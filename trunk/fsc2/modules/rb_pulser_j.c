@@ -22,7 +22,7 @@
  */
 
 
-#include "rb_pulser.h"
+#include "rb_pulser_j.h"
 
 
 /*--------------------------------*
@@ -33,7 +33,7 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-RB_Pulser_T rb_pulser;
+RB_Pulser_J_T rb_pulser_j;
 Rulbus_Clock_Card_T clock_card[ NUM_CLOCK_CARDS ];
 Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
 
@@ -42,7 +42,7 @@ Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
  * local functions and variables *
  *-------------------------------*/
 
-static void rb_pulser_card_setup( void );
+static void rb_pulser_j_card_setup( void );
 
 static bool Is_running_at_start;
 
@@ -51,7 +51,7 @@ static bool Is_running_at_start;
  * Function that gets called immediately after the module has been loaded
  *------------------------------------------------------------------------*/
 
-int rb_pulser_init_hook( void )
+int rb_pulser_j_init_hook( void )
 {
 	int i;
 	Function_T *f;
@@ -62,40 +62,42 @@ int rb_pulser_init_hook( void )
 
 	/* Set global variable to indicate that Rulbus is needed */
 
-#if ! defined RB_PULSER_TEST
+#if ! defined RB_PULSER_J_TEST
 	Need_RULBUS = SET;
 
-	rb_pulser.exists_synthesizer = exists_device( SYNTHESIZER_MODULE );
+	rb_pulser_j.exists_synthesizer = exists_device( SYNTHESIZER_MODULE );
 
 #else   /* in test mode */
-	rb_pulser.exists_synthesizer = SET;
+	rb_pulser_j.exists_synthesizer = SET;
 #endif
 
 #ifndef FIXED_TIMEBASE
-	Pulser_Struct.set_timebase = rb_pulser_store_timebase;
+	Pulser_Struct.set_timebase = rb_pulser_j_store_timebase;
 #else
 	Pulser_Struct.set_timebase = NULL;
 #endif
 
-	Pulser_Struct.set_trigger_mode = rb_pulser_set_trigger_mode;
-	Pulser_Struct.set_repeat_time = rb_pulser_set_repeat_time;
-	Pulser_Struct.set_trig_in_slope = rb_pulser_set_trig_in_slope;
-	Pulser_Struct.set_function_delay = rb_pulser_set_function_delay;
+	Pulser_Struct.set_trigger_mode = rb_pulser_j_set_trigger_mode;
+	Pulser_Struct.set_repeat_time = rb_pulser_j_set_repeat_time;
+	Pulser_Struct.set_trig_in_slope = rb_pulser_j_set_trig_in_slope;
+	Pulser_Struct.set_function_delay = rb_pulser_j_set_function_delay;
 
-	Pulser_Struct.new_pulse = rb_pulser_new_pulse;
-	Pulser_Struct.set_pulse_function = rb_pulser_set_pulse_function;
-	Pulser_Struct.set_pulse_position = rb_pulser_set_pulse_position;
-	Pulser_Struct.set_pulse_length = rb_pulser_set_pulse_length;
+	Pulser_Struct.new_pulse = rb_pulser_j_new_pulse;
+	Pulser_Struct.set_pulse_function = rb_pulser_j_set_pulse_function;
+	Pulser_Struct.set_pulse_position = rb_pulser_j_set_pulse_position;
+	Pulser_Struct.set_pulse_length = rb_pulser_j_set_pulse_length;
 	Pulser_Struct.set_pulse_position_change =
-										   rb_pulser_set_pulse_position_change;
-	Pulser_Struct.set_pulse_length_change = rb_pulser_set_pulse_length_change;
+										 rb_pulser_j_set_pulse_position_change;
+	Pulser_Struct.set_pulse_length_change =
+		                                   rb_pulser_j_set_pulse_length_change;
 
-	Pulser_Struct.get_pulse_function = rb_pulser_get_pulse_function;
-	Pulser_Struct.get_pulse_position = rb_pulser_get_pulse_position;
-	Pulser_Struct.get_pulse_length = rb_pulser_get_pulse_length;
+	Pulser_Struct.get_pulse_function = rb_pulser_j_get_pulse_function;
+	Pulser_Struct.get_pulse_position = rb_pulser_j_get_pulse_position;
+	Pulser_Struct.get_pulse_length = rb_pulser_j_get_pulse_length;
 	Pulser_Struct.get_pulse_position_change =
-										   rb_pulser_get_pulse_position_change;
-	Pulser_Struct.get_pulse_length_change = rb_pulser_get_pulse_length_change;
+										 rb_pulser_j_get_pulse_position_change;
+	Pulser_Struct.get_pulse_length_change =
+		                                   rb_pulser_j_get_pulse_length_change;
 
 	Pulser_Struct.assign_function = NULL;
 	Pulser_Struct.assign_channel_to_function = NULL;
@@ -115,48 +117,48 @@ int rb_pulser_init_hook( void )
 	Pulser_Struct.ch_to_num = NULL;
 	Pulser_Struct.keep_all_pulses = NULL;
 
-	rb_pulser.is_needed = SET;
+	rb_pulser_j.is_needed = SET;
 
 #ifndef FIXED_TIMEBASE
-	rb_pulser.is_timebase = UNSET;
+	rb_pulser_j.is_timebase = UNSET;
 #else
-	rb_pulser.timebase = 1.0e-8;         /* fixed 100 MHz clock is used */
-	rb_pulser.is_timebase = SET;
+	rb_pulser_j.timebase = 1.0e-8;         /* fixed 100 MHz clock is used */
+	rb_pulser_j.is_timebase = SET;
 #endif
 
-	rb_pulser.is_running = UNSET;
+	rb_pulser_j.is_running = UNSET;
 
-	if ( RB_PULSER_CONFIG_FILE[ 0 ] ==  '/' )
-		rb_pulser.config_file = T_strdup( RB_PULSER_CONFIG_FILE );
+	if ( RB_PULSER_J_CONFIG_FILE[ 0 ] ==  '/' )
+		rb_pulser_j.config_file = T_strdup( RB_PULSER_J_CONFIG_FILE );
 	else
-		rb_pulser.config_file = get_string( "%s%s%s", libdir,
-											slash( libdir ),
-											RB_PULSER_CONFIG_FILE );
+		rb_pulser_j.config_file = get_string( "%s%s%s", libdir,
+											  slash( libdir ),
+											  RB_PULSER_J_CONFIG_FILE );
 
-	rb_pulser.is_trig_in_mode = UNSET;
-	rb_pulser.is_trig_in_slope = UNSET;
-	rb_pulser.is_rep_time = UNSET;
-	rb_pulser.is_neg_delay = UNSET;
-	rb_pulser.neg_delay = 0;
+	rb_pulser_j.is_trig_in_mode = UNSET;
+	rb_pulser_j.is_trig_in_slope = UNSET;
+	rb_pulser_j.is_rep_time = UNSET;
+	rb_pulser_j.is_neg_delay = UNSET;
+	rb_pulser_j.neg_delay = 0;
 
-	rb_pulser.trig_in_mode = INTERNAL;
-	rb_pulser.rep_time = 0;
+	rb_pulser_j.trig_in_mode = INTERNAL;
+	rb_pulser_j.rep_time = 0;
 
-	rb_pulser.synth_state = NULL;
-	rb_pulser.synth_pulse_state = NULL;
-	rb_pulser.synth_pulse_width = NULL;
-	rb_pulser.synth_pulse_delay = NULL;
-	rb_pulser.synth_trig_slope = NULL;
+	rb_pulser_j.synth_state = NULL;
+	rb_pulser_j.synth_pulse_state = NULL;
+	rb_pulser_j.synth_pulse_width = NULL;
+	rb_pulser_j.synth_pulse_delay = NULL;
+	rb_pulser_j.synth_trig_slope = NULL;
 
-	rb_pulser.dump_file = NULL;
-	rb_pulser.show_file = NULL;
+	rb_pulser_j.dump_file = NULL;
+	rb_pulser_j.show_file = NULL;
 
-	rb_pulser.do_show_pulses = UNSET;
-	rb_pulser.do_dump_pulses = UNSET;
+	rb_pulser_j.do_show_pulses = UNSET;
+	rb_pulser_j.do_dump_pulses = UNSET;
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-        f = rb_pulser.function + i;
+        f = rb_pulser_j.function + i;
         f->self = i;
         f->name = Function_Names[ i ];
         f->num_pulses = 0;
@@ -174,14 +176,14 @@ int rb_pulser_init_hook( void )
 		f->is_declared = UNSET;
 	}
 
-	rb_pulser_card_setup( );
+	rb_pulser_j_card_setup( );
 
-	rb_pulser.function[ PULSER_CHANNEL_MW ].delay_card =
-										     rb_pulser.delay_card + MW_DELAY_0;
-	rb_pulser.function[ PULSER_CHANNEL_RF ].delay_card =
-											rb_pulser.delay_card + RF_DELAY;
-	rb_pulser.function[ PULSER_CHANNEL_DET ].delay_card =
-											rb_pulser.delay_card + DET_DELAY_0;
+	rb_pulser_j.function[ PULSER_CHANNEL_MW ].delay_card =
+										   rb_pulser_j.delay_card + MW_DELAY_0;
+	rb_pulser_j.function[ PULSER_CHANNEL_RF ].delay_card =
+										     rb_pulser_j.delay_card + RF_DELAY;
+	rb_pulser_j.function[ PULSER_CHANNEL_DET ].delay_card =
+										  rb_pulser_j.delay_card + DET_DELAY_0;
 
 	return 1;
 }
@@ -191,7 +193,7 @@ int rb_pulser_init_hook( void )
  * Function gets called just before the test run is started
  *----------------------------------------------------------*/
 
-int rb_pulser_test_hook( void )
+int rb_pulser_j_test_hook( void )
 {
 	Pulse_T *p;
 
@@ -199,13 +201,13 @@ int rb_pulser_test_hook( void )
 	/* If a RF pulse exists make sure the synthesizer module got loaded before
 	   the pulser module, otherwise we'll get into trouble */
 
-	for ( p = rb_pulser.pulses; p != NULL; p = p->next )
-		if ( p->function == rb_pulser.function + PULSER_CHANNEL_RF )
+	for ( p = rb_pulser_j.pulses; p != NULL; p = p->next )
+		if ( p->function == rb_pulser_j.function + PULSER_CHANNEL_RF )
 		{
-			if ( ! rb_pulser.exists_synthesizer )
+			if ( ! rb_pulser_j.exists_synthesizer )
 			{
 				print( FATAL, "Module \"" SYNTHESIZER_MODULE "\" pulser must "
-					   "be listed before \"rb_pulser\" module in DEVICES "
+					   "be listed before \"rb_pulser_j\" module in DEVICES "
 					   "section when RF pulses are to be used.\n" );
 				THROW( EXCEPTION );
 			}
@@ -218,33 +220,34 @@ int rb_pulser_test_hook( void )
 
 	TRY
 	{
-		if ( rb_pulser.trig_in_mode == INTERNAL && ! rb_pulser.is_rep_time )
+		if ( rb_pulser_j.trig_in_mode ==
+			                            INTERNAL && ! rb_pulser_j.is_rep_time )
 		{
 			print( FATAL, "No experiment repetition time/frequency has been "
 				   "set.\n" );
 			THROW( EXCEPTION );
 		}
 
-		Is_running_at_start = rb_pulser.is_running;
-		if ( rb_pulser.do_show_pulses )
-			rb_pulser_show_pulses( );
-		if ( rb_pulser.do_dump_pulses )
-			rb_pulser_dump_pulses( );
-		rb_pulser_init_setup( );
+		Is_running_at_start = rb_pulser_j.is_running;
+		if ( rb_pulser_j.do_show_pulses )
+			rb_pulser_j_show_pulses( );
+		if ( rb_pulser_j.do_dump_pulses )
+			rb_pulser_j_dump_pulses( );
+		rb_pulser_j_init_setup( );
 		TRY_SUCCESS;
 	}
 	OTHERWISE
 	{
-		if ( rb_pulser.dump_file )
+		if ( rb_pulser_j.dump_file )
 		{
-			fclose( rb_pulser.dump_file );
-			rb_pulser.dump_file = NULL;
+			fclose( rb_pulser_j.dump_file );
+			rb_pulser_j.dump_file = NULL;
 		}
 
-		if ( rb_pulser.show_file )
+		if ( rb_pulser_j.show_file )
 		{
-			fclose( rb_pulser.show_file );
-			rb_pulser.show_file = NULL;
+			fclose( rb_pulser_j.show_file );
+			rb_pulser_j.show_file = NULL;
 		}
 
 		RETHROW( );
@@ -253,23 +256,23 @@ int rb_pulser_test_hook( void )
 	/* If a repetition time has been set set up the corresponding value in
 	   th structure for the card creating the repetition time */
 
-	if ( rb_pulser.trig_in_mode == INTERNAL ) {
-		rb_pulser.clock_card[ ERT_CLOCK ].freq = rb_pulser.rep_time_index;
-		rb_pulser.delay_card[ ERT_DELAY ].delay = rb_pulser.rep_time_ticks;
+	if ( rb_pulser_j.trig_in_mode == INTERNAL ) {
+		rb_pulser_j.clock_card[ ERT_CLOCK ].freq = rb_pulser_j.rep_time_index;
+		rb_pulser_j.delay_card[ ERT_DELAY ].delay = rb_pulser_j.rep_time_ticks;
 	}
 
 	/* We now need some somewhat different functions for setting of pulse
 	   properties */
 
-	Pulser_Struct.set_pulse_position = rb_pulser_change_pulse_position;
-	Pulser_Struct.set_pulse_length = rb_pulser_change_pulse_length;
+	Pulser_Struct.set_pulse_position = rb_pulser_j_change_pulse_position;
+	Pulser_Struct.set_pulse_length = rb_pulser_j_change_pulse_length;
 	Pulser_Struct.set_pulse_position_change =
-										rb_pulser_change_pulse_position_change;
+									  rb_pulser_j_change_pulse_position_change;
 	Pulser_Struct.set_pulse_length_change =
-										  rb_pulser_change_pulse_length_change;
+										rb_pulser_j_change_pulse_length_change;
 
-	if ( rb_pulser.pulses == NULL )
-		rb_pulser.is_needed = UNSET;
+	if ( rb_pulser_j.pulses == NULL )
+		rb_pulser_j.is_needed = UNSET;
 
 	return 1;
 }
@@ -281,21 +284,21 @@ int rb_pulser_test_hook( void )
  * have been set to during the experiment
  *----------------------------------------------------------------------*/
 
-int rb_pulser_end_of_test_hook( void )
+int rb_pulser_j_end_of_test_hook( void )
 {
-	if ( ! rb_pulser.is_needed )
+	if ( ! rb_pulser_j.is_needed )
 		return 1;
 
-	if ( rb_pulser.dump_file != NULL )
+	if ( rb_pulser_j.dump_file != NULL )
 	{
-		fclose( rb_pulser.dump_file );
-		rb_pulser.dump_file = NULL;
+		fclose( rb_pulser_j.dump_file );
+		rb_pulser_j.dump_file = NULL;
 	}
 
-	if ( rb_pulser.show_file != NULL )
+	if ( rb_pulser_j.show_file != NULL )
 	{
-		fclose( rb_pulser.show_file );
-		rb_pulser.show_file = NULL;
+		fclose( rb_pulser_j.show_file );
+		rb_pulser_j.show_file = NULL;
 	}
 
 	return 1;
@@ -307,19 +310,19 @@ int rb_pulser_end_of_test_hook( void )
  * got to initialize the pulser and, if required, start it
  *---------------------------------------------------------------*/
 
-int rb_pulser_exp_hook( void )
+int rb_pulser_j_exp_hook( void )
 {
-	if ( ! rb_pulser.is_needed )
+	if ( ! rb_pulser_j.is_needed )
 		return 1;
 
-	rb_pulser.is_running = Is_running_at_start;
+	rb_pulser_j.is_running = Is_running_at_start;
 
 	/* Initialize the device */
 
-	rb_pulser_init( );
-	rb_pulser_full_reset( );
-	rb_pulser_do_update( );
-	rb_pulser_run( rb_pulser.is_running );
+	rb_pulser_j_init( );
+	rb_pulser_j_full_reset( );
+	rb_pulser_j_do_update( );
+	rb_pulser_j_run( rb_pulser_j.is_running );
 
 	return 1;
 }
@@ -329,10 +332,10 @@ int rb_pulser_exp_hook( void )
  * Function called at the end of the experiment
  *----------------------------------------------*/
 
-int rb_pulser_end_of_exp_hook( void )
+int rb_pulser_j_end_of_exp_hook( void )
 {
-	if ( rb_pulser.is_needed )
-		rb_pulser_exit( );
+	if ( rb_pulser_j.is_needed )
+		rb_pulser_j_exit( );
 	return 1;
 }
 
@@ -342,48 +345,49 @@ int rb_pulser_end_of_exp_hook( void )
  * used to get rid of memory allocated for the module
  *---------------------------------------------------------------*/
 
-void rb_pulser_exit_hook( void )
+void rb_pulser_j_exit_hook( void )
 {
 	Pulse_T *p, *pn;
 	Function_T *f;
 	int i;
 
 
-	rb_pulser_cleanup( );
+	rb_pulser_j_cleanup( );
 
-	if ( ! rb_pulser.is_needed )
+	if ( ! rb_pulser_j.is_needed )
 		return;
 
 	/* Free all memory allocated within the module */
 
-	for ( p = rb_pulser.pulses; p != NULL; p = pn )
+	for ( p = rb_pulser_j.pulses; p != NULL; p = pn )
 	{
 		pn = p->next;
 		T_free( p );
 	}
 
-	if ( rb_pulser.synth_state )
-		rb_pulser.synth_pulse_state = CHAR_P T_free( rb_pulser.synth_state );
+	if ( rb_pulser_j.synth_state )
+		rb_pulser_j.synth_pulse_state =
+			                          CHAR_P T_free( rb_pulser_j.synth_state );
 
-	if ( rb_pulser.synth_pulse_state )
-		rb_pulser.synth_pulse_state =
-								  CHAR_P T_free( rb_pulser.synth_pulse_state );
+	if ( rb_pulser_j.synth_pulse_state )
+		rb_pulser_j.synth_pulse_state =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_state );
 
-	if ( rb_pulser.synth_pulse_width )
-		rb_pulser.synth_pulse_width =
-								  CHAR_P T_free( rb_pulser.synth_pulse_width );
+	if ( rb_pulser_j.synth_pulse_width )
+		rb_pulser_j.synth_pulse_width =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_width );
 
-	if ( rb_pulser.synth_pulse_delay )
-		rb_pulser.synth_pulse_delay =
-								  CHAR_P T_free( rb_pulser.synth_pulse_delay );
+	if ( rb_pulser_j.synth_pulse_delay )
+		rb_pulser_j.synth_pulse_delay =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_delay );
 
-	if ( rb_pulser.synth_trig_slope )
-		rb_pulser.synth_trig_slope =
-								  CHAR_P T_free( rb_pulser.synth_trig_slope );
+	if ( rb_pulser_j.synth_trig_slope )
+		rb_pulser_j.synth_trig_slope =
+								 CHAR_P T_free( rb_pulser_j.synth_trig_slope );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = rb_pulser.function + i;
+		f = rb_pulser_j.function + i;
 		f->pulses = PULSE_PP T_free( f->pulses );
 	}
 }
@@ -407,7 +411,7 @@ Var_T *pulser_name( Var_T *v UNUSED_ARG )
 Var_T *pulser_show_pulses( Var_T *v UNUSED_ARG )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
-		rb_pulser.do_show_pulses = SET;
+		rb_pulser_j.do_show_pulses = SET;
 
 	return vars_push( INT_VAR, 1L );
 }
@@ -421,7 +425,7 @@ Var_T *pulser_show_pulses( Var_T *v UNUSED_ARG )
 Var_T *pulser_dump_pulses( Var_T *v UNUSED_ARG )
 {
 	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
-		rb_pulser.do_dump_pulses = SET;
+		rb_pulser_j.do_dump_pulses = SET;
 
 	return vars_push( INT_VAR, 1L );
 }
@@ -437,15 +441,16 @@ Var_T *pulser_state( Var_T *v )
 
 
 	if ( v == NULL )
-		return vars_push( INT_VAR, ( long ) rb_pulser.is_running );
+		return vars_push( INT_VAR, ( long ) rb_pulser_j.is_running );
 
 	state = get_boolean( v );
 
 	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( INT_VAR, ( long ) ( rb_pulser.is_running = state ) );
+		return vars_push( INT_VAR,
+						  ( long ) ( rb_pulser_j.is_running = state ) );
 
-	rb_pulser_run( state );
-	return vars_push( INT_VAR, ( long ) rb_pulser.is_running );
+	rb_pulser_j_run( state );
+	return vars_push( INT_VAR, ( long ) rb_pulser_j.is_running );
 }
 
 
@@ -458,12 +463,12 @@ Var_T *pulser_state( Var_T *v )
 
 Var_T *pulser_update( Var_T *v UNUSED_ARG )
 {
-	if ( ! rb_pulser.is_needed )
+	if ( ! rb_pulser_j.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* Send all changes to the pulser */
 
-	rb_pulser_do_update( );
+	rb_pulser_j_do_update( );
 
 	return vars_push( INT_VAR, 1L );
 }
@@ -482,14 +487,14 @@ Var_T *pulser_shift( Var_T *v )
 	Pulse_T *p;
 
 
-	if ( ! rb_pulser.is_needed )
+	if ( ! rb_pulser_j.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to shift all active pulses that
 	   have a position change time value set */
 
 	if ( v == NULL )
-		for ( p = rb_pulser.pulses; p != NULL; p = p->next )
+		for ( p = rb_pulser_j.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dpos )
 				pulser_shift( vars_push( INT_VAR, p->num ) );
 
@@ -497,7 +502,7 @@ Var_T *pulser_shift( Var_T *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = rb_pulser_get_pulse( get_strict_long( v, "pulse number" ) );
+		p = rb_pulser_j_get_pulse( get_strict_long( v, "pulse number" ) );
 
 		if ( ! p->is_pos )
 		{
@@ -518,7 +523,8 @@ Var_T *pulser_shift( Var_T *v )
 		/* Make sure we always end up with an integer multiple of the
 		   timebase */
 
-		p->pos = rb_pulser_ticks2double( rb_pulser_double2ticks( p->pos ) );
+		p->pos = rb_pulser_j_ticks2double(
+			                              rb_pulser_j_double2ticks( p->pos ) );
 
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 	}
@@ -540,14 +546,14 @@ Var_T *pulser_increment( Var_T *v )
 	Pulse_T *p;
 
 
-	if ( ! rb_pulser.is_needed )
+	if ( ! rb_pulser_j.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to increment all active pulses
 	   that have a length change time value set */
 
 	if ( v == NULL )
-		for ( p = rb_pulser.pulses; p != NULL; p = p->next )
+		for ( p = rb_pulser_j.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dlen )
 				pulser_increment( vars_push( INT_VAR, p->num ) );
 
@@ -555,7 +561,7 @@ Var_T *pulser_increment( Var_T *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = rb_pulser_get_pulse( get_strict_long( v, "pulse number" ) );
+		p = rb_pulser_j_get_pulse( get_strict_long( v, "pulse number" ) );
 
 		if ( ! p->is_len )
 		{
@@ -575,7 +581,7 @@ Var_T *pulser_increment( Var_T *v )
 		{
 			print( FATAL, "Incrementing the length of pulse #%ld leads to an "
 				   "invalid negative pulse length of %s.\n",
-				   p->num, rb_pulser_pticks( p->len ) );
+				   p->num, rb_pulser_j_pticks( p->len ) );
 			THROW( EXCEPTION );
 		}
 
@@ -592,7 +598,7 @@ Var_T *pulser_increment( Var_T *v )
 
 Var_T *pulser_reset( Var_T *v UNUSED_ARG )
 {
-	if ( ! rb_pulser.is_needed )
+	if ( ! rb_pulser_j.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	vars_pop( pulser_pulse_reset( NULL ) );
@@ -610,7 +616,7 @@ Var_T *pulser_pulse_reset( Var_T *v )
 	Pulse_T *p;
 
 
-	if ( ! rb_pulser.is_needed )
+	if ( ! rb_pulser_j.is_needed )
 		return vars_push( INT_VAR, 1L );
 
 	/* An empty pulse list means that we have to reset all pulses (even the
@@ -620,7 +626,7 @@ Var_T *pulser_pulse_reset( Var_T *v )
 
 	if ( v == NULL )
 	{
-		for ( p = rb_pulser.pulses; p != NULL; p = p->next )
+		for ( p = rb_pulser_j.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 )
 				vars_pop( pulser_pulse_reset( vars_push( INT_VAR, p->num ) ) );
 	}
@@ -629,7 +635,7 @@ Var_T *pulser_pulse_reset( Var_T *v )
 
 	for ( ; v != NULL; v = vars_pop( v ) )
 	{
-		p = rb_pulser_get_pulse( get_strict_long( v, "pulse number" ) );
+		p = rb_pulser_j_get_pulse( get_strict_long( v, "pulse number" ) );
 
 		/* Reset all changeable properties back to their initial values */
 
@@ -663,40 +669,40 @@ Var_T *pulser_pulse_reset( Var_T *v )
 
 Var_T *pulser_pulse_minimum_specs( Var_T *v )
 {
-	Pulse_T *p = rb_pulser_get_pulse( get_strict_long( v, "pulse number" ) );
+	Pulse_T *p = rb_pulser_j_get_pulse( get_strict_long( v, "pulse number" ) );
 	double t = 0.0;
 
 
-	if ( p->function == rb_pulser.function + PULSER_CHANNEL_MW )
+	if ( p->function == rb_pulser_j.function + PULSER_CHANNEL_MW )
 	{
 		if ( p == p->function->pulses[ 0 ] )
-			t =   rb_pulser.delay_card[ ERT_DELAY ].intr_delay
-				+ rb_pulser.delay_card[ INIT_DELAY ].intr_delay
-				+ INIT_DELAY_MINIMUM_DELAY_TICKS * rb_pulser.timebase
-				+ rb_pulser.delay_card[ MW_DELAY_0 ].intr_delay;
+			t =   rb_pulser_j.delay_card[ ERT_DELAY ].intr_delay
+				+ rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay
+				+ INIT_DELAY_MINIMUM_DELAY_TICKS * rb_pulser_j.timebase
+				+ rb_pulser_j.delay_card[ MW_DELAY_0 ].intr_delay;
 		else if ( p == p->function->pulses[ 1 ] )
-			t =   rb_pulser.delay_card[ MW_DELAY_1 ].intr_delay
-				+ rb_pulser.delay_card[ MW_DELAY_2 ].intr_delay;
+			t =   rb_pulser_j.delay_card[ MW_DELAY_1 ].intr_delay
+				+ rb_pulser_j.delay_card[ MW_DELAY_2 ].intr_delay;
 		else if ( p == p->function->pulses[ 2 ] )
-			t =   rb_pulser.delay_card[ MW_DELAY_3 ].intr_delay
-				+ rb_pulser.delay_card[ MW_DELAY_4 ].intr_delay;
+			t =   rb_pulser_j.delay_card[ MW_DELAY_3 ].intr_delay
+				+ rb_pulser_j.delay_card[ MW_DELAY_4 ].intr_delay;
 		else
 			fsc2_assert( 1 == 0 );
 	}
-	else if ( p->function == rb_pulser.function + PULSER_CHANNEL_RF )
-		t =   rb_pulser.delay_card[ ERT_DELAY ].intr_delay
-			+ rb_pulser.delay_card[ INIT_DELAY ].intr_delay
-			+ rb_pulser.delay_card[ INIT_DELAY ].delay
-			* rb_pulser.timebase
-			+ rb_pulser.delay_card[ RF_DELAY ].intr_delay
+	else if ( p->function == rb_pulser_j.function + PULSER_CHANNEL_RF )
+		t =   rb_pulser_j.delay_card[ ERT_DELAY ].intr_delay
+			+ rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay
+			+ rb_pulser_j.delay_card[ INIT_DELAY ].delay
+			* rb_pulser_j.timebase
+			+ rb_pulser_j.delay_card[ RF_DELAY ].intr_delay
 			+ SYNTHESIZER_INTRINSIC_DELAY;
-	else if ( p->function == rb_pulser.function + PULSER_CHANNEL_DET )
-		t =   rb_pulser.delay_card[ ERT_DELAY ].intr_delay
-			+ rb_pulser.delay_card[ INIT_DELAY ].intr_delay
-			+ rb_pulser.delay_card[ INIT_DELAY ].delay
-			* rb_pulser.timebase
-			+ rb_pulser.delay_card[ DET_DELAY_0 ].intr_delay
-			+ rb_pulser.delay_card[ DET_DELAY_1 ].intr_delay;
+	else if ( p->function == rb_pulser_j.function + PULSER_CHANNEL_DET )
+		t =   rb_pulser_j.delay_card[ ERT_DELAY ].intr_delay
+			+ rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay
+			+ rb_pulser_j.delay_card[ INIT_DELAY ].delay
+			* rb_pulser_j.timebase
+			+ rb_pulser_j.delay_card[ DET_DELAY_0 ].intr_delay
+			+ rb_pulser_j.delay_card[ DET_DELAY_1 ].intr_delay;
 	else
 		fsc2_assert( 1 == 0 );
 
@@ -709,7 +715,7 @@ Var_T *pulser_pulse_minimum_specs( Var_T *v )
  * the Rulbus cards the pulser is made of
  *------------------------------------------------------------*/
 
-static void rb_pulser_card_setup( void )
+static void rb_pulser_j_card_setup( void )
 {
 	size_t i;
 	RULBUS_CARD_INFO card_info;
@@ -717,80 +723,81 @@ static void rb_pulser_card_setup( void )
 
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
 	{
-		rb_pulser.clock_card[ i ].handle = -1;
-		rb_pulser.clock_card[ i ].name = NULL;
+		rb_pulser_j.clock_card[ i ].handle = -1;
+		rb_pulser_j.clock_card[ i ].name = NULL;
 	}
 
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
-		rb_pulser.delay_card[ i ].name = NULL;
+		rb_pulser_j.delay_card[ i ].name = NULL;
 
 	/* Get the names of all cards from the configuration file */
 
-	rb_pulser_read_configuration( );
+	rb_pulser_j_read_configuration( );
 
-	rb_pulser.delay_card[ ERT_DELAY ].prev = NULL;
-	rb_pulser.delay_card[ ERT_DELAY ].next = NULL;
+	rb_pulser_j.delay_card[ ERT_DELAY ].prev = NULL;
+	rb_pulser_j.delay_card[ ERT_DELAY ].next = NULL;
 
-	rb_pulser.delay_card[ INIT_DELAY ].prev = NULL;
-	rb_pulser.delay_card[ INIT_DELAY ].next = NULL;
+	rb_pulser_j.delay_card[ INIT_DELAY ].prev = NULL;
+	rb_pulser_j.delay_card[ INIT_DELAY ].next = NULL;
 
-	rb_pulser.delay_card[ MW_DELAY_0 ].prev =
-											rb_pulser.delay_card + INIT_DELAY;
-	rb_pulser.delay_card[ MW_DELAY_0 ].next =
-											rb_pulser.delay_card + MW_DELAY_1;
+	rb_pulser_j.delay_card[ MW_DELAY_0 ].prev =
+										   rb_pulser_j.delay_card + INIT_DELAY;
+	rb_pulser_j.delay_card[ MW_DELAY_0 ].next =
+										   rb_pulser_j.delay_card + MW_DELAY_1;
 
-	rb_pulser.delay_card[ MW_DELAY_1 ].prev =
-											rb_pulser.delay_card + MW_DELAY_0;
-	rb_pulser.delay_card[ MW_DELAY_1 ].next =
-											rb_pulser.delay_card + MW_DELAY_2;
+	rb_pulser_j.delay_card[ MW_DELAY_1 ].prev =
+										   rb_pulser_j.delay_card + MW_DELAY_0;
+	rb_pulser_j.delay_card[ MW_DELAY_1 ].next =
+										   rb_pulser_j.delay_card + MW_DELAY_2;
 
-	rb_pulser.delay_card[ MW_DELAY_2 ].prev =
-											rb_pulser.delay_card + MW_DELAY_1;
-	rb_pulser.delay_card[ MW_DELAY_2 ].next =
-											rb_pulser.delay_card + MW_DELAY_3;
+	rb_pulser_j.delay_card[ MW_DELAY_2 ].prev =
+										   rb_pulser_j.delay_card + MW_DELAY_1;
+	rb_pulser_j.delay_card[ MW_DELAY_2 ].next =
+										   rb_pulser_j.delay_card + MW_DELAY_3;
 
-	rb_pulser.delay_card[ MW_DELAY_3 ].prev =
-											rb_pulser.delay_card + MW_DELAY_2;
-	rb_pulser.delay_card[ MW_DELAY_3 ].next =
-											rb_pulser.delay_card + MW_DELAY_4;
+	rb_pulser_j.delay_card[ MW_DELAY_3 ].prev =
+										   rb_pulser_j.delay_card + MW_DELAY_2;
+	rb_pulser_j.delay_card[ MW_DELAY_3 ].next =
+										   rb_pulser_j.delay_card + MW_DELAY_4;
 
-	rb_pulser.delay_card[ MW_DELAY_4 ].prev =
-											rb_pulser.delay_card + MW_DELAY_3;
-	rb_pulser.delay_card[ MW_DELAY_4 ].next = NULL;
+	rb_pulser_j.delay_card[ MW_DELAY_4 ].prev =
+										   rb_pulser_j.delay_card + MW_DELAY_3;
+	rb_pulser_j.delay_card[ MW_DELAY_4 ].next = NULL;
 
-	rb_pulser.delay_card[ RF_DELAY ].prev = rb_pulser.delay_card + INIT_DELAY;
-	rb_pulser.delay_card[ RF_DELAY ].next = NULL;
+	rb_pulser_j.delay_card[ RF_DELAY ].prev =
+                                           rb_pulser_j.delay_card + INIT_DELAY;
+	rb_pulser_j.delay_card[ RF_DELAY ].next = NULL;
 
-	rb_pulser.delay_card[ DET_DELAY_0 ].prev =
-											rb_pulser.delay_card + INIT_DELAY;
-	rb_pulser.delay_card[ DET_DELAY_0 ].next =
-											rb_pulser.delay_card + DET_DELAY_1;
+	rb_pulser_j.delay_card[ DET_DELAY_0 ].prev =
+										   rb_pulser_j.delay_card + INIT_DELAY;
+	rb_pulser_j.delay_card[ DET_DELAY_0 ].next =
+										  rb_pulser_j.delay_card + DET_DELAY_1;
 
-	rb_pulser.delay_card[ DET_DELAY_1 ].prev =
-											rb_pulser.delay_card + DET_DELAY_0;
-	rb_pulser.delay_card[ DET_DELAY_1 ].next = NULL;
+	rb_pulser_j.delay_card[ DET_DELAY_1 ].prev =
+										  rb_pulser_j.delay_card + DET_DELAY_0;
+	rb_pulser_j.delay_card[ DET_DELAY_1 ].next = NULL;
 
 	/* Get handles for all the delay cards and determine their intrinsic
 	   delays */
 
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
 	{
-		rb_pulser.delay_card[ i ].handle = -1;
-		rb_pulser.delay_card[ i ].is_active = UNSET;
-		rb_pulser.delay_card[ i ].delay =
-		rb_pulser.delay_card[ i ].old_delay = 0;
-		if ( rulbus_get_card_info( rb_pulser.delay_card[ i ].name, &card_info )
-			 													 != RULBUS_OK )
+		rb_pulser_j.delay_card[ i ].handle = -1;
+		rb_pulser_j.delay_card[ i ].is_active = UNSET;
+		rb_pulser_j.delay_card[ i ].delay =
+		rb_pulser_j.delay_card[ i ].old_delay = 0;
+		if ( rulbus_get_card_info( rb_pulser_j.delay_card[ i ].name,
+								   &card_info ) != RULBUS_OK )
 		{
 			print( FATAL, "Failed to obtain RULBUS configuration "
 				   "information: %s.\n", rulbus_strerror( ) );
 			THROW( EXCEPTION );
 		}
 
-		rb_pulser.delay_card[ i ].intr_delay = card_info.intr_delay;
+		rb_pulser_j.delay_card[ i ].intr_delay = card_info.intr_delay;
 	}
 
-	rb_pulser.delay_card[ INIT_DELAY ].old_delay = -1;
+	rb_pulser_j.delay_card[ INIT_DELAY ].old_delay = -1;
 }
 
 
@@ -799,23 +806,23 @@ static void rb_pulser_card_setup( void )
  * configuration file and storing the names of the cards
  *---------------------------------------------------------------*/
 
-void rb_pulser_cleanup( void )
+void rb_pulser_j_cleanup( void )
 {
 	size_t i;
 
 
-	if ( rb_pulser.config_file != NULL )
-		rb_pulser.config_file = CHAR_P T_free( rb_pulser.config_file );
+	if ( rb_pulser_j.config_file != NULL )
+		rb_pulser_j.config_file = CHAR_P T_free( rb_pulser_j.config_file );
 
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
-		if ( rb_pulser.delay_card[ i ].name != NULL )
-			rb_pulser.delay_card[ i ].name =
-							   CHAR_P T_free( rb_pulser.delay_card[ i ].name );
+		if ( rb_pulser_j.delay_card[ i ].name != NULL )
+			rb_pulser_j.delay_card[ i ].name =
+							 CHAR_P T_free( rb_pulser_j.delay_card[ i ].name );
 
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
-		if ( rb_pulser.clock_card[ i ].name != NULL )
-			rb_pulser.clock_card[ i ].name =
-							  CHAR_P T_free( rb_pulser.clock_card[ i ].name );
+		if ( rb_pulser_j.clock_card[ i ].name != NULL )
+			rb_pulser_j.clock_card[ i ].name =
+							CHAR_P T_free( rb_pulser_j.clock_card[ i ].name );
 }
 
 

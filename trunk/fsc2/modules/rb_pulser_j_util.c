@@ -22,7 +22,7 @@
  */
 
 
-#include "rb_pulser.h"
+#include "rb_pulser_j.h"
 
 
 /*-------------------------------------------------------------------*
@@ -32,8 +32,8 @@
  * second pulse starts earlier.
  *-------------------------------------------------------------------*/
 
-int rb_pulser_start_compare( const void * A,
-							 const void * B )
+int rb_pulser_j_start_compare( const void * A,
+							   const void * B )
 {
 	Pulse_T *a = *( Pulse_T ** ) A,
 		    *b = *( Pulse_T ** ) B;
@@ -58,34 +58,34 @@ int rb_pulser_start_compare( const void * A,
  * i.e. a integer multiple of the time base
  *-----------------------------------------------------------------*/
 
-Ticks rb_pulser_double2ticks( double p_time )
+Ticks rb_pulser_j_double2ticks( double p_time )
 {
 	double ticks;
 
 
-	if ( ! rb_pulser.is_timebase )
+	if ( ! rb_pulser_j.is_timebase )
 	{
 		print( FATAL, "Can't set a time because no pulser time base has been "
 			   "set.\n" );
 		THROW( EXCEPTION );
 	}
 
-	ticks = p_time / rb_pulser.timebase;
+	ticks = p_time / rb_pulser_j.timebase;
 
 	if ( ticks > MAX_TICKS || ticks < - MAX_TICKS )
 	{
 		print( FATAL, "Specified time is too long for time base of %s.\n",
-			   rb_pulser_ptime( rb_pulser.timebase ) );
+			   rb_pulser_j_ptime( rb_pulser_j.timebase ) );
 		THROW( EXCEPTION );
 	}
 
 	if ( fabs( ( Ticks_rnd( ticks ) - ticks ) / ticks ) > 1.0e-2 ||
 		 ( p_time > 0.99e-9 && Ticks_rnd( ticks ) == 0 ) )
 	{
-		char *t = T_strdup( rb_pulser_ptime( p_time ) );
+		char *t = T_strdup( rb_pulser_j_ptime( p_time ) );
 		print( FATAL, "Specified time of %s is not an integer multiple of the "
 			   "pulser time base of %s.\n",
-			   t, rb_pulser_ptime( rb_pulser.timebase ) );
+			   t, rb_pulser_j_ptime( rb_pulser_j.timebase ) );
 		T_free( t );
 		THROW( EXCEPTION );
 	}
@@ -98,10 +98,10 @@ Ticks rb_pulser_double2ticks( double p_time )
  * Does the exact opposite of the previous function...
  *-----------------------------------------------------*/
 
-double rb_pulser_ticks2double( Ticks ticks )
+double rb_pulser_j_ticks2double( Ticks ticks )
 {
-	fsc2_assert( rb_pulser.is_timebase );
-	return ( double ) ( rb_pulser.timebase * ticks );
+	fsc2_assert( rb_pulser_j.is_timebase );
+	return ( double ) ( rb_pulser_j.timebase * ticks );
 }
 
 
@@ -109,9 +109,9 @@ double rb_pulser_ticks2double( Ticks ticks )
  * Returns pointer to the pulses structure if given a valid pulse number.
  *------------------------------------------------------------------------*/
 
-Pulse_T *rb_pulser_get_pulse( long pnum )
+Pulse_T *rb_pulser_j_get_pulse( long pnum )
 {
-	Pulse_T *cp = rb_pulser.pulses;
+	Pulse_T *cp = rb_pulser_j.pulses;
 
 
 	if ( pnum < 0 )
@@ -140,7 +140,7 @@ Pulse_T *rb_pulser_get_pulse( long pnum )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *rb_pulser_ptime( double p_time )
+const char *rb_pulser_j_ptime( double p_time )
 {
 	static char buffer[ 128 ];
 
@@ -160,16 +160,16 @@ const char *rb_pulser_ptime( double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *rb_pulser_pticks( Ticks ticks )
+const char *rb_pulser_j_pticks( Ticks ticks )
 {
-	return rb_pulser_ptime( rb_pulser_ticks2double( ticks ) );
+	return rb_pulser_j_ptime( rb_pulser_j_ticks2double( ticks ) );
 }
 
 
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void rb_pulser_show_pulses( void )
+void rb_pulser_j_show_pulses( void )
 {
 	int pd[ 2 ];
 	pid_t pid;
@@ -227,14 +227,14 @@ void rb_pulser_show_pulses( void )
 	/* And finally the code for the parent */
 
 	close( pd[ 0 ] );
-	rb_pulser.show_file = fdopen( pd[ 1 ], "w" );
+	rb_pulser_j.show_file = fdopen( pd[ 1 ], "w" );
 }
 
 
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void rb_pulser_dump_pulses( void )
+void rb_pulser_j_dump_pulses( void )
 {
 	char *name;
 	char *m;
@@ -271,7 +271,7 @@ void rb_pulser_dump_pulses( void )
 			T_free( m );
 		}
 
-		if ( ( rb_pulser.dump_file = fopen( name, "w+" ) ) == NULL )
+		if ( ( rb_pulser_j.dump_file = fopen( name, "w+" ) ) == NULL )
 		{
 			switch( errno )
 			{
@@ -301,7 +301,7 @@ void rb_pulser_dump_pulses( void )
 			name = CHAR_P T_free( name );
 			continue;
 		}
-	} while ( rb_pulser.dump_file == NULL );
+	} while ( rb_pulser_j.dump_file == NULL );
 
 	T_free( name );
 }
@@ -310,7 +310,7 @@ void rb_pulser_dump_pulses( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void rb_pulser_write_pulses( FILE * fp )
+void rb_pulser_j_write_pulses( FILE * fp )
 {
 	Function_T *f;
 	int i, j;
@@ -323,7 +323,7 @@ void rb_pulser_write_pulses( FILE * fp )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = rb_pulser.function + i;
+		f = rb_pulser_j.function + i;
 
 		if ( ! f->is_used )
 			continue;
@@ -331,9 +331,9 @@ void rb_pulser_write_pulses( FILE * fp )
 		fprintf( fp, "%s: ", f->name );
 		for ( j = 0; j < f->num_active_pulses; j++ )
 			fprintf( fp, " %ld %ld %ld", f->pulses[ j ]->num,
-					 Ticks_rnd( f->pulses[ j ]->pos / rb_pulser.timebase ),
+					 Ticks_rnd( f->pulses[ j ]->pos / rb_pulser_j.timebase ),
 					 f->delay_card->next != NULL ? f->pulses[ j ]->len  :
-					 Ticks_rnd( f->last_pulse_len / rb_pulser.timebase ) );
+					 Ticks_rnd( f->last_pulse_len / rb_pulser_j.timebase ) );
 
 		fprintf( fp, "\n" );
 	}

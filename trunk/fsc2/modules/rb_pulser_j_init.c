@@ -22,13 +22,13 @@
  */
 
 
-#include "rb_pulser.h"
+#include "rb_pulser_j.h"
 
 
-static void rb_pulser_init_print( FILE *fp );
-static void rb_pulser_basic_pulse_check( void );
-static void rb_pulser_basic_functions_init( void );
-static void rb_pulser_rf_synth_init( void );
+static void rb_pulser_j_init_print( FILE *fp );
+static void rb_pulser_j_basic_pulse_check( void );
+static void rb_pulser_j_basic_functions_init( void );
+static void rb_pulser_j_rf_synth_init( void );
 
 
 /*-------------------------------------------------------------*
@@ -37,19 +37,19 @@ static void rb_pulser_rf_synth_init( void );
  * the start of a test run.
  *-------------------------------------------------------------*/
 
-void rb_pulser_init_setup( void )
+void rb_pulser_j_init_setup( void )
 {
-	rb_pulser_basic_pulse_check( );
-	rb_pulser_basic_functions_init( );
-	rb_pulser_rf_synth_init( );
+	rb_pulser_j_basic_pulse_check( );
+	rb_pulser_j_basic_functions_init( );
+	rb_pulser_j_rf_synth_init( );
 
-	if ( rb_pulser.dump_file != NULL )
-		rb_pulser_init_print( rb_pulser.dump_file );
+	if ( rb_pulser_j.dump_file != NULL )
+		rb_pulser_j_init_print( rb_pulser_j.dump_file );
 
-	if ( rb_pulser.show_file != NULL )
-		rb_pulser_init_print( rb_pulser.show_file );
+	if ( rb_pulser_j.show_file != NULL )
+		rb_pulser_j_init_print( rb_pulser_j.show_file );
 
-	rb_pulser_update_pulses( SET );
+	rb_pulser_j_update_pulses( SET );
 }
 
 
@@ -58,7 +58,7 @@ void rb_pulser_init_setup( void )
  * and pulser_dump_pulses() EDL functions
  *------------------------------------------------------*/
 
-static void rb_pulser_init_print( FILE *fp )
+static void rb_pulser_j_init_print( FILE *fp )
 {
 	int i;
 
@@ -66,14 +66,14 @@ static void rb_pulser_init_print( FILE *fp )
 	if ( fp == NULL )
 		return;
 
-	fprintf( fp, "TB: %g\nD: %ld\n===\n", rb_pulser.timebase,
-			 Ticks_rnd( rb_pulser.neg_delay / rb_pulser.timebase ) );
+	fprintf( fp, "TB: %g\nD: %ld\n===\n", rb_pulser_j.timebase,
+			 Ticks_rnd( rb_pulser_j.neg_delay / rb_pulser_j.timebase ) );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-		if ( rb_pulser.function[ i ].is_used )
-			fprintf( fp, "%s:  %ld\n", rb_pulser.function[ i ].name,
-					 Ticks_rnd( rb_pulser.function[ i ].delay /
-								rb_pulser.timebase ) );
+		if ( rb_pulser_j.function[ i ].is_used )
+			fprintf( fp, "%s:  %ld\n", rb_pulser_j.function[ i ].name,
+					 Ticks_rnd( rb_pulser_j.function[ i ].delay /
+								rb_pulser_j.timebase ) );
 }
 
 
@@ -84,12 +84,12 @@ static void rb_pulser_init_print( FILE *fp )
  * 3. the length is set
  *------------------------------------------------------------*/
 
-static void rb_pulser_basic_pulse_check( void )
+static void rb_pulser_j_basic_pulse_check( void )
 {
 	Pulse_T *p;
 
 
-	for ( p = rb_pulser.pulses; p != NULL; p = p->next )
+	for ( p = rb_pulser_j.pulses; p != NULL; p = p->next )
 	{
 		p->is_active = SET;
 
@@ -118,7 +118,7 @@ static void rb_pulser_basic_pulse_check( void )
  * pulses assigned to it.
  *-----------------------------------------------------*/
 
-static void rb_pulser_basic_functions_init( void )
+static void rb_pulser_j_basic_functions_init( void )
 {
 	Function_T *f;
 	int i;
@@ -127,14 +127,14 @@ static void rb_pulser_basic_functions_init( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = rb_pulser.function + i;
+		f = rb_pulser_j.function + i;
 
 		if ( ! f->is_used )
 			continue;
 
 		/* Assemble a list of all pulses assigned to the function */
 
-		for ( f->num_pulses = 0, cp = rb_pulser.pulses;
+		for ( f->num_pulses = 0, cp = rb_pulser_j.pulses;
 			  cp != NULL; cp = cp->next )
 		{
 			if ( cp->function != f )
@@ -163,9 +163,9 @@ static void rb_pulser_basic_functions_init( void )
  * marked as belonging to the RF function)
  *------------------------------------------------------------------*/
 
-static void rb_pulser_rf_synth_init( void )
+static void rb_pulser_j_rf_synth_init( void )
 {
-	Function_T *f = rb_pulser.function + PULSER_CHANNEL_RF;
+	Function_T *f = rb_pulser_j.function + PULSER_CHANNEL_RF;
 	int dev_num;
 	char *func;
 	Var_T *func_ptr;
@@ -201,7 +201,7 @@ static void rb_pulser_rf_synth_init( void )
 	}
 
 	vars_pop( func_ptr );
-	rb_pulser.synth_pulse_state = func;
+	rb_pulser_j.synth_pulse_state = func;
 
 	if ( dev_num == 1 )
 		func = T_strdup( SYNTHESIZER_PULSE_WIDTH );
@@ -211,8 +211,8 @@ static void rb_pulser_rf_synth_init( void )
 	if ( ! func_exists( func ) ||
 		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
-		rb_pulser.synth_pulse_state =
-								  CHAR_P T_free( rb_pulser.synth_pulse_state );
+		rb_pulser_j.synth_pulse_state =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_state );
 		T_free( func );
 		print( FATAL, "Function for setting pulse widths is missing from "
 			   "the synthesizer module '%s'.\n", SYNTHESIZER_MODULE );
@@ -220,7 +220,7 @@ static void rb_pulser_rf_synth_init( void )
 	}
 
 	vars_pop( func_ptr );
-	rb_pulser.synth_pulse_width = func;
+	rb_pulser_j.synth_pulse_width = func;
 	
 	if ( dev_num == 1 )
 		func = T_strdup( SYNTHESIZER_PULSE_DELAY );
@@ -230,10 +230,10 @@ static void rb_pulser_rf_synth_init( void )
 	if ( ! func_exists( func ) ||
 		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
-		rb_pulser.synth_pulse_state =
-								  CHAR_P T_free( rb_pulser.synth_pulse_state );
-		rb_pulser.synth_pulse_width =
-								  CHAR_P T_free( rb_pulser.synth_pulse_width );
+		rb_pulser_j.synth_pulse_state =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_state );
+		rb_pulser_j.synth_pulse_width =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_width );
 		T_free( func );
 		print( FATAL, "Function for setting pulse delays is missing from "
 			   "the synthesizer module '%s'.\n", SYNTHESIZER_MODULE );
@@ -241,7 +241,7 @@ static void rb_pulser_rf_synth_init( void )
 	}
 
 	vars_pop( func_ptr );
-	rb_pulser.synth_pulse_delay = func;
+	rb_pulser_j.synth_pulse_delay = func;
 
 	if ( dev_num == 1 )
 		func = T_strdup( SYNTHESIZER_TRIG_SLOPE );
@@ -251,12 +251,12 @@ static void rb_pulser_rf_synth_init( void )
 	if ( ! func_exists( func ) ||
 		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
-		rb_pulser.synth_pulse_state =
-								  CHAR_P T_free( rb_pulser.synth_pulse_state );
-		rb_pulser.synth_pulse_delay =
-								  CHAR_P T_free( rb_pulser.synth_pulse_delay );
-		rb_pulser.synth_pulse_width =
-								  CHAR_P T_free( rb_pulser.synth_pulse_width );
+		rb_pulser_j.synth_pulse_state =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_state );
+		rb_pulser_j.synth_pulse_delay =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_delay );
+		rb_pulser_j.synth_pulse_width =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_width );
 		T_free( func );
 		print( FATAL, "Function for setting the trigger slope is missing from "
 			   "the synthesizer module '%s'.\n", SYNTHESIZER_MODULE );
@@ -264,7 +264,7 @@ static void rb_pulser_rf_synth_init( void )
 	}
 
 	vars_pop( func_ptr );
-	rb_pulser.synth_trig_slope = func;
+	rb_pulser_j.synth_trig_slope = func;
 
 	if ( dev_num == 1 )
 		func = T_strdup( SYNTHESIZER_STATE );
@@ -274,14 +274,14 @@ static void rb_pulser_rf_synth_init( void )
 	if ( ! func_exists( func ) ||
 		 ( func_ptr = func_get( func, &acc ) ) == NULL )
 	{
-		rb_pulser.synth_pulse_state =
-								  CHAR_P T_free( rb_pulser.synth_pulse_state );
-		rb_pulser.synth_pulse_delay =
-								  CHAR_P T_free( rb_pulser.synth_pulse_delay );
-		rb_pulser.synth_pulse_width =
-								  CHAR_P T_free( rb_pulser.synth_pulse_width );
-		rb_pulser.synth_trig_slope =
-								  CHAR_P T_free( rb_pulser.synth_trig_slope );
+		rb_pulser_j.synth_pulse_state =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_state );
+		rb_pulser_j.synth_pulse_delay =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_delay );
+		rb_pulser_j.synth_pulse_width =
+								CHAR_P T_free( rb_pulser_j.synth_pulse_width );
+		rb_pulser_j.synth_trig_slope =
+								CHAR_P T_free( rb_pulser_j.synth_trig_slope );
 		T_free( func );
 		print( FATAL, "Function for setting the trigger slope is missing from "
 			   "the synthesizer module '%s'.\n", SYNTHESIZER_MODULE );
@@ -289,7 +289,7 @@ static void rb_pulser_rf_synth_init( void )
 	}
 
 	vars_pop( func_ptr );
-	rb_pulser.synth_state = func;
+	rb_pulser_j.synth_state = func;
 }
 
 

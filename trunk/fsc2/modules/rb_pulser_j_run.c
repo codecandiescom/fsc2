@@ -22,12 +22,12 @@
  */
 
 
-#include "rb_pulser.h"
+#include "rb_pulser_j.h"
 
 
-static void rb_pulser_commit( bool flag );
+static void rb_pulser_j_commit( bool flag );
 
-static void rb_pulser_rf_pulse( void );
+static void rb_pulser_j_rf_pulse( void );
 
 
 /*---------------------------------------------------------------------*
@@ -35,29 +35,29 @@ static void rb_pulser_rf_pulse( void );
  * to update the pulser accordingly.
  *---------------------------------------------------------------------*/
 
-void rb_pulser_do_update( void )
+void rb_pulser_j_do_update( void )
 {
 	bool restart = UNSET;
 
 
 	/* Stop the pulser while the update is done */
 
-	if ( rb_pulser.is_running )
+	if ( rb_pulser_j.is_running )
 	{
 		restart = SET;
 		if ( FSC2_MODE == EXPERIMENT )
-			rb_pulser_run( STOP );
+			rb_pulser_j_run( STOP );
 	}
 
 	/* Recount and resort the pulses according to their positions, check
 	   that the new settings are reasonable and then commit all changes */
 
-	rb_pulser_update_pulses( FSC2_MODE == TEST );
+	rb_pulser_j_update_pulses( FSC2_MODE == TEST );
 
 	/* Restart the pulser if necessary */
 
 	if ( restart && FSC2_MODE == EXPERIMENT )
-		rb_pulser_run( START );
+		rb_pulser_j_run( START );
 }
 
 
@@ -66,18 +66,18 @@ void rb_pulser_do_update( void )
  * that the new settings are reasonable and then commit all changes.
  *---------------------------------------------------------------------*/
 
-void rb_pulser_update_pulses( bool flag )
+void rb_pulser_j_update_pulses( bool flag )
 {
-	rb_pulser_function_init( );
-	rb_pulser_init_delay( );
-	rb_pulser_delay_card_setup( );
-	rb_pulser_rf_pulse( );
+	rb_pulser_j_function_init( );
+	rb_pulser_j_init_delay( );
+	rb_pulser_j_delay_card_setup( );
+	rb_pulser_j_rf_pulse( );
 
 	/* Now calculate the pulse sequence length and then commit changes */
 
-	rb_pulser_seq_length_check( );
+	rb_pulser_j_seq_length_check( );
 
-	rb_pulser_commit( flag );
+	rb_pulser_j_commit( flag );
 }
 
 
@@ -87,7 +87,7 @@ void rb_pulser_update_pulses( bool flag )
  * to their positions.
  *-----------------------------------------------------------------*/
 
-void rb_pulser_function_init( void )
+void rb_pulser_j_function_init( void )
 {
 	int i, j;
 	Function_T *f;
@@ -95,7 +95,7 @@ void rb_pulser_function_init( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = rb_pulser.function + i;
+		f = rb_pulser_j.function + i;
 
 		if ( ! f->is_used )
 			continue;
@@ -106,7 +106,7 @@ void rb_pulser_function_init( void )
 
 		if ( f->num_pulses > 1 )
 			qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
-				   rb_pulser_start_compare );
+				   rb_pulser_j_start_compare );
 	}
 }
 
@@ -120,12 +120,12 @@ void rb_pulser_function_init( void )
  * be zero but must be at least INIT_DELAY_MINIMUM_DELAY_TICKS long!
  *----------------------------------------------------------------------*/
 
-void rb_pulser_init_delay( void )
+void rb_pulser_j_init_delay( void )
 {
-	Function_T *f = rb_pulser.function + PULSER_CHANNEL_MW;
+	Function_T *f = rb_pulser_j.function + PULSER_CHANNEL_MW;
 	Pulse_T *p;
 	double pos, shift;
-	Rulbus_Delay_Card_T *card = rb_pulser.delay_card + INIT_DELAY;
+	Rulbus_Delay_Card_T *card = rb_pulser_j.delay_card + INIT_DELAY;
 
 
 	card->was_active = card->is_active;
@@ -145,31 +145,32 @@ void rb_pulser_init_delay( void )
 
 	p = f->pulses[ 0 ];
 
-	pos =   p->pos + p->function->delay * rb_pulser.timebase
-		  - rb_pulser.delay_card[ ERT_DELAY  ].intr_delay
-		  - rb_pulser.delay_card[ INIT_DELAY ].intr_delay
-		  - rb_pulser.delay_card[ MW_DELAY_0 ].intr_delay;
+	pos =   p->pos + p->function->delay * rb_pulser_j.timebase
+		  - rb_pulser_j.delay_card[ ERT_DELAY  ].intr_delay
+		  - rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay
+		  - rb_pulser_j.delay_card[ MW_DELAY_0 ].intr_delay;
 
-	if ( pos / rb_pulser.timebase - INIT_DELAY_MINIMUM_DELAY_TICKS <
+	if ( pos / rb_pulser_j.timebase - INIT_DELAY_MINIMUM_DELAY_TICKS <
 		 									                     - PRECISION )
 	{
 		print( FATAL, "First MW pulse starts too early.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( pos / rb_pulser.timebase - INIT_DELAY_MINIMUM_DELAY_TICKS < 0.0 )
-		pos = INIT_DELAY_MINIMUM_DELAY_TICKS * rb_pulser.timebase;
+	if ( pos / rb_pulser_j.timebase - INIT_DELAY_MINIMUM_DELAY_TICKS < 0.0 )
+		pos = INIT_DELAY_MINIMUM_DELAY_TICKS * rb_pulser_j.timebase;
 
-	shift = Ticks_rnd( pos / rb_pulser.timebase ) * rb_pulser.timebase - pos;
+	shift =   Ticks_rnd( pos / rb_pulser_j.timebase )
+		    * rb_pulser_j.timebase - pos;
 
-	if ( fabs( shift ) > PRECISION * rb_pulser.timebase )
+	if ( fabs( shift ) > PRECISION * rb_pulser_j.timebase )
 	{
 		print( SEVERE, "Position of first MW pulse not possible, must shift "
-			   "it by %s.\n", rb_pulser_ptime( shift ) );
+			   "it by %s.\n", rb_pulser_j_ptime( shift ) );
 		pos += shift;
 	}
 
-	card->delay = Ticks_rnd( pos / rb_pulser.timebase );
+	card->delay = Ticks_rnd( pos / rb_pulser_j.timebase );
 }
 
 
@@ -179,7 +180,7 @@ void rb_pulser_init_delay( void )
  * the pulses.
  *------------------------------------------------------------------------*/
 
-void rb_pulser_delay_card_setup( void )
+void rb_pulser_j_delay_card_setup( void )
 {
 	Rulbus_Delay_Card_T *card;
 	Function_T *f;
@@ -191,7 +192,7 @@ void rb_pulser_delay_card_setup( void )
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = rb_pulser.function + i;
+		f = rb_pulser_j.function + i;
 
 		if ( ! f->is_used )
 			continue;
@@ -207,10 +208,10 @@ void rb_pulser_delay_card_setup( void )
 		/* Loop over all active pulses of the function (which are already
 		   ordered by start position */
 
-		start =   rb_pulser.delay_card[ ERT_DELAY  ].intr_delay
-			    + rb_pulser.delay_card[ INIT_DELAY ].intr_delay
-			    + rb_pulser.delay_card[ INIT_DELAY ].delay
-			    * rb_pulser.timebase;
+		start =   rb_pulser_j.delay_card[ ERT_DELAY  ].intr_delay
+			    + rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay
+			    + rb_pulser_j.delay_card[ INIT_DELAY ].delay
+			    * rb_pulser_j.timebase;
 
 		for ( card = f->delay_card, j = 0; j < f->num_active_pulses; j++ )
 		{
@@ -249,7 +250,7 @@ void rb_pulser_delay_card_setup( void )
 
 				delta = p->pos + f->delay - start;
 
-				if ( delta < - PRECISION * rb_pulser.timebase )
+				if ( delta < - PRECISION * rb_pulser_j.timebase )
 				{
 					if ( j == 0 )
 						print( FATAL, "Pulse #%ld of function '%s' starts too "
@@ -264,25 +265,25 @@ void rb_pulser_delay_card_setup( void )
 				if ( delta < 0.0 )
 					delta = 0.0;
 
-				dT = Ticks_rnd( delta / rb_pulser.timebase );
-				shift = dT * rb_pulser.timebase - delta;
+				dT = Ticks_rnd( delta / rb_pulser_j.timebase );
+				shift = dT * rb_pulser_j.timebase - delta;
 			
-				if ( fabs( shift ) > PRECISION * rb_pulser.timebase )
+				if ( fabs( shift ) > PRECISION * rb_pulser_j.timebase )
 					print( SEVERE, "Position of pulse #%ld of function '%s' "
 						   "not possible, must shift it by %s.\n", p->num,
-						   f->name, rb_pulser_ptime( shift ) );
+						   f->name, rb_pulser_j_ptime( shift ) );
 
 				card->delay = dT;
 				card->is_active = SET;
 				
-				start += card->delay * rb_pulser.timebase;
+				start += card->delay * rb_pulser_j.timebase;
 
 				/* Some channels have no card for the pulse itself, here we
 				   just store the length and lets deal with this later */
 
 				if ( ( card = card->next ) == NULL )
 				{
-					f->last_pulse_len = p->len * rb_pulser.timebase;
+					f->last_pulse_len = p->len * rb_pulser_j.timebase;
 					continue;
 				}
 			}
@@ -290,7 +291,7 @@ void rb_pulser_delay_card_setup( void )
 				start += card->intr_delay;
 
 			card->delay = p->len;
-			start += card->delay * rb_pulser.timebase;
+			start += card->delay * rb_pulser_j.timebase;
 			card->is_active = card->delay != 0;
 			card = card->next;
 		}
@@ -303,9 +304,9 @@ void rb_pulser_delay_card_setup( void )
  * variables describing the state of the pulser to their initial values.
  *------------------------------------------------------------------------*/
 
-void rb_pulser_full_reset( void )
+void rb_pulser_j_full_reset( void )
 {
-	Pulse_T *p = rb_pulser.pulses;
+	Pulse_T *p = rb_pulser_j.pulses;
 	Rulbus_Delay_Card_T *card;
 	size_t i;
 
@@ -329,15 +330,15 @@ void rb_pulser_full_reset( void )
 	/* Make sure all cards (except the ERT card) are inactive (i.e. have a
 	   delay of 0 and don't output trigger pulses) */
 
-	for ( i = INIT_DELAY, card = rb_pulser.delay_card + i;
+	for ( i = INIT_DELAY, card = rb_pulser_j.delay_card + i;
 		  i < NUM_DELAY_CARDS; card++, i++ )
 	{
 		card->is_active =
 		card->was_active = UNSET;
 		card->delay = card->old_delay = 0;
 
-#if ! defined RB_PULSER_TEST
-		rb_pulser_delay_card_state( card->handle, STOP );
+#if ! defined RB_PULSER_J_TEST
+		rb_pulser_j_delay_card_state( card->handle, STOP );
 
 #else   /* in test mode */
 		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %d, "
@@ -350,7 +351,7 @@ void rb_pulser_full_reset( void )
 	   its delay won't get set even though it should (thanks to Huib for
 	   pointing out that problem) */
 
-	rb_pulser.delay_card[ INIT_DELAY ].old_delay = -1;
+	rb_pulser_j.delay_card[ INIT_DELAY ].old_delay = -1;
 }
 
 
@@ -359,7 +360,7 @@ void rb_pulser_full_reset( void )
  * an exception if that's longer than possible with the pulser.
  *------------------------------------------------------------------*/
 
-void rb_pulser_seq_length_check( void )
+void rb_pulser_j_seq_length_check( void )
 {
 	int i;
 	Function_T *f;
@@ -367,14 +368,14 @@ void rb_pulser_seq_length_check( void )
 	double max_seq_len = 0.0, seq_len;
 
 
-	if ( rb_pulser.trig_in_mode == EXTERNAL )
+	if ( rb_pulser_j.trig_in_mode == EXTERNAL )
 		return;
 
 	/* Determine length of sequence lengths of the individual functions */
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		f = rb_pulser.function + i;
+		f = rb_pulser_j.function + i;
 
 		/* Nothing to be done for unused functions and the phase functions */
 
@@ -384,16 +385,16 @@ void rb_pulser_seq_length_check( void )
 		seq_len = 0.0;
 		for ( card = f->delay_card; card != NULL && card->is_active;
 			  card = card->next )
-			seq_len += card->delay * rb_pulser.timebase + card->intr_delay;
+			seq_len += card->delay * rb_pulser_j.timebase + card->intr_delay;
 
 		max_seq_len = d_max( max_seq_len, seq_len );
 	}
 
-	max_seq_len +=   rb_pulser.delay_card[ INIT_DELAY ].delay
-				   * rb_pulser.timebase
-				   + rb_pulser.delay_card[ INIT_DELAY ].intr_delay;
+	max_seq_len +=   rb_pulser_j.delay_card[ INIT_DELAY ].delay
+				   * rb_pulser_j.timebase
+				   + rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay;
 
-	if ( max_seq_len > rb_pulser.rep_time )
+	if ( max_seq_len > rb_pulser_j.rep_time )
 	{
 		print( FATAL, "Pulse sequence is longer than the experiment "
 			   "repetition time.\n" );
@@ -408,7 +409,7 @@ void rb_pulser_seq_length_check( void )
  * 'flag' is set during the test run.
  *-------------------------------------------------------------------*/
 
-static void rb_pulser_commit( bool flag )
+static void rb_pulser_j_commit( bool flag )
 {
 	Rulbus_Delay_Card_T *card;
 	size_t i;
@@ -416,15 +417,15 @@ static void rb_pulser_commit( bool flag )
 
 	if ( flag )
 	{
-		if ( rb_pulser.dump_file != NULL )
-			rb_pulser_write_pulses( rb_pulser.dump_file );
-		if ( rb_pulser.show_file != NULL )
-			rb_pulser_write_pulses( rb_pulser.show_file );
+		if ( rb_pulser_j.dump_file != NULL )
+			rb_pulser_j_write_pulses( rb_pulser_j.dump_file );
+		if ( rb_pulser_j.show_file != NULL )
+			rb_pulser_j_write_pulses( rb_pulser_j.show_file );
 
 		return;
 	}
 
-	for ( i = 0, card = rb_pulser.delay_card;
+	for ( i = 0, card = rb_pulser_j.delay_card;
 		  i < NUM_DELAY_CARDS; card++, i++ )
 	{
 		/* Don't mess with the ERT_DELAY card, it only gets set by starting
@@ -435,8 +436,8 @@ static void rb_pulser_commit( bool flag )
 
 		if ( card->was_active && ! card->is_active )
 		{
-#if ! defined RB_PULSER_TEST
-			rb_pulser_delay_card_state( card->handle, STOP );
+#if ! defined RB_PULSER_J_TEST
+			rb_pulser_j_delay_card_state( card->handle, STOP );
 
 #else   /* in test mode */
 			fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %d, "
@@ -448,8 +449,8 @@ static void rb_pulser_commit( bool flag )
 		}
 
 		if ( ! card->was_active && card->is_active )
-#if ! defined RB_PULSER_TEST
-			rb_pulser_delay_card_state( card->handle, START );
+#if ! defined RB_PULSER_J_TEST
+			rb_pulser_j_delay_card_state( card->handle, START );
 
 #else   /* in test mode */
 		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %d, "
@@ -459,8 +460,8 @@ static void rb_pulser_commit( bool flag )
 
 		if ( card->old_delay != card->delay )
 		{
-#if ! defined RB_PULSER_TEST
-			rb_pulser_delay_card_delay( card->handle, card->delay );
+#if ! defined RB_PULSER_J_TEST
+			rb_pulser_j_delay_card_delay( card->handle, card->delay );
 
 #else   /* in test mode */
 			fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %d, "
@@ -476,9 +477,9 @@ static void rb_pulser_commit( bool flag )
  * Function for telling the synthesizer about the RF pulse length
  *----------------------------------------------------------------*/
 
-static void rb_pulser_rf_pulse( void )
+static void rb_pulser_j_rf_pulse( void )
 {
-	Function_T *f = rb_pulser.function + PULSER_CHANNEL_RF;
+	Function_T *f = rb_pulser_j.function + PULSER_CHANNEL_RF;
 	Pulse_T *p;
 	Var_T *func_ptr;
 	int acc;
@@ -491,8 +492,8 @@ static void rb_pulser_rf_pulse( void )
 
 	if ( p->is_active )
 	{
-#if ! defined RB_PULSER_TEST
-		if ( ( func_ptr = func_get( rb_pulser.synth_pulse_width, &acc ) )
+#if ! defined RB_PULSER_J_TEST
+		if ( ( func_ptr = func_get( rb_pulser_j.synth_pulse_width, &acc ) )
 																	  == NULL )
 		{
 			print( FATAL, "Function for setting synthesizer pulse length is "
@@ -515,8 +516,8 @@ static void rb_pulser_rf_pulse( void )
 	if ( ( p->was_active && ! p->is_active ) ||
 		 ( ! p->was_active && p->is_active ) )
 	{
-#if ! defined RB_PULSER_TEST
-		if ( ( func_ptr = func_get( rb_pulser.synth_state, &acc ) ) == NULL )
+#if ! defined RB_PULSER_J_TEST
+		if ( ( func_ptr = func_get( rb_pulser_j.synth_state, &acc ) ) == NULL )
 		{
 			print( FATAL, "Function for setting synthesizer output state is "
 				   "not available.\n" );

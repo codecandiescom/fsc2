@@ -22,7 +22,7 @@
  */
 
 
-#include "rb_pulser.h"
+#include "rb_pulser_j.h"
 
 
 /* Array of timebases the adjustable clock (RB8515) can be set to and
@@ -47,15 +47,15 @@ static int tb_index[ ] = { RULBUS_RB8515_CLOCK_FREQ_100MHz,
  * all other functions depend on the timebase setting !
  *-----------------------------------------------------------------*/
 
-bool rb_pulser_store_timebase( double timebase )
+bool rb_pulser_j_store_timebase( double timebase )
 {
 	int i;
 
 
-	if ( rb_pulser.is_timebase )
+	if ( rb_pulser_j.is_timebase )
 	{
 		print( FATAL, "Time base has already been set to %s.\n",
-			   rb_pulser_ptime( rb_pulser.timebase ) );
+			   rb_pulser_j_ptime( rb_pulser_j.timebase ) );
 		THROW( EXCEPTION );
 	}
 
@@ -72,13 +72,13 @@ bool rb_pulser_store_timebase( double timebase )
 	if ( i == num_timebases )
 	{
 		print( FATAL, "Timebase of %s can't be realized with this pulser.\n",
-			   rb_pulser_ptime( timebase ) );
+			   rb_pulser_j_ptime( timebase ) );
 		THROW( EXCEPTION );
 	}
 
-	rb_pulser.timebase = timebases[ i ];
-	rb_pulser.tb_index = tb_index[ i ];
-	rb_pulser.is_timebase = SET;
+	rb_pulser_j.timebase = timebases[ i ];
+	rb_pulser_j.tb_index = tb_index[ i ];
+	rb_pulser_j.is_timebase = SET;
 
 	return OK;
 }
@@ -89,10 +89,10 @@ bool rb_pulser_store_timebase( double timebase )
  * are only possible for INTERNAL trigger mode!
  *---------------------------------------------------------------*/
 
-bool rb_pulser_set_function_delay( int    function,
-								   double delay )
+bool rb_pulser_j_set_function_delay( int    function,
+									 double delay )
 {
-	Function_T *f = rb_pulser.function + function;
+	Function_T *f = rb_pulser_j.function + function;
 	int i;
 
 
@@ -110,28 +110,28 @@ bool rb_pulser_set_function_delay( int    function,
 
 	if ( delay < 0.0 )
 	{
-		if ( rb_pulser.is_trig_in_mode &&
-			 rb_pulser.trig_in_mode == EXTERNAL )
+		if ( rb_pulser_j.is_trig_in_mode &&
+			 rb_pulser_j.trig_in_mode == EXTERNAL )
 		{
 			print( FATAL, "Negative delays are impossible in EXTERNAL trigger "
 				   "mode.\n" );
 			THROW( EXCEPTION );
 		}
 
-		rb_pulser.is_neg_delay = SET;
+		rb_pulser_j.is_neg_delay = SET;
 
-		if ( delay < rb_pulser.neg_delay )
+		if ( delay < rb_pulser_j.neg_delay )
 		{
 			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 				if ( i != function )
-					rb_pulser.function[ i ].delay -=
-												   rb_pulser.neg_delay + delay;
+					rb_pulser_j.function[ i ].delay -=
+												 rb_pulser_j.neg_delay + delay;
 
-			rb_pulser.neg_delay = - delay;
+			rb_pulser_j.neg_delay = - delay;
 			f->delay = 0;
 		}
 		else
-			f->delay += rb_pulser.neg_delay + delay;
+			f->delay += rb_pulser_j.neg_delay + delay;
 	}
 	else
 		f->delay += delay;
@@ -147,26 +147,26 @@ bool rb_pulser_set_function_delay( int    function,
  * Function for setting the trigger mode, either INTERNAL or EXTERNAL
  *--------------------------------------------------------------------*/
 
-bool rb_pulser_set_trigger_mode( int mode )
+bool rb_pulser_j_set_trigger_mode( int mode )
 {
 	fsc2_assert( mode == INTERNAL || mode == EXTERNAL );
 
-	if ( rb_pulser.is_trig_in_mode && rb_pulser.trig_in_mode != mode )
+	if ( rb_pulser_j.is_trig_in_mode && rb_pulser_j.trig_in_mode != mode )
 	{
 		print( FATAL, "Trigger mode has already been set to %sTERNAL.\n",
-			   rb_pulser.trig_in_mode == INTERNAL ? "IN" : "EX" );
+			   rb_pulser_j.trig_in_mode == INTERNAL ? "IN" : "EX" );
 		THROW( EXCEPTION );
 	}
 
-	if ( mode == EXTERNAL && rb_pulser.is_neg_delay )
+	if ( mode == EXTERNAL && rb_pulser_j.is_neg_delay )
 	{
 		print( FATAL, "EXTERNAL trigger mode and using negative delays "
 			   "for functions isn't possible.\n" );
 		THROW( EXCEPTION );
 	}
 
-	rb_pulser.trig_in_mode = mode;
-	rb_pulser.is_trig_in_mode = SET;
+	rb_pulser_j.trig_in_mode = mode;
+	rb_pulser_j.is_trig_in_mode = SET;
 
 	return OK;
 }
@@ -177,27 +177,27 @@ bool rb_pulser_set_trigger_mode( int mode )
  * runs in external trigger mode
  *-----------------------------------.-------------------*/
 
-bool rb_pulser_set_trig_in_slope( int slope )
+bool rb_pulser_j_set_trig_in_slope( int slope )
 {
 	fsc2_assert( slope == POSITIVE || slope == NEGATIVE );
 
-	if ( rb_pulser.is_trig_in_slope && rb_pulser.trig_in_slope != slope )
+	if ( rb_pulser_j.is_trig_in_slope && rb_pulser_j.trig_in_slope != slope )
 	{
 		print( FATAL, "A different trigger slope (%s) has already been set.\n",
 			   slope == POSITIVE ? "NEGATIVE" : "POSITIVE" );
 		THROW( EXCEPTION );
 	}
 
-	if ( rb_pulser.is_trig_in_mode && rb_pulser.trig_in_mode == INTERNAL )
+	if ( rb_pulser_j.is_trig_in_mode && rb_pulser_j.trig_in_mode == INTERNAL )
 	{
 		print( SEVERE, "Setting a trigger slope is useless in INTERNAL "
 			   "trigger mode.\n" );
 		return FAIL;
 	}
 
-	if ( rb_pulser.is_neg_delay &&
-		 ! ( rb_pulser.is_trig_in_mode &&
-			 rb_pulser.trig_in_mode == INTERNAL ) )
+	if ( rb_pulser_j.is_neg_delay &&
+		 ! ( rb_pulser_j.is_trig_in_mode &&
+			 rb_pulser_j.trig_in_mode == INTERNAL ) )
 	{
 		print( FATAL, "Setting a trigger slope (requiring EXTERNAL "
 			   "trigger mode) and using negative delays for functions is "
@@ -205,9 +205,9 @@ bool rb_pulser_set_trig_in_slope( int slope )
 		THROW( EXCEPTION );
 	}
 
-	rb_pulser.trig_in_mode = EXTERNAL;
-	rb_pulser.trig_in_slope = slope;
-	rb_pulser.is_trig_in_slope = SET;
+	rb_pulser_j.trig_in_mode = EXTERNAL;
+	rb_pulser_j.trig_in_slope = slope;
+	rb_pulser_j.is_trig_in_slope = SET;
 
 	return OK;
 }
@@ -218,12 +218,12 @@ bool rb_pulser_set_trig_in_slope( int slope )
  * when pulser runs in internal trigger mode
  *------------------------------------------------------------------*/
 
-bool rb_pulser_set_repeat_time( double rep_time )
+bool rb_pulser_j_set_repeat_time( double rep_time )
 {
 	int i;
 
 
-	if ( rb_pulser.is_trig_in_mode && rb_pulser.trig_in_mode != INTERNAL )
+	if ( rb_pulser_j.is_trig_in_mode && rb_pulser_j.trig_in_mode != INTERNAL )
 	{
 		print( FATAL, "Setting repeat time/frequency is useless for EXTERNAL "
 			   "trigger mode.\n" );
@@ -232,7 +232,7 @@ bool rb_pulser_set_repeat_time( double rep_time )
 
 	/* Complain if a different repetition time has already been set */
 
-	if ( rb_pulser.is_rep_time )
+	if ( rb_pulser_j.is_rep_time )
 	{
 		print( FATAL, "Repeat time/frequency has already been set.\n" );
 		THROW( EXCEPTION );
@@ -257,10 +257,10 @@ bool rb_pulser_set_repeat_time( double rep_time )
 		THROW( EXCEPTION );
 	}
 
-	rb_pulser.rep_time_index = tb_index[ i ];
-	rb_pulser.rep_time_ticks = Ticks_rnd( rep_time / timebases[ i ] );
-	rb_pulser.rep_time = rb_pulser.rep_time_ticks * timebases[ i ];
-	rb_pulser.is_rep_time = SET;
+	rb_pulser_j.rep_time_index = tb_index[ i ];
+	rb_pulser_j.rep_time_ticks = Ticks_rnd( rep_time / timebases[ i ] );
+	rb_pulser_j.rep_time = rb_pulser_j.rep_time_ticks * timebases[ i ];
+	rb_pulser_j.is_rep_time = SET;
 
 	return OK;
 }

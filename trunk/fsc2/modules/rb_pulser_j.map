@@ -21,12 +21,12 @@
 #  Boston, MA 02111-1307, USA.
 
 
-RB_PULSER {
+RB_PULSER_J {
 
 	global:
 				generic_type;
 				device_name;
-				rb_pulser_*_hook;
+				rb_pulser_j_*_hook;
 				pulser_*;
 
 	local:      *;

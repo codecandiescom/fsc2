@@ -22,8 +22,8 @@
  */
 
 
-#if ! defined RB_PULSER_HEADER
-#define RB_PULSER_HEADER
+#if ! defined RB_PULSER_J_HEADER
+#define RB_PULSER_J_HEADER
 
 
 #include "fsc2_module.h"
@@ -31,7 +31,7 @@
 
 /* Include configuration information for the device */
 
-#include "rb_pulser.conf"
+#include "rb_pulser_j.conf"
 
 
 /* Include the Rulbus header file */
@@ -44,7 +44,7 @@
    call for setting a deleay or clock card. */
 
 #if 0
-#define RB_PULSER_TEST
+#define RB_PULSER_J_TEST
 #endif
 
 
@@ -116,7 +116,7 @@
 #define INIT_DELAY_MINIMUM_DELAY_TICKS    2   /* typically 20 ns */
 
 
-typedef struct RB_Pulser RB_Pulser_T;
+typedef struct RB_Pulser_J RB_Pulser_J_T;
 typedef struct Rulbus_Clock_Card Rulbus_Clock_Card_T;
 typedef struct Rulbus_Delay_Card Rulbus_Delay_Card_T;
 typedef struct Function Function_T;
@@ -199,7 +199,7 @@ struct Pulse {
 };
 
 
-struct RB_Pulser {
+struct RB_Pulser_J {
 	bool is_needed;
 
 	char *config_file;
@@ -247,17 +247,17 @@ struct RB_Pulser {
 };
 
 
-extern RB_Pulser_T rb_pulser;
+extern RB_Pulser_J_T rb_pulser_j;
 
 
-/* Functions defined in rb_pulser.c */
+/* Functions defined in rb_pulser_j.c */
 
-int rb_pulser_init_hook(        void );
-int rb_pulser_test_hook(        void );
-int rb_pulser_end_of_test_hook( void );
-int rb_pulser_exp_hook(         void );
-int rb_pulser_end_of_exp_hook(  void );
-void rb_pulser_exit_hook(       void );
+int rb_pulser_j_init_hook(        void );
+int rb_pulser_j_test_hook(        void );
+int rb_pulser_j_end_of_test_hook( void );
+int rb_pulser_j_exp_hook(         void );
+int rb_pulser_j_end_of_exp_hook(  void );
+void rb_pulser_j_exit_hook(       void );
 
 Var_T *pulser_name(                Var_T * /* v */ );
 Var_T *pulser_show_pulses(         Var_T * /* v */ );
@@ -270,134 +270,134 @@ Var_T *pulser_reset(               Var_T * /* v */ );
 Var_T *pulser_pulse_reset(         Var_T * /* v */ );
 Var_T *pulser_pulse_minimum_specs( Var_T * /* v */ );
 
-void rb_pulser_cleanup( void );
+void rb_pulser_j_cleanup( void );
 
-/* Functions defined in rb_pulser_gen.c */
+/* Functions defined in rb_pulser_j_gen.c */
 
-bool rb_pulser_store_timebase( double /* timebase */ );
+bool rb_pulser_j_store_timebase( double /* timebase */ );
 
-bool rb_pulser_set_function_delay( int    /* function */,
-								   double /* delay    */ );
+bool rb_pulser_j_set_function_delay( int    /* function */,
+									 double /* delay    */ );
 
-bool rb_pulser_set_trigger_mode( int /* mode */ );
+bool rb_pulser_j_set_trigger_mode( int /* mode */ );
 
-bool rb_pulser_set_trig_in_slope( int /* slope */ );
+bool rb_pulser_j_set_trig_in_slope( int /* slope */ );
 
-bool rb_pulser_set_repeat_time( double /* rep_time */ );
+bool rb_pulser_j_set_repeat_time( double /* rep_time */ );
 
 
-/* Functions defined in rb_pulser_pulse.c */
+/* Functions defined in rb_pulser_j_pulse.c */
 
-bool rb_pulser_new_pulse( long /* pnum */ );
+bool rb_pulser_j_new_pulse( long /* pnum */ );
 
-bool rb_pulser_set_pulse_function( long /* pnum     */,
-								   int  /* function */ );
+bool rb_pulser_j_set_pulse_function( long /* pnum     */,
+									 int  /* function */ );
 
-bool rb_pulser_set_pulse_position( long   /* pnum   */,
+bool rb_pulser_j_set_pulse_position( long   /* pnum   */,
+									 double /* p_time */ );
+
+bool rb_pulser_j_set_pulse_length( long   /* pnum   */,
 								   double /* p_time */ );
 
-bool rb_pulser_set_pulse_length( long   /* pnum   */,
-								 double /* p_time */ );
+bool rb_pulser_j_set_pulse_position_change( long   /* pnum   */,
+											double /* p_time */ );
 
-bool rb_pulser_set_pulse_position_change( long   /* pnum   */,
+bool rb_pulser_j_set_pulse_length_change( long   /* pnum   */,
 										  double /* p_time */ );
 
-bool rb_pulser_set_pulse_length_change( long   /* pnum   */,
-										double /* p_time */ );
+bool rb_pulser_j_get_pulse_function( long  /* pnum     */,
+									 int * /* function */ );
 
-bool rb_pulser_get_pulse_function( long  /* pnum     */,
-								   int * /* function */ );
+bool rb_pulser_j_get_pulse_position( long     /* pnum   */,
+									 double * /* p_time */ );
 
-bool rb_pulser_get_pulse_position( long     /* pnum   */,
+bool rb_pulser_j_get_pulse_length( long     /* pnum   */,
 								   double * /* p_time */ );
 
-bool rb_pulser_get_pulse_length( long     /* pnum   */,
-								 double * /* p_time */ );
+bool rb_pulser_j_get_pulse_position_change( long     /* pnum   */,
+											double * /* p_time */ );
 
-bool rb_pulser_get_pulse_position_change( long     /* pnum   */,
+bool rb_pulser_j_get_pulse_length_change( long     /* pnum   */,
 										  double * /* p_time */ );
 
-bool rb_pulser_get_pulse_length_change( long     /* pnum   */,
-										double * /* p_time */ );
+bool rb_pulser_j_change_pulse_position( long   /* pnum   */,
+										double /* p_time */ );
 
-bool rb_pulser_change_pulse_position( long   /* pnum   */,
+bool rb_pulser_j_change_pulse_length( long   /* pnum   */,
 									  double /* p_time */ );
 
-bool rb_pulser_change_pulse_length( long   /* pnum   */,
-									double /* p_time */ );
+bool rb_pulser_j_change_pulse_position_change( long   /* pnum   */,
+											   double /* p_time */ );
 
-bool rb_pulser_change_pulse_position_change( long   /* pnum   */,
+bool rb_pulser_j_change_pulse_length_change( long   /* pnum   */,
 											 double /* p_time */ );
 
-bool rb_pulser_change_pulse_length_change( long   /* pnum   */,
-										   double /* p_time */ );
+
+/* Functions defined in rb_pulser_j_init.c */
+
+void rb_pulser_j_init_setup( void );
 
 
-/* Functions defined in rb_pulser_init.c */
+/* Functions defined in rb_pulser_j_run.c */
 
-void rb_pulser_init_setup( void );
+void rb_pulser_j_do_update( void );
 
+void rb_pulser_j_update_pulses( bool /* flag */ );
 
-/* Functions defined in rb_pulser_run.c */
+void rb_pulser_j_function_init( void );
 
-void rb_pulser_do_update( void );
+void rb_pulser_j_init_delay( void );
 
-void rb_pulser_update_pulses( bool /* flag */ );
+void rb_pulser_j_delay_card_setup( void );
 
-void rb_pulser_function_init( void );
+void rb_pulser_j_full_reset( void );
 
-void rb_pulser_init_delay( void );
-
-void rb_pulser_delay_card_setup( void );
-
-void rb_pulser_full_reset( void );
-
-void rb_pulser_seq_length_check( void );
+void rb_pulser_j_seq_length_check( void );
 
 
-/* Functions defined in rb_pulser_util.c */
+/* Functions defined in rb_pulser_j_util.c */
 
-int rb_pulser_start_compare( const void * /* A */,
-							 const void * /* B */ );
+int rb_pulser_j_start_compare( const void * /* A */,
+							   const void * /* B */ );
 
-Ticks rb_pulser_double2ticks( double /* p_time */ );
+Ticks rb_pulser_j_double2ticks( double /* p_time */ );
 
-double rb_pulser_ticks2double( Ticks /* ticks */ );
+double rb_pulser_j_ticks2double( Ticks /* ticks */ );
 
-Pulse_T *rb_pulser_get_pulse( long /* pnum */ );
+Pulse_T *rb_pulser_j_get_pulse( long /* pnum */ );
 
-const char *rb_pulser_ptime( double /* p_time */ );
+const char *rb_pulser_j_ptime( double /* p_time */ );
 
-const char *rb_pulser_pticks( Ticks /* ticks */ );
+const char *rb_pulser_j_pticks( Ticks /* ticks */ );
 
-void rb_pulser_show_pulses( void );
+void rb_pulser_j_show_pulses( void );
 
-void rb_pulser_dump_pulses( void );
+void rb_pulser_j_dump_pulses( void );
 
-void rb_pulser_write_pulses( FILE * /* fp */ );
-
-
-/* Functions defined in rb_pulser_config.l */
-
-void rb_pulser_read_configuration( void );
+void rb_pulser_j_write_pulses( FILE * /* fp */ );
 
 
-/* Functions defined in rb_pulser_ll.c */
+/* Functions defined in rb_pulser_j_config.l */
 
-void rb_pulser_init( void );
-
-void rb_pulser_exit( void );
-
-void rb_pulser_run( bool /* state */ );
-
-void rb_pulser_delay_card_state( int  /* handle */,
-								 bool /* state  */ );
-
-void rb_pulser_delay_card_delay( int           /* handle */,
-								 unsigned long /* delay  */ );
+void rb_pulser_j_read_configuration( void );
 
 
-#endif /* ! RB_PULSER_HEADER */
+/* Functions defined in rb_pulser_j_ll.c */
+
+void rb_pulser_j_init( void );
+
+void rb_pulser_j_exit( void );
+
+void rb_pulser_j_run( bool /* state */ );
+
+void rb_pulser_j_delay_card_state( int  /* handle */,
+								   bool /* state  */ );
+
+void rb_pulser_j_delay_card_delay( int           /* handle */,
+								   unsigned long /* delay  */ );
+
+
+#endif /* ! RB_PULSER_J_HEADER */
 
 
 /*
