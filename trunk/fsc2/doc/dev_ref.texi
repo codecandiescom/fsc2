@@ -71,7 +71,7 @@
 * rs_spec10::       Roper Scientific Spec-10 CCD Camera
 * rb8509::          Rulbus 12-bit ADC Card
 * rb8510::          Rulbus 12-bit DAC Card
-* rb_pulser::       Rulbus Pulser
+* rb_pulser_j::     Rulbus Pulser (J-band version)
 * rs690::           Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
 * s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
@@ -2143,7 +2143,7 @@ package)
 @c #############################################################
 
 
-@node rb8510, rb_pulser, rb8509, Device Reference
+@node rb8510, rb_pulser_j, rb8509, Device Reference
 @iftex
 @subheading Rulbus 12-bit DAC Card
 @end iftex
@@ -2175,20 +2175,21 @@ package)
 @c #############################################################
 
 
-@node rb_pulser, rs690, rb8510, Device Reference
+@node rb_pulser_j, rs690, rb8510, Device Reference
 @iftex
-@subheading Rulbus Pulser
+@subheading Rulbus Pulser (J-band version)
 @end iftex
 @ifnottex
-@section Rulbus Pulser
+@section Rulbus Pulser (J-band version)
 @end ifnottex
 
 @paragraphindent 0
 @strong{Module name}: @code{rb_pulser}
 
 @paragraphindent 0
-@strong{Description}: Pseudo-pulser using Rulbus (Rijksuniversiteit
-Leiden BUS, @url{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/})
+@strong{Description}: Pseudo-pulser for J-band spectrometer using Rulbus
+(Rijksuniversiteit Leiden BUS,
+@url{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/})
 - requires Linux device driver and library that are part of the @code{fsc2}
 package). This pulser isn't a stand-alone device but consists of a combination
 of (currently) 10 Rulbus RB8514 delay cards and 2 clock cards (one fixed
@@ -2228,7 +2229,7 @@ pulse of a function).
 @c #############################################################
 
 
-@node rs690, s_band_magnet_broad, rb_pulser, Device Reference
+@node rs690, s_band_magnet_broad, rb_pulser_j, Device Reference
 @iftex
 @subheading Interface Technology RS690 Word Generator (Berlin 360 GHz)
 @end iftex

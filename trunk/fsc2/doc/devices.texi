@@ -2418,7 +2418,7 @@ Currently, there are three pulser/spectrometer combinations implemented:
 @item Tektronix HFS9003 (W-band spectrometer, Berlin)
 @item Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
 @item Interface Technology RS690 (360 GHz spectrometer, Berlin)
-@item Rulbus Pulser (275 GHz spectrometer, Leiden)
+@item Rulbus Pulser for J-band (275 GHz spectrometer), Leiden
 @end itemize
 To load the functions for one of these pulsers use in the @code{DEVICES}
 section one of the lines
@@ -2428,7 +2428,7 @@ dg2020_b;
 hfs9003;
 ep385;
 rs690;
-rb_pulser;
+rb_pulser_j;
 @end example
 
 Pulsers are rather special and even the @code{EDL} syntax for dealing
@@ -2987,11 +2987,11 @@ of an @code{EDL} script.
 @anchor{pulser_pulse_minimum_specs()}
 @findex pulser_pulse_minimum_specs()
 @item pulser_pulse_minimum_specs()
-This function is available only for the @code{rb_pulser} module, i.e.@:
-the pulser used with the 275 GHz spectrometer in Leiden. It expects a
-single argument, a pulse, e.g. @code{P1}. If it is the first pulse of
-a function (i.e.@: @code{MICROWAVE}, @code{RF} or @code{DETECTION}), the
-function returns the earliest possible absolute position of the pulse.
+This function is available only for the @code{rb_pulser_j} module, i.e.@:
+the pulser used with the J-band (@w{275 GHz}) spectrometer in Leiden. It
+expects a single argument, a pulse, e.g. @code{P1}. If it is the first
+pulse of a function (i.e.@: @code{MICROWAVE}, @code{RF} or @code{DETECTION}),
+the function returns the earliest possible absolute position of the pulse.
 For all later pulses, the minimum distance to the end of the previous
 pulse is returned. Please note that the minimum positions of both the
 @code{RF} pulse and the detection pulse depend on the position of the
