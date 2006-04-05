@@ -150,7 +150,6 @@ int keithley228a_init_hook( void )
 	   used, otherwise the number defined by LOCKIN_DAC (if the number is
 	   valid) */
 
-
 #if defined( LOCKIN_NAME )
 	keithley228a.lockin_name = string_to_lower( T_strdup( LOCKIN_NAME ) );
 

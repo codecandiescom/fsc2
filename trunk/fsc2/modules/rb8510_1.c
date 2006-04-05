@@ -44,15 +44,18 @@ static struct {
 	double Vmax;
 	double Vmin;
 	double dV;
+	char *reserved_by;
 } rb8510, rb8510_stored;
 
 
-int rb8510_1_init_hook(       void );
-int rb8510_1_test_hook(       void );
-int rb8510_1_exp_hook(        void );
-int rb8510_1_end_of_exp_hook( void );
+int  rb8510_1_init_hook(       void );
+int  rb8510_1_test_hook(       void );
+int  rb8510_1_exp_hook(        void );
+int  rb8510_1_end_of_exp_hook( void );
+void rb8510_1_exit_hook(       void );
 
 Var_T *daq_name(        Var_T * v );
+Var_T *daq_reserve_dac( Var_T * v );
 Var_T *daq_set_voltage( Var_T * v );
 
 
@@ -66,6 +69,7 @@ int rb8510_1_init_hook( void )
 
 	rb8510.handle = -1;
 	rb8510.volts_is_set = UNSET;
+	rb8510.reserved_by = NULL;
 
 	return 1;
 }
@@ -86,6 +90,9 @@ int rb8510_1_test_hook( void )
 		rb8510.Vmax = - HUGE_VAL;
 		rb8510.Vmin = HUGE_VAL;
 	}
+
+	if ( rb8510.reserved_by )
+		rb8510_stored.reserved_by = T_strdup( rb8510.reserved_by );
 
 	return 1;
 }
@@ -157,9 +164,24 @@ int rb8510_1_end_of_exp_hook( void )
 	{
 		rulbus_card_close( rb8510.handle );
 		rb8510.handle = -1;
+
+		if ( rb8510.reserved_by &&
+			 rb8510.reserved_by != rb8510_stored.reserved_by )
+			rb8510.reserved_by = CHAR_P T_free( rb8510.reserved_by );
 	}
 
 	return 1;
+}
+
+
+/*------------------------------------------------------*
+ * Function called just before the module gets unloaded
+ *------------------------------------------------------*/
+
+void rb8510_1_exit_hook( void )
+{
+	if ( rb8510_stored.reserved_by )
+		T_free( rb8510_stored.reserved_by );
 }
 
 
@@ -173,6 +195,61 @@ Var_T *daq_name( Var_T * v  UNUSED_ARG )
 }
 
 
+/*-------------------------------------------------------------------*
+ * Functions allows to reserve (or un-reserve) the DAC so that in the
+ * following setting the DAC requires a pass-phrase as the very first
+ * argument to the function daq_set_voltage().
+ *-------------------------------------------------------------------*/
+
+Var_T *daq_reserve_dac( Var_T * v )
+{
+	bool lock_state = SET;
+
+
+	if ( v == NULL )
+		return vars_push( INT_VAR, rb8510.reserved_by ? 1L : 0L );
+
+	if ( v->type != STR_VAR )
+	{
+		print( FATAL, "First argument isn't a string.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->next != NULL )
+	{
+		lock_state = get_boolean( v->next );
+		too_many_arguments( v->next );
+	}
+
+	if ( rb8510.reserved_by )
+	{
+		if ( lock_state == SET )
+		{
+			if ( ! strcmp( rb8510.reserved_by, v->val.sptr ) )
+				return vars_push( INT_VAR, 1L );
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+		else
+		{
+			if ( ! strcmp( rb8510.reserved_by, v->val.sptr ) )
+			{
+				rb8510.reserved_by = CHAR_P T_free( rb8510.reserved_by );
+				return vars_push( INT_VAR, 1L );
+			}
+			else
+				return vars_push( INT_VAR, 0L );
+		}
+	}
+
+	if ( ! lock_state )
+		return vars_push( INT_VAR, 1L );
+
+	rb8510.reserved_by = T_strdup( v->val.sptr );
+	return vars_push( INT_VAR, 1L );
+}
+
+
 /*---------------------------------------------*
  * Function sets or returns the output voltage
  *--------------------------------------------*/
@@ -180,6 +257,14 @@ Var_T *daq_name( Var_T * v  UNUSED_ARG )
 Var_T *daq_set_voltage( Var_T * v )
 {
 	double volts;
+	char *pass = NULL;
+
+
+	if ( v != NULL && v->type == STR_VAR )
+	{
+		pass = v->val.sptr;
+		v = v->next;
+	}
 
 
 	if ( v == NULL )
@@ -193,6 +278,20 @@ Var_T *daq_set_voltage( Var_T * v )
 
 		return vars_push( FLOAT_VAR, rb8510.volts );
 	}
+
+	if ( rb8510.reserved_by )
+	{
+		if ( pass == NULL )
+		{
+			print( FATAL, "DAQ is reserved, phase-phrase required.\n" );
+			THROW( EXCEPTION );
+		}
+		else if ( strcmp( rb8510.reserved_by, pass ) )
+		{
+			print( FATAL, "DAQ is reserved, wrong phase-phrase.\n" );
+			THROW( EXCEPTION );
+		}
+	}		
 
 	volts = get_double( v, "DAC output voltage" );
 	too_many_arguments( v );

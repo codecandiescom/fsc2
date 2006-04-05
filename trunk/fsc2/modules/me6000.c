@@ -91,7 +91,7 @@ int me6000_init_hook( void )
 	{
 		me6000.dac[ i ].is_used = UNSET;
 		me6000.dac[ i ].volts = 0.0;
-		 me6000.dac[ i ].reserved_by = NULL;
+		me6000.dac[ i ].reserved_by = NULL;
 	}
 
 	return 1;
@@ -125,19 +125,7 @@ int me6000_exp_hook( void )
 	int i;
 
 
-	/* Restore state from before the start of the test run */
-
-	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
-		if ( me6000.dac[ i ].reserved_by )
-			me6000.dac[ i ].reserved_by =
-								  CHAR_P T_free( me6000.dac[ i ].reserved_by );
-
 	me6000 = me6000_stored;
-
-	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
-		if ( me6000_stored.dac[ i ].reserved_by )
-			me6000.dac[ i ].reserved_by =
-								T_strdup( me6000_stored.dac[ i ].reserved_by );
 
 	/* Try to get the number of DACs the boards has, this is also a test to
 	   see if it can be opened and accessed */
@@ -216,7 +204,18 @@ int me6000_exp_hook( void )
 
 int me6000_end_of_exp_hook( void )
 {
+	int i;
+
+
 	me6x00_close( BOARD_NUMBER );
+
+	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
+		if ( me6000.dac[ i ].reserved_by &&
+			 me6000.dac[ i ].reserved_by !=
+			                               me6000_stored.dac[ i ].reserved_by )
+			me6000.dac[ i ].reserved_by =
+								  CHAR_P T_free( me6000.dac[ i ].reserved_by );
+
 	return 1;
 }
 
@@ -230,12 +229,8 @@ void me6000_exit_hook( void )
 
 
 	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
-	{
-		if ( me6000.dac[ i ].reserved_by )
-			T_free( me6000.dac[ i ].reserved_by );
 		if ( me6000_stored.dac[ i ].reserved_by )
 			T_free( me6000_stored.dac[ i ].reserved_by );
-	}
 }
 
 

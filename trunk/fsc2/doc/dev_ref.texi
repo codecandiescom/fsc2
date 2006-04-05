@@ -2152,7 +2152,8 @@ package)
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{rb8510}
+@strong{Module name}: @code{rb8510_0} or @code{rb_8510_1} (there are always
+two DACs on a card an each one has its own module)
 
 @paragraphindent 0
 @strong{Description}: 12-bit DAC card for Rulbus (Rijksuniversiteit
@@ -2168,6 +2169,7 @@ package)
 @strong{Supported functions}:
 @table @samp
 @item @ref{daq_name()}
+@item @ref{daq_reserve_daq()}
 @item @ref{daq_set_voltage()}
 @end table
 
