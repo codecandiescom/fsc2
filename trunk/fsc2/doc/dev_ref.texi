@@ -1304,7 +1304,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @c #############################################################
 
 
-@node itc503, keithley228a, ips120_10, Device Reference
+@node itc503, keithley228a, ips120_10_mod, Device Reference
 @iftex
 @subheading Oxford Instruments Temperature Controller ITC503
 @end iftex
