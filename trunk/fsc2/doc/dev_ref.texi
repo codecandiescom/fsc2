@@ -51,6 +51,7 @@
 * hjs_fc::          Field Control (HJS_FC, Steinhoff group, Osnabrueck)
 * ips20_4::         Oxford Instruments Magnet Sweep Power Supply IPS20-4
 * ips120_10::       Oxford Instruments Magnet Sweep Power Supply IPS120-10
+* ips120_10_mod::   Oxford Instruments Magnet Sweep Power Supply IPS120-10 with DAC modulation input
 * itc503::          Oxford Instruments Temperature Controller ITC503
 * keithley228a::    Magnet Power Supply Keithley 228A (Berlin W-Band)
 * kontron4060::     Kontron 4060 Multimeter
@@ -1212,7 +1213,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @c #############################################################
 
 
-@node ips120_10, itc503, ips20_4, Device Reference
+@node ips120_10, ips120_10_mod, ips20_4, Device Reference
 @iftex
 @subheading Oxford Instruments Magnet Sweep Power Supply IPS120-10
 @end iftex
@@ -1221,12 +1222,64 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{ips20_4}
+@strong{Module name}: @code{ips120_10}
 
 @paragraphindent 0
 @strong{Description}: Power supply for the Oxford Instruments
 (@url{http://www.oxford-instruments.com/}) superconducting
 magnet used for Leiden @w{275 GHz} (J-band) spektrometer.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488)@*
+In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
+character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
+@code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{magnet_name()}
+@item @ref{magnet_setup()}
+@item @ref{get_field()}
+@item @ref{set_field()}
+@item @ref{magnet_sweep_rate()}
+@item @ref{magnet_sweep()}
+@item @ref{reset_field()}
+@item @ref{magnet_goto_field_on_end()}
+@end table
+
+
+@c #############################################################
+
+
+@node ips120_10_mod, itc503, ips120_10, Device Reference
+@iftex
+@subheading Oxford Instruments Magnet Sweep Power Supply IPS120-10 with DAC modulation input
+@end iftex
+@ifnottex
+@section Oxford Instruments Magnet Sweep Power Supply IPS120-10 with DAC modulation input
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{ips120_10_mod}
+
+@paragraphindent 0
+@strong{Additionally required module}: @code{rb8510_0} or @code{rb8510_1} (to
+be selected via the devices configuration file)
+
+@paragraphindent 0
+@strong{Description}: Power supply for the Oxford Instruments
+(@url{http://www.oxford-instruments.com/}) superconducting
+magnet used for Leiden W-band spektrometer. This is an older version of the
+IPS120-10 with a current resolution of only @w{10 mA}. Therefor it has been
+fitted with an external voltage input that allows to modulate the output
+current by about @w{+/- 5%} of the maximum rated current of @w{120 A} by a
+voltage in the @w{+/- 10 V} range. The external voltage is supplied by a
+RULBUS RB8510 DAC card, which has a voltage resolution of @w{5 mV},
+resulting in a current resolution of @w{0.3 mA} and a field resolution of
+ca.@: @w{0.125 G}. Please note that this improved resolution applies only
+when a field is set, the tep resolution of sweeps remains unchanged (and
+sweeps thus should probably be avoided when using this device).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488)@*
@@ -2169,7 +2222,7 @@ package)
 @strong{Supported functions}:
 @table @samp
 @item @ref{daq_name()}
-@item @ref{daq_reserve_daq()}
+@item @ref{daq_reserve_dac()}
 @item @ref{daq_set_voltage()}
 @end table
 

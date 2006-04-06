@@ -408,8 +408,7 @@ static void hjs_attenuator_set_attenuation( long new_step )
 
 	T_free( cmd );
 
-	/* Wait for the motor to move, we were using a speed of 300 steps per
-	   second. */
+	/* Wait for the motor to move, we're at a speed of 300 steps per second. */
 
 	fsc2_usleep( lrnd( fabs( steps / 300.0 * 1000000L ) ), UNSET );
 
