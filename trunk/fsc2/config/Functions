@@ -187,7 +187,8 @@ digitizer_display_channel, -1, PREP;    //
 digitizer_timebase, -1, ALL;            // set or get the time base
 digitizer_interleave_mode, -1, ALL;     // set or get SS/RIS mode (LeCroy only)
 digitizer_time_per_point, 0, EXP;       // returns time per point
-digitizer_sensitivity, -1, ALL;         // set or get the sensitivity
+digitizer_sensitivity, -1, ALL;         // set or get sensitivity
+digitizer_coupling, -1, ALL;            // set or get coupling
 digitizer_num_averages, -1, ALL;        // set or get number of averages
 digitizer_trigger_channel, -1, ALL;     // set or get trigger channel
 digitizer_trigger_level, -1, ALL;       // set or get trigger level

@@ -57,11 +57,11 @@
 #define LECROY_WR2_TO_GENERAL 1
 
 
-#define LECROY_WR2_INVALID_COUPL     -1   /* Input coupling for data channel */
-#define LECROY_WR2_AC_1_MOHM          0   /* (don't change the sequence!) */
-#define LECROY_WR2_DC_1_MOHM          1
-#define LECROY_WR2_DC_50_OHM          2
-#define LECROY_WR2_GND                3
+#define LECROY_WR2_CPL_INVALID       -1   /* Input coupling for data channel */
+#define LECROY_WR2_CPL_AC_1_MOHM      0   /* (don't change the sequence!) */
+#define LECROY_WR2_CPL_DC_1_MOHM      1
+#define LECROY_WR2_CPL_DC_50_OHM      2
+#define LECROY_WR2_CPL_GND            3
 
 #define LECROY_WR2_TRG_AC             0
 #define LECROY_WR2_TRG_DC             1
@@ -93,7 +93,7 @@
 #define LECROY_WR2_TEST_ILVD_MODE    UNSET       /* interleave mode (RIS/SS) */
 #define LECROY_WR2_TEST_SENSITIVITY  2.5         /* 2.5 V per division */
 #define LECROY_WR2_TEST_OFFSET       0.0
-#define LECROY_WR2_TEST_COUPLING     LECROY_WR2_DC_1_MOHM
+#define LECROY_WR2_TEST_COUPLING     LECROY_WR2_CPL_DC_1_MOHM
 #define LECROY_WR2_TEST_NUM_AVG      10
 #define LECROY_WR2_TEST_TRIG_DELAY   0           /* no pre- or posttrigger */
 #define LECROY_WR2_TEST_TRIG_SOURCE  LECROY_WR2_CH1
@@ -126,8 +126,8 @@
 
 /* Maximum and minimum sensitivity (in V/div) */
 
-#define LECROY_WR2_MAX_SENS     5.0e-3     /* 5 mV */
-#define LECROY_WR2_MIN_SENS     2.5        /* 2.5 V */
+#define LECROY_WR2_MAX_SENS     2.0e-3     /* 2 mV */
+#define LECROY_WR2_MIN_SENS     10.0       /* 10 V */
 
 
 /* The trigger delay can be set with a resolution of 1/10 of the timebase */
@@ -325,6 +325,7 @@ Var_T *digitizer_record_length(     Var_T * /* v */ );
 Var_T *digitizer_time_per_point(    Var_T * /* v */ );
 Var_T *digitizer_sensitivity(       Var_T * /* v */ );
 Var_T *digitizer_offset(            Var_T * /* v */ );
+Var_T *digitizer_coupling(          Var_T * /* v */ );
 Var_T *digitizer_bandwidth_limiter( Var_T * /* v */ );
 Var_T *digitizer_trigger_channel(   Var_T * /* v */ );
 Var_T *digitizer_trigger_level(     Var_T * /* v */ );

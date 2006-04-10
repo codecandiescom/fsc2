@@ -739,17 +739,17 @@ Var_T *digitizer_sensitivity( Var_T * v )
 	/* Check that the sensitivity setting isn't out of range (taking care
 	   of rounding errors) */
 
-	if ( sens < 0.9999 * LECROY_WR2_MIN_SENS ||
+	if ( sens < 0.9999 * LECROY_WR2_MAX_SENS ||
 		 sens > 1.0001 * LECROY_WR2_MIN_SENS )
 	{
 		print( FATAL, "Requested sensitivity setting is out of range.\n" );
 		THROW( EXCEPTION );
 	}
 
-	if ( sens < LECROY_WR2_MIN_SENS )
-		sens = LECROY_WR2_MIN_SENS;
-	if ( sens > LECROY_WR2_MAX_SENS )
+	if ( sens < LECROY_WR2_MAX_SENS )
 		sens = LECROY_WR2_MAX_SENS;
+	if ( sens > LECROY_WR2_MIN_SENS )
+		sens = LECROY_WR2_MIN_SENS;
 
 	if ( FSC2_MODE == EXPERIMENT )
 		lecroy_wr2_set_sens( channel, sens );
@@ -931,6 +931,87 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
 		lecroy_wr2_set_bandwidth_limiter( channel, bwl );
 
 	return vars_push( INT_VAR, ( long ) bwl );
+}
+
+
+/*--------------------------------------------------------------*
+ * Function for setting the coupling of a (measurement) channel
+ *--------------------------------------------------------------*/
+
+Var_T *digitizer_coupling( Var_T * v )
+{
+	long channel;
+	long cpl = LECROY_WR2_CPL_INVALID;
+	const char *cpl_str[ ] = { "A1M", "D1M", "D50", "GND" };
+	size_t i;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argument(s).\n" );
+		THROW( EXCEPTION );
+	}
+
+	channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+						       get_strict_long( v, "channel number" ), UNSET );
+
+	if ( channel < LECROY_WR2_CH1 || channel > LECROY_WR2_CH_MAX )
+	{
+		print( FATAL, "Can't set or obtain coupling for channel %s.\n",
+			   LECROY_WR2_Channel_Names[ channel ] );
+		THROW( EXCEPTION );
+	}
+
+	v = vars_pop( v );
+
+	if ( v == NULL )
+		switch( FSC2_MODE )
+		{
+			case PREPARATION :
+				if ( ! lecroy_wr2.is_coupling[ channel ] )
+					no_query_possible( );
+				/* Fall through */
+		
+			case TEST:
+				return vars_push( INT_VAR,
+								  ( long ) lecroy_wr2.coupling[ channel ] );
+
+			case EXPERIMENT :
+				lecroy_wr2.coupling[ channel ] =
+					                        lecroy_wr2_get_coupling( channel );
+				return vars_push( INT_VAR,
+								  ( long ) lecroy_wr2.coupling[ channel ] );
+		}
+
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+	if ( v->type == STR_VAR )
+	{
+		for ( i = 0; i < NUM_ELEMS( cpl_str ); i++ )
+			if ( ! strcasecmp( v->val.sptr, cpl_str[ i ] ) )
+			{
+				cpl = i;
+				break;
+			}
+	}
+	else
+		cpl = get_long( v, "coupling type" );
+
+	if ( cpl < LECROY_WR2_CPL_AC_1_MOHM || cpl > LECROY_WR2_CPL_GND )
+	{
+		print( FATAL, "Invalid coupling type.\n" );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		lecroy_wr2_set_coupling( channel, cpl );
+
+	lecroy_wr2.is_coupling[ channel ] = SET;
+	lecroy_wr2.coupling[ channel ] = cpl;
+
+	return vars_push( INT_VAR, cpl );
 }
 
 
@@ -1249,6 +1330,8 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
 				return vars_push( INT_VAR,
 							 ( long )lecroy_wr2.trigger_coupling[ channel ] );
 		}
+
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
 	if ( v->type == STR_VAR )
 	{

@@ -1544,6 +1544,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @item @ref{digitizer_time_per_point()}
 @item @ref{digitizer_sensitivity()}
 @item @ref{digitizer_offset()}
+@item @ref{digitizer_coupling()}
 @item @ref{digitizer_bandwidth_limiter()}
 @item @ref{digitizer_trigger_channel()}
 @item @ref{digitizer_trigger_level()}
@@ -1603,6 +1604,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @item @ref{digitizer_time_per_point()}
 @item @ref{digitizer_sensitivity()}
 @item @ref{digitizer_offset()}
+@item @ref{digitizer_coupling()}
 @item @ref{digitizer_bandwidth_limiter()}
 @item @ref{digitizer_trigger_channel()}
 @item @ref{digitizer_trigger_level()}
@@ -1662,6 +1664,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @item @ref{digitizer_time_per_point()}
 @item @ref{digitizer_sensitivity()}
 @item @ref{digitizer_offset()}
+@item @ref{digitizer_coupling()}
 @item @ref{digitizer_bandwidth_limiter()}
 @item @ref{digitizer_trigger_channel()}
 @item @ref{digitizer_trigger_level()}
@@ -1725,6 +1728,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @item @ref{digitizer_time_per_point()}
 @item @ref{digitizer_sensitivity()}
 @item @ref{digitizer_offset()}
+@item @ref{digitizer_coupling()}
 @item @ref{digitizer_bandwidth_limiter()}
 @item @ref{digitizer_trigger_channel()}
 @item @ref{digitizer_trigger_level()}
@@ -1786,6 +1790,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @item @ref{digitizer_time_per_point()}
 @item @ref{digitizer_sensitivity()}
 @item @ref{digitizer_offset()}
+@item @ref{digitizer_coupling()}
 @item @ref{digitizer_bandwidth_limiter()}
 @item @ref{digitizer_trigger_channel()}
 @item @ref{digitizer_trigger_level()}
@@ -1847,6 +1852,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @item @ref{digitizer_time_per_point()}
 @item @ref{digitizer_sensitivity()}
 @item @ref{digitizer_offset()}
+@item @ref{digitizer_coupling()}
 @item @ref{digitizer_bandwidth_limiter()}
 @item @ref{digitizer_trigger_channel()}
 @item @ref{digitizer_trigger_level()}

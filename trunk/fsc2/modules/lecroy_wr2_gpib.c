@@ -103,9 +103,9 @@ bool lecroy_wr2_init( const char * name )
 
 	TRY
 	{
-		/* Figure out which traces are displayed (only 4 can be displayed
+		/* Figure out which traces are displayed (only 8 can be displayed
 		   at the same time and we must be able to check for this when
-		   th user asks for one more to be displayed) */
+		   the user asks for one more to be displayed) */
 
 		lecroy_wr2.num_used_channels = 0;
 
@@ -195,16 +195,25 @@ bool lecroy_wr2_init( const char * name )
 		{
 			if ( lecroy_wr2.is_sens[ i ] )
 				lecroy_wr2_set_sens( i, lecroy_wr2.sens[ i ] );
+			else
+				lecroy_wr2.sens[ i ]  = lecroy_wr2_get_sens( i );
 
 			if ( lecroy_wr2.is_offset[ i ] )
 				lecroy_wr2_set_offset( i, lecroy_wr2.offset[ i ] );
+			else
+				lecroy_wr2.offset[ i ] = lecroy_wr2_get_offset( i );
 
 			if ( lecroy_wr2.is_coupling[ i ] )
 				lecroy_wr2_set_coupling( i, lecroy_wr2.coupling[ i ] );
+			else
+				lecroy_wr2.coupling[ i ] = lecroy_wr2_get_coupling( i );
 
 			if ( lecroy_wr2.is_bandwidth_limiter[ i ] )
 				lecroy_wr2_set_bandwidth_limiter( i,
-					                      lecroy_wr2.bandwidth_limiter[ i ] );
+					                       lecroy_wr2.bandwidth_limiter[ i ] );
+			else
+				lecroy_wr2.bandwidth_limiter[ i ] =
+					                     lecroy_wr2_get_bandwidth_limiter( i );
 		}
 
 		/* Set (if required) the trigger source */
@@ -223,14 +232,23 @@ bool lecroy_wr2_init( const char * name )
 			if ( lecroy_wr2.is_trigger_level[ trg_channels[ i ] ] )
 				lecroy_wr2_set_trigger_level( trg_channels[ i ],
 							lecroy_wr2.trigger_level[ trg_channels[ i ] ] );
+			else
+				lecroy_wr2.trigger_level[ trg_channels[ i ] ] = 
+					         lecroy_wr2_get_trigger_level( trg_channels[ i ] );
 
 			if ( lecroy_wr2.is_trigger_slope[ trg_channels[ i ] ] )
 				lecroy_wr2_set_trigger_slope( trg_channels[ i ],
 							lecroy_wr2.trigger_slope[ trg_channels[ i ] ] );
+			else
+				lecroy_wr2.trigger_slope[ trg_channels[ i ] ] = 
+					         lecroy_wr2_get_trigger_slope( trg_channels[ i ] );
 
 			if ( lecroy_wr2.is_trigger_coupling[ trg_channels[ i ] ] )
 				lecroy_wr2_set_trigger_coupling( trg_channels[ i ],
 						 lecroy_wr2.trigger_coupling[ trg_channels[ i ] ] );
+			else
+				lecroy_wr2.trigger_coupling[ trg_channels[ i ] ] = 
+					      lecroy_wr2_get_trigger_coupling( trg_channels[ i ] );
 		}
 
 		/* Set (if required) the trigger delay */
@@ -495,7 +513,7 @@ bool lecroy_wr2_set_offset( int    channel,
 
 int lecroy_wr2_get_coupling( int channel )
 {
-	int type = LECROY_WR2_INVALID_COUPL;
+	int type = LECROY_WR2_CPL_INVALID;
 	char buf[ 100 ];
 	long length = 100;
 
@@ -507,22 +525,22 @@ int lecroy_wr2_get_coupling( int channel )
     buf[ length - 1 ] = '\0';
 
 	if ( buf[ 0 ] == 'A' )
-		type = LECROY_WR2_AC_1_MOHM;
+		type = LECROY_WR2_CPL_AC_1_MOHM;
 	else if ( buf[ 0 ] == 'G' )
-		type = LECROY_WR2_GND;
+		type = LECROY_WR2_CPL_GND;
 	else if ( buf[ 0 ] == 'D' && buf[ 1 ] == '1' )
-		type = LECROY_WR2_DC_1_MOHM;
+		type = LECROY_WR2_CPL_DC_1_MOHM;
 	else if ( buf[ 0 ] == 'D' && buf[ 1 ] == '5' )
-		type = LECROY_WR2_DC_50_OHM;
+		type = LECROY_WR2_CPL_DC_50_OHM;
 	else if ( buf[ 0 ] == 'O' )          /* overload with 50 ohm DC coupling */
 	{
-		type = LECROY_WR2_DC_50_OHM;
+		type = LECROY_WR2_CPL_DC_50_OHM;
 		print( SEVERE, "Signal overload detected for channel '%s', input "
 			   "automatically disconnected.\n",
 			   LECROY_WR2_Channel_Names[ channel ] );
 	}
 
-	fsc2_assert( type != LECROY_WR2_INVALID_COUPL );  /* call me paranoid... */
+	fsc2_assert( type != LECROY_WR2_CPL_INVALID );  /* call me paranoid... */
 
 	return lecroy_wr2.coupling[ channel ] = type;
 }
@@ -540,7 +558,8 @@ bool lecroy_wr2_set_coupling( int channel,
 
 
 	fsc2_assert( channel >= LECROY_WR2_CH1 && channel <= LECROY_WR2_CH_MAX );
-	fsc2_assert( type >= LECROY_WR2_AC_1_MOHM && type <= LECROY_WR2_GND );
+	fsc2_assert( type >= LECROY_WR2_CPL_AC_1_MOHM &&
+				 type <= LECROY_WR2_CPL_GND );
 
 	sprintf( cmd, "C%1d:CPL %s", channel + 1, cpl[ type ] );
 	if ( gpib_write( lecroy_wr2.device, cmd, strlen( cmd ) ) == FAILURE )

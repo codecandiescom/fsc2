@@ -1366,6 +1366,7 @@ External amplified trigger input (LeCroy 9400, 9410, 9420, 9450, Waverunner-2)
 @item @ref{digitizer_time_per_point()}
 @item @ref{digitizer_sensitivity()}
 @item @ref{digitizer_offset()}
+@item @ref{digitizer_coupling()}
 @item @ref{digitizer_bandwidth_limiter()}
 @item @ref{digitizer_num_averages()}
 @item @ref{digitizer_averaging()}
@@ -1496,6 +1497,10 @@ already been started!
 If no second argument is given the current sensitivity setting for the
 channel is returned.
 
+Please note that for some of the oscilloscopes the range of input sensitivity
+settings may depend on the input impedance and requesting an invalid
+combination may result in aborting the @code{EDL} script.
+
 The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
 
@@ -1526,6 +1531,46 @@ oscilloscope:
 If a second argument is given this is taken to be the new offset
 setting (in Volts). If no second argument is given the current offset
 setting for the channel is returned.
+
+The function can be called in query mode (i.e.@: without a second
+argument) only in the @code{EXPERIMENT} section.
+
+
+@anchor{digitizer_coupling()}
+@findex digitizer_coupling()
+@item digitizer_coupling()
+The function queries (if called with just one argument) or sets (if
+called with two arguments) the input coupling of one of the channels
+of the oscilloscope. Currently this function only exists for the
+@strong{LeCroy} osccilloscopes @strong{9410}, @strong{9420}, @strong{9424},
+@strong{9424E} @strong{9450}, @strong{Waverunner-2} and @strong{WaveSurver}.
+It needs at least one argument, the channel. The channels that can be used
+as arguments depends on the model of the oscilloscope:
+@table @samp
+@itemx LeCroy 9400
+@itemx LeCroy 9420
+@itemx LeCroy 9410
+@itemx LeCroy 9450
+@itemx LeCroy Waverunner-2 (LT262, LT372, LT584)
+@itemx LeCroy Wavesurver (WS422, WS432, WS452)
+@code{CH1} or @code{CH2}
+@itemx LeCroy 9424
+@itemx LeCroy 9424E
+@itemx LeCroy Waverunner-2 (LT264, LT354, LT374)
+@itemx LeCroy Wavesurver (WS424, WS434, WS454)
+@code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
+@end table
+
+If a second argument is given this is taken to be the new input coupling
+setting, which has to b specified a string or an integer number, where
+@code{"A1M"} or @code{0} stands for AC with @w{1 MOhm}, @code{"D1M"} or
+@code{1} for DC with @w{1 MOhm}, @code{"D50"} for DC with @w{50 Ohm} and,
+finally, @code{"GND"} or @code{3} for Ground. If no second argument is
+given the current setting for the channel is returned as an integer number.
+
+Please note that for some of the oscilloscopes the range of input sensitivity
+settings may depend on the input impedance and requesting an invalid
+combination may result in aborting the @code{EDL} script.
 
 The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.

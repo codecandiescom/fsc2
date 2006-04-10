@@ -330,6 +330,7 @@ Var_T *digitizer_timebase(           Var_T * /* v */ );
 Var_T *digitizer_interleave_mode(    Var_T * /* v */ );
 Var_T *digitizer_time_per_point(     Var_T * /* v */ );
 Var_T *digitizer_sensitivity(        Var_T * /* v */ );
+Var_T *digitizer_coupling(           Var_T * /* v */ );
 Var_T *digitizer_offset(             Var_T * /* v */ );
 Var_T *digitizer_bandwidth_limiter(  Var_T * /* v */ );
 Var_T *digitizer_trigger_channel(    Var_T * /* v */ );

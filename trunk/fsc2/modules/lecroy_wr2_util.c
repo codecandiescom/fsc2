@@ -310,7 +310,7 @@ void lecroy_wr2_tbas_prep( void )
 	lecroy_wr2.num_tbas = 37;
 	if ( LECROY_WR2_MAX_SAMPLE_RATE > 1000000000L )
 	{
-		lecroy_wr2.num_tbas  += 1;
+		lecroy_wr2.num_tbas += 1;
 		cur_tbas *= 0.5;
 	}
 

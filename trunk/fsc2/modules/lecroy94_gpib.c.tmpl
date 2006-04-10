@@ -525,7 +525,7 @@ void lecroy94_tmpl_set_coupling( int channel,
 	fsc2_assert( channel >= LECROY94_TMPL_CH1 &&
 				 channel <= LECROY94_TMPL_CH_MAX );
 	fsc2_assert( type >= LECROY94_TMPL_AC_1_MOHM &&
-				 type <= LECROY94_TMPL_DC_50_OHM );
+				 type <= LECROY94_TMPL_GND );
 
 
 	sprintf( cmd, "C%1d:CPL %s", channel + 1, cpl[ type ] );

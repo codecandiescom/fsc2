@@ -672,6 +672,87 @@ Var_T *digitizer_sensitivity( Var_T * v )
 }
 
 
+/*--------------------------------------------------------------*
+ * Function for setting or query of input coupling of a channel 
+ *--------------------------------------------------------------*/
+
+Var_T *digitizer_coupling( Var_T * v )
+{
+	long channel;
+	long cpl = LECROY94_TMPL_INVALID_COUPL;
+	const char *cpl_str[ ] = { "A1M", "D1M", "D50", "GND" };
+	size_t i;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Missing argument(s).\n" );
+		THROW( EXCEPTION );
+	}
+
+	channel = lecroy94_tmpl_translate_channel( GENERAL_TO_LECROY94_TMPL,
+						       get_strict_long( v, "channel number" ), UNSET );
+
+	if ( channel < LECROY94_TMPL_CH1 || channel > LECROY94_TMPL_CH_MAX )
+	{
+		print( FATAL, "Can't set or obtain coupling for channel %s.\n",
+			   LECROY94_TMPL_Channel_Names[ channel ] );
+		THROW( EXCEPTION );
+	}
+
+	v = vars_pop( v );
+
+	if ( v == NULL )
+		switch( FSC2_MODE )
+		{
+			case PREPARATION :
+				if ( ! lecroy94_tmpl.is_coupling[ channel ] )
+					no_query_possible( );
+				/* Fall through */
+		
+			case TEST:
+				return vars_push( INT_VAR,
+								  ( long ) lecroy94_tmpl.coupling[ channel ] );
+
+			case EXPERIMENT :
+				lecroy94_tmpl.coupling[ channel ] =
+					                     lecroy94_tmpl_get_coupling( channel );
+				return vars_push( INT_VAR,
+								  ( long ) lecroy94_tmpl.coupling[ channel ] );
+		}
+
+	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+	if ( v->type == STR_VAR )
+	{
+		for ( i = 0; i < NUM_ELEMS( cpl_str ); i++ )
+			if ( ! strcasecmp( v->val.sptr, cpl_str[ i ] ) )
+			{
+				cpl = i;
+				break;
+			}
+	}
+	else
+		cpl = get_long( v, "coupling type" );
+
+	if ( cpl < LECROY94_TMPL_AC_1_MOHM || cpl > LECROY94_TMPL_GND )
+	{
+		print( FATAL, "Invalid coupling type.\n" );
+		THROW( EXCEPTION );
+	}
+
+	too_many_arguments( v );
+
+	if ( FSC2_MODE == EXPERIMENT )
+		lecroy94_tmpl_set_coupling( channel, cpl );
+
+	lecroy94_tmpl.is_coupling[ channel ] = SET;
+	lecroy94_tmpl.coupling[ channel ] = cpl;
+
+	return vars_push( INT_VAR, cpl );
+}
+
+
 /*----------------------------------------------------------------*
  * Function for setting or determining the vertical offset (in V)
  *----------------------------------------------------------------*/
