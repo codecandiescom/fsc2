@@ -45,15 +45,16 @@ of implemented:
 @item Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
 @item Interface Technology RS690 Word Generator (360 GHz and X-band
 spectrometer, Berlin)
-@item Rulbus pulser (275 GHz spectrometer, Leiden)
+@item J-band configuration Rulbus pulser (275 GHz spectrometer, Leiden)
+@item W-band configuration Rulbus pulser (95 GHz spectrometer, Leiden)
 @end itemize
 All pulsers can be used everywhere when no special requirements for
 phase-cycling exist, see the discussion below about the differences
 between the Frankfurt S-band and the Berlin X-band spectrometer.
 
-Please note that the Rubus pulser is a bit different form the rest
-in that it isn't a stand-alone device but is made up from a set of
-delay and clock cards connected to the Rulbus (Rijksuniversiteit
+Please note that the Rubus pulsers are a bit different form the rest
+in that it they aren't stand-alone devices but are made up from a set
+of delay and clock cards connected to the Rulbus (Rijksuniversiteit
 Leiden BUS) which results in a few restrictions.
 
 Because of the importance of the pulser for time-resolved experiments
@@ -137,7 +138,7 @@ requires an external clock the @code{TTL} level clock input connector is
 used per default.
 
 In the currently used configuration the time base of of the
-@strong{Rulbus pulser} is fixed at @w{10 ns}.
+@strong{Rulbus pulsers} is fixed at @w{10 ns}.
 
 The statement to set the time base, i.e.@: the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write
@@ -215,9 +216,9 @@ TRIGGER_MODE: EXTERNAL;
 
 Especially when using the internal trigger it is useful to be able to
 set the rate or the frequency with which the experiment is to be
-repeated. Thus for the @strong{Sony/Tektronix DG2020}, the @code{Bruker
-EP385} and @strong{Interface Technology RS690} an additional keyword can
-be specified, either @code{REPEAT_TIME} or
+repeated. Thus for the @strong{Sony/Tektronix DG2020}, the @strong{Bruker
+EP385}, the @strong{Interface Technology RS690} as well as the @strong{Rulbus
+pulsers} an additional keyword can be specified, either @code{REPEAT_TIME} or
 @code{REPEAT_FREQUENCY}@footnote{@code{REPEAT_TIME} and
 @code{REPEAT_FREQUENCY} may also be abbreviated to @code{REPT},
 @code{REP_T}, @code{REPTIME}, @code{REPEAT_TIME}, @code{REPEAT_T},
@@ -293,7 +294,7 @@ distinguish between the two trigger input ports the additional keywords
 @code{TTL} and @code{ECL} may be used. If none is given the @code{TTL}
 level input port is used per default.
 
-The @code{Rulbus pulser} allows to set the trigger slope only.
+The @strong{Rulbus pulsers} allow to set the trigger slope only.
 
 If you need to control more than one pulser you must have a
 @code{TRIGGER_MODE} statement for each of the pulsers. In this case you
@@ -314,7 +315,8 @@ need to append a @code{#} and the number of the pulser to tell
 @cindex @code{DEFENSE}
 @cindex @code{RADIO_FREQUENCY}
 @cindex @code{RADIO_FREQUENCY_GATE}
-@cindex @code{PULSE_SHAPER}
+@cindex @code{LASER}
+@cindex @code{PULSE_SHAPE}
 @cindex @code{PHASE_1}
 @cindex @code{PHASE_2}
 @cindex @code{OTHER_1}
@@ -375,10 +377,11 @@ etc.@footnote{For @code{RADIO_FREQUENCY_GATE} all combinations where
 @code{RADIO} is replaced by @code{R}, @code{FREQUENCY} by either
 @code{FREQ} or @code{F} or @code{GATE} by @code{G} may be used. As
 usual, the underscore characters can be omitted.})
-@item @code{PULSE_SHAPER} (or @code{PSH} etc.@footnote{You may
-abbreviate @code{PULSE_SHAPER} to @code{PULSESH}, @code{PULSE_SH},
-@code{PULSE_SHAPE}, @code{PULSESHAPE}, @code{PULSESHAPER}, @code{P_SH},
-@code{P_SHAPE}, @code{PSHAPE}, @code{P_SHAPER}, @code{P_SHAPER}.})
+@item @code{LASER}  (or @code{LSR})
+@item @code{PULSE_SHAPE} (or @code{PSH} etc.@footnote{You may
+abbreviate @code{PULSE_SHAPE} to @code{PULSESH}, @code{PULSE_SH},
+@code{PULSE_SHAPE}, @code{PULSESHAPE}, @code{PULSESHAPE}, @code{P_SH},
+@code{P_SHAPE}, @code{PSHAPE}, @code{P_SHAPE}, @code{P_SHAPE}.})
 @item @code{PHASE_1} (or @code{PHASE1}, @code{PH_1} or @code{PH1})
 @item @code{PHASE_2} (or @code{PHASE2}, @code{PH_2} or @code{PH2})
 @item @code{OTHER_1} (or @code{OTHER1}, @code{O_1}, @code{O1},
@@ -577,12 +580,16 @@ to create microwave pulses with the first pulser and TWT pulses with the
 second one.
 
 
-For the @code{Rulbus pulser} the current configuration only allows for
-three function, @code{MICROWAVE}, @code{RADIO_FREQUENCY} and
-@code{DETECTION}. These are fixed to the cards of the pulser, so
-assigning a function to a "channel" isn't possible because there are no
-channels. All that can be set for a certain function is the delay to be
-used with this function.
+For the @strong{Rulbus pulsers} the J-band configuration only allows for
+three function, @code{MICROWAVE} (restricted to creating three pulses),
+@code{RADIO_FREQUENCY} (restricted to creating a single pulse) and
+@code{DETECTION} (restricted to creating a single pulse), while the
+W-band configuration also allows the functions @code{PULSE_SHAPE} (one
+for each microwave pulse), @code{DEFENSE} (restricted to creating a
+single pulse) and @code{LASER} (restricted to creating a single pulse).
+These are fixed to the cards of the pulsers, so assigning a function to
+a "channel" isn't possible because there are no channels. All that can
+be set for a certain function is the delay to be used with this function.
 
 
 
@@ -594,8 +601,9 @@ used with this function.
 @cindex @code{PHASE_SETUP}
 
 Please note that a phase channel setup can only be done with the
-@strong{Sony/Tektronix DG2020} and the @strong{Bruker EP385} pulsers and
-that there are several differences between the Frankfurt S-band and the
+@strong{Sony/Tektronix DG2020}, the @strong{Bruker EP385} and the
+W-band configuration of the @strong{Rulbus pulser}. Moerover,
+there are several differences between the Frankfurt S-band and the
 Berlin X-band spectrometer. And all the following is only relevant if
 phase cycling is to be used.
 
@@ -615,7 +623,7 @@ for some sanity checks, which functions is to be phase cycled). This is
 done via a statement in the @code{ASSIGNMENTS} section like the following:
 @example
 PHASE_SETUP:  MICROWAVE,
-               X: POD = P1,
+              +X: POD = P1,
               +Y: POD = P2,
               -X: POD = P4,
               -Y: P5;
@@ -624,7 +632,7 @@ PHASE_SETUP:  MICROWAVE,
 or
 @example
 PHASE_SETUP:  MICROWAVE,
-               X: CH = C1,
+              +X: CH = C1,
               +Y: CH = C2,
               -X: CH = C4,
               -Y: C5,
@@ -672,7 +680,7 @@ pulses and the pod channels assigned to it are the ones numbered 8 and 9.
 The second thing that is needed is which voltages have to be present at
 the outputs to set a certain phase. Here's an example:
 @example
-PHASE_SETUP:   X: POD_1 = OFF, POD2 = OFF,
+PHASE_SETUP:  +X: POD_1 = OFF, POD2 = OFF,
               +Y: POD1  = ON,  POD_2 = 0,
               -X: 0, 1,
               -Y: 1, 1;
@@ -697,11 +705,25 @@ pulses necessary to set the phases of the microwave pulses.
 
 You can also specify how long phase pulses start before the pulse
 they are made for and how much longer they are supposed to last by using
-the functions @code{pulser_phase_switch_delay()} and
-@code{pulser_grace_period()} (these functions replace the deprectated
+the functions @ref{pulser_phase_switch_delay()} and
+@ref{pulser_grace_period()} (these functions replace the deprectated
 but still supported keywords @code{PHASE_SWITCH_DELAY} and
 @code{GRACE_PERIOD} in the @code{ASSIGNMENTS} section).
 
+
+@strong{W-band configuration of Rulbus pulser}
+
+Since functions are hard-coded to groups of the delay card making up the
+pulser no special phase function setup is needed for this device (phases
+can also only be set for microwave pulses). In contrast to the other
+pulsers supporting phase switching only the phases @code{+X}, @code{+Y}
+and @code{-X} are currently available (due to hardware limitations).
+Phase switching is done via a three-way switch which is controlled via
+the end pulses genetrated by a delay card for each of the three possible
+microwave pulses. Setting the delay cards controlling the phase switch
+is done automatically. You can specify a time delay between switching
+the phase switch and the start of the microwave pulse by using the
+function @ref{pulser_phase_switch_delay()}.
 
 
 @c ########################################################
@@ -737,6 +759,9 @@ optional underscore and the number of the phase sequence (if there is
 only one phase sequence no number is needed). For the phase number any
 number between 0 and 2147483647 @w{(2^32 - 1)} can be chosen. Of course
 the lengths of all phase sequences have to be identical.
+
+Please note that due to hardware limitations for the W-band configuration
+of the @strong{Rulbus pulser} the pase @code{-Y} can't be used.
 
 The following sections explain how the phase sequences become
 associated with certain pulses.
@@ -885,17 +910,18 @@ PULSE_2:    FUNCTION     = PULSE_1.FUNCTION,
 @end example
 
 
-For the @code{Rulbus pulser} there are several restrictions for the
+For the @strong{Rulbus pulsers} there are several restrictions for the
 number of pulses that can be used. The @code{MICROWAVE} function can
 have a maximum of three active pulses at a moment while both the
-@code{RADIO_FREQUENCY} and @code{DETECTION} function allow only a single
-active pulse. Moreover the @code{RADIO_FREQUENCY} and @code{DETECTION}
-can't start before the first @code{MICROWAVE} pulse. Pulses can have a
-maximum length of about @w{167 ms} and also delays between pulses (and
-before the start of a pulse) are restricted to this value. Finally, a
-@code{RADIO_FREQUENCY} pulse can only be created if the pulser is
-connected to the @strong{Rhode & Schwarz SML01} synthesizer (with SML-B3
-option), which has a built-in pulse unit.
+@code{RADIO_FREQUENCY}, the @code{LASER} (W-band configuration only)
+and the  @code{DETECTION} function allow only a single active pulse.
+Moreover, for the J-band configuration the @code{RADIO_FREQUENCY} and
+@code{DETECTION} can't start before the first @code{MICROWAVE} pulse.
+Pulses can have a maximum length of about @w{167 ms} and also delays
+between pulses (and before the start of a pulse) are restricted to this
+value. Finally, a @code{RADIO_FREQUENCY} pulse can only be created if
+the pulser is connected to the @strong{Rhode & Schwarz SML01} synthesizer
+(with SML-B3 option), which has a built-in pulse unit.
 
 
 
@@ -915,8 +941,7 @@ There are two methods to change the properties of pulses. The first one
 works by calling a dedicated function. To change the start position of,
 for example, pulse 1 by the start position change time
 (@code{DELTA_START}) as defined in the properties of the pulse the
-function @code{pulser_shift()} (see also @ref{Pulser Functions}) can be
-used:
+function @ref{pulser_shift()} can be used:
 @example
 pulser_shift( P1 );      // or  pulser_shift( 1 );
 @end example
@@ -927,13 +952,12 @@ function is called with no arguments at all the start positions of all
 pulses that have the @code{DELTA_START} property defined are changed.
 
 There is a similar function for changing the length of pulses by their
-@code{DELTA_LENGTH}, called @code{pulser_increment()} (see also
-@ref{Pulser Functions}):
+@code{DELTA_LENGTH}, called @ref{pulser_increment()}:
 @example
 pulser_increment( P3 );  // or  pulser_increment( 3 );
 @end example
 @noindent
-As for the @code{pulser_shift()} function also this functions accepts a
+As for the @ref{pulser_shift()} function also this functions accepts a
 comma separated list of pulses, and calling it with no arguments
 automatically lengthens all pulses that have the @code{DELTA_LENGTH}
 property defined.
@@ -979,16 +1003,15 @@ are the function and the phase sequence associated with the pulse.
 There is only one point that needs to be taken care of: Just calling one
 of these methods to change pulse properties does not change the real
 pulses immediately. Instead, all these changes are stored internally in
-the program. The changes get only send to the pulser when the function
-@code{pulser_update()} (see also @ref{Pulser Functions}) is
-called. Therefor, the normal way to change the pulse pattern is to
-change all necessary pulse properties and when everything is done
-@code{pulser_update()} is called to commit the changes. In this moment
-the program will also do all its usual checks, e.g.@: it will test that
-no pulses overlap.
+the program. The changes only get send to the pulser when the function
+@ref{pulser_update()} is called. Therefor, the normal way to change the
+pulse pattern is to change all necessary pulse properties and when
+everything is done to call @ref{pulser_update()} in order to commit the
+changes. In this moment the program will also do all its usual checks,
+e.g.@: it will test that no pulses overlap.
 
 There is a further function that resets all pulses to their initial
-state, @code{pulser_pulse_reset()}. This function can, for example, be
+state, @ref{pulser_pulse_reset()}. This function can, for example, be
 used for repeating the same experiment several times without having to
 reset each pulse individually. As in the other functions the argument
 can be either one pulse, a list of pulses or no argument, in which case
@@ -1062,20 +1085,18 @@ there are also functions to adjust the phases of pulses, needed for
 for phase cycled experiments. When the experiment starts the phase of
 a pulse is set to the first phase of its associated phase sequence
 (defined in the @code{PHASES} section). To switch to the next phase the
-function @code{pulser_next_phase()} (see also @ref{Pulser Functions})
-has to be used. In contrast to the functions @code{pulser_shift()} and
-@code{pulser_increment()} this function can not be used for phase
-changes of individual pulses but alway applies to all pulses that have
-been assigned a phase sequence. Thus this function does not accepts any
-arguments.
+function @ref{pulser_next_phase()} has to be used. In contrast to the
+functions @ref{pulser_shift()} and @ref{pulser_increment()} this function
+can not be used for phase changes of individual pulses but alway applies
+to all pulses that have been assigned a phase sequence. Thus this function
+does not accepts any arguments.
 
 Again, the necessary changes are only send to the pulser when the
-function @code{pulser_update()} is called afterwards. By repeatedly
-invoking @code{pulser_next_phase()} one can run through the complete
+function @ref{pulser_update()} is called afterwards. By repeatedly
+invoking @ref{pulser_next_phase()} one can run through the complete
 phase sequence. To reset all pulses to their start phase (i.e.@: the
 first phase of the associated phase sequence) the function
-@code{pulser_phase_reset()} (see also @ref{Pulser Functions}) can be
-used.
+@ref{pulser_phase_reset()} can be used.
 
 The next (rather simplified) example is a script for a phase cycled
 (1-dimensional) stimulated echo experiment. We need three microwave

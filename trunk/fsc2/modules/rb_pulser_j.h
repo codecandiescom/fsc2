@@ -181,9 +181,8 @@ struct Pulse {
 	double dpos;             /* pulsers time base) */
 	Ticks dlen;
 
-	bool is_function;        /* flags that are set when the corresponding */
-	bool is_pos;             /* property has been set */
-	bool is_len;
+	bool is_pos;             /* flags that are set when the corresponding */
+	bool is_len;             /* property has been set */
 	bool is_dpos;
 	bool is_dlen;
 

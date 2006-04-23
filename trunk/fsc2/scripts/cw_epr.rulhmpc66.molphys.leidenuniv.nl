@@ -648,6 +648,7 @@ kd = $kdw Hz;
 data[ *, * ];
 avg[ Num_Points ];
 
+start_temp;
 I = 0, J = 0, K;
 File1, File2;
 field = start_field;

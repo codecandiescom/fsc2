@@ -44,7 +44,9 @@ static int tb_index[ ] = { RULBUS_RB8515_CLOCK_FREQ_100MHz,
 /*-----------------------------------------------------------------*
  * Function is called via the TIMEBASE command to set the timebase
  * used with the pulser - got to be called first because nearly
- * all other functions depend on the timebase setting !
+ * all other functions depend on the timebase setting (unless the
+ * module is compiled with FIXED_TIMEBASE being defined in which
+ * case this function never will be called).
  *-----------------------------------------------------------------*/
 
 bool rb_pulser_j_store_timebase( double timebase )
@@ -113,8 +115,8 @@ bool rb_pulser_j_set_function_delay( int    function,
 		if ( rb_pulser_j.is_trig_in_mode &&
 			 rb_pulser_j.trig_in_mode == EXTERNAL )
 		{
-			print( FATAL, "Negative delays are impossible in EXTERNAL trigger "
-				   "mode.\n" );
+			print( FATAL, "Negative delays are not possible in EXTERNAL "
+				   "trigger mode.\n" );
 			THROW( EXCEPTION );
 		}
 
@@ -201,7 +203,7 @@ bool rb_pulser_j_set_trig_in_slope( int slope )
 	{
 		print( FATAL, "Setting a trigger slope (requiring EXTERNAL "
 			   "trigger mode) and using negative delays for functions is "
-			   "impossible.\n" );
+			   "not possible.\n" );
 		THROW( EXCEPTION );
 	}
 

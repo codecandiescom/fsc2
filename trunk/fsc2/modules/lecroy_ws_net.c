@@ -30,6 +30,8 @@
 
 static unsigned char *lecroy_ws_get_data( long * len );
 
+static bool lecroy_ws_can_fetch( int ch );
+
 static unsigned int lecroy_ws_get_inr( void );
 
 static long lecroy_ws_get_int_value( int          ch,
@@ -52,7 +54,6 @@ static int lecroy_ws_talk( const char * cmd,
 static void lecroy_ws_lan_failure( void );
 
 
-static unsigned int can_fetch = 0;
 static int trg_channels[ ] = { LECROY_WS_CH1,
 							   LECROY_WS_CH2,
 #if defined LECROY_WR2_CH3
@@ -1250,6 +1251,11 @@ void lecroy_ws_start_acquisition( void )
 		lecroy_vicp_write( cmd, &len, SET, UNSET );
 	}
 
+	/* Reset the bits in the word that tells us later when data from an
+	   normal acquisition channnel can be fetched */
+
+	lecroy_ws_get_inr( );
+
 	/* Switch digitizer back on to running state by switching to a trigger
 	   mode where the digitizer is running (i.e. typically NORMAL, but, if
 	   the user requested it, also AUTO, or, if there's no averaging setup,
@@ -1266,15 +1272,6 @@ void lecroy_ws_start_acquisition( void )
 
 	len = strlen( cmd );
 	lecroy_vicp_write( cmd, &len, SET, UNSET );
-
-	/* Reset the bits in the word that tells us later that the data in the
-	   corresponding channel are ready to be fetched */
-
-	lecroy_ws_get_inr( );
-
-	can_fetch &= ~ ( LECROY_WS_PROC_DONE_TA | LECROY_WS_PROC_DONE_TB |
-					 LECROY_WS_PROC_DONE_TC | LECROY_WS_PROC_DONE_TD |
-					 LECROY_WS_SIGNAL_ACQ );
 }
 
 
@@ -1291,7 +1288,6 @@ static void lecroy_ws_get_prep( int              ch,
 								double *         gain,
 								double *         offset )
 {
-	unsigned int bit_to_test;
 	char cmd[ 100 ];
 	ssize_t len;
 	char ch_str[ 3 ];
@@ -1299,16 +1295,12 @@ static void lecroy_ws_get_prep( int              ch,
 
 
 	CLOBBER_PROTECT( data );
-	CLOBBER_PROTECT( bit_to_test );
 
 	/* Figure out which channel is to be used and set a few variables
 	   needed later accordingly */
 
 	if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
-	{
-		bit_to_test = LECROY_WS_SIGNAL_ACQ;
 		sprintf( ch_str, "C%d", ch - LECROY_WS_CH1 + 1 );
-	}
 	else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
 	{
 		is_mem_ch = SET;
@@ -1323,7 +1315,6 @@ static void lecroy_ws_get_prep( int              ch,
 			THROW( EXCEPTION );
 		}
 
-		bit_to_test = LECROY_WS_PROC_DONE( ch );
 		sprintf( ch_str, "F%d", ch - LECROY_WS_F1 + 1 );
 	}
 	else
@@ -1346,13 +1337,11 @@ static void lecroy_ws_get_prep( int              ch,
 	   finished yet poll until the bit that tells that the acquisition for
 	   the requested channel is finished has become set */
 
-	if ( ! is_mem_ch &&
-		 ! ( can_fetch & bit_to_test ) )
-		while ( ! ( ( can_fetch |= lecroy_ws_get_inr( ) ) & bit_to_test ) )
-		{
-			stop_on_user_request( );
-			fsc2_usleep( 20000, UNSET );
-		}
+	while ( ! is_mem_ch && ! lecroy_ws_can_fetch( ch ) )
+	{
+		stop_on_user_request( );
+		fsc2_usleep( 20000, UNSET );
+	}
 
 	TRY
 	{
@@ -1387,6 +1376,27 @@ static void lecroy_ws_get_prep( int              ch,
 			T_free( *data );
 		RETHROW( );
 	}
+}
+
+
+/*--------------------------------------------------------------------*
+ * Function for checking if data of a channel are ready to be fetched
+ *--------------------------------------------------------------------*/
+
+static bool lecroy_ws_can_fetch( int ch )
+{
+	if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
+		return lecroy_ws_get_inr( ) & LECROY_WS_SIGNAL_ACQ;
+
+	if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
+		return TRUE;
+
+	if ( ch >= LECROY_WS_F1 && ch <= LECROY_WS_F8 )
+		return lecroy_ws_get_int_value( ch, "SWEEPS_PER_ACQ" ) >=
+								                       lecroy_ws.num_avg[ ch ];
+
+	fsc2_assert( 1 == 0 );
+	return FALSE;
 }
 
 

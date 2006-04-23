@@ -77,13 +77,13 @@ DET_DELAY_CARD_0 "DELAY_8"
 DET_DELAY_CARD_1 "DELAY_9"
 
 
-# Name of the clock card used as the input of the delay card for creating
-# main trigger of the experiment
+# 11. Name of the clock card used as the input of the delay card for creating
+#     main trigger of the experiment
 
 ERT_CLOCK_CARD    "CLOCK_0"
 
 
-# 11. Name of the clock card that's the clock for all the other delay cards,
+# 12. Name of the clock card that's the clock for all the other delay cards,
 #     i.e. the time base clock card - but note that there's a compile time
 #     option that makes the program assume that a fixed frequency (100 MHz)
 #     clock card is used instead, in this case this setting does nothing

@@ -198,8 +198,8 @@ int rb_pulser_j_test_hook( void )
 	Pulse_T *p;
 
 
-	/* If a RF pulse exists make sure the synthesizer module got loaded before
-	   the pulser module, otherwise we'll get into trouble */
+	/* If a RF pulse exists make sure the synthesizer module got loaded
+	   before the pulser module */
 
 	for ( p = rb_pulser_j.pulses; p != NULL; p = p->next )
 		if ( p->function == rb_pulser_j.function + PULSER_CHANNEL_RF )
@@ -220,8 +220,8 @@ int rb_pulser_j_test_hook( void )
 
 	TRY
 	{
-		if ( rb_pulser_j.trig_in_mode ==
-			                            INTERNAL && ! rb_pulser_j.is_rep_time )
+		if ( rb_pulser_j.trig_in_mode == INTERNAL &&
+			 ! rb_pulser_j.is_rep_time )
 		{
 			print( FATAL, "No experiment repetition time/frequency has been "
 				   "set.\n" );
@@ -261,8 +261,8 @@ int rb_pulser_j_test_hook( void )
 		rb_pulser_j.delay_card[ ERT_DELAY ].delay = rb_pulser_j.rep_time_ticks;
 	}
 
-	/* We now need some somewhat different functions for setting of pulse
-	   properties */
+	/* After the initial setup is done we need some different functions for
+	   setting of pulse properties */
 
 	Pulser_Struct.set_pulse_position = rb_pulser_j_change_pulse_position;
 	Pulser_Struct.set_pulse_length = rb_pulser_j_change_pulse_length;
@@ -336,6 +336,7 @@ int rb_pulser_j_end_of_exp_hook( void )
 {
 	if ( rb_pulser_j.is_needed )
 		rb_pulser_j_exit( );
+
 	return 1;
 }
 
@@ -496,7 +497,7 @@ Var_T *pulser_shift( Var_T *v )
 	if ( v == NULL )
 		for ( p = rb_pulser_j.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dpos )
-				pulser_shift( vars_push( INT_VAR, p->num ) );
+				vars_pop( pulser_shift( vars_push( INT_VAR, p->num ) ) );
 
 	/* Otherwise run through the supplied pulse list */
 
@@ -523,8 +524,8 @@ Var_T *pulser_shift( Var_T *v )
 		/* Make sure we always end up with an integer multiple of the
 		   timebase */
 
-		p->pos = rb_pulser_j_ticks2double(
-			                              rb_pulser_j_double2ticks( p->pos ) );
+		p->pos =
+			    rb_pulser_j_ticks2double( rb_pulser_j_double2ticks( p->pos ) );
 
 		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 	}
@@ -555,7 +556,7 @@ Var_T *pulser_increment( Var_T *v )
 	if ( v == NULL )
 		for ( p = rb_pulser_j.pulses; p != NULL; p = p->next )
 			if ( p->num >= 0 && p->is_active && p->is_dlen )
-				pulser_increment( vars_push( INT_VAR, p->num ) );
+				vars_pop( pulser_increment( vars_push( INT_VAR, p->num ) ) );
 
 	/* Otherwise run through the supplied pulse list */
 

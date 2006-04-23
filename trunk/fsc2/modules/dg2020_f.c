@@ -524,7 +524,14 @@ Var_T *pulser_phase_switch_delay( Var_T * v )
 	double psd;
 
 
+	if ( v == NULL || v->next == NULL )
+	{
+		print( FATAL, "Missing arguments.\n" );
+		THROW( EXCEPTION );
+	}
+
 	func = get_strict_long( v, "pulser function" );
+
 	if ( func != PULSER_CHANNEL_PHASE_1 ||
 		 func != PULSER_CHANNEL_PHASE_2 )
 	{
@@ -533,8 +540,12 @@ Var_T *pulser_phase_switch_delay( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
-	psd = get_double( v->next, "phase switch delay" );
+	v = vars_pop( v );
+
+	psd = get_double( v, "phase switch delay" );
 	is_mult_ns( psd, "Phase switch delay" );
+
+	too_many_arguments( v );
 
 	dg2020_set_phase_switch_delay( func, psd );
 	return vars_push( FLOAT_VAR,

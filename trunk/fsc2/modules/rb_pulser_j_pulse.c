@@ -58,7 +58,7 @@ bool rb_pulser_j_new_pulse( long pnum )
 	cp->prev = lp;
 	cp->next = NULL;
 	cp->num = pnum;
-	cp->is_function = UNSET;
+	cp->function = NULL;
 
 	cp->is_pos = cp->is_len = cp->is_dpos = cp->is_dlen = UNSET;
 	cp->initial_is_pos = cp->initial_is_len = cp->initial_is_dpos
@@ -90,7 +90,7 @@ bool rb_pulser_j_set_pulse_function( long pnum, int function )
 		THROW( EXCEPTION );
 	}
 
-	if ( p->is_function )
+	if ( p->function != NULL )
 	{
 		print( FATAL, "The function of pulse #%ld has already been set to "
 			   "'%s'.\n", pnum, p->function->name );
@@ -106,7 +106,6 @@ bool rb_pulser_j_set_pulse_function( long pnum, int function )
 	}
 
 	p->function = rb_pulser_j.function + function;
-	p->is_function = SET;
 
 	return OK;
 }
@@ -128,10 +127,11 @@ bool rb_pulser_j_set_pulse_position( long pnum, double p_time )
 		THROW( EXCEPTION );
 	}
 
-	if ( p->is_function && p_time + p->function->delay < 0.0 )
+	if ( p->function != NULL &&
+		 p_time + p->function->delay <
+		                      rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay )
 	{
-		print( FATAL, "Invalid (negative) start position for pulse #%ld: "
-			   "%s.\n", pnum, rb_pulser_j_ptime( p_time ) );
+		print( FATAL, "Start position for pulse #%ld is too early.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -250,7 +250,7 @@ bool rb_pulser_j_get_pulse_function( long pnum, int *function )
 	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	if ( ! p->is_function )
+	if ( p->function == NULL )
 	{
 		print( FATAL, "The function of pulse #%ld hasn't been set.\n", pnum );
 		THROW( EXCEPTION );
@@ -299,6 +299,7 @@ bool rb_pulser_j_get_pulse_length( long pnum, double *p_time )
 	}
 
 	*p_time = rb_pulser_j_ticks2double( p->len );
+
 	return OK;
 }
 
@@ -320,6 +321,7 @@ bool rb_pulser_j_get_pulse_position_change( long pnum, double *p_time )
 	}
 
 	*p_time = p->dpos;
+
 	return OK;
 }
 
@@ -340,6 +342,7 @@ bool rb_pulser_j_get_pulse_length_change( long pnum, double *p_time )
 	}
 
 	*p_time = rb_pulser_j_ticks2double( p->dlen );
+
 	return OK;
 }
 

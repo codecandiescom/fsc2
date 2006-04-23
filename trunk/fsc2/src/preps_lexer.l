@@ -90,6 +90,7 @@ DET_GATE    DET(ECTION)?_?G(ATE)?
 DEF         DEF(ENSE)?
 RF          R(ADIO)?_?F(REQ(UENCY)?)?
 RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?
+LSR         (LASER)|(LSR)
 PSH         P(ULSE)?_?SH(APE)?
 OI          O(THER)?(_?1)?
 OII         O(THER)?_?2
@@ -113,7 +114,7 @@ PC          PH(ASE)?_?C(YCLE)?
 
 PS          PH(ASE)?_?S(EQ(UENCE)?)?(_?[0-9])?
 
-CHT         ((CH((1[0-5])|[0-9]))|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(TRACE_[ABCD])|(M[1234])|(EXT(10)?)|(DEFAULT_SOURCE)|(SOURCE_[0-3])|(NEXT_GATE)|(TIMEBASE_[12]))
+CHT         ((CH((1[0-5])|[0-9]))|(AUX[12]?)|(MATH[1-3])|(REF[1-4])|(LIN(E)?)|(MEM_[CD])|(FUNC_[EF])|(TRACE_[A-D])|(M[1-4])|(F[1-8])|(EXT(10)?)|(DEFAULT_SOURCE)|(SOURCE_[0-3])|(NEXT_GATE)|(TIMEBASE_[12]))
 
 DIO         DIO_{INT}
 
@@ -348,6 +349,11 @@ FUNC        {IDENT}"#"[0-9]+
 			}
 {RF_GATE}   {
 				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF_GATE );
+				return VAR_REF;
+			}
+
+{LSR}       {
+				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_LASER );
 				return VAR_REF;
 			}
 

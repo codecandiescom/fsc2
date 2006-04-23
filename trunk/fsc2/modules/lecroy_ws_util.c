@@ -288,7 +288,7 @@ void lecroy_ws_numpoints_prep( void )
 /*-----------------------------------------------------------------*
  * Function allocates and sets up the array of possible timebases,
  * based on the sample rate of the model (the only possibly not
- * represened timebase is for the LT354, where the sample rate
+ * represented timebase is for the LT354, where the sample rate
  * according to the manual is 1 GS but which still is supposed to
  * have a minimum timebase setting of 500 ps, meaning that there
  * would be only a point at each second division, about which I
@@ -321,7 +321,7 @@ void lecroy_ws_tbas_prep( void )
 		lecroy_ws.tbas[ len ] = cur_tbas;
 		if ( ( len % 3 == 1 && lecroy_ws.num_tbas == 37 ) ||
 			 ( len % 3 == 2 && lecroy_ws.num_tbas == 38 ) ||
-			 ( len % 3 == 0 && lecroy_ws.num_tbas == 39 )
+			 ( len % 3 == 0 && lecroy_ws.num_tbas == 39 ) )
 			cur_tbas *= 2.5;
 		else
 			cur_tbas *= 2.0;

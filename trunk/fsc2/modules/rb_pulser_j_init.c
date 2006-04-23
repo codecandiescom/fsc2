@@ -95,7 +95,7 @@ static void rb_pulser_j_basic_pulse_check( void )
 
 		/* Check the pulse function */
 
-		if ( ! p->is_function )
+		if ( p->function == NULL )
 		{
 			print( FATAL, "Pulse #%ld is not associated with a function.\n",
 				   p->num );

@@ -266,6 +266,7 @@ const char *Function_Names[ PULSER_CHANNEL_NUM_FUNC ] =
 	"DETECTION_GATE",
 	"RF",
 	"RF_GATE",
+	"LASER",
 	"OTHER_1",
 	"OTHER_2",
 	"OTHER_3",

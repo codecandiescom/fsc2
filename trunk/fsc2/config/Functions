@@ -139,9 +139,13 @@ pulser_maximum_pattern_length, 1, PREP;
 
 /* Functions exported by the Frankfurt version of DG2020 only */
 
-pulser_phase_switch_delay, 2, PREP;
+pulser_phase_switch_delay, -1, PREP;
 pulser_grace_period, 1, PREP;
 
+/* Functions exported by the W-band configuration of the Rulbus pulser only */
+
+pulser_pulse_to_defense_minimum_distance,  1, PREP;
+pulser_disable_defense_pulse, 0, PREP;
 
 /* Functions exported by the lock-in amplifier drivers
    (Stanford Research 510, 530, 810, 830, and Bruker ER023M signal channel) */

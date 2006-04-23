@@ -63,6 +63,7 @@
 * lecroy9424e::     LeCroy Digitizing Oscilloscope 9424E
 * lecroy9450::      LeCroy Digitizing Oscilloscope 9450
 * lecroy_wr2::      LeCroy Digitizing Oscilloscope Waverunner-2
+* lecroy_ws::       LeCroy Digitizing Oscilloscope WaveSurfer
 * mcn700_2000::     F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 * ni6601::          National Instruments 6601 GPCT card
@@ -1814,7 +1815,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 
 @c #############################################################
 
-@node lecroy_wr2, mcn700_2000, lecroy9450, Device Reference
+@node lecroy_wr2, lecroy_ws, lecroy9450, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope Waverunner-2
 @end iftex
@@ -1877,7 +1878,67 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 
 @c #############################################################
 
-@node mcn700_2000, me6000, lecroy_wr2, Device Reference
+@node lecroy_ws, mcn700_2000, lecroy_wr2, Device Reference
+@iftex
+@subheading LeCroy Digitizing Oscilloscope WaveSurfer
+@end iftex
+@ifnottex
+@section LeCroy Digitizing Oscilloscope WaveSurfer
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{lecroy_ws}
+
+@paragraphindent 0
+@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
+Oscilloscope Waverunner-2, models 422, 424, 432, 434, 452 and 454 (the
+model must be set in the configuration file, together with information
+about further options e.g.@: the amount of memory). 2 or 4 measurement
+channels (depending on model), 8 function channels (needed for averaging),
+4 memory channels.
+
+@paragraphindent 0
+@strong{Controlled via}: LAN (LeCroy VICP protocol)
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{digitizer_name()}
+@item @ref{digitizer_define_window()}
+@item @ref{digitizer_change_window()}
+@item @ref{digitizer_window_position()}
+@item @ref{digitizer_window_width()}
+@item @ref{digitizer_timebase()}
+@item @ref{digitizer_interleave_mode()}
+@item @ref{digitizer_time_per_point()}
+@item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_offset()}
+@item @ref{digitizer_coupling()}
+@item @ref{digitizer_bandwidth_limiter()}
+@item @ref{digitizer_trigger_channel()}
+@item @ref{digitizer_trigger_level()}
+@item @ref{digitizer_trigger_slope()}
+@item @ref{digitizer_trigger_coupling()}
+@item @ref{digitizer_trigger_mode()}
+@item @ref{digitizer_trigger_delay()}
+@item @ref{digitizer_averaging()}
+@item @ref{digitizer_num_averages()}
+@item @ref{digitizer_record_length()}
+@item @ref{digitizer_memory_size()}
+@item @ref{digitizer_trigger_position()}
+@item digitizer_meas_channel_ok()
+@item @ref{digitizer_start_acquisition()}
+@item @ref{digitizer_get_curve()}
+@item @ref{digitizer_get_area()}
+@item @ref{digitizer_get_amplitude()}
+@item @ref{digitizer_run()}
+@item @ref{digitizer_copy_curve()}
+@end table
+
+
+@c #############################################################
+
+@node mcn700_2000, me6000, lecroy_ws, Device Reference
 @iftex
 @subheading F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 @end iftex

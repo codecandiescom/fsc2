@@ -560,7 +560,7 @@ static void ep385_basic_functions_check( void )
  * each channel (rows) of the function (in case of functions not set up
  * for phase cycling this will be just a 1x1 matrix). The pulse lists
  * are unsorted, i.e. when using the pulse lists we still have to sort
- * them according to there start times and check if they are switched on
+ * them according to their start times and check if they are switched on
  * and don't overlap.
  *-----------------------------------------------------------------------*/
 

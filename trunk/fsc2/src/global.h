@@ -461,6 +461,7 @@ enum {
 	PULSER_CHANNEL_DET_GATE,
 	PULSER_CHANNEL_RF,
 	PULSER_CHANNEL_RF_GATE,
+	PULSER_CHANNEL_LASER,
 	PULSER_CHANNEL_OTHER_1,
 	PULSER_CHANNEL_OTHER_2,
 	PULSER_CHANNEL_OTHER_3,
@@ -649,7 +650,7 @@ enum {
 /* Macro for calculation the number of elements of an array (but take care,
    it must be a real array, it won't work with just a pointer to an array!) */
 
-#define NUM_ELEMS( arr ) ( sizeof( arr ) / sizeof *( arr ) )
+#define NUM_ELEMS( arr ) ( sizeof( arr ) / sizeof( *( arr ) ) )
 
 
 #endif /* ! FSC2_GLOBAL */

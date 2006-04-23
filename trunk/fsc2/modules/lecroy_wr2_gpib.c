@@ -1261,6 +1261,15 @@ void lecroy_wr2_start_acquisition( void )
 			lecroy_wr2_gpib_failure( );
 	}
 
+	/* Reset the bits in the word that tells us later that the data in the
+	   corresponding channel are ready to be fetched */
+
+	lecroy_wr2_get_inr( );
+
+	can_fetch &= ~ ( LECROY_WR2_PROC_DONE_TA | LECROY_WR2_PROC_DONE_TB |
+					 LECROY_WR2_PROC_DONE_TC | LECROY_WR2_PROC_DONE_TD |
+					 LECROY_WR2_SIGNAL_ACQ );
+
 	/* Switch digitizer back on to running state by switching to a trigger
 	   mode where the digitizer is running (i.e. typically NORMAL, but, if
 	   the user requested it, also AUTO, or, if there's no averaging setup,
@@ -1278,14 +1287,6 @@ void lecroy_wr2_start_acquisition( void )
 	if ( gpib_write( lecroy_wr2.device, cmd, strlen( cmd ) ) == FAILURE )
 		lecroy_wr2_gpib_failure( );
 
-	/* Reset the bits in the word that tells us later that the data in the
-	   corresponding channel are ready to be fetched */
-
-	lecroy_wr2_get_inr( );
-
-	can_fetch &= ~ ( LECROY_WR2_PROC_DONE_TA | LECROY_WR2_PROC_DONE_TB |
-					 LECROY_WR2_PROC_DONE_TC | LECROY_WR2_PROC_DONE_TD |
-					 LECROY_WR2_SIGNAL_ACQ );
 }
 
 
