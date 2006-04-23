@@ -80,6 +80,9 @@ rs_sml01        := rs_sml01.c rs_sml01_util.c rs_sml01_gpib.c rs_sml01_lexer.c
 rb_pulser_j     := rb_pulser_j.c rb_pulser_j_gen.c rb_pulser_j_pulse.c \
 				   rb_pulser_j_util.c rb_pulser_j_init.c rb_pulser_j_run.c \
 				   rb_pulser_j_ll.c rb_pulser_j_lexer.c
+rb_pulser_w     := rb_pulser_w.c rb_pulser_w_gen.c rb_pulser_w_pulse.c \
+				   rb_pulser_w_util.c rb_pulser_w_init.c rb_pulser_w_run.c \
+				   rb_pulser_w_ll.c rb_pulser_w_lexer.c
 
 # List of all "complicated" modules that are to be made from more than a
 # single source file (plus a header file) and that don't need any further
@@ -132,7 +135,7 @@ endif
 
 ifdef WITH_RULBUS
 simp_modules    += rb8509 rb8510_0 rb8510_1
-comp_modules    += rb_pulser_j
+comp_modules    += rb_pulser_j rb_pulser_w
 endif
 
 src_headers     := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h

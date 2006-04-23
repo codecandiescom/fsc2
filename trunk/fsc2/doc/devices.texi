@@ -3018,16 +3018,17 @@ you specify the time a phase pulse has to start before the beginning of
 a microwave pulse (or other phase cycled pulses), the phase switch
 needing some small amount of time to settle.
 
-For the @strong{Sony/Tektronix DG2020} the function takes two arguments,
-the first one being the phase function the phase switch delay is to be
-applied to (i.e.@: either @code{PHASE_1} (or @code{PHASE} for short) or
-@code{PHASE_2}). The second argument is the amount of time.
+For the @code{dg2020_f} module the function takes two arguments, the first
+one being the phase function the phase switch delay is to be applied to
+(i.e.@: either @code{PHASE_1} (or @code{PHASE} for short) or @code{PHASE_2}).
+The second argument is the amount of time.
 
-For the W-band @strong{Rulbus pulser} only the amount of time is to be
-specified - a delay due to the "magic box" is included automatically
-and thus does not need to be factored in.
+For the W-band @strong{Rulbus pulser} (module @code{rb_pulser_w} only the
+amount of time is to be specified - a delay due to the "magic box" is
+included automatically and thus does not need to be factored in.
 
-When this function isn't called a default value of @w{20 ns} is used.
+When this function isn't called a default value as specified in the
+configuration file for the device is used.
 
 When the program does its tests it will always check if the distances
 between the pulses are large enough to allow setting the phase
@@ -3042,20 +3043,24 @@ of an @code{EDL} script.
 @findex pulser_grace_period()
 @item pulser_grace_period()
 This function is only implemented for the Frankfurt version the
-@strong{Sony/Tektronix DG2020} pulser, @code{dg2020_f}. While the time a
-phase pulse must start before the pulse it was set for can is supposed to
-start via the @ref{pulser_phase_switch_delay()} function, you also may
-set how much longer a phase pulse has to be set after the original pulse
-ended.
+@strong{Sony/Tektronix DG2020} pulser, @code{dg2020_f}, and the W-band
+configuration of the @strong{Rulbus pulser}, @code{rb_pulser_w}.  While
+the time a phase pulse must start before the pulse it was set for can is
+supposed to start via the @ref{pulser_phase_switch_delay()} function, you
+also may set how much longer a phase (pulse) has to be kept set after the
+original pulse ended.
 
 The function takes only one argument, the time the phase pulses will last
-longer. It applies automatically to both phase functions. 
+after the end of the pulse. For the @code{dg2020_f} module it applies
+automatically to both phase functions while for the @code{rb_pulser_w}
+only the @code{MICROWAVE} function allows phase switching.
 
-If this function isn't called a default grace period of @w{10 ns} will
-be used.
+If this function isn't called a default grace period as defined in the
+configurtion file for the device will be used.
 
 Here's a diagram that shows the phase switch delay and the grace period
-(assuming that the microwave pulses are to be phase-cycled):
+for the @code{dg2020_f} module (assuming that the microwave pulses are
+to be phase-cycled):
 @example
                    ____________________________
                   |                            |
@@ -3069,7 +3074,6 @@ Microwave pulse           |                 |
                 ->|       |<-             ->|  |<-
                phase switch delay        grace period
 @end example
-
 
 When the program does its tests it will always check if the distances
 between the pulses are large enough to allow setting the phase
