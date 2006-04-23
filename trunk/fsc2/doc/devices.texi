@@ -26,6 +26,7 @@
 @ifinfo
 @menu
 * Overview::            
+* Using two (or more) devices of the same type::
 * Magnet Functions::
 * Gaussmeter Functions::
 * Lock-In Functions::
@@ -49,7 +50,7 @@
 @end ifinfo
 
 
-@node Overview, Magnet Functions, Device Functions, Device Functions
+@node Overview, Using two (or more) devices of the same type, Device Functions, Device Functions
 @section Overview
 
 
@@ -89,7 +90,12 @@ may differ for different devices. But while this can be annoyingly
 enough it at least reduces the amount of changes to be done to an
 @code{EDL} script considerably.
 
-But what if you need to use for example two digitizers simultaneously?
+
+@node Using two (or more) devices of the same type, Magnet Functions, Overview, Device Functions
+@section Magnet Functions
+@cindex Magnet Functions
+
+But what if you need to use e.g.@: two digitizers simultaneously?
 When the names of the functions for accessing both the digitizers are
 identical how does one specify which one to use for a command? Actually,
 it's quite simple. In the @code{DEVICES} section the two digitizers will
@@ -125,20 +131,19 @@ necessary capabilities) the function can be used with and without
 appending the @code{"#2"} to the function name. To remind you about this
 a short message is printed out when the module gets loaded.
 
-
-The only situation that's a bit more problematical is the case where two
+The only situation were it's a bit more complicated is the case where two
 identical devices are to be used simultaneously. Due to limitations not
 only of @code{fsc2} but already to the way the libraries used for accessing
 e.g.@: the GPIB bus work you can't simply list the same device twice in the
 @code{DEVICES} section and then use them as outlined above. Instead, two
 device modules with different names have to be created for these identical
 devices and made known to the program. Fortunately, there's a Perl script
-that can automatically "clone" a module for an already exsiting device,
+that can automatically "clone" a module for an already existing device,
 please see one of the following chapters (@pxref{Cloning Devices}) on how
-this is done.
+this can be done.
 
 
-@node Magnet Functions, Gaussmeter Functions, Overview, Device Functions
+@node Magnet Functions, Gaussmeter Functions, Using two (or more) devices of the same type, Device Functions
 @section Magnet Functions
 @cindex Magnet Functions
 

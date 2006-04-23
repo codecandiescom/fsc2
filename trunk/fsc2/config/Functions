@@ -144,7 +144,7 @@ pulser_grace_period, 1, PREP;
 
 /* Functions exported by the W-band configuration of the Rulbus pulser only */
 
-pulser_pulse_to_defense_minimum_distance,  1, PREP;
+pulser_minimum_defense_distance,  1, PREP;
 pulser_disable_defense_pulse, 0, PREP;
 
 /* Functions exported by the lock-in amplifier drivers
