@@ -231,7 +231,7 @@ void rb_pulser_j_delay_card_setup( void )
 			   set to get the pulse to start at the correct moment */
 
 			if ( f->self != PULSER_CHANNEL_MW ||
-				 ( f->self == PULSER_CHANNEL_MW && j!= 0 ) )
+				 ( f->self == PULSER_CHANNEL_MW && j != 0 ) )
 			{
 				/* Find out the first possible moment the following pulse
 				   could start at - if there's no following delay card

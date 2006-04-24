@@ -92,8 +92,8 @@ enough it at least reduces the amount of changes to be done to an
 
 
 @node Using two (or more) devices of the same type, Magnet Functions, Overview, Device Functions
-@section Magnet Functions
-@cindex Magnet Functions
+@section Using two (or more) devices of the same type
+@cindex Using two (or more) devices of the same type
 
 But what if you need to use e.g.@: two digitizers simultaneously?
 When the names of the functions for accessing both the digitizers are
@@ -3029,8 +3029,9 @@ one being the phase function the phase switch delay is to be applied to
 The second argument is the amount of time.
 
 For the W-band @strong{Rulbus pulser} (module @code{rb_pulser_w} only the
-amount of time is to be specified - a delay due to the "magic box" is
-included automatically and thus does not need to be factored in.
+amount of time is to be specified, no further arguments are allowed (only
+microwave pulses can be phase-cycled, so only a single phase function is
+used).
 
 When this function isn't called a default value as specified in the
 configuration file for the device is used.
