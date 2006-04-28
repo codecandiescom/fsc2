@@ -343,15 +343,7 @@ void rb_pulser_j_do_update( void );
 
 void rb_pulser_j_update_pulses( bool /* flag */ );
 
-void rb_pulser_j_function_init( void );
-
-void rb_pulser_j_init_delay( void );
-
-void rb_pulser_j_delay_card_setup( void );
-
 void rb_pulser_j_full_reset( void );
-
-void rb_pulser_j_seq_length_check( void );
 
 
 /* Functions defined in rb_pulser_j_util.c */

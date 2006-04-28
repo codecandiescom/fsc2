@@ -696,14 +696,16 @@ Var_T *pulser_pulse_minimum_specs( Var_T *v )
 			+ rb_pulser_j.delay_card[ INIT_DELAY ].delay
 			* rb_pulser_j.timebase
 			+ rb_pulser_j.delay_card[ RF_DELAY ].intr_delay
-			+ SYNTHESIZER_INTRINSIC_DELAY;
+			+ SYNTHESIZER_INTRINSIC_DELAY
+			+ p->function->delay;
 	else if ( p->function == rb_pulser_j.function + PULSER_CHANNEL_DET )
 		t =   rb_pulser_j.delay_card[ ERT_DELAY ].intr_delay
 			+ rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay
 			+ rb_pulser_j.delay_card[ INIT_DELAY ].delay
 			* rb_pulser_j.timebase
 			+ rb_pulser_j.delay_card[ DET_DELAY_0 ].intr_delay
-			+ rb_pulser_j.delay_card[ DET_DELAY_1 ].intr_delay;
+			+ rb_pulser_j.delay_card[ DET_DELAY_1 ].intr_delay
+			+ p->function->delay;
 	else
 		fsc2_assert( 1 == 0 );
 

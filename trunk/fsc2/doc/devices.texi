@@ -2637,6 +2637,8 @@ of the pulse sequence has to be committed explicitely by calling
 @item @ref{pulser_show_pulses()}
 @item @ref{pulser_dump_pulses()}
 @item @ref{pulser_pulse_minimum_specs()}
+@item @ref{pulser_minimum_defense_distance()}
+@item @ref{pulser_disable_defense_pulse()}
 @end table
 
 @noindent
@@ -3062,7 +3064,7 @@ automatically to both phase functions while for the @code{rb_pulser_w}
 only the @code{MICROWAVE} function allows phase switching.
 
 If this function isn't called a default grace period as defined in the
-configurtion file for the device will be used.
+configuration file for the device will be used.
 
 Here's a diagram that shows the phase switch delay and the grace period
 for the @code{dg2020_f} module (assuming that the microwave pulses are
@@ -3164,6 +3166,41 @@ be recalculated.
 
 This function can only be called during the @code{EXPERIMENT} section
 of an @code{EDL} script.
+
+
+@anchor{pulser_minimum_defense_distance()}
+@findex pulser_minimum_defense_distance()
+@item pulser_minimum_defense_distance()
+This function exists only for the W-band configuration of the @strong{Rulbus
+pulser}, @code{rb_pulser_w}. Unless explicitely forbidden by a call of
+@ref{pulser_disable_defense_pulse()} for this module a defense pulse is
+created automatically, lasting from the start of the pulse pattern to some
+time after end of the last microwave pulse, in order to protect amplifiers
+and receivers from excessive levels of microwave power. Using this function
+the minimum distance between the end of the last microwave pulse and the end
+of the defense pulse can be set (this time can end up being be slightly
+longer, up to the length of the timebase of the pulser).
+
+If this function isn't called a default minimum time as defined in the
+configuration file for the device will be used.
+
+This function can only be called during the @code{PEPARATIONS} section
+of an @code{EDL} script.
+
+
+@anchor{pulser_disable_defense_pulse()}
+@findex pulser_disable_defense_pulse()
+@item pulser_disable_defense_pulse()
+This function exists only for the W-band configuration of the @strong{Rulbus
+pulser}, @code{rb_pulser_w}. Normally a defense pulse gets created
+automatically, lasting from the start of the pulse pattern to some time after
+end of the last microwave pulse, in order to protect amplifiers and receivers
+from excessive levels of microwave power. But in some situations such a
+defense pulse must not be created, in which case this function is to be
+called during the @code{PREPARATIONS} section of the @code{EDL} script.
+If it has been called the user will always explicitely asked if really no
+defense pulse is to be created.
+
 
 @end table
 

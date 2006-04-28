@@ -407,10 +407,10 @@ endif
 # (i.e. mostly assert() calls etc.). Otherwise enable debug symbols in
 # code and libc memory debugging (if available)
 
-ifneq ($(MAKECMDGOALS),release)
-	CFLAGS += -ggdb3
-else
+ifeq ($(MAKECMDGOALS),release)
 	CFLAGS += -DNDEBUG                    # switch off all debugging code
+else
+	CFLAGS += -ggdb3
 	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
 		CFLAGS += -DLIBC_MDEBUG           # for libc memory debugging
 	endif

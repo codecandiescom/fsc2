@@ -322,7 +322,7 @@ void rb_pulser_j_exit( void )
 void rb_pulser_j_run( bool state )
 {
 	int i;
-	int is_busy = 0;
+	int is_busy;
 
 
 	if ( state == START )
@@ -356,7 +356,7 @@ void rb_pulser_j_run( bool state )
 		   outputting pulses anymore */
 
 		do {
-			for ( i = 0; i < NUM_DELAY_CARDS; i++ )
+			for ( is_busy = 0, i = 0; i < NUM_DELAY_CARDS && ! is_busy; i++ )
 			{
 				if ( i == ERT_DELAY )
 					continue;
@@ -365,9 +365,6 @@ void rb_pulser_j_run( bool state )
 										  rb_pulser_j.delay_card[ i ].handle );
 				if ( rulbus_errno != RULBUS_OK )
 					rb_pulser_j_failure( SET, "Failure to stop pulser" );
-
-				if ( is_busy )
-					continue;
 			}
 		} while ( is_busy );
 
@@ -495,7 +492,7 @@ static void rb_pulser_j_start_internal_trigger( void )
  *-----------------------------------------------------------*/
 
 void rb_pulser_j_delay_card_state( int  handle,
-								 bool state )
+								   bool state )
 {
 	unsigned char type = state == START ?
 				RULBUS_RB8514_DELAY_END_PULSE : RULBUS_RB8514_DELAY_PULSE_NONE;

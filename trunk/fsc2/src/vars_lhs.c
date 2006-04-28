@@ -728,12 +728,10 @@ static void vars_do_init( Var_T * src,
 			}
 			return;
 
-#ifndef NDEBUG
 		default :
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
 			THROW( EXCEPTION );
-#endif
 	}
 }
 
@@ -814,9 +812,9 @@ static Var_T *vars_lhs_pointer( Var_T * v,
 		{
 			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 					__FILE__, __LINE__ );
-#endif
 			THROW( EXCEPTION );
 		}
+#endif
 		return vars_push( REF_PTR, a );
 	}
 
@@ -955,12 +953,10 @@ static Var_T *vars_lhs_simple_pointer( Var_T * a,
 						cv->val.dpnt[ i ] = 0.0;
 					break;
 
-#ifndef NDEBUG
 				default :
 					eprint( FATAL, UNSET, "Internal error detected at "
 							"%s:%d.\n", __FILE__, __LINE__ );
 					THROW( EXCEPTION );
-#endif
 			}
 		}
 
@@ -979,12 +975,10 @@ static Var_T *vars_lhs_simple_pointer( Var_T * a,
 			case INT_REF : case FLOAT_REF :
 				return vars_push( REF_PTR, cv->val.vptr[ ind ] );
 
-#ifndef NDEBUG
 			default :
 				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
 						__FILE__, __LINE__ );
 				THROW( EXCEPTION );
-#endif
 		}
 
 	return v->val.lval >= 0 ?
