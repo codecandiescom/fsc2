@@ -887,6 +887,11 @@ GPIB bus.
 For devices that use the Rulbus another global variable, @code{Need_RULBUS}
 and also of type @code{bool}, has to be set in the init hook function.
 
+Finally, for devices where the LAN is used for communicaation the variable
+@code{Need_LAN} (again of type @code{bool}) need to be set in the init hook
+function.
+
+
 @subsection Handling GPIB devices
 
 To make dealing with the GPIB bus simpler there are several routines

@@ -451,7 +451,7 @@ void rb_pulser_w_exit_hook( void )
 		T_free( p );
 	}
 
-<	if ( rb_pulser_w.synth_state )
+	if ( rb_pulser_w.synth_state )
 		rb_pulser_w.synth_pulse_state =
 			                          CHAR_P T_free( rb_pulser_w.synth_state );
 
@@ -524,8 +524,6 @@ Var_T *pulser_dump_pulses( Var_T * v UNUSED_ARG )
 
 Var_T *pulser_phase_switch_delay( Var_T * v )
 {
-	double psd;
-
 	if ( v == NULL )
 	{
 		print( FATAL, "Missing argument.\n" );
