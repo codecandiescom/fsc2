@@ -104,7 +104,9 @@ struct termios *fsc2_serial_open( int          sn        UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	errno = EACCES;
 	return NULL;
@@ -134,7 +136,9 @@ ssize_t fsc2_serial_write( int          sn              UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	errno = EBADF;
 	return -1;
@@ -155,7 +159,9 @@ ssize_t fsc2_serial_read( int    sn              UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	errno = EBADF;
 	return -1;
@@ -173,7 +179,9 @@ int fsc2_tcgetattr( int              sn         UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	errno = EBADF;
 	return -1;
@@ -192,7 +200,9 @@ int fsc2_tcsetattr( int              sn                UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	errno = EBADF;
 	return -1;
@@ -210,7 +220,9 @@ int fsc2_tcsendbreak( int sn        UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	errno = EBADF;
 	return -1;
@@ -227,7 +239,9 @@ int fsc2_tcdrain( int sn UNUSED_ARG )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	errno = EBADF;
 	return -1;
@@ -245,7 +259,9 @@ int fsc2_tcflush( int sn              UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	errno = EBADF;
 	return -1;
@@ -263,7 +279,9 @@ int fsc2_tcflow( int sn      UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	errno = EBADF;
 	return -1;
@@ -400,7 +418,15 @@ void fsc2_serial_exp_init( const char * log_file_name,
 						   int          log_level )
 {
 	int i;
+	int requested_ports = 0;
 
+
+	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
+		if ( Serial_Port[ i ].in_use )
+			requested_ports++;
+
+	if ( requested_ports == 0 )
+		return;
 
 	ll = log_level;
 
@@ -409,10 +435,6 @@ void fsc2_serial_exp_init( const char * log_file_name,
 		ll = LL_NONE;
 		return;
 	}
-
-	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
-		if ( Serial_Port[ i ].in_use )
-			return;
 
 	if ( i == NUM_SERIAL_PORTS )
 		return;
@@ -478,7 +500,15 @@ void fsc2_serial_init( void )
 void fsc2_serial_cleanup( void )
 {
 	int i;
+	int requested_ports = 0;
 
+
+	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
+		if ( Serial_Port[ i ].in_use )
+			requested_ports++;
+
+	if ( requested_ports == 0 )
+		return;
 
 	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
 		if ( Serial_Port[ i ].is_open )
@@ -546,7 +576,9 @@ struct termios *fsc2_serial_open( int          sn,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Check that the device name argument is reasonable */
 
@@ -658,7 +690,9 @@ void fsc2_serial_close( int sn )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	if ( Serial_Port[ sn ].dev_name )
 		fsc2_serial_log_function_start( "fsc2_serial_close",
@@ -724,14 +758,17 @@ ssize_t fsc2_serial_write( int          sn,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Check that serial port number is reasonable */
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
-		fsc2_serial_log_message( "Error: Invalid serial port %d in call of "
-								 "function fsc2_serial_write()\n", sn );
+		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+								 "call of function fsc2_serial_write()\n",
+								 sn );
 		errno = EBADF;
 		return -1;
 	}
@@ -780,8 +817,8 @@ ssize_t fsc2_serial_write( int          sn,
 			case -1 :
 				if ( errno != EINTR )
 				{
-					fsc2_serial_log_message( "Error: select() returned "
-											 "indicating error\n" );
+					fsc2_serial_log_message( "Error: select() returned value "
+											 "indicating an error\n" );
 					fsc2_serial_log_function_end( "fsc2_serial_write",
 												  Serial_Port[ sn ].dev_name );
 					lower_permissions( );
@@ -797,8 +834,8 @@ ssize_t fsc2_serial_write( int          sn,
 						goto write_retry;
 				}
 
-				fsc2_serial_log_message( "Error: select aborted due to "
-										 "signal\n" );
+				fsc2_serial_log_message( "Error: select() aborted due to the"
+										 "receipt of a signal\n" );
 				fsc2_serial_log_function_end( "fsc2_serial_write",
 											  Serial_Port[ sn ].dev_name );
 				lower_permissions( );
@@ -872,14 +909,16 @@ ssize_t fsc2_serial_read( int    sn,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Check that serial port number is reasonable */
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
-		fsc2_serial_log_message( "Error: Invalid serial port %d in call of "
-								 "function fsc2_serial_read()\n", sn );
+		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+								 "call of function fsc2_serial_read()\n", sn );
 		errno = EBADF;
 		return -1;
 	}
@@ -930,7 +969,7 @@ ssize_t fsc2_serial_read( int    sn,
 			case -1 :
 				if ( errno != EINTR )
 				{
-					fsc2_serial_log_message( "Error: select() returned "
+					fsc2_serial_log_message( "Error: select() returned value "
 											 "indicating error in "
 											 "fsc2_serial_read()\n" );
 					fsc2_serial_log_function_end( "fsc2_serial_read",
@@ -948,8 +987,8 @@ ssize_t fsc2_serial_read( int    sn,
 						goto read_retry;
 				}
 
-				fsc2_serial_log_message( "Error: select aborted due to "
-										 "signal\n" );
+				fsc2_serial_log_message( "Error: select() aborted due to "
+										 "receipt of a signal\n" );
 				fsc2_serial_log_function_end( "fsc2_serial_read",
 											  Serial_Port[ sn ].dev_name );
 				lower_permissions( );
@@ -1196,14 +1235,16 @@ int fsc2_tcgetattr( int              sn,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Check that serial port number is reasonable */
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
-		fsc2_serial_log_message( "Error: Invalid serial port %d in call of "
-								 "function fsc2_tcgetattr()\n", sn );
+		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+								 "call of function fsc2_tcgetattr()\n", sn );
 		errno = EBADF;
 		return -1;
 	}
@@ -1231,14 +1272,16 @@ int fsc2_tcsetattr( int              sn,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Check that serial port number is reasonable */
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
-		fsc2_serial_log_message( "Error: Invalid serial port %d in call of "
-								 "function fsc2_tcsetattr()\n", sn );
+		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+								 "call of function fsc2_tcsetattr()\n", sn );
 		errno = EBADF;
 		return -1;
 	}
@@ -1265,14 +1308,16 @@ int fsc2_tcsendbreak( int sn,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Check that serial port number is reasonable */
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
-		fsc2_serial_log_message( "Error: Invalid serial port %d in call of "
-								 "function fsc2_tcsendbreak()\n", sn );
+		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+								 "call of function fsc2_tcsendbreak()\n", sn );
 		errno = EBADF;
 		return -1;
 	}
@@ -1298,14 +1343,16 @@ int fsc2_tcdrain( int sn )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Check that serial port number is reasonable */
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
-		fsc2_serial_log_message( "Error: Invalid serial port %d in call of "
-								 "function fsc2_tcdrain()\n", sn );
+		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+								 "call of function fsc2_tcdrain()\n", sn );
 		errno = EBADF;
 		return -1;
 	}
@@ -1332,14 +1379,16 @@ int fsc2_tcflush( int sn,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Check that serial port number is reasonable */
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
-		fsc2_serial_log_message( "Error: Invalid serial port %d in call of "
-								 "function fsc2_tcflush()\n", sn );
+		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+								 "call of function fsc2_tcflush()\n", sn );
 		errno = EBADF;
 		return -1;
 	}
@@ -1366,14 +1415,16 @@ int fsc2_tcflow( int sn,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Check that serial port number is reasonable */
 
 	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
 	{
-		fsc2_serial_log_message( "Error: Invalid serial port %d in call of "
-								 "function fsc2_tcflow()\n", sn );
+		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+								 "call of function fsc2_tcflow()\n", sn );
 		errno = EBADF;
 		return -1;
 	}
@@ -1468,6 +1519,7 @@ void fsc2_serial_log_message( const char * fmt,
 	   section */
 
 	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
 				 Fsc2_Internals.mode  == EXPERIMENT );
 
 	if ( fsc2_serial_log == NULL || ll == LL_NONE )

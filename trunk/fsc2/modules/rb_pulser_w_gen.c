@@ -276,7 +276,7 @@ bool rb_pulser_w_set_repeat_time( double rep_time )
 bool rb_pulser_w_set_phase_switch_delay( int    dummy  UNUSED_ARG,
 										 double del_time )
 {
-	if ( del_time < 0 )
+	if ( del_time < 0.0 )
 	{
 		print( FATAL, "Invalid negative value for phase switch delay: "
 			   "%s.\n", rb_pulser_w_ptime( del_time ) );

@@ -44,8 +44,6 @@ Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
 
 static void rb_pulser_w_card_setup( void );
 
-static bool Is_running_at_start;
-
 
 /*------------------------------------------------------------------------*
  * Function that gets called immediately after the module has been loaded
@@ -269,7 +267,6 @@ int rb_pulser_w_test_hook( void )
 			THROW( EXCEPTION );
 		}
 
-		Is_running_at_start = rb_pulser_w.is_running;
 		if ( rb_pulser_w.do_show_pulses )
 			rb_pulser_w_show_pulses( );
 		if ( rb_pulser_w.do_dump_pulses )
@@ -362,8 +359,8 @@ int rb_pulser_w_exp_hook( void )
 	if ( rb_pulser_w.defense_pulse_mode == MANUAL )
 	{
 		const char *warn = "You want to set the defense pulse manually.\n"
-			               "This can destroy the microwave amplifier\n"
-			               "if you are not very careful.\n"
+			               "This can potentally destroy the signal ampli-\n"
+			               "fier if you are not extremely careful.\n"
 			               "***** Is this really what you want? *****";
 		if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
 			THROW( EXCEPTION );
@@ -380,7 +377,7 @@ int rb_pulser_w_exp_hook( void )
 		const char *warn = "You want an automatically set defense pulse\n"
 			               "but also use function delays. The program now\n"
 			               "can't guarantee the correct setting of the\n"
-			               "defense pulse. This can destroy the microwave\n"
+			               "defense pulse. This can destroy the signal\n"
 			               "amplifier if you are not very careful.\n"
 			               "***** Is this really what you want? *****";
 		if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
@@ -406,8 +403,6 @@ int rb_pulser_w_exp_hook( void )
 			THROW( EXCEPTION );
 	}
 #endif
-
-	rb_pulser_w.is_running = Is_running_at_start;
 
 	/* Initialize the device */
 
@@ -526,22 +521,24 @@ Var_T *pulser_dump_pulses( Var_T * v UNUSED_ARG )
 
 /*-----------------------------------------------------------------*
  * Function for setting the time the phase switch must be switched
- * before a microwave pulse with the new can start. The function
- * automatically includes the time it takes Leenderts "magic box"
- * to react to the phase pulse.
+ * before a microwave pulse with the new phase can start.
  *-----------------------------------------------------------------*/
 
 Var_T *pulser_phase_switch_delay( Var_T * v )
 {
+	double psd;
+
 	if ( v == NULL )
 	{
 		print( FATAL, "Missing argument.\n" );
 		THROW( EXCEPTION );
 	}
 
+	too_many_arguments( v->next );
+
 	rb_pulser_w_set_phase_switch_delay( 0,
 									   get_double( v, "phase switch delay" ) );
-	return vars_push( FLOAT_VAR, rb_pulser_w.psd * rb_pulser_w.timebase );
+	return vars_push( FLOAT_VAR, rb_pulser_w.psd );
 }
 
 
@@ -553,8 +550,7 @@ Var_T *pulser_phase_switch_delay( Var_T * v )
 Var_T *pulser_grace_period( Var_T * v )
 {
 	rb_pulser_w_set_grace_period( get_double( v, "grace period" ) );
-	return vars_push( FLOAT_VAR,
-					  rb_pulser_w.grace_period * rb_pulser_w.timebase );
+	return vars_push( FLOAT_VAR, rb_pulser_w.grace_period );
 }
 
 
@@ -582,7 +578,7 @@ Var_T *pulser_minimum_defense_distance( Var_T * v )
 	s2d = get_double( v, "end of last microwave pulse to end of defense "
 					  "pulse minimum distance" );
 
-	if ( s2d < 0 )
+	if ( s2d < 0.0 )
 	{
 		print( FATAL, "Negative minimum distance between end of last "
 			   "microwave pulse end end of defense pulse.\n" );

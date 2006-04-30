@@ -72,11 +72,12 @@ void rb_pulser_w_do_update( void )
 	}
 
 	/* Recount and resort the pulses according to their positions, check
-	   that the new settings are reasonable and then commit all changes */
+	   that the new settings are reasonable, set the defense pulse if
+	   necessary and then commit all changes */
 
 	rb_pulser_w_update_pulses( FSC2_MODE == TEST );
 
-	/* Restart the pulser if necessary */
+	/* Restart the pulser if it was running before */
 
 	if ( restart && FSC2_MODE == EXPERIMENT )
 		rb_pulser_w_run( START );

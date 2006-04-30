@@ -81,6 +81,8 @@
 #define INVALID_DELAY_NUMBER -1
 #define INVALID_CLOCK_NUMBER -1
 
+#define MAX_MW_PULSES     3
+
 
 /* Minimum precision (relative to the timebase) for pulse positions and
    lengths etc. - when the user requests a position or length that can't

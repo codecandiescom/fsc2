@@ -44,8 +44,6 @@ Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
 
 static void rb_pulser_j_card_setup( void );
 
-static bool Is_running_at_start;
-
 
 /*------------------------------------------------------------------------*
  * Function that gets called immediately after the module has been loaded
@@ -228,7 +226,6 @@ int rb_pulser_j_test_hook( void )
 			THROW( EXCEPTION );
 		}
 
-		Is_running_at_start = rb_pulser_j.is_running;
 		if ( rb_pulser_j.do_show_pulses )
 			rb_pulser_j_show_pulses( );
 		if ( rb_pulser_j.do_dump_pulses )
@@ -314,8 +311,6 @@ int rb_pulser_j_exp_hook( void )
 {
 	if ( ! rb_pulser_j.is_needed )
 		return 1;
-
-	rb_pulser_j.is_running = Is_running_at_start;
 
 	/* Initialize the device */
 

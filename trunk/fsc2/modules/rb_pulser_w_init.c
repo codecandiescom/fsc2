@@ -167,6 +167,20 @@ static void rb_pulser_w_basic_functions_init( void )
 					   "'%s'.\n", f->name );
 			f->is_used = UNSET;
 		}
+
+		if ( i == PULSER_CHANNEL_MW && f->num_pulses > MAX_MW_PULSES )
+		{
+			print( FATAL, "Pulser function 'MICROWAVE' allows only %d pulses "
+				   "but %d are defined.\n", MAX_MW_PULSES, f->num_pulses );
+			THROW( EXCEPTION );
+		}
+
+		if ( i != PULSER_CHANNEL_MW && f->num_pulses > 1 )
+		{
+			print( FATAL, "Pulser function '%s' allows only 1 pulse but %d "
+				   "are defined.\n", Function_Names[ i ], f->num_pulses );
+			THROW( EXCEPTION );
+		}
 	}
 }
 
