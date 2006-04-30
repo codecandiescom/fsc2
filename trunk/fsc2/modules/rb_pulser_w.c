@@ -26,7 +26,7 @@
 
 
 /*--------------------------------*
- * global variables of the module *
+ * Global variables of the module *
  *--------------------------------*/
 
 const char device_name[ ]  = DEVICE_NAME;
@@ -39,7 +39,7 @@ Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
 
 
 /*-------------------------------*
- * local functions and variables *
+ * Local functions and variables *
  *-------------------------------*/
 
 static void rb_pulser_w_card_setup( void );
@@ -223,9 +223,7 @@ int rb_pulser_w_test_hook( void )
 		rb_pulser_w.psd = DEFAULT_PHASE_SWITCH_DELAY;
 
 	/* Also set the default time a phase has to be kept after the end of a
-	   pulse unless the user already set it (please note that this can end
-	   up as a negative time if the grace period is shorter than the time
-	   Leendert's magic box needs to pass a signal through). */
+	   pulse unless the user already set it */
 
 	if ( ! rb_pulser_w.is_grace_period )
 		rb_pulser_w.grace_period = DEFAULT_GRACE_PERIOD;
@@ -453,7 +451,7 @@ void rb_pulser_w_exit_hook( void )
 		T_free( p );
 	}
 
-	if ( rb_pulser_w.synth_state )
+<	if ( rb_pulser_w.synth_state )
 		rb_pulser_w.synth_pulse_state =
 			                          CHAR_P T_free( rb_pulser_w.synth_state );
 
@@ -699,13 +697,14 @@ Var_T *pulser_update( Var_T * v UNUSED_ARG )
 }
 
 
-/*----------------------------------------------------------------------*
- * Public function to change the position of pulses. If called with no
- * argument all active pulses that have a position change time set will
- * be moved, otherwise all pulses passed as arguments to the function.
- * Take care: The changes will only be committed on the next call of
- *            the function pulser_update() !
- *----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function for changing the position of pulses. If called with no
+ * argument all active pulses that have a position change time set
+ * will be moved, otherwise all pulses passed as arguments to the
+ * function.
+ * Take care: The changes will only be committed on the next call
+ *            of the function pulser_update() !
+ *-----------------------------------------------------------------*/
 
 Var_T *pulser_shift( Var_T * v )
 {
@@ -758,13 +757,14 @@ Var_T *pulser_shift( Var_T * v )
 }
 
 
-/*-------------------------------------------------------------------------*
- * Public function for incrementing the length of pulses. If called with
- * no argument all active pulses that have a length change defined are
- * incremented, otherwise all pulses passed as arguments to the function.
- * Take care: The changes will only be committed on the next call of the
- *            function pulser_update() !
- *-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function for incrementing the length of pulses. If called with no
+ * argument all active pulses that have a length change defined are
+ * incremented, otherwise all pulses passed as arguments to the
+ * function.
+ * Take care: The changes will only be committed on the next call of
+ *            the function pulser_update() !
+ *-------------------------------------------------------------------*/
 
 Var_T *pulser_increment( Var_T * v )
 {
@@ -819,7 +819,9 @@ Var_T *pulser_increment( Var_T * v )
 
 /*-----------------------------------------------------*
  * Function for switching the pulser to the next phase
- * settings of the phase cycle sequence
+ * settings of the phase cycle sequence. This also
+ * involves sending all other changes that may have
+ * done to the pulses to the pulser!
  *-----------------------------------------------------*/
 
 Var_T *pulser_next_phase( Var_T * v )
@@ -846,7 +848,9 @@ Var_T *pulser_next_phase( Var_T * v )
 
 /*------------------------------------------------------*
  * Function for switching the pulser to the first phase
- * settings of the phase cycle sequence
+ * settings of the phase cycle sequence. This also
+ * involves sending all changes that may have done to
+ * the pulses to the pulser!
  *------------------------------------------------------*/
 
 Var_T *pulser_phase_reset( Var_T * v )
@@ -886,9 +890,9 @@ Var_T *pulser_reset( Var_T * v UNUSED_ARG )
 }
 
 
-/*---------------------------------------------------------------------*
- * Function for resetting one or more pulses back to the initial state
- *---------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for resetting one or more pulses back to their initial state
+ *-----------------------------------------------------------------------*/
 
 Var_T *pulser_pulse_reset( Var_T * v )
 {
