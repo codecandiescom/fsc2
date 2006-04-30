@@ -17,7 +17,7 @@ written with three main aims:
  * Users doing just standard experiments should only need to interact
    with a simple grapical user interface.
 
-This flexibility has beed achieved by making fsc2 basically an interpreter
+This flexibility has been achieved by making fsc2 basically an interpreter
 for a rather simple but powerful scripting language (EDL, Experiment
 Description Language) and employing a strictly modular approach to the
 handling of devices. This allows setting up a completely new experiment
@@ -114,6 +114,12 @@ Suported devices
   * Tektronix Digitizing Oscilloscopes TDS 744A
   * Tektronix Digitizing Oscilloscopes TDS 754A
   * LeCroy Digitizing Oscilloscope 9400
+  * LeCroy Digitizing Oscilloscope 9420
+  * LeCroy Digitizing Oscilloscope 9424
+  * LeCroy Digitizing Oscilloscope 9424
+  * LeCroy Digitizing Oscilloscope 9450
+  * LeCroy Digitizing Oscilloscope Waverunner-2
+  * LeCroy Digitizing Oscilloscope WaveSurfer
 
  Pulse generators:
 
@@ -121,7 +127,8 @@ Suported devices
   * Tektronix Stimulus System HFS9003
   * Bruker EP385 Pulse Programmer
   * Interface Technology RS690 Digital Word Generator
-  * RULBUS (Rijksuniversiteit Leiden BUS) Pulser
+  * RULBUS (Rijksuniversiteit Leiden BUS) Pulser, J-band configuration
+  * RULBUS (Rijksuniversiteit Leiden BUS) Pulser, W-band configuration
 
  Lock-in amplifiers:
 
