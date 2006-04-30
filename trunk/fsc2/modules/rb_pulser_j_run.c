@@ -496,7 +496,7 @@ static void rb_pulser_j_rf_pulse( void )
 	if ( ! f->is_used )
 		return;
 
-	p = f->pulses[ 0 ];
+	p = *f->pulses;
 
 	if ( p->is_active )
 	{

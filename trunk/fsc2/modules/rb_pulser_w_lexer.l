@@ -139,6 +139,7 @@ NAME     \"[^"]*\"
 "RF_DELAY_CARD"         set_cur_delay( RF_DELAY );
 "LASER_DELAY_CARD_0"    set_cur_delay( LASER_DELAY_0 );
 "LASER_DELAY_CARD_1"    set_cur_delay( LASER_DELAY_1 );
+"DEFENSE_DELAY_CARD"    set_cur_delay( DEFENSE_DELAY );
 "DET_DELAY_CARD"        set_cur_delay( DET_DELAY );
 "ERT_CLOCK_CARD"        set_cur_clock( ERT_CLOCK );
 "TB_CLOCK_CARD"         set_cur_clock( TB_CLOCK );

@@ -81,14 +81,28 @@ bool rb_pulser_w_set_pulse_function( long pnum,
 	Pulse_T *p = rb_pulser_w_get_pulse( pnum );
 
 
-	/* The pulser has only three functions that can be set */
+	/* The pulser has only five functions that can be set */
 
 	if ( function != PULSER_CHANNEL_MW &&
 		 function != PULSER_CHANNEL_RF &&
-		 function != PULSER_CHANNEL_LASER )
+		 function != PULSER_CHANNEL_LASER &&
+		 function != PULSER_CHANNEL_DEFENSE &&
+		 function != PULSER_CHANNEL_DET )
 	{
 		print( FATAL, "Pulse function '%s' can't be used with this "
 			   "driver.\n", Function_Names[ function ] );
+		THROW( EXCEPTION );
+	}
+
+	/* Moreover, defense pulses can only be created manually if the user
+	   explecitely asked for it. */
+
+	if ( function == PULSER_CHANNEL_DEFENSE &&
+		 rb_pulser_w.defense_pulse_mode == AUTOMATIC )
+	{
+		print( FATAL, "A DEFENSE pulse can only be created if the function "
+			   "'pulser_defense_pulse_mode()' has been called previously "
+			   "to switch off automatic defense pulse creation.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -101,10 +115,40 @@ bool rb_pulser_w_set_pulse_function( long pnum,
 
 	if ( p->pc && function != PULSER_CHANNEL_MW )
 	{
-		print( FATAL, "A pulse that that need phase-cycling can't be assigned "
+		print( FATAL, "A pulse which needs phase-cycling can't be assigned "
 			   "to function '%s'.\n", rb_pulser_w.function[ function ].name );
 		THROW( EXCEPTION );
 	}
+
+	if ( function == PULSER_CHANNEL_DET && p->is_len && p->len > 1 )
+	{
+		print( SEVERE, "Length of DETECTION pulse can only be either 0 or "
+			   "%s. Setting it to the latter value.\n", 
+			   rb_pulser_w_ptime( rb_pulser_w.timebase ) );
+		p->len = 1;
+	}
+
+	if ( function == PULSER_CHANNEL_DET && p->is_dlen )
+	{
+		print( SEVERE, "Length change for DETECTION pulse has set but its "
+			   "length can be only either 0 or %s.\n",
+			   rb_pulser_w_ptime( rb_pulser_w.timebase ) );
+		p->is_dlen = UNSET;
+	}
+
+	if ( function == PULSER_CHANNEL_DEFENSE &&
+		 p->is_pos &&
+		 fabs( p->pos + rb_pulser_w.function[ function ].delay ) >
+		                                     PRECISION * rb_pulser_w.timebase )
+	{
+		print( FATAL, "Position of defense pulse #%ld can only be set "
+			   "to %s.\n", pnum,
+			   rb_pulser_w_ptime( - rb_pulser_w.function[ function ].delay ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( function == PULSER_CHANNEL_DEFENSE )
+		p->pos = - rb_pulser_w.function[ function ].delay;
 
 	p->function = rb_pulser_w.function + function;
 
@@ -133,6 +177,15 @@ bool rb_pulser_w_set_pulse_position( long   pnum,
 	{
 		print( FATAL, "Invalid negative start position set for pulse "
 			   "#%ld: %s.\n", pnum, rb_pulser_w_ptime( p_time ) );
+		THROW( EXCEPTION );
+	}
+
+	if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DEFENSE &&
+		 fabs( p->pos + p->function->delay ) >
+		                                     PRECISION * rb_pulser_w.timebase )
+	{
+		print( FATAL, "Position of defense pulse #%ld must always be %s.\n",
+			   pnum, rb_pulser_w_ptime( - p->function->delay ) );
 		THROW( EXCEPTION );
 	}
 
@@ -172,6 +225,15 @@ bool rb_pulser_w_set_pulse_length( long   pnum,
 	p->len = rb_pulser_w_double2ticks( p_time );
 	p->is_len = SET;
 
+	if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DET
+		 && p->len > 1 )
+	{
+		print( SEVERE, "Length of DETECTION pulse can only be either 0 or "
+			   "%s. Setting it to the latter value.\n", 
+			   rb_pulser_w_ptime( rb_pulser_w.timebase ) );
+		p->len = 1;
+	}
+
 	p->initial_len = p->len;
 	p->initial_is_len = SET;
 
@@ -200,6 +262,13 @@ bool rb_pulser_w_set_pulse_position_change( long   pnum,
 	{
 		print( SEVERE, "Zero position change value for pulse #%ld.\n", pnum );
 		return FAIL;
+	}
+
+	if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DEFENSE )
+	{
+		print( FATAL, "Position change can't be set for defense pulse #%ld,\n",
+			   pnum );
+		THROW( EXCEPTION );
 	}
 
 	p->dpos = p_time;
@@ -343,7 +412,10 @@ bool rb_pulser_w_get_pulse_position( long     pnum,
 		THROW( EXCEPTION );
 	}
 
-	*p_time = p->pos;
+	if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DEFENSE )
+		*p_time = - p->function->delay;
+	else
+		*p_time = p->pos;
 
 	return OK;
 }
@@ -385,6 +457,13 @@ bool rb_pulser_w_get_pulse_position_change( long     pnum,
 	{
 		print( FATAL, "The position change of pulse #%ld hasn't been set.\n",
 			   pnum );
+		THROW( EXCEPTION );
+	}
+
+	if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DEFENSE )
+	{
+		print( FATAL, "Defense pulse #%ld does not have a position change "
+			   "property.\n", pnum );
 		THROW( EXCEPTION );
 	}
 
@@ -462,6 +541,14 @@ bool rb_pulser_w_change_pulse_position( long   pnum,
 			THROW( EXCEPTION );
 	}
 
+	if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DEFENSE )
+	{
+		print( FATAL, "Position of defense pulse #%ld can't be changed, it's "
+			   "always %s.\n", pnum,
+			   rb_pulser_w_ptime( - p->function->delay ) );
+		THROW( EXCEPTION );
+	}
+
 	if ( p->is_pos &&
 		 fabs( p_time - p->pos ) <= PRECISION * rb_pulser_w.timebase )
 	{
@@ -527,6 +614,15 @@ bool rb_pulser_w_change_pulse_length( long   pnum,
 	p->len = new_len;
 	p->is_len = SET;
 
+	if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DET
+		 && p->len > 1 )
+	{
+		print( SEVERE, "Length of DETECTION pulse can only be either 0 or "
+			   "%s. Setting it to the latter value.\n", 
+			   rb_pulser_w_ptime( rb_pulser_w.timebase ) );
+		p->len = 1;
+	}
+
 	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 
 	return OK;
@@ -542,6 +638,13 @@ bool rb_pulser_w_change_pulse_position_change( long   pnum,
 {
 	Pulse_T *p = rb_pulser_w_get_pulse( pnum );
 
+
+	if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DEFENSE )
+	{
+		print( FATAL, "Position change of defense pulse #%ld can't be set.\n",
+			   pnum );
+		THROW( EXCEPTION );
+	}
 
 	if ( p_time == 0 && FSC2_MODE == TEST )
 	{

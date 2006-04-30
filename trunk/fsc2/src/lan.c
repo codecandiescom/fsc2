@@ -1393,6 +1393,7 @@ void fsc2_lan_log_message( const char * fmt,
 	   section */
 
 	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
 				 Fsc2_Internals.mode  == EXPERIMENT );
 
 	if ( fsc2_lan_log == NULL || lan_log_level == LL_NONE )

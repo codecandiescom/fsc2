@@ -26,7 +26,7 @@
 
 /* This file only exists to hold the definitions of several global variables
    in a single, easy to find place (but not all are defined here, others
-   are defined in the files they mostly belong to!) */
+   are defined in the files were they seem to fit in better). */
 
 const char *Prog_Name;           /* Name the program was started with */
 
@@ -37,6 +37,7 @@ GUI_Stuff_T GUI;
 
 bool Need_GPIB   = UNSET;        /* Flag, set if GPIB bus is needed */
 bool Need_RULBUS = UNSET;        /* Flag, set if RULBUS is needed */
+bool Need_LAN    = UNSET;        /* Flag, set if LAN is needed */
 
 
 /* If you change the following always remember to also adjust the

@@ -127,6 +127,12 @@ enum {
 };
 
 
+enum {
+	AUTOMATIC = 0,
+	MANUAL
+};
+
+
 /* States to be returned to the HTTP server */
 
 enum {

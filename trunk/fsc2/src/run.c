@@ -275,7 +275,8 @@ static bool start_gpib_and_rulbus( void )
 
 	fsc2_serial_exp_init( SERIAL_LOG_FILE, SERIAL_LOG_LEVEL );
 
-	fsc2_lan_exp_init( LAN_LOG_FILE, LAN_LOG_LEVEL );
+	if ( Need_LAN )
+		fsc2_lan_exp_init( LAN_LOG_FILE, LAN_LOG_LEVEL );
 
 	return OK;
 }
@@ -335,7 +336,8 @@ static bool no_prog_to_run( void )
 
 	fsc2_serial_cleanup( );
 
-	fsc2_lan_cleanup( );
+	if ( Need_LAN )
+		fsc2_lan_cleanup( );
 
 	Fsc2_Internals.mode = PREPARATION;
 
@@ -441,7 +443,8 @@ static bool init_devs_and_graphics( void )
 
 		fsc2_serial_cleanup( );
 
-		fsc2_lan_cleanup( );
+		if ( Need_LAN )
+			fsc2_lan_cleanup( );
 
 		Fsc2_Internals.mode = PREPARATION;
 
@@ -565,7 +568,8 @@ static void fork_failure( int stored_errno )
 
 	fsc2_serial_cleanup( );
 
-	fsc2_lan_cleanup( );
+	if ( Need_LAN )
+		fsc2_lan_cleanup( );
 
 	Fsc2_Internals.mode = PREPARATION;
 
@@ -850,7 +854,8 @@ void run_sigchld_callback( FL_OBJECT * a,
 
 	fsc2_serial_cleanup( );
 
-	fsc2_lan_cleanup( );
+	if ( Need_LAN )
+		fsc2_lan_cleanup( );
 
 	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
 		return;

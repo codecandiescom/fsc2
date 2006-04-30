@@ -43,9 +43,9 @@
    instead of outputting pulses have a line printed to stderr for each
    call for setting a deleay or clock card. */
 
-#if 0
+//#if 0
 #define RB_PULSER_W_TEST
-#endif
+//#endif
 
 
 /* Defines for the number of delay and clock cards */
@@ -260,8 +260,8 @@ struct RB_Pulser_W {
 	bool is_pulse_2_defense;
 	double pulse_2_defense;  /* minimum delay between end of last microwave
 								pulse and end of defense pulse */
-	bool no_defense_pulse;   /* set if no defense pulse is to be created */
-
+	int defense_pulse_mode;  /* tells if defense pulses get set automatically
+								or manually */
 	bool is_psd;
 	double psd;              /* minimum delay between start of phase pulse and 
 								start of microwave pulse */
@@ -294,7 +294,7 @@ Var_T *pulser_dump_pulses(              Var_T * /* v */ );
 Var_T *pulser_phase_switch_delay(       Var_T * /* v */ );
 Var_T *pulser_grace_period(             Var_T * /* v */ );
 Var_T *pulser_minimum_defense_distance( Var_T * /* v */ );
-Var_T *pulser_disable_defense_pulse(    Var_T * /* v */ );
+Var_T *pulser_defense_pulse_mode(       Var_T * /* v */ );
 Var_T *pulser_state(                    Var_T * /* v */ );
 Var_T *pulser_update(                   Var_T * /* v */ );
 Var_T *pulser_shift(                    Var_T * /* v */ );

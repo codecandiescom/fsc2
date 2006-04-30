@@ -383,6 +383,7 @@ extern Cut_Graphics_T G_cut;
 
 extern bool Need_GPIB;
 extern bool Need_RULBUS;
+extern bool Need_LAN;
 
 extern PA_Seq_T PA_Seq;
 

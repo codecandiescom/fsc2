@@ -92,12 +92,11 @@ void rb_pulser_w_init( void )
 																!= RULBUS_OK ) 
 		rb_pulser_w_failure( SET, "Failure to stop pulser" );
 
-	/* If no phase cycling is to be used create a short pulse at one of the
-	   cards responsible for the phase setting so that we can be sure the
-	   switch is in the position for +X-phase */
+	/* Initially make all delay cards relevant for phase switching output end
+	   pulses for the +X phase and create a short pulse at one of the cards so
+	   that we can be sure the switch is in the position for +X-phase. */
 
-	if ( ! rb_pulser_w.needs_phases )
-		rb_pulser_w_switch_to_x_phase( );
+	rb_pulser_w_switch_to_x_phase( );
 
 	/* In external trigger mode set the trigger input slope of the ERT delay
 	   card to whatever the user had asked for and then set the delay for the
@@ -145,10 +144,10 @@ void rb_pulser_w_init( void )
 	{
 		f = rb_pulser_w.function + i;
 
-		if ( ! f->is_used || i == PULSER_CHANNEL_PHASE_1 )
+		if ( ! f->is_used )
 			continue;
 
-		for ( card = f->delay_card; card != NULL; card = card->next );
+		for ( card = f->delay_card; card != NULL; card = card->next )
 		{
 			if ( rulbus_rb8514_delay_set_output_pulse_polarity(
 			 						    card->handle,
@@ -165,7 +164,7 @@ void rb_pulser_w_init( void )
 		}
 	}
 
-	for ( card = rb_pulser_w.function[ PHASE_DELAY_0 ].delay_card;
+	for ( card = rb_pulser_w.delay_card + PHASE_DELAY_0;
 		  card != NULL; card = card->next )
 		if ( rulbus_rb8514_delay_set_trigger(
 				                             card->handle,
@@ -214,27 +213,26 @@ void rb_pulser_w_init( void )
 
 	fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse_polarity( %d, "
 			 "RULBUS_RB8514_DELAY_END_PULSE, "
-			 "RULBUS_RB8514_DELAY_POLARITY_POSITIVE )\n", ERT_CARD );
+			 "RULBUS_RB8514_DELAY_POLARITY_POSITIVE )\n", ERT_DELAY );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
 		f = rb_pulser_w.function + i;
 
-		if ( ! f->is_used || i == PULSER_CHANNEL_PHASE_1 )
+		if ( ! f->is_used )
 			continue;
 
-		for ( card = f->delay_card; card != NULL; card = card->next );
+		for ( card = f->delay_card; card != NULL; card = card->next )
 		{
-			fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse_polarity("
+			fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse_polarity( "
 					 "%d, RULBUS_RB8514_DELAY_END_PULSE, "
 					 "RULBUS_RB8514_DELAY_POLARITY_POSITIVE )\n", card->self );
-
 			fprintf( stderr, "rulbus_rb8514_delay_set_trigger( %d, "
 					 "RULBUS_RB8514_DELAY_RAISING_EDGE )\n", card->self );
 		}
 	}
 
-	for ( card = rb_pulser_w.function + PHASE_DELAY_0;
+	for ( card = rb_pulser_w.delay_card + PHASE_DELAY_0;
 		  card != NULL; card = card->next )
 		fprintf( stderr, "rulbus_rb8514_delay_set_trigger( %d, "
 				 "RULBUS_RB8514_DELAY_RAISING_EDGE )\n", card->self );
@@ -247,20 +245,20 @@ void rb_pulser_w_init( void )
 }
 
 
-/*--------------------------------------------------------------------*
- * Function hat gets called in the initialization of the pulser if no
- * phase cycling is to be used. In this case all cards relevant for
- * phase switching get set to emit end pulses for a +X phase switch
- * setting and one of the card gets started to make sure the phase
- * switch is in this state. Finally the delay time for all the phase
- * cards gets set to the maximum value so that normally they don't
- * output anything (or only the end pulses for the +X phase setting).
- *--------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function hat gets called in the initialization of the pulser to
+ * (at least) initially set all cards relevant for phase switching
+ * to emit end pulses for a +X phase switch setting and one of the
+ * card gets started to make sure the phase switch is in this state.
+ * Finally the delay time for all the phase cards gets set to the
+ * maximum value so that normally they don't output anything (or
+ * only the end pulses for the +X phase setting).
+ *-------------------------------------------------------------------*/
 
 static void rb_pulser_w_switch_to_x_phase( void )
 {
-	int is_busy;
 	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + PHASE_DELAY_0;
+	int is_busy;
 
 
 #if ! defined RB_PULSER_W_TEST
@@ -319,20 +317,51 @@ static void rb_pulser_w_switch_to_x_phase( void )
 		rb_pulser_w_failure( SET, "Failure to inititialize pulser" );
 #endif
 
-	/* Set all the cards for phases to produce the longest possible delay
-	   thus practically keeping it from ever outputting anything */
+	/* Set all the cards for phases to produce no output pulse thus keeping
+	   them from influencing the phase switch */
 
 	for ( ; card != NULL; card = card->next )
 	{
-		if ( rulbus_rb8514_delay_set_raw_delay( card->handle, card->delay, 1 )
+		if ( rulbus_rb8514_delay_set_raw_delay( card->handle, 0, 1 )
 			                                                   != RULBUS_OK ||
 			 rulbus_rb8514_delay_set_trigger(
 				                             card->handle,
 									   	     RULBUS_RB8514_DELAY_RAISING_EDGE )
 			 													 != RULBUS_OK )
 				rb_pulser_w_failure( SET, "Failure to initialize pulser" );
+
+		card->old_delay = card->old_delay = 0;
 	}
-#else
+
+#else /* in test mode */
+
+	for ( ; card != NULL; card = card->next )
+		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %d, %d, "
+				 "%d\n )\n", card->handle, phase_settings[ PHASE_PLUS_X ][ 0 ],
+				 phase_settings[ PHASE_PLUS_X ][ 0 ] );
+	rb_pulser_w_delay_card_delay( card->handle,
+								  Ticks_ceil( MINIMUM_PHASE_PULSE_LENGTH /
+											  rb_pulser_w.timebase ) );
+#ifndef FIXED_TIMEBASE
+	fprintf( stderr, "rulbus_rb8515_clock_set_frequency( %d, %d )\n",
+			 rb_pulser_w.clock_card[ TB_CLOCK ].handle,
+			 rb_pulser_w.clock_card[ TB_CLOCK ].freq );
+#endif
+	card = rb_pulser_w.delay_card + PHASE_DELAY_0;
+	fprintf( stderr, "rulbus_rb8514_software_start( %d )\n", card->handle );
+#ifndef FIXED_TIMEBASE
+	fprintf( stderrm "rulbus_rb8515_clock_set_frequency( %d, "
+			 "RULBUS_RB8515_CLOCK_FREQ_OFF )\n", 
+			 rb_pulser_w.clock_card[ TB_CLOCK ].handle );
+#endif
+	for ( ; card != NULL; card = card->next )
+	{
+		fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %d, %lu, 1 )\n",
+				 card->handle, card->delay );
+		fprintf( stderr, "rulbus_rb8514_delay_set_trigger( %d, "
+				 "RULBUS_RB8514_DELAY_RAISING_EDGE )\n", card->handle );
+		card->old_delay = card->old_delay = 0;
+	}
 #endif
 }
 
@@ -462,22 +491,6 @@ void rb_pulser_w_run( bool state )
 	{
 		/* If phase switching is used set the delay for the stopped cards */
 
-#if ! defined RB_PULSER_W_TEST
-		if ( rb_pulser_w.needs_phases )
-			for ( card = rb_pulser_w.delay_card + PHASE_DELAY_0; card != NULL;
-				  card = card->next )
-				if ( rulbus_rb8514_delay_set_raw_delay( card->handle,
-														card->delay, 1 )
-				                                                 != RULBUS_OK )
-					rb_pulser_w_failure( SET, "Failure to stop pulser" );
-#else
-		if ( rb_pulser_w.needs_phases )
-			for ( card = rb_pulser_w.delay_card + PHASE_DELAY_0; card != NULL;
-				  card = card->next )
-				fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %d, %lu, "
-						 "1 )\n", card->self, card->delay );
-#endif
-
 		if ( rb_pulser_w.trig_in_mode == EXTERNAL )
 			rb_pulser_w_start_external_trigger( );
 		else
@@ -509,8 +522,7 @@ void rb_pulser_w_run( bool state )
 		do {
 			for ( is_busy = 0, i = 0; i < NUM_DELAY_CARDS && ! is_busy; i++ )
 			{
-				if ( i == ERT_DELAY     || i == PHASE_DELAY_0 ||
-					 i == PHASE_DELAY_1 || i == PHASE_DELAY_2 )
+				if ( i == ERT_DELAY )
 					continue;
 
 				is_busy = rulbus_rb8514_delay_busy(
@@ -521,15 +533,6 @@ void rb_pulser_w_run( bool state )
 			}
 		} while ( is_busy );
 
-		/* If phase switching is used stop the phase cards */
-
-		if ( rb_pulser_w.needs_phases )
-			for ( card = rb_pulser_w.delay_card + PHASE_DELAY_0; card != NULL;
-				  card = card->next )
-				if ( rulbus_rb8514_delay_set_raw_delay( card->handle, 0, 1 )
-				                                                 != RULBUS_OK )
-					rb_pulser_w_failure( SET, "Failure to stop pulser" );
-
 		rb_pulser_w.is_running = UNSET;
 
 #else   /* in test mode */
@@ -538,12 +541,6 @@ void rb_pulser_w_run( bool state )
 				 "RULBUS_RB8514_DELAY_PULSE_NONE )\n", ERT_DELAY );
 		fprintf( stderr, "rulbus_rb8515_clock_set_frequency( %d, "
 				 "RULBUS_RB8515_CLOCK_FREQ_OFF )\n", ERT_CLOCK );
-
-		if ( rb_pulser_w.needs_phases )
-			for ( card = rb_pulser_w.delay_card + PHASE_DELAY_0; card != NULL;
-				  card = card->next )
-				fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %d, 0, "
-						 "1 )\n", card->self );
 #endif
 	}
 }
@@ -695,9 +692,9 @@ void rb_pulser_w_set_phase( int handle,
 									                             != RULBUS_OK )
 		rb_pulser_w_failure( SET, "Failure to set card trigger out mode" );
 #else   /* in test mode */
-	fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %d, %d, %d )\n"
-			 handle,
-			 phase_settings[ phase ][ 0 ], phase_settings[ phase ][ 1 ] );
+	fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %d, %d, %d )\n",
+			 handle, phase_settings[ phase ][ 0 ],
+			 phase_settings[ phase ][ 1 ] );
 #endif
 }
 

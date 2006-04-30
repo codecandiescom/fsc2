@@ -145,7 +145,7 @@ pulser_grace_period, 1, PREP;
 /* Functions exported by the W-band configuration of the Rulbus pulser only */
 
 pulser_minimum_defense_distance,  1, PREP;
-pulser_disable_defense_pulse, 0, PREP;
+pulser_defense_pulse_mode, 1, PREP;
 
 /* Functions exported by the lock-in amplifier drivers
    (Stanford Research 510, 530, 810, 830, and Bruker ER023M signal channel) */

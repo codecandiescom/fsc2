@@ -104,6 +104,16 @@ static void rb_pulser_w_basic_pulse_check( void )
 			THROW( EXCEPTION );
 		}
 
+		/* The length of the detection pulse can't be changed and is always
+		   assumed to be one Tick */
+
+		if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DET )
+		{
+			p->is_len = SET;
+			p->len = 1;
+			p->function->last_pulse_len = rb_pulser_w.timebase;
+		}
+
 		/* Check start position and pulse length */
 
 		if ( ! p->is_pos || ! p->is_len || p->len == 0 )
@@ -150,7 +160,9 @@ static void rb_pulser_w_basic_functions_init( void )
 
 		if ( f->num_pulses == 0 )
 		{
-			if(  f->is_declared )
+			if(  f->is_declared &&
+				 ! ( f == rb_pulser_w.function + PULSER_CHANNEL_DEFENSE &&
+					 rb_pulser_w.defense_pulse_mode == AUTOMATIC ) )
 				print( WARN, "No pulses have been assigned to function "
 					   "'%s'.\n", f->name );
 			f->is_used = UNSET;
@@ -159,8 +171,10 @@ static void rb_pulser_w_basic_functions_init( void )
 }
 
 
-/*------------------------------------------------------------------*
- *------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function for creating a pulse for the defense function (unless the
+ * user told us not to create one)
+ *--------------------------------------------------------------------*/
 
 static void rb_pulser_w_defense_pulse_create( void )
 {
@@ -168,14 +182,12 @@ static void rb_pulser_w_defense_pulse_create( void )
 	Function_T *def = rb_pulser_w.function + PULSER_CHANNEL_DEFENSE;
 	Pulse_T *cp = rb_pulser_w.pulses;
 	Pulse_T *lp = NULL;
-	long pnum = -1;
 
 
-
-	/* No defense pulse is needed if the aren't any microwave pulses or the
+	/* No defense pulse is needed if there aren't any microwave pulses or the
 	   user explicitely told us not to create one */
 
-	if ( ! mw->is_used || rb_pulser_w.no_defense_pulse )
+	if ( ! mw->is_used || rb_pulser_w.defense_pulse_mode == MANUAL )
 		return;
 
 	def->is_used = SET;
@@ -187,8 +199,6 @@ static void rb_pulser_w_defense_pulse_create( void )
 
 	while ( cp != NULL )
 	{
-		if ( cp->function == mw && cp->num > pnum )
-			pnum = cp->num;
 		lp = cp;
 		cp = cp->next;
 	}
@@ -198,15 +208,20 @@ static void rb_pulser_w_defense_pulse_create( void )
 	lp->next = cp;
 	cp->prev = lp;
 	cp->next = NULL;
-	cp->num = - 1;
+	cp->num = -1;
 	cp->function = def;
 	cp->pc = NULL;
 
 	cp->has_been_active = cp->was_active = UNSET;
 		
-	def->pulses[ 0 ] = cp;
+	def->pulses == PULSE_PP T_malloc( sizeof *def->pulses );
+	*def->pulses = cp;
 
-	lp = cp;
+	cp->is_pos = cp->initial_is_pos = SET;
+
+	cp->pos = cp->initial_pos = - def->delay;
+	cp->is_len = cp->is_dpos = cp->is_dlen = UNSET;
+	cp->initial_is_len = cp->initial_is_dpos = cp->initial_is_dlen = UNSET;
 }
 
 

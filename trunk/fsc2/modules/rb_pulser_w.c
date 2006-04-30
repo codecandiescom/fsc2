@@ -164,7 +164,7 @@ int rb_pulser_w_init_hook( void )
 	rb_pulser_w.is_psd = UNSET;
 	rb_pulser_w.is_grace_period = UNSET;
 	rb_pulser_w.is_pulse_2_defense = UNSET;
-	rb_pulser_w.no_defense_pulse = UNSET;
+	rb_pulser_w.defense_pulse_mode = AUTOMATIC;
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
@@ -295,7 +295,7 @@ int rb_pulser_w_test_hook( void )
 	}
 
 	/* If a repetition time has been set set up the corresponding value in
-	   th structure for the card creating the repetition time */
+	   the structure for the card creating the repetition time */
 
 	if ( rb_pulser_w.trig_in_mode == INTERNAL ) {
 		rb_pulser_w.clock_card[ ERT_CLOCK ].freq = rb_pulser_w.rep_time_index;
@@ -356,13 +356,33 @@ int rb_pulser_w_exp_hook( void )
 	if ( ! rb_pulser_w.is_needed )
 		return 1;
 
-	/* If the user asked to have no defense pulse ask if she really meant it */
+	/* If the user asked to have no automatically created defense pulse ask
+	   if (s)he really means it */
 
-	if ( rb_pulser_w.no_defense_pulse )
+	if ( rb_pulser_w.defense_pulse_mode == MANUAL )
 	{
-		const char *warn = "You wanr the defense pulse to be switched off.\n"
-			               "This can destroy the microwave amplifier.\n"
-			               "*****^ Is this really what you want? *****";
+		const char *warn = "You want to set the defense pulse manually.\n"
+			               "This can destroy the microwave amplifier\n"
+			               "if you are not very careful.\n"
+			               "***** Is this really what you want? *****";
+		if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
+			THROW( EXCEPTION );
+	}
+
+	/* If the user wants an automatic defense pulse but also uses function
+	   delays we can't be 100% sure that the defense pulse covers the
+	   required region. So we better warn the user */
+
+	if ( rb_pulser_w.defense_pulse_mode == AUTOMATIC &&
+		 ( rb_pulser_w.function[ PULSER_CHANNEL_MW ].is_delay ||
+		   rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].is_delay ) )
+	{
+		const char *warn = "You want an automatically set defense pulse\n"
+			               "but also use function delays. The program now\n"
+			               "can't guarantee the correct setting of the\n"
+			               "defense pulse. This can destroy the microwave\n"
+			               "amplifier if you are not very careful.\n"
+			               "***** Is this really what you want? *****";
 		if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
 			THROW( EXCEPTION );
 	}
@@ -372,7 +392,8 @@ int rb_pulser_w_exp_hook( void )
 	   last microwave pulse and the end of the defense pulse also ask
 	   if she's serious about that */
 
-	if ( rb_pulser_w.is_pulse_2_defense )
+	if ( rb_pulser_w.is_pulse_2_defense &&
+		 rb_pulser_w.defense_pulse_mode == AUTOMATIC )
 	{
 		char warn[ 500 ];
 		sprintf( warn, "The minimum distance between the end of the last\n"
@@ -579,11 +600,61 @@ Var_T *pulser_minimum_defense_distance( Var_T * v )
  * Function for setting the pulser not to create a defense pulse
  *---------------------------------------------------------------*/
 
-Var_T *pulser_disable_defense_pulse( Var_T * v  UNUSED_ARG )
+Var_T *pulser_defense_pulse_mode( Var_T * v )
 {
-	rb_pulser_w.no_defense_pulse = SET;
+	long mode;
 
-	return vars_push( INT_VAR, 1L );
+
+	if ( ! ( v->type & ( INT_VAR | STR_VAR ) ) )
+	{
+		print( FATAL, "Invalid type of argument, must be either \"AUTOMATIC\" "
+			   "or \"MANUAL\".\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( v->type == INT_VAR )
+	{
+		switch ( v->val.lval )
+		{
+			case AUTOMATIC :
+				mode = AUTOMATIC;
+				break;
+
+			case MANUAL :
+				mode = MANUAL;
+				break;
+
+			default :
+				print( FATAL, "Invalid argument value, must be 0 or 1 (but "
+					   "better use the strings \"AUTOMATIC\" or "
+					   "\"MANUAL\".\n" );
+				THROW( EXCEPTION );
+		}
+	}
+	else
+	{
+		if ( ! strcasecmp( v->val.sptr, "AUTOMATIC" ) )
+			mode = AUTOMATIC;
+		else if ( ! strcasecmp( v->val.sptr, "MANUAL" ) )
+			mode = MANUAL;
+		else
+		{
+			print( FATAL, "Invalid argument value, must be \"AUTOMATIC\" or "
+				   "\"MANUAL\".\n" );
+			THROW( EXCEPTION );
+		}
+	}
+
+	if ( mode == AUTOMATIC && rb_pulser_w.defense_pulse_mode == MANUAL )
+	{
+		print( FATAL, "Can't switch back from manual to automatic creation "
+			   "of defense pulse.\n" );
+		THROW( EXCEPTION );
+	}
+
+	rb_pulser_w.defense_pulse_mode = mode;
+
+	return vars_push( INT_VAR, rb_pulser_w.defense_pulse_mode );
 }
 
 
@@ -976,7 +1047,7 @@ static void rb_pulser_w_card_setup( void )
 	rb_pulser_w.delay_card[ PHASE_DELAY_2 ].self = PHASE_DELAY_2;
 	rb_pulser_w.delay_card[ PHASE_DELAY_2 ].prev =
 									    rb_pulser_w.delay_card + PHASE_DELAY_1;
-	rb_pulser_w.delay_card[ PHASE_DELAY_1 ].next = NULL;
+	rb_pulser_w.delay_card[ PHASE_DELAY_2 ].next = NULL;
 
 	rb_pulser_w.delay_card[ DEFENSE_DELAY ].self = DEFENSE_DELAY;
 	rb_pulser_w.delay_card[ DEFENSE_DELAY ].prev = NULL;

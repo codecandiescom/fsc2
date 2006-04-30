@@ -28,12 +28,20 @@
 
 install:
 ifdef WITH_RULBUS
-	rb_pulser_cards=`grep '^[ \t]*#define[ \t]\{1,\}RB_PULSER_CONFIG_FILE' rb_pulser.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RB_PULSER_CONFIG_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                      \
-	if [      -n "$$rb_pulser_cards"                                 \
-		 -a   -e $$rb_pulser_cards                                   \
-		 -a ! -e $(libdir)/$$rb_pulser_cards ]; then                 \
-		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$rb_pulser_cards  \
-												  $(libdir);         \
+	rb_pulser_j_cards=`grep '^[ \t]*#define[ \t]\{1,\}RB_PULSER_J_CONFIG_FILE' rb_pulser_j.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RB_PULSER_J_CONFIG_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                \
+	if [      -n "$$rb_pulser_j_cards"                                 \
+		 -a   -e $$rb_pulser_j_cards                                   \
+		 -a ! -e $(libdir)/$$rb_pulser_j_cards ]; then                 \
+		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$rb_pulser_j_cards  \
+												  $(libdir);           \
+	fi
+
+	rb_pulser_w_cards=`grep '^[ \t]*#define[ \t]\{1,\}RB_PULSER_W_CONFIG_FILE' rb_pulser_w.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RB_PULSER_W_CONFIG_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                \
+	if [      -n "$$rb_pulser_w_cards"                                 \
+		 -a   -e $$rb_pulser_w_cards                                   \
+		 -a ! -e $(libdir)/$$rb_pulser_w_cards ]; then                 \
+		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$rb_pulser_w_cards  \
+												  $(libdir);           \
 	fi
 endif
 
@@ -104,9 +112,14 @@ endif
 
 uninstall:
 ifdef WITH_RULBUS
-	rb_pulser_cards=`grep '^[ \t]*#define[ \t]\{1,\}RB_PULSER_CONFIG_FILE' rb_pulser.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RB_PULSER_CONFIG_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                        \
-	if [ -n "$$rb_pulser_cards" ]; then                \
-		$(RM) $(RMFLAGS) $(libdir)/$$rb_pulser_cards;  \
+	rb_pulser_j_cards=`grep '^[ \t]*#define[ \t]\{1,\}RB_PULSER_J_CONFIG_FILE' rb_pulser_j.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RB_PULSER_J_CONFIG_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                        \
+	if [ -n "$$rb_pulser_j_cards" ]; then                \
+		$(RM) $(RMFLAGS) $(libdir)/$$rb_pulser_j_cards;  \
+	fi
+
+	rb_pulser_w_cards=`grep '^[ \t]*#define[ \t]\{1,\}RB_PULSER_W_CONFIG_FILE' rb_pulser_w.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}RB_PULSER_W_CONFIG_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                        \
+	if [ -n "$$rb_pulser_w_cards" ]; then                \
+		$(RM) $(RMFLAGS) $(libdir)/$$rb_pulser_w_cards;  \
 	fi
 endif
 

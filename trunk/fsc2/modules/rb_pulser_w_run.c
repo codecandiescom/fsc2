@@ -41,6 +41,8 @@ static void rb_pulser_w_detection_channel_setup( void );
 
 static void rb_pulser_w_defense_channel_setup( void );
 
+static void rb_pulser_w_auto_defense_channel_setup( void );
+
 static void rb_pulser_w_seq_length_check( void );
 
 static void rb_pulser_w_commit( bool test_only );
@@ -116,7 +118,9 @@ static void rb_pulser_w_function_init( void )
 	{
 		f = rb_pulser_w.function + i;
 
-		if ( ! f->is_used || i == PULSER_CHANNEL_DEFENSE )
+		if ( ! f->is_used ||
+			 ( i == PULSER_CHANNEL_DEFENSE &&
+			   rb_pulser_w.defense_pulse_mode == AUTOMATIC ) )
 			continue;
 
 		for ( f->num_active_pulses = 0, j = 0; j < f->num_pulses; j++ )
@@ -142,7 +146,10 @@ static void rb_pulser_w_delay_card_setup( void )
 	rb_pulser_w_rf_channel_setup( );
 	rb_pulser_w_laser_channel_setup( );
 	rb_pulser_w_detection_channel_setup( );
-	rb_pulser_w_defense_channel_setup( );
+	if ( rb_pulser_w.defense_pulse_mode == AUTOMATIC )
+		rb_pulser_w_auto_defense_channel_setup( );
+	else
+		rb_pulser_w_defense_channel_setup( );
 }
 
 
@@ -221,8 +228,8 @@ static void rb_pulser_w_mw_channel_setup( void )
 		cur_card->is_active = SET;
 		cur_card = cur_card->next;
 
-		cur_card->next->delay = pulses[ i ]->len;
-		cur_card->next->is_active = SET;
+		cur_card->delay = pulses[ i ]->len;
+		cur_card->is_active = SET;
 		cur_card = cur_card->next;
 
 		start += ( dT + pulses[ i ]->len ) * rb_pulser_w.timebase;
@@ -338,7 +345,7 @@ static void rb_pulser_w_rf_channel_setup( void )
 {
 	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
 	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + RF_DELAY;
-	Pulse_T *p = *f->pulses;
+	Pulse_T *p;
 	Ticks start, dT;
 	double delta, shift;
 
@@ -348,6 +355,8 @@ static void rb_pulser_w_rf_channel_setup( void )
 
 	card->was_active = card->is_active;
 	card->is_active = UNSET;
+
+	p = *f->pulses;
 
 	if ( ! IS_ACTIVE( p ) )
 		return;
@@ -387,7 +396,7 @@ static void rb_pulser_w_laser_channel_setup( void )
 {
 	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_LASER;
 	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + LASER_DELAY_0;
-	Pulse_T *p = *f->pulses;
+	Pulse_T *p;
 	Ticks start, dT;
 	double delta, shift;
 
@@ -400,6 +409,8 @@ static void rb_pulser_w_laser_channel_setup( void )
 
 	card->next->was_active = card->is_active;
 	card->next->is_active = UNSET;
+
+	p = *f->pulses;
 
 	if ( ! IS_ACTIVE( p ) )
 		return;
@@ -445,7 +456,7 @@ static void rb_pulser_w_detection_channel_setup( void )
 {
 	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DET;
 	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DET_DELAY;
-	Pulse_T *p = f->pulses[ 0 ];
+	Pulse_T *p;
 	Ticks start, dT;
 	double delta, shift;
 
@@ -455,6 +466,8 @@ static void rb_pulser_w_detection_channel_setup( void )
 
 	card->was_active = card->is_active;
 	card->is_active = UNSET;
+
+	p = *f->pulses;
 
 	if ( ! IS_ACTIVE( p ) )
 		return;
@@ -478,22 +491,52 @@ static void rb_pulser_w_detection_channel_setup( void )
 
 	card->delay = dT;
 	card->is_active = SET;
+
+	f->last_pulse_len = p->len * rb_pulser_w.timebase;
 }
 
 
-/*-------------------------------------------------------------------*
- * Function for setting up the card creating the defense pulse which
- * gets created automatocilly (unless there are no microwavve pulses
- * or the user explicitely forbid it). The defense pulse must start
- * at least as early as the first microwave pulse and must last some
- * time longer than the end of the last microwave pulse. To be able
- * to work with the correct data this function must only be called
- * after the microwave pulses have been set up.
- *-------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ *------------------------------------------------------------------*/
 
 static void rb_pulser_w_defense_channel_setup( void )
 {
+	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DEFENSE;
+	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DEFENSE_DELAY;
+	Pulse_T *p;
+
+
+	if ( ! f->is_used )
+		return;
+
+	card->was_active = card->is_active;
+	card->is_active = UNSET;
+
+	p = *f->pulses;
+
+	if ( ! IS_ACTIVE( p ) )
+		return;
+
+	card->delay = p->len;
+	card->is_active = SET;
+
+	f->last_pulse_len = p->len * rb_pulser_w.timebase;
+}
+
+
+/*------------------------------------------------------------------*
+ * Function for setting up the card creating the defense pulse when
+ * it get created automatically. The defense pulse must start at
+ * least as early as the first microwave pulse and must last some
+ * time longer than the end of the last microwave pulse. To be able
+ * to work with the correct data this function must only be called
+ * after the microwave pulses have been set up.
+ *------------------------------------------------------------------*/
+
+static void rb_pulser_w_auto_defense_channel_setup( void )
+{
 	Function_T *mw = rb_pulser_w.function + PULSER_CHANNEL_MW;
+	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DEFENSE;
 	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DEFENSE_DELAY;
 	Rulbus_Delay_Card_T *mw_card = rb_pulser_w.delay_card + MW_DELAY_0;
 	double mw_start, mw_end, start, end;
@@ -501,21 +544,19 @@ static void rb_pulser_w_defense_channel_setup( void )
 	int i;
 
 
-	/* No defense pulse needs to be set if either there are no microwave
-	   pulses or the user explicitely asked us not to set a defense pulse */
-
-	if ( ! mw->is_used || mw->num_active_pulses == 0 ||
-		 rb_pulser_w.no_defense_pulse )
-		return;
-
 	card->was_active = card->is_active;
 	card->is_active = UNSET;
+
+	/* No defense pulse needs to be set if either there are no microwave
+	   pulses */
+
+	if ( ! mw->is_used || mw->num_active_pulses == 0 )
+		return;
 
 	/* Determine the position of the first microwave pulse and check if the
 	   defense pulse can at least start at the same time or earlier */
 
 	mw_start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
-		       + mw->delay
 		       + mw_card->intr_delay
 		       + mw_card->delay * rb_pulser_w.timebase
 		       + mw_card->next->intr_delay;
@@ -559,6 +600,8 @@ static void rb_pulser_w_defense_channel_setup( void )
 
 	card->delay = dT;
 	card->is_active = SET;
+
+	f->last_pulse_len = dT * rb_pulser_w.timebase;
 }
 
 
@@ -673,6 +716,9 @@ static void rb_pulser_w_commit( bool test_only )
 	size_t i;
 
 
+	/* During the test run only write out information about the pulse
+	   settings (if the user asked for it) */
+
 	if ( test_only )
 	{
 		if ( rb_pulser_w.dump_file != NULL )
@@ -690,7 +736,7 @@ static void rb_pulser_w_commit( bool test_only )
 		if ( ! f->is_used )
 			continue;
 
-		for ( card = f->delay_card; card != NULL; card = card->next );
+		for ( card = f->delay_card; card != NULL; card = card->next )
 		{
 			if ( card->was_active && ! card->is_active )
 			{
@@ -726,7 +772,7 @@ static void rb_pulser_w_set_phases( void )
 	int i;
 
 
-	if ( rb_pulser_w.needs_phases )
+	if ( ! rb_pulser_w.needs_phases )
 		return;
 
 	for ( i = 0; i < f->num_pulses; card = card->next, i++ )
@@ -734,14 +780,12 @@ static void rb_pulser_w_set_phases( void )
 		if ( card->was_active && ! card->is_active )
 		{
 			rb_pulser_w_set_phase( card->handle, PHASE_PLUS_X );
-			rb_pulser_w_delay_card_delay( card->handle, MAX_TICKS );
-			card->delay = card->old_delay = MAX_TICKS;
+			rb_pulser_w_delay_card_delay( card->handle, 0 );
+			card->delay = card->old_delay = 0;
 			continue;
 		}
 
-		if ( pulses[ i ]->pc == NULL )
-			rb_pulser_w_set_phase( card->handle, PHASE_PLUS_X );
-		else
+		if ( pulses[ i ]->pc != NULL )
 			rb_pulser_w_set_phase( card->handle,
 						 pulses[ i ]->pc->sequence[ rb_pulser_w.next_phase ] );
 
@@ -761,13 +805,15 @@ static void rb_pulser_w_set_phases( void )
 static void rb_pulser_w_rf_pulse( void )
 {
 	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
-	Pulse_T *p = *f->pulses;
+	Pulse_T *p;
 	Var_T *func_ptr;
 	int acc;
 
 
 	if ( ! f->is_used )
 		return;
+
+	p = *f->pulses;
 
 	if ( p->is_active )
 	{

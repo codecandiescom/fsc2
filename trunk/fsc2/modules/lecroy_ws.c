@@ -72,9 +72,9 @@ int lecroy_ws_init_hook( void )
 	size_t i;
 
 
-	/* Set global variable to indicate that GPIB bus is needed */
+	/* Set global variable to indicate that LAN is needed */
 
-	Need_GPIB = SET;
+	Need_LAN = SET;
 
 	/* Initialize some variables in the digitizers structure */
 

@@ -2638,7 +2638,7 @@ of the pulse sequence has to be committed explicitely by calling
 @item @ref{pulser_dump_pulses()}
 @item @ref{pulser_pulse_minimum_specs()}
 @item @ref{pulser_minimum_defense_distance()}
-@item @ref{pulser_disable_defense_pulse()}
+@item @ref{pulser_defense_pulse_mode()}
 @end table
 
 @noindent
@@ -3173,13 +3173,14 @@ of an @code{EDL} script.
 @item pulser_minimum_defense_distance()
 This function exists only for the W-band configuration of the @strong{Rulbus
 pulser}, @code{rb_pulser_w}. Unless explicitely forbidden by a call of
-@ref{pulser_disable_defense_pulse()} for this module a defense pulse is
-created automatically, lasting from the start of the pulse pattern to some
-time after end of the last microwave pulse, in order to protect amplifiers
-and receivers from excessive levels of microwave power. Using this function
-the minimum distance between the end of the last microwave pulse and the end
-of the defense pulse can be set (this time can end up being be slightly
-longer, up to the length of the timebase of the pulser).
+@ref{pulser_defense_pulse_mode()} with the appropriate argument, for this
+module a defense pulse is created automatically, lasting from the start of
+the pulse pattern to some time after end of the last microwave pulse, in
+order to protect amplifiers and receivers from excessive levels of microwave
+power. Using this function the minimum distance between the end of the last
+microwave pulse and the end of the defense pulse can be set (this time can
+end up being be slightly longer, up to the length of the timebase of the
+pulser).
 
 If this function isn't called a default minimum time as defined in the
 configuration file for the device will be used.
@@ -3188,18 +3189,36 @@ This function can only be called during the @code{PEPARATIONS} section
 of an @code{EDL} script.
 
 
-@anchor{pulser_disable_defense_pulse()}
-@findex pulser_disable_defense_pulse()
-@item pulser_disable_defense_pulse()
+@anchor{pulser_defense_pulse_mode()}
+@findex pulser_defense_pulse_mode()
+@item pulser_defense_pulse_mode()
 This function exists only for the W-band configuration of the @strong{Rulbus
-pulser}, @code{rb_pulser_w}. Normally a defense pulse gets created
-automatically, lasting from the start of the pulse pattern to some time after
-end of the last microwave pulse, in order to protect amplifiers and receivers
-from excessive levels of microwave power. But in some situations such a
-defense pulse must not be created, in which case this function is to be
-called during the @code{PREPARATIONS} section of the @code{EDL} script.
-If it has been called the user will always explicitely asked if really no
-defense pulse is to be created.
+pulser}, @code{rb_pulser_w}. For this module a defense pulse, starting at the
+very start of the pulse pattern and lasting to some time after end of the
+last microwave pulse, is created in order to protect amplifiers and receivers
+from excessive levels of microwave power. But in some situations such an
+aautomatic creation of a defense pulse is not desirable, in which case this
+function can be called during the @code{PREPARATIONS} section of the
+@code{EDL} script before a defense pulse is defined. It can be called with
+a string argument of either @code{"AUTOMATIC"} or @code{"MANUAL"} (or an
+integer argument of @code{0} or @code{1}). Calling it with the argument
+@code{"AUTOMATIC"} isn't really useful since this is the default (and
+switching back to automatic creation isn't possible once the function has
+been called with the @code{"MANUAL"} argument). To be able to create the
+defense pulse yourself and later control its length you need to call the
+function with an argument of @code{"MANUAL"}. Please note that you only
+can set the length of the defense pulse, it's position is fixed to the
+very start of the pulse pattern. Calling it with this argument and not
+defining a defense pulse at all allows to avoid the creation of a defense
+pulse.
+
+Once in manual mode the module does not evaluate the value set by a call
+of @ref{pulser_minimum_defense_distance()} anymore - the user is now
+completely responsible for setting the correct length of the defense pulse.
+
+If the function has been called with the argument @code{"MANUAL"} the user
+will always explicitely asked if the defense pulse is really to be created
+manually.
 
 
 @end table
