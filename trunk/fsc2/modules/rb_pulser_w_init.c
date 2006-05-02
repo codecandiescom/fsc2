@@ -199,10 +199,25 @@ static void rb_pulser_w_defense_pulse_create( void )
 
 
 	/* No defense pulse is needed if there aren't any microwave pulses or the
-	   user explicitely told us not to create one */
+	   user explicitely told us not to create one. */
 
 	if ( ! mw->is_used || rb_pulser_w.defense_pulse_mode == MANUAL )
+	{
+		if ( rb_pulser_w.defense_pulse_mode == MANUAL &&
+			 def->num_pulses != 0 && ! def->pulses[ 0 ]->is_pos )
+		{
+			def->pulses[ 0 ]->is_pos = def->pulses[ 0 ]->initial_is_pos = SET;
+			def->pulses[ 0 ]->pos = def->pulses[ 0 ]->initial_pos =
+				                                                  - def->delay;
+
+			if ( def->pulses[ 0 ]->is_len && def->pulses[ 0 ]->len != 0 )
+			{
+				def->pulses[ 0 ]->is_active = SET;
+				def->num_active_pulses = 1;
+			}
+		}
 		return;
+	}
 
 	def->is_used = SET;
 

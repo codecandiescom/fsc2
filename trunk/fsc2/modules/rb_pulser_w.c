@@ -622,7 +622,8 @@ Var_T *pulser_defense_pulse_mode( Var_T * v )
 	}
 	else
 	{
-		if ( ! strcasecmp( v->val.sptr, "AUTOMATIC" ) )
+		if ( ! strcasecmp( v->val.sptr, "AUTOMATIC" ) ||
+			 ! strcasecmp( v->val.sptr, "AUTO" ) )
 			mode = AUTOMATIC;
 		else if ( ! strcasecmp( v->val.sptr, "MANUAL" ) )
 			mode = MANUAL;

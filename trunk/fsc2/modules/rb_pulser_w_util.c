@@ -146,6 +146,10 @@ const char *rb_pulser_w_ptime( double p_time )
 {
 	static char buffer[ 128 ];
 
+
+	if ( p_time == - 0.0 )
+		p_time = 0.0;
+
 	if ( fabs( p_time ) >= 1.0 )
 		sprintf( buffer, "%g s", p_time );
 	else if ( fabs( p_time ) >= 1.0e-3 )
@@ -411,7 +415,7 @@ double rb_pulser_mw_min_specs( Pulse_T * p )
 
 double rb_pulser_rf_min_specs( Pulse_T * p )
 {
-	fsc2_assert( p->fucntion == rb_pulser_w.function + PULSER_CHANNEL_RF );
+	fsc2_assert( p->function == rb_pulser_w.function + PULSER_CHANNEL_RF );
 
 	return Ticks_ceil( (   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
 						 + SYNTHESIZER_INTRINSIC_DELAY
@@ -427,7 +431,7 @@ double rb_pulser_rf_min_specs( Pulse_T * p )
 
 double rb_pulser_laser_min_specs( Pulse_T * p )
 {
-	fsc2_assert( p->fucntion == rb_pulser_w.function + PULSER_CHANNEL_LASER );
+	fsc2_assert( p->function == rb_pulser_w.function + PULSER_CHANNEL_LASER );
 
 	return
 	   Ticks_ceil( (   rb_pulser_w.delay_card[ ERT_DELAY     ].intr_delay
@@ -445,7 +449,7 @@ double rb_pulser_laser_min_specs( Pulse_T * p )
 
 double rb_pulser_det_min_specs( Pulse_T * p )
 {
-	fsc2_assert( p->fucntion == rb_pulser_w.function + PULSER_CHANNEL_DET );
+	fsc2_assert( p->function == rb_pulser_w.function + PULSER_CHANNEL_DET );
 
 	return Ticks_ceil( (   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
 						 + rb_pulser_w.delay_card[ DET_DELAY ].intr_delay

@@ -590,12 +590,13 @@ three function, @code{MICROWAVE} (restricted to creating three pulses),
 W-band configuration also allows the functions @code{PULSE_SHAPE} (one
 for each microwave pulse), @code{DEFENSE} (restricted to creating a
 single pulse starting at the very start of the pulse pattern, so only its
-length can be changed) and @code{LASER} (restricted to creating a single
-pulse). For the module @code{rb_pulser_w} the lenght of the detection
-pulse can only be varied between @w{0 s} and the timebase of the pulser.
-The functions are fixed to the cards of the pulsers, so assigning a function
-to a "channel" isn't possible - there are no channels. All that can
-be set for a certain function is the delay to be used with this function.
+length can be changed - normally the defense pulse is created automatically)
+and @code{LASER} (restricted to creating a single pulse). For the module
+@code{rb_pulser_w} the lenght of the detection pulse can only be varied
+between @w{0 s} and the timebase of the pulser. The functions are fixed
+to the cards of the pulsers, so assigning a function to a "channel" isn't
+possible - there are no channels. All that can be set for a certain
+function is the delay to be used with this function.
 
 
 

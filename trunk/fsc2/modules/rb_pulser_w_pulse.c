@@ -102,7 +102,8 @@ bool rb_pulser_w_set_pulse_function( long pnum,
 	{
 		print( FATAL, "A DEFENSE pulse can only be created if the function "
 			   "'pulser_defense_pulse_mode()' has been called previously "
-			   "to switch off automatic defense pulse creation.\n" );
+			   "with the argument \"MANUAL\" to switch off automatic creation "
+			   "of the defense pulse.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -181,7 +182,7 @@ bool rb_pulser_w_set_pulse_position( long   pnum,
 	}
 
 	if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DEFENSE &&
-		 fabs( p->pos + p->function->delay ) >
+		 fabs( p_time + p->function->delay ) >
 		                                     PRECISION * rb_pulser_w.timebase )
 	{
 		print( FATAL, "Position of defense pulse #%ld must always be %s.\n",
