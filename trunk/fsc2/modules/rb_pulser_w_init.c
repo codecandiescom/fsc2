@@ -82,8 +82,8 @@ static void rb_pulser_w_init_print( FILE *fp )
 /*------------------------------------------------------------*
  * Function runs through all pulses and checks that at least:
  * 1. the pulse is associated with a function
- * 2. the start position is set
- * 3. the length is set
+ * 2. its start position is set
+ * 3. its length is set
  *------------------------------------------------------------*/
 
 static void rb_pulser_w_basic_pulse_check( void )

@@ -52,10 +52,11 @@ static void rb_pulser_w_set_phases( void );
 static void rb_pulser_w_rf_pulse( void );
 
 
-/*---------------------------------------------------------------------*
- * Function is called in the experiment after pulses have been changed
- * to update the pulser accordingly.
- *---------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function is called either in the experiment after pulses have been
+ * changed to update the pulser accordingly or as the last step in
+ * the inititialization of the pulser.
+ *--------------------------------------------------------------------*/
 
 void rb_pulser_w_do_update( void )
 {
@@ -77,7 +78,7 @@ void rb_pulser_w_do_update( void )
 
 	rb_pulser_w_update_pulses( FSC2_MODE == TEST );
 
-	/* Restart the pulser if it was running before */
+	/* Restart the pulser if it was running when we started */
 
 	if ( restart && FSC2_MODE == EXPERIMENT )
 		rb_pulser_w_run( START );
@@ -86,7 +87,7 @@ void rb_pulser_w_do_update( void )
 
 /*---------------------------------------------------------------------*
  * Recounts and resort the pulses according to their positions, checks
- * that the new settings are reasonable and then commit all changes.
+ * that the new settings are reasonable and then commits all changes.
  *---------------------------------------------------------------------*/
 
 void rb_pulser_w_update_pulses( bool test_only )
@@ -106,7 +107,8 @@ void rb_pulser_w_update_pulses( bool test_only )
 /*-----------------------------------------------------------------*
  * Before the pulses can be updated we must count how many pulses
  * there are per function after the update and sort them according
- * to their positions.
+ * to their positions (at least if there's more than one active
+ * pulse).
  *-----------------------------------------------------------------*/
 
 static void rb_pulser_w_function_init( void )
@@ -135,11 +137,12 @@ static void rb_pulser_w_function_init( void )
 }
 
 
-/*------------------------------------------------------------------------*
- * Function for setting all the other delay cards, both the cards for the
- * lengths of the pulses as well as the cards creating the delays between
- * the pulses.
- *------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for setting all the delay cards, i.e. both the cards for the
+ * lengths of the pulses and the cards creating the delays between the
+ * pulses. This also involves checking that the pulses don't overlap or
+ * can't be set for other reasons.
+ *-----------------------------------------------------------------------*/
 
 static void rb_pulser_w_delay_card_setup( void )
 {
@@ -156,7 +159,7 @@ static void rb_pulser_w_delay_card_setup( void )
 
 /*--------------------------------------------------------------------*
  * Function for setting up the cards that create the microwave pulses
- * and, if necessary, the phase pulses.
+ * and, if necessary, the phase pulse cards.
  *--------------------------------------------------------------------*/
 
 static void rb_pulser_w_mw_channel_setup( void )
@@ -491,8 +494,8 @@ static void rb_pulser_w_laser_channel_setup( void )
 
 /*---------------------------------------------------------------------*
  * Function for setting up the card creating the detection pulse (it's
- * just a single card and its end pulses or the end of the pulse it
- * emits is used as the detection pulse)
+ * just a single card and the end of the pulse it emits is used as the
+ * detection pulse).
  *---------------------------------------------------------------------*/
 
 static void rb_pulser_w_detection_channel_setup( void )
@@ -546,6 +549,10 @@ static void rb_pulser_w_detection_channel_setup( void )
 
 
 /*------------------------------------------------------------------*
+ * Function for setting up the card creating the defense pulse when
+ * the defense pulse is set manually, i.e. by the user. We only need
+ * to care about its length since it always starts as early as
+ * possible.
  *------------------------------------------------------------------*/
 
 static void rb_pulser_w_defense_channel_setup( void )
@@ -565,6 +572,12 @@ static void rb_pulser_w_defense_channel_setup( void )
 
 	if ( ! IS_ACTIVE( p ) )
 		return;
+
+	if ( p->len > MAX_TICKS )
+	{
+		print( FATAL, "Defense pulse #%ld is too long.\n", p->num );
+		THROW( EXCEPTION );
+	}
 
 	card->delay = p->len;
 	card->is_active = SET;
@@ -654,10 +667,10 @@ static void rb_pulser_w_auto_defense_channel_setup( void )
 }
 
 
-/*------------------------------------------------------------------------
- * Function is called after the test run and experiments to reset all the
+/*-------------------------------------------------------------------------*
+ * Function is called in the initialization of the pulser to reset all the
  * variables describing the state of the pulser to their initial values.
- *------------------------------------------------------------------------*/
+ *-------------------------------------------------------------------------*/
 
 void rb_pulser_w_full_reset( void )
 {
@@ -683,7 +696,8 @@ void rb_pulser_w_full_reset( void )
 		p = p->next;
 	}
 
-	/* Make sure all cards of functions are assumed to be inactive */
+	/* Make sure all cards associated with functions are assumed to be
+	   inactive */
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
@@ -694,11 +708,12 @@ void rb_pulser_w_full_reset( void )
 
 		for ( card = f->delay_card; card != NULL; card = card->next )
 		{
-			card->is_active =
-				card->was_active = UNSET;
+			card->is_active = card->was_active = UNSET;
 			card->delay = card->old_delay = 0;
 		}
 	}
+
+	/* Reset to the first phase */
 
 	rb_pulser_w.next_phase = 0;
 }
@@ -706,7 +721,7 @@ void rb_pulser_w_full_reset( void )
 
 /*------------------------------------------------------------------*
  * Functions determines the length of the pulse sequence and throws
- * an exception if that's longer than possible with the pulser.
+ * an exception if that's longer than possible.
  *------------------------------------------------------------------*/
 
 static void rb_pulser_w_seq_length_check( void )
@@ -815,8 +830,9 @@ static void rb_pulser_w_commit( bool test_only )
 }
 
 
-/*----------------------------------------------------------------*
- *----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function to set up the cards responsible for the phase settings
+ *-----------------------------------------------------------------*/
 
 static void rb_pulser_w_set_phases( void )
 {
@@ -831,6 +847,10 @@ static void rb_pulser_w_set_phases( void )
 
 	for ( i = 0; i < f->num_pulses; card = card->next, i++ )
 	{
+		/* If the card isn't needed switch set it for end pulses for the +X
+		   phase and keep it from emitting a pulse that would trigger
+		   Leendert's "magic box" */
+
 		if ( card->was_active && ! card->is_active )
 		{
 			rb_pulser_w_set_phase( card, PHASE_PLUS_X );
@@ -839,11 +859,16 @@ static void rb_pulser_w_set_phases( void )
 			continue;
 		}
 
+		/* If the pulse it's associated with is to be phase cycled set it up
+		   to emit the correct set of end pulses */
+
 		if ( pulses[ i ]->pc != NULL )
 			rb_pulser_w_set_phase( card,
 						 pulses[ i ]->pc->sequence[ rb_pulser_w.next_phase ] );
 
-		if ( card->old_delay != card->delay )
+		/* If the pulse length changed tell the card about it */
+
+		if ( card->delay != card->old_delay )
 		{
 			rb_pulser_w_delay_card_delay( card, card->delay );
 			card->old_delay = card->delay;

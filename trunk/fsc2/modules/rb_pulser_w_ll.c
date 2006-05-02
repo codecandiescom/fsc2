@@ -37,23 +37,29 @@ static void rb_pulser_w_failure( bool         rb_flag,
 								 const char * mess );
 
 
+/* The following array determines the setting of the end pulse patterns of
+ * the delay cards responsible for the phases. They must reflect what
+ * Leendert's "magic box" expects. */
+
 #if ! defined RB_PULSER_W_TEST
-static int phase_settings[ 4 ][ 2 ] = { { RULBUS_RB8514_DELAY_OUTPUT_BOTH,
+static int phase_settings[ 4 ][ 2 ] = { 
+              /* PHASE_PLUS_X  */       { RULBUS_RB8514_DELAY_OUTPUT_BOTH,
 										  RULBUS_RB8514_DELAY_PULSE_NONE },
-										{ RULBUS_RB8514_DELAY_OUTPUT_1,
+			  /* PHASE_MINUS_X */       { RULBUS_RB8514_DELAY_OUTPUT_1,
 										  RULBUS_RB8514_DELAY_END_PULSE },
-										{ RULBUS_RB8514_DELAY_OUTPUT_2,
+			  /* PHASE_PLUS_Y  */		{ RULBUS_RB8514_DELAY_OUTPUT_2,
 										  RULBUS_RB8514_DELAY_END_PULSE },
-										{ RULBUS_RB8514_DELAY_OUTPUT_BOTH,
+			  /* PHASE_MINUS_Y */		{ RULBUS_RB8514_DELAY_OUTPUT_BOTH,
 										  RULBUS_RB8514_DELAY_END_PULSE } };
 #else
-static const char *ps_str[ 4 ][ 2 ] = { { "RULBUS_RB8514_DELAY_OUTPUT_BOTH",
+static const char *ps_str[ 4 ][ 2 ] = {
+              /* PHASE_PLUS_X  */       { "RULBUS_RB8514_DELAY_OUTPUT_BOTH",
 										  "RULBUS_RB8514_DELAY_PULSE_NONE" },
-									    { "RULBUS_RB8514_DELAY_OUTPUT_1",
+			  /* PHASE_MINUS_X */	    { "RULBUS_RB8514_DELAY_OUTPUT_1",
 										  "RULBUS_RB8514_DELAY_END_PULSE" },
-									    { "RULBUS_RB8514_DELAY_OUTPUT_2",
+			  /* PHASE_PLUS_Y  */	    { "RULBUS_RB8514_DELAY_OUTPUT_2",
 										  "RULBUS_RB8514_DELAY_END_PULSE" },
-									    { "RULBUS_RB8514_DELAY_OUTPUT_BOTH",
+			  /* PHASE_MINUS_Y */	    { "RULBUS_RB8514_DELAY_OUTPUT_BOTH",
 										  "RULBUS_RB8514_DELAY_END_PULSE" } };
 #endif
 
@@ -672,8 +678,10 @@ void rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * card,
 }
 
 
-/*---------------------------------------------------------*
- *---------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for setting up then end pulses a card responsible
+ * for the phase setting emits.
+ *------------------------------------------------------------*/
 
 void rb_pulser_w_set_phase( Rulbus_Delay_Card_T * card,
 							int                   phase )
