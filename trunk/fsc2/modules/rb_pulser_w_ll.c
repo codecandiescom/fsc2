@@ -77,12 +77,12 @@ static const char *ps_str[ 4 ][ 2 ] = {
 
 void rb_pulser_w_init( void )
 {
+#if ! defined RB_PULSER_W_TEST
 	Rulbus_Delay_Card_T *card;
 	Function_T *f;
 	int i;
 
 
-#if ! defined RB_PULSER_W_TEST
 	/* Try to get handles for all Rulbus (clock and delay) cards used by
 	   the pulser */
 
@@ -192,6 +192,9 @@ void rb_pulser_w_init( void )
 	rb_pulser_w_synthesizer_init( );
 
 #else     /* in test mode */
+	int i;
+
+
 	fprintf( stderr, "rb_pulser_w_init()\n" );
 	fprintf( stderr, "rulbus_rb8514_delay_set_output_puls( ERT_DELAY, "
 			 "RULBUS_RB8514_DELAY_OUTPUT_BOTH, "
@@ -254,10 +257,11 @@ void rb_pulser_w_init( void )
 static void rb_pulser_w_switch_to_x_phase( void )
 {
 	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + PHASE_DELAY_0;
+
+#if ! defined RB_PULSER_W_TEST
 	int is_busy;
 
 
-#if ! defined RB_PULSER_W_TEST
 	/* Set up all the cards for phase pulses to emit end pulses for a +X
 	   phase switch setting */
 
@@ -435,41 +439,60 @@ void rb_pulser_w_exit( void )
 	/* Stop all open clock cards and close them */
 
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
-		if ( rb_pulser_w.clock_card[ i ].handle >= 0 )
-		{
+	{
 #if 0
-			/* Commented out according to Huibs wishes, he wants the clocks
-			   to continue to run even after the end of the experiment. */
+		/* Commented out according to Huibs wishes, he wants the clocks
+		   to continue to run even after the end of the experiment to
+		   keep the pulser running as before. */
 
-			rulbus_rb8515_clock_set_frequency(
-											rb_pulser_w.clock_card[ i ].handle,
-											RULBUS_RB8515_CLOCK_FREQ_OFF );
+		rulbus_rb8515_clock_set_frequency( rb_pulser_w.clock_card[ i ].handle,
+										   RULBUS_RB8515_CLOCK_FREQ_OFF );
 #endif
 
-			rulbus_card_close( rb_pulser_w.clock_card[ i ].handle );
-			rb_pulser_w.clock_card[ i ].handle = -1;
-		}
+		rulbus_card_close( rb_pulser_w.clock_card[ i ].handle );
+		rb_pulser_w.clock_card[ i ].handle = -1;
+	}
 
 	/* Set the delay for all open delay cards to 0 and close them */
 
 	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
-		if ( rb_pulser_w.delay_card[ i ].handle >= 0 )
-		{
+	{
 #if 0
-			/* Commented out according to Huibs wishes, he want's the pulses
-			   to stay where they were at the end of the experiment. */
+		/* Commented out according to Huibs wishes, he want's the pulses
+		   to stay where they were at the end of the experiment to keep
+		   the pulser running as before. */
 
-			rulbus_rb8514_delay_set_output_pulse(
+		rulbus_rb8514_delay_set_output_pulse(
 											rb_pulser_w.delay_card[ i ].handle,
 											RULBUS_RB8514_DELAY_OUTPUT_BOTH,
 											RULBUS_RB8514_DELAY_PULSE_NONE );
 #endif
 
-			rulbus_card_close( rb_pulser_w.delay_card[ i ].handle );
-			rb_pulser_w.delay_card[ i ].handle = -1;
-		}
-#else
+		rulbus_card_close( rb_pulser_w.delay_card[ i ].handle );
+		rb_pulser_w.delay_card[ i ].handle = -1;
+	}
+
+#else /* in test mode */
+
 	fprintf( stderr, "rb_pulser_w_exit()\n" );
+	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
+	{
+#if 0
+		fprintf( stderr, "rulbus_rb8515_clock_set_frequency( %s, "
+				 "RULBUS_RB8515_CLOCK_FREQ_OFF )\n",
+				 rb_pulser_w.clock_card[ i ].name );
+#endif
+	}
+	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
+	{
+#if 0
+		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %s, "
+				 "RULBUS_RB8514_DELAY_OUTPUT_BOTH, "
+				 "RULBUS_RB8514_DELAY_PULSE_NONE )*\n",
+				 rb_pulser_w.delay_card[ i ].name );
+#endif
+	}
+
 #endif
 }
 
@@ -480,9 +503,11 @@ void rb_pulser_w_exit( void )
 
 void rb_pulser_w_run( bool state )
 {
+#if ! defined RB_PULSER_W_TEST
 	Rulbus_Delay_Card_T *card;
 	int is_busy;
 	int i;
+#endif
 
 
 #if defined RB_PULSER_W_TEST
