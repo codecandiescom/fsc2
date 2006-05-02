@@ -51,7 +51,9 @@ static int phase_settings[ 4 ][ 2 ] = {
 										  RULBUS_RB8514_DELAY_END_PULSE },
 			  /* PHASE_MINUS_Y */		{ RULBUS_RB8514_DELAY_OUTPUT_BOTH,
 										  RULBUS_RB8514_DELAY_END_PULSE } };
-#else
+
+#else /* for test mode */
+
 static const char *ps_str[ 4 ][ 2 ] = {
               /* PHASE_PLUS_X  */       { "RULBUS_RB8514_DELAY_OUTPUT_BOTH",
 										  "RULBUS_RB8514_DELAY_PULSE_NONE" },
@@ -499,9 +501,9 @@ void rb_pulser_w_run( bool state )
 	}
 	else                        /* stop the pulser */
 	{
-		/* Keep the ERT delay card from emitting further end pulses that
-		   would trigger the following cards, then stop the clock card
-		   feeding the ERT delay card */
+		/* Keep the ERT delay card from emitting end pulses that would trigger
+		   the following cards, then stop the clock card feeding the ERT delay
+		   card */
 
 #if ! defined RB_PULSER_W_TEST
 		if ( rulbus_rb8514_delay_set_output_pulse(
