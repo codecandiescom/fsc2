@@ -227,7 +227,7 @@ void rb_pulser_w_init( void )
 
 #ifndef FIXED_TIMEBASE
 	fprintf( stderr, "rulbus_rb8515_clock_set_frequency( TB_CLOCK, %d )\n",
-			 rb_pulser_w.clock_card[ TB_CLOCK ].freq );
+			 rb_pulser_w_ptb( TB )rb_pulser_w.clock_card[ TB_CLOCK ].freq );
 #endif
 #endif
 }

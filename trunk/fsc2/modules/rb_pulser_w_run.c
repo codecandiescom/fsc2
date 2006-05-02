@@ -220,6 +220,26 @@ static void rb_pulser_w_mw_channel_setup( void )
 		dT = Ticks_rnd( delta / rb_pulser_w.timebase );
 		shift = dT * rb_pulser_w.timebase - delta;
 
+		/* Make sure the delay settings for both cards aren't too long */
+
+		if ( dT > MAX_TICKS )
+		{
+			if ( i == 0 )
+				print( FATAL, "Microwave pulse #%ld starts too late.\n",
+					   pulses[ 0 ]->num );
+			else
+				print( FATAL, "Microwave pulse #%ld is too far away from its "
+					   "predecessor, pulse #%ld.\n", pulses[ i ]->num,
+					   pulses[ i - 1 ]->num );
+			THROW( EXCEPTION );
+		}
+
+		if ( pulses[ i ]->len > MAX_TICKS )
+		{
+			print( FATAL, "Microwave pulse #%ld is too long.\n" );
+			THROW( EXCEPTION );
+		}
+
 		if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
 			print( SEVERE, "Position of microwave pulse #%ld not possible, "
 				   "must shift it by %s.\n", pulses[ i ]->num,
@@ -269,6 +289,9 @@ static void rb_pulser_w_phase_channel_setup( void )
 		cur_card->was_active = cur_card->is_active;
 		cur_card->is_active = UNSET;
 	}
+
+	/* The cards for setting phases aren't needed if there's no active
+	   microwave pulse */
 
 	if ( ! IS_ACTIVE( *pulses ) )
 		return;
@@ -322,8 +345,9 @@ static void rb_pulser_w_phase_channel_setup( void )
 			 dT * rb_pulser_w.timebase + cur_card->intr_delay <
 			 								mw_end + rb_pulser_w.grace_period )
 		{
-			print( FATAL, "Microwave pulse #%ld not far enough from its "
-				   "predecessor to allow phase switching.\n" );
+			print( FATAL, "Microwave pulse #%ld to near to its "
+				   "predecessor #%ld to allow phase switching.\n",
+				   pulses[ i ]->num, pulses[ i - 1 ]->num );
 			THROW( EXCEPTION );
 		}
 
@@ -337,10 +361,10 @@ static void rb_pulser_w_phase_channel_setup( void )
 }
 
 
-/*--------------------------------------------------------------------*
- * Function for setting up the card that creates the delay before the
- * RF pulse starts
- *--------------------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for setting up the card that creates the delay
+ * before the RF pulse starts
+ *---------------------------------------------------------*/
 
 static void rb_pulser_w_rf_channel_setup( void )
 {
@@ -375,6 +399,12 @@ static void rb_pulser_w_rf_channel_setup( void )
 	dT = Ticks_rnd( delta / rb_pulser_w.timebase );
 	shift = dT * rb_pulser_w.timebase - delta;
 			
+	if ( dT > MAX_TICKS )
+	{
+		print( FATAL, "RF pulse #%ld starts too late.\n", p->num );
+		THROW( EXCEPTION );
+	}
+
 	if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
 		print( SEVERE, "Position of RF pulse #%ld not possible, must shift it "
 			   "by %s.\n", p->num, rb_pulser_w_ptime( shift ) );
@@ -435,6 +465,18 @@ static void rb_pulser_w_laser_channel_setup( void )
 	dT = Ticks_rnd( delta / rb_pulser_w.timebase );
 	shift = dT * rb_pulser_w.timebase - delta;
 
+	if ( dT > MAX_TICKS )
+	{
+		print( FATAL, "Laser pulse #%ld starts too late.\n", p->num );
+		THROW( EXCEPTION );
+	}
+
+	if ( p->len > MAX_TICKS )
+	{
+		print( FATAL, "Laser pulse #%ld is too long.\n", p->num );
+		THROW( EXCEPTION );
+	}
+
 	if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
 		print( SEVERE, "Position of laser pulse #%ld not possible, must shift "
 			   "it by %s.\n", rb_pulser_w_ptime( shift ) );
@@ -486,6 +528,12 @@ static void rb_pulser_w_detection_channel_setup( void )
 	dT = Ticks_rnd( delta / rb_pulser_w.timebase );
 	shift = dT * rb_pulser_w.timebase - delta;
 			
+	if ( dT > MAX_TICKS )
+	{
+		print( FATAL, "Detection pulse #%ld starts too late.\n", p->num );
+		THROW( EXCEPTION );
+	}
+
 	if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
 		print( SEVERE, "Position of detection pulse #%ld not possible, must "
 			   "shift it by %s.\n", p->num, rb_pulser_w_ptime( shift ) );
@@ -836,8 +884,9 @@ static void rb_pulser_w_rf_pulse( void )
 		vars_pop( func_call( func_ptr ) );
 
 #else   /* in test mode */
-		fprintf( stderr, "synthesizer_pulse_width( %lf )\n",
-				 f->last_pulse_len );
+		if ( FSC2_MODE == EXPERIMENT )
+			fprintf( stderr, "synthesizer_pulse_width( %lf )\n",
+					 f->last_pulse_len );
 #endif
 	}
 

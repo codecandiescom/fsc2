@@ -55,7 +55,7 @@ int rb_pulser_w_start_compare( const void * A,
 
 /*-----------------------------------------------------------------*
  * Converts a time into the internal type of a time specification,
- * i.e. a integer multiple of the time base
+ * called Ticks, i.e. an integer multiple of the pulsers timebase
  *-----------------------------------------------------------------*/
 
 Ticks rb_pulser_w_double2ticks( double p_time )
@@ -137,8 +137,10 @@ Pulse_T *rb_pulser_w_get_pulse( long pnum )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Converts a time (passed to the function as a double variable) into
+ * a well-formated string (i.e. with proper units for printing)
+ *--------------------------------------------------------------------*/
 
 const char *rb_pulser_w_ptime( double p_time )
 {
@@ -146,19 +148,21 @@ const char *rb_pulser_w_ptime( double p_time )
 
 	if ( fabs( p_time ) >= 1.0 )
 		sprintf( buffer, "%g s", p_time );
-	else if ( fabs( p_time ) >= 1.e-3 )
+	else if ( fabs( p_time ) >= 1.0e-3 )
 		sprintf( buffer, "%g ms", 1.e3 * p_time );
-	else if ( fabs( p_time ) >= 1.e-6 )
-		sprintf( buffer, "%g us", 1.e6 * p_time );
+	else if ( fabs( p_time ) >= 1.0e-6 )
+		sprintf( buffer, "%g us", 1.0e6 * p_time );
 	else
-		sprintf( buffer, "%g ns", 1.e9 * p_time );
+		sprintf( buffer, "%g ns", 1.0e9 * p_time );
 
 	return buffer;
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Converts a time passed to the function in Ticks of the pulser into
+ * a well-formated time string (i.e. with proper units for printing)
+ *--------------------------------------------------------------------*/
 
 const char *rb_pulser_w_pticks( Ticks ticks )
 {
@@ -166,10 +170,12 @@ const char *rb_pulser_w_pticks( Ticks ticks )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for starting a process that graphically shows the
+ * settings of the pulses as determined during the test run
+ *------------------------------------------------------------*/
 
-void rb_pulser_w_show_pulses( void )
+void rb_pulser_w_start_show_pulses( void )
 {
 	int pd[ 2 ];
 	pid_t pid;
@@ -231,10 +237,12 @@ void rb_pulser_w_show_pulses( void )
 }
 
 
-/*----------------------------------------------------*
- *----------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for opening the file for writing information about all
+ * pulse settings as required by the function pulser_sump_pulses().
+ *------------------------------------------------------------------*/
 
-void rb_pulser_w_dump_pulses( void )
+void rb_pulser_w_open_dump_file( void )
 {
 	char *name;
 	char *m;
@@ -276,26 +284,26 @@ void rb_pulser_w_dump_pulses( void )
 			switch( errno )
 			{
 				case EMFILE :
-					show_message( "Sorry, you have too many open files!\n"
-								  "Please close at least one and retry." );
+					show_message( "Sorry, the program had has too many open "
+								  "files,\ncan't open another one!\n" );
 					break;
 
 				case ENFILE :
 					show_message( "Sorry, system limit for open files "
-								  "exceeded!\n Please try to close some "
+								  "exceeded!\nPlease try to close some "
 								  "files and retry." );
 				break;
 
 				case ENOSPC :
 					show_message( "Sorry, no space left on device for more "
-								  "file!\n    Please delete some files and "
+								  "file!\nPlease delete some files and "
 								  "retry." );
 					break;
 
 				default :
 					show_message( "Sorry, can't open selected file for "
-								  "writing!\n       Please select a "
-								  "different file." );
+								  "writing!\nPlease select a different "
+								  "file." );
 			}
 
 			name = CHAR_P T_free( name );
@@ -341,6 +349,9 @@ void rb_pulser_w_write_pulses( FILE * fp )
 
 
 /*-------------------------------------------------------------------*
+ * Function for determining the earliest possible position for the
+ * first microwave pulse or the minimum distance to the previous
+ * pulse.
  *-------------------------------------------------------------------*/
 
 double rb_pulser_mw_min_specs( Pulse_T * p )
@@ -351,7 +362,13 @@ double rb_pulser_mw_min_specs( Pulse_T * p )
 	double start;
 	double t;
 	int i;
+	double min =
+		    (   Ticks_ceil( rb_pulser_w.psd / rb_pulser_w.timebase )
+		      + Ticks_ceil( rb_pulser_w.grace_period / rb_pulser_w.timebase ) )
+			* rb_pulser_w.timebase;
 
+
+	fsc2_assert( f == rb_pulser_w.function + PULSER_CHANNEL_MW );
 
 	cur_card = card;
 	start = rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay + f->delay;
@@ -380,19 +397,22 @@ double rb_pulser_mw_min_specs( Pulse_T * p )
 	}
 	else
 	{
-		if ( t < rb_pulser_w.psd + rb_pulser_w.grace_period )
-			t = rb_pulser_w.psd + rb_pulser_w.grace_period;
+		if ( t < min )
+			t = min;
 	}
 
 	return t;
 }
 
 
-/*-------------------------------------------------------------------*
- *-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function for determining the earliest possible position of the RF pulse
+ *-------------------------------------------------------------------------*/
 
 double rb_pulser_rf_min_specs( Pulse_T * p )
 {
+	fsc2_assert( p->fucntion == rb_pulser_w.function + PULSER_CHANNEL_RF );
+
 	return Ticks_ceil( (   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
 						 + SYNTHESIZER_INTRINSIC_DELAY
 						 + p->function->delay ) / rb_pulser_w.timebase )
@@ -400,11 +420,15 @@ double rb_pulser_rf_min_specs( Pulse_T * p )
 }
 
 
-/*-------------------------------------------------------------------*
- *-------------------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for determining the earliest possible position
+ * of the laser pulse
+ *---------------------------------------------------------*/
 
 double rb_pulser_laser_min_specs( Pulse_T * p )
 {
+	fsc2_assert( p->fucntion == rb_pulser_w.function + PULSER_CHANNEL_LASER );
+
 	return
 	   Ticks_ceil( (   rb_pulser_w.delay_card[ ERT_DELAY     ].intr_delay
 					 + rb_pulser_w.delay_card[ LASER_DELAY_0 ].intr_delay
@@ -414,11 +438,15 @@ double rb_pulser_laser_min_specs( Pulse_T * p )
 }
 
 
-/*-------------------------------------------------------------------*
- *-------------------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function for determining the earliest possible position
+ * of the detection pulse
+ *---------------------------------------------------------*/
 
 double rb_pulser_det_min_specs( Pulse_T * p )
 {
+	fsc2_assert( p->fucntion == rb_pulser_w.function + PULSER_CHANNEL_DET );
+
 	return Ticks_ceil( (   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
 						 + rb_pulser_w.delay_card[ DET_DELAY ].intr_delay
 						 + p->function->delay ) / rb_pulser_w.timebase )

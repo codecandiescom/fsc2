@@ -263,9 +263,9 @@ int rb_pulser_w_test_hook( void )
 		}
 
 		if ( rb_pulser_w.do_show_pulses )
-			rb_pulser_w_show_pulses( );
+			rb_pulser_w_start_show_pulses( );
 		if ( rb_pulser_w.do_dump_pulses )
-			rb_pulser_w_dump_pulses( );
+			rb_pulser_w_open_dump_file( );
 		rb_pulser_w_init_setup( );
 		TRY_SUCCESS;
 	}

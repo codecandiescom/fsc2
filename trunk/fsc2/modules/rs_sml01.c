@@ -1446,9 +1446,9 @@ Var_T *synthesizer_pulse_width( Var_T * v )
 
 	if ( ticks == 0 || ticks > lrnd( MAX_PULSE_WIDTH / MIN_PULSE_WIDTH ) )
 	{
-		print( FATAL, "Invalid pulse width of %s, allowed range is %d ns "
+		print( FATAL, "Invalid pulse width of %s, allowed range is %ld ns "
 			   "to %.1f s\n", rs_sml01_pretty_print( width ),
-			   irnd( MIN_PULSE_WIDTH * 1.0e9 ), MAX_PULSE_WIDTH );
+			   lrnd( MIN_PULSE_WIDTH * 1.0e9 ), MAX_PULSE_WIDTH );
 		THROW( EXCEPTION );
 	}
 

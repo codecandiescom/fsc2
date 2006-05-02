@@ -407,9 +407,9 @@ const char *rb_pulser_w_ptime( double /* p_time */ );
 
 const char *rb_pulser_w_pticks( Ticks /* ticks */ );
 
-void rb_pulser_w_show_pulses( void );
+void rb_pulser_w_start_show_pulses( void );
 
-void rb_pulser_w_dump_pulses( void );
+void rb_pulser_w_open_dump_file( void );
 
 void rb_pulser_w_write_pulses( FILE * /* fp */ );
 
