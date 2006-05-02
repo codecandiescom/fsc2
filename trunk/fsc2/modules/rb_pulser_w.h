@@ -142,7 +142,6 @@ struct Rulbus_Clock_Card {
 
 struct Rulbus_Delay_Card {
 	char *name;
-	int self;
 	int handle;
 	Ticks delay;
 	Ticks old_delay;
@@ -436,14 +435,14 @@ void rb_pulser_w_exit( void );
 
 void rb_pulser_w_run( bool /* state */ );
 
-void rb_pulser_w_delay_card_state( int  /* handle */,
-								   bool /* state  */ );
+void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * /* card */,
+								   bool                  /* state  */ );
 
-void rb_pulser_w_delay_card_delay( int           /* handle */,
-								   unsigned long /* delay  */ );
+void rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * /* card */,
+								   unsigned long         /* delay  */ );
 
-void rb_pulser_w_set_phase( int handle,
-							int phase );
+void rb_pulser_w_set_phase( Rulbus_Delay_Card_T * /* card */,
+							int                   /* phase */ );
 
 
 #endif /* ! RB_PULSER_W_HEADER */

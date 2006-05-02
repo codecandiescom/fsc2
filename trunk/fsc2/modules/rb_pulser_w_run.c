@@ -614,6 +614,7 @@ static void rb_pulser_w_auto_defense_channel_setup( void )
 void rb_pulser_w_full_reset( void )
 {
 	Pulse_T *p = rb_pulser_w.pulses;
+	Function_T *f;
 	Rulbus_Delay_Card_T *card;
 	size_t i;
 
@@ -634,17 +635,21 @@ void rb_pulser_w_full_reset( void )
 		p = p->next;
 	}
 
-	/* Make sure all cards (except the ERT card) are inactive (i.e. have a
-	   delay of 0 and don't output trigger pulses) */
+	/* Make sure all cards of functions are assumed to be inactive */
 
-	for ( i = MW_DELAY_0, card = rb_pulser_w.delay_card + i;
-		  i < NUM_DELAY_CARDS; card++, i++ )
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
-		card->is_active =
-		card->was_active = UNSET;
-		card->delay = card->old_delay = 0;
+		f = rb_pulser_w.function + i;
 
-		rb_pulser_w_delay_card_state( card->handle, STOP );
+		if ( ! f->is_used )
+			continue;
+
+		for ( card = f->delay_card; card != NULL; card = card->next )
+		{
+			card->is_active =
+				card->was_active = UNSET;
+			card->delay = card->old_delay = 0;
+		}
 	}
 
 	rb_pulser_w.next_phase = 0;
@@ -741,17 +746,17 @@ static void rb_pulser_w_commit( bool test_only )
 		{
 			if ( card->was_active && ! card->is_active )
 			{
-				rb_pulser_w_delay_card_state( card->handle, STOP );
+				rb_pulser_w_delay_card_state( card, STOP );
 				card->delay = card->old_delay = 0;
 				continue;
 			}
 
 			if ( ! card->was_active && card->is_active )
-				rb_pulser_w_delay_card_state( card->handle, START );
+				rb_pulser_w_delay_card_state( card, START );
 
 			if ( card->old_delay != card->delay )
 			{
-				rb_pulser_w_delay_card_delay( card->handle, card->delay );
+				rb_pulser_w_delay_card_delay( card, card->delay );
 				card->old_delay = card->delay;
 			}
 		}
@@ -780,28 +785,28 @@ static void rb_pulser_w_set_phases( void )
 	{
 		if ( card->was_active && ! card->is_active )
 		{
-			rb_pulser_w_set_phase( card->handle, PHASE_PLUS_X );
-			rb_pulser_w_delay_card_delay( card->handle, 0 );
+			rb_pulser_w_set_phase( card, PHASE_PLUS_X );
+			rb_pulser_w_delay_card_delay( card, 0 );
 			card->delay = card->old_delay = 0;
 			continue;
 		}
 
 		if ( pulses[ i ]->pc != NULL )
-			rb_pulser_w_set_phase( card->handle,
+			rb_pulser_w_set_phase( card,
 						 pulses[ i ]->pc->sequence[ rb_pulser_w.next_phase ] );
 
 		if ( card->old_delay != card->delay )
 		{
-			rb_pulser_w_delay_card_delay( card->handle, card->delay );
+			rb_pulser_w_delay_card_delay( card, card->delay );
 			card->old_delay = card->delay;
 		}
 	}
 }
 
 
-/*----------------------------------------------------------------*
- * Function for telling the synthesizer about the RF pulse length
- *----------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function for setting the RF pulse length at the synthesizer
+ *-------------------------------------------------------------*/
 
 static void rb_pulser_w_rf_pulse( void )
 {

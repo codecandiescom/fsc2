@@ -95,7 +95,7 @@ void rb_pulser_j_init( void )
 			 													!= RULBUS_OK ||
 			 rulbus_rb8514_delay_set_raw_delay(
 				                    rb_pulser_j.delay_card[ ERT_DELAY ].handle,
-				                    1, 1 )                    != RULBUS_OK )
+				                    0, 1 )                    != RULBUS_OK )
 			rb_pulser_j_failure( SET, "Failure to initialize pulser" );
 	}
 	else  /* in internal trigger mode */
@@ -159,6 +159,7 @@ void rb_pulser_j_init( void )
 	rb_pulser_j_synthesizer_init( );
 
 #else     /* in test mode */
+
 	fprintf( stderr, "rulbus_rb8514_delay_set_output_puls( %d, "
 			 "RULBUS_RB8514_DELAY_OUTPUT_BOTH, "
 			 "RULBUS_RB8514_DELAY_PULSE_NONE )\n", ERT_DELAY );

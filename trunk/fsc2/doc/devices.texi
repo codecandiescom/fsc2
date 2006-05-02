@@ -2568,6 +2568,7 @@ Currently, there are three pulser/spectrometer combinations implemented:
 @item Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
 @item Interface Technology RS690 (360 GHz spectrometer, Berlin)
 @item Rulbus Pulser for J-band (275 GHz spectrometer), Leiden
+@item Rulbus Pulser for W-band (95 GHz spectrometer), Leiden
 @end itemize
 To load the functions for one of these pulsers use in the @code{DEVICES}
 section one of the lines
@@ -2578,6 +2579,7 @@ hfs9003;
 ep385;
 rs690;
 rb_pulser_j;
+rb_pulser_w;
 @end example
 
 Pulsers are rather special and even the @code{EDL} syntax for dealing
@@ -2754,8 +2756,13 @@ phase of the phase sequence (defined in the @code{PHASE} section)
 associated with the pulses. By calling this function the phases of the
 pulses are switched to the next phase. By repeatedly calling the
 function one can run through the complete list of phases for the pulses.
+
 This function also immediately updates the pulse sequence, as it is done
 by calling @ref{pulser_update()}.
+
+This function is only available for pulser modules that allow phase cycling,
+i.e.@: @strong{dg2020_f}, @strong{dg2020_b}, @strong{ep385}, @strong{rs690}
+and @code{rb_pulser_w}.
 
 
 @anchor{pulser_phase_reset()}
@@ -2777,6 +2784,10 @@ of the function associated with either @code{PULSE_SETUP_1} or
 
 This function also immediately updates the pulse sequence, as it is done
 by calling @ref{pulser_update()}.
+
+This function is only available for pulser modules that allow phase cycling,
+i.e.@: @strong{dg2020_f}, @strong{dg2020_b}, @strong{ep385}, @strong{rs690}
+and @code{rb_pulser_w}.
 
 
 @anchor{pulser_reset()}
@@ -2804,15 +2815,16 @@ the default behavior.
 @findex pulser_shape_to_defense_minimum_distance()
 @item pulser_shape_to_defense_minimum_distance()
 This function exists for the pulser modules @code{dg2020_b}, @code{ep385}
-and @code{rs690} only. It sets the minimum allowed distance between the
-end of a pulse shaper pulse and the start of a defense pulse to avoid
-destroying the detector by excessive microwave power. The default minimum
-value for this distance is intentionally set to an unreasonably long value
-and this function allows to reduce (but also enlarge) the value. As another
-security measure the function requires the user to explicitely confirm the
-new value before an experiment is started. When running in batch mode this
-security feature is @strong{deactivated}, @code{fsc2} will accept any value
-you set without requesting a confirmation, so be careful.
+and @code{rs690} only, i.e.@: pulser modules that automatically can create
+shape pulses. It sets the minimum allowed distance between the end of a
+pulse shaper pulse and the start of a defense pulse to avoid destroying
+the detector by excessive microwave power. The default minimum value for
+this distance is intentionally set to an unreasonably long value and this
+function allows to reduce (but also enlarge) the value. As another security
+measure the function requires the user to explicitely confirm the new value
+before an experiment is started. When running in batch mode this security
+feature is @strong{deactivated}, @code{fsc2} will accept any value you set
+without requesting a confirmation, so be careful.
 
 This function can only be called during the @code{PREPARATIONS} section
 of an @code{EDL} script.
@@ -2845,10 +2857,10 @@ of an @code{EDL} script.
 @findex pulser_automatic_shape_pulses()
 @item pulser_automatic_shape_pulses()
 This function exists for the pulser modules @code{dg2020_b}, @code{ep385}
-and @code{rs690} only. It tells @code{fsc2} to automatically create pulse
-shape pulses in the @code{PULSE_SHAPE} function. Obviously, this requires
-that a pod or channel has been assigned to the @code{PULSE_SHAPE} function.
-The first (and required) argument is the function for which shape pulses
+and @code{rs690} only. It tells @code{fsc2} to automatically create shape
+pulses in the @code{PULSE_SHAPE} function. Obviously, this requires that
+a pod or channel has been assigned to the @code{PULSE_SHAPE} function. The
+first (and required) argument is the function for which shape pulses
 are to be created, typically this will be @code{MICROWAVE} in which case
 shape pulses are created for all microwave pulses.
 
@@ -2934,13 +2946,13 @@ of an @code{EDL} script.
 @findex pulser_minimum_twt_pulse_distance
 @item pulser_minimum_twt_pulse_distance
 This function exists for the pulser modules @code{dg2020_b}, @code{ep385}
-and @code{rs690} only. It can be used to set or query the minimum time
-the module allows between automatically generated TWT pulses (if the
-distance between TWT pulses gets shorter than this minimum time they are
-automatically lengthened to cover the whole intermediate time interval).
-If you try to set a time that is shorter than the default minimum time
-distance (as set in the configuration file for the module) a warning is
-printed.
+and @code{rs690} only, i.e.@: pulser modules than can create automatic
+TWT pulses. It can be used to set or query the minimum time the module
+allows between automatically generated TWT pulses (if the distance between
+TWT pulses gets shorter than this minimum time they are automatically
+lengthened to cover the whole intermediate time interval). If you try to
+set a time that is shorter than the default minimum time distance (as set
+in the configuration file for the module) a warning is printed.
 
 This function can be used in all sections of the script and even allows
 to change the minimum time during an already running experiment repeatedly.

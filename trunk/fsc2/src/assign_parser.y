@@ -49,6 +49,7 @@ static void ass_func( int function );
 static int Channel_type;
 static int Cur_PHS = -1;
 static int Cur_PHST = -1;
+static bool is_p_phs_setup = UNSET;
 static bool Func_is_set = UNSET;
 static int Dont_exec = 0;
 
@@ -151,12 +152,14 @@ input:   /* empty */
        | input line ';'            { Channel_type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
+									 is_p_phs_setup = UNSET;
 									 Func_is_set = UNSET;
 									 fsc2_assert( Dont_exec == 0 );
                                      fsc2_assert( EDL.Var_Stack == NULL ); }
        | input SECTION_LABEL       { Channel_type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
+									 is_p_phs_setup = UNSET;
 	                                 fsc2_assert( EDL.Var_Stack == NULL );
 									 fsc2_assert( Dont_exec == 0 );
 									 Func_is_set = UNSET;
@@ -164,6 +167,7 @@ input:   /* empty */
        | input ';'                 { Channel_type = PULSER_CHANNEL_NO_TYPE;
 	                                 Cur_PHS = -1;
 	                                 Cur_PHST = -1;
+									 is_p_phs_setup = UNSET;
 									 Func_is_set = UNSET;
 									 fsc2_assert( Dont_exec == 0 );
                                      fsc2_assert( EDL.Var_Stack == NULL ); }
@@ -179,7 +183,13 @@ line:    func                      { Func_is_set = SET; }
        | tb atb
        | tm atm
        | mpl ampl
-       | phs aphs                  { p_phs_end( Cur_PHS ); }
+	   | phs aphs                  { if ( ! is_p_phs_setup )
+	                                 {
+		                                 print( FATAL, "Syntax error near "
+												"'%s'.\n", assigntext );
+	                                     THROW( EXCEPTION );
+									 }
+			                         p_phs_end( Cur_PHS ); }
        | psd apsd
        | gp agp
 	   | KAP_TOKEN                 { keep_all_pulses( ); }
@@ -577,7 +587,8 @@ mpl:      MPL_TOKEN expr           { p_set_max_seq_len( $2 ); }
 
 /* Handling of PHASE_SETUP commands */
 
-phs:      PHS_TOK                  { Cur_PHS = $1;
+phs:      PHS_TOK                  { p_phs_check( );
+	                                 Cur_PHS = $1;
                                      Cur_PHST = -1;
                                      Func_is_set = SET; }
           phsl
@@ -592,19 +603,24 @@ phsl:     /* empty */
 
 phsp:     /* empty */
 		| phsp phsv sep2           { p_phs_setup( Cur_PHS, Cur_PHST,
-												  -1, $2, UNSET ); }
+												  -1, $2, UNSET );
+		                             is_p_phs_setup = SET; }
         | phsp POD1_TOK sep1
 		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
-												  0, $4, SET ); }
+												  0, $4, SET );
+		                             is_p_phs_setup = SET; }
         | phsp POD2_TOK sep1
 		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
-												  1, $4, SET ); }
+												  1, $4, SET );
+		                             is_p_phs_setup = SET; }
 		| POD_TOKEN sep1 INT_TOKEN
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
-												  0, $3, SET ); }
+												  0, $3, SET );
+		                             is_p_phs_setup = SET; }
 		| CH_TOKEN sep1 INT_TOKEN
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
-												  0, $3, UNSET ); }
+												  0, $3, UNSET );
+		                             is_p_phs_setup = SET; }
 ;
 
 phsv:     INT_TOKEN                { $$ = $1; }

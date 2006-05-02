@@ -69,12 +69,7 @@ int rb_pulser_j_init_hook( void )
 	rb_pulser_j.exists_synthesizer = SET;
 #endif
 
-#ifndef FIXED_TIMEBASE
 	Pulser_Struct.set_timebase = rb_pulser_j_store_timebase;
-#else
-	Pulser_Struct.set_timebase = NULL;
-#endif
-
 	Pulser_Struct.set_trigger_mode = rb_pulser_j_set_trigger_mode;
 	Pulser_Struct.set_repeat_time = rb_pulser_j_set_repeat_time;
 	Pulser_Struct.set_trig_in_slope = rb_pulser_j_set_trig_in_slope;

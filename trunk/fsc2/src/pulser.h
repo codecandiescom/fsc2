@@ -203,6 +203,8 @@ Var_T *p_get( char * /* txt  */,
 Var_T *p_get_by_num( long /* pnum */,
 					 int  /* type */ );
 
+void p_phs_check( void );
+
 void p_phs_setup( int  /* func   */,
 				  int  /* type   */,
 				  int  /* pod    */,

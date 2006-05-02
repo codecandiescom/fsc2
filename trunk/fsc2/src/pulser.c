@@ -995,7 +995,7 @@ long p_new( long pnum )
 					"creating a new pulse" );
 
 	/* First check that the pulse does not already exist, the include it
-	   into the private list of pulses. */
+	   into our private list of pulses. */
 
 	for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
 		if ( cur_p->num == pnum )
@@ -1291,6 +1291,27 @@ Var_T *p_get_by_num( long pnum,
 }
 
 
+/*-------------------------------------------------------------------*
+ * Function that gets called first when a PHASE_SETUP token is found
+ * to determine if there's a pulser module at all and if this allows
+ * a phase setup (not all of them do).
+ *-------------------------------------------------------------------*/
+
+void p_phs_check( void )
+{
+	/* Check that's there a pulser module at all */
+
+	is_pulser_driver( );
+
+	/* Check if the pulser supports the functions needed */
+
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].phase_setup_prep,
+					"setting up phase channels" );
+	is_pulser_func( Pulser_Struct[ Cur_Pulser ].phase_setup,
+					"setting up phase channels" );
+}
+
+
 /*----------------------------------------------------------------------*
  * 'function' is the phase function the data are to be used for (i.e. 0
  *	means PHASE_1, 1 means PHASE_2, 2 means both)
@@ -1311,19 +1332,10 @@ void p_phs_setup( int  func,
 				  long val,
 				  bool is_pod )
 {
-	is_pulser_driver( );
-
 	/* A few sanity checks before we call the pulsers handler function */
 
 	fsc2_assert( type >= 0 && type < NUM_PHASE_TYPES );
 	fsc2_assert( func == 0 || func == 1 );       /* phase function correct ? */
-
-	/* Let's check if the pulser supports the function needed */
-
-	is_pulser_func( Pulser_Struct[ Cur_Pulser ].phase_setup_prep,
-					"setting up phase channels" );
-	is_pulser_func( Pulser_Struct[ Cur_Pulser ].phase_setup,
-					"setting up phase channels" );
 
 	if ( is_pod && ! Pulser_Struct[ Cur_Pulser ].has_pods )
 	{
@@ -1360,8 +1372,6 @@ void p_phs_setup( int  func,
 
 void p_phs_end( int func )
 {
-	is_pulser_driver( );
-
 	fsc2_assert( func == 0 || func == 1 );      /* phase function correct ? */
 
 	TRY

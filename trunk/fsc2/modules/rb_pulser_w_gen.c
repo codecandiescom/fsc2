@@ -51,6 +51,7 @@ static int tb_index[ ] = { RULBUS_RB8515_CLOCK_FREQ_100MHz,
 
 bool rb_pulser_w_store_timebase( double timebase )
 {
+#ifndef FIXED_TIMEBASE
 	int i;
 
 
@@ -68,7 +69,7 @@ bool rb_pulser_w_store_timebase( double timebase )
 	}
 
 	for ( i = 0; i < num_timebases; i++ )
-		if ( fabs( timebase - timebases[ i ] ) <= timebase * 0.01 )
+		if ( fabs( timebase - timebases[ i ] ) <= PRECISION * timebase )
 			break;
 
 	if ( i == num_timebases )
@@ -83,6 +84,17 @@ bool rb_pulser_w_store_timebase( double timebase )
 	rb_pulser_w.is_timebase = SET;
 
 	return OK;
+#else
+	if ( fabs( timebase - rb_pulser_w.timebase ) >
+		                                     PRECISION * rb_pulser_w.timebase )
+	{
+		print( FATAL, "Timebase is in the current configuration fixed to "
+			   "%s.\n", rb_pulser_w_ptime( rb_pulser_w.timebase ) );
+		THROW( EXCEPTION );
+	}
+
+	return OK;
+#endif
 }
 
 

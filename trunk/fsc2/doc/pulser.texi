@@ -138,7 +138,10 @@ requires an external clock the @code{TTL} level clock input connector is
 used per default.
 
 In the currently used configuration the time base of of the
-@strong{Rulbus pulsers} is fixed at @w{10 ns}.
+@strong{Rulbus pulsers} is fixed at @w{10 ns}. But this is a compilation
+option that can be changed via the configuration files. After this change
+and a rrecompilation of the modules variable timebases (with a resolution
+of @w{10 ns}) are possible.
 
 The statement to set the time base, i.e.@: the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write
@@ -294,7 +297,7 @@ distinguish between the two trigger input ports the additional keywords
 @code{TTL} and @code{ECL} may be used. If none is given the @code{TTL}
 level input port is used per default.
 
-The @strong{Rulbus pulsers} allow to set the trigger slope only.
+The @strong{Rulbus pulsers} only allow to set the trigger slope.
 
 If you need to control more than one pulser you must have a
 @code{TRIGGER_MODE} statement for each of the pulsers. In this case you
@@ -583,13 +586,15 @@ second one.
 For the @strong{Rulbus pulsers} the J-band configuration only allows for
 three function, @code{MICROWAVE} (restricted to creating three pulses),
 @code{RADIO_FREQUENCY} (restricted to creating a single pulse) and
-@code{DETECTION} (restricted to creating a single pulse), while the
+@code{DETECTION} (also restricted to creating a single pulse), while the
 W-band configuration also allows the functions @code{PULSE_SHAPE} (one
 for each microwave pulse), @code{DEFENSE} (restricted to creating a
 single pulse starting at the very start of the pulse pattern, so only its
 length can be changed) and @code{LASER} (restricted to creating a single
-pulse). These are fixed to the cards of the pulsers, so assigning a function
-to a "channel" isn't possible because there are no channels. All that can
+pulse). For the module @code{rb_pulser_w} the lenght of the detection
+pulse can only be varied between @w{0 s} and the timebase of the pulser.
+The functions are fixed to the cards of the pulsers, so assigning a function
+to a "channel" isn't possible - there are no channels. All that can
 be set for a certain function is the delay to be used with this function.
 
 
@@ -715,16 +720,16 @@ but still supported keywords @code{PHASE_SWITCH_DELAY} and
 @strong{W-band configuration of Rulbus pulser}
 
 Since functions are hard-coded to groups of the delay card making up the
-pulser no special phase function setup is needed for this device (phases
-can also only be set for microwave pulses). In contrast to the other
-pulsers supporting phase switching only the phases @code{+X}, @code{+Y}
-and @code{-X} are currently available (due to hardware limitations).
-Phase switching is done via a three-way switch which is controlled via
-the end pulses genetrated by a delay card for each of the three possible
-microwave pulses. Setting the delay cards controlling the phase switch
-is done automatically. You can specify a time delay between switching
-the phase switch and the start of the microwave pulse by using the
-function @ref{pulser_phase_switch_delay()}.
+pulser controlled by the module @code{rb_pulser_w} no special phase
+function setup is needed for this device (phases can also only be set
+for microwave pulses). In contrast to the other pulsers supporting phase
+switching only the phases @code{+X}, @code{+Y} and @code{-X} are currently
+available (due to hardware limitations). Phase switching is done via a
+three-way switch which is controlled via the end pulses genetrated by
+delay cards for each of the three possible microwave pulses. Setting the
+delay cards controlling the phase switch is done automatically. You can
+specify a time delay between switching the phase switch and the start of
+the microwave pulse by using the function @ref{pulser_phase_switch_delay()}.
 
 
 @c ########################################################
