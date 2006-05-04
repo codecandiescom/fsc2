@@ -583,20 +583,21 @@ to create microwave pulses with the first pulser and TWT pulses with the
 second one.
 
 
-For the @strong{Rulbus pulsers} the J-band configuration only allows for
-three function, @code{MICROWAVE} (restricted to creating three pulses),
-@code{RADIO_FREQUENCY} (restricted to creating a single pulse) and
-@code{DETECTION} (also restricted to creating a single pulse), while the
-W-band configuration also allows the functions @code{PULSE_SHAPE} (one
-for each microwave pulse), @code{DEFENSE} (restricted to creating a
-single pulse starting at the very start of the pulse pattern, so only its
-length can be changed - normally the defense pulse is created automatically)
-and @code{LASER} (restricted to creating a single pulse). For the module
-@code{rb_pulser_w} the lenght of the detection pulse can only be varied
-between @w{0 s} and the timebase of the pulser. The functions are fixed
-to the cards of the pulsers, so assigning a function to a "channel" isn't
-possible - there are no channels. All that can be set for a certain
-function is the delay to be used with this function.
+For the @strong{Rulbus pulsers} in the J-band configuration(module
+@code{rb_pulser_j}) only allows for three function, @code{MICROWAVE}
+(restricted to creating three pulses), @code{RADIO_FREQUENCY}
+(restricted to creating a single pulse) and @code{DETECTION} (also
+restricted to creating a single pulse). In the W-band configuration
+(module @code{rb_pulser_w} allows additionally the function @code{LASER}
+(restricted to creating a single pulse) and @code{DEFENSE} (restricted to
+creating a single pulse starting at the very start of the pulse pattern,
+so only its length can be changed - normally the defense pulse is created
+automatically). Moreover, in the W-band configuration the lenght of the 
+detection pulse can only be varied between @w{0 s} and the timebase of the
+pulser. For both configurations the functions are fixed to certain delay
+cards of the pulsers, so assigning a function to a "channel" isn't possible
+- there are no channels. All that can be set for a certain function is the
+delay to be used with this function.
 
 
 
@@ -608,8 +609,7 @@ function is the delay to be used with this function.
 @cindex @code{PHASE_SETUP}
 
 Please note that a phase channel setup can only be done with the
-@strong{Sony/Tektronix DG2020}, the @strong{Bruker EP385} and the
-W-band configuration of the @strong{Rulbus pulser}. Moerover,
+@strong{Sony/Tektronix DG2020} and the @strong{Bruker EP385}. Moerover,
 there are several differences between the Frankfurt S-band and the
 Berlin X-band spectrometer. And all the following is only relevant if
 phase cycling is to be used.
@@ -718,21 +718,6 @@ but still supported keywords @code{PHASE_SWITCH_DELAY} and
 @code{GRACE_PERIOD} in the @code{ASSIGNMENTS} section).
 
 
-@strong{W-band configuration of Rulbus pulser}
-
-Since functions are hard-coded to groups of the delay card making up the
-pulser controlled by the module @code{rb_pulser_w} no special phase
-function setup is needed for this device (phases can also only be set
-for microwave pulses). In contrast to the other pulsers supporting phase
-switching only the phases @code{+X}, @code{+Y} and @code{-X} are currently
-available (due to hardware limitations). Phase switching is done via a
-three-way switch which is controlled via the end pulses genetrated by
-delay cards for each of the three possible microwave pulses. Setting the
-delay cards controlling the phase switch is done automatically. You can
-specify a time delay between switching the phase switch and the start of
-the microwave pulse by using the function @ref{pulser_phase_switch_delay()}.
-
-
 @c ########################################################
 
 @anchor{PHASES section}
@@ -768,7 +753,7 @@ number between 0 and 2147483647 @w{(2^32 - 1)} can be chosen. Of course
 the lengths of all phase sequences have to be identical.
 
 Please note that due to hardware limitations for the W-band configuration
-of the @strong{Rulbus pulser} the pase @code{-Y} can't be used.
+of the @strong{Rulbus pulser} the phase @code{-Y} can't be used.
 
 The following sections explain how the phase sequences become
 associated with certain pulses.
@@ -922,13 +907,20 @@ number of pulses that can be used. The @code{MICROWAVE} function can
 have a maximum of three active pulses at a moment while both the
 @code{RADIO_FREQUENCY}, the @code{LASER} (W-band configuration only)
 and the  @code{DETECTION} function allow only a single active pulse.
-Moreover, for the J-band configuration the @code{RADIO_FREQUENCY} and
-@code{DETECTION} can't start before the first @code{MICROWAVE} pulse.
-Pulses can have a maximum length of about @w{167 ms} and also delays
-between pulses (and before the start of a pulse) are restricted to this
-value. Finally, a @code{RADIO_FREQUENCY} pulse can only be created if
-the pulser is connected to the @strong{Rhode & Schwarz SML01} synthesizer
-(with SML-B3 option), which has a built-in pulse unit.
+Moreover, for the J-band configuration (module @code{rb_pulser_j}) the
+@code{RADIO_FREQUENCY} and @code{DETECTION} can't start before the first
+@code{MICROWAVE} pulse. In the W-band configuration the @code{DETECTION}
+pulse only can have a length of @w{0 s} or the length of the timebase
+(which is the default value if no pulse length has been set) and the
+@code{DEFNSE} pulse must always start at the very beginning of the pulse
+pattern (moreover, unless the function @ref{pulser_defense_pulse_mode()}
+with the appropriate argument before the definition of the @code{DETECTION}
+pulse it is created automatically). Pulses can have a maximum length of
+about @w{167 ms} and also delays between pulses (and before the start of
+a pulse) are restricted to this range of value. Finally, a
+@code{RADIO_FREQUENCY} pulse can only be created if the pulser is
+connected to the @strong{Rhode & Schwarz SML01} synthesizer (with SML-B3
+option), which has a built-in pulse unit.
 
 
 
