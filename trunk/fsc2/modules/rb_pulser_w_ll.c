@@ -25,7 +25,7 @@
 #include "rb_pulser_w.h"
 
 
-static void rb_pulser_w_switch_to_x_phase( void );
+static void rb_pulser_w_phase_init( void );
 
 static void rb_pulser_w_synthesizer_init( void );
 
@@ -39,7 +39,8 @@ static void rb_pulser_w_failure( bool         rb_flag,
 
 /* The following array determines the setting of the end pulse patterns of
  * the delay cards responsible for the phases. They must reflect what
- * Leendert's "magic box" expects. */
+ * Leendert's "magic box" expects as inputs to achieve a certain phase
+ * setting. */
 
 #if ! defined RB_PULSER_W_TEST
 static int phase_settings[ 4 ][ 2 ] = { 
@@ -190,7 +191,7 @@ void rb_pulser_w_init( void )
 	   pulses for the +X phase and create a short pulse at one of the cards so
 	   that we can be sure the switch is in the position for the +X-phase. */
 
-	rb_pulser_w_switch_to_x_phase( );
+	rb_pulser_w_phase_init( );
 
 	/* Initialize synthesizer if it's required for RF pulses */
 
@@ -248,7 +249,7 @@ void rb_pulser_w_init( void )
 				 "RULBUS_RB8514_DELAY_PULSE_NONE )\n",
 				 rb_pulser_w.delay_card[ i ].name );
 	}
-	rb_pulser_w_switch_to_x_phase( );
+	rb_pulser_w_phase_init( );
 	fprintf( stderr, "<- rb_pulser_w_init( )\n" );
 #endif
 }
@@ -264,7 +265,7 @@ void rb_pulser_w_init( void )
  * only the end pulses for the +X phase setting).
  *-------------------------------------------------------------------*/
 
-static void rb_pulser_w_switch_to_x_phase( void )
+static void rb_pulser_w_phase_init( void )
 {
 	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + PHASE_DELAY_0;
 #if ! defined RB_PULSER_W_TEST
@@ -321,7 +322,7 @@ static void rb_pulser_w_switch_to_x_phase( void )
 
 #else /* in test mode */
 
-	fprintf( stderr, "-> rb_pulser_w_switch_to_x_phase()\n" );
+	fprintf( stderr, "-> rb_pulser_w_phase_init()\n" );
 	for ( ; card != NULL; card = card->next )
 		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %s, %s, "
 				 "%s )\n", card->name, ps_str[ PHASE_PLUS_X ][ 0 ],
@@ -337,7 +338,7 @@ static void rb_pulser_w_switch_to_x_phase( void )
 				 card->name );
 		card->old_delay = card->old_delay = 0;
 	}
-	fprintf( stderr, "<- rb_pulser_w_switch_to_x_phase()\n" );
+	fprintf( stderr, "<- rb_pulser_w_phase_init()\n" );
 #endif
 }
 
