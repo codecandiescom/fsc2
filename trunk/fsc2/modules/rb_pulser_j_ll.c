@@ -95,7 +95,7 @@ void rb_pulser_j_init( void )
 			 													!= RULBUS_OK ||
 			 rulbus_rb8514_delay_set_raw_delay(
 				                    rb_pulser_j.delay_card[ ERT_DELAY ].handle,
-				                    0, 1 )                    != RULBUS_OK )
+				                    1, 1 )                    != RULBUS_OK )
 			rb_pulser_j_failure( SET, "Failure to initialize pulser" );
 	}
 	else  /* in internal trigger mode */
@@ -173,7 +173,7 @@ void rb_pulser_j_init( void )
 				 ( ( rb_pulser_j.trig_in_slope == POSITIVE ) ?
 				   "RULBUS_RB8514_DELAY_RAISING_EDGE" :
 				   "RULBUS_RB8514_DELAY_FALLING_EDGE" ) );
-		fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %d, 1 )\n",
+		fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %d, 1, 1 )\n",
 				 ERT_DELAY );
 	}
 	else
@@ -300,7 +300,7 @@ void rb_pulser_j_exit( void )
 		if ( rb_pulser_j.delay_card[ i ].handle >= 0 )
 		{
 #if 0
-			/* Commented out according to Huibs wishes, he want's the pulses
+			/* Commented out according to Huibs wishes, he wants the pulses
 			   to stay where they were at the end of the experiment. */
 
 			rulbus_rb8514_delay_set_output_pulse(

@@ -816,12 +816,10 @@ static void rb_pulser_w_commit( bool test_only )
 
 			if ( ! card->was_active && card->is_active )
 				rb_pulser_w_delay_card_state( card, START );
-
-			if ( card->old_delay != card->delay )
-			{
+			else if ( card->old_delay != card->delay )
 				rb_pulser_w_delay_card_delay( card, card->delay );
-				card->old_delay = card->delay;
-			}
+
+			card->old_delay = card->delay;
 		}
 	}
 
@@ -859,10 +857,12 @@ static void rb_pulser_w_set_phases( void )
 			continue;
 		}
 
-		/* If the pulse it's associated with is to be phase cycled set it up
-		   to emit the correct set of end pulses */
+		/* Set the car up to emit the correct set of end pulses for the phase
+		   needed for the pulse */
 
-		if ( pulses[ i ]->pc != NULL )
+		if ( pulses[ i ]->pc == NULL )
+			rb_pulser_w_set_phase( card, PHASE_PLUS_X );
+		else
 			rb_pulser_w_set_phase( card,
 						 pulses[ i ]->pc->sequence[ rb_pulser_w.next_phase ] );
 

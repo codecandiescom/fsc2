@@ -89,7 +89,7 @@ sub usage{
 sub read_input {
 
 	my $if = *STDIN;
-	my ( $set, $old_set ) = ( "", "" );
+	my $set = "";
 
 
 	# Deal with command line arguments
@@ -153,10 +153,7 @@ sub read_input {
 		last unless defined ( $line = <$if> );
 
 		if ( $line =~ /^===$/ ) {
-			next if $set eq $old_set;
-
 			$has_auto_pulses |= new_pattern( $set, $num );
-			$old_set = $set;
 			$set ="";
 			$num++;
 			next;
