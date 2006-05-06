@@ -603,31 +603,22 @@ Var_T *digitizer_memory_size( Var_T *v )
 	}
 
 	for ( i = 0; i < lecroy_wr2.num_mem_sizes; i++ )
-		if ( mem_size >= lecroy_wr2.mem_sizes[ i ] )
+		if ( mem_size <= lecroy_wr2.mem_sizes[ i ] )
 		{
 			ms_index = i;
 			break;
 		}
 
-	if ( ms_index >= 0 &&                                   /* value found ? */
+	if ( ms_index >= 0 &&
 		 mem_size != lecroy_wr2.mem_sizes[ ms_index ] )
 		print( WARN, "Can't set memory size to %ld, using %ld instead.\n",
 			   mem_size, lecroy_wr2.mem_sizes[ ms_index ] );
 
 	if ( ms_index < 0 )                                   /* not found yet ? */
 	{
-		if ( mem_size < lecroy_wr2.mem_sizes[ 0 ] )
-		{
-			ms_index = 0;
-			print( WARN, "Memory size of %ld is too small, using %ld "
-				   "instead.\n", mem_size, lecroy_wr2.mem_sizes[ ms_index ] );
-		}
-		else
-		{
-		    ms_index = lecroy_wr2.num_mem_sizes - 1;
-			print( WARN, "Memory size of %ld is too large, using %ld "
-				   "instead.\n", mem_size, lecroy_wr2.mem_sizes[ ms_index ] );
-		}
+		ms_index = lecroy_wr2.num_mem_sizes - 1;
+		print( WARN, "Memory size of %ld is too large, using %ld instead.\n",
+			   mem_size, lecroy_wr2.mem_sizes[ ms_index ] );
 	}
 
 	lecroy_wr2.mem_size = lecroy_wr2.mem_sizes[ ms_index ];
@@ -1799,7 +1790,10 @@ Var_T *digitizer_get_curve( Var_T * v )
 	}
 	else
 	{
-		length = lecroy_wr2_curve_length( );
+		if ( lecroy_wr2.is_mem_size )
+			length = lecroy_wr2.mem_size;
+		else
+			length = lecroy_wr2_curve_length( );
 		array = DOUBLE_P T_malloc( length * sizeof *array );
 		for ( i = 0; i < length; i++ )
 			array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
@@ -2096,7 +2090,6 @@ Var_T *digitizer_get_amplitude( Var_T * v )
 								  lecroy_wr2_get_amplitude( ch, w ) );
 
 			ret->val.dpnt[ i++ ] = lecroy_wr2_get_amplitude( ch, w );
-
 		}
 	}
 

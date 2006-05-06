@@ -262,7 +262,7 @@ void lecroy_wr2_numpoints_prep( void )
 	long len;
 
 
-	for ( len = 1; cur_mem_size < LECROY_WR2_MAX_MEMORY_SIZE; len++ )
+	for ( len = 0; cur_mem_size < LECROY_WR2_MAX_MEMORY_SIZE; len++ )
 		if ( len % 3 == 1 )
 			cur_mem_size = ( 5 * cur_mem_size ) / 2;
 		else
