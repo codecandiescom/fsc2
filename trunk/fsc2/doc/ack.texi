@@ -30,29 +30,31 @@ and Prof.@: K.@: M@"obius (Freie Universit@"at Berlin). Both where so
 kind to allow me to spend quite some amount of time on it. Prof.@: R.@:
 Bittl and Prof.@: D.@: Stehlik (Freie Universit@"at Berlin),
 Prof.@: H.-J.@: Steinhoff (Universt@"at Osnabr@"uck), Prof.@: P.@:
-Hildebrandt(Technische Universit@"at Berlin), Prof.@: G.@: Gescheidt
+Hildebrandt (Technische Universit@"at Berlin), Prof.@: G.@: Gescheidt
 (Universit@"at Basel, Switzerland/Technische Universit@"at Graz, Austria)
 and Prof.@: J.@: Schmidt and Prof.@: E.@: Groenen (Universiteit Leiden,
-Netherlands) supported the development by employing me to to extend the
-program and write further device drivers.
+Netherlands) supported the development by employing me to extend and improve
+the program and write further device drivers.
 
-Special thanks to Anton Savitsky for writing the module for the
+Special thanks go to Anton Savitsky for writing the module for the
 @w{Thurlby 330} programable power supply and to Sergey Weber (Nowosibirsk)
-for the @w{Schlumberger 7510} multimeter and allowing me to include it into
-the distribution.
+for the @w{Schlumberger 7510} multimeter and allowing me to include them
+into the distribution.
 
 All the people using the program so far have from time to time been (mis)used
 as alpha-testers. The first one accepting this unpleasant role has been Axel
 Weber in Frankfurt/Main, who already dealt with the bugs and shortcomings of
-the very first version. Later also Burkhard Endeward had to deal with
-it. Then, in Berlin, Stefan Weber, Chris W.@: M.@: Kay, Gerriet Eilers,
-Andreas Kuppig, Heike M@"ogling, Michael Fuhs, Anton Savitsky, Alexander
-Schnegg, Radek Kowalczyk, Martin Fuchs, Celine Els@"asser, Marc Brecht,
-Hauke Studier, Jana Nieder, Irina Karyagina and Sergey Weber took over.
-Finally, also Iwo Gatlik, Tomasz Motylewski, Daniela Hristova (Basel/Graz),
-Huib Block and Peter Gast (Leiden) got some share of the fun. I would like to
-thank them not only for the constant stream of bug reports and proposals for
-improvements or new features (and I sometimes needed quite a bit of convincing
-even though they where right) but especially for their enduring patience. Much
-too often, when they had to do an important experiment, things didn't work and
-they had to wait until I got it fixed. Lots of thanks to all of them!
+the very first version (when the program was still named @code{fsc} and the
+@code{f} stood for Frankfurt). Later also Burkhard Endeward, now in Thomas
+Prisner's group in Frankfurt, had to deal with it. Then, in Berlin, Stefan
+Weber, Chris W.@: M.@: Kay, Gerriet Eilers, Andreas Kuppig, Heike M@"ogling,
+Michael Fuhs, Anton Savitsky, Alexander Schnegg, Radek Kowalczyk, Martin
+Fuchs, Celine Els@"asser, Marc Brecht, Hauke Studier, Jana Nieder, Irina
+Karyagina and Sergey Weber took over. Finally, also Iwo Gatlik, Tomasz
+Motylewski, Daniela Hristova (Basel/Graz), Huib Block and Peter Gast (Leiden)
+got some share of the fun. I would like to thank them not only for the
+constant stream of bug reports and proposals for improvements or new features
+(and I sometimes needed quite a bit of convincing even though they where
+right)  but especially for their enduring patience. Much too often, when
+they had to do an important experiment, things didn't work and they had to
+wait until I got it fixed. Lots of thanks to all of them!
