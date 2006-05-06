@@ -715,7 +715,7 @@ void rb_pulser_w_full_reset( void )
 
 	/* Reset to the first phase */
 
-	rb_pulser_w.next_phase = 0;
+	rb_pulser_w.cur_phase = 0;
 }
 
 
@@ -864,7 +864,7 @@ static void rb_pulser_w_set_phases( void )
 			rb_pulser_w_set_phase( card, PHASE_PLUS_X );
 		else
 			rb_pulser_w_set_phase( card,
-						 pulses[ i ]->pc->sequence[ rb_pulser_w.next_phase ] );
+						  pulses[ i ]->pc->sequence[ rb_pulser_w.cur_phase ] );
 
 		/* If the pulse length changed tell the card about it */
 

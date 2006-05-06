@@ -354,7 +354,7 @@ void rb_pulser_w_write_pulses( FILE * fp )
 					fprintf( fp, " +X" );
 				else
 					fprintf( fp, " %s", plist[ f->pulses[ j ]->pc->
-										sequence[ rb_pulser_w.next_phase ] ] );
+										sequence[ rb_pulser_w.cur_phase ] ] );
 			}
 		}
 

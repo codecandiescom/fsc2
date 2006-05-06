@@ -78,8 +78,6 @@ static const char *ps_str[ 4 ][ 2 ] = {
 void rb_pulser_w_init( void )
 {
 #if ! defined RB_PULSER_W_TEST
-	Rulbus_Delay_Card_T *card;
-	Function_T *f;
 	int i;
 
 
@@ -519,29 +517,27 @@ void rb_pulser_w_run( bool state )
 		   outputting pulses anymore - the sleep of 1 us is in there to avoid
 		   missing cards getting started by their predecessors. */
 
-		do {
-			for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-			{
-				f = rb_pulser_w.function + i;
+		for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		{
+			f = rb_pulser_w.function + i;
 
-				for ( card = f->delay_card; card != NULL; card = card->next )
-				  do
-				  {
-					  fsc2_usleep( 1, UNSET );
-					  is_busy = rulbus_rb8514_delay_busy( card->handle );
+			for ( card = f->delay_card; card != NULL; card = card->next )
+				do
+				{
+					fsc2_usleep( 1, UNSET );
+					is_busy = rulbus_rb8514_delay_busy( card->handle );
 
-					  if ( rulbus_errno != RULBUS_OK )
-						  rb_pulser_w_failure( SET, "Failure to stop pulser" );
-				  } while ( is_busy );
-			}
+					if ( rulbus_errno != RULBUS_OK )
+						rb_pulser_w_failure( SET, "Failure to stop pulser" );
+				} while ( is_busy );
 		}
 
 #else   /* in test mode */
 		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( ERT_DELAY "
 				 "RULBUS_RB8514_DELAY_OUTPUT_BOTH, "
 				 "RULBUS_RB8514_DELAY_PULSE_NONE )\n" );
-	fprintf( stderr, "<- rb_pulser_w_run( %s )\n",
-			 state == START ? "START" : "STOP" );
+		fprintf( stderr, "<- rb_pulser_w_run( %s )\n",
+				 state == START ? "START" : "STOP" );
 #endif
 	}
 }
@@ -647,7 +643,7 @@ void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
 	   the card itself must output end pulses to be active */
 
 	if ( card->prev == NULL && card->next == NULL &&
-		 rulbus_rb8514_delay_set_output_pulse( card->handle
+		 rulbus_rb8514_delay_set_output_pulse( card->handle,
 											   RULBUS_RB8514_DELAY_OUTPUT_BOTH,
 											   type )            != RULBUS_OK )
 		rb_pulser_w_failure( SET, "Failure to set card state" );

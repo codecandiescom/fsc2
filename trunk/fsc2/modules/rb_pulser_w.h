@@ -43,9 +43,9 @@
    instead of outputting pulses have a line printed to stderr for each
    call for setting a deleay or clock card. */
 
-//#if 0
+#if 0
 #define RB_PULSER_W_TEST
-//#endif
+#endif
 
 
 /* Defines for the number of delay and clock cards */
@@ -253,8 +253,8 @@ struct RB_Pulser_W {
 
 	bool needs_phases;       /* set if phase cycling (of microwave pulses)
 								is needed */
-	int next_phase;
-	int pc_len;                 /* length of the phase cycle */
+	int cur_phase;           /* Index of current phase in phase cycle */
+	int pc_len;              /* length of the phase cycle */
 
 	bool is_pulse_2_defense;
 	double pulse_2_defense;  /* minimum delay between end of last microwave

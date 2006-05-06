@@ -157,7 +157,7 @@ int rb_pulser_w_init_hook( void )
 	rb_pulser_w.do_dump_pulses = UNSET;
 
 	rb_pulser_w.needs_phases = UNSET;
-	rb_pulser_w.next_phase = 0;
+	rb_pulser_w.cur_phase = 0;
 
 	rb_pulser_w.is_psd = UNSET;
 	rb_pulser_w.is_grace_period = UNSET;
@@ -827,8 +827,8 @@ Var_T *pulser_next_phase( Var_T * v )
 		return vars_push( INT_VAR, 0L );
 	}
 
-	if ( ++rb_pulser_w.next_phase >= rb_pulser_w.pc_len )
-		rb_pulser_w.next_phase = 0;
+	if ( ++rb_pulser_w.cur_phase >= rb_pulser_w.pc_len )
+		rb_pulser_w.cur_phase = 0;
 
 	pulser_update( NULL );
 
@@ -856,7 +856,7 @@ Var_T *pulser_phase_reset( Var_T * v )
 		return vars_push( INT_VAR, 0L );
 	}
 
-	rb_pulser_w.next_phase = 0;
+	rb_pulser_w.cur_phase = 0;
 
 	pulser_update( NULL );
 
@@ -873,7 +873,7 @@ Var_T *pulser_reset( Var_T * v UNUSED_ARG )
 	if ( ! rb_pulser_w.is_needed )
 		return vars_push( INT_VAR, 1L );
 
-	rb_pulser_w.next_phase = 0;
+	rb_pulser_w.cur_phase = 0;
 	vars_pop( pulser_pulse_reset( NULL ) );
 
 	return pulser_update( NULL );
