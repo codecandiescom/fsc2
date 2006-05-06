@@ -68,8 +68,13 @@ static void rb_pulser_w_init_print( FILE *fp )
 	if ( fp == NULL )
 		return;
 
-	fprintf( fp, "TB: %g\nD: %ld\n===\n", rb_pulser_w.timebase,
+	fprintf( fp, "TB: %g\nD: %ld\n", rb_pulser_w.timebase,
 			 Ticks_rnd( rb_pulser_w.neg_delay / rb_pulser_w.timebase ) );
+
+	if ( rb_pulser_w.needs_phases )
+		fprintf( fp, "PC: MW\n" );
+
+	fprintf( fp, "===\n" );
 
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 		if ( rb_pulser_w.function[ i ].is_used )

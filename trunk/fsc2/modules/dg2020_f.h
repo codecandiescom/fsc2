@@ -132,8 +132,8 @@ struct Function {
 	Pulse_T **pulses;          /* list of pulse pointers */
 
 	bool needs_phases;         /* set if phase cycling is needed */
-
 	int next_phase;
+
 	Function_T *phase_func;    /* for phase functions here is stored which
 								  function it's going to take care of while
 								  for normal functions it's a pointer to the

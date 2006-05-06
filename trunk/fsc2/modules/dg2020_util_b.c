@@ -699,6 +699,7 @@ void dg2020_dump_channels( FILE * fp )
 	Pod_T *pod;
 	Pulse_Params_T *pp;
 	int i, j, k;
+	const char *plist[ ] = { "+X", "-X", "+Y", "-Y" };
 
 
 	if ( fp == NULL )
@@ -721,6 +722,7 @@ void dg2020_dump_channels( FILE * fp )
 			for ( k = 0; k < f->num_params; k++ )
 			{
 				pp = f->pulse_params + k;
+
 				if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
 					 pp->pulse->sp != NULL )
 					fprintf( fp, " (%ld) %ld %ld",
@@ -730,12 +732,25 @@ void dg2020_dump_channels( FILE * fp )
 					fprintf( fp, " (%ld) %ld %ld",
 							 pp->pulse->tp->num, pp->pos, pp->len );
 				else if ( pp->pulse->pc == NULL ||
-						  f->phase_setup->pod[
-							  pp->pulse->pc->sequence[ f->next_phase ] ]
-						  == pod )
+						  f->phase_setup->
+						        pod[ pp->pulse->pc->sequence[ f->next_phase ] ]
+						                                               == pod )
 					fprintf( fp, " %ld %ld %ld",
 							 pp->pulse->num, pp->pos, pp->len );
+
+				if ( f->phase_setup != NULL &&
+					 f->phase_setup->
+						        pod[ pp->pulse->pc->sequence[ f->next_phase ] ]
+						                                               == pod )
+				{
+					if ( pp->pulse->pc == NULL )
+						fprintf( fp, " +X" );
+					else
+						fprintf( fp, " %s", plist[ pp->pulse->pc->
+												sequence[ f->next_phase ] ] );
+				}
 			}
+
 			fprintf( fp, "\n" );
 		}
 	}

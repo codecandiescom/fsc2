@@ -74,6 +74,7 @@
 * rb8509::          Rulbus 12-bit ADC Card
 * rb8510::          Rulbus 12-bit DAC Card
 * rb_pulser_j::     Rulbus Pulser (J-band version)
+* rb_pulser_w::     Rulbus Pulser (W-band version)
 * rs690::           Interface Technology RS690 Word Generator (Berlin 360 GHz)
 * s_band_magnet_broad::   S-band Magnet Power Supply (broad range)
 * s_band_magnet_narrow::  S-band Magnet Power Supply (narrow range)
@@ -2297,7 +2298,7 @@ package)
 @c #############################################################
 
 
-@node rb_pulser_j, rs690, rb8510, Device Reference
+@node rb_pulser_j, rb_pulser_w, rb8510, Device Reference
 @iftex
 @subheading Rulbus Pulser (J-band version)
 @end iftex
@@ -2306,11 +2307,11 @@ package)
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{rb_pulser}
+@strong{Module name}: @code{rb_pulser_j}
 
 @paragraphindent 0
-@strong{Description}: Pseudo-pulser for J-band spectrometer using Rulbus
-(Rijksuniversiteit Leiden BUS,
+@strong{Description}: Pseudo-pulser for J-band spectrometer in Leiden,
+using the Rulbus (Rijksuniversiteit Leiden BUS,
 @url{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/})
 - requires Linux device driver and library that are part of the @code{fsc2}
 package). This pulser isn't a stand-alone device but consists of a combination
@@ -2351,7 +2352,82 @@ pulse of a function).
 @c #############################################################
 
 
-@node rs690, s_band_magnet_broad, rb_pulser_j, Device Reference
+@node rb_pulser_w, rs690, rb_pulser_j, Device Reference
+@iftex
+@subheading Rulbus Pulser (W-band version)
+@end iftex
+@ifnottex
+@section Rulbus Pulser (W-band version)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{rb_pulser_w}
+
+@paragraphindent 0
+@strong{Description}: Pseudo-pulser for W-band spectrometer in Leiden,
+using the Rulbus (Rijksuniversiteit Leiden BUS,
+@url{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/})
+- requires Linux device driver and library that are part of the @code{fsc2}
+package). This pulser isn't a stand-alone device but consists of a combination
+of (currently) 15 Rulbus RB8514 delay cards and 2 clock cards (one fixed
+frequency 100 MHz card and a RB8515 card with adjustable frequency) as well
+as requiring the @strong{Rohde & Schwarz SML01} synthesizer (with SML-B3
+option) in order to be able to create RF pulses.
+
+The time base of this pulser is aat the moment fixed to @w{10 ns}, but this
+can be changed by using a second adjustable clock card and a modification of
+the configuration file for the pulser. Its number of functions is restricted
+to @code{MICROWAVE}, @code{RADIO_FREQUENCY}, @code{DETECTION}, @code{LASER}
+and @code{DEFENSE}. Only a maximum of three active microwave pulses is
+possible and only a single active RF, Laser, detection and defense pulse.
+
+Moreover, the detection pulse can be only switched on or off by setting
+its length to either the length of the pulsers timebase or to @w{0 s} -
+the end pulse of the card for the detection pulse is to be used as the
+detection pulse and end pulses can only be switched on or off. Per default
+the defense pulse (if it is defined) is always on, even if no length has
+been set.
+
+The defense pulse always must start at the very beginning of the pulse
+pattern. And unless the function @ref{pulser_defense_pulse_mode()} has been
+called with the appropriate arguments before the definition of the defense
+pulse a defense pulse, covering the time from the start of the pulse pattern
+to some time after the end of the last active microwave pulse (see also
+function @ref{pulser_minimum_defense_distance()}) will be created
+automatically. 
+
+To be able to create an RF pulse the @strong{R&S SML01} synthesizer
+mentioned above is required. RF and detection pulse can only start after
+the first microwave pulse and the length of pulses and the distance
+between them is limited to about @w{167 ms} (and that's also the maximum
+delay between the start of the pulse sequence and the start of the first
+pulse of a function).
+
+
+@paragraphindent 0
+@strong{Controlled via}: Rulbus
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{pulser_name()}
+@item @ref{pulser_state()}
+@item @ref{pulser_update()}
+@item @ref{pulser_shift()}
+@item @ref{pulser_increment()}
+@item @ref{pulser_reset()}
+@item @ref{pulser_pulse_reset()}
+@item @ref{pulser_show_pulses()}
+@item @ref{pulser_dump_pulses()}
+@item @ref{pulser_minimum_defense_distance()}
+@item @ref{pulser_defense_pulse_mode()}
+@item @ref{pulser_pulse_minimum_specs()}
+@end table
+
+
+@c #############################################################
+
+
+@node rs690, s_band_magnet_broad, rb_pulser_w, Device Reference
 @iftex
 @subheading Interface Technology RS690 Word Generator (Berlin 360 GHz)
 @end iftex

@@ -310,6 +310,7 @@ void rs690_dump_channels( FILE * fp )
 	Function_T *f;
 	Channel_T *ch;
 	int i, j, k;
+	const char *plist[ ] = { "+X", "-X", "+Y", "-Y" };
 
 
 	if ( fp == NULL )
@@ -332,7 +333,9 @@ void rs690_dump_channels( FILE * fp )
 				continue;
 
 			fprintf( fp, "%s:%s", f->name, rs690_num_2_channel( ch->self ) );
+
 			for ( k = 0; k < ch->num_active_pulses; k++ )
+			{
 				if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
 					 ch->pulse_params[ k ].pulse->sp != NULL )
 					fprintf( fp, " (%ld) %ld %ld",
@@ -350,6 +353,18 @@ void rs690_dump_channels( FILE * fp )
 							 ch->pulse_params[ k ].pulse->num,
 							 ch->pulse_params[ k ].pos,
 							 ch->pulse_params[ k ].len );
+
+				if ( f->phase_setup != NULL )
+				{
+					if ( ch->pulse_params[ k ].pulse->pc == NULL )
+						fprintf( fp, " +X" );
+					else
+						fprintf( fp, " %s",
+								 plist[ ch->pulse_params[ k ].pulse->pc->
+										         sequence[ f->next_phase ] ] );
+				}
+			}
+
 			fprintf( fp, "\n" );
 		}
 	}

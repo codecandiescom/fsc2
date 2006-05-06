@@ -326,6 +326,7 @@ void rb_pulser_w_write_pulses( FILE * fp )
 {
 	Function_T *f;
 	int i, j;
+	const char *plist[ ] = { "+X", "-X", "+Y", "-Y" };
 
 
 	if ( fp == NULL )
@@ -342,10 +343,20 @@ void rb_pulser_w_write_pulses( FILE * fp )
 
 		fprintf( fp, "%s: ", f->name );
 		for ( j = 0; j < f->num_active_pulses; j++ )
+		{
 			fprintf( fp, " %ld %ld %ld", f->pulses[ j ]->num,
 					 Ticks_rnd( f->pulses[ j ]->pos / rb_pulser_w.timebase ),
 					 f->delay_card->next != NULL ? f->pulses[ j ]->len  :
 					 Ticks_rnd( f->last_pulse_len / rb_pulser_w.timebase ) );
+			if ( i == PULSER_CHANNEL_MW && rb_pulser_w.needs_phases )
+			{
+				if ( f->pulses[ j ]->pc == NULL )
+					fprintf( fp, " +X" );
+				else
+					fprintf( fp, " %s", plist[ f->pulses[ j ]->pc->
+										sequence[ rb_pulser_w.next_phase ] ] );
+			}
+		}
 
 		fprintf( fp, "\n" );
 	}

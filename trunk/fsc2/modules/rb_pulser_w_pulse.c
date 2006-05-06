@@ -434,11 +434,19 @@ bool rb_pulser_w_get_pulse_length( long     pnum,
 
 	if ( ! p->is_len )
 	{
-		print( FATAL, "Length of pulse #%ld hasn't been set.\n", pnum );
-		THROW( EXCEPTION );
-	}
+		/* Special treatment for the detection pulse: if its length isn't set
+		   the length defaults to the timebase of the pulser */
 
-	*p_time = rb_pulser_w_ticks2double( p->len );
+		if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DET )
+			*p_time = rb_pulser_w_ticks2double( 1 );
+		else
+		{
+			print( FATAL, "Length of pulse #%ld hasn't been set.\n", pnum );
+			THROW( EXCEPTION );
+		}
+	}
+	else
+		*p_time = rb_pulser_w_ticks2double( p->len );
 
 	return OK;
 }

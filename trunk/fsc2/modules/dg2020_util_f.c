@@ -560,6 +560,7 @@ void dg2020_dump_channels( FILE * fp )
 	Pulse_T *p;
 	int i, k;
 	int next_phase;
+	const char *plist[ ] = { "+X", "-X", "+Y", "-Y" };
 
 
 	if ( fp == NULL )
@@ -578,6 +579,7 @@ void dg2020_dump_channels( FILE * fp )
 			 f->self != PULSER_CHANNEL_PHASE_2 )
 		{
 			fprintf( fp, "%s:%d", f->name, f->pod->self );
+
 			for ( k = 0; k < f->num_pulses; k++ )
 			{
 				p = f->pulses[ k ];
@@ -585,7 +587,17 @@ void dg2020_dump_channels( FILE * fp )
 					continue;
 
 				fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
+
+				if ( f->needs_phases )
+				{
+					if ( p->pc == NULL )
+						fprintf( fp, " +X" );
+					else
+						fprintf( fp, " %s",
+								 plist[ p->pc->sequence[ f->next_phase ] ] );
+				}
 			}
+
 			fprintf( fp, "\n" );
 		}
 		else
@@ -607,10 +619,12 @@ void dg2020_dump_channels( FILE * fp )
 				else
 					fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
 			}
+
 			fprintf( fp, "\n" );
 
 			fprintf( fp, "%s:%d", f->name, f->pod2->self );
 			next_phase++;
+
 			for ( k = 0; k < f->num_pulses; k++ )
 			{
 				p = f->pulses[ k ];
@@ -622,6 +636,7 @@ void dg2020_dump_channels( FILE * fp )
 				else
 					fprintf( fp, " %ld %ld %ld", p->num, p->pos, p->len );
 			}
+
 			fprintf( fp, "\n" );
 
 		}

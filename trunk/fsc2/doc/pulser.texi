@@ -85,7 +85,7 @@ this chapter.
 
 The basic setup of a pulser happens in the @code{ASSIGNMENTS} and the
 @code{PHASES} section. The latter section will be missing if no phase
-cycling is to be done in the experiment.
+cycling is to be done during the experiment.
 
 
 @c ########################################################
@@ -655,8 +655,8 @@ either @code{1} or @code{_1} and @code{2} or @code{_2} to distinguish
 between the two phase setups, i.e.@: @code{PHASE_SETUP_1}.
 
 Please note that you only have to supply settings for phases that are
-really needed in the experiment, e.g.@: if in the experiment only the
-@code{+x} and @code{-x} phases are needed only channels for both these
+really needed during the experiment, e.g.@: if during the experiment only
+the @code{+X} and @code{-X} phases are needed only channels for both these
 phases have to be specified.
 
 
@@ -730,7 +730,7 @@ but still supported keywords @code{PHASE_SWITCH_DELAY} and
 The @code{PHASES} section is for defining with phase sequences and,
 optionally, acquisition sequences. As the word says a phase sequence
 defines for one (or more) pulses the sequence of phases a pulse is
-switched between in the experiment. For example, in a phase cycled
+switched between during the experiment. For example, in a phase cycled
 stimulated echo experiment the first microwave pulse usually is set
 first to a @code{+X} phase, then to @code{-X}, again to @code{+X} and
 finally to @code{-X}. The second pulse will run at the same time through
@@ -933,7 +933,7 @@ option), which has a built-in pulse unit.
 When pulses have been defined and the experiment is started (indicated by
 the begin of the @code{EXPERIMENT} section) all pulses get set (as long as
 their lengths are defined and non-zero) and all channels or PODs that
-have been assigned pulses (that are really used in the experiment) are
+have been assigned pulses (that are really used during the experiment) are
 switched on.
 
 There are two methods to change the properties of pulses. The first one

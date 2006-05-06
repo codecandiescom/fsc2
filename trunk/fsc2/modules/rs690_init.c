@@ -124,8 +124,14 @@ static void rs690_init_print( FILE * fp )
 	if ( fp == NULL )
 		return;
 
-	fprintf( fp, "TB: %g\nD: %ld\n===\n", rs690.timebase,
-			 rs690.neg_delay );
+	fprintf( fp, "TB: %g\nD: %ld\nPC:", rs690.timebase, rs690.neg_delay );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		if ( rs690.function[ i ].phase_setup != NULL )
+			fprintf( fp, " %s", Function_Names[ i ] );
+
+	fprintf( fp, "\n===\n" );
+
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
 		f = rs690.function + i;

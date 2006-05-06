@@ -135,8 +135,8 @@ static bool ep385_update_pulses( bool flag )
 				pp->len = p->len;
 				pp->pulse = p;
 
-				/* Extend pulses for which a shape pulse has been defined
-				   a bit */
+				/* Extend the pulses a bit for which a shape pulse has been
+				   defined */
 
 				if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
 					 p->sp != NULL )

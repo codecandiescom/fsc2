@@ -54,6 +54,8 @@ ACQUISITION_SEQUENCE = +, -, -, +;
 
 PREPARATIONS:
 
+pulser_dump_pulses( );
+
 P0:  FUNC        = MW,
 	 START       = 200 ns,
 	 LENGTH      = 15 ns,

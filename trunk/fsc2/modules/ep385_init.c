@@ -137,8 +137,14 @@ static void ep385_init_print( FILE * fp )
 	if ( fp == NULL )
 		return;
 
-	fprintf( fp, "TB: %g\nD: %ld\n===\n", ep385.timebase,
-			 ep385.neg_delay );
+	fprintf( fp, "TB: %g\nD: %ld\nPC:", ep385.timebase, ep385.neg_delay );
+
+	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+		if ( ep385.function[ i ].phase_setup != NULL )
+			fprintf( fp, " %s", Function_Names[ i ] );
+
+	fprintf( fp, "\n===\n" );
+
 	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
 	{
 		f = ep385.function + i;
@@ -709,7 +715,7 @@ static void ep385_setup_channels( void )
 
 	for ( i = 0; i < MAX_CHANNELS; i++ )
 	{
-		ch = &ep385.channel[ i ];
+		ch = ep385.channel + i;
 
 		if ( ( f = ch->function ) == NULL )
 			continue;
@@ -885,9 +891,10 @@ static void ep385_pulse_start_setup( void )
 	{
 		Ticks add;
 		Channel_T *cs =
-					 ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].channel[ 0 ],
-				  *cd = ep385.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
+			        ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].channel[ 0 ];
+		Channel_T *cd = ep385.function[ PULSER_CHANNEL_DEFENSE ].channel[ 0 ];
 		Pulse_Params_T *shape_p, *defense_p;
+
 
 		if ( cd->num_active_pulses != 0 && cs->num_active_pulses != 0 )
 		{

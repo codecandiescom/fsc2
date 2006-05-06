@@ -65,7 +65,8 @@ my $verbose = 0;
 my $Channels = Channels->new;
 my @Function_Names = qw( MW PULSE_SHAPE PHASE_1 PHASE_2 TWT TWT_GATE
 						 DEFENSE DETECTION DETECTION_GATE RF RF_GATE
-						 OTHER_1 OTHER_2 OTHER_3 OTHER_4 );
+						 LASER OTHER_1 OTHER_2 OTHER_3 OTHER_4 );
+my $with_phases = 0;
 
 
 read_input( );
@@ -89,7 +90,8 @@ sub usage{
 sub read_input {
 
 	my $if = *STDIN;
-	my $set = "";
+	my $set = '';
+	my %has_phases;
 
 
 	# Deal with command line arguments
@@ -101,7 +103,7 @@ sub read_input {
 
 	if ( $ARGV[ 0 ] ) {
 		usage( ) if $ARGV[ 0 ] =~ /^--?h(elp)?$/;
-		open( $if, "<" . $ARGV[ 0 ] )
+		open( $if, '<' . $ARGV[ 0 ] )
 			or fail( "Can't open input file " . $ARGV[ 0 ] . ": $!\n" );
 	}
 
@@ -122,6 +124,22 @@ sub read_input {
 	$Delay = $1;
 
 	defined( $line = <$if> ) or fail( "Premature end of input at line $..\n" );
+
+	if ( $line =~ /^PC:\s*(.*)$/) {
+		for my $f ( split /\s+/, $1 ) {
+			my $i;
+
+			for ( $i = 0; $i < @Function_Names; $i++ ) {
+				last if $f eq $Function_Names[ $i ];
+			}
+			fail( "Invalid input at line $..\n" ) if $i == @Function_Names;
+			$has_phases{ $i } = 1;
+			$with_phases = 1;
+		}
+		defined( $line = <$if> ) or
+			fail( "Premature end of input at line $..\n" );
+	}
+
 	$line =~ /^===$/ or fail( "Invalid input at line $..\n" );
 
 	# Read the function/channel information
@@ -136,7 +154,8 @@ sub read_input {
 			if ( $line =~
 				 /^($Function_Names[ $i ]):((([A-H]|CH)?\d+)|TRIG| ) ([+-]?\d+)( I)?$/ ) {
 				$Channels->add_channel( \$Function_Names[ $i ], $2, $5,
-										defined $6 ? 1 : 0 );
+										defined $6 ? 1 : 0,
+										defined $has_phases{ $i } ? 1 : 0 );
 				next CHANNEL_LINE;
 			}
 		}
@@ -153,7 +172,7 @@ sub read_input {
 		last unless defined ( $line = <$if> );
 
 		if ( $line =~ /^===$/ ) {
-			$has_auto_pulses |= new_pattern( $set, $num );
+			$has_auto_pulses |= new_pattern( $num, $set );
 			$set ="";
 			$num++;
 			next;
@@ -161,7 +180,7 @@ sub read_input {
 		$set .= $line;
 	}
 
-	$has_auto_pulses |= new_pattern( $set, $num )
+	$has_auto_pulses |= new_pattern( $num, $set )
 		if $set ne "";
 
 	fail( "No pulses patterns defined in input.\n" ) unless
@@ -172,13 +191,12 @@ sub read_input {
 
 sub new_pattern {
 
-	my ( $set, $num ) = @_;
+	my ( $num, $set ) = @_;
 	my $has_auto_pulses = 0;
 
 	for ( split /\n/, $set ) {
 		$has_auto_pulses = 1 if /\(\d+\)/;
 		my @bits = split /\s+/;
-		fail( "Invalid input at line $..\n" ) unless $#bits % 3 == 0;
 		$Channels->add_pulse_list( $num, @bits );
 	}
 
@@ -532,8 +550,8 @@ sub primary_draw {
 
 	for ( my $i = 0; $i < $Channels->num_channels; $i++ ) {
 		my $ch = $Channels->find_by_num( $i );
-
 		my $y = 10 + ( $i + 0.5 ) * $self->hstep;
+
 		$c->create( 'text', 10, $y,
 					'-anchor' => 'w',
 					'-text'   => $ch->key,
@@ -631,7 +649,8 @@ sub redraw {
 
 		my $y1 = 10 + ( $i + 0.5 ) * $self->hstep;
 		my $y2 = 10 + $i * $self->hstep;
-		my $yt = 10 + ( $i + 0.75 ) * $self->hstep;
+		my $yt1 = 10 + ( $i + 0.75 ) * $self->hstep;
+		my $yt2 = - 25 + ( $i + 0.75 ) * $self->hstep;
 
 		for my $cp ( @$pl ) {
 			next if $cp->len == 0;
@@ -647,17 +666,24 @@ sub redraw {
 			$x1 = 150 + $self->mag * $x1 + $self->shft;
 			$x2 = 150 + $self->mag * $x2 + $self->shft;
 
-			my $tag = $ch->key . ":" . $cp->num;
+			my $tag = $ch->key . ':' . $cp->num;
 			$c->create( 'rectangle', $x1, $y2, $x2, $y1,
 						'-tags'    => [ $ch->key, $tag ],
 						'-outline' => 'white',
 						'-fill'    => 'red' );
+			if ( $cp->phase ne '' ) {
+				$c->create( 'text', 0.5 * ( $x1 + $x2 ), $yt2,
+							'-text' => $cp->phase,
+							'-fill' => 'green',
+							'-tags'    => [ $ch->key, $tag ] );
+			}
+
 			$c->bind( $tag, '<Enter>' => sub {
 						  $self->dw->Enter( $tag, $self->step,
 											$self->delay ); } );
 			$c->bind( $tag, '<Leave>' => sub { $self->dw->Leave; } );
 
-			$c->create( 'text', 0.5 * ( $x1 + $x2 ), $yt,
+			$c->create( 'text', 0.5 * ( $x1 + $x2 ), $yt1,
 						'-text' => $cp->num,
 						'-tags' => [ $ch->key, $tag ],
 						'-fill' => 'green' );
@@ -678,17 +704,18 @@ sub new{
 	my ( $inv, $mw ) = @_;
 	my $class = ref( $inv ) || $inv;
 	my $self = { 'w' => $mw->Toplevel,
-			     'num'  => '',
-			     'pos'  => '',
-			     'len'  => '',
-				 'func' => '',
-				 'ch'   => '',
-				 'dp'   => '',
-				 'dn'   => '',
-			     'pp'   => '',
-			     'pl'   => '',
-				 'pc'   => '',
-				 'pf'   => '' };
+			     'num'   => '',
+			     'pos'   => '',
+			     'len'   => '',
+				 'func'  => '',
+				 'phase' => '',
+				 'ch'    => '',
+				 'dp'    => '',
+				 'dn'    => '',
+			     'pp'    => '',
+			     'pl'    => '',
+				 'pc'    => '',
+				 'pf'    => '' };
 
 	bless $self, $class;
 	$self->init;
@@ -758,6 +785,21 @@ sub init {
 			  '-pady' => 2 );
 	$l->pack( '-side' => 'left' );
 	$e->pack( '-side' => 'right' );
+
+	if ( $with_phases ) {
+		$f = $F->Frame;
+		$l = $f->Label( '-text'   => 'Pulse phase: ',
+						'-width'  => 20,
+						'-anchor' => 'w' );
+		$e = $f->Entry( '-textvariable' => \$self->{ 'phase' },
+						'-width'       => 20,
+						'-relief'      => 'flat' );
+		$f->pack( '-side' => 'top',
+				  '-padx' => 2,
+				  '-pady' => 2 );
+		$l->pack( '-side' => 'left' );
+		$e->pack( '-side' => 'right' );
+	}
 
 	$f = $F->Frame;
 	$l = $f->Label( '-text'   => 'Pulse pod/channel: ',
@@ -906,6 +948,7 @@ sub Enter {
 	$self->{ 'len' } = $self->ptime( $cp->len );
 
 	$self->{ 'func' } = $f;
+	$self->{ 'phase' } = $cp->phase;
 	$self->{ 'ch' } = $ch;
 
 	$self->{ 'dp' } = defined( $pp ) ?
@@ -1084,8 +1127,10 @@ sub add_pulse_list {
 	my $ch = $self->find_by_key( $key );
 
 	::fail( "Invalid input at line $..\n" ) unless defined $ch;
+	::fail( "Invalid input at line $..\n" )
+		unless @_ % ( 3 + $ch->has_phases ) == 0;
 
-	$ch->add_pulse_list( $step, @_ );
+	$ch->add_pulse_list( $step, $ch->has_phases, @_ );
 	$self->{ 'num_steps' } = $step if $step > $self->{ 'num_steps' };
 }
 
@@ -1151,6 +1196,7 @@ sub new {
 			     'num'   => shift,
 				 'delay' => shift,
 				 'inv'   => shift,
+				 'phase' => shift,
 			     'plist' => [ ] };
 	return bless $self, $class;
 }
@@ -1176,6 +1222,12 @@ sub num {
 
 #---------------------------------------------------------
 
+sub has_phases {
+	return shift->{ 'phase' };
+}
+
+#---------------------------------------------------------
+
 sub delay  {
 	return shift->{ 'delay' };
 }
@@ -1194,7 +1246,7 @@ sub inv {
 
 sub add_pulse_list {
 
-	my ( $self, $step ) = ( shift, shift );
+	my ( $self, $step, $has_phases ) = ( shift, shift, shift );
 
 	my $pstep;
 
@@ -1204,7 +1256,7 @@ sub add_pulse_list {
 
 	$self->{ 'plist' }[ $step ] = $self->{ 'plist' }[ $pstep ]->comp( @_ )
 		if $pstep > 0;
-	$self->{ 'plist' }[ $step ] = Pulse_List->new( @_ )
+	$self->{ 'plist' }[ $step ] = Pulse_List->new( $has_phases, @_ )
 		unless defined $self->{ 'plist' }[ $step ];
 }
 
@@ -1271,7 +1323,8 @@ package Pulse_List;
 
 sub new {
 	my $inv = shift;
-	my ( $num, $start, $len );
+	my $has_phases = shift;
+	my ( $num, $start, $len, $phase );
 	my $class = ref( $inv ) || $inv;
 	my $self = { 'list'  => [ ],
 			     'start' => undef,
@@ -1280,8 +1333,13 @@ sub new {
 
 	$self->{ 'start' } = $_[ 1 ];
 	while ( @_ ) {
+		my $tag;
 		( $num, $start, $len ) = ( shift, shift, shift );
-		my $tag = $num . "," . $start . "," . $len;
+		$tag = $num . "," . $start . "," . $len;
+		if ( $has_phases ) {
+			$self->{ 'phase' } = shift;
+			$tag .= "," . $self->{ 'phase' };
+		}
 		push @{ $self->{ 'list' } }, $Channels->new_pulse( $tag );
 	}
 	$self->{ 'len' } = $start + $len;
@@ -1338,28 +1396,39 @@ sub new {
 # the values passed to the function.
 
 sub comp {
-	return ${ shift( ) } eq shift( ) . "," . shift( ) . "," . shift( );
+	if ( scalar @_ == 4 ) {
+		return ${ shift( ) } eq shift( ) . "," . shift( ) . "," . shift( );
+	}
+	return ${ shift( ) } eq shift( ) . "," . shift( ) . "," . shift( ) . "," .
+		   shift( );
 }
 
 #---------------------------------------------------------
 
 sub num {
-	${ shift( ) } =~ /^(\(?[-]?\d+\)?)/o;
-	return $1 >= 0 ? $1 : "";
+	${ shift( ) } =~ /^(\(?([-]?\d+)\)?)/o;
+	return $2 >= 0 ? $1 : '';
 }
 
 #---------------------------------------------------------
 
 sub start {
-	${ shift( ) } =~ /,(\d+),/o;
+	${ shift( ) } =~ /,(\d+),\d+/o;
 	return $1;
 }
 
 #---------------------------------------------------------
 
 sub len {
-	${ shift( ) } =~ /,(\d+)$/o;
+	${ shift( ) } =~ /,(\d+)(,[+-][XY])?$/o;
 	return $1;
+}
+
+#---------------------------------------------------------
+
+sub phase {
+	${ shift( ) } =~ /,([+-][XY])$/o;
+	return defined $1 ? $1 : '';
 }
 
 1;
