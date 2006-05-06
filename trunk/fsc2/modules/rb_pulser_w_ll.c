@@ -198,7 +198,6 @@ void rb_pulser_w_init( void )
 #else     /* in test mode */
 	int i;
 
-	fprintf( stderr, "-> rb_pulser_w_init( )\n" );
 	fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %s, %s, %s )\n",
 			 rb_pulser_w.delay_card[ ERT_DELAY ].name,
 			 "RULBUS_RB8514_DELAY_OUTPUT_BOTH",
@@ -248,7 +247,6 @@ void rb_pulser_w_init( void )
 				 rb_pulser_w.delay_card[ i ].name );
 	}
 	rb_pulser_w_phase_init( );
-	fprintf( stderr, "<- rb_pulser_w_init( )\n" );
 #endif
 }
 
@@ -320,7 +318,6 @@ static void rb_pulser_w_phase_init( void )
 
 #else /* in test mode */
 
-	fprintf( stderr, "-> rb_pulser_w_phase_init()\n" );
 	for ( ; card != NULL; card = card->next )
 		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %s, %s, "
 				 "%s )\n", card->name, ps_str[ PHASE_PLUS_X ][ 0 ],
@@ -336,7 +333,6 @@ static void rb_pulser_w_phase_init( void )
 				 card->name );
 		card->old_delay = card->old_delay = 0;
 	}
-	fprintf( stderr, "<- rb_pulser_w_phase_init()\n" );
 #endif
 }
 
@@ -449,7 +445,6 @@ void rb_pulser_w_exit( void )
 
 #else /* in test mode */
 
-	fprintf( stderr, "-> rb_pulser_w_exit()\n" );
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
 	{
 #if 0
@@ -467,7 +462,6 @@ void rb_pulser_w_exit( void )
 				 rb_pulser_w.delay_card[ i ].name );
 #endif
 	}
-	fprintf( stderr, "<- rb_pulser_w_exit()\n" );
 #endif
 }
 
@@ -485,11 +479,6 @@ void rb_pulser_w_run( bool state )
 	int i;
 #endif
 
-
-#if defined RB_PULSER_W_TEST
-	fprintf( stderr, "-> rb_pulser_w_run( %s )\n",
-			 state == START ? "START" : "STOP" );
-#endif
 
 	if ( state == START )
 	{
@@ -536,8 +525,6 @@ void rb_pulser_w_run( bool state )
 		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( ERT_DELAY "
 				 "RULBUS_RB8514_DELAY_OUTPUT_BOTH, "
 				 "RULBUS_RB8514_DELAY_PULSE_NONE )\n" );
-		fprintf( stderr, "<- rb_pulser_w_run( %s )\n",
-				 state == START ? "START" : "STOP" );
 #endif
 	}
 }
