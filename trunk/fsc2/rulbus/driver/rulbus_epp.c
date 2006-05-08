@@ -47,7 +47,6 @@
 #else
 
 #include <linux/module.h>
-#include <linux/moduleparam.h>
 
 #endif
 
@@ -63,6 +62,12 @@
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 #include <asm/io.h>
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+#include <linux/moduleparam.h>
+#include <linux/cdev.h>
+#endif
+
 
 
 #include "rulbus_epp.h"
@@ -159,13 +164,22 @@ struct parport_driver rulbus_drv = { RULBUS_EPP_NAME,
 static struct rulbus_device {
         struct parport *port;
         struct pardevice *dev;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		struct cdev ch_dev;
+		dev_t dev_no;
+#endif
         int in_use;                 /* set when device is opened */
         int is_claimed;             /* set while we have exclusive access */
         uid_t owner;                /* current owner of the device */
         spinlock_t spinlock;
         unsigned char rack;         /* currently addressed rack */
         unsigned char direction;
-} rulbus = { NULL, NULL, 0, 0, 0, { }, 0x0F, FORWARD };
+} rulbus = { NULL, NULL, 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+             { },
+			 ( dev_t ) 0,
+#endif
+			 0, 0, 0, { }, 0x0F, FORWARD };
 
 
 struct file_operations rulbus_file_ops = {
@@ -192,6 +206,18 @@ module_param(  base, ulong, S_IRUGO );
 
 MODULE_AUTHOR( "Jens Thoms Toerring <jt@toerring.de>" );
 MODULE_DESCRIPTION( "RULBUS parallel port (EPP) driver" );
+#if defined MODULE_LICENSE
+MODULE_LICENSE( "GPL" );
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
+EXPORT_NO_SYMBOLS;
+#endif
+
+
+module_init( rulbus_init );
+module_exit( rulbus_cleanup );
+
 
 
 /*------------------------------------------------------*
@@ -200,7 +226,7 @@ MODULE_DESCRIPTION( "RULBUS parallel port (EPP) driver" );
 
 static int __init rulbus_init( void )
 {
-        int res_major;
+		int result;
 
 
         /* All we do at the moment is registering a driver and a char device,
@@ -210,16 +236,45 @@ static int __init rulbus_init( void )
         if ( parport_register_driver( &rulbus_drv ) != 0 )
                 return -EIO;
 
-        if ( ( res_major = register_chrdev( major, RULBUS_EPP_NAME,
-                                            &rulbus_file_ops ) ) < 0 ) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		if ( major == 0 )
+				result = alloc_chrdev_region( &rulbus.dev_no, 0, 1,
+											  RULBUS_EPP_NAME );
+		else {
+				rulbus.dev_no = MKDEV( major, 0 );
+				result = register_chrdev_region( rulbus.dev_no, 1,
+												 RULBUS_EPP_NAME );
+		}
+
+		if ( result < 0 ) {
                 printk( KERN_ERR RULBUS_EPP_NAME ": Can't register as char "
                         "device.\n" );
-                parport_put_port( rulbus.port );
+				parport_unregister_driver( &rulbus_drv );
+				return -EIO;
+		}
+
+		cdev_init( &rulbus.ch_dev, &rulbus_file_ops );
+		rulbus.ch_dev.owner = THIS_MODULE;
+
+		if ( cdev_add( &rulbus.ch_dev, rulbus.dev_no, 1 ) < 0 ){
+                printk( KERN_ERR RULBUS_EPP_NAME ": Can't register as char "
+                        "device.\n" );
+				unregister_chrdev_region( rulbus.dev_no, 1 );
+				parport_unregister_driver( &rulbus_drv );
+				return -EIO;
+		}
+#else
+        if ( ( result = register_chrdev( major, RULBUS_EPP_NAME,
+										 &rulbus_file_ops ) ) < 0 ) {
+                printk( KERN_ERR RULBUS_EPP_NAME ": Can't register as char "
+                        "device.\n" );
+				parport_unregister_driver( &rulbus_drv );
                 return -EIO;
         }
 
         if ( major == 0 )
-                major = res_major;
+                major = result;
+#endif
 
         spin_lock_init( &rulbus.spinlock );
 
@@ -236,12 +291,17 @@ static int __init rulbus_init( void )
 
 static void __exit rulbus_cleanup( void )
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		cdev_del( &rulbus.ch_dev );
+		unregister_chrdev_region( rulbus.dev_no, 1 );
+#else
         if ( unregister_chrdev( major, RULBUS_EPP_NAME ) < 0 )
 		{
                 printk( KERN_ERR RULBUS_EPP_NAME
                         ": Device busy or other module error.\n" );
 				return;
 		}
+#endif
 
         /* Unregister the device (but only if it's registered) */
 
@@ -963,20 +1023,6 @@ static int rulbus_epp_interface_present( void )
 }
 
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
-EXPORT_NO_SYMBOLS;
-#endif
-
-
-module_init( rulbus_init );
-module_exit( rulbus_cleanup );
-
-
-/* MODULE_LICENSE should be defined since at least 2.4.10 */
-
-#if defined MODULE_LICENSE
-MODULE_LICENSE( "GPL" );
-#endif
 
 
 /*

@@ -512,12 +512,13 @@ if [ $? -eq 1 ]; then
 fi
 
 
-# Check if this is a 2.4 kernel
+# Check if this is a 2.4 or 2.6 kernel
 
 if [    `uname -r | cut -d'.' -f1` != "2" \
-     -o `uname -r | cut -d'.' -f2` != "4" ]; then
+     -o `uname -r | cut -d'.' -f2` != "4" \
+	 -a `uname -r | cut -d'.' -f2` != "6" ]; then
     dialog --yesno \
-"This package is only tested with 2.4 kernels yet.\n\
+"This package is only tested with 2.4 and 2.6 kernels.\n\
 There may be lots of problems with other kernels.\n\n\
            Do you want to continue?" 8 56
     test $? -eq 0 || exit 0
