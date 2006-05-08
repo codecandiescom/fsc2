@@ -58,7 +58,7 @@ KERNEL_VER := $(shell grep UTS_RELEASE $(KERNELDIR)/include/linux/version.h \
 
 all $(MODULE) install clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \
-		echo "Error: Sorry, can't figure out kernel version."; \
+		echo "Error: Can't figure out kernel version under the assumption that the kernel sources are at $(KERNELDIR)"; \
 		exit 2; \
 	fi
 	$(MAKE) $@ KERNEL_VER=$(KERNEL_VER)
@@ -121,4 +121,3 @@ clean:
 
 endif
 endif
-
