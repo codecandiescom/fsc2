@@ -88,12 +88,13 @@ clean:
 
 endif
 
-else                                        # handling for pre-2.6 kernels
+else
 
-INCLUDES = -I$(KERNELDIR)/include -I$(PWD)/../include
+# Otherwise we're dealing with some pre-2.6 kernel (hopefully 2.4)
 
-CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
+INCLUDES := -I$(KERNELDIR)/include -I$(PWD)/../include
 
+CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
 
 all: $(MODULE)
 

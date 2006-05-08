@@ -47,6 +47,7 @@
 #else
 
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 
 #endif
 
@@ -178,6 +179,19 @@ struct file_operations rulbus_file_ops = {
 static int major = RULBUS_EPP_MAJOR;
 static unsigned long base = RULBUS_EPP_BASE;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
+MODULE_PARM( major, "i" );
+MODULE_PARM_DESC( major, "Major device number of device file" );
+MODULE_PARM( base, "i" );
+MODULE_PARM_DESC( base, "Base address of parallel port the RULBUS is "
+				  "connected to" );
+#else
+module_param( major, int, S_IRUGO );
+module_param(  base, ulong, S_IRUGO );
+#endif
+
+MODULE_AUTHOR( "Jens Thoms Toerring <jt@toerring.de>" );
+MODULE_DESCRIPTION( "RULBUS parallel port (EPP) driver" );
 
 
 /*------------------------------------------------------*
@@ -956,15 +970,6 @@ EXPORT_NO_SYMBOLS;
 
 module_init( rulbus_init );
 module_exit( rulbus_cleanup );
-
-
-MODULE_PARM( major, "i" );
-MODULE_PARM_DESC( major, "Major device number of device file" );
-MODULE_PARM( base, "i" );
-MODULE_PARM_DESC( base, "Base address of parallel port the RULBUS is "
-				  "connected to" );
-MODULE_AUTHOR( "Jens Thoms Toerring <jt@toerring.de>" );
-MODULE_DESCRIPTION( "RULBUS parallel port (EPP) driver" );
 
 
 /* MODULE_LICENSE should be defined since at least 2.4.10 */
