@@ -22,33 +22,82 @@
 # To contact the author send email to jt@toerring.de
 
 
+MODULE   := rulbus_epp.o
+SOURCES  := rulbus_epp.c
+PWD      := $(shell pwd)
+HEADERS  := $(PWD)/../include/rulbus_epp.h $(PWD)/../include/autoconf.h
+
+
+# Unless the user set the environment variable RULBUS_EPP_KERNEL_SOURCE
+# assume that we can find out where the kernel sources are (or at least
+# the kernel headers) from the 'build' symbolic link in the module
+# directory of the currently running kernel. Only if this doesn't exist
+# use '/usr/src/linux/' as a last resort - but it's not unlikely to point
+# to the wrong kernel code or may even not exist...
+
 ifneq ($(RULBUS_EPP_KERNEL_SOURCE),)
-    KERNEL_SRC = $(RULBUS_EPP_KERNEL_SOURCE)
-else
-	KERNEL_SRC = $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
-							 echo "/lib/modules/`uname -r`/build"; \
-						 else \
-							 echo "/usr/src/linux"; \
-						 fi )
+    KERNELDIR := $(RULBUS_EPP_KERNEL_SOURCE)
 endif
 
-MODULE   = rulbus_epp.o
-SOURCES  = rulbus_epp.c
-HEADERS  = rulbus_epp.h autoconf.h
-INCLUDES = -I$(KERNEL_SRC)/include -I../include
+KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
+					     echo "/lib/modules/`uname -r`/build"; \
+					 else \
+						 echo "/usr/src/linux"; \
+					 fi )
+
+# If KERNEL_VER isn't set determine it from the the kernel source directory
+# and then call make again with KERNEL_VER now being set. If KERNEL_VER
+# couldn't be found out that way give up and print an error message
+
+ifndef KERNEL_VER
+
+KERNEL_VER := $(shell grep UTS_RELEASE $(KERNELDIR)/include/linux/version.h \
+				      2>/dev/null | \
+				      sed 's/^[^"]\{1,\}"\([0-9\.]\{1,\}\).*$$/\1/' \
+					  2>/dev/null)
+
+all $(MODULE) install clean:
+	@if [ -z "$(KERNEL_VER)" ]; then \
+		echo "Error: Sorry, can't figure out kernel version."; \
+		exit 2; \
+	fi
+	$(MAKE) $@ KERNEL_VER=$(KERNEL_VER)
+
+else      # if KERNEL_VER is set
+
+# First handle the case that we're builing for a 2.6 kernel
+
+ifeq ($(findstring 2.6,$(KERNEL_VER)),2.6)
+
+EXTRA_CFLAGS := -I$(PWD)/../include	
+
+ifneq ($(KERNELRELEASE),)    # if can use the kernel build system
+	obj-m := $(MODULE)
+
+else                         # otherwise make kernel build system available
+
+all:
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) EXTRA_CFLAGS=$(EXTRA_CFLAGS) modules
+
+install:
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules_install
+
+clean:
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
+	$(RM) $(RMFLAGS) *~
+
+endif
+
+else                                        # handling for pre-2.6 kernels
+
+INCLUDES = -I$(KERNELDIR)/include -I$(PWD)/../include
 
 CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
 
-incl_dir = $(prefix)/include
 
+all: $(MODULE)
 
-.SUFFIXES:
-.PHONY: all install cleanup clean pack
-
-all:
-	$(MAKE) $(MODULE)
-
-$(MODULE): $(SOURCES)
+$(MODULE): $(SOURCES) $(HEADERS)
 	$(CC) $(CFLAGS) $(DBGFLAGS) $(INCLUDES) -c -o $@ $<
 
 install:
@@ -68,3 +117,7 @@ endif
 
 clean:
 	$(RM) $(RMFLAGS) *.o *~
+
+endif
+endif
+

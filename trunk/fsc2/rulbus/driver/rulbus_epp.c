@@ -24,7 +24,11 @@
  */
 
 
+#include <linux/version.h>
 #include <linux/config.h>
+
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 
 #if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
 #define MODVERSIONS
@@ -35,14 +39,15 @@
 #endif
 
 #include <linux/module.h>
-#include <linux/version.h>
-
-#if ! defined( KERNEL_VERSION )
-#define KERNEL_VERSION( a, b, c ) ( ( ( a ) << 16 ) | ( ( b ) << 8 ) | ( c ) )
-#endif
 
 #if defined( CONFIG_SMP ) && ! defined( __SMP__ )
 #define __SMP__
+#endif
+
+#else
+
+#include <linux/module.h>
+
 #endif
 
 
@@ -59,11 +64,11 @@
 #include <asm/io.h>
 
 
-#define RULBUS_EPP_NAME  "rulbus_epp"
-
-
 #include "rulbus_epp.h"
 #include "autoconf.h"
+
+
+#define RULBUS_EPP_NAME  "rulbus_epp"
 
 
 static int __init rulbus_init( void );
@@ -306,7 +311,9 @@ static int rulbus_open( struct inode * inode_p,
 
                 if ( rulbus.dev != NULL ) {
                         rulbus.in_use++;
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
                         MOD_INC_USE_COUNT;
+#endif
                         spin_unlock( &rulbus.spinlock );
                         return 0;
                 }
@@ -351,7 +358,9 @@ static int rulbus_open( struct inode * inode_p,
 
 		rulbus.rack = 0x0F;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
         MOD_INC_USE_COUNT;
+#endif
 
         spin_unlock( &rulbus.spinlock );
 
@@ -388,7 +397,9 @@ static int rulbus_release( struct inode * inode_p,
                 rulbus.is_claimed = 0;
         }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
         MOD_DEC_USE_COUNT;
+#endif
 
         return 0;
 }
@@ -938,7 +949,9 @@ static int rulbus_epp_interface_present( void )
 }
 
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 EXPORT_NO_SYMBOLS;
+#endif
 
 
 module_init( rulbus_init );
