@@ -65,16 +65,16 @@ all $(MODULE) install clean:
 
 else      # if KERNEL_VER is set
 
-# First handle the case that we're builing for a 2.6 kernel
+# First handle the case that we're building for a 2.6 kernel
 
 ifeq ($(findstring 2.6,$(KERNEL_VER)),2.6)
-
-EXTRA_CFLAGS := -I$(PWD)/../include	
 
 ifneq ($(KERNELRELEASE),)    # if can use the kernel build system
 	obj-m := $(MODULE)
 
 else                         # otherwise make kernel build system available
+
+EXTRA_CFLAGS := -I$(PWD)/../include
 
 all:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) EXTRA_CFLAGS=$(EXTRA_CFLAGS) modules

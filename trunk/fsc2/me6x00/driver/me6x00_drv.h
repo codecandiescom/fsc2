@@ -408,12 +408,10 @@ typedef struct {
 
 /* Board specific information */
 
-typedef  struct {
+typedef struct {
   char name[ 7 ];
-#ifdef CONFIG_DEVFS_FS
-  devfs_handle_t dev_handle;
-#endif
   struct pci_dev *dev;
+  int is_init;                      /* Flag, set if board is initialized     */
   unsigned int plx_regbase;         /* PLX configuration space base address  */
   unsigned int me6x00_regbase;      /* Base address of the ME6X00            */
   unsigned int xilinx_regbase;      /* Base address for Xilinx control       */
@@ -429,7 +427,10 @@ typedef  struct {
   int pci_func_no;                  /* PCI function number                   */
   char irq;                         /* IRQ assigned from the PCI BIOS        */
   int board_in_use;                 /* Indicates if board is already in use  */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
   spinlock_t use_lock;              /* Guards board_in_use                   */
+  spinlock_t irq_lock;
+#endif
   unsigned int num_dacs;            /* number of DACs on board               */
   int keep_voltage_on_close[ 16 ];
   me6x00_circ_buf_st buf[ 4 ];

@@ -256,7 +256,7 @@ static int __init rulbus_init( void )
 		cdev_init( &rulbus.ch_dev, &rulbus_file_ops );
 		rulbus.ch_dev.owner = THIS_MODULE;
 
-		if ( cdev_add( &rulbus.ch_dev, rulbus.dev_no, 1 ) < 0 ){
+		if ( cdev_add( &rulbus.ch_dev, rulbus.dev_no, 1 ) < 0 ) {
                 printk( KERN_ERR RULBUS_EPP_NAME ": Can't register as char "
                         "device.\n" );
 				unregister_chrdev_region( rulbus.dev_no, 1 );

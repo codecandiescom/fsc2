@@ -30,8 +30,9 @@
  *
  * File History: Version  Date      Editor  Action
  *---------------------------------------------------------------------
- *               1.00.00  02.01.21  GG      first release
- *               1.01.00  02.10.19  JTT     fixes, extensions
+ *        1.00.00  02.01.21  GG      first release
+ *        1.01.00  02.10.19  JTT     fixes, extensions
+ *        1.02.00  06.05.10  JTT     modified for 2.6 kernel support
  *---------------------------------------------------------------------
  *
  * Description:
@@ -45,7 +46,11 @@
  */
 
 
+#include <linux/version.h>
 #include <linux/config.h>
+
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 
 #if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
 #define MODVERSIONS
@@ -56,11 +61,17 @@
 #endif
 
 #include <linux/module.h>
-#include <linux/version.h>
 
 #if defined( CONFIG_SMP ) && ! defined( __SMP__ )
 #define __SMP__
 #endif
+
+#else
+
+#include <linux/module.h>
+
+#endif
+
 
 /*
  * Needed for the registration of I/O and MEMORY regions.
@@ -91,14 +102,16 @@
 
 #endif
 
-#ifdef CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+#include <linux/moduleparam.h>
+#include <linux/cdev.h>
 #endif
 
 /* Compatibility file for kernels from 2.0 up to 2.4 */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 #include "sysdep.h"
-
+#endif
 
 /* Include-File for the Meilhaus ME6000 and ME6100 I/O boards */
 
@@ -111,66 +124,7 @@
 #include "xilinx_firm.h"
 
 
-/* Board specific data are kept global */
-
-static me6x00_info_st info_vec[ ME6X00_MAX_BOARDS ];
-
-
-/* Number of boards, detected from the BIOS */
-
-static int me6x00_board_count;
-
-
-/* Major device number, 0 means to get it automatically from the system */
-
-static int major = ME6X00_MAJOR;
-
-/* Structure holding information about the different board types */
-
-static struct pci_device_id me6x00_pci_tbl[] __devinitdata = {
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6004,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6008,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME600F,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6014,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6018,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME601F,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6034,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6038,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME603F,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6104,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6108,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME610F,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6114,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6118,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME611F,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6134,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6138,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME613F,
-	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
-	{ 0 }
-};
-
-MODULE_DEVICE_TABLE( pci, me6x00_pci_tbl );
-
-
-/* Prototypes */
+/* Prototypes of all functions */
 
 static int me6x00_open( struct inode * /* inode_p */,
 			struct file  * /* file_p  */ );
@@ -184,17 +138,32 @@ static int me6x00_ioctl( struct inode * /* inode_p */,
 			 unsigned long  /* arg     */ );
 
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+static irqreturn_t me6x00_isr( int              /* irq    */,
+			       void *           /* dev_id */,
+			       struct pt_regs * /* dummy  */);
+#else
 static void me6x00_isr( int              /* irq    */,
 			void *           /* dev_id */,
 			struct pt_regs * /* dummy  */);
+#endif
 
 static int me6x00_find_boards( void );
 
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+static int me6x00_init_board( struct pci_dev *             /* dev */,
+			      const struct pci_device_id * /* id  */ );
+#else
 static int me6x00_init_board( int              /* board_count */,
 			      struct pci_dev * /* dev         */ );
+#endif
 
 static int me6x00_xilinx_download( me6x00_info_st * info );
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+static void me6x00_release_single_board( struct pci_dev * /* dev */ );
+#endif
 
 static int me6x00_reset_board( int /* board */,
 			       int /* from  */ );
@@ -252,6 +221,81 @@ static unsigned char  me6x00_inb( unsigned int /* port */ );
 static unsigned short me6x00_inw( unsigned int /* port */ );
 
 static unsigned int   me6x00_inl( unsigned int /* port */ );
+
+
+/* Board specific data are kept global */
+
+static me6x00_info_st info_vec[ ME6X00_MAX_BOARDS ];
+
+
+/* Number of boards, detected from the BIOS */
+
+static int me6x00_board_count;
+
+
+/* Major device number, 0 means to get it automatically from the system */
+
+static int major = ME6X00_MAJOR;
+
+
+/* Structure holding information about the different board types */
+
+static struct pci_device_id me6x00_pci_tbl[] __devinitdata = {
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6004,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6008,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME600F,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6014,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6018,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME601F,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6034,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6038,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME603F,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6104,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6108,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME610F,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6114,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6118,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME611F,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6134,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6138,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME613F,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ 0 }
+};
+
+MODULE_DEVICE_TABLE( pci, me6x00_pci_tbl );
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+
+static struct pci_driver me6x00_pci_driver = {
+	.name     = "ME6X00",
+	.id_table = me6x00_pci_tbl,
+	.probe    = me6x00_init_board,
+	.remove   = me6x00_release_single_board,
+};
+
+static dev_t dev_no;
+static struct cdev ch_dev;
+
+#endif
 
 
 /* File operations provided by the driver */
@@ -370,23 +414,27 @@ static int __init me6x00_init( void )
 int init_module( void )
 #endif
 {
-#ifdef CONFIG_PCI
-#ifndef CONFIG_DEVFS_FS
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+	int result;
+#else
 	int res_major;
 #endif
+#ifdef CONFIG_PCI
 	int i;
 
 
 	CALL_PDEBUG( "init_module() is executed\n" );
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 4, 0 )
 	if ( ! pci_present( ) ) {
 		printk( KERN_ERR "ME6X00: init_module(): "
 			"No PCI-BIOS present!\n");
 		return -ENODEV;
 	}
+#endif
 
 	if ( ( me6x00_board_count = me6x00_find_boards( ) ) == 0 ) {
-		printk( KERN_ERR "ME6x00: init_module(): "
+		printk( KERN_ERR "ME6X00: init_module(): "
 			"No ME6x00 bords found\n" );
 		return -ENODEV;
 	}
@@ -398,27 +446,40 @@ int init_module( void )
 
 	PDEBUG( "init_module(): %d board(s) found\n", me6x00_board_count );
 
-#ifdef CONFIG_DEVFS_FS
-	for ( i = 0; i < me6x00_board_count; i++ ) {
-		char dev_name[ 12 ];       /* long enough for 9999 boards;-) */
-
-		sprintf( name, ME6X00_NAME "_%d", i );
-		info_vec[ i ].dev_handle =
-			devfs_register( NULL, dev_name,
-					DEVFS_FL_AUTO_OWNER |
-					DEVFS_FL_AUTO_DEVNUM, 0, 0,
-					S_IFCHR | S_IRUGO | S_IWUGO,
-					&me6x00_file_operations,
-					info_vec + i );
-		if ( info_vec[ i ].dev_handle == NULL ) {
-			printk( KERN_ERR "ME6X00: init_module(): "
-				"Failed to register board %d\n", i );
-			while ( i > 0 )
-				devfs_unregister( info_vec[ --i ].dev_handle );
-			return -ENODEV;
-		}
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+	if ( major == 0 )
+		result = alloc_chrdev_region( &dev_no, 0, me6x00_board_count,
+					      ME6X00_NAME );
+	else {
+		dev_no = MKDEV( major, 0 );
+		result = register_chrdev_region( dev_no, me6x00_board_count,
+						 ME6X00_NAME );
 	}
+
+	if ( result < 0 ) {
+                printk( KERN_ERR "ME6X00: Can't register as char device.\n" );
+		return -EIO;
+	}
+
+	cdev_init( &ch_dev, &me6x00_file_operations );
+	ch_dev.owner = THIS_MODULE;
+
+	if ( cdev_add( &ch_dev, dev_no, me6x00_board_count ) < 0 ) {
+                printk( KERN_ERR "ME6X00: Can't register as char device.\n" );
+		unregister_chrdev_region( dev_no, me6x00_board_count );
+		return -EIO;
+	}
+
+	if ( ( result = pci_register_driver( &me6x00_pci_driver ) ) < 0 ) {
+		unregister_chrdev_region( dev_no, me6x00_board_count );
+		printk( KERN_ERR "ME6X00: Registering PCI device failed.\n" );
+		return result;
+	}
+
+	if ( major == 0 )
+		major = MAJOR( dev_no );
 #else
+
 	if ( ( res_major = register_chrdev( major, ME6X00_NAME,
 					    &me6x00_file_operations ) ) < 0 ) {
 		printk( KERN_ERR "ME6X00: init_module(): "
@@ -473,21 +534,29 @@ void cleanup_module( void )
 	int i;
 
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+	for ( i = 0; i < me6x00_board_count; i++ ) {
+		if ( info_vec[ i ].is_init ) {
+			me6x00_reset_board( i, FROM_CLEANUP );
+			pci_release_regions( info_vec[ i ].dev );
+		}
+	}
+
+	cdev_del( &ch_dev );
+	unregister_chrdev_region( dev_no, me6x00_board_count );
+#else
 	for ( i = 0; i < me6x00_board_count; i++ ) {
 		me6x00_reset_board( i, FROM_CLEANUP );
 		pci_release_regions( info_vec[ i ].dev );
 	}
 
-#ifdef CONFIG_DEVFS_FS
-	for ( i = me6x00_board_count - 1; i >= 0; i-- )
-		devfs_unregister( info_vec[ i ].dev_handle );
-#else
 	if ( unregister_chrdev( major, ME6X00_NAME ) ) {
 		printk( KERN_ERR "ME6X00: cleanup_module(): "
 			"can't unregister module.\n" );
 		return;
 	}
 #endif
+
 	printk( KERN_INFO "ME6X00: driver de-installed.\n" );
 }
 
@@ -515,23 +584,41 @@ static int me6x00_find_boards( void )
 	int board_count = 0;
 	unsigned int max_types;
 	unsigned int i;
-	static struct pci_dev *dev = NULL;
-
+	struct pci_dev *dev = NULL;
+	
 
 	max_types = sizeof me6x00_pci_tbl / sizeof me6x00_pci_tbl[ 0 ];
 
 	while ( board_count < ME6X00_MAX_BOARDS &&
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		NULL != ( dev = pci_get_device( PCI_VENDOR_ID_MEILHAUS,
+						PCI_ANY_ID, dev ) ) ) {
+#else
 		NULL != ( dev = pci_find_device( PCI_VENDOR_ID_MEILHAUS,
 						 PCI_ANY_ID, dev ) ) ) {
-		/* Check that board we found is a ME6X00 or ME6100 card */
+#endif
+		/* Check if the board we found is a ME6X00 or ME6100 card */
 
 		for ( i = 0; i < max_types; i++ )
 			if ( dev->device == me6x00_pci_tbl[ i ].device )
 				break;
 
-		if ( i == max_types )
+		if ( i == max_types ) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+			pci_dev_put( dev );
+#endif
 			continue;
+		}
 
+		/* For 2.6. kernels the board only gets initialized when the
+		   PCI core system asks us to to by calling the appropriate
+		   routine itself */
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		info_vec[ board_count ].dev = dev;
+		info_vec[ board_count ].is_init = 0;
+		pci_dev_put( dev );
+#else
 		/* Initialize the board */
 
 		if ( me6x00_init_board( board_count, dev ) ) {
@@ -539,6 +626,7 @@ static int me6x00_find_boards( void )
 				"Can't initialize board\n" );
 			return -1;
 		}
+#endif
 
 		board_count++;
 	}
@@ -551,6 +639,7 @@ static int me6x00_find_boards( void )
 }
 
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 /*
  * Routine:
  *   me6x00_init_board
@@ -564,17 +653,212 @@ static int me6x00_find_boards( void )
  *   - It executes the subroutine me6x00_reset_board to bring the
  *     board into a known state.
  *
- * Parameter list:
- *   Name           Type          Access    Description
- *--------------------------------------------------------------------------
- *   board_count    int           read      Index of the detected board
+ * Please note: There are two versions of this routine, one for 2.6 kernels,
+ * where this function is called by the PCI core system, and another one
+ * for older kernels, where the function is called in the the initialization
+ * of the module.
  *
+ * Parameter list for 2.5 kernels:
+ *   Name           Type            Access    Description
+ *--------------------------------------------------------------------------
+ *   dev         struct pci_dev *   read      Address of PCI structure of
+ *                                            the board
+ *   id    struct pci_device_id *   read      ?
+ *
+ * Result:
+ *   On success the return value is 0, everything else means failure.
+ *--------------------------------------------------------------------------
+ *
+ * Parameter list for 2.4 (or older) kernels:
+ *   Name           Type            Access    Description
+ *--------------------------------------------------------------------------
+ *   board_count  int               read      Index of the detected board
+ *   dev          struct pci_dev *  read      Address of PCI structure of
+ *                                            the board
  * Result:
  *   On success the return value is 0, everything else means failure.
  *--------------------------------------------------------------------------
  * Author: GG
  * Modification: JTT
  */
+
+static int me6x00_init_board( struct pci_dev *             dev,
+			      const struct pci_device_id * id )
+{
+	unsigned int i;
+	me6x00_info_st *info;
+	int board_count;
+
+
+	CALL_PDEBUG( "me6x00_init_board() is executed\n" );
+
+	for ( i = 0; i < me6x00_board_count; i++ )
+		if ( dev == info_vec[ i ].dev )
+			break;
+
+	if ( i == me6x00_board_count ) {
+		printk( KERN_ERR "ME6X00: me6x00_init_board() called with "
+			"unknown pci_dev structure.\n" );
+		return -1;
+	}
+
+	board_count = i;
+	info = info_vec + board_count;
+
+        if ( pci_enable_device( dev ) ) {
+		printk( KERN_ERR "ME6X00: Failed to enable device.\n" );
+		return -1;
+	}
+
+
+	if ( pci_request_regions( dev, ME6X00_NAME ) ) {
+		printk( KERN_ERR "ME6X00: me6x00_init_board(): "
+			"Failed to obtain required I/O regions\n" );
+		return -1;
+	}
+
+	/*------------------------ plx regbase ------------------------------*/
+
+	info->plx_regbase = pci_resource_start( dev, 1 );
+	info->plx_regbase_size = pci_resource_len( dev, 1 );
+
+	if ( ! ( pci_resource_flags( dev, 1 ) & IORESOURCE_IO ) ) {
+		printk( KERN_ERR "ME6X00: me6x00_init_board(): "
+			"PLX regbase is not I/O\n" );
+		goto init_failure;
+	}
+
+	PDEBUG( "me6x00_init_board(): PLX at 0x%08X[ 0x%08X ]\n",
+		info->plx_regbase, info->plx_regbase_size );
+
+	/*------------------------ me6x00 regbase ---------------------------*/
+
+	info->me6x00_regbase = pci_resource_start( dev, 2 );
+	info->me6x00_regbase_size = pci_resource_len( dev, 2 );
+
+	if ( ! ( pci_resource_flags( dev, 2 ) & IORESOURCE_IO ) ) {
+		printk( KERN_ERR "ME6X00: me6x00_init_board(): "
+			"ME6X00 regbase is not I/O\n" );
+		goto init_failure;
+	}
+
+	PDEBUG( "me6x00_init_board(): me6x00 at 0x%08X[ 0x%08X ]\n",
+		info->me6x00_regbase, info->me6x00_regbase_size );
+
+	/*------------------------ xilinx regbase ---------------------------*/
+
+	info->xilinx_regbase = pci_resource_start( dev, 3 );
+	info->xilinx_regbase_size = pci_resource_len( dev, 3 );
+
+	if ( ! ( pci_resource_flags( dev, 3 ) & IORESOURCE_IO ) ) {
+		printk( KERN_ERR "ME6X00: me6x00_init_board(): "
+			"Xilinx regbase is not I/O\n" );
+		goto init_failure;
+	}
+
+	PDEBUG( "me6x00_init_board(): xilinx at 0x%08X[ 0x%08X ]\n",
+		info->xilinx_regbase, info->xilinx_regbase_size );
+
+	/*---------------------- Init the board info ------------------------*/
+
+	info->pci_dev_no = PCI_FUNC( dev->devfn );
+	PDEBUG( "me6x00_init_board(): pci_func_no = 0x%x\n",
+		info->pci_func_no );
+
+	info->pci_dev_no = PCI_SLOT( dev->devfn );
+	PDEBUG( "me6x00_init_board(): pci_dev_no = 0x%x\n", info->pci_dev_no );
+
+	info->pci_bus_no = dev->bus->number;
+	PDEBUG( "me6x00_init_board(): pci_bus_no = 0x%x\n", info->pci_bus_no );
+
+	info->vendor_id = dev->vendor;
+	PDEBUG( "me6x00_init_board(): vendor_id = 0x%x\n", info->vendor_id );
+
+	info->device_id = dev->device;
+	sprintf( info->name, "ME%X", info->device_id );
+	PDEBUG( "me6x00_init_board(): device_id = 0x%x\n", info->device_id );
+
+	if ( PCIBIOS_SUCCESSFUL != pci_read_config_byte( dev, 0x08,
+							 &info->hw_revision ) )
+	{
+		printk( KERN_WARNING "ME6X00: me6x00_init_module: "
+			"Can't get hw_revision\n" );
+		goto init_failure;
+	}
+
+	PDEBUG( "me6x00_init_board(): hw_revision = 0x%x\n",
+		info->hw_revision );
+
+	info->serial_no = ( ( unsigned int ) dev->subsystem_device ) << 16 |
+			  dev->subsystem_vendor;
+
+	PDEBUG( "me6x00_init_board(): serial_no = 0x%x\n", info->serial_no );
+
+	info->irq = dev->irq;
+	PDEBUG( "me6x00_init_board(): irq = %d\n", info->irq );
+
+	info->board_in_use = 0;
+
+	for ( i = 0; i < 4; i++ ) {
+		info->buf[ i ].buf = NULL;
+		info->buf[ i ].head = info->buf[ i ].tail = 0;
+		init_waitqueue_head( info->wait_queues + i );
+	}
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
+	/* Initialize the spinlocks that are going to be used */
+
+	spin_lock_init( &info->use_lock );
+	spin_lock_init( &info->irq_lock );
+#endif
+
+	/* Download the Xilinx firmware, but only if the the reading the
+	   first byte of the I/O range for the Xilinx FPGA does not return
+	   0x74 - as far a I found out in this case the chip has already
+	   been initialized and trying to do so a second time will fail. */
+
+	if ( inb( info->xilinx_regbase ) != 0x74 &&
+	     me6x00_xilinx_download( info ) ) {
+		printk( KERN_ERR "ME6X00: me6x00_init_board: "
+			"Can't download firmware\n" );
+		goto init_failure;
+	}
+
+	switch ( info->device_id & 0xF ) {
+		case 0x04 :
+			info->num_dacs = 4;
+			break;
+
+		case 0x08 :
+			info->num_dacs = 8;
+			break;
+
+		case 0x0F :
+			info->num_dacs = 16;
+	}
+
+	for ( i = 0; i < info->num_dacs; i++ )
+		info->keep_voltage_on_close[ i ] = 0;
+
+	/* Now reset the board to bring it into a known state */
+
+	if ( me6x00_reset_board( board_count, FROM_INIT ) ) {
+		printk( KERN_ERR "ME6X00: me6x00_init_board: "
+			"Can't reset board\n");
+		goto init_failure;
+	}
+
+	info->is_init = 1;
+
+	return 0;
+
+ init_failure:
+
+	pci_release_regions( dev );
+	return -1;
+}
+
+#else  /* version for kernels 2.4 and older */
 
 static int me6x00_init_board( int              board_count,
 			      struct pci_dev * dev )
@@ -685,10 +969,12 @@ static int me6x00_init_board( int              board_count,
 		init_waitqueue_head( info->wait_queues + i );
 	}
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
 	/* Initialize the spinlock that's going to be used to avoid two
 	   processes opening the same board at the same time */
 
 	spin_lock_init( &info->use_lock );
+#endif
 
 	/* Download the Xilinx firmware, but only if the the reading the
 	   first byte of the I/O range for the Xilinx FPGA does not return
@@ -726,6 +1012,8 @@ static int me6x00_init_board( int              board_count,
 		goto init_failure;
 	}
 
+	info->is_init = 1;
+
 	return 0;
 
  init_failure:
@@ -733,6 +1021,8 @@ static int me6x00_init_board( int              board_count,
 	pci_release_regions( dev );
 	return -1;
 }
+
+#endif
 
 
 /*
@@ -860,6 +1150,42 @@ static int me6x00_xilinx_download( me6x00_info_st * info )
 }
 
 
+static void me6x00_release_single_board( struct pci_dev * dev )
+{
+	me6x00_info_st *info;
+	int i;
+
+
+	CALL_PDEBUG( "me6x00_release_single_board() is executed\n" );
+
+	for ( i = 0; i < me6x00_board_count; i++ )
+		if ( dev == info_vec[ i ].dev )
+			break;
+
+	if ( i == me6x00_board_count ) {
+		printk( KERN_ERR "ME6X00: me6x00_release_single_board() "
+			"called with unknown pci_dev structure.\n" );
+		return;
+	}
+
+	info = info_vec + i;
+
+	if ( ! info->is_init ) {
+		printk( KERN_ERR "ME6X00: me6x00_release_single_board() "
+			"called on uninitialized board.\n" );
+		return;
+	}
+
+	if ( me6x00_reset_board( i, FROM_CLEANUP ) != 0 )
+		printk( KERN_INFO "ME6X00: me6x00_release_single_board() "
+			"failed to reset board.\n" );
+
+	pci_release_regions( dev );
+
+	info->is_init = 0;
+}
+
+
 /*
  * Routine
  *   me6x00_reset_board
@@ -896,7 +1222,7 @@ static int me6x00_reset_board( int board_count,
 	/* I have no idea yet what the following write to the PLX register
 	   is supposed to do. But I found that it won't let me keep the
 	   current voltage of the DACs. On the other hand, at least for
-	   ME6000 boards irt doesn't seem to lead to any problems when these
+	   ME6000 boards it doesn't seem to lead to any problems when these
 	   lines are left out.                       JTT
 	*/
 
@@ -921,12 +1247,14 @@ static int me6x00_reset_board( int board_count,
 	for ( i = 0; i < 4; i++ )
 		me6x00_outl( 0x0, base + regs[ i ].ctrl );
 
-	/* Sending 0x7FFF to the DACs means an output voltage of 0V */
-	/*                                                          */
-	/* There's a problem here: I don't want the voltage to be   */
-	/* set to 0 V when closing the boards file descriptor. To   */
-	/* switch to this behaviour one has to set the "keep        */
-	/* voltage on close" property for each DAC of the board.    */
+	/* Sending 0x7FFF to the DACs means an output voltage of 0V
+	 *
+	 * There's a problem here: I don't want the voltage to be
+	 * set to 0 V when closing the boards file descriptor but
+	 * to keep it outputting the last set voltage. In order to
+	 * switch to this behaviour one has to set the "keep
+	 * voltage on close" property for each DAC of the board.
+	 */
 
 	for ( i = 0; i < info_vec[ board_count ].num_dacs; i++ )
 		if ( from == FROM_CLOSE &&
@@ -1044,7 +1372,9 @@ static int me6x00_open( struct inode * inode_p,
 
 	}
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_INC_USE_COUNT;
+#endif
 	return 0;
 }
 
@@ -1087,7 +1417,7 @@ static int me6x00_release( struct inode * inode_p,
 	CALL_PDEBUG( "me6x00_release() is executed\n" );
 
 	minor = MINOR( inode_p->i_rdev );
-	if ( me6x00_reset_board( minor, FROM_CLOSE ) ) {
+	if ( me6x00_reset_board( minor, FROM_CLOSE ) != 0 ) {
 		printk( KERN_ERR "ME6X00: me6x00_release(): Can't reset "
 			"board %d\n", minor );
 		return 1;
@@ -1110,7 +1440,9 @@ static int me6x00_release( struct inode * inode_p,
 		}
 	}
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_DEC_USE_COUNT;
+#endif
 	return 0;
 }
 
@@ -1157,8 +1489,14 @@ static int me6x00_ioctl( struct inode * inode_p,
 	minor = MINOR( inode_p->i_rdev );
 
 	if ( minor >= me6x00_board_count ) {
-		printk( KERN_ERR "ME6X00: me6x00_open(): Board %d does not "
+		printk( KERN_ERR "ME6X00: me6x00_ioctl(): Board %d does not "
 			"exist\n", minor );
+		return -ENODEV;
+	}
+
+	if ( ! info_vec[ minor ].is_init ) {
+		printk( KERN_ERR "ME6X00: me6x00_ioctl(): Call for "
+			"uninitialized board %d.\n", minor );
 		return -ENODEV;
 	}
 
@@ -1903,7 +2241,6 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 {
 	me6x00_info_st *info;
 	me6x00_write_st write;
-	unsigned int flags;
 	int free_space = 0;
 	int k = 0;
 	int ret = 0;
@@ -1911,6 +2248,11 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 	unsigned short *user_buf = NULL;
 	unsigned int reg;
 	unsigned int port;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
+	unsigned long flags;
+#else
+	unsigned int flags;
+#endif
 
 
 	CALL_PDEBUG( "me6x00_write_continuous() is executed\n" );
@@ -1952,7 +2294,7 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 
 	/* Start conversion */
 
-	reg &= ~0x4;
+	reg &= ~ 0x4;
 	me6x00_outl( reg, port );
 
 	/*
@@ -1965,12 +2307,24 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 
 	while ( 1 ) {
 
+
 		/* Get free buffer */
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
+		spin_lock_irqsave( &info->irq_lock, flags );
+#else
 		save_flags( flags );
 		cli( );
+#endif
 
 		free_space = me6x00_space_to_end( info->buf + write.dac );
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
+		spin_unlock_irqrestore( &info->irq_lock, flags );
+#else
+		restore_flags( flags );
+#endif
+
 		PDEBUG( "me6x00_write_continuous(): Buffer %d: Head = "
 			"0x%04X\n", write.dac,
 			info_vec[ minor ].buf[ write.dac ].head );
@@ -1981,8 +2335,6 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 			"0x%04X\n", write.dac, free_space );
 		PDEBUG( "me6x00_write_continuous(): Buffer %d: Udata size = "
 			"0x%04X\n", write.dac, count );
-
-		restore_flags( flags );
 
 		/* If there's no space left in the buffer wait to be woken on
 		   the next interrupt */
@@ -2045,8 +2397,12 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 		count -= free_space;
 		ret += free_space;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
+		spin_lock_irqsave( &info->irq_lock, flags );
+#else
 		save_flags( flags );
 		cli( );
+#endif
 
 		if ( me6x00_buf_count( info->buf + write.dac ) ) {
 			/* enable interrupts */
@@ -2057,7 +2413,11 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 			me6x00_outl( reg, port );
 		}
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
+		spin_unlock_irqrestore( &info->irq_lock, flags );
+#else
 		restore_flags( flags );
+#endif
 	}
 
 	write.ret = ret;
@@ -2247,9 +2607,15 @@ static int me6x00_write_wraparound( me6x00_write_st * arg,
  * Modification: JTT
  */
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+static irqreturn_t me6x00_isr( int              irq,
+			       void *           dev_id,
+			       struct pt_regs * dummy )
+#else
 static void me6x00_isr( int              irq,
 			void *           dev_id,
 			struct pt_regs * dummy )
+#endif
 {
 	me6x00_info_st *info;
 	unsigned int reg1;
@@ -2271,7 +2637,11 @@ static void me6x00_isr( int              irq,
 	if ( irq != info->irq ) {
 		ISR_PDEBUG( "me6x00_isr(): incorrect interrupt num: %d\n",
 			    irq );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		return IRQ_NONE;
+#else
 		return;
+#endif
 	}
 
 	/* Check if this board raised an interrupt */
@@ -2279,7 +2649,11 @@ static void me6x00_isr( int              irq,
 	if ( ! ( reg1 = 0xF & ( me6x00_inl( info->me6x00_regbase
 					    + ME6X00_IRQSREG_DACXX ) ) ) ) {
 		ISR_PDEBUG( "me6x00_isr(): not this board\n" );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		return IRQ_NONE;
+#else
 		return;
+#endif
 	}
 
 	/* Figure for which DAC the interrupt was send */
@@ -2293,7 +2667,11 @@ static void me6x00_isr( int              irq,
 	/* Something strange must be going on here... */
 
 	if ( dac > ME6X00_DAC03 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		return IRQ_NONE;
+#else
 		return;
+#endif
 
 	/* Increment interrupt count for the board */
 
@@ -2395,6 +2773,10 @@ static void me6x00_isr( int              irq,
 
 	ISR_PDEBUG( "me6x00_isr(): FIFO %d: reset interrupt\n", dac );
 	reg2 = me6x00_inl( info->me6x00_regbase + regs[ dac ].irqr );
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+	return IRQ_HANDLED;
+#endif
 }
 
 
@@ -2637,8 +3019,12 @@ static unsigned int me6x00_inl( unsigned int port )
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 2, 0 )
 MODULE_DESCRIPTION( "Preliminary driver for ME6x00 D/A cards "
 		    "(Meilhaus Electronic GmbH)" );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+module_param( major, int, S_IRUGO );
+#else
 MODULE_PARM( major, "i" );
 MODULE_PARM_DESC( major, "Major device number to use" );
+#endif
 #endif
 
 
@@ -2652,6 +3038,10 @@ MODULE_LICENSE( "GPL" );
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
 module_init( me6x00_init );
 module_exit( me6x00_exit );
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
+EXPORT_NO_SYMBOLS;
 #endif
 
 
