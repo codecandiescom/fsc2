@@ -74,6 +74,7 @@ static int Dont_exec = 0;
 %token DEF_TOKEN             /* DEFENSE */
 %token RF_TOKEN              /* RADIO_FREQUENCY */
 %token RF_GATE_TOKEN         /* RADIO_FREQUENCY_GATE */
+%token LSR_TOKEN             /* LASER */
 %token PSH_TOKEN             /* PULSE_SHAPE */
 %token PH1_TOKEN             /* PHASE_1 */
 %token PH2_TOKEN             /* PHASE_2 */
@@ -284,6 +285,7 @@ func:    MW_TOKEN                  { ass_func( PULSER_CHANNEL_MW ); }
        | DEF_TOKEN                 { ass_func( PULSER_CHANNEL_DEFENSE ); }
        | RF_TOKEN                  { ass_func( PULSER_CHANNEL_RF ); }
 	   | RF_GATE_TOKEN             { ass_func( PULSER_CHANNEL_RF_GATE ); }
+	   | LSR_TOKEN                 { ass_func( PULSER_CHANNEL_LASER ); }
 	   | PSH_TOKEN                 { ass_func( PULSER_CHANNEL_PULSE_SHAPE ); }
        | PH1_TOKEN                 { ass_func( PULSER_CHANNEL_PHASE_1 ); }
        | PH2_TOKEN                 { ass_func( PULSER_CHANNEL_PHASE_2 ); }

@@ -52,8 +52,7 @@ ifndef KERNEL_VER
 
 KERNEL_VER := $(shell grep UTS_RELEASE $(KERNELDIR)/include/linux/version.h \
 				      2>/dev/null | \
-				      sed 's/^[^"]\{1,\}"\([0-9\.]\{1,\}\).*$$/\1/' \
-					  2>/dev/null)
+				      sed 's/^[^"]\{1,\}"\([^"]\{1,\}\)".*$$/\1/' 2>/dev/null)
 
 all $(MODULE) install clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \
@@ -76,10 +75,12 @@ else                         # otherwise make kernel build system available
 EXTRA_CFLAGS := -I$(PWD)
 
 all:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) EXTRA_CFLAGS=$(EXTRA_CFLAGS) modules
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) EXTRA_CFLAGS=$(EXTRA_CFLAGS)
 
 install:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules_install
+	$(INSTALL) -d $(prefix)/include
+	$(INSTALL) -m 644 me6x00_drv.h $(prefix)/include
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
@@ -97,11 +98,6 @@ INCLUDES = -I$(KERNELDIR)/include -I.
 
 CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
 
-incl_dir = $(prefix)/include
-
-
-.SUFFIXES:
-.PHONY: all install cleanup clean
 
 all:
 	$(MAKE) $(SOURCES:.c=.o)
@@ -111,26 +107,26 @@ all:
 
 install:
 ifeq ($(ME6X00_KERNEL_SOURCE),)
-	if [ -d /lib/modules/`uname -r` ]; then                        \
-		if [ ! -d /lib/modules/`uname -r`/misc ]; then             \
-			$(INSTALL) -m 755 -d /lib/modules/`uname -r`/misc;     \
-		fi;                                                        \
-		$(INSTALL) -m 644 $(MODULE) /lib/modules/`uname -r`/misc;  \
-	else                                                           \
-		if [ ! -d /lib/modules/misc ]; then                        \
-			$(INSTALL) -m 755 -d /lib/modules/misc;                \
-		fi;                                                        \
-		$(INSTALL) -m 644 $(MODULE) /lib/modules/misc;             \
+	if [ -d /lib/modules/$KERNEL_VER ]; then                        \
+		if [ ! -d /lib/modules/$KERNEL_VER/misc ]; then             \
+			$(INSTALL) -m 755 -d /lib/modules/$KERNEL_VER/misc;     \
+		fi;                                                         \
+		$(INSTALL) -m 644 $(MODULE) /lib/modules/$KERNEL_VER/misc;  \
+	else                                                            \
+		if [ ! -d /lib/modules/misc ]; then                         \
+			$(INSTALL) -m 755 -d /lib/modules/misc;                 \
+		fi;                                                         \
+		$(INSTALL) -m 644 $(MODULE) /lib/modules/misc;              \
 	fi
 endif
-	$(INSTALL) -d $(incl_dir)
-	$(INSTALL) -m 644 me6x00_drv.h $(incl_dir)
+	$(INSTALL) -d $(prefix)/include
+	$(INSTALL) -m 644 me6x00_drv.h $(prefix)/include
 
 cleanup:
 	$(RM) $(RMFLAGS) *~
 
 clean:
-	$(RM) $(RMFLAGS) *.o autoconf.h *~
+	$(RM) $(RMFLAGS) *.o *~
 
 endif
 endif

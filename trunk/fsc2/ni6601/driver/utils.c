@@ -22,7 +22,6 @@
  */
 
 
-#include "autoconf.h"
 #include "ni6601_drv.h"
 
 
@@ -30,36 +29,39 @@
  * Function releases all resources allocated to the board
  *--------------------------------------------------------*/
 
-void ni6601_release_resources( Board *boards, int board_count )
+void ni6601_release_resources( Board *board )
 {
-	int i;
-
-	for ( i = 0; i < board_count; i++ ) {
-		if ( boards[ i ].buf ) {
-			vfree( boards[ i ].buf );
-			boards[ i ].buf = NULL;
-		}
-
-		if ( boards[ i ].mite ) {
-			iounmap( boards[ i ].mite );
-			boards[ i ].mite = NULL;
-		}
-
-		if ( boards[ i ].addr ) {
-			iounmap( boards[ i ].addr );
-			boards[ i ].addr = NULL;
-		}
-
-		if ( boards[ i ].irq ) {
-			free_irq( boards[ i ].irq, boards + i );
-			boards[ i ].irq = 0;
-		}
-
-		if ( boards[ i ].dev ) {
-			pci_release_regions( boards[ i ].dev );
-			boards[ i ].dev = NULL;
-		}
+	if ( board->buf ) {
+		vfree( board->buf );
+		board->buf = NULL;
 	}
+
+	if ( board->mite ) {
+		iounmap( board->mite );
+		board->mite = NULL;
+	}
+
+	if ( board->addr ) {
+		iounmap( board->addr );
+		board->addr = NULL;
+	}
+
+	if ( board->irq ) {
+		free_irq( board->irq, board );
+		board->irq = 0;
+	}
+
+	if ( board->has_region ) {
+		pci_release_regions( board->dev );
+		board->has_region = 0;
+	}
+
+	if ( board->is_enabled ) {
+		pci_disable_device( board->dev );
+		board->is_enabled = 0;
+	}
+
+	board->is_init = 0;
 }
 
 

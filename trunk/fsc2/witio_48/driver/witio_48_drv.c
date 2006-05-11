@@ -28,10 +28,6 @@
 #include "witio_48_drv.h"
 
 
-char kernel_version[ ] = UTS_RELEASE;
-
-
-
 /* Local function declarations */
 
 static int witio_48_get_ioport( void );
@@ -70,6 +66,11 @@ static struct file_operations witio_48_file_ops = {
 	release:            witio_48_release,
 };
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+static dev_t dev_no;
+struct cdev ch_dev;
+#endif
+
 
 /*------------------------------------*
  * Function for module initialization
@@ -77,38 +78,49 @@ static struct file_operations witio_48_file_ops = {
 
 static int __init witio_48_init( void )
 {
-#ifndef CONFIG_DEVFS_FS
-	int dynamic_major;
-#endif
+	int result;
 	int i, j;
 
 
 	/* Register the board as a character device with the major address
-	   either compiled into the driver or set while the module is loaded.
-	   If the major number is 0 this means we must use a dynamically
-	   assigned major number. */
+	   either compiled into the driver or set while the module is loaded
+	   (or a dynamically assigned one if 'major' is 0). */
 
-#ifdef CONFIG_DEVFS_FS
-	if ( ( board.dev_handle =
-	       devfs_register( NULL, "witio_48",
-			       DEVFS_FL_AUTO_OWNER | DEVFS_FL_AUTO_DEVNUM,
-			       0, 0, S_IFCHR | S_IRUGO | S_IWUGO,
-			       &witio_48_file_ops, &board ) ) == NULL ) {
-		printk( KERN_ERR "witio_48: Can't register device.\n" );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+	if ( major == 0 )
+		result = alloc_chrdev_region( &dev_no, 0, 1, "witio_48" );
+	else {
+		dev_no = MKDEV( major, 0 );
+		result = register_chrdev_region( dev_no, 1, "witio_48" );
+	}
+
+	if ( result < 0 ) {
+                printk( KERN_ERR "witio_48: Can't register as char "
+			"device.\n" );
+		return -EIO;
+	}
+
+	cdev_init( &ch_dev, &witio_48_file_ops );
+	ch_dev.owner = THIS_MODULE;
+
+	if ( cdev_add( &ch_dev, dev_no, 1 ) < 0 ) {
+                printk( KERN_ERR "witio_48: Can't register as char "
+                        "device.\n" );
 		goto device_registration_failure;
 	}
-#else
-	board.major = major;
 
-	if ( ( dynamic_major = register_chrdev( board.major, "witio_48",
+	if ( major != 0 )
+		board.major = MAJOR( dev_no );
+#else
+	if ( ( result = register_chrdev( major, "witio_48",
 						&witio_48_file_ops ) ) < 0 ) {
 		printk( KERN_ERR "witio_48: Can't register device major "
 			"%d.\n", board.major );
 		goto device_registration_failure;
 	}
 
-	if ( board.major == 0 )
-		board.major = dynamic_major;
+	if ( major != 0 )
+		board.major = result;
 #endif
 
 	/* Now try to get the IO-port region required for the board */
@@ -143,17 +155,15 @@ static int __init witio_48_init( void )
 	/* Finally tell the world about the successful installation ;-) */
 
 	printk( KERN_INFO "witio_48: Module succesfully installed.\n" );
-#ifndef CONFIG_DEVFS_FS
 	printk( KERN_INFO "witio_48: Major = %d\n", board.major );
-#endif
 	printk( KERN_INFO "witio_48: Base = 0x%lx\n",
 		( unsigned long ) board.base );
 
 	return 0;
 
  ioport_failure:
-#ifdef CONFIG_DEVFS_FS
-	devfs_unregister( board.dev_handle );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+	unregister_chrdev_region( dev_no, 1 );
 #else
 	unregister_chrdev( board.major, "witio_48" );
 #endif
@@ -174,11 +184,7 @@ static void __exit witio_48_cleanup( void )
 
 	release_region( ( unsigned long ) board.base, 0x0BUL );
 
-#ifdef CONFIG_DEVFS_FS
-	devfs_unregister( board.dev_handle );
-#else
 	if ( unregister_chrdev( board.major, "witio_48" ) != 0 )
-#endif
 		printk( KERN_ERR "witio_48: Device busy or other module "
 			"error.\n" );
 	else
@@ -215,6 +221,14 @@ static int witio_48_get_ioport( void )
 	/* Try to obtain the IO-port region requested for the port, we need
 	   11 bytes */
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+	if ( request_region( ( unsigned long ) base, 0x0BUL,
+			     "witio_48" ) == NULL ) {
+		printk( KERN_ERR "witio_48: Can't obtain region at boards "
+			"base address: %p\n", board.base );
+		return 1;
+	}
+#else
 	if ( check_region( ( unsigned long ) base, 0x0BUL ) < 0 ) {
 		printk( KERN_ERR "witio_48: Can't obtain region at boards "
 			"base address: %p\n", board.base );
@@ -225,6 +239,7 @@ static int witio_48_get_ioport( void )
            succeeded */
 
 	request_region( ( unsigned long ) base, 0x0BUL, "witio_48" );
+#endif
 
 	/* Finally set up the pointers to the registers on the board */
 
@@ -264,7 +279,9 @@ static int witio_48_open( struct inode *inode_p, struct file *file_p )
 		board.owner = current->uid;
 
 	board.in_use++;
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_INC_USE_COUNT;
+#endif
 
 	spin_unlock( &board.spinlock );
 
@@ -284,7 +301,9 @@ static int witio_48_release( struct inode *inode_p, struct file * file_p )
 	spin_lock( &board.spinlock );
 
 	board.in_use--;
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_DEC_USE_COUNT;
+#endif
 
 	spin_unlock( &board.spinlock );
 
@@ -900,8 +919,9 @@ static unsigned char witio_48_board_in( unsigned char *addr )
 
 /* No symbols are exported from the module */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 EXPORT_NO_SYMBOLS;
-
+#endif
 
 /* Mark the init and cleanup routines */
 
@@ -911,11 +931,17 @@ module_exit( witio_48_cleanup );
 
 /* Module options */
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+module_param( base, int, S_IRUGO );
+module_param( major, int, S_IRUGO );
+#else
 MODULE_PARM( base, "i" );
 MODULE_PARM_DESC( base, "Base address" );
 MODULE_PARM( major, "i" );
 MODULE_PARM_DESC( major, "Major device number (either 1-254 or 0 to use "
                  "dynamically assigned number)" );
+#endif
+
 MODULE_AUTHOR( "Jens Thoms Toerring <jt@toerring.de>" );
 MODULE_DESCRIPTION( "Driver for Wasco WITIO-48 DIO card" );
 

@@ -29,7 +29,7 @@ RMFLAGS = -f
 
 prefix  = $(shell if [ -e include/autoconf.h ]; then \
 					  grep RULBUS_EPP_PREFIX include/autoconf.h | \
-					  sed 's/^[^\"]*\"\([^\"]*\).*$$/\1/'; \
+					  sed 's/^[^"]*"\([^"]*\)".*$$/\1/'; \
 				  else \
 					  echo "/usr/local"; \
 				  fi)
@@ -80,4 +80,4 @@ cleanup:
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
-	$(RM) $(RMFLAGS) makelog *~ include/autoconf.h include/*~ util/*~
+	$(RM) $(RMFLAGS) makelog include/autoconf.h include/*~

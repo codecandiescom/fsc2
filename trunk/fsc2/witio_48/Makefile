@@ -71,4 +71,4 @@ cleanup:
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
-	$(RM) $(RMFLAGS) *~ makelog
+	$(RM) $(RMFLAGS) driver/autoconf.h makelog *~

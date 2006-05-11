@@ -32,7 +32,11 @@
 #if ! defined NI_DAQ_BOARD_HEADER
 #define NI_DAQ_BOARD_HEADER
 
-#include <linux/config.h>
+#include <linux/version.h>
+#include <linux/autoconf.h>
+
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 
 #if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
 #define MODVERSIONS
@@ -43,16 +47,16 @@
 #endif
 
 #include <linux/module.h>
-#include <linux/version.h>
-
-#if ! defined( KERNEL_VERSION )
-#define KERNEL_VERSION( a, b, c ) ( ( ( a ) << 16 ) | ( ( b ) << 8 ) | ( c ) )
-#endif
 
 #if defined( CONFIG_SMP ) && ! defined( __SMP__ )
 #define __SMP__
 #endif
 
+#else
+
+#include <linux/module.h>
+
+#endif
 
 #include <linux/kernel.h>
 #include <linux/fs.h>
@@ -71,6 +75,11 @@
 
 #if defined ( CONFIG_PROC_FS )
 #include <linux/proc_fs.h>
+#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+#include <linux/moduleparam.h>
+#include <linux/cdev.h>
 #endif
 
 
@@ -266,6 +275,9 @@ struct Board {
 	unsigned int irq;           /* Interrupt the board is using */
 
 	int in_use;                 /* set when board is opened */
+	int is_init;                /* set when board is initialized */
+	int is_enabled;
+	int has_region;
 	uid_t owner;                /* current owner of the board */
 
 	/* Spinlock used when opening the board to keep multiple users

@@ -169,9 +169,15 @@ typedef struct {
 
 #if defined __KERNEL__
 
-#include "autoconf.h"
 
-#include <linux/config.h>
+#include <linux/version.h>
+#include <linux/autoconf.h>
+
+#if ! defined ( CONFIG_PCI )
+#error "PCI support in kernel is missing."
+#endif
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 
 #if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
 #define MODVERSIONS
@@ -182,18 +188,15 @@ typedef struct {
 #endif
 
 #include <linux/module.h>
-#include <linux/version.h>
-
-#if ! defined ( CONFIG_PCI )
-#error "PCI support in kernel is missing."
-#endif
-
-#if ! defined( KERNEL_VERSION )
-#define KERNEL_VERSION( a, b, c ) ( ( ( a ) << 16 ) | ( ( b ) << 8 ) | ( c ) )
-#endif
 
 #if defined( CONFIG_SMP ) && ! defined( __SMP__ )
 #define __SMP__
+#endif
+
+#else
+
+#include <linux/module.h>
+
 #endif
 
 
@@ -215,6 +218,15 @@ typedef struct {
 #ifdef CONFIG_PROC_FS
 #include <linux/proc_fs.h>
 #endif
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+#include <linux/moduleparam.h>
+#include <linux/cdev.h>
+#endif
+
+
+#include "autoconf.h"
 
 
 #define NI6601_NAME "ni6601"
@@ -278,7 +290,10 @@ typedef struct {
 	unsigned long addr_phys;
 	unsigned long addr_len;
 
+	int is_init;
 	int in_use;
+	int is_enabled;
+	int has_region;
 	uid_t owner;
 	spinlock_t spinlock;
 
@@ -337,12 +352,16 @@ void ni6601_tc_irq_enable( Board *board, int counter );
 void ni6601_tc_irq_disable( Board *board, int counter );
 void ni6601_dma_irq_enable( Board *board, int counter );
 void ni6601_dma_irq_disable( Board *board );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+irqreturn_t ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy );
+#else
 void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy );
+#endif
 
 
 /* Functions from utils.c */
 
-void ni6601_release_resources( Board *boards, int board_count );
+void ni6601_release_resources( Board *board );
 void ni6601_register_setup( Board *board );
 void ni6601_dio_init( Board *board );
 void ni6601_enable_out( Board *board, int pfi );

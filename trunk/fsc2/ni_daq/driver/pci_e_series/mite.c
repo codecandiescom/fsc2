@@ -221,9 +221,16 @@ int pci_dma_buf_setup( Board *          board,
 		mdc->lc.tcr = cpu_to_le32( mdc->size );
 
 		if ( sys != NI_DAQ_AO_SUBSYSTEM ) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+			mdc->lc.mar = cpu_to_le32( dma_map_single(
+							   &board->dev->dev,
+							   mdc->buf, mdc->size,
+							   DMA_FROM_DEVICE ) );
+#else
 			mdc->lc.mar = cpu_to_le32( pci_map_single( board->dev,
 							mdc->buf, mdc->size,
 							PCI_DMA_FROMDEVICE ) );
+#endif
 			if ( mdc->lc.mar == 0 )
 				break;
 			mdc->is_mapped = 1;
@@ -240,10 +247,17 @@ int pci_dma_buf_setup( Board *          board,
 		for ( mdc = board->mite_chain[ sys ]; mdc->buf != NULL;
 		      mdc++ ) {
 			if ( mdc->is_mapped )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+				dma_unmap_single( &board->dev->dev,
+						  le32_to_cpu( mdc->lc.mar ),
+						  mdc->size,
+						  DMA_FROM_DEVICE );
+#else
 				pci_unmap_single( board->dev,
 						  le32_to_cpu( mdc->lc.mar ),
 						  mdc->size,
 						  PCI_DMA_FROMDEVICE );
+#endif
 			free_pages( ( unsigned long ) mdc->buf, mdc->order );
 		}
 
@@ -348,6 +362,21 @@ int pci_dma_buf_get( Board *          board,
 		/* Unmap the buffer (or sync it if it still might be needed) */
 
 		if ( mdc->is_mapped ) {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+			if ( still_used ||
+			     mdc->transfered + transf < mdc->size )
+				dma_sync_single_for_cpu( &board->dev->dev,
+						     le32_to_cpu( mdc->lc.mar )
+						     + mdc->transfered,
+						     transf, DMA_FROM_DEVICE );
+			else {
+				dma_unmap_single( &board->dev->dev,
+						  le32_to_cpu( mdc->lc.mar )
+						  + mdc->transfered,
+						  transf, DMA_FROM_DEVICE );
+				mdc->is_mapped = 0;
+			}
+#else
 			if ( still_used ||
 			     mdc->transfered + transf < mdc->size )
 				pci_dma_sync_single( board->dev,
@@ -361,6 +390,7 @@ int pci_dma_buf_get( Board *          board,
 						  transf, PCI_DMA_FROMDEVICE );
 				mdc->is_mapped = 0;
 			}
+#endif
 		}
 
 		/* Copy its (yet unused) content to the user buffer */
@@ -371,6 +401,14 @@ int pci_dma_buf_get( Board *          board,
 			PDEBUG( "Can't write to user space\n" );
 			return -EACCES;
 		}
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		if ( mdc->is_mapped )
+			dma_sync_single_for_device( &board->dev->dev,
+						    le32_to_cpu( mdc->lc.mar )
+						    + mdc->transfered,
+						    transf, DMA_FROM_DEVICE );
+#endif
 
 		mdc->transfered += transf;
 		*size -= transf;
@@ -441,12 +479,20 @@ void pci_dma_buf_release( Board *          board,
 
 	for ( mdc = board->mite_chain[ sys ]; mdc->buf != NULL; mdc++ ) {
 		if ( mdc->is_mapped )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+			dma_unmap_single( &board->dev->dev,
+					  le32_to_cpu( mdc->lc.mar ),
+					  mdc->size,
+					  sys == NI_DAQ_AI_SUBSYSTEM ?
+					  DMA_FROM_DEVICE : DMA_TO_DEVICE );
+#else
 			pci_unmap_single( board->dev,
 					  le32_to_cpu( mdc->lc.mar ),
 					  mdc->size,
 					  sys == NI_DAQ_AI_SUBSYSTEM ?
 					  PCI_DMA_FROMDEVICE :
 					  PCI_DMA_TODEVICE );
+#endif
 
 		free_pages( ( unsigned long ) mdc->buf, mdc->order );
 	}
@@ -522,11 +568,19 @@ int pci_dma_setup( Board *          board,
 		if ( mdc->is_mapped )
 			continue;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		mdc->lc.mar = cpu_to_le32( dma_map_single(
+					   &board->dev->dev,
+					   mdc->buf, mdc->size,
+					   sys == NI_DAQ_AO_SUBSYSTEM ? 
+					   DMA_TO_DEVICE : DMA_FROM_DEVICE ) );
+#else
 		mdc->lc.mar = cpu_to_le32( pci_map_single(
 				       	       board->dev, mdc->buf, mdc->size,
 					       sys == NI_DAQ_AO_SUBSYSTEM ? 
 					       PCI_DMA_TODEVICE :
 					       PCI_DMA_FROMDEVICE ) );
+#endif
 		if ( mdc->lc.mar == 0 ) {
 			PDEBUG( "Failed to set up DMA stream mapping\n" );
 			pci_dma_shutdown( board, sys );

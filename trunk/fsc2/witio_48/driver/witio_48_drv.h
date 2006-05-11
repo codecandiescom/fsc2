@@ -84,7 +84,11 @@ typedef struct {
 
 #if defined __KERNEL__
 
+#include <linux/version.h>
 #include <linux/config.h>
+
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 
 #if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
 #define MODVERSIONS
@@ -102,11 +106,12 @@ typedef struct {
 #define __NO_VERSION__
 #include <linux/module.h>
 
-#include <linux/version.h>
+#else
 
-#if ! defined( KERNEL_VERSION )
-#define KERNEL_VERSION( a, b, c ) ( ( ( a ) << 16 ) | ( ( b ) << 8 ) | ( c ) )
+#include <linux/module.h>
+
 #endif
+
 
 #include <linux/kernel.h>
 #include <linux/sched.h>
@@ -117,8 +122,10 @@ typedef struct {
 #include <asm/uaccess.h>
 #include <asm/io.h>
 
-#ifdef CONFIG_DEVFS_FS
-#include <linux/devfs_fs_kernel.h>
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+#include <linux/moduleparam.h>
+#include <linux/cdev.h>
 #endif
 
 
@@ -155,11 +162,7 @@ struct State {
 
 
 struct Board {
-#ifndef CONFIG_DEVFS_FS
 	int major;
-#else
-	devfs_handle_t dev_handle;
-#endif
 	unsigned char *base;
 	int in_use;
 	uid_t owner;

@@ -90,7 +90,7 @@ DET_GATE    DET(ECTION)?_?G(ATE)?
 DEF         DEF(ENSE)?
 RF          R(ADIO)?_?F(REQ(UENCY)?)?
 RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?
-LSR         (LASER)|(LSR)
+LSR         L(ASER)?
 PSH         P(ULSE)?_?SH(APE)?
 OI          O(THER)?(_?1)?
 OII         O(THER)?_?2

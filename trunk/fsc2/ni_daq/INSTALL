@@ -149,54 +149,20 @@ function do_compile() {
 
 # Check that system headers are available
 
-if [ ! -e /lib/modules/`uname -r`/build/include \
-	 -a ! \( -e /usr/include/linux -a -e /usr/include/asm \) ]; then
-    dialog --msgbox \
-"To create the driver for NI DAQ boards the system\n\
- header files are neeed but they don't seem to be\n\
- installed on your system, or the links pointing\n\
-   to the kernel include directory are not set\n\
- correctly. Please also see the README file.\n\
- Please fix this problem and then try again." 10 54;
-    exit 1;
-fi
-
-if [ ! \(     -e /lib/modules/`uname -r`/build/include/linux/autoconf.h \
+if [ ! \(     -e /lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h \
 		   -o -e /usr/include/linux/autoconf.h \) \
 	 -a -z "$NI_DAQ_KERNEL_SOURCE" ]; then
 	 dialog --msgbox \
 "To create the driver for NI DAQ boards the file\n\
-/lib/modules/`uname -r`/build/include/linux/autoconf.h\n\
+/lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h\n\
 or /usr/include/linux/autoconf.h (depending on how old\n\
 your kernel is) is required. This file contains vital\n\
 information about the kernel the module is intended for.\n\
+Please also see additonal information in the README file.\n\
 
 Alternatively, you could set the environment variable\n\
 NI_DAQ_KERNEL_SOURCE to the location of the directory with\n\
 the kernel sources.
-
-   Unfortunately, the installation can't proceed.\n" 16 62;
-	 exit 1;
-fi
-
-if [     \(      -e /lib/modules/`uname -r`/build \
-		    -a ! -e /lib/modules/`uname -r`/build/include/linux/version.h \) \
-	 -o \(       -n "$NI_DAQ_KERNEL_SOURCE" \
-		        -a ! -e $NI_DAQ_KERNEL_SOURCE/include/linux/version.h \) \
-	 -o \(      -L /usr/include/linux \
-		   -a ! -e /usr/include/linux/version.h \) ]; then
-    dialog --msgbox \
-"To create the driver for NI DAQ boards the file\n\
-/lib/modules/`uname -r`/build/include/linux/version.h\n\
-or /usr/include/linux/version.h (if /usr/include/linux\n\
-is a symbolic link to the linux include directory in the\n\
-kernel sources) is required. This file gets created\n\
-automatically when you run \"make dep\" in the kernel\n\
-source directory.
-
-If the environment variable NI_DAQ_KERNEL_SOURCE points\n\
-to the kernel sources and there exists a file version.h\n\
-in \$NI_DAQ_KERNEL_SOURCE/include/linux this will also do.\n\
 
    Unfortunately, the installation can't proceed.\n" 17 62;
 	 exit 1;
@@ -235,6 +201,11 @@ function do_install() {
 
 PREFIX=`grep NI_DAQ_PREFIX driver/include/autoconf.h | sed 's/[^\"]*//' | tr -d \"`
 MAJOR=`grep NI_DAQ_MAJOR driver/include/autoconf.h | awk '{print $3}'`;
+if [ `echo $KERNEL_VERSION | sed 's/^\(2\.6\)\..*$/XXX/'` == "XXX" ]; then
+	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/extra/ni_daq.ko";
+else
+	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/misc/ni_daq.o";
+fi
 
 dialog --yesno \
 "Now we're ready to install everything. This starts with\n\
@@ -244,7 +215,7 @@ directories that don't exist:\n\n\
  include/ni_daq_drv.h => $PREFIX/include/ni_daq_drv.h\n\
  lib/libni_daq.a      => $PREFIX/lib/libni_daq.a\n\
  lib/libni_daq.so     => $PREFIX/lib/libni_daq.so\n\
- driver/ni_daq.o      => /lib/modules/`uname -r`/misc/ni_daq.o\n\n\
+ driver/ni_daq.o      => $MOD_INST_AS\n\n\
 		Do you want to continue ?" 15 70
 
 test $? -eq 0 || exit 0
@@ -421,9 +392,9 @@ echo "alias char-major-$MAJOR ni_daq" >> $MODULECONF
 if [ -z "$NI_DAQ_KERNEL_SOURCE" ]; then
 	dialog --yesno \
 "Do you want to update the modules dependency\n\
-file /lib/modules/`uname -r`/modules.dep using\n\
+file /lib/modules/$KERNEL_VERSION/modules.dep using\n\
         the command 'depmod -a'?" 8 55
-	test $? || depmod -a
+	test $? || depmod -v $KERNEL_VERSION -a >/dev /NULL
 fi
 }
 
@@ -488,6 +459,38 @@ esac
 
 
 ################################################################
+# Function sets the variable KENREL_VERSION to a string with 
+# the name of the kernel we're supposed to compile for.
+
+function get_kernel_version() {
+
+	if [ -n "$NI_DAQ_KERNEL_SOURCE" ]; then
+		KERNEL_DIR=$NI_DAQ_KERNEL_SOURCE;
+	else
+		KERNEL_DIR="/lib/modules/`uname -r`/build";
+		if [ -z "$KERNEL_DIR" ]; then
+			KERNEL_DIR="/usr/src/linux";
+		fi
+	fi
+
+	KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_DIR/include/linux/version.h \
+                    2>/dev/null | \
+				    sed 's/^[^"]\{1,\}"\([^"]\{1,\}\)".*$/\1/' 2>/dev/null`;
+	
+	dialog --msgbox "\
+KD = $KERNEL_DIR\n\
+KV = $KERNEL_VERSION" 8 60;
+
+	if [ -z "$KERNEL_VERSION" ]; then
+		dialog --msgbox "\
+Sorry, can't determine kernel version under the assumption\n\
+that kernel sources are at '$KERNEL_DIR'" 6 64;
+		exit 1
+	fi
+}
+
+
+################################################################
 # Main part of the installation script
 
 trap "rm -f /tmp/NI_DAQ_reply" 0 1 2 15
@@ -503,14 +506,15 @@ if [ $? -eq 1 ]; then
 fi
 
 
-# Check if this is a 2.4 kernel
+# Check if this is a 2.4 or 2.6 kernel
 
-if [    `uname -r | cut -d'.' -f1` != "2" \
-     -o `uname -r | cut -d'.' -f2` != "4" ]; then
+get_kernel_version;
+
+if [ `echo $KERNEL_VERSION | sed 's/^\(2\.[46]\)\..*$/XXX/'` != "XXX" ]; then
     dialog --yesno \
-"This package is only tested with 2.4 kernels yet.\n\
+"This package is only tested with 2.4 and 2.6 kernels.\n\
 There may be lots of problems with other kernels.\n\n\
-           Do you want to continue?" 8 56
+           Do you want to continue?" 8 60
     test $? -eq 0 || exit 0
 fi
 

@@ -33,12 +33,55 @@
 /******************************************************************/
 
 
+#define PCI_DEVICE_ID_PCI_MIO_16E_1      0x1180
+#define PCI_DEVICE_ID_PCI_MIO_16E_4      0x1190
+#define PCI_DEVICE_ID_PCI_MIO_16XE_10    0x1170
+#define PCI_DEVICE_ID_PCI_MIO_16XE_50    0x0162
+#define PCI_DEVICE_ID_PCI_6023E          0x2a60
+#define PCI_DEVICE_ID_PCI_6024E          0x2a70
+#define PCI_DEVICE_ID_PCI_6031E          0x1330
+#define PCI_DEVICE_ID_PCI_6032E          0x1270
+#define PCI_DEVICE_ID_PCI_6033E          0x1340
+#define PCI_DEVICE_ID_PCI_6052E          0x18b0
+#define PCI_DEVICE_ID_PCI_6071E          0x1350
+
+
+static struct pci_device_id pci_e_series_pci_tbl[ ] = {
+	{ PCI_VENDOR_ID_NATINST, PCI_DEVICE_ID_PCI_MIO_16E_1,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_NATINST, PCI_DEVICE_ID_PCI_MIO_16E_4,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_NATINST, PCI_DEVICE_ID_PCI_MIO_16XE_10,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+	{ PCI_VENDOR_ID_NATINST, PCI_DEVICE_ID_PCI_MIO_16XE_50,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+        { PCI_VENDOR_ID_NATINST, PCI_DEVICE_ID_PCI_6023E,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+        { PCI_VENDOR_ID_NATINST, PCI_DEVICE_ID_PCI_6024E,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+        { PCI_VENDOR_ID_NATINST, PCI_DEVICE_ID_PCI_6031E,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+        { PCI_VENDOR_ID_NATINST, PCI_DEVICE_ID_PCI_6032E,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+        { PCI_VENDOR_ID_NATINST, PCI_DEVICE_ID_PCI_6033E,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+        { PCI_VENDOR_ID_NATINST, PCI_DEVICE_ID_PCI_6052E,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+        { PCI_VENDOR_ID_NATINST, PCI_DEVICE_ID_PCI_6071E,
+	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
+        { 0 }
+};
+
+
+MODULE_DEVICE_TABLE( pci, pci_e_series_pci_tbl );
+
+
 static Board_Properties pci_e_series_boards[ ]= {
 
 	/* PCI-MIO-16E-1 */
 
 	{
-		id:                 0x1180,
+		id:                 PCI_DEVICE_ID_PCI_MIO_16E_1,
 		name:               "pci-mio-16e-1",
 		ai_num_channels:    16,
 		ai_num_bits:        12,
@@ -66,7 +109,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 	/* PCI-MIO-16E-4 */
 
 	{
-		id:                 0x1190,
+		id:                 PCI_DEVICE_ID_PCI_MIO_16E_4,
 		name:               "pci-mio-16e-4",
 		ai_num_channels:    16,
 		ai_num_bits:        12,
@@ -94,7 +137,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 	/* PCI-MIO-16XE-10 */
 
 	{
-		id:                 0x1170,
+		id:                 PCI_DEVICE_ID_PCI_MIO_16XE_10,
 		name:               "pci-mio-16xe-10",
 		ai_num_channels:    16,
 		ai_num_bits:        16,
@@ -122,7 +165,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 	/* PCI-MIO-16XE-50 */
 
 	{
-		id:                 0x0162,
+		id:                 PCI_DEVICE_ID_PCI_MIO_16XE_50,
 		name:               "pci-mio-16xe-50",
 		ai_num_channels:    16,
 		ai_num_bits:        16,
@@ -144,7 +187,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 	/* PCI-6023E */
 
 	{
-		id:                 0x2a60,
+		id:                 PCI_DEVICE_ID_PCI_6023E,
 		name:               "pci-6023e",
 		ai_num_channels:    16,
 		ai_num_bits:        12,
@@ -166,7 +209,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 	/* PCI-6024E */
 
 	{
-		id:                 0x2a70,
+		id:                 PCI_DEVICE_ID_PCI_6024E,
 		name:               "pci-6024e",
 		ai_num_channels:    16,
 		ai_num_bits:        12,
@@ -193,7 +236,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 	/* PCI-6031E */
 
 	{
-		id:                 0x1330,
+		id:                 PCI_DEVICE_ID_PCI_6031E,
 		name:               "pci-6031e",
 		ai_num_channels:    64,
 		ai_num_bits:        16,
@@ -221,7 +264,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 	/* PCI-6032E */
 
 	{
-		id:                 0x1270,
+		id:                 PCI_DEVICE_ID_PCI_6032E,
 		name:               "pci-6032e",
 		ai_num_channels:    16,
 		ai_num_bits:        16,
@@ -249,7 +292,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 	/* PCI-6033E */
 
 	{
-		id:                 0x1340,
+		id:                 PCI_DEVICE_ID_PCI_6033E,
 		name:               "pci-6033e",
 		ai_num_channels:    64,
 		ai_num_bits:        16,
@@ -277,7 +320,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 	/* PCI-6052E */
 
 	{
-		id:                 0x18b0,
+		id:                 PCI_DEVICE_ID_PCI_6052E,
 		name:               "pci-6052e",
 		ai_num_channels:    16,
 		ai_num_bits:        16,
@@ -305,7 +348,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 	/* PCI-6071E */
 
 	{
-		id:                 0x1350,
+		id:                 PCI_DEVICE_ID_PCI_6071E,
 		name:               "pci-6071e",
 		ai_num_channels:    64,
 		ai_num_bits:        12,

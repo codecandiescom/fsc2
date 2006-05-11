@@ -99,7 +99,9 @@ static int ni_daq_open( struct inode * inode_p,
 
 	board->in_use++;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_INC_USE_COUNT;
+#endif
 
 	spin_unlock( &board->open_spinlock );
 
@@ -147,7 +149,9 @@ static int ni_daq_release( struct inode * inode_p,
 		
 	board->in_use--;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_DEC_USE_COUNT;
+#endif
 
 	return 0;
 }

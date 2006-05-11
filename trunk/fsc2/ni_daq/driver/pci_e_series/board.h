@@ -37,7 +37,7 @@
 #endif
 
 
-#define PCI_VENDOR_NATINST          0x1093
+#define PCI_VENDOR_ID_NATINST          0x1093
 
 
 struct Register_Addresses {
@@ -178,45 +178,85 @@ struct Register_Addresses {
 /* Functions from board.c - all must be globally visible and may not
    contain any reference to the underlying hardware */
 
-void pci_board_register_setup( Board *board );
-void pci_board_irq_handling_setup( Board *board );
-void pci_board_reset_all( Board *board );
-void pci_clear_configuration_memory( Board *board );
-void pci_clear_ADC_FIFO( Board *board );
-void pci_clear_DAC_FIFO( Board *board );
-int pci_configuration_high( Board *board, unsigned int channel, 
-			    NI_DAQ_AI_TYPE channel_type );
-int pci_configuration_low( Board *board, unsigned int last_channel,
-			   NI_DAQ_STATE generate_trigger,
-			   NI_DAQ_STATE dither_enable,
-			   NI_DAQ_BU_POLARITY polarity,
-			   NI_DAQ_AI_GAIN_TYPES gain );
-int pci_ao_configuration( Board *board, unsigned int channel, 
-			  NI_DAQ_STATE ground_ref,
-			  NI_DAQ_STATE external_ref,
-			  NI_DAQ_STATE reglitch,
-			  NI_DAQ_BU_POLARITY polarity );
-int pci_dac_direct_data( Board *board, unsigned int channel, int value );
-void pci_board_irq_handler( int irq, void *data, struct pt_regs *dummy );
+void pci_board_register_setup( Board * /* board */ );
+
+void pci_board_irq_handling_setup( Board * /* board */ );
+
+void pci_board_reset_all( Board * /* board */ );
+
+void pci_clear_configuration_memory( Board * /* board */ );
+
+void pci_clear_ADC_FIFO( Board * /* board */ );
+
+void pci_clear_DAC_FIFO( Board * /* board */ );
+
+int pci_configuration_high( Board *        /* board        */,
+			    unsigned int   /* channel      */, 
+			    NI_DAQ_AI_TYPE /* channel_type */ );
+
+int pci_configuration_low( Board *              /* board            */,
+			   unsigned int         /* last_channel     */,
+			   NI_DAQ_STATE         /* generate_trigger */,
+			   NI_DAQ_STATE         /* dither_enable    */,
+			   NI_DAQ_BU_POLARITY   /* polarity         */,
+			   NI_DAQ_AI_GAIN_TYPES /* gain             */ );
+
+int pci_ao_configuration( Board *            /* board        */,
+			  unsigned int       /* channel      */,
+			  NI_DAQ_STATE       /* ground_ref   */,
+			  NI_DAQ_STATE       /* external_ref */,
+			  NI_DAQ_STATE       /* reglitch     */,
+			  NI_DAQ_BU_POLARITY /* polarity     */ );
+
+int pci_dac_direct_data( Board *      /* board   */,
+			 unsigned int /* channel */,
+			 int          /* value   */ );
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+irqreturn_t pci_board_irq_handler( int              /* irq   */,
+				   void *           /* data  */,
+				   struct pt_regs * /* dummy */ );
+#else
+void pci_board_irq_handler( int              /* irq   */,
+			    void *           /* data  */,
+			    struct pt_regs * /* dummy */ );
+#endif
 
 
 /* Functions from mite.c that must be globally visible (and thus don't
    contain direct references to the MITE, i.e. the underlying hardware) */
 
-int pci_dma_setup( Board *board, NI_DAQ_SUBSYSTEM sub_system );
-int pci_dma_buf_setup( Board *board, NI_DAQ_SUBSYSTEM sub_system,
-		       size_t data_points, int continuous );
-int pci_dma_buf_get( Board *board, NI_DAQ_SUBSYSTEM sys, void *dest,
-		     size_t *size, int still_used );
-size_t pci_dma_get_available( Board *board, NI_DAQ_SUBSYSTEM sys );
-void pci_dma_buf_release( Board *board, NI_DAQ_SUBSYSTEM sys );
-int pci_dma_shutdown( Board *board, NI_DAQ_SUBSYSTEM sys );
+int pci_dma_setup( Board *          /* board      */,
+		   NI_DAQ_SUBSYSTEM /* sub_system */ );
+
+int pci_dma_buf_setup( Board *          /* board       */,
+		       NI_DAQ_SUBSYSTEM /* sub_system  */,
+		       size_t           /* data_points */,
+		       int              /* continuous  */ );
+
+int pci_dma_buf_get( Board *          /* board */,
+		     NI_DAQ_SUBSYSTEM /* sys   */,
+		     void *           /* dest  */,
+		     size_t *         /* size  */,
+		     int still_       /* used  */ );
+
+size_t pci_dma_get_available( Board *          /* board */,
+			      NI_DAQ_SUBSYSTEM /* sys   */ );
+
+void pci_dma_buf_release( Board *          /* board */,
+			  NI_DAQ_SUBSYSTEM /* sys   */ );
+
+int pci_dma_shutdown( Board *          /* board */,
+		      NI_DAQ_SUBSYSTEM /* sys   */ );
 
 
 /* Functions from caldac.c that must be globally visible */
 
-void pci_set_trigger_levels( Board *board, u16 high, u16 low );
-void caldac_calibrate( Board *board );
+void pci_set_trigger_levels( Board * /* board */,
+			     u16     /* high  */,
+			     u16     /* low   */ );
+
+void caldac_calibrate( Board * /* board */ );
 
 
 #endif /* PCI_E_SERIES_BOARD_H */

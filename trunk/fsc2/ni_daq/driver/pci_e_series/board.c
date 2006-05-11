@@ -374,7 +374,7 @@ int pci_configuration_high( Board *        board,
 int pci_configuration_low( Board *              board,
 			   unsigned int         last_channel,
 			   NI_DAQ_STATE         generate_trigger,
-			   NI_DAQ_STATE dither_ enable,
+			   NI_DAQ_STATE         dither_enable,
 			   NI_DAQ_BU_POLARITY   polarity,
 			   NI_DAQ_AI_GAIN_TYPES gain )
 {
@@ -490,9 +490,15 @@ int pci_dac_direct_data( Board *      board,
  * Handler for interrupts raised by the boards
  *---------------------------------------------*/
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+irqreturn_t pci_board_irq_handler( int              irq,
+				   void *           data,
+				   struct pt_regs * dummy )
+#else
 void pci_board_irq_handler( int              irq,
 			    void *           data,
 			    struct pt_regs * dummy )
+#endif
 {
 	u16 status;
 	Board *board = ( Board * ) data;
@@ -507,6 +513,10 @@ void pci_board_irq_handler( int              irq,
 	     ( status = pci_stc_readw( board, STC_AO_Status_1 ) ) &
 	     Interrupt_B_St )
 		pci_irq_B_handler( board, status );
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+	return IRQ_HANDLED;
+#endif
 }
 
 

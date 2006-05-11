@@ -108,6 +108,7 @@ DET_GATE    DET(ECTION)?_?G(ATE)?(#{INT})?:?
 DEF         DEF(ENSE)?(#{INT})?:?
 RF          R(ADIO)?_?F(REQ(UENCY)?)?(#{INT})?:?
 RF_GATE     R(ADIO)?_?F(REQ(UENCY)?)?_?G(ATE)?(#{INT})?:?
+LSR         L(ASER)?(#{INT})?:?
 PSH         P(ULSE)?_?SH(APE(R)?)?(#{INT})?:?
 OI          O(THER)?(_?1)?(#{INT})?:?
 OII         O(THER)?_?2?(#{INT})?:?
@@ -307,6 +308,11 @@ WS          [\n=: ]+
 {RF_GATE}   {
 				set_cur_pulser( );
 				return RF_GATE_TOKEN;
+			}
+
+{LSR}       {
+				set_cur_pulser( );
+				return PSH_TOKEN;
 			}
 
 {PSH}       {

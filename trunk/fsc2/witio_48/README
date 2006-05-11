@@ -6,7 +6,8 @@ DIO ISA card by Messcomp Datentechnik GmbH. It was mainly written to
 allow support for this type of cards for a program for spectrometer
 control, fsc2, I have written. It currently only allows to use the
 board for simple DIO, the timer/counter chips also on the board are
-not supported.
+not supported. The module has only been tested under 2.4 kernels but
+also compiles for 2.6 kernels.
 
 
 II. Preparation for installation
@@ -14,19 +15,19 @@ II. Preparation for installation
 
 Before you start compiling and installing the package please note: The
 way the module is build depends strongly on the configuration of the
-kernel the modules is supposed to work with and the directories with
-the kernels include (header) files are needed. Some distributions allow
-you to install just the kernel headers, this could be enough. Otherwise
-you will have to install the complete kernel sources and may need to do
-some further work.
+kernel the modules is supposed to work with. For kernels of up to and
+including the 2.4 serie the directories with the kernels include (header)
+files are needed. Some distributions allow you to install just the kernel
+headers, this could be enough. For kernels of the 2.6 series the
+complete kernel sourves are required.
 
 In the 'include/linux' subdirectory of the kernel sources a file called
 'autoconf.h' is of special importance. It contains information on how the
 kernel was build. Make sure that it is in sync with the kernel (it could
 be out of sync if you have run 'make menuconfig' or 'make xconfig' etc.,
 changed some settings and saved the results, but didn't built the kernel
-with these new settings). Especially important is that the macro
-CONFIG_MODVERSIONS is defined correctly. If you compile the module but
+with these new settings). For 2.4 kernels of special important is that the
+macro CONFIG_MODVERSIONS is defined correctly. If you compile the module but
 get error messages about undefined symbols when you try to run depmode or
 insmode on the new module chances are high that CONFIG_MODVERSIONS was
 defined in autoconf.h but the kernel has not been compiled with this
@@ -141,4 +142,4 @@ library and that the driver and library even seem to work when no card is
 installed in the computer at all.
 
 
-    22.1.2004   Jens Thoms Törring <jt@toerring.de>
+    10.5.2006   Jens Thoms Törring <jt@toerring.de>

@@ -47,7 +47,12 @@
 
 
 #include <linux/version.h>
-#include <linux/config.h>
+#include <linux/autoconf.h>
+
+
+#if ! defined ( CONFIG_PCI )
+#error "PCI support in kernel is missing."
+#endif
 
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
@@ -155,14 +160,14 @@ static int me6x00_find_boards( void );
 static int me6x00_init_board( struct pci_dev *             /* dev */,
 			      const struct pci_device_id * /* id  */ );
 #else
-static int me6x00_init_board( int              /* board_count */,
-			      struct pci_dev * /* dev         */ );
+static __init int me6x00_init_board( int              /* board_count */,
+				     struct pci_dev * /* dev         */ );
 #endif
 
 static int me6x00_xilinx_download( me6x00_info_st * info );
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-static void me6x00_release_single_board( struct pci_dev * /* dev */ );
+static void me6x00_release_board( struct pci_dev * /* dev */ );
 #endif
 
 static int me6x00_reset_board( int /* board */,
@@ -240,7 +245,7 @@ static int major = ME6X00_MAJOR;
 
 /* Structure holding information about the different board types */
 
-static struct pci_device_id me6x00_pci_tbl[] __devinitdata = {
+static struct pci_device_id me6x00_pci_tbl[ ] = {
 	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6004,
 	  PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0 },
 	{ PCI_VENDOR_ID_MEILHAUS, PCI_DEVICE_ID_MEILHAUS_ME6008,
@@ -289,7 +294,7 @@ static struct pci_driver me6x00_pci_driver = {
 	.name     = "ME6X00",
 	.id_table = me6x00_pci_tbl,
 	.probe    = me6x00_init_board,
-	.remove   = me6x00_release_single_board,
+	.remove   = me6x00_release_board,
 };
 
 static dev_t dev_no;
@@ -414,12 +419,8 @@ static int __init me6x00_init( void )
 int init_module( void )
 #endif
 {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-	int result;
-#else
-	int res_major;
-#endif
 #ifdef CONFIG_PCI
+	int result;
 	int i;
 
 
@@ -447,6 +448,7 @@ int init_module( void )
 	PDEBUG( "init_module(): %d board(s) found\n", me6x00_board_count );
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+
 	if ( major == 0 )
 		result = alloc_chrdev_region( &dev_no, 0, me6x00_board_count,
 					      ME6X00_NAME );
@@ -478,17 +480,18 @@ int init_module( void )
 
 	if ( major == 0 )
 		major = MAJOR( dev_no );
+
 #else
 
-	if ( ( res_major = register_chrdev( major, ME6X00_NAME,
-					    &me6x00_file_operations ) ) < 0 ) {
+	if ( ( result = register_chrdev( major, ME6X00_NAME,
+					 &me6x00_file_operations ) ) < 0 ) {
 		printk( KERN_ERR "ME6X00: init_module(): "
 			"Can't get assigned a major number\n" );
 		return -ENODEV;
 	}
 
 	if ( major == 0 )
-		major = res_major;
+		major = result;
 #endif
 
 	printk( KERN_INFO "ME6X00: driver succesfully installed.\n" );
@@ -531,20 +534,16 @@ static void __exit me6x00_exit( void )
 void cleanup_module( void )
 #endif
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+
+	pci_register_driver( &me6x00_pci_driver );
+	cdev_del( &ch_dev );
+	unregister_chrdev_region( dev_no, me6x00_board_count );
+
+#else
 	int i;
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-	for ( i = 0; i < me6x00_board_count; i++ ) {
-		if ( info_vec[ i ].is_init ) {
-			me6x00_reset_board( i, FROM_CLEANUP );
-			pci_release_regions( info_vec[ i ].dev );
-		}
-	}
-
-	cdev_del( &ch_dev );
-	unregister_chrdev_region( dev_no, me6x00_board_count );
-#else
 	for ( i = 0; i < me6x00_board_count; i++ ) {
 		me6x00_reset_board( i, FROM_CLEANUP );
 		pci_release_regions( info_vec[ i ].dev );
@@ -555,6 +554,7 @@ void cleanup_module( void )
 			"can't unregister module.\n" );
 		return;
 	}
+
 #endif
 
 	printk( KERN_INFO "ME6X00: driver de-installed.\n" );
@@ -589,14 +589,10 @@ static int me6x00_find_boards( void )
 
 	max_types = sizeof me6x00_pci_tbl / sizeof me6x00_pci_tbl[ 0 ];
 
-	while ( board_count < ME6X00_MAX_BOARDS &&
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+	while ( board_count < ME6X00_MAX_BOARDS &&
 		NULL != ( dev = pci_get_device( PCI_VENDOR_ID_MEILHAUS,
 						PCI_ANY_ID, dev ) ) ) {
-#else
-		NULL != ( dev = pci_find_device( PCI_VENDOR_ID_MEILHAUS,
-						 PCI_ANY_ID, dev ) ) ) {
-#endif
 		/* Check if the board we found is a ME6X00 or ME6100 card */
 
 		for ( i = 0; i < max_types; i++ )
@@ -604,9 +600,7 @@ static int me6x00_find_boards( void )
 				break;
 
 		if ( i == max_types ) {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 			pci_dev_put( dev );
-#endif
 			continue;
 		}
 
@@ -614,11 +608,26 @@ static int me6x00_find_boards( void )
 		   PCI core system asks us to to by calling the appropriate
 		   routine itself */
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 		info_vec[ board_count ].dev = dev;
-		info_vec[ board_count ].is_init = 0;
+		info_vec[ board_count++ ].is_init = 0;
 		pci_dev_put( dev );
-#else
+	}
+
+#else   /* for 2.4 kernels and older */
+
+	while ( board_count < ME6X00_MAX_BOARDS &&
+		NULL != ( dev = pci_find_device( PCI_VENDOR_ID_MEILHAUS,
+						 PCI_ANY_ID, dev ) ) ) {
+		/* Check if the board we found is a ME6X00 or ME6100 card */
+
+		for ( i = 0; i < max_types; i++ )
+			if ( dev->device == me6x00_pci_tbl[ i ].device )
+				break;
+
+		if ( i == max_types ) {
+			continue;
+		}
+
 		/* Initialize the board */
 
 		if ( me6x00_init_board( board_count, dev ) ) {
@@ -626,10 +635,11 @@ static int me6x00_find_boards( void )
 				"Can't initialize board\n" );
 			return -1;
 		}
-#endif
 
 		board_count++;
 	}
+
+#endif
 
 	if ( board_count == ME6X00_MAX_BOARDS )
 		printk( KERN_WARNING "ME6X00: init_module(): Possibly more "
@@ -855,13 +865,14 @@ static int me6x00_init_board( struct pci_dev *             dev,
  init_failure:
 
 	pci_release_regions( dev );
+	pci_disable_device( dev );
 	return -1;
 }
 
-#else  /* version for kernels 2.4 and older */
+#else  /* version for 2.4 kernels and older */
 
-static int me6x00_init_board( int              board_count,
-			      struct pci_dev * dev )
+static __init int me6x00_init_board( int              board_count,
+				     struct pci_dev * dev )
 {
 	unsigned int i;
 	me6x00_info_st *info;
@@ -1019,6 +1030,7 @@ static int me6x00_init_board( int              board_count,
  init_failure:
 
 	pci_release_regions( dev );
+	pci_disable_device( dev );
 	return -1;
 }
 
@@ -1150,20 +1162,47 @@ static int me6x00_xilinx_download( me6x00_info_st * info )
 }
 
 
-static void me6x00_release_single_board( struct pci_dev * dev )
+/*
+ * Routine
+ *   me6x00_release_board
+ *
+ * Description:
+ *   This function is only needed for 2.6 kernels where the PCI core
+ *   system calls this function for each of the boards when the driver
+ *   becomes unregistered (or if the board would get pulled out of a
+ *   hot-pluggable slot, but that's rather unlikely for these boards;-)
+ *   The function just calls me6x00_reset_board() to bring it back into
+ *   a well-known, quite state.
+ *
+ * Parameter list:
+ *   Name           Type          Access    Description
+ *--------------------------------------------------------------------------
+ *   dev      struct pci_dev *    r         Address of PCI structure of
+ *                                          the board
+ *
+ * Result:
+ *   none
+ *--------------------------------------------------------------------------
+ * Author: JTT
+ */
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+
+static void me6x00_release_board( struct pci_dev * dev )
 {
 	me6x00_info_st *info;
 	int i;
 
 
-	CALL_PDEBUG( "me6x00_release_single_board() is executed\n" );
+	CALL_PDEBUG( "me6x00_release_board() is executed\n" );
 
 	for ( i = 0; i < me6x00_board_count; i++ )
 		if ( dev == info_vec[ i ].dev )
 			break;
 
 	if ( i == me6x00_board_count ) {
-		printk( KERN_ERR "ME6X00: me6x00_release_single_board() "
+		printk( KERN_ERR "ME6X00: me6x00_release_board() "
 			"called with unknown pci_dev structure.\n" );
 		return;
 	}
@@ -1171,19 +1210,21 @@ static void me6x00_release_single_board( struct pci_dev * dev )
 	info = info_vec + i;
 
 	if ( ! info->is_init ) {
-		printk( KERN_ERR "ME6X00: me6x00_release_single_board() "
+		printk( KERN_ERR "ME6X00: me6x00_release_board() "
 			"called on uninitialized board.\n" );
 		return;
 	}
 
 	if ( me6x00_reset_board( i, FROM_CLEANUP ) != 0 )
-		printk( KERN_INFO "ME6X00: me6x00_release_single_board() "
+		printk( KERN_INFO "ME6X00: me6x00_release_board() "
 			"failed to reset board.\n" );
 
 	pci_release_regions( dev );
 
 	info->is_init = 0;
 }
+
+#endif
 
 
 /*

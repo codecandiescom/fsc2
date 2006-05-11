@@ -24,8 +24,8 @@
  */
 
 
-#include "autoconf.h"
 #include "ni6601_drv.h"
+
 static void ni6601_tc_irq_handler( Board *board );
 static void ni6601_dma_irq_handler( Board *board );
 
@@ -634,22 +634,38 @@ void ni6601_dma_irq_disable( Board *board )
  * Interrupt handler for all boards
  *----------------------------------*/
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+irqreturn_t ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
+#else
 void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
+#endif
 {
 	Board *board = ( Board * ) data;
 
 
 	if ( irq != board->irq ) {
 		PDEBUG( "Invalid interrupt number: %d\n", irq );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		return IRQ_NONE;
+#else
 		return;
+#endif
 	}
 
 	if ( board->expect_tc_irq )
 		ni6601_tc_irq_handler( board );
 	else if ( board->dma_irq_enabled )
 		ni6601_dma_irq_handler( board );
-	else
+	else {
 		printk( KERN_DEBUG " " NI6601_NAME ": Spurious interrupt\n" );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		return IRQ_NONE;
+#endif
+	}
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+		return IRQ_HANDLED;
+#endif
 }
 
 
