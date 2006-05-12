@@ -258,7 +258,7 @@ typedef struct {
 		u32 lkar;         /* bus address of next link */
 		u32 dar;          /* ? */
 	} lc;
-} MITE_DMA_CHAIN;
+} MITE_DMA_Chain_t;
 
 
 struct Board {
@@ -331,7 +331,7 @@ struct Board {
 	/* Chains of DMA buffers used with the mite for AI and AO */
 
 	int mite_irq_enabled[ NUM_MITE_DMA_CHANNELS ];
-	MITE_DMA_CHAIN *mite_chain[ NUM_MITE_DMA_CHANNELS ];
+	MITE_DMA_Chain_t *mite_chain[ NUM_MITE_DMA_CHANNELS ];
 };
 
 

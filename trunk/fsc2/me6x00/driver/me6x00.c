@@ -1172,7 +1172,7 @@ static int me6x00_xilinx_download( me6x00_info_st * info )
  *   becomes unregistered (or if the board would get pulled out of a
  *   hot-pluggable slot, but that's rather unlikely for these boards;-)
  *   The function just calls me6x00_reset_board() to bring it back into
- *   a well-known, quite state.
+ *   a well-known, quiet state.
  *
  * Parameter list:
  *   Name           Type          Access    Description

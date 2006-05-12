@@ -266,7 +266,7 @@ void pci_board_irq_handling_setup( Board * board )
 
 
 /*-------------------------------------------------------*
- * Function to bring the board into a known, quite state
+ * Function to bring the board into a known, quiet state
  *-------------------------------------------------------*/
 
 void pci_board_reset_all( Board * board )

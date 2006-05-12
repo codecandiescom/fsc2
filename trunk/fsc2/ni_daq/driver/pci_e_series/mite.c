@@ -114,7 +114,7 @@ int pci_dma_buf_setup( Board *          board,
 		       size_t           num_points,
 		       int              continuous )
 {
-	MITE_DMA_CHAIN *mdc;
+	MITE_DMA_Chain_t *mdc;
 	int num_links;
 	unsigned long size;
 	unsigned long buf_size = 1;
@@ -317,7 +317,7 @@ int pci_dma_buf_get( Board *          board,
 	size_t left;
 	size_t transf = 0;
 	size_t total = 0;
-	MITE_DMA_CHAIN *mdc;
+	MITE_DMA_Chain_t *mdc;
 	size_t avail;
 
 
@@ -471,7 +471,7 @@ size_t pci_dma_get_available( Board *          board,
 void pci_dma_buf_release( Board *          board,
 			  NI_DAQ_SUBSYSTEM sys )
 {
-	MITE_DMA_CHAIN *mdc;
+	MITE_DMA_Chain_t *mdc;
 
 
 	if ( board->mite_chain[ sys ] == NULL )
@@ -513,7 +513,7 @@ void pci_dma_buf_release( Board *          board,
 int pci_dma_setup( Board *          board,
 		   NI_DAQ_SUBSYSTEM sys )
 {
-	MITE_DMA_CHAIN *mdc;
+	MITE_DMA_Chain_t *mdc;
 	u32 chcr;
 	u32 dcr;
 	u32 lkar;
