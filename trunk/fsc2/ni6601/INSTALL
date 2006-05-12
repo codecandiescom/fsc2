@@ -199,8 +199,10 @@ PREFIX=`grep NI6601_PREFIX driver/autoconf.h | sed 's/[^\"]*//' | tr -d \"`
 MAJOR=`grep NI6601_MAJOR driver/autoconf.h | awk '{print $3}'`;
 if [ `echo $KERNEL_VERSION | sed 's/^\(2\.6\)\..*$/XXX/'` == "XXX" ]; then
 	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/extra/ni6601.ko";
+	LOCAL_NAME="driver/ni6601.ko";
 else
 	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/misc/ni6601.o";
+	LOCAL_NAME="driver/ni6601.o ";
 fi
 
 dialog --yesno \
@@ -211,8 +213,8 @@ directories that don't exist:\n\n\
  lib/ni6601.h         => $PREFIX/include/ni6601.h\n\
  lib/libni6601.a      => $PREFIX/lib/libni6601.a\n\
  lib/libni6601.so     => $PREFIX/lib/libni6601.so\n\
- driver/ni6601.o      => $MOD_INST_AS\n\n\
-		Do you want to continue ?" 15 70
+ $LOCAL_NAME     => $MOD_INST_AS\n\n\
+		Do you want to continue ?" 15 74
 
 test $? -eq 0 || exit 0
 

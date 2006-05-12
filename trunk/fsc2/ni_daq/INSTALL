@@ -198,8 +198,10 @@ PREFIX=`grep NI_DAQ_PREFIX driver/include/autoconf.h | sed 's/[^\"]*//' | tr -d 
 MAJOR=`grep NI_DAQ_MAJOR driver/include/autoconf.h | awk '{print $3}'`;
 if [ `echo $KERNEL_VERSION | sed 's/^\(2\.6\)\..*$/XXX/'` == "XXX" ]; then
 	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/extra/ni_daq.ko";
+	LOCAL_NAME="driver/ni_daq.ko";
 else
 	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/misc/ni_daq.o";
+	LOCAL_NAME="driver/ni_daq.o ";
 fi
 
 dialog --yesno \
@@ -210,8 +212,8 @@ directories that don't exist:\n\n\
  include/ni_daq_drv.h => $PREFIX/include/ni_daq_drv.h\n\
  lib/libni_daq.a      => $PREFIX/lib/libni_daq.a\n\
  lib/libni_daq.so     => $PREFIX/lib/libni_daq.so\n\
- driver/ni_daq.o      => $MOD_INST_AS\n\n\
-		Do you want to continue ?" 15 70
+ $LOCAL_NAME     => $MOD_INST_AS\n\n\
+		Do you want to continue ?" 15 74
 
 test $? -eq 0 || exit 0
 
@@ -459,10 +461,6 @@ function get_kernel_version() {
                     2>/dev/null | \
 				    sed 's/^[^"]\{1,\}"\([^"]\{1,\}\)".*$/\1/' 2>/dev/null`;
 	
-	dialog --msgbox "\
-KD = $KERNEL_DIR\n\
-KV = $KERNEL_VERSION" 8 60;
-
 	if [ -z "$KERNEL_VERSION" ]; then
 		dialog --msgbox "\
 Sorry, can't determine kernel version under the assumption\n\

@@ -27,15 +27,15 @@ MODULE   := witio_48.o
 SOURCE   := witio_48_drv.c
 OBJECT   := $(SOURCE:.c=.o)
 
-# Unless the user set the environment variable WITIO48_KERNEL_SOURCE
+# Unless the user set the environment variable WITIO_48_KERNEL_SOURCE
 # assume that we can find out where the kernel sources are (or at least
 # the kernel headers) from the 'build' symbolic link in the module
 # directory of the currently running kernel. Only if this doesn't exist
 # use '/usr/src/linux/' as a last resort - but it's not unlikely to point
 # to the wrong kernel code or may even not exist...
 
-ifneq ($(WITIO48_KERNEL_SOURCE),)
-    KERNELDIR := $(WITIO48_KERNEL_SOURCE)
+ifneq ($(WITIO_48_KERNEL_SOURCE),)
+    KERNELDIR := $(WITIO_48_KERNEL_SOURCE)
 endif
 
 KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \

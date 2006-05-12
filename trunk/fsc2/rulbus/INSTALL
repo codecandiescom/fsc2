@@ -205,8 +205,10 @@ PREFIX=`grep RULBUS_EPP_PREFIX include/autoconf.h | sed 's/[^\"]*//' | tr -d \"`
 MAJOR=`grep RULBUS_EPP_MAJOR include/autoconf.h | awk '{print $3}'`;
 if [ `echo $KERNEL_VERSION | sed 's/^\(2\.6\)\..*$/XXX/'` == "XXX" ]; then
 	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/extra/rulbus_epp.ko";
+	LOCAL_NAME="driver/rulbus_epp.ko";
 else
 	MOD_INST_AS="/lib/modules/$KERNEL_VERSION/misc/rulbus_epp.o";
+	LOCAL_NAME="driver/rulbus_epp.o ";
 fi
 
 dialog --yesno \
@@ -216,8 +218,8 @@ directories that don't exist:\n\n\
  include/rulbus.h     => $PREFIX/include/rulbus.h\n\
  lib/librulbus.a      => $PREFIX/lib/librulbus.a\n\
  lib/librulbus.so     => $PREFIX/lib/librulbus.so\n\
- driver/rulbus_epp.o  => $MOD_INST_AS\n\n\
-		Do you want to continue ?" 14 70
+ $LOCAL_NAME => $MOD_INST_AS\n\n\
+		Do you want to continue ?" 14 74
 
 test $? -eq 0 || exit 0
 
