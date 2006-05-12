@@ -161,7 +161,7 @@ function do_compile() {
 # Check that system headers are available
 
 if [    ! -e /lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h \
-	 -o ! -e /usr/include/linux/autoconf.h \) ]; then
+	 -a ! -e /usr/include/linux/autoconf.h ]; then
 	 dialog --msgbox \
 "To create the driver for ME6X00 boards the file\n\
 /lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h\n\
