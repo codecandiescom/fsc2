@@ -644,6 +644,7 @@ ni6601/driver/ni6601_drv.h
 ni6601/driver/ni6601_drv.h.dma_not_yet_working
 ni6601/driver/ni6601_drv.txt
 ni6601/driver/ni_test.c
+ni6601/driver/README
 ni6601/driver/utils.c
 
 ni6601/lib/Makefile
@@ -709,7 +710,6 @@ ni_daq/driver/pci_e_series/io.c
 ni_daq/driver/pci_e_series/io.h
 ni_daq/driver/pci_e_series/Makefile
 ni_daq/driver/pci_e_series/mite.c
-ni_daq/driver/pci_e_series/mite.c~
 ni_daq/driver/pci_e_series/mite.h
 
 ni_daq/include/ni_daq_drv.h
