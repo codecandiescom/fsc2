@@ -43,12 +43,7 @@ If you want to create the module for a kernel you are *not* currently
 running you must set the environment variable RULBUS_EPP_KERNEL_SOURCE
 tothe source directory  of the kernel you want to make the module for.
 It's still required that both 'autoconf.h' and 'version.h' exist for
-this kernel. If RULBUS_EPP_KERNEL_SOURCE is set the module will be
-created for the kernel the variable is pointing to but you will have
-to copy the module to the correct place in '/lib/modules', run
-'depmod -a' and create the device files yourself (but the user library
-gets installed automatically). So, this probably is only for those that
-are quite sure they know what they are doing...
+this kernel.
 
 Another thing you may want to check is if your version of the GNU C
 compiler gcc is identical to the version the kernel was compiled with.
@@ -190,4 +185,4 @@ the driver and library in order to extend my fsc2 program to make
 it work with their 275 GHz EPR and ENDOR spectrometer.
 
 
-3.9.2005     Jens Thoms Törring       <jt@toerring.de>
+     12.5.2006     Jens Thoms Törring       <jt@toerring.de>

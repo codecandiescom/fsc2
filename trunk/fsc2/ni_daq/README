@@ -50,12 +50,7 @@ If you want to create the module for a kernel you are *not* currently
 running you must set the environment variable NI_DAQ_KERNEL_SOURCE to
 the source directory  of the kernel you want to make the module for.
 It's still required that both 'autoconf.h' and 'version.h' exist for
-this kernel. If NI_DAQ_KERNEL_SOURCE is set the module will be created
-for the kernel the variable is pointing to but you will have to copy
-the module to the correct place in '/lib/modules', run 'makedep -a' 
-and create the device files yourself (but the user library gets
-installed automatically). So, this probably is only for those that
-are quite sure they know what they are doing...
+this kernel.
 
 
 III. Compiling and installing via the 'INSTALL' script
@@ -160,7 +155,7 @@ list archives I found quite a bit of useful information.
 
 Prof. Georg Gescheidt from Technical University of Graz, Austria, paid me
 for developing the driver and library in order to extend my fsc2 program
-to make it work with his time resolved EPR X-band spectrometer.
+to make it work with his time-resolved EPR X-band spectrometer.
 
 While National Instruments has made quite an amount of information about
 register level programming of the card available, some very important bits,
@@ -169,4 +164,4 @@ to program it an unnecessary PITA. Thanks go to Tim Ously of National
 Instruments by supplying in the comedi mailing list as much of the missing
 informations on the Comedi mailing as he was able to get permission for.
 
-    13.3.2004   Jens Thoms Törring <jt@toerring.de>
+        12.5.2006   Jens Thoms Törring <jt@toerring.de>

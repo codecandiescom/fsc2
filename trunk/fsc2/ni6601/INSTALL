@@ -64,7 +64,7 @@ device number." \
 
     get_reply MAJOR
     test -n "$MAJOR" || REPEAT=1
-    test -z "$MAJOR" | tr -d '[:digit:]'` || REPEAT=1
+    test -z `echo $MAJOR | tr -d '[:digit:]'` || REPEAT=1
 	if [ $REPEAT -eq 0 ]; then
 		test \( $MAJOR -ge 0 -a $MAJOR -le 254 \) || REPEAT=1
 	fi
@@ -150,9 +150,8 @@ function do_compile() {
 
 # Check that system headers are available
 
-if [ ! \(     -e /lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h \
-		   -o -e /usr/include/linux/autoconf.h \) \
-	 -a -z "$NI6601_KERNEL_SOURCE" ]; then
+if [    ! -e /lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h \
+	 -o ! -e /usr/include/linux/autoconf.h \) ]; then
 	 dialog --msgbox \
 "To create the driver for NI6601 boards the file\n\
 /lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h\n\
@@ -161,11 +160,7 @@ your kernel is) is required. This file contains vital\n\
 information about the kernel the module is intended for.\n\
 Please also see additonal information in the README file.\n\
 
-Alternatively, you could set the environment variable\n\
-NI6601_KERNEL_SOURCE to the location of the directory with\n\
-the kernel sources.
-
-   Unfortunately, the installation can't proceed.\n" 17 62;
+   Unfortunately, the installation can't proceed.\n" 14 62;
 	 exit 1;
 fi
 
@@ -238,17 +233,6 @@ if [ $? -ne 0 ]; then
 	dialog --msgbox \
 "  Sorry, installation failed.\nSee \"makelog\" for the reasons.\n" 7 35;
     exit 1
-fi
-
-if [ -n "$NI6601_KERNEL_SOURCE" ]; then
-    dialog --msgbox \
-"Please note:\n\
-  Because NI6601_KERNEL_SOURCE is set the new module\n\
-   `pwd`/driver/ni6601.o was *not* copied to the\n\
-   appropriate module directory (which probably\n\
-  is /lib/modules/${NI6601_KERNEL_SOURCE##/}) and\n\
-       also 'depmod -a' won't be run.\n\n\
-Only the user library and header files got installed." 12 58
 fi
 
 # Find out if user wants to create the device file for the board, but only if
@@ -385,13 +369,11 @@ fi
 
 echo "alias char-major-$MAJOR ni6601" >> $MODULECONF
 
-if [ -z "$NI6601_KERNEL_SOURCE" ]; then
-	dialog --yesno \
+dialog --yesno \
 "Do you want to update the modules dependency\n\
 file /lib/modules/$KERNEL_VERSION/modules.dep using\n\
         the command 'depmod -a'?" 8 55
-	test $? || depmod -v $KERNEL_VERSION -a > /dev/null
-fi
+test $? || depmod -v $KERNEL_VERSION -a > /dev/null
 }
 
 
