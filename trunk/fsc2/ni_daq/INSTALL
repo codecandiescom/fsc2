@@ -96,7 +96,7 @@ dialog --yesno "\
 You selected the following settings for the driver:\n\n\
       Major device number:     $MAJOR\n\
       Include debbuging code:  $dbg\n\
-      Install directory:       '$PREFIX'\n\n\
+      Install directory:       $PREFIX\n\n\
           Create 'driver/include/autoconf.h'?\n" 11 57
 
 return $?

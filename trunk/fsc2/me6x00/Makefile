@@ -29,7 +29,12 @@ INSTALL = install
 RM      = -rm
 RMFLAGS = -f
 
-prefix  = $(shell if [ -e driver/autoconf.h ]; then grep ME6X00_PREFIX driver/autoconf.h | sed 's/[^\"]*//' | tr -d \"; else echo "/usr/local"; fi)
+prefix  = $(shell if [ -e driver/autoconf.h ]; then           \
+			          grep ME6X00_PREFIX driver/autoconf.h |  \
+	                  sed 's/[^\"]*//' | tr -d \";            \
+	              else                                        \
+	                  echo "/usr/local"                       \
+	              fi)
 
 export
 

@@ -103,7 +103,7 @@ PREFIX=${PREFIX%%/}    # strip trailing slashes
 dialog --yesno "\
 You selected the following settings for the driver:\n\n\
       Major device number:     $MAJOR\n\
-      Install directory:       '$PREFIX'\n\n\
+      Install directory:       $PREFIX\n\n\
            Create 'include/autoconf.h'?\n" 11 57
 
 return $?

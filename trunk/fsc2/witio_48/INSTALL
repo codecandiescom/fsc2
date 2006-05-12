@@ -124,7 +124,7 @@ You selected the following settings for the driver:\n\n\
       Base address:            $BASE\n\
       Major device number:     $MAJOR\n\
       Include debbuging code:  $dbg\n\
-      Install directory:       '$PREFIX'\n\n\
+      Install directory:       $PREFIX\n\n\
           Create 'driver/autoconf.h'?\n" 12 57
 
 return $?

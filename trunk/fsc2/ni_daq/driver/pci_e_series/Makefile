@@ -21,6 +21,8 @@
 #
 # To contact the author send email to:  jt@toerring.de
 
+# Please note: this Makefile isn't needed anymore for 2.6 kernels
+
 
 SOURCES  = $(shell ls *.c)
 HEADERS  = $(shell ls *.h) $(shell ls ../include/*.h) \
