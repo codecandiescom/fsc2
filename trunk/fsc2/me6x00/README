@@ -22,11 +22,9 @@ II. Preparation for installation
 
 Before you start compiling and installing the package please note: The
 way the module is build depends strongly on the configuration of the
-kernel the modules is supposed to work with and the directories with
-the kernels include (header) files are needed. Some distributions allow
-you to install just the kernel headers, this could be enough. Otherwise,
-you will have to install the complete kernel sources and may need to do
-some further work.
+kernel the modules is supposed to work with. For 2.4 kernels at least
+the directories with the kernels include (header) files are needed while
+for 2.6 kernels the complete kernel sources are required.
 
 In the 'include/linux' subdirectory of the kernel sources a file called
 'autoconf.h' is of special importance. It contains information on how the
@@ -42,8 +40,8 @@ option.
 
 Another essential file is 'version.h' in the kernel include directory.
 Without this file the module can not be compiled. The file gets created
-automatically if autoconf.h exists and you have at least run 'make dep'
-in the kernel source directory.
+automatically if autoconf.h exists and you at least run 'make dep' in the
+kernel source directory.
 
 If you want to create the module for a kernel you are *not* currently
 running you must set the environment variable ME6X00_KERNEL_SOURCE to

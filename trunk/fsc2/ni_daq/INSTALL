@@ -47,27 +47,47 @@ settings for the driver. If you have problems understanding\n\
 	test $? -eq 0 || exit 0
 fi
 
-# Ask for the major device number, it must be between 1 and 254
-# or 0 for a dynamically assigned device nuber
+# Ask for the major device number, it must be between 1 and 254 (or 4094
+# for 2.6 kernels) or 0 for a dynamically assigned device nuber
 
-REPEAT=1;
-while [ $REPEAT -ne 0 ]; do
-    MAJOR=0;
-    REPEAT=0;
-    dialog --inputbox "\
+if [ `echo $KERNEL_VERSION | sed 's/^\(2\.[0-4]\)\..*$/XXX/'` != "XXX" ]; then
+
+	REPEAT=1;
+	while [ $REPEAT -ne 0 ]; do
+		MAJOR=0;
+		REPEAT=0;
+		dialog --inputbox "\
 Select the major device number, pick one between 1 and 254\n\
 and also compare with/usr/src/linux/Documentation/devices.txt.\n\
 Alternatively specify 0 to use a dynamically assigned major\n\
-device number." \
-    12 70 "$MAJOR" 2> /tmp/NI_DAQ_reply
+device number." 12 70 "$MAJOR" 2> /tmp/NI_DAQ_reply
 
-    get_reply MAJOR
-    test -n $MAJOR || REPEAT=1
-    test -z `echo $MAJOR | tr -d '[:digit:]'` || REPEAT=1
-	if [ $REPEAT -eq 0 ]; then
-		test \( $MAJOR -ge 0 -a $MAJOR -le 254 \) || REPEAT=1
-	fi
-done
+		get_reply MAJOR
+		test -n $MAJOR || REPEAT=1
+		test -z `echo $MAJOR | tr -d '[:digit:]'` || REPEAT=1
+		if [ $REPEAT -eq 0 ]; then
+			test \( $MAJOR -ge 0 -a $MAJOR -le 254 \) || REPEAT=1
+		fi
+	done
+else
+	REPEAT=1;
+	while [ $REPEAT -ne 0 ]; do
+		MAJOR=0;
+		REPEAT=0;
+		dialog --inputbox "\
+Select the major device number, pick one between 1 and 4094\n\
+and also compare with/usr/src/linux/Documentation/devices.txt.\n\
+Alternatively specify 0 to use a dynamically assigned major\n\
+device number." 12 70 "$MAJOR" 2> /tmp/NI_DAQ_reply
+
+		get_reply MAJOR
+		test -n $MAJOR || REPEAT=1
+		test -z `echo $MAJOR | tr -d '[:digit:]'` || REPEAT=1
+		if [ $REPEAT -eq 0 ]; then
+			test \( $MAJOR -ge 0 -a $MAJOR -le 4094 \) || REPEAT=1
+		fi
+	done
+fi
 
 # Ask for further compilation options
 
@@ -154,12 +174,11 @@ if [    ! -e /lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h \
 	 dialog --msgbox \
 "To create the driver for NI DAQ boards the file\n\
 /lib/modules/$KERNEL_VERSION/build/include/linux/autoconf.h\n\
-or /usr/include/linux/autoconf.h (depending on how old\n\
+(or /usr/include/linux/autoconf.h, depending on how old\n\
 your kernel is) is required. This file contains vital\n\
 information about the kernel the module is intended for.\n\
-Please also see additonal information in the README file.\n\
-
-   Unfortunately, the installation can't proceed.\n" 14 62;
+Please also see additonal information in the README file.\n\n\
+   Unfortunately, the installation can't proceed.\n" 13 62;
 	 exit 1;
 fi
 
@@ -455,6 +474,18 @@ function get_kernel_version() {
 		if [ -z "$KERNEL_DIR" ]; then
 			KERNEL_DIR="/usr/src/linux";
 		fi
+	fi
+
+	if [ ! -e $KERNEL_DIR/include/linux/version.h ]; then
+		dialog --msgbox \
+"To create the driver for NI DAQ boards the file\n\
+/lib/modules/$KERNEL_VERSION/build/include/linux/version.h\n\
+(or /usr/include/linux/version.h, depending on how old\n\
+your kernel is) is required. This file contains vital\n\
+information about the kernel the module is intended for.\n\
+Please also see additonal information in the README file.\n\n\
+   Unfortunately, the installation can't proceed.\n" 13 62;
+		exit 1;
 	fi
 
 	KERNEL_VERSION=`grep UTS_RELEASE $KERNEL_DIR/include/linux/version.h \
