@@ -1,4 +1,4 @@
-!/usr/bin/perl
+#!/usr/bin/perl
 # -*- cperl -*-
 #
 #  $Id$
@@ -316,7 +316,7 @@ sub replace_txt {
 	open( Fout, "> $nfn" ) or die "Can't open file $nfn for writing.\n";
 
 	while ( defined( $line = <Fin> ) ) {
-		$line =~ s/$os/$ns/; 
+		$line =~ s/$os/$ns/;
 		print Fout $line;
 	}
 
