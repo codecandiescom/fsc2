@@ -829,11 +829,17 @@ fsc2_config.h: Makefile $(MACHINE_INCLUDE_FILE)
 built:
 	-@cat fsc2_config.h > version
 	-@echo >> version
-	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]             \
-					 $(mdir)/Makefile $(mdir)/*.[chl]                       \
-					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf |     \
-	grep -v 'sed\|grep' |                                               \
-	sed 's/^.*$$Id\: \(.*,v [0-9]\{1,\}\.[0-9]\{1,\} [0-9]\{4\}\/[0-9]\{2\}\/[0-9]\{2\} [\0-9]\{2\}:[0-9]\{2\}:[0-9]\{2\}\).*/\1/g' >> version
+	-@svn status -u 2>/dev/null | grep -v '?' >> version
+	-@echo >> version
+	-@grep '$$Id$(sdir)/Makefile $(sdir)/*.[chly]              \
+	                $(sdir)/fsc2_http_server $(mdir)/Makefile               \
+			  	    $(mdir)/*.[chl] $(cdir)/Functions $(cdir)/Devices       \
+			        $(cdir)/*.conf $(udir)/check_dist $(udir)/clone_device  \
+			        $(udir)/edl-mode.el $(udir)/edl.ssh $(udir)/fsc2_guify  \
+			        $(udir)/fsc2_pulses $(udir)/ipcc $(udir)/Makefile       \
+				    $(udir)/memcheck |                                      \
+	grep -v 'sed\|grep' |                                                   \
+	sed 's/^[^\$$]\{1,\}\$$Id: \([^\$$]\{1,\}\).*$$/\1/' >> version
 	-@gzip -c -9 version | uuencode - > version.ugz
 	-@$(RM) $(RMFLAGS) version
 
