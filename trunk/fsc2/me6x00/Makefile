@@ -23,36 +23,33 @@
 # To contact the author send email to:  jt@toerring.de
 
 
-SHELL   = /bin/sh
-CC      = gcc
-INSTALL = install
-RM      = -rm
-RMFLAGS = -f
+SHELL   := /bin/sh
+CC      := gcc
+INSTALL := install
+RM      := -rm
+RMFLAGS := -f
 
 prefix  = $(shell if [ -e driver/autoconf.h ]; then           \
 			          grep ME6X00_PREFIX driver/autoconf.h |  \
 	                  sed 's/[^\"]*//' | tr -d \";            \
 	              else                                        \
-	                  echo "/usr/local"                       \
+	                  echo "/usr/local";                      \
 	              fi)
 
 export
 
-
-.SUFFIXES:
-.PHONY: all driver lib install cleanup clean
 
 all:
 	$(MAKE) driver
 	$(MAKE) lib
 
 driver:
-	@if [ ! -e driver/autoconf.h ]; then \
-		echo "**********************************************";\
-		echo "*   The file driver/autoconf.h is missing.   *"; \
-		echo "*    Please run './INSTALL' to create it.    *"; \
-		echo "**********************************************";\
-		exit 2; \
+	@if [ ! -e driver/autoconf.h ]; then                        \
+		echo "**********************************************";  \
+		echo "*   The file driver/autoconf.h is missing.   *";  \
+		echo "*    Please run './INSTALL' to create it.    *";  \
+		echo "**********************************************";  \
+		exit 2;                                                 \
 	fi
 	$(MAKE) -C driver
 
@@ -67,7 +64,7 @@ install:
 cleanup:
 	$(MAKE) -C driver cleanup
 	$(MAKE) -C lib cleanup
-	$(RM) $(RMFLAGS) *~ makelog
+	$(RM) $(RMFLAGS) makelog *~
 
 clean:
 	$(MAKE) -C driver clean

@@ -38,11 +38,11 @@ ifneq ($(ME6X00_KERNEL_SOURCE),)
     KERNELDIR := $(ME6X00_KERNEL_SOURCE)
 endif
 
-KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
-					     echo "/lib/modules/`uname -r`/build"; \
-					 else \
-						 echo "/usr/src/linux"; \
-					 fi )
+KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then  \
+					     echo "/lib/modules/`uname -r`/build";      \
+					 else                                           \
+						 echo "/usr/src/linux";                     \
+					 fi)
 
 # If KERNEL_VER isn't set determine it from the the kernel source directory
 # and then call make again with KERNEL_VER now being set. If KERNEL_VER
@@ -50,8 +50,8 @@ KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
 
 ifndef KERNEL_VER
 
-KERNEL_VER := $(shell grep UTS_RELEASE $(KERNELDIR)/include/linux/version.h \
-				      2>/dev/null | \
+KERNEL_VER := $(shell grep UTS_RELEASE $(KERNELDIR)/include/linux/version.h   \
+				      2>/dev/null |                                           \
 				      sed 's/^[^"]\{1,\}"\([^"]\{1,\}\)".*$$/\1/' 2>/dev/null)
 
 all $(MODULE) install clean:

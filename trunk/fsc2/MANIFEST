@@ -598,7 +598,6 @@ utils/fsc2_pulses
 utils/ipcc
 utils/Makefile
 utils/memcheck
-utils/spex_show
 
 me6x00/COPYING
 me6x00/INSTALL

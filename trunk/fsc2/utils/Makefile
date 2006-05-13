@@ -20,7 +20,7 @@
 #  Boston, MA 02111-1307, USA.
 
 
-emacs_dir = /usr/share/emacs/site-lisp
+emacs_dir := /usr/share/emacs/site-lisp
 
 all:
 	$(MAKE) utils
