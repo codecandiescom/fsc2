@@ -284,7 +284,7 @@ highest resolution setting.
 Generator DG2020, used as pulser for the Berlin X-band spectrometer.
 
 @paragraphindent 0
-Time base: between @w{5 ns} and @w{100 ms}@*
+Timebase: between @w{5 ns} and @w{100 ms}@*
 Maximum pulse voltage: between @w{-2 V} and @w{7 V}@*
 Minimum pulse voltage: between @w{-3 V} and @w{6 V}@*
 Difference between minimum and maximum pulse voltage must be not more
@@ -299,7 +299,7 @@ Number of internal channels: 36
 @paragraphindent 0
 Due to some problems with the firmware of the device pulse sequences
 always start with a state where the output of all connectors is the
-minimum pulse voltage for the duration of the time base (this also holds
+minimum pulse voltage for the duration of the timebase (this also holds
 for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
@@ -354,7 +354,7 @@ of T.@: Prisner at the J.-W.-Goethe University in Frankfurt/Main
 (@url{http://www.prisner.de/}).
 
 @paragraphindent 0
-Time base: between @w{5 ns} and @w{100 ms}@*
+Timebase: between @w{5 ns} and @w{100 ms}@*
 Maximum pulse voltage: between @w{-2 V} and @w{7 V}@*
 Minimum pulse voltage: between @w{-3 V} and @w{6 V}@*
 Difference between minimum and maximum pulse voltage must be not more
@@ -369,7 +369,7 @@ Number of internal channels: 36
 @paragraphindent 0
 Due to some problems with the firmware of the device pulse sequences
 always start with a state where the output of all connectors is the
-minimum pulse voltage for the duration of the time base (this also holds
+minimum pulse voltage for the duration of the timebase (this also holds
 for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
@@ -456,11 +456,11 @@ character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
 Programmer EP385, used as pulser for the Berlin X-band spectrometer.
 
 @paragraphindent 0
-Time base: internal clock @w{8 ns}, external clock @w{8 ns} and slower@*
+Timebase: internal clock @w{8 ns}, external clock @w{8 ns} and slower@*
 Minimum repetition time: internal clock @w{1.286 ms}, external clock
-160768 times time base@*
+160768 times timebase@*
 Repetition time increments: internal clock @w{102.4 us}, external clock
-12800 times time base@*
+12800 times timebase@*
 Maximum number of pulses per channel: 59@*
 Output channels: 8
 
@@ -784,7 +784,7 @@ System HFS9000, used as pulser in the Berlin W-band spectrometer. No support
 for phase cycled experiments.
 
 @paragraphindent 0
-Time base: between @w{1.6 ns} and @w{20 us}@*
+Timebase: between @w{1.6 ns} and @w{20 us}@*
 Maximum pulse voltage: between @w{-1.5 V} and @w{5.5 V}@*
 Minimum pulse voltage: between @w{-2 V} and @w{5 V}@*
 Difference must be not more than @w{5.5 V} and at least @w{0.5 V}@*
@@ -2320,7 +2320,7 @@ combination of (currently) 10 Rulbus RB8514 delay cards and 2 clock cards
 as well as requiring the @strong{Rohde & Schwarz SML01} synthesizer (with
 the SML-B3 option) in order to be able to create @code{RF} pulses.
 
-The time base of this pulser is fixed to @w{10 ns}, but this can be changed
+The timebase of this pulser is fixed to @w{10 ns}, but this can be changed
 by using a second adjustable clock card and a modification of the
 configuration file for the pulser. Its number of functions is restricted to
 @code{MICROWAVE}, @code{RADIO_FREQUENCY} and @code{DETECTION}. Moreover, only
@@ -2376,7 +2376,7 @@ combination of (currently) 15 Rulbus RB8514 delay cards and 2 clock cards
 as well as requiring the @strong{Rohde & Schwarz SML01} synthesizer (with
 the SML-B3 option) in order to be able to create @code{RF} pulses.
 
-The time base of this pulser is aat the moment fixed to @w{10 ns}, but this
+The timebase of this pulser is aat the moment fixed to @w{10 ns}, but this
 can be changed by using a second adjustable clock card and a modification of
 the configuration file for the pulser. Its number of functions is restricted
 to @code{MICROWAVE}, @code{RADIO_FREQUENCY}, @code{DETECTION}, @code{LASER}
@@ -2446,21 +2446,21 @@ pulse sequence and the start of the first pulse of a function).
 for the Berlin 360 GHz spectrometer.
 
 @paragraphindent 0
-Time base: internal clock @w{4 ns}, @w{8 ns} and @w{16 ns}, external
+Timebase: internal clock @w{4 ns}, @w{8 ns} and @w{16 ns}, external
 clock @w{4 ns} and longer (either via @code{TTL} or @code{ECL} level
 input connector)@*
 Trigger-in: either via @code{TTL} or @code{ECL} level input connector@*
 Number of channels: 16 (4 per output connector) with internal @w{4 ns}
-time base or external clock, 32 (8 per output connector) with internal @w{8 ns}
-time base, 64 (16 per output connector) with internal @w{16 ns} time base@*
-Maximum repetition time: 2,147,483,647 times the time base with external
+timebase or external clock, 32 (8 per output connector) with internal @w{8 ns}
+timebase, 64 (16 per output connector) with internal @w{16 ns} timebase@*
+Maximum repetition time: 2,147,483,647 times the timebase with external
 clock or @w{4 ns} internal clock (i.e.@: @w{8.59 s}), @w{17.18 s} with
-@w{8 ns} internal time base, @w{34.36 s} with @w{16 ns} internal time base
+@w{8 ns} internal timebase, @w{34.36 s} with @w{16 ns} internal timebase.
 
 @paragraphindent 0
-When using an external clock or the internal @w{4 ns} time base for certain 
+When using an external clock or the internal @w{4 ns} timebase for certain 
 pulse seqences the repetition time may be increases slightly (but never more
-than 3 times the time base), with an @w{8 ns} time base the repetition time
+than 3 times the timebase), with an @w{8 ns} timebase the repetition time
 may become larger by @w{8 ns}.
 
 @paragraphindent 0

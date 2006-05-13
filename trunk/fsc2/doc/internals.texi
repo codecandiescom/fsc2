@@ -294,14 +294,14 @@ arguments were really acceptable and, if not, stop the experiment.
 
 A typical example of this case are the settings for a "window" for the
 digitizers, defining the part of a curve that gets returned or that is
-integrated over etc. Because during the test run neither the time base
+integrated over etc. Because during the test run neither the timebase
 nor the amount of pre-trigger the digitizer is set to are known (unless
 both have been set explicitely from the @code{EDL} script) it can't be
 tested if the windows start and end positions are within the time range
 the digitizer measures. Thus the module can just store these settings
 and report to @code{fsc2} that they seem to be reasonable. Only when the
 experiment starts and the module has its first chance of finding out the
-time base and pre-trigger setting it can do the necessary checks on the
+timebase and pre-trigger setting it can do the necessary checks on the
 windows settings and should abort the experiment at the earliest
 possible point if necessary.
 

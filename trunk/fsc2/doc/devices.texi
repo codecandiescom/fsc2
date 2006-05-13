@@ -1449,8 +1449,8 @@ Returns a string with the name of the digitizer being used.
 @findex digitizer_timebase()
 @item digitizer_timebase()
 The function queries (if called with no argument) or sets (if called
-with an argument) the time base setting of the oscilloscope. The
-possible time bases depend on the model, please check the manual.
+with an argument) the timebase setting of the oscilloscope. The
+possible timebases depend on the model, please check the manual.
 
 For the @strong{LeCroy} digitizers (except the @strong{9400} model)
 interleaved sample (RIS) mode will be automatically switched on if
@@ -2018,7 +2018,7 @@ variable to be able to use this window in further calls of digitizer
 functions.
 
 The allowed ranges of the arguments for the start point and width of the
-window depend on the time base setting of the oscilloscope as well as
+window depend on the timebase setting of the oscilloscope as well as
 the pre- or post-trigger setting (and, for the @strong{Tektronix}
 oscillosopes, the current record length or, for the @strong{LeCroy
 Waverunner-2}, the memory size). The position of the trigger event

@@ -952,11 +952,11 @@ variable.
 Then follows a section which we haven't had to deal with until now, the
 @code{ASSIGNMENTS} section. It is for the basic set up of the pulser.
 
-As the very first thing (line 35) we need to set the time base the
+As the very first thing (line 35) we need to set the timebase the
 pulser is going to be used with. It always has to be the first
 instruction because all timings in later statements concerning the
-pulser must be integer multiples of this time base and the program can
-only check this when it already knows about the time base.
+pulser must be integer multiples of this timebase and the program can
+only check this when it already knows about the timebase.
 
 The next statment sets the trigger mode for the pulser. Here we tell
 @code{fsc2} to use the internal trigger of the pulser and to take care
