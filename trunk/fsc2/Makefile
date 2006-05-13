@@ -735,10 +735,11 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 
-.PHONY: all config src modules utils docs built        \
-		install-strip install uninstall http_server    \
-		version test cleanup clean pack tags MANIFEST  \
-		me6x00 ni6601 ni_daq rulbus witio_48
+.PHONY: all config src modules utils docs built          \
+		install-strip install uninstall http_server      \
+		version test cleanup clean pack pack-with-svn    \
+		packages packages-with-svn tags MANIFEST me6x00  \
+		ni6601 ni_daq rulbus witio_48
 
 
 ############## End of configuration section ##############
@@ -950,7 +951,7 @@ ifdef WITH_HTTP_SERVER
 	fi
 endif
 	$(MAKE) -C $(udir) clean
-	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h *~
+	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h svn-* *~
 	$(MAKE) -C me6x00 clean
 	$(MAKE) -C ni6601 clean
 	$(MAKE) -C ni_daq clean
@@ -974,7 +975,11 @@ test:
 
 pack:
 	@$(MAKE) clean
-	cd ..; tar -c fsc2 | gzip -c -9 > fsc2.tar.gz
+	cd ..; tar -c fsc2 --exclude=.svn | gzip -c -9 > fsc2.tar.gz
+
+pack-with-svn:
+	@$(MAKE) clean
+	cd ..; tar -c fsc2 | gzip -c -9 > fsc2-with-svn.tar.gz
 
 
 # Make distributions of the device modules etc.
@@ -982,9 +987,14 @@ pack:
 packages:
 	@for dir in Fcntl_Lock me6x00 ni6601 ni_daq rulbus witio_48; do  \
 		$(MAKE) -C $$dir clean;                                      \
-		tar -c $$dir | gzip -c -9 > ../$$dir.tar.gz;                 \
+		tar -c $$dir --exclude=.svn | gzip -c -9 > ../$$dir.tar.gz;  \
 	done
 
+packages-with-svn:
+	@for dir in Fcntl_Lock me6x00 ni6601 ni_daq rulbus witio_48; do  \
+		$(MAKE) -C $$dir clean;                                      \
+		tar -c $$dir | gzip -c -9 > ../$$dir-with-svn.tar.gz;        \
+	done
 
 # Creates the MANIFEST file with the list of relevant files
 
@@ -996,15 +1006,15 @@ MANIFEST:
 	@echo '$$' >> MANIFEST
 	@echo '#' >> MANIFEST
 
-	@for dir in . $(ldir) $(adir) $(cdir) $(ddir) $(mdir) scripts $(sdir) \
-		tests $(udir) me6x00 me6x00/driver me6x00/lib me6x00/utils ni6601 \
-		ni6601/driver ni6601/lib ni6601/utils witio_48 witio_48/driver    \
-		witio_48/lib witio_48/utils ni_daq ni_daq/driver                  \
-		ni_daq/driver/daq_stc ni_daq/driver/include                       \
-		ni_daq/driver/pci_e_series ni_daq/include ni_daq/lib              \
-		ni_daq/misc_doc ni_daq/utils rulbus rulbus/driver rulbus/lib      \
-		rulbus/util; do                                                   \
-		echo "" >> MANIFEST; \
-		'ls' -1F $$dir | grep -v '/$$' | sed "s|^|$$dir/|" | \
-		sed "s|^$$fdir/||" | sed 's|\./||' | sed 's|\*$$||' >> MANIFEST; \
+	@for dir in . $(ldir) $(adir) $(cdir) $(ddir) $(mdir) scripts $(sdir)  \
+		tests $(udir) me6x00 me6x00/driver me6x00/lib me6x00/utils ni6601  \
+		ni6601/driver ni6601/lib ni6601/utils witio_48 witio_48/driver     \
+		witio_48/lib witio_48/utils ni_daq ni_daq/driver                   \
+		ni_daq/driver/daq_stc ni_daq/driver/include                        \
+		ni_daq/driver/pci_e_series ni_daq/include ni_daq/lib               \
+		ni_daq/misc_doc ni_daq/utils rulbus rulbus/driver rulbus/lib       \
+		rulbus/util; do                                                    \
+		echo "" >> MANIFEST;                                               \
+		'ls' -1F $$dir | grep -v '/$$' | sed "s|^|$$dir/|" |               \
+		sed "s|^$$fdir/||" | sed 's|\./||' | sed 's|\*$$||' >> MANIFEST;   \
 	done;

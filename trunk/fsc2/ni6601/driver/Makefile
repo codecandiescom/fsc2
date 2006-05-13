@@ -88,7 +88,7 @@ install:
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
-	$(RM) $(RMFLAGS) *~
+	$(RM) $(RMFLAGS) svn-* *~
 
 endif
 
@@ -132,10 +132,10 @@ endif
 	$(INSTALL) -m 644 ni6601_drv.h $(prefix)/include
 
 cleanup:
-	$(RM) $(RMFLAGS) ni6601_drv.o util.o *~
+	$(RM) $(RMFLAGS) ni6601_drv.o util.o svn-* *~
 
 clean:
-	$(RM) $(RMFLAGS) *.o *~
+	$(RM) $(RMFLAGS) *.o svn-* *~
 
 endif
 endif

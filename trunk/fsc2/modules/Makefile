@@ -296,7 +296,7 @@ uninstall:
 # How to clean up the mess we created
 
 cleanup:
-	$(RM) $(RMFLAGS) *.o *_lexer.c cscope.out *.make *~
+	$(RM) $(RMFLAGS) *.o *_lexer.c cscope.out *.make svn-* *~
 
 clean:
 	$(MAKE) cleanup

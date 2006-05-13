@@ -47,7 +47,7 @@ uninstall:
 	fi
 
 cleanup:
-	-$(RM) $(RMFLAGS) *~
+	-$(RM) $(RMFLAGS) svn-* *~
 
 clean:
 	$(MAKE) cleanup

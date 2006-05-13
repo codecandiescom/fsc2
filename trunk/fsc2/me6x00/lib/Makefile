@@ -62,8 +62,8 @@ install:
 	$(INSTALL) -m 644 me6x00.h $(incl_dir)
 
 cleanup:
-	$(RM) $(RMFLAGS) *.o me_test
+	$(RM) $(RMFLAGS) *.o me_test svn-* *~
 
 clean:
 	$(MAKE) cleanup
-	$(RM) $(RMFLAGS) *.so *.a *~
+	$(RM) $(RMFLAGS) *.so *.a

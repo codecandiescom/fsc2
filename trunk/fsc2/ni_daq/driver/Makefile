@@ -86,7 +86,7 @@ install:
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
-	$(RM) $(RMFLAGS) *~
+	$(RM) $(RMFLAGS) svn-* *~
 
 endif
 
@@ -137,7 +137,7 @@ endif
 cleanup:
 	$(MAKE) -C pci_e_series cleanup
 	$(MAKE) -C daq_stc cleanup
-	$(RM) $(RMFLAGS) *~ include/*~
+	$(RM) $(RMFLAGS) svn-* *~ include/*~
 
 clean:
 	$(MAKE) cleanup

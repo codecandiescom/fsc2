@@ -86,7 +86,7 @@ install:
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
-	$(RM) $(RMFLAGS) *~
+	$(RM) $(RMFLAGS) svn-* *~
 
 endif
 
@@ -126,10 +126,10 @@ endif
 	$(INSTALL) -m 644 witio_48_drv.h $(prefix)/include
 
 cleanup:
-	$(RM) $(RMFLAGS) *~
+	$(RM) $(RMFLAGS) svn-* *~
 
 clean:
-	$(RM) $(RMFLAGS) *.o *~
+	$(RM) $(RMFLAGS) *.o svn-* *~
 
 endif
 endif

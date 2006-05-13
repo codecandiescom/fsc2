@@ -23,17 +23,17 @@
 # To contact the author send email to:  jt@toerring.de
 
 
-SHELL   = /bin/sh
-CC      = gcc
-INSTALL = install
-RM      = -rm
-RMFLAGS = -f
+SHELL   := /bin/sh
+CC      := gcc
+INSTALL := install
+RM      := -rm
+RMFLAGS := -f
 
-prefix  = $(shell if [ -e driver/autoconf.h ]; then \
-                      grep NI6601_PREFIX driver/autoconf.h | \
-                      sed 's/^[^\"]*\"\([^\"]*\).*$$/\1/'; \
-                  else \
-                      echo "/usr/local"; \
+prefix  = $(shell if [ -e driver/autoconf.h ]; then           \
+                      grep NI6601_PREFIX driver/autoconf.h |  \
+                      sed 's/^[^\"]*\"\([^\"]*\).*$$/\1/';    \
+                  else                                        \
+                      echo "/usr/local";                      \
                   fi)
 
 export 
@@ -47,12 +47,12 @@ all:
 	$(MAKE) lib
 
 driver:
-	@if [ ! -e driver/autoconf.h ]; then \
-		echo "**********************************************"; \
-		echo "*   The file driver/autoconf.h is missing.   *"; \
-		echo "*    Please run './INSTALL' to create it.    *"; \
-		echo "**********************************************"; \
-		exit 2; \
+	@if [ ! -e driver/autoconf.h ]; then                        \
+		echo "**********************************************";  \
+		echo "*   The file driver/autoconf.h is missing.   *";  \
+		echo "*    Please run './INSTALL' to create it.    *";  \
+		echo "**********************************************";  \
+		exit 2;                                                 \
 	fi
 	$(MAKE) -C driver
 
@@ -66,9 +66,9 @@ install:
 cleanup:
 	$(MAKE) -C driver cleanup
 	$(MAKE) -C lib cleanup
-	$(RM) $(RMFLAGS) *~ makelog
+	$(RM) $(RMFLAGS) makelog svn-* *~ 
 
 clean:
 	$(MAKE) -C driver clean
 	$(MAKE) -C lib clean
-	$(RM) $(RMFLAGS) autoconf.h makelog *~
+	$(RM) $(RMFLAGS) autoconf.h makelog svn-* *~
