@@ -30,19 +30,19 @@ to display the contents of the file (but it's pretty boring).
 
 If you are concerned about me receiving any information about you or
 your system you don't want me to see it's very easy to get rid of
-the feature. First, this can be done during compilation of the program.
+the feature. First this can be done during compilation of the program.
 If you define the variable NO_MAIL somewhere at the start of the main
 Makefile the program is compiled so that it is unable to send any
 emails on crashes. In this case another variable, ADDR2LINE, won't be
 set and without it no crash mails can be generated, see the files
 dump.c and bugs.c and please tell me if you think I got it wrong.
 
-An alternative method, which still sends crash emails, but not to me
-but to someone you can select is changing the variable MAIL_ADDRESS
+An alternative method, which still sends crash emails but not to me
+but to someone you can select, is changing the variable MAIL_ADDRESS
 in the main Makefile. If you change it to a different email address
 crash emails (but also bug reports send in by the users) will go to
-this email address. Perhaps this is the best method to go about it,
-set MAIL_ADDRESS to your own email address, and if anything should
+this email address. Perhaps the best method to go about it is to
+set MAIL_ADDRESS to your own email address and if anything should
 fail badly you can inspect the contents of the email and, if you
 don't find anything you don't want me to know about, you can still
 forward it on to me.
