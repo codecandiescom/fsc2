@@ -574,7 +574,7 @@ ON_STOP:
 
 fsave( File,
        \"% Date:                   # #\\n\"
-       \"% Script:                 3_pulse_T1\\n\"
+       \"% Script:                 3_pulse_T1 (J-band, Leiden)\\n\"
        \"% Field:                  # G\\n\"
        \"% Repetition time:        # ms\\n\"
        \"% Length of 1st MW pulse: # ns\\n\"

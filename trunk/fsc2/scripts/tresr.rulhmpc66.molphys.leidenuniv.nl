@@ -577,6 +577,7 @@ ON_STOP:
    the case that a scan was aborted while under way */
 
 fsave( File, \"\\# Date                 : # #\\n\"
+             \"\\# Script:              tresr (J-band, Leiden)\\n\"
 	         \"\\# Start field          = # G\\n\"
              \"\\# End field            = # G\\n\"
              \"\\# Field step size      = # G\\n\"

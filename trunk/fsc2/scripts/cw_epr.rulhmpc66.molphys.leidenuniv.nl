@@ -798,7 +798,7 @@ IF I != 0 {
 
 	fsave( File1,
 	       \"% Date:                    # #\\n\"
-	       \"% Script:                  cw_epr\\n\"
+	       \"% Script:                  cw_epr (J-band, Leiden)\\n\"
 	       \"% Magnet:\\n\"
 	       \"%   Start field:           # G\\n\"
 	       \"%   End field:             # G\\n\"
@@ -827,7 +827,7 @@ IF I != 0 {
 	IF J > 1 {
 		fsave( File2,
 		       \"% Date:                    # #\\n\"
-		       \"% Script:                  cw_epr\\n\"
+		       \"% Script:                  cw_epr (J-band, Leiden)\\n\"
 		       \"% Magnet:\\n\"
 		       \"%   Start field:           # G\\n\"
 		       \"%   End field:             # G\\n\"
@@ -1106,7 +1106,7 @@ IF I != 0 {
 
 	fsave( File1,
 	       \"% Date:                    # #\\n\"
-		   \"% Script:                  cw_epr\\n\"
+		   \"% Script:                  cw_epr (J-band, Leiden)\\n\"
 	       \"% Magnet (measuring while sweeping both up and down):\\n\"
 	       \"%   Start field:           # G\\n\"
 	       \"%   End field:             # G\\n\"
@@ -1134,7 +1134,7 @@ IF I != 0 {
 	IF J > 1 {
 		fsave( File2,
 		       \"% Date:                    # #\\n\"
-			   \"% Script:                  cw_epr\\n\"
+			   \"% Script:                  cw_epr (J-band, Leiden)\\n\"
 		       \"% Magnet (measuring while sweeping both up and down):\\n\"
 		       \"%   Start field:           # G\\n\"
 		       \"%   End field:             # G\\n\"

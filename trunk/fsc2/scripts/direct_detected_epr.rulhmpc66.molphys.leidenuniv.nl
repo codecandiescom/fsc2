@@ -469,7 +469,7 @@ IF I != 0 {
 
 	fsave( File1,
 	       \"% Date:                   # #\\n\"
-	       \"% Script:                 direct_detected_epr\\n\"
+	       \"% Script:                 direct_detected_epr (J-band, Leiden)\\n\"
 	       \"% Start field:            # G\\n\"
 	       \"% End field:              # G\\n\"
 	       \"% Field step:             # G\\n\"
@@ -486,7 +486,7 @@ IF I != 0 {
 	IF J > 1 {
 		fsave( File2,
 	    	   \"% Date:                   # #\\n\"
-	       	   \"% Script:                 direct_detected_epr\\n\"
+	       	   \"% Script:                 direct_detected_epr (J-band, Leiden)\\n\"
 	    	   \"% Start field:            # G\\n\"
 	    	   \"% End field:              # G\\n\"
 	    	   \"% Field step:             # G\\n\"
