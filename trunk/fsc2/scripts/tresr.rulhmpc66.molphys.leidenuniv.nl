@@ -576,22 +576,22 @@ ON_STOP:
 /* Write out the experimental parameters - make sure to get it right also in
    the case that a scan was aborted while under way */
 
-fsave( File, \"\\# Date                 : # #\\n\"
-             \"\\# Script:              tresr (J-band, Leiden)\\n\"
-	         \"\\# Start field          = # G\\n\"
-             \"\\# End field            = # G\\n\"
-             \"\\# Field step size      = # G\\n\"
-			 \"\\# No. of scans         = #\\n\"
-             \"\\# No. of averages      = #\\n\"
-			 \"\\# Sensitivity          = # mV\\n\"
-			 \"\\# Timebase             = # us\\n\"
-             \"\\# Time resolution      = # ns\\n\"
-             \"\\# Trigger position     = # us\\n\"
-			 \"\\# No. of traces        = #\\n\"
-             \"\\# Trace length         = #\\n\"
-			 \"\\# No signal traces     = #\\n\"
-	         \"\\# Temperature at start = # K\\n\"
-    	     \"\\# Temperature at end   = # K\\n\",
+fsave( File, \"\\# Date:                 # #\\n\"
+             \"\\# Script:               tresr (J-band, Leiden)\\n\"
+	         \"\\# Start field:          # G\\n\"
+             \"\\# End field:            # G\\n\"
+             \"\\# Field step size:      # G\\n\"
+			 \"\\# No. of scans:         #\\n\"
+             \"\\# No. of averages:      #\\n\"
+			 \"\\# Sensitivity:          # mV\\n\"
+			 \"\\# Timebase:             # us\\n\"
+             \"\\# Time resolution:      # ns\\n\"
+             \"\\# Trigger position:     # us\\n\"
+			 \"\\# No. of traces:        #\\n\"
+             \"\\# Trace length:         #\\n\"
+			 \"\\# No signal traces:     #\\n\"
+	         \"\\# Temperature at start: # K\\n\"
+    	     \"\\# Temperature at end:   # K\\n\",
        date( ), time( ), start_field,
 	   Scans_Done == 0 ? start_field + ( I - 1 ) * field_step : end_field,
 	   field_step, Scans_Done == 0 ? 1 : Scans_Done, Num_Avg, sens / 1 mV,
