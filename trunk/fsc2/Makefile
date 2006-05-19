@@ -79,10 +79,13 @@ GROUP              := uucp
 
 
 # The next variable defines the GPIB library to use, it must be set to either
-# 'LLP' for the LLP library, 'NI' for the National Instruments library,
-# 'SLG' for the updated version of the LLP library, now hosted on sourceforge,
-# or 'JTT' for the library written by me. Alternatively, if no GPIB support is
-# needed, define GPIB_LIBRARY as 'NONE' (which is the default if not set).
+# 'LLP' for the LLP library, 'NI' for the newee National Instruments library,
+# 'NI_OLD' for the old National Instruments library (you can distinguish
+# them from the include file they install, if it is ni488.h then it's the
+# newer version, if it's ugpib.h it's the older one), 'SLG' for the updated
+# version of the LLP library, now hosted on sourceforge, or 'JTT' for the
+# library written by me for ISA GPIB cards. Alternatively, if no GPIB support
+# is needed, define GPIB_LIBRARY as 'NONE' (which is the default if not set).
 
 GPIB_LIBRARY       := JTT
 
@@ -123,6 +126,16 @@ GPIB_LOG_LEVEL     := HIGH
 # library reside.
 
 # GPIB_HEADER_DIR    := /usr/include/gpib
+
+
+# In the case you're using the newer National Instruments library you can link
+# against a file named cib.o coming with the library. By linking in this file
+# the dynamic library will only be loaded when the first call is made into
+# the library, otherwise the library gets loaded on start of the program. To
+# be able to link the file in the exact location of the file is needed and
+# the following variable set accordingly.
+
+# CIB_FILE           := /home/jens/Lab/NatInst/ni488223L/driver/lib/cib.o
 
 
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
@@ -533,8 +546,6 @@ ifneq ($(GPIB_LIBRARY),NONE)
 		CONFFLAGS += -DGPIB_CONF_FILE=\"/etc/gpib.conf\"
 	endif
 
-	LIBS += -lgpib
-
 	ifdef GPIB_LOG_FILE
 		CONFFLAGS += -DGPIB_LOG_FILE=\"$(patsubst % ,%,$(GPIB_LOG_FILE))\"
 	else
@@ -560,20 +571,30 @@ ifneq ($(GPIB_LIBRARY),NONE)
 	endif
 
 	ifeq ($(GPIB_LIBRARY),LLP)
-		GPIB_LIBRARY         := llp
+		GPIB_LIBRARY             := llp
 		ifndef GPIB_HEADER_DIR
-			INCLUDES         += -I/usr/local/include/gpib
+			INCLUDES             += -I/usr/local/include/gpib
 		endif
-		LIBS                 += -lfl
+		LIBS                     += -lgpib -lfl
 	else
 		ifeq ($(GPIB_LIBRARY),SLG)
 			GPIB_LIBRARY         := slg
+			LIBS                 += -lgpib
 		else
 			ifeq ($(GPIB_LIBRARY),NI)
 				GPIB_LIBRARY     := ni
+				LIBS             := $(CIB_FILE) $(LIBS) -lgpibapi
+				CONFFLAGS        += -DGPIB_LIRARY_NI
 			else
-				ifeq ($(GPIB_LIBRARY),JTT)
-					GPIB_LIBRARY := jtt
+				ifeq ($(GPIB_LIBRARY),NI_OLD)
+					GPIB_LIBRARY     := ni_old
+					LIBS             += -lgpib
+					CONFFLAGS        += -DGPIB_LIRARY_NI_OLD
+				else
+					ifeq ($(GPIB_LIBRARY),JTT)
+						GPIB_LIBRARY := jtt
+						LIBS         += -lgpib
+					endif
 				endif
 			endif
 		endif
@@ -819,7 +840,6 @@ fsc2_config.h: Makefile $(MACHINE_INCLUDE_FILE)
 		echo "Creating fsc2_config.h...";    \
 	fi
 	@echo "/*--- Created automatically, don't change ---*/" > fsc2_config.h
-	@echo $(CONFFLAGS)
 	@echo -e $(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS))) >> \
 		  fsc2_config.h
 
@@ -836,7 +856,7 @@ built:
 	                 $(sdir)/fsc2_http_server $(mdir)/Makefile               \
 			  	     $(mdir)/*.[chl] $(cdir)/Functions $(cdir)/Devices       \
 			         $(cdir)/*.conf $(udir)/check_dist $(udir)/clone_device  \
-			         $(udir)/edl-mode.el $(udir)/edl.ssh $(udir)/fsc2_guify  \
+			         $(udir)/edl-mod.el $(udir)/edl.ssh $(udir)/fsc2_guify   \
 			         $(udir)/fsc2_pulses $(udir)/ipcc $(udir)/Makefile       \
 				     $(udir)/memcheck |                                      \
 	grep -v 'sed\|grep' |                                                    \

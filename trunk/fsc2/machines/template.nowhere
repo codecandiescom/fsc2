@@ -61,10 +61,13 @@ GROUP              := uucp
 
 
 # The next variable defines the GPIB library to use, it must be set to either
-# 'LLP' for the LLP library, 'NI' for the National Instruments library,
-# 'SLG' for the updated version of the LLP library, now hosted on sourceforge,
-# or 'JTT' for the library written by me. Alternatively, if no GPIB support is
-# needed, define GPIB_LIBRARY as 'NONE' (which is the default if not set).
+# 'LLP' for the LLP library, 'NI' for the newee National Instruments library,
+# 'NI_OLD' for the old National Instruments library (you can distinguish
+# them from the include file they install, if it is ni488.h then it's the
+# newer version, if it's ugpib.h it's the older one), 'SLG' for the updated
+# version of the LLP library, now hosted on sourceforge, or 'JTT' for the
+# library written by me for ISA GPIB cards. Alternatively, if no GPIB support
+# is needed, define GPIB_LIBRARY as 'NONE' (which is the default if not set).
 
 GPIB_LIBRARY       := JTT
 
@@ -105,6 +108,16 @@ GPIB_LOG_LEVEL     := HIGH
 # library reside.
 
 # GPIB_HEADER_DIR    := /usr/include/gpib
+
+
+# In the case you're using the newer National Instruments library you can link
+# against a file named cib.o coming with the library. By linking in this file
+# the dynamic library will only be loaded when the first call is made into
+# the library, otherwise the library gets loaded on start of the program. To
+# be able to link the file in the exact location of the file is needed and
+# the following variable set accordingly.
+
+# CIB_FILE           := /home/jens/Lab/NatInst/ni488223L/driver/lib/cib.o
 
 
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on

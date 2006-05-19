@@ -178,7 +178,7 @@ static int gpib_parse_config( const char * file )
 
     if ( ( fp = fopen( file, "r" ) ) == NULL )
     {
-        sprintf( gpib_error_msg, "Can't open data base %s.", file );
+        sprintf( gpib_error_msg, "Can't open database '%s'.", file );
         iberr = ECAP;
         return FAILURE;
     }
@@ -284,7 +284,7 @@ static void gpib_init_log( const char * log_file_name )
 
 /*-----------------------------------------------------------------------*
  * gpib_init_device() initializes a device.
- * Function has to be called before any other operations on the device !
+ * Function has to be called before any other operations on the device!
  * ->
  *  * Symbolic name of the device (string, has to be identical to the
  *    corresponding entry in GPIB_CONF_FILE)
@@ -323,7 +323,7 @@ int gpib_init_device( const char * device_name,
 
 	if ( i == GPIB_MAX_DEV )
 	{
-        sprintf( gpib_error_msg, "Device %s not found in data base %s.\n",
+        sprintf( gpib_error_msg, "Device %s not found in database '%s'.\n",
 				 device_name, GPIB_CONF_FILE );
 		if ( ll > LL_NONE )
 			gpib_log_function_end( "gpib_init_device", device_name );
@@ -435,12 +435,14 @@ int gpib_local_lockout( int device )
 	for ( i = 0; i < GPIB_MAX_DEV; i++ )
 		if ( devices[ i ].number == device )
 		{
+#if defined GPIB_LIRARY_NI_OLD
 			if ( devices[ i ].is_online )
 			{
 				raise_permissions( );
 				ibllo( device );
 				lower_permissions( );
 			}
+#endif
 			return SUCCESS;
 		}
 

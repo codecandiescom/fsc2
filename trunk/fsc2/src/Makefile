@@ -133,6 +133,7 @@ gpib_setup:
 	@if [ -n "$(GPIB_LIBRARY)"                                       \
 		  -a \(    "$(GPIB_LIBRARY)" = "llp"                         \
 			    -o "$(GPIB_LIBRARY)" = "ni"                          \
+			    -o "$(GPIB_LIBRARY)" = "ni_old"                      \
 			    -o "$(GPIB_LIBRARY)" = "slg"                         \
 			    -o "$(GPIB_LIBRARY)" = "jtt"                         \
 			    -o "$(GPIB_LIBRARY)" = "none" \) ]; then             \
@@ -150,7 +151,8 @@ gpib_setup:
 		if [ ! -e gpib_if.h ]; then                                  \
 			$(LN) $(LNFLAGS) gpib_if_$(GPIB_LIBRARY).hx gpib_if.h;   \
 		fi;                                                          \
-		if [ "$(GPIB_LIBRARY)" = "ni" ]; then                        \
+		if [    "$(GPIB_LIBRARY)" = "ni"                             \
+			 -o "$(GPIB_LIBRARY)" = "ni_old" ]; then                 \
 			if [ ! -e gpib_parser.y ]; then                          \
 				$(LN) $(LNFLAGS) gpib_ni_parser.yx gpib_parser.y;    \
 			fi;                                                      \
