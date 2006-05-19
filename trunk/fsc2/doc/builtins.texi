@@ -1231,7 +1231,7 @@ Complete more-dimensional arrays
 @end itemize
 
 The function saves data in an unformatted fashion, i.e.@: each data
-value is written with a new line cahracter appended to it. The only
+value is written with a new line character appended to it. The only
 exception are more-dimensional arrays -- here an empty line is output
 between the individual slices of the array. Here's an example: The array
 
