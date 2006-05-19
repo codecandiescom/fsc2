@@ -872,8 +872,7 @@ http_server:
 ifdef WITH_HTTP_SERVER
 	@if [ ! -e $(ldir)/Makefile                                \
 		  -o $(ldir)/Makefile.PL -nt $(ldir)/Makefile ]; then  \
-		cd $(ldir) &&                                          \
-		perl Makefile.PL;                                      \
+		cd $(ldir) && perl Makefile.PL;                        \
 		cd $(fdir);                                            \
 	fi
 	$(MAKE) -C $(ldir)
@@ -966,8 +965,9 @@ clean:
 	$(MAKE) -C $(mdir) clean
 	$(MAKE) -C $(ddir) clean
 ifdef WITH_HTTP_SERVER
-	if [ -e $(ldir)/Makefile ]; then   \
-		$(MAKE) -C $(ldir) distclean;  \
+	if [ -e $(ldir)/Makefile ]; then             \
+		$(MAKE) -C $(ldir) distclean;            \
+		$(RM) $(RMFLAGS) $(ldir)/MANIFEST.SKIP;  \
 	fi
 endif
 	$(MAKE) -C $(udir) clean

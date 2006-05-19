@@ -15,7 +15,7 @@ use Config;
 # Check if we can run the C compiler and if using fcntl() works - if the
 # later fails the system may not have a fcntl() system call at all.
 
-open( $fh, ">cc_test.c" ) or die "Can't open a file for writing: $!\n";
+open $fh, ">cc_test.c" or die "Can't open a file for writing: $!\n";
 print $fh "int main(void)\n{\nreturn 0;\n}\n";
 close $fh;
 
@@ -26,18 +26,19 @@ if ( system $Config{cc}, qw( -o cc_test cc_test.c ) ) {
 unlink "cc_test";
 unlink "cc_test.c";
 
-open( $fh, ">fcntl_test.c" ) or die "Can't open a file for writing: $!\n";
-print $fh "#include <fcntl.h>\n" .
-	      "#include <stdio.h>\n" .
-	      "int main(void)\n" .
-          "{\n" .
-	      "    struct flock f;\n" .
-	      "    f.l_type = F_RDLCK;\n" .
-	      "    f.l_whence = SEEK_SET;\n" .
-          "    f.l_start = 0;\n" .
-	      "    f.l_len = 0;\n" .
-          "    return fcntl( 0, F_SETLK, &f ) == -1;\n" .
-          "}\n";
+open $fh, ">fcntl_test.c" or die "Can't open a file for writing: $!\n";
+print $fh <<EOF;
+#include <fcntl.h>
+#include <stdio.h>
+int main(void) {
+struct flock f;
+f.l_type = F_RDLCK;
+f.l_whence = SEEK_SET;
+f.l_start = 0;
+f.l_len = 0;
+return fcntl( 0, F_SETLK, &f ) == -1;
+};
+EOF
 close $fh;
 
 if ( system $Config{cc}, qw( -o fcntl_test fcntl_test.c ) ) {
@@ -61,6 +62,12 @@ if ( ( system $Config{cc}, qw( -o sizes1 sizes1.c ) or system "./sizes1" ) and
 unlink "sizes1" if -e "sizes1";
 unlink "sizes2" if -e "sizes2";
 
+open $fh, ">MANIFEST.SKIP" or die "Can't open a file for writing: $!\n";
+print $fh <<EOF;
+\\B\\.svn\\b
+MAKEFILE\\.SKIP
+EOF
+close $fh;
 
 # Now create the Makefile
 
