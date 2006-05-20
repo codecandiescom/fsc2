@@ -669,7 +669,7 @@ using the mouse. It expects at least two and up to seven arguments. The
 first one is the number of the curve to be zoomed. This must be a number
 between @code{1} and the maximum curve number (as set by the call of
 @code{init_2d()}). The second and third argument are the @i{x}-coordinate
-of the leftmost point to be displayed within the 2D wndow and the number
+of the leftmost point to be displayed within the 2D window and the number
 of points to be displayed in @i{x}-direction. The fourth and fifth argument
 are the @i{y}-coordinate of the point with the smallest @i{y}-value and the
 number of points to be displayed. The sixth and seventh argument determine the

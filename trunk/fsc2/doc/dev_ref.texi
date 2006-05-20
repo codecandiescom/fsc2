@@ -2376,7 +2376,7 @@ combination of (currently) 15 Rulbus RB8514 delay cards and 2 clock cards
 as well as requiring the @strong{Rohde & Schwarz SML01} synthesizer (with
 the SML-B3 option) in order to be able to create @code{RF} pulses.
 
-The timebase of this pulser is aat the moment fixed to @w{10 ns}, but this
+The timebase of this pulser is at the moment fixed to @w{10 ns}, but this
 can be changed by using a second adjustable clock card and a modification of
 the configuration file for the pulser. Its number of functions is restricted
 to @code{MICROWAVE}, @code{RADIO_FREQUENCY}, @code{DETECTION}, @code{LASER}
