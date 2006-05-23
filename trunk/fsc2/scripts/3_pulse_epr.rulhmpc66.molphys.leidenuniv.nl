@@ -722,7 +722,7 @@ IF I != 0 {
 # === else
     } else {
         print $fh "		FOR K = N_Points - I + 2 : N_Points {
-			fsave( File1, \"#,#\\n\", end_field + ( K - 1 ) * field_step,
+			fsave( File1, \"#,#\\n\", end_field - ( K - 1 ) * field_step,
 				   data[ 1, K ] );
 		}
 ";
@@ -744,7 +744,7 @@ IF I != 0 {
 ";
 # === else
     } else {
-		print $fh "	 		fsave( File2, \"#\", end_field + ( I - 1 ) * field_step );
+		print $fh "	 		fsave( File2, \"#\", end_field - ( I - 1 ) * field_step );
 ";
 	}
 	print $fh "			FOR K = 1 : J {
@@ -764,7 +764,7 @@ IF I != 0 {
 ";
 # === else
     } else {
-		print $fh "			fsave( File1, \"#,#\\n\", end_field + ( I - 1 ) * field_step, avg[ I ] );
+		print $fh "			fsave( File1, \"#,#\\n\", end_field - ( I - 1 ) * field_step, avg[ I ] );
 ";
 	}
 	print $fh "		}

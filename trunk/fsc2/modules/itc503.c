@@ -134,7 +134,7 @@ int itc503_exp_hook( void )
 
 int itc503_end_of_exp_hook( void )
 {
-	itc503_lock( LOCAL_AND_LOCKED );
+	itc503_lock( LOCAL_AND_UNLOCKED );
 	return 1;
 }
 
