@@ -69,7 +69,7 @@ P3:   FUNCTION = MW,
       LENGTH   = 100 ns;
 
 P4:   FUNCTION = RF,
-      START    = 360 ns,
+      START    = 380 ns,
       LENGTH   = 100 ns;
 
 P5:   FUNCTION = DETECTION,

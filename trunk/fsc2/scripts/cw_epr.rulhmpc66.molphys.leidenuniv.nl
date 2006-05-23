@@ -1129,6 +1129,7 @@ IF I != 0 {
 	       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
 		   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
 		   J, Num_Points, start_temp, temp_contr_temperature( ) );
+
 	save_comment( File1, \"% \", \"Sample:  \\nTemperature:  \\n\" );
 
 	IF J > 1 {
