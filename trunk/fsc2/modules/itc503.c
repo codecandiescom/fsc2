@@ -135,6 +135,7 @@ int itc503_exp_hook( void )
 int itc503_end_of_exp_hook( void )
 {
 	itc503_lock( LOCAL_AND_UNLOCKED );
+	gpib_local( itc503.device );
 	return 1;
 }
 
