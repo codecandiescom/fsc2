@@ -1,0 +1,148 @@
+=== TRIG_MODE menu [ "EXTERNAL", "INTERNAL" ] [ 1 ] "Trigger mode"
+=== REP_TIME float [ 0.001 : ] [ 50 ] "Repetition time" "ms"
+=== P1_POS int [ 200 : 167772150 ] [ 200 ] "Position of 1st MW pulse" "ns"
+=== P1_LEN int [ 10 : 167772150 ] [ 100 ] "Length of 1st MW pulse" "ns"
+=== P2_LEN int [ 10 : 167772150 ] [ 200 ] "Length of 2st MW pulse" "ns"
+=== P3_LEN int [ 10 : 167772150 ] [ 200 ] "Length of 3rd MW pulse" "ns"
+=== P1_P2_DIST int [ 100 : 167772150 ] [ 400 ] "P1-P2 distance" "ns"
+=== P2_P3_DIST int [ 100 : 167772150 ] [ 400 ] "Init. P2-P3 distance" "ns"
+=== P2_P3_INCR int [ 10 : ] [ 20 ] "P2-P3 dist. increment" "ns"
+=== DET_OFFSET int [ -167772150 : 167772150 ] [ 0 ] "Detection offset" "ns"
+=== N_AVG menu [ "1", "3", "10", "30", "100", "300", "1000", \
+===			     "3000", "10000" ] [ 3 ] "Number of averages"
+=== FIELD float [ 0 : 114304 ] [ 80000 ] "Field" "G"
+=== SHOW_PREV button [ OFF ] "Show pulse preview"
+DEVICES:
+
+ips120_10;
+itc503;
+rb8509;
+rb_pulser_j;
+
+
+VARIABLES:
+
+repeat_time   = REP_TIME ms;
+p1_pos        = P1_POS ns;
+p1_to_p2_dist = P1_P2_DIST ns;
+p2_to_p3_dist = P2_P3_DIST ns;
+p2_to_p3_incr = P2_P3_INCR ns;
+p1_len        = P1_LEN ns;
+p2_len        = P2_LEN ns;
+p3_len        = P3_LEN ns;
+det_offset    = DET_OFFSET ns;
+field         = FIELD G;
+N_Avg         = N_AVG;
+
+I;
+data;
+File;
+start_temp;
+B1, B2, B3;
+
+
+ASSIGNMENTS:
+
+=== if ( TRIG_MODE eq "EXTERNAL" )
+TRIGGER_MODE: EXTERNAL;
+=== else
+TRIGGER_MODE: $TRIG_MODE, REPEAT_TIME = repeat_time;
+=== endif
+
+
+PREPARATIONS:
+
+P1:  FUNCTION    = MICROWAVE,
+	 START       = p1_pos,
+	 LENGTH      = p1_len;
+
+P2:  FUNCTION    = MICROWAVE,
+	 START       = P1.START + p1_to_p2_dist + 0.5 * ( P1.LENGTH - p2_len ),
+	 LENGTH      = p2_len;
+
+P3:  FUNCTION    = MICROWAVE,
+	 START       = P2.START + p2_to_p3_dist + 0.5 * ( P2.LENGTH - p3_len ),
+	 DELTA_START = p2_to_p3_incr,
+	 LENGTH      = p3_len;
+
+P4:  FUNCTION    = DETECTION,
+	 START       = P3.START + det_offset + p1_to_p2_dist + 0.5 * P3.LENGTH,
+	 DELTA_START = p2_to_p3_incr,
+	 LENGTH      = 100 ns;
+
+=== if SHOW_PREV
+pulser_show_pulses( );
+=== endif
+
+init_1d( 1, 0, p2_to_p3_dist / 1ns, p2_to_p3_incr / 1 ns,
+		 "Pulse separation [ns]", "Echo amplitude [a.u.]" );
+
+
+EXPERIMENT:
+=== if ( TRIG_MODE eq "EXTERNAL" )
+print( "Please make sure the repetition time is set correctly!\n" );
+=== endif
+
+start_temp = temp_contr_temperature( );
+
+/* Go to the field */
+
+set_field( field );
+
+/* Open the data file, ask user for comment to be written to it and the
+   output the parameter to it */
+
+File = get_file( );
+
+hide_toolbox( "ON" );
+B1 = output_create( "INT_OUTPUT", "Current P2-P3 separation [ns]" );
+B2 = output_create( "FLOAT_OUTPUT", "Field [G]", "%.3f" );
+B3 = output_create( "FLOAT_OUTPUT", "Current temperature [K]", "%.1f" );
+hide_toolbox( "OFF" );
+
+output_value( B1, int( p2_to_p3_dist / 1 ns ) );
+output_value( B2, field );
+output_value( B3, start_temp );
+
+I = 1;
+pulser_state( "ON" );
+daq_gain( 4 );
+
+FOREVER {
+	wait( 1.1 * repeat_time * N_Avg );
+	data = daq_get_voltage( CH0 );
+	display( I, data );
+	fsave( File, "#,#\n",
+		   ( p2_to_p3_dist + p2_to_p3_incr * ( I - 1 ) ) / 1 ns, data );
+	pulser_shift( );
+	pulser_update( );	
+    output_value( B1, int( ( p2_to_p3_dist + I * p2_to_p3_incr ) / 1 ns ) );
+    output_value( B3, temp_contr_temperature( ) );
+	I += 1;
+}
+
+
+ON_STOP:
+
+fsave( File,
+	   "% Date:                   # #\n"
+	   "% Script:                 3_pulse_EM (J-band, Leiden)\n"
+	   "% Field:                  # G\n"
+	   "% Repetition time:        # ms\n"
+	   "% Length of 1st MW pulse: # ns\n"
+	   "% Length of 2st MW pulse: # ns\n"
+	   "% Length of 3st MW pulse: # ns\n"
+	   "% P1-P2 separation:       # ns\n"
+	   "% Init. P2-P3 separation: # ns\n"
+	   "% P2-P3 increment:        # ns\n"
+	   "% Number of averages:     >= #\n"
+	   "% ADC gain:               4\n"
+       "% Temperature at start:   # K\n"
+       "% Temperature at end:     # K\n",
+	   date( ), time( ), field,  repeat_time / 1 ms, int( P1.LENGTH / 1ns ),
+	   int( P2.LENGTH / 1 ns ), int( P3.LENGTH / 1 ns ),
+	   int( p1_to_p2_dist / 1 ns ), int( p2_to_p3_dist / 1 ns ),
+	   int( p2_to_p3_incr / 1 ns ), N_Avg,
+	   start_temp, temp_contr_temperature( ) );
+
+save_comment( File, "%" );

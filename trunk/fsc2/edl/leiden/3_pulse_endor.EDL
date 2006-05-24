@@ -1,0 +1,294 @@
+=== TRIG_MODE menu [ "EXTERNAL", "INTERNAL" ] [ 1 ] "Trigger mode"
+=== REP_TIME float [ 0.001 : ] [ 50 ] "Repetition time" "ms"
+=== P1_POS int [ 200 : 167772150 ] [ 200 ] "Position of 1st MW pulse" "ns"
+=== P1_LEN int [ 10 : 167772150 ] [ 100 ] "Length of 1st MW pulse" "ns"
+=== P2_LEN int [ 10 : 167772150 ] [ 200 ] "Length of 2st MW pulse" "ns"
+=== P3_LEN int [ 10 : 167772150 ] [ 200 ] "Length of 3rd MW pulse" "ns"
+=== P1_P2_DIST int [ 100 : 167772150 ] [ 400 ] "P1-P2 distance" "ns"
+=== P2_P3_DIST int [ 100 : 167772150 ] [ 2000 ] "P2-P3 distance" "ns"
+=== P2_RF_DEL int [ 0 : 167772150 ] [ 100 ] "P2-RF pulse delay" "ns"
+=== RF_P3_DEL int [ 0 : 167772150 ] [ 100 ] "RF-P3 pulse delay" "ns"
+=== DET_OFFSET int [ -167772150 : 167772150 ] [ 0 ] "Detection offset" "ns"
+=== N_AVG menu [ "1", "3", "10", "30", "100", "300", "1000", \
+===              "3000", "10000" ] [ 3 ] "Number of averages"
+=== FIELD float [ 0 : 114304 ] [ 80000 ] "Field" "G"
+=== START_FREQ float [ 0.009 : 1100 ] [ 25 ] "Start frequency" "MHz"
+=== END_FREQ float [ 0.009 : 1100 ] [ 50 ] "End frequency" "MHz"
+=== FREQ_STEP float [ 0.001 : 1000 ] [ 0.25 ] "Step frequency" "MHz"
+=== RF_ATT float [ -140 : 13 ] [ -13 ] "Attenuation" "dB"
+=== SHOW_PREV button [ OFF ] "Show pulse preview"
+DEVICES:
+
+ips120_10;
+itc503;
+rs_sml01;
+rb8509;
+rb_pulser_j;
+
+
+VARIABLES:
+
+repeat_time   = REP_TIME ms;
+p1_pos        = P1_POS ns;
+p1_to_p2_dist = P1_P2_DIST ns;
+p2_to_p3_dist = P2_P3_DIST ns;
+p1_len        = P1_LEN ns;
+p2_len        = P2_LEN ns;
+p3_len        = P3_LEN ns;
+p2_rf_delay   = P2_RF_DEL ns;
+rf_p3_delay   = RF_P3_DEL ns;
+det_offset    = DET_OFFSET ns;
+
+start_freq    = START_FREQ MHz;
+end_freq      = END_FREQ MHz;
+=== if ( START_FREQ <= END_FREQ )
+freq_step     = FREQ_STEP MHz;
+=== else
+freq_step     = - FREQ_STEP MHz;
+=== endif
+att           = RF_ATT;
+freq;
+
+field         = FIELD G;
+N_Avg         = N_AVG;
+N_Points      = ceil( ( end_freq - start_freq ) / freq_step ) + 1;
+I = 0;
+J = 0;
+K;
+data[ *, *];
+avg[ N_Points ];
+File1, File2;
+start_temp;
+B1, B2, B3, B4;
+
+
+ASSIGNMENTS:
+
+=== if ( TRIG_MODE eq "EXTERNAL" )
+TRIGGER_MODE: EXTERNAL;
+=== else
+TRIGGER_MODE: TRIG_MODE, REPEAT_TIME = repeat_time;
+=== endif
+
+
+PREPARATIONS:
+
+P1:  FUNCTION = MICROWAVE,
+     START    = p1_pos,
+     LENGTH   = p1_len;
+
+P2:  FUNCTION = MICROWAVE,
+     START    = P1.START + p1_to_p2_dist + 0.5 * ( P1.LENGTH - p2_len ),
+     LENGTH   = p2_len;
+
+P3:  FUNCTION = MICROWAVE,
+     START    = P2.START + p2_to_p3_dist + 0.5 * ( P2.LENGTH - p3_len ),
+     LENGTH   = p3_len;
+
+P4:  FUNCTION = RF,
+     START    = P2.START + P2.LENGTH + p2_rf_delay,
+     LENGTH   = p2_to_p3_dist - 0.5 * ( P2.LENGTH + P3.LENGTH )
+                - p2_rf_delay - rf_p3_delay;
+
+P5:  FUNCTION = DETECTION,
+     START    = P3.START + det_offset + p1_to_p2_dist + 0.5 * P3.LENGTH,
+     LENGTH   = 100 ns;
+
+=== if SHOW_PREV
+pulser_show_pulses( );
+=== endif
+=== if ( START_FREQ <= END_FREQ )
+init_1d( 3, N_Points, start_freq / 1 MHz, freq_step / 1 MHz,
+         "RF frequency [MHz]", "Echo amplitude [a.u.]" );
+=== else
+init_1d( 3, N_Points, end_freq / 1 MHz, - freq_step / 1 MHz,
+         "RF frequency [MHz]", "Echo amplitude [a.u.]" );
+=== endif
+
+
+EXPERIMENT:
+=== if ( TRIG_MODE eq "EXTERNAL" )
+print( "Please make sure the repetition time is set correctly!\n" );
+=== endif
+
+/* Go to the start field */
+
+field = set_field( field );
+
+/* Open the data file */
+
+File1 = get_file( "", "*.avg", "", "", "avg" );
+
+start_temp = temp_contr_temperature( );
+synthesizer_attenuation( att );
+freq = synthesizer_frequency( start_freq );
+synthesizer_state( "ON" );
+pulser_state( "ON" );
+daq_gain( 4 );
+
+/* Create the toolbox */
+
+hide_toolbox( "ON" );
+B1 = output_create( "INT_OUTPUT", "Current scan" );
+B2 = output_create( "FLOAT_OUTPUT", "Current frequency [MHz]", "%.3f" );
+B3 = output_create( "FLOAT_OUTPUT", "Current temperature [K]", "%.1f" );
+B4 = button_create( "PUSH_BUTTON", "Stop after end of scan" );
+hide_toolbox( "OFF" );
+
+FOREVER {
+    freq = synthesizer_frequency( start_freq );
+    J += 1;
+    output_value( B1, J );                // Update the scan count display
+
+    FOR I = 1 : N_Points {
+        output_value( B2, freq );
+        output_value( B3, temp_contr_temperature( ) );
+        wait( 1.1 * repeat_time * N_Avg );
+=== if ( START_FREQ <= END_FREQ )
+        data[ J, I ] = daq_get_voltage( CH0 );
+        display_1d( I, data[ J, I ], 1,
+                    I, ( ( J - 1 ) * avg[ I ]  + data[ J, I ] ) / J, 2 );
+=== else
+        data[ J, N_Points - I + 1 ] = daq_get_voltage( CH0 );
+        display_1d( N_Points - I + 1, data[ J, N_Points - I + 1 ], 1,
+                    N_Points - I + 1, ( ( J - 1 ) * avg[ N_Points - I + 1 ]
+                    + data[ J, N_Points - I + 1 ] ) / J, 2 );
+=== endif
+
+=== if ( START_FREQ <= END_FREQ )
+        IF I < N_Points {
+=== else
+        IF I > 1 {
+=== endif
+            freq += freq_step;
+            synthesizer_frequency( freq );
+        }
+    }
+
+    avg = add_to_average( avg, data[ J ], J );
+
+    IF button_state( B4 ) {               // Stop on user request
+        BREAK;
+    }
+
+    clear_curve_1d( 1, 3 );
+    display_1d( 1, data[ J ], 3 );
+}
+
+ON_STOP:
+
+synthesizer_state( "OFF" );
+
+IF I != 0 {
+    IF J == 1 {
+=== if ( START_FREQ <= END_FREQ )
+        FOR K = 1 : I - 1 {
+            fsave( File1, "#,#\n",
+                   ( start_freq + ( K - 1 ) * freq_step ) / 1 MHz,
+                   data[ 1, K ] );
+        }
+=== else
+        FOR K = N_Points - I + 2 : N_Points {
+            fsave( File1, "#,#\n",
+                   ( end_freq - ( K - 1 ) * freq_step ) / 1 MHz,
+                   data[ 1, K ] );
+        }
+=== endif
+        fsave( File1, "\n" );
+    } ELSE {
+        IF I < N_Points {
+            J -= 1;
+        }
+
+        IF J > 1 {
+            File2 = clone_file( File1, "avg", "scans" );
+
+            FOR I = 1 : N_Points {
+=== if ( START_FREQ <= END_FREQ )
+                fsave( File2, "#",
+                       ( start_freq + ( I - 1 ) * freq_step ) / 1 MHz );
+=== else
+                fsave( File2, "#",
+                       ( end_freq - ( I - 1 ) * freq_step ) / 1 MHz );
+=== endif
+                FOR K = 1 : J {
+                    fsave( File2, ",#", data[ K, I ] );
+                }
+                fsave( File2, "\n" );
+            }
+
+            fsave( File2, "\n" );
+        }
+
+        FOR I = 1 : N_Points {
+=== if ( START_FREQ <= END_FREQ )
+            fsave( File1, "#,#\n",
+                   ( start_freq + ( I - 1 ) * freq_step ) / 1 MHz, avg[ I ] );
+=== else
+            fsave( File1, "#,#\n",
+                   ( end_freq - ( I - 1 ) * freq_step ) / 1 MHz, avg[ I ] );
+=== endif
+        }
+        fsave( File1, "\n" );
+    }
+
+    fsave( File1,
+           "% Date:                   # #\n"
+           "% Script:                 3_pulse_endor (J-band, Leiden)\n"
+           "% Field:                  # G\n"
+           "% Start frequency:        # MHz\n"
+           "% End frequency:          # MHz\n"
+           "% Frequency step:         # MHz\n"
+           "% Attenuation:            # dB\n"
+           "% Repetition time:        # ms\n"
+           "% Length of 1st MW pulse: # ns\n"
+           "% Length of 2st MW pulse: # ns\n"
+           "% Length of 3st MW pulse: # ns\n"
+           "% P1-P2 separation:       # ns\n"
+           "% P2-P3 separation:       # ns\n"
+           "% RF pulse position:      # ns\n"
+           "% RF pulse length:        # ns\n"
+           "% Number of averages:     >= #\n"
+           "% ADC gain:               4\n"
+           "% Temperature at start:   # K\n"
+           "% Temperature at end:     # K\n",
+           date( ), time( ), field, start_freq / 1 MHz, freq / 1 MHz,
+           freq_step / 1 MHz, att, repeat_time / 1 ms,
+           int( P1.LENGTH / 1 MHz ), int( P2.LENGTH / 1 ns ),
+           int( P3.LENGTH / 1 ns ), int( p1_to_p2_dist / 1 ns ),
+           int( p2_to_p3_dist / 1 ns ), int( P4.START / 1 ns ),
+           int( P4.LENGTH / 1 ns ), N_Avg,
+           start_temp, temp_contr_temperature( ) );
+
+    save_comment( File1, "%" );
+
+    IF J > 1 {
+        fsave( File2,
+               "% Date:                   # #\n"
+               "% Script:                 3_pulse_endor (J-band, Leiden)\n"
+               "% Field:                  # G\n"
+               "% Start frequency:        # MHz\n"
+               "% End frequency:          # MHz\n"
+               "% Frequency step:         # MHz\n"
+               "% Attenuation:            # dB\n"
+               "% Repetition time:        # ms\n"
+               "% Length of 1st MW pulse: # ns\n"
+               "% Length of 2st MW pulse: # ns\n"
+               "% Length of 3st MW pulse: # ns\n"
+               "% P1-P2 separation:       # ns\n"
+               "% P2-P3 separation:       # ns\n"
+               "% RF pulse position:      # ns\n"
+               "% RF pulse length:        # ns\n"
+               "% Number of averages:     >= #\n"
+               "% ADC gain:               4\n"
+               "% Temperature at start:   # K\n"
+               "% Temperature at end:     # K\n",
+               date( ), time( ), field, start_freq / 1 MHz, freq / 1 MHz,
+               freq_step / 1 MHz, att, repeat_time / 1 ms,
+               int( P1.LENGTH / 1 MHz ), int( P2.LENGTH / 1 ns ),
+               int( P3.LENGTH / 1 ns ), int( p1_to_p2_dist / 1 ns ),
+               int( p2_to_p3_dist / 1 ns ), int( P4.START / 1 ns ),
+               int( P4.LENGTH / 1 ns ), N_Avg,
+               start_temp, temp_contr_temperature( ) );
+    }
+}
