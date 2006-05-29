@@ -38,7 +38,7 @@ extern "C" {
 
 typedef struct RULBUS_CARD_INFO RULBUS_CARD_INFO;
 
-int rulbus_open( void );
+int rulbus_open( int flags );
 void rulbus_close( void );
 
 int rulbus_perror( const char * /* s */ );
@@ -253,6 +253,10 @@ int rulbus_generic_read( int             /* handle  */,
 #define RULBUS_TIME_OUT                       -45
 #define RULBUS_NO_CLOCK_FREQ                  -46
 #define RULBUS_NO_EXT_TRIGGER                 -47
+#define RULBUS_SIGNAL_RECEIVED                -48
+#define RULBUS_EXCL_ACCESS_DENIED             -49
+#define RULBUS_EXCL_ACCESS_BY_OTHER           -50
+#define RULBUS_WOULD_BLOCK                    -51
 
 
 #ifdef __cplusplus

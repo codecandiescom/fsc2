@@ -253,7 +253,7 @@ static bool start_gpib_and_rulbus( void )
 #if defined WITH_RULBUS
 	/* If there are devices that are controlled via the RULBUS initialize it */
 
-	if ( Need_RULBUS && ( retval = rulbus_open( ) ) < 0 )
+	if ( Need_RULBUS && ( retval = rulbus_open( O_EXCL ) ) < 0 )
 	{
 		eprint( FATAL, UNSET, "Failed to initialize RULBUS: %s.\n",
 				rulbus_strerror( ) );

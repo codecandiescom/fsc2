@@ -17,6 +17,7 @@
 === FREQ_STEP float [ 0.001 : 1000 ] [ 0.25 ] "Step frequency" "MHz"
 === RF_ATT float [ -140 : 13 ] [ -13 ] "Attenuation" "dB"
 === SHOW_PREV button [ OFF ] "Show pulse preview"
+=== WAIT_TIME float [ 0.0 : ] [ 5 ] "Delay between scans" "s"
 DEVICES:
 
 ips120_10;
@@ -28,30 +29,32 @@ rb_pulser_j;
 
 VARIABLES:
 
-repeat_time   = REP_TIME ms;
-p1_pos        = P1_POS ns;
-p1_to_p2_dist = P1_P2_DIST ns;
-p2_to_p3_dist = P2_P3_DIST ns;
-p1_len        = P1_LEN ns;
-p2_len        = P2_LEN ns;
-p3_len        = P3_LEN ns;
-p2_rf_delay   = P2_RF_DEL ns;
-rf_p3_delay   = RF_P3_DEL ns;
-det_offset    = DET_OFFSET ns;
+repeat_time    = REP_TIME ms;
+p1_pos         = P1_POS ns;
+p1_to_p2_dist  = P1_P2_DIST ns;
+p2_to_p3_dist  = P2_P3_DIST ns;
+p1_len         = P1_LEN ns;
+p2_len         = P2_LEN ns;
+p3_len         = P3_LEN ns;
+p2_rf_delay    = P2_RF_DEL ns;
+rf_p3_delay    = RF_P3_DEL ns;
+det_offset     = DET_OFFSET ns;
 
-start_freq    = START_FREQ MHz;
-end_freq      = END_FREQ MHz;
+start_freq     = START_FREQ MHz;
+end_freq       = END_FREQ MHz;
 === if ( START_FREQ <= END_FREQ )
-freq_step     = FREQ_STEP MHz;
+freq_step      = FREQ_STEP MHz;
 === else
-freq_step     = - FREQ_STEP MHz;
+freq_step      = - FREQ_STEP MHz;
 === endif
-att           = RF_ATT;
+att            = RF_ATT;
 freq;
 
-field         = FIELD G;
-N_Avg         = N_AVG;
-N_Points      = ceil( ( end_freq - start_freq ) / freq_step ) + 1;
+pre_scan_delay = WAIT_TIME s;
+
+field          = FIELD G;
+N_Avg          = N_AVG;
+N_Points       = ceil( ( end_freq - start_freq ) / freq_step ) + 1;
 I = 0;
 J = 0;
 K;
@@ -139,6 +142,8 @@ FOREVER {
     freq = synthesizer_frequency( start_freq );
     J += 1;
     output_value( B1, J );                // Update the scan count display
+
+	wait( pre_scan_delay );
 
     FOR I = 1 : N_Points {
         output_value( B2, freq / 1 MHz );

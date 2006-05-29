@@ -37,7 +37,8 @@ static void ni6601_dma_irq_handler( Board *board );
  * the others are used for output at the same time).
  *-----------------------------------------------------------*/
 
-int ni6601_dio_in( Board *board, NI6601_DIO_VALUE *arg )
+int ni6601_dio_in( Board *           board,
+		   NI6601_DIO_VALUE * arg )
 {
 	NI6601_DIO_VALUE dio;
 
@@ -51,13 +52,13 @@ int ni6601_dio_in( Board *board, NI6601_DIO_VALUE *arg )
 
 	if ( ( ( u8 ) ( board->dio_mask & 0xFF ) ^ dio.mask ) != 0xFF ) {
 		board->dio_mask &= ~ ( u16 ) dio.mask;
-		writew( board->dio_mask, board->regs.dio_control );
+		iowrite16( board->dio_mask, board->regs.dio_control );
 	}
 
 	/* Read in data value from DIO parallel input register */
 
 	dio.value = ( unsigned char )
-		    ( readw( board->regs.dio_parallel_in ) & dio.mask );
+		    ( ioread16( board->regs.dio_parallel_in ) & dio.mask );
 
 	if ( copy_to_user( arg, &dio, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
@@ -75,7 +76,8 @@ int ni6601_dio_in( Board *board, NI6601_DIO_VALUE *arg )
  * while the others are used for input at the same time).
  *-----------------------------------------------------------*/
 
-int ni6601_dio_out( Board *board, NI6601_DIO_VALUE *arg )
+int ni6601_dio_out( Board *            board,
+		    NI6601_DIO_VALUE * arg )
 {
 	NI6601_DIO_VALUE dio;
 
@@ -87,13 +89,13 @@ int ni6601_dio_out( Board *board, NI6601_DIO_VALUE *arg )
 
 	/* Write data value to DIO parallel output register */
 
-	writew( ( u16 ) dio.value, board->regs.dio_output );
+	iowrite16( ( u16 ) dio.value, board->regs.dio_output );
 
 	/* Now if necessary switch selected pins to output mode */
 
 	if ( ( board->dio_mask & 0xFF ) != dio.mask ) {
 		board->dio_mask |= dio.mask;
-		writew( board->dio_mask, board->regs.dio_control );
+		iowrite16( board->dio_mask, board->regs.dio_control );
 	}
 
 	return 0;
@@ -104,7 +106,8 @@ int ni6601_dio_out( Board *board, NI6601_DIO_VALUE *arg )
  * Function for stopping the counter of a board, i.e. disarming it.
  *------------------------------------------------------------------*/
 
-int ni6601_disarm( Board *board, NI6601_DISARM *arg )
+int ni6601_disarm( Board *         board,
+		   NI6601_DISARM * arg )
 {
 	NI6601_DISARM d;
 
@@ -119,7 +122,7 @@ int ni6601_disarm( Board *board, NI6601_DISARM *arg )
 		return -EINVAL;
 	}
 
-	writew( DISARM, board->regs.command[ d.counter ] );
+	iowrite16( DISARM, board->regs.command[ d.counter ] );
 
 	return 0;
 }
@@ -135,7 +138,8 @@ int ni6601_disarm( Board *board, NI6601_DISARM *arg )
  * the counter value.
  *---------------------------------------------------------------------------*/
 
-int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
+int ni6601_read_count( Board *              board,
+		       NI6601_COUNTER_VAL * arg )
 {
 	NI6601_COUNTER_VAL cs;
 	u32 next_val;
@@ -167,21 +171,21 @@ int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 		int oc = cs.counter + ( cs.counter & 1 ? -1 : 1 );
 
 		if ( cs.do_poll ) {
-			while ( readw( board->regs.joint_status[ oc ] ) &
+			while ( ioread16( board->regs.joint_status[ oc ] ) &
 				Gi_COUNTING( oc ) &&
 				! signal_pending( current ) )
 				/* empty */ ;
 		} else {
 			ni6601_tc_irq_enable( board, oc );
-			if ( readw( board->regs.joint_status[ oc ] ) &
+			if ( ioread16( board->regs.joint_status[ oc ] ) &
 			     Gi_COUNTING( oc ) )
 				wait_event_interruptible( board->tc_waitqueue,
 						  board->tc_irq_raised[ oc ] );
 			ni6601_tc_irq_disable( board, oc );
 		}
 
-		writew( G1_RESET | G0_RESET,
-			board->regs.joint_reset[ cs.counter ] );
+		iowrite16( G1_RESET | G0_RESET,
+			   board->regs.joint_reset[ cs.counter ] );
 
 		if ( signal_pending( current ) ) {
 			PDEBUG( "Aborted by signal\n" );
@@ -191,15 +195,15 @@ int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
 
 	/* Read the SW save register to get the current count value */
 
-	cs.count = readl( board->regs.sw_save[ cs.counter ] );
+	cs.count = ioread32( board->regs.sw_save[ cs.counter ] );
 
 	/* If the counter is armed, re-read the SW save register until two
 	   readings are identical */
 
-	if ( readw( board->regs.joint_status[ cs.counter ] ) &
+	if ( ioread16( board->regs.joint_status[ cs.counter ] ) &
 	     Gi_ARMED( cs.counter ) )
 		while ( cs.count != ( next_val =
-				 readl( board->regs.sw_save[ cs.counter ] ) ) )
+			      ioread32( board->regs.sw_save[ cs.counter ] ) ) )
 			cs.count = next_val;
 	
 	if ( copy_to_user( arg, &cs, sizeof *arg ) ) {
@@ -215,7 +219,8 @@ int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg )
  * Function to start outputting pulses from a counter
  *----------------------------------------------------*/
 
-int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
+int ni6601_start_pulses( Board *         board,
+			 NI6601_PULSES * arg )
 {
 	NI6601_PULSES p;
 	u16 gate_bits;
@@ -256,18 +261,18 @@ int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 	if ( p.output_polarity != NI6601_NORMAL )
 		source_bits |= INVERTED_OUTPUT_POLARITY;
 
-	writew( source_bits, board->regs.input_select[ p.counter ] );
+	iowrite16( source_bits, board->regs.input_select[ p.counter ] );
 
 	/* Load counter with 1 so we're able to start the first pulse as
 	   fast as possible, i.e. 100 ns after arming the counter */
 
-	writel( 1UL, board->regs.load_a[ p.counter ] );
-	writew( LOAD, board->regs.command[ p.counter ] );
+	iowrite32( 1UL, board->regs.load_a[ p.counter ] );
+	iowrite16( LOAD, board->regs.command[ p.counter ] );
 
 	/* Use normal counting and no second gating */
 
-	writew( 0, board->regs.counting_mode[ p.counter ] );
-	writew( 0, board->regs.second_gate[ p.counter ] );
+	iowrite16( 0, board->regs.counting_mode[ p.counter ] );
+	iowrite16( 0, board->regs.second_gate[ p.counter ] );
 
 	if ( ! p.disable_output )
 		ni6601_enable_out( board, NI6601_OUT( p.counter ) );
@@ -277,8 +282,8 @@ int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 	/* Set the count for the duration of the high and the low voltage
 	   phase of the pulse (after subtracting 1) */
 
-	writel( p.high_ticks - 1, board->regs.load_a[ p.counter ] );
-	writel( p.low_ticks  - 1, board->regs.load_b[ p.counter ] );
+	iowrite32( p.high_ticks - 1, board->regs.load_a[ p.counter ] );
+	iowrite32( p.low_ticks  - 1, board->regs.load_b[ p.counter ] );
 
 	/* Assemble value to be written into the mode register */
 
@@ -293,13 +298,13 @@ int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
 		cmd_bits  |= SYNCHRONIZE_GATE;
 	}
 
-	writew( mode_bits, board->regs.mode[ p.counter ] );
+	iowrite16( mode_bits, board->regs.mode[ p.counter ] );
 
 	/* Finally start outputting the pulses */
 
-	writew( cmd_bits, board->regs.command[ p.counter ] );
+	iowrite16( cmd_bits, board->regs.command[ p.counter ] );
 	cmd_bits &= ~ LOAD;
-	writew( cmd_bits | ARM, board->regs.command[ p.counter ] );
+	iowrite16( cmd_bits | ARM, board->regs.command[ p.counter ] );
 
 	return 0;
 }
@@ -309,7 +314,8 @@ int ni6601_start_pulses( Board *board, NI6601_PULSES *arg )
  * Function for starting event counting.
  *---------------------------------------*/
 
-int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
+int ni6601_start_counting( Board *          board,
+			   NI6601_COUNTER * arg )
 {
 	NI6601_COUNTER c;
 	u16 gate_bits;
@@ -345,7 +351,7 @@ int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
 	if ( c.source_polarity != NI6601_NORMAL )
 		source_bits |= INVERTED_SOURCE_POLARITY;
 
-	writew( source_bits, board->regs.input_select[ c.counter ] );
+	iowrite16( source_bits, board->regs.input_select[ c.counter ] );
 
 	if ( ! c.disable_output )
 		ni6601_enable_out( board, NI6601_OUT( c.counter ) );
@@ -354,25 +360,25 @@ int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
 
 	/* Use normal counting and no second gating */
 
-	writew( 0, board->regs.counting_mode[ c.counter ] );
-	writew( 0, board->regs.second_gate[ c.counter ] );
+	iowrite16( 0, board->regs.counting_mode[ c.counter ] );
+	iowrite16( 0, board->regs.second_gate[ c.counter ] );
 
 	if ( use_gate ) {
 		mode_bits |= GATING_MODE_LEVEL;
 		cmd_bits  |= SYNCHRONIZE_GATE;
 	}
 
-	writew( mode_bits, board->regs.mode[ c.counter ] );
+	iowrite16( mode_bits, board->regs.mode[ c.counter ] );
 
 	/* Put start value into Load Register A, set counting direction
 	   etc., then arm (arming while loading does not seems to work
 	   for some of the counters...) */
 
-	writel( 0UL, board->regs.load_a[ c.counter ] );
-	writew( cmd_bits, board->regs.command[ c.counter ] );
+	iowrite32( 0UL, board->regs.load_a[ c.counter ] );
+	iowrite16( cmd_bits, board->regs.command[ c.counter ] );
 	cmd_bits &= ~ LOAD;
 	cmd_bits |= ARM;
-	writew( cmd_bits, board->regs.command[ c.counter ] );
+	iowrite16( cmd_bits, board->regs.command[ c.counter ] );
 
 	return 0;
 }
@@ -382,7 +388,8 @@ int ni6601_start_counting( Board *board, NI6601_COUNTER *arg )
  * Function for starting event counting with DMA mode PIO transfers.
  *-------------------------------------------------------------------*/
 
-int ni6601_start_buf_counting( Board *board, NI6601_BUF_COUNTER *arg )
+int ni6601_start_buf_counting( Board *              board,
+			       NI6601_BUF_COUNTER * arg )
 {
 	NI6601_BUF_COUNTER c;
 	u16 gate_bits;
@@ -429,7 +436,7 @@ int ni6601_start_buf_counting( Board *board, NI6601_BUF_COUNTER *arg )
 	if ( c.source_polarity != NI6601_NORMAL )
 		source_bits |= INVERTED_SOURCE_POLARITY;
 
-	writew( source_bits, board->regs.input_select[ c.counter ] );
+	iowrite16( source_bits, board->regs.input_select[ c.counter ] );
 
 	if ( ! c.disable_output )
 		ni6601_enable_out( board, NI6601_OUT( c.counter ) );
@@ -438,13 +445,13 @@ int ni6601_start_buf_counting( Board *board, NI6601_BUF_COUNTER *arg )
 
 	/* Use normal counting and no second gating */
 
-	writew( 0, board->regs.counting_mode[ c.counter ] );
-	writew( 0, board->regs.second_gate[ c.counter ] );
+	iowrite16( 0, board->regs.counting_mode[ c.counter ] );
+	iowrite16( 0, board->regs.second_gate[ c.counter ] );
 
 	if ( use_gate )
 		cmd_bits  |= SYNCHRONIZE_GATE;
 
-	writew( mode_bits, board->regs.mode[ c.counter ] );
+	iowrite16( mode_bits, board->regs.mode[ c.counter ] );
 
 	if ( ( board->buf = vmalloc( c.num_points * sizeof *board->buf ) )
 	     == NULL ) {
@@ -466,11 +473,11 @@ int ni6601_start_buf_counting( Board *board, NI6601_BUF_COUNTER *arg )
 	/* Put start value into Load Register A, set counting direction etc.
 	   and arm  */
 
-	writel( 0, board->regs.load_a[ c.counter ] );
-	writew( cmd_bits, board->regs.command[ c.counter ] );
+	iowrite32( 0, board->regs.load_a[ c.counter ] );
+	iowrite16( cmd_bits, board->regs.command[ c.counter ] );
 	cmd_bits &= ~ LOAD;
 	cmd_bits |= ARM;
-	writew( cmd_bits, board->regs.command[ c.counter ] );
+	iowrite16( cmd_bits, board->regs.command[ c.counter ] );
 
 	return 0;
 }
@@ -481,7 +488,8 @@ int ni6601_start_buf_counting( Board *board, NI6601_BUF_COUNTER *arg )
  * a buffered counter.
  *-------------------------------------------------------------*/
 
-int ni6601_get_buf_avail( Board *board, NI6601_BUF_AVAIL *arg )
+int ni6601_get_buf_avail( Board *            board,
+			  NI6601_BUF_AVAIL * arg )
 {
 	if ( board->buf_counter < 0 )
 		return -EINVAL;
@@ -509,11 +517,11 @@ int ni6601_get_buf_avail( Board *board, NI6601_BUF_AVAIL *arg )
  * Internally used function for stopping a buffered counter.
  *-----------------------------------------------------------*/
 
-int ni6601_stop_buf_counting( Board *board )
+int ni6601_stop_buf_counting( Board * board )
 {
 	if ( board->buf_counter >= 0 ) {
 		ni6601_dma_irq_disable( board );
-		writew( DISARM, board->regs.command[ board->buf_counter ] );
+		iowrite16( DISARM, board->regs.command[ board->buf_counter ] );
 		board->buf_counter = -1;
 		if ( board->buf ) {
 			vfree( board->buf );
@@ -530,7 +538,8 @@ int ni6601_stop_buf_counting( Board *board )
  * (i.e. if it's armed).
  *---------------------------------------------------------------*/
 
-int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
+int ni6601_is_busy( Board *           board,
+		    NI6601_IS_ARMED * arg )
 {
 	NI6601_IS_ARMED a;
 
@@ -542,7 +551,7 @@ int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
 
 	/* Test if the counter is armed */
 
-	a.state =  ( readw( board->regs.joint_status[ a.counter ] ) &
+	a.state =  ( ioread16( board->regs.joint_status[ a.counter ] ) &
 		     Gi_ARMED( a.counter ) ) ? 1 : 0;
 	
 	if ( copy_to_user( arg, &a, sizeof *arg ) ) {
@@ -558,15 +567,17 @@ int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg )
  * Function to enable TC interrupts from one of the counters
  *-----------------------------------------------------------*/
 
-void ni6601_tc_irq_enable( Board *board, int counter )
+void ni6601_tc_irq_enable( Board * board,
+			   int     counter )
 {
 	board->tc_irq_raised[ counter ] = 0;
 	if ( ! board->tc_irq_enabled[ counter ] )
 	{
 		PDEBUG( "Enabling TC IRQ for counter %d\n", counter );
-		writew( Gi_TC_INTERRUPT_ACK, board->regs.irq_ack[ counter ] );
-		writew( Gi_TC_INTERRUPT_ENABLE( counter ),
-			board->regs.irq_enable[ counter ] );
+		iowrite16( Gi_TC_INTERRUPT_ACK,
+			   board->regs.irq_ack[ counter ] );
+		iowrite16( Gi_TC_INTERRUPT_ENABLE( counter ),
+			   board->regs.irq_enable[ counter ] );
 		board->tc_irq_enabled[ counter ] = 1;
 		board->expect_tc_irq = 1;
 	}
@@ -577,7 +588,8 @@ void ni6601_tc_irq_enable( Board *board, int counter )
  * Function to disable TC interrupts from one of the counters
  *------------------------------------------------------------*/
 
-void ni6601_tc_irq_disable( Board *board, int counter )
+void ni6601_tc_irq_disable( Board * board,
+			    int     counter )
 {
 	int i;
 	int tc_irq_count = 0;
@@ -586,9 +598,9 @@ void ni6601_tc_irq_disable( Board *board, int counter )
 	if ( board->tc_irq_enabled[ counter ] )
 	{
 		PDEBUG( "Disabling TC IRQ for counter %d\n", counter );
-		writew( 0, board->regs.irq_enable[ counter ] );
-		writew( Gi_TC_INTERRUPT_ACK,
-			board->regs.irq_ack[ counter ] );
+		iowrite16( 0, board->regs.irq_enable[ counter ] );
+		iowrite16( Gi_TC_INTERRUPT_ACK,
+			   board->regs.irq_ack[ counter ] );
 		board->tc_irq_enabled[ counter ] = 0;
 		for ( tc_irq_count = 0, i = 0; i < 4; i++ )
 			tc_irq_count += board->tc_irq_enabled[ i ];
@@ -602,13 +614,14 @@ void ni6601_tc_irq_disable( Board *board, int counter )
  * Function to enable DMA interrupts from one of the counters
  *------------------------------------------------------------*/
 
-void ni6601_dma_irq_enable( Board *board, int counter )
+void ni6601_dma_irq_enable( Board * board,
+			    int     counter )
 {
 	if ( ! board->dma_irq_enabled )
 	{
 		PDEBUG( "Enabling DMA IRQ for counter %d\n", counter );
-		writew( DMA_INT | DMA_ENABLE,
-			board->regs.dma_config[ counter ] );
+		iowrite16( DMA_INT | DMA_ENABLE,
+			   board->regs.dma_config[ counter ] );
 		board->dma_irq_enabled = 1;
 	}
 }
@@ -618,13 +631,13 @@ void ni6601_dma_irq_enable( Board *board, int counter )
  * Function to disable DMA interrupts from one of the counters
  *-------------------------------------------------------------*/
 
-void ni6601_dma_irq_disable( Board *board )
+void ni6601_dma_irq_disable( Board * board )
 {
 	if ( board->dma_irq_enabled )
 	{
 		PDEBUG( "Disabling DMA IRQ for counter %d\n",
 			board->buf_counter );
-		writew( 0, board->regs.dma_config[ board->buf_counter ] );
+		iowrite16( 0, board->regs.dma_config[ board->buf_counter ] );
 		board->dma_irq_enabled = 0;
 	}
 }
@@ -635,9 +648,13 @@ void ni6601_dma_irq_disable( Board *board )
  *----------------------------------*/
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-irqreturn_t ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
+irqreturn_t ni6601_irq_handler( int              irq,
+				void *           data,
+				struct pt_regs * dummy )
 #else
-void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
+void ni6601_irq_handler( int              irq,
+			 void *           data,
+			 struct pt_regs * dummy )
 #endif
 {
 	Board *board = ( Board * ) data;
@@ -672,7 +689,7 @@ void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy )
 /*----------------------------------*
  *----------------------------------*/
 
-static void ni6601_tc_irq_handler( Board *board )
+static void ni6601_tc_irq_handler( Board * board )
 {
 	int i;
 	u16 state = Gi_INTERRUPT | Gi_TC_STATUS;
@@ -680,10 +697,10 @@ static void ni6601_tc_irq_handler( Board *board )
 
 	for ( i = 0; i < 4; i++ )
 		if ( board->tc_irq_enabled[ i ] &&
-		     readw( board->regs.status[ i ] ) & state ) {
+		     ioread16( board->regs.status[ i ] ) & state ) {
 			PDEBUG( "TC Interrupt for counter %d\n", i );
-			writew( Gi_TC_INTERRUPT_ACK,
-				board->regs.irq_ack[ i ] );
+			iowrite16( Gi_TC_INTERRUPT_ACK,
+				   board->regs.irq_ack[ i ] );
 			board->tc_irq_raised[ i ]++;
 			wake_up_interruptible( &board->tc_waitqueue );
 		}
@@ -693,10 +710,10 @@ static void ni6601_tc_irq_handler( Board *board )
 /*----------------------------------*
  *----------------------------------*/
 
-static void ni6601_dma_irq_handler( Board *board )
+static void ni6601_dma_irq_handler( Board * board )
 {
 	int counter = board->buf_counter;
-	u16 state = readw( board->regs.dma_status[ counter ] );
+	u16 state = ioread16( board->regs.dma_status[ counter ] );
 
 
 	if ( ! ( state & DRQ_STATUS ) )
@@ -706,7 +723,7 @@ static void ni6601_dma_irq_handler( Board *board )
 	   not be stored correctly in the SW and HW save register */
 
 	if ( state & DRQ_ERROR ) {
-		writew( DISARM, board->regs.command[ counter ] );
+		iowrite16( DISARM, board->regs.command[ counter ] );
 		ni6601_dma_irq_disable( board );
 		board->too_fast = 1;
 		PDEBUG( "DMA FIFO overflow\n" );
@@ -718,9 +735,9 @@ static void ni6601_dma_irq_handler( Board *board )
 
 	if ( board->is_just_started ) {
 		if ( state & DRQ_READBACK )
-			readl( board->regs.sw_save[ counter ] );
+			ioread32( board->regs.sw_save[ counter ] );
 		else
-			readl( board->regs.hw_save[ counter ] );
+			ioread32( board->regs.hw_save[ counter ] );
 		board->is_just_started = 0;
 		return;
 	}
@@ -735,7 +752,7 @@ static void ni6601_dma_irq_handler( Board *board )
 		if ( ( board->high_ptr + 1 == board->buf_top &&
 		       board->low_ptr == board->buf ) ||
 		     board->high_ptr + 1 == board->low_ptr ) {
-			writew( DISARM, board->regs.command[ counter ] );
+			iowrite16( DISARM, board->regs.command[ counter ] );
 			ni6601_dma_irq_disable( board );
 			board->buf_overflow = 1;
 			PDEBUG( "Buffer overflow\n" );
@@ -745,10 +762,10 @@ static void ni6601_dma_irq_handler( Board *board )
 
 	if ( state & DRQ_READBACK )
 		*( board->high_ptr++ ) =
-				       readl( board->regs.sw_save[ counter ] );
+				    ioread32( board->regs.sw_save[ counter ] );
 	else
 		*( board->high_ptr++ ) =
-				       readl( board->regs.hw_save[ counter ] );
+				    ioread32( board->regs.hw_save[ counter ] );
 
 	/* If the high pointer reaches the top of the buffer in non-continuous
 	   mode all data to be expected have been acquired and acquisition
@@ -757,7 +774,7 @@ static void ni6601_dma_irq_handler( Board *board )
 
 	if ( board->high_ptr == board->buf_top ) {
 		if ( ! board->buf_continuous ) {
-			writew( DISARM, board->regs.command[ counter ] );
+			iowrite16( DISARM, board->regs.command[ counter ] );
 			ni6601_dma_irq_disable( board );
 		} else
 			board->high_ptr = board->buf;

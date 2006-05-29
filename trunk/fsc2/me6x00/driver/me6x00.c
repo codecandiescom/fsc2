@@ -137,10 +137,16 @@ static int me6x00_open( struct inode * /* inode_p */,
 static int me6x00_release( struct inode * /* inode_p */,
 			   struct file  * /* file_p  */ );
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 static int me6x00_ioctl( struct inode * /* inode_p */,
 			 struct file  * /* file_p  */,
 			 unsigned int   /* service */,
 			 unsigned long  /* arg     */ );
+#else
+static long me6x00_ioctl( struct file  * /* file_p  */,
+			  unsigned int   /* service */,
+			  unsigned long  /* arg     */ );
+#endif
 
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
@@ -212,20 +218,20 @@ static int me6x00_space_to_end( me6x00_circ_buf_st * /* buf */ );
 
 static int me6x00_values_to_end( me6x00_circ_buf_st * /* buf */);
 
-static void me6x00_outb( unsigned char /* value */,
+inline static void me6x00_outb( unsigned char /* value */,
 			 unsigned int  /* port  */ );
 
-static void me6x00_outw( unsigned short /* value */,
-			 unsigned int   /* port  */ );
+inline static void me6x00_outw( unsigned short /* value */,
+				unsigned int   /* port  */ );
 
-static void me6x00_outl( unsigned int /* value */,
-			 unsigned int /* port */ );
+inline static void me6x00_outl( unsigned int /* value */,
+				unsigned int /* port */ );
 
-static unsigned char  me6x00_inb( unsigned int /* port */ );
+inline static unsigned char  me6x00_inb( unsigned int /* port */ );
 
-static unsigned short me6x00_inw( unsigned int /* port */ );
+inline static unsigned short me6x00_inw( unsigned int /* port */ );
 
-static unsigned int   me6x00_inl( unsigned int /* port */ );
+inline static unsigned int   me6x00_inl( unsigned int /* port */ );
 
 
 /* Board specific data are kept global */
@@ -338,10 +344,14 @@ static struct file_operations me6x00_file_operations = {
     NULL,               /* revalidate         */
     NULL                /* lock               */
 #elif LINUX_VERSION_CODE > KERNEL_VERSION( 2, 4, 0 )
-    owner:      THIS_MODULE,
-    ioctl:      me6x00_ioctl,
-    open:       me6x00_open,
-    release:    me6x00_release
+    owner:           THIS_MODULE,
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+    ioctl:           me6x00_ioctl,
+#else
+    unlocked_ioctl:  me6x00_ioctl,
+#endif
+    open:            me6x00_open,
+    release:         me6x00_release
 #endif
 };
 
@@ -382,7 +392,6 @@ static unsigned int sval_regs[ ] = {
 	ME6X00_SVALREG_DAC14,
 	ME6X00_SVALREG_DAC15
 };
-
 
 
 /*
@@ -815,19 +824,24 @@ static int me6x00_init_board( struct pci_dev *             dev,
 		init_waitqueue_head( info->wait_queues + i );
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
-	/* Initialize the spinlocks that are going to be used */
+	/* Initialize the mutex and spinlock that are going to be used */
 
-	spin_lock_init( &info->use_lock );
-	spin_lock_init( &info->irq_lock );
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
+        sema_init( &info->use_lock, 1 );
+        sema_init( &info->ioctl_mutex, 1 );
+#else
+	init_MUTEX( &info->use_lock );
+	init_MUTEX( &info->ioctl_mutex );
 #endif
 
-	/* Download the Xilinx firmware, but only if the the reading the
-	   first byte of the I/O range for the Xilinx FPGA does not return
-	   0x74 - as far a I found out in this case the chip has already
-	   been initialized and trying to do so a second time will fail. */
+	spin_lock_init( &info->irq_lock );
 
-	if ( inb( info->xilinx_regbase ) != 0x74 &&
+	/* Download the Xilinx firmware, but only if reading the first byte
+	   of the I/O range for the Xilinx FPGA does not return 0x74 - as
+	   far a I (JTT) found out in this case the chip has already been
+	   initialized and trying to initialize it a second time fails. */
+
+	if ( me6x00_inb( info->xilinx_regbase ) != 0x74 &&
 	     me6x00_xilinx_download( info ) ) {
 		printk( KERN_ERR "ME6X00: me6x00_init_board: "
 			"Can't download firmware\n" );
@@ -980,19 +994,12 @@ static __init int me6x00_init_board( int              board_count,
 		init_waitqueue_head( info->wait_queues + i );
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
-	/* Initialize the spinlock that's going to be used to avoid two
-	   processes opening the same board at the same time */
-
-	spin_lock_init( &info->use_lock );
-#endif
-
 	/* Download the Xilinx firmware, but only if the the reading the
 	   first byte of the I/O range for the Xilinx FPGA does not return
 	   0x74 - as far a I found out in this case the chip has already
 	   been initialized and trying to do so a second time will fail. */
 
-	if ( inb( info->xilinx_regbase ) != 0x74 &&
+	if ( me6x00_inb( info->xilinx_regbase ) != 0x74 &&
 	     me6x00_xilinx_download( info ) ) {
 		printk( KERN_ERR "ME6X00: me6x00_init_board: "
 			"Can't download firmware\n" );
@@ -1065,7 +1072,7 @@ static __init int me6x00_init_board( int              board_count,
 static int me6x00_xilinx_download( me6x00_info_st * info )
 {
 	int size = 0;
-	int value = 0;
+	u16 value = 0;
 	int idx = 0;
 	int i;
 
@@ -1083,7 +1090,7 @@ static int me6x00_xilinx_download( me6x00_info_st * info )
 
 	/* Init Xilinx with CS1 */
 
-	value = me6x00_inb( info->xilinx_regbase + 0x200 );
+	me6x00_inb( info->xilinx_regbase + 0x200 );
 
 	/* Wait for init bit to become set */
 
@@ -1091,7 +1098,7 @@ static int me6x00_xilinx_download( me6x00_info_st * info )
 		if ( me6x00_inb( info->plx_regbase + PLX_INTCSR ) & 0x20 )
 			break;
 
-	if ( i == XILINX_INIT_COUNT ) {
+	if ( i >= XILINX_INIT_COUNT ) {
 		printk( KERN_ERR "ME6X00: me6x00_xilinx_download(): "
 			"maximum wait for init bit reached!\n" );
 		return -EIO;
@@ -1118,9 +1125,10 @@ static int me6x00_xilinx_download( me6x00_info_st * info )
 				break;
 		}
 
-		if ( i == XILINX_BUSY_COUNT ) {
+		if ( i >= XILINX_BUSY_COUNT ) {
 			udelay( 1000 );
 			value = me6x00_inw( info->plx_regbase + PLX_ICR );
+
 			if ( ! ( value & 0x0800 ) )   /* busy flag */
 				break;
 
@@ -1143,7 +1151,7 @@ static int me6x00_xilinx_download( me6x00_info_st * info )
 	        udelay( 1000 );
 	}
 
-	if ( i == XILINX_DONE_COUNT ) {
+	if ( i >= XILINX_DONE_COUNT ) {
 		PDEBUG( "me6x00_download_xilinx(): Done flag not set\n" );
 		printk( KERN_ERR "ME6X00: me6x00_download_xilinx(): "
 			"Download failed\n" );
@@ -1156,7 +1164,7 @@ static int me6x00_xilinx_download( me6x00_info_st * info )
 	/* Write User DIO (CSWrite, reset Xilinx) */
 
 	value = me6x00_inw( info->plx_regbase + PLX_ICR ) | 0x0100;
-	me6x00_outw( value,info->plx_regbase + PLX_ICR );
+	me6x00_outw( value, info->plx_regbase + PLX_ICR );
 
 	return 0;
 }
@@ -1269,7 +1277,7 @@ static int me6x00_reset_board( int board_count,
 
 	if ( from != FROM_CLOSE ) {
 		base = info_vec[ board_count ].plx_regbase;
-		icr = inl( base + PLX_ICR );
+		icr = me6x00_inl( base + PLX_ICR );
 		icr |= 0x40000000;
 		PDEBUG( "me6x00_reset_board: write 0x%08X to plx with offset "
 			"= 0x%02X\n", icr, PLX_ICR );
@@ -1370,17 +1378,20 @@ static int me6x00_open( struct inode * inode_p,
 	/* Use a spinlock to avoid a race condition between two processes
 	   trying to open the same board at the same time on SMP machines */
 
-	spin_lock( &info->use_lock );
+	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &info->use_lock ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &info->use_lock ) )
+		return -ERESTARTSYS;
+
+	/* The board can only be open by one process at a time */
 
 	if ( info->board_in_use ) {
 		printk( KERN_ERR "ME6X00: me6x00_open(): Board %d already "
 			"in use\n", minor );
-		spin_unlock( &info->use_lock );
+		up( &info->use_lock );
 		return -EBUSY;
 	}
-
-	info->board_in_use = 1;
-	spin_unlock( &info->use_lock );
 
 	if ( IS_ME6100( minor ) ) {
 		CALL_PDEBUG( "Got a ME6100 board\n" );
@@ -1388,6 +1399,7 @@ static int me6x00_open( struct inode * inode_p,
 		if ( request_irq( info->irq, me6x00_isr,
 				  SA_INTERRUPT | SA_SHIRQ,
 				  ME6X00_NAME, info ) ) {
+			up( &info->use_lock );
 			printk( KERN_WARNING "ME6X00: me6x00_open(): "
 				"Can't get interrupt line" );
 			return -ENODEV;
@@ -1402,6 +1414,7 @@ static int me6x00_open( struct inode * inode_p,
 		}
 
 		if ( i < 4 ) {
+			up( &info->use_lock );
 			printk( KERN_ERR "ME6X00: me6x00_open(): "
 				"Can't get memory\n" );
 			for ( --i; i >= 0; --i )
@@ -1416,6 +1429,10 @@ static int me6x00_open( struct inode * inode_p,
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_INC_USE_COUNT;
 #endif
+
+	info->board_in_use = 1;
+	up( &info->use_lock );
+
 	return 0;
 }
 
@@ -1458,18 +1475,27 @@ static int me6x00_release( struct inode * inode_p,
 	CALL_PDEBUG( "me6x00_release() is executed\n" );
 
 	minor = MINOR( inode_p->i_rdev );
+	info = info_vec + minor;
+
+	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &info->use_lock ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &info->use_lock ) )
+		return -ERESTARTSYS;
+
+	if ( info->board_in_use == 0 ) {
+		up( &info->use_lock );
+		return 0;
+	}
+
 	if ( me6x00_reset_board( minor, FROM_CLOSE ) != 0 ) {
 		printk( KERN_ERR "ME6X00: me6x00_release(): Can't reset "
 			"board %d\n", minor );
 		return 1;
 	}
 
-	info = info_vec + minor;
-
 	for ( i = 0; i < info->num_dacs; i++ )
 		info->keep_voltage_on_close[ i ] = 0;
-
-	info->board_in_use = 0;
 
 	if ( IS_ME6100( minor ) ) {
 		free_irq( info->irq, info );
@@ -1484,6 +1510,10 @@ static int me6x00_release( struct inode * inode_p,
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_DEC_USE_COUNT;
 #endif
+
+	info->board_in_use = 0;
+	up( &info->use_lock );
+
 	return 0;
 }
 
@@ -1516,18 +1546,28 @@ static int me6x00_release( struct inode * inode_p,
  * Modification: JTT
  */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 static int me6x00_ioctl( struct inode * inode_p,
 			 struct file *  file_p,
 			 unsigned int   service,
 			 unsigned long  arg )
+#else
+static long me6x00_ioctl( struct file *  file_p,
+			  unsigned int   service,
+			  unsigned long  arg )
+#endif
 {
 	int minor = 0;
+	int ret;
 
 
-	file_p = file_p;
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+	inode_p = inode_p;
+#endif
+
 	CALL_PDEBUG( "me6x00_ioctl() is executed\n" );
 
-	minor = MINOR( inode_p->i_rdev );
+	minor = MINOR( file_p->f_dentry->d_inode->i_rdev );
 
 	if ( minor >= me6x00_board_count ) {
 		printk( KERN_ERR "ME6X00: me6x00_ioctl(): Board %d does not "
@@ -1546,69 +1586,83 @@ static int me6x00_ioctl( struct inode * inode_p,
 		return -EINVAL;
 	}
 
-	if ( _IOC_NR( service ) < ME6X00_IOCTL_MINNR ) {
-		PDEBUG( "me6x00_ioctl(): IOCTL number low low\n" );
-		return -EINVAL;
-	}
+	/* The ioctl() calls can't be handled for two or more callers at once.
+	   Thus callers must wait for a mutex (or, in the case where instant
+	   access is requested, be prepared to get an EGAIN return value). */
 
-	if ( _IOC_NR( service ) > ME6X00_IOCTL_MAXNR ) {
-		PDEBUG( "me6x00_ioctl(): Service number too high\n" );
-		return -EINVAL;
-	}
+	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &info_vec[ minor ].ioctl_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &info_vec[ minor ].ioctl_mutex ) )
+		return -ERESTARTSYS;
 
 	switch ( service ) {
 		case ME6X00_SET_MODE :
-			return me6x00_set_mode( ( me6x00_mode_st * ) arg,
-						minor );
+			ret = me6x00_set_mode( ( me6x00_mode_st * ) arg,
+					       minor );
+			break;
 
 		case ME6X00_START_STOP_CONV :
-			return me6x00_start_stop_conv(
+			ret = me6x00_start_stop_conv(
 					   ( me6x00_stasto_st * ) arg, minor );
+			break;
 
 		case ME6X00_CLEAR_ENABLE_FIFO :
-			return me6x00_clear_enable_fifo(
+			ret = me6x00_clear_enable_fifo(
 					    ( me6x00_endis_st * ) arg, minor );
+			break;
 
 		case ME6X00_ENDIS_EXTRIG :
-			return me6x00_endis_extrig(
+			ret = me6x00_endis_extrig(
 					    ( me6x00_endis_st * ) arg, minor );
 
+			break;
 		case ME6X00_RIFA_EXTRIG :
-			return me6x00_rifa_extrig(
+			ret = me6x00_rifa_extrig(
 					     ( me6x00_rifa_st * ) arg, minor );
+			break;
 
 		case ME6X00_SET_TIMER :
-			return me6x00_set_timer(
+			ret = me6x00_set_timer(
 					    ( me6x00_timer_st * ) arg, minor );
+			break;
 
 		case ME6X00_WRITE_SINGLE :
-			return me6x00_write_single(
+			ret = me6x00_write_single(
 					   ( me6x00_single_st * ) arg, minor );
+			break;
 
 		case ME6X00_WRITE_CONTINUOUS :
-			return me6x00_write_continuous(
+			ret = me6x00_write_continuous(
 					    ( me6x00_write_st * ) arg, minor );
+			break;
 
 		case ME6X00_WRITE_WRAPAROUND :
-			return me6x00_write_wraparound(
+			ret = me6x00_write_wraparound(
 					    ( me6x00_write_st * ) arg, minor );
+			break;
 
 		case ME6X00_RESET_BOARD :
-			return me6x00_reset_board( minor, FROM_IOCTL );
+			ret = me6x00_reset_board( minor, FROM_IOCTL );
+			break;
 
 		case ME6X00_BOARD_INFO :
-			return me6x00_board_info(
+			ret = me6x00_board_info(
 					    ( me6x00_dev_info * ) arg, minor );
+			break;
 
 		case ME6X00_KEEP_VOLTAGE :
-			return me6x00_board_keep_volts(
+			ret = me6x00_board_keep_volts(
 					     ( me6x00_keep_st * ) arg, minor );
 
 		default :
-			return -EINVAL;
+			PDEBUG( "me6x00_ioctl(): invalid ioctl number\n" );
+			ret = -EINVAL;
 	}
 
-	return 0;
+	up( &info_vec[ minor ].ioctl_mutex );
+
+        return ret;
 }
 
 
@@ -2924,8 +2978,8 @@ static int me6x00_space_to_end( me6x00_circ_buf_st * buf )
  * Modification:
  */
 
-static void me6x00_outb( unsigned char value,
-			 unsigned int  port )
+inline static void me6x00_outb( unsigned char value,
+				unsigned int  port )
 {
 	PORT_PDEBUG( "--> 0x%02X port 0x%04X\n", value, port );
 	outb( value, port );
@@ -2947,8 +3001,8 @@ static void me6x00_outb( unsigned char value,
  * Modification:
  */
 
-static void me6x00_outw( unsigned short value,
-			 unsigned int   port )
+static void inline me6x00_outw( unsigned short value,
+				unsigned int   port )
 {
 	PORT_PDEBUG( "--> 0x%04X port 0x%04X\n", value, port );
 	outw( value, port );
@@ -2970,8 +3024,8 @@ static void me6x00_outw( unsigned short value,
  * Modification:
  */
 
-static void me6x00_outl( unsigned int value,
-			 unsigned int port )
+inline static void me6x00_outl( unsigned int value,
+				unsigned int port )
 {
 	PORT_PDEBUG( "--> 0x%08X port 0x%04X\n", value, port );
 	outl( value, port );
@@ -2994,7 +3048,7 @@ static void me6x00_outl( unsigned int value,
  * Modification:
  */
 
-static unsigned char me6x00_inb( unsigned int port )
+inline static unsigned char me6x00_inb( unsigned int port )
 {
 	unsigned char value;
 
@@ -3020,7 +3074,7 @@ static unsigned char me6x00_inb( unsigned int port )
  * Modification:
  */
 
-static unsigned short me6x00_inw( unsigned int port )
+inline static unsigned short me6x00_inw( unsigned int port )
 {
 	unsigned short value;
 
@@ -3046,7 +3100,7 @@ static unsigned short me6x00_inw( unsigned int port )
  * Modification:
  */
 
-static unsigned int me6x00_inl( unsigned int port )
+inline static unsigned int me6x00_inl( unsigned int port )
 {
 	unsigned int value;
 	value = inl( port );

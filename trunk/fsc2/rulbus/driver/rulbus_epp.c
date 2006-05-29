@@ -58,7 +58,7 @@
 #include <linux/init.h>
 #include <linux/wait.h>
 #include <linux/delay.h>
-#include <linux/spinlock.h>
+#include <asm/semaphore.h>
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 #include <asm/io.h>
@@ -82,15 +82,21 @@ static int __init rulbus_init( void );
 static void __exit rulbus_cleanup( void );
 
 static int rulbus_open( struct inode * inode_p,
-						struct file * file_p );
+						struct file *  filep );
 
 static int rulbus_release( struct inode * inode_p,
-						   struct file *  file_p );
+						   struct file *  filep );
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 static int rulbus_ioctl( struct inode * inode_p,
-						 struct file *  file_p,
+						 struct file *  filep,
 						 unsigned int   cmd,
 						 unsigned long  arg );
+#else
+static long rulbus_ioctl( struct file * filep,
+						  unsigned int  cmd,
+						  unsigned long arg );
+#endif
 
 static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
 
@@ -123,8 +129,10 @@ static inline void rulbus_parport_reverse( void );
 static int rulbus_epp_interface_present( void );
 
 
-#define FORWARD     0
-#define REVERSE     1
+#define RULBUS_MAX_BUFFER_SIZE  10          /* never to be smaller than 1 ! */
+
+#define WRITE_TO_DEVICE     0
+#define READ_FROM_DEVICE    1
 
 
 #define STATUS_BYTE         ( base + 1 )
@@ -168,25 +176,29 @@ static struct rulbus_device {
 		struct cdev ch_dev;
 		dev_t dev_no;
 #endif
-        int in_use;                 /* set when device is opened */
-        int is_claimed;             /* set while we have exclusive access */
-        uid_t owner;                /* current owner of the device */
-        spinlock_t spinlock;
-        unsigned char rack;         /* currently addressed rack */
-        unsigned char direction;
+        int in_use;                   /* set when device is opened */
+        int is_claimed;               /* set while we have exclusive access */
+        struct semaphore open_mutex;  /* mutex for open call */
+		struct semaphore ioctl_mutex; /* mutex for ioctl calls */
+		unsigned char exclusive;      /* for exclusive access to device file */
+        unsigned char rack;           /* currently addressed rack */
+        unsigned char direction;      /* current transfer direction */
 } rulbus = { NULL, NULL, 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-             { },
-			 ( dev_t ) 0,
+             { }, ( dev_t ) 0,
 #endif
-			 0, 0, 0, { }, 0x0F, FORWARD };
+			 0, 0, { }, { }, 0, 0x0F, WRITE_TO_DEVICE };
 
 
 struct file_operations rulbus_file_ops = {
-        owner:          THIS_MODULE,
-        ioctl:          rulbus_ioctl,
-        open:           rulbus_open,
-        release:        rulbus_release,
+        owner:           THIS_MODULE,
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+        ioctl:           rulbus_ioctl,
+#else
+		unlocked_ioctl:  rulbus_ioctl,
+#endif
+        open:            rulbus_open,
+        release:         rulbus_release,
 };
 
 
@@ -276,7 +288,13 @@ static int __init rulbus_init( void )
                 major = result;
 #endif
 
-        spin_lock_init( &rulbus.spinlock );
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
+        sema_init( &rulbus.open_mutex, 1 );
+        sema_init( &rulbus.ioctl_mutex, 1 );
+#else
+		init_MUTEX( &rulbus.open_mutex );
+		init_MUTEX( &rulbus.ioctl_mutex );
+#endif
 
         printk( KERN_INFO RULBUS_EPP_NAME
                 ": Module successfully installed\n" );
@@ -358,85 +376,98 @@ static void rulbus_epp_detach( struct parport * port )
 }
 
 
-/*---------------------------------------------------------------------------*
+/*-------------------------------------------------------------------------*
  * Function that gets called when the device file for the RULBUS interface
- * gets opened. First, we must make sure there's only a single user of the
- * device (except that root can still fiddle with it). Then, after checking
- * that a device has been registered we must claim the port - and we only
- * will unclaim it when the device file is closed, there's no daisy chaining
- * possible with this device. Next we must check that the device is present
- * and talks EPP. Only then we can be reasonably sure we got it.
- *---------------------------------------------------------------------------*/
+ * gets opened. After checking that a device has been registered we must
+ * claim the port - and we only will unclaim it when the device file is
+ * closed, there's no daisy chaining possible with this device. Next we
+ * must check that the device is present and talks EPP. Only then we can
+ * be reasonably sure we got it.
+ *-------------------------------------------------------------------------*/
 
 static int rulbus_open( struct inode * inode_p,
-						struct file *  file_p )
+						struct file *  filep )
 {
-        spin_lock( &rulbus.spinlock );
+		/* All the following code can be only be accessed from a single thread
+		   at a time. For callers that want to open the device not prepared
+		   to wait we need to work with down_trylock(). For others we call
+		   down_interruptible() in order to be able to react to signals (the
+		   return value ERESTARTSYS is a "magic" value saying that it's ok to
+		   restart the system call automagically after the signal has been
+		   handled and gets converted to EINTR if that's not possible).
+		   Please note that the mutex is also used during the close() call. */
 
-        if ( rulbus.in_use > 0 ) {
-                if ( rulbus.owner != current->uid &&
-                     rulbus.owner != current->euid &&
-                     ! capable( CAP_DAC_OVERRIDE ) ) {
-                        printk( KERN_NOTICE
-                                "Device already in use by another user\n" );
-                        spin_unlock( &rulbus.spinlock );
-                        return -EBUSY;
-                }
+		if ( filep->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+				if ( down_trylock( &rulbus.open_mutex ) )
+						return -EAGAIN;
+		} else if ( down_interruptible( &rulbus.open_mutex ) )
+				return -ERESTARTSYS;
 
-                if ( rulbus.dev != NULL ) {
-                        rulbus.in_use++;
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
-                        MOD_INC_USE_COUNT;
-#endif
-                        spin_unlock( &rulbus.spinlock );
-                        return 0;
-                }
-        }
+		/* Return EEXIST if the caller asks for exclusive access or the device
+		   has already been opened with exclusive access by another caller -
+		   this allows to grant exclusive access to the device without
+		   having to use some kind of locking mechanism in userland. */
 
-        /* Check that a device is registered for the port we need */
+		if ( rulbus.in_use != 0 && 
+			 ( filep->f_flags & O_EXCL || rulbus.exclusive != 0 ) ) {
+				up( &rulbus.open_mutex );
+				return -EEXIST;
+		}
 
-        if ( rulbus.dev == NULL ) {
-                spin_unlock( &rulbus.spinlock );
-                printk( KERN_NOTICE "No device registered for port\n" );
-                return -EIO;
-        }
+		/* If the device file hasn't already been opened by another caller
+		   do all the required initializations. */
 
-        /* We need exclusive access to the port as long as the device file
-           is open - the device does not allow daisy chaining since its
-           using all addresses on the bus. */
+        if ( rulbus.in_use == 0 ) {
+				/* Check that a device is registered for the port we need */
 
-        if ( parport_claim_or_block( rulbus.dev ) < 0 ) {
-                spin_unlock( &rulbus.spinlock );
-                printk( KERN_NOTICE "Failed to claim parallel port\n" );
-                return -EIO;
-        }
+				if ( rulbus.dev == NULL ) {
+						up( &rulbus.open_mutex );
+						printk( KERN_NOTICE
+								"No device registered for port\n" );
+						return -EIO;
+				}
 
-        if ( rulbus_epp_init( ) != 0  ) {
-                parport_release( rulbus.dev );
-                spin_unlock( &rulbus.spinlock );
-                printk( KERN_NOTICE "Rulbus interface not present.\n" );
-                return -EIO;
-        }
+				/* We need exclusive access to the port as long as the device
+				   file is open - the device does not allow daisy chaining
+				   since its using all addresses on the bus. */
 
-        rulbus.is_claimed = 1;
+				if ( parport_claim_or_block( rulbus.dev ) < 0 ) {
+						up( &rulbus.open_mutex );
+						printk( KERN_NOTICE
+								"Failed to claim parallel port\n" );
+						return -EIO;
+				}
 
-        rulbus.owner = current->uid;
+				if ( rulbus_epp_init( ) != 0  ) {
+						parport_release( rulbus.dev );
+						up( &rulbus.open_mutex );
+						printk( KERN_NOTICE
+								"Rulbus interface not present.\n" );
+						return -EIO;
+				}
+
+				rulbus.is_claimed = 1;
+
+				/* Set the currently rack address to an invalid rack address
+				   so that the next the read or write results in a readdressing
+				   of the rack. */
+
+				rulbus.rack = 0x0F;
+
+				/* Finally, if the caller asked for exclusive access to the
+				   device file, set a flag that reminds us about it. */
+
+				if ( filep->f_flags & O_EXCL )
+						rulbus.exclusive = 1;
+		}
 
         rulbus.in_use++;
-
-		/* Set the currently rack address to the value of the default rack
-		   address. While this address isn't a valid rack address it indicates
-		   that there's only a single rack that is always selected, so no
-		   rack addressing needs to be done unless no other rack address is
-		   requested. */
-
-		rulbus.rack = 0x0F;
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
         MOD_INC_USE_COUNT;
 #endif
 
-        spin_unlock( &rulbus.spinlock );
+        up( &rulbus.open_mutex );
 
         return 0;
 }
@@ -448,19 +479,23 @@ static int rulbus_open( struct inode * inode_p,
  *---------------------------------------------------------------------*/
 
 static int rulbus_release( struct inode * inode_p,
-						   struct file *  file_p )
+						   struct file *  filep )
 {
         if ( rulbus.in_use == 0 ) {
                 printk( KERN_NOTICE "Device not open\n" );
                 return -ENODEV;
         }
 
-        if ( rulbus.owner != current->uid &&
-             rulbus.owner != current->euid &&
-             ! capable( CAP_DAC_OVERRIDE ) ) {
-                printk( KERN_NOTICE "No permission to release device\n" );
-                return -EPERM;
-        }
+		if ( filep->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+				if ( down_trylock( &rulbus.open_mutex ) )
+						return -EAGAIN;
+		} else if ( down_interruptible( &rulbus.open_mutex ) )
+						return -ERESTARTSYS;
+
+		if ( rulbus.in_use == 0 ) {
+				up( &rulbus.open_mutex );
+				return -EBADF;
+		}
 
         /* Unclaim and unregister the parallel port */
 
@@ -475,6 +510,10 @@ static int rulbus_release( struct inode * inode_p,
         MOD_DEC_USE_COUNT;
 #endif
 
+		rulbus.exclusive = 0;
+
+		up( &rulbus.open_mutex );
+
         return 0;
 }
 
@@ -483,22 +522,39 @@ static int rulbus_release( struct inode * inode_p,
  * Function dealing with ioctl() calls for the device
  *----------------------------------------------------*/
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 static int rulbus_ioctl( struct inode * inode_p,
-						 struct file *  file_p,
+						 struct file *  filep,
 						 unsigned int   cmd,
 						 unsigned long  arg )
+#else
+static long rulbus_ioctl( struct file * filep,
+						  unsigned int  cmd,
+						  unsigned long arg )
+#endif
 {
         RULBUS_EPP_IOCTL_ARGS rulbus_arg;
         int ret;
 
 
         if ( rulbus.dev == NULL || ! rulbus.is_claimed ) {
-                printk( KERN_NOTICE "Device has been closed\n" );
+                printk( KERN_NOTICE "Device is not open\n" );
                 return -ENODEV;
         }
 
+		/* The ioctl() calls can't be handled for two or more callers at once.
+		   Thus callers must wait for a mutex (or, in the case where instant
+		   access is requested, be prepared to get an EGAIN return value). */
+
+		if ( filep->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+				if ( down_trylock( &rulbus.ioctl_mutex ) )
+						return -EAGAIN;
+		} else if ( down_interruptible( &rulbus.ioctl_mutex ) )
+				return -ERESTARTSYS;
+
         if ( copy_from_user( &rulbus_arg, ( RULBUS_EPP_IOCTL_ARGS * ) arg,
                              sizeof rulbus_arg ) ) {
+				up( &rulbus.ioctl_mutex );
                 printk( KERN_NOTICE "Can't read from user space\n" );
                 return -EACCES;
         }
@@ -525,8 +581,10 @@ static int rulbus_ioctl( struct inode * inode_p,
 
                 default :
                         printk( KERN_NOTICE "Invalid ioctl() call %d\n", cmd );
-                        return -EINVAL;
+                        ret = -EINVAL;
         }
+
+		up( &rulbus.ioctl_mutex );
 
         return ret;
 }
@@ -539,8 +597,9 @@ static int rulbus_ioctl( struct inode * inode_p,
 static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
         unsigned char *data;
+		unsigned char buffer[ RULBUS_MAX_BUFFER_SIZE ];
         unsigned char *bp;
-        int i;
+        size_t i;
 
 
 		/* Plausibility checks */
@@ -560,19 +619,25 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
                 return -EINVAL;
         }
 
-        /* Allocate a buffer for reading */
-
 		if ( rulbus_arg->data == NULL ) {
-				printk( KERN_NOTICE "Invalid write data pointer.\n" );
+				printk( KERN_NOTICE "Invalid read data pointer.\n" );
 				return -EINVAL;
 		}
 
-		data = kmalloc( rulbus_arg->len, GFP_KERNEL );
+        /* If there are not more that RULBUS_MAX_BUFFER_SIZE to be read
+		   (the typical case) use a local buffer (which should be faster),
+		   otherwise allocate as much memory as needed */
 
-		if ( data == NULL ) {
-				printk( KERN_NOTICE
-						"Not enough memory for reading.\n" );
-				return -ENOMEM;
+		if ( rulbus_arg->len <= RULBUS_MAX_BUFFER_SIZE )
+				data = buffer;
+		else {
+				data = kmalloc( rulbus_arg->len, GFP_KERNEL );
+
+				if ( data == NULL ) {
+						printk( KERN_NOTICE
+								"Not enough memory for reading.\n" );
+						return -ENOMEM;
+				}
 		}
 
         /* Select the rack (unless it's not already selected) */
@@ -589,31 +654,33 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- )
                 *bp = rulbus_parport_read_data( );
 
-        /* Copy all that has just been read to the user space buffer and
-		   deallocate the kernel buffer */
+        /* Copy all that has just been read to the user space buffer and, if
+		   necessary, deallocate the kernel buffer */
 
 		if ( copy_to_user( rulbus_arg->data, data, rulbus_arg->len ) ) {
-				kfree( data );
+				if ( rulbus_arg->len > RULBUS_MAX_BUFFER_SIZE )
+						kfree( data );
 				printk( KERN_NOTICE "Can't write to user space\n" );
 				return -EACCES;
 		}
 
-		kfree( data );
+		if ( rulbus_arg->len > RULBUS_MAX_BUFFER_SIZE )
+				kfree( data );
 
         return rulbus_arg->len;
 }
 
 
-/*-------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  * Function for reading data from a (consecutive) range of addresses
- * of one of the racks
- *-------------------------------------------------------------------*/
+ * of one of the racks. Since there are never more that 254 addresses
+ * we can do with a local buffer instead of allocating one.
+ *--------------------------------------------------------------------*/
 
 static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
-        unsigned char *data;
-        unsigned char *bp;
-        int i;
+        unsigned char data[ 254 ];
+        size_t i;
 
 
 		/* If only a single byte is to be read call rulbus_read() */
@@ -643,19 +710,9 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
                 return -EINVAL;
         }
 
-        /* Allocate a buffer for reading */
-
 		if ( rulbus_arg->data == NULL ) {
-				printk( KERN_NOTICE "Invalid write data pointer.\n" );
+				printk( KERN_NOTICE "Invalid read data pointer.\n" );
 				return -EINVAL;
-		}
-
-		data = kmalloc( rulbus_arg->len, GFP_KERNEL );
-
-		if ( data == NULL ) {
-				printk( KERN_NOTICE
-						"Not enough memory for reading.\n" );
-				return -ENOMEM;
 		}
 
         /* Select the rack (unless it's not already selected) */
@@ -669,21 +726,18 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         /* Now read as many data as required from consecutive rulbus
 		   addresses*/
 
-        for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- ) {
-				rulbus_parport_write_addr( rulbus_arg->offset++ );
-                *bp = rulbus_parport_read_data( );
+        for ( i = 0; i < rulbus_arg->len; i++ ) {
+				rulbus_parport_write_addr( rulbus_arg->offset + i );
+                data[ i ] = rulbus_parport_read_data( );
 		}
 
         /* Copy all that has just been read to the user space buffer and
 		   deallocate the kernel buffer */
 
 		if ( copy_to_user( rulbus_arg->data, data, rulbus_arg->len ) ) {
-				kfree( data );
 				printk( KERN_NOTICE "Can't write to user space\n" );
 				return -EACCES;
 		}
-
-		kfree( data );
 
         return rulbus_arg->len;
 }
@@ -695,9 +749,10 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 
 static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
+		unsigned char buffer[ RULBUS_MAX_BUFFER_SIZE ];
         unsigned char *data;
         unsigned char *bp;
-        int i;
+        size_t i;
 
 
 		/* Plausibility checks */
@@ -719,32 +774,38 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         }
 
         /* If there's just a single byte to be written the 'byte' field of
-           the RULBUS_EPP_IOCTL_ARGS structure is used, otherwise a buffer
-		   needs to be allocated and everything gets copied there from user
-		   space */
+           the RULBUS_EPP_IOCTL_ARGS structure gets used, for not more than
+		   RULBUS_MAX_BUFFER_SIZE (which is the typical case) copy everything
+		   to a local buffer and only for "huge" amounts of data allocate
+		   memory and then copy the data there. */
 
         if ( rulbus_arg->len == 1 )
-                data = &rulbus_arg->byte;
-        else {
+				data = &rulbus_arg->byte;
+		else {
+				if ( rulbus_arg->len <= RULBUS_MAX_BUFFER_SIZE )
+						data = buffer;
+				else {
+						data = kmalloc( rulbus_arg->len, GFP_KERNEL );
+
+						if ( data == NULL ) {
+								printk( KERN_NOTICE
+										"Not enough memory for reading.\n" );
+								return -ENOMEM;
+						}
+				}
+
                 if ( rulbus_arg->data == NULL ) {
                         printk( KERN_NOTICE "Invalid write data pointer.\n" );
                         return -EINVAL;
                 }
 
-                data = kmalloc( rulbus_arg->len, GFP_KERNEL );
-
-                if ( data == NULL ) {
-                        printk( KERN_NOTICE
-                                "Not enough memory for reading.\n" );
-                        return -ENOMEM;
-                }
-
-                if ( copy_from_user( data, rulbus_arg->data,
-                                     rulbus_arg->len ) ) {
-                        kfree( data );
-                        printk( KERN_NOTICE "Can't read from user space\n" );
-                        return -EACCES;
-                }
+				if ( copy_from_user( data, rulbus_arg->data,
+									 rulbus_arg->len ) ) {
+						if ( data != buffer )
+								kfree( data );
+						printk( KERN_NOTICE "Can't read from user space\n" );
+						return -EACCES;
+				}
         }
 
         /* Select the rack (if necessary) */
@@ -761,7 +822,9 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- )
                 rulbus_parport_write_data( *bp );
 
-        if ( rulbus_arg->len > 1 )
+		/* If we had to allocate a buffer get rid of it */
+
+        if ( rulbus_arg->len > RULBUS_MAX_BUFFER_SIZE )
                 kfree( data );
 
         return rulbus_arg->len;
@@ -770,14 +833,15 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 
 /*---------------------------------------------------------------*
  * Function for writing data to a consecutive range of addresses 
- * in one of the racks
+ * in one of the racks. Since there are never more that 254
+ * addresses we can do with a local buffer instead of allocating
+ * one.
  *---------------------------------------------------------------*/
 
 static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
-        unsigned char *data;
-        unsigned char *bp;
-        int i;
+        unsigned char data[ 254 ];
+        size_t i;
 
 
 		/* If only a single byte is to be written call rulbus_write() */
@@ -808,19 +872,9 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
                 return -EINVAL;
         }
 
-        /* We need to allocate a buffer and copy everything over there from
-		   user space */
-
 		if ( rulbus_arg->data == NULL ) {
 				printk( KERN_NOTICE "Invalid write data pointer.\n" );
 				return -EINVAL;
-		}
-
-		data = kmalloc( rulbus_arg->len, GFP_KERNEL );
-
-		if ( data == NULL ) {
-				printk( KERN_NOTICE "Not enough memory for reading.\n" );
-				return -ENOMEM;
 		}
 
 		if ( copy_from_user( data, rulbus_arg->data, rulbus_arg->len ) ) {
@@ -840,13 +894,10 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         /* Now write as many data as required to consecutive rulbus
 		   addresses */
 
-        for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- ) {
-				rulbus_parport_write_addr( rulbus_arg->offset++ );
-                rulbus_parport_write_data( *bp );
+        for ( i = 0; i < rulbus_arg->len; i++ ) {
+				rulbus_parport_write_addr( rulbus_arg->offset + i );
+                rulbus_parport_write_data( data[ i ] );
 		}
-
-        if ( rulbus_arg->len > 1 )
-                kfree( data );
 
         return rulbus_arg->len;
 }
@@ -925,7 +976,7 @@ static inline unsigned char rulbus_epp_timout_check( void )
 
 static inline unsigned char rulbus_parport_read_data( void )
 {
-        if ( rulbus.direction != REVERSE )
+        if ( rulbus.direction != READ_FROM_DEVICE )
                 rulbus_parport_reverse( );
         rulbus_clear_epp_timeout( );
         return inb( DATA_BYTE );
@@ -939,7 +990,7 @@ static inline unsigned char rulbus_parport_read_data( void )
 
 static inline unsigned char rulbus_parport_read_addr( void )
 {
-        if ( rulbus.direction != REVERSE )
+        if ( rulbus.direction != READ_FROM_DEVICE )
                 rulbus_parport_reverse( );
         rulbus_clear_epp_timeout( );
         return inb( ADDR_BYTE );
@@ -953,7 +1004,7 @@ static inline unsigned char rulbus_parport_read_addr( void )
 
 static inline void rulbus_parport_write_data( unsigned char data )
 {
-        if ( rulbus.direction != FORWARD )
+        if ( rulbus.direction != WRITE_TO_DEVICE )
                 rulbus_parport_reverse( );
         rulbus_clear_epp_timeout( );
         outb( data, DATA_BYTE );
@@ -967,7 +1018,7 @@ static inline void rulbus_parport_write_data( unsigned char data )
 
 static inline void rulbus_parport_write_addr( unsigned char addr )
 {
-        if ( rulbus.direction != FORWARD )
+        if ( rulbus.direction != WRITE_TO_DEVICE )
                 rulbus_parport_reverse( );
         rulbus_clear_epp_timeout( );
         outb( addr, ADDR_BYTE );

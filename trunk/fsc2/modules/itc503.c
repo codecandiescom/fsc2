@@ -408,19 +408,19 @@ static void itc503_lock( int state )
 	switch ( state )
 	{
 		case LOCAL_AND_LOCKED :
-			cmd = "Q0\r";
+			cmd = "C0\r";
 			break;
 
 		case REMOTE_AND_LOCKED :
-			cmd = "Q1\r";
+			cmd = "C1\r";
 			break;
 
 		case LOCAL_AND_UNLOCKED :
-			cmd = "Q2\r";
+			cmd = "C2\r";
 			break;
 
 		case REMOTE_AND_UNLOCKED :
-			cmd = "Q3\r";
+			cmd = "C3\r";
 			break;
 	}
 

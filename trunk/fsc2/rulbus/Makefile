@@ -41,7 +41,7 @@ export
 
 
 .SUFFIXES:
-.PHONY: all driver lib cleanup clean
+.PHONY: all driver lib install cleanup clean
 
 
 all:

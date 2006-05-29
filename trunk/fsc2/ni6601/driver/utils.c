@@ -29,7 +29,7 @@
  * Function releases all resources allocated to the board
  *--------------------------------------------------------*/
 
-void ni6601_release_resources( Board *board )
+void ni6601_release_resources( Board * board )
 {
 	if ( board->buf ) {
 		vfree( board->buf );
@@ -70,11 +70,12 @@ void ni6601_release_resources( Board *board )
  * of the boards registers
  *----------------------------------------------------------*/
 
-void ni6601_register_setup( Board *board )
+void ni6601_register_setup( Board * board )
 {
 	int i;
 
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
 	board->regs.irq_ack[ 0 ]        = board->addr + 0x004;
 	board->regs.irq_ack[ 1 ]        = board->addr + 0x006;
 	board->regs.irq_ack[ 2 ]        = board->addr + 0x104;
@@ -185,9 +186,210 @@ void ni6601_register_setup( Board *board )
 	board->regs.clock_config        = board->addr + 0x73C;
 	board->regs.chip_signature      = board->addr + 0x700;
 
+#else
+
+	board->regs.irq_ack[ 0 ]        =
+		( void __iomem * ) ( ( char * ) board->addr + 0x004 );
+	board->regs.irq_ack[ 1 ]        =
+		( void __iomem * ) ( ( char * ) board->addr + 0x006 );
+	board->regs.irq_ack[ 2 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x104 );
+	board->regs.irq_ack[ 3 ]        =
+		( void __iomem * ) ( ( char * ) board->addr + 0x106 );
+
+	board->regs.status[ 0 ]         =
+		( void __iomem * ) ( ( char * ) board->addr + 0x004 );
+	board->regs.status[ 1 ]         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x006 );
+	board->regs.status[ 2 ]         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x104 );
+	board->regs.status[ 3 ]         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x106 );
+	
+	board->regs.joint_status[ 0 ]   = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x008 );
+	board->regs.joint_status[ 1 ]   = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x008 );
+	board->regs.joint_status[ 2 ]   = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x108 );
+	board->regs.joint_status[ 3 ]   = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x108 );
+	
+	board->regs.command[ 0 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x00C );
+	board->regs.command[ 1 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x00E );
+	board->regs.command[ 2 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x10C );
+	board->regs.command[ 3 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x10E );
+
+	board->regs.hw_save[ 0 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x010 );
+	board->regs.hw_save[ 1 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x014 );
+	board->regs.hw_save[ 2 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x110 );
+	board->regs.hw_save[ 3 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x114 );
+
+	board->regs.sw_save[ 0 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x018 );
+	board->regs.sw_save[ 1 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x01C );
+	board->regs.sw_save[ 2 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x118 );
+	board->regs.sw_save[ 3 ]        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x11C );
+
+	board->regs.mode[ 0 ]           = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x034 );
+	board->regs.mode[ 1 ]           = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x036 );
+	board->regs.mode[ 2 ]           = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x134 );
+	board->regs.mode[ 3 ]           = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x136 );
+
+	board->regs.joint_status_1[ 0 ] = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x036 );
+	board->regs.joint_status_1[ 1 ] = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x036 );
+	board->regs.joint_status_1[ 2 ] = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x136 );
+	board->regs.joint_status_1[ 3 ] = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x136 );
+
+	board->regs.load_a[ 0 ]         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x038 );
+	board->regs.load_a[ 1 ]         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x040 );
+	board->regs.load_a[ 2 ]         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x138 );
+	board->regs.load_a[ 3 ]         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x140 );
+
+	board->regs.joint_status_2[ 0 ] = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x03A );
+	board->regs.joint_status_2[ 1 ] = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x03A );
+	board->regs.joint_status_2[ 2 ] = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x13A );
+	board->regs.joint_status_2[ 3 ] = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x13A );
+
+	board->regs.load_b[ 0 ]         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x03C );
+	board->regs.load_b[ 1 ]         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x044 );
+	board->regs.load_b[ 2 ]         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x13C );
+	board->regs.load_b[ 3 ]         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x144 );
+
+	board->regs.input_select[ 0 ]   = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x048 );
+	board->regs.input_select[ 1 ]   = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x04A );
+	board->regs.input_select[ 2 ]   = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x148 );
+	board->regs.input_select[ 3 ]   = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x14A );
+
+	board->regs.autoincrement[ 0 ]  = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x088 );
+	board->regs.autoincrement[ 1 ]  = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x08A );
+	board->regs.autoincrement[ 2 ]  = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x188 );
+	board->regs.autoincrement[ 3 ]  = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x18A );
+
+	board->regs.joint_reset[ 0 ]    = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x090 );
+	board->regs.joint_reset[ 1 ]    = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x090 );
+	board->regs.joint_reset[ 2 ]    = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x190 );
+	board->regs.joint_reset[ 3 ]    = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x190 );
+
+	board->regs.irq_enable[ 0 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x092 );
+	board->regs.irq_enable[ 1 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x096 );
+	board->regs.irq_enable[ 2 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x192 );
+	board->regs.irq_enable[ 3 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x196 );
+
+	board->regs.counting_mode[ 0 ]  = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x0B0 );
+	board->regs.counting_mode[ 1 ]  = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x0B2 );
+	board->regs.counting_mode[ 2 ]  = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x1B0 );
+	board->regs.counting_mode[ 3 ]  = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x1B2 );
+
+	board->regs.second_gate[ 0 ]    = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x0B4 );
+	board->regs.second_gate[ 1 ]    = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x0B6 );
+	board->regs.second_gate[ 2 ]    = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x1B4 );
+	board->regs.second_gate[ 3 ]    = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x1B6 );
+
+	board->regs.dma_config[ 0 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x0B8 );
+	board->regs.dma_config[ 1 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x0BA );
+	board->regs.dma_config[ 2 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x1B8 );
+	board->regs.dma_config[ 3 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x1BA );
+
+	board->regs.dma_status[ 0 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x0B8 );
+	board->regs.dma_status[ 1 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x0BA );
+	board->regs.dma_status[ 2 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x1B8 );
+	board->regs.dma_status[ 3 ]     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x1BA );
+
+	board->regs.dio_parallel_in     = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x00E );
+	board->regs.dio_output          = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x014 );
+	board->regs.dio_control         = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x016 );
+	board->regs.dio_serial_input    = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x038 );
+
+	for ( i = 0; i < 10; i++ )
+		board->regs.io_config[ i ] = 
+		 ( void __iomem * ) ( ( char * ) board->addr + 0x77C + 4 * i );
+
+	board->regs.reset_control       = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x700 );
+	board->regs.global_irq_control  = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x770 );
+	board->regs.global_irq_status   = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x754 );
+	board->regs.dma_configuration   = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x76C );
+	board->regs.clock_config        = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x73C );
+	board->regs.chip_signature      = 
+		( void __iomem * ) ( ( char * ) board->addr + 0x700 );
+
+#endif
+
 	/* Send a reset to get the board in a clean, well-defined state */
 
-	writel( SOFT_RESET, board->regs.reset_control );
+	iowrite32( SOFT_RESET, board->regs.reset_control );
 }
 
 
@@ -196,21 +398,22 @@ void ni6601_register_setup( Board *board )
  * STC DIO Control Register and switched to input
  *-------------------------------------------------------*/
 
-void ni6601_dio_init( Board *board )
+void ni6601_dio_init( Board * board )
 {
 	int i;
 
+
 	board->dio_mask = 0;
-	writew( board->dio_mask, board->regs.dio_control );
+	iowrite16( board->dio_mask, board->regs.dio_control );
 
 	/* Switch the DIO pins to output (so that they can be controlled
 	   via the DIO Control Register), all other to input */
 
-	writel( 0x01010101, board->regs.io_config[ 0 ] );
-	writel( 0x01010101, board->regs.io_config[ 1 ] );
+	iowrite32( ( u32 ) 0x01010101, board->regs.io_config[ 0 ] );
+	iowrite32( ( u32 ) 0x01010101, board->regs.io_config[ 1 ] );
 
 	for ( i = 2; i < 10; i++ )
-		writel( 0x0, board->regs.io_config[ i ] );
+		iowrite32( ( u32 ) 0x0, board->regs.io_config[ i ] );
 }
 
 
@@ -219,16 +422,17 @@ void ni6601_dio_init( Board *board )
  * Take care not to change any other bit of the register.
  *------------------------------------------------------------------*/
 
-void ni6601_enable_out( Board *board, int pfi )
+void ni6601_enable_out( Board * board,
+			int     pfi )
 {
 	u32 val, to_set;
 
 
-	val = readl( board->regs.io_config[ pfi >> 2 ] );
+	val = ioread32( board->regs.io_config[ pfi >> 2 ] );
 	to_set = 1 << ( 8 * ( 3 - ( pfi & 0x3 ) ) );
 
 	if ( ! ( val & to_set ) )
-	     writel( val | to_set, board->regs.io_config[ pfi >> 2 ] );
+	     iowrite32( val | to_set, board->regs.io_config[ pfi >> 2 ] );
 }
 
 
@@ -238,23 +442,25 @@ void ni6601_enable_out( Board *board, int pfi )
  * of the register.
  *---------------------------------------------------------------------*/
 
-void ni6601_disable_out( Board *board, int pfi )
+void ni6601_disable_out( Board * board,
+			 int     pfi )
 {
 	u32 val, to_clear;
 
 
-	val = readl( board->regs.io_config[ pfi >> 2 ] );
+	val = ioread32( board->regs.io_config[ pfi >> 2 ] );
 	to_clear = 1 << ( 8 * ( 3 - ( pfi & 0x3 ) ) );
 
 	if ( val & to_clear )
-	     writel( val ^ to_clear, board->regs.io_config[ pfi >> 2 ] );
+	     iowrite32( val ^ to_clear, board->regs.io_config[ pfi >> 2 ] );
 }
 
 
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-int ni6601_input_gate( int gate, u16 *bits )
+int ni6601_input_gate( int   gate,
+		       u16 * bits )
 {
 	switch ( gate ) {
 		case NI6601_NONE :
@@ -299,7 +505,8 @@ int ni6601_input_gate( int gate, u16 *bits )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-int ni6601_input_source( int source, u16 *bits )
+int ni6601_input_source( int   source,
+			 u16 * bits )
 {
 	switch ( source ) {
 		case NI6601_LOW :

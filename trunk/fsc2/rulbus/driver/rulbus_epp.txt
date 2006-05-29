@@ -6,10 +6,40 @@ Rulbus EPP Device Driver Description
 ====================================
 
 The driver supports the parallel port EPP interface for the Rulbus
-(Rijksuniversiteit Leiden BUS). The driver supports the open(),
-close() and ioctl() system calls. Please note that that driver will
-probably work with PC style hardware only. It also requires the
-parallel port being set up to EPP mode (probably from BIOS)!
+(Rijksuniversiteit Leiden BUS). The driver supports the open(), close()
+and ioctl() system calls. Please note that that driver will probably
+work with PC style hardware only. It also requires the parallel port
+being set up to EPP mode (probably from BIOS)!
+
+
+The open() and close() system calls
+===================================
+
+The device file can be opened from more than one process/thread at a time.
+If you call open() with the O_NONBLOCK or O_NDELAY flags and some other
+process is just in the process of opening the device you will receive a
+return value of EAGAIN. Otherwise the call may return EINTR if your process
+receives a signal before it was able to open the device. The same holds
+for the close() call. Moreover, if you try to close an already closed
+device file you will receive a return value of ENODEV.
+
+Moreover, you can open the device with the O_EXCL flag which is treated
+to mean that you want exclusive access to the device. If exclusive access
+can't be granted (because some other process or thread already opened the
+device file) EEXIST will be returned. Even if you try to open device file
+without specifying the O_EXCL flag you must be prepared to receive a
+return value of EEXIST when some other process or thread already has been
+granted exclusive access to the file.
+
+
+The ioctl() calls
+=================
+
+If you call ioctl() on the device file that was opened with the O_NONBLOCK
+or O_NDELAY flags and some other process is just in the process also of
+doing an ioctl() call on the device you will receive a return value of
+EAGAIN. Otherwise the call may return EINTR if your process did receive a
+signal before it was able to read from or write to the device.
 
 All ioctl() data are passed via the following structure
 

@@ -42,8 +42,8 @@ will use '/dev/rulbus_epp' per default.
 For each rack connected to the Rulbus interface that you want to use
 you need a line starting with the keyword 'rack' and a rack name (a
 string, enclosed in either single or double quotes, but please note
-that you can't use the delimiter within the string) and followed by
-a set of further instructions enclosed in curly braces:
+that you then can't use that delimiter within the string), followed
+by a set of further instructions enclosed in curly braces:
 
 rack "top rack" {
 
@@ -78,36 +78,37 @@ rack "top rack" {
 Within the set of configuration informations for the rack you normally
 should specify the rack address by a line containing the keyword 'address'
 and followed by the address. The rack address can be given as a decimal
-number as well as a hexadecimal number (if it starts with '0x') or as a
-octal number (if it starts with a '0'). If you only have a single rack
-in the file with cards in it the rack address can be omitted and the rack
-is assumed to be always selected, having the default address 0c 15. When
-there's more than rack with cards listed in the configuration file rack
-addresses must be specified, which must be between 0 and 14.
+number as well as a hexadecimal (if it starts with '0x') or octal number
+(if it starts with a '0'). If you only have a single rack in the file
+with cards in it the rack address can be omitted and the rack is assumed
+to be always selected, having the default address 0x0 (that's 15 in
+decimal). When there's more than one rack with cards listed in th
+configuration file rack addresses must be specified, which must be between
+0 and 14.
 
 The configuration file may contain comments: everything following the
-a '#' or '//' is discarded uo to the end of the line. To create comments
+a '#' or '//' is discarded up to the end of the line. To create comments
 spanning multiple lines the usual C syntax for comments can be used, i.e.
 everything from the character sequence '/*' until the first encounter of
-'*/' is also discarded (with the consequence that such comments can't be
-nested).
+'*/' is also discarded (note that such comments can't be nested).
 
-Further entries for a rack are for the cards in the rack (as many as there
-are cards). Each card description starts with the type of the card, either
-'rb8509_adc12' (for the 12-bit ADC card RB8509), 'rb8510_dac12', (for the
-12-bit DAC card RB8510), 'rb8514_delay' (for the RB8514 delay card),
-'rb8515_clock' (for the RB8515 clock card) or 'rb_generic' (a card type
-to be discussed later) and the card name (a string, enclosed in single or
-double quotes) and followed by a set of card specific informations,
-enclosed in curly braces. The name of that card must be unique, i.e. the
-same name can't be used for two or more cards. Using this name the card
-is later going to be accessed from your program.
+Further entries for a rack are for all the cards in the rack. Each card
+description starts with the type of the card, either 'rb8509_adc12' (for
+the 12-bit ADC card RB8509), 'rb8510_dac12', (for the 12-bit DAC card
+RB8510), 'rb8514_delay' (for the RB8514 delay card), 'rb8515_clock' (for
+the RB8515 clock card) or 'rb_generic' (a card type to be discussed later)
+and the card name (a string, enclosed in single or double quotes) and
+followed by a set of card specific informations, enclosed in curly braces.
+The name of that card must be unique, i.e. the same name can't be used for
+two or more cards. Using this name the card is later going to be accessed
+from your program.
 
 For each card its address should be specified by a line starting with the
 keyword 'address' and followed by the numeric card address. If no address
-is specified for the card a default address is used. Please note that the
-default address can't be used for two cards at the same time in a single
-rack. Valid card addresses are in the range between 1 and 254.
+is specified for the card a default address (depending on the type of the
+card, see below) is used. Obviously, the default address can't be used for
+two cards at the same time in a single rack. Valid card addresses are in
+the range between 1 and 254.
 
 For 12-bit ADC (RB8509) cards the default address is 0xC0, for 12-bit DAC
 (RB8510) cards it is 0xD0, for delay (RB8514) cards it's 0xC4 and for
@@ -115,9 +116,9 @@ clock (RB8515) cards 0xC8. No address (or only the address 0, which is
 invalid for all other cards) can be specified for "generic" (rb_generic)
 cards.
 
-For 12-bit ADC (RB8509) cards additional informations to be specified are
-the number of channels, if the card works in bipolar or unipolar mode and
-its sensitivity.
+For 12-bit ADC (RB8509) cards additional informations are to be specified.
+These are the number of channels, if the card works in bipolar or unipolar 
+mode and its sensitivity.
 
 The number of channels of the ADC card has to follow the keyword
 'num_channels' and must be number between 1 and a maximum of 8 (when
@@ -126,10 +127,10 @@ can't be used). If not specified a default value of 8 is used.
 
 Another entry tells if the ADC works in bipolar or unipolar mode, i.e. if
 it can convert voltages symmetrical to 0 V (biploar mode) or positive
-voltages only (unipolar mode). It has to be specified following the keyword
+voltages only (unipolar mode). It has to be specified after the keyword
 'bipolar' as a boolean value, either 'true' or 'yes' to indicates that the
-card works in bipolar mode or 'false' or 'yes' (if a numerical (integer)
-value is used instead 0 stands for 'false' and all other values for 'true').
+card works in bipolar mode or 'false' or 'no' (if a numerical (integer)
+value is used 0 stands for 'false' and all non-zero values for 'true').
 If not specified the library will assume that the card works in bipolar
 mode.
 
@@ -153,9 +154,9 @@ into the configuration information for the card. If not specified a default
 value of 5 mV is used.
 
 Finally, a line starting with the 'has_ext_trigger' keyword, followed
-by a boolean value, tells if the card has an input connector for an
-external trigger signal. If not specified the library will default to
-false.
+by a boolean value (i.e. 'true'/'yes'/non-zero number or 'false'/'no'/0),
+tells if the card has an input connector for an external trigger signal.
+If not specified the library will default to false.
 
 Also the 12-bit DACs (RB8510) may require some additional information.
 Unless specified a default address of 0xD0 is used. And like for the
@@ -166,19 +167,26 @@ value for a card can be calculated by dividing the total input range
 by 4095. When not given, 'bipolar' defaults to 'true' and volt_per_bit'
 to 5 mV.
 
-Please note: For each RB8510 12-bit DAC two card entries are required,
-one for each of the two inputs of the card!
+Important: For each RB8510 12-bit DAC two card entries are required,
+one for each of the two inputs of the card! So even if this is a
+single card each of the both inputs gets treated as if it were a
+card of its own, complete with different card addreses for both
+inputs.
 
 The RB8514 delay card expects, beside the address which defaults to 0xC4
 when not specified, a line describing the intrinsic delay of the card.
-Each delay card introduces a minimum delay, which is typically in the
-order of 55-65 ns. To tell the library about the exact value a line
-consisting of the the keyword 'intr_delay' and the length of this
-minimum delay can be specified. If not given it defaults to 60 ns.
+Each delay card introduces a minimum delay between it receives its
+trigger and the start of the delay pulse it produces. This delay is
+typically in the order of 55-65 ns. To tell the library about the exact
+value a line consisting of the the keyword 'intr_delay' and the length
+of this minimum delay can be specified. If not given it defaults to 60 ns.
+This information is not used by the library directly but can be inquired
+by the calling program than in turn can use that information, e.g. by
+raising the trigger earlier by that amount of time to countervail for
+the delay.
 
-The RB8515 clock card does not properties have any properties that can
-be set in the configuration file except its address, which defaults to
-0xC8.
+The RB8515 clock card does not have any properties that can be set in
+the configuration file except its address which defaults t 0xC8.
 
 Finally, the generic card, 'rb_generic', does not allow to specify any
 properties at all, not even an address. This card type isn't meant to
@@ -285,6 +293,18 @@ of return codes with a short explanation:
 									  file doesn't exist)
   RULBUS_DEV_NO_DEVICE                File does not exist (probably because
 									  driver for the device isn't loaded)
+  RULBUS_SIGNAL_RECEIVED              During a function call (for opening,
+                                      closing, reading or writing) a signal
+									  has been received before the function
+									  could do anything.
+  RULBUS_EXCL_ACCESS_DENIED           Failure to open the device with exclusive
+                                      access permissions
+  RULBUS_EXCL_ACCESS_BY_OTHER         Failure to open the device because some
+                                      other process has exclusive access rights
+  RULBUS_WOULD_BLOCK                  The device is to be used without any of
+                                      the functions bein allowed to wait but
+                                      the function call can not proceed without
+                                      waiting
   RULBUS_DEV_FILE_OPEN_FAIL           Failure to open the device file
   RULBUS_NO_INITIALIZATION            rulbus_open() hasn't been called
   RULBUS_INVALID_ARGUMENT             Invalid function argument
@@ -310,7 +330,7 @@ of return codes with a short explanation:
 
 ----------------------------------------------------------------------
 
-int rulbus_open( void )
+int rulbus_open( int flags )
 
 Before anything else the RULBUS must be initialized by calling this
 function. It will try to read in the configuration file, which is
@@ -322,11 +342,21 @@ file for the rulbus interface. This is usually "/dev/rulbus" (unless
 a different name has been compiled into the program) or, if set, the
 name that has been set in the configuration file.
 
-Please note that the close-on-exec flag is set for the device file
-for the interface.
+The flags O_NONBLOCK (or O_NODELAY) and O_EXCL can be passed (if
+necessary or-ed together) to the function. The O_NONBLOCK flag will
+make sure that function calls will return immediately (returning
+EAGAIN) if the execution of the function would have to wait for some
+time. In this case no data get read or written. If the device is to be
+opened with the E_EXCL flag you ask for exclusiv access to the device
+in order to keep other processes (or threads) from accessing it.
 
 On success the function returns RULBUS_OK, otherwise a negative value
-indicating the reason for the failure.
+indicating the reason for the failure. Please note that the function
+may fail because another process already has been granted exclusive
+access to te device even if you don't ask for exclusive access.
+
+Please note that the close-on-exec flag is set for the device file
+for the interface.
 
 
 ----------------------------------------------------------------------

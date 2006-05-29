@@ -709,8 +709,9 @@ FOREVER {
 		data[ J, I ] = lockin_get_data( );
 		output_value( B2, start_field + ( I - 1 ) * step_size );
 		output_value( B3, temp_contr_temperature( ) );
-		display_1d( I, data[ J, I ] * 1.0e6, 1,
-					I, ( avg[ I ] + data[ J, I ] ) / J  * 1.0e6, 2 );
+		display_1d( I, data[ J, I ] / 1 uV, 1,
+					I, ( ( J - 1 ) avg[ I ] + data[ J, I ] ) / ( J  * 1 uV ),
+                    2 );
 	}
 ";
 	} else {
@@ -719,14 +720,15 @@ FOREVER {
 		data[ J, I ] = lockin_get_data( );
 		output_value( B2, end_field + ( I - 1 ) * step_size );
 		output_value( B3, temp_contr_temperature( ) );
-		display_1d( I, data[ J, I ] * 1.0e6, 1,
-					I, ( avg[ I ] + data[ J, I ] ) / J  * 1.0e6, 2 );
+		display_1d( I, data[ J, I ] / 1 uV, 1,
+					I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / ( J  * 1 uV ),
+                    2 );
 	}
 ";
 	}
 
 	print F "
-	avg += data[ J ];
+	avg = add_to_avg( avg, data[ J ], J );
 
 	magnet_sweep( \"STOP\" );
 	lockin_auto_acquisition( \"OFF\" );
@@ -771,9 +773,7 @@ IF I != 0 {
 ";
 	}
 
-	print F "
-		fsave( File1, \"\\n\" );
-	} ELSE {
+	print F "	} ELSE {
 		IF I <= Num_Points {
 			J -= 1;
 		}
@@ -787,16 +787,43 @@ IF I != 0 {
 				}
 				fsave( File2, \"\\n\" );
 			}
-			fsave( File2, \"\\n\" );
+
+			fsave( File2,
+                   \"\\n\"
+			       \"% Date:                    # #\\n\"
+			       \"% Script:                  cw_epr (J-band, Leiden)\\n\"
+			       \"% Magnet:\\n\"
+			       \"%   Start field:           # G\\n\"
+			       \"%   End field:             # G\\n\"
+			       \"%   Sweep rate:            # G/s\\n\"
+			       \"%   Start delay:           # s\\n\"
+			       \"% Lock-In:\\n\"
+			       \"%   Sensitivity:           # mV\\n\"
+			       \"%   Time constant:         # s\\n\"
+			       \"%   Acquisition rate:      # Hz\\n\"
+			       \"%   Phase:                 # degree\\n\"
+			       \"%   Modulation frequency:  # Khz\\n\"
+			       \"%   Modulation amplitude:  # V\\n\"
+			       \"% Number of scans:         #\\n\"
+			       \"% Number of points:        #\\n\"
+			       \"% Temperature at start:    # K\\n\"
+	    		   \"% Temperature at end:      # K\\n\",
+			       date(), time(),
+				   start_field, start_field + ( Num_Points - 1 ) * step_size,
+				   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
+			       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
+				   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
+				   J, Num_Points, start_temp, temp_contr_temperature( ) );
 		}
 
 		FOR I = 1 : Num_Points {
-			fsave( File2, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] / J );
+			fsave( File1, \"#,#\\n\",
+                   field + ( I - 1 ) * step_size, avg[ I ] );
 		}
-		fsave( File2, \"\\n\" );
 	}
 
 	fsave( File1,
+           \"\\n\"
 	       \"% Date:                    # #\\n\"
 	       \"% Script:                  cw_epr (J-band, Leiden)\\n\"
 	       \"% Magnet:\\n\"
@@ -823,34 +850,6 @@ IF I != 0 {
 		   J, Num_Points, start_temp, temp_contr_temperature( ) );
 
 	save_comment( File1, \"% \", \"Sample:  \\nTemperature:  \\n\" );
-
-	IF J > 1 {
-		fsave( File2,
-		       \"% Date:                    # #\\n\"
-		       \"% Script:                  cw_epr (J-band, Leiden)\\n\"
-		       \"% Magnet:\\n\"
-		       \"%   Start field:           # G\\n\"
-		       \"%   End field:             # G\\n\"
-		       \"%   Sweep rate:            # G/s\\n\"
-		       \"%   Start delay:           # s\\n\"
-		       \"% Lock-In:\\n\"
-		       \"%   Sensitivity:           # mV\\n\"
-		       \"%   Time constant:         # s\\n\"
-		       \"%   Acquisition rate:      # Hz\\n\"
-		       \"%   Phase:                 # degree\\n\"
-		       \"%   Modulation frequency:  # Khz\\n\"
-		       \"%   Modulation amplitude:  # V\\n\"
-		       \"% Number of scans:         #\\n\"
-		       \"% Number of points:        #\\n\"
-		       \"% Temperature at start:    # K\\n\"
-    		   \"% Temperature at end:      # K\\n\",
-		       date(), time(),
-			   start_field, start_field + ( Num_Points - 1 ) * step_size,
-			   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
-		       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
-			   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
-			   J, Num_Points, start_temp, temp_contr_temperature( ) );
-	}
 }
 ";
 
@@ -991,7 +990,8 @@ FOREVER {
 		output_value( B2, start_field + ( I - 1 ) * step_size );
 		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
-					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
+					I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / ( J * 1 uV ),
+                    2 );
 	}
 ";
 	} else {
@@ -1000,7 +1000,8 @@ FOREVER {
 		output_value( B2, start_field + ( I - 1 ) * step_size );
 		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
-					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
+					I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / ( J * 1 uV ),
+                    2 );
 	}
 ";
 	}
@@ -1008,7 +1009,7 @@ FOREVER {
 	print F "	lockin_auto_acquisition( \"OFF\" );
 	magnet_sweep( \"STOP\" );
 
-	avg += data[ J ];
+	avg = add_to_average( avg, data[ J ], J );
 	clear_curve_1d( 1, 3 );
 	display_1d( 1, data[ J ] / 1 uV, 3 );
 
@@ -1033,7 +1034,8 @@ FOREVER {
 		output_value( B2, start_field + ( I - 1 ) * step_size );
 		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
-					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
+					I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / ( J * 1 uV ),
+                    2 );
 	}
 ";
 	} else {
@@ -1045,7 +1047,8 @@ FOREVER {
 		output_value( B2, start_field + ( I - 1 ) * step_size );
 		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
-					I, ( avg[ I ] + data[ J, I ] ) / ( J * 1 uV ), 2 );
+					I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / ( J * 1 uV ),
+                    2 );
 	}
 ";
 	}
@@ -1053,9 +1056,9 @@ FOREVER {
     lockin_auto_acquisition( \"OFF\" );
 	magnet_sweep( \"STOP\" );
 
-	avg += data[ J ];
+	avg = add_to_average( avg, data[ J ], J );
 	clear_curve_1d( 1, 3 );
-	display_1d( 1, data[ J ] * 1.0e6, 3 );
+	display_1d( 1, data[ J ] / 1 uV, 3 );
 
 	IF button_state( B4 ) {               // Stop on user request
 		BREAK;
@@ -1095,16 +1098,43 @@ IF I != 0 {
 				}
 				fsave( File2, \"\\n\" );
 			}
-			fsave( File2, \"\\n\" );
+
+			fsave( File2,
+                   \"\\n\"
+			       \"% Date:                    # #\\n\"
+				   \"% Script:                  cw_epr (J-band, Leiden)\\n\"
+			       \"% Magnet (measuring while sweeping both up and down):\\n\"
+			       \"%   Start field:           # G\\n\"
+			       \"%   End field:             # G\\n\"
+			       \"%   Sweep rate:            # G/min\\n\"
+			       \"%   Start delay:           # s\\n\"
+			       \"% Lock-In:\\n\"
+			       \"%   Sensitivity:           # mV\\n\"
+			       \"%   Time constant:         # s\\n\"
+			       \"%   Acquisition rate:      # Hz\\n\"
+			       \"%   Phase:                 # degree\\n\"
+			       \"%   Modulation frequency:  # Khz\\n\"
+			       \"%   Modulation amplitude:  # V\\n\"
+			       \"% Number of scans:         #\\n\"
+			       \"% Number of points:        #\\n\"
+			       \"% Temperature at start:    # K\\n\"
+	    		   \"% Temperature at end:      # K\\n\",
+				   date(), time(),
+				   start_field, start_field + ( Num_Points - 1 ) * step_size,
+				   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
+			       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
+				   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
+				   J, Num_Points, start_temp, temp_contr_temperature( ) );
 		}
 
 		FOR I = 1 : Num_Points {
-			fsave( File1, \"#,#\\n\", field + ( I - 1 ) * step_size, avg[ I ] / J );
+			fsave( File1, \"#,#\\n\",
+                   field + ( I - 1 ) * step_size, avg[ I ] );
 		}
-		fsave( File1, \"\\n\" );
 	}
 
 	fsave( File1,
+           \"\\n\"
 	       \"% Date:                    # #\\n\"
 		   \"% Script:                  cw_epr (J-band, Leiden)\\n\"
 	       \"% Magnet (measuring while sweeping both up and down):\\n\"
@@ -1131,34 +1161,6 @@ IF I != 0 {
 		   J, Num_Points, start_temp, temp_contr_temperature( ) );
 
 	save_comment( File1, \"% \", \"Sample:  \\nTemperature:  \\n\" );
-
-	IF J > 1 {
-		fsave( File2,
-		       \"% Date:                    # #\\n\"
-			   \"% Script:                  cw_epr (J-band, Leiden)\\n\"
-		       \"% Magnet (measuring while sweeping both up and down):\\n\"
-		       \"%   Start field:           # G\\n\"
-		       \"%   End field:             # G\\n\"
-		       \"%   Sweep rate:            # G/min\\n\"
-		       \"%   Start delay:           # s\\n\"
-		       \"% Lock-In:\\n\"
-		       \"%   Sensitivity:           # mV\\n\"
-		       \"%   Time constant:         # s\\n\"
-		       \"%   Acquisition rate:      # Hz\\n\"
-		       \"%   Phase:                 # degree\\n\"
-		       \"%   Modulation frequency:  # Khz\\n\"
-		       \"%   Modulation amplitude:  # V\\n\"
-		       \"% Number of scans:         #\\n\"
-		       \"% Number of points:        #\\n\"
-		       \"% Temperature at start:    # K\\n\"
-    		   \"% Temperature at end:      # K\\n\",
-			   date(), time(),
-			   start_field, start_field + ( Num_Points - 1 ) * step_size,
-			   sweep_rate, " . ( $sleep_time ne "" ? $sleep_time : 0 ) .
-		       ", lockin_sensitivity( ) * 1.0e3, tc, kd,
-			   lockin_phase( ), lockin_ref_freq( ) * 1.0e-3, lockin_ref_level( ),
-			   J, Num_Points, start_temp, temp_contr_temperature( ) );
-	}
 }
 ";
 

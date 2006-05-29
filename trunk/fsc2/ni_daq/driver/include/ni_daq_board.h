@@ -264,11 +264,19 @@ typedef struct {
 struct Board {
 	struct pci_dev *dev;        /* PCI device structure of board */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
 	u8 *mite;                   /* virtual address of MITE */
+#else
+	void __iomem *mite;
+#endif
 	unsigned long mite_phys;    /* physical address of MITE */
 	unsigned long mite_len;     /* length of MITE address space */
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
 	u8 *daq_stc;                /* virtual address of DAQ-STC registers */
+#else
+	void __iomem *daq_stc;
+#endif
 	unsigned long daq_stc_phys; /* physical address of DAQ-STC registers */
 	unsigned long daq_stc_len;  /* length of DAQ-STC address space */
 
@@ -280,10 +288,15 @@ struct Board {
 	int has_region;
 	uid_t owner;                /* current owner of the board */
 
-	/* Spinlock used when opening the board to keep multiple users
+	/* Mutex used when opening the board to keep multiple users
 	   opening the board at the same time */
 
-	spinlock_t open_spinlock;
+	struct semaphore open_mutex;
+
+	/* And another one that the process must get before it can do anything
+	   with the board */
+
+	struct semaphore use_mutex;
 
 	/* Pointer to structure describing the properties of the board */
 

@@ -27,34 +27,43 @@
 #include "ni_daq_board.h"
 
 
-static int ni_daq_open( struct inode * inode_p,
-			struct file *  file_p );
+static int ni_daq_open( struct inode * /* inode_p */,
+			struct file *  /* file_p  */);
 
-static int ni_daq_release( struct inode * inode_p,
-			   struct file *  file_p );
+static int ni_daq_release( struct inode * /* inode_p */,
+			   struct file *  /* file_p  */ );
 
-static unsigned int ni_daq_poll( struct file *              filep,
-				 struct poll_table_struct * pt );
+static unsigned int ni_daq_poll( struct file *              /* file_p */,
+				 struct poll_table_struct * /* pt     */ );
 
-static ssize_t ni_daq_read( struct file * filep,
-			    char *        buff,
-			    size_t        count,
-			    loff_t *      offp );
+static ssize_t ni_daq_read( struct file * /* file_p */,
+			    char *        /* buff   */,
+			    size_t        /* count  */,
+			    loff_t *      /* offp   */ );
 
-static ssize_t ni_daq_write( struct file * filep,
-			     const char *  buff,
-			     size_t        count,
-			     loff_t *      offp );
+static ssize_t ni_daq_write( struct file * /* file_p */,
+			     const char *  /* buff   */,
+			     size_t        /* count  */,
+			     loff_t *      /* offp   */ );
 
-static int ni_daq_ioctl( struct inode * inode_p,
-			 struct file *  file_p,
-			 unsigned int   cmd,
-			 unsigned long  arg );
-
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+static int ni_daq_ioctl( struct inode * /* inode_p */,
+			 struct file *  /* file_p  */,
+			 unsigned int   /* cmd     */,
+			 unsigned long  /* arg     */ );
+#else
+static long ni_daq_ioctl( struct file *  /* file_p */,
+			  unsigned int   /* cmd    */,
+			  unsigned long  /* arg    */ );
+#endif
 
 struct file_operations ni_daq_file_ops = {
 	owner:		    THIS_MODULE,
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 	ioctl:              ni_daq_ioctl,
+#else
+	unlocked_ioctl:     ni_daq_ioctl,
+#endif
 	open:               ni_daq_open,
 	poll:               ni_daq_poll,
 	read:               ni_daq_read,
@@ -74,36 +83,34 @@ static int ni_daq_open( struct inode * inode_p,
 	Board *board;
 
 
-	file_p = file_p;
+	minor = MINOR( inode_p->i_rdev );
 
-	if ( ( minor = MINOR( inode_p->i_rdev ) ) >= board_count ) {
+	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );
 		return -ENODEV;
 	}
 
 	board = boards + minor;
 
-	spin_lock( &board->open_spinlock );
+	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board->open_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board->open_mutex ) )
+		return -ERESTARTSYS;
 
-	if ( board->in_use > 0 &&
-	     board->owner != current->uid &&
-	     board->owner != current->euid &&
-	     ! capable( CAP_DAC_OVERRIDE ) ) {
-		PDEBUG( "Board already in use by another user\n" );
-		spin_unlock( &board->open_spinlock );
+	if ( board->in_use ) {
+		up( &board->open_mutex );
+		PDEBUG( "Board already in use by another process/thread\n" );
 		return -EBUSY;
 	}
 
-	if ( board->in_use == 0 )
-		board->owner = current->uid;
-
-	board->in_use++;
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_INC_USE_COUNT;
 #endif
 
-	spin_unlock( &board->open_spinlock );
+	board->in_use = 1;
+	up( &board->open_mutex );
 
 	return 0;
 }
@@ -131,27 +138,29 @@ static int ni_daq_release( struct inode * inode_p,
 
 	board = boards + minor;
 
-	if ( board->in_use == 0 ) {
-		PDEBUG( "Board %d not open\n", minor );
-		return -ENODEV;
-	}
+	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board->open_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board->open_mutex ) )
+		return -ERESTARTSYS;
 
-	if ( board->owner != current->uid &&
-	     board->owner != current->euid &&
-	     ! capable( CAP_DAC_OVERRIDE ) ) {
-		PDEBUG( "No permission to release board %d\n", minor );
-		return -EPERM;
+	if ( ! board->in_use ) {
+		up( &board->open_mutex );
+		PDEBUG( "Board %d not open\n", minor );
+		return -EBADF;
 	}
 
 	/* Reset the board before closing it */
 
 	board->func->board_reset_all( board );
 		
-	board->in_use--;
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_DEC_USE_COUNT;
 #endif
+
+	board->in_use = 0;
+	up( &board->open_mutex );
 
 	return 0;
 }
@@ -161,7 +170,7 @@ static int ni_daq_release( struct inode * inode_p,
  * Function for dealing with poll() and select() calls for the driver
  *--------------------------------------------------------------------*/
 
-static unsigned int ni_daq_poll( struct file *              filep,
+static unsigned int ni_daq_poll( struct file *              file_p,
 				 struct poll_table_struct * pt )
 {
 	int minor;
@@ -169,7 +178,7 @@ static unsigned int ni_daq_poll( struct file *              filep,
 	unsigned int mask = 0;
 
 
-	minor = MINOR( filep->f_dentry->d_inode->i_rdev );
+	minor = MINOR( file_p->f_dentry->d_inode->i_rdev );
 
 	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );
@@ -177,6 +186,17 @@ static unsigned int ni_daq_poll( struct file *              filep,
 	}
 
 	board = boards + minor;
+
+	if ( ! board->in_use ) {
+		PDEBUG( "Board %d not open\n", minor );
+		return -EBADF;
+	}
+
+	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board->use_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board->use_mutex ) )
+		return -ERESTARTSYS;
 
 	if ( board->mite_chain[ NI_DAQ_AI_SUBSYSTEM ] ) {
 
@@ -193,7 +213,7 @@ static unsigned int ni_daq_poll( struct file *              filep,
 			mask |= POLLIN | POLLRDNORM;
 		else if ( ! board->irq_hand[ IRQ_AI_SC_TC ].raised ) {
 			daq_irq_enable( board, IRQ_AI_STOP, AI_irq_handler );
-			poll_wait( filep, &board->AI.waitqueue, pt );
+			poll_wait( file_p, &board->AI.waitqueue, pt );
 			daq_irq_disable( board, IRQ_AI_STOP );
 
 			if ( board->func->dma_get_available( board,
@@ -208,6 +228,7 @@ static unsigned int ni_daq_poll( struct file *              filep,
 	     board->func->dma_get_available( board, NI_DAQ_AO_SUBSYSTEM ) )
 		mask |= POLLOUT | POLLWRNORM;
 
+	up( &board->use_mutex );
 	return mask;
 }
 
@@ -227,7 +248,7 @@ static unsigned int ni_daq_poll( struct file *              filep,
  *    and trigger input lines are released back into the pool
  *----------------------------------------------------------------------*/
 
-static ssize_t ni_daq_read( struct file * filep,
+static ssize_t ni_daq_read( struct file * file_p,
 			    char *        buff,
 			    size_t        count,
 			    loff_t *      offp )
@@ -237,7 +258,7 @@ static ssize_t ni_daq_read( struct file * filep,
 	int ret;
 
 
-	minor = MINOR( filep->f_dentry->d_inode->i_rdev );
+	minor = MINOR( file_p->f_dentry->d_inode->i_rdev );
 
 	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );
@@ -246,10 +267,22 @@ static ssize_t ni_daq_read( struct file * filep,
 
 	board = boards + minor;
 
-	/* If there can't be any data because no valid acquisition setup has
-	   been done that's an error */
+	if ( ! board->in_use ) {
+		PDEBUG( "Board %d not open\n", minor );
+		return -EBADF;
+	}
+
+	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board->use_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board->use_mutex ) )
+		return -ERESTARTSYS;
+
+	/* It's a fatal error if there can't be any data because no valid
+	   acquisition setup has been done */
 
 	if ( ! board->AI.is_acq_setup ) {
+		up( &board->use_mutex );
 		PDEBUG( "Missing acquisition setup\n" );
 		return -EINVAL;
 	}
@@ -258,8 +291,10 @@ static ssize_t ni_daq_read( struct file * filep,
 	   trying to read data triggers the start of the acquisition */
 
 	if ( ! board->mite_chain[ NI_DAQ_AI_SUBSYSTEM ] &&
-	     ( ret = AI_start_acq( board ) ) < 0 )
+	     ( ret = AI_start_acq( board ) ) < 0 ) {
+		up( &board->use_mutex );
 		return ret;
+	}
 
 	/* If the device file was opened in blocking mode make sure there are
 	   data: if no data are available immediately enable the STOP
@@ -267,7 +302,7 @@ static ssize_t ni_daq_read( struct file * filep,
 	   wait for it (or for the SC TC interrupt, which is raised at the
 	   end of the acquisition). */
 
-	if ( ! ( filep->f_flags & O_NONBLOCK ) &&
+	if ( ! ( file_p->f_flags & O_NONBLOCK ) &&
 	     ! board->func->dma_get_available( board,
 					       NI_DAQ_AI_SUBSYSTEM ) ) {
 		daq_irq_enable( board, IRQ_AI_STOP, AI_irq_handler );
@@ -276,6 +311,7 @@ static ssize_t ni_daq_read( struct file * filep,
 			   board->irq_hand[ IRQ_AI_SC_TC ].raised ||
 			   board->irq_hand[ IRQ_AI_STOP ].raised ) ) {
 			daq_irq_disable( board, IRQ_AI_STOP );
+			up( &board->use_mutex );
 			return -EINTR;
 		}
 
@@ -290,8 +326,10 @@ static ssize_t ni_daq_read( struct file * filep,
 	/* If there are no new data and the device file was opened in non-
 	   blocking mode return -EAGAIN */
 
-	if ( ret == 0 && count == 0 && filep->f_flags & O_NONBLOCK )
+	if ( ret == 0 && count == 0 && file_p->f_flags & O_NONBLOCK ) {
+		up( &board->use_mutex );
 		return -EAGAIN;
+	}
 
 	/* If all points to be expected from the acquisition have been fetched
 	   or if there was an unrecoverable error disable AI SC_TC interrupt
@@ -307,13 +345,15 @@ static ssize_t ni_daq_read( struct file * filep,
 
 	if ( ret < 0 ) {
 		board->func->dma_shutdown( board, NI_DAQ_AI_SUBSYSTEM );
+		up( &board->use_mutex );
 		return ret;
 	}
 
 	*offp += count;
 
-	PDEBUG( "Returning count = %ld\n", ( long ) count );
+	up( &board->use_mutex );
 
+	PDEBUG( "Returning count = %ld\n", ( long ) count );
 	return count;
 }
 
@@ -322,7 +362,7 @@ static ssize_t ni_daq_read( struct file * filep,
  * Not implemented yet (to be used with the AO subsystem)
  *--------------------------------------------------------*/
 
-static ssize_t ni_daq_write( struct file * filep,
+static ssize_t ni_daq_write( struct file * file_p,
 			     const char *  buff,
 			     size_t        count,
 			     loff_t *      offp )
@@ -335,21 +375,38 @@ static ssize_t ni_daq_write( struct file * filep,
  * Function for handling of ioctl() calls for one of the boards
  *--------------------------------------------------------------*/
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 static int ni_daq_ioctl( struct inode * inode_p,
 			 struct file *  file_p,
 			 unsigned int   cmd,
 			 unsigned long  arg )
+#else
+static long ni_daq_ioctl( struct file *  file_p,
+			  unsigned int   cmd,
+			  unsigned long  arg )
+#endif
 {
 	int minor;
+	Board *board;
+	int ret;
 
 
-	file_p = file_p;
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+	inode_p = inode_p;
+#endif
 
-	minor = MINOR( inode_p->i_rdev );
+	minor = MINOR( file_p->f_dentry->d_inode->i_rdev );
 
 	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );
 		return -ENODEV;
+	}
+
+	board = boards + minor;
+
+	if ( ! board->in_use ) {
+		PDEBUG( "Board %d not open\n", minor );
+		return -EBADF;
 	}
 
 	if ( _IOC_TYPE( cmd ) != NI_DAQ_MAGIC_IOC || 
@@ -359,32 +416,45 @@ static int ni_daq_ioctl( struct inode * inode_p,
 		return -EINVAL;
 	}
 
+	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board->use_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board->use_mutex ) )
+		return -ERESTARTSYS;
+
 	switch ( cmd ) {
 		case NI_DAQ_IOC_MSC :
-			return MSC_ioctl_handler( boards + minor,
-						  ( NI_DAQ_MSC_ARG * ) arg );
+			ret = MSC_ioctl_handler( board,
+						 ( NI_DAQ_MSC_ARG * ) arg );
+			break;
 
 		case NI_DAQ_IOC_AI :
-			return AI_ioctl_handler( boards + minor,
-						 ( NI_DAQ_AI_ARG * ) arg );
+			ret = AI_ioctl_handler( board,
+						( NI_DAQ_AI_ARG * ) arg );
+			break;
 
 		case NI_DAQ_IOC_AO :
-			return AO_ioctl_handler( boards + minor,
-						 ( NI_DAQ_AO_ARG * ) arg );
+			ret = AO_ioctl_handler( board,
+						( NI_DAQ_AO_ARG * ) arg );
+			break;
 
 		case NI_DAQ_IOC_GPCT :
-			return GPCT_ioctl_handler( boards + minor,
-						   ( NI_DAQ_GPCT_ARG * ) arg );
+			ret = GPCT_ioctl_handler( board,
+						  ( NI_DAQ_GPCT_ARG * ) arg );
+			break;
 
 		case NI_DAQ_IOC_DIO :
-			return DIO_ioctl_handler( boards + minor,
+			ret = DIO_ioctl_handler( board,
 						  ( NI_DAQ_DIO_ARG * ) arg );
+			break;
 
+		default :
+			PDEBUG( "Invalid ioctl() call %d\n", cmd );
+			ret = -EINVAL;
 	}
 
-	/* We never should end up here... */
-
-	return -EINVAL;
+	up( &board->use_mutex );
+	return ret;
 }
 
 

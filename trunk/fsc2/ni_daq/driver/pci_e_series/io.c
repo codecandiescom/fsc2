@@ -27,6 +27,8 @@
 #include "ni_daq_board.h"
 #include "board.h"
 
+
+
 #if defined NI_DAQ_DEBUG
 static char *DAQ_reg_names[ ] = { "Window_Address",
 				  "Window_Data_Write",
@@ -125,15 +127,15 @@ static char *DAQ_reg_names[ ] = { "Window_Address",
  * and writing to the window data register.
  *------------------------------------------------------------------*/
 
-#if defined NI_DAQ_DEBUG
+#if ! defined NI_DAQ_DEBUG
+inline void pci_stc_writew( Board * board,
+			    u16     offset,
+			    u16     data )
+#else
 inline void pci_stc_writew( const char * fn,
 			    Board *      board,
 			    u16          offset,
 			    u16          data )
-#else
-inline void pci_stc_writew( Board * board,
-			    u16     offset,
-			    u16     data )
 #endif
 {
 #if defined NI_DAQ_DEBUG
@@ -153,11 +155,11 @@ inline void pci_stc_writew( Board * board,
 
 	if ( offset >= STC_Interrupt_A_Ack &&
 	     offset <= STC_Gi_Command( 1 ) )
-		writew( data, board->regs->Window_Address + offset );
+		iowrite16( data, board->regs->Window_Address + offset );
 	else {
 		pci_start_critical_section( board );
-		writew( offset, board->regs->Window_Address );
-		writew( data, board->regs->Window_Data );
+		iowrite16( offset, board->regs->Window_Address );
+		iowrite16( data, board->regs->Window_Data );
 		pci_end_critical_section( board );
 	}
 
@@ -196,10 +198,10 @@ inline void pci_stc_writel( Board * board,
 #endif
 
 	pci_start_critical_section( board );
-	writew( offset, board->regs->Window_Address );
-	writew( ( u16 ) ( data >> 16 ), board->regs->Window_Data );
-	writew( offset + 1, board->regs->Window_Address );
-	writew( ( u16 ) ( data & 0xFFFF ), board->regs->Window_Data );
+	iowrite16( offset, board->regs->Window_Address );
+	iowrite16( ( u16 ) ( data >> 16 ), board->regs->Window_Data );
+	iowrite16( offset + 1, board->regs->Window_Address );
+	iowrite16( ( u16 ) ( data & 0xFFFF ), board->regs->Window_Data );
 	pci_end_critical_section( board );
 
 	/* Keep a private copy of what we've just written to the register */
@@ -233,11 +235,11 @@ inline u16 pci_stc_readw( Board * board,
 	   do a windowed read operation. */
 
 	if ( offset >= STC_AI_Status_1 && offset <= STC_DIO_Parallel_Input )
-		data = readw( board->regs->Window_Address + offset );
+		data = ioread16( board->regs->Window_Address + offset );
 	else {
 		pci_start_critical_section( board );
-		writew( offset, board->regs->Window_Address );
-		data = readw( board->regs->Window_Data );
+		iowrite16( offset, board->regs->Window_Address );
+		data = ioread16( board->regs->Window_Data );
 		pci_end_critical_section( board );
 	}
 
@@ -266,10 +268,10 @@ inline u32 pci_stc_readl( Board * board,
 #endif
 
 	pci_start_critical_section( board );
-	writew( offset, board->regs->Window_Address );
-	data = ( u32 ) readw( board->regs->Window_Data ) << 16;
-	writew( offset + 1, board->regs->Window_Address );
-	data |= ( u32 ) ( readw( board->regs->Window_Data ) & 0xFFFF );
+	iowrite16( offset, board->regs->Window_Address );
+	data = ( u32 ) ioread16( board->regs->Window_Data ) << 16;
+	iowrite16( offset + 1, board->regs->Window_Address );
+	data |= ( u32 ) ( ioread16( board->regs->Window_Data ) & 0xFFFF );
 	pci_end_critical_section( board );
 
 	return data;

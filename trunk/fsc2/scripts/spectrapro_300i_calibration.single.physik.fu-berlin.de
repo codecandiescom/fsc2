@@ -14,9 +14,12 @@
 /* non-volatile memory of the monochromator.                             */
 /*                                                                       */
 /* A complete calibration is done in several steps:                      */
+/*                                                                       */
 /* 1. Select the grating for which the calibration is to be done.        */
+/*                                                                       */
 /* 2. Select the type of calibration, either zero offset and grating     */
 /*    adjust (which always must be calibrated first!) or dispersion.     */
+/*                                                                       */
 /* 3. If zero offset and grating adjust have been selected the  mono-    */
 /*    chromator is set to 0 nm. If the 0th order line is not exactly at  */
 /*    center of the CCD chip click on the button labeled "Calibrate      */
@@ -24,6 +27,7 @@
 /*    optimum setting for the offset. Redo the procedure if the 0th      */
 /*    order does not end up at the center of the chip, otherwise click   */
 /*    on continue.                                                       */
+/*                                                                       */
 /* 4. In the input field labeled "Reference wavelength" enter the wave-  */
 /*    length of a well-known, strong single line in the spectrum. The    */
 /*    monochromators wavelength will now be set to this wavelength. In   */
@@ -34,22 +38,26 @@
 /*    above procedure. The line should now be shifted to the center of   */
 /*    the CCD chip. If the new position isn't correct yet repeat the     */
 /*    above procedure. When satisfied press the "Done" button.           */
-/* 4. If dispersion calibration is to be done select a center wave-      */
-/*    lengths at which well-known, strong line (the "reference wave-     */
-/*    lengt") his once at the left side of the display and once at the   */
+/*                                                                       */
+/* 5. If dispersion calibration is to be done select a center wave-      */
+/*    lengths at which a well-known, strong line (the "reference wave-   */
+/*    lengt") is once at the left side of the display and once at the    */
 /*    right side. Repeat this for at least 2 calibration lines (to get a */
 /*    minimum of 4 data sets). Each time measure the position of the     */
 /*    line. The data for center wavelength, reference line wavelength,   */
-/*    line position and diffraction order (shown in the main windows     */
+/*    line position and diffraction order (all shown in the main windows */
 /*    lower browser after the "Add data set" button has been pressed)    */
 /*    are used to calculate the calibration parameters. The calculated   */
 /*    parameters are displayed when at least 4 data sets have been       */
 /*    entered.                                                           */
-/* 5. Repeat the above procedure until the calibrations for all gratings */
+/*                                                                       */
+/* 6. Repeat the above procedure until the calibrations for all gratings */
 /*    is done.                                                           */
-/* 6. When the script gets stopped by clicking on the "Stop" select a    */
+/*                                                                       */
+/* 7. When the script gets stopped by clicking on the "Stop" select a    */
 /*    file for writing out the calibration parameter.  The default file  */
 /*    extension is ".calib".                                             */
+/*                                                                       */
 /*                                                                       */
 /* $Id$ */
 /*                                                                       */

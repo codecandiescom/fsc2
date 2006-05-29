@@ -58,8 +58,8 @@ void pci_mite_init( Board * board )
 	   logical DMA channel) */
 
 	for ( i = 0; i < board->type->num_mite_channels; i++ ) {
-		writel( CHOR_DMARESET | CHOR_FRESET, mite_CHOR( i ) );
-		writel( 0, mite_CHCR( i ) );
+		iowrite32( CHOR_DMARESET | CHOR_FRESET, mite_CHOR( i ) );
+		iowrite32( 0, mite_CHCR( i ) );
 		board->mite_chain[ i ] = NULL;
 		sys_data[ i ].num_links = 0;
 		sys_data[ i ].transfered = 0;
@@ -70,11 +70,11 @@ void pci_mite_init( Board * board )
 	   channel D for GPCT1. */
 
 	if ( board->type->ao_num_channels > 0 )
-		writeb( Output_B | Input_A, board->regs->AI_AO_Select );
+		iowrite8( Output_B | Input_A, board->regs->AI_AO_Select );
 	else
-		writeb( Input_A, board->regs->AI_AO_Select );
+		iowrite8( Input_A, board->regs->AI_AO_Select );
 
-	writeb( GPCT1_D | GPCT0_C, board->regs->G0_G1_Select );
+	iowrite8( GPCT1_D | GPCT0_C, board->regs->G0_G1_Select );
 }
 
 
@@ -91,8 +91,8 @@ void pci_mite_close( Board * board )
 	for ( i = 0; i < board->type->num_mite_channels; i++ )
 		pci_dma_shutdown( board, i );
 
-	writeb( 0, board->regs->AI_AO_Select );
-	writeb( 0, board->regs->G0_G1_Select );
+	iowrite8( 0, board->regs->AI_AO_Select );
+	iowrite8( 0, board->regs->G0_G1_Select );
 }
 
 
@@ -449,9 +449,9 @@ size_t pci_dma_get_available( Board *          board,
 	   when doing that the compiler rearranged the code to read the FCR
 	   first and the DAR only afterwards. */
 
-	u32 avail = le32_to_cpu( readl( mite_DAR( sys ) ) );
+	u32 avail = le32_to_cpu( ioread32( mite_DAR( sys ) ) );
 
-	avail -= ( le32_to_cpu( readl( mite_FCR( sys ) ) ) & 0x000000FF )
+	avail -= ( le32_to_cpu( ioread32( mite_FCR( sys ) ) ) & 0x000000FF )
 	         + sys_data[ sys ].transfered;
 
 	/* Only tell about AI data for completed scans */
@@ -536,29 +536,29 @@ int pci_dma_setup( Board *          board,
 	if ( sys != NI_DAQ_AO_SUBSYSTEM )
 		chcr |= CHCR_DEV_TO_MEM;
 
-	writel( cpu_to_le32( chcr ), mite_CHCR( sys ) );
+	iowrite32( cpu_to_le32( chcr ), mite_CHCR( sys ) );
 
 	board->mite_irq_enabled[ sys ] = 1;
 
 	/* 16 bits to memory */
 
-	writel( cpu_to_le32( CR_RL64 | CR_ASEQxP1 | CR_PSIZEHALF ),
-		mite_MCR( sys ) );
+	iowrite32( cpu_to_le32( CR_RL64 | CR_ASEQxP1 | CR_PSIZEHALF ),
+		   mite_MCR( sys ) );
 
 	/* 16 bits from device */
 
 	dcr = CR_RL64 |  CR_ASEQx( 1 ) | CR_PSIZEHALF |
 	      CR_PORTIO | CR_AMDEVICE | CR_REQS( sys );
-	writel( cpu_to_le32( dcr ), mite_DCR( sys ) );
+	iowrite32( cpu_to_le32( dcr ), mite_DCR( sys ) );
     
 	/* Reset the DAR */
 
-	writel( 0, mite_DAR( sys ) );
+	iowrite32( 0, mite_DAR( sys ) );
     
 	/* The link is 32 bits wide */
 
-	writel( cpu_to_le32( CR_RL64 | CR_ASEQUP | CR_PSIZEWORD ),
-		mite_LKCR( sys ) );
+	iowrite32( cpu_to_le32( CR_RL64 | CR_ASEQUP | CR_PSIZEWORD ),
+		   mite_LKCR( sys ) );
 
 	/* Before finally passing the pointer to the link chain to the MITE
 	   make sure all buffers are streaming mapped */
@@ -593,11 +593,11 @@ int pci_dma_setup( Board *          board,
 	/* Set start address for link chaining */
 
 	lkar = virt_to_bus( &board->mite_chain[ sys ][ 0 ].lc );
-	writel( cpu_to_le32( lkar ), mite_LKAR( sys ) );
+	iowrite32( cpu_to_le32( lkar ), mite_LKAR( sys ) );
 
 	/* Arm the MITE for DMA transfers */
 
-	writel( CHOR_START, mite_CHOR( sys ) );
+	iowrite32( CHOR_START, mite_CHOR( sys ) );
 
 	return 0;
 }
@@ -638,8 +638,8 @@ static void pci_dma_stop( Board *          board,
 
 	/* Stop the MITE */
 
-	writel( CHOR_DMARESET | CHOR_CLRDONE | CHOR_FRESET | CHOR_ABORT,
-		mite_CHOR( sys ) );
+	iowrite32( CHOR_DMARESET | CHOR_CLRDONE | CHOR_FRESET | CHOR_ABORT,
+		   mite_CHOR( sys ) );
 	board->mite_irq_enabled[ sys ] = 0;
 }
 
@@ -653,23 +653,23 @@ static void pci_dma_stop( Board *          board,
 #if defined NI_DAQ_DEBUG
 void pci_mite_dump( Board * board,
 		    int     channel )
-{	PDEBUG( "mite_CHOR  = 0x%08X\n", readl( mite_CHOR(  channel ) ) );
-	PDEBUG( "mite_CHCR  = 0x%08X\n", readl( mite_CHCR(  channel ) ) );
-	PDEBUG( "mite_TCR   = 0x%08X\n", readl( mite_TCR(   channel ) ) );
-	PDEBUG( "mite_CHSR  = 0x%08X\n", readl( mite_CHSR(  channel ) ) );
-	PDEBUG( "mite_MCR   = 0x%08X\n", readl( mite_MCR(   channel ) ) );
-	PDEBUG( "mite_MAR   = 0x%08X\n", readl( mite_MAR(   channel ) ) );
-	PDEBUG( "mite_DCR   = 0x%08X\n", readl( mite_DCR(   channel ) ) );
-	PDEBUG( "mite_DAR   = 0x%08X\n", readl( mite_DAR(   channel ) ) );
-	PDEBUG( "mite_LKCR  = 0x%08X\n", readl( mite_LKCR(  channel ) ) );
-	PDEBUG( "mite_LKAR  = 0x%08X\n", readl( mite_LKAR(  channel ) ) );
-	PDEBUG( "mite_LLKAR = 0x%08X\n", readl( mite_LLKAR( channel ) ) );
-	PDEBUG( "mite_BAR   = 0x%08X\n", readl( mite_BAR(   channel ) ) );
-	PDEBUG( "mite_BCR   = 0x%08X\n", readl( mite_BCR(   channel ) ) );
-	PDEBUG( "mite_SAR   = 0x%08X\n", readl( mite_SAR(   channel ) ) );
-	PDEBUG( "mite_WSCR  = 0x%08X\n", readl( mite_WSCR(  channel ) ) );
-	PDEBUG( "mite_WSER  = 0x%08X\n", readl( mite_WSER(  channel ) ) );
-	PDEBUG( "mite_FCR   = 0x%08X\n", readl( mite_FCR(   channel ) ) );
+{	PDEBUG( "mite_CHOR  = 0x%08X\n", ioread32( mite_CHOR(  channel ) ) );
+	PDEBUG( "mite_CHCR  = 0x%08X\n", ioread32( mite_CHCR(  channel ) ) );
+	PDEBUG( "mite_TCR   = 0x%08X\n", ioread32( mite_TCR(   channel ) ) );
+	PDEBUG( "mite_CHSR  = 0x%08X\n", ioread32( mite_CHSR(  channel ) ) );
+	PDEBUG( "mite_MCR   = 0x%08X\n", ioread32( mite_MCR(   channel ) ) );
+	PDEBUG( "mite_MAR   = 0x%08X\n", ioread32( mite_MAR(   channel ) ) );
+	PDEBUG( "mite_DCR   = 0x%08X\n", ioread32( mite_DCR(   channel ) ) );
+	PDEBUG( "mite_DAR   = 0x%08X\n", ioread32( mite_DAR(   channel ) ) );
+	PDEBUG( "mite_LKCR  = 0x%08X\n", ioread32( mite_LKCR(  channel ) ) );
+	PDEBUG( "mite_LKAR  = 0x%08X\n", ioread32( mite_LKAR(  channel ) ) );
+	PDEBUG( "mite_LLKAR = 0x%08X\n", ioread32( mite_LLKAR( channel ) ) );
+	PDEBUG( "mite_BAR   = 0x%08X\n", ioread32( mite_BAR(   channel ) ) );
+	PDEBUG( "mite_BCR   = 0x%08X\n", ioread32( mite_BCR(   channel ) ) );
+	PDEBUG( "mite_SAR   = 0x%08X\n", ioread32( mite_SAR(   channel ) ) );
+	PDEBUG( "mite_WSCR  = 0x%08X\n", ioread32( mite_WSCR(  channel ) ) );
+	PDEBUG( "mite_WSER  = 0x%08X\n", ioread32( mite_WSER(  channel ) ) );
+	PDEBUG( "mite_FCR   = 0x%08X\n", ioread32( mite_FCR(   channel ) ) );
 }
 #endif
 

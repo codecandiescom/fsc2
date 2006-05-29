@@ -20,32 +20,22 @@
 # Boston, MA 02111-1307, USA.
 #
 
+
 # List of all scripts for the current machine (i.e. all scripts with
 # an extension equal to the machines FQDN)
 
 scripts = $(wildcard *.$(machine_name))
 
+
 # Install these scripts in the bindir (but without the FQDN extension)
-# Some care has to be taken for the case that there are no scripts...
 
 install:
-	if [ -n "$(scripts)" ]; then  \
-		$(MAKE) install_it;       \
-	fi
-
-install_it:
-	for file in $(scripts); do                           \
-		install -m 755 -o $(OWNER) -g $(GROUP)           \
-			$$file $(bindir)/$${file%.$(machine_name)};  \
+	@for file in $(scripts); do                                     \
+		install -m 755 $$file $(bindir)/$${file%.$(machine_name)};  \
 	done
 
 
 uninstall:
-	if [ -n "$(scripts)" ]; then  \
-		$(MAKE) uninstall_it;     \
-	fi
-
-uninstall_it:
-	for file in $(scripts); do                                  \
+	@for file in $(scripts); do                                 \
 		-$(RM) $(RMFLAGS) $(bindir)/$${file%.$(machine_name)};  \
 	done

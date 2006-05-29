@@ -10,14 +10,10 @@ limited to 4. But by changing 'ME6X00_MAX_BOARDS' in 'me6x00_drv.h'
 this can easily be changed.
 
 
-A process that opens the device file for a board gets granted
-exclusive access to the board until it closes the device file.
-
-
-There are only three operations that can be used with the driver:
-Beside doing an open() and close()/release() on a board all
-dealings with a board are done vio ioctl() calls. The following
-ioctl() requests are currently implemented:
+There are only three operations that can be used with the driver: beside
+open() and close() calls for a board all dealings with a board are done
+vio ioctl() calls. The following ioctl() requests are currently
+implemented:
 
     ME6X00_SET_MODE
     ME6X00_START_STOP_CONV
@@ -31,6 +27,22 @@ ioctl() requests are currently implemented:
     ME6X00_RESET_BOARD
     ME6X00_BOARD_INFO
     ME6X00_KEEP_VOLTAGE
+
+
+During the open() call the O_NONBLOCK or O_NODELAY flag can be set. If it
+is set all calls (including open() and close()) can return imediately with
+an error code of EAGAIN if the execution of the call would block. Moreover,
+the calls also might fail, returning EINTR if a signal for the calling was
+received before the call could do anything reasonable.
+
+Please note: the device file for a board can only be opened once if another
+process already has that device file the open() call will fail, returning
+EBUSY. I.e. the process that successfully opened the boards device file
+has exclusive access to the board.
+
+Please also note: while the driver is executing an ioctl() call further
+ioctl() calls (e.g. from another thread) will block until the first call
+has been finished.
 
 
 ===================================================================

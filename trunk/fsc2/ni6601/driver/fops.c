@@ -35,70 +35,13 @@ extern int board_count;                      /* defined in ni6601_drv.c */
  * Function gets exectuted when the device file for a board gets opened
  *----------------------------------------------------------------------*/
 
-int ni6601_open( struct inode *inode_p, struct file *file_p )
+int ni6601_open( struct inode * inode_p,
+		 struct file *  filep )
 {
 	int minor;
 	Board *board;
 	int i;
 
-
-	file_p = file_p;
-
-	if ( ( minor = MINOR( inode_p->i_rdev ) ) >= board_count ) {
-		PDEBUG( "Board %d does not exist\n", minor );
-		return -ENODEV;
-	}
-
-	board = boards + minor;
-
-	spin_lock( &board->spinlock );
-
-	if ( board->in_use &&
-	     board->owner != current->uid &&
-	     board->owner != current->euid &&
-	     ! capable( CAP_DAC_OVERRIDE ) ) {
-		PDEBUG( "Board already in use by another user\n" );
-		spin_unlock( &board->spinlock );
-		return -EBUSY;
-	}
-
-	if ( ! board->in_use ) {
-		board->in_use = 1;
-		board->owner = current->uid;
-	}
-
-	/* Globally enable interrupts (without this they get raised internally
-	   in the timer chip only and don't make through to the CPU) */
-
-	writel( GLOBAL_IRQ_ENABLE, board->regs.global_irq_control );
-
-	/* Clean out the autoincrement registers */
-
-	for ( i = 0; i < 4; i++ )
-		writew( 0, board->regs.autoincrement[ i ] );
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
-	MOD_INC_USE_COUNT;
-#endif
-
-	spin_unlock( &board->spinlock );
-
-	return 0;
-}
-
-
-/*---------------------------------------------------------------------*
- * Function gets executed when the device file for a board gets closed
- *---------------------------------------------------------------------*/
-
-int ni6601_release( struct inode *inode_p, struct file *file_p )
-{
-	int minor;
-	Board *board;
-	int i;
-
-
-	file_p = file_p;
 
 	minor = MINOR( inode_p->i_rdev );
 
@@ -109,14 +52,91 @@ int ni6601_release( struct inode *inode_p, struct file *file_p )
 
 	board = boards + minor;
 
+	/* All the follwing code can be only be accessed from a single thread
+	   at a time. For callers that want to open the device not prepared
+	   to wait we need to work with down_trylock(). For others we call
+	   down_interruptible() in order to be able to react to signals (the
+	   return value ERESTARTSYS is a "magic" value saying that it's ok to
+	   restart the system call automagically after the signal has been
+	   handled and gets converted to EINTR if that's not possible).
+	   Please note that the mutex is also used during the close() call. */
+
+	if ( filep->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board->open_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board->open_mutex ) )
+		return -ERESTARTSYS;
+
+	if ( board->in_use ) {
+		up( &board->open_mutex );
+		PDEBUG( "Board already in use by another process/thread\n" );
+		return -EBUSY;
+	}
+
+	/* Globally enable interrupts (without this they get raised internally
+	   in the timer chip only and don't make it through to the CPU) */
+
+	iowrite32( GLOBAL_IRQ_ENABLE, board->regs.global_irq_control );
+
+	/* Clean out the autoincrement registers */
+
+	for ( i = 0; i < 4; i++ )
+		iowrite16( 0, board->regs.autoincrement[ i ] );
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
+	MOD_INC_USE_COUNT;
+#endif
+
+	board->in_use = 1;
+	up( &board->open_mutex );
+
+	return 0;
+}
+
+
+/*---------------------------------------------------------------------*
+ * Function gets executed when the device file for a board gets closed
+ *---------------------------------------------------------------------*/
+
+int ni6601_release( struct inode * inode_p,
+		    struct file * filep )
+{
+	int minor;
+	Board *board;
+	int i;
+
+
+	minor = MINOR( inode_p->i_rdev );
+
+	if ( minor >= board_count ) {
+		PDEBUG( "Board %d does not exist\n", minor );
+		return -ENODEV;
+	}
+
+	board = boards + minor;
+
+	if ( filep->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board->open_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board->open_mutex ) )
+		return -ERESTARTSYS;
+
+	if ( ! board->in_use ) {
+		up( &board->open_mutex );
+		PDEBUG( "Board %d not open\n", minor );
+		return -EBADF;
+	}
+
 	/* Disable interrupts, reset and disarm all counters and shutdown
 	   DMA if necessary, etc. */
 
-	writew( G1_RESET | G0_RESET, board->regs.joint_reset[ 0 ] );
-	writew( G1_RESET | G0_RESET, board->regs.joint_reset[ 2 ] );
-	writel( 0, board->regs.global_irq_control );
+	iowrite16( G1_RESET | G0_RESET, board->regs.joint_reset[ 0 ] );
+	iowrite16( G1_RESET | G0_RESET, board->regs.joint_reset[ 2 ] );
+	iowrite32( 0, board->regs.global_irq_control );
+
 	for ( i = NI6601_COUNTER_0; i <= NI6601_COUNTER_3; i++ )
 		ni6601_tc_irq_disable( board, i );
+
 	ni6601_dma_irq_disable( board );
 
 	if ( board->buf ) {
@@ -125,18 +145,19 @@ int ni6601_release( struct inode *inode_p, struct file *file_p )
 		board->buf_counter = -1;
 	}
 
-	writew( 0, board->regs.dio_control );
+	iowrite16( 0, board->regs.dio_control );
 
 	for ( i = 0; i < 10; i++ )
-		writel( 0, board->regs.io_config[ i ] );
+		iowrite32( 0, board->regs.io_config[ i ] );
 		
-	writel( SOFT_RESET, board->regs.reset_control );
-
-	board->in_use = 0;
+	iowrite32( SOFT_RESET, board->regs.reset_control );
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_DEC_USE_COUNT;
 #endif
+
+	board->in_use = 0;
+	up( &board->open_mutex );
 
 	return 0;
 }
@@ -146,15 +167,27 @@ int ni6601_release( struct inode *inode_p, struct file *file_p )
  * Function for handling of ioctl() calls for one of the boards
  *--------------------------------------------------------------*/
 
-int ni6601_ioctl( struct inode *inode_p, struct file *file_p,
-		  unsigned int cmd, unsigned long arg )
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+int ni6601_ioctl( struct inode * inode_p,
+		  struct file *  filep,
+		  unsigned int   cmd,
+		  unsigned long  arg )
+#else
+long ni6601_ioctl( struct file *  filep,
+		   unsigned int   cmd,
+		   unsigned long  arg )
+#endif
 {
 	int minor;
+	Board *board;
+	int ret;
 
 
-	file_p = file_p;
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+	inode_p = inode_p;
+#endif
 
-	minor = MINOR( inode_p->i_rdev );
+	minor = MINOR( filep->f_dentry->d_inode->i_rdev );
 
 	if ( minor >= board_count ) {
 		PDEBUG( "Board %d does not exist\n", minor );
@@ -168,48 +201,76 @@ int ni6601_ioctl( struct inode *inode_p, struct file *file_p,
 		return -EINVAL;
 	}
 
+	board = boards + minor;
+
+	if ( filep->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board->ioctl_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board->ioctl_mutex ) )
+		return -ERESTARTSYS;
+
+	if ( ! board->in_use ) {
+		up( &board->open_mutex );
+		PDEBUG( "Board %d not open\n", minor );
+		return -EBADF;
+	}
+
 	switch ( cmd ) {
 		case NI6601_IOC_DIO_IN :
-			return ni6601_dio_in( boards + minor,
+			ret = ni6601_dio_in( board,
 					      ( NI6601_DIO_VALUE * ) arg );
+			break;
 
 		case NI6601_IOC_DIO_OUT :
-			return ni6601_dio_out( boards + minor,
-					       ( NI6601_DIO_VALUE * ) arg );
+			ret = ni6601_dio_out( board,
+					      ( NI6601_DIO_VALUE * ) arg );
+			break;
 
 		case NI6601_IOC_COUNT :
-			return ni6601_read_count( boards + minor,
+			ret = ni6601_read_count( board,
 						( NI6601_COUNTER_VAL * ) arg );
+			break;
 
 		case NI6601_IOC_PULSER :
-			return ni6601_start_pulses( boards + minor,
-						    ( NI6601_PULSES * ) arg );
+			ret = ni6601_start_pulses( board,
+						   ( NI6601_PULSES * ) arg );
+			break;
 
 		case NI6601_IOC_COUNTER :
-			return ni6601_start_counting( boards + minor,
+			ret = ni6601_start_counting( board,
 						    ( NI6601_COUNTER * ) arg );
+			break;
 
 		case NI6601_IOC_START_BUF_COUNTER :
-			return ni6601_start_buf_counting( boards + minor,
+			ret = ni6601_start_buf_counting( board,
 					        ( NI6601_BUF_COUNTER * ) arg );
+			break;
 
 		case NI6601_IOC_STOP_BUF_COUNTER :
-			return ni6601_stop_buf_counting( boards + minor );
+			ret = ni6601_stop_buf_counting( board );
+			break;
 
 		case NI6601_IOC_GET_BUF_AVAIL :
-			return ni6601_get_buf_avail( boards + minor,
+			ret = ni6601_get_buf_avail( board,
 						  ( NI6601_BUF_AVAIL * ) arg );
+			break;
 
 		case NI6601_IOC_IS_BUSY :
-			return ni6601_is_busy( boards + minor,
-					       ( NI6601_IS_ARMED * ) arg );
+			ret = ni6601_is_busy( board,
+					      ( NI6601_IS_ARMED * ) arg );
+			break;
 
 		case NI6601_IOC_DISARM :
-			return ni6601_disarm( boards + minor,
-					      ( NI6601_DISARM * ) arg );
+			ret = ni6601_disarm( board, ( NI6601_DISARM * ) arg );
+			break;
+
+		default :
+			PDEBUG( "Invalid ioctl() call %d\n", cmd );
+			ret = -EINVAL;
 	}			
 
-	return 0;
+	up( &board->ioctl_mutex );
+	return ret;
 }
 
 
@@ -217,8 +278,8 @@ int ni6601_ioctl( struct inode *inode_p, struct file *file_p,
  * Function for dealing with poll() and select() calls for the driver
  *--------------------------------------------------------------------*/
 
-unsigned int ni6601_poll( struct file *filep,
-			  struct poll_table_struct *pt )
+unsigned int ni6601_poll( struct file *              filep,
+			  struct poll_table_struct * pt )
 {
 	int minor;
 	Board *board;
@@ -235,18 +296,37 @@ unsigned int ni6601_poll( struct file *filep,
 
 	board = boards + minor;
 
+	if ( filep->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board->ioctl_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board->ioctl_mutex ) )
+		return -ERESTARTSYS;
+
+	if ( ! board->in_use ) {
+		up( &board->open_mutex );
+		PDEBUG( "Board %d not open\n", minor );
+		return -EBADF;
+	}
+
 	/* If no acquisition is under way or a buffer overflow happened
 	   (only possible in continuous mode) return immediately - the
 	   device is "readable" */
 
-	if ( board->buf_counter < 0 || board->buf_overflow || board->too_fast )
+	if ( board->buf_counter < 0 ||
+	     board->buf_overflow    ||
+	     board->too_fast ) {
+		up( &board->ioctl_mutex );
 		return mask | POLLERR;
+	}
 
 	/* If we already returned as many points as requested in non-continuous
 	   mode return HUP */
 
-	if ( ! board->buf_continuous && board->high_ptr == board->buf_top )
+	if ( ! board->buf_continuous &&
+	     board->high_ptr == board->buf_top ) {
+		up( &board->ioctl_mutex );
 		return mask | POLLHUP;
+	}
 
 	/* If necessary wait for data to be acquired */
 
@@ -259,8 +339,12 @@ unsigned int ni6601_poll( struct file *filep,
 		board->buf_waiting = 0;
 	}
 	
-	if ( board->buf_overflow || board->too_fast )
+	if ( board->buf_overflow || board->too_fast ) {
+		up( &board->ioctl_mutex );
 		return mask | POLLERR;
+	}
+
+	up( &board->ioctl_mutex );
 
 	if ( ret != 0 )
 		return 0;
@@ -284,8 +368,10 @@ unsigned int ni6601_poll( struct file *filep,
  *    and trigger input lines are released back into the pool
  *----------------------------------------------------------------------*/
 
-ssize_t ni6601_read( struct file *filep, char *buff, size_t count,
-		     loff_t *offp )
+ssize_t ni6601_read( struct file * filep,
+		     char *        buff,
+		     size_t        count,
+		     loff_t *      offp )
 {
 	int minor;
 	Board *board;
@@ -304,19 +390,35 @@ ssize_t ni6601_read( struct file *filep, char *buff, size_t count,
 
 	board = boards + minor;
 
+	if ( filep->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board->ioctl_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board->ioctl_mutex ) )
+		return -ERESTARTSYS;
+
+	if ( ! board->in_use ) {
+		up( &board->open_mutex );
+		PDEBUG( "Board %d not open\n", minor );
+		return -EBADF;
+	}
+
 	/* Make sure the number of bytes to fetch is an integer multiple
 	   of the size of a data point */
 
 	count = ( count / sizeof *board->buf ) * sizeof *board->buf;
 
-	if ( count == 0 )
+	if ( count == 0 ) {
+		up( &board->ioctl_mutex );
 		return -EINVAL;
+	}
 
 	/* If the acquisition buffer does not exist either no acquisition
 	   was started or it's already finished */
 
-	if ( board->buf_counter < 0 || board->buf == NULL )
+	if ( board->buf_counter < 0 || board->buf == NULL ) {
+		up( &board->ioctl_mutex );
 		return 0;
+	}
 
 	/* In case the buffer wasn't large enough to store all new values
 	   (which can only happen in continuous mode) stop everything and
@@ -328,11 +430,12 @@ ssize_t ni6601_read( struct file *filep, char *buff, size_t count,
 			vfree( board->buf );
 			board->buf = NULL;
 		}
+		up( &board->ioctl_mutex );
 		return -EOVERFLOW;
 	}
 
-	/* It is also possible that data get acquired that fast that the
-	   machine can't keep up with the amount of interrupts - in that
+	/* It is also possible that data got acquired that fast that the
+	   machine couldn't keep up with the amount of interrupts - in that
 	   case return ESTRPIPE */
 	
 	if ( board->too_fast ) {
@@ -341,6 +444,7 @@ ssize_t ni6601_read( struct file *filep, char *buff, size_t count,
 			vfree( board->buf );
 			board->buf = NULL;
 		}
+		up( &board->ioctl_mutex );
 		return -ESTRPIPE;
 	}
 
@@ -356,11 +460,15 @@ ssize_t ni6601_read( struct file *filep, char *buff, size_t count,
 					   board->buf_overflow ||
 					   board->too_fast );
 			board->buf_waiting = 0;
-			if ( ret != 0 )
+			if ( ret != 0 ) {
+				up( &board->ioctl_mutex );
 				return ret;
+			}
 		}
-	} else if ( board->low_ptr == board->high_ptr )
+	} else if ( board->low_ptr == board->high_ptr ) {
+		up( &board->ioctl_mutex );
 		return -EAGAIN;
+	}
 
 	/* From now on only use the current value of the high pointer - its
 	   value may get changed from within the interrupt handler */
@@ -375,6 +483,7 @@ ssize_t ni6601_read( struct file *filep, char *buff, size_t count,
 			vfree( board->buf );
 			board->buf = NULL;
 		}
+		up( &board->ioctl_mutex );
 		return -EOVERFLOW;
 	}
 
@@ -384,6 +493,7 @@ ssize_t ni6601_read( struct file *filep, char *buff, size_t count,
 			vfree( board->buf );
 			board->buf = NULL;
 		}
+		up( &board->ioctl_mutex );
 		return -ESTRPIPE;
 	}
 
@@ -444,6 +554,8 @@ ssize_t ni6601_read( struct file *filep, char *buff, size_t count,
 	}
 
 	*offp += count;
+
+	up( &board->ioctl_mutex );
 
 	return count;
 }

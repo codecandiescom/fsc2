@@ -90,16 +90,16 @@ static u8 eeprom_read( Board * board,
 
 	/* Send the address we want to read from to the EEPROM */
 
-	writeb( EEPromCS, board->regs->Serial_Command );
+	iowrite8( EEPromCS, board->regs->Serial_Command );
 	udelay( 1 );
 
 	for ( bit = 0x8000; bit; bit >>= 1 )
 	{
 		bits = EEPromCS | ( ( bit & bitstring ) ? SerData : 0 );
-		writeb( bits, board->regs->Serial_Command );
+		iowrite8( bits, board->regs->Serial_Command );
 		udelay( 1 );
 		bits |= SerClk;
-		writeb( bits, board->regs->Serial_Command );
+		iowrite8( bits, board->regs->Serial_Command );
 		udelay( 1 );
 	}
 
@@ -109,16 +109,16 @@ static u8 eeprom_read( Board * board,
 
 	for ( bit = 0x80; bit; bit >>= 1 )
 	{
-		writeb( EEPromCS, board->regs->Serial_Command );
+		iowrite8( EEPromCS, board->regs->Serial_Command );
 		udelay( 1 );
-		writeb( EEPromCS | SerClk, board->regs->Serial_Command );
+		iowrite8( EEPromCS | SerClk, board->regs->Serial_Command );
 		udelay( 1 );
 		bitstring |=
-			  ( readb( board->regs->Status ) & PROMOUT ) ? bit : 0;
+			( ioread8( board->regs->Status ) & PROMOUT ) ? bit : 0;
 	}
 
-	writeb( 0, board->regs->Serial_Command );
-	writeb( 0, board->regs->Serial_Command );
+	iowrite8( 0, board->regs->Serial_Command );
+	iowrite8( 0, board->regs->Serial_Command );
 
 	return bitstring;
 }
@@ -183,18 +183,18 @@ static void caldac_send( Board * board,
 	for ( bit = 1 << ( num_bits - 1 ); bit; bit >>= 1 )
 	{
 		bitstring = ( ( bit & data ) ? SerData : 0 );
-		writeb( bitstring, board->regs->Serial_Command );
+		iowrite8( bitstring, board->regs->Serial_Command );
 		udelay( 1 );
 		bitstring |= SerClk;
-		writeb( bitstring, board->regs->Serial_Command );
+		iowrite8( bitstring, board->regs->Serial_Command );
 		udelay( 1 );
 	}
 
 	bitstring = 1 << ( ser_dac + SerDacLd_Shift );
-	writeb( bitstring, board->regs->Serial_Command );
+	iowrite8( bitstring, board->regs->Serial_Command );
 	udelay( 1 );
 	bitstring = 0;
-	writeb( bitstring, board->regs->Serial_Command );
+	iowrite8( bitstring, board->regs->Serial_Command );
 	udelay( 1 );
 }
 

@@ -226,6 +226,16 @@ typedef struct {
 #endif
 
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
+#define iowrite8( a, v )   writeb( a, v )
+#define iowrite16( a, v )  writew( a, v )
+#define iowrite32( a, v )  writel( a, v )
+#define ioread8( a )       readb( a )
+#define ioread16( a )      readw( a )
+#define ioread32( a )      readl( a )
+#endif
+
+
 #include "autoconf.h"
 
 
@@ -243,6 +253,7 @@ typedef struct {
 #define NI6601_SOURCE( num )   ( 39 - ( num ) * 4 )
 
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
 typedef struct {
 	unsigned char *irq_ack[ 4 ];                 /* 16-bit write-only   */
 	unsigned char *status[ 4 ];                  /* 16-bit read-only    */
@@ -278,13 +289,55 @@ typedef struct {
 	unsigned char *clock_config;                 /* 32-bit write-only   */
 	unsigned char *chip_signature;               /* 32-bit read-only    */
 } Registers;
+#else
+typedef struct {
+	void __iomem *irq_ack[ 4 ];                 /* 16-bit write-only   */
+	void __iomem *status[ 4 ];                  /* 16-bit read-only    */
+	void __iomem *joint_status[ 4 ];            /* 16-bit read-only    */
+	void __iomem *command[ 4 ];                 /* 16-bit write-only   */
+	void __iomem *hw_save[ 4 ];                 /* 32-bit read-only    */
+	void __iomem *sw_save[ 4 ];                 /* 32-bit read-only    */
+	void __iomem *mode[ 4 ];                    /* 16-bit write-only   */
+	void __iomem *joint_status_1[ 4 ];          /* 16-bit read-only    */
+	void __iomem *autoincrement[ 4 ];           /* 16-bit write-only   */
+	void __iomem *load_a[ 4 ];                  /* 32-bit write-only   */
+	void __iomem *joint_status_2[ 4 ];          /* 16-bit read-only    */
+	void __iomem *load_b[ 4 ];                  /* 32-bit write-only   */
+	void __iomem *input_select[ 4 ];            /* 16-bit write-only   */
+	void __iomem *joint_reset[ 4 ];             /* 16-bit write-only   */
+	void __iomem *irq_enable[ 4 ];              /* 16-bit write-only   */
+	void __iomem *counting_mode[ 4 ];           /* 16-bit write-only   */
+	void __iomem *second_gate[ 4 ];             /* 16-bit write-only   */
+	void __iomem *dma_config[ 4 ];              /* 16-bit write-only   */
+	void __iomem *dma_status[ 4 ];              /* 16-bit read-only    */
 
+	void __iomem *dio_parallel_in;              /* 16-bit read-only    */
+	void __iomem *dio_output;                   /* 16-bit write-only   */
+	void __iomem *dio_control;                  /* 16-bit write-only   */
+	void __iomem *dio_serial_input;             /* 16-bit read-only    */
+
+	void __iomem *io_config[ 10 ];              /* 16-bit read & write */
+
+	void __iomem *reset_control;                /* 32-bit write-only   */
+	void __iomem *global_irq_control;           /* 32-bit write-only   */
+	void __iomem *global_irq_status;            /* 32-bit read-only    */
+	void __iomem *dma_configuration;            /* 32-bit write-only   */
+	void __iomem *clock_config;                 /* 32-bit write-only   */
+	void __iomem *chip_signature;               /* 32-bit read-only    */
+} Registers;
+#endif
 
 typedef struct {
 	struct pci_dev *dev;
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
 	char *mite;
 	char *addr;
+#else
+	void __iomem *mite;
+	void __iomem *addr;
+#endif
+
 	unsigned long mite_phys;
 	unsigned long mite_len;
 	unsigned long addr_phys;
@@ -294,8 +347,8 @@ typedef struct {
 	int in_use;
 	int is_enabled;
 	int has_region;
-	uid_t owner;
-	spinlock_t spinlock;
+	struct semaphore open_mutex;
+	struct semaphore ioctl_mutex;
 
 	unsigned int irq;
 	int expect_tc_irq;
@@ -326,49 +379,104 @@ typedef struct {
 
 /* Functions from fops.c */
 
-int ni6601_open( struct inode *inode_p, struct file *file_p );
-int ni6601_release( struct inode *inode_p, struct file *file_p );
-int ni6601_ioctl( struct inode *inode_p, struct file *file_p,
-		  unsigned int cmd, unsigned long arg );
-unsigned int ni6601_poll( struct file *filep,
-			  struct poll_table_struct * pt );
-ssize_t ni6601_read( struct file *filep, char *buff, size_t count,
-		     loff_t *offp );
+int ni6601_open( struct inode * /* inode_p */,
+		 struct file *  /* filep   */ );
+
+int ni6601_release( struct inode * /* inode_p */,
+		    struct file *  /* filep   */ );
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+int ni6601_ioctl( struct inode * /* inode_p */,
+		  struct file *  /* filep   */,
+		  unsigned int   /* cmd     */,
+		  unsigned long  /* arg     */ );
+#else
+long ni6601_ioctl( struct file *  /* filep */,
+		   unsigned int   /* cmd   */,
+		   unsigned long  /* arg   */ );
+#endif
+
+unsigned int ni6601_poll( struct file *              /* filep */,
+			  struct poll_table_struct * /* pt    */);
+
+ssize_t ni6601_read( struct file * /* filep */,
+		     char *        /* buff  */,
+		     size_t        /* count */,
+		     loff_t *      /* offp  */ );
 
 
 /* Functions from ioctl.c */
 
-int ni6601_dio_in( Board *board, NI6601_DIO_VALUE *arg );
-int ni6601_dio_out( Board *board, NI6601_DIO_VALUE *arg );
-int ni6601_disarm( Board *board, NI6601_DISARM *arg );
-int ni6601_read_count( Board *board, NI6601_COUNTER_VAL *arg );
-int ni6601_start_pulses( Board *board, NI6601_PULSES *arg );
-int ni6601_start_counting( Board *board, NI6601_COUNTER *arg );
-int ni6601_start_buf_counting( Board *board, NI6601_BUF_COUNTER *arg );
-int ni6601_get_buf_avail( Board *board, NI6601_BUF_AVAIL *arg );
-int ni6601_stop_buf_counting( Board *board );
-int ni6601_is_busy( Board *board, NI6601_IS_ARMED *arg );
-void ni6601_tc_irq_enable( Board *board, int counter );
-void ni6601_tc_irq_disable( Board *board, int counter );
-void ni6601_dma_irq_enable( Board *board, int counter );
-void ni6601_dma_irq_disable( Board *board );
+int ni6601_dio_in( Board *            /* board */,
+		   NI6601_DIO_VALUE * /* arg   */ );
+
+int ni6601_dio_out( Board *            /* board */,
+		    NI6601_DIO_VALUE * /* arg   */ );
+
+int ni6601_disarm( Board *         /* board */,
+		   NI6601_DISARM * /* arg   */ );
+
+int ni6601_read_count( Board *              /* board */,
+		       NI6601_COUNTER_VAL * /* arg   */ );
+
+int ni6601_start_pulses( Board *         /* board */,
+			 NI6601_PULSES * /* arg   */);
+
+int ni6601_start_counting( Board *          /* board */,
+			   NI6601_COUNTER * /* arg   */);
+
+int ni6601_start_buf_counting( Board *              /* board */,
+			       NI6601_BUF_COUNTER * /* arg   */ );
+
+int ni6601_get_buf_avail( Board *            /* board */,
+			  NI6601_BUF_AVAIL * /* arg   */ );
+
+int ni6601_stop_buf_counting( Board * /* board */ );
+
+int ni6601_is_busy( Board *           /* board */,
+		    NI6601_IS_ARMED * /* arg   */ );
+
+void ni6601_tc_irq_enable( Board * /* board   */,
+			   int     /* counter */ );
+
+void ni6601_tc_irq_disable( Board * /* board   */,
+			    int     /* counter */ );
+
+void ni6601_dma_irq_enable( Board * /* board   */,
+			    int     /* counter */ );
+
+void ni6601_dma_irq_disable( Board * /* board  */ );
+
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-irqreturn_t ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy );
+irqreturn_t ni6601_irq_handler( int              /* irq   */,
+				void *           /* data  */,
+				struct pt_regs * /* dummy */ );
 #else
-void ni6601_irq_handler( int irq, void *data, struct pt_regs *dummy );
+void ni6601_irq_handler( int              /* irq   */,
+			 void *           /* data  */,
+			 struct pt_regs * /* dummy */ );
 #endif
 
 
 /* Functions from utils.c */
 
-void ni6601_release_resources( Board *board );
-void ni6601_register_setup( Board *board );
-void ni6601_dio_init( Board *board );
-void ni6601_enable_out( Board *board, int pfi );
-void ni6601_disable_out( Board *board, int pfi );
-int ni6601_input_gate( int gate, u16 *bits );
-int ni6601_input_source( int source, u16 *bits );
+void ni6601_release_resources( Board * /* board */ );
 
+void ni6601_register_setup( Board * /* board */ );
+
+void ni6601_dio_init( Board * /* board */ );
+
+void ni6601_enable_out( Board * /* board */,
+			int     /* pfi   */ );
+
+void ni6601_disable_out( Board * /* board */,
+			 int     /* pfi   */ );
+
+int ni6601_input_gate( int   /* gate */,
+		       u16 * /* bits */ );
+
+int ni6601_input_source( int   /* source */,
+			 u16 * /* bits   */ );
 
 
 /* Clock Config Register */

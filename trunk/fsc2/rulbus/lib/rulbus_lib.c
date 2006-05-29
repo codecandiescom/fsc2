@@ -126,8 +126,14 @@ static const char *rulbus_errlist[ ] = {
 	"Rulbus timeout",                   /* RULBUS_TIME_OUT */
 	"No clock frequency has been set for delay card",
 										/* RULBUS_NO_CLOCK_FREQ */
-	"Card does not have external trigger capabilities"
+	"Card does not have external trigger capabilities",
 										/* RULBUS_NO_EXT_TRIGGER */
+	"Signal received in function call", /* RULBUS_SIGNAL_RECEIVED */
+	"Exclusive access to device denied",
+	                                    /* RULBUS_EXCL_ACCESS_DENIED */
+	"Another process has been granted exclusive access to device",
+	                                    /* RULBUS_EXCL_ACCESS_BY_OTHER */
+	"Function call would block"         /* RULBUS_WOULD_BLOCK */
 };
 
 
@@ -239,7 +245,7 @@ static const int rulbus_num_card_handlers =
  * out about the cards in the racks.
  *--------------------------------------------------------------------*/
 
-int rulbus_open( void )
+int rulbus_open( int flags )
 {
 	const char *config_name;
 	extern FILE *rulbus_in;             /* defined in parser.y */
@@ -298,7 +304,7 @@ int rulbus_open( void )
 
 	/* Try to open the device file */
 
-	if ( ( fd = open( rulbus_dev_file, O_RDWR | O_EXCL | O_NONBLOCK) ) < 0 )
+	if ( ( fd = open( rulbus_dev_file, O_RDWR | flags) ) < 0 )
 	{
 		int stored_errno = errno;
 
@@ -306,6 +312,18 @@ int rulbus_open( void )
 
 		switch ( stored_errno )
 		{
+			case EAGAIN :
+				return rulbus_errno = RULBUS_WOULD_BLOCK;
+
+			case EINTR :
+				return rulbus_errno = RULBUS_SIGNAL_RECEIVED;
+
+			case EEXIST :
+				if ( flags & O_EXCL )
+					return rulbus_errno = RULBUS_EXCL_ACCESS_DENIED;
+				else
+					return rulbus_errno = RULBUS_EXCL_ACCESS_BY_OTHER;
+
 			case ENOMEM :
 				return rulbus_errno = RULBUS_NO_MEMORY;
 
@@ -357,6 +375,7 @@ int rulbus_open( void )
 void rulbus_close( void )
 {
 	int i;
+	int ret;
 
 
 	if ( rulbus_in_use )
@@ -373,7 +392,15 @@ void rulbus_close( void )
 			if ( rulbus_card_handler[ i ].exit )
 				rulbus_card_handler[ i ].exit( );
 
-		close( fd );
+		/* We have to loop over the close call() on the device file in case
+		   it gets aborted because another process is just in the process
+		   of closing it and the device file was opened with the O_NONBLOCK
+		   or the O_NODELAY flag or a signal was received that interrupted
+		   the call. */
+
+		while ( ( ret = close( fd ) ) == EAGAIN || ret == EINTR )
+			/* empty */ ;
+
 		rulbus_cleanup( );
 		rulbus_in_use = UNSET;
 	}

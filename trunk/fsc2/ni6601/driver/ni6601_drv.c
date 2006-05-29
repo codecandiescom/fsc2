@@ -64,7 +64,11 @@ static struct cdev ch_dev;
 
 struct file_operations ni6601_file_ops = {
 	owner:		    THIS_MODULE,
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 	ioctl:              ni6601_ioctl,
+#else
+	unlocked_ioctl:     ni6601_ioctl,
+#endif
 	open:               ni6601_open,
 	poll:               ni6601_poll,
 	read:               ni6601_read,
@@ -299,9 +303,9 @@ static int ni6601_init_board( struct pci_dev *             dev,
 	/* Enable access to the 2nd memory region (width 8k) where the
 	   TIO is located through the MITE */
 
-	writel( ( board->addr_phys & 0xFFFFFF00L ) | 0x8C,
-		board->mite + 0xC4 );
-	writel( 0, board->mite + 0xF4 );
+	iowrite32( ( board->addr_phys & 0xFFFFFF00L ) | 0x8C,
+		   board->mite + 0xC4 );
+	iowrite32( 0, board->mite + 0xF4 );
 
 	/* Request the interrupt used by the board */
 
@@ -327,7 +331,13 @@ static int ni6601_init_board( struct pci_dev *             dev,
 	init_waitqueue_head( &board->tc_waitqueue );
 	init_waitqueue_head( &board->dma_waitqueue );
 
-	spin_lock_init( &board->spinlock );
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
+        sema_init( &board->open_mutex, 1 );
+        sema_init( &board->ioctl_mutex, 1 );
+#else
+	init_MUTEX( &board->open_mutex );
+	init_MUTEX( &board->ioctl_mutex );
+#endif
 
 	/* Get addresses of all registers and reset the board */
 
@@ -348,7 +358,8 @@ static int ni6601_init_board( struct pci_dev *             dev,
 
 #else  /* version for 2.4 kernels */
 
-static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
+static int __init ni6601_init_board( struct pci_dev * dev,
+				     Board *          board )
 {
 	int i;
 
@@ -405,9 +416,9 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 	/* Enable access to the 2nd memory region (width 8k) where the
 	   TIO is located through the MITE */
 
-	writel( ( board->addr_phys & 0xFFFFFF00L ) | 0x8C,
-		board->mite + 0xC4 );
-	writel( 0, board->mite + 0xF4 );
+	iowrite32( ( board->addr_phys & 0xFFFFFF00L ) | 0x8C,
+		   board->mite + 0xC4 );
+	iowrite32( 0, board->mite + 0xF4 );
 
 	/* Request the interrupt used by the board */
 
@@ -433,7 +444,7 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
 	init_waitqueue_head( &board->tc_waitqueue );
 	init_waitqueue_head( &board->dma_waitqueue );
 
-	spin_lock_init( &board->spinlock );
+        sema_init( &board->open_mutex, 1 );
 
 	/* Get addresses of all registers and reset the board */
 
@@ -456,7 +467,7 @@ static int __init ni6601_init_board( struct pci_dev *dev, Board *board )
  *-----------------------------------------------------------------------*/
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-static void ni6601_release_board( struct pci_dev *dev )
+static void ni6601_release_board( struct pci_dev * dev )
 {
 	int i;
 

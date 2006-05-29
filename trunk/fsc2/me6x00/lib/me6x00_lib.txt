@@ -111,11 +111,15 @@ use ME6X00_DAC01 etc.).
 There is no need to "open" a board before using it - the first call
 to one of the functions will automatically open the board and make it
 exclusively accessable by the process that opened the board this way.
+Please note that if another process already opened the board the
+call of the library function that led to the call of open() will
+return ME6X00_ERR_BSY.
 
 
 Processes that get started by a call to the exec-family of functions
-won't be able to access the board, i.e. the close-on-exec flag is
-set for the file handle used for accessing the board.
+won't be able to access the board, i.e. they won't inherit the file
+descriptor for the board because the close-on-exec flag is set for that
+file handle.
 
 
 ======================================================================

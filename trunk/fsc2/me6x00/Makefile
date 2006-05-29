@@ -39,9 +39,14 @@ prefix  = $(shell if [ -e driver/autoconf.h ]; then           \
 export
 
 
+.SUFFIXES:
+.PHONY: all driver lib install cleanup clean
+
+
 all:
 	$(MAKE) driver
 	$(MAKE) lib
+
 
 driver:
 	@if [ ! -e driver/autoconf.h ]; then                        \
@@ -53,8 +58,10 @@ driver:
 	fi
 	$(MAKE) -C driver
 
+
 lib:
 	$(MAKE) -C lib
+
 
 install:
 	$(MAKE) -C driver install
@@ -65,6 +72,7 @@ cleanup:
 	$(MAKE) -C driver cleanup
 	$(MAKE) -C lib cleanup
 	$(RM) $(RMFLAGS) makelog svn-* *~
+
 
 clean:
 	$(MAKE) -C driver clean

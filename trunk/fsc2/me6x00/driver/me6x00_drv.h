@@ -428,7 +428,8 @@ typedef struct {
   char irq;                         /* IRQ assigned from the PCI BIOS        */
   int board_in_use;                 /* Indicates if board is already in use  */
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 )
-  spinlock_t use_lock;              /* Guards board_in_use                   */
+  struct semaphore use_lock;        /* Guards board_in_use                   */
+  struct semaphore ioctl_mutex;     /* Guards ioctl() calls                  */
   spinlock_t irq_lock;
 #endif
   unsigned int num_dacs;            /* number of DACs on board               */

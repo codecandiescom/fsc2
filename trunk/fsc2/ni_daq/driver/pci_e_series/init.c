@@ -312,8 +312,13 @@ static int pci_e_series_init_board( struct pci_dev * dev,
 		return -1;
 	}
 
-	writel( ( board->daq_stc_phys & 0xFFFFFF00L ) | 0x80,
-		board->mite + 0xC0 );
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
+	iowrite32( ( board->daq_stc_phys & 0xFFFFFF00L ) | 0x80,
+		   board->mite + 0xC0 );
+#else
+	iowrite32( ( board->daq_stc_phys & 0xFFFFFF00L ) | 0x80,
+		   ( void __iomem * ) ( ( char * ) board->mite + 0xC0 ) );
+#endif
 
 	/* Request the interrupt used by the board */
 
@@ -326,7 +331,8 @@ static int pci_e_series_init_board( struct pci_dev * dev,
 	}
 	board->irq = dev->irq;
 
-	spin_lock_init( &board->open_spinlock );
+	init_MUTEX( &board->open_mutex );
+	init_MUTEX( &board->use_mutex );
 
 	pci_init_critical_section_handling( board );
 
@@ -398,8 +404,12 @@ static int __init pci_e_series_init_board( struct pci_dev * dev,
 		return -1;
 	}
 
-	writel( ( board->daq_stc_phys & 0xFFFFFF00L ) | 0x80,
-		board->mite + 0xC0 );
+	iowrite32( ( board->daq_stc_phys & 0xFFFFFF00L ) | 0x80,
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
+		   board->mite + 0xC0 );
+#else
+		   ( void __iomem * ) ( ( char * ) board->mite + 0xC0 ) );
+#endif
 
 	/* Request the interrupt used by the board */
 
@@ -411,7 +421,8 @@ static int __init pci_e_series_init_board( struct pci_dev * dev,
 	}
 	board->irq = dev->irq;
 
-	spin_lock_init( &board->open_spinlock );
+	sema_init( &board->open_mutex, 1 );
+	sema_init( &board->use_mutex, 1 );
 
 	pci_init_critical_section_handling( board );
 

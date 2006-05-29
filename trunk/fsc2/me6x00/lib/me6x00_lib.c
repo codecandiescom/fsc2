@@ -227,7 +227,7 @@ int me6x00_close( int board )
  * close. To make a DAC of a board keep its last voltage this
  * function has to be called anew each time the board is opened!
  * Arguments:
- *  1. number of board
+ *  1. number of the board
  *  2. number of DAC
  *  3. state: 1: keep last voltage, 0: output 0 V on close
  *-----------------------------------------------------------------*/
@@ -249,8 +249,17 @@ int me6x00_keep_voltage( int board,
 	keep.dac = dac;
 	keep.value = state ? ME6X00_KEEP : ME6X00_DONT_KEEP;
 
-	if ( ioctl( dev_info[ board ].fd, ME6X00_KEEP_VOLTAGE, &keep ) < 0 )
+	while ( 1 )
 	{
+		ret = ioctl( dev_info[ board ].fd, ME6X00_KEEP_VOLTAGE, &keep );
+
+		if ( ret == 0 )
+			break;
+		else if ( errno == EAGAIN )
+			continue;
+		else if ( errno == EINTR )
+			return me6x00_errno = ME6X00_ERR_ABS;
+
 		close( dev_info[ board ].fd );
 		dev_info[ board ].fd = -1;
 		return me6x00_errno = ME6X00_ERR_INT;
@@ -345,7 +354,7 @@ int me6x00_continuous_ex( int              board,
  * output in continuous or wrap-around mode currently in progress and
  * setting the output voltage of the DAC to 0 V.
  * Arguments:
- *  1. number of board
+ *  1. number of the board
  *  2. number of DAC
  *---------------------------------------------------------------------*/
 
@@ -370,9 +379,17 @@ int me6x00_reset( int board,
 		conv.dac = dac;
 		conv.stasto = ME6X00_STOP;
 
-		if ( ioctl( dev_info[ board ].fd, ME6X00_START_STOP_CONV, &conv )
-			 < 0 )
+		while ( 1 )
 		{
+			ret = ioctl( dev_info[ board ].fd, ME6X00_START_STOP_CONV, &conv );
+
+			if ( ret == 0 )
+				break;
+			else if ( errno == EAGAIN )
+				continue;
+			else if ( errno == EINTR )
+				return me6x00_errno = ME6X00_ERR_ABS;
+
 			close( dev_info[ board ].fd );
 			dev_info[ board ].fd = -1;
 			return me6x00_errno = ME6X00_ERR_INT;
@@ -390,7 +407,7 @@ int me6x00_reset( int board,
  * any output in continuous or wrap-around mode currently in progress
  * and  setting the output voltage of all DACs of the board to 0 V.
  * Arguments:
- *  1. number of board
+ *  1. number of the board
  *--------------------------------------------------------------------*/
 
 int me6x00_reset_all( int board )
@@ -401,8 +418,17 @@ int me6x00_reset_all( int board )
 	if ( ( ret = check_board( board ) ) < 0 )
 		return ret;
 
-	if ( ioctl( dev_info[ board ].fd, ME6X00_RESET_BOARD, NULL ) < 0 )
+	while ( 1 )
 	{
+		ret = ioctl( dev_info[ board ].fd, ME6X00_RESET_BOARD, NULL );
+
+		if ( ret == 0 )
+			break;
+		else if ( errno == EAGAIN )
+			continue;
+		else if ( errno == EINTR )
+			return me6x00_errno = ME6X00_ERR_ABS;
+
 		close( dev_info[ board ].fd );
 		dev_info[ board ].fd = -1;
 		return me6x00_errno = ME6X00_ERR_INT;
@@ -435,8 +461,17 @@ int me6x00_set_timer( int          board,
 	timer.dac     = dac;
 	timer.divisor = ticks;
 
-	if ( ioctl( dev_info[ board ].fd, ME6X00_SET_TIMER, &timer ) < 0 )
+	while ( 1 )
 	{
+		ret = ioctl( dev_info[ board ].fd, ME6X00_SET_TIMER, &timer );
+
+		if ( ret == 0 )
+			break;
+		else if ( errno == EAGAIN )
+			continue;
+		else if ( errno == EINTR )
+			return me6x00_errno = ME6X00_ERR_ABS;
+
 		close( dev_info[ board ].fd );
 		dev_info[ board ].fd = -1;
 		return me6x00_errno = ME6X00_ERR_INT;
@@ -501,8 +536,18 @@ int me6x00_single( int            board,
 		mode.dac = dac;
 		mode.mode = ME6X00_SINGLE;
 
-		if ( ioctl( dev_info[ board ].fd, ME6X00_SET_MODE, &mode ) < 0 )
+
+		while ( 1 )
 		{
+			ret = ioctl( dev_info[ board ].fd, ME6X00_SET_MODE, &mode );
+
+			if ( ret == 0 )
+				break;
+			else if ( errno == EAGAIN )
+				continue;
+			else if ( errno == EINTR )
+				return me6x00_errno = ME6X00_ERR_ABS;
+
 			close( dev_info[ board ].fd );
 			dev_info[ board ].fd = -1;
 			return me6x00_errno = ME6X00_ERR_INT;
@@ -514,11 +559,14 @@ int me6x00_single( int            board,
 
 	while ( 1 )
 	{
-		if ( ioctl( dev_info[ board ].fd, ME6X00_WRITE_SINGLE, &single ) == 0 )
-			break;
+		ret = ioctl( dev_info[ board ].fd, ME6X00_WRITE_SINGLE, &single );
 
-		if ( errno == -EINTR )
+		if ( ret == 0 )
+			break;
+		else if ( errno == EAGAIN )
 			continue;
+		else if ( errno == EINTR )
+			return me6x00_errno = ME6X00_ERR_ABS;
 
 		close( dev_info[ board ].fd );
 		dev_info[ board ].fd = -1;
@@ -549,8 +597,17 @@ int me6x00_start( int board,
 	start.dac = dac;
 	start.stasto = ME6X00_START;
 
-	if ( ioctl( dev_info[ board ].fd, ME6X00_START_STOP_CONV, &start ) < 0 )
+	while ( 1 )
 	{
+		ret = ioctl( dev_info[ board ].fd, ME6X00_START_STOP_CONV, &start );
+
+		if ( ret == 0 )
+			break;
+		else if ( errno == EAGAIN )
+			continue;
+		else if ( errno == EINTR )
+			return me6x00_errno = ME6X00_ERR_ABS;
+
 		close( dev_info[ board ].fd );
 		dev_info[ board ].fd = -1;
 		return me6x00_errno = ME6X00_ERR_INT;
@@ -654,6 +711,7 @@ static int check_board( int board )
 {
 	char name[ 20 ] = "/dev/" ME6X00_DEVICE_NAME;
 	struct stat buf;
+	int ret;
 
 
 	if ( board < 0 || board >= ME6X00_MAX_BOARDS )
@@ -680,7 +738,7 @@ static int check_board( int board )
 					return me6x00_errno = ME6X00_ERR_DFP;
 			}
 
-		/* Try to open it in non-blocking mode */
+		/* Try to open it */
 
 		dev_info[ board ].fd = open( name, O_RDWR | O_NONBLOCK );
 
@@ -700,19 +758,29 @@ static int check_board( int board )
 					return me6x00_errno = ME6X00_ERR_DFP;
 			}
 
-		/* This should never happen and we give up on the board... */
+		/* This should never happen and we give up on the board.should it
+		   happen anyway.. */
 
-		if ( ioctl( dev_info[ board ].fd, ME6X00_BOARD_INFO,
-					&dev_info[ board ].info ) < 0 )
+		while ( 1 )
 		{
+			ret = ioctl( dev_info[ board ].fd, ME6X00_BOARD_INFO,
+						 &dev_info[ board ].info );
+
+			if ( ret == 0 )
+				break;
+			else if ( errno == EAGAIN )
+				continue;
+
 			close( dev_info[ board ].fd );
-			return me6x00_errno = ME6X00_ERR_INT;
+			dev_info[ board ].fd = -1;
+			return me6x00_errno =
+						  ( errno == EINTR ) ? ME6X00_ERR_ABS : ME6X00_ERR_INT;
 		}
 
-		/* Set the FD_CLOEXEC bit for the device file - exec()'ed application
+		/* Set the FD_CLOEXEC flag for the device file - exec()'ed application
 		   should have no interest at all in the board (and even don't know
 		   that they have the file open) but could interfere seriously with
-		   normal operation of the program that did open the device file. */
+		   normal operation of programs that opened the device file. */
 
 		fcntl( dev_info[ board ].fd, F_SETFD, FD_CLOEXEC );
 

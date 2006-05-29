@@ -40,6 +40,17 @@
 #define PCI_VENDOR_ID_NATINST          0x1093
 
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
+#define iowrite8( v, a )   writeb( v, a )
+#define iowrite16( v, a )  writew( v, a )
+#define iowrite32( v, a )  writel( v, a )
+#define ioread8(  a )      readb( a )
+#define ioread16( a )      readw( a )
+#define ioread32( a )      readl( a )
+#endif
+
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
 struct Register_Addresses {
 	/* Misc Register Group */
 
@@ -81,7 +92,49 @@ struct Register_Addresses {
 	u16 *AO_Status_2;
 	u16 *DIO_Parallel_Input;
 };
+#else
+struct Register_Addresses {
+	/* Misc Register Group */
 
+	void __iomem  *Serial_Command;             /*  8 bit */
+	void __iomem  *Misc_Command;               /*  8 bit */
+	void __iomem  *Status;                     /*  8 bit */
+
+	/* Analog Input Register Group */
+
+	void __iomem *ADC_FIFO_Data_Register;      /* 16 bit */
+	void __iomem *Configuration_Memory_Low;    /* 16 bit */
+	void __iomem *Configuration_Memory_High;   /* 16 bit */
+
+	/* Analog Output Register Group */
+
+	void __iomem *AO_Configuration;            /* 16 bit */
+	void __iomem *DAC_FIFO_Data;               /* 16 bit */
+	void __iomem *DAC0_Direct_data;            /* 16 bit */
+	void __iomem *DAC1_Direct_data;            /* 16 bit */
+
+	/* DMA Control Register Group */
+
+	void __iomem  *AI_AO_Select;               /*  8 bit */
+	void __iomem  *G0_G1_Select;               /*  8 bit */
+
+	/* DAQ_STC Register Group */
+
+	void __iomem *Window_Address;              /* 16 bit */
+	void __iomem *Window_Data;		   /* 16 bit */
+	void __iomem *Interrupt_A_Acknowledge;	   /* 16 bit */
+	void __iomem *Interrupt_B_Acknowledge;	   /* 16 bit */
+	void __iomem *AI_Command_2;		   /* 16 bit */
+	void __iomem *AO_Command_2;		   /* 16 bit */
+	void __iomem *Gi_Command[ 2 ];		   /* 16 bit */
+	void __iomem *AI_Status_1;		   /* 16 bit */
+	void __iomem *AO_Status_1;		   /* 16 bit */
+	void __iomem *G_status;			   /* 16 bit */
+	void __iomem *AI_Status_2;		   /* 16 bit */
+	void __iomem *AO_Status_2;		   /* 16 bit */
+	void __iomem *DIO_Parallel_Input;          /* 16 bit */ 
+};
+#endif
 
 
 /* Serial_Command */
@@ -234,11 +287,11 @@ int pci_dma_buf_setup( Board *          /* board       */,
 		       size_t           /* data_points */,
 		       int              /* continuous  */ );
 
-int pci_dma_buf_get( Board *          /* board */,
-		     NI_DAQ_SUBSYSTEM /* sys   */,
-		     void *           /* dest  */,
-		     size_t *         /* size  */,
-		     int still_       /* used  */ );
+int pci_dma_buf_get( Board *          /* board      */,
+		     NI_DAQ_SUBSYSTEM /* sys        */,
+		     void *           /* dest       */,
+		     size_t *         /* size       */,
+		     int              /* still_used */ );
 
 size_t pci_dma_get_available( Board *          /* board */,
 			      NI_DAQ_SUBSYSTEM /* sys   */ );
