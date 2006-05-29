@@ -51,7 +51,7 @@ static int MSC_board_properties( Board *                   board,
 
 typedef struct {
 	NI_DAQ_SUBSYSTEM sub_system;
-	NI_DAQ_SUBSYSTEM state;
+	NI_DAQ_PFI_STATE state;
 } PFI_States;
 
 static PFI_States PFI_state[ 10 ];
@@ -396,7 +396,7 @@ int MSC_ioctl_handler( Board *          board,
 	NI_DAQ_MSC_ARG a;
 
 
-	if ( copy_from_user( &a, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &a, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -429,7 +429,7 @@ int MSC_ioctl_handler( Board *          board,
 			return -EINVAL;
 	}
 
-	if ( copy_to_user( arg, &a, sizeof *arg ) ) {
+	if ( copy_to_user( ( void __user * ) arg, &a, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
 		return -EACCES;
 	}
@@ -735,7 +735,7 @@ int MSC_board_properties( Board *                   board,
 	p.has_analog_trig  = board->type->has_analog_trig;
 	p.atrig_bits       = board->type->atrig_bits;
 
-	if ( copy_to_user( arg, &p, sizeof *arg ) ) {
+	if ( copy_to_user( ( void __user * ) arg, &p, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
 		return -EACCES;
 	}

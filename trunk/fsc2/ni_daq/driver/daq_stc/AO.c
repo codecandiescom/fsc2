@@ -162,7 +162,7 @@ int AO_ioctl_handler( Board *         board,
 		return -EINVAL;
 	}
 
-	if ( copy_from_user( &a, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &a, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -197,7 +197,8 @@ static int AO_channel_setup( Board *                  board,
 		return -EINVAL;
 	}
 
-	if ( copy_from_user( &a, channel_args, sizeof *channel_args ) ) {
+	if ( copy_from_user( &a, ( const void __user * ) channel_args,
+			     sizeof *channel_args ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}

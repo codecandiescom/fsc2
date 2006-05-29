@@ -37,14 +37,14 @@ static unsigned int ni_daq_poll( struct file *              /* file_p */,
 				 struct poll_table_struct * /* pt     */ );
 
 static ssize_t ni_daq_read( struct file * /* file_p */,
-			    char *        /* buff   */,
+			    char __user * /* buff   */,
 			    size_t        /* count  */,
 			    loff_t *      /* offp   */ );
 
-static ssize_t ni_daq_write( struct file * /* file_p */,
-			     const char *  /* buff   */,
-			     size_t        /* count  */,
-			     loff_t *      /* offp   */ );
+static ssize_t ni_daq_write( struct file       * /* file_p */,
+			     const char __user *  /* buff   */,
+			     size_t               /* count  */,
+			     loff_t *             /* offp   */ );
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 static int ni_daq_ioctl( struct inode * /* inode_p */,
@@ -57,19 +57,31 @@ static long ni_daq_ioctl( struct file *  /* file_p */,
 			  unsigned long  /* arg    */ );
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 struct file_operations ni_daq_file_ops = {
 	owner:		    THIS_MODULE,
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 	ioctl:              ni_daq_ioctl,
-#else
-	unlocked_ioctl:     ni_daq_ioctl,
-#endif
 	open:               ni_daq_open,
 	poll:               ni_daq_poll,
 	read:               ni_daq_read,
 	write:              ni_daq_write,
 	release:            ni_daq_release,
 };
+#else
+struct file_operations ni_daq_file_ops = {
+	.owner =	    THIS_MODULE,
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+	.ioctl =            ni_daq_ioctl,
+#else
+	.unlocked_ioctl =   ni_daq_ioctl,
+#endif
+	.open =             ni_daq_open,
+	.poll =             ni_daq_poll,
+	.read =             ni_daq_read,
+	.write =            ni_daq_write,
+	.release =          ni_daq_release,
+};
+#endif
 
 
 /*---------------------------------------------------------------------*
@@ -249,7 +261,7 @@ static unsigned int ni_daq_poll( struct file *              file_p,
  *----------------------------------------------------------------------*/
 
 static ssize_t ni_daq_read( struct file * file_p,
-			    char *        buff,
+			    char __user * buff,
 			    size_t        count,
 			    loff_t *      offp )
 {
@@ -321,7 +333,7 @@ static ssize_t ni_daq_read( struct file * file_p,
 	/* Now get as many new data as possible */
 
         ret = board->func->dma_buf_get( board, NI_DAQ_AI_SUBSYSTEM,
-					buff, &count, 0 );
+					( void __user * ) buff, &count, 0 );
 
 	/* If there are no new data and the device file was opened in non-
 	   blocking mode return -EAGAIN */
@@ -362,10 +374,10 @@ static ssize_t ni_daq_read( struct file * file_p,
  * Not implemented yet (to be used with the AO subsystem)
  *--------------------------------------------------------*/
 
-static ssize_t ni_daq_write( struct file * file_p,
-			     const char *  buff,
-			     size_t        count,
-			     loff_t *      offp )
+static ssize_t ni_daq_write( struct file *        file_p,
+			     const char __user *  buff,
+			     size_t               count,
+			     loff_t *             offp )
 {
 	return 0;
 }

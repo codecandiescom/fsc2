@@ -29,20 +29,36 @@
 
 
 #if ! defined NI_DAQ_DEBUG
-inline void pci_stc_writew( Board *board, u16 offset, u16 data );
-inline void pci_stc_writel( Board *board, u16 offset, u32 data );
+void pci_stc_writew( Board * board,
+		     u16     offset,
+		     u16     data );
+
+void pci_stc_writel( Board * board,
+		     u16     offset,
+		     u32     data );
 #else
-inline void pci_stc_writew( const char *fn, Board *board, u16 offset,
-							u16 data );
-inline void pci_stc_writel( const char *fn, Board *board, u16 offset,
-							u32 data );
+void pci_stc_writew( const char * fn,
+		     Board *      board,
+		     u16          offset,
+		     u16          data );
+
+void pci_stc_writel( const char * fn,
+		     Board *      board,
+		     u16          offset,
+		     u32          data );
 #endif
 
-inline u16 pci_stc_readw( Board *board, u16 offset );
-inline u32 pci_stc_readl( Board *board, u16 offset );
-void pci_init_critical_section_handling( Board *board );
-inline void pci_start_critical_section( Board *board );
-inline void pci_end_critical_section( Board *board );
+u16 pci_stc_readw( Board * board,
+		   u16     offset );
+
+inline u32 pci_stc_readl( Board * board,
+			  u16     offset );
+
+void pci_init_critical_section_handling( Board * board );
+
+void pci_start_critical_section( Board * board );
+
+void pci_end_critical_section( Board * board );
 
 
 #endif  /* IO_HEADER */

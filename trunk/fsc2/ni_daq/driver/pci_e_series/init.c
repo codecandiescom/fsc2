@@ -35,6 +35,30 @@ int board_count = 0;
 
 static Register_Addresses regs[ NI_DAQ_MAX_PCI_E_BOARDS ];
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+static Board_Functions func = {
+	.board_reset_all =            pci_board_reset_all,
+	.stc_writew =                 pci_stc_writew,
+	.stc_writel =                 pci_stc_writel,
+	.stc_readw =                  pci_stc_readw,
+	.stc_readl =                  pci_stc_readl,
+	.start_critical_section =     pci_start_critical_section,
+	.end_critical_section =       pci_end_critical_section,
+	.clear_configuration_memory = pci_clear_configuration_memory,
+	.clear_ADC_FIFO =             pci_clear_ADC_FIFO,
+	.clear_DAC_FIFO =             pci_clear_DAC_FIFO,
+	.configuration_high =         pci_configuration_high,
+	.configuration_low =          pci_configuration_low,
+	.ao_configuration =           pci_ao_configuration,
+	.dac_direct_data =            pci_dac_direct_data,
+	.dma_setup =                  pci_dma_setup,
+	.dma_buf_setup =              pci_dma_buf_setup,
+	.dma_buf_get =                pci_dma_buf_get,
+	.dma_get_available =          pci_dma_get_available,
+	.dma_shutdown =               pci_dma_shutdown,
+	.set_trigger_levels =         pci_set_trigger_levels
+};
+#else
 static Board_Functions func = {
 	board_reset_all:            pci_board_reset_all,
 	stc_writew:                 pci_stc_writew,
@@ -57,7 +81,7 @@ static Board_Functions func = {
 	dma_shutdown:               pci_dma_shutdown,
 	set_trigger_levels:         pci_set_trigger_levels
 };
-
+#endif
 
 extern struct file_operations ni_daq_file_ops;   /* from daq_stc/fops.c */
 
@@ -312,13 +336,8 @@ static int pci_e_series_init_board( struct pci_dev * dev,
 		return -1;
 	}
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
 	iowrite32( ( board->daq_stc_phys & 0xFFFFFF00L ) | 0x80,
 		   board->mite + 0xC0 );
-#else
-	iowrite32( ( board->daq_stc_phys & 0xFFFFFF00L ) | 0x80,
-		   ( void __iomem * ) ( ( char * ) board->mite + 0xC0 ) );
-#endif
 
 	/* Request the interrupt used by the board */
 
@@ -405,11 +424,7 @@ static int __init pci_e_series_init_board( struct pci_dev * dev,
 	}
 
 	iowrite32( ( board->daq_stc_phys & 0xFFFFFF00L ) | 0x80,
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
 		   board->mite + 0xC0 );
-#else
-		   ( void __iomem * ) ( ( char * ) board->mite + 0xC0 ) );
-#endif
 
 	/* Request the interrupt used by the board */
 

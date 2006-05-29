@@ -223,6 +223,8 @@ typedef struct {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 #include <linux/moduleparam.h>
 #include <linux/cdev.h>
+#else
+#define __user
 #endif
 
 
@@ -400,7 +402,7 @@ unsigned int ni6601_poll( struct file *              /* filep */,
 			  struct poll_table_struct * /* pt    */);
 
 ssize_t ni6601_read( struct file * /* filep */,
-		     char *        /* buff  */,
+		     char __user * /* buff  */,
 		     size_t        /* count */,
 		     loff_t *      /* offp  */ );
 

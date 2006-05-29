@@ -76,6 +76,309 @@ static struct pci_device_id pci_e_series_pci_tbl[ ] = {
 MODULE_DEVICE_TABLE( pci, pci_e_series_pci_tbl );
 
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+static Board_Properties pci_e_series_boards[ ]= {
+
+	/* PCI-MIO-16E-1 */
+
+	{
+		.id =                PCI_DEVICE_ID_PCI_MIO_16E_1,
+		.name =              "pci-mio-16e-1",
+		.ai_num_channels =   16,
+		.ai_num_bits =       12,
+		.ai_fifo_depth =     512,
+		.ai_always_dither =  0,
+		.ai_gains =          { NI_DAQ_GAIN_0_5, NI_DAQ_GAIN_1,
+				       NI_DAQ_GAIN_2, NI_DAQ_GAIN_5,
+				       NI_DAQ_GAIN_10, NI_DAQ_GAIN_20,
+				       NI_DAQ_GAIN_50, NI_DAQ_GAIN_100 },
+		.ai_speed =          800,
+		.ao_num_channels =   2,
+		.ao_num_bits =       12,
+		.ao_fifo_depth =     2048,
+		.ao_unipolar =       1,
+	        .ao_has_ext_ref =    1,
+		.has_analog_trig =   1,
+		.atrig_caldac =      mb88341,
+		.atrig_low_ch =      11,
+		.atrig_high_ch =     12,
+		.atrig_bits =        8,
+		.num_mite_channels = 4,
+		.caldac =            { mb88341 }
+	},
+
+	/* PCI-MIO-16E-4 */
+
+	{
+		.id =                PCI_DEVICE_ID_PCI_MIO_16E_4,
+		.name =              "pci-mio-16e-4",
+		.ai_num_channels =   16,
+		.ai_num_bits =       12,
+		.ai_fifo_depth =     512,
+		.ai_always_dither =  0,
+		.ai_gains =          { NI_DAQ_GAIN_0_5, NI_DAQ_GAIN_1,
+				       NI_DAQ_GAIN_2, NI_DAQ_GAIN_5,
+				       NI_DAQ_GAIN_10, NI_DAQ_GAIN_20,
+				       NI_DAQ_GAIN_50, NI_DAQ_GAIN_100 },
+		.ai_speed =          2000,
+		.ao_num_channels =   2,
+		.ao_num_bits =       12,
+		.ao_fifo_depth =     512,
+		.ao_unipolar =       1,
+	        .ao_has_ext_ref =    1,
+		.has_analog_trig =   1,
+		.atrig_caldac =      mb88341,
+		.atrig_low_ch =      11,
+		.atrig_high_ch =     12,
+		.atrig_bits =        8,
+		.num_mite_channels = 4,
+		.caldac =            { mb88341 }
+	},
+
+	/* PCI-MIO-16XE-10 */
+
+	{
+		.id =                PCI_DEVICE_ID_PCI_MIO_16XE_10,
+		.name =              "pci-mio-16xe-10",
+		.ai_num_channels =   16,
+		.ai_num_bits =       16,
+		.ai_fifo_depth =     512,
+		.ai_always_dither =  1,
+		.ai_gains =          { NI_DAQ_GAIN_1, NI_DAQ_GAIN_2,
+				       NI_DAQ_GAIN_5, NI_DAQ_GAIN_10,
+				       NI_DAQ_GAIN_20, NI_DAQ_GAIN_50,
+				       NI_DAQ_GAIN_100,
+				       NI_DAQ_GAIN_NOT_AVAIL },
+		.ai_speed =          10000,
+		.ao_num_channels =   2,
+		.ao_num_bits =       16,
+		.ao_fifo_depth =     2048,
+		.ao_unipolar =       1,
+		.ao_has_ext_ref =    0,
+		.has_analog_trig =   1,
+		.atrig_caldac =      ad8522,
+		.atrig_low_ch =      0,
+		.atrig_high_ch =     1,
+		.atrig_bits =        12,
+		.num_mite_channels = 4,
+		.caldac =            { dac8800, dac8043, ad8522 }
+	},
+
+	/* PCI-MIO-16XE-50 */
+
+	{
+		.id =                PCI_DEVICE_ID_PCI_MIO_16XE_50,
+		.name =              "pci-mio-16xe-50",
+		.ai_num_channels =   16,
+		.ai_num_bits =       16,
+		.ai_fifo_depth =     2048,
+		.ai_always_dither =  1,
+		.ai_gains =          { NI_DAQ_GAIN_1, NI_DAQ_GAIN_2,
+				       NI_DAQ_GAIN_10, NI_DAQ_GAIN_100,
+				       NI_DAQ_GAIN_NOT_AVAIL },
+		.ai_speed =          50000,
+		.ao_num_channels =   2,
+		.ao_num_bits =       12,
+		.ao_fifo_depth =     0,
+		.ao_unipolar =       0,
+		.has_analog_trig =   0,
+		.num_mite_channels = 4,
+		.caldac =            { dac8800, dac8043 }
+	},
+
+	/* PCI-6023E */
+
+	{
+		.id =                PCI_DEVICE_ID_PCI_6023E,
+		.name =              "pci-6023e",
+		.ai_num_channels =   16,
+		.ai_num_bits =       12,
+		.ai_fifo_depth =     512,
+		.ai_always_dither =  0,
+		.ai_gains =          { NI_DAQ_GAIN_0_5, NI_DAQ_GAIN_1,
+				       NI_DAQ_GAIN_10, NI_DAQ_GAIN_100,
+				       NI_DAQ_GAIN_NOT_AVAIL },
+		.ai_speed =          5000,
+		.ao_num_channels =   0,
+		.ao_num_bits =       0,
+		.ao_unipolar =       0,
+		.ao_has_ext_ref =    0,
+		.has_analog_trig =   0,
+		.num_mite_channels = 4,
+		.caldac =            { mb88341 }
+	},
+
+	/* PCI-6024E */
+
+	{
+		.id =                PCI_DEVICE_ID_PCI_6024E,
+		.name =              "pci-6024e",
+		.ai_num_channels =   16,
+		.ai_num_bits =       12,
+		.ai_fifo_depth =     512,
+		.ai_always_dither =  0,
+		.ai_gains =          { NI_DAQ_GAIN_0_5, NI_DAQ_GAIN_1,
+				       NI_DAQ_GAIN_10, NI_DAQ_GAIN_100,
+				       NI_DAQ_GAIN_NOT_AVAIL },
+		.ai_speed =          5000,
+		.ao_num_channels =   2,
+		.ao_num_bits =       12,
+		.ao_fifo_depth =     0,
+		.ao_unipolar =       0,
+		.ao_has_ext_ref =    0,
+		.has_analog_trig =   1,
+		.atrig_caldac =      mb88341,
+		.atrig_low_ch =      11,
+		.atrig_high_ch =     12,
+		.atrig_bits =        8,
+		.num_mite_channels = 4,
+		.caldac =            { mb88341 }
+	},
+
+	/* PCI-6031E */
+
+	{
+		.id =                PCI_DEVICE_ID_PCI_6031E,
+		.name =              "pci-6031e",
+		.ai_num_channels =   64,
+		.ai_num_bits =       16,
+		.ai_fifo_depth =     512,
+		.ai_always_dither =  1,
+		.ai_gains =          { NI_DAQ_GAIN_1, NI_DAQ_GAIN_2,
+				       NI_DAQ_GAIN_5, NI_DAQ_GAIN_10,
+				       NI_DAQ_GAIN_20, NI_DAQ_GAIN_50,
+				       NI_DAQ_GAIN_100,
+				       NI_DAQ_GAIN_NOT_AVAIL },
+		.ai_speed =          10000,
+		.ao_num_channels =   2,
+		.ao_num_bits =       16,
+		.ao_fifo_depth =     2048,
+		.ao_unipolar =       1,
+		.ao_has_ext_ref =    0,
+		.has_analog_trig =   1,
+		.atrig_caldac =      ad8522,
+		.atrig_low_ch =      0,
+		.atrig_high_ch =     1,
+		.atrig_bits =        12,
+		.num_mite_channels = 4,
+		.caldac =            { dac8800, dac8043, ad8522 }
+	},
+
+	/* PCI-6032E */
+
+	{
+		.id =                PCI_DEVICE_ID_PCI_6032E,
+		.name =              "pci-6032e",
+		.ai_num_channels =   16,
+		.ai_num_bits =       16,
+		.ai_fifo_depth =     512,
+		.ai_always_dither =  1,
+		.ai_gains =          { NI_DAQ_GAIN_1, NI_DAQ_GAIN_2,
+				       NI_DAQ_GAIN_5, NI_DAQ_GAIN_10,
+				       NI_DAQ_GAIN_20, NI_DAQ_GAIN_50,
+				       NI_DAQ_GAIN_100,
+				       NI_DAQ_GAIN_NOT_AVAIL },
+		.ai_speed =          10000,
+		.ao_num_channels =   0,
+		.ao_num_bits =       0,
+		.ao_fifo_depth =     0,
+		.ao_unipolar =       1,
+		.ao_has_ext_ref =    0,
+		.has_analog_trig =   1,
+		.atrig_caldac =      ad8522,
+		.atrig_low_ch =      0,
+		.atrig_high_ch =     1,
+		.atrig_bits =        12,
+		.num_mite_channels = 4,
+		.caldac =            { dac8800, dac8043, ad8522 }
+	},
+
+	/* PCI-6033E */
+
+	{
+		.id =                PCI_DEVICE_ID_PCI_6033E,
+		.name =              "pci-6033e",
+		.ai_num_channels =   64,
+		.ai_num_bits =       16,
+		.ai_fifo_depth =     512,
+		.ai_always_dither =  1,
+		.ai_gains =          { NI_DAQ_GAIN_1, NI_DAQ_GAIN_2,
+				       NI_DAQ_GAIN_5, NI_DAQ_GAIN_10,
+				       NI_DAQ_GAIN_20, NI_DAQ_GAIN_50,
+				       NI_DAQ_GAIN_100,
+				       NI_DAQ_GAIN_NOT_AVAIL },
+		.ai_speed =          10000,
+		.ao_num_channels =   0,
+		.ao_num_bits =       0,
+		.ao_fifo_depth =     0,
+		.ao_unipolar =       1,
+		.ao_has_ext_ref =    0,
+		.has_analog_trig =   1,
+		.atrig_caldac =      ad8522,
+		.atrig_low_ch =      0,
+		.atrig_high_ch =     1,
+		.atrig_bits =        12,
+		.num_mite_channels = 4,
+		.caldac =            { dac8800, dac8043, ad8522 }
+	},
+
+	/* PCI-6052E */
+
+	{
+		.id =                PCI_DEVICE_ID_PCI_6052E,
+		.name =              "pci-6052e",
+		.ai_num_channels =   16,
+		.ai_num_bits =       16,
+		.ai_fifo_depth =     512,
+		.ai_always_dither =  1,
+		.ai_gains =          { NI_DAQ_GAIN_0_5, NI_DAQ_GAIN_1,
+				       NI_DAQ_GAIN_2, NI_DAQ_GAIN_5,
+				       NI_DAQ_GAIN_10, NI_DAQ_GAIN_20,
+				       NI_DAQ_GAIN_50, NI_DAQ_GAIN_100 },
+		.ai_speed =          3000,
+		.ao_num_channels =   2,
+		.ao_num_bits =       16,
+		.ao_unipolar =       1,
+		.ao_fifo_depth =     2048,
+		.ao_has_ext_ref =    0,
+		.has_analog_trig =   1,
+		.atrig_caldac =      ad8522,
+		.atrig_low_ch =      0,
+		.atrig_high_ch =     1,
+		.atrig_bits =        12,
+		.num_mite_channels = 4,
+		.caldac =            { mb88341, ad8522 }
+	},
+
+	/* PCI-6071E */
+
+	{
+		.id =                PCI_DEVICE_ID_PCI_6071E,
+		.name =              "pci-6071e",
+		.ai_num_channels =   64,
+		.ai_num_bits =       12,
+		.ai_fifo_depth =     512,
+		.ai_always_dither =  1,
+		.ai_gains =          { NI_DAQ_GAIN_0_5, NI_DAQ_GAIN_1,
+				       NI_DAQ_GAIN_2, NI_DAQ_GAIN_5,
+				       NI_DAQ_GAIN_10, NI_DAQ_GAIN_20,
+				       NI_DAQ_GAIN_50, NI_DAQ_GAIN_100 },
+		.ai_speed =          800,
+		.ao_num_channels =   2,
+		.ao_num_bits =       12,
+		.ao_fifo_depth =     2048,
+		.ao_unipolar =       1,
+		.ao_has_ext_ref =    1,
+		.has_analog_trig =   1,
+		.atrig_caldac =      mb88341,
+		.atrig_low_ch =      11,
+		.atrig_high_ch =     12,
+		.atrig_bits =        8,
+		.num_mite_channels = 4,
+		.caldac =            { mb88341 }
+	},
+};
+#else
 static Board_Properties pci_e_series_boards[ ]= {
 
 	/* PCI-MIO-16E-1 */
@@ -373,6 +676,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		caldac:             { mb88341 }
 	},
 };
+#endif
 
 
 /*

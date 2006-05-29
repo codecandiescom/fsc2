@@ -195,7 +195,7 @@ int GPCT_ioctl_handler( Board *           board,
 	int ret = 0;
 
 
-	if ( copy_from_user( &a, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &a, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -251,7 +251,8 @@ int GPCT_ioctl_handler( Board *           board,
 			return -EINVAL;
 	}
 
-	if ( ret == 0 && copy_to_user( arg, &a, sizeof *arg ) ) {
+	if ( ret == 0 &&
+	     copy_to_user( ( void __user * ) arg, &a, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
 		return -EACCES;
 	}

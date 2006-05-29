@@ -43,7 +43,8 @@ int ni6601_dio_in( Board *           board,
 	NI6601_DIO_VALUE dio;
 
 
-	if ( copy_from_user( &dio, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &dio, ( const void __user * ) arg,
+			     sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -60,7 +61,7 @@ int ni6601_dio_in( Board *           board,
 	dio.value = ( unsigned char )
 		    ( ioread16( board->regs.dio_parallel_in ) & dio.mask );
 
-	if ( copy_to_user( arg, &dio, sizeof *arg ) ) {
+	if ( copy_to_user( ( void __user * ) arg, &dio, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
 		return -EACCES;
 	}
@@ -82,7 +83,8 @@ int ni6601_dio_out( Board *            board,
 	NI6601_DIO_VALUE dio;
 
 
-	if ( copy_from_user( &dio, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &dio, ( const void __user * ) arg,
+			     sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -112,7 +114,7 @@ int ni6601_disarm( Board *         board,
 	NI6601_DISARM d;
 
 
-	if ( copy_from_user( &d, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &d, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -145,7 +147,8 @@ int ni6601_read_count( Board *              board,
 	u32 next_val;
 
 
-	if ( copy_from_user( &cs, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &cs, ( const void __user * ) arg,
+			     sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -206,7 +209,7 @@ int ni6601_read_count( Board *              board,
 			      ioread32( board->regs.sw_save[ cs.counter ] ) ) )
 			cs.count = next_val;
 	
-	if ( copy_to_user( arg, &cs, sizeof *arg ) ) {
+	if ( copy_to_user( ( void __user * ) arg, &cs, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
 		return -EACCES;
 	}
@@ -230,7 +233,7 @@ int ni6601_start_pulses( Board *         board,
 	u16 cmd_bits = ALWAYS_DOWN;
 
 
-	if ( copy_from_user( &p, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &p, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -325,7 +328,7 @@ int ni6601_start_counting( Board *          board,
 	u16 cmd_bits = ALWAYS_UP | LOAD;
 
 
-	if ( copy_from_user( &c, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &c, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -400,7 +403,7 @@ int ni6601_start_buf_counting( Board *              board,
 	u16 cmd_bits = LOAD | ALWAYS_UP;
 
 
-	if ( copy_from_user( &c, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &c, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -544,7 +547,7 @@ int ni6601_is_busy( Board *           board,
 	NI6601_IS_ARMED a;
 
 
-	if ( copy_from_user( &a, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &a, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -554,7 +557,7 @@ int ni6601_is_busy( Board *           board,
 	a.state =  ( ioread16( board->regs.joint_status[ a.counter ] ) &
 		     Gi_ARMED( a.counter ) ) ? 1 : 0;
 	
-	if ( copy_to_user( arg, &a, sizeof *arg ) ) {
+	if ( copy_to_user( ( void __user * ) arg, &a, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
 		return -EACCES;
 	}

@@ -369,7 +369,7 @@ unsigned int ni6601_poll( struct file *              filep,
  *----------------------------------------------------------------------*/
 
 ssize_t ni6601_read( struct file * filep,
-		     char *        buff,
+		     char __user * buff,
 		     size_t        count,
 		     loff_t *      offp )
 {

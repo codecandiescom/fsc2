@@ -80,6 +80,8 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 #include <linux/moduleparam.h>
 #include <linux/cdev.h>
+#else
+#define __user
 #endif
 
 
@@ -178,7 +180,7 @@ struct Board_Functions {
 	int ( *dac_direct_data )( Board *, unsigned int, int );
 	int ( *dma_setup )( Board *, NI_DAQ_SUBSYSTEM );
 	int ( *dma_buf_setup )( Board *, NI_DAQ_SUBSYSTEM, size_t, int );
-	int ( *dma_buf_get )( Board *, NI_DAQ_SUBSYSTEM, void *,
+	int ( *dma_buf_get )( Board *, NI_DAQ_SUBSYSTEM, void __user *,
 			      size_t *, int );
 	size_t ( *dma_get_available )( Board *, NI_DAQ_SUBSYSTEM );
 	void ( *dma_buf_release )( Board *, NI_DAQ_SUBSYSTEM );

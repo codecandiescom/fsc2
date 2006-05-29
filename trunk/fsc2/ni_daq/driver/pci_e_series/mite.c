@@ -310,7 +310,7 @@ int pci_dma_buf_setup( Board *          board,
 
 int pci_dma_buf_get( Board *          board,
 		     NI_DAQ_SUBSYSTEM sys,
-		     void *           dest,
+		     void __user *    dest,
 		     size_t *         size,
 		     int              still_used )
 {

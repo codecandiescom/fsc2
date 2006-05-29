@@ -62,19 +62,29 @@ static struct cdev ch_dev;
 #endif
 
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 struct file_operations ni6601_file_ops = {
 	owner:		    THIS_MODULE,
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 	ioctl:              ni6601_ioctl,
-#else
-	unlocked_ioctl:     ni6601_ioctl,
-#endif
 	open:               ni6601_open,
 	poll:               ni6601_poll,
 	read:               ni6601_read,
 	release:            ni6601_release
 };
-
+#else
+struct file_operations ni6601_file_ops = {
+	.owner =	    THIS_MODULE,
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+	.ioctl =            ni6601_ioctl,
+#else
+	.unlocked_ioctl =   ni6601_ioctl,
+#endif
+	.open =             ni6601_open,
+	.poll =             ni6601_poll,
+	.read =             ni6601_read,
+	.release =          ni6601_release
+};
+#endif
 
 
 /*-------------------------------------------------------*

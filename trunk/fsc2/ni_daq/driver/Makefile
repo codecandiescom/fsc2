@@ -53,7 +53,7 @@ KERNEL_VER := $(shell grep UTS_RELEASE $(KERNELDIR)/include/linux/version.h \
 				      sed 's/^[^"]\{1,\}"\([0-9\.]\{1,\}\).*$$/\1/' \
 					  2>/dev/null)
 
-all $(MODULE) install clean:
+all $(MODULE) install check clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \
 		echo "Error: Can't figure out kernel version under the assumption that the kernel sources are at $(KERNELDIR)"; \
 		exit 2; \
@@ -80,6 +80,9 @@ export OBJECTS
 
 all:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
+
+check:
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" C=1 EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
 
 install:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules_install

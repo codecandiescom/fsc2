@@ -47,8 +47,7 @@ static void pci_irq_B_handler( Board * board,
  * with board register addresses
  *----------------------------------------------------------------*/
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 9 )
 void pci_board_register_setup( Board * board )
 {
 	/* Addresses of the registers of the board */
@@ -61,9 +60,54 @@ void pci_board_register_setup( Board * board )
 
 	/* Analog Input Register Group */
 
-	board->regs->ADC_FIFO_Data_Register   =
-				  ( u16 * ) ( board->daq_stc + 0x1C ); /* ro */
-	board->regs->Configuration_Memory_Low =
+	board->regs->ADC_FIFO_Data_Register   = board->daq_stc + 0x1C; /* ro */
+	board->regs->Configuration_Memory_Low = board->daq_stc + 0x10; /* wo */
+	board->regs->Configuration_Memory_High = board->daq_stc + 0x12;/* wo */
+
+	/* Analog Output Register Group */
+
+	board->regs->AO_Configuration         = board->daq_stc + 0x16; /* wo */
+	board->regs->DAC_FIFO_Data            = board->daq_stc + 0x1E; /* wo */
+	board->regs->DAC0_Direct_data         = board->daq_stc + 0x18; /* wo */
+	board->regs->DAC1_Direct_data         = board->daq_stc + 0x1A; /* wo */
+
+	/* DMA Control Register Group */
+
+	board->regs->AI_AO_Select             = board->daq_stc + 0x09; /* wo */
+	board->regs->G0_G1_Select             = board->daq_stc + 0x0B; /* wo */
+
+	/* DAQ-STC Register Group */
+
+	board->regs->Window_Address           = board->daq_stc + 0x00; /* rw */
+	board->regs->Window_Data              = board->daq_stc + 0x02; /* rw */
+	board->regs->Interrupt_A_Acknowledge  = board->daq_stc + 0x04; /* wo */
+	board->regs->Interrupt_B_Acknowledge  = board->daq_stc + 0x06; /* wo */
+	board->regs->AI_Command_2             = board->daq_stc + 0x08; /* wo */
+	board->regs->AO_Command_2             = board->daq_stc + 0x0A; /* wo */
+	board->regs->Gi_Command[ 0 ]          = board->daq_stc + 0x0C; /* wo */
+	board->regs->Gi_Command[ 1 ]          = board->daq_stc + 0x0E; /* wo */
+	board->regs->AI_Status_1              = board->daq_stc + 0x04; /* ro */
+	board->regs->AO_Status_1              = board->daq_stc + 0x06; /* ro */
+	board->regs->G_status                 = board->daq_stc + 0x08; /* ro */
+	board->regs->AI_Status_2              = board->daq_stc + 0x0A; /* ro */
+	board->regs->AO_Status_2              = board->daq_stc + 0x0C; /* ro */
+	board->regs->DIO_Parallel_Input       = board->daq_stc + 0x0E; /* ro */
+}
+#else
+void pci_board_register_setup( Board * board )
+{
+	/* Addresses of the registers of the board */
+
+	/* Misc Register Group */
+
+	board->regs->Serial_Command           = board->daq_stc + 0x0D; /* wo */
+	board->regs->Misc_Command             = board->daq_stc + 0x0F; /* wo */
+	board->regs->Status                   = board->daq_stc + 0x01; /* ro */
+
+	/* Analog Input Register Group */
+
+	board->regs->ADC_FIFO_Data_Register   = board->daq_stc + 0x1C; /* ro */
+	board->regs->Configuration_Memory_Low = 
 		                  ( u16 * ) ( board->daq_stc + 0x10 ); /* wo */
 	board->regs->Configuration_Memory_High =
 		                  ( u16 * ) ( board->daq_stc + 0x12 ); /* wo */
@@ -115,81 +159,8 @@ void pci_board_register_setup( Board * board )
 	board->regs->DIO_Parallel_Input       =
 		                  ( u16 * ) ( board->daq_stc + 0x0E ); /* ro */
 }
-
-#else
-
-void pci_board_register_setup( Board * board )
-{
-	/* Addresses of the registers of the board */
-
-	/* Misc Register Group */
-
-	board->regs->Serial_Command           =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x0D ); /* wo */
-	board->regs->Misc_Command             =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x0F ); /* wo */
-	board->regs->Status                   =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x01 ); /* ro */
-
-	/* Analog Input Register Group */
-
-	board->regs->ADC_FIFO_Data_Register   =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x1C ); /* ro */
-	board->regs->Configuration_Memory_Low =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x10 ); /* wo */
-	board->regs->Configuration_Memory_High =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x12 ); /* wo */
-
-	/* Analog Output Register Group */
-
-	board->regs->AO_Configuration         =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x16 ); /* wo */
-	board->regs->DAC_FIFO_Data            =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x1E ); /* wo */
-	board->regs->DAC0_Direct_data         =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x18 ); /* wo */
-	board->regs->DAC1_Direct_data         =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x1A ); /* wo */
-
-	/* DMA Control Register Group */
-
-	board->regs->AI_AO_Select             =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x09 ); /* wo */
-	board->regs->G0_G1_Select             =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x0B ); /* wo */
-
-	/* DAQ-STC Register Group */
-
-	board->regs->Window_Address           =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x00 ); /* rw */
-	board->regs->Window_Data              =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x02 ); /* rw */
-	board->regs->Interrupt_A_Acknowledge  =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x04 ); /* wo */
-	board->regs->Interrupt_B_Acknowledge  =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x06 ); /* wo */
-	board->regs->AI_Command_2             =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x08 ); /* wo */
-	board->regs->AO_Command_2             =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x0A ); /* wo */
-	board->regs->Gi_Command[ 0 ]          =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x0C ); /* wo */
-	board->regs->Gi_Command[ 1 ]          =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x0E ); /* wo */
-	board->regs->AI_Status_1              =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x04 ); /* ro */
-	board->regs->AO_Status_1              =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x06 ); /* ro */
-	board->regs->G_status                 =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x08 ); /* ro */
-	board->regs->AI_Status_2              =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x0A ); /* ro */
-	board->regs->AO_Status_2              =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x0C ); /* ro */
-	board->regs->DIO_Parallel_Input       =
-	      ( void __iomem * ) ( ( char * ) board->daq_stc + 0x0E ); /* ro */
-}
 #endif
+
 
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
@@ -548,8 +519,13 @@ int pci_dac_direct_data( Board *      board,
 			 unsigned int channel,
 			 int          value )
 {
-	u16 *reg = channel ? board->regs->DAC1_Direct_data :
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
+	u16 * reg = channel ? board->regs->DAC1_Direct_data :
 			     board->regs->DAC0_Direct_data;
+#else
+	void __iomem * reg = channel ? board->regs->DAC1_Direct_data :
+		                       board->regs->DAC0_Direct_data;
+#endif
 
 
 	if ( ! board->AO.is_channel_setup[ channel ] ) {

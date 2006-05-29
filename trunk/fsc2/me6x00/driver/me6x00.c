@@ -110,6 +110,8 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 #include <linux/moduleparam.h>
 #include <linux/cdev.h>
+#else
+#define __user
 #endif
 
 /* Compatibility file for kernels from 2.0 up to 2.4 */
@@ -217,21 +219,6 @@ static int me6x00_buf_count( me6x00_circ_buf_st * /* buf */ );
 static int me6x00_space_to_end( me6x00_circ_buf_st * /* buf */ );
 
 static int me6x00_values_to_end( me6x00_circ_buf_st * /* buf */);
-
-inline static void me6x00_outb( unsigned char /* value */,
-			 unsigned int  /* port  */ );
-
-inline static void me6x00_outw( unsigned short /* value */,
-				unsigned int   /* port  */ );
-
-inline static void me6x00_outl( unsigned int /* value */,
-				unsigned int /* port */ );
-
-inline static unsigned char  me6x00_inb( unsigned int /* port */ );
-
-inline static unsigned short me6x00_inw( unsigned int /* port */ );
-
-inline static unsigned int   me6x00_inl( unsigned int /* port */ );
 
 
 /* Board specific data are kept global */
@@ -343,15 +330,21 @@ static struct file_operations me6x00_file_operations = {
     NULL,               /* check_media_change */
     NULL,               /* revalidate         */
     NULL                /* lock               */
-#elif LINUX_VERSION_CODE > KERNEL_VERSION( 2, 4, 0 )
-    owner:           THIS_MODULE,
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 ) && \
+    LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
+    owner:            THIS_MODULE,
+    ioctl:            me6x00_ioctl,
+    open:             me6x00_open,
+    release:          me6x00_release
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+    .owner =          THIS_MODULE,
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
-    ioctl:           me6x00_ioctl,
+    .ioctl =          me6x00_ioctl,
 #else
-    unlocked_ioctl:  me6x00_ioctl,
+    .unlocked_ioctl = me6x00_ioctl,
 #endif
-    open:            me6x00_open,
-    release:         me6x00_release
+    .open =           me6x00_open,
+    .release =        me6x00_release
 #endif
 };
 
@@ -392,6 +385,152 @@ static unsigned int sval_regs[ ] = {
 	ME6X00_SVALREG_DAC14,
 	ME6X00_SVALREG_DAC15
 };
+
+
+/*
+ * Routine:
+ *   me6x00_outb
+ *
+ * Parameter list:
+ *   Name       Type               Access    Description
+ *--------------------------------------------------------------------------
+ *   port       unsigned int       r         Port address.
+ *   value      unsigned char      r         Byte you want to write.
+ *
+ *--------------------------------------------------------------------------
+ * Author: GG
+ * Modification:
+ */
+
+inline static void me6x00_outb( unsigned char value,
+				unsigned int  port )
+{
+	PORT_PDEBUG( "--> 0x%02X port 0x%04X\n", value, port );
+	outb( value, port );
+}
+
+
+/*
+ * Routine:
+ *   me6x00_outw
+ *
+ * Parameter list:
+ *   Name       Type               Access    Description
+ *--------------------------------------------------------------------------
+ *   port       unsigned int       r         Port address.
+ *   value      unsigned short     r         Word you want to write.
+ *
+ *--------------------------------------------------------------------------
+ * Author: GG
+ * Modification:
+ */
+
+static void inline me6x00_outw( unsigned short value,
+				unsigned int   port )
+{
+	PORT_PDEBUG( "--> 0x%04X port 0x%04X\n", value, port );
+	outw( value, port );
+}
+
+
+/*
+ * Routine:
+ *   me6x00_outl
+ *
+ * Parameter list:
+ *   Name       Type               Access    Description
+ *--------------------------------------------------------------------------
+ *   port       unsigned int       r         Port address.
+ *   value      unsigned int       r         Integer you want to write.
+ *
+ *--------------------------------------------------------------------------
+ * Author: GG
+ * Modification:
+ */
+
+inline static void me6x00_outl( unsigned int value,
+				unsigned int port )
+{
+	PORT_PDEBUG( "--> 0x%08X port 0x%04X\n", value, port );
+	outl( value, port );
+}
+
+
+/*
+ * Routine:
+ *   me6x00_inb
+ *
+ * Parameter list:
+ *   Name       Type               Access    Description
+ *--------------------------------------------------------------------------
+ *   port       unsigned int       r         Port address.
+ *
+ * Result:
+ *  Value from the port.
+ *--------------------------------------------------------------------------
+ * Author: GG
+ * Modification:
+ */
+
+inline static unsigned char me6x00_inb( unsigned int port )
+{
+	unsigned char value;
+
+	value = inb( port );
+	PORT_PDEBUG( "<-- 0x%02X port 0x%04X\n", value, port );
+	return value;
+}
+
+
+/*
+ * Routine:
+ *   me6x00_inw
+ *
+ * Parameter list:
+ *   Name       Type               Access    Description
+ *--------------------------------------------------------------------------
+ *   port       unsigned int       r         Port address.
+ *
+ * Result:
+ *  Value from the port.
+ *--------------------------------------------------------------------------
+ * Author: GG
+ * Modification:
+ */
+
+inline static unsigned short me6x00_inw( unsigned int port )
+{
+	unsigned short value;
+
+	value = inw( port );
+	PORT_PDEBUG( "<-- 0x%04X port 0x%04X\n", value, port );
+	return value;
+}
+
+
+/*
+ * Routine:
+ *   me6x00_inl
+ *
+ * Parameter list:
+ *   Name       Type               Access    Description
+ *--------------------------------------------------------------------------
+ *   port       unsigned int       r         Port address.
+ *
+ * Result:
+ *  Value from the port.
+ *--------------------------------------------------------------------------
+ * Author: GG
+ * Modification:
+ */
+
+inline static unsigned int me6x00_inl( unsigned int port )
+{
+	unsigned int value;
+	value = inl( port );
+	PORT_PDEBUG( "<-- 0x%08X port 0x%04X\n", value, port );
+	return value;
+}
 
 
 /*
@@ -1707,7 +1846,7 @@ static int me6x00_board_info( me6x00_dev_info * arg,
 	dev_info.dev_no      = info->pci_dev_no;
 	dev_info.func_no     = info->pci_func_no;
 
-	if ( copy_to_user( arg, &dev_info, sizeof *arg ) )
+	if ( copy_to_user( ( void __user * ) arg, &dev_info, sizeof *arg ) )
 		return -EFAULT;
 
 	return 0;
@@ -1745,7 +1884,8 @@ static int me6x00_board_keep_volts( me6x00_keep_st * arg,
 
 	CALL_PDEBUG( "me6x00_board_keep() is executed\n" );
 
-	if ( copy_from_user( &keep, arg, sizeof *arg ) )
+	if ( copy_from_user( &keep, ( const void __user * ) arg,
+			     sizeof *arg ) )
 		return -EFAULT;
 
 	if ( keep.dac >= info_vec[ minor ].num_dacs ) {
@@ -1798,7 +1938,8 @@ static int me6x00_set_mode( me6x00_mode_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &dacmode, arg, sizeof *arg ) )
+	if ( copy_from_user( &dacmode, ( const void __user * ) arg,
+			     sizeof *arg ) )
 		return -EFAULT;
 
 	if ( dacmode.dac > ME6X00_DAC03 )
@@ -1870,7 +2011,8 @@ static int me6x00_start_stop_conv( me6x00_stasto_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &conv, arg, sizeof *arg ) )
+	if ( copy_from_user( &conv, ( const void __user * ) arg,
+			     sizeof *arg ) )
 		return -EFAULT;
 
 	if ( conv.dac > ME6X00_DAC03 ) {
@@ -1974,7 +2116,8 @@ static int me6x00_clear_enable_fifo( me6x00_endis_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &fifo, arg, sizeof *arg ) )
+	if ( copy_from_user( &fifo, ( const void __user * ) arg,
+			     sizeof *arg ) )
 		return -EFAULT;
 
 	if ( fifo.dac > ME6X00_DAC03 ) {
@@ -2042,7 +2185,8 @@ static int me6x00_endis_extrig( me6x00_endis_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &trig, arg, sizeof *arg ) )
+	if ( copy_from_user( &trig, ( const void __user * ) arg,
+			     sizeof *arg ) )
 		return -EFAULT;
 
 	if ( trig.dac > ME6X00_DAC03 ) {
@@ -2111,7 +2255,8 @@ static int me6x00_rifa_extrig( me6x00_rifa_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &edge, arg, sizeof *arg ) )
+	if ( copy_from_user( &edge, ( const void __user * ) arg,
+			     sizeof *arg ) )
 		return -EFAULT;
 
 	if ( edge.dac > ME6X00_DAC03 ) {
@@ -2180,7 +2325,8 @@ static int me6x00_set_timer( me6x00_timer_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &timer, arg, sizeof *arg ) )
+	if ( copy_from_user( &timer, ( const void __user * ) arg,
+			     sizeof *arg ) )
 		return -EFAULT;
 
 	/* Check if the divisor is right. ME6X00_MIN_TICKS is the lowest */
@@ -2247,7 +2393,8 @@ static int me6x00_write_single( me6x00_single_st * arg,
 
 	init_waitqueue_head( &wait );
 
-	if ( copy_from_user( &single, arg, sizeof *arg ) )
+	if ( copy_from_user( &single, ( const void __user * ) arg,
+			     sizeof *arg ) )
 		return -EFAULT;
 
 	if ( single.dac >= info_vec[ minor ].num_dacs ) {
@@ -2358,7 +2505,8 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &write, arg, sizeof *arg ) )
+	if ( copy_from_user( &write, ( const void __user * ) arg,
+			     sizeof *arg ) )
 		return -EFAULT;
 
 	if ( write.dac > ME6X00_DAC03 ) {
@@ -2479,7 +2627,7 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 		k = 2 * free_space;
 		k -= copy_from_user( info->buf[ write.dac ].buf
 				     + info->buf[ write.dac ].head,
-				     user_buf, k );
+				     ( const void __user * ) user_buf, k );
 		if ( k == 0 )
 			return -EFAULT;
 
@@ -2516,7 +2664,7 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 	}
 
 	write.ret = ret;
-	if ( copy_to_user( arg, &write, sizeof *arg ) )
+	if ( copy_to_user( ( void __user * ) arg, &write, sizeof *arg ) )
 		return -EFAULT;
 
 	return 0;
@@ -2579,7 +2727,8 @@ static int me6x00_write_wraparound( me6x00_write_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &write, arg, sizeof *arg ) )
+	if ( copy_from_user( &write, ( const void __user * ) arg,
+			     sizeof *arg ) )
 		return -EFAULT;
 
 	if ( write.dac > ME6X00_DAC03 ) {
@@ -2647,7 +2796,8 @@ static int me6x00_write_wraparound( me6x00_write_st * arg,
 	if ( to_send > ME6X00_FIFO_SIZE )
 		to_send = ME6X00_FIFO_SIZE;
 	k = to_send * 2;
-	k -= copy_from_user( info->buf[ write.dac ].buf, write.buf, k );
+	k -= copy_from_user( info->buf[ write.dac ].buf,
+			     ( const void __user * ) write.buf, k );
 
 	if ( k == 0 )
 		return -EFAULT;
@@ -2668,7 +2818,7 @@ static int me6x00_write_wraparound( me6x00_write_st * arg,
 
 	write.ret = to_send;
 
-	if ( copy_to_user( arg, &write, sizeof *arg ) )
+	if ( copy_to_user( ( void __user * ) arg, &write, sizeof *arg ) )
 		return -EFAULT;
 
 	return 0;
@@ -2961,154 +3111,6 @@ static int me6x00_space_to_end( me6x00_circ_buf_st * buf )
 		return n;
 	return end + 1;
 }
-
-
-/*
- * Routine:
- *   me6x00_outb
- *
- * Parameter list:
- *   Name       Type               Access    Description
- *--------------------------------------------------------------------------
- *   port       unsigned int       r         Port address.
- *   value      unsigned char      r         Byte you want to write.
- *
- *--------------------------------------------------------------------------
- * Author: GG
- * Modification:
- */
-
-inline static void me6x00_outb( unsigned char value,
-				unsigned int  port )
-{
-	PORT_PDEBUG( "--> 0x%02X port 0x%04X\n", value, port );
-	outb( value, port );
-}
-
-
-/*
- * Routine:
- *   me6x00_outw
- *
- * Parameter list:
- *   Name       Type               Access    Description
- *--------------------------------------------------------------------------
- *   port       unsigned int       r         Port address.
- *   value      unsigned short     r         Word you want to write.
- *
- *--------------------------------------------------------------------------
- * Author: GG
- * Modification:
- */
-
-static void inline me6x00_outw( unsigned short value,
-				unsigned int   port )
-{
-	PORT_PDEBUG( "--> 0x%04X port 0x%04X\n", value, port );
-	outw( value, port );
-}
-
-
-/*
- * Routine:
- *   me6x00_outl
- *
- * Parameter list:
- *   Name       Type               Access    Description
- *--------------------------------------------------------------------------
- *   port       unsigned int       r         Port address.
- *   value      unsigned int       r         Integer you want to write.
- *
- *--------------------------------------------------------------------------
- * Author: GG
- * Modification:
- */
-
-inline static void me6x00_outl( unsigned int value,
-				unsigned int port )
-{
-	PORT_PDEBUG( "--> 0x%08X port 0x%04X\n", value, port );
-	outl( value, port );
-}
-
-
-/*
- * Routine:
- *   me6x00_inb
- *
- * Parameter list:
- *   Name       Type               Access    Description
- *--------------------------------------------------------------------------
- *   port       unsigned int       r         Port address.
- *
- * Result:
- *  Value from the port.
- *--------------------------------------------------------------------------
- * Author: GG
- * Modification:
- */
-
-inline static unsigned char me6x00_inb( unsigned int port )
-{
-	unsigned char value;
-
-	value = inb( port );
-	PORT_PDEBUG( "<-- 0x%02X port 0x%04X\n", value, port );
-	return value;
-}
-
-
-/*
- * Routine:
- *   me6x00_inw
- *
- * Parameter list:
- *   Name       Type               Access    Description
- *--------------------------------------------------------------------------
- *   port       unsigned int       r         Port address.
- *
- * Result:
- *  Value from the port.
- *--------------------------------------------------------------------------
- * Author: GG
- * Modification:
- */
-
-inline static unsigned short me6x00_inw( unsigned int port )
-{
-	unsigned short value;
-
-	value = inw( port );
-	PORT_PDEBUG( "<-- 0x%04X port 0x%04X\n", value, port );
-	return value;
-}
-
-
-/*
- * Routine:
- *   me6x00_inl
- *
- * Parameter list:
- *   Name       Type               Access    Description
- *--------------------------------------------------------------------------
- *   port       unsigned int       r         Port address.
- *
- * Result:
- *  Value from the port.
- *--------------------------------------------------------------------------
- * Author: GG
- * Modification:
- */
-
-inline static unsigned int me6x00_inl( unsigned int port )
-{
-	unsigned int value;
-	value = inl( port );
-	PORT_PDEBUG( "<-- 0x%08X port 0x%04X\n", value, port );
-	return value;
-}
-
-
 
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 2, 0 )

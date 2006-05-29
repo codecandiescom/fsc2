@@ -66,6 +66,8 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 #include <linux/moduleparam.h>
 #include <linux/cdev.h>
+#else
+#define __user
 #endif
 
 
@@ -74,59 +76,12 @@
 #include "autoconf.h"
 
 
+/*****************************************
+ * Defines
+ *****************************************/
+
+
 #define RULBUS_EPP_NAME  "rulbus_epp"
-
-
-static int __init rulbus_init( void );
-
-static void __exit rulbus_cleanup( void );
-
-static int rulbus_open( struct inode * inode_p,
-						struct file *  filep );
-
-static int rulbus_release( struct inode * inode_p,
-						   struct file *  filep );
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
-static int rulbus_ioctl( struct inode * inode_p,
-						 struct file *  filep,
-						 unsigned int   cmd,
-						 unsigned long  arg );
-#else
-static long rulbus_ioctl( struct file * filep,
-						  unsigned int  cmd,
-						  unsigned long arg );
-#endif
-
-static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
-
-static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
-
-static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
-
-static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
-
-static void rulbus_epp_attach( struct parport * port );
-
-static void rulbus_epp_detach( struct parport * port );
-
-static int rulbus_epp_init( void );
-
-static inline int rulbus_clear_epp_timeout( void );
-
-static inline unsigned char rulbus_epp_timout_check( void );
-
-static inline unsigned char rulbus_parport_read_data( void );
-
-static inline unsigned char rulbus_parport_read_addr( void );
-
-static inline void rulbus_parport_write_data( unsigned char data );
-
-static inline void rulbus_parport_write_addr( unsigned char addr );
-
-static inline void rulbus_parport_reverse( void );
-
-static int rulbus_epp_interface_present( void );
 
 
 #define RULBUS_MAX_BUFFER_SIZE  10          /* never to be smaller than 1 ! */
@@ -165,6 +120,58 @@ static int rulbus_epp_interface_present( void );
 #define SPP_Unused2	        ( 1 << 7 )   /* SPP unused2 */
 
 
+
+
+/*****************************************
+ * Declaration of non-inline functions
+ *****************************************/
+
+static int __init rulbus_init( void );
+
+static void __exit rulbus_cleanup( void );
+
+static int rulbus_open( struct inode * inode_p,
+						struct file *  filep );
+
+static int rulbus_release( struct inode * inode_p,
+						   struct file *  filep );
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+static int rulbus_ioctl( struct inode * inode_p,
+						 struct file *  filep,
+						 unsigned int   cmd,
+						 unsigned long  arg );
+#else
+static long rulbus_ioctl( struct file * filep,
+						  unsigned int  cmd,
+						  unsigned long arg );
+#endif
+
+static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+
+static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+
+static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+
+static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+
+static void rulbus_epp_attach( struct parport * port );
+
+static void rulbus_epp_detach( struct parport * port );
+
+static int rulbus_epp_init( void );
+
+static int rulbus_epp_interface_present( void );
+
+
+
+/*****************************************
+ * Definition of global variables
+ *****************************************/
+
+static int major = RULBUS_EPP_MAJOR;
+static unsigned long base = RULBUS_EPP_BASE;
+
 struct parport_driver rulbus_drv = { RULBUS_EPP_NAME,
                                      rulbus_epp_attach,
                                      rulbus_epp_detach };
@@ -190,20 +197,30 @@ static struct rulbus_device {
 			 0, 0, { }, { }, 0, 0x0F, WRITE_TO_DEVICE };
 
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 struct file_operations rulbus_file_ops = {
-        owner:           THIS_MODULE,
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
-        ioctl:           rulbus_ioctl,
-#else
-		unlocked_ioctl:  rulbus_ioctl,
-#endif
-        open:            rulbus_open,
-        release:         rulbus_release,
+        owner:            THIS_MODULE,
+        ioctl:            rulbus_ioctl,
+        open:             rulbus_open,
+        release:          rulbus_release,
 };
+#else
+struct file_operations rulbus_file_ops = {
+        .owner =          THIS_MODULE,
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+        .ioctl =          rulbus_ioctl,
+#else
+		.unlocked_ioctl = rulbus_ioctl,
+#endif
+        .open =           rulbus_open,
+        .release =        rulbus_release,
+};
+#endif
 
 
-static int major = RULBUS_EPP_MAJOR;
-static unsigned long base = RULBUS_EPP_BASE;
+/*****************************************
+ * Bookkeeping for the module
+ *****************************************/
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 MODULE_PARM( major, "i" );
@@ -231,6 +248,119 @@ module_init( rulbus_init );
 module_exit( rulbus_cleanup );
 
 
+/*****************************************
+ * Definition of inlined functions
+ *****************************************/
+
+/*-----------------------------------------------------------*
+ * Function tests if the last transfer resulted in a timeout
+ *-----------------------------------------------------------*/
+
+inline static unsigned char rulbus_epp_timeout_check( void )
+{
+        return inb( STATUS_BYTE ) & EPP_Timeout;
+}
+
+
+/*-----------------------------------------------------*
+ * Function to check for and clear a timeout condition
+ *-----------------------------------------------------*/
+
+inline static int rulbus_clear_epp_timeout( void )
+{
+        unsigned char status;
+
+
+        if ( ! rulbus_epp_timeout_check( ) )
+                return 1;
+
+        printk( KERN_NOTICE "EPP Timeout\n" );
+
+        /* To clear timeout some chips require double read */
+
+        inb( STATUS_BYTE );
+        status = inb( STATUS_BYTE );
+
+		/* Some chips reset the timeout condition by setting the lowest bit,
+		   others by resetting it */
+
+        outb( status | EPP_Timeout, STATUS_BYTE );
+        outb( status & ~ EPP_Timeout, STATUS_BYTE );
+
+        return ! rulbus_epp_timeout_check( );
+}
+
+
+/*--------------------------------------------------------------------------*
+ * Reverse the port direction by enabling or disabling the bi-direction bit
+ *--------------------------------------------------------------------------*/
+
+inline static void rulbus_parport_reverse( void )
+{
+        rulbus.direction ^= 1;
+        outb( inb( CTRL_BYTE ) ^ SPP_EnaBiDirect, CTRL_BYTE );
+}
+
+
+/*----------------------------------------------------------*
+ * Function for reading a data byte from the parallel port,
+ * if necessary after switching from write to read mode
+ *---------------------------------------------------------*/
+
+inline static unsigned char rulbus_parport_read_data( void )
+{
+        if ( rulbus.direction != READ_FROM_DEVICE )
+                rulbus_parport_reverse( );
+        rulbus_clear_epp_timeout( );
+        return inb( DATA_BYTE );
+}
+
+
+/*--------------------------------------------------------------*
+ * Function for reading an address byte from the parallel port,
+ * if necessary after switching from write to read mode
+ *--------------------------------------------------------------*/
+
+inline static unsigned char rulbus_parport_read_addr( void )
+{
+        if ( rulbus.direction != READ_FROM_DEVICE )
+                rulbus_parport_reverse( );
+        rulbus_clear_epp_timeout( );
+        return inb( ADDR_BYTE );
+}
+
+
+/*------------------------------------------------------*
+ * Function for writing a data byte to the parallel port,
+ * if necessary after switching from read to write mode
+ *------------------------------------------------------*/
+
+inline static void rulbus_parport_write_data( unsigned char data )
+{
+        if ( rulbus.direction != WRITE_TO_DEVICE )
+                rulbus_parport_reverse( );
+        rulbus_clear_epp_timeout( );
+        outb( data, DATA_BYTE );
+}
+
+
+/*------------------------------------------------------------*
+ * Function for writing an address byte to the parallel port,
+ * if necessary after switching from read to write mode
+ *------------------------------------------------------------*/
+
+inline static void rulbus_parport_write_addr( unsigned char addr )
+{
+        if ( rulbus.direction != WRITE_TO_DEVICE )
+                rulbus_parport_reverse( );
+        rulbus_clear_epp_timeout( );
+        outb( addr, ADDR_BYTE );
+}
+
+
+/*****************************************
+ * Definition of non-inlined function
+ *****************************************/
 
 /*------------------------------------------------------*
  * Function that gets invoked when the module is loaded
@@ -552,7 +682,7 @@ static long rulbus_ioctl( struct file * filep,
 		} else if ( down_interruptible( &rulbus.ioctl_mutex ) )
 				return -ERESTARTSYS;
 
-        if ( copy_from_user( &rulbus_arg, ( RULBUS_EPP_IOCTL_ARGS * ) arg,
+        if ( copy_from_user( &rulbus_arg, ( const void __user * ) arg,
                              sizeof rulbus_arg ) ) {
 				up( &rulbus.ioctl_mutex );
                 printk( KERN_NOTICE "Can't read from user space\n" );
@@ -657,7 +787,8 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         /* Copy all that has just been read to the user space buffer and, if
 		   necessary, deallocate the kernel buffer */
 
-		if ( copy_to_user( rulbus_arg->data, data, rulbus_arg->len ) ) {
+		if ( copy_to_user( ( void __user * ) rulbus_arg->data,
+						   data, rulbus_arg->len ) ) {
 				if ( rulbus_arg->len > RULBUS_MAX_BUFFER_SIZE )
 						kfree( data );
 				printk( KERN_NOTICE "Can't write to user space\n" );
@@ -734,7 +865,8 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         /* Copy all that has just been read to the user space buffer and
 		   deallocate the kernel buffer */
 
-		if ( copy_to_user( rulbus_arg->data, data, rulbus_arg->len ) ) {
+		if ( copy_to_user( ( void __user * ) rulbus_arg->data,
+						   data, rulbus_arg->len ) ) {
 				printk( KERN_NOTICE "Can't write to user space\n" );
 				return -EACCES;
 		}
@@ -799,7 +931,8 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
                         return -EINVAL;
                 }
 
-				if ( copy_from_user( data, rulbus_arg->data,
+				if ( copy_from_user( data,
+									 ( const void __user * ) rulbus_arg->data,
 									 rulbus_arg->len ) ) {
 						if ( data != buffer )
 								kfree( data );
@@ -877,7 +1010,8 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 				return -EINVAL;
 		}
 
-		if ( copy_from_user( data, rulbus_arg->data, rulbus_arg->len ) ) {
+		if ( copy_from_user( data, ( const void __user * ) rulbus_arg->data,
+							 rulbus_arg->len ) ) {
 				kfree( data );
 				printk( KERN_NOTICE "Can't read from user space\n" );
 				return -EACCES;
@@ -930,112 +1064,6 @@ static int rulbus_epp_init( void )
 }
 
 
-/*-----------------------------------------------------*
- * Function to check for and clear a timeout condition
- *-----------------------------------------------------*/
-
-static inline int rulbus_clear_epp_timeout( void )
-{
-        unsigned char status;
-
-
-        if ( ! rulbus_epp_timout_check( ) )
-                return 1;
-
-        printk( KERN_NOTICE "EPP Timeout\n" );
-
-        /* To clear timeout some chips require double read */
-
-        inb( STATUS_BYTE );
-        status = inb( STATUS_BYTE );
-
-		/* Some chips reset the timeout condition by setting the lowest bit,
-		   others by resetting it */
-
-        outb( status | EPP_Timeout, STATUS_BYTE );
-        outb( status & ~ EPP_Timeout, STATUS_BYTE );
-
-        return ! rulbus_epp_timout_check( );
-}
-
-
-/*-----------------------------------------------------------*
- * Function tests if the last transfer resulted in a timeout
- *-----------------------------------------------------------*/
-
-static inline unsigned char rulbus_epp_timout_check( void )
-{
-        return inb( STATUS_BYTE ) & EPP_Timeout;
-}
-
-
-/*----------------------------------------------------------*
- * Function for reading a data byte from the parallel port,
- * if necessary after switching from write to read mode
- *---------------------------------------------------------*/
-
-static inline unsigned char rulbus_parport_read_data( void )
-{
-        if ( rulbus.direction != READ_FROM_DEVICE )
-                rulbus_parport_reverse( );
-        rulbus_clear_epp_timeout( );
-        return inb( DATA_BYTE );
-}
-
-
-/*--------------------------------------------------------------*
- * Function for reading an address byte from the parallel port,
- * if necessary after switching from write to read mode
- *--------------------------------------------------------------*/
-
-static inline unsigned char rulbus_parport_read_addr( void )
-{
-        if ( rulbus.direction != READ_FROM_DEVICE )
-                rulbus_parport_reverse( );
-        rulbus_clear_epp_timeout( );
-        return inb( ADDR_BYTE );
-}
-
-
-/*------------------------------------------------------*
- * Function for writing a data byte to the parallel port,
- * if necessary after switching from read to write mode
- *------------------------------------------------------*/
-
-static inline void rulbus_parport_write_data( unsigned char data )
-{
-        if ( rulbus.direction != WRITE_TO_DEVICE )
-                rulbus_parport_reverse( );
-        rulbus_clear_epp_timeout( );
-        outb( data, DATA_BYTE );
-}
-
-
-/*------------------------------------------------------------*
- * Function for writing an address byte to the parallel port,
- * if necessary after switching from read to write mode
- *------------------------------------------------------------*/
-
-static inline void rulbus_parport_write_addr( unsigned char addr )
-{
-        if ( rulbus.direction != WRITE_TO_DEVICE )
-                rulbus_parport_reverse( );
-        rulbus_clear_epp_timeout( );
-        outb( addr, ADDR_BYTE );
-}
-
-
-/*--------------------------------------------------------------------------*
- * Reverse the port direction by enabling or disabling the bi-direction bit
- *--------------------------------------------------------------------------*/
-
-static inline void rulbus_parport_reverse( void )
-{
-        rulbus.direction ^= 1;
-        outb( inb( CTRL_BYTE ) ^ SPP_EnaBiDirect, CTRL_BYTE );
-}
-
-
 /*----------------------------------------------------------------*
  * Function tries to determine if the Rulbus interface is present
  * by writing two different address patterns and then checking if
@@ -1050,30 +1078,28 @@ static int rulbus_epp_interface_present( void )
 
         rulbus_parport_write_addr( p1 );
 
-        if ( rulbus_epp_timout_check( ) )
+        if ( rulbus_epp_timeout_check( ) )
                 return 1;
 
         if ( rulbus_parport_read_addr( ) != p1 )
                 return 1;
 
-        if ( rulbus_epp_timout_check( ) )
+        if ( rulbus_epp_timeout_check( ) )
                 return 1;
 
         rulbus_parport_write_addr( p2 );
 
-        if ( rulbus_epp_timout_check( ) )
+        if ( rulbus_epp_timeout_check( ) )
                 return 1;
 
         if ( rulbus_parport_read_addr( ) != p2 )
                 return 1;
 
-        if ( rulbus_epp_timout_check( ) )
+        if ( rulbus_epp_timeout_check( ) )
                 return 1;
 
         return 0;
 }
-
-
 
 
 /*

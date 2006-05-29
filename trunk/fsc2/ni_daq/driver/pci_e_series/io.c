@@ -121,6 +121,52 @@ static char *DAQ_reg_names[ ] = { "Window_Address",
 #endif
 
 
+/*------------------------------------------------------------*
+ * Initialization of the data structure used in protection of
+ * parts of code that must not be interrupted.
+ *------------------------------------------------------------*/
+
+inline void pci_init_critical_section_handling( Board * board )
+{
+	board->critical_section.count = 0;
+	spin_lock_init( &board->critical_section.spinlock );
+}
+
+
+/*---------------------------------------------------------------------*
+ * Function to protect parts of code that must not be interrupted.
+ * The inverse function must be called as many times as this
+ * function has been to give up the spinlock and re-enable interrupts.
+ *---------------------------------------------.-----------------------*/
+
+void pci_start_critical_section( Board * board )
+{
+	if ( board->critical_section.count++ == 0 )
+		spin_lock_irqsave( &board->critical_section.spinlock,
+				   board->critical_section.flags );
+}
+
+
+/*----------------------------------------------------------*
+ * Function to be called at the end of a parts of code that
+ * must not be interrupted.
+ *----------------------------------------------------------*/
+
+void pci_end_critical_section( Board * board )
+{
+#if defined NI_DAQ_DEBUG
+	if ( board->critical_section.count == 0 ) {
+		PDEBUG( "Unbalanced start/end critical section\n" );
+		return;
+	}
+#endif
+
+	if ( --board->critical_section.count == 0 )
+		spin_unlock_irqrestore( &board->critical_section.spinlock,
+					board->critical_section.flags );
+}
+
+
 /*------------------------------------------------------------------*
  * Function for writing to one of the 16-bit wide DAQ-STC registers
  * Interrupts must be disabled between setting the window address
@@ -128,14 +174,14 @@ static char *DAQ_reg_names[ ] = { "Window_Address",
  *------------------------------------------------------------------*/
 
 #if ! defined NI_DAQ_DEBUG
-inline void pci_stc_writew( Board * board,
-			    u16     offset,
-			    u16     data )
+void pci_stc_writew( Board * board,
+		     u16     offset,
+		     u16     data )
 #else
-inline void pci_stc_writew( const char * fn,
-			    Board *      board,
-			    u16          offset,
-			    u16          data )
+void pci_stc_writew( const char * fn,
+		     Board *      board,
+		     u16          offset,
+		     u16          data )
 #endif
 {
 #if defined NI_DAQ_DEBUG
@@ -176,14 +222,14 @@ inline void pci_stc_writew( const char * fn,
  *------------------------------------------------------------------*/
 
 #if defined NI_DAQ_DEBUG
-inline void pci_stc_writel( const char * fn,
-			    Board *      board,
-			    u16          offset,
-			    u32          data )
+void pci_stc_writel( const char * fn,
+		     Board *      board,
+		     u16          offset,
+		     u32          data )
 #else
-inline void pci_stc_writel( Board * board,
-			    u16     offset,
-			    u32     data )
+void pci_stc_writel( Board * board,
+		     u16     offset,
+		     u32     data )
 #endif
 {
 #if defined NI_DAQ_DEBUG
@@ -216,8 +262,8 @@ inline void pci_stc_writel( Board * board,
  * reading from the window data register.
  *--------------------------------------------------------------------*/
 
-inline u16 pci_stc_readw( Board * board,
-			  u16     offset )
+u16 pci_stc_readw( Board * board,
+		   u16     offset )
 {
 	u16 data;
 
@@ -253,8 +299,8 @@ inline u16 pci_stc_readw( Board * board,
  * reading from the window data register.
  *--------------------------------------------------------------------*/
 
-inline u32 pci_stc_readl( Board * board,
-			  u16     offset )
+u32 pci_stc_readl( Board * board,
+		   u16     offset )
 {
 	u32 data;
 
@@ -275,52 +321,6 @@ inline u32 pci_stc_readl( Board * board,
 	pci_end_critical_section( board );
 
 	return data;
-}
-
-
-/*------------------------------------------------------------*
- * Initialization of the data structure used in protection of
- * parts of code that must not be interrupted.
- *------------------------------------------------------------*/
-
-void pci_init_critical_section_handling( Board * board )
-{
-	board->critical_section.count = 0;
-	spin_lock_init( &board->critical_section.spinlock );
-}
-
-
-/*---------------------------------------------------------------------*
- * Function to protect parts of code that must not be interrupted.
- * The inverse function must be called as many times as this
- * function has been to give up the spinlock and re-enable interrupts.
- *---------------------------------------------.-----------------------*/
-
-inline void pci_start_critical_section( Board * board )
-{
-	if ( board->critical_section.count++ == 0 )
-		spin_lock_irqsave( &board->critical_section.spinlock,
-				   board->critical_section.flags );
-}
-
-
-/*----------------------------------------------------------*
- * Function to be called at the end of a parts of code that
- * must not be interrupted.
- *----------------------------------------------------------*/
-
-inline void pci_end_critical_section( Board * board )
-{
-#if defined NI_DAQ_DEBUG
-	if ( board->critical_section.count == 0 ) {
-		PDEBUG( "Unbalanced start/end critical section\n" );
-		return;
-	}
-#endif
-
-	if ( --board->critical_section.count == 0 )
-		spin_unlock_irqrestore( &board->critical_section.spinlock,
-					board->critical_section.flags );
 }
 
 

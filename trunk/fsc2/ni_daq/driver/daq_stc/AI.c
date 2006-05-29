@@ -258,7 +258,7 @@ int AI_ioctl_handler( Board *         board,
 	int ret = 0;
 
 
-	if ( copy_from_user( &a, arg, sizeof *arg ) ) {
+	if ( copy_from_user( &a, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}
@@ -304,7 +304,8 @@ int AI_ioctl_handler( Board *         board,
 			return -EINVAL;
 	}
 
-	if ( ret >= 0 && copy_to_user( arg, &a, sizeof *arg ) ) {
+	if ( ret >= 0 && copy_to_user( ( void __user * ) arg, &a,
+				       sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
 		return -EACCES;
 	}
@@ -345,6 +346,12 @@ static int AI_clock_setup( Board *                  board,
  * Function sets up the Configuration FIFO
  *-----------------------------------------*/
 
+/* Make sure that this is always as least as large as the largest value
+   for the ai_num_channels member of the structure for the board properties
+   defined in board_props.h !*/
+
+#define MAX_AI_NUM_CHANNELS 64
+
 static int AI_channel_setup( Board *                  board,
 			     unsigned int             num_channels,
 			     NI_DAQ_AI_CHANNEL_ARGS * channel_args )
@@ -353,7 +360,7 @@ static int AI_channel_setup( Board *                  board,
 	unsigned int i;
 	NI_DAQ_AI_CHANNEL_ARGS a;
 	unsigned int num_data = 0;
-	NI_DAQ_AI_TYPE ch_types[ board->type->ai_num_channels ];
+	NI_DAQ_AI_TYPE ch_types[ MAX_AI_NUM_CHANNELS ];
 
 
 	if ( board->AI.is_running )
@@ -384,7 +391,8 @@ static int AI_channel_setup( Board *                  board,
 	board->AI.num_data_per_scan = 0;
 
 	for ( i = 0; i < num_channels; i++ ) {
-		if ( copy_from_user( &a, channel_args + i,
+		if ( copy_from_user( &a,
+				     ( const void __user * ) channel_args + i,
 				     sizeof *channel_args ) ) {
 			PDEBUG( "Can't read from user space\n" );
 			board->func->clear_configuration_memory( board );
@@ -482,7 +490,8 @@ static int AI_acq_setup( Board *            board,
 		return -EINVAL;
 	}
 
-	if ( copy_from_user( &a, acq_args, sizeof *acq_args ) ) {
+	if ( copy_from_user( &a, ( const void __user * ) acq_args,
+			     sizeof *acq_args ) ) {
 		PDEBUG( "Can't read from user space\n" );
 		return -EACCES;
 	}

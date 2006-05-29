@@ -54,7 +54,7 @@ KERNEL_VER := $(shell grep UTS_RELEASE $(KERNELDIR)/include/linux/version.h \
 				      2>/dev/null | \
 				      sed 's/^[^"]\{1,\}"\([^"]\{1,\}\)".*$$/\1/' 2>/dev/null)
 
-all $(MODULE) install clean:
+all $(MODULE) install check clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \
 		echo "Error: Can't figure out kernel version under the assumption that the kernel sources are at $(KERNELDIR)"; \
 		exit 2; \
@@ -79,15 +79,18 @@ OBJECTS  := $(SOURCES:.c=.o)
 export OBJECTS
 
 all:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) EXTRA_CFLAGS=$(EXTRA_CFLAGS)
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
+
+check:
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" C=1 EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
 
 install:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules_install
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules_install
 	$(INSTALL) -d $(prefix)/include
 	$(INSTALL) -m 644 ni6601_drv.h $(prefix)/include
 
 clean:
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
 	$(RM) $(RMFLAGS) svn-* *~
 
 endif
