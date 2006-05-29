@@ -125,6 +125,7 @@ FOREVER {
 ON_STOP:
 
 fsave( File,
+	   "\n"
 	   "% Date:                   # #\n"
 	   "% Script:                 3_pulse_EM (J-band, Leiden)\n"
 	   "% Field:                  # G\n"
