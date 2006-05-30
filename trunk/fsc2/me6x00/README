@@ -3,8 +3,8 @@ I. Introduction
 
 This a a driver and library for ME6000 and ME6100 DAC cards (Meilhaus
 Electronic GmbH). The driver is mostly based on the driver (version
-1.0.0) by Meilhaus (author is Guenter Gebhardt), distributed with the
-card.
+1.0.0) by Meilhaus (the author is Guenter Gebhardt), distributed with
+the card.
 
 Currently, support for continuous and wrap-around mode for ME6100 cards
 is restricted to the driver and can only be used via ioctl()-calls, see
@@ -15,6 +15,9 @@ have such a card and only tried to reorganize the code a bit.
 It was mainly written to allow support for this type of cards for fsc2,
 a program for spectrometer control I have written. The kernel module
 has been tested with 2.4 kernels only but also compiles with 2.6 kernels.
+
+Please see the different files for questions concerning copyright issues,
+for some files Meilhaus Electronic GmbH is the sole owner of the copyright.
 
 
 II. Preparation for installation
