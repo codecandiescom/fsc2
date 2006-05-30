@@ -137,28 +137,38 @@ A. Administrative and miscellaneous functions
 
 ======================================================================
 
-int ni_daq_open( const char *name )
+int ni_daq_open( const char *name, int flag )
 
 This function must be called before the card can be used. It expects
-a single argument, the name of the device file for the board. This will
-usually be '/dev/pci_e_series_0' to /dev/pci_e_series_4' for the PCI E
-Series boards and '/dev/at_mio_series_0' to '/dev/at_mio_series_4' for
-the AT MIO Series boards.
+two arguments, the first being the name of the device file for the board.
+This will usually be '/dev/pci_e_series_0' to /dev/pci_e_series_4' for the
+PCI E Series boards and '/dev/at_mio_series_0' to '/dev/at_mio_series_4'
+for the AT MIO Series boards. The second agument is an additional flag to
+be passed to the open(2) call, the only useful value being O_NONBLOCK
+or O_NODELAY in order to open the boards device file in non-blocking
+mode (in this case a return value of NI_DAQ_ERR_BBS can also mean that
+opening the device file without any delay wasn't possible).
 
 When successful the function returns an integer to be used as a handle
 for the board in all futher calls of functions for the board.
 
-The function may fail for several reasons. The board can be not installed
-at all, the driver for the board could be not loaded, the device file (i.e.
+The function may fail for several reasons. The board may not be installed
+at all, the driver for the board could be unloadable, the device file (i.e.
 the file name passed to the function) may not exist, the user may have
 no permission to open the board, the board could already be opened by
-a different process, or an unspecified error may occur when opening the
-file, or, finally, an internal error in the driver might get triggered.
-In these cases a negative number is returned, with the following
-error codes:
+a different process, a signal may have been received while trying to open
+the board, an unspecified error may occur when opening the file, or,
+finally, an internal error in the driver might get triggered. In these
+cases a negative number is returned, with the following error codes:
 
     NI_DAQ_ERR_NSB   NI_DAQ_ERR_NDV   NI_DAQ_ERR_DFM   NI_DAQ_ERR_ACS
-    NI_DAQ_ERR_BBS   NI_DAQ_ERR_DFP   NI_DAQ_ERR_INT
+    NI_DAQ_ERR_BBS   NI_DAQ_ERR_DFP   NI_DAQ_ERR_INT   NI_DAQ_ERR_ITR
+
+
+Please note: processes that inherit the file descriptor for the device
+file via a call to the exec-family of functions won't be able to access
+the board, the close-on-exec flag gets set for the file handle used
+for accessing the board.
 
 
 ======================================================================

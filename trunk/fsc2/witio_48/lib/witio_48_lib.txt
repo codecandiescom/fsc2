@@ -20,8 +20,8 @@ not supported.
 * and the driver is correctly configured is to apply different inputs to   *
 * the DIO input(s) and check if the reported values are correct. When no   *
 * card exists or the driver is mis-configured the reported value will      *
-* most probably indicate that all input lines are in a high state what-    *
-* ever is really applied to the inputs.                                    *
+* most probably indicate that all input lines are in a high state for      *
+* whatever gets applied to the inputs.                                     *
 ****************************************************************************
 
 The 24-bit wide DIOs can be split up into either three 8-bit DIOs, two
@@ -98,9 +98,9 @@ and make it exclusively accessible by the process that opened the board
 this way.
 
 
-Processes that get started by a call to the exec-family of functions
-won't be able to access the board, i.e. the close-on-exec flag is
-set for the file handle used for accessing the board.
+Processes that inherit the file descriptor for the board vi a call to of
+exec-family of functions won't be able to access the board because the
+close-on-exec flag is set for the file handle used for accessing the board.
 
 
 All functions (except witio_48_close() and witio_48_perror() and
@@ -141,7 +141,8 @@ the first or second DIO chip on the board.
 
 ======================================================================
 
-int witio_48_set_mode( WITIO_48_DIO dio, WITIO_48_MODE mode )
+int witio_48_set_mode( WITIO_48_DIO  dio,
+                       WITIO_48_MODE mode )
 
 The function splits up the DIO specified by the first argument into
 sub-DIOs according to the value of the second argument.
@@ -183,7 +184,8 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
-int witio_48_get_mode( WITIO_48_DIO dio, WITIO_48_MODE *mode )
+int witio_48_get_mode( WITIO_48_DIO    dio,
+                       WITIO_48_MODE * mode )
 
 The function returns the current I/O mode for the DIO specified as the
 first argument cia the second argument.
@@ -203,8 +205,9 @@ the NULL pointer and return 'WITIO_48_OK' immediately.
 
 ======================================================================
 
-int witio_48_dio_out( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
-                      unsigned long value )
+int witio_48_dio_out( WITIO_48_DIO     dio,
+	                  WITIO_48_CHANNEL channel,
+                      unsigned long    value )
 
 The function outputs the value given as the third argument at the sub-DIO
 specified by the second argument of the DIO passed as the first argument.
@@ -244,8 +247,9 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
-int witio_48_dio_in( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
-					 unsigned long *value )
+int witio_48_dio_in( WITIO_48_DIO     dio,
+                     WITIO_48_CHANNEL channel,
+					 unsigned long *  value )
 
 The Function returns via the pointer specified as the third argument
 the value at the sub-DIO passed as the second argument from the DIO
@@ -295,7 +299,7 @@ the library was loaded) an empty string is returned.
 
 ======================================================================
 
-int witio_48_perror( const char *s )
+int witio_48_perror( const char * s )
 
 The function prints produces a message on the standard error output
 describing the error encountered during the last call of one of the

@@ -260,7 +260,7 @@ int AI_ioctl_handler( Board *         board,
 
 	if ( copy_from_user( &a, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	switch ( a.cmd ) {
@@ -307,7 +307,7 @@ int AI_ioctl_handler( Board *         board,
 	if ( ret >= 0 && copy_to_user( ( void __user * ) arg, &a,
 				       sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	return ret;
@@ -396,7 +396,7 @@ static int AI_channel_setup( Board *                  board,
 				     sizeof *channel_args ) ) {
 			PDEBUG( "Can't read from user space\n" );
 			board->func->clear_configuration_memory( board );
-			return -EACCES;
+			return -EFAULT;
 		}
 
 		if ( channel_args->channel >= board->type->ai_num_channels ) {
@@ -493,7 +493,7 @@ static int AI_acq_setup( Board *            board,
 	if ( copy_from_user( &a, ( const void __user * ) acq_args,
 			     sizeof *acq_args ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	acq_setup.start_stop    = AI_START_Sync | AI_START_Edge;

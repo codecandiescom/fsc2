@@ -88,6 +88,8 @@ install:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" modules_install
 
 clean:
+	$(MAKE) -C pci_e_series cleanup
+	$(MAKE) -C daq_stc cleanup
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
 	$(RM) $(RMFLAGS) svn-* *~
 

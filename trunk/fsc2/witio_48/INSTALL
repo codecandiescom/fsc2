@@ -207,7 +207,7 @@ or /usr/include/linux/autoconf.h (depending on how old\n\
 your kernel is) is required. This file contains vital\n\
 information about the kernel the module is intended for.\n\
 Please also see additonal information in the README file.\n\n\
-   Unfortunately, the installation can't proceed.\n" 13 62;
+Unfortunately, the installation can't proceed.\n" 13 62;
 	 exit 1;
 fi
 
@@ -496,12 +496,12 @@ function get_kernel_version() {
 	if [ ! -e $KERNEL_DIR/include/linux/version.h ]; then
 		dialog --msgbox \
 "To create the driver for WITIO-48 boards the file\n\
-/lib/modules/$KERNEL_VERSION/build/include/linux/version.h\n\
+$KERNEL_DIR/include/linux/version.h\n\
 (or /usr/include/linux/version.h, depending on how old\n\
 your kernel is) is required. This file contains vital\n\
 information about the kernel the module is intended for.\n\
 Please also see additonal information in the README file.\n\n\
-   Unfortunately, the installation can't proceed.\n" 13 62;
+Unfortunately, the installation can't proceed.\n" 13 68;
 		exit 1;
 	fi
 

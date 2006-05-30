@@ -46,7 +46,7 @@ int ni6601_dio_in( Board *           board,
 	if ( copy_from_user( &dio, ( const void __user * ) arg,
 			     sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	/* If necessary switch selected pins to input mode */
@@ -63,7 +63,7 @@ int ni6601_dio_in( Board *           board,
 
 	if ( copy_to_user( ( void __user * ) arg, &dio, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	return 0;
@@ -86,7 +86,7 @@ int ni6601_dio_out( Board *            board,
 	if ( copy_from_user( &dio, ( const void __user * ) arg,
 			     sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	/* Write data value to DIO parallel output register */
@@ -116,7 +116,7 @@ int ni6601_disarm( Board *         board,
 
 	if ( copy_from_user( &d, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	if ( d.counter < NI6601_COUNTER_0 || d.counter > NI6601_COUNTER_3 ) {
@@ -150,7 +150,7 @@ int ni6601_read_count( Board *              board,
 	if ( copy_from_user( &cs, ( const void __user * ) arg,
 			     sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	if ( cs.counter < NI6601_COUNTER_0 || cs.counter > NI6601_COUNTER_3 ) {
@@ -211,7 +211,7 @@ int ni6601_read_count( Board *              board,
 	
 	if ( copy_to_user( ( void __user * ) arg, &cs, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	return 0;
@@ -235,7 +235,7 @@ int ni6601_start_pulses( Board *         board,
 
 	if ( copy_from_user( &p, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	if ( p.counter < NI6601_COUNTER_0 || p.counter > NI6601_COUNTER_3 ) {
@@ -330,7 +330,7 @@ int ni6601_start_counting( Board *          board,
 
 	if ( copy_from_user( &c, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	if ( c.counter < NI6601_COUNTER_0 || c.counter > NI6601_COUNTER_3 ) {
@@ -405,7 +405,7 @@ int ni6601_start_buf_counting( Board *              board,
 
 	if ( copy_from_user( &c, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	if ( board->buf_counter >= 0 ) {
@@ -549,7 +549,7 @@ int ni6601_is_busy( Board *           board,
 
 	if ( copy_from_user( &a, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	/* Test if the counter is armed */
@@ -559,7 +559,7 @@ int ni6601_is_busy( Board *           board,
 	
 	if ( copy_to_user( ( void __user * ) arg, &a, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	return 0;

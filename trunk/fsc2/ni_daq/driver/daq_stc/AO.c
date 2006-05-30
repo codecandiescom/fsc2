@@ -164,7 +164,7 @@ int AO_ioctl_handler( Board *         board,
 
 	if ( copy_from_user( &a, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	switch ( a.cmd ) {
@@ -200,7 +200,7 @@ static int AO_channel_setup( Board *                  board,
 	if ( copy_from_user( &a, ( const void __user * ) channel_args,
 			     sizeof *channel_args ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	/* Some boards don't allow an external reference */

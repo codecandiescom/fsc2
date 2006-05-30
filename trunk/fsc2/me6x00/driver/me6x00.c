@@ -181,35 +181,35 @@ static void me6x00_release_board( struct pci_dev * /* dev */ );
 static int me6x00_reset_board( int /* board */,
 			       int /* from  */ );
 
-static int me6x00_board_info( me6x00_dev_info * /* arg   */,
-			      int               /* minor */ );
+static int me6x00_board_info( void __user * /* arg   */,
+			      int           /* minor */ );
 
-static int me6x00_board_keep_volts( me6x00_keep_st * /* arg   */,
-				    int              /* minor */ );
+static int me6x00_board_keep_volts( void __user * /* arg   */,
+				    int           /* minor */ );
 
-static int me6x00_set_mode( me6x00_mode_st * /* arg   */,
-			    int              /* minor */);
+static int me6x00_set_mode( void __user * /* arg   */,
+			    int           /* minor */);
 
-static int me6x00_start_stop_conv( me6x00_stasto_st * /* arg   */,
-				   int                /* minor */ );
+static int me6x00_start_stop_conv( void __user * /* arg   */,
+				   int           /* minor */ );
 
-static int me6x00_clear_enable_fifo( me6x00_endis_st * /* arg   */,
-				     int               /* minor */ );
+static int me6x00_clear_enable_fifo( void __user * /* arg   */,
+				     int           /* minor */ );
 
-static int me6x00_endis_extrig( me6x00_endis_st * /* arg   */,
-				int               /* minor */ );
+static int me6x00_endis_extrig( void __user * /* arg   */,
+				int           /* minor */ );
 
-static int me6x00_rifa_extrig( me6x00_rifa_st * /* arg   */,
-			       int              /* minor */ );
+static int me6x00_rifa_extrig( void __user * /* arg   */,
+			       int           /* minor */ );
 
-static int me6x00_set_timer( me6x00_timer_st * /* arg   */,
-			     int               /* minor */ );
+static int me6x00_set_timer( void __user * /* arg   */,
+			     int           /* minor */ );
 
-static int me6x00_write_single( me6x00_single_st * /* arg   */,
-				int                /* minor */ );
+static int me6x00_write_single( void __user * /* arg   */,
+				int           /* minor */ );
 
-static int me6x00_write_continuous( me6x00_write_st * /* arg   */,
-				    int               /* minor */ );
+static int me6x00_write_continuous( void __user * /* arg   */,
+				    int           /* minor */ );
 
 static int me6x00_write_wraparound( me6x00_write_st * /* arg   */,
 				    int               /* minor */ );
@@ -1616,10 +1616,7 @@ static int me6x00_release( struct inode * inode_p,
 	minor = MINOR( inode_p->i_rdev );
 	info = info_vec + minor;
 
-	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
-		if ( down_trylock( &info->use_lock ) )
-			return -EAGAIN;
-	} else if ( down_interruptible( &info->use_lock ) )
+	if ( down_interruptible( &info->use_lock ) )
 		return -ERESTARTSYS;
 
 	if ( info->board_in_use == 0 ) {
@@ -1737,43 +1734,42 @@ static long me6x00_ioctl( struct file *  file_p,
 
 	switch ( service ) {
 		case ME6X00_SET_MODE :
-			ret = me6x00_set_mode( ( me6x00_mode_st * ) arg,
-					       minor );
+			ret = me6x00_set_mode( ( void __user * ) arg, minor );
 			break;
 
 		case ME6X00_START_STOP_CONV :
-			ret = me6x00_start_stop_conv(
-					   ( me6x00_stasto_st * ) arg, minor );
+			ret = me6x00_start_stop_conv( ( void __user * ) arg,
+						      minor );
 			break;
 
 		case ME6X00_CLEAR_ENABLE_FIFO :
-			ret = me6x00_clear_enable_fifo(
-					    ( me6x00_endis_st * ) arg, minor );
+			ret = me6x00_clear_enable_fifo( ( void __user * ) arg,
+							minor );
 			break;
 
 		case ME6X00_ENDIS_EXTRIG :
-			ret = me6x00_endis_extrig(
-					    ( me6x00_endis_st * ) arg, minor );
+			ret = me6x00_endis_extrig( ( void __user * ) arg,
+						   minor );
 
 			break;
+
 		case ME6X00_RIFA_EXTRIG :
-			ret = me6x00_rifa_extrig(
-					     ( me6x00_rifa_st * ) arg, minor );
+			ret = me6x00_rifa_extrig( ( void __user * ) arg,
+						  minor );
 			break;
 
 		case ME6X00_SET_TIMER :
-			ret = me6x00_set_timer(
-					    ( me6x00_timer_st * ) arg, minor );
+			ret = me6x00_set_timer( ( void __user * ) arg, minor );
 			break;
 
 		case ME6X00_WRITE_SINGLE :
-			ret = me6x00_write_single(
-					   ( me6x00_single_st * ) arg, minor );
+			ret = me6x00_write_single( ( void __user * ) arg,
+						   minor );
 			break;
 
 		case ME6X00_WRITE_CONTINUOUS :
-			ret = me6x00_write_continuous(
-					    ( me6x00_write_st * ) arg, minor );
+			ret = me6x00_write_continuous( ( void __user * ) arg,
+						       minor );
 			break;
 
 		case ME6X00_WRITE_WRAPAROUND :
@@ -1786,13 +1782,13 @@ static long me6x00_ioctl( struct file *  file_p,
 			break;
 
 		case ME6X00_BOARD_INFO :
-			ret = me6x00_board_info(
-					    ( me6x00_dev_info * ) arg, minor );
+			ret = me6x00_board_info( ( void __user * ) arg,
+						 minor );
 			break;
 
 		case ME6X00_KEEP_VOLTAGE :
-			ret = me6x00_board_keep_volts(
-					     ( me6x00_keep_st * ) arg, minor );
+			ret = me6x00_board_keep_volts( ( void __user * ) arg,
+						       minor );
 
 		default :
 			PDEBUG( "me6x00_ioctl(): invalid ioctl number\n" );
@@ -1807,7 +1803,7 @@ static long me6x00_ioctl( struct file *  file_p,
 
 /*
  * Routine:
- *   me6x00_set_mode
+ *   me6x00_board_info
  *
  * Description:
  *   This function is called by me6x00_ioctl() in order to set up a structure
@@ -1817,7 +1813,7 @@ static long me6x00_ioctl( struct file *  file_p,
  * Parameter list:
  *   Name    Type             Access  Description
  *--------------------------------------------------------------------------
- *   arg     me6x00_dev_info*   w    structure for returning device information
+ *   arg     void __user *      w    structure for returning device information
  *   minor   int                r    specifies the board
  *
  * Result:
@@ -1827,8 +1823,8 @@ static long me6x00_ioctl( struct file *  file_p,
  * Modification:
  */
 
-static int me6x00_board_info( me6x00_dev_info * arg,
-			      int               minor )
+static int me6x00_board_info( void __user * arg,
+			      int           minor )
 {
 	me6x00_dev_info dev_info;
 	me6x00_info_st *info;
@@ -1846,7 +1842,7 @@ static int me6x00_board_info( me6x00_dev_info * arg,
 	dev_info.dev_no      = info->pci_dev_no;
 	dev_info.func_no     = info->pci_func_no;
 
-	if ( copy_to_user( ( void __user * ) arg, &dev_info, sizeof *arg ) )
+	if ( copy_to_user( arg, &dev_info, sizeof dev_info ) )
 		return -EFAULT;
 
 	return 0;
@@ -1866,7 +1862,7 @@ static int me6x00_board_info( me6x00_dev_info * arg,
  * Parameter list:
  *   Name    Type             Access  Description
  *--------------------------------------------------------------------------
- *   arg     me6x00_keep_st *   r    specifies DAC and mode
+ *   arg     void __user *      r    specifies DAC and mode
  *   minor   int                r    specifies the board
  *
  * Result:
@@ -1876,16 +1872,15 @@ static int me6x00_board_info( me6x00_dev_info * arg,
  * Modification:
  */
 
-static int me6x00_board_keep_volts( me6x00_keep_st * arg,
-				    int              minor )
+static int me6x00_board_keep_volts( void __user * arg,
+				    int           minor )
 {
 	me6x00_keep_st keep;
 	
 
 	CALL_PDEBUG( "me6x00_board_keep() is executed\n" );
 
-	if ( copy_from_user( &keep, ( const void __user * ) arg,
-			     sizeof *arg ) )
+	if ( copy_from_user( &keep, arg, sizeof keep ) )
 		return -EFAULT;
 
 	if ( keep.dac >= info_vec[ minor ].num_dacs ) {
@@ -1913,7 +1908,7 @@ static int me6x00_board_keep_volts( me6x00_keep_st * arg,
  * Parameter list:
  *   Name    Type                      Access  Description
  *--------------------------------------------------------------------------
- *   arg     me6x00_mode_st*           r       Specifies the DAC and mode
+ *   arg     void __user *             r       Specifies the DAC and mode
  *   minor   int                       r       specifies the board
  *
  * Result:
@@ -1923,8 +1918,8 @@ static int me6x00_board_keep_volts( me6x00_keep_st * arg,
  * Modification: JTT
  */
 
-static int me6x00_set_mode( me6x00_mode_st * arg,
-			    int              minor )
+static int me6x00_set_mode( void __user * arg,
+			    int         minor )
 {
 	me6x00_mode_st dacmode;
 	unsigned int reg = 0;
@@ -1938,8 +1933,7 @@ static int me6x00_set_mode( me6x00_mode_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &dacmode, ( const void __user * ) arg,
-			     sizeof *arg ) )
+	if ( copy_from_user( &dacmode, arg, sizeof dacmode ) )
 		return -EFAULT;
 
 	if ( dacmode.dac > ME6X00_DAC03 )
@@ -1979,7 +1973,7 @@ static int me6x00_set_mode( me6x00_mode_st * arg,
  * Parameter list:
  *   Name    Type                      Access  Description
  *--------------------------------------------------------------------------
- *   arg     me6x00_stasto_st*         r       specifies the DAC and
+ *   arg     void __user *             r       specifies the DAC and
  *                                             start/stop
  *   minor   int                       r       specifies the board
  *
@@ -1990,8 +1984,8 @@ static int me6x00_set_mode( me6x00_mode_st * arg,
  * Modification: JTT
  */
 
-static int me6x00_start_stop_conv( me6x00_stasto_st * arg,
-				   int                minor )
+static int me6x00_start_stop_conv( void __user * arg,
+				   int           minor )
 {
 	me6x00_stasto_st conv;
 	me6x00_info_st *info;
@@ -2011,8 +2005,7 @@ static int me6x00_start_stop_conv( me6x00_stasto_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &conv, ( const void __user * ) arg,
-			     sizeof *arg ) )
+	if ( copy_from_user( &conv, arg, sizeof conv ) )
 		return -EFAULT;
 
 	if ( conv.dac > ME6X00_DAC03 ) {
@@ -2090,7 +2083,7 @@ static int me6x00_start_stop_conv( me6x00_stasto_st * arg,
  * Parameter list:
  *   Name    Type                      Access  Description
  *--------------------------------------------------------------------------
- *   arg     me6x00_fifo_st*           r       specifies the DAC and cl/en
+ *   arg     void __user *             r       specifies the DAC and cl/en
  *   minor   int                       r       specifies the board
  *
  * Result:
@@ -2100,8 +2093,8 @@ static int me6x00_start_stop_conv( me6x00_stasto_st * arg,
  * Modification: JTT
  */
 
-static int me6x00_clear_enable_fifo( me6x00_endis_st * arg,
-				     int               minor )
+static int me6x00_clear_enable_fifo( void __user * arg,
+				     int           minor )
 {
 	me6x00_endis_st fifo;
 	unsigned int reg;
@@ -2116,8 +2109,7 @@ static int me6x00_clear_enable_fifo( me6x00_endis_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &fifo, ( const void __user * ) arg,
-			     sizeof *arg ) )
+	if ( copy_from_user( &fifo, arg, sizeof fifo ) )
 		return -EFAULT;
 
 	if ( fifo.dac > ME6X00_DAC03 ) {
@@ -2159,7 +2151,7 @@ static int me6x00_clear_enable_fifo( me6x00_endis_st * arg,
  * Parameter list:
  *   Name    Type                      Access  Description
  *--------------------------------------------------------------------------
- *   arg     me6x00_en_dis_st*         r       specifies the DAC and en/dis
+ *   arg     void __user *             r       specifies the DAC and en/dis
  *   minor   int                       r       specifies the board
  *
  * Result:
@@ -2169,8 +2161,8 @@ static int me6x00_clear_enable_fifo( me6x00_endis_st * arg,
  * Modification: JTT
  */
 
-static int me6x00_endis_extrig( me6x00_endis_st * arg,
-				int               minor )
+static int me6x00_endis_extrig( void __user * arg,
+				int           minor )
 {
 	me6x00_endis_st trig;
 	unsigned int reg;
@@ -2185,8 +2177,7 @@ static int me6x00_endis_extrig( me6x00_endis_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &trig, ( const void __user * ) arg,
-			     sizeof *arg ) )
+	if ( copy_from_user( &trig, arg, sizeof trig ) )
 		return -EFAULT;
 
 	if ( trig.dac > ME6X00_DAC03 ) {
@@ -2228,7 +2219,7 @@ static int me6x00_endis_extrig( me6x00_endis_st * arg,
  * Parameter list:
  *   Name    Type                      Access  Description
  *--------------------------------------------------------------------------
- *   arg     me6x00_en_dis_st*         r       specifies the DAC and enable
+ *   arg     void __user *            r       specifies the DAC and enable
  *                                             or disable
  *   minor   int                       r       specifies the board
  *
@@ -2239,8 +2230,8 @@ static int me6x00_endis_extrig( me6x00_endis_st * arg,
  * Modification: JTT
  */
 
-static int me6x00_rifa_extrig( me6x00_rifa_st * arg,
-			       int              minor )
+static int me6x00_rifa_extrig( void __user * arg,
+			       int           minor )
 {
 	me6x00_rifa_st edge;
 	unsigned int reg;
@@ -2255,8 +2246,7 @@ static int me6x00_rifa_extrig( me6x00_rifa_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &edge, ( const void __user * ) arg,
-			     sizeof *arg ) )
+	if ( copy_from_user( &edge, arg, sizeof edge ) )
 		return -EFAULT;
 
 	if ( edge.dac > ME6X00_DAC03 ) {
@@ -2300,7 +2290,7 @@ static int me6x00_rifa_extrig( me6x00_rifa_st * arg,
  * Parameter list:
  *   Name    Type                      Access  Description
  *--------------------------------------------------------------------------
- *   arg     me6x00_timer_st*          r       carries the value from user
+ *   arg     void __user *             r       carries the value from user
  *   minor   int                       r       specifies the board
  *
  * Result:
@@ -2310,8 +2300,8 @@ static int me6x00_rifa_extrig( me6x00_rifa_st * arg,
  * Modification: JTT
  */
 
-static int me6x00_set_timer( me6x00_timer_st * arg,
-			     int               minor )
+static int me6x00_set_timer( void __user * arg,
+			     int           minor )
 {
 	me6x00_timer_st timer;
 	unsigned int port;
@@ -2325,8 +2315,7 @@ static int me6x00_set_timer( me6x00_timer_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &timer, ( const void __user * ) arg,
-			     sizeof *arg ) )
+	if ( copy_from_user( &timer, arg, sizeof timer ) )
 		return -EFAULT;
 
 	/* Check if the divisor is right. ME6X00_MIN_TICKS is the lowest */
@@ -2367,7 +2356,7 @@ static int me6x00_set_timer( me6x00_timer_st * arg,
  * Parameter list:
  *   Name    Type                      Access  Description
  *--------------------------------------------------------------------------
- *   *arg    me6x00_single_st          r       specifies the DAC and
+ *   *arg    void __user *             r       specifies the DAC and
  *                                             carries the value from user
  *   minor   int                       r       specifies the board
  *
@@ -2378,8 +2367,8 @@ static int me6x00_set_timer( me6x00_timer_st * arg,
  * Modification: JTT
  */
 
-static int me6x00_write_single( me6x00_single_st * arg,
-				int                minor )
+static int me6x00_write_single( void __user * arg,
+				int           minor )
 {
 	wait_queue_head_t wait;
 	unsigned int port;
@@ -2393,8 +2382,7 @@ static int me6x00_write_single( me6x00_single_st * arg,
 
 	init_waitqueue_head( &wait );
 
-	if ( copy_from_user( &single, ( const void __user * ) arg,
-			     sizeof *arg ) )
+	if ( copy_from_user( &single, arg, sizeof single ) )
 		return -EFAULT;
 
 	if ( single.dac >= info_vec[ minor ].num_dacs ) {
@@ -2467,7 +2455,7 @@ static int me6x00_write_single( me6x00_single_st * arg,
  * Parameter list:
  *   Name    Type                      Access  Description
  *--------------------------------------------------------------------------
- *   arg     me6x00_write_st*          r       specifies the DAC and
+ *   arg     void __user *             r       specifies the DAC and
  *                                             carries the value from user
  *   minor   int                       r       specifies the board
  *
@@ -2478,8 +2466,8 @@ static int me6x00_write_single( me6x00_single_st * arg,
  * Modification: JTT
  */
 
-static int me6x00_write_continuous( me6x00_write_st * arg,
-				    int               minor )
+static int me6x00_write_continuous( void __user * arg,
+				    int           minor )
 {
 	me6x00_info_st *info;
 	me6x00_write_st write;
@@ -2505,8 +2493,7 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 		return -ENODEV;
 	}
 
-	if ( copy_from_user( &write, ( const void __user * ) arg,
-			     sizeof *arg ) )
+	if ( copy_from_user( &write, arg, sizeof write ) )
 		return -EFAULT;
 
 	if ( write.dac > ME6X00_DAC03 ) {
@@ -2664,7 +2651,7 @@ static int me6x00_write_continuous( me6x00_write_st * arg,
 	}
 
 	write.ret = ret;
-	if ( copy_to_user( ( void __user * ) arg, &write, sizeof *arg ) )
+	if ( copy_to_user( ( void __user * ) arg, &write, sizeof write ) )
 		return -EFAULT;
 
 	return 0;

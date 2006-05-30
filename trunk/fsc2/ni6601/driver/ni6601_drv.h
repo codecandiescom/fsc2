@@ -672,10 +672,10 @@ int ni6601_input_source( int   /* source */,
 
 
 #if defined NI6601_DEBUG
-#define PDEBUG( fmt, args... ) \
-	do { \
-        	printk( KERN_DEBUG " " NI6601_NAME " %s(): " \
-			fmt, __FUNCTION__ , ## args ); \
+#define PDEBUG( fmt, args... )                                \
+	do {                                                  \
+        	printk( KERN_DEBUG " " NI6601_NAME " %s(): "  \
+			fmt, __FUNCTION__ , ##args );         \
 	} while( 0 )
 #else
 #define PDEBUG( ftm, args... )

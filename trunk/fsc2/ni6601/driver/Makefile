@@ -91,7 +91,7 @@ install:
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
-	$(RM) $(RMFLAGS) svn-* *~
+	$(RM) $(RMFLAGS) autoconf.h svn-* *~
 
 endif
 
@@ -138,7 +138,7 @@ cleanup:
 	$(RM) $(RMFLAGS) ni6601_drv.o util.o svn-* *~
 
 clean:
-	$(RM) $(RMFLAGS) *.o svn-* *~
+	$(RM) $(RMFLAGS) autoconf.h *.o svn-* *~
 
 endif
 endif

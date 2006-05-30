@@ -150,10 +150,7 @@ static int ni_daq_release( struct inode * inode_p,
 
 	board = boards + minor;
 
-	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
-		if ( down_trylock( &board->open_mutex ) )
-			return -EAGAIN;
-	} else if ( down_interruptible( &board->open_mutex ) )
+	if ( down_interruptible( &board->open_mutex ) )
 		return -ERESTARTSYS;
 
 	if ( ! board->in_use ) {

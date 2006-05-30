@@ -38,7 +38,7 @@ extern "C" {
 
 typedef struct RULBUS_CARD_INFO RULBUS_CARD_INFO;
 
-int rulbus_open( int flags );
+int rulbus_open( int /* flag */ );
 void rulbus_close( void );
 
 int rulbus_perror( const char * /* s */ );

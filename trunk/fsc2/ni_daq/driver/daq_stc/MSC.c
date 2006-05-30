@@ -398,7 +398,7 @@ int MSC_ioctl_handler( Board *          board,
 
 	if ( copy_from_user( &a, ( const void __user * ) arg, sizeof *arg ) ) {
 		PDEBUG( "Can't read from user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	switch ( a.cmd ) {
@@ -431,7 +431,7 @@ int MSC_ioctl_handler( Board *          board,
 
 	if ( copy_to_user( ( void __user * ) arg, &a, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	return 0;
@@ -737,7 +737,7 @@ int MSC_board_properties( Board *                   board,
 
 	if ( copy_to_user( ( void __user * ) arg, &p, sizeof *arg ) ) {
 		PDEBUG( "Can't write to user space\n" );
-		return -EACCES;
+		return -EFAULT;
 	}
 
 	return 0;

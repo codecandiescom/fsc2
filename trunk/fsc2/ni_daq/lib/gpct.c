@@ -27,21 +27,21 @@
 #include "ni_daq_lib.h"
 
 
-static int ni_daq_gpct_check_source( NI_DAQ_INPUT source );
+static int ni_daq_gpct_check_source( NI_DAQ_INPUT /* source */ );
 
-static int ni_daq_gpct_state( int   board,
-							  int   counter,
-							  int * state );
+static int ni_daq_gpct_state( int   /* board   */,
+							  int   /* counter */,
+							  int * /* state   */ );
 
-static int ni_daq_gpct_is_armed( int   board,
-								 int   counter,
-								 int * state );
+static int ni_daq_gpct_is_armed( int   /* board   */,
+								 int   /* counter */,
+								 int * /* state   */);
 
-static int ni_daq_gpct_time_to_ticks( int             board,
-									  int             counter,
-									  double          gate_length,
-									  unsigned long * ticks,
-									  NI_DAQ_INPUT *  source );
+static int ni_daq_gpct_time_to_ticks( int             /* board       */,
+									  int             /* counter     */,
+									  double          /* gate_length */,
+									  unsigned long * /* ticks       */,
+									  NI_DAQ_INPUT *  /* source      */ );
 
 
 /*-------------------------------------------------*

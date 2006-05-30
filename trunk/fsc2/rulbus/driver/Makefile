@@ -76,7 +76,7 @@ else                         # otherwise make kernel build system available
 EXTRA_CFLAGS := -I$(PWD)/../include
 
 all:
-	$(MAKE) -C $(KERNELDIR) M=$"(PWD)" EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
 
 check:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" C=1 EXTRA_CFLAGS="$(EXTRA_CFLAGS)"

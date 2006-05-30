@@ -115,10 +115,7 @@ int ni6601_release( struct inode * inode_p,
 
 	board = boards + minor;
 
-	if ( filep->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
-		if ( down_trylock( &board->open_mutex ) )
-			return -EAGAIN;
-	} else if ( down_interruptible( &board->open_mutex ) )
+	if ( down_interruptible( &board->open_mutex ) )
 		return -ERESTARTSYS;
 
 	if ( ! board->in_use ) {
@@ -210,7 +207,7 @@ long ni6601_ioctl( struct file *  filep,
 		return -ERESTARTSYS;
 
 	if ( ! board->in_use ) {
-		up( &board->open_mutex );
+		up( &board->ioctl_mutex );
 		PDEBUG( "Board %d not open\n", minor );
 		return -EBADF;
 	}
@@ -303,7 +300,7 @@ unsigned int ni6601_poll( struct file *              filep,
 		return -ERESTARTSYS;
 
 	if ( ! board->in_use ) {
-		up( &board->open_mutex );
+		up( &board->ioctl_mutex );
 		PDEBUG( "Board %d not open\n", minor );
 		return -EBADF;
 	}
@@ -397,7 +394,7 @@ ssize_t ni6601_read( struct file * filep,
 		return -ERESTARTSYS;
 
 	if ( ! board->in_use ) {
-		up( &board->open_mutex );
+		up( &board->ioctl_mutex );
 		PDEBUG( "Board %d not open\n", minor );
 		return -EBADF;
 	}
@@ -504,7 +501,10 @@ ssize_t ni6601_read( struct file * filep,
 		if ( transferable > count )
 			transferable = count;
 	
-		copy_to_user( buff, board->low_ptr, transferable );
+		if ( copy_to_user( buff, board->low_ptr, transferable ) ) {
+			up( &board->ioctl_mutex );
+			return -EFAULT;
+		}
 		board->low_ptr += transferable / sizeof *board->buf;
 		count = transferable;
 
@@ -526,7 +526,11 @@ ssize_t ni6601_read( struct file * filep,
 			if ( transferable > count )
 				transferable = count;
 
-			copy_to_user( buff, board->low_ptr, transferable );
+			if ( copy_to_user( buff, board->low_ptr,
+					   transferable ) ) {
+				up( &board->ioctl_mutex );
+				return -EFAULT;
+			}
 			transfered = transferable;
 
 			board->low_ptr += transferable / sizeof *board->buf;
@@ -543,7 +547,11 @@ ssize_t ni6601_read( struct file * filep,
 			if ( transferable > count - transfered  )
 				transferable = count - transfered;
 	
-			copy_to_user( buff, board->low_ptr, transferable );
+			if ( copy_to_user( buff, board->low_ptr,
+					   transferable ) ) {
+				up( &board->ioctl_mutex );
+				return -EFAULT;
+			}
 			count = transfered + transferable;
 
 			board->low_ptr += transferable / sizeof *board->buf;

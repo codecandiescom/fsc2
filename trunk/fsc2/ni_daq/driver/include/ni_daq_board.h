@@ -361,10 +361,10 @@ struct Board {
 
 
 #if defined NI_DAQ_DEBUG
-#define PDEBUG( fmt, args... )                                \
-	do {                                                  \
-        	printk( KERN_DEBUG " "BOARD_SERIES_NAME ": "  \
-			__FUNCTION__ "(): " fmt, ## args );   \
+#define PDEBUG( fmt, args... )                                       \
+	do {                                                         \
+        	printk( KERN_DEBUG " " BOARD_SERIES_NAME ": %s(): "  \
+			fmt, __FUNCTION__, ##args );                 \
 	} while( 0 )
 #else
 #define PDEBUG( fmt, args... )

@@ -399,7 +399,7 @@ int pci_dma_buf_get( Board *          board,
 				   transf ) ) {
 			pci_dma_shutdown( board, sys );
 			PDEBUG( "Can't write to user space\n" );
-			return -EACCES;
+			return -EFAULT;
 		}
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )

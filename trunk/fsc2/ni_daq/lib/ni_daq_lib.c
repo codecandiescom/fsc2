@@ -79,14 +79,16 @@ static int ni_daq_first_call_handler( void );
 
 /*------------------------------------------------------------------*
  * Function for initializing the board - it expects the name of the
- * device file associated with the board as its argument. It then
- * tries to open the device file, applies some default settings and
- * asks the driver for the boards capabilities. On success a non-
- * negative integer handle for the board is returned, on failure a
- * negative number indicating the reason of the failure.
+ * device file associated with the board and a flag (only  O_NONBLOCK
+ * or O_NODELAY make sense) as its arguments. It then tries to open
+ * the device file, applies some default settings and asks the driver
+ * for the boards capabilities. On success a non-negative integer
+ * handle for the board is returned, on failure a negative number
+ * indicating the reason of the failure.
  *------------------------------------------------------------------*/
 
-int ni_daq_open( const char * name )
+int ni_daq_open( const char * name,
+				 int          flag )
 {
 	int board;
 	struct stat stat_buf;
@@ -105,7 +107,7 @@ int ni_daq_open( const char * name )
 	if ( stat( name, &stat_buf ) < 0 )
 		switch ( errno )
 		{
-			case ENOENT : case ENOTDIR : case ELOOP :
+			case ENOENT :  case ENOTDIR : case ENAMETOOLONG : case ELOOP :
 				return ni_daq_errno = NI_DAQ_ERR_DFM;
 
 			case EACCES :
@@ -117,17 +119,23 @@ int ni_daq_open( const char * name )
 
 	board = stat_buf.st_rdev & 0xFF;
 
-	if ( ( ni_daq_dev[ board ].fd = open( name, O_RDWR | O_NONBLOCK ) ) < 0 )
+	if ( ( ni_daq_dev[ board ].fd = open( name, O_RDWR | flag ) ) < 0 )
 		switch ( errno )
 		{
+			case ENOENT :  case ENOTDIR : case ENAMETOOLONG : case ELOOP :
+				return ni_daq_errno = NI_DAQ_ERR_DFM;
+
 			case ENODEV : case ENXIO :
 				return ni_daq_errno = NI_DAQ_ERR_NDV;
             
 			case EACCES :
 				return ni_daq_errno = NI_DAQ_ERR_ACS;
 
-			case EBUSY :
+			case EBUSY : case EAGAIN :
 				return ni_daq_errno = NI_DAQ_ERR_BBS;
+
+			case EINTR :
+				return ni_daq_errno = NI_DAQ_ERR_ITR;
 
 			default :
 				return ni_daq_errno = NI_DAQ_ERR_DFP;
@@ -157,8 +165,7 @@ int ni_daq_open( const char * name )
 	if ( ni_daq_msc_init( board ) || ni_daq_ai_init( board ) ||
 		 ni_daq_ao_init( board )  || ni_daq_gpct_init( board ) )
 	{
-		close( ni_daq_dev[ board ].fd );
-		ni_daq_dev[ board ].fd = -1;
+		ni_daq_close( board );
 		return ni_daq_errno = NI_DAQ_ERR_INT;
 	}
 	
@@ -174,13 +181,14 @@ int ni_daq_close( int board )
 	int ret;
 
 
-	if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
-		return ret;
+	if ( board < 0 || board > NI_DAQ_MAX_BOARDS )
+        return ni_daq_errno = NI_DAQ_ERR_NSB;
 
-	if ( ni_daq_dev[ board ].fd >= 0 )
-        while ( close( ni_daq_dev[ board ].fd ) == -1 && errno == EINTR )
-            /* empty */ ;
+	if ( ni_daq_dev[ board ].fd < 0 )
+		return ni_daq_errno = NI_DAQ_ERR_BNO;
 
+	while ( close( ni_daq_dev[ board ].fd ) && errno == EINTR )
+		/* empty */ ;
 	ni_daq_dev[ board ].fd = -1;
 
     return ni_daq_errno = NI_DAQ_OK;

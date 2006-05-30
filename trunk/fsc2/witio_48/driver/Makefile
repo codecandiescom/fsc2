@@ -24,8 +24,6 @@
 
 
 MODULE   := witio_48.o
-SOURCE   := witio_48_drv.c
-OBJECT   := $(SOURCE:.c=.o)
 
 # Unless the user set the environment variable WITIO_48_KERNEL_SOURCE
 # assume that we can find out where the kernel sources are (or at least
@@ -55,7 +53,7 @@ KERNEL_VER := $(shell grep UTS_RELEASE $(KERNELDIR)/include/linux/version.h \
 				      sed 's/^[^"]\{1,\}"\([^"]\{1,\}\)".*$$/\1/' \
 					  2>/dev/null)
 
-all $(MODULE) install clean:
+all $(MODULE) install check clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \
 		echo "Error: Can't figure out kernel version under the assumption that the kernel sources are at $(KERNELDIR)"; \
 		exit 2; \
@@ -74,10 +72,17 @@ ifneq ($(KERNELRELEASE),)    # if can use the kernel build system
 
 else                         # otherwise make kernel build system available
 
+PWD          := $(shell pwd)
+SOURCE   := witio_48_drv.c
+OBJECT   := $(SOURCE:.c=.o)
 EXTRA_CFLAGS := -I$(PWD)/../include
+export OBJECT
 
 all:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) EXTRA_CFLAGS=$(EXTRA_CFLAGS)
+
+check:
+	$(MAKE) -C $(KERNELDIR) M="$(PWD)" C=1 EXTRA_CFLAGS="$(EXTRA_CFLAGS)"
 
 install:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules_install
@@ -94,6 +99,8 @@ else
 
 # Otherwise we're dealing with some pre-2.6 kernel (hopefully 2.4)
 
+SOURCE   := witio_48_drv.c
+OBJECT   := $(SOURCE:.c=.o)
 HEADERS  = witio_48_drv.h autoconf.h
 INCLUDES = -I$(KERNELDIR)/include -I.
 CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes

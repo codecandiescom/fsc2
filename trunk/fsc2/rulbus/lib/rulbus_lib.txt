@@ -344,19 +344,20 @@ name that has been set in the configuration file.
 
 The flags O_NONBLOCK (or O_NODELAY) and O_EXCL can be passed (if
 necessary or-ed together) to the function. The O_NONBLOCK flag will
-make sure that function calls will return immediately (returning
-EAGAIN) if the execution of the function would have to wait for some
-time. In this case no data get read or written. If the device is to be
-opened with the E_EXCL flag you ask for exclusiv access to the device
-in order to keep other processes (or threads) from accessing it.
+make sure that function calls will return immediately if opening the
+board would require any delay. If the device is to be opened with
+the O_EXCL flag you ask for exclusiv access to the device in order
+to keep other processes (or threads) from accessing it.
 
 On success the function returns RULBUS_OK, otherwise a negative value
 indicating the reason for the failure. Please note that the function
 may fail because another process already has been granted exclusive
-access to te device even if you don't ask for exclusive access.
+access to the device even if you didn't request exclusive access.
 
-Please note that the close-on-exec flag is set for the device file
-for the interface.
+Please note: processes that inherit the file descriptor for the device
+file via a call to the exec-family of functions won't be able to access
+the board, the close-on-exec flag gets set for the file handle used for
+accessing the board.
 
 
 ----------------------------------------------------------------------

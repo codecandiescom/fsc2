@@ -37,15 +37,15 @@ The library supplies the following functions:
     ni6601_dio_read()
     ni6601_is_counter_armed()
     ni6601_close()
-	ni6601_perror()
-	ni6601_strerror()
+    ni6601_perror()
+    ni6601_strerror()
 
 Most functions return an integer, indicating success or failure. On success,
 'NI6601_OK' (which is just 0) is returned. On failure a negative number
 is returned, indicating the type of failure. The following values can be
 expected:
 
-	NI6601_OK         Function call was successful
+    NI6601_OK         Function call was successful
     NI6601_ERR_NSB    Invalid board number
     NI6601_ERR_NSC    Invalid counter number
     NI6601_ERR_CBS    Requested counter is busy
@@ -57,15 +57,15 @@ expected:
     NI6601_ERR_NDV    Driver for board not loaded or board does not exist
     NI6601_ERR_NCB    Neighbouring counter of specified counter is busy
     NI6601_ERR_ITR    Function was interrupted by a signal
-	NI6601_ERR_ACS    Missing permission to open the device file
-	NI6601_ERR_DFM    Device file for the requested board does not exist
-	NI6601_ERR_DFP    Unspecified error when opening the device file
+    NI6601_ERR_ACS    Missing permission to open the device file
+    NI6601_ERR_DFM    Device file for the requested board does not exist
+    NI6601_ERR_DFP    Unspecified error when opening the device file
     NI6601_ERR_INT    Internal driver or library error
-	NI6601_ERR_TMB    Only one buffered counter possible
-	NI6601_ERR_MEM    Not enough memory for internal buffers
-	NI6601_ERR_OFL    Internal buffer overflow
-	NI6601_ERR_TFS    Acquisition is procceding too fast
-	NI6601_ERR_NBC    No buffered counter running
+    NI6601_ERR_TMB    Only one buffered counter possible
+    NI6601_ERR_MEM    Not enough memory for internal buffers
+    NI6601_ERR_OFL    Internal buffer overflow
+    NI6601_ERR_TFS    Acquisition is procceding too fast
+    NI6601_ERR_NBC    No buffered counter running
 
 
 The absolute value of the error code can be used as an index into a an
@@ -86,7 +86,7 @@ is ni6601_nerr - 1.
 All functions (except ni6601_close(), ni6601_perror() and ni6601_strerror())
 may return at least one of the following error codes:
 
-    NI6601_ERR_NSB    NI6601_ERR_NSC   	NI6601_ERR_DFM
+    NI6601_ERR_NSB    NI6601_ERR_NSC    NI6601_ERR_DFM
     NI6601_ERR_DFP    NI6601_ERR_NDV    NI6601_ERR_ACS
     NI6601_ERR_BBS    NI6601_ERR_DFP    NI6601_ERR_INT
 
@@ -121,18 +121,22 @@ events to be counted. Valid values for this argument are
 
 
 There is no need to "open" a board before using it - the first call
-to one of the functions will automatically open the board and make it
-exclusively accessable by the process that opened the board this way.
+to one of the functions will automatically call open() on the device
+file (in blocking mode) to allow access to the board and make it thus
+exclusively available to the process that opened it board this way.
 
 
-Processes that get started by a call to the exec-family of functions
-won't be able to access the board, i.e. the close-on-exec flag is
-set for the file handle used for accessing the board.
+Processes that inherit the file descriptor for the device file via a
+call to the exec-family of functions won't be able to access the board,
+i.e. the close-on-exec flag is set for the file handle used for accessing
+the board.
 
 
 ======================================================================
 
-int ni6601_start_counter( int board, int counter, int source )
+int ni6601_start_counter( int board,
+                          int counter,
+                          int source )
 
 The function starts a countinuously counting counter. The counter is
 initialized to 0 at the start and counts upwards.
@@ -151,8 +155,10 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
-int ni6601_start_gated_counter( int board, int counter, double gate_length,
-								int source )
+int ni6601_start_gated_counter( int    board,
+                                int    counter,
+                                double gate_length,
+                                int    source )
 
 The function starts a gated counter. The counter will run only for the
 time specified by the 'gate_length' argument and then stop. The counter
@@ -176,14 +182,17 @@ of 50 ns. It must not be longer than 214.7483648 s.
 Beside the error codes mentioned above the function may return:
 
      NI6601_ERR_IVS    NI6601_ERR_IVA
-	 NI6601_ERR_CBS    NI6601_ERR_NCB
+     NI6601_ERR_CBS    NI6601_ERR_NCB
 
 
 ======================================================================
 
-int ni6601_start_buffered_counter( int board, int counter, double gate_length,
-								   int source, unsigned long num_points,
-                                   int continuous )
+int ni6601_start_buffered_counter( int           board,
+                                   int           counter,
+                                   double        gate_length,
+                                   int           source,
+                                   unsigned long num_points,
+                                   int           continuous )
 
 The function starts a buffered, gated counter. The counter will repeatedly
 run for the specified 'gate_length' and store the data in an internal
@@ -244,7 +253,8 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
-int ni6601_stop_counter( int board, int counter )
+int ni6601_stop_counter( int board,
+                         int counter )
 
 The function stops a counter. If the specified counter isn't counting
 nothing happens (i.e. success is reported).
@@ -255,8 +265,12 @@ nothing happens (i.e. success is reported).
 
 ======================================================================
 
-int ni6601_get_count( int board, int counter, int wait_for_end,
-					  int do_poll, unsigned long *count, int *state )
+int ni6601_get_count( int             board,
+                      int             counter,
+                      int             wait_for_end,
+                      int             do_poll,
+                      unsigned long * count,
+                      int *           state )
 
 The function returns the current value of a non-buffered counter (use
 the function ni6601_get_buffered_counts() to obtain the data acquired
@@ -312,10 +326,13 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
-ssize_t ni6601_get_buffered_counts( int board, unsigned long *counts,
-									size_t num_points, double wait_secs,
-									int *quit_on_signal, int *timed_out,
-									int *end_of_data )
+ssize_t ni6601_get_buffered_counts( int             board,
+                                    unsigned long * counts,
+                                    size_t          num_points,
+                                    double          wait_secs,
+                                    int *           quit_on_signal,
+                                    int *           timed_out,
+                                    int *           end_of_data )
 
 This function must be used to fetch data from a buffered counter.
 
@@ -373,7 +390,9 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
-int ni6601_generate_single_pulse( int board, int counter, double duration )
+int ni6601_generate_single_pulse( int    board,
+                                  int    counter,
+                                  double duration )
 
 The function creates a single pulse of 'duration' length at the output
 connectors of the specified counter.
@@ -392,8 +411,10 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
-int ni6601_generate_continuous_pulses( int board, int counter,
-									   double high_phase, double low_phase )
+int ni6601_generate_continuous_pulses( int    board,
+                                       int    counter,
+                                       double high_phase,
+                                       double low_phase )
 
 The function creates a continuous train of pulses at the output
 connectors of of the specified counter.
@@ -417,7 +438,8 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
-int ni6601_stop_pulses( int board, int counter )
+int ni6601_stop_pulses( int board,
+                        int counter )
 
 The function is just an alias for the ni6601_stop_counter() function
 and can be used to stop a continous train of pulses being generated.
@@ -425,7 +447,9 @@ and can be used to stop a continous train of pulses being generated.
 
 ======================================================================
 
-int ni6601_is_counter_armed( int board, int counter, int *state )
+int ni6601_is_counter_armed( int   board,
+                             int   counter,
+                             int * state )
 
 The function checks if a counter is armed and thus can be taken to
 be counting and busy.
@@ -440,7 +464,9 @@ via the variable pointed to by 'state'.
 
 ======================================================================
 
-int ni6601_dio_write( int board, unsigned char bits, unsigned char mask )
+int ni6601_dio_write( int           board,
+                      unsigned char bits,
+                      unsigned char mask )
 
 The function sets a subset, selected via the 'mask' argument, of the
 8 DIO output lines of the board to the states given by the 'bits'
@@ -469,7 +495,9 @@ simultaneously.
 
 ======================================================================
 
-int ni6601_dio_read( int board, unsigned char *bits, unsigned char mask )
+int ni6601_dio_read( int             board,
+                     unsigned char * bits,
+                     unsigned char   mask )
 
 The function returns the state of a subset, selected via the 'mask'
 argument, of the 8 DIO output lines of the board.
@@ -508,7 +536,7 @@ Beside the error codes mentioned above the function may return:
 
 ======================================================================
 
-int ni6601_perror( const char *s )
+int ni6601_perror( const char * s )
 
 The function prints produces a message on the standard error output,
 describing the error encountered during the last call of one of the

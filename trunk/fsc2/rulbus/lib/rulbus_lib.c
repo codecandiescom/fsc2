@@ -150,25 +150,25 @@ static int rulbus_check_config( void );
 
 static void rulbus_cleanup( void );
 
-static int rulbus_write_rack( unsigned char   rack,
-							  unsigned char   addr,
-							  unsigned char * data,
-							  size_t          len );
+static int rulbus_write_rack( unsigned char   /* rack */,
+							  unsigned char   /* addr */,
+							  unsigned char * /* data */,
+							  size_t          /* len  */ );
 
-static int rulbus_write_rack_range( unsigned char   rack,
-									unsigned char   addr,
-									unsigned char * data,
-									size_t          len );
+static int rulbus_write_rack_range( unsigned char   /* rack */,
+									unsigned char   /* addr */,
+									unsigned char * /* data */,
+									size_t          /* len  */ );
 
-static int rulbus_read_rack( unsigned char   rack,
-							 unsigned char   addr,
-							 unsigned char * data,
-							 size_t          len );
+static int rulbus_read_rack( unsigned char   /* rack */,
+							 unsigned char   /* addr */,
+							 unsigned char * /* data */,
+							 size_t          /* len  */ );
 
-static int rulbus_read_rack_range( unsigned char   rack,
-								   unsigned char   addr,
-								   unsigned char * data,
-								   size_t          len );
+static int rulbus_read_rack_range( unsigned char   /* rack */,
+								   unsigned char   /* addr */,
+								   unsigned char * /* data */,
+								   size_t          /* len  */ );
 
 extern int rulbus_parse( void );
 
@@ -235,7 +235,7 @@ static RULBUS_CARD_HANDLER rulbus_card_handler[ ] =
 
 
 static const int rulbus_num_card_handlers = 
-	  ( int ) ( sizeof rulbus_card_handler / sizeof rulbus_card_handler[ 0 ] );
+	  ( int ) ( sizeof rulbus_card_handler / sizeof *rulbus_card_handler );
 
 
 /*--------------------------------------------------------------------*
@@ -245,7 +245,7 @@ static const int rulbus_num_card_handlers =
  * out about the cards in the racks.
  *--------------------------------------------------------------------*/
 
-int rulbus_open( int flags )
+int rulbus_open( int flag )
 {
 	const char *config_name;
 	extern FILE *rulbus_in;             /* defined in parser.y */
@@ -304,7 +304,7 @@ int rulbus_open( int flags )
 
 	/* Try to open the device file */
 
-	if ( ( fd = open( rulbus_dev_file, O_RDWR | flags) ) < 0 )
+	if ( ( fd = open( rulbus_dev_file, O_RDWR | flag ) ) < 0 )
 	{
 		int stored_errno = errno;
 
@@ -319,7 +319,7 @@ int rulbus_open( int flags )
 				return rulbus_errno = RULBUS_SIGNAL_RECEIVED;
 
 			case EEXIST :
-				if ( flags & O_EXCL )
+				if ( flag & O_EXCL )
 					return rulbus_errno = RULBUS_EXCL_ACCESS_DENIED;
 				else
 					return rulbus_errno = RULBUS_EXCL_ACCESS_BY_OTHER;
@@ -375,7 +375,6 @@ int rulbus_open( int flags )
 void rulbus_close( void )
 {
 	int i;
-	int ret;
 
 
 	if ( rulbus_in_use )
@@ -392,13 +391,7 @@ void rulbus_close( void )
 			if ( rulbus_card_handler[ i ].exit )
 				rulbus_card_handler[ i ].exit( );
 
-		/* We have to loop over the close call() on the device file in case
-		   it gets aborted because another process is just in the process
-		   of closing it and the device file was opened with the O_NONBLOCK
-		   or the O_NODELAY flag or a signal was received that interrupted
-		   the call. */
-
-		while ( ( ret = close( fd ) ) == EAGAIN || ret == EINTR )
+		while ( close( fd ) && errno == EINTR )
 			/* empty */ ;
 
 		rulbus_cleanup( );
@@ -549,7 +542,7 @@ int rulbus_card_close( int handle )
 int rulbus_write( int             handle,
 				  unsigned char   offset,
 				  unsigned char * data,
-				  size_t          len)
+				  size_t          len )
 {
 	int retval;
 
@@ -593,7 +586,7 @@ int rulbus_write( int             handle,
 int rulbus_write_range( int             handle,
 						unsigned char   offset,
 						unsigned char * data,
-						size_t          len)
+						size_t          len )
 {
 	int retval;
 

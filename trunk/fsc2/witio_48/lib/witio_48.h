@@ -30,13 +30,23 @@ extern "C" {
 
 
 int witio_48_close( void );
-int witio_48_set_mode( WITIO_48_DIO /* dio */, WITIO_48_MODE /* mode */ );
-int witio_48_get_mode( WITIO_48_DIO /* dio */, WITIO_48_MODE * /* mode */ );
-int witio_48_dio_out( WITIO_48_DIO /* dio */, WITIO_48_CHANNEL /* channel */,
-					  unsigned long /* value */ );
-int witio_48_dio_in( WITIO_48_DIO /* dio */, WITIO_48_CHANNEL /* channel */,
-					 unsigned long * /* value */ );
+
+int witio_48_set_mode( WITIO_48_DIO  /* dio */,
+					   WITIO_48_MODE /* mode */ );
+
+int witio_48_get_mode( WITIO_48_DIO    /* dio */,
+					   WITIO_48_MODE * /* mode */ );
+
+int witio_48_dio_out( WITIO_48_DIO     /* dio */,
+					  WITIO_48_CHANNEL /* channel */,
+					  unsigned long    /* value */ );
+
+int witio_48_dio_in( WITIO_48_DIO     /* dio */,
+					 WITIO_48_CHANNEL /* channel */,
+					 unsigned long *  /* value */ );
+
 int witio_48_perror( const char * /* s */ );
+
 const char *witio_48_strerror( void );
 
 

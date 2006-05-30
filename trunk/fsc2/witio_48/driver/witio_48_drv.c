@@ -27,30 +27,154 @@
 #include "autoconf.h"
 #include "witio_48_drv.h"
 
+#include <linux/version.h>
+#include <linux/config.h>
+
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
+
+#if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
+#define MODVERSIONS
+#endif
+
+
+#if defined( MODVERSIONS )
+#include <linux/modversions.h>
+#endif
+
+#define __NO_VERSION__
+#include <linux/module.h>
+
+#else
+
+#include <linux/module.h>
+
+#endif
+
+
+#include <linux/kernel.h>
+#include <linux/sched.h>
+#include <linux/fs.h>
+#include <linux/ioport.h>
+#include <linux/init.h>
+#include <asm/uaccess.h>
+#include <asm/io.h>
+
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+#include <linux/moduleparam.h>
+#include <linux/cdev.h>
+#else
+#define __user
+#endif
+
+
+#define PORT unsigned int
+
+
+#define A 0
+#define B 1
+#define C 2
+
+
+#define WRITE_ALL   0
+#define READ_LOWER  1
+#define READ_UPPER  2
+#define READ_ALL    3
+
+
+typedef struct Board Board;
+typedef struct Registers Registers;
+typedef struct State State;
+
+struct Registers {
+	unsigned char *port[ 2 ][ 3 ];
+	unsigned char *control[ 2 ];
+	unsigned char *counter[ 3 ];
+};
+
+
+struct State {
+	WITIO_48_MODE mode;
+	unsigned char state[ 3 ];
+	unsigned char out_value[ 3 ];
+};
+
+
+struct Board {
+	int major;
+	unsigned char *base;
+	int in_use;
+	uid_t owner;
+	struct semaphore open_mutex;
+	struct semaphore use_mutex;
+	Registers regs;
+	State states[ 2 ];
+};
+
+
+#if defined WITIO_48_DEBUG
+#define PDEBUG( fmt, args... )                           \
+	do {                                             \
+        	printk( KERN_DEBUG " WITIO_48: %s(): "   \
+			fmt, __FUNCTION__ , ## args );   \
+	} while( 0 )
+#else
+#define PDEBUG( ftm, args... )
+#endif
+
 
 /* Local function declarations */
 
 static int witio_48_get_ioport( void );
-static int witio_48_open( struct inode *inode_p, struct file *file_p );
-static int witio_48_release( struct inode *inode_p, struct file * file_p );
-static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
-			   unsigned int cmd, unsigned long arg );
-static int witio_48_set_mode( WITIO_48_DIO_MODE *state );
-static int witio_48_get_mode( WITIO_48_DIO_MODE *state );
-static int witio_48_dio_out( WITIO_48_DATA *data );
-static void witio_48_3x8_dio_out( WITIO_48_DATA *data );
-static void witio_48_2x12_dio_out( WITIO_48_DATA *data );
-static void witio_48_1x24_dio_out( WITIO_48_DATA *data );
-static void witio_48_16_8_dio_out( WITIO_48_DATA *data );
-static int witio_48_dio_in( WITIO_48_DATA *data );
-static void witio_48_3x8_dio_in( WITIO_48_DATA *data );
-static void witio_48_2x12_dio_in( WITIO_48_DATA *data );
-static void witio_48_1x24_dio_in( WITIO_48_DATA *data );
-static void witio_48_16_8_dio_in( WITIO_48_DATA *data );
-static int witio_48_get_from_user( unsigned long arg, void *to, size_t len );
+
+static int witio_48_open( struct inode * inode_p,
+			  struct file *  file_p );
+
+static int witio_48_release( struct inode * inode_p,
+			     struct file *  file_p );
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+static int witio_48_ioctl( struct inode * inode_p,
+			   struct file *  file_p,
+			   unsigned int   cmd,
+			   unsigned long  arg );
+#else
+static long witio_48_ioctl( struct file *  file_p,
+			    unsigned int   cmd,
+			    unsigned long  arg );
+#endif
+
+static int witio_48_set_mode( WITIO_48_DIO_MODE * state );
+
+static int witio_48_get_mode( WITIO_48_DIO_MODE * state );
+
+static int witio_48_dio_out( WITIO_48_DATA * data );
+
+static void witio_48_3x8_dio_out( WITIO_48_DATA * data );
+
+static void witio_48_2x12_dio_out( WITIO_48_DATA * data );
+
+static void witio_48_1x24_dio_out( WITIO_48_DATA * data );
+
+static void witio_48_16_8_dio_out( WITIO_48_DATA * data );
+
+static int witio_48_dio_in( WITIO_48_DATA * data );
+
+static void witio_48_3x8_dio_in( WITIO_48_DATA * data );
+
+static void witio_48_2x12_dio_in( WITIO_48_DATA * data );
+
+static void witio_48_1x24_dio_in( WITIO_48_DATA * data );
+
+static void witio_48_16_8_dio_in( WITIO_48_DATA * data );
+
 static void witio_48_set_crtl( int dio );
-static void witio_48_board_out( unsigned char *addr, unsigned char byte );
-static unsigned char witio_48_board_in( unsigned char *addr );
+
+static void witio_48_board_out( unsigned char * addr,
+				unsigned char   byte );
+
+static unsigned char witio_48_board_in( unsigned char * addr );
 
 
 /* Global variables of the module */
@@ -59,16 +183,29 @@ static Board board;                              /* board structure */
 static int major    = WITIO_48_MAJOR;            /* major device number */
 static int base     = WITIO_48_BASE;             /* IO memory address */
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+static struct file_operations witio_48_file_ops = {
+	.owner =            THIS_MODULE,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 11 )
+	.unlocked_ioctl =   witio_48_ioctl,
+#else
+	.ioctl =            witio_48_ioctl,
+#endif
+	.open =             witio_48_open,
+	.release =          witio_48_release
+};
+
+
+static dev_t dev_no;
+struct cdev ch_dev;
+
+#else
 static struct file_operations witio_48_file_ops = {
 	owner:              THIS_MODULE,
 	ioctl:              witio_48_ioctl,
 	open:               witio_48_open,
-	release:            witio_48_release,
+	release:            witio_48_release
 };
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-static dev_t dev_no;
-struct cdev ch_dev;
 #endif
 
 
@@ -147,10 +284,15 @@ static int __init witio_48_init( void )
 		witio_48_set_crtl( i );
 	}
 
-	/* Finally initialize the spinlock that's used during opening and
-	   closing the board. */
+	/* Finally initialize the mutexes */
 
-	spin_lock_init( &board.spinlock );
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
+        sema_init( &board.open_mutex, 1 );
+        sema_init( &board.use_mutex, 1 );
+#else
+	init_MUTEX( &board.open_mutex );
+	init_MUTEX( &board.use_mutex );
+#endif
 
 	/* Finally tell the world about the successful installation ;-) */
 
@@ -260,30 +402,28 @@ static int witio_48_get_ioport( void )
  * Function executed when device file for board gets opened
  *----------------------------------------------------------*/
 
-static int witio_48_open( struct inode *inode_p, struct file *file_p )
+static int witio_48_open( struct inode * inode_p,
+			  struct file *  file_p )
 {
-	file_p = file_p;
 	inode_p = inode_p;
 
-	spin_lock( &board.spinlock );
+	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board.open_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board.open_mutex ) )
+		return -ERESTARTSYS;
 
-	if ( board.in_use &&
-	     board.owner != current->uid &&
-	     board.owner != current->euid ) {
-		spin_unlock( &board.spinlock );
-		PDEBUG( "Board already in use by another user.\n" );
+	if ( board.in_use ) {
+		up( &board.open_mutex );
 		return -EBUSY;
 	}
 
-	if ( ! board.in_use )
-		board.owner = current->uid;
-
-	board.in_use++;
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_INC_USE_COUNT;
 #endif
 
-	spin_unlock( &board.spinlock );
+	board.in_use = 1;
+	up( &board.open_mutex );
 
 	return 0;
 }
@@ -293,19 +433,24 @@ static int witio_48_open( struct inode *inode_p, struct file *file_p )
  * Function executed when device file for board gets closed
  *----------------------------------------------------------*/
 
-static int witio_48_release( struct inode *inode_p, struct file * file_p )
+static int witio_48_release( struct inode * inode_p,
+			     struct file *  file_p )
 {
-	file_p = file_p;
 	inode_p = inode_p;
 
-	spin_lock( &board.spinlock );
+	if ( down_interruptible( &board.open_mutex ) )
+		return -ERESTARTSYS;
 
-	board.in_use--;
+	if ( board.in_use == 0 ) {
+		up( &board.open_mutex );
+		return 0;
+	}
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 	MOD_DEC_USE_COUNT;
 #endif
-
-	spin_unlock( &board.spinlock );
+	board.in_use = 0;
+	up( &board.open_mutex );
 
 	return 0;
 }
@@ -315,89 +460,87 @@ static int witio_48_release( struct inode *inode_p, struct file * file_p )
  * Function for handling of ioctl() calls for the module
  *-------------------------------------------------------*/
 
-static int witio_48_ioctl( struct inode *inode_p, struct file *file_p,
-			   unsigned int cmd, unsigned long arg )
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
+static int witio_48_ioctl( struct inode * inode_p,
+			   struct file *  file_p,
+			   unsigned int   cmd,
+			   unsigned long  arg )
+#else
+static long witio_48_ioctl( struct file *  file_p,
+			    unsigned int   cmd,
+			    unsigned long  arg )
+#endif
 {
-	int ret_val = 0;
+	int ret = 0;
 	WITIO_48_DIO_MODE state_struct;
 	WITIO_48_DATA data_struct;
 
 
-	file_p = file_p;
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 	inode_p = inode_p;
+#endif
 
-	if ( _IOC_TYPE( cmd ) != WITIO_48_MAGIC_IOC || 
-	     _IOC_NR( cmd ) < WITIO_48_MIN_NR ||
-	     _IOC_NR( cmd ) > WITIO_48_MAX_NR ) {
+	if ( _IOC_TYPE( cmd ) != WITIO_48_MAGIC_IOC ) {
+		up( &board.use_mutex );
 		PDEBUG( "Invalid ioctl() call.\n" );
 		return -EINVAL;
 	}
 
+	/* Serialize access to board */
+
+	if ( file_p->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
+		if ( down_trylock( &board.use_mutex ) )
+			return -EAGAIN;
+	} else if ( down_interruptible( &board.use_mutex ) )
+		return -ERESTARTSYS;
+
+	if ( cmd == WITIO_48_IOC_SET_MODE )
+	{
+		if ( copy_from_user( &state_struct,
+				     ( const void __user * ) arg,
+				     sizeof state_struct ) ) {
+			up( &board.use_mutex );
+			return -EFAULT;
+		}
+	} else if ( copy_from_user( &data_struct, ( const void __user * ) arg,
+				    sizeof data_struct ) ) {
+		up( &board.use_mutex );
+		return -EFAULT;
+	}
+
 	switch ( cmd ) {
 		case WITIO_48_IOC_SET_MODE :
-			if ( witio_48_get_from_user( arg,
-						     ( void * ) &state_struct,
-						     sizeof state_struct ) )
-				return -EACCES;
-			ret_val = witio_48_set_mode( &state_struct );
+			ret = witio_48_set_mode( &state_struct );
 			break;
 
 		case WITIO_48_IOC_GET_MODE :
-			if ( witio_48_get_from_user( arg,
-						     ( void * ) &state_struct,
-						     sizeof state_struct ) ) 
-				return -EACCES;
-			if ( ( ret_val = witio_48_get_mode( &state_struct ) )
-			     != 0 )
-				break;
-			__copy_to_user( ( WITIO_48_DIO_MODE * ) arg,
-					&state_struct,
-					sizeof( WITIO_48_DIO_MODE ) );
+			ret = witio_48_get_mode( &state_struct );
+			if ( ret == 0 &&
+			     copy_to_user( ( void __user * ) arg,
+					   &state_struct,
+					   sizeof state_struct ) )
+			     ret = -EFAULT;
 			break;
 
 		case WITIO_48_IOC_DIO_OUT :
-			if ( witio_48_get_from_user( arg,
-						     ( void * ) &data_struct,
-						     sizeof data_struct ) )
-				return -EACCES;
-			ret_val = witio_48_dio_out( &data_struct );
+			ret = witio_48_dio_out( &data_struct );
 			break;
 
 		case WITIO_48_IOC_DIO_IN :
-			if ( witio_48_get_from_user( arg,
-						     ( void * ) &data_struct,
-						     sizeof data_struct ) )
-				return -EACCES;
-			if ( ( ret_val = witio_48_dio_in( &data_struct ) )
-			     != 0 )
-				break;
-			__copy_to_user( ( WITIO_48_DATA * ) arg, &data_struct,
-					sizeof( WITIO_48_DATA ) );
+			ret = witio_48_dio_in( &data_struct );
+			if ( ret == 0 &&
+			     copy_to_user( ( void __user * ) arg,
+					   &data_struct, sizeof data_struct ) )
+			     ret = -EFAULT;
 			break;
 
-		default :                     /* we can never end up here... */
+		default :
 			PDEBUG( "Invalid ioctl() call.\n" );
-			ret_val = -EINVAL;
+			ret = -EINVAL;
 	}
 
-	return ret_val;
-}
-
-
-/*-----------------------------------------------------*
- * Function for copying data from user to kernel space
- *-----------------------------------------------------*/
-
-static int witio_48_get_from_user( unsigned long arg, void *to, size_t len )
-{
-	if ( access_ok( VERIFY_READ, ( void * ) arg, len ) )
-		__copy_from_user( to, ( void * ) arg, len );
-	else {
-		PDEBUG( "Failure to access user space data.\n" );
-		return -EACCES;
-	}
-
-	return 0;
+	up( &board.use_mutex );
+	return ret;
 }
 
 
@@ -405,7 +548,7 @@ static int witio_48_get_from_user( unsigned long arg, void *to, size_t len )
  * Function for setting the I/O-mode
  *-----------------------------------*/
 
-static int witio_48_set_mode( WITIO_48_DIO_MODE *state )
+static int witio_48_set_mode( WITIO_48_DIO_MODE * state )
 {
 	/* Check if the DIO number is valid */
 
@@ -432,7 +575,7 @@ static int witio_48_set_mode( WITIO_48_DIO_MODE *state )
  * Function for returning the I/O-mode
  *-------------------------------------*/
 
-static int witio_48_get_mode( WITIO_48_DIO_MODE *state )
+static int witio_48_get_mode( WITIO_48_DIO_MODE * state )
 {
 	/* Check if the DIO number is valid */
 
@@ -451,7 +594,7 @@ static int witio_48_get_mode( WITIO_48_DIO_MODE *state )
  * Function for outputting values, according to the current I/O-mode
  *-------------------------------------------------------------------*/
 
-static int witio_48_dio_out( WITIO_48_DATA *data )
+static int witio_48_dio_out( WITIO_48_DATA * data )
 {
 	int dio = data->dio;
 	int ch  = data->channel;
@@ -516,7 +659,7 @@ static int witio_48_dio_out( WITIO_48_DATA *data )
  * output at port C.
  *-----------------------------------------------------------------*/
 
-static void witio_48_3x8_dio_out( WITIO_48_DATA *data )
+static void witio_48_3x8_dio_out( WITIO_48_DATA * data )
 {
 	int dio = data->dio;
 	int ch  = data->channel;
@@ -540,7 +683,7 @@ static void witio_48_3x8_dio_out( WITIO_48_DATA *data )
  * the remaining upper 4 bits at the lower nibble of port C.
  *--------------------------------------------------------------------*/
 
-static void witio_48_2x12_dio_out( WITIO_48_DATA *data )
+static void witio_48_2x12_dio_out( WITIO_48_DATA * data )
 {
 	int dio = data->dio;
 	int ch  = data->channel;
@@ -599,7 +742,7 @@ static void witio_48_2x12_dio_out( WITIO_48_DATA *data )
  * at port C, the middle byte at port B and the lowest byte at port A.
  *---------------------------------------------------------------------*/
 
-static void witio_48_1x24_dio_out( WITIO_48_DATA *data )
+static void witio_48_1x24_dio_out( WITIO_48_DATA * data )
 {
 	int dio = data->dio;
 	unsigned long val = data->value;
@@ -629,7 +772,7 @@ static void witio_48_1x24_dio_out( WITIO_48_DATA *data )
  * argument an 8-bit value is written to port C.
  *---------------------------------------------------------------------*/
 
-static void witio_48_16_8_dio_out( WITIO_48_DATA *data )
+static void witio_48_16_8_dio_out( WITIO_48_DATA * data )
 {
 	int dio = data->dio;
 	int ch  = data->channel;
@@ -668,7 +811,7 @@ static void witio_48_16_8_dio_out( WITIO_48_DATA *data )
  * Function for reading in values, according to the current I/O-mode
  *-------------------------------------------------------------------*/
 
-static int witio_48_dio_in( WITIO_48_DATA *data )
+static int witio_48_dio_in( WITIO_48_DATA * data )
 {
 	int dio = data->dio;
 	int ch  = data->channel;
@@ -733,7 +876,7 @@ static int witio_48_dio_in( WITIO_48_DATA *data )
  * argument set to 2 the value is what gets read in from port C.
  *-------------------------------------------------------------------*/
 
-static void witio_48_3x8_dio_in( WITIO_48_DATA *data )
+static void witio_48_3x8_dio_in( WITIO_48_DATA * data )
 {
 	int dio = data->dio;
 	int ch  = data->channel;
@@ -756,7 +899,7 @@ static void witio_48_3x8_dio_in( WITIO_48_DATA *data )
  * bits are the lower nibble of port C.
  *----------------------------------------------------------------*/
 
-static void witio_48_2x12_dio_in( WITIO_48_DATA *data )
+static void witio_48_2x12_dio_in( WITIO_48_DATA * data )
 {
 	int dio = data->dio;
 	int ch  = data->channel;
@@ -799,7 +942,7 @@ static void witio_48_2x12_dio_in( WITIO_48_DATA *data )
  * and the lowest byte from port A.
  *------------------------------------------------------------*/
 
-static void witio_48_1x24_dio_in( WITIO_48_DATA *data )
+static void witio_48_1x24_dio_in( WITIO_48_DATA * data )
 {
 	int dio = data->dio;
 	int i;
@@ -832,7 +975,7 @@ static void witio_48_1x24_dio_in( WITIO_48_DATA *data )
  * from port C.
  *------------------------------------------------------------*/
 
-static void witio_48_16_8_dio_in( WITIO_48_DATA *data )
+static void witio_48_16_8_dio_in( WITIO_48_DATA * data )
 {
 	int dio = data->dio;
 	int ch  = data->channel;
@@ -900,7 +1043,8 @@ static void witio_48_set_crtl( int dio )
  * Outputs one byte to the register addressed by the first argument
  *------------------------------------------------------------------*/
 
-static void witio_48_board_out( unsigned char *addr, unsigned char byte )
+static void witio_48_board_out( unsigned char * addr,
+				unsigned char   byte )
 {
 	outb_p( byte, ( PORT ) addr );
 }
@@ -910,7 +1054,7 @@ static void witio_48_board_out( unsigned char *addr, unsigned char byte )
  * Inputs one byte from the register addressed by the argument
  *-------------------------------------------------------------*/
 
-static unsigned char witio_48_board_in( unsigned char *addr )
+static unsigned char witio_48_board_in( unsigned char * addr )
 {
 	return inb_p( ( PORT ) addr );
 }

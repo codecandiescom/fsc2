@@ -87,9 +87,8 @@ int witio_48_close( void )
     if ( dev_info.fd < 0 )
         return witio_48_errno = WITIO_48_ERR_BNO;
 
-	while ( close( dev_info.fd ) == -1 && errno == EINTR )
+	while ( close( dev_info.fd ) && errno == EINTR )
 		/* empty */ ;
-
     dev_info.fd = -1;
 
     return witio_48_errno = WITIO_48_OK;
@@ -100,7 +99,8 @@ int witio_48_close( void )
  * Function for setting the I/O mode of one of the DIOs of the board.
  *--------------------------------------------------------------------*/
 
-int witio_48_set_mode( WITIO_48_DIO dio, WITIO_48_MODE mode )
+int witio_48_set_mode( WITIO_48_DIO  dio,
+					   WITIO_48_MODE mode )
 {
 	int ret;
 	WITIO_48_DIO_MODE dio_mode = { dio, mode };
@@ -124,7 +124,8 @@ int witio_48_set_mode( WITIO_48_DIO dio, WITIO_48_MODE mode )
  * Function returns the current I/O mode of the specified DIO on the board.
  *--------------------------------------------------------------------------*/
 
-int witio_48_get_mode( WITIO_48_DIO dio, WITIO_48_MODE *mode )
+int witio_48_get_mode( WITIO_48_DIO    dio,
+					   WITIO_48_MODE * mode )
 {
 	int ret;
 	WITIO_48_DIO_MODE dio_mode = { dio, 0 };
@@ -146,8 +147,8 @@ int witio_48_get_mode( WITIO_48_DIO dio, WITIO_48_MODE *mode )
 
 /*-------------------------------------------------------------------------*
  * Function for outputting a value at one of the DIOs. Which channels and
- * which range of values are allowed depend on the current I/O mode of the
- * specified DIO:
+ * which range of values are allowed depends on the current I/O mode of
+ * the specified DIO:
  *
  * |--------------------|--------------------|-------------------------|
  * |        mode        |     channels       |       ranges            |
@@ -186,8 +187,9 @@ int witio_48_get_mode( WITIO_48_DIO dio, WITIO_48_MODE *mode )
  *
  *-------------------------------------------------------------------------*/
 
-int witio_48_dio_out( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
-					  unsigned long value )
+int witio_48_dio_out( WITIO_48_DIO     dio,
+					  WITIO_48_CHANNEL channel,
+					  unsigned long    value )
 {
 	int ret;
 	WITIO_48_DATA data = { dio, channel, value };
@@ -215,8 +217,9 @@ int witio_48_dio_out( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
  * description of the function witio_48_dio_out() (see above).
  *-------------------------------------------------------------*/
 
-int witio_48_dio_in( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
-					 unsigned long *value )
+int witio_48_dio_in( WITIO_48_DIO     dio,
+					 WITIO_48_CHANNEL channel,
+					 unsigned long *  value )
 {
 	int ret;
 	WITIO_48_DATA data = { dio, channel, 0 };
@@ -267,7 +270,8 @@ static int check_mode( WITIO_48_MODE mode )
  * Internally used function to test a user supplied channel value
  *----------------------------------------------------------------*/
 
-static int check_channel( WITIO_48_DIO dio, WITIO_48_CHANNEL channel )
+static int check_channel( WITIO_48_DIO     dio,
+						  WITIO_48_CHANNEL channel )
 {
 	if ( channel > WITIO_48_CHANNEL_2 )
 		return witio_48_errno = WITIO_48_ERR_ICA;
@@ -287,8 +291,9 @@ static int check_channel( WITIO_48_DIO dio, WITIO_48_CHANNEL channel )
  * Internally used function to test a user supplied output value
  *---------------------------------------------------------------*/
 
-static int check_value( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
-						unsigned long value )
+static int check_value( WITIO_48_DIO     dio,
+						WITIO_48_CHANNEL channel,
+						unsigned long    value )
 {
 	if ( ( value >= 1UL << 24 )                                    ||
 		 ( dev_info.mode[ dio ] == WITIO_48_MODE_16_8 &&
@@ -315,7 +320,6 @@ static int check_value( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
 static int check_board( void )
 {
     const char *name = "/dev/" WITIO_48_DEVICE_NAME;
-    struct stat buf;
 	WITIO_48_DIO_MODE dio_mode = { 0, 0 };
 	int i;
 
@@ -323,31 +327,19 @@ static int check_board( void )
     if ( dev_info.fd >= 0 )
 		return WITIO_48_OK;
 
-	/* Check if the device file exists and can be accessed */
-
-	if ( stat( name, &buf ) < 0 )
-		switch ( errno )
-		{
-			case ENOENT :
-				return witio_48_errno = WITIO_48_ERR_DFM;
-
-			case EACCES :
-				return witio_48_errno = WITIO_48_ERR_ACS;
-
-			default :
-				return witio_48_errno = WITIO_48_ERR_DFP;
-		}
-
 	/* Try to open the device file for the board */
 
 	if ( ( dev_info.fd = open( name, O_RDWR ) ) < 0 )
 		switch ( errno )
 		{
-			case ENODEV : case ENXIO :
-				return witio_48_errno = WITIO_48_ERR_NDV;
+			case ENOENT : case ENOTDIR : case ENAMETOOLONG : case ELOOP :
+				return witio_48_errno = WITIO_48_ERR_DFM;
 
 			case EACCES :
 				return witio_48_errno = WITIO_48_ERR_ACS;
+
+			case ENODEV : case ENXIO :
+				return witio_48_errno = WITIO_48_ERR_NDV;
 
 			case EBUSY :
 				return witio_48_errno = WITIO_48_ERR_BBS;
@@ -371,9 +363,8 @@ static int check_board( void )
 
 		if ( ioctl( dev_info.fd, WITIO_48_IOC_GET_MODE, &dio_mode ) < 0 )
 		{
-			while ( close( dev_info.fd ) == -1 && errno == EINTR )
+			while ( close( dev_info.fd ) && errno == EINTR )
 				/* empty */ ;
-
 			dev_info.fd = -1;
 			return witio_48_errno = WITIO_48_ERR_INT;
 		}
@@ -394,7 +385,7 @@ static int check_board( void )
  * the error message is printed.
  *----------------------------------------------------------------*/
 
-int witio_48_perror( const char *s )
+int witio_48_perror( const char * s )
 {
 	if ( s != NULL && *s != '\0' )
 		return fprintf( stderr, "%s: %s\n",

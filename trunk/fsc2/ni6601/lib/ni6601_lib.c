@@ -40,11 +40,21 @@
 #define NI6601_DEVICE_NAME "ni6601_"
 
 
-static int ni6601_is_armed( int board, int counter, int *state );
-static int ni6601_state( int board, int counter, int *state );
-static int check_board( int board );
-static int check_source( int source );
-static int ni6601_time_to_ticks( double time, unsigned long *ticks );
+static int ni6601_is_armed( int   /* board   */,
+							int   /* counter */,
+							int * /* state   */ );
+
+static int ni6601_state( int   /* board   */,
+						 int   /* counter */,
+						 int * /* state   */ );
+
+static int check_board( int /* board */ );
+
+static int check_source( int /* source */ );
+
+static int ni6601_time_to_ticks( double          /* time  */,
+								 unsigned long * /* ticks */ );
+
 
 static NI6601_Device_Info dev_info[ NI6601_MAX_BOARDS ];
 static const char *error_message = "";
@@ -101,7 +111,7 @@ int ni6601_close( int board )
 			break;
 
     if ( dev_info[ board ].fd >= 0 )
-        while ( close( dev_info[ board ].fd ) == -1 && errno == EINTR )
+        while ( close( dev_info[ board ].fd ) && errno == EINTR )
 			/* empty */ ;
 
 	dev_info[ board ].is_init = 0;
@@ -115,7 +125,9 @@ int ni6601_close( int board )
  * stopped by a call to ni6601_stop_counter().
  *-----------------------------------------------------------------*/
 
-int ni6601_start_counter( int board, int counter, int source )
+int ni6601_start_counter( int board,
+						  int counter,
+						  int source )
 {
 	int ret;
 	int state;
@@ -156,8 +168,10 @@ int ni6601_start_counter( int board, int counter, int source )
  * for 'gate_length'. It stops automatically at the end of the gate.
  *----------------------------------------------------------------------*/
 
-int ni6601_start_gated_counter( int board, int counter, double gate_length,
-								int source )
+int ni6601_start_gated_counter( int    board,
+								int    counter,
+								double gate_length,
+								int    source )
 {
 	int ret;
 	int pulser;
@@ -247,9 +261,12 @@ int ni6601_start_gated_counter( int board, int counter, double gate_length,
  * fetched by calling read(2) on the device file.
  *----------------------------------------------------------------------*/
 
-int ni6601_start_buffered_counter( int board, int counter,
-								   double gate_length, int source,
-								   unsigned long num_points, int continuous )
+int ni6601_start_buffered_counter( int           board,
+								   int           counter,
+								   double        gate_length,
+								   int           source,
+								   unsigned long num_points,
+								   int           continuous )
 {
 	int ret;
 	int pulser;
@@ -410,10 +427,13 @@ ssize_t ni6601_get_buffered_available( int board )
  * Function to fetch data from a buffered counter
  *------------------------------------------------------------------------*/
 
-ssize_t ni6601_get_buffered_counts( int board, unsigned long *counts,
-									size_t num_points, double wait_secs,
-									int *quit_on_signal, int *timed_out,
-									int *end_of_data )
+ssize_t ni6601_get_buffered_counts( int             board,
+									unsigned long * counts,
+									size_t          num_points,
+									double          wait_secs,
+									int *           quit_on_signal,
+									int *           timed_out,
+									int *           end_of_data )
 {
 	fd_set rfds;
 	unsigned char *buf;
@@ -667,7 +687,8 @@ ssize_t ni6601_get_buffered_counts( int board, unsigned long *counts,
  * pulser in case of continuously runnning or buffered counters)
  *------------------------------------------------------------------------*/
 
-int ni6601_stop_counter( int board, int counter )
+int ni6601_stop_counter( int board,
+						 int counter )
 {
 	int ret;
 	int state;
@@ -716,8 +737,12 @@ int ni6601_stop_counter( int board, int counter )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni6601_get_count( int board, int counter, int wait_for_end,
-					  int do_poll, unsigned long *count, int *state )
+int ni6601_get_count( int             board,
+					  int             counter,
+					  int             wait_for_end,
+					  int             do_poll,
+					  unsigned long * count,
+					  int *           state )
 {
 	int ret;
 	NI6601_COUNTER_VAL v;
@@ -773,7 +798,9 @@ int ni6601_get_count( int board, int counter, int wait_for_end,
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni6601_generate_single_pulse( int board, int counter, double duration )
+int ni6601_generate_single_pulse( int    board,
+								  int    counter,
+								  double duration )
 {
 	int ret;
 	NI6601_PULSES p;
@@ -820,8 +847,10 @@ int ni6601_generate_single_pulse( int board, int counter, double duration )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni6601_generate_continuous_pulses( int board, int counter,
-									   double high_phase, double low_phase )
+int ni6601_generate_continuous_pulses( int    board,
+									   int    counter,
+									   double high_phase,
+									   double low_phase )
 {
 	int ret;
 	int state;
@@ -866,7 +895,8 @@ int ni6601_generate_continuous_pulses( int board, int counter,
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni6601_stop_pulses( int board, int counter )
+int ni6601_stop_pulses( int board,
+						int counter )
 {
 	return ni6601_stop_counter( board, counter );
 }
@@ -875,7 +905,9 @@ int ni6601_stop_pulses( int board, int counter )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni6601_dio_write( int board, unsigned char bits, unsigned char mask )
+int ni6601_dio_write( int           board,
+					  unsigned char bits,
+					  unsigned char mask )
 {
 	int ret;
 	NI6601_DIO_VALUE dio;
@@ -897,7 +929,9 @@ int ni6601_dio_write( int board, unsigned char bits, unsigned char mask )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni6601_dio_read( int board, unsigned char *bits, unsigned char mask )
+int ni6601_dio_read( int             board,
+					 unsigned char * bits,
+					 unsigned char   mask )
 {
 	int ret;
 	NI6601_DIO_VALUE dio;
@@ -922,7 +956,9 @@ int ni6601_dio_read( int board, unsigned char *bits, unsigned char mask )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-int ni6601_is_counter_armed( int board, int counter, int *state )
+int ni6601_is_counter_armed( int   board,
+							 int   counter,
+							 int * state )
 {
 	int ret;
 
@@ -943,7 +979,9 @@ int ni6601_is_counter_armed( int board, int counter, int *state )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-static int ni6601_is_armed( int board, int counter, int *state )
+static int ni6601_is_armed( int   board,
+							int   counter,
+							int * state )
 {
 	NI6601_IS_ARMED a;
 
@@ -962,7 +1000,9 @@ static int ni6601_is_armed( int board, int counter, int *state )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-static int ni6601_state( int board, int counter, int *state )
+static int ni6601_state( int   board,
+						 int   counter,
+						 int * state )
 {
 	if ( dev_info[ board ].state[ counter ] == NI6601_IDLE )
 	{
@@ -998,7 +1038,6 @@ static int check_board( int board )
 {
 	char name[ 20 ] = "/dev/" NI6601_DEVICE_NAME;
 	int i;
-	struct stat buf;
 
 
 	if ( board < 0 || board >= NI6601_MAX_BOARDS )
@@ -1010,32 +1049,20 @@ static int check_board( int board )
 
 		snprintf( name + strlen( name ), 20 - strlen( name ), "%d", board );
 
-		/* Check if the device file exists and can be accessed */
+		/* Try to open the device file */
 
-		if ( stat( name, &buf ) < 0 )
+		if ( ( dev_info[ board ].fd = open( name, O_RDWR ) ) < 0 )
 			switch ( errno )
 			{
-				case ENOENT :
+				case ENOENT :  case ENOTDIR : case ENAMETOOLONG : case ELOOP :
 					return ni6601_errno = NI6601_ERR_DFM;
 
 				case EACCES :
 					return ni6601_errno = NI6601_ERR_ACS;
 
-				default :
-					return ni6601_errno = NI6601_ERR_DFP;
-			}
-
-		/* Try to open it in non-blocking mode */
-
-		if ( ( dev_info[ board ].fd = open( name, O_RDWR | O_NONBLOCK ) ) < 0 )
-			switch ( errno )
-			{
 				case ENODEV : case ENXIO :
 					return ni6601_errno = NI6601_ERR_NDV;
 			
-				case EACCES :
-					return ni6601_errno = NI6601_ERR_ACS;
-
 				case EBUSY :
 					return ni6601_errno = NI6601_ERR_BBS;
 
@@ -1084,7 +1111,8 @@ static int check_source( int source )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-static int ni6601_time_to_ticks( double time, unsigned long *ticks )
+static int ni6601_time_to_ticks( double          time,
+								 unsigned long * ticks )
 {
 	unsigned long t;
 
@@ -1116,7 +1144,7 @@ static int ni6601_time_to_ticks( double time, unsigned long *ticks )
  * the error message is printed.
  *---------------------------------------------------------------*/
 
-int ni6601_perror( const char *s )
+int ni6601_perror( const char * s )
 {
 	if ( s != NULL && *s != '\0' )
 		return fprintf( stderr, "%s: %s\n",

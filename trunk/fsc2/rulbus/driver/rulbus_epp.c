@@ -616,11 +616,8 @@ static int rulbus_release( struct inode * inode_p,
                 return -ENODEV;
         }
 
-		if ( filep->f_flags & ( O_NONBLOCK | O_NDELAY ) ) {
-				if ( down_trylock( &rulbus.open_mutex ) )
-						return -EAGAIN;
-		} else if ( down_interruptible( &rulbus.open_mutex ) )
-						return -ERESTARTSYS;
+		if ( down_interruptible( &rulbus.open_mutex ) )
+				return -ERESTARTSYS;
 
 		if ( rulbus.in_use == 0 ) {
 				up( &rulbus.open_mutex );
@@ -686,7 +683,7 @@ static long rulbus_ioctl( struct file * filep,
                              sizeof rulbus_arg ) ) {
 				up( &rulbus.ioctl_mutex );
                 printk( KERN_NOTICE "Can't read from user space\n" );
-                return -EACCES;
+                return -EFAULT;
         }
 
         switch ( cmd )
@@ -792,7 +789,7 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 				if ( rulbus_arg->len > RULBUS_MAX_BUFFER_SIZE )
 						kfree( data );
 				printk( KERN_NOTICE "Can't write to user space\n" );
-				return -EACCES;
+				return -EFAULT;
 		}
 
 		if ( rulbus_arg->len > RULBUS_MAX_BUFFER_SIZE )
@@ -868,7 +865,7 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 		if ( copy_to_user( ( void __user * ) rulbus_arg->data,
 						   data, rulbus_arg->len ) ) {
 				printk( KERN_NOTICE "Can't write to user space\n" );
-				return -EACCES;
+				return -EFAULT;
 		}
 
         return rulbus_arg->len;
@@ -937,7 +934,7 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 						if ( data != buffer )
 								kfree( data );
 						printk( KERN_NOTICE "Can't read from user space\n" );
-						return -EACCES;
+						return -EFAULT;
 				}
         }
 
@@ -1014,7 +1011,7 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 							 rulbus_arg->len ) ) {
 				kfree( data );
 				printk( KERN_NOTICE "Can't read from user space\n" );
-				return -EACCES;
+				return -EFAULT;
 		}
 
         /* Select the rack (if necessary) */

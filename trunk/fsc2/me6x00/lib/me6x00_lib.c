@@ -208,7 +208,7 @@ int me6x00_close( int board )
 		return me6x00_errno = ME6X00_ERR_BNO;
 
 	if ( dev_info[ board ].fd >= 0 )
-		while ( close( dev_info[ board ].fd ) == -1 && errno == EINTR )
+		while ( close( dev_info[ board ].fd ) && errno == EINTR )
 			/* empty */ ;
 
 	dev_info[ board ].is_init = 0;
@@ -260,7 +260,8 @@ int me6x00_keep_voltage( int board,
 		else if ( errno == EINTR )
 			return me6x00_errno = ME6X00_ERR_ABS;
 
-		close( dev_info[ board ].fd );
+		while( close( dev_info[ board ].fd ) && errno == EINTR )
+			/* empty */ ;
 		dev_info[ board ].fd = -1;
 		return me6x00_errno = ME6X00_ERR_INT;
 	}
@@ -390,7 +391,8 @@ int me6x00_reset( int board,
 			else if ( errno == EINTR )
 				return me6x00_errno = ME6X00_ERR_ABS;
 
-			close( dev_info[ board ].fd );
+			while( close( dev_info[ board ].fd ) && errno == EINTR )
+				/* empty */ ;
 			dev_info[ board ].fd = -1;
 			return me6x00_errno = ME6X00_ERR_INT;
 		}
@@ -429,7 +431,8 @@ int me6x00_reset_all( int board )
 		else if ( errno == EINTR )
 			return me6x00_errno = ME6X00_ERR_ABS;
 
-		close( dev_info[ board ].fd );
+		while( close( dev_info[ board ].fd ) && errno == EINTR )
+			/* empty */ ;
 		dev_info[ board ].fd = -1;
 		return me6x00_errno = ME6X00_ERR_INT;
 	}
@@ -472,7 +475,8 @@ int me6x00_set_timer( int          board,
 		else if ( errno == EINTR )
 			return me6x00_errno = ME6X00_ERR_ABS;
 
-		close( dev_info[ board ].fd );
+		while( close( dev_info[ board ].fd ) && errno == EINTR )
+			/* empty */ ;
 		dev_info[ board ].fd = -1;
 		return me6x00_errno = ME6X00_ERR_INT;
 	}
@@ -548,7 +552,8 @@ int me6x00_single( int            board,
 			else if ( errno == EINTR )
 				return me6x00_errno = ME6X00_ERR_ABS;
 
-			close( dev_info[ board ].fd );
+			while( close( dev_info[ board ].fd ) && errno == EINTR )
+				/* empty */ ;
 			dev_info[ board ].fd = -1;
 			return me6x00_errno = ME6X00_ERR_INT;
 		}
@@ -568,7 +573,8 @@ int me6x00_single( int            board,
 		else if ( errno == EINTR )
 			return me6x00_errno = ME6X00_ERR_ABS;
 
-		close( dev_info[ board ].fd );
+		while( close( dev_info[ board ].fd ) && errno == EINTR )
+			/* empty */ ;
 		dev_info[ board ].fd = -1;
 		return me6x00_errno = ME6X00_ERR_INT;
 	}
@@ -608,7 +614,8 @@ int me6x00_start( int board,
 		else if ( errno == EINTR )
 			return me6x00_errno = ME6X00_ERR_ABS;
 
-		close( dev_info[ board ].fd );
+		while( close( dev_info[ board ].fd ) && errno == EINTR )
+			/* empty */ ;
 		dev_info[ board ].fd = -1;
 		return me6x00_errno = ME6X00_ERR_INT;
 	}
@@ -710,7 +717,6 @@ int me6x00_wraparound( int              board,
 static int check_board( int board )
 {
 	char name[ 20 ] = "/dev/" ME6X00_DEVICE_NAME;
-	struct stat buf;
 	int ret;
 
 
@@ -719,34 +725,18 @@ static int check_board( int board )
 
 	if ( ! dev_info[ board ].is_init )
 	{
-		/* Cobble together the device file name */
+		/* Cobble together the device file name and try to open it */
 
 		snprintf( name + strlen( name ), 20 - strlen( name ), "%d", board );
 
-		/* Check if the device file exists and can be accessed */
-
-		if ( stat( name, &buf ) < 0 )
-			switch ( errno )
-			{
-				case ENOENT :
-					return me6x00_errno = ME6X00_ERR_NDF;
-
-				case EACCES :
-					return me6x00_errno = ME6X00_ERR_ACS;
-
-				default :
-					return me6x00_errno = ME6X00_ERR_DFP;
-			}
-
-		/* Try to open it */
-
-		dev_info[ board ].fd = open( name, O_RDWR | O_NONBLOCK );
-
-		if ( dev_info[ board ].fd < 0 )
+		if ( ( dev_info[ board ].fd = open( name, O_RDWR ) ) < 0 )
 			switch( errno )
 			{
 				case ENODEV : case ENXIO :
 					return me6x00_errno = ME6X00_ERR_NDV;
+
+				case ENOENT :  case ENOTDIR : case ENAMETOOLONG : case ELOOP :
+					return me6x00_errno = ME6X00_ERR_NDF;
 
 				case EACCES :
 					return me6x00_errno = ME6X00_ERR_ACS;
@@ -771,7 +761,8 @@ static int check_board( int board )
 			else if ( errno == EAGAIN )
 				continue;
 
-			close( dev_info[ board ].fd );
+			while ( close( dev_info[ board ].fd ) && errno == EINTR )
+				/* empty */ ;
 			dev_info[ board ].fd = -1;
 			return me6x00_errno =
 						  ( errno == EINTR ) ? ME6X00_ERR_ABS : ME6X00_ERR_INT;
@@ -799,7 +790,8 @@ static int check_board( int board )
 				break;
 
 			default :
-				close( dev_info[ board ].fd );
+				while ( close( dev_info[ board ].fd ) && errno == EINTR )
+					/* empty */ ;
 				dev_info[ board ].fd = -1;
 				return me6x00_errno = ME6X00_ERR_INT;
 		}
@@ -859,7 +851,8 @@ static int check_dac( int board,
 			break;
 
 		default :
-			close( dev_info[ board ].fd );
+			while( close( dev_info[ board ].fd ) && errno == EINTR )
+				/* empty */ ;
 			dev_info[ board ].fd = -1;
 			return me6x00_errno = ME6X00_ERR_INT;
 	}

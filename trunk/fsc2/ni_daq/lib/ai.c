@@ -27,27 +27,27 @@
 #include "ni_daq_lib.h"
 
 
-static int ni_daq_acq_start_check( NI_DAQ_INPUT as );
+static int ni_daq_acq_start_check( NI_DAQ_INPUT /* as */ );
 
-static int ni_daq_scan_start_check( NI_DAQ_INPUT ss );
+static int ni_daq_scan_start_check( NI_DAQ_INPUT /* ss */ );
 
-static int ni_daq_conv_start_check( NI_DAQ_INPUT cs );
+static int ni_daq_conv_start_check( NI_DAQ_INPUT /* cs */ );
 
-static int ni_daq_get_ai_timings( int             board,
-								  NI_DAQ_INPUT *  ss,
-								  double          sd,
-								  unsigned long * sl,
-								  NI_DAQ_INPUT *  cs,
-								  double          cd,
-								  unsigned long * cl );
+static int ni_daq_get_ai_timings( int             /* board */,
+								  NI_DAQ_INPUT *  /* ss    */,
+								  double          /* sd    */,
+								  unsigned long * /* sl    */,
+								  NI_DAQ_INPUT *  /* cs    */,
+								  double          /* cd    */,
+								  unsigned long * /* cl    */ );
 
-static int ni_daq_get_ai_timings2( int             board,
-								   NI_DAQ_INPUT *  ss,
-								   double          sd,
-								   unsigned long * sl,
-								   NI_DAQ_INPUT *  cs,
-								   double          cd,
-								   unsigned long * cl );
+static int ni_daq_get_ai_timings2( int             /* board */,
+								   NI_DAQ_INPUT *  /* ss    */,
+								   double          /* sd    */,
+								   unsigned long * /* sl    */,
+								   NI_DAQ_INPUT *  /* cs    */,
+								   double          /* cd    */,
+								   unsigned long * /* cl    */ );
 
 
 /*---------------------------------------------------------------------*

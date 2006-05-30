@@ -43,7 +43,8 @@ extern const int ni_daq_nerr;
 
 /* Basic function for opening and closing the board */
 
-int ni_daq_open( const char * /* name */ );
+int ni_daq_open( const char * /* name */,
+		 int          /* flag */ );
 
 int ni_daq_close( int /* board */ );
 
