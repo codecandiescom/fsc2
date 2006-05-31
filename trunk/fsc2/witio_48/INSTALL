@@ -551,9 +551,12 @@ if [ ! -e driver/autoconf.h ]; then
    do_compile 0
    do_install
 else
-    if [ ! -e driver/witio_48.o -o \
-		 ! -e lib/libwitio_48.a -o \
-		 ! -e lib/libwitio_48.so ]; then
+    if [    \(      "2.4.${KERNEL_VERSION#2.4.}" == "$KERNEL_VERSION"  \
+               -a ! -e driver/witio_48.o \)                            \
+         -o \(      "2.6.${KERNEL_VERSION#2.6.}" == "$KERNEL_VERSION"  \
+               -a ! -e driver/witio_48.ko \)                           \
+		 -o ! -e lib/libwitio_48.a                                     \
+		 -o ! -e lib/libwitio_48.so ]; then
         pref_comp
         do_compile 0
         do_install

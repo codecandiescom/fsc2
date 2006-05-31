@@ -46,179 +46,14 @@
  */
 
 
-#include <linux/version.h>
-#include <linux/autoconf.h>
-
-
-#if ! defined ( CONFIG_PCI )
-#error "PCI support in kernel is missing."
-#endif
-
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
-
-#if defined( CONFIG_MODVERSIONS ) && ! defined( MODVERSIONS )
-#define MODVERSIONS
-#endif
-
-#ifdef MODVERSIONS
-#include <linux/modversions.h>
-#endif
-
-#include <linux/module.h>
-
-#if defined( CONFIG_SMP ) && ! defined( __SMP__ )
-#define __SMP__
-#endif
-
-#else
-
-#include <linux/module.h>
-
-#endif
-
-
-/*
- * Needed for the registration of I/O and MEMORY regions.
- * (request_region, ...)
- */
-
-#include <linux/ioport.h>
-
-#include <linux/fs.h>
-#include <linux/sched.h>
-#include <linux/interrupt.h>
-#include <linux/pci.h>
-#include <asm/io.h>
-#include <asm/system.h>
-#include <linux/errno.h>
-#include <linux/delay.h>
-#include <linux/unistd.h>
-#include <linux/poll.h>
-#include <linux/vmalloc.h>
-#include <linux/mm.h>
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 2, 0 )
-#include <linux/slab.h>
-#include <asm/uaccess.h>
-#include <linux/spinlock.h>
-#else
-#include <linux/malloc.h>
-
-#endif
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-#include <linux/moduleparam.h>
-#include <linux/cdev.h>
-#else
-#define __user
-#endif
-
-/* Compatibility file for kernels from 2.0 up to 2.4 */
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
-#include "sysdep.h"
-#endif
-
 /* Include-File for the Meilhaus ME6000 and ME6100 I/O boards */
 
-#include "autoconf.h"
-#include "me6x00_drv.h"
+#include "me6x00_brd.h"
 
 
 /* Include-File for the Xilinx Firmware */
 
 #include "xilinx_firm.h"
-
-
-/* Prototypes of all functions */
-
-static int me6x00_open( struct inode * /* inode_p */,
-			struct file  * /* file_p  */ );
-
-static int me6x00_release( struct inode * /* inode_p */,
-			   struct file  * /* file_p  */ );
-
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
-static int me6x00_ioctl( struct inode * /* inode_p */,
-			 struct file  * /* file_p  */,
-			 unsigned int   /* service */,
-			 unsigned long  /* arg     */ );
-#else
-static long me6x00_ioctl( struct file  * /* file_p  */,
-			  unsigned int   /* service */,
-			  unsigned long  /* arg     */ );
-#endif
-
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-static irqreturn_t me6x00_isr( int              /* irq    */,
-			       void *           /* dev_id */,
-			       struct pt_regs * /* dummy  */);
-#else
-static void me6x00_isr( int              /* irq    */,
-			void *           /* dev_id */,
-			struct pt_regs * /* dummy  */);
-#endif
-
-static int me6x00_find_boards( void );
-
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-static int me6x00_init_board( struct pci_dev *             /* dev */,
-			      const struct pci_device_id * /* id  */ );
-#else
-static __init int me6x00_init_board( int              /* board_count */,
-				     struct pci_dev * /* dev         */ );
-#endif
-
-static int me6x00_xilinx_download( me6x00_info_st * info );
-
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-static void me6x00_release_board( struct pci_dev * /* dev */ );
-#endif
-
-static int me6x00_reset_board( int /* board */,
-			       int /* from  */ );
-
-static int me6x00_board_info( void __user * /* arg   */,
-			      int           /* minor */ );
-
-static int me6x00_board_keep_volts( void __user * /* arg   */,
-				    int           /* minor */ );
-
-static int me6x00_set_mode( void __user * /* arg   */,
-			    int           /* minor */);
-
-static int me6x00_start_stop_conv( void __user * /* arg   */,
-				   int           /* minor */ );
-
-static int me6x00_clear_enable_fifo( void __user * /* arg   */,
-				     int           /* minor */ );
-
-static int me6x00_endis_extrig( void __user * /* arg   */,
-				int           /* minor */ );
-
-static int me6x00_rifa_extrig( void __user * /* arg   */,
-			       int           /* minor */ );
-
-static int me6x00_set_timer( void __user * /* arg   */,
-			     int           /* minor */ );
-
-static int me6x00_write_single( void __user * /* arg   */,
-				int           /* minor */ );
-
-static int me6x00_write_continuous( void __user * /* arg   */,
-				    int           /* minor */ );
-
-static int me6x00_write_wraparound( me6x00_write_st * /* arg   */,
-				    int               /* minor */ );
-
-static int me6x00_buf_count( me6x00_circ_buf_st * /* buf */ );
-
-static int me6x00_space_to_end( me6x00_circ_buf_st * /* buf */ );
-
-static int me6x00_values_to_end( me6x00_circ_buf_st * /* buf */);
 
 
 /* Board specific data are kept global */
@@ -298,8 +133,9 @@ static struct cdev ch_dev;
 
 /* File operations provided by the driver */
 
-static struct file_operations me6x00_file_operations = {
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 2, 0 )
+
+static struct file_operations me6x00_file_operations = {
     NULL,               /* lseek              */
     NULL                /* read               */
     NULL,               /* write              */
@@ -313,8 +149,12 @@ static struct file_operations me6x00_file_operations = {
     NULL,               /* fasync             */
     NULL,               /* check_media_change */
     NULL                /* revalidate         */
+};
+
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 2, 0 ) && \
     LINUX_VERSION_CODE < KERNEL_VERSION( 2, 4, 0 )
+
+static struct file_operations me6x00_file_operations = {
     NULL,               /* llseek             */
     NULL,               /* read               */
     NULL,               /* write              */
@@ -330,13 +170,21 @@ static struct file_operations me6x00_file_operations = {
     NULL,               /* check_media_change */
     NULL,               /* revalidate         */
     NULL                /* lock               */
+};
+
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 ) && \
     LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
+
+static struct file_operations me6x00_file_operations = {
     owner:            THIS_MODULE,
     ioctl:            me6x00_ioctl,
     open:             me6x00_open,
     release:          me6x00_release
+};
+
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+
+static struct file_operations me6x00_file_operations = {
     .owner =          THIS_MODULE,
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
     .ioctl =          me6x00_ioctl,
@@ -345,8 +193,9 @@ static struct file_operations me6x00_file_operations = {
 #endif
     .open =           me6x00_open,
     .release =        me6x00_release
-#endif
 };
+
+#endif
 
 
 /* Array of DAC register offsets */

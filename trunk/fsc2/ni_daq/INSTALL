@@ -534,9 +534,12 @@ if [ ! -e driver/include/autoconf.h ]; then
    do_compile 0
    do_install
 else
-    if [ ! -e driver/ni_daq.o -o \
-		 ! -e lib/libni_daq.a -o \
-		 ! -e lib/libni_daq.so ]; then
+    if [    \(      "2.4.${KERNEL_VERSION#2.4.}" == "$KERNEL_VERSION"  \
+               -a ! -e driver/ni_daq.o \)                              \
+         -o \(      "2.6.${KERNEL_VERSION#2.6.}" == "$KERNEL_VERSION"  \
+               -a ! -e driver/ni_daq.ko \)                             \
+		 -o ! -e lib/libni_daq.a                                       \
+		 -o ! -e lib/libni_daq.so ]; then
         pref_comp
         do_compile 0
         do_install

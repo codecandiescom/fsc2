@@ -96,7 +96,7 @@ else
 # Otherwise we're dealing with some pre-2.6 kernel (hopefully 2.4)
 
 SOURCES  = me6x00.c
-HEADERS  = pci-compat.h sysdep.h me6x00_drv.h autoconf.h
+HEADERS  = pci-compat.h sysdep.h me6x00_drv.h me6x00_brd.h autoconf.h
 INCLUDES = -I$(KERNELDIR)/include -I.
 
 CFLAGS   = -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes

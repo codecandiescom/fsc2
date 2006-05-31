@@ -21,6 +21,10 @@
  */
 
 
+#if ! defined ME6X00_HEADER
+#define ME6X00_HEADER
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -140,3 +144,6 @@ extern const int me6x00_nerr;
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
+
+
+#endif  /* ME6X00_HEADER */

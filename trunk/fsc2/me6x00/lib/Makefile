@@ -41,7 +41,6 @@ headers   = me6x00.h ../driver/me6x00_drv.h ../driver/autoconf.h
 
 all: libme6x00.so libme6x00.a
 
-
 libme6x00.so: ${sources:.c=.o} $(headers) me6x00_lib.map
 	$(CC) -shared -o $@ ${sources:.c=.o} $(LDFLAGS)
 
@@ -56,9 +55,9 @@ me_test: me_test.c libme6x00.so
 
 install:
 	$(INSTALL) -d $(lib_dir)
-	$(INSTALL) -d $(incl_dir)
 	$(INSTALL) -m 755 libme6x00.so $(lib_dir)
 	$(INSTALL) -m 644 libme6x00.a  $(lib_dir)
+	$(INSTALL) -d $(incl_dir)
 	$(INSTALL) -m 644 me6x00.h $(incl_dir)
 
 cleanup:

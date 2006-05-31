@@ -153,7 +153,7 @@ int pci_mio_16e_1_exp_hook( void )
 		pci_mio_16e_1.msc_state.reserved_by =
 				 CHAR_P T_strdup( pci_mio_16e_1_stored.msc_state.reserved_by );
 
-	if ( ( pci_mio_16e_1.board = ni_daq_open( BOARD_DEVICE_FILE ) ) < 0 )
+	if ( ( pci_mio_16e_1.board = ni_daq_open( BOARD_DEVICE_FILE, 0 ) ) < 0 )
 	{
 		switch ( pci_mio_16e_1.board )
 		{

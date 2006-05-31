@@ -239,11 +239,11 @@ dialog --yesno \
 "Now we're ready to install everything. This starts with\n\
 copying the following files, if necessary creating\n\
 directories that don't exist:\n\n\
+ $LOCAL_NAME     => $MOD_INST_AS\n\
  driver/me6x00_drv.h  => $PREFIX/include/me6x00_drv.h\n\
- lib/me6x00.h         => $PREFIX/include/me6x00.h\n\
- lib/libme6x00.a      => $PREFIX/lib/libme6x00.a\n\
  lib/libme6x00.so     => $PREFIX/lib/libme6x00.so\n\
- $LOCAL_NAME     => $MOD_INST_AS\n\n\
+ lib/libme6x00.a      => $PREFIX/lib/libme6x00.a\n\
+ lib/me6x00.h         => $PREFIX/include/me6x00.h\n\n\
 		Do you want to continue ?" 15 74
 
 test $? -eq 0 || exit 0
@@ -542,9 +542,12 @@ if [ ! -e driver/autoconf.h ]; then
    do_compile 0
    do_install
 else
-    if [ ! -e driver/me6x00.o -o \
-		 ! -e lib/libme6x00.a -o \
-		 ! -e lib/libme6x00.so ]; then
+    if [    \(      "2.4.${KERNEL_VERSION#2.4.}" == "$KERNEL_VERSION"  \
+               -a ! -e driver/me6x00.o \)                              \
+         -o \(      "2.6.${KERNEL_VERSION#2.6.}" == "$KERNEL_VERSION"  \
+               -a ! -e driver/me6x00.ko \)                             \
+		 -o ! -e lib/libme6x00.a                                       \
+		 -o ! -e lib/libme6x00.so ]; then
         pref_comp
         do_compile 0
         do_install
