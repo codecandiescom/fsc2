@@ -69,8 +69,7 @@ done
 # Ask for the major device number, it must be between 1 and 254 (or 4094
 # for 2.6 kernels) or 0 for a dynamically assigned device nuber
 
-if [ `echo $KERNEL_VERSION | sed 's/^\(2\.[0-4]\)\..*$/XXX/'` != "XXX" ]; then
-
+if [ `echo $KERNEL_VERSION | sed 's/^\(2\.[0-4]\)\..*$/XXX/'` == "XXX" ]; then
 	REPEAT=1;
 	while [ $REPEAT -ne 0 ]; do
 		MAJOR=0;
