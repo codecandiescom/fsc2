@@ -15,8 +15,10 @@ TODO
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
 Fcntl_Lock/Fcntl_Lock.xs
+Fcntl_Lock/Makefile.old
 Fcntl_Lock/Makefile.PL
 Fcntl_Lock/MANIFEST
+Fcntl_Lock/MANIFEST.SKIP
 Fcntl_Lock/README
 Fcntl_Lock/sizes1.c
 Fcntl_Lock/sizes2.c
@@ -129,6 +131,7 @@ config/tds520.conf
 config/tds540.conf
 config/tds744a.conf
 config/tds754a.conf
+config/tegam2714a_p.conf
 config/thurlby330.conf
 config/User_Functions.conf
 config/witio_48.conf
@@ -380,6 +383,10 @@ modules/tds.c.tmpl
 modules/tds_gpib.c.tmpl
 modules/tds.map.tmpl
 modules/tds_util.c.tmpl
+modules/tegam2714a_p.c
+modules/tegam2714a_p_gen.c
+modules/tegam2714a_p.h
+modules/tegam2714a_p_pulse.c
 modules/thurlby330.c
 modules/User_Functions.c
 modules/witio_48.c
@@ -606,6 +613,7 @@ me6x00/README
 
 me6x00/driver/autoconf.h.example
 me6x00/driver/Makefile
+me6x00/driver/me6x00_brd.h
 me6x00/driver/me6x00.c
 me6x00/driver/me6x00_drv.h
 me6x00/driver/me6x00.txt
@@ -628,7 +636,6 @@ ni6601/INSTALL
 ni6601/Makefile
 ni6601/README
 
-ni6601/driver/autoconf.h
 ni6601/driver/autoconf.h.example
 ni6601/driver/fops.c
 ni6601/driver/fops.c.dma_not_yet_working
