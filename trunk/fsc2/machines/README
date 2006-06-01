@@ -26,10 +26,12 @@ The first file 'hex.unseen.edu' must contain just definitions as
 you will find them in a makefile. It is for setting the variables
 from the start of the makefile in the main directory, overriding
 any settings made in that makefile. Here's the list of variables
-that may be set in this file:
+that can be set in this file:
 
+prefix
 OWNER
 GROUP
+NO_VERSION_SCRIPTS
 DEF_INCL_DIR
 GPIB_LIBRARY
 GPIB_CONF_FILE
@@ -43,6 +45,8 @@ SERIAL_LOG_FILE
 SERIAL_LOG_LEVEL
 LAN_LOG_FILE
 LAN_LOG_LEVEL
+EDITOR
+BROWSER
 WITH_NI6601
 ni6601_libs
 WITH_ME6000
@@ -52,6 +56,11 @@ witio_48_libs
 WITH_RS_SPEC10
 rs_spec10_incl
 rs_spec10_libs
+WITH_PCI_MIO_16E_1
+pci_mio_16e_1_libs
+WITH_RULBUS
+rulbus_incl_path
+rulbus_lib_path
 WITH_HTTP_SERVER
 DEFAULT_HTTP_PORT
 NO_MAIL
@@ -60,16 +69,18 @@ USE_IPv6
 MAIL_ADDRESS
 
 What they mean is explained in some detail at the top of the
-makefile in the main directory.
+makefile in the main directory as well as in 'template.nowhere'
+in the 'machines' directory.
 
-The file 'hex.unseen.edu-config' is a file with commands that
-get executed before the compilation starts. It can e.g. be used
-to automatically change configuration files for devices etc.
-(or with whatever ideas you come up with).
+If you're on the machine 'hex.unseen.edu' and there exists a file
+caaled 'hex.unseen.edu-config' with (shell) commands it will get
+executed before the compilation starts. It can be used to e.g.
+automatically change configuration files for devices or with
+whatever ideas you come up with.
 
-The third file, 'hex.unseen.edu-install', again is a makefile that
-gets included during installation of fsc2. It should contain two
-(phony) targets,
+If a third third file, 'hex.unseen.edu-install', exist and is also
+a makefile it gets executed during the installation of fsc2. It
+should contain two (phony) targets,
 
 install-hex.unseen.edu:
 
