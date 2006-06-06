@@ -38,9 +38,6 @@
 #define GPIB_JTT
 
 
-#define DMA_SIZE 64512    /* compare this with entry in /etc/gpib.conf ! */
-
-
 typedef struct GPIB_Dev GPIB_Dev_T;
 
 struct GPIB_Dev {

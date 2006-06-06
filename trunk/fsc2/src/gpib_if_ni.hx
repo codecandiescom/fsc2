@@ -72,15 +72,7 @@ struct GPIB_Dev {
 };
 
 
-/* The National Instruments library defines ERR which clashes  with newer
-   kernel versions. So the following lines tell the user about this potential
-   problem ... */
-
 #if ! defined( IBERR )
-#warning "***************************"
-#warning "* Using ERR will conflict *"
-#warning "* with post-2.2 kernels!  *"
-#warning "***************************"
 #define IBERR ERR
 #endif
 

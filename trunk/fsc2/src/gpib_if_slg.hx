@@ -41,19 +41,11 @@
 
 #include <dirent.h>
 
-/* The SLG library defines ERR which clashes with newer kernel versions. So
-   the following line will tell the user about this potential problem... */
 
 #if ! defined IBERR
-#warning "***************************"
-#warning "* Using ERR will conflict *"
-#warning "* with post-2.2 kernels!  *"
-#warning "***************************"
 #define IBERR ERR
 #endif
 
-
-#define DMA_SIZE 64512    /* compare this with entry in /etc/gpib.conf ! */
 
 typedef struct GPIB_Dev GPIB_Dev_T;
 

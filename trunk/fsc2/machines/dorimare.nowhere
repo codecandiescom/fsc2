@@ -5,7 +5,8 @@
 OWNER              := fsc2
 GROUP              := uucp
 EDITOR             := emacs
-GPIB_LIBRARY       := JTT
+GPIB_LIBRARY       := SLG
+GPIB_HEADER_DIR    := /usr/local/include/gpib
 GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
 GPIB_LOG_LEVEL     := HIGH
 NUM_SERIAL_PORTS   := 2

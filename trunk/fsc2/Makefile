@@ -583,7 +583,11 @@ ifneq ($(GPIB_LIBRARY),NONE)
 		else
 			ifeq ($(GPIB_LIBRARY),NI)
 				GPIB_LIBRARY     := ni
-				LIBS             := $(CIB_FILE) $(LIBS) -lgpibapi
+				ifeq ($(CIB_FILE),)
+					LIBS         += $(LIBS) -lgpibapi
+				else
+					LIBS         += $(CIB_FILE)
+				endif
 				CONFFLAGS        += -DGPIB_LIRARY_NI
 			else
 				ifeq ($(GPIB_LIBRARY),NI_OLD)

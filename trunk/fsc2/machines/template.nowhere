@@ -54,7 +54,7 @@ GROUP              := uucp
 
 
 # The next variable defines the GPIB library to use, it must be set to either
-# 'LLP' for the LLP library, 'NI' for the newee National Instruments library,
+# 'LLP' for the LLP library, 'NI' for the newer National Instruments library,
 # 'NI_OLD' for the old National Instruments library (you can distinguish
 # them from the include file they install, if it is ni488.h then it's the
 # newer version, if it's ugpib.h it's the older one), 'SLG' for the updated

@@ -67,9 +67,6 @@
 #define GPIB_EOT  0x08    /* Send END with last byte    */
 
 
-#define DMA_SIZE 64512    /* compare this with entry in /etc/gpib.conf ! */
-
-
 int gpib_init( const char * /* log_file_name */,
 			   int          /* log_level     */ );
 int gpib_shutdown( void );
