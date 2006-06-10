@@ -32,9 +32,9 @@
 extern int gpiblex( void );
 extern int gpiblineno;
 extern char *gpibtext;
-extern int gpib_dev_setup( GPIB_Dev_T * temp_dev );
+extern int gpib_dev_setup( GPIB_Dev_T * /* temp_dev */ );
 
-static void gpiberror( const char *s );
+static void gpiberror( const char * /* s */ );
 
 static GPIB_Dev_T dev;
 

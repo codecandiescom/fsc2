@@ -31,6 +31,9 @@ extern int gpibparse( void );
 extern FILE *gpibin;
 
 
+int gpib_dev_setup( GPIB_Dev_T * /* temp_dev */ );
+
+
 /*----------------------------------------------------------------*
  * GPIB_LOG_FILE is the name of the default file to which logging
  * information about GPIB operations are written - the name can

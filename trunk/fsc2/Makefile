@@ -859,8 +859,6 @@ fsc2_config.h: Makefile $(MACHINE_INCLUDE_FILE)
 built:
 	-@cat fsc2_config.h > version
 	-@echo >> version
-	-@svn status -u 2>/dev/null | grep -v '?' >> version
-	-@echo >> version
 	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]              \
 	                 $(sdir)/fsc2_http_server $(mdir)/Makefile               \
 			  	     $(mdir)/*.[chl] $(cdir)/Functions $(cdir)/Devices       \
