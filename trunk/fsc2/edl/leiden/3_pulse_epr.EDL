@@ -221,7 +221,7 @@ IF I != 0 {
 				   repeat_time / 1 ms, int( P1.LENGTH / 1 ns ),
 				   int( P2.LENGTH / 1 ns ), int( P3.LENGTH / 1 ns ),
 				   int( p1_to_p2_dist / 1 ns ), int( p2_to_p3_dist / 1 ns ),
-				   J, N_Avg, start_temp, temp_contr_temperature( ) );
+				   N_Avg, J, start_temp, temp_contr_temperature( ) );
 		}
 
 		FOR I = 1 : N_Points {
@@ -257,7 +257,7 @@ IF I != 0 {
 		   repeat_time / 1 ms, int( P1.LENGTH / 1 ns ),
 		   int( P2.LENGTH / 1 ns ), int( P3.LENGTH / 1 ns ),
 		   int( p1_to_p2_dist / 1 ns ), int( p2_to_p3_dist / 1 ns ),
-		   J, N_Avg, start_temp, temp_contr_temperature( ) );
+		   N_Avg, J, start_temp, temp_contr_temperature( ) );
 
 	save_comment( File1, "% " );
 }

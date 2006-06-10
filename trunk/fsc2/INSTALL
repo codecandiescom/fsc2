@@ -88,10 +88,16 @@ be downloaded from
 
   http://www.natinst.com
 
-(which is supposed to work with 2.2 and 2,4 kernels). From the documentations
-of the LLP and SLG libraries and the one I have written it is already clear
-that a GPIB configuration file (typically '/etc/gpib.conf') is required, in
-which all devices to be used with are listed with their respetive properties.
+Only the beta-drivers (with 2,4 kernels) have been used. The newer driver
+and library (supposed to work also with 2.6) hasn't been tested, I didn't
+even get the driver to compile and linking against the library led to the
+program aborting immediately. I haven't any idea yet how to resolve that
+problem.
+
+From the documentations of the LLP and SLG libraries and the one I have
+written it should already be clear that a GPIB configuration file (that
+is typically '/etc/gpib.conf') is required, in which all devices to be
+used with are listed with their respetive properties.
 
 But also for the NI library fsc2 expects such a configuration file (instead
 of using the configuration method native to the GPIB library). A typical
