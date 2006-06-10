@@ -6,11 +6,11 @@ OWNER              := fsc2
 GROUP              := uucp
 
 # If we're running a 2.4 kernel we use the old NI driver, otherwise the
-# SourveForge driver
+# SourceForge driver
 
 KERNEL_VERSION     := $(shell uname -r)
 
-ifeq ($(KERNEL_VERSION),$(subst 2.6,XXX,$(KERNEL_VERSION)))
+ifeq ($(KERNEL_VERSION),$(shell echo $(KERNEL_VERSION) | sed -e 's/^2\.6\.//'))
 	GPIB_LIBRARY       := NI_OLD
 else
 	GPIB_LIBRARY       := SLG

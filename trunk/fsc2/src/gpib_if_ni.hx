@@ -33,7 +33,7 @@
 #if ! defined GPIB_IF_NI_HEADER
 #define GPIB_IF_NI_HEADER
 
-#if defined GPIB_LIRARY_NI
+#if defined GPIB_LIBRARY_NI
 #include <ni488.h>
 #else
 #include <sys/ugpib.h>

@@ -405,59 +405,6 @@ CFLAGS           := -Wall                   \
 				    # -pedantic           # ditto
 
 
-# If make gets started with 'make debug' switch off optimization and enable
-# built-in memory debugging
-
-ifeq ($(findstring debug,$(MAKECMDGOALS)),debug)
-	CFLAGS += -O0
-	CFLAGS += -DFSC2_MDEBUG               # for built-in malloc debugging
-else
-	CFLAGS += $(OPTIMIZATION)
-endif
-
-
-# If make gets stated with 'make release' switch off all debugging code
-# (i.e. mostly assert() calls etc.). Otherwise enable debug symbols in
-# code and libc memory debugging (if available)
-
-ifeq ($(MAKECMDGOALS),release)
-	CFLAGS += -DNDEBUG                    # switch off all debugging code
-else
-	CFLAGS += -ggdb3
-	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-		CFLAGS += -DLIBC_MDEBUG           # for libc memory debugging
-	endif
-endif
-
-
-# If make gets started with 'make mdebug' enable both internal memory
-# debugging options as well as libc memory debugging (if available)
-
-ifeq ($(MAKECMDGOALS),mdebug)
-	CFLAGS += -DFSC2_MDEBUG               # for built-in malloc debugging
-	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
-		CFLAGS += -DLIBC_MDEBUG           # for libc memory debugging
-	endif
-endif
-
-
-INCLUDES := -I$(fdir) -I$(adir) -I/usr/X11R6/include \
-			-I/usr/X11R6/include/X11 -I/usr/local/include \
-
-LFLAGS	 := $(OPT) -shared -fpic  # needed for libraries
-
-
-ifeq ($(MPATROL),YES)
-	CONFFLAGS := -DMPATROL
-	LIBS      := -L/usr/local/lib -lmpatrol -lelf -L/usr/X11R6/lib -lforms \
-				 -lX11 -lXpm -lm -ldl
-else
-	CONFFLAGS :=
-	LIBS      := -L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl
-				 # -lmcheck   # for malloc debugging
-				 # -lefence   # to run with efence
-endif
-
 BISON         := bison
 BISONFLAGS    := -d -v -t -p
 FLEX          := flex
@@ -478,8 +425,63 @@ EXEC_INSTALL  := install
 ############################################################################
 
 
-tagsfile      := $(fdir)/TAGS
+# If make gets started with 'make debug' switch off optimization and enable
+# built-in memory debugging
 
+ifeq ($(findstring debug,$(MAKECMDGOALS)),debug)
+	CFLAGS += -O0
+	CFLAGS += -DFSC2_MDEBUG
+else
+	CFLAGS += $(OPTIMIZATION)
+endif
+
+
+# If make gets stated with 'make release' switch off all debugging code
+# (i.e. mostly assert() calls etc.). Otherwise enable debug symbols in
+# code and libc memory debugging (if available)
+
+ifeq ($(MAKECMDGOALS),release)
+	CFLAGS += -DNDEBUG
+else
+	CFLAGS += -ggdb3
+	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
+		CFLAGS += -DLIBC_MDEBUG
+	endif
+endif
+
+
+# If make gets started with 'make mdebug' enable both internal memory
+# debugging options as well as libc memory debugging (if available)
+
+ifeq ($(MAKECMDGOALS),mdebug)
+	CFLAGS += -DFSC2_MDEBUG
+	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
+		CFLAGS += -DLIBC_MDEBUG           # for libc memory debugging
+	endif
+endif
+
+
+# Set the minimum include paths and linker flags
+
+INCLUDES := -I$(fdir) -I$(adir) -I/usr/X11R6/include \
+			-I/usr/X11R6/include/X11 -I/usr/local/include
+
+LFLAGS	 := -shared -fpic
+
+
+ifeq ($(MPATROL),YES)
+	CONFFLAGS := -DMPATROL
+	LIBS      := -L/usr/local/lib -lmpatrol -lelf -L/usr/X11R6/lib -lforms \
+				 -lX11 -lXpm -lm -ldl
+else
+	CONFFLAGS :=
+	LIBS      := -L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl
+				 # -lmcheck   # enable for malloc debugging
+				 # -lefence   # enable to run with efence
+endif
+
+
+tagsfile      := $(fdir)/TAGS
 
 # Check that the machine has a new libc, i.e. at least version 2 (which means
 # that /lib/libc.so.6 should exist), otherwise some problems with the older
@@ -576,10 +578,12 @@ ifneq ($(GPIB_LIBRARY),NONE)
 			INCLUDES             += -I/usr/local/include/gpib
 		endif
 		LIBS                     += -lgpib -lfl
+		CONFFLAGS                += -DGPIB_LIBRARY_LLP
 	else
 		ifeq ($(GPIB_LIBRARY),SLG)
 			GPIB_LIBRARY         := slg
 			LIBS                 += -lgpib
+			CONFFLAGS            += -DGPIB_LIBRARY_SLG
 		else
 			ifeq ($(GPIB_LIBRARY),NI)
 				GPIB_LIBRARY     := ni
@@ -588,16 +592,17 @@ ifneq ($(GPIB_LIBRARY),NONE)
 				else
 					LIBS         += $(CIB_FILE)
 				endif
-				CONFFLAGS        += -DGPIB_LIRARY_NI
+				CONFFLAGS        += -DGPIB_LIBRARY_NI
 			else
 				ifeq ($(GPIB_LIBRARY),NI_OLD)
 					GPIB_LIBRARY     := ni_old
 					LIBS             += -lgpib
-					CONFFLAGS        += -DGPIB_LIRARY_NI_OLD
+					CONFFLAGS        += -DGPIB_LIBRARY_NI_OLD
 				else
 					ifeq ($(GPIB_LIBRARY),JTT)
 						GPIB_LIBRARY := jtt
 						LIBS         += -lgpib
+						CONFFLAGS    += -DGPIB_LIBRARY_JTT
 					endif
 				endif
 			endif

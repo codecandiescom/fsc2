@@ -2,38 +2,39 @@
 #
 # $Id$
 
-OWNER              := fsc2
-GROUP              := uucp
-EDITOR             := emacs
-KERNEL_VERSION     := $(shell uname -r)
+OWNER                := fsc2
+GROUP                := uucp
+EDITOR               := emacs
 
-ifeq ($(KERNEL_VERSION),$(subst 2.6,XXX,$(KERNEL_VERSION)))
-	GPIB_LIBRARY       := NI_OLD
+KERNEL_VERSION       := $(shell uname -r)
+ifeq ($(KERNEL_VERSION),$(shell echo $(KERNEL_VERSION) | sed -e 's/^2\.6\.//'))
+	GPIB_LIBRARY     := NI_OLD
 else
-	GPIB_LIBRARY       := SLG
-	GPIB_HEADER_DIR    := /usr/local/include/gpib
+	GPIB_LIBRARY     := SLG
+	GPIB_HEADER_DIR  := /usr/local/include/gpib
 endif
-GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
-GPIB_LOG_LEVEL     := HIGH
-NUM_SERIAL_PORTS   := 2
-SERIAL_LOCK_DIR    := /var/lock
-SERIAL_LOG_FILE    := /tmp/fsc2_serial.log
-SERIAL_LOG_LEVEL   := HIGH
-LAN_LOG_FILE       := /tmp/fsc2_lan.log
-LAN_LOG_LEVEL      := HIGH
-WITH_NI6601        := yes
-ni6601_libs        := libni6601.so
-WITH_ME6000        := yes
-me6000_libs        := libme6x00.so
-WITH_RS_SPEC10     := yes
-rs_spec10_incl     := /usr/local/include/pvcam
-rs_spec10_libs     := libpvcam.so
-WITH_WITIO_48      := yes
-witio_48_libs      := libwitio_48.so
-WITH_PCI_MIO_16E_1 := yes
-pci_mio_16e_1_libs := libni_daq.so
-WITH_RULBUS        := yes
-rulbus_incl_path   := /usr/local/include
-rulbus_lib_path    := /usr/local/lib
-MAIL_ADDRESS       := jens
-BROWSER            := /home/jens/firefox/firefox 
+
+GPIB_LOG_FILE        := /tmp/fsc2_gpib.log
+GPIB_LOG_LEVEL       := HIGH
+NUM_SERIAL_PORTS     := 2
+SERIAL_LOCK_DIR      := /var/lock
+SERIAL_LOG_FILE      := /tmp/fsc2_serial.log
+SERIAL_LOG_LEVEL     := HIGH
+LAN_LOG_FILE         := /tmp/fsc2_lan.log
+LAN_LOG_LEVEL        := HIGH
+WITH_NI6601          := yes
+ni6601_libs          := libni6601.so
+WITH_ME6000          := yes
+me6000_libs          := libme6x00.so
+WITH_RS_SPEC10       := yes
+rs_spec10_incl       := /usr/local/include/pvcam
+rs_spec10_libs       := libpvcam.so
+WITH_WITIO_48        := yes
+witio_48_libs        := libwitio_48.so
+WITH_PCI_MIO_16E_1   := yes
+pci_mio_16e_1_libs   := libni_daq.so
+WITH_RULBUS          := yes
+rulbus_incl_path     := /usr/local/include
+rulbus_lib_path      := /usr/local/lib
+MAIL_ADDRESS         := jens
+BROWSER              := /home/jens/firefox/firefox 
