@@ -5,8 +5,14 @@
 OWNER              := fsc2
 GROUP              := uucp
 EDITOR             := emacs
-GPIB_LIBRARY       := SLG
-GPIB_HEADER_DIR    := /usr/local/include/gpib
+KERNEL_VERSION     := $(shell uname -r)
+
+ifeq ($(KERNEL_VERSION),$(subst 2.6,XXX,$(KERNEL_VERSION)))
+	GPIB_LIBRARY       := NI_OLD
+else
+	GPIB_LIBRARY       := SLG
+	GPIB_HEADER_DIR    := /usr/local/include/gpib
+endif
 GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
 GPIB_LOG_LEVEL     := HIGH
 NUM_SERIAL_PORTS   := 2
