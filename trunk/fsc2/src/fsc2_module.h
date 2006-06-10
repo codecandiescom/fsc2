@@ -47,11 +47,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined WITH_RULBUS
-#include <rulbus.h>
-#endif
-
-
 /* inclusion of programs own header files as far as necessary */
 
 #include "fsc2_config.h"
@@ -70,9 +65,6 @@
 #include "loader.h"
 #include "phases.h"
 #include "pulser.h"
-#include "gpib_if.h"
-#include "serial.h"
-#include "lan.h"
 #include "module_util.h"
 
 

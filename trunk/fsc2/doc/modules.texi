@@ -738,7 +738,18 @@ First of all, each module has to include the header file
 of macros, variables and functions of @code{fsc2} that can be used
 within modules.
 
-Second, each module must put its basic configuration information into
+The module may also have to include a header file for a library dealing
+with the interface used for connecting the device to the computer. If
+you're using a device on the GPIB bus you need to include @file{gpib_if.h},
+if it's connected to one of the serial ports @file{serial.h} or, if the
+device is controlled via the LAN, the file @file{lan.h} (all these files
+are in the source directory of @code{fsc2}, so just put the file name
+into double quotes and it will be found automatically). For other devices
+some other file may need to be included, e.g.@: @file{rulbus.h} for the
+RULBUS, that may reside in some of the standard include directories and
+thus the file name may have to be enclosed in angle braces.
+
+Finally, each module must put its basic configuration information into
 a special file which should be commented well enough to allow even
 people without much programming experience to adapt the behavior of the
 module to his/her needs. A good example are modules for devices that are
@@ -897,15 +908,21 @@ function.
 To make dealing with the GPIB bus simpler there are several routines
 that can be used when writing a module, which then call the needed
 functions from the GPIB library you choose when installing
-@code{fsc2}. Please note that these function may not invoked before
+@code{fsc2}. To be able to use that functions you must include the
+appropriate header file for tge GPIB interface, i.e.@. you need
+@example
+#include "gpib_if.h"
+@end example
+@noindent
+Please note that these function can't be invoked before
 the @code{exp_hook} function.
 
 As already pointed out above, to be able to use the GPIB bus our module
 must set the boolean variable @code{need_GPIB}.
 
-The first other thing to do is to announce the device to the set of
-functions dealing with the GPIB bus. This should be done in the
-@code{exp_hook} function (see below) via a call of the function
+The first other thing to do is to announce the device to the library
+dealing with the GPIB bus. This should be done in the @code{exp_hook}
+function (see below) via a call of the function
 @example
 int gpib_init_device( const char *name, int *device );
 @end example
@@ -978,9 +995,16 @@ the format string.
 
 @subsection Serial port handling
 
-For serial ports things are handled a bit differently from GPIB
-devices. In the init hook function you must try to request the serial
-port you need by calling the function
+To be able use @code{fsc2}'s interface to the serial ports you must
+include the appropriate header file, i.e.@: you need
+@example
+#include "serial.h"
+@end example
+@noindent
+For serial ports things are handled a bit differently from GPIB devices.
+You don't need to set a special variable to advertise your intention
+of using one of them. Instead, in the init hook function you must try to
+request the serial port you need by calling the function
 @example
 fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 @end example
@@ -1111,13 +1135,19 @@ the format string.
 There are some functions for the communication with devices connected
 via the LAN (@code{TCP} only, there's no support for @code{UDP} yet)
 provided by @code{fsc2}. They allow you to connect to a device, send
-and receive data and finally close the connection. Naturally they
-aren't written with a certain protocol in mind -- writing that is your
-business -- but just provide a set of fundamental routines on top of
-which you can write your own functions. You can even forego using them
-at all and write your own code for talking with the devices directly,
-they only exist for your convenience. But if you use them make sure
-they don't get invoked before the @code{exp_hook} function.
+and receive data and finally close the connection. To be able to use
+these functions you need to include the appropriate header file, i.e.@:
+you need
+@example
+#include "lan.h"
+@end example
+
+Naturally the functions aren't written with a certain protocol in mind
+-- writing that is your business -- but just provide a set of fundamental
+routines on top of which you can write your own functions. You can even
+forego using them at all and write your own code for talking with the
+devices directly, they only exist for your convenience. But if you use
+them make sure they don't get invoked before the @code{exp_hook} function.
 
 The advantage of using them is that you don't have to care about basic
 operations (including dealing with timeouts etc.@:) and that the

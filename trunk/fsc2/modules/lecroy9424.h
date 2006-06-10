@@ -26,6 +26,7 @@
 #define LECROY9424_HEADER
 
 #include "fsc2_module.h"
+#include "gpib_if.h"
 
 
 /* Include configuration information for the device */

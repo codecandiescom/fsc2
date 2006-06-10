@@ -93,10 +93,13 @@ endif
 else
 
 # Otherwise we're dealing with some pre-2.6 kernel (hopefully 2.4)
+# (the -fno-strict-aliasing in CFLAGS is set because of some problems with
+# the 2.4 kernel header files withh gcc 3.3.3 on Debian)
 
 INCLUDES := -I$(KERNELDIR)/include -I$(PWD)/../include
 
-CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes
+CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes  \
+            -fno-strict-aliasing
 
 all: $(MODULE)
 
@@ -105,16 +108,16 @@ $(MODULE): $(SOURCES) $(HEADERS)
 
 install:
 ifeq ($(RULBUS_EPP_KERNEL_SOURCE),)
-	if [ -d /lib/modules/$KERNEL_VER ]; then                        \
-		if [ ! -d /lib/modules/$KERNEL_VER/misc ]; then             \
-			$(INSTALL) -m 755 -d /lib/modules/$KERNEL_VER/misc;     \
-		fi;                                                         \
-		$(INSTALL) -m 644 $(MODULE) /lib/modules/$KERNEL_VER/misc;  \
-	else                                                            \
-		if [ ! -d /lib/modules/misc ]; then                         \
-			$(INSTALL) -m 755 -d /lib/modules/misc;                 \
-		fi;                                                         \
-		$(INSTALL) -m 644 $(MODULE) /lib/modules/misc;              \
+	if [ -d /lib/modules/$(KERNEL_VER) ]; then                        \
+		if [ ! -d /lib/modules/$(KERNEL_VER)/misc ]; then             \
+			$(INSTALL) -m 755 -d /lib/modules/$(KERNEL_VER)/misc;     \
+		fi;                                                           \
+		$(INSTALL) -m 644 $(MODULE) /lib/modules/$(KERNEL_VER)/misc;  \
+	else                                                              \
+		if [ ! -d /lib/modules/misc ]; then                           \
+			$(INSTALL) -m 755 -d /lib/modules/misc;                   \
+		fi;                                                           \
+		$(INSTALL) -m 644 $(MODULE) /lib/modules/misc;                \
 	fi
 endif
 

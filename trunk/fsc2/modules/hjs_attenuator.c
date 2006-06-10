@@ -23,6 +23,7 @@
 
 
 #include "hjs_attenuator.h"
+#include "serial.h"
 
 
 /* Global variables */

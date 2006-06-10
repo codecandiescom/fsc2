@@ -25,7 +25,9 @@
 #if ! defined SPEX_CD2A_HEADER
 #define SPEX_CD2A_HEADER
 
+
 #include "fsc2_module.h"
+#include "serial.h"
 
 
 /* Define the following for test purposes only where no real communication

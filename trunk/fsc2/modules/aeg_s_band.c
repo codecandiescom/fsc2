@@ -23,11 +23,13 @@
 
 
 #include "fsc2_module.h"
+#include "serial.h"
 
 
 /* Include configuration information for the device */
 
 #include "aeg_s_band.conf"
+
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;

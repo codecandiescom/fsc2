@@ -192,7 +192,7 @@
 
 
 #include "lecroy_vicp.h"
-#include <netinet/in.h>
+#include "lan.h"
 #include <sys/time.h>
 
 

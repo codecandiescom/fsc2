@@ -25,7 +25,9 @@
 #if ! defined DG2020_B_HEADER
 #define DG2020_B_HEADER
 
+
 #include "fsc2_module.h"
+#include "gpib_if.h"
 
 
 /* Include configuration information for the device */

@@ -164,8 +164,7 @@ int lecroy_ws_exp_hook( void )
 
 	if ( ! lecroy_ws_init( DEVICE_NAME ) )
 	{
-		print( FATAL, "Initialization of device failed: %s\n",
-			   gpib_error_msg );
+		print( FATAL, "Initialization of device failed.\n" );
 		THROW( EXCEPTION );
 	}
 

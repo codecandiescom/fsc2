@@ -22,7 +22,12 @@
  */
 
 
+#if ! defined HFS9000_HEADER
+#define HFS9000_HEADER
+
+
 #include "fsc2_module.h"
+#include "gpib_if.h"
 
 
 /* Include configuration information for the device */
@@ -418,6 +423,9 @@ bool hfs9000_command( const char * /* cmd */ );
 long hfs9000_ch_to_num( long /* channel */ );
 
 bool hfs9000_operation_complete( void );
+
+
+#endif  /* ! HFS9000_HEADER */
 
 
 /*

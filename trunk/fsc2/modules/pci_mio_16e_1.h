@@ -26,10 +26,6 @@
 #define PCI_MIO_16E_1_FSC2_HEADER
 
 #include "fsc2_module.h"
-
-
-/* Include the header file for the library for the card */
-
 #include <ni_daq.h>
 
 

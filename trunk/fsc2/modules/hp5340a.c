@@ -23,13 +23,13 @@
 
 
 /*
- *   The HP5340A is a very old device, it's from 1973, thus even pre-dating
+ *   The HP5340A is a very old device, it's from 1973, i.e. even pre-dating
  *   the GPIB standard. Its programming capabilities are rather limited,
- *   especially one can't find out the settings of the device made via the
- *   front panel and one either has to set all parameters via the program
- *   or none at all. Thus, to keep things simple, all settings must be made
- *   via the front panel and the only function that is supported is querying
- *   the measured frequency.
+ *   especially one can't find out about the settings of the device and
+ *   one either has to set all parameters via the program or none at all.
+ *   Thus, to keep things simple, all settings must be made via the front
+ *   panel and the only function that is supported is querying the measured
+ *   frequency.
  * 
  *   The device is set to a state where it measures new frequencies with an
  *   internal sample rate (which can be adjusted via a knob at the front
@@ -38,6 +38,7 @@
 
 
 #include "fsc2_module.h"
+#include "gpib_if.h"
 
 
 /* Include configuration information for the device */

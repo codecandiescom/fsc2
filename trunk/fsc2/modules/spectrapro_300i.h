@@ -26,6 +26,8 @@
 #define SPECTRAPRO_300I_HEADER
 
 #include "fsc2_module.h"
+#include "serial.h"
+
 
 /* Include configuration information for the device */
 

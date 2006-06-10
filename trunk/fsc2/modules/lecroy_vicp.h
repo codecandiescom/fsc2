@@ -30,7 +30,6 @@
 #define LECROY_VICP_HEADER
 
 
-
 #define SUCCESS            0
 #define SUCCESS_WITH_EOI   1
 #define FAILURE           -1

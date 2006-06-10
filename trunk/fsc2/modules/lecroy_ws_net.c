@@ -24,7 +24,6 @@
 
 
 #include "lecroy_ws.h"
-
 #include "lecroy_vicp.h"
 
 
@@ -80,8 +79,9 @@ bool lecroy_ws_init( const char * name )
 	int i;
 
 
-	if ( gpib_init_device( name, &lecroy_ws.device ) == FAILURE )
-        return FAIL;
+	/* Open a socket to the device */
+
+	lecroy_vicp_init( name, NETWORK_ADDRESS, 100000, 1 );
 
     /* Disable the local button, set digitizer to short form of replies,
 	   transmit data in one block in binary word (2 byte) format with LSB
@@ -1182,12 +1182,13 @@ bool lecroy_ws_display( int ch,
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*-----------------------------------------------*
+ * Function for closing the socket to the device
+ *-----------------------------------------------*/
 
 void lecroy_ws_finished( void )
 {
-	gpib_local( lecroy_ws.device );
+	lecroy_vicp_close( );
 }
 
 

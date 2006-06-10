@@ -23,10 +23,6 @@
 
 
 #include "fsc2_module.h"
-
-
-/* Include the header file for the library for the card */
-
 #include <ni6601.h>
 
 
