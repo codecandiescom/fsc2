@@ -66,6 +66,7 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 #include <linux/moduleparam.h>
 #include <linux/cdev.h>
+#include <linux/device.h>
 #else
 #define __user
 #endif
@@ -172,9 +173,9 @@ static int rulbus_epp_interface_present( void );
 static int major = RULBUS_EPP_MAJOR;
 static unsigned long base = RULBUS_EPP_BASE;
 
-struct parport_driver rulbus_drv = { RULBUS_EPP_NAME,
-                                     rulbus_epp_attach,
-                                     rulbus_epp_detach };
+static struct parport_driver rulbus_drv = { RULBUS_EPP_NAME,
+											rulbus_epp_attach,
+											rulbus_epp_detach };
 
 static struct rulbus_device {
         struct parport *port;
@@ -182,6 +183,9 @@ static struct rulbus_device {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 		struct cdev ch_dev;
 		dev_t dev_no;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+		struct class *rb_class;
+#endif
 #endif
         int in_use;                   /* set when device is opened */
         int is_claimed;               /* set while we have exclusive access */
@@ -193,6 +197,10 @@ static struct rulbus_device {
 } rulbus = { NULL, NULL, 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
              { }, ( dev_t ) 0,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+
+			 NULL,
+#endif
 #endif
 			 0, 0, { }, { }, 0, 0x0F, WRITE_TO_DEVICE };
 
@@ -216,6 +224,7 @@ struct file_operations rulbus_file_ops = {
         .release =        rulbus_release,
 };
 #endif
+
 
 
 /*****************************************
@@ -405,6 +414,22 @@ static int __init rulbus_init( void )
 				parport_unregister_driver( &rulbus_drv );
 				return -EIO;
 		}
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+		rulbus.rb_class = class_create( THIS_MODULE, RULBUS_EPP_NAME );
+		if ( IS_ERR( rulbus.rb_class ) ) {
+                printk( KERN_ERR RULBUS_EPP_NAME ": Can't create a class for "
+                        "the device.\n" );
+				cdev_del( &rulbus.ch_dev );
+				unregister_chrdev_region( rulbus.dev_no, 1 );
+				parport_unregister_driver( &rulbus_drv );
+				return -EIO;
+		}
+
+		class_device_create( rulbus.rb_class, NULL, rulbus.dev_no,
+							 NULL, RULBUS_EPP_NAME );
+#endif
+
 #else
         if ( ( result = register_chrdev( major, RULBUS_EPP_NAME,
 										 &rulbus_file_ops ) ) < 0 ) {
@@ -440,6 +465,12 @@ static int __init rulbus_init( void )
 static void __exit rulbus_cleanup( void )
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+		class_device_destroy( rulbus.rb_class, rulbus.dev_no );
+        class_destroy( rulbus.rb_class );
+#endif
+
 		cdev_del( &rulbus.ch_dev );
 		unregister_chrdev_region( rulbus.dev_no, 1 );
 #else
@@ -457,6 +488,9 @@ static void __exit rulbus_cleanup( void )
                 rulbus_epp_detach( rulbus.port );
 
         parport_unregister_driver( &rulbus_drv );
+
+        printk( KERN_INFO RULBUS_EPP_NAME
+                ": Module successfully removed\n" );
 }
 
 

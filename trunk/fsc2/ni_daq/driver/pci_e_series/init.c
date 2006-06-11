@@ -113,7 +113,13 @@ static struct pci_driver pci_e_series_pci_driver = {
 
 static dev_t dev_no;
 static struct cdev ch_dev;
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+static struct class *pci_e_series_class;
 #endif
+
+#endif
+
 
 /*-------------------------------------------------------*
  * Function that gets executed when the module is loaded
@@ -216,6 +222,9 @@ static int __init pci_e_series_init( void )
 		return -EIO;
 	}
 
+	if ( major == 0 )
+		major = MAJOR( dev_no );
+
 	cdev_init( &ch_dev, &ni_daq_file_ops );
 	ch_dev.owner = THIS_MODULE;
 
@@ -234,8 +243,22 @@ static int __init pci_e_series_init( void )
 		return result;
 	}
 
-	if ( major == 0 )
-		major = MAJOR( dev_no );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+	pci_e_series_class = class_create( THIS_MODULE, BOARD_SERIES_NAME );
+
+	if ( IS_ERR( pci_e_series_class ) ) {
+		printk( KERN_ERR BOARD_SERIES_NAME ": Can't create a class "
+			"for the device.\n" );
+		pci_unregister_driver( &pci_e_series_pci_driver );
+		cdev_del( &ch_dev );
+		unregister_chrdev_region( dev_no, board_count );
+		return -EIO;
+	}
+
+	for ( i = 0; i < board_count; i++ )
+		class_device_create( pci_e_series_class, NULL, major, NULL,
+				     BOARD_SERIES_NAME "_%i", i );
+#endif
 
 	printk( KERN_INFO BOARD_SERIES_NAME ": Module successfully installed\n"
 		BOARD_SERIES_NAME ": Major device number = %d\n"
@@ -465,6 +488,14 @@ static int __init pci_e_series_init_board( struct pci_dev * dev,
 static void __exit pci_e_series_cleanup( void )
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+	int i;
+
+	for ( i = 0; i <board_count; i++ )
+		class_device_destroy( pci_e_series_class, major );
+        class_destroy( pci_e_series_class );
+#endif
 
 	pci_unregister_driver( &pci_e_series_pci_driver );
 	cdev_del( &ch_dev );

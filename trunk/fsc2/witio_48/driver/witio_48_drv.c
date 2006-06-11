@@ -64,6 +64,7 @@
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 #include <linux/moduleparam.h>
 #include <linux/cdev.h>
+#include <linux/device.h>
 #else
 #define __user
 #endif
@@ -199,6 +200,10 @@ static struct file_operations witio_48_file_ops = {
 static dev_t dev_no;
 struct cdev ch_dev;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+static struct class *witio_48_class;
+#endif
+
 #else
 static struct file_operations witio_48_file_ops = {
 	owner:              THIS_MODULE,
@@ -237,6 +242,9 @@ static int __init witio_48_init( void )
 		return -EIO;
 	}
 
+	if ( major != 0 )
+		board.major = MAJOR( dev_no );
+
 	cdev_init( &ch_dev, &witio_48_file_ops );
 	ch_dev.owner = THIS_MODULE;
 
@@ -246,8 +254,20 @@ static int __init witio_48_init( void )
 		goto device_registration_failure;
 	}
 
-	if ( major != 0 )
-		board.major = MAJOR( dev_no );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+	witio_48_class = class_create( THIS_MODULE, "witio_48" );
+
+	if ( IS_ERR( witio_48_class ) ) {
+		printk( KERN_ERR "witio_48: Can't create a class for "
+			"the device.\n" );
+		cdev_del( &ch_dev );
+		unregister_chrdev_region( dev_no, 1 );
+		return -EIO;
+	}
+
+	class_device_create( witio_48_class, NULL, major, NULL, "witio_48" );
+#endif
+
 #else
 	if ( ( result = register_chrdev( major, "witio_48",
 						&witio_48_file_ops ) ) < 0 ) {
@@ -326,11 +346,24 @@ static void __exit witio_48_cleanup( void )
 
 	release_region( ( unsigned long ) board.base, 0x0BUL );
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+		class_device_destroy( witio_48_class, dev_no );
+        class_destroy( witio_48_class );
+#endif
+
+	cdev_del( &ch_dev );
+	unregister_chrdev_region( dev_no, 1 );
+
+	printk( KERN_INFO "witio_48: Module succesfully removed.\n" );
+#else
 	if ( unregister_chrdev( board.major, "witio_48" ) != 0 )
 		printk( KERN_ERR "witio_48: Device busy or other module "
 			"error.\n" );
 	else
 		printk( KERN_INFO "witio_48: Module succesfully removed.\n" );
+#endif
 }
 
 

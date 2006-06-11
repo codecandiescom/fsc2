@@ -128,6 +128,10 @@ static struct pci_driver me6x00_pci_driver = {
 static dev_t dev_no;
 static struct cdev ch_dev;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+static struct class *me6x00_class;
+#endif
+
 #endif
 
 
@@ -136,63 +140,63 @@ static struct cdev ch_dev;
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 2, 0 )
 
 static struct file_operations me6x00_file_operations = {
-    NULL,               /* lseek              */
-    NULL                /* read               */
-    NULL,               /* write              */
-    NULL,               /* readdir            */
-    NULL,               /* select             */
-    me6x00_ioctl,       /* ioctl              */
-    NULL,               /* mmap               */
-    me6x00_open,        /* open               */
-    me6x00_release,     /* release            */
-    NULL,               /* fsync              */
-    NULL,               /* fasync             */
-    NULL,               /* check_media_change */
-    NULL                /* revalidate         */
+	NULL,               /* lseek              */
+	NULL                /* read               */
+	NULL,               /* write              */
+	NULL,               /* readdir            */
+	NULL,               /* select             */
+	me6x00_ioctl,       /* ioctl              */
+	NULL,               /* mmap               */
+	me6x00_open,        /* open               */
+	me6x00_release,     /* release            */
+	NULL,               /* fsync              */
+	NULL,               /* fasync             */
+	NULL,               /* check_media_change */
+	NULL                /* revalidate         */
 };
 
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 2, 0 ) && \
     LINUX_VERSION_CODE < KERNEL_VERSION( 2, 4, 0 )
 
 static struct file_operations me6x00_file_operations = {
-    NULL,               /* llseek             */
-    NULL,               /* read               */
-    NULL,               /* write              */
-    NULL,               /* readdir            */
-    NULL,               /* poll               */
-    me6x00_ioctl,       /* ioctl              */
-    NULL,               /* mmap               */
-    me6x00_open,        /* open               */
-    NULL,               /* flush              */
-    me6x00_release,     /* release            */
-    NULL,               /* fsync              */
-    NULL,               /* fasync             */
-    NULL,               /* check_media_change */
-    NULL,               /* revalidate         */
-    NULL                /* lock               */
+	NULL,               /* llseek             */
+	NULL,               /* read               */
+	NULL,               /* write              */
+	NULL,               /* readdir            */
+	NULL,               /* poll               */
+	me6x00_ioctl,       /* ioctl              */
+	NULL,               /* mmap               */
+	me6x00_open,        /* open               */
+	NULL,               /* flush              */
+	me6x00_release,     /* release            */
+	NULL,               /* fsync              */
+	NULL,               /* fasync             */
+	NULL,               /* check_media_change */
+	NULL,               /* revalidate         */
+	NULL                /* lock               */
 };
 
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 4, 0 ) && \
     LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 
 static struct file_operations me6x00_file_operations = {
-    owner:            THIS_MODULE,
-    ioctl:            me6x00_ioctl,
-    open:             me6x00_open,
-    release:          me6x00_release
+	owner:            THIS_MODULE,
+	ioctl:            me6x00_ioctl,
+	open:             me6x00_open,
+	release:          me6x00_release
 };
 
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 
 static struct file_operations me6x00_file_operations = {
-    .owner =          THIS_MODULE,
+	.owner =          THIS_MODULE,
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
-    .ioctl =          me6x00_ioctl,
+	.ioctl =          me6x00_ioctl,
 #else
-    .unlocked_ioctl = me6x00_ioctl,
+	.unlocked_ioctl = me6x00_ioctl,
 #endif
-    .open =           me6x00_open,
-    .release =        me6x00_release
+	.open =           me6x00_open,
+	.release =        me6x00_release
 };
 
 #endif
@@ -460,6 +464,9 @@ int init_module( void )
 		return -EIO;
 	}
 
+	if ( major == 0 )
+		major = MAJOR( dev_no );
+
 	cdev_init( &ch_dev, &me6x00_file_operations );
 	ch_dev.owner = THIS_MODULE;
 
@@ -472,11 +479,24 @@ int init_module( void )
 	if ( ( result = pci_register_driver( &me6x00_pci_driver ) ) < 0 ) {
 		unregister_chrdev_region( dev_no, me6x00_board_count );
 		printk( KERN_ERR "ME6X00: Registering PCI device failed.\n" );
-		return result;
+		return -EIO;
 	}
 
-	if ( major == 0 )
-		major = MAJOR( dev_no );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+	me6x00_class = class_create( THIS_MODULE, "me6x00" );
+	if ( IS_ERR( me6x00_class ) ) {
+		printk( KERN_ERR "ME6X00: Can't create a class for "
+			"the device.\n" );
+		pci_unregister_driver( &me6x00_pci_driver );
+		cdev_del( &ch_dev );
+		unregister_chrdev_region( dev_no, me6x00_board_count );
+		return -EIO;
+	}
+
+	for ( i = 0; i < me6x00_board_count; i++ )
+		class_device_create( me6x00_class, NULL, major, NULL,
+				     "me6x00_%i", i );
+#endif
 
 #else
 
@@ -533,7 +553,15 @@ void cleanup_module( void )
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 
-	pci_register_driver( &me6x00_pci_driver );
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+	int i;
+
+	for ( i = 0; i < me6x00_board_count; i++ )
+		class_device_destroy( me6x00_class, major );
+        class_destroy( me6x00_class );
+#endif
+
+	pci_unregister_driver( &me6x00_pci_driver );
 	cdev_del( &ch_dev );
 	unregister_chrdev_region( dev_no, me6x00_board_count );
 
@@ -554,7 +582,7 @@ void cleanup_module( void )
 
 #endif
 
-	printk( KERN_INFO "ME6X00: driver de-installed.\n" );
+	printk( KERN_INFO "ME6X00: driver successfully removed.\n" );
 }
 
 

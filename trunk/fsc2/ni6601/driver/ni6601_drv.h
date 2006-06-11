@@ -208,12 +208,11 @@ typedef struct {
 #include <linux/init.h>
 #include <linux/wait.h>
 #include <linux/delay.h>
-
+#include <linux/interrupt.h>
 #include <linux/spinlock.h>
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 #include <linux/poll.h>
-
 
 #ifdef CONFIG_PROC_FS
 #include <linux/proc_fs.h>

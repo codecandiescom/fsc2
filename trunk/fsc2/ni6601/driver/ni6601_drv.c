@@ -59,6 +59,11 @@ static struct pci_driver ni6601_pci_driver = {
 
 static dev_t dev_no;
 static struct cdev ch_dev;
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+static struct class *ni6601_class;
+#endif
+
 #endif
 
 
@@ -95,7 +100,9 @@ static int __init ni6601_init( void )
 {
 	struct pci_dev *dev = NULL;
 	int result;
-
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+	int i;
+#endif
 
 	/* Try to find all boards */
 
@@ -121,7 +128,6 @@ static int __init ni6601_init( void )
 	}
 #else
 	int i;
-
 
 	while ( ( dev = pci_find_device( PCI_VENDOR_NATINST,
 					 PCI_DEVICE_NATINST_6601, dev ) )
@@ -188,6 +194,23 @@ static int __init ni6601_init( void )
 	if ( major == 0 )
 		major = MAJOR( dev_no );
 
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+	ni6601_class = class_create( THIS_MODULE, NI6601_NAME );
+	if ( IS_ERR( ni6601_class ) ) {
+		printk( KERN_ERR "ME6X00: Can't create a class for "
+			"the device.\n" );
+		pci_unregister_driver( &ni6601_pci_driver );
+		cdev_del( &ch_dev );
+		unregister_chrdev_region( dev_no, board_count );
+		return -EIO;
+	}
+
+	for ( i = 0; i < board_count; i++ )
+		class_device_create( ni6601_class, NULL, major, NULL,
+				     NI6601_NAME "_%i", i );
+#endif
+
 #else
 
 	if ( ( result = register_chrdev( major, NI6601_NAME,
@@ -221,13 +244,20 @@ static void __exit ni6601_cleanup( void )
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+	int i;
+
+	for ( i = 0; i < board_count; i++ )
+		class_device_destroy( ni6601_class, major );
+        class_destroy( ni6601_class );
+#endif
+
 	pci_unregister_driver( &ni6601_pci_driver );
 	cdev_del( &ch_dev );
 	unregister_chrdev_region( dev_no, board_count );
 
 #else
 	int i;
-
 
 	for ( i = 0; i < board_count; i++ )
 		ni6601_release_resources( boards + i );
