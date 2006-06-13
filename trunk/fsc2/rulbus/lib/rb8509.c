@@ -340,7 +340,7 @@ int rulbus_rb8509_adc12_set_gain( int handle,
 
 /*-------------------------------------------------------------*
  * Function for setting the trigger mode of the card to either
- * RULBUS_RB8509_ADC12_INT_TRIG or RULBUS_RB8509_ADC12_INT_TRIG
+ * RULBUS_RB8509_ADC12_INT_TRIG or RULBUS_RB8509_ADC12_EXT_TRIG
  *-------------------------------------------------------------*/
 
 int rulbus_rb8509_adc12_set_trigger_mode( int handle,
@@ -360,7 +360,7 @@ int rulbus_rb8509_adc12_set_trigger_mode( int handle,
 
 	/* Some cards can't be triggered externally */
 
-	if ( mode != RULBUS_RB8509_ADC12_INT_TRIG && ! card->has_ext_trigger )
+	if ( mode == RULBUS_RB8509_ADC12_EXT_TRIG && ! card->has_ext_trigger )
 		return rulbus_errno = RULBUS_NO_EXT_TRIGGER;
 
 	if ( mode == RULBUS_RB8509_ADC12_INT_TRIG )
