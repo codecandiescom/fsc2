@@ -42,7 +42,7 @@ ASSIGNMENTS:
 === if ( TRIG_MODE eq "EXTERNAL" )
 TRIGGER_MODE: EXTERNAL;
 === else
-TRIGGER_MODE: $TRIG_MODE, REPEAT_TIME = repeat_time;
+TRIGGER_MODE: TRIG_MODE, REPEAT_TIME = repeat_time;
 === endif
 
 
