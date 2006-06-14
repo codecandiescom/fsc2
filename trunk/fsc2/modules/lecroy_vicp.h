@@ -31,31 +31,31 @@
 
 
 #define SUCCESS            0
-#define SUCCESS_WITH_EOI   1
+#define SUCCESS_BUT_MORE   1
 #define FAILURE           -1
 
 
-void lecroy_vicp_init( const char * dev_name,
-					   const char * address,
-					   long         us_timeout,
-					   bool         quit_on_signal );
+void lecroy_vicp_init( const char * /* dev_name       */,
+					   const char * /* address        */,
+					   long         /* us_timeout     */,
+					   bool         /* quit_on_signal */ );
 
 void lecroy_vicp_close( void );
 
-void lecroy_vicp_set_timeout( int  dir,
-							  long us_timeout );
+void lecroy_vicp_set_timeout( int  /* dir        */,
+							  long /* us_timeout */ );
 
-int lecroy_vicp_write( const char * buffer,
-					   ssize_t    * length,
-					   bool         command_complete,
-					   bool         quit_on_signal );
+int lecroy_vicp_write( const char * /* buffer         */,
+					   ssize_t    * /* length         */,
+					   bool         /* with_eoi       */,
+					   bool         /* quit_on_signal */ );
 
-int lecroy_vicp_read( char *    buffer,
-					  ssize_t * length,
-					  bool      quit_on_signal );
+int lecroy_vicp_read( char *    /* buffer         */,
+					  ssize_t * /* length         */,
+					  bool    * /* with_eoi       */,
+					  bool      /* quit_on_signal */ );
 
 void lecroy_vicp_device_clear( void );
-
 
 
 #endif /* ! LECROY_VICP_HEADER */

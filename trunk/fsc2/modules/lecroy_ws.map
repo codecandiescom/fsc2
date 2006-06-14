@@ -26,7 +26,7 @@ LECROY_WR2 {
 	global:
 				generic_type;
 				device_name;
-				lecroy_wr2_*_hook;
+				lecroy_ws_*_hook;
 				digitizer_*;
 
 	local:      *;

@@ -49,12 +49,10 @@
    bit 3    SRQ (only to be send by the device)
    bit 2    reserved
    bit 1    reserved
-   bit 0    data block terminates with EOI if set
+   bit 0    if set data block terminates in EOI character
 
-   As far as I understand it the EOI is the information if the device (or
-   the sender) is done sending the requested data - if set this is the case,
-   if not the receiver has to expect at least one more data block (which,
-   of course, starts with another header).
+   The EOI bit simply tells if the data block send to the device or received
+   from it ends in an EOI character ('\n' or 0x0A).
 
    The 'header_version' field is a number - currently only 1 is an acceptable
    value (protocol version 1A is treated as a subversion of version 1).
@@ -88,11 +86,12 @@
 
 	int lecroy_vicp_write( const char * buffer,
 						   ssize_t    * length,
-						   bool         command_complete,
+						   bool         with_eoi,
 						   bool         quit_on_signal )
 
 	int lecroy_vicp_read( char *    buffer,
 						  ssize_t * length,
+						  bool    * with_eoi,
 						  bool      quit_on_signal )
 
 	void lecroy_vicp_device_clear( void )
@@ -135,28 +134,36 @@
    The function lecroy_vicp_write() is used to send data to the device.
    It requires four arguments, a buffer with the data to be send, a pointer
    to a variable with the number of bytes to be send, a flag that tells
-   if this is a complete command (i.e. all data belonging to the command
-   are being send) and a flag that tells if the function is supposed to
-   return immediately when receiving a signal. The function returns either
-   SUCCESS_WITH_EOI (1) if a complete command could be send successfully,
-   SUCCESS (0) if an incomplete command was send successfully, or FAILURE (-1)
-   if sending the command was aborted due to receiving a signal. On errors
-   or timeouts the function closes the connection and throws an exception.
-   On return the variable pointed to by the secand argument will contain the
-   number of bytes that have been sent - this also is the case if the function
-   returns FAILURE or did throw an exception.
+   if the data are send with a trailing EOI and a flag that tells if the
+   function is supposed to return immediately when receiving a signal. The
+   function returns either SUCCESS (0) if the date could be send successfully,
+   or FAILURE (-1) if sending the data aborted due to receiving a signal. On
+   errors or timeouts the function closes the connection and throws an
+   exception. On return the variable pointed to by the secand argument will
+   contain the number of bytes that have been sent - this also is the case
+   if the function returns FAILURE or did throw an exception.
 
    lecroy_vicp_read() is for reading data the device sends. It takes three
    arguments, a buffer for storing the data, a pointer to a variable with
-   the length of the buffer and a flag telling if the function is supposed
-   to return immediately on signals. The function returns SUCCESS_WITH_EOI (1)
-   if a complete reply from the device was received, SUCCESS (0) if an in-
-   complete reply got read (i.e. the device will send more data on another
-   call of lecroy_vicp_read()) and FAILURE (-1) if the function aborted because
+   the length of the buffer, a pointer to a variable that tells on return if
+   EOI was set for the data and a flag telling if the function is supposed
+   to return immediately on signals. The function returns SUCCESS_BUT MORE
+   (1) if a reply was received but not all data could be read because they
+   wouldn't have fit into the user supplied buffer, SUCCESS (0) if the reply
+   was read completely and FAILURE (-1) if the function aborted because
    a signal was received. On erros or timeouts the function closes the
    connection and throws an exception. On return the variable pointed to by
    the second argument is set to the number of bytes that have been received
-   even if the function did return with FAILURE or threw an exception.
+   and the third one shows if the data sent have a trailing EOI, even if the
+   function did return with FAILURE or threw an exception.
+
+   if  the function returns less data than the device was willing to send
+   (in which case SUCCESS_BUT_MORE gets returned) the next invocation of
+   lecroy_vicp_read() will return these yet unread data, even if another
+   reply by the device was initiated by sending another command in between.
+   I.e. "new data" (data resulting from the next command) only will be
+   returned after the function has been called until SUCCESS has been
+   returned.
 
    Please note: If a read or write gets aborted due to a signal there may
    still be data to be read from the device or the device may still be
@@ -262,10 +269,6 @@ struct LeCroy_VICP {
 static LeCroy_VICP_T lecroy_vicp = { -1, 0, { 0 }, 0, 0, UNSET,
 									 NULL, NULL, 0, 0 };
 
-
-static int lecroy_vicp_failure_or_signal( ssize_t   count,
-										  ssize_t * length,
-										  ssize_t   total );
 
 static inline unsigned char lecroy_vicp_get_operation( unsigned char *
 													                  header );
@@ -419,18 +422,14 @@ void lecroy_vicp_set_timeout( int  dir,
  * ->
  *    1. Pointer to buffer with the data
  *    2. Pointer to variable with the amount of bytes to be send
- *    3. Flag that tells when set if the data to be send are a
- *       complete transmission or otherwise that further parts
- *       of the transmission are to be sent later
+ *    3. Flag that tells when set that the block of data is
+ *       terminated by the EOI character
  *    4. Flag that tells if he function is supposed to return when
  *       a signal is received.
- * <- The function the variable pointed to by 'length' gets set to
- *    the number of bytes that have been send. It has three possible
+ * <- The return the variable pointed to by 'length' gets set to the
+ *    number of bytes that have been send. There are two possible
  *    return values:
- *     a) SUCCESS_WITH_EOI (1)  data have been send successfully and
- *                              the device also got the the EOI flag
- *     b) SUCCESS (0)           data have been send successfully but
- *                              withou an EOI flag
+ *     a) SUCCESS (0)           data have been send <successfully
  *     c) FAILURE (-1)          transmission was aborted due to a
  *                              signal
  *    If a timeout happens during the transmission an exception gets
@@ -439,10 +438,10 @@ void lecroy_vicp_set_timeout( int  dir,
 
 int lecroy_vicp_write( const char * buffer,
 					   ssize_t    * length,
-					   bool         command_complete,
+					   bool         with_eoi,
 					   bool         quit_on_signal )
 {
-	unsigned char  header[ LECROY_VICP_HEADER_SIZE ];
+	unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
 	unsigned char  op = LECROY_VICP_DATA | LECROY_VICP_REMOTE;
 	struct iovec   data[ 2 ];
 	ssize_t        total_length;
@@ -479,68 +478,48 @@ int lecroy_vicp_write( const char * buffer,
 	data[ 1 ].iov_base = ( void * ) buffer;
 	data[ 1 ].iov_len  = *length;
 
-	total_length = LECROY_VICP_HEADER_SIZE + *length;
-
 	/* Assemble the header, set the EOI flag if the user tells us so */
 
-	if ( command_complete )
+	if ( with_eoi )
 		op |= LECROY_VICP_EOI;
 
 	lecroy_vicp_set_operation( header, op );
 	lecroy_vicp_set_version( header );
 	lecroy_vicp_set_sequence( header );
-	lecroy_vicp_set_length( header, total_length );
+	lecroy_vicp_set_length( header, *length );
 
 	/* Now start pushing the data over to the device. Since there is no
 	   guarantee that all of them will be written in one go (e.g. because
-	   there are more than fit into a packet) we must go on trying if
-	   lesss then the requested amount of bytes could be send. */
+	   there are more than fit into a packet) we must go on trying if less
+	   then the requested amount of bytes could be send on the first try. */
 
 	gettimeofday( &before, NULL );
 
 	bytes_written = fsc2_lan_writev( lecroy_vicp.handle, data, 2,
 									 us_timeout, quit_on_signal );
 
-	if ( bytes_written <= 0 )
-		return lecroy_vicp_failure_or_signal( bytes_written, length,
-											  bytes_written );
+	if ( bytes_written < 0 )
+		THROW( EXCEPTION );
 
-	/* If not even the complete header could be send we must retry with
-	   a writev() call until the header has been sent. */
-
-	total_length = bytes_written;
-
-	while ( total_length < LECROY_VICP_HEADER_SIZE )
+	if ( bytes_written == 0 )
 	{
-		data[ 0 ].iov_base = header + total_length;
-		data[ 0 ].iov_len  = LECROY_VICP_HEADER_SIZE - total_length;
-
-		gettimeofday( &after, NULL );
-		us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-			          - ( before.tv_sec * 1000000 + before.tv_usec );
-		if ( us_timeout <= 0 )
-			return lecroy_vicp_failure_or_signal( -1, length, total_length );
-		before = after;
-
-		bytes_written = fsc2_lan_writev( lecroy_vicp.handle, data, 2,
-										 us_timeout, quit_on_signal );
-
-		if ( bytes_written <= 0 )
-			return lecroy_vicp_failure_or_signal( bytes_written,
-												  length, total_length );
-
-		total_length += bytes_written;
+		*length = 0;
+		return FAILURE;
 	}
 
-	total_length -= LECROY_VICP_HEADER_SIZE;
+	total_length = bytes_written - LECROY_VICP_HEADER_SIZE;
+
+	fsc2_assert( total_length >= 0 );
 
 	while ( total_length < *length )
 	{
 		gettimeofday( &after, NULL );
 		us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
 			          - ( before.tv_sec * 1000000 + before.tv_usec );
+
 		if ( us_timeout <= 0 )
-			return lecroy_vicp_failure_or_signal( -1, length, total_length );
+			THROW( EXCEPTION );
+
 		before = after;
 
 		buffer += total_length;
@@ -549,17 +528,19 @@ int lecroy_vicp_write( const char * buffer,
 										*length - total_length, us_timeout,
 										quit_on_signal );
 
-		if ( bytes_written <= 0 )
-			return lecroy_vicp_failure_or_signal( bytes_written, length,
-												  total_length );
+		if ( bytes_written < 0 )
+			THROW( EXCEPTION );
 
 		total_length += bytes_written;
+
+		if ( bytes_written == 0 )
+		{
+			*length = total_length;
+			return FAILURE;
+		}
 	}
 
-	if ( ! command_complete )
-		return SUCCESS;
-
-	return SUCCESS_WITH_EOI;
+	return SUCCESS;
 }
 
 
@@ -569,17 +550,18 @@ int lecroy_vicp_write( const char * buffer,
  *    1. Pointer to buffer for the data
  *    2. Pointer to variable with the maximum amount of bytes that
  *       can be received.
+ *    3. Flag that tells if the data block is terminated by an EOI
+ *       character
  *    3. Flag that tells if he function is supposed to return when
  *       a signal is received.
  * <- The function the variable pointed to by 'length' gets set to
  *    the number of bytes that have been received. It has three
  *    possible return values:
- *     a) SUCCESS_WITH_EOI (1)  data have successfully received and
- *                              the device also set the EOI flag
- *     b) SUCCESS (0)           data have been send successfully but
- *                              without the EOI flag being set by the
- *                              device (i.e. another call will return
- *                              further data)
+ *     a) SUCCESS_BUT_MORE (1)  data have successfully received but
+ *                              there are still data the device wants
+ *                              to transmit but which wouldn't hav
+ *                              fit into the user supplied buffer
+ *     b) SUCCESS (0)           all data have been received successfully
  *     c) FAILURE (-1)          transmission was aborted due to a
  *                              signal
  *    If a timeout happens during the transmission an exception gets
@@ -588,13 +570,12 @@ int lecroy_vicp_write( const char * buffer,
 
 int lecroy_vicp_read( char *    buffer,
 					  ssize_t * length,
+					  bool *    with_eoi,
 					  bool      quit_on_signal )
 {
 	unsigned char   header[ LECROY_VICP_HEADER_SIZE ];
-	unsigned char * hdr_ptr;
 	ssize_t         total_length = 0;
 	ssize_t         bytes_read;
-	ssize_t         header_to_read;
 	unsigned long   bytes_to_expect;
 	struct timeval  before,
 		            after;
@@ -622,192 +603,129 @@ int lecroy_vicp_read( char *    buffer,
 
 	/* Check if there are still outstanding bytes, i.e. bytes of wich we know
 	   from reading the last received header that they are in the process of
-	   being sent by the device. Get them first and if the header for them
-	   had the EOI flag set don't read more but return them, even if that's
-	   a smaller number than requested by the caller. */
+	   being sent by the device. Get them first. */
 
 	gettimeofday( &before, NULL );
 
-	while ( lecroy_vicp.remaining > 0 && total_length < *length )
+	if ( lecroy_vicp.remaining > 0 )
+	{
+		*with_eoi = lecroy_vicp.eoi_was_set;
+
+		while ( lecroy_vicp.remaining > 0 && total_length < *length )
+		{
+			gettimeofday( &after, NULL );
+			us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
+				          - ( before.tv_sec * 1000000 + before.tv_usec );
+
+			if ( us_timeout <= 0 )
+				THROW( EXCEPTION );
+			before = after;
+
+			bytes_read = fsc2_lan_read( lecroy_vicp.handle, buffer,
+										ss_min( lecroy_vicp.remaining,
+												*length ),
+										us_timeout, quit_on_signal );
+
+			if ( bytes_read > 0 )
+			{
+				lecroy_vicp.remaining -= bytes_read;
+				total_length += bytes_read;
+				buffer += bytes_read;
+			}
+
+			if ( bytes_read < 0 )
+				THROW( EXCEPTION );
+
+			if ( bytes_read == 0 )
+				break;
+		}
+
+		return lecroy_vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
+	}
+
+	gettimeofday( &before, NULL );
+	bytes_read = fsc2_lan_read( lecroy_vicp.handle, header,
+								LECROY_VICP_HEADER_SIZE,
+								us_timeout, quit_on_signal );
+	
+	if ( bytes_read < 0 )
+		THROW( EXCEPTION );
+
+	if ( bytes_read == 0 )
+	{
+		*length = 0;
+		return FAILURE;
+	}
+
+	fsc2_assert( bytes_read == LECROY_VICP_HEADER_SIZE );
+
+	/* Check the version field - if this is not correct something must
+	   have gone seriously wrong */
+
+	if ( lecroy_vicp_get_version( header ) !=
+			                                 LECROY_VICP_HEADER_VERSION_VALUE )
+		THROW( EXCEPTION );
+
+	/* The header tells us how many bytes we can expect - if there are
+	   none something must really be going wrong */
+
+	if ( ( bytes_to_expect = lecroy_vicp_get_length( header ) ) == 0 )
+		THROW( EXCEPTION );
+
+	/* Examine and store the EOI bit */
+
+	*with_eoi = lecroy_vicp.eoi_was_set =
+						 lecroy_vicp_get_operation( header ) & LECROY_VICP_EOI;
+
+	/* Otherwise we can now start to read the real data. Make sure we don't
+	   try to read more than the user asked for. If we could read more we
+	   store the number of bytes we couldn't fetch. */
+
+	if ( ( ssize_t ) bytes_to_expect - total_length > *length )
+	{
+		lecroy_vicp.remaining = bytes_to_expect - *length + total_length;
+		bytes_to_expect = *length - total_length;
+	}
+
+	while ( bytes_to_expect > 0 )
 	{
 		gettimeofday( &after, NULL );
 		us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
 			          - ( before.tv_sec * 1000000 + before.tv_usec );
+
 		if ( us_timeout <= 0 )
-			return lecroy_vicp_failure_or_signal( -1, length, total_length );
+			THROW( EXCEPTION );
 		before = after;
 
 		bytes_read = fsc2_lan_read( lecroy_vicp.handle, buffer,
-									ss_min( lecroy_vicp.remaining, *length ),
+									bytes_to_expect,
 									us_timeout, quit_on_signal );
 
-		if ( bytes_read > 0 )
+		if ( bytes_read == 0 )
 		{
-			lecroy_vicp.remaining -= bytes_read;
-			total_length += bytes_read;
-			buffer += bytes_read;
+			lecroy_vicp.remaining += bytes_to_expect;
+			break;
 		}
 
-		if ( bytes_read <= 0 )
-			return lecroy_vicp_failure_or_signal( bytes_read, length,
-												  total_length );
+		if ( bytes_read < 0 )
+			THROW( EXCEPTION );
+
+		buffer += bytes_read;
+		total_length += bytes_read;
+		bytes_to_expect -= bytes_read;
 	}
-
-	/* If the requested number of bytes now already has been read or the
-	   data just read where sent with the EOI flag being set we must
-	   stop here and return them to the user immediately. */
-
-	if ( total_length == *length || lecroy_vicp.eoi_was_set )
-	{
-		*length = total_length;
-
-		if ( lecroy_vicp.remaining == 0 && lecroy_vicp.eoi_was_set )
-		{
-			lecroy_vicp.eoi_was_set = UNSET;
-			return SUCCESS_WITH_EOI;
-		}
-
-		return SUCCESS;
-	}
-
-	/* Now we must read in the next data, consisting of header and data parts
-	   - since we might get the requested data in a number of packages, each
-	   with its own header, we need to loop over the following code. */
-
-	do
-	{
-		/* First we've got to read and analyze the next header - since it's
-		   possible we got stopped by a signal in the last call while reading
-		   the header we may have to restore that state so that we can go on
-		   from were we got interrupted, i.e. continue with reading the rest
-		   of the header. */
-
-		if ( lecroy_vicp.header_count != 0 )
-		{
-			memcpy( header, lecroy_vicp.partial_header,
-					lecroy_vicp.header_count );
-			hdr_ptr = header + lecroy_vicp.header_count;
-			header_to_read =
-				           LECROY_VICP_HEADER_SIZE - lecroy_vicp.header_count;
-
-			lecroy_vicp.header_count = 0;
-		}
-		else
-		{
-			hdr_ptr = header;
-			header_to_read = LECROY_VICP_HEADER_SIZE;
-		}
-
-		/* Loop until we have read in the complete header */
-
-		while ( header_to_read > 0 )
-		{
-			gettimeofday( &after, NULL );
-			us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-				          - ( before.tv_sec * 1000000 + before.tv_usec );
-			if ( us_timeout <= 0 )
-				return lecroy_vicp_failure_or_signal( -1, length,
-													  total_length );
-			before = after;
-
-			bytes_read = fsc2_lan_read( lecroy_vicp.handle, hdr_ptr,
-										header_to_read,
-										us_timeout, quit_on_signal );
-	
-			/* On abort due to a signal store a partially read header to be
-			   able to continue later where we left off */
-
-			if ( header_to_read < LECROY_VICP_HEADER_SIZE && bytes_read == 0 )
-			{
-				lecroy_vicp.header_count =
-									  LECROY_VICP_HEADER_SIZE - header_to_read;
-				memcpy( lecroy_vicp.partial_header, header, 
-						lecroy_vicp.header_count );
-			}
-
-			if ( bytes_read <= 0 )
-				return lecroy_vicp_failure_or_signal( bytes_read, length,
-													  total_length );
-
-			hdr_ptr += bytes_read;
-			header_to_read -= bytes_read;
-		}
-
-		/* Check the version field - if this is not correct something must
-		   have gone seriously wrong */
-
-		if ( lecroy_vicp_get_version( header ) !=
-			                                 LECROY_VICP_HEADER_VERSION_VALUE )
-			return lecroy_vicp_failure_or_signal( -1, length, total_length );
-
-		/* The header tells us how many bytes we can expect - if there are
-		   none something must really be going wrong */
-
-		if ( ( bytes_to_expect = lecroy_vicp_get_length( header ) ) == 0 )
-			lecroy_vicp_failure_or_signal( -1, length, total_length );
-
-		/* Otherwise we can now start to read the real data. Make sure we don't
-		   try to read more than the user asked for. If we could read more we
-		   store the number of bytes we won't fetch as well as the setting of
-		   the EOI flag. */
-
-		if ( ( ssize_t ) bytes_to_expect - total_length > *length )
-		{
-			lecroy_vicp.remaining = bytes_to_expect - *length + total_length;
-			lecroy_vicp.eoi_was_set =
-				         lecroy_vicp_get_operation( header ) & LECROY_VICP_EOI;
-			bytes_to_expect = *length - total_length;
-		}
-
-		while ( bytes_to_expect > 0 )
-		{
-			gettimeofday( &after, NULL );
-			us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-				          - ( before.tv_sec * 1000000 + before.tv_usec );
-			if ( us_timeout <= 0 )
-				return lecroy_vicp_failure_or_signal( -1, length,
-													  total_length );
-			before = after;
-
-			bytes_read = fsc2_lan_read( lecroy_vicp.handle, buffer,
-										bytes_to_expect,
-										us_timeout, quit_on_signal );
-
-			if ( bytes_read == 0 )
-			{
-				lecroy_vicp.remaining += bytes_to_expect;
-				lecroy_vicp.eoi_was_set =
-				         lecroy_vicp_get_operation( header ) & LECROY_VICP_EOI;
-			}
-
-			if ( bytes_read <= 0 )
-				return lecroy_vicp_failure_or_signal( bytes_read, length,
-													  total_length );
-
-			buffer += bytes_read;
-			total_length += bytes_read;
-			bytes_to_expect -= bytes_read;
-		}
-
-	} while ( total_length < *length &&
-			  ! ( lecroy_vicp_get_operation( header ) & LECROY_VICP_EOI ) );
 
 	*length = total_length;
 
-	/* We has complete success if we got everything the device wanted to send
-	   and the EOI flag was set in the last header sent, otherwise the caller
-	   must know that there's more to be had. */
-
-	return ( lecroy_vicp_get_operation( header ) & LECROY_VICP_EOI &&
-		     lecroy_vicp.remaining == 0 ) ? SUCCESS_WITH_EOI : SUCCESS;
+	return lecroy_vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
 }
 
 
 /*--------------------------------------------------------*
  * Function for sending a CLEAR command to the device.
- * This will clear all inout and output buffers, aborts
+ * This will clear all input and output buffers, abort
  * the interpretation of the current command (if any)
- * and clears any pending commands. Status and status
+ * and clear any pending commands. Status and status
  * enable registers remain unchanged. The command may
  * take several seconds to finish.
  * The function also closes and then reopens the network
@@ -818,13 +736,9 @@ int lecroy_vicp_read( char *    buffer,
 void lecroy_vicp_device_clear( void )
 {
 	int             fd;
-	unsigned char   header[ LECROY_VICP_HEADER_SIZE ];
-	unsigned char * hdr_ptr = header;
+	unsigned char   header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
 	ssize_t         bytes_written;
-	unsigned long   header_count = LECROY_VICP_HEADER_SIZE;
 	long            us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
-	struct timeval  before,
-		            after;
 
 
 	if ( lecroy_vicp.handle < 0 )
@@ -841,36 +755,19 @@ void lecroy_vicp_device_clear( void )
 	lecroy_vicp_set_version( header );
 	lecroy_vicp_set_length( header, 0 );
 
-	gettimeofday( &before, NULL );
-
 	/* Try to send the header, don't abort on signals */
 
-	while ( header_count > 0 )
-	{	
-		gettimeofday( &after, NULL );
-		us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-			          - ( before.tv_sec * 1000000 + before.tv_usec );
-		if ( us_timeout <= 0 )
-		{
-			lecroy_vicp_close( );
-			print( FATAL, "Communication with device failed.\n" );
-			THROW( EXCEPTION );
-		}
-		before = after;
+	bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
+									LECROY_VICP_HEADER_SIZE, us_timeout,
+									UNSET );
 
-		bytes_written = fsc2_lan_write( lecroy_vicp.handle, hdr_ptr,
-										header_count, us_timeout, UNSET );
-
-		if ( bytes_written < 0  )
-		{
-			lecroy_vicp_close( );
-			print( FATAL, "Communication with device failed.\n" );
-			THROW( EXCEPTION );
-		}
-
-		header_count -= bytes_written;
-		hdr_ptr += bytes_written;
+	if ( bytes_written <= 0 )
+	{
+		lecroy_vicp_close( );
+		THROW( EXCEPTION );
 	}
+
+	fsc2_assert( bytes_written == LECROY_VICP_HEADER_SIZE );
 
 	/* Sleeping for 100 ms after sending a clear seems to be necessary as far
 	   as I can see from the SourceForge LeCroyVICP projects sources, where
@@ -898,34 +795,6 @@ void lecroy_vicp_device_clear( void )
 
 	lecroy_vicp.handle = fd;
 }
-
-
-/*----------------------------------------------------------------*
- *----------------------------------------------------------------*/
-
-static int lecroy_vicp_failure_or_signal( ssize_t   count,
-										  ssize_t * length,
-										  ssize_t   total )
-{
-	fsc2_assert( count <= 0 );
-
-	if ( length != NULL )
-		*length = total;
-
-	/* A zero return value means we got a signal - this should only be
-	   possible if 'quit_on_signal' was set. */
-
-	if ( count == 0 )
-		return FAILURE;
-
-	/* Otherwise we've got an error or a timeout, nothing we can do about
-	   that */
-
-	lecroy_vicp_close( );
-	print( FATAL, "Communication with device failed.\n" );
-	THROW( EXCEPTION );
-}
-
 
 
 /*--------------------------------------------------------------*

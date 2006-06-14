@@ -70,12 +70,15 @@ NAME     \"[^"]*\"
 
 
             /* handling of C++ and bash style comment spanning a whole line */
+
 {REM1}		rb_pulser_w_Lc++;
 
 			/* handling of C++/bash style comment not spanning a whole line */
+
 {REM2}		rb_pulser_w_Lc++;
 
 			/* handling of C style comment */
+
 {REM3}		{
 				rb_pulser_w_Comm_Lc = rb_pulser_w_Lc;
 				yy_push_state( comm );
@@ -87,9 +90,11 @@ NAME     \"[^"]*\"
 {REM5}      /* skipping all '*'s not followed by '/'s */
 
 			/* end of line character in a comment */
+
 \n			rb_pulser_w_Lc++;
 
 			/* handling of EOF within a comment -> fatal error */
+
 <<EOF>> 	{
 				print( FATAL, "End of configuration file '%s' detected within "
 							  "a comment.\n", rb_pulser_w.config_file );
@@ -97,9 +102,11 @@ NAME     \"[^"]*\"
 			}
 
 			/* end of comment but not end of line */
+
 {EREM1}		yy_pop_state( );
 
 			/* end of comment and end of line */
+
 {EREM2}     {
 				rb_pulser_w_Lc++;
 				yy_pop_state( );
@@ -115,15 +122,19 @@ NAME     \"[^"]*\"
 			}
 
 			/* dump empty line (i.e. just containing tabs and spaces) */
+
 {WLWS}      rb_pulser_w_Lc++;
 
 			/* dumps trailing white space */
+
 {TWS}       rb_pulser_w_Lc++;
 
 			/* dump all other forms of white space as well as units */
+
 {WS}
 
 			/* count lines */
+
 \n			rb_pulser_w_Lc++;
 
 "ERT_DELAY_CARD"        set_cur_delay( ERT_DELAY );

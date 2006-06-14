@@ -1024,16 +1024,12 @@ static void rb_pulser_w_card_setup( void )
 	rb_pulser_w.delay_card[ MW_DELAY_5 ].next = NULL;
 
 	rb_pulser_w.delay_card[ PHASE_DELAY_0 ].prev = NULL;
-	rb_pulser_w.delay_card[ PHASE_DELAY_0 ].next =
-									    rb_pulser_w.delay_card + PHASE_DELAY_1;
+	rb_pulser_w.delay_card[ PHASE_DELAY_0 ].next = NULL;
 
-	rb_pulser_w.delay_card[ PHASE_DELAY_1 ].prev =
-									    rb_pulser_w.delay_card + PHASE_DELAY_0;
-	rb_pulser_w.delay_card[ PHASE_DELAY_1 ].next =
-									    rb_pulser_w.delay_card + PHASE_DELAY_2;
+	rb_pulser_w.delay_card[ PHASE_DELAY_1 ].prev = NULL;
+	rb_pulser_w.delay_card[ PHASE_DELAY_1 ].next = NULL;
 
-	rb_pulser_w.delay_card[ PHASE_DELAY_2 ].prev =
-									    rb_pulser_w.delay_card + PHASE_DELAY_1;
+	rb_pulser_w.delay_card[ PHASE_DELAY_2 ].prev = NULL;
 	rb_pulser_w.delay_card[ PHASE_DELAY_2 ].next = NULL;
 
 	rb_pulser_w.delay_card[ DEFENSE_DELAY ].prev = NULL;

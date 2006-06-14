@@ -15,7 +15,7 @@
 # This file gets read in each time the module for the RULBUS pulser is
 # loaded anew (i.e. whenever a new EDL file is loaded and then at least
 # a test run is done). This way the configuration of the RULBUS pulser
-# can be changed "on the fly" without even exiting fsc2.
+# can be changed "on the fly" without even restarting fsc2.
 
 
 # 1. Name of the card creating the main trigger of the experiment (i.e.
@@ -56,41 +56,41 @@ MW_DELAY_CARD_4	      "DELAY_5"
 MW_DELAY_CARD_5	      "DELAY_6"
 
 
-# 8. Name of the card for controlling the phase of the first pulse
+# 8. Name of the card for creating the defense pulse
 
-PHASE_DELAY_CARD_0    "DELAY_7"
-
-
-# 9. Name of the card for controlling the phase of the second pulse
-
-PHASE_DELAY_CARD_1    "DELAY_8"
+DEFENSE_DELAY_CARD    "DELAY_7"
 
 
-# 10. Name of the card for controlling the phase of the third pulse
+# 9. Name of the card for creating the delay before the laser pulse
 
-PHASE_DELAY_CARD_2    "DELAY_9"
-
-
-# 11. Name of the card for creating the defense pulse
-
-DEFENSE_DELAY_CARD    "DELAY_10"
+LASER_DELAY_CARD_0    "DELAY_8"
 
 
-# 12. Name of the delay card that creates the delay before the start of
+# 10. Name of the card producing the laser pulse
+
+LASER_DELAY_CARD_1    "DELAY_9"
+
+
+# 11. Name of the card for controlling the phase of the first pulse
+
+PHASE_DELAY_CARD_0    "DELAY_10"
+
+
+# 12. Name of the card for controlling the phase of the second pulse
+
+PHASE_DELAY_CARD_1    "DELAY_11"
+
+
+# 13. Name of the card for controlling the phase of the third pulse
+
+PHASE_DELAY_CARD_2    "DELAY_12"
+
+
+# 14. Name of the delay card that creates the delay before the start of
 #     the RF pulse (the length of this pulse is set using the pulse mode
 #     of the Rhode & Schwarz synthesizer)
 
-RF_DELAY_CARD         "DELAY_11"
-
-
-# 13. Name of the card for creating the delay before the laser pulse
-
-LASER_DELAY_CARD_0    "DELAY_12"
-
-
-# 14. Name of the card producing the laser pulse
-
-LASER_DELAY_CARD_1    "DELAY_13"
+RF_DELAY_CARD         "DELAY_13"
 
 
 # 15. Name of the delay cards creating the delay before detection trigger
@@ -99,13 +99,13 @@ LASER_DELAY_CARD_1    "DELAY_13"
 DET_DELAY_CARD        "DELAY_14"
 
 
-# 23. Name of the clock card used as the input of the delay card for
+# 16. Name of the clock card used as the input of the delay card for
 #     creating main trigger of the experiment
 
 ERT_CLOCK_CARD    "CLOCK_0"
 
 
-# 24. Name of the clock card that's the clock for all the other delay cards,
+# 17. Name of the clock card that's the clock for all the other delay cards,
 #     i.e. the time base clock card - but note that there's a compile time
 #     option that makes the program assume that a fixed frequency (100 MHz)
 #     clock card is used instead, in this case this setting does nothing

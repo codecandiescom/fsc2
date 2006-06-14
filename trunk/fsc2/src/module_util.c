@@ -303,12 +303,6 @@ double is_mult_ns( double       val,
 	double ip, fp;
 
 
-	if ( val * 1.0e9 > LONG_MAX )
-	{
-		print( FATAL, "%s of %.0f is too large.\n", text, val );
-		THROW( EXCEPTION );
-	}
-
 	val *= 1.0e9;
 	fp = modf( val , &ip );
 

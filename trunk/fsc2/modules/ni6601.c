@@ -105,6 +105,7 @@ int ni6601_init_hook( void )
 int ni6601_exp_hook( void )
 {
 	int s;
+	int ret;
 
 
 	buffered_counter = NI6601_COUNTER_0 - 1;
@@ -112,7 +113,11 @@ int ni6601_exp_hook( void )
 	/* Ask for state of the one of the counters of the board to find out
 	   if we can access the board */
 
-	switch ( ni6601_is_counter_armed( BOARD_NUMBER, NI6601_COUNTER_0, &s ) )
+	raise_permissions( );
+	ret = ni6601_is_counter_armed( BOARD_NUMBER, NI6601_COUNTER_0, &s );
+	lower_permissions( );
+
+	switch ( ret )
 	{
 		case NI6601_OK :
 			break;
@@ -161,7 +166,10 @@ int ni6601_exp_hook( void )
 
 int ni6601_end_of_exp_hook( void )
 {
+	raise_permissions( );
 	ni6601_close( BOARD_NUMBER );
+	lower_permissions( );
+
 	buffered_counter = NI6601_COUNTER_0 - 1;
 	return 1;
 }
@@ -183,6 +191,7 @@ Var_T *counter_start_continuous_counter( Var_T * v )
 {
 	int	counter;
 	int	source;
+	int ret;
 
 
 	if ( v == NULL )
@@ -203,7 +212,12 @@ Var_T *counter_start_continuous_counter( Var_T * v )
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch( ni6601_start_counter( BOARD_NUMBER, counter, source ) )
+	{
+		raise_permissions( );
+		ret = ni6601_start_counter( BOARD_NUMBER, counter, source );
+		lower_permissions( );
+
+		switch( ret )
 		{
 			case NI6601_OK :
 				break;
@@ -216,6 +230,7 @@ Var_T *counter_start_continuous_counter( Var_T * v )
 				print( FATAL, "Can't start counter.\n" );
 				THROW( EXCEPTION );
 		}
+	}
 	else if ( FSC2_MODE == TEST )
 	{
 		if ( states[ counter ] == COUNTER_IS_BUSY )
@@ -238,6 +253,7 @@ Var_T *counter_start_timed_counter( Var_T * v )
 	int counter;
 	int source;
 	double interval;
+	int ret;
 
 
 	if ( v == NULL )
@@ -267,8 +283,13 @@ Var_T *counter_start_timed_counter( Var_T * v )
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch ( ni6601_start_gated_counter( BOARD_NUMBER, counter, interval,
-											 source ) )
+	{
+		raise_permissions( );
+		ret = ni6601_start_gated_counter( BOARD_NUMBER, counter, interval,
+										  source );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI6601_OK :
 				break;
@@ -286,6 +307,7 @@ Var_T *counter_start_timed_counter( Var_T * v )
 				print( FATAL, "Can't start counter.\n" );
 				THROW( EXCEPTION );
 		}
+	}
 	else if ( FSC2_MODE == TEST &&
 			  states[ counter ] == COUNTER_IS_BUSY )
 	{
@@ -311,6 +333,7 @@ Var_T *counter_timed_count( Var_T * v )
 	unsigned long count;
 	int state;
 	static long dummy_count = 0;
+	int ret;
 
 
 	if ( v == NULL )
@@ -340,8 +363,13 @@ Var_T *counter_timed_count( Var_T * v )
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch ( ni6601_start_gated_counter( BOARD_NUMBER, counter, interval,
-											 source ) )
+	{
+		raise_permissions( );
+		ret = ni6601_start_gated_counter( BOARD_NUMBER, counter, interval,
+										  source );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI6601_OK :
 				break;
@@ -359,6 +387,7 @@ Var_T *counter_timed_count( Var_T * v )
 				print( FATAL, "Can't start counter.\n" );
 				THROW( EXCEPTION );
 		}
+	}
 	else if ( FSC2_MODE == TEST &&
 			  states[ counter ] == COUNTER_IS_BUSY )
 	{
@@ -380,7 +409,11 @@ Var_T *counter_timed_count( Var_T * v )
 		{
 			fsc2_usleep( ( unsigned long ) ( interval * 1.0e6 ), SET );
 			if ( check_user_request( ) )
+			{
+				raise_permissions( );
 				counter_stop_counter( vars_push( INT_VAR, counter ) );
+				lower_permissions( );
+			}
 		}
 
 	try_counter_again:
@@ -390,8 +423,11 @@ Var_T *counter_timed_count( Var_T * v )
 		   within less than the clock rate. This helps not slowing down the
 		   program too much when really short counting intervals are used. */
 
-		switch ( ni6601_get_count( BOARD_NUMBER, counter, 1, 1,
-								   &count, &state ) )
+		raise_permissions( );
+		ret = ni6601_get_count( BOARD_NUMBER, counter, 1, 1, &count, &state );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI6601_OK :
 				if ( count > LONG_MAX )
@@ -431,14 +467,18 @@ Var_T *counter_intermediate_count( Var_T * v )
 	unsigned long count;
 	int state;
 	static long dummy_count = 0;
+	int ret;
 
 
 	counter = ni6601_counter_number( get_strict_long( v, "counter channel" ) );
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		if ( ni6601_get_count( BOARD_NUMBER, counter, 0, 0,
-							   &count, &state ) < 0 )
+		raise_permissions( );
+		ret = ni6601_get_count( BOARD_NUMBER, counter, 0, 0, &count, &state );
+		lower_permissions( );
+
+		if ( ret < 0 )
 		{
 			print( FATAL, "Can't get counter value.\n" );
 			THROW( EXCEPTION );
@@ -467,6 +507,7 @@ Var_T *counter_final_count( Var_T * v )
 	unsigned long count;
 	int state;
 	static long dummy_count = 0;
+	int ret;
 
 
 	counter = ni6601_counter_number( get_strict_long( v, "counter channel" ) );
@@ -476,8 +517,11 @@ Var_T *counter_final_count( Var_T * v )
 
 	try_counter_again:
 
-		switch ( ni6601_get_count( BOARD_NUMBER, counter, 1, 0,
-								   &count, &state ) )
+		raise_permissions( );
+		ret = ni6601_get_count( BOARD_NUMBER, counter, 1, 0, &count, &state );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI6601_OK :
 				if ( count > LONG_MAX )
@@ -517,6 +561,7 @@ Var_T *counter_start_buffered_counter( Var_T * v )
 	int source = NI6601_DEFAULT_SOURCE;
 	int continuous = 1;
 	long num_points = 0;
+	int ret;
 
 
 	if ( v == NULL )
@@ -552,8 +597,8 @@ Var_T *counter_start_buffered_counter( Var_T * v )
 	{
 		if ( v->type != STR_VAR )
 		{
-			source = ni6601_source_number(
-				get_strict_long( v, "source channel" ) );
+			source = ni6601_source_number( get_strict_long( v,
+														  "source channel" ) );
 			v = vars_pop( v );
 		} else
 			source = NI6601_DEFAULT_SOURCE;
@@ -588,9 +633,14 @@ Var_T *counter_start_buffered_counter( Var_T * v )
 		buffered_remaining = ceil( 1.0 / interval );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch ( ni6601_start_buffered_counter( BOARD_NUMBER, counter,
-												interval, source,
-												num_points, continuous ) )
+	{
+		raise_permissions( );
+		ret = ni6601_start_buffered_counter( BOARD_NUMBER, counter,
+											 interval, source,
+											 num_points, continuous );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI6601_OK :
 				break;
@@ -608,6 +658,7 @@ Var_T *counter_start_buffered_counter( Var_T * v )
 				print( FATAL, "Can't start buffered counter.\n" );
 				THROW( EXCEPTION );
 		}
+	}
 	else if ( FSC2_MODE == TEST &&
 			  states[ counter ] == COUNTER_IS_BUSY )
 	{
@@ -789,7 +840,9 @@ static Var_T *ni6601_get_data( long   to_fetch,
 
 	if ( to_fetch == 0 )
 	{
+		raise_permissions( );
 		to_fetch = ni6601_get_buffered_available( BOARD_NUMBER );
+		lower_permissions( );
 
 		if ( to_fetch < 0 )
 		{
@@ -816,9 +869,11 @@ static Var_T *ni6601_get_data( long   to_fetch,
 
 		quit_on_signal = 1;
 
+		raise_permissions( );
 		ret = ni6601_get_buffered_counts( BOARD_NUMBER, buf + received,
 										  to_fetch, wait_secs, &quit_on_signal,
 										  &timed_out, &eod );
+		lower_permissions( );
 
 		if ( ret < 0 )
 		{
@@ -935,13 +990,18 @@ static Var_T *ni6601_get_data( long   to_fetch,
 Var_T *counter_stop_counter( Var_T * v )
 {
 	int counter;
+	int ret;
 
 
 	counter = ni6601_counter_number( get_strict_long( v, "counter channel" ) );
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		if ( ni6601_stop_counter( BOARD_NUMBER, counter ) < 0 )
+		raise_permissions( );
+		ret = ni6601_stop_counter( BOARD_NUMBER, counter );
+		lower_permissions( );
+
+		if ( ret < 0 )
 			print( SEVERE, "Failed to stop counter CH%d.\n", counter );
 	}
 	else if ( FSC2_MODE == TEST )
@@ -961,6 +1021,7 @@ Var_T *counter_single_pulse( Var_T * v )
 {
 	int counter;
 	double duration;
+	int ret;
 
 
 	counter = ni6601_counter_number( get_strict_long( v, "counter channel" ) );
@@ -968,8 +1029,12 @@ Var_T *counter_single_pulse( Var_T * v )
 								  "pulse length" );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch ( ni6601_generate_single_pulse( BOARD_NUMBER, counter,
-											   duration ) )
+	{
+		raise_permissions( );
+		ret = ni6601_generate_single_pulse( BOARD_NUMBER, counter, duration );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI6601_OK :
 				break;
@@ -983,6 +1048,7 @@ Var_T *counter_single_pulse( Var_T * v )
 				print( FATAL, "Can't create the pulse.\n" );
 				THROW( EXCEPTION );
 		}
+	}
 	else if ( FSC2_MODE == TEST &&
 			  states[ counter ] == COUNTER_IS_BUSY )
 	{
@@ -1002,6 +1068,7 @@ Var_T *counter_continuous_pulses( Var_T * v )
 {
 	int counter;
 	double len_hi, len_low;
+	int ret;
 
 
 	if ( v == NULL )
@@ -1036,8 +1103,13 @@ Var_T *counter_continuous_pulses( Var_T * v )
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch ( ni6601_generate_continuous_pulses( BOARD_NUMBER, counter,
-													len_hi, len_low ) )
+	{
+		raise_permissions( );
+		ret = ni6601_generate_continuous_pulses( BOARD_NUMBER, counter,
+												 len_hi, len_low );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI6601_OK :
 				break;
@@ -1051,6 +1123,7 @@ Var_T *counter_continuous_pulses( Var_T * v )
 				print( FATAL, "Can't create continuous pulses.\n" );
 				THROW( EXCEPTION );
 		}
+	}
 	else if ( FSC2_MODE == TEST &&
 			  states[ counter ] == COUNTER_IS_BUSY )
 	{
@@ -1070,6 +1143,7 @@ Var_T *counter_dio_read( Var_T * v )
 {
 	long mask;
 	unsigned char bits = 0;
+	int ret;
 
 
 	if ( v == NULL )
@@ -1085,13 +1159,19 @@ Var_T *counter_dio_read( Var_T * v )
 		}
 	}
 
-	if ( FSC2_MODE == EXPERIMENT &&
-		 ni6601_dio_read( BOARD_NUMBER, &bits,
-						  ( unsigned char ) ( mask & 0xFF ) ) < 0 )
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		raise_permissions( );
+		ret = ni6601_dio_read( BOARD_NUMBER, &bits,
+							   ( unsigned char ) ( mask & 0xFF ) );
+		lower_permissions( );
+
+		if ( ret < 0 )
 		{
 			print( FATAL, "Can't read data from DIO.\n" );
 			THROW( EXCEPTION );
 		}
+	}
 
 	return vars_push( INT_VAR, ( long ) bits );
 }
@@ -1104,6 +1184,7 @@ Var_T *counter_dio_write( Var_T * v )
 {
 	long bits;
 	long mask;
+	int ret;
 
 
 	if ( v == NULL )
@@ -1136,12 +1217,19 @@ Var_T *counter_dio_write( Var_T * v )
 		too_many_arguments( v );
 	}
 
-	if ( FSC2_MODE == EXPERIMENT &&
-		 ni6601_dio_write( BOARD_NUMBER, ( unsigned char ) ( bits & 0xFF ),
-						   ( unsigned char ) ( mask & 0xFF ) ) < 0 )
+	if ( FSC2_MODE == EXPERIMENT )
 	{
-		print( FATAL, "Can't write value to DIO.\n" );
-		THROW( EXCEPTION );
+		raise_permissions( );
+		ret = ni6601_dio_write( BOARD_NUMBER,
+								( unsigned char ) ( bits & 0xFF ),
+								( unsigned char ) ( mask & 0xFF ) );
+		lower_permissions( );
+
+		if ( ret < 0 )
+		{
+			print( FATAL, "Can't write value to DIO.\n" );
+			THROW( EXCEPTION );
+		}
 	}
 
 	return vars_push( INT_VAR, 1 );

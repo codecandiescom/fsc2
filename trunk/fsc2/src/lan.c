@@ -91,6 +91,9 @@ static void fsc2_lan_log_function_start( const char * function,
 static void fsc2_lan_log_function_end( const char * function,
 									   const char * dev_name );
 
+static void fsc2_lan_log_data( long         length,
+							   const char * buffer );
+
 
 /*----------------------------------------------------------*
  * Function for opening a connection to a device on the LAN
@@ -471,13 +474,12 @@ ssize_t fsc2_lan_write( int          handle,
 	{
 		if ( us_timeout <= 0 )
 			fsc2_lan_log_message( "Expecting to write %ld byte(s) to LAN "
-								  "device %s:\n%*s\n", ( long ) length,
-								  ll->name, ( int ) length, buffer );
+								  "device %s:\n", ( long ) length, ll->name );
 		else
 			fsc2_lan_log_message( "Expecting to write %ld byte(s) within %ld "
-								  "ms to LAN device %s:\n%*s\n\n",
-								  ( long ) length, us_timeout / 1000, ll->name,
-								  ( int ) length, buffer );
+								  "ms to LAN device %s:\n", ( long ) length,
+								  us_timeout / 1000, ll->name );
+		fsc2_lan_log_data( length, buffer );
 	}
 
 	/* Deal with setting a timeout - if possible a socket option is used,
@@ -514,8 +516,7 @@ ssize_t fsc2_lan_write( int          handle,
 				  ( ! ll->so_timeo_avail && errno == EINTR && got_sigalrm ) )
 		{
 			fsc2_lan_log_message( "Error: writing aborted due to timeout\n" );
-			
-			bytes_written = -2;
+			bytes_written = -1;
 		}
 		else
 			fsc2_lan_log_message( "Error: failed to write to socket: %s\n",
@@ -619,19 +620,16 @@ ssize_t fsc2_lan_writev( int                  handle,
 	{
 		if ( us_timeout <= 0 )
 			fsc2_lan_log_message( "Expecting to write %ld byte(s) (from %d "
-								  "buffers) to LAN device %s:\n%*s\n",
-								  ( long ) length, count, ll->name,
-								  ( int ) data->iov_len, data->iov_base );
+								  "buffers) to LAN device %s:\n",
+								  ( long ) length, count, ll->name );
 		else
 			fsc2_lan_log_message( "Expecting to write %ld byte(s) (from %d "
 								  "buffers) within %ld ms to LAN device "
-								  "%s:\n%*s\n", ( long ) length, count,
-								  us_timeout / 1000, ll->name,
-								  ( int ) data->iov_len, data->iov_base );
+								  "%s:\n", ( long ) length, count,
+								  us_timeout / 1000, ll->name );
 
-		for ( i = 1; i < count; i++ )
-			fsc2_lan_log_message( "%*s\n", ( int ) data[ i ].iov_len,
-								  data[ i ].iov_base );
+		for ( i = 0; i < count; i++ )
+			fsc2_lan_log_data( data[ i ].iov_len, data[ i ].iov_base );
 	}
 
 	/* Deal with setting a timeout - if possible a socket option is used,
@@ -640,7 +638,7 @@ ssize_t fsc2_lan_writev( int                  handle,
 	timeout_init( WRITE, ll, &us_timeout, &old_sact, &before );
 
 	/* Start writting - if it's interrupted by a signal other than SIGALRM
-	   and we're supposed to continue on such signals and the timeout time
+	   and we are supposed to continue on such signals and the timeout time
 	   hasn't already been reached retry the write() */
 
 	do
@@ -668,7 +666,7 @@ ssize_t fsc2_lan_writev( int                  handle,
 				  ( ! ll->so_timeo_avail && errno == EINTR && got_sigalrm ) )
 		{
 			fsc2_lan_log_message( "Error: writing aborted due to timeout\n" );
-			bytes_written = -2;
+			bytes_written = -1;
 		}
 		else
 			fsc2_lan_log_message( "Error: failed to write to socket: %s\n",
@@ -791,16 +789,18 @@ ssize_t fsc2_lan_read( int    handle,
 				  ( ! ll->so_timeo_avail && errno == EINTR && got_sigalrm ) )
 		{
 			fsc2_lan_log_message( "Error: reading aborted due to timeout\n" );
-			bytes_read = -2;
+			bytes_read = -1;
 		}
 		else
 			fsc2_lan_log_message( "Error: failed to read from socket: %s\n",
 								  strerror( errno ));
 	}
 	else if ( lan_log_level == LL_ALL )
-		fsc2_lan_log_message( "Read %ld byte(s) from LAN device %s:\n%.*s\n",
-							  ( long ) bytes_read, ll->name,
-							  ( int ) bytes_read, buffer );
+	{
+		fsc2_lan_log_message( "Read %ld byte(s) from LAN device %s:\n",
+							  ( long ) bytes_read, ll->name );
+		fsc2_lan_log_data( bytes_read, buffer );
+	}
 
 	fsc2_lan_log_function_end( "fsc2_lan_read", ll->name );
 
@@ -943,7 +943,7 @@ ssize_t fsc2_lan_readv( int            handle,
 				  ( ! ll->so_timeo_avail && errno == EINTR && got_sigalrm ) )
 		{
 			fsc2_lan_log_message( "Error: reading aborted due to timeout\n" );
-			bytes_read = -2;
+			bytes_read = -1;
 		}
 		else
 			fsc2_lan_log_message( "Error: failed to read from socket: %s\n",
@@ -973,8 +973,7 @@ ssize_t fsc2_lan_readv( int            handle,
 								  ( long ) bytes_read, ll->name );
 
 			for ( i = 0; i < count && data[ i ].iov_len != 0; i++ )
-				fsc2_lan_log_message( "%.*s\n", ( int ) data[ i ].iov_len,
-									  data[ i ].iov_base );
+				fsc2_lan_log_data( data[ i ].iov_len, data[ i ].iov_base );
 		}
 	}
 
@@ -1408,6 +1407,28 @@ void fsc2_lan_log_message( const char * fmt,
 	fflush( fsc2_lan_log );
 	lower_permissions( );
 }
+
+
+/*------------------------------------------------*
+ *------------------------------------------------*/
+
+static void fsc2_lan_log_data( long length, const char *buffer )
+{
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT );
+
+	if ( fsc2_lan_log == NULL || lan_log_level == LL_NONE )
+		return;
+
+	raise_permissions( );
+	while ( length-- > 0 )
+		fputc( *buffer++, fsc2_lan_log );
+	fputc( '\n', fsc2_lan_log );
+	fflush( fsc2_lan_log );
+	lower_permissions( );
+}
+	
 
 
 /*

@@ -115,7 +115,7 @@ static const char *rulbus_errlist[ ] = {
 	"Missing intialization of Rulbus library",
 										/* RULBUS_NO_INITIALIZATION */
 	"Invalid function argument",        /* RULBUS_INVALID_ARGUMENT */
-	"No such card with that name",      /* RULBUS_INVALID_CARD_NAME */
+	"No such card with that name",      /* RULBUS_INVALD_CARD_NAME */
 	"Invalid card handle",              /* RULBUS_INVALID_CARD_HANDLE */
 	"Card has not been opened",         /* RULBUS_CARD_NOT_OPEN */
 	"Invalid card address offset",      /* RULBUS_INVALID_CARD_OFFSET */

@@ -81,6 +81,8 @@ void rb_pulser_w_init( void )
 	int i;
 
 
+	raise_permissions( );
+
 	/* Try to get handles for all Rulbus (clock and delay) cards used by
 	   the pulser */
 
@@ -168,7 +170,6 @@ void rb_pulser_w_init( void )
 									RULBUS_RB8514_DELAY_POLARITY_POSITIVE )
 			                                                    != RULBUS_OK )
 			rb_pulser_w_failure( SET, "Failure to initialize pulser" );
-			rb_pulser_w_failure( SET, "Failure to initialize pulser" );
 
 		if ( i == ERT_DELAY )
 			continue;
@@ -194,6 +195,8 @@ void rb_pulser_w_init( void )
 	/* Initialize synthesizer if it's required for RF pulses */
 
 	rb_pulser_w_synthesizer_init( );
+
+	lower_permissions( );
 
 #else     /* in test mode */
 	int i;
@@ -268,6 +271,8 @@ static void rb_pulser_w_phase_init( void )
 	int is_busy;
 
 
+	raise_permissions( );
+
 	/* Set up all the cards for phase pulses to emit end pulses for a +X
 	   phase switch setting */
 
@@ -315,6 +320,8 @@ static void rb_pulser_w_phase_init( void )
 
 		card->old_delay = card->old_delay = 0;
 	}
+
+	lower_permissions( );
 
 #else /* in test mode */
 
@@ -407,6 +414,9 @@ void rb_pulser_w_exit( void )
 
 
 #if ! defined RB_PULSER_W_TEST
+
+	raise_permissions( );
+
 	/* Stop all open clock cards and close them */
 
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
@@ -443,6 +453,8 @@ void rb_pulser_w_exit( void )
 		rb_pulser_w.delay_card[ i ].handle = -1;
 	}
 
+	lower_permissions( );
+
 #else /* in test mode */
 
 	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
@@ -477,8 +489,10 @@ void rb_pulser_w_run( bool state )
 	Function_T *f;
 	int is_busy;
 	int i;
-#endif
 
+
+	raise_permissions( );
+#endif
 
 	if ( state == START )
 	{
@@ -520,6 +534,8 @@ void rb_pulser_w_run( bool state )
 						rb_pulser_w_failure( SET, "Failure to stop pulser" );
 				} while ( is_busy );
 		}
+
+	lower_permissions( );
 
 #else   /* in test mode */
 		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( ERT_DELAY "
@@ -616,6 +632,8 @@ void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
 				RULBUS_RB8514_DELAY_END_PULSE : RULBUS_RB8514_DELAY_PULSE_NONE;
 
 
+	raise_permissions( );
+
 	/* If a card has a predecessor we must make the predecessor create end
 	   pulses to make the card active, or the predecessor must be kept from
 	   outputting end pulses in order to deactivate the card */
@@ -648,6 +666,8 @@ void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
 		 rulbus_rb8514_delay_set_raw_delay( card->handle, card->delay, 1 )
 		                                                         != RULBUS_OK )
 		rb_pulser_w_failure( SET, "Failure to set card state" );	
+
+	lower_permissions( );
 
 #else
 	const char *type = state == START ?
@@ -682,6 +702,8 @@ void rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * card,
 	int ret;
 
 
+	raise_permissions( );
+
 	/* Set the new delay but wait until the card is finished with outputting
 	   a pulse */
 
@@ -692,6 +714,8 @@ void rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * card,
 
 	if ( ret != RULBUS_OK )
 		rb_pulser_w_failure( SET, "Failure to set card delay length" );
+
+	lower_permissions( );
 #else
 	fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %s, %lu, 0 )\n",
 			 card->name, delay );
@@ -708,11 +732,15 @@ void rb_pulser_w_set_phase( Rulbus_Delay_Card_T * card,
 							int                   phase )
 {
 #if ! defined RB_PULSER_W_TEST
+	raise_permissions( );
+
 	if ( rulbus_rb8514_delay_set_output_pulse( card->handle,
 											   phase_settings[ phase ][ 0 ],
 											   phase_settings[ phase ][ 1 ] )
 									                             != RULBUS_OK )
 		rb_pulser_w_failure( SET, "Failure to set card trigger out mode" );
+
+	lower_permissions( );
 #else   /* in test mode */
 	fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %s, %s, %s )\n",
 			 card->name, ps_str[ phase ][ 0 ], ps_str[ phase ][ 1 ] );
@@ -740,6 +768,7 @@ static void rb_pulser_w_failure( bool         rb_flag,
 		print( FATAL, "%s.\n", mess );
 	rb_pulser_w_exit( );
 	calls--;
+	lower_permissions( );
 	THROW( EXCEPTION );
 }
 
