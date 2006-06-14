@@ -66,12 +66,12 @@ PHASE_DELAY_CARD_0    "DELAY_7"
 PHASE_DELAY_CARD_1    "DELAY_8"
 
 
-# 10. Name of the card for controlling the phase of the thrid pulse
+# 10. Name of the card for controlling the phase of the third pulse
 
 PHASE_DELAY_CARD_2    "DELAY_9"
 
 
-# 11. Name of the card fir creating the defense pulse
+# 11. Name of the card for creating the defense pulse
 
 DEFENSE_DELAY_CARD    "DELAY_10"
 

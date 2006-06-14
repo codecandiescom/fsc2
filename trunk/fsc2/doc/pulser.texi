@@ -137,11 +137,13 @@ neither of the two keywords is given and the specified timebase
 requires an external clock the @code{TTL} level clock input connector is
 used per default.
 
-In the currently used configuration the timebase of of the
-@strong{Rulbus pulsers} is fixed at @w{10 ns}. But this is a compilation
-option that can be changed via the configuration files. After this change
-and a rrecompilation of the modules variable timebases (with a resolution
-of @w{10 ns}) are possible.
+In the currently used configuration the timebase for the J-band version
+of the @strong{Rulbus pulsers} is fixed to @w{10 ns}. But this is a
+compilation option that can be changed via the configuration files. After
+this change and a recompilation of the modules variable timebases. In
+contrast, for the W-band version the timebase in the current configuration
+must be set, where possible settings are either @w{10 ns}, @w{100 ns},
+@w{1 us}, @w{10 us}, @w{100 us}, @w{1 ms} or @w{10 ms}.
 
 The statement to set the timebase, i.e.@: the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write

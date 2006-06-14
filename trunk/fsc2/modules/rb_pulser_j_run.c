@@ -254,7 +254,7 @@ static void rb_pulser_j_delay_card_setup( void )
 				else if ( f->self == PULSER_CHANNEL_RF )
 					start += SYNTHESIZER_INTRINSIC_DELAY;
 
-				/* Check that the pulse doesn't start earlier */
+				/* Check that the pulse doesn't start earlier than that */
 
 				delta = p->pos + f->delay - start;
 
@@ -287,7 +287,7 @@ static void rb_pulser_j_delay_card_setup( void )
 				start += card->delay * rb_pulser_j.timebase;
 
 				/* Some channels have no card for the pulse itself, here we
-				   just store the length and lets deal with this later */
+				   just store the length and deal with this case later */
 
 				if ( ( card = card->next ) == NULL )
 				{

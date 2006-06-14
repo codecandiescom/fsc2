@@ -710,7 +710,7 @@ FOREVER {
 		output_value( B2, start_field + ( I - 1 ) * step_size );
 		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
-					I, ( ( J - 1 ) avg[ I ] + data[ J, I ] ) / ( J  * 1 uV ),
+					I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / ( J  * 1 uV ),
                     2 );
 	}
 ";
@@ -728,7 +728,7 @@ FOREVER {
 	}
 
 	print F "
-	avg = add_to_avg( avg, data[ J ], J );
+	avg = add_to_average( avg, data[ J ], J );
 
 	magnet_sweep( \"STOP\" );
 	lockin_auto_acquisition( \"OFF\" );

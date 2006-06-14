@@ -349,7 +349,7 @@ static void __exit witio_48_cleanup( void )
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
-		class_device_destroy( witio_48_class, dev_no );
+	class_device_destroy( witio_48_class, dev_no );
         class_destroy( witio_48_class );
 #endif
 

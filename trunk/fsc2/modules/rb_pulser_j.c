@@ -245,6 +245,13 @@ int rb_pulser_j_test_hook( void )
 		RETHROW( );
 	}
 
+#ifndef FIXED_TIMEBASE
+	/* Set the frequency (index) of the timebase clock to the one for the
+	   requested timebase */
+
+	rb_pulser_w.clock_card[ TB_CLOCK ].freq = rb_pulser_w.tb_index;
+#endif
+
 	/* If a repetition time has been set set up the corresponding value in
 	   th structure for the card creating the repetition time */
 

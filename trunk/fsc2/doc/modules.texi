@@ -45,14 +45,14 @@ Modules allow to extend the set of commands that can be used in an
 @code{EDL} script. This is especially important if a new device needs to
 be integrated into @code{fsc2}. You don't have to change @code{fsc2}
 itself but just write a new module for the device. To do so you don't
-have to understand completely how @code{fsc2} works. You only must have a
-working knowledge of @code{C} programming language and understand a few
-basics about @code{fsc2}'s variables (and, of course, you must know how
+have to understand in all details how @code{fsc2} works. You only must have
+a working knowledge of the @code{C} programming language and understand a
+few basics about @code{fsc2}'s variables (and, of course, you must know how
 your device works and how to communicate with it). But modules may also be
-used for other purposes beside handling devices, one might also write modules
-that supply new mathematical functions or other useful functionalities.
-But the following discussion will concentrate on modules for new
-devices, writing other kinds of modules is even simpler.
+used for other purposes beside handling devices, one could also write modules
+that supply new mathematical functions or other functionalities. But the
+following discussion will concentrate on modules for new devices, writing
+other kinds of modules is even simpler.
 
 I want to start with a short summary of what a module usually consists of and
 how to make @code{fsc2} aware of its existence. The most important things
@@ -76,6 +76,9 @@ Of course, a module will usually also contain other utility functions.
 Here you're free to use whatever name you like. To avoid trouble I
 always prepend the name of the device to the names of all function not
 exported by the module and define them, as far as possible, as @code{static}.
+Moreover, I use so-called version scripts (see the files with the exension
+@file{.map}) for complete control over which symbols get exported from a
+module.
 
 There usually are a few functions in a module beside the ones that are
 going to be invoked from @code{EDL} scripts that get called from
@@ -88,11 +91,11 @@ data of the module, initialize the device you're controlling and finally
 bring it back into a well defined state when the experiment is done.
 
 Once you have written the module you must make @code{fsc2} aware of the
-new device it's supposed to control and give it a list of the @code{EDL}
+new device it's supposed to control and inform it of the additional @code{EDL}
 functions that can be used with the device. For this purpose there are
 two files in the @file{config} directory, called @file{Devices} and
-@file{Functions} where you have to enter the name of the device and add
-the list of the new functions.
+@file{Functions} where you have to enter the name of the device and
+append the new functions to the list of the already known functions.
 
 All these subjects are discussed in detail in the following. But before 
 I do so I want to start with an explanation of the special type of
@@ -122,7 +125,8 @@ typedef struct Var
         long   *lpnt;        /* pointer to integer arrays */
         double *dpnt;        /* pointer to floating point arrays */
         char   *sptr;        /* for string constants */
-        struct Var **vptr;   /* for array references */
+        struct Var **vptr;   /* for array references, used for
+                                multi-dimensional arrays */
     @} val;
     int dim;                 /* dimension of array */
     ssize_t len;             /* length of array */
@@ -137,8 +141,8 @@ type @code{Var_Type_T}) you have to know about:
 @item @code{FLOAT_VAR} @tab a variable for floating point values
 @item @code{INT_ARR} @tab a one-dimensional array of integer values
 @item @code{FLOAT_ARR} @tab a one-dimensional array of floating point values
-@item @code{INT_REF} @tab a more-dimensional array of integer values
-@item @code{FLOAT_REF} @tab a more-dimensional array of floating point values
+@item @code{INT_REF} @tab a 2- or more-dimensional array of integer values
+@item @code{FLOAT_REF} @tab a 2- or more-dimensional array of floating point values
 @end multitable
 @noindent
 There are a few others, but they are only used by @code{fsc2} internally.
@@ -745,9 +749,9 @@ if it's connected to one of the serial ports @file{serial.h} or, if the
 device is controlled via the LAN, the file @file{lan.h} (all these files
 are in the source directory of @code{fsc2}, so just put the file name
 into double quotes and it will be found automatically). For other devices
-some other file may need to be included, e.g.@: @file{rulbus.h} for the
-RULBUS, that may reside in some of the standard include directories and
-thus the file name may have to be enclosed in angle braces.
+some other include file may be required, e.g.@: @file{rulbus.h} for the
+RULBUS, that usually reside in some of the standard include directories and
+thus the file name will have to be enclosed in angle braces.
 
 Finally, each module must put its basic configuration information into
 a special file which should be commented well enough to allow even
@@ -798,14 +802,14 @@ type string, otherwise pick a new and descriptive name.
 
 @subsection Variables a module must define
 
-In the previous section the meanings of the device name and type type
-strings have already been discussed. While the definitions of the strings
-should go into the configuration file for the device, no memory has been
-allocated for these strings yet. This should be done as one of the first
-things after the include files have been included. Each and every
-device module should define two constant character arrays called
-@code{device_name} and @code{generic_type}, that contain the device name
-and type strings, i.e.@: one of the first lines should always be
+In the previous section the meanings of the device name and type strings
+have already been discussed. While the definitions of the strings should
+go into the configuration file for the device, no memory has been allocated
+for these strings yet. This should be done as one of the first things after
+the include files have been included. Each and every device module should 
+define two constant character arrays called @code{device_name} and
+@code{generic_type}, that contain the device name and type strings, i.e.@:
+one of the first lines should always be
 @example
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
@@ -815,20 +819,21 @@ or
 const char *device_name  = DEVICE_NAME;
 const char *generic_type = DEVICE_TYPE;
 @end example
-@code{fsc2} will use the first variable with the name for printing of
 @noindent
+@code{fsc2} will use the first variable with the device name while printing
 warnings and error messages. The second string is needed to find out
 about the type of the device. If this variable does not exist
 @code{fsc2} won't have any information about the device type and
-having another device of the same type recognized automatically will fail.
+recognizing another device of the same type automatically will fail (in
+which case e.g.@: using more than one device of a certain type won't work)-
 
-Another important point is that if in two modules with different
-@code{generic_type} settings the same function name is used only one of
-this modules can be used at the same time. If the user tries to list
-both modules simultaneously in the @code{DEVICES} section an error
-message will be printed and interpretation of the @code{EDL} script
-will be stopped. Thus it must be avoided to use identical @code{EDL}
-function names in modules for devices of different types.
+Another important point is that if in two modules (with different
+@code{generic_type} settings) define the same function name only one of
+these modules can be used at the same time. If the user tries to load
+both modules in the @code{DEVICES} section an error message will be
+printed and interpretation of the @code{EDL} script stopped. Thus it
+must be avoided to use identical @code{EDL} function names in modules
+for devices of different types.
 
 
 @subsection Global variables

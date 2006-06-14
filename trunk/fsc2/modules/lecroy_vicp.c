@@ -49,12 +49,12 @@
    bit 3    SRQ (only to be send by the device)
    bit 2    reserved
    bit 1    reserved
-   bit 0    data block terminates with EOI id set
+   bit 0    data block terminates with EOI if set
 
-   As far as I understand it the EOI is the information if the device or the
-   sender) is done sending the requested data - if set this is the case, if
-   not the receiver has to expect at least one more data block (which, of
-   course, starts with another header).
+   As far as I understand it the EOI is the information if the device (or
+   the sender) is done sending the requested data - if set this is the case,
+   if not the receiver has to expect at least one more data block (which,
+   of course, starts with another header).
 
    The 'header_version' field is a number - currently only 1 is an acceptable
    value (protocol version 1A is treated as a subversion of version 1).
@@ -65,13 +65,13 @@
    number" incremented by 1 relative to the previous block (if 255 is
    reached the next number is then 1). For all other devices the field
    will always be set to 0. Since one can't figure out from the version
-   field if the device is using versiob 1 or 1A of the protocol one only
+   field if the device is using version 1 or 1A of the protocol one only
    can find out from checking if the sequence number is 0 or non-zero.
 
    Finally, the 'block_length' member is the length of the block of data
-   to be send following the header. It is 32-bit number in big_endian
-   format, i.e. the MSB is at the lowest memory address and the LSB at the
-   highest.
+   (in bytes) to be send following the header. It is 32-bit number in
+   big-endian format, i.e. the MSB is at the lowest memory address and
+   the LSB at the highest address.
 
    The following functions for communicating with a device using the LeCroy
    VICP protocol can be used:
@@ -98,34 +98,34 @@
 	void lecroy_vicp_device_clear( void )
 
    The function lecroy_vicp_init() must be the first function to be called.
-   It establishes a connection to the device which then is used for all the
-   other functions. The function expects a symbolic name for the device
-   (only to be used for the log file), its IP address, either has a hostname
-   or an numerical IP address in dotted-quad format, a positive or zero
+   It establishes the connection to the device which then is used for all
+   further function calls. The function expects a symbolic name for the device
+   (only to be used for the log file), its IP address, either as a hostname
+   or a numerical IP address in dotted-quad format, a positive or zero
    maximum time (in micro-seconds, a zero value means indefinitely long
    timeout) the function is allowed to wait for successfully establishing
-   the connection (if  and a flag that tells if the function is supposed
-   to return immediately on receipt of a signal. Please note that a timer,
-   raising a SIGALRM signal on expiry, is used for controlling the timeout.
-   Thus the function temporarily installs its own signal handler for SIGALRM,
-   so the caller should make sure that it doesn't initate anything that would
-   also raise such a signal. Please also note that the function can't be called
+   the connection and a flag that tells if the function is supposed to return
+   immediately on receipt of a signal. Please note that a timer, raising a
+   SIGALRM signal on expiry, is used for controlling the timeout. Thus the
+   function temporarily installs its own signal handler for SIGALRM, so the
+   caller should make sure that it doesn't initate anything that would also
+   raise such a signal. Please also note that the function can't be called
    when an connection has already been created. On failure (either because
    the connection has already been opened, connecting to the device fails or
    not enough memory is available) the function throws an exception.
 
    lecroy_vicp_close() is the opposite of lecroy_vicp_init(), i.e. it closes
-   down existing the connection. It throws an exception when you try to
+   down the existing connection. It throws an exception when you try to
    close an already closed connection.
 
    lecroy_vicp_set_timeout() allows to set timeouts for read or write
    operations. If the first argument is the symbolic value READ (or 0),
    a timeout for read operations gets set, if it's WRITE (or 1) the
    timeout for writes gets set. Timeouts must be specified in micro-
-   seconds and muts be either positive numbers or zero, in which case an
+   seconds and must be either positive numbers or zero, in which case an
    indefinitely long timeout is used. Without calling the function a
    default timeout of 5 seconds  will be used. Please note that the function
-   only can be called after the connection has been established. Please
+   can only be called after the connection has been established. Please
    also note that on some systems (those tht don't support the SO_RCVTIMEO
    and SO_SNDTIMEO socket options) the timeouts get created via a timer
    that raises a SIGALRM signal. Thus on these systems the caller may not
@@ -136,10 +136,10 @@
    It requires four arguments, a buffer with the data to be send, a pointer
    to a variable with the number of bytes to be send, a flag that tells
    if this is a complete command (i.e. all data belonging to the command
-   ae being send) and a flag that tells if the function is supposed to
-   return immediately when receiving a signal. The function either returns
+   are being send) and a flag that tells if the function is supposed to
+   return immediately when receiving a signal. The function returns either
    SUCCESS_WITH_EOI (1) if a complete command could be send successfully,
-   SUCCESS (0) if an incomplete command was send successfully, FAILURE (-1)
+   SUCCESS (0) if an incomplete command was send successfully, or FAILURE (-1)
    if sending the command was aborted due to receiving a signal. On errors
    or timeouts the function closes the connection and throws an exception.
    On return the variable pointed to by the secand argument will contain the
@@ -149,9 +149,9 @@
    lecroy_vicp_read() is for reading data the device sends. It takes three
    arguments, a buffer for storing the data, a pointer to a variable with
    the length of the buffer and a flag telling if the function is supposed
-   to return immediately on signals. The function return SUCCESS_WITH_EOI (1)
-   if a complete replay from the device was received, SUCCESS (0) if an in-
-   complete replay got read (i.e. the device will send more data on another
+   to return immediately on signals. The function returns SUCCESS_WITH_EOI (1)
+   if a complete reply from the device was received, SUCCESS (0) if an in-
+   complete reply got read (i.e. the device will send more data on another
    call of lecroy_vicp_read()) and FAILURE (-1) if the function aborted because
    a signal was received. On erros or timeouts the function closes the
    connection and throws an exception. On return the variable pointed to by
@@ -162,7 +162,7 @@
    still be data to be read from the device or the device may still be
    waiting to receive remaining data. Unless you're closing the connection
    after receipt of a signal you must make sure that the remaining data
-   are fetched or remaining data the device is waiting for get send.
+   are fetched from or get send to the device.
 
    lecroy_vicp_device_clear() allows to clear the device and reset the
    connection. Clearing the device includes clearing its input and output
@@ -179,7 +179,7 @@
 
    http://osam.eee.nottingham.ac.uk/lecroy_tcp/
 
-   and for the (Windows) CroyVICP Client Library written by Anthony Cake
+   and for the (Windows) LeCroyVICP Client Library written by Anthony Cake
    (anthonyrc@users.sourceforge.net) and Larry Salant
    (larryss@users.sourceforge.net), available at
 
@@ -457,7 +457,7 @@ int lecroy_vicp_write( const char * buffer,
 	if ( *length == 0 )
 		return SUCCESS;
 
-	if (  buffer != NULL )
+	if ( buffer == NULL )
 	{
 		print( FATAL, "Internal error in module, write data buffer "
 			   "is NULL.\n" );
@@ -477,7 +477,7 @@ int lecroy_vicp_write( const char * buffer,
 	data[ 0 ].iov_base = header;
 	data[ 0 ].iov_len  = LECROY_VICP_HEADER_SIZE;
 	data[ 1 ].iov_base = ( void * ) buffer;
-	data[ 1 ].iov_len  = ( ssize_t ) *length;
+	data[ 1 ].iov_len  = *length;
 
 	total_length = LECROY_VICP_HEADER_SIZE + *length;
 
@@ -606,10 +606,10 @@ int lecroy_vicp_read( char *    buffer,
 	if ( *length == 0 )
 		return SUCCESS;
 
-	if (  buffer != NULL )
+	if ( buffer == NULL )
 	{
-		print( FATAL, "Internal error in module, write data buffer "
-			   "is NULL.\n" );
+		print( FATAL, "Internal error in module, read data buffer is "
+			   "NULL.\n" );
 		THROW( EXCEPTION );
 	}
 

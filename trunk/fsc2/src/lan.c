@@ -274,7 +274,7 @@ int fsc2_lan_open( const char * dev_name,
 		{
 			fsc2_lan_log_message( "Error: connect() to socket failed due "
 								  "to timeout\n" );
-			return -2;
+			return -1;
 		}
 		else
 			fsc2_lan_log_message( "Error: connect() to socket failed: %s\n",
@@ -381,26 +381,27 @@ int fsc2_lan_close( int handle )
 	   another chance */
 
 	if ( close( ll->fd ) == -1 )
+	{
 		fsc2_lan_log_message( "Error: close() failed: %s\n",
 							  strerror( errno ) );
-	else
-	{
-		if ( ll->prev != NULL )
-			ll->prev->next = ll->next;
-
-		if ( ll->next != NULL )
-			ll->next->prev = ll->prev;
-
-		if ( ll == lan_list )
-			lan_list = ll->next;
-
-		if ( ll->name )
-			T_free( ( char * ) ll->name );
-
-		T_free( ll );
+		return -1;
 	}
 
 	fsc2_lan_log_function_end( "fsc2_lan_close", ll->name );
+
+	if ( ll->prev != NULL )
+		ll->prev->next = ll->next;
+
+	if ( ll->next != NULL )
+		ll->next->prev = ll->prev;
+
+	if ( ll == lan_list )
+		lan_list = ll->next;
+
+	if ( ll->name )
+		T_free( ( char * ) ll->name );
+
+	T_free( ll );
 
 	return 0;
 }
@@ -761,7 +762,7 @@ ssize_t fsc2_lan_read( int    handle,
 
 	timeout_init( READ, ll, &us_timeout, &old_sact, &before );
 
-	/* Start writting - if it's interrupted by a signal other than SIGALRM
+	/* Start reading - if it's interrupted by a signal other than SIGALRM
 	   and we're supposed to continue on such signals and the timeout time
 	   hasn't already been reached retry the read() */
 

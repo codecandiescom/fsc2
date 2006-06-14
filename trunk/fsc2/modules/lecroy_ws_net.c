@@ -87,7 +87,7 @@ bool lecroy_ws_init( const char * name )
 	   transmit data in one block in binary word (2 byte) format with LSB
 	   first. Then ask for the status byte to make sure the device reacts. */
 
-	len = 49;
+	len = 50;
 	lecroy_vicp_write( "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO;*STB?",
 					   &len, SET, UNSET );
 	len = 100;
@@ -549,7 +549,7 @@ int lecroy_ws_get_coupling( int channel )
 		type = LECROY_WS_CPL_DC_1_MOHM;
 	else if ( buf[ 0 ] == 'D' && buf[ 1 ] == '5' )
 		type = LECROY_WS_CPL_DC_50_OHM;
-	else if ( buf[ 0 ] == 'O' )          /* overload with 50 ohm DC coupling */
+	else if ( buf[ 0 ] == 'O' )          /* overload with 50 Ohm DC coupling */
 	{
 		type = LECROY_WS_CPL_DC_50_OHM;
 		print( SEVERE, "Signal overload detected for channel '%s', input "
