@@ -103,11 +103,18 @@ int rb8510_1_test_hook( void )
 
 int rb8510_1_exp_hook( void )
 {
+	int ret;
+
+
 	rb8510 = rb8510_stored;
 
 	/* Open the card */
 
-	if ( ( rb8510.handle = rulbus_card_open( RULBUS_CARD_NAME ) ) < 0 )
+	raise_permissions( );
+	rb8510.handle = rulbus_card_open( RULBUS_CARD_NAME );
+	lower_permissions( );
+
+	if ( rb8510.handle < 0 )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
@@ -116,9 +123,12 @@ int rb8510_1_exp_hook( void )
 
 	/* Find out about minimum and maximum output voltage */
 
-	if ( rulbus_rb8510_dac12_properties( rb8510.handle, &rb8510.Vmax,
-										 &rb8510.Vmin,
-										 &rb8510.dV ) != RULBUS_OK )
+	raise_permissions( );
+	ret = rulbus_rb8510_dac12_properties( rb8510.handle, &rb8510.Vmax,
+										  &rb8510.Vmin, &rb8510.dV );
+	lower_permissions( );
+
+	if ( ret != RULBUS_OK )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
@@ -141,13 +151,18 @@ int rb8510_1_exp_hook( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( rb8510.volts_is_set &&
-		 rulbus_rb8510_dac12_set_voltage( rb8510.handle, rb8510.volts )
-																 != RULBUS_OK )
+	if ( rb8510.volts_is_set )
 	{
-		print( FATAL, "Initialization of card failed: %s.\n",
-			   rulbus_strerror( ) );
-		THROW( EXCEPTION );
+		raise_permissions( );
+		ret = rulbus_rb8510_dac12_set_voltage( rb8510.handle, rb8510.volts );
+		lower_permissions( );
+		 
+		if ( ret != RULBUS_OK )
+		{
+			print( FATAL, "Initialization of card failed: %s.\n",
+				   rulbus_strerror( ) );
+			THROW( EXCEPTION );
+		}
 	}
 
 	return 1;
@@ -258,6 +273,7 @@ Var_T *daq_set_voltage( Var_T * v )
 {
 	double volts;
 	char *pass = NULL;
+	int ret;
 
 
 	if ( v != NULL && v->type == STR_VAR )
@@ -335,7 +351,11 @@ Var_T *daq_set_voltage( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
-	if ( rulbus_rb8510_dac12_set_voltage( rb8510.handle, volts ) != RULBUS_OK )
+	raise_permissions( );
+	ret = rulbus_rb8510_dac12_set_voltage( rb8510.handle, volts );
+	lower_permissions( );
+
+	if ( ret != RULBUS_OK )
 	{
 		print( FATAL, "Setting output voltage failed: %s.\n",
 			   rulbus_strerror( ) );

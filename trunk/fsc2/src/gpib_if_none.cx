@@ -72,7 +72,9 @@ int gpib_timeout( int device  UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
 	return FAILURE;
 }
@@ -87,7 +89,9 @@ int gpib_clear_device( int device  UNUSED_ARG )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
 	return FAILURE;
 }
@@ -102,7 +106,9 @@ int gpib_local( int device  UNUSED_ARG )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
 	return FAILURE;
 }
@@ -117,7 +123,9 @@ int gpib_local_lockout( int device  UNUSED_ARG )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
 	return FAILURE;
 }
@@ -132,7 +140,9 @@ int gpib_trigger( int device  UNUSED_ARG )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
 	return FAILURE;
 }
@@ -149,7 +159,9 @@ int gpib_write( int          device  UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
 	return FAILURE;
 }
@@ -166,7 +178,9 @@ int gpib_read( int    device  UNUSED_ARG,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
 	return FAILURE;
 }
@@ -185,8 +199,9 @@ void gpib_log_message( const char * fmt,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.mode  == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
 	if ( gpib_log == NULL || ll == LL_NONE )
 		return;

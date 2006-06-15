@@ -256,7 +256,7 @@ int rulbus_rb8514_delay_set_delay( int    handle,
 
 	for ( i = 0; i < 3; ldelay >>= 8, i++ )
 		bytes[ 2 - i ] = ( unsigned char ) ( ldelay & 0xFF );
-
+	
 	if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE,
 										bytes, 3 ) ) != 3 )
 		return rulbus_errno = retval;

@@ -204,14 +204,14 @@ static void rb_pulser_w_mw_channel_setup( void )
 
 		start += cur_card->intr_delay + cur_card->next->intr_delay;
 
-		if ( i == 0 && pulses[ 0 ]->pos < start )
+		if ( i == 0 && pulses[ 0 ]->pos <= start )
 		{
 			print( FATAL, "Microwave pulse #%ld starts too early.\n",
 				   pulses[ 0 ]->num );
 			THROW( EXCEPTION );
 		}
 
-		if ( i != 0 && pulses[ i ]->pos < start )
+		if ( i != 0 && pulses[ i ]->pos <= start )
 		{
 			print( FATAL, "Microwave pulse #%ld not far enough away from its "
 				   "predecessor, pulse #%ld.\n", pulses[ i ]->num,
@@ -321,7 +321,7 @@ static void rb_pulser_w_phase_channel_setup( void )
 		dT = Ticks_floor( ( mw_start - cur_card->intr_delay - rb_pulser_w.psd )
 						  / rb_pulser_w.timebase );
 
-		/* The phase pulse must have a finite length so that Leendert's
+		/* The phase pulse must have a minimum length so that Leendert's
 		   "MoNos W-band magic box" can react to it */
 
 		if ( dT * rb_pulser_w.timebase < MINIMUM_PHASE_PULSE_LENGTH )
@@ -374,8 +374,8 @@ static void rb_pulser_w_rf_channel_setup( void )
 	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
 	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + RF_DELAY;
 	Pulse_T *p;
-	Ticks start, dT;
-	double delta, shift;
+	Ticks dT;
+	double start, delta, shift;
 
 
 	if ( ! f->is_used )
@@ -392,7 +392,7 @@ static void rb_pulser_w_rf_channel_setup( void )
 	start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
 		    + SYNTHESIZER_INTRINSIC_DELAY + f->delay;
 
-	if ( p->pos < start )
+	if ( p->pos <= start )
 	{
 		print( FATAL, "RF pulse #%ld starts too early.\n", p->num );
 		THROW( EXCEPTION );
@@ -431,8 +431,8 @@ static void rb_pulser_w_laser_channel_setup( void )
 	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_LASER;
 	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + LASER_DELAY_0;
 	Pulse_T *p;
-	Ticks start, dT;
-	double delta, shift;
+	Ticks dT;
+	double start, delta, shift;
 
 
 	if ( ! f->is_used )
@@ -455,7 +455,7 @@ static void rb_pulser_w_laser_channel_setup( void )
 	start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
 		    + card->intr_delay + card->next->intr_delay + f->delay;
 
-	if ( p->pos < start )
+	if ( p->pos <= start )
 	{
 		print( FATAL, "Laser pulse #%ld starts too early.\n", p->num );
 		THROW( EXCEPTION );
@@ -503,8 +503,8 @@ static void rb_pulser_w_detection_channel_setup( void )
 	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DET;
 	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DET_DELAY;
 	Pulse_T *p;
-	Ticks start, dT;
-	double delta, shift;
+	Ticks dT;
+	double start, delta, shift;
 
 
 	if ( ! f->is_used )
@@ -521,7 +521,7 @@ static void rb_pulser_w_detection_channel_setup( void )
 	start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay + card->intr_delay
 		    + f->delay;
 
-	if ( p->pos < start )
+	if ( p->pos <= start )
 	{
 		print( FATAL, "Detection pulse #%ld starts too early.\n", p->num );
 		THROW( EXCEPTION );

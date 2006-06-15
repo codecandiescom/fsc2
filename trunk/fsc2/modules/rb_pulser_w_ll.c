@@ -137,7 +137,7 @@ void rb_pulser_w_init( void )
 			                                                    != RULBUS_OK ||
 		 rulbus_rb8514_delay_set_raw_delay(
 					 			   rb_pulser_w.delay_card[ ERT_DELAY ].handle,
-								   0, 1 )                       != RULBUS_OK ||
+								   1, 1 )                       != RULBUS_OK ||
 		 rulbus_rb8515_clock_set_frequency(
 								   rb_pulser_w.clock_card[ ERT_CLOCK ].handle,
 								   RULBUS_RB8515_CLOCK_FREQ_100MHz )
@@ -535,7 +535,7 @@ void rb_pulser_w_run( bool state )
 				} while ( is_busy );
 		}
 
-	lower_permissions( );
+		lower_permissions( );
 
 #else   /* in test mode */
 		fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( ERT_DELAY "

@@ -119,7 +119,7 @@ bool lecroy_ws_init( const char * name )
 		for ( i = LECROY_WS_M1; i <= LECROY_WS_M4; i++ )
 			lecroy_ws.is_displayed[ i ] = UNSET;
 
-		for ( i = LECROY_WS_F1; i <= LECROY_WS_F8; i++ )
+		for ( i = LECROY_WS_Z1; i <= LECROY_WS_Z4; i++ )
 		{
 			lecroy_ws.is_displayed[ i ] = UNSET;
 			if ( lecroy_ws_is_displayed( i ) )
@@ -1117,8 +1117,8 @@ bool lecroy_ws_is_displayed( int ch )
 
 	if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
 		sprintf( cmd, "C%d:TRA?\n", ch - LECROY_WS_CH1 + 1 );
-	else if ( ch >= LECROY_WS_F1 && ch <= LECROY_WS_F8 )
-		sprintf( cmd, "F%d:TRA?\n", ch - LECROY_WS_F1 + 1 );
+	else if ( ch >= LECROY_WS_Z1 && ch <= LECROY_WS_Z4 )
+		sprintf( cmd, "Z%d:TRA?\n", ch - LECROY_WS_Z1 + 1 );
 	else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
 	{
 		print( FATAL, "A memory channel can't be displayed.\n");
@@ -1149,8 +1149,8 @@ bool lecroy_ws_display( int ch,
 
 	if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
 		sprintf( cmd, "C%d:TRA ", ch - LECROY_WS_CH1 + 1 );
-	else if ( ch >= LECROY_WS_F1 && ch <= LECROY_WS_F8 )
-		sprintf( cmd, "F%d:TRA ", ch - LECROY_WS_F1 + 1 );
+	else if ( ch >= LECROY_WS_Z1 && ch <= LECROY_WS_Z4 )
+		sprintf( cmd, "Z%d:TRA ", ch - LECROY_WS_Z1 + 1 );
 	else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
 	{
 		print( FATAL, "Memory channels can't be displayed.\n" );
@@ -1221,7 +1221,7 @@ void lecroy_ws_start_acquisition( void )
 	/* Set up the parameter to be used for averaging for the function channels
 	   (as far as they have been set by the user) */
 
-	for ( ch = LECROY_WS_F1; ch <= LECROY_WS_F8; ch++ )
+	for ( ch = LECROY_WS_Z1; ch <= LECROY_WS_Z4; ch++ )
 	{
 		if ( ! lecroy_ws.is_avg_setup[ ch ] )
 			continue;
@@ -1229,7 +1229,7 @@ void lecroy_ws_start_acquisition( void )
 		do_averaging = SET;
 
 		snprintf( cmd, 100, "F%d:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld\n",
-				  ch - LECROY_WS_F1 + 1,
+				  ch - LECROY_WS_Z1 + 1,
 				  lecroy_ws.source_ch[ ch ] - LECROY_WS_CH1 + 1,
 				  lecroy_ws_curve_length( ),
 				  lecroy_ws.num_avg[ ch ] );
@@ -1246,8 +1246,8 @@ void lecroy_ws_start_acquisition( void )
 		/* Switch off horizontal zoom and shift - if it's on the curve fetched
 		   from the device isn't what one would expect... */
 
-		sprintf( cmd, "F%d:HMAG 1;F%c:HPOS 5\n", ch -  LECROY_WS_F1 + 1,
-				 ch -  LECROY_WS_F1 + 1 ) ;
+		sprintf( cmd, "Z%d:HMAG 1;Z%c:HPOS 5\n", ch -  LECROY_WS_Z1 + 1,
+				 ch -  LECROY_WS_Z1 + 1 ) ;
 
 		len = strlen( cmd );
 		lecroy_vicp_write( cmd, &len, SET, UNSET );
@@ -1255,7 +1255,7 @@ void lecroy_ws_start_acquisition( void )
 		/* Finally reset what's currently stored in the trace (otherwise a
 		   new acquisition may not get started) */
 
-		sprintf( cmd, "F%d:FRST\n", ch - LECROY_WS_F1 + 1 );
+		sprintf( cmd, "Z%d:FRST\n", ch - LECROY_WS_Z1 + 1 );
 
 		len = strlen( cmd );
 		lecroy_vicp_write( cmd, &len, SET, UNSET );
@@ -1316,7 +1316,7 @@ static void lecroy_ws_get_prep( int              ch,
 		is_mem_ch = SET;
 		sprintf( ch_str, "M%d", ch - LECROY_WS_M1 + 1 );
 	}
-	else if ( ch >= LECROY_WS_F1 && ch <= LECROY_WS_F8 )
+	else if ( ch >= LECROY_WS_Z1 && ch <= LECROY_WS_Z4 )
 	{
 		if ( ! lecroy_ws.is_avg_setup[ ch ] )
 		{
@@ -1325,7 +1325,7 @@ static void lecroy_ws_get_prep( int              ch,
 			THROW( EXCEPTION );
 		}
 
-		sprintf( ch_str, "F%d", ch - LECROY_WS_F1 + 1 );
+		sprintf( ch_str, "Z%d", ch - LECROY_WS_Z1 + 1 );
 	}
 	else
 	{
@@ -1401,7 +1401,7 @@ static bool lecroy_ws_can_fetch( int ch )
 	if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
 		return TRUE;
 
-	if ( ch >= LECROY_WS_F1 && ch <= LECROY_WS_F8 )
+	if ( ch >= LECROY_WS_Z1 && ch <= LECROY_WS_Z4 )
 		return lecroy_ws_get_int_value( ch, "SWEEPS_PER_ACQ" ) >=
 								                       lecroy_ws.num_avg[ ch ];
 
@@ -1543,18 +1543,12 @@ void lecroy_ws_copy_curve( long src,
 	ssize_t len;
 
 
-	fsc2_assert( ( src >= LECROY_WS_CH1 && src <= LECROY_WS_CH_MAX ) ||
-				 ( src >= LECROY_WS_F1 && src <= LECROY_WS_F8 ) );
+	fsc2_assert( src >= LECROY_WS_CH1 && src <= LECROY_WS_CH_MAX );
 	fsc2_assert( dest >= LECROY_WS_M1 && dest <= LECROY_WS_M4 );
 
 
-	if ( src >= LECROY_WS_CH1 && src <= LECROY_WS_CH_MAX )
-		sprintf( cmd + strlen( cmd ), "C%ld,", src - LECROY_WS_CH1 + 1 );
-	else
-		sprintf( cmd + strlen( cmd ), "F%d,",
-				 ( char ) ( src - LECROY_WS_F1 + 1 ) );
-
-	sprintf( cmd + strlen( cmd ), "M%ld\n", dest - LECROY_WS_M1 + 1 );
+	sprintf( cmd + strlen( cmd ), "C%ld,M%ld\n", src - LECROY_WS_CH1 + 1,
+			 dest - LECROY_WS_M1 + 1 );
 
 	len = strlen( cmd );
 	lecroy_vicp_write( cmd, &len, SET, UNSET );
@@ -1624,8 +1618,6 @@ static long lecroy_ws_get_int_value( int          ch,
 		sprintf( cmd, "C%d:INSP? '%s'\n", ch - LECROY_WS_CH1 + 1, name );
 	else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
 		sprintf( cmd, "M%c:INSP? '%s'\n", ch - LECROY_WS_M1 + 1, name );
-	else if ( ch >= LECROY_WS_F1 && ch <= LECROY_WS_F8 )
-		sprintf( cmd, "F%d:INSP? '%s'\n", ch - LECROY_WS_F1 + 1, name );
 	else
 	{
 		fsc2_assert( 1 == 0 );
@@ -1661,8 +1653,6 @@ static double lecroy_ws_get_float_value( int          ch,
 		sprintf( cmd, "C%d:INSP? '%s'\n", ch - LECROY_WS_CH1 + 1, name );
 	else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
 		sprintf( cmd, "M%c:INSP? '%s'\n", ch - LECROY_WS_M1 + 1, name );
-	else if ( ch >= LECROY_WS_F1 && ch <= LECROY_WS_F8 )
-		sprintf( cmd, "F%d:INSP? '%s'\n", ch - LECROY_WS_F1 + 1, name );
 	else
 	{
 		fsc2_assert( 1 == 0 );

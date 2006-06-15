@@ -126,32 +126,39 @@ int me6000_exp_hook( void )
 	/* Try to get the number of DACs the boards has, this is also a test to
 	   see if it can be opened and accessed */
 
+	raise_permissions( );
 	switch ( me6x00_num_dacs( BOARD_NUMBER, &num_dacs ) )
 	{
 		case 0 :                    /* everything is fine */
 			break;
 
 		case ME6X00_ERR_IBN :
+			lower_permissions( );
 			print( FATAL, "Invalid board number.\n" );
 			THROW( EXCEPTION );
 
 		case ME6X00_ERR_NDV :
+			lower_permissions( );
 			print( FATAL, "Driver for board not loaded.\n" );
 			THROW( EXCEPTION );
 
 		case ME6X00_ERR_NDF :
+			lower_permissions( );
 			print( FATAL, "Device file for board missing or inaccessible.\n" );
 			THROW( EXCEPTION );
 
 		case ME6X00_ERR_BSY :
+			lower_permissions( );
 			print( FATAL, "Board already in use by another program.\n" );
 			THROW( EXCEPTION );
 
 		case ME6X00_ERR_INT :
+			lower_permissions( );
 			print( FATAL, "Internal error in driver for board.\n" );
 			THROW( EXCEPTION );
 
 		default :
+			lower_permissions( );
 			print( FATAL, "Unrecognized error when trying to access the "
 				   "board.\n" );
 			THROW( EXCEPTION );
@@ -166,15 +173,17 @@ int me6000_exp_hook( void )
 		if ( me6000.dac[ i ].is_used &&
 			 me6x00_voltage( BOARD_NUMBER, i, me6000.dac[ i ].volts ) < 0 )
 		{
-			print( FATAL, "Failed to set voltage for CH%d.\n", i );
 			me6x00_close( BOARD_NUMBER );
+			lower_permissions( );
+			print( FATAL, "Failed to set voltage for CH%d.\n", i );
 			THROW( EXCEPTION );
 		}
 
 		if ( me6x00_keep_voltage( BOARD_NUMBER, i, 1 ) < 0 )
 		{
-			print( FATAL, "Failed to initialize board.\n" );
 			me6x00_close( BOARD_NUMBER );
+			lower_permissions( );
+			print( FATAL, "Failed to initialize board.\n" );
 			THROW( EXCEPTION );
 		}
 	}
@@ -185,12 +194,14 @@ int me6000_exp_hook( void )
 	for ( i = me6000.num_dacs; i < MAX_NUMBER_OF_DACS; i++ )
 		if ( me6000.dac[ i ].is_used )
 		{
+			me6x00_close( BOARD_NUMBER );
+			lower_permissions( );
 			print( FATAL, "Can't set voltage for CH%d, board has only "
 				   "%u channels.\n", i, me6000.num_dacs );
-			me6x00_close( BOARD_NUMBER );
 			THROW( EXCEPTION );
 		}
 
+	lower_permissions( );
 	return 1;
 }
 
@@ -203,7 +214,9 @@ int me6000_end_of_exp_hook( void )
 	int i;
 
 
+	raise_permissions( );
 	me6x00_close( BOARD_NUMBER );
+	lower_permissions( );
 
 	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
 		if ( me6000.dac[ i ].reserved_by &&
@@ -323,6 +336,7 @@ Var_T *daq_set_voltage( Var_T * v )
 	int dac;
 	double volts;
 	char *pass = NULL;
+	int ret;
 
 
 	if ( v != NULL && v->type == STR_VAR )
@@ -405,11 +419,16 @@ Var_T *daq_set_voltage( Var_T * v )
 		}
 	}
 	
-	if ( FSC2_MODE == EXPERIMENT && 
-		 me6x00_voltage( BOARD_NUMBER, dac, volts ) < 0 )
+	if ( FSC2_MODE == EXPERIMENT )
 	{
-		print( FATAL, "Failed to set output voltage.\n" );
-		THROW( EXCEPTION );
+		raise_permissions( );
+		ret = me6x00_voltage( BOARD_NUMBER, dac, volts );
+		lower_permissions( );
+		if ( ret < 0 )
+		{
+			print( FATAL, "Failed to set output voltage.\n" );
+			THROW( EXCEPTION );
+		}
 	}
 
 	me6000.dac[ dac ].is_used = SET;

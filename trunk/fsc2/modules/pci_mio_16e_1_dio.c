@@ -90,6 +90,7 @@ Var_T *daq_dio_read( Var_T * v )
 	long mask;
 	unsigned char bits = 0;
 	char *pass;
+	int ret;
 
 
 	if ( v != NULL && v->type == STR_VAR )
@@ -130,13 +131,19 @@ Var_T *daq_dio_read( Var_T * v )
 		}
 	}
 
-	if ( FSC2_MODE == EXPERIMENT &&
-		 ni_daq_dio_read( pci_mio_16e_1.board, &bits,
-						  ( unsigned char ) ( mask & 0xFF ) ) < 0 )
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		raise_permissions( );
+		ret = ni_daq_dio_read( pci_mio_16e_1.board, &bits,
+							   ( unsigned char ) ( mask & 0xFF ) );
+		lower_permissions( );
+
+		if ( ret < 0 )
 		{
 			print( FATAL, "Can't read data from DIO.\n" );
 			THROW( EXCEPTION );
 		}
+	}
 
 	return vars_push( INT_VAR, ( long ) bits );
 }
@@ -150,6 +157,7 @@ Var_T *daq_dio_write( Var_T * v )
 	long bits;
 	long mask;
 	char *pass;
+	int ret;
 
 
 	if ( v != NULL && v->type == STR_VAR )
@@ -207,13 +215,19 @@ Var_T *daq_dio_write( Var_T * v )
 		too_many_arguments( v );
 	}
 
-	if ( FSC2_MODE == EXPERIMENT &&
-		 ni_daq_dio_write( pci_mio_16e_1.board,
-						   ( unsigned char ) ( bits & 0xFF ),
-						   ( unsigned char ) ( mask & 0xFF ) ) < 0 )
+	if ( FSC2_MODE == EXPERIMENT )
 	{
-		print( FATAL, "Can't write value to DIO.\n" );
-		THROW( EXCEPTION );
+		raise_permissions( );
+		ret = ni_daq_dio_write( pci_mio_16e_1.board,
+								( unsigned char ) ( bits & 0xFF ),
+								( unsigned char ) ( mask & 0xFF ) );
+		lower_permissions( );
+
+		if ( ret < 0 )
+		{
+			print( FATAL, "Can't write value to DIO.\n" );
+			THROW( EXCEPTION );
+		}
 	}
 
 	return vars_push( INT_VAR, 1 );

@@ -112,6 +112,7 @@ Var_T *daq_ao_channel_setup( Var_T * v )
 	int pol;
 	int other_count;
 	char *pass = NULL;
+	int ret;
 
 
 	if ( v == NULL )
@@ -258,8 +259,12 @@ Var_T *daq_ao_channel_setup( Var_T * v )
 		NI_DAQ_STATE l_er = er;
 		NI_DAQ_BU_POLARITY l_pol = pol;
 
-		switch ( ni_daq_ao_channel_configuration( pci_mio_16e_1.board, 1,
-												  &dac, &l_er, &l_pol ) )
+		raise_permissions( );
+		ret = ni_daq_ao_channel_configuration( pci_mio_16e_1.board, 1,
+											   &dac, &l_er, &l_pol );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI_DAQ_OK :
 				break;
@@ -335,6 +340,7 @@ Var_T *daq_set_voltage( Var_T * v )
 	int dac;
 	double volts;
 	char *pass = NULL;
+	int ret;
 
 
 	if ( v == NULL )
@@ -409,7 +415,11 @@ Var_T *daq_set_voltage( Var_T * v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		if ( ni_daq_ao( pci_mio_16e_1.board, 1, &dac, &volts ) < 0 )
+		raise_permissions( );
+		ret = ni_daq_ao( pci_mio_16e_1.board, 1, &dac, &volts ); 
+		lower_permissions( );
+
+		if ( ret < 0 )
 		{
 			print( FATAL, "Setting AO voltage failed.\n" );
 			THROW( EXCEPTION );

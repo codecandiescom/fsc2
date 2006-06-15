@@ -552,33 +552,8 @@ long lecroy_ws_translate_channel( int  dir,
 			case CHANNEL_CH4 :
 				return LECROY_WS_CH4;
 #endif
-			case CHANNEL_F1 :
-			case CHANNEL_TRACE_A :
-				return LECROY_WS_F1;
-
-			case CHANNEL_F2 :
-			case CHANNEL_TRACE_B :
-				return LECROY_WS_F2;
-
-			case CHANNEL_F3 :
-			case CHANNEL_TRACE_C :
-				return LECROY_WS_F3;
-
-			case CHANNEL_F4 :
-			case CHANNEL_TRACE_D :
-				return LECROY_WS_F4;
-
-			case CHANNEL_F5 :
-				return LECROY_WS_F5;
-
-			case CHANNEL_F6 :
-				return LECROY_WS_F6;
-
-			case CHANNEL_F7 :
-				return LECROY_WS_F7;
-
-			case CHANNEL_F8 :
-				return LECROY_WS_F8;
+			case CHANNEL_MATH :
+				return LECROY_WS_MATH;
 
 			case CHANNEL_M1 :
 				return LECROY_WS_M1;
@@ -630,29 +605,8 @@ long lecroy_ws_translate_channel( int  dir,
 			case LECROY_WS_CH4 :
 				return CHANNEL_CH4;
 #endif
-			case LECROY_WS_F1 :
-				return CHANNEL_F1;
-
-			case LECROY_WS_F2 :
-				return CHANNEL_F2;
-
-			case LECROY_WS_F3 :
-				return CHANNEL_F3;
-
-			case LECROY_WS_F4 :
-				return CHANNEL_F4;
-
-			case LECROY_WS_F5 :
-				return CHANNEL_F5;
-
-			case LECROY_WS_F6 :
-				return CHANNEL_F6;
-
-			case LECROY_WS_F7 :
-				return CHANNEL_F7;
-
-			case LECROY_WS_F8 :
-				return CHANNEL_F8;
+			case LECROY_WS_MATH :
+				return CHANNEL_MATH;
 
 			case LECROY_WS_M1 :
 				return CHANNEL_M1;

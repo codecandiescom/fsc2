@@ -153,7 +153,10 @@ int pci_mio_16e_1_exp_hook( void )
 		pci_mio_16e_1.msc_state.reserved_by =
 				 CHAR_P T_strdup( pci_mio_16e_1_stored.msc_state.reserved_by );
 
-	if ( ( pci_mio_16e_1.board = ni_daq_open( BOARD_DEVICE_FILE, 0 ) ) < 0 )
+	raise_permissions( );
+	pci_mio_16e_1.board = ni_daq_open( BOARD_DEVICE_FILE, 0 );
+
+	if ( pci_mio_16e_1.board < 0 )
 	{
 		switch ( pci_mio_16e_1.board )
 		{
@@ -197,6 +200,7 @@ int pci_mio_16e_1_exp_hook( void )
 				break;
 		}
 
+		ni_daq_close( pci_mio_16e_1.board );
 		THROW( EXCEPTION );
 	}
 
@@ -206,15 +210,17 @@ int pci_mio_16e_1_exp_hook( void )
 		if ( ni_daq_ao_channel_configuration( pci_mio_16e_1.board, 1, &i,
 								 pci_mio_16e_1.ao_state.external_reference + i,
 								 pci_mio_16e_1.ao_state.polarity + i ) < 0 ||
-
-
 			 ( pci_mio_16e_1.ao_state.is_used &&
 			   ni_daq_ao( pci_mio_16e_1.board, 1, &i,
 						  pci_mio_16e_1.ao_state.volts + i  ) < 0 ) )
 		{
+			ni_daq_close( pci_mio_16e_1.board );
+			lower_permissions( );
 			print( FATAL, "Failure to initialize AO channels\n ");
 			THROW( EXCEPTION );
 		}
+
+	lower_permissions( );
 
 	return 1;
 }
@@ -229,7 +235,11 @@ int pci_mio_16e_1_end_of_exp_hook( void )
 
 
 	if ( pci_mio_16e_1.board >= 0 )
+	{
+		raise_permissions( );
 		ni_daq_close( pci_mio_16e_1.board );
+		lower_permissions( );
+	}
 
 	for ( i = 0; i < 2; i++ )
 		if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )

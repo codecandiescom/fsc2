@@ -108,8 +108,12 @@ Var_T *daq_freq_out( Var_T * v )
 	   otherwise take some dummy values */
 
 	if ( FSC2_MODE == EXPERIMENT )
+	{
+		raise_permissions( );
 		ni_daq_msc_get_clock_state( pci_mio_16e_1.board, &daq_clock, &on_off,
 									&speed, &divider );
+		lower_permissions( );
+	}
 	else
 	{
 		daq_clock = pci_mio_16e_1.msc_state.daq_clock;
@@ -267,14 +271,17 @@ Var_T *daq_freq_out( Var_T * v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
+		raise_permissions( );
 		if ( ni_daq_msc_set_clock_speed( pci_mio_16e_1.board, speed,
 										 divider ) < 0 ||
 			 ni_daq_msc_set_clock_output( pci_mio_16e_1.board, daq_clock,
 										  on_off ) < 0 )
 		{
+			lower_permissions( );
 			print( FATAL, "Failed to set frequency output.\n ");
 			THROW( EXCEPTION );
 		}
+		lower_permissions( );
 	}
 	else
 	{
@@ -300,6 +307,7 @@ Var_T *daq_trigger_setup( Var_T * v )
 	double tl = -10.0;
 	double th = 10.0;
 	size_t i;
+	int ret;
 
 
 	if ( v == NULL )
@@ -422,13 +430,19 @@ Var_T *daq_trigger_setup( Var_T * v )
 
 	too_many_arguments( v );
 
-	if ( FSC2_MODE == EXPERIMENT &&
-		 ni_daq_msc_set_trigger( pci_mio_16e_1.board,
-								 trigger_type, th, tl ) < 0 )
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		raise_permissions( );
+		ret = ni_daq_msc_set_trigger( pci_mio_16e_1.board,
+									  trigger_type, th, tl );
+		lower_permissions( );
+
+		if ( ret < 0 )
 		{
 			print( FATAL, "Failed to set trigger mode (and level).\n" );
 			THROW( EXCEPTION );
 		}
+	}
 
 	return vars_push( INT_VAR, 1L );
 }

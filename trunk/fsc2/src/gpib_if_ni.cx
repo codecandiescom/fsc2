@@ -309,8 +309,9 @@ int gpib_init_device( const char * device_name,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.mode  == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
     if ( ! strcmp( device_name, CONTROLLER ) )
 		return SUCCESS;
@@ -403,7 +404,9 @@ int gpib_local( int device )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
 	for ( i = 0; i < GPIB_MAX_DEV; i++ )
 		if ( devices[ i ].number == device )
@@ -433,7 +436,9 @@ int gpib_local_lockout( int device )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
 	for ( i = 0; i < GPIB_MAX_DEV; i++ )
 		if ( devices[ i ].number == device )
@@ -476,7 +481,9 @@ int gpib_timeout( int device,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -552,7 +559,9 @@ int gpib_clear_device( int device )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -609,7 +618,9 @@ int gpib_trigger( int device )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -678,7 +689,9 @@ int gpib_wait( int   device,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -759,7 +772,9 @@ int gpib_write( int          device,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -864,7 +879,9 @@ int gpib_read( int    device,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -974,7 +991,9 @@ int gpib_serial_poll( int             device,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialized yet ? */
 
@@ -1154,8 +1173,9 @@ void gpib_log_message( const char * fmt,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.mode  == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode  == EXPERIMENT  );
 
 	if ( gpib_log == NULL || ll == LL_NONE )
 		return;

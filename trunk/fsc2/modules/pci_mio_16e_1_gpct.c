@@ -38,6 +38,7 @@ Var_T *daq_start_continuous_counter( Var_T * v )
 {
 	long counter;
 	NI_DAQ_INPUT source;
+	int ret;
 
 
 	if ( v == NULL )
@@ -66,8 +67,13 @@ Var_T *daq_start_continuous_counter( Var_T * v )
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch( ni_daq_gpct_start_counter( pci_mio_16e_1.board,
-										   ( int ) counter, source ) )
+	{
+		raise_permissions( );
+		ret = ni_daq_gpct_start_counter( pci_mio_16e_1.board,
+										 ( int ) counter, source );
+		lower_permissions( );
+
+		switch( ret )
 		{
 			case NI_DAQ_OK :
 				break;
@@ -80,6 +86,7 @@ Var_T *daq_start_continuous_counter( Var_T * v )
 				print( FATAL, "Can't start counter CH%ld.\n", counter );
 				THROW( EXCEPTION );
 		}
+	}
 	else if ( FSC2_MODE == TEST )
 	{
 		if ( pci_mio_16e_1.gpct_state.states[ counter ] == COUNTER_IS_BUSY )
@@ -103,6 +110,7 @@ Var_T *daq_start_timed_counter( Var_T * v )
 	int counter;
 	NI_DAQ_INPUT source;
 	double interval;
+	int ret;
 
 
 	if ( v == NULL )
@@ -141,8 +149,13 @@ Var_T *daq_start_timed_counter( Var_T * v )
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch ( ni_daq_gpct_start_gated_counter( pci_mio_16e_1.board, counter,
-												  interval, source ) )
+	{
+		raise_permissions( );
+		ret = ni_daq_gpct_start_gated_counter( pci_mio_16e_1.board, counter,
+											   interval, source );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI_DAQ_OK :
 				break;
@@ -164,6 +177,7 @@ Var_T *daq_start_timed_counter( Var_T * v )
 				print( FATAL, "Can't start counter.\n" );
 				THROW( EXCEPTION );
 		}
+	}
 	else if ( FSC2_MODE == TEST &&
 			  pci_mio_16e_1.gpct_state.states[ counter ] == COUNTER_IS_BUSY )
 	{
@@ -189,6 +203,7 @@ Var_T *daq_timed_count( Var_T * v )
 	unsigned long count;
 	int state;
 	static long dummy_count = 0;
+	int ret;
 
 
 	if ( v == NULL )
@@ -226,8 +241,13 @@ Var_T *daq_timed_count( Var_T * v )
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch ( ni_daq_gpct_start_gated_counter( pci_mio_16e_1.board, counter,
-												  interval, source ) )
+	{
+		raise_permissions( );
+		ret = ni_daq_gpct_start_gated_counter( pci_mio_16e_1.board, counter,
+											   interval, source );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI_DAQ_OK :
 				break;
@@ -249,6 +269,7 @@ Var_T *daq_timed_count( Var_T * v )
 				print( FATAL, "Can't start counter.\n" );
 				THROW( EXCEPTION );
 		}
+	}
 	else if ( FSC2_MODE == TEST &&
 			  pci_mio_16e_1.gpct_state.states[ counter ] == COUNTER_IS_BUSY )
 	{
@@ -275,8 +296,12 @@ Var_T *daq_timed_count( Var_T * v )
 
 	try_counter_again:
 
-		switch ( ni_daq_gpct_get_count( pci_mio_16e_1.board, counter, 1,
-										&count, &state ) )
+		raise_permissions( );
+		ret = ni_daq_gpct_get_count( pci_mio_16e_1.board, counter, 1,
+									 &count, &state );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI_DAQ_OK :
 				if ( count > LONG_MAX )
@@ -316,6 +341,7 @@ Var_T *daq_intermediate_count( Var_T * v )
 	unsigned long count;
 	int state;
 	static long dummy_count = 0;
+	int ret;
 
 
 	counter = pci_mio_16e_1_channel_number( get_strict_long( v,
@@ -324,8 +350,12 @@ Var_T *daq_intermediate_count( Var_T * v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		if ( ni_daq_gpct_get_count( pci_mio_16e_1.board, counter, 0,
-									&count, &state ) < 0 )
+		raise_permissions( );
+		ret = ni_daq_gpct_get_count( pci_mio_16e_1.board, counter, 0,
+									 &count, &state );
+		lower_permissions( );
+
+		if ( ret < 0 )
 		{
 			print( FATAL, "Can't get counter value.\n" );
 			THROW( EXCEPTION );
@@ -354,6 +384,7 @@ Var_T *daq_final_count( Var_T * v )
 	unsigned long count;
 	int state;
 	static long dummy_count = 0;
+	int ret;
 
 
 	counter = pci_mio_16e_1_channel_number( get_strict_long( v,
@@ -365,8 +396,12 @@ Var_T *daq_final_count( Var_T * v )
 
 	try_counter_again:
 
-		switch ( ni_daq_gpct_get_count( pci_mio_16e_1.board, counter, 1,
-										&count, &state ) )
+		raise_permissions( );
+		ret = ni_daq_gpct_get_count( pci_mio_16e_1.board, counter, 1,
+									 &count, &state );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI_DAQ_OK :
 				if ( count > LONG_MAX )
@@ -402,6 +437,7 @@ Var_T *daq_final_count( Var_T * v )
 Var_T *daq_stop_counter( Var_T * v )
 {
 	int counter;
+	int ret;
 
 
 	counter = pci_mio_16e_1_channel_number( get_strict_long( v,
@@ -410,7 +446,11 @@ Var_T *daq_stop_counter( Var_T * v )
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
-		if ( ni_daq_gpct_stop_counter( pci_mio_16e_1.board, counter ) < 0 )
+		raise_permissions( );
+		ret = ni_daq_gpct_stop_counter( pci_mio_16e_1.board, counter );
+		lower_permissions( );
+
+		if ( ret < 0 )
 			print( SEVERE, "Failed to stop counter CH%d.\n", counter );
 	}
 	else if ( FSC2_MODE == TEST )
@@ -428,6 +468,7 @@ Var_T *daq_single_pulse( Var_T * v )
 	int counter;
 	double duration;
 	double dummy = 0.0;
+	int ret;
 
 
 	counter = pci_mio_16e_1_channel_number( get_strict_long( v,
@@ -437,8 +478,13 @@ Var_T *daq_single_pulse( Var_T * v )
 										 "pulse length" );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch ( ni_daq_gpct_single_pulse( pci_mio_16e_1.board, counter,
-										   duration, &dummy, 0 ) )
+	{
+		raise_permissions( );
+		ret = ni_daq_gpct_single_pulse( pci_mio_16e_1.board, counter,
+										duration, &dummy, 0 );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI_DAQ_OK :
 				break;
@@ -452,6 +498,7 @@ Var_T *daq_single_pulse( Var_T * v )
 				print( FATAL, "Can't create the pulse.\n" );
 				THROW( EXCEPTION );
 		}
+	}
 	else if ( FSC2_MODE == TEST &&
 			  pci_mio_16e_1.gpct_state.states[ counter ] == COUNTER_IS_BUSY )
 	{
@@ -472,6 +519,7 @@ Var_T *daq_continuous_pulses( Var_T * v )
 	int counter;
 	double len_hi, len_low;
 	double dummy = 0.0;
+	int ret;
 
 
 	if ( v == NULL )
@@ -508,8 +556,13 @@ Var_T *daq_continuous_pulses( Var_T * v )
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
-		switch ( ni_daq_gpct_continuous_pulses( pci_mio_16e_1.board, counter,
-												len_hi, len_low, &dummy, 0 ) )
+	{
+		raise_permissions( );
+		ret = ni_daq_gpct_continuous_pulses( pci_mio_16e_1.board, counter,
+											 len_hi, len_low, &dummy, 0 );
+		lower_permissions( );
+
+		switch ( ret )
 		{
 			case NI_DAQ_OK :
 				break;
@@ -523,6 +576,7 @@ Var_T *daq_continuous_pulses( Var_T * v )
 				print( FATAL, "Can't create continuous pulses.\n" );
 				THROW( EXCEPTION );
 		}
+	}
 	else if ( FSC2_MODE == TEST &&
 			  pci_mio_16e_1.gpct_state.states[ counter ] == COUNTER_IS_BUSY )
 	{

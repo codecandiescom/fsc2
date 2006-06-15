@@ -40,21 +40,18 @@
 #else
 #define LECROY_WS_CH_MAX   LECROY_WS_CH2
 #endif
-#define LECROY_WS_F1       4
-#define LECROY_WS_F2       5
-#define LECROY_WS_F3       6
-#define LECROY_WS_F4       7
-#define LECROY_WS_F5       8
-#define LECROY_WS_F6       9
-#define LECROY_WS_F7      10
-#define LECROY_WS_F8      11
-#define LECROY_WS_M1      12
-#define LECROY_WS_M2      13
-#define LECROY_WS_M3      14
-#define LECROY_WS_M4      15
-#define LECROY_WS_LIN     16
-#define LECROY_WS_EXT     17
-#define LECROY_WS_EXT10   18
+#define LECROY_WS_MATH     4
+#define LECROY_WS_Z1       5
+#define LECROY_WS_Z2       6
+#define LECROY_WS_Z3       7
+#define LECROY_WS_Z4       8
+#define LECROY_WS_M1       9
+#define LECROY_WS_M2      10
+#define LECROY_WS_M3      11
+#define LECROY_WS_M4      12
+#define LECROY_WS_LIN     13
+#define LECROY_WS_EXT     14
+#define LECROY_WS_EXT10   15
 
 
 #define GENERAL_TO_LECROY_WS 0
@@ -120,7 +117,7 @@
 /* Total number of channels and maximum number of channels that can be
    displayed at once */
 
-#define LECROY_WS_MAX_CHANNELS       16
+#define LECROY_WS_MAX_CHANNELS       13
 #define LECROY_WS_MAX_USED_CHANNELS   8
 
 

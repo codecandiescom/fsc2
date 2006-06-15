@@ -253,23 +253,32 @@ static bool start_gpib_and_rulbus( void )
 #if defined WITH_RULBUS
 	/* If there are devices that are controlled via the RULBUS initialize it */
 
-	if ( Need_RULBUS && ( retval = rulbus_open( O_EXCL ) ) < 0 )
+	if ( Need_RULBUS )
 	{
-		eprint( FATAL, UNSET, "Failed to initialize RULBUS: %s.\n",
-				rulbus_strerror( ) );
+		raise_permissions( );
 
-		if ( Need_GPIB )
-			gpib_shutdown( );
-
-		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+		if ( ( retval = rulbus_open( O_EXCL ) ) < 0 )
 		{
-			set_buttons_for_run( 0 );
-			fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-			XFlush( fl_get_display( ) );
+			lower_permissions( );
+
+			eprint( FATAL, UNSET, "Failed to initialize RULBUS: %s.\n",
+					rulbus_strerror( ) );
+
+			if ( Need_GPIB )
+				gpib_shutdown( );
+
+			if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+			{
+				set_buttons_for_run( 0 );
+				fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+				XFlush( fl_get_display( ) );
+			}
+
+			Fsc2_Internals.state = STATE_IDLE;
+			return FAIL;
 		}
 
-		Fsc2_Internals.state = STATE_IDLE;
-		return FAIL;
+		lower_permissions( );
 	}
 #endif
 

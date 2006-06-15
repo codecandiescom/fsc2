@@ -112,12 +112,19 @@ int rb8509_test_hook( void )
 
 int rb8509_exp_hook( void )
 {
+	int ret;
+
+
 	rb8509 = rb8509_stored;
 	rb8509.channel = 0;
 
 	/* Open the card */
 
-	if ( ( rb8509.handle = rulbus_card_open( RULBUS_CARD_NAME ) ) < 0 )
+	raise_permissions( );
+	rb8509.handle = rulbus_card_open( RULBUS_CARD_NAME );
+	lower_permissions( );
+
+	if ( rb8509.handle < 0 )
 	{
 		print( FATAL, "Initialization of card failed: %s.\n",
 			   rulbus_strerror( ) );
@@ -127,27 +134,37 @@ int rb8509_exp_hook( void )
 	/* If necessary set the gain (card switches to a gain of 1 on
 	   initialization) */
 
-	if ( rb8509.gain_is_set && rb8509.gain != RULBUS_RB8509_ADC12_GAIN_1 &&
-		 rulbus_rb8509_adc12_set_gain( rb8509.handle,
-									   rb8509.gain ) != RULBUS_OK )
+	if ( rb8509.gain_is_set && rb8509.gain != RULBUS_RB8509_ADC12_GAIN_1 )
 	{
-		print( FATAL, "Initialization of card failed: %s.\n",
-			   rulbus_strerror( ) );
-		THROW( EXCEPTION );
+		raise_permissions( );
+		ret = rulbus_rb8509_adc12_set_gain( rb8509.handle, rb8509.gain );
+		lower_permissions( );
+
+		if ( ret != RULBUS_OK )
+		{
+			print( FATAL, "Initialization of card failed: %s.\n",
+				   rulbus_strerror( ) );
+			THROW( EXCEPTION );
+		}
 	}
 
 	/* If necessary set the trigger mode (card switches to internal trigger
 	   mode on initialization) */
 
 	if ( rb8509.trig_mode_is_set &&
-		 rb8509.trig_mode != RULBUS_RB8509_ADC12_INT_TRIG &&
-		 rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
-											   rb8509.trig_mode ) 
-		 														 != RULBUS_OK )
+		 rb8509.trig_mode != RULBUS_RB8509_ADC12_INT_TRIG )
 	{
-		print( FATAL, "Initialization of card failed: %s.\n",
-			   rulbus_strerror( ) );
-		THROW( EXCEPTION );
+		raise_permissions( );
+		ret = rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
+													rb8509.trig_mode );
+		lower_permissions( );
+
+		if ( ret != RULBUS_OK )
+		{
+			print( FATAL, "Initialization of card failed: %s.\n",
+				   rulbus_strerror( ) );
+			THROW( EXCEPTION );
+		}
 	}
 
 	return 1;
@@ -162,7 +179,10 @@ int rb8509_end_of_exp_hook( void )
 {
 	if ( rb8509.handle >= 0 )
 	{
+		raise_permissions( );
 		rulbus_card_close( rb8509.handle );
+		lower_permissions( );
+
 		rb8509.handle = -1;
 	}
 
@@ -227,8 +247,11 @@ Var_T *daq_get_voltage( Var_T * v )
 
 	if ( rb8509.trig_mode == RULBUS_RB8509_ADC12_INT_TRIG )
 	{
-		if ( rulbus_rb8509_adc12_convert( rb8509.handle,
-										  &volts ) != RULBUS_OK )
+		raise_permissions( );
+		retval = rulbus_rb8509_adc12_convert( rb8509.handle, &volts );
+		lower_permissions( );
+
+		if ( retval != RULBUS_OK )
 			rb8509_comm_failure( );
 
 		return vars_push( FLOAT_VAR, volts );
@@ -239,8 +262,11 @@ Var_T *daq_get_voltage( Var_T * v )
 
 	while ( ! retval )
 	{
-		if ( ( retval = rulbus_rb8509_adc12_check_convert( rb8509.handle,
-														   &volts ) ) < 0 )
+		raise_permissions( );
+		retval = rulbus_rb8509_adc12_check_convert( rb8509.handle, &volts );
+		lower_permissions( );
+
+		if ( retval < 0 )
 			rb8509_comm_failure( );
 
 		stop_on_user_request( );
@@ -258,6 +284,9 @@ Var_T *daq_get_voltage( Var_T * v )
 
 Var_T *daq_trigger_mode( Var_T * v )
 {
+	int ret;
+
+
 	if ( v == NULL )
 		return vars_push( INT_VAR, rb8509.trig_mode );
 
@@ -288,11 +317,16 @@ Var_T *daq_trigger_mode( Var_T * v )
 
 	rb8509.trig_mode_is_set = SET;
 
-	if ( FSC2_MODE == EXPERIMENT &&
-		 rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
-											   rb8509.trig_mode )
-																 != RULBUS_OK )
-		rb8509_comm_failure( );
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		raise_permissions( );
+		ret = rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
+													rb8509.trig_mode );
+		lower_permissions( );
+		 
+		if ( ret != RULBUS_OK )
+			rb8509_comm_failure( );
+	}
 
 	return vars_push( INT_VAR, rb8509.trig_mode );
 }
@@ -306,6 +340,7 @@ Var_T *daq_trigger_mode( Var_T * v )
 Var_T *daq_gain( Var_T * v )
 {
 	int gain;
+	int ret;
 
 
 	if ( v == NULL )
@@ -330,10 +365,15 @@ Var_T *daq_gain( Var_T * v )
 	rb8509.gain = gain;
 	rb8509.gain_is_set = SET;
 
-	if ( FSC2_MODE == EXPERIMENT &&
-		 rulbus_rb8509_adc12_set_gain( rb8509.handle,
-									   rb8509.gain ) != RULBUS_OK )
-		rb8509_comm_failure( );
+	if ( FSC2_MODE == EXPERIMENT )
+	{
+		raise_permissions( );
+		ret = rulbus_rb8509_adc12_set_gain( rb8509.handle, rb8509.gain );
+		lower_permissions( );
+
+		if ( ret != RULBUS_OK )
+			rb8509_comm_failure( );
+	}
 
 	return vars_push( INT_VAR, rb8509.gain );
 }

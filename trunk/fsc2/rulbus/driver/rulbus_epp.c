@@ -339,16 +339,21 @@ inline static unsigned char rulbus_parport_read_addr( void )
 }
 
 
-/*------------------------------------------------------*
+/*--------------------------------------------------------*
  * Function for writing a data byte to the parallel port,
  * if necessary after switching from read to write mode
- *------------------------------------------------------*/
+ * (the data byte gets written out twice with a delay of
+ * 100 ns in between since otherwise the write sometimes
+ * fails - even using out_p() doesn't seem to help).
+*--------------------------------------------------------*/
 
 inline static void rulbus_parport_write_data( unsigned char data )
 {
         if ( rulbus.direction != WRITE_TO_DEVICE )
                 rulbus_parport_reverse( );
         rulbus_clear_epp_timeout( );
+        outb( data, DATA_BYTE );
+		ndelay( 100 );
         outb( data, DATA_BYTE );
 }
 
@@ -1057,7 +1062,7 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
         }
 
         /* Now write as many data as required to consecutive rulbus
-		   addresses */
+		   addresses. */
 
         for ( i = 0; i < rulbus_arg->len; i++ ) {
 				rulbus_parport_write_addr( rulbus_arg->offset + i );

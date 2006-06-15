@@ -124,6 +124,7 @@ int witio_48_exp_hook( void )
 	{
 		for ( i = 0; i < NUMBER_OF_DIOS; i++ )
 		{
+			raise_permissions( );
 			check_ret( witio_48_set_mode( ( WITIO_48_DIO ) i,
 										  witio_48.mode[ i ] ) );
 
@@ -361,8 +362,12 @@ Var_T *dio_mode( Var_T * v )
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
+		{
+			raise_permissions( );
 			check_ret( witio_48_get_mode( ( WITIO_48_DIO ) dio,
 										  &witio_48.mode[ dio ] ) );
+		}
+
 		return vars_push( INT_VAR, ( long ) witio_48.mode[ dio ] );
 	}
 
@@ -399,8 +404,11 @@ Var_T *dio_mode( Var_T * v )
 	witio_48.mode[ dio ] = ( WITIO_48_MODE ) mode;
 
 	if ( FSC2_MODE == EXPERIMENT )
+	{
+		raise_permissions( );
 		check_ret( witio_48_set_mode( ( WITIO_48_DIO ) dio,
 									  witio_48.mode[ dio ] ) );
+	}
 
 	return vars_push( INT_VAR, mode );
 }
@@ -496,8 +504,12 @@ Var_T *dio_value( Var_T * v )
 	if ( ( v = vars_pop( v ) ) == NULL )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
+		{
+			raise_permissions( );
 			check_ret( witio_48_dio_in( ( WITIO_48_DIO ) dio,
 										( WITIO_48_CHANNEL ) ch, &uval ) );
+		}
+
 		return vars_push( INT_VAR, ( long ) uval );
 	}
 
@@ -552,8 +564,11 @@ Var_T *dio_value( Var_T * v )
 	/* Output the value */
 
 	if ( FSC2_MODE == EXPERIMENT )
+	{
+		raise_permissions( );
 		check_ret( witio_48_dio_out( ( WITIO_48_DIO ) dio,
 									 ( WITIO_48_CHANNEL ) ch, uval ) );
+	}
 
 	return vars_push( INT_VAR, ( long ) uval );
 }
@@ -597,6 +612,7 @@ static long translate_channel( long channel )
 
 static void check_ret( int ret_val )
 {
+	lower_permissions( );
 	if ( ret_val == WITIO_48_OK )
 		return;
 

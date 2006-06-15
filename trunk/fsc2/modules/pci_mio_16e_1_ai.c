@@ -423,10 +423,14 @@ Var_T *daq_ai_channel_setup( Var_T * v )
 	}
 
 	if ( FSC2_MODE == EXPERIMENT )
+	{
+		raise_permissions( );
 		ret = ni_daq_ai_channel_configuration( pci_mio_16e_1.board,
 											   num_channels, channels, types,
 											   polarities, ranges,
 											   dither_enables );
+		lower_permissions( );
+	}
 
 	T_free( channels );
 	T_free( types );
@@ -524,6 +528,8 @@ Var_T *daq_ai_acq_setup( Var_T * v )
 		   the delay delay time on channel 1) we have to setup the
 		   counters. */
 
+		raise_permissions( );
+
 		if ( trig.type == TRIGGER_OUT )
 			ni_daq_two_channel_pulses( trig.delay_duration,
 									   trig.scan_duration );
@@ -536,6 +542,8 @@ Var_T *daq_ai_acq_setup( Var_T * v )
 										  trig.conv_duration,
 										  num_scans ) ) != NI_DAQ_OK )
 		{
+			lower_permissions( );
+
 			switch ( ret )
 			{
 				case NI_DAQ_ERR_NPT :
@@ -557,6 +565,8 @@ Var_T *daq_ai_acq_setup( Var_T * v )
 
 		if ( trig.type == TRIGGER_OUT )
 			ni_daq_gpct_stop_pulses( pci_mio_16e_1.board, 2 );
+
+		lower_permissions( );
 	}
 
 	pci_mio_16e_1.ai_state.is_acq_setup = SET;
@@ -589,6 +599,8 @@ Var_T *daq_ai_start_acquisition( Var_T * v  UNUSED_ARG )
 
 	if ( FSC2_MODE == EXPERIMENT )
 	{
+		raise_permissions( );
+
 		if ( trig.type == TRIGGER_OUT )
 			 ni_daq_two_channel_pulses( trig.delay_duration,
 										trig.scan_duration );
@@ -600,6 +612,8 @@ Var_T *daq_ai_start_acquisition( Var_T * v  UNUSED_ARG )
 			 ( ret = ni_daq_ai_start_acq( pci_mio_16e_1.board ) )
 			 													 != NI_DAQ_OK )
 		{
+			lower_permissions( );
+
 			if ( ret == NI_DAQ_ERR_NEM )
 				print( FATAL, "Running out if memory\n" );
 			else
@@ -611,12 +625,15 @@ Var_T *daq_ai_start_acquisition( Var_T * v  UNUSED_ARG )
 		if ( trig.type == TRIGGER_OUT &&
 			 ni_daq_gpct_start_pulses( pci_mio_16e_1.board, 2 ) != NI_DAQ_OK )
 		{
+			lower_permissions( );
+
 			print( FATAL, "Starting AI acquisition failed: %s\n",
 				   ni_daq_strerror( ) );
 			THROW( EXCEPTION );
 		}
 	}
 
+	lower_permissions( );
 	pci_mio_16e_1.ai_state.is_acq_running = SET;
 	return vars_push( INT_VAR, 1L );
 }
@@ -677,11 +694,13 @@ Var_T *daq_ai_get_curve( Var_T * v  UNUSED_ARG )
 	{
 		to_be_fetched = pci_mio_16e_1.ai_state.data_per_channel;
 
+		raise_permissions( );
 		received_data = ni_daq_ai_get_acq_data( pci_mio_16e_1.board, volts,
 												0, to_be_fetched, 1 );
 
 		if ( received_data < ( ssize_t ) to_be_fetched )
 		{
+			lower_permissions( );
 			vars_pop( nv );
 			T_free( volts );
 
@@ -706,6 +725,8 @@ Var_T *daq_ai_get_curve( Var_T * v  UNUSED_ARG )
 
 		if ( trig.type == TRIGGER_OUT )
 			ni_daq_gpct_stop_pulses( pci_mio_16e_1.board, 2 );
+
+		lower_permissions( );
 	}
 	else
 	{
