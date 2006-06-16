@@ -31,24 +31,24 @@ extern bool No_File_Numbers;           /* defined in func.c */
 extern bool Dont_Save;                 /* defined in func.c */
 
 
-static int get_save_file( Var_T ** v );
-static Var_T *batch_mode_file_open( char * name );
-static long arr_save( long    file_num,
-					  Var_T * v );
-static void f_format_check( Var_T * v );
-static void ff_format_check( Var_T * v );
-static long do_printf( long    file_num,
-					   Var_T * v );
-static long print_browser( int          browser,
-						   int          fid,
-						   const char * comment );
-static long T_fprintf( long         fn,
-					   const char * fmt,
+static int get_save_file( Var_T ** /* v */ );
+static Var_T *batch_mode_file_open( char * /* name */ );
+static long arr_save( long    /* file_num */,
+					  Var_T * /* v        */ );
+static void f_format_check( Var_T * /* v */ );
+static void ff_format_check( Var_T * /* v */ );
+static long do_printf( long    /* file_num */,
+					   Var_T * /* v        */ );
+static long print_browser( int          /* browser */,
+						   int          /* fid     */,
+						   const char * /* comment */ );
+static long print_include( int          /* fid      */,
+						   char *       /* cp       */,
+						   const char * /* comment  */,
+						   const char * /* cur_file */ );
+static long T_fprintf( long         /* fn  */,
+					   const char * /* fmt */,
 					   ... );
-static long print_include( int          fid,
-						   char *       cp,
-						   const char * comment,
-						   const char * cur_file );
 
 
 /*----------------------------------------------------------------*
