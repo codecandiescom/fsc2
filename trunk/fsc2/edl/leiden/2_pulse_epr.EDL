@@ -2,7 +2,7 @@
 === REP_TIME float [ 0.001 : ] [ 50 ] "Repetition time" "ms"
 === P1_POS int [ 200 : 167772150 ] [ 200 ] "Position of 1st MW pulse" "ns"
 === P1_LEN int [ 10 : 167772150 ] [ 100 ] "Length of 1st MW pulse" "ns"
-=== P2_LEN int [ 10 : 167772150 ] [ 200 ] "Length of 2st MW pulse" "ns"
+=== P2_LEN int [ 10 : 167772150 ] [ 200 ] "Length of 2nd MW pulse" "ns"
 === PULSE_DIST int [ 100 : 167772150 ] [ 400 ] "Pulse distance" "ns"
 === DET_OFFSET int [ -167772150 : 167772150 ] [ 0 ] "Detection offset" "ns"
 === START_FIELD float [ 0 : 114304 ] [ 80000 ] "Start field" "G"
@@ -212,9 +212,9 @@ IF I != 0 {
 	               "% Temperature at start:   # K\n"
 	               "% Temperature at end:     # K\n",
 	               date( ), time( ), start_field, field, field_step,
-	               repeat_time / 1 ms, int( P1.LENGTH / 1 ns ),
-	               int( P2.LENGTH / 1 ns ), int( p1_to_p2_dist / 1 ns ), N_Avg,
-	               J, start_temp, temp_contr_temperature( ) );
+	               repeat_time / 1 ms, round( P1.LENGTH / 1 ns ),
+	               round( P2.LENGTH / 1 ns ), round( p1_to_p2_dist / 1 ns ),
+                   N_Avg, J, start_temp, temp_contr_temperature( ) );
         }
 
         FOR I = 1 : N_Points {
@@ -245,8 +245,8 @@ IF I != 0 {
            "% Temperature at start:   # K\n"
            "% Temperature at end:     # K\n",
            date( ), time( ), start_field, field, field_step,
-           repeat_time / 1 ms, int( P1.LENGTH / 1 ns ),
-           int( P2.LENGTH / 1 ns ), int( p1_to_p2_dist / 1 ns ), N_Avg, J,
+           repeat_time / 1 ms, round( P1.LENGTH / 1 ns ),
+           round( P2.LENGTH / 1 ns ), round( p1_to_p2_dist / 1 ns ), N_Avg, J,
            start_temp, temp_contr_temperature( ) );
 
     save_comment( File1, "% " );

@@ -2022,7 +2022,7 @@ static long T_fprintf( long         fn,
 	long to_write;                       /* number of bytes we need to write */
 	size_t size = BUFFER_SIZE_GUESS;
 	char initial_buffer[ BUFFER_SIZE_GUESS ];
-	char *p;
+	char *p = initial_buffer;
 	long file_num = fn;
 	va_list ap;
 	char *new_name;
@@ -2063,13 +2063,11 @@ static long T_fprintf( long         fn,
 	/* First we've got to find out how many characters we need to write out.
 	   We start by trying to write to a fixed size memory buffer. If the
 	   required string is longer we try allocating a longer buffer (where
-	   newer libc versions already tell us how memory much is needed older
-	   don't, so we may have to retry several times with increased buffer
+	   newer libc versions already tell us how memory much is needed while
+	   older don't, so we may have to retry several times with increased buffer
 	   sizes) and write to that. To speed things up we start with a buffer
 	   that is local to the function and only start calling memory allocation
 	   functions if the original buffer isn't large enough. */
-
-	p = initial_buffer;
 
 	while ( 1 )
 	{
@@ -2104,7 +2102,7 @@ static long T_fprintf( long         fn,
 		{
 			if ( p == initial_buffer )
 				p = NULL;
-			p = CHAR_P T_realloc( NULL, size );
+			p = CHAR_P T_realloc( p, size );
 			TRY_SUCCESS;
 		}
 		OTHERWISE
@@ -2132,26 +2130,26 @@ static long T_fprintf( long         fn,
         return count;
 	}
 
-	/* We can't do anything when writing failed for stdout or stderr, all
-	   we can do is printing out a warning and return, keeping out fingers
-	   crossed... */
+	/* We can't do anything to save the day when writing failed for stdout or
+	   stderr, all we can do is printing out a warning and return... */
 
 	if ( file_num == 0 || file_num == 1 )
 	{
-		print( SEVERE, "Can't write to std%s, if you're redirecting to a "
-			   "file make sure there's enough space on the disk.\n" );
+		print( SEVERE, "Can't write to std%s, if it's redirected to a "
+			   "file make sure there's enough space on the disk.\n",
+			   file_num == 0 ? "out" : "err" );
 		if ( p != initial_buffer )
 			T_free( p );
         return count;
 	}
 
-	/* If less characters than required where written we reduce 'n' to the
-	   number of characters that still need to be written out and get rid
+	/* If less characters than required where written we reduce 'to_write' to
+	   the number of characters that still need to be written out and get rid
 	   of the part of the buffer that already has been written to the file. */
 
 	if ( count > 0 )
 	{
-		written += count;
+		written  += count;
 		to_write -= count;
 		memmove( p, p + count, to_write + 1 );
 	}
@@ -2209,7 +2207,7 @@ get_repl_retry:
 		goto get_repl_retry;
 	}
 
-	/* Try to open new file */
+	/* Try to open the new file */
 
 	new_fp = NULL;
 	if ( ( old_stat.st_dev != new_stat.st_dev ||
@@ -2242,9 +2240,9 @@ get_repl_retry:
 		goto get_repl_retry;
 	}
 
-	/* Check if the new and the old file are identical. If they are we simply
-	   continue to write to the old file, otherwise we first have to copy
-	   everything from the old to the new file and get rid of it */
+	/* Check if the new and old file are identical. If yes continue to write
+	   to the old file, otherwise copy everything from the old to the new file
+	   and then get rid of the old one. */
 
 	if ( old_stat.st_dev == new_stat.st_dev &&
 		 old_stat.st_ino == new_stat.st_ino )
@@ -2303,12 +2301,12 @@ get_repl_retry:
 		return written + count;
 	}
 
-	/* Again, on failure get rid of all what already has been written to
-	   the file and then ask for another replacement file */
+	/* Again, on failure get rid of all what already has been written to the
+	   file and then ask for another replacement file */
 
 	if ( count > 0 )
 	{
-		written += count;
+		written  += count;
 		to_write -= count;
 		memmove( p, p + count, to_write + 1 );
 	}
