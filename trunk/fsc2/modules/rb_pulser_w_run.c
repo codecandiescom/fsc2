@@ -313,7 +313,7 @@ static void rb_pulser_w_phase_channel_setup( void )
 					 mw_card->next != NULL );
 
 		/* Calculate where the microwave pulse really starts and from this
-		   how long the phase pulse must be */
+		   how long the phase cards delay must be */
 
 		mw_start +=   mw_card->intr_delay + mw_card->next->intr_delay
 		            + mw_card->delay * rb_pulser_w.timebase;
@@ -332,7 +332,7 @@ static void rb_pulser_w_phase_channel_setup( void )
 		}
 
 		/* And, of course, we have to make sure that a phase pulse doesn't
-		   have to be longer than we can produce with a single delay card */
+		   are to be longer than we can produce with a single delay card */
 
 		if ( dT > MAX_TICKS )
 		{
@@ -359,8 +359,11 @@ static void rb_pulser_w_phase_channel_setup( void )
 		cur_card = cur_card->next;
 
 		mw_end = mw_start + mw_card->next->delay * rb_pulser_w.timebase;
+		mw_start += mw_card->next->delay * rb_pulser_w.timebase;
+
 		mw_card = mw_card->next->next;
 	}
+
 }
 
 

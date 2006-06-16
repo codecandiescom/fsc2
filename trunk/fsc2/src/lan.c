@@ -123,7 +123,9 @@ int fsc2_lan_open( const char * dev_name,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	fsc2_assert( dev_name != NULL );
 
@@ -365,7 +367,9 @@ int fsc2_lan_close( int handle )
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Figure out which device connection it's meant for */
 
@@ -433,7 +437,9 @@ ssize_t fsc2_lan_write( int          handle,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Figure out which device connection it's meant for */
 
@@ -557,7 +563,9 @@ ssize_t fsc2_lan_writev( int                  handle,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Figure out which device connection it's meant for */
 
@@ -705,7 +713,9 @@ ssize_t fsc2_lan_read( int    handle,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Figure out which device connection it's meant for */
 
@@ -837,7 +847,9 @@ ssize_t fsc2_lan_readv( int            handle,
 	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
 	   section */
 
-	fsc2_assert( Fsc2_Internals.mode == EXPERIMENT );
+	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+				 Fsc2_Internals.state == STATE_FINISHED ||
+				 Fsc2_Internals.mode == EXPERIMENT );
 
 	/* Figure out which device connection it's meant for */
 

@@ -116,6 +116,13 @@ bool lecroy_ws_init( const char * name )
 			}
 		}
 
+		lecroy_ws.is_displayed[ LECROY_WS_MATH ] = UNSET;
+		if ( lecroy_ws_is_displayed( LECROY_WS_MATH ) )
+		{
+			lecroy_ws.is_displayed[ LECROY_WS_MATH ] = SET;
+			lecroy_ws.num_used_channels++;
+		}
+
 		for ( i = LECROY_WS_M1; i <= LECROY_WS_M4; i++ )
 			lecroy_ws.is_displayed[ i ] = UNSET;
 
@@ -389,24 +396,12 @@ long lecroy_ws_get_memory_size( void )
 		lecroy_ws_lan_failure( );
 	reply[ len - 1 ] = '\0';
 
-	mem_size = strtol( reply, &end_p, 10 );
+	mem_size = lrnd( T_atod( reply ) );
 
-	if ( errno == ERANGE )
-	{
-		print( FATAL, "Long integer number out of range: %s.\n", reply );
-		THROW( EXCEPTION );
-	}
+	fprintf( stderr, "%s, %ld\n", reply, mem_size );
 
-	if ( end_p == ( char * ) reply )
-	{
-		print( FATAL, "Not an integer number: %s.\n", reply );
-		THROW( EXCEPTION );
-	}
-
-	if ( *end_p == 'K' )
-		mem_size *= 1000;
-	else if ( *end_p == 'M' )
-		mem_size *= 1000000;
+	for ( i = 0; i < lecroy_ws.num_mem_sizes; i++ )
+		fprintf( stderr, "%ld\n", lecroy_ws.mem_sizes[ i ] );
 
 	for ( i = 0; i < lecroy_ws.num_mem_sizes; i++ )
 		if ( lecroy_ws.mem_sizes[ i ] == mem_size )
@@ -456,7 +451,7 @@ double lecroy_ws_get_sens( int channel )
 
 	fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 
-	sprintf( cmd, "C%1d:VDIV?\n", channel + 1 );
+	sprintf( cmd, "C%1d:VDIV?\n", channel - LECROY_WS_CH1 + 1 );
 	if ( lecroy_ws_talk( cmd, reply, &len ) != SUCCESS )
 		lecroy_ws_lan_failure( );
     reply[ len - 1 ] = '\0';
@@ -477,7 +472,7 @@ bool lecroy_ws_set_sens( int    channel,
 
 	fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 
-	sprintf( cmd, "C%1d:VDIV ", channel + 1 );
+	sprintf( cmd, "C%1d:VDIV ", channel - LECROY_WS_CH1 + 1 );
 	gcvt( sens, 8, cmd + strlen( cmd ) );
 	strcat( cmd, "\n" );
 	len = strlen( cmd );
@@ -499,7 +494,7 @@ double lecroy_ws_get_offset( int channel )
 
 	fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 
-	sprintf( buf, "C%1d:OFST?\n", channel + 1 );
+	sprintf( buf, "C%1d:OFST?\n", channel - LECROY_WS_CH1 + 1 );
 	if ( lecroy_ws_talk( buf, buf, &len ) != SUCCESS )
 		lecroy_ws_lan_failure( );
     buf[ len - 1 ] = '\0';
@@ -520,7 +515,7 @@ bool lecroy_ws_set_offset( int    channel,
 
 	fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 
-	sprintf( cmd, "C%1d:OFST ", channel + 1 );
+	sprintf( cmd, "C%1d:OFST ", channel - LECROY_WS_CH1 + 1 );
 	gcvt( offset, 8, cmd + strlen( cmd ) );
 	strcat( cmd, "\n" );
 	len = strlen( cmd ),
@@ -543,7 +538,7 @@ int lecroy_ws_get_coupling( int channel )
 
 	fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 
-	sprintf( buf, "C%1d:CPL?\n", channel + 1 );
+	sprintf( buf, "C%1d:CPL?\n", channel - LECROY_WS_CH1 + 1 );
 	if ( lecroy_ws_talk( buf, buf, &len ) != SUCCESS )
 		lecroy_ws_lan_failure( );
     buf[ len - 1 ] = '\0';
@@ -586,7 +581,7 @@ bool lecroy_ws_set_coupling( int channel,
 	fsc2_assert( type >= LECROY_WS_CPL_AC_1_MOHM &&
 				 type <= LECROY_WS_CPL_GND );
 
-	sprintf( cmd, "C%1d:CPL %s\n", channel + 1, cpl[ type ] );
+	sprintf( cmd, "C%1d:CPL %s\n", channel - LECROY_WS_CH1 + 1, cpl[ type ] );
 	len = strlen( cmd );
 	lecroy_vicp_write( cmd, &len, SET, UNSET );
 
@@ -604,8 +599,7 @@ int lecroy_ws_get_bandwidth_limiter( int channel )
 	ssize_t len = 30;
 	int mode = -1;
 	char *ptr;
-	const char *delim = " ";
-	int ch;
+	char look_for[ 4 ];
 
 
 	fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
@@ -619,59 +613,24 @@ int lecroy_ws_get_bandwidth_limiter( int channel )
 	   each channel will be reported as a list of comma separated channel-value
 	   pairs */
 
-	if ( ! strchr( buf, ',' ) )
-	{
-		size_t i;
+	sprintf( look_for, "C%1d,", channel - LECROY_WS_CH1 + 1 );
+	ptr = strstr( buf, look_for );
 
-		if ( buf[ 1 ] == 'F' )           /* OFF */
-			mode = LECROY_WS_BWL_OFF;
-		else if ( buf[ 1 ] == 'N' )      /* ON */
-			mode = LECROY_WS_BWL_ON;
+	if ( ptr == NULL )
+		lecroy_ws_lan_failure( );
+
+	if ( ptr[ 4 ] == 'F' )           /* OFF */
+		mode = LECROY_WS_BWL_OFF;
+	else if ( ptr[ 4 ] == 'N' )      /* ON */
+		mode = LECROY_WS_BWL_ON;
 #if defined LECROY_WS_BWL_200MHZ
-		else if ( buf[ 0 ] == '2' )      /* 200MHZ */
-			mode = LECROY_WS_BWL_200MHZ;
+	else if ( ptr[ 3 ] == '2' )      /* 200MHZ */
+		mode = LECROY_WS_BWL_200MHZ;
 #endif
 
-		fsc2_assert( mode >= 0 );
+	fsc2_assert( mode >= 0 );
 
-		for ( i = 0; i <= LECROY_WS_CH_MAX; i++ )
-			lecroy_ws.bandwidth_limiter[ i ] = mode;
-
-		return mode;
-	}
-
-	if ( ( ptr = strtok( buf, delim ) ) == NULL )
-	{
-		print( FATAL, "Can't determine bandwidth limiter settings.\n" );
-		THROW( EXCEPTION );
-	}
-
-	delim = ",";
-
-	do
-	{
-		if ( sscanf( ptr + 1, "%d", &ch ) != 1 ||
-			 ( ptr = strtok( NULL, delim ) ) == NULL )
-		{
-			print( FATAL, "Can't determine bandwidth limiter settings.\n" );
-			THROW( EXCEPTION );
-		}
-
-		fsc2_assert( --ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX );
-		
-		if ( ptr[ 1 ] == 'F' )           /* OFF */
-			mode = LECROY_WS_BWL_OFF;
-		else if ( ptr[ 1 ] == 'N' )      /* ON */
-			mode = LECROY_WS_BWL_ON;
-#if defined LECROY_WS_BWL_200MHZ
-		else if ( ptr[ 0 ] == '2' )      /* 200MHZ */
-			mode = LECROY_WS_BWL_200MHZ;
-#endif
-
-		fsc2_assert( mode >= 0 );
-
-		lecroy_ws.bandwidth_limiter[ ch ] = mode;
-	} while ( ( ptr = strtok( NULL, delim ) ) != NULL );
+	lecroy_ws.bandwidth_limiter[ channel ] = mode;
 
 	return lecroy_ws.bandwidth_limiter[ channel ];
 }
@@ -697,7 +656,7 @@ bool lecroy_ws_set_bandwidth_limiter( int channel,
 #endif
 		                                       );
 
-	sprintf( buf, "BWL C%d,", channel + 1 );
+	sprintf( buf, "BWL C%d,", channel - LECROY_WS_CH1 + 1 );
 	if ( bwl == LECROY_WS_BWL_OFF )
 		strcat( buf, "OFF\n" );
 	else if ( bwl == LECROY_WS_BWL_ON )
@@ -773,7 +732,7 @@ bool lecroy_ws_set_trigger_source( int channel )
 				 channel == LECROY_WS_EXT10 );
 
 	if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
-		sprintf( cmd + 11, "C%1d\n", channel + 1 );
+		sprintf( cmd + 11, "C%1d\n", channel - LECROY_WS_CH1 + 1 );
 	else if ( channel == LECROY_WS_LIN )
 		strcat( cmd, "LINE\n" );
 	else if ( channel == LECROY_WS_EXT )
@@ -804,7 +763,7 @@ double lecroy_ws_get_trigger_level( int channel )
 				 channel == LECROY_WS_EXT10 );
 
 	if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
-		sprintf( buf, "C%1d:TRLV?\n", channel + 1 );
+		sprintf( buf, "C%1d:TRLV?\n", channel - LECROY_WS_CH1 + 1 );
 	else if ( channel == LECROY_WS_EXT )
 		strcpy( buf, "EX:TRLV?\n" );
 	else
@@ -834,7 +793,7 @@ bool lecroy_ws_set_trigger_level( int    channel,
 				 channel == LECROY_WS_EXT10 );
 
 	if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
-		sprintf( cmd, "C%1d:TRLV ", channel + 1 );
+		sprintf( cmd, "C%1d:TRLV ", channel - LECROY_WS_CH1 + 1 );
 	else if ( channel == LECROY_WS_EXT )
 		strcpy( cmd, "EX:TRLV " );
 	else
@@ -866,7 +825,7 @@ bool lecroy_ws_get_trigger_slope( int channel )
 				 channel == LECROY_WS_EXT10 );
 
 	if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
-		sprintf( buf, "C%1d:TRSL?\n", channel + 1 );
+		sprintf( buf, "C%1d:TRSL?\n", channel - LECROY_WS_CH1 + 1 );
 	else if ( channel == LECROY_WS_EXT )
 		strcpy( buf, "EX:TRSL?\n" );
 	else
@@ -899,7 +858,7 @@ bool lecroy_ws_set_trigger_slope( int channel,
 				 channel == LECROY_WS_EXT10 );
 
 	if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
-		sprintf( cmd, "C%1d:TRSL ", channel + 1 );
+		sprintf( cmd, "C%1d:TRSL ", channel - LECROY_WS_CH1 + 1 );
 	else if ( channel == LECROY_WS_LIN )
 		strcpy( cmd, "LINE:TRSL " );
 	else if ( channel == LECROY_WS_EXT )
@@ -932,7 +891,7 @@ int lecroy_ws_get_trigger_coupling( int channel )
 				 channel == LECROY_WS_EXT10 );
 
 	if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
-		sprintf( buf, "C%1d:TRCP?\n", channel + 1 );
+		sprintf( buf, "C%1d:TRCP?\n", channel - LECROY_WS_CH1 + 1 );
 	else if ( channel == LECROY_WS_EXT )
 		strcpy( buf, "EX:TRCP?\n" );
 	else
@@ -988,7 +947,7 @@ int lecroy_ws_set_trigger_coupling( int channel,
 	fsc2_assert( cpl >= LECROY_WS_TRG_AC && cpl <= LECROY_WS_TRG_HF_REJ );
 
 	if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
-		sprintf( cmd, "C%1d:TRCP ", channel + 1 );
+		sprintf( cmd, "C%1d:TRCP ", channel - LECROY_WS_CH1 + 1 );
 	else if ( channel == LECROY_WS_EXT )
 		strcpy( cmd, "EX:TRCP " );
 	else
@@ -1117,8 +1076,10 @@ bool lecroy_ws_is_displayed( int ch )
 
 	if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
 		sprintf( cmd, "C%d:TRA?\n", ch - LECROY_WS_CH1 + 1 );
+	else if ( ch == LECROY_WS_MATH )
+		sprintf( cmd, "F1:TRA?\n" );
 	else if ( ch >= LECROY_WS_Z1 && ch <= LECROY_WS_Z4 )
-		sprintf( cmd, "Z%d:TRA?\n", ch - LECROY_WS_Z1 + 1 );
+		sprintf( cmd, "F%d:TRA?\n", ch - LECROY_WS_Z1 + 5 );
 	else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
 	{
 		print( FATAL, "A memory channel can't be displayed.\n");
