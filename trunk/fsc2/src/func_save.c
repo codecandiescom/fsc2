@@ -32,20 +32,28 @@ extern bool Dont_Save;                 /* defined in func.c */
 
 
 static int get_save_file( Var_T ** /* v */ );
+
 static Var_T *batch_mode_file_open( char * /* name */ );
+
 static long arr_save( long    /* file_num */,
 					  Var_T * /* v        */ );
+
 static void f_format_check( Var_T * /* v */ );
+
 static void ff_format_check( Var_T * /* v */ );
+
 static long do_printf( long    /* file_num */,
 					   Var_T * /* v        */ );
+
 static long print_browser( int          /* browser */,
 						   int          /* fid     */,
 						   const char * /* comment */ );
+
 static long print_include( int          /* fid      */,
 						   char *       /* cp       */,
 						   const char * /* comment  */,
 						   const char * /* cur_file */ );
+
 static long T_fprintf( long         /* fn  */,
 					   const char * /* fmt */,
 					   ... );
@@ -180,12 +188,21 @@ Var_T *f_openf( Var_T * v )
 	   EDL.File_List before we try to reallocate (if allocation already
 	   fails while making the copy this isn't a problem!) */
 
-	if ( EDL.File_List )
+	TRY
 	{
-		old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
-											  * sizeof *old_File_List );
-		memcpy( old_File_List, EDL.File_List,
-				EDL.File_List_Len * sizeof *old_File_List );
+		if ( EDL.File_List )
+		{
+			old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
+												  * sizeof *old_File_List );
+			memcpy( old_File_List, EDL.File_List,
+					EDL.File_List_Len * sizeof *old_File_List );
+		}
+		TRY_SUCCESS;
+	}
+	CATCH( OUT_OF_MEMORY_EXCEPTION )
+	{
+		fclose( fp );
+		THROW( EXCEPTION );
 	}
 
 	TRY
@@ -193,13 +210,13 @@ Var_T *f_openf( Var_T * v )
 		EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
 											   ( EDL.File_List_Len + 1 )
 											   * sizeof *EDL.File_List );
-
 		if ( old_File_List != NULL )
 			T_free( old_File_List );
 		TRY_SUCCESS;
 	}
 	CATCH( OUT_OF_MEMORY_EXCEPTION )
 	{
+		fclose( fp );
 		EDL.File_List = old_File_List;
 		THROW( EXCEPTION );
 	}
@@ -2020,7 +2037,7 @@ static long T_fprintf( long         fn,
 					   ... )
 {
 	long to_write;                       /* number of bytes we need to write */
-	size_t size = BUFFER_SIZE_GUESS;
+	long size = BUFFER_SIZE_GUESS;
 	char initial_buffer[ BUFFER_SIZE_GUESS ];
 	char *p = initial_buffer;
 	long file_num = fn;
@@ -2079,7 +2096,7 @@ static long T_fprintf( long         fn,
 
         /* If that worked, try to write out the string */
 
-        if ( to_write > -1 && size - to_write > 0 )
+        if ( to_write > -1 && size > to_write )
             break;
 
         /* Else try again with more space */
