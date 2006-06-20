@@ -25,6 +25,7 @@
 #if ! defined FSC2_ASSERT_HEADER
 #define FSC2_ASSERT_HEADER
 
+
 typedef struct Fsc2_Assert Fsc2_Assert_T;
 
 struct Fsc2_Assert {
@@ -42,8 +43,8 @@ int fsc2_assert_print( const char * /* expression */,
 #ifdef NDEBUG
 #define fsc2_assert( expression ) ( ( void ) 0 )
 #else
-#define fsc2_assert( expression )    \
-       ( ( void ) ( ( expression ) ? \
+#define fsc2_assert( expression )                                    \
+       ( ( void ) ( ( expression ) ?                                 \
        0 : fsc2_assert_print( #expression, __FILE__, __LINE__ ) ) )
 #endif
 

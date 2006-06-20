@@ -22,8 +22,8 @@
  */
 
 
-/* All of the following is to allow compiling also with a C++ compiler to
-   get more strict type checking... */
+/* All of the following is to allow for compiling also with a C++ compiler
+   if more strict type checking would be nice... */
 
 
 #if ! defined FSC2_TYPES_HEADER

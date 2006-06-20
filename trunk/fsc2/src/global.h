@@ -72,8 +72,8 @@
 /* The colors used in 2D graphics are also needed when exporting the current
    state of the experiment via the webserver. The lookup is done via a hash
    and the size of the hash is defined here - it should be about ten times
-   the total numbers of colors (which is ( NUM_COLORS + 26) and it *MUST* be
-   a prime number! */
+   larger than the total numbers of colors (which is (NUM_COLORS + 26) and
+   it *MUST* be a prime number! */
 
 #define COLOR_HASH_SIZE 1543
 

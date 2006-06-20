@@ -85,7 +85,7 @@
 #define RULBUS_EPP_NAME  "rulbus_epp"
 
 
-#define RULBUS_MAX_BUFFER_SIZE  10          /* never to be smaller than 1 ! */
+#define RULBUS_MAX_BUFFER_SIZE  10       /* may never be smaller than 1 ! */
 
 #define WRITE_TO_DEVICE     0
 #define READ_FROM_DEVICE    1
@@ -131,34 +131,34 @@ static int __init rulbus_init( void );
 
 static void __exit rulbus_cleanup( void );
 
-static int rulbus_open( struct inode * inode_p,
-						struct file *  filep );
+static int rulbus_open( struct inode * /* inode_p */,
+						struct file *  /* filep   */ );
 
-static int rulbus_release( struct inode * inode_p,
-						   struct file *  filep );
+static int rulbus_release( struct inode * /* inode_p */,
+						   struct file *  /* filep   */ );
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
-static int rulbus_ioctl( struct inode * inode_p,
-						 struct file *  filep,
-						 unsigned int   cmd,
-						 unsigned long  arg );
+static int rulbus_ioctl( struct inode * /* inode_p */,
+						 struct file *  /* filep   */,
+						 unsigned int   /* cmd     */,
+						 unsigned long  /* arg     */ );
 #else
-static long rulbus_ioctl( struct file * filep,
-						  unsigned int  cmd,
-						  unsigned long arg );
+static long rulbus_ioctl( struct file * /* filep */,
+						  unsigned int  /* cmd   */,
+						  unsigned long /* arg   */ );
 #endif
 
-static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * /* rulbus_arg */ );
 
-static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * /* rulbus_arg */ );
 
-static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * /* rulbus_arg */ );
 
-static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg );
+static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * /* rulbus_arg */ );
 
-static void rulbus_epp_attach( struct parport * port );
+static void rulbus_epp_attach( struct parport * /* port */ );
 
-static void rulbus_epp_detach( struct parport * port );
+static void rulbus_epp_detach( struct parport * /* port */ );
 
 static int rulbus_epp_init( void );
 

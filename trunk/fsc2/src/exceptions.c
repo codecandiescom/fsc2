@@ -22,31 +22,32 @@
  */
 
 
-/********************************************************************
- * The basic ideas for the following code came from an article by   *
- * Peter Simons in the iX magazine No. 5, 1998, pp. 160-162. It has *
- * been changed a lot thanks to the very constructive criticism by  *
- * Chris Torek <nospam@elf.eng.bsdi.com> on comp.lang.c.            *
- *                                                                  *
- * In order to avoid overflows of the fixed size exception frame    *
- * stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is  *
- * necessary to manually remove an exception frame (in contrast to  *
- * C++ where this is handled automatically) by calling TRY_SUCCESS  *
- * if the code of the TRY block finished successfully. A typical    *
- * TRY block sequence is thus:                                      *
- *                                                                  *
- * TRY {                                                            *
- *     statement;                                                   *
- *     TRY_SUCCESS;                                                 *
- * }                                                                *
- * CATCH( exception ) {                                             *
- *     ...                                                          *
- * }                                                                *
- *                                                                  *
- * Don't use this exception mechanism from within signal handlers   *
- * or other code invoked asynchronously, it easily could trigger a  *
- * race condition.                                                  *
- ********************************************************************/
+/*******************************************************************
+ * The original ideas for the following code came from an article  *
+ * by Peter Simons in the iX magazine No. 5, 1998, pp. 160-162. It *
+ * has been changed a lot thanks to very constructive criticism by *
+ * Chris Torek <nospam@elf.eng.bsdi.com> on comp.lang.c (which is  *
+ * meant to mean that he would be responsible for its flaws!)      *
+ *                                                                 *
+ * In order to avoid overflows of the fixed size exception frame   *
+ * stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is *
+ * necessary to manually remove an exception frame (in contrast to *
+ * C++ where this is handled automatically) by calling TRY_SUCCESS *
+ * if the code of the TRY block finished successfully. A typical   *
+ * TRY block sequence is thus:                                     *
+ *                                                                 *
+ * TRY {                                                           *
+ *     statement;                                                  *
+ *     TRY_SUCCESS;                                                *
+ * }                                                               *
+ * CATCH( exception ) {                                            *
+ *     ...                                                         *
+ * }                                                               *
+ *                                                                 *
+ * Don't use this exception mechanism from within signal handlers  *
+ * or other code invoked asynchronously, it easily could trigger a *
+ * race condition.                                                 *
+ *******************************************************************/
 
 
 #include <stdlib.h>
@@ -86,7 +87,7 @@ static int Exception_stack_pos = -1;
  * started (by calling this function) the state of the array element to be
  * overwritten is saved in the second array (and restored when this TRY
  * block succeded and thus the corresponding element gets removed from the
- * array), so that we're back in the state we were in before the TRY block
+ * array), so that we're back to the state we were in before the TRY block
  * within the exception handler was started.
  *--------------------------------------------------------------------------*/
 
@@ -164,6 +165,10 @@ jmp_buf *throw_exception( Exception_Types_T type )
 	}
 
 #ifdef FSC2_HEADER
+	/* Make sure that carelessly written code where the exception is thrown
+	   while the program has higher permissions than the user opens up a
+	   security hole */
+
 	lower_permissions( );
 #endif
 
@@ -184,10 +189,10 @@ Exception_Types_T get_exception_type( const char * file,
 	if ( Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION ||
 		 ! Exception_stack[ Exception_stack_pos + 1 ].is_thrown )
 	{
-	    fprintf( stderr, "%s: Request for type of exception that never got "
-				 "thrown at %s:%d.\n", Prog_Name, file, line );
-	    syslog( LOG_ERR, "%s: Request for type of exception that never got "
-				"thrown at %s:%d.\n", Prog_Name, file, line );
+	    fprintf( stderr, "%s: Request for type of an exception that never had "
+				 "been thrown at %s:%d.\n", Prog_Name, file, line );
+	    syslog( LOG_ERR, "%s: Request for type of an exception that never had "
+				"been thrown at %s:%d.\n", Prog_Name, file, line );
 #ifdef FSC2_HEADER
 		if ( Fsc2_Internals.I_am == CHILD )
 			_exit( FAIL );

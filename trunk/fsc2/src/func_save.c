@@ -61,7 +61,7 @@ static long T_fprintf( long         /* fn  */,
 
 /*----------------------------------------------------------------*
  * Using this function is deprecated (and not necessary anymore),
- * so just return value indicating success.
+ * so just return a value indicating success.
  *----------------------------------------------------------------*/
 
 Var_T *f_is_file( Var_T * v  UNUSED_ARG )
@@ -101,14 +101,14 @@ Var_T *f_openf( Var_T * v )
 	/* If there was a call of 'f_save()' without a previous call to 'f_getf()'
 	   then 'f_save()' already called 'f_getf()' by itself and now does not
 	   expects file identifiers anymore - in this case 'No_File_Numbers' is
-	   set. So, if we get a call to 'f_getf()' while 'No_File_Numbers' is set
-	   we must tell the user that he can't have it both ways, i.e. (s)he
+	   set. So, if we get a call to 'f_getf()' with 'No_File_Numbers' being
+	   set we must tell the user that he can't have it both ways, i.e. (s)he
 	   either has to call 'f_getf()' before any call to 'f_save()' or never. */
 
 	if ( No_File_Numbers )
 	{
-		print( FATAL, "Function can't be called if one save()-type functions "
-			   "already has been invoked.\n" );
+		print( FATAL, "Function can't be called if one of the functions for "
+			   "writing data to a file already has been invoked.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -241,12 +241,13 @@ Var_T *f_openf( Var_T * v )
 /*---------------------------------------------------------------------------*
  * Function allows the user to select a file using the file selector. If the
  * file already exists a confirmation by the user is required. Then the file
- * is opened - if this fails the file selector is shown again. The FILE
- * pointer returned is stored in an array of FILE pointers for each of the
- * open files. The returned value is an INT_VAR with the index in the FILE
- * pointer array or -1 if no file was selected.
+ * is opened - if this fails tell the user about the reasons and show the
+ * file selector again. The new FILE pointer returned is stored in the array
+ * of FILE pointers of open file descriptors. The return value is an INT_VAR,
+ * which is the index in the FILE  *pointer array (plus an offset) or -1 if
+ * no file was selected.
  * Optional input variables (each will replaced by a default string if the
- * argument is either NULL or the empty string) are:
+ * argument is either NULL, the empty string or missing) are:
  * 1. Message string (not allowed to start with a backslash '\'!)
  * 2. Default pattern for file name
  * 3. Default directory
@@ -372,7 +373,7 @@ getfile_retry:
 	}
 
 	/* If given append default extension to the file name (but only if the
-	   user didn't specified it already) */
+	   user didn't entered one when telling us about the file name) */
 
 	if ( s[ 4 ] != NULL &&
 		 ( strrchr( r, '.' ) == NULL ||
@@ -590,9 +591,8 @@ static Var_T *batch_mode_file_open( char * name )
 	   (but only the name, not the path). We do so by appending an extension
 	   of ".batch_output.%lu", where %lu stands for an integer number that
 	   gets incremented until we have a file that does not yet exist.
-	   Otherwise, when a prefered name was given we try to use it, but when
-	   it already exists we also append an additional extension in the same
-	   way. */
+	   Otherwise, when a prefered name was given we try to use it, but if it
+	   already exists we also append an additional extension the same way. */
 
 	if ( name == NULL )
 	{
@@ -727,7 +727,9 @@ static int get_save_file( Var_T ** v )
 
 	/* If no file has been selected yet get a file and then use it exclusively
 	   (i.e. also expect that no file identifier is given in later calls),
-	   otherwise the first variable has to be the file identifier */
+	   otherwise the first variable has to be the file identifier. We compare
+	   the length of the list to two because the first and second entry are
+	   always exist for stdout and stderr. */
 
 	if ( EDL.File_List_Len == 2 )
 	{
