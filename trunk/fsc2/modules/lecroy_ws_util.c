@@ -553,6 +553,7 @@ long lecroy_ws_translate_channel( int  dir,
 				return LECROY_WS_CH4;
 #endif
 			case CHANNEL_MATH :
+			case CHANNEL_F1 :
 				return LECROY_WS_MATH;
 
 			case CHANNEL_M1 :
@@ -566,6 +567,18 @@ long lecroy_ws_translate_channel( int  dir,
 
 			case CHANNEL_M4 :
 				return LECROY_WS_M4;
+
+			case CHANNEL_Z1 :
+				return LECROY_WS_Z1;
+
+			case CHANNEL_Z2 :
+				return LECROY_WS_Z2;
+
+			case CHANNEL_Z3 :
+				return LECROY_WS_Z3;
+
+			case CHANNEL_Z4 :
+				return LECROY_WS_Z4;
 
 			case CHANNEL_EXT :
 				return LECROY_WS_EXT;
@@ -619,6 +632,18 @@ long lecroy_ws_translate_channel( int  dir,
 
 			case LECROY_WS_M4 :
 				return CHANNEL_M4;
+
+			case LECROY_WS_Z1 :
+				return CHANNEL_Z1;
+
+			case LECROY_WS_Z2 :
+				return CHANNEL_Z2;
+
+			case LECROY_WS_Z3 :
+				return CHANNEL_Z3;
+
+			case LECROY_WS_Z4 :
+				return CHANNEL_Z4;
 
 			case LECROY_WS_LIN :
 				return CHANNEL_LINE;

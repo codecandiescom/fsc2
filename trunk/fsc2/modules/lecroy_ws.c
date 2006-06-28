@@ -36,15 +36,15 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 LECROY_WS_T lecroy_ws;
 
-const char *LECROY_WS_Channel_Names[ 20 ] = { "CH1",  "CH2",
+const char *LECROY_WS_Channel_Names[ 16 ] = { "CH1",  "CH2",
 											  "CH3",  "CH4",
 											  "MATH",
 											  "Z1",   "Z2",
 											  "Z3",   "Z4",
 											  "M1",   "M2",
 											  "M3",   "M4"
-											  "LINE", "EXT",
-											  "EXT5", "EXT10" };
+											  "LINE",
+											  "EXT", "EXT10" };
 
 /* List of fixed sensivity settings where the range of the offset changes */
 
@@ -1557,11 +1557,10 @@ Var_T *digitizer_averaging( Var_T * v )
 	channel = lecroy_ws_translate_channel( GENERAL_TO_LECROY_WS,
 							   get_strict_long( v, "channel number" ), UNSET );
 
-	if ( channel < LECROY_WS_Z1 && channel > LECROY_WS_Z4 )
+	if ( channel != LECROY_WS_MATH )
 	{
-		print( FATAL, "Averaging can only be done with channels %s to %s.\n",
-			   LECROY_WS_Channel_Names[ LECROY_WS_Z1 ],
-			   LECROY_WS_Channel_Names[ LECROY_WS_Z4 ] );
+		print( FATAL, "Averaging can only be done with channel '%s'.\n",
+			   LECROY_WS_Channel_Names[ LECROY_WS_MATH ] );
 		THROW( EXCEPTION );
 	}
 
@@ -1630,9 +1629,9 @@ Var_T *digitizer_averaging( Var_T * v )
 }
 
 
-/*---------------------------------------------------------------------------*
- * Function for quering the number of averages for one of the trace channels
- *---------------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for quering the number of averages for the math channel
+ *------------------------------------------------------------------*/
 
 Var_T *digitizer_num_averages( Var_T * v )
 {
@@ -1655,11 +1654,10 @@ Var_T *digitizer_num_averages( Var_T * v )
 	channel = lecroy_ws_translate_channel( GENERAL_TO_LECROY_WS,
 							   get_strict_long( v, "channel number" ), UNSET );
 
-	if ( channel < LECROY_WS_Z1 || channel > LECROY_WS_Z4 )
+	if ( channel != LECROY_WS_MATH )
 	{
-		print( FATAL, "Averaging can only be done using channels %s to %s.\n",
-			   LECROY_WS_Channel_Names[ LECROY_WS_Z1 ],
-			   LECROY_WS_Channel_Names[ LECROY_WS_Z4 ] );
+		print( FATAL, "Averaging can only be done using channel '%s'.\n",
+			   LECROY_WS_Channel_Names[ LECROY_WS_MATH ] );
 		THROW( EXCEPTION );
 	}
 

@@ -246,6 +246,10 @@ const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
 	"M3",
 	"M4"
 	"MATH",
+	"Z1",
+	"Z2",
+	"Z3",
+	"Z4"
 };
 
 

@@ -1346,14 +1346,8 @@ Memory channel B (LeCroy Waverunner-2)
 Memory channel C (all LeCroy digitizers except WaveSurfer)
 @item MEM_D
 Memory channel D (all LeCroy digitizers except WaveSurfer)
-@item M1
-Memory channel 1 (LeCroy WaveSurfer)
-@item M2
-Memory channel 2 (LeCroy WaveSurfer)
-@item M3
-Memory channel 3 (LeCroy WaveSurfer)
-@item M4
-Memory channel 4 (LeCroy WaveSurfer)
+@item MATH
+Math (function) channel (LeCroy WaveSurfer)
 @item FUNC_E
 First function (averaging) channel (LeCroy 9400, 9410, 9420, 9424, 9424E, 9450)
 @item FUNC_F
@@ -1367,22 +1361,6 @@ Second function (averaging) channel (LeCroy Waverunner-2)
 Third function (averaging) channel (LeCroy Waverunner-2)
 @item TRACE_D
 Fourth function (averaging) channel (LeCroy Waverunner-2)
-@item F1
-First function (averaging) channel (LeCroy WaveSurfer)
-@item F2
-Second function (averaging) channel (LeCroy WaveSurfer)
-@item F3
-Thrid function (averaging) channel (LeCroy WaveSurfer)
-@item F4
-Forth function (averaging) channel (LeCroy WaveSurfer)
-@item F5
-Fifth function (averaging) channel (LeCroy WaveSurfer)
-@item F6
-Sixth function (averaging) channel (LeCroy WaveSurfer)
-@item F7
-Seventh function (averaging) channel (LeCroy WaveSurfer)
-@item F8
-Eighth function (averaging) channel (LeCroy WaveSurfer)
 @item EXT
 External trigger input (LeCroy 9400, 9410, 9420, 9424E, 9450, Waverunner-2)
 @item EXT10
@@ -1698,7 +1676,7 @@ The first argument is the channel to be used to do the averaging, i.e.@:
 @itemx LeCroy Waverunner-2
 @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
 @itemx LeCroy WaveSurfer
-@code{F1}, @code{F2}, @code{F3}, @code{F4}, @code{F5}, @code{F6}, @code{F7}, @code{F8}
+@code{MATH}
 @end table
 The second is the source channel to be averaged, i.e.@:
 @table @samp
@@ -2163,14 +2141,12 @@ of the digitizer:
 @item LeCroy WaveSurfer (422, 432, 452)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
-@item @code{M1}, @code{M2}, @code{M3} or @code{M4}
-@item @code{F1}, @code{F2}, @code{F3}, @code{F4}, @code{F5}, @code{F6}, @code{F7}, @code{F8}
+@item @code{MATH}
 @end itemize
 @item LeCroy WaveSurfer (424, 434, 454)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{M1}, @code{M2}, @code{M3} or @code{M4}
-@item @code{F1}, @code{F2}, @code{F3}, @code{F4}, @code{F5}, @code{F6}, @code{F7}, @code{F8}
+@item @code{MATH}
 @end itemize
 @end table
 
@@ -2258,14 +2234,12 @@ the digitizer:
 @item LeCroy WaveSurfer (422, 432, 452)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
-@item @code{M1}, @code{M2}, @code{M3} or @code{M4}
-@item @code{F1}, @code{F2}, @code{F3}, @code{F4}, @code{F5}, @code{F6}, @code{F7}, @code{F8}
+@item @code{MATH}
 @end itemize
 @item LeCroy WaveSurfer (424, 434, 454)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{M1}, @code{M2}, @code{M3} or @code{M4}
-@item @code{F1}, @code{F2}, @code{F3}, @code{F4}, @code{F5}, @code{F6}, @code{F7}, @code{F8}
+@item @code{MATH}
 @end itemize
 @end table
 
@@ -2377,14 +2351,12 @@ choices of the data channel depend on the model of the digitizer:
 @item LeCroy WaveSurfer (422, 432, 452)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
-@item @code{M1}, @code{M2}, @code{M3} or @code{M4}
-@item @code{F1}, @code{F2}, @code{F3}, @code{F4}, @code{F5}, @code{F6}, @code{F7}, @code{F8}
+@item @code{MATH}
 @end itemize
 @item LeCroy WaveSurfer (424, 434, 454)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{M1}, @code{M2}, @code{M3} or @code{M4}
-@item @code{F1}, @code{F2}, @code{F3}, @code{F4}, @code{F5}, @code{F6}, @code{F7}, @code{F8}
+@item @code{MATH}
 @end itemize
 @end table
 
@@ -2496,12 +2468,10 @@ the digitizer)
 @item LeCroy WaveSurfer (422, 432, 452)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
-@item @code{F1}, @code{F2}, @code{F3}, @code{F4}, @code{F5}, @code{F6}, @code{F7}, @code{F8}
 @end itemize
 @item LeCroy WaveSurfer (424, 434, 454)
 @itemize @bullet
 @item @code{CH1} or @code{CH2}, @code{CH3} or @code{CH4}
-@item @code{F1}, @code{F2}, @code{F3}, @code{F4}, @code{F5}, @code{F6}, @code{F7}, @code{F8}
 @end itemize
 @end table
 

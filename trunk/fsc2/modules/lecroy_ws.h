@@ -278,7 +278,7 @@ struct LECROY_WS {
 
 
 extern LECROY_WS_T lecroy_ws;
-extern const char *LECROY_WS_Channel_Names[ 20 ];
+extern const char *LECROY_WS_Channel_Names[ 16 ];
 extern bool lecroy_ws_IN_SETUP;
 
 

@@ -389,7 +389,6 @@ long lecroy_ws_get_memory_size( void )
 	ssize_t len = 30;
 	long mem_size;
 	long i;
-	char *end_p;
 
 
 	if ( lecroy_ws_talk( "MSIZ?\n", reply, &len ) != SUCCESS )
@@ -1079,12 +1078,7 @@ bool lecroy_ws_is_displayed( int ch )
 	else if ( ch == LECROY_WS_MATH )
 		sprintf( cmd, "F1:TRA?\n" );
 	else if ( ch >= LECROY_WS_Z1 && ch <= LECROY_WS_Z4 )
-		sprintf( cmd, "F%d:TRA?\n", ch - LECROY_WS_Z1 + 5 );
-	else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
-	{
-		print( FATAL, "A memory channel can't be displayed.\n");
-		THROW( EXCEPTION );
-	}
+		sprintf( cmd, "Z%d:TRA?\n", ch - LECROY_WS_Z1 + 5 );
 	else
 	{
 		print( FATAL, "Internal error detected.\n" );
@@ -1168,7 +1162,6 @@ void lecroy_ws_finished( void )
 
 void lecroy_ws_start_acquisition( void )
 {
-	int ch;
 	char cmd[ 100 ];
 	ssize_t len;
 	bool do_averaging = UNSET;
@@ -1182,18 +1175,14 @@ void lecroy_ws_start_acquisition( void )
 	/* Set up the parameter to be used for averaging for the function channels
 	   (as far as they have been set by the user) */
 
-	for ( ch = LECROY_WS_Z1; ch <= LECROY_WS_Z4; ch++ )
+	if ( lecroy_ws.is_avg_setup[ LECROY_WS_MATH ] )
 	{
-		if ( ! lecroy_ws.is_avg_setup[ ch ] )
-			continue;
-
 		do_averaging = SET;
 
-		snprintf( cmd, 100, "F%d:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld\n",
-				  ch - LECROY_WS_Z1 + 1,
-				  lecroy_ws.source_ch[ ch ] - LECROY_WS_CH1 + 1,
+		snprintf( cmd, 100, "F1:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld\n",
+				  lecroy_ws.source_ch[ LECROY_WS_MATH ] - LECROY_WS_CH1 + 1,
 				  lecroy_ws_curve_length( ),
-				  lecroy_ws.num_avg[ ch ] );
+				  lecroy_ws.num_avg[ LECROY_WS_MATH ] );
 
 		len = strlen( cmd );
 		lecroy_vicp_write( cmd, &len, SET, UNSET );
@@ -1201,23 +1190,20 @@ void lecroy_ws_start_acquisition( void )
 		/* If we want to use a trace it must be switched on (but not the
 		   channel that gets averaged) */
 
-		if ( ! lecroy_ws_is_displayed( ch ) )
-			lecroy_ws_display( ch, SET );
+		if ( ! lecroy_ws_is_displayed( LECROY_WS_MATH ) )
+			lecroy_ws_display( LECROY_WS_MATH, SET );
 
 		/* Switch off horizontal zoom and shift - if it's on the curve fetched
 		   from the device isn't what one would expect... */
 
-		sprintf( cmd, "Z%d:HMAG 1;Z%c:HPOS 5\n", ch -  LECROY_WS_Z1 + 1,
-				 ch -  LECROY_WS_Z1 + 1 ) ;
-
+		sprintf( cmd, "F1:HMAG 1;F1:HPOS 5\n" );
 		len = strlen( cmd );
 		lecroy_vicp_write( cmd, &len, SET, UNSET );
 
 		/* Finally reset what's currently stored in the trace (otherwise a
 		   new acquisition may not get started) */
 
-		sprintf( cmd, "Z%d:FRST\n", ch - LECROY_WS_Z1 + 1 );
-
+		sprintf( cmd, "F1:FRST\n" );
 		len = strlen( cmd );
 		lecroy_vicp_write( cmd, &len, SET, UNSET );
 	}
@@ -1277,12 +1263,12 @@ static void lecroy_ws_get_prep( int              ch,
 		is_mem_ch = SET;
 		sprintf( ch_str, "M%d", ch - LECROY_WS_M1 + 1 );
 	}
-	else if ( ch >= LECROY_WS_Z1 && ch <= LECROY_WS_Z4 )
+	else if ( ch == LECROY_WS_MATH )
 	{
 		if ( ! lecroy_ws.is_avg_setup[ ch ] )
 		{
 			print( FATAL, "Averaging has not been initialized for "
-				   "channel %s.\n", LECROY_WS_Channel_Names[ ch ] );
+				   "channel '%s'.\n", LECROY_WS_Channel_Names[ ch ] );
 			THROW( EXCEPTION );
 		}
 

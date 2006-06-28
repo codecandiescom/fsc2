@@ -23,7 +23,7 @@
 
 
 #include "fsc2_module.h"
-#include "gpib_if.h"
+#include "serial.h"
 
 
 /* Include configuration information for the device */
@@ -70,7 +70,7 @@ static void magnet_sweep_down( void );
 
 static void magnet_stop_sweep( void );
 
-static bool ips120_10_mod_init( const char * name );
+static bool ips120_10_mod_init( void );
 
 static void ips120_10_mod_to_local( void );
 
@@ -106,14 +106,14 @@ static long ips120_10_mod_talk( const char * message,
 								char *       reply,
 								long         length );
 
+static bool ips120_10_mod_serial_open( void );
+
 static void ips120_10_mod_comm_failure( void );
 
 
-#define MESSAGE_AVAILABLE 0x10
-
-
 struct IPS120_10_MOD {
-	int device;
+	int sn;
+    struct termios *tio;
 
 	int sweep_state;
 
@@ -194,7 +194,9 @@ int ips120_10_mod_init_hook( void )
 	Var_T *v;
 
 
-	Need_GPIB = SET;
+	/* Claim the serial port (throws an exception on errors) */
+
+	fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
 	/* Check if the module for the DAC we need has been loaded */
 
@@ -249,8 +251,6 @@ int ips120_10_mod_init_hook( void )
 	}
 
 	vars_pop( v );
-
-	ips120_10_mod.device = -1;
 
 	ips120_10_mod.act_current = 0.0;
 
@@ -307,10 +307,9 @@ int ips120_10_mod_exp_hook( void )
 {
 	ips120_10_mod = ips120_10_mod_stored;
 
-	if ( ! ips120_10_mod_init( DEVICE_NAME ) )
+	if ( ! ips120_10_mod_init( ) )
 	{
-		print( FATAL, "Initialization of device failed: %s\n",
-			   gpib_error_msg );
+		print( FATAL, "Initialization of device failed.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -326,7 +325,6 @@ int ips120_10_mod_end_of_exp_hook( void )
 {
 	ips120_10_mod_to_local( );
 	ips120_10_mod = ips120_10_mod_stored;
-	ips120_10_mod.device = -1;
 
 	return 1;
 }
@@ -717,10 +715,10 @@ Var_T *magnet_goto_field_on_end( Var_T * v )
 }
 
 
-/*-------------------------------------------------------------*
- * Function to allow sending a GPIB command string directly to
- * the magent - only use for debugging or testing purposes!
- *-------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function to allow sending a command string directly to the
+ * magent - only use for debugging or testing purposes!
+ *------------------------------------------------------------*/
 
 Var_T *magnet_command( Var_T * v )
 {
@@ -755,7 +753,7 @@ Var_T *magnet_command( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static bool ips120_10_mod_init( const char * name )
+static bool ips120_10_mod_init( void )
 {
 	char reply[ 100 ];
 	long length;
@@ -765,17 +763,15 @@ static bool ips120_10_mod_init( const char * name )
 	int acc;
 
 
-	if ( gpib_init_device( name, &ips120_10_mod.device ) == FAILURE )
-	{
-		ips120_10_mod.device = -1;
+	if ( ! ips120_10_mod_serial_open( ) )
         return FAIL;
-	}
 
+/*
 	if ( gpib_clear_device( ips120_10_mod.device ) == FAILURE )
 		ips120_10_mod_comm_failure( );
 
 	fsc2_usleep( 250000, UNSET );
-
+*/
 	/* Bring power supply in remote state */
 
 	ips120_10_mod_talk( "C3\r", reply, 100 );
@@ -784,8 +780,12 @@ static bool ips120_10_mod_init( const char * name )
 	   resolution (this is one of the few commands that don't produce a
 	   reply) */
 
-	if ( gpib_write( ips120_10_mod.device, "Q4\r", 3 ) == FAILURE )
+	if ( fsc2_serial_write( SERIAL_PORT, "Q4\r", 3,
+							MAX_WRITE_WAIT, SET ) != 3 )
+	{
+		stop_on_user_request( );
 		ips120_10_mod_comm_failure( );
+	}
 
 	/* Get the status of the magnet - if it's not in the LOC/REMOTE state we
 	   set it to something is going wrong... */
@@ -915,8 +915,6 @@ static void ips120_10_mod_to_local( void )
 	}
 
 	ips120_10_mod_talk( "C2\r", reply, 100 );
-
-	gpib_local( ips120_10_mod.device );
 }
 
 
@@ -941,14 +939,20 @@ static void ips120_10_mod_get_complete_status( void )
 	   would still be inclined after all these years to believe in what's
 	   written in manuals ;-) */
 
-	if ( gpib_write( ips120_10_mod.device, "X\r", 2 ) == FAILURE )
+	if ( fsc2_serial_write( SERIAL_PORT, "X\r", 2, MAX_WRITE_WAIT, SET ) != 2 )
+	{
+		stop_on_user_request( );
 		ips120_10_mod_comm_failure( );
+	}
 
 	for ( i = 0; i < max_retries; i++ )
 	{
-		if ( gpib_read( ips120_10_mod.device, reply + offset, &len )
-			                                                       == FAILURE )
+		if ( ( len = fsc2_serial_read( SERIAL_PORT, reply + offset, len,
+									   MAX_READ_WAIT, SET ) )<= 0 )
+		{
+			stop_on_user_request( );
 			ips120_10_mod_comm_failure( );
+		}
 
 		if ( reply[ 0 ] != 'X' )
 		{
@@ -959,7 +963,7 @@ static void ips120_10_mod_get_complete_status( void )
 		if ( offset + len < 15 )
 		{
 			offset += len;
-			len = 100;
+			len = 100 - offset;
 			continue;
 		}
 
@@ -1002,11 +1006,13 @@ static void ips120_10_mod_get_complete_status( void )
 			break;
 
 		case '4' :
-			print( FATAL, "Magnet is outside positive current limit.\n" );
+			print( FATAL, "Magnet is outside of its positive current "
+				   "limit.\n" );
 			THROW( EXCEPTION );
 
 		case '8' :
-			print( FATAL, "Magnet is outside negative current limit.\n" );
+			print( FATAL, "Magnet is outside of its negative current "
+				   "limit.\n" );
 			THROW( EXCEPTION );
 
 		default :
@@ -1096,13 +1102,13 @@ static void ips120_10_mod_get_complete_status( void )
 		default :
 			/* The manual claims that the above are the only values we should
 			   expect, but as usual the manual is shamelessly lying. At least
-			   for the current magnet the character 'C' seems to be returned.
+			   for the magnet at hand the character 'C' seems to be returned.
 			   Because we don't have any better documentation we simply accept
-			   whatever the device tells us...
-
+			   whatever the device tells us... */
+#if 0
 			print( FATAL, "Received invalid reply from device.\n" );
 			THROW( EXCEPTION );
-			*/
+#endif
 			break;
 	}
 
@@ -1146,11 +1152,10 @@ static void ips120_10_mod_get_complete_status( void )
 			THROW( EXCEPTION );
 	}
 
-	/* The polarity status bytes are always '0' according to the manual, but
-	   as it's not uncommon the manual isn't telling the whole truth, the
-	   device sends '7' or '2' and '0'. Due to lack of better documentation
-	   we simply ignore the P field... */
-
+	/* The polarity status bytes should always be'0' according to the manual.
+	   But, as it's not uncommon, the manual isn't telling the whole truth,
+	   the device sends '7' or '2' and '0' instead. Due to lack of better
+	   documentation we simply ignore the P field... */
 #if 0
 	if ( reply[ 13 ] != '0' || reply[ 14 ] != '0' )
 	{
@@ -1547,48 +1552,36 @@ static int ips120_10_mod_set_activity( int activity )
 }
 
 
-/*---------------------------------------------------*
- * Function for talking with the magnet via the GPIB
- *---------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for talking with the magnet via the serial port
+ *----------------------------------------------------------*/
 
 static long ips120_10_mod_talk( const char * message,
 								char *       reply,
 								long         length )
 {
-	long len = length;
+	long len;
 	int retries = MAX_RETRIES;
+	ssize_t to_write = strlen( message );
 
 
  start:
 
-	if ( gpib_write( ips120_10_mod.device, message, strlen( message ) ) ==
-		 															  FAILURE )
-		ips120_10_mod_comm_failure( );
-
-#if 0
-	/* Re-enable this if you want to be extremely careful (that's what the
-	   manual recommends, but not even the LabVIEW driver written by Oxford
-	   does it this way...). */
-
-	do {
-		unsigned char stb;
-
+	if ( fsc2_serial_write( SERIAL_PORT, message, to_write,
+							MAX_WRITE_WAIT, SET ) != to_write )
+	{
 		stop_on_user_request( );
-
-		fsc2_usleep( 500, UNSET );
-
-		if ( gpib_serial_poll( ips120_10_mod.device, &stb ) == FAILURE )
-			ips120_10_mod_comm_failure( );
-	} while ( ! ( stb & MESSAGE_AVAILABLE ) );
-#endif
+		ips120_10_mod_comm_failure( );
+	}
 
  reread:
 
-	stop_on_user_request( );
-
-	len = length;
-	if ( gpib_read( ips120_10_mod.device, reply, &len ) == FAILURE )
+	if ( ( len = fsc2_serial_read( SERIAL_PORT, reply, length,
+								   MAX_READ_WAIT, SET ) ) <= 0 )
+	{
+		stop_on_user_request( );
 		ips120_10_mod_comm_failure( );
+	}
 
 	/* If device misunderstood the command send it again, repeat up to
 	   MAX_RETRIES times */
@@ -1614,6 +1607,39 @@ static long ips120_10_mod_talk( const char * message,
 	}
 
 	return len;
+}
+
+
+/*---------------------------------------------------*
+ *---------------------------------------------------*/
+
+static bool ips120_10_mod_serial_open( void )
+{
+	/* We need exclussive access to the serial port and we also need
+	   non-blocking mode to avoid hanging indefinitely if the other
+	   side does not react. O_NOCTTY is set because the serial port
+	   should not become the controlling terminal, otherwise line
+	   noise read as a CTRL-C might kill the program. */
+
+	if ( ( ips120_10_mod.tio =
+		   		fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+								  O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) )
+		 															  == NULL )
+		return FAIL;
+
+	/* Switch off parity checking (8N1) and use of 2 stop bits, clear the
+	   character size mask, then set character size mask to CS8, allow flow
+	   control and finally set the baud rate */
+
+	ips120_10_mod.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
+	ips120_10_mod.tio->c_cflag |= CS8 | CRTSCTS;
+	cfsetispeed( ips120_10_mod.tio, SERIAL_BAUDRATE );
+	cfsetospeed( ips120_10_mod.tio, SERIAL_BAUDRATE );
+
+	fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
+	fsc2_tcsetattr( SERIAL_PORT, TCSANOW, ips120_10_mod.tio );
+
+	return OK;
 }
 
 
