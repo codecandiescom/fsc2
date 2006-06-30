@@ -180,6 +180,8 @@ sub check_status {
 
 	$laser_line = Laser_Line::get_line( $mw );
 
+	exit 1 if ! defined $laser_line;
+
 	$center_line = 1.0e7 / $vals[ 0 ];
 
 	my $cwn = $center_line;
@@ -568,6 +570,10 @@ EOF
 							"the console to allow computer control\n" .
 							"of the monochromator." );
 		return;
+	}
+
+	if ( defined $reply and $reply =~ /^F\s+SPEX_CD2A:\s+(.+)$/ ) {
+		$reply = $1;
 	}
 
 	unless ( defined $reply and $reply =~ /^\d+(\.\d*)?$/ ) {

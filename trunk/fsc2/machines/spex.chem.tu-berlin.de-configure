@@ -1,3 +1,0 @@
-sed 's/^[ \t]*#define[ \t]+CCD_PIXEL_HEIGHT[ \t]+[1-9]+.*$/#define CCD_PIXEL_HEIGHT 400/'  \
-	$cdir/rs_spec10.conf > $cdir/s_spec10.conf.new
-mv $cdir/rs_spec.conf.new $cdir/rs_spec10.conf

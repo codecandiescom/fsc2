@@ -1886,9 +1886,10 @@ this is to call either @code{usleep()} or @code{nanosleep()}. The second
 function, @code{nanosleep()}, may look like a bit of overkill since both
 functions real time resolution is usually in the @w{10 ms} range, at
 least on Intel machines. On the other hand, @code{usleep()} is marked as
-obsolescent in the IEEE Standard 1003.1-2001 (Single UNIX
-Specification, Version 3) for several reasons and thus should not be
-used anymore.
+obsolete in the IEEE Standard 1003.1-2001 (Single UNIX Specification,
+Version 3) for several reasons (mainly for it's undefined interaction
+with the @code{SIGALRM} signal and other similar functions) and thus
+should not be used anymore.
 
 As a replacement for @code{usleep()} (which you shouldn't use in a
 module) there is a function
@@ -1911,9 +1912,8 @@ One of the most important but also tedious things in programming is
 error handling. In order to make a program failsafe in every place where
 there is even the remotest chance something may go wrong one has to
 include error handling code everywhere. This is especially annoying
-within deeply nested function calls where the type of the error has to
-"bubble up" several levels before it reaches a function prepared to deal
-with the problem.
+within deeply nested function calls where the type of the error may have
+to "bubble up" several levels before it is finally can be dealt with.
 
 In order to alleviate this problem in @code{fsc2} there is a mechanism
 called exceptions@footnote{The basic ideas for the exceptions code came
@@ -1924,13 +1924,14 @@ benefited quite a lot thanks to the very constructive criticism by Chris
 Torek (@email{nospam@@elf.eng.bsdi.com}) on @uref{news:comp.lang.c}.},
 similar to the mechanism in @code{C++} by the same name. An exception
 can be seen as a kind of flag that can be raised at any instance in the
-program and leads to the flow of control being changed to a place were
+program and leads to the flow of control being transfered to a place were
 the error can be handled (another way to see it is as a non-local
 @code{goto} which knows all by itself were to go to).
 
-You may @strong{not} use exceptions from within code that might get
-called asynchronously, like signal handlers. But this is probably not an
-important restriction when writing a module.
+There's one restriction with @code{fsc2}'s exceptions: you may @strong{not}
+use them from within code that might get called asynchronously, like signal
+handlers. But this is probably not an important restriction when writing a
+module.
 
 As far as raising exceptions in a module is concerned it's usually very
 simple. If you run into an error that you can't handle within the module
@@ -1955,9 +1956,9 @@ don't have to care about catching exceptions, @code{fsc2} will do this
 for you. But in some situations you might prefer to do it yourself. So
 lets assume that you have a function @code{foo()} that might run into a
 non-recoverable error that can't be handled within the module itself.
-However you may need to do some cleaning-up before you alert
-@code{fsc2}. The following example demonstrates how to catch an
-exception in the calling function:
+However you may need to do some cleaning-up before you pass it up to
+@code{fsc2}. The following example demonstrates how to catch an exception
+in the calling function:
 @example
 TRY
 @{
@@ -1995,15 +1996,15 @@ one specified as the arguments of the @code{CATCH()} calls, a
 @code{CATCH()} should always followed finally by an @code{OTHERWISE}
 (unless you are absolutely sure no other exceptions than the one you're
 catching could happen). The block following @code{OTHERWISE} will deal
-with all other exceptions not dealt with yet.  Normally, you just will
-rethrow the exception you're not interested in or unable to handle
-yourself by calling @code{RETHROW()}.
+with all other exceptions not dealt by @code{CATCH()}.  Normally, you
+just will rethrow the exception you're not interested in or unable to
+handle yourself by calling @code{RETHROW()}.
 
 In cases where you aren't interested in a special type of exception but
 want to catch every exception, e.g.@: to just do some cleaning up before
 bailing out to pass the problem on to some higher level routines, you
-can use just an @code{OTEHRWISE} block without a @code{CATCH()}. Here's
-sanother example:
+can use just an @code{OTHERWISE} block without a @code{CATCH()}. Here's
+another example:
 @example
 TRY
 @{
@@ -2063,7 +2064,7 @@ Here's some code taken from the module for a digitizer. It waits
 indefinitely in a loop for the digitizer to become finished with a
 measurement. To allow the user to get out of this loop (when, for
 example, he realizes that he forgot to connect the trigger input to the
-digitizer and the function will never end) @code{stop_on_user_request()}
+digitizer, so the function never returns) @code{stop_on_user_request()}
 is called each time the loop is repeated.  When the user presses the
 @code{STOP} button the function will break out of the loop by throwing
 an @code{USER_BREAK_EXCEPTION}.
@@ -2071,15 +2072,14 @@ an @code{USER_BREAK_EXCEPTION}.
 while ( 1 )                   /* loop forever */
 @{
     stop_on_user_request( );
-
     fsc2_sleep( 100000, UNSET );   /* give the device a bit if time */
-    length = 40;
 
+    length = 40;
     if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
          gpib_read_w( tds754a.device, reply, &length ) == FAILURE )
         THROW( EXCEPTION );
 
-    if ( reply[ 0 ] == '1' )  /* leave loop when digitizer is ready */
+    if ( length > 0 && reply[ 0 ] == '1' )  /* break when digitizer is ready */
         break;
 @}
 @end example
@@ -2089,15 +2089,15 @@ while ( 1 )                   /* loop forever */
 
 There is a caveat when using exceptions. The exception mechanism is
 using the standard C functions @code{setjmp()} and @code{longjmp()} to
-realize @code{TRY} and @code{CATCH}. But these functions have some
-problems: when an exception is thrown the data stored in CPU registers
-are not necessarily saved. But an optimizing compiler usually stores the
-values of often used variables in CPU registers, i.e.@: the value of a
-variable in memory is not necessarily identical to its 'real' value (or
-variables might even not exist in memory, they may have gotten optimized
-out.). When the program now reaches the @code{CATCH()} part the values
-of these variables can be completely bogus and if you would try to use
-their values nearly impossible to find errors might result.
+realize @code{TRY} and @code{CATCH}. These functions have some problems:
+when an exception is thrown the data stored in CPU registers are not
+necessarily saved, but an optimizing compiler usually stores the values
+of often used variables in CPU registers, i.e.@: the value of a variable
+in memory is not necessarily identical to its 'real' value (or variables
+might even not exist in memory, they may have gotten optimized out.).
+When the program now reaches the @code{CATCH()} part the values of these
+variables can be completely bogus and if you would try to use their values
+extremely hard to find errors might result.
 
 Fortunately, when the compiler gets invoked with its warning level set
 to a suitable level it will recognize such potential problems and utter

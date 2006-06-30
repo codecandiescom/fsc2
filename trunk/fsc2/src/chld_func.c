@@ -38,7 +38,8 @@ void show_message( const char * str )
 	if ( Fsc2_Internals.I_am == PARENT )
 	{
 		if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
-			 Fsc2_Internals.cmdline_flags & BATCH_MODE )
+			 Fsc2_Internals.cmdline_flags &
+									  ( TEST_ONLY | NO_GUI_RUN | BATCH_MODE ) )
 			fprintf( stdout, "%s\n", str );
 		else
 		{
@@ -83,7 +84,8 @@ void show_alert( const char * str )
 			strs[ 1 ] = strs[ 2 ] = NULL;
 
 		if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
-			 Fsc2_Internals.cmdline_flags & BATCH_MODE )
+			 Fsc2_Internals.cmdline_flags &
+									  ( TEST_ONLY | NO_GUI_RUN | BATCH_MODE ) )
 		{
 			for ( i = 0; i < 3 && strs[ i ] != NULL; i++ )
 				fprintf( stdout, "%s", strs[ i ] );
@@ -129,8 +131,9 @@ int show_choices( const char * text,
 
 	if ( Fsc2_Internals.I_am == PARENT )
 	{
-		if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
-			 ( Fsc2_Internals.cmdline_flags & BATCH_MODE && is_batch ) )
+		if ( Fsc2_Internals.cmdline_flags & DO_CHECK || 
+			 ( Fsc2_Internals.cmdline_flags & BATCH_MODE && is_batch ) ||
+			 ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
 		{
 			fprintf( stdout, "%s\n%s %s %s\n", text, b1, b2, b3 );
 			return def != 0 ? def : 1;
