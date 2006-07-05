@@ -168,12 +168,18 @@ bool lecroy_ws_init( const char * name )
 			}
 		}
 
-		/* Either set the record length or query it */
+		/* According to the errata of the Remote Programming Manual the
+		   memory size can't be set for the WaveSurfer. */
 
+		lecroy_ws.mem_size = LECROY_WS_MAX_MEMORY_SIZE;
+		lecroy_ws.ms_index = lecroy_ws.num_mem_sizes - 1;
+
+#if 0
 		if ( lecroy_ws.is_mem_size )
 			lecroy_ws_set_memory_size( lecroy_ws.mem_size );
 		else
-			lecroy_ws.mem_size = lecroy_ws_get_memory_size( );
+			lecroy_ws_get_memory_size( );
+#endif
 
 		lecroy_ws.cur_hres = 
 		             lecroy_ws.hres[ lecroy_ws.ms_index ] + lecroy_ws.tb_index;
@@ -1165,6 +1171,7 @@ void lecroy_ws_start_acquisition( void )
 	char cmd[ 100 ];
 	ssize_t len;
 	bool do_averaging = UNSET;
+	int i;
 
 
 	/* Stop the digitizer (also switches to "STOPPED" trigger mode) */
@@ -1207,6 +1214,20 @@ void lecroy_ws_start_acquisition( void )
 		len = strlen( cmd );
 		lecroy_vicp_write( cmd, &len, SET, UNSET );
 	}
+
+	/* For all measurement channels make sure they don't do pre-processing
+	   (i.e. continuous averaging) and are reset */
+
+	for ( i = LECROY_WS_CH1; i <= LECROY_WS_CH_MAX; i++ )
+	{
+		sprintf( cmd, "VBS 'avg.Acquisition.C%d.AverageSweeps=1'\n",
+				 i - LECROY_WS_CH1 + 1 );
+		len = strlen( cmd );
+		lecroy_vicp_write( cmd, &len, SET, UNSET );
+	}
+
+	len = 5;
+	lecroy_vicp_write( "CLSW\n", &len, SET, UNSET );
 
 	/* Reset the bits in the word that tells us later when data from an
 	   normal acquisition channnel can be fetched */
@@ -1253,6 +1274,10 @@ static void lecroy_ws_get_prep( int              ch,
 
 	CLOBBER_PROTECT( data );
 
+	fsc2_assert( ( LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )  ||
+				 ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 ) ||
+				 ch == LECROY_WS_MATH );
+
 	/* Figure out which channel is to be used and set a few variables
 	   needed later accordingly */
 
@@ -1272,11 +1297,7 @@ static void lecroy_ws_get_prep( int              ch,
 			THROW( EXCEPTION );
 		}
 
-		sprintf( ch_str, "Z%d", ch - LECROY_WS_Z1 + 1 );
-	}
-	else
-	{
-		fsc2_assert( 1 == 0 );
+		strcpy( ch_str, "F1" );
 	}
 
 	/* Set up the number of points to be fetched */
@@ -1616,6 +1637,15 @@ static double lecroy_ws_get_float_value( int          ch,
 		lecroy_ws_lan_failure( );
 
 	return T_atod( ptr );
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+void lecroy_ws_lock_state( bool lock_state )
+{
+	lecroy_vicp_lock_out( lock_state );
 }
 
 

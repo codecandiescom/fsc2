@@ -178,8 +178,8 @@ name of a variable, which may consist of all normal characters, digits
 and the underscore character. But you must make sure that its name does
 not coincide with the name of a variable already used in the
 @code{EDL} script. The next required item is the type of the
-variable, which can be either @code{int}, @code{float}, @code{menu} or
-@code{file} (all four in lower case characters).
+variable, which can be either @code{int}, @code{float}, @code{menu},
+@code{button} or @code{file} (all five in lower case characters).
 
 For variables of type @code{int} and @code{float} all the following
 items are optional. The first thing you can tell the conversion program
@@ -391,7 +391,7 @@ set} menu entry we would get a line like
 @end example
 @noindent
 and we can be quite sure that @code{fsc2} would complain loudly
-about a syntax errors. Thus we'll need to make this line depend on
+about a syntax error. Thus we'll need to make this line depend on
 which menu entry the user selected. To do so we'll have to use
 (including the commands for creating the menu):
 @example

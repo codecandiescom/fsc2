@@ -81,6 +81,8 @@
    
 	void lecroy_vicp_close( void )
    
+	void lecroy_vicp_lock_out( bool lock_out )
+
 	void lecroy_vicp_set_timeout( int  dir,
 							      long us_timeout )
 
@@ -116,6 +118,11 @@
    lecroy_vicp_close() is the opposite of lecroy_vicp_init(), i.e. it closes
    down the existing connection. It throws an exception when you try to
    close an already closed connection.
+
+   lecroy_vicp_lock_out() allows you to control if the DSO is in
+   local_lockout state (the default when a connection is made) or not.
+   By calling the funtion with a true boolean value local lockout gets
+   switched on, switch it off by calling it with a false value.
 
    lecroy_vicp_set_timeout() allows to set timeouts for read or write
    operations. If the first argument is the symbolic value READ (or 0),
@@ -263,15 +270,18 @@ struct LeCroy_VICP {
 	char          * address;
 	long            us_write_timeout;
 	long            us_read_timeout;
+	bool            is_locked;
 };
 
 
 static LeCroy_VICP_T lecroy_vicp = { -1, 0, { 0 }, 0, 0, UNSET,
-									 NULL, NULL, 0, 0 };
+									 NULL, NULL, 0, 0, UNSET };
 
 
-static inline unsigned char lecroy_vicp_get_operation( unsigned char *
-													                  header );
+static void lecroy_vicp_close_without_header( void );
+
+static inline unsigned char lecroy_vicp_get_operation(
+													  unsigned char * header );
 
 static inline unsigned char lecroy_vicp_get_version( unsigned char * header );
 
@@ -310,8 +320,12 @@ void lecroy_vicp_init( const char * dev_name,
 					   long         us_timeout,
 					   bool         quit_on_signal )
 {
-	int fd;
+	int            fd;
+	unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
+	ssize_t        bytes_written;
 
+
+	CLOBBER_PROTECT( us_timeout );
 
 	if ( lecroy_vicp.handle >= 0 )
 	{
@@ -354,24 +368,84 @@ void lecroy_vicp_init( const char * dev_name,
 	}
 	OTHERWISE
 	{
-		lecroy_vicp_close( );
+		lecroy_vicp_close_without_header( );
 		RETHROW( );
 	}
+
+	/* Finally bring the device into the remote state by sending a header
+	   where just the remote and the lockout bits in the operations byte
+	   are set */
+
+	lecroy_vicp_set_operation( header,
+							   LECROY_VICP_REMOTE | LECROY_VICP_LOCKOUT );
+	lecroy_vicp_set_version( header );
+	lecroy_vicp_set_length( header, 0 );
+
+	bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
+									LECROY_VICP_HEADER_SIZE, us_timeout,
+									UNSET );
+
+	if ( bytes_written <= 0 )
+	{
+		lecroy_vicp_close_without_header( );
+		THROW( EXCEPTION );
+	}
+
+	fsc2_assert( bytes_written == LECROY_VICP_HEADER_SIZE );
+
+	lecroy_vicp.is_locked = SET;
+}
+
+
+/*--------------------------------------------------*
+ * Local function for closing the connection to the
+ * device and resetting some internal variables.
+ *--------------------------------------------------*/
+
+static void lecroy_vicp_close_without_header( void )
+{
+	fsc2_lan_close( lecroy_vicp.handle );
+
+	lecroy_vicp.handle = -1;
+
+	if ( lecroy_vicp.name )
+		T_free( lecroy_vicp.name );
+
+	if ( lecroy_vicp.address )
+		T_free( lecroy_vicp.address );
 }
 
 
 /*---------------------------------------------------*
  * Function for closing the connection to the device
- * and resetting some internal variables.
+ * after bringing it back to local
  *---------------------------------------------------*/
 
 void lecroy_vicp_close( void )
 {
+	unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
+	long           us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
+
+
 	if ( lecroy_vicp.handle < 0 )
 	{
 		print( FATAL, "Internal error in module, no connection exists.\n" );
 		THROW( EXCEPTION );
 	}
+
+	/* Send a header with all bits reset in order to get device out of
+	   remote (and possibly local lockout) state */
+
+	lecroy_vicp_set_version( header );
+	lecroy_vicp_set_length( header, 0 );
+
+	fsc2_lan_write( lecroy_vicp.handle, header,
+					LECROY_VICP_HEADER_SIZE, us_timeout,
+					UNSET );
+
+	/* Now close down the connection to the device */
+
+	lecroy_vicp_close_without_header( );
 
 	fsc2_lan_close( lecroy_vicp.handle );
 
@@ -382,6 +456,58 @@ void lecroy_vicp_close( void )
 
 	if ( lecroy_vicp.address )
 		T_free( lecroy_vicp.address );
+}
+
+
+/*------------------------------------------------------*
+ * Function to switch between locked and unlocked state
+ * ->
+ *    1. boolean value, if set lock out device,
+ *       otherwise unlock it
+ *------------------------------------------------------*/
+ 
+void lecroy_vicp_lock_out( bool lock_state )
+{
+	unsigned char op = LECROY_VICP_REMOTE;
+	unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
+	ssize_t        bytes_written;
+	long           us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
+
+
+	if ( lecroy_vicp.handle >= 0 )
+	{
+		print( FATAL, "Internal error in module, connection already "
+			   "exists.\n" );
+		THROW( EXCEPTION );
+	}
+
+	if ( ( lecroy_vicp.is_locked && lock_state ) ||
+		 ( ! lecroy_vicp.is_locked && ! lock_state ) )
+		return;
+
+	if ( lock_state )
+		op |= LECROY_VICP_LOCKOUT;
+
+	if ( lecroy_vicp.eoi_was_set )
+		op |= LECROY_VICP_EOI;
+			
+	lecroy_vicp_set_operation( header, op );
+	lecroy_vicp_set_version( header );
+	lecroy_vicp_set_length( header, 0 );
+
+	bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
+									LECROY_VICP_HEADER_SIZE, us_timeout,
+									UNSET );
+
+	if ( bytes_written <= 0 )
+	{
+		lecroy_vicp_close_without_header( );
+		THROW( EXCEPTION );
+	}
+
+	fsc2_assert( bytes_written == LECROY_VICP_HEADER_SIZE );
+
+	lecroy_vicp.is_locked = lock_state;
 }
 
 

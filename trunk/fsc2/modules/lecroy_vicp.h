@@ -42,6 +42,8 @@ void lecroy_vicp_init( const char * /* dev_name       */,
 
 void lecroy_vicp_close( void );
 
+void lecroy_vicp_lock_out( bool /* lock_state */ );
+
 void lecroy_vicp_set_timeout( int  /* dir        */,
 							  long /* us_timeout */ );
 

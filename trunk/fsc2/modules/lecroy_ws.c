@@ -133,6 +133,8 @@ int lecroy_ws_init_hook( void )
 	for ( i = LECROY_WS_M1; i <= LECROY_WS_M4; i++ )
 		lecroy_ws.channels_in_use[ i ] = UNSET;
 
+	lecroy_ws.lock_state = SET;
+
 	lecroy_ws_stored.w = NULL;
 
 	return 1;
@@ -571,6 +573,8 @@ Var_T *digitizer_interleave_mode( Var_T * v )
  * Function for setting or quering the memory size
  *-------------------------------------------------*/
 
+#if 0
+
 Var_T *digitizer_memory_size( Var_T *v )
 {
 	long mem_size;
@@ -645,6 +649,8 @@ Var_T *digitizer_memory_size( Var_T *v )
 
 	return vars_push( INT_VAR, lecroy_ws.mem_size );
 }
+
+#endif
 
 
 /*------------------------------------------------------------------*
@@ -1134,9 +1140,9 @@ Var_T *digitizer_trigger_level( Var_T * v )
 	v = vars_pop( v );
 
 	if ( channel == LECROY_WS_LIN ) {
-		print( SEVERE, "Trigger level for LINE can't be determined nor "
-			   "changed.\n" );
-		return vars_push( FLOAT_VAR, 0.0 );
+		print( FATAL, "Trigger level for %s can't be determined nor "
+			   "changed.\n", LECROY_WS_Channel_Names[ LECROY_WS_LIN ] );
+		THROW( EXCEPTION );
 	}
 
 	if ( ( channel < LECROY_WS_CH1 || channel > LECROY_WS_CH_MAX ) &&
@@ -1247,18 +1253,13 @@ Var_T *digitizer_trigger_slope( Var_T * v )
 	v = vars_pop( v );
 
 	if ( channel == LECROY_WS_LIN ) {
-		print( SEVERE, "Trigger slope for LINE can't be determined or "
-			   "changed.\n" );
-		return vars_push( INT_VAR, 0 );
+		print( SEVERE, "Trigger slope for %s can't be determined or "
+			   "changed.\n", LECROY_WS_Channel_Names[ LECROY_WS_LIN ] );
+		THROW( EXCEPTION );
 	}
 
 	if ( ( channel < LECROY_WS_CH1 || channel > LECROY_WS_CH_MAX ) &&
 		 channel != LECROY_WS_EXT && channel != LECROY_WS_EXT10 )
-	{
-		print( FATAL, "Invalid trigger channel.\n" );
-		THROW( EXCEPTION );
-	}
-
 	{
 		print( FATAL, "Invalid trigger channel.\n" );
 		THROW( EXCEPTION );
@@ -1781,7 +1782,8 @@ Var_T *digitizer_get_curve( Var_T * v )
 							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( ( ch < LECROY_WS_CH1 && ch > LECROY_WS_CH_MAX ) &&
-		 ( ch < LECROY_WS_M1  && ch > LECROY_WS_M4     ) )
+		 ( ch < LECROY_WS_M1  && ch > LECROY_WS_M4     ) &&
+		 ch != LECROY_WS_MATH )
 	{
 		print( FATAL, "Invalid channel specification.\n" );
 		THROW( EXCEPTION );
@@ -1865,7 +1867,8 @@ Var_T *digitizer_get_area( Var_T * v )
 							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( ( ch < LECROY_WS_CH1 && ch > LECROY_WS_CH_MAX ) &&
-		 ( ch < LECROY_WS_M1  && ch > LECROY_WS_M4     ) )
+		 ( ch < LECROY_WS_M1  && ch > LECROY_WS_M4     ) &&
+		 ch != LECROY_WS_MATH )
 	{
 		print( FATAL, "Invalid channel specification.\n" );
 		THROW( EXCEPTION );
@@ -2009,7 +2012,8 @@ Var_T *digitizer_get_amplitude( Var_T * v )
 							   get_strict_long( v, "channel number" ), UNSET );
 
 	if ( ( ch < LECROY_WS_CH1 && ch > LECROY_WS_CH_MAX ) &&
-		 ( ch < LECROY_WS_M1  && ch > LECROY_WS_M4     ) )
+		 ( ch < LECROY_WS_M1  && ch > LECROY_WS_M4     ) &&
+		 ch != LECROY_WS_MATH )
 	{
 		print( FATAL, "Invalid channel specification.\n" );
 		THROW( EXCEPTION );
@@ -2126,6 +2130,30 @@ Var_T *digitizer_get_amplitude( Var_T * v )
 	}
 
 	return ret;
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *digitizer_lock_keyboard( Var_T * v )
+{
+	bool lock;
+
+
+	if ( v == NULL )
+		lock = SET;
+	else
+	{
+		lock = get_boolean( v );
+		too_many_arguments( v );
+	}
+
+	if ( FSC2_MODE == EXPERIMENT )
+		lecroy_ws_lock_state( lock );
+
+	lecroy_ws.lock_state = lock;
+	return vars_push( INT_VAR, lock ? 1L : 0L );
 }
 
 

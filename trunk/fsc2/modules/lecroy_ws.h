@@ -274,6 +274,8 @@ struct LECROY_WS {
 								lutions for the different record lengths
 								and timebases */
 	HORI_RES_T *cur_hres;    /* pointer into table to current settings */
+
+	bool lock_state;
 };
 
 
@@ -304,7 +306,9 @@ Var_T *digitizer_window_position(   Var_T * /* v */ );
 Var_T *digitizer_window_width(      Var_T * /* v */ );
 Var_T *digitizer_timebase(          Var_T * /* v */ );
 Var_T *digitizer_interleave_mode(   Var_T * /* v */ );
+#if 0
 Var_T *digitizer_memory_size(       Var_T * /* v */ );
+#endif
 Var_T *digitizer_record_length(     Var_T * /* v */ );
 Var_T *digitizer_time_per_point(    Var_T * /* v */ );
 Var_T *digitizer_sensitivity(       Var_T * /* v */ );
@@ -327,6 +331,7 @@ Var_T *digitizer_get_curve(         Var_T * /* v */ );
 Var_T *digitizer_get_area(          Var_T * /* v */ );
 Var_T *digitizer_get_amplitude(     Var_T * /* v */ );
 Var_T *digitizer_copy_curve(        Var_T * /* v */ );
+Var_T *digitizer_lock_keyboard(     Var_T * /* v */ );
 Var_T *digitizer_command(           Var_T * /* v */ );
 
 
@@ -424,6 +429,8 @@ double lecroy_ws_get_amplitude( int        /* ch */,
 
 void lecroy_ws_copy_curve( long /* src  */,
 						   long /* dest */ );
+
+void lecroy_ws_lock_state( bool /* lock_state */ );
 
 bool lecroy_ws_command( const char * /* cmd */ );
 
