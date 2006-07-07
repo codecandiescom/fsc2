@@ -731,7 +731,6 @@ ifdef OWNER
 else
 	OWNER := root
 endif
-endif
 else
 ifndef OWNER
 	ONLY_SETGID := 1
