@@ -22,9 +22,9 @@
  */
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap stack nounput noyy_top_state
 
@@ -69,66 +69,66 @@ IDENT    [A-Za-z][A-Za-z_0-9]*
 %x      comm
 
 
-		/*---------------*/
-%%		/*     RULES     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     RULES     */
+        /*---------------*/
 
 
             /* handling of C++ style comment spanning a whole line */
-{REM1}		EDL.Lc++;
+{REM1}      EDL.Lc++;
 
-			/* handling of C++ style comment not spanning a whole line */
-{REM2}		EDL.Lc++;
+            /* handling of C++ style comment not spanning a whole line */
+{REM2}      EDL.Lc++;
 
-			/* handling of C style comment */
-{REM3}		{
-				Comm_lc = EDL.Lc;
-				yy_push_state( comm );
-			}
+            /* handling of C style comment */
+{REM3}      {
+                Comm_lc = EDL.Lc;
+                yy_push_state( comm );
+            }
 
 <comm>{
 
-{REM4}		/* skipping anything that's not a '*' */
+{REM4}      /* skipping anything that's not a '*' */
 {REM5}      /* skipping all '*'s not followed by a '/' */
 
-			/* end of line character in a comment */
-\n			EDL.Lc++;
+            /* end of line character in a comment */
+\n          EDL.Lc++;
 
-			/* handling of EOF within a comment -> fatal error */
+            /* handling of EOF within a comment -> fatal error */
 <<EOF>>     {
-				eprint( FATAL, UNSET, "%s: End of file in comment starting at "
-						"line %ld.\n", EDL.Fname, Comm_lc );
-				THROW( EXCEPTION );
-			}
+                eprint( FATAL, UNSET, "%s: End of file in comment starting at "
+                        "line %ld.\n", EDL.Fname, Comm_lc );
+                THROW( EXCEPTION );
+            }
 
-			/* end of comment but not end of line */
-{EREM1}		yy_pop_state( );
+            /* end of comment but not end of line */
+{EREM1}     yy_pop_state( );
 
-			/* end of comment and end of line */
+            /* end of comment and end of line */
 {EREM2}     {
-				EDL.Lc++;
-				yy_pop_state( );
-			}
+                EDL.Lc++;
+                yy_pop_state( );
+            }
 } /* end of <comm> */
 
 {EREM1}     {  /* End of comment without start */
-				eprint( FATAL, UNSET, "End of comment found at line %ld in "
-						"function data base '%s'.\n", EDL.Lc, EDL.Fname );
-				THROW( EXCEPTION );
-			}
+                eprint( FATAL, UNSET, "End of comment found at line %ld in "
+                        "function data base '%s'.\n", EDL.Lc, EDL.Fname );
+                THROW( EXCEPTION );
+            }
 
-			/* dump empty line (i.e. just containing tabs and spaces) */
+            /* dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      EDL.Lc++;
 
 {LWS}       /* dumps of leading white space */
 
-			/* dumps trailing white space */
+            /* dumps trailing white space */
 {TWS}       EDL.Lc++;
 
 {WS}        /* dump (other) white space */
 
-			/* writes out EOL character */
-\n			EDL.Lc++;
+            /* writes out EOL character */
+\n          EDL.Lc++;
 
 ,           /* skip commas */
 
@@ -140,44 +140,44 @@ PREP        return PREP_TOKEN;
 ;           return ';';
 
 .           {
-				eprint( FATAL, UNSET, "Syntax error at line %ld in function "
-							   "data base '%s'.\n", EDL.Lc, EDL.Fname );
-				THROW( EXCEPTION );
-			}
+                eprint( FATAL, UNSET, "Syntax error at line %ld in function "
+                               "data base '%s'.\n", EDL.Lc, EDL.Fname );
+                THROW( EXCEPTION );
+            }
 
-<<EOF>>		return 0;
+<<EOF>>     return 0;
 
 
 
-		/*----------------------*/
-%%		/*     END OF RULES     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     END OF RULES     */
+        /*----------------------*/
 
 
 /*-------------------------------------------*
  *-------------------------------------------*/
 
 size_t func_list_parse( Func_T ** fncts,
-						size_t    num_func )
+                        size_t    num_func )
 {
-	static bool is_restart = UNSET;
-	size_t nf = num_func;
-	size_t num_predef_func = num_func;
-	size_t num;
-	size_t cur;
+    static bool is_restart = UNSET;
+    size_t nf = num_func;
+    size_t num_predef_func = num_func;
+    size_t num;
+    size_t cur;
     struct stat buf;
     char *ld_path;
     char *ld = NULL;
     char *ldc;
 
 
-	CLOBBER_PROTECT( nf );
+    CLOBBER_PROTECT( nf );
 
-	EDL.Fname = CHAR_P T_free( EDL.Fname );
+    EDL.Fname = CHAR_P T_free( EDL.Fname );
 
     /* As usual, we first check paths defined by the environment variable
        'LD_LIBRARY_PATH' and then the compiled-in path (except when this
-	   is a check run). */
+       is a check run). */
 
     if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
     {
@@ -201,82 +201,82 @@ size_t func_list_parse( Func_T ** fncts,
             EDL.Fname = CHAR_P T_free( EDL.Fname );
     }
 
-	if ( EDL.Fname == NULL )
-	{
-		eprint( FATAL, UNSET, "Can't open function data base 'Functions'.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( EDL.Fname == NULL )
+    {
+        eprint( FATAL, UNSET, "Can't open function data base 'Functions'.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( ( func_listin = fopen( EDL.Fname, "r" ) ) == NULL )
-	{
-		eprint( FATAL, UNSET, "Can't open function data base '%s'.\n",
-				EDL.Fname );
-		EDL.Fname = CHAR_P T_free( EDL.Fname );
-		THROW( EXCEPTION );
-	}
+    if ( ( func_listin = fopen( EDL.Fname, "r" ) ) == NULL )
+    {
+        eprint( FATAL, UNSET, "Can't open function data base '%s'.\n",
+                EDL.Fname );
+        EDL.Fname = CHAR_P T_free( EDL.Fname );
+        THROW( EXCEPTION );
+    }
 
-	/* Keep the lexer happy... */
+    /* Keep the lexer happy... */
 
-	if ( is_restart )
-	    func_listrestart( func_listin );
-	else
-		 is_restart = SET;
+    if ( is_restart )
+        func_listrestart( func_listin );
+    else
+         is_restart = SET;
 
-	/* Count the number of functions defined in the file */
+    /* Count the number of functions defined in the file */
 
-	TRY
-	{
-		num = fll_count_functions( *fncts, num_predef_func );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		fclose( func_listin );
-		RETHROW( );
-	}
+    TRY
+    {
+        num = fll_count_functions( *fncts, num_predef_func );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        fclose( func_listin );
+        RETHROW( );
+    }
 
-	/* If no functions were found return immediately */
+    /* If no functions were found return immediately */
 
-	if ( num == 0 )
-	{
-		fclose( func_listin );
-		return num_predef_func;
-	}
+    if ( num == 0 )
+    {
+        fclose( func_listin );
+        return num_predef_func;
+    }
 
-	/* Rewind input file, allocate memory for the additional functions and
-	   set defaults values */
+    /* Rewind input file, allocate memory for the additional functions and
+       set defaults values */
 
-	rewind( func_listin );
-	nf = num + num_predef_func;
+    rewind( func_listin );
+    nf = num + num_predef_func;
 
-	if ( num != 0 )
-		*fncts = FUNC_P T_realloc( *fncts, nf * sizeof **fncts );
+    if ( num != 0 )
+        *fncts = FUNC_P T_realloc( *fncts, nf * sizeof **fncts );
 
-	for ( cur = num_predef_func; cur < nf; cur++ )
-	{
-		( *fncts )[ cur ].name = NULL;
-		( *fncts )[ cur ].fnct = NULL;
-		( *fncts )[ cur ].nargs = 0;
-		( *fncts )[ cur ].access_flag = ACCESS_EXP;
-		( *fncts )[ cur ].device = NULL;
-		( *fncts )[ cur ].to_be_loaded = SET;
-	}
+    for ( cur = num_predef_func; cur < nf; cur++ )
+    {
+        ( *fncts )[ cur ].name = NULL;
+        ( *fncts )[ cur ].fnct = NULL;
+        ( *fncts )[ cur ].nargs = 0;
+        ( *fncts )[ cur ].access_flag = ACCESS_EXP;
+        ( *fncts )[ cur ].device = NULL;
+        ( *fncts )[ cur ].to_be_loaded = SET;
+    }
 
-	/* Now parse the function database file again */
+    /* Now parse the function database file again */
 
-	TRY
-	{
-		fll_get_functions( *fncts, num_predef_func );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		fclose( func_listin );
-		RETHROW( );
-	}
+    TRY
+    {
+        fll_get_functions( *fncts, num_predef_func );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        fclose( func_listin );
+        RETHROW( );
+    }
 
-	fclose( func_listin );
-	return nf;
+    fclose( func_listin );
+    return nf;
 }
 
 
@@ -286,58 +286,58 @@ size_t func_list_parse( Func_T ** fncts,
  *---------------------------------------------------*/
 
 static size_t fll_count_functions( Func_T * fncts,
-								   size_t   num_predef_func )
+                                   size_t   num_predef_func )
 {
-	int ret_token;
-	int last_token = 0;
-	size_t num = 0;
-	Func_T *f = NULL;
+    int ret_token;
+    int last_token = 0;
+    size_t num = 0;
+    Func_T *f = NULL;
 
 
-	EDL.Lc = 1;
+    EDL.Lc = 1;
 
-	while ( ( ret_token = func_listlex( ) ) != 0 )
-	{
-		/* If the name of a loadable function conflicts with the name of a
-		   built-in function the loadable function will replace the built-in
-		   function completely (even if it doesn't get loaded!) */
+    while ( ( ret_token = func_listlex( ) ) != 0 )
+    {
+        /* If the name of a loadable function conflicts with the name of a
+           built-in function the loadable function will replace the built-in
+           function completely (even if it doesn't get loaded!) */
 
-		if ( ret_token == IDENT_TOKEN )
-		{
-			if ( ( f = FUNC_P bsearch( func_listtext, fncts, num_predef_func,
-									   sizeof( Func_T ), ffl_func_cmp2 ) )
-				 != NULL )
-			{
-				eprint( WARN, UNSET, "Loadable function '%s()' hides "
-						"built-in function (line %ld in function data "
-						"base '%s').\n", f->name, EDL.Lc, EDL.Fname );
+        if ( ret_token == IDENT_TOKEN )
+        {
+            if ( ( f = FUNC_P bsearch( func_listtext, fncts, num_predef_func,
+                                       sizeof( Func_T ), ffl_func_cmp2 ) )
+                 != NULL )
+            {
+                eprint( WARN, UNSET, "Loadable function '%s()' hides "
+                        "built-in function (line %ld in function data "
+                        "base '%s').\n", f->name, EDL.Lc, EDL.Fname );
 
-				f->name = T_strdup( f->name );
-				f->fnct = NULL;
-				f->nargs = 0;
-				f->access_flag = ACCESS_EXP;
-				f->device = NULL;
-				f->to_be_loaded = SET;
-			}
-		}
+                f->name = T_strdup( f->name );
+                f->fnct = NULL;
+                f->nargs = 0;
+                f->access_flag = ACCESS_EXP;
+                f->device = NULL;
+                f->to_be_loaded = SET;
+            }
+        }
 
-		/* Increment number of functions only after a semicolon (but not if
-		   the previous token was also a semicolon) and if the new function
-		   didn't overload a built-in function */
+        /* Increment number of functions only after a semicolon (but not if
+           the previous token was also a semicolon) and if the new function
+           didn't overload a built-in function */
 
-		if ( ret_token == ';' && last_token != ';' && f == NULL )
-		   num++;
-		last_token = ret_token;
-	}
+        if ( ret_token == ';' && last_token != ';' && f == NULL )
+           num++;
+        last_token = ret_token;
+    }
 
-	if ( last_token != ';' )
-	{
-		eprint( FATAL, UNSET, "Missing semiciolon at end of function data "
-				"base '%s'.\n", EDL.Fname );
-		THROW( EXCEPTION );
-	}
+    if ( last_token != ';' )
+    {
+        eprint( FATAL, UNSET, "Missing semiciolon at end of function data "
+                "base '%s'.\n", EDL.Fname );
+        THROW( EXCEPTION );
+    }
 
-	return num;
+    return num;
 }
 
 
@@ -346,9 +346,9 @@ static size_t fll_count_functions( Func_T * fncts,
  *--------------------------------------------------------------------------*/
 
 static int ffl_func_cmp2( const void * a,
-						  const void * b )
+                          const void * b )
 {
-	return strcmp( ( const char * ) a, ( ( const Func_T * ) b )->name );
+    return strcmp( ( const char * ) a, ( ( const Func_T * ) b )->name );
 }
 
 
@@ -358,127 +358,129 @@ static int ffl_func_cmp2( const void * a,
  *------------------------------------------------------------*/
 
 static void fll_get_functions( Func_T * fncts,
-							   size_t   num_predef_func )
+                               size_t   num_predef_func )
 {
-	int ret_token;
-	int state;
-	size_t cur;
-	size_t act;
-	size_t i;
+    int ret_token;
+    int state;
+    size_t cur;
+    size_t act;
+    size_t i;
 
 
-	EDL.Lc = 1;
-	state = 0;
-	act = cur = num_predef_func;
+    EDL.Lc = 1;
+    state = 0;
+    act = cur = num_predef_func;
 
-	while ( ( ret_token = func_listlex( ) ) != 0 )
-	{
-		switch ( ret_token )
-		{
-			case IDENT_TOKEN :
-				if ( state != 0 )
-				{
-					eprint( FATAL, UNSET, "Syntax error at line %ld in "
-							"function data base '%s'.\n", EDL.Lc, EDL.Fname );
-					THROW( EXCEPTION );
-				}
+    while ( ( ret_token = func_listlex( ) ) != 0 )
+    {
+        switch ( ret_token )
+        {
+            case IDENT_TOKEN :
+                if ( state != 0 )
+                {
+                    eprint( FATAL, UNSET, "Syntax error at line %ld in "
+                            "function data base '%s'.\n", EDL.Lc, EDL.Fname );
+                    THROW( EXCEPTION );
+                }
 
-				/* Allow overloading of built-in functions but don't allow
-				   multiple overloading (this got nothing to do with several
-				   modules defining the same function, because here we only
-				   care about the declarations in 'Functions') */
+                /* Allow overloading of built-in functions but don't allow
+                   multiple overloading (this got nothing to do with several
+                   modules defining the same function, because here we only
+                   care about the declarations in 'Functions') */
 
-				for ( i = 0; i < cur; i++ )
-					if ( ! strcmp( fncts[ i ].name, func_listtext ) )
-					{
-						if ( i < num_predef_func )
-							act = i;
-						else
-						{
-							eprint( FATAL, UNSET, "Function '%s()' is declared"
-									"more than once in function data base "
-									"'%s'.\n", func_listtext, EDL.Fname );
-							THROW( EXCEPTION );
-						}
-						break;
-					}
+                for ( i = 0; i < cur; i++ )
+                    if ( ! strcmp( fncts[ i ].name, func_listtext ) )
+                    {
+                        if ( i < num_predef_func )
+                            act = i;
+                        else
+                        {
+                            eprint( FATAL, UNSET, "Function '%s()' is declared"
+                                    "more than once in function data base "
+                                    "'%s'.\n", func_listtext, EDL.Fname );
+                            THROW( EXCEPTION );
+                        }
+                        break;
+                    }
 
-				if ( act >= num_predef_func )
-				    fncts[ act ].name = T_strdup( func_listtext );
+                if ( act >= num_predef_func )
+                    fncts[ act ].name = T_strdup( func_listtext );
 
-				state = 1;
-				break;
+                state = 1;
+                break;
 
-			case INT_TOKEN :
-				if ( state != 1 )
-				{
-					eprint( FATAL, UNSET, "Syntax error at line %ld of "
-							"function data base '%s'.\n", EDL.Lc, EDL.Fname );
-					THROW( EXCEPTION );
-				}
+            case INT_TOKEN :
+                if ( state != 1 )
+                {
+                    eprint( FATAL, UNSET, "Syntax error at line %ld of "
+                            "function data base '%s'.\n", EDL.Lc, EDL.Fname );
+                    THROW( EXCEPTION );
+                }
 
-				if ( ! strcmp( func_listtext, "-" ) ||
-					 ( fncts[ act ].nargs = atol( func_listtext ) ) < 0 )
-					fncts[ act ].nargs = INT_MIN;
+                if ( ! strcmp( func_listtext, "-" ) ||
+                     ( fncts[ act ].nargs = atol( func_listtext ) ) < 0 )
+                    fncts[ act ].nargs = INT_MIN;
 
-				state = 2;
-				break;
+                state = 2;
+                break;
 
-			case ALL_TOKEN : case EXP_TOKEN : case PREP_TOKEN :
-				if ( state != 2 )
-				{
-					eprint( FATAL, UNSET, "Syntax error at line %ld of "
-							"function data base '%s'.\n", EDL.Lc, EDL.Fname );
-					THROW( EXCEPTION );
-				}
+            case ALL_TOKEN : case EXP_TOKEN : case PREP_TOKEN :
+                if ( state != 2 )
+                {
+                    eprint( FATAL, UNSET, "Syntax error at line %ld of "
+                            "function data base '%s'.\n", EDL.Lc, EDL.Fname );
+                    THROW( EXCEPTION );
+                }
 
-				switch ( ret_token )
-				{
-				    case ALL_TOKEN :
-						fncts[ act ].access_flag = ACCESS_ALL;
-						break;
+                switch ( ret_token )
+                {
+                    case ALL_TOKEN :
+                        fncts[ act ].access_flag = ACCESS_ALL;
+                        break;
 
-					case EXP_TOKEN :
-						fncts[ act ].access_flag = ACCESS_EXP;
-						break;
+                    case EXP_TOKEN :
+                        fncts[ act ].access_flag = ACCESS_EXP;
+                        break;
 
-					case PREP_TOKEN :
-						fncts[ act ].access_flag = ACCESS_PREP;
-						break;
-				}
+                    case PREP_TOKEN :
+                        fncts[ act ].access_flag = ACCESS_PREP;
+                        break;
+                }
 
-				state = 3;
-				break;
+                state = 3;
+                break;
 
-			case ';' :
-				if ( state != 0 && state < 2 )
-				{
-					eprint( FATAL, UNSET, "Missing number of arguments for "
+            case ';' :
+                if ( state != 0 && state < 2 )
+                {
+                    eprint( FATAL, UNSET, "Missing number of arguments for "
                             "function '%s' at line %ld in function data base "
                             "'%s'.\n", fncts[ act ].name, EDL.Lc, EDL.Fname );
-					THROW( EXCEPTION );
-				}
+                    THROW( EXCEPTION );
+                }
 
-				if ( state == 0 )   /* if there was a superfluous semicolon */
-					break;          /* in the input file */
+                if ( state == 0 )   /* if there was a superfluous semicolon */
+                    break;          /* in the input file */
 
-				state = 0;
-				if ( act == cur )   /* "new" function ? */
-					act = ++cur;
-				else                /* built-in function has been overloaded */
-					act = cur;
-				break;
+                state = 0;
+                if ( act == cur )   /* "new" function ? */
+                    act = ++cur;
+                else                /* built-in function has been overloaded */
+                    act = cur;
+                break;
 
-			default:                             /* this can never happen... */
-				fsc2_assert( 1 == 0 );
-				break;
-		}
-	}
+            default:                             /* this can never happen... */
+                fsc2_assert( 1 == 0 );
+                break;
+        }
+    }
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

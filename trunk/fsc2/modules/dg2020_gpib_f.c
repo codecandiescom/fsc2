@@ -148,18 +148,18 @@
 typedef struct dg2020_store dg2020_store_T;
 
 struct  dg2020_store {
-	int channel;
-	Ticks address;
-	Ticks length;
-	int state;
-	dg2020_store_T *next;
-	dg2020_store_T *prev;
+    int channel;
+    Ticks address;
+    Ticks length;
+    int state;
+    dg2020_store_T *next;
+    dg2020_store_T *prev;
 };
 
 static void dg2020_gpib_store( int   channel,
-							   Ticks address,
-							   Ticks length,
-							   int   state );
+                               Ticks address,
+                               Ticks length,
+                               int   state );
 
 static bool dg2020_gpib_check( void );
 
@@ -176,120 +176,120 @@ static bool dg2020_gpib_do_check( dg2020_store_T * params );
 
 bool dg2020_init( const char * name )
 {
-	int i;
-	Function_T *f;
-	char reply[ 100 ];
-	long len = 100;
+    int i;
+    Function_T *f;
+    char reply[ 100 ];
+    long len = 100;
 
 
-	if ( gpib_init_device( name, &dg2020.device ) == FAILURE )
-		return FAIL;
+    if ( gpib_init_device( name, &dg2020.device ) == FAILURE )
+        return FAIL;
 
-	/* Try to get the status byte to make sure the pulser reacts */
+    /* Try to get the status byte to make sure the pulser reacts */
 
-	dg2020_command( "*STB?\n" );
-	if ( gpib_read( dg2020.device, reply, &len ) == FAILURE )
-		dg2020_gpib_failure( );
+    dg2020_command( "*STB?\n" );
+    if ( gpib_read( dg2020.device, reply, &len ) == FAILURE )
+        dg2020_gpib_failure( );
 
     /* Set pulser to short form of replies */
 
-	dg2020_command( "VERB OFF\n" );
-	dg2020_command( "HEAD OFF\n" );
+    dg2020_command( "VERB OFF\n" );
+    dg2020_command( "HEAD OFF\n" );
 
-	/* Make sure the pulser is stopped */
+    /* Make sure the pulser is stopped */
 
-	dg2020_command( "STOP\n" );
+    dg2020_command( "STOP\n" );
 
-	/* Switch off remote command debugging function */
+    /* Switch off remote command debugging function */
 
-	dg2020_command( "DEB:SNO:STAT OFF\n" );
+    dg2020_command( "DEB:SNO:STAT OFF\n" );
 
-	/* Switch on phase lock for internal oscillator */
+    /* Switch on phase lock for internal oscillator */
 
-	dg2020_command( "SOUR:OSC:INT:PLL ON\n" );
+    dg2020_command( "SOUR:OSC:INT:PLL ON\n" );
 
-	/* Delete all blocks */
+    /* Delete all blocks */
 
-	dg2020_command( "DATA:BLOC:DEL:ALL\n" );
+    dg2020_command( "DATA:BLOC:DEL:ALL\n" );
 
-	/* Remove all sequence definitions */
+    /* Remove all sequence definitions */
 
-	dg2020_command( "DATA:SEQ:DEL:ALL\n" );
+    dg2020_command( "DATA:SEQ:DEL:ALL\n" );
 
-	/* Switch to manual update mode */
+    /* Switch to manual update mode */
 
-	dg2020_command( "MODE:UPD MAN\n" );
+    dg2020_command( "MODE:UPD MAN\n" );
 
-	/* Set the time base */
+    /* Set the time base */
 
-	dg2020_set_timebase( dg2020.timebase );
+    dg2020_set_timebase( dg2020.timebase );
 
-	/* Set the memory size needed */
+    /* Set the memory size needed */
 
-	dg2020_set_memory_size( ( long ) dg2020.mem_size );
+    dg2020_set_memory_size( ( long ) dg2020.mem_size );
 
-	/* Switch on repeat mode for INTERNAL trigger mode and enhanced mode for
-	   EXTERNAL trigger mode - in the later case also set trigger level and
-	   slope */
+    /* Switch on repeat mode for INTERNAL trigger mode and enhanced mode for
+       EXTERNAL trigger mode - in the later case also set trigger level and
+       slope */
 
-	if ( dg2020.trig_in_mode == INTERNAL )
-		dg2020_command( "MODE:STAT REP\n" );
-	else
-	{
-		dg2020_command( "MODE:STAT ENH\n" );
-		if ( dg2020.is_trig_in_level )
-			dg2020_set_trigger_in_level( dg2020.trig_in_level );
-		if ( dg2020.is_trig_in_slope )
-			dg2020_set_trigger_in_slope( dg2020.trig_in_slope );
-		if ( dg2020.is_trig_in_impedance )
-			dg2020_set_trigger_in_impedance( dg2020.trig_in_impedance );
-	}
+    if ( dg2020.trig_in_mode == INTERNAL )
+        dg2020_command( "MODE:STAT REP\n" );
+    else
+    {
+        dg2020_command( "MODE:STAT ENH\n" );
+        if ( dg2020.is_trig_in_level )
+            dg2020_set_trigger_in_level( dg2020.trig_in_level );
+        if ( dg2020.is_trig_in_slope )
+            dg2020_set_trigger_in_slope( dg2020.trig_in_slope );
+        if ( dg2020.is_trig_in_impedance )
+            dg2020_set_trigger_in_impedance( dg2020.trig_in_impedance );
+    }
 
-	/* If additional padding is needed or trigger mode is EXTERNAL create
-	   sequence and blocks */
+    /* If additional padding is needed or trigger mode is EXTERNAL create
+       sequence and blocks */
 
-	if ( dg2020.block[ 0 ].is_used && dg2020.block[ 1 ].is_used &&
-		 ( ! dg2020_make_blocks( 2, dg2020.block ) ||
-		   ! dg2020_make_seq( 2, dg2020.block ) ) )
-		dg2020_gpib_failure( );
+    if ( dg2020.block[ 0 ].is_used && dg2020.block[ 1 ].is_used &&
+         ( ! dg2020_make_blocks( 2, dg2020.block ) ||
+           ! dg2020_make_seq( 2, dg2020.block ) ) )
+        dg2020_gpib_failure( );
 
-	if ( dg2020.block[ 0 ].is_used && ! dg2020.block[ 1 ].is_used &&
-		 ( ! dg2020_make_blocks( 1, dg2020.block ) ||
-		   ! dg2020_make_seq( 1, dg2020.block ) ) )
-		dg2020_gpib_failure( );
+    if ( dg2020.block[ 0 ].is_used && ! dg2020.block[ 1 ].is_used &&
+         ( ! dg2020_make_blocks( 1, dg2020.block ) ||
+           ! dg2020_make_seq( 1, dg2020.block ) ) )
+        dg2020_gpib_failure( );
 
-	/* Do the assignement of channels to pods */
+    /* Do the assignement of channels to pods */
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
-		if ( ! f->is_used )
-			continue;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
+        if ( ! f->is_used )
+            continue;
 
-		dg2020_channel_assign( f->channel[ 0 ]->self, f->pod->self );
+        dg2020_channel_assign( f->channel[ 0 ]->self, f->pod->self );
 
-		if ( f->self == PULSER_CHANNEL_PHASE_1 ||
-			 f->self == PULSER_CHANNEL_PHASE_2 )
-		{
-			dg2020_channel_assign( f->channel[ 1 ]->self, f->pod2->self );
-			f->next_phase = 2;
-		}
-	}
+        if ( f->self == PULSER_CHANNEL_PHASE_1 ||
+             f->self == PULSER_CHANNEL_PHASE_2 )
+        {
+            dg2020_channel_assign( f->channel[ 1 ]->self, f->pod2->self );
+            f->next_phase = 2;
+        }
+    }
 
-	/* Set up the pod output voltages */
+    /* Set up the pod output voltages */
 
-	for ( i = 0; i < NUM_PODS; i++ )
-	{
-		if ( dg2020.pod[ i ].function == NULL )
-			continue;
+    for ( i = 0; i < NUM_PODS; i++ )
+    {
+        if ( dg2020.pod[ i ].function == NULL )
+            continue;
 
-		if ( dg2020.pod[ i ].function->is_high_level )
-			dg2020_set_pod_high_level( i,
-									   dg2020.pod[ i ].function->high_level );
-		if ( dg2020.pod[ i ].function->is_low_level )
-			dg2020_set_pod_low_level( i,
-									  dg2020.pod[ i ].function->low_level );
-	}
+        if ( dg2020.pod[ i ].function->is_high_level )
+            dg2020_set_pod_high_level( i,
+                                       dg2020.pod[ i ].function->high_level );
+        if ( dg2020.pod[ i ].function->is_low_level )
+            dg2020_set_pod_low_level( i,
+                                      dg2020.pod[ i ].function->low_level );
+    }
 
     return OK;
 }
@@ -307,9 +307,9 @@ bool dg2020_init( const char * name )
 
 bool dg2020_run( bool flag )
 {
-	dg2020_command( flag ? "*WAI;STAR\n": "*WAI;STOP\n" );
-	dg2020.is_running = flag;
-	return OK;
+    dg2020_command( flag ? "*WAI;STAR\n": "*WAI;STOP\n" );
+    dg2020.is_running = flag;
+    return OK;
 }
 
 
@@ -325,18 +325,18 @@ bool dg2020_run( bool flag )
 
 bool dg2020_set_timebase( double timebase )
 {
-	char cmd[ 30 ] = "SOUR:OSC:INT:FREQ ";
+    char cmd[ 30 ] = "SOUR:OSC:INT:FREQ ";
 
 
-	if ( timebase < MIN_TIMEBASE * 0.99999 ||
-		 timebase > MAX_TIMEBASE * 1.00001 )
-		return FAIL;
+    if ( timebase < MIN_TIMEBASE * 0.99999 ||
+         timebase > MAX_TIMEBASE * 1.00001 )
+        return FAIL;
 
-	gcvt( 1.0 / timebase, 4, cmd + strlen( cmd ) );
-	strcat( cmd, "\n" );
-	dg2020_command( cmd );
+    gcvt( 1.0 / timebase, 4, cmd + strlen( cmd ) );
+    strcat( cmd, "\n" );
+    dg2020_command( cmd );
 
-	return OK;
+    return OK;
 }
 
 
@@ -352,16 +352,16 @@ bool dg2020_set_timebase( double timebase )
 
 bool dg2020_set_memory_size( long mem_size )
 {
-	char cmd[ 20 ] = "DATA:MSIZ ";
+    char cmd[ 20 ] = "DATA:MSIZ ";
 
 
-	if ( mem_size < 64 || mem_size > MAX_PULSER_BITS )
-		return FAIL;
+    if ( mem_size < 64 || mem_size > MAX_PULSER_BITS )
+        return FAIL;
 
-	sprintf( cmd + strlen( cmd ), "%ld\n", mem_size );
-	dg2020_command( cmd );
+    sprintf( cmd + strlen( cmd ), "%ld\n", mem_size );
+    dg2020_command( cmd );
 
-	return OK;
+    return OK;
 }
 
 
@@ -376,18 +376,18 @@ bool dg2020_set_memory_size( long mem_size )
  *-----------------------------------------------------*/
 
 bool dg2020_channel_assign( int channel,
-							int pod )
+                            int pod )
 {
-	char cmd[ 50 ];
+    char cmd[ 50 ];
 
 
-	fsc2_assert( channel >= 0 && channel < MAX_CHANNELS &&
-				 pod >= 0 && pod < NUM_PODS );
+    fsc2_assert( channel >= 0 && channel < MAX_CHANNELS &&
+                 pod >= 0 && pod < NUM_PODS );
 
-	sprintf( cmd, "OUTP:PODA:CH%d:ASSIGN %d\n", pod, channel );
-	dg2020_command( cmd );
+    sprintf( cmd, "OUTP:PODA:CH%d:ASSIGN %d\n", pod, channel );
+    dg2020_command( cmd );
 
-	return OK;
+    return OK;
 }
 
 
@@ -402,8 +402,8 @@ bool dg2020_channel_assign( int channel,
 
 bool dg2020_update_data( void )
 {
-	dg2020_command( "DATA:UPD\n" );
-	return dg2020_gpib_check( );
+    dg2020_command( "DATA:UPD\n" );
+    return dg2020_gpib_check( );
 }
 
 
@@ -417,68 +417,68 @@ bool dg2020_update_data( void )
  *-----------------------------------------------------------------------*/
 
 bool dg2020_make_blocks( int       num_blocks,
-						 Block_T * block )
+                         Block_T * block )
 {
-	char cmd[ 1024 ] = "",
-		 dummy[ 1000 ];
-	long l;
-	int i;
+    char cmd[ 1024 ] = "",
+         dummy[ 1000 ];
+    long l;
+    int i;
 
 /*  According to the manual this should do the job - but it doesn't...
 
-	for ( i = 0; i < num_blocks; ++i )
-	{
-		sprintf( cmd + strlen( cmd ), "%ld,%s\n",
-				 block[ i ].start, block[ i ].blk_name );
-	}
+    for ( i = 0; i < num_blocks; ++i )
+    {
+        sprintf( cmd + strlen( cmd ), "%ld,%s\n",
+                 block[ i ].start, block[ i ].blk_name );
+    }
 
-	l = strlen( cmd ) - 1;
-	sprintf( dummy, "%ld", l );
-	sprintf( cmd, "DATA:BLOC:DEF #%ld%s", ( long ) strlen( dummy ), dummy );
+    l = strlen( cmd ) - 1;
+    sprintf( dummy, "%ld", l );
+    sprintf( cmd, "DATA:BLOC:DEF #%ld%s", ( long ) strlen( dummy ), dummy );
 
-	for ( i = 0; i < num_blocks; ++i )
-	{
-		sprintf( cmd + strlen( cmd ), "%ld,%s\n",
-				 block[ i ].start, block[ i ].blk_name );
-	}
-	cmd[ strlen( cmd ) - 1 ] = '\0';
+    for ( i = 0; i < num_blocks; ++i )
+    {
+        sprintf( cmd + strlen( cmd ), "%ld,%s\n",
+                 block[ i ].start, block[ i ].blk_name );
+    }
+    cmd[ strlen( cmd ) - 1 ] = '\0';
 
-	dg2020_command( cmd );
-	dg2020_command( "*ESR?\n" );
+    dg2020_command( cmd );
+    dg2020_command( "*ESR?\n" );
 
-	l = 100;
-	if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
-		dg2020_gpib_failure( );
-	if ( dummy[ 0 ] != '0' || l != 2 )
-	{
-		dg2020_command( "ALLE?\n" );
-		l = 1000;
-		if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
-			dg2020_gpib_failure( );
-	}
+    l = 100;
+    if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
+        dg2020_gpib_failure( );
+    if ( dummy[ 0 ] != '0' || l != 2 )
+    {
+        dg2020_command( "ALLE?\n" );
+        l = 1000;
+        if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
+            dg2020_gpib_failure( );
+    }
 */
 
-	/* ...so we try it this way - at least it does work.
-	   Notice also the nice irregularity in the DEF and ADD command:
-	   for DEF we need the block name without quotes while in ADD
-	   we need quotes...*/
+    /* ...so we try it this way - at least it does work.
+       Notice also the nice irregularity in the DEF and ADD command:
+       for DEF we need the block name without quotes while in ADD
+       we need quotes...*/
 
-	sprintf( dummy, "%ld,%s", block[ 0 ].start, block[ 0 ].blk_name );
-	l = strlen( dummy );
-	sprintf( dummy, "%ld", l );
-	l = strlen( dummy );
-	sprintf( cmd, "DATA:BLOC:DEF #%ld%s%ld,%s\n", l, dummy,
-			 block[ 0 ].start, block[ 0 ].blk_name );
-	dg2020_command( cmd );
+    sprintf( dummy, "%ld,%s", block[ 0 ].start, block[ 0 ].blk_name );
+    l = strlen( dummy );
+    sprintf( dummy, "%ld", l );
+    l = strlen( dummy );
+    sprintf( cmd, "DATA:BLOC:DEF #%ld%s%ld,%s\n", l, dummy,
+             block[ 0 ].start, block[ 0 ].blk_name );
+    dg2020_command( cmd );
 
-	for ( i = 1; i < num_blocks; ++i )
-	{
-		sprintf( cmd, "DATA:BLOC:ADD %ld,\"%s\"\n",
-				 block[ i ].start, block[ i ].blk_name );
-		dg2020_command( cmd );
-	}
+    for ( i = 1; i < num_blocks; ++i )
+    {
+        sprintf( cmd, "DATA:BLOC:ADD %ld,\"%s\"\n",
+                 block[ i ].start, block[ i ].blk_name );
+        dg2020_command( cmd );
+    }
 
-	return OK;
+    return OK;
 }
 
 
@@ -495,37 +495,37 @@ bool dg2020_make_blocks( int       num_blocks,
  *----------------------------------------------------------------*/
 
 bool dg2020_make_seq( int       num_blocks,
-					  Block_T * block )
+                      Block_T * block )
 {
-	char cmd[ 1024 ] = "",
-		 dummy[ 10 ];
-	long l;
-	int i;
+    char cmd[ 1024 ] = "",
+         dummy[ 10 ];
+    long l;
+    int i;
 
 
-	l = 10 + strlen( block[ 0 ].blk_name );
-	sprintf( dummy, "%ld", l );
-	l = strlen( dummy );
-	sprintf( cmd, ":DATA:SEQ:DEF #%ld%s%s,1,0,0,0,0\n",
-			 l, dummy, block[ 0 ].blk_name );
-	dg2020_command( cmd );
+    l = 10 + strlen( block[ 0 ].blk_name );
+    sprintf( dummy, "%ld", l );
+    l = strlen( dummy );
+    sprintf( cmd, ":DATA:SEQ:DEF #%ld%s%s,1,0,0,0,0\n",
+             l, dummy, block[ 0 ].blk_name );
+    dg2020_command( cmd );
 
-	for ( i = 1; i < num_blocks; i++ )
-	{
-		sprintf( cmd, ":DATA:SEQ:ADD %d,\"%s\",%ld,0,0,0,0\n",
-				 i, block[ i ].blk_name, block[ i ].repeat );
-		dg2020_command( cmd );
-	}
+    for ( i = 1; i < num_blocks; i++ )
+    {
+        sprintf( cmd, ":DATA:SEQ:ADD %d,\"%s\",%ld,0,0,0,0\n",
+                 i, block[ i ].blk_name, block[ i ].repeat );
+        dg2020_command( cmd );
+    }
 
-	/* For external trigger mode set trigger wait for first (and only) block */
+    /* For external trigger mode set trigger wait for first (and only) block */
 
-	if ( dg2020.trig_in_mode == EXTERNAL )
-	{
-		dg2020_command( "DATA:SEQ:REP 0,1\n" );
-		dg2020_command( "DATA:SEQ:TWAIT 0,1\n" );
-	}
+    if ( dg2020.trig_in_mode == EXTERNAL )
+    {
+        dg2020_command( "DATA:SEQ:REP 0,1\n" );
+        dg2020_command( "DATA:SEQ:TWAIT 0,1\n" );
+    }
 
-	return OK;
+    return OK;
 }
 
 
@@ -543,70 +543,70 @@ bool dg2020_make_seq( int       num_blocks,
  *-----------------------------------------------------*/
 
 bool dg2020_set_constant( int   channel,
-						  Ticks address,
-						  Ticks length,
-						  int   state )
+                          Ticks address,
+                          Ticks length,
+                          int   state )
 {
-	char *cmd, *cptr;
+    char *cmd, *cptr;
 #if defined ( DMA_SIZE )
-	Ticks m, n;
+    Ticks m, n;
 #endif
 
 
 #if defined ( DMA_SIZE )
 
-	/* The following is a dirty hack to get around the 63K write limit by
-	   splitting transfers that would be too long into several shorter ones.
-	   This should go away when the problem is finally solved !!!!!!! */
+    /* The following is a dirty hack to get around the 63K write limit by
+       splitting transfers that would be too long into several shorter ones.
+       This should go away when the problem is finally solved !!!!!!! */
 
-	if ( length > DMA_SIZE - 50 )
-	{
-		for ( m = address; m < length; m += DMA_SIZE - 50 )
-		{
-			if ( ( n = DMA_SIZE - 50 ) > length - m )
-				n = length - m;
-			if ( ! dg2020_set_constant( channel, m, n, state ) )
-				return FAIL;
-		}
-		return OK;
-	}
+    if ( length > DMA_SIZE - 50 )
+    {
+        for ( m = address; m < length; m += DMA_SIZE - 50 )
+        {
+            if ( ( n = DMA_SIZE - 50 ) > length - m )
+                n = length - m;
+            if ( ! dg2020_set_constant( channel, m, n, state ) )
+                return FAIL;
+        }
+        return OK;
+    }
 #endif
 
-	/* In order to check that the command really arrived at the pulser and has
-	   been executed we have to store each change and compare it with the
-	   actual state after an update comand */
+    /* In order to check that the command really arrived at the pulser and has
+       been executed we have to store each change and compare it with the
+       actual state after an update comand */
 
-	dg2020_gpib_store( channel, address, length, state );
+    dg2020_gpib_store( channel, address, length, state );
 
-	/* Check parameters, allocate memory and set up start of command string.
-	   Because the very first bit in a channel alway has to stay unset we
-	   have not to use address but the increment of address! */
+    /* Check parameters, allocate memory and set up start of command string.
+       Because the very first bit in a channel alway has to stay unset we
+       have not to use address but the increment of address! */
 
-	if ( ! dg2020_prep_cmd( &cmd, channel, address + 1, length ) )
-		return FAIL;
+    if ( ! dg2020_prep_cmd( &cmd, channel, address + 1, length ) )
+        return FAIL;
 
-	/* Assemble rest of command string */
+    /* Assemble rest of command string */
 
-	cptr = cmd + strlen( cmd );
-	memset( cptr, state ? '1' : '0', length );
-	strcpy( cptr + length, "\n" );
+    cptr = cmd + strlen( cmd );
+    memset( cptr, state ? '1' : '0', length );
+    strcpy( cptr + length, "\n" );
 
-	/* Send the command string to the pulser */
+    /* Send the command string to the pulser */
 
-	TRY
-	{
-		dg2020_command( cmd );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( cmd );
-		RETHROW( );
-	}
+    TRY
+    {
+        dg2020_command( cmd );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( cmd );
+        RETHROW( );
+    }
 
-	T_free( cmd );
+    T_free( cmd );
 
-	return OK;
+    return OK;
 }
 
 
@@ -614,16 +614,16 @@ bool dg2020_set_constant( int   channel,
  *----------------------------------------------------------------*/
 
 bool dg2020_set_pod_high_level( int    pod,
-								double voltage )
+                                double voltage )
 {
-	char cmd[ 100 ];
+    char cmd[ 100 ];
 
-	sprintf( cmd, "OUTP:PODA:CH%d:HIGH %f %s\n", pod,
-			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
-			 fabs( voltage ) >= 1 ? "V" : "mV" );
-	dg2020_command( cmd );
+    sprintf( cmd, "OUTP:PODA:CH%d:HIGH %f %s\n", pod,
+             fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
+             fabs( voltage ) >= 1 ? "V" : "mV" );
+    dg2020_command( cmd );
 
-	return OK;
+    return OK;
 }
 
 
@@ -631,16 +631,16 @@ bool dg2020_set_pod_high_level( int    pod,
  *----------------------------------------------------------------*/
 
 bool dg2020_set_pod_low_level( int    pod,
-							   double voltage )
+                               double voltage )
 {
-	char cmd[ 100 ];
+    char cmd[ 100 ];
 
-	sprintf( cmd, "OUTP:PODA:CH%d:LOW %f %s\n", pod,
-			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
-			 fabs( voltage ) >= 1 ? "V" : "mV" );
-	dg2020_command( cmd );
+    sprintf( cmd, "OUTP:PODA:CH%d:LOW %f %s\n", pod,
+             fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
+             fabs( voltage ) >= 1 ? "V" : "mV" );
+    dg2020_command( cmd );
 
-	return OK;
+    return OK;
 }
 
 
@@ -649,14 +649,14 @@ bool dg2020_set_pod_low_level( int    pod,
 
 bool dg2020_set_trigger_in_level( double voltage )
 {
-	char cmd[ 100 ];
+    char cmd[ 100 ];
 
-	sprintf( cmd, "TRIG:LEV %f %s\n",
-			 fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
-			 fabs( voltage ) >= 1 ? "V" : "mV" );
-	dg2020_command( cmd );
+    sprintf( cmd, "TRIG:LEV %f %s\n",
+             fabs( voltage ) >= 1 ? voltage : 1000.0 * voltage,
+             fabs( voltage ) >= 1 ? "V" : "mV" );
+    dg2020_command( cmd );
 
-	return OK;
+    return OK;
 }
 
 
@@ -665,13 +665,13 @@ bool dg2020_set_trigger_in_level( double voltage )
 
 bool dg2020_set_trigger_in_slope( int slope )
 {
-	char cmd[ 100 ];
+    char cmd[ 100 ];
 
-	sprintf( cmd, "TRIG:SLO %s\n",
-			 slope == POSITIVE ? "POS" : "NEG" );
-	dg2020_command( cmd );
+    sprintf( cmd, "TRIG:SLO %s\n",
+             slope == POSITIVE ? "POS" : "NEG" );
+    dg2020_command( cmd );
 
-	return OK;
+    return OK;
 }
 
 
@@ -680,13 +680,13 @@ bool dg2020_set_trigger_in_slope( int slope )
 
 bool dg2020_set_trigger_in_impedance( int state )
 {
-	char cmd[ 100 ];
+    char cmd[ 100 ];
 
-	sprintf( cmd, "TRIG:IMP %s\n",
-			 state == LOW ? "LOW" : "HIGH" );
-	dg2020_command( cmd );
+    sprintf( cmd, "TRIG:IMP %s\n",
+             state == LOW ? "LOW" : "HIGH" );
+    dg2020_command( cmd );
 
-	return OK;
+    return OK;
 }
 
 
@@ -695,8 +695,8 @@ bool dg2020_set_trigger_in_impedance( int state )
 
 void dg2020_gpib_failure( void )
 {
-	print( FATAL, "Communication with device failed.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Communication with device failed.\n" );
+    THROW( EXCEPTION );
 }
 
 
@@ -718,7 +718,7 @@ void dg2020_gpib_failure( void )
  * Unfortunately, this checking will increase the time to setup the pulser
  * quite a lot. To get rid of the checking just comment out the line
  *
- * 	   dg2020_gpib_store( channel, address, length, state );
+ *     dg2020_gpib_store( channel, address, length, state );
  *
  * in the function dg2020_set_constant().
  *-------------------------------------------------------------------------*/
@@ -733,35 +733,35 @@ static int check_retries = 0;
  *----------------------------------------------------------------*/
 
 static void dg2020_gpib_store( int   channel,
-							   Ticks address,
-							   Ticks length,
-							   int   state )
+                               Ticks address,
+                               Ticks length,
+                               int   state )
 {
-	dg2020_store_T *cur = dst;
+    dg2020_store_T *cur = dst;
 
 
-	/* Setup a linked list of all pulse changing commands */
+    /* Setup a linked list of all pulse changing commands */
 
-	if ( dst == NULL )
-	{
-		dst = cur = DG2020_STORE_P T_malloc( sizeof *cur );
-		cur->prev = cur->next = NULL;
-	}
-	else
-	{
-		while ( cur->next != NULL )
-			cur = cur->next;
+    if ( dst == NULL )
+    {
+        dst = cur = DG2020_STORE_P T_malloc( sizeof *cur );
+        cur->prev = cur->next = NULL;
+    }
+    else
+    {
+        while ( cur->next != NULL )
+            cur = cur->next;
 
-		cur->next = DG2020_STORE_P T_malloc( sizeof *cur->next );
-		cur->next->prev = cur;
-		cur = cur->next;
-		cur->next = NULL;
-	}
+        cur->next = DG2020_STORE_P T_malloc( sizeof *cur->next );
+        cur->next->prev = cur;
+        cur = cur->next;
+        cur->next = NULL;
+    }
 
-	cur->channel = channel;
-	cur->address = address;
-	cur->length = length;
-	cur->state = state;
+    cur->channel = channel;
+    cur->address = address;
+    cur->length = length;
+    cur->state = state;
 }
 
 
@@ -770,119 +770,119 @@ static void dg2020_gpib_store( int   channel,
 
 static bool dg2020_gpib_check( void )
 {
-	dg2020_store_T *cur = dst,
-		           *tmp,
-		           *old_dst;
-	bool result = OK;
+    dg2020_store_T *cur = dst,
+                   *tmp,
+                   *old_dst;
+    bool result = OK;
 
 
-	/* Return immediately if there's nothing to check */
+    /* Return immediately if there's nothing to check */
 
-	if ( dst == NULL )
-		return OK;
+    if ( dst == NULL )
+        return OK;
 
-	/* Do a check on each of the commands - if everything is ok remove the
-	   entry from the list. So we end up with a list of just the commands
-	   that failed.*/
+    /* Do a check on each of the commands - if everything is ok remove the
+       entry from the list. So we end up with a list of just the commands
+       that failed.*/
 
-	while ( cur != NULL )
-	{
-		if ( dg2020_gpib_do_check( cur ) )           /* everything ok ? */
-		{
-			if ( cur->prev != NULL )
-				cur->prev->next = cur->next;
-			if ( cur->next != NULL )
-				cur->next->prev = cur->prev;
-			if ( cur == dst )
-				dst = cur->next;
-			tmp = cur->next;
-			T_free( cur );
-			cur = tmp;
-		}
-		else
-		{
-			gpib_log_message( "dg2020_set_constant( %d, %ld, %ld, %d ) "
-							  "failed.\n", cur->channel, cur->address,
-							  cur->length, cur->state );
-			result = FAIL;
-			cur = cur->next;
-		}
-	}
+    while ( cur != NULL )
+    {
+        if ( dg2020_gpib_do_check( cur ) )           /* everything ok ? */
+        {
+            if ( cur->prev != NULL )
+                cur->prev->next = cur->next;
+            if ( cur->next != NULL )
+                cur->next->prev = cur->prev;
+            if ( cur == dst )
+                dst = cur->next;
+            tmp = cur->next;
+            T_free( cur );
+            cur = tmp;
+        }
+        else
+        {
+            gpib_log_message( "dg2020_set_constant( %d, %ld, %ld, %d ) "
+                              "failed.\n", cur->channel, cur->address,
+                              cur->length, cur->state );
+            result = FAIL;
+            cur = cur->next;
+        }
+    }
 
-	/* If everything is ok the command list is removed and we just return */
+    /* If everything is ok the command list is removed and we just return */
 
-	if ( result )
-	{
-		check_retries = 0;
-		return OK;
-	}
+    if ( result )
+    {
+        check_retries = 0;
+        return OK;
+    }
 
-	/* We give up if there were already enough retries - this is necessary to
+    /* We give up if there were already enough retries - this is necessary to
        avoid getting into an infinite loop of failed commands */
 
-	if ( check_retries++ >= MAX_CHECK_RETRIES )
-	{
-		/* Throw away the list of failed commands */
+    if ( check_retries++ >= MAX_CHECK_RETRIES )
+    {
+        /* Throw away the list of failed commands */
 
-		while ( dst != NULL )
-		{
-			tmp = dst->next;
-			T_free( dst );
-			dst = tmp;
-		}
+        while ( dst != NULL )
+        {
+            tmp = dst->next;
+            T_free( dst );
+            dst = tmp;
+        }
 
-		check_retries = 0;
-		return FAIL;
-	}
+        check_retries = 0;
+        return FAIL;
+    }
 
-	/* Redo all the failed commands - we still need the list of the old
+    /* Redo all the failed commands - we still need the list of the old
        commands to deallocate it while the retries create a new list */
 
-	cur = old_dst = dst;
-	dst = NULL;
-	result = OK;
+    cur = old_dst = dst;
+    dst = NULL;
+    result = OK;
 
-	while ( cur != NULL )
-	{
-		if ( ! dg2020_set_constant( cur->channel, cur->address, cur->length,
-									cur->state ) )
-		{
-			result = FAIL;
-			break;
-		}
+    while ( cur != NULL )
+    {
+        if ( ! dg2020_set_constant( cur->channel, cur->address, cur->length,
+                                    cur->state ) )
+        {
+            result = FAIL;
+            break;
+        }
 
-		cur = cur->next;
-	}
+        cur = cur->next;
+    }
 
-	/* Get rid of the old list */
+    /* Get rid of the old list */
 
-	while ( old_dst != NULL )
-	{
-		tmp = old_dst->next;
-		T_free( old_dst );
-		old_dst = tmp;
-	}
+    while ( old_dst != NULL )
+    {
+        tmp = old_dst->next;
+        T_free( old_dst );
+        old_dst = tmp;
+    }
 
-	/* If redoing the commands failed we're out of options - we just delete
-	   the newly created command list and return the failure status */
+    /* If redoing the commands failed we're out of options - we just delete
+       the newly created command list and return the failure status */
 
-	if ( result != OK )
-	{
-		while ( dst != NULL )
-		{
-			tmp = dst->next;
-			T_free( dst );
-			dst = tmp;
-		}
+    if ( result != OK )
+    {
+        while ( dst != NULL )
+        {
+            tmp = dst->next;
+            T_free( dst );
+            dst = tmp;
+        }
 
-		check_retries = 0;
-		return FAIL;
-	}
+        check_retries = 0;
+        return FAIL;
+    }
 
-	/* Now, to commit the changes, we call the update function - this, in
-	   turn, leads to the checks done here being called again */
+    /* Now, to commit the changes, we call the update function - this, in
+       turn, leads to the checks done here being called again */
 
-	return dg2020_update_data( );
+    return dg2020_update_data( );
 }
 
 
@@ -891,91 +891,91 @@ static bool dg2020_gpib_check( void )
 
 static bool dg2020_gpib_do_check( dg2020_store_T * params )
 {
-	char cmd[ 100 ] = "DATA:PATT:BIT? ";
-	char *reply;
-	char *ptr;
-	long length;
-	long got_count;
-	int got_count_digits;
-	char state_char = ( params->state ? '1' : '0' );
-	int i;
+    char cmd[ 100 ] = "DATA:PATT:BIT? ";
+    char *reply;
+    char *ptr;
+    long length;
+    long got_count;
+    int got_count_digits;
+    char state_char = ( params->state ? '1' : '0' );
+    int i;
 
 
-	/* Let's be paranoid */
+    /* Let's be paranoid */
 
-	if ( params->length < 1 )
-		return OK;
+    if ( params->length < 1 )
+        return OK;
 
-	/* Allocate enough space for the pulsers reply */
+    /* Allocate enough space for the pulsers reply */
 
-	length = params->length + 30;
-	reply = CHAR_P T_malloc( length );
+    length = params->length + 30;
+    reply = CHAR_P T_malloc( length );
 
-	/* Assemble the command string - because of the first bit problem we have
-	   to use the increment of address, see also dg2020_set_constant() */
+    /* Assemble the command string - because of the first bit problem we have
+       to use the increment of address, see also dg2020_set_constant() */
 
-	sprintf( cmd + strlen( cmd ), "%d,%ld,%ld\n", params->channel,
-			 params->address + 1, params->length );
+    sprintf( cmd + strlen( cmd ), "%d,%ld,%ld\n", params->channel,
+             params->address + 1, params->length );
 
-	/* Send command and receive reply */
+    /* Send command and receive reply */
 
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( dg2020.device, reply, &length ) == FAILURE )
-	{
-		T_free( reply );
-		dg2020_gpib_failure( );
-	}
+    if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE ||
+         gpib_read( dg2020.device, reply, &length ) == FAILURE )
+    {
+        T_free( reply );
+        dg2020_gpib_failure( );
+    }
 
-	/* The interesting part of the reply starts with a '#' character */
+    /* The interesting part of the reply starts with a '#' character */
 
-	ptr = reply;
-	while ( *ptr != '#' && ptr < reply + length )
-		ptr++;
+    ptr = reply;
+    while ( *ptr != '#' && ptr < reply + length )
+        ptr++;
 
-	/* If no '#' could be found we're in deep trouble... */
+    /* If no '#' could be found we're in deep trouble... */
 
-	if ( *ptr != '#' )
-	{
-		T_free( reply );
-		return FAIL;
-	}
+    if ( *ptr != '#' )
+    {
+        T_free( reply );
+        return FAIL;
+    }
 
-	/* The first byte is the number of digits of the next number... */
+    /* The first byte is the number of digits of the next number... */
 
-	ptr++;
-	got_count_digits = ( int ) ( *ptr++ - '0' );
+    ptr++;
+    got_count_digits = ( int ) ( *ptr++ - '0' );
 
-	if ( got_count_digits < 1 )         /* paranoia */
-	{
-		T_free( reply );
-		return FAIL;
-	}
+    if ( got_count_digits < 1 )         /* paranoia */
+    {
+        T_free( reply );
+        return FAIL;
+    }
 
-	/* The next number is the number of relevant bytes */
+    /* The next number is the number of relevant bytes */
 
-	for ( got_count = 0, i = 0; i < got_count_digits; i++ )
-		got_count = got_count * 10 + ( long ) ( *ptr++ - '0' );
+    for ( got_count = 0, i = 0; i < got_count_digits; i++ )
+        got_count = got_count * 10 + ( long ) ( *ptr++ - '0' );
 
-	/* The number of bytes we got as the reply must be as long as we asked for
+    /* The number of bytes we got as the reply must be as long as we asked for
        - another symptom of paranoia ;-) */
 
-	if ( got_count != params->length )
-	{
-		T_free( reply );
-		return FAIL;
-	}
+    if ( got_count != params->length )
+    {
+        T_free( reply );
+        return FAIL;
+    }
 
-	/* Now check that the bytes received show the correct state */
+    /* Now check that the bytes received show the correct state */
 
-	for ( i = 0; i < got_count; i++ )
-		if ( *ptr++ != state_char )
-			break;                     /* whoops, an error ! */
+    for ( i = 0; i < got_count; i++ )
+        if ( *ptr++ != state_char )
+            break;                     /* whoops, an error ! */
 
-	T_free( reply );
+    T_free( reply );
 
-	/* If we got to the end of the list of bytes everything is ok */
+    /* If we got to the end of the list of bytes everything is ok */
 
-	return ( i == got_count ? OK : FAIL );
+    return ( i == got_count ? OK : FAIL );
 }
 
 
@@ -984,12 +984,12 @@ static bool dg2020_gpib_do_check( dg2020_store_T * params )
 
 bool dg2020_lock_state( bool lock )
 {
-	char cmd[ 10 ];
+    char cmd[ 10 ];
 
-	sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
-	dg2020_command( cmd );
+    sprintf( cmd, "LOC %s\n", lock ? "ALL" : "NON" );
+    dg2020_command( cmd );
 
-	return OK;
+    return OK;
 }
 
 
@@ -998,14 +998,16 @@ bool dg2020_lock_state( bool lock )
 
 bool dg2020_command( const char * cmd )
 {
-	if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
-		dg2020_gpib_failure( );
-	return OK;
+    if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
+        dg2020_gpib_failure( );
+    return OK;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -21,8 +21,8 @@
  */
 
 
-#if ! defined ME6X00_HEADER
-#define ME6X00_HEADER
+#if ! defined ME6X00_LIBRARY_HEADER
+#define ME6X00_LIBRARY_HEADER
 
 
 #ifdef __cplusplus
@@ -34,77 +34,77 @@ extern "C" {
 
 
 typedef struct {
-	me6x00_dev_info info;     /* structure with informations about board */
-	int is_init;              /* has board been used so far? */
-	int fd;                   /* file descriptor for board */
-	int num_dacs;             /* number of DACs on the board */
+    me6x00_dev_info info;     /* structure with informations about board */
+    int is_init;              /* has board been used so far? */
+    int fd;                   /* file descriptor for board */
+    int num_dacs;             /* number of DACs on the board */
 } ME6X00_Device_Info;
 
 
 unsigned int me6x00_frequency_to_timer( double /* freq */ );
 
 int me6x00_board_type( int            /* board */,
-					   unsigned int * /* type  */ );
+                       unsigned int * /* type  */ );
 
 int me6x00_num_dacs( int            /* board    */,
-					 unsigned int * /* num_dacs */ );
+                     unsigned int * /* num_dacs */ );
 
 int me6x00_serial_number( int            /* board     */,
-						  unsigned int * /* serial_no */ );
+                          unsigned int * /* serial_no */ );
 
 int me6x00_board_info( int                /* board */,
-					   me6x00_dev_info ** /* info  */ );
+                       me6x00_dev_info ** /* info  */ );
 
 int me6x00_close( int /* board */ );
 
 int me6x00_voltage( int    /* board */,
-					int    /* dac   */,
-					double /* volts */ );
+                    int    /* dac   */,
+                    double /* volts */ );
 
 int me6x00_keep_voltage( int /* board */,
-						 int /* dac   */,
-						 int /* state */ );
+                         int /* dac   */,
+                         int /* state */ );
 
 int me6x00_continuous( int              /* board */,
-					   int              /* dac   */,
-					   int              /* size  */,
-					   unsigned short * /* buf   */ );
+                       int              /* dac   */,
+                       int              /* size  */,
+                       unsigned short * /* buf   */ );
 
 int me6x00_continuous_ex( int              /* board */,
-						  int              /* dac   */,
-						  int              /* size  */,
-						  unsigned short * /* buf   */ );
+                          int              /* dac   */,
+                          int              /* size  */,
+                          unsigned short * /* buf   */ );
 
 int me6x00_reset( int /* board */,
-				  int /* dac   */ );
+                  int /* dac   */ );
 
 int me6x00_reset_all( int /* board */ );
 
 int me6x00_set_timer( int          /* board */,
-					  int          /* dac   */,
-					  unsigned int /* ticks */ );
+                      int          /* dac   */,
+                      unsigned int /* ticks */ );
 
 int me6x00_set_trigger( int /* board */,
-						int /* dac   */,
-						int /* mode  */ );
+                        int /* dac   */,
+                        int /* mode  */ );
 
 int me6x00_single( int            /* board */,
-				   int            /* dac   */,
-				   unsigned short /* val   */ );
+                   int            /* dac   */,
+                   unsigned short /* val   */ );
 
 int me6x00_start( int /* board */,
-				  int /* dac   */ );
+                  int /* dac   */ );
 
 int me6x00_stop( int /* board */,
-				 int /* dac   */ );
+                 int /* dac   */ );
 
 int me6x00_stop_ex( int /* board */,
-					int /* dac   */ );
+                    int /* dac   */ );
 
 int me6x00_wraparound( int              /* board */,
-					   int              /* dac   */,
-					   int              /* size  */,
-					   unsigned short * /* buf   */ );
+                       int              /* dac   */,
+                       int              /* size  */,
+                       unsigned short * /* buf   */ );
 
 int me6x00_perror( const char * /* s */ );
 
@@ -146,4 +146,12 @@ extern const int me6x00_nerr;
 #endif
 
 
-#endif  /* ME6X00_HEADER */
+#endif  /* ME6X00_LIBRARY_HEADER */
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */

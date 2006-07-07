@@ -30,7 +30,7 @@
 
 
 Var_T *vars_div( Var_T * /* v1 */,
-				 Var_T * /* v2 */ );
+                 Var_T * /* v2 */ );
 
 
 #endif  /* ! VARS_DIV_HEADER */
@@ -39,5 +39,7 @@ Var_T *vars_div( Var_T * /* v1 */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

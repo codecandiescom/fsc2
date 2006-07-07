@@ -35,23 +35,23 @@ typedef struct Att_Table_Entry Att_Table_Entry_T;
 
 
 struct Att_Table_Entry {
-	double att;
-	double step;
+    double att;
+    double step;
 };
 
 struct HJS_Attenuator {
-	bool is_open;                   /* set when serial port has been opened */
+    bool is_open;                   /* set when serial port has been opened */
     struct termios *tio;            /* serial port interface structure */
-	double att;                     /* current attenuation */
-	long step;                      /* current stepper motor position */
-	bool is_step;                   /* set when initial position of stepper
-									   motor has been set */
-	char *calib_file;               /* name of attenuation calibration file */
-	Att_Table_Entry_T *att_table;   /* (sorted) array of attenuation/position
-									   of motor settings */
-	size_t att_table_len;           /* length of this array */
-	double min_table_att;           /* lowest attenuation in array */
-	double max_table_att;           /* largest attenuation in array */
+    double att;                     /* current attenuation */
+    long step;                      /* current stepper motor position */
+    bool is_step;                   /* set when initial position of stepper
+                                       motor has been set */
+    char *calib_file;               /* name of attenuation calibration file */
+    Att_Table_Entry_T *att_table;   /* (sorted) array of attenuation/position
+                                       of motor settings */
+    size_t att_table_len;           /* length of this array */
+    double min_table_att;           /* lowest attenuation in array */
+    double max_table_att;           /* largest attenuation in array */
 };
 
 
@@ -82,5 +82,7 @@ void hjs_attenuator_read_calibration( FILE * /* fp */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

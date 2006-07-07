@@ -64,18 +64,18 @@ char gpib_error_msg[ 1024 ];        /* global for GPIB error messages */
 static int   gpib_init_controller( void );
 static void  gpib_init_log( const char * log_file_name );
 static void  gpib_read_end( const char * dev_name,
-							char *       buffer,
-							long         received,
-							long         expected );
+                            char *       buffer,
+                            long         received,
+                            long         expected );
 static void  gpib_log_date( void );
 static void  gpib_log_error( const char * type );
 static void  gpib_write_start( const char * dev_name,
-							   const char * buffer,
-							   long         length );
+                               const char * buffer,
+                               long         length );
 static void  gpib_log_function_start( const char * function,
-									  const char * dev_name );
+                                      const char * dev_name );
 static void  gpib_log_function_end( const char * function,
-									const char * dev_name );
+                                    const char * dev_name );
 static char *gpib_get_dev_name( int device );
 
 
@@ -115,59 +115,59 @@ static char gpib_error_buffer[ GPIB_ERROR_BUFFER_LENGTH ];
  *-------------------------------------------------------------------------*/
 
 int gpib_init( const char * log_file_name,
-			   int          log_level )
+               int          log_level )
 {
-	GPIB_Dev_T *cur_dev;
+    GPIB_Dev_T *cur_dev;
 
 
-	if ( gpib_is_active )
-		return SUCCESS;
+    if ( gpib_is_active )
+        return SUCCESS;
 
-	ll = log_level;
-	if ( ll < LL_NONE )
-		ll = LL_NONE;
-	if ( ll > LL_ALL )
-		ll = LL_ALL;
+    ll = log_level;
+    if ( ll < LL_NONE )
+        ll = LL_NONE;
+    if ( ll > LL_ALL )
+        ll = LL_ALL;
 
     gpib_init_log( log_file_name );             /* initialise logging */
-	gpib_error_setup( gpib_error_buffer, GPIB_ERROR_BUFFER_LENGTH );
+    gpib_error_setup( gpib_error_buffer, GPIB_ERROR_BUFFER_LENGTH );
 
     if ( gpib_init_controller( ) != SUCCESS )   /* initialise the controller */
     {
         strcpy( gpib_error_msg, "Initialization of controller failed!" );
 
-		if ( ll > LL_NONE )
-		{
-			raise_permissions( );
-			gpib_log_date( );
-			fprintf( gpib_log, "%s\n", gpib_error_buffer );
-			gpib_log_date( );
-			fprintf( gpib_log, "Initialization of controller failed.\n\n" );
-			if ( gpib_log != stderr )
-				fclose( gpib_log );                 /* close log file */
-			lower_permissions( );
-		}
+        if ( ll > LL_NONE )
+        {
+            raise_permissions( );
+            gpib_log_date( );
+            fprintf( gpib_log, "%s\n", gpib_error_buffer );
+            gpib_log_date( );
+            fprintf( gpib_log, "Initialization of controller failed.\n\n" );
+            if ( gpib_log != stderr )
+                fclose( gpib_log );                 /* close log file */
+            lower_permissions( );
+        }
 
-		/* Get rid of the device list if it's already created */
+        /* Get rid of the device list if it's already created */
 
-		if ( gpib_dev_list != NULL )
-		{
-			for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
-				  cur_dev = cur_dev->next )
-				/* empty */ ;
+        if ( gpib_dev_list != NULL )
+        {
+            for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
+                  cur_dev = cur_dev->next )
+                /* empty */ ;
 
-			while ( 1 )
-			{
-				T_free( cur_dev->name );
-				if ( cur_dev->prev != NULL )
-				{
-					cur_dev = cur_dev->prev;
-					T_free( cur_dev->next );
-				}
-				else
-					break;
-			}
-		}
+            while ( 1 )
+            {
+                T_free( cur_dev->name );
+                if ( cur_dev->prev != NULL )
+                {
+                    cur_dev = cur_dev->prev;
+                    T_free( cur_dev->next );
+                }
+                else
+                    break;
+            }
+        }
 
         return FAILURE;
     }
@@ -189,25 +189,25 @@ int gpib_init( const char * log_file_name,
 
 static int gpib_init_controller( void )
 {
-	int state = 0;
+    int state = 0;
 
 
-	raise_permissions( );
+    raise_permissions( );
 
     if ( gpib_init_device( CONTROLLER, &controller ) != SUCCESS )
-	{
-		lower_permissions( );
+    {
+        lower_permissions( );
         return FAILURE;
-	}
+    }
 
     if ( gpib_ask( controller, GPIB_ASK_IS_MASTER, &state ) & GPIB_ERR )
-	{
-		lower_permissions( );
-		return FAILURE;
-	}
+    {
+        lower_permissions( );
+        return FAILURE;
+    }
 
-	lower_permissions( );
-	return state ? SUCCESS : FAILURE;
+    lower_permissions( );
+    return state ? SUCCESS : FAILURE;
 }
 
 
@@ -221,31 +221,31 @@ static int gpib_init_controller( void )
 
 int gpib_shutdown( void )
 {
-	GPIB_Dev_T *cur_dev;
+    GPIB_Dev_T *cur_dev;
 
 
     TEST_BUS_STATE;
 
-	for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
-		  cur_dev = cur_dev->next )
-		/* empty */ ;
+    for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
+          cur_dev = cur_dev->next )
+        /* empty */ ;
 
-	while ( 1 )
-	{
-		T_free( cur_dev->name );
-		if ( cur_dev->prev != NULL )
-		{
-			cur_dev = cur_dev->prev;
-			T_free( cur_dev->next );
-		}
-		else
-			break;
-	}
+    while ( 1 )
+    {
+        T_free( cur_dev->name );
+        if ( cur_dev->prev != NULL )
+        {
+            cur_dev = cur_dev->prev;
+            T_free( cur_dev->next );
+        }
+        else
+            break;
+    }
 
-	T_free( cur_dev );
-	gpib_dev_list = NULL;
+    T_free( cur_dev );
+    gpib_dev_list = NULL;
 
-	raise_permissions( );
+    raise_permissions( );
     gpib_onl( controller, OFF );       /* "switch off" the controller */
 
     if ( ll > LL_NONE )
@@ -256,7 +256,7 @@ int gpib_shutdown( void )
             fclose( gpib_log );                 /* close log file */
     }
 
-	lower_permissions( );
+    lower_permissions( );
     gpib_is_active = 0;
     return SUCCESS;
 }
@@ -276,41 +276,40 @@ int gpib_shutdown( void )
 
 static void gpib_init_log( const char * log_file_name )
 {
-	const char *name;
+    const char *name;
 
 
     if ( ll == LL_NONE )
         return;
 
-	raise_permissions( );
+    raise_permissions( );
 
     if ( log_file_name == NULL || *log_file_name == '\0' )
-	{
+    {
         gpib_log = stderr;
-		fprintf( stderr, "GPIB log file not specified, using stderr "
-				 "instead\n" );
-	}
-	else
-	{
+        fprintf( stderr, "GPIB log file not specified, using stderr "
+                 "instead\n" );
+    }
+    else
+    {
         name = log_file_name;
 
-		if ( ( gpib_log = fopen( name, "w" ) ) == NULL )     /* open fails ? */
-		{
-			gpib_log = stderr;
-			fprintf( stderr, "Can't open log file %s, using stderr instead.\n",
-					 name );
-		}
-		else
-			chmod( name,
-				   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH );
-	}
+        if ( ( gpib_log = fopen( name, "w" ) ) == NULL )     /* open fails ? */
+        {
+            gpib_log = stderr;
+            fprintf( stderr, "Can't open log file %s, using stderr instead.\n",
+                     name );
+        }
+        else
+            chmod( name, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH );
+    }
 
     gpib_log_date( );
 
     fprintf( gpib_log, "GPIB bus is being initialised.\n" );
     fflush( gpib_log );
 
-	lower_permissions( );
+    lower_permissions( );
 }
 
 
@@ -327,18 +326,18 @@ static void gpib_init_log( const char * log_file_name )
  *-----------------------------------------------------------------------*/
 
 int gpib_init_device( const char * device_name,
-					  int *        dev )
+                      int *        dev )
 {
-	GPIB_Dev_T *cur_dev;
+    GPIB_Dev_T *cur_dev;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode  == EXPERIMENT  );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode  == EXPERIMENT  );
 
     if ( ! gpib_is_active && strcmp( device_name, CONTROLLER ) )
     {
@@ -346,60 +345,60 @@ int gpib_init_device( const char * device_name,
         return FAILURE;
     }
 
-	/* Append a new entry to the device list */
+    /* Append a new entry to the device list */
 
-	if ( gpib_dev_list == NULL )
-	{
-		gpib_dev_list = cur_dev = GPIB_DEV_P T_malloc( sizeof *cur_dev );
-		cur_dev->prev = NULL;
-	}
-	else
-	{
-		for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
-			  cur_dev = cur_dev->next )
-			/* empty */ ;
+    if ( gpib_dev_list == NULL )
+    {
+        gpib_dev_list = cur_dev = GPIB_DEV_P T_malloc( sizeof *cur_dev );
+        cur_dev->prev = NULL;
+    }
+    else
+    {
+        for ( cur_dev = gpib_dev_list; cur_dev->next != NULL;
+              cur_dev = cur_dev->next )
+            /* empty */ ;
 
-		cur_dev->next = GPIB_DEV_P T_malloc( sizeof *cur_dev->next );
-		cur_dev->next->prev = cur_dev;
-		cur_dev = cur_dev->next;
-	}
+        cur_dev->next = GPIB_DEV_P T_malloc( sizeof *cur_dev->next );
+        cur_dev->next->prev = cur_dev;
+        cur_dev = cur_dev->next;
+    }
 
-	cur_dev->name = T_strdup( device_name );
-	cur_dev->next = NULL;
+    cur_dev->name = T_strdup( device_name );
+    cur_dev->next = NULL;
 
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_init_device", device_name );
 
-	raise_permissions( );
-	if ( strcmp( device_name, CONTROLLER ) )
-		cur_dev->number = gpib_find( ( char * ) device_name );
-	else
-		cur_dev->number = gpib_find( NULL );
-	lower_permissions( );
+    raise_permissions( );
+    if ( strcmp( device_name, CONTROLLER ) )
+        cur_dev->number = gpib_find( ( char * ) device_name );
+    else
+        cur_dev->number = gpib_find( NULL );
+    lower_permissions( );
 
     if ( cur_dev->number < 0 || gpib_status & GPIB_ERR )
-	{
-		raise_permissions( );
-		gpib_log_date( );
-		fprintf( gpib_log, "%s\n", gpib_error_buffer );
-		lower_permissions( );
+    {
+        raise_permissions( );
+        gpib_log_date( );
+        fprintf( gpib_log, "%s\n", gpib_error_buffer );
+        lower_permissions( );
 
-		T_free( cur_dev->name );
-		if ( cur_dev->prev != NULL )
-			cur_dev->prev->next = NULL;
-		else
-			gpib_dev_list = NULL;
-		T_free( cur_dev );
+        T_free( cur_dev->name );
+        if ( cur_dev->prev != NULL )
+            cur_dev->prev->next = NULL;
+        else
+            gpib_dev_list = NULL;
+        T_free( cur_dev );
         sprintf( gpib_error_msg, "Can't initialize device %s: %s",
-				 device_name, gpib_error_buffer );
-		return FAILURE;
-	}
+                 device_name, gpib_error_buffer );
+        return FAILURE;
+    }
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_init_device", device_name );
 
-	*dev = cur_dev->number;
-	return SUCCESS;
+    *dev = cur_dev->number;
+    return SUCCESS;
 }
 
 
@@ -413,31 +412,31 @@ int gpib_init_device( const char * device_name,
  *-----------------------------------------------------------*/
 
 int gpib_timeout( int device,
-				  int period )
+                  int period )
 {
-	char *dev_name;
+    char *dev_name;
     const char tc[ ][ 9 ] = { "infinity", "10us", "30us", "100us",
-							  "300us", "1ms", "3ms", "10ms", "30ms",
-							  "100ms", "300ms", "1s", "3s", "10s",
-							  "30s", "100s", "300s", "1000s" };
+                              "300us", "1ms", "3ms", "10ms", "30ms",
+                              "100ms", "300ms", "1s", "3s", "10s",
+                              "30s", "100s", "300s", "1000s" };
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode  == EXPERIMENT  );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
-	{
-		sprintf( gpib_error_msg, "Call of gpib_timeout for unknown device "
-				 "(device number %d)\n", device );
-		return FAILURE;
-	}
+    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    {
+        sprintf( gpib_error_msg, "Call of gpib_timeout for unknown device "
+                 "(device number %d)\n", device );
+        return FAILURE;
+    }
 
     if ( period < TNONE )        /* check validity of parameter */
         period = TNONE;
@@ -446,32 +445,32 @@ int gpib_timeout( int device,
 
     if ( ll > LL_ERR )
     {
-		raise_permissions( );
+        raise_permissions( );
         gpib_log_date( );
         fprintf( gpib_log, "Call of gpib_timeout for device %s, ", dev_name );
         fprintf( gpib_log, "-> timeout is set to %s\n", tc[ period ] );
         fflush( gpib_log );
-		lower_permissions( );
+        lower_permissions( );
     }
 
-	raise_permissions( );
+    raise_permissions( );
     gpib_tmo( device, period );
-	lower_permissions( );
+    lower_permissions( );
 
     if ( gpib_status & GPIB_ERR )
     {
         sprintf( gpib_error_msg, "Can't set timeout period for device %s, "
-				 "gpib_status = 0x%x.", dev_name, gpib_status );
+                 "gpib_status = 0x%x.", dev_name, gpib_status );
         return FAILURE;
     }
 
     if ( ll > LL_ERR )
     {
-		raise_permissions( );
+        raise_permissions( );
         gpib_log_date( );
         fprintf( gpib_log, "EXIT of gpib_timeout\n" );
         fflush( gpib_log );
-		lower_permissions( );
+        lower_permissions( );
     }
 
     timeout = period;          /* store actual value of timeout period */
@@ -490,32 +489,32 @@ int gpib_timeout( int device,
 
 int gpib_clear_device( int device )
 {
-	char *dev_name;
+    char *dev_name;
 
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode  == EXPERIMENT  );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode  == EXPERIMENT  );
 
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
-	{
-		sprintf( gpib_error_msg, "Call of gpib_clear_device for unknown "
-				 "device (device number %d)\n", device );
-		return FAILURE;
-	}
+    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    {
+        sprintf( gpib_error_msg, "Call of gpib_clear_device for unknown "
+                 "device (device number %d)\n", device );
+        return FAILURE;
+    }
 
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_clear_device", dev_name );
 
-	raise_permissions( );
+    raise_permissions( );
     gpib_clr( device );
-	lower_permissions( );
+    lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_clear_device", dev_name );
@@ -523,7 +522,7 @@ int gpib_clear_device( int device )
     if ( gpib_status & GPIB_ERR )
     {
         sprintf( gpib_error_msg, "Can't clear device %s, gpib_status = 0x%x",
-				 dev_name, gpib_status );
+                 dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -542,32 +541,32 @@ int gpib_clear_device( int device )
 
 int gpib_local( int device )
 {
-	char *dev_name;
+    char *dev_name;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
-	{
-		sprintf( gpib_error_msg, "Call of gpib_local for unknown "
-				 "device (device number %d)\n", device );
-		return FAILURE;
-	}
+    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    {
+        sprintf( gpib_error_msg, "Call of gpib_local for unknown "
+                 "device (device number %d)\n", device );
+        return FAILURE;
+    }
 
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_local", dev_name );
 
-	raise_permissions( );
+    raise_permissions( );
     gpib_loc( device );
-	lower_permissions( );
+    lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_local", dev_name );
@@ -575,7 +574,7 @@ int gpib_local( int device )
     if ( gpib_status & GPIB_ERR )
     {
         sprintf( gpib_error_msg, "Can't send 'GOTO LOCAL' message to device "
-				 "%s, gpib_status = 0x%x", dev_name, gpib_status );
+                 "%s, gpib_status = 0x%x", dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -594,32 +593,32 @@ int gpib_local( int device )
 
 int gpib_local_lockout( int device )
 {
-	char *dev_name;
+    char *dev_name;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
-	{
-		sprintf( gpib_error_msg, "Call of gpib_local_lockout() for unknown "
-				 "device (device number %d)\n", device );
-		return FAILURE;
-	}
+    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    {
+        sprintf( gpib_error_msg, "Call of gpib_local_lockout() for unknown "
+                 "device (device number %d)\n", device );
+        return FAILURE;
+    }
 
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_local_lockout", dev_name );
 
-	raise_permissions( );
+    raise_permissions( );
     gpib_llo( device );
-	lower_permissions( );
+    lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_local_lockout", dev_name );
@@ -627,7 +626,7 @@ int gpib_local_lockout( int device )
     if ( gpib_status & GPIB_ERR )
     {
         sprintf( gpib_error_msg, "Can't lock device %s, gpib_status = 0x%x",
-				 dev_name, gpib_status );
+                 dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -646,32 +645,32 @@ int gpib_local_lockout( int device )
 
 int gpib_trigger( int device )
 {
-	char *dev_name;
+    char *dev_name;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode  == EXPERIMENT  );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
-	{
-		sprintf( gpib_error_msg, "Call of gpib_trigger for unknown device "
-				 "(device number %d)\n", device );
-		return FAILURE;
-	}
+    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    {
+        sprintf( gpib_error_msg, "Call of gpib_trigger for unknown device "
+                 "(device number %d)\n", device );
+        return FAILURE;
+    }
 
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_trigger", dev_name );
 
-	raise_permissions( );
+    raise_permissions( );
     gpib_trg( device );
-	lower_permissions( );
+    lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_trigger", dev_name );
@@ -679,7 +678,7 @@ int gpib_trigger( int device )
     if ( gpib_status & GPIB_ERR )
     {
         sprintf( gpib_error_msg, "Can't trigger device %s, gpib_status = 0x%x",
-				 dev_name, gpib_status );
+                 dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -709,75 +708,75 @@ int gpib_trigger( int device )
 #if 0
 
 int gpib_wait( int   device,
-			   int   mask,
-			   int * status )
+               int   mask,
+               int * status )
 {
-	int old_timeout = timeout;
-	char *dev_name;
+    int old_timeout = timeout;
+    char *dev_name;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode  == EXPERIMENT  );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode  == EXPERIMENT  );
 
-	TEST_BUS_STATE;              /* bus not initialised yet ? */
+    TEST_BUS_STATE;              /* bus not initialised yet ? */
 
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
-	{
-		sprintf( gpib_error_msg, "Call of gpib_wait for unknown device "
-				 "(device number %d)\n", device );
-		return FAILURE;
-	}
+    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    {
+        sprintf( gpib_error_msg, "Call of gpib_wait for unknown device "
+                 "(device number %d)\n", device );
+        return FAILURE;
+    }
 
-	if ( ll > LL_ERR )
-	{
-		gpib_log_function_start( "gpib_wait", dev_name );
-		seteuid( Fsc2_Internals.EUID );
-		fprintf( gpib_log, "wait mask = 0x0%X\n", mask );
-		if ( mask & ~( GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL ) )
-			fprintf( gpib_log, "=> Setting mask to 0x%X <=\n",
-					 mask & ( GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL ) );
-		fflush( gpib_log );
-		seteuid( getuid( ) );
-	}
+    if ( ll > LL_ERR )
+    {
+        gpib_log_function_start( "gpib_wait", dev_name );
+        seteuid( Fsc2_Internals.EUID );
+        fprintf( gpib_log, "wait mask = 0x0%X\n", mask );
+        if ( mask & ~( GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL ) )
+            fprintf( gpib_log, "=> Setting mask to 0x%X <=\n",
+                     mask & ( GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL ) );
+        fflush( gpib_log );
+        seteuid( getuid( ) );
+    }
 
     /* Only allow certain flags */
 
-	mask &= GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL;
+    mask &= GPIB_TIMO | GPIB_END | GPIB_RQS | GPIB_CMPL;
 
-	if ( ! ( mask & GPIB_TIMO ) && timeout != TNONE )
-		gpib_timeout( device, TNONE );
+    if ( ! ( mask & GPIB_TIMO ) && timeout != TNONE )
+        gpib_timeout( device, TNONE );
 
-	gpib_wait( device, mask );
+    gpib_wait( device, mask );
 
-	if ( status != NULL )
-		*status = gpib_status;
+    if ( status != NULL )
+        *status = gpib_status;
 
-	if ( ll > LL_ERR )
-	{
-		seteuid( Fsc2_Internals.EUID );
-		fprintf( gpib_log, "wait return status = 0x0%X\n", gpib_status );
-		seteuid( getuid( ) );
-	}
+    if ( ll > LL_ERR )
+    {
+        seteuid( Fsc2_Internals.EUID );
+        fprintf( gpib_log, "wait return status = 0x0%X\n", gpib_status );
+        seteuid( getuid( ) );
+    }
 
-	if ( ! ( mask & GPIB_TIMO ) && old_timeout != TNONE )
-		gpib_timeout( device, old_timeout );
+    if ( ! ( mask & GPIB_TIMO ) && old_timeout != TNONE )
+        gpib_timeout( device, old_timeout );
 
-	if ( ll > LL_NONE )
-		gpib_log_function_end( "gpib_wait", dev_name );
+    if ( ll > LL_NONE )
+        gpib_log_function_end( "gpib_wait", dev_name );
 
-	if ( gpib_status & GPIB_ERR )
-	{
-		sprintf( gpib_error_msg, "Can't wait for device %s, status = 0x%x",
-				 dev_name, gpib_status );
-		return FAILURE;
-	}
+    if ( gpib_status & GPIB_ERR )
+    {
+        sprintf( gpib_error_msg, "Can't wait for device %s, status = 0x%x",
+                 dev_name, gpib_status );
+        return FAILURE;
+    }
 
-	return SUCCESS;
+    return SUCCESS;
 }
 
 #endif
@@ -794,54 +793,54 @@ int gpib_wait( int   device,
  *---------------------------------------------------*/
 
 int gpib_write( int          device,
-				const char * buffer,
-				long         length )
+                const char * buffer,
+                long         length )
 {
-	char *dev_name;
+    char *dev_name;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode  == EXPERIMENT  );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
-	{
-		sprintf( gpib_error_msg, "Call of gpib_write for unknown device "
-				 "(device number %d)\n", device );
-		return FAILURE;
-	}
+    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    {
+        sprintf( gpib_error_msg, "Call of gpib_write for unknown device "
+                 "(device number %d)\n", device );
+        return FAILURE;
+    }
 
     if ( length <= 0 )           /* check validity of length parameter */
     {
         if ( ll != LL_NONE )
         {
-			raise_permissions( );
+            raise_permissions( );
             gpib_log_date( );
             fprintf( gpib_log, "ERROR in in call of gpib_write: "
                                "Invalid parameter: %ld bytes.\n", length );
             fflush( gpib_log );
-			lower_permissions( );
+            lower_permissions( );
         }
 
-		sprintf( gpib_error_msg, "Can't write %ld bytes.", length );
-		return FAILURE;
+        sprintf( gpib_error_msg, "Can't write %ld bytes.", length );
+        return FAILURE;
     }
 
     if ( ll > LL_ERR )
         gpib_write_start( dev_name, buffer, length );
 
-	raise_permissions( );
-	gpib_wrt( device, buffer, length );
-	lower_permissions( );
+    raise_permissions( );
+    gpib_wrt( device, buffer, length );
+    lower_permissions( );
 
     if ( ! ( gpib_status & GPIB_ERR ) )
-		gpib_count--;
+        gpib_count--;
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_write", dev_name );
@@ -849,7 +848,7 @@ int gpib_write( int          device,
     if ( gpib_status & GPIB_ERR )
     {
         sprintf( gpib_error_msg, "Can't send data to device %s, status = 0x%x",
-				 dev_name, gpib_status );
+                 dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -866,21 +865,21 @@ int gpib_write( int          device,
  *----------------------------------------------------------------*/
 
 static void gpib_write_start( const char * dev_name,
-							  const char * buffer,
-							  long         length )
+                              const char * buffer,
+                              long         length )
 {
     gpib_log_function_start( "gpib_write", dev_name );
-	raise_permissions( );
+    raise_permissions( );
     fprintf( gpib_log, "-> There are %ld bytes to be sent\n", length );
 
     if ( ll == LL_ALL )
-	{
-		fwrite( buffer, length, 1, gpib_log );
+    {
+        fwrite( buffer, length, 1, gpib_log );
         fputc( ( int ) '\n', gpib_log );
     }
 
     fflush( gpib_log );
-	lower_permissions( );
+    lower_permissions( );
 }
 
 
@@ -897,40 +896,40 @@ static void gpib_write_start( const char * dev_name,
  *----------------------------------------------------------*/
 
 int gpib_read( int    device,
-			   char * buffer,
-			   long * length )
+               char * buffer,
+               long * length )
 {
     long expected = *length;
-	char *dev_name;
+    char *dev_name;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode  == EXPERIMENT  );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
-	{
-		sprintf( gpib_error_msg, "Call of gpib_read for unknown device "
-				 "(device number %d)\n", device );
-		return FAILURE;
-	}
+    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    {
+        sprintf( gpib_error_msg, "Call of gpib_read for unknown device "
+                 "(device number %d)\n", device );
+        return FAILURE;
+    }
 
     if ( *length <= 0 )          /* check validity of length parameter */
     {
         if ( ll != LL_NONE )
         {
-			raise_permissions( );
+            raise_permissions( );
             gpib_log_date( );
             fprintf( gpib_log, "ERROR in call of gpib_read: "
                                "Invalid parameter: %ld bytes\n", *length );
             fflush( gpib_log );
-			lower_permissions( );
+            lower_permissions( );
         }
 
         sprintf( gpib_error_msg, "Can't read %ld bytes.", *length );
@@ -940,15 +939,15 @@ int gpib_read( int    device,
     if ( ll > LL_ERR )
     {
         gpib_log_function_start( "gpib_read", dev_name );
-		raise_permissions( );
+        raise_permissions( );
         fprintf( gpib_log, "-> Expecting up to %ld bytes\n", *length );
         fflush( gpib_log );
-		lower_permissions( );
+        lower_permissions( );
     }
 
-	raise_permissions( );
+    raise_permissions( );
     gpib_rd( device, buffer, expected );
-	lower_permissions( );
+    lower_permissions( );
     *length = gpib_count;
 
     if ( ll > LL_NONE )
@@ -957,7 +956,7 @@ int gpib_read( int    device,
     if ( gpib_status & GPIB_ERR )
     {
         sprintf( gpib_error_msg, "Can't read data from device %s, status = "
-				 "0x%x.", dev_name, gpib_status );
+                 "0x%x.", dev_name, gpib_status );
         return FAILURE;
     }
 
@@ -975,9 +974,9 @@ int gpib_read( int    device,
  *------------------------------------------------------------------*/
 
 static void gpib_read_end( const char * dev_name,
-						   char *       buffer,
-						   long         received,
-						   long         expected )
+                           char *       buffer,
+                           long         received,
+                           long         expected )
 {
     if ( ll > LL_ERR || ( gpib_status & GPIB_ERR ) )
         gpib_log_function_end( "gpib_read", dev_name );
@@ -985,18 +984,18 @@ static void gpib_read_end( const char * dev_name,
     if ( ll < LL_CE )
         return;
 
-	raise_permissions( );
+    raise_permissions( );
     fprintf( gpib_log, "-> Received %ld of up to %ld bytes\n",
              received, expected );
 
     if ( ll == LL_ALL )
-	{
-		fwrite( buffer, received, 1, gpib_log );
+    {
+        fwrite( buffer, received, 1, gpib_log );
         fputc( ( int ) '\n', gpib_log );
     }
 
     fflush( gpib_log );
-	lower_permissions( );
+    lower_permissions( );
 
 }
 
@@ -1005,34 +1004,34 @@ static void gpib_read_end( const char * dev_name,
  *------------------------------------------------------------------*/
 
 int gpib_serial_poll( int             device,
-					  unsigned char * stb )
+                      unsigned char * stb )
 {
-	char *dev_name;
+    char *dev_name;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode  == EXPERIMENT  );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode  == EXPERIMENT  );
 
     TEST_BUS_STATE;              /* bus not initialised yet ? */
 
-	if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
-	{
-		sprintf( gpib_error_msg, "Call of gpib_serial_poll for unknown device "
-				 "(device number %d)\n", device );
-		return FAILURE;
-	}
+    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    {
+        sprintf( gpib_error_msg, "Call of gpib_serial_poll for unknown device "
+                 "(device number %d)\n", device );
+        return FAILURE;
+    }
 
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_serial_poll", dev_name );
 
-	raise_permissions( );
+    raise_permissions( );
     gpib_rsp( device, stb );
-	lower_permissions( );
+    lower_permissions( );
 
     if ( ll > LL_NONE )
         gpib_log_function_end( "gpib_serial_poll", dev_name );
@@ -1040,17 +1039,17 @@ int gpib_serial_poll( int             device,
     if ( gpib_status & GPIB_ERR )
     {
         sprintf( gpib_error_msg, "Can't serial poll device %s, "
-				 "gpib_status = 0x%x", dev_name, gpib_status );
+                 "gpib_status = 0x%x", dev_name, gpib_status );
         return FAILURE;
     }
 
     if ( ll >= LL_CE )
-	{
-		raise_permissions( );
-		fprintf( gpib_log, "-> Received status byte = 0x%x\n", *stb );
-		fflush( gpib_log );
-		lower_permissions( );
-	}
+    {
+        raise_permissions( );
+        fprintf( gpib_log, "-> Received status byte = 0x%x\n", *stb );
+        fflush( gpib_log );
+        lower_permissions( );
+    }
 
     return SUCCESS;
 }
@@ -1063,16 +1062,16 @@ int gpib_serial_poll( int             device,
 static void gpib_log_date( void )
 {
     char tc[ 26 ];
-	struct timeb mt;
+    struct timeb mt;
     time_t t;
 
 
     t = time( NULL );
     strcpy( tc, asctime( localtime( &t ) ) );
-	tc[ 10 ] = '\0';
-	tc[ 19 ] = '\0';
+    tc[ 10 ] = '\0';
+    tc[ 19 ] = '\0';
     tc[ 24 ] = '\0';
-	ftime( &mt );
+    ftime( &mt );
     fprintf( gpib_log, "[%s %s %s.%03d] ", tc, tc + 20, tc + 11, mt.millitm );
 }
 
@@ -1088,9 +1087,9 @@ static void gpib_log_error( const char * type )
 {
     int i;
     static int stats[ 16 ] = { 0x8000, 0x4000, 0x2000, 0x1000,
-							   0x0800, 0x0400, 0x0200, 0x0100,
-							   0x0080, 0x0040, 0x0020, 0x0010,
-							   0x0008, 0x0004, 0x0002, 0x0001 };
+                               0x0800, 0x0400, 0x0200, 0x0100,
+                               0x0080, 0x0040, 0x0020, 0x0010,
+                               0x0008, 0x0004, 0x0002, 0x0001 };
     static char is[ 16 ][ 6 ] = {  "ERR", "TIMO", "END",  "SRQI",
                                    "RQS",   "\b",   "\b",   "CMPL",
                                    "LOK",   "REM",  "CIC",  "ATN",
@@ -1124,13 +1123,13 @@ static void gpib_log_error( const char * type )
  *------------------------------------------------------------*/
 
 static void gpib_log_function_start( const char * function,
-									 const char * dev_name )
+                                     const char * dev_name )
 {
-	raise_permissions( );
+    raise_permissions( );
     gpib_log_date( );
     fprintf( gpib_log, "Call of %s, dev = %s\n", function, dev_name );
     fflush( gpib_log );
-	lower_permissions( );
+    lower_permissions( );
 }
 
 
@@ -1143,9 +1142,9 @@ static void gpib_log_function_start( const char * function,
  *--------------------------------------------------------*/
 
 static void gpib_log_function_end( const char * function,
-								   const char * dev_name )
+                                   const char * dev_name )
 {
-	raise_permissions( );
+    raise_permissions( );
 
     if ( gpib_status & GPIB_ERR )
         gpib_log_error( function );
@@ -1159,7 +1158,7 @@ static void gpib_log_function_end( const char * function,
     }
 
     fflush( gpib_log );
-	lower_permissions( );
+    lower_permissions( );
 }
 
 
@@ -1168,13 +1167,13 @@ static void gpib_log_function_end( const char * function,
 
 static char *gpib_get_dev_name( int device )
 {
-	GPIB_Dev_T *cur_dev = gpib_dev_list;
+    GPIB_Dev_T *cur_dev = gpib_dev_list;
 
 
-	while ( cur_dev != NULL && cur_dev->number != device )
-		cur_dev = cur_dev->next;
+    while ( cur_dev != NULL && cur_dev->number != device )
+        cur_dev = cur_dev->next;
 
-	return cur_dev == NULL ? NULL : cur_dev->name;
+    return cur_dev == NULL ? NULL : cur_dev->name;
 }
 
 
@@ -1182,33 +1181,35 @@ static char *gpib_get_dev_name( int device )
  *--------------------------------------------------------*/
 
 void gpib_log_message( const char * fmt,
-					   ... )
+                       ... )
 {
-	va_list ap;
+    va_list ap;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode  == EXPERIMENT  );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode  == EXPERIMENT  );
 
-	if ( gpib_log == NULL || ll == LL_NONE )
-		return;
+    if ( gpib_log == NULL || ll == LL_NONE )
+        return;
 
-	raise_permissions( );
-	gpib_log_date( );
-	va_start( ap, fmt );
-	vfprintf( gpib_log, fmt, ap );
-	va_end( ap );
-	lower_permissions( );
+    raise_permissions( );
+    gpib_log_date( );
+    va_start( ap, fmt );
+    vfprintf( gpib_log, fmt, ap );
+    va_end( ap );
+    lower_permissions( );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

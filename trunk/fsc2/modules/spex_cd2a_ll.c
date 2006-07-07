@@ -39,11 +39,11 @@
 static void spex_cd2a_scan_end( void );
 
 static void spex_cd2a_print( char * mess,
-							 int    digits,
-							 double val );
+                             int    digits,
+                             double val );
 
 static size_t spex_cd2a_write( int          type,
-							   const char * mess );
+                               const char * mess );
 
 static void spex_cd2a_read_ack( void );
 
@@ -77,78 +77,78 @@ static bool spex_cd2a_do_print_message = UNSET;
 
 void spex_cd2a_init( void )
 {
-	/* First calculate the length of position messages, so we don't have to
-	   recalculate it all of the time. */
+    /* First calculate the length of position messages, so we don't have to
+       recalculate it all of the time. */
 
-	spex_cd2a_pos_mess_len = spex_cd2a_calc_pos_mess_len( );
+    spex_cd2a_pos_mess_len = spex_cd2a_calc_pos_mess_len( );
 
-	/* Now check if the device is prepared to talk with us by sending it the
-	   command to use burst scans - that's the only type of scans supported
-	   anyway (with bursts induced by software triggers). */
+    /* Now check if the device is prepared to talk with us by sending it the
+       command to use burst scans - that's the only type of scans supported
+       anyway (with bursts induced by software triggers). */
 
-	spex_cd2a_do_print_message = UNSET;
+    spex_cd2a_do_print_message = UNSET;
 
 #ifndef SPEX_CD2A_TEST
-	while ( 1 )
-	{
-		TRY
-		{
-			fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-			spex_cd2a_write( PARAMETER, "TYB" );
-			TRY_SUCCESS;
-		}
-		CATCH( EXCEPTION )
-		{
-			if ( 1 != show_choices( "Please press the \"REMOTE\" button at\n"
-									"the console to allow computer control\n"
-									"of the monochromator.",
-									2, "Abort", "Done", NULL, 1 ) )
-				continue;
-			SPEX_CD2A_THROW( EXCEPTION );
-			
-		}
-		OTHERWISE
-			SPEX_CD2A_RETHROW( );
+    while ( 1 )
+    {
+        TRY
+        {
+            fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
+            spex_cd2a_write( PARAMETER, "TYB" );
+            TRY_SUCCESS;
+        }
+        CATCH( EXCEPTION )
+        {
+            if ( 1 != show_choices( "Please press the \"REMOTE\" button at\n"
+                                    "the console to allow computer control\n"
+                                    "of the monochromator.",
+                                    2, "Abort", "Done", NULL, 1 ) )
+                continue;
+            SPEX_CD2A_THROW( EXCEPTION );
+            
+        }
+        OTHERWISE
+            SPEX_CD2A_RETHROW( );
 
-		break;
-	}
+        break;
+    }
 #endif
 
-	spex_cd2a_do_print_message = SET;
+    spex_cd2a_do_print_message = SET;
 
-	/* Set the laser line position if the monochromator is wavenumber driven
-	   (if not set the laser line gets switched off automatically to make
-	   the device accept wavenumbers in absolute units). */
+    /* Set the laser line position if the monochromator is wavenumber driven
+       (if not set the laser line gets switched off automatically to make
+       the device accept wavenumbers in absolute units). */
 
-	if ( spex_cd2a.mode & WN_MODES )
-		spex_cd2a_set_laser_line( );
+    if ( spex_cd2a.mode & WN_MODES )
+        spex_cd2a_set_laser_line( );
 
-	/* Set the end of scans to the upper wavelength or lower wavenumber limit
-	   and the number of scan repetitions to 1. */
+    /* Set the end of scans to the upper wavelength or lower wavenumber limit
+       and the number of scan repetitions to 1. */
 
-	spex_cd2a_scan_end( );
-	spex_cd2a_write( PARAMETER, "NS1" );
+    spex_cd2a_scan_end( );
+    spex_cd2a_write( PARAMETER, "NS1" );
 
-	/* If a wavelength was set in the PREPARATIONS section set it now. */
+    /* If a wavelength was set in the PREPARATIONS section set it now. */
 
-	if ( spex_cd2a.is_wavelength )
-		spex_cd2a_set_wavelength( );
+    if ( spex_cd2a.is_wavelength )
+        spex_cd2a_set_wavelength( );
 
-	/* If there was a scan setup send the values to the device now and, if
-	   no wavelength or -number was set, set it to the value of the start
-	   position of the scan. */
+    /* If there was a scan setup send the values to the device now and, if
+       no wavelength or -number was set, set it to the value of the start
+       position of the scan. */
 
-	if ( spex_cd2a.scan_is_init )
-	{
-		spex_cd2a_scan_start( );
-		spex_cd2a_scan_step( );
+    if ( spex_cd2a.scan_is_init )
+    {
+        spex_cd2a_scan_start( );
+        spex_cd2a_scan_step( );
 
-		if ( ! spex_cd2a.is_wavelength )
-		{
-			spex_cd2a_set_wavelength( );
-			spex_cd2a.is_wavelength = SET;
-		}
-	}
+        if ( ! spex_cd2a.is_wavelength )
+        {
+            spex_cd2a_set_wavelength( );
+            spex_cd2a.is_wavelength = SET;
+        }
+    }
 }
 
 
@@ -158,27 +158,27 @@ void spex_cd2a_init( void )
 
 void spex_cd2a_set_wavelength( void )
 {
-	char mess[ 11 ] = "SE";
+    char mess[ 11 ] = "SE";
 
 
-	/* If we're in scan mode we need to stop the currently running scan
-	   before we can set a new position */
+    /* If we're in scan mode we need to stop the currently running scan
+       before we can set a new position */
 
-	if ( spex_cd2a.in_scan )
-		spex_cd2a_halt( );
+    if ( spex_cd2a.in_scan )
+        spex_cd2a_halt( );
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return;
+    if ( FSC2_MODE != EXPERIMENT )
+        return;
 
-	/* Set the wavenumber or -length, depending on monochromator type */
+    /* Set the wavenumber or -length, depending on monochromator type */
 
-	spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.wavelength ) );
+    spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.wavelength ) );
 
-	spex_cd2a_write( PARAMETER, mess );
+    spex_cd2a_write( PARAMETER, mess );
 
-	/* ...and ask the monochromator to move to it */
+    /* ...and ask the monochromator to move to it */
 
-	spex_cd2a_write( COMMAND, "P" );
+    spex_cd2a_write( COMMAND, "P" );
 }
 
 
@@ -188,9 +188,9 @@ void spex_cd2a_set_wavelength( void )
 
 void spex_cd2a_halt( void )
 {
-	if ( FSC2_MODE == EXPERIMENT )
-		spex_cd2a_write( COMMAND, "H" );
-	spex_cd2a.in_scan = UNSET;
+    if ( FSC2_MODE == EXPERIMENT )
+        spex_cd2a_write( COMMAND, "H" );
+    spex_cd2a.in_scan = UNSET;
 }
 
 
@@ -200,18 +200,18 @@ void spex_cd2a_halt( void )
 
 void spex_cd2a_start_scan( void )
 {
-	fsc2_assert( spex_cd2a.scan_is_init );
+    fsc2_assert( spex_cd2a.scan_is_init );
 
-	/* If we're already scanning stop the current scan */
+    /* If we're already scanning stop the current scan */
 
-	if ( spex_cd2a.in_scan )
-		spex_cd2a_halt( );
+    if ( spex_cd2a.in_scan )
+        spex_cd2a_halt( );
 
-	if ( FSC2_MODE == EXPERIMENT )
-		spex_cd2a_write( COMMAND, "T" );
+    if ( FSC2_MODE == EXPERIMENT )
+        spex_cd2a_write( COMMAND, "T" );
 
-	spex_cd2a.in_scan = SET;
-	spex_cd2a.wavelength = spex_cd2a.scan_start;
+    spex_cd2a.in_scan = SET;
+    spex_cd2a.wavelength = spex_cd2a.scan_start;
 }
 
 
@@ -221,17 +221,17 @@ void spex_cd2a_start_scan( void )
 
 void spex_cd2a_trigger( void )
 {
-	fsc2_assert( spex_cd2a.in_scan );
+    fsc2_assert( spex_cd2a.in_scan );
 
-	if ( FSC2_MODE == EXPERIMENT )
-		spex_cd2a_write( COMMAND, "E" );
+    if ( FSC2_MODE == EXPERIMENT )
+        spex_cd2a_write( COMMAND, "E" );
 
-	if ( spex_cd2a.mode == WL )
-		spex_cd2a.wavelength += spex_cd2a.scan_step;
-	else
-		spex_cd2a.wavelength =
-					   spex_cd2a_wn2wl( spex_cd2a_wl2wn( spex_cd2a.wavelength )
-										- spex_cd2a.scan_step );
+    if ( spex_cd2a.mode == WL )
+        spex_cd2a.wavelength += spex_cd2a.scan_step;
+    else
+        spex_cd2a.wavelength =
+                       spex_cd2a_wn2wl( spex_cd2a_wl2wn( spex_cd2a.wavelength )
+                                        - spex_cd2a.scan_step );
 }
 
 
@@ -251,23 +251,23 @@ void spex_cd2a_trigger( void )
 
 void spex_cd2a_set_laser_line( void )
 {
-	char mess[ 11 ] = "LL";
+    char mess[ 11 ] = "LL";
 
 
-	fsc2_assert( spex_cd2a.mode & WN_MODES );
+    fsc2_assert( spex_cd2a.mode & WN_MODES );
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return;
+    if ( FSC2_MODE != EXPERIMENT )
+        return;
 
-	fsc2_assert( spex_cd2a.mode & WN_MODES );
+    fsc2_assert( spex_cd2a.mode & WN_MODES );
 
-	/* Stop a running scan */
+    /* Stop a running scan */
 
-	if ( spex_cd2a.in_scan )
-		spex_cd2a_halt( );
+    if ( spex_cd2a.in_scan )
+        spex_cd2a_halt( );
 
-	spex_cd2a_print( mess + 2, 8, spex_cd2a.laser_line );
-	spex_cd2a_write( PARAMETER, mess );
+    spex_cd2a_print( mess + 2, 8, spex_cd2a.laser_line );
+    spex_cd2a_write( PARAMETER, mess );
 }
 
 
@@ -277,29 +277,29 @@ void spex_cd2a_set_laser_line( void )
 
 void spex_cd2a_set_shutter_limits( void )
 {
-	char mess[ 11 ] = "SL";
+    char mess[ 11 ] = "SL";
 
 
-	fsc2_assert( spex_cd2a.has_shutter );
+    fsc2_assert( spex_cd2a.has_shutter );
 
-	/* Halt a running scan */
+    /* Halt a running scan */
 
-	if ( spex_cd2a.in_scan )
-		spex_cd2a_halt( );
+    if ( spex_cd2a.in_scan )
+        spex_cd2a_halt( );
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return;
+    if ( FSC2_MODE != EXPERIMENT )
+        return;
 
-	/* Set the lower shutter limit */
+    /* Set the lower shutter limit */
 
-	spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.lower_limit ) );
-	spex_cd2a_write( PARAMETER, mess );
+    spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.lower_limit ) );
+    spex_cd2a_write( PARAMETER, mess );
 
-	/* Set the upper shutter limit */
+    /* Set the upper shutter limit */
 
-	strcpy( mess, "SH" );
-	spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.upper_limit ) );
-	spex_cd2a_write( PARAMETER, mess );
+    strcpy( mess, "SH" );
+    spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.upper_limit ) );
+    spex_cd2a_write( PARAMETER, mess );
 }
 
 
@@ -309,21 +309,21 @@ void spex_cd2a_set_shutter_limits( void )
 
 void spex_cd2a_scan_start( void )
 {
-	char mess[ 11 ] = "ST";
+    char mess[ 11 ] = "ST";
 
 
-	/* If a scan is already running halt it first */
+    /* If a scan is already running halt it first */
 
-	if ( spex_cd2a.in_scan )
-		spex_cd2a_halt( );
+    if ( spex_cd2a.in_scan )
+        spex_cd2a_halt( );
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return;
+    if ( FSC2_MODE != EXPERIMENT )
+        return;
 
-	/* Set start wavenumber or -length, depending on monochromator type */
+    /* Set start wavenumber or -length, depending on monochromator type */
 
-	spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.scan_start ) );
-	spex_cd2a_write( PARAMETER, mess );
+    spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.scan_start ) );
+    spex_cd2a_write( PARAMETER, mess );
 }
 
 
@@ -336,10 +336,10 @@ void spex_cd2a_scan_start( void )
 
 static void spex_cd2a_scan_end( void )
 {
-	char mess[ 11 ] = "EN";
+    char mess[ 11 ] = "EN";
 
-	spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.upper_limit ) );
-	spex_cd2a_write( PARAMETER, mess );
+    spex_cd2a_print( mess + 2, 8, spex_cd2a_wl2mu( spex_cd2a.upper_limit ) );
+    spex_cd2a_write( PARAMETER, mess );
 }
 
 
@@ -349,20 +349,20 @@ static void spex_cd2a_scan_end( void )
 
 void spex_cd2a_scan_step( void )
 {
-	char mess[ 9 ] = "BI";
+    char mess[ 9 ] = "BI";
 
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return;
+    if ( FSC2_MODE != EXPERIMENT )
+        return;
 
-	if ( spex_cd2a.mode & WN_MODES )
-		spex_cd2a_print( mess + 2, 6, spex_cd2a.scan_step );
-	else
-		spex_cd2a_print( mess + 2, 6, ( UNITS == NANOMETER ? 1.0e9 : 1.0e10 )
-						 			  * spex_cd2a.scan_step );
+    if ( spex_cd2a.mode & WN_MODES )
+        spex_cd2a_print( mess + 2, 6, spex_cd2a.scan_step );
+    else
+        spex_cd2a_print( mess + 2, 6, ( UNITS == NANOMETER ? 1.0e9 : 1.0e10 )
+                                      * spex_cd2a.scan_step );
 
-	spex_cd2a_write( PARAMETER, mess );
-}	
+    spex_cd2a_write( PARAMETER, mess );
+}   
 
 
 /*-----------------------------------------------------------------------*
@@ -371,40 +371,40 @@ void spex_cd2a_scan_step( void )
  *-----------------------------------------------------------------------*/
 
 static void spex_cd2a_print( char * mess,
-							 int    digits,
-							 double val )
+                             int    digits,
+                             double val )
 {
-	int pre_digits, after_digits;
-	char *buf;
+    int pre_digits, after_digits;
+    char *buf;
 
 
-	fsc2_assert( digits > 0 );
+    fsc2_assert( digits > 0 );
 
-	if ( log10( fabs( fabs( val  ) ) ) < 0 )
-	{
-		pre_digits = 1;
-		if ( val < 0.0 )
-			pre_digits += 1;
-		after_digits = digits - pre_digits - 1;
-	}
-	else
-	{
-		buf = get_string( "%f", val );
-		for ( pre_digits = 0; pre_digits < digits - 1; pre_digits++ )
-			if ( buf[ pre_digits ] == '.' )
-				break;
-		T_free( buf );
-		after_digits = digits - pre_digits - 1;
-		fsc2_assert( after_digits >= 0 );
-	}
+    if ( log10( fabs( fabs( val  ) ) ) < 0 )
+    {
+        pre_digits = 1;
+        if ( val < 0.0 )
+            pre_digits += 1;
+        after_digits = digits - pre_digits - 1;
+    }
+    else
+    {
+        buf = get_string( "%f", val );
+        for ( pre_digits = 0; pre_digits < digits - 1; pre_digits++ )
+            if ( buf[ pre_digits ] == '.' )
+                break;
+        T_free( buf );
+        after_digits = digits - pre_digits - 1;
+        fsc2_assert( after_digits >= 0 );
+    }
 
-	if ( after_digits == 0 )
-		sprintf( mess, "%*ld", digits, lrnd( val ) );
-	else
-	{
-		val = lrnd( val * pow( 10, after_digits ) ) / pow( 10, after_digits );
-		sprintf( mess, "%*.*f", digits, after_digits, val );
-	}
+    if ( after_digits == 0 )
+        sprintf( mess, "%*ld", digits, lrnd( val ) );
+    else
+    {
+        val = lrnd( val * pow( 10, after_digits ) ) / pow( 10, after_digits );
+        sprintf( mess, "%*.*f", digits, after_digits, val );
+    }
 }
 
 
@@ -417,100 +417,100 @@ void spex_cd2a_open( void )
 {
 #ifndef SPEX_CD2A_TEST
 
-	/* We need exclusive access to the serial port and we also need non-
-	   blocking mode to avoid hanging indefinitely if the other side does not
-	   react. O_NOCTTY is set because the serial port should not become the
-	   controlling terminal, otherwise line noise read as a CTRL-C might kill
-	   the program. */
+    /* We need exclusive access to the serial port and we also need non-
+       blocking mode to avoid hanging indefinitely if the other side does not
+       react. O_NOCTTY is set because the serial port should not become the
+       controlling terminal, otherwise line noise read as a CTRL-C might kill
+       the program. */
 
-	if ( ( spex_cd2a.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
-						  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
-	{
-		print( FATAL, "Can't open device file for monochromator.\n" );
-		SPEX_CD2A_THROW( EXCEPTION );
-	}
+    if ( ( spex_cd2a.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+                          O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+    {
+        print( FATAL, "Can't open device file for monochromator.\n" );
+        SPEX_CD2A_THROW( EXCEPTION );
+    }
 
-	spex_cd2a.tio->c_cflag = 0;
+    spex_cd2a.tio->c_cflag = 0;
 
-	switch ( PARITY_TYPE )
-	{
-		case NO_PARITY :
-			break;
+    switch ( PARITY_TYPE )
+    {
+        case NO_PARITY :
+            break;
 
-		case ODD_PARITY :
-			spex_cd2a.tio->c_cflag |= PARENB | PARODD;
-			break;
+        case ODD_PARITY :
+            spex_cd2a.tio->c_cflag |= PARENB | PARODD;
+            break;
 
-		case EVEN_PARITY :
-			spex_cd2a.tio->c_cflag |= PARENB;
-			break;
+        case EVEN_PARITY :
+            spex_cd2a.tio->c_cflag |= PARENB;
+            break;
 
-		default :
-			fsc2_serial_close( SERIAL_PORT );
-			print( FATAL, "Invalid setting for parity bit in "
-				   "configuration file for the device.\n" );
-			SPEX_CD2A_THROW( EXCEPTION );
-	}
+        default :
+            fsc2_serial_close( SERIAL_PORT );
+            print( FATAL, "Invalid setting for parity bit in "
+                   "configuration file for the device.\n" );
+            SPEX_CD2A_THROW( EXCEPTION );
+    }
 
-	switch ( NUMBER_OF_STOP_BITS )
-	{
-		case 1 :
-			break;
+    switch ( NUMBER_OF_STOP_BITS )
+    {
+        case 1 :
+            break;
 
-		case 2 :
-			spex_cd2a.tio->c_cflag |= CSTOPB;
-			break;
+        case 2 :
+            spex_cd2a.tio->c_cflag |= CSTOPB;
+            break;
 
-		default :
-			fsc2_serial_close( SERIAL_PORT );
-			print( FATAL, "Invalid setting for number of stop bits in "
-				   "configuration file for the device.\n" );
-			SPEX_CD2A_THROW( EXCEPTION );
-	}
+        default :
+            fsc2_serial_close( SERIAL_PORT );
+            print( FATAL, "Invalid setting for number of stop bits in "
+                   "configuration file for the device.\n" );
+            SPEX_CD2A_THROW( EXCEPTION );
+    }
 
-	switch ( NUMBER_OF_BITS_PER_CHARACTER )
-	{
-		case 5 :
-			spex_cd2a.tio->c_cflag |= CS5;
-			break;
+    switch ( NUMBER_OF_BITS_PER_CHARACTER )
+    {
+        case 5 :
+            spex_cd2a.tio->c_cflag |= CS5;
+            break;
 
-		case 6 :
-			spex_cd2a.tio->c_cflag |= CS6;
-			break;
+        case 6 :
+            spex_cd2a.tio->c_cflag |= CS6;
+            break;
 
-		case 7 :
-			spex_cd2a.tio->c_cflag |= CS7;
-			break;
+        case 7 :
+            spex_cd2a.tio->c_cflag |= CS7;
+            break;
 
-		case 8 :
-			spex_cd2a.tio->c_cflag |= CS8;
-			break;
+        case 8 :
+            spex_cd2a.tio->c_cflag |= CS8;
+            break;
 
-		default :
-			fsc2_serial_close( SERIAL_PORT );
-			print( FATAL, "Invalid setting for number of bits per "
-				   "in character configuration file for the device.\n" );
-			SPEX_CD2A_THROW( EXCEPTION );
-	}
+        default :
+            fsc2_serial_close( SERIAL_PORT );
+            print( FATAL, "Invalid setting for number of bits per "
+                   "in character configuration file for the device.\n" );
+            SPEX_CD2A_THROW( EXCEPTION );
+    }
 
-	spex_cd2a.tio->c_cflag |= CLOCAL | CREAD;
-	spex_cd2a.tio->c_iflag = IGNBRK;
-	spex_cd2a.tio->c_oflag = 0;
-	spex_cd2a.tio->c_lflag = 0;
+    spex_cd2a.tio->c_cflag |= CLOCAL | CREAD;
+    spex_cd2a.tio->c_iflag = IGNBRK;
+    spex_cd2a.tio->c_oflag = 0;
+    spex_cd2a.tio->c_lflag = 0;
 
-	cfsetispeed( spex_cd2a.tio, SERIAL_BAUDRATE );
-	cfsetospeed( spex_cd2a.tio, SERIAL_BAUDRATE );
+    cfsetispeed( spex_cd2a.tio, SERIAL_BAUDRATE );
+    cfsetospeed( spex_cd2a.tio, SERIAL_BAUDRATE );
 
-	/* We can't use canonical mode here... */
+    /* We can't use canonical mode here... */
 
-	spex_cd2a.tio->c_lflag = 0;
+    spex_cd2a.tio->c_lflag = 0;
 
-	fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-	fsc2_tcsetattr( SERIAL_PORT, TCSANOW, spex_cd2a.tio );
+    fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
+    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, spex_cd2a.tio );
 
 #endif
 
-	spex_cd2a.is_open = SET;
+    spex_cd2a.is_open = SET;
 }
 
 
@@ -521,60 +521,60 @@ void spex_cd2a_open( void )
  *-----------------------------------------------------------------------*/
 
 static size_t spex_cd2a_write( int          type,
-							   const char * mess )
+                               const char * mess )
 {
-	unsigned char *tmx;
-	unsigned long cs = 0;
-	size_t len;
-	size_t i;
-	ssize_t written;
+    unsigned char *tmx;
+    unsigned long cs = 0;
+    size_t len;
+    size_t i;
+    ssize_t written;
 
 
 #ifdef SPEX_CD2A_TEST
 
-//	fprintf( stderr, "%s\n", mess );
+//  fprintf( stderr, "%s\n", mess );
 
-	return 0;
+    return 0;
 #endif
 
-	len = strlen( mess );
-	tmx = UCHAR_P T_malloc( len + 6 );
+    len = strlen( mess );
+    tmx = UCHAR_P T_malloc( len + 6 );
 
-	tmx[ 0 ] = type == PARAMETER ? STX : CAN;
-	len++;
-	strcpy( ( char * ) ( tmx + 1 ), mess );
-	tmx[ len++ ] = ETX;
+    tmx[ 0 ] = type == PARAMETER ? STX : CAN;
+    len++;
+    strcpy( ( char * ) ( tmx + 1 ), mess );
+    tmx[ len++ ] = ETX;
 
-	if ( spex_cd2a.use_checksum )
-	{
-		for ( i = 0; i < len; i++ )
-			cs += tmx[ i ];
-		sprintf( ( char * ) ( tmx + len ), "%02lx", cs & 0xFF );
-		len += 2;
-	}
+    if ( spex_cd2a.use_checksum )
+    {
+        for ( i = 0; i < len; i++ )
+            cs += tmx[ i ];
+        sprintf( ( char * ) ( tmx + len ), "%02lx", cs & 0xFF );
+        len += 2;
+    }
 
-	tmx[ len++ ] = '\r';
+    tmx[ len++ ] = '\r';
 
-	/* The device don't seem to accept commands unless there's a short
-	   delay since the last transmission... */
+    /* The device don't seem to accept commands unless there's a short
+       delay since the last transmission... */
 
-	if ( type == COMMAND )
-		fsc2_usleep( 10000, UNSET );
+    if ( type == COMMAND )
+        fsc2_usleep( 10000, UNSET );
 
-	if ( ( written = fsc2_serial_write( SERIAL_PORT, tmx, len, 0, UNSET ) )
-		 <= 0 )
-	{
-		T_free( tmx );
-		spex_cd2a_comm_fail( );
-	}
+    if ( ( written = fsc2_serial_write( SERIAL_PORT, tmx, len, 0, UNSET ) )
+         <= 0 )
+    {
+        T_free( tmx );
+        spex_cd2a_comm_fail( );
+    }
 
-	T_free( tmx );
+    T_free( tmx );
 
-	spex_cd2a_read_ack( );
-	if ( type != PARAMETER )
-		spex_cd2a_read_cmd_ack( mess );
+    spex_cd2a_read_ack( );
+    if ( type != PARAMETER )
+        spex_cd2a_read_cmd_ack( mess );
 
-	return ( size_t ) written;
+    return ( size_t ) written;
 }
 
 
@@ -587,76 +587,76 @@ static size_t spex_cd2a_write( int          type,
 
 static void spex_cd2a_read_ack( void )
 {
-	char buf[ 8 ];
-	ssize_t received, len, count;
+    char buf[ 8 ];
+    ssize_t received, len, count;
 
 
-	/* Skip initial <CAN> characters, the device sometimes sends them without
-	   good reasons (at least in contrast to what's written in the manual) */
+    /* Skip initial <CAN> characters, the device sometimes sends them without
+       good reasons (at least in contrast to what's written in the manual) */
 
-	do {
-		if ( ( received = fsc2_serial_read( SERIAL_PORT, buf, 1,
-											1000000, UNSET ) ) <= 0 )
-			spex_cd2a_comm_fail( );
-	} while ( *buf == CAN );
+    do {
+        if ( ( received = fsc2_serial_read( SERIAL_PORT, buf, 1,
+                                            1000000, UNSET ) ) <= 0 )
+            spex_cd2a_comm_fail( );
+    } while ( *buf == CAN );
 
-	if ( *buf != NAK &&
-		 ( received = fsc2_serial_read( SERIAL_PORT, buf + 1,
-										1, 1000000, UNSET ) ) <= 0 )
-		spex_cd2a_comm_fail( );
+    if ( *buf != NAK &&
+         ( received = fsc2_serial_read( SERIAL_PORT, buf + 1,
+                                        1, 1000000, UNSET ) ) <= 0 )
+        spex_cd2a_comm_fail( );
 
-	/* A <NAK> character means that there are communication problems */
+    /* A <NAK> character means that there are communication problems */
 
-	if ( *buf == NAK )
-	{
-		print( FATAL, "Communication problem with device.\n" );
-		SPEX_CD2A_THROW( EXCEPTION );
-	}
+    if ( *buf == NAK )
+    {
+        print( FATAL, "Communication problem with device.\n" );
+        SPEX_CD2A_THROW( EXCEPTION );
+    }
 
-	/* If the device sends an <ACK><CAN> sequence everything is fine */
+    /* If the device sends an <ACK><CAN> sequence everything is fine */
 
-	if ( buf[ 0 ] == ACK && buf[ 1 ] == CAN )
-		return;
+    if ( buf[ 0 ] == ACK && buf[ 1 ] == CAN )
+        return;
 
-	/* A <BEL> character after the <ACK> means something went wrong and we're
-	   going to get the error code in the next bytes. A complete error message
-	   consists of two (printable) ASCII characters for the error code, an
-	   <EOT> character, optionally two checksum bytes, a <CR> and an optional
-	   <LF>. */
+    /* A <BEL> character after the <ACK> means something went wrong and we're
+       going to get the error code in the next bytes. A complete error message
+       consists of two (printable) ASCII characters for the error code, an
+       <EOT> character, optionally two checksum bytes, a <CR> and an optional
+       <LF>. */
 
-	if ( buf[ 0 ] == ACK && buf[ 1 ] == '\a' )
-	{
-		count = 0;
-		len = 4;
-		if ( spex_cd2a.use_checksum )
-			len += 2;
-		if ( spex_cd2a.sends_lf )
-			len++;
+    if ( buf[ 0 ] == ACK && buf[ 1 ] == '\a' )
+    {
+        count = 0;
+        len = 4;
+        if ( spex_cd2a.use_checksum )
+            len += 2;
+        if ( spex_cd2a.sends_lf )
+            len++;
 
-		while ( len > 0 )
-		{
-			if ( ( received = fsc2_serial_read( SERIAL_PORT, buf + count + 2,
-												len - count, 1000000, UNSET ) )
-				 <= 0 )
-				spex_cd2a_comm_fail( );
+        while ( len > 0 )
+        {
+            if ( ( received = fsc2_serial_read( SERIAL_PORT, buf + count + 2,
+                                                len - count, 1000000, UNSET ) )
+                 <= 0 )
+                spex_cd2a_comm_fail( );
 
-			count += received;
-			len -= received;
-		}
+            count += received;
+            len -= received;
+        }
 
-		if ( buf[ 4 ] != EOT )
-			spex_cd2a_comm_fail( );
+        if ( buf[ 4 ] != EOT )
+            spex_cd2a_comm_fail( );
 
-		buf[ 4 ] = '\0';
-		if ( spex_cd2a_do_print_message )
-			print( FATAL, "Failure to execute command, error code: \"%s\".\n",
-			   buf + 2 );
-		SPEX_CD2A_THROW( EXCEPTION );
-	}
+        buf[ 4 ] = '\0';
+        if ( spex_cd2a_do_print_message )
+            print( FATAL, "Failure to execute command, error code: \"%s\".\n",
+               buf + 2 );
+        SPEX_CD2A_THROW( EXCEPTION );
+    }
 
-	/* If none of the above was received things went really wrong... */
+    /* If none of the above was received things went really wrong... */
 
-	spex_cd2a_wrong_data( );
+    spex_cd2a_wrong_data( );
 }
 
 
@@ -666,71 +666,71 @@ static void spex_cd2a_read_ack( void )
 
 static char *spex_cd2a_read_mess( ssize_t to_be_read )
 {
-	static char buf[ 20 ];
-	ssize_t already_read = 0;
-	ssize_t old_already_read, i;
-	char *bp = buf + to_be_read - 1;
+    static char buf[ 20 ];
+    ssize_t already_read = 0;
+    ssize_t old_already_read, i;
+    char *bp = buf + to_be_read - 1;
 
 
-	while ( already_read < to_be_read )
-	{
-		old_already_read = already_read;
+    while ( already_read < to_be_read )
+    {
+        old_already_read = already_read;
 
-		if ( ( already_read +=
-			   fsc2_serial_read( SERIAL_PORT, buf + already_read,
-							to_be_read - already_read, 1000000, UNSET ) ) < 0 )
-			spex_cd2a_comm_fail( );
+        if ( ( already_read +=
+               fsc2_serial_read( SERIAL_PORT, buf + already_read,
+                            to_be_read - already_read, 1000000, UNSET ) ) < 0 )
+            spex_cd2a_comm_fail( );
 
-		/* Throw away <CAN> characters, the device sends them sometimes in the
-		   middle of a message (contrary to what's written in the manual. But
-		   if the device sends a checksum we must be careful because the
-		   checksum could contain a value equivalent to <CAN>... */
+        /* Throw away <CAN> characters, the device sends them sometimes in the
+           middle of a message (contrary to what's written in the manual. But
+           if the device sends a checksum we must be careful because the
+           checksum could contain a value equivalent to <CAN>... */
 
-		if ( ! spex_cd2a.use_checksum )
-		{
-			for ( i = old_already_read; i < already_read; i++ )
-				if ( buf[ i ] == CAN )
-					memmove( buf + i, buf + i + 1, --already_read - i );
-		}
-		else
-		{
-			for ( i = old_already_read;
-				  i < already_read &&
-					  i < to_be_read - ( spex_cd2a.sends_lf ? 4 : 3 );
-				  i++ )
-				if ( buf[ i ] == CAN )
-					memmove( buf + i, buf + i + 1, --already_read - i );
+        if ( ! spex_cd2a.use_checksum )
+        {
+            for ( i = old_already_read; i < already_read; i++ )
+                if ( buf[ i ] == CAN )
+                    memmove( buf + i, buf + i + 1, --already_read - i );
+        }
+        else
+        {
+            for ( i = old_already_read;
+                  i < already_read &&
+                      i < to_be_read - ( spex_cd2a.sends_lf ? 4 : 3 );
+                  i++ )
+                if ( buf[ i ] == CAN )
+                    memmove( buf + i, buf + i + 1, --already_read - i );
 
-			for ( i = to_be_read - ( spex_cd2a.sends_lf ? 2 : 1 );
-				  i < already_read; i++ )
-				if ( buf[ i ] == CAN )
-					memmove( buf + i, buf + i + 1, --already_read - i );
-		}
-	}
+            for ( i = to_be_read - ( spex_cd2a.sends_lf ? 2 : 1 );
+                  i < already_read; i++ )
+                if ( buf[ i ] == CAN )
+                    memmove( buf + i, buf + i + 1, --already_read - i );
+        }
+    }
 
-	/* In STANDARD data format the first byte has to be a <STX> character */
+    /* In STANDARD data format the first byte has to be a <STX> character */
 
-	if ( spex_cd2a.data_format == STANDARD && buf[ 0 ] != STX )
-		spex_cd2a_wrong_data( );
+    if ( spex_cd2a.data_format == STANDARD && buf[ 0 ] != STX )
+        spex_cd2a_wrong_data( );
 
-	/* Last character(s) of message must be <CR> or <CR><LR> */
+    /* Last character(s) of message must be <CR> or <CR><LR> */
 
-	if ( ( spex_cd2a.sends_lf && *bp-- != '\n' ) || *bp-- != '\r' )
-		spex_cd2a_wrong_data( );
+    if ( ( spex_cd2a.sends_lf && *bp-- != '\n' ) || *bp-- != '\r' )
+        spex_cd2a_wrong_data( );
 
-	/* Finally check end of message character which (in standard output mode)
-	   is <ETX> */
+    /* Finally check end of message character which (in standard output mode)
+       is <ETX> */
 
-	if ( spex_cd2a.data_format == STANDARD )
-	{
-		if ( spex_cd2a.use_checksum )
-			bp -= 2;
+    if ( spex_cd2a.data_format == STANDARD )
+    {
+        if ( spex_cd2a.use_checksum )
+            bp -= 2;
 
-		if ( *bp != ETX )
-			spex_cd2a_wrong_data( );
-	}
+        if ( *bp != ETX )
+            spex_cd2a_wrong_data( );
+    }
 
-	return spex_cd2a.data_format == STANDARD ? buf + 1 : buf;
+    return spex_cd2a.data_format == STANDARD ? buf + 1 : buf;
 }
 
 
@@ -745,26 +745,26 @@ static char *spex_cd2a_read_mess( ssize_t to_be_read )
 
 static void spex_cd2a_read_cmd_ack( const char * cmd )
 {
-	switch ( *cmd )
-	{
-		case 'P' :                /* "GO TO SET POSITION" command */
-			spex_cd2a_read_set_pos_ack( );
-			break;
+    switch ( *cmd )
+    {
+        case 'P' :                /* "GO TO SET POSITION" command */
+            spex_cd2a_read_set_pos_ack( );
+            break;
 
-		case 'T' :                /* "ENABLE TRIGGER SCAN" command */
-			spex_cd2a_read_start_scan_ack( );
-			break;
+        case 'T' :                /* "ENABLE TRIGGER SCAN" command */
+            spex_cd2a_read_start_scan_ack( );
+            break;
 
-		case 'E' :                /* "START TRIGGER SCAN" command */
-			spex_cd2a_read_scan_ack( );
-			break;
+        case 'E' :                /* "START TRIGGER SCAN" command */
+            spex_cd2a_read_scan_ack( );
+            break;
 
-		case 'H' :                /* "HALT" command */
-			break;
+        case 'H' :                /* "HALT" command */
+            break;
 
-		default :                 /* no other commands are used */
-			SPEX_CD2A_ASSERT( 1 == 0 );
-	}
+        default :                 /* no other commands are used */
+            SPEX_CD2A_ASSERT( 1 == 0 );
+    }
 }
 
 
@@ -775,32 +775,32 @@ static void spex_cd2a_read_cmd_ack( const char * cmd )
 
 static void spex_cd2a_read_set_pos_ack( void )
 {
-	char *bp; 
+    char *bp; 
 
 
-	/* Repeatedly read in the current position until the final position has
-	   been reached. */
+    /* Repeatedly read in the current position until the final position has
+       been reached. */
 
-	while ( 1 )
-	{
-		bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
+    while ( 1 )
+    {
+        bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
 
-		switch ( *bp++ )
-		{
-			case '*' :          /* final position reached ? */
-				spex_cd2a_pos_mess_check( bp );
-				return;
+        switch ( *bp++ )
+        {
+            case '*' :          /* final position reached ? */
+                spex_cd2a_pos_mess_check( bp );
+                return;
 
-			case 'P' :          /* still moving to final position ? */
-				spex_cd2a_pos_mess_check( bp );
-				break;
+            case 'P' :          /* still moving to final position ? */
+                spex_cd2a_pos_mess_check( bp );
+                break;
 
-			default :
-				spex_cd2a_wrong_data( );
-		}
-	}
+            default :
+                spex_cd2a_wrong_data( );
+        }
+    }
 }
-		
+        
 
 /*-----------------------------------------------------------------------*
  * Function for handling of messages received after a start trigger scan
@@ -809,30 +809,30 @@ static void spex_cd2a_read_set_pos_ack( void )
 
 static void spex_cd2a_read_start_scan_ack( void )
 {
-	char *bp;
+    char *bp;
 
-	
-	/* Repeatedly read in the current position until the start position for
-	   the scan is reached. */
+    
+    /* Repeatedly read in the current position until the start position for
+       the scan is reached. */
 
-	while ( 1 )
-	{
-		bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
+    while ( 1 )
+    {
+        bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
 
-		switch ( *bp++ )
-		{
-			case 'S' :          /* final position reached ? */
-				spex_cd2a_pos_mess_check( bp );
-				return;
+        switch ( *bp++ )
+        {
+            case 'S' :          /* final position reached ? */
+                spex_cd2a_pos_mess_check( bp );
+                return;
 
-			case 'P' :          /* still moving to final position ? */
-				spex_cd2a_pos_mess_check( bp );
-				break;
+            case 'P' :          /* still moving to final position ? */
+                spex_cd2a_pos_mess_check( bp );
+                break;
 
-			default :
-				spex_cd2a_wrong_data( );
-		}
-	}
+            default :
+                spex_cd2a_wrong_data( );
+        }
+    }
 }
 
 
@@ -843,29 +843,29 @@ static void spex_cd2a_read_start_scan_ack( void )
 
 static void spex_cd2a_read_scan_ack( void )
 {
-	char *bp;
+    char *bp;
 
-	
-	/* Repeatedly read in the position until the burst movement is complete */
+    
+    /* Repeatedly read in the position until the burst movement is complete */
 
-	while ( 1 )
-	{
-		bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
+    while ( 1 )
+    {
+        bp = spex_cd2a_read_mess( spex_cd2a_pos_mess_len );
 
-		switch ( *bp++ )
-		{
-			case 'B' :          /* final position reached ? */
-				spex_cd2a_pos_mess_check( bp );
-				return;
+        switch ( *bp++ )
+        {
+            case 'B' :          /* final position reached ? */
+                spex_cd2a_pos_mess_check( bp );
+                return;
 
-			case 'P' :          /* still moving to final position ? */
-				spex_cd2a_pos_mess_check( bp );
-				break;
+            case 'P' :          /* still moving to final position ? */
+                spex_cd2a_pos_mess_check( bp );
+                break;
 
-			default :
-				spex_cd2a_wrong_data( );
-		}
-	}
+            default :
+                spex_cd2a_wrong_data( );
+        }
+    }
 }
 
 
@@ -875,9 +875,9 @@ static void spex_cd2a_read_scan_ack( void )
 
 void spex_cd2a_close( void )
 {
-	if ( spex_cd2a.is_open )
-		fsc2_serial_close( SERIAL_PORT );
-	spex_cd2a.is_open = UNSET;
+    if ( spex_cd2a.is_open )
+        fsc2_serial_close( SERIAL_PORT );
+    spex_cd2a.is_open = UNSET;
 }
 
 
@@ -888,9 +888,9 @@ void spex_cd2a_close( void )
 
 static void spex_cd2a_comm_fail( void )
 {
-	if ( spex_cd2a_do_print_message )
-		print( FATAL, "Can't access the monochromator.\n" );
-	SPEX_CD2A_THROW( EXCEPTION );
+    if ( spex_cd2a_do_print_message )
+        print( FATAL, "Can't access the monochromator.\n" );
+    SPEX_CD2A_THROW( EXCEPTION );
 }
 
 
@@ -901,8 +901,8 @@ static void spex_cd2a_comm_fail( void )
 
 static void spex_cd2a_wrong_data( void )
 {
-	print( FATAL, "Device send unexpected data.\n" );
-	SPEX_CD2A_THROW( EXCEPTION );
+    print( FATAL, "Device send unexpected data.\n" );
+    SPEX_CD2A_THROW( EXCEPTION );
 }
 
 
@@ -919,17 +919,17 @@ static void spex_cd2a_wrong_data( void )
 
 static ssize_t spex_cd2a_calc_pos_mess_len( void )
 {
-	ssize_t len = 11;
+    ssize_t len = 11;
 
 
-	if ( spex_cd2a.data_format == STANDARD )
-		len += 2;
-	if ( spex_cd2a.use_checksum )
-		len += 2;
-	if ( spex_cd2a.sends_lf )
-		len++;
+    if ( spex_cd2a.data_format == STANDARD )
+        len += 2;
+    if ( spex_cd2a.use_checksum )
+        len += 2;
+    if ( spex_cd2a.sends_lf )
+        len++;
 
-	return len;
+    return len;
 }
 
 
@@ -939,40 +939,42 @@ static ssize_t spex_cd2a_calc_pos_mess_len( void )
 
 static void spex_cd2a_pos_mess_check( const char * bp )
 {
-	char *ep;
-	const char *eu = bp;
+    char *ep;
+    const char *eu = bp;
 
 
-	/* When the device is wavenumber driven it sends either a 'W' (when
-	   no laser line has been set) or a 'D' (for delta wavelength),
-	   otherwise either a 'N' or 'A', depending if it's set up to use
-	   nanometer or Angstrom units */
-	   
-	if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
-		 ( spex_cd2a.mode == WND && *bp == 'D' ) ||
-		 ( spex_cd2a.mode == WL &&
-		   ( ( spex_cd2a.units == NANOMETER && *bp == 'N' ) ||
-			 ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )
-		bp++;
-	else
-		spex_cd2a_wrong_data( );
+    /* When the device is wavenumber driven it sends either a 'W' (when
+       no laser line has been set) or a 'D' (for delta wavelength),
+       otherwise either a 'N' or 'A', depending if it's set up to use
+       nanometer or Angstrom units */
+       
+    if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
+         ( spex_cd2a.mode == WND && *bp == 'D' ) ||
+         ( spex_cd2a.mode == WL &&
+           ( ( spex_cd2a.units == NANOMETER && *bp == 'N' ) ||
+             ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )
+        bp++;
+    else
+        spex_cd2a_wrong_data( );
 
-	/* Now follows an 8-byte long numeric field - for negative numbers
-	   we have a minus sign which is possibly followed by spaces before
-	   the number starts. */
+    /* Now follows an 8-byte long numeric field - for negative numbers
+       we have a minus sign which is possibly followed by spaces before
+       the number starts. */
 
-	if ( *bp == '-' )
-		bp++;
+    if ( *bp == '-' )
+        bp++;
 
-	errno = 0;
-	strtod( bp, &ep );
-	if ( errno || ep != eu + 9 )
-		spex_cd2a_wrong_data( );
+    errno = 0;
+    strtod( bp, &ep );
+    if ( errno || ep != eu + 9 )
+        spex_cd2a_wrong_data( );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

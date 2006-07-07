@@ -57,35 +57,35 @@
 
 
 struct HJS_FC {
-	double B0V;             /* Field for DAC voltage of 0 V */
-	double slope;           /* field step for 1 V DAC voltage increment */
+    double B0V;             /* Field for DAC voltage of 0 V */
+    double slope;           /* field step for 1 V DAC voltage increment */
 
-	double min_test_field;  /* minimum and maximum field during test run */
-	double max_test_field;
+    double min_test_field;  /* minimum and maximum field during test run */
+    double max_test_field;
 
-	double B_max;           /* maximum and minimum field the magnet can */
-	double B_min;           /* produce */
+    double B_max;           /* maximum and minimum field the magnet can */
+    double B_min;           /* produce */
 
-	double field;			/* the start field given by the user */
-	double field_step;		/* the field steps to be used for sweeps */
+    double field;           /* the start field given by the user */
+    double field_step;      /* the field steps to be used for sweeps */
 
-	bool is_field;			/* flag, set if start field is defined */
-	bool is_field_step;		/* flag, set if field step size is defined */
+    bool is_field;          /* flag, set if start field is defined */
+    bool is_field_step;     /* flag, set if field step size is defined */
 
-	bool use_calib_file;    /* set when calibration file is to be used */
-	char *calib_file;       /* name of (optional) calibration file */
+    bool use_calib_file;    /* set when calibration file is to be used */
+    char *calib_file;       /* name of (optional) calibration file */
 
-	char *dac_func;
-	char *gm_gf_func;
-	char *gm_res_func;
+    char *dac_func;
+    char *gm_gf_func;
+    char *gm_res_func;
 
-	double dac_min_volts;
-	double dac_max_volts;
-	double dac_resolution;
+    double dac_min_volts;
+    double dac_max_volts;
+    double dac_resolution;
 
-	double cur_volts;       /* current voltage at the DAC output */
-	double act_field;		/* used internally */
-	double target_field;
+    double cur_volts;       /* current voltage at the DAC output */
+    double act_field;       /* used internally */
+    double target_field;
 };
 
 
@@ -120,5 +120,7 @@ void hjs_fc_read_calibration( void );
  * Local variables:
  * tags-file-name: "../TAGS"
  * End:
+ * tab-width: 4
+ * indent-tabs-mode: nil
  */
 

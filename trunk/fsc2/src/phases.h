@@ -34,37 +34,37 @@ typedef struct PA_Seq PA_Seq_T;
 
 
 struct Phs_Seq {
-	long num;
-	int *sequence;                   /* array of phase types */
-	int len;                         /* length of array of phase types */
-	Phs_Seq_T *next;
+    long num;
+    int *sequence;                   /* array of phase types */
+    int len;                         /* length of array of phase types */
+    Phs_Seq_T *next;
 };
 
 
 struct Acq_Seq {
-	bool defined;                    /* is the acquisition sequence defined? */
-	int *sequence;                   /* array of acquisition types */
-	int len;                         /* length of array of acquisition types */
+    bool defined;                    /* is the acquisition sequence defined? */
+    int *sequence;                   /* array of acquisition types */
+    int len;                         /* length of array of acquisition types */
 };
 
 
 struct PA_Seq {
-	Phs_Seq_T *phs_seq;
-	Acq_Seq_T acq_seq[ 2 ];
+    Phs_Seq_T *phs_seq;
+    Acq_Seq_T acq_seq[ 2 ];
 };
 
 
 void phases_clear( void );
 
 void acq_seq_start( long /* acq_num  */,
-					long /* acq_type */ );
+                    long /* acq_type */ );
 
 void acq_seq_cont(  long /* acq_type */ );
 
 Phs_Seq_T * phase_seq_start( long /* phase_seq_num */ );
 
 void phases_add_phase( Phs_Seq_T * /* p          */,
-					   int         /* phase_type */ );
+                       int         /* phase_type */ );
 
 void acq_miss_list( void );
 
@@ -79,5 +79,7 @@ void phases_end( void );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

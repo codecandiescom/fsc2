@@ -33,7 +33,7 @@
 
 int get_mode( void )
 {
-	return Fsc2_Internals.mode;
+    return Fsc2_Internals.mode;
 }
 
 
@@ -44,8 +44,8 @@ int get_mode( void )
 
 int get_check_state( void )
 {
-	return Fsc2_Internals.cmdline_flags &
-		   ( DO_CHECK | TEST_ONLY | NO_GUI_RUN );
+    return Fsc2_Internals.cmdline_flags &
+           ( DO_CHECK | TEST_ONLY | NO_GUI_RUN );
 }
 
 
@@ -56,7 +56,7 @@ int get_check_state( void )
 
 int get_batch_state( void )
 {
-	return Fsc2_Internals.cmdline_flags & BATCH_MODE;
+    return Fsc2_Internals.cmdline_flags & BATCH_MODE;
 }
 
 
@@ -68,9 +68,9 @@ int get_batch_state( void )
 
 bool check_user_request( void )
 {
-	if ( Fsc2_Internals.I_am == PARENT )
-		fl_check_only_forms( );
-	return  EDL.do_quit && EDL.react_to_do_quit;
+    if ( Fsc2_Internals.I_am == PARENT )
+        fl_check_only_forms( );
+    return  EDL.do_quit && EDL.react_to_do_quit;
 }
 
 
@@ -81,10 +81,10 @@ bool check_user_request( void )
 
 void stop_on_user_request( void )
 {
-	if ( Fsc2_Internals.I_am == PARENT )
-		fl_check_only_forms( );
-	if ( EDL.do_quit && EDL.react_to_do_quit )
-		THROW( USER_BREAK_EXCEPTION );
+    if ( Fsc2_Internals.I_am == PARENT )
+        fl_check_only_forms( );
+    if ( EDL.do_quit && EDL.react_to_do_quit )
+        THROW( USER_BREAK_EXCEPTION );
 }
 
 
@@ -96,14 +96,14 @@ void stop_on_user_request( void )
 
 void too_many_arguments( Var_T * v )
 {
-	if ( v == NULL || ( v = vars_pop( v ) ) == NULL )
-		return;
+    if ( v == NULL || ( v = vars_pop( v ) ) == NULL )
+        return;
 
-	print( WARN, "Too many arguments, discarding superfluous arguments.\n",
-		   v->next != NULL ? "s" : "" );
+    print( WARN, "Too many arguments, discarding superfluous arguments.\n",
+           v->next != NULL ? "s" : "" );
 
-	while ( ( v = vars_pop( v ) ) != NULL )
-		/* empty */ ;
+    while ( ( v = vars_pop( v ) ) != NULL )
+        /* empty */ ;
 }
 
 
@@ -115,9 +115,9 @@ void too_many_arguments( Var_T * v )
 
 void no_query_possible( void )
 {
-	print( FATAL, "Function can be used for queries in the EXPERIMENT "
-		   "section only.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Function can be used for queries in the EXPERIMENT "
+           "section only.\n" );
+    THROW( EXCEPTION );
 }
 
 
@@ -125,18 +125,18 @@ void no_query_possible( void )
  *--------------------------------------------------------------*/
 
 long get_long( Var_T *      v,
-			   const char * snippet )
+               const char * snippet )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+    vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == FLOAT_VAR && snippet != NULL )
-		print( WARN, "Floating point number used as %s.\n", snippet );
+    if ( v->type == FLOAT_VAR && snippet != NULL )
+        print( WARN, "Floating point number used as %s.\n", snippet );
 
-	if ( v->type == FLOAT_VAR && 
-		 ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN ) )
-		print( SEVERE, "Integer argument overflow.\n" );
+    if ( v->type == FLOAT_VAR && 
+         ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN ) )
+        print( SEVERE, "Integer argument overflow.\n" );
 
-	return v->type == INT_VAR ? v->val.lval : lrnd( v->val.dval );
+    return v->type == INT_VAR ? v->val.lval : lrnd( v->val.dval );
 }
 
 
@@ -144,14 +144,14 @@ long get_long( Var_T *      v,
  *--------------------------------------------------------------*/
 
 double get_double( Var_T *      v,
-				   const char * snippet )
+                   const char * snippet )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+    vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == INT_VAR && snippet != NULL )
-		print( WARN, "Integer number used as %s.\n", snippet );
+    if ( v->type == INT_VAR && snippet != NULL )
+        print( WARN, "Integer number used as %s.\n", snippet );
 
-	return v->type == INT_VAR ? v->val.lval : v->val.dval;
+    return v->type == INT_VAR ? v->val.lval : v->val.dval;
 }
 
 
@@ -164,31 +164,31 @@ double get_double( Var_T *      v,
  *----------------------------------------------------------------------*/
 
 long get_strict_long( Var_T *      v,
-					  const char * snippet )
+                      const char * snippet )
 {
-	vars_check( v, INT_VAR | FLOAT_VAR );
+    vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( v->type == FLOAT_VAR )
-	{
-		if ( Fsc2_Internals.mode == EXPERIMENT )
-		{
-			if ( snippet != NULL )
-				print( SEVERE, "Floating point number used as %s, "
-					   "trying to continue!\n", snippet );
+    if ( v->type == FLOAT_VAR )
+    {
+        if ( Fsc2_Internals.mode == EXPERIMENT )
+        {
+            if ( snippet != NULL )
+                print( SEVERE, "Floating point number used as %s, "
+                       "trying to continue!\n", snippet );
 
-			if ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN )
-				print( SEVERE, "Integer argument overflow.\n" );
+            if ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN )
+                print( SEVERE, "Integer argument overflow.\n" );
 
-			return lrnd( v->val.dval );
-		}
+            return lrnd( v->val.dval );
+        }
 
-		if ( snippet != NULL  )
-			print( FATAL, "Floating point number can't be used as %s.\n",
-				   snippet );
-		THROW( EXCEPTION );
-	}
+        if ( snippet != NULL  )
+            print( FATAL, "Floating point number can't be used as %s.\n",
+                   snippet );
+        THROW( EXCEPTION );
+    }
 
-	return v->val.lval;
+    return v->val.lval;
 }
 
 
@@ -204,35 +204,35 @@ long get_strict_long( Var_T *      v,
 
 bool get_boolean( Var_T * v )
 {
-	const char *alt[ 2 ] = { "OFF", "ON" };
-	int res;
+    const char *alt[ 2 ] = { "OFF", "ON" };
+    int res;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+    vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
-	if ( v->type == FLOAT_VAR )
-	{
-		if ( Fsc2_Internals.mode != EXPERIMENT )
-		{
-			print( FATAL, "Floating point number found where boolean value "
-				   "was expected.\n" );
-			THROW( EXCEPTION );
-		}
+    if ( v->type == FLOAT_VAR )
+    {
+        if ( Fsc2_Internals.mode != EXPERIMENT )
+        {
+            print( FATAL, "Floating point number found where boolean value "
+                   "was expected.\n" );
+            THROW( EXCEPTION );
+        }
 
-		print( SEVERE, "Floating point number found where boolean value "
-			   "was expected, trying to continue.\n" );
-		return v->val.dval != 0.0;
-	}
-	else if ( v->type == STR_VAR )
-	{
-		if ( ( res = is_in( v->val.sptr, alt, 2 ) ) >= 0 )
-			return res != 0 ? SET : UNSET;
+        print( SEVERE, "Floating point number found where boolean value "
+               "was expected, trying to continue.\n" );
+        return v->val.dval != 0.0;
+    }
+    else if ( v->type == STR_VAR )
+    {
+        if ( ( res = is_in( v->val.sptr, alt, 2 ) ) >= 0 )
+            return res != 0 ? SET : UNSET;
 
-		print( FATAL, "Invalid boolean argument (\"%s\").\n",  v->val.sptr );
-		THROW( EXCEPTION );
-	}
+        print( FATAL, "Invalid boolean argument (\"%s\").\n",  v->val.sptr );
+        THROW( EXCEPTION );
+    }
 
-	return v->val.lval != 0;
+    return v->val.lval != 0;
 }
 
 
@@ -240,52 +240,52 @@ bool get_boolean( Var_T * v )
  *-------------------------------------------------------------------*/
 
 Var_T *get_element( Var_T * v,
-					int     len,
-					... )
+                    int     len,
+                    ... )
 {
-	va_list ap;
-	long cur_idx;
+    va_list ap;
+    long cur_idx;
 
 
-	vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
+    vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
 
-	if ( len <= 0 || v->dim < len )
-		THROW( EXCEPTION );
+    if ( len <= 0 || v->dim < len )
+        THROW( EXCEPTION );
 
-	va_start( ap, len );
+    va_start( ap, len );
 
-	while ( len-- > 0 )
-	{
-		cur_idx = va_arg( ap, long );
+    while ( len-- > 0 )
+    {
+        cur_idx = va_arg( ap, long );
 
-		if ( cur_idx < 0 || cur_idx >= v->len )
-		{
-			va_end( ap );
-			THROW( EXCEPTION );
-		}
+        if ( cur_idx < 0 || cur_idx >= v->len )
+        {
+            va_end( ap );
+            THROW( EXCEPTION );
+        }
 
-		if ( v->dim > 1 )
-		{
-			fsc2_assert( v != NULL && v->val.vptr != NULL );
-			v = v->val.vptr[ cur_idx ];
-		}
-		else
-		{
-			if ( v->type == INT_ARR )
-			{
-				fsc2_assert( v != NULL && v->val.lpnt != NULL );
-				v = vars_push( INT_VAR, v->val.lpnt[ cur_idx ] );
-			}
-			else
-			{
-				fsc2_assert( v != NULL && v->val.dpnt != NULL );
-				v = vars_push( FLOAT_VAR, v->val.dpnt[ cur_idx ] );
-			}
-		}
-	}
+        if ( v->dim > 1 )
+        {
+            fsc2_assert( v != NULL && v->val.vptr != NULL );
+            v = v->val.vptr[ cur_idx ];
+        }
+        else
+        {
+            if ( v->type == INT_ARR )
+            {
+                fsc2_assert( v != NULL && v->val.lpnt != NULL );
+                v = vars_push( INT_VAR, v->val.lpnt[ cur_idx ] );
+            }
+            else
+            {
+                fsc2_assert( v != NULL && v->val.dpnt != NULL );
+                v = vars_push( FLOAT_VAR, v->val.dpnt[ cur_idx ] );
+            }
+        }
+    }
 
-	va_end( ap );
-	return v;
+    va_end( ap );
+    return v;
 }
 
 
@@ -298,26 +298,26 @@ Var_T *get_element( Var_T * v,
  *---------------------------------------------------------------------------*/
 
 double is_mult_ns( double       val,
-				   const char * text )
+                   const char * text )
 {
-	double ip, fp;
+    double ip, fp;
 
 
-	val *= 1.0e9;
-	fp = modf( val , &ip );
+    val *= 1.0e9;
+    fp = modf( val , &ip );
 
-	if ( fabs( fp ) > 1.e-2 && fabs( fp ) < 0.99 )
-	{
-		print( FATAL, "%s must be an integer multiple of 1 ns.\n", text );
-		THROW( EXCEPTION );
-	}
+    if ( fabs( fp ) > 1.e-2 && fabs( fp ) < 0.99 )
+    {
+        print( FATAL, "%s must be an integer multiple of 1 ns.\n", text );
+        THROW( EXCEPTION );
+    }
 
-	if ( ip < 0.0 && fp < -0.5 )
-		return ( ip - 1.0 ) * 1.0e-9;
-	if ( ip >= 0.0 && fp > 0.5 )
-		return ( ip + 1.0 ) * 1.0e-9;;
+    if ( ip < 0.0 && fp < -0.5 )
+        return ( ip - 1.0 ) * 1.0e-9;
+    if ( ip >= 0.0 && fp > 0.5 )
+        return ( ip + 1.0 ) * 1.0e-9;;
 
-	return ip * 1.0e-9;
+    return ip * 1.0e-9;
 }
 
 
@@ -326,7 +326,7 @@ double is_mult_ns( double       val,
 
 char *translate_escape_sequences( char * str )
 {
-	return handle_escape( str );
+    return handle_escape( str );
 }
 
 
@@ -348,20 +348,20 @@ char *translate_escape_sequences( char * str )
 
 double experiment_time( void )
 {
-	struct timeval t_new;
-	static struct timeval t_old = { 0, 0 };
-	long dsec, dusec;
+    struct timeval t_new;
+    static struct timeval t_old = { 0, 0 };
+    long dsec, dusec;
 
 
-	gettimeofday( &t_new, NULL );
+    gettimeofday( &t_new, NULL );
 
-	dsec = t_new.tv_sec - t_old.tv_sec;
-	dusec = t_new.tv_usec - t_old.tv_usec;
+    dsec = t_new.tv_sec - t_old.tv_sec;
+    dusec = t_new.tv_usec - t_old.tv_usec;
 
-	t_old.tv_sec = t_new.tv_sec;
-	t_old.tv_usec = t_new.tv_usec;
+    t_old.tv_sec = t_new.tv_sec;
+    t_old.tv_usec = t_new.tv_usec;
 
-	return EDL.experiment_time += dsec + 1.e-6 * dusec;
+    return EDL.experiment_time += dsec + 1.e-6 * dusec;
 }
 
 
@@ -370,15 +370,15 @@ double experiment_time( void )
  *--------------------------------------------------------------*/
 
 FILE *fsc2_fopen( const char * path,
-				  const char * mode )
+                  const char * mode )
 {
-	FILE *fp;
+    FILE *fp;
 
 
-	raise_permissions( );
-	fp = fopen( path, mode );
-	lower_permissions( );
-	return fp;
+    raise_permissions( );
+    fp = fopen( path, mode );
+    lower_permissions( );
+    return fp;
 }
 
 
@@ -389,24 +389,24 @@ FILE *fsc2_fopen( const char * path,
 
 #if ! defined vfscanf
 extern int vfscanf( FILE *       s,
-					const char * format,
-					va_list      arg );
+                    const char * format,
+                    va_list      arg );
 #endif
 
 int fsc2_fscanf( FILE *       stream,
-				 const char * format,
-				 ... )
+                 const char * format,
+                 ... )
 {
-	va_list ap;
-	int num;
+    va_list ap;
+    int num;
 
 
-	va_start( ap, format );
-	raise_permissions( );
-	num = vfscanf( stream, format, ap );
-	lower_permissions( );
-	va_end( ap );
-	return num;
+    va_start( ap, format );
+    raise_permissions( );
+    num = vfscanf( stream, format, ap );
+    lower_permissions( );
+    va_end( ap );
+    return num;
 }
 
 
@@ -416,17 +416,17 @@ int fsc2_fscanf( FILE *       stream,
  *--------------------------------------------------*/
 
 size_t fsc2_fread( void * ptr,
-				   size_t size,
-				   size_t nmemb,
-				   FILE * stream )
+                   size_t size,
+                   size_t nmemb,
+                   FILE * stream )
 {
-	size_t num;
+    size_t num;
 
 
-	raise_permissions( );
-	num = fread( ptr, size, nmemb, stream );
-	lower_permissions( );
-	return num;
+    raise_permissions( );
+    num = fread( ptr, size, nmemb, stream );
+    lower_permissions( );
+    return num;
 }
 
 
@@ -436,20 +436,20 @@ size_t fsc2_fread( void * ptr,
  *-------------------------------------------------------*/
 
 int fsc2_fprintf( FILE *       stream,
-				  const char * format,
-				  ... )
+                  const char * format,
+                  ... )
 {
-	va_list ap;
-	int num;
+    va_list ap;
+    int num;
 
 
-	va_start( ap, format );
-	raise_permissions( );
-	num = vfprintf( stream, format, ap );
-	fflush( stream );
-	lower_permissions( );
-	va_end( ap );
-	return num;
+    va_start( ap, format );
+    raise_permissions( );
+    num = vfprintf( stream, format, ap );
+    fflush( stream );
+    lower_permissions( );
+    va_end( ap );
+    return num;
 }
 
 
@@ -459,18 +459,18 @@ int fsc2_fprintf( FILE *       stream,
  *------------------------------------------------*/
 
 size_t fsc2_fwrite( void * ptr,
-					size_t size,
-					size_t nmemb,
-					FILE * stream )
+                    size_t size,
+                    size_t nmemb,
+                    FILE * stream )
 {
-	size_t num;
+    size_t num;
 
 
-	raise_permissions( );
-	num = fwrite( ptr, size, nmemb, stream );
-	fflush( stream );
-	lower_permissions( );
-	return num;
+    raise_permissions( );
+    num = fwrite( ptr, size, nmemb, stream );
+    fflush( stream );
+    lower_permissions( );
+    return num;
 }
 
 
@@ -481,15 +481,15 @@ size_t fsc2_fwrite( void * ptr,
 
 int fsc2_fgetc( FILE * stream )
 {
-	int num;
+    int num;
 
 
-	raise_permissions( );
-	num = fgetc( stream );
-	lower_permissions( );
-	return num;
+    raise_permissions( );
+    num = fgetc( stream );
+    lower_permissions( );
+    return num;
 }
-	
+    
 
 /*------------------------------------------------*
  * Function for reading a single char from a file
@@ -498,12 +498,12 @@ int fsc2_fgetc( FILE * stream )
 
 int fsc2_getc( FILE * stream )
 {
-	int num;
+    int num;
 
-	raise_permissions( );
-	num = getc( stream );
-	lower_permissions( );
-	return num;
+    raise_permissions( );
+    num = getc( stream );
+    lower_permissions( );
+    return num;
 }
 
 
@@ -513,16 +513,16 @@ int fsc2_getc( FILE * stream )
  *-------------------------------------------*/
 
 char *fsc2_fgets( char * s,
-				  int    size,
-				  FILE * stream )
+                  int    size,
+                  FILE * stream )
 {
-	char *p;
+    char *p;
 
 
-	raise_permissions( );
-	p = fgets( s, size, stream );
-	lower_permissions( );
-	return p;
+    raise_permissions( );
+    p = fgets( s, size, stream );
+    lower_permissions( );
+    return p;
 }
 
 
@@ -532,15 +532,15 @@ char *fsc2_fgets( char * s,
  *---------------------------------------------------*/
 
 int fsc2_ungetc( int    c,
-				 FILE * stream )
+                 FILE * stream )
 {
-	int num;
+    int num;
 
 
-	raise_permissions( );
-	num = ungetc( c, stream );
-	lower_permissions( );
-	return num;
+    raise_permissions( );
+    num = ungetc( c, stream );
+    lower_permissions( );
+    return num;
 }
 
 
@@ -550,15 +550,15 @@ int fsc2_ungetc( int    c,
  *---------------------------------------------*/
 
 int fsc2_fseek( FILE * stream,
-				long   offset,
-				int    whence )
+                long   offset,
+                int    whence )
 {
-	int num;
+    int num;
 
-	raise_permissions( );
-	num = fseek( stream, offset, whence );
-	lower_permissions( );
-	return num;
+    raise_permissions( );
+    num = fseek( stream, offset, whence );
+    lower_permissions( );
+    return num;
 }
 
 
@@ -569,13 +569,13 @@ int fsc2_fseek( FILE * stream,
 
 long fsc2_ftell( FILE * stream )
 {
-	long num;
+    long num;
 
 
-	raise_permissions( );
-	num = ftell( stream );
-	lower_permissions( );
-	return num;
+    raise_permissions( );
+    num = ftell( stream );
+    lower_permissions( );
+    return num;
 }
 
 
@@ -585,16 +585,16 @@ long fsc2_ftell( FILE * stream )
  *----------------------------------------------*/
 
 int fsc2_fputc( int    c,
-				FILE * stream )
+                FILE * stream )
 {
-	int num;
+    int num;
 
 
-	raise_permissions( );
-	num = fputc( c, stream );
-	fflush( stream );
-	lower_permissions( );
-	return num;
+    raise_permissions( );
+    num = fputc( c, stream );
+    fflush( stream );
+    lower_permissions( );
+    return num;
 }
 
 
@@ -604,16 +604,16 @@ int fsc2_fputc( int    c,
  *-----------------------------------------*/
 
 int fsc2_fputs( const char * s,
-				FILE *       stream )
+                FILE *       stream )
 {
-	int num;
+    int num;
 
 
-	raise_permissions( );
-	num = fputs( s, stream );
-	fflush( stream );
-	lower_permissions( );
-	return num;
+    raise_permissions( );
+    num = fputs( s, stream );
+    fflush( stream );
+    lower_permissions( );
+    return num;
 }
 
 
@@ -623,16 +623,16 @@ int fsc2_fputs( const char * s,
  *----------------------------------------------*/
 
 int fsc2_putc( int    c,
-			   FILE * stream )
+               FILE * stream )
 {
-	int num;
+    int num;
 
 
-	raise_permissions( );
-	num = putc( c, stream );
-	fflush( stream );
-	lower_permissions( );
-	return num;
+    raise_permissions( );
+    num = putc( c, stream );
+    fflush( stream );
+    lower_permissions( );
+    return num;
 }
 
 
@@ -642,13 +642,13 @@ int fsc2_putc( int    c,
 
 int fsc2_fclose( FILE * stream )
 {
-	int num;
+    int num;
 
 
-	raise_permissions( );
-	num = fclose( stream );
-	lower_permissions( );
-	return num;
+    raise_permissions( );
+    num = fclose( stream );
+    lower_permissions( );
+    return num;
 }
 
 
@@ -657,12 +657,14 @@ int fsc2_fclose( FILE * stream )
 
 const char *fsc2_config_dir( void )
 {
-	return ( Fsc2_Internals.cmdline_flags & DO_CHECK ) ? "../config" : libdir;
+    return ( Fsc2_Internals.cmdline_flags & DO_CHECK ) ? "../config" : libdir;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

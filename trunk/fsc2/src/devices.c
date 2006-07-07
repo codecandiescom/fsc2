@@ -42,168 +42,168 @@ static long pathmax = 0;
 
 void device_add( const char * name )
 {
-	Device_Name_T *dl;
-	char *dev_name;
-	char *real_name = NULL;
-	const char *search_name;
-	char *lib_name = NULL;
-	struct stat buf;
-	int length;
-	Device_T *cd;
-	char *ld_path;
-	char *ld = NULL;
-	char *ldc;
+    Device_Name_T *dl;
+    char *dev_name;
+    char *real_name = NULL;
+    const char *search_name;
+    char *lib_name = NULL;
+    struct stat buf;
+    int length;
+    Device_T *cd;
+    char *ld_path;
+    char *ld = NULL;
+    char *ldc;
 
 
-	CLOBBER_PROTECT( dev_name );
-	CLOBBER_PROTECT( real_name );
+    CLOBBER_PROTECT( dev_name );
+    CLOBBER_PROTECT( real_name );
 
-	dev_name = string_to_lower( T_strdup( name ) );
+    dev_name = string_to_lower( T_strdup( name ) );
 
-	/* First we've got to check if the name refers to a device driver that is
-	   a symbolic link to the 'real' device. If so get the real name by
-	   following the link. This way it's possible to have more convenient,
-	   locally adjustable names for the devices. As usual, we first check
-	   paths defined by the environment variable 'LD_LIBRARY_PATH' and then
-	   in the compiled-in path (except when this is a check run). */
+    /* First we've got to check if the name refers to a device driver that is
+       a symbolic link to the 'real' device. If so get the real name by
+       following the link. This way it's possible to have more convenient,
+       locally adjustable names for the devices. As usual, we first check
+       paths defined by the environment variable 'LD_LIBRARY_PATH' and then
+       in the compiled-in path (except when this is a check run). */
 
-	if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
-	{
-		ld = T_strdup( ld_path );
+    if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
+    {
+        ld = T_strdup( ld_path );
 
-		for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
-		{
-			lib_name = get_string( "%s%s%s.fsc2_so", ldc, slash( ldc ),
-								   dev_name );
-			if ( lstat( lib_name, &buf ) == 0 )
-				break;
-			lib_name = CHAR_P T_free( lib_name );
-		}
+        for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
+        {
+            lib_name = get_string( "%s%s%s.fsc2_so", ldc, slash( ldc ),
+                                   dev_name );
+            if ( lstat( lib_name, &buf ) == 0 )
+                break;
+            lib_name = CHAR_P T_free( lib_name );
+        }
 
-		T_free( ld );
-	}
+        T_free( ld );
+    }
 
-	if ( lib_name == NULL && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
-	{
-		lib_name = get_string( "%s%s%s.fsc2_so",
-							   libdir, slash( libdir ), dev_name );
-		if ( lstat( lib_name, &buf ) < 0 )
-			lib_name = CHAR_P T_free( lib_name );
-	}
+    if ( lib_name == NULL && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+    {
+        lib_name = get_string( "%s%s%s.fsc2_so",
+                               libdir, slash( libdir ), dev_name );
+        if ( lstat( lib_name, &buf ) < 0 )
+            lib_name = CHAR_P T_free( lib_name );
+    }
 
-	if ( lib_name == NULL )
-	{
-		eprint( FATAL, UNSET, "Can't find or access module '%s.fsc2_so'.\n",
-				dev_name );
-		T_free( dev_name );
-		THROW( EXCEPTION );
-	}
+    if ( lib_name == NULL )
+    {
+        eprint( FATAL, UNSET, "Can't find or access module '%s.fsc2_so'.\n",
+                dev_name );
+        T_free( dev_name );
+        THROW( EXCEPTION );
+    }
 
-	/* If the module is a symbolic link try to figure out the name of the file
-	   the symbolic link points to and store it in 'real_name' */
+    /* If the module is a symbolic link try to figure out the name of the file
+       the symbolic link points to and store it in 'real_name' */
 
-	if ( S_ISLNK( buf.st_mode ) )
-	{
-		/* We need memory for the name of the file the link points to, but
-		   we may not know the maximum length of a file name... */
+    if ( S_ISLNK( buf.st_mode ) )
+    {
+        /* We need memory for the name of the file the link points to, but
+           we may not know the maximum length of a file name... */
 
-		if ( pathmax == 0 )
-		{
-			if ( ( pathmax = pathconf( "/", _PC_PATH_MAX ) ) < 0 )
-			{
-				if ( errno == 0 )
-					pathmax = PATH_MAX_GUESS;
-				else
-				{
-					eprint( FATAL, UNSET, "%s:%d: This operating system "
-							"sucks!\n", __FILE__, __LINE__ );
-					T_free( lib_name );
-					T_free( dev_name );
-					THROW( EXCEPTION );
-				}
-			}
-		}
+        if ( pathmax == 0 )
+        {
+            if ( ( pathmax = pathconf( "/", _PC_PATH_MAX ) ) < 0 )
+            {
+                if ( errno == 0 )
+                    pathmax = PATH_MAX_GUESS;
+                else
+                {
+                    eprint( FATAL, UNSET, "%s:%d: This operating system "
+                            "sucks!\n", __FILE__, __LINE__ );
+                    T_free( lib_name );
+                    T_free( dev_name );
+                    THROW( EXCEPTION );
+                }
+            }
+        }
 
-		real_name = CHAR_P T_malloc( pathmax + 1 );
-		if ( ( length = readlink( lib_name, real_name, pathmax ) ) < 0 )
-		{
-			eprint( FATAL, UNSET, "Can't follow symbolic link for '%s'.\n",
-					lib_name );
-			T_free( lib_name );
-			T_free( dev_name );
-			T_free( real_name );
-			THROW( EXCEPTION );
-		}
+        real_name = CHAR_P T_malloc( pathmax + 1 );
+        if ( ( length = readlink( lib_name, real_name, pathmax ) ) < 0 )
+        {
+            eprint( FATAL, UNSET, "Can't follow symbolic link for '%s'.\n",
+                    lib_name );
+            T_free( lib_name );
+            T_free( dev_name );
+            T_free( real_name );
+            THROW( EXCEPTION );
+        }
 
-		real_name[ length ] = '\0';
+        real_name[ length ] = '\0';
 
-		/* Check that module has the extension ".fsc2_so" and strip it off */
+        /* Check that module has the extension ".fsc2_so" and strip it off */
 
-		if ( strcmp( real_name + length - 8, ".fsc2_so" ) )
-		{
-			eprint( FATAL, UNSET, "Module '%s' used for device '%s' hasn't "
-					"extension \".fsc2_so\".\n", real_name, dev_name );
-			T_free( lib_name );
-			T_free( dev_name );
-			T_free( real_name );
-			THROW( EXCEPTION );
-		}
+        if ( strcmp( real_name + length - 8, ".fsc2_so" ) )
+        {
+            eprint( FATAL, UNSET, "Module '%s' used for device '%s' hasn't "
+                    "extension \".fsc2_so\".\n", real_name, dev_name );
+            T_free( lib_name );
+            T_free( dev_name );
+            T_free( real_name );
+            THROW( EXCEPTION );
+        }
 
-		*( real_name + length - 8 ) = '\0';
-	}
+        *( real_name + length - 8 ) = '\0';
+    }
 
-	T_free( lib_name );
+    T_free( lib_name );
 
-	/* Now test if the device is in the list of device names, either with the
-	   real name or the alternate name - because 'real_name' might start with
-	   a path but the names in 'Devices' are just names without a path
-	   compare only after stripping off the path */
+    /* Now test if the device is in the list of device names, either with the
+       real name or the alternate name - because 'real_name' might start with
+       a path but the names in 'Devices' are just names without a path
+       compare only after stripping off the path */
 
-	search_name = real_name != NULL ? strip_path( real_name ) : NULL;
+    search_name = real_name != NULL ? strip_path( real_name ) : NULL;
 
-	for ( dl = EDL.Device_Name_List; dl != NULL; dl = dl->next )
-		if ( ! strcmp( dl->name, dev_name ) ||
-			 ( search_name != NULL && ! strcmp( dl->name, search_name ) ) )
-			break;
+    for ( dl = EDL.Device_Name_List; dl != NULL; dl = dl->next )
+        if ( ! strcmp( dl->name, dev_name ) ||
+             ( search_name != NULL && ! strcmp( dl->name, search_name ) ) )
+            break;
 
-	if ( dl == NULL )
-	{
-		print( FATAL, "Device '%s' not found in device name data base.\n",
-			   dev_name );
-		T_free( real_name );
-		T_free( dev_name );
-		THROW( EXCEPTION );
-	}
+    if ( dl == NULL )
+    {
+        print( FATAL, "Device '%s' not found in device name data base.\n",
+               dev_name );
+        T_free( real_name );
+        T_free( dev_name );
+        THROW( EXCEPTION );
+    }
 
-	/* Make sure the device isn't already loaded */
+    /* Make sure the device isn't already loaded */
 
-	for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
-		if ( ! strcmp( cd->name, dev_name ) ||
-			 ( real_name != NULL && ! strcmp( cd->name, real_name ) ) )
-		{
-			print( FATAL, "Device '%s' is listed twice in the DEVICES "
-				   "section%s%s.\n", dev_name, real_name != NULL ?
-					", the first time possibly under the name " : "",
-					real_name != NULL ? real_name : "" );
-			THROW( EXCEPTION );
-		}
+    for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
+        if ( ! strcmp( cd->name, dev_name ) ||
+             ( real_name != NULL && ! strcmp( cd->name, real_name ) ) )
+        {
+            print( FATAL, "Device '%s' is listed twice in the DEVICES "
+                   "section%s%s.\n", dev_name, real_name != NULL ?
+                    ", the first time possibly under the name " : "",
+                    real_name != NULL ? real_name : "" );
+            THROW( EXCEPTION );
+        }
 
-	/* Now append the device to the end of the device list */
+    /* Now append the device to the end of the device list */
 
-	TRY
-	{
-		device_append_to_list( real_name != NULL ? real_name : dev_name );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( real_name );
-		T_free( dev_name );
-		RETHROW( );
-	}
+    TRY
+    {
+        device_append_to_list( real_name != NULL ? real_name : dev_name );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( real_name );
+        T_free( dev_name );
+        RETHROW( );
+    }
 
-	T_free( real_name );
-	T_free( dev_name );
+    T_free( real_name );
+    T_free( dev_name );
 }
 
 
@@ -214,45 +214,45 @@ void device_add( const char * name )
 
 void device_append_to_list( const char * dev_name )
 {
-	Device_T *cd;
+    Device_T *cd;
 
 
-	/* Append a new new Device structure to the list of devices */
+    /* Append a new new Device structure to the list of devices */
 
-	if ( EDL.Device_List != NULL )
-	{
-		for ( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
-			/* empty */ ;
+    if ( EDL.Device_List != NULL )
+    {
+        for ( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
+            /* empty */ ;
 
-		cd->next = DEVICE_P T_malloc( sizeof *cd->next );
-		cd->next->prev = cd;
-		cd = cd->next;
-	}
-	else
-	{
-		EDL.Device_List = cd = DEVICE_P T_malloc( sizeof *cd );
-		cd->prev = NULL;
-	}
+        cd->next = DEVICE_P T_malloc( sizeof *cd->next );
+        cd->next->prev = cd;
+        cd = cd->next;
+    }
+    else
+    {
+        EDL.Device_List = cd = DEVICE_P T_malloc( sizeof *cd );
+        cd->prev = NULL;
+    }
 
-	/* Initialize the new structure */
+    /* Initialize the new structure */
 
-	cd->name = T_strdup( dev_name );
-	cd->is_loaded = UNSET;
-	cd->next = NULL;
-	cd->count = 1;
+    cd->name = T_strdup( dev_name );
+    cd->is_loaded = UNSET;
+    cd->next = NULL;
+    cd->count = 1;
 
-	/* Initialize members of the driver structure */
+    /* Initialize members of the driver structure */
 
-	cd->driver.handle = NULL;
-	cd->driver.is_init_hook =
-		cd->driver.is_test_hook =
-			cd->driver.is_end_of_test_hook =
-				cd->driver.is_exp_hook =
-					cd->driver.is_end_of_exp_hook =
-						cd->driver.is_exit_hook =
-							cd->driver.exp_hook_is_run =
-								cd->driver.is_child_exit_hook =
-									cd->driver.init_hook_is_run = UNSET;
+    cd->driver.handle = NULL;
+    cd->driver.is_init_hook =
+        cd->driver.is_test_hook =
+            cd->driver.is_end_of_test_hook =
+                cd->driver.is_exp_hook =
+                    cd->driver.is_end_of_exp_hook =
+                        cd->driver.is_exit_hook =
+                            cd->driver.exp_hook_is_run =
+                                cd->driver.is_child_exit_hook =
+                                    cd->driver.init_hook_is_run = UNSET;
 }
 
 
@@ -263,25 +263,25 @@ void device_append_to_list( const char * dev_name )
 
 void delete_devices( void )
 {
-	Device_T *cd, *cdp;
+    Device_T *cd, *cdp;
 
 
-	if ( EDL.Device_List == NULL )  /* list is empty or does not exist */
-		return;
+    if ( EDL.Device_List == NULL )  /* list is empty or does not exist */
+        return;
 
-	/* Get last element of list - always delete last entry first */
+    /* Get last element of list - always delete last entry first */
 
-	for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
-		/* empty */ ;
+    for( cd = EDL.Device_List; cd->next != NULL; cd = cd->next )
+        /* empty */ ;
 
-	for ( ; cd != NULL; cd = cdp )
-	{
-		if ( cd->is_loaded )
-			unload_device( cd );         /* run exit hooks and unload module */
-		T_free( cd->name );
-		cdp = cd->prev;
-		T_free( cd );
-	}
+    for ( ; cd != NULL; cd = cdp )
+    {
+        if ( cd->is_loaded )
+            unload_device( cd );         /* run exit hooks and unload module */
+        T_free( cd->name );
+        cdp = cd->prev;
+        T_free( cd );
+    }
 
     EDL.Device_List = NULL;
 }
@@ -294,21 +294,23 @@ void delete_devices( void )
 
 void delete_device_name_list( void )
 {
-	Device_Name_T *cd, *cdn;
+    Device_Name_T *cd, *cdn;
 
-	for ( cd = EDL.Device_Name_List; cd != NULL; cd = cdn )
-	{
-		T_free( cd->name );
-		cdn = cd->next;
-		T_free( cd );
-	}
+    for ( cd = EDL.Device_Name_List; cd != NULL; cd = cdn )
+    {
+        T_free( cd->name );
+        cdn = cd->next;
+        T_free( cd );
+    }
 
-	EDL.Device_Name_List = NULL;
+    EDL.Device_Name_List = NULL;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

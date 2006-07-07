@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 # -*- cperl -*-
 #
 #  Copyright (C) 1999-2006 Jens Thoms Toerring
@@ -21,11 +21,20 @@
 #  Boston, MA 02111-1307, USA.
 
 
+use strict;
+use warnings;
+
+
 open( IN, "ipcs -m|" ) or die "Can't call ipcs -m\n";
 while ( <IN> ) {
-	if ( /^0x\d+ (\d+)/ ) {
-		print "Deleting shared memory segment #$1.\n";
-		system "ipcrm shm $1 > /dev/null";
-	}
+    if ( /^0x\d+ (\d+)/ ) {
+        print "Deleting shared memory segment #$1.\n";
+        system "ipcrm shm $1 > /dev/null";
+    }
 }
 
+
+# Local variables:
+# tab-width: 4
+# indent-tabs-mode: nil
+# End:

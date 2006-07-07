@@ -25,38 +25,38 @@
 
 NI_DAQ_LIB_1.0 {
 
-	global:
-			ni_daq_errlist;
-			ni_daq_nerr;
-			ni_daq_open;
-			ni_daq_close;
-			ni_daq_perror;
-			ni_daq_strerror;
-			ni_daq_msc_set_clock_speed;
-			ni_daq_msc_set_clock_output;
-			ni_daq_msc_get_clock_state;
-			ni_daq_msc_set_trigger;
-			ni_daq_ai_set_speed;
-			ni_daq_ai_get_speed;
-			ni_daq_ai_channel_configuration;
-			ni_daq_ai_acq_setup;
-			ni_daq_ai_start_acq;
-			ni_daq_ai_stop_acq;
-			ni_daq_ai_get_acq_data;
-			ni_daq_ao_channel_configuration;
-			ni_daq_ao;
-			ni_daq_gpct_set_speed;
-			ni_daq_gpct_get_speed;
-			ni_daq_gpct_start_counter;
-			ni_daq_gpct_start_gated_counter;
-			ni_daq_gpct_stop_counter;
-			ni_daq_gpct_get_count;
-			ni_daq_gpct_single_pulse;
-			ni_daq_gpct_continuous_pulses;
-			ni_daq_gpct_start_pulses;
-			ni_daq_gpct_stop_pulses;
-			ni_daq_dio_write;
-			ni_daq_dio_read;
+    global:
+            ni_daq_errlist;
+            ni_daq_nerr;
+            ni_daq_open;
+            ni_daq_close;
+            ni_daq_perror;
+            ni_daq_strerror;
+            ni_daq_msc_set_clock_speed;
+            ni_daq_msc_set_clock_output;
+            ni_daq_msc_get_clock_state;
+            ni_daq_msc_set_trigger;
+            ni_daq_ai_set_speed;
+            ni_daq_ai_get_speed;
+            ni_daq_ai_channel_configuration;
+            ni_daq_ai_acq_setup;
+            ni_daq_ai_start_acq;
+            ni_daq_ai_stop_acq;
+            ni_daq_ai_get_acq_data;
+            ni_daq_ao_channel_configuration;
+            ni_daq_ao;
+            ni_daq_gpct_set_speed;
+            ni_daq_gpct_get_speed;
+            ni_daq_gpct_start_counter;
+            ni_daq_gpct_start_gated_counter;
+            ni_daq_gpct_stop_counter;
+            ni_daq_gpct_get_count;
+            ni_daq_gpct_single_pulse;
+            ni_daq_gpct_continuous_pulses;
+            ni_daq_gpct_start_pulses;
+            ni_daq_gpct_stop_pulses;
+            ni_daq_dio_write;
+            ni_daq_dio_read;
 
-	local:  *;
+    local:  *;
 };

@@ -51,156 +51,156 @@ static void rb_pulser_w_card_setup( void );
 
 int rb_pulser_w_init_hook( void )
 {
-	size_t i;
-	Function_T *f;
+    size_t i;
+    Function_T *f;
 
 
-	Pulser_Struct.name     = DEVICE_NAME;
-	Pulser_Struct.has_pods = UNSET;
+    Pulser_Struct.name     = DEVICE_NAME;
+    Pulser_Struct.has_pods = UNSET;
 
-	/* Set global variable to indicate that Rulbus is needed */
+    /* Set global variable to indicate that Rulbus is needed */
 
 #if ! defined RB_PULSER_W_TEST
-	Need_RULBUS = SET;
+    Need_RULBUS = SET;
 
-	rb_pulser_w.exists_synthesizer = exists_device( SYNTHESIZER_MODULE );
+    rb_pulser_w.exists_synthesizer = exists_device( SYNTHESIZER_MODULE );
 
 #else   /* in test mode */
-	rb_pulser_w.exists_synthesizer = SET;
+    rb_pulser_w.exists_synthesizer = SET;
 #endif
 
-	/* First we must set up the variables the main program expects a
-	   pulser module to set so it knows which functions to call */
+    /* First we must set up the variables the main program expects a
+       pulser module to set so it knows which functions to call */
 
-	Pulser_Struct.set_timebase = rb_pulser_w_store_timebase;
-	Pulser_Struct.set_trigger_mode = rb_pulser_w_set_trigger_mode;
-	Pulser_Struct.set_repeat_time = rb_pulser_w_set_repeat_time;
-	Pulser_Struct.set_trig_in_slope = rb_pulser_w_set_trig_in_slope;
-	Pulser_Struct.set_function_delay = rb_pulser_w_set_function_delay;
+    Pulser_Struct.set_timebase = rb_pulser_w_store_timebase;
+    Pulser_Struct.set_trigger_mode = rb_pulser_w_set_trigger_mode;
+    Pulser_Struct.set_repeat_time = rb_pulser_w_set_repeat_time;
+    Pulser_Struct.set_trig_in_slope = rb_pulser_w_set_trig_in_slope;
+    Pulser_Struct.set_function_delay = rb_pulser_w_set_function_delay;
 
-	Pulser_Struct.new_pulse = rb_pulser_w_new_pulse;
-	Pulser_Struct.set_pulse_function = rb_pulser_w_set_pulse_function;
-	Pulser_Struct.set_pulse_position = rb_pulser_w_set_pulse_position;
-	Pulser_Struct.set_pulse_length = rb_pulser_w_set_pulse_length;
-	Pulser_Struct.set_pulse_position_change =
-										 rb_pulser_w_set_pulse_position_change;
-	Pulser_Struct.set_pulse_length_change =
-		                                   rb_pulser_w_set_pulse_length_change;
-	Pulser_Struct.set_pulse_phase_cycle = rb_pulser_w_set_pulse_phase_cycle;
+    Pulser_Struct.new_pulse = rb_pulser_w_new_pulse;
+    Pulser_Struct.set_pulse_function = rb_pulser_w_set_pulse_function;
+    Pulser_Struct.set_pulse_position = rb_pulser_w_set_pulse_position;
+    Pulser_Struct.set_pulse_length = rb_pulser_w_set_pulse_length;
+    Pulser_Struct.set_pulse_position_change =
+                                         rb_pulser_w_set_pulse_position_change;
+    Pulser_Struct.set_pulse_length_change =
+                                           rb_pulser_w_set_pulse_length_change;
+    Pulser_Struct.set_pulse_phase_cycle = rb_pulser_w_set_pulse_phase_cycle;
 
-	Pulser_Struct.get_pulse_function = rb_pulser_w_get_pulse_function;
-	Pulser_Struct.get_pulse_position = rb_pulser_w_get_pulse_position;
-	Pulser_Struct.get_pulse_length = rb_pulser_w_get_pulse_length;
-	Pulser_Struct.get_pulse_position_change =
-										 rb_pulser_w_get_pulse_position_change;
-	Pulser_Struct.get_pulse_length_change =
-		                                   rb_pulser_w_get_pulse_length_change;
-	Pulser_Struct.get_pulse_phase_cycle = rb_pulser_w_get_pulse_phase_cycle;
+    Pulser_Struct.get_pulse_function = rb_pulser_w_get_pulse_function;
+    Pulser_Struct.get_pulse_position = rb_pulser_w_get_pulse_position;
+    Pulser_Struct.get_pulse_length = rb_pulser_w_get_pulse_length;
+    Pulser_Struct.get_pulse_position_change =
+                                         rb_pulser_w_get_pulse_position_change;
+    Pulser_Struct.get_pulse_length_change =
+                                           rb_pulser_w_get_pulse_length_change;
+    Pulser_Struct.get_pulse_phase_cycle = rb_pulser_w_get_pulse_phase_cycle;
 
-	Pulser_Struct.set_phase_switch_delay = rb_pulser_w_set_phase_switch_delay;
-	Pulser_Struct.set_grace_period = rb_pulser_w_set_grace_period;
+    Pulser_Struct.set_phase_switch_delay = rb_pulser_w_set_phase_switch_delay;
+    Pulser_Struct.set_grace_period = rb_pulser_w_set_grace_period;
 
-	Pulser_Struct.assign_function = NULL;
-	Pulser_Struct.assign_channel_to_function = NULL;
-	Pulser_Struct.invert_function = NULL;
-	Pulser_Struct.set_max_seq_len = NULL;
-	Pulser_Struct.set_function_high_level = NULL;
-	Pulser_Struct.set_function_low_level = NULL;
-	Pulser_Struct.set_trig_in_level = NULL;
-	Pulser_Struct.set_trig_in_impedance = NULL;
-	Pulser_Struct.set_phase_reference = NULL;
-	Pulser_Struct.phase_setup_prep = NULL;
-	Pulser_Struct.phase_setup = NULL;
-	Pulser_Struct.set_grace_period = NULL;
-	Pulser_Struct.ch_to_num = NULL;
-	Pulser_Struct.keep_all_pulses = NULL;
+    Pulser_Struct.assign_function = NULL;
+    Pulser_Struct.assign_channel_to_function = NULL;
+    Pulser_Struct.invert_function = NULL;
+    Pulser_Struct.set_max_seq_len = NULL;
+    Pulser_Struct.set_function_high_level = NULL;
+    Pulser_Struct.set_function_low_level = NULL;
+    Pulser_Struct.set_trig_in_level = NULL;
+    Pulser_Struct.set_trig_in_impedance = NULL;
+    Pulser_Struct.set_phase_reference = NULL;
+    Pulser_Struct.phase_setup_prep = NULL;
+    Pulser_Struct.phase_setup = NULL;
+    Pulser_Struct.set_grace_period = NULL;
+    Pulser_Struct.ch_to_num = NULL;
+    Pulser_Struct.keep_all_pulses = NULL;
 
-	/* Now set up the variables that describe the state of the pulser */
+    /* Now set up the variables that describe the state of the pulser */
 
-	rb_pulser_w.is_needed = SET;
+    rb_pulser_w.is_needed = SET;
 
 #ifndef FIXED_TIMEBASE
-	rb_pulser_w.is_timebase = UNSET;
+    rb_pulser_w.is_timebase = UNSET;
 #else
-	rb_pulser_w.timebase = 1.0e-8;         /* fixed 100 MHz clock is used */
-	rb_pulser_w.is_timebase = SET;
+    rb_pulser_w.timebase = 1.0e-8;         /* fixed 100 MHz clock is used */
+    rb_pulser_w.is_timebase = SET;
 #endif
 
-	rb_pulser_w.is_running = UNSET;
+    rb_pulser_w.is_running = UNSET;
 
-	if ( RB_PULSER_W_CONFIG_FILE[ 0 ] ==  '/' )
-		rb_pulser_w.config_file = T_strdup( RB_PULSER_W_CONFIG_FILE );
-	else
-		rb_pulser_w.config_file = get_string( "%s%s%s", libdir,
-											  slash( libdir ),
-											  RB_PULSER_W_CONFIG_FILE );
+    if ( RB_PULSER_W_CONFIG_FILE[ 0 ] ==  '/' )
+        rb_pulser_w.config_file = T_strdup( RB_PULSER_W_CONFIG_FILE );
+    else
+        rb_pulser_w.config_file = get_string( "%s%s%s", libdir,
+                                              slash( libdir ),
+                                              RB_PULSER_W_CONFIG_FILE );
 
-	rb_pulser_w.is_trig_in_mode = UNSET;
-	rb_pulser_w.is_trig_in_slope = UNSET;
-	rb_pulser_w.is_rep_time = UNSET;
-	rb_pulser_w.is_neg_delay = UNSET;
-	rb_pulser_w.neg_delay = 0;
+    rb_pulser_w.is_trig_in_mode = UNSET;
+    rb_pulser_w.is_trig_in_slope = UNSET;
+    rb_pulser_w.is_rep_time = UNSET;
+    rb_pulser_w.is_neg_delay = UNSET;
+    rb_pulser_w.neg_delay = 0;
 
-	rb_pulser_w.trig_in_mode = INTERNAL;
-	rb_pulser_w.rep_time = 0;
+    rb_pulser_w.trig_in_mode = INTERNAL;
+    rb_pulser_w.rep_time = 0;
 
-	rb_pulser_w.synth_state = NULL;
-	rb_pulser_w.synth_pulse_state = NULL;
-	rb_pulser_w.synth_pulse_width = NULL;
-	rb_pulser_w.synth_pulse_delay = NULL;
-	rb_pulser_w.synth_trig_slope = NULL;
+    rb_pulser_w.synth_state = NULL;
+    rb_pulser_w.synth_pulse_state = NULL;
+    rb_pulser_w.synth_pulse_width = NULL;
+    rb_pulser_w.synth_pulse_delay = NULL;
+    rb_pulser_w.synth_trig_slope = NULL;
 
-	rb_pulser_w.dump_file = NULL;
-	rb_pulser_w.show_file = NULL;
+    rb_pulser_w.dump_file = NULL;
+    rb_pulser_w.show_file = NULL;
 
-	rb_pulser_w.do_show_pulses = UNSET;
-	rb_pulser_w.do_dump_pulses = UNSET;
+    rb_pulser_w.do_show_pulses = UNSET;
+    rb_pulser_w.do_dump_pulses = UNSET;
 
-	rb_pulser_w.needs_phases = UNSET;
-	rb_pulser_w.cur_phase = 0;
+    rb_pulser_w.needs_phases = UNSET;
+    rb_pulser_w.cur_phase = 0;
 
-	rb_pulser_w.is_psd = UNSET;
-	rb_pulser_w.is_grace_period = UNSET;
-	rb_pulser_w.is_pulse_2_defense = UNSET;
-	rb_pulser_w.defense_pulse_mode = AUTOMATIC;
+    rb_pulser_w.is_psd = UNSET;
+    rb_pulser_w.is_grace_period = UNSET;
+    rb_pulser_w.is_pulse_2_defense = UNSET;
+    rb_pulser_w.defense_pulse_mode = AUTOMATIC;
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
         f = rb_pulser_w.function + i;
         f->self = i;
         f->name = Function_Names[ i ];
         f->num_pulses = 0;
-		f->num_active_pulses = 0;
+        f->num_active_pulses = 0;
         f->pulses = NULL;
-		f->delay_card = NULL;
+        f->delay_card = NULL;
         f->delay = 0.0;
         f->is_delay = UNSET;
 
-		if ( i != PULSER_CHANNEL_MW &&
-			 i != PULSER_CHANNEL_RF &&
-			 i != PULSER_CHANNEL_DEFENSE &&
-			 i != PULSER_CHANNEL_DET &&
-			 i != PULSER_CHANNEL_LASER )
-			f->is_used = UNSET;
-		else
-			f->is_used = SET;
-		f->is_declared = UNSET;
-	}
+        if ( i != PULSER_CHANNEL_MW &&
+             i != PULSER_CHANNEL_RF &&
+             i != PULSER_CHANNEL_DEFENSE &&
+             i != PULSER_CHANNEL_DET &&
+             i != PULSER_CHANNEL_LASER )
+            f->is_used = UNSET;
+        else
+            f->is_used = SET;
+        f->is_declared = UNSET;
+    }
 
-	rb_pulser_w_card_setup( );
+    rb_pulser_w_card_setup( );
 
-	rb_pulser_w.function[ PULSER_CHANNEL_MW ].delay_card =
-										   rb_pulser_w.delay_card + MW_DELAY_0;
-	rb_pulser_w.function[ PULSER_CHANNEL_RF ].delay_card =
-										     rb_pulser_w.delay_card + RF_DELAY;
-	rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].delay_card =
-									    rb_pulser_w.delay_card + DEFENSE_DELAY;
-	rb_pulser_w.function[ PULSER_CHANNEL_DET ].delay_card =
-										    rb_pulser_w.delay_card + DET_DELAY;
-	rb_pulser_w.function[ PULSER_CHANNEL_LASER ].delay_card =
-										rb_pulser_w.delay_card + LASER_DELAY_0;
+    rb_pulser_w.function[ PULSER_CHANNEL_MW ].delay_card =
+                                           rb_pulser_w.delay_card + MW_DELAY_0;
+    rb_pulser_w.function[ PULSER_CHANNEL_RF ].delay_card =
+                                             rb_pulser_w.delay_card + RF_DELAY;
+    rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].delay_card =
+                                        rb_pulser_w.delay_card + DEFENSE_DELAY;
+    rb_pulser_w.function[ PULSER_CHANNEL_DET ].delay_card =
+                                            rb_pulser_w.delay_card + DET_DELAY;
+    rb_pulser_w.function[ PULSER_CHANNEL_LASER ].delay_card =
+                                        rb_pulser_w.delay_card + LASER_DELAY_0;
 
-	return 1;
+    return 1;
 }
 
 
@@ -210,111 +210,111 @@ int rb_pulser_w_init_hook( void )
 
 int rb_pulser_w_test_hook( void )
 {
-	Pulse_T *p;
+    Pulse_T *p;
 
 
-	/* If not set by the user take the default time distance between
-	   activating the phase switch and the start of a microwave pulse */
+    /* If not set by the user take the default time distance between
+       activating the phase switch and the start of a microwave pulse */
 
-	if ( ! rb_pulser_w.is_psd )
-		rb_pulser_w.psd = DEFAULT_PHASE_SWITCH_DELAY;
+    if ( ! rb_pulser_w.is_psd )
+        rb_pulser_w.psd = DEFAULT_PHASE_SWITCH_DELAY;
 
-	/* Also set the default time a phase has to be kept after the end of a
-	   pulse unless the user already set it */
+    /* Also set the default time a phase has to be kept after the end of a
+       pulse unless the user already set it */
 
-	if ( ! rb_pulser_w.is_grace_period )
-		rb_pulser_w.grace_period = DEFAULT_GRACE_PERIOD;
+    if ( ! rb_pulser_w.is_grace_period )
+        rb_pulser_w.grace_period = DEFAULT_GRACE_PERIOD;
 
-	/* If the user didn't set a minimum time between the end of the last
-	   microwave pulse and the end of the defense pulse use the default
-	   value */
+    /* If the user didn't set a minimum time between the end of the last
+       microwave pulse and the end of the defense pulse use the default
+       value */
 
-	if ( ! rb_pulser_w.is_pulse_2_defense )
-		rb_pulser_w.pulse_2_defense = PULSE_2_DEFENSE_DEFAULT_MIN_DISTANCE;
+    if ( ! rb_pulser_w.is_pulse_2_defense )
+        rb_pulser_w.pulse_2_defense = PULSE_2_DEFENSE_DEFAULT_MIN_DISTANCE;
 
-	/* If a RF pulse exists make sure the synthesizer module got loaded
-	   before the pulser module */
+    /* If a RF pulse exists make sure the synthesizer module got loaded
+       before the pulser module */
 
-	for ( p = rb_pulser_w.pulses; p != NULL; p = p->next )
-		if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_RF )
-		{
-			if ( ! rb_pulser_w.exists_synthesizer )
-			{
-				print( FATAL, "Module \"" SYNTHESIZER_MODULE "\" pulser must "
-					   "be listed before \"rb_pulser_w\" module in DEVICES "
-					   "section when RF pulses are to be used.\n" );
-				THROW( EXCEPTION );
-			}
+    for ( p = rb_pulser_w.pulses; p != NULL; p = p->next )
+        if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_RF )
+        {
+            if ( ! rb_pulser_w.exists_synthesizer )
+            {
+                print( FATAL, "Module \"" SYNTHESIZER_MODULE "\" pulser must "
+                       "be listed before \"rb_pulser_w\" module in DEVICES "
+                       "section when RF pulses are to be used.\n" );
+                THROW( EXCEPTION );
+            }
 
-			break;
-		}
+            break;
+        }
 
-	/* Check consistency of pulse settings and do everything to setup the
-	   pulser for the test run */
+    /* Check consistency of pulse settings and do everything to setup the
+       pulser for the test run */
 
-	TRY
-	{
-		if ( rb_pulser_w.trig_in_mode == INTERNAL &&
-			 ! rb_pulser_w.is_rep_time )
-		{
-			print( FATAL, "No experiment repetition time/frequency has been "
-				   "set.\n" );
-			THROW( EXCEPTION );
-		}
+    TRY
+    {
+        if ( rb_pulser_w.trig_in_mode == INTERNAL &&
+             ! rb_pulser_w.is_rep_time )
+        {
+            print( FATAL, "No experiment repetition time/frequency has been "
+                   "set.\n" );
+            THROW( EXCEPTION );
+        }
 
-		if ( rb_pulser_w.do_show_pulses )
-			rb_pulser_w_start_show_pulses( );
-		if ( rb_pulser_w.do_dump_pulses )
-			rb_pulser_w_open_dump_file( );
-		rb_pulser_w_init_setup( );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		if ( rb_pulser_w.dump_file )
-		{
-			fclose( rb_pulser_w.dump_file );
-			rb_pulser_w.dump_file = NULL;
-		}
+        if ( rb_pulser_w.do_show_pulses )
+            rb_pulser_w_start_show_pulses( );
+        if ( rb_pulser_w.do_dump_pulses )
+            rb_pulser_w_open_dump_file( );
+        rb_pulser_w_init_setup( );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        if ( rb_pulser_w.dump_file )
+        {
+            fclose( rb_pulser_w.dump_file );
+            rb_pulser_w.dump_file = NULL;
+        }
 
-		if ( rb_pulser_w.show_file )
-		{
-			fclose( rb_pulser_w.show_file );
-			rb_pulser_w.show_file = NULL;
-		}
+        if ( rb_pulser_w.show_file )
+        {
+            fclose( rb_pulser_w.show_file );
+            rb_pulser_w.show_file = NULL;
+        }
 
-		RETHROW( );
-	}
+        RETHROW( );
+    }
 
 #ifndef FIXED_TIMEBASE
-	/* Set the frequency (index) of the timebase clock to the one for the
-	   requested timebase */
+    /* Set the frequency (index) of the timebase clock to the one for the
+       requested timebase */
 
-	rb_pulser_w.clock_card[ TB_CLOCK ].freq = rb_pulser_w.tb_index;
+    rb_pulser_w.clock_card[ TB_CLOCK ].freq = rb_pulser_w.tb_index;
 #endif
 
-	/* If a repetition time has been set set up the corresponding value in
-	   the structure for the card creating the repetition time */
+    /* If a repetition time has been set set up the corresponding value in
+       the structure for the card creating the repetition time */
 
-	if ( rb_pulser_w.trig_in_mode == INTERNAL ) {
-		rb_pulser_w.clock_card[ ERT_CLOCK ].freq = rb_pulser_w.rep_time_index;
-		rb_pulser_w.delay_card[ ERT_DELAY ].delay = rb_pulser_w.rep_time_ticks;
-	}
+    if ( rb_pulser_w.trig_in_mode == INTERNAL ) {
+        rb_pulser_w.clock_card[ ERT_CLOCK ].freq = rb_pulser_w.rep_time_index;
+        rb_pulser_w.delay_card[ ERT_DELAY ].delay = rb_pulser_w.rep_time_ticks;
+    }
 
-	/* After the initial setup is done we need some different functions for
-	   setting of pulse properties */
+    /* After the initial setup is done we need some different functions for
+       setting of pulse properties */
 
-	Pulser_Struct.set_pulse_position = rb_pulser_w_change_pulse_position;
-	Pulser_Struct.set_pulse_length = rb_pulser_w_change_pulse_length;
-	Pulser_Struct.set_pulse_position_change =
-									  rb_pulser_w_change_pulse_position_change;
-	Pulser_Struct.set_pulse_length_change =
-										rb_pulser_w_change_pulse_length_change;
+    Pulser_Struct.set_pulse_position = rb_pulser_w_change_pulse_position;
+    Pulser_Struct.set_pulse_length = rb_pulser_w_change_pulse_length;
+    Pulser_Struct.set_pulse_position_change =
+                                      rb_pulser_w_change_pulse_position_change;
+    Pulser_Struct.set_pulse_length_change =
+                                        rb_pulser_w_change_pulse_length_change;
 
-	if ( rb_pulser_w.pulses == NULL )
-		rb_pulser_w.is_needed = UNSET;
+    if ( rb_pulser_w.pulses == NULL )
+        rb_pulser_w.is_needed = UNSET;
 
-	return 1;
+    return 1;
 }
 
 
@@ -326,22 +326,22 @@ int rb_pulser_w_test_hook( void )
 
 int rb_pulser_w_end_of_test_hook( void )
 {
-	if ( ! rb_pulser_w.is_needed )
-		return 1;
+    if ( ! rb_pulser_w.is_needed )
+        return 1;
 
-	if ( rb_pulser_w.dump_file != NULL )
-	{
-		fclose( rb_pulser_w.dump_file );
-		rb_pulser_w.dump_file = NULL;
-	}
+    if ( rb_pulser_w.dump_file != NULL )
+    {
+        fclose( rb_pulser_w.dump_file );
+        rb_pulser_w.dump_file = NULL;
+    }
 
-	if ( rb_pulser_w.show_file != NULL )
-	{
-		fclose( rb_pulser_w.show_file );
-		rb_pulser_w.show_file = NULL;
-	}
+    if ( rb_pulser_w.show_file != NULL )
+    {
+        fclose( rb_pulser_w.show_file );
+        rb_pulser_w.show_file = NULL;
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -352,68 +352,68 @@ int rb_pulser_w_end_of_test_hook( void )
 
 int rb_pulser_w_exp_hook( void )
 {
-	if ( ! rb_pulser_w.is_needed )
-		return 1;
+    if ( ! rb_pulser_w.is_needed )
+        return 1;
 
-	/* If the user asked to have no automatically created defense pulse ask
-	   if (s)he really means it */
+    /* If the user asked to have no automatically created defense pulse ask
+       if (s)he really means it */
 
-	if ( rb_pulser_w.defense_pulse_mode == MANUAL )
-	{
-		const char *warn = "You want to set the defense pulse manually.\n"
-			               "This can potentally destroy the signal ampli-\n"
-			               "fier if you are not extremely careful.\n"
-			               "***** Is this really what you want? *****";
-		if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
-			THROW( EXCEPTION );
-	}
+    if ( rb_pulser_w.defense_pulse_mode == MANUAL )
+    {
+        const char *warn = "You want to set the defense pulse manually.\n"
+                           "This can potentally destroy the signal ampli-\n"
+                           "fier if you are not extremely careful.\n"
+                           "***** Is this really what you want? *****";
+        if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
+            THROW( EXCEPTION );
+    }
 
-	/* If the user wants an automatic defense pulse but also uses function
-	   delays we can't be 100% sure that the defense pulse covers the
-	   required region. So we better warn the user */
+    /* If the user wants an automatic defense pulse but also uses function
+       delays we can't be 100% sure that the defense pulse covers the
+       required region. So we better warn the user */
 
-	if ( rb_pulser_w.defense_pulse_mode == AUTOMATIC &&
-		 ( rb_pulser_w.function[ PULSER_CHANNEL_MW ].is_delay ||
-		   rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].is_delay ) )
-	{
-		const char *warn = "You want an automatically set defense pulse\n"
-			               "but also use function delays. The program now\n"
-			               "can't guarantee the correct setting of the\n"
-			               "defense pulse. This can destroy the signal\n"
-			               "amplifier if you are not very careful.\n"
-			               "***** Is this really what you want? *****";
-		if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
-			THROW( EXCEPTION );
-	}
+    if ( rb_pulser_w.defense_pulse_mode == AUTOMATIC &&
+         ( rb_pulser_w.function[ PULSER_CHANNEL_MW ].is_delay ||
+           rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].is_delay ) )
+    {
+        const char *warn = "You want an automatically set defense pulse\n"
+                           "but also use function delays. The program now\n"
+                           "can't guarantee the correct setting of the\n"
+                           "defense pulse. This can destroy the signal\n"
+                           "amplifier if you are not very careful.\n"
+                           "***** Is this really what you want? *****";
+        if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
+            THROW( EXCEPTION );
+    }
 
 #if defined ASK_FOR_PULSE_2_DEFENSE_DISTANCE_CONFORMATION
-	/* If the user changed the minimum distance between the end of the
-	   last microwave pulse and the end of the defense pulse also ask
-	   if she's serious about that */
+    /* If the user changed the minimum distance between the end of the
+       last microwave pulse and the end of the defense pulse also ask
+       if she's serious about that */
 
-	if ( rb_pulser_w.is_pulse_2_defense &&
-		 rb_pulser_w.defense_pulse_mode == AUTOMATIC )
-	{
-		char warn[ 500 ];
-		sprintf( warn, "The minimum distance between the end of the last\n"
-				       "microwave pulse and the end of defense pulse has\n"
-				       "been changed to %s.\n"
-				       "***** Is this really what you want? *****",
-				 rb_pulser_w_ptime( rb_pulser_w_ticks2double(
-										     rb_pulser_w.pulse_2_defense ) ) );
-		if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
-			THROW( EXCEPTION );
-	}
+    if ( rb_pulser_w.is_pulse_2_defense &&
+         rb_pulser_w.defense_pulse_mode == AUTOMATIC )
+    {
+        char warn[ 500 ];
+        sprintf( warn, "The minimum distance between the end of the last\n"
+                       "microwave pulse and the end of defense pulse has\n"
+                       "been changed to %s.\n"
+                       "***** Is this really what you want? *****",
+                 rb_pulser_w_ptime( rb_pulser_w_ticks2double(
+                                             rb_pulser_w.pulse_2_defense ) ) );
+        if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
+            THROW( EXCEPTION );
+    }
 #endif
 
-	/* Initialize the device */
+    /* Initialize the device */
 
-	rb_pulser_w.is_running = UNSET;
-	rb_pulser_w_init( );
-	rb_pulser_w_full_reset( );
-	rb_pulser_w_do_update( );
+    rb_pulser_w.is_running = UNSET;
+    rb_pulser_w_init( );
+    rb_pulser_w_full_reset( );
+    rb_pulser_w_do_update( );
 
-	return 1;
+    return 1;
 }
 
 
@@ -423,10 +423,10 @@ int rb_pulser_w_exp_hook( void )
 
 int rb_pulser_w_end_of_exp_hook( void )
 {
-	if ( rb_pulser_w.is_needed )
-		rb_pulser_w_exit( );
+    if ( rb_pulser_w.is_needed )
+        rb_pulser_w_exit( );
 
-	return 1;
+    return 1;
 }
 
 
@@ -437,49 +437,49 @@ int rb_pulser_w_end_of_exp_hook( void )
 
 void rb_pulser_w_exit_hook( void )
 {
-	Pulse_T *p, *pn;
-	Function_T *f;
-	int i;
+    Pulse_T *p, *pn;
+    Function_T *f;
+    int i;
 
 
-	rb_pulser_w_cleanup( );
+    rb_pulser_w_cleanup( );
 
-	if ( ! rb_pulser_w.is_needed )
-		return;
+    if ( ! rb_pulser_w.is_needed )
+        return;
 
-	/* Free all memory allocated within the module */
+    /* Free all memory allocated within the module */
 
-	for ( p = rb_pulser_w.pulses; p != NULL; p = pn )
-	{
-		pn = p->next;
-		T_free( p );
-	}
+    for ( p = rb_pulser_w.pulses; p != NULL; p = pn )
+    {
+        pn = p->next;
+        T_free( p );
+    }
 
-	if ( rb_pulser_w.synth_state )
-		rb_pulser_w.synth_pulse_state =
-			                          CHAR_P T_free( rb_pulser_w.synth_state );
+    if ( rb_pulser_w.synth_state )
+        rb_pulser_w.synth_pulse_state =
+                                      CHAR_P T_free( rb_pulser_w.synth_state );
 
-	if ( rb_pulser_w.synth_pulse_state )
-		rb_pulser_w.synth_pulse_state =
-								CHAR_P T_free( rb_pulser_w.synth_pulse_state );
+    if ( rb_pulser_w.synth_pulse_state )
+        rb_pulser_w.synth_pulse_state =
+                                CHAR_P T_free( rb_pulser_w.synth_pulse_state );
 
-	if ( rb_pulser_w.synth_pulse_width )
-		rb_pulser_w.synth_pulse_width =
-								CHAR_P T_free( rb_pulser_w.synth_pulse_width );
+    if ( rb_pulser_w.synth_pulse_width )
+        rb_pulser_w.synth_pulse_width =
+                                CHAR_P T_free( rb_pulser_w.synth_pulse_width );
 
-	if ( rb_pulser_w.synth_pulse_delay )
-		rb_pulser_w.synth_pulse_delay =
-								CHAR_P T_free( rb_pulser_w.synth_pulse_delay );
+    if ( rb_pulser_w.synth_pulse_delay )
+        rb_pulser_w.synth_pulse_delay =
+                                CHAR_P T_free( rb_pulser_w.synth_pulse_delay );
 
-	if ( rb_pulser_w.synth_trig_slope )
-		rb_pulser_w.synth_trig_slope =
-								 CHAR_P T_free( rb_pulser_w.synth_trig_slope );
+    if ( rb_pulser_w.synth_trig_slope )
+        rb_pulser_w.synth_trig_slope =
+                                 CHAR_P T_free( rb_pulser_w.synth_trig_slope );
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = rb_pulser_w.function + i;
-		f->pulses = PULSE_PP T_free( f->pulses );
-	}
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = rb_pulser_w.function + i;
+        f->pulses = PULSE_PP T_free( f->pulses );
+    }
 }
 
 
@@ -489,7 +489,7 @@ void rb_pulser_w_exit_hook( void )
 
 Var_T *pulser_name( Var_T * v UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -500,10 +500,10 @@ Var_T *pulser_name( Var_T * v UNUSED_ARG )
 
 Var_T *pulser_show_pulses( Var_T * v UNUSED_ARG )
 {
-	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
-		rb_pulser_w.do_show_pulses = SET;
+    if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
+        rb_pulser_w.do_show_pulses = SET;
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -514,10 +514,10 @@ Var_T *pulser_show_pulses( Var_T * v UNUSED_ARG )
 
 Var_T *pulser_dump_pulses( Var_T * v UNUSED_ARG )
 {
-	if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
-		rb_pulser_w.do_dump_pulses = SET;
+    if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
+        rb_pulser_w.do_dump_pulses = SET;
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -528,17 +528,17 @@ Var_T *pulser_dump_pulses( Var_T * v UNUSED_ARG )
 
 Var_T *pulser_phase_switch_delay( Var_T * v )
 {
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v->next );
+    too_many_arguments( v->next );
 
-	rb_pulser_w_set_phase_switch_delay( 0,
-									   get_double( v, "phase switch delay" ) );
-	return vars_push( FLOAT_VAR, rb_pulser_w.psd );
+    rb_pulser_w_set_phase_switch_delay( 0,
+                                       get_double( v, "phase switch delay" ) );
+    return vars_push( FLOAT_VAR, rb_pulser_w.psd );
 }
 
 
@@ -549,8 +549,8 @@ Var_T *pulser_phase_switch_delay( Var_T * v )
 
 Var_T *pulser_grace_period( Var_T * v )
 {
-	rb_pulser_w_set_grace_period( get_double( v, "grace period" ) );
-	return vars_push( FLOAT_VAR, rb_pulser_w.grace_period );
+    rb_pulser_w_set_grace_period( get_double( v, "grace period" ) );
+    return vars_push( FLOAT_VAR, rb_pulser_w.grace_period );
 }
 
 
@@ -563,32 +563,32 @@ Var_T *pulser_grace_period( Var_T * v )
 
 Var_T *pulser_minimum_defense_distance( Var_T * v )
 {
-	double s2d;
+    double s2d;
 
 
-	if ( rb_pulser_w.is_pulse_2_defense )
-	{
-		print( FATAL, "End of last microwave pulse to end of defense pulse "
-			   "minimum distance has already been set to %s.\n",
-			   rb_pulser_w_ptime(
-				   rb_pulser_w_ticks2double( rb_pulser_w.pulse_2_defense ) ) );
-		THROW( EXCEPTION );
-	}
+    if ( rb_pulser_w.is_pulse_2_defense )
+    {
+        print( FATAL, "End of last microwave pulse to end of defense pulse "
+               "minimum distance has already been set to %s.\n",
+               rb_pulser_w_ptime(
+                   rb_pulser_w_ticks2double( rb_pulser_w.pulse_2_defense ) ) );
+        THROW( EXCEPTION );
+    }
 
-	s2d = get_double( v, "end of last microwave pulse to end of defense "
-					  "pulse minimum distance" );
+    s2d = get_double( v, "end of last microwave pulse to end of defense "
+                      "pulse minimum distance" );
 
-	if ( s2d < 0.0 )
-	{
-		print( FATAL, "Negative minimum distance between end of last "
-			   "microwave pulse end end of defense pulse.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( s2d < 0.0 )
+    {
+        print( FATAL, "Negative minimum distance between end of last "
+               "microwave pulse end end of defense pulse.\n" );
+        THROW( EXCEPTION );
+    }
 
-	rb_pulser_w.is_pulse_2_defense = SET;
-	rb_pulser_w.pulse_2_defense = s2d;
+    rb_pulser_w.is_pulse_2_defense = SET;
+    rb_pulser_w.pulse_2_defense = s2d;
 
-	return vars_push( FLOAT_VAR, s2d );
+    return vars_push( FLOAT_VAR, s2d );
 }
 
 
@@ -598,60 +598,60 @@ Var_T *pulser_minimum_defense_distance( Var_T * v )
 
 Var_T *pulser_defense_pulse_mode( Var_T * v )
 {
-	long mode;
+    long mode;
 
 
-	if ( ! ( v->type & ( INT_VAR | STR_VAR ) ) )
-	{
-		print( FATAL, "Invalid type of argument, must be either \"AUTOMATIC\" "
-			   "or \"MANUAL\".\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! ( v->type & ( INT_VAR | STR_VAR ) ) )
+    {
+        print( FATAL, "Invalid type of argument, must be either \"AUTOMATIC\" "
+               "or \"MANUAL\".\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( v->type == INT_VAR )
-	{
-		switch ( v->val.lval )
-		{
-			case AUTOMATIC :
-				mode = AUTOMATIC;
-				break;
+    if ( v->type == INT_VAR )
+    {
+        switch ( v->val.lval )
+        {
+            case AUTOMATIC :
+                mode = AUTOMATIC;
+                break;
 
-			case MANUAL :
-				mode = MANUAL;
-				break;
+            case MANUAL :
+                mode = MANUAL;
+                break;
 
-			default :
-				print( FATAL, "Invalid argument value, must be 0 or 1 (but "
-					   "better use the strings \"AUTOMATIC\" or "
-					   "\"MANUAL\".\n" );
-				THROW( EXCEPTION );
-		}
-	}
-	else
-	{
-		if ( ! strcasecmp( v->val.sptr, "AUTOMATIC" ) ||
-			 ! strcasecmp( v->val.sptr, "AUTO" ) )
-			mode = AUTOMATIC;
-		else if ( ! strcasecmp( v->val.sptr, "MANUAL" ) )
-			mode = MANUAL;
-		else
-		{
-			print( FATAL, "Invalid argument value, must be \"AUTOMATIC\" or "
-				   "\"MANUAL\".\n" );
-			THROW( EXCEPTION );
-		}
-	}
+            default :
+                print( FATAL, "Invalid argument value, must be 0 or 1 (but "
+                       "better use the strings \"AUTOMATIC\" or "
+                       "\"MANUAL\".\n" );
+                THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        if ( ! strcasecmp( v->val.sptr, "AUTOMATIC" ) ||
+             ! strcasecmp( v->val.sptr, "AUTO" ) )
+            mode = AUTOMATIC;
+        else if ( ! strcasecmp( v->val.sptr, "MANUAL" ) )
+            mode = MANUAL;
+        else
+        {
+            print( FATAL, "Invalid argument value, must be \"AUTOMATIC\" or "
+                   "\"MANUAL\".\n" );
+            THROW( EXCEPTION );
+        }
+    }
 
-	if ( mode == AUTOMATIC && rb_pulser_w.defense_pulse_mode == MANUAL )
-	{
-		print( FATAL, "Can't switch back from manual to automatic creation "
-			   "of defense pulse.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( mode == AUTOMATIC && rb_pulser_w.defense_pulse_mode == MANUAL )
+    {
+        print( FATAL, "Can't switch back from manual to automatic creation "
+               "of defense pulse.\n" );
+        THROW( EXCEPTION );
+    }
 
-	rb_pulser_w.defense_pulse_mode = mode;
+    rb_pulser_w.defense_pulse_mode = mode;
 
-	return vars_push( INT_VAR, rb_pulser_w.defense_pulse_mode );
+    return vars_push( INT_VAR, rb_pulser_w.defense_pulse_mode );
 }
 
 
@@ -662,15 +662,15 @@ Var_T *pulser_defense_pulse_mode( Var_T * v )
 
 Var_T *pulser_state( Var_T * v )
 {
-	if ( v == NULL )
-		return vars_push( INT_VAR, ( long ) rb_pulser_w.is_running );
+    if ( v == NULL )
+        return vars_push( INT_VAR, ( long ) rb_pulser_w.is_running );
 
-	rb_pulser_w.is_running = get_boolean( v );
+    rb_pulser_w.is_running = get_boolean( v );
 
-	if ( FSC2_MODE == EXPERIMENT )
-		rb_pulser_w_run( rb_pulser_w.is_running );
+    if ( FSC2_MODE == EXPERIMENT )
+        rb_pulser_w_run( rb_pulser_w.is_running );
 
-	return vars_push( INT_VAR, ( long ) rb_pulser_w.is_running );
+    return vars_push( INT_VAR, ( long ) rb_pulser_w.is_running );
 }
 
 
@@ -683,14 +683,14 @@ Var_T *pulser_state( Var_T * v )
 
 Var_T *pulser_update( Var_T * v UNUSED_ARG )
 {
-	if ( ! rb_pulser_w.is_needed )
-		return vars_push( INT_VAR, 1L );
+    if ( ! rb_pulser_w.is_needed )
+        return vars_push( INT_VAR, 1L );
 
-	/* Send all changes to the pulser */
+    /* Send all changes to the pulser */
 
-	rb_pulser_w_do_update( );
+    rb_pulser_w_do_update( );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -705,52 +705,52 @@ Var_T *pulser_update( Var_T * v UNUSED_ARG )
 
 Var_T *pulser_shift( Var_T * v )
 {
-	Pulse_T *p;
+    Pulse_T *p;
 
 
-	if ( ! rb_pulser_w.is_needed )
-		return vars_push( INT_VAR, 1L );
+    if ( ! rb_pulser_w.is_needed )
+        return vars_push( INT_VAR, 1L );
 
-	/* An empty pulse list means that we have to shift all active pulses that
-	   have a position change time value set */
+    /* An empty pulse list means that we have to shift all active pulses that
+       have a position change time value set */
 
-	if ( v == NULL )
-		for ( p = rb_pulser_w.pulses; p != NULL; p = p->next )
-			if ( p->num >= 0 && p->is_active && p->is_dpos )
-				vars_pop( pulser_shift( vars_push( INT_VAR, p->num ) ) );
+    if ( v == NULL )
+        for ( p = rb_pulser_w.pulses; p != NULL; p = p->next )
+            if ( p->num >= 0 && p->is_active && p->is_dpos )
+                vars_pop( pulser_shift( vars_push( INT_VAR, p->num ) ) );
 
-	/* Otherwise run through the supplied pulse list */
+    /* Otherwise run through the supplied pulse list */
 
-	for ( ; v != NULL; v = vars_pop( v ) )
-	{
-		p = rb_pulser_w_get_pulse( get_strict_long( v, "pulse number" ) );
+    for ( ; v != NULL; v = vars_pop( v ) )
+    {
+        p = rb_pulser_w_get_pulse( get_strict_long( v, "pulse number" ) );
 
-		if ( ! p->is_pos )
-		{
-			print( FATAL, "Pulse #%ld has no position set, so shifting it "
-				   "isn't possible.\n", p->num );
-			THROW( EXCEPTION );
-		}
+        if ( ! p->is_pos )
+        {
+            print( FATAL, "Pulse #%ld has no position set, so shifting it "
+                   "isn't possible.\n", p->num );
+            THROW( EXCEPTION );
+        }
 
-		if ( ! p->is_dpos )
-		{
-			print( FATAL, "Amount of position change hasn't been defined for "
-				   "pulse #%ld.\n", p->num );
-			THROW( EXCEPTION );
-		}
+        if ( ! p->is_dpos )
+        {
+            print( FATAL, "Amount of position change hasn't been defined for "
+                   "pulse #%ld.\n", p->num );
+            THROW( EXCEPTION );
+        }
 
-		p->pos += p->dpos;
+        p->pos += p->dpos;
 
-		/* Make sure we always end up with an integer multiple of the
-		   timebase */
+        /* Make sure we always end up with an integer multiple of the
+           timebase */
 
-		p->pos =
-			    rb_pulser_w_ticks2double( rb_pulser_w_double2ticks( p->pos ) );
+        p->pos =
+                rb_pulser_w_ticks2double( rb_pulser_w_double2ticks( p->pos ) );
 
-		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
-	}
+        p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
+    }
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -765,52 +765,52 @@ Var_T *pulser_shift( Var_T * v )
 
 Var_T *pulser_increment( Var_T * v )
 {
-	Pulse_T *p;
+    Pulse_T *p;
 
 
-	if ( ! rb_pulser_w.is_needed )
-		return vars_push( INT_VAR, 1L );
+    if ( ! rb_pulser_w.is_needed )
+        return vars_push( INT_VAR, 1L );
 
-	/* An empty pulse list means that we have to increment all active pulses
-	   that have a length change time value set */
+    /* An empty pulse list means that we have to increment all active pulses
+       that have a length change time value set */
 
-	if ( v == NULL )
-		for ( p = rb_pulser_w.pulses; p != NULL; p = p->next )
-			if ( p->num >= 0 && p->is_active && p->is_dlen )
-				vars_pop( pulser_increment( vars_push( INT_VAR, p->num ) ) );
+    if ( v == NULL )
+        for ( p = rb_pulser_w.pulses; p != NULL; p = p->next )
+            if ( p->num >= 0 && p->is_active && p->is_dlen )
+                vars_pop( pulser_increment( vars_push( INT_VAR, p->num ) ) );
 
-	/* Otherwise run through the supplied pulse list */
+    /* Otherwise run through the supplied pulse list */
 
-	for ( ; v != NULL; v = vars_pop( v ) )
-	{
-		p = rb_pulser_w_get_pulse( get_strict_long( v, "pulse number" ) );
+    for ( ; v != NULL; v = vars_pop( v ) )
+    {
+        p = rb_pulser_w_get_pulse( get_strict_long( v, "pulse number" ) );
 
-		if ( ! p->is_len )
-		{
-			print( FATAL, "Pulse #%ld has no length set, so incrementing its "
-				   "length isn't possible.\n", p->num );
-			THROW( EXCEPTION );
-		}
+        if ( ! p->is_len )
+        {
+            print( FATAL, "Pulse #%ld has no length set, so incrementing its "
+                   "length isn't possible.\n", p->num );
+            THROW( EXCEPTION );
+        }
 
-		if ( ! p->is_dlen )
-		{
-			print( FATAL, "Length change time hasn't been defined for pulse "
-				   "#%ld.\n", p->num );
-			THROW( EXCEPTION );
-		}
+        if ( ! p->is_dlen )
+        {
+            print( FATAL, "Length change time hasn't been defined for pulse "
+                   "#%ld.\n", p->num );
+            THROW( EXCEPTION );
+        }
 
-		if ( ( p->len += p->dlen ) < 0 )
-		{
-			print( FATAL, "Incrementing the length of pulse #%ld leads to an "
-				   "invalid negative pulse length of %s.\n",
-				   p->num, rb_pulser_w_pticks( p->len ) );
-			THROW( EXCEPTION );
-		}
+        if ( ( p->len += p->dlen ) < 0 )
+        {
+            print( FATAL, "Incrementing the length of pulse #%ld leads to an "
+                   "invalid negative pulse length of %s.\n",
+                   p->num, rb_pulser_w_pticks( p->len ) );
+            THROW( EXCEPTION );
+        }
 
-		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
-	}
+        p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
+    }
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -823,23 +823,23 @@ Var_T *pulser_increment( Var_T * v )
 
 Var_T *pulser_next_phase( Var_T * v )
 {
-	if ( ! rb_pulser_w.is_needed )
-		return vars_push( INT_VAR, 1L );
+    if ( ! rb_pulser_w.is_needed )
+        return vars_push( INT_VAR, 1L );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( ! rb_pulser_w.needs_phases )
-	{
-		print( SEVERE, "No phase cycling is used.\n" );
-		return vars_push( INT_VAR, 0L );
-	}
+    if ( ! rb_pulser_w.needs_phases )
+    {
+        print( SEVERE, "No phase cycling is used.\n" );
+        return vars_push( INT_VAR, 0L );
+    }
 
-	if ( ++rb_pulser_w.cur_phase >= rb_pulser_w.pc_len )
-		rb_pulser_w.cur_phase = 0;
+    if ( ++rb_pulser_w.cur_phase >= rb_pulser_w.pc_len )
+        rb_pulser_w.cur_phase = 0;
 
-	pulser_update( NULL );
+    pulser_update( NULL );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -852,22 +852,22 @@ Var_T *pulser_next_phase( Var_T * v )
 
 Var_T *pulser_phase_reset( Var_T * v )
 {
-	if ( ! rb_pulser_w.is_needed )
-		return vars_push( INT_VAR, 1L );
+    if ( ! rb_pulser_w.is_needed )
+        return vars_push( INT_VAR, 1L );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( ! rb_pulser_w.needs_phases )
-	{
-		print( SEVERE, "No phase cycling is used.\n" );
-		return vars_push( INT_VAR, 0L );
-	}
+    if ( ! rb_pulser_w.needs_phases )
+    {
+        print( SEVERE, "No phase cycling is used.\n" );
+        return vars_push( INT_VAR, 0L );
+    }
 
-	rb_pulser_w.cur_phase = 0;
+    rb_pulser_w.cur_phase = 0;
 
-	pulser_update( NULL );
+    pulser_update( NULL );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -877,13 +877,13 @@ Var_T *pulser_phase_reset( Var_T * v )
 
 Var_T *pulser_reset( Var_T * v UNUSED_ARG )
 {
-	if ( ! rb_pulser_w.is_needed )
-		return vars_push( INT_VAR, 1L );
+    if ( ! rb_pulser_w.is_needed )
+        return vars_push( INT_VAR, 1L );
 
-	rb_pulser_w.cur_phase = 0;
-	vars_pop( pulser_pulse_reset( NULL ) );
+    rb_pulser_w.cur_phase = 0;
+    vars_pop( pulser_pulse_reset( NULL ) );
 
-	return pulser_update( NULL );
+    return pulser_update( NULL );
 }
 
 
@@ -893,50 +893,50 @@ Var_T *pulser_reset( Var_T * v UNUSED_ARG )
 
 Var_T *pulser_pulse_reset( Var_T * v )
 {
-	Pulse_T *p;
+    Pulse_T *p;
 
 
-	if ( ! rb_pulser_w.is_needed )
-		return vars_push( INT_VAR, 1L );
+    if ( ! rb_pulser_w.is_needed )
+        return vars_push( INT_VAR, 1L );
 
-	/* An empty pulse list means that we have to reset all pulses (even the
+    /* An empty pulse list means that we have to reset all pulses (even the
        inactive ones). Don't explicitely reset automatically created pulses
-	   (which all have a negative pulse number), they will be reset together
-	   with the pulses belong to. */
+       (which all have a negative pulse number), they will be reset together
+       with the pulses belong to. */
 
-	if ( v == NULL )
-	{
-		for ( p = rb_pulser_w.pulses; p != NULL; p = p->next )
-			if ( p->num >= 0 )
-				vars_pop( pulser_pulse_reset( vars_push( INT_VAR, p->num ) ) );
-	}
+    if ( v == NULL )
+    {
+        for ( p = rb_pulser_w.pulses; p != NULL; p = p->next )
+            if ( p->num >= 0 )
+                vars_pop( pulser_pulse_reset( vars_push( INT_VAR, p->num ) ) );
+    }
 
-	/* Otherwise run through the supplied pulse list */
+    /* Otherwise run through the supplied pulse list */
 
-	for ( ; v != NULL; v = vars_pop( v ) )
-	{
-		p = rb_pulser_w_get_pulse( get_strict_long( v, "pulse number" ) );
+    for ( ; v != NULL; v = vars_pop( v ) )
+    {
+        p = rb_pulser_w_get_pulse( get_strict_long( v, "pulse number" ) );
 
-		/* Reset all changeable properties back to their initial values */
+        /* Reset all changeable properties back to their initial values */
 
-		p->pos = p->initial_pos;
-		p->is_pos = p->initial_is_pos;
+        p->pos = p->initial_pos;
+        p->is_pos = p->initial_is_pos;
 
-		p->len = p->initial_len;
-		p->is_len = p->initial_is_len;
+        p->len = p->initial_len;
+        p->is_len = p->initial_is_len;
 
-		if ( p->initial_is_dpos )
-			p->dpos = p->initial_dpos;
-		p->is_dpos = p->initial_is_dpos;
+        if ( p->initial_is_dpos )
+            p->dpos = p->initial_dpos;
+        p->is_dpos = p->initial_is_dpos;
 
-		if ( p->initial_is_dlen )
-			p->dlen = p->initial_dlen;
-		p->is_dlen = p->initial_is_dlen;
+        if ( p->initial_is_dlen )
+            p->dlen = p->initial_dlen;
+        p->is_dlen = p->initial_is_dlen;
 
-		p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
-	}
+        p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
+    }
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -949,22 +949,22 @@ Var_T *pulser_pulse_reset( Var_T * v )
 
 Var_T *pulser_pulse_minimum_specs( Var_T * v )
 {
-	Pulse_T *p = rb_pulser_w_get_pulse( get_strict_long( v, "pulse number" ) );
-	double t = 0.0;
+    Pulse_T *p = rb_pulser_w_get_pulse( get_strict_long( v, "pulse number" ) );
+    double t = 0.0;
 
 
-	if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_MW )
-		t = rb_pulser_mw_min_specs( p );
-	else if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_RF )
-		t = rb_pulser_rf_min_specs( p );
-	else if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_LASER )
-		t = rb_pulser_laser_min_specs( p );
-	else if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DET )
-		t = rb_pulser_det_min_specs( p );
-	else
-		fsc2_assert( 1 == 0 );
+    if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_MW )
+        t = rb_pulser_mw_min_specs( p );
+    else if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_RF )
+        t = rb_pulser_rf_min_specs( p );
+    else if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_LASER )
+        t = rb_pulser_laser_min_specs( p );
+    else if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DET )
+        t = rb_pulser_det_min_specs( p );
+    else
+        fsc2_assert( 1 == 0 );
 
-	return vars_push( FLOAT_VAR, t );
+    return vars_push( FLOAT_VAR, t );
 }
 
 
@@ -975,104 +975,104 @@ Var_T *pulser_pulse_minimum_specs( Var_T * v )
 
 static void rb_pulser_w_card_setup( void )
 {
-	size_t i;
-	RULBUS_CARD_INFO card_info;
+    size_t i;
+    RULBUS_CARD_INFO card_info;
 
 
-	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
-	{
-		rb_pulser_w.clock_card[ i ].handle = -1;
-		rb_pulser_w.clock_card[ i ].name = NULL;
-	}
+    for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
+    {
+        rb_pulser_w.clock_card[ i ].handle = -1;
+        rb_pulser_w.clock_card[ i ].name = NULL;
+    }
 
-	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
-		rb_pulser_w.delay_card[ i ].name = NULL;
+    for ( i = 0; i < NUM_DELAY_CARDS; i++ )
+        rb_pulser_w.delay_card[ i ].name = NULL;
 
-	/* Get the names of all cards from the configuration file */
+    /* Get the names of all cards from the configuration file */
 
-	rb_pulser_w_read_configuration( );
+    rb_pulser_w_read_configuration( );
 
-	rb_pulser_w.delay_card[ ERT_DELAY ].prev = NULL;
-	rb_pulser_w.delay_card[ ERT_DELAY ].next = NULL;
+    rb_pulser_w.delay_card[ ERT_DELAY ].prev = NULL;
+    rb_pulser_w.delay_card[ ERT_DELAY ].next = NULL;
 
-	rb_pulser_w.delay_card[ MW_DELAY_0 ].prev = NULL;
-	rb_pulser_w.delay_card[ MW_DELAY_0 ].next =
-										   rb_pulser_w.delay_card + MW_DELAY_1;
+    rb_pulser_w.delay_card[ MW_DELAY_0 ].prev = NULL;
+    rb_pulser_w.delay_card[ MW_DELAY_0 ].next =
+                                           rb_pulser_w.delay_card + MW_DELAY_1;
 
-	rb_pulser_w.delay_card[ MW_DELAY_1 ].prev =
-										   rb_pulser_w.delay_card + MW_DELAY_0;
-	rb_pulser_w.delay_card[ MW_DELAY_1 ].next =
-										   rb_pulser_w.delay_card + MW_DELAY_2;
+    rb_pulser_w.delay_card[ MW_DELAY_1 ].prev =
+                                           rb_pulser_w.delay_card + MW_DELAY_0;
+    rb_pulser_w.delay_card[ MW_DELAY_1 ].next =
+                                           rb_pulser_w.delay_card + MW_DELAY_2;
 
-	rb_pulser_w.delay_card[ MW_DELAY_2 ].prev =
-										   rb_pulser_w.delay_card + MW_DELAY_1;
-	rb_pulser_w.delay_card[ MW_DELAY_2 ].next =
-										   rb_pulser_w.delay_card + MW_DELAY_3;
+    rb_pulser_w.delay_card[ MW_DELAY_2 ].prev =
+                                           rb_pulser_w.delay_card + MW_DELAY_1;
+    rb_pulser_w.delay_card[ MW_DELAY_2 ].next =
+                                           rb_pulser_w.delay_card + MW_DELAY_3;
 
-	rb_pulser_w.delay_card[ MW_DELAY_3 ].prev =
-										   rb_pulser_w.delay_card + MW_DELAY_2;
-	rb_pulser_w.delay_card[ MW_DELAY_3 ].next =
-										   rb_pulser_w.delay_card + MW_DELAY_4;
+    rb_pulser_w.delay_card[ MW_DELAY_3 ].prev =
+                                           rb_pulser_w.delay_card + MW_DELAY_2;
+    rb_pulser_w.delay_card[ MW_DELAY_3 ].next =
+                                           rb_pulser_w.delay_card + MW_DELAY_4;
 
-	rb_pulser_w.delay_card[ MW_DELAY_4 ].prev =
-										   rb_pulser_w.delay_card + MW_DELAY_3;
-	rb_pulser_w.delay_card[ MW_DELAY_4 ].next =
-										   rb_pulser_w.delay_card + MW_DELAY_5;
+    rb_pulser_w.delay_card[ MW_DELAY_4 ].prev =
+                                           rb_pulser_w.delay_card + MW_DELAY_3;
+    rb_pulser_w.delay_card[ MW_DELAY_4 ].next =
+                                           rb_pulser_w.delay_card + MW_DELAY_5;
 
-	rb_pulser_w.delay_card[ MW_DELAY_5 ].prev =
-										   rb_pulser_w.delay_card + MW_DELAY_4;
-	rb_pulser_w.delay_card[ MW_DELAY_5 ].next = NULL;
+    rb_pulser_w.delay_card[ MW_DELAY_5 ].prev =
+                                           rb_pulser_w.delay_card + MW_DELAY_4;
+    rb_pulser_w.delay_card[ MW_DELAY_5 ].next = NULL;
 
-	rb_pulser_w.delay_card[ PHASE_DELAY_0 ].prev = NULL;
-	rb_pulser_w.delay_card[ PHASE_DELAY_0 ].next =
-										rb_pulser_w.delay_card + PHASE_DELAY_1;
+    rb_pulser_w.delay_card[ PHASE_DELAY_0 ].prev = NULL;
+    rb_pulser_w.delay_card[ PHASE_DELAY_0 ].next =
+                                        rb_pulser_w.delay_card + PHASE_DELAY_1;
 
-	rb_pulser_w.delay_card[ PHASE_DELAY_1 ].prev =
-										rb_pulser_w.delay_card + PHASE_DELAY_0;
-	rb_pulser_w.delay_card[ PHASE_DELAY_1 ].next =
-										rb_pulser_w.delay_card + PHASE_DELAY_2;
+    rb_pulser_w.delay_card[ PHASE_DELAY_1 ].prev =
+                                        rb_pulser_w.delay_card + PHASE_DELAY_0;
+    rb_pulser_w.delay_card[ PHASE_DELAY_1 ].next =
+                                        rb_pulser_w.delay_card + PHASE_DELAY_2;
 
-	rb_pulser_w.delay_card[ PHASE_DELAY_2 ].prev =
-										rb_pulser_w.delay_card + PHASE_DELAY_1;
-	rb_pulser_w.delay_card[ PHASE_DELAY_2 ].next = NULL;
+    rb_pulser_w.delay_card[ PHASE_DELAY_2 ].prev =
+                                        rb_pulser_w.delay_card + PHASE_DELAY_1;
+    rb_pulser_w.delay_card[ PHASE_DELAY_2 ].next = NULL;
 
-	rb_pulser_w.delay_card[ DEFENSE_DELAY ].prev = NULL;
-	rb_pulser_w.delay_card[ DEFENSE_DELAY ].next = NULL;
+    rb_pulser_w.delay_card[ DEFENSE_DELAY ].prev = NULL;
+    rb_pulser_w.delay_card[ DEFENSE_DELAY ].next = NULL;
 
-	rb_pulser_w.delay_card[ RF_DELAY ].prev = NULL;
-	rb_pulser_w.delay_card[ RF_DELAY ].next = NULL;
+    rb_pulser_w.delay_card[ RF_DELAY ].prev = NULL;
+    rb_pulser_w.delay_card[ RF_DELAY ].next = NULL;
 
-	rb_pulser_w.delay_card[ LASER_DELAY_0 ].prev = NULL;
-	rb_pulser_w.delay_card[ LASER_DELAY_0 ].next =
-										rb_pulser_w.delay_card + LASER_DELAY_1;
+    rb_pulser_w.delay_card[ LASER_DELAY_0 ].prev = NULL;
+    rb_pulser_w.delay_card[ LASER_DELAY_0 ].next =
+                                        rb_pulser_w.delay_card + LASER_DELAY_1;
 
-	rb_pulser_w.delay_card[ LASER_DELAY_1 ].prev =
-										rb_pulser_w.delay_card + LASER_DELAY_0;
-	rb_pulser_w.delay_card[ LASER_DELAY_1 ].next = NULL;
+    rb_pulser_w.delay_card[ LASER_DELAY_1 ].prev =
+                                        rb_pulser_w.delay_card + LASER_DELAY_0;
+    rb_pulser_w.delay_card[ LASER_DELAY_1 ].next = NULL;
 
-	rb_pulser_w.delay_card[ DET_DELAY ].prev = NULL;
-	rb_pulser_w.delay_card[ DET_DELAY ].next = NULL;
+    rb_pulser_w.delay_card[ DET_DELAY ].prev = NULL;
+    rb_pulser_w.delay_card[ DET_DELAY ].next = NULL;
 
-	/* Get handles for all the delay cards and determine their intrinsic
-	   delays */
+    /* Get handles for all the delay cards and determine their intrinsic
+       delays */
 
-	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
-	{
-		rb_pulser_w.delay_card[ i ].handle = -1;
-		rb_pulser_w.delay_card[ i ].is_active = UNSET;
-		rb_pulser_w.delay_card[ i ].delay =
-		rb_pulser_w.delay_card[ i ].old_delay = 0;
+    for ( i = 0; i < NUM_DELAY_CARDS; i++ )
+    {
+        rb_pulser_w.delay_card[ i ].handle = -1;
+        rb_pulser_w.delay_card[ i ].is_active = UNSET;
+        rb_pulser_w.delay_card[ i ].delay =
+        rb_pulser_w.delay_card[ i ].old_delay = 0;
 
-		if ( rulbus_get_card_info( rb_pulser_w.delay_card[ i ].name,
-								   &card_info ) != RULBUS_OK )
-		{
-			print( FATAL, "Failed to obtain RULBUS configuration "
-				   "information: %s.\n", rulbus_strerror( ) );
-			THROW( EXCEPTION );
-		}
+        if ( rulbus_get_card_info( rb_pulser_w.delay_card[ i ].name,
+                                   &card_info ) != RULBUS_OK )
+        {
+            print( FATAL, "Failed to obtain RULBUS configuration "
+                   "information: %s.\n", rulbus_strerror( ) );
+            THROW( EXCEPTION );
+        }
 
-		rb_pulser_w.delay_card[ i ].intr_delay = card_info.intr_delay;
-	}
+        rb_pulser_w.delay_card[ i ].intr_delay = card_info.intr_delay;
+    }
 }
 
 
@@ -1083,26 +1083,28 @@ static void rb_pulser_w_card_setup( void )
 
 void rb_pulser_w_cleanup( void )
 {
-	size_t i;
+    size_t i;
 
 
-	if ( rb_pulser_w.config_file != NULL )
-		rb_pulser_w.config_file = CHAR_P T_free( rb_pulser_w.config_file );
+    if ( rb_pulser_w.config_file != NULL )
+        rb_pulser_w.config_file = CHAR_P T_free( rb_pulser_w.config_file );
 
-	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
-		if ( rb_pulser_w.delay_card[ i ].name != NULL )
-			rb_pulser_w.delay_card[ i ].name =
-							 CHAR_P T_free( rb_pulser_w.delay_card[ i ].name );
+    for ( i = 0; i < NUM_DELAY_CARDS; i++ )
+        if ( rb_pulser_w.delay_card[ i ].name != NULL )
+            rb_pulser_w.delay_card[ i ].name =
+                             CHAR_P T_free( rb_pulser_w.delay_card[ i ].name );
 
-	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
-		if ( rb_pulser_w.clock_card[ i ].name != NULL )
-			rb_pulser_w.clock_card[ i ].name =
-							CHAR_P T_free( rb_pulser_w.clock_card[ i ].name );
+    for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
+        if ( rb_pulser_w.clock_card[ i ].name != NULL )
+            rb_pulser_w.clock_card[ i ].name =
+                            CHAR_P T_free( rb_pulser_w.clock_card[ i ].name );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

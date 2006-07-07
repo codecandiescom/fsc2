@@ -61,52 +61,51 @@
 typedef enum Exception_Types Exception_Types_T;
 
 enum Exception_Types {
-	EXCEPTION,
-	OUT_OF_MEMORY_EXCEPTION,
-	TOO_DEEPLY_NESTED_EXCEPTION,
-	EOF_IN_COMMENT_EXCEPTION,
-	EOF_IN_STRING_EXCEPTION,
-	DANGLING_END_OF_COMMENT,
-	MISPLACED_SHEBANG,
-	MISSING_SEMICOLON_EXCEPTION,
-	INVALID_INPUT_EXCEPTION,
-	USER_BREAK_EXCEPTION,
-	ABORT_EXCEPTION
+    EXCEPTION,
+    OUT_OF_MEMORY_EXCEPTION,
+    TOO_DEEPLY_NESTED_EXCEPTION,
+    EOF_IN_COMMENT_EXCEPTION,
+    EOF_IN_STRING_EXCEPTION,
+    DANGLING_END_OF_COMMENT,
+    MISPLACED_SHEBANG,
+    MISSING_SEMICOLON_EXCEPTION,
+    INVALID_INPUT_EXCEPTION,
+    USER_BREAK_EXCEPTION,
+    ABORT_EXCEPTION
 };
 
 
 jmp_buf *push_exception_frame( const char * /* file */,
-							   int          /* line */ );
+                               int          /* line */ );
 
 void pop_exception_frame( const char * /* file */,
-						  int          /* line */ );
+                          int          /* line */ );
 
 jmp_buf *throw_exception( Exception_Types_T /* type */ );
 
 Exception_Types_T get_exception_type( const char * /* file */,
-									  int          /* line */ );
+                                      int          /* line */ );
 
 
-#define TRY         \
-			if ( setjmp( *push_exception_frame( __FILE__, __LINE__ ) ) == 0 )
+#define TRY  if ( setjmp( *push_exception_frame( __FILE__, __LINE__ ) ) == 0 )
 
 #define TRY_SUCCESS  pop_exception_frame( __FILE__, __LINE__ )
 
-#define THROW( e )   longjmp( *throw_exception( e ), 1 )
+#define THROW( e )  longjmp( *throw_exception( e ), 1 )
 
-#define RETHROW( )   THROW( get_exception_type( __FILE__, __LINE__ ) )
+#define RETHROW( )  THROW( get_exception_type( __FILE__, __LINE__ ) )
 
-#define CATCH( e )     \
-			else if ( get_exception_type( __FILE__, __LINE__ ) == ( e ) )
+#define CATCH( e )  \
+                  else if ( get_exception_type( __FILE__, __LINE__ ) == ( e ) )
 
-#define OTHERWISE    else
+#define OTHERWISE  else
 
 /* Automatic variables are not required to be restored after a longjmp() when
    they were stored in a register but we can keep the compiler (at least gcc)
    from putting a variable in a register by taking its address. We also do
    some dummy stuff with the variable to keep the compiler from complaining
    about statements with no effect, which we get when the statement consists
-   of just taking the address of the variable. */
+   of e.g. just taking the address of the variable. */
 
 #define CLOBBER_PROTECT( a )  do { if ( &( a ) ) ( a ) = ( a ); } while( 0 )
 
@@ -117,5 +116,7 @@ Exception_Types_T get_exception_type( const char * /* file */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

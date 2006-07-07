@@ -22,9 +22,9 @@
  */
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap stack nounput never-interactive
 
@@ -46,13 +46,13 @@
 static int hjs_attenuator_lex( void );
 
 static void hjs_attenuator_new_table_entry( int    type,
-											double val );
+                                            double val );
 
 static int hjs_attenuator_comp( const void * a,
-								const void * b );
+                                const void * b );
 
 static long hjs_attenuator_Lc,
-			hjs_attenuator_Comm_Lc;
+            hjs_attenuator_Comm_Lc;
 
 static size_t cur_table_len;
 
@@ -79,69 +79,69 @@ UNIT     "db"|"dB"
 %x      comm
 
 
-		/*---------------*/
-%%		/*     RULES     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     RULES     */
+        /*---------------*/
 
 
             /* handling of C++ style comment spanning a whole line */
-{REM1}		hjs_attenuator_Lc++;
+{REM1}      hjs_attenuator_Lc++;
 
-			/* handling of C++ style comment not spanning a whole line */
-{REM2}		hjs_attenuator_Lc++;
+            /* handling of C++ style comment not spanning a whole line */
+{REM2}      hjs_attenuator_Lc++;
 
-			/* handling of C style comment */
-{REM3}		{
-				hjs_attenuator_Comm_Lc = hjs_attenuator_Lc;
-				yy_push_state( comm );
-			}
+            /* handling of C style comment */
+{REM3}      {
+                hjs_attenuator_Comm_Lc = hjs_attenuator_Lc;
+                yy_push_state( comm );
+            }
 
 <comm>{
 
-{REM4}		/* skipping anything that's not a '*' */
+{REM4}      /* skipping anything that's not a '*' */
 {REM5}      /* skipping all '*'s not followed by '/'s */
 
-			/* end of line character in a comment */
-\n			hjs_attenuator_Lc++;
+            /* end of line character in a comment */
+\n          hjs_attenuator_Lc++;
 
-			/* handling of EOF within a comment -> fatal error */
-<<EOF>>		THROW( EOF_IN_COMMENT_EXCEPTION );
+            /* handling of EOF within a comment -> fatal error */
+<<EOF>>     THROW( EOF_IN_COMMENT_EXCEPTION );
 
-			/* end of comment but not end of line */
-{EREM1}		yy_pop_state( );
+            /* end of comment but not end of line */
+{EREM1}     yy_pop_state( );
 
-			/* end of comment and end of line */
+            /* end of comment and end of line */
 {EREM2}     {
-				hjs_attenuator_Lc++;
-				yy_pop_state( );
-			}
+                hjs_attenuator_Lc++;
+                yy_pop_state( );
+            }
 } /* end of <comm> */
 
 {EREM1}     THROW( DANGLING_END_OF_COMMENT );
 
-			/* dump empty line (i.e. just containing tabs and spaces) */
+            /* dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      hjs_attenuator_Lc++;
 
-			/* dumps trailing white space */
+            /* dumps trailing white space */
 {TWS}       hjs_attenuator_Lc++;
 
-			/* dump all other forms of white space as well as units */
+            /* dump all other forms of white space as well as units */
 {WS}
 {UNIT}
 
-			/* count lines */
-\n			hjs_attenuator_Lc++;
+            /* count lines */
+\n          hjs_attenuator_Lc++;
 
 {D}         return 1;
 
-<<EOF>>		return 0;
+<<EOF>>     return 0;
 
 .           THROW( INVALID_INPUT_EXCEPTION );
 
 
-		/*----------------------*/
-%%		/*     END OF RULES     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     END OF RULES     */
+        /*----------------------*/
 
 
 /*-------------------------------------------------------------*
@@ -149,54 +149,54 @@ UNIT     "db"|"dB"
 
 void hjs_attenuator_read_calibration( FILE * fp )
 {
-	static bool is_restart = UNSET;
+    static bool is_restart = UNSET;
 
 
-	if ( ( hjs_attenuator_in = fp ) == NULL )
-	{
-		print( FATAL, "Internal error while reading calibration file.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ( hjs_attenuator_in = fp ) == NULL )
+    {
+        print( FATAL, "Internal error while reading calibration file.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* Keep the lexer happy... */
+    /* Keep the lexer happy... */
 
-	if ( is_restart )
-	    hjs_attenuator_restart( hjs_attenuator_in );
-	else
-		is_restart = SET;
+    if ( is_restart )
+        hjs_attenuator_restart( hjs_attenuator_in );
+    else
+        is_restart = SET;
 
-	hjs_attenuator_Lc = 1;
+    hjs_attenuator_Lc = 1;
 
-	TRY 
-	{
-		hjs_attenuator_new_table_entry( TABLE_INIT, 0.0 );
-		while( hjs_attenuator_lex( ) != 0 )
-			hjs_attenuator_new_table_entry( TABLE_ENTRY,
-											T_atod( hjs_attenuator_text ) );
-		hjs_attenuator_new_table_entry( TABLE_END, 0.0 );
-		TRY_SUCCESS;
-	}
-	CATCH( EOF_IN_COMMENT_EXCEPTION )
-	{
-		print( FATAL, "Unexpected end of calibration file '%s' in comment "
-			   "starting at line %ld.\n", hjs_attenuator.calib_file,
-			   hjs_attenuator_Comm_Lc );
-		THROW( EXCEPTION );
-	}
-	CATCH( DANGLING_END_OF_COMMENT )
-	{
-		print( FATAL, "End of comment found in calibration file '%s' at "
-			   "line %ld.\n", hjs_attenuator.calib_file, hjs_attenuator_Lc );
-		THROW( EXCEPTION );
-	}
-	CATCH( INVALID_INPUT_EXCEPTION )
-	{
-		print( FATAL, "Invalid entry in calibration file '%s' at line %ld.\n",
-			   hjs_attenuator.calib_file, hjs_attenuator_Lc );
-		THROW( EXCEPTION );
-	}
-	OTHERWISE
-		RETHROW( );
+    TRY 
+    {
+        hjs_attenuator_new_table_entry( TABLE_INIT, 0.0 );
+        while( hjs_attenuator_lex( ) != 0 )
+            hjs_attenuator_new_table_entry( TABLE_ENTRY,
+                                            T_atod( hjs_attenuator_text ) );
+        hjs_attenuator_new_table_entry( TABLE_END, 0.0 );
+        TRY_SUCCESS;
+    }
+    CATCH( EOF_IN_COMMENT_EXCEPTION )
+    {
+        print( FATAL, "Unexpected end of calibration file '%s' in comment "
+               "starting at line %ld.\n", hjs_attenuator.calib_file,
+               hjs_attenuator_Comm_Lc );
+        THROW( EXCEPTION );
+    }
+    CATCH( DANGLING_END_OF_COMMENT )
+    {
+        print( FATAL, "End of comment found in calibration file '%s' at "
+               "line %ld.\n", hjs_attenuator.calib_file, hjs_attenuator_Lc );
+        THROW( EXCEPTION );
+    }
+    CATCH( INVALID_INPUT_EXCEPTION )
+    {
+        print( FATAL, "Invalid entry in calibration file '%s' at line %ld.\n",
+               hjs_attenuator.calib_file, hjs_attenuator_Lc );
+        THROW( EXCEPTION );
+    }
+    OTHERWISE
+        RETHROW( );
 }
 
 
@@ -204,101 +204,101 @@ void hjs_attenuator_read_calibration( FILE * fp )
  *-------------------------------------------------------------*/
 
 static void hjs_attenuator_new_table_entry( int    type,
-											double val )
+                                            double val )
 {
-	static int last_type;
-	size_t i;
+    static int last_type;
+    size_t i;
 
 
-	/* Initialize everything when type is TABLE_INIT */
+    /* Initialize everything when type is TABLE_INIT */
 
-	if ( type == TABLE_INIT )
-	{
-		last_type = TABLE_INIT;
-		hjs_attenuator.att_table =
-			  ATT_TABLE_ENTRY_P T_malloc( TABLE_CHUNK_SIZE
-										  * sizeof *hjs_attenuator.att_table );
-	    cur_table_len = TABLE_CHUNK_SIZE;
-		return;
-	}
+    if ( type == TABLE_INIT )
+    {
+        last_type = TABLE_INIT;
+        hjs_attenuator.att_table =
+              ATT_TABLE_ENTRY_P T_malloc( TABLE_CHUNK_SIZE
+                                          * sizeof *hjs_attenuator.att_table );
+        cur_table_len = TABLE_CHUNK_SIZE;
+        return;
+    }
 
-	/* If type is TABLE_END this is the final check after all data have
-	   been read */
+    /* If type is TABLE_END this is the final check after all data have
+       been read */
 
-	if ( type == TABLE_END )
-	{
-		/* Check that we're not expecting another attenuation or frequency
-		   while the end of the file is already reached */
+    if ( type == TABLE_END )
+    {
+        /* Check that we're not expecting another attenuation or frequency
+           while the end of the file is already reached */
 
-		if ( last_type != TABLE_TYPE_STEP )
-		{
-			print( FATAL, "More attenuations than steps in calibration "
-				   "file '%s'.\n", hjs_attenuator.calib_file );
-			THROW( EXCEPTION );
-		}
+        if ( last_type != TABLE_TYPE_STEP )
+        {
+            print( FATAL, "More attenuations than steps in calibration "
+                   "file '%s'.\n", hjs_attenuator.calib_file );
+            THROW( EXCEPTION );
+        }
 
-		/* Check that there are at least two entries in the table */
+        /* Check that there are at least two entries in the table */
 
-		if ( hjs_attenuator.att_table_len < 2 )
-		{
-			print( FATAL, "Calibration file '%s' contains less than 2 "
-				   "entries.\n", hjs_attenuator.calib_file );
-			THROW( EXCEPTION );
-		}
+        if ( hjs_attenuator.att_table_len < 2 )
+        {
+            print( FATAL, "Calibration file '%s' contains less than 2 "
+                   "entries.\n", hjs_attenuator.calib_file );
+            THROW( EXCEPTION );
+        }
 
-		/* Cut back table size to the amount of memory really needed and sort
-		   the table in ascending order with respect to the frequencies, then
-		   set lowest and highest frequency in structure for synthesizer */
+        /* Cut back table size to the amount of memory really needed and sort
+           the table in ascending order with respect to the frequencies, then
+           set lowest and highest frequency in structure for synthesizer */
 
-		hjs_attenuator.att_table =
-			 ATT_TABLE_ENTRY_P T_realloc( hjs_attenuator.att_table,
-										  hjs_attenuator.att_table_len
-										  * sizeof *hjs_attenuator.att_table );
-		cur_table_len = hjs_attenuator.att_table_len;
-		qsort( hjs_attenuator.att_table, hjs_attenuator.att_table_len,
-			   sizeof( Att_Table_Entry_T ), hjs_attenuator_comp );
+        hjs_attenuator.att_table =
+             ATT_TABLE_ENTRY_P T_realloc( hjs_attenuator.att_table,
+                                          hjs_attenuator.att_table_len
+                                          * sizeof *hjs_attenuator.att_table );
+        cur_table_len = hjs_attenuator.att_table_len;
+        qsort( hjs_attenuator.att_table, hjs_attenuator.att_table_len,
+               sizeof( Att_Table_Entry_T ), hjs_attenuator_comp );
 
-		/* Finally check if the stepper motor postitions drop monotonuosly
-		   with increasing attenuation - otherwise something very fishy is
-		   going on... */
+        /* Finally check if the stepper motor postitions drop monotonuosly
+           with increasing attenuation - otherwise something very fishy is
+           going on... */
 
-		for ( i = 0; i < hjs_attenuator.att_table_len - 2; i++ )
-			if ( hjs_attenuator.att_table[ i ].step <=
-				 hjs_attenuator.att_table[ i + 1 ].step )
-			{
-				print( FATAL, "Stepper motor position aren't dropping "
-					   "monotonously in calibration file '%s'.\n",
-					   hjs_attenuator.calib_file );
-				THROW( EXCEPTION );
-			}
+        for ( i = 0; i < hjs_attenuator.att_table_len - 2; i++ )
+            if ( hjs_attenuator.att_table[ i ].step <=
+                 hjs_attenuator.att_table[ i + 1 ].step )
+            {
+                print( FATAL, "Stepper motor position aren't dropping "
+                       "monotonously in calibration file '%s'.\n",
+                       hjs_attenuator.calib_file );
+                THROW( EXCEPTION );
+            }
 
-		hjs_attenuator.min_table_att = hjs_attenuator.att_table[ 0 ].att;
-		hjs_attenuator.max_table_att =
-			hjs_attenuator.att_table[ hjs_attenuator.att_table_len - 1 ].att;
-		return;
-	}
+        hjs_attenuator.min_table_att = hjs_attenuator.att_table[ 0 ].att;
+        hjs_attenuator.max_table_att =
+            hjs_attenuator.att_table[ hjs_attenuator.att_table_len - 1 ].att;
+        return;
+    }
 
-	if ( last_type == TABLE_INIT || last_type == TABLE_TYPE_STEP )
-	{
-		/* If necessary extend the length of the table */
+    if ( last_type == TABLE_INIT || last_type == TABLE_TYPE_STEP )
+    {
+        /* If necessary extend the length of the table */
 
-		if ( cur_table_len <= hjs_attenuator.att_table_len )
-		{
-			cur_table_len += TABLE_CHUNK_SIZE;
-			hjs_attenuator.att_table =
-				ATT_TABLE_ENTRY_P T_realloc( hjs_attenuator.att_table,
-										  cur_table_len
-										  * sizeof *hjs_attenuator.att_table );
-		}
+        if ( cur_table_len <= hjs_attenuator.att_table_len )
+        {
+            cur_table_len += TABLE_CHUNK_SIZE;
+            hjs_attenuator.att_table =
+                ATT_TABLE_ENTRY_P T_realloc( hjs_attenuator.att_table,
+                                          cur_table_len
+                                          * sizeof *hjs_attenuator.att_table );
+        }
 
-		hjs_attenuator.att_table[ hjs_attenuator.att_table_len ].att = val;
-		last_type = TABLE_TYPE_DB;
-	}
-	else
-	{
-		hjs_attenuator.att_table[ hjs_attenuator.att_table_len++ ].step = val;
-		last_type = TABLE_TYPE_STEP;
-	}
+        hjs_attenuator.att_table[ hjs_attenuator.att_table_len ].att = val;
+        last_type = TABLE_TYPE_DB;
+    }
+    else
+    {
+        hjs_attenuator.att_table[ hjs_attenuator.att_table_len++ ].step = val;
+        last_type = TABLE_TYPE_STEP;
+    }
 }
 
 
@@ -308,25 +308,27 @@ static void hjs_attenuator_new_table_entry( int    type,
  *---------------------------------------------------------------*/
 
 static int hjs_attenuator_comp( const void * a,
-								const void * b )
+                                const void * b )
 {
-	Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
-					  *B = ( Att_Table_Entry_T * ) b;
+    Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
+                      *B = ( Att_Table_Entry_T * ) b;
 
 
-	if ( A->att == B->att )
-	{
-		print( FATAL, "Attenuation of %s dB appears twice in calibration file "
-					  "'%s'\n", A->att, hjs_attenuator.calib_file );
-		THROW( EXCEPTION );
-	}
+    if ( A->att == B->att )
+    {
+        print( FATAL, "Attenuation of %s dB appears twice in calibration file "
+                      "'%s'\n", A->att, hjs_attenuator.calib_file );
+        THROW( EXCEPTION );
+    }
 
-	return A->att < B->att ? -1 : 1;
+    return A->att < B->att ? -1 : 1;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

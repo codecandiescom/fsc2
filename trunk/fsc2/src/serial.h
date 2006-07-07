@@ -31,53 +31,53 @@
 /* Routines to be used from modules */
 
 void fsc2_request_serial_port( int          /* sn       */,
-							   const char * /* dev_name */ );
+                               const char * /* dev_name */ );
 
 struct termios *fsc2_serial_open( int          /* sn       */,
-								  const char * /* dev_name */,
-								  int          /* flags    */ );
+                                  const char * /* dev_name */,
+                                  int          /* flags    */ );
 
 void fsc2_serial_close( int /* sn */ );
 
 ssize_t fsc2_serial_write( int          /* sn             */,
-						   const void * /* buf            */,
-						   size_t       /* count          */,
-						   long         /* us_wait        */,
-						   bool         /* quit_on_signal */ );
+                           const void * /* buf            */,
+                           size_t       /* count          */,
+                           long         /* us_wait        */,
+                           bool         /* quit_on_signal */ );
 
 ssize_t fsc2_serial_read( int    /* sn             */,
-						  void * /* buf            */,
-						  size_t /* count          */,
-						  long   /* us_wait        */,
-						  bool   /* quit_on_signal */ );
+                          void * /* buf            */,
+                          size_t /* count          */,
+                          long   /* us_wait        */,
+                          bool   /* quit_on_signal */ );
 
 int fsc2_tcgetattr( int              /* sn        */,
-					struct termios * /* termios_p */ );
+                    struct termios * /* termios_p */ );
 
 int fsc2_tcsetattr( int              /* sn               */,
-					int              /* optional_actions */,
-					struct termios * /* termios_p        */ );
+                    int              /* optional_actions */,
+                    struct termios * /* termios_p        */ );
 
 int fsc2_tcsendbreak( int /* sn       */,
-					  int /* duration */ );
+                      int /* duration */ );
 
 int fsc2_tcdrain( int /* sn */ );
 
 int fsc2_tcflush( int /* sn             */,
-				  int /* queue_selector */ );
+                  int /* queue_selector */ );
 
 int fsc2_tcflow( int /* sn     */,
-				 int /* action */ );
+                 int /* action */ );
 
 void fsc2_serial_log_message( const char * /* fmt */,
-							  ... );
+                              ... );
 
 /* Routines for internal use only */
 
 void fsc2_serial_init( void );
 
 void fsc2_serial_exp_init( const char * /* log_file_name */,
-						   int          /* log_level     */ );
+                           int          /* log_level     */ );
 
 void fsc2_serial_cleanup( void );
 
@@ -90,5 +90,7 @@ void fsc2_final_serial_cleanup( void );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

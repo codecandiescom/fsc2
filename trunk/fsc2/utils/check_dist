@@ -22,8 +22,10 @@
 #  Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 #  Boston, MA 02111-1307, USA.
 
+
 use strict;
 use warnings;
+
 
 my $fh;
 my $missing = 0;
@@ -32,15 +34,21 @@ chdir( ".." );
 
 open( $fh, "<MANIFEST" ) or die "Can't open file MANIFEST for reading: $!\n";
 while ( <$fh> ) {
-	next if /^\s*(#.*)?$/;
-	chomp;
-	next if -e $_;
-	$missing += 1;
-	print "$_ is missing\n";
+    next if /^\s*(#.*)?$/;
+    chomp;
+    next if -e $_;
+    $missing += 1;
+    print "$_ is missing\n";
 }
 
 if ( $missing ) {
-	print "\n $missing files are missing.\n";
+    print "\n $missing files are missing.\n";
 } else {
-	print "Found all nessecary files.\n";
+    print "Found all nessecary files.\n";
 }
+
+
+# Local variables:
+# tab-width: 4
+# indent-tabs-mode: nil
+# End:

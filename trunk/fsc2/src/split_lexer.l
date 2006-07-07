@@ -38,12 +38,12 @@
 
 #define YY_INPUT( buf, result, max_size )                        \
 {                                                                \
-	char c;                                                      \
-	ssize_t count;                                               \
-	while ( ( count = read( fileno( splitin ), &c, 1 ) ) < 0 &&  \
-			errno == EINTR )                                     \
-		/* empty */ ;                                            \
-	result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );     \
+    char c;                                                      \
+    ssize_t count;                                               \
+    while ( ( count = read( fileno( splitin ), &c, 1 ) ) < 0 &&  \
+            errno == EINTR )                                     \
+        /* empty */ ;                                            \
+    result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );     \
 }
 
 
@@ -70,85 +70,85 @@ PREP        ^[\t ]*PREP(ARATION)?S?:
 EXP         ^[\t ]*EXP(ERIMENT)?:
 
 
-		/*---------------*/
-%%		/*     Rules     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     Rules     */
+        /*---------------*/
 
-			/* handling of file name lines */
+            /* handling of file name lines */
 {FILE}      {
-				*( splittext + splitleng - 1 ) = '\0';
-				EDL.Fname = CHAR_P T_free( EDL.Fname );
-				EDL.Fname = T_strdup( splittext + 2 );
-			}
+                *( splittext + splitleng - 1 ) = '\0';
+                EDL.Fname = CHAR_P T_free( EDL.Fname );
+                EDL.Fname = T_strdup( splittext + 2 );
+            }
 
-			/* handling of line number lines */
-{LNUM}		{
-				*( splittext + splitleng - 1 ) = '\0';
-				EDL.Lc = atol( splittext + 2 );
-			}
+            /* handling of line number lines */
+{LNUM}      {
+                *( splittext + splitleng - 1 ) = '\0';
+                EDL.Lc = atol( splittext + 2 );
+            }
 
-			/* handling of error messages from the cleaner */
-{ERR}		{
-				eprint( FATAL, UNSET, "%s", splittext + 2 );
-				return FAIL;
-			}
+            /* handling of error messages from the cleaner */
+{ERR}       {
+                eprint( FATAL, UNSET, "%s", splittext + 2 );
+                return FAIL;
+            }
 
-			/* handling of DEVICES: label */
-{DEV}		{
-				if ( ! section_parser( DEVICES_SECTION ) )
-					return FAIL;
-			}
+            /* handling of DEVICES: label */
+{DEV}       {
+                if ( ! section_parser( DEVICES_SECTION ) )
+                    return FAIL;
+            }
 
-			/* handling of ASSIGNMENTS: label */
-{ASS}		{
-				if ( ! section_parser( ASSIGNMENTS_SECTION ) )
-					return FAIL;
-			}
+            /* handling of ASSIGNMENTS: label */
+{ASS}       {
+                if ( ! section_parser( ASSIGNMENTS_SECTION ) )
+                    return FAIL;
+            }
 
-			/* handling of VARIABLES: label */
-{VAR}		{
-				if ( ! section_parser( VARIABLES_SECTION ) )
-					return FAIL;
-			}
+            /* handling of VARIABLES: label */
+{VAR}       {
+                if ( ! section_parser( VARIABLES_SECTION ) )
+                    return FAIL;
+            }
 
-			/* handling of PHASES: label */
+            /* handling of PHASES: label */
 {PHAS}      {
-				if ( ! section_parser( PHASES_SECTION ) )
-					return FAIL;
-			}
+                if ( ! section_parser( PHASES_SECTION ) )
+                    return FAIL;
+            }
 
-			/* handling of PREPARATIONS: label */
+            /* handling of PREPARATIONS: label */
 {PREP}      {
-				if ( ! section_parser( PREPARATIONS_SECTION ) )
-					return FAIL;
-			}
+                if ( ! section_parser( PREPARATIONS_SECTION ) )
+                    return FAIL;
+            }
 
-			/* handling of EXPERIMENT: label */
+            /* handling of EXPERIMENT: label */
 {EXP}       {
-				if ( ! section_parser( EXPERIMENT_SECTION ) )
-					return FAIL;
-			}
+                if ( ! section_parser( EXPERIMENT_SECTION ) )
+                    return FAIL;
+            }
 
-			/* handling of unknown label */
+            /* handling of unknown label */
 .+":"       {
-				print( FATAL, "Unknown label: '%s'.\n", splittext );
-				return FAIL;
-			}
+                print( FATAL, "Unknown label: '%s'.\n", splittext );
+                return FAIL;
+            }
 
 [\t \n]+    /* dump white space */
 
-			/* handling of invalid input */
-.   		{
-				print( FATAL, "Missing section label at start of file.\n" );
-				return FAIL;
-			}
+            /* handling of invalid input */
+.           {
+                print( FATAL, "Missing section label at start of file.\n" );
+                return FAIL;
+            }
 
 <<EOF>>     return OK;
 
 
-		/*----------------------*/
-%%		/*     End of rules     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     End of rules     */
+        /*----------------------*/
 
 
 /* The following is for some versions of flex that undefine YY_FLUSH_BUFFER
@@ -163,68 +163,68 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
  *-------------------------------------------*/
 
 bool scan_main( const char * name,
-				FILE *       fp )
+                FILE *       fp )
 {
-	bool split_error;
+    bool split_error;
 
 
-	fsc2_assert( fp != NULL );
+    fsc2_assert( fp != NULL );
 
-	/* Forget everything about previous tests */
+    /* Forget everything about previous tests */
 
-	clean_up( );
+    clean_up( );
 
-	/* Parse the function and the device name data base */
+    /* Parse the function and the device name data base */
 
-	if ( ! functions_init( ) || ! device_list_parse( ) )
-		return FAIL;
+    if ( ! functions_init( ) || ! device_list_parse( ) )
+        return FAIL;
 
-	/* Setting the program length to -1 means that no EXPERIMENT section has
-	   been found yet. */
+    /* Setting the program length to -1 means that no EXPERIMENT section has
+       been found yet. */
 
-	EDL.prg_length = -1;
+    EDL.prg_length = -1;
 
-	/* Make the lexer read its input from the output of fsc2_clean */
+    /* Make the lexer read its input from the output of fsc2_clean */
 
-	Fsc2_Internals.fsc2_clean_died = UNSET;
-	if ( ( splitin = filter_edl( name, fp ) ) == NULL )
-	{
-		Fsc2_Internals.fsc2_clean_died = SET;
-		return FAIL;
-	}
+    Fsc2_Internals.fsc2_clean_died = UNSET;
+    if ( ( splitin = filter_edl( name, fp ) ) == NULL )
+    {
+        Fsc2_Internals.fsc2_clean_died = SET;
+        return FAIL;
+    }
 
-	/* The next rather simple looking line is were the predigested EDL file,
-	   i.e. what we get back from fsc2_clean, is read in and tested for
-	   syntactical correctness. The code of the EXPERIMENT section is stored
-	   in memory when the splitlex() function returns successfully. */
+    /* The next rather simple looking line is were the predigested EDL file,
+       i.e. what we get back from fsc2_clean, is read in and tested for
+       syntactical correctness. The code of the EXPERIMENT section is stored
+       in memory when the splitlex() function returns successfully. */
 
-	split_error = ( bool ) splitlex( );
+    split_error = ( bool ) splitlex( );
 
-	fclose( splitin );
+    fclose( splitin );
 
-	while ( ! Fsc2_Internals.fsc2_clean_died )
-		fsc2_usleep( 10000, UNSET );
+    while ( ! Fsc2_Internals.fsc2_clean_died )
+        fsc2_usleep( 10000, UNSET );
 
-	if ( split_error == OK && ! Fsc2_Internals.fsc2_clean_status_ok )
-	{
-		print( FATAL, "Parsing the EDL script '%s' failed due to some "
-			   "internal problems.\n", name );
-		split_error = FAIL;
-	}
+    if ( split_error == OK && ! Fsc2_Internals.fsc2_clean_status_ok )
+    {
+        print( FATAL, "Parsing the EDL script '%s' failed due to some "
+               "internal problems.\n", name );
+        split_error = FAIL;
+    }
 
-	/* In case there was an error and the input file wasn't read until the
-	   end it's sometimes necessary to flush the lexer's input buffer */
+    /* In case there was an error and the input file wasn't read until the
+       end it's sometimes necessary to flush the lexer's input buffer */
 
-	YY_FLUSH_BUFFER;
+    YY_FLUSH_BUFFER;
 
-	if ( split_error != OK && Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
-	{
-		Fsc2_Internals.cmdline_flags &= ~ ICONIFIED_RUN;
-		fl_raise_form( GUI.main_form->fsc2 );
-		XMapWindow( fl_get_display( ), GUI.main_form->fsc2->window );
-	}
+    if ( split_error != OK && Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
+    {
+        Fsc2_Internals.cmdline_flags &= ~ ICONIFIED_RUN;
+        fl_raise_form( GUI.main_form->fsc2 );
+        XMapWindow( fl_get_display( ), GUI.main_form->fsc2->window );
+    }
 
-	return split_error;
+    return split_error;
 }
 
 
@@ -246,64 +246,66 @@ bool scan_main( const char * name,
 
 bool section_parser( int section )
 {
-	int s = section;
+    int s = section;
 
 
-	CLOBBER_PROTECT( s );
+    CLOBBER_PROTECT( s );
 
-	TRY
-	{
-		do
-		{
-			/* First run the appropriate lexer/parser combination */
+    TRY
+    {
+        do
+        {
+            /* First run the appropriate lexer/parser combination */
 
-			switch ( s )
-			{
-				case DEVICES_SECTION :
-					s = devices_parser( splitin );
-					break;
+            switch ( s )
+            {
+                case DEVICES_SECTION :
+                    s = devices_parser( splitin );
+                    break;
 
-				case ASSIGNMENTS_SECTION :
-					s = assignments_parser( splitin );
-					break;
+                case ASSIGNMENTS_SECTION :
+                    s = assignments_parser( splitin );
+                    break;
 
-				case VARIABLES_SECTION :
-					s = variables_parser( splitin );
-					break;
+                case VARIABLES_SECTION :
+                    s = variables_parser( splitin );
+                    break;
 
-				case PHASES_SECTION :
-					s = phases_parser( splitin );
-					break;
+                case PHASES_SECTION :
+                    s = phases_parser( splitin );
+                    break;
 
-				case PREPARATIONS_SECTION :
-					s = preparations_parser( splitin );
-					break;
+                case PREPARATIONS_SECTION :
+                    s = preparations_parser( splitin );
+                    break;
 
-				case EXPERIMENT_SECTION :
-					s = experiment_parser( splitin );
-					break;
+                case EXPERIMENT_SECTION :
+                    s = experiment_parser( splitin );
+                    break;
 
-				default :              /* this should never happen, but ... */
-					fsc2_assert( 1 == 0 );
-					break;
-			}
-		} while ( s != NO_SECTION );
+                default :              /* this should never happen, but ... */
+                    fsc2_assert( 1 == 0 );
+                    break;
+            }
+        } while ( s != NO_SECTION );
 
-		TRY_SUCCESS;
-		return OK;
-	}
-	CATCH( MISSING_SEMICOLON_EXCEPTION )
-	{
-		print( FATAL, "Missing semicolon before (or on) this line.\n" );
-		return FAIL;
-	}
+        TRY_SUCCESS;
+        return OK;
+    }
+    CATCH( MISSING_SEMICOLON_EXCEPTION )
+    {
+        print( FATAL, "Missing semicolon before (or on) this line.\n" );
+        return FAIL;
+    }
 
-	return FAIL;
+    return FAIL;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

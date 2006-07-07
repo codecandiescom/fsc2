@@ -50,25 +50,25 @@ static bool In_cond;
    in 'exp.h' ! */
 
 %union {
-	long   lval;
+    long   lval;
     double dval;
-	char   *sptr;
-	Var_T  *vptr;
+    char   *sptr;
+    Var_T  *vptr;
 }
 
-%token E_VAR_TOKEN	  258
-%token E_VAR_REF	  259
-%token E_FUNC_TOKEN	  260
-%token E_INT_TOKEN	  261
+%token E_VAR_TOKEN    258
+%token E_VAR_REF      259
+%token E_FUNC_TOKEN   260
+%token E_INT_TOKEN    261
 %token E_FLOAT_TOKEN  262
-%token E_STR_TOKEN	  263
-%token E_EQ	          264
-%token E_NE	          265
-%token E_LT	          266
-%token E_LE	          267
-%token E_GT	          268
-%token E_GE	          269
-%token E_NEG	      270
+%token E_STR_TOKEN    263
+%token E_EQ           264
+%token E_NE           265
+%token E_LT           266
+%token E_LE           267
+%token E_GT           268
+%token E_GE           269
+%token E_NEG          270
 %token E_AND          271
 %token E_OR           272
 %token E_XOR          273
@@ -127,8 +127,8 @@ eol:     ';'
        | '}'
        |                         { Dont_print_error = SET; }
          error                   { print( FATAL, "Missing semicolon before "
-										  "(or on) this line.\n" );
-	                               THROW( EXCEPTION ); }
+                                          "(or on) this line.\n" );
+                                   THROW( EXCEPTION ); }
 ;
 
 cond:    FOR_TOK                 { In_cond = SET; }
@@ -148,14 +148,14 @@ sc:      REPEAT_TOK
 ;
 
 fi:      /* empty */
-	   | ':' expr
+       | ':' expr
 ;
 
 ls:      '{'
        |                         { Dont_print_error = SET; }
          error                   { print( FATAL, "Syntax error in loop or "
-										  "IF/UNLESS condition.\n" );
-	                               THROW( EXCEPTION ); }
+                                          "IF/UNLESS condition.\n" );
+                                   THROW( EXCEPTION ); }
 ;
 
 et:      ls
@@ -167,11 +167,11 @@ line:    E_VAR_TOKEN ass                              { }
        | E_VAR_TOKEN '[' list1 ']' ass                { }
        | E_FUNC_TOKEN '(' list2 ')'                   { }
        | E_FUNC_TOKEN              { print( FATAL, "'%s' is a predefined "
-											"function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
+                                            "function.\n", $1->name );
+                                     THROW( EXCEPTION ); }
        | E_VAR_TOKEN '('
           { print( FATAL, "'%s' is a variable, not a funnction.\n", $1->name );
-		    THROW( EXCEPTION ); }
+            THROW( EXCEPTION ); }
        | pt ass
        | BREAK_TOK
        | CONT_TOK
@@ -199,12 +199,12 @@ expr:    E_INT_TOKEN                  { }
        | E_VAR_REF                    { }
        | E_VAR_TOKEN '[' list1 ']'    { }
        | E_VAR_TOKEN '('              { print( FATAL, "'%s' is a variable, "
-											   "not a function.\n", $1->name );
-	                                    THROW( EXCEPTION ); }
+                                               "not a function.\n", $1->name );
+                                        THROW( EXCEPTION ); }
        | E_FUNC_TOKEN '(' list2 ')'   { }
        | E_FUNC_TOKEN              { print( FATAL, "'%s' is a predefined "
-											"function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
+                                            "function.\n", $1->name );
+                                     THROW( EXCEPTION ); }
        | pt
        | bin
        | '+' expr %prec E_NEG
@@ -267,25 +267,25 @@ strs:    E_STR_TOKEN
 
 static void exp_testerror( const char * s  UNUSED_ARG )
 {
-	if ( ! Dont_print_error && ! In_cond )
-	{
-		print( FATAL, "Syntax error in EXPERIMENT section.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! Dont_print_error && ! In_cond )
+    {
+        print( FATAL, "Syntax error in EXPERIMENT section.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( In_cond )
-	{
-		if ( ( EDL.cur_prg_token - 1 )->token == '=' )
-			print( FATAL, "Assignment '=' used in loop or IF/UNLESS condition "
-				   "instead of comparison '=='.\n" );
-		else
-			print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
+    if ( In_cond )
+    {
+        if ( ( EDL.cur_prg_token - 1 )->token == '=' )
+            print( FATAL, "Assignment '=' used in loop or IF/UNLESS condition "
+                   "instead of comparison '=='.\n" );
+        else
+            print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
 
-		In_cond = UNSET;
-		THROW( EXCEPTION );
-	}
+        In_cond = UNSET;
+        THROW( EXCEPTION );
+    }
 
-	Dont_print_error = UNSET;
+    Dont_print_error = UNSET;
 }
 
 
@@ -294,13 +294,15 @@ static void exp_testerror( const char * s  UNUSED_ARG )
 
 void exp_test_init( void )
 {
-	Dont_print_error = UNSET;
-	In_cond = UNSET;
+    Dont_print_error = UNSET;
+    In_cond = UNSET;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

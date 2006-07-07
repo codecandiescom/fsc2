@@ -26,10 +26,10 @@
    There are five types of simple variables:
 
      INT_VAR        stores a single integer value (long)
-	 FLOAT_VAR      stores a single float value (double)
-	 STR_VAR        stores a string
-	 INT_ARR        stores a 1d array of (long) integer values
-	 FLOAT_ARR      stores a 1d array of (double) float values
+     FLOAT_VAR      stores a single float value (double)
+     STR_VAR        stores a string
+     INT_ARR        stores a 1d array of (long) integer values
+     FLOAT_ARR      stores a 1d array of (double) float values
 
    STR_VARs are only used internally and can't be explicitely created by
    the user (they are for storing literal strings in the EDL code).
@@ -48,7 +48,7 @@
    variable types
 
      INT_REF
-	 FLOAT_REF
+     FLOAT_REF
 
    These variables contain pointers to further variables of the same kind
    (only with the 'dim' field set to a value smaller by 1) or, for the
@@ -63,14 +63,14 @@
    script like
 
      a[ *, *, * ];
-	 b[ 3, *, * ];
-	 c[ 5, 3, * ];
-	 d[ 2, 7, 9 ];
+     b[ 3, *, * ];
+     c[ 5, 3, * ];
+     d[ 2, 7, 9 ];
 
    but not
 
      e[ *, 3, * ];
-	 f[ *, 4, 2 ];
+     f[ *, 4, 2 ];
 
    It is also possible that the referenced references or arrays of a
    reference have different lengths, i.e. the definition
@@ -125,7 +125,7 @@
    Finally, there are two more variable types:
 
      UNDEF_VAR
-	 FUNC
+     FUNC
 
    UNDEF_VAR is the state in which every variable is born, i.e. it has no
    type yet. Thus variables of this type usually will only exist shortly
@@ -152,18 +152,18 @@
 
 static void free_all_vars( void );
 static Var_T *vars_push_submatrix( Var_T *    from,
-								   Var_Type_T type,
-								   int        dim,
-								   ssize_t *  sizes );
+                                   Var_Type_T type,
+                                   int        dim,
+                                   ssize_t *  sizes );
 static void vars_ref_copy( Var_T * nsv,
-						   Var_T * cp,
-						   bool    exact_copy );
+                           Var_T * cp,
+                           bool    exact_copy );
 static void vars_ref_copy_create( Var_T * nsv,
-								  Var_T * src,
-								  bool    exact_copy );
+                                  Var_T * src,
+                                  bool    exact_copy );
 static void *vars_get_pointer( ssize_t * iter,
-							   ssize_t   depth,
-							   Var_T *   p );
+                               ssize_t   depth,
+                               Var_T *   p );
 
 
 /*----------------------------------------------------------------------*
@@ -179,20 +179,20 @@ static void *vars_get_pointer( ssize_t * iter,
 
 Var_T *vars_get( const char * name )
 {
-	Var_T *v;
+    Var_T *v;
 
 
-	/* Try to find the variable with the name passed to the function */
+    /* Try to find the variable with the name passed to the function */
 
-	for ( v = EDL.Var_List; v != NULL; v = v->next )
-	{
-		if ( v->name == NULL )
-			continue;
-		if ( ! strcmp( v->name, name ) )
-			return v;
-	}
+    for ( v = EDL.Var_List; v != NULL; v = v->next )
+    {
+        if ( v->name == NULL )
+            continue;
+        if ( ! strcmp( v->name, name ) )
+            return v;
+    }
 
-	return NULL;
+    return NULL;
 }
 
 
@@ -207,30 +207,30 @@ Var_T *vars_get( const char * name )
 
 Var_T *vars_new( const char * name )
 {
-	static Var_T template = { NULL, UNDEF_VAR, { 0 }, 0, 0,
-							  NEW_VARIABLE, NULL, NULL, NULL };
-	Var_T *vp;
+    static Var_T template = { NULL, UNDEF_VAR, { 0 }, 0, 0,
+                              NEW_VARIABLE, NULL, NULL, NULL };
+    Var_T *vp;
 
 
-	/* Get memory for a new variable structure, initialize it (from a
-	   template variable, that might be a bit faster than setting all
-	   elements individually), and get memory for storing the name */
+    /* Get memory for a new variable structure, initialize it (from a
+       template variable, that might be a bit faster than setting all
+       elements individually), and get memory for storing the name */
 
-	vp = VAR_P T_malloc( sizeof *vp );
+    vp = VAR_P T_malloc( sizeof *vp );
 
-	*vp = template;
+    *vp = template;
 
-	if ( name != NULL )
-		vp->name    = T_strdup( name );
+    if ( name != NULL )
+        vp->name    = T_strdup( name );
 
-	/* Make the new variable the first element of the variable list */
+    /* Make the new variable the first element of the variable list */
 
-	vp->next = EDL.Var_List;
-	if ( EDL.Var_List != NULL )      /* set previous pointer in successor */
-		EDL.Var_List->prev = vp;     /* (if this isn't the very first) */
+    vp->next = EDL.Var_List;
+    if ( EDL.Var_List != NULL )      /* set previous pointer in successor */
+        EDL.Var_List->prev = vp;     /* (if this isn't the very first) */
     EDL.Var_List = vp;               /* make it the head of the list */
-	
-	return vp;
+    
+    return vp;
 }
 
 
@@ -244,12 +244,12 @@ Var_T *vars_new( const char * name )
 
 Var_T *vars_arr_start( Var_T * v )
 {
-	if ( v->type != UNDEF_VAR )
-		vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
+    if ( v->type != UNDEF_VAR )
+        vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
 
-	/* Push variable with generic pointer to an array onto the stack */
+    /* Push variable with generic pointer to an array onto the stack */
 
-	return vars_push( REF_PTR, v );
+    return vars_push( REF_PTR, v );
 }
 
 
@@ -261,62 +261,62 @@ Var_T *vars_arr_start( Var_T * v )
  *--------------------------------------------------------------*/
 
 Var_T *vars_free( Var_T * v,
-				  bool    also_nameless )
+                  bool    also_nameless )
 {
-	ssize_t i;
-	Var_T *ret;
+    ssize_t i;
+    Var_T *ret;
 
 
-	fsc2_assert( ! ( v->flags & ON_STACK ) );
+    fsc2_assert( ! ( v->flags & ON_STACK ) );
 
-	if ( v->name == NULL && ! also_nameless )
-		return v->next;
+    if ( v->name == NULL && ! also_nameless )
+        return v->next;
 
-	switch ( v->type )
-	{
-		case INT_ARR :
-			if ( v->len != 0 )
-				v->val.lpnt = LONG_P T_free( v->val.lpnt );
-			break;
+    switch ( v->type )
+    {
+        case INT_ARR :
+            if ( v->len != 0 )
+                v->val.lpnt = LONG_P T_free( v->val.lpnt );
+            break;
 
-		case FLOAT_ARR :
-			if ( v->len != 0 )
-				v->val.dpnt = DOUBLE_P T_free( v->val.dpnt );
-			break;
+        case FLOAT_ARR :
+            if ( v->len != 0 )
+                v->val.dpnt = DOUBLE_P T_free( v->val.dpnt );
+            break;
 
-		case STR_VAR :
-			if ( v->val.sptr != NULL )
-				v->val.sptr = CHAR_P T_free( v->val.sptr );
-				break;
+        case STR_VAR :
+            if ( v->val.sptr != NULL )
+                v->val.sptr = CHAR_P T_free( v->val.sptr );
+                break;
 
-		case INT_REF : case FLOAT_REF :
-			if ( v->len == 0 )
-				break;
-			if ( ! ( v->flags & DONT_RECURSE ) )
-				for ( i = 0; i < v->len; i++ )
-					if ( v->val.vptr[ i ] != NULL )
-						vars_free( v->val.vptr[ i ], SET );
-			v->val.vptr = VAR_PP T_free( v->val.vptr );
-			break;
+        case INT_REF : case FLOAT_REF :
+            if ( v->len == 0 )
+                break;
+            if ( ! ( v->flags & DONT_RECURSE ) )
+                for ( i = 0; i < v->len; i++ )
+                    if ( v->val.vptr[ i ] != NULL )
+                        vars_free( v->val.vptr[ i ], SET );
+            v->val.vptr = VAR_PP T_free( v->val.vptr );
+            break;
 
-		default :
-			break;
-	}
+        default :
+            break;
+    }
 
-	if ( v->name != NULL )
-		v->name = CHAR_P T_free( v->name );
+    if ( v->name != NULL )
+        v->name = CHAR_P T_free( v->name );
 
-	if ( v->prev == NULL )
-		EDL.Var_List = v->next;
-	else
-		v->prev->next = v->next;
+    if ( v->prev == NULL )
+        EDL.Var_List = v->next;
+    else
+        v->prev->next = v->next;
 
-	if ( v->next != NULL )
-		v->next->prev = v->prev;
+    if ( v->next != NULL )
+        v->next->prev = v->prev;
 
-	ret = v->next;
-	T_free( v );
-	return ret;
+    ret = v->next;
+    T_free( v );
+    return ret;
 }
 
 
@@ -326,11 +326,11 @@ Var_T *vars_free( Var_T * v,
 
 static void free_all_vars( void )
 {
-	Var_T *v;
+    Var_T *v;
 
 
-	for ( v = EDL.Var_List; v != NULL; )
-		v = vars_free( v, UNSET );
+    for ( v = EDL.Var_List; v != NULL; )
+        v = vars_free( v, UNSET );
 }
 
 
@@ -340,8 +340,8 @@ static void free_all_vars( void )
 
 void vars_del_stack( void )
 {
-	while ( vars_pop( EDL.Var_Stack ) )
-		/* empty */ ;
+    while ( vars_pop( EDL.Var_Stack ) )
+        /* empty */ ;
 }
 
 
@@ -352,9 +352,9 @@ void vars_del_stack( void )
 
 void vars_clean_up( void )
 {
-	vars_del_stack( );
-	free_all_vars( );
-	vars_iter( NULL );
+    vars_del_stack( );
+    free_all_vars( );
+    vars_iter( NULL );
 }
 
 
@@ -365,42 +365,42 @@ void vars_clean_up( void )
 
 Var_T *vars_push_copy( Var_T * v )
 {
-	Var_T *nv = NULL;
+    Var_T *nv = NULL;
 
 
-	if ( v->flags & ON_STACK )
-		return v;
+    if ( v->flags & ON_STACK )
+        return v;
 
-	vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
-				   INT_REF | FLOAT_REF );
+    vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
+                   INT_REF | FLOAT_REF );
 
-	switch ( v->type )
-	{
-		case INT_VAR :
-			nv = vars_push( v->type, v->val.lval );
-			break;
+    switch ( v->type )
+    {
+        case INT_VAR :
+            nv = vars_push( v->type, v->val.lval );
+            break;
 
-		case FLOAT_VAR :
-			nv = vars_push( v->type, v->val.dval );
-			break;
+        case FLOAT_VAR :
+            nv = vars_push( v->type, v->val.dval );
+            break;
 
-		case INT_ARR :
-			nv = vars_push( v->type, v->val.lpnt, v->len );
-			break;
+        case INT_ARR :
+            nv = vars_push( v->type, v->val.lpnt, v->len );
+            break;
 
-		case FLOAT_ARR :
-			nv = vars_push( v->type, v->val.dpnt, v->len );
-			break;
+        case FLOAT_ARR :
+            nv = vars_push( v->type, v->val.dpnt, v->len );
+            break;
 
-		case INT_REF : case FLOAT_REF :
-			nv = vars_push( v->type, v );
-			break;
+        case INT_REF : case FLOAT_REF :
+            nv = vars_push( v->type, v );
+            break;
 
-		default:
-			fsc2_assert( 1 == 0 );
-	}
+        default:
+            fsc2_assert( 1 == 0 );
+    }
 
-	return nv;
+    return nv;
 }
 
 
@@ -408,73 +408,73 @@ Var_T *vars_push_copy( Var_T * v )
  *-----------------------------------------------------------------------*/
 
 Var_T *vars_push_matrix( Var_Type_T type,
-						 int        dim,
-						 ... )
+                         int        dim,
+                         ... )
 {
-	Var_T *nv;
-	va_list ap;
-	ssize_t *sizes;
-	ssize_t i;
+    Var_T *nv;
+    va_list ap;
+    ssize_t *sizes;
+    ssize_t i;
 
 
 #ifndef NDEBUG
-	if ( ! ( type & ( INT_REF | FLOAT_REF ) ) || dim < 2 )
-		fsc2_assert( 1 == 0 );
+    if ( ! ( type & ( INT_REF | FLOAT_REF ) ) || dim < 2 )
+        fsc2_assert( 1 == 0 );
 #endif
 
-	nv = vars_push( type, NULL );
-	nv->from = NULL;
+    nv = vars_push( type, NULL );
+    nv->from = NULL;
 
-	sizes = SSIZE_T_P T_malloc( dim * sizeof *sizes );
+    sizes = SSIZE_T_P T_malloc( dim * sizeof *sizes );
 
-	va_start( ap, dim );
-	
-	for ( i = 0; i < dim; i++ )
-	{
-		sizes[ i ] = ( ssize_t ) va_arg( ap, long );
+    va_start( ap, dim );
+    
+    for ( i = 0; i < dim; i++ )
+    {
+        sizes[ i ] = ( ssize_t ) va_arg( ap, long );
 
 #ifndef NDEBUG
-		if ( sizes[ i ] == 0 )
-			fsc2_assert( 1 == 0 );
+        if ( sizes[ i ] == 0 )
+            fsc2_assert( 1 == 0 );
 #endif
-	}
+    }
 
-	va_end( ap );
+    va_end( ap );
 
-	TRY
-	{
-		nv->val.vptr = VAR_PP T_malloc( sizes[ 0 ] * sizeof *nv->val.vptr );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( sizes );
-		RETHROW( );
-	}
+    TRY
+    {
+        nv->val.vptr = VAR_PP T_malloc( sizes[ 0 ] * sizeof *nv->val.vptr );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( sizes );
+        RETHROW( );
+    }
 
-	for ( i = 0; i < sizes[ 0 ]; i++ )
-		nv->val.vptr[ i ] = NULL;
+    for ( i = 0; i < sizes[ 0 ]; i++ )
+        nv->val.vptr[ i ] = NULL;
 
-	TRY
-	{
-		for ( i = 0; i < sizes[ 0 ]; i++ )
-			nv->val.vptr[ i ] = vars_push_submatrix( nv, type, dim - 1,
-													 sizes + 1 );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		for ( i = 0; i < sizes[ 0 ] && nv->val.vptr[ i ] != NULL; i++ )
-			vars_free( nv->val.vptr[ i ], SET );
-		T_free( sizes );
-		RETHROW( );
-	}
+    TRY
+    {
+        for ( i = 0; i < sizes[ 0 ]; i++ )
+            nv->val.vptr[ i ] = vars_push_submatrix( nv, type, dim - 1,
+                                                     sizes + 1 );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        for ( i = 0; i < sizes[ 0 ] && nv->val.vptr[ i ] != NULL; i++ )
+            vars_free( nv->val.vptr[ i ], SET );
+        T_free( sizes );
+        RETHROW( );
+    }
 
-	nv->len = sizes[ 0 ];
-	nv->dim = dim;
+    nv->len = sizes[ 0 ];
+    nv->dim = dim;
 
-	T_free( sizes );
-	return nv;
+    T_free( sizes );
+    return nv;
 }
 
 
@@ -482,49 +482,49 @@ Var_T *vars_push_matrix( Var_Type_T type,
  *-----------------------------------------------------------------------*/
 
 static Var_T *vars_push_submatrix( Var_T *    from,
-								   Var_Type_T type,
-								   int        dim,
-								   ssize_t *  sizes )
+                                   Var_Type_T type,
+                                   int        dim,
+                                   ssize_t *  sizes )
 {
-	Var_T *nv;
-	ssize_t i;
+    Var_T *nv;
+    ssize_t i;
 
 
-	nv = vars_new( NULL );
-	nv->flags |= IS_TEMP;
-	nv->from = from;
-	nv->dim = dim;
-	nv->len = sizes[ 0 ];
+    nv = vars_new( NULL );
+    nv->flags |= IS_TEMP;
+    nv->from = from;
+    nv->dim = dim;
+    nv->len = sizes[ 0 ];
 
-	if ( dim == 1 )
-	{
-		if ( type == INT_REF )
-		{
-			nv->type = type = INT_ARR;
-			nv->val.lpnt = LONG_P T_calloc( nv->len, sizeof *nv->val.lpnt );
-		}
-		else
-		{
-			nv->type = FLOAT_ARR;
-			nv->val.dpnt = DOUBLE_P T_malloc( nv->len * sizeof *nv->val.dpnt );
-			for ( i = 0; i < nv->len; i++ )
-				nv->val.dpnt[ i ] = 0.0;
-		}
+    if ( dim == 1 )
+    {
+        if ( type == INT_REF )
+        {
+            nv->type = type = INT_ARR;
+            nv->val.lpnt = LONG_P T_calloc( nv->len, sizeof *nv->val.lpnt );
+        }
+        else
+        {
+            nv->type = FLOAT_ARR;
+            nv->val.dpnt = DOUBLE_P T_malloc( nv->len * sizeof *nv->val.dpnt );
+            for ( i = 0; i < nv->len; i++ )
+                nv->val.dpnt[ i ] = 0.0;
+        }
 
-		return nv;
-	}
+        return nv;
+    }
 
-	nv->type = type;
-	nv->val.vptr = VAR_PP T_malloc( nv->len * sizeof *nv->val.vptr );
+    nv->type = type;
+    nv->val.vptr = VAR_PP T_malloc( nv->len * sizeof *nv->val.vptr );
 
-	for ( i = 0; i < nv->len; i++ )
-		nv->val.vptr[ i ] = NULL;
+    for ( i = 0; i < nv->len; i++ )
+        nv->val.vptr[ i ] = NULL;
 
-	for ( i = 0; i < nv->len; i++ )
-		nv->val.vptr[ i ] = vars_push_submatrix( nv, type,
-												 dim - 1, sizes + 1 );
+    for ( i = 0; i < nv->len; i++ )
+        nv->val.vptr[ i ] = vars_push_submatrix( nv, type,
+                                                 dim - 1, sizes + 1 );
 
-	return nv;
+    return nv;
 }
 
 
@@ -551,146 +551,146 @@ static Var_T *vars_push_submatrix( Var_T *    from,
  *-----------------------------------------------------------------------*/
 
 Var_T *vars_push( Var_Type_T type,
-				  ... )
+                  ... )
 {
-	Var_T *nsv, *stack, *src;
-	va_list ap;
-	ssize_t i;
-	const char *str;
+    Var_T *nsv, *stack, *src;
+    va_list ap;
+    ssize_t i;
+    const char *str;
 
 
-	/* Get memory for the new variable to be appended to the stack, set its
-	   type and initialize some fields */
+    /* Get memory for the new variable to be appended to the stack, set its
+       type and initialize some fields */
 
-	nsv         = VAR_P T_malloc( sizeof *nsv );
-	nsv->name   = NULL;
-	nsv->type   = type;
-	nsv->next   = NULL;
-	nsv->flags  = ON_STACK;
+    nsv         = VAR_P T_malloc( sizeof *nsv );
+    nsv->name   = NULL;
+    nsv->type   = type;
+    nsv->next   = NULL;
+    nsv->flags  = ON_STACK;
 
-	/* Get the data for the new variable */
+    /* Get the data for the new variable */
 
-	va_start( ap, type );
+    va_start( ap, type );
 
-	switch ( type )
-	{
-		case UNDEF_VAR :
-			break;
+    switch ( type )
+    {
+        case UNDEF_VAR :
+            break;
 
-		case INT_VAR :
-			nsv->dim = 0;
-			nsv->val.lval = va_arg( ap, long );
-			break;
+        case INT_VAR :
+            nsv->dim = 0;
+            nsv->val.lval = va_arg( ap, long );
+            break;
 
-		case FLOAT_VAR :
-			nsv->dim = 0;
-			nsv->val.dval = va_arg( ap, double );
-			break;
+        case FLOAT_VAR :
+            nsv->dim = 0;
+            nsv->val.dval = va_arg( ap, double );
+            break;
 
-		case STR_VAR :
-			str = va_arg( ap, const char * );
-			if ( str != NULL )
-				nsv->val.sptr = T_strdup( str );
-			else
-				nsv->val.sptr = NULL;
-			break;
+        case STR_VAR :
+            str = va_arg( ap, const char * );
+            if ( str != NULL )
+                nsv->val.sptr = T_strdup( str );
+            else
+                nsv->val.sptr = NULL;
+            break;
 
-		case INT_ARR :
-			nsv->val.lpnt = va_arg( ap, long * );
-			nsv->len = va_arg( ap, ssize_t );
+        case INT_ARR :
+            nsv->val.lpnt = va_arg( ap, long * );
+            nsv->len = va_arg( ap, ssize_t );
 
-			fsc2_assert( nsv->len >= 0 );
+            fsc2_assert( nsv->len >= 0 );
 
-			nsv->dim = 1;
-			if ( nsv->len == 0 )
-				nsv->val.lpnt = NULL;
-			else
-			{
-				if ( nsv->val.lpnt != NULL )
-					nsv->val.lpnt = LONG_P get_memcpy( nsv->val.lpnt,
-											nsv->len * sizeof *nsv->val.lpnt );
-				else
-					nsv->val.lpnt = LONG_P T_calloc( nsv->len,
-													 sizeof *nsv->val.lpnt );
-			}
-			break;
+            nsv->dim = 1;
+            if ( nsv->len == 0 )
+                nsv->val.lpnt = NULL;
+            else
+            {
+                if ( nsv->val.lpnt != NULL )
+                    nsv->val.lpnt = LONG_P get_memcpy( nsv->val.lpnt,
+                                            nsv->len * sizeof *nsv->val.lpnt );
+                else
+                    nsv->val.lpnt = LONG_P T_calloc( nsv->len,
+                                                     sizeof *nsv->val.lpnt );
+            }
+            break;
 
-		case FLOAT_ARR :
-			nsv->val.dpnt = va_arg( ap, double * );
-			nsv->len = va_arg( ap, ssize_t );
+        case FLOAT_ARR :
+            nsv->val.dpnt = va_arg( ap, double * );
+            nsv->len = va_arg( ap, ssize_t );
 
-			fsc2_assert( nsv->len >= 0 );
+            fsc2_assert( nsv->len >= 0 );
 
-			nsv->dim = 1;
-			if ( nsv->len == 0 )
-				nsv->val.dpnt = NULL;
-			else
-			{
-				if ( nsv->val.dpnt != NULL )
-					nsv->val.dpnt = DOUBLE_P get_memcpy( nsv->val.dpnt,
-											nsv->len * sizeof *nsv->val.dpnt );
-				else
-				{
-					nsv->val.dpnt = DOUBLE_P T_malloc( nsv->len *
-													   sizeof *nsv->val.dpnt );
-					for ( i = 0; i < nsv->len; i++ )
-						nsv->val.dpnt[ i ] = 0.0;
-				}
-			}
-			break;
+            nsv->dim = 1;
+            if ( nsv->len == 0 )
+                nsv->val.dpnt = NULL;
+            else
+            {
+                if ( nsv->val.dpnt != NULL )
+                    nsv->val.dpnt = DOUBLE_P get_memcpy( nsv->val.dpnt,
+                                            nsv->len * sizeof *nsv->val.dpnt );
+                else
+                {
+                    nsv->val.dpnt = DOUBLE_P T_malloc( nsv->len *
+                                                       sizeof *nsv->val.dpnt );
+                    for ( i = 0; i < nsv->len; i++ )
+                        nsv->val.dpnt[ i ] = 0.0;
+                }
+            }
+            break;
 
-		case INT_PTR :
-			nsv->val.lpnt = va_arg( ap, long * );
-			break;
+        case INT_PTR :
+            nsv->val.lpnt = va_arg( ap, long * );
+            break;
 
-		case FLOAT_PTR :
-			nsv->val.dpnt = va_arg( ap, double * );
-			break;
+        case FLOAT_PTR :
+            nsv->val.dpnt = va_arg( ap, double * );
+            break;
 
-		case INT_REF : case FLOAT_REF :
-			src = va_arg( ap, Var_T * );
-			if ( src != NULL )
-				vars_ref_copy( nsv, src, UNSET );
-			break;
+        case INT_REF : case FLOAT_REF :
+            src = va_arg( ap, Var_T * );
+            if ( src != NULL )
+                vars_ref_copy( nsv, src, UNSET );
+            break;
 
-		case SUB_REF_PTR :
-			nsv->len = va_arg( ap, ssize_t );
-			nsv->val.index = SSIZE_T_P T_malloc( nsv->len *
-												 sizeof *nsv->val.index );
-			break;
+        case SUB_REF_PTR :
+            nsv->len = va_arg( ap, ssize_t );
+            nsv->val.index = SSIZE_T_P T_malloc( nsv->len *
+                                                 sizeof *nsv->val.index );
+            break;
 
-		case REF_PTR :
-			nsv->from = va_arg( ap, Var_T * );
-			break;
+        case REF_PTR :
+            nsv->from = va_arg( ap, Var_T * );
+            break;
 
-		case FUNC :
-			nsv->val.fnct = va_arg( ap, struct Func * );
-			break;
+        case FUNC :
+            nsv->val.fnct = va_arg( ap, struct Func * );
+            break;
 
-		default :
-			fsc2_assert( 1 == 0 );     /* This can't happen... */
-	}
+        default :
+            fsc2_assert( 1 == 0 );     /* This can't happen... */
+    }
 
-	va_end( ap );
+    va_end( ap );
 
-	/* Finally append the new variable to the stack */
+    /* Finally append the new variable to the stack */
 
-	if ( ( stack = EDL.Var_Stack ) == NULL )
-	{
-		EDL.Var_Stack = nsv;
-		nsv->prev = NULL;
-	}
-	else
-	{
-		while ( stack->next != NULL )
-			stack = stack->next;
-		stack->next = nsv;
-		nsv->prev = stack;
-	}
+    if ( ( stack = EDL.Var_Stack ) == NULL )
+    {
+        EDL.Var_Stack = nsv;
+        nsv->prev = NULL;
+    }
+    else
+    {
+        while ( stack->next != NULL )
+            stack = stack->next;
+        stack->next = nsv;
+        nsv->prev = stack;
+    }
 
-	/* Return the address of the new stack variable */
+    /* Return the address of the new stack variable */
 
-	return nsv;
+    return nsv;
 }
 
 
@@ -698,88 +698,88 @@ Var_T *vars_push( Var_Type_T type,
  *------------------------------------------------------------------------*/
 
 Var_T *vars_make( Var_Type_T type,
-				  Var_T *    src )
+                  Var_T *    src )
 {
-	Var_T *nv = NULL;
-	Var_T *stack;
-	ssize_t i;
+    Var_T *nv = NULL;
+    Var_T *stack;
+    ssize_t i;
 
 
-	if ( src->flags & ON_STACK )
-	{
-		nv        = VAR_P T_malloc( sizeof *nv );
-		nv->name  = NULL;
-		nv->next  = NULL;
-		nv->flags = ON_STACK;
+    if ( src->flags & ON_STACK )
+    {
+        nv        = VAR_P T_malloc( sizeof *nv );
+        nv->name  = NULL;
+        nv->next  = NULL;
+        nv->flags = ON_STACK;
 
-		if ( ( stack = EDL.Var_Stack ) == NULL )
-		{
-			EDL.Var_Stack = nv;
-			nv->prev = NULL;
-		}
-		else
-		{
-			while ( stack->next != NULL )
-				stack = stack->next;
-			stack->next = nv;
-			nv->prev = stack;
-		}
-	}
-	else
-		nv = vars_new( NULL );
+        if ( ( stack = EDL.Var_Stack ) == NULL )
+        {
+            EDL.Var_Stack = nv;
+            nv->prev = NULL;
+        }
+        else
+        {
+            while ( stack->next != NULL )
+                stack = stack->next;
+            stack->next = nv;
+            nv->prev = stack;
+        }
+    }
+    else
+        nv = vars_new( NULL );
 
-	nv->type = type;
+    nv->type = type;
 
-	if ( src->flags & IS_DYNAMIC )
-		nv->flags |= IS_DYNAMIC;
+    if ( src->flags & IS_DYNAMIC )
+        nv->flags |= IS_DYNAMIC;
 
-	switch ( type )
-	{
-		case INT_ARR :
-			nv->len = src->len;
-			nv->dim = 1;
-			if ( nv->len != 0 )
-				nv->val.lpnt = LONG_P T_calloc( nv->len,
-												sizeof *nv->val.lpnt );
-			else
-				nv->val.lpnt = NULL;
-			break;
+    switch ( type )
+    {
+        case INT_ARR :
+            nv->len = src->len;
+            nv->dim = 1;
+            if ( nv->len != 0 )
+                nv->val.lpnt = LONG_P T_calloc( nv->len,
+                                                sizeof *nv->val.lpnt );
+            else
+                nv->val.lpnt = NULL;
+            break;
 
-		case FLOAT_ARR :
-			nv->len = src->len;
-			nv->dim = 1;
-			if ( nv->len != 0 )
-			{
-				nv->val.dpnt = DOUBLE_P T_malloc(   nv->len
-												  * sizeof *nv->val.dpnt );
-				for ( i = 0; i < nv->len; i++ )
-					nv->val.dpnt[ i ] = 0.0;
-			}
-			else
-				nv->val.dpnt = NULL;
-			break;
+        case FLOAT_ARR :
+            nv->len = src->len;
+            nv->dim = 1;
+            if ( nv->len != 0 )
+            {
+                nv->val.dpnt = DOUBLE_P T_malloc(   nv->len
+                                                  * sizeof *nv->val.dpnt );
+                for ( i = 0; i < nv->len; i++ )
+                    nv->val.dpnt[ i ] = 0.0;
+            }
+            else
+                nv->val.dpnt = NULL;
+            break;
 
-		case INT_REF : case FLOAT_REF :
-			nv->dim = src->dim;
-			if ( src->len != 0 )
-			{
-				nv->val.vptr = VAR_PP T_malloc(   src->len
-												* sizeof *nv->val.vptr );
-				for ( nv->len = 0; nv->len < src->len; nv->len++ )
-					nv->val.vptr[ nv->len ] = NULL;
-			}
-			else
-			{
-				nv->val.vptr = NULL;
-				nv->len = 0;
-			}
-			break;
+        case INT_REF : case FLOAT_REF :
+            nv->dim = src->dim;
+            if ( src->len != 0 )
+            {
+                nv->val.vptr = VAR_PP T_malloc(   src->len
+                                                * sizeof *nv->val.vptr );
+                for ( nv->len = 0; nv->len < src->len; nv->len++ )
+                    nv->val.vptr[ nv->len ] = NULL;
+            }
+            else
+            {
+                nv->val.vptr = NULL;
+                nv->len = 0;
+            }
+            break;
 
-		default :
-			fsc2_assert( 1 == 0 );
-	}
+        default :
+            fsc2_assert( 1 == 0 );
+    }
 
-	return nv;
+    return nv;
 }
 
 
@@ -793,21 +793,21 @@ Var_T *vars_make( Var_Type_T type,
  *------------------------------------------------------------------------*/
 
 static void vars_ref_copy( Var_T * nsv,
-						   Var_T * src,
-						   bool    exact_copy )
+                           Var_T * src,
+                           bool    exact_copy )
 {
-	if ( ! exact_copy )
-		nsv->flags |= IS_DYNAMIC | IS_TEMP;
-	if ( nsv->type == INT_REF && src->type == FLOAT_REF )
-		nsv->type = FLOAT_REF;
-	nsv->from = src;
-	nsv->dim = src->dim;
-	nsv->len = src->len;
+    if ( ! exact_copy )
+        nsv->flags |= IS_DYNAMIC | IS_TEMP;
+    if ( nsv->type == INT_REF && src->type == FLOAT_REF )
+        nsv->type = FLOAT_REF;
+    nsv->from = src;
+    nsv->dim = src->dim;
+    nsv->len = src->len;
 
-	if ( nsv->len != 0 )
-		vars_ref_copy_create( nsv, src, exact_copy );
-	else
-		nsv->val.vptr = NULL;
+    if ( nsv->len != 0 )
+        vars_ref_copy_create( nsv, src, exact_copy );
+    else
+        nsv->val.vptr = NULL;
 }
 
 
@@ -817,102 +817,102 @@ static void vars_ref_copy( Var_T * nsv,
  *------------------------------------------------------*/
 
 static void vars_ref_copy_create( Var_T * nsv,
-								  Var_T * src,
-								  bool    exact_copy )
+                                  Var_T * src,
+                                  bool    exact_copy )
 {
-	Var_T *vd;
-	ssize_t i;
+    Var_T *vd;
+    ssize_t i;
 
 
-	/* If we're already at the lowest level, i.e. there are only one-
-	   dimensional arrays, copy the contents. Then we're done. */
+    /* If we're already at the lowest level, i.e. there are only one-
+       dimensional arrays, copy the contents. Then we're done. */
 
-	if ( src->type & ( INT_ARR | FLOAT_ARR ) )
-	{
-		nsv->dim = 1;
+    if ( src->type & ( INT_ARR | FLOAT_ARR ) )
+    {
+        nsv->dim = 1;
 
-		if ( src->type == INT_ARR )
-		{
-			if ( INT_TYPE( nsv ) )
-			{
-				nsv->type = INT_ARR;
-				if ( nsv->len != 0 )
-				{
-					nsv->val.lpnt = LONG_P T_malloc(   nsv->len 
-													 * sizeof *nsv->val.lpnt );
-					memcpy( nsv->val.lpnt, src->val.lpnt,
-							nsv->len * sizeof *nsv->val.lpnt );
-				}
-				else
-					nsv->val.lpnt = NULL;
-			}
-			else
-			{
-				nsv->type = FLOAT_ARR;
-				if ( nsv->len != 0 )
-				{
-					nsv->val.dpnt = DOUBLE_P T_malloc( nsv->len 
-													 * sizeof *nsv->val.dpnt );
-					for ( i = 0; i < nsv->len; i++ )
-						nsv->val.dpnt[ i ] = ( double ) src->val.lpnt[ i ];
-				}
-				else
-					nsv->val.dpnt = NULL;
-			}
-		}
-		else
-		{
-			nsv->type = FLOAT_ARR;
-			if ( nsv->len != 0 )
-			{
-				nsv->val.dpnt = DOUBLE_P T_malloc(   nsv->len 
-												   * sizeof *nsv->val.dpnt );
-				memcpy( nsv->val.dpnt, src->val.dpnt,
-						nsv->len * sizeof *nsv->val.dpnt );
-			}
-			else
-				nsv->val.dpnt = NULL;
-		}
+        if ( src->type == INT_ARR )
+        {
+            if ( INT_TYPE( nsv ) )
+            {
+                nsv->type = INT_ARR;
+                if ( nsv->len != 0 )
+                {
+                    nsv->val.lpnt = LONG_P T_malloc(   nsv->len 
+                                                     * sizeof *nsv->val.lpnt );
+                    memcpy( nsv->val.lpnt, src->val.lpnt,
+                            nsv->len * sizeof *nsv->val.lpnt );
+                }
+                else
+                    nsv->val.lpnt = NULL;
+            }
+            else
+            {
+                nsv->type = FLOAT_ARR;
+                if ( nsv->len != 0 )
+                {
+                    nsv->val.dpnt = DOUBLE_P T_malloc( nsv->len 
+                                                     * sizeof *nsv->val.dpnt );
+                    for ( i = 0; i < nsv->len; i++ )
+                        nsv->val.dpnt[ i ] = ( double ) src->val.lpnt[ i ];
+                }
+                else
+                    nsv->val.dpnt = NULL;
+            }
+        }
+        else
+        {
+            nsv->type = FLOAT_ARR;
+            if ( nsv->len != 0 )
+            {
+                nsv->val.dpnt = DOUBLE_P T_malloc(   nsv->len 
+                                                   * sizeof *nsv->val.dpnt );
+                memcpy( nsv->val.dpnt, src->val.dpnt,
+                        nsv->len * sizeof *nsv->val.dpnt );
+            }
+            else
+                nsv->val.dpnt = NULL;
+        }
 
-		return;
-	}
+        return;
+    }
 
-	/* Otherwise create as many new sub-matrices as necessary and then
-	   recurse, going to the next lower level. */
+    /* Otherwise create as many new sub-matrices as necessary and then
+       recurse, going to the next lower level. */
 
-	if ( nsv->len == 0 )
-	{
-		nsv->val.vptr = NULL;
-		return;
-	}
+    if ( nsv->len == 0 )
+    {
+        nsv->val.vptr = NULL;
+        return;
+    }
 
-	TRY
-	{
-		nsv->val.vptr = VAR_PP T_malloc( nsv->len * sizeof *nsv->val.vptr );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		nsv->len = 0;
-		RETHROW( );
-	}
+    TRY
+    {
+        nsv->val.vptr = VAR_PP T_malloc( nsv->len * sizeof *nsv->val.vptr );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        nsv->len = 0;
+        RETHROW( );
+    }
 
-	for ( i = 0; i < nsv->len; i++ )
-		nsv->val.vptr[ i ] = NULL;
+    for ( i = 0; i < nsv->len; i++ )
+        nsv->val.vptr[ i ] = NULL;
 
-	for ( i = 0; i < nsv->len; i++ )
-	{
-		vd = nsv->val.vptr[ i ] = vars_new( NULL );
-		vd->from = nsv;
-		vd->flags &= ~ NEW_VARIABLE;
-		if ( ! exact_copy )
-			vd->flags |= IS_DYNAMIC | IS_TEMP;
-		vd->len = src->val.vptr[ i ]->len;
-		vd->type = nsv->type;
-		vd->dim = src->val.vptr[ i ]->dim;
+    for ( i = 0; i < nsv->len; i++ )
+    {
+        vd = nsv->val.vptr[ i ] = vars_new( NULL );
+        vd->from = nsv;
+        vd->flags &= ~ NEW_VARIABLE;
+        if ( ! exact_copy )
+            vd->flags |= IS_DYNAMIC | IS_TEMP;
+        vd->len = src->val.vptr[ i ]->len;
+        vd->type = nsv->type;
+        vd->dim = src->val.vptr[ i ]->dim;
 
-		vars_ref_copy_create( vd, src->val.vptr[ i ], exact_copy );
-	}
+        vars_ref_copy_create( vd, src->val.vptr[ i ], exact_copy );
+    }
 }
 
 
@@ -927,85 +927,85 @@ static void vars_ref_copy_create( Var_T * nsv,
 
 Var_T *vars_pop( Var_T * v )
 {
-	Var_T *ret = NULL;
-	ssize_t i;
+    Var_T *ret = NULL;
+    ssize_t i;
 #ifndef NDEBUG
-	Var_T *stack,
-		  *prev = NULL;
+    Var_T *stack,
+          *prev = NULL;
 #endif
 
 
-	/* Check that this is a variable that can be popped from the stack */
+    /* Check that this is a variable that can be popped from the stack */
 
-	if ( v == NULL || ! ( v->flags & ON_STACK ) )
-		return NULL;
+    if ( v == NULL || ! ( v->flags & ON_STACK ) )
+        return NULL;
 
 #ifndef NDEBUG
-	/* Figure out if 'v' is really on the stack - otherwise we have found
-	   a new bug */
+    /* Figure out if 'v' is really on the stack - otherwise we have found
+       a new bug */
 
-	for ( stack = EDL.Var_Stack; stack && stack != v; stack = stack->next )
-		prev = stack;
+    for ( stack = EDL.Var_Stack; stack && stack != v; stack = stack->next )
+        prev = stack;
 
-	if ( stack == NULL )
-		fsc2_assert( 1 == 0 );
+    if ( stack == NULL )
+        fsc2_assert( 1 == 0 );
 #endif
 
-	/* Now get rid of the variable */
+    /* Now get rid of the variable */
 
-	ret = v->next;
+    ret = v->next;
 
-	if ( v->prev != NULL )
-	{
-		v->prev->next = v->next;
-		if ( v->next != NULL )
-			v->next->prev = v->prev;
-	}
-	else
-	{
-		EDL.Var_Stack = v->next;
-		if ( v->next != NULL )
-			v->next->prev = NULL;
-	}
+    if ( v->prev != NULL )
+    {
+        v->prev->next = v->next;
+        if ( v->next != NULL )
+            v->next->prev = v->prev;
+    }
+    else
+    {
+        EDL.Var_Stack = v->next;
+        if ( v->next != NULL )
+            v->next->prev = NULL;
+    }
 
-	switch( v->type )
-	{
-		case STR_VAR :
-			T_free( v->val.sptr );
-			break;
+    switch( v->type )
+    {
+        case STR_VAR :
+            T_free( v->val.sptr );
+            break;
 
-		case FUNC :
-			T_free( v->name );
-			break;
+        case FUNC :
+            T_free( v->name );
+            break;
 
-		case INT_ARR :
-			T_free( v->val.lpnt );
-			break;
+        case INT_ARR :
+            T_free( v->val.lpnt );
+            break;
 
-		case FLOAT_ARR :
-			T_free( v->val.dpnt );
-			break;
+        case FLOAT_ARR :
+            T_free( v->val.dpnt );
+            break;
 
-		case INT_REF : case FLOAT_REF :
-			if ( ! ( v->flags & DONT_RECURSE ) )
-			{
-				for ( i = 0; i < v->len; i++ )
-					if ( v->val.vptr[ i ] != NULL )
-						vars_free( v->val.vptr[ i ], SET );
-			}
-			T_free( v->val.vptr );
-			break;
+        case INT_REF : case FLOAT_REF :
+            if ( ! ( v->flags & DONT_RECURSE ) )
+            {
+                for ( i = 0; i < v->len; i++ )
+                    if ( v->val.vptr[ i ] != NULL )
+                        vars_free( v->val.vptr[ i ], SET );
+            }
+            T_free( v->val.vptr );
+            break;
 
-		case SUB_REF_PTR :
-			T_free( v->val.index );
-			break;
+        case SUB_REF_PTR :
+            T_free( v->val.index );
+            break;
 
-		default :
-			break;
-	}
+        default :
+            break;
+    }
 
-	T_free( v );
-	return ret;
+    T_free( v );
+    return ret;
 }
 
 
@@ -1021,65 +1021,65 @@ Var_T *vars_pop( Var_T * v )
  *-------------------------------------------------------------------*/
 
 void vars_check( Var_T * v,
-				 int     types )
+                 int     types )
 {
-	int i;
-	int t;
-	const char *type_names[ ] = { "STRING", "INTEGER", "FLOAT",
-								  "1D INTEGER ARRAY", "1D FLOAT ARRAY",
-								  "INTEGER MATRIX", "FLOAT MATRIX",
-								  "INTEGER REFERENCE", "FLOAT REFERENCE",
-								  "SUBARRAY REFERENCE", "ARRAY REFERENCE",
-								  "FUNCTION" };
+    int i;
+    int t;
+    const char *type_names[ ] = { "STRING", "INTEGER", "FLOAT",
+                                  "1D INTEGER ARRAY", "1D FLOAT ARRAY",
+                                  "INTEGER MATRIX", "FLOAT MATRIX",
+                                  "INTEGER REFERENCE", "FLOAT REFERENCE",
+                                  "SUBARRAY REFERENCE", "ARRAY REFERENCE",
+                                  "FUNCTION" };
 
 
 #ifndef NDEBUG
-	/* Someone might call the function with a NULL pointer - handle this
-	   gracefully, i.e. by throwing an exception and don't crash (even
-	   though this clearly is a bug) */
+    /* Someone might call the function with a NULL pointer - handle this
+       gracefully, i.e. by throwing an exception and don't crash (even
+       though this clearly is a bug) */
 
-	if ( v == NULL )
-		fsc2_assert( 1 == 0 );
+    if ( v == NULL )
+        fsc2_assert( 1 == 0 );
 
-	/* Being real paranoid we check that the variable exists at all -
-	   probably this can vanish later. */
+    /* Being real paranoid we check that the variable exists at all -
+       probably this can vanish later. */
 
-	if ( ! vars_exist( v ) )
-		fsc2_assert( 1 == 0 );
+    if ( ! vars_exist( v ) )
+        fsc2_assert( 1 == 0 );
 #endif
 
-	/* Check that the variable has a value assigned to it */
+    /* Check that the variable has a value assigned to it */
 
-	if ( v->type == UNDEF_VAR )
-	{
-		fsc2_assert( v->name != NULL );         /* just a bit paranoid ? */
+    if ( v->type == UNDEF_VAR )
+    {
+        fsc2_assert( v->name != NULL );         /* just a bit paranoid ? */
 
-		print( FATAL, "The accessed variable '%s' has not been assigned a "
-			   "value.\n", v->name );
-		THROW( EXCEPTION );
-	}
+        print( FATAL, "The accessed variable '%s' has not been assigned a "
+               "value.\n", v->name );
+        THROW( EXCEPTION );
+    }
 
-	/* Check that the variable has the correct type */
+    /* Check that the variable has the correct type */
 
-	if ( ! ( v->type & types ) )
-	{
-		for ( i = 0, t = v->type; ! ( t & 1 ); t >>= 1, i++ )
-			/* empty */ ;
-		if ( v->name != NULL )
-			print( FATAL, "The variable '%s' of type %s can't be used in "
-				   "this context.\n", v->name, type_names[ i ] );
-		else
-			print( FATAL, "Variable of type %s can't be used in this "
-				   "context.\n", type_names[ i ] );
-		THROW( EXCEPTION );
-	}
+    if ( ! ( v->type & types ) )
+    {
+        for ( i = 0, t = v->type; ! ( t & 1 ); t >>= 1, i++ )
+            /* empty */ ;
+        if ( v->name != NULL )
+            print( FATAL, "The variable '%s' of type %s can't be used in "
+                   "this context.\n", v->name, type_names[ i ] );
+        else
+            print( FATAL, "Variable of type %s can't be used in this "
+                   "context.\n", type_names[ i ] );
+        THROW( EXCEPTION );
+    }
 
-	if ( v->name != NULL && v->flags & NEW_VARIABLE )
-	{
-		print( WARN, "Variable '%s' has not been assigned a value.\n",
-			   v->name );
-		THROW( EXCEPTION );
-	}
+    if ( v->name != NULL && v->flags & NEW_VARIABLE )
+    {
+        print( WARN, "Variable '%s' has not been assigned a value.\n",
+               v->name );
+        THROW( EXCEPTION );
+    }
 }
 
 
@@ -1091,19 +1091,19 @@ void vars_check( Var_T * v,
 
 bool vars_exist( Var_T * v )
 {
-	Var_T *lp;
+    Var_T *lp;
 
 
-	fsc2_assert( v != NULL );
+    fsc2_assert( v != NULL );
 
-	if ( v->flags & ON_STACK )
-		for ( lp = EDL.Var_Stack; lp != NULL && lp != v; lp = lp->next )
-			/* empty */ ;
-	else
-		for ( lp = EDL.Var_List; lp != NULL && lp != v; lp = lp->next )
-			/* empty */ ;
+    if ( v->flags & ON_STACK )
+        for ( lp = EDL.Var_Stack; lp != NULL && lp != v; lp = lp->next )
+            /* empty */ ;
+    else
+        for ( lp = EDL.Var_List; lp != NULL && lp != v; lp = lp->next )
+            /* empty */ ;
 
-	return lp == v;
+    return lp == v;
 }
 
 
@@ -1119,44 +1119,44 @@ bool vars_exist( Var_T * v )
 
 void *vars_iter( Var_T * v )
 {
-	static ssize_t *iter = NULL;
-	void *ret;
-	ssize_t i;
+    static ssize_t *iter = NULL;
+    void *ret;
+    ssize_t i;
 
 
-	/* If called with a NULL argument just reset the iter array */
+    /* If called with a NULL argument just reset the iter array */
 
-	if ( v == NULL )
-	{
-		if ( iter != NULL )
-			iter = SSIZE_T_P T_free( iter );
-		return NULL;
-	}
+    if ( v == NULL )
+    {
+        if ( iter != NULL )
+            iter = SSIZE_T_P T_free( iter );
+        return NULL;
+    }
 
-	/* If this is the first call of a sequence set up the iter array */
+    /* If this is the first call of a sequence set up the iter array */
 
-	if ( iter == NULL )
-	{
-		iter = SSIZE_T_P T_malloc( v->dim * sizeof *iter );
-		for ( i = 0; i < v->dim - 1; i++ )
-			iter[ i ] = 0;
-		iter[ v->dim - 1 ] = -1;
-	}
+    if ( iter == NULL )
+    {
+        iter = SSIZE_T_P T_malloc( v->dim * sizeof *iter );
+        for ( i = 0; i < v->dim - 1; i++ )
+            iter[ i ] = 0;
+        iter[ v->dim - 1 ] = -1;
+    }
 
-	/* Increment the index for the lowest dimension */
+    /* Increment the index for the lowest dimension */
 
-	iter[ v->dim - 1 ]++;
+    iter[ v->dim - 1 ]++;
 
-	/* Find the element associated with the indices in iter, reset the iter
-	   array when there were no more elements */
+    /* Find the element associated with the indices in iter, reset the iter
+       array when there were no more elements */
 
-	if ( ( ret = vars_get_pointer( iter, 0, v ) ) == NULL )
-	{
-		iter = SSIZE_T_P T_free( iter );
-		return NULL;
-	}
+    if ( ( ret = vars_get_pointer( iter, 0, v ) ) == NULL )
+    {
+        iter = SSIZE_T_P T_free( iter );
+        return NULL;
+    }
 
-	return ret;
+    return ret;
 }
 
 
@@ -1169,41 +1169,41 @@ void *vars_iter( Var_T * v )
  *--------------------------------------------------------------*/
 
 static void *vars_get_pointer( ssize_t * iter,
-							   ssize_t   depth,
-							   Var_T *   p )
+                               ssize_t   depth,
+                               Var_T *   p )
 {
-	Var_T *p_next;
+    Var_T *p_next;
 
 
-	/* If the index for the current dimension is too large reset it to
-	   0 and increment the index for the next higher dimension (if we're
-	   already at the top level we have returned all elements of the array
-	   and thus return a NULL pointer). */
+    /* If the index for the current dimension is too large reset it to
+       0 and increment the index for the next higher dimension (if we're
+       already at the top level we have returned all elements of the array
+       and thus return a NULL pointer). */
 
-	if ( iter[ depth ] >= p->len )
-	{
-		if ( depth == 0 )
-			return NULL;
-		else
-		{
-			iter[ depth ] = 0;
-			iter[ --depth ]++;
-			return vars_get_pointer( iter, depth, p->from );
-		}
-	}
+    if ( iter[ depth ] >= p->len )
+    {
+        if ( depth == 0 )
+            return NULL;
+        else
+        {
+            iter[ depth ] = 0;
+            iter[ --depth ]++;
+            return vars_get_pointer( iter, depth, p->from );
+        }
+    }
 
-	/* If we're already at the lowest level return a pointer to the
-	   element, otherwise go down another level. */
+    /* If we're already at the lowest level return a pointer to the
+       element, otherwise go down another level. */
 
-	if ( p->type == INT_ARR )
-		return ( void * ) ( p->val.lpnt + iter[ depth ] );
-	else if ( p->type == FLOAT_ARR )
-		return ( void * ) ( p->val.dpnt + iter[ depth ] );
-	else
-	{
-		p_next = p->val.vptr[ iter[ depth ] ];
-		return vars_get_pointer( iter, ++depth, p_next );
-	}
+    if ( p->type == INT_ARR )
+        return ( void * ) ( p->val.lpnt + iter[ depth ] );
+    else if ( p->type == FLOAT_ARR )
+        return ( void * ) ( p->val.dpnt + iter[ depth ] );
+    else
+    {
+        p_next = p->val.vptr[ iter[ depth ] ];
+        return vars_get_pointer( iter, ++depth, p_next );
+    }
 }
 
 
@@ -1217,130 +1217,132 @@ static void *vars_get_pointer( ssize_t * iter,
 
 void vars_save_restore( bool flag )
 {
-	Var_T *src;
-	Var_T *cpy;
-	static Var_T *cpy_area = NULL;
-	static bool exists_copy = UNSET;
-	ssize_t var_count;
-	ssize_t i;
+    Var_T *src;
+    Var_T *cpy;
+    static Var_T *cpy_area = NULL;
+    static bool exists_copy = UNSET;
+    ssize_t var_count;
+    ssize_t i;
 
 
-	if ( flag )
-	{
-		fsc2_assert( ! exists_copy );                  /* don't save twice ! */
+    if ( flag )
+    {
+        fsc2_assert( ! exists_copy );                  /* don't save twice ! */
 
-		if ( EDL.Var_List == NULL )
-		{
-			exists_copy = SET;
-			return;
-		}
+        if ( EDL.Var_List == NULL )
+        {
+            exists_copy = SET;
+            return;
+        }
 
-		for ( var_count = 0, src = EDL.Var_List; src != NULL; src = src->next )
-			var_count++;
+        for ( var_count = 0, src = EDL.Var_List; src != NULL; src = src->next )
+            var_count++;
 
-		cpy_area = VAR_P T_malloc( var_count * sizeof *cpy_area );
+        cpy_area = VAR_P T_malloc( var_count * sizeof *cpy_area );
 
-		for ( cpy = cpy_area, src = EDL.Var_List; src != NULL;
-			  src = src->next, cpy++ )
-		{
-			memcpy( cpy, src, sizeof *src );
+        for ( cpy = cpy_area, src = EDL.Var_List; src != NULL;
+              src = src->next, cpy++ )
+        {
+            memcpy( cpy, src, sizeof *src );
 
-			switch ( src->type )
-			{
-				case UNDEF_VAR : case INT_VAR : case FLOAT_VAR :
-					break;
+            switch ( src->type )
+            {
+                case UNDEF_VAR : case INT_VAR : case FLOAT_VAR :
+                    break;
 
-				case INT_ARR :
-					if ( src->len == 0 )
-						break;
-					cpy->val.lpnt = NULL;
-					cpy->val.lpnt = LONG_P get_memcpy( src->val.lpnt,
-											src->len * sizeof *src->val.lpnt );
-					break;
+                case INT_ARR :
+                    if ( src->len == 0 )
+                        break;
+                    cpy->val.lpnt = NULL;
+                    cpy->val.lpnt = LONG_P get_memcpy( src->val.lpnt,
+                                            src->len * sizeof *src->val.lpnt );
+                    break;
 
-				case FLOAT_ARR :
-					if ( src->len == 0 )
-						break;
-					cpy->val.dpnt = NULL;
-					cpy->val.dpnt = DOUBLE_P get_memcpy( src->val.dpnt,
-											src->len * sizeof *src->val.dpnt );
-					break;
+                case FLOAT_ARR :
+                    if ( src->len == 0 )
+                        break;
+                    cpy->val.dpnt = NULL;
+                    cpy->val.dpnt = DOUBLE_P get_memcpy( src->val.dpnt,
+                                            src->len * sizeof *src->val.dpnt );
+                    break;
 
-				case INT_REF : case FLOAT_REF :
-					if ( src->len == 0 )
-						break;
-					cpy->val.vptr = NULL;
-					cpy->val.vptr = VAR_PP get_memcpy( src->val.vptr,
-											src->len * sizeof *src->val.vptr );
-					break;
+                case INT_REF : case FLOAT_REF :
+                    if ( src->len == 0 )
+                        break;
+                    cpy->val.vptr = NULL;
+                    cpy->val.vptr = VAR_PP get_memcpy( src->val.vptr,
+                                            src->len * sizeof *src->val.vptr );
+                    break;
 
-				default :
-					fsc2_assert( 1 == 0 );
-			}
+                default :
+                    fsc2_assert( 1 == 0 );
+            }
 
-			src->flags |= EXISTS_BEFORE_TEST;
-		}
+            src->flags |= EXISTS_BEFORE_TEST;
+        }
 
-		exists_copy = SET;
-	}
-	else
-	{
-		fsc2_assert( exists_copy );             /* no restore without save ! */
+        exists_copy = SET;
+    }
+    else
+    {
+        fsc2_assert( exists_copy );             /* no restore without save ! */
 
-		/* Remove all sub-matrices that got created during the test run */
+        /* Remove all sub-matrices that got created during the test run */
 
-		for ( cpy = EDL.Var_List; cpy != NULL; cpy = cpy->next )
-		{
-			if ( cpy->name == NULL ||
-				 ! ( cpy->type & ( INT_REF | FLOAT_REF ) ) )
-				continue;
+        for ( cpy = EDL.Var_List; cpy != NULL; cpy = cpy->next )
+        {
+            if ( cpy->name == NULL ||
+                 ! ( cpy->type & ( INT_REF | FLOAT_REF ) ) )
+                continue;
 
-			for ( i = 0; i < cpy->len; i++ )
-				if ( cpy->val.vptr != NULL &&
-					 ! ( cpy->val.vptr[ i ]->flags & EXISTS_BEFORE_TEST ) )
-					vars_free( cpy->val.vptr[ i ], SET );
-		}
+            for ( i = 0; i < cpy->len; i++ )
+                if ( cpy->val.vptr != NULL &&
+                     ! ( cpy->val.vptr[ i ]->flags & EXISTS_BEFORE_TEST ) )
+                    vars_free( cpy->val.vptr[ i ], SET );
+        }
 
-		/* Reset all variables to what they were before the rest run */
+        /* Reset all variables to what they were before the rest run */
 
-		for ( cpy = EDL.Var_List, src = cpy_area; cpy != NULL;
-			  cpy = cpy->next, src++ )
-		{
-			switch ( src->type )
-			{
-				case UNDEF_VAR : case INT_VAR : case FLOAT_VAR :
-					break;
+        for ( cpy = EDL.Var_List, src = cpy_area; cpy != NULL;
+              cpy = cpy->next, src++ )
+        {
+            switch ( src->type )
+            {
+                case UNDEF_VAR : case INT_VAR : case FLOAT_VAR :
+                    break;
 
-				case INT_ARR :
-					if ( cpy->len != 0 )
-						cpy->val.lpnt = LONG_P T_free( cpy->val.lpnt );
-					break;
+                case INT_ARR :
+                    if ( cpy->len != 0 )
+                        cpy->val.lpnt = LONG_P T_free( cpy->val.lpnt );
+                    break;
 
-				case FLOAT_ARR :
-					if ( cpy->len != 0 )
-						cpy->val.dpnt = DOUBLE_P T_free( cpy->val.dpnt );
-					break;
+                case FLOAT_ARR :
+                    if ( cpy->len != 0 )
+                        cpy->val.dpnt = DOUBLE_P T_free( cpy->val.dpnt );
+                    break;
 
-				case INT_REF : case FLOAT_REF :
-					if ( cpy->len != 0 )
-						cpy->val.vptr = VAR_PP T_free( cpy->val.vptr );
-					break;
+                case INT_REF : case FLOAT_REF :
+                    if ( cpy->len != 0 )
+                        cpy->val.vptr = VAR_PP T_free( cpy->val.vptr );
+                    break;
 
-				default :
-					fsc2_assert( 1 == 0 );
-			}
+                default :
+                    fsc2_assert( 1 == 0 );
+            }
 
-			memcpy( cpy, src, sizeof *src );
-		}
+            memcpy( cpy, src, sizeof *src );
+        }
 
-		cpy_area = VAR_P T_free( cpy_area );
-		exists_copy = UNSET;
-	}
+        cpy_area = VAR_P T_free( cpy_area );
+        exists_copy = UNSET;
+    }
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

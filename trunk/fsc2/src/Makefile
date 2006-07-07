@@ -176,7 +176,15 @@ install:
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) -d $(libdir)
 
+ifdef ONLY_SETGID
+	$(EXEC_INSTALL) -m 2755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+else
+ifdef ONLY_SETUID
+	$(EXEC_INSTALL) -m 4755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+else
 	$(EXEC_INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+endif
+endif
 	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_clean $(bindir)
 	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_connect $(bindir)
 	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)

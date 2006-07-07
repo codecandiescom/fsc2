@@ -30,7 +30,7 @@
 
 
 void vars_assign( Var_T * /* src */,
-				  Var_T * /* dest */ );
+                  Var_T * /* dest */ );
 
 
 #endif  /* ! VARS_ASS_HEADER */
@@ -39,5 +39,7 @@ void vars_assign( Var_T * /* src */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

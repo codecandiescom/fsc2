@@ -32,11 +32,11 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 static Var_T *get_area( Var_T * v,
-						bool    use_cursor );
+                        bool    use_cursor );
 static Var_T *get_curve( Var_T * v,
-						 bool    use_cursor );
+                         bool    use_cursor );
 static Var_T *get_amplitude( Var_T * v,
-							 bool    use_cursor );
+                             bool    use_cursor );
 
 
 static TDS_TMPL_T tds_tmpl_stored;
@@ -53,39 +53,39 @@ static TDS_TMPL_T tds_tmpl_stored;
 
 int tds_tmpl_init_hook( void )
 {
-	int i;
+    int i;
 
 
-	/* Set global variable to indicate that GPIB bus is needed */
+    /* Set global variable to indicate that GPIB bus is needed */
 
-	Need_GPIB = SET;
+    Need_GPIB = SET;
 
-	/* Initialize some variables in the digitizers structure */
+    /* Initialize some variables in the digitizers structure */
 
-	tds_tmpl.is_reacting = UNSET;
-	tds_tmpl.w           = NULL;
-	tds_tmpl.is_timebase = UNSET;
-	tds_tmpl.is_num_avg  = UNSET;
-	tds_tmpl.is_rec_len  = UNSET;
-	tds_tmpl.is_trig_pos = UNSET;
-	tds_tmpl.data_source = TDS_TMPL_UNDEF;
-	tds_tmpl.windows_are_checked = UNSET;
+    tds_tmpl.is_reacting = UNSET;
+    tds_tmpl.w           = NULL;
+    tds_tmpl.is_timebase = UNSET;
+    tds_tmpl.is_num_avg  = UNSET;
+    tds_tmpl.is_rec_len  = UNSET;
+    tds_tmpl.is_trig_pos = UNSET;
+    tds_tmpl.data_source = TDS_TMPL_UNDEF;
+    tds_tmpl.windows_are_checked = UNSET;
 #ifndef NO_GATED_MEASUREMENTS
-	tds_tmpl.meas_source = TDS_TMPL_UNDEF;
+    tds_tmpl.meas_source = TDS_TMPL_UNDEF;
 #endif
-	tds_tmpl.lock_state  = SET;
+    tds_tmpl.lock_state  = SET;
 
-	for ( i = TDS_TMPL_CH1; i < NUM_NORMAL_CHANNELS; i++ )
-		tds_tmpl.is_sens[ i ] = UNSET;
+    for ( i = TDS_TMPL_CH1; i < NUM_NORMAL_CHANNELS; i++ )
+        tds_tmpl.is_sens[ i ] = UNSET;
 
-	for ( i = 0; i < NUM_DISPLAYABLE_CHANNELS; i++ )
-		tds_tmpl.channels_in_use[ i ] = UNSET;
+    for ( i = 0; i < NUM_DISPLAYABLE_CHANNELS; i++ )
+        tds_tmpl.channels_in_use[ i ] = UNSET;
 
-	tds_tmpl_stored.w = NULL;
+    tds_tmpl_stored.w = NULL;
 
-	tds_tmpl_stored.w    = NULL;
+    tds_tmpl_stored.w    = NULL;
 
-	return 1;
+    return 1;
 }
 
 
@@ -95,11 +95,11 @@ int tds_tmpl_init_hook( void )
 
 int tds_tmpl_test_hook( void )
 {
-	/* Store the state of the digitizer structure it was set to in the
-	   PREPARATIONS section */
+    /* Store the state of the digitizer structure it was set to in the
+       PREPARATIONS section */
 
-	tds_tmpl_store_state( &tds_tmpl_stored, &tds_tmpl );
-	return 1;
+    tds_tmpl_store_state( &tds_tmpl_stored, &tds_tmpl );
+    return 1;
 }
 
 
@@ -109,33 +109,33 @@ int tds_tmpl_test_hook( void )
 
 int tds_tmpl_end_of_test_hook( void )
 {
-	int ch;
-	int count;
+    int ch;
+    int count;
 
 
-	/* Make sure we don't forget which channels have been marked as used
-	   during the test run, they got to be switched on at the start of the
-	   experiment. */
+    /* Make sure we don't forget which channels have been marked as used
+       during the test run, they got to be switched on at the start of the
+       experiment. */
 
-	for ( count = 0, ch = 0; ch < NUM_DISPLAYABLE_CHANNELS; ch++ )
-	{
-		tds_tmpl_stored.channels_in_use[ ch ] = tds_tmpl.channels_in_use[ ch ];
-		if ( tds_tmpl.channels_in_use[ ch ] &&
-			 ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS )
-			count++;
-	}
+    for ( count = 0, ch = 0; ch < NUM_DISPLAYABLE_CHANNELS; ch++ )
+    {
+        tds_tmpl_stored.channels_in_use[ ch ] = tds_tmpl.channels_in_use[ ch ];
+        if ( tds_tmpl.channels_in_use[ ch ] &&
+             ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS )
+            count++;
+    }
 
-	/* If more than MAX_SIMULTANEOUS_CHANNELS are needed we're in trouble */
+    /* If more than MAX_SIMULTANEOUS_CHANNELS are needed we're in trouble */
 
-	if ( count > MAX_SIMULTANEOUS_CHANNELS )
-	{
-		print( FATAL, "%d live channels are needed for the experiment but "
-			   "only %d can be displayed simulataneously.\n", count,
-			   MAX_SIMULTANEOUS_CHANNELS );
-		THROW( EXCEPTION );
-	}
+    if ( count > MAX_SIMULTANEOUS_CHANNELS )
+    {
+        print( FATAL, "%d live channels are needed for the experiment but "
+               "only %d can be displayed simulataneously.\n", count,
+               MAX_SIMULTANEOUS_CHANNELS );
+        THROW( EXCEPTION );
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -145,35 +145,35 @@ int tds_tmpl_end_of_test_hook( void )
 
 int tds_tmpl_exp_hook( void )
 {
-	/* Reset the digitizer structure to the state it was set to in the
-	   preparations section - changes done to it in the test run are to
-	   be undone... */
+    /* Reset the digitizer structure to the state it was set to in the
+       preparations section - changes done to it in the test run are to
+       be undone... */
 
-	tds_tmpl_store_state( &tds_tmpl, &tds_tmpl_stored );
-	tds_tmpl.windows_are_checked = UNSET;
+    tds_tmpl_store_state( &tds_tmpl, &tds_tmpl_stored );
+    tds_tmpl.windows_are_checked = UNSET;
 
-	if ( ! tds_tmpl_init( DEVICE_NAME ) )
-	{
-		print( FATAL, "Initialization of device failed: %s\n",
-			   gpib_error_msg );
-		THROW( EXCEPTION );
-	}
+    if ( ! tds_tmpl_init( DEVICE_NAME ) )
+    {
+        print( FATAL, "Initialization of device failed: %s\n",
+               gpib_error_msg );
+        THROW( EXCEPTION );
+    }
 
-	/* If the pre-experiment checks fail we must unlock the keyboard
-	   and switch back to a normal acquisition mode */
+    /* If the pre-experiment checks fail we must unlock the keyboard
+       and switch back to a normal acquisition mode */
 
-	TRY
-	{
-		tds_tmpl_do_pre_exp_checks( );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		tds_tmpl_finished( );
-		RETHROW( );
-	}
+    TRY
+    {
+        tds_tmpl_do_pre_exp_checks( );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        tds_tmpl_finished( );
+        RETHROW( );
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -183,8 +183,8 @@ int tds_tmpl_exp_hook( void )
 
 int tds_tmpl_end_of_exp_hook( void )
 {
-	tds_tmpl_finished( );
-	return 1;
+    tds_tmpl_finished( );
+    return 1;
 }
 
 
@@ -195,8 +195,8 @@ int tds_tmpl_end_of_exp_hook( void )
 
 void tds_tmpl_exit_hook( void )
 {
-	tds_tmpl_delete_windows( &tds_tmpl );
-	tds_tmpl_delete_windows( &tds_tmpl_stored );
+    tds_tmpl_delete_windows( &tds_tmpl );
+    tds_tmpl_delete_windows( &tds_tmpl_stored );
 }
 
 
@@ -205,7 +205,7 @@ void tds_tmpl_exit_hook( void )
 
 Var_T *digitizer_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -214,129 +214,129 @@ Var_T *digitizer_name( Var_T * v  UNUSED_ARG )
 
 Var_T *digitizer_define_window( Var_T * v )
 {
-	double win_start = 0,
-		   win_width = 0;
-	bool is_win_start = UNSET;
-	bool is_win_width = UNSET;
-	long num_windows = 1;
-	double w1, w2;
-	Window_T *w;
+    double win_start = 0,
+           win_width = 0;
+    bool is_win_start = UNSET;
+    bool is_win_width = UNSET;
+    long num_windows = 1;
+    double w1, w2;
+    Window_T *w;
 
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+    /* During the experiment if the digitizer's keyboard isn't locked we
+       need to reread the timebase, record length and trigger position and
+       update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+    if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+        tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-	if ( v != NULL )
-	{
-		/* Get the start point of the window */
+    if ( v != NULL )
+    {
+        /* Get the start point of the window */
 
-		win_start = get_double( v, "window position" );
-		is_win_start = SET;
+        win_start = get_double( v, "window position" );
+        is_win_start = SET;
 
-		/* If there's a second parameter take it to be the window width */
+        /* If there's a second parameter take it to be the window width */
 
-		if ( ( v = vars_pop( v ) ) != NULL )
-		{
-			win_width = get_double( v, "window width" );
+        if ( ( v = vars_pop( v ) ) != NULL )
+        {
+            win_width = get_double( v, "window width" );
 
-			/* Allow window width to be zero in test run... */
+            /* Allow window width to be zero in test run... */
 
-			if ( ( FSC2_MODE == TEST && win_width < 0.0 ) ||
-				 ( FSC2_MODE != TEST && win_width <= 0.0 ) )
-			{
-				print( FATAL, "Zero or negative window width.\n" );
-				THROW( EXCEPTION );
-			}
-			is_win_width = SET;
+            if ( ( FSC2_MODE == TEST && win_width < 0.0 ) ||
+                 ( FSC2_MODE != TEST && win_width <= 0.0 ) )
+            {
+                print( FATAL, "Zero or negative window width.\n" );
+                THROW( EXCEPTION );
+            }
+            is_win_width = SET;
 
-			too_many_arguments( v );
-		}
-	}
+            too_many_arguments( v );
+        }
+    }
 
-	/* During the experiment take the current cursor positions as the
-	   windows borders if they haven't been specified - but we have to
-	   be careful: if the cursors ae exacty on top of each other we take
-	   the smallest possible non-zero cursor distance as the width. */
+    /* During the experiment take the current cursor positions as the
+       windows borders if they haven't been specified - but we have to
+       be careful: if the cursors ae exacty on top of each other we take
+       the smallest possible non-zero cursor distance as the width. */
 
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		if ( ! is_win_start )
-		{
-			w1 = tds_tmpl_get_cursor_position( 1 );
-			w2 = tds_tmpl_get_cursor_position( 2 );
-			win_start = d_min( w1, w2 );
-			is_win_start = SET;
-		}
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        if ( ! is_win_start )
+        {
+            w1 = tds_tmpl_get_cursor_position( 1 );
+            w2 = tds_tmpl_get_cursor_position( 2 );
+            win_start = d_min( w1, w2 );
+            is_win_start = SET;
+        }
 
-		if ( ! is_win_width )
-		{
-			win_width = fabs( tds_tmpl_get_cursor_distance( ) );
-			if ( 1 > lrnd( win_width / tds_tmpl.timebase
-						   * TDS_TMPL_POINTS_PER_DIV ) )
-				win_width = tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
-			is_win_width = SET;
-		}
-	}
+        if ( ! is_win_width )
+        {
+            win_width = fabs( tds_tmpl_get_cursor_distance( ) );
+            if ( 1 > lrnd( win_width / tds_tmpl.timebase
+                           * TDS_TMPL_POINTS_PER_DIV ) )
+                win_width = tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
+            is_win_width = SET;
+        }
+    }
 
-	/* Create a new window structure and append it to the list of windows */
+    /* Create a new window structure and append it to the list of windows */
 
-	if ( tds_tmpl.w == NULL )
-	{
-		tds_tmpl.w = w = WINDOW_P T_malloc( sizeof *w );
-		w->prev = NULL;
-	}
-	else
-	{
-		w = tds_tmpl.w;
-		while ( w->next != NULL )
-		{
-			num_windows++;
-			w = w->next;
-		}
-		w->next = WINDOW_P T_malloc( sizeof *w->next );
-		w->next->prev = w;
-		w = w->next;
-		w->is_start = UNSET;
-		w->is_width = UNSET;
-		num_windows++;
-	}
+    if ( tds_tmpl.w == NULL )
+    {
+        tds_tmpl.w = w = WINDOW_P T_malloc( sizeof *w );
+        w->prev = NULL;
+    }
+    else
+    {
+        w = tds_tmpl.w;
+        while ( w->next != NULL )
+        {
+            num_windows++;
+            w = w->next;
+        }
+        w->next = WINDOW_P T_malloc( sizeof *w->next );
+        w->next->prev = w;
+        w = w->next;
+        w->is_start = UNSET;
+        w->is_width = UNSET;
+        num_windows++;
+    }
 
-	w->next = NULL;
-	w->num = num_windows + WINDOW_START_NUMBER;
+    w->next = NULL;
+    w->num = num_windows + WINDOW_START_NUMBER;
 
-	if ( is_win_start )
-		w->start = win_start;
-	w->is_start = is_win_start;
+    if ( is_win_start )
+        w->start = win_start;
+    w->is_start = is_win_start;
 
-	if ( is_win_width )
-		w->width = win_width;
-	w->is_width = is_win_width;
+    if ( is_win_width )
+        w->width = win_width;
+    w->is_width = is_win_width;
 
-	/* Do all possible checks and, if necessary, readjust window position and
-	   width */
+    /* Do all possible checks and, if necessary, readjust window position and
+       width */
 
-	tds_tmpl_window_checks( w );
+    tds_tmpl_window_checks( w );
 
 
 #ifndef NO_GATED_MEASUREMENTS
-	/* If we're already running the experiment and only just now the very
-	   first window gets defined we have to switch on gated measurements
-	   (unless the device can't do gated measurements). */
+    /* If we're already running the experiment and only just now the very
+       first window gets defined we have to switch on gated measurements
+       (unless the device can't do gated measurements). */
 
-	if ( FSC2_MODE == EXPERIMENT && w == tds_tmpl.w )
-	{
-		tds_tmpl_set_gated_meas( SET );
-		tds_tmpl.gated_state = SET;
-	}
+    if ( FSC2_MODE == EXPERIMENT && w == tds_tmpl.w )
+    {
+        tds_tmpl_set_gated_meas( SET );
+        tds_tmpl.gated_state = SET;
+    }
 
-	tds_tmpl_set_tracking( w );
+    tds_tmpl_set_tracking( w );
 #endif
 
-	return vars_push( INT_VAR, w->num );
+    return vars_push( INT_VAR, w->num );
 }
 
 
@@ -345,92 +345,92 @@ Var_T *digitizer_define_window( Var_T * v )
 
 Var_T *digitizer_change_window( Var_T * v )
 {
-	Window_T *w;
-	long win_num;
-	double w1, w2;
+    Window_T *w;
+    long win_num;
+    double w1, w2;
 
 
-	if ( tds_tmpl.w == NULL )
-	{
-		print( FATAL, "No windows have been defined.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( tds_tmpl.w == NULL )
+    {
+        print( FATAL, "No windows have been defined.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing window ID.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing window ID.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windws */
+    /* During the experiment if the digitizer's keyboard isn't locked we
+       need to reread the timebase, record length and trigger position and
+       update and recheck the windws */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+    if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+        tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-	/* Figure out the window number and test if a window with this number
-	   exists at all */
+    /* Figure out the window number and test if a window with this number
+       exists at all */
 
-	win_num = get_strict_long( v, "window ID" );
-	v = vars_pop( v );
+    win_num = get_strict_long( v, "window ID" );
+    v = vars_pop( v );
 
-	w = tds_tmpl_get_window_by_number( win_num );
+    w = tds_tmpl_get_window_by_number( win_num );
 
-	/* During the experiment we also accept that there are no arguments for
-	   the position or the width and use the cursor positions instead */
+    /* During the experiment we also accept that there are no arguments for
+       the position or the width and use the cursor positions instead */
 
-	if ( FSC2_MODE != PREPARATION && v == NULL )
-	{
-		if ( FSC2_MODE == EXPERIMENT )
-		{
-			w1 = tds_tmpl_get_cursor_position( 1 );
-			w2 = tds_tmpl_get_cursor_position( 2 );
-			w->start = d_min( w1, w2 );
-		}
-	}
-	else
-	{
-		if ( v == NULL )
-		{
-			print( FATAL, "Missing window start position argument.\n" );
-			THROW( EXCEPTION );
-		}
-		w->start = get_double( v, "window start position" );
-		v = vars_pop( v );
-	}
+    if ( FSC2_MODE != PREPARATION && v == NULL )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+        {
+            w1 = tds_tmpl_get_cursor_position( 1 );
+            w2 = tds_tmpl_get_cursor_position( 2 );
+            w->start = d_min( w1, w2 );
+        }
+    }
+    else
+    {
+        if ( v == NULL )
+        {
+            print( FATAL, "Missing window start position argument.\n" );
+            THROW( EXCEPTION );
+        }
+        w->start = get_double( v, "window start position" );
+        v = vars_pop( v );
+    }
 
-	if ( FSC2_MODE != PREPARATION && v == NULL )
-	{
-		if ( FSC2_MODE == EXPERIMENT )
-		{
-			w->width = fabs( tds_tmpl_get_cursor_distance( ) );
-			if ( 1 > lrnd( w->width / tds_tmpl.timebase
-						   * TDS_TMPL_POINTS_PER_DIV ) )
-				w->width = tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
-		}
-	}
-	else
-	{
-		if ( v == NULL )
-		{
-			print( FATAL, "Missing window width argument.\n" );
-			THROW( EXCEPTION );
-		}
-		w->width = get_double(  v, "window with" );
-	}
+    if ( FSC2_MODE != PREPARATION && v == NULL )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+        {
+            w->width = fabs( tds_tmpl_get_cursor_distance( ) );
+            if ( 1 > lrnd( w->width / tds_tmpl.timebase
+                           * TDS_TMPL_POINTS_PER_DIV ) )
+                w->width = tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
+        }
+    }
+    else
+    {
+        if ( v == NULL )
+        {
+            print( FATAL, "Missing window width argument.\n" );
+            THROW( EXCEPTION );
+        }
+        w->width = get_double(  v, "window with" );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	/* Do all possible checks and, if necessary, readjust window position and
-	   width */
+    /* Do all possible checks and, if necessary, readjust window position and
+       width */
 
-	tds_tmpl_window_checks( w );
+    tds_tmpl_window_checks( w );
 #ifndef NO_GATED_MEASUREMENTS
-	tds_tmpl_set_tracking( w );
+    tds_tmpl_set_tracking( w );
 #endif
 
-	return vars_push( INT_VAR, win_num );
+    return vars_push( INT_VAR, win_num );
 }
 
 
@@ -439,49 +439,49 @@ Var_T *digitizer_change_window( Var_T * v )
 
 Var_T *digitizer_window_position( Var_T * v )
 {
-	Window_T *w;
+    Window_T *w;
 
 
-	if ( tds_tmpl.w == NULL )
-	{
-		print( FATAL, "No windows have been defined.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( tds_tmpl.w == NULL )
+    {
+        print( FATAL, "No windows have been defined.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing window ID.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing window ID.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+    /* During the experiment if the digitizer's keyboard isn't locked we
+       need to reread the timebase, record length and trigger position and
+       update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+    if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+        tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-	/* Figure out the window number and test if a window with this number
-	   exists at all */
+    /* Figure out the window number and test if a window with this number
+       exists at all */
 
-	w = tds_tmpl_get_window_by_number( get_strict_long( v, "window ID" ) );
+    w = tds_tmpl_get_window_by_number( get_strict_long( v, "window ID" ) );
 
-	if ( ( v = vars_pop( v ) ) == NULL )
-		return vars_push( FLOAT_VAR, w->start );
+    if ( ( v = vars_pop( v ) ) == NULL )
+        return vars_push( FLOAT_VAR, w->start );
 
-	w->start = get_double( v, "window start position" );
+    w->start = get_double( v, "window start position" );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	/* Do all possible checks and, if necessary, readjust window position and
-	   width */
+    /* Do all possible checks and, if necessary, readjust window position and
+       width */
 
-	tds_tmpl_window_checks( w );
+    tds_tmpl_window_checks( w );
 #ifndef NO_GATED_MEASUREMENTS
-	tds_tmpl_set_tracking( w );
+    tds_tmpl_set_tracking( w );
 #endif
 
-	return vars_push( FLOAT_VAR, w->start );
+    return vars_push( FLOAT_VAR, w->start );
 }
 
 
@@ -490,49 +490,49 @@ Var_T *digitizer_window_position( Var_T * v )
 
 Var_T *digitizer_window_width( Var_T * v )
 {
-	Window_T *w;
+    Window_T *w;
 
 
-	if ( tds_tmpl.w == NULL )
-	{
-		print( FATAL, "No windows have been defined.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( tds_tmpl.w == NULL )
+    {
+        print( FATAL, "No windows have been defined.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+    /* During the experiment if the digitizer's keyboard isn't locked we
+       need to reread the timebase, record length and trigger position and
+       update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+    if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+        tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-	/* Figure out the window number and test if a window with this number
-	   exists at all */
+    /* Figure out the window number and test if a window with this number
+       exists at all */
 
-	w = tds_tmpl_get_window_by_number( get_strict_long( v, "window ID" ) );
+    w = tds_tmpl_get_window_by_number( get_strict_long( v, "window ID" ) );
 
-	if ( ( v = vars_pop( v ) ) == NULL )
-		return vars_push( FLOAT_VAR, w->width );
+    if ( ( v = vars_pop( v ) ) == NULL )
+        return vars_push( FLOAT_VAR, w->width );
 
-	w->width = get_double( v, "window width" );
+    w->width = get_double( v, "window width" );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	/* Do all possible checks and, if necessary, readjust window position and
-	   width */
+    /* Do all possible checks and, if necessary, readjust window position and
+       width */
 
-	tds_tmpl_window_checks( w );
+    tds_tmpl_window_checks( w );
 #ifndef NO_GATED_MEASUREMENTS
-	tds_tmpl_set_tracking( w );
+    tds_tmpl_set_tracking( w );
 #endif
 
-	return vars_push( FLOAT_VAR, w->width );
+    return vars_push( FLOAT_VAR, w->width );
 }
 
 
@@ -544,39 +544,39 @@ Var_T *digitizer_window_width( Var_T * v )
 
 Var_T *digitizer_display_channel( Var_T * v )
 {
-	long channel;
+    long channel;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	do
-	{
-		channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-							   get_strict_long( v, "channel number" ), UNSET );
+    do
+    {
+        channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+                               get_strict_long( v, "channel number" ), UNSET );
 
-		if ( channel >= MAX_CHANNELS )
-		{
-			print( FATAL, "Invalid channel number: %ld.\n",
-				   tds_tmpl_translate_channel( TDS_TMPL_TO_GENERAL,
-											   channel, UNSET ) );
-			THROW( EXCEPTION );
-		}
+        if ( channel >= MAX_CHANNELS )
+        {
+            print( FATAL, "Invalid channel number: %ld.\n",
+                   tds_tmpl_translate_channel( TDS_TMPL_TO_GENERAL,
+                                               channel, UNSET ) );
+            THROW( EXCEPTION );
+        }
 
-		if( channel >= NUM_DISPLAYABLE_CHANNELS )
-		{
-			print( FATAL, "Channel \"%s\" can't be displayed.\n",
-				   TDS_TMPL_Channel_Names[ channel ] );
-			THROW( EXCEPTION );
-		}
+        if( channel >= NUM_DISPLAYABLE_CHANNELS )
+        {
+            print( FATAL, "Channel \"%s\" can't be displayed.\n",
+                   TDS_TMPL_Channel_Names[ channel ] );
+            THROW( EXCEPTION );
+        }
 
-		tds_tmpl.channels_in_use[ channel ] = SET;
-	} while ( ( v = vars_pop( v ) ) != NULL );
+        tds_tmpl.channels_in_use[ channel ] = SET;
+    } while ( ( v = vars_pop( v ) ) != NULL );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -585,95 +585,95 @@ Var_T *digitizer_display_channel( Var_T * v )
 
 Var_T *digitizer_timebase( Var_T * v )
 {
-	double timebase;
-	int TB = -1;
-	size_t i;
-	char *t;
+    double timebase;
+    int TB = -1;
+    size_t i;
+    char *t;
 
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+    /* During the experiment if the digitizer's keyboard isn't locked we
+       need to reread the timebase, record length and trigger position and
+       update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+    if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+        tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-	if ( v == NULL )
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! tds_tmpl.is_timebase )
-					no_query_possible( );
-				return vars_push( FLOAT_VAR, tds_tmpl.timebase );
+    if ( v == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! tds_tmpl.is_timebase )
+                    no_query_possible( );
+                return vars_push( FLOAT_VAR, tds_tmpl.timebase );
 
-			case TEST :
-				return vars_push( FLOAT_VAR, tds_tmpl.is_timebase ?
-								 tds_tmpl.timebase : TDS_TMPL_TEST_TIME_BASE );
+            case TEST :
+                return vars_push( FLOAT_VAR, tds_tmpl.is_timebase ?
+                                 tds_tmpl.timebase : TDS_TMPL_TEST_TIME_BASE );
 
-			case EXPERIMENT :
-				return vars_push( FLOAT_VAR, tds_tmpl.timebase );
-		}
+            case EXPERIMENT :
+                return vars_push( FLOAT_VAR, tds_tmpl.timebase );
+        }
 
-	timebase = get_double( v, "time base" );
+    timebase = get_double( v, "time base" );
 
-	if ( timebase <= 0 )
-	{
-		print( FATAL, "Invalid zero or negative time base: %s.\n",
-			   tds_tmpl_ptime( timebase ) );
-		THROW( EXCEPTION );
-	}
+    if ( timebase <= 0 )
+    {
+        print( FATAL, "Invalid zero or negative time base: %s.\n",
+               tds_tmpl_ptime( timebase ) );
+        THROW( EXCEPTION );
+    }
 
-	/* Pick the allowed timebase nearest to the user supplied value */
+    /* Pick the allowed timebase nearest to the user supplied value */
 
-	for ( i = 0; i < NUM_ELEMS( tb ) - 1; i++ )
-		if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
-		{
-			TB = i +
-				   ( ( tb[ i ] / timebase > timebase / tb[ i + 1 ] ) ? 0 : 1 );
-			break;
-		}
+    for ( i = 0; i < NUM_ELEMS( tb ) - 1; i++ )
+        if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
+        {
+            TB = i +
+                   ( ( tb[ i ] / timebase > timebase / tb[ i + 1 ] ) ? 0 : 1 );
+            break;
+        }
 
-	if ( TB >= 0 &&                                         /* value found ? */
-		 fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )  /* error > 1% ?  */
-	{
-		t = T_strdup( tds_tmpl_ptime( timebase ) );
-		print( WARN, "Can't set timebase to %s, using %s instead.\n",
-			   t, tds_tmpl_ptime( tb[ TB ] ) );
-		T_free( t );
-	}
+    if ( TB >= 0 &&                                         /* value found ? */
+         fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )  /* error > 1% ?  */
+    {
+        t = T_strdup( tds_tmpl_ptime( timebase ) );
+        print( WARN, "Can't set timebase to %s, using %s instead.\n",
+               t, tds_tmpl_ptime( tb[ TB ] ) );
+        T_free( t );
+    }
 
-	if ( TB < 0 )                                   /* not found yet ? */
-	{
-		t = T_strdup( tds_tmpl_ptime( timebase ) );
+    if ( TB < 0 )                                   /* not found yet ? */
+    {
+        t = T_strdup( tds_tmpl_ptime( timebase ) );
 
-		if ( timebase < tb[ 0 ] )
-		{
-			TB = 0;
-			print( WARN, "Timebase of %s is too low, using %s instead.\n",
-				   t, tds_tmpl_ptime( tb[ TB ] ) );
-		}
-		else
-		{
-		    TB = NUM_ELEMS( tb ) - 1;
-			print( WARN, "Timebase of %s is too large, using %s instead.\n",
-				   t, tds_tmpl_ptime( tb[ TB ] ) );
-		}
+        if ( timebase < tb[ 0 ] )
+        {
+            TB = 0;
+            print( WARN, "Timebase of %s is too low, using %s instead.\n",
+                   t, tds_tmpl_ptime( tb[ TB ] ) );
+        }
+        else
+        {
+            TB = NUM_ELEMS( tb ) - 1;
+            print( WARN, "Timebase of %s is too large, using %s instead.\n",
+                   t, tds_tmpl_ptime( tb[ TB ] ) );
+        }
 
-		T_free( t );
-	}
+        T_free( t );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	tds_tmpl.is_timebase = SET;
+    tds_tmpl.is_timebase = SET;
 
-	if ( FSC2_MODE == EXPERIMENT )
-		tds_tmpl_set_timebase( tb[ TB ] );
+    if ( FSC2_MODE == EXPERIMENT )
+        tds_tmpl_set_timebase( tb[ TB ] );
 
-	tds_tmpl.timebase = tb[ TB ];
+    tds_tmpl.timebase = tb[ TB ];
 
-	tds_tmpl_state_check( tb[ TB ], tds_tmpl.rec_len, tds_tmpl.trig_pos );
+    tds_tmpl_state_check( tb[ TB ], tds_tmpl.rec_len, tds_tmpl.trig_pos );
 
-	return vars_push( FLOAT_VAR, tds_tmpl.timebase );
+    return vars_push( FLOAT_VAR, tds_tmpl.timebase );
 }
 
 
@@ -682,18 +682,18 @@ Var_T *digitizer_timebase( Var_T * v )
 
 Var_T *digitizer_time_per_point( Var_T * v  UNUSED_ARG )
 {
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+    /* During the experiment if the digitizer's keyboard isn't locked we
+       need to reread the timebase, record length and trigger position and
+       update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+    if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+        tds_tmpl_state_check( 0.0, 0, 0.0 );
 
 
-	if ( FSC2_MODE == PREPARATION && ! tds_tmpl.is_timebase )
-		no_query_possible( );
+    if ( FSC2_MODE == PREPARATION && ! tds_tmpl.is_timebase )
+        no_query_possible( );
 
-	return vars_push( FLOAT_VAR, tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV );
+    return vars_push( FLOAT_VAR, tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV );
 }
 
 
@@ -702,62 +702,62 @@ Var_T *digitizer_time_per_point( Var_T * v  UNUSED_ARG )
 
 Var_T *digitizer_sensitivity( Var_T * v )
 {
-	long channel;
-	double sens;
+    long channel;
+    double sens;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-							   get_strict_long( v, "channel number" ), UNSET );
+    channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+                               get_strict_long( v, "channel number" ), UNSET );
 
-	if ( channel >= NUM_NORMAL_CHANNELS )
-	{
-		print( FATAL, "Can't set or obtain sensitivity for channel %s.\n",
-			   TDS_TMPL_Channel_Names[ channel ] );
-		THROW( EXCEPTION );
-	}
+    if ( channel >= NUM_NORMAL_CHANNELS )
+    {
+        print( FATAL, "Can't set or obtain sensitivity for channel %s.\n",
+               TDS_TMPL_Channel_Names[ channel ] );
+        THROW( EXCEPTION );
+    }
 
-	if ( ( v = vars_pop( v ) ) == NULL )
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! tds_tmpl.is_sens[ channel ] )
-					no_query_possible( );
-				return vars_push( FLOAT_VAR, tds_tmpl.sens[ channel ] );
+    if ( ( v = vars_pop( v ) ) == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! tds_tmpl.is_sens[ channel ] )
+                    no_query_possible( );
+                return vars_push( FLOAT_VAR, tds_tmpl.sens[ channel ] );
 
-			case TEST :
-				return vars_push( FLOAT_VAR, tds_tmpl.is_sens[ channel ] ?
-								  tds_tmpl.sens[ channel ] :
-								  TDS_TMPL_TEST_SENSITIVITY );
+            case TEST :
+                return vars_push( FLOAT_VAR, tds_tmpl.is_sens[ channel ] ?
+                                  tds_tmpl.sens[ channel ] :
+                                  TDS_TMPL_TEST_SENSITIVITY );
 
-			case EXPERIMENT :
-				tds_tmpl.sens[ channel ] = tds_tmpl_get_sens( channel );
-				tds_tmpl.is_sens[ channel ] = SET;
-				return vars_push( FLOAT_VAR, tds_tmpl.sens[ channel ] );
-		}
+            case EXPERIMENT :
+                tds_tmpl.sens[ channel ] = tds_tmpl_get_sens( channel );
+                tds_tmpl.is_sens[ channel ] = SET;
+                return vars_push( FLOAT_VAR, tds_tmpl.sens[ channel ] );
+        }
 
-	sens = get_double( v, "sensitivity" );
+    sens = get_double( v, "sensitivity" );
 
-	if ( sens < max_sens || sens > min_sens )
-	{
-		print( FATAL, "Sensitivity setting is out of range.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( sens < max_sens || sens > min_sens )
+    {
+        print( FATAL, "Sensitivity setting is out of range.\n" );
+        THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE == EXPERIMENT )
-		tds_tmpl_set_sens( channel, sens );
+    if ( FSC2_MODE == EXPERIMENT )
+        tds_tmpl_set_sens( channel, sens );
 
-	tds_tmpl.sens[ channel ] = sens;
-	tds_tmpl.is_sens[ channel ] = SET;
+    tds_tmpl.sens[ channel ] = sens;
+    tds_tmpl.is_sens[ channel ] = SET;
 
-	return vars_push( FLOAT_VAR, tds_tmpl.sens[ channel ] );
+    return vars_push( FLOAT_VAR, tds_tmpl.sens[ channel ] );
 }
 
 
@@ -766,72 +766,72 @@ Var_T *digitizer_sensitivity( Var_T * v )
 
 Var_T *digitizer_num_averages( Var_T * v )
 {
-	long num_avg;
+    long num_avg;
 
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+    /* During the experiment if the digitizer's keyboard isn't locked we
+       need to reread the timebase, record length and trigger position and
+       update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+    if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+        tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-	if ( v == NULL )
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! tds_tmpl.is_num_avg )
-					no_query_possible( );
-				return vars_push( INT_VAR, tds_tmpl.num_avg );
+    if ( v == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! tds_tmpl.is_num_avg )
+                    no_query_possible( );
+                return vars_push( INT_VAR, tds_tmpl.num_avg );
 
-			case TEST :
-				return vars_push( INT_VAR, tds_tmpl.is_num_avg ?
-								  tds_tmpl.num_avg : TDS_TMPL_TEST_NUM_AVG );
+            case TEST :
+                return vars_push( INT_VAR, tds_tmpl.is_num_avg ?
+                                  tds_tmpl.num_avg : TDS_TMPL_TEST_NUM_AVG );
 
-			case EXPERIMENT :
-				tds_tmpl.num_avg = tds_tmpl_get_num_avg( );
-				return vars_push( INT_VAR, tds_tmpl.num_avg );
-		}
+            case EXPERIMENT :
+                tds_tmpl.num_avg = tds_tmpl_get_num_avg( );
+                return vars_push( INT_VAR, tds_tmpl.num_avg );
+        }
 
-	num_avg = get_long( v, "number of averages" );
+    num_avg = get_long( v, "number of averages" );
 
-	if ( num_avg == 0 )
-	{
-		if ( FSC2_MODE != EXPERIMENT )
-		{
-			print( FATAL, "Can't do zero averages. If you want to set sample "
-				   "mode specify 1 as number of averages.\n" );
-			THROW( EXCEPTION );
-		}
+    if ( num_avg == 0 )
+    {
+        if ( FSC2_MODE != EXPERIMENT )
+        {
+            print( FATAL, "Can't do zero averages. If you want to set sample "
+                   "mode specify 1 as number of averages.\n" );
+            THROW( EXCEPTION );
+        }
 
-		print( SEVERE, "Can't do zero averages. Switching off averaging.\n" );
-		num_avg = 1;
+        print( SEVERE, "Can't do zero averages. Switching off averaging.\n" );
+        num_avg = 1;
 
-	}
-	else if ( num_avg < 0 )
-	{
-		if ( FSC2_MODE != EXPERIMENT )
-		{
-			print( FATAL, "Invalid negative number of averages: %ld.\n",
-				   num_avg );
-			THROW( EXCEPTION );
-		}
+    }
+    else if ( num_avg < 0 )
+    {
+        if ( FSC2_MODE != EXPERIMENT )
+        {
+            print( FATAL, "Invalid negative number of averages: %ld.\n",
+                   num_avg );
+            THROW( EXCEPTION );
+        }
 
-		print( SEVERE, "Invalid negative number of averages: %ld.\n",
-			   num_avg );
-		tds_tmpl.num_avg = tds_tmpl_get_num_avg( );
-		return vars_push( INT_VAR, tds_tmpl.num_avg );
-	}
+        print( SEVERE, "Invalid negative number of averages: %ld.\n",
+               num_avg );
+        tds_tmpl.num_avg = tds_tmpl_get_num_avg( );
+        return vars_push( INT_VAR, tds_tmpl.num_avg );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE == EXPERIMENT )
-		tds_tmpl_set_num_avg( num_avg );
+    if ( FSC2_MODE == EXPERIMENT )
+        tds_tmpl_set_num_avg( num_avg );
 
-	tds_tmpl.num_avg = num_avg;
-	tds_tmpl.is_num_avg = SET;
+    tds_tmpl.num_avg = num_avg;
+    tds_tmpl.is_num_avg = SET;
 
-	return vars_push( INT_VAR, tds_tmpl.num_avg );
+    return vars_push( INT_VAR, tds_tmpl.num_avg );
 }
 
 
@@ -843,79 +843,79 @@ Var_T *digitizer_num_averages( Var_T * v )
 
 Var_T *digitizer_record_length( Var_T * v )
 {
-	long rec_len;
-	int i;
+    long rec_len;
+    int i;
 
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+    /* During the experiment if the digitizer's keyboard isn't locked we
+       need to reread the timebase, record length and trigger position and
+       update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+    if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+        tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-	if ( v == NULL )
-	{
+    if ( v == NULL )
+    {
 
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! tds_tmpl.is_rec_len )
-					no_query_possible( );
-				return vars_push( INT_VAR, tds_tmpl.rec_len );
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! tds_tmpl.is_rec_len )
+                    no_query_possible( );
+                return vars_push( INT_VAR, tds_tmpl.rec_len );
 
-			case TEST :
-				return vars_push( INT_VAR, tds_tmpl.is_rec_len ?
-								  tds_tmpl.rec_len : TDS_TMPL_TEST_REC_LEN );
+            case TEST :
+                return vars_push( INT_VAR, tds_tmpl.is_rec_len ?
+                                  tds_tmpl.rec_len : TDS_TMPL_TEST_REC_LEN );
 
-			case EXPERIMENT :
-				return vars_push( INT_VAR, tds_tmpl.rec_len );
-		}
-	}
+            case EXPERIMENT :
+                return vars_push( INT_VAR, tds_tmpl.rec_len );
+        }
+    }
 
-	rec_len = get_long( v, "record length" );
+    rec_len = get_long( v, "record length" );
 
-	i = 0;
-	while ( 1 )
-	{
-		if ( record_lengths[ i ] == 0 )
-		{
-			if ( FSC2_MODE == EXPERIMENT )
-			{
-				print( FATAL, "Record length %ld too long.\n", rec_len );
-				THROW( EXCEPTION );
-			}
+    i = 0;
+    while ( 1 )
+    {
+        if ( record_lengths[ i ] == 0 )
+        {
+            if ( FSC2_MODE == EXPERIMENT )
+            {
+                print( FATAL, "Record length %ld too long.\n", rec_len );
+                THROW( EXCEPTION );
+            }
 
-			print( SEVERE, "Record length %ld too long, using %ld instead.\n",
-				   rec_len, record_lengths[ i  - 1] );
-			rec_len = record_lengths[ i  - 1];
-		}
+            print( SEVERE, "Record length %ld too long, using %ld instead.\n",
+                   rec_len, record_lengths[ i  - 1] );
+            rec_len = record_lengths[ i  - 1];
+        }
 
-		if ( rec_len == record_lengths[ i ] )
-			break;
+        if ( rec_len == record_lengths[ i ] )
+            break;
 
-		if ( rec_len < record_lengths[ i ] )
-		{
-			print( SEVERE, "Can't set record length to %ld, using next larger "
-				   "allowed value of %ld instead.\n",
-				   rec_len, record_lengths[ i ] );
-			break;
-		}
+        if ( rec_len < record_lengths[ i ] )
+        {
+            print( SEVERE, "Can't set record length to %ld, using next larger "
+                   "allowed value of %ld instead.\n",
+                   rec_len, record_lengths[ i ] );
+            break;
+        }
 
-		i++;
-	}
+        i++;
+    }
 
-	tds_tmpl.is_rec_len = SET;
+    tds_tmpl.is_rec_len = SET;
 
-	if ( FSC2_MODE == EXPERIMENT )
-		tds_tmpl_set_record_length( record_lengths[ i ] );
-	else
-		tds_tmpl.rec_len = record_lengths[ i ];
+    if ( FSC2_MODE == EXPERIMENT )
+        tds_tmpl_set_record_length( record_lengths[ i ] );
+    else
+        tds_tmpl.rec_len = record_lengths[ i ];
 
-	tds_tmpl_state_check( tds_tmpl.timebase, record_lengths[ i ],
-						 tds_tmpl.trig_pos );
+    tds_tmpl_state_check( tds_tmpl.timebase, record_lengths[ i ],
+                         tds_tmpl.trig_pos );
 
-	return vars_push( INT_VAR, tds_tmpl.rec_len );
+    return vars_push( INT_VAR, tds_tmpl.rec_len );
 }
 
 
@@ -927,58 +927,58 @@ Var_T *digitizer_record_length( Var_T * v )
 
 Var_T *digitizer_trigger_position( Var_T * v )
 {
-	double trig_pos;
+    double trig_pos;
 
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+    /* During the experiment if the digitizer's keyboard isn't locked we
+       need to reread the timebase, record length and trigger position and
+       update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+    if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+        tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-	if ( v == NULL )
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! tds_tmpl.is_trig_pos )
-					no_query_possible( );
-				return vars_push( FLOAT_VAR, tds_tmpl.trig_pos );
+    if ( v == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! tds_tmpl.is_trig_pos )
+                    no_query_possible( );
+                return vars_push( FLOAT_VAR, tds_tmpl.trig_pos );
 
-			case TEST :
-				return vars_push( FLOAT_VAR, tds_tmpl.is_trig_pos ?
-								  tds_tmpl.trig_pos : TDS_TMPL_TEST_TRIG_POS );
+            case TEST :
+                return vars_push( FLOAT_VAR, tds_tmpl.is_trig_pos ?
+                                  tds_tmpl.trig_pos : TDS_TMPL_TEST_TRIG_POS );
 
-			case EXPERIMENT :
-				return vars_push( FLOAT_VAR, tds_tmpl.trig_pos );
-		}
+            case EXPERIMENT :
+                return vars_push( FLOAT_VAR, tds_tmpl.trig_pos );
+        }
 
-	trig_pos = get_double( v, "trigger position" );
+    trig_pos = get_double( v, "trigger position" );
 
-	if ( trig_pos < 0.0 || trig_pos > 1.0 )
-	{
-		if ( FSC2_MODE == EXPERIMENT )
-		{
-			print( FATAL, "Invalid trigger position %f, must be in interval "
-				   "[0,1].\n", trig_pos );
-			THROW( EXCEPTION );
-		}
+    if ( trig_pos < 0.0 || trig_pos > 1.0 )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+        {
+            print( FATAL, "Invalid trigger position %f, must be in interval "
+                   "[0,1].\n", trig_pos );
+            THROW( EXCEPTION );
+        }
 
-		print( SEVERE, "Invalid trigger position %f, using %f instead.\n",
-			   trig_pos, trig_pos < 0 ? 0.0 : 1.0 );
-		trig_pos = trig_pos < 0 ? 0.0 : 1.0;
-	}
+        print( SEVERE, "Invalid trigger position %f, using %f instead.\n",
+               trig_pos, trig_pos < 0 ? 0.0 : 1.0 );
+        trig_pos = trig_pos < 0 ? 0.0 : 1.0;
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	tds_tmpl.is_trig_pos = SET;
+    tds_tmpl.is_trig_pos = SET;
 
-	if ( FSC2_MODE  == EXPERIMENT )
-		tds_tmpl_set_trigger_pos( trig_pos );
+    if ( FSC2_MODE  == EXPERIMENT )
+        tds_tmpl_set_trigger_pos( trig_pos );
 
-	tds_tmpl_state_check( tds_tmpl.timebase, tds_tmpl.rec_len, trig_pos );
+    tds_tmpl_state_check( tds_tmpl.timebase, tds_tmpl.rec_len, trig_pos );
 
-	return vars_push( FLOAT_VAR, tds_tmpl.trig_pos );
+    return vars_push( FLOAT_VAR, tds_tmpl.trig_pos );
 }
 
 
@@ -991,83 +991,83 @@ Var_T *digitizer_trigger_position( Var_T * v )
 
 Var_T *digitizer_trigger_delay( Var_T * v )
 {
-	double delay;
-	double trig_pos = 0.0;
-	long rec_len = tds_tmpl.is_rec_len ?
-		           tds_tmpl.rec_len : TDS_TMPL_TEST_REC_LEN;
-	double ticks = ( tds_tmpl.is_timebase ?
-					 tds_tmpl.timebase : TDS_TMPL_TEST_TIME_BASE )
-		             / TDS_TMPL_POINTS_PER_DIV;
+    double delay;
+    double trig_pos = 0.0;
+    long rec_len = tds_tmpl.is_rec_len ?
+                   tds_tmpl.rec_len : TDS_TMPL_TEST_REC_LEN;
+    double ticks = ( tds_tmpl.is_timebase ?
+                     tds_tmpl.timebase : TDS_TMPL_TEST_TIME_BASE )
+                     / TDS_TMPL_POINTS_PER_DIV;
 
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+    /* During the experiment if the digitizer's keyboard isn't locked we
+       need to reread the timebase, record length and trigger position and
+       update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+    if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+        tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-	if ( v == NULL )
-	{
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! tds_tmpl.is_trig_pos || ! tds_tmpl.is_timebase ||
-					 ! tds_tmpl.is_rec_len )
-					no_query_possible( );
-				trig_pos = tds_tmpl.trig_pos;
-				break;
+    if ( v == NULL )
+    {
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! tds_tmpl.is_trig_pos || ! tds_tmpl.is_timebase ||
+                     ! tds_tmpl.is_rec_len )
+                    no_query_possible( );
+                trig_pos = tds_tmpl.trig_pos;
+                break;
 
-			case TEST :
-				trig_pos = tds_tmpl.is_trig_pos ?
-						   tds_tmpl.trig_pos : TDS_TMPL_TEST_TRIG_POS;
-				break;
+            case TEST :
+                trig_pos = tds_tmpl.is_trig_pos ?
+                           tds_tmpl.trig_pos : TDS_TMPL_TEST_TRIG_POS;
+                break;
 
-			case EXPERIMENT :
-				trig_pos = tds_tmpl.trig_pos;
-				break;
-		}
+            case EXPERIMENT :
+                trig_pos = tds_tmpl.trig_pos;
+                break;
+        }
 
-		return vars_push( FLOAT_VAR, trig_pos * ticks * rec_len );
-	}
+        return vars_push( FLOAT_VAR, trig_pos * ticks * rec_len );
+    }
 
-	delay = get_double( v, "trigger delay" );
+    delay = get_double( v, "trigger delay" );
 
-	if ( delay < 0.0 )
-	{
-		print( FATAL, "Invalid negative trigger delay (post-trigger isn't "
-			   "possible with this oscilloscope).\n" );
-		THROW( EXCEPTION );
-	}
+    if ( delay < 0.0 )
+    {
+        print( FATAL, "Invalid negative trigger delay (post-trigger isn't "
+               "possible with this oscilloscope).\n" );
+        THROW( EXCEPTION );
+    }
 
-	trig_pos = delay * ticks / rec_len;
+    trig_pos = delay * ticks / rec_len;
 
-	if ( trig_pos > 1.0 )
-	{
-		if ( FSC2_MODE == EXPERIMENT )
-		{
-			print( FATAL, "Trigger delay of %f s too long, can't be longer "
-				   "than %f with current settings for timebase and record "
-				   "length.\n", trig_pos, ticks * rec_len );
-			THROW( EXCEPTION );
-		}
+    if ( trig_pos > 1.0 )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+        {
+            print( FATAL, "Trigger delay of %f s too long, can't be longer "
+                   "than %f with current settings for timebase and record "
+                   "length.\n", trig_pos, ticks * rec_len );
+            THROW( EXCEPTION );
+        }
 
-		print( SEVERE, "Trigger delay of %f s too large , using maximum "
-			   "currently possible delay of %f s instead.\n",
-			   delay, delay, ticks * rec_len );
-		trig_pos = 1.0;
-	}
+        print( SEVERE, "Trigger delay of %f s too large , using maximum "
+               "currently possible delay of %f s instead.\n",
+               delay, delay, ticks * rec_len );
+        trig_pos = 1.0;
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	tds_tmpl.is_trig_pos = SET;
+    tds_tmpl.is_trig_pos = SET;
 
-	if ( FSC2_MODE  == EXPERIMENT )
-		tds_tmpl_set_trigger_pos( trig_pos );
+    if ( FSC2_MODE  == EXPERIMENT )
+        tds_tmpl_set_trigger_pos( trig_pos );
 
-	tds_tmpl_state_check( tds_tmpl.timebase, tds_tmpl.rec_len, trig_pos );
+    tds_tmpl_state_check( tds_tmpl.timebase, tds_tmpl.rec_len, trig_pos );
 
-	return vars_push( FLOAT_VAR, delay );
+    return vars_push( FLOAT_VAR, delay );
 }
 
 
@@ -1082,17 +1082,17 @@ Var_T *digitizer_trigger_delay( Var_T * v )
 
 Var_T *digitizer_meas_channel_ok( Var_T * v )
 {
-	long channel;
+    long channel;
 
 
-	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-										get_strict_long( v, "channel number" ),
-										v->next != NULL );
+    channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+                                        get_strict_long( v, "channel number" ),
+                                        v->next != NULL );
 
-	if ( channel < 0 || channel >= NUM_DISPLAYABLE_CHANNELS )
-		return vars_push( INT_VAR, 0L );
-	else
-		return vars_push( INT_VAR, 1L );
+    if ( channel < 0 || channel >= NUM_DISPLAYABLE_CHANNELS )
+        return vars_push( INT_VAR, 0L );
+    else
+        return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1103,76 +1103,76 @@ Var_T *digitizer_meas_channel_ok( Var_T * v )
 
 Var_T *digitizer_trigger_channel( Var_T * v )
 {
-	long in_channel;
-	long channel;
+    long in_channel;
+    long channel;
 
 
-	if ( v == NULL )
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! tds_tmpl.is_trigger_channel )
-					no_query_possible( );
-				return vars_push( INT_VAR, tds_tmpl_translate_channel(
-									  TDS_TMPL_TO_GENERAL,
-									  tds_tmpl.trigger_channel, UNSET ) );
+    if ( v == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! tds_tmpl.is_trigger_channel )
+                    no_query_possible( );
+                return vars_push( INT_VAR, tds_tmpl_translate_channel(
+                                      TDS_TMPL_TO_GENERAL,
+                                      tds_tmpl.trigger_channel, UNSET ) );
 
-			case TEST :
-				return vars_push( INT_VAR, tds_tmpl_translate_channel(
-									  TDS_TMPL_TO_GENERAL,
-									  tds_tmpl.is_trigger_channel ?
-									  tds_tmpl.trigger_channel :
-									  TDS_TMPL_TEST_TRIG_CHANNEL, UNSET ) );
+            case TEST :
+                return vars_push( INT_VAR, tds_tmpl_translate_channel(
+                                      TDS_TMPL_TO_GENERAL,
+                                      tds_tmpl.is_trigger_channel ?
+                                      tds_tmpl.trigger_channel :
+                                      TDS_TMPL_TEST_TRIG_CHANNEL, UNSET ) );
 
-			case EXPERIMENT :
-				return vars_push( INT_VAR, tds_tmpl_translate_channel(
-									  TDS_TMPL_TO_GENERAL,
-									  tds_tmpl_get_trigger_channel( ),
-									  UNSET ) );
-		}
+            case EXPERIMENT :
+                return vars_push( INT_VAR, tds_tmpl_translate_channel(
+                                      TDS_TMPL_TO_GENERAL,
+                                      tds_tmpl_get_trigger_channel( ),
+                                      UNSET ) );
+        }
 
-	in_channel = get_strict_long( v, "channel number" );
-	channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL, in_channel,
-										  UNSET );
+    in_channel = get_strict_long( v, "channel number" );
+    channel = tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL, in_channel,
+                                          UNSET );
 
     switch ( channel )
     {
         case TDS_TMPL_CH1 :
-		case TDS_TMPL_CH2 :
+        case TDS_TMPL_CH2 :
 #if defined TDS_TMPL_CH3
-		case TDS_TMPL_CH3 :
+        case TDS_TMPL_CH3 :
 #endif
 #if defined TDS_TMPL_CH4
-		case TDS_TMPL_CH4 :
+        case TDS_TMPL_CH4 :
 #endif
 #if defined TDS_TMPL_AUX
-		case TDS_TMPL_AUX :
+        case TDS_TMPL_AUX :
 #endif
 #if defined TDS_TMPL_AUX1
-		case TDS_TMPL_AUX1 :
+        case TDS_TMPL_AUX1 :
 #endif
 #if defined TDS_TMPL_AUX2
-		case TDS_TMPL_AUX2 :
+        case TDS_TMPL_AUX2 :
 #endif
-		case TDS_TMPL_LIN :
-			if ( FSC2_MODE == EXPERIMENT )
-				tds_tmpl_set_trigger_channel( channel );
-			tds_tmpl.trigger_channel = channel;
-			tds_tmpl.is_trigger_channel = SET;
+        case TDS_TMPL_LIN :
+            if ( FSC2_MODE == EXPERIMENT )
+                tds_tmpl_set_trigger_channel( channel );
+            tds_tmpl.trigger_channel = channel;
+            tds_tmpl.is_trigger_channel = SET;
             break;
 
-		default :
-			if ( channel >= 0 && channel < MAX_CHANNELS )
-				print( FATAL, "Channel \"%s\" can't be used as trigger "
-					   "channel.\n", TDS_TMPL_Channel_Names[ channel ] );
-			else
-				print( FATAL, "Invalid channel number %ld.\n", in_channel );
-			THROW( EXCEPTION );
+        default :
+            if ( channel >= 0 && channel < MAX_CHANNELS )
+                print( FATAL, "Channel \"%s\" can't be used as trigger "
+                       "channel.\n", TDS_TMPL_Channel_Names[ channel ] );
+            else
+                print( FATAL, "Invalid channel number %ld.\n", in_channel );
+            THROW( EXCEPTION );
     }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1181,10 +1181,10 @@ Var_T *digitizer_trigger_channel( Var_T * v )
 
 Var_T *digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 {
-	if ( FSC2_MODE == EXPERIMENT )
-		tds_tmpl_start_acquisition( );
+    if ( FSC2_MODE == EXPERIMENT )
+        tds_tmpl_start_acquisition( );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1193,7 +1193,7 @@ Var_T *digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 
 Var_T *digitizer_get_area( Var_T * v )
 {
-	return get_area( v, tds_tmpl.w != NULL ? SET : UNSET );
+    return get_area( v, tds_tmpl.w != NULL ? SET : UNSET );
 }
 
 
@@ -1202,7 +1202,7 @@ Var_T *digitizer_get_area( Var_T * v )
 
 Var_T *digitizer_get_area_fast( Var_T * v )
 {
-	return get_area( v, UNSET );
+    return get_area( v, UNSET );
 }
 
 
@@ -1210,160 +1210,160 @@ Var_T *digitizer_get_area_fast( Var_T * v )
  *----------------------------------------------------*/
 
 static Var_T *get_area( Var_T * v,
-						bool    use_cursor )
+                        bool    use_cursor )
 {
-	Window_T *w;
-	int ch;
-	Var_T *cv;
-	Var_T *ret = NULL;
-	ssize_t win_count = 0;
-	ssize_t j;
-	long i;
+    Window_T *w;
+    int ch;
+    Var_T *cv;
+    Var_T *ret = NULL;
+    ssize_t win_count = 0;
+    ssize_t j;
+    long i;
 
 
-	/* The first variable got to be a channel number */
+    /* The first variable got to be a channel number */
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-							   get_strict_long( v, "channel number" ), UNSET );
+    ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+                               get_strict_long( v, "channel number" ), UNSET );
 
-	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
-	{
-		print( FATAL, "Invalid channel %s.\n", TDS_TMPL_Channel_Names[ ch ] );
-		THROW( EXCEPTION );
-	}
+    if ( ch >= NUM_DISPLAYABLE_CHANNELS )
+    {
+        print( FATAL, "Invalid channel %s.\n", TDS_TMPL_Channel_Names[ ch ] );
+        THROW( EXCEPTION );
+    }
 
-	tds_tmpl.channels_in_use[ ch ] = SET;
+    tds_tmpl.channels_in_use[ ch ] = SET;
 
-	/* Now check the variables and count how many window handles we got */
+    /* Now check the variables and count how many window handles we got */
 
-	for ( cv = v = vars_pop( v ); cv != NULL; cv = cv->next )
-	{
-		vars_check( cv, INT_VAR | INT_ARR );
+    for ( cv = v = vars_pop( v ); cv != NULL; cv = cv->next )
+    {
+        vars_check( cv, INT_VAR | INT_ARR );
 
-		if ( cv->type == INT_VAR )
-			win_count++;
-		else
-		{
-			if ( cv->len == 0 )
-			{
-				print( FATAL, "Length of array passed as argument #%d is "
-					   "not known.\n", win_count + 1 );
-				THROW( EXCEPTION );
-			}
-			win_count += cv->len;
-		}
-	}
+        if ( cv->type == INT_VAR )
+            win_count++;
+        else
+        {
+            if ( cv->len == 0 )
+            {
+                print( FATAL, "Length of array passed as argument #%d is "
+                       "not known.\n", win_count + 1 );
+                THROW( EXCEPTION );
+            }
+            win_count += cv->len;
+        }
+    }
 
-	/* Complain when we got something that could be a window handle but no
-	   windows have been defined */
+    /* Complain when we got something that could be a window handle but no
+       windows have been defined */
 
-	if ( win_count > 0 && tds_tmpl.w == NULL )
-	{
-		print( FATAL, "No measurement windows have been defined.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( win_count > 0 && tds_tmpl.w == NULL )
+    {
+        print( FATAL, "No measurement windows have been defined.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* If there's more than one window handle we must return an array */
+    /* If there's more than one window handle we must return an array */
 
-	if ( win_count > 1 )
-		ret = vars_push( FLOAT_ARR, NULL, ( long ) win_count );
+    if ( win_count > 1 )
+        ret = vars_push( FLOAT_ARR, NULL, ( long ) win_count );
 
-	/* When we're still in the test phase we got to return a dummy value */
+    /* When we're still in the test phase we got to return a dummy value */
 
-	if ( FSC2_MODE != EXPERIMENT )
-	{
-		if ( win_count == 0 )
-			return vars_push( FLOAT_VAR, 1.234e-8 );
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        if ( win_count == 0 )
+            return vars_push( FLOAT_VAR, 1.234e-8 );
 
-		for ( i = 0; i < win_count; v = vars_pop( v ) )
-		{
-			if ( v->type == INT_VAR )
-			{
-				w = tds_tmpl_get_window_by_number(
-									   get_strict_long( v, "window number" ) );
+        for ( i = 0; i < win_count; v = vars_pop( v ) )
+        {
+            if ( v->type == INT_VAR )
+            {
+                w = tds_tmpl_get_window_by_number(
+                                       get_strict_long( v, "window number" ) );
 
-				if ( win_count == 1 )
-					return vars_push( FLOAT_VAR, 1.234e-8 );
+                if ( win_count == 1 )
+                    return vars_push( FLOAT_VAR, 1.234e-8 );
 
-				ret->val.dpnt[ i++ ] = 1.234e-8;
-				continue;
-			}
+                ret->val.dpnt[ i++ ] = 1.234e-8;
+                continue;
+            }
 
-			for ( j = 0; j < v->len; j++ )
-			{
-				w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
+            for ( j = 0; j < v->len; j++ )
+            {
+                w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
 
-				/* Take care of the hopefully rather unlikely situation that
-				   we've got an array of length 1 */
+                /* Take care of the hopefully rather unlikely situation that
+                   we've got an array of length 1 */
 
-				if ( win_count == 1 )
-					return vars_push( FLOAT_VAR, 1.234e-8 );
+                if ( win_count == 1 )
+                    return vars_push( FLOAT_VAR, 1.234e-8 );
 
-				ret->val.dpnt[ i++ ] = 1.234e-8;
-			}
-		}
+                ret->val.dpnt[ i++ ] = 1.234e-8;
+            }
+        }
 
-		return ret;
-	}
+        return ret;
+    }
 
-	/* Now comes the part that gets run in a real experiment. First we
-	   deal with the case that there's no window number in the arguments,
-	   here we return the area of the whole curve. Don't forget to reread
-	   the digitizer settings if the keyboard isn't locked. */
+    /* Now comes the part that gets run in a real experiment. First we
+       deal with the case that there's no window number in the arguments,
+       here we return the area of the whole curve. Don't forget to reread
+       the digitizer settings if the keyboard isn't locked. */
 
-	if ( win_count == 0 )
-	{
-		if ( ! tds_tmpl.lock_state )
-			tds_tmpl_state_check( 0.0, 0, 0.0 );
-		return vars_push( FLOAT_VAR,
-						  tds_tmpl_get_area( ch, NULL, use_cursor ) );
-	}
+    if ( win_count == 0 )
+    {
+        if ( ! tds_tmpl.lock_state )
+            tds_tmpl_state_check( 0.0, 0, 0.0 );
+        return vars_push( FLOAT_VAR,
+                          tds_tmpl_get_area( ch, NULL, use_cursor ) );
+    }
 
-	/* Otherwise loop over the window numbers and fill the array with areas
-	   for the different windows. */
+    /* Otherwise loop over the window numbers and fill the array with areas
+       for the different windows. */
 
-	for ( i = 0; i < win_count; v = vars_pop( v ) )
-	{
-		if ( v->type == INT_VAR )
-		{
-			w = tds_tmpl_get_window_by_number(
-									   get_strict_long( v, "window number" ) );
+    for ( i = 0; i < win_count; v = vars_pop( v ) )
+    {
+        if ( v->type == INT_VAR )
+        {
+            w = tds_tmpl_get_window_by_number(
+                                       get_strict_long( v, "window number" ) );
 
-			if ( ! tds_tmpl.lock_state )
-				tds_tmpl_state_check( 0.0, 0, 0.0 );
+            if ( ! tds_tmpl.lock_state )
+                tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-			if ( win_count == 1 )
-				return vars_push( FLOAT_VAR,
-								  tds_tmpl_get_area( ch, w, use_cursor ) );
+            if ( win_count == 1 )
+                return vars_push( FLOAT_VAR,
+                                  tds_tmpl_get_area( ch, w, use_cursor ) );
 
-			ret->val.dpnt[ i++ ] = tds_tmpl_get_area( ch, w, use_cursor );
+            ret->val.dpnt[ i++ ] = tds_tmpl_get_area( ch, w, use_cursor );
 
-			continue;
-		}
+            continue;
+        }
 
-		for ( j = 0; j < v->len; j++ )
-		{
-			w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
+        for ( j = 0; j < v->len; j++ )
+        {
+            w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
 
-			if ( ! tds_tmpl.lock_state )
-				tds_tmpl_state_check( 0.0, 0, 0.0 );
+            if ( ! tds_tmpl.lock_state )
+                tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-			if ( win_count == 1 )
-				return vars_push( FLOAT_VAR,
-								  tds_tmpl_get_area( ch, w, use_cursor ) );
+            if ( win_count == 1 )
+                return vars_push( FLOAT_VAR,
+                                  tds_tmpl_get_area( ch, w, use_cursor ) );
 
-			ret->val.dpnt[ i++ ] = tds_tmpl_get_area( ch, w, use_cursor );
+            ret->val.dpnt[ i++ ] = tds_tmpl_get_area( ch, w, use_cursor );
 
-		}
-	}
+        }
+    }
 
-	return ret;
+    return ret;
 }
 
 
@@ -1372,7 +1372,7 @@ static Var_T *get_area( Var_T * v,
 
 Var_T *digitizer_get_curve( Var_T * v )
 {
-	return get_curve( v, tds_tmpl.w != NULL ? SET : UNSET );
+    return get_curve( v, tds_tmpl.w != NULL ? SET : UNSET );
 }
 
 
@@ -1381,7 +1381,7 @@ Var_T *digitizer_get_curve( Var_T * v )
 
 Var_T *digitizer_get_curve_fast( Var_T * v )
 {
-	return get_curve( v, UNSET );
+    return get_curve( v, UNSET );
 }
 
 
@@ -1389,92 +1389,92 @@ Var_T *digitizer_get_curve_fast( Var_T * v )
  *----------------------------------------------------*/
 
 static Var_T *get_curve( Var_T * v,
-						 bool    use_cursor )
+                         bool    use_cursor )
 {
-	Window_T *w;
-	int ch, i;
-	double *array;
-	long length;
-	Var_T *nv;
+    Window_T *w;
+    int ch, i;
+    double *array;
+    long length;
+    Var_T *nv;
 
 
-	/* The first variable got to be a channel number */
+    /* The first variable got to be a channel number */
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-							   get_strict_long( v, "channel number" ), UNSET );
+    ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+                               get_strict_long( v, "channel number" ), UNSET );
 
-	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
-	{
-		print( FATAL, "Invalid channel %s.\n", TDS_TMPL_Channel_Names[ ch ] );
-		THROW( EXCEPTION );
-	}
+    if ( ch >= NUM_DISPLAYABLE_CHANNELS )
+    {
+        print( FATAL, "Invalid channel %s.\n", TDS_TMPL_Channel_Names[ ch ] );
+        THROW( EXCEPTION );
+    }
 
-	tds_tmpl.channels_in_use[ ch ] = SET;
+    tds_tmpl.channels_in_use[ ch ] = SET;
 
-	/* Now check if there's a variable with a window number and check it */
+    /* Now check if there's a variable with a window number and check it */
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		long win_num;
+    if ( ( v = vars_pop( v ) ) != NULL )
+    {
+        long win_num;
 
-		if ( tds_tmpl.w == NULL )
-		{
-			print( FATAL, "No measurement windows have been defined.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( tds_tmpl.w == NULL )
+        {
+            print( FATAL, "No measurement windows have been defined.\n" );
+            THROW( EXCEPTION );
+        }
 
-		win_num = get_strict_long( v, "window number" );
+        win_num = get_strict_long( v, "window number" );
 
-		for ( w = tds_tmpl.w; w != NULL && w->num != win_num; w = w->next )
-			/* empty */ ;
+        for ( w = tds_tmpl.w; w != NULL && w->num != win_num; w = w->next )
+            /* empty */ ;
 
-		if ( w == NULL )
-		{
-			print( FATAL, "Second argument is not a valid window ID.\n" );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-		w = NULL;
+        if ( w == NULL )
+        {
+            print( FATAL, "Second argument is not a valid window ID.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        w = NULL;
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	/* During the experiment if the digitizer's keyboard isn't locked we
-	   need to reread the timebase, record length and trigger position and
-	   update and recheck the windows */
+    /* During the experiment if the digitizer's keyboard isn't locked we
+       need to reread the timebase, record length and trigger position and
+       update and recheck the windows */
 
-	if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
-		tds_tmpl_state_check( 0.0, 0, 0.0 );
+    if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
+        tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-	/* Talk to digitizer only in the real experiment, otherwise return a dummy
-	   array */
+    /* Talk to digitizer only in the real experiment, otherwise return a dummy
+       array */
 
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		tds_tmpl_get_curve( ch, w, &array, &length, use_cursor );
-		nv = vars_push( FLOAT_ARR, array, length );
-	}
-	else
-	{
-		if ( tds_tmpl.is_rec_len  )
-			length = tds_tmpl.rec_len;
-		else
-			length = TDS_TMPL_TEST_REC_LEN;
-		array = DOUBLE_P T_malloc( length * sizeof *array );
-		for ( i = 0; i < length; i++ )
-			array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
-		nv = vars_push( FLOAT_ARR, array, length );
-		nv->flags |= IS_DYNAMIC;
-	}
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        tds_tmpl_get_curve( ch, w, &array, &length, use_cursor );
+        nv = vars_push( FLOAT_ARR, array, length );
+    }
+    else
+    {
+        if ( tds_tmpl.is_rec_len  )
+            length = tds_tmpl.rec_len;
+        else
+            length = TDS_TMPL_TEST_REC_LEN;
+        array = DOUBLE_P T_malloc( length * sizeof *array );
+        for ( i = 0; i < length; i++ )
+            array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
+        nv = vars_push( FLOAT_ARR, array, length );
+        nv->flags |= IS_DYNAMIC;
+    }
 
-	T_free( array );
-	return nv;
+    T_free( array );
+    return nv;
 }
 
 
@@ -1483,7 +1483,7 @@ static Var_T *get_curve( Var_T * v,
 
 Var_T *digitizer_get_amplitude( Var_T * v )
 {
-	return get_amplitude( v, SET );
+    return get_amplitude( v, SET );
 }
 
 
@@ -1492,7 +1492,7 @@ Var_T *digitizer_get_amplitude( Var_T * v )
 
 Var_T *digitizer_get_amplitude_fast( Var_T * v )
 {
-	return get_amplitude( v, UNSET );
+    return get_amplitude( v, UNSET );
 }
 
 
@@ -1500,152 +1500,152 @@ Var_T *digitizer_get_amplitude_fast( Var_T * v )
  *----------------------------------------------------*/
 
 static Var_T *get_amplitude( Var_T * v,
-							 bool    use_cursor )
+                             bool    use_cursor )
 {
-	Window_T *w;
-	int ch;
-	Var_T *cv;
-	Var_T *ret = NULL;
-	ssize_t win_count = 0;
-	ssize_t j;
-	long i;
+    Window_T *w;
+    int ch;
+    Var_T *cv;
+    Var_T *ret = NULL;
+    ssize_t win_count = 0;
+    ssize_t j;
+    long i;
 
 
-	/* The first variable got to be a channel number */
+    /* The first variable got to be a channel number */
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-							   get_strict_long( v, "channel number" ), UNSET );
+    ch = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+                               get_strict_long( v, "channel number" ), UNSET );
 
-	if ( ch >= NUM_DISPLAYABLE_CHANNELS )
-	{
-		print( FATAL, "Invalid channel %s.\n", TDS_TMPL_Channel_Names[ ch ] );
-		THROW( EXCEPTION );
-	}
+    if ( ch >= NUM_DISPLAYABLE_CHANNELS )
+    {
+        print( FATAL, "Invalid channel %s.\n", TDS_TMPL_Channel_Names[ ch ] );
+        THROW( EXCEPTION );
+    }
 
-	tds_tmpl.channels_in_use[ ch ] = SET;
+    tds_tmpl.channels_in_use[ ch ] = SET;
 
-	/* Now check the variables and count how many window handles we got */
+    /* Now check the variables and count how many window handles we got */
 
-	for ( cv = v = vars_pop( v ); cv != NULL; cv = cv->next )
-	{
-		vars_check( cv, INT_VAR | INT_ARR );
+    for ( cv = v = vars_pop( v ); cv != NULL; cv = cv->next )
+    {
+        vars_check( cv, INT_VAR | INT_ARR );
 
-		if ( cv->type == INT_VAR )
-			win_count++;
-		else
-		{
-			if ( cv->len == 0 )
-			{
-				print( FATAL, "Length of array passed as argument #%d is "
-					   "not known.\n", win_count + 1 );
-				THROW( EXCEPTION );
-			}
-			win_count += cv->len;
-		}
-	}
+        if ( cv->type == INT_VAR )
+            win_count++;
+        else
+        {
+            if ( cv->len == 0 )
+            {
+                print( FATAL, "Length of array passed as argument #%d is "
+                       "not known.\n", win_count + 1 );
+                THROW( EXCEPTION );
+            }
+            win_count += cv->len;
+        }
+    }
 
-	/* Complain when we got something that could be a window handler but no
-	   windows have been defined */
+    /* Complain when we got something that could be a window handler but no
+       windows have been defined */
 
-	if ( win_count > 0 && tds_tmpl.w == NULL )
-	{
-		print( FATAL, "No measurement windows have been defined.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( win_count > 0 && tds_tmpl.w == NULL )
+    {
+        print( FATAL, "No measurement windows have been defined.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* If there's more than one window handle we must return an array */
+    /* If there's more than one window handle we must return an array */
 
-	if ( win_count > 1 )
-		ret = vars_push( FLOAT_ARR, NULL, ( long ) win_count );
+    if ( win_count > 1 )
+        ret = vars_push( FLOAT_ARR, NULL, ( long ) win_count );
 
-	/* When we're still in the test phase we got to return a dummy value */
+    /* When we're still in the test phase we got to return a dummy value */
 
-	if ( FSC2_MODE != EXPERIMENT )
-	{
-		if ( win_count == 0 )
-			return vars_push( FLOAT_VAR, 1.23e-7 );
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        if ( win_count == 0 )
+            return vars_push( FLOAT_VAR, 1.23e-7 );
 
-		for ( i = 0; i < win_count; v = vars_pop( v ) )
-		{
-			if ( v->type == INT_VAR )
-			{
-				w = tds_tmpl_get_window_by_number(
-									   get_strict_long( v, "window number" ) );
+        for ( i = 0; i < win_count; v = vars_pop( v ) )
+        {
+            if ( v->type == INT_VAR )
+            {
+                w = tds_tmpl_get_window_by_number(
+                                       get_strict_long( v, "window number" ) );
 
-				if ( win_count == 1 )
-					return vars_push( FLOAT_VAR, 1.23e-7 );
+                if ( win_count == 1 )
+                    return vars_push( FLOAT_VAR, 1.23e-7 );
 
-				ret->val.dpnt[ i++ ] = 1.23e-7;
-				continue;
-			}
+                ret->val.dpnt[ i++ ] = 1.23e-7;
+                continue;
+            }
 
-			for ( j = 0; j < v->len; j++ )
-			{
-				w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
+            for ( j = 0; j < v->len; j++ )
+            {
+                w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
 
-				/* Take care of the hopefully rather unlikely situation that
-				   we've got an array of length 1 */
+                /* Take care of the hopefully rather unlikely situation that
+                   we've got an array of length 1 */
 
-				if ( win_count == 1 )
-					return vars_push( FLOAT_VAR, 1.23e-7 );
+                if ( win_count == 1 )
+                    return vars_push( FLOAT_VAR, 1.23e-7 );
 
-				ret->val.dpnt[ i++ ] = 1.234e-7;
-			}
-		}
+                ret->val.dpnt[ i++ ] = 1.234e-7;
+            }
+        }
 
-		return ret;
-	}
+        return ret;
+    }
 
-	if ( win_count == 0 )
-	{
-		if ( ! tds_tmpl.lock_state )
-			tds_tmpl_state_check( 0.0, 0, 0.0 );
-		return vars_push( FLOAT_VAR,
-						  tds_tmpl_get_amplitude( ch, NULL, use_cursor ) );
-	}
+    if ( win_count == 0 )
+    {
+        if ( ! tds_tmpl.lock_state )
+            tds_tmpl_state_check( 0.0, 0, 0.0 );
+        return vars_push( FLOAT_VAR,
+                          tds_tmpl_get_amplitude( ch, NULL, use_cursor ) );
+    }
 
-	for ( i = 0; i < win_count; v = vars_pop( v ) )
-	{
-		if ( v->type == INT_VAR )
-		{
-			w = tds_tmpl_get_window_by_number(
-									   get_strict_long( v, "window number" ) );
+    for ( i = 0; i < win_count; v = vars_pop( v ) )
+    {
+        if ( v->type == INT_VAR )
+        {
+            w = tds_tmpl_get_window_by_number(
+                                       get_strict_long( v, "window number" ) );
 
-			if ( ! tds_tmpl.lock_state )
-				tds_tmpl_state_check( 0.0, 0, 0.0 );
+            if ( ! tds_tmpl.lock_state )
+                tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-			if ( win_count == 1 )
-				return vars_push( FLOAT_VAR,
-								 tds_tmpl_get_amplitude( ch, w, use_cursor ) );
+            if ( win_count == 1 )
+                return vars_push( FLOAT_VAR,
+                                 tds_tmpl_get_amplitude( ch, w, use_cursor ) );
 
-			ret->val.dpnt[ i++ ] = tds_tmpl_get_amplitude( ch, w, use_cursor );
+            ret->val.dpnt[ i++ ] = tds_tmpl_get_amplitude( ch, w, use_cursor );
 
-			continue;
-		}
+            continue;
+        }
 
-		for ( j = 0; j < v->len; j++ )
-		{
-			w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
+        for ( j = 0; j < v->len; j++ )
+        {
+            w = tds_tmpl_get_window_by_number( v->val.lpnt[ j ] );
 
-			if ( ! tds_tmpl.lock_state )
-				tds_tmpl_state_check( 0.0, 0, 0.0 );
+            if ( ! tds_tmpl.lock_state )
+                tds_tmpl_state_check( 0.0, 0, 0.0 );
 
-			if ( win_count == 1 )
-				return vars_push( FLOAT_VAR,
-								 tds_tmpl_get_amplitude( ch, w, use_cursor ) );
+            if ( win_count == 1 )
+                return vars_push( FLOAT_VAR,
+                                 tds_tmpl_get_amplitude( ch, w, use_cursor ) );
 
-			ret->val.dpnt[ i++ ] = tds_tmpl_get_amplitude( ch, w, use_cursor );
+            ret->val.dpnt[ i++ ] = tds_tmpl_get_amplitude( ch, w, use_cursor );
 
-		}
-	}
+        }
+    }
 
-	return ret;
+    return ret;
 }
 
 
@@ -1654,35 +1654,35 @@ static Var_T *get_amplitude( Var_T * v,
 
 Var_T *digitizer_copy_curve( Var_T * v )
 {
-	int src, dest;
+    int src, dest;
 
 
-	src = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-						get_strict_long( v, "source channel number" ), UNSET );
+    src = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+                        get_strict_long( v, "source channel number" ), UNSET );
 
-	if ( src >= NUM_MEAS_CHANNELS )
-	{
-		print( FATAL, "Invalid source channel %s, must be one of the normal "
-			   "or the MATH channels.\n", TDS_TMPL_Channel_Names[ src ] );
-		THROW( EXCEPTION );
-	}
+    if ( src >= NUM_MEAS_CHANNELS )
+    {
+        print( FATAL, "Invalid source channel %s, must be one of the normal "
+               "or the MATH channels.\n", TDS_TMPL_Channel_Names[ src ] );
+        THROW( EXCEPTION );
+    }
 
-	v = vars_pop( v );
+    v = vars_pop( v );
 
-	dest = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
-				   get_strict_long( v, "destination channel number" ), UNSET );
+    dest = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
+                   get_strict_long( v, "destination channel number" ), UNSET );
 
-	if ( dest < TDS_TMPL_REF1 || dest > TDS_TMPL_REF4 )
-	{
-		print( FATAL, "Invalid destination channel %s, must be one of the REF "
-			   "channel\n", TDS_TMPL_Channel_Names[ dest ] );
-		THROW( EXCEPTION );
-	}
+    if ( dest < TDS_TMPL_REF1 || dest > TDS_TMPL_REF4 )
+    {
+        print( FATAL, "Invalid destination channel %s, must be one of the REF "
+               "channel\n", TDS_TMPL_Channel_Names[ dest ] );
+        THROW( EXCEPTION );
+    }
 
-	if ( FSC2_MODE == EXPERIMENT )
-		tds_tmpl_copy_curve( src, dest );
+    if ( FSC2_MODE == EXPERIMENT )
+        tds_tmpl_copy_curve( src, dest );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1691,10 +1691,10 @@ Var_T *digitizer_copy_curve( Var_T * v )
 
 Var_T *digitizer_run( Var_T * v  UNUSED_ARG )
 {
-	if ( FSC2_MODE == EXPERIMENT )
-		tds_tmpl_free_running( );
+    if ( FSC2_MODE == EXPERIMENT )
+        tds_tmpl_free_running( );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1703,22 +1703,22 @@ Var_T *digitizer_run( Var_T * v  UNUSED_ARG )
 
 Var_T *digitizer_lock_keyboard( Var_T * v )
 {
-	bool lock;
+    bool lock;
 
 
-	if ( v == NULL )
-		lock = SET;
-	else
-	{
-		lock = get_boolean( v );
-		too_many_arguments( v );
-	}
+    if ( v == NULL )
+        lock = SET;
+    else
+    {
+        lock = get_boolean( v );
+        too_many_arguments( v );
+    }
 
-	if ( FSC2_MODE == EXPERIMENT )
-		tds_tmpl_lock_state( lock );
+    if ( FSC2_MODE == EXPERIMENT )
+        tds_tmpl_lock_state( lock );
 
-	tds_tmpl.lock_state = lock;
-	return vars_push( INT_VAR, lock ? 1L : 0L );
+    tds_tmpl.lock_state = lock;
+    return vars_push( INT_VAR, lock ? 1L : 0L );
 }
 
 
@@ -1727,35 +1727,37 @@ Var_T *digitizer_lock_keyboard( Var_T * v )
 
 Var_T *digitizer_command( Var_T * v )
 {
-	char *cmd = NULL;
+    char *cmd = NULL;
 
 
-	CLOBBER_PROTECT( cmd );
+    CLOBBER_PROTECT( cmd );
 
-	vars_check( v, STR_VAR );
-	
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		TRY
-		{
-			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-			tds_tmpl_command( cmd );
-			T_free( cmd );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( cmd );
-			RETHROW( );
-		}
-	}
+    vars_check( v, STR_VAR );
+    
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        TRY
+        {
+            cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+            tds_tmpl_command( cmd );
+            T_free( cmd );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( cmd );
+            RETHROW( );
+        }
+    }
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

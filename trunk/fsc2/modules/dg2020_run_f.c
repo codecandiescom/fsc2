@@ -39,36 +39,36 @@
 
 bool dg2020_do_update( void )
 {
-	if ( ! dg2020.is_needed )
-		return OK;
+    if ( ! dg2020.is_needed )
+        return OK;
 
-	/* Resort the pulses and, while in a test run, we also have to check that
-	   the new pulse settings are reasonable */
+    /* Resort the pulses and, while in a test run, we also have to check that
+       the new pulse settings are reasonable */
 
-	if ( ! dg2020_reorganize_pulses( FSC2_MODE == TEST ) )
-	{
-		dg2020.needs_update = UNSET;
-		return FAIL;
-	}
+    if ( ! dg2020_reorganize_pulses( FSC2_MODE == TEST ) )
+    {
+        dg2020.needs_update = UNSET;
+        return FAIL;
+    }
 
-	/* Finally commit all changes */
+    /* Finally commit all changes */
 
-	if ( FSC2_MODE == EXPERIMENT && ! dg2020_update_data( ) )
-	{
-		print( FATAL, "Setting the pulser failed badly.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( FSC2_MODE == EXPERIMENT && ! dg2020_update_data( ) )
+    {
+        print( FATAL, "Setting the pulser failed badly.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( FSC2_MODE == TEST )
-	{
-		if ( dg2020.dump_file != NULL )
-			dg2020_dump_channels( dg2020.dump_file );
-		if ( dg2020.show_file != NULL )
-			dg2020_dump_channels( dg2020.show_file );
-	}
+    if ( FSC2_MODE == TEST )
+    {
+        if ( dg2020.dump_file != NULL )
+            dg2020_dump_channels( dg2020.dump_file );
+        if ( dg2020.show_file != NULL )
+            dg2020_dump_channels( dg2020.show_file );
+    }
 
-	dg2020.needs_update = UNSET;
-	return OK;
+    dg2020.needs_update = UNSET;
+    return OK;
 }
 
 
@@ -79,69 +79,69 @@ bool dg2020_do_update( void )
 
 bool dg2020_reorganize_pulses( bool flag )
 {
-	int i;
-	Function_T *f;
-	Pulse_T *p;
+    int i;
+    Function_T *f;
+    Pulse_T *p;
 
 
-	CLOBBER_PROTECT( i );
+    CLOBBER_PROTECT( i );
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
 
-		/* Nothing to be done for unused functions and the phase functions */
+        /* Nothing to be done for unused functions and the phase functions */
 
-		if ( ! f->is_used ||
-			 f->self == PULSER_CHANNEL_PHASE_1 ||
-			 f->self == PULSER_CHANNEL_PHASE_2 )
-			continue;
+        if ( ! f->is_used ||
+             f->self == PULSER_CHANNEL_PHASE_1 ||
+             f->self == PULSER_CHANNEL_PHASE_2 )
+            continue;
 
-		qsort( f->pulses, ( size_t ) f->num_pulses, sizeof( Pulse_T * ),
-			   dg2020_start_compare );
+        qsort( f->pulses, ( size_t ) f->num_pulses, sizeof( Pulse_T * ),
+               dg2020_start_compare );
 
-		/* Check the pulse positions and lengths, if test fails in test run
-		   the program is stopped, while in real run all pulses are reset to
-		   their original position and length */
+        /* Check the pulse positions and lengths, if test fails in test run
+           the program is stopped, while in real run all pulses are reset to
+           their original position and length */
 
-		TRY
-		{
-			dg2020_do_checks( f );
+        TRY
+        {
+            dg2020_do_checks( f );
 
-			/* Reorganize the phase pulses of the phase function associated
-			   with the current function */
+            /* Reorganize the phase pulses of the phase function associated
+               with the current function */
 
-			if ( f->needs_phases )
-				dg2020_reorganize_phases( f->phase_func, flag );
+            if ( f->needs_phases )
+                dg2020_reorganize_phases( f->phase_func, flag );
 
-			TRY_SUCCESS;
-		}
-		CATCH( EXCEPTION )
-		{
-			if ( flag )
-				THROW( EXCEPTION );
+            TRY_SUCCESS;
+        }
+        CATCH( EXCEPTION )
+        {
+            if ( flag )
+                THROW( EXCEPTION );
 
-			for ( p = dg2020.pulses; p != NULL; p = p->next )
-			{
-				if ( p->is_old_pos )
-					p->pos = p->old_pos;
-				if ( p->is_old_len )
-					p->len = p->old_len;
-				p->is_active = IS_ACTIVE( p );
-				p->needs_update = UNSET;
-			}
+            for ( p = dg2020.pulses; p != NULL; p = p->next )
+            {
+                if ( p->is_old_pos )
+                    p->pos = p->old_pos;
+                if ( p->is_old_len )
+                    p->len = p->old_len;
+                p->is_active = IS_ACTIVE( p );
+                p->needs_update = UNSET;
+            }
 
-			return FAIL;
-		}
-		OTHERWISE
-			RETHROW( );
+            return FAIL;
+        }
+        OTHERWISE
+            RETHROW( );
 
-		/* Send all the changes to the pulser */
+        /* Send all the changes to the pulser */
 
-		dg2020_commit( f, flag );
-	}
+        dg2020_commit( f, flag );
+    }
 
-	return OK;
+    return OK;
 }
 
 
@@ -152,52 +152,52 @@ bool dg2020_reorganize_pulses( bool flag )
 
 void dg2020_do_checks( Function_T * f )
 {
-	Pulse_T *p;
-	int i;
+    Pulse_T *p;
+    int i;
 
 
-	for ( i = 0; i < f->num_pulses; i++ )
-	{
-		p = f->pulses[ i ];
+    for ( i = 0; i < f->num_pulses; i++ )
+    {
+        p = f->pulses[ i ];
 
-		if ( p->is_active )
-		{
-			/* Check that pulses still fit into the pulser memory (while in
-			   test run) or the maximum sequence length (in the real run) */
+        if ( p->is_active )
+        {
+            /* Check that pulses still fit into the pulser memory (while in
+               test run) or the maximum sequence length (in the real run) */
 
-			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
-			if ( f->delay + f->max_seq_len >
-				 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
-			{
-				if ( FSC2_MODE == TEST )
-					print( FATAL, "Pulse sequence for function '%s' does not "
-						   "fit into the pulsers memory. Maybe, you could try "
-						   "a longer pulser time base.\n",
-						   f->name );
-				else
-					print( FATAL, "Pulse sequence for function '%s' is too "
-						   "long. Perhaps you should try to use the "
-						   "pulser_maximum_pattern_length() function.\n",
-						   f->name );
-				THROW( EXCEPTION );
-			}
+            f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
+            if ( f->delay + f->max_seq_len >
+                 ( FSC2_MODE == TEST ? MAX_PULSER_BITS : dg2020.max_seq_len ) )
+            {
+                if ( FSC2_MODE == TEST )
+                    print( FATAL, "Pulse sequence for function '%s' does not "
+                           "fit into the pulsers memory. Maybe, you could try "
+                           "a longer pulser time base.\n",
+                           f->name );
+                else
+                    print( FATAL, "Pulse sequence for function '%s' is too "
+                           "long. Perhaps you should try to use the "
+                           "pulser_maximum_pattern_length() function.\n",
+                           f->name );
+                THROW( EXCEPTION );
+            }
 
-			f->num_active_pulses = i + 1;
-		}
+            f->num_active_pulses = i + 1;
+        }
 
-		if ( i + 1 < f->num_pulses && f->pulses[ i + 1 ]->is_active &&
-			 p->pos + p->len > f->pulses[ i + 1 ]->pos )
-		{
-			if ( dg2020.in_setup )
-				print( FSC2_MODE == TEST ? FATAL : SEVERE,
-					   "Pulses %ld and %ld overlap.\n",
-					   p->num, f->pulses[ i + 1 ]->num );
-			else
-				print( FATAL, "Pulses %ld and %ld begin to overlap.\n",
-					   p->num, f->pulses[ i + 1 ]->num );
-			THROW( EXCEPTION );
-		}
-	}
+        if ( i + 1 < f->num_pulses && f->pulses[ i + 1 ]->is_active &&
+             p->pos + p->len > f->pulses[ i + 1 ]->pos )
+        {
+            if ( dg2020.in_setup )
+                print( FSC2_MODE == TEST ? FATAL : SEVERE,
+                       "Pulses %ld and %ld overlap.\n",
+                       p->num, f->pulses[ i + 1 ]->num );
+            else
+                print( FATAL, "Pulses %ld and %ld begin to overlap.\n",
+                       p->num, f->pulses[ i + 1 ]->num );
+            THROW( EXCEPTION );
+        }
+    }
 }
 
 
@@ -211,46 +211,46 @@ void dg2020_do_checks( Function_T * f )
  *---------------------------------------------------------------------------*/
 
 void dg2020_reorganize_phases( Function_T * f,
-							   bool         flag )
+                               bool         flag )
 {
-	int i, j;
-	Pulse_T *p;
-	bool need_update = UNSET;
+    int i, j;
+    Pulse_T *p;
+    bool need_update = UNSET;
 
 
-	fsc2_assert( f->is_used && ( f->self == PULSER_CHANNEL_PHASE_1 ||
-								 f->self == PULSER_CHANNEL_PHASE_2 ) );
+    fsc2_assert( f->is_used && ( f->self == PULSER_CHANNEL_PHASE_1 ||
+                                 f->self == PULSER_CHANNEL_PHASE_2 ) );
 
-	/* First check if any of the phase pulses needs to be updated */
+    /* First check if any of the phase pulses needs to be updated */
 
-	for ( i = 0; i < f->num_pulses; i++ )
-	{
-		p = f->pulses[ i ];
-		if ( FSC2_MODE == TEST && p->is_active )
-			f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
-		if ( p->for_pulse->needs_update )
-			need_update = SET;
-	}
+    for ( i = 0; i < f->num_pulses; i++ )
+    {
+        p = f->pulses[ i ];
+        if ( FSC2_MODE == TEST && p->is_active )
+            f->max_seq_len = Ticks_max( f->max_seq_len, p->pos + p->len );
+        if ( p->for_pulse->needs_update )
+            need_update = SET;
+    }
 
-	/* If nothing changed at all we're already finished... */
+    /* If nothing changed at all we're already finished... */
 
-	if ( ! need_update )
-		return;
+    if ( ! need_update )
+        return;
 
-	/* Now run through the phase pulses associated with each of the functions
-	   pulse */
+    /* Now run through the phase pulses associated with each of the functions
+       pulse */
 
-	for ( i = 0; i < f->phase_func->num_pulses; i++ )
-	{
-		p = f->phase_func->pulses[ i ];
+    for ( i = 0; i < f->phase_func->num_pulses; i++ )
+    {
+        p = f->phase_func->pulses[ i ];
 
-		for ( j = 0; j < f->num_pulses; j++ )
-			if ( f->pulses[ j ]->for_pulse == p )
-				dg2020_recalc_phase_pulse( f, f->pulses[ j ], p, i, flag );
-	}
+        for ( j = 0; j < f->num_pulses; j++ )
+            if ( f->pulses[ j ]->for_pulse == p )
+                dg2020_recalc_phase_pulse( f, f->pulses[ j ], p, i, flag );
+    }
 
-	if ( ! flag )
-		dg2020_commit_phases( f, flag );
+    if ( ! flag )
+        dg2020_commit_phases( f, flag );
 }
 
 
@@ -258,272 +258,272 @@ void dg2020_reorganize_phases( Function_T * f,
  *--------------------------------------------------------------------------*/
 
 void dg2020_recalc_phase_pulse( Function_T * f,
-								Pulse_T *    phase_p,
-								Pulse_T *    p,
-								int          nth,
-								bool         flag )
+                                Pulse_T *    phase_p,
+                                Pulse_T *    p,
+                                int          nth,
+                                bool         flag )
 {
-	Pulse_T **pppl;               /* list of phase pulses for previous pulse */
-	int ppp_num;                  /* and the length of this list */
-	Pulse_T *pp, *pn;
-	int i;
-	Pulse_T *for_pulse = NULL;
+    Pulse_T **pppl;               /* list of phase pulses for previous pulse */
+    int ppp_num;                  /* and the length of this list */
+    Pulse_T *pp, *pn;
+    int i;
+    Pulse_T *for_pulse = NULL;
 
 
-	/* If the pulse the phase pulse is associated with has become inactive
-	   also the phase pulse becomes inactive and has to be removed */
+    /* If the pulse the phase pulse is associated with has become inactive
+       also the phase pulse becomes inactive and has to be removed */
 
-	p->was_active = p->is_active;
+    p->was_active = p->is_active;
 
-	if ( ! p->is_active && phase_p->is_active )
-	{
-		phase_p->is_active = UNSET;
+    if ( ! p->is_active && phase_p->is_active )
+    {
+        phase_p->is_active = UNSET;
 
-		phase_p->old_pos = phase_p->pos;
-		phase_p->is_old_pos = SET;
+        phase_p->old_pos = phase_p->pos;
+        phase_p->is_old_pos = SET;
 
-		phase_p->old_len = phase_p->len;
-		phase_p->is_old_len = SET;
+        phase_p->old_len = phase_p->len;
+        phase_p->is_old_len = SET;
 
-		phase_p->is_len = UNSET;
-		phase_p->len = 0;
-		phase_p->is_active = UNSET;
-		phase_p->needs_update = SET;
+        phase_p->is_len = UNSET;
+        phase_p->len = 0;
+        phase_p->is_active = UNSET;
+        phase_p->needs_update = SET;
 
-		return;
-	}
+        return;
+    }
 
-	/* If neither the phase pulse nor the pulse its associated with is active
-	   nothing has to be done */
+    /* If neither the phase pulse nor the pulse its associated with is active
+       nothing has to be done */
 
-	if ( ! p->is_active && ! phase_p->is_active )
-		return;
+    if ( ! p->is_active && ! phase_p->is_active )
+        return;
 
-	/* All remaining phase pulses and the pulses they are associated with got
+    /* All remaining phase pulses and the pulses they are associated with got
        to be active */
 
-	phase_p->has_been_active = phase_p->is_active = SET;
+    phase_p->has_been_active = phase_p->is_active = SET;
 
-	/* Now lets start to check the positions */
+    /* Now lets start to check the positions */
 
-	if ( nth == 0 )                 /* for the first phase pulse */
-	{
-		/* If the position is set and is already at the first possible moment
-		   do nothing about it */
+    if ( nth == 0 )                 /* for the first phase pulse */
+    {
+        /* If the position is set and is already at the first possible moment
+           do nothing about it */
 
-		if ( phase_p->is_pos && phase_p->pos == - f->delay )
-			goto set_length;
+        if ( phase_p->is_pos && phase_p->pos == - f->delay )
+            goto set_length;
 
-		if ( p->pos - f->delay < f->psd )
-		{
-			print( FATAL, "Pulse %ld now starts too early to allow setting of "
-				   "a phase pulse.\n", p->num );
-			THROW( EXCEPTION );
-		}
+        if ( p->pos - f->delay < f->psd )
+        {
+            print( FATAL, "Pulse %ld now starts too early to allow setting of "
+                   "a phase pulse.\n", p->num );
+            THROW( EXCEPTION );
+        }
 
-		/* Store the old position if there's one and hasn't been set yet */
+        /* Store the old position if there's one and hasn't been set yet */
 
-		if ( phase_p->is_pos && ! phase_p->is_old_pos )
-		{
-			phase_p->old_pos = phase_p->pos;
-			phase_p->is_old_pos = SET;
-		}
+        if ( phase_p->is_pos && ! phase_p->is_old_pos )
+        {
+            phase_p->old_pos = phase_p->pos;
+            phase_p->is_old_pos = SET;
+        }
 
-		phase_p->pos = - f->delay;
-		phase_p->is_pos = SET;
-		phase_p->needs_update = SET;
-	}
-	else                                 /* if its not the first pulse */
-	{
-		/* Find the position of the preceeding pulse */
+        phase_p->pos = - f->delay;
+        phase_p->is_pos = SET;
+        phase_p->needs_update = SET;
+    }
+    else                                 /* if its not the first pulse */
+    {
+        /* Find the position of the preceeding pulse */
 
-		pp = p->function->pulses[ nth - 1 ];
+        pp = p->function->pulses[ nth - 1 ];
 
-		/* Don't do anything if the position is already set and the pulse
-		   starts at a reasonable position, i.e. it starts long enough before
-		   the pulse its associated with and not too near to the previous
-		   pulse */
+        /* Don't do anything if the position is already set and the pulse
+           starts at a reasonable position, i.e. it starts long enough before
+           the pulse its associated with and not too near to the previous
+           pulse */
 
-		if ( phase_p->is_pos &&
-			 ( ( phase_p->pos <= p->pos - f->psd &&
-				 phase_p->pos >= pp->pos + pp->len + dg2020.grace_period ) ||
-			   p->pc == pp->pc ) )
-			goto set_length;
+        if ( phase_p->is_pos &&
+             ( ( phase_p->pos <= p->pos - f->psd &&
+                 phase_p->pos >= pp->pos + pp->len + dg2020.grace_period ) ||
+               p->pc == pp->pc ) )
+            goto set_length;
 
-		/* If the phase switch delay does not fit between the pulse it's
-		   associated with and its predecessor we have to complain (except
-		   when both pulses use the same phase sequence or none at all) */
+        /* If the phase switch delay does not fit between the pulse it's
+           associated with and its predecessor we have to complain (except
+           when both pulses use the same phase sequence or none at all) */
 
-		if ( p->pos - ( pp->pos + pp->len ) < f->psd && p->pc != pp->pc )
-		{
-			print( FATAL, "Distance between pulses %ld and %ld becomes too "
-				   "small to allow setting of phase pulses.\n",
-				   p->num, pp->num );
-			THROW( EXCEPTION );
-		}
+        if ( p->pos - ( pp->pos + pp->len ) < f->psd && p->pc != pp->pc )
+        {
+            print( FATAL, "Distance between pulses %ld and %ld becomes too "
+                   "small to allow setting of phase pulses.\n",
+                   p->num, pp->num );
+            THROW( EXCEPTION );
+        }
 
-		/* If the phase pulse has a position and it hasn't been stored yet
+        /* If the phase pulse has a position and it hasn't been stored yet
            store it now */
 
-		if ( phase_p->is_pos && ! phase_p->is_old_pos )
-		{
-			phase_p->old_pos = phase_p->pos;
-			phase_p->is_old_pos = SET;
-		}
+        if ( phase_p->is_pos && ! phase_p->is_old_pos )
+        {
+            phase_p->old_pos = phase_p->pos;
+            phase_p->is_old_pos = SET;
+        }
 
-		/* So, obviously, we have to reset the pulse position: Try to start the
-		   phase pulse as late as possible, i.e. just the phase switch delay
-		   plus a grace period before the associated pulse, because the
-		   probablity is high that the preceeding pulse is going to be shifted
-		   to later times or is lenghtened */
+        /* So, obviously, we have to reset the pulse position: Try to start the
+           phase pulse as late as possible, i.e. just the phase switch delay
+           plus a grace period before the associated pulse, because the
+           probablity is high that the preceeding pulse is going to be shifted
+           to later times or is lenghtened */
 
-		phase_p->pos = p->pos - f->psd;
+        phase_p->pos = p->pos - f->psd;
 
-		/* If this is too near to the preceeding pulse leave out the grace
-		   period, and if this still is too near complain (except when both
-		   pulses use the same phase sequence since than both phase pulses get
-		   merged into one) */
+        /* If this is too near to the preceeding pulse leave out the grace
+           period, and if this still is too near complain (except when both
+           pulses use the same phase sequence since than both phase pulses get
+           merged into one) */
 
-		if ( phase_p->pos < pp->pos + pp->len + dg2020.grace_period )
-		{
-			phase_p->pos += dg2020.grace_period;
+        if ( phase_p->pos < pp->pos + pp->len + dg2020.grace_period )
+        {
+            phase_p->pos += dg2020.grace_period;
 
-			if ( phase_p->pos < pp->pos + pp->len + dg2020.grace_period &&
-				 p->pc != pp->pc && for_pulse != p )
-			{
-				print( SEVERE, "Pulses %ld and %ld become so close that "
-					   "problems with phase switching may result.\n",
-					   pp->num, p->num );
-				for_pulse = p;
-			}
-		}
+            if ( phase_p->pos < pp->pos + pp->len + dg2020.grace_period &&
+                 p->pc != pp->pc && for_pulse != p )
+            {
+                print( SEVERE, "Pulses %ld and %ld become so close that "
+                       "problems with phase switching may result.\n",
+                       pp->num, p->num );
+                for_pulse = p;
+            }
+        }
 
-		/* Adjust the length of all phase pulses associated with the
-		   precceding pulse */
+        /* Adjust the length of all phase pulses associated with the
+           precceding pulse */
 
-		if ( dg2020_find_phase_pulse( pp, &pppl, &ppp_num ) )
-		{
-			for ( i = 0; i < ppp_num; i++ )
-			{
-				if ( pppl[ i ]->is_len )
-				{
-					if ( ! pppl[ i ]->is_old_len )
-					{
-						pppl[ i ]->is_old_len = SET;
-						pppl[ i ]->old_len = pppl[ i ]->len;
-					}
+        if ( dg2020_find_phase_pulse( pp, &pppl, &ppp_num ) )
+        {
+            for ( i = 0; i < ppp_num; i++ )
+            {
+                if ( pppl[ i ]->is_len )
+                {
+                    if ( ! pppl[ i ]->is_old_len )
+                    {
+                        pppl[ i ]->is_old_len = SET;
+                        pppl[ i ]->old_len = pppl[ i ]->len;
+                    }
 
-					pppl[ i ]->len = phase_p->pos - pppl[ i ]->pos;
+                    pppl[ i ]->len = phase_p->pos - pppl[ i ]->pos;
 
-					if ( pppl[ i ]->old_len == pppl[ i ]->len )
-						pppl[ i ]->is_old_len = UNSET;
+                    if ( pppl[ i ]->old_len == pppl[ i ]->len )
+                        pppl[ i ]->is_old_len = UNSET;
 
-					pppl[ i ]->needs_update = NEEDS_UPDATE( pppl[ i ] );
-				}
+                    pppl[ i ]->needs_update = NEEDS_UPDATE( pppl[ i ] );
+                }
 
-				if ( pppl[ i ]->pos + pppl[ i ]->len <
-					 pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len &&
-					 pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
-				{
-					print( FATAL, "Distance between pulses %ld and %ld "
-						   "becomes too small to allow setting of phase "
-						   "pulses.\n", p->num, pppl[ i ]->for_pulse->num );
-					THROW( EXCEPTION );
-				}
+                if ( pppl[ i ]->pos + pppl[ i ]->len <
+                     pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len &&
+                     pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
+                {
+                    print( FATAL, "Distance between pulses %ld and %ld "
+                           "becomes too small to allow setting of phase "
+                           "pulses.\n", p->num, pppl[ i ]->for_pulse->num );
+                    THROW( EXCEPTION );
+                }
 
-				if ( pppl[ i ]->pos + pppl[ i ]->len <
-					 pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len
-					 + dg2020.grace_period  &&
-					 pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc &&
-					 p != for_pulse )
-				{
-					print( SEVERE, "Pulses %ld and %ld become so close that "
-						   "problems with phase switching may result.\n",
-						   p->num, pppl[ i ]->for_pulse->num );
-					for_pulse = p;
-				}
-			}
+                if ( pppl[ i ]->pos + pppl[ i ]->len <
+                     pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len
+                     + dg2020.grace_period  &&
+                     pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc &&
+                     p != for_pulse )
+                {
+                    print( SEVERE, "Pulses %ld and %ld become so close that "
+                           "problems with phase switching may result.\n",
+                           p->num, pppl[ i ]->for_pulse->num );
+                    for_pulse = p;
+                }
+            }
 
-			T_free( pppl );
-		}
+            T_free( pppl );
+        }
 
-		/* Now we can be sure that we have a legal position for the phase
-		   pulse and as it got a new position it has to be updated */
+        /* Now we can be sure that we have a legal position for the phase
+           pulse and as it got a new position it has to be updated */
 
-		phase_p->is_pos = SET;
-		phase_p->needs_update = SET;
-	}
+        phase_p->is_pos = SET;
+        phase_p->needs_update = SET;
+    }
 
 set_length:
 
-	if ( phase_p->is_old_pos && phase_p->old_pos == phase_p->pos )
-		phase_p->is_old_pos = UNSET;
+    if ( phase_p->is_old_pos && phase_p->old_pos == phase_p->pos )
+        phase_p->is_old_pos = UNSET;
 
-	/* Store the old length of the phase pulse (if there's one) */
+    /* Store the old length of the phase pulse (if there's one) */
 
-	if ( phase_p->is_len )
-	{
-		phase_p->old_len = phase_p->len;
-		phase_p->is_old_len = SET;
-	}
+    if ( phase_p->is_len )
+    {
+        phase_p->old_len = phase_p->len;
+        phase_p->is_old_len = SET;
+    }
 
-	if ( nth == p->function->num_pulses - 1 ||        /* last active pulse ? */
-		 ! p->function->pulses[ nth  + 1 ]->is_active )
-	{
-		if ( flag )                /* in test run */
-			phase_p->len = -1;
-		else
-			/* Take care: the variable 'dg2020.max_seq_len' already
-			   includes the delay for the functions... */
+    if ( nth == p->function->num_pulses - 1 ||        /* last active pulse ? */
+         ! p->function->pulses[ nth  + 1 ]->is_active )
+    {
+        if ( flag )                /* in test run */
+            phase_p->len = -1;
+        else
+            /* Take care: the variable 'dg2020.max_seq_len' already
+               includes the delay for the functions... */
 
-			phase_p->len = dg2020.max_seq_len - f->delay - phase_p->pos;
-	}
-	else
-	{
-		pn = p->function->pulses[ nth + 1 ];
+            phase_p->len = dg2020.max_seq_len - f->delay - phase_p->pos;
+    }
+    else
+    {
+        pn = p->function->pulses[ nth + 1 ];
 
-		/* This length is only tentatively and may become shorter when the
-		   following phase pulse is set */
+        /* This length is only tentatively and may become shorter when the
+           following phase pulse is set */
 
-		if ( phase_p->is_len &&
-			 ( ( phase_p->pos + phase_p->len >=
-				 p->pos + p->len + dg2020.grace_period || p->pc == pn->pc ) &&
-			   phase_p->pos + phase_p->len <= dg2020.max_seq_len - f->delay &&
-			   ( phase_p->pos + phase_p->len <= pn->pos - f->psd ||
-				 p->pc == pn->pc ) ) )
-			goto done_setting;
+        if ( phase_p->is_len &&
+             ( ( phase_p->pos + phase_p->len >=
+                 p->pos + p->len + dg2020.grace_period || p->pc == pn->pc ) &&
+               phase_p->pos + phase_p->len <= dg2020.max_seq_len - f->delay &&
+               ( phase_p->pos + phase_p->len <= pn->pos - f->psd ||
+                 p->pc == pn->pc ) ) )
+            goto done_setting;
 
-		phase_p->len = pn->pos - f->psd - phase_p->pos;
+        phase_p->len = pn->pos - f->psd - phase_p->pos;
 
-		if ( phase_p->pos + phase_p->len < p->pos + p->len && p->pc != pn->pc )
-		{
-			print( FATAL, "Distance between pulses %ld and %ld becomes too "
-				   "small to allow setting of phase pulses.\n",
-				   p->num, pn->num );
-			THROW( EXCEPTION );
-		}
+        if ( phase_p->pos + phase_p->len < p->pos + p->len && p->pc != pn->pc )
+        {
+            print( FATAL, "Distance between pulses %ld and %ld becomes too "
+                   "small to allow setting of phase pulses.\n",
+                   p->num, pn->num );
+            THROW( EXCEPTION );
+        }
 
-		if ( phase_p->pos + phase_p->len <
-			 p->pos + p->len + dg2020.grace_period &&
-			 p->pc != pn->pc && p != for_pulse )
-		{
-			print( SEVERE, "Pulses %ld and %ld become so close that problems "
-				   "with phase switching may result.\n", p->num, pn->num );
-			for_pulse = p;
-		}
-	}
+        if ( phase_p->pos + phase_p->len <
+             p->pos + p->len + dg2020.grace_period &&
+             p->pc != pn->pc && p != for_pulse )
+        {
+            print( SEVERE, "Pulses %ld and %ld become so close that problems "
+                   "with phase switching may result.\n", p->num, pn->num );
+            for_pulse = p;
+        }
+    }
 
 done_setting:
 
-	phase_p->is_len = SET;
+    phase_p->is_len = SET;
 
-	/* Make sure the flags for an old position or length are only set if the
-	   old and the new value really differ */
+    /* Make sure the flags for an old position or length are only set if the
+       old and the new value really differ */
 
-	if ( phase_p->is_old_len && phase_p->old_len == phase_p->len )
-		phase_p->is_old_len = UNSET;
+    if ( phase_p->is_old_len && phase_p->old_len == phase_p->len )
+        phase_p->is_old_len = UNSET;
 
-	phase_p->needs_update = NEEDS_UPDATE( phase_p );
+    phase_p->needs_update = NEEDS_UPDATE( phase_p );
 }
 
 
@@ -534,43 +534,43 @@ done_setting:
 
 void dg2020_full_reset( void )
 {
-	Pulse_T *p = dg2020.pulses;
+    Pulse_T *p = dg2020.pulses;
 
 
-	while ( p != NULL )
-	{
-		/* First we check if the pulse has been used at all, send a warning
+    while ( p != NULL )
+    {
+        /* First we check if the pulse has been used at all, send a warning
            and delete it if it hasn't (unless we haven't ben told to keep
-		   all pulses, even unused ones) */
+           all pulses, even unused ones) */
 
-		if ( ! p->has_been_active && ! dg2020.keep_all )
-		{
-			if ( p->num >=0 )
-				print( WARN, "Pulse %ld is never used.\n", p->num );
-			p = dg2020_delete_pulse( p );
-			continue;
-		}
+        if ( ! p->has_been_active && ! dg2020.keep_all )
+        {
+            if ( p->num >=0 )
+                print( WARN, "Pulse %ld is never used.\n", p->num );
+            p = dg2020_delete_pulse( p );
+            continue;
+        }
 
-		/* Reset pulse properies to their initial values */
+        /* Reset pulse properies to their initial values */
 
-		p->pos = p->initial_pos;
-		p->is_pos = p->initial_is_pos;
-		p->len = p->initial_len;
-		p->is_len = p->initial_is_len;
-		p->dpos = p->initial_dpos;
-		p->is_dpos = p->initial_is_dpos;
-		p->dlen = p->initial_dlen;
-		p->is_dlen = p->initial_is_dlen;
+        p->pos = p->initial_pos;
+        p->is_pos = p->initial_is_pos;
+        p->len = p->initial_len;
+        p->is_len = p->initial_is_len;
+        p->dpos = p->initial_dpos;
+        p->is_dpos = p->initial_is_dpos;
+        p->dlen = p->initial_dlen;
+        p->is_dlen = p->initial_is_dlen;
 
-		p->needs_update = UNSET;
+        p->needs_update = UNSET;
 
-		p->is_old_pos = p->is_old_len = UNSET;
+        p->is_old_pos = p->is_old_len = UNSET;
 
-		p->is_active = ( p->is_pos && p->is_len &&
-						 ( p->len > 0 || p->len == -1 ) );
+        p->is_active = ( p->is_pos && p->is_len &&
+                         ( p->len > 0 || p->len == -1 ) );
 
-		p = p->next;
-	}
+        p = p->next;
+    }
 }
 
 
@@ -581,72 +581,72 @@ void dg2020_full_reset( void )
 
 Pulse_T *dg2020_delete_pulse( Pulse_T * p )
 {
-	Pulse_T *pp;
-	int i;
+    Pulse_T *pp;
+    int i;
 
 
-	/* If the pulse belongs to a function that needs phase cycling we try to
-	   find the phase pulses and delete them first */
+    /* If the pulse belongs to a function that needs phase cycling we try to
+       find the phase pulses and delete them first */
 
-	if ( p->num >= 0 && p->function->needs_phases )
-	{
-		pp = dg2020.pulses;
-		while ( pp != NULL )
-			if ( pp->num < 0 && pp->for_pulse == p )
-				pp = dg2020_delete_pulse( pp );
-			else
-				pp = pp->next;
-	}
+    if ( p->num >= 0 && p->function->needs_phases )
+    {
+        pp = dg2020.pulses;
+        while ( pp != NULL )
+            if ( pp->num < 0 && pp->for_pulse == p )
+                pp = dg2020_delete_pulse( pp );
+            else
+                pp = pp->next;
+    }
 
-	/* Now delete the pulse. First we've got to remove it from its functions
+    /* Now delete the pulse. First we've got to remove it from its functions
        pulse list */
 
-	for ( i = 0; i < p->function->num_pulses; i++ )
-		if ( p->function->pulses[ i ] == p )
-			break;
+    for ( i = 0; i < p->function->num_pulses; i++ )
+        if ( p->function->pulses[ i ] == p )
+            break;
 
-	fsc2_assert( i < p->function->num_pulses );  /* Paranoia */
+    fsc2_assert( i < p->function->num_pulses );  /* Paranoia */
 
-	/* Put the last of the functions pulses into the slot for the pulse to
-	   be deleted and shorten the list by one element */
+    /* Put the last of the functions pulses into the slot for the pulse to
+       be deleted and shorten the list by one element */
 
-	if ( i != p->function->num_pulses - 1 )
-		p->function->pulses[ i ] =
-			p->function->pulses[ p->function->num_pulses - 1 ];
+    if ( i != p->function->num_pulses - 1 )
+        p->function->pulses[ i ] =
+            p->function->pulses[ p->function->num_pulses - 1 ];
 
-	/* Now delete the pulse - if the deleted pulse was the last pulse of
-	   its function send a warning and mark the function as useless */
+    /* Now delete the pulse - if the deleted pulse was the last pulse of
+       its function send a warning and mark the function as useless */
 
-	if ( p->function->num_pulses-- > 1 )
-		p->function->pulses = PULSE_PP
-					  T_realloc( p->function->pulses,
-								 p->function->num_pulses *
-								 sizeof *p->function->pulses );
-	else
-	{
-		p->function->pulses = PULSE_PP T_free( p->function->pulses );
+    if ( p->function->num_pulses-- > 1 )
+        p->function->pulses = PULSE_PP
+                      T_realloc( p->function->pulses,
+                                 p->function->num_pulses *
+                                 sizeof *p->function->pulses );
+    else
+    {
+        p->function->pulses = PULSE_PP T_free( p->function->pulses );
 
-		print( SEVERE, "Function '%s' isn't used at all because all its "
-			   "pulses are never used.\n", p->function->name );
-		p->function->is_used = UNSET;
-	}
+        print( SEVERE, "Function '%s' isn't used at all because all its "
+               "pulses are never used.\n", p->function->name );
+        p->function->is_used = UNSET;
+    }
 
-	/* Now remove the pulse from the real pulse list */
+    /* Now remove the pulse from the real pulse list */
 
-	if ( p->next != NULL )
-		p->next->prev = p->prev;
-	pp = p->next;
-	if ( p->prev != NULL )
-		p->prev->next = p->next;
+    if ( p->next != NULL )
+        p->next->prev = p->prev;
+    pp = p->next;
+    if ( p->prev != NULL )
+        p->prev->next = p->next;
 
-	/* Special care has to be taken if this is the very last pulse... */
+    /* Special care has to be taken if this is the very last pulse... */
 
-	if ( p == dg2020.pulses && p->next == NULL )
-		dg2020.pulses = PULSE_P T_free( dg2020.pulses );
-	else
-		T_free( p );
+    if ( p == dg2020.pulses && p->next == NULL )
+        dg2020.pulses = PULSE_P T_free( dg2020.pulses );
+    else
+        T_free( p );
 
-	return pp;
+    return pp;
 }
 
 
@@ -659,29 +659,29 @@ Pulse_T *dg2020_delete_pulse( Pulse_T * p )
 
 void dg2020_finalize_phase_pulses( int func )
 {
-	Function_T *f;
-	int i;
-	Pulse_T *p;
+    Function_T *f;
+    int i;
+    Pulse_T *p;
 
 
-	fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
-				 func == PULSER_CHANNEL_PHASE_2 );
+    fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
+                 func == PULSER_CHANNEL_PHASE_2 );
 
-	f = dg2020.function + func;
-	if ( ! f->is_used )
-		return;
+    f = dg2020.function + func;
+    if ( ! f->is_used )
+        return;
 
-	/* Find the last active phase pulses and set its length to the maximum
-	   posible amount, i.e. to the maximum sequence length - take care, the
-	   variable 'dg2020.max_seq_len' already includes the delay for the
-	   function... */
+    /* Find the last active phase pulses and set its length to the maximum
+       posible amount, i.e. to the maximum sequence length - take care, the
+       variable 'dg2020.max_seq_len' already includes the delay for the
+       function... */
 
-	for ( i = 0; i < f->num_pulses; i++ )
-	{
-		p = f->pulses[ i ];
-		if ( p->is_active && p->is_pos && p->is_len && p->len == -1 )
-			p->len = dg2020.max_seq_len - f->delay - p->pos;
-	}
+    for ( i = 0; i < f->num_pulses; i++ )
+    {
+        p = f->pulses[ i ];
+        if ( p->is_active && p->is_pos && p->is_len && p->len == -1 )
+            p->len = dg2020.max_seq_len - f->delay - p->pos;
+    }
 }
 
 
@@ -692,69 +692,69 @@ void dg2020_finalize_phase_pulses( int func )
 
 void dg2020_set_pulses( Function_T * f )
 {
-	Pulse_T *p,
-		    *pp;
-	Ticks start, end = 0;
-	int i;
+    Pulse_T *p,
+            *pp;
+    Ticks start, end = 0;
+    int i;
 
 
-	/* As usual we need a special treatment of phase pulses... */
+    /* As usual we need a special treatment of phase pulses... */
 
-	if ( f->self == PULSER_CHANNEL_PHASE_1 ||
-		 f->self == PULSER_CHANNEL_PHASE_2 )
-		return;
+    if ( f->self == PULSER_CHANNEL_PHASE_1 ||
+         f->self == PULSER_CHANNEL_PHASE_2 )
+        return;
 
-	/* Always set the very first bit to LOW state, see the rant about the bugs
-	   in the pulser firmware at the start of dg2020_gpib.c... */
+    /* Always set the very first bit to LOW state, see the rant about the bugs
+       in the pulser firmware at the start of dg2020_gpib.c... */
 
-	dg2020_set_constant( f->channel[ 0 ]->self, -1, 1, LOW );
+    dg2020_set_constant( f->channel[ 0 ]->self, -1, 1, LOW );
 
-	/* Now simply run through all active pulses of the channel */
+    /* Now simply run through all active pulses of the channel */
 
-	for ( pp = NULL, p = f->pulses[ 0 ], i = 0;
-		  i < f->num_pulses && p->is_active;
-		  pp = p, p = f->pulses[ ++i ] )
-	{
-		/* Set the area from the end of the previous pulse up to the start
-		   of the current pulse (exception: for the first pulse we start
-		   at the first possible position */
+    for ( pp = NULL, p = f->pulses[ 0 ], i = 0;
+          i < f->num_pulses && p->is_active;
+          pp = p, p = f->pulses[ ++i ] )
+    {
+        /* Set the area from the end of the previous pulse up to the start
+           of the current pulse (exception: for the first pulse we start
+           at the first possible position */
 
-		start = ( pp == NULL ) ? 0 : pp->pos + pp->len + f->delay;
-		end = p->pos + f->delay;
-		if ( start != end )
-			dg2020_set_constant( p->channel->self, start, end - start,
-								 type_OFF( f ) );
+        start = ( pp == NULL ) ? 0 : pp->pos + pp->len + f->delay;
+        end = p->pos + f->delay;
+        if ( start != end )
+            dg2020_set_constant( p->channel->self, start, end - start,
+                                 type_OFF( f ) );
 
-		/* Set the area of the pulse itself */
+        /* Set the area of the pulse itself */
 
-		start = end;
-		end = p->pos + p->len + f->delay;
-		if ( start != end )
-			dg2020_set_constant( p->channel->self, start, end - start,
-								   type_ON( f ) );
-	}
+        start = end;
+        end = p->pos + p->len + f->delay;
+        if ( start != end )
+            dg2020_set_constant( p->channel->self, start, end - start,
+                                   type_ON( f ) );
+    }
 
-	/* Finally set the area following the last active pulse to the end
-	   of the sequence (take care: dg2020.max_seq_len already includes the
-	   maximum delay of all functions) */
+    /* Finally set the area following the last active pulse to the end
+       of the sequence (take care: dg2020.max_seq_len already includes the
+       maximum delay of all functions) */
 
-	if ( pp != NULL )
-	{
-		start = end;
-		end = dg2020.max_seq_len;
-		if ( start != end )
-			dg2020_set_constant( pp->channel->self, start, end - start,
-								   f->is_inverted ? HIGH : LOW );
-	}
-	else
-		dg2020_set_constant( f->channel[ 0 ]->self, -1,
-							 dg2020.max_seq_len + 1, type_OFF( f ) );
+    if ( pp != NULL )
+    {
+        start = end;
+        end = dg2020.max_seq_len;
+        if ( start != end )
+            dg2020_set_constant( pp->channel->self, start, end - start,
+                                   f->is_inverted ? HIGH : LOW );
+    }
+    else
+        dg2020_set_constant( f->channel[ 0 ]->self, -1,
+                             dg2020.max_seq_len + 1, type_OFF( f ) );
 
-	for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses; p = f->pulses[ ++i ] )
-		p->was_active = p->is_active;
+    for ( p = f->pulses[ 0 ], i = 0; i < f->num_pulses; p = f->pulses[ ++i ] )
+        p->was_active = p->is_active;
 
-	if ( f->needs_phases )
-		dg2020_set_phase_pulses( f->phase_func );
+    if ( f->needs_phases )
+        dg2020_set_phase_pulses( f->phase_func );
 }
 
 
@@ -770,42 +770,42 @@ void dg2020_set_pulses( Function_T * f )
 
 void dg2020_set_phase_pulses( Function_T * f )
 {
-	Function_T dummy_f;
-	int i;
+    Function_T dummy_f;
+    int i;
 
 
-	dummy_f.self = PULSER_CHANNEL_NO_TYPE;
-	dummy_f.is_inverted = f->is_inverted;
-	dummy_f.delay = f->delay;
-	dummy_f.needs_phases = UNSET;
+    dummy_f.self = PULSER_CHANNEL_NO_TYPE;
+    dummy_f.is_inverted = f->is_inverted;
+    dummy_f.delay = f->delay;
+    dummy_f.needs_phases = UNSET;
 
-	for ( i = 0; i < f->num_channels; i++ )
-	{
-		dummy_f.pulses = NULL;
-		dummy_f.channel[ 0 ] = f->channel[ i ];
+    for ( i = 0; i < f->num_channels; i++ )
+    {
+        dummy_f.pulses = NULL;
+        dummy_f.channel[ 0 ] = f->channel[ i ];
 
-		/* Get a sorted list of all phase pulses in this channel */
+        /* Get a sorted list of all phase pulses in this channel */
 
-		dummy_f.num_pulses = dg2020_get_phase_pulse_list( f, f->channel[ i ],
-														  &dummy_f.pulses );
-		if ( dummy_f.pulses != NULL )        /* there are pulses */
-		{
-			dg2020_set_pulses( &dummy_f );
-			T_free( dummy_f.pulses );
-		}
-		else                                 /* no pulses in this channel */
-		{
-			if ( ! f->is_inverted )
-				dg2020_set_constant( f->channel[ i ]->self, -1,
-									 dg2020.max_seq_len + 1, type_OFF( f ) );
-			else
-			{
-				dg2020_set_constant( f->channel[ i ]->self, -1, 1, LOW );
-				dg2020_set_constant( f->channel[ i ]->self, 0,
-									 dg2020.max_seq_len, type_OFF( f ) );
-			}
-		}
-	}
+        dummy_f.num_pulses = dg2020_get_phase_pulse_list( f, f->channel[ i ],
+                                                          &dummy_f.pulses );
+        if ( dummy_f.pulses != NULL )        /* there are pulses */
+        {
+            dg2020_set_pulses( &dummy_f );
+            T_free( dummy_f.pulses );
+        }
+        else                                 /* no pulses in this channel */
+        {
+            if ( ! f->is_inverted )
+                dg2020_set_constant( f->channel[ i ]->self, -1,
+                                     dg2020.max_seq_len + 1, type_OFF( f ) );
+            else
+            {
+                dg2020_set_constant( f->channel[ i ]->self, -1, 1, LOW );
+                dg2020_set_constant( f->channel[ i ]->self, 0,
+                                     dg2020.max_seq_len, type_OFF( f ) );
+            }
+        }
+    }
 }
 
 
@@ -817,91 +817,91 @@ void dg2020_set_phase_pulses( Function_T * f )
  *--------------------------------------------------------------------*/
 
 void dg2020_commit( Function_T * f,
-					bool         flag )
+                    bool         flag )
 {
-	Pulse_T *p;
-	int i;
-	Ticks start, len;
-	char *old_p, *new_p;
-	int what;
-	bool needs_changes = UNSET;
-	int ch;
+    Pulse_T *p;
+    int i;
+    Ticks start, len;
+    char *old_p, *new_p;
+    int what;
+    bool needs_changes = UNSET;
+    int ch;
 
 
-	/* As so often the phase functions need some special treatment */
+    /* As so often the phase functions need some special treatment */
 
-	if ( f->self == PULSER_CHANNEL_PHASE_1 ||
-		 f->self == PULSER_CHANNEL_PHASE_2 )
-	{
-		dg2020_commit_phases( f, flag );
-		return;
-	}
+    if ( f->self == PULSER_CHANNEL_PHASE_1 ||
+         f->self == PULSER_CHANNEL_PHASE_2 )
+    {
+        dg2020_commit_phases( f, flag );
+        return;
+    }
 
-	/* In a test run just reset the flags of all pulses that say that the
-	   pulse needs updating */
+    /* In a test run just reset the flags of all pulses that say that the
+       pulse needs updating */
 
-	if ( flag )
-	{
-		for ( i = 0; i < f->num_pulses; i++ )
-		{
-			p = f->pulses[ i ];
-			p->needs_update = UNSET;
-			p->was_active = p->is_active;
-			p->is_old_pos = p->is_old_len = UNSET;
-		}
+    if ( flag )
+    {
+        for ( i = 0; i < f->num_pulses; i++ )
+        {
+            p = f->pulses[ i ];
+            p->needs_update = UNSET;
+            p->was_active = p->is_active;
+            p->is_old_pos = p->is_old_len = UNSET;
+        }
 
-		return;
-	}
+        return;
+    }
 
-	/* In a real run we have to change the pulses. The only way to keep the
-	   number and length of commands to be sent to the pulser at a minimum
-	   while getting it right in every imaginable case is to create two images
-	   of the pulser channels state, one of the current stateand a second one
-	   of the state after the changes. These images are compared and only that
-	   parts where differences are found are either SET or RESET. Of course,
-	   that needs quite some computer time but probable is faster, or at least
-	   easier to understand and to debug, than any alternative I came up
-	   with... */
+    /* In a real run we have to change the pulses. The only way to keep the
+       number and length of commands to be sent to the pulser at a minimum
+       while getting it right in every imaginable case is to create two images
+       of the pulser channels state, one of the current stateand a second one
+       of the state after the changes. These images are compared and only that
+       parts where differences are found are either SET or RESET. Of course,
+       that needs quite some computer time but probable is faster, or at least
+       easier to understand and to debug, than any alternative I came up
+       with... */
 
-	old_p = CHAR_P T_calloc( 2 * ( size_t ) dg2020.max_seq_len, 1 );
-	new_p = old_p + dg2020.max_seq_len;
+    old_p = CHAR_P T_calloc( 2 * ( size_t ) dg2020.max_seq_len, 1 );
+    new_p = old_p + dg2020.max_seq_len;
 
-	for ( i = 0; i < f->num_pulses; i++ )
-	{
-		p = f->pulses[ i ];
-		if ( ! p->needs_update )
-		{
-			p->is_old_len = p->is_old_pos = UNSET;
-			p->was_active = p->is_active;
-			continue;
-		}
+    for ( i = 0; i < f->num_pulses; i++ )
+    {
+        p = f->pulses[ i ];
+        if ( ! p->needs_update )
+        {
+            p->is_old_len = p->is_old_pos = UNSET;
+            p->was_active = p->is_active;
+            continue;
+        }
 
-		needs_changes = SET;
+        needs_changes = SET;
 
-		if ( p->is_old_pos || p->is_old_len )
-			dg2020_set( old_p, p->is_old_pos ? p->old_pos : p->pos,
-						p->is_old_len ? p->old_len : p->len, f->delay );
-		dg2020_set( new_p, p->pos, p->len, f->delay );
+        if ( p->is_old_pos || p->is_old_len )
+            dg2020_set( old_p, p->is_old_pos ? p->old_pos : p->pos,
+                        p->is_old_len ? p->old_len : p->len, f->delay );
+        dg2020_set( new_p, p->pos, p->len, f->delay );
 
-		p->is_old_len = p->is_old_pos = UNSET;
-		if ( p->is_active )
-			p->was_active = SET;
-		p->needs_update = UNSET;
-	}
+        p->is_old_len = p->is_old_pos = UNSET;
+        if ( p->is_active )
+            p->was_active = SET;
+        p->needs_update = UNSET;
+    }
 
-	/* Find all different areas by repeatedly calling dg2020_diff() - it
+    /* Find all different areas by repeatedly calling dg2020_diff() - it
        returns +1 or -1 for setting or resetting plus the start and length of
        the different area or 0 if no differences are found anymore */
 
-	if ( needs_changes )
-	{
-		ch = f->pulses[ 0 ]->channel->self;
-		while ( ( what = dg2020_diff( old_p, new_p, &start, &len ) ) != 0 )
-			dg2020_set_constant( ch, start, len,
-								 what == -1 ? type_OFF( f ) : type_ON( f ) );
-	}
+    if ( needs_changes )
+    {
+        ch = f->pulses[ 0 ]->channel->self;
+        while ( ( what = dg2020_diff( old_p, new_p, &start, &len ) ) != 0 )
+            dg2020_set_constant( ch, start, len,
+                                 what == -1 ? type_OFF( f ) : type_ON( f ) );
+    }
 
-	T_free( old_p );
+    T_free( old_p );
 }
 
 
@@ -912,28 +912,28 @@ void dg2020_commit( Function_T * f,
  *--------------------------------------------------------------------------*/
 
 void dg2020_commit_phases( Function_T * f,
-						   bool         flag )
+                           bool         flag )
 {
-	Function_T dummy_f;
-	int i;
+    Function_T dummy_f;
+    int i;
 
 
-	dummy_f.self = PULSER_CHANNEL_NO_TYPE;
-	dummy_f.is_inverted = f->is_inverted;
-	dummy_f.delay = f->delay;
-	dummy_f.max_seq_len = f->max_seq_len;
+    dummy_f.self = PULSER_CHANNEL_NO_TYPE;
+    dummy_f.is_inverted = f->is_inverted;
+    dummy_f.delay = f->delay;
+    dummy_f.max_seq_len = f->max_seq_len;
 
-	for ( i = 0; i < f->num_channels; i++ )
-	{
-		dummy_f.pulses = NULL;
-		dummy_f.num_pulses = dg2020_get_phase_pulse_list( f, f->channel[ i ],
-														  &dummy_f.pulses );
-		if ( dummy_f.pulses != NULL )
-		{
-			dg2020_commit( &dummy_f, flag );
-			T_free( dummy_f.pulses );
-		}
-	}
+    for ( i = 0; i < f->num_channels; i++ )
+    {
+        dummy_f.pulses = NULL;
+        dummy_f.num_pulses = dg2020_get_phase_pulse_list( f, f->channel[ i ],
+                                                          &dummy_f.pulses );
+        if ( dummy_f.pulses != NULL )
+        {
+            dg2020_commit( &dummy_f, flag );
+            T_free( dummy_f.pulses );
+        }
+    }
 }
 
 
@@ -944,23 +944,25 @@ void dg2020_commit_phases( Function_T * f,
 
 void dg2020_clear_padding_block( Function_T * f )
 {
-	int i;
+    int i;
 
 
-	if ( ! f->is_used ||
-		 ! dg2020.block[ 1 ].is_used )
-		return;
+    if ( ! f->is_used ||
+         ! dg2020.block[ 1 ].is_used )
+        return;
 
-	for ( i = 0; i < f->num_channels; i++ )
-		dg2020_set_constant( f->channel[ i ]->self,
-							 dg2020.block[ 1 ].start - 1,
-							 dg2020.mem_size - dg2020.block[ 1 ].start,
-							 type_OFF( f ) );
+    for ( i = 0; i < f->num_channels; i++ )
+        dg2020_set_constant( f->channel[ i ]->self,
+                             dg2020.block[ 1 ].start - 1,
+                             dg2020.mem_size - dg2020.block[ 1 ].start,
+                             type_OFF( f ) );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

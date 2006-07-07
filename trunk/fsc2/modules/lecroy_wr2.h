@@ -198,14 +198,14 @@ typedef struct HORI_RES HORI_RES_T;
    the area between the pair of cursors */
 
 struct Window {
-	long num;                   /* number of window                          */
-	double start;               /* start of window (in time units)           */
-	double width;               /* width of window (in time units)           */
-	long start_num;				/* first point of window                     */
-	long end_num;				/* last point of window                      */
-	long num_points;            /* number of data points between the cursors */
-	Window_T *next;             /* pointer to next window structure          */
-	Window_T *prev;             /* pointer to previous window structure      */
+    long num;                   /* number of window                          */
+    double start;               /* start of window (in time units)           */
+    double width;               /* width of window (in time units)           */
+    long start_num;             /* first point of window                     */
+    long end_num;               /* last point of window                      */
+    long num_points;            /* number of data points between the cursors */
+    Window_T *next;             /* pointer to next window structure          */
+    Window_T *prev;             /* pointer to previous window structure      */
 };
 
 
@@ -215,82 +215,82 @@ struct Window {
 
 
 struct HORI_RES {
-	double tpp;         /* time resolution (SINGLE SHOT mode) */
-	long   ppd;         /* points per division (SINGLE SHOT mode) */
-	double tpp_ris;     /* time resolution (RIS mode)  */
-	long   ppd_ris;     /* points per division (RIS mode) */
+    double tpp;         /* time resolution (SINGLE SHOT mode) */
+    long   ppd;         /* points per division (SINGLE SHOT mode) */
+    double tpp_ris;     /* time resolution (RIS mode)  */
+    long   ppd_ris;     /* points per division (RIS mode) */
 };
 
 
 struct LECROY_WR2 {
-	int device;
+    int device;
 
-	unsigned int INR;
+    unsigned int INR;
 
-	bool is_displayed[ LECROY_WR2_MAX_CHANNELS ];
+    bool is_displayed[ LECROY_WR2_MAX_CHANNELS ];
 
-	int num_used_channels;
+    int num_used_channels;
 
-	double timebase;
-	int tb_index;           /* index into 'tbas' for current timebase */
-	bool is_timebase;
+    double timebase;
+    int tb_index;           /* index into 'tbas' for current timebase */
+    bool is_timebase;
 
-	bool interleaved;       /* set if in RIS mode, unset in SINGLE SHOT mode */
-	bool is_interleaved;
+    bool interleaved;       /* set if in RIS mode, unset in SINGLE SHOT mode */
+    bool is_interleaved;
 
-	long num_mem_sizes;      /* number of memory size settings */
-	long *mem_sizes;         /* allowed memory size settings */
+    long num_mem_sizes;      /* number of memory size settings */
+    long *mem_sizes;         /* allowed memory size settings */
 
-	long mem_size;
-	int ms_index;           /* index into 'mem_sizes' for current setting */
-	bool is_mem_size;
+    long mem_size;
+    int ms_index;           /* index into 'mem_sizes' for current setting */
+    bool is_mem_size;
 
-	double sens[ LECROY_WR2_MAX_CHANNELS ];
-	bool is_sens[ LECROY_WR2_MAX_CHANNELS ];
+    double sens[ LECROY_WR2_MAX_CHANNELS ];
+    bool is_sens[ LECROY_WR2_MAX_CHANNELS ];
 
-	double offset[ LECROY_WR2_MAX_CHANNELS ];
-	bool is_offset[ LECROY_WR2_MAX_CHANNELS ];
+    double offset[ LECROY_WR2_MAX_CHANNELS ];
+    bool is_offset[ LECROY_WR2_MAX_CHANNELS ];
 
-	int bandwidth_limiter[ LECROY_WR2_MAX_CHANNELS ];
-	bool is_bandwidth_limiter[ LECROY_WR2_MAX_CHANNELS ];
+    int bandwidth_limiter[ LECROY_WR2_MAX_CHANNELS ];
+    bool is_bandwidth_limiter[ LECROY_WR2_MAX_CHANNELS ];
 
-	int coupling[ LECROY_WR2_MAX_CHANNELS ];
-	bool is_coupling[ LECROY_WR2_MAX_CHANNELS ];
+    int coupling[ LECROY_WR2_MAX_CHANNELS ];
+    bool is_coupling[ LECROY_WR2_MAX_CHANNELS ];
 
-	int trigger_source;
-	bool is_trigger_source;
+    int trigger_source;
+    bool is_trigger_source;
 
-	double trigger_level[ LECROY_WR2_MAX_CHANNELS ];
-	bool is_trigger_level[ LECROY_WR2_MAX_CHANNELS ];
+    double trigger_level[ LECROY_WR2_MAX_CHANNELS ];
+    bool is_trigger_level[ LECROY_WR2_MAX_CHANNELS ];
 
-	bool trigger_slope[ LECROY_WR2_MAX_CHANNELS ];
-	bool is_trigger_slope[ LECROY_WR2_MAX_CHANNELS ];
+    bool trigger_slope[ LECROY_WR2_MAX_CHANNELS ];
+    bool is_trigger_slope[ LECROY_WR2_MAX_CHANNELS ];
 
-	int trigger_coupling[ LECROY_WR2_MAX_CHANNELS ];
-	bool is_trigger_coupling[ LECROY_WR2_MAX_CHANNELS ];
+    int trigger_coupling[ LECROY_WR2_MAX_CHANNELS ];
+    bool is_trigger_coupling[ LECROY_WR2_MAX_CHANNELS ];
 
-	double trigger_delay;
-	bool is_trigger_delay;
+    double trigger_delay;
+    bool is_trigger_delay;
 
-	int trigger_mode;
-	bool is_trigger_mode;
+    int trigger_mode;
+    bool is_trigger_mode;
 
-	bool is_avg_setup[ LECROY_WR2_MAX_CHANNELS ];
-	long source_ch[ LECROY_WR2_MAX_CHANNELS ];
-	long num_avg[ LECROY_WR2_MAX_CHANNELS ];
+    bool is_avg_setup[ LECROY_WR2_MAX_CHANNELS ];
+    long source_ch[ LECROY_WR2_MAX_CHANNELS ];
+    long num_avg[ LECROY_WR2_MAX_CHANNELS ];
 
-	Window_T *w;           /* start element of list of windows               */
-	int num_windows;
+    Window_T *w;           /* start element of list of windows               */
+    int num_windows;
 
-	bool channels_in_use[ LECROY_WR2_MAX_CHANNELS ];
+    bool channels_in_use[ LECROY_WR2_MAX_CHANNELS ];
 
-	long num_tbas;           /* number of timebase settings */
-	double *tbas;            /* allowed timebase settings */
+    long num_tbas;           /* number of timebase settings */
+    double *tbas;            /* allowed timebase settings */
 
-	HORI_RES_T **hres;       /* table of points per division and time reso-
-								lutions for the different record lengths
-								and timebases */
-	HORI_RES_T *cur_hres;    /* pointer into table to current settings */
+    HORI_RES_T **hres;       /* table of points per division and time reso-
+                                lutions for the different record lengths
+                                and timebases */
+    HORI_RES_T *cur_hres;    /* pointer into table to current settings */
 };
 
 
@@ -300,8 +300,8 @@ extern bool lecroy_wr2_IN_SETUP;
 
 
 enum {
-	SAMPLE,
-	AVERAGE
+    SAMPLE,
+    AVERAGE
 };
 
 
@@ -366,22 +366,22 @@ bool lecroy_wr2_set_memory_size( long /* mem_size */ );
 double lecroy_wr2_get_sens( int /* channel */ );
 
 bool lecroy_wr2_set_sens( int    /* channel */,
-						  double /* sens    */ );
+                          double /* sens    */ );
 
 double lecroy_wr2_get_offset( int /* channel */ );
 
 bool lecroy_wr2_set_offset( int    /* channel */,
-							double /* offset  */ );
+                            double /* offset  */ );
 
 int lecroy_wr2_get_coupling( int /* channel */ );
 
 bool lecroy_wr2_set_coupling( int /* channel */,
-							  int /* type    */ );
+                              int /* type    */ );
 
 int lecroy_wr2_get_bandwidth_limiter( int /* channel */ );
 
 bool lecroy_wr2_set_bandwidth_limiter( int /* channel */,
-									   int /* bwl     */ );
+                                       int /* bwl     */ );
 
 int lecroy_wr2_get_trigger_source( void );
 
@@ -390,17 +390,17 @@ bool lecroy_wr2_set_trigger_source( int /* channel */ );
 double lecroy_wr2_get_trigger_level( int /* channel */ );
 
 bool lecroy_wr2_set_trigger_level( int    /* channel */,
-								   double /* level   */ );
+                                   double /* level   */ );
 
 bool lecroy_wr2_get_trigger_slope( int /* channel */ );
 
 bool lecroy_wr2_set_trigger_slope( int  /* channel */,
-								   bool /* slope   */ );
+                                   bool /* slope   */ );
 
 int lecroy_wr2_get_trigger_coupling( int /* channel */ );
 
 int lecroy_wr2_set_trigger_coupling( int /* channel */,
-									 int /* cpl     */ );
+                                     int /* cpl     */ );
 
 int lecroy_wr2_get_trigger_mode( void );
 
@@ -413,34 +413,34 @@ bool lecroy_wr2_set_trigger_delay( double /* delay */ );
 bool lecroy_wr2_is_displayed( int /* channel */ );
 
 bool lecroy_wr2_display( int /* channel */,
-						 int /* on_off  */ );
+                         int /* on_off  */ );
 
 long lecroy_wr2_get_num_avg( int /* channel */ );
 
 bool lecroy_wr2_get_desc( int /* channel */ );
 
 void lecroy_wr2_set_up_averaging( long /* channel */,
-								  long /* source  */,
-								  long /* num_avg */,
-								  long /* rec_len */ );
+                                  long /* source  */,
+                                  long /* num_avg */,
+                                  long /* rec_len */ );
 
 void lecroy_wr2_finished( void );
 
 void lecroy_wr2_start_acquisition( void );
 
 void lecroy_wr2_get_curve( int        /* ch     */,
-						   Window_T * /* w      */,
-						   double **  /* array  */,
-						   long *     /* length */ );
+                           Window_T * /* w      */,
+                           double **  /* array  */,
+                           long *     /* length */ );
 
 double lecroy_wr2_get_area( int        /* ch */,
-							Window_T * /* w  */ );
+                            Window_T * /* w  */ );
 
 double lecroy_wr2_get_amplitude( int        /* ch */,
-								 Window_T * /* w  */ );
+                                 Window_T * /* w  */ );
 
 void lecroy_wr2_copy_curve( long /* src  */,
-							long /* dest */ );
+                            long /* dest */ );
 
 bool lecroy_wr2_command( const char * /* cmd */ );
 
@@ -455,18 +455,18 @@ Window_T *lecroy_wr2_get_window_by_number( long /* wid */ );
 void lecroy_wr2_all_windows_check( void );
 
 void lecroy_wr2_window_check( Window_T * /* w        */,
-							  bool       /* show_num */ );
+                              bool       /* show_num */ );
 
 long lecroy_wr2_curve_length( void );
 
 double lecroy_wr2_time_per_point( void );
 
 long lecroy_wr2_translate_channel( int  /* dir     */,
-								   long /* channel */,
-								   bool /* flag    */ );
+                                   long /* channel */,
+                                   bool /* flag    */ );
 
 void lecroy_wr2_store_state( LECROY_WR2_T * /* dest */,
-							 LECROY_WR2_T * /* src  */ );
+                             LECROY_WR2_T * /* src  */ );
 
 
 void lecroy_wr2_numpoints_prep( void );
@@ -480,5 +480,7 @@ void lecroy_wr2_clean_up( void );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

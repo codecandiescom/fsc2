@@ -50,19 +50,24 @@
 prefix             := /usr/local
 
 
-# Next the owner and the group of fsc2 all files that will be installed has
-# to be set. I would recommended to create a special account for the program,
-# with 'fsc2' being the natural choice (which is also the default). The group
-# that owns the files, especially the executable fsc2 should be one that
-# allows access to the device files. See the longer discussion in section B
-# of the INSTALL file.
+# Next the owner and the group of fsc2 all files that will be installed can
+# be set. Per default (i.e. when these variables aren't set) fsc2 will run
+# with the privileges of the root account (but will drop them to the ones
+# of the user running the program except in situations where the higher
+# permissions are required). I.e. the program will run with the UID and GID
+# of the root account. If you should feel uneasy about that there's the
+# alternative of setting both or at least one of them. If both are set
+# the program will run with the UID of the account USER is set to. If only
+# GROUP is set the program will will run with the GID of that group. If only
+# USER is set it will run with the UID of that account. Please also see the
+# discussion in the INSTALL file for more information.
 
-OWNER              := fsc2
-GROUP              := uucp
+# OWNER              := fsc2
+# GROUP              := uucp
 
 
 # The next variable should only be set for very old Linux systems where
-# linker map files don't really work and the program crashes after loading
+# linker map files don't work and the program crashes after loading
 # a module. Only in that case the following line should be activated.
 
 # NO_VERSION_SCRIPTS := yes
@@ -716,14 +721,21 @@ ifdef DEF_INCL_DIR
 endif
 
 
-# Make sure some owner and group for the program are set
-
-ifndef OWNER
-	OWNER := fsc2
-endif
+# Make sure some owner and group for the program are set and we know how
+# to set up the program (setuid'ed, setgid'ed or both)
 
 ifndef GROUP
-	GROUP := uucp
+	GROUP := root
+ifdef OWNER
+	ONLY_SETUID := 1
+else
+	OWNER := root
+endif
+endif
+else
+ifndef OWNER
+	ONLY_SETGID := 1
+endif
 endif
 
 

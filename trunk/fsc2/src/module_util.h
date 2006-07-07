@@ -41,73 +41,73 @@ void too_many_arguments( Var_T * /* v */ );
 void no_query_possible( void );
 
 long get_long( Var_T *      /* v       */,
-			   const char * /* snippet */ );
+               const char * /* snippet */ );
 
 double get_double( Var_T *      /* v       */,
-				   const char * /* snippet */ );
+                   const char * /* snippet */ );
 
 long get_strict_long( Var_T *      /* v       */,
-					  const char * /* snippet */ );
+                      const char * /* snippet */ );
 
 bool get_boolean( Var_T * /* v */ );
 
 Var_T *get_element( Var_T * /* v   */,
-					int     /* len */,
-					... );
+                    int     /* len */,
+                    ... );
 
 double is_mult_ns( double       /* val  */,
-				   const char * /* text */ );
+                   const char * /* text */ );
 
 char *translate_escape_sequences( char * /* str */ );
 
 double experiment_time( void );
 
 FILE *fsc2_fopen( const char * /* path */,
-				  const char * /* mode */ );
+                  const char * /* mode */ );
 
 int fsc2_fscanf( FILE *       /* stream */,
-				 const char * /* format */,
-				 ... );
+                 const char * /* format */,
+                 ... );
 
 size_t fsc2_fread( void  * /* ptr    */,
-				   size_t  /* size   */,
-				   size_t  /* nmemb  */,
-				   FILE *  /* stream */ );
+                   size_t  /* size   */,
+                   size_t  /* nmemb  */,
+                   FILE *  /* stream */ );
 
 int fsc2_fprintf( FILE *       /* stream */,
-				  const char * /* format */,
-				  ... );
+                  const char * /* format */,
+                  ... );
 
 size_t fsc2_fwrite( void  * /* ptr    */,
-					size_t  /* size   */,
-					size_t  /* nmemb  */,
-					FILE *  /* stream */ );
+                    size_t  /* size   */,
+                    size_t  /* nmemb  */,
+                    FILE *  /* stream */ );
 
 int fsc2_fgetc( FILE * /* stream */ );
 
 int fsc2_getc( FILE * /* stream */ );
 
 char *fsc2_fgets( char * /* s      */,
-				  int    /* size   */,
-				  FILE * /* stream */ );
+                  int    /* size   */,
+                  FILE * /* stream */ );
 
 int fsc2_ungetc( int    /* c      */,
-				 FILE * /* stream */ );
+                 FILE * /* stream */ );
 
 int fsc2_fseek( FILE * /* stream */,
-				long   /* offset */,
-				int    /* whence */ );
+                long   /* offset */,
+                int    /* whence */ );
 
 long fsc2_ftell( FILE * /* stream */ );
 
 int fsc2_fputc( int    /* c      */,
-				FILE * /* stream */ );
+                FILE * /* stream */ );
 
 int fsc2_fputs( const char * /* s      */,
-				FILE *       /* stream */ );
+                FILE *       /* stream */ );
 
 int fsc2_putc( int    /* c      */,
-			   FILE * /* stream */ );
+               FILE * /* stream */ );
 
 int fsc2_fclose( FILE * /* stream */ );
 
@@ -115,8 +115,8 @@ const char *fsc2_config_dir( void );
 
 
 #define MODULE_CALL_ESTIMATE   0.02   /* 20 ms per module function call -
-										 estimate for calculation of time in
-										 test run via experiment_time() */
+                                         estimate for calculation of time in
+                                         test run via experiment_time() */
 
 
 #endif  /* ! MODULE_UTIL_HEADER */
@@ -125,5 +125,7 @@ const char *fsc2_config_dir( void );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

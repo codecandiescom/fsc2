@@ -89,11 +89,11 @@ typedef unsigned int socklen_t;
 #define P_tmpdir   "/tmp"
 extern int mkstemp( char * template );
 extern int fchmod( int    fildes,
-				   mode_t mode );
+                   mode_t mode );
 extern int snprintf( char *        str,
-					 size_t        size,
-					 const  char * format,
-					 ... );
+                     size_t        size,
+                     const  char * format,
+                     ... );
 #endif
 
 /* FSC2_SOCKET must be identical to the definition in fsc2.h ! */
@@ -106,23 +106,23 @@ extern int snprintf( char *        str,
 void make_tmp_file( char * fname );
 int open_fsc2_socket( const char * fname );
 void start_fsc2( char * pname,
-				 char * fname,
-				 int    wait_flag );
+                 char * fname,
+                 int    wait_flag );
 void sig_handler( int signo );
 void contact_fsc2( int    sock_fd,
-				   char * pname,
-				   char * fname );
+                   char * pname,
+                   char * fname );
 void clean_up( const char * fname,
-			   int          sock_fd,
-			   int          ret_val );
+               int          sock_fd,
+               int          ret_val );
 ssize_t writen( int          fd,
-				const void * vptr,
-				size_t       n );
+                const void * vptr,
+                size_t       n );
 ssize_t read_line( int    fd,
-				   void * vptr,
-				   size_t max_len );
+                   void * vptr,
+                   size_t max_len );
 ssize_t do_read( int    fd,
-				 char * ptr );
+                 char * ptr );
 
 
 static volatile sig_atomic_t Sig_type = 0;
@@ -139,22 +139,22 @@ static volatile sig_atomic_t Sig_type = 0;
 
 int main( int argc, char * argv[ ] )
 {
-	char fname[ ] = P_tmpdir "/fsc2.edl.XXXXXX";
-	int sock_fd;
+    char fname[ ] = P_tmpdir "/fsc2.edl.XXXXXX";
+    int sock_fd;
 
 
-	make_tmp_file( fname );
-	if ( ( sock_fd = open_fsc2_socket( fname ) ) == -1 )
-	{
-		if ( argc == 1 || strcmp( argv[ 1 ], "-w" ) )
-			start_fsc2( argv[ 0 ], fname, 0 );
-		else
-			start_fsc2( argv[ 0 ], fname, 1 );
-	}
-	else
-		contact_fsc2( sock_fd, argv[ 0 ], fname );
+    make_tmp_file( fname );
+    if ( ( sock_fd = open_fsc2_socket( fname ) ) == -1 )
+    {
+        if ( argc == 1 || strcmp( argv[ 1 ], "-w" ) )
+            start_fsc2( argv[ 0 ], fname, 0 );
+        else
+            start_fsc2( argv[ 0 ], fname, 1 );
+    }
+    else
+        contact_fsc2( sock_fd, argv[ 0 ], fname );
 
-	return 0;
+    return 0;
 }
 
 
@@ -163,43 +163,43 @@ int main( int argc, char * argv[ ] )
 
 void make_tmp_file( char * fname )
 {
-	int tmp;
-	ssize_t bytes_read;
-	char line[ MAXLINE ];
+    int tmp;
+    ssize_t bytes_read;
+    char line[ MAXLINE ];
 
 
-	/* Try to open a temporary file */
+    /* Try to open a temporary file */
 
-	if ( ( tmp = mkstemp( fname ) ) < 0 )
-		exit( -1 );
+    if ( ( tmp = mkstemp( fname ) ) < 0 )
+        exit( -1 );
 
-	fchmod( tmp, S_IRUSR | S_IWUSR );
+    fchmod( tmp, S_IRUSR | S_IWUSR );
 
-	/* Now read in from stdin and write into the temporary file */
+    /* Now read in from stdin and write into the temporary file */
 
-	while ( ( bytes_read = read( 0, line, MAXLINE ) ) != 0 )
-	{
-		if ( bytes_read == -1 )
-		{
-			if ( errno == EINTR )
-				continue;
-			else
-			{
-				close( tmp );
-				unlink( fname );
-				exit( -1 );
-			}
-		}
+    while ( ( bytes_read = read( 0, line, MAXLINE ) ) != 0 )
+    {
+        if ( bytes_read == -1 )
+        {
+            if ( errno == EINTR )
+                continue;
+            else
+            {
+                close( tmp );
+                unlink( fname );
+                exit( -1 );
+            }
+        }
 
-		if ( write( tmp, line, ( size_t ) bytes_read ) != bytes_read )
-		{
-			close( tmp );
-			unlink( fname );
-			exit( -1 );
-		}
-	}
+        if ( write( tmp, line, ( size_t ) bytes_read ) != bytes_read )
+        {
+            close( tmp );
+            unlink( fname );
+            exit( -1 );
+        }
+    }
 
-	close( tmp );
+    close( tmp );
 }
 
 
@@ -208,50 +208,50 @@ void make_tmp_file( char * fname )
 
 int open_fsc2_socket( const char * fname )
 {
-	int sock_fd;
-	struct sockaddr_un serv_addr;
+    int sock_fd;
+    struct sockaddr_un serv_addr;
 
 
-	/* Out of paranoia make sure the name of the socket file isn't
-	   larger than the char array we're going to copy it to... */
+    /* Out of paranoia make sure the name of the socket file isn't
+       larger than the char array we're going to copy it to... */
 
-	if ( strlen( FSC2_SOCKET ) >= sizeof serv_addr.sun_path )
-	{
-		unlink( fname );
-		exit( -1 );
-	}
+    if ( strlen( FSC2_SOCKET ) >= sizeof serv_addr.sun_path )
+    {
+        unlink( fname );
+        exit( -1 );
+    }
 
-	/* Try to get a socket */
+    /* Try to get a socket */
 
-	if ( ( sock_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )
-	{
-		unlink( fname );
-		exit( -1 );
-	}
+    if ( ( sock_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )
+    {
+        unlink( fname );
+        exit( -1 );
+    }
 
-	memset( &serv_addr, 0, sizeof( serv_addr ) );
-	serv_addr.sun_family = AF_UNIX;
-	strcpy( serv_addr.sun_path, FSC2_SOCKET );
+    memset( &serv_addr, 0, sizeof( serv_addr ) );
+    serv_addr.sun_family = AF_UNIX;
+    strcpy( serv_addr.sun_path, FSC2_SOCKET );
 
-	/* If connect fails due to connection refused or because there's no socket
-	   file (or it exists but isn't a socket file) it means fsc2 isn't running
-	   and we've got to start it */
+    /* If connect fails due to connection refused or because there's no socket
+       file (or it exists but isn't a socket file) it means fsc2 isn't running
+       and we've got to start it */
 
-	if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
-				  sizeof( serv_addr ) ) == -1 )
-	{
-		if ( errno == ECONNREFUSED || errno == ENOENT || errno == ENOTSOCK )
-		{
-			close( sock_fd );
-			return -1;
-		}
+    if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
+                  sizeof( serv_addr ) ) == -1 )
+    {
+        if ( errno == ECONNREFUSED || errno == ENOENT || errno == ENOTSOCK )
+        {
+            close( sock_fd );
+            return -1;
+        }
 
-		/* Bomb out on other errors */
+        /* Bomb out on other errors */
 
-		clean_up( fname, sock_fd, -1 );
-	}
+        clean_up( fname, sock_fd, -1 );
+    }
 
-	return sock_fd;
+    return sock_fd;
 }
 
 
@@ -259,83 +259,83 @@ int open_fsc2_socket( const char * fname )
  *-----------------------------------------------------------*/
 
 void start_fsc2( char * pname,
-				 char * fname,
-				 int    wait_flag )
+                 char * fname,
+                 int    wait_flag )
 {
-	char *av[ 6 ] = { NULL, NULL, NULL, NULL, NULL, NULL };
-	int ac = 0;
-	char *prog_name;
-	pid_t new_pid;
-	char flags[ 5 ][ 9 ] = { "--delete", "-s", "-S", "-T", "-I" };
+    char *av[ 6 ] = { NULL, NULL, NULL, NULL, NULL, NULL };
+    int ac = 0;
+    char *prog_name;
+    pid_t new_pid;
+    char flags[ 5 ][ 9 ] = { "--delete", "-s", "-S", "-T", "-I" };
 
 
-	if ( NULL == ( av[ 0 ] =
-				 CHAR_P malloc( ( bindir ? strlen( bindir ) + 1 : 0 ) + 6 ) ) )
-	{
-		unlink ( fname );
-		exit( -1 );
-	}
+    if ( NULL == ( av[ 0 ] =
+                 CHAR_P malloc( ( bindir ? strlen( bindir ) + 1 : 0 ) + 6 ) ) )
+    {
+        unlink ( fname );
+        exit( -1 );
+    }
 
-	if ( bindir )
-		strcpy( av[ 0 ], bindir );
-	if ( bindir != NULL && av[ 0 ][ strlen( av[ 0 ] ) - 1 ] != '/' )
-		strcat( av[ 0 ], "/" );
-	strcat( av[ ac++ ], "fsc2" );
+    if ( bindir )
+        strcpy( av[ 0 ], bindir );
+    if ( bindir != NULL && av[ 0 ][ strlen( av[ 0 ] ) - 1 ] != '/' )
+        strcat( av[ 0 ], "/" );
+    strcat( av[ ac++ ], "fsc2" );
 
-	av[ ac++ ] = flags[ 0 ];
-	av[ ac++ ] = flags[ 1 ];
+    av[ ac++ ] = flags[ 0 ];
+    av[ ac++ ] = flags[ 1 ];
 
-	if ( ( prog_name = strrchr( pname, '/' ) ) != NULL )
-		prog_name++;
-	else
-		prog_name = pname;
+    if ( ( prog_name = strrchr( pname, '/' ) ) != NULL )
+        prog_name++;
+    else
+        prog_name = pname;
 
-	if ( ! strcmp( prog_name, "fsc2_start" ) )
-		av[ ac++ ] = flags[ 2 ];
-	else if ( ! strcmp( prog_name, "fsc2_test" ) )
-		av[ ac++ ] = flags[ 3 ];
-	else if ( ! strcmp( prog_name, "fsc2_iconic_start" ) )
-		av[ ac++ ] = flags[ 4 ];
-	else if ( strcmp( prog_name, "fsc2_load" ) &&
-			  strcmp( prog_name, "fsc2_connect" ) )
-	{
-		free( av[ 0 ] );
-		unlink( fname );
-		exit( -1 );
-	}
+    if ( ! strcmp( prog_name, "fsc2_start" ) )
+        av[ ac++ ] = flags[ 2 ];
+    else if ( ! strcmp( prog_name, "fsc2_test" ) )
+        av[ ac++ ] = flags[ 3 ];
+    else if ( ! strcmp( prog_name, "fsc2_iconic_start" ) )
+        av[ ac++ ] = flags[ 4 ];
+    else if ( strcmp( prog_name, "fsc2_load" ) &&
+              strcmp( prog_name, "fsc2_connect" ) )
+    {
+        free( av[ 0 ] );
+        unlink( fname );
+        exit( -1 );
+    }
 
-	av[ ac++ ] = fname;
+    av[ ac++ ] = fname;
 
-	signal( SIGUSR1, sig_handler );
-	signal( SIGCHLD, sig_handler );
+    signal( SIGUSR1, sig_handler );
+    signal( SIGCHLD, sig_handler );
 
-	if ( ( new_pid = fork( ) ) == 0 )
-	{
-		execvp( av[ 0 ], av );
-		_exit( -1 );                 /* kill child on failed execvp() */
-	}
+    if ( ( new_pid = fork( ) ) == 0 )
+    {
+        execvp( av[ 0 ], av );
+        _exit( -1 );                 /* kill child on failed execvp() */
+    }
 
-	free( av[ 0 ] );
+    free( av[ 0 ] );
 
-	if ( new_pid < 0 )               /* fork failed ? */
-	{
-		unlink( fname );
-		exit( -1 ) ;
-	}
+    if ( new_pid < 0 )               /* fork failed ? */
+    {
+        unlink( fname );
+        exit( -1 ) ;
+    }
 
-	while ( ! Sig_type )
-	{
-		pause( );                    /* wait for fsc2 to send signal or fail */
+    while ( ! Sig_type )
+    {
+        pause( );                    /* wait for fsc2 to send signal or fail */
 
-		if ( Sig_type == SIGCHLD )   /* fsc2 failed to start */
-		{
-			unlink( fname );
-			exit( 4 );
-		}
-	}
+        if ( Sig_type == SIGCHLD )   /* fsc2 failed to start */
+        {
+            unlink( fname );
+            exit( 4 );
+        }
+    }
 
-	if ( wait_flag )
-		waitpid( new_pid, NULL, 0 );
+    if ( wait_flag )
+        waitpid( new_pid, NULL, 0 );
 }
 
 
@@ -344,12 +344,12 @@ void start_fsc2( char * pname,
 
 void sig_handler( int signo )
 {
-	/* Bomb out on unexpected signals */
+    /* Bomb out on unexpected signals */
 
-	if ( signo != SIGCHLD && signo != SIGUSR1 )
-		exit( -1 );
+    if ( signo != SIGCHLD && signo != SIGUSR1 )
+        exit( -1 );
 
-	Sig_type = signo;
+    Sig_type = signo;
 }
 
 
@@ -357,94 +357,94 @@ void sig_handler( int signo )
  *-----------------------------------------------------------*/
 
 void contact_fsc2( int    sock_fd,
-				   char * pname,
-				   char * fname )
+                   char * pname,
+                   char * fname )
 {
-	char line[ MAXLINE ];
-	char *prog_name;
+    char line[ MAXLINE ];
+    char *prog_name;
 
 
-	/* Send UID to fsc2 as credential */
+    /* Send UID to fsc2 as credential */
 
-	sprintf( line, "%d\n", getuid( ) );
-	if ( writen( sock_fd, line, strlen( line ) )
-		 != ( ssize_t ) strlen( line ) )
-		clean_up( fname, sock_fd, -1 );
+    sprintf( line, "%d\n", getuid( ) );
+    if ( writen( sock_fd, line, strlen( line ) )
+         != ( ssize_t ) strlen( line ) )
+        clean_up( fname, sock_fd, -1 );
 
-	if ( read_line( sock_fd, line, MAXLINE ) <= 0 )
-		clean_up( fname, sock_fd, -1 );
+    if ( read_line( sock_fd, line, MAXLINE ) <= 0 )
+        clean_up( fname, sock_fd, -1 );
 
-	if ( ! strcmp( line, "FAIL\n" ) )
-		clean_up( fname, sock_fd, 1 );
+    if ( ! strcmp( line, "FAIL\n" ) )
+        clean_up( fname, sock_fd, 1 );
 
-	if ( ! strcmp( line, "BUSY\n" ) )
-		clean_up( fname, sock_fd, 2 );
+    if ( ! strcmp( line, "BUSY\n" ) )
+        clean_up( fname, sock_fd, 2 );
 
-	if ( strcmp( line, "OK\n" ) )                /* unexpected reply */
-		clean_up( fname, sock_fd, -1 );
+    if ( strcmp( line, "OK\n" ) )                /* unexpected reply */
+        clean_up( fname, sock_fd, -1 );
 
-	/* Assemble second string to send, the first character is the method ('S'
-	   for start, 'T' for test, 'I' to start with the main window in iconic
-	   state or 'L' for load). The method is deduced from the name the program
-	   was called with - if a non-standard name was used this is an error. The
-	   second character is always 'd', telling fsc2 to delete the temporary
-	   files when it's done with it. */
+    /* Assemble second string to send, the first character is the method ('S'
+       for start, 'T' for test, 'I' to start with the main window in iconic
+       state or 'L' for load). The method is deduced from the name the program
+       was called with - if a non-standard name was used this is an error. The
+       second character is always 'd', telling fsc2 to delete the temporary
+       files when it's done with it. */
 
-	if ( ( prog_name = strrchr( pname, '/' ) ) != NULL )
-		prog_name++;
-	else
-		prog_name = pname;
-	strcpy( line, " d\n" );
+    if ( ( prog_name = strrchr( pname, '/' ) ) != NULL )
+        prog_name++;
+    else
+        prog_name = pname;
+    strcpy( line, " d\n" );
 
-	if ( ! strcmp( prog_name, "fsc2_start" ) )
-		line[ 0 ] = 'S';
-	if ( ! strcmp( prog_name, "fsc2_test" ) )
-		line[ 0 ] = 'T';
-	if ( ! strcmp( prog_name, "fsc2_iconic_start" ) )
-		line[ 0 ] = 'I';
-	if ( ! strcmp( prog_name, "fsc2_load" ) ||
-		 ! strcmp( prog_name, "fsc2_connect" ) )
-		line[ 0 ] = 'L';
+    if ( ! strcmp( prog_name, "fsc2_start" ) )
+        line[ 0 ] = 'S';
+    if ( ! strcmp( prog_name, "fsc2_test" ) )
+        line[ 0 ] = 'T';
+    if ( ! strcmp( prog_name, "fsc2_iconic_start" ) )
+        line[ 0 ] = 'I';
+    if ( ! strcmp( prog_name, "fsc2_load" ) ||
+         ! strcmp( prog_name, "fsc2_connect" ) )
+        line[ 0 ] = 'L';
 
-	if ( line[ 0 ] == ' ' )
-		clean_up( fname, sock_fd, -1 );
+    if ( line[ 0 ] == ' ' )
+        clean_up( fname, sock_fd, -1 );
 
-	/* Now tell fsc2 the method - it can either reply with "BUSY\n" or with
+    /* Now tell fsc2 the method - it can either reply with "BUSY\n" or with
        "OK\n" */
 
-	if ( writen( sock_fd, line, strlen( line ) )
-		 != ( ssize_t ) strlen( line ) )                 /* can't write */
-		clean_up( fname, sock_fd, -1 );
+    if ( writen( sock_fd, line, strlen( line ) )
+         != ( ssize_t ) strlen( line ) )                 /* can't write */
+        clean_up( fname, sock_fd, -1 );
 
-	if ( read_line( sock_fd, line, MAXLINE ) <= 0 )      /* unexpected reply */
-		clean_up( fname, sock_fd, -1 );
+    if ( read_line( sock_fd, line, MAXLINE ) <= 0 )      /* unexpected reply */
+        clean_up( fname, sock_fd, -1 );
 
-	if ( ! strcmp( line, "BUSY\n" ) )
-		clean_up( fname, sock_fd, 2 );
+    if ( ! strcmp( line, "BUSY\n" ) )
+        clean_up( fname, sock_fd, 2 );
 
-	if ( strcmp( line, "OK\n" ) )                        /* unexpected reply */
-		clean_up( fname, sock_fd, -1 );
+    if ( strcmp( line, "OK\n" ) )                        /* unexpected reply */
+        clean_up( fname, sock_fd, -1 );
 
-	/* Finally tell fsc2 the name of the temporary file */
+    /* Finally tell fsc2 the name of the temporary file */
 
-	snprintf( line, MAXLINE - 2, "%s\n", fname );
-	if ( writen( sock_fd, line, strlen( line ) )
-		 != ( ssize_t ) strlen( line ) )                 /* can't write */
-		clean_up( fname, sock_fd, -1 );
+    snprintf( line, MAXLINE - 2, "%s\n", fname );
+    if ( writen( sock_fd, line, strlen( line ) )
+         != ( ssize_t ) strlen( line ) )                 /* can't write */
+        clean_up( fname, sock_fd, -1 );
 
-	if ( read_line( sock_fd, line, MAXLINE - 2 ) <= 0 )  /* unexpected reply */
-		clean_up( fname, sock_fd, -1 );
+    if ( read_line( sock_fd, line, MAXLINE - 2 ) <= 0 )  /* unexpected reply */
+        clean_up( fname, sock_fd, -1 );
 
-	if ( ! strcmp( line, "FAIL\n" ) )
-		clean_up( fname, sock_fd, 3 );
+    if ( ! strcmp( line, "FAIL\n" ) )
+        clean_up( fname, sock_fd, 3 );
 
-	if ( ! strcmp( line, "BUSY\n" ) )
-		clean_up( fname, sock_fd, 2 );
+    if ( ! strcmp( line, "BUSY\n" ) )
+        clean_up( fname, sock_fd, 2 );
 
-	if ( strcmp( line, "OK\n" ) )                        /* unexpected reply */
-		clean_up( fname, sock_fd, -1 );
+    if ( strcmp( line, "OK\n" ) )                        /* unexpected reply */
+        clean_up( fname, sock_fd, -1 );
 
-	close( sock_fd );
+    close( sock_fd );
 }
 
 
@@ -452,12 +452,12 @@ void contact_fsc2( int    sock_fd,
  *-----------------------------------------------------------*/
 
 void clean_up( const char * fname,
-			   int          sock_fd,
-			   int          ret_val )
+               int          sock_fd,
+               int          ret_val )
 {
-	unlink( fname );
-	close( sock_fd );
-	exit( ret_val );
+    unlink( fname );
+    close( sock_fd );
+    exit( ret_val );
 }
 
 
@@ -465,35 +465,35 @@ void clean_up( const char * fname,
  *-----------------------------------------------------------*/
 
 ssize_t read_line( int    fd,
-				   void * vptr,
-				   size_t max_len )
+                   void * vptr,
+                   size_t max_len )
 {
-	ssize_t n, rc;
-	char c, *ptr;
+    ssize_t n, rc;
+    char c, *ptr;
 
 
-	ptr = CHAR_P vptr;
-	for ( n = 1; n < ( ssize_t ) max_len; n++ )
-	{
-		if ( ( rc = do_read( fd, &c ) ) == 1 )
-		{
-			*ptr++ = c;
-			if ( c == '\n' )
-				break;
-		}
-		else if ( rc == 0 )
-		{
-			if ( n == 1 )
-				return 0;
-			else
-				break;
-		}
-		else
-			return -1;
-	}
+    ptr = CHAR_P vptr;
+    for ( n = 1; n < ( ssize_t ) max_len; n++ )
+    {
+        if ( ( rc = do_read( fd, &c ) ) == 1 )
+        {
+            *ptr++ = c;
+            if ( c == '\n' )
+                break;
+        }
+        else if ( rc == 0 )
+        {
+            if ( n == 1 )
+                return 0;
+            else
+                break;
+        }
+        else
+            return -1;
+    }
 
-	*ptr = '\0';
-	return n;
+    *ptr = '\0';
+    return n;
 }
 
 
@@ -501,31 +501,31 @@ ssize_t read_line( int    fd,
  *-----------------------------------------------------------*/
 
 ssize_t do_read( int    fd,
-				 char * ptr )
+                 char * ptr )
 {
-	static int read_cnt;
-	static char *read_ptr;
-	static char read_buf[ MAXLINE ];
+    static int read_cnt;
+    static char *read_ptr;
+    static char read_buf[ MAXLINE ];
 
 
-	if ( read_cnt <= 0 )
-	{
-	  again:
-		if ( ( read_cnt = read( fd, read_buf, sizeof( read_buf ) ) ) < 0 )
-		{
-			if ( errno == EINTR )
-				goto again;
-			return -1;
-		}
-		else if ( read_cnt == 0 )
-			return 0;
+    if ( read_cnt <= 0 )
+    {
+      again:
+        if ( ( read_cnt = read( fd, read_buf, sizeof( read_buf ) ) ) < 0 )
+        {
+            if ( errno == EINTR )
+                goto again;
+            return -1;
+        }
+        else if ( read_cnt == 0 )
+            return 0;
 
-		read_ptr = read_buf;
-	}
+        read_ptr = read_buf;
+    }
 
-	read_cnt--;
-	*ptr = *read_ptr++;
-	return 1;
+    read_cnt--;
+    *ptr = *read_ptr++;
+    return 1;
 }
 
 
@@ -533,36 +533,38 @@ ssize_t do_read( int    fd,
  *-----------------------------------------------------------*/
 
 ssize_t writen( int          fd,
-				const void * vptr,
-				size_t       n )
+                const void * vptr,
+                size_t       n )
 {
-	size_t nleft;
-	ssize_t nwritten;
-	const char *ptr;
+    size_t nleft;
+    ssize_t nwritten;
+    const char *ptr;
 
 
-	ptr = CHAR_P vptr;
-	nleft = n;
-	while ( nleft > 0 )
-	{
-		if ( ( nwritten = write( fd, ptr, nleft ) ) <= 0 )
-		{
-			if ( errno == EINTR )
-				nwritten = 0;
-			else
-				return -1;
-		}
+    ptr = CHAR_P vptr;
+    nleft = n;
+    while ( nleft > 0 )
+    {
+        if ( ( nwritten = write( fd, ptr, nleft ) ) <= 0 )
+        {
+            if ( errno == EINTR )
+                nwritten = 0;
+            else
+                return -1;
+        }
 
-		nleft -= nwritten;
-		ptr += nwritten;
-	}
+        nleft -= nwritten;
+        ptr += nwritten;
+    }
 
-	return n;
+    return n;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

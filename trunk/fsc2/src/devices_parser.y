@@ -43,7 +43,7 @@ static void deviceserror( const char * s );
 
 
 %union {
-	char *sptr;
+    char *sptr;
 }
 
 
@@ -63,8 +63,8 @@ input:   /* empty */
 ;
 
 sep:     ';'
-	   | DEV_TOKEN                    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-	   | SECTION_LABEL                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | DEV_TOKEN                    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | SECTION_LABEL                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 %%
@@ -75,16 +75,18 @@ sep:     ';'
 
 static void deviceserror( const char * s  UNUSED_ARG )
 {
-	if ( *devicestext == '\0' )
-		print( FATAL, "Unexpected end of file in DEVICES section.\n" );
-	else
-		print( FATAL, "Syntax error near token '%s'.\n", devicestext );
-	THROW( EXCEPTION );
+    if ( *devicestext == '\0' )
+        print( FATAL, "Unexpected end of file in DEVICES section.\n" );
+    else
+        print( FATAL, "Syntax error near token '%s'.\n", devicestext );
+    THROW( EXCEPTION );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -27,7 +27,7 @@
 
 
 void server_callback( FL_OBJECT * /* obj */,
-					  long        /* a   */ );
+                      long        /* a   */ );
 
 void http_check( void );
 
@@ -38,5 +38,7 @@ void http_check( void );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

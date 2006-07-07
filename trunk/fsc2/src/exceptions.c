@@ -61,15 +61,15 @@
 extern char *Prog_Name;        /* defined in global.c */
 
 struct Exception_Struct {
-	const char        *file;
-	unsigned int      line;
-	Exception_Types_T type;
-	unsigned char     is_thrown;
-	jmp_buf           env;
+    const char        *file;
+    unsigned int      line;
+    Exception_Types_T type;
+    unsigned char     is_thrown;
+    jmp_buf           env;
 };
 
 static struct Exception_Struct Exception_stack[ MAX_NESTED_EXCEPTION ],
-							   Stored_exceptions[ MAX_NESTED_EXCEPTION ];
+                               Stored_exceptions[ MAX_NESTED_EXCEPTION ];
 static int Exception_stack_pos = -1;
 
 
@@ -92,28 +92,28 @@ static int Exception_stack_pos = -1;
  *--------------------------------------------------------------------------*/
 
 jmp_buf *push_exception_frame( const char * file,
-							   int          line )
+                               int          line )
 {
-	if ( Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION )
-	{
-		fprintf( stderr, "%s: Too many nested exceptions at %s:%d.\n",
-				 Prog_Name, file, line );
-	    syslog( LOG_ERR, "%s: Too many nested exceptions at %s:%d.\n",
-				Prog_Name, file, line );
+    if ( Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION )
+    {
+        fprintf( stderr, "%s: Too many nested exceptions at %s:%d.\n",
+                 Prog_Name, file, line );
+        syslog( LOG_ERR, "%s: Too many nested exceptions at %s:%d.\n",
+                Prog_Name, file, line );
 #ifdef FSC2_HEADER
-		if ( Fsc2_Internals.I_am == CHILD )
-			_exit( FAIL );
+        if ( Fsc2_Internals.I_am == CHILD )
+            _exit( FAIL );
 #endif
-		exit( EXIT_FAILURE );
-	}
+        exit( EXIT_FAILURE );
+    }
 
-	++Exception_stack_pos;
-	Stored_exceptions[ Exception_stack_pos ] =
-										Exception_stack[ Exception_stack_pos ];
-	Exception_stack[ Exception_stack_pos ].file = file;
-	Exception_stack[ Exception_stack_pos ].line = line;
-	Exception_stack[ Exception_stack_pos ].is_thrown = 0;
-	return &Exception_stack[ Exception_stack_pos ].env;
+    ++Exception_stack_pos;
+    Stored_exceptions[ Exception_stack_pos ] =
+                                        Exception_stack[ Exception_stack_pos ];
+    Exception_stack[ Exception_stack_pos ].file = file;
+    Exception_stack[ Exception_stack_pos ].line = line;
+    Exception_stack[ Exception_stack_pos ].is_thrown = 0;
+    return &Exception_stack[ Exception_stack_pos ].env;
 }
 
 
@@ -123,24 +123,24 @@ jmp_buf *push_exception_frame( const char * file,
  *-------------------------------------------------------------------------*/
 
 void pop_exception_frame( const char * file,
-						  int          line )
+                          int          line )
 {
-	if ( Exception_stack_pos < 0 )
-	{
-		fprintf( stderr, "%s: Exception stack empty at %s:%d.\n",
-				 Prog_Name, file, line );
-		syslog( LOG_ERR, "%s: Exception stack empty at %s:%d.\n",
-				Prog_Name, file, line );
+    if ( Exception_stack_pos < 0 )
+    {
+        fprintf( stderr, "%s: Exception stack empty at %s:%d.\n",
+                 Prog_Name, file, line );
+        syslog( LOG_ERR, "%s: Exception stack empty at %s:%d.\n",
+                Prog_Name, file, line );
 #ifdef FSC2_HEADER
-		if ( Fsc2_Internals.I_am == CHILD )
-			_exit( FAIL );
+        if ( Fsc2_Internals.I_am == CHILD )
+            _exit( FAIL );
 #endif
-		exit( EXIT_FAILURE );
-	}
+        exit( EXIT_FAILURE );
+    }
 
-	Exception_stack[ Exception_stack_pos ] =
-									  Stored_exceptions[ Exception_stack_pos ];
-	Exception_stack_pos--;
+    Exception_stack[ Exception_stack_pos ] =
+                                      Stored_exceptions[ Exception_stack_pos ];
+    Exception_stack_pos--;
 }
 
 
@@ -155,26 +155,26 @@ void pop_exception_frame( const char * file,
 
 jmp_buf *throw_exception( Exception_Types_T type )
 {
-	if ( Exception_stack_pos < 0 )
-	{
+    if ( Exception_stack_pos < 0 )
+    {
 #ifdef FSC2_HEADER
-		if ( Fsc2_Internals.I_am == CHILD )
-			_exit( FAIL );
+        if ( Fsc2_Internals.I_am == CHILD )
+            _exit( FAIL );
 #endif
-		exit( EXIT_FAILURE );
-	}
+        exit( EXIT_FAILURE );
+    }
 
 #ifdef FSC2_HEADER
-	/* Make sure that carelessly written code where the exception is thrown
-	   while the program has higher permissions than the user opens up a
-	   security hole */
+    /* Make sure that carelessly written code where the exception is thrown
+       while the program has higher permissions than the user opens up a
+       security hole */
 
-	lower_permissions( );
+    lower_permissions( );
 #endif
 
-	Exception_stack[ Exception_stack_pos ].type = type;
-	Exception_stack[ Exception_stack_pos ].is_thrown = 1;
-	return &Exception_stack[ Exception_stack_pos-- ].env;
+    Exception_stack[ Exception_stack_pos ].type = type;
+    Exception_stack[ Exception_stack_pos ].is_thrown = 1;
+    return &Exception_stack[ Exception_stack_pos-- ].env;
 }
 
 
@@ -184,41 +184,43 @@ jmp_buf *throw_exception( Exception_Types_T type )
  *-------------------------------------------------------------------------*/
 
 Exception_Types_T get_exception_type( const char * file,
-									  int          line )
+                                      int          line )
 {
-	if ( Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION ||
-		 ! Exception_stack[ Exception_stack_pos + 1 ].is_thrown )
-	{
-	    fprintf( stderr, "%s: Request for type of an exception that never had "
-				 "been thrown at %s:%d.\n", Prog_Name, file, line );
-	    syslog( LOG_ERR, "%s: Request for type of an exception that never had "
-				"been thrown at %s:%d.\n", Prog_Name, file, line );
+    if ( Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION ||
+         ! Exception_stack[ Exception_stack_pos + 1 ].is_thrown )
+    {
+        fprintf( stderr, "%s: Request for type of an exception that never had "
+                 "been thrown at %s:%d.\n", Prog_Name, file, line );
+        syslog( LOG_ERR, "%s: Request for type of an exception that never had "
+                "been thrown at %s:%d.\n", Prog_Name, file, line );
 #ifdef FSC2_HEADER
-		if ( Fsc2_Internals.I_am == CHILD )
-			_exit( FAIL );
+        if ( Fsc2_Internals.I_am == CHILD )
+            _exit( FAIL );
 #endif
-		exit( EXIT_FAILURE );
-	}
+        exit( EXIT_FAILURE );
+    }
 
-	if ( Exception_stack_pos < -1 )
-	{
-	    fprintf( stderr, "%s: Exception stack is empty at %s:%d.\n",
-				 Prog_Name, file, line );
-	    syslog( LOG_ERR, "%s: Exception stack is empty at %s:%d.\n",
-				Prog_Name, file, line );
+    if ( Exception_stack_pos < -1 )
+    {
+        fprintf( stderr, "%s: Exception stack is empty at %s:%d.\n",
+                 Prog_Name, file, line );
+        syslog( LOG_ERR, "%s: Exception stack is empty at %s:%d.\n",
+                Prog_Name, file, line );
 #ifdef FSC2_HEADER
-		if ( Fsc2_Internals.I_am == CHILD )
-			_exit( FAIL );
+        if ( Fsc2_Internals.I_am == CHILD )
+            _exit( FAIL );
 #endif
-		exit( EXIT_FAILURE );
-	}
+        exit( EXIT_FAILURE );
+    }
 
-	return Exception_stack[ Exception_stack_pos + 1 ].type;
+    return Exception_stack[ Exception_stack_pos + 1 ].type;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

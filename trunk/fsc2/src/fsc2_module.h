@@ -83,15 +83,15 @@ extern void show_message( const char * /* str */ );
 extern void show_alert( const char * /* str */ );
 
 extern int show_choices( const char * /* text     */,
-						 int          /* numb     */,
-						 const char * /* b1       */,
-						 const char * /* b2       */,
-						 const char * /* b3       */,
-						 int          /* def      */,
-						 bool         /* is_batch */ );
+                         int          /* numb     */,
+                         const char * /* b1       */,
+                         const char * /* b2       */,
+                         const char * /* b3       */,
+                         int          /* def      */,
+                         bool         /* is_batch */ );
 
 extern const char *show_input( const char * /* content */,
-							   const char * /* label   */ );
+                               const char * /* label   */ );
 
 
 /* Global variables that must be visible for modules */
@@ -115,8 +115,8 @@ extern const char *Phase_Types[ NUM_PHASE_TYPES ];
 #define Pulser_Struct Pulser_Struct[ Cur_Pulser ]
 
 
-#define show_choices( a, b, c, d, e, f ) \
-		show_choices( ( a ), ( b ), ( c ), ( d ), ( e ), ( f ), SET )
+#define show_choices( a, b, c, d, e, f )  \
+        show_choices( ( a ), ( b ), ( c ), ( d ), ( e ), ( f ), SET )
 
 
 #endif  /* ! FSC2_MODULE_HEADER */
@@ -125,5 +125,7 @@ extern const char *Phase_Types[ NUM_PHASE_TYPES ];
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

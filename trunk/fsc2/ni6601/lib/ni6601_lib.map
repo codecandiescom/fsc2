@@ -24,22 +24,22 @@
 
 NI6601_LIB_1.0 {
 
-	global:
-			ni6601_close;
-			ni6601_start_counter;
-			ni6601_start_gated_counter;
-			ni6601_stop_counter;
-			ni6601_get_count;
-			ni6601_generate_continuous_pulses;
-			ni6601_stop_pulses;
-			ni6601_generate_single_pulse;
-			ni6601_dio_write;
-			ni6601_dio_read;
-			ni6601_is_counter_armed;
-			ni6601_perror;
-			ni6601_strerror;
-			ni6601_errlist;
-			ni6601_nerr;
+    global:
+            ni6601_close;
+            ni6601_start_counter;
+            ni6601_start_gated_counter;
+            ni6601_stop_counter;
+            ni6601_get_count;
+            ni6601_generate_continuous_pulses;
+            ni6601_stop_pulses;
+            ni6601_generate_single_pulse;
+            ni6601_dio_write;
+            ni6601_dio_read;
+            ni6601_is_counter_armed;
+            ni6601_perror;
+            ni6601_strerror;
+            ni6601_errlist;
+            ni6601_nerr;
 
-	local: *;
+    local: *;
 };

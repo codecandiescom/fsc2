@@ -26,10 +26,10 @@
 
 
 static int fsc2_simplex_is_minimum( int      n,
-									double * y,
-									double   epsilon );
+                                    double * y,
+                                    double   epsilon );
 static ssize_t do_read( int    fd,
-						char * ptr );
+                        char * ptr );
 
 
 /*------------------------------------------------------------------*
@@ -49,43 +49,43 @@ static ssize_t do_read( int    fd,
 #define GET_STRING_TRY_LENGTH 128
 
 char *get_string( const char * fmt,
-				  ... )
+                  ... )
 {
-	char *c = NULL;
-	size_t len = GET_STRING_TRY_LENGTH;
-	va_list ap;
-	int wr;
+    char *c = NULL;
+    size_t len = GET_STRING_TRY_LENGTH;
+    va_list ap;
+    int wr;
 
 
-	while ( 1 )
-	{
-		c = CHAR_P T_realloc( c, len );
-		va_start( ap, fmt );
-		wr = vsnprintf( c, len, fmt, ap );
-		va_end( ap );
+    while ( 1 )
+    {
+        c = CHAR_P T_realloc( c, len );
+        va_start( ap, fmt );
+        wr = vsnprintf( c, len, fmt, ap );
+        va_end( ap );
 
-		if ( wr < 0 )         /* indicates not enough space with older glibs */
-		{
-			len *= 2;
-			continue;
-		}
+        if ( wr < 0 )         /* indicates not enough space with older glibs */
+        {
+            len *= 2;
+            continue;
+        }
 
-		if ( ( size_t ) wr + 1 > len )   /* newer glibs return the number of */
-		{	                             /* chars needed, not counting the   */
-			len = wr + 1;                /* trailing '\0'                    */
-			continue;
-		}
+        if ( ( size_t ) wr + 1 > len )   /* newer glibs return the number of */
+        {                                /* chars needed, not counting the   */
+            len = wr + 1;                /* trailing '\0'                    */
+            continue;
+        }
 
-		break;
-	}
+        break;
+    }
 
-	/* Trim the string to the number of required characters (only needed for
-	   older glibc, up to 2.0.6). */
+    /* Trim the string to the number of required characters (only needed for
+       older glibc, up to 2.0.6). */
 
-	if ( ( size_t ) wr + 1 < len )
-		T_realloc( c, ( size_t ) wr + 1 );
+    if ( ( size_t ) wr + 1 < len )
+        T_realloc( c, ( size_t ) wr + 1 );
 
-	return c;
+    return c;
 }
 
 
@@ -97,16 +97,16 @@ char *get_string( const char * fmt,
 
 char *string_to_lower( char * str )
 {
-	char *ptr;
+    char *ptr;
 
 
-	if ( str == NULL )
-		return NULL;
-	for ( ptr = str; *ptr; ptr++ )
-		if ( isupper( ( unsigned char ) *ptr ) )
-			*ptr = ( char ) tolower( ( unsigned char ) *ptr );
+    if ( str == NULL )
+        return NULL;
+    for ( ptr = str; *ptr; ptr++ )
+        if ( isupper( ( unsigned char ) *ptr ) )
+            *ptr = ( char ) tolower( ( unsigned char ) *ptr );
 
-	return str;
+    return str;
 }
 
 
@@ -116,14 +116,14 @@ char *string_to_lower( char * str )
  *---------------------------------------------------*/
 
 void *get_memcpy( const void * array,
-				  size_t       size )
+                  size_t       size )
 {
-	void *new_mem;
+    void *new_mem;
 
 
-	new_mem = T_malloc( size );
-	memcpy( new_mem, array, size );
-	return new_mem;
+    new_mem = T_malloc( size );
+    memcpy( new_mem, array, size );
+    return new_mem;
 }
 
 
@@ -136,19 +136,19 @@ void *get_memcpy( const void * array,
 
 char *correct_line_breaks( char * str )
 {
-	char *p1 = str,
-		 *p2;
+    char *p1 = str,
+         *p2;
 
 
-	while ( ( p1 = strstr( p1, "\\n" ) ) != NULL )
-	{
-		p2 = p1++;
-		*p2 = '\n';
-		while ( *++p2 )
-			*p2 = *( p2 + 1 );
-	}
+    while ( ( p1 = strstr( p1, "\\n" ) ) != NULL )
+    {
+        p2 = p1++;
+        *p2 = '\n';
+        while ( *++p2 )
+            *p2 = *( p2 + 1 );
+    }
 
-	return str;
+    return str;
 }
 
 
@@ -177,7 +177,7 @@ const char *strip_path( const char * path )
 
 const char *slash( const char * path )
 {
-	return path[ strlen( path ) - 1 ] != '/' ? "/" : "";
+    return path[ strlen( path ) - 1 ] != '/' ? "/" : "";
 }
 
 
@@ -192,55 +192,55 @@ const char *slash( const char * path )
  *-----------------------------------------------------------------*/
 
 long get_file_length( FILE * fp,
-					  int *  len )
+                      int *  len )
 {
-	char *cur,
-		 *end,
-		 buffer[ 4096 ];
-	int fd;
-	long i,
-		 lines = 0;
-	bool is_char = UNSET;
-	ssize_t bytes_read;
+    char *cur,
+         *end,
+         buffer[ 4096 ];
+    int fd;
+    long i,
+         lines = 0;
+    bool is_char = UNSET;
+    ssize_t bytes_read;
 
 
-	if ( ( fd = fileno( fp ) ) == -1 )
-		 return -1;
+    if ( ( fd = fileno( fp ) ) == -1 )
+         return -1;
 
-	while ( ( bytes_read = read( fd, buffer, 4096 ) ) > 0 )
-	{
-		cur = buffer;
-		end = buffer + bytes_read;
+    while ( ( bytes_read = read( fd, buffer, 4096 ) ) > 0 )
+    {
+        cur = buffer;
+        end = buffer + bytes_read;
 
-		while ( cur < end )
-		{
-			if ( *cur++ == '\n' )
-			{
-				lines++;
-				is_char = UNSET;
-			}
-			else
-			{
-				is_char = SET;
-				while ( cur < end && *cur != '\n' )
-					cur++;
-			}
-		}
-	}
+        while ( cur < end )
+        {
+            if ( *cur++ == '\n' )
+            {
+                lines++;
+                is_char = UNSET;
+            }
+            else
+            {
+                is_char = SET;
+                while ( cur < end && *cur != '\n' )
+                    cur++;
+            }
+        }
+    }
 
-	/* If the last line does not end with a '\n' increment line count */
+    /* If the last line does not end with a '\n' increment line count */
 
-	if ( is_char )
-		lines++;
+    if ( is_char )
+        lines++;
 
-	lseek( fd, 0, SEEK_SET );
+    lseek( fd, 0, SEEK_SET );
 
-	/* Count number of digits of number of lines */
+    /* Count number of digits of number of lines */
 
-	for ( i = lines, *len = 1; ( i /= 10 ) > 0; ++( *len ) )
-		/* empty */ ;
+    for ( i = lines, *len = 1; ( i /= 10 ) > 0; ++( *len ) )
+        /* empty */ ;
 
-	return lines;
+    return lines;
 }
 
 
@@ -266,89 +266,89 @@ long get_file_length( FILE * fp,
  *--------------------------------------------------------------------*/
 
 void eprint( int          severity,
-			 bool         print_fl,
-			 const char * fmt,
-			 ... )
+             bool         print_fl,
+             const char * fmt,
+             ... )
 {
-	char buffer[ FL_BROWSER_LINELENGTH + 1 ];
-	char *cp = buffer;
-	int space_left = FL_BROWSER_LINELENGTH;
-	int count;
-	va_list ap;
+    char buffer[ FL_BROWSER_LINELENGTH + 1 ];
+    char *cp = buffer;
+    int space_left = FL_BROWSER_LINELENGTH;
+    int count;
+    va_list ap;
 
 
-	if ( severity != NO_ERROR )
-		EDL.compilation.error[ severity ] += 1;
+    if ( severity != NO_ERROR )
+        EDL.compilation.error[ severity ] += 1;
 
-	if ( ! ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
-	{
-		if ( severity == FATAL )
-		{
-			strcpy( buffer, "@C1@f" );
-			cp += 5;
-			space_left -= 5;
-		}
+    if ( ! ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
+    {
+        if ( severity == FATAL )
+        {
+            strcpy( buffer, "@C1@f" );
+            cp += 5;
+            space_left -= 5;
+        }
 
-		if ( severity == SEVERE )
-		{
-			strcpy( buffer, "@C4@f" );
-			cp += 5;
-			space_left -= 5;
-		}
+        if ( severity == SEVERE )
+        {
+            strcpy( buffer, "@C4@f" );
+            cp += 5;
+            space_left -= 5;
+        }
 
-		if ( severity == WARN )
-		{
-			strcpy( buffer, "@C2@f" );
-			cp += 5;
-			space_left -= 5;
-		}
+        if ( severity == WARN )
+        {
+            strcpy( buffer, "@C2@f" );
+            cp += 5;
+            space_left -= 5;
+        }
 
-		if ( print_fl && EDL.Fname )
-		{
-			count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
-							  EDL.Fname, EDL.Lc );
-			space_left -= count;
-			cp += count;
-		}
+        if ( print_fl && EDL.Fname )
+        {
+            count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
+                              EDL.Fname, EDL.Lc );
+            space_left -= count;
+            cp += count;
+        }
 
-		va_start( ap, fmt );
-		vsnprintf( cp, ( size_t ) space_left, fmt, ap );
-		va_end( ap );
+        va_start( ap, fmt );
+        vsnprintf( cp, ( size_t ) space_left, fmt, ap );
+        va_end( ap );
 
-		if ( Fsc2_Internals.I_am == PARENT )
-		{
-			fl_freeze_form( GUI.main_form->error_browser->form );
-			fl_addto_browser_chars( GUI.main_form->error_browser, buffer );
+        if ( Fsc2_Internals.I_am == PARENT )
+        {
+            fl_freeze_form( GUI.main_form->error_browser->form );
+            fl_addto_browser_chars( GUI.main_form->error_browser, buffer );
 
-			fl_set_browser_topline( GUI.main_form->error_browser,
-				   fl_get_browser_maxline( GUI.main_form->error_browser )
-				   - fl_get_browser_screenlines( GUI.main_form->error_browser )
+            fl_set_browser_topline( GUI.main_form->error_browser,
+                   fl_get_browser_maxline( GUI.main_form->error_browser )
+                   - fl_get_browser_screenlines( GUI.main_form->error_browser )
                    + 1 );
 
-			fl_unfreeze_form( GUI.main_form->error_browser->form );
+            fl_unfreeze_form( GUI.main_form->error_browser->form );
 
-			if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-				fprintf( severity == NO_ERROR ? stdout : stderr,
-						 "%s", buffer );
-		}
-		else
-			writer( C_EPRINT, buffer );
-	}
-	else                               /* simple test run ? */
-	{
-		if ( severity != NO_ERROR )
-			fprintf( stderr, "%c ", severity[ "FSW" ] );      /* Hehe... */
+            if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+                fprintf( severity == NO_ERROR ? stdout : stderr,
+                         "%s", buffer );
+        }
+        else
+            writer( C_EPRINT, buffer );
+    }
+    else                               /* simple test run ? */
+    {
+        if ( severity != NO_ERROR )
+            fprintf( stderr, "%c ", severity[ "FSW" ] );      /* Hehe... */
 
-		if ( print_fl && EDL.Fname )
-			fprintf( severity == NO_ERROR ? stdout : stderr,
-					 "%s:%ld: ", EDL.Fname, EDL.Lc );
+        if ( print_fl && EDL.Fname )
+            fprintf( severity == NO_ERROR ? stdout : stderr,
+                     "%s:%ld: ", EDL.Fname, EDL.Lc );
 
-		va_start( ap, fmt );
-		vfprintf( severity == NO_ERROR ? stdout : stderr, fmt, ap );
-		va_end( ap );
-		if ( severity == NO_ERROR )
-			fflush( stdout );
-	}
+        va_start( ap, fmt );
+        vfprintf( severity == NO_ERROR ? stdout : stderr, fmt, ap );
+        va_end( ap );
+        if ( severity == NO_ERROR )
+            fflush( stdout );
+    }
 }
 
 
@@ -361,143 +361,143 @@ void eprint( int          severity,
  *-----------------------------------------------------------------------*/
 
 void print( int          severity,
-			const char * fmt,
-			... )
+            const char * fmt,
+            ... )
 {
-	char buffer[ FL_BROWSER_LINELENGTH + 1 ];
-	char *cp = buffer;
-	int space_left = FL_BROWSER_LINELENGTH;
-	int count;
-	va_list ap;
+    char buffer[ FL_BROWSER_LINELENGTH + 1 ];
+    char *cp = buffer;
+    int space_left = FL_BROWSER_LINELENGTH;
+    int count;
+    va_list ap;
 
 
-	if ( severity != NO_ERROR )
-		EDL.compilation.error[ severity ] += 1;
+    if ( severity != NO_ERROR )
+        EDL.compilation.error[ severity ] += 1;
 
-	if ( ! ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
-	{
-		if ( severity == FATAL )
-		{
-			strcpy( buffer, "@C1@f" );
-			cp += 5;
-			space_left -= 5;
-		}
+    if ( ! ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
+    {
+        if ( severity == FATAL )
+        {
+            strcpy( buffer, "@C1@f" );
+            cp += 5;
+            space_left -= 5;
+        }
 
-		if ( severity == SEVERE )
-		{
-			strcpy( buffer, "@C4@f" );
-			cp += 5;
-			space_left -= 5;
-		}
+        if ( severity == SEVERE )
+        {
+            strcpy( buffer, "@C4@f" );
+            cp += 5;
+            space_left -= 5;
+        }
 
-		if ( severity == WARN )
-		{
-			strcpy( buffer, "@C2@f" );
-			cp += 5;
-			space_left -= 5;
-		}
+        if ( severity == WARN )
+        {
+            strcpy( buffer, "@C2@f" );
+            cp += 5;
+            space_left -= 5;
+        }
 
-		/* Print EDL file name and line number unless we're running a hook
-		   function */
+        /* Print EDL file name and line number unless we're running a hook
+           function */
 
-		if ( ! Fsc2_Internals.in_hook && EDL.Fname )
-		{
-			count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
-							  EDL.Fname, EDL.Lc );
-			space_left -= count;
-			cp += count;
-		}
+        if ( ! Fsc2_Internals.in_hook && EDL.Fname )
+        {
+            count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
+                              EDL.Fname, EDL.Lc );
+            space_left -= count;
+            cp += count;
+        }
 
-		if ( EDL.Call_Stack != NULL )
-		{
-			if ( EDL.Call_Stack->f == NULL )
-			{
-				if ( EDL.Call_Stack->dev_name != NULL )
-				{
-					count = snprintf( cp, ( size_t ) space_left, "%s: ",
-									  EDL.Call_Stack->dev_name );
-					space_left -= count;
-					cp += count;
-				}
-			}
-			else
-			{
-				if ( EDL.Call_Stack->f->device != NULL )
-				{
-					count = snprintf( cp, ( size_t ) space_left, "%s: ",
-									  EDL.Call_Stack->f->device->name );
-					space_left -= count;
-					cp += count;
-				}
+        if ( EDL.Call_Stack != NULL )
+        {
+            if ( EDL.Call_Stack->f == NULL )
+            {
+                if ( EDL.Call_Stack->dev_name != NULL )
+                {
+                    count = snprintf( cp, ( size_t ) space_left, "%s: ",
+                                      EDL.Call_Stack->dev_name );
+                    space_left -= count;
+                    cp += count;
+                }
+            }
+            else
+            {
+                if ( EDL.Call_Stack->f->device != NULL )
+                {
+                    count = snprintf( cp, ( size_t ) space_left, "%s: ",
+                                      EDL.Call_Stack->f->device->name );
+                    space_left -= count;
+                    cp += count;
+                }
 
-				if ( EDL.Call_Stack->f->name != NULL )
-				{
-					count = snprintf( cp, ( size_t ) space_left, "%s(): ",
-									  EDL.Call_Stack->f->name );
-					space_left -= count;
-					cp += count;
-				}
-			}
-		}
+                if ( EDL.Call_Stack->f->name != NULL )
+                {
+                    count = snprintf( cp, ( size_t ) space_left, "%s(): ",
+                                      EDL.Call_Stack->f->name );
+                    space_left -= count;
+                    cp += count;
+                }
+            }
+        }
 
-		va_start( ap, fmt );
-		vsnprintf( cp, ( size_t ) space_left, fmt, ap );
-		va_end( ap );
+        va_start( ap, fmt );
+        vsnprintf( cp, ( size_t ) space_left, fmt, ap );
+        va_end( ap );
 
-		if ( Fsc2_Internals.I_am == PARENT )
-		{
-			fl_freeze_form( GUI.main_form->error_browser->form );
-			fl_addto_browser_chars( GUI.main_form->error_browser, buffer );
+        if ( Fsc2_Internals.I_am == PARENT )
+        {
+            fl_freeze_form( GUI.main_form->error_browser->form );
+            fl_addto_browser_chars( GUI.main_form->error_browser, buffer );
 
-			fl_set_browser_topline( GUI.main_form->error_browser,
-				   fl_get_browser_maxline( GUI.main_form->error_browser )
-				   - fl_get_browser_screenlines( GUI.main_form->error_browser )
-				   + 1 );
+            fl_set_browser_topline( GUI.main_form->error_browser,
+                   fl_get_browser_maxline( GUI.main_form->error_browser )
+                   - fl_get_browser_screenlines( GUI.main_form->error_browser )
+                   + 1 );
 
-			fl_unfreeze_form( GUI.main_form->error_browser->form );
+            fl_unfreeze_form( GUI.main_form->error_browser->form );
 
-			if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-				fprintf( severity == NO_ERROR ? stdout : stderr,
-						 "%s", buffer );
-		}
-		else
-			writer( C_EPRINT, buffer );
-	}
-	else                               /* simple test run ? */
-	{
-		if ( severity != NO_ERROR )
-			fprintf( stderr, "%c ", severity[ "FSW" ] );      /* Hehe... */
+            if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+                fprintf( severity == NO_ERROR ? stdout : stderr,
+                         "%s", buffer );
+        }
+        else
+            writer( C_EPRINT, buffer );
+    }
+    else                               /* simple test run ? */
+    {
+        if ( severity != NO_ERROR )
+            fprintf( stderr, "%c ", severity[ "FSW" ] );      /* Hehe... */
 
-		if ( ! Fsc2_Internals.in_hook && EDL.Fname )
-			fprintf( severity == NO_ERROR ? stdout : stderr,
-					 "%s:%ld: ", EDL.Fname, EDL.Lc );
+        if ( ! Fsc2_Internals.in_hook && EDL.Fname )
+            fprintf( severity == NO_ERROR ? stdout : stderr,
+                     "%s:%ld: ", EDL.Fname, EDL.Lc );
 
-		if ( EDL.Call_Stack != NULL )
-		{
-			if ( EDL.Call_Stack->f == NULL )
-			{
-				if ( EDL.Call_Stack->dev_name != NULL )
-					fprintf( severity == NO_ERROR ? stdout : stderr,
-							 "%s: ", EDL.Call_Stack->dev_name );
-			}
-			else
-			{
-				if ( EDL.Call_Stack->f->device != NULL )
-					fprintf( severity == NO_ERROR ? stdout : stderr,
-							 "%s: ", EDL.Call_Stack->f->device->name );
+        if ( EDL.Call_Stack != NULL )
+        {
+            if ( EDL.Call_Stack->f == NULL )
+            {
+                if ( EDL.Call_Stack->dev_name != NULL )
+                    fprintf( severity == NO_ERROR ? stdout : stderr,
+                             "%s: ", EDL.Call_Stack->dev_name );
+            }
+            else
+            {
+                if ( EDL.Call_Stack->f->device != NULL )
+                    fprintf( severity == NO_ERROR ? stdout : stderr,
+                             "%s: ", EDL.Call_Stack->f->device->name );
 
-				if ( EDL.Call_Stack->f->name != NULL )
-					fprintf( severity == NO_ERROR ? stdout : stderr,
-							 "%s(): ", EDL.Call_Stack->f->name );
-			}
-		}
+                if ( EDL.Call_Stack->f->name != NULL )
+                    fprintf( severity == NO_ERROR ? stdout : stderr,
+                             "%s(): ", EDL.Call_Stack->f->name );
+            }
+        }
 
-		va_start( ap, fmt );
-		vfprintf( severity == NO_ERROR ? stdout : stderr, fmt, ap );
-		va_end( ap );
-		if ( severity == NO_ERROR )
-			fflush( stdout );
-	}
+        va_start( ap, fmt );
+        vfprintf( severity == NO_ERROR ? stdout : stderr, fmt, ap );
+        va_end( ap );
+        if ( severity == NO_ERROR )
+            fflush( stdout );
+    }
 }
 
 
@@ -511,8 +511,8 @@ void print( int          severity,
 
 void raise_permissions( void )
 {
-	seteuid( Fsc2_Internals.EUID );
-	setegid( Fsc2_Internals.EGID );
+    seteuid( Fsc2_Internals.EUID );
+    setegid( Fsc2_Internals.EGID );
 }
 
 
@@ -523,8 +523,8 @@ void raise_permissions( void )
 
 void lower_permissions( void )
 {
-	seteuid( getuid( ) );
-	setegid( getgid( ) );
+    seteuid( getuid( ) );
+    setegid( getgid( ) );
 }
 
 
@@ -535,135 +535,135 @@ void lower_permissions( void )
 
 char *handle_escape( char * str )
 {
-	char *cp = str;
-	size_t esc_len;
+    char *cp = str;
+    size_t esc_len;
 
 
-	fsc2_assert( str != NULL );
+    fsc2_assert( str != NULL );
 
-	while ( ( cp = strchr( cp, '\\' ) ) != NULL )
-		switch ( *( cp + 1 ) )
-		{
-			case '\0' :
-				print( FATAL, "End of string directly following escape "
-					   "character '\\'.\n" );
-				THROW( EXCEPTION );
-				break;
+    while ( ( cp = strchr( cp, '\\' ) ) != NULL )
+        switch ( *( cp + 1 ) )
+        {
+            case '\0' :
+                print( FATAL, "End of string directly following escape "
+                       "character '\\'.\n" );
+                THROW( EXCEPTION );
+                break;
 
-			case 'a' :
-				*cp++ = '\a';
-				memmove( cp, cp + 1, strlen( cp ) );
-				break;
+            case 'a' :
+                *cp++ = '\a';
+                memmove( cp, cp + 1, strlen( cp ) );
+                break;
 
-			case 'b' :
-				*cp++ = '\b';
-				memmove( cp, cp + 1, strlen( cp ) );
-				cp++;
-				break;
+            case 'b' :
+                *cp++ = '\b';
+                memmove( cp, cp + 1, strlen( cp ) );
+                cp++;
+                break;
 
-			case 'f' :
-				*cp++ = '\f';
-				memmove( cp, cp + 1, strlen( cp ) );
-				cp++;
-				break;
+            case 'f' :
+                *cp++ = '\f';
+                memmove( cp, cp + 1, strlen( cp ) );
+                cp++;
+                break;
 
-			case 'n' :
-				*cp++ = '\n';
-				memmove( cp, cp + 1, strlen( cp ) );
-				cp++;
-				break;
+            case 'n' :
+                *cp++ = '\n';
+                memmove( cp, cp + 1, strlen( cp ) );
+                cp++;
+                break;
 
-			case 'r' :
-				*cp++ = '\r';
-				memmove( cp, cp + 1, strlen( cp ) );
-				cp++;
-				break;
+            case 'r' :
+                *cp++ = '\r';
+                memmove( cp, cp + 1, strlen( cp ) );
+                cp++;
+                break;
 
-			case 't' :
-				*cp++ = '\t';
-				memmove( cp, cp + 1, strlen( cp ) );
-				break;
+            case 't' :
+                *cp++ = '\t';
+                memmove( cp, cp + 1, strlen( cp ) );
+                break;
 
-			case 'v' :
-				*cp++ = '\v';
-				memmove( cp, cp + 1, strlen( cp ) );
-				break;
+            case 'v' :
+                *cp++ = '\v';
+                memmove( cp, cp + 1, strlen( cp ) );
+                break;
 
-			case '\\' :
-				*cp++ = '\\';
-				memmove( cp, cp + 1, strlen( cp ) );
-				break;
+            case '\\' :
+                *cp++ = '\\';
+                memmove( cp, cp + 1, strlen( cp ) );
+                break;
 
-			case '\?' :
-				*cp++ = '\?';
-				memmove( cp, cp + 1, strlen( cp ) );
-				break;
+            case '\?' :
+                *cp++ = '\?';
+                memmove( cp, cp + 1, strlen( cp ) );
+                break;
 
-			case '\'' :
-				*cp++ = '\'';
-				memmove( cp, cp + 1, strlen( cp ) );
-				break;
+            case '\'' :
+                *cp++ = '\'';
+                memmove( cp, cp + 1, strlen( cp ) );
+                break;
 
-			case '\"' :
-				*cp++ = '\"';
-				memmove( cp, cp + 1, strlen( cp ) );
-				break;
+            case '\"' :
+                *cp++ = '\"';
+                memmove( cp, cp + 1, strlen( cp ) );
+                break;
 
-			case 'x' :
-				if ( ! isxdigit( ( unsigned char ) *( cp + 2 ) ) )
-				{
-					print( FATAL, "'\\x' with no following hex digits "
-						   "in string.\n" );
-					THROW( EXCEPTION );
-				}
-				esc_len = 1;
-				*cp = toupper( ( unsigned char ) *( cp + 2 ) )
-					  - ( isdigit( ( unsigned char )*( cp + 2 ) ) ?
-						  '0' : ( 'A' - 10 ) );
+            case 'x' :
+                if ( ! isxdigit( ( unsigned char ) *( cp + 2 ) ) )
+                {
+                    print( FATAL, "'\\x' with no following hex digits "
+                           "in string.\n" );
+                    THROW( EXCEPTION );
+                }
+                esc_len = 1;
+                *cp = toupper( ( unsigned char ) *( cp + 2 ) )
+                      - ( isdigit( ( unsigned char )*( cp + 2 ) ) ?
+                          '0' : ( 'A' - 10 ) );
 
-				if ( isxdigit( ( unsigned char ) *( cp + 3 ) ) )
-				{
-					esc_len++;
-					*cp = *cp * 16
-						  + toupper( ( unsigned char ) *( cp + 3 ) )
-						  - ( isdigit( ( unsigned char ) *( cp + 3 ) ) ?
-							  '0' : ( 'A' - 10 ) );
-				}
+                if ( isxdigit( ( unsigned char ) *( cp + 3 ) ) )
+                {
+                    esc_len++;
+                    *cp = *cp * 16
+                          + toupper( ( unsigned char ) *( cp + 3 ) )
+                          - ( isdigit( ( unsigned char ) *( cp + 3 ) ) ?
+                              '0' : ( 'A' - 10 ) );
+                }
 
-				cp++;
-				memmove( cp, cp + 1 + esc_len, strlen( cp + esc_len ) );
-				break;
+                cp++;
+                memmove( cp, cp + 1 + esc_len, strlen( cp + esc_len ) );
+                break;
 
-			default :
-				if ( *( cp + 1 ) < '0' || *( cp + 1 ) > '7' )
-				{
-					print( FATAL, "Unknown escape sequence '\\%c' in "
-						   "string.\n", *( cp + 1 ) );
-					THROW( EXCEPTION );
-				}
+            default :
+                if ( *( cp + 1 ) < '0' || *( cp + 1 ) > '7' )
+                {
+                    print( FATAL, "Unknown escape sequence '\\%c' in "
+                           "string.\n", *( cp + 1 ) );
+                    THROW( EXCEPTION );
+                }
 
-				*cp = *( cp + 1 ) - '0';
-				esc_len = 1;
+                *cp = *( cp + 1 ) - '0';
+                esc_len = 1;
 
-				if ( *( cp + 2 ) >= '0' && *( cp + 2 ) <= '7' )
-				{
-					*cp = *cp * 8 + *( cp + 2 ) - '0';
-					esc_len++;
+                if ( *( cp + 2 ) >= '0' && *( cp + 2 ) <= '7' )
+                {
+                    *cp = *cp * 8 + *( cp + 2 ) - '0';
+                    esc_len++;
 
-					if ( *( cp + 3 ) >= '0' && *( cp + 3 ) <= '7' &&
-						 *cp <= 0x1F )
-					{
-						*cp = *cp * 8 + *( cp + 3 ) - '0';
-						esc_len++;
-					}
-				}
+                    if ( *( cp + 3 ) >= '0' && *( cp + 3 ) <= '7' &&
+                         *cp <= 0x1F )
+                    {
+                        *cp = *cp * 8 + *( cp + 3 ) - '0';
+                        esc_len++;
+                    }
+                }
 
-				cp++;
-				memmove( cp, cp + esc_len, strlen( cp + esc_len ) + 1 );
-				break;
-		}
+                cp++;
+                memmove( cp, cp + esc_len, strlen( cp + esc_len ) + 1 );
+                break;
+        }
 
-	return str;
+    return str;
 }
 
 
@@ -677,167 +677,167 @@ char *handle_escape( char * str )
  *-------------------------------------------------------------------------*/
 
 FILE *filter_edl( const char * name,
-				  FILE *       fp )
+                  FILE *       fp )
 {
-	int pd[ 2 ];
-	int pdt[ 2 ];
-	fd_set rfds;
-	int rs;
-	char c;
+    int pd[ 2 ];
+    int pdt[ 2 ];
+    fd_set rfds;
+    int rs;
+    char c;
 
 
-	/* The first set of pipes is needed to read the output of 'fsc2_clean' */
+    /* The first set of pipes is needed to read the output of 'fsc2_clean' */
 
-	if ( pipe( pd ) == -1 )
-	{
-		if ( errno == EMFILE || errno == ENFILE )
-			print( FATAL, "Starting the test procedure failed, running out "
-				   "of system resources.\n" );
-		return NULL;
-	}
+    if ( pipe( pd ) == -1 )
+    {
+        if ( errno == EMFILE || errno == ENFILE )
+            print( FATAL, "Starting the test procedure failed, running out "
+                   "of system resources.\n" );
+        return NULL;
+    }
 
-	/* The second set of pipes is only needed to make sure that the parent
-	   runs first by having the parent write something to the pipe and the
-	   child process waiting for it. This is required because otherwise it
-	   sometimes (especially for short EDL scripts) happens that the whole
-	   child process is already finished and dead before the parent even
-	   knows about its PID. In this case the signal handler does not know
-	   about the child aleady running and would thus not store the childs
-	   return value which we still need to figure out if 'fsc2_clean' did
-	   exit successfully. */
+    /* The second set of pipes is only needed to make sure that the parent
+       runs first by having the parent write something to the pipe and the
+       child process waiting for it. This is required because otherwise it
+       sometimes (especially for short EDL scripts) happens that the whole
+       child process is already finished and dead before the parent even
+       knows about its PID. In this case the signal handler does not know
+       about the child aleady running and would thus not store the childs
+       return value which we still need to figure out if 'fsc2_clean' did
+       exit successfully. */
 
-	if ( pipe( pdt ) == -1 )
-	{
-		close( pd[ 0 ] );
-		close( pd[ 1 ] );
-		if ( errno == EMFILE || errno == ENFILE )
-			print( FATAL, "Starting the test procedure failed, running out "
-				   "of system resources.\n" );
-		return NULL;
-	}
+    if ( pipe( pdt ) == -1 )
+    {
+        close( pd[ 0 ] );
+        close( pd[ 1 ] );
+        if ( errno == EMFILE || errno == ENFILE )
+            print( FATAL, "Starting the test procedure failed, running out "
+                   "of system resources.\n" );
+        return NULL;
+    }
 
-	if ( ( Fsc2_Internals.fsc2_clean_pid = fork( ) ) < 0 )
-	{
-		close( pd[ 0 ] );
-		close( pd[ 1 ] );
-		close( pdt[ 0 ] );
-		close( pdt[ 1 ] );
-		if ( errno == ENOMEM || errno == EAGAIN )
-			print( FATAL, "Starting the test procedure failed, running out "
-				   "of system resources.\n" );
-		return NULL;
-	}
+    if ( ( Fsc2_Internals.fsc2_clean_pid = fork( ) ) < 0 )
+    {
+        close( pd[ 0 ] );
+        close( pd[ 1 ] );
+        close( pdt[ 0 ] );
+        close( pdt[ 1 ] );
+        if ( errno == ENOMEM || errno == EAGAIN )
+            print( FATAL, "Starting the test procedure failed, running out "
+                   "of system resources.\n" );
+        return NULL;
+    }
 
-	/* Here's the childs code */
+    /* Here's the childs code */
 
-	if ( Fsc2_Internals.fsc2_clean_pid == 0 )
-	{
-		char *cmd = NULL;
+    if ( Fsc2_Internals.fsc2_clean_pid == 0 )
+    {
+        char *cmd = NULL;
 
 
-		CLOBBER_PROTECT( cmd );
+        CLOBBER_PROTECT( cmd );
 
-		/* First of all things wait for a single char from the parent, it
-		   doesn't matter what get written, we need just to know that the
-		   parent has run and thus knows about the childs PID. */
+        /* First of all things wait for a single char from the parent, it
+           doesn't matter what get written, we need just to know that the
+           parent has run and thus knows about the childs PID. */
 
-		close( pdt[ 1 ] );
-		while ( read( pdt[ 0 ], &c, 1 ) < 1 )
-			/* empty */ ;
-		close( pdt[ 0 ] );
+        close( pdt[ 1 ] );
+        while ( read( pdt[ 0 ], &c, 1 ) < 1 )
+            /* empty */ ;
+        close( pdt[ 0 ] );
 
-		/* Make sure we start at the beginnig of the file - the last run
-		   may have been stopped by the user and the file may now be
-		   positioned somewhere in the middle */
+        /* Make sure we start at the beginnig of the file - the last run
+           may have been stopped by the user and the file may now be
+           positioned somewhere in the middle */
 
-		rewind( fp );
-		lseek( fileno( fp ), 0, SEEK_SET );      /* paranoia... */
+        rewind( fp );
+        lseek( fileno( fp ), 0, SEEK_SET );      /* paranoia... */
 
-		close( pd[ 0 ] );
+        close( pd[ 0 ] );
 
-		if ( dup2( fileno( fp ), STDIN_FILENO ) == -1 ||
-			 dup2( pd[ 1 ], STDOUT_FILENO ) == -1 )
-		{
-			if ( errno == EMFILE )
-				 write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
-						"running out of system resources.\n", 71 );
-			else
-				 write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
-						"internal error detected.\n", 63 );
-			
-			fclose( fp );
-			close( pd[ 1 ] );
+        if ( dup2( fileno( fp ), STDIN_FILENO ) == -1 ||
+             dup2( pd[ 1 ], STDOUT_FILENO ) == -1 )
+        {
+            if ( errno == EMFILE )
+                 write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
+                        "running out of system resources.\n", 71 );
+            else
+                 write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
+                        "internal error detected.\n", 63 );
+            
+            fclose( fp );
+            close( pd[ 1 ] );
 
-			goto filter_failure;
-		}
+            goto filter_failure;
+        }
 
-		fclose( fp );
-		close( pd[ 1 ] );
+        fclose( fp );
+        close( pd[ 1 ] );
 
-		TRY
-		{
-			if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-				cmd = get_string( "%s%sfsc2_clean", srcdir, slash( srcdir ) );
-			else
-				cmd = get_string( "%s%sfsc2_clean", bindir, slash( bindir ) );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			printf( "\x03\nStarting the test procedure failed, not enough "
-					"memory left.\n" );
-			goto filter_failure;
-		}
+        TRY
+        {
+            if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+                cmd = get_string( "%s%sfsc2_clean", srcdir, slash( srcdir ) );
+            else
+                cmd = get_string( "%s%sfsc2_clean", bindir, slash( bindir ) );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            printf( "\x03\nStarting the test procedure failed, not enough "
+                    "memory left.\n" );
+            goto filter_failure;
+        }
 
-		execl( cmd, "fsc2_clean", name, NULL );
+        execl( cmd, "fsc2_clean", name, NULL );
 
-		/* On failure to exec fsc2_clean we send an error message back that
-		   the lexer has to deal with. */
+        /* On failure to exec fsc2_clean we send an error message back that
+           the lexer has to deal with. */
 
-		printf( "\x03\nStarting the test procedure failed, utility '%s' "
-				"probably not correctly installed.\n", cmd );
+        printf( "\x03\nStarting the test procedure failed, utility '%s' "
+                "probably not correctly installed.\n", cmd );
 
-	filter_failure:
+    filter_failure:
 
-		fclose( stdout );
-		T_free( cmd );
-		_exit( EXIT_SUCCESS );
-	}
+        fclose( stdout );
+        T_free( cmd );
+        _exit( EXIT_SUCCESS );
+    }
 
-	/* And finally the code for the parent: first thing to do is to send a
-	   single byte to the child so it knows we already have its PID. */
+    /* And finally the code for the parent: first thing to do is to send a
+       single byte to the child so it knows we already have its PID. */
 
-	close( pdt[ 0 ] );
-	write( pdt[ 1 ], &c, 1);
-	close( pdt[ 1 ] );
+    close( pdt[ 0 ] );
+    write( pdt[ 1 ], &c, 1);
+    close( pdt[ 1 ] );
 
-	/* Close write side of the important pipe, we're only going to read */
+    /* Close write side of the important pipe, we're only going to read */
 
-	close( pd[ 1 ] );
+    close( pd[ 1 ] );
 
-	/* Wait until the child process had a chance to write to the pipe. If the
-	   parent is too fast in trying to read on it it only may see an EOF. */
+    /* Wait until the child process had a chance to write to the pipe. If the
+       parent is too fast in trying to read on it it only may see an EOF. */
 
-	FD_ZERO( &rfds );
-	FD_SET( pd[ 0 ], &rfds );
-	while ( ( rs = select( pd[ 0 ] + 1, &rfds, NULL, NULL, NULL ) ) == -1
-			&& errno == EINTR )
-		/* empty */ ;
+    FD_ZERO( &rfds );
+    FD_SET( pd[ 0 ], &rfds );
+    while ( ( rs = select( pd[ 0 ] + 1, &rfds, NULL, NULL, NULL ) ) == -1
+            && errno == EINTR )
+        /* empty */ ;
 
-	if ( rs == -1 )
-	{
-		if ( errno == ENOMEM )
-			print( FATAL, "Starting the test procedure failed, running out "
-				   "of system resources.\n" );
+    if ( rs == -1 )
+    {
+        if ( errno == ENOMEM )
+            print( FATAL, "Starting the test procedure failed, running out "
+                   "of system resources.\n" );
 #ifndef NDEBUG
-		else
-			fsc2_assert( 1 == 0 );
+        else
+            fsc2_assert( 1 == 0 );
 #endif
-		close( pd[ 0 ] );
-		return NULL;
-	}
+        close( pd[ 0 ] );
+        return NULL;
+    }
 
-	return fdopen( pd[ 0 ], "r" );
+    return fdopen( pd[ 0 ], "r" );
 }
 
 
@@ -850,22 +850,22 @@ FILE *filter_edl( const char * name,
  *---------------------------------------------------------------------*/
 
 int fsc2_usleep( unsigned long us_dur,
-				 bool          quit_on_signal )
+                 bool          quit_on_signal )
 {
-	struct timespec req, rem;
-	int ret;
+    struct timespec req, rem;
+    int ret;
 
 
-	req.tv_sec = ( time_t ) us_dur / 1000000L;
-	req.tv_nsec = ( us_dur % 1000000L ) * 1000;
+    req.tv_sec = ( time_t ) us_dur / 1000000L;
+    req.tv_nsec = ( us_dur % 1000000L ) * 1000;
 
-	do
-	{
-		ret = nanosleep( &req, &rem );
-		req = rem;
-	} while ( ! quit_on_signal && ret == -1 && errno == EINTR );
+    do
+    {
+        ret = nanosleep( &req, &rem );
+        req = rem;
+    } while ( ! quit_on_signal && ret == -1 && errno == EINTR );
 
-	return ret;
+    return ret;
 }
 
 
@@ -880,36 +880,36 @@ int fsc2_usleep( unsigned long us_dur,
  *--------------------------------------------------------------------------*/
 
 int is_in( const char *  supplied_in,
-		   const char ** alternatives,
-		   int           max )
+           const char ** alternatives,
+           int           max )
 {
-	char *in, *cpy;
-	const char *a;
-	int count;
+    char *in, *cpy;
+    const char *a;
+    int count;
 
 
-	fsc2_assert( supplied_in != NULL && alternatives != NULL );
+    fsc2_assert( supplied_in != NULL && alternatives != NULL );
 
-	/* Get copy of input string and get rid of leading and trailing white
-	   space */
+    /* Get copy of input string and get rid of leading and trailing white
+       space */
 
-	in = cpy = T_strdup( supplied_in );
-	while ( isspace( ( unsigned char ) *in ) )
-		in++;
-	while( isspace( ( unsigned char ) cpy[ strlen( cpy ) - 1 ] ) )
-		cpy[ strlen( cpy ) - 1 ] = '\0';
+    in = cpy = T_strdup( supplied_in );
+    while ( isspace( ( unsigned char ) *in ) )
+        in++;
+    while( isspace( ( unsigned char ) cpy[ strlen( cpy ) - 1 ] ) )
+        cpy[ strlen( cpy ) - 1 ] = '\0';
 
-	/* Now check if the cleaned up input string is identical to one of the
-	   alternatives */
+    /* Now check if the cleaned up input string is identical to one of the
+       alternatives */
 
-	for ( cpy = in, a = alternatives[ 0 ], count = 0; a && count < max;
-		   a = alternatives[ ++count ] )
-		if ( ! strcasecmp( in, a ) )
-			break;
+    for ( cpy = in, a = alternatives[ 0 ], count = 0; a && count < max;
+           a = alternatives[ ++count ] )
+        if ( ! strcasecmp( in, a ) )
+            break;
 
-	T_free( cpy );
+    T_free( cpy );
 
-	return ( a && count < max ) ? count : -1;
+    return ( a && count < max ) ? count : -1;
 }
 
 
@@ -924,39 +924,39 @@ int is_in( const char *  supplied_in,
  *------------------------------------------------------------------------*/
 
 void i2rgb( double h,
-			int *  rgb )
+            int *  rgb )
 {
-	int i, j;
-	double p[ 7 ] = { 0.0, 0.125, 0.4, 0.5, 0.6, 0.875, 1.0 };
-	int v[ 3 ][ 7 ] = { {  64,   0,   0,  32, 233, 255, 191 },     /* RED   */
-						{   0,  32, 233, 255, 233,  32,   0 },     /* GREEN */
-						{ 191, 255, 233,  32,   0,   0,   0 } };   /* BLUE  */
-	double scale;
+    int i, j;
+    double p[ 7 ] = { 0.0, 0.125, 0.4, 0.5, 0.6, 0.875, 1.0 };
+    int v[ 3 ][ 7 ] = { {  64,   0,   0,  32, 233, 255, 191 },     /* RED   */
+                        {   0,  32, 233, 255, 233,  32,   0 },     /* GREEN */
+                        { 191, 255, 233,  32,   0,   0,   0 } };   /* BLUE  */
+    double scale;
 
 
-	if ( h < p[ 0 ] )           /* return very dark blue for values below 0 */
-	{
-		rgb[ RED   ] = 72;
-		rgb[ GREEN ] =  0;
-		rgb[ BLUE  ] = 72;
-		return;
-	}
+    if ( h < p[ 0 ] )           /* return very dark blue for values below 0 */
+    {
+        rgb[ RED   ] = 72;
+        rgb[ GREEN ] =  0;
+        rgb[ BLUE  ] = 72;
+        return;
+    }
 
-	for ( i = 0; i < 6; i++ )
-	{
-		if ( p[ i ] == p[ i + 1 ] || h > p[ i + 1 ] )
-			continue;
+    for ( i = 0; i < 6; i++ )
+    {
+        if ( p[ i ] == p[ i + 1 ] || h > p[ i + 1 ] )
+            continue;
 
-		scale = ( h - p[ i ] ) / ( p[ i + 1 ] - p[ i ] );
-		for ( j = RED; j <= BLUE; j++ )
-			rgb[ j ] = irnd( v[ j ][ i ]
-							 + ( v[ j ][ i + 1 ] - v[ j ][ i ] ) * scale );
-		return;
-	}
+        scale = ( h - p[ i ] ) / ( p[ i + 1 ] - p[ i ] );
+        for ( j = RED; j <= BLUE; j++ )
+            rgb[ j ] = irnd( v[ j ][ i ]
+                             + ( v[ j ][ i + 1 ] - v[ j ][ i ] ) * scale );
+        return;
+    }
 
-	rgb[ RED   ] = 255;  /* return a kind of creamy white for values above 1 */
-	rgb[ GREEN ] = 248;
-	rgb[ BLUE  ] = 220;
+    rgb[ RED   ] = 255;  /* return a kind of creamy white for values above 1 */
+    rgb[ GREEN ] = 248;
+    rgb[ BLUE  ] = 220;
 }
 
 
@@ -968,27 +968,27 @@ void i2rgb( double h,
 void create_colors( void )
 {
     FL_COLOR i;
-	int rgb[ 3 ];
+    int rgb[ 3 ];
 
 
-	/* Create the colours between blue and red */
+    /* Create the colours between blue and red */
 
-	for ( i = 0; i < NUM_COLORS; i++ )
-	{
-		i2rgb( ( double ) i / ( double ) ( NUM_COLORS - 1 ), rgb );
-		fl_mapcolor( i + FL_FREE_COL1,
-					 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
-	}
+    for ( i = 0; i < NUM_COLORS; i++ )
+    {
+        i2rgb( ( double ) i / ( double ) ( NUM_COLORS - 1 ), rgb );
+        fl_mapcolor( i + FL_FREE_COL1,
+                     rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+    }
 
-	/* Finally create colours for values too small or too large */
+    /* Finally create colours for values too small or too large */
 
-	i2rgb( -1.0, rgb );
-	fl_mapcolor( NUM_COLORS + FL_FREE_COL1,
-				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+    i2rgb( -1.0, rgb );
+    fl_mapcolor( NUM_COLORS + FL_FREE_COL1,
+                 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
 
-	i2rgb( 2.0, rgb );
-	fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 1,
-				 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
+    i2rgb( 2.0, rgb );
+    fl_mapcolor( NUM_COLORS + FL_FREE_COL1 + 1,
+                 rgb[ RED ], rgb[ GREEN ], rgb[ BLUE ] );
 }
 
 
@@ -998,33 +998,33 @@ void create_colors( void )
 
 Var_T *convert_to_channel_number( const char * channel_name )
 {
-	long channel;
+    long channel;
 
 
-	for ( channel = 0; channel < NUM_CHANNEL_NAMES; channel++ )
-		if ( ! strcmp( channel_name, Channel_Names[ channel ] ) )
-			break;
+    for ( channel = 0; channel < NUM_CHANNEL_NAMES; channel++ )
+        if ( ! strcmp( channel_name, Channel_Names[ channel ] ) )
+            break;
 
-	/* If the name was not recognized the reason might by that the
-	   abbreviation "LIN" may have been used for "LINE" or instead of
-	   "TRIG_OUT" "TRIGGER_OUT" or "TRIGGEROUT" or "TRIGOUT"... */
+    /* If the name was not recognized the reason might by that the
+       abbreviation "LIN" may have been used for "LINE" or instead of
+       "TRIG_OUT" "TRIGGER_OUT" or "TRIGGEROUT" or "TRIGOUT"... */
 
-	if ( channel == NUM_CHANNEL_NAMES )
-	{
-		if ( ! strcmp( channel_name, "LIN" ) )
-			channel = CHANNEL_LINE;
-		if ( ! strcmp( channel_name, "TRIGGER_OUT" ) ||
-			 ! strcmp( channel_name, "TRIGOUT" ) ||
-			 ! strcmp( channel_name, "TRIGGEROUT" ) )
-			channel = CHANNEL_TRIG_OUT;
-	}
+    if ( channel == NUM_CHANNEL_NAMES )
+    {
+        if ( ! strcmp( channel_name, "LIN" ) )
+            channel = CHANNEL_LINE;
+        if ( ! strcmp( channel_name, "TRIGGER_OUT" ) ||
+             ! strcmp( channel_name, "TRIGOUT" ) ||
+             ! strcmp( channel_name, "TRIGGEROUT" ) )
+            channel = CHANNEL_TRIG_OUT;
+    }
 
 #ifndef NDEBUG
-	if ( channel == NUM_CHANNEL_NAMES )
-		fsc2_assert( 1 == 0 );
+    if ( channel == NUM_CHANNEL_NAMES )
+        fsc2_assert( 1 == 0 );
 #endif
 
-	return vars_push( INT_VAR, channel );
+    return vars_push( INT_VAR, channel );
 }
 
 
@@ -1049,16 +1049,16 @@ Var_T *convert_to_channel_number( const char * channel_name )
  *-----------------------------------------------------------------------*/
 
 double fsc2_simplex( size_t   n,
-					 double * x,
-					 double * dx,
-					 void *   par,
-					 double   ( *func )( double * x,
-										 void *  par ),
-					 double   epsilon )
+                     double * x,
+                     double * dx,
+                     void *   par,
+                     double   ( *func )( double * x,
+                                         void *  par ),
+                     double   epsilon )
 {
     double *p,              /* matrix of the (n + 1) simplex corners */
-		   *y,              /* array of function values at the corners */
-		   *p_centroid,     /* coordinates of center of simplex */
+           *y,              /* array of function values at the corners */
+           *p_centroid,     /* coordinates of center of simplex */
            *p_1st_try,      /* point after reflection */
            *p_2nd_try,      /* point after expansion/contraction */
            y_1st_try,       /* function value after reflection */
@@ -1074,19 +1074,19 @@ double fsc2_simplex( size_t   n,
            lowest;          /* function value */
 
 
-	CLOBBER_PROTECT( i );
+    CLOBBER_PROTECT( i );
 
     /* Get enough memory for the corners of the simplex, center points and
-	   function values at the (n + 1) corners */
+       function values at the (n + 1) corners */
 
-	p = DOUBLE_P T_malloc( ( n * ( n + 5 ) + 1 ) * sizeof *p );
-	p_centroid = p + n * ( n + 1 );
+    p = DOUBLE_P T_malloc( ( n * ( n + 5 ) + 1 ) * sizeof *p );
+    p_centroid = p + n * ( n + 1 );
     p_1st_try = p_centroid + n;
     p_2nd_try = p_1st_try + n;
     y = p_2nd_try + n;
 
     /* Set up the corners of the simplex and calculate the function values
-	   at these positions */
+       at these positions */
 
     for ( i = 0; i < n + 1; i++ )
     {
@@ -1096,25 +1096,25 @@ double fsc2_simplex( size_t   n,
         if ( i != n )
             p[ i * ( n + 1 ) ] += dx[ i ];
 
-		TRY
-		{
-			y[ i ] = func( p + i * n, par );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( p );
-			RETHROW( );
-		}
+        TRY
+        {
+            y[ i ] = func( p + i * n, par );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( p );
+            RETHROW( );
+        }
     }
 
     /* Here starts the loop for finding the minimum. It will only stop when
-	   the minimum criterion is satisfied. */
+       the minimum criterion is satisfied. */
 
     do
     {
-		/* Determine index and function value of the corner with the lowest,
-		   the largest and the second largest function value */
+        /* Determine index and function value of the corner with the lowest,
+           the largest and the second largest function value */
 
         lowest = ( y[ 0 ] < y[ 1 ] ) ? ( highest = 1, 0 ) : ( highest = 0, 1 );
 
@@ -1136,8 +1136,8 @@ double fsc2_simplex( size_t   n,
                     y_2nd_highest = y[ i ];
         }
 
-		/* Calculate center of simplex (excluding the corner with the largest
-		   function value) */
+        /* Calculate center of simplex (excluding the corner with the largest
+           function value) */
 
         for ( j = 0; j < n; j++ )
         {
@@ -1151,20 +1151,20 @@ double fsc2_simplex( size_t   n,
             p_centroid[ j ] /=  n;
         }
 
-		/* Do a reflection, i.e. mirror the point with the largest function
-		   value at the center point and calculate the function value at
-		   this new point */
+        /* Do a reflection, i.e. mirror the point with the largest function
+           value at the center point and calculate the function value at
+           this new point */
 
         for ( j = 0; j < n; j++ )
             p_1st_try[ j ] = ( 1.0 + alpha ) * p_centroid[ j ]
-							 - alpha * p[ highest * n + j ];
+                             - alpha * p[ highest * n + j ];
 
-		y_1st_try = func( p_1st_try, par );
+        y_1st_try = func( p_1st_try, par );
 
-		/* If the function value at the new point is smaller than the largest
-		   value, the new point replaces the corner with the largest function
-		   value */
-		   
+        /* If the function value at the new point is smaller than the largest
+           value, the new point replaces the corner with the largest function
+           value */
+           
         if ( y_1st_try < y_highest )
         {
             for ( j = 0; j < n; j++ )
@@ -1173,20 +1173,20 @@ double fsc2_simplex( size_t   n,
             y[ highest ] = y_1st_try;
         }
 
-		/* If the function value at the new point even smaller than all other
-		   function values try an expansion of the simplex */
+        /* If the function value at the new point even smaller than all other
+           function values try an expansion of the simplex */
 
         if ( y_1st_try < y_lowest )
         {
             for ( j = 0; j < n; j++ )
                 p_2nd_try[ j ] = gamm * p_1st_try[ j ] +
-								 ( 1.0 - gamm ) * p_centroid[ j ];
+                                 ( 1.0 - gamm ) * p_centroid[ j ];
 
-			y_2nd_try = func( p_2nd_try, par );
+            y_2nd_try = func( p_2nd_try, par );
 
-			/* If the expansion was successful, i.e. led to an even smaller
-			   function value, replace the corner with the largest function
-			   by this new improved new point */
+            /* If the expansion was successful, i.e. led to an even smaller
+               function value, replace the corner with the largest function
+               by this new improved new point */
 
             if ( y_2nd_try < y_1st_try )
             {
@@ -1199,23 +1199,23 @@ double fsc2_simplex( size_t   n,
             continue;                     /* start next cycle */
         }
 
-		/* If the new point is at least smaller than the previous maximum
-		   value start a new cycle, otherwise try a contraction */
+        /* If the new point is at least smaller than the previous maximum
+           value start a new cycle, otherwise try a contraction */
 
         if ( y_1st_try < y_2nd_highest )
             continue;                     /* start next cycle */
 
         for ( j = 0; j < n; j++ )
             p_2nd_try[ j ] = beta * p[ highest * n + j ]
-							 + ( 1.0 - beta ) * p_centroid[ j ];
+                             + ( 1.0 - beta ) * p_centroid[ j ];
 
-		y_2nd_try = func( p_2nd_try, par );
+        y_2nd_try = func( p_2nd_try, par );
 
-		/* If the contraction was successful, i.e. led to a value that is
-		   smaller than the previous maximum value, the new point replaces
-		   the largest value. Otherwise the whole simplex gets contracted
-		   by shrinking all edges by a factor of 2 toward the point toward
-		   the point with the smallest function value. */
+        /* If the contraction was successful, i.e. led to a value that is
+           smaller than the previous maximum value, the new point replaces
+           the largest value. Otherwise the whole simplex gets contracted
+           by shrinking all edges by a factor of 2 toward the point toward
+           the point with the smallest function value. */
 
         if ( y_2nd_try < y[ highest ] )
         {
@@ -1232,15 +1232,15 @@ double fsc2_simplex( size_t   n,
 
                 for ( j = 0; j < n; j++ )
                     p[ i * n + j ] =
-								0.5 * ( p[ i * n + j ] + p[ lowest * n +  j ]);
+                                0.5 * ( p[ i * n + j ] + p[ lowest * n +  j ]);
 
-				y[ i ] = func( p + n * i, par );
+                y[ i ] = func( p + n * i, par );
             }
     } while ( ! fsc2_simplex_is_minimum( n + 1, y, epsilon ) );
 
-	/* Pick the corner with the lowest function value and write its
-	   coordinates over the array with the start values, deallocate
-	   memory and return the minimum function value */
+    /* Pick the corner with the lowest function value and write its
+       coordinates over the array with the start values, deallocate
+       memory and return the minimum function value */
 
     y_lowest = y[ 0 ];
 
@@ -1253,7 +1253,7 @@ double fsc2_simplex( size_t   n,
 
     T_free( p );
 
-	return y_lowest;
+    return y_lowest;
 }
 
 
@@ -1270,12 +1270,12 @@ double fsc2_simplex( size_t   n,
  *-------------------------------------------------------------------*/
 
 static int fsc2_simplex_is_minimum( int      n,
-									double * y,
-									double   epsilon )
+                                    double * y,
+                                    double   epsilon )
 {
     int i;                      /* counter */
     double yq,                  /* sum of function values */
-		   yq_2,                /* Sum of squares of function values */
+           yq_2,                /* Sum of squares of function values */
            dev;                 /* standard error of fucntion values */
 
 
@@ -1287,7 +1287,7 @@ static int fsc2_simplex_is_minimum( int      n,
 
     dev = sqrt( ( yq_2 - yq * yq / n ) /  ( n - 1 ) );
 
-	return dev * n / fabs( yq ) < epsilon;
+    return dev * n / fabs( yq ) < epsilon;
 }
 
 
@@ -1297,35 +1297,35 @@ static int fsc2_simplex_is_minimum( int      n,
  *----------------------------------------------------------------*/
 
 ssize_t read_line( int    fd,
-				   void * vptr,
-				   size_t max_len )
+                   void * vptr,
+                   size_t max_len )
 {
-	ssize_t n, rc;
-	char c, *ptr;
+    ssize_t n, rc;
+    char c, *ptr;
 
 
-	ptr = CHAR_P vptr;
-	for ( n = 1; n < ( ssize_t ) max_len; n++ )
-	{
-		if ( ( rc = do_read( fd, &c ) ) == 1 )
-		{
-			*ptr++ = c;
-			if ( c == '\n' )
-				break;
-		}
-		else if ( rc == 0 )
-		{
-			if ( n == 1 )
-				return 0;
-			else
-				break;
-		}
-		else
-			return -1;
-	}
+    ptr = CHAR_P vptr;
+    for ( n = 1; n < ( ssize_t ) max_len; n++ )
+    {
+        if ( ( rc = do_read( fd, &c ) ) == 1 )
+        {
+            *ptr++ = c;
+            if ( c == '\n' )
+                break;
+        }
+        else if ( rc == 0 )
+        {
+            if ( n == 1 )
+                return 0;
+            else
+                break;
+        }
+        else
+            return -1;
+    }
 
-	*ptr = '\0';
-	return n;
+    *ptr = '\0';
+    return n;
 }
 
 
@@ -1334,31 +1334,31 @@ ssize_t read_line( int    fd,
  *-----------------------------------------------------*/
 
 static ssize_t do_read( int    fd,
-						char * ptr )
+                        char * ptr )
 {
-	static int read_cnt;
-	static char *read_ptr;
-	static char read_buf[ MAX_LINE_LENGTH ];
+    static int read_cnt;
+    static char *read_ptr;
+    static char read_buf[ MAX_LINE_LENGTH ];
 
 
-	if ( read_cnt <= 0 )
-	{
-	  again:
-		if ( ( read_cnt = read( fd, read_buf, sizeof( read_buf ) ) ) < 0 )
-		{
-			if ( errno == EINTR )
-				goto again;
-			return -1;
-		}
-		else if ( read_cnt == 0 )
-			return 0;
+    if ( read_cnt <= 0 )
+    {
+      again:
+        if ( ( read_cnt = read( fd, read_buf, sizeof( read_buf ) ) ) < 0 )
+        {
+            if ( errno == EINTR )
+                goto again;
+            return -1;
+        }
+        else if ( read_cnt == 0 )
+            return 0;
 
-		read_ptr = read_buf;
-	}
+        read_ptr = read_buf;
+    }
 
-	read_cnt--;
-	*ptr = *read_ptr++;
-	return 1;
+    read_cnt--;
+    *ptr = *read_ptr++;
+    return 1;
 }
 
 
@@ -1368,31 +1368,31 @@ static ssize_t do_read( int    fd,
  *-----------------------------------------------------*/
 
 ssize_t writen( int          fd,
-				const void * vptr,
-				size_t       n )
+                const void * vptr,
+                size_t       n )
 {
-	size_t nleft;
-	ssize_t nwritten;
-	const char *ptr;
+    size_t nleft;
+    ssize_t nwritten;
+    const char *ptr;
 
 
-	ptr = CHAR_P vptr;
-	nleft = n;
-	while ( nleft > 0 )
-	{
-		if ( ( nwritten = write( fd, ptr, nleft ) ) <= 0 )
-		{
-			if ( errno == EINTR )
-				nwritten = 0;
-			else
-				return -1;
-		}
+    ptr = CHAR_P vptr;
+    nleft = n;
+    while ( nleft > 0 )
+    {
+        if ( ( nwritten = write( fd, ptr, nleft ) ) <= 0 )
+        {
+            if ( errno == EINTR )
+                nwritten = 0;
+            else
+                return -1;
+        }
 
-		nleft -= nwritten;
-		ptr += nwritten;
-	}
+        nleft -= nwritten;
+        ptr += nwritten;
+    }
 
-	return n;
+    return n;
 }
 
 
@@ -1403,28 +1403,28 @@ ssize_t writen( int          fd,
  *-----------------------------------------------------------------------*/
 
 const char *fsc2_show_fselector( const char * message,
-								 const char * dir,
-								 const char * pattern,
-								 const char * def_name )
+                                 const char * dir,
+                                 const char * pattern,
+                                 const char * def_name )
 {
-	const char *ret;
+    const char *ret;
 
 
-	/* If no directory is specified and this is the first invocation use
-	   the directory from the user specific configuration file */
+    /* If no directory is specified and this is the first invocation use
+       the directory from the user specific configuration file */
 
-	if ( ( dir == NULL || *dir == '\0' ) && Fsc2_Internals.use_def_directory )
-		dir = Fsc2_Internals.def_directory;
+    if ( ( dir == NULL || *dir == '\0' ) && Fsc2_Internals.use_def_directory )
+        dir = Fsc2_Internals.def_directory;
 
-	Fsc2_Internals.use_def_directory = UNSET;
+    Fsc2_Internals.use_def_directory = UNSET;
 
-	ret = fl_show_fselector( message, dir, pattern, def_name );
+    ret = fl_show_fselector( message, dir, pattern, def_name );
 
-	if ( Fsc2_Internals.def_directory != NULL )
-		Fsc2_Internals.def_directory =
-								 CHAR_P T_free( Fsc2_Internals.def_directory );
+    if ( Fsc2_Internals.def_directory != NULL )
+        Fsc2_Internals.def_directory =
+                                 CHAR_P T_free( Fsc2_Internals.def_directory );
 
-	return ret;
+    return ret;
 }
 
 
@@ -1433,27 +1433,29 @@ const char *fsc2_show_fselector( const char * message,
  *-------------------------------------------------------------------*/
 
 void get_form_position( FL_FORM * form,
-						int *     x,
-						int *     y )
+                        int *     x,
+                        int *     y )
 {
-	XWindowAttributes attr;
-	Window root, parent, *children;
-	unsigned int nchilds;
+    XWindowAttributes attr;
+    Window root, parent, *children;
+    unsigned int nchilds;
 
 
-	XQueryTree( fl_get_display( ), form->window, &root, &parent, &children,
-				&nchilds );
-	XQueryTree( fl_get_display( ), parent, &root, &parent, &children,
-				&nchilds );
-	XGetWindowAttributes( fl_get_display( ), parent, &attr );
+    XQueryTree( fl_get_display( ), form->window, &root, &parent, &children,
+                &nchilds );
+    XQueryTree( fl_get_display( ), parent, &root, &parent, &children,
+                &nchilds );
+    XGetWindowAttributes( fl_get_display( ), parent, &attr );
 
-	*x = attr.x;
-	*y = attr.y;
+    *x = attr.x;
+    *y = attr.y;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

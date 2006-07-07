@@ -29,26 +29,26 @@
 typedef struct G_Funcs G_Funcs_T;
 
 struct G_Funcs {
-	bool size;
-	FD_fsc2 *          ( * create_form_fsc2       ) ( void );
-	FD_run_1d *        ( * create_form_run_1d     ) ( void );
-	FD_run_2d *        ( * create_form_run_2d     ) ( void );
-	FD_input_form *    ( * create_form_input_form ) ( void );
-	FD_print *         ( * create_form_print      ) ( void );
-	FD_cut *           ( * create_form_cut        ) ( void );
-	FD_print_comment * ( * create_pc_form         ) ( void );
+    bool size;
+    FD_fsc2 *          ( * create_form_fsc2       ) ( void );
+    FD_run_1d *        ( * create_form_run_1d     ) ( void );
+    FD_run_2d *        ( * create_form_run_2d     ) ( void );
+    FD_input_form *    ( * create_form_input_form ) ( void );
+    FD_print *         ( * create_form_print      ) ( void );
+    FD_cut *           ( * create_form_cut        ) ( void );
+    FD_print_comment * ( * create_pc_form         ) ( void );
 };
 
 bool xforms_init( int *  /* argc */,
-				  char * /* argv */ [ ] );
+                  char * /* argv */ [ ] );
 
 void xforms_close( void );
 
 void win_slider_callback( FL_OBJECT * /* a */,
-						  long        /* b */ );
+                          long        /* b */ );
 
 int is_iconic( Display * /* d */,
-			   Window    /* w */ );
+               Window    /* w */ );
 
 
 #endif   /* ! XINIT__HEADER */
@@ -57,5 +57,7 @@ int is_iconic( Display * /* d */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

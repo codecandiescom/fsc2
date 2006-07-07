@@ -30,11 +30,11 @@
 typedef struct RULBUS_RB8510_DAC12_CARD RULBUS_RB8510_DAC12_CARD;
 
 struct RULBUS_RB8510_DAC12_CARD {
-	int handle;
-	unsigned short int v;
-	double dV;
-	double Vmin;
-	double Vmax;
+    int handle;
+    unsigned short int v;
+    double dV;
+    double Vmin;
+    double Vmax;
 };
 
 
@@ -61,9 +61,9 @@ static RULBUS_RB8510_DAC12_CARD *rulbus_rb8510_dac12_card_find( int handle );
 
 int rulbus_rb8510_dac12_init( void )
 {
-	rulbus_rb8510_dac12_card = NULL;
-	rulbus_num_dac12_cards = 0;
-	return rulbus_errno = RULBUS_OK;
+    rulbus_rb8510_dac12_card = NULL;
+    rulbus_num_dac12_cards = 0;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -77,12 +77,12 @@ int rulbus_rb8510_dac12_init( void )
 
 void rulbus_rb8510_dac12_exit( void )
 {
-	if ( rulbus_rb8510_dac12_card == NULL )
-		return;
+    if ( rulbus_rb8510_dac12_card == NULL )
+        return;
 
-	free( rulbus_rb8510_dac12_card );
-	rulbus_rb8510_dac12_card = NULL;
-	rulbus_num_dac12_cards = 0;
+    free( rulbus_rb8510_dac12_card );
+    rulbus_rb8510_dac12_card = NULL;
+    rulbus_num_dac12_cards = 0;
 }
 
 
@@ -94,37 +94,37 @@ void rulbus_rb8510_dac12_exit( void )
 
 int rulbus_rb8510_dac12_card_init( int handle )
 {
-	RULBUS_RB8510_DAC12_CARD *tmp;
+    RULBUS_RB8510_DAC12_CARD *tmp;
 
 
-	tmp = realloc( rulbus_rb8510_dac12_card,
-				   ( rulbus_num_dac12_cards + 1 ) * sizeof *tmp );
+    tmp = realloc( rulbus_rb8510_dac12_card,
+                   ( rulbus_num_dac12_cards + 1 ) * sizeof *tmp );
 
-	if ( tmp == NULL )
-		return rulbus_errno = RULBUS_NO_MEMORY;
+    if ( tmp == NULL )
+        return rulbus_errno = RULBUS_NO_MEMORY;
 
-	rulbus_rb8510_dac12_card = tmp;
-	tmp += rulbus_num_dac12_cards++;
+    rulbus_rb8510_dac12_card = tmp;
+    tmp += rulbus_num_dac12_cards++;
 
-	tmp->handle = handle;
-	tmp->dV = rulbus_card[ handle ].vpb;
+    tmp->handle = handle;
+    tmp->dV = rulbus_card[ handle ].vpb;
 
-	if ( rulbus_card[ handle ].bipolar )
-	{
-		tmp->Vmax = tmp->dV * ( DAC12_RANGE >> 1 );
-		tmp->Vmin = tmp->Vmax - tmp->dV * DAC12_RANGE;
-	}
-	else
-	{
-		tmp->Vmax = tmp->dV * DAC12_RANGE;
-		tmp->Vmin = 0.0;
-	}
+    if ( rulbus_card[ handle ].bipolar )
+    {
+        tmp->Vmax = tmp->dV * ( DAC12_RANGE >> 1 );
+        tmp->Vmin = tmp->Vmax - tmp->dV * DAC12_RANGE;
+    }
+    else
+    {
+        tmp->Vmax = tmp->dV * DAC12_RANGE;
+        tmp->Vmin = 0.0;
+    }
 
-	tmp->v = DAC12_RANGE + 1;                     /* impossible value */
+    tmp->v = DAC12_RANGE + 1;                     /* impossible value */
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
-	
+    
 
 /*---------------------------------------------------------------*
  * Function for deactivating a card (gets invoked automatically
@@ -134,40 +134,40 @@ int rulbus_rb8510_dac12_card_init( int handle )
 
 int rulbus_rb8510_dac12_card_exit( int handle )
 {
-	RULBUS_RB8510_DAC12_CARD *card;
+    RULBUS_RB8510_DAC12_CARD *card;
 
 
-	/* Try to find the card, if it doesn't exist just return */
+    /* Try to find the card, if it doesn't exist just return */
 
-	if ( ( card = rulbus_rb8510_dac12_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_OK;
+    if ( ( card = rulbus_rb8510_dac12_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_OK;
 
-	/* Remove the entry for the card */
+    /* Remove the entry for the card */
 
-	if ( rulbus_num_dac12_cards > 1 )
-	{
-		if ( card != rulbus_rb8510_dac12_card + rulbus_num_dac12_cards - 1 )
-			memmove( card, card + 1, sizeof *card *
-					 ( rulbus_num_dac12_cards -
-					   ( card - rulbus_rb8510_dac12_card ) - 1 ) );
+    if ( rulbus_num_dac12_cards > 1 )
+    {
+        if ( card != rulbus_rb8510_dac12_card + rulbus_num_dac12_cards - 1 )
+            memmove( card, card + 1, sizeof *card *
+                     ( rulbus_num_dac12_cards -
+                       ( card - rulbus_rb8510_dac12_card ) - 1 ) );
 
-		card = realloc( rulbus_rb8510_dac12_card,
-						( rulbus_num_dac12_cards - 1 ) * sizeof *card );
+        card = realloc( rulbus_rb8510_dac12_card,
+                        ( rulbus_num_dac12_cards - 1 ) * sizeof *card );
 
-		if ( card == NULL )
-			return rulbus_errno = RULBUS_NO_MEMORY;
+        if ( card == NULL )
+            return rulbus_errno = RULBUS_NO_MEMORY;
 
-		rulbus_rb8510_dac12_card = card;
-	}
-	else
-	{
-		free( rulbus_rb8510_dac12_card );
-		rulbus_rb8510_dac12_card = NULL;
-	}
+        rulbus_rb8510_dac12_card = card;
+    }
+    else
+    {
+        free( rulbus_rb8510_dac12_card );
+        rulbus_rb8510_dac12_card = NULL;
+    }
 
-	rulbus_num_dac12_cards--;
+    rulbus_num_dac12_cards--;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -176,26 +176,26 @@ int rulbus_rb8510_dac12_card_exit( int handle )
  *--------------------------------------------------*/
 
 int rulbus_rb8510_dac12_properties( int      handle,
-									double * Vmax,
-									double * Vmin,
-									double * dV )
+                                    double * Vmax,
+                                    double * Vmin,
+                                    double * dV )
 {
-	RULBUS_RB8510_DAC12_CARD *card;
+    RULBUS_RB8510_DAC12_CARD *card;
 
 
-	if ( ( card = rulbus_rb8510_dac12_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8510_dac12_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	if ( Vmax != NULL )
-		*Vmax = card->Vmax;
+    if ( Vmax != NULL )
+        *Vmax = card->Vmax;
 
-	if ( Vmin != NULL )
-		*Vmin = card->Vmin;
+    if ( Vmin != NULL )
+        *Vmin = card->Vmin;
 
-	if ( dV != NULL )
-		*dV = card->dV;
+    if ( dV != NULL )
+        *dV = card->dV;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -204,36 +204,36 @@ int rulbus_rb8510_dac12_properties( int      handle,
  *-------------------------------------------*/
 
 int rulbus_rb8510_dac12_set_voltage( int    handle,
-									 double volts )
+                                     double volts )
 {
-	RULBUS_RB8510_DAC12_CARD *card;
-	int retval;
-	unsigned char byte[ 2 ];
-	unsigned short int val;
+    RULBUS_RB8510_DAC12_CARD *card;
+    int retval;
+    unsigned char byte[ 2 ];
+    unsigned short int val;
 
 
-	if ( ( card = rulbus_rb8510_dac12_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8510_dac12_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	if ( volts + 0.5 * card->dV < card->Vmin ||
-		 volts - 0.5 * card->dV > card->Vmax )
-		return rulbus_errno = RULBUS_INVALID_VOLTAGE;
+    if ( volts + 0.5 * card->dV < card->Vmin ||
+         volts - 0.5 * card->dV > card->Vmax )
+        return rulbus_errno = RULBUS_INVALID_VOLTAGE;
 
-	val = ( unsigned short int )
-							  floor( ( volts - card->Vmin ) / card->dV + 0.5 );
+    val = ( unsigned short int )
+                              floor( ( volts - card->Vmin ) / card->dV + 0.5 );
 
-	if ( card->v == val )
-		return rulbus_errno = RULBUS_OK;
+    if ( card->v == val )
+        return rulbus_errno = RULBUS_OK;
 
-	card->v = val;
+    card->v = val;
 
-	byte[ 0 ] = ( unsigned char ) ( ( val >> 8 ) & 0xFF );
-	byte[ 1 ] = ( unsigned char ) ( val & 0xFF );
+    byte[ 0 ] = ( unsigned char ) ( ( val >> 8 ) & 0xFF );
+    byte[ 1 ] = ( unsigned char ) ( val & 0xFF );
 
-	if ( ( retval = rulbus_write_range( handle, DAC12_MSB, byte, 2 ) ) != 2 )
-		return rulbus_errno = retval;
+    if ( ( retval = rulbus_write_range( handle, DAC12_MSB, byte, 2 ) ) != 2 )
+        return rulbus_errno = retval;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -243,22 +243,23 @@ int rulbus_rb8510_dac12_set_voltage( int    handle,
 
 static RULBUS_RB8510_DAC12_CARD *rulbus_rb8510_dac12_card_find( int handle )
 {
-	int i;
+    int i;
 
 
-	if ( handle < 0 )
-		return NULL;
+    if ( handle < 0 )
+        return NULL;
 
-	for ( i = 0; i < rulbus_num_dac12_cards; i++ )
-		if ( handle == rulbus_rb8510_dac12_card[ i ].handle )
-			return rulbus_rb8510_dac12_card + i;
+    for ( i = 0; i < rulbus_num_dac12_cards; i++ )
+        if ( handle == rulbus_rb8510_dac12_card[ i ].handle )
+            return rulbus_rb8510_dac12_card + i;
 
-	return NULL;
+    return NULL;
 }
 
 
 /*
  * Local variables:
- * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -134,144 +134,144 @@ typedef struct PHS PHS_T;
 
 
 struct Rulbus_Clock_Card {
-	char *name;
-	int handle;
-	int freq;
+    char *name;
+    int handle;
+    int freq;
 };
 
 
 struct Rulbus_Delay_Card {
-	char *name;
-	int handle;
-	Ticks delay;
-	Ticks old_delay;
-	double intr_delay;
-	Rulbus_Delay_Card_T *prev;
-	Rulbus_Delay_Card_T *next;
-	int num_next;
-	bool is_active;
-	bool was_active;
+    char *name;
+    int handle;
+    Ticks delay;
+    Ticks old_delay;
+    double intr_delay;
+    Rulbus_Delay_Card_T *prev;
+    Rulbus_Delay_Card_T *next;
+    int num_next;
+    bool is_active;
+    bool was_active;
 };
 
 
 struct Function {
-	int self;                   /* the functions number */
-	const char *name;           /* name of function */
-	bool is_used;
-	bool is_declared;
+    int self;                   /* the functions number */
+    const char *name;           /* name of function */
+    bool is_used;
+    bool is_declared;
 
-	int num_pulses;             /* number of pulses assigned to the function */
-	int num_active_pulses;
-	Pulse_T **pulses;           /* list of pulse pointers */
+    int num_pulses;             /* number of pulses assigned to the function */
+    int num_active_pulses;
+    Pulse_T **pulses;           /* list of pulse pointers */
 
-	double last_pulse_len;
+    double last_pulse_len;
 
-	double delay;
-	bool is_delay;
+    double delay;
+    bool is_delay;
 
-	Rulbus_Delay_Card_T *delay_card;
+    Rulbus_Delay_Card_T *delay_card;
 };
 
 
 struct Pulse {
-	long num;                /* number of the pulse (automatically created
-								pulses have negative, normal pulses
-								positive numbers */
-	bool is_active;          /* set if the pulse is really used */
-	bool was_active;
-	bool has_been_active;    /* used to find useless pulses */
+    long num;                /* number of the pulse (automatically created
+                                pulses have negative, normal pulses
+                                positive numbers */
+    bool is_active;          /* set if the pulse is really used */
+    bool was_active;
+    bool has_been_active;    /* used to find useless pulses */
 
-	Pulse_T *next;
-	Pulse_T *prev;
+    Pulse_T *next;
+    Pulse_T *prev;
 
-	Function_T *function;    /* function the pulse is associated with */
+    Function_T *function;    /* function the pulse is associated with */
 
-	Phs_Seq_T *pc;           /* the pulse sequence to be used for the pulse
-								(or NULL if none is to be used) */
+    Phs_Seq_T *pc;           /* the pulse sequence to be used for the pulse
+                                (or NULL if none is to be used) */
 
-	double pos;              /* current position, length, position change */
-	Ticks len;               /* and length change of pulse (in units of the */
-	double dpos;             /* pulsers time base) */
-	Ticks dlen;
+    double pos;              /* current position, length, position change */
+    Ticks len;               /* and length change of pulse (in units of the */
+    double dpos;             /* pulsers time base) */
+    Ticks dlen;
 
-	bool is_pos;             /* flags that are set when the corresponding */
-	bool is_len;             /* property has been set */
-	bool is_dpos;
-	bool is_dlen;
+    bool is_pos;             /* flags that are set when the corresponding */
+    bool is_len;             /* property has been set */
+    bool is_dpos;
+    bool is_dlen;
 
-	double initial_pos;      /* position, length, position change and length */
-	Ticks initial_len;       /* change at the start of the experiment */
-	double initial_dpos;
-	Ticks initial_dlen;
+    double initial_pos;      /* position, length, position change and length */
+    Ticks initial_len;       /* change at the start of the experiment */
+    double initial_dpos;
+    Ticks initial_dlen;
 
-	bool initial_is_pos;     /* property has initially been set */
-	bool initial_is_len;
-	bool initial_is_dpos;
-	bool initial_is_dlen;
+    bool initial_is_pos;     /* property has initially been set */
+    bool initial_is_len;
+    bool initial_is_dpos;
+    bool initial_is_dlen;
 };
 
 
 struct RB_Pulser_W {
-	bool is_needed;
+    bool is_needed;
 
-	char *config_file;
+    char *config_file;
 
-	Rulbus_Clock_Card_T clock_card[ NUM_CLOCK_CARDS ];
-	Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
+    Rulbus_Clock_Card_T clock_card[ NUM_CLOCK_CARDS ];
+    Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
 
-	bool exists_synthesizer;
+    bool exists_synthesizer;
 
-	Pulse_T *pulses;
+    Pulse_T *pulses;
 
-	double timebase;         /* time base of pulse clock */
-	int tb_index;            /* to be used as argument for clock card */
-	bool is_timebase;
+    double timebase;         /* time base of pulse clock */
+    int tb_index;            /* to be used as argument for clock card */
+    bool is_timebase;
 
-	int trig_in_mode;        /* EXTERNAL or INTERNAL */
-	int trig_in_slope;       /* only in EXTERNAL mode */
+    int trig_in_mode;        /* EXTERNAL or INTERNAL */
+    int trig_in_slope;       /* only in EXTERNAL mode */
 
-	double rep_time;
-	bool is_rep_time;
-	int rep_time_index;      /* to be used as argument for clock card */
-	Ticks rep_time_ticks;    /* only in INTERNAL mode, used for ERT card */
+    double rep_time;
+    bool is_rep_time;
+    int rep_time_index;      /* to be used as argument for clock card */
+    Ticks rep_time_ticks;    /* only in INTERNAL mode, used for ERT card */
 
-	bool is_trig_in_mode;
-	bool is_trig_in_slope;
+    bool is_trig_in_mode;
+    bool is_trig_in_slope;
 
-	double neg_delay;
-	bool is_neg_delay;       /* if any of the functions has a negative delay */
+    double neg_delay;
+    bool is_neg_delay;       /* if any of the functions has a negative delay */
 
-	Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
+    Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
 
-	bool is_running;         /* set if the pulser is in run mode */
+    bool is_running;         /* set if the pulser is in run mode */
 
-	char *synth_state;
-	char *synth_pulse_state;
-	char *synth_pulse_width;
-	char *synth_pulse_delay;
-	char *synth_trig_slope;
+    char *synth_state;
+    char *synth_pulse_state;
+    char *synth_pulse_width;
+    char *synth_pulse_delay;
+    char *synth_trig_slope;
 
-	bool needs_phases;       /* set if phase cycling (of microwave pulses)
-								is needed */
-	int cur_phase;           /* Index of current phase in phase cycle */
-	int pc_len;              /* length of the phase cycle */
+    bool needs_phases;       /* set if phase cycling (of microwave pulses)
+                                is needed */
+    int cur_phase;           /* Index of current phase in phase cycle */
+    int pc_len;              /* length of the phase cycle */
 
-	bool is_pulse_2_defense;
-	double pulse_2_defense;  /* minimum delay between end of last microwave
-								pulse and end of defense pulse */
-	int defense_pulse_mode;  /* tells if defense pulses get set automatically
-								or manually */
-	bool is_psd;
-	double psd;              /* minimum delay between start of phase pulse and 
-								start of microwave pulse */
-	bool is_grace_period;
-	double grace_period;     /* minimum delay between end of microwave pulse
-								and start of next phase pulse */
-	FILE *show_file;
-	FILE *dump_file;
+    bool is_pulse_2_defense;
+    double pulse_2_defense;  /* minimum delay between end of last microwave
+                                pulse and end of defense pulse */
+    int defense_pulse_mode;  /* tells if defense pulses get set automatically
+                                or manually */
+    bool is_psd;
+    double psd;              /* minimum delay between start of phase pulse and 
+                                start of microwave pulse */
+    bool is_grace_period;
+    double grace_period;     /* minimum delay between end of microwave pulse
+                                and start of next phase pulse */
+    FILE *show_file;
+    FILE *dump_file;
 
-	bool do_show_pulses;
-	bool do_dump_pulses;
+    bool do_show_pulses;
+    bool do_dump_pulses;
 };
 
 
@@ -311,7 +311,7 @@ void rb_pulser_w_cleanup( void );
 bool rb_pulser_w_store_timebase( double /* timebase */ );
 
 bool rb_pulser_w_set_function_delay( int    /* function */,
-									 double /* delay    */ );
+                                     double /* delay    */ );
 
 bool rb_pulser_w_set_trigger_mode( int /* mode */ );
 
@@ -320,7 +320,7 @@ bool rb_pulser_w_set_trig_in_slope( int /* slope */ );
 bool rb_pulser_w_set_repeat_time( double /* rep_time */ );
 
 bool rb_pulser_w_set_phase_switch_delay( int    dummy,
-										 double del_time );
+                                         double del_time );
 
 bool rb_pulser_w_set_grace_period( double gp_time );
 
@@ -330,52 +330,52 @@ bool rb_pulser_w_set_grace_period( double gp_time );
 bool rb_pulser_w_new_pulse( long /* pnum */ );
 
 bool rb_pulser_w_set_pulse_function( long /* pnum     */,
-									 int  /* function */ );
+                                     int  /* function */ );
 
 bool rb_pulser_w_set_pulse_position( long   /* pnum   */,
-									 double /* p_time */ );
+                                     double /* p_time */ );
 
 bool rb_pulser_w_set_pulse_length( long   /* pnum   */,
-								   double /* p_time */ );
+                                   double /* p_time */ );
 
 bool rb_pulser_w_set_pulse_position_change( long   /* pnum   */,
-											double /* p_time */ );
+                                            double /* p_time */ );
 
 bool rb_pulser_w_set_pulse_length_change( long   /* pnum   */,
-										  double /* p_time */ );
+                                          double /* p_time */ );
 
 bool rb_pulser_w_set_pulse_phase_cycle( long /* pnum  */,
-										long /* cycle */ );
+                                        long /* cycle */ );
 
 bool rb_pulser_w_get_pulse_function( long  /* pnum     */,
-									 int * /* function */ );
+                                     int * /* function */ );
 
 bool rb_pulser_w_get_pulse_position( long     /* pnum   */,
-									 double * /* p_time */ );
+                                     double * /* p_time */ );
 
 bool rb_pulser_w_get_pulse_length( long     /* pnum   */,
-								   double * /* p_time */ );
+                                   double * /* p_time */ );
 
 bool rb_pulser_w_get_pulse_position_change( long     /* pnum   */,
-											double * /* p_time */ );
+                                            double * /* p_time */ );
 
 bool rb_pulser_w_get_pulse_length_change( long     /* pnum   */,
-										  double * /* p_time */ );
+                                          double * /* p_time */ );
 
 bool rb_pulser_w_get_pulse_phase_cycle( long   /* pnum  */,
-										long * /* cycle */ );
+                                        long * /* cycle */ );
 
 bool rb_pulser_w_change_pulse_position( long   /* pnum   */,
-										double /* p_time */ );
+                                        double /* p_time */ );
 
 bool rb_pulser_w_change_pulse_length( long   /* pnum   */,
-									  double /* p_time */ );
+                                      double /* p_time */ );
 
 bool rb_pulser_w_change_pulse_position_change( long   /* pnum   */,
-											   double /* p_time */ );
+                                               double /* p_time */ );
 
 bool rb_pulser_w_change_pulse_length_change( long   /* pnum   */,
-											 double /* p_time */ );
+                                             double /* p_time */ );
 
 
 /* Functions defined in rb_pulser_w_init.c */
@@ -395,7 +395,7 @@ void rb_pulser_w_full_reset( void );
 /* Functions defined in rb_pulser_w_util.c */
 
 int rb_pulser_w_start_compare( const void * /* A */,
-							   const void * /* B */ );
+                               const void * /* B */ );
 
 Ticks rb_pulser_w_double2ticks( double /* p_time */ );
 
@@ -436,13 +436,13 @@ void rb_pulser_w_exit( void );
 void rb_pulser_w_run( bool /* state */ );
 
 void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * /* card */,
-								   bool                  /* state  */ );
+                                   bool                  /* state  */ );
 
 void rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * /* card */,
-								   unsigned long         /* delay  */ );
+                                   unsigned long         /* delay  */ );
 
 void rb_pulser_w_set_phase( Rulbus_Delay_Card_T * /* card */,
-							int                   /* phase */ );
+                            int                   /* phase */ );
 
 
 #endif /* ! RB_PULSER_W_HEADER */
@@ -451,5 +451,7 @@ void rb_pulser_w_set_phase( Rulbus_Delay_Card_T * /* card */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -55,14 +55,14 @@ Var_T *powersupply_command(       Var_T * v );
 static bool thurlby330_init( const char * name );
 
 static double thurlby330_set_voltage( long   channel,
-									  double voltage );
+                                      double voltage );
 
 static double thurlby330_get_voltage( long channel );
 
 static double thurlby330_get_voltage_limit( long channel );
 
 static double thurlby330_set_current( long   channel,
-									  double current );
+                                      double current );
 
 static double thurlby330_get_current( long channel );
 
@@ -71,8 +71,8 @@ static double thurlby330_get_current_limit( long channel );
 static bool thurlby330_command( const char * cmd );
 
 static bool thurlby330_talk( const char * cmd,
-							 char *       reply,
-							 long *       length );
+                             char *       reply,
+                             long *       length );
 
 static void thurlby330_failure( void );
 
@@ -91,7 +91,7 @@ static long thurlby330_get_channel( Var_T * v );
 
 
 static struct {
-	int device;
+    int device;
 } thurlby330;
 
 
@@ -102,15 +102,15 @@ static struct {
 
 int thurlby330_init_hook( void )
 {
-	/* Set global variable to indicate that GPIB bus is needed */
+    /* Set global variable to indicate that GPIB bus is needed */
 
-	Need_GPIB = SET;
+    Need_GPIB = SET;
 
-	/* Reset several variables in the structure describing the device */
+    /* Reset several variables in the structure describing the device */
 
-	thurlby330.device = -1;
+    thurlby330.device = -1;
 
-	return 1;
+    return 1;
 }
 
 
@@ -120,16 +120,16 @@ int thurlby330_init_hook( void )
 
 int thurlby330_exp_hook( void )
 {
-	/* Initialize the power supply */
+    /* Initialize the power supply */
 
-	if ( ! thurlby330_init( DEVICE_NAME ) )
-	{
-		print( FATAL, "Initialization of device failed: %s\n",
-			   gpib_error_msg );
-		THROW( EXCEPTION );
-	}
+    if ( ! thurlby330_init( DEVICE_NAME ) )
+    {
+        print( FATAL, "Initialization of device failed: %s\n",
+               gpib_error_msg );
+        THROW( EXCEPTION );
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -139,14 +139,14 @@ int thurlby330_exp_hook( void )
 
 int thurlby330_end_of_exp_hook( void )
 {
-	/* Switch power supply back to local mode */
+    /* Switch power supply back to local mode */
 
-	if ( thurlby330.device >= 0 )
-		gpib_local( thurlby330.device );
+    if ( thurlby330.device >= 0 )
+        gpib_local( thurlby330.device );
 
-	thurlby330.device = -1;
+    thurlby330.device = -1;
 
-	return 1;
+    return 1;
 }
 
 
@@ -155,7 +155,7 @@ int thurlby330_end_of_exp_hook( void )
 
 Var_T *powersupply_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -165,32 +165,32 @@ Var_T *powersupply_name( Var_T * v  UNUSED_ARG )
 
 Var_T *powersupply_damping( Var_T * v )
 {   
-	long channel;
-	long status;
-	char buffer[ 100 ];
+    long channel;
+    long status;
+    char buffer[ 100 ];
 
 
-	/* First argument must be the channel number (1 or 2) */
+    /* First argument must be the channel number (1 or 2) */
 
-	channel = thurlby330_get_channel( v );
+    channel = thurlby330_get_channel( v );
 
-	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		print( FATAL, "Missing damping status argument.\n" );
-		THROW( EXCEPTION );
-	}
-		
-	/* Second argument must be 0 or "OFF" for OFF or not 0 or "ON" for ON */
+    if ( ( v = vars_pop( v ) ) == NULL )
+    {
+        print( FATAL, "Missing damping status argument.\n" );
+        THROW( EXCEPTION );
+    }
+        
+    /* Second argument must be 0 or "OFF" for OFF or not 0 or "ON" for ON */
 
-	status = get_boolean( v );
+    status = get_boolean( v );
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( FLOAT_VAR, status );
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_VAR, status );
 
-	sprintf( buffer, "DAMPING%ld %c\n", channel, status ? '1' : '0' );
-	thurlby330_command( buffer );
+    sprintf( buffer, "DAMPING%ld %c\n", channel, status ? '1' : '0' );
+    thurlby330_command( buffer );
 
-	return vars_push( INT_VAR, status );
+    return vars_push( INT_VAR, status );
 }
 
 
@@ -200,32 +200,32 @@ Var_T *powersupply_damping( Var_T * v )
 
 Var_T *powersupply_channel_state( Var_T * v )
 {   
-	long channel;
-	long status;
-	char buffer[ 100 ];
+    long channel;
+    long status;
+    char buffer[ 100 ];
 
 
-	/* First argument must be the channel number (1 or 2) */
+    /* First argument must be the channel number (1 or 2) */
 
-	channel = thurlby330_get_channel( v );
+    channel = thurlby330_get_channel( v );
     
-	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		print( FATAL, "Missing channel status argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ( v = vars_pop( v ) ) == NULL )
+    {
+        print( FATAL, "Missing channel status argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* Second argument must be 0 or "OFF" for OFF and not 0 or "ON" for ON */
+    /* Second argument must be 0 or "OFF" for OFF and not 0 or "ON" for ON */
 
-	status = get_boolean( v );
+    status = get_boolean( v );
 
-	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, status );
+    if ( FSC2_MODE == TEST )
+        return vars_push( FLOAT_VAR, status );
 
-	sprintf( buffer, "OP%ld %c\n", channel, status ? '1' : '0' );
-	thurlby330_command( buffer );
+    sprintf( buffer, "OP%ld %c\n", channel, status ? '1' : '0' );
+    thurlby330_command( buffer );
 
-	return vars_push( INT_VAR, status );
+    return vars_push( INT_VAR, status );
 }
 
 
@@ -240,47 +240,47 @@ Var_T *powersupply_channel_state( Var_T * v )
 
 Var_T *powersupply_voltage( Var_T * v )
 {
-	long channel;
-	double voltage;
+    long channel;
+    double voltage;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* First argument must be the channel number (1 or 2) */
+    /* First argument must be the channel number (1 or 2) */
 
-	channel = thurlby330_get_channel( v );
+    channel = thurlby330_get_channel( v );
 
-	/* If no second argument is specified return the actual setting */
+    /* If no second argument is specified return the actual setting */
 
-	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		if ( FSC2_MODE == TEST )
-			return vars_push( FLOAT_VAR, TEST_VOLTAGE );
-		return vars_push( FLOAT_VAR, thurlby330_get_voltage( channel ) );
-	}
+    if ( ( v = vars_pop( v ) ) == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, TEST_VOLTAGE );
+        return vars_push( FLOAT_VAR, thurlby330_get_voltage( channel ) );
+    }
 
-	/* Second argument must be a voltage between 0 V and 32 V */
+    /* Second argument must be a voltage between 0 V and 32 V */
 
-	voltage = get_double( v, "voltage" );
+    voltage = get_double( v, "voltage" );
 
-	if ( voltage < MIN_VOLTAGE ||
-		 voltage >= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION )
-	{
-		print( FATAL, "Voltage of %.1f V is out of valid range "
-			   "(%.1f to %.1f V).\n", voltage, MIN_VOLTAGE, MAX_VOLTAGE );
-		THROW( EXCEPTION );
-	}
+    if ( voltage < MIN_VOLTAGE ||
+         voltage >= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION )
+    {
+        print( FATAL, "Voltage of %.1f V is out of valid range "
+               "(%.1f to %.1f V).\n", voltage, MIN_VOLTAGE, MAX_VOLTAGE );
+        THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, voltage );
+    if ( FSC2_MODE == TEST )
+        return vars_push( FLOAT_VAR, voltage );
 
-	return vars_push( FLOAT_VAR, thurlby330_set_voltage( channel, voltage ) );
+    return vars_push( FLOAT_VAR, thurlby330_set_voltage( channel, voltage ) );
 }
 
 
@@ -294,49 +294,49 @@ Var_T *powersupply_voltage( Var_T * v )
 
 Var_T *powersupply_voltage_limit( Var_T * v )
 {
-	long channel;
-	double voltage;
+    long channel;
+    double voltage;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* First argument must be the channel number (1 or 2) */
+    /* First argument must be the channel number (1 or 2) */
 
-	channel = thurlby330_get_channel( v );
+    channel = thurlby330_get_channel( v );
 
-	/* If there's no second argument return the voltage limit for the
-	   selected channel */
+    /* If there's no second argument return the voltage limit for the
+       selected channel */
 
-	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		if ( FSC2_MODE == TEST )
-			return vars_push( FLOAT_VAR, TEST_VOLTAGE );
-		return vars_push( FLOAT_VAR, thurlby330_get_voltage_limit( channel ) );
-	}
+    if ( ( v = vars_pop( v ) ) == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, TEST_VOLTAGE );
+        return vars_push( FLOAT_VAR, thurlby330_get_voltage_limit( channel ) );
+    }
 
-	/* Otherwise set a new current limit (which is actually the same as
-	   setting a current with power-supply_current()) */
+    /* Otherwise set a new current limit (which is actually the same as
+       setting a current with power-supply_current()) */
 
-	voltage = get_double( v, "voltage limit" );
+    voltage = get_double( v, "voltage limit" );
 
-	if ( voltage < MIN_VOLTAGE ||
-		 voltage >= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION )
-	{
-		print( FATAL, "Voltage limit of %f A is out of valid range "
-			   "(%.1f to %.1f A).\n", voltage, MIN_VOLTAGE, MAX_VOLTAGE );
-		THROW( EXCEPTION );
-	}
+    if ( voltage < MIN_VOLTAGE ||
+         voltage >= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION )
+    {
+        print( FATAL, "Voltage limit of %f A is out of valid range "
+               "(%.1f to %.1f A).\n", voltage, MIN_VOLTAGE, MAX_VOLTAGE );
+        THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, voltage );
+    if ( FSC2_MODE == TEST )
+        return vars_push( FLOAT_VAR, voltage );
 
-	return vars_push( FLOAT_VAR, thurlby330_set_voltage( channel, voltage ) );
+    return vars_push( FLOAT_VAR, thurlby330_set_voltage( channel, voltage ) );
 }
 
 
@@ -351,48 +351,48 @@ Var_T *powersupply_voltage_limit( Var_T * v )
 
 Var_T *powersupply_current( Var_T * v )
 {
-	long channel;
-	double current;
+    long channel;
+    double current;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* First argument must be the channel number (1 or 2) */
+    /* First argument must be the channel number (1 or 2) */
 
-	channel = thurlby330_get_channel( v );
+    channel = thurlby330_get_channel( v );
 
-	/* If no second argument is specified return the current output by
-	 the power supply (not the current limit) */
+    /* If no second argument is specified return the current output by
+     the power supply (not the current limit) */
 
-	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		if ( FSC2_MODE == TEST )
-			return vars_push( FLOAT_VAR, TEST_CURRENT );
-		return vars_push( FLOAT_VAR, thurlby330_get_current( channel ) );
-	}
+    if ( ( v = vars_pop( v ) ) == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, TEST_CURRENT );
+        return vars_push( FLOAT_VAR, thurlby330_get_current( channel ) );
+    }
 
-	/* Otherwise the second argument must be a current between 0 A and 3 A */
+    /* Otherwise the second argument must be a current between 0 A and 3 A */
 
-	current = get_double( v, "current" );
+    current = get_double( v, "current" );
 
-	if ( current < MIN_CURRENT ||
-		 current >= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION )
-	{
-		print( FATAL, "Current of %f A is out of valid range "
-			   "(%.1f to %.1f A).\n", current, MIN_CURRENT, MAX_CURRENT );
-		THROW( EXCEPTION );
-	}
+    if ( current < MIN_CURRENT ||
+         current >= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION )
+    {
+        print( FATAL, "Current of %f A is out of valid range "
+               "(%.1f to %.1f A).\n", current, MIN_CURRENT, MAX_CURRENT );
+        THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, current );
+    if ( FSC2_MODE == TEST )
+        return vars_push( FLOAT_VAR, current );
 
-	return vars_push( FLOAT_VAR, thurlby330_set_current( channel, current ) );
+    return vars_push( FLOAT_VAR, thurlby330_set_current( channel, current ) );
 }
 
 
@@ -406,48 +406,48 @@ Var_T *powersupply_current( Var_T * v )
 
 Var_T *powersupply_current_limit( Var_T * v )
 {
-	long channel;
-	double current;
+    long channel;
+    double current;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* First argument must be the channel number (1 or 2) */
+    /* First argument must be the channel number (1 or 2) */
 
-	channel = thurlby330_get_channel( v );
+    channel = thurlby330_get_channel( v );
 
-	/* If there's no further variable return the current limit setting */
+    /* If there's no further variable return the current limit setting */
 
-	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		if ( FSC2_MODE == TEST )
-			return vars_push( FLOAT_VAR, TEST_CURRENT );
-		return vars_push( FLOAT_VAR, thurlby330_get_current_limit( channel ) );
-	}
+    if ( ( v = vars_pop( v ) ) == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, TEST_CURRENT );
+        return vars_push( FLOAT_VAR, thurlby330_get_current_limit( channel ) );
+    }
 
-	/* Otherwise set a new current limit (which is actually the same as
-	   setting a current with powersupply_current()) */
+    /* Otherwise set a new current limit (which is actually the same as
+       setting a current with powersupply_current()) */
 
-	current = get_double( v, "current limit" );
+    current = get_double( v, "current limit" );
 
-	if ( current < MIN_CURRENT ||
-		 current >= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION )
-	{
-		print( FATAL, "Current limit of %f A is out of valid range "
-			   "(%.1f to %.1f A).\n", current, MIN_CURRENT, MAX_CURRENT );
-		THROW( EXCEPTION );
-	}
+    if ( current < MIN_CURRENT ||
+         current >= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION )
+    {
+        print( FATAL, "Current limit of %f A is out of valid range "
+               "(%.1f to %.1f A).\n", current, MIN_CURRENT, MAX_CURRENT );
+        THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, current );
+    if ( FSC2_MODE == TEST )
+        return vars_push( FLOAT_VAR, current );
 
-	return vars_push( FLOAT_VAR, thurlby330_set_current( channel, current ) );
+    return vars_push( FLOAT_VAR, thurlby330_set_current( channel, current ) );
 }
 
 
@@ -457,30 +457,30 @@ Var_T *powersupply_current_limit( Var_T * v )
 
 Var_T *powersupply_command( Var_T * v )
 {
-	char *cmd = NULL;
+    char *cmd = NULL;
 
 
-	CLOBBER_PROTECT( cmd );
+    CLOBBER_PROTECT( cmd );
 
-	vars_check( v, STR_VAR );
-	
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		TRY
-		{
-			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-			thurlby330_command( cmd );
-			T_free( cmd );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( cmd );
-			RETHROW( );
-		}
-	}
+    vars_check( v, STR_VAR );
+    
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        TRY
+        {
+            cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+            thurlby330_command( cmd );
+            T_free( cmd );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( cmd );
+            RETHROW( );
+        }
+    }
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -490,10 +490,10 @@ Var_T *powersupply_command( Var_T * v )
 
 static bool thurlby330_init( const char * name )
 {
-	if ( gpib_init_device( name, &thurlby330.device ) == FAILURE )
+    if ( gpib_init_device( name, &thurlby330.device ) == FAILURE )
         return FAIL;
 
-	return OK;
+    return OK;
 }
 
 
@@ -501,18 +501,18 @@ static bool thurlby330_init( const char * name )
  *--------------------------------------------------------------*/
 
 static double thurlby330_set_voltage( long   channel,
-									  double voltage )
+                                      double voltage )
 {
-	char buffer[ 100 ];
+    char buffer[ 100 ];
 
 
-	fsc2_assert( channel == 1 || channel == 2 );
-	fsc2_assert( voltage >= MIN_VOLTAGE &&
-				 voltage <= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION );
+    fsc2_assert( channel == 1 || channel == 2 );
+    fsc2_assert( voltage >= MIN_VOLTAGE &&
+                 voltage <= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION );
 
-	sprintf( buffer, "V%ld %.2f\n", channel, voltage );
-	thurlby330_command( buffer );
-	return voltage;
+    sprintf( buffer, "V%ld %.2f\n", channel, voltage );
+    thurlby330_command( buffer );
+    return voltage;
 }
 
 
@@ -521,17 +521,17 @@ static double thurlby330_set_voltage( long   channel,
 
 static double thurlby330_get_voltage( long channel )
 {
-	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
+    char buffer[ 100 ];
+    char reply[ 100 ];
+    long length = 100;
 
 
-	fsc2_assert( channel == 1 || channel == 2 );
+    fsc2_assert( channel == 1 || channel == 2 );
 
-	sprintf( buffer, "V%ldO?\n", channel );
-	thurlby330_talk( buffer, reply, &length );
-	reply[ length - 2 ] = '\0';
-	return T_atod( reply );
+    sprintf( buffer, "V%ldO?\n", channel );
+    thurlby330_talk( buffer, reply, &length );
+    reply[ length - 2 ] = '\0';
+    return T_atod( reply );
 }
 
 
@@ -540,17 +540,17 @@ static double thurlby330_get_voltage( long channel )
 
 static double thurlby330_get_voltage_limit( long channel )
 {
-	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
+    char buffer[ 100 ];
+    char reply[ 100 ];
+    long length = 100;
 
 
-	fsc2_assert( channel == 1 || channel == 2 );
+    fsc2_assert( channel == 1 || channel == 2 );
 
-	sprintf( buffer, "V%ld?\n", channel );
-	thurlby330_talk( buffer, reply, &length );
-	reply[ length - 2 ] = '\0';
-	return T_atod( reply + 3 );
+    sprintf( buffer, "V%ld?\n", channel );
+    thurlby330_talk( buffer, reply, &length );
+    reply[ length - 2 ] = '\0';
+    return T_atod( reply + 3 );
 }
 
 
@@ -558,19 +558,19 @@ static double thurlby330_get_voltage_limit( long channel )
  *--------------------------------------------------------------*/
 
 static double thurlby330_set_current( long   channel,
-									  double current )
+                                      double current )
 {
-	char buffer[ 100 ];
+    char buffer[ 100 ];
 
 
-	fsc2_assert( channel == 1 || channel == 2 );
-	fsc2_assert( current >= MIN_CURRENT &&
-				 current <= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION );
+    fsc2_assert( channel == 1 || channel == 2 );
+    fsc2_assert( current >= MIN_CURRENT &&
+                 current <= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION );
 
-	sprintf( buffer, "I%ld %.3f\n", channel, current );
-	thurlby330_command( buffer );
+    sprintf( buffer, "I%ld %.3f\n", channel, current );
+    thurlby330_command( buffer );
 
-	return current;
+    return current;
 }
 
 
@@ -579,17 +579,17 @@ static double thurlby330_set_current( long   channel,
 
 static double thurlby330_get_current( long channel )
 {
-	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
+    char buffer[ 100 ];
+    char reply[ 100 ];
+    long length = 100;
 
 
-	fsc2_assert( channel == 1 || channel == 2 );
+    fsc2_assert( channel == 1 || channel == 2 );
 
-	sprintf( buffer, "I%ldO?\n", channel );
-	thurlby330_talk( buffer, reply, &length );
-	reply[ length - 2 ] = '\0';
-	return T_atod( reply );
+    sprintf( buffer, "I%ldO?\n", channel );
+    thurlby330_talk( buffer, reply, &length );
+    reply[ length - 2 ] = '\0';
+    return T_atod( reply );
 }
 
 
@@ -598,17 +598,17 @@ static double thurlby330_get_current( long channel )
 
 static double thurlby330_get_current_limit( long channel )
 {
-	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
+    char buffer[ 100 ];
+    char reply[ 100 ];
+    long length = 100;
 
 
-	fsc2_assert( channel == 1 || channel == 2 );
+    fsc2_assert( channel == 1 || channel == 2 );
 
-	sprintf( buffer, "I%ld?\n", channel );
-	thurlby330_talk( buffer, reply, &length );
-	reply[ length - 2 ] = '\0';
-	return T_atod( reply + 3 );
+    sprintf( buffer, "I%ld?\n", channel );
+    thurlby330_talk( buffer, reply, &length );
+    reply[ length - 2 ] = '\0';
+    return T_atod( reply + 3 );
 }
 
 
@@ -617,12 +617,12 @@ static double thurlby330_get_current_limit( long channel )
 
 static bool thurlby330_command( const char * cmd )
 {
-	if ( gpib_write( thurlby330.device, cmd, strlen( cmd ) ) == FAILURE )
-		thurlby330_failure( );
+    if ( gpib_write( thurlby330.device, cmd, strlen( cmd ) ) == FAILURE )
+        thurlby330_failure( );
 
-	fsc2_usleep( 20000, UNSET );
+    fsc2_usleep( 20000, UNSET );
 
-	return OK;
+    return OK;
 }
 
 
@@ -630,20 +630,20 @@ static bool thurlby330_command( const char * cmd )
  *--------------------------------------------------------------*/
 
 static bool thurlby330_talk( const char * cmd,
-							 char *       reply,
-							 long *       length )
+                             char *       reply,
+                             long *       length )
 {
-	if ( gpib_write( thurlby330.device, cmd, strlen( cmd ) ) == FAILURE )
-		thurlby330_failure( );
+    if ( gpib_write( thurlby330.device, cmd, strlen( cmd ) ) == FAILURE )
+        thurlby330_failure( );
 
-	fsc2_usleep( 20000, UNSET );
+    fsc2_usleep( 20000, UNSET );
 
-	if ( gpib_read( thurlby330.device, reply, length ) == FAILURE )
-		thurlby330_failure( );
+    if ( gpib_read( thurlby330.device, reply, length ) == FAILURE )
+        thurlby330_failure( );
 
-	fsc2_usleep( 20000, UNSET );
+    fsc2_usleep( 20000, UNSET );
 
-	return OK;
+    return OK;
 }
 
 
@@ -652,8 +652,8 @@ static bool thurlby330_talk( const char * cmd,
 
 static void thurlby330_failure( void )
 {
-	print( FATAL, "Communication with power supply failed.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Communication with power supply failed.\n" );
+    THROW( EXCEPTION );
 }
 
 
@@ -662,24 +662,26 @@ static void thurlby330_failure( void )
 
 static long thurlby330_get_channel( Var_T * v )
 {
-	long channel;
+    long channel;
 
 
-	channel = get_long( v, "channel number" );
+    channel = get_long( v, "channel number" );
 
-	if ( channel < CHANNEL_CH1 || channel > CHANNEL_CH2 )
-	{
-		print( FATAL, "Invalid power supply channel number %ld, valid "
-			   "channels are 'CH1' and 'CH2'.\n", channel );
-		THROW( EXCEPTION );
-	}
+    if ( channel < CHANNEL_CH1 || channel > CHANNEL_CH2 )
+    {
+        print( FATAL, "Invalid power supply channel number %ld, valid "
+               "channels are 'CH1' and 'CH2'.\n", channel );
+        THROW( EXCEPTION );
+    }
 
-	return channel + 1;
+    return channel + 1;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

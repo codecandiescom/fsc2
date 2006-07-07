@@ -42,5 +42,7 @@ Var_T *f_ochanged( Var_T * /* v */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

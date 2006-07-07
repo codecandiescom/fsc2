@@ -35,43 +35,43 @@
 
 
 struct SPECTRAPRO_300I {
-	bool is_needed;         /* is the monochromator needed at all? */
-	bool is_open;           /* is the device file open ? */
+    bool is_needed;         /* is the monochromator needed at all? */
+    bool is_open;           /* is the device file open ? */
     struct termios *tio;    /* serial port terminal interface structure */
-	double wavelength;      /* current wavelength */
-	bool is_wavelength;     /* if wavelength got set in PREPARATIONS section */
-	long tn;                /* current turret number, range 0-2 */
-	long current_gn;        /* current grating number, range 0-8 */
-	bool use_calib;         /* can calibration info be used ? */
-	struct {
-		bool is_installed;  /* is grating installed at all ? */
-		long grooves;       /* number of grooves per m */
-		double blaze;       /* blaze wavelength (negative if not appicable) */
-		bool is_calib;      /* is calibration information valid ? */
-		double init_offset;
-		double init_adjust;
-		double inclusion_angle;
-		double focal_length;
-		double detector_angle;
-		bool used_in_test;
-		bool installed_in_test;
-	} grating[ MAX_GRATINGS ];
+    double wavelength;      /* current wavelength */
+    bool is_wavelength;     /* if wavelength got set in PREPARATIONS section */
+    long tn;                /* current turret number, range 0-2 */
+    long current_gn;        /* current grating number, range 0-8 */
+    bool use_calib;         /* can calibration info be used ? */
+    struct {
+        bool is_installed;  /* is grating installed at all ? */
+        long grooves;       /* number of grooves per m */
+        double blaze;       /* blaze wavelength (negative if not appicable) */
+        bool is_calib;      /* is calibration information valid ? */
+        double init_offset;
+        double init_adjust;
+        double inclusion_angle;
+        double focal_length;
+        double detector_angle;
+        bool used_in_test;
+        bool installed_in_test;
+    } grating[ MAX_GRATINGS ];
 };
 
 typedef struct Calib_Params Calib_Params_T;
 
 struct Calib_Params {
-	double d;                    /* grating grooves per millimeter */
-	double pixel_width;          /* width of a pixel of the CCD */
-	size_t num_values;           /* number of values */
-	double *n_exp;               /* array of measured values */
-	double *wavelengths;         /* array of wavelengths */
-	double *center_wavelengths;  /* array of center wavelengths */
-	long *m;                     /* array of diffraction orders */
-	int opt;                     /* indicates which parameter is minimized */
-	double inclusion_angle;
-	double focal_length;
-	double detector_angle;
+    double d;                    /* grating grooves per millimeter */
+    double pixel_width;          /* width of a pixel of the CCD */
+    size_t num_values;           /* number of values */
+    double *n_exp;               /* array of measured values */
+    double *wavelengths;         /* array of wavelengths */
+    double *center_wavelengths;  /* array of center wavelengths */
+    long *m;                     /* array of diffraction orders */
+    int opt;                     /* indicates which parameter is minimized */
+    double inclusion_angle;
+    double focal_length;
+    double detector_angle;
 };
 
 
@@ -117,7 +117,7 @@ FILE *spectrapro_300i_find_calib( char * /* name */ );
 FILE *spectrapro_300i_open_calib( char * /* name */ );
 
 double spectrapro_300i_min( double * /* x   */,
-							void *   /* par */ );
+                            void *   /* par */ );
 
 void spectrapro_300i_open( void );
 
@@ -140,15 +140,15 @@ void spectrapro_300i_get_gratings( void );
 long spectrapro_300i_get_offset( long /* gn */ );
 
 void spectrapro_300i_set_offset( long /* gn     */,
-								 long /* offset */ );
+                                 long /* offset */ );
 
 long spectrapro_300i_get_adjust( long /* gn */ );
 
 void spectrapro_300i_set_adjust( long /* gn     */,
-								 long /* adjust */ );
+                                 long /* adjust */ );
 
 void spectrapro_300i_install_grating( long         /* gn      */,
-									  const char * /* part_no */ );
+                                      const char * /* part_no */ );
 
 void spectrapro_300i_uninstall_grating( long /* gn */ );
 
@@ -157,7 +157,7 @@ double spectrapro_300i_wl2wn( double /* wl */ );
 double spectrapro_300i_wn2wl( double /* wn */ );
 
 void spectrapro_300i_read_calib( FILE *       /* fp         */,
-								 const char * /* calib_file */ );
+                                 const char * /* calib_file */ );
 
 
 #endif /* ! SPECTRAPRO_300I_HEADER */
@@ -166,5 +166,7 @@ void spectrapro_300i_read_calib( FILE *       /* fp         */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

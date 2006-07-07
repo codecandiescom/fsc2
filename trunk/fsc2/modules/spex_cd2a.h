@@ -100,14 +100,14 @@
 
    Exceptions: monochromator_wavelength() expects and returns data always
                in wavelength units.
-			   monochromator_wavenumber() handles data in wavenumber units
-			   only.
-			   monochromator_laser_line() accepts and returns data in
-			   absolute wavenumber units only.
-			   monochromator_wavelength_axis() returns data always in
-			   wavelength units
-			   monochromator_wavenumber_axis() returns data always in
-			   wavenumber units
+               monochromator_wavenumber() handles data in wavenumber units
+               only.
+               monochromator_laser_line() accepts and returns data in
+               absolute wavenumber units only.
+               monochromator_wavelength_axis() returns data always in
+               wavelength units
+               monochromator_wavenumber_axis() returns data always in
+               wavenumber units
 */
 
 
@@ -119,52 +119,52 @@
    scan step width and the minimum value for a scan step. */
 
 struct Spex_CD2A {
-	bool is_needed;
-	bool is_open;
-	int method;
-	int units;
-	bool has_shutter;
+    bool is_needed;
+    bool is_open;
+    int method;
+    int units;
+    bool has_shutter;
 
-	int mode;                       /* wavelength (WL) or wavenumber
-									   (absolute (WN) relative (WND)) */
+    int mode;                       /* wavelength (WL) or wavenumber
+                                       (absolute (WN) relative (WND)) */
 
-	double wavelength;              /* in m */
-	bool is_wavelength;
+    double wavelength;              /* in m */
+    bool is_wavelength;
 
-	double laser_line;              /* in cm^-1 (wavenumber mode only) */
+    double laser_line;              /* in cm^-1 (wavenumber mode only) */
 
-	double scan_start;              /* in m */
-	double scan_step;               /* in m or cm^-1, depending on mode */
-	bool scan_is_init;
-	bool in_scan;                   /* set while scanning */
+    double scan_start;              /* in m */
+    double scan_step;               /* in m or cm^-1, depending on mode */
+    bool scan_is_init;
+    bool in_scan;                   /* set while scanning */
 
-	double offset;                  /* in m or abs. cm^-1, depending on mode */
+    double offset;                  /* in m or abs. cm^-1, depending on mode */
 
-	double pixel_diff;              /* in m */
+    double pixel_diff;              /* in m */
 
-	double mini_step;               /* in m or cm^-1, depending on mode */
+    double mini_step;               /* in m or cm^-1, depending on mode */
 
-	double lower_limit;             /* wavelength in m */
-	double upper_limit;             /* wavelength in m */
+    double lower_limit;             /* wavelength in m */
+    double upper_limit;             /* wavelength in m */
 
-	double grooves;                 /* in grooves per m */
-	double standard_grooves;        /* in grooves per m */
+    double grooves;                 /* in grooves per m */
+    double standard_grooves;        /* in grooves per m */
 
-	double shutter_low_limit;       /* wavelength in m */
-	double shutter_high_limit;      /* wavelength in m */
-	bool shutter_limits_are_set;
+    double shutter_low_limit;       /* wavelength in m */
+    double shutter_high_limit;      /* wavelength in m */
+    bool shutter_limits_are_set;
 
-	struct termios *tio;            /* serial port terminal interface
-									   structure */
+    struct termios *tio;            /* serial port terminal interface
+                                       structure */
 
-	bool data_format;               /* either STANDARD or DATALOGGER */
-	bool use_checksum;              /* do we need a checksum in transfers ? */
-	bool sends_lf;
+    bool data_format;               /* either STANDARD or DATALOGGER */
+    bool use_checksum;              /* do we need a checksum in transfers ? */
+    bool sends_lf;
 
     bool fatal_error;               /* set on exceptions etc. */
 
-	bool new_calibration;           /* set when monochromator_calibrate()
-									   has been called successfully */
+    bool new_calibration;           /* set when monochromator_calibrate()
+                                       has been called successfully */
 };
 
 extern struct Spex_CD2A spex_cd2a;
@@ -273,5 +273,7 @@ double spex_cd2a_wl2mu( double /* wl */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

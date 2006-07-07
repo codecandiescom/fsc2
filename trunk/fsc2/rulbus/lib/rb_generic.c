@@ -30,7 +30,7 @@
 typedef struct RULBUS_GENERIC_CARD RULBUS_GENERIC_CARD;
 
 struct RULBUS_GENERIC_CARD {
-	int handle;
+    int handle;
 };
 
 
@@ -49,9 +49,9 @@ static RULBUS_GENERIC_CARD *rulbus_generic_card_find( int handle );
 
 int rulbus_generic_init( void )
 {
-	rulbus_generic_card = NULL;
-	rulbus_num_generic_cards = 0;
-	return RULBUS_OK;
+    rulbus_generic_card = NULL;
+    rulbus_num_generic_cards = 0;
+    return RULBUS_OK;
 }
 
 
@@ -65,12 +65,12 @@ int rulbus_generic_init( void )
 
 void rulbus_generic_exit( void )
 {
-	if ( rulbus_generic_card == NULL )
-		return;
+    if ( rulbus_generic_card == NULL )
+        return;
 
-	free( rulbus_generic_card );
-	rulbus_generic_card = NULL;
-	rulbus_num_generic_cards = 0;
+    free( rulbus_generic_card );
+    rulbus_generic_card = NULL;
+    rulbus_num_generic_cards = 0;
 }
 
 
@@ -82,23 +82,23 @@ void rulbus_generic_exit( void )
 
 int rulbus_generic_card_init( int handle )
 {
-	RULBUS_GENERIC_CARD *tmp;
+    RULBUS_GENERIC_CARD *tmp;
 
 
-	tmp = realloc( rulbus_generic_card,
-				   ( rulbus_num_generic_cards + 1 ) * sizeof *tmp );
+    tmp = realloc( rulbus_generic_card,
+                   ( rulbus_num_generic_cards + 1 ) * sizeof *tmp );
 
-	if ( tmp == NULL )
-		return RULBUS_NO_MEMORY;
+    if ( tmp == NULL )
+        return RULBUS_NO_MEMORY;
 
-	rulbus_generic_card = tmp;
-	tmp += rulbus_num_generic_cards++;
+    rulbus_generic_card = tmp;
+    tmp += rulbus_num_generic_cards++;
 
-	tmp->handle = handle;
+    tmp->handle = handle;
 
-	return RULBUS_OK;
+    return RULBUS_OK;
 }
-	
+    
 
 /*---------------------------------------------------------------*
  * Function for deactivation a card (gets invoked automatically
@@ -108,40 +108,40 @@ int rulbus_generic_card_init( int handle )
 
 int rulbus_generic_card_exit( int handle )
 {
-	RULBUS_GENERIC_CARD *card;
+    RULBUS_GENERIC_CARD *card;
 
 
-	/* Try to find the card, if it doesn't exist just return */
+    /* Try to find the card, if it doesn't exist just return */
 
-	if ( ( card = rulbus_generic_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_OK;
+    if ( ( card = rulbus_generic_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_OK;
 
-	/* Remove the entry for the card */
+    /* Remove the entry for the card */
 
-	if ( rulbus_num_generic_cards > 1 )
-	{
-		if ( card != rulbus_generic_card + rulbus_num_generic_cards - 1 )
-			memmove( card, card + 1, sizeof *card *
-					 ( rulbus_num_generic_cards -
-					   ( card - rulbus_generic_card ) - 1 ) );
+    if ( rulbus_num_generic_cards > 1 )
+    {
+        if ( card != rulbus_generic_card + rulbus_num_generic_cards - 1 )
+            memmove( card, card + 1, sizeof *card *
+                     ( rulbus_num_generic_cards -
+                       ( card - rulbus_generic_card ) - 1 ) );
 
-		card = realloc( rulbus_generic_card,
-						( rulbus_num_generic_cards - 1 ) * sizeof *card );
+        card = realloc( rulbus_generic_card,
+                        ( rulbus_num_generic_cards - 1 ) * sizeof *card );
 
-		if ( card == NULL )
-			return RULBUS_NO_MEMORY;
+        if ( card == NULL )
+            return RULBUS_NO_MEMORY;
 
-		rulbus_generic_card = card;
-	}
-	else
-	{
-		free( rulbus_generic_card );
-		rulbus_generic_card = NULL;
-	}
+        rulbus_generic_card = card;
+    }
+    else
+    {
+        free( rulbus_generic_card );
+        rulbus_generic_card = NULL;
+    }
 
-	rulbus_num_generic_cards--;
+    rulbus_num_generic_cards--;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -150,21 +150,21 @@ int rulbus_generic_card_exit( int handle )
  *---------------------------------------------*/
 
 int rulbus_generic_write( int             handle,
-						  unsigned char   address,
-						  unsigned char * data,
-						  size_t          len )
+                          unsigned char   address,
+                          unsigned char * data,
+                          size_t          len )
 {
-	RULBUS_GENERIC_CARD *card;
+    RULBUS_GENERIC_CARD *card;
 
 
-	if ( address == 0 || address > RULBUS_MAX_CARD_ADDR ||
-		 data == NULL || len == 0 )
-		return RULBUS_INVALID_ARGUMENT;
+    if ( address == 0 || address > RULBUS_MAX_CARD_ADDR ||
+         data == NULL || len == 0 )
+        return RULBUS_INVALID_ARGUMENT;
 
-	if ( ( card = rulbus_generic_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_generic_card_find( handle ) ) == NULL )
+        return RULBUS_INVALID_CARD_HANDLE;
 
-	return rulbus_write( handle, address, data, len );
+    return rulbus_write( handle, address, data, len );
 }
 
 
@@ -173,21 +173,21 @@ int rulbus_generic_write( int             handle,
  *-----------------------------------------------*/
 
 int rulbus_generic_read( int             handle,
-						 unsigned char   address,
-						 unsigned char * data,
-						 size_t          len )
+                         unsigned char   address,
+                         unsigned char * data,
+                         size_t          len )
 {
-	RULBUS_GENERIC_CARD *card;
+    RULBUS_GENERIC_CARD *card;
 
 
-	if ( address == 0 || address > RULBUS_MAX_CARD_ADDR ||
-		 data == NULL || len == 0 )
-		return RULBUS_INVALID_ARGUMENT;
+    if ( address == 0 || address > RULBUS_MAX_CARD_ADDR ||
+         data == NULL || len == 0 )
+        return RULBUS_INVALID_ARGUMENT;
 
-	if ( ( card = rulbus_generic_card_find( handle ) ) == NULL )
-		return RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_generic_card_find( handle ) ) == NULL )
+        return RULBUS_INVALID_CARD_HANDLE;
 
-	return rulbus_write( handle, address, data, len );
+    return rulbus_write( handle, address, data, len );
 }
 
 
@@ -197,22 +197,23 @@ int rulbus_generic_read( int             handle,
 
 static RULBUS_GENERIC_CARD *rulbus_generic_card_find( int handle )
 {
-	int i;
+    int i;
 
 
-	if ( handle < 0 )
-		return NULL;
+    if ( handle < 0 )
+        return NULL;
 
-	for ( i = 0; i < rulbus_num_generic_cards; i++ )
-		if ( handle == rulbus_generic_card[ i ].handle )
-			return rulbus_generic_card + i;
+    for ( i = 0; i < rulbus_num_generic_cards; i++ )
+        if ( handle == rulbus_generic_card[ i ].handle )
+            return rulbus_generic_card + i;
 
-	return NULL;
+    return NULL;
 }
 
 
 /*
  * Local variables:
- * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

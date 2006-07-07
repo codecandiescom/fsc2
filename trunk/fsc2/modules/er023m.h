@@ -121,8 +121,8 @@ extern double ma_list[ MAX_MA_INDEX + 1 ];
 
 /* Constants for dealing with the resonators */
 
-#define MAX_RESONATOR		  2         /* 2nd resonator*/
-#define MIN_RESONATOR		  1         /* 1st resonator */
+#define MAX_RESONATOR         2         /* 2nd resonator*/
+#define MIN_RESONATOR         1         /* 1st resonator */
 #define UNDEF_RESONATOR       -1
 
 
@@ -138,42 +138,42 @@ extern double ma_list[ MAX_MA_INDEX + 1 ];
 #define SRQ_ON                1
 
 #define MAX_NB                4          /* maximum number of bytes that get
-											send for a ADC data point */
+                                            send for a ADC data point */
 
 
 struct CALIB {
-	bool is_ph[ 2 ];          /* set if phase is calibrated */
-	bool is_ma;               /* set if modulation attenuation is calibrated */
+    bool is_ph[ 2 ];          /* set if phase is calibrated */
+    bool is_ma;               /* set if modulation attenuation is calibrated */
 
-	int pc[ 2 ];              /* phase calibration offset */
-	int mc;                   /* modulation attenuation calibration offset */
-	double ma_fac;            /* modulation attenuation conversion factor */
+    int pc[ 2 ];              /* phase calibration offset */
+    int mc;                   /* modulation attenuation calibration offset */
+    double ma_fac;            /* modulation attenuation conversion factor */
 };
 
 
 struct ER023M {
-	int device;
+    int device;
 
-	int rg_index;         /* receiver gain index */
-	int tc_index;         /* time constant index */
-	int ct_mult;          /* conversion time multiplicator */
-	int mf_index;         /* modulation frequency index */
-	int phase;            /* modulation phase */
-	int ma_index;         /* modulation attenuation index */
-	int of;               /* offset */
-	int ha;               /* harmonic setting */
-	int re;               /* resonator number */
+    int rg_index;         /* receiver gain index */
+    int tc_index;         /* time constant index */
+    int ct_mult;          /* conversion time multiplicator */
+    int mf_index;         /* modulation frequency index */
+    int phase;            /* modulation phase */
+    int ma_index;         /* modulation attenuation index */
+    int of;               /* offset */
+    int ha;               /* harmonic setting */
+    int re;               /* resonator number */
 
-	struct CALIB calib[ MAX_MF_INDEX + 1 ];
+    struct CALIB calib[ MAX_MF_INDEX + 1 ];
 
-	int nb;               /* number of bytes send from ADC */
-	                      /* recheck whenever CT changes */
-	double scale_factor;
-	long min;
+    int nb;               /* number of bytes send from ADC */
+                          /* recheck whenever CT changes */
+    double scale_factor;
+    long min;
 
-	unsigned char st;     /* status byte */
-	bool st_is_valid;     /* when set use the stored value of the status byte,
-							 otherwise fetch from device */
+    unsigned char st;     /* status byte */
+    bool st_is_valid;     /* when set use the stored value of the status byte,
+                             otherwise fetch from device */
 };
 
 
@@ -264,5 +264,7 @@ void er023m_failure( void );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

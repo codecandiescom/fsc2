@@ -57,10 +57,10 @@ static int Dont_exec = 0;
 
 
 %union {
-	long   lval;
-	double dval;
-	char   *sptr;
-	Var_T  *vptr;
+    long   lval;
+    double dval;
+    char   *sptr;
+    Var_T  *vptr;
 }
 
 
@@ -151,26 +151,26 @@ static int Dont_exec = 0;
 
 input:   /* empty */
        | input line ';'            { Channel_type = PULSER_CHANNEL_NO_TYPE;
-	                                 Cur_PHS = -1;
-	                                 Cur_PHST = -1;
-									 is_p_phs_setup = UNSET;
-									 Func_is_set = UNSET;
-									 fsc2_assert( Dont_exec == 0 );
+                                     Cur_PHS = -1;
+                                     Cur_PHST = -1;
+                                     is_p_phs_setup = UNSET;
+                                     Func_is_set = UNSET;
+                                     fsc2_assert( Dont_exec == 0 );
                                      fsc2_assert( EDL.Var_Stack == NULL ); }
        | input SECTION_LABEL       { Channel_type = PULSER_CHANNEL_NO_TYPE;
-	                                 Cur_PHS = -1;
-	                                 Cur_PHST = -1;
-									 is_p_phs_setup = UNSET;
-	                                 fsc2_assert( EDL.Var_Stack == NULL );
-									 fsc2_assert( Dont_exec == 0 );
-									 Func_is_set = UNSET;
-									 YYACCEPT; }
+                                     Cur_PHS = -1;
+                                     Cur_PHST = -1;
+                                     is_p_phs_setup = UNSET;
+                                     fsc2_assert( EDL.Var_Stack == NULL );
+                                     fsc2_assert( Dont_exec == 0 );
+                                     Func_is_set = UNSET;
+                                     YYACCEPT; }
        | input ';'                 { Channel_type = PULSER_CHANNEL_NO_TYPE;
-	                                 Cur_PHS = -1;
-	                                 Cur_PHST = -1;
-									 is_p_phs_setup = UNSET;
-									 Func_is_set = UNSET;
-									 fsc2_assert( Dont_exec == 0 );
+                                     Cur_PHS = -1;
+                                     Cur_PHST = -1;
+                                     is_p_phs_setup = UNSET;
+                                     Func_is_set = UNSET;
+                                     fsc2_assert( Dont_exec == 0 );
                                      fsc2_assert( EDL.Var_Stack == NULL ); }
 ;
 
@@ -184,23 +184,23 @@ line:    func                      { Func_is_set = SET; }
        | tb atb
        | tm atm
        | mpl ampl
-	   | phs aphs                  { if ( ! is_p_phs_setup )
-	                                 {
-		                                 print( FATAL, "Syntax error near "
-												"'%s'.\n", assigntext );
-	                                     THROW( EXCEPTION );
-									 }
-			                         p_phs_end( Cur_PHS ); }
+       | phs aphs                  { if ( ! is_p_phs_setup )
+                                     {
+                                         print( FATAL, "Syntax error near "
+                                                "'%s'.\n", assigntext );
+                                         THROW( EXCEPTION );
+                                     }
+                                     p_phs_end( Cur_PHS ); }
        | psd apsd
        | gp agp
-	   | KAP_TOKEN                 { keep_all_pulses( ); }
+       | KAP_TOKEN                 { keep_all_pulses( ); }
 ;
 
 
 /* all the next entries are just for catching missing semicolon errors */
 
 af:      /* empty */
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TB_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | TM_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
@@ -217,7 +217,7 @@ atb:     /* empty */
        | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 
@@ -228,7 +228,7 @@ atm:     /* empty */
        | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 ampl:    /*empty */
@@ -238,7 +238,7 @@ ampl:    /*empty */
        | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 
@@ -248,7 +248,7 @@ aphs:    /* empty */
        | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PSD_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 
@@ -259,19 +259,19 @@ apsd:    /* empty */
        | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | PHS_TOK                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | GP_TOKEN                  { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 
 agp:     /* empty */
-       | gp	func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | gp	TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | gp	TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp func                   { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp TB_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp TM_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | MPL_TOKEN                 { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | gp	PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | gp	PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-       | gp	GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
-	   | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp PHS_TOK                { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp PSD_TOKEN              { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | gp GP_TOKEN               { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | SECTION_LABEL             { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
 
@@ -281,12 +281,12 @@ func:    MW_TOKEN                  { ass_func( PULSER_CHANNEL_MW ); }
        | TWT_TOKEN                 { ass_func( PULSER_CHANNEL_TWT ); }
        | TWT_GATE_TOKEN            { ass_func( PULSER_CHANNEL_TWT_GATE ); }
        | DET_TOKEN                 { ass_func( PULSER_CHANNEL_DET ); }
-	   | DET_GATE_TOKEN            { ass_func( PULSER_CHANNEL_DET_GATE ); }
+       | DET_GATE_TOKEN            { ass_func( PULSER_CHANNEL_DET_GATE ); }
        | DEF_TOKEN                 { ass_func( PULSER_CHANNEL_DEFENSE ); }
        | RF_TOKEN                  { ass_func( PULSER_CHANNEL_RF ); }
-	   | RF_GATE_TOKEN             { ass_func( PULSER_CHANNEL_RF_GATE ); }
-	   | LSR_TOKEN                 { ass_func( PULSER_CHANNEL_LASER ); }
-	   | PSH_TOKEN                 { ass_func( PULSER_CHANNEL_PULSE_SHAPE ); }
+       | RF_GATE_TOKEN             { ass_func( PULSER_CHANNEL_RF_GATE ); }
+       | LSR_TOKEN                 { ass_func( PULSER_CHANNEL_LASER ); }
+       | PSH_TOKEN                 { ass_func( PULSER_CHANNEL_PULSE_SHAPE ); }
        | PH1_TOKEN                 { ass_func( PULSER_CHANNEL_PHASE_1 ); }
        | PH2_TOKEN                 { ass_func( PULSER_CHANNEL_PHASE_2 ); }
        | OI_TOKEN                  { ass_func( PULSER_CHANNEL_OTHER_1 ); }
@@ -308,27 +308,27 @@ pcd:    /* empty */
       | pcd chd
       | pcd del
       | pcd inv
-	  | pcd vh
+      | pcd vh
       | pcd vl
-	  | pcd func sep2
+      | pcd func sep2
 ;
 
 pod:    POD_TOKEN sep1 pm
 ;
 
 pm:     INT_TOKEN sep2             { p_assign_pod( Channel_type,
-												  vars_push( INT_VAR, $1 ) ); }
+                                                  vars_push( INT_VAR, $1 ) ); }
       | pm INT_TOKEN sep2          { p_assign_pod( Channel_type,
-												  vars_push( INT_VAR, $2 ) ); }
+                                                  vars_push( INT_VAR, $2 ) ); }
 ;
 
 chd:    CH_TOKEN sep1 ch
 ;
 
 ch:     INT_TOKEN sep2             { p_assign_channel( Channel_type,
-												  vars_push( INT_VAR, $1 ) ); }
+                                                  vars_push( INT_VAR, $1 ) ); }
       | ch INT_TOKEN sep2          { p_assign_channel( Channel_type,
-												  vars_push( INT_VAR, $2 ) ); }
+                                                  vars_push( INT_VAR, $2 ) ); }
 ;
 
 del:    DEL_TOKEN sep1 expr sep2   { p_set_delay( Channel_type, $3 ); }
@@ -344,126 +344,126 @@ vl:     VL_TOKEN sep1 expr sep2    { p_set_v_low( Channel_type, $3 ); }
 ;
 
 expr:    INT_TOKEN                { if ( ! Dont_exec )
-		                                 $$ = vars_push( INT_VAR, $1 ); }
+                                         $$ = vars_push( INT_VAR, $1 ); }
        | FLOAT_TOKEN              { if ( ! Dont_exec )
-		                                 $$ = vars_push( FLOAT_VAR, $1 ); }
+                                         $$ = vars_push( FLOAT_VAR, $1 ); }
        | VAR_TOKEN                 { if ( ! Dont_exec )
-		                                 $$ = vars_push_copy( $1 ); }
+                                         $$ = vars_push_copy( $1 ); }
        | VAR_TOKEN '('             { print( FATAL, "'%s' isn't a function.\n",
-											$1->name );
-									 THROW( EXCEPTION ); }
+                                            $1->name );
+                                     THROW( EXCEPTION ); }
        | VAR_TOKEN '['             { if ( ! Dont_exec )
-		                                 vars_arr_start( $1 ); }
+                                         vars_arr_start( $1 ); }
          list1 ']'                 { if ( ! Dont_exec )
-		                                 $$ = vars_arr_rhs( $4 ); }
+                                         $$ = vars_arr_rhs( $4 ); }
        | FUNC_TOKEN '(' list2 ')'  { if ( ! Dont_exec )
-		                                 $$ = func_call( $1 ); }
+                                         $$ = func_call( $1 ); }
        | FUNC_TOKEN                { print( FATAL, "'%s' is a predefined "
-											"function.\n", $1->name );
-	                                 THROW( EXCEPTION ); }
+                                            "function.\n", $1->name );
+                                     THROW( EXCEPTION ); }
        | VAR_REF
-	   | expr AND                  { if ( ! Dont_exec )
-	                                 {
-										 if ( ! check_result( $1 ) )
-										 {
-											 Dont_exec++;
-											 vars_pop( $1 );
-										 }
-									 }
-									 else
-										 Dont_exec++;
-	                               }
-	     expr                      { if ( ! Dont_exec )
+       | expr AND                  { if ( ! Dont_exec )
+                                     {
+                                         if ( ! check_result( $1 ) )
+                                         {
+                                             Dont_exec++;
+                                             vars_pop( $1 );
+                                         }
+                                     }
+                                     else
+                                         Dont_exec++;
+                                   }
+         expr                      { if ( ! Dont_exec )
                                          $$ = vars_comp( COMP_AND, $1, $4 );
-		                             else if ( ! --Dont_exec )
-										 $$ = vars_push( INT_VAR, 0L );
-		                           }
+                                     else if ( ! --Dont_exec )
+                                         $$ = vars_push( INT_VAR, 0L );
+                                   }
        | expr OR                   { if ( ! Dont_exec )
-	                                 {
-										 if ( check_result( $1 ) )
-										 {
-											 Dont_exec++;
-										     vars_pop( $1 );
-										 }
-									 }
-									 else
-										 Dont_exec++;
-	                               }
-	     expr                      { if ( ! Dont_exec )
+                                     {
+                                         if ( check_result( $1 ) )
+                                         {
+                                             Dont_exec++;
+                                             vars_pop( $1 );
+                                         }
+                                     }
+                                     else
+                                         Dont_exec++;
+                                   }
+         expr                      { if ( ! Dont_exec )
                                          $$ = vars_comp( COMP_OR, $1, $4 );
-		                             else if ( ! --Dont_exec )
-									     $$ = vars_push( INT_VAR, 1L );
-		                           }
-       | expr XOR expr       	   { if ( ! Dont_exec )
-		                                 $$ = vars_comp( COMP_XOR, $1, $3 ); }
-       | NOT expr            	   { if ( ! Dont_exec )
-		                                 $$ = vars_lnegate( $2 ); }
+                                     else if ( ! --Dont_exec )
+                                         $$ = vars_push( INT_VAR, 1L );
+                                   }
+       | expr XOR expr             { if ( ! Dont_exec )
+                                         $$ = vars_comp( COMP_XOR, $1, $3 ); }
+       | NOT expr                  { if ( ! Dont_exec )
+                                         $$ = vars_lnegate( $2 ); }
        | expr EQ expr              { if ( ! Dont_exec )
-		                                $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
+                                        $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | expr NE expr              { if ( ! Dont_exec )
-		                              $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
+                                      $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
        | expr LT expr              { if ( ! Dont_exec )
-		                                 $$ = vars_comp( COMP_LESS, $1, $3 ); }
+                                         $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | expr GT expr              { if ( ! Dont_exec )
-		                                 $$ = vars_comp( COMP_LESS, $3, $1 ); }
+                                         $$ = vars_comp( COMP_LESS, $3, $1 ); }
        | expr LE expr              { if ( ! Dont_exec )
-		                                 $$ = vars_comp( COMP_LESS_EQUAL,
-														 $1, $3 ); }
+                                         $$ = vars_comp( COMP_LESS_EQUAL,
+                                                         $1, $3 ); }
        | expr GE expr              { if ( ! Dont_exec )
-		                                 $$ = vars_comp( COMP_LESS_EQUAL,
-														 $3, $1 ); }
+                                         $$ = vars_comp( COMP_LESS_EQUAL,
+                                                         $3, $1 ); }
        | strs EQ strs              { if ( ! Dont_exec )
                                         $$ = vars_comp( COMP_EQUAL, $1, $3 ); }
        | strs NE strs              { if ( ! Dont_exec )
                                       $$ = vars_comp( COMP_UNEQUAL, $1, $3 ); }
        | strs LT strs              { if ( ! Dont_exec )
-	                                     $$ = vars_comp( COMP_LESS, $1, $3 ); }
+                                         $$ = vars_comp( COMP_LESS, $1, $3 ); }
        | strs GT strs              { if ( ! Dont_exec )
-	                                     $$ = vars_comp( COMP_LESS, $3, $1 ); }
+                                         $$ = vars_comp( COMP_LESS, $3, $1 ); }
        | strs LE strs              { if ( ! Dont_exec )
-	                                     $$ = vars_comp( COMP_LESS_EQUAL,
-														 $1, $3 ); }
+                                         $$ = vars_comp( COMP_LESS_EQUAL,
+                                                         $1, $3 ); }
        | strs GE strs              { if ( ! Dont_exec )
-	                                     $$ = vars_comp( COMP_LESS_EQUAL,
-														 $3, $1 ); }
+                                         $$ = vars_comp( COMP_LESS_EQUAL,
+                                                         $3, $1 ); }
        | '+' expr %prec NEG        { if ( ! Dont_exec )
-		                                 $$ = $2; }
+                                         $$ = $2; }
        | '-' expr %prec NEG        { if ( ! Dont_exec )
-		                                 $$ = vars_negate( $2 ); }
+                                         $$ = vars_negate( $2 ); }
        | expr '+' expr             { if ( ! Dont_exec )
-		                                 $$ = vars_add( $1, $3 ); }
+                                         $$ = vars_add( $1, $3 ); }
        | strs '+' strs             { if ( ! Dont_exec )
-		                                 $$ = vars_add( $1, $3 ); }
+                                         $$ = vars_add( $1, $3 ); }
        | expr '-' expr             { if ( ! Dont_exec )
-		                                 $$ = vars_sub( $1, $3 ); }
+                                         $$ = vars_sub( $1, $3 ); }
        | expr '*' expr             { if ( ! Dont_exec )
-		                                 $$ = vars_mult( $1, $3 ); }
+                                         $$ = vars_mult( $1, $3 ); }
        | expr '/' expr             { if ( ! Dont_exec )
-		                                 $$ = vars_div( $1, $3 ); }
+                                         $$ = vars_div( $1, $3 ); }
        | expr '%' expr             { if ( ! Dont_exec )
-		                                 $$ = vars_mod( $1, $3 ); }
+                                         $$ = vars_mod( $1, $3 ); }
        | expr '^' expr             { if ( ! Dont_exec )
-		                                 $$ = vars_pow( $1, $3 ); }
+                                         $$ = vars_pow( $1, $3 ); }
        | '(' expr ')'              { if ( ! Dont_exec )
-		                                 $$ = $2; }
+                                         $$ = $2; }
        | expr '?'                  { if ( ! Dont_exec )
-	                                 {
-		                                 if ( ! check_result( $1 ) )
-		                                     Dont_exec++;
-		                                 vars_pop( $1 );
-									 }
-	                                 else
-										 Dont_exec +=2;
-	                               }
-		 expr ':'                  { if ( ! Dont_exec )
-										 Dont_exec++;
-		 							 else
-										 Dont_exec--;
-	                               }
-		 expr                      { if ( ! Dont_exec )
-										 $$ = $7;
-		                             else if ( ! --Dont_exec )
-									     $$ = $4;
+                                     {
+                                         if ( ! check_result( $1 ) )
+                                             Dont_exec++;
+                                         vars_pop( $1 );
+                                     }
+                                     else
+                                         Dont_exec +=2;
+                                   }
+         expr ':'                  { if ( ! Dont_exec )
+                                         Dont_exec++;
+                                     else
+                                         Dont_exec--;
+                                   }
+         expr                      { if ( ! Dont_exec )
+                                         $$ = $7;
+                                     else if ( ! --Dont_exec )
+                                         $$ = $4;
                                    }
 ;
 
@@ -471,23 +471,23 @@ expr:    INT_TOKEN                { if ( ! Dont_exec )
 
 
 list1:   /* empty */              { if ( ! Dont_exec )
-		                                 $$ = vars_push( UNDEF_VAR ); }
+                                         $$ = vars_push( UNDEF_VAR ); }
        | l1e                      { if ( ! Dont_exec )
-		                                 $$ = $1; }
+                                         $$ = $1; }
 ;
 
 l1e:     ind                      { if ( ! Dont_exec )
-		                                 $$ = $1; }
+                                         $$ = $1; }
        | l1e ',' ind              { if ( ! Dont_exec )
-		                                 $$ = $3; }
+                                         $$ = $3; }
 ;
 
 ind:     expr                     { if ( ! Dont_exec )
-		                                $$ = $1; }
-	   | expr ':'                 { if ( ! Dont_exec )
-									    vars_push( STR_VAR, ":" ); }
+                                        $$ = $1; }
+       | expr ':'                 { if ( ! Dont_exec )
+                                        vars_push( STR_VAR, ":" ); }
          expr                     { if ( ! Dont_exec )
-		                                $$ = $4; }
+                                        $$ = $4; }
 ;
 
 
@@ -506,13 +506,13 @@ exprs:   expr                     { }
 ;
 
 strs:    STR_TOKEN                { if ( ! Dont_exec )
-		                                $$ = vars_push( STR_VAR, $1 ); }
+                                        $$ = vars_push( STR_VAR, $1 ); }
        | strs STR_TOKEN           { if ( ! Dont_exec )
-	                                {
-		                                Var_T *v = vars_push( STR_VAR, $2 );
-										$$ = vars_add( v->prev, v );
-									 }
-	                               }
+                                    {
+                                        Var_T *v = vars_push( STR_VAR, $2 );
+                                        $$ = vars_add( v->prev, v );
+                                     }
+                                   }
 ;
 
 /* separator between keyword and value */
@@ -538,8 +538,8 @@ tb1:     /* empty */
        | tb2
 ;
 
-tb2:     TTL_TOKEN sep2  	       { p_set_timebase_level( TTL_LEVEL ); }
-	   | ECL_TOKEN sep2		       { p_set_timebase_level( ECL_LEVEL ); }
+tb2:     TTL_TOKEN sep2            { p_set_timebase_level( TTL_LEVEL ); }
+       | ECL_TOKEN sep2            { p_set_timebase_level( ECL_LEVEL ); }
 ;
 
 /* handling of TRIGGER_MODE lines */
@@ -549,24 +549,24 @@ tm:       TM_TOKEN tmp
 
 tmp:      /* empty */
         | tmp exter sep2           { p_set_trigger_mode( vars_push( INT_VAR,
-																EXTERNAL ) ); }
+                                                                EXTERNAL ) ); }
         | tmp inter sep2           { p_set_trigger_mode( vars_push( INT_VAR,
-																INTERNAL ) ); }
+                                                                INTERNAL ) ); }
         | tmp SLOPE_TOKEN sep1
-		  sl_val sep2              { p_set_trigger_slope( $4 ); }
+          sl_val sep2              { p_set_trigger_slope( $4 ); }
         | tmp THRESH_TOKEN sep1
-		  expr sep2                { p_set_trigger_level( $4 ); }
-		| tmp TTL_TOKEN sep2       { p_set_trigger_level( vars_push( 
-										 FLOAT_VAR, ( double ) TTL_LEVEL ) ); }
-		| tmp ECL_TOKEN sep2       { p_set_trigger_level( vars_push( 
-										 FLOAT_VAR, ( double ) ECL_LEVEL ) ); }
+          expr sep2                { p_set_trigger_level( $4 ); }
+        | tmp TTL_TOKEN sep2       { p_set_trigger_level( vars_push( 
+                                         FLOAT_VAR, ( double ) TTL_LEVEL ) ); }
+        | tmp ECL_TOKEN sep2       { p_set_trigger_level( vars_push( 
+                                         FLOAT_VAR, ( double ) ECL_LEVEL ) ); }
         | tmp REPT_TOKEN sep1
-		  expr sep2                { p_set_rep_time( $4 ); }
+          expr sep2                { p_set_rep_time( $4 ); }
         | tmp REPF_TOKEN sep1
-		  expr sep2                { p_set_rep_freq( $4 ); }
+          expr sep2                { p_set_rep_freq( $4 ); }
         | tmp IMP_TOKEN sep1
-		  HL_TOKEN sep2            { p_set_trigger_impedance(
-			                                      vars_push( INT_VAR, $4 ) ); }
+          HL_TOKEN sep2            { p_set_trigger_impedance(
+                                                  vars_push( INT_VAR, $4 ) ); }
 ;
 
 exter:    EXTERN_TOKEN
@@ -578,7 +578,7 @@ inter:    INTERN_TOKEN
 sl_val:   NEG_TOKEN                { $$ = vars_push( INT_VAR, NEGATIVE ); }
         | POS_TOKEN                { $$ = vars_push( INT_VAR, POSITIVE ); }
         | '-'                      { $$ = vars_push( INT_VAR, NEGATIVE ); }
-		| '+'                      { $$ = vars_push( INT_VAR, POSITIVE ); }
+        | '+'                      { $$ = vars_push( INT_VAR, POSITIVE ); }
 ;
 
 
@@ -590,39 +590,39 @@ mpl:      MPL_TOKEN expr           { p_set_max_seq_len( $2 ); }
 /* Handling of PHASE_SETUP commands */
 
 phs:      PHS_TOK                  { p_phs_check( );
-	                                 Cur_PHS = $1;
+                                     Cur_PHS = $1;
                                      Cur_PHST = -1;
                                      Func_is_set = SET; }
           phsl
 ;
 
 phsl:     /* empty */
-		| phsl
-		  func sep2
+        | phsl
+          func sep2
         | phsl PXY_TOK sep1        { Cur_PHST = $2; }
           phsp
 ;
 
 phsp:     /* empty */
-		| phsp phsv sep2           { p_phs_setup( Cur_PHS, Cur_PHST,
-												  -1, $2, UNSET );
-		                             is_p_phs_setup = SET; }
+        | phsp phsv sep2           { p_phs_setup( Cur_PHS, Cur_PHST,
+                                                  -1, $2, UNSET );
+                                     is_p_phs_setup = SET; }
         | phsp POD1_TOK sep1
-		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
-												  0, $4, SET );
-		                             is_p_phs_setup = SET; }
+          phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
+                                                  0, $4, SET );
+                                     is_p_phs_setup = SET; }
         | phsp POD2_TOK sep1
-		  phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
-												  1, $4, SET );
-		                             is_p_phs_setup = SET; }
-		| POD_TOKEN sep1 INT_TOKEN
+          phsv sep2                { p_phs_setup( Cur_PHS, Cur_PHST,
+                                                  1, $4, SET );
+                                     is_p_phs_setup = SET; }
+        | POD_TOKEN sep1 INT_TOKEN
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
-												  0, $3, SET );
-		                             is_p_phs_setup = SET; }
-		| CH_TOKEN sep1 INT_TOKEN
+                                                  0, $3, SET );
+                                     is_p_phs_setup = SET; }
+        | CH_TOKEN sep1 INT_TOKEN
           sep2                     { p_phs_setup( Cur_PHS, Cur_PHST,
-												  0, $3, UNSET );
-		                             is_p_phs_setup = SET; }
+                                                  0, $3, UNSET );
+                                     is_p_phs_setup = SET; }
 ;
 
 phsv:     INT_TOKEN                { $$ = $1; }
@@ -649,11 +649,11 @@ gp:       GP_TOKEN expr            { p_set_gp( $2 ); }
 
 static void assignerror( const char * s  UNUSED_ARG )
 {
-	if ( *assigntext == '\0' )
-		print( FATAL, "Unexpected end of file in ASSIGNMENTS section.\n" );
-	else
-		print( FATAL, "Syntax error near '%s'.\n", assigntext );
-	THROW( EXCEPTION );
+    if ( *assigntext == '\0' )
+        print( FATAL, "Unexpected end of file in ASSIGNMENTS section.\n" );
+    else
+        print( FATAL, "Syntax error near '%s'.\n", assigntext );
+    THROW( EXCEPTION );
 }
 
 
@@ -663,49 +663,49 @@ static void assignerror( const char * s  UNUSED_ARG )
 
 static void ass_func( int function )
 {
-	/* If we're at the start of a function line (i.e. when 'Func_is_set' is
-	   unset) test if the function is usable (if there are no phase switches
-	   we can't use the PHASE functions). Then store the current function in a
-	   global variable for later use. */
+    /* If we're at the start of a function line (i.e. when 'Func_is_set' is
+       unset) test if the function is usable (if there are no phase switches
+       we can't use the PHASE functions). Then store the current function in a
+       global variable for later use. */
 
-	if ( ! Func_is_set )
-	{
-		p_exists_function( function );
-		Channel_type = function;
-		return;
-	}
+    if ( ! Func_is_set )
+    {
+        p_exists_function( function );
+        Channel_type = function;
+        return;
+    }
 
-	/* Otherwise there are two valid alternatives. We're either in within
-	   a function line - in this case we're dealing with a pulser that
-	   has phase switches and this is the declaration of the function that
-	   needs phase switching */
+    /* Otherwise there are two valid alternatives. We're either in within
+       a function line - in this case we're dealing with a pulser that
+       has phase switches and this is the declaration of the function that
+       needs phase switching */
 
-	if ( Channel_type != PULSER_CHANNEL_NO_TYPE )
-	{
-		if ( Pulser_Struct[ Cur_Pulser ].needs_phase_pulses )
-			p_phase_ref( Channel_type, function );
-		else
-		{
-			print( FATAL, "Syntax error near '%s' when using pulser %s.\n",
-				   assigntext, Pulser_Struct[ Cur_Pulser ].name );
-			THROW( EXCEPTION );
-		}
-		return;
-	}
+    if ( Channel_type != PULSER_CHANNEL_NO_TYPE )
+    {
+        if ( Pulser_Struct[ Cur_Pulser ].needs_phase_pulses )
+            p_phase_ref( Channel_type, function );
+        else
+        {
+            print( FATAL, "Syntax error near '%s' when using pulser %s.\n",
+                   assigntext, Pulser_Struct[ Cur_Pulser ].name );
+            THROW( EXCEPTION );
+        }
+        return;
+    }
 
-	/* The other alternative is that we're dealing with a pulser with no
-	   phase switches. In this cas Cur_PHS must be set to the number of
-	   the Phase_SETUP (i.e. 0 or 1 for the first or second PHASE_SETUP) */
+    /* The other alternative is that we're dealing with a pulser with no
+       phase switches. In this cas Cur_PHS must be set to the number of
+       the Phase_SETUP (i.e. 0 or 1 for the first or second PHASE_SETUP) */
 
-	if ( ! Pulser_Struct[ Cur_Pulser ].needs_phase_pulses &&
-		 Cur_PHS != -1 )
-		p_phase_ref( Cur_PHS, function );
-	else
-	{
-		print( FATAL, "Syntax error near '%s' when using pulser %s.\n",
-			   assigntext, Pulser_Struct[ Cur_Pulser ].name );
-		THROW( EXCEPTION );
-	}
+    if ( ! Pulser_Struct[ Cur_Pulser ].needs_phase_pulses &&
+         Cur_PHS != -1 )
+        p_phase_ref( Cur_PHS, function );
+    else
+    {
+        print( FATAL, "Syntax error near '%s' when using pulser %s.\n",
+               assigntext, Pulser_Struct[ Cur_Pulser ].name );
+        THROW( EXCEPTION );
+    }
 }
 
 
@@ -714,12 +714,14 @@ static void ass_func( int function )
 
 void assignparser_init( void )
 {
-	Dont_exec = 0;
+    Dont_exec = 0;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

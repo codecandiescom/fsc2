@@ -58,23 +58,23 @@ static void dg2020_create_twt_pulses( void );
 
 void dg2020_init_setup( void )
 {
-	dg2020_create_shape_pulses( );
-	dg2020_create_twt_pulses( );
-	dg2020_basic_pulse_check( );
-	dg2020_basic_functions_check( );
-	dg2020_distribute_channels( );
-	dg2020_pulse_start_setup( );
+    dg2020_create_shape_pulses( );
+    dg2020_create_twt_pulses( );
+    dg2020_basic_pulse_check( );
+    dg2020_basic_functions_check( );
+    dg2020_distribute_channels( );
+    dg2020_pulse_start_setup( );
 
-	if ( dg2020.dump_file != NULL )
-	{
-		dg2020_init_print( dg2020.dump_file );
-		dg2020_dump_channels( dg2020.dump_file );
-	}
-	if ( dg2020.show_file != NULL )
-	{
-		dg2020_init_print( dg2020.show_file );
-		dg2020_dump_channels( dg2020.show_file );
-	}
+    if ( dg2020.dump_file != NULL )
+    {
+        dg2020_init_print( dg2020.dump_file );
+        dg2020_dump_channels( dg2020.dump_file );
+    }
+    if ( dg2020.show_file != NULL )
+    {
+        dg2020_init_print( dg2020.show_file );
+        dg2020_dump_channels( dg2020.show_file );
+    }
 }
 
 
@@ -83,155 +83,155 @@ void dg2020_init_setup( void )
 
 static void dg2020_init_print( FILE * fp )
 {
-	Function_T *f;
-	int i, j;
+    Function_T *f;
+    int i, j;
 
 
-	if ( fp == NULL )
-		return;
+    if ( fp == NULL )
+        return;
 
-	fprintf( fp, "TB: %g\nD: %ld\nPC:", dg2020.timebase, dg2020.neg_delay);
+    fprintf( fp, "TB: %g\nD: %ld\nPC:", dg2020.timebase, dg2020.neg_delay);
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-		if ( dg2020.function[ i ].phase_setup != NULL )
-			fprintf( fp, " %s", Function_Names[ i ] );
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+        if ( dg2020.function[ i ].phase_setup != NULL )
+            fprintf( fp, " %s", Function_Names[ i ] );
 
-	fprintf( fp, "\n===\n" );
+    fprintf( fp, "\n===\n" );
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
 
-		if ( f->num_pods == 0 )
-			continue;
+        if ( f->num_pods == 0 )
+            continue;
 
-		for ( j = 0; j < f->num_pods; j++ )
-			fprintf( fp, "%s:%d %ld%s\n", f->name, f->pod[ j ]->self, f->delay,
-					 f->is_inverted ? " I" : "" );
-	}
+        for ( j = 0; j < f->num_pods; j++ )
+            fprintf( fp, "%s:%d %ld%s\n", f->name, f->pod[ j ]->self, f->delay,
+                     f->is_inverted ? " I" : "" );
+    }
 }
 
 
 /*-------------------------------------------------------------------------*
  * Function runs through all pulses and checks that at least:
  * 1. A pulse function is set and the function itself has been declared in
- *	  the ASSIGNMENTS section
+ *    the ASSIGNMENTS section
  * 2. The start position is set
  * 3. The length is set (only exception: if pulse function is DETECTION
- *	  and no length is set it's more or less silently set to one tick)
+ *    and no length is set it's more or less silently set to one tick)
  * 4. The sum of function delay, pulse start position and length does not
- *	  exceed the pulsers memory
+ *    exceed the pulsers memory
  *-------------------------------------------------------------------------*/
 
 void dg2020_basic_pulse_check( void )
 {
-	Pulse_T *p;
-	int i, j;
-	int cur_type;
+    Pulse_T *p;
+    int i, j;
+    int cur_type;
 
 
-	for ( p = dg2020.pulses; p != NULL; p = p->next )
-	{
-		p->is_active = SET;
+    for ( p = dg2020.pulses; p != NULL; p = p->next )
+    {
+        p->is_active = SET;
 
-		/* Check the pulse function */
+        /* Check the pulse function */
 
-		if ( ! p->is_function )
-		{
-			print( FATAL, "Pulse #%ld is not associated with a function.\n",
-				   p->num );
-			THROW( EXCEPTION );
-		}
+        if ( ! p->is_function )
+        {
+            print( FATAL, "Pulse #%ld is not associated with a function.\n",
+                   p->num );
+            THROW( EXCEPTION );
+        }
 
-		if ( ! p->function->is_used )
-		{
-			print( FATAL, "Function '%s' of pulse #%ld hasn't been declared "
-				   "in the ASSIGNMENTS section.\n",
-				   p->function->name, p->num );
-			THROW( EXCEPTION );
-		}
+        if ( ! p->function->is_used )
+        {
+            print( FATAL, "Function '%s' of pulse #%ld hasn't been declared "
+                   "in the ASSIGNMENTS section.\n",
+                   p->function->name, p->num );
+            THROW( EXCEPTION );
+        }
 
-		/* Check start position and pulse length */
+        /* Check start position and pulse length */
 
-		if ( ! p->is_pos || ! p->is_len || p->len == 0 )
-			p->is_active = UNSET;
+        if ( ! p->is_pos || ! p->is_len || p->len == 0 )
+            p->is_active = UNSET;
 
-		/* We need to know which phase types will be needed for this pulse. */
+        /* We need to know which phase types will be needed for this pulse. */
 
-		if ( p->pc )
-		{
-			if ( p->function->num_pods == 1 )
-			{
-				print( FATAL, "Pulse %ld needs phase cycling but its "
-					   "function '%s' has only one pod assigned to it.\n",
-					   p->num, p->function->name );
-				THROW( EXCEPTION );
-			}
+        if ( p->pc )
+        {
+            if ( p->function->num_pods == 1 )
+            {
+                print( FATAL, "Pulse %ld needs phase cycling but its "
+                       "function '%s' has only one pod assigned to it.\n",
+                       p->num, p->function->name );
+                THROW( EXCEPTION );
+            }
 
-			if ( p->function->phase_setup == NULL )
-			{
-				print( FATAL, "Pulse #%ld needs phase cycling but a phase "
-					   "setup for its function '%s' is missing.\n",
-					   p->num, p->function->name );
-				THROW( EXCEPTION );
-			}
+            if ( p->function->phase_setup == NULL )
+            {
+                print( FATAL, "Pulse #%ld needs phase cycling but a phase "
+                       "setup for its function '%s' is missing.\n",
+                       p->num, p->function->name );
+                THROW( EXCEPTION );
+            }
 
-			for ( i = 0; i < p->pc->len; i++ )
-			{
-				cur_type = p->pc->sequence[ i ];
+            for ( i = 0; i < p->pc->len; i++ )
+            {
+                cur_type = p->pc->sequence[ i ];
 
-				fsc2_assert( cur_type >= PHASE_PLUS_X &&
-							 cur_type < NUM_PHASE_TYPES );
-				p->function->phase_setup->is_needed[ cur_type ] = SET;
-			}
-		}
-		else if ( p->function->num_pods > 1 )
-		{
-			/* If the function has more than one pod but no phase setup
-			   create a dummy phase setup in which only the first pod is
-			   used for pulses (the other pods assigned to the function
-			   will be constantly low). */
+                fsc2_assert( cur_type >= PHASE_PLUS_X &&
+                             cur_type < NUM_PHASE_TYPES );
+                p->function->phase_setup->is_needed[ cur_type ] = SET;
+            }
+        }
+        else if ( p->function->num_pods > 1 )
+        {
+            /* If the function has more than one pod but no phase setup
+               create a dummy phase setup in which only the first pod is
+               used for pulses (the other pods assigned to the function
+               will be constantly low). */
 
-			if ( p->function->phase_setup == NULL )
-			{
-				p->function->phase_setup =
-								dg2020_create_dummy_phase_setup( p->function );
+            if ( p->function->phase_setup == NULL )
+            {
+                p->function->phase_setup =
+                                dg2020_create_dummy_phase_setup( p->function );
 
-				print( NO_ERROR, "Using only POD %d for %s pulses.\n",
-					   p->function->pod[ 0 ]->self,
-					   p->function->name );
-			}
+                print( NO_ERROR, "Using only POD %d for %s pulses.\n",
+                       p->function->pod[ 0 ]->self,
+                       p->function->name );
+            }
 
-			p->pc = dg2020_create_dummy_phase_seq( );
-			p->function->phase_setup->is_needed[ PHASE_PLUS_X ] = SET;
-		}
+            p->pc = dg2020_create_dummy_phase_seq( );
+            p->function->phase_setup->is_needed[ PHASE_PLUS_X ] = SET;
+        }
 
-		/* For functions with more than 1 pod (i.e. functions with phase
-		   cycling) we need to set up a matrix that stores which phase types
-		   are needed in each element of the phase cycle - this is needed for
-		   calculating the number of channels we're going to need */
+        /* For functions with more than 1 pod (i.e. functions with phase
+           cycling) we need to set up a matrix that stores which phase types
+           are needed in each element of the phase cycle - this is needed for
+           calculating the number of channels we're going to need */
 
-		if ( p->function->num_pods > 1 )
-		{
-			if ( p->function->pm == NULL )      /* if it doesn't exist yet */
-			{
-				p->function->pm = BOOL_P T_malloc( p->pc->len 
-												   * sizeof( *p->function->pm )
-												   * NUM_PHASE_TYPES );
+        if ( p->function->num_pods > 1 )
+        {
+            if ( p->function->pm == NULL )      /* if it doesn't exist yet */
+            {
+                p->function->pm = BOOL_P T_malloc( p->pc->len 
+                                                   * sizeof( *p->function->pm )
+                                                   * NUM_PHASE_TYPES );
 
-				for ( i = 0; i < NUM_PHASE_TYPES; i++ )
-					for ( j = 0; j < p->pc->len; j++ )
-						p->function->pm[ i * p->pc->len + j ] = UNSET;
-				p->function->pc_len = p->pc->len;
-			}
+                for ( i = 0; i < NUM_PHASE_TYPES; i++ )
+                    for ( j = 0; j < p->pc->len; j++ )
+                        p->function->pm[ i * p->pc->len + j ] = UNSET;
+                p->function->pc_len = p->pc->len;
+            }
 
-			for ( i = 0; i < p->pc->len; i++ )
-				p->function->pm[ p->pc->sequence[ i ] * p->pc->len + i ] = SET;
-		}
+            for ( i = 0; i < p->pc->len; i++ )
+                p->function->pm[ p->pc->sequence[ i ] * p->pc->len + i ] = SET;
+        }
 
-		if ( p->is_active )
-			p->was_active = p->has_been_active = SET;
-	}
+        if ( p->is_active )
+            p->was_active = p->has_been_active = SET;
+    }
 }
 
 
@@ -240,82 +240,82 @@ void dg2020_basic_pulse_check( void )
 
 static void dg2020_basic_functions_check( void )
 {
-	Function_T *f;
-	int i;
-	Pulse_T *cp;
+    Function_T *f;
+    int i;
+    Pulse_T *cp;
 
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
 
-		/* Phase functions are not supported in this driver... */
+        /* Phase functions are not supported in this driver... */
 
-		fsc2_assert( ! f->is_used ||
-					 ( f->is_used &&
-					   i != PULSER_CHANNEL_PHASE_1 &&
-					   i != PULSER_CHANNEL_PHASE_2 ) );
+        fsc2_assert( ! f->is_used ||
+                     ( f->is_used &&
+                       i != PULSER_CHANNEL_PHASE_1 &&
+                       i != PULSER_CHANNEL_PHASE_2 ) );
 
-		/* Don't do anything if the function has never been mentioned */
+        /* Don't do anything if the function has never been mentioned */
 
-		if ( ! f->is_used )
-			continue;
+        if ( ! f->is_used )
+            continue;
 
-		/* Make sure there's at least one pod assigned to the function */
+        /* Make sure there's at least one pod assigned to the function */
 
-		if ( f->num_pods == 0 )
-		{
-			print( FATAL, "No pod has been assigned to function '%s'.\n",
-				   Function_Names[ i ] );
-			THROW( EXCEPTION );
-		}
+        if ( f->num_pods == 0 )
+        {
+            print( FATAL, "No pod has been assigned to function '%s'.\n",
+                   Function_Names[ i ] );
+            THROW( EXCEPTION );
+        }
 
-		/* Assemble a list of all pulses assigned to the function */
+        /* Assemble a list of all pulses assigned to the function */
 
-		f->num_pulses = 0;
-		f->num_active_pulses = 0;
+        f->num_pulses = 0;
+        f->num_active_pulses = 0;
 
-		for ( cp = dg2020.pulses; cp != NULL; cp = cp->next )
-		{
-			if ( cp->function != f )
-				continue;
+        for ( cp = dg2020.pulses; cp != NULL; cp = cp->next )
+        {
+            if ( cp->function != f )
+                continue;
 
-			f->num_pulses++;
-			f->pulses = PULSE_PP T_realloc( f->pulses, f->num_pulses
-													   * sizeof *f->pulses );
-			f->pulses[ f->num_pulses - 1 ] = cp;
+            f->num_pulses++;
+            f->pulses = PULSE_PP T_realloc( f->pulses, f->num_pulses
+                                                       * sizeof *f->pulses );
+            f->pulses[ f->num_pulses - 1 ] = cp;
 
-			if ( cp->is_active )
-				f->num_active_pulses++;
-		}
+            if ( cp->is_active )
+                f->num_active_pulses++;
+        }
 
-		/* Check if the function has pulses assigned to it, if not print
-		   a warning, otherwise allocate memory for two sets of pulse
-		   parameter structures for the function. */
+        /* Check if the function has pulses assigned to it, if not print
+           a warning, otherwise allocate memory for two sets of pulse
+           parameter structures for the function. */
 
-		if ( f->num_pulses == 0 )
-			print( WARN, "No pulses have been assigned to function '%s'.\n",
-				   f->name );
-		else
-		{
-			f->pulse_params = PULSE_PARAMS_P T_malloc( 2 * f->num_pulses
-												   * sizeof *f->pulse_params );
-			f->old_pulse_params = f->pulse_params + f->num_pulses;
-		}
+        if ( f->num_pulses == 0 )
+            print( WARN, "No pulses have been assigned to function '%s'.\n",
+                   f->name );
+        else
+        {
+            f->pulse_params = PULSE_PARAMS_P T_malloc( 2 * f->num_pulses
+                                                   * sizeof *f->pulse_params );
+            f->old_pulse_params = f->pulse_params + f->num_pulses;
+        }
 
-		/* Check that for functions that need phase cycling there was also a
-		   PHASE_SETUP command */
+        /* Check that for functions that need phase cycling there was also a
+           PHASE_SETUP command */
 
-		fsc2_assert( f->num_pods == 1 || f->phase_setup != NULL );
+        fsc2_assert( f->num_pods == 1 || f->phase_setup != NULL );
 
-		/* Now its time to check the phase setup for functions which use phase
-		   cycling */
+        /* Now its time to check the phase setup for functions which use phase
+           cycling */
 
-		if ( f->num_pods > 1 )
-			dg2020_phase_setup_check( f );
+        if ( f->num_pods > 1 )
+            dg2020_phase_setup_check( f );
 
-		f->num_needed_channels = dg2020_calc_channels_needed( f );
-	}
+        f->num_needed_channels = dg2020_calc_channels_needed( f );
+    }
 }
 
 
@@ -332,39 +332,39 @@ static void dg2020_basic_functions_check( void )
 
 static int dg2020_calc_channels_needed( Function_T * f )
 {
-	int i, j;
-	int num_channels;
+    int i, j;
+    int num_channels;
 
 
-	if ( f->num_pods < 2 )
-		return 1;
+    if ( f->num_pods < 2 )
+        return 1;
 
-	/* For channels with more than one pod but no pulses... */
+    /* For channels with more than one pod but no pulses... */
 
-	if ( f->num_pulses == 0 )
-	{
-		f->pc_len = 1;
-		f->need_constant = SET;
-		return 1;
-	}
+    if ( f->num_pulses == 0 )
+    {
+        f->pc_len = 1;
+        f->need_constant = SET;
+        return 1;
+    }
 
-	fsc2_assert( f->pm != NULL );
+    fsc2_assert( f->pm != NULL );
 
-	num_channels = 0;
-	f->need_constant = UNSET;
-	for ( i = 0; i < f->pc_len; i++ )
-		for ( j = 0; j < NUM_PHASE_TYPES; j++ )
-		{
-			if ( f->pm[ j * f->pc_len + i ] )
-				num_channels++;
-			else
-				f->need_constant = SET;
-		}
+    num_channels = 0;
+    f->need_constant = UNSET;
+    for ( i = 0; i < f->pc_len; i++ )
+        for ( j = 0; j < NUM_PHASE_TYPES; j++ )
+        {
+            if ( f->pm[ j * f->pc_len + i ] )
+                num_channels++;
+            else
+                f->need_constant = SET;
+        }
 
-	if ( f->need_constant )            /* if we needed a constant voltage */
-		num_channels++;
+    if ( f->need_constant )            /* if we needed a constant voltage */
+        num_channels++;
 
-	return num_channels;
+    return num_channels;
 }
 
 
@@ -373,103 +373,103 @@ static int dg2020_calc_channels_needed( Function_T * f )
 
 static void dg2020_phase_setup_check( Function_T * f )
 {
-	int i, j;
-	Pod_T *free_pod_list[ MAX_PODS_PER_FUNC ];
-	int free_pods;
+    int i, j;
+    Pod_T *free_pod_list[ MAX_PODS_PER_FUNC ];
+    int free_pods;
 
 
-	/* First let's see if the pods mentioned in the phase setup are really
-	   assigned to the function */
+    /* First let's see if the pods mentioned in the phase setup are really
+       assigned to the function */
 
-	for ( i = 0; i < NUM_PHASE_TYPES; i++ )
-	{
-		if ( ! f->phase_setup->is_set[ i ] )
-			continue;
+    for ( i = 0; i < NUM_PHASE_TYPES; i++ )
+    {
+        if ( ! f->phase_setup->is_set[ i ] )
+            continue;
 
-		for ( j = 0; j < f->num_pods; j++ )
-			if ( f->pod[ j ]->self == f->phase_setup->pod[ i ]->self )
-				break;
+        for ( j = 0; j < f->num_pods; j++ )
+            if ( f->pod[ j ]->self == f->phase_setup->pod[ i ]->self )
+                break;
 
-		if ( j == f->num_pods )                 /* not found ? */
-		{
-			print( FATAL, "According to the phase setup pod %d is needed "
-				   "for function '%s' but it's not assigned to it.\n",
-				   f->phase_setup->pod[ i ]->self, f->name );
-			THROW( EXCEPTION );
-		}
-	}
+        if ( j == f->num_pods )                 /* not found ? */
+        {
+            print( FATAL, "According to the phase setup pod %d is needed "
+                   "for function '%s' but it's not assigned to it.\n",
+                   f->phase_setup->pod[ i ]->self, f->name );
+            THROW( EXCEPTION );
+        }
+    }
 
-	/* In the basic pulse check we created a list of all phase types needed
-	   for the current function. Now we can check if these phase types are
-	   also defined in the phase setup. */
+    /* In the basic pulse check we created a list of all phase types needed
+       for the current function. Now we can check if these phase types are
+       also defined in the phase setup. */
 
-	for ( i = 0; i < NUM_PHASE_TYPES; i++ )
-	{
-		if ( f->phase_setup->is_needed[ i ] && ! f->phase_setup->is_set[ i ] )
-		{
-			print( FATAL, "Phase type '%s' is needed for function '%s' but "
-				   "has not been not defined in a PHASE_SETUP command.\n",
-				   Phase_Types[ i ], f->name );
-			THROW( EXCEPTION );
-		}
-	}
+    for ( i = 0; i < NUM_PHASE_TYPES; i++ )
+    {
+        if ( f->phase_setup->is_needed[ i ] && ! f->phase_setup->is_set[ i ] )
+        {
+            print( FATAL, "Phase type '%s' is needed for function '%s' but "
+                   "has not been not defined in a PHASE_SETUP command.\n",
+                   Phase_Types[ i ], f->name );
+            THROW( EXCEPTION );
+        }
+    }
 
-	/* Now we distribute pods of the function that aren't used for pulse types
-	   as set in the PHASE_SETUP command to phase types that aren't needed for
-	   real pulses (this way the unused pod is automatically set to a constant
-	   voltages as needed by the Berlin pulse bridge) */
+    /* Now we distribute pods of the function that aren't used for pulse types
+       as set in the PHASE_SETUP command to phase types that aren't needed for
+       real pulses (this way the unused pod is automatically set to a constant
+       voltages as needed by the Berlin pulse bridge) */
 
-	free_pods = 0;
-	for ( i = 0; i < f->num_pods; i++ )
-	{
-		for ( j = 0; j < NUM_PHASE_TYPES; j++ )
-			if ( f->pod[ i ] == f->phase_setup->pod[ j ] )
-				break;
-		if ( j == NUM_PHASE_TYPES )
-			free_pod_list[ free_pods++ ] = f->pod[ i ];
-	}
+    free_pods = 0;
+    for ( i = 0; i < f->num_pods; i++ )
+    {
+        for ( j = 0; j < NUM_PHASE_TYPES; j++ )
+            if ( f->pod[ i ] == f->phase_setup->pod[ j ] )
+                break;
+        if ( j == NUM_PHASE_TYPES )
+            free_pod_list[ free_pods++ ] = f->pod[ i ];
+    }
 
-	if ( free_pods != 0 )
-		for ( i = j = 0; i < NUM_PHASE_TYPES; i++ )
-			if ( ! f->phase_setup->is_set[ i ] )
-			{
-				f->phase_setup->is_set[ i ]= SET;
-				f->phase_setup->pod[ i ] = free_pod_list[ j ];
-				j = ( j + 1 ) % free_pods;
-			}
+    if ( free_pods != 0 )
+        for ( i = j = 0; i < NUM_PHASE_TYPES; i++ )
+            if ( ! f->phase_setup->is_set[ i ] )
+            {
+                f->phase_setup->is_set[ i ]= SET;
+                f->phase_setup->pod[ i ] = free_pod_list[ j ];
+                j = ( j + 1 ) % free_pods;
+            }
 
-	/* We also have to test that different phase types are not associated with
+    /* We also have to test that different phase types are not associated with
        the same pod (exception: the different phase types are never actually
        used for a pulse - that's ok). */
 
-	for ( i = 0; i < NUM_PHASE_TYPES; i++ )
-		for ( j = 0; j < NUM_PHASE_TYPES; j++ )
-		{
-			if ( i == j )
-				continue;
+    for ( i = 0; i < NUM_PHASE_TYPES; i++ )
+        for ( j = 0; j < NUM_PHASE_TYPES; j++ )
+        {
+            if ( i == j )
+                continue;
 
-			if ( f->phase_setup->is_needed[ i ] &&
-				 f->phase_setup->is_set[ j ] &&
-				 f->phase_setup->pod[ i ] == f->phase_setup->pod[ j ] )
-			{
+            if ( f->phase_setup->is_needed[ i ] &&
+                 f->phase_setup->is_set[ j ] &&
+                 f->phase_setup->pod[ i ] == f->phase_setup->pod[ j ] )
+            {
 
-				/* Distinguish between the cases that either both phase types
-				   are really needed by pulses or that one is needed by a
-				   pulse and the other is defined but not actually needed for
-				   a pulse but to just to create a constant voltage. */
+                /* Distinguish between the cases that either both phase types
+                   are really needed by pulses or that one is needed by a
+                   pulse and the other is defined but not actually needed for
+                   a pulse but to just to create a constant voltage. */
 
-				if ( f->phase_setup->is_needed[ j ] )
-					print( FATAL, "Pod %ld can't be used for phase type '%s' "
-						   "and '%s' at the same time.\n",
-						   f->phase_setup->pod[ i ]->self,
-						   Phase_Types[ i ], Phase_Types[ j ] );
-				else
-					print( FATAL, "Pod %ld is needed for phase type '%s' and "
-						   "can't be also used for other phase types.\n",
-						   f->phase_setup->pod[ i ]->self, Phase_Types[ i ] );
-				THROW( EXCEPTION );
-			}
-		}
+                if ( f->phase_setup->is_needed[ j ] )
+                    print( FATAL, "Pod %ld can't be used for phase type '%s' "
+                           "and '%s' at the same time.\n",
+                           f->phase_setup->pod[ i ]->self,
+                           Phase_Types[ i ], Phase_Types[ j ] );
+                else
+                    print( FATAL, "Pod %ld is needed for phase type '%s' and "
+                           "can't be also used for other phase types.\n",
+                           f->phase_setup->pod[ i ]->self, Phase_Types[ i ] );
+                THROW( EXCEPTION );
+            }
+        }
 }
 
 
@@ -481,51 +481,51 @@ static void dg2020_phase_setup_check( Function_T * f )
 
 static void dg2020_distribute_channels( void )
 {
-	int i;
-	Function_T *f;
+    int i;
+    Function_T *f;
 
 
-	dg2020.needed_channels = 0;
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
-		if ( ! f->is_used )
-			continue;
-		dg2020.needed_channels += f->num_needed_channels;
-	}
+    dg2020.needed_channels = 0;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
+        if ( ! f->is_used )
+            continue;
+        dg2020.needed_channels += f->num_needed_channels;
+    }
 
-	/* Now we've got to check if there are at least as many channels as are
-	   needed for the experiment */
+    /* Now we've got to check if there are at least as many channels as are
+       needed for the experiment */
 
-	if ( dg2020.needed_channels > MAX_CHANNELS )
-	{
-		print( FATAL, "Experiment would require %d pulser channels but only "
-			   "%d are available.\n",
-			   dg2020.needed_channels, ( int ) MAX_CHANNELS );
-		THROW( EXCEPTION );
-	}
+    if ( dg2020.needed_channels > MAX_CHANNELS )
+    {
+        print( FATAL, "Experiment would require %d pulser channels but only "
+               "%d are available.\n",
+               dg2020.needed_channels, ( int ) MAX_CHANNELS );
+        THROW( EXCEPTION );
+    }
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
 
-		/* Don't do anything for unused functions */
+        /* Don't do anything for unused functions */
 
-		if ( ! f->is_used )
-			continue;
+        if ( ! f->is_used )
+            continue;
 
-		/* If the function needs more channels than it got assigned get them
-		   now from the pool of free channels */
+        /* If the function needs more channels than it got assigned get them
+           now from the pool of free channels */
 
-		while ( f->num_channels < f->num_needed_channels )
-		{
-			f->channel[ f->num_channels ] = dg2020_get_next_free_channel( );
-			f->channel[ f->num_channels++ ]->function = f;
-		}
+        while ( f->num_channels < f->num_needed_channels )
+        {
+            f->channel[ f->num_channels ] = dg2020_get_next_free_channel( );
+            f->channel[ f->num_channels++ ]->function = f;
+        }
 
-		if ( f->num_pods > 1 )
-			dg2020_setup_phase_matrix( f );
-	}
+        if ( f->num_pods > 1 )
+            dg2020_setup_phase_matrix( f );
+    }
 }
 
 
@@ -540,29 +540,29 @@ static void dg2020_distribute_channels( void )
 
 static void dg2020_setup_phase_matrix( Function_T * f )
 {
-	int i, j;
-	int cur_channel;
+    int i, j;
+    int cur_channel;
 
 
-	fsc2_assert( f->num_pulses == 0 || ( f->pm != NULL && f->pcm == NULL ) );
+    fsc2_assert( f->num_pulses == 0 || ( f->pm != NULL && f->pcm == NULL ) );
 
-	/* If the function needs constant voltage channel we keep the channel with
-	   the lowest number for it */
+    /* If the function needs constant voltage channel we keep the channel with
+       the lowest number for it */
 
-	cur_channel = f->need_constant ? 1 : 0;
+    cur_channel = f->need_constant ? 1 : 0;
 
-	f->pcm = CHANNEL_PP T_malloc( f->pc_len * NUM_PHASE_TYPES
-								  * sizeof *f->pcm );
+    f->pcm = CHANNEL_PP T_malloc( f->pc_len * NUM_PHASE_TYPES
+                                  * sizeof *f->pcm );
 
-	for ( i = 0; i < NUM_PHASE_TYPES; i++ )
-		for ( j = 0; j < f->pc_len; j++ )
-			if ( f->pm && f->pm[ i * f->pc_len + j ] )
-				f->pcm[ i * f->pc_len + j ] = f->channel[ cur_channel++ ];
-			else
-				f->pcm[ i * f->pc_len + j ] = f->channel[ 0 ];
+    for ( i = 0; i < NUM_PHASE_TYPES; i++ )
+        for ( j = 0; j < f->pc_len; j++ )
+            if ( f->pm && f->pm[ i * f->pc_len + j ] )
+                f->pcm[ i * f->pc_len + j ] = f->channel[ cur_channel++ ];
+            else
+                f->pcm[ i * f->pc_len + j ] = f->channel[ 0 ];
 
-	if ( f->pm != NULL )
-		f->pm = BOOL_P T_free( f->pm );
+    if ( f->pm != NULL )
+        f->pm = BOOL_P T_free( f->pm );
 }
 
 
@@ -571,98 +571,98 @@ static void dg2020_setup_phase_matrix( Function_T * f )
 
 static void dg2020_pulse_start_setup( void )
 {
-	Function_T *f;
-	int i, j, k;
+    Function_T *f;
+    int i, j, k;
 
 
-	/* Sort the pulses and check that they don't overlap */
+    /* Sort the pulses and check that they don't overlap */
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
 
-		/* Nothing to be done for unused functions and the phase functions */
+        /* Nothing to be done for unused functions and the phase functions */
 
-		if ( ! f->is_used ||
-			 i == PULSER_CHANNEL_PHASE_1 ||
-			 i == PULSER_CHANNEL_PHASE_2 )
-			continue;
+        if ( ! f->is_used ||
+             i == PULSER_CHANNEL_PHASE_1 ||
+             i == PULSER_CHANNEL_PHASE_2 )
+            continue;
 
-		/* Sort the pulses of current the function */
+        /* Sort the pulses of current the function */
 
-		qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
-			   dg2020_start_compare );
+        qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
+               dg2020_start_compare );
 
-		/* Check that they don't overlap and fit into the pulsers memory */
+        /* Check that they don't overlap and fit into the pulsers memory */
 
-		dg2020_do_checks( f );
+        dg2020_do_checks( f );
 
-		/* For each pulse set the channel(s) it belongs to */
+        /* For each pulse set the channel(s) it belongs to */
 
-		for ( j = 0; j < f->num_pulses; j++ )
-		{
-			f->pulses[ j ]->channel = CHANNEL_PP T_malloc( f->pc_len
-										   * sizeof *f->pulses[ j ]->channel );
-			for ( k = 0; k < f->pc_len; k++ )
-				f->pulses[ j ]->channel[ k ] = NULL;
+        for ( j = 0; j < f->num_pulses; j++ )
+        {
+            f->pulses[ j ]->channel = CHANNEL_PP T_malloc( f->pc_len
+                                           * sizeof *f->pulses[ j ]->channel );
+            for ( k = 0; k < f->pc_len; k++ )
+                f->pulses[ j ]->channel[ k ] = NULL;
 
-			if ( f->num_needed_channels == 1 )
-				f->pulses[ j ]->channel[ 0 ] = f->channel[ 0 ];
-			else
-				for ( k = 0; k < f->pc_len; k++ )
-					f->pulses[ j ]->channel[ k ] =
-									f->pcm[   f->pulses[ j ]->pc->sequence[ k ]
-										    * f->pc_len + k ];
-		}
-	}
+            if ( f->num_needed_channels == 1 )
+                f->pulses[ j ]->channel[ 0 ] = f->channel[ 0 ];
+            else
+                for ( k = 0; k < f->pc_len; k++ )
+                    f->pulses[ j ]->channel[ k ] =
+                                    f->pcm[   f->pulses[ j ]->pc->sequence[ k ]
+                                            * f->pc_len + k ];
+        }
+    }
 
-	/* Now we still need a final check that the distance between the last
-	   defense pulse and the first shape pulse isn't too short - this is
-	   only relevant for very fast repetitions of the pulse sequence but
-	   needs to be tested - thanks to Celine Elsaesser for pointing this
-	   out. */
+    /* Now we still need a final check that the distance between the last
+       defense pulse and the first shape pulse isn't too short - this is
+       only relevant for very fast repetitions of the pulse sequence but
+       needs to be tested - thanks to Celine Elsaesser for pointing this
+       out. */
 
-	if ( dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-		 dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
-	{
-		Ticks add;
-		Function_T *fs = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE,
-				   *fd = dg2020.function + PULSER_CHANNEL_DEFENSE;
-		Pulse_Params_T *shape_p, *defense_p;
+    if ( dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
+         dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
+    {
+        Ticks add;
+        Function_T *fs = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE,
+                   *fd = dg2020.function + PULSER_CHANNEL_DEFENSE;
+        Pulse_Params_T *shape_p, *defense_p;
 
-		if ( fd->num_params > 0 && fs->num_params > 0 )
-		{
-			shape_p = fs->pulse_params;
-			defense_p = fd->pulse_params + fd->num_params - 1;
-			add = Ticks_min( dg2020.defense_2_shape, shape_p->pos 
-							 + Ticks_max( fd->max_seq_len, fs->max_seq_len )
-							 - defense_p->pos - defense_p->len );
+        if ( fd->num_params > 0 && fs->num_params > 0 )
+        {
+            shape_p = fs->pulse_params;
+            defense_p = fd->pulse_params + fd->num_params - 1;
+            add = Ticks_min( dg2020.defense_2_shape, shape_p->pos 
+                             + Ticks_max( fd->max_seq_len, fs->max_seq_len )
+                             - defense_p->pos - defense_p->len );
 
-			if ( add < dg2020.defense_2_shape )
-				fs->max_seq_len = fd->max_seq_len =
-								Ticks_max( fd->max_seq_len, fs->max_seq_len )
-								+ dg2020.defense_2_shape - add;
+            if ( add < dg2020.defense_2_shape )
+                fs->max_seq_len = fd->max_seq_len =
+                                Ticks_max( fd->max_seq_len, fs->max_seq_len )
+                                + dg2020.defense_2_shape - add;
 
-			shape_p = fs->pulse_params  + fs->num_params - 1;
-			defense_p = fd->pulse_params;
-			add = Ticks_min( dg2020.shape_2_defense, defense_p->pos
-							 + Ticks_max( fd->max_seq_len, fs->max_seq_len )
-							 - shape_p->pos - shape_p->len );
+            shape_p = fs->pulse_params  + fs->num_params - 1;
+            defense_p = fd->pulse_params;
+            add = Ticks_min( dg2020.shape_2_defense, defense_p->pos
+                             + Ticks_max( fd->max_seq_len, fs->max_seq_len )
+                             - shape_p->pos - shape_p->len );
 
-			if ( add < dg2020.shape_2_defense )
-				fs->max_seq_len = fd->max_seq_len =
-								Ticks_max( fd->max_seq_len, fs->max_seq_len )
-								+ dg2020.shape_2_defense - add;
-		}
+            if ( add < dg2020.shape_2_defense )
+                fs->max_seq_len = fd->max_seq_len =
+                                Ticks_max( fd->max_seq_len, fs->max_seq_len )
+                                + dg2020.shape_2_defense - add;
+        }
 
-		if ( fd->max_seq_len > MAX_PULSER_BITS )
-		{
-			print( FATAL, "Pulse sequence for function '%s' is too long. "
-				   "Perhaps you should try to use the "
-				   "pulser_maximum_pattern_length() function.\n", fd->name );
-			THROW( EXCEPTION );
-		}
-	}
+        if ( fd->max_seq_len > MAX_PULSER_BITS )
+        {
+            print( FATAL, "Pulse sequence for function '%s' is too long. "
+                   "Perhaps you should try to use the "
+                   "pulser_maximum_pattern_length() function.\n", fd->name );
+            THROW( EXCEPTION );
+        }
+    }
 }
 
 
@@ -676,30 +676,30 @@ static void dg2020_pulse_start_setup( void )
 
 static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T * f )
 {
-	int i, j;
+    int i, j;
 
 
-	i = dg2020.num_dummy_phase_setups;
-	dg2020.dummy_phase_setup = PHASE_SETUP_P
-								T_realloc( dg2020.dummy_phase_setup,
-										   ++dg2020.num_dummy_phase_setups *
-										   sizeof *dg2020.dummy_phase_setup );
+    i = dg2020.num_dummy_phase_setups;
+    dg2020.dummy_phase_setup = PHASE_SETUP_P
+                                T_realloc( dg2020.dummy_phase_setup,
+                                           ++dg2020.num_dummy_phase_setups *
+                                           sizeof *dg2020.dummy_phase_setup );
 
 
-	dg2020.dummy_phase_setup[ i ].is_defined = SET;
-	dg2020.dummy_phase_setup[ i ].is_set[ 0 ] = SET;
-	dg2020.dummy_phase_setup[ i ].is_needed[ 0 ] = SET;
-	dg2020.dummy_phase_setup[ i ].pod[ 0 ] = f->pod[ 0 ];
-	dg2020.dummy_phase_setup[ i ].function = f;
+    dg2020.dummy_phase_setup[ i ].is_defined = SET;
+    dg2020.dummy_phase_setup[ i ].is_set[ 0 ] = SET;
+    dg2020.dummy_phase_setup[ i ].is_needed[ 0 ] = SET;
+    dg2020.dummy_phase_setup[ i ].pod[ 0 ] = f->pod[ 0 ];
+    dg2020.dummy_phase_setup[ i ].function = f;
 
-	for ( j = 1; j < NUM_PHASE_TYPES; j++ )
-	{
-		dg2020.dummy_phase_setup[ i ].is_set[ j ] = UNSET;
-		dg2020.dummy_phase_setup[ i ].is_needed[ j ] = UNSET;
-		dg2020.dummy_phase_setup[ i ].pod[ j ] = NULL;
-	}
+    for ( j = 1; j < NUM_PHASE_TYPES; j++ )
+    {
+        dg2020.dummy_phase_setup[ i ].is_set[ j ] = UNSET;
+        dg2020.dummy_phase_setup[ i ].is_needed[ j ] = UNSET;
+        dg2020.dummy_phase_setup[ i ].pod[ j ] = NULL;
+    }
 
-	return dg2020.dummy_phase_setup + i;
+    return dg2020.dummy_phase_setup + i;
 }
 
 
@@ -715,48 +715,48 @@ static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T * f )
 
 static Phs_Seq_T *dg2020_create_dummy_phase_seq( void )
 {
-	Phs_Seq_T *np, *pn;
-	int i;
+    Phs_Seq_T *np, *pn;
+    int i;
 
 
-	/* First check if there's a phase sequence consisting of just '+X' - if it
-	   does use this as the phase sequence for the pulse */
+    /* First check if there's a phase sequence consisting of just '+X' - if it
+       does use this as the phase sequence for the pulse */
 
-	for ( np = PA_Seq.phs_seq; np != NULL; np = np->next )
-	{
-		for ( i = 0; i < np->len; i++ )
-			if ( np->sequence[ i ] != PHASE_PLUS_X )
-				break;
+    for ( np = PA_Seq.phs_seq; np != NULL; np = np->next )
+    {
+        for ( i = 0; i < np->len; i++ )
+            if ( np->sequence[ i ] != PHASE_PLUS_X )
+                break;
 
-		if ( i == np->len )
-			return np;
-	}
+        if ( i == np->len )
+            return np;
+    }
 
-	/* Create a new phase sequence */
+    /* Create a new phase sequence */
 
-	np = PHS_SEQ_P T_malloc( sizeof *np );
+    np = PHS_SEQ_P T_malloc( sizeof *np );
 
-	if ( PA_Seq.phs_seq == NULL )
-	{
-		PA_Seq.phs_seq = np;
-		np->len = 1;
-		np->sequence = INT_P T_malloc( sizeof *np->sequence );
-		np->sequence[ 0 ] = PHASE_PLUS_X;
-	}
-	else
-	{
-		pn = PA_Seq.phs_seq;
-		while ( pn->next != NULL )
-			pn = pn->next;
-		pn->next = np;
-		np->len = PA_Seq.phs_seq->len;
-		np->sequence = INT_P T_malloc( np->len * sizeof *np->sequence );
-		for ( i = 0; i < np->len; i++ )
-			np->sequence[ i ] = PHASE_PLUS_X;
-	}
+    if ( PA_Seq.phs_seq == NULL )
+    {
+        PA_Seq.phs_seq = np;
+        np->len = 1;
+        np->sequence = INT_P T_malloc( sizeof *np->sequence );
+        np->sequence[ 0 ] = PHASE_PLUS_X;
+    }
+    else
+    {
+        pn = PA_Seq.phs_seq;
+        while ( pn->next != NULL )
+            pn = pn->next;
+        pn->next = np;
+        np->len = PA_Seq.phs_seq->len;
+        np->sequence = INT_P T_malloc( np->len * sizeof *np->sequence );
+        for ( i = 0; i < np->len; i++ )
+            np->sequence[ i ] = PHASE_PLUS_X;
+    }
 
-	np->next = NULL;
-	return np;
+    np->next = NULL;
+    return np;
 }
 
 
@@ -773,161 +773,161 @@ static Phs_Seq_T *dg2020_create_dummy_phase_seq( void )
 
 static void dg2020_create_shape_pulses( void )
 {
-	Function_T *f;
-	Pulse_T *np = NULL, *cp, *rp, *p1, *p2, *old_end;
+    Function_T *f;
+    Pulse_T *np = NULL, *cp, *rp, *p1, *p2, *old_end;
 
 
-	/* Nothing to be done if no automatic setting of shape pulses is
-	   required or no pulses exist */
+    /* Nothing to be done if no automatic setting of shape pulses is
+       required or no pulses exist */
 
-	if ( ! dg2020.auto_shape_pulses || dg2020.pulses == NULL )
-		return;
+    if ( ! dg2020.auto_shape_pulses || dg2020.pulses == NULL )
+        return;
 
-	/* Find the end of the pulse list (to be able to append the new shape
-	   pulses) */
+    /* Find the end of the pulse list (to be able to append the new shape
+       pulses) */
 
-	for ( cp = dg2020.pulses; cp->next != NULL; cp = cp->next )
-		/* empty */ ;
-	old_end = cp;
+    for ( cp = dg2020.pulses; cp->next != NULL; cp = cp->next )
+        /* empty */ ;
+    old_end = cp;
 
-	/* Loop over all pulses */
+    /* Loop over all pulses */
 
-	for ( rp = dg2020.pulses; rp != NULL; rp = rp->next )
-	{
-		f = rp->function;
+    for ( rp = dg2020.pulses; rp != NULL; rp = rp->next )
+    {
+        f = rp->function;
 
-		/* No shape pulses are set for the PULSE_SHAPE function itself
-		   and functions that don't are marked for needing shape pulses */
+        /* No shape pulses are set for the PULSE_SHAPE function itself
+           and functions that don't are marked for needing shape pulses */
 
-		if ( f->self == PULSER_CHANNEL_PULSE_SHAPE ||
-			 ! f->uses_auto_shape_pulses )
-			continue;
+        if ( f->self == PULSER_CHANNEL_PULSE_SHAPE ||
+             ! f->uses_auto_shape_pulses )
+            continue;
 
-		/* Append a new pulse to the list of pulses */
+        /* Append a new pulse to the list of pulses */
 
-		np = PULSE_P T_malloc( sizeof *np );
+        np = PULSE_P T_malloc( sizeof *np );
 
-		np->prev = cp;
-		cp = cp->next = np;
+        np->prev = cp;
+        cp = cp->next = np;
 
-		np->next = NULL;
-		np->pc = NULL;
+        np->next = NULL;
+        np->pc = NULL;
 
-		np->function = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE;
-		np->is_function = SET;
+        np->function = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE;
+        np->is_function = SET;
 
-		/* These 'artifical' pulses get negative numbers */
+        /* These 'artifical' pulses get negative numbers */
 
-		np->num = ( np->prev->num >= 0 ) ? -1 : np->prev->num - 1;
+        np->num = ( np->prev->num >= 0 ) ? -1 : np->prev->num - 1;
 
-		np->pc = NULL;              /* No phase cycling for shape pulses */
+        np->pc = NULL;              /* No phase cycling for shape pulses */
 
-		rp->sp = np;                /* link the shape pulse and the pulse */
-		np->sp = rp;                /* it's made for by setting pointers */
+        rp->sp = np;                /* link the shape pulse and the pulse */
+        np->sp = rp;                /* it's made for by setting pointers */
 
-		np->tp = NULL;
+        np->tp = NULL;
 
-		/* The remaining properties are just exact copies of the pulse the
-		   shape pulse is made for */
+        /* The remaining properties are just exact copies of the pulse the
+           shape pulse is made for */
 
-		np->is_active = rp->is_active;
-		np->was_active = rp->was_active;
-		np->has_been_active = rp->has_been_active;
+        np->is_active = rp->is_active;
+        np->was_active = rp->was_active;
+        np->has_been_active = rp->has_been_active;
 
-		np->pos = rp->pos;
-		np->len = rp->len;
-		np->dpos = rp->dpos;
-		np->dlen = rp->dlen;
+        np->pos = rp->pos;
+        np->len = rp->len;
+        np->dpos = rp->dpos;
+        np->dlen = rp->dlen;
 
-		np->is_pos = rp->is_pos;
-		np->is_len = rp->is_len;
-		np->is_dpos = rp->is_dpos;
-		np->is_dlen = rp->is_dlen;
+        np->is_pos = rp->is_pos;
+        np->is_len = rp->is_len;
+        np->is_dpos = rp->is_dpos;
+        np->is_dlen = rp->is_dlen;
 
-		np->initial_pos = rp->initial_pos;
-		np->initial_len = rp->initial_len;
-		np->initial_dpos = rp->initial_dpos;
-		np->initial_dlen = rp->initial_dlen;
+        np->initial_pos = rp->initial_pos;
+        np->initial_len = rp->initial_len;
+        np->initial_dpos = rp->initial_dpos;
+        np->initial_dlen = rp->initial_dlen;
 
-		np->initial_is_pos = rp->initial_is_pos;
-		np->initial_is_len = rp->initial_is_len;
-		np->initial_is_dpos = rp->initial_is_dpos;
-		np->initial_is_dlen = rp->initial_is_dlen;
+        np->initial_is_pos = rp->initial_is_pos;
+        np->initial_is_len = rp->initial_is_len;
+        np->initial_is_dpos = rp->initial_is_dpos;
+        np->initial_is_dlen = rp->initial_is_dlen;
 
-		np->old_pos = rp->old_pos;
-		np->old_len = rp->old_len;
+        np->old_pos = rp->old_pos;
+        np->old_len = rp->old_len;
 
-		np->is_old_pos = rp->is_old_pos;
-		np->is_old_len = rp->is_old_len;
+        np->is_old_pos = rp->is_old_pos;
+        np->is_old_len = rp->is_old_len;
 
-		np->channel = NULL;
+        np->channel = NULL;
 
-		np->needs_update = rp->needs_update;
-	}
+        np->needs_update = rp->needs_update;
+    }
 
-	/* Now after we created all the necessary shape pulses we've got to check
-	   that they don't overlap with manually created shape pulses or with
-	   shape pulses for pulses of different functions (overlaps for shape
-	   pulses for pulses of the same function will be detected later and
-	   reported as overlaps of the pulses they belong to, which is the only
-	   reason this could happen). */
+    /* Now after we created all the necessary shape pulses we've got to check
+       that they don't overlap with manually created shape pulses or with
+       shape pulses for pulses of different functions (overlaps for shape
+       pulses for pulses of the same function will be detected later and
+       reported as overlaps of the pulses they belong to, which is the only
+       reason this could happen). */
 
-	if ( np == NULL )    /* no shape pulses have been created automatically */
-		return;
+    if ( np == NULL )    /* no shape pulses have been created automatically */
+        return;
 
-	for ( p1 = dg2020.pulses; p1 != old_end->next; p1 = p1->next )
-	{
-		if ( ! p1->is_active ||
-			 p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
-			continue;
+    for ( p1 = dg2020.pulses; p1 != old_end->next; p1 = p1->next )
+    {
+        if ( ! p1->is_active ||
+             p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+            continue;
 
-		for ( p2 = old_end->next; p2 != NULL; p2 = p2->next )
-		{
-			if ( ! p2->is_active ||
-				 p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
-				continue;
+        for ( p2 = old_end->next; p2 != NULL; p2 = p2->next )
+        {
+            if ( ! p2->is_active ||
+                 p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+                continue;
 
-			if ( p1->pos == p2->pos ||
-				 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-				 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
-			{
-				print( FATAL, "PULSE_SHAPE pulse #%ld and automatically "
-					   "created shape pulse for pulse #%ld (function '%s') "
-					   "would overlap.\n", p1->num, p2->sp->num,
-					   p2->sp->function->name );
-				THROW( EXCEPTION );
-			}
-		}
-	}
+            if ( p1->pos == p2->pos ||
+                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
+                 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
+            {
+                print( FATAL, "PULSE_SHAPE pulse #%ld and automatically "
+                       "created shape pulse for pulse #%ld (function '%s') "
+                       "would overlap.\n", p1->num, p2->sp->num,
+                       p2->sp->function->name );
+                THROW( EXCEPTION );
+            }
+        }
+    }
 
-	for ( p1 = old_end->next; p1 != NULL && p1->next != NULL; p1 = p1->next )
-	{
-		if ( ! p1->is_active ||
-			 p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
-			continue;
+    for ( p1 = old_end->next; p1 != NULL && p1->next != NULL; p1 = p1->next )
+    {
+        if ( ! p1->is_active ||
+             p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+            continue;
 
-		for ( p2 = p1->next; p2 != NULL; p2 = p2->next )
-		{
-			if ( ! p2->is_active ||
-				 p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
-				continue;
+        for ( p2 = p1->next; p2 != NULL; p2 = p2->next )
+        {
+            if ( ! p2->is_active ||
+                 p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+                continue;
 
-			if ( p1->sp->function == p2->sp->function )
-				continue;
+            if ( p1->sp->function == p2->sp->function )
+                continue;
 
-			if ( p1->pos == p2->pos ||
-				 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-				 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
-			{
-				print( FATAL, "Automatically created shape pulses for pulse "
-					   "#%ld (function '%s') and #%ld (function '%s') would "
-					   "overlap.\n",
-					   p1->sp->num, p1->sp->function->name,
-					   p2->sp->num, p2->sp->function->name );
-				THROW( EXCEPTION );
-			}
-		}
-	}
+            if ( p1->pos == p2->pos ||
+                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
+                 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
+            {
+                print( FATAL, "Automatically created shape pulses for pulse "
+                       "#%ld (function '%s') and #%ld (function '%s') would "
+                       "overlap.\n",
+                       p1->sp->num, p1->sp->function->name,
+                       p2->sp->num, p2->sp->function->name );
+                THROW( EXCEPTION );
+            }
+        }
+    }
 }
 
 
@@ -941,103 +941,105 @@ static void dg2020_create_shape_pulses( void )
 
 static void dg2020_create_twt_pulses( void )
 {
-	Function_T *f;
-	Pulse_T *np, *cp, *rp, *old_end;
+    Function_T *f;
+    Pulse_T *np, *cp, *rp, *old_end;
 
 
-	/* Nothing to be done if no automatic setting of TWT pulses is
-	   required or no pulses exist */
+    /* Nothing to be done if no automatic setting of TWT pulses is
+       required or no pulses exist */
 
-	if ( ! dg2020.auto_twt_pulses  || dg2020.pulses == NULL )
-		return;
+    if ( ! dg2020.auto_twt_pulses  || dg2020.pulses == NULL )
+        return;
 
-	/* Find the end of the pulse list (to be able to add further TWT
-	   pulses) */
+    /* Find the end of the pulse list (to be able to add further TWT
+       pulses) */
 
-	for ( cp = dg2020.pulses; cp->next != NULL; cp = cp->next )
-		/* empty */ ;
-	old_end = cp;
+    for ( cp = dg2020.pulses; cp->next != NULL; cp = cp->next )
+        /* empty */ ;
+    old_end = cp;
 
-	/* Loop over all pulses */
+    /* Loop over all pulses */
 
-	for ( rp = dg2020.pulses; rp != NULL; rp = rp->next )
-	{
-		f = rp->function;
+    for ( rp = dg2020.pulses; rp != NULL; rp = rp->next )
+    {
+        f = rp->function;
 
-		/* No TWT pulses can be set for the TWT or TWT_GATE function and
-		   functions that don't need TWT pulses */
+        /* No TWT pulses can be set for the TWT or TWT_GATE function and
+           functions that don't need TWT pulses */
 
-		if ( f->self == PULSER_CHANNEL_TWT ||
-			 f->self == PULSER_CHANNEL_TWT_GATE ||
-			 ! f->uses_auto_twt_pulses )
-			continue;
+        if ( f->self == PULSER_CHANNEL_TWT ||
+             f->self == PULSER_CHANNEL_TWT_GATE ||
+             ! f->uses_auto_twt_pulses )
+            continue;
 
-		/* Append a new pulse to the list of pulses */
+        /* Append a new pulse to the list of pulses */
 
-		np = PULSE_P T_malloc( sizeof *np );
+        np = PULSE_P T_malloc( sizeof *np );
 
-		np->prev = cp;
-		cp = cp->next = np;
+        np->prev = cp;
+        cp = cp->next = np;
 
-		np->next = NULL;
-		np->pc = NULL;
+        np->next = NULL;
+        np->pc = NULL;
 
-		np->function = dg2020.function + PULSER_CHANNEL_TWT;
-		np->is_function = SET;
+        np->function = dg2020.function + PULSER_CHANNEL_TWT;
+        np->is_function = SET;
 
-		/* These 'artifical' pulses get negative numbers */
+        /* These 'artifical' pulses get negative numbers */
 
-		np->num = ( np->prev->num >= 0 ) ? -1 : np->prev->num - 1;
+        np->num = ( np->prev->num >= 0 ) ? -1 : np->prev->num - 1;
 
-		np->pc = NULL;             /* no phase cycling for TWT pulses */
+        np->pc = NULL;             /* no phase cycling for TWT pulses */
 
-		rp->tp = np;
-		np->tp = rp;
+        rp->tp = np;
+        np->tp = rp;
 
-		np->sp = NULL;
+        np->sp = NULL;
 
-		/* The remaining properties are just exact copies of the
-		   pulse the TWT pulse has to be used with */
+        /* The remaining properties are just exact copies of the
+           pulse the TWT pulse has to be used with */
 
-		np->is_active = rp->is_active;
-		np->was_active = rp->was_active;
-		np->has_been_active = rp->has_been_active;
+        np->is_active = rp->is_active;
+        np->was_active = rp->was_active;
+        np->has_been_active = rp->has_been_active;
 
-		np->pos = rp->pos;
-		np->len = rp->len;
-		np->dpos = rp->dpos;
-		np->dlen = rp->dlen;
+        np->pos = rp->pos;
+        np->len = rp->len;
+        np->dpos = rp->dpos;
+        np->dlen = rp->dlen;
 
-		np->is_pos = rp->is_pos;
-		np->is_len = rp->is_len;
-		np->is_dpos = rp->is_dpos;
-		np->is_dlen = rp->is_dlen;
+        np->is_pos = rp->is_pos;
+        np->is_len = rp->is_len;
+        np->is_dpos = rp->is_dpos;
+        np->is_dlen = rp->is_dlen;
 
-		np->initial_pos = rp->initial_pos;
-		np->initial_len = rp->initial_len;
-		np->initial_dpos = rp->initial_dpos;
-		np->initial_dlen = rp->initial_dlen;
+        np->initial_pos = rp->initial_pos;
+        np->initial_len = rp->initial_len;
+        np->initial_dpos = rp->initial_dpos;
+        np->initial_dlen = rp->initial_dlen;
 
-		np->initial_is_pos = rp->initial_is_pos;
-		np->initial_is_len = rp->initial_is_len;
-		np->initial_is_dpos = rp->initial_is_dpos;
-		np->initial_is_dlen = rp->initial_is_dlen;
+        np->initial_is_pos = rp->initial_is_pos;
+        np->initial_is_len = rp->initial_is_len;
+        np->initial_is_dpos = rp->initial_is_dpos;
+        np->initial_is_dlen = rp->initial_is_dlen;
 
-		np->old_pos = rp->old_pos;
-		np->old_len = rp->old_len;
+        np->old_pos = rp->old_pos;
+        np->old_len = rp->old_len;
 
-		np->is_old_pos = rp->is_old_pos;
-		np->is_old_len = rp->is_old_len;
+        np->is_old_pos = rp->is_old_pos;
+        np->is_old_len = rp->is_old_len;
 
-		np->channel = NULL;
+        np->channel = NULL;
 
-		np->needs_update = rp->needs_update;
-	}
+        np->needs_update = rp->needs_update;
+    }
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

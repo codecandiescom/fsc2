@@ -35,131 +35,131 @@
 
 bool spex_cd2a_read_state( void )
 {
-	char *fn;
-	const char *dn;
-	FILE *fp;
-	int c;
-	double val[ 4 ];
-	int new;
-	int i = 0;
-	bool in_comment = UNSET;
-	bool found_end = UNSET;
+    char *fn;
+    const char *dn;
+    FILE *fp;
+    int c;
+    double val[ 4 ];
+    int new;
+    int i = 0;
+    bool in_comment = UNSET;
+    bool found_end = UNSET;
 
 
-	dn = fsc2_config_dir( );
-	fn = get_string( "%s%s%s", dn, slash( dn ), SPEX_CD2A_STATE_FILE );
+    dn = fsc2_config_dir( );
+    fn = get_string( "%s%s%s", dn, slash( dn ), SPEX_CD2A_STATE_FILE );
 
-	if ( ( fp = fsc2_fopen( fn, "r" ) ) == NULL )
-	{
-		print( FATAL, "Can't open state file '%s'.\n", fn );
-		T_free( fn );
-		SPEX_CD2A_THROW( EXCEPTION );
-	}
+    if ( ( fp = fsc2_fopen( fn, "r" ) ) == NULL )
+    {
+        print( FATAL, "Can't open state file '%s'.\n", fn );
+        T_free( fn );
+        SPEX_CD2A_THROW( EXCEPTION );
+    }
 
-	do
-	{
-		c = fsc2_fgetc( fp );
+    do
+    {
+        c = fsc2_fgetc( fp );
 
-		switch ( c )
-		{
-			case EOF :
-				found_end = SET;
-				break;
+        switch ( c )
+        {
+            case EOF :
+                found_end = SET;
+                break;
 
-			case '#' :
-				in_comment = SET;
-				break;
+            case '#' :
+                in_comment = SET;
+                break;
 
-			case '\n' :
-				in_comment = UNSET;
-				break;
+            case '\n' :
+                in_comment = UNSET;
+                break;
 
-			default :
-				if ( in_comment )
-					break;
+            default :
+                if ( in_comment )
+                    break;
 
-				fsc2_fseek( fp, -1, SEEK_CUR );
+                fsc2_fseek( fp, -1, SEEK_CUR );
 
-				if ( ( spex_cd2a.mode & WL && i > 3 ) || i > 4 ||
-					 ( ( ( spex_cd2a.mode & WL && i < 3 ) ||
-						 ( spex_cd2a.mode & WN_MODES && i < 4 ) )&& 
-					   fsc2_fscanf( fp, "%lf", val + i ) != 1 ) ||
-					 ( ( ( spex_cd2a.mode & WL && i == 3 ) ||
-						 ( spex_cd2a.mode & WN_MODES && i == 4 ) ) &&
-					   fsc2_fscanf( fp, "%d", &new ) != 1 ) )
-				{
-					print( FATAL, "Invalid state file '%s'.\n", fn );
-					T_free( fn );
-					fsc2_fclose( fp );
-					SPEX_CD2A_THROW( EXCEPTION );
-				}
+                if ( ( spex_cd2a.mode & WL && i > 3 ) || i > 4 ||
+                     ( ( ( spex_cd2a.mode & WL && i < 3 ) ||
+                         ( spex_cd2a.mode & WN_MODES && i < 4 ) )&& 
+                       fsc2_fscanf( fp, "%lf", val + i ) != 1 ) ||
+                     ( ( ( spex_cd2a.mode & WL && i == 3 ) ||
+                         ( spex_cd2a.mode & WN_MODES && i == 4 ) ) &&
+                       fsc2_fscanf( fp, "%d", &new ) != 1 ) )
+                {
+                    print( FATAL, "Invalid state file '%s'.\n", fn );
+                    T_free( fn );
+                    fsc2_fclose( fp );
+                    SPEX_CD2A_THROW( EXCEPTION );
+                }
 
-				while ( ( c = fsc2_fgetc( fp ) ) != EOF && isspace( c ) )
-					/* empty */ ;
+                while ( ( c = fsc2_fgetc( fp ) ) != EOF && isspace( c ) )
+                    /* empty */ ;
 
-				if ( ( c == EOF &&
-					   ( ( i != 3 && spex_cd2a.mode & WL ) ||
-						 ( i != 4 && spex_cd2a.mode & WN_MODES ) ) ) ||
-					 ( ( i == 0 || i == 2 || spex_cd2a.mode & WL ) &&
-					   c != 'n' ) ||
-					 ( ( i == 1 || i == 3 ) && spex_cd2a.mode & WN_MODES &&
-					   c != 'c' ) )
-				{
-					print( FATAL, "Invalid state file '%s'.\n", fn );
-					T_free( fn );
-					fsc2_fclose( fp );
-					SPEX_CD2A_THROW( EXCEPTION );
-				}
-				
-				if ( ( ( spex_cd2a.mode & WL && i != 3 ) || i != 4 ) &&
-					 ( fsc2_fgetc( fp ) != 'm' ||
-					   ( c == 'c' &&
-						 ( fsc2_fgetc( fp ) != '^' ||
-						   fsc2_fgetc( fp ) != '-' ||
-						   fsc2_fgetc( fp ) != '1' ) ) ) )
-				{
-					print( FATAL, "Invalid state file '%s'.\n", fn );
-					T_free( fn );
-					fsc2_fclose( fp );
-					SPEX_CD2A_THROW( EXCEPTION );
-				}
+                if ( ( c == EOF &&
+                       ( ( i != 3 && spex_cd2a.mode & WL ) ||
+                         ( i != 4 && spex_cd2a.mode & WN_MODES ) ) ) ||
+                     ( ( i == 0 || i == 2 || spex_cd2a.mode & WL ) &&
+                       c != 'n' ) ||
+                     ( ( i == 1 || i == 3 ) && spex_cd2a.mode & WN_MODES &&
+                       c != 'c' ) )
+                {
+                    print( FATAL, "Invalid state file '%s'.\n", fn );
+                    T_free( fn );
+                    fsc2_fclose( fp );
+                    SPEX_CD2A_THROW( EXCEPTION );
+                }
+                
+                if ( ( ( spex_cd2a.mode & WL && i != 3 ) || i != 4 ) &&
+                     ( fsc2_fgetc( fp ) != 'm' ||
+                       ( c == 'c' &&
+                         ( fsc2_fgetc( fp ) != '^' ||
+                           fsc2_fgetc( fp ) != '-' ||
+                           fsc2_fgetc( fp ) != '1' ) ) ) )
+                {
+                    print( FATAL, "Invalid state file '%s'.\n", fn );
+                    T_free( fn );
+                    fsc2_fclose( fp );
+                    SPEX_CD2A_THROW( EXCEPTION );
+                }
 
-				i++;
-				break;
-		}
+                i++;
+                break;
+        }
 
-	} while ( ! found_end );
+    } while ( ! found_end );
 
-	fsc2_fclose( fp );
+    fsc2_fclose( fp );
 
-	if ( val[ 0 ] < 0.0 || val[ 2 ] < 0.0 )
-	{
-		print( FATAL, "Invalid state file '%s'.\n", fn );
-		T_free( fn );
-		SPEX_CD2A_THROW( EXCEPTION );
-	}	
+    if ( val[ 0 ] < 0.0 || val[ 2 ] < 0.0 )
+    {
+        print( FATAL, "Invalid state file '%s'.\n", fn );
+        T_free( fn );
+        SPEX_CD2A_THROW( EXCEPTION );
+    }   
 
-	spex_cd2a.wavelength = 1.0e-9 * val[ 0 ];
-	spex_cd2a.pixel_diff = 1.0e-9 * val[ 2 ];
+    spex_cd2a.wavelength = 1.0e-9 * val[ 0 ];
+    spex_cd2a.pixel_diff = 1.0e-9 * val[ 2 ];
 
-	if ( spex_cd2a.mode & WN_MODES )
-	{
-		spex_cd2a.offset = val[ 1 ];
+    if ( spex_cd2a.mode & WN_MODES )
+    {
+        spex_cd2a.offset = val[ 1 ];
 
-		if ( val[ 3 ] < 0.0 )
-		{
-			print( FATAL, "Invalid state file '%s'.\n", fn );
-			T_free( fn );
-			SPEX_CD2A_THROW( EXCEPTION );
-		}
+        if ( val[ 3 ] < 0.0 )
+        {
+            print( FATAL, "Invalid state file '%s'.\n", fn );
+            T_free( fn );
+            SPEX_CD2A_THROW( EXCEPTION );
+        }
 
-		spex_cd2a.laser_line = val[ 3 ];
-	}
-	else
-		spex_cd2a.offset = 1.0e-9 * val[ 1 ];
+        spex_cd2a.laser_line = val[ 3 ];
+    }
+    else
+        spex_cd2a.offset = 1.0e-9 * val[ 1 ];
 
-	T_free( fn );
-	return OK;
+    T_free( fn );
+    return OK;
 }
 
 
@@ -169,56 +169,56 @@ bool spex_cd2a_read_state( void )
 
 bool spex_cd2a_store_state( void )
 {
-	char *fn;
-	const char *dn;
-	FILE *fp;
+    char *fn;
+    const char *dn;
+    FILE *fp;
 
 
-	dn = fsc2_config_dir( );
-	fn = get_string( "%s%s%s", dn, slash( dn ), SPEX_CD2A_STATE_FILE );
+    dn = fsc2_config_dir( );
+    fn = get_string( "%s%s%s", dn, slash( dn ), SPEX_CD2A_STATE_FILE );
 
-	if ( ( fp = fsc2_fopen( fn, "w" ) ) == NULL )
-	{
-		print( SEVERE, "Can't store state data in '%s', can't open file "
-			   "for writing.\n", fn );
-		return FAIL;
-	}
+    if ( ( fp = fsc2_fopen( fn, "w" ) ) == NULL )
+    {
+        print( SEVERE, "Can't store state data in '%s', can't open file "
+               "for writing.\n", fn );
+        return FAIL;
+    }
 
-	fsc2_fprintf( fp, "# --- Do *not* edit this file, it gets created "
-				  "automatically ---\n\n"
-				  "# In this file state information for the spex_cd2a "
-				  "driver is stored:\n"
-				  "# 1. The wavelength the monochromator is set to\n"
-				  "# 2. An offset of the monochromator, i.e. a number that "
-				  "always has to be\n"
-				  "#    added to wavenumbers or -lengths specified by the "
-				  "user\n"
-				  "# 3. The wavelength difference between two pixels of the "
-				  "connected CCD camera\n"
-				  "# 4. For wavenumber driven monochromators only: the "
-				  "current setting of\n"
-				  "#    the position of the laser line (as set at the "
-				  "SPEX CD2A)\n"
-				  "# 5. a flag that indicates if a new calibration has "
-				  "been done.\n\n" );
+    fsc2_fprintf( fp, "# --- Do *not* edit this file, it gets created "
+                  "automatically ---\n\n"
+                  "# In this file state information for the spex_cd2a "
+                  "driver is stored:\n"
+                  "# 1. The wavelength the monochromator is set to\n"
+                  "# 2. An offset of the monochromator, i.e. a number that "
+                  "always has to be\n"
+                  "#    added to wavenumbers or -lengths specified by the "
+                  "user\n"
+                  "# 3. The wavelength difference between two pixels of the "
+                  "connected CCD camera\n"
+                  "# 4. For wavenumber driven monochromators only: the "
+                  "current setting of\n"
+                  "#    the position of the laser line (as set at the "
+                  "SPEX CD2A)\n"
+                  "# 5. a flag that indicates if a new calibration has "
+                  "been done.\n\n" );
 
-	if ( spex_cd2a.mode & WN_MODES )
-		fsc2_fprintf( fp, "%.5f nm\n%.4f cm^-1\n%.7f nm\n%.4f cm^-1\n",
-					  1.0e9 * spex_cd2a.wavelength,
-					  spex_cd2a.offset,
-					  1.0e9 * spex_cd2a.pixel_diff,
-					  spex_cd2a.laser_line );
-	else
-		fsc2_fprintf( fp, "%.5f nm\n%.5f nm\n%.7f nm\n",
-					  1.0e9 * spex_cd2a.wavelength,
-					  1.0e9 * spex_cd2a.offset,
-					  1.0e9 * spex_cd2a.pixel_diff );
+    if ( spex_cd2a.mode & WN_MODES )
+        fsc2_fprintf( fp, "%.5f nm\n%.4f cm^-1\n%.7f nm\n%.4f cm^-1\n",
+                      1.0e9 * spex_cd2a.wavelength,
+                      spex_cd2a.offset,
+                      1.0e9 * spex_cd2a.pixel_diff,
+                      spex_cd2a.laser_line );
+    else
+        fsc2_fprintf( fp, "%.5f nm\n%.5f nm\n%.7f nm\n",
+                      1.0e9 * spex_cd2a.wavelength,
+                      1.0e9 * spex_cd2a.offset,
+                      1.0e9 * spex_cd2a.pixel_diff );
 
-	fprintf( fp, "%d\n", spex_cd2a.new_calibration ? 1 : 0 );
+    fprintf( fp, "%d\n", spex_cd2a.new_calibration ? 1 : 0 );
 
-	fsc2_fclose( fp );
+    fsc2_fclose( fp );
 
-	return OK;
+    return OK;
 }
 
 
@@ -238,9 +238,9 @@ bool spex_cd2a_store_state( void )
 
 double spex_cd2a_wl2wn( double wl )
 {
-	if ( wl <= 0.0 )
-		SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
-	return 0.01 / wl;
+    if ( wl <= 0.0 )
+        SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
+    return 0.01 / wl;
 }
 
 
@@ -250,9 +250,9 @@ double spex_cd2a_wl2wn( double wl )
 
 double spex_cd2a_wn2wl( double wn )
 {
-	if ( wn <= 0.0 )
-		SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
-	return 0.01 / wn;
+    if ( wn <= 0.0 )
+        SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
+    return 0.01 / wn;
 }
 
 
@@ -263,12 +263,12 @@ double spex_cd2a_wn2wl( double wn )
 
 double spex_cd2a_wl2Uwl( double wl )
 {
-	if ( spex_cd2a.mode & WL )
-		wl -= spex_cd2a.offset;
-	else
-		wl = spex_cd2a_wn2wl( spex_cd2a_wl2wn( wl ) - spex_cd2a.offset );
+    if ( spex_cd2a.mode & WL )
+        wl -= spex_cd2a.offset;
+    else
+        wl = spex_cd2a_wn2wl( spex_cd2a_wl2wn( wl ) - spex_cd2a.offset );
 
-	return wl;
+    return wl;
 }
 
 
@@ -279,12 +279,12 @@ double spex_cd2a_wl2Uwl( double wl )
 
 double spex_cd2a_Uwl2wl( double wl )
 {
-	if ( spex_cd2a.mode & WL )
-		wl += spex_cd2a.offset;
-	else
-		wl = spex_cd2a_wn2wl( spex_cd2a_wl2wn( wl ) + spex_cd2a.offset );
+    if ( spex_cd2a.mode & WL )
+        wl += spex_cd2a.offset;
+    else
+        wl = spex_cd2a_wn2wl( spex_cd2a_wl2wn( wl ) + spex_cd2a.offset );
 
-	return wl;
+    return wl;
 }
 
 
@@ -296,25 +296,25 @@ double spex_cd2a_Uwl2wl( double wl )
 
 double spex_cd2a_wn2Uwn( double wn )
 {
-	switch ( spex_cd2a.mode )
-	{
-		case WND :
-			wn = spex_cd2a.laser_line - wn;
-			/* fall through */
+    switch ( spex_cd2a.mode )
+    {
+        case WND :
+            wn = spex_cd2a.laser_line - wn;
+            /* fall through */
 
-		case WN :
-			wn -= spex_cd2a.offset;
-			break;
+        case WN :
+            wn -= spex_cd2a.offset;
+            break;
 
-		case WL :
-			wn = spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( spex_cd2a_wn2wl( wn ) ) );
-			break;
+        case WL :
+            wn = spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( spex_cd2a_wn2wl( wn ) ) );
+            break;
 
-		default:
-			fsc2_assert( 1 == 0 );
-	}
+        default:
+            fsc2_assert( 1 == 0 );
+    }
 
-	return wn;
+    return wn;
 }
 
 
@@ -326,25 +326,25 @@ double spex_cd2a_wn2Uwn( double wn )
 
 double spex_cd2a_Uwn2wn( double wn )
 {
-	switch ( spex_cd2a.mode )
-	{
-		case WND :
-			wn = spex_cd2a.laser_line - wn;
-			/* fall through */
+    switch ( spex_cd2a.mode )
+    {
+        case WND :
+            wn = spex_cd2a.laser_line - wn;
+            /* fall through */
 
-		case WN :
-			wn += spex_cd2a.offset;
-			break;
+        case WN :
+            wn += spex_cd2a.offset;
+            break;
 
-		case WL :
-			wn = spex_cd2a_wl2wn( spex_cd2a_Uwl2wl( spex_cd2a_wn2wl( wn ) ) );
-			break;
-			
-		default:
-			fsc2_assert( 1 == 0 );
-	}
+        case WL :
+            wn = spex_cd2a_wl2wn( spex_cd2a_Uwl2wl( spex_cd2a_wn2wl( wn ) ) );
+            break;
+            
+        default:
+            fsc2_assert( 1 == 0 );
+    }
 
-	return wn;
+    return wn;
 }
 
 
@@ -355,10 +355,10 @@ double spex_cd2a_Uwn2wn( double wn )
 
 double spex_cd2a_wn2Uwl( double wn )
 {
-	if ( spex_cd2a.mode & WN_MODES )
-		return spex_cd2a_wn2wl( wn - spex_cd2a.offset );
+    if ( spex_cd2a.mode & WN_MODES )
+        return spex_cd2a_wn2wl( wn - spex_cd2a.offset );
 
-	return spex_cd2a_wl2Uwl( spex_cd2a_wn2wl( wn ) );
+    return spex_cd2a_wl2Uwl( spex_cd2a_wn2wl( wn ) );
 }
 
 
@@ -369,10 +369,10 @@ double spex_cd2a_wn2Uwl( double wn )
 
 double spex_cd2a_Uwl2wn( double wl )
 {
-	if ( spex_cd2a.mode & WN_MODES )
-		return spex_cd2a_wl2wn( wl ) + spex_cd2a.offset;
+    if ( spex_cd2a.mode & WN_MODES )
+        return spex_cd2a_wl2wn( wl ) + spex_cd2a.offset;
 
-	return spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( wl ) );
+    return spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( wl ) );
 }
 
 
@@ -384,10 +384,10 @@ double spex_cd2a_Uwl2wn( double wl )
 
 double spex_cd2a_wl2Uwn( double wl )
 {
-	if ( spex_cd2a.mode & WN_MODES )
-		return spex_cd2a_wn2Uwn( spex_cd2a_wl2wn( wl ) );
+    if ( spex_cd2a.mode & WN_MODES )
+        return spex_cd2a_wn2Uwn( spex_cd2a_wl2wn( wl ) );
 
-	return spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( wl ) );
+    return spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( wl ) );
 }
 
 
@@ -399,10 +399,10 @@ double spex_cd2a_wl2Uwn( double wl )
 
 double spex_cd2a_Uwn2wl( double wn )
 {
-	if ( spex_cd2a.mode & WN_MODES )
-		return spex_cd2a_wn2wl( spex_cd2a_Uwn2wn( wn ) );
+    if ( spex_cd2a.mode & WN_MODES )
+        return spex_cd2a_wn2wl( spex_cd2a_Uwn2wn( wn ) );
 
-	return spex_cd2a_Uwl2wl( spex_cd2a_wn2wl( wn ) );
+    return spex_cd2a_Uwl2wl( spex_cd2a_wn2wl( wn ) );
 }
 
 
@@ -413,25 +413,27 @@ double spex_cd2a_Uwn2wl( double wn )
 
 double spex_cd2a_wl2mu( double wl )
 {
-	switch ( spex_cd2a.mode )
-	{
-		case WN :
-			return spex_cd2a_wl2wn( wl );
+    switch ( spex_cd2a.mode )
+    {
+        case WN :
+            return spex_cd2a_wl2wn( wl );
 
-		case WND :
-			return spex_cd2a.laser_line - spex_cd2a_wl2wn( wl );
+        case WND :
+            return spex_cd2a.laser_line - spex_cd2a_wl2wn( wl );
 
-		case WL :
-			return ( UNITS == NANOMETER ? 1.0e9 : 1.0e10 ) * wl;
-	}
+        case WL :
+            return ( UNITS == NANOMETER ? 1.0e9 : 1.0e10 ) * wl;
+    }
 
-	fsc2_assert( 1 == 0 );            /* we'll never get here */
-	return 0.0;
+    fsc2_assert( 1 == 0 );            /* we'll never get here */
+    return 0.0;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

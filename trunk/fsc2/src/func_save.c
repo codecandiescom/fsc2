@@ -36,27 +36,27 @@ static int get_save_file( Var_T ** /* v */ );
 static Var_T *batch_mode_file_open( char * /* name */ );
 
 static long arr_save( long    /* file_num */,
-					  Var_T * /* v        */ );
+                      Var_T * /* v        */ );
 
 static void f_format_check( Var_T * /* v */ );
 
 static void ff_format_check( Var_T * /* v */ );
 
 static long do_printf( long    /* file_num */,
-					   Var_T * /* v        */ );
+                       Var_T * /* v        */ );
 
 static long print_browser( int          /* browser */,
-						   int          /* fid     */,
-						   const char * /* comment */ );
+                           int          /* fid     */,
+                           const char * /* comment */ );
 
 static long print_include( int          /* fid      */,
-						   char *       /* cp       */,
-						   const char * /* comment  */,
-						   const char * /* cur_file */ );
+                           char *       /* cp       */,
+                           const char * /* comment  */,
+                           const char * /* cur_file */ );
 
 static long T_fprintf( long         /* fn  */,
-					   const char * /* fmt */,
-					   ... );
+                       const char * /* fmt */,
+                       ... );
 
 
 /*----------------------------------------------------------------*
@@ -66,7 +66,7 @@ static long T_fprintf( long         /* fn  */,
 
 Var_T *f_is_file( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -86,155 +86,155 @@ Var_T *f_is_file( Var_T * v  UNUSED_ARG )
 
 Var_T *f_openf( Var_T * v )
 {
-	Var_T *cur;
-	int i;
-	char *fn;
-	char *m;
-	struct stat stat_buf;
-	FILE *fp = NULL;
-	File_List_T *old_File_List = NULL;
+    Var_T *cur;
+    int i;
+    char *fn;
+    char *m;
+    struct stat stat_buf;
+    FILE *fp = NULL;
+    File_List_T *old_File_List = NULL;
 
 
-	CLOBBER_PROTECT( fp );
-	CLOBBER_PROTECT( old_File_List );
+    CLOBBER_PROTECT( fp );
+    CLOBBER_PROTECT( old_File_List );
 
-	/* If there was a call of 'f_save()' without a previous call to 'f_getf()'
-	   then 'f_save()' already called 'f_getf()' by itself and now does not
-	   expects file identifiers anymore - in this case 'No_File_Numbers' is
-	   set. So, if we get a call to 'f_getf()' with 'No_File_Numbers' being
-	   set we must tell the user that he can't have it both ways, i.e. (s)he
-	   either has to call 'f_getf()' before any call to 'f_save()' or never. */
+    /* If there was a call of 'f_save()' without a previous call to 'f_getf()'
+       then 'f_save()' already called 'f_getf()' by itself and now does not
+       expects file identifiers anymore - in this case 'No_File_Numbers' is
+       set. So, if we get a call to 'f_getf()' with 'No_File_Numbers' being
+       set we must tell the user that he can't have it both ways, i.e. (s)he
+       either has to call 'f_getf()' before any call to 'f_save()' or never. */
 
-	if ( No_File_Numbers )
-	{
-		print( FATAL, "Function can't be called if one of the functions for "
-			   "writing data to a file already has been invoked.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( No_File_Numbers )
+    {
+        print( FATAL, "Function can't be called if one of the functions for "
+               "writing data to a file already has been invoked.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* During test run just do a plausibilty check of the variables and
-	   return a dummy value */
+    /* During test run just do a plausibilty check of the variables and
+       return a dummy value */
 
-	if ( Fsc2_Internals.mode == TEST )
-	{
-		for ( i = 0, cur = v; i < 6 && cur != NULL; i++, cur = cur->next )
-			vars_check( cur, STR_VAR );
-		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
-	}
+    if ( Fsc2_Internals.mode == TEST )
+    {
+        for ( i = 0, cur = v; i < 6 && cur != NULL; i++, cur = cur->next )
+            vars_check( cur, STR_VAR );
+        return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
+    }
 
-	/* Check the arguments and supply default values if necessary */
+    /* Check the arguments and supply default values if necessary */
 
-	for ( i = 0, cur = v; i < 6 && cur != NULL; i++, cur = cur->next )
-		vars_check( cur, STR_VAR );
+    for ( i = 0, cur = v; i < 6 && cur != NULL; i++, cur = cur->next )
+        vars_check( cur, STR_VAR );
 
-	fn = v->val.sptr;
+    fn = v->val.sptr;
 
-	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-		goto got_file;
+    if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+        goto got_file;
 
-	if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
-		return batch_mode_file_open( *fn == '\0' ? NULL : fn );
+    if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
+        return batch_mode_file_open( *fn == '\0' ? NULL : fn );
 
-	if ( *fn == '\0' )
-		return f_getf( v->next );
+    if ( *fn == '\0' )
+        return f_getf( v->next );
 
-	/* Now ask for confirmation if the file already exists and try to open
-	   it for writing */
+    /* Now ask for confirmation if the file already exists and try to open
+       it for writing */
 
-	if  ( 0 == stat( fn, &stat_buf ) )
-	{
-		m = get_string( "The specified file already exists:\n%s\n"
-						"\nDo you really want to overwrite it?", fn );
-		if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
-		{
-			T_free( m );
-			return f_getf( v->next );
-		}
-		T_free( m );
-	}
+    if  ( 0 == stat( fn, &stat_buf ) )
+    {
+        m = get_string( "The specified file already exists:\n%s\n"
+                        "\nDo you really want to overwrite it?", fn );
+        if ( 2 == show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
+        {
+            T_free( m );
+            return f_getf( v->next );
+        }
+        T_free( m );
+    }
 
-	if ( ( fp = fopen( fn, "w+" ) ) == NULL )
-	{
-		switch( errno )
-		{
-			case EMFILE :
-				show_message( "Sorry, you have too many open files!\n"
-							  "Please close at least one and retry." );
-				break;
+    if ( ( fp = fopen( fn, "w+" ) ) == NULL )
+    {
+        switch( errno )
+        {
+            case EMFILE :
+                show_message( "Sorry, you have too many open files!\n"
+                              "Please close at least one and retry." );
+                break;
 
-			case ENFILE :
-				show_message( "Sorry, system limit for open files exceeded!\n"
-							  " Please try to close some files and retry." );
-				break;
+            case ENFILE :
+                show_message( "Sorry, system limit for open files exceeded!\n"
+                              " Please try to close some files and retry." );
+                break;
 
-			case ENOSPC :
-				show_message( "Sorry, no space left on device for more file!\n"
-							  "    Please delete some files and retry." );
-				break;
+            case ENOSPC :
+                show_message( "Sorry, no space left on device for more file!\n"
+                              "    Please delete some files and retry." );
+                break;
 
-			default :
-				show_message( "Sorry, can't open selected file for writing!\n"
-							  "       Please select a different file." );
-		}
+            default :
+                show_message( "Sorry, can't open selected file for writing!\n"
+                              "       Please select a different file." );
+        }
 
-		return f_getf( v->next );
-	}
+        return f_getf( v->next );
+    }
 
  got_file:
 
-	/* The reallocation for the EDL.File_List may fail and we may need to
-	   close all files and get rid of memory for the file names when
-	   stopping the experiment, thus we save a copy of the current
-	   EDL.File_List before we try to reallocate (if allocation already
-	   fails while making the copy this isn't a problem!) */
+    /* The reallocation for the EDL.File_List may fail and we may need to
+       close all files and get rid of memory for the file names when
+       stopping the experiment, thus we save a copy of the current
+       EDL.File_List before we try to reallocate (if allocation already
+       fails while making the copy this isn't a problem!) */
 
-	TRY
-	{
-		if ( EDL.File_List )
-		{
-			old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
-												  * sizeof *old_File_List );
-			memcpy( old_File_List, EDL.File_List,
-					EDL.File_List_Len * sizeof *old_File_List );
-		}
-		TRY_SUCCESS;
-	}
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
-	{
-		fclose( fp );
-		THROW( EXCEPTION );
-	}
+    TRY
+    {
+        if ( EDL.File_List )
+        {
+            old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
+                                                  * sizeof *old_File_List );
+            memcpy( old_File_List, EDL.File_List,
+                    EDL.File_List_Len * sizeof *old_File_List );
+        }
+        TRY_SUCCESS;
+    }
+    CATCH( OUT_OF_MEMORY_EXCEPTION )
+    {
+        fclose( fp );
+        THROW( EXCEPTION );
+    }
 
-	TRY
-	{
-		EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
-											   ( EDL.File_List_Len + 1 )
-											   * sizeof *EDL.File_List );
-		if ( old_File_List != NULL )
-			T_free( old_File_List );
-		TRY_SUCCESS;
-	}
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
-	{
-		fclose( fp );
-		EDL.File_List = old_File_List;
-		THROW( EXCEPTION );
-	}
+    TRY
+    {
+        EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
+                                               ( EDL.File_List_Len + 1 )
+                                               * sizeof *EDL.File_List );
+        if ( old_File_List != NULL )
+            T_free( old_File_List );
+        TRY_SUCCESS;
+    }
+    CATCH( OUT_OF_MEMORY_EXCEPTION )
+    {
+        fclose( fp );
+        EDL.File_List = old_File_List;
+        THROW( EXCEPTION );
+    }
 
-	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-		EDL.File_List[ EDL.File_List_Len ].fp = stdout;
-	else
-		EDL.File_List[ EDL.File_List_Len ].fp = fp;
+    if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+        EDL.File_List[ EDL.File_List_Len ].fp = stdout;
+    else
+        EDL.File_List[ EDL.File_List_Len ].fp = fp;
 
-	EDL.File_List[ EDL.File_List_Len ].name = NULL;
-	EDL.File_List[ EDL.File_List_Len ].name = T_strdup( fn );
+    EDL.File_List[ EDL.File_List_Len ].name = NULL;
+    EDL.File_List[ EDL.File_List_Len ].name = T_strdup( fn );
 
-	/* Switch off buffering for the newly opened file so we're sure
-	   everything gets written to disk without delay */
+    /* Switch off buffering for the newly opened file so we're sure
+       everything gets written to disk without delay */
 
-	setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
+    setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
-	return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
+    return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 }
 
 
@@ -257,221 +257,221 @@ Var_T *f_openf( Var_T * v )
 
 Var_T *f_getf( Var_T * v )
 {
-	Var_T *cur;
-	int i;
-	char *s[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
-	FILE *fp;
-	struct stat stat_buf;
-	char *r = NULL;
-	char *new_r, *m;
-	File_List_T *old_File_List = NULL;
+    Var_T *cur;
+    int i;
+    char *s[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
+    FILE *fp;
+    struct stat stat_buf;
+    char *r = NULL;
+    char *new_r, *m;
+    File_List_T *old_File_List = NULL;
 
 
-	CLOBBER_PROTECT( fp );
-	CLOBBER_PROTECT( r );
-	CLOBBER_PROTECT( old_File_List );
+    CLOBBER_PROTECT( fp );
+    CLOBBER_PROTECT( r );
+    CLOBBER_PROTECT( old_File_List );
 
-	/* If there was a call of 'f_save()' without a previous call to 'f_getf()'
-	   then 'f_save()' already called 'f_getf()' by itself and now does not
-	   expects file identifiers anymore - in this case 'No_File_Numbers' is
-	   set. So, if we get a call to 'f_getf()' while 'No_File_Numbers' is set
-	   we must tell the user that he can't have it both ways, i.e. (s)he
-	   either has to call 'f_getf()' before any call to 'f_save()' or never. */
+    /* If there was a call of 'f_save()' without a previous call to 'f_getf()'
+       then 'f_save()' already called 'f_getf()' by itself and now does not
+       expects file identifiers anymore - in this case 'No_File_Numbers' is
+       set. So, if we get a call to 'f_getf()' while 'No_File_Numbers' is set
+       we must tell the user that he can't have it both ways, i.e. (s)he
+       either has to call 'f_getf()' before any call to 'f_save()' or never. */
 
-	if ( No_File_Numbers )
-	{
-		print( FATAL, "Function can't be called if one of the save()-type "
-			   "functions already has been invoked.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( No_File_Numbers )
+    {
+        print( FATAL, "Function can't be called if one of the save()-type "
+               "functions already has been invoked.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* During test run just do a plausibilty check of the variables and
-	   return a dummy value */
+    /* During test run just do a plausibilty check of the variables and
+       return a dummy value */
 
-	if ( Fsc2_Internals.mode == TEST )
-	{
-		for ( i = 0, cur = v; i < 5 && cur != NULL; i++, cur = cur->next )
-			vars_check( cur, STR_VAR );
-		if ( i > 0 && *v->val.sptr == '\\' )
-			print( WARN, "Use of hard-coded file names is deprecated, please "
-				   "use open_file() instead.\n" );
-		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
-	}
+    if ( Fsc2_Internals.mode == TEST )
+    {
+        for ( i = 0, cur = v; i < 5 && cur != NULL; i++, cur = cur->next )
+            vars_check( cur, STR_VAR );
+        if ( i > 0 && *v->val.sptr == '\\' )
+            print( WARN, "Use of hard-coded file names is deprecated, please "
+                   "use open_file() instead.\n" );
+        return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
+    }
 
-	/* Check the arguments and supply default values if necessary */
+    /* Check the arguments and supply default values if necessary */
 
-	for ( i = 0, cur = v; i < 5 && cur != NULL; i++, cur = cur->next )
-	{
-		vars_check( cur, STR_VAR );
-		s[ i ] = cur->val.sptr;
-	}
+    for ( i = 0, cur = v; i < 5 && cur != NULL; i++, cur = cur->next )
+    {
+        vars_check( cur, STR_VAR );
+        s[ i ] = cur->val.sptr;
+    }
 
-	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-		goto got_file;
+    if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+        goto got_file;
 
-	if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
-		return batch_mode_file_open( NULL );
+    if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
+        return batch_mode_file_open( NULL );
 
-	/* First string is the message */
+    /* First string is the message */
 
-	if ( s[ 0 ] == NULL || s[ 0 ][ 0 ] == '\0' || s[ 0 ][ 0 ] == '\\' )
-		s[ 0 ] = T_strdup( "Please select a file name:" );
-	else
-		s[ 0 ] = T_strdup( s[ 0 ] );
+    if ( s[ 0 ] == NULL || s[ 0 ][ 0 ] == '\0' || s[ 0 ][ 0 ] == '\\' )
+        s[ 0 ] = T_strdup( "Please select a file name:" );
+    else
+        s[ 0 ] = T_strdup( s[ 0 ] );
 
-	/* Second string is the file name pattern */
+    /* Second string is the file name pattern */
 
-	if ( s[ 1 ] == NULL || s[ 1 ][ 0 ] == '\0' )
-		s[ 1 ] = T_strdup( "*.dat" );
-	else
-		s[ 1 ] = T_strdup( s[ 1 ] );
+    if ( s[ 1 ] == NULL || s[ 1 ][ 0 ] == '\0' )
+        s[ 1 ] = T_strdup( "*.dat" );
+    else
+        s[ 1 ] = T_strdup( s[ 1 ] );
 
-	/* Third string is the default directory */
+    /* Third string is the default directory */
 
-	if ( s[ 2 ] != NULL )
-	{
-		if ( s[ 2 ][ 0 ] == '\0' )
-			s[ 2 ] = NULL;
-		else
-			s[ 2 ] = T_strdup( s[ 2 ] );
-	}
+    if ( s[ 2 ] != NULL )
+    {
+        if ( s[ 2 ][ 0 ] == '\0' )
+            s[ 2 ] = NULL;
+        else
+            s[ 2 ] = T_strdup( s[ 2 ] );
+    }
 
-	if ( s[ 3 ] == NULL )
-		s[ 3 ] = T_strdup( "" );
-	else
-		s[ 3 ] = T_strdup( s[ 3 ] );
+    if ( s[ 3 ] == NULL )
+        s[ 3 ] = T_strdup( "" );
+    else
+        s[ 3 ] = T_strdup( s[ 3 ] );
 
-	if ( s[ 4 ] == NULL || s[ 4 ][ 0 ] == '\0' )
-		s[ 4 ] = NULL;
-	else
-		s[ 4 ] = T_strdup( s[ 4 ] );
+    if ( s[ 4 ] == NULL || s[ 4 ][ 0 ] == '\0' )
+        s[ 4 ] = NULL;
+    else
+        s[ 4 ] = T_strdup( s[ 4 ] );
 
 getfile_retry:
 
-	/* Try to get a filename - on 'Cancel' request confirmation (unless a
-	   file name was passed to the routine and this is not a repeat call) */
+    /* Try to get a filename - on 'Cancel' request confirmation (unless a
+       file name was passed to the routine and this is not a repeat call) */
 
-	if ( r == NULL )
-		r = T_strdup( show_fselector( s[ 0 ], s[ 2 ], s[ 1 ], s[ 3 ] ) );
+    if ( r == NULL )
+        r = T_strdup( show_fselector( s[ 0 ], s[ 2 ], s[ 1 ], s[ 3 ] ) );
 
-	if ( ( r == NULL || *r == '\0' ) &&
-		 show_choices( "Do you really want to cancel saving data?\n"
-					   "        The data will be lost!",
-					   2, "Yes", "No", NULL, 2, SET ) != 1 )
-	{
-		r = CHAR_P T_free( r );
-		goto getfile_retry;
-	}
+    if ( ( r == NULL || *r == '\0' ) &&
+         show_choices( "Do you really want to cancel saving data?\n"
+                       "        The data will be lost!",
+                       2, "Yes", "No", NULL, 2, SET ) != 1 )
+    {
+        r = CHAR_P T_free( r );
+        goto getfile_retry;
+    }
 
-	if ( r == NULL || *r == '\0' )         /* on 'Cancel' with confirmation */
-	{
-		T_free( r );
-		for ( i = 0; i < 5; i++ )
-			T_free( s[ i ] );
-		Dont_Save = SET;
-		return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
-	}
+    if ( r == NULL || *r == '\0' )         /* on 'Cancel' with confirmation */
+    {
+        T_free( r );
+        for ( i = 0; i < 5; i++ )
+            T_free( s[ i ] );
+        Dont_Save = SET;
+        return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
+    }
 
-	/* If given append default extension to the file name (but only if the
-	   user didn't entered one when telling us about the file name) */
+    /* If given append default extension to the file name (but only if the
+       user didn't entered one when telling us about the file name) */
 
-	if ( s[ 4 ] != NULL &&
-		 ( strrchr( r, '.' ) == NULL ||
-		   strcmp( strrchr( r, '.' ) + 1, s[ 4 ] ) ) )
-	{
-		new_r = get_string( "%s.%s", r, s[ 4 ] );
-		T_free( r );
-		r = new_r;
-	}
+    if ( s[ 4 ] != NULL &&
+         ( strrchr( r, '.' ) == NULL ||
+           strcmp( strrchr( r, '.' ) + 1, s[ 4 ] ) ) )
+    {
+        new_r = get_string( "%s.%s", r, s[ 4 ] );
+        T_free( r );
+        r = new_r;
+    }
 
-	/* Now ask for confirmation if the file already exists and try to open
-	   it for writing */
+    /* Now ask for confirmation if the file already exists and try to open
+       it for writing */
 
-	if  ( 0 == stat( r, &stat_buf ) )
-	{
-		m = get_string( "The selected file does already exist:\n%s\n"
-						"\nDo you really want to overwrite it?", r );
-		if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
-		{
-			T_free( m );
-			r = CHAR_P T_free( r );
-			goto getfile_retry;
-		}
-		T_free( m );
-	}
+    if  ( 0 == stat( r, &stat_buf ) )
+    {
+        m = get_string( "The selected file does already exist:\n%s\n"
+                        "\nDo you really want to overwrite it?", r );
+        if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
+        {
+            T_free( m );
+            r = CHAR_P T_free( r );
+            goto getfile_retry;
+        }
+        T_free( m );
+    }
 
-	if ( ( fp = fopen( r, "w+" ) ) == NULL )
-	{
-		switch( errno )
-		{
-			case EMFILE :
-				show_message( "Sorry, you have too many open files!\n"
-							  "Please close at least one and retry." );
-				break;
+    if ( ( fp = fopen( r, "w+" ) ) == NULL )
+    {
+        switch( errno )
+        {
+            case EMFILE :
+                show_message( "Sorry, you have too many open files!\n"
+                              "Please close at least one and retry." );
+                break;
 
-			case ENFILE :
-				show_message( "Sorry, system limit for open files exceeded!\n"
-							  " Please try to close some files and retry." );
-				break;
+            case ENFILE :
+                show_message( "Sorry, system limit for open files exceeded!\n"
+                              " Please try to close some files and retry." );
+                break;
 
-			case ENOSPC :
-				show_message( "Sorry, no space left on device for more file!\n"
-							  "    Please delete some files and retry." );
-				break;
+            case ENOSPC :
+                show_message( "Sorry, no space left on device for more file!\n"
+                              "    Please delete some files and retry." );
+                break;
 
-			default :
-				show_message( "Sorry, can't open selected file for writing!\n"
-							  "       Please select a different file." );
-		}
+            default :
+                show_message( "Sorry, can't open selected file for writing!\n"
+                              "       Please select a different file." );
+        }
 
-		r = CHAR_P T_free( r );
-		goto getfile_retry;
-	}
+        r = CHAR_P T_free( r );
+        goto getfile_retry;
+    }
 
  got_file:
 
-	for ( i = 0; i < 5; i++ )
-		T_free( s[ i ] );
+    for ( i = 0; i < 5; i++ )
+        T_free( s[ i ] );
 
-	/* The reallocation for the EDL.File_List may fail but we still need to
-	   close all files and get rid of memory for the file names, thus we save
-	   the current EDL.File_List before we try to reallocate */
+    /* The reallocation for the EDL.File_List may fail but we still need to
+       close all files and get rid of memory for the file names, thus we save
+       the current EDL.File_List before we try to reallocate */
 
-	if ( EDL.File_List )
-	{
-		old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len *
-											  sizeof *old_File_List );
-		memcpy( old_File_List, EDL.File_List,
-				EDL.File_List_Len * sizeof *old_File_List );
-	}
+    if ( EDL.File_List )
+    {
+        old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len *
+                                              sizeof *old_File_List );
+        memcpy( old_File_List, EDL.File_List,
+                EDL.File_List_Len * sizeof *old_File_List );
+    }
 
-	TRY
-	{
-		EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
-											   ( EDL.File_List_Len + 1 )
-											   * sizeof *EDL.File_List );
-		if ( old_File_List != NULL )
-			T_free( old_File_List );
-		TRY_SUCCESS;
-	}
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
-	{
-		EDL.File_List = old_File_List;
-		THROW( EXCEPTION );
-	}
+    TRY
+    {
+        EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
+                                               ( EDL.File_List_Len + 1 )
+                                               * sizeof *EDL.File_List );
+        if ( old_File_List != NULL )
+            T_free( old_File_List );
+        TRY_SUCCESS;
+    }
+    CATCH( OUT_OF_MEMORY_EXCEPTION )
+    {
+        EDL.File_List = old_File_List;
+        THROW( EXCEPTION );
+    }
 
-	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-		EDL.File_List[ EDL.File_List_Len ].fp = stdout;
-	else
-		EDL.File_List[ EDL.File_List_Len ].fp = fp;
-	EDL.File_List[ EDL.File_List_Len ].name = r;
+    if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+        EDL.File_List[ EDL.File_List_Len ].fp = stdout;
+    else
+        EDL.File_List[ EDL.File_List_Len ].fp = fp;
+    EDL.File_List[ EDL.File_List_Len ].name = r;
 
-	/* Switch off buffering so we're sure everything gets written to disk
-	   immediately */
+    /* Switch off buffering so we're sure everything gets written to disk
+       immediately */
 
-	setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
+    setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
-	return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
+    return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 }
 
 
@@ -483,90 +483,90 @@ getfile_retry:
 
 Var_T *f_clonef( Var_T * v )
 {
-	char *fn;
-	char *n;
-	Var_T *new_v, *arg[ 6 ];
-	int i;
-	long file_num;
+    char *fn;
+    char *n;
+    Var_T *new_v, *arg[ 6 ];
+    int i;
+    long file_num;
 
 
-	/* If the file handle passed to the function is FILE_NUMBER_NOT_OPEN
-	   opening a file for this file handle did not happen, so we also don't
-	   open the new file */
+    /* If the file handle passed to the function is FILE_NUMBER_NOT_OPEN
+       opening a file for this file handle did not happen, so we also don't
+       open the new file */
 
-	if ( v->type == INT_VAR &&
-		 ( v->val.lval == FILE_NUMBER_STDOUT ||
-		   v->val.lval == FILE_NUMBER_STDERR ) )
-	{
-		print( WARN, "std%s can't be cloned.\n",
-			   v->val.lval == FILE_NUMBER_STDOUT ? "out" : "err" );
-		return vars_push( INT_VAR, FILE_NUMBER_STDERR );
-	}
+    if ( v->type == INT_VAR &&
+         ( v->val.lval == FILE_NUMBER_STDOUT ||
+           v->val.lval == FILE_NUMBER_STDERR ) )
+    {
+        print( WARN, "std%s can't be cloned.\n",
+               v->val.lval == FILE_NUMBER_STDOUT ? "out" : "err" );
+        return vars_push( INT_VAR, FILE_NUMBER_STDERR );
+    }
 
-	if ( v->type == INT_VAR && v->val.lval == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
+    if ( v->type == INT_VAR && v->val.lval == FILE_NUMBER_NOT_OPEN )
+        return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
 
-	/* Check all the parameter */
+    /* Check all the parameter */
 
-	if ( v->type != INT_VAR ||
-		 v->val.lval < FILE_NUMBER_OFFSET ||
-		 v->val.lval >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
-	{
-		 print( FATAL, "First argument isn't a vaild file handle.\n" );
-		 THROW( EXCEPTION );
-	}
+    if ( v->type != INT_VAR ||
+         v->val.lval < FILE_NUMBER_OFFSET ||
+         v->val.lval >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
+    {
+         print( FATAL, "First argument isn't a vaild file handle.\n" );
+         THROW( EXCEPTION );
+    }
 
-	file_num = v->val.lval - FILE_NUMBER_OFFSET;
+    file_num = v->val.lval - FILE_NUMBER_OFFSET;
 
-	if ( v->next->type != STR_VAR )
-	{
-		print( FATAL, "Invalid second argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v->next->type != STR_VAR )
+    {
+        print( FATAL, "Invalid second argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( v->next->next->type != STR_VAR ||
-		 *v->next->next->val.sptr == '\0' )
-	{
-		print( FATAL, "Invalid third argument.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v->next->next->type != STR_VAR ||
+         *v->next->next->val.sptr == '\0' )
+    {
+        print( FATAL, "Invalid third argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( Fsc2_Internals.mode == TEST )
-		return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
+    if ( Fsc2_Internals.mode == TEST )
+        return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 
-	fn = CHAR_P T_malloc(   strlen( EDL.File_List[ file_num ].name )
-						  + strlen( v->next->next->val.sptr ) + 2 );
-	strcpy( fn, EDL.File_List[ file_num ].name );
+    fn = CHAR_P T_malloc(   strlen( EDL.File_List[ file_num ].name )
+                          + strlen( v->next->next->val.sptr ) + 2 );
+    strcpy( fn, EDL.File_List[ file_num ].name );
 
-	n = fn + strlen( fn ) - strlen( v->next->val.sptr );
-	if ( n > fn + 1 && *( n - 1 ) == '.' &&
-		 ! strcmp( n, v->next->val.sptr ) )
-		strcpy( n, v->next->next->val.sptr );
-	else
-	{
-		strcat( n, "." );
-		strcat( n, v->next->next->val.sptr );
-	}
+    n = fn + strlen( fn ) - strlen( v->next->val.sptr );
+    if ( n > fn + 1 && *( n - 1 ) == '.' &&
+         ! strcmp( n, v->next->val.sptr ) )
+        strcpy( n, v->next->next->val.sptr );
+    else
+    {
+        strcat( n, "." );
+        strcat( n, v->next->next->val.sptr );
+    }
 
-	arg[ 0 ] = vars_push( STR_VAR, fn );
-	T_free( fn );
+    arg[ 0 ] = vars_push( STR_VAR, fn );
+    T_free( fn );
 
-	arg[ 1 ] = vars_push( STR_VAR, "" );
+    arg[ 1 ] = vars_push( STR_VAR, "" );
 
-	n = get_string( "*.%s", v->next->next->val.sptr );
-	arg[ 2 ] = vars_push( STR_VAR, n );
-	T_free( n );
+    n = get_string( "*.%s", v->next->next->val.sptr );
+    arg[ 2 ] = vars_push( STR_VAR, n );
+    T_free( n );
 
-	arg[ 3 ] = vars_push( STR_VAR, "" );
-	arg[ 4 ] = vars_push( STR_VAR, "" );
-	arg[ 5 ] = vars_push( STR_VAR, v->next->next->val.sptr );
+    arg[ 3 ] = vars_push( STR_VAR, "" );
+    arg[ 4 ] = vars_push( STR_VAR, "" );
+    arg[ 5 ] = vars_push( STR_VAR, v->next->next->val.sptr );
 
-	new_v = f_openf( arg[ 0 ] );
+    new_v = f_openf( arg[ 0 ] );
 
-	for ( i = 5; i >= 0; i-- )
-		vars_pop( arg[ i ] );
+    for ( i = 5; i >= 0; i-- )
+        vars_pop( arg[ i ] );
 
-	return new_v;
+    return new_v;
 }
 
 
@@ -576,124 +576,124 @@ Var_T *f_clonef( Var_T * v )
 
 static Var_T *batch_mode_file_open( char * name )
 {
-	unsigned long cn = 0;
-	char *new_name = NULL;
-	struct stat stat_buf;
-	FILE *fp;
-	File_List_T *old_File_List = NULL;
+    unsigned long cn = 0;
+    char *new_name = NULL;
+    struct stat stat_buf;
+    FILE *fp;
+    File_List_T *old_File_List = NULL;
 
 
-	CLOBBER_PROTECT( new_name );
-	CLOBBER_PROTECT( old_File_List );
+    CLOBBER_PROTECT( new_name );
+    CLOBBER_PROTECT( old_File_List );
 
-	/* If no prefered file name is given (e.g. if we came here from f_getf())
-	   we make one up from the name of the currently executed EDL script
-	   (but only the name, not the path). We do so by appending an extension
-	   of ".batch_output.%lu", where %lu stands for an integer number that
-	   gets incremented until we have a file that does not yet exist.
-	   Otherwise, when a prefered name was given we try to use it, but if it
-	   already exists we also append an additional extension the same way. */
+    /* If no prefered file name is given (e.g. if we came here from f_getf())
+       we make one up from the name of the currently executed EDL script
+       (but only the name, not the path). We do so by appending an extension
+       of ".batch_output.%lu", where %lu stands for an integer number that
+       gets incremented until we have a file that does not yet exist.
+       Otherwise, when a prefered name was given we try to use it, but if it
+       already exists we also append an additional extension the same way. */
 
-	if ( name == NULL )
-	{
-		do
-		{
-			if ( cn % 10 == 0 )
-			{
-				if ( new_name != NULL )
-					new_name = CHAR_P T_free( new_name );
-				new_name = get_string( "%s.batch_output.%lu",
-									   strrchr( EDL.in_file, '/' ) + 1, cn++ );
-			}
-			else
-				new_name[ strlen( new_name ) - 1 ] += 1;
-		} while ( 0 == stat( new_name, &stat_buf ) );
-	}
-	else
-	{
-		if ( 0 == stat( name, &stat_buf ) )
-		{
-			do
-			{
-				if ( cn % 10 == 0 )
-				{
-					if ( new_name != NULL )
-						new_name = CHAR_P T_free( new_name );
-					new_name = get_string( "%s.batch_output.%lu", name, cn++ );
-				}
-				else
-					new_name[ strlen( new_name ) - 1 ] += 1;
-			} while ( 0 == stat( new_name, &stat_buf ) );
-		}
-		else
-			new_name = T_strdup( name );
-	}
-		
+    if ( name == NULL )
+    {
+        do
+        {
+            if ( cn % 10 == 0 )
+            {
+                if ( new_name != NULL )
+                    new_name = CHAR_P T_free( new_name );
+                new_name = get_string( "%s.batch_output.%lu",
+                                       strrchr( EDL.in_file, '/' ) + 1, cn++ );
+            }
+            else
+                new_name[ strlen( new_name ) - 1 ] += 1;
+        } while ( 0 == stat( new_name, &stat_buf ) );
+    }
+    else
+    {
+        if ( 0 == stat( name, &stat_buf ) )
+        {
+            do
+            {
+                if ( cn % 10 == 0 )
+                {
+                    if ( new_name != NULL )
+                        new_name = CHAR_P T_free( new_name );
+                    new_name = get_string( "%s.batch_output.%lu", name, cn++ );
+                }
+                else
+                    new_name[ strlen( new_name ) - 1 ] += 1;
+            } while ( 0 == stat( new_name, &stat_buf ) );
+        }
+        else
+            new_name = T_strdup( name );
+    }
+        
 
-	/* Now try to open the new file, if this fails we must give up */
+    /* Now try to open the new file, if this fails we must give up */
 
-	if ( ( fp = fopen( new_name, "w+" ) ) == NULL )
-	{
-		switch( errno )
-		{
-			case EMFILE :
-				fprintf( stderr, "Sorry, you have too many open files.\n" );
-				break;
+    if ( ( fp = fopen( new_name, "w+" ) ) == NULL )
+    {
+        switch( errno )
+        {
+            case EMFILE :
+                fprintf( stderr, "Sorry, you have too many open files.\n" );
+                break;
 
-			case ENFILE :
-				fprintf( stderr, "Sorry, system limit for open files "
-						 "exceeded.\n" );
-				break;
+            case ENFILE :
+                fprintf( stderr, "Sorry, system limit for open files "
+                         "exceeded.\n" );
+                break;
 
-			case ENOSPC :
-				fprintf( stderr, "Sorry, no space left on device for more "
-						 "file.\n" );
-				break;
+            case ENOSPC :
+                fprintf( stderr, "Sorry, no space left on device for more "
+                         "file.\n" );
+                break;
 
-			default :
-				fprintf( stderr, "Sorry, can't open file for writing.\n" );
-		}
+            default :
+                fprintf( stderr, "Sorry, can't open file for writing.\n" );
+        }
 
-		THROW( EXCEPTION );
-	}
+        THROW( EXCEPTION );
+    }
 
-	/* The reallocation for the EDL.File_List may fail but we still need to
-	   close all files and get rid of memory for the file names, thus we save
-	   the current EDL.File_List before we try to reallocate */
+    /* The reallocation for the EDL.File_List may fail but we still need to
+       close all files and get rid of memory for the file names, thus we save
+       the current EDL.File_List before we try to reallocate */
 
-	if ( EDL.File_List )
-	{
-		old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
-											  * sizeof *old_File_List );
-		memcpy( old_File_List, EDL.File_List,
-				EDL.File_List_Len * sizeof *old_File_List );
-	}
+    if ( EDL.File_List )
+    {
+        old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
+                                              * sizeof *old_File_List );
+        memcpy( old_File_List, EDL.File_List,
+                EDL.File_List_Len * sizeof *old_File_List );
+    }
 
-	TRY
-	{
-		EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
-											   ( EDL.File_List_Len + 1 )
-											   * sizeof *EDL.File_List );
-		if ( old_File_List != NULL )
-			T_free( old_File_List );
-		TRY_SUCCESS;
-	}
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
-	{
-		T_free( new_name );
-		EDL.File_List = old_File_List;
-		THROW( EXCEPTION );
-	}
+    TRY
+    {
+        EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
+                                               ( EDL.File_List_Len + 1 )
+                                               * sizeof *EDL.File_List );
+        if ( old_File_List != NULL )
+            T_free( old_File_List );
+        TRY_SUCCESS;
+    }
+    CATCH( OUT_OF_MEMORY_EXCEPTION )
+    {
+        T_free( new_name );
+        EDL.File_List = old_File_List;
+        THROW( EXCEPTION );
+    }
 
-	EDL.File_List[ EDL.File_List_Len ].fp = fp;
-	EDL.File_List[ EDL.File_List_Len ].name = new_name;
+    EDL.File_List[ EDL.File_List_Len ].fp = fp;
+    EDL.File_List[ EDL.File_List_Len ].name = new_name;
 
-	/* Switch buffering off so we're sure everything gets written to disk
-	   immediately */
+    /* Switch buffering off so we're sure everything gets written to disk
+       immediately */
 
-	setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
+    setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
-	return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
+    return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 }
 
 
@@ -706,94 +706,94 @@ static Var_T *batch_mode_file_open( char * name )
 
 static int get_save_file( Var_T ** v )
 {
-	Var_T *get_file_ptr;
-	Var_T *file;
-	long file_num;
-	int acc;
+    Var_T *get_file_ptr;
+    Var_T *file;
+    long file_num;
+    int acc;
 
 
-	/* If the first argument is an integer variable and has the value 1
-	   or 2 return the index for stdout or stderr */
+    /* If the first argument is an integer variable and has the value 1
+       or 2 return the index for stdout or stderr */
 
-	if ( *v != NULL && ( *v )->type == INT_VAR &&
-		 ( ( *v )->val.lval == STDOUT_FILENO ||
-		   ( *v )->val.lval == STDERR_FILENO ) )
-	{
-		file_num = ( *v )->val.lval == STDOUT_FILENO ?
-							FILE_NUMBER_STDOUT : FILE_NUMBER_STDERR;
-		*v = vars_pop( *v );
-		return ( int ) file_num;
-	}
+    if ( *v != NULL && ( *v )->type == INT_VAR &&
+         ( ( *v )->val.lval == STDOUT_FILENO ||
+           ( *v )->val.lval == STDERR_FILENO ) )
+    {
+        file_num = ( *v )->val.lval == STDOUT_FILENO ?
+                            FILE_NUMBER_STDOUT : FILE_NUMBER_STDERR;
+        *v = vars_pop( *v );
+        return ( int ) file_num;
+    }
 
-	/* If no file has been selected yet get a file and then use it exclusively
-	   (i.e. also expect that no file identifier is given in later calls),
-	   otherwise the first variable has to be the file identifier. We compare
-	   the length of the list to two because the first and second entry are
-	   always exist for stdout and stderr. */
+    /* If no file has been selected yet get a file and then use it exclusively
+       (i.e. also expect that no file identifier is given in later calls),
+       otherwise the first variable has to be the file identifier. We compare
+       the length of the list to two because the first and second entry are
+       always exist for stdout and stderr. */
 
-	if ( EDL.File_List_Len == 2 )
-	{
-		if ( Dont_Save )
-			return FILE_NUMBER_NOT_OPEN;
+    if ( EDL.File_List_Len == 2 )
+    {
+        if ( Dont_Save )
+            return FILE_NUMBER_NOT_OPEN;
 
-		No_File_Numbers = UNSET;
+        No_File_Numbers = UNSET;
 
-		get_file_ptr = func_get( "get_file", &acc );
-		file = func_call( get_file_ptr );         /* get the file name */
+        get_file_ptr = func_get( "get_file", &acc );
+        file = func_call( get_file_ptr );         /* get the file name */
 
-		No_File_Numbers = SET;
+        No_File_Numbers = SET;
 
-		if ( file->val.lval == FILE_NUMBER_NOT_OPEN )
-		{
-			vars_pop( file );
-			Dont_Save = SET;
-			return FILE_NUMBER_NOT_OPEN;
-		}
+        if ( file->val.lval == FILE_NUMBER_NOT_OPEN )
+        {
+            vars_pop( file );
+            Dont_Save = SET;
+            return FILE_NUMBER_NOT_OPEN;
+        }
 
-		vars_pop( file );
-		file_num = FILE_NUMBER_OFFSET + 2;
-	}
-	else if ( ! No_File_Numbers )                    /* file number is given */
-	{
-		if ( *v != NULL )
-		{
-			/* Check that the first variable is an integer, i.e. can be a
-			   file identifier */
+        vars_pop( file );
+        file_num = FILE_NUMBER_OFFSET + 2;
+    }
+    else if ( ! No_File_Numbers )                    /* file number is given */
+    {
+        if ( *v != NULL )
+        {
+            /* Check that the first variable is an integer, i.e. can be a
+               file identifier */
 
-			if ( ( *v )->type != INT_VAR )
-			{
-				print( FATAL, "First argument isn't a file handle.\n" );
-				THROW( EXCEPTION );
-			}
-			file_num = ( int ) ( *v )->val.lval;
-		}
-		else
-		{
-			print( WARN, "Missing arguments.\n" );
-			return FILE_NUMBER_NOT_OPEN;
-		}
-		*v = vars_pop( *v );
-	}
-	else
-		file_num = FILE_NUMBER_OFFSET + 2;
+            if ( ( *v )->type != INT_VAR )
+            {
+                print( FATAL, "First argument isn't a file handle.\n" );
+                THROW( EXCEPTION );
+            }
+            file_num = ( int ) ( *v )->val.lval;
+        }
+        else
+        {
+            print( WARN, "Missing arguments.\n" );
+            return FILE_NUMBER_NOT_OPEN;
+        }
+        *v = vars_pop( *v );
+    }
+    else
+        file_num = FILE_NUMBER_OFFSET + 2;
 
-	/* Check that the file identifier is reasonable */
+    /* Check that the file identifier is reasonable */
 
-	if ( file_num == FILE_NUMBER_NOT_OPEN )
-	{
-		if ( ! Dont_Save )
-			print( WARN, "File has never been opened, skipping command.\n" );
-		return FILE_NUMBER_NOT_OPEN;
-	}
+    if ( file_num == FILE_NUMBER_NOT_OPEN )
+    {
+        if ( ! Dont_Save )
+            print( WARN, "File has never been opened, skipping command.\n" );
+        return FILE_NUMBER_NOT_OPEN;
+    }
 
-	if ( file_num < FILE_NUMBER_OFFSET ||
-		 file_num >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
-	{
-		print( FATAL, "Invalid file handle.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( file_num < FILE_NUMBER_OFFSET ||
+         file_num >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
+    {
+        print( FATAL, "Invalid file handle.\n" );
+        THROW( EXCEPTION );
+    }
 
-	return file_num;
+    return file_num;
 }
 
 
@@ -803,26 +803,26 @@ static int get_save_file( Var_T ** v )
 
 void close_all_files( void )
 {
-	int i;
+    int i;
 
 
-	/* Return immediately if only the file entries for stdout and stderr
-	   are in the list */
+    /* Return immediately if only the file entries for stdout and stderr
+       are in the list */
 
-	if ( EDL.File_List_Len == 2 )
-		return;
+    if ( EDL.File_List_Len == 2 )
+        return;
 
-	for ( i = 2; i < EDL.File_List_Len; i++ )
-	{
-		if ( EDL.File_List[ i ].fp )
-			fclose( EDL.File_List[ i ].fp );
-		if ( EDL.File_List[ i ].name )
-			T_free( EDL.File_List[ i ].name );
-	}
+    for ( i = 2; i < EDL.File_List_Len; i++ )
+    {
+        if ( EDL.File_List[ i ].fp )
+            fclose( EDL.File_List[ i ].fp );
+        if ( EDL.File_List[ i ].name )
+            T_free( EDL.File_List[ i ].name );
+    }
 
-	EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
-										   2 * sizeof *EDL.File_List );
-	EDL.File_List_Len = 2;
+    EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
+                                           2 * sizeof *EDL.File_List );
+    EDL.File_List_Len = 2;
 }
 
 
@@ -838,49 +838,49 @@ void close_all_files( void )
 
 Var_T *f_save( Var_T * v )
 {
-	long file_num;
-	long count = 0;
+    long file_num;
+    long count = 0;
 
 
-	/* Determine the file identifier */
+    /* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0L );
+    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+        return vars_push( INT_VAR, 0L );
 
-	if ( v == NULL )
-	{
-		print( WARN, "Missing arguments.\n" );
-		return vars_push( INT_VAR, 0L );
-	}
+    if ( v == NULL )
+    {
+        print( WARN, "Missing arguments.\n" );
+        return vars_push( INT_VAR, 0L );
+    }
 
-	do
-	{
-		switch( v->type )
-		{
-			case INT_VAR :
-				count += T_fprintf( file_num, "%ld\n", v->val.lval );
-				break;
+    do
+    {
+        switch( v->type )
+        {
+            case INT_VAR :
+                count += T_fprintf( file_num, "%ld\n", v->val.lval );
+                break;
 
-			case FLOAT_VAR :
-				count += T_fprintf( file_num, "%#.9g\n", v->val.dval );
-				break;
+            case FLOAT_VAR :
+                count += T_fprintf( file_num, "%#.9g\n", v->val.dval );
+                break;
 
-			case STR_VAR :
-				count += T_fprintf( file_num, "%s\n",
-									handle_escape( v->val.sptr ) );
-				break;
+            case STR_VAR :
+                count += T_fprintf( file_num, "%s\n",
+                                    handle_escape( v->val.sptr ) );
+                break;
 
 
-			case INT_ARR : case FLOAT_ARR : case INT_REF : case FLOAT_REF :
-				count += arr_save( file_num, v );
-				break;
+            case INT_ARR : case FLOAT_ARR : case INT_REF : case FLOAT_REF :
+                count += arr_save( file_num, v );
+                break;
 
-			default :
-				fsc2_assert( 1 == 0 );
-		}
-	} while ( ( v = vars_pop( v ) ) != NULL );
+            default :
+                fsc2_assert( 1 == 0 );
+        }
+    } while ( ( v = vars_pop( v ) ) != NULL );
 
-	return vars_push( INT_VAR, count );
+    return vars_push( INT_VAR, count );
 }
 
 
@@ -890,39 +890,39 @@ Var_T *f_save( Var_T * v )
  *-------------------------------------------------------------------------*/
 
 static long arr_save( long    file_num,
-					  Var_T * v )
+                      Var_T * v )
 {
-	ssize_t i;
-	long count = 0;
+    ssize_t i;
+    long count = 0;
 
 
-	switch ( v->type )
-	{
-		case INT_ARR :
-			for ( i = 0; i < v->len; i++ )
-				count = T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
-			break;
+    switch ( v->type )
+    {
+        case INT_ARR :
+            for ( i = 0; i < v->len; i++ )
+                count = T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
+            break;
 
-		case FLOAT_ARR :
-			for ( i = 0; i < v->len; i++ )
-				count = T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] );
-			break;
+        case FLOAT_ARR :
+            for ( i = 0; i < v->len; i++ )
+                count = T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] );
+            break;
 
-		case INT_REF : case FLOAT_REF :
-			for ( i = 0; i < v->len; i++ )
-			{
-				if ( v->val.vptr[ i ] != NULL )
-					count += arr_save( file_num, v->val.vptr[ i ] );
-				if ( i != v->len - 1 )
-					count += T_fprintf( file_num, "\n" );
-			}
-			break;
+        case INT_REF : case FLOAT_REF :
+            for ( i = 0; i < v->len; i++ )
+            {
+                if ( v->val.vptr[ i ] != NULL )
+                    count += arr_save( file_num, v->val.vptr[ i ] );
+                if ( i != v->len - 1 )
+                    count += T_fprintf( file_num, "\n" );
+            }
+            break;
 
-		default :
-			break;
-	}
+        default :
+            break;
+    }
 
-	return count;
+    return count;
 }
 
 
@@ -937,31 +937,31 @@ static long arr_save( long    file_num,
 
 Var_T *f_fsave( Var_T * v )
 {
-	long file_num;
+    long file_num;
 
 
-	/* Determine the file identifier */
+    /* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0L );
+    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+        return vars_push( INT_VAR, 0L );
 
-	if ( v == NULL )
-	{
-		print( WARN, "Missing arguments.\n" );
-		return vars_push( INT_VAR, 0L );
-	}
+    if ( v == NULL )
+    {
+        print( WARN, "Missing arguments.\n" );
+        return vars_push( INT_VAR, 0L );
+    }
 
-	if ( v->type != STR_VAR )
-	{
-		print( FATAL, "Missing format string.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v->type != STR_VAR )
+    {
+        print( FATAL, "Missing format string.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* Rewrite the format string and check that arguments are ok, then print */
+    /* Rewrite the format string and check that arguments are ok, then print */
 
-	f_format_check( v );
+    f_format_check( v );
 
-	return vars_push( INT_VAR, do_printf( file_num, v ) );
+    return vars_push( INT_VAR, do_printf( file_num, v ) );
 }
 
 
@@ -972,104 +972,104 @@ Var_T *f_fsave( Var_T * v )
 
 static void f_format_check( Var_T * v )
 {
-	char *cp;
-	Var_T *cv;
-	ptrdiff_t s2c;
+    char *cp;
+    Var_T *cv;
+    ptrdiff_t s2c;
 
 
-	/* Clean up the format string, especially replace the '#' characters with
-	   the appropriate conversion specifiers */
+    /* Clean up the format string, especially replace the '#' characters with
+       the appropriate conversion specifiers */
 
-	for ( cp = v->val.sptr, cv = v->next; *cp != '\0'; cp++ )
-	{
-		if ( *cp == '%' )                 /* '%' must be replaced by "%%" */
-		{
-			s2c = cp - v->val.sptr;
-			v->val.sptr = CHAR_P T_realloc( v->val.sptr,
-											strlen( v->val.sptr ) + 2 );
-			cp = v->val.sptr + s2c;
-			memmove( cp + 1, cp, strlen( cp ) + 1 );
-			cp++;
-			continue;
-		}
+    for ( cp = v->val.sptr, cv = v->next; *cp != '\0'; cp++ )
+    {
+        if ( *cp == '%' )                 /* '%' must be replaced by "%%" */
+        {
+            s2c = cp - v->val.sptr;
+            v->val.sptr = CHAR_P T_realloc( v->val.sptr,
+                                            strlen( v->val.sptr ) + 2 );
+            cp = v->val.sptr + s2c;
+            memmove( cp + 1, cp, strlen( cp ) + 1 );
+            cp++;
+            continue;
+        }
 
-		if ( *cp == '\\' )                /* replace escaped '#' characters */
-		{
-			int sc;
+        if ( *cp == '\\' )                /* replace escaped '#' characters */
+        {
+            int sc;
 
-			for ( sc = 0; *cp == '\\'; sc++, cp++ )
-				/* empty */ ;
+            for ( sc = 0; *cp == '\\'; sc++, cp++ )
+                /* empty */ ;
 
-			if ( sc & 1 && *cp =='#' )
-				memmove( cp - 1, cp, strlen( cp ) + 1 );
+            if ( sc & 1 && *cp =='#' )
+                memmove( cp - 1, cp, strlen( cp ) + 1 );
 
-			cp--;
-			continue;
-		}
+            cp--;
+            continue;
+        }
 
-		if ( *cp != '#' )                 /* keep "normal" characters */
-			continue;
+        if ( *cp != '#' )                 /* keep "normal" characters */
+            continue;
 
-		if ( cv == NULL )                  /* '#' without variable to print */
-		{
-			print( FATAL, "Less data than format descriptors in format "
-				   "string.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( cv == NULL )                  /* '#' without variable to print */
+        {
+            print( FATAL, "Less data than format descriptors in format "
+                   "string.\n" );
+            THROW( EXCEPTION );
+        }
 
-		switch ( cv->type )               /* replace '#' by format specifier */
-		{
-			case INT_VAR :
-				s2c = cp - v->val.sptr;
-				v->val.sptr = CHAR_P T_realloc( v->val.sptr,
-												strlen( v->val.sptr ) + 2 );
-				cp = v->val.sptr + s2c;
-			    memmove( cp + 2, cp + 1, strlen( cp ) );
-				memcpy( cp, "%d", 2 );
-				cp++;
-				break;
+        switch ( cv->type )               /* replace '#' by format specifier */
+        {
+            case INT_VAR :
+                s2c = cp - v->val.sptr;
+                v->val.sptr = CHAR_P T_realloc( v->val.sptr,
+                                                strlen( v->val.sptr ) + 2 );
+                cp = v->val.sptr + s2c;
+                memmove( cp + 2, cp + 1, strlen( cp ) );
+                memcpy( cp, "%d", 2 );
+                cp++;
+                break;
 
-			case FLOAT_VAR :
-				s2c = cp - v->val.sptr;
-				v->val.sptr = CHAR_P T_realloc( v->val.sptr,
-												strlen( v->val.sptr ) + 5 );
-				cp = v->val.sptr + s2c;
-			    memmove( cp + 5, cp + 1, strlen( cp ) );
-				memcpy( cp, "%#.9g", 5 );
-				cp += 4;
-				break;
+            case FLOAT_VAR :
+                s2c = cp - v->val.sptr;
+                v->val.sptr = CHAR_P T_realloc( v->val.sptr,
+                                                strlen( v->val.sptr ) + 5 );
+                cp = v->val.sptr + s2c;
+                memmove( cp + 5, cp + 1, strlen( cp ) );
+                memcpy( cp, "%#.9g", 5 );
+                cp += 4;
+                break;
 
-			case STR_VAR :
-				s2c = cp - v->val.sptr;
-				v->val.sptr = CHAR_P T_realloc( v->val.sptr,
-												strlen( v->val.sptr ) + 2 );
-				cp = v->val.sptr + s2c;
-			    memmove( cp + 2, cp + 1, strlen( cp ) );
-				memcpy( cp, "%s", 2 );
-				handle_escape( cv->val.sptr );
-				cp++;
-				break;
+            case STR_VAR :
+                s2c = cp - v->val.sptr;
+                v->val.sptr = CHAR_P T_realloc( v->val.sptr,
+                                                strlen( v->val.sptr ) + 2 );
+                cp = v->val.sptr + s2c;
+                memmove( cp + 2, cp + 1, strlen( cp ) );
+                memcpy( cp, "%s", 2 );
+                handle_escape( cv->val.sptr );
+                cp++;
+                break;
 
-			default :
-				print( FATAL, "Function can only write numbers and strings "
-					   "to a file.\n" );
-				THROW( EXCEPTION );
-		}
+            default :
+                print( FATAL, "Function can only write numbers and strings "
+                       "to a file.\n" );
+                THROW( EXCEPTION );
+        }
 
-		cv = cv->next;
-	}
+        cv = cv->next;
+    }
 
-	if ( cv != NULL )
-	{
-		print( SEVERE, "More data than format descriptors in format "
-			   "string.\n" );
-		while ( ( cv = vars_pop( cv ) ) != NULL )
-			/* empty */ ;
-	}
+    if ( cv != NULL )
+    {
+        print( SEVERE, "More data than format descriptors in format "
+               "string.\n" );
+        while ( ( cv = vars_pop( cv ) ) != NULL )
+            /* empty */ ;
+    }
 
-	/* Finally replace the escape sequences in the format string */
+    /* Finally replace the escape sequences in the format string */
 
-	handle_escape( v->val.sptr );
+    handle_escape( v->val.sptr );
 }
 
 
@@ -1087,31 +1087,31 @@ static void f_format_check( Var_T * v )
 
 Var_T *f_ffsave( Var_T * v )
 {
-	long file_num;
+    long file_num;
 
 
-	/* Determine the file identifier */
+    /* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0L );
+    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+        return vars_push( INT_VAR, 0L );
 
-	if ( v == NULL )
-	{
-		print( WARN, "Missing arguments.\n" );
-		return vars_push( INT_VAR, 0L );
-	}
+    if ( v == NULL )
+    {
+        print( WARN, "Missing arguments.\n" );
+        return vars_push( INT_VAR, 0L );
+    }
 
-	if ( v->type != STR_VAR )
-	{
-		print( FATAL, "Missing format string.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v->type != STR_VAR )
+    {
+        print( FATAL, "Missing format string.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* Check that format string and arguments are ok, then print */
+    /* Check that format string and arguments are ok, then print */
 
-	ff_format_check( v );
+    ff_format_check( v );
 
-	return vars_push( INT_VAR, do_printf( file_num, v ) );
+    return vars_push( INT_VAR, do_printf( file_num, v ) );
 }
 
 
@@ -1124,195 +1124,195 @@ Var_T *f_ffsave( Var_T * v )
 
 static void ff_format_check( Var_T * v )
 {
-	const char *sptr = v->val.sptr;
-	Var_T *vptr = v->next;
+    const char *sptr = v->val.sptr;
+    Var_T *vptr = v->next;
 
 
-	/* Replace escape characters in the format string */
+    /* Replace escape characters in the format string */
 
-	handle_escape( v->val.sptr );
+    handle_escape( v->val.sptr );
 
-	/* Loop over the format string to figure out if there are enough arguments
-	   for the format string and that the argument types are the ones expected
-	   by the conversion modifiers. */
+    /* Loop over the format string to figure out if there are enough arguments
+       for the format string and that the argument types are the ones expected
+       by the conversion modifiers. */
 
-	while ( 1 )
-	{
-		/* Skip over everything that's not a conversion specifier */
+    while ( 1 )
+    {
+        /* Skip over everything that's not a conversion specifier */
 
-		for ( ; *sptr != '\0' && *sptr != '%'; sptr++ )
-			/* empty */ ;
+        for ( ; *sptr != '\0' && *sptr != '%'; sptr++ )
+            /* empty */ ;
 
-		if ( *sptr++ == '\0' )
-			break;
+        if ( *sptr++ == '\0' )
+            break;
 
-		if ( *sptr == '\0' )
-		{
-			print( FATAL, "'%%' found at end of format string.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( *sptr == '\0' )
+        {
+            print( FATAL, "'%%' found at end of format string.\n" );
+            THROW( EXCEPTION );
+        }
 
-		if ( *sptr == '%' )
-			continue;
+        if ( *sptr == '%' )
+            continue;
 
-		/* First thing to be expected in a conversion specifier are flags */
+        /* First thing to be expected in a conversion specifier are flags */
 
-		while ( *sptr == '-' || *sptr == '+' || *sptr == ' ' ||
-				*sptr == '0' || *sptr == '#' )
-		{
-			sptr++;
-			if ( *sptr == '\0' )
-			{
-				print( FATAL, "End of format string within conversion "
-					   "specifier.\n" );
-				THROW( EXCEPTION );
-			}
-		}
+        while ( *sptr == '-' || *sptr == '+' || *sptr == ' ' ||
+                *sptr == '0' || *sptr == '#' )
+        {
+            sptr++;
+            if ( *sptr == '\0' )
+            {
+                print( FATAL, "End of format string within conversion "
+                       "specifier.\n" );
+                THROW( EXCEPTION );
+            }
+        }
 
-		/* Next a minimum length and precision might follow, if one or both
-		   of these are given by a '*' we need an integer argument to
-		   specifiy the number to be used */
+        /* Next a minimum length and precision might follow, if one or both
+           of these are given by a '*' we need an integer argument to
+           specifiy the number to be used */
 
-		if ( *sptr == '*' )
-		{
-			if ( vptr->type != INT_VAR )
-			{
-				print( FATAL, "Non-integer variable used as field length in "
-					   "format string.\n" );
-				THROW( EXCEPTION );
-			}
+        if ( *sptr == '*' )
+        {
+            if ( vptr->type != INT_VAR )
+            {
+                print( FATAL, "Non-integer variable used as field length in "
+                       "format string.\n" );
+                THROW( EXCEPTION );
+            }
 
-			sptr++;
-			vptr = vptr->next;
-		}
-		else if ( isdigit( ( unsigned char ) *sptr ) )
-			while ( isdigit( ( unsigned char ) *++sptr ) )
-				/* empty */ ;
+            sptr++;
+            vptr = vptr->next;
+        }
+        else if ( isdigit( ( unsigned char ) *sptr ) )
+            while ( isdigit( ( unsigned char ) *++sptr ) )
+                /* empty */ ;
 
-		if ( *sptr == '\0' )
-		{
-			print( FATAL, "End of format string within conversion "
-				   "specifier.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( *sptr == '\0' )
+        {
+            print( FATAL, "End of format string within conversion "
+                   "specifier.\n" );
+            THROW( EXCEPTION );
+        }
 
-		if ( *sptr == '.' )
-		{
-			sptr++;
+        if ( *sptr == '.' )
+        {
+            sptr++;
 
-			if ( *sptr == '*' )
-			{
-				if ( vptr == NULL )
-				{
-					print( FATAL, "Not enough arguments for format "
-						   "string.\n" );
-					THROW( EXCEPTION );
-				}
+            if ( *sptr == '*' )
+            {
+                if ( vptr == NULL )
+                {
+                    print( FATAL, "Not enough arguments for format "
+                           "string.\n" );
+                    THROW( EXCEPTION );
+                }
 
-				if ( vptr->type != INT_VAR )
-				{
-					print( FATAL, "Non-integer variable used as field "
-						   "length in format string.\n" );
-					THROW( EXCEPTION );
-				}
+                if ( vptr->type != INT_VAR )
+                {
+                    print( FATAL, "Non-integer variable used as field "
+                           "length in format string.\n" );
+                    THROW( EXCEPTION );
+                }
 
-				sptr++;
-				vptr = vptr->next;
-			}
-			else if ( isdigit( ( unsigned char ) *sptr ) )
-				while ( isdigit( ( unsigned char ) *++sptr ) )
-					/* empty */ ;
+                sptr++;
+                vptr = vptr->next;
+            }
+            else if ( isdigit( ( unsigned char ) *sptr ) )
+                while ( isdigit( ( unsigned char ) *++sptr ) )
+                    /* empty */ ;
 
-			if ( *sptr == '\0' )
-			{
-				print( FATAL, "End of format string within conversion "
-					   "specifier.\n" );
-				THROW( EXCEPTION );
-			}
-		}
+            if ( *sptr == '\0' )
+            {
+                print( FATAL, "End of format string within conversion "
+                       "specifier.\n" );
+                THROW( EXCEPTION );
+            }
+        }
 
-		/* Now the conversion specifier has to follow, this can be either
-		   's', 'd', 'i', 'f', 'e', 'g', 'E', 'G', or 'n'. For 'n' no
-		   argument is needed because it just prints the number of character
-		   written up to the moment the 'n' is found in the format string. */
+        /* Now the conversion specifier has to follow, this can be either
+           's', 'd', 'i', 'f', 'e', 'g', 'E', 'G', or 'n'. For 'n' no
+           argument is needed because it just prints the number of character
+           written up to the moment the 'n' is found in the format string. */
 
-		if ( *sptr == 's' )
-		{
-			if ( vptr == NULL )
-			{
-				print( FATAL, "Not enough arguments for format string.\n" );
-				THROW( EXCEPTION );
-			}
+        if ( *sptr == 's' )
+        {
+            if ( vptr == NULL )
+            {
+                print( FATAL, "Not enough arguments for format string.\n" );
+                THROW( EXCEPTION );
+            }
 
-			if ( vptr->type != STR_VAR )
-			{
-				print( FATAL, "Non-string variable found for string type "
-					   "conversion specifier in format string.\n" );
-				THROW( EXCEPTION );
-			}
+            if ( vptr->type != STR_VAR )
+            {
+                print( FATAL, "Non-string variable found for string type "
+                       "conversion specifier in format string.\n" );
+                THROW( EXCEPTION );
+            }
 
-			handle_escape( vptr->val.sptr );
-			sptr++;
-			vptr = vptr->next;
-			continue;
-		}
+            handle_escape( vptr->val.sptr );
+            sptr++;
+            vptr = vptr->next;
+            continue;
+        }
 
-		if ( *sptr == 'd' || *sptr == 'i' )
-		{
-			if ( vptr == NULL )
-			{
-				print( FATAL, "Not enough arguments for format string.\n" );
-				THROW( EXCEPTION );
-			}
+        if ( *sptr == 'd' || *sptr == 'i' )
+        {
+            if ( vptr == NULL )
+            {
+                print( FATAL, "Not enough arguments for format string.\n" );
+                THROW( EXCEPTION );
+            }
 
-			if ( vptr->type != INT_VAR )
-			{
-				print( WARN, "Non-integer variable found for integer type "
-					   "conversion specifier in format string.\n" );
-				THROW( EXCEPTION );
-			}
+            if ( vptr->type != INT_VAR )
+            {
+                print( WARN, "Non-integer variable found for integer type "
+                       "conversion specifier in format string.\n" );
+                THROW( EXCEPTION );
+            }
 
-			sptr++;
-			vptr = vptr->next;
-			continue;
-		}
+            sptr++;
+            vptr = vptr->next;
+            continue;
+        }
 
-		if ( *sptr == 'f' || *sptr == 'e' || *sptr == 'g' ||
-			 *sptr == 'E' || *sptr == 'G' )
-		{
-			if ( vptr == NULL )
-			{
-				print( FATAL, "Not enough arguments for format string.\n" );
-				THROW( EXCEPTION );
-			}
+        if ( *sptr == 'f' || *sptr == 'e' || *sptr == 'g' ||
+             *sptr == 'E' || *sptr == 'G' )
+        {
+            if ( vptr == NULL )
+            {
+                print( FATAL, "Not enough arguments for format string.\n" );
+                THROW( EXCEPTION );
+            }
 
-			if ( vptr->type != FLOAT_VAR )
-			{
-				print( WARN, "Non-floating point variable found for float "
-					   "type conversion specifier in format string.\n" );
-				THROW( EXCEPTION );
-			}
+            if ( vptr->type != FLOAT_VAR )
+            {
+                print( WARN, "Non-floating point variable found for float "
+                       "type conversion specifier in format string.\n" );
+                THROW( EXCEPTION );
+            }
 
-			sptr++;
-			vptr = vptr->next;
-			continue;
-		}
+            sptr++;
+            vptr = vptr->next;
+            continue;
+        }
 
-		print( FATAL, "Unknown conversion specifier '%c' found in format "
-			   "string.\n", *sptr );
-		THROW( EXCEPTION );
-	}
+        print( FATAL, "Unknown conversion specifier '%c' found in format "
+               "string.\n", *sptr );
+        THROW( EXCEPTION );
+    }
 
-	/* Check for superfluous arguments, print a warning if there are any and
-	   discard them */
+    /* Check for superfluous arguments, print a warning if there are any and
+       discard them */
 
-	if ( vptr != NULL )
-	{
-		print( SEVERE, "More arguments than conversion specifiers found in "
-			   "format.\n" );
-		while ( ( vptr = vars_pop( vptr ) ) != NULL )
-			/* empty */ ;
-	}
+    if ( vptr != NULL )
+    {
+        print( SEVERE, "More arguments than conversion specifiers found in "
+               "format.\n" );
+        while ( ( vptr = vars_pop( vptr ) ) != NULL )
+            /* empty */ ;
+    }
 }
 
 
@@ -1326,299 +1326,299 @@ static void ff_format_check( Var_T * v )
 
 static long do_printf( long file_num, Var_T * v )
 {
-	char *fmt_start,
-	     *fmt_end,
-	     *sptr;
-	Var_T *cv;
-	long count = 0;
-	char store;
-	int need_vars;
-	int need_type;
+    char *fmt_start,
+         *fmt_end,
+         *sptr;
+    Var_T *cv;
+    long count = 0;
+    char store;
+    int need_vars;
+    int need_type;
 
 
-	CLOBBER_PROTECT( fmt_start );
-	CLOBBER_PROTECT( fmt_end );
-	CLOBBER_PROTECT( sptr );
-	CLOBBER_PROTECT( cv );
-	CLOBBER_PROTECT( count );
+    CLOBBER_PROTECT( fmt_start );
+    CLOBBER_PROTECT( fmt_end );
+    CLOBBER_PROTECT( sptr );
+    CLOBBER_PROTECT( cv );
+    CLOBBER_PROTECT( count );
 
-	sptr = v->val.sptr;
-	fmt_start = fmt_end = CHAR_P T_malloc( strlen( sptr ) + 2 );
-	strcpy( fmt_start, sptr );
-	cv = v->next;
+    sptr = v->val.sptr;
+    fmt_start = fmt_end = CHAR_P T_malloc( strlen( sptr ) + 2 );
+    strcpy( fmt_start, sptr );
+    cv = v->next;
 
-	TRY
-	{
-		/* Print everything up to the first conversion specifier */
+    TRY
+    {
+        /* Print everything up to the first conversion specifier */
 
-		while ( *fmt_end != '\0' )
-		{
-			if ( *fmt_end == '%' )
-			{
-				if ( *( fmt_end + 1 ) == '%' )
-				{
-					fmt_end += 2;
-					continue;
-				}
-				else
-					break;
-			}
+        while ( *fmt_end != '\0' )
+        {
+            if ( *fmt_end == '%' )
+            {
+                if ( *( fmt_end + 1 ) == '%' )
+                {
+                    fmt_end += 2;
+                    continue;
+                }
+                else
+                    break;
+            }
 
-			fmt_end++;
-		}
+            fmt_end++;
+        }
 
-		store = *fmt_end;
-		*fmt_end = '\0';
+        store = *fmt_end;
+        *fmt_end = '\0';
 
-		if ( fmt_start != fmt_end )
-			count += T_fprintf( file_num, fmt_start );
+        if ( fmt_start != fmt_end )
+            count += T_fprintf( file_num, fmt_start );
 
-		if ( store == '\0' )                         /* already at the end ? */
-		{
-			TRY_SUCCESS;
-			T_free( fmt_start );
-			return count;
-		}
+        if ( store == '\0' )                         /* already at the end ? */
+        {
+            TRY_SUCCESS;
+            T_free( fmt_start );
+            return count;
+        }
 
-		sptr += fmt_end - fmt_start;
-		strcpy( fmt_start, sptr );
-		fmt_end = fmt_start + 1;
+        sptr += fmt_end - fmt_start;
+        strcpy( fmt_start, sptr );
+        fmt_end = fmt_start + 1;
 
-		/* Now repeat printing, starting each time with a conversion specifier
-		   and ending just before the next one until the end of the format
-		   string has been reached */
+        /* Now repeat printing, starting each time with a conversion specifier
+           and ending just before the next one until the end of the format
+           string has been reached */
 
-		while ( 1 )
-		{
-			need_vars = 0;                  /* how many arguments are needed */
-			need_type = -1;                 /* type of the argument to print */
+        while ( 1 )
+        {
+            need_vars = 0;                  /* how many arguments are needed */
+            need_type = -1;                 /* type of the argument to print */
 
-			/* Skip over flags */
+            /* Skip over flags */
 
-			while ( *fmt_end == '-' || *fmt_end == '+' || *fmt_end == ' ' ||
-					*fmt_end == '0' || *fmt_end == '#' )
-				fmt_end++;
+            while ( *fmt_end == '-' || *fmt_end == '+' || *fmt_end == ' ' ||
+                    *fmt_end == '0' || *fmt_end == '#' )
+                fmt_end++;
 
-			/* Deal with the minumum length and precision fields, checking
-			   if, due to a '*' an argument is needed */
+            /* Deal with the minumum length and precision fields, checking
+               if, due to a '*' an argument is needed */
 
-			if ( *fmt_end == '*' )
-			{
-				need_vars++;
-				fmt_end++;
-			}
-			else if ( isdigit( ( unsigned char ) *fmt_end ) )
-				while ( isdigit( ( unsigned char ) *++fmt_end ) )
-					/* empty */ ;
+            if ( *fmt_end == '*' )
+            {
+                need_vars++;
+                fmt_end++;
+            }
+            else if ( isdigit( ( unsigned char ) *fmt_end ) )
+                while ( isdigit( ( unsigned char ) *++fmt_end ) )
+                    /* empty */ ;
 
-			if ( *fmt_end == '.' )
-			{
-				if ( *++fmt_end == '*' )
-				{
-					need_vars++;
-					fmt_end++;
-				}
-				else if ( isdigit( ( unsigned char ) *fmt_end ) )
-					while ( isdigit( ( unsigned char ) *++fmt_end ) )
-						/* empty */ ;
-			}
+            if ( *fmt_end == '.' )
+            {
+                if ( *++fmt_end == '*' )
+                {
+                    need_vars++;
+                    fmt_end++;
+                }
+                else if ( isdigit( ( unsigned char ) *fmt_end ) )
+                    while ( isdigit( ( unsigned char ) *++fmt_end ) )
+                        /* empty */ ;
+            }
 
-			/* Find out about the type of the argument to be printed */
+            /* Find out about the type of the argument to be printed */
 
-			if ( *fmt_end == 's' )
-			{
-				need_type = 0;       /* string */
-				need_vars++;
-			}
+            if ( *fmt_end == 's' )
+            {
+                need_type = 0;       /* string */
+                need_vars++;
+            }
 
-			if ( *fmt_end == 'd' || *fmt_end == 'i' )
-			{
-				/* Integers are always 'long' integers, so an 'l' must be
-				   inserted in front of the 'd' or 'i' */
+            if ( *fmt_end == 'd' || *fmt_end == 'i' )
+            {
+                /* Integers are always 'long' integers, so an 'l' must be
+                   inserted in front of the 'd' or 'i' */
 
-				memmove( fmt_end + 1, fmt_end, strlen( fmt_end ) + 1 );
-				*fmt_end++ = 'l';
+                memmove( fmt_end + 1, fmt_end, strlen( fmt_end ) + 1 );
+                *fmt_end++ = 'l';
 
-				need_type = 1;       /* integer */
-				need_vars++;
-			}
+                need_type = 1;       /* integer */
+                need_vars++;
+            }
 
-			if ( *fmt_end == 'f' || *fmt_end == 'e' || *fmt_end == 'g' ||
-				 *fmt_end == 'E' || *fmt_end == 'G' )
-			{
-				need_type = 2;       /* float */
-				need_vars++;
-			}
+            if ( *fmt_end == 'f' || *fmt_end == 'e' || *fmt_end == 'g' ||
+                 *fmt_end == 'E' || *fmt_end == 'G' )
+            {
+                need_type = 2;       /* float */
+                need_vars++;
+            }
 
-			/* Now get rest of string until the next conversion specifier or
-			   the end of the format string is reached */
+            /* Now get rest of string until the next conversion specifier or
+               the end of the format string is reached */
 
-			while ( *fmt_end != '\0' )
-			{
-				if ( *fmt_end == '%' )
-				{
-					if ( *( fmt_end + 1 ) == '%' )
-					{
-						fmt_end += 2;
-						continue;
-					}
-					else
-						break;
-				}
+            while ( *fmt_end != '\0' )
+            {
+                if ( *fmt_end == '%' )
+                {
+                    if ( *( fmt_end + 1 ) == '%' )
+                    {
+                        fmt_end += 2;
+                        continue;
+                    }
+                    else
+                        break;
+                }
 
-				fmt_end++;
-			}
+                fmt_end++;
+            }
 
-			store = *fmt_end;
-			*fmt_end = '\0';
+            store = *fmt_end;
+            *fmt_end = '\0';
 
-			/* Call the function doing the printing, supplying it with the
-			   necessary number of arguments */
+            /* Call the function doing the printing, supplying it with the
+               necessary number of arguments */
 
-			switch ( need_vars )
-			{
-				case 1 :
-					switch ( need_type )
-					{
-						case 0 : /* string */
-							count += T_fprintf( file_num, fmt_start,
-												cv->val.sptr );
-							break;
+            switch ( need_vars )
+            {
+                case 1 :
+                    switch ( need_type )
+                    {
+                        case 0 : /* string */
+                            count += T_fprintf( file_num, fmt_start,
+                                                cv->val.sptr );
+                            break;
 
-						case 1 : /* integer */
-							if ( cv->type == INT_VAR )
-								count += T_fprintf( file_num, fmt_start,
-													cv->val.lval );
-							else
-								count += T_fprintf( file_num, fmt_start,
-													lrnd( cv->val.dval ) );
+                        case 1 : /* integer */
+                            if ( cv->type == INT_VAR )
+                                count += T_fprintf( file_num, fmt_start,
+                                                    cv->val.lval );
+                            else
+                                count += T_fprintf( file_num, fmt_start,
+                                                    lrnd( cv->val.dval ) );
 
-							break;
+                            break;
 
-						case 2 : /* double */
-							if ( cv->type == FLOAT_VAR )
-								count += T_fprintf( file_num, fmt_start,
-													cv->val.dval );
-							else
-								count += T_fprintf( file_num, fmt_start,
-													( double ) cv->val.lval );
-							break;
+                        case 2 : /* double */
+                            if ( cv->type == FLOAT_VAR )
+                                count += T_fprintf( file_num, fmt_start,
+                                                    cv->val.dval );
+                            else
+                                count += T_fprintf( file_num, fmt_start,
+                                                    ( double ) cv->val.lval );
+                            break;
 
-						default :
-							fsc2_assert( 1 == 0 );
-					}
+                        default :
+                            fsc2_assert( 1 == 0 );
+                    }
 
-					cv = vars_pop( cv );
-					break;
+                    cv = vars_pop( cv );
+                    break;
 
-				case 2 :
-					switch ( need_type )
-					{
-						case 0 : /* string */
-							count += T_fprintf( file_num, fmt_start,
-												( int ) cv->val.lval,
-												cv->next->val.sptr );
-							break;
+                case 2 :
+                    switch ( need_type )
+                    {
+                        case 0 : /* string */
+                            count += T_fprintf( file_num, fmt_start,
+                                                ( int ) cv->val.lval,
+                                                cv->next->val.sptr );
+                            break;
 
-						case 1 : /* integer */
-							if ( cv->next->type == INT_VAR )
-								count += T_fprintf( file_num, fmt_start,
-													( int ) cv->val.lval,
-													cv->next->val.lval );
-							else
-								count += T_fprintf( file_num, fmt_start,
-													( int ) cv->val.lval,
-													lrnd(
-														cv->next->val.dval ) );
-							break;
+                        case 1 : /* integer */
+                            if ( cv->next->type == INT_VAR )
+                                count += T_fprintf( file_num, fmt_start,
+                                                    ( int ) cv->val.lval,
+                                                    cv->next->val.lval );
+                            else
+                                count += T_fprintf( file_num, fmt_start,
+                                                    ( int ) cv->val.lval,
+                                                    lrnd(
+                                                        cv->next->val.dval ) );
+                            break;
 
-						case 2 : /* double */
-							if ( cv->next->type == FLOAT_VAR )
-								count += T_fprintf( file_num, fmt_start,
-													( int ) cv->val.lval,
-													cv->next->val.dval );
-							else
-								count += T_fprintf( file_num, fmt_start,
-													( int ) cv->val.lval,
-													( long )
-													      cv->next->val.lval );
-							break;
+                        case 2 : /* double */
+                            if ( cv->next->type == FLOAT_VAR )
+                                count += T_fprintf( file_num, fmt_start,
+                                                    ( int ) cv->val.lval,
+                                                    cv->next->val.dval );
+                            else
+                                count += T_fprintf( file_num, fmt_start,
+                                                    ( int ) cv->val.lval,
+                                                    ( long )
+                                                          cv->next->val.lval );
+                            break;
 
-						default :
-							fsc2_assert( 1 == 0 );
-					}
+                        default :
+                            fsc2_assert( 1 == 0 );
+                    }
 
-					cv = vars_pop( vars_pop( cv ) );
-					break;
+                    cv = vars_pop( vars_pop( cv ) );
+                    break;
 
-				case 3 :
-					switch ( need_type )
-					{
-						case 0 : /* string */
-							count += T_fprintf( file_num, fmt_start,
-												( int ) cv->val.lval,
-												( int ) cv->next->val.lval,
-												cv->next->next->val.sptr );
-							break;
+                case 3 :
+                    switch ( need_type )
+                    {
+                        case 0 : /* string */
+                            count += T_fprintf( file_num, fmt_start,
+                                                ( int ) cv->val.lval,
+                                                ( int ) cv->next->val.lval,
+                                                cv->next->next->val.sptr );
+                            break;
 
-						case 1 : /* integer */
-							if ( cv->next->next->type == INT_VAR )
-								count += T_fprintf( file_num, fmt_start,
-													( int ) cv->val.lval,
-													( int ) cv->next->val.lval,
-													cv->next->next->val.lval );
-							else
-								count += T_fprintf( file_num, fmt_start,
-													( int ) cv->val.lval,
-													( int ) cv->next->val.lval,
-													lrnd(
-													cv->next->next->val.dval )
-									               );
-							break;
+                        case 1 : /* integer */
+                            if ( cv->next->next->type == INT_VAR )
+                                count += T_fprintf( file_num, fmt_start,
+                                                    ( int ) cv->val.lval,
+                                                    ( int ) cv->next->val.lval,
+                                                    cv->next->next->val.lval );
+                            else
+                                count += T_fprintf( file_num, fmt_start,
+                                                    ( int ) cv->val.lval,
+                                                    ( int ) cv->next->val.lval,
+                                                    lrnd(
+                                                    cv->next->next->val.dval )
+                                                   );
+                            break;
 
-						case 2 : /* double */
-							if ( cv->next->next->type == FLOAT_VAR )
-								count += T_fprintf( file_num, fmt_start,
-													( int ) cv->val.lval,
-													( int ) cv->next->val.lval,
-													cv->next->next->val.dval );
-							else
-								count += T_fprintf( file_num, fmt_start,
-													( int ) cv->val.lval,
-													( int ) cv->next->val.lval,
-													( long )
-													cv->next->next->val.lval );
-							break;
+                        case 2 : /* double */
+                            if ( cv->next->next->type == FLOAT_VAR )
+                                count += T_fprintf( file_num, fmt_start,
+                                                    ( int ) cv->val.lval,
+                                                    ( int ) cv->next->val.lval,
+                                                    cv->next->next->val.dval );
+                            else
+                                count += T_fprintf( file_num, fmt_start,
+                                                    ( int ) cv->val.lval,
+                                                    ( int ) cv->next->val.lval,
+                                                    ( long )
+                                                    cv->next->next->val.lval );
+                            break;
 
-						default :
-							fsc2_assert( 1 == 0 );
-					}
+                        default :
+                            fsc2_assert( 1 == 0 );
+                    }
 
-					cv = vars_pop( vars_pop( vars_pop( cv ) ) );
-					break;
+                    cv = vars_pop( vars_pop( vars_pop( cv ) ) );
+                    break;
 
-				default :
-					fsc2_assert( 1 == 0 );
-			}
+                default :
+                    fsc2_assert( 1 == 0 );
+            }
 
-			if ( store == '\0' )             /* end reached ? */
-				break;
+            if ( store == '\0' )             /* end reached ? */
+                break;
 
-			sptr += fmt_end - fmt_start - ( need_type == 1 ? 1 : 0 );
-			strcpy( fmt_start, sptr );
-			fmt_end = fmt_start + 1;
-		}
+            sptr += fmt_end - fmt_start - ( need_type == 1 ? 1 : 0 );
+            strcpy( fmt_start, sptr );
+            fmt_end = fmt_start + 1;
+        }
 
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( fmt_start );
-		RETHROW( );
-	}
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( fmt_start );
+        RETHROW( );
+    }
 
-	T_free( fmt_start );
-	return count;
+    T_free( fmt_start );
+    return count;
 }
 
 
@@ -1634,24 +1634,24 @@ static long do_printf( long file_num, Var_T * v )
 
 Var_T *f_save_p( Var_T * v )
 {
-	long file_num;
+    long file_num;
 
 
-	/* Determine the file identifier */
+    /* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0L );
+    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+        return vars_push( INT_VAR, 0L );
 
-	if ( v != NULL )
-		vars_check( v, STR_VAR );
+    if ( v != NULL )
+        vars_check( v, STR_VAR );
 
-	if ( Fsc2_Internals.mode == TEST )
-		return vars_push( INT_VAR, 1L );
+    if ( Fsc2_Internals.mode == TEST )
+        return vars_push( INT_VAR, 1L );
 
-	if ( ! print_browser( 0, file_num, v != NULL ? v->val.sptr : "" ) )
-		THROW( EXCEPTION );
+    if ( ! print_browser( 0, file_num, v != NULL ? v->val.sptr : "" ) )
+        THROW( EXCEPTION );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1666,24 +1666,24 @@ Var_T *f_save_p( Var_T * v )
 
 Var_T *f_save_o( Var_T * v )
 {
-	long file_num;
+    long file_num;
 
 
-	/* Determine the file identifier */
+    /* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0L );
+    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+        return vars_push( INT_VAR, 0L );
 
-	if ( v != NULL )
-		vars_check( v, STR_VAR );
+    if ( v != NULL )
+        vars_check( v, STR_VAR );
 
-	if ( Fsc2_Internals.mode == TEST )
-		return vars_push( INT_VAR, 1L );
+    if ( Fsc2_Internals.mode == TEST )
+        return vars_push( INT_VAR, 1L );
 
-	if ( ! print_browser( 1, file_num, v != NULL ? v->val.sptr : "" ) )
-		THROW( EXCEPTION );
+    if ( ! print_browser( 1, file_num, v != NULL ? v->val.sptr : "" ) )
+        THROW( EXCEPTION );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -1696,57 +1696,57 @@ Var_T *f_save_o( Var_T * v )
  *---------------------------------------------------------------------*/
 
 static long print_browser( int          browser,
-						   int          fid,
-						   const char * comment )
+                           int          fid,
+                           const char * comment )
 {
-	char *line;
-	char *lp, *cp;
-	long count;
+    char *line;
+    char *lp, *cp;
+    long count;
 
 
-	writer( browser ==  0 ? C_PROG : C_OUTPUT );
-	if ( comment == NULL )
-		comment = "";
-	count = T_fprintf( fid, "%s\n", comment );
+    writer( browser ==  0 ? C_PROG : C_OUTPUT );
+    if ( comment == NULL )
+        comment = "";
+    count = T_fprintf( fid, "%s\n", comment );
 
-	while ( 1 )
-	{
-		reader( &line );
-		lp = line;
-		if ( line != NULL )
-		{
-			if ( browser == 0 )
-			{
-				while ( *lp++ != ':' )
-					/* empty */ ;
+    while ( 1 )
+    {
+        reader( &line );
+        lp = line;
+        if ( line != NULL )
+        {
+            if ( browser == 0 )
+            {
+                while ( *lp++ != ':' )
+                    /* empty */ ;
 
-				cp = lp++;
-				while ( *cp == ' ' || *cp == '\t' )
-					cp++;
-				if ( ! strncmp( cp, "#INCLUDE", 8 ) )
-				{
-					count += T_fprintf( fid, "%s// %s\n", comment, lp );
-					count += print_include( fid, cp + 8, comment,
-											EDL.in_file );
-					continue;
-				}
-			}
-			else if ( *line == '@' )
-			{
-				lp++;
-				while ( *lp++ != 'f' )
-					/* empty */ ;
-			}
+                cp = lp++;
+                while ( *cp == ' ' || *cp == '\t' )
+                    cp++;
+                if ( ! strncmp( cp, "#INCLUDE", 8 ) )
+                {
+                    count += T_fprintf( fid, "%s// %s\n", comment, lp );
+                    count += print_include( fid, cp + 8, comment,
+                                            EDL.in_file );
+                    continue;
+                }
+            }
+            else if ( *line == '@' )
+            {
+                lp++;
+                while ( *lp++ != 'f' )
+                    /* empty */ ;
+            }
 
-			count += T_fprintf( fid, "%s%s\n", comment, lp );
-		}
-		else
-			break;
-	}
+            count += T_fprintf( fid, "%s%s\n", comment, lp );
+        }
+        else
+            break;
+    }
 
-	count += T_fprintf( fid, "%s\n", comment );
+    count += T_fprintf( fid, "%s\n", comment );
 
-	return count;
+    return count;
 }
 
 
@@ -1756,175 +1756,175 @@ static long print_browser( int          browser,
  *------------------------------------------------------*/
 
 #define MAX_INCLUDE_DEPTH 16         /* should be identical to the same
-										value in fsc2_clean.l */
+                                        value in fsc2_clean.l */
 #define PRINT_BUF_SIZE 1025
 
 static long print_include( int          fid,
-						   char *       cp,
-						   const char * comment,
-						   const char * cur_file )
+                           char *       cp,
+                           const char * comment,
+                           const char * cur_file )
 {
-	char delim;
-	char *ep;
-	FILE *finc = NULL;
-	char buf[ PRINT_BUF_SIZE ];
-	static long count;
-	static int level;
-	char *file_name = NULL;
-	struct passwd *pwe;
+    char delim;
+    char *ep;
+    FILE *finc = NULL;
+    char buf[ PRINT_BUF_SIZE ];
+    static long count;
+    static int level;
+    char *file_name = NULL;
+    struct passwd *pwe;
 
 
-	CLOBBER_PROTECT( delim );
-	CLOBBER_PROTECT( file_name );
-	CLOBBER_PROTECT( cp );
+    CLOBBER_PROTECT( delim );
+    CLOBBER_PROTECT( file_name );
+    CLOBBER_PROTECT( cp );
 
-	if ( ! strcmp( cur_file, EDL.in_file ) )
-	{
-		level = 0;
-		count = 0L;
-	}
-	else level++;
+    if ( ! strcmp( cur_file, EDL.in_file ) )
+    {
+        level = 0;
+        count = 0L;
+    }
+    else level++;
 
-	if ( level > MAX_INCLUDE_DEPTH )
-	{
-		level--;
-		return count;
-	}
+    if ( level > MAX_INCLUDE_DEPTH )
+    {
+        level--;
+        return count;
+    }
 
-	/* Skip leading white space */
+    /* Skip leading white space */
 
-	while ( *cp == ' ' || *cp == '\t' )
-		cp++;
+    while ( *cp == ' ' || *cp == '\t' )
+        cp++;
 
-	/* Try to extract the file name */
+    /* Try to extract the file name */
 
-	ep = cp++;
-	delim = *ep++;
+    ep = cp++;
+    delim = *ep++;
 
-	if ( delim != '"' && delim != '<' )
-	{
-		level--;
-		return count;
-	}
-	else if ( delim == '<' )
-		delim = '>';
+    if ( delim != '"' && delim != '<' )
+    {
+        level--;
+        return count;
+    }
+    else if ( delim == '<' )
+        delim = '>';
 
-	while ( *ep != '\0' && *ep != delim )
-		ep++;
+    while ( *ep != '\0' && *ep != delim )
+        ep++;
 
-	/* Give up when no file name could be extracted */
+    /* Give up when no file name could be extracted */
 
-	if ( *ep == '\0' || ( delim != '"' && delim != '>' ) )
-	{
-		level--;
-		return count;
-	}
+    if ( *ep == '\0' || ( delim != '"' && delim != '>' ) )
+    {
+        level--;
+        return count;
+    }
 
-	*ep = '\0';
+    *ep = '\0';
 
-	/* Now adorn the file name with the required path. If the include file is
-	   enclosed in '<' and '>' we try to use the system wide default include
-	   directory (if it is defined, otherwise we give up). If its included
-	   in double quotes we check if the name starts with a '/', indicating
-	   an absolute path, in which case we take it. If it starts with "~/"
-	   the '~' gets replaced by the users home directory. If we find only
-	   a name or a relative path we prepend the name of the directory the
-	   EDL file is from in which we found the '#INCLUDE' directive. */
-	   
-	TRY
-	{
-		if ( delim == '"' )
-		{
-			if ( *cp == '/' )
-				file_name = T_strdup( cp );
-			else if ( *cp == '~' && cp[ 1 ] == '/' )
-			{
-				pwe = getpwuid( getuid( ) );
-				file_name = CHAR_P T_malloc(   strlen( pwe->pw_dir ) 
-											 + strlen( cp ) );
-				strcpy( file_name, pwe->pw_dir );
-				strcat( file_name, cp + 1 );
-			}
-			else
-			{
-				file_name = T_strdup( cur_file );
-				*strrchr( file_name, '/' ) = '\0';
-				file_name = CHAR_P T_realloc( file_name, strlen( file_name )
-											  + strlen( cp ) + 2 );
-				strcat( file_name, "/" );
-				strcat( file_name, cp );
-			}
+    /* Now adorn the file name with the required path. If the include file is
+       enclosed in '<' and '>' we try to use the system wide default include
+       directory (if it is defined, otherwise we give up). If its included
+       in double quotes we check if the name starts with a '/', indicating
+       an absolute path, in which case we take it. If it starts with "~/"
+       the '~' gets replaced by the users home directory. If we find only
+       a name or a relative path we prepend the name of the directory the
+       EDL file is from in which we found the '#INCLUDE' directive. */
+       
+    TRY
+    {
+        if ( delim == '"' )
+        {
+            if ( *cp == '/' )
+                file_name = T_strdup( cp );
+            else if ( *cp == '~' && cp[ 1 ] == '/' )
+            {
+                pwe = getpwuid( getuid( ) );
+                file_name = CHAR_P T_malloc(   strlen( pwe->pw_dir ) 
+                                             + strlen( cp ) );
+                strcpy( file_name, pwe->pw_dir );
+                strcat( file_name, cp + 1 );
+            }
+            else
+            {
+                file_name = T_strdup( cur_file );
+                *strrchr( file_name, '/' ) = '\0';
+                file_name = CHAR_P T_realloc( file_name, strlen( file_name )
+                                              + strlen( cp ) + 2 );
+                strcat( file_name, "/" );
+                strcat( file_name, cp );
+            }
 
-		}
-		else
-		{
+        }
+        else
+        {
 #if defined DEF_INCL_DIR
-			file_name = CHAR_P T_malloc(   strlen( cp )
-										 + strlen( DEF_INCL_DIR ) + 3 );
-			strcpy( file_name, DEF_INCL_DIR );
-			if ( file_name[ strlen( file_name ) - 1 ] != '/' )
-				strcat( file_name, "/" );
-			strcat( file_name, cp );
+            file_name = CHAR_P T_malloc(   strlen( cp )
+                                         + strlen( DEF_INCL_DIR ) + 3 );
+            strcpy( file_name, DEF_INCL_DIR );
+            if ( file_name[ strlen( file_name ) - 1 ] != '/' )
+                strcat( file_name, "/" );
+            strcat( file_name, cp );
 #else
-			level--;
-			return count;
+            level--;
+            return count;
 #endif
-		}
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		level--;
-		T_free( file_name );
-		return count;
-	}
+        }
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        level--;
+        T_free( file_name );
+        return count;
+    }
 
-	/* Try to open the include file, give up on failure */
+    /* Try to open the include file, give up on failure */
 
-	if ( ( finc = fopen( file_name, "r" ) ) == NULL )
-	{
-		level--;
-		T_free( file_name );
-		return count;
-	}
+    if ( ( finc = fopen( file_name, "r" ) ) == NULL )
+    {
+        level--;
+        T_free( file_name );
+        return count;
+    }
 
-	/* Now print the include file, taking care of include files within the
-	   include file */
+    /* Now print the include file, taking care of include files within the
+       include file */
 
-	TRY
-	{
-		count = T_fprintf( fid, "%s// --- %c%s%c starts here --------------\n",
-						   comment, delim == '"' ? '"' : '<', cp, delim );
+    TRY
+    {
+        count = T_fprintf( fid, "%s// --- %c%s%c starts here --------------\n",
+                           comment, delim == '"' ? '"' : '<', cp, delim );
 
-		while ( fgets( buf, PRINT_BUF_SIZE, finc ) != NULL )
-		{
-			count += T_fprintf( fid, "%s%s", comment, buf );
+        while ( fgets( buf, PRINT_BUF_SIZE, finc ) != NULL )
+        {
+            count += T_fprintf( fid, "%s%s", comment, buf );
 
-			ep = buf;
-			while ( *ep && ( *ep == ' ' || *ep == '\t' ) )
-				ep++;
+            ep = buf;
+            while ( *ep && ( *ep == ' ' || *ep == '\t' ) )
+                ep++;
 
-			if ( ! strncmp( ep, "#INCLUDE", 8 ) )
-				count += print_include( fid, ep + 8, comment, file_name );
-		}
+            if ( ! strncmp( ep, "#INCLUDE", 8 ) )
+                count += print_include( fid, ep + 8, comment, file_name );
+        }
 
-		count = T_fprintf( fid, "%s// --- %c%s%c ends here ----------------\n",
-						   comment, delim == '"' ? '"' : '<', cp, delim );
-		fclose( finc );
+        count = T_fprintf( fid, "%s// --- %c%s%c ends here ----------------\n",
+                           comment, delim == '"' ? '"' : '<', cp, delim );
+        fclose( finc );
 
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		level--;
-		fclose( finc );
-		T_free( file_name );
-		RETHROW( );
-	}
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        level--;
+        fclose( finc );
+        T_free( file_name );
+        RETHROW( );
+    }
 
-	level--;
-	T_free( file_name );
-	return count;
+    level--;
+    T_free( file_name );
+    return count;
 }
 
 
@@ -1939,84 +1939,84 @@ static long print_include( int          fid,
 
 Var_T *f_save_c( Var_T * v )
 {
-	long file_num;
-	const char *cc = NULL;
-	char *c = NULL,
-		 *l = NULL,
-		 *r = NULL,
-		 *cl, *nl;
+    long file_num;
+    const char *cc = NULL;
+    char *c = NULL,
+         *l = NULL,
+         *r = NULL,
+         *cl, *nl;
 
-	/* Determine the file identifier */
+    /* Determine the file identifier */
 
-	if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
-		return vars_push( INT_VAR, 0L );
+    if ( ( file_num = get_save_file( &v ) ) == FILE_NUMBER_NOT_OPEN )
+        return vars_push( INT_VAR, 0L );
 
-	if ( Fsc2_Internals.mode == TEST )
-		return vars_push( INT_VAR, 1L );
+    if ( Fsc2_Internals.mode == TEST )
+        return vars_push( INT_VAR, 1L );
 
-	/* Try to get the comment chars to prepend to each line */
+    /* Try to get the comment chars to prepend to each line */
 
-	if ( v != NULL )
-	{
-		vars_check( v, STR_VAR );
-		cc = v->val.sptr;
-		v = v->next;
-	}
+    if ( v != NULL )
+    {
+        vars_check( v, STR_VAR );
+        cc = v->val.sptr;
+        v = v->next;
+    }
 
-	/* Try to get the predefined content of the editor */
+    /* Try to get the predefined content of the editor */
 
-	if ( v != NULL )
-	{
-		vars_check( v, STR_VAR );
-		c = v->val.sptr;
-		correct_line_breaks( c );
-		v = v->next;
-	}
+    if ( v != NULL )
+    {
+        vars_check( v, STR_VAR );
+        c = v->val.sptr;
+        correct_line_breaks( c );
+        v = v->next;
+    }
 
-	/* Try to get a label string for the editor */
+    /* Try to get a label string for the editor */
 
-	if ( v != NULL )
-	{
-		vars_check( v, STR_VAR );
-		l = v->val.sptr;
-	}
+    if ( v != NULL )
+    {
+        vars_check( v, STR_VAR );
+        l = v->val.sptr;
+    }
 
-	/* Show the comment editor and get the returned contents (just one string
-	   with embedded newline chars) */
+    /* Show the comment editor and get the returned contents (just one string
+       with embedded newline chars) */
 
-	if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
-		 ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) )
-		 r = T_strdup( show_input( c, l ) );
+    if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
+         ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) )
+         r = T_strdup( show_input( c, l ) );
 
-	if ( r == NULL )
-		return vars_push( INT_VAR, 1L );
+    if ( r == NULL )
+        return vars_push( INT_VAR, 1L );
 
-	if ( *r == '\0' )
-	{
-		T_free( r );
-		return vars_push( INT_VAR, 1L );
-	}
+    if ( *r == '\0' )
+    {
+        T_free( r );
+        return vars_push( INT_VAR, 1L );
+    }
 
-	cl = r;
-	if ( cc == NULL )
-		cc = "";
-	T_fprintf( file_num, "%s\n", cc );
+    cl = r;
+    if ( cc == NULL )
+        cc = "";
+    T_fprintf( file_num, "%s\n", cc );
 
-	while ( cl != NULL )
-	{
-		nl = strchr( cl, '\n' );
-		if ( nl != NULL )
-			*nl++ = '\0';
-		T_fprintf( file_num, "%s%s\n", cc, cl );
-		cl = nl;
-	}
+    while ( cl != NULL )
+    {
+        nl = strchr( cl, '\n' );
+        if ( nl != NULL )
+            *nl++ = '\0';
+        T_fprintf( file_num, "%s%s\n", cc, cl );
+        cl = nl;
+    }
 
-	if ( cc != NULL )
-		T_fprintf( file_num, "%s\n", cc );
+    if ( cc != NULL )
+        T_fprintf( file_num, "%s\n", cc );
 
-	T_free( r );
+    T_free( r );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -2035,61 +2035,61 @@ Var_T *f_save_c( Var_T * v )
 #define COPY_BUFFER_SIZE 1024       /* size of buffer used when copying */
 
 static long T_fprintf( long         fn,
-					   const char * fmt,
-					   ... )
+                       const char * fmt,
+                       ... )
 {
-	long to_write;                       /* number of bytes we need to write */
-	long size = BUFFER_SIZE_GUESS;
-	char initial_buffer[ BUFFER_SIZE_GUESS ];
-	char *p = initial_buffer;
-	long file_num = fn;
-	va_list ap;
-	char *new_name;
-	FILE *new_fp;
-	struct stat old_stat, new_stat;
-	size_t rw;
-	char *mess;
-	long count;
-	long written = 0;
+    long to_write;                       /* number of bytes we need to write */
+    long size = BUFFER_SIZE_GUESS;
+    char initial_buffer[ BUFFER_SIZE_GUESS ];
+    char *p = initial_buffer;
+    long file_num = fn;
+    va_list ap;
+    char *new_name;
+    FILE *new_fp;
+    struct stat old_stat, new_stat;
+    size_t rw;
+    char *mess;
+    long count;
+    long written = 0;
 
 
-	CLOBBER_PROTECT( size );
-	CLOBBER_PROTECT( written );
-	CLOBBER_PROTECT( p );
-	CLOBBER_PROTECT( file_num );
+    CLOBBER_PROTECT( size );
+    CLOBBER_PROTECT( written );
+    CLOBBER_PROTECT( p );
+    CLOBBER_PROTECT( file_num );
 
-	/* If the file has been closed because of insufficient space and no
+    /* If the file has been closed because of insufficient space and no
        replacement file has been given just don't print */
 
-	if ( Fsc2_Internals.mode != TEST )
-	{
-		if ( file_num == FILE_NUMBER_NOT_OPEN )
-			return 0;
+    if ( Fsc2_Internals.mode != TEST )
+    {
+        if ( file_num == FILE_NUMBER_NOT_OPEN )
+            return 0;
 
-		if ( file_num < FILE_NUMBER_OFFSET ||
-			 file_num >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
-		{
-			print( FATAL, "Invalid file handle.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( file_num < FILE_NUMBER_OFFSET ||
+             file_num >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
+        {
+            print( FATAL, "Invalid file handle.\n" );
+            THROW( EXCEPTION );
+        }
 
-		if ( EDL.File_List[ file_num - FILE_NUMBER_OFFSET ].fp == NULL )
-			return 0;
-	}
+        if ( EDL.File_List[ file_num - FILE_NUMBER_OFFSET ].fp == NULL )
+            return 0;
+    }
 
-	file_num -= FILE_NUMBER_OFFSET;
+    file_num -= FILE_NUMBER_OFFSET;
 
-	/* First we've got to find out how many characters we need to write out.
-	   We start by trying to write to a fixed size memory buffer. If the
-	   required string is longer we try allocating a longer buffer (where
-	   newer libc versions already tell us how memory much is needed while
-	   older don't, so we may have to retry several times with increased buffer
-	   sizes) and write to that. To speed things up we start with a buffer
-	   that is local to the function and only start calling memory allocation
-	   functions if the original buffer isn't large enough. */
+    /* First we've got to find out how many characters we need to write out.
+       We start by trying to write to a fixed size memory buffer. If the
+       required string is longer we try allocating a longer buffer (where
+       newer libc versions already tell us how memory much is needed while
+       older don't, so we may have to retry several times with increased buffer
+       sizes) and write to that. To speed things up we start with a buffer
+       that is local to the function and only start calling memory allocation
+       functions if the original buffer isn't large enough. */
 
-	while ( 1 )
-	{
+    while ( 1 )
+    {
         /* Try to print into the allocated space */
 
         va_start( ap, fmt );
@@ -2111,236 +2111,238 @@ static long T_fprintf( long         fn,
                 size *= 2;           /* twice the old size */
             else
             {
-				show_message( "String to be written is too long." );
+                show_message( "String to be written is too long." );
                 T_free( p );
                 THROW( EXCEPTION );
             }
         }
 
-		TRY
-		{
-			if ( p == initial_buffer )
-				p = NULL;
-			p = CHAR_P T_realloc( p, size );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			if ( p != NULL )
-				T_free( p );
-			RETHROW( );
-		}
+        TRY
+        {
+            if ( p == initial_buffer )
+                p = NULL;
+            p = CHAR_P T_realloc( p, size );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            if ( p != NULL )
+                T_free( p );
+            RETHROW( );
+        }
     }
 
-	if ( Fsc2_Internals.mode == TEST )
-	{
-		if ( p != initial_buffer )
-			T_free( p );
-		return to_write;
-	}
+    if ( Fsc2_Internals.mode == TEST )
+    {
+        if ( p != initial_buffer )
+            T_free( p );
+        return to_write;
+    }
 
     /* Now we try to write the string to the file */
 
     if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) )
-		                                                          == to_write )
+                                                                  == to_write )
     {
-		if ( p != initial_buffer )
-			T_free( p );
+        if ( p != initial_buffer )
+            T_free( p );
         return count;
-	}
+    }
 
-	/* We can't do anything to save the day when writing failed for stdout or
-	   stderr, all we can do is printing out a warning and return... */
+    /* We can't do anything to save the day when writing failed for stdout or
+       stderr, all we can do is printing out a warning and return... */
 
-	if ( file_num == 0 || file_num == 1 )
-	{
-		print( SEVERE, "Can't write to std%s, if it's redirected to a "
-			   "file make sure there's enough space on the disk.\n",
-			   file_num == 0 ? "out" : "err" );
-		if ( p != initial_buffer )
-			T_free( p );
+    if ( file_num == 0 || file_num == 1 )
+    {
+        print( SEVERE, "Can't write to std%s, if it's redirected to a "
+               "file make sure there's enough space on the disk.\n",
+               file_num == 0 ? "out" : "err" );
+        if ( p != initial_buffer )
+            T_free( p );
         return count;
-	}
+    }
 
-	/* If less characters than required where written we reduce 'to_write' to
-	   the number of characters that still need to be written out and get rid
-	   of the part of the buffer that already has been written to the file. */
+    /* If less characters than required where written we reduce 'to_write' to
+       the number of characters that still need to be written out and get rid
+       of the part of the buffer that already has been written to the file. */
 
-	if ( count > 0 )
-	{
-		written  += count;
-		to_write -= count;
-		memmove( p, p + count, to_write + 1 );
-	}
+    if ( count > 0 )
+    {
+        written  += count;
+        to_write -= count;
+        memmove( p, p + count, to_write + 1 );
+    }
 
     /* Couldn't write as many bytes as needed - disk seems to be full */
 
-	mess = get_string( "Disk full while writing to file\n%s\n"
-					   "Please choose a new file.",
-					   EDL.File_List[ file_num ].name );
+    mess = get_string( "Disk full while writing to file\n%s\n"
+                       "Please choose a new file.",
+                       EDL.File_List[ file_num ].name );
     show_message( mess );
-	T_free( mess );
+    T_free( mess );
 
-	/* Get a new file name, make user confirm it if he either selected no file
-	   at all or a file that already exists (exception: if the file was
-	   selected to which we were already writing, we assume that the user
-	   deleted some stuff on the disk in between) */
+    /* Get a new file name, make user confirm it if he either selected no file
+       at all or a file that already exists (exception: if the file was
+       selected to which we were already writing, we assume that the user
+       deleted some stuff on the disk in between) */
 
 get_repl_retry:
 
-	new_name = T_strdup( show_fselector( "Replacement file:", NULL,
-										 NULL, NULL ) );
+    new_name = T_strdup( show_fselector( "Replacement file:", NULL,
+                                         NULL, NULL ) );
 
-	if ( ( new_name == NULL || *new_name == '\0' ) &&
-		 1 != show_choices( "Do you really want to stop saving data?\n"
-							"     All further data will be lost!",
-							2, "Yes", "No", NULL, 2, SET ) )
-	{
-		if ( new_name != NULL )
-			new_name = CHAR_P T_free( new_name );
-		goto get_repl_retry;
-	}
+    if ( ( new_name == NULL || *new_name == '\0' ) &&
+         1 != show_choices( "Do you really want to stop saving data?\n"
+                            "     All further data will be lost!",
+                            2, "Yes", "No", NULL, 2, SET ) )
+    {
+        if ( new_name != NULL )
+            new_name = CHAR_P T_free( new_name );
+        goto get_repl_retry;
+    }
 
-	if ( new_name == NULL || *new_name == '\0' )       /* confirmed 'Cancel' */
-	{
-		if ( p != initial_buffer )
-			T_free( p );
-		if ( new_name != NULL )
-			T_free( new_name );
-		T_free( EDL.File_List[ file_num ].name );
-		EDL.File_List[ file_num ].name = NULL;
-		fclose( EDL.File_List[ file_num ].fp );
-		EDL.File_List[ file_num ].fp = NULL;
-		return count;
-	}
+    if ( new_name == NULL || *new_name == '\0' )       /* confirmed 'Cancel' */
+    {
+        if ( p != initial_buffer )
+            T_free( p );
+        if ( new_name != NULL )
+            T_free( new_name );
+        T_free( EDL.File_List[ file_num ].name );
+        EDL.File_List[ file_num ].name = NULL;
+        fclose( EDL.File_List[ file_num ].fp );
+        EDL.File_List[ file_num ].fp = NULL;
+        return count;
+    }
 
-	stat( EDL.File_List[ file_num ].name, &old_stat );
-	if ( 0 == stat( new_name, &new_stat ) &&
-		 ( old_stat.st_dev != new_stat.st_dev ||
-		   old_stat.st_ino != new_stat.st_ino ) &&
-		  1 != show_choices( "The selected file does already exist!\n"
-							 " Do you really want to overwrite it?",
-							 2, "Yes", "No", NULL, 2, SET ) )
-	{
-		new_name = CHAR_P T_free( new_name );
-		goto get_repl_retry;
-	}
+    stat( EDL.File_List[ file_num ].name, &old_stat );
+    if ( 0 == stat( new_name, &new_stat ) &&
+         ( old_stat.st_dev != new_stat.st_dev ||
+           old_stat.st_ino != new_stat.st_ino ) &&
+          1 != show_choices( "The selected file does already exist!\n"
+                             " Do you really want to overwrite it?",
+                             2, "Yes", "No", NULL, 2, SET ) )
+    {
+        new_name = CHAR_P T_free( new_name );
+        goto get_repl_retry;
+    }
 
-	/* Try to open the new file */
+    /* Try to open the new file */
 
-	new_fp = NULL;
-	if ( ( old_stat.st_dev != new_stat.st_dev ||
-		   old_stat.st_ino != new_stat.st_ino ) &&
-		 ( new_fp = fopen( new_name, "w+" ) ) == NULL )
-	{
-		switch( errno )
-		{
-			case EMFILE :
-				show_message( "Sorry, you have too many open files!\n"
-							  "Please close at least one and retry." );
-				break;
+    new_fp = NULL;
+    if ( ( old_stat.st_dev != new_stat.st_dev ||
+           old_stat.st_ino != new_stat.st_ino ) &&
+         ( new_fp = fopen( new_name, "w+" ) ) == NULL )
+    {
+        switch( errno )
+        {
+            case EMFILE :
+                show_message( "Sorry, you have too many open files!\n"
+                              "Please close at least one and retry." );
+                break;
 
-			case ENFILE :
-				show_message( "Sorry, system limit for open files exceeded!\n"
-							  " Please try to close some files and retry." );
-				break;
+            case ENFILE :
+                show_message( "Sorry, system limit for open files exceeded!\n"
+                              " Please try to close some files and retry." );
+                break;
 
-			case ENOSPC :
-				show_message( "Sorry, no space left on device for more file!\n"
-							  "    Please delete some files and retry." );
-				break;
+            case ENOSPC :
+                show_message( "Sorry, no space left on device for more file!\n"
+                              "    Please delete some files and retry." );
+                break;
 
-			default :
-				show_message( "Sorry, can't open selected file for writing!\n"
-							  "       Please select a different file." );
-		}
+            default :
+                show_message( "Sorry, can't open selected file for writing!\n"
+                              "       Please select a different file." );
+        }
 
-		new_name = CHAR_P T_free( new_name );
-		goto get_repl_retry;
-	}
+        new_name = CHAR_P T_free( new_name );
+        goto get_repl_retry;
+    }
 
-	/* Check if the new and old file are identical. If yes continue to write
-	   to the old file, otherwise copy everything from the old to the new file
-	   and then get rid of the old one. */
+    /* Check if the new and old file are identical. If yes continue to write
+       to the old file, otherwise copy everything from the old to the new file
+       and then get rid of the old one. */
 
-	if ( old_stat.st_dev == new_stat.st_dev &&
-		 old_stat.st_ino == new_stat.st_ino )
-		T_free( new_name );
-	else
-	{
-		char buffer[ COPY_BUFFER_SIZE ];
+    if ( old_stat.st_dev == new_stat.st_dev &&
+         old_stat.st_ino == new_stat.st_ino )
+        T_free( new_name );
+    else
+    {
+        char buffer[ COPY_BUFFER_SIZE ];
 
-		fseek( EDL.File_List[ file_num ].fp, 0, SEEK_SET );
-		while( 1 )
-		{
-			clearerr( EDL.File_List[ file_num ].fp );
-			clearerr( new_fp );
+        fseek( EDL.File_List[ file_num ].fp, 0, SEEK_SET );
+        while( 1 )
+        {
+            clearerr( EDL.File_List[ file_num ].fp );
+            clearerr( new_fp );
 
-			rw = fread( buffer, 1, COPY_BUFFER_SIZE,
-						EDL.File_List[ file_num ].fp );
+            rw = fread( buffer, 1, COPY_BUFFER_SIZE,
+                        EDL.File_List[ file_num ].fp );
 
-			if ( rw != 0 )
-				fwrite( buffer, 1, rw, new_fp );
+            if ( rw != 0 )
+                fwrite( buffer, 1, rw, new_fp );
 
-			if ( ferror( new_fp ) )
-			{
-				mess = get_string( "Can't write to replacement file\n%s\n"
-								   "Please choose another replacement file.",
-								   new_name );
-				show_message( mess );
-				T_free( mess );
-				fclose( new_fp );
-				unlink( new_name );
-				new_name = CHAR_P T_free( new_name );
-				goto get_repl_retry;
-			}
+            if ( ferror( new_fp ) )
+            {
+                mess = get_string( "Can't write to replacement file\n%s\n"
+                                   "Please choose another replacement file.",
+                                   new_name );
+                show_message( mess );
+                T_free( mess );
+                fclose( new_fp );
+                unlink( new_name );
+                new_name = CHAR_P T_free( new_name );
+                goto get_repl_retry;
+            }
 
-			if ( feof( EDL.File_List[ file_num ].fp ) )
-				break;
-		}
+            if ( feof( EDL.File_List[ file_num ].fp ) )
+                break;
+        }
 
-		fclose( EDL.File_List[ file_num ].fp );
-		unlink( EDL.File_List[ file_num ].name );
-		T_free( EDL.File_List[ file_num ].name );
-		EDL.File_List[ file_num ].name = new_name;
-		EDL.File_List[ file_num ].fp = new_fp;
+        fclose( EDL.File_List[ file_num ].fp );
+        unlink( EDL.File_List[ file_num ].name );
+        T_free( EDL.File_List[ file_num ].name );
+        EDL.File_List[ file_num ].name = new_name;
+        EDL.File_List[ file_num ].fp = new_fp;
 
-		/* After we're done with copying switch off buffering for the file */
+        /* After we're done with copying switch off buffering for the file */
 
-		setbuf( new_fp, NULL );
-	}
+        setbuf( new_fp, NULL );
+    }
 
-	/* Finally write out the remaining part of the string */
+    /* Finally write out the remaining part of the string */
 
-	if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) )
-		                                                          == to_write )
-	{
-		if ( p != initial_buffer )
-			T_free( p );
-		return written + count;
-	}
+    if ( ( count = fprintf( EDL.File_List[ file_num ].fp, "%s", p ) )
+                                                                  == to_write )
+    {
+        if ( p != initial_buffer )
+            T_free( p );
+        return written + count;
+    }
 
-	/* Again, on failure get rid of all what already has been written to the
-	   file and then ask for another replacement file */
+    /* Again, on failure get rid of all what already has been written to the
+       file and then ask for another replacement file */
 
-	if ( count > 0 )
-	{
-		written  += count;
-		to_write -= count;
-		memmove( p, p + count, to_write + 1 );
-	}
+    if ( count > 0 )
+    {
+        written  += count;
+        to_write -= count;
+        memmove( p, p + count, to_write + 1 );
+    }
 
-	mess = get_string( "Can't write to (replacement) file\n%s\n"
-					   "Please choose another replacement file.",
-					   EDL.File_List[ file_num ].name );
-	show_message( mess );
-	T_free( mess );
-	goto get_repl_retry;
+    mess = get_string( "Can't write to (replacement) file\n%s\n"
+                       "Please choose another replacement file.",
+                       EDL.File_List[ file_num ].name );
+    show_message( mess );
+    T_free( mess );
+    goto get_repl_retry;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

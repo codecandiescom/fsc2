@@ -33,19 +33,19 @@ typedef struct Toolbox Toolbox_T;
 
 
 typedef enum {
-	NORMAL_BUTTON = 1,
-	PUSH_BUTTON,
-	RADIO_BUTTON,
-	NORMAL_SLIDER,
-	VALUE_SLIDER,
-	SLOW_NORMAL_SLIDER,
-	SLOW_VALUE_SLIDER,
-	INT_INPUT,
-	FLOAT_INPUT,
-	INT_OUTPUT,
-	FLOAT_OUTPUT,
-	STRING_OUTPUT,
-	MENU,
+    NORMAL_BUTTON = 1,
+    PUSH_BUTTON,
+    RADIO_BUTTON,
+    NORMAL_SLIDER,
+    VALUE_SLIDER,
+    SLOW_NORMAL_SLIDER,
+    SLOW_VALUE_SLIDER,
+    INT_INPUT,
+    FLOAT_INPUT,
+    INT_OUTPUT,
+    FLOAT_OUTPUT,
+    STRING_OUTPUT,
+    MENU,
 } Iobject_Type_T;
 
 
@@ -65,58 +65,58 @@ typedef enum {
 
 
 struct Iobject {
-	long ID;                  /* ID of object */
-	FL_OBJECT *self;
-	Iobject_T *prev;          /* pointer to previous object */
-	Iobject_T *next;          /* pointer to next object */
+    long ID;                  /* ID of object */
+    FL_OBJECT *self;
+    Iobject_T *prev;          /* pointer to previous object */
+    Iobject_T *next;          /* pointer to next object */
 
-	Iobject_Type_T type;      /* object type (BUTTON, SLIDER, etc.) */
+    Iobject_Type_T type;      /* object type (BUTTON, SLIDER, etc.) */
 
-	FL_COORD x,               /* position and dimensions of object */
-		     y,
-		     w,
-			 h;
+    FL_COORD x,               /* position and dimensions of object */
+             y,
+             w,
+             h;
 
-	int wt,                   /* total width and height of object */
-		ht;                   /* (including the label) */
+    int wt,                   /* total width and height of object */
+        ht;                   /* (including the label) */
 
-	char *label;              /* object label */
-	char *help_text;          /* objects help text */
-	char *form_str;           /* C format string for in/output objects */
-	char **menu_items;        /* list of menu items */
+    char *label;              /* object label */
+    char *help_text;          /* objects help text */
+    char *form_str;           /* C format string for in/output objects */
+    char **menu_items;        /* list of menu items */
     int num_items;            /* number of entries of a menu */
 
-	bool enabled;
-	volatile int state;       /* state (on/off) of press count (buttons)
-								 or currently seletced menu item */
-	volatile bool is_changed; /* set when objects state changed but state 
-								 change wasn't detected by the script yet */
-	bool report_change;
+    bool enabled;
+    volatile int state;       /* state (on/off) of press count (buttons)
+                                 or currently seletced menu item */
+    volatile bool is_changed; /* set when objects state changed but state 
+                                 change wasn't detected by the script yet */
+    bool report_change;
 
-	FL_OBJECT *group;         /* group a radio button belongs to */
-	long partner;
+    FL_OBJECT *group;         /* group a radio button belongs to */
+    long partner;
 
-	volatile double value;    /* current value of slider */
-	double start_val,         /* maximum and minimum value */
-		   end_val,
-		   step;              /* step width of slider (0.0 means not set) */
+    volatile double value;    /* current value of slider */
+    double start_val,         /* maximum and minimum value */
+           end_val,
+           step;              /* step width of slider (0.0 means not set) */
 
-	union {                   /* value of INT, FLOAT or STRING input or */
-		long lval;            /* output objects */
-		double dval;
-		char *sptr;
-	} val;
+    union {                   /* value of INT, FLOAT or STRING input or */
+        long lval;            /* output objects */
+        double dval;
+        char *sptr;
+    } val;
 
 };
 
 
 struct Toolbox {
-	int layout;               /* 0 / 1 <-> vertical / horizontal */
-	FL_FORM *Tools;
-	FL_COORD w,               /* size of form */
-		     h;
-	Iobject_T *objs;          /* linked list of objects in form */
-	long next_ID;             /* ID for next created object */
+    int layout;               /* 0 / 1 <-> vertical / horizontal */
+    FL_FORM *Tools;
+    FL_COORD w,               /* size of form */
+             h;
+    Iobject_T *objs;          /* linked list of objects in form */
+    long next_ID;             /* ID for next created object */
 };
 
 
@@ -130,15 +130,15 @@ struct Toolbox {
 
 
 #define IS_BUTTON( type )  \
-		( ( type ) >= FIRST_BUTTON_TYPE && ( type ) <= LAST_BUTTON_TYPE )
+        ( ( type ) >= FIRST_BUTTON_TYPE && ( type ) <= LAST_BUTTON_TYPE )
 #define IS_SLIDER( type )  \
-		( ( type ) >= FIRST_SLIDER_TYPE && ( type ) <= LAST_SLIDER_TYPE )
+        ( ( type ) >= FIRST_SLIDER_TYPE && ( type ) <= LAST_SLIDER_TYPE )
 #define IS_INPUT( type )   \
-		( ( type ) >= FIRST_INPUT_TYPE && ( type ) <= LAST_INPUT_TYPE )
+        ( ( type ) >= FIRST_INPUT_TYPE && ( type ) <= LAST_INPUT_TYPE )
 #define IS_OUTPUT( type )   \
-		( ( type )>= FIRST_OUTPUT_TYPE && ( type ) <= LAST_OUTPUT_TYPE )
+        ( ( type )>= FIRST_OUTPUT_TYPE && ( type ) <= LAST_OUTPUT_TYPE )
 #define IS_INOUTPUT( type )   \
-		( ( type ) >= FIRST_INOUTPUT_TYPE && ( type ) <= LAST_INOUTPUT_TYPE )
+        ( ( type ) >= FIRST_INOUTPUT_TYPE && ( type ) <= LAST_INOUTPUT_TYPE )
 
 
 /* exported functions */
@@ -185,5 +185,7 @@ Var_T *f_tb_wait( Var_T * /* v */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

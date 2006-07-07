@@ -31,11 +31,11 @@
 typedef struct RULBUS_RB8514_DELAY_CARD RULBUS_RB8514_DELAY_CARD;
 
 struct RULBUS_RB8514_DELAY_CARD {
-	int handle;
-	unsigned char ctrl;
-	unsigned long delay;
-	double intr_delay;
-	double clock_time;
+    int handle;
+    unsigned char ctrl;
+    unsigned long delay;
+    double intr_delay;
+    double clock_time;
 };
 
 
@@ -80,9 +80,9 @@ static inline long lrnd( double x );
 
 int rulbus_rb8514_delay_init( void )
 {
-	rulbus_rb8514_delay_card = NULL;
-	rulbus_num_delay_cards = 0;
-	return rulbus_errno = RULBUS_OK;
+    rulbus_rb8514_delay_card = NULL;
+    rulbus_num_delay_cards = 0;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -96,12 +96,12 @@ int rulbus_rb8514_delay_init( void )
 
 void rulbus_rb8514_delay_exit( void )
 {
-	if ( rulbus_rb8514_delay_card == NULL )
-		return;
+    if ( rulbus_rb8514_delay_card == NULL )
+        return;
 
-	free( rulbus_rb8514_delay_card );
-	rulbus_rb8514_delay_card = NULL;
-	rulbus_num_delay_cards = 0;
+    free( rulbus_rb8514_delay_card );
+    rulbus_rb8514_delay_card = NULL;
+    rulbus_num_delay_cards = 0;
 }
 
 
@@ -113,39 +113,39 @@ void rulbus_rb8514_delay_exit( void )
 
 int rulbus_rb8514_delay_card_init( int handle )
 {
-	RULBUS_RB8514_DELAY_CARD *tmp;
-	unsigned char byte[ 3 ] = { 0, 0, 0 };
-	int retval;
+    RULBUS_RB8514_DELAY_CARD *tmp;
+    unsigned char byte[ 3 ] = { 0, 0, 0 };
+    int retval;
 
 
-	tmp = realloc( rulbus_rb8514_delay_card,
-				   ( rulbus_num_delay_cards + 1 ) * sizeof *tmp );
+    tmp = realloc( rulbus_rb8514_delay_card,
+                   ( rulbus_num_delay_cards + 1 ) * sizeof *tmp );
 
-	if ( tmp == NULL )
-		return rulbus_errno = RULBUS_NO_MEMORY;
+    if ( tmp == NULL )
+        return rulbus_errno = RULBUS_NO_MEMORY;
 
-	rulbus_rb8514_delay_card = tmp;
-	tmp += rulbus_num_delay_cards++;
+    rulbus_rb8514_delay_card = tmp;
+    tmp += rulbus_num_delay_cards++;
 
-	tmp->handle = handle;
-	tmp->delay = 0;
-	tmp->clock_time = -1.0;
-	tmp->ctrl = START_PULSE_POSITIVE | END_PULSE_POSITIVE;
+    tmp->handle = handle;
+    tmp->delay = 0;
+    tmp->clock_time = -1.0;
+    tmp->ctrl = START_PULSE_POSITIVE | END_PULSE_POSITIVE;
 
-	/* Set a few defaults: output neither start nor end pulses, disable
-	   interrupts, trigger on rasing edge, output polarity of start and
-	   end pulses is positive, finally set the delay to 0. */
+    /* Set a few defaults: output neither start nor end pulses, disable
+       interrupts, trigger on rasing edge, output polarity of start and
+       end pulses is positive, finally set the delay to 0. */
 
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
-								  &tmp->ctrl, 1 ) ) != RULBUS_OK )
-		return rulbus_errno = retval;
-	
-	if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE, byte, 3 ) ) != 3 )
-		return rulbus_errno = retval;
+    if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+                                  &tmp->ctrl, 1 ) ) != RULBUS_OK )
+        return rulbus_errno = retval;
+    
+    if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE, byte, 3 ) ) != 3 )
+        return rulbus_errno = retval;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
-	
+    
 
 /*---------------------------------------------------------------*
  * Function for deactivation a card (gets invoked automatically
@@ -155,39 +155,39 @@ int rulbus_rb8514_delay_card_init( int handle )
 
 int rulbus_rb8514_delay_card_exit( int handle )
 {
-	RULBUS_RB8514_DELAY_CARD *card;
+    RULBUS_RB8514_DELAY_CARD *card;
 
 
-	/* Try to find the card, if it doesn't exist just return */
+    /* Try to find the card, if it doesn't exist just return */
 
-	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_OK;
+    if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_OK;
 
-	/* Remove the entry for the card */
+    /* Remove the entry for the card */
 
-	if ( rulbus_num_delay_cards > 1 )
-	{
-		if ( card != rulbus_rb8514_delay_card + rulbus_num_delay_cards - 1 )
-			memmove( card, card + 1, sizeof *card *
-					 ( rulbus_num_delay_cards -
-					   ( card - rulbus_rb8514_delay_card ) - 1 ) );
+    if ( rulbus_num_delay_cards > 1 )
+    {
+        if ( card != rulbus_rb8514_delay_card + rulbus_num_delay_cards - 1 )
+            memmove( card, card + 1, sizeof *card *
+                     ( rulbus_num_delay_cards -
+                       ( card - rulbus_rb8514_delay_card ) - 1 ) );
 
-		card = realloc( rulbus_rb8514_delay_card,
-						( rulbus_num_delay_cards - 1 ) * sizeof *card );
+        card = realloc( rulbus_rb8514_delay_card,
+                        ( rulbus_num_delay_cards - 1 ) * sizeof *card );
 
-		if ( card == NULL )
-			return rulbus_errno = RULBUS_NO_MEMORY;
+        if ( card == NULL )
+            return rulbus_errno = RULBUS_NO_MEMORY;
 
-		rulbus_rb8514_delay_card = card;
-	}
-	else
-	{
-		free( rulbus_rb8514_delay_card );
-		rulbus_rb8514_delay_card = NULL;
-	}
-		
-	rulbus_num_delay_cards--;
-	return rulbus_errno = RULBUS_OK;
+        rulbus_rb8514_delay_card = card;
+    }
+    else
+    {
+        free( rulbus_rb8514_delay_card );
+        rulbus_rb8514_delay_card = NULL;
+    }
+        
+    rulbus_num_delay_cards--;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -196,19 +196,19 @@ int rulbus_rb8514_delay_card_exit( int handle )
  *-----------------------------------------*/
 
 int rulbus_rb8514_delay_set_clock_frequency( int    handle,
-											 double freq )
+                                             double freq )
 {
-	RULBUS_RB8514_DELAY_CARD *card;
+    RULBUS_RB8514_DELAY_CARD *card;
 
 
-	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	if ( freq <= 0.0 )
-		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
+    if ( freq <= 0.0 )
+        return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
-	card->clock_time = 1.0 / freq;
-	return rulbus_errno = RULBUS_OK;
+    card->clock_time = 1.0 / freq;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -217,51 +217,51 @@ int rulbus_rb8514_delay_set_clock_frequency( int    handle,
  *-----------------------------------------*/
 
 int rulbus_rb8514_delay_set_delay( int    handle,
-								   double delay,
-								   int    force )
+                                   double delay,
+                                   int    force )
 {
-	RULBUS_RB8514_DELAY_CARD *card;
-	long ldelay;
-	int retval;
-	unsigned char i;
-	unsigned char bytes[ 3 ];
+    RULBUS_RB8514_DELAY_CARD *card;
+    long ldelay;
+    int retval;
+    unsigned char i;
+    unsigned char bytes[ 3 ];
 
 
-	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	if ( card->clock_time <= 0.0 )
-		return rulbus_errno = RULBUS_NO_CLOCK_FREQ;
+    if ( card->clock_time <= 0.0 )
+        return rulbus_errno = RULBUS_NO_CLOCK_FREQ;
 
-	ldelay = lrnd( ( delay - card->intr_delay ) / card->clock_time );
+    ldelay = lrnd( ( delay - card->intr_delay ) / card->clock_time );
 
-	if ( ldelay < 0 || ldelay > RULBUS_RB8514_DELAY_CARD_MAX )
-		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
+    if ( ldelay < 0 || ldelay > RULBUS_RB8514_DELAY_CARD_MAX )
+        return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
-	if ( delay == card->delay )
-		return rulbus_errno = RULBUS_OK;
+    if ( delay == card->delay )
+        return rulbus_errno = RULBUS_OK;
 
-	/* Check that the card isn't currently creating a delay - if it is tell
-	   the user it's busy unless the 'force' flag is set (which allows the
-	   user to set a new delay even though a delay is already created, which
-	   then gets ended prematurely) */
+    /* Check that the card isn't currently creating a delay - if it is tell
+       the user it's busy unless the 'force' flag is set (which allows the
+       user to set a new delay even though a delay is already created, which
+       then gets ended prematurely) */
 
-	if ( ( retval = rulbus_read( handle, STATUS_ADDR, bytes, 1 ) ) != 1 )
-		 return rulbus_errno = retval;
+    if ( ( retval = rulbus_read( handle, STATUS_ADDR, bytes, 1 ) ) != 1 )
+         return rulbus_errno = retval;
 
-	if ( bytes[ 0 ] & DELAY_BUSY && ! force )
-		return rulbus_errno = RULBUS_CARD_IS_BUSY;
+    if ( bytes[ 0 ] & DELAY_BUSY && ! force )
+        return rulbus_errno = RULBUS_CARD_IS_BUSY;
 
-	card->delay = ldelay;
+    card->delay = ldelay;
 
-	for ( i = 0; i < 3; ldelay >>= 8, i++ )
-		bytes[ 2 - i ] = ( unsigned char ) ( ldelay & 0xFF );
-	
-	if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE,
-										bytes, 3 ) ) != 3 )
-		return rulbus_errno = retval;
+    for ( i = 0; i < 3; ldelay >>= 8, i++ )
+        bytes[ 2 - i ] = ( unsigned char ) ( ldelay & 0xFF );
+    
+    if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE,
+                                        bytes, 3 ) ) != 3 )
+        return rulbus_errno = retval;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -271,45 +271,45 @@ int rulbus_rb8514_delay_set_delay( int    handle,
  *--------------------------------------------------------------*/
 
 int rulbus_rb8514_delay_set_raw_delay( int           handle,
-									   unsigned long delay,
-									   int           force )
+                                       unsigned long delay,
+                                       int           force )
 {
-	RULBUS_RB8514_DELAY_CARD *card;
-	unsigned char bytes[ 3 ];
-	unsigned char i;
-	int retval;
+    RULBUS_RB8514_DELAY_CARD *card;
+    unsigned char bytes[ 3 ];
+    unsigned char i;
+    int retval;
 
 
-	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	if ( delay > RULBUS_RB8514_DELAY_CARD_MAX )
-		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
+    if ( delay > RULBUS_RB8514_DELAY_CARD_MAX )
+        return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
-	if ( delay == card->delay )
-		return rulbus_errno = RULBUS_OK;
+    if ( delay == card->delay )
+        return rulbus_errno = RULBUS_OK;
 
-	/* Check that the card isn't currently creating a delay - if it is tell
-	   the user it's busy unless the 'force' flag is set (which allows the
-	   user to set a new delay even though a delay is already created, which
-	   then ends prematurely) */
+    /* Check that the card isn't currently creating a delay - if it is tell
+       the user it's busy unless the 'force' flag is set (which allows the
+       user to set a new delay even though a delay is already created, which
+       then ends prematurely) */
 
-	if ( ( retval = rulbus_read( handle, STATUS_ADDR, bytes, 1 ) ) != 1 )
-		 return rulbus_errno = retval;
+    if ( ( retval = rulbus_read( handle, STATUS_ADDR, bytes, 1 ) ) != 1 )
+         return rulbus_errno = retval;
 
-	if ( bytes[ 0 ] & DELAY_BUSY && ! force )
-		return rulbus_errno = RULBUS_CARD_IS_BUSY;
+    if ( bytes[ 0 ] & DELAY_BUSY && ! force )
+        return rulbus_errno = RULBUS_CARD_IS_BUSY;
 
-	card->delay = delay;
+    card->delay = delay;
 
-	for ( i = 0; i < 3; delay >>= 8, i++ )
-		bytes[ 2 - i ] = ( unsigned char ) ( delay & 0xFF );
+    for ( i = 0; i < 3; delay >>= 8, i++ )
+        bytes[ 2 - i ] = ( unsigned char ) ( delay & 0xFF );
 
-	if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE,
-										bytes, 3 ) ) != 3 )
-		return rulbus_errno = retval;
+    if ( ( retval = rulbus_write_range( handle, DATA_MSBYTE,
+                                        bytes, 3 ) ) != 3 )
+        return rulbus_errno = retval;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -319,37 +319,37 @@ int rulbus_rb8514_delay_set_raw_delay( int           handle,
  *---------------------------------------------------------------*/
 
 int rulbus_rb8514_delay_set_trigger( int handle,
-									 int edge )
+                                     int edge )
 {
-	RULBUS_RB8514_DELAY_CARD *card;
-	unsigned char ctrl;
-	int retval;
+    RULBUS_RB8514_DELAY_CARD *card;
+    unsigned char ctrl;
+    int retval;
 
 
-	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	if ( edge != RULBUS_RB8514_DELAY_FALLING_EDGE &&
-		 edge != RULBUS_RB8514_DELAY_RAISING_EDGE )
-		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
+    if ( edge != RULBUS_RB8514_DELAY_FALLING_EDGE &&
+         edge != RULBUS_RB8514_DELAY_RAISING_EDGE )
+        return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
-	ctrl = card->ctrl;
+    ctrl = card->ctrl;
 
-	if ( edge == RULBUS_RB8514_DELAY_FALLING_EDGE )
-		ctrl |= TRIGGER_ON_FALLING_EDGE;
-	else
-		ctrl &= ~ TRIGGER_ON_FALLING_EDGE;
+    if ( edge == RULBUS_RB8514_DELAY_FALLING_EDGE )
+        ctrl |= TRIGGER_ON_FALLING_EDGE;
+    else
+        ctrl &= ~ TRIGGER_ON_FALLING_EDGE;
 
-	if ( ctrl == card->ctrl )
-		return rulbus_errno = RULBUS_OK;
+    if ( ctrl == card->ctrl )
+        return rulbus_errno = RULBUS_OK;
 
-	card->ctrl = ctrl;
+    card->ctrl = ctrl;
 
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
-								  &card->ctrl, 1 ) ) != 1 )
-		return rulbus_errno = retval;
+    if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+                                  &card->ctrl, 1 ) ) != 1 )
+        return rulbus_errno = retval;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -359,54 +359,54 @@ int rulbus_rb8514_delay_set_trigger( int handle,
  *-------------------------------------------------------------*/
 
 int rulbus_rb8514_delay_set_output_pulse( int handle,
-										  int output,
-										  int type )
+                                          int output,
+                                          int type )
 {
-	RULBUS_RB8514_DELAY_CARD *card;
-	unsigned char ctrl;
-	int retval;
+    RULBUS_RB8514_DELAY_CARD *card;
+    unsigned char ctrl;
+    int retval;
 
 
-	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	if ( ( output != RULBUS_RB8514_DELAY_OUTPUT_1 &&
-		   output != RULBUS_RB8514_DELAY_OUTPUT_2 &&
-		   output != RULBUS_RB8514_DELAY_OUTPUT_BOTH ) ||
-		 ( type != RULBUS_RB8514_DELAY_START_PULSE &&
-		   type != RULBUS_RB8514_DELAY_END_PULSE &&
-		   type != RULBUS_RB8514_DELAY_PULSE_BOTH &&
-		   type != RULBUS_RB8514_DELAY_PULSE_NONE ) )
-		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
+    if ( ( output != RULBUS_RB8514_DELAY_OUTPUT_1 &&
+           output != RULBUS_RB8514_DELAY_OUTPUT_2 &&
+           output != RULBUS_RB8514_DELAY_OUTPUT_BOTH ) ||
+         ( type != RULBUS_RB8514_DELAY_START_PULSE &&
+           type != RULBUS_RB8514_DELAY_END_PULSE &&
+           type != RULBUS_RB8514_DELAY_PULSE_BOTH &&
+           type != RULBUS_RB8514_DELAY_PULSE_NONE ) )
+        return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
-	ctrl = card->ctrl & 0xF0;
+    ctrl = card->ctrl & 0xF0;
 
-	if ( output & RULBUS_RB8514_DELAY_OUTPUT_1 )
-	{
-		if ( type & RULBUS_RB8514_DELAY_START_PULSE )
-			ctrl |= START_PULSE_OUT_1_ENABLE;
-		if ( type & RULBUS_RB8514_DELAY_END_PULSE )
-			ctrl |= END_PULSE_OUT_1_ENABLE;
-	}
-		
-	if ( output & RULBUS_RB8514_DELAY_OUTPUT_2 )
-	{
-		if ( type & RULBUS_RB8514_DELAY_START_PULSE )
-			ctrl |= START_PULSE_OUT_2_ENABLE;
-		if ( type & RULBUS_RB8514_DELAY_END_PULSE )
-			ctrl |= END_PULSE_OUT_2_ENABLE;
-	}
+    if ( output & RULBUS_RB8514_DELAY_OUTPUT_1 )
+    {
+        if ( type & RULBUS_RB8514_DELAY_START_PULSE )
+            ctrl |= START_PULSE_OUT_1_ENABLE;
+        if ( type & RULBUS_RB8514_DELAY_END_PULSE )
+            ctrl |= END_PULSE_OUT_1_ENABLE;
+    }
+        
+    if ( output & RULBUS_RB8514_DELAY_OUTPUT_2 )
+    {
+        if ( type & RULBUS_RB8514_DELAY_START_PULSE )
+            ctrl |= START_PULSE_OUT_2_ENABLE;
+        if ( type & RULBUS_RB8514_DELAY_END_PULSE )
+            ctrl |= END_PULSE_OUT_2_ENABLE;
+    }
 
-	if ( ctrl == card->ctrl )
-		return rulbus_errno = RULBUS_OK;
+    if ( ctrl == card->ctrl )
+        return rulbus_errno = RULBUS_OK;
 
-	card->ctrl = ctrl;
+    card->ctrl = ctrl;
 
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
-								  &card->ctrl, 1 ) ) != 1 )
-		return rulbus_errno = retval;
+    if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+                                  &card->ctrl, 1 ) ) != 1 )
+        return rulbus_errno = retval;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -416,52 +416,52 @@ int rulbus_rb8514_delay_set_output_pulse( int handle,
  *-------------------------------------------------------------*/
 
 int rulbus_rb8514_delay_set_output_pulse_polarity( int handle,
-												   int type,
-												   int pol )
+                                                   int type,
+                                                   int pol )
 {
-	RULBUS_RB8514_DELAY_CARD *card;
-	unsigned char ctrl;
-	int retval;
+    RULBUS_RB8514_DELAY_CARD *card;
+    unsigned char ctrl;
+    int retval;
 
 
-	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	if ( ( type != RULBUS_RB8514_DELAY_START_PULSE &&
-		   type != RULBUS_RB8514_DELAY_END_PULSE &&
-		   type != RULBUS_RB8514_DELAY_PULSE_BOTH ) ||
-		 ( pol != RULBUS_RB8514_DELAY_POLARITY_NEGATIVE &&
-		   pol != RULBUS_RB8514_DELAY_POLARITY_POSITIVE ) )
-		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
+    if ( ( type != RULBUS_RB8514_DELAY_START_PULSE &&
+           type != RULBUS_RB8514_DELAY_END_PULSE &&
+           type != RULBUS_RB8514_DELAY_PULSE_BOTH ) ||
+         ( pol != RULBUS_RB8514_DELAY_POLARITY_NEGATIVE &&
+           pol != RULBUS_RB8514_DELAY_POLARITY_POSITIVE ) )
+        return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
-	ctrl = card->ctrl;
+    ctrl = card->ctrl;
 
-	if ( type & RULBUS_RB8514_DELAY_START_PULSE )
-	{
-		if ( pol == RULBUS_RB8514_DELAY_POLARITY_NEGATIVE )
-			ctrl &= ~ START_PULSE_POSITIVE;
-		else
-			ctrl |= START_PULSE_POSITIVE;
-	}
+    if ( type & RULBUS_RB8514_DELAY_START_PULSE )
+    {
+        if ( pol == RULBUS_RB8514_DELAY_POLARITY_NEGATIVE )
+            ctrl &= ~ START_PULSE_POSITIVE;
+        else
+            ctrl |= START_PULSE_POSITIVE;
+    }
 
-	if ( type & RULBUS_RB8514_DELAY_END_PULSE )
-	{
-		if ( pol == RULBUS_RB8514_DELAY_POLARITY_NEGATIVE )
-			ctrl &= ~ END_PULSE_POSITIVE;
-		else
-			ctrl |= END_PULSE_POSITIVE;
-	}
+    if ( type & RULBUS_RB8514_DELAY_END_PULSE )
+    {
+        if ( pol == RULBUS_RB8514_DELAY_POLARITY_NEGATIVE )
+            ctrl &= ~ END_PULSE_POSITIVE;
+        else
+            ctrl |= END_PULSE_POSITIVE;
+    }
 
-	if ( ctrl == card->ctrl )
-		return rulbus_errno = RULBUS_OK;
+    if ( ctrl == card->ctrl )
+        return rulbus_errno = RULBUS_OK;
 
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
-								  &card->ctrl, 1 ) ) != 1 )
-		return rulbus_errno = retval;
+    if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+                                  &card->ctrl, 1 ) ) != 1 )
+        return rulbus_errno = retval;
 
-	card->ctrl = ctrl;
+    card->ctrl = ctrl;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -475,29 +475,29 @@ int rulbus_rb8514_delay_set_output_pulse_polarity( int handle,
 
 int rulbus_rb8514_software_start( int handle )
 {
-	RULBUS_RB8514_DELAY_CARD *card;
-	unsigned char bytes[ 4 ];
-	size_t cnt;
-	int retval;
+    RULBUS_RB8514_DELAY_CARD *card;
+    unsigned char bytes[ 4 ];
+    size_t cnt;
+    int retval;
 
-	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	bytes[ 0 ] = bytes[ 2 ] = card->ctrl & ~ TRIGGER_ON_FALLING_EDGE;
-	bytes[ 1 ] = bytes[ 3 ] = card->ctrl | TRIGGER_ON_FALLING_EDGE;
-	
-	cnt = card->ctrl & TRIGGER_ON_FALLING_EDGE ? 4 : 3;
+    bytes[ 0 ] = bytes[ 2 ] = card->ctrl & ~ TRIGGER_ON_FALLING_EDGE;
+    bytes[ 1 ] = bytes[ 3 ] = card->ctrl | TRIGGER_ON_FALLING_EDGE;
+    
+    cnt = card->ctrl & TRIGGER_ON_FALLING_EDGE ? 4 : 3;
 
-	/* Take care not to set rulbus_errno to a positive value in case
-	   rulbus_write() returned with too short a byte count! */
+    /* Take care not to set rulbus_errno to a positive value in case
+       rulbus_write() returned with too short a byte count! */
 
-	if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
-								  bytes, cnt ) ) != ( int ) cnt )
-		return rulbus_errno = retval < 0 ? retval : RULBUS_WRITE_ERROR;
+    if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
+                                  bytes, cnt ) ) != ( int ) cnt )
+        return rulbus_errno = retval < 0 ? retval : RULBUS_WRITE_ERROR;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
-	
+    
 
 /*-----------------------------------------------------------------*
  * Function to determine if the card is currently creating a delay
@@ -505,19 +505,19 @@ int rulbus_rb8514_software_start( int handle )
 
 int rulbus_rb8514_delay_busy( int handle )
 {
-	RULBUS_RB8514_DELAY_CARD *card;
-	unsigned char byte;
-	int retval;
+    RULBUS_RB8514_DELAY_CARD *card;
+    unsigned char byte;
+    int retval;
 
 
-	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) != 1 )
-		return rulbus_errno = retval;
+    if ( ( retval = rulbus_read( handle, STATUS_ADDR, &byte, 1 ) ) != 1 )
+        return rulbus_errno = retval;
 
-	rulbus_errno = RULBUS_OK;
-	return ( byte & DELAY_BUSY ) ? 1 : 0;
+    rulbus_errno = RULBUS_OK;
+    return ( byte & DELAY_BUSY ) ? 1 : 0;
 }
 
 
@@ -527,14 +527,14 @@ int rulbus_rb8514_delay_busy( int handle )
 
 double rulbus_rb8514_delay_get_intrinsic_delay( int handle )
 {
-	RULBUS_RB8514_DELAY_CARD *card;
+    RULBUS_RB8514_DELAY_CARD *card;
 
 
-	if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8514_delay_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	rulbus_errno = RULBUS_OK;
-	return card->intr_delay;
+    rulbus_errno = RULBUS_OK;
+    return card->intr_delay;
 }
 
 
@@ -544,17 +544,17 @@ double rulbus_rb8514_delay_get_intrinsic_delay( int handle )
 
 static RULBUS_RB8514_DELAY_CARD *rulbus_rb8514_delay_card_find( int handle )
 {
-	int i;
+    int i;
 
 
-	if ( handle < 0 )
-		return NULL;
+    if ( handle < 0 )
+        return NULL;
 
-	for ( i = 0; i < rulbus_num_delay_cards; i++ )
-		if ( handle == rulbus_rb8514_delay_card[ i ].handle )
-			return rulbus_rb8514_delay_card + i;
+    for ( i = 0; i < rulbus_num_delay_cards; i++ )
+        if ( handle == rulbus_rb8514_delay_card[ i ].handle )
+            return rulbus_rb8514_delay_card + i;
 
-	return NULL;
+    return NULL;
 }
 
 
@@ -572,8 +572,10 @@ static inline long lrnd( double x )
     return ( long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
 }
 
+
 /*
  * Local variables:
- * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

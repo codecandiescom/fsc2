@@ -75,127 +75,127 @@ bool Dont_Save;
 
 /* Take care: The number of maximum parameters has to be changed for
               display() and clear_curve() if the maximum number of curves
-			  (defined as MAX_CURVES in graphics.h) should ever be changed. */
+              (defined as MAX_CURVES in graphics.h) should ever be changed. */
 
 Func_T Def_Fncts[ ] =              /* List of built-in functions */
 {
-	{ "int",                 f_int,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "float",               f_float,    		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "round",               f_round,    		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "floor",               f_floor,    		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "ceil",                f_ceil,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "abs",                 f_abs,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "max_of",              f_lmax,       INT_MIN, ACCESS_ALL,  NULL, UNSET },
-	{ "min_of",              f_lmin,       INT_MIN, ACCESS_ALL,  NULL, UNSET },
-	{ "sin",                 f_sin,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "cos",                 f_cos,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "tan",                 f_tan,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "asin",                f_asin,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "acos",                f_acos,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "atan",                f_atan,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "sinh",                f_sinh,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "cosh",                f_cosh,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "tanh",                f_tanh,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "asinh",               f_asinh,    		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "acosh",               f_acosh,    		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "atanh",               f_atanh,    		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "exp",                 f_exp,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "ln",                  f_ln,       		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "log",                 f_log,      		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "sqrt",                f_sqrt,     		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "random",              f_random,   	    -1, ACCESS_ALL,  NULL, UNSET },
-	{ "grandom",             f_grand,    	    -1, ACCESS_ALL,  NULL, UNSET },
-	{ "set_seed",            f_setseed,  	    -1, ACCESS_ALL,  NULL, UNSET },
+    { "int",                 f_int,              1, ACCESS_ALL,  NULL, UNSET },
+    { "float",               f_float,            1, ACCESS_ALL,  NULL, UNSET },
+    { "round",               f_round,            1, ACCESS_ALL,  NULL, UNSET },
+    { "floor",               f_floor,            1, ACCESS_ALL,  NULL, UNSET },
+    { "ceil",                f_ceil,             1, ACCESS_ALL,  NULL, UNSET },
+    { "abs",                 f_abs,              1, ACCESS_ALL,  NULL, UNSET },
+    { "max_of",              f_lmax,       INT_MIN, ACCESS_ALL,  NULL, UNSET },
+    { "min_of",              f_lmin,       INT_MIN, ACCESS_ALL,  NULL, UNSET },
+    { "sin",                 f_sin,              1, ACCESS_ALL,  NULL, UNSET },
+    { "cos",                 f_cos,              1, ACCESS_ALL,  NULL, UNSET },
+    { "tan",                 f_tan,              1, ACCESS_ALL,  NULL, UNSET },
+    { "asin",                f_asin,             1, ACCESS_ALL,  NULL, UNSET },
+    { "acos",                f_acos,             1, ACCESS_ALL,  NULL, UNSET },
+    { "atan",                f_atan,             1, ACCESS_ALL,  NULL, UNSET },
+    { "sinh",                f_sinh,             1, ACCESS_ALL,  NULL, UNSET },
+    { "cosh",                f_cosh,             1, ACCESS_ALL,  NULL, UNSET },
+    { "tanh",                f_tanh,             1, ACCESS_ALL,  NULL, UNSET },
+    { "asinh",               f_asinh,            1, ACCESS_ALL,  NULL, UNSET },
+    { "acosh",               f_acosh,            1, ACCESS_ALL,  NULL, UNSET },
+    { "atanh",               f_atanh,            1, ACCESS_ALL,  NULL, UNSET },
+    { "exp",                 f_exp,              1, ACCESS_ALL,  NULL, UNSET },
+    { "ln",                  f_ln,               1, ACCESS_ALL,  NULL, UNSET },
+    { "log",                 f_log,              1, ACCESS_ALL,  NULL, UNSET },
+    { "sqrt",                f_sqrt,             1, ACCESS_ALL,  NULL, UNSET },
+    { "random",              f_random,          -1, ACCESS_ALL,  NULL, UNSET },
+    { "grandom",             f_grand,           -1, ACCESS_ALL,  NULL, UNSET },
+    { "set_seed",            f_setseed,         -1, ACCESS_ALL,  NULL, UNSET },
     { "add_to_average",      f_add2avg,          3, ACCESS_ALL,  NULL, UNSET },
-	{ "time",                f_time,     		-1, ACCESS_ALL,  NULL, UNSET },
-	{ "date",                f_date,     		-1, ACCESS_ALL,  NULL, UNSET },
-	{ "delta_time",          f_dtime,    		 0, ACCESS_EXP,  NULL, UNSET },
-	{ "find_peak",           f_find_peak, 		 1, ACCESS_ALL,  NULL, UNSET },
-	{ "index_of_max",        f_index_of_max, 	 1, ACCESS_ALL,  NULL, UNSET },
-	{ "index_of_min",        f_index_of_min, 	 1, ACCESS_ALL,  NULL, UNSET },
-	{ "print",               f_print,	   INT_MIN, ACCESS_ALL,  NULL, UNSET },
-	{ "sprint",              f_sprint,	   INT_MIN, ACCESS_ALL,  NULL, UNSET },
-	{ "wait",                f_wait,     	     1, ACCESS_EXP,  NULL, UNSET },
-	{ "init_1d",             f_init_1d,  	    -6, ACCESS_PREP, NULL, UNSET },
-	{ "init_2d",             f_init_2d,  	   -10, ACCESS_PREP, NULL, UNSET },
-	{ "change_scale",        f_cscale,   	    -4, ACCESS_EXP,  NULL, UNSET },
-	{ "change_scale_1d",     f_cscale_1d,  	    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "change_scale_2d",     f_cscale_2d, 	    -4, ACCESS_EXP,  NULL, UNSET },
-	{ "vert_rescale",        f_vrescale,   	     0, ACCESS_EXP,  NULL, UNSET },
-	{ "vert_rescale_1d",     f_vrescale_1d,  	 0, ACCESS_EXP,  NULL, UNSET },
-	{ "vert_rescale_2d",     f_vrescale_2d, 	 0, ACCESS_EXP,  NULL, UNSET },
-	{ "change_label",        f_clabel,   	    -3, ACCESS_EXP,  NULL, UNSET },
-	{ "change_label_1d",     f_clabel_1d,  	    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "change_label_2d",     f_clabel_2d, 	    -3, ACCESS_EXP,  NULL, UNSET },
-	{ "rescale",             f_rescale,  	    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "rescale_1d",          f_rescale_1d, 	     1, ACCESS_EXP,  NULL, UNSET },
-	{ "rescale_2d",          f_rescale_2d, 	    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "display",             f_display,  	   -16, ACCESS_EXP,  NULL, UNSET },
-	{ "display_1d",          f_display_1d, 	   -12, ACCESS_EXP,  NULL, UNSET },
-	{ "display_2d",          f_display_2d,	   -16, ACCESS_EXP,  NULL, UNSET },
-	{ "clear_curve",         f_clearcv,  	    -4, ACCESS_EXP,  NULL, UNSET },
-	{ "clear_curve_1d",      f_clearcv_1d, 	    -4, ACCESS_EXP,  NULL, UNSET },
-	{ "clear_curve_2d",      f_clearcv_2d, 	    -4, ACCESS_EXP,  NULL, UNSET },
+    { "time",                f_time,            -1, ACCESS_ALL,  NULL, UNSET },
+    { "date",                f_date,            -1, ACCESS_ALL,  NULL, UNSET },
+    { "delta_time",          f_dtime,            0, ACCESS_EXP,  NULL, UNSET },
+    { "find_peak",           f_find_peak,        1, ACCESS_ALL,  NULL, UNSET },
+    { "index_of_max",        f_index_of_max,     1, ACCESS_ALL,  NULL, UNSET },
+    { "index_of_min",        f_index_of_min,     1, ACCESS_ALL,  NULL, UNSET },
+    { "print",               f_print,      INT_MIN, ACCESS_ALL,  NULL, UNSET },
+    { "sprint",              f_sprint,     INT_MIN, ACCESS_ALL,  NULL, UNSET },
+    { "wait",                f_wait,             1, ACCESS_EXP,  NULL, UNSET },
+    { "init_1d",             f_init_1d,         -6, ACCESS_PREP, NULL, UNSET },
+    { "init_2d",             f_init_2d,        -10, ACCESS_PREP, NULL, UNSET },
+    { "change_scale",        f_cscale,          -4, ACCESS_EXP,  NULL, UNSET },
+    { "change_scale_1d",     f_cscale_1d,       -2, ACCESS_EXP,  NULL, UNSET },
+    { "change_scale_2d",     f_cscale_2d,       -4, ACCESS_EXP,  NULL, UNSET },
+    { "vert_rescale",        f_vrescale,         0, ACCESS_EXP,  NULL, UNSET },
+    { "vert_rescale_1d",     f_vrescale_1d,      0, ACCESS_EXP,  NULL, UNSET },
+    { "vert_rescale_2d",     f_vrescale_2d,      0, ACCESS_EXP,  NULL, UNSET },
+    { "change_label",        f_clabel,          -3, ACCESS_EXP,  NULL, UNSET },
+    { "change_label_1d",     f_clabel_1d,       -2, ACCESS_EXP,  NULL, UNSET },
+    { "change_label_2d",     f_clabel_2d,       -3, ACCESS_EXP,  NULL, UNSET },
+    { "rescale",             f_rescale,         -2, ACCESS_EXP,  NULL, UNSET },
+    { "rescale_1d",          f_rescale_1d,       1, ACCESS_EXP,  NULL, UNSET },
+    { "rescale_2d",          f_rescale_2d,      -2, ACCESS_EXP,  NULL, UNSET },
+    { "display",             f_display,        -16, ACCESS_EXP,  NULL, UNSET },
+    { "display_1d",          f_display_1d,     -12, ACCESS_EXP,  NULL, UNSET },
+    { "display_2d",          f_display_2d,     -16, ACCESS_EXP,  NULL, UNSET },
+    { "clear_curve",         f_clearcv,         -4, ACCESS_EXP,  NULL, UNSET },
+    { "clear_curve_1d",      f_clearcv_1d,      -4, ACCESS_EXP,  NULL, UNSET },
+    { "clear_curve_2d",      f_clearcv_2d,      -4, ACCESS_EXP,  NULL, UNSET },
     { "display_mode",        f_dmode,           -2, ACCESS_ALL,  NULL, UNSET },
-	{ "dim",                 f_dim,      	     1, ACCESS_ALL,  NULL, UNSET },
-	{ "size",                f_size,     	     1, ACCESS_ALL,  NULL, UNSET },
-	{ "mean",                f_mean,     	    -3, ACCESS_ALL,  NULL, UNSET },
-	{ "rms",                 f_rms,      	    -3, ACCESS_ALL,  NULL, UNSET },
-	{ "slice",               f_slice,    	    -3, ACCESS_ALL,  NULL, UNSET },
-	{ "mean_part_array",     f_mean_part_array,  2, ACCESS_ALL,  NULL, UNSET },
-	{ "square",              f_square,   	     1, ACCESS_ALL,  NULL, UNSET },
-	{ "G_to_T",              f_G2T,              1, ACCESS_ALL,  NULL, UNSET },
-	{ "T_to_G",              f_T2G,              1, ACCESS_ALL,  NULL, UNSET },
-	{ "C_to_K",              f_C2K,              1, ACCESS_ALL,  NULL, UNSET },
-	{ "K_to_C",              f_K2C,              1, ACCESS_ALL,  NULL, UNSET },
-	{ "D_to_R",              f_D2R,              1, ACCESS_ALL,  NULL, UNSET },
-	{ "R_to_D",              f_R2D,              1, ACCESS_ALL,  NULL, UNSET },
-	{ "WL_to_WN",            f_WL2WN,            1, ACCESS_ALL,  NULL, UNSET },
-	{ "WN_to_WL",            f_WN2WL,            1, ACCESS_ALL,  NULL, UNSET },
-	{ "F_to_WN",             f_F2WN,             1, ACCESS_ALL,  NULL, UNSET },
-	{ "WN_to_F" ,            f_WN2F,             1, ACCESS_ALL,  NULL, UNSET },
-	{ "int_slice",           f_islice,     INT_MIN, ACCESS_ALL,  NULL, UNSET },
-	{ "float_slice",         f_fslice,     INT_MIN, ACCESS_ALL,  NULL, UNSET },
-	{ "lin_space",           f_lspace,           3, ACCESS_ALL,  NULL, UNSET },
+    { "dim",                 f_dim,              1, ACCESS_ALL,  NULL, UNSET },
+    { "size",                f_size,             1, ACCESS_ALL,  NULL, UNSET },
+    { "mean",                f_mean,            -3, ACCESS_ALL,  NULL, UNSET },
+    { "rms",                 f_rms,             -3, ACCESS_ALL,  NULL, UNSET },
+    { "slice",               f_slice,           -3, ACCESS_ALL,  NULL, UNSET },
+    { "mean_part_array",     f_mean_part_array,  2, ACCESS_ALL,  NULL, UNSET },
+    { "square",              f_square,           1, ACCESS_ALL,  NULL, UNSET },
+    { "G_to_T",              f_G2T,              1, ACCESS_ALL,  NULL, UNSET },
+    { "T_to_G",              f_T2G,              1, ACCESS_ALL,  NULL, UNSET },
+    { "C_to_K",              f_C2K,              1, ACCESS_ALL,  NULL, UNSET },
+    { "K_to_C",              f_K2C,              1, ACCESS_ALL,  NULL, UNSET },
+    { "D_to_R",              f_D2R,              1, ACCESS_ALL,  NULL, UNSET },
+    { "R_to_D",              f_R2D,              1, ACCESS_ALL,  NULL, UNSET },
+    { "WL_to_WN",            f_WL2WN,            1, ACCESS_ALL,  NULL, UNSET },
+    { "WN_to_WL",            f_WN2WL,            1, ACCESS_ALL,  NULL, UNSET },
+    { "F_to_WN",             f_F2WN,             1, ACCESS_ALL,  NULL, UNSET },
+    { "WN_to_F" ,            f_WN2F,             1, ACCESS_ALL,  NULL, UNSET },
+    { "int_slice",           f_islice,     INT_MIN, ACCESS_ALL,  NULL, UNSET },
+    { "float_slice",         f_fslice,     INT_MIN, ACCESS_ALL,  NULL, UNSET },
+    { "lin_space",           f_lspace,           3, ACCESS_ALL,  NULL, UNSET },
     { "reverse",             f_reverse,          1, ACCESS_ALL,  NULL, UNSET },
-	{ "spike_remove",	     f_spike_rem,	    -3, ACCESS_EXP,  NULL, UNSET },
-	{ "get_file",            f_getf,     	    -5, ACCESS_EXP,  NULL, UNSET },
-	{ "open_file",           f_openf,    	    -6, ACCESS_EXP,  NULL, UNSET },
-	{ "clone_file",          f_clonef,   	     3, ACCESS_EXP,  NULL, UNSET },
-	{ "save",                f_save,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "fsave",               f_fsave,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
-    { "ffsave",              f_ffsave,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "save_program",        f_save_p,   	    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "save_output",         f_save_o,   	    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "save_comment",        f_save_c,   	    -4, ACCESS_EXP,  NULL, UNSET },
-	{ "is_file",             f_is_file,  	     1, ACCESS_EXP,  NULL, UNSET },
-	{ "layout",              f_layout,   	     1, ACCESS_EXP,  NULL, UNSET },
-	{ "button_create",       f_bcreate,  	    -4, ACCESS_EXP,  NULL, UNSET },
-	{ "button_delete",       f_bdelete,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "button_state",        f_bstate,   	    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "button_changed",      f_bchanged,	   	 1, ACCESS_EXP,  NULL, UNSET },
-	{ "slider_create",       f_screate,  	    -6, ACCESS_EXP,  NULL, UNSET },
-	{ "slider_delete",       f_sdelete,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "slider_value",        f_svalue,   	    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "slider_changed",      f_schanged,   	     1, ACCESS_EXP,  NULL, UNSET },
-	{ "input_create",        f_ocreate,  	    -5, ACCESS_EXP,  NULL, UNSET },
-	{ "input_delete",        f_odelete,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "input_value",         f_ovalue,   	    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "input_changed",       f_ochanged,	   	 1, ACCESS_EXP,  NULL, UNSET },
-	{ "output_create",       f_ocreate,  	    -5, ACCESS_EXP,  NULL, UNSET },
-	{ "output_delete",       f_odelete,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "output_value",        f_ovalue,   	    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "menu_create",         f_mcreate,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "menu_delete",         f_mdelete,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "menu_choice",         f_mchoice,  	    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "menu_changed",        f_mchanged,	     1, ACCESS_EXP,  NULL, UNSET },
-	{ "toolbox_changed",     f_tb_changed, INT_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "toolbox_wait",        f_tb_wait,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "object_delete",       f_objdel,	   INT_MIN, ACCESS_EXP,  NULL, UNSET },
-	{ "object_change_label", f_obj_clabel,	   	 2, ACCESS_EXP,  NULL, UNSET },
-	{ "object_enable",       f_obj_xable,	   	 2, ACCESS_EXP,  NULL, UNSET },
+    { "spike_remove",        f_spike_rem,       -3, ACCESS_EXP,  NULL, UNSET },
+    { "get_file",            f_getf,            -5, ACCESS_EXP,  NULL, UNSET },
+    { "open_file",           f_openf,           -6, ACCESS_EXP,  NULL, UNSET },
+    { "clone_file",          f_clonef,           3, ACCESS_EXP,  NULL, UNSET },
+    { "save",                f_save,       INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "fsave",               f_fsave,      INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "ffsave",              f_ffsave,     INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "save_program",        f_save_p,          -2, ACCESS_EXP,  NULL, UNSET },
+    { "save_output",         f_save_o,          -2, ACCESS_EXP,  NULL, UNSET },
+    { "save_comment",        f_save_c,          -4, ACCESS_EXP,  NULL, UNSET },
+    { "is_file",             f_is_file,          1, ACCESS_EXP,  NULL, UNSET },
+    { "layout",              f_layout,           1, ACCESS_EXP,  NULL, UNSET },
+    { "button_create",       f_bcreate,         -4, ACCESS_EXP,  NULL, UNSET },
+    { "button_delete",       f_bdelete,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "button_state",        f_bstate,          -2, ACCESS_EXP,  NULL, UNSET },
+    { "button_changed",      f_bchanged,         1, ACCESS_EXP,  NULL, UNSET },
+    { "slider_create",       f_screate,         -6, ACCESS_EXP,  NULL, UNSET },
+    { "slider_delete",       f_sdelete,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "slider_value",        f_svalue,          -2, ACCESS_EXP,  NULL, UNSET },
+    { "slider_changed",      f_schanged,         1, ACCESS_EXP,  NULL, UNSET },
+    { "input_create",        f_ocreate,         -5, ACCESS_EXP,  NULL, UNSET },
+    { "input_delete",        f_odelete,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "input_value",         f_ovalue,          -2, ACCESS_EXP,  NULL, UNSET },
+    { "input_changed",       f_ochanged,         1, ACCESS_EXP,  NULL, UNSET },
+    { "output_create",       f_ocreate,         -5, ACCESS_EXP,  NULL, UNSET },
+    { "output_delete",       f_odelete,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "output_value",        f_ovalue,          -2, ACCESS_EXP,  NULL, UNSET },
+    { "menu_create",         f_mcreate,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "menu_delete",         f_mdelete,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "menu_choice",         f_mchoice,         -2, ACCESS_EXP,  NULL, UNSET },
+    { "menu_changed",        f_mchanged,         1, ACCESS_EXP,  NULL, UNSET },
+    { "toolbox_changed",     f_tb_changed, INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "toolbox_wait",        f_tb_wait,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "object_delete",       f_objdel,     INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "object_change_label", f_obj_clabel,       2, ACCESS_EXP,  NULL, UNSET },
+    { "object_enable",       f_obj_xable,        2, ACCESS_EXP,  NULL, UNSET },
     { "hide_toolbox",        f_freeze,           1, ACCESS_EXP,  NULL, UNSET },
-	{ "show_message",        f_showm,            1, ACCESS_EXP,  NULL, UNSET },
+    { "show_message",        f_showm,            1, ACCESS_EXP,  NULL, UNSET },
     { "draw_marker",         f_setmark,         -4, ACCESS_EXP,  NULL, UNSET },
     { "draw_marker_1d",      f_setmark_1d,      -2, ACCESS_EXP,  NULL, UNSET },
     { "draw_marker_2d",      f_setmark_2d,      -4, ACCESS_EXP,  NULL, UNSET },
@@ -212,19 +212,19 @@ Func_T Def_Fncts[ ] =              /* List of built-in functions */
     { "fs_button",           f_fs_button,       -2, ACCESS_EXP,  NULL, UNSET },
     { "fs_button_1d",        f_fs_button_1d,    -2, ACCESS_EXP,  NULL, UNSET },
     { "fs_button_2d",        f_fs_button_2d,    -2, ACCESS_EXP,  NULL, UNSET },
-	{ "end",                 f_stopsim,          0, ACCESS_EXP,  NULL, UNSET },
-	{ "abort",               f_abort,            0, ACCESS_EXP,  NULL, UNSET },
-	{ NULL,                  NULL,     	         0, 0,           NULL, UNSET }
-	                   /* last set marks the very last entry, don't remove ! */
+    { "end",                 f_stopsim,          0, ACCESS_EXP,  NULL, UNSET },
+    { "abort",               f_abort,            0, ACCESS_EXP,  NULL, UNSET },
+    { NULL,                  NULL,               0, 0,           NULL, UNSET }
+                       /* last set marks the very last entry, don't remove ! */
 };
 
 
 /* Locally used functions and variables */
 
 static int func_cmp1( const void * a,
-					  const void * b );
+                      const void * b );
 static int func_cmp2( const void * a,
-					  const void * b );
+                      const void * b );
 
 
 /*--------------------------------------------------------------------*
@@ -234,38 +234,38 @@ static int func_cmp2( const void * a,
 
 bool functions_init( void )
 {
-	No_File_Numbers = UNSET;
-	Dont_Save = UNSET;
+    No_File_Numbers = UNSET;
+    Dont_Save = UNSET;
 
-	/* Count number of built-in functions */
+    /* Count number of built-in functions */
 
-	for ( Num_Func = 0; Def_Fncts[ Num_Func ].fnct != NULL; Num_Func++ )
-		/* empty */ ;
+    for ( Num_Func = 0; Def_Fncts[ Num_Func ].fnct != NULL; Num_Func++ )
+        /* empty */ ;
 
-	/*
-	   1. Get new memory for the functions structures and copy the built-in
-	      functions into it.
-	   2. Parse the function name data base 'Functions' where all additional
-	      functions have to be listed.
-	   3. Sort the functions by name so that they can be found using bsearch()
-	*/
+    /*
+       1. Get new memory for the functions structures and copy the built-in
+          functions into it.
+       2. Parse the function name data base 'Functions' where all additional
+          functions have to be listed.
+       3. Sort the functions by name so that they can be found using bsearch()
+    */
 
-	TRY
-	{
-		Fncts = FUNC_P T_malloc( Num_Func * sizeof *Fncts );
-		memcpy( Fncts, Def_Fncts, Num_Func * sizeof *Fncts );
-		qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp1 );
-		Num_Func = func_list_parse( &Fncts, Num_Func );
-		qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp1 );
-   		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		functions_exit( );
-		return FAIL;
-	}
+    TRY
+    {
+        Fncts = FUNC_P T_malloc( Num_Func * sizeof *Fncts );
+        memcpy( Fncts, Def_Fncts, Num_Func * sizeof *Fncts );
+        qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp1 );
+        Num_Func = func_list_parse( &Fncts, Num_Func );
+        qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp1 );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        functions_exit( );
+        return FAIL;
+    }
 
-	return OK;
+    return OK;
 }
 
 
@@ -274,10 +274,10 @@ bool functions_init( void )
  *-----------------------------------------------------------*/
 
 static int func_cmp1( const void * a,
-					  const void * b )
+                      const void * b )
 {
-	return strcmp( ( ( const Func_T * ) a )->name,
-				   ( ( const Func_T * ) b )->name );
+    return strcmp( ( ( const Func_T * ) a )->name,
+                   ( ( const Func_T * ) b )->name );
 }
 
 
@@ -288,34 +288,34 @@ static int func_cmp1( const void * a,
 
 void functions_exit( void )
 {
-	size_t i;
+    size_t i;
 
 
-	if ( Fncts == NULL )
-		return;
+    if ( Fncts == NULL )
+        return;
 
-	/* Get rid of the names of loaded functions (but not the built-in ones) */
+    /* Get rid of the names of loaded functions (but not the built-in ones) */
 
-	for ( i = 0; i < Num_Func; i++ )
-		if ( Fncts[ i ].to_be_loaded )
-			T_free( ( char * ) Fncts[ i ].name );
+    for ( i = 0; i < Num_Func; i++ )
+        if ( Fncts[ i ].to_be_loaded )
+            T_free( ( char * ) Fncts[ i ].name );
 
-	Fncts = FUNC_P T_free( Fncts );
+    Fncts = FUNC_P T_free( Fncts );
 
-	/* Clean up the call stack */
+    /* Clean up the call stack */
 
 #ifndef NDEBUG
-	if ( EDL.Call_Stack != NULL )
-		eprint( SEVERE, UNSET, "Internal error detected at %s:%d, call stack "
-				"not empty!\n", __FILE__, __LINE__ );
+    if ( EDL.Call_Stack != NULL )
+        eprint( SEVERE, UNSET, "Internal error detected at %s:%d, call stack "
+                "not empty!\n", __FILE__, __LINE__ );
 #endif
 
-	while ( call_pop( ) )
-		/* empty */ ;
+    while ( call_pop( ) )
+        /* empty */ ;
 
-	No_File_Numbers = UNSET;
-	Dont_Save = UNSET;
-	close_all_files( );
+    No_File_Numbers = UNSET;
+    Dont_Save = UNSET;
+    close_all_files( );
 }
 
 
@@ -326,25 +326,25 @@ void functions_exit( void )
 
 int func_exists( const char * name )
 {
-	char *fn;
-	char *hp;
-	void *res;
+    char *fn;
+    char *hp;
+    void *res;
 
 
-	fn = T_strdup( name );
+    fn = T_strdup( name );
 
-	/* If the function name ends in "#1" strip it off, the function for
-	   the first device of a generic type is stored in the list of functions
-	   without it.*/
+    /* If the function name ends in "#1" strip it off, the function for
+       the first device of a generic type is stored in the list of functions
+       without it.*/
 
-	if ( ( hp = strrchr( fn, '#' ) ) != NULL && ! strcmp( hp, "#1" ) )
-		*hp = '\0';
+    if ( ( hp = strrchr( fn, '#' ) ) != NULL && ! strcmp( hp, "#1" ) )
+        *hp = '\0';
 
-	res = bsearch( fn, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
+    res = bsearch( fn, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
 
-	T_free( fn );
+    T_free( fn );
 
-	return res != NULL;
+    return res != NULL;
 }
 
 
@@ -362,62 +362,62 @@ int func_exists( const char * name )
  *----------------------------------------------------------------------*/
 
 Var_T *func_get( const char * name,
-				 int *        acc )
+                 int *        acc )
 {
-	char *sec_name;
-	Var_T *func_ptr;
+    char *sec_name;
+    Var_T *func_ptr;
 
 
-	/* We have to help the writers of modules a bit: If they want a
-	   pointer to a function from within the same module they don't know
-	   if there are other modules with the same generic type and thus
-	   have no chance to figure out if they need to append a '#' plus the
-	   number of the device to the function name to get the correct
-	   function within the same module.
+    /* We have to help the writers of modules a bit: If they want a
+       pointer to a function from within the same module they don't know
+       if there are other modules with the same generic type and thus
+       have no chance to figure out if they need to append a '#' plus the
+       number of the device to the function name to get the correct
+       function within the same module.
 
-	   We can here figure out if this is needed and which number to append
-	   by checking the following:
+       We can here figure out if this is needed and which number to append
+       by checking the following:
 
-	   1. There's still a function call that has not yet returned in which
-	      case the call stack isn't empty.
-	   2. The function which is still running comes from a module - in this
-	      case the device member of the last call stack element isn't NULL.
-	   3. The function that's still running came from a device that's not
-	      the first of a set of devices with the same generic type, indicated 
-		  by the dev_count member of the last call stack element being
-		  larger than 1.
-	   4. The functions name we got as the argument hasn't already a '#'
-	      appended to it.
+       1. There's still a function call that has not yet returned in which
+          case the call stack isn't empty.
+       2. The function which is still running comes from a module - in this
+          case the device member of the last call stack element isn't NULL.
+       3. The function that's still running came from a device that's not
+          the first of a set of devices with the same generic type, indicated 
+          by the dev_count member of the last call stack element being
+          larger than 1.
+       4. The functions name we got as the argument hasn't already a '#'
+          appended to it.
 
-	   If now a function of the name passed to this function is found in
-	   the module from which the call is we append the '#' plus the device
-	   count number to the name of the function and use this adorned name
-	   as the name of the function the caller is really looking for. */
+       If now a function of the name passed to this function is found in
+       the module from which the call is we append the '#' plus the device
+       count number to the name of the function and use this adorned name
+       as the name of the function the caller is really looking for. */
 
-	if ( EDL.Call_Stack != NULL && EDL.Call_Stack->device != NULL &&
-		 EDL.Call_Stack->dev_count > 1 && strrchr( name, '#' ) == NULL )
-	{
-		dlerror( );
-		dlsym( EDL.Call_Stack->device->driver.handle, name );
-		if ( dlerror( ) == NULL )
-		{
-			sec_name = get_string( "%s#%d", name, EDL.Call_Stack->dev_count );
-			TRY
-			{
-				func_ptr = func_get_long( sec_name, acc, SET );
-				TRY_SUCCESS;
-			}
-			OTHERWISE
-			{
-				T_free( sec_name );
-				RETHROW( );
-			}
-			T_free( sec_name );
-			return func_ptr;
-		}
-	}
+    if ( EDL.Call_Stack != NULL && EDL.Call_Stack->device != NULL &&
+         EDL.Call_Stack->dev_count > 1 && strrchr( name, '#' ) == NULL )
+    {
+        dlerror( );
+        dlsym( EDL.Call_Stack->device->driver.handle, name );
+        if ( dlerror( ) == NULL )
+        {
+            sec_name = get_string( "%s#%d", name, EDL.Call_Stack->dev_count );
+            TRY
+            {
+                func_ptr = func_get_long( sec_name, acc, SET );
+                TRY_SUCCESS;
+            }
+            OTHERWISE
+            {
+                T_free( sec_name );
+                RETHROW( );
+            }
+            T_free( sec_name );
+            return func_ptr;
+        }
+    }
 
-	return func_get_long( name, acc, SET );
+    return func_get_long( name, acc, SET );
 }
 
 
@@ -429,53 +429,53 @@ Var_T *func_get( const char * name,
  *----------------------------------------------------------------*/
 
 Var_T *func_get_long( const char * name,
-					  int *        acc,
-					  bool         flag )
+                      int *        acc,
+                      bool         flag )
 {
-	Func_T *f;
-	Var_T *ret;
-	char *fn;
-	char *hp;
+    Func_T *f;
+    Var_T *ret;
+    char *fn;
+    char *hp;
 
 
-	fn = T_strdup( name );
+    fn = T_strdup( name );
 
-	/* If the function name ends in "#1" strip it off, the function for
-	   the first device of a generic type is stored in the list of functions
-	   without it.*/
+    /* If the function name ends in "#1" strip it off, the function for
+       the first device of a generic type is stored in the list of functions
+       without it.*/
 
-	if ( ( hp = strrchr( fn, '#' ) ) != NULL && ! strcmp( hp, "#1" ) )
-		*hp = '\0';
+    if ( ( hp = strrchr( fn, '#' ) ) != NULL && ! strcmp( hp, "#1" ) )
+        *hp = '\0';
 
-	/* Try to find the function by its name and if found create a variable on
-	   the variable stack with a pointer to the function and the number of
-	   arguments. Also copy the functions name and access flag. */
+    /* Try to find the function by its name and if found create a variable on
+       the variable stack with a pointer to the function and the number of
+       arguments. Also copy the functions name and access flag. */
 
-	f = FUNC_P bsearch( fn, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
+    f = FUNC_P bsearch( fn, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
 
-	T_free( fn );
+    T_free( fn );
 
-	if ( f == NULL )             /* function not found */
-		return NULL;
+    if ( f == NULL )             /* function not found */
+        return NULL;
 
-	if ( f->fnct == NULL )       /* function found but not loaded */
-	{
-		if ( flag )
-		{
-			print( FATAL, "%s(): Function has not been loaded.\n", f->name );
-			THROW( EXCEPTION );
-		}
-		else                     /* some callers do their own error handling */
-			return NULL;
-	}
+    if ( f->fnct == NULL )       /* function found but not loaded */
+    {
+        if ( flag )
+        {
+            print( FATAL, "%s(): Function has not been loaded.\n", f->name );
+            THROW( EXCEPTION );
+        }
+        else                     /* some callers do their own error handling */
+            return NULL;
+    }
 
-	ret = vars_push( FUNC, f );
-	ret->name = T_strdup( name );
-	ret->dim = f->nargs;
-	if ( acc != NULL )
-		*acc = f->access_flag;
+    ret = vars_push( FUNC, f );
+    ret->name = T_strdup( name );
+    ret->dim = f->nargs;
+    if ( acc != NULL )
+        *acc = f->access_flag;
 
-	return ret;
+    return ret;
 }
 
 
@@ -484,9 +484,9 @@ Var_T *func_get_long( const char * name,
  *------------------------------------------------------------*/
 
 static int func_cmp2( const void * a,
-					  const void * b )
+                      const void * b )
 {
-	return strcmp( ( const char * ) a, ( ( const Func_T * ) b )->name );
+    return strcmp( ( const char * ) a, ( ( const Func_T * ) b )->name );
 }
 
 
@@ -499,158 +499,158 @@ static int func_cmp2( const void * a,
 
 Var_T *func_call( Var_T * f )
 {
-	Var_T *ap;
-	Var_T *ret = NULL;
-	long ac;
-	long abs_len;
+    Var_T *ap;
+    Var_T *ret = NULL;
+    long ac;
+    long abs_len;
 #ifndef NDEBUG
-	size_t i;
+    size_t i;
 
 
-	/* Check (and double-check) that it's really a function variable - one
-	   can never be sure someone really got it right... */
+    /* Check (and double-check) that it's really a function variable - one
+       can never be sure someone really got it right... */
 
-	if ( f->type != FUNC )
-	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+    if ( f->type != FUNC )
+    {
+        eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+                __FILE__, __LINE__ );
+        THROW( EXCEPTION );
+    }
 
 /* A weaker check than the one we're currently using....
 
-	if ( f->val.fnct < Fncts || f->val.fnct >= Fncts + Num_Func )
-	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+    if ( f->val.fnct < Fncts || f->val.fnct >= Fncts + Num_Func )
+    {
+        eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+                __FILE__, __LINE__ );
+        THROW( EXCEPTION );
+    }
 */
 
-	for ( i = 0; i < Num_Func; i++ )
-		if ( Fncts[ i ].fnct == f->val.fnct->fnct )
-			break;
+    for ( i = 0; i < Num_Func; i++ )
+        if ( Fncts[ i ].fnct == f->val.fnct->fnct )
+            break;
 
-	if ( i >= Num_Func )
-	{
-		eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-				__FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+    if ( i >= Num_Func )
+    {
+        eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+                __FILE__, __LINE__ );
+        THROW( EXCEPTION );
+    }
 
 #endif
 
-	/* If the number of function arguments isn't INT_MIN (indicating a
-	   variable number of arguments without an upper limit) count the number
-	   of variables on the stack */
+    /* If the number of function arguments isn't INT_MIN (indicating a
+       variable number of arguments without an upper limit) count the number
+       of variables on the stack */
 
-	if ( f->dim > INT_MIN )
-	{
-		abs_len = f->dim > 0 ? f->dim : - f->dim;
+    if ( f->dim > INT_MIN )
+    {
+        abs_len = f->dim > 0 ? f->dim : - f->dim;
 
-		/* Count number of arguments on the stack */
+        /* Count number of arguments on the stack */
 
-		for ( ac = 0, ap = f->next; ap != NULL; ++ac, ap = ap->next )
-			/* empty */ ;
+        for ( ac = 0, ap = f->next; ap != NULL; ++ac, ap = ap->next )
+            /* empty */ ;
 
-		/* If there are too many arguments utter a warning and remove the
-		   superfluous ones (distinuguish between functions with a fixed
-		   and a variable number of arguments - in the first case f->dim
-		   is positive, in the second negative) */
+        /* If there are too many arguments utter a warning and remove the
+           superfluous ones (distinuguish between functions with a fixed
+           and a variable number of arguments - in the first case f->dim
+           is positive, in the second negative) */
 
-		if ( ac > abs_len )
-		{
-			print( WARN, "%s(): Too many arguments, discarding superfluous "
-				   "arguments.\n", f->name );
+        if ( ac > abs_len )
+        {
+            print( WARN, "%s(): Too many arguments, discarding superfluous "
+                   "arguments.\n", f->name );
 
-			for ( ac = 0, ap = f->next; ac < abs_len; ++ac, ap = ap->next )
-				/* empty */ ;
-			while ( ( ap = vars_pop( ap ) ) != NULL )
-				/* empty */ ;
-		}
+            for ( ac = 0, ap = f->next; ac < abs_len; ++ac, ap = ap->next )
+                /* empty */ ;
+            while ( ( ap = vars_pop( ap ) ) != NULL )
+                /* empty */ ;
+        }
 
-		/* For functions with a fixed number of arguments (a positive number
-		   of arguments is specified in the nargs entry of the functions
-		   structure, which has been copied to the dim entry of the variables
-		   structure) less arguments than needed by the function is a fatal
-		   error. */
+        /* For functions with a fixed number of arguments (a positive number
+           of arguments is specified in the nargs entry of the functions
+           structure, which has been copied to the dim entry of the variables
+           structure) less arguments than needed by the function is a fatal
+           error. */
 
-		if ( f->dim >= 0 && ac < f->dim )
-		{
-			print( FATAL, "%s(): Function expects %d argument%s but only %d "
-				   "%s found.\n", f->name, f->dim, f->dim == 1 ? "" : "s",
-				   ac, ac == 1 ? "was" : "were" );
-			THROW( EXCEPTION );
-		}
-	}
+        if ( f->dim >= 0 && ac < f->dim )
+        {
+            print( FATAL, "%s(): Function expects %d argument%s but only %d "
+                   "%s found.\n", f->name, f->dim, f->dim == 1 ? "" : "s",
+                   ac, ac == 1 ? "was" : "were" );
+            THROW( EXCEPTION );
+        }
+    }
 
-	/* Now call the function after storing some information about the
-	   function on the call stack */
+    /* Now call the function after storing some information about the
+       function on the call stack */
 
-	if ( call_push( f->val.fnct, NULL,
-					f->val.fnct->device ? f->val.fnct->device->name : NULL,
-					f->val.fnct->device ? f->val.fnct->device->count : 0 )
-		 == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+    if ( call_push( f->val.fnct, NULL,
+                    f->val.fnct->device ? f->val.fnct->device->name : NULL,
+                    f->val.fnct->device ? f->val.fnct->device->count : 0 )
+         == NULL )
+        THROW( OUT_OF_MEMORY_EXCEPTION );
 
-	TRY
-	{
-		ret = f->val.fnct->fnct( f->next );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
+    TRY
+    {
+        ret = f->val.fnct->fnct( f->next );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
 #ifndef NDEBUG
-		if ( ! vars_exist( f ) )
-		{
-			if ( EDL.Call_Stack->f != NULL &&
-				 ! EDL.Call_Stack->f->to_be_loaded )
-				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-						__FILE__, __LINE__ );
-			else
-				print( FATAL, "Function %s() from module %s.fsc2_so messed up "
-					   "the variable stack at %s:%d.\n",
-					   EDL.Call_Stack->f->name,
-					   EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
-			call_pop( );
-			RETHROW( );
-		}
+        if ( ! vars_exist( f ) )
+        {
+            if ( EDL.Call_Stack->f != NULL &&
+                 ! EDL.Call_Stack->f->to_be_loaded )
+                eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+                        __FILE__, __LINE__ );
+            else
+                print( FATAL, "Function %s() from module %s.fsc2_so messed up "
+                       "the variable stack at %s:%d.\n",
+                       EDL.Call_Stack->f->name,
+                       EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
+            call_pop( );
+            RETHROW( );
+        }
 #endif
-		call_pop( );
+        call_pop( );
 
-		for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
-			/* empty */ ;
+        for ( ap = f; ap != NULL; ap = vars_pop( ap ) )
+            /* empty */ ;
 
-		RETHROW( );
-	}
+        RETHROW( );
+    }
 
 #ifndef NDEBUG
 
-	/* Before starting to delete the now defunct variables do another sanity
-	   check, i.e. test that the variables stack didn't get corrupted. */
+    /* Before starting to delete the now defunct variables do another sanity
+       check, i.e. test that the variables stack didn't get corrupted. */
 
-	if ( ! vars_exist( f ) )
-	{
-		if ( EDL.Call_Stack->f != NULL && ! EDL.Call_Stack->f->to_be_loaded )
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-		else
-			print( FATAL, "Function %s() from module %s.fsc2_so messed up the "
-				   "variables stack at %s:%d.\n", EDL.Call_Stack->f->name,
-				   EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
-		THROW( EXCEPTION );
-	}
+    if ( ! vars_exist( f ) )
+    {
+        if ( EDL.Call_Stack->f != NULL && ! EDL.Call_Stack->f->to_be_loaded )
+            eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+                    __FILE__, __LINE__ );
+        else
+            print( FATAL, "Function %s() from module %s.fsc2_so messed up the "
+                   "variables stack at %s:%d.\n", EDL.Call_Stack->f->name,
+                   EDL.Call_Stack->f->device->name, __FILE__, __LINE__ );
+        THROW( EXCEPTION );
+    }
 #endif
 
-	call_pop( );
+    call_pop( );
 
-	/* Finally do the clean up, i.e. remove the variable with the function
-	   and all parameters that survived - just keep the return value. */
+    /* Finally do the clean up, i.e. remove the variable with the function
+       and all parameters that survived - just keep the return value. */
 
-	for ( ap = f; ap != ret; ap = vars_pop( ap ) )
-		/* empty */ ;
+    for ( ap = f; ap != ret; ap = vars_pop( ap ) )
+        /* empty */ ;
 
-	return ret;
+    return ret;
 }
 
 
@@ -688,48 +688,48 @@ Var_T *func_call( Var_T * f )
  *-----------------------------------------------------------------------*/
 
 Call_Stack_T *call_push( Func_T *     f,
-						 Device_T *   device,
-						 const char * device_name,
-						 int          dev_count )
+                         Device_T *   device,
+                         const char * device_name,
+                         int          dev_count )
 {
-	const char *t;
-	Call_Stack_T *cs;
+    const char *t;
+    Call_Stack_T *cs;
 
 
-	cs = CALL_STACK_P T_malloc( sizeof *cs );
-	cs->next = EDL.Call_Stack;
-	cs->f = f;
-	if ( f != NULL )
-		cs->device = f->device;
-	else
-	{
-		fsc2_assert( device != NULL );
-		cs->device = device;
-	}
-	cs->dev_name = device_name;
-	cs->dev_count = dev_count;
+    cs = CALL_STACK_P T_malloc( sizeof *cs );
+    cs->next = EDL.Call_Stack;
+    cs->f = f;
+    if ( f != NULL )
+        cs->device = f->device;
+    else
+    {
+        fsc2_assert( device != NULL );
+        cs->device = device;
+    }
+    cs->dev_name = device_name;
+    cs->dev_count = dev_count;
 
-	/* If this is a function for a pulser figure out the number of the pulser
-	   (there might be more than one pulser) */
+    /* If this is a function for a pulser figure out the number of the pulser
+       (there might be more than one pulser) */
 
-	if ( f != NULL && f->device != NULL && f->device->generic_type != NULL &&
-		 ! strcasecmp( f->device->generic_type, PULSER_GENERIC_TYPE ) )
-	{
-		if ( ( t = strrchr( f->name, '#' ) ) != NULL )
-			Cur_Pulser = cs->Cur_Pulser = T_atol( t + 1 ) - 1;
-	}
-	else
-		cs->Cur_Pulser = Cur_Pulser;
+    if ( f != NULL && f->device != NULL && f->device->generic_type != NULL &&
+         ! strcasecmp( f->device->generic_type, PULSER_GENERIC_TYPE ) )
+    {
+        if ( ( t = strrchr( f->name, '#' ) ) != NULL )
+            Cur_Pulser = cs->Cur_Pulser = T_atol( t + 1 ) - 1;
+    }
+    else
+        cs->Cur_Pulser = Cur_Pulser;
 
-	/* If this is call of function within one of the modules during the test
-	   run add an extremely rough estimate for the mean time spend in the
-	   function for the call to the global variable that is used to keep
-	   an estimate time for the modules. */
+    /* If this is call of function within one of the modules during the test
+       run add an extremely rough estimate for the mean time spend in the
+       function for the call to the global variable that is used to keep
+       an estimate time for the modules. */
 
-	if ( Fsc2_Internals.mode == TEST && device_name != NULL )
-		EDL.experiment_time += MODULE_CALL_ESTIMATE;
+    if ( Fsc2_Internals.mode == TEST && device_name != NULL )
+        EDL.experiment_time += MODULE_CALL_ESTIMATE;
 
-	return EDL.Call_Stack = cs;
+    return EDL.Call_Stack = cs;
 }
 
 
@@ -738,25 +738,27 @@ Call_Stack_T *call_push( Func_T *     f,
 
 Call_Stack_T *call_pop( void )
 {
-	Call_Stack_T *cs;
+    Call_Stack_T *cs;
 
 
-	if ( EDL.Call_Stack == NULL )
-		return NULL;
+    if ( EDL.Call_Stack == NULL )
+        return NULL;
 
-	cs = EDL.Call_Stack;
-	EDL.Call_Stack = cs->next;
+    cs = EDL.Call_Stack;
+    EDL.Call_Stack = cs->next;
 
-	Cur_Pulser = cs->Cur_Pulser;
+    Cur_Pulser = cs->Cur_Pulser;
 
-	T_free( cs );
+    T_free( cs );
 
-	return EDL.Call_Stack;
+    return EDL.Call_Stack;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

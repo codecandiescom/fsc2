@@ -47,7 +47,7 @@ static Phs_Seq_T *Phase_seq;
 %}
 
 %union {
-	long lval;
+    long lval;
 }
 
 
@@ -71,7 +71,7 @@ line:    acq ';'
        | acq phase                    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | acq SECTION_LABEL            { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phase ';'
-	   | phase acq                    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
+       | phase acq                    { THROW( MISSING_SEMICOLON_EXCEPTION ); }
        | phase SECTION_LABEL          { THROW( MISSING_SEMICOLON_EXCEPTION ); }
 ;
 
@@ -103,16 +103,18 @@ p_list:  /* empty */
 
 static void phaseserror( const char * s  UNUSED_ARG )
 {
-	if ( *phasestext == '\0' )
-		print( FATAL, "Unexpected end of file in PHASES section.\n" );
-	else
-		print( FATAL, "Syntax error near token '%s'.\n", phasestext );
-	THROW( EXCEPTION );
+    if ( *phasestext == '\0' )
+        print( FATAL, "Unexpected end of file in PHASES section.\n" );
+    else
+        print( FATAL, "Syntax error near token '%s'.\n", phasestext );
+    THROW( EXCEPTION );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

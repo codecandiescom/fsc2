@@ -33,52 +33,52 @@
 
 Var_T *daq_reserve_dio( Var_T * v )
 {
-	bool lock_state = SET;
+    bool lock_state = SET;
 
 
-	if ( v == NULL )
-		return vars_push( INT_VAR,
-						  pci_mio_16e_1.ao_state.reserved_by ? 1L : 0L );
+    if ( v == NULL )
+        return vars_push( INT_VAR,
+                          pci_mio_16e_1.ao_state.reserved_by ? 1L : 0L );
 
-	if ( v->type != STR_VAR )
-	{
-		print( FATAL, "Argument isn't a pass-phrase.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v->type != STR_VAR )
+    {
+        print( FATAL, "Argument isn't a pass-phrase.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( v->next != NULL )
-	{
-		lock_state = get_boolean( v->next );
-		too_many_arguments( v->next );
-	}
+    if ( v->next != NULL )
+    {
+        lock_state = get_boolean( v->next );
+        too_many_arguments( v->next );
+    }
 
-	if ( pci_mio_16e_1.dio_state.reserved_by )
-	{
-		if ( lock_state )
-		{
-			if ( ! strcmp( pci_mio_16e_1.dio_state.reserved_by, v->val.sptr ) )
-				return vars_push( INT_VAR, 1L );
-			else
-				return vars_push( INT_VAR, 0L );
-		}
-		else
-		{
-			if ( ! strcmp( pci_mio_16e_1.dio_state.reserved_by, v->val.sptr ) )
-			{
-				pci_mio_16e_1.dio_state.reserved_by =
-						  CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
-				return vars_push( INT_VAR, 1L );
-			}
-			else
-				return vars_push( INT_VAR, 0L );
-		}
-	}
+    if ( pci_mio_16e_1.dio_state.reserved_by )
+    {
+        if ( lock_state )
+        {
+            if ( ! strcmp( pci_mio_16e_1.dio_state.reserved_by, v->val.sptr ) )
+                return vars_push( INT_VAR, 1L );
+            else
+                return vars_push( INT_VAR, 0L );
+        }
+        else
+        {
+            if ( ! strcmp( pci_mio_16e_1.dio_state.reserved_by, v->val.sptr ) )
+            {
+                pci_mio_16e_1.dio_state.reserved_by =
+                          CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
+                return vars_push( INT_VAR, 1L );
+            }
+            else
+                return vars_push( INT_VAR, 0L );
+        }
+    }
 
-	if ( ! lock_state )
-		return vars_push( INT_VAR, 1L );
+    if ( ! lock_state )
+        return vars_push( INT_VAR, 1L );
 
-	pci_mio_16e_1.dio_state.reserved_by = T_strdup( v->val.sptr );
-	return vars_push( INT_VAR, 1L );
+    pci_mio_16e_1.dio_state.reserved_by = T_strdup( v->val.sptr );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -87,65 +87,65 @@ Var_T *daq_reserve_dio( Var_T * v )
 
 Var_T *daq_dio_read( Var_T * v )
 {
-	long mask;
-	unsigned char bits = 0;
-	char *pass;
-	int ret;
+    long mask;
+    unsigned char bits = 0;
+    char *pass;
+    int ret;
 
 
-	if ( v != NULL && v->type == STR_VAR )
-	{
-		pass = T_strdup( v->val.sptr );
+    if ( v != NULL && v->type == STR_VAR )
+    {
+        pass = T_strdup( v->val.sptr );
 
-		if ( pci_mio_16e_1.dio_state.reserved_by )
-		{
-			if ( strcmp( pci_mio_16e_1.dio_state.reserved_by, pass ) )
-			{
-				print( FATAL, "DIO is reserved, wrong phase-phrase.\n" );
-				T_free( pass );
-				THROW( EXCEPTION );
-			}
-		}
-		else 
-			print( WARN, "Pass-phrase for non-reserved DIO.\n" );
+        if ( pci_mio_16e_1.dio_state.reserved_by )
+        {
+            if ( strcmp( pci_mio_16e_1.dio_state.reserved_by, pass ) )
+            {
+                print( FATAL, "DIO is reserved, wrong phase-phrase.\n" );
+                T_free( pass );
+                THROW( EXCEPTION );
+            }
+        }
+        else 
+            print( WARN, "Pass-phrase for non-reserved DIO.\n" );
 
-		T_free( pass );
-		v = vars_pop( v );
-	}
-	else if ( pci_mio_16e_1.dio_state.reserved_by )
-	{
-		print( FATAL, "DIO is reserved, phase-phrase required.\n" );
-		THROW( EXCEPTION );
-	}
+        T_free( pass );
+        v = vars_pop( v );
+    }
+    else if ( pci_mio_16e_1.dio_state.reserved_by )
+    {
+        print( FATAL, "DIO is reserved, phase-phrase required.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( v == NULL )
-		mask = 0xFF;
-	else
-	{
-		mask = get_strict_long( v, "DIO bit mask" );
-		if ( mask < 0 || mask > 0xFF )
-		{
-			print( FATAL, "Invalid mask of 0x%X, valid range is [0-255].\n",
-				   mask );
-			THROW( EXCEPTION );
-		}
-	}
+    if ( v == NULL )
+        mask = 0xFF;
+    else
+    {
+        mask = get_strict_long( v, "DIO bit mask" );
+        if ( mask < 0 || mask > 0xFF )
+        {
+            print( FATAL, "Invalid mask of 0x%X, valid range is [0-255].\n",
+                   mask );
+            THROW( EXCEPTION );
+        }
+    }
 
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		raise_permissions( );
-		ret = ni_daq_dio_read( pci_mio_16e_1.board, &bits,
-							   ( unsigned char ) ( mask & 0xFF ) );
-		lower_permissions( );
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        raise_permissions( );
+        ret = ni_daq_dio_read( pci_mio_16e_1.board, &bits,
+                               ( unsigned char ) ( mask & 0xFF ) );
+        lower_permissions( );
 
-		if ( ret < 0 )
-		{
-			print( FATAL, "Can't read data from DIO.\n" );
-			THROW( EXCEPTION );
-		}
-	}
+        if ( ret < 0 )
+        {
+            print( FATAL, "Can't read data from DIO.\n" );
+            THROW( EXCEPTION );
+        }
+    }
 
-	return vars_push( INT_VAR, ( long ) bits );
+    return vars_push( INT_VAR, ( long ) bits );
 }
 
 
@@ -154,88 +154,90 @@ Var_T *daq_dio_read( Var_T * v )
 
 Var_T *daq_dio_write( Var_T * v )
 {
-	long bits;
-	long mask;
-	char *pass;
-	int ret;
+    long bits;
+    long mask;
+    char *pass;
+    int ret;
 
 
-	if ( v != NULL && v->type == STR_VAR )
-	{
-		pass = T_strdup( v->val.sptr );
+    if ( v != NULL && v->type == STR_VAR )
+    {
+        pass = T_strdup( v->val.sptr );
 
-		if ( pci_mio_16e_1.dio_state.reserved_by )
-		{
-			if ( strcmp( pci_mio_16e_1.dio_state.reserved_by, pass ) )
-			{
-				print( FATAL, "DIO is reserved, wrong phase-phrase.\n" );
-				T_free( pass );
-				THROW( EXCEPTION );
-			}
-		}
-		else 
-			print( WARN, "Pass-phrase for non-reserved DIO.\n" );
+        if ( pci_mio_16e_1.dio_state.reserved_by )
+        {
+            if ( strcmp( pci_mio_16e_1.dio_state.reserved_by, pass ) )
+            {
+                print( FATAL, "DIO is reserved, wrong phase-phrase.\n" );
+                T_free( pass );
+                THROW( EXCEPTION );
+            }
+        }
+        else 
+            print( WARN, "Pass-phrase for non-reserved DIO.\n" );
 
-		T_free( pass );
-		v = vars_pop( v );
-	}
-	else if ( pci_mio_16e_1.dio_state.reserved_by )
-	{
-		print( FATAL, "DIO is reserved, phase-phrase required.\n" );
-		THROW( EXCEPTION );
-	}
+        T_free( pass );
+        v = vars_pop( v );
+    }
+    else if ( pci_mio_16e_1.dio_state.reserved_by )
+    {
+        print( FATAL, "DIO is reserved, phase-phrase required.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	bits = get_strict_long( v, "DIO value" );
+    bits = get_strict_long( v, "DIO value" );
 
-	if ( bits < 0 || bits > 0xFF )
-	{
-		print( FATAL, "Invalid value of %ld, valid range is [0-255].\n",
-			   bits );
-		THROW( EXCEPTION );
-	}
+    if ( bits < 0 || bits > 0xFF )
+    {
+        print( FATAL, "Invalid value of %ld, valid range is [0-255].\n",
+               bits );
+        THROW( EXCEPTION );
+    }
 
-	if ( ( v = vars_pop( v ) ) == NULL )
-		mask = 0xFF;
-	else
-	{
-		mask = get_strict_long( v, "DIO bit mask" );
-		if ( mask < 0 || mask > 0xFF )
-		{
-			print( FATAL, "Invalid mask of 0x%X, valid range is [0-255].\n",
-				   mask );
-			THROW( EXCEPTION );
-		}
+    if ( ( v = vars_pop( v ) ) == NULL )
+        mask = 0xFF;
+    else
+    {
+        mask = get_strict_long( v, "DIO bit mask" );
+        if ( mask < 0 || mask > 0xFF )
+        {
+            print( FATAL, "Invalid mask of 0x%X, valid range is [0-255].\n",
+                   mask );
+            THROW( EXCEPTION );
+        }
 
-		too_many_arguments( v );
-	}
+        too_many_arguments( v );
+    }
 
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		raise_permissions( );
-		ret = ni_daq_dio_write( pci_mio_16e_1.board,
-								( unsigned char ) ( bits & 0xFF ),
-								( unsigned char ) ( mask & 0xFF ) );
-		lower_permissions( );
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        raise_permissions( );
+        ret = ni_daq_dio_write( pci_mio_16e_1.board,
+                                ( unsigned char ) ( bits & 0xFF ),
+                                ( unsigned char ) ( mask & 0xFF ) );
+        lower_permissions( );
 
-		if ( ret < 0 )
-		{
-			print( FATAL, "Can't write value to DIO.\n" );
-			THROW( EXCEPTION );
-		}
-	}
+        if ( ret < 0 )
+        {
+            print( FATAL, "Can't write value to DIO.\n" );
+            THROW( EXCEPTION );
+        }
+    }
 
-	return vars_push( INT_VAR, 1 );
+    return vars_push( INT_VAR, 1 );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

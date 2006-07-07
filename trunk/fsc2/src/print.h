@@ -27,7 +27,7 @@
 
 
 void print_it( FL_OBJECT * /* obj  */,
-			   long        /* data */ );
+               long        /* data */ );
 
 
 #endif   /* ! PRINT_HEADER */
@@ -36,5 +36,7 @@ void print_it( FL_OBJECT * /* obj  */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

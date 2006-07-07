@@ -29,22 +29,24 @@ Fsc2_Assert_T Assert_Struct;
 
 
 int fsc2_assert_print( const char * expression,
-					   const char * filename,
-					   int          line )
+                       const char * filename,
+                       int          line )
 {
-	fprintf( stderr, "%s:%d: failed assertion: %s\n", filename, line,
-			 expression );
-	Assert_Struct.expression = expression;
-	Assert_Struct.line = line;
-	Assert_Struct.filename = filename;
-	abort( );
+    fprintf( stderr, "%s:%d: failed assertion: %s\n", filename, line,
+             expression );
+    Assert_Struct.expression = expression;
+    Assert_Struct.line = line;
+    Assert_Struct.filename = filename;
+    abort( );
 
-	return 0;
+    return 0;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

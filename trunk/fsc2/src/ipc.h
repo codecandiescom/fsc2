@@ -29,12 +29,12 @@
 
 
 void *get_shm( int * /* shm_id */,
-			   long  /* len    */ );
+               long  /* len    */ );
 
 char *attach_shm( int /* key */ );
 
 void detach_shm( void * /* buf */,
-				 int *  /* key */ );
+                 int *  /* key */ );
 
 void delete_all_shm( void );
 
@@ -55,5 +55,7 @@ int sema_post( int /* sema_id */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

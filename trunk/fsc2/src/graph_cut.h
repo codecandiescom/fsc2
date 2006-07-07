@@ -28,43 +28,43 @@
 typedef struct Cut_Graphics Cut_Graphics_T;
 
 struct Cut_Graphics {
-	int cut_dir;             /* direction of cut (i.e. X, Y) */
-	int curve;               /* number of the curve the cut comes from */
+    int cut_dir;             /* direction of cut (i.e. X, Y) */
+    int curve;               /* number of the curve the cut comes from */
 
-	bool is_shown;
+    bool is_shown;
 
-	bool is_scale_set;       /* have scaling factors been calculated ? */
-	bool scale_changed;      /* have scaling factors changed ? */
+    bool is_scale_set;       /* have scaling factors been calculated ? */
+    bool scale_changed;      /* have scaling factors changed ? */
 
-	long nx;                 /* number of points to display */
-	long index;              /* index in curve the cut is taken from */
+    long nx;                 /* number of points to display */
+    long index;              /* index in curve the cut is taken from */
 
-	bool is_fs[ MAX_CURVES ];
-	bool has_been_shown[ MAX_CURVES ];
-	bool can_undo[ MAX_CURVES ];
-	double s2d[ MAX_CURVES ][ 2 ];
-	double shift[ MAX_CURVES ][ 2 ];
-	double old_s2d[ MAX_CURVES ][ 2 ];
-	double old_shift[ MAX_CURVES ][ 2 ];
+    bool is_fs[ MAX_CURVES ];
+    bool has_been_shown[ MAX_CURVES ];
+    bool can_undo[ MAX_CURVES ];
+    double s2d[ MAX_CURVES ][ 2 ];
+    double shift[ MAX_CURVES ][ 2 ];
+    double old_s2d[ MAX_CURVES ][ 2 ];
+    double old_shift[ MAX_CURVES ][ 2 ];
 
-	Pixmap label_pm[ 3 ];    /* used for drawing of rotated text */
-	                         /* the second pixmap (text at y axis) is always
-								identical to the third label pixmap (z axis)
-								of the main display window, so don't free! */
+    Pixmap label_pm[ 3 ];    /* used for drawing of rotated text */
+                             /* the second pixmap (text at y axis) is always
+                                identical to the third label pixmap (z axis)
+                                of the main display window, so don't free! */
 
-	Pixmap up_arrows[ 4 ],
-		   down_arrows[ 4 ],
-		   left_arrows[ 4 ],
-		   right_arrows[ 4 ];
+    Pixmap up_arrows[ 4 ],
+           down_arrows[ 4 ],
+           left_arrows[ 4 ],
+           right_arrows[ 4 ];
 
-	unsigned int up_arrow_w,    /* sizes of out of range markers */
-		         up_arrow_h,
-		         down_arrow_w,
-		         down_arrow_h,
-		         left_arrow_w,
-		         left_arrow_h,
-		         right_arrow_w,
-		         right_arrow_h;
+    unsigned int up_arrow_w,    /* sizes of out of range markers */
+                 up_arrow_h,
+                 down_arrow_w,
+                 down_arrow_h,
+                 left_arrow_w,
+                 left_arrow_h,
+                 right_arrow_w,
+                 right_arrow_h;
 
 };
 
@@ -75,19 +75,19 @@ struct Cut_Graphics {
 void cut_init( void );
 
 void cut_show( int  /* dir     */,
-			   long /* u_index */ );
+               long /* u_index */ );
 
 bool cut_data_rescaled( long   /* curve */,
-						double /* y_min */,
-						double /* y_max */ );
+                        double /* y_min */,
+                        double /* y_max */ );
 
 bool cut_num_points_changed( int  /* dir        */,
-							 long /* num_points */ );
+                             long /* num_points */ );
 
 bool cut_new_points( long /* curve   */,
-					 long /* x_index */,
-					 long /* y_index */,
-					 long /* len     */ );
+                     long /* x_index */,
+                     long /* y_index */,
+                     long /* len     */ );
 
 void redraw_all_cut_canvases( void );
 
@@ -98,25 +98,25 @@ void cut_new_curve_handler( void );
 void cut_form_close( void );
 
 void cut_undo_button_callback( FL_OBJECT * /* a */,
-							   long        /* b */ );
+                               long        /* b */ );
 
 void cut_close_callback( FL_OBJECT * /* a */,
-						 long        /* b */ );
+                         long        /* b */ );
 
 void cut_fs_button_callback( FL_OBJECT * /* a */,
-							 long        /* b */ );
+                             long        /* b */ );
 
 void cut_clear_curve( long /* curve */ );
 
 void set_cut_marker( long /* x_pos */,
-					 long /* color */ );
+                     long /* color */ );
 
 void delete_cut_marker( long /* x_pos */ );
 
 void delete_all_cut_markers( bool /* redraw_flag */ );
 
 int get_mouse_pos_cut( double *       /* pa      */,
-					   unsigned int * /* keymask */ );
+                       unsigned int * /* keymask */ );
 
 
 #endif   /* ! GRAPH_CUT_HEADER */
@@ -125,5 +125,7 @@ int get_mouse_pos_cut( double *       /* pa      */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

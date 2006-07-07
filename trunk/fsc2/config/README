@@ -60,4 +60,4 @@ of the module itself.
 
 
 Please note: Changes to the configuration file of a device only take effect
-after recompiling the module.
+after recompiling the module!

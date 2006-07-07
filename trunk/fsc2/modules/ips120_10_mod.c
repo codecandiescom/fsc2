@@ -103,8 +103,8 @@ static double ips120_10_mod_goto_current( double current );
 static int ips120_10_mod_set_activity( int activity );
 
 static long ips120_10_mod_talk( const char * message,
-								char *       reply,
-								long         length );
+                                char *       reply,
+                                long         length );
 
 static bool ips120_10_mod_serial_open( void );
 
@@ -112,69 +112,69 @@ static void ips120_10_mod_comm_failure( void );
 
 
 struct IPS120_10_MOD {
-	int sn;
+    int sn;
     struct termios *tio;
 
-	int sweep_state;
+    int sweep_state;
 
-	int activity;
-	int mode;
-	int state;
-	int loc_rem_state;
+    int activity;
+    int mode;
+    int state;
+    int loc_rem_state;
 
-	double act_current;
-	double target_current;
+    double act_current;
+    double target_current;
 
-	double start_current;
-	bool is_start_current;
+    double start_current;
+    bool is_start_current;
 
-	double sweep_rate;
-	bool is_sweep_rate;
+    double sweep_rate;
+    bool is_sweep_rate;
 
-	double fast_sweep_rate;
+    double fast_sweep_rate;
 
-	double max_current;
-	double min_current;
+    double max_current;
+    double min_current;
 
-	double time_estimate;
+    double time_estimate;
 
-	bool goto_field_on_end;
-	double final_target_current;
+    bool goto_field_on_end;
+    double final_target_current;
 
-	char *dac_func;           /* name of function to set DAC voltage */
+    char *dac_func;           /* name of function to set DAC voltage */
 };
 
 
 enum {
-	STOPPED,
-	SWEEPING_UP,
-	SWEEPING_DOWN
+    STOPPED,
+    SWEEPING_UP,
+    SWEEPING_DOWN
 };
 
 enum {
-	LOCAL_AND_LOCKED,
-	REMOTE_AND_LOCKED,
-	LOCAL_AND_UNLOCKED,
-	REMOTE_AND_UNLOCKED
+    LOCAL_AND_LOCKED,
+    REMOTE_AND_LOCKED,
+    LOCAL_AND_UNLOCKED,
+    REMOTE_AND_UNLOCKED
 };
 
 enum {
-	HOLD,
-	TO_SET_POINT,
-	TO_ZERO
+    HOLD,
+    TO_SET_POINT,
+    TO_ZERO
 };
 
 enum {
-	AT_REST,
-	SWEEPING,
-	SWEEP_LIMITING,
-	SWEEPING_AND_SWEEP_LIMITING
+    AT_REST,
+    SWEEPING,
+    SWEEP_LIMITING,
+    SWEEPING_AND_SWEEP_LIMITING
 };
 
 
 enum {
-	FAST,
-	SLOW
+    FAST,
+    SLOW
 };
 
 
@@ -187,84 +187,84 @@ static struct IPS120_10_MOD ips120_10_mod, ips120_10_mod_stored;
 
 int ips120_10_mod_init_hook( void )
 {
-	int dev_num;
-	Var_T *func_ptr;
-	char *reserve_dac_func;
-	int acc;
-	Var_T *v;
+    int dev_num;
+    Var_T *func_ptr;
+    char *reserve_dac_func;
+    int acc;
+    Var_T *v;
 
 
-	/* Claim the serial port (throws an exception on errors) */
+    /* Claim the serial port (throws an exception on errors) */
 
-	fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
-	/* Check if the module for the DAC we need has been loaded */
+    /* Check if the module for the DAC we need has been loaded */
 
-	if ( ( dev_num = exists_device( DAC_NAME ) ) < 1 )
-	{
-		print( FATAL, "Module for DAC '%s' required by the magnet "
-			   "power supply isn't loaded.\n", DAC_NAME );
-		THROW( EXCEPTION );
-	}
+    if ( ( dev_num = exists_device( DAC_NAME ) ) < 1 )
+    {
+        print( FATAL, "Module for DAC '%s' required by the magnet "
+               "power supply isn't loaded.\n", DAC_NAME );
+        THROW( EXCEPTION );
+    }
 
-	/* Assemble the name of the function for setting the DAC port and test
-	   if it exists */
+    /* Assemble the name of the function for setting the DAC port and test
+       if it exists */
 
-	if ( dev_num == 1 )
-		ips120_10_mod.dac_func = T_strdup( "daq_set_voltage" );
-	else
-		ips120_10_mod.dac_func = get_string( "daq_set_voltage#%d", dev_num );
-	
-	if ( ( func_ptr = func_get( ips120_10_mod.dac_func, &acc ) ) == NULL )
-	{
-		print( FATAL, "DAC module '%s' not supplying a function for setting "
-			   "a voltage.\n", DAC_NAME );
-		T_free( ips120_10_mod.dac_func );
-		THROW( EXCEPTION );
-	}
+    if ( dev_num == 1 )
+        ips120_10_mod.dac_func = T_strdup( "daq_set_voltage" );
+    else
+        ips120_10_mod.dac_func = get_string( "daq_set_voltage#%d", dev_num );
+    
+    if ( ( func_ptr = func_get( ips120_10_mod.dac_func, &acc ) ) == NULL )
+    {
+        print( FATAL, "DAC module '%s' not supplying a function for setting "
+               "a voltage.\n", DAC_NAME );
+        T_free( ips120_10_mod.dac_func );
+        THROW( EXCEPTION );
+    }
 
-	vars_pop( func_ptr );
+    vars_pop( func_ptr );
 
-	/* Now try to resere the DAC, password is the power supplies name */
+    /* Now try to resere the DAC, password is the power supplies name */
 
-	if ( dev_num == 1 )
-		reserve_dac_func = T_strdup( "daq_reserve_dac" );
-	else
-		reserve_dac_func = get_string( "daq_reserve_dac#%d", dev_num );
-	
-	if ( ( func_ptr = func_get( reserve_dac_func, &acc ) ) == NULL )
-	{
-		print( FATAL, "DAC module '%s' not supplying a function for reserving "
-			   "the DAC.\n", DAC_NAME );
-		THROW( EXCEPTION );
-	}
+    if ( dev_num == 1 )
+        reserve_dac_func = T_strdup( "daq_reserve_dac" );
+    else
+        reserve_dac_func = get_string( "daq_reserve_dac#%d", dev_num );
+    
+    if ( ( func_ptr = func_get( reserve_dac_func, &acc ) ) == NULL )
+    {
+        print( FATAL, "DAC module '%s' not supplying a function for reserving "
+               "the DAC.\n", DAC_NAME );
+        THROW( EXCEPTION );
+    }
 
-	vars_push( STR_VAR, DEVICE_NAME );
-	vars_push( INT_VAR, 1L );
-	v = func_call( func_ptr );
+    vars_push( STR_VAR, DEVICE_NAME );
+    vars_push( INT_VAR, 1L );
+    v = func_call( func_ptr );
 
-	if ( v->val.lval != 1 )
-	{
-		print( FATAL, "Can't reserve DAC '%s'.\n" DAC_NAME );
-		vars_pop( v );
-		THROW( EXCEPTION );
-	}
+    if ( v->val.lval != 1 )
+    {
+        print( FATAL, "Can't reserve DAC '%s'.\n" DAC_NAME );
+        vars_pop( v );
+        THROW( EXCEPTION );
+    }
 
-	vars_pop( v );
+    vars_pop( v );
 
-	ips120_10_mod.act_current = 0.0;
+    ips120_10_mod.act_current = 0.0;
 
-	ips120_10_mod.is_start_current = UNSET;
-	ips120_10_mod.is_sweep_rate = UNSET;
+    ips120_10_mod.is_start_current = UNSET;
+    ips120_10_mod.is_sweep_rate = UNSET;
 
-	ips120_10_mod.fast_sweep_rate = FAST_SWEEP_RATE;
+    ips120_10_mod.fast_sweep_rate = FAST_SWEEP_RATE;
 
-	ips120_10_mod.max_current = MAX_CURRENT;
-	ips120_10_mod.min_current = MIN_CURRENT;
+    ips120_10_mod.max_current = MAX_CURRENT;
+    ips120_10_mod.min_current = MIN_CURRENT;
 
-	ips120_10_mod.goto_field_on_end = UNSET;
+    ips120_10_mod.goto_field_on_end = UNSET;
 
-	return 1;
+    return 1;
 }
 
 
@@ -274,28 +274,28 @@ int ips120_10_mod_init_hook( void )
 
 int ips120_10_mod_test_hook( void )
 {
-	ips120_10_mod_stored = ips120_10_mod;
+    ips120_10_mod_stored = ips120_10_mod;
 
-	if ( ips120_10_mod.is_start_current )
-		ips120_10_mod.act_current = ips120_10_mod.start_current;
-	else
-	{
-		ips120_10_mod.start_current = ips120_10_mod.act_current = TEST_CURRENT;
-		ips120_10_mod.is_start_current = SET;
-	}
+    if ( ips120_10_mod.is_start_current )
+        ips120_10_mod.act_current = ips120_10_mod.start_current;
+    else
+    {
+        ips120_10_mod.start_current = ips120_10_mod.act_current = TEST_CURRENT;
+        ips120_10_mod.is_start_current = SET;
+    }
 
-	if ( ! ips120_10_mod.is_sweep_rate )
-	{
-		ips120_10_mod.sweep_rate = TEST_SWEEP_RATE;
-		ips120_10_mod.is_sweep_rate = SET;
-	}
+    if ( ! ips120_10_mod.is_sweep_rate )
+    {
+        ips120_10_mod.sweep_rate = TEST_SWEEP_RATE;
+        ips120_10_mod.is_sweep_rate = SET;
+    }
 
-	ips120_10_mod.activity = HOLD;
-	ips120_10_mod.sweep_state = STOPPED;
+    ips120_10_mod.activity = HOLD;
+    ips120_10_mod.sweep_state = STOPPED;
 
-	ips120_10_mod.time_estimate = experiment_time( );
+    ips120_10_mod.time_estimate = experiment_time( );
 
-	return 1;
+    return 1;
 }
 
 
@@ -305,15 +305,15 @@ int ips120_10_mod_test_hook( void )
 
 int ips120_10_mod_exp_hook( void )
 {
-	ips120_10_mod = ips120_10_mod_stored;
+    ips120_10_mod = ips120_10_mod_stored;
 
-	if ( ! ips120_10_mod_init( ) )
-	{
-		print( FATAL, "Initialization of device failed.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! ips120_10_mod_init( ) )
+    {
+        print( FATAL, "Initialization of device failed.\n" );
+        THROW( EXCEPTION );
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -323,10 +323,10 @@ int ips120_10_mod_exp_hook( void )
 
 int ips120_10_mod_end_of_exp_hook( void )
 {
-	ips120_10_mod_to_local( );
-	ips120_10_mod = ips120_10_mod_stored;
+    ips120_10_mod_to_local( );
+    ips120_10_mod = ips120_10_mod_stored;
 
-	return 1;
+    return 1;
 }
 
 
@@ -336,7 +336,7 @@ int ips120_10_mod_end_of_exp_hook( void )
 
 Var_T *magnet_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -346,36 +346,36 @@ Var_T *magnet_name( Var_T * v  UNUSED_ARG )
 
 Var_T *magnet_setup( Var_T * v )
 {
-	double cur;
-	double sweep_rate;
+    double cur;
+    double sweep_rate;
 
 
-	if ( v->next == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v->next == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	cur = get_double( v, "field" ) / F2C_RATIO;
-	ips120_10_mod.start_current = ips120_10_mod_current_check( cur );
-	ips120_10_mod.is_start_current = SET;
+    cur = get_double( v, "field" ) / F2C_RATIO;
+    ips120_10_mod.start_current = ips120_10_mod_current_check( cur );
+    ips120_10_mod.is_start_current = SET;
 
-	if ( ( v = vars_pop( v ) ) != NULL )
-	{
-		sweep_rate = get_double( v, "magnet sweep speed" ) / F2C_RATIO;
-		if ( sweep_rate < 0.0 )
-		{
-			print( FATAL, "Negative sweep rates can't be used, use argument "
-				   "to magnet_sweep() to set sweep direction.\n" );
-			THROW( EXCEPTION );
-		}
+    if ( ( v = vars_pop( v ) ) != NULL )
+    {
+        sweep_rate = get_double( v, "magnet sweep speed" ) / F2C_RATIO;
+        if ( sweep_rate < 0.0 )
+        {
+            print( FATAL, "Negative sweep rates can't be used, use argument "
+                   "to magnet_sweep() to set sweep direction.\n" );
+            THROW( EXCEPTION );
+        }
 
-		ips120_10_mod.sweep_rate =
-								  ips120_10_mod_sweep_rate_check( sweep_rate );
-		ips120_10_mod.is_sweep_rate = SET;
-	}
+        ips120_10_mod.sweep_rate =
+                                  ips120_10_mod_sweep_rate_check( sweep_rate );
+        ips120_10_mod.is_sweep_rate = SET;
+    }
 
-	return vars_push( INT_VAR, 1 );
+    return vars_push( INT_VAR, 1 );
 }
 
 
@@ -387,57 +387,57 @@ Var_T *magnet_setup( Var_T * v )
 
 Var_T *get_field( Var_T * v  UNUSED_ARG )
 {
-	if ( FSC2_MODE == TEST )
-	{
-		/* During the test run we need to return some not completely bogus
-		   value when a sweep is run. Thus an estimate for the time spend
-		   until now is fetched, multiplied by the sweep rate and added to
-		   the current field */
+    if ( FSC2_MODE == TEST )
+    {
+        /* During the test run we need to return some not completely bogus
+           value when a sweep is run. Thus an estimate for the time spend
+           until now is fetched, multiplied by the sweep rate and added to
+           the current field */
 
-		if ( ips120_10_mod.sweep_state != STOPPED &&
-			 ips120_10_mod.activity == TO_SET_POINT )
-		{
-			double cur_time, dtime;
+        if ( ips120_10_mod.sweep_state != STOPPED &&
+             ips120_10_mod.activity == TO_SET_POINT )
+        {
+            double cur_time, dtime;
 
-			cur_time = experiment_time( );
-			dtime = cur_time - ips120_10_mod.time_estimate;
-			ips120_10_mod.time_estimate = cur_time;
+            cur_time = experiment_time( );
+            dtime = cur_time - ips120_10_mod.time_estimate;
+            ips120_10_mod.time_estimate = cur_time;
 
-			ips120_10_mod.act_current =
-				 1.0e-4 * lrnd( 1.0e4 * ( ips120_10_mod.act_current
-								+ experiment_time( ) * ips120_10_mod.sweep_rate
-								* ( ips120_10_mod.sweep_state == SWEEPING_UP ?
-									1.0 : - 1.0 ) ) );
+            ips120_10_mod.act_current =
+                 1.0e-4 * lrnd( 1.0e4 * ( ips120_10_mod.act_current
+                                + experiment_time( ) * ips120_10_mod.sweep_rate
+                                * ( ips120_10_mod.sweep_state == SWEEPING_UP ?
+                                    1.0 : - 1.0 ) ) );
 
-			if ( ips120_10_mod.act_current > ips120_10_mod.max_current )
-				ips120_10_mod.act_current = ips120_10_mod.max_current;
-			if ( ips120_10_mod.act_current < ips120_10_mod.min_current )
-				ips120_10_mod.act_current = ips120_10_mod.min_current;
-		}
-	}
-	else
-		ips120_10_mod.act_current = ips120_10_mod_get_act_current( );
+            if ( ips120_10_mod.act_current > ips120_10_mod.max_current )
+                ips120_10_mod.act_current = ips120_10_mod.max_current;
+            if ( ips120_10_mod.act_current < ips120_10_mod.min_current )
+                ips120_10_mod.act_current = ips120_10_mod.min_current;
+        }
+    }
+    else
+        ips120_10_mod.act_current = ips120_10_mod_get_act_current( );
 
-	/* If a sweep reached one of the current limits stop the sweep */
+    /* If a sweep reached one of the current limits stop the sweep */
 
-	if ( ( ( ips120_10_mod.sweep_state == SWEEPING_UP ||
-			 ips120_10_mod.activity == TO_SET_POINT ) &&
-		   ips120_10_mod.act_current >= ips120_10_mod.max_current ) ||
-		 ( ( ips120_10_mod.sweep_state == SWEEPING_DOWN ||
-			 ips120_10_mod.activity == TO_SET_POINT ) &&
-		   ips120_10_mod.act_current <= ips120_10_mod.min_current ) )
-	{
-		print( WARN, "Sweep had to be stopped because current limit was "
-			   "reached.\n" );
+    if ( ( ( ips120_10_mod.sweep_state == SWEEPING_UP ||
+             ips120_10_mod.activity == TO_SET_POINT ) &&
+           ips120_10_mod.act_current >= ips120_10_mod.max_current ) ||
+         ( ( ips120_10_mod.sweep_state == SWEEPING_DOWN ||
+             ips120_10_mod.activity == TO_SET_POINT ) &&
+           ips120_10_mod.act_current <= ips120_10_mod.min_current ) )
+    {
+        print( WARN, "Sweep had to be stopped because current limit was "
+               "reached.\n" );
 
-		if ( FSC2_MODE == EXPERIMENT )
-			ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
-		else
-			ips120_10_mod.activity = HOLD;
-		ips120_10_mod.sweep_state = STOPPED;
-	}
+        if ( FSC2_MODE == EXPERIMENT )
+            ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
+        else
+            ips120_10_mod.activity = HOLD;
+        ips120_10_mod.sweep_state = STOPPED;
+    }
 
-	return vars_push( FLOAT_VAR, ips120_10_mod.act_current * F2C_RATIO );
+    return vars_push( FLOAT_VAR, ips120_10_mod.act_current * F2C_RATIO );
 }
 
 
@@ -448,31 +448,31 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 
 Var_T *set_field( Var_T * v )
 {
-	double cur;
+    double cur;
 
 
-	/* Stop sweeping */
+    /* Stop sweeping */
 
-	if ( ips120_10_mod.sweep_state != STOPPED ||
-		 ips120_10_mod.activity != HOLD )
-	{
-		if ( FSC2_MODE == EXPERIMENT )
-			ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
-		else
-			ips120_10_mod.activity = HOLD;
-		ips120_10_mod.sweep_state = STOPPED;
-	}
+    if ( ips120_10_mod.sweep_state != STOPPED ||
+         ips120_10_mod.activity != HOLD )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+            ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
+        else
+            ips120_10_mod.activity = HOLD;
+        ips120_10_mod.sweep_state = STOPPED;
+    }
 
-	/* Check the current */
+    /* Check the current */
 
-	cur = ips120_10_mod_current_check( get_double( v, "field" ) / F2C_RATIO );
+    cur = ips120_10_mod_current_check( get_double( v, "field" ) / F2C_RATIO );
 
-	if ( FSC2_MODE == EXPERIMENT )
-		cur = ips120_10_mod_goto_current( cur );
+    if ( FSC2_MODE == EXPERIMENT )
+        cur = ips120_10_mod_goto_current( cur );
 
-	ips120_10_mod.act_current = cur;
+    ips120_10_mod.act_current = cur;
 
-	return vars_push( FLOAT_VAR, ips120_10_mod.act_current * F2C_RATIO );
+    return vars_push( FLOAT_VAR, ips120_10_mod.act_current * F2C_RATIO );
 }
 
 
@@ -483,61 +483,61 @@ Var_T *set_field( Var_T * v )
 
 Var_T *magnet_sweep( Var_T * v )
 {
-	long dir;
-	Var_T *vc;
+    long dir;
+    Var_T *vc;
 
 
-	if ( v == NULL || FSC2_MODE == TEST )
-	{
-		vc = get_field( NULL );
-		ips120_10_mod.act_current = vc->val.dval / F2C_RATIO;
-		vars_pop( vc );
-	}
+    if ( v == NULL || FSC2_MODE == TEST )
+    {
+        vc = get_field( NULL );
+        ips120_10_mod.act_current = vc->val.dval / F2C_RATIO;
+        vars_pop( vc );
+    }
 
-	if ( v == NULL )
-		switch ( ips120_10_mod.sweep_state )
-		{
-			case STOPPED :
-				return vars_push( INT_VAR, 0 );
+    if ( v == NULL )
+        switch ( ips120_10_mod.sweep_state )
+        {
+            case STOPPED :
+                return vars_push( INT_VAR, 0 );
 
-			case SWEEPING_UP :
-				return vars_push( INT_VAR, 1 );
+            case SWEEPING_UP :
+                return vars_push( INT_VAR, 1 );
 
-			case SWEEPING_DOWN :
-				return vars_push( INT_VAR, -1 );
-		}
+            case SWEEPING_DOWN :
+                return vars_push( INT_VAR, -1 );
+        }
 
-	if ( v->type != STR_VAR )
-		dir = get_long( v, "sweep direction" );
-	else
-	{
-		if ( ! strcasecmp( v->val.sptr, "UP" ) )
-			dir = 1;
-		else if ( ! strcasecmp( v->val.sptr, "DOWN" ) )
-			dir = -1;
-		else if ( ! strcasecmp( v->val.sptr, "STOP" ) )
-			dir = 0;
-		else
-		{
-			print( FATAL, "Invalid sweep direction : '%s'.\n", v->val.sptr );
-			THROW( EXCEPTION );
-		}
-	}
+    if ( v->type != STR_VAR )
+        dir = get_long( v, "sweep direction" );
+    else
+    {
+        if ( ! strcasecmp( v->val.sptr, "UP" ) )
+            dir = 1;
+        else if ( ! strcasecmp( v->val.sptr, "DOWN" ) )
+            dir = -1;
+        else if ( ! strcasecmp( v->val.sptr, "STOP" ) )
+            dir = 0;
+        else
+        {
+            print( FATAL, "Invalid sweep direction : '%s'.\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
 
-	if ( dir == 0 )
-		magnet_stop_sweep( );
-	else if ( dir > 0 )
-	{
-		dir = 1;
-		magnet_sweep_up( );
-	}
-	else
-	{
-		dir = -1;
-		magnet_sweep_down( );
-	}
+    if ( dir == 0 )
+        magnet_stop_sweep( );
+    else if ( dir > 0 )
+    {
+        dir = 1;
+        magnet_sweep_up( );
+    }
+    else
+    {
+        dir = -1;
+        magnet_sweep_down( );
+    }
 
-	return vars_push( FLOAT_VAR, dir );
+    return vars_push( FLOAT_VAR, dir );
 }
 
 
@@ -547,34 +547,34 @@ Var_T *magnet_sweep( Var_T * v )
 
 static void magnet_sweep_up( void )
 {
-	if ( ! ips120_10_mod.is_sweep_rate )
-	{
-		print( FATAL, "No sweep rate has been set.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! ips120_10_mod.is_sweep_rate )
+    {
+        print( FATAL, "No sweep rate has been set.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( FSC2_MODE == TEST )
-	{
-		if ( ips120_10_mod.sweep_state == SWEEPING_UP )
-		{
-			print( SEVERE, "Field is already sweeping up.\n" );
-			return;
-		}
+    if ( FSC2_MODE == TEST )
+    {
+        if ( ips120_10_mod.sweep_state == SWEEPING_UP )
+        {
+            print( SEVERE, "Field is already sweeping up.\n" );
+            return;
+        }
 
-		if ( ips120_10_mod.act_current >=
-			 				   ips120_10_mod.max_current - CURRENT_RESOLUTION )
-		{
-			print( WARN, "Magnet is already at maximum field.\n" );
-			return;
-		}
+        if ( ips120_10_mod.act_current >=
+                               ips120_10_mod.max_current - CURRENT_RESOLUTION )
+        {
+            print( WARN, "Magnet is already at maximum field.\n" );
+            return;
+        }
 
-		ips120_10_mod.sweep_state = SWEEPING_UP;
-		ips120_10_mod.activity = TO_SET_POINT;
-		ips120_10_mod.target_current = ips120_10_mod.max_current;
-		return;
-	}
+        ips120_10_mod.sweep_state = SWEEPING_UP;
+        ips120_10_mod.activity = TO_SET_POINT;
+        ips120_10_mod.target_current = ips120_10_mod.max_current;
+        return;
+    }
 
-	ips120_10_mod_sweep_up( );
+    ips120_10_mod_sweep_up( );
 }
 
 
@@ -584,34 +584,34 @@ static void magnet_sweep_up( void )
 
 static void magnet_sweep_down( void )
 {
-	if ( ! ips120_10_mod.is_sweep_rate )
-	{
-		print( FATAL, "No sweep rate has been set.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! ips120_10_mod.is_sweep_rate )
+    {
+        print( FATAL, "No sweep rate has been set.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( FSC2_MODE == TEST )
-	{
-		if ( ips120_10_mod.sweep_state == SWEEPING_DOWN )
-		{
-			print( SEVERE, "Field is already sweeping down.\n" );
-			return;
-		}
+    if ( FSC2_MODE == TEST )
+    {
+        if ( ips120_10_mod.sweep_state == SWEEPING_DOWN )
+        {
+            print( SEVERE, "Field is already sweeping down.\n" );
+            return;
+        }
 
-		if ( ips120_10_mod.act_current
-			 				<= ips120_10_mod.min_current + CURRENT_RESOLUTION )
-		{
-			print( WARN, "Magnet is already at minimum field.\n" );
-			return;
-		}
+        if ( ips120_10_mod.act_current
+                            <= ips120_10_mod.min_current + CURRENT_RESOLUTION )
+        {
+            print( WARN, "Magnet is already at minimum field.\n" );
+            return;
+        }
 
-		ips120_10_mod.sweep_state = SWEEPING_DOWN;
-		ips120_10_mod.activity = TO_SET_POINT;
-		ips120_10_mod.target_current = ips120_10_mod.min_current;
-		return;
-	}
+        ips120_10_mod.sweep_state = SWEEPING_DOWN;
+        ips120_10_mod.activity = TO_SET_POINT;
+        ips120_10_mod.target_current = ips120_10_mod.min_current;
+        return;
+    }
 
-	ips120_10_mod_sweep_down( );
+    ips120_10_mod_sweep_down( );
 }
 
 
@@ -621,22 +621,22 @@ static void magnet_sweep_down( void )
 
 static void magnet_stop_sweep( void )
 {
-	if ( ips120_10_mod.sweep_state == STOPPED )
-	{
-		print( FSC2_MODE == TEST ? SEVERE : WARN,
-			   "Sweep is already stopped.\n" );
-		return;
-	}
+    if ( ips120_10_mod.sweep_state == STOPPED )
+    {
+        print( FSC2_MODE == TEST ? SEVERE : WARN,
+               "Sweep is already stopped.\n" );
+        return;
+    }
 
-	if ( FSC2_MODE == TEST )
-	{
-		ips120_10_mod.sweep_state = STOPPED;
-		ips120_10_mod.activity = HOLD;
-		return;
-	}
+    if ( FSC2_MODE == TEST )
+    {
+        ips120_10_mod.sweep_state = STOPPED;
+        ips120_10_mod.activity = HOLD;
+        return;
+    }
 
-	ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
-	ips120_10_mod.sweep_state = STOPPED;
+    ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
+    ips120_10_mod.sweep_state = STOPPED;
 }
 
 
@@ -646,40 +646,40 @@ static void magnet_stop_sweep( void )
 
 Var_T *magnet_sweep_rate( Var_T * v )
 {
-	double sweep_rate;
+    double sweep_rate;
 
 
-	if ( v == NULL )
-		switch( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! ips120_10_mod.is_sweep_rate )
-					no_query_possible( );
-				else
-					return vars_push( FLOAT_VAR, ips120_10_mod.sweep_rate );
+    if ( v == NULL )
+        switch( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! ips120_10_mod.is_sweep_rate )
+                    no_query_possible( );
+                else
+                    return vars_push( FLOAT_VAR, ips120_10_mod.sweep_rate );
 
-			case TEST :
-				return vars_push( FLOAT_VAR, ips120_10_mod.is_sweep_rate ?
-								  ips120_10_mod.sweep_rate : TEST_SWEEP_RATE );
+            case TEST :
+                return vars_push( FLOAT_VAR, ips120_10_mod.is_sweep_rate ?
+                                  ips120_10_mod.sweep_rate : TEST_SWEEP_RATE );
 
-			case EXPERIMENT :
-				return vars_push( FLOAT_VAR, ips120_10_mod.sweep_rate );
-		}
+            case EXPERIMENT :
+                return vars_push( FLOAT_VAR, ips120_10_mod.sweep_rate );
+        }
 
-	sweep_rate = ips120_10_mod_sweep_rate_check(
-								   get_double( v, "sweep rate" ) / F2C_RATIO );
+    sweep_rate = ips120_10_mod_sweep_rate_check(
+                                   get_double( v, "sweep rate" ) / F2C_RATIO );
 
-	if ( ips120_10_mod.is_sweep_rate &&
-		 sweep_rate == ips120_10_mod.sweep_rate )
-		return vars_push( FLOAT_VAR, ips120_10_mod.sweep_rate * F2C_RATIO );
+    if ( ips120_10_mod.is_sweep_rate &&
+         sweep_rate == ips120_10_mod.sweep_rate )
+        return vars_push( FLOAT_VAR, ips120_10_mod.sweep_rate * F2C_RATIO );
 
-	ips120_10_mod.sweep_rate = sweep_rate;
-	ips120_10_mod.is_sweep_rate = SET;
+    ips120_10_mod.sweep_rate = sweep_rate;
+    ips120_10_mod.is_sweep_rate = SET;
 
-	if ( FSC2_MODE == EXPERIMENT )
-		ips120_10_mod_set_sweep_rate( ips120_10_mod.sweep_rate );
+    if ( FSC2_MODE == EXPERIMENT )
+        ips120_10_mod_set_sweep_rate( ips120_10_mod.sweep_rate );
 
-	return vars_push( FLOAT_VAR, ips120_10_mod.sweep_rate * F2C_RATIO );
+    return vars_push( FLOAT_VAR, ips120_10_mod.sweep_rate * F2C_RATIO );
 }
 
 
@@ -690,8 +690,8 @@ Var_T *magnet_sweep_rate( Var_T * v )
 
 Var_T *reset_field( Var_T * v  UNUSED_ARG )
 {
-	return set_field( vars_push( FLOAT_VAR,
-								 ips120_10_mod.start_current * F2C_RATIO) );
+    return set_field( vars_push( FLOAT_VAR,
+                                 ips120_10_mod.start_current * F2C_RATIO) );
 }
 
 
@@ -703,15 +703,15 @@ Var_T *reset_field( Var_T * v  UNUSED_ARG )
 
 Var_T *magnet_goto_field_on_end( Var_T * v )
 {
-	double cur;
+    double cur;
 
 
-	cur = get_double( v, "final target field" ) / F2C_RATIO;
-	ips120_10_mod.final_target_current = ips120_10_mod_current_check( cur );
-	ips120_10_mod.goto_field_on_end = SET;
+    cur = get_double( v, "final target field" ) / F2C_RATIO;
+    ips120_10_mod.final_target_current = ips120_10_mod_current_check( cur );
+    ips120_10_mod.goto_field_on_end = SET;
 
-	return vars_push( FLOAT_VAR,
-					  ips120_10_mod.final_target_current * F2C_RATIO );
+    return vars_push( FLOAT_VAR,
+                      ips120_10_mod.final_target_current * F2C_RATIO );
 }
 
 
@@ -722,31 +722,31 @@ Var_T *magnet_goto_field_on_end( Var_T * v )
 
 Var_T *magnet_command( Var_T * v )
 {
-	char *cmd = NULL;
-	char reply[ 100 ];
+    char *cmd = NULL;
+    char reply[ 100 ];
 
 
-	CLOBBER_PROTECT( cmd );
+    CLOBBER_PROTECT( cmd );
 
-	vars_check( v, STR_VAR );
-	
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		TRY
-		{
-			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-			ips120_10_mod_talk( cmd, reply, 100 );
-			T_free( cmd );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( cmd );
-			RETHROW( );
-		}
-	}
+    vars_check( v, STR_VAR );
+    
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        TRY
+        {
+            cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+            ips120_10_mod_talk( cmd, reply, 100 );
+            T_free( cmd );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( cmd );
+            RETHROW( );
+        }
+    }
 
-	return vars_push( INT_VAR, 1 );
+    return vars_push( INT_VAR, 1 );
 }
 
 
@@ -755,135 +755,135 @@ Var_T *magnet_command( Var_T * v )
 
 static bool ips120_10_mod_init( void )
 {
-	char reply[ 100 ];
-	long length;
-	double cur_limit;
-	bool was_hold = UNSET;
-	Var_T *func_ptr;
-	int acc;
+    char reply[ 100 ];
+    long length;
+    double cur_limit;
+    bool was_hold = UNSET;
+    Var_T *func_ptr;
+    int acc;
 
 
-	if ( ! ips120_10_mod_serial_open( ) )
+    if ( ! ips120_10_mod_serial_open( ) )
         return FAIL;
 
 /*
-	if ( gpib_clear_device( ips120_10_mod.device ) == FAILURE )
-		ips120_10_mod_comm_failure( );
+    if ( gpib_clear_device( ips120_10_mod.device ) == FAILURE )
+        ips120_10_mod_comm_failure( );
 
-	fsc2_usleep( 250000, UNSET );
+    fsc2_usleep( 250000, UNSET );
 */
-	/* Bring power supply in remote state */
+    /* Bring power supply in remote state */
 
-	ips120_10_mod_talk( "C3\r", reply, 100 );
+    ips120_10_mod_talk( "C3\r", reply, 100 );
 
-	/* Set the sweep power supply to send and accept data with extended
-	   resolution (this is one of the few commands that don't produce a
-	   reply) */
+    /* Set the sweep power supply to send and accept data with extended
+       resolution (this is one of the few commands that don't produce a
+       reply) */
 
-	if ( fsc2_serial_write( SERIAL_PORT, "Q4\r", 3,
-							MAX_WRITE_WAIT, SET ) != 3 )
-	{
-		stop_on_user_request( );
-		ips120_10_mod_comm_failure( );
-	}
+    if ( fsc2_serial_write( SERIAL_PORT, "Q4\r", 3,
+                            MAX_WRITE_WAIT, SET ) != 3 )
+    {
+        stop_on_user_request( );
+        ips120_10_mod_comm_failure( );
+    }
 
-	/* Get the status of the magnet - if it's not in the LOC/REMOTE state we
-	   set it to something is going wrong... */
+    /* Get the status of the magnet - if it's not in the LOC/REMOTE state we
+       set it to something is going wrong... */
 
-	ips120_10_mod_get_complete_status( );
-	if ( ips120_10_mod.loc_rem_state != REMOTE_AND_UNLOCKED )
-	{
-		print( FATAL, "Magnet did not accept command.\n" );
-		THROW( EXCEPTION );
-	}
+    ips120_10_mod_get_complete_status( );
+    if ( ips120_10_mod.loc_rem_state != REMOTE_AND_UNLOCKED )
+    {
+        print( FATAL, "Magnet did not accept command.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* Get the maximum and minimum safe current limits and use these as the
-	   allowed current range (unless they are larger than the ones set in the
-	   configuration file). */
+    /* Get the maximum and minimum safe current limits and use these as the
+       allowed current range (unless they are larger than the ones set in the
+       configuration file). */
 
-	length = ips120_10_mod_talk( "R21\r", reply, 100 );
-	reply[ length - 1 ] = '\0';
-	cur_limit = T_atod( reply + 1 );
+    length = ips120_10_mod_talk( "R21\r", reply, 100 );
+    reply[ length - 1 ] = '\0';
+    cur_limit = T_atod( reply + 1 );
 
-	if ( cur_limit > MIN_CURRENT )
-		ips120_10_mod.min_current = cur_limit;
+    if ( cur_limit > MIN_CURRENT )
+        ips120_10_mod.min_current = cur_limit;
 
-	length = ips120_10_mod_talk( "R22\r", reply, 100 );
+    length = ips120_10_mod_talk( "R22\r", reply, 100 );
 
-	reply[ length - 1 ] = '\0';
-	cur_limit = T_atod( reply + 1 );
+    reply[ length - 1 ] = '\0';
+    cur_limit = T_atod( reply + 1 );
 
-	if ( cur_limit < MAX_CURRENT )
-		ips120_10_mod.max_current = cur_limit;
+    if ( cur_limit < MAX_CURRENT )
+        ips120_10_mod.max_current = cur_limit;
 
-	/* Lets make sure the DAC is set to outpuut 0 V */
+    /* Lets make sure the DAC is set to outpuut 0 V */
 
-	func_ptr = func_get( ips120_10_mod.dac_func, &acc );
-	vars_push( STR_VAR, DEVICE_NAME );
-	vars_push( FLOAT_VAR, 0.0 );
-	vars_pop( func_call( func_ptr ) );
+    func_ptr = func_get( ips120_10_mod.dac_func, &acc );
+    vars_push( STR_VAR, DEVICE_NAME );
+    vars_push( FLOAT_VAR, 0.0 );
+    vars_pop( func_call( func_ptr ) );
 
-	/* Get the actual current and, if the magnet is sweeping, the current
-	   sweep direction. If the magnet is running to zero current just stop
-	   it. */
+    /* Get the actual current and, if the magnet is sweeping, the current
+       sweep direction. If the magnet is running to zero current just stop
+       it. */
 
-	ips120_10_mod.act_current = ips120_10_mod_get_act_current( );
-	ips120_10_mod.target_current = ips120_10_mod_get_target_current( );
+    ips120_10_mod.act_current = ips120_10_mod_get_act_current( );
+    ips120_10_mod.target_current = ips120_10_mod_get_target_current( );
 
-	switch ( ips120_10_mod.activity )
-	{
-		case HOLD :
-			ips120_10_mod.sweep_state = STOPPED;
-			was_hold = SET;
-			break;
+    switch ( ips120_10_mod.activity )
+    {
+        case HOLD :
+            ips120_10_mod.sweep_state = STOPPED;
+            was_hold = SET;
+            break;
 
-		case TO_SET_POINT :
-			ips120_10_mod.sweep_state =
-				ips120_10_mod.act_current < ips120_10_mod.target_current ?
-				SWEEPING_UP : SWEEPING_DOWN;
-			break;
+        case TO_SET_POINT :
+            ips120_10_mod.sweep_state =
+                ips120_10_mod.act_current < ips120_10_mod.target_current ?
+                SWEEPING_UP : SWEEPING_DOWN;
+            break;
 
-		case TO_ZERO:
-			ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
-			ips120_10_mod.sweep_state = STOPPED;
-			break;
-	}
+        case TO_ZERO:
+            ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
+            ips120_10_mod.sweep_state = STOPPED;
+            break;
+    }
 
-	/* Set the sweep rate if the user defined one, otherwise get the current
-	   sweep rate. */
+    /* Set the sweep rate if the user defined one, otherwise get the current
+       sweep rate. */
 
-	if ( ips120_10_mod.is_sweep_rate )
-		ips120_10_mod.sweep_rate =
-					  ips120_10_mod_set_sweep_rate( ips120_10_mod.sweep_rate );
-	else
-	{
-		ips120_10_mod.sweep_rate = ips120_10_mod_get_sweep_rate( );
-		ips120_10_mod.is_sweep_rate = SET;
-	}
+    if ( ips120_10_mod.is_sweep_rate )
+        ips120_10_mod.sweep_rate =
+                      ips120_10_mod_set_sweep_rate( ips120_10_mod.sweep_rate );
+    else
+    {
+        ips120_10_mod.sweep_rate = ips120_10_mod_get_sweep_rate( );
+        ips120_10_mod.is_sweep_rate = SET;
+    }
 
-	/* Finally, if a start curent has been set stop the magnet if necessary
-	   and set the start current. If the magnet was in HOLD state when we
-	   started and no start current had been set use the actual current as the
-	   start current. */
+    /* Finally, if a start curent has been set stop the magnet if necessary
+       and set the start current. If the magnet was in HOLD state when we
+       started and no start current had been set use the actual current as the
+       start current. */
 
-	if ( ips120_10_mod.is_start_current )
-	{
-		if ( ips120_10_mod.sweep_state != STOPPED )
-		{
-			ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
-			ips120_10_mod.sweep_state = STOPPED;
-		}
+    if ( ips120_10_mod.is_start_current )
+    {
+        if ( ips120_10_mod.sweep_state != STOPPED )
+        {
+            ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
+            ips120_10_mod.sweep_state = STOPPED;
+        }
 
-		ips120_10_mod.act_current =
-					 ips120_10_mod_goto_current( ips120_10_mod.start_current );
-	}
-	else if ( was_hold )
-	{
-		ips120_10_mod.start_current = ips120_10_mod.act_current;
-		ips120_10_mod.is_start_current = SET;
-	}
+        ips120_10_mod.act_current =
+                     ips120_10_mod_goto_current( ips120_10_mod.start_current );
+    }
+    else if ( was_hold )
+    {
+        ips120_10_mod.start_current = ips120_10_mod.act_current;
+        ips120_10_mod.is_start_current = SET;
+    }
 
-	return OK;
+    return OK;
 }
 
 
@@ -892,29 +892,29 @@ static bool ips120_10_mod_init( void )
 
 static void ips120_10_mod_to_local( void )
 {
-	char reply[ 100 ];
+    char reply[ 100 ];
 
 
-	/* On Martin Fuchs' request there are now two alternatives: Normally
-	   the magnet simply gets stopped when the experiment finishes, but if
-	   the function magnet_current_field_on_end() has been called the magnet
-	   instead sweeps to the current value passed to the function. */
+    /* On Martin Fuchs' request there are now two alternatives: Normally
+       the magnet simply gets stopped when the experiment finishes, but if
+       the function magnet_current_field_on_end() has been called the magnet
+       instead sweeps to the current value passed to the function. */
 
 
-	if ( ips120_10_mod.goto_field_on_end )
-	{
-		ips120_10_mod_set_target_current( ips120_10_mod.final_target_current );
-		ips120_10_mod_set_sweep_rate( ips120_10_mod.fast_sweep_rate );
-		ips120_10_mod_set_activity( TO_SET_POINT );
-	}
-	else
-	{	
-		ips120_10_mod_set_sweep_rate( ips120_10_mod.fast_sweep_rate );
-		ips120_10_mod_set_activity( HOLD );
-		ips120_10_mod.sweep_state = STOPPED;
-	}
+    if ( ips120_10_mod.goto_field_on_end )
+    {
+        ips120_10_mod_set_target_current( ips120_10_mod.final_target_current );
+        ips120_10_mod_set_sweep_rate( ips120_10_mod.fast_sweep_rate );
+        ips120_10_mod_set_activity( TO_SET_POINT );
+    }
+    else
+    {   
+        ips120_10_mod_set_sweep_rate( ips120_10_mod.fast_sweep_rate );
+        ips120_10_mod_set_activity( HOLD );
+        ips120_10_mod.sweep_state = STOPPED;
+    }
 
-	ips120_10_mod_talk( "C2\r", reply, 100 );
+    ips120_10_mod_talk( "C2\r", reply, 100 );
 }
 
 
@@ -924,244 +924,244 @@ static void ips120_10_mod_to_local( void )
 
 static void ips120_10_mod_get_complete_status( void )
 {
-	char reply[ 100 ];
-	long len = 100;
-	long offset = 0;
-	int i, max_retries = 3;
+    char reply[ 100 ];
+    long len = 100;
+    long offset = 0;
+    int i, max_retries = 3;
 
 
-	/* Get all information about the state of the magnet power supply and
-	   analyze the reply which has the form "XmnAnCnMmnPmn" where m and n
-	   are single decimal digits.
-	   This transmission seems to have problems when the device was just
-	   switched on, so we try to deal with situations gracefully where the
-	   device returns data that it isn't supposed to send (at least if we
-	   would still be inclined after all these years to believe in what's
-	   written in manuals ;-) */
+    /* Get all information about the state of the magnet power supply and
+       analyze the reply which has the form "XmnAnCnMmnPmn" where m and n
+       are single decimal digits.
+       This transmission seems to have problems when the device was just
+       switched on, so we try to deal with situations gracefully where the
+       device returns data that it isn't supposed to send (at least if we
+       would still be inclined after all these years to believe in what's
+       written in manuals ;-) */
 
-	if ( fsc2_serial_write( SERIAL_PORT, "X\r", 2, MAX_WRITE_WAIT, SET ) != 2 )
-	{
-		stop_on_user_request( );
-		ips120_10_mod_comm_failure( );
-	}
+    if ( fsc2_serial_write( SERIAL_PORT, "X\r", 2, MAX_WRITE_WAIT, SET ) != 2 )
+    {
+        stop_on_user_request( );
+        ips120_10_mod_comm_failure( );
+    }
 
-	for ( i = 0; i < max_retries; i++ )
-	{
-		if ( ( len = fsc2_serial_read( SERIAL_PORT, reply + offset, len,
-									   MAX_READ_WAIT, SET ) )<= 0 )
-		{
-			stop_on_user_request( );
-			ips120_10_mod_comm_failure( );
-		}
+    for ( i = 0; i < max_retries; i++ )
+    {
+        if ( ( len = fsc2_serial_read( SERIAL_PORT, reply + offset, len,
+                                       MAX_READ_WAIT, SET ) )<= 0 )
+        {
+            stop_on_user_request( );
+            ips120_10_mod_comm_failure( );
+        }
 
-		if ( reply[ 0 ] != 'X' )
-		{
-			len = 100;
-			continue;
-		}
+        if ( reply[ 0 ] != 'X' )
+        {
+            len = 100;
+            continue;
+        }
 
-		if ( offset + len < 15 )
-		{
-			offset += len;
-			len = 100 - offset;
-			continue;
-		}
+        if ( offset + len < 15 )
+        {
+            offset += len;
+            len = 100 - offset;
+            continue;
+        }
 
-		break;
-	}
-	
-	/* Check system status data */
+        break;
+    }
+    
+    /* Check system status data */
 
-	switch ( reply[ 1 ] )
-	{
-		case '0' :     /* normal */
-			break;
+    switch ( reply[ 1 ] )
+    {
+        case '0' :     /* normal */
+            break;
 
-		case '1' :     /* quenched */
-			print( FATAL, "Magnet claims to be quenched.\n" );
-			THROW( EXCEPTION );
+        case '1' :     /* quenched */
+            print( FATAL, "Magnet claims to be quenched.\n" );
+            THROW( EXCEPTION );
 
-		case '2' :     /* overheated */
-			print( FATAL, "Magnet claims to be overheated.\n" );
-			THROW( EXCEPTION );
+        case '2' :     /* overheated */
+            print( FATAL, "Magnet claims to be overheated.\n" );
+            THROW( EXCEPTION );
 
-		case '4' :     /* warming up */
-			print( FATAL, "Magnet claims to be warming up.\n" );
-			THROW( EXCEPTION );
+        case '4' :     /* warming up */
+            print( FATAL, "Magnet claims to be warming up.\n" );
+            THROW( EXCEPTION );
 
-		case '8' :     /* fault */
-			print( FATAL, "Device signals fault condition.\n" );
-			THROW( EXCEPTION );
+        case '8' :     /* fault */
+            print( FATAL, "Device signals fault condition.\n" );
+            THROW( EXCEPTION );
 
-		default :
-			print( FATAL, "Received invalid reply from device.\n" );
-			THROW( EXCEPTION );
-	}
+        default :
+            print( FATAL, "Received invalid reply from device.\n" );
+            THROW( EXCEPTION );
+    }
 
-	switch ( reply[ 2 ] )
-	{
-		case '0' :     /* normal */
-		case '1' :     /* on positive voltage limit */
-		case '2' :     /* on negative voltage limit */
-			break;
+    switch ( reply[ 2 ] )
+    {
+        case '0' :     /* normal */
+        case '1' :     /* on positive voltage limit */
+        case '2' :     /* on negative voltage limit */
+            break;
 
-		case '4' :
-			print( FATAL, "Magnet is outside of its positive current "
-				   "limit.\n" );
-			THROW( EXCEPTION );
+        case '4' :
+            print( FATAL, "Magnet is outside of its positive current "
+                   "limit.\n" );
+            THROW( EXCEPTION );
 
-		case '8' :
-			print( FATAL, "Magnet is outside of its negative current "
-				   "limit.\n" );
-			THROW( EXCEPTION );
+        case '8' :
+            print( FATAL, "Magnet is outside of its negative current "
+                   "limit.\n" );
+            THROW( EXCEPTION );
 
-		default :
-			print( FATAL, "Recived invalid reply from device.\n" );
-			THROW( EXCEPTION );
-	}
+        default :
+            print( FATAL, "Recived invalid reply from device.\n" );
+            THROW( EXCEPTION );
+    }
 
-	/* Check activity status */
+    /* Check activity status */
 
-	switch ( reply[ 4 ] )
-	{
-		case '0' :
-			ips120_10_mod.activity = HOLD;
-			break;
+    switch ( reply[ 4 ] )
+    {
+        case '0' :
+            ips120_10_mod.activity = HOLD;
+            break;
 
-		case '1' :
-			ips120_10_mod.activity = TO_SET_POINT;
-			break;
+        case '1' :
+            ips120_10_mod.activity = TO_SET_POINT;
+            break;
 
-		case '2' :
-			ips120_10_mod.activity = TO_ZERO;
-			break;
+        case '2' :
+            ips120_10_mod.activity = TO_ZERO;
+            break;
 
-		case '4' :
-			print( FATAL, "Magnet claims to be clamped.\n" );
-			THROW( EXCEPTION );
+        case '4' :
+            print( FATAL, "Magnet claims to be clamped.\n" );
+            THROW( EXCEPTION );
 
-		default :
-			print( FATAL, "Received invalid reply from device.\n" );
-			THROW( EXCEPTION );
-	}
+        default :
+            print( FATAL, "Received invalid reply from device.\n" );
+            THROW( EXCEPTION );
+    }
 
-	/* Check LOC/REM status */
+    /* Check LOC/REM status */
 
-	switch ( reply[ 6 ] )
-	{
-		case '0' :
-			ips120_10_mod.loc_rem_state = LOCAL_AND_LOCKED;
-			break;
+    switch ( reply[ 6 ] )
+    {
+        case '0' :
+            ips120_10_mod.loc_rem_state = LOCAL_AND_LOCKED;
+            break;
 
-		case '1' :
-			ips120_10_mod.loc_rem_state = REMOTE_AND_LOCKED;
-			break;
+        case '1' :
+            ips120_10_mod.loc_rem_state = REMOTE_AND_LOCKED;
+            break;
 
-		case '2' :
-			ips120_10_mod.loc_rem_state = LOCAL_AND_UNLOCKED;
-			break;
+        case '2' :
+            ips120_10_mod.loc_rem_state = LOCAL_AND_UNLOCKED;
+            break;
 
-		case '3' :
-			ips120_10_mod.loc_rem_state = REMOTE_AND_UNLOCKED;
-			break;
+        case '3' :
+            ips120_10_mod.loc_rem_state = REMOTE_AND_UNLOCKED;
+            break;
 
-		case '4' :
-		case '5' :
-		case '6' :
-		case '7' :
-			print( FATAL, "Magnet claims to be auto-running down.\n" );
-			THROW( EXCEPTION );
+        case '4' :
+        case '5' :
+        case '6' :
+        case '7' :
+            print( FATAL, "Magnet claims to be auto-running down.\n" );
+            THROW( EXCEPTION );
 
-		default :
-			print( FATAL, "Received invalid reply from device.\n" );
-			THROW( EXCEPTION );
-	}
+        default :
+            print( FATAL, "Received invalid reply from device.\n" );
+            THROW( EXCEPTION );
+    }
 
-	/* Check switch heater status */
+    /* Check switch heater status */
 
-	switch ( reply[ 8 ] )
-	{
-		case '0' :
-			print( FATAL, "Switch heater is off (at zero field).\n" );
-			THROW( EXCEPTION );
+    switch ( reply[ 8 ] )
+    {
+        case '0' :
+            print( FATAL, "Switch heater is off (at zero field).\n" );
+            THROW( EXCEPTION );
 
-		case '1' :     /* swich heater is on */
-			break;
+        case '1' :     /* swich heater is on */
+            break;
 
-		case '2' :
-			print( FATAL, "Switch heater is off (at non-zero field).\n" );
-			THROW( EXCEPTION );
+        case '2' :
+            print( FATAL, "Switch heater is off (at non-zero field).\n" );
+            THROW( EXCEPTION );
 
-		case '5' :
-			print( FATAL, "Switch heater fault condition.\n" );
-			THROW( EXCEPTION );
+        case '5' :
+            print( FATAL, "Switch heater fault condition.\n" );
+            THROW( EXCEPTION );
 
-		case '8' :     /* no switch fitted */
-			break;
+        case '8' :     /* no switch fitted */
+            break;
 
-		default :
-			/* The manual claims that the above are the only values we should
-			   expect, but as usual the manual is shamelessly lying. At least
-			   for the magnet at hand the character 'C' seems to be returned.
-			   Because we don't have any better documentation we simply accept
-			   whatever the device tells us... */
+        default :
+            /* The manual claims that the above are the only values we should
+               expect, but as usual the manual is shamelessly lying. At least
+               for the magnet at hand the character 'C' seems to be returned.
+               Because we don't have any better documentation we simply accept
+               whatever the device tells us... */
 #if 0
-			print( FATAL, "Received invalid reply from device.\n" );
-			THROW( EXCEPTION );
+            print( FATAL, "Received invalid reply from device.\n" );
+            THROW( EXCEPTION );
 #endif
-			break;
-	}
+            break;
+    }
 
-	/* Check mode status */
+    /* Check mode status */
 
-	switch ( reply[ 10 ] )
-	{
-		case '0' : case '1' :
-			ips120_10_mod.mode = FAST;
-			break;
+    switch ( reply[ 10 ] )
+    {
+        case '0' : case '1' :
+            ips120_10_mod.mode = FAST;
+            break;
 
-		case '4' : case '5' :
-			ips120_10_mod.mode = SLOW;
-			break;
+        case '4' : case '5' :
+            ips120_10_mod.mode = SLOW;
+            break;
 
-		default :
-			print( FATAL, "Received invalid reply from device.\n" );
-			THROW( EXCEPTION );
-	}
+        default :
+            print( FATAL, "Received invalid reply from device.\n" );
+            THROW( EXCEPTION );
+    }
 
-	switch ( reply[ 11 ] )
-	{
-		case '0' :
-			ips120_10_mod.state = AT_REST;
-			break;
+    switch ( reply[ 11 ] )
+    {
+        case '0' :
+            ips120_10_mod.state = AT_REST;
+            break;
 
-		case '1' :
-			ips120_10_mod.state = SWEEPING;
-			break;
+        case '1' :
+            ips120_10_mod.state = SWEEPING;
+            break;
 
-		case '2' :
-			ips120_10_mod.state = SWEEP_LIMITING;
-			break;
+        case '2' :
+            ips120_10_mod.state = SWEEP_LIMITING;
+            break;
 
-		case '3' :
-			ips120_10_mod.state = SWEEPING_AND_SWEEP_LIMITING;
-			break;
+        case '3' :
+            ips120_10_mod.state = SWEEPING_AND_SWEEP_LIMITING;
+            break;
 
-		default :
-			print( FATAL, "Received invalid reply from device.\n" );
-			THROW( EXCEPTION );
-	}
+        default :
+            print( FATAL, "Received invalid reply from device.\n" );
+            THROW( EXCEPTION );
+    }
 
-	/* The polarity status bytes should always be'0' according to the manual.
-	   But, as it's not uncommon, the manual isn't telling the whole truth,
-	   the device sends '7' or '2' and '0' instead. Due to lack of better
-	   documentation we simply ignore the P field... */
+    /* The polarity status bytes should always be'0' according to the manual.
+       But, as it's not uncommon, the manual isn't telling the whole truth,
+       the device sends '7' or '2' and '0' instead. Due to lack of better
+       documentation we simply ignore the P field... */
 #if 0
-	if ( reply[ 13 ] != '0' || reply[ 14 ] != '0' )
-	{
-		print( FATAL, "Received invalid reply from device.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( reply[ 13 ] != '0' || reply[ 14 ] != '0' )
+    {
+        print( FATAL, "Received invalid reply from device.\n" );
+        THROW( EXCEPTION );
+    }
 #endif
 }
 
@@ -1173,32 +1173,32 @@ static void ips120_10_mod_get_complete_status( void )
 
 static void ips120_10_mod_sweep_up( void )
 {
-	/* Do nothing except printing a warning when we're alredy sweeping up */
+    /* Do nothing except printing a warning when we're alredy sweeping up */
 
-	if ( ips120_10_mod.sweep_state == SWEEPING_UP )
-	{
-		print( WARN, "Useless command, magnet is already sweeping up.\n" );
-		return;
-	}
+    if ( ips120_10_mod.sweep_state == SWEEPING_UP )
+    {
+        print( WARN, "Useless command, magnet is already sweeping up.\n" );
+        return;
+    }
 
-	/* Print a severe warning when the actual current is already very near to
-	   the maximum current */
+    /* Print a severe warning when the actual current is already very near to
+       the maximum current */
 
-	ips120_10_mod.act_current = ips120_10_mod_get_act_current( );
-	if ( ips120_10_mod.act_current >=
-		                       ips120_10_mod.max_current - CURRENT_RESOLUTION )
-	{
-		print( SEVERE, "Magnet is already at maximum field.\n" );
-		return;
-	}
+    ips120_10_mod.act_current = ips120_10_mod_get_act_current( );
+    if ( ips120_10_mod.act_current >=
+                               ips120_10_mod.max_current - CURRENT_RESOLUTION )
+    {
+        print( SEVERE, "Magnet is already at maximum field.\n" );
+        return;
+    }
 
-	if ( ips120_10_mod.activity != HOLD )
-		ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
+    if ( ips120_10_mod.activity != HOLD )
+        ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
 
-	ips120_10_mod.target_current =
-				 ips120_10_mod_set_target_current( ips120_10_mod.max_current );
-	ips120_10_mod.activity = ips120_10_mod_set_activity( TO_SET_POINT );
-	ips120_10_mod.sweep_state = SWEEPING_UP;
+    ips120_10_mod.target_current =
+                 ips120_10_mod_set_target_current( ips120_10_mod.max_current );
+    ips120_10_mod.activity = ips120_10_mod_set_activity( TO_SET_POINT );
+    ips120_10_mod.sweep_state = SWEEPING_UP;
 }
 
 
@@ -1209,31 +1209,31 @@ static void ips120_10_mod_sweep_up( void )
 
 static void ips120_10_mod_sweep_down( void )
 {
-	/* Do nothing except printing a warning when we're alredy sweeping down */
+    /* Do nothing except printing a warning when we're alredy sweeping down */
 
-	if ( ips120_10_mod.sweep_state == SWEEPING_DOWN )
-	{
-		print( WARN, "Useless command, magnet is already sweeping down.\n" );
-		return;
-	}
+    if ( ips120_10_mod.sweep_state == SWEEPING_DOWN )
+    {
+        print( WARN, "Useless command, magnet is already sweeping down.\n" );
+        return;
+    }
 
-	/* Print a severe warning when the actual current is already very near to
-	   the minimum current */
+    /* Print a severe warning when the actual current is already very near to
+       the minimum current */
 
-	ips120_10_mod.act_current = ips120_10_mod_get_act_current( );
-	if ( ips120_10_mod.act_current <=
-		                       ips120_10_mod.min_current + CURRENT_RESOLUTION )
-	{
-		print( SEVERE, "Magnet is already at minimum field.\n" );
-		return;
-	}
+    ips120_10_mod.act_current = ips120_10_mod_get_act_current( );
+    if ( ips120_10_mod.act_current <=
+                               ips120_10_mod.min_current + CURRENT_RESOLUTION )
+    {
+        print( SEVERE, "Magnet is already at minimum field.\n" );
+        return;
+    }
 
-	if ( ips120_10_mod.activity != HOLD )
-		ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
-	ips120_10_mod.target_current =
-				 ips120_10_mod_set_target_current( ips120_10_mod.min_current );
-	ips120_10_mod.activity = ips120_10_mod_set_activity( TO_SET_POINT );
-	ips120_10_mod.sweep_state = SWEEPING_DOWN;
+    if ( ips120_10_mod.activity != HOLD )
+        ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
+    ips120_10_mod.target_current =
+                 ips120_10_mod_set_target_current( ips120_10_mod.min_current );
+    ips120_10_mod.activity = ips120_10_mod_set_activity( TO_SET_POINT );
+    ips120_10_mod.sweep_state = SWEEPING_DOWN;
 }
 
 
@@ -1247,54 +1247,54 @@ static void ips120_10_mod_sweep_down( void )
 
 static double ips120_10_mod_current_check( double current )
 {
-	double norm_current,
-		   dac_current;
+    double norm_current,
+           dac_current;
 
-	if ( current > ips120_10_mod.max_current )
-	{
-		if ( FSC2_MODE != EXPERIMENT )
-		{
-			print( FATAL, "Field of %f G is too high, maximum field is "
-				   "%f G.\n", current * F2C_RATIO,
-				   ips120_10_mod.max_current * F2C_RATIO );
-			THROW( EXCEPTION );
-		}
-		else
-		{
-			print( SEVERE, "Field of %f G is too high, using maximum field of "
-				   "%f G instead.\n", current * F2C_RATIO,
-				   ips120_10_mod.max_current * F2C_RATIO );
-			return MAX_CURRENT;
-		}
-	}
+    if ( current > ips120_10_mod.max_current )
+    {
+        if ( FSC2_MODE != EXPERIMENT )
+        {
+            print( FATAL, "Field of %f G is too high, maximum field is "
+                   "%f G.\n", current * F2C_RATIO,
+                   ips120_10_mod.max_current * F2C_RATIO );
+            THROW( EXCEPTION );
+        }
+        else
+        {
+            print( SEVERE, "Field of %f G is too high, using maximum field of "
+                   "%f G instead.\n", current * F2C_RATIO,
+                   ips120_10_mod.max_current * F2C_RATIO );
+            return MAX_CURRENT;
+        }
+    }
 
-	if ( current < ips120_10_mod.min_current )
-	{
-		if ( FSC2_MODE != EXPERIMENT )
-		{
-			print( FATAL, "Field of %f G is too low, minimum field is %f G.\n",
-				   current * F2C_RATIO,
-				   ips120_10_mod.min_current * F2C_RATIO );
-			THROW( EXCEPTION );
-		}
-		else
-		{
-			print( SEVERE, "Field of %f G is too low, using minimum field of "
-				   "%f G instead.\n", current * F2C_RATIO,
-				   ips120_10_mod.min_current * F2C_RATIO );
-			return ips120_10_mod.min_current;
-		}
-	}
+    if ( current < ips120_10_mod.min_current )
+    {
+        if ( FSC2_MODE != EXPERIMENT )
+        {
+            print( FATAL, "Field of %f G is too low, minimum field is %f G.\n",
+                   current * F2C_RATIO,
+                   ips120_10_mod.min_current * F2C_RATIO );
+            THROW( EXCEPTION );
+        }
+        else
+        {
+            print( SEVERE, "Field of %f G is too low, using minimum field of "
+                   "%f G instead.\n", current * F2C_RATIO,
+                   ips120_10_mod.min_current * F2C_RATIO );
+            return ips120_10_mod.min_current;
+        }
+    }
 
-	/* Maximum current resolution is 10 mA plus what we get from the 5 mV
-	   voltage resolution of the DAC. Using that calculate the nearest
-	   possible curent we can set and return this to the caller. */
+    /* Maximum current resolution is 10 mA plus what we get from the 5 mV
+       voltage resolution of the DAC. Using that calculate the nearest
+       possible curent we can set and return this to the caller. */
 
-	norm_current = lrnd( current / CURRENT_RESOLUTION ) * CURRENT_RESOLUTION;
-	dac_current  = lrnd( ( current - norm_current ) / DAC_CURRENT_RESOLUTION )
-		           * DAC_CURRENT_RESOLUTION;
+    norm_current = lrnd( current / CURRENT_RESOLUTION ) * CURRENT_RESOLUTION;
+    dac_current  = lrnd( ( current - norm_current ) / DAC_CURRENT_RESOLUTION )
+                   * DAC_CURRENT_RESOLUTION;
 
-	return norm_current + dac_current;
+    return norm_current + dac_current;
 }
 
 
@@ -1305,49 +1305,49 @@ static double ips120_10_mod_current_check( double current )
 
 static double ips120_10_mod_sweep_rate_check( double sweep_rate )
 {
-	if ( sweep_rate > MAX_SWEEP_RATE && 
-		 ( sweep_rate - MAX_SWEEP_RATE ) / sweep_rate > 0.0001 )
-	{
-		if ( FSC2_MODE != EXPERIMENT )
-		{
-			print( FATAL, "Sweep rate of %f G/s is too high, maximum sweep "
-				   "rate is %f G/s.\n",
-				   sweep_rate * F2C_RATIO, MAX_SWEEP_RATE * F2C_RATIO );
-			THROW( EXCEPTION );
-		}
-		else
-		{
-			print( SEVERE, "Sweep rate of %f G/s is too high, using maximum "
-				   "sweep rate of %f G/s instead.\n",
-				   sweep_rate * F2C_RATIO, MAX_SWEEP_RATE * F2C_RATIO );
-			return MAX_SWEEP_RATE;
-		}
-	}
+    if ( sweep_rate > MAX_SWEEP_RATE && 
+         ( sweep_rate - MAX_SWEEP_RATE ) / sweep_rate > 0.0001 )
+    {
+        if ( FSC2_MODE != EXPERIMENT )
+        {
+            print( FATAL, "Sweep rate of %f G/s is too high, maximum sweep "
+                   "rate is %f G/s.\n",
+                   sweep_rate * F2C_RATIO, MAX_SWEEP_RATE * F2C_RATIO );
+            THROW( EXCEPTION );
+        }
+        else
+        {
+            print( SEVERE, "Sweep rate of %f G/s is too high, using maximum "
+                   "sweep rate of %f G/s instead.\n",
+                   sweep_rate * F2C_RATIO, MAX_SWEEP_RATE * F2C_RATIO );
+            return MAX_SWEEP_RATE;
+        }
+    }
 
-	if ( sweep_rate < MIN_SWEEP_RATE &&
-		 ( MIN_SWEEP_RATE - sweep_rate ) / MIN_SWEEP_RATE > 0.0001 )
-	{
-		if ( FSC2_MODE != EXPERIMENT )
-		{
-			print( FATAL, "Sweep rate of %f mG/s is too low, minimum sweep "
-				   "rate is %f mG/s.\n", sweep_rate * 1.0e3 * F2C_RATIO,
-				   MIN_SWEEP_RATE * 1.0e3 * F2C_RATIO );
-			THROW( EXCEPTION );
-		}
-		else
-		{
-			print( SEVERE, "Sweep rate of %f mG/s is too low, using minimum "
-				   "sweep rate of %f mG/s instead.\n",
-					sweep_rate * 1.0e3 * F2C_RATIO,
-				   MIN_SWEEP_RATE * 1.0e3 * F2C_RATIO );
-			return MIN_SWEEP_RATE;
-		}
-	}
+    if ( sweep_rate < MIN_SWEEP_RATE &&
+         ( MIN_SWEEP_RATE - sweep_rate ) / MIN_SWEEP_RATE > 0.0001 )
+    {
+        if ( FSC2_MODE != EXPERIMENT )
+        {
+            print( FATAL, "Sweep rate of %f mG/s is too low, minimum sweep "
+                   "rate is %f mG/s.\n", sweep_rate * 1.0e3 * F2C_RATIO,
+                   MIN_SWEEP_RATE * 1.0e3 * F2C_RATIO );
+            THROW( EXCEPTION );
+        }
+        else
+        {
+            print( SEVERE, "Sweep rate of %f mG/s is too low, using minimum "
+                   "sweep rate of %f mG/s instead.\n",
+                    sweep_rate * 1.0e3 * F2C_RATIO,
+                   MIN_SWEEP_RATE * 1.0e3 * F2C_RATIO );
+            return MIN_SWEEP_RATE;
+        }
+    }
 
-	/* Minimum sweep speed resolution is 10 mA/min */
+    /* Minimum sweep speed resolution is 10 mA/min */
 
-	return ( lrnd( ( 60.0 * sweep_rate ) / MIN_SWEEP_RATE ) * MIN_SWEEP_RATE )
-		   / 60.0;
+    return ( lrnd( ( 60.0 * sweep_rate ) / MIN_SWEEP_RATE ) * MIN_SWEEP_RATE )
+           / 60.0;
 }
 
 
@@ -1357,27 +1357,27 @@ static double ips120_10_mod_sweep_rate_check( double sweep_rate )
 
 static double ips120_10_mod_get_act_current( void )
 {
-	char reply[ 100 ];
-	long length;
-	double norm_current,
-		   dac_current;
-	int acc;
-	Var_T *v;
+    char reply[ 100 ];
+    long length;
+    double norm_current,
+           dac_current;
+    int acc;
+    Var_T *v;
 
 
-	/* Get the current the power supply is set to */
+    /* Get the current the power supply is set to */
 
-	length = ips120_10_mod_talk( "R0\r", reply, 100 );
-	reply[ length - 1 ] = '\0';
-	norm_current = T_atod( reply + 1 );
+    length = ips120_10_mod_talk( "R0\r", reply, 100 );
+    reply[ length - 1 ] = '\0';
+    norm_current = T_atod( reply + 1 );
 
-	/* Get the additional current due to the setting of the DAC */
+    /* Get the additional current due to the setting of the DAC */
 
-	v = func_call( func_get( ips120_10_mod.dac_func, &acc ) );
-	dac_current = v->val.dval * C2V_RATIO;
-	vars_pop( v );
+    v = func_call( func_get( ips120_10_mod.dac_func, &acc ) );
+    dac_current = v->val.dval * C2V_RATIO;
+    vars_pop( v );
 
-	return norm_current + dac_current;
+    return norm_current + dac_current;
 }
 
 
@@ -1388,36 +1388,36 @@ static double ips120_10_mod_get_act_current( void )
 
 static double ips120_10_mod_set_target_current( double current )
 {
-	char cmd[ 30 ];
-	char reply[ 100 ];
-	double norm_current,
-		   dac_current;
-	Var_T *func_ptr;
-	int acc;
+    char cmd[ 30 ];
+    char reply[ 100 ];
+    double norm_current,
+           dac_current;
+    Var_T *func_ptr;
+    int acc;
 
-	
-	current = ips120_10_mod_current_check( current );
+    
+    current = ips120_10_mod_current_check( current );
 
-	/* Split the current up into the part that can be set directly and the
-	   additional one induced by the DAC */
+    /* Split the current up into the part that can be set directly and the
+       additional one induced by the DAC */
 
-	norm_current = lrnd( current / CURRENT_RESOLUTION ) * CURRENT_RESOLUTION;
-	dac_current  = lrnd( ( current - norm_current ) / DAC_CURRENT_RESOLUTION )
-		           * DAC_CURRENT_RESOLUTION;
+    norm_current = lrnd( current / CURRENT_RESOLUTION ) * CURRENT_RESOLUTION;
+    dac_current  = lrnd( ( current - norm_current ) / DAC_CURRENT_RESOLUTION )
+                   * DAC_CURRENT_RESOLUTION;
 
-	/* Set the power supplies current */
+    /* Set the power supplies current */
 
-	sprintf( cmd, "I%.4f\r", norm_current );
-	ips120_10_mod_talk( cmd, reply, 100 );
+    sprintf( cmd, "I%.4f\r", norm_current );
+    ips120_10_mod_talk( cmd, reply, 100 );
 
-	/* And set the DAC voltage */
+    /* And set the DAC voltage */
 
-	func_ptr = func_get( ips120_10_mod.dac_func, &acc );
-	vars_push( STR_VAR, DEVICE_NAME );
-	vars_push( FLOAT_VAR, dac_current / C2V_RATIO );
-	vars_pop( func_call( func_ptr ) );
+    func_ptr = func_get( ips120_10_mod.dac_func, &acc );
+    vars_push( STR_VAR, DEVICE_NAME );
+    vars_push( FLOAT_VAR, dac_current / C2V_RATIO );
+    vars_pop( func_call( func_ptr ) );
 
-	return current;
+    return current;
 }
 
 /*---------------------------------------------------------------*
@@ -1426,25 +1426,25 @@ static double ips120_10_mod_set_target_current( double current )
 
 static double ips120_10_mod_get_target_current( void )
 {
-	char reply[ 100 ];
-	long length;
-	double norm_current,
-		   dac_current;
-	Var_T *v;
-	int acc;
+    char reply[ 100 ];
+    long length;
+    double norm_current,
+           dac_current;
+    Var_T *v;
+    int acc;
 
 
-	length = ips120_10_mod_talk( "R5\r", reply, 100 );
-	reply[ length - 1 ] = '\0';
-	norm_current = T_atod( reply + 1 );
+    length = ips120_10_mod_talk( "R5\r", reply, 100 );
+    reply[ length - 1 ] = '\0';
+    norm_current = T_atod( reply + 1 );
 
-	/* Get the additional current due to the setting of the DAC */
+    /* Get the additional current due to the setting of the DAC */
 
-	v = func_call( func_get( ips120_10_mod.dac_func, &acc ) );
-	dac_current = v->val.dval * C2V_RATIO;
-	vars_pop( v );
+    v = func_call( func_get( ips120_10_mod.dac_func, &acc ) );
+    dac_current = v->val.dval * C2V_RATIO;
+    vars_pop( v );
 
-	return norm_current + dac_current;
+    return norm_current + dac_current;
 }
 
 
@@ -1454,15 +1454,15 @@ static double ips120_10_mod_get_target_current( void )
 
 static double ips120_10_mod_set_sweep_rate( double sweep_rate )
 {
-	char cmd[ 30 ];
-	char reply[ 100 ];
+    char cmd[ 30 ];
+    char reply[ 100 ];
 
 
-	sweep_rate = ips120_10_mod_sweep_rate_check( sweep_rate );
-	sprintf( cmd, "S%.3f\r", sweep_rate * 60.0 );
-	ips120_10_mod_talk( cmd, reply, 100 );
+    sweep_rate = ips120_10_mod_sweep_rate_check( sweep_rate );
+    sprintf( cmd, "S%.3f\r", sweep_rate * 60.0 );
+    ips120_10_mod_talk( cmd, reply, 100 );
 
-	return sweep_rate;
+    return sweep_rate;
 }
 
 /*-------------------------------------------------------------*
@@ -1471,13 +1471,13 @@ static double ips120_10_mod_set_sweep_rate( double sweep_rate )
 
 static double ips120_10_mod_get_sweep_rate( void )
 {
-	char reply[ 100 ];
-	long length;
+    char reply[ 100 ];
+    long length;
 
 
-	length = ips120_10_mod_talk( "R6\r", reply, 100 );
-	reply[ length - 1 ] = '\0';
-	return T_atod( reply + 1 ) / 60.0;
+    length = ips120_10_mod_talk( "R6\r", reply, 100 );
+    reply[ length - 1 ] = '\0';
+    return T_atod( reply + 1 ) / 60.0;
 }
 
 
@@ -1490,26 +1490,26 @@ static double ips120_10_mod_get_sweep_rate( void )
 
 static double ips120_10_mod_goto_current( double current )
 {
-	ips120_10_mod_set_target_current( current );
-	ips120_10_mod_set_sweep_rate( ips120_10_mod.fast_sweep_rate );
+    ips120_10_mod_set_target_current( current );
+    ips120_10_mod_set_sweep_rate( ips120_10_mod.fast_sweep_rate );
 
-	if ( ips120_10_mod.activity != TO_SET_POINT )
-		ips120_10_mod.activity = ips120_10_mod_set_activity( TO_SET_POINT );
+    if ( ips120_10_mod.activity != TO_SET_POINT )
+        ips120_10_mod.activity = ips120_10_mod_set_activity( TO_SET_POINT );
 
-	while ( lrnd( ( current -  ips120_10_mod_get_act_current( ) ) /
-				  CURRENT_RESOLUTION ) != 0 )
-	{
-		fsc2_usleep( 50000, UNSET );
-		stop_on_user_request( );
-	}
+    while ( lrnd( ( current -  ips120_10_mod_get_act_current( ) ) /
+                  CURRENT_RESOLUTION ) != 0 )
+    {
+        fsc2_usleep( 50000, UNSET );
+        stop_on_user_request( );
+    }
 
-	ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
-	ips120_10_mod.sweep_state = STOPPED;
+    ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
+    ips120_10_mod.sweep_state = STOPPED;
 
-	if ( ips120_10_mod.is_sweep_rate )
-		ips120_10_mod_set_sweep_rate( ips120_10_mod.sweep_rate );
+    if ( ips120_10_mod.is_sweep_rate )
+        ips120_10_mod_set_sweep_rate( ips120_10_mod.sweep_rate );
 
-	return ips120_10_mod_get_act_current( );
+    return ips120_10_mod_get_act_current( );
 }
 
 
@@ -1520,35 +1520,35 @@ static double ips120_10_mod_goto_current( double current )
 
 static int ips120_10_mod_set_activity( int activity )
 {
-	char cmd[ 20 ];
-	char reply[ 100 ];
-	int act;
+    char cmd[ 20 ];
+    char reply[ 100 ];
+    int act;
 
 
-	switch ( activity )
-	{
-		case HOLD :
-			act = 0;
-			break;
+    switch ( activity )
+    {
+        case HOLD :
+            act = 0;
+            break;
 
-		case TO_SET_POINT :
-			act = 1;
-			break;
+        case TO_SET_POINT :
+            act = 1;
+            break;
 
-		case TO_ZERO :
-			act = 2;
-			break;
+        case TO_ZERO :
+            act = 2;
+            break;
 
-		default :
-			print( FATAL, "Internal error detected at %s:%d,\n",
-				   __FILE__, __LINE__ );
-			THROW( EXCEPTION );
-	}
+        default :
+            print( FATAL, "Internal error detected at %s:%d,\n",
+                   __FILE__, __LINE__ );
+            THROW( EXCEPTION );
+    }
 
-	sprintf( cmd, "A%1d\r", act );
-	ips120_10_mod_talk( cmd, reply, 100 );
+    sprintf( cmd, "A%1d\r", act );
+    ips120_10_mod_talk( cmd, reply, 100 );
 
-	return activity;
+    return activity;
 }
 
 
@@ -1557,56 +1557,56 @@ static int ips120_10_mod_set_activity( int activity )
  *----------------------------------------------------------*/
 
 static long ips120_10_mod_talk( const char * message,
-								char *       reply,
-								long         length )
+                                char *       reply,
+                                long         length )
 {
-	long len;
-	int retries = MAX_RETRIES;
-	ssize_t to_write = strlen( message );
+    long len;
+    int retries = MAX_RETRIES;
+    ssize_t to_write = strlen( message );
 
 
  start:
 
-	if ( fsc2_serial_write( SERIAL_PORT, message, to_write,
-							MAX_WRITE_WAIT, SET ) != to_write )
-	{
-		stop_on_user_request( );
-		ips120_10_mod_comm_failure( );
-	}
+    if ( fsc2_serial_write( SERIAL_PORT, message, to_write,
+                            MAX_WRITE_WAIT, SET ) != to_write )
+    {
+        stop_on_user_request( );
+        ips120_10_mod_comm_failure( );
+    }
 
  reread:
 
-	if ( ( len = fsc2_serial_read( SERIAL_PORT, reply, length,
-								   MAX_READ_WAIT, SET ) ) <= 0 )
-	{
-		stop_on_user_request( );
-		ips120_10_mod_comm_failure( );
-	}
+    if ( ( len = fsc2_serial_read( SERIAL_PORT, reply, length,
+                                   MAX_READ_WAIT, SET ) ) <= 0 )
+    {
+        stop_on_user_request( );
+        ips120_10_mod_comm_failure( );
+    }
 
-	/* If device misunderstood the command send it again, repeat up to
-	   MAX_RETRIES times */
+    /* If device misunderstood the command send it again, repeat up to
+       MAX_RETRIES times */
 
-	if ( reply[ 0 ] == '?' )
-	{
-		if ( retries-- )
-			goto start;
-		else
-			ips120_10_mod_comm_failure( );
-	}
+    if ( reply[ 0 ] == '?' )
+    {
+        if ( retries-- )
+            goto start;
+        else
+            ips120_10_mod_comm_failure( );
+    }
 
-	/* If the first character of the reply isn't equal to the first character
-	   of the message we probably read the reply for a previous command and
-	   try to read again... */
+    /* If the first character of the reply isn't equal to the first character
+       of the message we probably read the reply for a previous command and
+       try to read again... */
 
-	if ( reply[ 0 ] != message[ 0 ] )
-	{
-		if ( retries-- )
-			goto reread;
-		else
-			ips120_10_mod_comm_failure( );
-	}
+    if ( reply[ 0 ] != message[ 0 ] )
+    {
+        if ( retries-- )
+            goto reread;
+        else
+            ips120_10_mod_comm_failure( );
+    }
 
-	return len;
+    return len;
 }
 
 
@@ -1615,31 +1615,31 @@ static long ips120_10_mod_talk( const char * message,
 
 static bool ips120_10_mod_serial_open( void )
 {
-	/* We need exclussive access to the serial port and we also need
-	   non-blocking mode to avoid hanging indefinitely if the other
-	   side does not react. O_NOCTTY is set because the serial port
-	   should not become the controlling terminal, otherwise line
-	   noise read as a CTRL-C might kill the program. */
+    /* We need exclussive access to the serial port and we also need
+       non-blocking mode to avoid hanging indefinitely if the other
+       side does not react. O_NOCTTY is set because the serial port
+       should not become the controlling terminal, otherwise line
+       noise read as a CTRL-C might kill the program. */
 
-	if ( ( ips120_10_mod.tio =
-		   		fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
-								  O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) )
-		 															  == NULL )
-		return FAIL;
+    if ( ( ips120_10_mod.tio =
+                fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+                                  O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) )
+                                                                      == NULL )
+        return FAIL;
 
-	/* Switch off parity checking (8N1) and use of 2 stop bits, clear the
-	   character size mask, then set character size mask to CS8, allow flow
-	   control and finally set the baud rate */
+    /* Switch off parity checking (8N1) and use of 2 stop bits, clear the
+       character size mask, then set character size mask to CS8, allow flow
+       control and finally set the baud rate */
 
-	ips120_10_mod.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
-	ips120_10_mod.tio->c_cflag |= CS8 | CRTSCTS;
-	cfsetispeed( ips120_10_mod.tio, SERIAL_BAUDRATE );
-	cfsetospeed( ips120_10_mod.tio, SERIAL_BAUDRATE );
+    ips120_10_mod.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
+    ips120_10_mod.tio->c_cflag |= CS8 | CRTSCTS;
+    cfsetispeed( ips120_10_mod.tio, SERIAL_BAUDRATE );
+    cfsetospeed( ips120_10_mod.tio, SERIAL_BAUDRATE );
 
-	fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
-	fsc2_tcsetattr( SERIAL_PORT, TCSANOW, ips120_10_mod.tio );
+    fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
+    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, ips120_10_mod.tio );
 
-	return OK;
+    return OK;
 }
 
 
@@ -1649,13 +1649,15 @@ static bool ips120_10_mod_serial_open( void )
 
 static void ips120_10_mod_comm_failure( void )
 {
-	print( FATAL, "Communication with device failed.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Communication with device failed.\n" );
+    THROW( EXCEPTION );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

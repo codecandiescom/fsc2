@@ -22,24 +22,24 @@
 */
 
 
-/********************************************************************/
-/* List of all non-builtin functions that can be used in EDL files  */
-/*                                                                  */
-/* Syntax:                                                          */
-/*                                                                  */
-/*               name, num_args [ , access ] ;                      */
-/*                                                                  */
-/* where `name' is the name of the function and `num_args' is the   */
-/* number of arguments - use a negative number for functions with   */
-/* variable number of arguments. The optional parameter `access'    */
-/* is the access flag, where ALL means that it can be used in all   */
-/* sections of an EDL file while EXP says that the function can     */
-/* be used only in the EXPERIMENTS section, e.g. when it is a       */
-/* function that accesses a device. The default is EXP. Finally,    */
-/* PREP says that the function may only be used in the PREPARATION  */
-/* section (and thus will never really talk with the device).       */
-/*                                                                  */
-/********************************************************************/
+/*******************************************************************
+ * List of all non-builtin functions that can be used in EDL files
+ *
+ * Syntax:
+ *
+ *               name, num_args [ , access ] ;
+ *
+ * where `name' is the name of the function and `num_args' is the
+ * number of arguments - use a negative number for functions with
+ * variable number of arguments. The optional parameter `access'
+ * is the access flag, where ALL means that it can be used in all
+ * sections of an EDL file while EXP says that the function can
+ * be used only in the EXPERIMENTS section, e.g. when it is a
+ * function that accesses a device. The default is EXP. Finally,
+ * PREP says that the function may only be used in the PREPARATION
+ * section (and thus will never really talk with the device).
+ *
+ *******************************************************************/
 
 /* Function exported by the User_Functions modules */
 
@@ -99,7 +99,7 @@ gaussmeter_resolution, -1, ALL; // returns resolution of field meter
 gaussmeter_wait, 0, EXP;        // wait for field to stabilize
 
 measure_field, 0, EXP;          // return field value (ER035M_SA, ER035M_SAS
-								// and PT2025)
+                                // and PT2025)
 gaussmeter_probe_orientation, -1, ALL;
 gaussmeter_command, 1, EXP;
 gaussmeter_upper_search_limit, -1, EXP;  // er035m family only
@@ -219,7 +219,7 @@ digitizer_memory_size, -1, ALL;         // LeCroy WR2 only
 
 
 /* Functions exported by the RF synthesizers (HP8647A, HP8648A, HP8672A,
-											  R&S SML01) */
+                                              R&S SML01) */
 
 synthesizer_name, 0, ALL;             // returns the device name
 synthesizer_state, -1, ALL;           // set/get state (ON/OFF)
@@ -356,7 +356,7 @@ ccd_camera_pixel_area, 0, ALL;
 
 /* Functions exported by monochromators (Acton SpectaPro-300i, SPEX-CD2A) */
 
-monochromator_name, 0, ALL;		          // returns the device name
+monochromator_name, 0, ALL;               // returns the device name
 monochromator_turret, -1, EXP;            // set/query current turret
 monochromator_grating, -1, EXP;           // set/query current grating
 monochromator_wavelength, -1, ALL;        // set/query wavelength
@@ -381,13 +381,13 @@ monochromator_shutter_limits, -1, ALL;
 /* Functions exported by the power supply (Thurlby&Thandar PL330DP,
                                            F.u.G. MCN700-2000) */
 
-powersupply_name, 0, ALL;			   // returns the device name
-powersupply_damping, 2, EXP;		   // sets damping of output to on/off
-powersupply_channel_state, 2, EXP;	   // switches power supply channel on/off
+powersupply_name, 0, ALL;              // returns the device name
+powersupply_damping, 2, EXP;           // sets damping of output to on/off
+powersupply_channel_state, 2, EXP;     // switches power supply channel on/off
 powersupply_voltage, -1, EXP;          // set/get channel voltage
 powersupply_voltage_limit, -1, EXP;    // set/get channel voltage limit
 powersupply_current, -1, EXP;          // set/set channeloutput current
-powersupply_current_limit, -1, EXP;	   // get/set channelcurrent limit
+powersupply_current_limit, -1, EXP;    // get/set channelcurrent limit
 powersupply_command, 1, EXP;
 
 
@@ -411,3 +411,11 @@ mw_attenuator_attenuation, -1, EXP;
 
 chopper_name, 0, ALL;
 chopper_sector_frequency, -1, ALL;
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */

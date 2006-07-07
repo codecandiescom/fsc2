@@ -31,57 +31,57 @@
 typedef struct LAN_List LAN_List_T;
 
 struct LAN_List {
-	const char *   name;
-	int            fd;
-	struct in_addr address;
-	int            port;
-	long           us_read_timeout;
-	long           us_write_timeout;
-	bool           so_timeo_avail;
-	LAN_List_T *   next;
-	LAN_List_T *   prev;
+    const char *   name;
+    int            fd;
+    struct in_addr address;
+    int            port;
+    long           us_read_timeout;
+    long           us_write_timeout;
+    bool           so_timeo_avail;
+    LAN_List_T *   next;
+    LAN_List_T *   prev;
 };
 
 
 int fsc2_lan_open( const char * /* dev_name */,
-				   const char * /* address */,
-				   int          /* port */,
-				   long         /* us_timeout */,
-				   bool         /* quit_on_signal */ );
+                   const char * /* address */,
+                   int          /* port */,
+                   long         /* us_timeout */,
+                   bool         /* quit_on_signal */ );
 
 int fsc2_lan_close( int /* handle */ );
 
 ssize_t fsc2_lan_write( int          /* handle */,
-						const char * /* buffer */,
-						long         /* length */,
-						long         /* us_timeout */,
-						bool         /* quit_on_signal */ );
+                        const char * /* buffer */,
+                        long         /* length */,
+                        long         /* us_timeout */,
+                        bool         /* quit_on_signal */ );
 
 ssize_t fsc2_lan_writev( int                  /* handle */,
-						 const struct iovec * /* data */,
-						 int                  /* count */,
-						 long                 /* us_timeout */,
-						 bool                 /* quit_on_signal */ );
+                         const struct iovec * /* data */,
+                         int                  /* count */,
+                         long                 /* us_timeout */,
+                         bool                 /* quit_on_signal */ );
 
 ssize_t fsc2_lan_read( int    /* handle */,
-					   char * /* buffer */,
-					   long   /* length */,
-					   long   /* us_timeout */,
-					   bool   /* quit_on_signal */ );
+                       char * /* buffer */,
+                       long   /* length */,
+                       long   /* us_timeout */,
+                       bool   /* quit_on_signal */ );
 
 ssize_t fsc2_lan_readv( int            /* handle */,
-						struct iovec * /* data */,
-						int            /* count */,
-						long           /* us_timeout */,
-						bool           /* quit_on_signal */ );
+                        struct iovec * /* data */,
+                        int            /* count */,
+                        long           /* us_timeout */,
+                        bool           /* quit_on_signal */ );
 
 void fsc2_lan_log_message( const char * /* fmt */,
-						   ... );
+                           ... );
 
 void fsc2_lan_cleanup( void );
 
 void fsc2_lan_exp_init( const char * /* log_file_name */,
-						int          /* log_level */ );
+                        int          /* log_level */ );
 
 
 #endif   /* ! LAN_HEADER */
@@ -91,5 +91,7 @@ void fsc2_lan_exp_init( const char * /* log_file_name */,
  * Local variables:
  * tags-file-name: "../TAGS"
  * End:
+ * tab-width: 4
+ * indent-tabs-mode: nil
  */
 

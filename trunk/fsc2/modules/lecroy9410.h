@@ -167,81 +167,81 @@ typedef struct HORI_RES HORI_RES_T;
 
 
 struct Window {
-	long num;                   /* number of window                          */
-	double start;               /* start of window (in time units)           */
-	double width;               /* width of window (in time units)           */
-	long start_num;				/* first point of window                     */
-	long end_num;				/* last point of window                      */
-	long num_points;            /* number of data points between the cursors */
-	Window_T *next;             /* pointer to next window structure          */
-	Window_T *prev;             /* pointer to previous window structure      */
+    long num;                   /* number of window                          */
+    double start;               /* start of window (in time units)           */
+    double width;               /* width of window (in time units)           */
+    long start_num;             /* first point of window                     */
+    long end_num;               /* last point of window                      */
+    long num_points;            /* number of data points between the cursors */
+    Window_T *next;             /* pointer to next window structure          */
+    Window_T *prev;             /* pointer to previous window structure      */
 };
 
 
 struct LECROY9410 {
-	int device;
+    int device;
 
-	unsigned int INR;
+    unsigned int INR;
 
-	bool is_displayed[ LECROY9410_MAX_CHANNELS ];
+    bool is_displayed[ LECROY9410_MAX_CHANNELS ];
 
-	int num_used_channels;
+    int num_used_channels;
 
-	double timebase;
-	int tb_index;
-	bool is_timebase;
+    double timebase;
+    int tb_index;
+    bool is_timebase;
 
-	bool interleaved;
-	bool is_interleaved;
+    bool interleaved;
+    bool is_interleaved;
 
-	double sens[ LECROY9410_MAX_CHANNELS ];
-	bool is_sens[ LECROY9410_MAX_CHANNELS ];
+    double sens[ LECROY9410_MAX_CHANNELS ];
+    bool is_sens[ LECROY9410_MAX_CHANNELS ];
 
-	double offset[ LECROY9410_MAX_CHANNELS ];
-	bool is_offset[ LECROY9410_MAX_CHANNELS ];
+    double offset[ LECROY9410_MAX_CHANNELS ];
+    bool is_offset[ LECROY9410_MAX_CHANNELS ];
 
-	bool bandwidth_limiter;
-	bool is_bandwidth_limiter;
+    bool bandwidth_limiter;
+    bool is_bandwidth_limiter;
 
-	int coupling[ LECROY9410_MAX_CHANNELS ];
-	bool is_coupling[ LECROY9410_MAX_CHANNELS ];
+    int coupling[ LECROY9410_MAX_CHANNELS ];
+    bool is_coupling[ LECROY9410_MAX_CHANNELS ];
 
-	int trigger_channel;
-	bool is_trigger_channel;
+    int trigger_channel;
+    bool is_trigger_channel;
 
-	double trigger_level[ LECROY9410_MAX_CHANNELS ];
-	bool is_trigger_level[ LECROY9410_MAX_CHANNELS ];
+    double trigger_level[ LECROY9410_MAX_CHANNELS ];
+    bool is_trigger_level[ LECROY9410_MAX_CHANNELS ];
 
-	int trigger_slope[ LECROY9410_MAX_CHANNELS ];
-	bool is_trigger_slope[ LECROY9410_MAX_CHANNELS ];
+    int trigger_slope[ LECROY9410_MAX_CHANNELS ];
+    bool is_trigger_slope[ LECROY9410_MAX_CHANNELS ];
 
-	int trigger_coupling[ LECROY9410_MAX_CHANNELS ];
-	bool is_trigger_coupling[ LECROY9410_MAX_CHANNELS ];
+    int trigger_coupling[ LECROY9410_MAX_CHANNELS ];
+    bool is_trigger_coupling[ LECROY9410_MAX_CHANNELS ];
 
-	double trigger_delay;
-	bool is_trigger_delay;
+    double trigger_delay;
+    bool is_trigger_delay;
 
-	int trigger_mode;
-	bool is_trigger_mode;
+    int trigger_mode;
+    bool is_trigger_mode;
 
-	bool is_avg_setup[ LECROY9410_MAX_CHANNELS ];
-	long source_ch[ LECROY9410_MAX_CHANNELS ];
-	long rec_len[ LECROY9410_MAX_CHANNELS ];
-	long num_avg[ LECROY9410_MAX_CHANNELS ];
+    bool is_avg_setup[ LECROY9410_MAX_CHANNELS ];
+    long source_ch[ LECROY9410_MAX_CHANNELS ];
+    long rec_len[ LECROY9410_MAX_CHANNELS ];
+    long num_avg[ LECROY9410_MAX_CHANNELS ];
 
-	Window_T *w;           /* start element of list of windows */
-	int num_windows;
+    Window_T *w;           /* start element of list of windows */
+    int num_windows;
 
-	bool channels_in_use[ LECROY9410_MAX_CHANNELS ];
+    bool channels_in_use[ LECROY9410_MAX_CHANNELS ];
 };
 
 
 struct HORI_RES {
-	double tdiv;         /* time base setting */
-	double ris_tp;       /* time resolution (RIS mode) */
-	long ris_rl;         /* record length (RIS mode) */
-	double ss_tp;        /* time resolution (SINGLE SHOT mode) */
-	long ss_rl;          /* record length (SINGLE SHOT mode) */
+    double tdiv;         /* time base setting */
+    double ris_tp;       /* time resolution (RIS mode) */
+    long ris_rl;         /* record length (RIS mode) */
+    double ss_tp;        /* time resolution (SINGLE SHOT mode) */
+    long ss_rl;          /* record length (SINGLE SHOT mode) */
 };
 
 
@@ -249,46 +249,46 @@ struct HORI_RES {
 
 
 HORI_RES_T hres[ 36 ] = { { 2.0e-9, 2.5e-10,    80,   -1.0,    -1 },
-					      { 5.0e-9, 2.5e-10,   200,   -1.0,    -1 },
-					      { 1.0e-8, 2.5e-10,   400,   -1.0,    -1 },
-					      { 2.0e-8, 2.5e-10,   800,   -1.0,    -1 },
-					      { 5.0e-8, 2.5e-10,  2000, 1.0e-8,    50 },
-					      { 1.0e-7, 2.5e-10,  4000, 1.0e-8,   100 },
-					      { 2.0e-7, 2.5e-10,  8000, 1.0e-8,   200 },
-					      { 5.0e-7, 5.0e-10, 10000, 1.0e-8,   500 },
-					      { 1.0e-6, 1.0e-00, 10000, 1.0e-8,  1000 },
-					      { 2.0e-6, 2.5e-09,  8000, 1.0e-8,  2000 },
-					      { 5.0e-6, 5.0e-09, 10000, 1.0e-8,  5000 },
-					      { 1.0e-5,    -1.0,    -1, 1.0e-8, 10000 },
-					      { 2.0e-5,    -1.0,    -1, 2.5e-8,  8000 },
-					      { 5.0e-5,    -1.0,    -1, 5.0e-8, 10000 },
-					      { 1.0e-4,    -1.0,    -1, 1.0e-7, 10000 },
-					      { 2.0e-4,    -1.0,    -1, 2.5e-7,  8000 },
-					      { 5.0e-4,    -1.0,    -1, 5.0e-7, 10000 },
-					      { 1.0e-3,    -1.0,    -1, 1.0e-6, 10000 },
-					      { 2.0e-3,    -1.0,    -1, 2.5e-6,  8000 },
-					      { 5.0e-3,    -1.0,    -1, 5.0e-6, 10000 },
-					      { 1.0e-2,    -1.0,    -1, 1.0e-5, 10000 },
-					      { 2.0e-2,    -1.0,    -1, 2.5e-5,  8000 },
-					      { 5.0e-2,    -1.0,    -1, 5.0e-5, 10000 },
-					      { 1.0e-1,    -1.0,    -1, 1.0e-4, 10000 },
-					      { 2.0e-1,    -1.0,    -1, 2.5e-4,  8000 },
-					      { 5.0e-1,    -1.0,    -1, 5.0e-4, 10000 },
-					      {    1.0,    -1.0,    -1, 1.0e-3, 10000 },
-					      {    2.0,    -1.0,    -1, 2.5e-3,  8000 },
-					      {    5.0,    -1.0,    -1, 5.0e-3, 10000 },
-					      {  1.0e1,    -1.0,    -1, 1.0e-2, 10000 },
-					      {  2.0e1,    -1.0,    -1, 2.5e-2,  8000 },
-					      {  5.0e1,    -1.0,    -1, 5.0e-2, 10000 },
-					      {  1.0e2,    -1.0,    -1, 1.0e-1, 10000 },
-					      {  2.0e2,    -1.0,    -1, 2.5e-1,  8000 },
-					      {  5.0e2,    -1.0,    -1, 5.0e-1, 10000 },
-					      {  1.0e3,    -1.0,    -1, 1.0e-0, 10000 } };
+                          { 5.0e-9, 2.5e-10,   200,   -1.0,    -1 },
+                          { 1.0e-8, 2.5e-10,   400,   -1.0,    -1 },
+                          { 2.0e-8, 2.5e-10,   800,   -1.0,    -1 },
+                          { 5.0e-8, 2.5e-10,  2000, 1.0e-8,    50 },
+                          { 1.0e-7, 2.5e-10,  4000, 1.0e-8,   100 },
+                          { 2.0e-7, 2.5e-10,  8000, 1.0e-8,   200 },
+                          { 5.0e-7, 5.0e-10, 10000, 1.0e-8,   500 },
+                          { 1.0e-6, 1.0e-00, 10000, 1.0e-8,  1000 },
+                          { 2.0e-6, 2.5e-09,  8000, 1.0e-8,  2000 },
+                          { 5.0e-6, 5.0e-09, 10000, 1.0e-8,  5000 },
+                          { 1.0e-5,    -1.0,    -1, 1.0e-8, 10000 },
+                          { 2.0e-5,    -1.0,    -1, 2.5e-8,  8000 },
+                          { 5.0e-5,    -1.0,    -1, 5.0e-8, 10000 },
+                          { 1.0e-4,    -1.0,    -1, 1.0e-7, 10000 },
+                          { 2.0e-4,    -1.0,    -1, 2.5e-7,  8000 },
+                          { 5.0e-4,    -1.0,    -1, 5.0e-7, 10000 },
+                          { 1.0e-3,    -1.0,    -1, 1.0e-6, 10000 },
+                          { 2.0e-3,    -1.0,    -1, 2.5e-6,  8000 },
+                          { 5.0e-3,    -1.0,    -1, 5.0e-6, 10000 },
+                          { 1.0e-2,    -1.0,    -1, 1.0e-5, 10000 },
+                          { 2.0e-2,    -1.0,    -1, 2.5e-5,  8000 },
+                          { 5.0e-2,    -1.0,    -1, 5.0e-5, 10000 },
+                          { 1.0e-1,    -1.0,    -1, 1.0e-4, 10000 },
+                          { 2.0e-1,    -1.0,    -1, 2.5e-4,  8000 },
+                          { 5.0e-1,    -1.0,    -1, 5.0e-4, 10000 },
+                          {    1.0,    -1.0,    -1, 1.0e-3, 10000 },
+                          {    2.0,    -1.0,    -1, 2.5e-3,  8000 },
+                          {    5.0,    -1.0,    -1, 5.0e-3, 10000 },
+                          {  1.0e1,    -1.0,    -1, 1.0e-2, 10000 },
+                          {  2.0e1,    -1.0,    -1, 2.5e-2,  8000 },
+                          {  5.0e1,    -1.0,    -1, 5.0e-2, 10000 },
+                          {  1.0e2,    -1.0,    -1, 1.0e-1, 10000 },
+                          {  2.0e2,    -1.0,    -1, 2.5e-1,  8000 },
+                          {  5.0e2,    -1.0,    -1, 5.0e-1, 10000 },
+                          {  1.0e3,    -1.0,    -1, 1.0e-0, 10000 } };
 
 /* List of fixed sensivity settings where the range of the offset changes */
 
 double fixed_sens[ 8 ] = { 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2,
-						   0.1, 0.2, 0.5, 1.0 };
+                           0.1, 0.2, 0.5, 1.0 };
 
 /* List of offset factors for the different sensitivity ranges */
 
@@ -306,8 +306,8 @@ extern const char *LECROY9410_Channel_Names[ 13 ];
 
 
 enum {
-	SAMPLE,
-	AVERAGE
+    SAMPLE,
+    AVERAGE
 };
 
 
@@ -369,17 +369,17 @@ void lecroy9410_set_interleaved( bool /* state */ );
 double lecroy9410_get_sens( int /* channel */ );
 
 void lecroy9410_set_sens( int    /* channel */,
-						  double /* sens    */ );
+                          double /* sens    */ );
 
 double lecroy9410_get_offset( int /* channel */ );
 
 void lecroy9410_set_offset( int    /* channel */,
-							double /* offset  */ );
+                            double /* offset  */ );
 
 int lecroy9410_get_coupling( int /* channel */ );
 
 void lecroy9410_set_coupling( int /* channel */,
-							  int /* type    */ );
+                              int /* type    */ );
 
 int lecroy9410_get_bandwidth_limiter( void );
 
@@ -392,17 +392,17 @@ void lecroy9410_set_trigger_source( int /* channel */ );
 double lecroy9410_get_trigger_level( int /* channel */ );
 
 void lecroy9410_set_trigger_level( int    /* channel */,
-								   double /* level   */ );
+                                   double /* level   */ );
 
 double lecroy9410_get_trigger_slope( int /* channel */ );
 
 void lecroy9410_set_trigger_slope( int /* channel */,
-								   int /* slope   */ );
+                                   int /* slope   */ );
 
 int lecroy9410_get_trigger_coupling( int /* channel */ );
 
 void lecroy9410_set_trigger_coupling( int /* channel */,
-									  int /* cpl     */ );
+                                      int /* cpl     */ );
 
 int lecroy9410_get_trigger_mode( void );
 
@@ -415,35 +415,35 @@ void lecroy9410_set_trigger_delay( double /* delay */ );
 long lecroy9410_get_probe_attenuation( int /* ch */ );
 
 void lecroy9410_set_probe_attenuation( int /* ch */,
-									   long /* att */ );
+                                       long /* att */ );
 
 bool lecroy9410_is_displayed( int /* ch */ );
 
 void lecroy9410_display( int /* ch     */,
-						 int /* on_off */ );
+                         int /* on_off */ );
 
 void lecroy9410_set_up_averaging( long /* channel */,
-								  long /* source  */,
-								  long /* num_avg */,
-								  long /* rec_len */ );
+                                  long /* source  */,
+                                  long /* num_avg */,
+                                  long /* rec_len */ );
 
 void lecroy9410_finished( void );
 
 void lecroy9410_start_acquisition( void );
 
 void lecroy9410_get_curve( int        /* ch     */,
-						   Window_T * /* w      */,
-						   double **  /* array  */,
-						   long *     /* length */ );
+                           Window_T * /* w      */,
+                           double **  /* array  */,
+                           long *     /* length */ );
 
 double lecroy9410_get_area( int        /* ch */,
-							Window_T * /* w */ );
+                            Window_T * /* w */ );
 
 double lecroy9410_get_amplitude( int        /* ch */,
-								 Window_T * /* w  */ );
+                                 Window_T * /* w  */ );
 
 void lecroy9410_copy_curve( long /* src  */,
-							long /* dest */ );
+                            long /* dest */ );
 
 void lecroy9410_command( const char * /* cmd */ );
 
@@ -458,7 +458,7 @@ double lecroy9410_trigger_delay_check( void );
 void lecroy9410_all_windows_check( void );
 
 void lecroy9410_window_check( Window_T * /* w        */,
-							  bool       /* show_num */ );
+                              bool       /* show_num */ );
 
 long lecroy9410_find_length( void );
 
@@ -467,11 +467,11 @@ long lecroy9410_curve_length( void );
 double lecroy9410_time_per_point( void );
 
 long lecroy9410_translate_channel( int  /* dir     */,
-								   long /* channel */,
-								   bool /* flag    */ );
+                                   long /* channel */,
+                                   bool /* flag    */ );
 
 void lecroy9410_store_state( LECROY9410_T * /* dest */,
-							 LECROY9410_T * /* src  */ );
+                             LECROY9410_T * /* src  */ );
 
 
 #endif /* ! LECROY9410_HEADER */
@@ -479,5 +479,7 @@ void lecroy9410_store_state( LECROY9410_T * /* dest */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

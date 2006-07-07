@@ -31,42 +31,42 @@
 
 bool rb_pulser_j_new_pulse( long pnum )
 {
-	Pulse_T *cp = rb_pulser_j.pulses;
-	Pulse_T *lp = NULL;
+    Pulse_T *cp = rb_pulser_j.pulses;
+    Pulse_T *lp = NULL;
 
 
-	while ( cp != NULL )
-	{
-		if ( cp->num == pnum )
-		{
-			print( FATAL, "Can't create pulse with number %ld, it already "
-				   "exists.\n", pnum );
-			THROW( EXCEPTION );
-		}
+    while ( cp != NULL )
+    {
+        if ( cp->num == pnum )
+        {
+            print( FATAL, "Can't create pulse with number %ld, it already "
+                   "exists.\n", pnum );
+            THROW( EXCEPTION );
+        }
 
-		lp = cp;
-		cp = cp->next;
-	}
+        lp = cp;
+        cp = cp->next;
+    }
 
-	cp = PULSE_P T_malloc( sizeof *cp );
+    cp = PULSE_P T_malloc( sizeof *cp );
 
-	if ( lp == NULL )
-		rb_pulser_j.pulses = cp;
-	else
-		lp->next = cp;
+    if ( lp == NULL )
+        rb_pulser_j.pulses = cp;
+    else
+        lp->next = cp;
 
-	cp->prev = lp;
-	cp->next = NULL;
-	cp->num = pnum;
-	cp->function = NULL;
+    cp->prev = lp;
+    cp->next = NULL;
+    cp->num = pnum;
+    cp->function = NULL;
 
-	cp->is_pos = cp->is_len = cp->is_dpos = cp->is_dlen = UNSET;
-	cp->initial_is_pos = cp->initial_is_len = cp->initial_is_dpos
-				  	   = cp->initial_is_dlen = UNSET;
+    cp->is_pos = cp->is_len = cp->is_dpos = cp->is_dlen = UNSET;
+    cp->initial_is_pos = cp->initial_is_len = cp->initial_is_dpos
+                       = cp->initial_is_dlen = UNSET;
 
-	cp->has_been_active = cp->was_active = UNSET;
+    cp->has_been_active = cp->was_active = UNSET;
 
-	return OK;
+    return OK;
 }
 
 
@@ -76,38 +76,38 @@ bool rb_pulser_j_new_pulse( long pnum )
 
 bool rb_pulser_j_set_pulse_function( long pnum, int function )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	/* The pulser has only tree functions */
+    /* The pulser has only tree functions */
 
-	if ( function != PULSER_CHANNEL_MW &&
-		 function != PULSER_CHANNEL_RF &&
-		 function != PULSER_CHANNEL_DET )
-	{
-		print( FATAL, "Pulse function '%s' can't be used with this "
-			   "driver.\n", Function_Names[ function ] );
-		THROW( EXCEPTION );
-	}
+    if ( function != PULSER_CHANNEL_MW &&
+         function != PULSER_CHANNEL_RF &&
+         function != PULSER_CHANNEL_DET )
+    {
+        print( FATAL, "Pulse function '%s' can't be used with this "
+               "driver.\n", Function_Names[ function ] );
+        THROW( EXCEPTION );
+    }
 
-	if ( p->function != NULL )
-	{
-		print( FATAL, "The function of pulse #%ld has already been set to "
-			   "'%s'.\n", pnum, p->function->name );
-		THROW( EXCEPTION );
-	}
+    if ( p->function != NULL )
+    {
+        print( FATAL, "The function of pulse #%ld has already been set to "
+               "'%s'.\n", pnum, p->function->name );
+        THROW( EXCEPTION );
+    }
 
-	if ( p->is_pos &&
-		 p->pos + p->function->delay <
-		 					  rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay )
-	{
-		print( FATAL, "Start position for pulse #%ld is too early.\n", pnum );
-		THROW( EXCEPTION );
-	}
+    if ( p->is_pos &&
+         p->pos + p->function->delay <
+                              rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay )
+    {
+        print( FATAL, "Start position for pulse #%ld is too early.\n", pnum );
+        THROW( EXCEPTION );
+    }
 
-	p->function = rb_pulser_j.function + function;
+    p->function = rb_pulser_j.function + function;
 
-	return OK;
+    return OK;
 }
 
 
@@ -117,30 +117,30 @@ bool rb_pulser_j_set_pulse_function( long pnum, int function )
 
 bool rb_pulser_j_set_pulse_position( long pnum, double p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	if ( p->is_pos )
-	{
-		print( FATAL, "The start position of pulse #%ld has already been set "
-			   "to %s.\n", pnum, rb_pulser_j_ptime( p->pos ) );
-		THROW( EXCEPTION );
-	}
+    if ( p->is_pos )
+    {
+        print( FATAL, "The start position of pulse #%ld has already been set "
+               "to %s.\n", pnum, rb_pulser_j_ptime( p->pos ) );
+        THROW( EXCEPTION );
+    }
 
-	if ( p->function != NULL &&
-		 p_time + p->function->delay <
-		                      rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay )
-	{
-		print( FATAL, "Start position for pulse #%ld is too early.\n", pnum );
-		THROW( EXCEPTION );
-	}
+    if ( p->function != NULL &&
+         p_time + p->function->delay <
+                              rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay )
+    {
+        print( FATAL, "Start position for pulse #%ld is too early.\n", pnum );
+        THROW( EXCEPTION );
+    }
 
-	p->pos = p_time;
-	p->is_pos = SET;
-	p->initial_pos = p_time;
-	p->initial_is_pos = SET;
+    p->pos = p_time;
+    p->is_pos = SET;
+    p->initial_pos = p_time;
+    p->initial_is_pos = SET;
 
-	return OK;
+    return OK;
 }
 
 
@@ -150,30 +150,30 @@ bool rb_pulser_j_set_pulse_position( long pnum, double p_time )
 
 bool rb_pulser_j_set_pulse_length( long pnum, double p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	if ( p->is_len )
-	{
-		print( FATAL, "Length of pulse #%ld has already been set to %s.\n",
-			   pnum, rb_pulser_j_pticks( p->len ) );
-		THROW( EXCEPTION );
-	}
+    if ( p->is_len )
+    {
+        print( FATAL, "Length of pulse #%ld has already been set to %s.\n",
+               pnum, rb_pulser_j_pticks( p->len ) );
+        THROW( EXCEPTION );
+    }
 
-	if ( p_time < 0.0 )
-	{
-		print( FATAL, "Invalid negative length set for pulse #%ld: %s.\n",
-			   pnum, rb_pulser_j_ptime( p_time ) );
-		THROW( EXCEPTION );
-	}
+    if ( p_time < 0.0 )
+    {
+        print( FATAL, "Invalid negative length set for pulse #%ld: %s.\n",
+               pnum, rb_pulser_j_ptime( p_time ) );
+        THROW( EXCEPTION );
+    }
 
-	p->len = rb_pulser_j_double2ticks( p_time );
-	p->is_len = SET;
+    p->len = rb_pulser_j_double2ticks( p_time );
+    p->is_len = SET;
 
-	p->initial_len = p->len;
-	p->initial_is_len = SET;
+    p->initial_len = p->len;
+    p->initial_is_len = SET;
 
-	return OK;
+    return OK;
 }
 
 
@@ -183,29 +183,29 @@ bool rb_pulser_j_set_pulse_length( long pnum, double p_time )
 
 bool rb_pulser_j_set_pulse_position_change( long pnum, double p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	if ( p->is_dpos )
-	{
-		print( FATAL, "The position change of pulse #%ld has already been set "
-			   "to %s.\n", pnum, rb_pulser_j_ptime( p->dpos ) );
-		THROW( EXCEPTION );
-	}
+    if ( p->is_dpos )
+    {
+        print( FATAL, "The position change of pulse #%ld has already been set "
+               "to %s.\n", pnum, rb_pulser_j_ptime( p->dpos ) );
+        THROW( EXCEPTION );
+    }
 
-	if ( p_time == 0.0 )
-	{
-		print( SEVERE, "Zero position change value for pulse #%ld.\n", pnum );
-		return FAIL;
-	}
+    if ( p_time == 0.0 )
+    {
+        print( SEVERE, "Zero position change value for pulse #%ld.\n", pnum );
+        return FAIL;
+    }
 
-	p->dpos = p_time;
-	p->is_dpos = SET;
+    p->dpos = p_time;
+    p->is_dpos = SET;
 
-	p->initial_dpos = p->dpos;
-	p->initial_is_dpos = SET;
+    p->initial_dpos = p->dpos;
+    p->initial_is_dpos = SET;
 
-	return OK;
+    return OK;
 }
 
 
@@ -215,29 +215,29 @@ bool rb_pulser_j_set_pulse_position_change( long pnum, double p_time )
 
 bool rb_pulser_j_set_pulse_length_change( long pnum, double p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	if ( p->is_dlen )
-	{
-		print( FATAL, "Length change of pulse #%ld has already been set to "
-			   "%s.\n", pnum, rb_pulser_j_pticks( p->len ) );
-		THROW( EXCEPTION );
-	}
+    if ( p->is_dlen )
+    {
+        print( FATAL, "Length change of pulse #%ld has already been set to "
+               "%s.\n", pnum, rb_pulser_j_pticks( p->len ) );
+        THROW( EXCEPTION );
+    }
 
-	if ( rb_pulser_j_double2ticks( p_time ) == 0 )
-	{
-		print( SEVERE, "Zero length change value for pulse #%ld.\n", pnum );
-		return FAIL;
-	}
+    if ( rb_pulser_j_double2ticks( p_time ) == 0 )
+    {
+        print( SEVERE, "Zero length change value for pulse #%ld.\n", pnum );
+        return FAIL;
+    }
 
-	p->dlen = rb_pulser_j_double2ticks( p_time );
-	p->is_dlen = SET;
+    p->dlen = rb_pulser_j_double2ticks( p_time );
+    p->is_dlen = SET;
 
-	p->initial_dlen = p->dlen;
-	p->initial_is_dlen = SET;
+    p->initial_dlen = p->dlen;
+    p->initial_is_dlen = SET;
 
-	return OK;
+    return OK;
 }
 
 
@@ -247,17 +247,17 @@ bool rb_pulser_j_set_pulse_length_change( long pnum, double p_time )
 
 bool rb_pulser_j_get_pulse_function( long pnum, int *function )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	if ( p->function == NULL )
-	{
-		print( FATAL, "The function of pulse #%ld hasn't been set.\n", pnum );
-		THROW( EXCEPTION );
-	}
+    if ( p->function == NULL )
+    {
+        print( FATAL, "The function of pulse #%ld hasn't been set.\n", pnum );
+        THROW( EXCEPTION );
+    }
 
-	*function = p->function->self;
-	return OK;
+    *function = p->function->self;
+    return OK;
 }
 
 
@@ -267,19 +267,19 @@ bool rb_pulser_j_get_pulse_function( long pnum, int *function )
 
 bool rb_pulser_j_get_pulse_position( long pnum, double *p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	if ( ! p->is_pos )
-	{
-		print( FATAL, "The start position of pulse #%ld hasn't been set.\n",
-			   pnum );
-		THROW( EXCEPTION );
-	}
+    if ( ! p->is_pos )
+    {
+        print( FATAL, "The start position of pulse #%ld hasn't been set.\n",
+               pnum );
+        THROW( EXCEPTION );
+    }
 
-	*p_time = p->pos;
+    *p_time = p->pos;
 
-	return OK;
+    return OK;
 }
 
 
@@ -289,18 +289,18 @@ bool rb_pulser_j_get_pulse_position( long pnum, double *p_time )
 
 bool rb_pulser_j_get_pulse_length( long pnum, double *p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	if ( ! p->is_len )
-	{
-		print( FATAL, "Length of pulse #%ld hasn't been set.\n", pnum );
-		THROW( EXCEPTION );
-	}
+    if ( ! p->is_len )
+    {
+        print( FATAL, "Length of pulse #%ld hasn't been set.\n", pnum );
+        THROW( EXCEPTION );
+    }
 
-	*p_time = rb_pulser_j_ticks2double( p->len );
+    *p_time = rb_pulser_j_ticks2double( p->len );
 
-	return OK;
+    return OK;
 }
 
 
@@ -310,19 +310,19 @@ bool rb_pulser_j_get_pulse_length( long pnum, double *p_time )
 
 bool rb_pulser_j_get_pulse_position_change( long pnum, double *p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	if ( ! p->is_dpos )
-	{
-		print( FATAL, "The position change of pulse #%ld hasn't been set.\n",
-			   pnum );
-		THROW( EXCEPTION );
-	}
+    if ( ! p->is_dpos )
+    {
+        print( FATAL, "The position change of pulse #%ld hasn't been set.\n",
+               pnum );
+        THROW( EXCEPTION );
+    }
 
-	*p_time = p->dpos;
+    *p_time = p->dpos;
 
-	return OK;
+    return OK;
 }
 
 
@@ -332,18 +332,18 @@ bool rb_pulser_j_get_pulse_position_change( long pnum, double *p_time )
 
 bool rb_pulser_j_get_pulse_length_change( long pnum, double *p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	if ( ! p->is_dlen )
-	{
-		print( FATAL, "Length change of pulse #%ld hasn't been set.\n", pnum );
-		THROW( EXCEPTION );
-	}
+    if ( ! p->is_dlen )
+    {
+        print( FATAL, "Length change of pulse #%ld hasn't been set.\n", pnum );
+        THROW( EXCEPTION );
+    }
 
-	*p_time = rb_pulser_j_ticks2double( p->dlen );
+    *p_time = rb_pulser_j_ticks2double( p->dlen );
 
-	return OK;
+    return OK;
 }
 
 
@@ -353,45 +353,45 @@ bool rb_pulser_j_get_pulse_length_change( long pnum, double *p_time )
 
 bool rb_pulser_j_change_pulse_position( long pnum, double p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
-	double new_pos = 0.0;
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    double new_pos = 0.0;
 
 
-	CLOBBER_PROTECT( new_pos );
+    CLOBBER_PROTECT( new_pos );
 
 
-	if ( p_time < 0.0 )
-	{
-		print( FATAL, "Invalid (negative) start position for pulse #%ld: "
-			   "%s.\n", pnum, rb_pulser_j_ptime( p_time ) );
-		if ( FSC2_MODE == EXPERIMENT )
-			return FAIL;
-		else
-			THROW( EXCEPTION );
-	}
+    if ( p_time < 0.0 )
+    {
+        print( FATAL, "Invalid (negative) start position for pulse #%ld: "
+               "%s.\n", pnum, rb_pulser_j_ptime( p_time ) );
+        if ( FSC2_MODE == EXPERIMENT )
+            return FAIL;
+        else
+            THROW( EXCEPTION );
+    }
 
-	if ( p_time + p->function->delay <
-		 					  rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay )
-	{
-		print( FATAL, "Start position for pulse #%ld is too early.\n",
-			   pnum );
-		THROW( EXCEPTION );
-	}
+    if ( p_time + p->function->delay <
+                              rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay )
+    {
+        print( FATAL, "Start position for pulse #%ld is too early.\n",
+               pnum );
+        THROW( EXCEPTION );
+    }
 
-	if ( p->is_pos &&
-		 fabs( p_time - p->pos ) <= PRECISION * rb_pulser_j.timebase )
-	{
-		print( WARN, "Old and new position of pulse #%ld are identical.\n",
-			   pnum );
-		return OK;
-	}
+    if ( p->is_pos &&
+         fabs( p_time - p->pos ) <= PRECISION * rb_pulser_j.timebase )
+    {
+        print( WARN, "Old and new position of pulse #%ld are identical.\n",
+               pnum );
+        return OK;
+    }
 
-	p->pos = p_time;
-	p->is_pos = SET;
+    p->pos = p_time;
+    p->is_pos = SET;
 
-	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
+    p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 
-	return OK;
+    return OK;
 }
 
 
@@ -401,50 +401,50 @@ bool rb_pulser_j_change_pulse_position( long pnum, double p_time )
 
 bool rb_pulser_j_change_pulse_length( long pnum, double p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
-	Ticks new_len = 0;
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Ticks new_len = 0;
 
 
-	CLOBBER_PROTECT( new_len );
+    CLOBBER_PROTECT( new_len );
 
-	if ( p_time < 0 )
-	{
-		print( FATAL, "Invalid (negative) length for pulse #%ld: %s.\n",
-			   pnum, rb_pulser_j_ptime( p_time ) );
-		if ( FSC2_MODE == EXPERIMENT )
-			return FAIL;
-		else
-			THROW( EXCEPTION );
-	}
+    if ( p_time < 0 )
+    {
+        print( FATAL, "Invalid (negative) length for pulse #%ld: %s.\n",
+               pnum, rb_pulser_j_ptime( p_time ) );
+        if ( FSC2_MODE == EXPERIMENT )
+            return FAIL;
+        else
+            THROW( EXCEPTION );
+    }
 
-	TRY
-	{
-		new_len = rb_pulser_j_double2ticks( p_time );
-		TRY_SUCCESS;
-	}
-	CATCH( EXCEPTION )
-	{
-		if ( FSC2_MODE == EXPERIMENT )
-			return FAIL;
-		else
-			THROW( EXCEPTION );
-	}
-	OTHERWISE
-		RETHROW( );
+    TRY
+    {
+        new_len = rb_pulser_j_double2ticks( p_time );
+        TRY_SUCCESS;
+    }
+    CATCH( EXCEPTION )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+            return FAIL;
+        else
+            THROW( EXCEPTION );
+    }
+    OTHERWISE
+        RETHROW( );
 
-	if ( p->is_len && p->len == new_len )
-	{
-		print( WARN, "Old and new length of pulse #%ld are identical.\n",
-			   pnum );
-		return OK;
-	}
+    if ( p->is_len && p->len == new_len )
+    {
+        print( WARN, "Old and new length of pulse #%ld are identical.\n",
+               pnum );
+        return OK;
+    }
 
-	p->len = new_len;
-	p->is_len = SET;
+    p->len = new_len;
+    p->is_len = SET;
 
-	p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
+    p->has_been_active |= ( p->is_active = IS_ACTIVE( p ) );
 
-	return OK;
+    return OK;
 }
 
 
@@ -454,19 +454,19 @@ bool rb_pulser_j_change_pulse_length( long pnum, double p_time )
 
 bool rb_pulser_j_change_pulse_position_change( long pnum, double p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
 
 
-	if ( p_time == 0 && FSC2_MODE == TEST )
-	{
-		print( SEVERE, "Zero position change value for pulse #%ld.\n", pnum );
-		return FAIL;
-	}
+    if ( p_time == 0 && FSC2_MODE == TEST )
+    {
+        print( SEVERE, "Zero position change value for pulse #%ld.\n", pnum );
+        return FAIL;
+    }
 
-	p->dpos = p_time;
-	p->is_dpos = SET;
+    p->dpos = p_time;
+    p->is_dpos = SET;
 
-	return OK;
+    return OK;
 }
 
 
@@ -476,42 +476,44 @@ bool rb_pulser_j_change_pulse_position_change( long pnum, double p_time )
 
 bool rb_pulser_j_change_pulse_length_change( long pnum, double p_time )
 {
-	Pulse_T *p = rb_pulser_j_get_pulse( pnum );
-	Ticks new_dlen = 0;
+    Pulse_T *p = rb_pulser_j_get_pulse( pnum );
+    Ticks new_dlen = 0;
 
 
-	CLOBBER_PROTECT( new_dlen );
+    CLOBBER_PROTECT( new_dlen );
 
-	TRY
-	{
-		new_dlen = rb_pulser_j_double2ticks( p_time );
-		TRY_SUCCESS;
-	}
-	CATCH( EXCEPTION )
-	{
-		if ( FSC2_MODE == EXPERIMENT )
-			return FAIL;
-		else
-			THROW( EXCEPTION );
-	}
-	OTHERWISE
-		RETHROW( );
+    TRY
+    {
+        new_dlen = rb_pulser_j_double2ticks( p_time );
+        TRY_SUCCESS;
+    }
+    CATCH( EXCEPTION )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+            return FAIL;
+        else
+            THROW( EXCEPTION );
+    }
+    OTHERWISE
+        RETHROW( );
 
-	if ( new_dlen == 0 && FSC2_MODE == TEST )
-	{
-		print( SEVERE, "Zero length change value for pulse #%ld.\n", pnum );
-		return FAIL;
-	}
+    if ( new_dlen == 0 && FSC2_MODE == TEST )
+    {
+        print( SEVERE, "Zero length change value for pulse #%ld.\n", pnum );
+        return FAIL;
+    }
 
-	p->dlen = new_dlen;
-	p->is_dlen = SET;
+    p->dlen = new_dlen;
+    p->is_dlen = SET;
 
-	return OK;
+    return OK;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -22,9 +22,9 @@
  */
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap stack nounput never-interactive
 
@@ -46,13 +46,13 @@ static int hp8672a_lex( void );
 static int hp8672a_get_unit( void );
 
 static void hp8672a_new_table_entry( int    type,
-									 double val );
+                                     double val );
 
 static int hp8672a_comp( const void * a,
-						 const void * b );
+                         const void * b );
 
 static long hp8672a_Lc,
-			hp8672a_Comm_Lc;
+            hp8672a_Comm_Lc;
 static double unit_fac = 1.0;
 
 static long cur_table_len;
@@ -82,73 +82,73 @@ DU       {IU}|{FU}
 %x      comm
 
 
-		/*---------------*/
-%%		/*     RULES     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     RULES     */
+        /*---------------*/
 
 
             /* handling of C++ style comment spanning a whole line */
-{REM1}		hp8672a_Lc++;
+{REM1}      hp8672a_Lc++;
 
-			/* handling of C++ style comment not spanning a whole line */
-{REM2}		hp8672a_Lc++;
+            /* handling of C++ style comment not spanning a whole line */
+{REM2}      hp8672a_Lc++;
 
-			/* handling of C style comment */
-{REM3}		{
-				hp8672a_Comm_Lc = hp8672a_Lc;
-				yy_push_state( comm );
-			}
+            /* handling of C style comment */
+{REM3}      {
+                hp8672a_Comm_Lc = hp8672a_Lc;
+                yy_push_state( comm );
+            }
 
 <comm>{
 
-{REM4}		/* skipping anything that's not a '*' */
+{REM4}      /* skipping anything that's not a '*' */
 {REM5}      /* skipping all '*'s not followed by '/'s */
 
-			/* end of line character in a comment */
-\n			hp8672a_Lc++;
+            /* end of line character in a comment */
+\n          hp8672a_Lc++;
 
-			/* handling of EOF within a comment -> fatal error */
-<<EOF>>		THROW( EOF_IN_COMMENT_EXCEPTION );
+            /* handling of EOF within a comment -> fatal error */
+<<EOF>>     THROW( EOF_IN_COMMENT_EXCEPTION );
 
-			/* end of comment but not end of line */
-{EREM1}		yy_pop_state( );
+            /* end of comment but not end of line */
+{EREM1}     yy_pop_state( );
 
-			/* end of comment and end of line */
+            /* end of comment and end of line */
 {EREM2}     {
-				hp8672a_Lc++;
-				yy_pop_state( );
-			}
+                hp8672a_Lc++;
+                yy_pop_state( );
+            }
 } /* end of <comm> */
 
 {EREM1}     THROW( DANGLING_END_OF_COMMENT );
 
-			/* dump empty line (i.e. just containing tabs and spaces) */
+            /* dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      hp8672a_Lc++;
 
-			/* dumps trailing white space */
+            /* dumps trailing white space */
 {TWS}       hp8672a_Lc++;
 
-			/* dump all other forms of white */
+            /* dump all other forms of white */
 {WS}
 
-			/* count lines */
-\n			hp8672a_Lc++;
+            /* count lines */
+\n          hp8672a_Lc++;
 
 {DU}        return hp8672a_get_unit( );
 
 {D}         {
-				unit_fac = 1.0;
-				return IS_FREQ | IS_ATT;
-			}
+                unit_fac = 1.0;
+                return IS_FREQ | IS_ATT;
+            }
 
-<<EOF>>		return 0;
+<<EOF>>     return 0;
 
 .           THROW( INVALID_INPUT_EXCEPTION );
 
 
-		/*----------------------*/
-%%		/*     END OF RULES     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     END OF RULES     */
+        /*----------------------*/
 
 
 /*-------------------------------------------------------------*
@@ -156,53 +156,53 @@ DU       {IU}|{FU}
 
 void hp8672a_read_table( FILE * fp )
 {
-	static bool is_restart = UNSET;
-	int type;
+    static bool is_restart = UNSET;
+    int type;
 
 
-	if ( ( hp8672a_in = fp ) == NULL )
-	{
-		print( FATAL, "Internal error while reading attenuation table.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ( hp8672a_in = fp ) == NULL )
+    {
+        print( FATAL, "Internal error while reading attenuation table.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* Keep the lexer happy... */
+    /* Keep the lexer happy... */
 
-	if ( is_restart )
-	    hp8672a_restart( hp8672a_in );
-	else
-		is_restart = SET;
+    if ( is_restart )
+        hp8672a_restart( hp8672a_in );
+    else
+        is_restart = SET;
 
-	hp8672a_Lc = 1;
+    hp8672a_Lc = 1;
 
-	TRY 
-	{
-		hp8672a_new_table_entry( TABLE_INIT, 0.0 );
-		while( ( type = hp8672a_lex( ) ) != 0 )
-			hp8672a_new_table_entry( type, T_atod( hp8672a_text ) * unit_fac );
-		hp8672a_new_table_entry( TABLE_END, 0.0 );
-		TRY_SUCCESS;
-	}
-	CATCH( EOF_IN_COMMENT_EXCEPTION )
-	{
-		print( FATAL, "Unexpected end of table file '%s' in comment starting "
-			   "at line %ld.\n", hp8672a.table_file, hp8672a_Comm_Lc );
-		THROW( EXCEPTION );
-	}
-	CATCH( DANGLING_END_OF_COMMENT )
-	{
-		print( FATAL, "End of comment found in table file '%s' at line %ld.\n",
-			   hp8672a.table_file, hp8672a_Lc );
-		THROW( EXCEPTION );
-	}
-	CATCH( INVALID_INPUT_EXCEPTION )
-	{
-		print( FATAL, "Invalid entry in table file '%s' at line %ld.\n",
-			   hp8672a.table_file, hp8672a_Lc );
-		THROW( EXCEPTION );
-	}
-	OTHERWISE
-		RETHROW( );
+    TRY 
+    {
+        hp8672a_new_table_entry( TABLE_INIT, 0.0 );
+        while( ( type = hp8672a_lex( ) ) != 0 )
+            hp8672a_new_table_entry( type, T_atod( hp8672a_text ) * unit_fac );
+        hp8672a_new_table_entry( TABLE_END, 0.0 );
+        TRY_SUCCESS;
+    }
+    CATCH( EOF_IN_COMMENT_EXCEPTION )
+    {
+        print( FATAL, "Unexpected end of table file '%s' in comment starting "
+               "at line %ld.\n", hp8672a.table_file, hp8672a_Comm_Lc );
+        THROW( EXCEPTION );
+    }
+    CATCH( DANGLING_END_OF_COMMENT )
+    {
+        print( FATAL, "End of comment found in table file '%s' at line %ld.\n",
+               hp8672a.table_file, hp8672a_Lc );
+        THROW( EXCEPTION );
+    }
+    CATCH( INVALID_INPUT_EXCEPTION )
+    {
+        print( FATAL, "Invalid entry in table file '%s' at line %ld.\n",
+               hp8672a.table_file, hp8672a_Lc );
+        THROW( EXCEPTION );
+    }
+    OTHERWISE
+        RETHROW( );
 }
 
 
@@ -211,50 +211,50 @@ void hp8672a_read_table( FILE * fp )
 
 static int hp8672a_get_unit( void )
 {
-	char *cp;
-	bool done = UNSET;
-	int type = 0;
+    char *cp;
+    bool done = UNSET;
+    int type = 0;
 
 
-	for ( cp = hp8672a_text; ! done && *cp; cp++ )
-	{
-		switch ( *cp )
-		{
-			 case ' ' : case '\t' :
-				 *cp = '\0';
-				 break;
+    for ( cp = hp8672a_text; ! done && *cp; cp++ )
+    {
+        switch ( *cp )
+        {
+             case ' ' : case '\t' :
+                 *cp = '\0';
+                 break;
 
-			 case 'k' :
-				  *cp = '\0';
-				  unit_fac = 1.0e3;
-				  type = IS_FREQ;
-				  done = SET;
-				  break;
+             case 'k' :
+                  *cp = '\0';
+                  unit_fac = 1.0e3;
+                  type = IS_FREQ;
+                  done = SET;
+                  break;
 
-			 case 'M' :
-				  *cp = '\0';
-				  type = IS_FREQ;
-				  unit_fac = 1.0e6;
-				  done = SET;
-				  break;
+             case 'M' :
+                  *cp = '\0';
+                  type = IS_FREQ;
+                  unit_fac = 1.0e6;
+                  done = SET;
+                  break;
 
-			 case 'G' :
-				  *cp = '\0';
-				  type = IS_FREQ;
-				  unit_fac = 1.0e9;
-				  done = SET;
-				  break;
+             case 'G' :
+                  *cp = '\0';
+                  type = IS_FREQ;
+                  unit_fac = 1.0e9;
+                  done = SET;
+                  break;
 
-			 case 'd' :
-				  *cp = '\0';
-				  type = IS_ATT;
-				  unit_fac = 1.0;
-				  done = SET;
-				  break;
-		}
-	}
+             case 'd' :
+                  *cp = '\0';
+                  type = IS_ATT;
+                  unit_fac = 1.0;
+                  done = SET;
+                  break;
+        }
+    }
 
-	return type;
+    return type;
 }
 
 
@@ -262,140 +262,140 @@ static int hp8672a_get_unit( void )
  *-------------------------------------------------------------*/
 
 static void hp8672a_new_table_entry( int    type,
-									 double val )
+                                     double val )
 {
-	static bool is_freq = UNSET, is_att = UNSET;
+    static bool is_freq = UNSET, is_att = UNSET;
 
 
-	/* Initialize everything when type is -1 */
+    /* Initialize everything when type is -1 */
 
-	if ( type == TABLE_INIT )
-	{
-		is_freq = is_att = UNSET;
-		hp8672a.att_table = ATT_TABLE_ENTRY_P T_malloc( TABLE_CHUNK_SIZE
-												 * sizeof *hp8672a.att_table );
-	    cur_table_len = TABLE_CHUNK_SIZE;
-		return;
-	}
+    if ( type == TABLE_INIT )
+    {
+        is_freq = is_att = UNSET;
+        hp8672a.att_table = ATT_TABLE_ENTRY_P T_malloc( TABLE_CHUNK_SIZE
+                                                 * sizeof *hp8672a.att_table );
+        cur_table_len = TABLE_CHUNK_SIZE;
+        return;
+    }
 
-	/* If type is 0 this is the final check after all data have been read */
+    /* If type is 0 this is the final check after all data have been read */
 
-	if ( type == TABLE_END )
-	{
-		/* Check that we're not expecting another attenuation or frequency
-		   while the end of the file is already reached */
+    if ( type == TABLE_END )
+    {
+        /* Check that we're not expecting another attenuation or frequency
+           while the end of the file is already reached */
 
-		if ( is_freq ^ is_att )                /* one of them is still set ? */
-		{
-			print( FATAL, "Missing final %s in table file '%s'.\n",
-				   is_freq ? "attenuation" : "frequency", hp8672a.table_file );
-			THROW( EXCEPTION );
-		}
+        if ( is_freq ^ is_att )                /* one of them is still set ? */
+        {
+            print( FATAL, "Missing final %s in table file '%s'.\n",
+                   is_freq ? "attenuation" : "frequency", hp8672a.table_file );
+            THROW( EXCEPTION );
+        }
 
-		/* Check that there are at least two entries in the table */
+        /* Check that there are at least two entries in the table */
 
-		if ( hp8672a.att_table_len < 2 )
-		{
-			print( FATAL, "Table file '%s' contains less than 2 entries.\n",
-				   hp8672a.table_file );
-			THROW( EXCEPTION );
-		}
+        if ( hp8672a.att_table_len < 2 )
+        {
+            print( FATAL, "Table file '%s' contains less than 2 entries.\n",
+                   hp8672a.table_file );
+            THROW( EXCEPTION );
+        }
 
-		/* Cut back table size to the amount of memory really needed and sort
-		   the table in ascending order with respect to the frequencies, then
-		   set lowest and highest frequency in structure for synthesizer */
+        /* Cut back table size to the amount of memory really needed and sort
+           the table in ascending order with respect to the frequencies, then
+           set lowest and highest frequency in structure for synthesizer */
 
-		hp8672a.att_table = ATT_TABLE_ENTRY_P T_realloc( hp8672a.att_table,
-						   hp8672a.att_table_len * sizeof *hp8672a.att_table );
-		cur_table_len = hp8672a.att_table_len;
-		qsort( hp8672a.att_table, hp8672a.att_table_len,
-			   sizeof ( Att_Table_Entry_T ), hp8672a_comp );
-		hp8672a.min_table_freq = hp8672a.att_table[ 0 ].freq;
-		hp8672a.max_table_freq =
-						   hp8672a.att_table[ hp8672a.att_table_len - 1 ].freq;
-		return;
-	}
+        hp8672a.att_table = ATT_TABLE_ENTRY_P T_realloc( hp8672a.att_table,
+                           hp8672a.att_table_len * sizeof *hp8672a.att_table );
+        cur_table_len = hp8672a.att_table_len;
+        qsort( hp8672a.att_table, hp8672a.att_table_len,
+               sizeof ( Att_Table_Entry_T ), hp8672a_comp );
+        hp8672a.min_table_freq = hp8672a.att_table[ 0 ].freq;
+        hp8672a.max_table_freq =
+                           hp8672a.att_table[ hp8672a.att_table_len - 1 ].freq;
+        return;
+    }
 
-	/* Two frequencies or two attenuations in a row aren't allowed (at least
-	   when the first entry wasn't used up) */
+    /* Two frequencies or two attenuations in a row aren't allowed (at least
+       when the first entry wasn't used up) */
 
-	if ( type == IS_ATT && is_att )
-	{
-		print( FATAL, "Error while reading table file '%s': Two attenuation "
-			   "values in a row at line %ld.\n",
-			   hp8672a.table_file, hp8672a_Lc );
-		THROW( EXCEPTION );
-	}
+    if ( type == IS_ATT && is_att )
+    {
+        print( FATAL, "Error while reading table file '%s': Two attenuation "
+               "values in a row at line %ld.\n",
+               hp8672a.table_file, hp8672a_Lc );
+        THROW( EXCEPTION );
+    }
 
-	if ( type == IS_FREQ && is_freq )
-	{
-		print( FATAL, "Error while reading table file '%s': Two frequency "
-			   "values in a row at line %ld.\n",
-			   hp8672a.table_file, hp8672a_Lc );
-		THROW( EXCEPTION );
-	}
+    if ( type == IS_FREQ && is_freq )
+    {
+        print( FATAL, "Error while reading table file '%s': Two frequency "
+               "values in a row at line %ld.\n",
+               hp8672a.table_file, hp8672a_Lc );
+        THROW( EXCEPTION );
+    }
 
-	/* If the type is indetermined either set it to the not yet set type
-	   or to frequency if none has been set yet - thus the default, when no
-	   units are given is frequency first, then the attenuation */
+    /* If the type is indetermined either set it to the not yet set type
+       or to frequency if none has been set yet - thus the default, when no
+       units are given is frequency first, then the attenuation */
 
-	if ( type == ( IS_FREQ | IS_ATT ) )
-	{
-		if ( is_freq )
-		   type = IS_ATT;
-		else
-			type = IS_FREQ;
-	}
+    if ( type == ( IS_FREQ | IS_ATT ) )
+    {
+        if ( is_freq )
+           type = IS_ATT;
+        else
+            type = IS_FREQ;
+    }
 
-	/* If necessary extend the length of the table */
+    /* If necessary extend the length of the table */
 
-	if ( cur_table_len <= hp8672a.att_table_len )
-	{
-		cur_table_len += TABLE_CHUNK_SIZE;
-	    hp8672a.att_table = ATT_TABLE_ENTRY_P T_realloc( hp8672a.att_table,
-								   cur_table_len * sizeof *hp8672a.att_table );
-	}
+    if ( cur_table_len <= hp8672a.att_table_len )
+    {
+        cur_table_len += TABLE_CHUNK_SIZE;
+        hp8672a.att_table = ATT_TABLE_ENTRY_P T_realloc( hp8672a.att_table,
+                                   cur_table_len * sizeof *hp8672a.att_table );
+    }
 
-	if ( type == IS_FREQ )
-	{
-		if ( val < 0 )
-		{
-			print( FATAL, "Invalid negative RF frequency found in the table "
-				   "file '%s' at line %ld.\n",
-				   hp8672a.table_file, hp8672a_Lc );
-			THROW( EXCEPTION );
-		}
+    if ( type == IS_FREQ )
+    {
+        if ( val < 0 )
+        {
+            print( FATAL, "Invalid negative RF frequency found in the table "
+                   "file '%s' at line %ld.\n",
+                   hp8672a.table_file, hp8672a_Lc );
+            THROW( EXCEPTION );
+        }
 
-		if ( val > MAX_FREQ || val < MIN_FREQ )
-			print( WARN, "Frequency of %g MHz in table file '%s', line %ld, "
-				   "is not within range of synthesizer (%f kHz - %f MHz).\n",
-				   val * 1.0e-6, hp8672a.table_file, hp8672a_Lc,
-				   MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
-	    hp8672a.att_table[ hp8672a.att_table_len ].freq = val;
-		is_freq = SET;
-	}
-	else                /* IS_ATT */
-	{
-		if ( val > hp8672a.min_attenuation - MAX_ATTEN )
-		{
-			print( FATAL, "Attenuation of %.1f dB in table file '%s', line "
-				   "%ld, can't be achieved, maximum dynamic range is "
-				   "%.1f dB.\n", val, hp8672a.table_file, hp8672a_Lc,
-				   hp8672a.min_attenuation - MAX_ATTEN );
-			THROW( EXCEPTION );
-		}
-	    hp8672a.att_table[ hp8672a.att_table_len ].att = val;
-		is_att = SET;
-	}
+        if ( val > MAX_FREQ || val < MIN_FREQ )
+            print( WARN, "Frequency of %g MHz in table file '%s', line %ld, "
+                   "is not within range of synthesizer (%f kHz - %f MHz).\n",
+                   val * 1.0e-6, hp8672a.table_file, hp8672a_Lc,
+                   MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
+        hp8672a.att_table[ hp8672a.att_table_len ].freq = val;
+        is_freq = SET;
+    }
+    else                /* IS_ATT */
+    {
+        if ( val > hp8672a.min_attenuation - MAX_ATTEN )
+        {
+            print( FATAL, "Attenuation of %.1f dB in table file '%s', line "
+                   "%ld, can't be achieved, maximum dynamic range is "
+                   "%.1f dB.\n", val, hp8672a.table_file, hp8672a_Lc,
+                   hp8672a.min_attenuation - MAX_ATTEN );
+            THROW( EXCEPTION );
+        }
+        hp8672a.att_table[ hp8672a.att_table_len ].att = val;
+        is_att = SET;
+    }
 
-	/* If both frequency and attenuation have been set increment entry count
-	   and prepare for the next pair of data */
+    /* If both frequency and attenuation have been set increment entry count
+       and prepare for the next pair of data */
 
-	if ( is_freq && is_att )
-	{
-		hp8672a.att_table_len++;
-		is_freq = is_att = UNSET;
-	}
+    if ( is_freq && is_att )
+    {
+        hp8672a.att_table_len++;
+        is_freq = is_att = UNSET;
+    }
 }
 
 
@@ -405,25 +405,27 @@ static void hp8672a_new_table_entry( int    type,
  *---------------------------------------------------------------*/
 
 static int hp8672a_comp( const void * a,
-						 const void  *b )
+                         const void  *b )
 {
-	Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
-					  *B = ( Att_Table_Entry_T * ) b;
+    Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
+                      *B = ( Att_Table_Entry_T * ) b;
 
 
-	if ( A->freq == B->freq )
-	{
-		print( FATAL, "Frequency of %s Hz appears twice in table file '%s'\n",
-			   A->freq, hp8672a.table_file );
-		THROW( EXCEPTION );
-	}
+    if ( A->freq == B->freq )
+    {
+        print( FATAL, "Frequency of %s Hz appears twice in table file '%s'\n",
+               A->freq, hp8672a.table_file );
+        THROW( EXCEPTION );
+    }
 
-	return A->freq < B->freq ? -1 : 1;
+    return A->freq < B->freq ? -1 : 1;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

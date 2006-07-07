@@ -26,24 +26,28 @@ extern "C" {
 #endif
 
 
+#if ! define WITIO_48_LIBRARY_HEADER
+#define WITIO_48_LIBRARY_HEADER
+
+
 #include <witio_48_drv.h>
 
 
 int witio_48_close( void );
 
 int witio_48_set_mode( WITIO_48_DIO  /* dio */,
-					   WITIO_48_MODE /* mode */ );
+                       WITIO_48_MODE /* mode */ );
 
 int witio_48_get_mode( WITIO_48_DIO    /* dio */,
-					   WITIO_48_MODE * /* mode */ );
+                       WITIO_48_MODE * /* mode */ );
 
 int witio_48_dio_out( WITIO_48_DIO     /* dio */,
-					  WITIO_48_CHANNEL /* channel */,
-					  unsigned long    /* value */ );
+                      WITIO_48_CHANNEL /* channel */,
+                      unsigned long    /* value */ );
 
 int witio_48_dio_in( WITIO_48_DIO     /* dio */,
-					 WITIO_48_CHANNEL /* channel */,
-					 unsigned long *  /* value */ );
+                     WITIO_48_CHANNEL /* channel */,
+                     unsigned long *  /* value */ );
 
 int witio_48_perror( const char * /* s */ );
 
@@ -72,3 +76,14 @@ extern const int witio_48_nerr;
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
+
+
+#endif /* ! WITIO_48_LIBRARY_HEADER */
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */

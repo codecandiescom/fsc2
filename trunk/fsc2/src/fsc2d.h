@@ -27,7 +27,7 @@
 
 
 int check_spawn_fsc2d( bool   /* exclusive  */,
-					   FILE * /* in_file_fp */ );
+                       FILE * /* in_file_fp */ );
 
 
 #endif  /* ! FSC2D_HEADER */
@@ -36,5 +36,7 @@ int check_spawn_fsc2d( bool   /* exclusive  */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

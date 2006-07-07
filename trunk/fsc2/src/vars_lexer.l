@@ -27,9 +27,9 @@
 /**************************************************************/
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap nounput
 
@@ -42,12 +42,12 @@
 
 #define YY_INPUT( buf, result, max_size )                       \
 {                                                               \
-	char c;                                                     \
-	ssize_t count;                                              \
-	while ( ( count = read( fileno( varsin ), &c, 1 ) ) < 0 &&  \
-			errno == EINTR )                                    \
-		/* empty */ ;                                           \
-	result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );    \
+    char c;                                                     \
+    ssize_t count;                                              \
+    while ( ( count = read( fileno( varsin ), &c, 1 ) ) < 0 &&  \
+            errno == EINTR )                                    \
+        /* empty */ ;                                           \
+    result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );    \
 }
 
 
@@ -99,7 +99,7 @@ P           P(ULSE)?_?{INT}
 
 F           F(UNC(TION)?)?
 S           S(TART)?
-L			L(EN(GTH)?)?
+L           L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 
@@ -107,47 +107,47 @@ CTRL        (WHILE)|(UNTIL)|(BREAK)|(NEXT)|(IF)|(ELSE)|(REPEAT)|(FOR)
 
 WS          [\n \t]+
 
-		/*---------------*/
-%%		/*     Rules     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     Rules     */
+        /*---------------*/
 
 
-			/* Handling of file name lines */
+            /* Handling of file name lines */
 {FILE}      {
-				*( varstext + varsleng - 1 ) = '\0';
-				EDL.Fname = CHAR_P T_free( EDL.Fname );
-				EDL.Fname = T_strdup( varstext + 2 );
-			}
+                *( varstext + varsleng - 1 ) = '\0';
+                EDL.Fname = CHAR_P T_free( EDL.Fname );
+                EDL.Fname = T_strdup( varstext + 2 );
+            }
 
-			/* Handling of line number lines */
-{LNUM}		{
-				*( varstext + varsleng - 1 ) = '\0';
-				EDL.Lc = atol( varstext + 2 );
-			}
+            /* Handling of line number lines */
+{LNUM}      {
+                *( varstext + varsleng - 1 ) = '\0';
+                EDL.Lc = atol( varstext + 2 );
+            }
 
-			/* Handling of error messages from the cleaner */
-{ERR}		{
-				eprint( FATAL, UNSET, "%s\n", varstext + 2 );
-				THROW( EXCEPTION );
-			}
+            /* Handling of error messages from the cleaner */
+{ERR}       {
+                eprint( FATAL, UNSET, "%s\n", varstext + 2 );
+                THROW( EXCEPTION );
+            }
 
-{ESTR}		{
-				varstext = strchr( varstext, '\x03' );
-				eprint( FATAL, UNSET, "%s\n", varstext + 2 );
-				THROW( EXCEPTION );
-			}
+{ESTR}      {
+                varstext = strchr( varstext, '\x03' );
+                eprint( FATAL, UNSET, "%s\n", varstext + 2 );
+                THROW( EXCEPTION );
+            }
 
-			/* Handling of DEVICES: labels */
-{DEV}		{
-				Vars_next_section = DEVICES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* Handling of DEVICES: labels */
+{DEV}       {
+                Vars_next_section = DEVICES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* Handling of ASSIGNMENTS: label */
-{ASS}		{
-				Vars_next_section = ASSIGNMENTS_SECTION;
-				return SECTION_LABEL;
-			}
+            /* Handling of ASSIGNMENTS: label */
+{ASS}       {
+                Vars_next_section = ASSIGNMENTS_SECTION;
+                return SECTION_LABEL;
+            }
 
 "=="        return EQ;        /* equal */
 "!="        return NE;        /* unequal */
@@ -180,70 +180,70 @@ WS          [\n \t]+
 "?"         return '?';
 ":"         return ':';
 
-			/* Handling of VARIABLES: label */
-{VAR}		{
-				Vars_next_section = VARIABLES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* Handling of VARIABLES: label */
+{VAR}       {
+                Vars_next_section = VARIABLES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* Handling of PHASES: label */
-{PHAS}		{
-				Vars_next_section = PHASES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* Handling of PHASES: label */
+{PHAS}      {
+                Vars_next_section = PHASES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* Handling of PREPARATIONS: label */
-{PREP}		{
-				Vars_next_section = PREPARATIONS_SECTION;
-				return SECTION_LABEL;
-			}
+            /* Handling of PREPARATIONS: label */
+{PREP}      {
+                Vars_next_section = PREPARATIONS_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* Handling of EXPERIMENT: label */
-{EXP}		{
-				Vars_next_section = EXPERIMENT_SECTION;
-				return SECTION_LABEL;
-			}
+            /* Handling of EXPERIMENT: label */
+{EXP}       {
+                Vars_next_section = EXPERIMENT_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* All needed pulse related keywords... */
+            /* All needed pulse related keywords... */
 
 {P}"."{F}   {
-				varslval.vptr = p_get( varstext, P_FUNC );
-				return VAR_REF;
+                varslval.vptr = p_get( varstext, P_FUNC );
+                return VAR_REF;
             }
 
 {P}"."{S}   {
-				varslval.vptr = p_get( varstext, P_POS );
-				return VAR_REF;
+                varslval.vptr = p_get( varstext, P_POS );
+                return VAR_REF;
             }
 
 {P}"."{L}   {
-				varslval.vptr = p_get( varstext, P_LEN );
-				return VAR_REF;
+                varslval.vptr = p_get( varstext, P_LEN );
+                return VAR_REF;
             }
 
 {P}"."{DS}  {
-				varslval.vptr = p_get( varstext, P_DPOS );
-				return VAR_REF;
+                varslval.vptr = p_get( varstext, P_DPOS );
+                return VAR_REF;
             }
 
 {P}"."{DL}  {
-				varslval.vptr = p_get( varstext, P_DLEN );
-				return VAR_REF;
+                varslval.vptr = p_get( varstext, P_DLEN );
+                return VAR_REF;
             }
 
 {CHT}       {
                 varslval.vptr = convert_to_channel_number( varstext );
-				return VAR_REF;
+                return VAR_REF;
             }
 
 {DIO}       {
-				varslval.lval = T_atol( varstext + 3 );
+                varslval.lval = T_atol( varstext + 3 );
                 return INT_TOKEN;
             }
 
-			/* Handling of integer and floating point numbers */
+            /* Handling of integer and floating point numbers */
 {INT}/[^_a-zA-Z] {
-				varslval.lval = T_atol( varstext );
+                varslval.lval = T_atol( varstext );
                 return INT_TOKEN;
             }
 
@@ -252,97 +252,97 @@ WS          [\n \t]+
                 return FLOAT_TOKEN;
             }
 
-			/* Handling of string constants */
+            /* Handling of string constants */
 {STR}       {
-				varstext[ strlen( varstext ) - 1 ] = '\0';
-				varslval.sptr = varstext + 1;
-				return STR_TOKEN;
-			}
+                varstext[ strlen( varstext ) - 1 ] = '\0';
+                varslval.sptr = varstext + 1;
+                return STR_TOKEN;
+            }
 
 {CTRL}      {
-				print( FATAL, "Flow control structures can't be used "
-					   "in the VARIABLES section.\n" );
-				THROW( EXCEPTION );
-			}
+                print( FATAL, "Flow control structures can't be used "
+                       "in the VARIABLES section.\n" );
+                THROW( EXCEPTION );
+            }
 
-			/* Handling of function, variable and array identifiers */
+            /* Handling of function, variable and array identifiers */
 {FUNC}      {
-				char *t;
-				int acc;
+                char *t;
+                int acc;
 
-				t = strrchr( varstext, '#' );
+                t = strrchr( varstext, '#' );
                 if ( t != NULL && ! strcmp( t, "#1" ) )
                     *t = '\0';
 
-				varslval.vptr = func_get( varstext, &acc );
-				if ( varslval.vptr != NULL )
-				{
-					/* If it's a function check that the function can be used
-					   in the current context */
+                varslval.vptr = func_get( varstext, &acc );
+                if ( varslval.vptr != NULL )
+                {
+                    /* If it's a function check that the function can be used
+                       in the current context */
 
-					if ( acc == ACCESS_EXP )
-					{
-						print( FATAL, "Function '%s' can only be used "
-							   "in the EXPERIMENT section.\n", varstext );
-						THROW( EXCEPTION );
-					}
-					return FUNC_TOKEN;
-				}
+                    if ( acc == ACCESS_EXP )
+                    {
+                        print( FATAL, "Function '%s' can only be used "
+                               "in the EXPERIMENT section.\n", varstext );
+                        THROW( EXCEPTION );
+                    }
+                    return FUNC_TOKEN;
+                }
                 else
                 {
                     print( FATAL, "Function '%s' is not loaded.\n", varstext );
-					THROW( EXCEPTION );
+                    THROW( EXCEPTION );
                 }
             }
 
 {IDENT}     {
-				int acc;
+                int acc;
 
-				/* First check if the identifier is a function name */
+                /* First check if the identifier is a function name */
 
-				varslval.vptr = func_get( varstext, &acc );
-				if ( varslval.vptr != NULL )
-				{
-					/* If it's a function check that the function can be used
-					   in the current context */
+                varslval.vptr = func_get( varstext, &acc );
+                if ( varslval.vptr != NULL )
+                {
+                    /* If it's a function check that the function can be used
+                       in the current context */
 
-					if ( acc == ACCESS_EXP )
-					{
-						print( FATAL, "Function '%s' can only be used "
-							   "in the EXPERIMENT section.\n", varstext );
-						THROW( EXCEPTION );
-					}
-					return FUNC_TOKEN;
-				}
+                    if ( acc == ACCESS_EXP )
+                    {
+                        print( FATAL, "Function '%s' can only be used "
+                               "in the EXPERIMENT section.\n", varstext );
+                        THROW( EXCEPTION );
+                    }
+                    return FUNC_TOKEN;
+                }
 
-				/* If it's not a function it's got to be a variable */
+                /* If it's not a function it's got to be a variable */
 
-				if ( ( varslval.vptr = vars_get( varstext ) ) == NULL )
-					varslval.vptr = vars_new( varstext );
-				return VAR_TOKEN;
-			}
+                if ( ( varslval.vptr = vars_get( varstext ) ) == NULL )
+                    varslval.vptr = vars_new( varstext );
+                return VAR_TOKEN;
+            }
 
-			/* Handling of end of statement character */
-";"			return ';';
+            /* Handling of end of statement character */
+";"         return ';';
 
 {WS}        /* Skip white space */
 
-			/* Handling of invalid input */
+            /* Handling of invalid input */
 .           {
-				print( FATAL, "Invalid input near '%s'.\n", varstext );
-				THROW( EXCEPTION );
-			}
+                print( FATAL, "Invalid input near '%s'.\n", varstext );
+                THROW( EXCEPTION );
+            }
 
-			/* Handling of end of file */
-<<EOF>>	    {
-				Vars_next_section = NO_SECTION;
-				return 0;
-			}
+            /* Handling of end of file */
+<<EOF>>     {
+                Vars_next_section = NO_SECTION;
+                return 0;
+            }
 
 
-		/*----------------------*/
-%%		/*     End of Rules     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     End of Rules     */
+        /*----------------------*/
 
 
 /*---------------------------------------------------------------*
@@ -359,37 +359,39 @@ WS          [\n \t]+
 
 int variables_parser( FILE * in )
 {
-	static bool needs_restart = UNSET;
+    static bool needs_restart = UNSET;
 
 
-	/* Don't allow more than one VARIABLES section */
+    /* Don't allow more than one VARIABLES section */
 
-	if ( EDL.compilation.sections[ VARIABLES_SECTION ] )
-	{
-		print( FATAL, "Multiple instances of VARIABLES section label.\n" );
-		THROW( EXCEPTION );
-	}
-	EDL.compilation.sections[ VARIABLES_SECTION ] = SET;
+    if ( EDL.compilation.sections[ VARIABLES_SECTION ] )
+    {
+        print( FATAL, "Multiple instances of VARIABLES section label.\n" );
+        THROW( EXCEPTION );
+    }
+    EDL.compilation.sections[ VARIABLES_SECTION ] = SET;
 
-	varsin = in;
+    varsin = in;
 
-	/* Keep the lexer happy... */
+    /* Keep the lexer happy... */
 
-	if ( needs_restart )
-	    varsrestart( varsin );
-	else
-		needs_restart = SET;
+    if ( needs_restart )
+        varsrestart( varsin );
+    else
+        needs_restart = SET;
 
-	varsparser_init( );
+    varsparser_init( );
 
-	varsparse( );
+    varsparse( );
 
-	return Vars_next_section;
+    return Vars_next_section;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

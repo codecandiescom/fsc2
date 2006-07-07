@@ -109,9 +109,9 @@
 
 #define NEEDS_UPDATE( p ) ( ( ( p )->is_active ^ ( p )->was_active ) || \
                             ( ( p )->is_old_pos &&                      \
-							  ( p )->old_pos != ( p )->pos )         || \
+                              ( p )->old_pos != ( p )->pos )         || \
                             ( ( p )->is_old_len &&                      \
-							  ( p )->old_len != ( p )->len ) )
+                              ( p )->old_len != ( p )->len ) )
 
 
 /* typedefs of structures needed in the module */
@@ -124,135 +124,135 @@ typedef struct Pulse Pulse_T;
 
 
 struct Function {
-	int self;                  /* the functions number */
-	const char *name;
-	bool is_used;              /* set if the function has been declared in
-								  the ASSIGNMENTS section */
-	bool is_needed;            /* set if the function has been assigned
-								  pulses */
-	Channel_T *channel;        /* channel assigned to function */
+    int self;                  /* the functions number */
+    const char *name;
+    bool is_used;              /* set if the function has been declared in
+                                  the ASSIGNMENTS section */
+    bool is_needed;            /* set if the function has been assigned
+                                  pulses */
+    Channel_T *channel;        /* channel assigned to function */
 
-	int num_pulses;            /* number of pulses assigned to the function */
-	int num_active_pulses;     /* number of pulses currenty in use */
-	Pulse_T **pulses;          /* list of pulse pointers */
+    int num_pulses;            /* number of pulses assigned to the function */
+    int num_active_pulses;     /* number of pulses currenty in use */
+    Pulse_T **pulses;          /* list of pulse pointers */
 
-	long max_seq_len;          /* maximum length of the pulse sequence */
+    long max_seq_len;          /* maximum length of the pulse sequence */
 
-	bool is_inverted;          /* if set polarity is inverted */
+    bool is_inverted;          /* if set polarity is inverted */
 
-	Ticks delay;               /* delay for the function/channel combination */
-	bool is_delay;
+    Ticks delay;               /* delay for the function/channel combination */
+    bool is_delay;
 
-	double high_level;         /* high and low voltage levels for the pod(s) */
-	double low_level;          /* associated with the fucntion */
+    double high_level;         /* high and low voltage levels for the pod(s) */
+    double low_level;          /* associated with the fucntion */
 
-	bool is_high_level;
-	bool is_low_level;
+    bool is_high_level;
+    bool is_low_level;
 };
 
 
 struct Channel {
-	int self;
-	Function_T *function;
-	bool needs_update;
-	char *old_d;
-	char *new_d;
-	bool state;
+    int self;
+    Function_T *function;
+    bool needs_update;
+    char *old_d;
+    char *new_d;
+    bool state;
 };
 
 
 struct Pulse {
 
-	long num;                /* (positive) number of the pulse */
+    long num;                /* (positive) number of the pulse */
 
-	bool is_active;          /* set if the pulse is really used */
-	bool was_active;
-	bool has_been_active;    /* used to find useless pulses */
+    bool is_active;          /* set if the pulse is really used */
+    bool was_active;
+    bool has_been_active;    /* used to find useless pulses */
 
-	Pulse_T *next;
-	Pulse_T *prev;
+    Pulse_T *next;
+    Pulse_T *prev;
 
-	Function_T *function;    /* function the pulse is associated with */
+    Function_T *function;    /* function the pulse is associated with */
 
-	Ticks pos;               /* current position, length, position change */
-	Ticks len;               /* and length change of pulse (in units of the */
-	Ticks dpos;              /* pulsers time base) */
-	Ticks dlen;
+    Ticks pos;               /* current position, length, position change */
+    Ticks len;               /* and length change of pulse (in units of the */
+    Ticks dpos;              /* pulsers time base) */
+    Ticks dlen;
 
-	bool is_function;        /* flags that are set when the corresponding */
-	bool is_pos;             /* property has been set */
-	bool is_len;
-	bool is_dpos;
-	bool is_dlen;
+    bool is_function;        /* flags that are set when the corresponding */
+    bool is_pos;             /* property has been set */
+    bool is_len;
+    bool is_dpos;
+    bool is_dlen;
 
-	Ticks initial_pos;       /* position, length, position change and length */
-	Ticks initial_len;       /* change at the start of the experiment */
-	Ticks initial_dpos;
-	Ticks initial_dlen;
+    Ticks initial_pos;       /* position, length, position change and length */
+    Ticks initial_len;       /* change at the start of the experiment */
+    Ticks initial_dpos;
+    Ticks initial_dlen;
 
-	bool initial_is_pos;     /* property has initially been set */
-	bool initial_is_len;
-	bool initial_is_dpos;
-	bool initial_is_dlen;
+    bool initial_is_pos;     /* property has initially been set */
+    bool initial_is_len;
+    bool initial_is_dpos;
+    bool initial_is_dlen;
 
-	Ticks old_pos;           /* position and length of pulse before a change */
-	Ticks old_len;           /* is applied */
+    Ticks old_pos;           /* position and length of pulse before a change */
+    Ticks old_len;           /* is applied */
 
-	bool is_old_pos;
-	bool is_old_len;
+    bool is_old_pos;
+    bool is_old_len;
 
-	Channel_T *channel;
+    Channel_T *channel;
 
-	bool needs_update;       /* set if the pulses properties have been changed
-								in test run or experiment */
+    bool needs_update;       /* set if the pulses properties have been changed
+                                in test run or experiment */
 };
 
 
 struct HFS9000 {
-	int device;              /* GPIB number of the device */
+    int device;              /* GPIB number of the device */
 
-	bool is_needed;
-	bool in_setup;
+    bool is_needed;
+    bool in_setup;
 
-	Pulse_T *pulses;
+    Pulse_T *pulses;
 
-	double timebase;         /* time base of the digitizer */
-	bool is_timebase;
+    double timebase;         /* time base of the digitizer */
+    bool is_timebase;
 
-	int trig_in_mode;        /* EXTERNAL or INTERNAL */
-	int trig_in_slope;       /* only in EXTERNAL mode */
-	double trig_in_level;    /* only in EXTERNAL mode */
+    int trig_in_mode;        /* EXTERNAL or INTERNAL */
+    int trig_in_slope;       /* only in EXTERNAL mode */
+    double trig_in_level;    /* only in EXTERNAL mode */
 
-	bool keep_all;           /* keep even unused pulses ? */
+    bool keep_all;           /* keep even unused pulses ? */
 
-	bool is_trig_in_mode;
-	bool is_trig_in_slope;
-	bool is_trig_in_level;
+    bool is_trig_in_mode;
+    bool is_trig_in_slope;
+    bool is_trig_in_level;
 
-	Ticks neg_delay;
-	bool is_neg_delay;       /* if any of the functions has a negative delay */
+    Ticks neg_delay;
+    bool is_neg_delay;       /* if any of the functions has a negative delay */
 
-	long max_seq_len;        /* maximum length of all pulse sequences */
-	bool is_max_seq_len;
+    long max_seq_len;        /* maximum length of all pulse sequences */
+    bool is_max_seq_len;
 
-	Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
-	Channel_T channel[ MAX_CHANNEL + 1 ];   /* zero is for TRIGGER_OUT ! */
+    Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
+    Channel_T channel[ MAX_CHANNEL + 1 ];   /* zero is for TRIGGER_OUT ! */
 
-	int needed_channels;     /* number of channels that are going to be needed
-								in the experiment */
+    int needed_channels;     /* number of channels that are going to be needed
+                                in the experiment */
 
-	bool needs_update;       /* set if pulse properties have been changed in
-							    test run or experiment */
-	bool is_running;         /* set if the pulser is in run mode */
-	bool has_been_running;
+    bool needs_update;       /* set if pulse properties have been changed in
+                                test run or experiment */
+    bool is_running;         /* set if the pulser is in run mode */
+    bool has_been_running;
 
-	Ticks mem_size;          /* size of the complete sequence, i.e. including
-								the memory needed for padding */
+    Ticks mem_size;          /* size of the complete sequence, i.e. including
+                                the memory needed for padding */
 
-	bool stop_on_update;     /* if not set the pulser does not get stopped
-								while doing an update */
-	FILE *dump_file;
-	FILE *show_file;
+    bool stop_on_update;     /* if not set the pulser does not get stopped
+                                while doing an update */
+    FILE *dump_file;
+    FILE *show_file;
 };
 
 
@@ -307,46 +307,46 @@ bool hfs9000_keep_all( void );
 bool hfs9000_new_pulse( long pnum );
 
 bool hfs9000_set_pulse_function( long /* pnum     */,
-								 int  /* function */ );
+                                 int  /* function */ );
 
 bool hfs9000_set_pulse_position( long   /* pnum   */,
-								 double /* p_time */ );
+                                 double /* p_time */ );
 
 bool hfs9000_set_pulse_length( long   /* pnum   */,
-							   double /* p_time */ );
+                               double /* p_time */ );
 
 bool hfs9000_set_pulse_position_change( long   /* pnum   */,
-										double /* p_time */ );
+                                        double /* p_time */ );
 
 bool hfs9000_set_pulse_length_change( long   /* pnum   */,
-									  double /* p_time */ );
+                                      double /* p_time */ );
 
 bool hfs9000_get_pulse_function( long  /* pnum     */,
-								 int * /* function */ );
+                                 int * /* function */ );
 
 bool hfs9000_get_pulse_position( long     /* pnum   */,
-								 double * /* p_time */ );
+                                 double * /* p_time */ );
 
 bool hfs9000_get_pulse_length( long     /* pnum   */,
-							   double * /* p_time */ );
+                               double * /* p_time */ );
 
 bool hfs9000_get_pulse_position_change( long     /* pnum   */,
-										double * /* p_time */ );
+                                        double * /* p_time */ );
 
 bool hfs9000_get_pulse_length_change( long     /* pnum   */,
-									  double * /* p_time */ );
+                                      double * /* p_time */ );
 
 bool hfs9000_change_pulse_position( long   /* pnum   */,
-									double /* p_time */ );
+                                    double /* p_time */ );
 
 bool hfs9000_change_pulse_length( long   /* pnum   */,
-								  double /* tp_ime */ );
+                                  double /* tp_ime */ );
 
 bool hfs9000_change_pulse_position_change( long   /* pnum   */,
-										   double /* p_time */ );
+                                           double /* p_time */ );
 
 bool hfs9000_change_pulse_length_change( long   /* pnum   */,
-										 double /* p_time */ );
+                                         double /* p_time */ );
 
 
 /* Functions from hfs9000_init.c */
@@ -363,7 +363,7 @@ Ticks hfs9000_double2ticks( double /* p_time */ );
 double hfs9000_ticks2double( Ticks /* ticks */ );
 
 void hfs9000_check_pod_level_diff( double /* high */,
-								   double /* low  */ );
+                                   double /* low  */ );
 
 Pulse_T *hfs9000_get_pulse( long /* pnum */ );
 
@@ -372,19 +372,19 @@ const char *hfs9000_ptime( double /* p_time */ );
 const char *hfs9000_pticks( Ticks /* ticks */ );
 
 int hfs9000_start_compare( const void * /* A */,
-						   const void * /* B */ );
+                           const void * /* B */ );
 
 Ticks hfs9000_get_max_seq_len( void );
 
 void hfs9000_set( char * /* arena  */,
-				  Ticks  /* start  */,
-				  Ticks  /* len    */,
-				  Ticks  /* offset */ );
+                  Ticks  /* start  */,
+                  Ticks  /* len    */,
+                  Ticks  /* offset */ );
 
 int hfs9000_diff( char *  /* old_p  */,
-				  char *  /* new_p  */,
-				  Ticks * /* start  */,
-				  Ticks * /* length */ );
+                  char *  /* new_p  */,
+                  Ticks * /* start  */,
+                  Ticks * /* length */ );
 
 void hfs9000_dump_channels( FILE * /* fp */ );
 
@@ -405,9 +405,9 @@ void hfs9000_full_reset( void );
 bool hfs9000_init( const char * /* name */ );
 
 bool hfs9000_set_constant( int   /* channel */,
-						   Ticks /* start   */,
-						   Ticks /* length  */,
-						   int   /* state   */ );
+                           Ticks /* start   */,
+                           Ticks /* length  */,
+                           int   /* state   */ );
 
 bool hfs9000_set_trig_out_pulse( void );
 
@@ -416,7 +416,7 @@ bool hfs9000_run( bool /* flag */ );
 bool hfs9000_get_channel_state( int /* channel */ );
 
 bool hfs9000_set_channel_state( int  /* channel */,
-								bool /* flag    */ );
+                                bool /* flag    */ );
 
 bool hfs9000_command( const char * /* cmd */ );
 
@@ -431,5 +431,7 @@ bool hfs9000_operation_complete( void );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

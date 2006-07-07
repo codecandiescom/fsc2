@@ -26,17 +26,17 @@
 
 
 static Var_T *vars_str_var_add( Var_T * v1,
-								Var_T * v2 );
+                                Var_T * v2 );
 static Var_T *vars_int_var_add( Var_T * v1,
-								Var_T * v2 );
+                                Var_T * v2 );
 static Var_T *vars_float_var_add( Var_T * v1,
-								  Var_T * v2 );
+                                  Var_T * v2 );
 static Var_T *vars_int_arr_add( Var_T * v1,
-								Var_T * v2 );
+                                Var_T * v2 );
 static Var_T *vars_float_arr_add( Var_T * v1,
-								  Var_T * v2 );
+                                  Var_T * v2 );
 static Var_T *vars_ref_add( Var_T * v1,
-							Var_T * v2 );
+                            Var_T * v2 );
 
 
 /*---------------------------------------------------------*
@@ -44,76 +44,76 @@ static Var_T *vars_ref_add( Var_T * v1,
  *---------------------------------------------------------*/
 
 Var_T *vars_add( Var_T * v1,
-				 Var_T * v2 )
+                 Var_T * v2 )
 {
-	Var_T *new_var = NULL;
+    Var_T *new_var = NULL;
 
 
-	vars_check( v1, STR_VAR | RHS_TYPES | REF_PTR |
-				    INT_PTR | FLOAT_PTR | SUB_REF_PTR );
-	vars_check( v2, STR_VAR | RHS_TYPES );
+    vars_check( v1, STR_VAR | RHS_TYPES | REF_PTR |
+                    INT_PTR | FLOAT_PTR | SUB_REF_PTR );
+    vars_check( v2, STR_VAR | RHS_TYPES );
 
-	if ( ( v1->type == STR_VAR && v2->type != STR_VAR ) ||
-		 ( v1->type != STR_VAR && v2->type == STR_VAR ) )
-	{
-		print( FATAL, "Variable of type STRING can't be used in this "
-			   "context.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ( v1->type == STR_VAR && v2->type != STR_VAR ) ||
+         ( v1->type != STR_VAR && v2->type == STR_VAR ) )
+    {
+        print( FATAL, "Variable of type STRING can't be used in this "
+               "context.\n" );
+        THROW( EXCEPTION );
+    }
 
-	switch( v1->type )
-	{
-		case REF_PTR :
-			v1 = v1->from;
-			break;
+    switch( v1->type )
+    {
+        case REF_PTR :
+            v1 = v1->from;
+            break;
 
-		case INT_PTR :
-			v1 = vars_push( INT_VAR, *v1->val.lpnt );
-			break;
+        case INT_PTR :
+            v1 = vars_push( INT_VAR, *v1->val.lpnt );
+            break;
 
-		case FLOAT_PTR :
-			v1 = vars_push( FLOAT_VAR, *v1->val.dpnt );
-			break;
+        case FLOAT_PTR :
+            v1 = vars_push( FLOAT_VAR, *v1->val.dpnt );
+            break;
 
-		case SUB_REF_PTR :
-			v1 = vars_subref_to_rhs_conv( v1 );
-			break;
+        case SUB_REF_PTR :
+            v1 = vars_subref_to_rhs_conv( v1 );
+            break;
 
-		default :
-			break;
-	}
+        default :
+            break;
+    }
 
-	switch ( v1->type )
-	{
-		case STR_VAR :
-			new_var = vars_str_var_add( v1, v2 );
-			break;
+    switch ( v1->type )
+    {
+        case STR_VAR :
+            new_var = vars_str_var_add( v1, v2 );
+            break;
 
-		case INT_VAR :
-			new_var = vars_int_var_add( v1, v2 );
-			break;
+        case INT_VAR :
+            new_var = vars_int_var_add( v1, v2 );
+            break;
 
-		case FLOAT_VAR :
-			new_var = vars_float_var_add( v1, v2 );
-			break;
-	
-		case INT_ARR :
-			new_var = vars_int_arr_add( v1, v2 );
-			break;
+        case FLOAT_VAR :
+            new_var = vars_float_var_add( v1, v2 );
+            break;
+    
+        case INT_ARR :
+            new_var = vars_int_arr_add( v1, v2 );
+            break;
 
-		case FLOAT_ARR :
-			new_var = vars_float_arr_add( v1, v2 );
-			break;
+        case FLOAT_ARR :
+            new_var = vars_float_arr_add( v1, v2 );
+            break;
 
-		case INT_REF : case FLOAT_REF :
-			new_var = vars_ref_add( v1, v2 );
-			break;
+        case INT_REF : case FLOAT_REF :
+            new_var = vars_ref_add( v1, v2 );
+            break;
 
-		default :
-			fsc2_assert( 1 == 0 );     /* This can't happen... */
-		}
+        default :
+            fsc2_assert( 1 == 0 );     /* This can't happen... */
+        }
 
-	return new_var;
+    return new_var;
 }
 
 
@@ -122,18 +122,18 @@ Var_T *vars_add( Var_T * v1,
  *-----------------------------------------------------------*/
 
 static Var_T *vars_str_var_add( Var_T * v1,
-								Var_T * v2 )
+                                Var_T * v2 )
 {
-	Var_T *new_var = NULL;
-	char *new_str;
+    Var_T *new_var = NULL;
+    char *new_str;
 
 
-	new_str = get_string( "%s%s", v1->val.sptr, v2->val.sptr );
-	new_var = vars_push( STR_VAR, new_str );
-	T_free( new_str );
-	vars_pop( v1 );
-	vars_pop( v2 );
-	return new_var;
+    new_str = get_string( "%s%s", v1->val.sptr, v2->val.sptr );
+    new_var = vars_push( STR_VAR, new_str );
+    T_free( new_str );
+    vars_pop( v1 );
+    vars_pop( v2 );
+    return new_var;
 }
 
 
@@ -142,98 +142,98 @@ static Var_T *vars_str_var_add( Var_T * v1,
  *-------------------------------------------------------------------------*/
 
 static Var_T *vars_int_var_add( Var_T * v1,
-								Var_T * v2 )
+                                Var_T * v2 )
 {
-	Var_T *new_var = NULL;
-	ssize_t i;
-	void *gp;
+    Var_T *new_var = NULL;
+    ssize_t i;
+    void *gp;
 
 
-	vars_arith_len_check( v1, v2, "addition" );
+    vars_arith_len_check( v1, v2, "addition" );
 
-	switch ( v2->type )
-	{
-		case INT_VAR :
-			new_var = vars_push( INT_VAR, v1->val.lval + v2->val.lval );
-			vars_pop( v1 );
-			vars_pop( v2 );
-			break;
+    switch ( v2->type )
+    {
+        case INT_VAR :
+            new_var = vars_push( INT_VAR, v1->val.lval + v2->val.lval );
+            vars_pop( v1 );
+            vars_pop( v2 );
+            break;
 
-		case FLOAT_VAR :
-			new_var = vars_push( FLOAT_VAR,
-								 ( double ) v1->val.lval + v2->val.dval );
-			vars_pop( v1 );
-			vars_pop( v2 );
-			break;
+        case FLOAT_VAR :
+            new_var = vars_push( FLOAT_VAR,
+                                 ( double ) v1->val.lval + v2->val.dval );
+            vars_pop( v1 );
+            vars_pop( v2 );
+            break;
 
-		case INT_ARR :
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( INT_ARR, v2->val.lpnt, v2->len );
+        case INT_ARR :
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( INT_ARR, v2->val.lpnt, v2->len );
 
-			if ( v1->val.lval != 0 )
-				for ( i = 0; i < v2->len; i++ )
-					new_var->val.lpnt[ i ] += v1->val.lval;
+            if ( v1->val.lval != 0 )
+                for ( i = 0; i < v2->len; i++ )
+                    new_var->val.lpnt[ i ] += v1->val.lval;
 
-			vars_pop( v1 );
-			if ( new_var != v2 )
-				vars_pop( v2 );
+            vars_pop( v1 );
+            if ( new_var != v2 )
+                vars_pop( v2 );
 
-			break;
+            break;
 
-		case FLOAT_ARR :
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
+        case FLOAT_ARR :
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
 
-			if ( v1->val.lval != 0 )
-				for ( i = 0; i < v2->len; i++ )
-					new_var->val.dpnt[ i ] += ( double ) v1->val.lval;
+            if ( v1->val.lval != 0 )
+                for ( i = 0; i < v2->len; i++ )
+                    new_var->val.dpnt[ i ] += ( double ) v1->val.lval;
 
-			vars_pop( v1 );
-			if ( new_var != v2 )
-				vars_pop( v2 );
+            vars_pop( v1 );
+            if ( new_var != v2 )
+                vars_pop( v2 );
 
-			break;
+            break;
 
-		case INT_REF :
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( v2->type, v2 );
+        case INT_REF :
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( v2->type, v2 );
 
-			if ( v1->val.lval != 0 )
-				while ( ( gp = vars_iter( new_var ) ) != NULL )
-					* ( long * ) gp += v1->val.lval;
+            if ( v1->val.lval != 0 )
+                while ( ( gp = vars_iter( new_var ) ) != NULL )
+                    * ( long * ) gp += v1->val.lval;
 
-			vars_pop( v1 );
-			if ( new_var != v2 )
-				vars_pop( v2 );
+            vars_pop( v1 );
+            if ( new_var != v2 )
+                vars_pop( v2 );
 
-			break;
+            break;
 
-		case FLOAT_REF :
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( v2->type, v2 );
+        case FLOAT_REF :
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( v2->type, v2 );
 
-			if ( v1->val.lval != 0 )
-				while ( ( gp = vars_iter( new_var ) ) != NULL )
-					* ( double * ) gp += ( double ) v1->val.lval;
+            if ( v1->val.lval != 0 )
+                while ( ( gp = vars_iter( new_var ) ) != NULL )
+                    * ( double * ) gp += ( double ) v1->val.lval;
 
-			vars_pop( v1 );
-			if ( new_var != v2 )
-				vars_pop( v2 );
-			break;
+            vars_pop( v1 );
+            if ( new_var != v2 )
+                vars_pop( v2 );
+            break;
 
-		default :
-			fsc2_assert( 1 == 0 );     /* This can't happen... */
-	}
+        default :
+            fsc2_assert( 1 == 0 );     /* This can't happen... */
+    }
 
-	return new_var;
+    return new_var;
 }
 
 
@@ -243,87 +243,87 @@ static Var_T *vars_int_var_add( Var_T * v1,
  *--------------------------------------------------*/
 
 static Var_T *vars_float_var_add( Var_T * v1,
-								  Var_T * v2 )
+                                  Var_T * v2 )
 {
-	Var_T *new_var = NULL;
-	ssize_t i;
-	void *gp;
+    Var_T *new_var = NULL;
+    ssize_t i;
+    void *gp;
 
 
-	vars_arith_len_check( v1, v2, "addition" );
+    vars_arith_len_check( v1, v2, "addition" );
 
-	switch ( v2->type )
-	{
-		case INT_VAR :
-			new_var = vars_add( v2, v1 );
-			break;
+    switch ( v2->type )
+    {
+        case INT_VAR :
+            new_var = vars_add( v2, v1 );
+            break;
 
-		case FLOAT_VAR :
-			new_var = vars_push( FLOAT_VAR, v1->val.dval + v2->val.dval );
-			vars_pop( v1 );
-			vars_pop( v2 );
-			break;
+        case FLOAT_VAR :
+            new_var = vars_push( FLOAT_VAR, v1->val.dval + v2->val.dval );
+            vars_pop( v1 );
+            vars_pop( v2 );
+            break;
 
-		case INT_ARR :
-			new_var = vars_push( FLOAT_ARR, NULL, v2->len );
+        case INT_ARR :
+            new_var = vars_push( FLOAT_ARR, NULL, v2->len );
 
-			for ( i = 0; i < new_var->len; i++ )
-				new_var->val.dpnt[ i ]
-								 = v1->val.dval + ( double ) v2->val.lpnt[ i ];
+            for ( i = 0; i < new_var->len; i++ )
+                new_var->val.dpnt[ i ]
+                                 = v1->val.dval + ( double ) v2->val.lpnt[ i ];
 
-			vars_pop( v1 );
-			vars_pop( v2 );
+            vars_pop( v1 );
+            vars_pop( v2 );
 
-			break;
+            break;
 
-		case FLOAT_ARR :
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
+        case FLOAT_ARR :
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
 
-			if ( v1->val.dval != 0.0 )
-				for ( i = 0; i < new_var->len; i++ )
-					new_var->val.dpnt[ i ] += v1->val.dval;
+            if ( v1->val.dval != 0.0 )
+                for ( i = 0; i < new_var->len; i++ )
+                    new_var->val.dpnt[ i ] += v1->val.dval;
 
-			vars_pop( v1 );
-			if ( new_var != v2 )
-				vars_pop( v2 );
+            vars_pop( v1 );
+            if ( new_var != v2 )
+                vars_pop( v2 );
 
-			break;
+            break;
 
-		case INT_REF :
-			new_var = vars_push( FLOAT_REF, v2 );
+        case INT_REF :
+            new_var = vars_push( FLOAT_REF, v2 );
 
-			if ( v1->val.dval != 0.0 )
-				while ( ( gp = vars_iter( new_var ) ) != NULL )
-					* ( double * ) gp += v1->val.dval;
+            if ( v1->val.dval != 0.0 )
+                while ( ( gp = vars_iter( new_var ) ) != NULL )
+                    * ( double * ) gp += v1->val.dval;
 
-			vars_pop( v1 );
-			vars_pop( v2 );
+            vars_pop( v1 );
+            vars_pop( v2 );
 
-			break;
+            break;
 
-		case FLOAT_REF :
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( v2->type, v2 );
+        case FLOAT_REF :
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( v2->type, v2 );
 
-			if ( v1->val.dval != 0.0 )
-				while ( ( gp = vars_iter( new_var ) ) != NULL )
-					* ( double * ) gp += v1->val.dval;
+            if ( v1->val.dval != 0.0 )
+                while ( ( gp = vars_iter( new_var ) ) != NULL )
+                    * ( double * ) gp += v1->val.dval;
 
-			vars_pop( v1 );
-			if ( v2 != new_var )
-				vars_pop( v2 );
-			break;
+            vars_pop( v1 );
+            if ( v2 != new_var )
+                vars_pop( v2 );
+            break;
 
-		default :
-			fsc2_assert( 1 == 0 );     /* This can't happen... */
-	}
+        default :
+            fsc2_assert( 1 == 0 );     /* This can't happen... */
+    }
 
-	return new_var;
+    return new_var;
 }
 
 
@@ -332,83 +332,83 @@ static Var_T *vars_float_var_add( Var_T * v1,
  *-------------------------------------------------------------------------*/
 
 static Var_T *vars_int_arr_add( Var_T * v1,
-								Var_T * v2 )
+                                Var_T * v2 )
 {
-	Var_T *new_var = NULL;
-	Var_T *vt;
-	ssize_t i;
+    Var_T *new_var = NULL;
+    Var_T *vt;
+    ssize_t i;
 
 
-	vars_arith_len_check( v1, v2, "addition" );
+    vars_arith_len_check( v1, v2, "addition" );
 
-	switch ( v2->type )
-	{
-		case INT_VAR :
-			new_var = vars_add( v2, v1 );
-			break;
+    switch ( v2->type )
+    {
+        case INT_VAR :
+            new_var = vars_add( v2, v1 );
+            break;
 
-		case FLOAT_VAR :
-			new_var = vars_add( v2, v1 );
-			break;
+        case FLOAT_VAR :
+            new_var = vars_add( v2, v1 );
+            break;
 
-		case INT_ARR :
-			if ( v1->flags & IS_TEMP )
-			{
-				vt = v1;
-				v1 = v2;
-				v2 = vt;
-			}
+        case INT_ARR :
+            if ( v1->flags & IS_TEMP )
+            {
+                vt = v1;
+                v1 = v2;
+                v2 = vt;
+            }
 
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( INT_ARR, v2->val.lpnt, v2->len );
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( INT_ARR, v2->val.lpnt, v2->len );
 
-			for ( i = 0; i < new_var->len; i++ )
-				new_var->val.lpnt[ i ] += v1->val.lpnt[ i ];
+            for ( i = 0; i < new_var->len; i++ )
+                new_var->val.lpnt[ i ] += v1->val.lpnt[ i ];
 
-			vars_pop( v1 );
-			if ( new_var != v2 )
-				vars_pop( v2 );
+            vars_pop( v1 );
+            if ( new_var != v2 )
+                vars_pop( v2 );
 
-			break;
+            break;
 
-		case FLOAT_ARR :
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
+        case FLOAT_ARR :
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
 
-			for ( i = 0; i < v1->len; i++ )
-				new_var->val.dpnt[ i ] += ( double ) v1->val.lpnt[ i ];
+            for ( i = 0; i < v1->len; i++ )
+                new_var->val.dpnt[ i ] += ( double ) v1->val.lpnt[ i ];
 
-			if ( v1 != v2 )
-				vars_pop( v1 );
-			if ( new_var != v2 )
-				vars_pop( v2 );
+            if ( v1 != v2 )
+                vars_pop( v1 );
+            if ( new_var != v2 )
+                vars_pop( v2 );
 
-			break;
+            break;
 
-		case INT_REF : case FLOAT_REF :
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( v2->type, v2 );
+        case INT_REF : case FLOAT_REF :
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( v2->type, v2 );
 
-			for ( i = 0; i < new_var->len; i++ )
-				vars_add( vars_push( INT_ARR, v1->val.lpnt, v1->len ),
-						  new_var->val.vptr[ i ] );
+            for ( i = 0; i < new_var->len; i++ )
+                vars_add( vars_push( INT_ARR, v1->val.lpnt, v1->len ),
+                          new_var->val.vptr[ i ] );
 
-			vars_pop( v1 );
-			if ( new_var != v2 )
-				vars_pop( v2 );
-			break;
+            vars_pop( v1 );
+            if ( new_var != v2 )
+                vars_pop( v2 );
+            break;
 
-		default :
-			fsc2_assert( 1 == 0 );     /* This can't happen... */
-	}
+        default :
+            fsc2_assert( 1 == 0 );     /* This can't happen... */
+    }
 
-	return new_var;
+    return new_var;
 }
 
 
@@ -418,76 +418,76 @@ static Var_T *vars_int_arr_add( Var_T * v1,
  *--------------------------------------------------*/
 
 static Var_T *vars_float_arr_add( Var_T * v1,
-								  Var_T * v2 )
+                                  Var_T * v2 )
 {
-	Var_T *new_var = NULL;
-	Var_T *vt;
-	ssize_t i;
+    Var_T *new_var = NULL;
+    Var_T *vt;
+    ssize_t i;
 
 
-	vars_arith_len_check( v1, v2, "addition" );
+    vars_arith_len_check( v1, v2, "addition" );
 
-	switch ( v2->type )
-	{
-		case STR_VAR :
-			print( FATAL, "Can't add a string to an array.\n" );
-			THROW( EXCEPTION );
+    switch ( v2->type )
+    {
+        case STR_VAR :
+            print( FATAL, "Can't add a string to an array.\n" );
+            THROW( EXCEPTION );
 
-		case INT_VAR :
-			new_var = vars_add( v2, v1 );
-			break;
+        case INT_VAR :
+            new_var = vars_add( v2, v1 );
+            break;
 
-		case FLOAT_VAR :
-			new_var = vars_add( v2, v1 );
-			break;
+        case FLOAT_VAR :
+            new_var = vars_add( v2, v1 );
+            break;
 
-		case INT_ARR :
-			new_var = vars_add( v2, v1 );
-			break;
+        case INT_ARR :
+            new_var = vars_add( v2, v1 );
+            break;
 
-		case FLOAT_ARR :
-			if ( v1->flags & IS_TEMP )
-			{
-				vt = v1;
-				v1 = v2;
-				v2 = vt;
-			}
+        case FLOAT_ARR :
+            if ( v1->flags & IS_TEMP )
+            {
+                vt = v1;
+                v1 = v2;
+                v2 = vt;
+            }
 
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( FLOAT_ARR, v2->val.dpnt, v2->len );
 
-			for ( i = 0; i < new_var->len; i++ )
-				new_var->val.dpnt[ i ] += v1->val.dpnt[ i ];
+            for ( i = 0; i < new_var->len; i++ )
+                new_var->val.dpnt[ i ] += v1->val.dpnt[ i ];
 
-			if ( v1 != v2 )
-				vars_pop( v1 );
-			if ( new_var != v2 )
-				vars_pop( v2 );
+            if ( v1 != v2 )
+                vars_pop( v1 );
+            if ( new_var != v2 )
+                vars_pop( v2 );
 
-			break;
+            break;
 
-		case INT_REF : case FLOAT_REF :
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( v2->type, v2 );
+        case INT_REF : case FLOAT_REF :
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( v2->type, v2 );
 
-			for ( i = 0; i < new_var->len; i++ )
-				vars_add( vars_push( FLOAT_ARR, v1->val.dpnt, v1->len ),
-						  new_var->val.vptr[ i ] );
+            for ( i = 0; i < new_var->len; i++ )
+                vars_add( vars_push( FLOAT_ARR, v1->val.dpnt, v1->len ),
+                          new_var->val.vptr[ i ] );
 
-			vars_pop( v1 );
-			if ( new_var != v2 )
-				vars_pop( v2 );
-			break;
+            vars_pop( v1 );
+            if ( new_var != v2 )
+                vars_pop( v2 );
+            break;
 
-		default :
-			fsc2_assert( 1 == 0 );     /* This can't happen... */
-	}
+        default :
+            fsc2_assert( 1 == 0 );     /* This can't happen... */
+    }
 
-	return new_var;
+    return new_var;
 }
 
 
@@ -497,77 +497,79 @@ static Var_T *vars_float_arr_add( Var_T * v1,
  *-----------------------------------------------------*/
 
 static Var_T *vars_ref_add( Var_T * v1,
-							Var_T * v2 )
+                            Var_T * v2 )
 {
-	Var_T *new_var = NULL;
-	Var_T *vt;
-	ssize_t i;
+    Var_T *new_var = NULL;
+    Var_T *vt;
+    ssize_t i;
 
 
-	vars_arith_len_check( v1, v2, "addition" );
+    vars_arith_len_check( v1, v2, "addition" );
 
-	switch ( v2->type )
-	{
-		case STR_VAR :
-			print( FATAL, "Can't add a string to a multidimensional "
-				   "array.\n" );
-			THROW( EXCEPTION );
+    switch ( v2->type )
+    {
+        case STR_VAR :
+            print( FATAL, "Can't add a string to a multidimensional "
+                   "array.\n" );
+            THROW( EXCEPTION );
 
-		case INT_VAR :
-			new_var = vars_add( v2, v1 );
-			break;
+        case INT_VAR :
+            new_var = vars_add( v2, v1 );
+            break;
 
-		case FLOAT_VAR :
-			new_var = vars_add( v2, v1 );
-			break;
+        case FLOAT_VAR :
+            new_var = vars_add( v2, v1 );
+            break;
 
-		case INT_ARR :
-			new_var = vars_add( v2, v1 );
-			break;
+        case INT_ARR :
+            new_var = vars_add( v2, v1 );
+            break;
 
-		case FLOAT_ARR :
-			new_var = vars_add( v2, v1 );
-			break;
+        case FLOAT_ARR :
+            new_var = vars_add( v2, v1 );
+            break;
 
-		case INT_REF : case FLOAT_REF :
-			if ( v1->flags & IS_TEMP )
-			{
-				vt = v1;
-				v1 = v2;
-				v2 = vt;
-			}
+        case INT_REF : case FLOAT_REF :
+            if ( v1->flags & IS_TEMP )
+            {
+                vt = v1;
+                v1 = v2;
+                v2 = vt;
+            }
 
-			if ( v2->flags & IS_TEMP )
-				new_var = v2;
-			else
-				new_var = vars_push( v2->type, v2 );
+            if ( v2->flags & IS_TEMP )
+                new_var = v2;
+            else
+                new_var = vars_push( v2->type, v2 );
 
-			if ( v1->dim > new_var->dim )
-				for ( i = 0; i < v1->len; i++ )
-					vars_add( v1->val.vptr[ i ], new_var );
-			else if ( v1->dim < new_var->dim )
-				for ( i = 0; i < new_var->len; i++ )
-					vars_add( v1, new_var->val.vptr[ i ] );
-			else
-				for ( i = 0; i < new_var->len; i++ )
-					vars_add( new_var->val.vptr[ i ], v1->val.vptr[ i ] );
+            if ( v1->dim > new_var->dim )
+                for ( i = 0; i < v1->len; i++ )
+                    vars_add( v1->val.vptr[ i ], new_var );
+            else if ( v1->dim < new_var->dim )
+                for ( i = 0; i < new_var->len; i++ )
+                    vars_add( v1, new_var->val.vptr[ i ] );
+            else
+                for ( i = 0; i < new_var->len; i++ )
+                    vars_add( new_var->val.vptr[ i ], v1->val.vptr[ i ] );
 
-			if ( v1 != v2 )
-				vars_pop( v1 );
-			if ( v2 != new_var )
-				vars_pop( v2 );
-			break;
+            if ( v1 != v2 )
+                vars_pop( v1 );
+            if ( v2 != new_var )
+                vars_pop( v2 );
+            break;
 
-		default :
-			fsc2_assert( 1 == 0 );     /* This can't happen... */
-	}
+        default :
+            fsc2_assert( 1 == 0 );     /* This can't happen... */
+    }
 
-	return new_var;
+    return new_var;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

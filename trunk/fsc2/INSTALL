@@ -46,13 +46,14 @@ To create the complete documentation beside Perl you also need
 20) gzip
 
 
+
 A1) Graphics support
 --------------------
 
-Graphics in fsc2 are mostly build on top of the XFORMS package. While it
-works with the older XFORMS library version 0.89, which may be still
-available in binary only form you may prefer to use the newer version
-1.0.90 version which can be downloaded from
+Graphics in fsc2 are on top of the XFORMS package. While it works with
+the older XFORMS library version 0.89, which may be still available in
+binary only form you may prefer to use the newer version 1.0.90 version
+which can be downloaded from
 
   http://savannah.nongnu.org/projects/xforms/
 
@@ -60,6 +61,7 @@ or, if it isn't available from there for some reasons a working version
 of the sources (but probably not the newest) can be downloaded from
 
   http://www.physik.fu-berlin.de/~toerring/xforms-1.0-release.tgz
+
 
 
 A2) GPIB support
@@ -92,7 +94,8 @@ Only the beta-drivers (with 2,4 kernels) have been used. The newer driver
 and library (supposed to work also with 2.6) hasn't been tested, I didn't
 even get the driver to compile and linking against the library led to the
 program aborting immediately. I haven't any idea yet how to resolve that
-problem.
+problem. If you want the older beta-driver but can't find it on the NI web
+site anymore send me an email, I still have a copy of it around somewhere.
 
 From the documentations of the LLP and SLG libraries and the one I have
 written it should already be clear that a GPIB configuration file (that
@@ -158,6 +161,7 @@ and installed before trying to compile fsc2 (unless you don't need GPIB
 support built into fsc2).
 
 
+
 A3) Support for other devices
 -----------------------------
 
@@ -172,13 +176,13 @@ correctly before an attempt is made to build fsc2.
 The same holds for several other devices that are ISA or PCI cards (or
 are controlled via an ISA or PCI card) or are controlled via the Rulbus
 (Rijksuniversiteit Leiden BUS). All of these require an additional library
-and a kernel driver to be installed prior to creating fsc2. If these come
+and a kernel driver to be installed prior to building fsc2. If these come
 from the makers of the device (e.g. Roper Scientific Spec-10 CCD camera)
 please see the documentation coming with the device on how to that. For
 the other devices the sources for the libraries and kernel drivers are
 part of fsc2, see the subdirectories 'me6x00', 'ni6601', 'ni_daq',
 'rulbus' and 'witio_48'). You must create and install the libraries and
-kernel drivers before you can make fsc2. Typically, it's as easy as going
+kernel drivers before you can make fsc2. Typically it's as easy as going
 into the subdirectory, typing "./INSTALL" and answering a few questions.
 Please refer to the documentation (README files) in these subdirectories
 for more details. After a successful installation fsc2 should be able to
@@ -186,39 +190,76 @@ find the libraries and include support for the devices.
 
 
 
-B) Permissions
-==============
-
-Unless you want to do just a few simple tests with fsc2 you should
-create a special account for it. fsc2 needs to be installed setuid'ed,
-so for security reasons its account should have as low privileges as
-possible and it should be impossible to log into this account (e.g. by
-setting its shell in /etc/passwd to /bin/false). The account shouldn't
-have root privileges! Most of the time fsc2 runs with the effective
-user ID (EUID) and effective group ID (EGID) set to the real users ID
-and group, i.e. with only the permissions of the user starting fsc2.
-But in a few places (e.g. when writing to log files, manipulating
-lock files or accessing shared memory or device files) it will use
-the UID and GID of the fsc2 account.
+B) Security issues
+==================
 
 
-What group the fsc2 account belongs to does not really matter. Relevant is
-only the group of the executable, i.e the file itself. I would recommend to
-use the group that has read and write access for the serial port device
-files, (/dev/ttyS* where * stands for a positive number). On the Linux
-systems I have seen this group was either 'uucp' or 'dialout'. If the
-fsc2 executable file is owned by this group the program automatically has
-the necessary permisssions to access these device files. Otherwise you
-will have to either change the modes of the files to allow access by
-'other', i.e. make them world readable and writable, or to make all
-users of fsc2 belong to this group as one of their supplementary groups.
+To be able to read from and write to the device files for the devices
+fsc2 is supposed to control it needs permissions that often only the
+root account has. Therefore fsc2 per default gets installed setuid'ed
+(i.e. it starts running with the privileges of the root account, i.e.
+with the user and group ID of the root account). But most of the time
+fsc2 drops thos privileges and runs with only the effective user ID
+(EUID) and group ID (EGID) of to the users that started fsc2, i.e.
+with the permissions that user normally as. Care has been taken drop
+the extra privileges the root account has except for the few places
+where either device files are accessed or log files get written to.
 
 
-By setting the group of the device file for the GPIB board (and possibly
-other boards controlled by fsc2) to the group that fsc2 belongs to (i.e.
-usually 'uucp' or 'dialout') also the access permissions to the board's
-device file don't have to be set to allow either access by 'other' or to
-make all users members of the group that has access permissions.
+Should you feel uneasy about running a program setuid'ed to root
+(and I would sympathize with you if you do;-) there are alternatives,
+but which may requires some extra work. There are two variables in
+the Makefile, OWNER and GROUP, that can be used to avoid running
+fsc2 with the full permissions of the root account. If both are
+set the program runs with the UID and GID of the account and group
+specified by these variables. If neither of them is set then they
+default to 'root' and the program gets setuid'ed to root, i.e. as
+in the default case discussed above. But if only GROUP is set then
+the program becomes setgid'ed to this group, i.e. will run with
+the UID of the user but with the GID of the group specified by
+GROUP - this may already give it high enough access permissions for
+the device files in case the device files are set up acordingly
+(i.e. their permissions are set to allow read and write access to
+members of this group). It's also possible to specify OWNER alone
+and in this case the program runs with the UID of that process but
+the GID of the user.
+
+
+In the simplest case where you didn't set these variables (or both to
+'root') and fsc2 has in principle all permissions the root account
+has and you don't have to care about the permission settings for
+the device files.
+
+
+In all other cases you have to make sure that either the account the
+program belongs to or the group it belongs to has the necessary
+permissions to read and write to the required device files. If both
+OWNER and GROUP are set, the device files must be readable and writable
+by either that account or that group (or both). If only OWNER but not
+GROUP is set they must be accesible by the account specified by OWNER.
+And if only GROUP but not OWNER is set the must be readable and writable
+by that group. Please note that if you change the access permissions of
+the device files on some systems they may get reset by the system to
+what it believes to be more secure, e.g. on a reboot or as part of
+some daily system maintenance tasks etc. (or because you use udev
+and the device files get deleted on shutodwn and re-created on boot
+- but this can be handled by setting up udev correctly, i.e. to
+create the device files with the necessary permissions and ownnerships
+being set).
+
+
+One possible scenario is to create an account for fsc2 with extremely
+low permissions (even logging in can be disabled) and set USER to that
+account, but set GROUP to a group that has read and write acces
+permissions for the device files that are going to be required. This
+could be the 'uucp' (or 'dialout') group that typically has the
+necessary permissions for the accessing the device files for the
+serial ports. Of course, you need to allow read and write access for
+all other device files (e.g. GPIB card, PCI data acquisition cards
+etc.) for this group or make the account fsc2 is running under member
+of the groups that have read and write access permissions to these
+devce files.
+
 
 
 C) Preparing for Installation
@@ -253,7 +294,7 @@ setting up for your machine.
 
 The next two variables, OWNER and GROUP, will be used when setting the
 owner of all the files that will be installed as well as its group. See
-the preceeding section for all the details.
+the preceeding section for all the details and security implications.
 
 
 The variable DEF_INCL_DIR sets a default directory for EDL include files
@@ -427,15 +468,15 @@ if you're using the Bourne or Korn shell (sh or ksh) or bash. Use
 if you use the C shell (csh) or tcsh.
 
 
-When the compilation of the program succeeds (even though making the
-documentation failed at some stage), you can now install the program by
-typing
+When the compilation of the program succeeds (even though building the
+documentation failed at some stage), you can now install the program
+with the command
 
     make install
 
-Normally, you will need root privileges to do this. If making the
-documentation failed with an error also its installion may fail,
-but that's not something to worry about too much...
+Normally you will need root privileges to do this. If making the
+documentation failed with an error also its installion will fail,
+but that's not something to worry too much about...
 
 
 If you want to you can also try to test your built of fsc2 before
@@ -443,41 +484,13 @@ installation by running
 
     make test
 
-This will make fsc2 run a set of EDL programs that (hopefully) test most
+This will make fsc2 run a set of EDL scripts that (hopefully) test most
 of its built-in functions at least once. Be prepared for lots of windows
 popping up during the test run, displaying some rather strange graphics.
-Normally, the test should run without any errors, otherwise you probably
+Normally the test should run without any errors, otherwise you probably
 should contact me and complain. All these tests don't access any of the
 devices, writing a test suite for the supported devices is still on my
 to-do list.
-
-
-Please note: If you installed the program and then decide that you don't
-like it and want to get rid of it, you can always de-install it by running
-
-   make deinstall
-
-as long as you haven't changed the makefiles in between.
-
-
-To manualy remove the installed package you have to delete the following
-files and directories (assuming you've used the default locations, i.e.
-/usr/local):
-
-/usr/local/bin/fsc2             (file)
-/usr/local/bin/fsc2_connect     (file)
-/usr/local/bin/fsc2_guify       (file)
-/usr/local/bin/fsc2_pulses      (file)
-/usr/local/bin/fsc2_clean       (file)
-/usr/local/bin/fsc2_http_server (file)
-/usr/local/bin/fsc2_test        (symbolic link)
-/usr/local/bin/fsc2_load        (symbolic link)
-/usr/local/bin/fsc2_start       (symbolic link)
-/usr/local/lib/fsc2/            (directory)
-/usr/local/share/doc/fsc2/      (directory)
-/usr/local/man/man1/fsc2.1.gz   (file)
-/usr/local/info/fsc2.info.gz    (file)
-/usr/local/info/fsc2-*.info.gz  (file, with * being a numbers between 1 and 19)
 
 
 E) Getting started
@@ -485,9 +498,9 @@ E) Getting started
 
 The subdirectory 'edl' contains several several EDL programs that you can
 use to get an impression of fsc2 and to become acquainted with the syntax.
-Many of the files in there are just for testing purposes and a few may
-not even work. But there are a few that work without any devices, some
-of them are
+Many of the files in there are just for my private testing purposes and 
+few may not even work. But there are a few that work without any devices
+some of them are:
 
   a.edl
   gr.edl
@@ -502,10 +515,10 @@ Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click on the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-August 12, 2005                       Much luck, Jens
+    July 5, 2006                        Much luck, Jens
 
 --
-  \   Jens Thoms Toerring  ___  jt@toerring.de
-   \__________________________  http://www.toerring.de
-                                Urbanstr. 176, D-10961 Berlin
-                                +49 (0)30 692 86 27
+  \   Jens Thoms Toerring  ___    jt@toerring.de
+   \__________________________    http://www.toerring.de
+                                  Urbanstr. 176, D-10961 Berlin
+                                  +49 (0)30 692 86 27

@@ -35,62 +35,62 @@ static Var_T *vars_str_comp( int comp_type, Var_T *v1, Var_T *v2 );
 
 Var_T *vars_negate( Var_T * v )
 {
-	Var_T *new_var = v;
-	ssize_t i;
+    Var_T *new_var = v;
+    ssize_t i;
 
 
-	/* Make sure that 'v' exists and has RHS type */
+    /* Make sure that 'v' exists and has RHS type */
 
-	vars_check( v, RHS_TYPES | SUB_REF_PTR );
+    vars_check( v, RHS_TYPES | SUB_REF_PTR );
 
-	if ( v->type == SUB_REF_PTR )
-		new_var = v = vars_subref_to_rhs_conv( v );
+    if ( v->type == SUB_REF_PTR )
+        new_var = v = vars_subref_to_rhs_conv( v );
 
-	switch( v->type )
-	{
-		case INT_VAR :
-			v->val.lval = - v->val.lval;
-			break;
+    switch( v->type )
+    {
+        case INT_VAR :
+            v->val.lval = - v->val.lval;
+            break;
 
-		case FLOAT_VAR :
-			v->val.dval = - v->val.dval;
-			break;
+        case FLOAT_VAR :
+            v->val.dval = - v->val.dval;
+            break;
 
-		case INT_ARR :
-			if ( ! ( v->flags & IS_TEMP ) )
-				new_var = vars_push( v->type, v->val.lpnt, v->len );
+        case INT_ARR :
+            if ( ! ( v->flags & IS_TEMP ) )
+                new_var = vars_push( v->type, v->val.lpnt, v->len );
 
-			for ( i = 0; i < new_var->len; i++ )
-				new_var->val.lpnt[ i ] = - new_var->val.lpnt[ i ];
+            for ( i = 0; i < new_var->len; i++ )
+                new_var->val.lpnt[ i ] = - new_var->val.lpnt[ i ];
 
-			break;
+            break;
 
-		case FLOAT_ARR :
-			if ( ! ( v->flags & IS_TEMP ) )
-				new_var = vars_push( v->type, v->val.dpnt, v->len );
+        case FLOAT_ARR :
+            if ( ! ( v->flags & IS_TEMP ) )
+                new_var = vars_push( v->type, v->val.dpnt, v->len );
 
-			for ( i = 0; i < new_var->len; i++ )
-				new_var->val.dpnt[ i ] = - new_var->val.dpnt[ i ];
+            for ( i = 0; i < new_var->len; i++ )
+                new_var->val.dpnt[ i ] = - new_var->val.dpnt[ i ];
 
-			break;
+            break;
 
-		case INT_REF : case FLOAT_REF :
-			if ( ! ( v->flags & IS_TEMP ) )
-				new_var = vars_push( v->type, v );
+        case INT_REF : case FLOAT_REF :
+            if ( ! ( v->flags & IS_TEMP ) )
+                new_var = vars_push( v->type, v );
 
-			for ( i = 0; i < new_var->len; i++ )
-				vars_pop( vars_negate( new_var->val.vptr[ i ] ) );	
+            for ( i = 0; i < new_var->len; i++ )
+                vars_pop( vars_negate( new_var->val.vptr[ i ] ) );  
 
-			break;
+            break;
 
-		default :
-			fsc2_assert( 1 == 0 );     /* This can't happen... */
-	}
+        default :
+            fsc2_assert( 1 == 0 );     /* This can't happen... */
+    }
 
-	if ( new_var != v )
-		vars_pop( v );
+    if ( new_var != v )
+        vars_pop( v );
 
-	return new_var;
+    return new_var;
 }
 
 
@@ -114,129 +114,129 @@ Var_T *vars_negate( Var_T * v )
  *--------------------------------------------------------------------------*/
 
 Var_T *vars_comp( int     comp_type,
-				  Var_T * v1,
-				  Var_T * v2 )
+                  Var_T * v1,
+                  Var_T * v2 )
 {
-	Var_T *new_var = NULL;
+    Var_T *new_var = NULL;
 
 
-	/* If both variables are strings we can also do some kind of comparisons */
+    /* If both variables are strings we can also do some kind of comparisons */
 
-	if ( v1 && v1->type == STR_VAR && v2 && v2->type == STR_VAR )
-		return vars_str_comp( comp_type, v1, v2 );
+    if ( v1 && v1->type == STR_VAR && v2 && v2->type == STR_VAR )
+        return vars_str_comp( comp_type, v1, v2 );
 
-	/* Make sure that 'v1' and 'v2' exist, are integers or float values
-	   and have an value assigned to it */
+    /* Make sure that 'v1' and 'v2' exist, are integers or float values
+       and have an value assigned to it */
 
-	vars_check( v1, INT_VAR | FLOAT_VAR );
-	vars_check( v2, INT_VAR | FLOAT_VAR );
+    vars_check( v1, INT_VAR | FLOAT_VAR );
+    vars_check( v2, INT_VAR | FLOAT_VAR );
 
-	switch ( comp_type )
-	{
+    switch ( comp_type )
+    {
 #if ! defined IS_STILL_LIBC1     /* libc2 *has* nextafter() */
-		case COMP_EQUAL :
-			if ( v1->type == INT_VAR && v2->type == INT_VAR )
-				new_var = vars_push( INT_VAR, v1->INT == v2->INT );
-			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) ||
-									 nextafter( VALUE( v1 ), VALUE( v2 ) )
-									 == VALUE( v2 ) );
-			break;
+        case COMP_EQUAL :
+            if ( v1->type == INT_VAR && v2->type == INT_VAR )
+                new_var = vars_push( INT_VAR, v1->INT == v2->INT );
+            else
+                new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) ||
+                                     nextafter( VALUE( v1 ), VALUE( v2 ) )
+                                     == VALUE( v2 ) );
+            break;
 
-		case COMP_UNEQUAL :
-			if ( v1->type == INT_VAR && v2->type == INT_VAR )
-				new_var = vars_push( INT_VAR, v1->INT != v2->INT );
-			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) &&
-									 nextafter( VALUE( v1 ), VALUE( v2 ) )
-									 != VALUE( v2 ) );
-			break;
+        case COMP_UNEQUAL :
+            if ( v1->type == INT_VAR && v2->type == INT_VAR )
+                new_var = vars_push( INT_VAR, v1->INT != v2->INT );
+            else
+                new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) &&
+                                     nextafter( VALUE( v1 ), VALUE( v2 ) )
+                                     != VALUE( v2 ) );
+            break;
 
-		case COMP_LESS :
-			if ( v1->type == INT_VAR && v2->type == INT_VAR )
-				new_var = vars_push( INT_VAR, v1->INT < v2->INT );
-			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) &&
-									 nextafter( VALUE( v1 ), VALUE( v2 ) )
-									 < VALUE( v2 ) );
-			break;
+        case COMP_LESS :
+            if ( v1->type == INT_VAR && v2->type == INT_VAR )
+                new_var = vars_push( INT_VAR, v1->INT < v2->INT );
+            else
+                new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) &&
+                                     nextafter( VALUE( v1 ), VALUE( v2 ) )
+                                     < VALUE( v2 ) );
+            break;
 
-		case COMP_LESS_EQUAL :
-			if ( v1->type == INT_VAR && v2->type == INT_VAR )
-				new_var = vars_push( INT_VAR, v1->INT <= v2->INT );
-			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) ||
-									 nextafter( VALUE( v1 ), VALUE( v2 ) )
-									 <= VALUE( v2 ) );
-			break;
+        case COMP_LESS_EQUAL :
+            if ( v1->type == INT_VAR && v2->type == INT_VAR )
+                new_var = vars_push( INT_VAR, v1->INT <= v2->INT );
+            else
+                new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) ||
+                                     nextafter( VALUE( v1 ), VALUE( v2 ) )
+                                     <= VALUE( v2 ) );
+            break;
 #else
-		case COMP_EQUAL :
-			if ( v1->type == INT_VAR && v2->type == INT_VAR )
-				new_var = vars_push( INT_VAR, v1->INT == v2->INT );
-			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) );
-			break;
+        case COMP_EQUAL :
+            if ( v1->type == INT_VAR && v2->type == INT_VAR )
+                new_var = vars_push( INT_VAR, v1->INT == v2->INT );
+            else
+                new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) );
+            break;
 
-		case COMP_UNEQUAL :
-			if ( v1->type == INT_VAR && v2->type == INT_VAR )
-				new_var = vars_push( INT_VAR, v1->INT != v2->INT );
-			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) );
+        case COMP_UNEQUAL :
+            if ( v1->type == INT_VAR && v2->type == INT_VAR )
+                new_var = vars_push( INT_VAR, v1->INT != v2->INT );
+            else
+                new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) );
 
-			break;
+            break;
 
-		case COMP_LESS :
-			if ( v1->type == INT_VAR && v2->type == INT_VAR )
-				new_var = vars_push( INT_VAR, v1->INT < v2->INT );
-			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) );
-			break;
+        case COMP_LESS :
+            if ( v1->type == INT_VAR && v2->type == INT_VAR )
+                new_var = vars_push( INT_VAR, v1->INT < v2->INT );
+            else
+                new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) );
+            break;
 
-		case COMP_LESS_EQUAL :
-			if ( v1->type == INT_VAR && v2->type == INT_VAR )
-				new_var = vars_push( INT_VAR, v1->INT <= v2->INT );
-			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) );
-			break;
+        case COMP_LESS_EQUAL :
+            if ( v1->type == INT_VAR && v2->type == INT_VAR )
+                new_var = vars_push( INT_VAR, v1->INT <= v2->INT );
+            else
+                new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) );
+            break;
 #endif
 
-		case COMP_AND :
-			if ( v1->type == INT_VAR && v2->type == INT_VAR )
-				new_var = vars_push( INT_VAR, v1->INT != 0 && v2->INT != 0 );
-			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) != 0.0 &&
-									          VALUE( v2 ) != 0.0 );
-			break;
+        case COMP_AND :
+            if ( v1->type == INT_VAR && v2->type == INT_VAR )
+                new_var = vars_push( INT_VAR, v1->INT != 0 && v2->INT != 0 );
+            else
+                new_var = vars_push( INT_VAR, VALUE( v1 ) != 0.0 &&
+                                              VALUE( v2 ) != 0.0 );
+            break;
 
-		case COMP_OR :
-			if ( v1->type == INT_VAR && v2->type == INT_VAR )
-				new_var = vars_push( INT_VAR, v1->INT != 0 || v2->INT != 0 );
-			else
-				new_var = vars_push( INT_VAR, VALUE( v1 ) != 0.0 ||
-									          VALUE( v2 ) != 0.0 );
-			break;
+        case COMP_OR :
+            if ( v1->type == INT_VAR && v2->type == INT_VAR )
+                new_var = vars_push( INT_VAR, v1->INT != 0 || v2->INT != 0 );
+            else
+                new_var = vars_push( INT_VAR, VALUE( v1 ) != 0.0 ||
+                                              VALUE( v2 ) != 0.0 );
+            break;
 
-		case COMP_XOR :
-			if ( v1->type == INT_VAR && v2->type == INT_VAR )
-				new_var = vars_push( INT_VAR,
-									 ( v1->INT != 0 && v2->INT == 0 ) ||
-									 ( v1->INT == 0 && v2->INT != 0 ) );
-			else
-				new_var = vars_push( INT_VAR,
-								( VALUE( v1 ) != 0.0 && VALUE( v2 ) == 0.0 ) ||
-								( VALUE( v1 ) == 0.0 && VALUE( v2 ) != 0.0 ) );
-			break;
+        case COMP_XOR :
+            if ( v1->type == INT_VAR && v2->type == INT_VAR )
+                new_var = vars_push( INT_VAR,
+                                     ( v1->INT != 0 && v2->INT == 0 ) ||
+                                     ( v1->INT == 0 && v2->INT != 0 ) );
+            else
+                new_var = vars_push( INT_VAR,
+                                ( VALUE( v1 ) != 0.0 && VALUE( v2 ) == 0.0 ) ||
+                                ( VALUE( v1 ) == 0.0 && VALUE( v2 ) != 0.0 ) );
+            break;
 
-		default :
-			fsc2_assert( 1 == 0 );     /* This can't happen... */
-	}
+        default :
+            fsc2_assert( 1 == 0 );     /* This can't happen... */
+    }
 
-	/* Pop the variables from the stack */
+    /* Pop the variables from the stack */
 
-	vars_pop( v1 );
-	vars_pop( v2 );
+    vars_pop( v1 );
+    vars_pop( v2 );
 
-	return new_var;
+    return new_var;
 }
 
 
@@ -244,51 +244,51 @@ Var_T *vars_comp( int     comp_type,
  *--------------------------------------------------------------------------*/
 
 static Var_T *vars_str_comp( int     comp_type,
-							 Var_T * v1,
-							 Var_T * v2 )
+                             Var_T * v1,
+                             Var_T * v2 )
 {
-	Var_T *new_var = NULL;
+    Var_T *new_var = NULL;
 
 
-	switch ( comp_type )
-	{
-		case COMP_EQUAL :
-			new_var = vars_push( INT_VAR,
-					   strcmp( v1->val.sptr, v2->val.sptr ) ? 0L : 1L );
-			break;
-			
-		case COMP_UNEQUAL :
-			new_var = vars_push( INT_VAR,
-					   strcmp( v1->val.sptr, v2->val.sptr ) ? 1L : 0L );
-			break;
+    switch ( comp_type )
+    {
+        case COMP_EQUAL :
+            new_var = vars_push( INT_VAR,
+                       strcmp( v1->val.sptr, v2->val.sptr ) ? 0L : 1L );
+            break;
+            
+        case COMP_UNEQUAL :
+            new_var = vars_push( INT_VAR,
+                       strcmp( v1->val.sptr, v2->val.sptr ) ? 1L : 0L );
+            break;
 
-		case COMP_LESS :
-			new_var = vars_push( INT_VAR,
-					   strcmp( v1->val.sptr, v2->val.sptr ) < 0 ? 1L : 0L );
-			break;
+        case COMP_LESS :
+            new_var = vars_push( INT_VAR,
+                       strcmp( v1->val.sptr, v2->val.sptr ) < 0 ? 1L : 0L );
+            break;
 
-		case COMP_LESS_EQUAL :
-			new_var = vars_push( INT_VAR,
-					   strcmp( v1->val.sptr, v2->val.sptr ) <= 0 ? 1L : 0L );
-			break;
+        case COMP_LESS_EQUAL :
+            new_var = vars_push( INT_VAR,
+                       strcmp( v1->val.sptr, v2->val.sptr ) <= 0 ? 1L : 0L );
+            break;
 
-		case COMP_AND :
-		case COMP_OR  :
-		case COMP_XOR :
-			print( FATAL, "Logical and, or and xor operators can't be used "
-				   "with string variables.\n" );
-			THROW( EXCEPTION );
+        case COMP_AND :
+        case COMP_OR  :
+        case COMP_XOR :
+            print( FATAL, "Logical and, or and xor operators can't be used "
+                   "with string variables.\n" );
+            THROW( EXCEPTION );
 
-		default :
-			fsc2_assert( 1 == 0 );     /* This can't happen... */
-	}
+        default :
+            fsc2_assert( 1 == 0 );     /* This can't happen... */
+    }
 
-	/* Pop the variables from the stack */
+    /* Pop the variables from the stack */
 
-	vars_pop( v1 );
-	vars_pop( v2 );
+    vars_pop( v1 );
+    vars_pop( v2 );
 
-	return new_var;
+    return new_var;
 }
 
 
@@ -300,20 +300,20 @@ static Var_T *vars_str_comp( int     comp_type,
 
 Var_T *vars_lnegate( Var_T * v )
 {
-	Var_T *new_var;
+    Var_T *new_var;
 
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+    vars_check( v, INT_VAR | FLOAT_VAR );
 
-	if ( ( v->type == INT_VAR && v->INT == 0 ) ||
-		 ( v->type == FLOAT_VAR && v->FLOAT == 0.0 ) )
-		new_var = vars_push( INT_VAR, 1L );
-	else
-		new_var = vars_push( INT_VAR, 0L );
+    if ( ( v->type == INT_VAR && v->INT == 0 ) ||
+         ( v->type == FLOAT_VAR && v->FLOAT == 0.0 ) )
+        new_var = vars_push( INT_VAR, 1L );
+    else
+        new_var = vars_push( INT_VAR, 0L );
 
-	vars_pop( v );
+    vars_pop( v );
 
-	return new_var;
+    return new_var;
 }
 
 
@@ -324,48 +324,50 @@ Var_T *vars_lnegate( Var_T * v )
  *-----------------------------------------------------------------------*/
 
 void vars_arith_len_check( Var_T *      v1,
-						   Var_T *      v2,
-						   const char * op )
+                           Var_T *      v2,
+                           const char * op )
 {
-	ssize_t len1 = -1, len2 = -1;
+    ssize_t len1 = -1, len2 = -1;
 
 
-	if ( v1->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) )
-	{
-		len1 = v1->len;
-		if ( len1 < 1 )
-		{
-			print( FATAL, "Length of array or matrix used in %s is "
-				   "unknown.\n", op );
-			THROW( EXCEPTION );
-		}
-	}
+    if ( v1->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) )
+    {
+        len1 = v1->len;
+        if ( len1 < 1 )
+        {
+            print( FATAL, "Length of array or matrix used in %s is "
+                   "unknown.\n", op );
+            THROW( EXCEPTION );
+        }
+    }
 
-	if ( v2->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) )
-	{
-		len2 = v2->len;
-		if ( len2 < 1 )
-		{
-			print( FATAL, "Length of array or matrix used in %s is unknown.\n",
-				   op );
-			THROW( EXCEPTION );
-		}
-	}
+    if ( v2->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) )
+    {
+        len2 = v2->len;
+        if ( len2 < 1 )
+        {
+            print( FATAL, "Length of array or matrix used in %s is unknown.\n",
+                   op );
+            THROW( EXCEPTION );
+        }
+    }
 
-	if ( len1 < 0 || len2 < 0 )
-		return;
+    if ( len1 < 0 || len2 < 0 )
+        return;
 
-	if ( len1 != len2 && v1->dim == v2->dim )
-	{
-		print( FATAL, "Lengths of arrays or matrices used in %s differ.\n",
-			   op );
-		THROW( EXCEPTION );
-	}
+    if ( len1 != len2 && v1->dim == v2->dim )
+    {
+        print( FATAL, "Lengths of arrays or matrices used in %s differ.\n",
+               op );
+        THROW( EXCEPTION );
+    }
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

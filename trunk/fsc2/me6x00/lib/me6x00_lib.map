@@ -30,30 +30,30 @@
 
 ME6x00_LIB_1.0 {
 
-	global:
-			me6x00_frequency_to_timer;
-			me6x00_board_type;
-			me6x00_num_dacs;
-			me6x00_serial_number;
-			me6x00_board_info;
-			me6x00_close;
-			me6x00_voltage;
-			me6x00_keep_voltage;
-			me6x00_continuous;
-			me6x00_continuous_ex;
-			me6x00_reset;
-			me6x00_reset_all;
-			me6x00_set_timer;
-			me6x00_set_trigger;
-			me6x00_single;
-			me6x00_start;
-			me6x00_stop;
-			me6x00_stop_ex;
-			me6x00_wraparound;
-			me6x00_perror;
-			me6x00_strerror;
-			me6x00_errlist;
-			me6x00_nerr;
+    global:
+            me6x00_frequency_to_timer;
+            me6x00_board_type;
+            me6x00_num_dacs;
+            me6x00_serial_number;
+            me6x00_board_info;
+            me6x00_close;
+            me6x00_voltage;
+            me6x00_keep_voltage;
+            me6x00_continuous;
+            me6x00_continuous_ex;
+            me6x00_reset;
+            me6x00_reset_all;
+            me6x00_set_timer;
+            me6x00_set_trigger;
+            me6x00_single;
+            me6x00_start;
+            me6x00_stop;
+            me6x00_stop_ex;
+            me6x00_wraparound;
+            me6x00_perror;
+            me6x00_strerror;
+            me6x00_errlist;
+            me6x00_nerr;
 
-	local:  *;
+    local:  *;
 };

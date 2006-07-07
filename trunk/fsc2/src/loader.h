@@ -49,8 +49,8 @@ void run_exit_hooks( void );
 void run_child_exit_hooks( void );
 
 int get_lib_symbol( const char * /* from       */,
-					const char * /* symbol     */,
-					void **      /* symbol_ptr */ );
+                    const char * /* symbol     */,
+                    void **      /* symbol_ptr */ );
 
 void unload_device( Device_T * /* dev */ );
 
@@ -61,5 +61,7 @@ void unload_device( Device_T * /* dev */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

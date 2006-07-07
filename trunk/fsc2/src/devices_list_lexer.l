@@ -22,9 +22,9 @@
  */
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap stack nounput noyy_top_state
 
@@ -56,67 +56,67 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 %x      comm
 
 
-		/*---------------*/
-%%		/*     RULES     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     RULES     */
+        /*---------------*/
 
 
             /* handling of C++ style comment spanning a whole line */
-{REM1}		EDL.Lc++;
+{REM1}      EDL.Lc++;
 
-			/* handling of C++ style comment not spanning a whole line */
-{REM2}		EDL.Lc++;
+            /* handling of C++ style comment not spanning a whole line */
+{REM2}      EDL.Lc++;
 
-			/* handling of C style comment */
-{REM3}		{
-				Comm_lc = EDL.Lc;
-				yy_push_state( comm );
-			}
+            /* handling of C style comment */
+{REM3}      {
+                Comm_lc = EDL.Lc;
+                yy_push_state( comm );
+            }
 
 <comm>{
 
-{REM4}		/* skipping anything that's not a '*' */
+{REM4}      /* skipping anything that's not a '*' */
 {REM5}      /* skipping all '*'s not followed by '/'s */
 
-			/* end of line character in a comment */
-\n			EDL.Lc++;
+            /* end of line character in a comment */
+\n          EDL.Lc++;
 
-			/* handling of EOF within a comment -> fatal error */
+            /* handling of EOF within a comment -> fatal error */
 <<EOF>>     {
-				eprint( FATAL, UNSET, "%s: End of device data base '%s' in "
-							   "comment starting at line %ld.\n",
-							   EDL.Fname, Comm_lc );
-				THROW( EXCEPTION );
-			}
+                eprint( FATAL, UNSET, "%s: End of device data base '%s' in "
+                               "comment starting at line %ld.\n",
+                               EDL.Fname, Comm_lc );
+                THROW( EXCEPTION );
+            }
 
-			/* end of comment but not end of line */
-{EREM1}		yy_pop_state( );
+            /* end of comment but not end of line */
+{EREM1}     yy_pop_state( );
 
-			/* end of comment and end of line */
+            /* end of comment and end of line */
 {EREM2}     {
-				EDL.Lc++;
-				yy_pop_state( );
-			}
+                EDL.Lc++;
+                yy_pop_state( );
+            }
 } /* end of <comm> */
 
 {EREM1}     {  /* End of comment without start */
-				eprint( FATAL, UNSET, "End of comment found at line %ld in "
-							   "device data base '%s'.\n", EDL.Lc, EDL.Fname );
-				THROW( EXCEPTION );
-			}
+                eprint( FATAL, UNSET, "End of comment found at line %ld in "
+                               "device data base '%s'.\n", EDL.Lc, EDL.Fname );
+                THROW( EXCEPTION );
+            }
 
-			/* dump empty line (i.e. just containing tabs and spaces) */
+            /* dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      EDL.Lc++;
 
 {LWS}       /* dumps of leading white space */
 
-			/* dumps trailing white space */
+            /* dumps trailing white space */
 {TWS}       EDL.Lc++;
 
 {WS}        /* dum (other) white space */
 
-			/* writes out EOL character */
-\n			EDL.Lc++;
+            /* writes out EOL character */
+\n          EDL.Lc++;
 
 ,           /* skip commas */
 ;           /* skip semicolon */
@@ -124,18 +124,18 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 {IDENT}     return 1;
 
 .           {
-				eprint( FATAL, UNSET, "Syntax error in devices data base '%s' "
-							   "at line %ld.\n", EDL.Fname, EDL.Lc );
-				THROW( EXCEPTION );
-			}
+                eprint( FATAL, UNSET, "Syntax error in devices data base '%s' "
+                               "at line %ld.\n", EDL.Fname, EDL.Lc );
+                THROW( EXCEPTION );
+            }
 
-<<EOF>>		return 0;
+<<EOF>>     return 0;
 
 
 
-		/*----------------------*/
-%%		/*     END OF RULES     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     END OF RULES     */
+        /*----------------------*/
 
 
 /*-------------------------------------------*
@@ -143,19 +143,19 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 
 bool device_list_parse( void )
 {
-	static bool is_restart = UNSET;
-	Device_Name_T *new_device_name;
+    static bool is_restart = UNSET;
+    Device_Name_T *new_device_name;
     struct stat buf;
     char *ld_path;
     char *ld = NULL;
     char *ldc;
 
 
-	EDL.Fname = CHAR_P T_free( EDL.Fname );
+    EDL.Fname = CHAR_P T_free( EDL.Fname );
 
     /* As usual, we first check paths defined by the environment variable
        'LD_LIBRARY_PATH' and then the compiled-in path (except when this
-	   is a check run). */
+       is a check run). */
 
     if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
     {
@@ -179,55 +179,57 @@ bool device_list_parse( void )
             EDL.Fname = CHAR_P T_free( EDL.Fname );
     }
 
-	if ( EDL.Fname == NULL )
-	{
-		eprint( FATAL, UNSET, "Can't open device data base 'Devices'.\n" );
-		return FAIL;
-	}
+    if ( EDL.Fname == NULL )
+    {
+        eprint( FATAL, UNSET, "Can't open device data base 'Devices'.\n" );
+        return FAIL;
+    }
 
-	if ( ( devices_listin = fopen( EDL.Fname, "r" ) ) == NULL )
-	{
-		eprint( FATAL, UNSET, "Can't open device data base '%s'.\n",
-					   EDL.Fname );
-		EDL.Fname = CHAR_P T_free( EDL.Fname );
-		return FAIL;
-	}
+    if ( ( devices_listin = fopen( EDL.Fname, "r" ) ) == NULL )
+    {
+        eprint( FATAL, UNSET, "Can't open device data base '%s'.\n",
+                       EDL.Fname );
+        EDL.Fname = CHAR_P T_free( EDL.Fname );
+        return FAIL;
+    }
 
-	/* Keep the lexer happy... */
+    /* Keep the lexer happy... */
 
-	if ( is_restart )
-	    devices_listrestart( devices_listin );
-	else
-		 is_restart = SET;
+    if ( is_restart )
+        devices_listrestart( devices_listin );
+    else
+         is_restart = SET;
 
-	EDL.Lc = 1;
+    EDL.Lc = 1;
 
-	TRY
-	{
-		while ( devices_listlex( ) )
-		{
-			new_device_name =
-							 DEVICE_NAME_P T_malloc( sizeof *new_device_name );
-			new_device_name->name = T_strdup( devices_listtext );
-			string_to_lower( new_device_name->name );
-			new_device_name->next = EDL.Device_Name_List;
-			EDL.Device_Name_List = new_device_name;
-		}
-   		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		fclose( devices_listin );
-		RETHROW( );
-	}
+    TRY
+    {
+        while ( devices_listlex( ) )
+        {
+            new_device_name =
+                             DEVICE_NAME_P T_malloc( sizeof *new_device_name );
+            new_device_name->name = T_strdup( devices_listtext );
+            string_to_lower( new_device_name->name );
+            new_device_name->next = EDL.Device_Name_List;
+            EDL.Device_Name_List = new_device_name;
+        }
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        fclose( devices_listin );
+        RETHROW( );
+    }
 
-	fclose( devices_listin );
-	return OK;
+    fclose( devices_listin );
+    return OK;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

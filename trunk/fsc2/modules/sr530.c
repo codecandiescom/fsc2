@@ -78,13 +78,13 @@ int last_DAC_port = 6;
 /* Global variables used only in this file */
 
 struct SR530 {
-	int device;
-	int sens_index;
-	bool sens_warn;
-	double phase;
-	bool is_phase;
-	int tc_index;
-	double dac_voltage[ 2 ];
+    int device;
+    int sens_index;
+    bool sens_warn;
+    double phase;
+    bool is_phase;
+    int tc_index;
+    double dac_voltage[ 2 ];
 };
 
 
@@ -99,15 +99,15 @@ static struct SR530 sr530, sr530_stored;
    is switched on!) */
 
 static double sens_list[ ] = { 5.0e-1, 2.0e-1, 1.0e-1, 5.0e-2, 2.0e-2,
-							   1.0e-2, 5.0e-3, 2.0e-3, 1.0e-3, 5.0e-4,
-							   2.0e-4, 1.0e-4, 5.0e-5, 2.0e-5, 1.0e-5,
-							   5.0e-6, 2.0e-6, 1.0e-6, 5.0e-7, 2.0e-7,
-							   1.0e-7, 5.0e-8, 2.0e-8, 1.0e-8 };
+                               1.0e-2, 5.0e-3, 2.0e-3, 1.0e-3, 5.0e-4,
+                               2.0e-4, 1.0e-4, 5.0e-5, 2.0e-5, 1.0e-5,
+                               5.0e-6, 2.0e-6, 1.0e-6, 5.0e-7, 2.0e-7,
+                               1.0e-7, 5.0e-8, 2.0e-8, 1.0e-8 };
 
 /* List of all available time constants */
 
 static double tc_list[ ] = { 1.0e-3, 3.0e-3, 1.0e-2, 3.0e-2, 1.0e-1, 3.0e-1,
-							 1.0, 3.0, 10.0, 30.0, 100.0 };
+                             1.0, 3.0, 10.0, 30.0, 100.0 };
 
 
 /* Declaration of all functions used only in this file */
@@ -135,15 +135,15 @@ static double sr530_set_phase( double phase );
 static double sr530_get_ref_freq( void );
 
 static double sr530_set_dac_voltage( long   channel,
-									 double voltage );
+                                     double voltage );
 
 static void sr530_lock_state( bool lock );
 
 static bool sr530_command( const char * cmd );
 
 static bool sr530_talk( const char * cmd,
-						char *       reply,
-						long *       length );
+                        char *       reply,
+                        long *       length );
 
 static void sr530_failure( void );
 
@@ -155,26 +155,26 @@ static void sr530_failure( void );
 
 int sr530_init_hook( void )
 {
-	int i;
+    int i;
 
 
-	/* Set global variable to indicate that GPIB bus is needed */
+    /* Set global variable to indicate that GPIB bus is needed */
 
-	Need_GPIB = SET;
+    Need_GPIB = SET;
 
-	/* Reset several variables in the structure describing the device */
+    /* Reset several variables in the structure describing the device */
 
-	sr530.device = -1;
+    sr530.device = -1;
 
-	sr530.sens_index = UNDEF_SENS_INDEX;
-	sr530.sens_warn = UNSET;
-	sr530.is_phase = UNSET;
-	sr530.tc_index = UNDEF_TC_INDEX;
+    sr530.sens_index = UNDEF_SENS_INDEX;
+    sr530.sens_warn = UNSET;
+    sr530.is_phase = UNSET;
+    sr530.tc_index = UNDEF_TC_INDEX;
 
-	for ( i = 0; i < 2; i++ )
-		sr530.dac_voltage[ i ]  = 0.0;
+    for ( i = 0; i < 2; i++ )
+        sr530.dac_voltage[ i ]  = 0.0;
 
-	return 1;
+    return 1;
 }
 
 
@@ -184,8 +184,8 @@ int sr530_init_hook( void )
 
 int sr530_test_hook( void )
 {
-	sr530_stored = sr530;
-	return 1;
+    sr530_stored = sr530;
+    return 1;
 }
 
 
@@ -195,20 +195,20 @@ int sr530_test_hook( void )
 
 int sr530_exp_hook( void )
 {
-	/* Reset the device structure to the state it had before the test run */
+    /* Reset the device structure to the state it had before the test run */
 
-	sr530 = sr530_stored;
+    sr530 = sr530_stored;
 
-	/* Initialize the lock-in */
+    /* Initialize the lock-in */
 
-	if ( ! sr530_init( DEVICE_NAME ) )
-	{
-		print( FATAL, "Initialization of device failed: %s\n",
-			   gpib_error_msg );
-		THROW( EXCEPTION );
-	}
+    if ( ! sr530_init( DEVICE_NAME ) )
+    {
+        print( FATAL, "Initialization of device failed: %s\n",
+               gpib_error_msg );
+        THROW( EXCEPTION );
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -226,8 +226,8 @@ int sr530_end_of_exp_hook( void )
         gpib_local( sr530.device );
     }
 
-	sr530.device = -1;
-	return 1;
+    sr530.device = -1;
+    return 1;
 }
 
 
@@ -236,7 +236,7 @@ int sr530_end_of_exp_hook( void )
 
 Var_T *lockin_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -251,21 +251,21 @@ Var_T *lockin_name( Var_T * v  UNUSED_ARG )
 
 Var_T *lockin_get_data( Var_T * v )
 {
-	double val[ 2 ];
+    double val[ 2 ];
 
-	if ( v == NULL )
-		return vars_push( FLOAT_VAR, get_single_channel_data( v ) );
+    if ( v == NULL )
+        return vars_push( FLOAT_VAR, get_single_channel_data( v ) );
 
-	val[ 0 ] = get_single_channel_data( v );
+    val[ 0 ] = get_single_channel_data( v );
 
-	if ( ( v = vars_pop( v ) ) == NULL )
-		return vars_push( FLOAT_VAR, val[ 0 ] );
+    if ( ( v = vars_pop( v ) ) == NULL )
+        return vars_push( FLOAT_VAR, val[ 0 ] );
 
-	val[ 1 ] = get_single_channel_data( v );
+    val[ 1 ] = get_single_channel_data( v );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	return vars_push( FLOAT_ARR, val, 2 );
+    return vars_push( FLOAT_ARR, val, 2 );
 }
 
 
@@ -274,26 +274,26 @@ Var_T *lockin_get_data( Var_T * v )
 
 static double get_single_channel_data( Var_T * v )
 {
-	long channel;
+    long channel;
 
 
-	if ( v == NULL )
-		channel = 1;
-	else
-		channel = ( v == NULL ) ?
-					  1 : get_long( v, "channel number" );
+    if ( v == NULL )
+        channel = 1;
+    else
+        channel = ( v == NULL ) ?
+                      1 : get_long( v, "channel number" );
 
-	if ( channel != 1 && channel != 2 )
-	{
-		print( FATAL, "Invalid channel number %ld, valid channels are "
-			   "1 or 2.\n", channel );
-		THROW( EXCEPTION );
-	}
+    if ( channel != 1 && channel != 2 )
+    {
+        print( FATAL, "Invalid channel number %ld, valid channels are "
+               "1 or 2.\n", channel );
+        THROW( EXCEPTION );
+    }
 
-	if ( FSC2_MODE == TEST )               /* return dummy value in test run */
-		return 0.0;
+    if ( FSC2_MODE == TEST )               /* return dummy value in test run */
+        return 0.0;
 
-	return sr530_get_data( ( int ) channel );
+    return sr530_get_data( ( int ) channel );
 }
 
 
@@ -306,22 +306,22 @@ static double get_single_channel_data( Var_T * v )
 
 Var_T *lockin_get_adc_data( Var_T * v )
 {
-	long port;
+    long port;
 
 
-	port = get_long( v, "ADC number" );
+    port = get_long( v, "ADC number" );
 
-	if ( port < 1 || port > 4 )
-	{
-		print( FATAL, "Invalid ADC channel number (%ld), valid channels are "
-			   "in the range between 1 and 4.\n", port );
-		THROW( EXCEPTION );
-	}
+    if ( port < 1 || port > 4 )
+    {
+        print( FATAL, "Invalid ADC channel number (%ld), valid channels are "
+               "in the range between 1 and 4.\n", port );
+        THROW( EXCEPTION );
+    }
 
-	if ( FSC2_MODE == TEST )               /* return dummy value in test run */
-		return vars_push( FLOAT_VAR, SR530_TEST_ADC_VOLTAGE );
+    if ( FSC2_MODE == TEST )               /* return dummy value in test run */
+        return vars_push( FLOAT_VAR, SR530_TEST_ADC_VOLTAGE );
 
-	return vars_push( FLOAT_VAR, sr530_get_adc_data( port ) );
+    return vars_push( FLOAT_VAR, sr530_get_adc_data( port ) );
 }
 
 
@@ -334,105 +334,105 @@ Var_T *lockin_get_adc_data( Var_T * v )
 
 Var_T *lockin_sensitivity( Var_T * v )
 {
-	double sens;
-	int sens_index = UNDEF_SENS_INDEX;
-	unsigned int i;
+    double sens;
+    int sens_index = UNDEF_SENS_INDEX;
+    unsigned int i;
 
 
-	if ( v == NULL )
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				no_query_possible( );
+    if ( v == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                no_query_possible( );
 
-			case TEST :
-				return vars_push( FLOAT_VAR,
-								  sr530.sens_index == UNDEF_SENS_INDEX ?
-								  SR530_TEST_SENSITIVITY :
-								  sens_list[ sr530.sens_index ] );
+            case TEST :
+                return vars_push( FLOAT_VAR,
+                                  sr530.sens_index == UNDEF_SENS_INDEX ?
+                                  SR530_TEST_SENSITIVITY :
+                                  sens_list[ sr530.sens_index ] );
 
-			case EXPERIMENT :
-				return vars_push( FLOAT_VAR, sr530_get_sens( ) );
-		}
+            case EXPERIMENT :
+                return vars_push( FLOAT_VAR, sr530_get_sens( ) );
+        }
 
-	sens = get_double( v, "sensitivity" );
+    sens = get_double( v, "sensitivity" );
 
-	if ( sens < 0.0 )
-	{
-		print( FATAL, "Invalid negative sensitivity.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( sens < 0.0 )
+    {
+        print( FATAL, "Invalid negative sensitivity.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* We try to match the sensitivity passed to the function by checking if
-	   it fits in between two of the valid values and setting it to the nearer
-	   one and, if this doesn't work, we set it to the minimum or maximum
-	   value, depending on the size of the argument. If the value does not fit
-	   within 1 percent, we utter a warning message (but only once). */
+    /* We try to match the sensitivity passed to the function by checking if
+       it fits in between two of the valid values and setting it to the nearer
+       one and, if this doesn't work, we set it to the minimum or maximum
+       value, depending on the size of the argument. If the value does not fit
+       within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < NUM_ELEMS( sens_list ) - 1; i++ )
-		if ( sens <= sens_list[ i ] && sens >= sens_list[ i + 1 ] )
-		{
-			if ( sens_list[ i ] / sens < sens / sens_list[ i + 1 ] )
-				sens_index = i;
-			else
-				sens_index = i + 1;
-			break;
-		}
+    for ( i = 0; i < NUM_ELEMS( sens_list ) - 1; i++ )
+        if ( sens <= sens_list[ i ] && sens >= sens_list[ i + 1 ] )
+        {
+            if ( sens_list[ i ] / sens < sens / sens_list[ i + 1 ] )
+                sens_index = i;
+            else
+                sens_index = i + 1;
+            break;
+        }
 
-	if ( sens_index == UNDEF_SENS_INDEX &&
-		 sens >= sens_list[ NUM_ELEMS( sens_list ) - 1 ] / 1.01 &&
-		 sens < sens_list[ NUM_ELEMS( sens_list ) - 1 ] )
-		sens_index = NUM_ELEMS( sens_list ) - 1;
+    if ( sens_index == UNDEF_SENS_INDEX &&
+         sens >= sens_list[ NUM_ELEMS( sens_list ) - 1 ] / 1.01 &&
+         sens < sens_list[ NUM_ELEMS( sens_list ) - 1 ] )
+        sens_index = NUM_ELEMS( sens_list ) - 1;
 
-	if ( sens_index >= 0 &&                         /* value found ? */
-		 fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
+    if ( sens_index >= 0 &&                         /* value found ? */
+         fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
                                                     /* error > 1% ? */
-		 ! sr530.sens_warn  )                       /* no warn message yet ? */
-	{
-		if ( sens >= 1.0e-3 )
-			print( WARN, "Can't set sensitivity to %.0lf mV, using %.0lf mV "
-				   "instead.\n",
-				   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
-		else if ( sens >= 1.0e-6 )
-			print( WARN, "Can't set sensitivity to %.0lf uV, using %.0lf uV "
-				   "instead.\n",
-				   sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
-		else
-			print( WARN, "Can't set sensitivity to %.0lf nV, using %.0lf nV "
-				   "instead.\n",
-				   sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
-		sr530.sens_warn = SET;
-	}
+         ! sr530.sens_warn  )                       /* no warn message yet ? */
+    {
+        if ( sens >= 1.0e-3 )
+            print( WARN, "Can't set sensitivity to %.0lf mV, using %.0lf mV "
+                   "instead.\n",
+                   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
+        else if ( sens >= 1.0e-6 )
+            print( WARN, "Can't set sensitivity to %.0lf uV, using %.0lf uV "
+                   "instead.\n",
+                   sens * 1.0e6, sens_list[ sens_index ] * 1.0e6 );
+        else
+            print( WARN, "Can't set sensitivity to %.0lf nV, using %.0lf nV "
+                   "instead.\n",
+                   sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
+        sr530.sens_warn = SET;
+    }
 
-	if ( sens_index == UNDEF_SENS_INDEX )                 /* not found yet ? */
-	{
-		if ( sens > sens_list[ 0 ] )
-			sens_index = 0;
-		else
-		    sens_index = NUM_ELEMS( sens_list ) - 1;
+    if ( sens_index == UNDEF_SENS_INDEX )                 /* not found yet ? */
+    {
+        if ( sens > sens_list[ 0 ] )
+            sens_index = 0;
+        else
+            sens_index = NUM_ELEMS( sens_list ) - 1;
 
-		if ( ! sr530.sens_warn )                      /* no warn message yet */
-		{
-		if ( sens >= 1.0e-3 )
-			print( WARN, "Sensitivity of %.0lf mV is too low, using %.0lf mV "
-				   "instead.\n",
-				   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
-		else
-			print( WARN, "Sensitivity of %.0lf nV is too high, using %.0lf nV "
-				   "instead.\n",
-				   sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
-			sr530.sens_warn = SET;
-		}
-	}
+        if ( ! sr530.sens_warn )                      /* no warn message yet */
+        {
+        if ( sens >= 1.0e-3 )
+            print( WARN, "Sensitivity of %.0lf mV is too low, using %.0lf mV "
+                   "instead.\n",
+                   sens * 1.0e3, sens_list[ sens_index ] * 1.0e3 );
+        else
+            print( WARN, "Sensitivity of %.0lf nV is too high, using %.0lf nV "
+                   "instead.\n",
+                   sens * 1.0e9, sens_list[ sens_index ] * 1.0e9 );
+            sr530.sens_warn = SET;
+        }
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	sr530.sens_index = sens_index;
+    sr530.sens_index = sens_index;
 
-	if ( FSC2_MODE == EXPERIMENT )
-		sr530_set_sens( sens_index );
+    if ( FSC2_MODE == EXPERIMENT )
+        sr530_set_sens( sens_index );
 
-	return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
+    return vars_push( FLOAT_VAR, sens_list[ sens_index ] );
 }
 
 
@@ -444,89 +444,89 @@ Var_T *lockin_sensitivity( Var_T * v )
 
 Var_T *lockin_time_constant( Var_T * v )
 {
-	double tc;
-	int tc_index = UNDEF_TC_INDEX;
-	unsigned int i;
+    double tc;
+    int tc_index = UNDEF_TC_INDEX;
+    unsigned int i;
 
 
-	if ( v == NULL )
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				no_query_possible( );
+    if ( v == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                no_query_possible( );
 
-			case TEST :
-				return vars_push( FLOAT_VAR, sr530.tc_index == UNDEF_TC_INDEX ?
-								  SR530_TEST_TIME_CONSTANT :
-								  tc_list[ sr530.tc_index ] );
+            case TEST :
+                return vars_push( FLOAT_VAR, sr530.tc_index == UNDEF_TC_INDEX ?
+                                  SR530_TEST_TIME_CONSTANT :
+                                  tc_list[ sr530.tc_index ] );
 
-			case EXPERIMENT :
-				return vars_push( FLOAT_VAR, sr530_get_tc( ) );
-		}
+            case EXPERIMENT :
+                return vars_push( FLOAT_VAR, sr530_get_tc( ) );
+        }
 
-	tc = get_double( v, "time constant" );
+    tc = get_double( v, "time constant" );
 
-	if ( tc < 0.0 )
-	{
-		print( FATAL, "Invalid negative time constant.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( tc < 0.0 )
+    {
+        print( FATAL, "Invalid negative time constant.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* We try to match the time constant passed to the function by checking if
-	   it fits in between two of the valid values and setting it to the nearer
-	   one and, if this doesn't work, we set it to the minimum or maximum
-	   value, depending on the size of the argument. If the value does not fit
-	   within 1 percent, we utter a warning message (but only once). */
+    /* We try to match the time constant passed to the function by checking if
+       it fits in between two of the valid values and setting it to the nearer
+       one and, if this doesn't work, we set it to the minimum or maximum
+       value, depending on the size of the argument. If the value does not fit
+       within 1 percent, we utter a warning message (but only once). */
 
-	for ( i = 0; i < NUM_ELEMS( tc_list ) - 1; i++ )
-		if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
-		{
-			if ( tc / tc_list[ i ] < tc_list[ i + 1 ] / tc )
-				tc_index = i;
-			else
-				tc_index = i + 1;
-			break;
-		}
+    for ( i = 0; i < NUM_ELEMS( tc_list ) - 1; i++ )
+        if ( tc >= tc_list[ i ] && tc <= tc_list[ i + 1 ] )
+        {
+            if ( tc / tc_list[ i ] < tc_list[ i + 1 ] / tc )
+                tc_index = i;
+            else
+                tc_index = i + 1;
+            break;
+        }
 
-	if ( tc_index >= 0 &&                                   /* value found ? */
-		 fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 )   /* error > 1% ?  */
-	{
-		if ( tc >= 1.0 )
-			print( WARN, "Can't set time constant to %g s, using %.0lf s "
-				   "instead.\n", tc, tc_list[ tc_index ] );
-		else
-			print( WARN, "Can't set time constant to %g ms, using %.0lf ms "
-				   "instead.\n", tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
-	}
+    if ( tc_index >= 0 &&                                   /* value found ? */
+         fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 )   /* error > 1% ?  */
+    {
+        if ( tc >= 1.0 )
+            print( WARN, "Can't set time constant to %g s, using %.0lf s "
+                   "instead.\n", tc, tc_list[ tc_index ] );
+        else
+            print( WARN, "Can't set time constant to %g ms, using %.0lf ms "
+                   "instead.\n", tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
+    }
 
-	if ( tc_index == UNDEF_SENS_INDEX )                   /* not found yet ? */
-	{
-		if ( tc < tc_list[ 0 ] )
-			tc_index = 0;
-		else
-			tc_index = NUM_ELEMS( tc_list ) - 1;
+    if ( tc_index == UNDEF_SENS_INDEX )                   /* not found yet ? */
+    {
+        if ( tc < tc_list[ 0 ] )
+            tc_index = 0;
+        else
+            tc_index = NUM_ELEMS( tc_list ) - 1;
 
-		if ( tc >= 1.0 )
-			print( WARN, "Time constant of %0.lf s is too large, using "
-				   "%.0lf s instead.\n", tc, tc_list[ tc_index ] );
-		else if ( tc >= 1.0e-3 )
-			print( WARN, "Time constant of %.0lf ms is too short, using "
-				   "%.0lf ms instead.\n",
-				   tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
-		else
-			print( WARN, "Time constant of %lf ms is too short, using "
-				   "%.0lf ms instead.\n",
-				   tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
-	}
+        if ( tc >= 1.0 )
+            print( WARN, "Time constant of %0.lf s is too large, using "
+                   "%.0lf s instead.\n", tc, tc_list[ tc_index ] );
+        else if ( tc >= 1.0e-3 )
+            print( WARN, "Time constant of %.0lf ms is too short, using "
+                   "%.0lf ms instead.\n",
+                   tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
+        else
+            print( WARN, "Time constant of %lf ms is too short, using "
+                   "%.0lf ms instead.\n",
+                   tc * 1.0e3, tc_list[ tc_index ] * 1.0e3 );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	sr530.tc_index = tc_index;
+    sr530.tc_index = tc_index;
 
-	if ( FSC2_MODE == EXPERIMENT )
-		sr530_set_tc( tc_index );
+    if ( FSC2_MODE == EXPERIMENT )
+        sr530_set_tc( tc_index );
 
-	return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
+    return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
 
 
@@ -540,49 +540,49 @@ Var_T *lockin_time_constant( Var_T * v )
 
 Var_T *lockin_phase( Var_T * v )
 {
-	double phase;
+    double phase;
 
 
-	/* Without an argument just return current phase settting */
+    /* Without an argument just return current phase settting */
 
-	if ( v == NULL )
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				no_query_possible( );
+    if ( v == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                no_query_possible( );
 
-			case TEST :
-				return vars_push( FLOAT_VAR, sr530.is_phase ?
-								  sr530.phase : SR530_TEST_PHASE );
+            case TEST :
+                return vars_push( FLOAT_VAR, sr530.is_phase ?
+                                  sr530.phase : SR530_TEST_PHASE );
 
-			case EXPERIMENT :
-				return vars_push( FLOAT_VAR, sr530_get_phase( ) );
-		}
+            case EXPERIMENT :
+                return vars_push( FLOAT_VAR, sr530_get_phase( ) );
+        }
 
-	/* Otherwise set phase to value passed to the function */
+    /* Otherwise set phase to value passed to the function */
 
-	phase = get_double( v, "phase" );
+    phase = get_double( v, "phase" );
 
-	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
-		phase -= 360.0;
+    while ( phase >= 360.0 )    /* convert to 0-359 degree range */
+        phase -= 360.0;
 
-	if ( phase < 0.0 )
-	{
-		phase *= -1.0;
-		while ( phase >= 360.0 )    /* convert to 0-359 degree range */
-			phase -= 360.0;
-		phase = 360.0 - phase;
-	}
+    if ( phase < 0.0 )
+    {
+        phase *= -1.0;
+        while ( phase >= 360.0 )    /* convert to 0-359 degree range */
+            phase -= 360.0;
+        phase = 360.0 - phase;
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	sr530.phase    = phase;
-	sr530.is_phase = SET;
+    sr530.phase    = phase;
+    sr530.is_phase = SET;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( FLOAT_VAR, phase );
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_VAR, phase );
 
-	return vars_push( FLOAT_VAR, sr530_set_phase( phase ) );
+    return vars_push( FLOAT_VAR, sr530_set_phase( phase ) );
 }
 
 
@@ -593,22 +593,22 @@ Var_T *lockin_phase( Var_T * v )
 
 Var_T *lockin_ref_freq( Var_T * v )
 {
-	if ( v != NULL )
-	{
-		print( FATAL, "Reference frequency cannot be set for this model.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v != NULL )
+    {
+        print( FATAL, "Reference frequency cannot be set for this model.\n" );
+        THROW( EXCEPTION );
+    }
 
-	switch ( FSC2_MODE )
-	{
-		case PREPARATION :
-			no_query_possible( );
+    switch ( FSC2_MODE )
+    {
+        case PREPARATION :
+            no_query_possible( );
 
-		case TEST :
-			return vars_push( FLOAT_VAR, SR530_TEST_REF_FREQUENCY );
-	}
+        case TEST :
+            return vars_push( FLOAT_VAR, SR530_TEST_REF_FREQUENCY );
+    }
 
-	return vars_push( FLOAT_VAR, sr530_get_ref_freq( ) );
+    return vars_push( FLOAT_VAR, sr530_get_ref_freq( ) );
 }
 
 
@@ -623,58 +623,58 @@ Var_T *lockin_ref_freq( Var_T * v )
 
 Var_T *lockin_dac_voltage( Var_T * v )
 {
-	long channel;
-	double voltage;
+    long channel;
+    double voltage;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* First argument must be the channel number (5 or 6) */
+    /* First argument must be the channel number (5 or 6) */
 
-	channel = get_long( v, "DAC channel" );
+    channel = get_long( v, "DAC channel" );
 
-	if ( channel < first_DAC_port || channel > last_DAC_port )
-	{
-		print( FATAL, "Invalid lock-in DAC channel number %ld, valid channels "
-			   "are in the range from %d to %d.\n",
-				channel, first_DAC_port, last_DAC_port );
-		THROW( EXCEPTION );
-	}
+    if ( channel < first_DAC_port || channel > last_DAC_port )
+    {
+        print( FATAL, "Invalid lock-in DAC channel number %ld, valid channels "
+               "are in the range from %d to %d.\n",
+                channel, first_DAC_port, last_DAC_port );
+        THROW( EXCEPTION );
+    }
 
-	/* If no second argument is specified return the current DAC setting */
+    /* If no second argument is specified return the current DAC setting */
 
-	if ( ( v = vars_pop( v ) ) == NULL )
-	{
-		if ( FSC2_MODE == PREPARATION )
-			no_query_possible( );
+    if ( ( v = vars_pop( v ) ) == NULL )
+    {
+        if ( FSC2_MODE == PREPARATION )
+            no_query_possible( );
 
-		return vars_push( FLOAT_VAR,
-						  sr530.dac_voltage[ channel - first_DAC_port ] );
-	}
+        return vars_push( FLOAT_VAR,
+                          sr530.dac_voltage[ channel - first_DAC_port ] );
+    }
 
-	/* Second argument must be a voltage between -10.24 V and +10.24 V */
+    /* Second argument must be a voltage between -10.24 V and +10.24 V */
 
-	voltage = get_double( v, "DAC voltage" );
+    voltage = get_double( v, "DAC voltage" );
 
-	if ( fabs( voltage ) > 10.24 )
-	{
-		print( FATAL, "DAC voltage of %f V is out of valid range "
-			   "(+/-10.24 V).\n", voltage );
-		THROW( EXCEPTION );
-	}
+    if ( fabs( voltage ) > 10.24 )
+    {
+        print( FATAL, "DAC voltage of %f V is out of valid range "
+               "(+/-10.24 V).\n", voltage );
+        THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	sr530.dac_voltage[ channel - first_DAC_port ] = voltage;
+    sr530.dac_voltage[ channel - first_DAC_port ] = voltage;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( FLOAT_VAR, voltage );
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( FLOAT_VAR, voltage );
 
-	return vars_push( FLOAT_VAR, sr530_set_dac_voltage( channel, voltage ) );
+    return vars_push( FLOAT_VAR, sr530_set_dac_voltage( channel, voltage ) );
 }
 
 
@@ -683,21 +683,21 @@ Var_T *lockin_dac_voltage( Var_T * v )
 
 Var_T *lockin_lock_keyboard( Var_T * v )
 {
-	bool lock;
+    bool lock;
 
 
-	if ( v == NULL )
-		lock = SET;
-	else
-	{
-		lock = get_boolean( v );
-		too_many_arguments( v );
-	}
+    if ( v == NULL )
+        lock = SET;
+    else
+    {
+        lock = get_boolean( v );
+        too_many_arguments( v );
+    }
 
-	if ( FSC2_MODE == EXPERIMENT )
-		sr530_lock_state( lock );
+    if ( FSC2_MODE == EXPERIMENT )
+        sr530_lock_state( lock );
 
-	return vars_push( INT_VAR, lock ? 1L : 0L );
+    return vars_push( INT_VAR, lock ? 1L : 0L );
 }
 
 
@@ -706,30 +706,30 @@ Var_T *lockin_lock_keyboard( Var_T * v )
 
 Var_T *lockin_command( Var_T * v )
 {
-	char *cmd = NULL;
+    char *cmd = NULL;
 
 
-	CLOBBER_PROTECT( cmd );
+    CLOBBER_PROTECT( cmd );
 
-	vars_check( v, STR_VAR );
-	
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		TRY
-		{
-			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-			sr530_command( cmd );
-			T_free( cmd );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( cmd );
-			RETHROW( );
-		}
-	}
+    vars_check( v, STR_VAR );
+    
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        TRY
+        {
+            cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+            sr530_command( cmd );
+            T_free( cmd );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( cmd );
+            RETHROW( );
+        }
+    }
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -746,51 +746,51 @@ Var_T *lockin_command( Var_T * v )
 
 bool sr530_init( const char * name )
 {
-	char buffer[ 20 ];
-	long length = 20;
-	int i;
+    char buffer[ 20 ];
+    long length = 20;
+    int i;
 
 
-	if ( gpib_init_device( name, &sr530.device ) == FAILURE )
-	{
-		sr530.device = -1;
+    if ( gpib_init_device( name, &sr530.device ) == FAILURE )
+    {
+        sr530.device = -1;
         return FAIL;
-	}
+    }
 
-	/* Ask lock-in to send status byte and test if it does */
+    /* Ask lock-in to send status byte and test if it does */
 
-	if ( gpib_write( sr530.device, "Y\n", 2 ) == FAILURE ||
-		 gpib_read( sr530.device, buffer, &length ) == FAILURE )
-		return FAIL;
+    if ( gpib_write( sr530.device, "Y\n", 2 ) == FAILURE ||
+         gpib_read( sr530.device, buffer, &length ) == FAILURE )
+        return FAIL;
 
-	/* Check that there's reference input and the internal reference is
-	   locked to it, if not print a warning */
+    /* Check that there's reference input and the internal reference is
+       locked to it, if not print a warning */
 
-	if ( buffer[ 0 ] & 4 )
-		print( SEVERE, "No reference input detected.\n" );
-	if ( buffer[ 0 ] & 8 )
-		print( SEVERE, "Reference oszillator not locked to reference "
-			   "input.\n" );
+    if ( buffer[ 0 ] & 4 )
+        print( SEVERE, "No reference input detected.\n" );
+    if ( buffer[ 0 ] & 8 )
+        print( SEVERE, "Reference oszillator not locked to reference "
+               "input.\n" );
 
-	/* Lock the keyboard */
+    /* Lock the keyboard */
 
-	sr530_command( "I1\n" );
+    sr530_command( "I1\n" );
 
-	/* If sensitivity, time constant or phase were set in one of the
-	   preparation sections only the value was stored and we have to do the
-	   actual setting now because the lock-in could not be accessed before
-	   Finally set the DAC output voltages to a defined value (default 0 V).*/
+    /* If sensitivity, time constant or phase were set in one of the
+       preparation sections only the value was stored and we have to do the
+       actual setting now because the lock-in could not be accessed before
+       Finally set the DAC output voltages to a defined value (default 0 V).*/
 
-	if ( sr530.sens_index != UNDEF_SENS_INDEX )
-		sr530_set_sens( sr530.sens_index );
-	if ( sr530.is_phase == SET )
-		sr530_set_phase( sr530.phase );
-	if ( sr530.tc_index != UNDEF_TC_INDEX )
-		sr530_set_tc( sr530.tc_index );
-	for ( i = 0; i < 2; i++ )
-		sr530_set_dac_voltage( i + first_DAC_port, sr530.dac_voltage[ i ] );
+    if ( sr530.sens_index != UNDEF_SENS_INDEX )
+        sr530_set_sens( sr530.sens_index );
+    if ( sr530.is_phase == SET )
+        sr530_set_phase( sr530.phase );
+    if ( sr530.tc_index != UNDEF_TC_INDEX )
+        sr530_set_tc( sr530.tc_index );
+    for ( i = 0; i < 2; i++ )
+        sr530_set_dac_voltage( i + first_DAC_port, sr530.dac_voltage[ i ] );
 
-	return OK;
+    return OK;
 }
 
 
@@ -800,17 +800,17 @@ bool sr530_init( const char * name )
 
 double sr530_get_data( int channel )
 {
-	char cmd[ 5 ] = "Q*\n";
-	char buffer[ 20 ];
-	long length = 20;
+    char cmd[ 5 ] = "Q*\n";
+    char buffer[ 20 ];
+    long length = 20;
 
 
-	fsc2_assert( channel == 1 || channel == 2 );
+    fsc2_assert( channel == 1 || channel == 2 );
 
-	cmd[ 1 ] = ( char ) ( channel + '0' );
-	sr530_talk( cmd, buffer, &length );
-	buffer[ length - 2 ] = '\0';
-	return T_atod( buffer );
+    cmd[ 1 ] = ( char ) ( channel + '0' );
+    sr530_talk( cmd, buffer, &length );
+    buffer[ length - 2 ] = '\0';
+    return T_atod( buffer );
 }
 
 
@@ -822,14 +822,14 @@ double sr530_get_data( int channel )
 
 double sr530_get_adc_data( long channel )
 {
-	char buffer[ 16 ] = "X*\n";
-	long length = 16;
+    char buffer[ 16 ] = "X*\n";
+    long length = 16;
 
 
-	buffer[ 1 ] = ( char ) channel + '0';
-	sr530_talk( buffer, buffer, &length );
-	buffer[ length - 2 ] = '\0';
-	return T_atod( buffer );
+    buffer[ 1 ] = ( char ) channel + '0';
+    sr530_talk( buffer, buffer, &length );
+    buffer[ length - 2 ] = '\0';
+    return T_atod( buffer );
 }
 
 
@@ -839,25 +839,25 @@ double sr530_get_adc_data( long channel )
 
 double sr530_get_sens( void )
 {
-	char buffer[ 10 ];
-	long length = 10;
-	double sens;
+    char buffer[ 10 ];
+    long length = 10;
+    double sens;
 
-	/* Ask lock-in for the sensitivity setting */
+    /* Ask lock-in for the sensitivity setting */
 
-	sr530_talk( "G\n", buffer, &length );
-	buffer[ length - 2 ] = '\0';
-	sens = sens_list[ NUM_ELEMS( sens_list ) - T_atol( buffer ) ];
+    sr530_talk( "G\n", buffer, &length );
+    buffer[ length - 2 ] = '\0';
+    sens = sens_list[ NUM_ELEMS( sens_list ) - T_atol( buffer ) ];
 
     /* Check if EXPAND is switched on - this increases the sensitivity
-	   by a factor of 10 */
+       by a factor of 10 */
 
-	length = 10;
-	sr530_talk( "E1\n", buffer, &length );
-	if ( buffer[ 0 ] == '1' )
-		sens *= 0.1;
+    length = 10;
+    sr530_talk( "E1\n", buffer, &length );
+    if ( buffer[ 0 ] == '1' )
+        sens *= 0.1;
 
-	return sens;
+    return sens;
 }
 
 
@@ -871,34 +871,34 @@ double sr530_get_sens( void )
 
 void sr530_set_sens( int sens_index )
 {
-	char buffer[ 10 ];
+    char buffer[ 10 ];
 
 
-	/* Coding of sensitivity commands work just the other way round as
-	   in the list of sensitivities 'sens_list', i.e. 1 stands for the
-	   highest sensitivity (10nV) and 24 for the lowest (500mV) */
+    /* Coding of sensitivity commands work just the other way round as
+       in the list of sensitivities 'sens_list', i.e. 1 stands for the
+       highest sensitivity (10nV) and 24 for the lowest (500mV) */
 
-	sens_index = NUM_ELEMS( sens_list ) - sens_index;
+    sens_index = NUM_ELEMS( sens_list ) - sens_index;
 
-	/* For sensitivities lower than 100 nV EXPAND has to be switched on
-	   (for both channels) otherwise it got to be switched off */
+    /* For sensitivities lower than 100 nV EXPAND has to be switched on
+       (for both channels) otherwise it got to be switched off */
 
-	if ( sens_index <= 3 )
-	{
-		sr530_command( "E1,1\n" );
-		sr530_command( "E2,1\n" );
-		sens_index += 3;
-	}
-	else
-	{
-		sr530_command( "E1,0\n" );
-		sr530_command( "E2,0\n" );
-	}
+    if ( sens_index <= 3 )
+    {
+        sr530_command( "E1,1\n" );
+        sr530_command( "E2,1\n" );
+        sens_index += 3;
+    }
+    else
+    {
+        sr530_command( "E1,0\n" );
+        sr530_command( "E2,0\n" );
+    }
 
-	/* Now set the sensitivity */
+    /* Now set the sensitivity */
 
-	sprintf( buffer, "G%d\n", sens_index );
-	sr530_command( buffer );
+    sprintf( buffer, "G%d\n", sens_index );
+    sr530_command( buffer );
 }
 
 
@@ -910,13 +910,13 @@ void sr530_set_sens( int sens_index )
 
 double sr530_get_tc( void )
 {
-	char buffer[10];
-	long length = 10;
+    char buffer[10];
+    long length = 10;
 
 
-	sr530_talk( "T1\n", buffer, &length );
-	buffer[ length - 2 ] = '\0';
-	return tc_list[ T_atol( buffer ) - 1 ];
+    sr530_talk( "T1\n", buffer, &length );
+    buffer[ length - 2 ] = '\0';
+    return tc_list[ T_atol( buffer ) - 1 ];
 }
 
 
@@ -929,21 +929,21 @@ double sr530_get_tc( void )
 
 void sr530_set_tc( int tc_index )
 {
-	char buffer[ 10 ];
+    char buffer[ 10 ];
 
 
-	sprintf( buffer, "T1,%d\n", tc_index + 1 );
-	sr530_command( buffer );
+    sprintf( buffer, "T1,%d\n", tc_index + 1 );
+    sr530_command( buffer );
 
-	/* Also set the POST time constant where 'T2,0' switches it off, 'T2,1'
-	   sets it to 100ms and 'T1,2' to 1s */
+    /* Also set the POST time constant where 'T2,0' switches it off, 'T2,1'
+       sets it to 100ms and 'T1,2' to 1s */
 
-	if ( tc_index < 4 )
-		sr530_command( "T2,0\n" );
-	else if ( tc_index >= 4 && tc_index < 6 )
-		sr530_command( "T2,1\n" );
-	else if ( tc_index >= 6 )
-		sr530_command( "T2,2\n" );
+    if ( tc_index < 4 )
+        sr530_command( "T2,0\n" );
+    else if ( tc_index >= 4 && tc_index < 6 )
+        sr530_command( "T2,1\n" );
+    else if ( tc_index >= 6 )
+        sr530_command( "T2,2\n" );
 }
 
 
@@ -954,22 +954,22 @@ void sr530_set_tc( int tc_index )
 
 double sr530_get_phase( void )
 {
-	char buffer[ 20 ];
-	long length = 20;
-	double phase;
+    char buffer[ 20 ];
+    long length = 20;
+    double phase;
 
 
-	sr530_talk( "P\n", buffer, &length );
-	buffer[ length - 2 ] = '\0';
-	phase = T_atod( buffer );
+    sr530_talk( "P\n", buffer, &length );
+    buffer[ length - 2 ] = '\0';
+    phase = T_atod( buffer );
 
-	while ( phase >= 360.0 )    /* convert to 0-359 degree range */
-		phase -= 360.0;
+    while ( phase >= 360.0 )    /* convert to 0-359 degree range */
+        phase -= 360.0;
 
-	while ( phase < 0.0 )
-		phase += 360.0;
+    while ( phase < 0.0 )
+        phase += 360.0;
 
-	return phase;
+    return phase;
 }
 
 
@@ -979,12 +979,12 @@ double sr530_get_phase( void )
 
 double sr530_set_phase( double phase )
 {
-	char buffer[ 20 ];
+    char buffer[ 20 ];
 
 
-	sprintf( buffer, "P%.2f\n", phase );
-	sr530_command( buffer );
-	return phase;
+    sprintf( buffer, "P%.2f\n", phase );
+    sr530_command( buffer );
+    return phase;
 }
 
 
@@ -994,13 +994,13 @@ double sr530_set_phase( double phase )
 
 static double sr530_get_ref_freq( void )
 {
-	char buffer[ 50 ];
-	long length = 50;
+    char buffer[ 50 ];
+    long length = 50;
 
 
-	sr530_talk( "F\n", buffer, &length );
-	buffer[ length - 2 ] = '\0';
-	return T_atod( buffer );
+    sr530_talk( "F\n", buffer, &length );
+    buffer[ length - 2 ] = '\0';
+    return T_atod( buffer );
 }
 
 
@@ -1009,24 +1009,24 @@ static double sr530_get_ref_freq( void )
  *----------------------------------------*/
 
 static double sr530_set_dac_voltage( long   channel,
-									 double voltage )
+                                     double voltage )
 {
-	char buffer[ 30 ];
+    char buffer[ 30 ];
 
 
-	/* Just some more sanity checks, should already been done by calling
+    /* Just some more sanity checks, should already been done by calling
        function... */
 
-	fsc2_assert( channel >= first_DAC_port || channel <= last_DAC_port );
+    fsc2_assert( channel >= first_DAC_port || channel <= last_DAC_port );
 
-	if ( voltage > 10.24 )
-		voltage = 10.24;
-	if ( voltage < -10.24 )
-		voltage = -10.24;
+    if ( voltage > 10.24 )
+        voltage = 10.24;
+    if ( voltage < -10.24 )
+        voltage = -10.24;
 
-	sprintf( buffer, "X%1ld,%f\n", channel, voltage );
-	sr530_command( buffer );
-	return voltage;
+    sprintf( buffer, "X%1ld,%f\n", channel, voltage );
+    sr530_command( buffer );
+    return voltage;
 }
 
 
@@ -1035,11 +1035,11 @@ static double sr530_set_dac_voltage( long   channel,
 
 static void sr530_lock_state( bool lock )
 {
-	char cmd[ 100 ];
+    char cmd[ 100 ];
 
 
-	sprintf( cmd, "I%c\n", lock ? '2' : '0' );
-	sr530_command( cmd );
+    sprintf( cmd, "I%c\n", lock ? '2' : '0' );
+    sr530_command( cmd );
 }
 
 
@@ -1048,9 +1048,9 @@ static void sr530_lock_state( bool lock )
 
 static bool sr530_command( const char * cmd )
 {
-	if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE )
-		sr530_failure( );
-	return OK;
+    if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE )
+        sr530_failure( );
+    return OK;
 }
 
 
@@ -1058,13 +1058,13 @@ static bool sr530_command( const char * cmd )
  *--------------------------------------------------------------*/
 
 static bool sr530_talk( const char * cmd,
-						char *       reply,
-						long *       length )
+                        char *       reply,
+                        long *       length )
 {
-	if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE ||
-		 gpib_read( sr530.device, reply, length ) == FAILURE )
-		sr530_failure( );
-	return OK;
+    if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE ||
+         gpib_read( sr530.device, reply, length ) == FAILURE )
+        sr530_failure( );
+    return OK;
 }
 
 
@@ -1073,13 +1073,15 @@ static bool sr530_talk( const char * cmd,
 
 static void sr530_failure( void )
 {
-	print( FATAL, "Can't access the lock-in amplifier.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Can't access the lock-in amplifier.\n" );
+    THROW( EXCEPTION );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -22,9 +22,9 @@
  */
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap stack nounput never-interactive
 
@@ -39,7 +39,7 @@
 static int hjs_fc_lex( void );
 
 static long hjs_fc_Lc,
-			hjs_fc_Comm_Lc;
+            hjs_fc_Comm_Lc;
 %}
 
 REM1     ^[\t ]*("//"|"#").*\n
@@ -62,84 +62,84 @@ UNIT     "G"
 %x      comm
 
 
-		/*---------------*/
-%%		/*     RULES     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     RULES     */
+        /*---------------*/
 
 
             /* handling of C++ style comment spanning a whole line */
-{REM1}		hjs_fc_Lc++;
+{REM1}      hjs_fc_Lc++;
 
-			/* handling of C++ style comment not spanning a whole line */
-{REM2}		hjs_fc_Lc++;
+            /* handling of C++ style comment not spanning a whole line */
+{REM2}      hjs_fc_Lc++;
 
-			/* handling of C style comment */
-{REM3}		{
-				hjs_fc_Comm_Lc = hjs_fc_Lc;
-				yy_push_state( comm );
-			}
+            /* handling of C style comment */
+{REM3}      {
+                hjs_fc_Comm_Lc = hjs_fc_Lc;
+                yy_push_state( comm );
+            }
 
 <comm>{
 
-{REM4}		/* skipping anything that's not a '*' */
+{REM4}      /* skipping anything that's not a '*' */
 {REM5}      /* skipping all '*'s not followed by '/'s */
 
-			/* end of line character in a comment */
-\n			hjs_fc_Lc++;
+            /* end of line character in a comment */
+\n          hjs_fc_Lc++;
 
-			/* handling of EOF within a comment -> fatal error */
-<<EOF>> 	{
-				print( FATAL, "End of calibration file '%s' detected within a "
-					   "comment.\n", hjs_fc.calib_file );
-				fclose( hjs_fc_in );
-				THROW( EXCEPTION );
-			}
+            /* handling of EOF within a comment -> fatal error */
+<<EOF>>     {
+                print( FATAL, "End of calibration file '%s' detected within a "
+                       "comment.\n", hjs_fc.calib_file );
+                fclose( hjs_fc_in );
+                THROW( EXCEPTION );
+            }
 
-			/* end of comment but not end of line */
-{EREM1}		yy_pop_state( );
+            /* end of comment but not end of line */
+{EREM1}     yy_pop_state( );
 
-			/* end of comment and end of line */
+            /* end of comment and end of line */
 {EREM2}     {
-				hjs_fc_Lc++;
-				yy_pop_state( );
-			}
+                hjs_fc_Lc++;
+                yy_pop_state( );
+            }
 } /* end of <comm> */
 
 {EREM1}     {
-				print( FATAL, "End of comment indicator (\"*/\") without "
-					   "previous start of comment in calibration file '%s' "
-					   "at line %ld.\n", hjs_fc.calib_file, hjs_fc_Lc );
-				fclose( hjs_fc_in );
-				THROW( EXCEPTION );
-			}
+                print( FATAL, "End of comment indicator (\"*/\") without "
+                       "previous start of comment in calibration file '%s' "
+                       "at line %ld.\n", hjs_fc.calib_file, hjs_fc_Lc );
+                fclose( hjs_fc_in );
+                THROW( EXCEPTION );
+            }
 
-			/* dump empty line (i.e. just containing tabs and spaces) */
+            /* dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      hjs_fc_Lc++;
 
-			/* dumps trailing white space */
+            /* dumps trailing white space */
 {TWS}       hjs_fc_Lc++;
 
-			/* dump all other forms of white space as well as units */
+            /* dump all other forms of white space as well as units */
 {WS}
 {UNIT}
 
-			/* count lines */
-\n			hjs_fc_Lc++;
+            /* count lines */
+\n          hjs_fc_Lc++;
 
 {D}         return 1;
 
-<<EOF>>		return 0;
+<<EOF>>     return 0;
 
 .           {
-				print( FATAL, "Invalid input in calibration file '%s' at "
-					   "line %ld.\n", hjs_fc.calib_file, hjs_fc_Lc );
-				fclose( hjs_fc_in );
-				THROW( EXCEPTION );
-			}
+                print( FATAL, "Invalid input in calibration file '%s' at "
+                       "line %ld.\n", hjs_fc.calib_file, hjs_fc_Lc );
+                fclose( hjs_fc_in );
+                THROW( EXCEPTION );
+            }
 
-		/*----------------------*/
-%%		/*     END OF RULES     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     END OF RULES     */
+        /*----------------------*/
 
 
 /*-------------------------------------------------------------*
@@ -147,99 +147,101 @@ UNIT     "G"
 
 void hjs_fc_read_calibration( void )
 {
-	static bool is_restart = UNSET;
-	int num_entries;
+    static bool is_restart = UNSET;
+    int num_entries;
 
 
-	/* Try to open the configuration file */
+    /* Try to open the configuration file */
 
-	if ( hjs_fc.calib_file == NULL )
-	{
-		if ( DEFAULT_CALIB_FILE[ 0 ] ==  '/' )
-			hjs_fc.calib_file = T_strdup( DEFAULT_CALIB_FILE );
-		else
-			hjs_fc.calib_file = get_string( "%s%s%s", libdir, slash( libdir ),
-											DEFAULT_CALIB_FILE );
-	}
+    if ( hjs_fc.calib_file == NULL )
+    {
+        if ( DEFAULT_CALIB_FILE[ 0 ] ==  '/' )
+            hjs_fc.calib_file = T_strdup( DEFAULT_CALIB_FILE );
+        else
+            hjs_fc.calib_file = get_string( "%s%s%s", libdir, slash( libdir ),
+                                            DEFAULT_CALIB_FILE );
+    }
 
-	if ( access( hjs_fc.calib_file, R_OK ) == -1 )
-	{
-		if ( errno == ENOENT )       /* file not found */
-			print( FATAL, "Calibration file '%s' not found.\n",
-				   hjs_fc.calib_file );
-		else
-			print( FATAL, "No read permission for calibration file '%s'.\n",
-				   hjs_fc.calib_file );
-		THROW( EXCEPTION );
-	}
+    if ( access( hjs_fc.calib_file, R_OK ) == -1 )
+    {
+        if ( errno == ENOENT )       /* file not found */
+            print( FATAL, "Calibration file '%s' not found.\n",
+                   hjs_fc.calib_file );
+        else
+            print( FATAL, "No read permission for calibration file '%s'.\n",
+                   hjs_fc.calib_file );
+        THROW( EXCEPTION );
+    }
 
-	if ( ( hjs_fc_in = fopen( hjs_fc.calib_file, "r" ) ) == NULL )
-	{
-		print( FATAL, "Can't open calibration file '%s'.\n",
-			   hjs_fc.calib_file );
-		THROW( EXCEPTION );
-	}
+    if ( ( hjs_fc_in = fopen( hjs_fc.calib_file, "r" ) ) == NULL )
+    {
+        print( FATAL, "Can't open calibration file '%s'.\n",
+               hjs_fc.calib_file );
+        THROW( EXCEPTION );
+    }
 
-	/* Keep the lexer happy... */
+    /* Keep the lexer happy... */
 
-	if ( is_restart )
-	    hjs_fc_restart( hjs_fc_in );
-	else
-		is_restart = SET;
+    if ( is_restart )
+        hjs_fc_restart( hjs_fc_in );
+    else
+        is_restart = SET;
 
-	hjs_fc_Lc = 1;
+    hjs_fc_Lc = 1;
 
-	for ( num_entries = 0; hjs_fc_lex( ) != 0; num_entries++ )
-		switch ( num_entries )
-		{
-			case 0 :
-				hjs_fc.B0V = T_atod( hjs_fc_text );
-				break;
+    for ( num_entries = 0; hjs_fc_lex( ) != 0; num_entries++ )
+        switch ( num_entries )
+        {
+            case 0 :
+                hjs_fc.B0V = T_atod( hjs_fc_text );
+                break;
 
-			case 1 :
-				hjs_fc.slope = 0.1 * ( T_atod( hjs_fc_text ) - hjs_fc.B0V );
-				break;
+            case 1 :
+                hjs_fc.slope = 0.1 * ( T_atod( hjs_fc_text ) - hjs_fc.B0V );
+                break;
 
-			default :
-				print( FATAL, "Too many entries in configuration file '%s'.\n",
-					   hjs_fc.calib_file );
-				fclose( hjs_fc_in );
-				THROW( EXCEPTION );
-		}
+            default :
+                print( FATAL, "Too many entries in configuration file '%s'.\n",
+                       hjs_fc.calib_file );
+                fclose( hjs_fc_in );
+                THROW( EXCEPTION );
+        }
 
-	fclose( hjs_fc_in );
+    fclose( hjs_fc_in );
 
-	/* Check that there were exactly two entries int the calibration file */
+    /* Check that there were exactly two entries int the calibration file */
 
-	if ( num_entries < 2 )
-	{
-		print( FATAL, "Calibration file '%s' contains %s, but both the field "
-			   "at the minimum and maximum DAC output voltage is required.\n",
-			   hjs_fc.calib_file, num_entries ? "only one entry" :
-			   "no entries" );
-		THROW( EXCEPTION );
-	}
+    if ( num_entries < 2 )
+    {
+        print( FATAL, "Calibration file '%s' contains %s, but both the field "
+               "at the minimum and maximum DAC output voltage is required.\n",
+               hjs_fc.calib_file, num_entries ? "only one entry" :
+               "no entries" );
+        THROW( EXCEPTION );
+    }
 
-	/* Check that the entries weren't completely bogus */
+    /* Check that the entries weren't completely bogus */
 
-	if ( hjs_fc.B0V < 0.0 )
-	{
-		print( FATAL, "Invalid negative value for field at DAC output "
-			   "of 0 V in calibration file '%s'.\n", hjs_fc.calib_file );
-		THROW( EXCEPTION );
-	}
-		
-	if ( hjs_fc.slope == 0.0 )
-	{
-		print( FATAL, "According to calibration file '%s' the field does not "
-			   "change with DAC output voltage.\n", hjs_fc.calib_file );
-		THROW( EXCEPTION );
-	}
+    if ( hjs_fc.B0V < 0.0 )
+    {
+        print( FATAL, "Invalid negative value for field at DAC output "
+               "of 0 V in calibration file '%s'.\n", hjs_fc.calib_file );
+        THROW( EXCEPTION );
+    }
+        
+    if ( hjs_fc.slope == 0.0 )
+    {
+        print( FATAL, "According to calibration file '%s' the field does not "
+               "change with DAC output voltage.\n", hjs_fc.calib_file );
+        THROW( EXCEPTION );
+    }
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

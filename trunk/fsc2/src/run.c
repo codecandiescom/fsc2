@@ -43,12 +43,12 @@ static void error_while_iconified( void );
 static bool no_prog_to_run( void );
 static bool init_devs_and_graphics( void );
 static void stop_while_exp_hook( FL_OBJECT * a,
-								 long        b );
+                                 long        b );
 static void setup_signal_handlers( void );
 static void fork_failure( int stored_errno );
 static void check_for_further_errors( Compilation_T * c_old,
-									  Compilation_T * c_all );
-static void quitting_handler( int signo	);
+                                      Compilation_T * c_all );
+static void quitting_handler( int signo );
 static void run_sigchld_handler( int signo );
 static void set_buttons_for_run( int run_state );
 
@@ -73,7 +73,7 @@ volatile sig_atomic_t Can_Jmp_Alrm = 0;
 /* Locally used global variables used in parent, child and signal handlers */
 
 static struct sigaction Sigchld_old_act,
-	                    Quitting_old_act;
+                        Quitting_old_act;
 static volatile sig_atomic_t Child_return_status;
 static bool Graphics_have_been_started = UNSET;
 
@@ -92,113 +92,113 @@ static bool Graphics_have_been_started = UNSET;
 
 bool run( void )
 {
-	int stored_errno;
-	sigset_t new_mask, old_mask;
+    int stored_errno;
+    sigset_t new_mask, old_mask;
 
 
-	/* We can't run more than one experiment - so quit if child_pid != 0 */
+    /* We can't run more than one experiment - so quit if child_pid != 0 */
 
-	if ( Fsc2_Internals.child_pid != 0 )
-		return FAIL;
+    if ( Fsc2_Internals.child_pid != 0 )
+        return FAIL;
 
-	/* If there's no EXPERIMENT section at all (indicated by 'prg_length'
-	   being negative) we're already done */
+    /* If there's no EXPERIMENT section at all (indicated by 'prg_length'
+       being negative) we're already done */
 
-	if ( EDL.prg_length < 0 )
-	{
-		if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
-			 Fsc2_Internals.cmdline_flags & BATCH_MODE )
-			fl_trigger_object( GUI.main_form->quit );
+    if ( EDL.prg_length < 0 )
+    {
+        if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
+             Fsc2_Internals.cmdline_flags & BATCH_MODE )
+            fl_trigger_object( GUI.main_form->quit );
 
-		if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
-			error_while_iconified( );
+        if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
+            error_while_iconified( );
 
-		return FAIL;
-	}
+        return FAIL;
+    }
 
-	/* Start the GPIB bus (and do some changes to the graphics) */
+    /* Start the GPIB bus (and do some changes to the graphics) */
 
-	Fsc2_Internals.state = STATE_RUNNING;
+    Fsc2_Internals.state = STATE_RUNNING;
 
-	if ( ! start_gpib_and_rulbus( ) )
-	{
-		if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
-			error_while_iconified( );
+    if ( ! start_gpib_and_rulbus( ) )
+    {
+        if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
+            error_while_iconified( );
 
-		return FAIL;
-	}
+        return FAIL;
+    }
 
-	/* If there are no commands but an EXPERIMENT section label we just run
-	   all the init hooks, then the exit hooks and are already done. */
+    /* If there are no commands but an EXPERIMENT section label we just run
+       all the init hooks, then the exit hooks and are already done. */
 
-	if ( EDL.prg_token == NULL )
-	{
-		if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
-			error_while_iconified( );
+    if ( EDL.prg_token == NULL )
+    {
+        if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
+            error_while_iconified( );
 
-		return no_prog_to_run( );
-	}
+        return no_prog_to_run( );
+    }
 
-	/* Initialize devices and graphics */
+    /* Initialize devices and graphics */
 
-	if ( ! init_devs_and_graphics( ) )
-	{
-		if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
-			error_while_iconified( );
+    if ( ! init_devs_and_graphics( ) )
+    {
+        if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
+            error_while_iconified( );
 
-		return FAIL;
-	}
+        return FAIL;
+    }
 
-	/* Setup the signal handlers for signals used for communication between
-	   parent and child process and an idle callback function for displaying
-	   new data. */
+    /* Setup the signal handlers for signals used for communication between
+       parent and child process and an idle callback function for displaying
+       new data. */
 
-	setup_signal_handlers( );
+    setup_signal_handlers( );
 
-	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+    if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 
-	/* We have to be careful: When the child process gets forked it may
-	   already be finished running *before* the fork() call returns in the
-	   parent. In this case the signal handlers of the parent don't know the
-	   PID of the child process and thus won't work correctly. Therefore all
-	   the signals the child may send are blocked until we can be sure the
-	   parent has got the child's PID. */
+    /* We have to be careful: When the child process gets forked it may
+       already be finished running *before* the fork() call returns in the
+       parent. In this case the signal handlers of the parent don't know the
+       PID of the child process and thus won't work correctly. Therefore all
+       the signals the child may send are blocked until we can be sure the
+       parent has got the child's PID. */
 
-	sigemptyset( &new_mask );
-	sigaddset( &new_mask, SIGCHLD );
-	sigaddset( &new_mask, QUITTING );
-	sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+    sigemptyset( &new_mask );
+    sigaddset( &new_mask, SIGCHLD );
+    sigaddset( &new_mask, QUITTING );
+    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
-	/* Here the experiment starts - the child process is forked */
+    /* Here the experiment starts - the child process is forked */
 
-	if ( ( Fsc2_Internals.child_pid = fork( ) ) == 0 )
-	{
-		sigprocmask( SIG_SETMASK, &old_mask, NULL );
-		if ( GUI.is_init )
-			close( ConnectionNumber( GUI.d ) );
-		run_child( );
-	}
+    if ( ( Fsc2_Internals.child_pid = fork( ) ) == 0 )
+    {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        if ( GUI.is_init )
+            close( ConnectionNumber( GUI.d ) );
+        run_child( );
+    }
 
-	stored_errno = errno;            /* stored for later examination... */
-	close_all_files( );              /* only child is going to write to them */
+    stored_errno = errno;            /* stored for later examination... */
+    close_all_files( );              /* only child is going to write to them */
 
-	close( Comm.pd[ READ ] );        /* close unused ends of pipes */
-	close( Comm.pd[ 3 ] );
-	Comm.pd[ READ ] = Comm.pd[ 2 ];
+    close( Comm.pd[ READ ] );        /* close unused ends of pipes */
+    close( Comm.pd[ 3 ] );
+    Comm.pd[ READ ] = Comm.pd[ 2 ];
 
-	if ( Fsc2_Internals.child_pid > 0 )   /* fork() did succeeded */
-	{
-		sigprocmask( SIG_SETMASK, &old_mask, NULL );
-		Fsc2_Internals.mode = PREPARATION;
-		return OK;
-	}
+    if ( Fsc2_Internals.child_pid > 0 )   /* fork() did succeeded */
+    {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        Fsc2_Internals.mode = PREPARATION;
+        return OK;
+    }
 
-	/* If forking the child failed we end up here */
+    /* If forking the child failed we end up here */
 
-	sigprocmask( SIG_SETMASK, &old_mask, NULL );
-	fork_failure( stored_errno );
-	return FAIL;
+    sigprocmask( SIG_SETMASK, &old_mask, NULL );
+    fork_failure( stored_errno );
+    return FAIL;
 }
 
 
@@ -210,9 +210,9 @@ bool run( void )
 
 static void error_while_iconified( void )
 {
-	Fsc2_Internals.cmdline_flags &= ~ ICONIFIED_RUN;
-	fl_raise_form( GUI.main_form->fsc2 );
-	XMapWindow( fl_get_display( ), GUI.main_form->fsc2->window );
+    Fsc2_Internals.cmdline_flags &= ~ ICONIFIED_RUN;
+    fl_raise_form( GUI.main_form->fsc2 );
+    XMapWindow( fl_get_display( ), GUI.main_form->fsc2->window );
 }
 
 
@@ -225,69 +225,69 @@ static void error_while_iconified( void )
 static bool start_gpib_and_rulbus( void )
 {
 #if defined WITH_RULBUS
-	int retval;
+    int retval;
 #endif
 
-	/* Disable some buttons and show a watch cursor */
+    /* Disable some buttons and show a watch cursor */
 
-	set_buttons_for_run( 1 );
+    set_buttons_for_run( 1 );
 
-	/* If there are devices that need the GPIB bus initialize it now */
+    /* If there are devices that need the GPIB bus initialize it now */
 
-	if ( Need_GPIB && gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) == FAILURE )
-	{
-		eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
-				gpib_error_msg );
+    if ( Need_GPIB && gpib_init( GPIB_LOG_FILE, GPIB_LOG_LEVEL ) == FAILURE )
+    {
+        eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
+                gpib_error_msg );
 
-		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-		{
-			set_buttons_for_run( 0 );
-			fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-			XFlush( fl_get_display( ) );
-		}
+        if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        {
+            set_buttons_for_run( 0 );
+            fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+            XFlush( fl_get_display( ) );
+        }
 
-		Fsc2_Internals.state = STATE_IDLE;
-		return FAIL;
-	}
+        Fsc2_Internals.state = STATE_IDLE;
+        return FAIL;
+    }
 
 #if defined WITH_RULBUS
-	/* If there are devices that are controlled via the RULBUS initialize it */
+    /* If there are devices that are controlled via the RULBUS initialize it */
 
-	if ( Need_RULBUS )
-	{
-		raise_permissions( );
+    if ( Need_RULBUS )
+    {
+        raise_permissions( );
 
-		if ( ( retval = rulbus_open( O_EXCL ) ) < 0 )
-		{
-			lower_permissions( );
+        if ( ( retval = rulbus_open( O_EXCL ) ) < 0 )
+        {
+            lower_permissions( );
 
-			eprint( FATAL, UNSET, "Failed to initialize RULBUS: %s.\n",
-					rulbus_strerror( ) );
+            eprint( FATAL, UNSET, "Failed to initialize RULBUS: %s.\n",
+                    rulbus_strerror( ) );
 
-			if ( Need_GPIB )
-				gpib_shutdown( );
+            if ( Need_GPIB )
+                gpib_shutdown( );
 
-			if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-			{
-				set_buttons_for_run( 0 );
-				fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-				XFlush( fl_get_display( ) );
-			}
+            if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+            {
+                set_buttons_for_run( 0 );
+                fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+                XFlush( fl_get_display( ) );
+            }
 
-			Fsc2_Internals.state = STATE_IDLE;
-			return FAIL;
-		}
+            Fsc2_Internals.state = STATE_IDLE;
+            return FAIL;
+        }
 
-		lower_permissions( );
-	}
+        lower_permissions( );
+    }
 #endif
 
-	fsc2_serial_exp_init( SERIAL_LOG_FILE, SERIAL_LOG_LEVEL );
+    fsc2_serial_exp_init( SERIAL_LOG_FILE, SERIAL_LOG_LEVEL );
 
-	if ( Need_LAN )
-		fsc2_lan_exp_init( LAN_LOG_FILE, LAN_LOG_LEVEL );
+    if ( Need_LAN )
+        fsc2_lan_exp_init( LAN_LOG_FILE, LAN_LOG_LEVEL );
 
-	return OK;
+    return OK;
 }
 
 
@@ -299,69 +299,69 @@ static bool start_gpib_and_rulbus( void )
 
 static bool no_prog_to_run( void )
 {
-	bool ret;
+    bool ret;
 
 
-	TRY
-	{
-		EDL.do_quit = UNSET;
-		EDL.react_to_do_quit = SET;
+    TRY
+    {
+        EDL.do_quit = UNSET;
+        EDL.react_to_do_quit = SET;
 
-		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-		{
-			fl_set_object_callback( GUI.main_form->run,
-									stop_while_exp_hook, 0 );
-			fl_set_object_label( GUI.main_form->run, "Stop" );
-			XFlush( fl_get_display( ) );
-		}
+        if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        {
+            fl_set_object_callback( GUI.main_form->run,
+                                    stop_while_exp_hook, 0 );
+            fl_set_object_label( GUI.main_form->run, "Stop" );
+            XFlush( fl_get_display( ) );
+        }
 
-		Fsc2_Internals.mode = EXPERIMENT;
+        Fsc2_Internals.mode = EXPERIMENT;
 
-		experiment_time( );
-		EDL.experiment_time = 0.0;
-		vars_pop( f_dtime( NULL ) );
+        experiment_time( );
+        EDL.experiment_time = 0.0;
+        vars_pop( f_dtime( NULL ) );
 
-		run_exp_hooks( );
-		ret = OK;
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		vars_del_stack( );
-		ret = FAIL;
-	}
+        run_exp_hooks( );
+        ret = OK;
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        vars_del_stack( );
+        ret = FAIL;
+    }
 
-	EDL.do_quit = EDL.react_to_do_quit = UNSET;
+    EDL.do_quit = EDL.react_to_do_quit = UNSET;
 
-	run_end_of_exp_hooks( );
+    run_end_of_exp_hooks( );
 
 #if defined WITH_RULBUS
-	if ( Need_RULBUS )
-		 rulbus_close( );
+    if ( Need_RULBUS )
+         rulbus_close( );
 #endif
 
-	if ( Need_GPIB )
-		gpib_shutdown( );
+    if ( Need_GPIB )
+        gpib_shutdown( );
 
-	fsc2_serial_cleanup( );
+    fsc2_serial_cleanup( );
 
-	if ( Need_LAN )
-		fsc2_lan_cleanup( );
+    if ( Need_LAN )
+        fsc2_lan_cleanup( );
 
-	Fsc2_Internals.mode = PREPARATION;
+    Fsc2_Internals.mode = PREPARATION;
 
-	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-	{
-		fl_set_object_label( GUI.main_form->run, "Start" );
-		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
-		set_buttons_for_run( 0 );
-		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-		XFlush( fl_get_display( ) );
-	}
+    if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+    {
+        fl_set_object_label( GUI.main_form->run, "Start" );
+        fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+        set_buttons_for_run( 0 );
+        fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+        XFlush( fl_get_display( ) );
+    }
 
-	Fsc2_Internals.state = STATE_IDLE;
+    Fsc2_Internals.state = STATE_IDLE;
 
-	return ret;
+    return ret;
 }
 
 
@@ -374,110 +374,110 @@ static bool no_prog_to_run( void )
 
 static bool init_devs_and_graphics( void )
 {
-	Compilation_T compile_test;
+    Compilation_T compile_test;
 
 
-	/* Make a copy of the errors found while compiling the program */
+    /* Make a copy of the errors found while compiling the program */
 
-	compile_test = EDL.compilation;
-	Graphics_have_been_started = UNSET;
+    compile_test = EDL.compilation;
+    Graphics_have_been_started = UNSET;
 
-	TRY
-	{
-		EDL.do_quit = UNSET;
-		EDL.react_to_do_quit = SET;
+    TRY
+    {
+        EDL.do_quit = UNSET;
+        EDL.react_to_do_quit = SET;
 
-		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-		{
-			fl_set_object_callback( GUI.main_form->run,
-									stop_while_exp_hook, 0 );
-			fl_set_object_label( GUI.main_form->run, "Stop" );
-			XFlush( fl_get_display( ) );
-		}
+        if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        {
+            fl_set_object_callback( GUI.main_form->run,
+                                    stop_while_exp_hook, 0 );
+            fl_set_object_label( GUI.main_form->run, "Stop" );
+            XFlush( fl_get_display( ) );
+        }
 
-		Fsc2_Internals.mode = EXPERIMENT;
+        Fsc2_Internals.mode = EXPERIMENT;
 
-		experiment_time( );
-		EDL.experiment_time = 0.0;
-		vars_pop( f_dtime( NULL ) );
+        experiment_time( );
+        EDL.experiment_time = 0.0;
+        vars_pop( f_dtime( NULL ) );
 
-		run_exp_hooks( );
+        run_exp_hooks( );
 
-		EDL.react_to_do_quit = UNSET;
+        EDL.react_to_do_quit = UNSET;
 
-		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-		{
-			fl_deactivate_object( GUI.main_form->run );
-			fl_set_object_label( GUI.main_form->run, "Start" );
-			fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
-			fl_set_object_callback( GUI.main_form->run, run_file, 0 );
-			XFlush( fl_get_display( ) );
-		}
+        if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        {
+            fl_deactivate_object( GUI.main_form->run );
+            fl_set_object_label( GUI.main_form->run, "Start" );
+            fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
+            fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+            XFlush( fl_get_display( ) );
+        }
 
-		check_for_further_errors( &compile_test, &EDL.compilation );
+        check_for_further_errors( &compile_test, &EDL.compilation );
 
-		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-		{
-			start_graphics( );
-			Graphics_have_been_started = SET;
+        if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        {
+            start_graphics( );
+            Graphics_have_been_started = SET;
 
-			if ( G.dim & 1 || ! G.is_init )
-				fl_set_object_callback( GUI.run_form_1d->stop_1d,
-										run_stop_button_callback, 0 );
-			if ( G.dim & 2 )
-				fl_set_object_callback( GUI.run_form_2d->stop_2d,
-										run_stop_button_callback, 0 );
-		}
+            if ( G.dim & 1 || ! G.is_init )
+                fl_set_object_callback( GUI.run_form_1d->stop_1d,
+                                        run_stop_button_callback, 0 );
+            if ( G.dim & 2 )
+                fl_set_object_callback( GUI.run_form_2d->stop_2d,
+                                        run_stop_button_callback, 0 );
+        }
 
-		setup_comm( );
+        setup_comm( );
 
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		EDL.do_quit = EDL.react_to_do_quit = UNSET;
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        EDL.do_quit = EDL.react_to_do_quit = UNSET;
 
-		end_comm( );
+        end_comm( );
 
-		run_end_of_exp_hooks( );
-		vars_del_stack( );
+        run_end_of_exp_hooks( );
+        vars_del_stack( );
 
 #if defined WITH_RULBUS
-		if ( Need_RULBUS )
-			 rulbus_close( );
+        if ( Need_RULBUS )
+             rulbus_close( );
 #endif
 
-		if ( Need_GPIB )
-			gpib_shutdown( );
+        if ( Need_GPIB )
+            gpib_shutdown( );
 
-		fsc2_serial_cleanup( );
+        fsc2_serial_cleanup( );
 
-		if ( Need_LAN )
-			fsc2_lan_cleanup( );
+        if ( Need_LAN )
+            fsc2_lan_cleanup( );
 
-		Fsc2_Internals.mode = PREPARATION;
+        Fsc2_Internals.mode = PREPARATION;
 
-		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-		{
-			run_close_button_callback( NULL, 0 );
+        if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        {
+            run_close_button_callback( NULL, 0 );
 
-			fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-			fl_set_object_label( GUI.main_form->run, "Start" );
-			fl_set_object_callback( GUI.main_form->run, run_file, 0 );
-			fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
-			fl_activate_object( GUI.main_form->run );
-			XFlush( fl_get_display( ) );
-		}
+            fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+            fl_set_object_label( GUI.main_form->run, "Start" );
+            fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+            fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+            fl_activate_object( GUI.main_form->run );
+            XFlush( fl_get_display( ) );
+        }
 
-		return FAIL;
-	}
+        return FAIL;
+    }
 
-	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-		fl_set_object_callback( GUI.main_form->run, run_file, 0 );
+    if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        fl_set_object_callback( GUI.main_form->run, run_file, 0 );
 
-	Fsc2_Internals.child_is_quitting = QUITTING_UNSET;
+    Fsc2_Internals.child_is_quitting = QUITTING_UNSET;
 
-	return OK;
+    return OK;
 }
 
 
@@ -490,18 +490,18 @@ static bool init_devs_and_graphics( void )
 
 static void setup_signal_handlers( void )
 {
-	struct sigaction sact;
+    struct sigaction sact;
 
 
-	sact.sa_handler = quitting_handler;
-	sigemptyset( &sact.sa_mask );
-	sact.sa_flags = 0;
-	sigaction( QUITTING, &sact, &Quitting_old_act );
+    sact.sa_handler = quitting_handler;
+    sigemptyset( &sact.sa_mask );
+    sact.sa_flags = 0;
+    sigaction( QUITTING, &sact, &Quitting_old_act );
 
-	sact.sa_handler = run_sigchld_handler;
-	sigemptyset( &sact.sa_mask );
-	sact.sa_flags = 0;
-	sigaction( SIGCHLD, &sact, &Sigchld_old_act );
+    sact.sa_handler = run_sigchld_handler;
+    sigemptyset( &sact.sa_mask );
+    sact.sa_flags = 0;
+    sigaction( SIGCHLD, &sact, &Sigchld_old_act );
 }
 
 
@@ -512,9 +512,9 @@ static void setup_signal_handlers( void )
  *-----------------------------------------------------------*/
 
 static void stop_while_exp_hook( FL_OBJECT * a  UNUSED_ARG,
-								 long        b  UNUSED_ARG )
+                                 long        b  UNUSED_ARG )
 {
-	EDL.do_quit = EDL.react_to_do_quit = SET;
+    EDL.do_quit = EDL.react_to_do_quit = SET;
 }
 
 
@@ -524,70 +524,70 @@ static void stop_while_exp_hook( FL_OBJECT * a  UNUSED_ARG,
 
 static void fork_failure( int stored_errno )
 {
-	sigaction( SIGCHLD,  &Sigchld_old_act,  NULL );
-	sigaction( QUITTING, &Quitting_old_act, NULL );
+    sigaction( SIGCHLD,  &Sigchld_old_act,  NULL );
+    sigaction( QUITTING, &Quitting_old_act, NULL );
 
-	if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
-		error_while_iconified( );
+    if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
+        error_while_iconified( );
 
-	switch ( stored_errno )
-	{
-		case EAGAIN :
-			eprint( FATAL, UNSET, "Not enough system resources left to run "
-					"the experiment.\n" );
-			if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
-				exit( EXIT_FAILURE );
-			fl_show_alert( "FATAL Error", "Not enough system resources",
-						   "left to run the experiment.", 1 );
-			break;
+    switch ( stored_errno )
+    {
+        case EAGAIN :
+            eprint( FATAL, UNSET, "Not enough system resources left to run "
+                    "the experiment.\n" );
+            if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+                exit( EXIT_FAILURE );
+            fl_show_alert( "FATAL Error", "Not enough system resources",
+                           "left to run the experiment.", 1 );
+            break;
 
-		case ENOMEM :
-			eprint( FATAL, UNSET, "Not enough memory left to run the "
-					"experiment.\n" );
-			if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
-				exit( EXIT_FAILURE );
-			fl_show_alert( "FATAL Error", "Not enough memory left",
-						   "to run the experiment.", 1 );
-			break;
+        case ENOMEM :
+            eprint( FATAL, UNSET, "Not enough memory left to run the "
+                    "experiment.\n" );
+            if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+                exit( EXIT_FAILURE );
+            fl_show_alert( "FATAL Error", "Not enough memory left",
+                           "to run the experiment.", 1 );
+            break;
 
-		default :
-			eprint( FATAL, UNSET, "System error \"%s\" when trying to "
-					"start experiment.\n", strerror( stored_errno ) );
-			if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
-				exit( EXIT_FAILURE );
-			fl_show_alert( "FATAL Error", "System error on start of "
-						   "experiment.", NULL, 1 );
-			break;
-	}
+        default :
+            eprint( FATAL, UNSET, "System error \"%s\" when trying to "
+                    "start experiment.\n", strerror( stored_errno ) );
+            if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+                exit( EXIT_FAILURE );
+            fl_show_alert( "FATAL Error", "System error on start of "
+                           "experiment.", NULL, 1 );
+            break;
+    }
 
-	Fsc2_Internals.child_pid = 0;
-	EDL.do_quit = EDL.react_to_do_quit = UNSET;
+    Fsc2_Internals.child_pid = 0;
+    EDL.do_quit = EDL.react_to_do_quit = UNSET;
 
-	end_comm( );
+    end_comm( );
 
-	run_end_of_exp_hooks( );
+    run_end_of_exp_hooks( );
 
 #if defined WITH_RULBUS
-	if ( Need_RULBUS )
-		 rulbus_close( );
+    if ( Need_RULBUS )
+         rulbus_close( );
 #endif
 
-	if ( Need_GPIB )
-		gpib_shutdown( );
+    if ( Need_GPIB )
+        gpib_shutdown( );
 
-	fsc2_serial_cleanup( );
+    fsc2_serial_cleanup( );
 
-	if ( Need_LAN )
-		fsc2_lan_cleanup( );
+    if ( Need_LAN )
+        fsc2_lan_cleanup( );
 
-	Fsc2_Internals.mode = PREPARATION;
+    Fsc2_Internals.mode = PREPARATION;
 
-	if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-	{
-		run_close_button_callback( NULL, 0 );
-		fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
-		fl_activate_object( GUI.main_form->run );
-	}
+    if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+    {
+        run_close_button_callback( NULL, 0 );
+        fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+        fl_activate_object( GUI.main_form->run );
+    }
 }
 
 
@@ -598,49 +598,49 @@ static void fork_failure( int stored_errno )
  *-------------------------------------------------------------------*/
 
 static void check_for_further_errors( Compilation_T * c_old,
-									  Compilation_T * c_all )
+                                      Compilation_T * c_all )
 {
-	Compilation_T diff;
-	char str1[ 128 ],
-		 str2[ 128 ];
-	const char *mess = "During start of the experiment there where";
-	int i;
+    Compilation_T diff;
+    char str1[ 128 ],
+         str2[ 128 ];
+    const char *mess = "During start of the experiment there where";
+    int i;
 
 
-	for ( i = FATAL; i < NO_ERROR; i++ )
-		diff.error[ i ] = c_all->error[ i ] - c_old->error[ i ];
+    for ( i = FATAL; i < NO_ERROR; i++ )
+        diff.error[ i ] = c_all->error[ i ] - c_old->error[ i ];
 
-	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN &&
-		 ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
-		THROW( EXCEPTION );
+    if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN &&
+         ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
+        THROW( EXCEPTION );
 
-	if ( ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
-		 ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
-	{
-		if ( diff.error[ SEVERE ] != 0 )
-		{
-			if ( diff.error[ WARN ] != 0 )
-			{
-				sprintf( str1, "%s %d severe", mess, diff.error[ SEVERE ] );
-				sprintf( str2, "and normal %d warnings.", diff.error[ WARN ] );
-			}
-			else
-			{
-				sprintf( str1, "%s %d severe warnings.",
-						 mess, diff.error[ SEVERE ] );
-				str2[ 0 ] = '\0';
-			}
-		}
-		else
-		{
-			sprintf( str1, "%s %d warnings.", mess, diff.error[ WARN ] );
-			str2[ 0 ] = '\0';
-		}
+    if ( ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
+         ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
+    {
+        if ( diff.error[ SEVERE ] != 0 )
+        {
+            if ( diff.error[ WARN ] != 0 )
+            {
+                sprintf( str1, "%s %d severe", mess, diff.error[ SEVERE ] );
+                sprintf( str2, "and normal %d warnings.", diff.error[ WARN ] );
+            }
+            else
+            {
+                sprintf( str1, "%s %d severe warnings.",
+                         mess, diff.error[ SEVERE ] );
+                str2[ 0 ] = '\0';
+            }
+        }
+        else
+        {
+            sprintf( str1, "%s %d warnings.", mess, diff.error[ WARN ] );
+            str2[ 0 ] = '\0';
+        }
 
-		if ( 1 == fl_show_choice( str1, str2, "Continue running the program?",
-								  2, "No", "Yes", "", 1 ) )
-			THROW( EXCEPTION );
-	}
+        if ( 1 == fl_show_choice( str1, str2, "Continue running the program?",
+                                  2, "No", "Yes", "", 1 ) )
+            THROW( EXCEPTION );
+    }
 }
 
 
@@ -652,12 +652,12 @@ static void check_for_further_errors( Compilation_T * c_old,
 
 static void quitting_handler( int signo  UNUSED_ARG )
 {
-	int errno_saved;
+    int errno_saved;
 
 
-	errno_saved = errno;
-	Fsc2_Internals.child_is_quitting = QUITTING_RAISED;
-	errno = errno_saved;
+    errno_saved = errno;
+    Fsc2_Internals.child_is_quitting = QUITTING_RAISED;
+    errno = errno_saved;
 }
 
 
@@ -668,45 +668,45 @@ static void quitting_handler( int signo  UNUSED_ARG )
  *-------------------------------------------------------------------*/
 
 void run_stop_button_callback( FL_OBJECT * a,
-							   long        b  UNUSED_ARG )
+                               long        b  UNUSED_ARG )
 {
-	int bn;
+    int bn;
 
 
-	/* Activating the Stop button when the child is already dead should
-	   not be possible, but to make real sure (in case of some real
-	   subtle timing problems) we better check */
+    /* Activating the Stop button when the child is already dead should
+       not be possible, but to make real sure (in case of some real
+       subtle timing problems) we better check */
 
-	if ( Fsc2_Internals.child_pid == 0 ||
-		 kill( Fsc2_Internals.child_pid, 0 ) == -1 )
-	{
-		fl_set_object_callback( a, NULL, 0 );
-		return;
-	}
+    if ( Fsc2_Internals.child_pid == 0 ||
+         kill( Fsc2_Internals.child_pid, 0 ) == -1 )
+    {
+        fl_set_object_callback( a, NULL, 0 );
+        return;
+    }
 
-	/* Only send DO_QUIT signal if the mouse button has been used
-	   the user told us he/she would use... */
+    /* Only send DO_QUIT signal if the mouse button has been used
+       the user told us he/she would use... */
 
-	if ( GUI.stop_button_mask != 0 )
-	{
-		bn = fl_get_button_numb( a );
-		if ( bn != FL_SHORTCUT + 'S' && bn != GUI.stop_button_mask )
-			return;
-	}
+    if ( GUI.stop_button_mask != 0 )
+    {
+        bn = fl_get_button_numb( a );
+        if ( bn != FL_SHORTCUT + 'S' && bn != GUI.stop_button_mask )
+            return;
+    }
 
-	kill( Fsc2_Internals.child_pid, DO_QUIT );
+    kill( Fsc2_Internals.child_pid, DO_QUIT );
 
-	/* Disable the stop button for the time until the child has died */
+    /* Disable the stop button for the time until the child has died */
 
-	fl_set_object_callback( a, NULL, 0 );
+    fl_set_object_callback( a, NULL, 0 );
 
-	/* If we're currently waiting for an event from the toolbox or for the
-	   timer to expire the child won't react to the DO_QUIT signal because
-	   it's still trying to read a reply from the parent. So we've got to
-	   give it this reply to let it die. */
+    /* If we're currently waiting for an event from the toolbox or for the
+       timer to expire the child won't react to the DO_QUIT signal because
+       it's still trying to read a reply from the parent. So we've got to
+       give it this reply to let it die. */
 
-	if ( Fsc2_Internals.tb_wait != TB_WAIT_NOT_RUNNING )
-		tb_wait_handler( -1 );
+    if ( Fsc2_Internals.tb_wait != TB_WAIT_NOT_RUNNING )
+        tb_wait_handler( -1 );
 }
 
 
@@ -721,52 +721,52 @@ void run_stop_button_callback( FL_OBJECT * a,
 
 static void run_sigchld_handler( int signo )
 {
-	int return_status;
-	int pid;
-	int errno_saved;
+    int return_status;
+    int pid;
+    int errno_saved;
 
 
-	if ( signo != SIGCHLD )
-		return;
+    if ( signo != SIGCHLD )
+        return;
 
-	errno_saved = errno;
+    errno_saved = errno;
 
-	while ( ( pid = waitpid( -1, &return_status, WNOHANG ) ) > 0 )
-	{
-		if ( pid == Fsc2_Internals.http_pid )
-		{
-			Fsc2_Internals.http_pid = -1;
-			Fsc2_Internals.http_server_died = SET;
-			continue;
-		}
+    while ( ( pid = waitpid( -1, &return_status, WNOHANG ) ) > 0 )
+    {
+        if ( pid == Fsc2_Internals.http_pid )
+        {
+            Fsc2_Internals.http_pid = -1;
+            Fsc2_Internals.http_server_died = SET;
+            continue;
+        }
 
-		if ( pid != Fsc2_Internals.child_pid )
-			continue;
+        if ( pid != Fsc2_Internals.child_pid )
+            continue;
 
 #if ! defined NDEBUG
-		if ( WIFSIGNALED( return_status ) )
-			fprintf( stderr, "Child process %d died due to signal %d\n",
-					 pid, WTERMSIG( return_status ) );
+        if ( WIFSIGNALED( return_status ) )
+            fprintf( stderr, "Child process %d died due to signal %d\n",
+                     pid, WTERMSIG( return_status ) );
 #endif
 
-		Fsc2_Internals.child_pid = 0;                    /* child is dead... */
-		sigaction( SIGCHLD, &Sigchld_old_act, NULL );
+        Fsc2_Internals.child_pid = 0;                    /* child is dead... */
+        sigaction( SIGCHLD, &Sigchld_old_act, NULL );
 
-		/* Disable use of the 'Stop' button */
+        /* Disable use of the 'Stop' button */
 
-		EDL.do_quit = EDL.react_to_do_quit = UNSET;
+        EDL.do_quit = EDL.react_to_do_quit = UNSET;
 
-		if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-		{
-			GUI.main_form->sigchld->u_ldata =
-										 ( long ) ! WIFEXITED( return_status );
-			fl_trigger_object( GUI.main_form->sigchld );
-		}
-		else
-			Fsc2_Internals.check_return = ! WIFEXITED( return_status );
-	}
+        if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        {
+            GUI.main_form->sigchld->u_ldata =
+                                         ( long ) ! WIFEXITED( return_status );
+            fl_trigger_object( GUI.main_form->sigchld );
+        }
+        else
+            Fsc2_Internals.check_return = ! WIFEXITED( return_status );
+    }
 
-	errno = errno_saved;
+    errno = errno_saved;
 }
 
 
@@ -784,149 +784,149 @@ static void run_sigchld_handler( int signo )
  *----------------------------------------------------------------*/
 
 void run_sigchld_callback( FL_OBJECT * a,
-						   long        b )
+                           long        b )
 {
-	int hours, mins, secs;
-	const char *mess;
-	int state = EXIT_SUCCESS;
+    int hours, mins, secs;
+    const char *mess;
+    int state = EXIT_SUCCESS;
 
 
-	if ( Fsc2_Internals.child_is_quitting == QUITTING_UNSET )
-									/* missing notification by the child ? */
-	{
-		if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) && 
-			 ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
-			 ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-		{
-			Fsc2_Internals.state = STATE_WAITING;
-			fl_show_alert( "Fatal Error", "Experiment stopped unexpectedly.",
-						   NULL, 1 );
-		}
+    if ( Fsc2_Internals.child_is_quitting == QUITTING_UNSET )
+                                    /* missing notification by the child ? */
+    {
+        if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) && 
+             ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
+             ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        {
+            Fsc2_Internals.state = STATE_WAITING;
+            fl_show_alert( "Fatal Error", "Experiment stopped unexpectedly.",
+                           NULL, 1 );
+        }
 
-		if ( Fsc2_Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
-			fprintf( stderr, "Fatal Error: Experiment stopped unexpectedly: "
-					 "'%s'.\n", EDL.in_file );
+        if ( Fsc2_Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
+            fprintf( stderr, "Fatal Error: Experiment stopped unexpectedly: "
+                     "'%s'.\n", EDL.in_file );
 
-		mess = "Experiment stopped unexpectedly after ";
-		state = EXIT_FAILURE;
-	}
-	else if ( ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN && b ) ||
-			  ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
-				a->u_ldata ) )
-	{
-		if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
-			 ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
-			 ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-		{
-			Fsc2_Internals.state = STATE_WAITING;
-			fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
-						   NULL, 1 );
-		}
+        mess = "Experiment stopped unexpectedly after ";
+        state = EXIT_FAILURE;
+    }
+    else if ( ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN && b ) ||
+              ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
+                a->u_ldata ) )
+    {
+        if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
+             ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
+             ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        {
+            Fsc2_Internals.state = STATE_WAITING;
+            fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
+                           NULL, 1 );
+        }
 
-		if ( Fsc2_Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
-			fprintf( stderr, "Fatal Error: Experiment had to be stopped: "
-					 "'%s'.\n", EDL.in_file );
+        if ( Fsc2_Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
+            fprintf( stderr, "Fatal Error: Experiment had to be stopped: "
+                     "'%s'.\n", EDL.in_file );
 
-		mess = "Experiment had to be stopped after ";
-		state = EXIT_FAILURE;
-	}
-	else                              /* normal death of child */
-		mess = "Experiment finished after ";
+        mess = "Experiment had to be stopped after ";
+        state = EXIT_FAILURE;
+    }
+    else                              /* normal death of child */
+        mess = "Experiment finished after ";
 
-	Fsc2_Internals.state = STATE_FINISHED;
+    Fsc2_Internals.state = STATE_FINISHED;
 
-	/* Get and display all remaining data the child sent before it died,
-	   then close the communication channels */
+    /* Get and display all remaining data the child sent before it died,
+       then close the communication channels */
 
-	end_comm( );
+    end_comm( );
 
-	/* Reset the handler for the QUITTING signal */
+    /* Reset the handler for the QUITTING signal */
 
-	sigaction( QUITTING, &Quitting_old_act, NULL );
+    sigaction( QUITTING, &Quitting_old_act, NULL );
 
-	/* Remove the tool box */
+    /* Remove the tool box */
 
-	tools_clear( );
+    tools_clear( );
 
-	/* Reset all the devices and finally the GPIB bus, RULBUS, LAN and serial
-	   port(s) */
+    /* Reset all the devices and finally the GPIB bus, RULBUS, LAN and serial
+       port(s) */
 
-	run_end_of_exp_hooks( );
+    run_end_of_exp_hooks( );
 
 #if defined WITH_RULBUS
-	if ( Need_RULBUS )
-		 rulbus_close( );
+    if ( Need_RULBUS )
+         rulbus_close( );
 #endif
 
-	if ( Need_GPIB )
-		gpib_shutdown( );
+    if ( Need_GPIB )
+        gpib_shutdown( );
 
-	fsc2_serial_cleanup( );
+    fsc2_serial_cleanup( );
 
-	if ( Need_LAN )
-		fsc2_lan_cleanup( );
+    if ( Need_LAN )
+        fsc2_lan_cleanup( );
 
-	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
-		return;
+    if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+        return;
 
-	/* Print out for how long the experiment had been running */
+    /* Print out for how long the experiment had been running */
 
-	secs  = irnd( experiment_time( ) );
-	hours = secs / 3600;
-	mins  = ( secs / 60 ) % 60;
-	secs %= 60;
+    secs  = irnd( experiment_time( ) );
+    hours = secs / 3600;
+    mins  = ( secs / 60 ) % 60;
+    secs %= 60;
 
-	if ( hours > 0 )
-		eprint( NO_ERROR, UNSET, "%s %d h, %d m and %d s.\n",
-				mess, hours, mins, secs );
-	else
-	{
-		if ( mins > 0 )
-			eprint( NO_ERROR, UNSET, "%s %d m and %d s.\n", mess, mins, secs );
-		else
-			eprint( NO_ERROR, UNSET, "%s %d s.\n", mess, secs );
-	}
+    if ( hours > 0 )
+        eprint( NO_ERROR, UNSET, "%s %d h, %d m and %d s.\n",
+                mess, hours, mins, secs );
+    else
+    {
+        if ( mins > 0 )
+            eprint( NO_ERROR, UNSET, "%s %d m and %d s.\n", mess, mins, secs );
+        else
+            eprint( NO_ERROR, UNSET, "%s %d s.\n", mess, secs );
+    }
 
-	/* Re-enable the stop button (which was disabled when the DO_QUIT
-	   signal was send to the child) by associating it with a new
-	   handler that's responsible for closing the window. Also change the
-	   buttons label to 'Close'. */
+    /* Re-enable the stop button (which was disabled when the DO_QUIT
+       signal was send to the child) by associating it with a new
+       handler that's responsible for closing the window. Also change the
+       buttons label to 'Close'. */
 
-	if ( G.dim & 1 || ! G.is_init )
-	{
-		fl_freeze_form( GUI.run_form_1d->run_1d );
-		fl_set_object_label( GUI.run_form_1d->stop_1d,
-							 G.dim == 1 ? "Close" : "Close all" );
-		fl_set_button_shortcut( GUI.run_form_1d->stop_1d, "C", 1 );
-		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
-			fl_set_object_helper( GUI.run_form_1d->stop_1d,
-								  "Removes all display windows" );
-		fl_set_object_callback( GUI.run_form_1d->stop_1d,
-								run_close_button_callback, 0 );
-		fl_unfreeze_form( GUI.run_form_1d->run_1d );
-	}
+    if ( G.dim & 1 || ! G.is_init )
+    {
+        fl_freeze_form( GUI.run_form_1d->run_1d );
+        fl_set_object_label( GUI.run_form_1d->stop_1d,
+                             G.dim == 1 ? "Close" : "Close all" );
+        fl_set_button_shortcut( GUI.run_form_1d->stop_1d, "C", 1 );
+        if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
+            fl_set_object_helper( GUI.run_form_1d->stop_1d,
+                                  "Removes all display windows" );
+        fl_set_object_callback( GUI.run_form_1d->stop_1d,
+                                run_close_button_callback, 0 );
+        fl_unfreeze_form( GUI.run_form_1d->run_1d );
+    }
 
-	if ( G.dim & 2 )
-	{
-		fl_freeze_form( GUI.run_form_2d->run_2d );
-		fl_set_object_label( GUI.run_form_2d->stop_2d,
-							 G.dim == 2 ? "Close" : "Close all" );
-		fl_set_button_shortcut( GUI.run_form_2d->stop_2d, "C", 1 );
-		if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
-			fl_set_object_helper( GUI.run_form_2d->stop_2d,
-								  "Removes all display windows" );
-		fl_set_object_callback( GUI.run_form_2d->stop_2d,
-								run_close_button_callback, 0 );
-		fl_unfreeze_form( GUI.run_form_2d->run_2d );
-	}
+    if ( G.dim & 2 )
+    {
+        fl_freeze_form( GUI.run_form_2d->run_2d );
+        fl_set_object_label( GUI.run_form_2d->stop_2d,
+                             G.dim == 2 ? "Close" : "Close all" );
+        fl_set_button_shortcut( GUI.run_form_2d->stop_2d, "C", 1 );
+        if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
+            fl_set_object_helper( GUI.run_form_2d->stop_2d,
+                                  "Removes all display windows" );
+        fl_set_object_callback( GUI.run_form_2d->stop_2d,
+                                run_close_button_callback, 0 );
+        fl_unfreeze_form( GUI.run_form_2d->run_2d );
+    }
 
-	if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
-		 Fsc2_Internals.cmdline_flags & BATCH_MODE )
-	{
-		run_close_button_callback( NULL, 0 );
-		Fsc2_Internals.check_return = state;
-		fl_trigger_object( GUI.main_form->quit );
-	}
+    if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
+         Fsc2_Internals.cmdline_flags & BATCH_MODE )
+    {
+        run_close_button_callback( NULL, 0 );
+        Fsc2_Internals.check_return = state;
+        fl_trigger_object( GUI.main_form->quit );
+    }
 }
 
 
@@ -937,30 +937,30 @@ void run_sigchld_callback( FL_OBJECT * a,
 
 void run_close_button_callback( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
 {
-	if ( Graphics_have_been_started )
-	{
-		stop_graphics( );
-		Graphics_have_been_started = UNSET;
-	}
+    if ( Graphics_have_been_started )
+    {
+        stop_graphics( );
+        Graphics_have_been_started = UNSET;
+    }
 
-	set_buttons_for_run( 0 );
-	Fsc2_Internals.state = STATE_IDLE;
+    set_buttons_for_run( 0 );
+    Fsc2_Internals.state = STATE_IDLE;
 
-	if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
-		switch( is_iconic( fl_get_display( ), GUI.main_form->fsc2->window ) )
-		{
-			case 1 :
-				fl_trigger_object( GUI.main_form->quit );
-				break;
+    if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
+        switch( is_iconic( fl_get_display( ), GUI.main_form->fsc2->window ) )
+        {
+            case 1 :
+                fl_trigger_object( GUI.main_form->quit );
+                break;
 
-			case 0 :
-				Fsc2_Internals.cmdline_flags &= ~ ICONIFIED_RUN;
-				break;
+            case 0 :
+                Fsc2_Internals.cmdline_flags &= ~ ICONIFIED_RUN;
+                break;
 
-			case -1 :
-				error_while_iconified( );
-				break;
-		}
+            case -1 :
+                error_while_iconified( );
+                break;
+        }
 }
 
 
@@ -973,50 +973,50 @@ void run_close_button_callback( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
 
 static void set_buttons_for_run( int run_state )
 {
-	if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
-		return;
+    if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+        return;
 
-	fl_freeze_form( GUI.main_form->fsc2 );
+    fl_freeze_form( GUI.main_form->fsc2 );
 
-	if ( run_state == 1 )
-	{
-		fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
+    if ( run_state == 1 )
+    {
+        fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 
-		fl_deactivate_object( GUI.main_form->Load );
-		fl_set_object_lcol( GUI.main_form->Load, FL_INACTIVE_COL );
+        fl_deactivate_object( GUI.main_form->Load );
+        fl_set_object_lcol( GUI.main_form->Load, FL_INACTIVE_COL );
 
-		fl_deactivate_object( GUI.main_form->reload );
-		fl_set_object_lcol( GUI.main_form->reload, FL_INACTIVE_COL );
+        fl_deactivate_object( GUI.main_form->reload );
+        fl_set_object_lcol( GUI.main_form->reload, FL_INACTIVE_COL );
 
-		fl_deactivate_object( GUI.main_form->quit );
-		fl_set_object_lcol( GUI.main_form->quit, FL_INACTIVE_COL );
+        fl_deactivate_object( GUI.main_form->quit );
+        fl_set_object_lcol( GUI.main_form->quit, FL_INACTIVE_COL );
 
-		fl_deactivate_object( GUI.main_form->bug_report );
-		fl_set_object_lcol( GUI.main_form->bug_report, FL_INACTIVE_COL );
+        fl_deactivate_object( GUI.main_form->bug_report );
+        fl_set_object_lcol( GUI.main_form->bug_report, FL_INACTIVE_COL );
 
-		XFlush( fl_get_display( ) );
-	}
-	else
-	{
-		fl_activate_object( GUI.main_form->Load );
-		fl_set_object_lcol( GUI.main_form->Load, FL_BLACK );
+        XFlush( fl_get_display( ) );
+    }
+    else
+    {
+        fl_activate_object( GUI.main_form->Load );
+        fl_set_object_lcol( GUI.main_form->Load, FL_BLACK );
 
-		fl_activate_object( GUI.main_form->reload );
-		fl_set_object_lcol( GUI.main_form->reload, FL_BLACK );
+        fl_activate_object( GUI.main_form->reload );
+        fl_set_object_lcol( GUI.main_form->reload, FL_BLACK );
 
-		fl_activate_object( GUI.main_form->run );
-		fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
+        fl_activate_object( GUI.main_form->run );
+        fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
 
-		fl_activate_object( GUI.main_form->quit );
-		fl_set_object_lcol( GUI.main_form->quit, FL_BLACK );
+        fl_activate_object( GUI.main_form->quit );
+        fl_set_object_lcol( GUI.main_form->quit, FL_BLACK );
 
-		fl_activate_object( GUI.main_form->bug_report );
-		fl_set_object_lcol( GUI.main_form->bug_report, FL_BLACK );
+        fl_activate_object( GUI.main_form->bug_report );
+        fl_set_object_lcol( GUI.main_form->bug_report, FL_BLACK );
 
-		notify_conn( UNBUSY_SIGNAL );
-	}
+        notify_conn( UNBUSY_SIGNAL );
+    }
 
-	fl_unfreeze_form( GUI.main_form->fsc2 );
+    fl_unfreeze_form( GUI.main_form->fsc2 );
 }
 
 
@@ -1043,68 +1043,68 @@ static void set_buttons_for_run( int run_state )
 static void run_child( void )
 {
 #ifndef NDEBUG
-	const char *fcd;
+    const char *fcd;
 #endif
 
 
-	Fsc2_Internals.I_am = CHILD;
+    Fsc2_Internals.I_am = CHILD;
 
     /* Set up pipes for communication with parent process */
 
-	close( Comm.pd[ WRITE ] );
-	close( Comm.pd[ 2 ] );
-	Comm.pd[ WRITE ] = Comm.pd[ 3 ];
+    close( Comm.pd[ WRITE ] );
+    close( Comm.pd[ 2 ] );
+    Comm.pd[ WRITE ] = Comm.pd[ 3 ];
 
-	/* Set up pointers, global variables and signal handlers */
+    /* Set up pointers, global variables and signal handlers */
 
-	Child_return_status = OK;
-	EDL.cur_prg_token = EDL.prg_token;
-	EDL.do_quit = UNSET;
-	setup_child_signals( );
+    Child_return_status = OK;
+    EDL.cur_prg_token = EDL.prg_token;
+    EDL.do_quit = UNSET;
+    setup_child_signals( );
 
 #ifndef NDEBUG
-	/* Setting the environment variable FSC2_CHILD_DEBUG to a non-empty
-	   string will induce the child to sleep for about 10 hours or until it
-	   receives a signal, e.g. from the debugger attaching to it. In the case
-	   that this environment variable isn't set make the process ignore
-	   SIGTRAP signals, that could lead to a premature termination of the
-	   process if the parent process is being debugged and a breakpoint has
-	   been set in a part of code that is shared between parent and child. */
+    /* Setting the environment variable FSC2_CHILD_DEBUG to a non-empty
+       string will induce the child to sleep for about 10 hours or until it
+       receives a signal, e.g. from the debugger attaching to it. In the case
+       that this environment variable isn't set make the process ignore
+       SIGTRAP signals, that could lead to a premature termination of the
+       process if the parent process is being debugged and a breakpoint has
+       been set in a part of code that is shared between parent and child. */
 
-	if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL && *fcd != '\0' )
-	{
-		fprintf( stderr, "Child process pid = %d\n", getpid( ) );
-		sleep( 36000 );
-	}
-	else
-	{
-		struct sigaction sact;
+    if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL && *fcd != '\0' )
+    {
+        fprintf( stderr, "Child process pid = %d\n", getpid( ) );
+        sleep( 36000 );
+    }
+    else
+    {
+        struct sigaction sact;
 
-		sact.sa_handler = child_sig_handler;
-		sigemptyset( &sact.sa_mask );
-		sact.sa_flags = 0;
-		sigaction( SIGTRAP, &sact, NULL );
-	}
+        sact.sa_handler = child_sig_handler;
+        sigemptyset( &sact.sa_mask );
+        sact.sa_flags = 0;
+        sigaction( SIGTRAP, &sact, NULL );
+    }
 #endif
 
-	/* Initialization is done and the child can start doing its real work */
+    /* Initialization is done and the child can start doing its real work */
 
-	TRY
-	{
-		do_measurement( );               /* run the experiment */
-		Child_return_status = OK;
-		TRY_SUCCESS;
-	}
-	OTHERWISE                            /* catch all exceptions */
-		Child_return_status = FAIL;
+    TRY
+    {
+        do_measurement( );               /* run the experiment */
+        Child_return_status = OK;
+        TRY_SUCCESS;
+    }
+    OTHERWISE                            /* catch all exceptions */
+        Child_return_status = FAIL;
 
-	run_child_exit_hooks( );
+    run_child_exit_hooks( );
 
-	close_all_files( );
-	close( Comm.pd[ READ ] );            /* close read end of pipe */
-	close( Comm.pd[ WRITE ] );           /* close also write end of pipe */
+    close_all_files( );
+    close( Comm.pd[ READ ] );            /* close read end of pipe */
+    close( Comm.pd[ WRITE ] );           /* close also write end of pipe */
 
-	wait_for_confirmation( );            /* wait for license to die... */
+    wait_for_confirmation( );            /* wait for license to die... */
 }
 
 
@@ -1119,34 +1119,34 @@ static void run_child( void )
 
 static void setup_child_signals( void )
 {
-	struct sigaction sact;
-	int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
-						SIGSEGV, SIGPIPE, SIGTERM, SIGUSR1, SIGCHLD, SIGCONT,
-						SIGTTIN, SIGTTOU, SIGBUS, SIGVTALRM };
-	size_t i;
+    struct sigaction sact;
+    int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
+                        SIGSEGV, SIGPIPE, SIGTERM, SIGUSR1, SIGCHLD, SIGCONT,
+                        SIGTTIN, SIGTTOU, SIGBUS, SIGVTALRM };
+    size_t i;
 
 
-	for ( i = 0; i < NUM_ELEMS( sig_list ); i++ )
-	{
-		sact.sa_handler = child_sig_handler;
-		sigemptyset( &sact.sa_mask );
-		sact.sa_flags = 0;
-		if ( sigaction( sig_list[ i ], &sact, NULL ) < 0 )
-			_exit( EXIT_FAILURE );
-	}
+    for ( i = 0; i < NUM_ELEMS( sig_list ); i++ )
+    {
+        sact.sa_handler = child_sig_handler;
+        sigemptyset( &sact.sa_mask );
+        sact.sa_flags = 0;
+        if ( sigaction( sig_list[ i ], &sact, NULL ) < 0 )
+            _exit( EXIT_FAILURE );
+    }
 
-	sact.sa_handler = child_sig_handler;
-	sigemptyset( &sact.sa_mask );
-	sigaddset( &sact.sa_mask, SIGALRM );
-	sact.sa_flags = 0;
-	if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )    /* aka SIGUSR2 */
-		_exit( EXIT_FAILURE );
+    sact.sa_handler = child_sig_handler;
+    sigemptyset( &sact.sa_mask );
+    sigaddset( &sact.sa_mask, SIGALRM );
+    sact.sa_flags = 0;
+    if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )    /* aka SIGUSR2 */
+        _exit( EXIT_FAILURE );
 
-	sact.sa_handler = child_sig_handler;
-	sigemptyset( &sact.sa_mask );
-	sact.sa_flags = 0;
-	if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
-		_exit( EXIT_FAILURE );
+    sact.sa_handler = child_sig_handler;
+    sigemptyset( &sact.sa_mask );
+    sact.sa_flags = 0;
+    if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
+        _exit( EXIT_FAILURE );
 }
 
 
@@ -1164,75 +1164,75 @@ static void setup_child_signals( void )
  * guaranteed that also this signal will end the pause() - it
  * works even when the handler, while handling a SIGALRM signal,
  * is interrupted by a DO_QUIT signal. In all other cases (i.e.
- * when we're not waiting in the pause() in	f_wait()) nothing
+ * when we're not waiting in the pause() in f_wait()) nothing
  * unexpected happens.
  *----------------------------------------------------------------*/
 
 static void child_sig_handler( int signo )
 {
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-	int *EBP;           /* assumes sizeof( int ) equals size of pointers */
+    int *EBP;           /* assumes sizeof( int ) equals size of pointers */
 #endif
 
 
-	switch ( signo )
-	{
-		case DO_QUIT :                             /* aka SIGUSR2 */
-			if ( ! EDL.react_to_do_quit )
-				return;
-			EDL.do_quit = SET;
-			/* fall through ! */
+    switch ( signo )
+    {
+        case DO_QUIT :                             /* aka SIGUSR2 */
+            if ( ! EDL.react_to_do_quit )
+                return;
+            EDL.do_quit = SET;
+            /* fall through ! */
 
-		case SIGALRM :
-			if ( Can_Jmp_Alrm )
-			{
-				Can_Jmp_Alrm = 0;
-				siglongjmp( Alrm_Env, 1 );
-			}
-			return;
+        case SIGALRM :
+            if ( Can_Jmp_Alrm )
+            {
+                Can_Jmp_Alrm = 0;
+                siglongjmp( Alrm_Env, 1 );
+            }
+            return;
 
-		/* Ignored signals : */
+        /* Ignored signals : */
 
-		case SIGHUP :  case SIGINT :    case SIGUSR1 :
-		case SIGCHLD : case SIGCONT :   case SIGTTIN :
-		case SIGTTOU : case SIGVTALRM : case SIGTRAP :
-			return;
+        case SIGHUP :  case SIGINT :    case SIGUSR1 :
+        case SIGCHLD : case SIGCONT :   case SIGTTIN :
+        case SIGTTOU : case SIGVTALRM : case SIGTRAP :
+            return;
 
-		case SIGPIPE:
-			if ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) )
-				return;
-	}
+        case SIGPIPE:
+            if ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) )
+                return;
+    }
 
-	/* All remaining signals are deadly... */
+    /* All remaining signals are deadly... */
 
-	close_all_files( );
+    close_all_files( );
 
-	if ( signo != SIGTERM && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
-	{
+    if ( signo != SIGTERM && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
+    {
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-		if ( Fsc2_Internals.is_linux_i386 )
-		{
-			asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-			DumpStack( ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET ) );
-		}
+        if ( Fsc2_Internals.is_linux_i386 )
+        {
+            asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+            DumpStack( ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET ) );
+        }
 #endif
-		death_mail( signo );
-	}
+        death_mail( signo );
+    }
 
-	/* Test if parent still exists - if not (i.e. the parent died without
-	   sending a SIGTERM signal) destroy the semaphore and shared memory (as
-	   far as the child knows about it) and also kill the child for
-	   connections (if it exists). */
+    /* Test if parent still exists - if not (i.e. the parent died without
+       sending a SIGTERM signal) destroy the semaphore and shared memory (as
+       far as the child knows about it) and also kill the child for
+       connections (if it exists). */
 
-	if ( getppid( ) == 1 )
-	{
-		if ( Fsc2_Internals.conn_pid > 0 )
-			kill( Fsc2_Internals.conn_pid, SIGTERM );
-		delete_all_shm( );
-		sema_destroy( Comm.mq_semaphore );
-	}
+    if ( getppid( ) == 1 )
+    {
+        if ( Fsc2_Internals.conn_pid > 0 )
+            kill( Fsc2_Internals.conn_pid, SIGTERM );
+        delete_all_shm( );
+        sema_destroy( Comm.mq_semaphore );
+    }
 
-	_exit( EXIT_FAILURE );
+    _exit( EXIT_FAILURE );
 }
 
 
@@ -1247,32 +1247,32 @@ static void child_sig_handler( int signo )
 
 static void wait_for_confirmation( void )
 {
-	struct sigaction sact;
+    struct sigaction sact;
 
 
-	sact.sa_handler = child_confirmation_handler;
-	sigemptyset( &sact.sa_mask );
-	sact.sa_flags = 0;
-	if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )    /* aka SIGUSR2 */
-		_exit( EXIT_FAILURE );
+    sact.sa_handler = child_confirmation_handler;
+    sigemptyset( &sact.sa_mask );
+    sact.sa_flags = 0;
+    if ( sigaction( DO_QUIT, &sact, NULL ) < 0 )    /* aka SIGUSR2 */
+        _exit( EXIT_FAILURE );
 
-	sact.sa_handler = child_confirmation_handler;
-	sigemptyset( &sact.sa_mask );
-	sact.sa_flags = 0;
-	if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
-		_exit( EXIT_FAILURE );
+    sact.sa_handler = child_confirmation_handler;
+    sigemptyset( &sact.sa_mask );
+    sact.sa_flags = 0;
+    if ( sigaction( SIGALRM, &sact, NULL ) < 0 )
+        _exit( EXIT_FAILURE );
 
-	/* Tell parent that we're done and just wait for its DO_QUIT signal - if
-	   we can't send the signal to the parent stop the child. */
+    /* Tell parent that we're done and just wait for its DO_QUIT signal - if
+       we can't send the signal to the parent stop the child. */
 
     if ( getppid( ) == 1 || kill( getppid( ), QUITTING ) == -1 )
-		_exit( Child_return_status );           /* commit controlled suicide */
+        _exit( Child_return_status );           /* commit controlled suicide */
 
-	/* The following infinite loop looks worse than it is, the child really
-	   exits in the signal handler for DO_QUIT. */
+    /* The following infinite loop looks worse than it is, the child really
+       exits in the signal handler for DO_QUIT. */
 
-	while ( 1 )
-		pause( );
+    while ( 1 )
+        pause( );
 }
 
 
@@ -1282,8 +1282,8 @@ static void wait_for_confirmation( void )
 
 static void child_confirmation_handler( int signo )
 {
-	if ( signo == DO_QUIT )
-		_exit( Child_return_status );                /* ...and that's it ! */
+    if ( signo == DO_QUIT )
+        _exit( Child_return_status );                /* ...and that's it ! */
 }
 
 
@@ -1294,58 +1294,58 @@ static void child_confirmation_handler( int signo )
 
 static void do_measurement( void )
 {
-	EDL.react_to_do_quit = SET;
+    EDL.react_to_do_quit = SET;
 
-	exp_runparser_init( );
+    exp_runparser_init( );
 
-	while ( EDL.cur_prg_token != NULL &&
-			EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
-	{
-		TRY
-		{
-			/* Check if the 'do_quit' flag got set in the mean time, i.e. the
-			   user pressed the STOP button. If there's an ON_STOP label jump
-			   to it, otherwise quit immediately. */
+    while ( EDL.cur_prg_token != NULL &&
+            EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
+    {
+        TRY
+        {
+            /* Check if the 'do_quit' flag got set in the mean time, i.e. the
+               user pressed the STOP button. If there's an ON_STOP label jump
+               to it, otherwise quit immediately. */
 
-			if ( EDL.do_quit && EDL.react_to_do_quit )
-			{
-				if ( EDL.On_Stop_Pos < 0 )            /* no ON_STOP part ? */
-					return;
+            if ( EDL.do_quit && EDL.react_to_do_quit )
+            {
+                if ( EDL.On_Stop_Pos < 0 )            /* no ON_STOP part ? */
+                    return;
 
-				EDL.cur_prg_token = EDL.prg_token + EDL.On_Stop_Pos;
-				EDL.do_quit = EDL.react_to_do_quit = UNSET;
-				continue;
-			}
+                EDL.cur_prg_token = EDL.prg_token + EDL.On_Stop_Pos;
+                EDL.do_quit = EDL.react_to_do_quit = UNSET;
+                continue;
+            }
 
-			/* Don't react to STOP button anymore after ON_STOP label has been
-			   reached */
+            /* Don't react to STOP button anymore after ON_STOP label has been
+               reached */
 
-			if ( EDL.cur_prg_token == EDL.prg_token + EDL.On_Stop_Pos )
-				EDL.react_to_do_quit = EDL.do_quit = UNSET;
+            if ( EDL.cur_prg_token == EDL.prg_token + EDL.On_Stop_Pos )
+                EDL.react_to_do_quit = EDL.do_quit = UNSET;
 
-			/* Do whatever is necessary to do for the program token */
+            /* Do whatever is necessary to do for the program token */
 
-			deal_with_program_tokens( );
+            deal_with_program_tokens( );
 
-			TRY_SUCCESS;
-		}
-		CATCH( USER_BREAK_EXCEPTION )
-		{
-			/* Clean up the variable stack, it may have become messed up */
+            TRY_SUCCESS;
+        }
+        CATCH( USER_BREAK_EXCEPTION )
+        {
+            /* Clean up the variable stack, it may have become messed up */
 
-			vars_del_stack( );
+            vars_del_stack( );
 
-			/* If the exception arrived while we're already dealing with the
-			   ON_STOP part this probably is a sign that there is some
-			   severe hardware problem and we better stop even though the
-			   ON_STOP part isn't been finished yet. */
+            /* If the exception arrived while we're already dealing with the
+               ON_STOP part this probably is a sign that there is some
+               severe hardware problem and we better stop even though the
+               ON_STOP part isn't been finished yet. */
 
-			if ( ! EDL.react_to_do_quit )
-				THROW( EXCEPTION );
-		}
-		OTHERWISE
-			RETHROW( );
-	}
+            if ( ! EDL.react_to_do_quit )
+                THROW( EXCEPTION );
+        }
+        OTHERWISE
+            RETHROW( );
+    }
 }
 
 
@@ -1359,104 +1359,106 @@ static void do_measurement( void )
 
 static void deal_with_program_tokens( void )
 {
-	Prg_Token_T *cur = EDL.cur_prg_token;
+    Prg_Token_T *cur = EDL.cur_prg_token;
 
 
-	switch ( cur->token )
-	{
-		case '}' :
-			EDL.cur_prg_token = cur->end;
-			break;
+    switch ( cur->token )
+    {
+        case '}' :
+            EDL.cur_prg_token = cur->end;
+            break;
 
-		case WHILE_TOK :
-			if ( test_condition( cur ) )
-			{
-				cur->counter = 1;
-				EDL.cur_prg_token = cur->start;
-			}
-			else
-			{
-				cur->counter = 0;
-				EDL.cur_prg_token = cur->end;
-			}
-			break;
+        case WHILE_TOK :
+            if ( test_condition( cur ) )
+            {
+                cur->counter = 1;
+                EDL.cur_prg_token = cur->start;
+            }
+            else
+            {
+                cur->counter = 0;
+                EDL.cur_prg_token = cur->end;
+            }
+            break;
 
-		case UNTIL_TOK :
-			if ( ! test_condition( cur ) )
-			{
-				cur->counter = 1;
-				EDL.cur_prg_token = cur->start;
-			}
-			else
-			{
-				cur->counter = 0;
-				EDL.cur_prg_token = cur->end;
-			}
-			break;
+        case UNTIL_TOK :
+            if ( ! test_condition( cur ) )
+            {
+                cur->counter = 1;
+                EDL.cur_prg_token = cur->start;
+            }
+            else
+            {
+                cur->counter = 0;
+                EDL.cur_prg_token = cur->end;
+            }
+            break;
 
-		case REPEAT_TOK :
-			if ( cur->counter == 0 )
-				get_max_repeat_count( cur );
+        case REPEAT_TOK :
+            if ( cur->counter == 0 )
+                get_max_repeat_count( cur );
 
-			if ( ++cur->count.repl.act <= cur->count.repl.max )
-			{
-				cur->counter++;
-				EDL.cur_prg_token = cur->start;
-			}
-			else
-			{
-				cur->counter = 0;
-				EDL.cur_prg_token = cur->end;
-			}
-			break;
+            if ( ++cur->count.repl.act <= cur->count.repl.max )
+            {
+                cur->counter++;
+                EDL.cur_prg_token = cur->start;
+            }
+            else
+            {
+                cur->counter = 0;
+                EDL.cur_prg_token = cur->end;
+            }
+            break;
 
-		case FOR_TOK :
-			if ( cur->counter == 0 )
-				get_for_cond( cur );
+        case FOR_TOK :
+            if ( cur->counter == 0 )
+                get_for_cond( cur );
 
-			if ( test_for_cond( cur ) )
-			{
-				cur->counter = 1;
-				EDL.cur_prg_token = cur->start;
-			}
-			else
-			{
-				cur->counter = 0;
-				EDL.cur_prg_token = cur->end;
-			}
-			break;
+            if ( test_for_cond( cur ) )
+            {
+                cur->counter = 1;
+                EDL.cur_prg_token = cur->start;
+            }
+            else
+            {
+                cur->counter = 0;
+                EDL.cur_prg_token = cur->end;
+            }
+            break;
 
-		case FOREVER_TOK :
-			EDL.cur_prg_token = cur->start;
-			break;
+        case FOREVER_TOK :
+            EDL.cur_prg_token = cur->start;
+            break;
 
-		case BREAK_TOK :
-			cur->start->counter = 0;
-			EDL.cur_prg_token = cur->start->end;
-			break;
+        case BREAK_TOK :
+            cur->start->counter = 0;
+            EDL.cur_prg_token = cur->start->end;
+            break;
 
-		case NEXT_TOK :
-			EDL.cur_prg_token = cur->start;
-			break;
+        case NEXT_TOK :
+            EDL.cur_prg_token = cur->start;
+            break;
 
-		case IF_TOK : case UNLESS_TOK :
-			EDL.cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
-			break;
+        case IF_TOK : case UNLESS_TOK :
+            EDL.cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
+            break;
 
-		case ELSE_TOK :
-			if ( ( ++EDL.cur_prg_token )->token == '{' )
-				EDL.cur_prg_token++;
-			break;
+        case ELSE_TOK :
+            if ( ( ++EDL.cur_prg_token )->token == '{' )
+                EDL.cur_prg_token++;
+            break;
 
-		default :
-			exp_runparse( );                         /* (re)start the parser */
-			break;
-	}
+        default :
+            exp_runparse( );                         /* (re)start the parser */
+            break;
+    }
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

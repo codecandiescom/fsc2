@@ -46,40 +46,40 @@ static HP864_TMPL_T hp864_tmpl_backup;
 
 int hp864_tmpl_init_hook( void )
 {
-	int i;
+    int i;
 
 
-	/* Set global variable to indicate that GPIB bus is needed */
+    /* Set global variable to indicate that GPIB bus is needed */
 
-	Need_GPIB = SET;
+    Need_GPIB = SET;
 
-	hp864_tmpl.device = -1;
+    hp864_tmpl.device = -1;
 
-	hp864_tmpl.state = UNSET;
+    hp864_tmpl.state = UNSET;
 
-	hp864_tmpl.freq_is_set = UNSET;
-	hp864_tmpl.step_freq_is_set = UNSET;
-	hp864_tmpl.start_freq_is_set = UNSET;
-	hp864_tmpl.attenuation_is_set = UNSET;
-	hp864_tmpl.min_attenuation = MIN_ATTEN;
+    hp864_tmpl.freq_is_set = UNSET;
+    hp864_tmpl.step_freq_is_set = UNSET;
+    hp864_tmpl.start_freq_is_set = UNSET;
+    hp864_tmpl.attenuation_is_set = UNSET;
+    hp864_tmpl.min_attenuation = MIN_ATTEN;
 
-	hp864_tmpl.table_file = NULL;
-	hp864_tmpl.use_table = UNSET;
-	hp864_tmpl.att_table = NULL;
-	hp864_tmpl.att_table_len = 0;
-	hp864_tmpl.real_attenuation = MAX_ATTEN - 100.0;  /* invalid value ! */
+    hp864_tmpl.table_file = NULL;
+    hp864_tmpl.use_table = UNSET;
+    hp864_tmpl.att_table = NULL;
+    hp864_tmpl.att_table_len = 0;
+    hp864_tmpl.real_attenuation = MAX_ATTEN - 100.0;  /* invalid value ! */
 
-	hp864_tmpl.att_ref_freq = DEF_ATT_REF_FREQ;
+    hp864_tmpl.att_ref_freq = DEF_ATT_REF_FREQ;
 
-	hp864_tmpl.mod_type = UNDEFINED;
-	hp864_tmpl.mod_type_is_set = UNSET;
-	for ( i = 0; i < NUM_MOD_TYPES; i++ )
-	{
-		hp864_tmpl.mod_source_is_set[ i ] = UNSET;
-		hp864_tmpl.mod_ampl_is_set[ i ] = UNSET;
-	}
+    hp864_tmpl.mod_type = UNDEFINED;
+    hp864_tmpl.mod_type_is_set = UNSET;
+    for ( i = 0; i < NUM_MOD_TYPES; i++ )
+    {
+        hp864_tmpl.mod_source_is_set[ i ] = UNSET;
+        hp864_tmpl.mod_ampl_is_set[ i ] = UNSET;
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -89,31 +89,31 @@ int hp864_tmpl_init_hook( void )
 
 int hp864_tmpl_test_hook( void )
 {
-	/* If a table has been set check that at the frequency the attenuations
-	   refer to the table is defined and if it is get the attenuation at the
-	   reference frequency */
+    /* If a table has been set check that at the frequency the attenuations
+       refer to the table is defined and if it is get the attenuation at the
+       reference frequency */
 
-	if ( hp864_tmpl.use_table )
-	{
-		if ( hp864_tmpl.att_ref_freq < hp864_tmpl.min_table_freq ||
-			 hp864_tmpl.att_ref_freq > hp864_tmpl.max_table_freq )
-		{
-			print( FATAL, "Reference frequency for attenuation settings of "
-				   "%g MHz is not covered by the table.\n",
-				   hp864_tmpl.att_ref_freq );
-			THROW( EXCEPTION );
-		}
+    if ( hp864_tmpl.use_table )
+    {
+        if ( hp864_tmpl.att_ref_freq < hp864_tmpl.min_table_freq ||
+             hp864_tmpl.att_ref_freq > hp864_tmpl.max_table_freq )
+        {
+            print( FATAL, "Reference frequency for attenuation settings of "
+                   "%g MHz is not covered by the table.\n",
+                   hp864_tmpl.att_ref_freq );
+            THROW( EXCEPTION );
+        }
 
-		hp864_tmpl.att_at_ref_freq =
-			          hp864_tmpl_get_att_from_table( hp864_tmpl.att_ref_freq );
-	}
+        hp864_tmpl.att_at_ref_freq =
+                      hp864_tmpl_get_att_from_table( hp864_tmpl.att_ref_freq );
+    }
 
-	/* Save the current state of the device structure which always has to be
-	   reset to this state at the start of the experiment */
+    /* Save the current state of the device structure which always has to be
+       reset to this state at the start of the experiment */
 
-	hp864_tmpl_backup = hp864_tmpl;
+    hp864_tmpl_backup = hp864_tmpl;
 
-	return 1;
+    return 1;
 }
 
 
@@ -123,18 +123,18 @@ int hp864_tmpl_test_hook( void )
 
 int hp864_tmpl_exp_hook( void )
 {
-	/* Restore device structure to the state at the start of the test run */
+    /* Restore device structure to the state at the start of the test run */
 
-	hp864_tmpl = hp864_tmpl_backup;
+    hp864_tmpl = hp864_tmpl_backup;
 
-	if ( ! hp864_tmpl_init( DEVICE_NAME ) )
-	{
-		print( FATAL, "Initialization of device failed: %s\n",
-			   gpib_error_msg );
-		THROW( EXCEPTION );
-	}
+    if ( ! hp864_tmpl_init( DEVICE_NAME ) )
+    {
+        print( FATAL, "Initialization of device failed: %s\n",
+               gpib_error_msg );
+        THROW( EXCEPTION );
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -144,11 +144,11 @@ int hp864_tmpl_exp_hook( void )
 
 int hp864_tmpl_end_of_exp_hook( void )
 {
-	hp864_tmpl_finished( );
+    hp864_tmpl_finished( );
 
-	hp864_tmpl = hp864_tmpl_backup;
+    hp864_tmpl = hp864_tmpl_backup;
 
-	return 1;
+    return 1;
 }
 
 
@@ -159,12 +159,12 @@ int hp864_tmpl_end_of_exp_hook( void )
 
 void hp864_tmpl_exit_hook( void )
 {
-	if ( hp864_tmpl.table_file != NULL )
-		hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
+    if ( hp864_tmpl.table_file != NULL )
+        hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
 
-	if ( hp864_tmpl.use_table && hp864_tmpl.att_table != NULL )
-		hp864_tmpl.att_table =
-							  ATT_TABLE_ENTRY_P T_free( hp864_tmpl.att_table );
+    if ( hp864_tmpl.use_table && hp864_tmpl.att_table != NULL )
+        hp864_tmpl.att_table =
+                              ATT_TABLE_ENTRY_P T_free( hp864_tmpl.att_table );
 }
 
 
@@ -173,7 +173,7 @@ void hp864_tmpl_exit_hook( void )
 
 Var_T *synthesizer_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -183,33 +183,33 @@ Var_T *synthesizer_name( Var_T * v  UNUSED_ARG )
 
 Var_T *synthesizer_state( Var_T * v )
 {
-	bool state;
+    bool state;
 
 
-	if ( v == NULL )              /* query of the current state */
-		switch( FSC2_MODE )
-		{
-			case PREPARATION :
-				no_query_possible( );
+    if ( v == NULL )              /* query of the current state */
+        switch( FSC2_MODE )
+        {
+            case PREPARATION :
+                no_query_possible( );
 
-			case TEST :
-				return vars_push( INT_VAR, ( long ) hp864_tmpl.state );
+            case TEST :
+                return vars_push( INT_VAR, ( long ) hp864_tmpl.state );
 
-			case EXPERIMENT :
-				return vars_push( INT_VAR,
-								  ( long ) ( hp864_tmpl.state =
-											hp864_tmpl_get_output_state( ) ) );
-		}
+            case EXPERIMENT :
+                return vars_push( INT_VAR,
+                                  ( long ) ( hp864_tmpl.state =
+                                            hp864_tmpl_get_output_state( ) ) );
+        }
 
-	state = get_boolean( v );
-	too_many_arguments( v );
+    state = get_boolean( v );
+    too_many_arguments( v );
 
-	hp864_tmpl.state = state;
+    hp864_tmpl.state = state;
 
-	if ( FSC2_MODE != EXPERIMENT )
-		return vars_push( INT_VAR, ( long ) state );
+    if ( FSC2_MODE != EXPERIMENT )
+        return vars_push( INT_VAR, ( long ) state );
 
-	return vars_push( INT_VAR, ( long ) hp864_tmpl_set_output_state( state ) );
+    return vars_push( INT_VAR, ( long ) hp864_tmpl_set_output_state( state ) );
 }
 
 
@@ -226,116 +226,116 @@ Var_T *synthesizer_state( Var_T * v )
 
 Var_T *synthesizer_frequency( Var_T * v )
 {
-	double freq;
-	double att;
+    double freq;
+    double att;
 
 
-	if ( v == NULL )              /* query for the current frequency */
-	{
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! hp864_tmpl.freq_is_set )
-				{
-					print( FATAL, "RF frequency hasn't been set yet.\n" );
-					THROW( EXCEPTION );
-				}
-				return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+    if ( v == NULL )              /* query for the current frequency */
+    {
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! hp864_tmpl.freq_is_set )
+                {
+                    print( FATAL, "RF frequency hasn't been set yet.\n" );
+                    THROW( EXCEPTION );
+                }
+                return vars_push( FLOAT_VAR, hp864_tmpl.freq );
 
-			case TEST :
-				if ( ! hp864_tmpl.freq_is_set )
-				{
-					hp864_tmpl.freq = HP864_TMPL_TEST_FREQ;
-					hp864_tmpl.freq_is_set = SET;
-				}
-				return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+            case TEST :
+                if ( ! hp864_tmpl.freq_is_set )
+                {
+                    hp864_tmpl.freq = HP864_TMPL_TEST_FREQ;
+                    hp864_tmpl.freq_is_set = SET;
+                }
+                return vars_push( FLOAT_VAR, hp864_tmpl.freq );
 
-			case EXPERIMENT :
-				hp864_tmpl.freq = hp864_tmpl_get_frequency( );
-				return vars_push( FLOAT_VAR, hp864_tmpl.freq );
-		}
-	}
+            case EXPERIMENT :
+                hp864_tmpl.freq = hp864_tmpl_get_frequency( );
+                return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+        }
+    }
 
-	freq = get_double( v, "RF frequency" );
+    freq = get_double( v, "RF frequency" );
 
-	if ( freq < 0 )
-	{
-		print( FATAL, "Invalid negative RF frequency.\n" );
-		if ( FSC2_MODE == EXPERIMENT )
-			return vars_push( FLOAT_VAR, hp864_tmpl.freq );
-		else
-			THROW( EXCEPTION );
-	}
+    if ( freq < 0 )
+    {
+        print( FATAL, "Invalid negative RF frequency.\n" );
+        if ( FSC2_MODE == EXPERIMENT )
+            return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+        else
+            THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	/* In test run stop program if value is out of range while in real run
-	   just keep the current value on errors */
+    /* In test run stop program if value is out of range while in real run
+       just keep the current value on errors */
 
-	if ( freq < MIN_FREQ || freq > MAX_FREQ )
-	{
-		print( FATAL, "RF frequency (%f MHz) not within synthesizers range "
-			   "(%f kHz - %g Mhz).\n", 1.0e-6 * freq, 1.0e-3 * MIN_FREQ,
-			   1.0e-6 * MAX_FREQ );
-		if ( FSC2_MODE == EXPERIMENT )
-			return vars_push( FLOAT_VAR, hp864_tmpl.freq );
-		else
-			THROW( EXCEPTION );
-	}
+    if ( freq < MIN_FREQ || freq > MAX_FREQ )
+    {
+        print( FATAL, "RF frequency (%f MHz) not within synthesizers range "
+               "(%f kHz - %g Mhz).\n", 1.0e-6 * freq, 1.0e-3 * MIN_FREQ,
+               1.0e-6 * MAX_FREQ );
+        if ( FSC2_MODE == EXPERIMENT )
+            return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+        else
+            THROW( EXCEPTION );
+    }
 
-	switch ( FSC2_MODE )
-	{
-		case PREPARATION :
-			hp864_tmpl.freq = hp864_tmpl.start_freq = freq;
-			hp864_tmpl.freq_is_set = SET;
-			hp864_tmpl.start_freq_is_set = SET;
-			break;
+    switch ( FSC2_MODE )
+    {
+        case PREPARATION :
+            hp864_tmpl.freq = hp864_tmpl.start_freq = freq;
+            hp864_tmpl.freq_is_set = SET;
+            hp864_tmpl.start_freq_is_set = SET;
+            break;
 
-		case TEST :
-			hp864_tmpl.freq = freq;
-			hp864_tmpl.freq_is_set = SET;
-			if ( ! hp864_tmpl.start_freq_is_set )
-			{
-				hp864_tmpl.start_freq = freq;
-				hp864_tmpl.start_freq_is_set = SET;
-			}
+        case TEST :
+            hp864_tmpl.freq = freq;
+            hp864_tmpl.freq_is_set = SET;
+            if ( ! hp864_tmpl.start_freq_is_set )
+            {
+                hp864_tmpl.start_freq = freq;
+                hp864_tmpl.start_freq_is_set = SET;
+            }
 
-			/* Calculate the attenuation needed to level out the non-flatness
-			   of the RF field in the resonator if a table has been set - in
-			   the test run we only do this to check that we stay within all
-			   the limits */
+            /* Calculate the attenuation needed to level out the non-flatness
+               of the RF field in the resonator if a table has been set - in
+               the test run we only do this to check that we stay within all
+               the limits */
 
-			if ( hp864_tmpl.use_table )
-				hp864_tmpl.real_attenuation = hp864_tmpl_get_att( freq );
-			break;
+            if ( hp864_tmpl.use_table )
+                hp864_tmpl.real_attenuation = hp864_tmpl_get_att( freq );
+            break;
 
-		case EXPERIMENT :
-			if ( ! hp864_tmpl.start_freq_is_set )
-			{
-				hp864_tmpl.start_freq = freq;
-				hp864_tmpl.start_freq_is_set = SET;
-			}
+        case EXPERIMENT :
+            if ( ! hp864_tmpl.start_freq_is_set )
+            {
+                hp864_tmpl.start_freq = freq;
+                hp864_tmpl.start_freq_is_set = SET;
+            }
 
-			/* Take care of setting the correct attenuation to level out the
-			   non-flatness of the RF field in the resonator if a table has
-			   been set */
+            /* Take care of setting the correct attenuation to level out the
+               non-flatness of the RF field in the resonator if a table has
+               been set */
 
-			if ( hp864_tmpl.use_table )
-			{
-				att = hp864_tmpl_get_att( freq );
-				if ( att != hp864_tmpl.real_attenuation )
-				{
-					hp864_tmpl_set_attenuation( att );
-					hp864_tmpl.real_attenuation = att;
-				}
-			}
+            if ( hp864_tmpl.use_table )
+            {
+                att = hp864_tmpl_get_att( freq );
+                if ( att != hp864_tmpl.real_attenuation )
+                {
+                    hp864_tmpl_set_attenuation( att );
+                    hp864_tmpl.real_attenuation = att;
+                }
+            }
 
-			/* Finally set the frequency */
+            /* Finally set the frequency */
 
-			hp864_tmpl.freq = hp864_tmpl_set_frequency( freq );
-	}
+            hp864_tmpl.freq = hp864_tmpl_set_frequency( freq );
+    }
 
-	return vars_push( FLOAT_VAR, freq );
+    return vars_push( FLOAT_VAR, freq );
 }
 
 
@@ -350,85 +350,85 @@ Var_T *synthesizer_frequency( Var_T * v )
 
 Var_T *synthesizer_attenuation( Var_T * v )
 {
-	double att;
+    double att;
 
 
-	if ( v == NULL )              /* query of the current attenuation */
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! hp864_tmpl.attenuation_is_set )
-				{
-					print( FATAL, "RF attenuation has not been set yet.\n" );
-					THROW( EXCEPTION );
-				}
-				return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
+    if ( v == NULL )              /* query of the current attenuation */
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! hp864_tmpl.attenuation_is_set )
+                {
+                    print( FATAL, "RF attenuation has not been set yet.\n" );
+                    THROW( EXCEPTION );
+                }
+                return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
 
-			case TEST :
-				if ( ! hp864_tmpl.attenuation_is_set )
-				{
-					hp864_tmpl.attenuation = HP864_TMPL_TEST_ATTEN;
-					hp864_tmpl.attenuation_is_set = SET;
-				}
-				return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
+            case TEST :
+                if ( ! hp864_tmpl.attenuation_is_set )
+                {
+                    hp864_tmpl.attenuation = HP864_TMPL_TEST_ATTEN;
+                    hp864_tmpl.attenuation_is_set = SET;
+                }
+                return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
 
-			case EXPERIMENT :
-				if ( ! hp864_tmpl.use_table )
-				{
-					hp864_tmpl.attenuation = hp864_tmpl_get_attenuation( );
-					return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
-				}
-				else
-				{
-					hp864_tmpl.real_attenuation =
-												 hp864_tmpl_get_attenuation( );
-					return vars_push( FLOAT_VAR, hp864_tmpl.real_attenuation );
-				}
-		}
+            case EXPERIMENT :
+                if ( ! hp864_tmpl.use_table )
+                {
+                    hp864_tmpl.attenuation = hp864_tmpl_get_attenuation( );
+                    return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
+                }
+                else
+                {
+                    hp864_tmpl.real_attenuation =
+                                                 hp864_tmpl_get_attenuation( );
+                    return vars_push( FLOAT_VAR, hp864_tmpl.real_attenuation );
+                }
+        }
 
-	att = get_double( v, "RF attenuation" );
+    att = get_double( v, "RF attenuation" );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	/* Check that attenuation is within valid range, if not throw exception
-	   in test run, but in real run just don't change the attenuation */
+    /* Check that attenuation is within valid range, if not throw exception
+       in test run, but in real run just don't change the attenuation */
 
-	if ( att > hp864_tmpl.min_attenuation || att < MAX_ATTEN )
-	{
-		print( FATAL, "RF attenuation (%g dB) not within valid range (%g dB "
-			   "to %g dB).\n", att, MAX_ATTEN, hp864_tmpl.min_attenuation );
-		if ( FSC2_MODE == EXPERIMENT )
-			return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
-		else
-			THROW( EXCEPTION );
-	}
+    if ( att > hp864_tmpl.min_attenuation || att < MAX_ATTEN )
+    {
+        print( FATAL, "RF attenuation (%g dB) not within valid range (%g dB "
+               "to %g dB).\n", att, MAX_ATTEN, hp864_tmpl.min_attenuation );
+        if ( FSC2_MODE == EXPERIMENT )
+            return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
+        else
+            THROW( EXCEPTION );
+    }
 
-	switch ( FSC2_MODE )
-	{
-		case PREPARATION :
-			if ( hp864_tmpl.attenuation_is_set )
-			{
-				print( SEVERE, "RF attenuation has already been set to %g dB, "
-					   "keeping old value.\n", hp864_tmpl.attenuation );
-				return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
-			}
+    switch ( FSC2_MODE )
+    {
+        case PREPARATION :
+            if ( hp864_tmpl.attenuation_is_set )
+            {
+                print( SEVERE, "RF attenuation has already been set to %g dB, "
+                       "keeping old value.\n", hp864_tmpl.attenuation );
+                return vars_push( FLOAT_VAR, hp864_tmpl.attenuation );
+            }
 
-			hp864_tmpl.attenuation = att;
-			hp864_tmpl.attenuation_is_set = SET;
-			break;
+            hp864_tmpl.attenuation = att;
+            hp864_tmpl.attenuation_is_set = SET;
+            break;
 
-		case TEST :
-			hp864_tmpl.attenuation = hp864_tmpl.real_attenuation = att;
-			hp864_tmpl.attenuation_is_set = SET;
-			break;
+        case TEST :
+            hp864_tmpl.attenuation = hp864_tmpl.real_attenuation = att;
+            hp864_tmpl.attenuation_is_set = SET;
+            break;
 
-		case EXPERIMENT :
-			hp864_tmpl.attenuation = hp864_tmpl.real_attenuation =
-				                             hp864_tmpl_set_attenuation( att );
-			break;
-	}
+        case EXPERIMENT :
+            hp864_tmpl.attenuation = hp864_tmpl.real_attenuation =
+                                             hp864_tmpl_set_attenuation( att );
+            break;
+    }
 
-	return vars_push( FLOAT_VAR, att );
+    return vars_push( FLOAT_VAR, att );
 }
 
 
@@ -438,34 +438,34 @@ Var_T *synthesizer_attenuation( Var_T * v )
 
 Var_T *synthesizer_minimum_attenuation( Var_T * v )
 {
-	double min_atten;
+    double min_atten;
 
 
-	if ( v == NULL )          /* i.e. return the current minimum attenuation */
-		return vars_push( FLOAT_VAR, hp864_tmpl.min_attenuation );
+    if ( v == NULL )          /* i.e. return the current minimum attenuation */
+        return vars_push( FLOAT_VAR, hp864_tmpl.min_attenuation );
 
 
-	min_atten = get_double( v, "minimum RF attenuation" );
+    min_atten = get_double( v, "minimum RF attenuation" );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( min_atten > MIN_MIN_ATTEN )
-	{
-		print( FATAL, "Minimum attenuation must be below %g dB.\n",
-			   MIN_MIN_ATTEN );
-		THROW( EXCEPTION );
-	}
+    if ( min_atten > MIN_MIN_ATTEN )
+    {
+        print( FATAL, "Minimum attenuation must be below %g dB.\n",
+               MIN_MIN_ATTEN );
+        THROW( EXCEPTION );
+    }
 
-	if ( min_atten < MAX_ATTEN )
-	{
-		print( FATAL, "Minimum attenuation must be more than %g dB.\n",
-			   MAX_ATTEN );
-		THROW( EXCEPTION );
-	}
+    if ( min_atten < MAX_ATTEN )
+    {
+        print( FATAL, "Minimum attenuation must be more than %g dB.\n",
+               MAX_ATTEN );
+        THROW( EXCEPTION );
+    }
 
-	hp864_tmpl.min_attenuation = min_atten;
+    hp864_tmpl.min_attenuation = min_atten;
 
-	return vars_push( FLOAT_VAR, hp864_tmpl.min_attenuation );
+    return vars_push( FLOAT_VAR, hp864_tmpl.min_attenuation );
 }
 
 /*-----------------------------------------------------------*
@@ -475,30 +475,30 @@ Var_T *synthesizer_minimum_attenuation( Var_T * v )
 
 Var_T *synthesizer_step_frequency( Var_T * v )
 {
-	if ( v != NULL )
-	{
-		/* Allow setting of the step frequency in the PREPARATIONS section
-		   only once */
+    if ( v != NULL )
+    {
+        /* Allow setting of the step frequency in the PREPARATIONS section
+           only once */
 
-		if ( FSC2_MODE == PREPARATION && hp864_tmpl.step_freq_is_set )
-		{
-			print( SEVERE, "RF step frequency has already been set to %f MHz, "
-				   "keeping old value.\n", 1.0e-6 * hp864_tmpl.step_freq );
-			return vars_push( FLOAT_VAR, hp864_tmpl.step_freq );
-		}
+        if ( FSC2_MODE == PREPARATION && hp864_tmpl.step_freq_is_set )
+        {
+            print( SEVERE, "RF step frequency has already been set to %f MHz, "
+                   "keeping old value.\n", 1.0e-6 * hp864_tmpl.step_freq );
+            return vars_push( FLOAT_VAR, hp864_tmpl.step_freq );
+        }
 
-		hp864_tmpl.step_freq = get_double( v, "RF step frequency" );
-		hp864_tmpl.step_freq_is_set = SET;
+        hp864_tmpl.step_freq = get_double( v, "RF step frequency" );
+        hp864_tmpl.step_freq_is_set = SET;
 
-		too_many_arguments( v );
-	}
-	else if ( ! hp864_tmpl.step_freq_is_set )
-	{
-		print( FATAL, "RF step frequency has not been set yet.\n" );
-		THROW( EXCEPTION );
-	}
+        too_many_arguments( v );
+    }
+    else if ( ! hp864_tmpl.step_freq_is_set )
+    {
+        print( FATAL, "RF step frequency has not been set yet.\n" );
+        THROW( EXCEPTION );
+    }
 
-	return vars_push( FLOAT_VAR, hp864_tmpl.step_freq );
+    return vars_push( FLOAT_VAR, hp864_tmpl.step_freq );
 }
 
 
@@ -508,54 +508,54 @@ Var_T *synthesizer_step_frequency( Var_T * v )
 
 Var_T *synthesizer_sweep_up( Var_T * v  UNUSED_ARG )
 {
-	double att;
+    double att;
 
 
-	if ( ! hp864_tmpl.step_freq_is_set )
-	{
-		print( FATAL, "RF step frequency hasn't been set.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! hp864_tmpl.step_freq_is_set )
+    {
+        print( FATAL, "RF step frequency hasn't been set.\n" );
+        THROW( EXCEPTION );
+    }
 
-	hp864_tmpl.freq += hp864_tmpl.step_freq;
+    hp864_tmpl.freq += hp864_tmpl.step_freq;
 
-	/* Check that frequency stays within the synthesizers range */
+    /* Check that frequency stays within the synthesizers range */
 
-	if ( hp864_tmpl.freq < MIN_FREQ )
-	{
-		print( FATAL, "RF frequency dropping below lower limit of %f kHz.\n",
-			   1.0e-3 * MIN_FREQ );
-		if ( FSC2_MODE == EXPERIMENT )
-			return vars_push( FLOAT_VAR, hp864_tmpl.freq );
-		else
-			THROW( EXCEPTION );
-	}
+    if ( hp864_tmpl.freq < MIN_FREQ )
+    {
+        print( FATAL, "RF frequency dropping below lower limit of %f kHz.\n",
+               1.0e-3 * MIN_FREQ );
+        if ( FSC2_MODE == EXPERIMENT )
+            return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+        else
+            THROW( EXCEPTION );
+    }
 
-	if ( hp864_tmpl.freq > MAX_FREQ )
-	{
-		print( FATAL, "RF frequency increased above upper limit of %f MHz.\n",
-			   1.0e-6 * MAX_FREQ );
-		if ( FSC2_MODE == EXPERIMENT )
-			return vars_push( FLOAT_VAR, hp864_tmpl.freq );
-		else
-			THROW( EXCEPTION );
-	}
+    if ( hp864_tmpl.freq > MAX_FREQ )
+    {
+        print( FATAL, "RF frequency increased above upper limit of %f MHz.\n",
+               1.0e-6 * MAX_FREQ );
+        if ( FSC2_MODE == EXPERIMENT )
+            return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+        else
+            THROW( EXCEPTION );
+    }
 
-	if ( FSC2_MODE == TEST )
-		hp864_tmpl.real_attenuation = hp864_tmpl_get_att( hp864_tmpl.freq );
-	else
-	{
-		att = hp864_tmpl_get_att( hp864_tmpl.freq );
-		if ( att != hp864_tmpl.real_attenuation )
-		{
-			hp864_tmpl.real_attenuation = att;
-			hp864_tmpl_set_attenuation( att );
-		}
+    if ( FSC2_MODE == TEST )
+        hp864_tmpl.real_attenuation = hp864_tmpl_get_att( hp864_tmpl.freq );
+    else
+    {
+        att = hp864_tmpl_get_att( hp864_tmpl.freq );
+        if ( att != hp864_tmpl.real_attenuation )
+        {
+            hp864_tmpl.real_attenuation = att;
+            hp864_tmpl_set_attenuation( att );
+        }
 
-		hp864_tmpl_set_frequency( hp864_tmpl.freq );
-	}
+        hp864_tmpl_set_frequency( hp864_tmpl.freq );
+    }
 
-	return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+    return vars_push( FLOAT_VAR, hp864_tmpl.freq );
 }
 
 
@@ -565,13 +565,13 @@ Var_T *synthesizer_sweep_up( Var_T * v  UNUSED_ARG )
 
 Var_T *synthesizer_sweep_down( Var_T * v  UNUSED_ARG )
 {
-	Var_T *nv;
+    Var_T *nv;
 
 
-	hp864_tmpl.step_freq *= -1.0;
-	nv = synthesizer_sweep_up( NULL );
-	hp864_tmpl.step_freq *= -1.0;
-	return nv;
+    hp864_tmpl.step_freq *= -1.0;
+    nv = synthesizer_sweep_up( NULL );
+    hp864_tmpl.step_freq *= -1.0;
+    return nv;
 }
 
 
@@ -581,19 +581,19 @@ Var_T *synthesizer_sweep_down( Var_T * v  UNUSED_ARG )
 
 Var_T *synthesizer_reset_frequency( Var_T * v  UNUSED_ARG )
 {
-	if ( ! hp864_tmpl.start_freq_is_set )
-	{
-		print( FATAL, "No RF frequency has been set yet, so can't do a "
-			   "frequency reset.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! hp864_tmpl.start_freq_is_set )
+    {
+        print( FATAL, "No RF frequency has been set yet, so can't do a "
+               "frequency reset.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( FSC2_MODE == TEST )
-		hp864_tmpl.freq = hp864_tmpl.start_freq;
-	else
-		hp864_tmpl.freq = hp864_tmpl_set_frequency( hp864_tmpl.start_freq );
+    if ( FSC2_MODE == TEST )
+        hp864_tmpl.freq = hp864_tmpl.start_freq;
+    else
+        hp864_tmpl.freq = hp864_tmpl_set_frequency( hp864_tmpl.start_freq );
 
-	return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+    return vars_push( FLOAT_VAR, hp864_tmpl.freq );
 }
 
 
@@ -602,72 +602,72 @@ Var_T *synthesizer_reset_frequency( Var_T * v  UNUSED_ARG )
 
 Var_T *synthesizer_use_table( Var_T * v )
 {
-	FILE *tfp = NULL;
-	char *tfname;
+    FILE *tfp = NULL;
+    char *tfname;
 
 
-	CLOBBER_PROTECT( tfp );
+    CLOBBER_PROTECT( tfp );
 
-	/* Try to figure out the name of the table file - if no argument is given
-	   use the default table file, otherwise use the user supplied file name */
+    /* Try to figure out the name of the table file - if no argument is given
+       use the default table file, otherwise use the user supplied file name */
 
-	if ( v == NULL )
-	{
-		if ( DEFAULT_TABLE_FILE[ 0 ] ==  '/' )
-			hp864_tmpl.table_file = T_strdup( DEFAULT_TABLE_FILE );
-		else
-			hp864_tmpl.table_file = get_string( "%s%s%s", libdir,
-											   slash( libdir ),
-											   DEFAULT_TABLE_FILE );
+    if ( v == NULL )
+    {
+        if ( DEFAULT_TABLE_FILE[ 0 ] ==  '/' )
+            hp864_tmpl.table_file = T_strdup( DEFAULT_TABLE_FILE );
+        else
+            hp864_tmpl.table_file = get_string( "%s%s%s", libdir,
+                                               slash( libdir ),
+                                               DEFAULT_TABLE_FILE );
 
-		if ( ( tfp = hp864_tmpl_open_table( hp864_tmpl.table_file ) ) == NULL )
-		{
-			print( FATAL, "Default table file '%s' not found.\n",
-				   hp864_tmpl.table_file );
-			hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-	{
-		vars_check( v, STR_VAR );
+        if ( ( tfp = hp864_tmpl_open_table( hp864_tmpl.table_file ) ) == NULL )
+        {
+            print( FATAL, "Default table file '%s' not found.\n",
+                   hp864_tmpl.table_file );
+            hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        vars_check( v, STR_VAR );
 
-		tfname = T_strdup( v->val.sptr );
+        tfname = T_strdup( v->val.sptr );
 
-		too_many_arguments( v );
+        too_many_arguments( v );
 
-		TRY
-		{
-			tfp = hp864_tmpl_find_table( &tfname );
-			hp864_tmpl.table_file = tfname;
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( tfname );
-			RETHROW( );
-		}
-	}
+        TRY
+        {
+            tfp = hp864_tmpl_find_table( &tfname );
+            hp864_tmpl.table_file = tfname;
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( tfname );
+            RETHROW( );
+        }
+    }
 
-	/* Now try to read in the table file */
+    /* Now try to read in the table file */
 
-	TRY
-	{
-		hp864_tmpl_read_table( tfp );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		fclose( tfp );
-		hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
-		RETHROW( );
-	}
+    TRY
+    {
+        hp864_tmpl_read_table( tfp );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        fclose( tfp );
+        hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
+        RETHROW( );
+    }
 
-	fclose( tfp );
-	hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
-	hp864_tmpl.use_table = SET;
+    fclose( tfp );
+    hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
+    hp864_tmpl.use_table = SET;
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -676,54 +676,54 @@ Var_T *synthesizer_use_table( Var_T * v )
 
 Var_T *synthesizer_att_ref_freq( Var_T * v )
 {
-	double freq;
+    double freq;
 
 
-	/* Without an argument just return the reference frequency setting */
+    /* Without an argument just return the reference frequency setting */
 
-	if ( v == NULL )
-		return vars_push( FLOAT_VAR, hp864_tmpl.att_ref_freq );
+    if ( v == NULL )
+        return vars_push( FLOAT_VAR, hp864_tmpl.att_ref_freq );
 
-	/* Otherwise check the supplied variable */
+    /* Otherwise check the supplied variable */
 
-	freq = get_double( v, "RF attenuation reference frequency" );
+    freq = get_double( v, "RF attenuation reference frequency" );
 
-	/* Check that the frequency is within the synthesizers range */
+    /* Check that the frequency is within the synthesizers range */
 
-	if ( freq > MAX_FREQ || freq < MIN_FREQ )
-	{
-		print( FATAL, "Reference frequency for attenuation settings of %g MHz "
-			   "is out of synthesizer range (%f kHz - %f MHz).\n",
-			   hp864_tmpl.att_ref_freq * 1.0e-6,
-			   MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
-		if ( FSC2_MODE == EXPERIMENT )
-			return vars_push( FLOAT_VAR, hp864_tmpl.freq );
-		else
-			THROW( EXCEPTION );
-	}
+    if ( freq > MAX_FREQ || freq < MIN_FREQ )
+    {
+        print( FATAL, "Reference frequency for attenuation settings of %g MHz "
+               "is out of synthesizer range (%f kHz - %f MHz).\n",
+               hp864_tmpl.att_ref_freq * 1.0e-6,
+               MIN_FREQ * 1.0e-3, MAX_FREQ * 1.0e-6 );
+        if ( FSC2_MODE == EXPERIMENT )
+            return vars_push( FLOAT_VAR, hp864_tmpl.freq );
+        else
+            THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	hp864_tmpl.att_ref_freq = freq;
+    hp864_tmpl.att_ref_freq = freq;
 
-	/* If a table has already been loaded calculate the attenuation at the
-	   reference frequency */
+    /* If a table has already been loaded calculate the attenuation at the
+       reference frequency */
 
-	if ( hp864_tmpl.use_table )
-	{
-		if ( hp864_tmpl.att_ref_freq < hp864_tmpl.min_table_freq ||
-			 hp864_tmpl.att_ref_freq > hp864_tmpl.max_table_freq )
-		{
-			print( FATAL, "Reference frequency for attenuation settings of "
-				   "%g MHz is not covered by the table.\n",
-				   hp864_tmpl.att_ref_freq );
-			THROW( EXCEPTION );
-		}
+    if ( hp864_tmpl.use_table )
+    {
+        if ( hp864_tmpl.att_ref_freq < hp864_tmpl.min_table_freq ||
+             hp864_tmpl.att_ref_freq > hp864_tmpl.max_table_freq )
+        {
+            print( FATAL, "Reference frequency for attenuation settings of "
+                   "%g MHz is not covered by the table.\n",
+                   hp864_tmpl.att_ref_freq );
+            THROW( EXCEPTION );
+        }
 
-		hp864_tmpl.att_at_ref_freq = hp864_tmpl_get_att_from_table( freq );
-	}
+        hp864_tmpl.att_at_ref_freq = hp864_tmpl_get_att_from_table( freq );
+    }
 
-	return vars_push( FLOAT_VAR, freq );
+    return vars_push( FLOAT_VAR, freq );
 }
 
 
@@ -736,75 +736,75 @@ Var_T *synthesizer_att_ref_freq( Var_T * v )
 
 Var_T *synthesizer_modulation( Var_T * v )
 {
-	int res;
-	int set = 0;
-	const char *str[ ] = { "amplitude", "type", "source" };
-	double ampl = -1.0;
-	int what;
-	int type = UNDEFINED,
-		source = UNDEFINED;
-	Var_T *func_ptr;
-	int acc;
+    int res;
+    int set = 0;
+    const char *str[ ] = { "amplitude", "type", "source" };
+    double ampl = -1.0;
+    int what;
+    int type = UNDEFINED,
+        source = UNDEFINED;
+    Var_T *func_ptr;
+    int acc;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Use functions 'synthesizer_mod_(type|source|ampl)' "
-			   "to determine modulation settings.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Use functions 'synthesizer_mod_(type|source|ampl)' "
+               "to determine modulation settings.\n" );
+        THROW( EXCEPTION );
+    }
 
-	while ( v )
-	{
-		if ( ( 1 << ( ( res = hp864_tmpl_set_mod_param( v, &ampl, &what ) )
-					  - 1 ) ) & set )
-			print( SEVERE, "Parameter for modulation %s set more than once in "
-				   "call of 'synthesizer_modulation'.\n", str[ res ] );
-		else
-		{
-			switch ( res )
-			{
-				case 1 :                /* setting modulatopn amplitude */
-					break;
+    while ( v )
+    {
+        if ( ( 1 << ( ( res = hp864_tmpl_set_mod_param( v, &ampl, &what ) )
+                      - 1 ) ) & set )
+            print( SEVERE, "Parameter for modulation %s set more than once in "
+                   "call of 'synthesizer_modulation'.\n", str[ res ] );
+        else
+        {
+            switch ( res )
+            {
+                case 1 :                /* setting modulatopn amplitude */
+                    break;
 
-				case 2 :                /* setting modulation type */
-					type = what;
-					break;
+                case 2 :                /* setting modulation type */
+                    type = what;
+                    break;
 
-				case 3 :                /* setting modulation source */
-					source = what;
-					break;
+                case 3 :                /* setting modulation source */
+                    source = what;
+                    break;
 
-				default :                 /* this definitely can't happen... */
-					fsc2_assert( 1 == 0 );
-			}
-		}
-		set |= ( 1 << ( res - 1 ) );
-		v = vars_pop( v );
-	}
+                default :                 /* this definitely can't happen... */
+                    fsc2_assert( 1 == 0 );
+            }
+        }
+        set |= ( 1 << ( res - 1 ) );
+        v = vars_pop( v );
+    }
 
-	if ( type != UNDEFINED )
-	{
-		func_ptr = func_get( "synthesizer_mod_type", &acc );
-		vars_push( INT_VAR, ( long ) type );
-		func_call( func_ptr );
-	}
+    if ( type != UNDEFINED )
+    {
+        func_ptr = func_get( "synthesizer_mod_type", &acc );
+        vars_push( INT_VAR, ( long ) type );
+        func_call( func_ptr );
+    }
 
-	if ( ampl >= 0.0 )
-	{
-		func_ptr = func_get( "synthesizer_mod_ampl", &acc );
-		vars_push( FLOAT_VAR, ampl );
-		func_call( func_ptr );
-	}
+    if ( ampl >= 0.0 )
+    {
+        func_ptr = func_get( "synthesizer_mod_ampl", &acc );
+        vars_push( FLOAT_VAR, ampl );
+        func_call( func_ptr );
+    }
 
-	if ( source != UNDEFINED )
-	{
-		func_ptr = func_get( "synthesizer_mod_source", &acc );
-		vars_push( INT_VAR, ( long ) source );
-		func_call( func_ptr );
-	}
+    if ( source != UNDEFINED )
+    {
+        func_ptr = func_get( "synthesizer_mod_source", &acc );
+        vars_push( INT_VAR, ( long ) source );
+        func_call( func_ptr );
+    }
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -813,67 +813,67 @@ Var_T *synthesizer_modulation( Var_T * v )
 
 Var_T *synthesizer_mod_type( Var_T * v )
 {
-	int res;
+    int res;
 
 
-	if ( v == NULL )
-	{
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! hp864_tmpl.mod_type_is_set )
-				{
-					print( FATAL, "Modulation type hasn't been set yet.\n" );
-					THROW( EXCEPTION );
-				}
-				break;
+    if ( v == NULL )
+    {
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! hp864_tmpl.mod_type_is_set )
+                {
+                    print( FATAL, "Modulation type hasn't been set yet.\n" );
+                    THROW( EXCEPTION );
+                }
+                break;
 
-			case TEST :
-				if ( ! hp864_tmpl.mod_type_is_set )
-				{
-					hp864_tmpl.mod_type = MOD_TYPE_FM;
-					hp864_tmpl.mod_type_is_set = SET;
-				}
-				break;
+            case TEST :
+                if ( ! hp864_tmpl.mod_type_is_set )
+                {
+                    hp864_tmpl.mod_type = MOD_TYPE_FM;
+                    hp864_tmpl.mod_type_is_set = SET;
+                }
+                break;
 
-			case EXPERIMENT :
-				hp864_tmpl.mod_type = hp864_tmpl_get_mod_type( );
-		}
+            case EXPERIMENT :
+                hp864_tmpl.mod_type = hp864_tmpl_get_mod_type( );
+        }
 
-		return vars_push( INT_VAR, hp864_tmpl.mod_type != UNDEFINED ?
-						  						  hp864_tmpl.mod_type : - 1L );
-	}
+        return vars_push( INT_VAR, hp864_tmpl.mod_type != UNDEFINED ?
+                                                  hp864_tmpl.mod_type : - 1L );
+    }
 
-	vars_check( v, STR_VAR | INT_VAR );
+    vars_check( v, STR_VAR | INT_VAR );
 
-	if ( v->type == INT_VAR )
-	{
-		res = ( int ) v->val.lval;
+    if ( v->type == INT_VAR )
+    {
+        res = ( int ) v->val.lval;
 
-		if ( res < 0 || res >= NUM_MOD_TYPES )
-		{
-			print( FATAL, "Invalid modulation type %d.\n", res );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-	{
-		if ( ( res = is_in( v->val.sptr, mod_types, 4 ) ) == UNDEFINED )
-		{
-			print( FATAL, "Invalid modulation type '%s'.\n", v->val.sptr );
-			THROW( EXCEPTION );
-		}
-	}
+        if ( res < 0 || res >= NUM_MOD_TYPES )
+        {
+            print( FATAL, "Invalid modulation type %d.\n", res );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        if ( ( res = is_in( v->val.sptr, mod_types, 4 ) ) == UNDEFINED )
+        {
+            print( FATAL, "Invalid modulation type '%s'.\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	hp864_tmpl.mod_type = res;
-	hp864_tmpl.mod_type_is_set = SET;
+    hp864_tmpl.mod_type = res;
+    hp864_tmpl.mod_type_is_set = SET;
 
-	if ( FSC2_MODE == EXPERIMENT )
-		hp864_tmpl_set_mod_type( res );
+    if ( FSC2_MODE == EXPERIMENT )
+        hp864_tmpl_set_mod_type( res );
 
-	return vars_push( INT_VAR, ( long ) res );
+    return vars_push( INT_VAR, ( long ) res );
 }
 
 
@@ -882,124 +882,124 @@ Var_T *synthesizer_mod_type( Var_T * v )
 
 Var_T *synthesizer_mod_source( Var_T * v )
 {
-	int source = 0;
-	const char *sources[ ] = { "EXT AC", "AC", "EXT DC", "DC",
-							   "INT 1kHz", "INT 1 kHz", "INT 1", "1kHz",
-							   "1 kHz", "1", "INT 400Hz", "INT 400 Hz",
-							   "INT 400", "400Hz", "400 Hz", "400" };
+    int source = 0;
+    const char *sources[ ] = { "EXT AC", "AC", "EXT DC", "DC",
+                               "INT 1kHz", "INT 1 kHz", "INT 1", "1kHz",
+                               "1 kHz", "1", "INT 400Hz", "INT 400 Hz",
+                               "INT 400", "400Hz", "400 Hz", "400" };
 
 
-	if ( v == NULL )
-	{
-		if ( ! hp864_tmpl.mod_type_is_set )
-		{
-			print( FATAL, "Can't determine modulation source as long as "
-				   "modulation type isn't set.\n" );
-			THROW( EXCEPTION );
-		}
+    if ( v == NULL )
+    {
+        if ( ! hp864_tmpl.mod_type_is_set )
+        {
+            print( FATAL, "Can't determine modulation source as long as "
+                   "modulation type isn't set.\n" );
+            THROW( EXCEPTION );
+        }
 
-		if ( hp864_tmpl.mod_type == MOD_TYPE_OFF )
-		{
-			print( FATAL, "Can't determine modulation source when modulation "
-				   "is off.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( hp864_tmpl.mod_type == MOD_TYPE_OFF )
+        {
+            print( FATAL, "Can't determine modulation source when modulation "
+                   "is off.\n" );
+            THROW( EXCEPTION );
+        }
 
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! hp864_tmpl.mod_source_is_set[ hp864_tmpl.mod_type ] )
-				{
-					print( FATAL, "Modulation source for %s modulation "
-						   "hasn't been set yet.\n",
-						   mod_types[ hp864_tmpl.mod_type ] );
-					THROW( EXCEPTION );
-				}
-				break;
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! hp864_tmpl.mod_source_is_set[ hp864_tmpl.mod_type ] )
+                {
+                    print( FATAL, "Modulation source for %s modulation "
+                           "hasn't been set yet.\n",
+                           mod_types[ hp864_tmpl.mod_type ] );
+                    THROW( EXCEPTION );
+                }
+                break;
 
-			case TEST :
-				if ( ! hp864_tmpl.mod_source_is_set[ hp864_tmpl.mod_type ] )
-				{
-					hp864_tmpl.mod_source[ hp864_tmpl.mod_type ] =
-																 MOD_SOURCE_AC;
-					hp864_tmpl.mod_source_is_set[ hp864_tmpl.mod_type ] = SET;
-				}
-				break;
+            case TEST :
+                if ( ! hp864_tmpl.mod_source_is_set[ hp864_tmpl.mod_type ] )
+                {
+                    hp864_tmpl.mod_source[ hp864_tmpl.mod_type ] =
+                                                                 MOD_SOURCE_AC;
+                    hp864_tmpl.mod_source_is_set[ hp864_tmpl.mod_type ] = SET;
+                }
+                break;
 
-			case EXPERIMENT :
-				hp864_tmpl.mod_source[ hp864_tmpl.mod_type ] =
-			                   hp864_tmpl_get_mod_source( hp864_tmpl.mod_type );
-				break;
-		}
+            case EXPERIMENT :
+                hp864_tmpl.mod_source[ hp864_tmpl.mod_type ] =
+                               hp864_tmpl_get_mod_source( hp864_tmpl.mod_type );
+                break;
+        }
 
-		return vars_push( INT_VAR,
-						  hp864_tmpl.mod_source[ hp864_tmpl.mod_type ] );
-	}
+        return vars_push( INT_VAR,
+                          hp864_tmpl.mod_source[ hp864_tmpl.mod_type ] );
+    }
 
-	if ( ! hp864_tmpl.mod_type_is_set )
-	{
-		print( FATAL, "Can't set modulation source as long as modulation type "
-			   "isn't set.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! hp864_tmpl.mod_type_is_set )
+    {
+        print( FATAL, "Can't set modulation source as long as modulation type "
+               "isn't set.\n" );
+        THROW( EXCEPTION );
+    }
 
-	vars_check( v, STR_VAR | INT_VAR );
+    vars_check( v, STR_VAR | INT_VAR );
 
-	if ( v->type == INT_VAR )
-	{
-		source = ( int ) v->val.lval;
-		if ( source < 0 || source >= NUM_MOD_SOURCES )
-		{
-			print( FATAL, "Invalid modulation source parameter %d.\n",
-				   source );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-	{
-		switch ( is_in( v->val.sptr, sources, 16 ) )
-		{
-			case 0 : case 1 :
-				source = MOD_SOURCE_AC;
-				break;
+    if ( v->type == INT_VAR )
+    {
+        source = ( int ) v->val.lval;
+        if ( source < 0 || source >= NUM_MOD_SOURCES )
+        {
+            print( FATAL, "Invalid modulation source parameter %d.\n",
+                   source );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        switch ( is_in( v->val.sptr, sources, 16 ) )
+        {
+            case 0 : case 1 :
+                source = MOD_SOURCE_AC;
+                break;
 
-			case 2 : case 3 :
-				source = MOD_SOURCE_DC;
-				break;
+            case 2 : case 3 :
+                source = MOD_SOURCE_DC;
+                break;
 
-			case 4 : case 5 : case 6 : case 7 : case 8 : case 9 :
-				source = MOD_SOURCE_1k;
-				break;
+            case 4 : case 5 : case 6 : case 7 : case 8 : case 9 :
+                source = MOD_SOURCE_1k;
+                break;
 
-			case 10 : case 11 : case 12 : case 13 : case 14 : case 15 :
-				source = MOD_SOURCE_400;
-				break;
+            case 10 : case 11 : case 12 : case 13 : case 14 : case 15 :
+                source = MOD_SOURCE_400;
+                break;
 
-			default :
-				print( FATAL, "Invalid modulation source '%s'.\n",
-					   v->val.sptr );
-				THROW( EXCEPTION );
-		}
-	}
+            default :
+                print( FATAL, "Invalid modulation source '%s'.\n",
+                       v->val.sptr );
+                THROW( EXCEPTION );
+        }
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
 
-	if ( hp864_tmpl.mod_type == MOD_TYPE_OFF )
-	{
-		print( FATAL, "Can't set modulation source while modulation is "
-			   "off.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( hp864_tmpl.mod_type == MOD_TYPE_OFF )
+    {
+        print( FATAL, "Can't set modulation source while modulation is "
+               "off.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( FSC2_MODE != EXPERIMENT )
-		hp864_tmpl.mod_source[ hp864_tmpl.mod_type ] = source;
-	else
-		hp864_tmpl.mod_source[ hp864_tmpl.mod_type ] =
-					  hp864_tmpl_set_mod_source( hp864_tmpl.mod_type, source );
-	hp864_tmpl.mod_source_is_set[ hp864_tmpl.mod_type ] = SET;
+    if ( FSC2_MODE != EXPERIMENT )
+        hp864_tmpl.mod_source[ hp864_tmpl.mod_type ] = source;
+    else
+        hp864_tmpl.mod_source[ hp864_tmpl.mod_type ] =
+                      hp864_tmpl_set_mod_source( hp864_tmpl.mod_type, source );
+    hp864_tmpl.mod_source_is_set[ hp864_tmpl.mod_type ] = SET;
 
-	return vars_push( INT_VAR, hp864_tmpl.mod_source );
+    return vars_push( INT_VAR, hp864_tmpl.mod_source );
 }
 
 
@@ -1008,127 +1008,127 @@ Var_T *synthesizer_mod_source( Var_T * v )
 
 Var_T *synthesizer_mod_ampl( Var_T * v )
 {
-	double ampl;
-	double defaults[ ] = { 1.0e5, 100.0, 10.0 };
+    double ampl;
+    double defaults[ ] = { 1.0e5, 100.0, 10.0 };
 
 
-	if ( v == NULL )
-	{
-		if ( ! hp864_tmpl.mod_type_is_set )
-		{
-			print( FATAL, "Can't determine modulation amplitude as long as "
-				   "modulation type isn't set.\n" );
-			THROW( EXCEPTION );
-		}
+    if ( v == NULL )
+    {
+        if ( ! hp864_tmpl.mod_type_is_set )
+        {
+            print( FATAL, "Can't determine modulation amplitude as long as "
+                   "modulation type isn't set.\n" );
+            THROW( EXCEPTION );
+        }
 
-		if ( hp864_tmpl.mod_type == MOD_TYPE_OFF )
-		{
-			print( FATAL, "Can't determine modulation amplitude when "
-				   "modulation is off.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( hp864_tmpl.mod_type == MOD_TYPE_OFF )
+        {
+            print( FATAL, "Can't determine modulation amplitude when "
+                   "modulation is off.\n" );
+            THROW( EXCEPTION );
+        }
 
-		switch ( FSC2_MODE )
-		{
-			case PREPARATION :
-				if ( ! hp864_tmpl.mod_ampl_is_set[ hp864_tmpl.mod_type ] )
-				{
-					print( FATAL, "Modulation amplitude for %s modulation "
-						   "hasn't been set yet.\n",
-						   mod_types[ hp864_tmpl.mod_type ] );
-					THROW( EXCEPTION );
-				}
-				break;
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! hp864_tmpl.mod_ampl_is_set[ hp864_tmpl.mod_type ] )
+                {
+                    print( FATAL, "Modulation amplitude for %s modulation "
+                           "hasn't been set yet.\n",
+                           mod_types[ hp864_tmpl.mod_type ] );
+                    THROW( EXCEPTION );
+                }
+                break;
 
-			case TEST :
-				if ( ! hp864_tmpl.mod_ampl_is_set[ hp864_tmpl.mod_type ] )
-				{
-					hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] =
-											   defaults[ hp864_tmpl.mod_type ];
-					hp864_tmpl.mod_ampl_is_set[ hp864_tmpl.mod_type ] = SET;
-				}
-				break;
+            case TEST :
+                if ( ! hp864_tmpl.mod_ampl_is_set[ hp864_tmpl.mod_type ] )
+                {
+                    hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] =
+                                               defaults[ hp864_tmpl.mod_type ];
+                    hp864_tmpl.mod_ampl_is_set[ hp864_tmpl.mod_type ] = SET;
+                }
+                break;
 
-			case EXPERIMENT :
-				hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] =
-			                    hp864_tmpl_get_mod_ampl( hp864_tmpl.mod_type );
-				break;
-		}
+            case EXPERIMENT :
+                hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] =
+                                hp864_tmpl_get_mod_ampl( hp864_tmpl.mod_type );
+                break;
+        }
 
-		return vars_push( FLOAT_VAR,
-						  hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] );
-	}
+        return vars_push( FLOAT_VAR,
+                          hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] );
+    }
 
-	if ( ! hp864_tmpl.mod_type_is_set )
-	{
-		print( FATAL, "Can't set modulation amplitude as long as modulation "
-			   "type isn't set.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! hp864_tmpl.mod_type_is_set )
+    {
+        print( FATAL, "Can't set modulation amplitude as long as modulation "
+               "type isn't set.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( hp864_tmpl.mod_type == MOD_TYPE_OFF )
-	{
-		print( FATAL, "Can't set modulation amplitude while modulation is "
-			   "off.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( hp864_tmpl.mod_type == MOD_TYPE_OFF )
+    {
+        print( FATAL, "Can't set modulation amplitude while modulation is "
+               "off.\n" );
+        THROW( EXCEPTION );
+    }
 
-	ampl = get_double( v, "modulation amplitude" );
+    ampl = get_double( v, "modulation amplitude" );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( ampl < 0.0 )
-	{
-		print( FATAL, "Invalid negative %s modulation amplitude of %g %s.\n",
-			   mod_types[ hp864_tmpl.mod_type ],
-			   hp864_tmpl.mod_type == MOD_TYPE_FM ? "kHz" :
-					   ( hp864_tmpl.mod_type == MOD_TYPE_AM ? "%%" : "rad" ) );
-		THROW( EXCEPTION );
-	}
+    if ( ampl < 0.0 )
+    {
+        print( FATAL, "Invalid negative %s modulation amplitude of %g %s.\n",
+               mod_types[ hp864_tmpl.mod_type ],
+               hp864_tmpl.mod_type == MOD_TYPE_FM ? "kHz" :
+                       ( hp864_tmpl.mod_type == MOD_TYPE_AM ? "%%" : "rad" ) );
+        THROW( EXCEPTION );
+    }
 
-	switch ( hp864_tmpl.mod_type )
-	{
-		case MOD_TYPE_FM :
-			if ( ampl > MAX_FM_AMPL )
-			{
-				print( FATAL, "FM modulation amplitude of %.1f kHz is too "
-					   "large, valid range is 0 - %.1f kHz.\n",
-					   ampl * 1.0e-3, MAX_FM_AMPL * 1.0e-3 );
-				THROW( EXCEPTION );
-			}
-			break;
+    switch ( hp864_tmpl.mod_type )
+    {
+        case MOD_TYPE_FM :
+            if ( ampl > MAX_FM_AMPL )
+            {
+                print( FATAL, "FM modulation amplitude of %.1f kHz is too "
+                       "large, valid range is 0 - %.1f kHz.\n",
+                       ampl * 1.0e-3, MAX_FM_AMPL * 1.0e-3 );
+                THROW( EXCEPTION );
+            }
+            break;
 
-		case MOD_TYPE_AM :
-			if ( ampl > MAX_AM_AMPL )
-			{
-				print( FATAL, "AM modulation amplitude of %.1f %% is too "
-					   "large, valid range is 0 - %.1f %%.\n",
-					   ampl, ( double ) MAX_AM_AMPL );
-				THROW( EXCEPTION );
-			}
-			break;
+        case MOD_TYPE_AM :
+            if ( ampl > MAX_AM_AMPL )
+            {
+                print( FATAL, "AM modulation amplitude of %.1f %% is too "
+                       "large, valid range is 0 - %.1f %%.\n",
+                       ampl, ( double ) MAX_AM_AMPL );
+                THROW( EXCEPTION );
+            }
+            break;
 
-		case MOD_TYPE_PHASE :
-			if ( ampl > MAX_PHASE_AMPL )
-			{
-				print( FATAL, "Phase modulation amplitude of %.1f rad is too "
-					   "large, valid range is 0 - %.1f rad.\n",
-					   ampl, ( double ) MAX_PHASE_AMPL );
-				THROW( EXCEPTION );
-			}
-			break;
+        case MOD_TYPE_PHASE :
+            if ( ampl > MAX_PHASE_AMPL )
+            {
+                print( FATAL, "Phase modulation amplitude of %.1f rad is too "
+                       "large, valid range is 0 - %.1f rad.\n",
+                       ampl, ( double ) MAX_PHASE_AMPL );
+                THROW( EXCEPTION );
+            }
+            break;
 
-		default :                         /* this can never happen... */
-			fsc2_assert( 1 == 0 );
-	}
+        default :                         /* this can never happen... */
+            fsc2_assert( 1 == 0 );
+    }
 
-	if ( FSC2_MODE == EXPERIMENT )
-		hp864_tmpl_set_mod_ampl( hp864_tmpl.mod_type, ampl );
+    if ( FSC2_MODE == EXPERIMENT )
+        hp864_tmpl_set_mod_ampl( hp864_tmpl.mod_type, ampl );
 
-	hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] = ampl;
-	hp864_tmpl.mod_ampl_is_set[ hp864_tmpl.mod_type ] = SET;
+    hp864_tmpl.mod_ampl[ hp864_tmpl.mod_type ] = ampl;
+    hp864_tmpl.mod_ampl_is_set[ hp864_tmpl.mod_type ] = SET;
 
-	return vars_push( FLOAT_VAR, ampl );
+    return vars_push( FLOAT_VAR, ampl );
 }
 
 
@@ -1137,35 +1137,37 @@ Var_T *synthesizer_mod_ampl( Var_T * v )
 
 Var_T *synthesizer_command( Var_T * v )
 {
-	char *cmd = NULL;
+    char *cmd = NULL;
 
 
-	CLOBBER_PROTECT( cmd );
+    CLOBBER_PROTECT( cmd );
 
-	vars_check( v, STR_VAR );
-	
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		TRY
-		{
-			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-			hp864_tmpl_command( cmd );
-			T_free( cmd );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( cmd );
-			RETHROW( );
-		}
-	}
+    vars_check( v, STR_VAR );
+    
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        TRY
+        {
+            cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+            hp864_tmpl_command( cmd );
+            T_free( cmd );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( cmd );
+            RETHROW( );
+        }
+    }
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

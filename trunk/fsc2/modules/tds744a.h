@@ -60,7 +60,7 @@
 #define TDS744A_POINTS_PER_DIV    50
 
 #define CHECK_SENS_IMPEDANCE   /* Not all sensitivites are allowed for all
-								  input impedances, needs additonal checks */
+                                  input impedances, needs additonal checks */
 
 /* Here values are defined that get returned by the driver in the test run
    when the digitizer can't be accessed - these values must really be
@@ -83,70 +83,70 @@ typedef struct TDS744A TDS744A_T;
 
 
 struct Window {
-	long num;                   /* number of window                          */
-	double start;               /* start of window (in time units)			 */
-	double width;               /* width of window (in time units)			 */
-	long start_num;				/* first point of window                     */
-	long end_num;				/* last point of window                      */
-	bool is_start;              /* flag, set if start of window has been set */
-	bool is_width;              /* flag, set if width of window has been set */
-	long num_points;            /* number of data points between the cursors */
-	Window_T *next;             /* pointer to next window structure			 */
-	Window_T *prev;             /* pointer to previous window structure      */
+    long num;                   /* number of window                          */
+    double start;               /* start of window (in time units)           */
+    double width;               /* width of window (in time units)           */
+    long start_num;             /* first point of window                     */
+    long end_num;               /* last point of window                      */
+    bool is_start;              /* flag, set if start of window has been set */
+    bool is_width;              /* flag, set if width of window has been set */
+    long num_points;            /* number of data points between the cursors */
+    Window_T *next;             /* pointer to next window structure          */
+    Window_T *prev;             /* pointer to previous window structure      */
 };
 
 
 struct TDS744A {
-	int device;
+    int device;
 
-	bool is_reacting;
+    bool is_reacting;
 
-	double timebase;
-	bool is_timebase;
+    double timebase;
+    bool is_timebase;
 
-	double sens[ NUM_NORMAL_CHANNELS ];
-	double is_sens[ NUM_NORMAL_CHANNELS ];
+    double sens[ NUM_NORMAL_CHANNELS ];
+    double is_sens[ NUM_NORMAL_CHANNELS ];
 
-	long num_avg;
-	bool is_num_avg;
+    long num_avg;
+    bool is_num_avg;
 
-	Window_T *w;              /* start element of list of windows */
-	bool is_equal_width;      /* all windows have equal width -> tracking
-								 cursors can be used without further checks */
-	bool gated_state;         /* Gated measurements ? */
-	bool snap_state;
+    Window_T *w;              /* start element of list of windows */
+    bool is_equal_width;      /* all windows have equal width -> tracking
+                                 cursors can be used without further checks */
+    bool gated_state;         /* Gated measurements ? */
+    bool snap_state;
 
-	int trigger_channel;
-	bool is_trigger_channel;
+    int trigger_channel;
+    bool is_trigger_channel;
 
-	long rec_len;
-	bool is_rec_len;
+    long rec_len;
+    bool is_rec_len;
 
-	double trig_pos;
-	bool is_trig_pos;
+    double trig_pos;
+    bool is_trig_pos;
 
-	double cursor_pos;        /* current position of cursor 1 */
+    double cursor_pos;        /* current position of cursor 1 */
 
-	int meas_source;          /* channel selected as measurements source */
-	int data_source;          /* channel selected as data source */
+    int meas_source;          /* channel selected as measurements source */
+    int data_source;          /* channel selected as data source */
 
-	bool channel_is_on[ NUM_DISPLAYABLE_CHANNELS ];
-	bool channels_in_use[ NUM_DISPLAYABLE_CHANNELS ];
+    bool channel_is_on[ NUM_DISPLAYABLE_CHANNELS ];
+    bool channels_in_use[ NUM_DISPLAYABLE_CHANNELS ];
 
-	bool lock_state;          /* set when keyboard is locked */
+    bool lock_state;          /* set when keyboard is locked */
 
-	bool windows_are_checked;
+    bool windows_are_checked;
 };
 
 
 enum {
-	SAMPLE,
-	AVERAGE
+    SAMPLE,
+    AVERAGE
 };
 
 enum {
-	GENERAL_TO_TDS744A,
-	TDS744A_TO_GENERAL
+    GENERAL_TO_TDS744A,
+    TDS744A_TO_GENERAL
 };
 
 
@@ -162,17 +162,17 @@ static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 50000, 0 };
 /* List of all allowed time base values (in seconds) */
 
 static double tb[ ] = {                     500.0e-12,
-						  1.0e-9,   2.0e-9,   5.0e-9,
-						 12.5e-9,  25.0e-9,  50.0e-9,
-						100.0e-9, 200.0e-9, 500.0e-9,
-						  1.0e-6,   2.0e-6,   5.0e-6,
-						 10.0e-6,  20.0e-6,  50.0e-6,
-						100.0e-6, 200.0e-6, 500.0e-6,
-						  1.0e-3,   2.0e-3,   5.0e-3,
-						 10.0e-3,  20.0e-3,  50.0e-3,
-						100.0e-3, 200.0e-3, 500.0e-3,
-						  1.0,      2.0,      5.0,
-						 10.0 };
+                          1.0e-9,   2.0e-9,   5.0e-9,
+                         12.5e-9,  25.0e-9,  50.0e-9,
+                        100.0e-9, 200.0e-9, 500.0e-9,
+                          1.0e-6,   2.0e-6,   5.0e-6,
+                         10.0e-6,  20.0e-6,  50.0e-6,
+                        100.0e-6, 200.0e-6, 500.0e-6,
+                          1.0e-3,   2.0e-3,   5.0e-3,
+                         10.0e-3,  20.0e-3,  50.0e-3,
+                        100.0e-3, 200.0e-3, 500.0e-3,
+                          1.0,      2.0,      5.0,
+                         10.0 };
 
 /* Maximum and minimum sensitivity settings (in V) of the measurement
    channels
@@ -181,14 +181,14 @@ static double tb[ ] = {                     500.0e-12,
    Unfortunately, this can only be tested after the digitizer is online. */
 
 double max_sens    = 1e-3,
-	   min_sens_50 = 1.0,
-	   min_sens    = 10.0;
+       min_sens_50 = 1.0,
+       min_sens    = 10.0;
 
 const char *TDS744A_Channel_Names[ MAX_CHANNELS  ] = {
-											"CH1", "CH2", "CH3", "CH4",
-								 			"MATH1", "MATH2", "MATH3", "REF1",
-								 			"REF2", "REF3", "REF4",
-								 			"AUX", "LINE" };
+                                            "CH1", "CH2", "CH3", "CH4",
+                                            "MATH1", "MATH2", "MATH3", "REF1",
+                                            "REF2", "REF3", "REF4",
+                                            "AUX", "LINE" };
 #else
 
 extern TDS744A_T tds744a;
@@ -257,15 +257,15 @@ void tds744a_set_curve_window( Window_T * /* w */ );
 void tds744a_set_window( Window_T * /* w */ );
 
 long tds744a_translate_channel( int  /* dir     */,
-								long /* channel */,
-								bool /* flag    */ );
+                                long /* channel */,
+                                bool /* flag    */ );
 
 void tds744a_store_state( TDS744A_T * /* dest */,
-						  TDS744A_T * /* src  */ );
+                          TDS744A_T * /* src  */ );
 
 void tds744a_state_check( double /* timebase */,
-						  long   /* rec_len  */,
-						  double /* trig_pos */ );
+                          long   /* rec_len  */,
+                          double /* trig_pos */ );
 
 Window_T *tds744a_get_window_by_number( long /* win_number */ );
 
@@ -304,7 +304,7 @@ void tds744a_clear_SESR( void );
 void tds744a_finished( void );
 
 void tds744a_set_cursor( int    /* cur_num */,
-						 double /* pos     */ );
+                         double /* pos     */ );
 
 void tds744a_set_track_cursors( bool /* flag */ );
 
@@ -315,35 +315,35 @@ void tds744a_set_snap( bool /* flag */ );
 bool tds744a_display_channel_state( int /* channel */ );
 
 void tds744a_display_channel( int  /* channel */,
-							  bool /* on_flag */ );
+                              bool /* on_flag */ );
 
 double tds744a_get_sens( int /* channel */ );
 
 void tds744a_set_sens( int    /* channel */,
-					   double /* val     */ );
+                       double /* val     */ );
 
 void tds744a_start_acquisition( void );
 
 double tds744a_get_area( int        /* channel     */,
-						 Window_T * /* w           */,
-						 bool       /* use_cursors */ );
+                         Window_T * /* w           */,
+                         bool       /* use_cursors */ );
 
 void tds744a_get_curve( int        /* channel    */,
-						Window_T * /* w          */,
-						double **  /* data       */,
-						long *     /* length     */,
-						bool       /* use_cursor */ );
+                        Window_T * /* w          */,
+                        double **  /* data       */,
+                        long *     /* length     */,
+                        bool       /* use_cursor */ );
 
 double tds744a_get_amplitude( int        /* channel     */,
-							  Window_T * /* w           */,
-							  bool       /* use_cursors */ );
+                              Window_T * /* w           */,
+                              bool       /* use_cursors */ );
 
 void tds744a_free_running( void );
 
 void tds744a_lock_state( bool /* lock */ );
 
 void tds744a_copy_curve( int /* src  */,
-						 int /* dest */ );
+                         int /* dest */ );
 
 bool tds744a_command( const char */* cmd */ );
 
@@ -354,7 +354,7 @@ bool tds744a_command( const char */* cmd */ );
    I found empirically that waiting 2 ms seems to get rid of the problem. */
 
 #define gpib_read( a, b, c ) \
-		( usleep( 2000 ), gpib_read( ( a ), ( b ), ( c ) ) )
+        ( usleep( 2000 ), gpib_read( ( a ), ( b ), ( c ) ) )
 
 
 #endif /* ! TDS744A_HEADER */
@@ -362,5 +362,7 @@ bool tds744a_command( const char */* cmd */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

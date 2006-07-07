@@ -29,7 +29,7 @@
 
 
 void run_help( FL_OBJECT * /* a */,
-			   long        /* b */ );
+               long        /* b */ );
 
 
 #endif  /* ! HELP_HEADER */
@@ -38,5 +38,7 @@ void run_help( FL_OBJECT * /* a */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

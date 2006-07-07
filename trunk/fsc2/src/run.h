@@ -48,10 +48,10 @@
 bool run( void );
 
 void run_stop_button_callback( FL_OBJECT * /* a */,
-							   long        /* b */ );
+                               long        /* b */ );
 
 void run_close_button_callback( FL_OBJECT * /* a */,
-								long        /* b */ );
+                                long        /* b */ );
 
 
 #endif  /* ! RUN_HEADER */
@@ -60,5 +60,7 @@ void run_close_button_callback( FL_OBJECT * /* a */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

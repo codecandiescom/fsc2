@@ -37,11 +37,11 @@
  *-----------------------------------------------*/
 
 void fsc2_request_serial_port( int          sn  UNUSED_ARG,
-							   const char * dev_name )
+                               const char * dev_name )
 {
-	eprint( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
-			"not compiled with support for serial port access.\n", dev_name );
-	THROW( EXCEPTION );
+    eprint( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
+            "not compiled with support for serial port access.\n", dev_name );
+    THROW( EXCEPTION );
 }
 
 
@@ -59,7 +59,7 @@ void fsc2_serial_init( void )
  *--------------------*/
 
 void fsc2_serial_exp_init( const char * log_file_name  UNUSED_ARG ,
-						   int          log_level UNUSED_ARG )
+                           int          log_level UNUSED_ARG )
 {
 }
 
@@ -97,19 +97,19 @@ void fsc2_final_serial_cleanup( void )
  *-------------------------------------------------------------*/
 
 struct termios *fsc2_serial_open( int          sn        UNUSED_ARG,
-								  const char * dev_name  UNUSED_ARG,
-								  int          flags     UNUSED_ARG )
+                                  const char * dev_name  UNUSED_ARG,
+                                  int          flags     UNUSED_ARG )
 {
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	errno = EACCES;
-	return NULL;
+    errno = EACCES;
+    return NULL;
 }
 
 
@@ -127,21 +127,21 @@ void fsc2_serial_close( int sn  UNUSED_ARG )
  *-------------------------------*/
 
 ssize_t fsc2_serial_write( int          sn              UNUSED_ARG,
-						   const void * buf             UNUSED_ARG ,
-						   size_t       count           UNUSED_ARG,
-						   long         us_wait         UNUSED_ARG,
-						   bool         quit_on_signal  UNUSED_ARG )
+                           const void * buf             UNUSED_ARG ,
+                           size_t       count           UNUSED_ARG,
+                           long         us_wait         UNUSED_ARG,
+                           bool         quit_on_signal  UNUSED_ARG )
 {
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	errno = EBADF;
-	return -1;
+    errno = EBADF;
+    return -1;
 }
 
 
@@ -150,21 +150,21 @@ ssize_t fsc2_serial_write( int          sn              UNUSED_ARG,
  *-------------------------------*/
 
 ssize_t fsc2_serial_read( int    sn              UNUSED_ARG,
-						  void * buf             UNUSED_ARG ,
-						  size_t count           UNUSED_ARG,
-						  long   us_wait         UNUSED_ARG,
-						  bool   quit_on_signal  UNUSED_ARG )
+                          void * buf             UNUSED_ARG ,
+                          size_t count           UNUSED_ARG,
+                          long   us_wait         UNUSED_ARG,
+                          bool   quit_on_signal  UNUSED_ARG )
 {
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	errno = EBADF;
-	return -1;
+    errno = EBADF;
+    return -1;
 }
 
 
@@ -173,18 +173,18 @@ ssize_t fsc2_serial_read( int    sn              UNUSED_ARG,
  *-------------------------------*/
 
 int fsc2_tcgetattr( int              sn         UNUSED_ARG,
-					struct termios * termios_p  UNUSED_ARG )
+                    struct termios * termios_p  UNUSED_ARG )
 {
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	errno = EBADF;
-	return -1;
+    errno = EBADF;
+    return -1;
 }
 
 
@@ -193,19 +193,19 @@ int fsc2_tcgetattr( int              sn         UNUSED_ARG,
  *-------------------------------*/
 
 int fsc2_tcsetattr( int              sn                UNUSED_ARG,
-					int              optional_actions  UNUSED_ARG,
-					struct termios * termios_p         UNUSED_ARG )
+                    int              optional_actions  UNUSED_ARG,
+                    struct termios * termios_p         UNUSED_ARG )
 {
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	errno = EBADF;
-	return -1;
+    errno = EBADF;
+    return -1;
 }
 
 
@@ -214,18 +214,18 @@ int fsc2_tcsetattr( int              sn                UNUSED_ARG,
  *-------------------------------*/
 
 int fsc2_tcsendbreak( int sn        UNUSED_ARG,
-					  int duration  UNUSED_ARG )
+                      int duration  UNUSED_ARG )
 {
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	errno = EBADF;
-	return -1;
+    errno = EBADF;
+    return -1;
 }
 
 
@@ -235,16 +235,16 @@ int fsc2_tcsendbreak( int sn        UNUSED_ARG,
 
 int fsc2_tcdrain( int sn UNUSED_ARG )
 {
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	errno = EBADF;
-	return -1;
+    errno = EBADF;
+    return -1;
 }
 
 
@@ -253,18 +253,18 @@ int fsc2_tcdrain( int sn UNUSED_ARG )
  *-------------------------------*/
 
 int fsc2_tcflush( int sn              UNUSED_ARG,
-				  int queue_selector  UNUSED_ARG )
+                  int queue_selector  UNUSED_ARG )
 {
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	errno = EBADF;
-	return -1;
+    errno = EBADF;
+    return -1;
 }
 
 
@@ -273,18 +273,18 @@ int fsc2_tcflush( int sn              UNUSED_ARG,
  *-------------------------------*/
 
 int fsc2_tcflow( int sn      UNUSED_ARG,
-				 int action  UNUSED_ARG )
+                 int action  UNUSED_ARG )
 {
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	errno = EBADF;
-	return -1;
+    errno = EBADF;
+    return -1;
 }
 
 
@@ -315,15 +315,15 @@ int fsc2_tcflow( int sn      UNUSED_ARG,
    for serial ports. */
 
 static struct {
-	bool in_use;
-	const char* dev_name;
-	char* dev_file;
-	char *lock_file;
-	bool have_lock;
-	bool is_open;
-	int fd;
-	struct termios old_tio,
-		           new_tio;
+    bool in_use;
+    const char* dev_name;
+    char* dev_file;
+    char *lock_file;
+    bool have_lock;
+    bool is_open;
+    int fd;
+    struct termios old_tio,
+                   new_tio;
 } Serial_Port[ NUM_SERIAL_PORTS ];
 
 static int ll;                       /* log level                            */
@@ -338,10 +338,10 @@ static void remove_serial_lock( int sn );
 static void fsc2_serial_log_date( void );
 
 static void fsc2_serial_log_function_start( const char * function,
-											const char * dev_name );
+                                            const char * dev_name );
 
 static void fsc2_serial_log_function_end( const char * function,
-										  const char * dev_name );
+                                          const char * dev_name );
 
 
 /*-------------------------------------------------------------------*
@@ -356,50 +356,50 @@ static void fsc2_serial_log_function_end( const char * function,
  *-------------------------------------------------------------------*/
 
 void fsc2_request_serial_port( int          sn,
-							   const char * dev_name )
+                               const char * dev_name )
 {
-	/* Do some sanity checks on the serial port number */
+    /* Do some sanity checks on the serial port number */
 
-	if ( sn >= NUM_SERIAL_PORTS || sn < 0 )
-	{
-		if ( NUM_SERIAL_PORTS > 1 )
-			eprint( FATAL, UNSET, "%s: Serial port number %d out of valid "
-					"range (0-%d).\n", dev_name, sn, NUM_SERIAL_PORTS - 1 );
-		else if ( NUM_SERIAL_PORTS == 1 )
-			eprint( FATAL, UNSET, "%s: Serial port number %d out of valid "
-					"range (only 0 is allowed).\n", dev_name, sn );
-		else
-			eprint( FATAL, UNSET, "%s: Invalid serial port number %d.\n",
-					dev_name, sn );
-		THROW( EXCEPTION );
-	}
+    if ( sn >= NUM_SERIAL_PORTS || sn < 0 )
+    {
+        if ( NUM_SERIAL_PORTS > 1 )
+            eprint( FATAL, UNSET, "%s: Serial port number %d out of valid "
+                    "range (0-%d).\n", dev_name, sn, NUM_SERIAL_PORTS - 1 );
+        else if ( NUM_SERIAL_PORTS == 1 )
+            eprint( FATAL, UNSET, "%s: Serial port number %d out of valid "
+                    "range (only 0 is allowed).\n", dev_name, sn );
+        else
+            eprint( FATAL, UNSET, "%s: Invalid serial port number %d.\n",
+                    dev_name, sn );
+        THROW( EXCEPTION );
+    }
 
-	/* Check that serial port hasn't already been requested by another
-	   module */
+    /* Check that serial port hasn't already been requested by another
+       module */
 
-	if ( Serial_Port[ sn ].in_use )
-	{
-		eprint( FATAL, UNSET, "%s: Requested serial port %d (i.e. /dev/ttyS%d "
-				"or COM%d) is already used by device %s.\n", dev_name, sn, sn,
-				sn + 1, Serial_Port[ sn ].dev_name );
-		THROW( EXCEPTION );
-	}
+    if ( Serial_Port[ sn ].in_use )
+    {
+        eprint( FATAL, UNSET, "%s: Requested serial port %d (i.e. /dev/ttyS%d "
+                "or COM%d) is already used by device %s.\n", dev_name, sn, sn,
+                sn + 1, Serial_Port[ sn ].dev_name );
+        THROW( EXCEPTION );
+    }
 
-	Serial_Port[ sn ].in_use    = SET;
-	Serial_Port[ sn ].have_lock = UNSET;
-	Serial_Port[ sn ].is_open   = UNSET;
-	Serial_Port[ sn ].dev_name   = dev_name;
+    Serial_Port[ sn ].in_use    = SET;
+    Serial_Port[ sn ].have_lock = UNSET;
+    Serial_Port[ sn ].is_open   = UNSET;
+    Serial_Port[ sn ].dev_name   = dev_name;
 
-	/* Assemble name of device file and (optionally) lock file */
+    /* Assemble name of device file and (optionally) lock file */
 
-	Serial_Port[ sn ].dev_file  = get_string( "/dev/ttyS%d", sn );
+    Serial_Port[ sn ].dev_file  = get_string( "/dev/ttyS%d", sn );
 #ifdef SERIAL_LOCK_DIR
-	if ( *( SERIAL_LOCK_DIR + strlen( SERIAL_LOCK_DIR ) - 1 ) == '/' )
-		Serial_Port[ sn ].lock_file = get_string( "%sLCK..ttyS%d",
-												  SERIAL_LOCK_DIR, sn );
-	else
-		Serial_Port[ sn ].lock_file = get_string( "%s/LCK..ttyS%d",
-												  SERIAL_LOCK_DIR, sn );
+    if ( *( SERIAL_LOCK_DIR + strlen( SERIAL_LOCK_DIR ) - 1 ) == '/' )
+        Serial_Port[ sn ].lock_file = get_string( "%sLCK..ttyS%d",
+                                                  SERIAL_LOCK_DIR, sn );
+    else
+        Serial_Port[ sn ].lock_file = get_string( "%s/LCK..ttyS%d",
+                                                  SERIAL_LOCK_DIR, sn );
 #endif
 }
 
@@ -415,55 +415,55 @@ void fsc2_request_serial_port( int          sn,
  *-----------------------------------------------------------------------*/
 
 void fsc2_serial_exp_init( const char * log_file_name,
-						   int          log_level )
+                           int          log_level )
 {
-	int i;
-	int requested_ports = 0;
+    int i;
+    int requested_ports = 0;
 
 
-	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
-		if ( Serial_Port[ i ].in_use )
-			requested_ports++;
+    for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
+        if ( Serial_Port[ i ].in_use )
+            requested_ports++;
 
-	if ( requested_ports == 0 )
-		return;
+    if ( requested_ports == 0 )
+        return;
 
-	ll = log_level;
+    ll = log_level;
 
-	if ( ll < LL_NONE )
-	{
-		ll = LL_NONE;
-		return;
-	}
+    if ( ll < LL_NONE )
+    {
+        ll = LL_NONE;
+        return;
+    }
 
-	if ( i == NUM_SERIAL_PORTS )
-		return;
+    if ( i == NUM_SERIAL_PORTS )
+        return;
 
-	if ( ll > LL_ALL )
-		ll = LL_ALL;
+    if ( ll > LL_ALL )
+        ll = LL_ALL;
 
-	raise_permissions( );
+    raise_permissions( );
 
     if ( log_file_name == NULL || *log_file_name == '\0' )
-	{
+    {
         fsc2_serial_log = stderr;
-		fprintf( stderr, "Serial port log file not specified, using stderr "
-				 "instead\n" );
-	}
-	else
-	{
-		if ( ( fsc2_serial_log = fopen( log_file_name, "w" ) ) == NULL )
-		{
-			fsc2_serial_log = stderr;
-			fprintf( stderr, "Can't open serial port log file %s, using "
-					 "stderr instead.\n", log_file_name );
-		}
-		else
-			chmod( log_file_name,
-				   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH );
-	}
+        fprintf( stderr, "Serial port log file not specified, using stderr "
+                 "instead\n" );
+    }
+    else
+    {
+        if ( ( fsc2_serial_log = fopen( log_file_name, "w" ) ) == NULL )
+        {
+            fsc2_serial_log = stderr;
+            fprintf( stderr, "Can't open serial port log file %s, using "
+                     "stderr instead.\n", log_file_name );
+        }
+        else
+            chmod( log_file_name,
+                   S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH );
+    }
 
-	lower_permissions( );
+    lower_permissions( );
 
     fsc2_serial_log_message( "Starting serial port logging\n" );
 }
@@ -476,19 +476,19 @@ void fsc2_serial_exp_init( const char * log_file_name,
 
 void fsc2_serial_init( void )
 {
-	int i;
+    int i;
 
 
-	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
-	{
-		Serial_Port[ i ].dev_file    = NULL;
-		Serial_Port[ i ].dev_name    = NULL;
-		Serial_Port[ i ].lock_file   = UNSET;
-		Serial_Port[ i ].in_use      = UNSET;
-		Serial_Port[ i ].have_lock   = UNSET;
-		Serial_Port[ i ].is_open     = UNSET;
-		Serial_Port[ i ].fd          = -1;
-	}
+    for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
+    {
+        Serial_Port[ i ].dev_file    = NULL;
+        Serial_Port[ i ].dev_name    = NULL;
+        Serial_Port[ i ].lock_file   = UNSET;
+        Serial_Port[ i ].in_use      = UNSET;
+        Serial_Port[ i ].have_lock   = UNSET;
+        Serial_Port[ i ].is_open     = UNSET;
+        Serial_Port[ i ].fd          = -1;
+    }
 }
 
 
@@ -499,30 +499,30 @@ void fsc2_serial_init( void )
 
 void fsc2_serial_cleanup( void )
 {
-	int i;
-	int requested_ports = 0;
+    int i;
+    int requested_ports = 0;
 
 
-	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
-		if ( Serial_Port[ i ].in_use )
-			requested_ports++;
+    for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
+        if ( Serial_Port[ i ].in_use )
+            requested_ports++;
 
-	if ( requested_ports == 0 )
-		return;
+    if ( requested_ports == 0 )
+        return;
 
-	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
-		if ( Serial_Port[ i ].is_open )
-			fsc2_serial_close( i );
+    for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
+        if ( Serial_Port[ i ].is_open )
+            fsc2_serial_close( i );
 
-	if ( fsc2_serial_log != NULL )
-	{
-		fsc2_serial_log_message( "Closed all serial ports\n" );
-		raise_permissions( );
-		if ( fsc2_serial_log != stderr )
-			fclose( fsc2_serial_log );
-		fsc2_serial_log = NULL;
-		lower_permissions( );
-	}
+    if ( fsc2_serial_log != NULL )
+    {
+        fsc2_serial_log_message( "Closed all serial ports\n" );
+        raise_permissions( );
+        if ( fsc2_serial_log != stderr )
+            fclose( fsc2_serial_log );
+        fsc2_serial_log = NULL;
+        lower_permissions( );
+    }
 }
 
 
@@ -533,25 +533,25 @@ void fsc2_serial_cleanup( void )
 
 void fsc2_final_serial_cleanup( void )
 {
-	int i;
+    int i;
 
 
-	for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
-	{
-		if ( Serial_Port[ i ].is_open )
-			fsc2_serial_close( i );
+    for ( i = 0; i < NUM_SERIAL_PORTS; i++ )
+    {
+        if ( Serial_Port[ i ].is_open )
+            fsc2_serial_close( i );
 
-		if ( Serial_Port[ i ].in_use )
-		{
-			Serial_Port[ i ].dev_file =
-								   CHAR_P T_free( Serial_Port[ i ].dev_file );
-			Serial_Port[ i ].lock_file =
-								   CHAR_P T_free( Serial_Port[ i ].lock_file );
-		}
+        if ( Serial_Port[ i ].in_use )
+        {
+            Serial_Port[ i ].dev_file =
+                                   CHAR_P T_free( Serial_Port[ i ].dev_file );
+            Serial_Port[ i ].lock_file =
+                                   CHAR_P T_free( Serial_Port[ i ].lock_file );
+        }
 
-		Serial_Port[ i ].dev_name   = NULL;
-		Serial_Port[ i ].in_use    = UNSET;
-	}
+        Serial_Port[ i ].dev_name   = NULL;
+        Serial_Port[ i ].in_use    = UNSET;
+    }
 }
 
 
@@ -565,118 +565,118 @@ void fsc2_final_serial_cleanup( void )
  *--------------------------------------------------------------------*/
 
 struct termios *fsc2_serial_open( int          sn,
-								  const char * dev_name,
-								  int          flags )
+                                  const char * dev_name,
+                                  int          flags )
 {
-	int fd;
-	int fd_flags;
+    int fd;
+    int fd_flags;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	/* Check that the device name argument is reasonable */
+    /* Check that the device name argument is reasonable */
 
-	if ( dev_name == NULL || *dev_name == '\0' )
-	{
-		fsc2_serial_log_message( "Error: Invalid 'dev_name' argument in call "
-								 "of function fsc2_serial_init()\n" );
-		errno = EINVAL;
-		return NULL;
-	}
+    if ( dev_name == NULL || *dev_name == '\0' )
+    {
+        fsc2_serial_log_message( "Error: Invalid 'dev_name' argument in call "
+                                 "of function fsc2_serial_init()\n" );
+        errno = EINVAL;
+        return NULL;
+    }
 
-	fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
+    fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
 
-	/* Check that the serial prot number is within the allowed range */
+    /* Check that the serial prot number is within the allowed range */
 
-	if ( sn >= NUM_SERIAL_PORTS || sn < 0 )
-	{
-		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
-								 "call from module %s\n", sn, dev_name );
-		fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
-		errno = EBADF;
-		return NULL;
-	}
+    if ( sn >= NUM_SERIAL_PORTS || sn < 0 )
+    {
+        fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+                                 "call from module %s\n", sn, dev_name );
+        fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
+        errno = EBADF;
+        return NULL;
+    }
 
-	/* Check if serial port has been requested by the module */
+    /* Check if serial port has been requested by the module */
 
-	if ( ! Serial_Port[ sn ].in_use ||
-		 strcmp( Serial_Port[ sn ].dev_name, dev_name ) )
-	{
-		fsc2_serial_log_message( "Error: Serial port %d hasn't been claimed "
-								 "by module %s\n", sn, dev_name );
-		fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
-		errno = EACCES;
-		return NULL;
-	}
+    if ( ! Serial_Port[ sn ].in_use ||
+         strcmp( Serial_Port[ sn ].dev_name, dev_name ) )
+    {
+        fsc2_serial_log_message( "Error: Serial port %d hasn't been claimed "
+                                 "by module %s\n", sn, dev_name );
+        fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
+        errno = EACCES;
+        return NULL;
+    }
 
-	/* If the port has already been opened just return the structure with the
-	   current terminal settings */
+    /* If the port has already been opened just return the structure with the
+       current terminal settings */
 
-	if ( Serial_Port[ sn ].is_open )
-	{
-		raise_permissions( );
-		tcgetattr( Serial_Port[ sn ].fd, &Serial_Port[ sn ].new_tio );
-		lower_permissions( );
-		fsc2_serial_log_function_end( "fsc2_serial_open", dev_name );
-		fsc2_serial_log_message( "Serial port %d for module %s already "
-								 "open\n", sn, dev_name );
-		fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
-		return &Serial_Port[ sn ].new_tio;
-	}
+    if ( Serial_Port[ sn ].is_open )
+    {
+        raise_permissions( );
+        tcgetattr( Serial_Port[ sn ].fd, &Serial_Port[ sn ].new_tio );
+        lower_permissions( );
+        fsc2_serial_log_function_end( "fsc2_serial_open", dev_name );
+        fsc2_serial_log_message( "Serial port %d for module %s already "
+                                 "open\n", sn, dev_name );
+        fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
+        return &Serial_Port[ sn ].new_tio;
+    }
 
-	/* Try to create a lock file */
+    /* Try to create a lock file */
 
-	if ( ! get_serial_lock( sn ) )
-	{
-		fsc2_serial_log_message( "Error: Failure to create lock file\n" );
-		fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
-		errno = EACCES;
-		return NULL;
-	}
+    if ( ! get_serial_lock( sn ) )
+    {
+        fsc2_serial_log_message( "Error: Failure to create lock file\n" );
+        fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
+        errno = EACCES;
+        return NULL;
+    }
 
-	/* Try to open the serial port */
+    /* Try to open the serial port */
 
-	raise_permissions( );
-	if ( ( fd = open( Serial_Port[ sn ].dev_file, flags ) ) < 0 )
-	{
-		remove_serial_lock( sn );
-		lower_permissions( );
-		fsc2_serial_log_message( "Error: Failure to open serial port %d in "
-								 "function fsc2_serial_init()\n", sn );
-		fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
-		errno = EACCES;
-		return NULL;
-	}
+    raise_permissions( );
+    if ( ( fd = open( Serial_Port[ sn ].dev_file, flags ) ) < 0 )
+    {
+        remove_serial_lock( sn );
+        lower_permissions( );
+        fsc2_serial_log_message( "Error: Failure to open serial port %d in "
+                                 "function fsc2_serial_init()\n", sn );
+        fsc2_serial_log_function_start( "fsc2_serial_open", dev_name );
+        errno = EACCES;
+        return NULL;
+    }
 
-	/* Set the close-on-exec flag for the file descriptor */
+    /* Set the close-on-exec flag for the file descriptor */
 
-	if ( ( fd_flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
-		fd_flags = 0;
+    if ( ( fd_flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
+        fd_flags = 0;
 
-	fcntl( fd, F_SETFD, fd_flags | FD_CLOEXEC );
+    fcntl( fd, F_SETFD, fd_flags | FD_CLOEXEC );
 
-	/* Get the the current terminal settings and copy them to a structure
-	   that gets passed back to the caller */
+    /* Get the the current terminal settings and copy them to a structure
+       that gets passed back to the caller */
 
-	tcgetattr( fd, &Serial_Port[ sn ].old_tio );
-	memcpy( &Serial_Port[ sn ].new_tio, &Serial_Port[ sn ].old_tio,
-			sizeof( struct termios ) );
-	lower_permissions( );
+    tcgetattr( fd, &Serial_Port[ sn ].old_tio );
+    memcpy( &Serial_Port[ sn ].new_tio, &Serial_Port[ sn ].old_tio,
+            sizeof( struct termios ) );
+    lower_permissions( );
 
-	Serial_Port[ sn ].fd = fd;
-	Serial_Port[ sn ].is_open = SET;
+    Serial_Port[ sn ].fd = fd;
+    Serial_Port[ sn ].is_open = SET;
 
-	fsc2_serial_log_message( "Successfully opened serial port %d for device ",
-							 "%s\n", sn, dev_name );
-	fsc2_serial_log_function_end( "fsc2_serial_open", dev_name );
+    fsc2_serial_log_message( "Successfully opened serial port %d for device ",
+                             "%s\n", sn, dev_name );
+    fsc2_serial_log_function_end( "fsc2_serial_open", dev_name );
 
-	return &Serial_Port[ sn ].new_tio;
+    return &Serial_Port[ sn ].new_tio;
 }
 
 
@@ -686,43 +686,43 @@ struct termios *fsc2_serial_open( int          sn,
 
 void fsc2_serial_close( int sn )
 {
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	if ( Serial_Port[ sn ].dev_name )
-		fsc2_serial_log_function_start( "fsc2_serial_close",
-										Serial_Port[ sn ].dev_name );
+    if ( Serial_Port[ sn ].dev_name )
+        fsc2_serial_log_function_start( "fsc2_serial_close",
+                                        Serial_Port[ sn ].dev_name );
 
-	/* Flush the port, reset the settings back to the original state and
-	   close the port */
+    /* Flush the port, reset the settings back to the original state and
+       close the port */
 
-	if ( Serial_Port[ sn ].is_open )
-	{
-		raise_permissions( );
-		tcflush( Serial_Port[ sn ].fd, TCIFLUSH );
-		tcsetattr( Serial_Port[ sn ].fd, TCSANOW, &Serial_Port[ sn ].old_tio );
-		close( Serial_Port[ sn ].fd );
-		lower_permissions( );
-		Serial_Port[ sn ].is_open = UNSET;
-	}
+    if ( Serial_Port[ sn ].is_open )
+    {
+        raise_permissions( );
+        tcflush( Serial_Port[ sn ].fd, TCIFLUSH );
+        tcsetattr( Serial_Port[ sn ].fd, TCSANOW, &Serial_Port[ sn ].old_tio );
+        close( Serial_Port[ sn ].fd );
+        lower_permissions( );
+        Serial_Port[ sn ].is_open = UNSET;
+    }
 
-	/* Also remove the lock file for the serial port */
+    /* Also remove the lock file for the serial port */
 
-	if ( Serial_Port[ sn ].have_lock )
-		remove_serial_lock( sn );
+    if ( Serial_Port[ sn ].have_lock )
+        remove_serial_lock( sn );
 
-	if ( Serial_Port[ sn ].dev_name )
-	{
-		fsc2_serial_log_message( "Closed serial port %d for device %s\n",
-								 sn, Serial_Port[ sn ].dev_name );
-		fsc2_serial_log_function_end( "fsc2_serial_close",
-									  Serial_Port[ sn ].dev_name );
-	}
+    if ( Serial_Port[ sn ].dev_name )
+    {
+        fsc2_serial_log_message( "Closed serial port %d for device %s\n",
+                                 sn, Serial_Port[ sn ].dev_name );
+        fsc2_serial_log_function_end( "fsc2_serial_close",
+                                      Serial_Port[ sn ].dev_name );
+    }
 }
 
 
@@ -743,138 +743,138 @@ void fsc2_serial_close( int sn )
  *-------------------------------------------------------------------*/
 
 ssize_t fsc2_serial_write( int          sn,
-						   const void * buf,
-						   size_t       count,
-						   long         us_wait,
-						   bool         quit_on_signal )
+                           const void * buf,
+                           size_t       count,
+                           long         us_wait,
+                           bool         quit_on_signal )
 {
-	ssize_t write_count;
-	fd_set wrds;
-	struct timeval timeout;
-	struct timeval before, after;
+    ssize_t write_count;
+    fd_set wrds;
+    struct timeval timeout;
+    struct timeval before, after;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	/* Check that serial port number is reasonable */
+    /* Check that serial port number is reasonable */
 
-	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
-	{
-		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
-								 "call of function fsc2_serial_write()\n",
-								 sn );
-		errno = EBADF;
-		return -1;
-	}
+    if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
+    {
+        fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+                                 "call of function fsc2_serial_write()\n",
+                                 sn );
+        errno = EBADF;
+        return -1;
+    }
 
-	fsc2_serial_log_function_start( "fsc2_serial_write",
-									Serial_Port[ sn ].dev_name );
+    fsc2_serial_log_function_start( "fsc2_serial_write",
+                                    Serial_Port[ sn ].dev_name );
 
-	if ( ll == LL_ALL )
-	{
-		if ( us_wait == 0 )
-			fsc2_serial_log_message( "Expected to write %ld bytes without "
-									 "delay to serial port %d:\n%.*s\n",
-									 ( long int ) count, sn,
-									 ( int ) count, buf );
-		else if ( us_wait < 0 )
-			fsc2_serial_log_message( "Expected to write %ld bytes to serial "
-									 "port %d:\n%.*s\n", ( long int ) count,
-									 sn, ( int ) count, buf );
-		else
-			fsc2_serial_log_message( "Expected to write %ld bytes within %ld "
-									 "ms to serial port %d:\n%.*s\n",
-									 ( long int ) count, us_wait / 1000, sn,
-									 ( int ) count, buf );
-	}
+    if ( ll == LL_ALL )
+    {
+        if ( us_wait == 0 )
+            fsc2_serial_log_message( "Expected to write %ld bytes without "
+                                     "delay to serial port %d:\n%.*s\n",
+                                     ( long int ) count, sn,
+                                     ( int ) count, buf );
+        else if ( us_wait < 0 )
+            fsc2_serial_log_message( "Expected to write %ld bytes to serial "
+                                     "port %d:\n%.*s\n", ( long int ) count,
+                                     sn, ( int ) count, buf );
+        else
+            fsc2_serial_log_message( "Expected to write %ld bytes within %ld "
+                                     "ms to serial port %d:\n%.*s\n",
+                                     ( long int ) count, us_wait / 1000, sn,
+                                     ( int ) count, buf );
+    }
 
-	raise_permissions( );
+    raise_permissions( );
 
-	if ( us_wait != 0 )
-	{
-		FD_ZERO( &wrds );
-		FD_SET( Serial_Port[ sn ].fd, &wrds );
+    if ( us_wait != 0 )
+    {
+        FD_ZERO( &wrds );
+        FD_SET( Serial_Port[ sn ].fd, &wrds );
 
-	write_retry:
+    write_retry:
 
-		if ( us_wait > 0 )
-		{
-			timeout.tv_sec  = us_wait / 1000000;
-			timeout.tv_usec = us_wait % 1000000;
-		}
+        if ( us_wait > 0 )
+        {
+            timeout.tv_sec  = us_wait / 1000000;
+            timeout.tv_usec = us_wait % 1000000;
+        }
 
-		gettimeofday( &before, NULL );
+        gettimeofday( &before, NULL );
 
-		switch ( select( Serial_Port[ sn ].fd + 1, NULL, &wrds, NULL,
-						 us_wait > 0 ? &timeout : NULL ) )
-		{
-			case -1 :
-				if ( errno != EINTR )
-				{
-					fsc2_serial_log_message( "Error: select() returned value "
-											 "indicating an error\n" );
-					fsc2_serial_log_function_end( "fsc2_serial_write",
-												  Serial_Port[ sn ].dev_name );
-					lower_permissions( );
-					return -1;
-				}
+        switch ( select( Serial_Port[ sn ].fd + 1, NULL, &wrds, NULL,
+                         us_wait > 0 ? &timeout : NULL ) )
+        {
+            case -1 :
+                if ( errno != EINTR )
+                {
+                    fsc2_serial_log_message( "Error: select() returned value "
+                                             "indicating an error\n" );
+                    fsc2_serial_log_function_end( "fsc2_serial_write",
+                                                  Serial_Port[ sn ].dev_name );
+                    lower_permissions( );
+                    return -1;
+                }
 
-				if ( ! quit_on_signal )
-				{
-					gettimeofday( &after, NULL );
-					us_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-							   - ( before.tv_sec * 1000000 + before.tv_usec );
-					if ( us_wait > 0 )
-						goto write_retry;
-				}
+                if ( ! quit_on_signal )
+                {
+                    gettimeofday( &after, NULL );
+                    us_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
+                               - ( before.tv_sec * 1000000 + before.tv_usec );
+                    if ( us_wait > 0 )
+                        goto write_retry;
+                }
 
-				fsc2_serial_log_message( "Error: select() aborted due to the"
-										 "receipt of a signal\n" );
-				fsc2_serial_log_function_end( "fsc2_serial_write",
-											  Serial_Port[ sn ].dev_name );
-				lower_permissions( );
-				return 0;
-				
-			case 0 :
-				fsc2_serial_log_message( "Error: writing aborted due to "
-										 "timeout\n" );
-				fsc2_serial_log_function_end( "fsc2_serial_write",
-											  Serial_Port[ sn ].dev_name );
-				lower_permissions( );
-				return 0;
-		}
-	}
+                fsc2_serial_log_message( "Error: select() aborted due to the"
+                                         "receipt of a signal\n" );
+                fsc2_serial_log_function_end( "fsc2_serial_write",
+                                              Serial_Port[ sn ].dev_name );
+                lower_permissions( );
+                return 0;
+                
+            case 0 :
+                fsc2_serial_log_message( "Error: writing aborted due to "
+                                         "timeout\n" );
+                fsc2_serial_log_function_end( "fsc2_serial_write",
+                                              Serial_Port[ sn ].dev_name );
+                lower_permissions( );
+                return 0;
+        }
+    }
 
-	while ( ( write_count = write( Serial_Port[ sn ].fd, buf, count ) ) < 0 
-			&& errno == EINTR && ! quit_on_signal )
-		/* empty */ ;
+    while ( ( write_count = write( Serial_Port[ sn ].fd, buf, count ) ) < 0 
+            && errno == EINTR && ! quit_on_signal )
+        /* empty */ ;
 
 
-	if ( write_count < 0 && errno == EINTR )
-	{
-		fsc2_serial_log_message( "Error: writing aborted due to signal, "
-								 "0 bytes got written\n" );
-		write_count = 0;
-	}
-	else
-	{
-		if ( ll == LL_ALL )
-			fsc2_serial_log_message( "Wrote %ld bytes to serial port %d\n",
-									 ( long ) write_count, sn );
-	}
+    if ( write_count < 0 && errno == EINTR )
+    {
+        fsc2_serial_log_message( "Error: writing aborted due to signal, "
+                                 "0 bytes got written\n" );
+        write_count = 0;
+    }
+    else
+    {
+        if ( ll == LL_ALL )
+            fsc2_serial_log_message( "Wrote %ld bytes to serial port %d\n",
+                                     ( long ) write_count, sn );
+    }
 
-	lower_permissions( );
+    lower_permissions( );
 
-	fsc2_serial_log_function_end( "fsc2_serial_write",
-								  Serial_Port[ sn ].dev_name );
+    fsc2_serial_log_function_end( "fsc2_serial_write",
+                                  Serial_Port[ sn ].dev_name );
 
-	return write_count;
+    return write_count;
 }
 
 
@@ -894,142 +894,142 @@ ssize_t fsc2_serial_write( int          sn,
  *---------------------------------------------------------------------*/
 
 ssize_t fsc2_serial_read( int    sn,
-						  void * buf,
-						  size_t count,
-						  long   us_wait,
-						  bool   quit_on_signal )
+                          void * buf,
+                          size_t count,
+                          long   us_wait,
+                          bool   quit_on_signal )
 {
-	ssize_t read_count;
-	fd_set rfds;
-	struct timeval timeout;
-	struct timeval before, after;
+    ssize_t read_count;
+    fd_set rfds;
+    struct timeval timeout;
+    struct timeval before, after;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	/* Check that serial port number is reasonable */
+    /* Check that serial port number is reasonable */
 
-	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
-	{
-		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
-								 "call of function fsc2_serial_read()\n", sn );
-		errno = EBADF;
-		return -1;
-	}
+    if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
+    {
+        fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+                                 "call of function fsc2_serial_read()\n", sn );
+        errno = EBADF;
+        return -1;
+    }
 
-	fsc2_serial_log_function_start( "fsc2_serial_read",
-									Serial_Port[ sn ].dev_name );
+    fsc2_serial_log_function_start( "fsc2_serial_read",
+                                    Serial_Port[ sn ].dev_name );
 
-	if ( ll == LL_ALL )
-	{
-		if ( us_wait == 0 )
-			fsc2_serial_log_message( "Expected to read up to %ld bytes "
-									 "without delay from serial port "
-									 "%d\n", ( long ) count, sn );
-		else if ( us_wait < 0 )
-			fsc2_serial_log_message( "Expected to read up to %ld bytes from "
-									 "serial port %d\n",
-									 ( long ) count, sn );
-		else
-			fsc2_serial_log_message( "Expected to read up to %ld bytes "
-									 "within %ld ms from serial port "
-									 "%d\n", ( long ) count,
-									 us_wait / 1000, sn );
-	}
+    if ( ll == LL_ALL )
+    {
+        if ( us_wait == 0 )
+            fsc2_serial_log_message( "Expected to read up to %ld bytes "
+                                     "without delay from serial port "
+                                     "%d\n", ( long ) count, sn );
+        else if ( us_wait < 0 )
+            fsc2_serial_log_message( "Expected to read up to %ld bytes from "
+                                     "serial port %d\n",
+                                     ( long ) count, sn );
+        else
+            fsc2_serial_log_message( "Expected to read up to %ld bytes "
+                                     "within %ld ms from serial port "
+                                     "%d\n", ( long ) count,
+                                     us_wait / 1000, sn );
+    }
 
-	raise_permissions( );
+    raise_permissions( );
 
-	/* If there is a zero timeout period wait for data for the specified
-	   timeout. A negative timeout means wait forever. */
+    /* If there is a zero timeout period wait for data for the specified
+       timeout. A negative timeout means wait forever. */
 
-	if ( us_wait != 0 )
-	{
-		FD_ZERO( &rfds );
-		FD_SET( Serial_Port[ sn ].fd, &rfds );
+    if ( us_wait != 0 )
+    {
+        FD_ZERO( &rfds );
+        FD_SET( Serial_Port[ sn ].fd, &rfds );
 
-	read_retry:
+    read_retry:
 
-		if ( us_wait > 0 )
-		{
-			timeout.tv_sec  = us_wait / 1000000;
-			timeout.tv_usec = us_wait % 1000000;
-		}
+        if ( us_wait > 0 )
+        {
+            timeout.tv_sec  = us_wait / 1000000;
+            timeout.tv_usec = us_wait % 1000000;
+        }
 
-		gettimeofday( &before, NULL );
+        gettimeofday( &before, NULL );
 
-		switch ( select( Serial_Port[ sn ].fd + 1, &rfds, NULL, NULL,
-						 us_wait > 0 ? &timeout : NULL ) )
-		{
-			case -1 :
-				if ( errno != EINTR )
-				{
-					fsc2_serial_log_message( "Error: select() returned value "
-											 "indicating error in "
-											 "fsc2_serial_read()\n" );
-					fsc2_serial_log_function_end( "fsc2_serial_read",
-												  Serial_Port[ sn ].dev_name );
-					lower_permissions( );
-					return -1;
-				}
+        switch ( select( Serial_Port[ sn ].fd + 1, &rfds, NULL, NULL,
+                         us_wait > 0 ? &timeout : NULL ) )
+        {
+            case -1 :
+                if ( errno != EINTR )
+                {
+                    fsc2_serial_log_message( "Error: select() returned value "
+                                             "indicating error in "
+                                             "fsc2_serial_read()\n" );
+                    fsc2_serial_log_function_end( "fsc2_serial_read",
+                                                  Serial_Port[ sn ].dev_name );
+                    lower_permissions( );
+                    return -1;
+                }
 
-				if ( ! quit_on_signal )
-				{
-					gettimeofday( &after, NULL );
-					us_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-							   - ( before.tv_sec * 1000000 + before.tv_usec );
-					if ( us_wait > 0 )
-						goto read_retry;
-				}
+                if ( ! quit_on_signal )
+                {
+                    gettimeofday( &after, NULL );
+                    us_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
+                               - ( before.tv_sec * 1000000 + before.tv_usec );
+                    if ( us_wait > 0 )
+                        goto read_retry;
+                }
 
-				fsc2_serial_log_message( "Error: select() aborted due to "
-										 "receipt of a signal\n" );
-				fsc2_serial_log_function_end( "fsc2_serial_read",
-											  Serial_Port[ sn ].dev_name );
-				lower_permissions( );
-				return 0;
+                fsc2_serial_log_message( "Error: select() aborted due to "
+                                         "receipt of a signal\n" );
+                fsc2_serial_log_function_end( "fsc2_serial_read",
+                                              Serial_Port[ sn ].dev_name );
+                lower_permissions( );
+                return 0;
 
-			case 0 :
-				fsc2_serial_log_message( "Error: reading aborted due to "
-										 "timeout\n" );
-				fsc2_serial_log_function_end( "fsc2_serial_write",
-											  Serial_Port[ sn ].dev_name );
-				lower_permissions( );
-				return 0;
-		}
-	}
+            case 0 :
+                fsc2_serial_log_message( "Error: reading aborted due to "
+                                         "timeout\n" );
+                fsc2_serial_log_function_end( "fsc2_serial_write",
+                                              Serial_Port[ sn ].dev_name );
+                lower_permissions( );
+                return 0;
+        }
+    }
 
-	while ( ( read_count = read( Serial_Port[ sn ].fd, buf, count ) ) < 0 
-			&& errno == EINTR && ! quit_on_signal )
-		/* empty */ ;
-		
-	if ( read_count == 0 )
-	{
-		if ( ll == LL_ALL )
-			fsc2_serial_log_message( "No bytes could be read\n" );
-	}
-	else if ( read_count < 0 && errno == EINTR )
-	{
-		fsc2_serial_log_message( "Error: reading aborted due to signal, "
-								 "0 bytes got read\n" );
-		read_count = 0;
-	}
-	else if ( ll == LL_ALL )
-		fsc2_serial_log_message( "Read %ld bytes from serial port %d:\n%.*s\n",
-								 ( long ) read_count, sn,
-								 ( int ) read_count, buf );
+    while ( ( read_count = read( Serial_Port[ sn ].fd, buf, count ) ) < 0 
+            && errno == EINTR && ! quit_on_signal )
+        /* empty */ ;
+        
+    if ( read_count == 0 )
+    {
+        if ( ll == LL_ALL )
+            fsc2_serial_log_message( "No bytes could be read\n" );
+    }
+    else if ( read_count < 0 && errno == EINTR )
+    {
+        fsc2_serial_log_message( "Error: reading aborted due to signal, "
+                                 "0 bytes got read\n" );
+        read_count = 0;
+    }
+    else if ( ll == LL_ALL )
+        fsc2_serial_log_message( "Read %ld bytes from serial port %d:\n%.*s\n",
+                                 ( long ) read_count, sn,
+                                 ( int ) read_count, buf );
 
-	lower_permissions( );
+    lower_permissions( );
 
-	fsc2_serial_log_function_end( "fsc2_serial_read",
-								  Serial_Port[ sn ].dev_name );
+    fsc2_serial_log_function_end( "fsc2_serial_read",
+                                  Serial_Port[ sn ].dev_name );
 
-	return read_count;
+    return read_count;
 }
 
 
@@ -1049,150 +1049,150 @@ ssize_t fsc2_serial_read( int    sn,
 #ifdef SERIAL_LOCK_DIR
 static bool get_serial_lock( int sn )
 {
-	int fd;
-	char buf[ 128 ];
-	const char *bp;
-	int n;
-	long pid = -1;
-	int mask;
+    int fd;
+    char buf[ 128 ];
+    const char *bp;
+    int n;
+    long pid = -1;
+    int mask;
 
 
-	/* Try to open lock file - if it exists we can check its content and
-	   decide what to do, i.e. find out if the process it belonged to is
-	   dead, in which case it can be removed */
+    /* Try to open lock file - if it exists we can check its content and
+       decide what to do, i.e. find out if the process it belonged to is
+       dead, in which case it can be removed */
 
-	fsc2_serial_log_function_start( "get_serial_lock",
-									Serial_Port[ sn ].dev_name );
+    fsc2_serial_log_function_start( "get_serial_lock",
+                                    Serial_Port[ sn ].dev_name );
 
-	raise_permissions( );
+    raise_permissions( );
 
-	if ( ( fd = open( Serial_Port[ sn ].lock_file, O_RDONLY ) ) >= 0 )
-	{
-		n = read( fd, buf, sizeof( buf ) - 1 );
-		close( fd );
+    if ( ( fd = open( Serial_Port[ sn ].lock_file, O_RDONLY ) ) >= 0 )
+    {
+        n = read( fd, buf, sizeof( buf ) - 1 );
+        close( fd );
 
-		if ( n == 11 )                    /* expect standard HDB UUCP format */
-		{
-			buf[ n ] = '\0';
-			n = 0;
-			bp = buf;
-			while ( *bp && *bp == ' ' )
-				bp++;
+        if ( n == 11 )                    /* expect standard HDB UUCP format */
+        {
+            buf[ n ] = '\0';
+            n = 0;
+            bp = buf;
+            while ( *bp && *bp == ' ' )
+                bp++;
 
-			if ( *bp && isdigit( ( unsigned char ) *bp ) )
-				n = sscanf( bp, "%ld", &pid );
+            if ( *bp && isdigit( ( unsigned char ) *bp ) )
+                n = sscanf( bp, "%ld", &pid );
 
-			if ( n == 0 || n == EOF )
-			{
-				lower_permissions( );
-				fsc2_serial_log_message( "Error: Lock file '%s' for serial "
-										 "port %d has unknown format.\n",
-										 Serial_Port[ sn ].lock_file, sn );
-				fsc2_serial_log_function_end( "get_serial_lock",
-											  Serial_Port[ sn ].dev_name );
-				return FAIL;
-			}
+            if ( n == 0 || n == EOF )
+            {
+                lower_permissions( );
+                fsc2_serial_log_message( "Error: Lock file '%s' for serial "
+                                         "port %d has unknown format.\n",
+                                         Serial_Port[ sn ].lock_file, sn );
+                fsc2_serial_log_function_end( "get_serial_lock",
+                                              Serial_Port[ sn ].dev_name );
+                return FAIL;
+            }
 
-			/* Check if the lock file belongs to a running process, if not
-			   try to delete it */
+            /* Check if the lock file belongs to a running process, if not
+               try to delete it */
 
-			if ( pid > 0 && kill( ( pid_t ) pid, 0 ) < 0 &&
-				 errno == ESRCH )
-			{
-				if ( unlink( Serial_Port[ sn ].lock_file ) < 0 )
-				{
-					lower_permissions( );
-					fsc2_serial_log_message( "Error: Can't delete stale lock "
-											 "'%s' file for serial port %d.\n",
-											 Serial_Port[ sn ].lock_file, sn );
-					fsc2_serial_log_function_end( "get_serial_lock",
-												  Serial_Port[ sn ].dev_name );
-					return FAIL;
-				}
-			}
-			else
-			{
-				lower_permissions( );
-				fsc2_serial_log_message( "Error: Serial port %d is locked by "
-										 "another program according to lock "
-										 "file '%s'.\n",
-										 sn, Serial_Port[ sn ].lock_file );
-				fsc2_serial_log_function_end( "get_serial_lock",
-											  Serial_Port[ sn ].dev_name );
-				return FAIL;
-			}
-		}
-		else
-		{
-			lower_permissions( );
-			fsc2_serial_log_message( "Error: Can't read lock file '%s' for "
-									 "serial port %d or it has an unknown "
-									 "format.\n",
-									 Serial_Port[ sn ].lock_file, sn );
-			fsc2_serial_log_function_end( "get_serial_lock",
-										  Serial_Port[ sn ].dev_name );
-			return FAIL;
-		}
-	}
-	else                               /* couldn't open lock file, check why */
-	{
-		if ( errno == EACCES )                       /* no access permission */
-		{
-			lower_permissions( );
-			fsc2_serial_log_message( "Error: No permission to access lock "
-									 "file '%s' for serial port %d.\n",
-									 Serial_Port[ sn ].lock_file, sn );
-			fsc2_serial_log_function_end( "get_serial_lock",
-										  Serial_Port[ sn ].dev_name );
-			return FAIL;
-		}
+            if ( pid > 0 && kill( ( pid_t ) pid, 0 ) < 0 &&
+                 errno == ESRCH )
+            {
+                if ( unlink( Serial_Port[ sn ].lock_file ) < 0 )
+                {
+                    lower_permissions( );
+                    fsc2_serial_log_message( "Error: Can't delete stale lock "
+                                             "'%s' file for serial port %d.\n",
+                                             Serial_Port[ sn ].lock_file, sn );
+                    fsc2_serial_log_function_end( "get_serial_lock",
+                                                  Serial_Port[ sn ].dev_name );
+                    return FAIL;
+                }
+            }
+            else
+            {
+                lower_permissions( );
+                fsc2_serial_log_message( "Error: Serial port %d is locked by "
+                                         "another program according to lock "
+                                         "file '%s'.\n",
+                                         sn, Serial_Port[ sn ].lock_file );
+                fsc2_serial_log_function_end( "get_serial_lock",
+                                              Serial_Port[ sn ].dev_name );
+                return FAIL;
+            }
+        }
+        else
+        {
+            lower_permissions( );
+            fsc2_serial_log_message( "Error: Can't read lock file '%s' for "
+                                     "serial port %d or it has an unknown "
+                                     "format.\n",
+                                     Serial_Port[ sn ].lock_file, sn );
+            fsc2_serial_log_function_end( "get_serial_lock",
+                                          Serial_Port[ sn ].dev_name );
+            return FAIL;
+        }
+    }
+    else                               /* couldn't open lock file, check why */
+    {
+        if ( errno == EACCES )                       /* no access permission */
+        {
+            lower_permissions( );
+            fsc2_serial_log_message( "Error: No permission to access lock "
+                                     "file '%s' for serial port %d.\n",
+                                     Serial_Port[ sn ].lock_file, sn );
+            fsc2_serial_log_function_end( "get_serial_lock",
+                                          Serial_Port[ sn ].dev_name );
+            return FAIL;
+        }
 
-		if ( errno != ENOENT )    /* other errors except file does not exist */
-		{
-			lower_permissions( );
-			fsc2_serial_log_message( "Error: Can't access lock file '%s' for "
-									 "serial port %d .\n",
-									 Serial_Port[ sn ].lock_file, sn );
-			fsc2_serial_log_function_end( "get_serial_lock",
-										  Serial_Port[ sn ].dev_name );
-			return FAIL;
-		}
-	}
+        if ( errno != ENOENT )    /* other errors except file does not exist */
+        {
+            lower_permissions( );
+            fsc2_serial_log_message( "Error: Can't access lock file '%s' for "
+                                     "serial port %d .\n",
+                                     Serial_Port[ sn ].lock_file, sn );
+            fsc2_serial_log_function_end( "get_serial_lock",
+                                          Serial_Port[ sn ].dev_name );
+            return FAIL;
+        }
+    }
 
     /* Create lockfile compatible with UUCP-1.2 */
 
     mask = umask( 022 );
     if ( ( fd = open( Serial_Port[ sn ].lock_file,
-					  O_WRONLY | O_CREAT | O_EXCL, 0666 ) ) < 0 )
-	{
-		lower_permissions( );
+                      O_WRONLY | O_CREAT | O_EXCL, 0666 ) ) < 0 )
+    {
+        lower_permissions( );
         fsc2_serial_log_message( "Error: Can't create lockfile '%s' for "
-								 "serial port %d.\n",
-								 Serial_Port[ sn ].lock_file, sn );
-		fsc2_serial_log_function_end( "get_serial_lock",
-									  Serial_Port[ sn ].dev_name );
+                                 "serial port %d.\n",
+                                 Serial_Port[ sn ].lock_file, sn );
+        fsc2_serial_log_function_end( "get_serial_lock",
+                                      Serial_Port[ sn ].dev_name );
         return FAIL;
     }
 
-	umask( mask );
+    umask( mask );
     chown( Serial_Port[ sn ].lock_file, Fsc2_Internals.EUID,
-		   Fsc2_Internals.EGID );
+           Fsc2_Internals.EGID );
     snprintf( buf, sizeof( buf ), "%10ld\n", ( long ) getpid( ) );
     write( fd, buf, strlen( buf ) );
     close( fd );
 
-	lower_permissions( );
-	Serial_Port[ sn ].have_lock = SET;
+    lower_permissions( );
+    Serial_Port[ sn ].have_lock = SET;
 
-	fsc2_serial_log_function_end( "get_serial_lock",
-								  Serial_Port[ sn ].dev_name );
+    fsc2_serial_log_function_end( "get_serial_lock",
+                                  Serial_Port[ sn ].dev_name );
 
-	return OK;
+    return OK;
 }
 #else
 static bool get_serial_lock( int sn  UNUSED_ARG )
 {
-	return OK;
+    return OK;
 }
 #endif
 
@@ -1204,19 +1204,19 @@ static bool get_serial_lock( int sn  UNUSED_ARG )
 static void remove_serial_lock( int sn )
 {
 #ifdef SERIAL_LOCK_DIR
-	fsc2_serial_log_function_end( "remove_serial_lock",
-								  Serial_Port[ sn ].dev_name );
+    fsc2_serial_log_function_end( "remove_serial_lock",
+                                  Serial_Port[ sn ].dev_name );
 
-	if ( Serial_Port[ sn ].have_lock )
-	{
-		raise_permissions( );
-		unlink( Serial_Port[ sn ].lock_file );
-		lower_permissions( );
-		Serial_Port[ sn ].have_lock = UNSET;
-	}
+    if ( Serial_Port[ sn ].have_lock )
+    {
+        raise_permissions( );
+        unlink( Serial_Port[ sn ].lock_file );
+        lower_permissions( );
+        Serial_Port[ sn ].have_lock = UNSET;
+    }
 
-	fsc2_serial_log_function_end( "remove_serial_lock",
-								  Serial_Port[ sn ].dev_name );
+    fsc2_serial_log_function_end( "remove_serial_lock",
+                                  Serial_Port[ sn ].dev_name );
 #endif
 }
 
@@ -1226,34 +1226,34 @@ static void remove_serial_lock( int sn )
  *------------------------------*/
 
 int fsc2_tcgetattr( int              sn,
-					struct termios * termios_p )
+                    struct termios * termios_p )
 {
-	int ret_val;
+    int ret_val;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	/* Check that serial port number is reasonable */
+    /* Check that serial port number is reasonable */
 
-	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
-	{
-		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
-								 "call of function fsc2_tcgetattr()\n", sn );
-		errno = EBADF;
-		return -1;
-	}
+    if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
+    {
+        fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+                                 "call of function fsc2_tcgetattr()\n", sn );
+        errno = EBADF;
+        return -1;
+    }
 
-	raise_permissions( );
-	ret_val = tcgetattr( Serial_Port[ sn ].fd, termios_p );
-	lower_permissions( );
+    raise_permissions( );
+    ret_val = tcgetattr( Serial_Port[ sn ].fd, termios_p );
+    lower_permissions( );
 
-	return ret_val;
+    return ret_val;
 }
 
 
@@ -1262,35 +1262,35 @@ int fsc2_tcgetattr( int              sn,
  *------------------------------*/
 
 int fsc2_tcsetattr( int              sn,
-					int              optional_actions,
-					struct termios * termios_p )
+                    int              optional_actions,
+                    struct termios * termios_p )
 {
-	int ret_val;
+    int ret_val;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	/* Check that serial port number is reasonable */
+    /* Check that serial port number is reasonable */
 
-	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
-	{
-		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
-								 "call of function fsc2_tcsetattr()\n", sn );
-		errno = EBADF;
-		return -1;
-	}
+    if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
+    {
+        fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+                                 "call of function fsc2_tcsetattr()\n", sn );
+        errno = EBADF;
+        return -1;
+    }
 
-	raise_permissions( );
-	ret_val = tcsetattr( Serial_Port[ sn ].fd, optional_actions, termios_p );
-	lower_permissions( );
+    raise_permissions( );
+    ret_val = tcsetattr( Serial_Port[ sn ].fd, optional_actions, termios_p );
+    lower_permissions( );
 
-	return ret_val;
+    return ret_val;
 }
 
 
@@ -1299,34 +1299,34 @@ int fsc2_tcsetattr( int              sn,
  *--------------------------------*/
 
 int fsc2_tcsendbreak( int sn,
-					  int duration )
+                      int duration )
 {
-	int ret_val;
+    int ret_val;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	/* Check that serial port number is reasonable */
+    /* Check that serial port number is reasonable */
 
-	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
-	{
-		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
-								 "call of function fsc2_tcsendbreak()\n", sn );
-		errno = EBADF;
-		return -1;
-	}
+    if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
+    {
+        fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+                                 "call of function fsc2_tcsendbreak()\n", sn );
+        errno = EBADF;
+        return -1;
+    }
 
-	raise_permissions( );
-	ret_val = tcsendbreak( Serial_Port[ sn ].fd, duration );
-	lower_permissions( );
+    raise_permissions( );
+    ret_val = tcsendbreak( Serial_Port[ sn ].fd, duration );
+    lower_permissions( );
 
-	return ret_val;
+    return ret_val;
 }
 
 
@@ -1336,32 +1336,32 @@ int fsc2_tcsendbreak( int sn,
 
 int fsc2_tcdrain( int sn )
 {
-	int ret_val;
+    int ret_val;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	/* Check that serial port number is reasonable */
+    /* Check that serial port number is reasonable */
 
-	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
-	{
-		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
-								 "call of function fsc2_tcdrain()\n", sn );
-		errno = EBADF;
-		return -1;
-	}
+    if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
+    {
+        fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+                                 "call of function fsc2_tcdrain()\n", sn );
+        errno = EBADF;
+        return -1;
+    }
 
-	raise_permissions( );
-	ret_val = tcdrain( Serial_Port[ sn ].fd );
-	lower_permissions( );
+    raise_permissions( );
+    ret_val = tcdrain( Serial_Port[ sn ].fd );
+    lower_permissions( );
 
-	return ret_val;
+    return ret_val;
 }
 
 
@@ -1370,34 +1370,34 @@ int fsc2_tcdrain( int sn )
  *----------------------------*/
 
 int fsc2_tcflush( int sn,
-				  int queue_selector )
+                  int queue_selector )
 {
-	int ret_val;
+    int ret_val;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	/* Check that serial port number is reasonable */
+    /* Check that serial port number is reasonable */
 
-	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
-	{
-		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
-								 "call of function fsc2_tcflush()\n", sn );
-		errno = EBADF;
-		return -1;
-	}
+    if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
+    {
+        fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+                                 "call of function fsc2_tcflush()\n", sn );
+        errno = EBADF;
+        return -1;
+    }
 
-	raise_permissions( );
-	ret_val = tcflush( Serial_Port[ sn ].fd, queue_selector );
-	lower_permissions( );
+    raise_permissions( );
+    ret_val = tcflush( Serial_Port[ sn ].fd, queue_selector );
+    lower_permissions( );
 
-	return ret_val;
+    return ret_val;
 }
 
 
@@ -1406,34 +1406,34 @@ int fsc2_tcflush( int sn,
  *---------------------------*/
 
 int fsc2_tcflow( int sn,
-				 int action )
+                 int action )
 {
-	int ret_val;
+    int ret_val;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode == EXPERIMENT );
 
-	/* Check that serial port number is reasonable */
+    /* Check that serial port number is reasonable */
 
-	if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
-	{
-		fsc2_serial_log_message( "Error: Invalid serial port number %d in "
-								 "call of function fsc2_tcflow()\n", sn );
-		errno = EBADF;
-		return -1;
-	}
+    if ( sn >= NUM_SERIAL_PORTS || sn < 0 || ! Serial_Port[ sn ].is_open )
+    {
+        fsc2_serial_log_message( "Error: Invalid serial port number %d in "
+                                 "call of function fsc2_tcflow()\n", sn );
+        errno = EBADF;
+        return -1;
+    }
 
-	raise_permissions( );
-	ret_val = tcflow( Serial_Port[ sn ].fd, action );
-	lower_permissions( );
+    raise_permissions( );
+    ret_val = tcflow( Serial_Port[ sn ].fd, action );
+    lower_permissions( );
 
-	return ret_val;
+    return ret_val;
 }
 
 
@@ -1445,18 +1445,18 @@ int fsc2_tcflow( int sn,
 static void fsc2_serial_log_date( void )
 {
     char tc[ 26 ];
-	struct timeb mt;
+    struct timeb mt;
     time_t t;
 
 
     t = time( NULL );
     strcpy( tc, asctime( localtime( &t ) ) );
-	tc[ 10 ] = '\0';
-	tc[ 19 ] = '\0';
+    tc[ 10 ] = '\0';
+    tc[ 19 ] = '\0';
     tc[ 24 ] = '\0';
-	ftime( &mt );
+    ftime( &mt );
     fprintf( fsc2_serial_log, "[%s %s %s.%03d] ", tc, tc + 20, tc + 11,
-			 mt.millitm );
+             mt.millitm );
 }
 
 
@@ -1469,16 +1469,16 @@ static void fsc2_serial_log_date( void )
  *--------------------------------------------------------------*/
 
 static void fsc2_serial_log_function_start( const char * function,
-											const char * dev_name )
+                                            const char * dev_name )
 {
-	if ( fsc2_serial_log == NULL || ll < LL_CE )
-		return;
+    if ( fsc2_serial_log == NULL || ll < LL_CE )
+        return;
 
-	raise_permissions( );
+    raise_permissions( );
     fsc2_serial_log_date( );
     fprintf( fsc2_serial_log, "Call of %s(), dev = %s\n", function, dev_name );
     fflush( fsc2_serial_log );
-	lower_permissions( );
+    lower_permissions( );
 }
 
 
@@ -1491,16 +1491,16 @@ static void fsc2_serial_log_function_start( const char * function,
  *---------------------------------------------------------*/
 
 static void fsc2_serial_log_function_end( const char * function,
-										  const char * dev_name )
+                                          const char * dev_name )
 {
-	if ( fsc2_serial_log == NULL || ll < LL_CE )
-		return;
+    if ( fsc2_serial_log == NULL || ll < LL_CE )
+        return;
 
-	raise_permissions( );
-	fsc2_serial_log_date( );
-	fprintf( fsc2_serial_log, "Exit of %s(), dev = %s\n", function, dev_name );
-	fflush( fsc2_serial_log );
-	lower_permissions( );
+    raise_permissions( );
+    fsc2_serial_log_date( );
+    fprintf( fsc2_serial_log, "Exit of %s(), dev = %s\n", function, dev_name );
+    fflush( fsc2_serial_log );
+    lower_permissions( );
 }
 
 
@@ -1509,28 +1509,28 @@ static void fsc2_serial_log_function_end( const char * function,
  *-----------------------------------------------------*/
 
 void fsc2_serial_log_message( const char * fmt,
-									 ... )
+                                     ... )
 {
-	va_list ap;
+    va_list ap;
 
 
-	/* Keep the module writers from calling the function anywhere else
-	   than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-	   section */
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
 
-	fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-				 Fsc2_Internals.state == STATE_FINISHED ||
-				 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
+                 Fsc2_Internals.state == STATE_FINISHED ||
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
-	if ( fsc2_serial_log == NULL || ll == LL_NONE )
-		return;
+    if ( fsc2_serial_log == NULL || ll == LL_NONE )
+        return;
 
-	raise_permissions( );
-	fsc2_serial_log_date( );
-	va_start( ap, fmt );
-	vfprintf( fsc2_serial_log, fmt, ap );
-	va_end( ap );
-	lower_permissions( );
+    raise_permissions( );
+    fsc2_serial_log_date( );
+    va_start( ap, fmt );
+    vfprintf( fsc2_serial_log, fmt, ap );
+    va_end( ap );
+    lower_permissions( );
 }
 
 
@@ -1540,5 +1540,7 @@ void fsc2_serial_log_message( const char * fmt,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -40,7 +40,7 @@
 
 struct {
     int fd;                        /* file descriptor for board */
-	WITIO_48_MODE mode[ 2 ];       /* current I/O modes of the DIOs */
+    WITIO_48_MODE mode[ 2 ];       /* current I/O modes of the DIOs */
 } dev_info = { -1, { WITIO_48_MODE_3x8, WITIO_48_MODE_3x8 } };
 
 
@@ -48,30 +48,30 @@ static int check_dio( WITIO_48_DIO dio );
 static int check_mode( WITIO_48_MODE mode );
 static int check_channel( WITIO_48_DIO dio, WITIO_48_CHANNEL channel );
 static int check_value( WITIO_48_DIO dio, WITIO_48_CHANNEL channel,
-						unsigned long value );
+                        unsigned long value );
 static int check_board( void );
 
 
 static int witio_48_errno = 0;
 
 const char *witio_48_errlist[ ] = {
-	"Success",                                        /* WITIO_48_OK      */
-	"Invalid channel number",						  /* WITIO_48_ERR_ICA */
-	"Invalid channel for current I/O mode",			  /* WITIO_48_ERR_ICM */
-	"Invalid DIO number",							  /* WITIO_48_ERR_IVD */
-	"Invalid mode",									  /* WITIO_48_ERR_IMD */
-	"Invalid output value",							  /* WITIO_48_ERR_IDV */
-	"Board is busy",								  /* WITIO_48_ERR_BNO */
-	"Board not open",								  /* WITIO_48_ERR_BBS */
-	"No driver loaded for board",					  /* WITIO_48_ERR_NDV */
-	"No permissions to open device file",			  /* WITIO_48_ERR_ACS */
-	"Device file does not exist",					  /* WITIO_48_ERR_DFM */
-	"Unspecified error when opening device file",	  /* WITIO_48_ERR_DFP */
-	"Internal driver or library error"				  /* WITIO_48_ERR_INT */
+    "Success",                                        /* WITIO_48_OK      */
+    "Invalid channel number",                         /* WITIO_48_ERR_ICA */
+    "Invalid channel for current I/O mode",           /* WITIO_48_ERR_ICM */
+    "Invalid DIO number",                             /* WITIO_48_ERR_IVD */
+    "Invalid mode",                                   /* WITIO_48_ERR_IMD */
+    "Invalid output value",                           /* WITIO_48_ERR_IDV */
+    "Board is busy",                                  /* WITIO_48_ERR_BNO */
+    "Board not open",                                 /* WITIO_48_ERR_BBS */
+    "No driver loaded for board",                     /* WITIO_48_ERR_NDV */
+    "No permissions to open device file",             /* WITIO_48_ERR_ACS */
+    "Device file does not exist",                     /* WITIO_48_ERR_DFM */
+    "Unspecified error when opening device file",     /* WITIO_48_ERR_DFP */
+    "Internal driver or library error"                /* WITIO_48_ERR_INT */
 };
 
 const int witio_48_nerr =
-			( int ) ( sizeof witio_48_errlist / sizeof witio_48_errlist[ 0 ] );
+            ( int ) ( sizeof witio_48_errlist / sizeof witio_48_errlist[ 0 ] );
 
 
 
@@ -87,8 +87,8 @@ int witio_48_close( void )
     if ( dev_info.fd < 0 )
         return witio_48_errno = WITIO_48_ERR_BNO;
 
-	while ( close( dev_info.fd ) && errno == EINTR )
-		/* empty */ ;
+    while ( close( dev_info.fd ) && errno == EINTR )
+        /* empty */ ;
     dev_info.fd = -1;
 
     return witio_48_errno = WITIO_48_OK;
@@ -100,21 +100,21 @@ int witio_48_close( void )
  *--------------------------------------------------------------------*/
 
 int witio_48_set_mode( WITIO_48_DIO  dio,
-					   WITIO_48_MODE mode )
+                       WITIO_48_MODE mode )
 {
-	int ret;
-	WITIO_48_DIO_MODE dio_mode = { dio, mode };
+    int ret;
+    WITIO_48_DIO_MODE dio_mode = { dio, mode };
 
 
     if ( ( ret = check_board( ) )     < 0 ||
-		 ( ret = check_dio( dio ) )   < 0 ||
-		 ( ret = check_mode( mode ) ) < 0 )
+         ( ret = check_dio( dio ) )   < 0 ||
+         ( ret = check_mode( mode ) ) < 0 )
         return ret;
 
     if ( ioctl( dev_info.fd, WITIO_48_IOC_SET_MODE, &dio_mode ) < 0 )
         return witio_48_errno = WITIO_48_ERR_INT;
 
-	dev_info.mode[ dio ] = mode;
+    dev_info.mode[ dio ] = mode;
 
     return witio_48_errno = WITIO_48_OK;
 }
@@ -125,21 +125,21 @@ int witio_48_set_mode( WITIO_48_DIO  dio,
  *--------------------------------------------------------------------------*/
 
 int witio_48_get_mode( WITIO_48_DIO    dio,
-					   WITIO_48_MODE * mode )
+                       WITIO_48_MODE * mode )
 {
-	int ret;
-	WITIO_48_DIO_MODE dio_mode = { dio, 0 };
+    int ret;
+    WITIO_48_DIO_MODE dio_mode = { dio, 0 };
 
 
     if ( ( ret = check_board( ) )   < 0 ||
-		 ( ret = check_dio( dio ) ) < 0 )
+         ( ret = check_dio( dio ) ) < 0 )
         return ret;
 
     if ( ioctl( dev_info.fd, WITIO_48_IOC_GET_MODE, &dio_mode ) < 0 )
         return witio_48_errno = WITIO_48_ERR_INT;
 
-	if ( mode != NULL )
-		*mode = dev_info.mode[ dio ] = dio_mode.mode;
+    if ( mode != NULL )
+        *mode = dev_info.mode[ dio ] = dio_mode.mode;
 
     return witio_48_errno = WITIO_48_OK;
 }
@@ -153,17 +153,17 @@ int witio_48_get_mode( WITIO_48_DIO    dio,
  * |--------------------|--------------------|-------------------------|
  * |        mode        |     channels       |       ranges            |
  * |--------------------|--------------------|-------------------------|
- * | WITIO_48_MODE_3x8  | WITIO_48_CHANNEL_0 | 0 - 255 (0xFF)		   |
- * |                    | WITIO_48_CHANNEL_1 | 0 - 255 (0xFF)		   |
- * |                    | WITIO_48_CHANNEL_2 | 0 - 255 (0xFF)		   |
+ * | WITIO_48_MODE_3x8  | WITIO_48_CHANNEL_0 | 0 - 255 (0xFF)          |
+ * |                    | WITIO_48_CHANNEL_1 | 0 - 255 (0xFF)          |
+ * |                    | WITIO_48_CHANNEL_2 | 0 - 255 (0xFF)          |
  * |--------------------|--------------------|-------------------------|
- * | WITIO_48_MODE_2x12 | WITIO_48_CHANNEL_0 | 0 - 4095 (0xFFF)		   |
- * |                    | WITIO_48_CHANNEL_1 | 0 - 4095 (0xFFF)		   |
+ * | WITIO_48_MODE_2x12 | WITIO_48_CHANNEL_0 | 0 - 4095 (0xFFF)        |
+ * |                    | WITIO_48_CHANNEL_1 | 0 - 4095 (0xFFF)        |
  * |--------------------|--------------------|-------------------------|
  * | WITIO_48_MODE_1x24 | WITIO_48_CHANNEL_0 | 0 - 16777215 (0xFFFFFF) |
  * |--------------------|--------------------|-------------------------|
- * | WITIO_48_MODE_16_8 | WITIO_48_CHANNEL_0 | 0 - 65536 (0xFFFF)	   |
- * |                    | WITIO_48_CHANNEL_1 | 0 - 255 (0xFF)		   |
+ * | WITIO_48_MODE_16_8 | WITIO_48_CHANNEL_0 | 0 - 65536 (0xFFFF)      |
+ * |                    | WITIO_48_CHANNEL_1 | 0 - 255 (0xFF)          |
  * |--------------------|--------------------|-------------------------|
  *
  * At which pins of the output connectors the bits of the values apear
@@ -188,17 +188,17 @@ int witio_48_get_mode( WITIO_48_DIO    dio,
  *-------------------------------------------------------------------------*/
 
 int witio_48_dio_out( WITIO_48_DIO     dio,
-					  WITIO_48_CHANNEL channel,
-					  unsigned long    value )
+                      WITIO_48_CHANNEL channel,
+                      unsigned long    value )
 {
-	int ret;
-	WITIO_48_DATA data = { dio, channel, value };
+    int ret;
+    WITIO_48_DATA data = { dio, channel, value };
 
 
     if ( ( ret = check_board( ) )                     < 0 ||
-		 ( ret = check_dio( dio ) )                   < 0 ||
-		 ( ret = check_channel( dio, channel ) )      < 0 ||
-		 ( ret = check_value( dio, channel, value ) ) < 0 )
+         ( ret = check_dio( dio ) )                   < 0 ||
+         ( ret = check_channel( dio, channel ) )      < 0 ||
+         ( ret = check_value( dio, channel, value ) ) < 0 )
         return ret;
 
     if ( ioctl( dev_info.fd, WITIO_48_IOC_DIO_OUT, &data ) < 0 )
@@ -218,23 +218,23 @@ int witio_48_dio_out( WITIO_48_DIO     dio,
  *-------------------------------------------------------------*/
 
 int witio_48_dio_in( WITIO_48_DIO     dio,
-					 WITIO_48_CHANNEL channel,
-					 unsigned long *  value )
+                     WITIO_48_CHANNEL channel,
+                     unsigned long *  value )
 {
-	int ret;
-	WITIO_48_DATA data = { dio, channel, 0 };
+    int ret;
+    WITIO_48_DATA data = { dio, channel, 0 };
 
 
     if ( ( ret = check_board( ) )                < 0 ||
-		 ( ret = check_dio( dio ) )              < 0 ||
-		 ( ret = check_channel( dio, channel ) ) < 0 )
-		return ret;
+         ( ret = check_dio( dio ) )              < 0 ||
+         ( ret = check_channel( dio, channel ) ) < 0 )
+        return ret;
 
     if ( ioctl( dev_info.fd, WITIO_48_IOC_DIO_IN, &data ) < 0 )
         return witio_48_errno = WITIO_48_ERR_INT;
 
-	if ( value != NULL )
-		*value = data.value;
+    if ( value != NULL )
+        *value = data.value;
 
     return witio_48_errno = WITIO_48_OK;
 }
@@ -246,10 +246,10 @@ int witio_48_dio_in( WITIO_48_DIO     dio,
 
 static int check_dio( WITIO_48_DIO dio )
 {
-	if ( dio > WITIO_48_DIO_2 )
-		return witio_48_errno = WITIO_48_ERR_IVD;
+    if ( dio > WITIO_48_DIO_2 )
+        return witio_48_errno = WITIO_48_ERR_IVD;
 
-	return WITIO_48_OK;
+    return WITIO_48_OK;
 }
 
 
@@ -259,10 +259,10 @@ static int check_dio( WITIO_48_DIO dio )
 
 static int check_mode( WITIO_48_MODE mode )
 {
-	if ( mode > WITIO_48_MODE_16_8 )
-		return witio_48_errno = WITIO_48_ERR_IMD;
+    if ( mode > WITIO_48_MODE_16_8 )
+        return witio_48_errno = WITIO_48_ERR_IMD;
 
-	return witio_48_errno = WITIO_48_OK;
+    return witio_48_errno = WITIO_48_OK;
 }
 
 
@@ -271,19 +271,19 @@ static int check_mode( WITIO_48_MODE mode )
  *----------------------------------------------------------------*/
 
 static int check_channel( WITIO_48_DIO     dio,
-						  WITIO_48_CHANNEL channel )
+                          WITIO_48_CHANNEL channel )
 {
-	if ( channel > WITIO_48_CHANNEL_2 )
-		return witio_48_errno = WITIO_48_ERR_ICA;
+    if ( channel > WITIO_48_CHANNEL_2 )
+        return witio_48_errno = WITIO_48_ERR_ICA;
 
-	if ( ( ( dev_info.mode[ dio ] == WITIO_48_MODE_2x12 ||
-			 dev_info.mode[ dio ] == WITIO_48_MODE_16_8 ) &&
-		   channel > WITIO_48_CHANNEL_1 ) ||
-		 ( dev_info.mode[ dio ] == WITIO_48_MODE_1x24 &&
-		   channel > WITIO_48_CHANNEL_0 ) )
-		return witio_48_errno = WITIO_48_ERR_ICM;
+    if ( ( ( dev_info.mode[ dio ] == WITIO_48_MODE_2x12 ||
+             dev_info.mode[ dio ] == WITIO_48_MODE_16_8 ) &&
+           channel > WITIO_48_CHANNEL_1 ) ||
+         ( dev_info.mode[ dio ] == WITIO_48_MODE_1x24 &&
+           channel > WITIO_48_CHANNEL_0 ) )
+        return witio_48_errno = WITIO_48_ERR_ICM;
 
-	return witio_48_errno = WITIO_48_OK;
+    return witio_48_errno = WITIO_48_OK;
 }
 
 
@@ -292,22 +292,22 @@ static int check_channel( WITIO_48_DIO     dio,
  *---------------------------------------------------------------*/
 
 static int check_value( WITIO_48_DIO     dio,
-						WITIO_48_CHANNEL channel,
-						unsigned long    value )
+                        WITIO_48_CHANNEL channel,
+                        unsigned long    value )
 {
-	if ( ( value >= 1UL << 24 )                                    ||
-		 ( dev_info.mode[ dio ] == WITIO_48_MODE_16_8 &&
-		   channel == WITIO_48_CHANNEL_1              &&
-		   value >= 1UL << 16 )                                    ||
-		 ( dev_info.mode[ dio ] == WITIO_48_MODE_2x12 &&
-		   value >= 1UL << 12 )                                    ||
-		 ( ( dev_info.mode[ dio ] == WITIO_48_MODE_3x8       ||
-			 ( dev_info.mode[ dio ] == WITIO_48_MODE_16_8 &&
-			   channel == WITIO_48_CHANNEL_2 ) )                &&
-		   value >= 1UL << 8 ) )
-		return witio_48_errno = WITIO_48_ERR_IDV;
+    if ( ( value >= 1UL << 24 )                                    ||
+         ( dev_info.mode[ dio ] == WITIO_48_MODE_16_8 &&
+           channel == WITIO_48_CHANNEL_1              &&
+           value >= 1UL << 16 )                                    ||
+         ( dev_info.mode[ dio ] == WITIO_48_MODE_2x12 &&
+           value >= 1UL << 12 )                                    ||
+         ( ( dev_info.mode[ dio ] == WITIO_48_MODE_3x8       ||
+             ( dev_info.mode[ dio ] == WITIO_48_MODE_16_8 &&
+               channel == WITIO_48_CHANNEL_2 ) )                &&
+           value >= 1UL << 8 ) )
+        return witio_48_errno = WITIO_48_ERR_IDV;
 
-	return witio_48_errno = WITIO_48_OK;
+    return witio_48_errno = WITIO_48_OK;
 }
 
 
@@ -320,59 +320,59 @@ static int check_value( WITIO_48_DIO     dio,
 static int check_board( void )
 {
     const char *name = "/dev/" WITIO_48_DEVICE_NAME;
-	WITIO_48_DIO_MODE dio_mode = { 0, 0 };
-	int i;
+    WITIO_48_DIO_MODE dio_mode = { 0, 0 };
+    int i;
 
 
     if ( dev_info.fd >= 0 )
-		return WITIO_48_OK;
+        return WITIO_48_OK;
 
-	/* Try to open the device file for the board */
+    /* Try to open the device file for the board */
 
-	if ( ( dev_info.fd = open( name, O_RDWR ) ) < 0 )
-		switch ( errno )
-		{
-			case ENOENT : case ENOTDIR : case ENAMETOOLONG : case ELOOP :
-				return witio_48_errno = WITIO_48_ERR_DFM;
+    if ( ( dev_info.fd = open( name, O_RDWR ) ) < 0 )
+        switch ( errno )
+        {
+            case ENOENT : case ENOTDIR : case ENAMETOOLONG : case ELOOP :
+                return witio_48_errno = WITIO_48_ERR_DFM;
 
-			case EACCES :
-				return witio_48_errno = WITIO_48_ERR_ACS;
+            case EACCES :
+                return witio_48_errno = WITIO_48_ERR_ACS;
 
-			case ENODEV : case ENXIO :
-				return witio_48_errno = WITIO_48_ERR_NDV;
+            case ENODEV : case ENXIO :
+                return witio_48_errno = WITIO_48_ERR_NDV;
 
-			case EBUSY :
-				return witio_48_errno = WITIO_48_ERR_BBS;
+            case EBUSY :
+                return witio_48_errno = WITIO_48_ERR_BBS;
 
-			default :
-				return witio_48_errno = WITIO_48_ERR_DFP;
-		}
+            default :
+                return witio_48_errno = WITIO_48_ERR_DFP;
+        }
 
-	/* Set the FD_CLOEXEC bit for the device file, exec()'ed applications
-	   should have no interest at all in the board (and even don't know
-	   that they have the file open) but could interfere seriously with
-	   normal operation of the program that did open the device file. */
+    /* Set the FD_CLOEXEC bit for the device file, exec()'ed applications
+       should have no interest at all in the board (and even don't know
+       that they have the file open) but could interfere seriously with
+       normal operation of the program that did open the device file. */
 
-	fcntl( dev_info.fd, F_SETFD, FD_CLOEXEC );
+    fcntl( dev_info.fd, F_SETFD, FD_CLOEXEC );
 
-	/* Finally get the I/O mode for both DIOs */
+    /* Finally get the I/O mode for both DIOs */
 
-	for ( i = 0; i < 2; i++ )
-	{
-		dio_mode.dio = i;
+    for ( i = 0; i < 2; i++ )
+    {
+        dio_mode.dio = i;
 
-		if ( ioctl( dev_info.fd, WITIO_48_IOC_GET_MODE, &dio_mode ) < 0 )
-		{
-			while ( close( dev_info.fd ) && errno == EINTR )
-				/* empty */ ;
-			dev_info.fd = -1;
-			return witio_48_errno = WITIO_48_ERR_INT;
-		}
+        if ( ioctl( dev_info.fd, WITIO_48_IOC_GET_MODE, &dio_mode ) < 0 )
+        {
+            while ( close( dev_info.fd ) && errno == EINTR )
+                /* empty */ ;
+            dev_info.fd = -1;
+            return witio_48_errno = WITIO_48_ERR_INT;
+        }
 
-		dev_info.mode[ i ] = dio_mode.mode;
-	}
+        dev_info.mode[ i ] = dio_mode.mode;
+    }
 
-	return witio_48_errno = WITIO_48_OK;
+    return witio_48_errno = WITIO_48_OK;
 }
 
 
@@ -387,11 +387,11 @@ static int check_board( void )
 
 int witio_48_perror( const char * s )
 {
-	if ( s != NULL && *s != '\0' )
-		return fprintf( stderr, "%s: %s\n",
-						s, witio_48_errlist[ - witio_48_errno ] );
+    if ( s != NULL && *s != '\0' )
+        return fprintf( stderr, "%s: %s\n",
+                        s, witio_48_errlist[ - witio_48_errno ] );
 
-	return fprintf( stderr, "%s\n", witio_48_errlist[ - witio_48_errno ] );
+    return fprintf( stderr, "%s\n", witio_48_errlist[ - witio_48_errno ] );
 }
 
 
@@ -403,5 +403,13 @@ int witio_48_perror( const char * s )
 
 const char *witio_48_strerror( void )
 {
-	return witio_48_errlist[ - witio_48_errno ];
+    return witio_48_errlist[ - witio_48_errno ];
 }
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */

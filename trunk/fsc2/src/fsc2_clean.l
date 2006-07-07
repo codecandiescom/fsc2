@@ -22,9 +22,9 @@
  */
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap stack
 
@@ -49,8 +49,8 @@
 
 typedef enum
 {
-	false = 0,
-	true  = 1
+    false = 0,
+    true  = 1
 } bool;
 
 #endif
@@ -76,9 +76,9 @@ char *Prog_Name;
 extern int seteuid( uid_t euid );
 extern int setegid( gid_t egid );
 extern int vsnprintf( char *       str,
-					  size_t       size,
-					  const char * format,
-					  va_list      ap );
+                      size_t       size,
+                      const char * format,
+                      va_list      ap );
 extern int fileno( FILE * stream );
 #endif
 
@@ -89,27 +89,27 @@ int yylex( void );
 
 static void include_handler( char * file );
 static void xclose( YY_BUFFER_STATE   primary_buf,
-					YY_BUFFER_STATE * buf_state,
-					FILE *            primary_fp,
-					FILE **           fp,
-					int *             incl_depth );
+                    YY_BUFFER_STATE * buf_state,
+                    FILE *            primary_fp,
+                    FILE **           fp,
+                    int *             incl_depth );
 static void unit_spec( char * text,
-					   int    power );
+                       int    power );
 static char *T_strdup( const char * string );
 static void *T_malloc( size_t size );
 static void *T_realloc( void * ptr,
-						size_t size );
+                        size_t size );
 static void *T_free( void * ptr );
 static void lower_permissions( void );
 static ssize_t output( const char * fmt,
-					   ... );
+                       ... );
 static void usage( void );
 
 
 long Lc,
-	 Comm_Lc,
-	 Incl_Lc,
-	 Str_Lc;
+     Comm_Lc,
+     Incl_Lc,
+     Str_Lc;
 char *Fname;
 bool Eol;
 
@@ -182,12 +182,12 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 
 %x       str
 %x       comm
-%x		 incl
+%x       incl
 
 
-		/*---------------*/
-%%		/*     RULES     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     RULES     */
+        /*---------------*/
 
 
             /* Drop characters used for internal purposes */
@@ -199,12 +199,12 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 \005        /* Indicates a start of string */
 \006        /* Indicates an end of string */
 
-			/* Handling of string constants */
+            /* Handling of string constants */
 \"          {
-				output( "\x05" );
-				Str_Lc = Lc;
-				yy_push_state( str );
-			}
+                output( "\x05" );
+                Str_Lc = Lc;
+                yy_push_state( str );
+            }
 
 <str>{
 
@@ -212,159 +212,159 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 
 
 \"          {
-				output( "\x06" );
-				yy_pop_state( );
-			}
+                output( "\x06" );
+                yy_pop_state( );
+            }
 
 \n          {
-				Lc++;
-				Eol = SET;
-			}
+                Lc++;
+                Eol = SET;
+            }
 
 [^"\\\n]+   output( "%s", yytext );
 "\\"        output( "%s", yytext );
 
-<<EOF>>		THROW( EOF_IN_STRING_EXCEPTION );
+<<EOF>>     THROW( EOF_IN_STRING_EXCEPTION );
 
 } /* end of <str> */
 
 {SHEBANG}   {
                 if ( Lc == 1 )
-				{
+                {
                     Lc++;
-					Eol = SET;
-				}
-				else
-				    THROW( MISPLACED_SHEBANG );
-			}
+                    Eol = SET;
+                }
+                else
+                    THROW( MISPLACED_SHEBANG );
+            }
 
             /* Handling of C++ style comment spanning a whole line */
-{REM1}		{
-				Lc++;
-			    Eol = SET;
-			}
+{REM1}      {
+                Lc++;
+                Eol = SET;
+            }
 
-			/* Handling of C++ style comment not spanning a whole line */
-{REM2}		{
-				Lc++;
-				Eol = SET;
-				output( "\n" );
-			}
+            /* Handling of C++ style comment not spanning a whole line */
+{REM2}      {
+                Lc++;
+                Eol = SET;
+                output( "\n" );
+            }
 
-			/* Handling of C style comment */
-{REM3}		{
-				Comm_Lc = Lc;
-				yy_push_state( comm );
-			}
+            /* Handling of C style comment */
+{REM3}      {
+                Comm_Lc = Lc;
+                yy_push_state( comm );
+            }
 
 <comm>{
 
-{REM4}		/* Skips everything that's not a '*' */
+{REM4}      /* Skips everything that's not a '*' */
 {REM5}      /* Skips all '*'s not followed by '/'s */
 
-			/* End of line character in a comment */
-\n			{
-				Lc++;
-				Eol = SET;
-			}
+            /* End of line character in a comment */
+\n          {
+                Lc++;
+                Eol = SET;
+            }
 
-			/* Handling of EOF within a comment -> fatal error */
-<<EOF>>		THROW( EOF_IN_COMMENT_EXCEPTION );
+            /* Handling of EOF within a comment -> fatal error */
+<<EOF>>     THROW( EOF_IN_COMMENT_EXCEPTION );
 
-			/* End of comment but not end of line */
-{EREM1}		yy_pop_state( );
+            /* End of comment but not end of line */
+{EREM1}     yy_pop_state( );
 
-			/* End of comment and end of line */
+            /* End of comment and end of line */
 {EREM2}     {
-				/* On end of comment in #INCLUDE-statement don't dump '\n' */
+                /* On end of comment in #INCLUDE-statement don't dump '\n' */
 
-				if ( yy_top_state( ) == incl )
-				   unput( '\n' );
+                if ( yy_top_state( ) == incl )
+                   unput( '\n' );
 
-				Eol = SET;
-				Lc++;
-				yy_pop_state( );
-			}
+                Eol = SET;
+                Lc++;
+                yy_pop_state( );
+            }
 } /* end of <comm> */
 
 {EREM1}     THROW( DANGLING_END_OF_COMMENT );
 
-			/* Dump empty line (i.e. just containing tabs and spaces) */
+            /* Dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      Lc++;
 
 {LWS}       /* Dumps of leading white space */
 
-			/* Dumps trailing white space */
+            /* Dumps trailing white space */
 {TWS}       {
-				Lc++;
-				Eol = SET;
-				output( "\n" );
-			}
+                Lc++;
+                Eol = SET;
+                output( "\n" );
+            }
 
-			/* Reduces any amount of (other) white space to just one space */
+            /* Reduces any amount of (other) white space to just one space */
 {WS}        output( " " );
 
-			/* Writes out EOL character */
-\n		    {
-				Lc++;
-				Eol = SET;
-				output( "\n" );
-			}
+            /* Writes out EOL character */
+\n          {
+                Lc++;
+                Eol = SET;
+                output( "\n" );
+            }
 
             /* "#EXIT" means that rest of current file is to be discarded */
-{EXIT}		{
-				YY_FLUSH_BUFFER;
-				include_handler( NULL );
-			}
+{EXIT}      {
+                YY_FLUSH_BUFFER;
+                include_handler( NULL );
+            }
 
-   		    /* "#QUIT" means that all following input is to be discarded */
-{QUIT}		exit( EXIT_SUCCESS );
+            /* "#QUIT" means that all following input is to be discarded */
+{QUIT}      exit( EXIT_SUCCESS );
 
-		    /* Handling of lines starting with "#INCLUDE" */
+            /* Handling of lines starting with "#INCLUDE" */
 {INCL}      {
-				Incl_Lc = Lc;
-				BEGIN( incl );
-			}
+                Incl_Lc = Lc;
+                BEGIN( incl );
+            }
 
 <incl>{
-			/* Handling of C++ style comments */
+            /* Handling of C++ style comments */
 {REM2}
 
 {WS}        /* Dumps white space */
 
             /*  Handling of file name */
-{IFN} 		{
-				register char *q = yytext + yyleng - 1,
-							  *p = yytext;
+{IFN}       {
+                register char *q = yytext + yyleng - 1,
+                              *p = yytext;
 
-				if ( *q == '\n' )
-				{
-					Eol = SET;
-					Lc++;
-					--q;
-				}
-				while ( *q == '\t' || *q == ' ' )
-					 --q;
-				*++q = '\0';
-				BEGIN( INITIAL );
-				include_handler( p );
-			}
+                if ( *q == '\n' )
+                {
+                    Eol = SET;
+                    Lc++;
+                    --q;
+                }
+                while ( *q == '\t' || *q == ' ' )
+                     --q;
+                *++q = '\0';
+                BEGIN( INITIAL );
+                include_handler( p );
+            }
 
-			/* Either start of C style comment or syntax error */
+            /* Either start of C style comment or syntax error */
 {IFNE}      {
-				if ( yytext[ 0 ] == '/' && yytext[ 1 ] == '*' )
-				   yy_push_state( comm );
-				else
-				{
-					output( "\x03\n%s:%ld: '#INCLUDE' expects \"FILENAME\" "
-							"or <FILENAME>.\n", Fname, Incl_Lc );
-					exit( EXIT_FAILURE );
-				}
-			}
+                if ( yytext[ 0 ] == '/' && yytext[ 1 ] == '*' )
+                   yy_push_state( comm );
+                else
+                {
+                    output( "\x03\n%s:%ld: '#INCLUDE' expects \"FILENAME\" "
+                            "or <FILENAME>.\n", Fname, Incl_Lc );
+                    exit( EXIT_FAILURE );
+                }
+            }
 } /* end of <incl> */
 
             /* Here's handling of numbers with units - they are converted
-			   to double automatically */
+               to double automatically */
 
 {INANO}/[^a-zA-z0-9_]   unit_spec( yytext, -9 );
 {IMICRO}/[^a-zA-z0-9_]  unit_spec( yytext, -6 );
@@ -397,35 +397,35 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 {FMGT}/[^a-zA-z0-9_]    unit_spec( yytext, 10 );
 {FGGT}/[^a-zA-z0-9_]    unit_spec( yytext, 13 );
 
-			/* All the rest is simply copied to the output */
+            /* All the rest is simply copied to the output */
 
-{THROU}		{
-				if ( Eol )
-				{
-					output( "\x02\n%ld\n", Lc );
-					Eol = UNSET;
-				}
-				output( "%s", yytext );
-			}
+{THROU}     {
+                if ( Eol )
+                {
+                    output( "\x02\n%ld\n", Lc );
+                    Eol = UNSET;
+                }
+                output( "%s", yytext );
+            }
 
-{KEEP}		{
-				if ( Eol )
-				{
-					output( "\x02\n%ld\n", Lc );
-					Eol = UNSET;
-				}
-				output( "%s", yytext );
-			}
+{KEEP}      {
+                if ( Eol )
+                {
+                    output( "\x02\n%ld\n", Lc );
+                    Eol = UNSET;
+                }
+                output( "%s", yytext );
+            }
 
 .           output( "%s", yytext );
 
-<<EOF>>		include_handler( NULL );
+<<EOF>>     include_handler( NULL );
 
 
 
-		/*----------------------*/
-%%		/*     End of rULES     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     End of rULES     */
+        /*----------------------*/
 
 
 /* The following is for some versions of flex that undefine YY_FLUSH_BUFFER
@@ -440,119 +440,119 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
  *-------------------------------------------------------*/
 
 int main( int    argc,
-		  char * argv[ ] )
+          char * argv[ ] )
 {
-	struct passwd *pwe;
+    struct passwd *pwe;
 
 
 #if defined FSC2_MDEBUG
-	mcheck( NULL );
+    mcheck( NULL );
 #endif
 
-	lower_permissions( );
+    lower_permissions( );
 
-	Prog_Name = argv[ 0 ];
+    Prog_Name = argv[ 0 ];
 
-	if ( argc < 2 )
-	{
-		yyin = stdin;
-		if ( yyin == NULL )
-		{
-			output( "\x03\nCan't read from stdin.\n" );
-			return EXIT_FAILURE;
-		}
+    if ( argc < 2 )
+    {
+        yyin = stdin;
+        if ( yyin == NULL )
+        {
+            output( "\x03\nCan't read from stdin.\n" );
+            return EXIT_FAILURE;
+        }
 
-		output( "\x01\n" );
-		Fname = T_strdup( "" );
-	}
-	else if ( argc == 2 )
-	{
-		if ( ! strcmp( argv[ 1 ], "-h" ) || ! strcmp( argv[ 1 ], "--help" ) )
-		{
-			usage( );
-			return EXIT_FAILURE;
-		}
+        output( "\x01\n" );
+        Fname = T_strdup( "" );
+    }
+    else if ( argc == 2 )
+    {
+        if ( ! strcmp( argv[ 1 ], "-h" ) || ! strcmp( argv[ 1 ], "--help" ) )
+        {
+            usage( );
+            return EXIT_FAILURE;
+        }
 
-		yyin = stdin;
-		if ( yyin == NULL )
-		{
-			output( "\x03\nCan't read input file %s.\n", argv[ 1 ] );
-			return EXIT_FAILURE;
-		}
+        yyin = stdin;
+        if ( yyin == NULL )
+        {
+            output( "\x03\nCan't read input file %s.\n", argv[ 1 ] );
+            return EXIT_FAILURE;
+        }
 
-		/* Analyze name of input file - if it starts with "~/" expand it
-		   to the name of the home directory of the user. */
+        /* Analyze name of input file - if it starts with "~/" expand it
+           to the name of the home directory of the user. */
 
-		output( "\x01\n%s\n", argv[ 1 ] );
+        output( "\x01\n%s\n", argv[ 1 ] );
 
-		if ( argv[ 1 ][ 0 ] == '~' && argv[ 1 ][ 1 ] == '/' )
-		{
-			pwe = getpwuid( getuid( ) );
-			Fname = CHAR_P T_malloc(   strlen( pwe->pw_dir )
-									 + strlen( argv[ 1 ] ) );
-			strcpy( Fname, pwe->pw_dir );
-			strcat( Fname, &argv[ 1 ][ 1 ] );
-		}
-		else
-			Fname = T_strdup( argv[ 1 ] );
-	}
-	else
-	{
-		usage( );
-		return EXIT_FAILURE;
-	}
+        if ( argv[ 1 ][ 0 ] == '~' && argv[ 1 ][ 1 ] == '/' )
+        {
+            pwe = getpwuid( getuid( ) );
+            Fname = CHAR_P T_malloc(   strlen( pwe->pw_dir )
+                                     + strlen( argv[ 1 ] ) );
+            strcpy( Fname, pwe->pw_dir );
+            strcat( Fname, &argv[ 1 ][ 1 ] );
+        }
+        else
+            Fname = T_strdup( argv[ 1 ] );
+    }
+    else
+    {
+        usage( );
+        return EXIT_FAILURE;
+    }
 
-	Lc = 1;
-	Eol = SET;
+    Lc = 1;
+    Eol = SET;
 
-	/* Now try to clean up the input and output appropriate error messages
-	   if there are problems */
+    /* Now try to clean up the input and output appropriate error messages
+       if there are problems */
 
-	TRY
-	{
-		yylex( );
-		TRY_SUCCESS;
-	}
-	CATCH( OUT_OF_MEMORY_EXCEPTION )
-	{
-		output( "\x03\n%s:%ld: Running out of memory.\n", Fname, Lc );
-		exit( EXIT_FAILURE );
-	}
-	CATCH( TOO_DEEPLY_NESTED_EXCEPTION )
-	{
-		output( "\x03\n%s:%ld: Include levels too deeply nested.\n",
-				Fname, Lc );
-		exit( EXIT_FAILURE );
-	}
-	CATCH( EOF_IN_COMMENT_EXCEPTION )
-	{
-		output( "\x03\n%s: End of file in comment starting at line %ld.\n",
-				Fname, Comm_Lc );
-		exit( EXIT_FAILURE );
-	}
-	CATCH( EOF_IN_STRING_EXCEPTION )
-	{
-		output( "\x03\n%s: End of line in string constant starting at "
-				"line %ld.\n", Fname, Str_Lc );
-		exit( EXIT_FAILURE );
-	}
-	CATCH( DANGLING_END_OF_COMMENT )
-	{
-		output( "\x03\n%s: End of comment found in program text at "
-				"line %ld.\n", Fname, Lc );
-		exit( EXIT_FAILURE );
-	}
-	CATCH( MISPLACED_SHEBANG )
-	{
-		output( "\x03\n%s: '#!' must appear on the very first line instead of "
-				"line %ld.\n", Fname, Lc );
-	}
-	OTHERWISE
-		exit( EXIT_FAILURE );
+    TRY
+    {
+        yylex( );
+        TRY_SUCCESS;
+    }
+    CATCH( OUT_OF_MEMORY_EXCEPTION )
+    {
+        output( "\x03\n%s:%ld: Running out of memory.\n", Fname, Lc );
+        exit( EXIT_FAILURE );
+    }
+    CATCH( TOO_DEEPLY_NESTED_EXCEPTION )
+    {
+        output( "\x03\n%s:%ld: Include levels too deeply nested.\n",
+                Fname, Lc );
+        exit( EXIT_FAILURE );
+    }
+    CATCH( EOF_IN_COMMENT_EXCEPTION )
+    {
+        output( "\x03\n%s: End of file in comment starting at line %ld.\n",
+                Fname, Comm_Lc );
+        exit( EXIT_FAILURE );
+    }
+    CATCH( EOF_IN_STRING_EXCEPTION )
+    {
+        output( "\x03\n%s: End of line in string constant starting at "
+                "line %ld.\n", Fname, Str_Lc );
+        exit( EXIT_FAILURE );
+    }
+    CATCH( DANGLING_END_OF_COMMENT )
+    {
+        output( "\x03\n%s: End of comment found in program text at "
+                "line %ld.\n", Fname, Lc );
+        exit( EXIT_FAILURE );
+    }
+    CATCH( MISPLACED_SHEBANG )
+    {
+        output( "\x03\n%s: '#!' must appear on the very first line instead of "
+                "line %ld.\n", Fname, Lc );
+    }
+    OTHERWISE
+        exit( EXIT_FAILURE );
 
-	/* Finished succesfully... */
+    /* Finished succesfully... */
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 
@@ -561,138 +561,138 @@ int main( int    argc,
 
 static void include_handler( char * file )
 {
-	static YY_BUFFER_STATE primary_buf;
-	static YY_BUFFER_STATE buf_state[ MAX_INCLUDE_DEPTH ];
-	static FILE *primary_fp;
-	static FILE *fp[ MAX_INCLUDE_DEPTH ];
-	static int incl_depth = -1;
+    static YY_BUFFER_STATE primary_buf;
+    static YY_BUFFER_STATE buf_state[ MAX_INCLUDE_DEPTH ];
+    static FILE *primary_fp;
+    static FILE *fp[ MAX_INCLUDE_DEPTH ];
+    static int incl_depth = -1;
     static long lc[ MAX_INCLUDE_DEPTH ];
-	static char *fname[ MAX_INCLUDE_DEPTH ];
-	static bool eol_state[ MAX_INCLUDE_DEPTH ];
-	char *incl_file;
-	struct passwd *pwe;
+    static char *fname[ MAX_INCLUDE_DEPTH ];
+    static bool eol_state[ MAX_INCLUDE_DEPTH ];
+    char *incl_file;
+    struct passwd *pwe;
 
 
-	if ( file != NULL )		      /* at the start of an include file */
-	{
-		/* If all the files the program is prepared to open are already open
-		   this is a fatal error (most probably it's due to an infinite
-		   recurrsion) */
+    if ( file != NULL )           /* at the start of an include file */
+    {
+        /* If all the files the program is prepared to open are already open
+           this is a fatal error (most probably it's due to an infinite
+           recurrsion) */
 
-		if ( incl_depth + 1 == MAX_INCLUDE_DEPTH )
-			THROW( TOO_DEEPLY_NESTED_EXCEPTION );
+        if ( incl_depth + 1 == MAX_INCLUDE_DEPTH )
+            THROW( TOO_DEEPLY_NESTED_EXCEPTION );
 
-		/* Now check if file name is enclosed by '"' or '<' and '>' - in the
-		   later case prepend the default directory */
+        /* Now check if file name is enclosed by '"' or '<' and '>' - in the
+           later case prepend the default directory */
 
-		if ( file[ 0 ] == '"' )
-		{
-			*( file + strlen( file ) - 1 ) = '\0';
+        if ( file[ 0 ] == '"' )
+        {
+            *( file + strlen( file ) - 1 ) = '\0';
 
-			/* If the include file name is an absolute path or if we don't
-			   know where the EDL script we're currently reading (i.e. its
-			   name does not start with an absolute file name) we take the
-			   include file name as it is. If it starts with "~/" we replace
-			   it by the home directory of the user. In all other cases we
-			   prepend the path of the current file to the include files
-			   name. */
+            /* If the include file name is an absolute path or if we don't
+               know where the EDL script we're currently reading (i.e. its
+               name does not start with an absolute file name) we take the
+               include file name as it is. If it starts with "~/" we replace
+               it by the home directory of the user. In all other cases we
+               prepend the path of the current file to the include files
+               name. */
 
-			if ( file[ 1 ] == '/' || Fname[ 0 ] != '/' )
-				incl_file = T_strdup( file + 1 );
-			else if ( file[ 1 ] == '~' && file[ 2 ] == '/' )
-			{
-				pwe = getpwuid( getuid( ) );
-				incl_file = CHAR_P T_malloc(   strlen( pwe->pw_dir ) 
-											 + strlen( file ) - 1 );
-				strcpy( incl_file, pwe->pw_dir );
-				strcat( incl_file, file + 2 );
-			}
-			else
-			{
-				incl_file = T_strdup( Fname );
-				*strrchr( incl_file, '/' ) = '\0';
-				incl_file = CHAR_P T_realloc( incl_file, strlen( incl_file )
-											  + strlen( file ) + 1 );
-				strcat( incl_file, "/" );
-				strcat( incl_file, file + 1 );
-			}
-		}
-		else
-		{
+            if ( file[ 1 ] == '/' || Fname[ 0 ] != '/' )
+                incl_file = T_strdup( file + 1 );
+            else if ( file[ 1 ] == '~' && file[ 2 ] == '/' )
+            {
+                pwe = getpwuid( getuid( ) );
+                incl_file = CHAR_P T_malloc(   strlen( pwe->pw_dir ) 
+                                             + strlen( file ) - 1 );
+                strcpy( incl_file, pwe->pw_dir );
+                strcat( incl_file, file + 2 );
+            }
+            else
+            {
+                incl_file = T_strdup( Fname );
+                *strrchr( incl_file, '/' ) = '\0';
+                incl_file = CHAR_P T_realloc( incl_file, strlen( incl_file )
+                                              + strlen( file ) + 1 );
+                strcat( incl_file, "/" );
+                strcat( incl_file, file + 1 );
+            }
+        }
+        else
+        {
 #if defined DEF_INCL_DIR
-			*( file + strlen( file ) - 1 ) = '\0';
-			incl_file = CHAR_P T_malloc(   strlen( file )
-										 + strlen( DEF_INCL_DIR ) + 2 );
-			strcpy( incl_file, DEF_INCL_DIR );
-			if ( incl_file[ strlen( incl_file ) - 1 ] != '/' )
-				strcat( incl_file, "/" );
-			strcat( incl_file, file + 1 );
+            *( file + strlen( file ) - 1 ) = '\0';
+            incl_file = CHAR_P T_malloc(   strlen( file )
+                                         + strlen( DEF_INCL_DIR ) + 2 );
+            strcpy( incl_file, DEF_INCL_DIR );
+            if ( incl_file[ strlen( incl_file ) - 1 ] != '/' )
+                strcat( incl_file, "/" );
+            strcat( incl_file, file + 1 );
 #else
-			output( "\x03\n%s:%ld: No default directory has been compiled "
-					"into fsc2 for EDL include files.\n", Fname, Lc );
-			exit( EXIT_FAILURE );
+            output( "\x03\n%s:%ld: No default directory has been compiled "
+                    "into fsc2 for EDL include files.\n", Fname, Lc );
+            exit( EXIT_FAILURE );
 #endif
-		}
+        }
 
 
-		/* The same holds for the case that the file can't be opened. */
+        /* The same holds for the case that the file can't be opened. */
 
-		if ( ( fp[ incl_depth + 1 ] = fopen( incl_file, "r" ) ) == NULL )
-		{
-			output( "\x03\n%s:%ld: Can't open include file %s.\n",
-					Fname, Lc, incl_file );
-			exit( EXIT_FAILURE );
-		}
+        if ( ( fp[ incl_depth + 1 ] = fopen( incl_file, "r" ) ) == NULL )
+        {
+            output( "\x03\n%s:%ld: Can't open include file %s.\n",
+                    Fname, Lc, incl_file );
+            exit( EXIT_FAILURE );
+        }
 
-		/* If this is the very first include store the current state in
-		   some special variables... */
+        /* If this is the very first include store the current state in
+           some special variables... */
 
-		if ( ++incl_depth == 0 )
-		{
-			primary_buf = YY_CURRENT_BUFFER;
-			primary_fp = yyin;
-		}
+        if ( ++incl_depth == 0 )
+        {
+            primary_buf = YY_CURRENT_BUFFER;
+            primary_fp = yyin;
+        }
 
-		/* ...store the still current file name, line number and EOL state,
-		   set them for the new file to be included and write the new file's
-		   name into the output file... */
+        /* ...store the still current file name, line number and EOL state,
+           set them for the new file to be included and write the new file's
+           name into the output file... */
 
-		fname[ incl_depth ] = Fname;
-		lc[ incl_depth ] = Lc;
-		eol_state[ incl_depth ] = Eol;
-		Fname = incl_file;
-		Lc = 1;
-		Eol = SET;
-		output( "\x01\n%s\n", Fname );
+        fname[ incl_depth ] = Fname;
+        lc[ incl_depth ] = Lc;
+        eol_state[ incl_depth ] = Eol;
+        Fname = incl_file;
+        Lc = 1;
+        Eol = SET;
+        output( "\x01\n%s\n", Fname );
 
-		/* ...and switch to the new file after allocating a buffer for it */
+        /* ...and switch to the new file after allocating a buffer for it */
 
-		buf_state[ incl_depth ] = yy_create_buffer( fp[ incl_depth ],
-													YY_BUF_SIZE );
-		yy_switch_to_buffer( buf_state[ incl_depth ] );
-		yyin = fp[ incl_depth ];
-	}
-	else						            /* at the end of an include file */
-	{
-		/* If the end of the very first file is reached exit signaling
-		   success, otherwise switch back to the previous buffer and file
-		   (and also restore the it's name, line number and EOL state) */
+        buf_state[ incl_depth ] = yy_create_buffer( fp[ incl_depth ],
+                                                    YY_BUF_SIZE );
+        yy_switch_to_buffer( buf_state[ incl_depth ] );
+        yyin = fp[ incl_depth ];
+    }
+    else                                    /* at the end of an include file */
+    {
+        /* If the end of the very first file is reached exit signaling
+           success, otherwise switch back to the previous buffer and file
+           (and also restore the it's name, line number and EOL state) */
 
-		if ( incl_depth == -1 )
-		{
-			T_free( Fname );
-			exit( EXIT_SUCCESS );
-		}
-		else
-		{
-			T_free( Fname );
-			Fname = fname[ incl_depth ];
-			Lc = lc[ incl_depth ];
-			Eol = eol_state[ incl_depth ];
-			xclose( primary_buf, buf_state, primary_fp, fp, &incl_depth );
-			output( "\x01\n%s\n", Fname );
-		}
-	}
+        if ( incl_depth == -1 )
+        {
+            T_free( Fname );
+            exit( EXIT_SUCCESS );
+        }
+        else
+        {
+            T_free( Fname );
+            Fname = fname[ incl_depth ];
+            Lc = lc[ incl_depth ];
+            Eol = eol_state[ incl_depth ];
+            xclose( primary_buf, buf_state, primary_fp, fp, &incl_depth );
+            output( "\x01\n%s\n", Fname );
+        }
+    }
 }
 
 
@@ -700,27 +700,27 @@ static void include_handler( char * file )
  *-------------------------------------------------------*/
 
 static void xclose( YY_BUFFER_STATE   primary_buf,
-					YY_BUFFER_STATE * buf_state,
-			 		FILE *            primary_fp,
-					FILE **           fp,
-					int *             incl_depth )
+                    YY_BUFFER_STATE * buf_state,
+                    FILE *            primary_fp,
+                    FILE **           fp,
+                    int *             incl_depth )
 {
-	if ( *incl_depth > 0 )
-	{
-		yy_switch_to_buffer( buf_state[ *incl_depth - 1 ] );
-		yyin = fp[ *incl_depth - 1 ];
-		fclose( fp[ *incl_depth ] );
-		yy_delete_buffer( buf_state[ *incl_depth ] );
-	}
-	else
-	{
-		yy_switch_to_buffer( primary_buf );
-		yyin = primary_fp;
-		fclose( fp[ 0 ] );
-		yy_delete_buffer( buf_state[ 0 ] );
-	}
+    if ( *incl_depth > 0 )
+    {
+        yy_switch_to_buffer( buf_state[ *incl_depth - 1 ] );
+        yyin = fp[ *incl_depth - 1 ];
+        fclose( fp[ *incl_depth ] );
+        yy_delete_buffer( buf_state[ *incl_depth ] );
+    }
+    else
+    {
+        yy_switch_to_buffer( primary_buf );
+        yyin = primary_fp;
+        fclose( fp[ 0 ] );
+        yy_delete_buffer( buf_state[ 0 ] );
+    }
 
-	*incl_depth -= 1;
+    *incl_depth -= 1;
 }
 
 
@@ -729,70 +729,70 @@ static void xclose( YY_BUFFER_STATE   primary_buf,
  *---------------------------------------------------------------------*/
 
 static void unit_spec( char * text,
-					   int    power )
+                       int    power )
 {
-	double dval;
+    double dval;
 
 
-	dval = strtod( text, NULL );
-	if ( ( dval == HUGE_VAL || dval == 0.0 ) && errno == ERANGE )
-	{
-		output( "\x03\n%s:%ld: Overflow or underflow occurred while "
-				"reading a number.\n", Fname, Lc );
-		exit( EXIT_FAILURE );
-	}
+    dval = strtod( text, NULL );
+    if ( ( dval == HUGE_VAL || dval == 0.0 ) && errno == ERANGE )
+    {
+        output( "\x03\n%s:%ld: Overflow or underflow occurred while "
+                "reading a number.\n", Fname, Lc );
+        exit( EXIT_FAILURE );
+    }
 
-	switch ( power )
-	{
-		case -9 :
-			 output( "%.12f", dval * 1.0e-9 );
-			 break;
+    switch ( power )
+    {
+        case -9 :
+             output( "%.12f", dval * 1.0e-9 );
+             break;
 
-		case -6 :
-			 output( "%.12f", dval * 1.0e-6 );
-			 break;
+        case -6 :
+             output( "%.12f", dval * 1.0e-6 );
+             break;
 
-		case -5 :
-			 output( "%.12f", dval * 1.0e-5 );
-			 break;
+        case -5 :
+             output( "%.12f", dval * 1.0e-5 );
+             break;
 
-		case -3 :
-			 output( "%.12f", dval * 1.0e-3 );
-			 break;
+        case -3 :
+             output( "%.12f", dval * 1.0e-3 );
+             break;
 
-		case -2 :
-			 output( "%.12f", dval * 1.0e-2 );
-			 break;
+        case -2 :
+             output( "%.12f", dval * 1.0e-2 );
+             break;
 
-		case 0 :
-			 output( "%.12f", dval );
-			 break;
+        case 0 :
+             output( "%.12f", dval );
+             break;
 
-		case 1 :
-			 output( "%.12f", dval * 10.0 );
-			 break;
+        case 1 :
+             output( "%.12f", dval * 10.0 );
+             break;
 
-		case 3 :
-			 output( "%.12f", dval * 1.0e3 );
-			 break;
+        case 3 :
+             output( "%.12f", dval * 1.0e3 );
+             break;
 
-		case 4 :
-			 output( "%.12f", dval * 1.0e4 );
-			 break;
+        case 4 :
+             output( "%.12f", dval * 1.0e4 );
+             break;
 
-		case 6 :
-			 output( "%.12f", dval * 1.0e6 );
-			 break;
+        case 6 :
+             output( "%.12f", dval * 1.0e6 );
+             break;
 
-		case 9 :
-			 output( "%f", dval * 1.0e9 );
-			 break;
+        case 9 :
+             output( "%f", dval * 1.0e9 );
+             break;
 
-		default :
-			 output( "\x03\n%s:%ld: Internal error in fsc2_clean.\n",
-					 Fname, Lc );
-			 exit( EXIT_FAILURE );
-	}
+        default :
+             output( "\x03\n%s:%ld: Internal error in fsc2_clean.\n",
+                     Fname, Lc );
+             exit( EXIT_FAILURE );
+    }
 }
 
 
@@ -801,17 +801,17 @@ static void unit_spec( char * text,
 
 static void *T_malloc( size_t size )
 {
-	void *mem;
+    void *mem;
 
 
-	if ( ( mem = malloc( size ) ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+    if ( ( mem = malloc( size ) ) == NULL )
+        THROW( OUT_OF_MEMORY_EXCEPTION );
 
 #if defined FSC2_MDEBUG
-	fprintf( stderr, "malloc:  %p (%u)\n", mem, size );
+    fprintf( stderr, "malloc:  %p (%u)\n", mem, size );
 #endif
 
-	return mem;
+    return mem;
 }
 
 
@@ -821,12 +821,12 @@ static void *T_malloc( size_t size )
 static void *T_free( void * ptr )
 {
 #if defined FSC2_MDEBUG
-	fprintf( stderr, "free:    %p\n", ptr );
-	assert( mprobe( ptr ) == MCHECK_OK );
+    fprintf( stderr, "free:    %p\n", ptr );
+    assert( mprobe( ptr ) == MCHECK_OK );
 #endif
 
-	free( ptr );
-	return NULL;
+    free( ptr );
+    return NULL;
 }
 
 
@@ -834,20 +834,20 @@ static void *T_free( void * ptr )
  *--------------------------------------------------------------------*/
 
 static void *T_realloc( void * ptr,
-						size_t size )
+                        size_t size )
 {
-	void *new_ptr;
+    void *new_ptr;
 
 #if defined FSC2_MDEBUG
-	fprintf( stderr, "malloc:  %p (%u)\n", ptr, size );
+    fprintf( stderr, "malloc:  %p (%u)\n", ptr, size );
 #endif
 
-	new_ptr = realloc( ptr, size );
+    new_ptr = realloc( ptr, size );
 
-	if ( new_ptr == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
+    if ( new_ptr == NULL )
+        THROW( OUT_OF_MEMORY_EXCEPTION );
 
-	return new_ptr;
+    return new_ptr;
 }
 
 
@@ -856,20 +856,20 @@ static void *T_realloc( void * ptr,
 
 static char *T_strdup( const char * string )
 {
-	char *new_mem;
+    char *new_mem;
 
-	if ( string == NULL )
-		return NULL;
+    if ( string == NULL )
+        return NULL;
 
-	if ( ( new_mem = malloc( strlen( string ) + 1 ) ) == NULL )
-		THROW( OUT_OF_MEMORY_EXCEPTION );
-	strcpy( new_mem, string );
+    if ( ( new_mem = malloc( strlen( string ) + 1 ) ) == NULL )
+        THROW( OUT_OF_MEMORY_EXCEPTION );
+    strcpy( new_mem, string );
 
 #if defined FSC2_MDEBUG
-	fprintf( stderr, "strdup:  %p (%u)\n", new_mem, strlen( string ) );
+    fprintf( stderr, "strdup:  %p (%u)\n", new_mem, strlen( string ) );
 #endif
 
-	return new_mem;
+    return new_mem;
 }
 
 
@@ -878,8 +878,8 @@ static char *T_strdup( const char * string )
 
 static void lower_permissions( void )
 {
-	seteuid( getuid( ) );
-	setegid( getgid( ) );
+    seteuid( getuid( ) );
+    setegid( getgid( ) );
 }
 
 
@@ -892,67 +892,67 @@ static void lower_permissions( void )
 #define OUTPUT_TRY_LENGTH 256
 
 static ssize_t output( const char * fmt,
-					   ... )
+                       ... )
 {
-	static char *c = NULL;
-	static size_t len = OUTPUT_TRY_LENGTH;
-	size_t bytes_to_write;
-	ssize_t last_written;
-	size_t total_bytes_written = 0;
+    static char *c = NULL;
+    static size_t len = OUTPUT_TRY_LENGTH;
+    size_t bytes_to_write;
+    ssize_t last_written;
+    size_t total_bytes_written = 0;
 
 
-	if ( c == NULL )
-		c = CHAR_P T_malloc( len );
+    if ( c == NULL )
+        c = CHAR_P T_malloc( len );
 
-	while ( 1 )
-	{
-		va_list ap;
-		int wr;
-		size_t new_len;
+    while ( 1 )
+    {
+        va_list ap;
+        int wr;
+        size_t new_len;
 
 
-		va_start( ap, fmt );
-		wr = vsnprintf( c, len, fmt, ap );
-		va_end( ap );
+        va_start( ap, fmt );
+        wr = vsnprintf( c, len, fmt, ap );
+        va_end( ap );
 
-		/* Older versions of glibc (up to 2.0.6) return a negativ value when
-		   there wasn't enough space in the output string, newer ones return
-		   the number of characters needed, not counting the trailing '\0'. */
+        /* Older versions of glibc (up to 2.0.6) return a negativ value when
+           there wasn't enough space in the output string, newer ones return
+           the number of characters needed, not counting the trailing '\0'. */
 
-		if ( wr >= 0 && ( size_t ) wr + 1 <= len )
-			break;
+        if ( wr >= 0 && ( size_t ) wr + 1 <= len )
+            break;
 
-		/* Usually double the size of the buffer, only when this wouldn't be
-		   enough (as far as we can figure out) allocate as much as needed.
-		   Update the 'len' variable only after the realloc call succeeded,
-		   otherwise it would be wrong when we're running out of memory in
-		   the realloc call. */
+        /* Usually double the size of the buffer, only when this wouldn't be
+           enough (as far as we can figure out) allocate as much as needed.
+           Update the 'len' variable only after the realloc call succeeded,
+           otherwise it would be wrong when we're running out of memory in
+           the realloc call. */
 
-		new_len = 2 * len;
-		if ( wr >= 0 && ( size_t ) wr + 1 > new_len )
-			new_len = ( size_t ) wr + 1;
+        new_len = 2 * len;
+        if ( wr >= 0 && ( size_t ) wr + 1 > new_len )
+            new_len = ( size_t ) wr + 1;
 
-		c = CHAR_P T_realloc( c, new_len );
-		len = new_len;
-	}
+        c = CHAR_P T_realloc( c, new_len );
+        len = new_len;
+    }
 
-	bytes_to_write = strlen( c );
+    bytes_to_write = strlen( c );
 
-	while ( bytes_to_write > 0 )
-	{
-		if ( ( last_written = write( STDOUT_FILENO, c + total_bytes_written,
-									 bytes_to_write ) ) < 0 )
-		{
-			if ( errno == EINTR )   /* non-deadly signal has been received ? */
-				continue;
-			THROW( EXCEPTION );     /* sorry, can't continue */
-		}
+    while ( bytes_to_write > 0 )
+    {
+        if ( ( last_written = write( STDOUT_FILENO, c + total_bytes_written,
+                                     bytes_to_write ) ) < 0 )
+        {
+            if ( errno == EINTR )   /* non-deadly signal has been received ? */
+                continue;
+            THROW( EXCEPTION );     /* sorry, can't continue */
+        }
 
-		bytes_to_write -= last_written;
-		total_bytes_written += last_written;
-	}
+        bytes_to_write -= last_written;
+        total_bytes_written += last_written;
+    }
 
-	return total_bytes_written;
+    return total_bytes_written;
 }
 
 
@@ -961,27 +961,29 @@ static ssize_t output( const char * fmt,
 
 static void usage( void )
 {
-	fprintf( stderr, "Usage: fsc2_clean [ filename ]\n"
-			 "This program predigests EDL files and is only meant for\n"
-			 "internal use by fsc2(1). But since you're already here:\n"
-			 "fsc2_clean expects input (i.e. an EDL programs) on STDIN\n"
-			 "and writes a cleaned up version to STDOUT. It is e.g.\n"
-			 "responsible for getting rid of comments, inclusion of\n"
-			 "further EDL files (so fsc2 has only to deal with a flat\n"
-			 "and simple input stream) and also already may detect some\n"
-			 "flaws in an EDL file. If you want to see what fsc2 really\n"
-			 "sees of your EDL file try\n\n"
-			 "    fsc2_clean `pwd`/my_program.edl < my_program.edl\n\n"
-			 "(but be prepared to get some non-printable character).\n"
-			 "If it gets passed a file name as the only argument this\n"
-			 "name is used in error messages. When called with an argument\n"
-			 "of either \"-h\" or \"--help\" (or with more than one "
-			 "argument)\nit prints out this text.\n" );
+    fprintf( stderr, "Usage: fsc2_clean [ filename ]\n"
+             "This program predigests EDL files and is only meant for\n"
+             "internal use by fsc2(1). But since you're already here:\n"
+             "fsc2_clean expects input (i.e. an EDL programs) on STDIN\n"
+             "and writes a cleaned up version to STDOUT. It is e.g.\n"
+             "responsible for getting rid of comments, inclusion of\n"
+             "further EDL files (so fsc2 has only to deal with a flat\n"
+             "and simple input stream) and also already may detect some\n"
+             "flaws in an EDL file. If you want to see what fsc2 really\n"
+             "sees of your EDL file try\n\n"
+             "    fsc2_clean `pwd`/my_program.edl < my_program.edl\n\n"
+             "(but be prepared to get some non-printable character).\n"
+             "If it gets passed a file name as the only argument this\n"
+             "name is used in error messages. When called with an argument\n"
+             "of either \"-h\" or \"--help\" (or with more than one "
+             "argument)\nit prints out this text.\n" );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

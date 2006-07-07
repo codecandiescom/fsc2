@@ -44,70 +44,70 @@ static void ep385_gpib_failure( void );
 #ifndef EP385_GPIB_DEBUG
 bool ep385_init( const char * name )
 {
-	char cmd[ 100 ];
-	int i;
+    char cmd[ 100 ];
+    int i;
 
 
-	if ( gpib_init_device( name, &ep385.device ) == FAILURE )
-		return FAIL;
+    if ( gpib_init_device( name, &ep385.device ) == FAILURE )
+        return FAIL;
 
-	/* Stop and reset pulser */
+    /* Stop and reset pulser */
 
-	ep385_command( "TIM;SET;STQ\r" );
+    ep385_command( "TIM;SET;STQ\r" );
 
-	strcpy( cmd, "TIM;" );
+    strcpy( cmd, "TIM;" );
 
-	/* Set the trigger mode */
+    /* Set the trigger mode */
 
-	if ( ep385.is_trig_in_mode && ep385.trig_in_mode == EXTERNAL )
-		strcat( cmd, "STS1;" );
-	else
-		strcat( cmd, "STS3;IEC0;" );
+    if ( ep385.is_trig_in_mode && ep385.trig_in_mode == EXTERNAL )
+        strcat( cmd, "STS1;" );
+    else
+        strcat( cmd, "STS3;IEC0;" );
 
-	/* Set the shot-repetition time (if the user didn't specify one set the
-	   shortest possible one) */
+    /* Set the shot-repetition time (if the user didn't specify one set the
+       shortest possible one) */
 
-	if ( ep385.is_repeat_time )
-		sprintf( cmd + strlen( cmd ), "SRT%ld;", ep385.repeat_time );
-	else
-		strcat( cmd, "SRT10;" );
+    if ( ep385.is_repeat_time )
+        sprintf( cmd + strlen( cmd ), "SRT%ld;", ep385.repeat_time );
+    else
+        strcat( cmd, "SRT10;" );
 
-	/* Set the time base source */
+    /* Set the time base source */
 
-	if ( ep385.timebase_mode == EXTERNAL )
-		strcat( cmd, "FRE0;" );
-	else
-		strcat( cmd, "FRE1;" );
+    if ( ep385.timebase_mode == EXTERNAL )
+        strcat( cmd, "FRE0;" );
+    else
+        strcat( cmd, "FRE1;" );
 
-	/* Set infinite repetition of the pulse sequence */
+    /* Set infinite repetition of the pulse sequence */
 
-	strcat( cmd, "SPE65535;LPS65535;SPL65535;MEM16\r" );
+    strcat( cmd, "SPE65535;LPS65535;SPL65535;MEM16\r" );
 
-	ep385_command( cmd );
+    ep385_command( cmd );
 
-	/* Tell the pulser to accept the values and to enable the time base for
-	   tiggering */
+    /* Tell the pulser to accept the values and to enable the time base for
+       tiggering */
 
-	ep385_command( "TIM;SET;TRY\r" );
+    ep385_command( "TIM;SET;TRY\r" );
 
-	/* According to a request by Robert and Stefan all channels get reset
-	   (so they can be sure there are no left-over pulses lurking anywhere)
-	   before the new pulse patterns are set. */
+    /* According to a request by Robert and Stefan all channels get reset
+       (so they can be sure there are no left-over pulses lurking anywhere)
+       before the new pulse patterns are set. */
 
-	for ( i = 0; i < MAX_CHANNELS; i++ )
-	{
-		sprintf( cmd, "DIG;SLT%d;PSD2,1,0,0,0,0\r", i + CHANNEL_OFFSET );
-		ep385_command( cmd );
-	}
+    for ( i = 0; i < MAX_CHANNELS; i++ )
+    {
+        sprintf( cmd, "DIG;SLT%d;PSD2,1,0,0,0,0\r", i + CHANNEL_OFFSET );
+        ep385_command( cmd );
+    }
 
-	ep385_do_update( );
+    ep385_do_update( );
 
-	return OK;
+    return OK;
 }
 #else
 bool ep385_init( const char * name  UNUSED_ARG )
 {
-	return OK;
+    return OK;
 }
 #endif
 
@@ -117,10 +117,10 @@ bool ep385_init( const char * name  UNUSED_ARG )
 
 bool ep385_run( bool state )
 {
-	ep385_command( state ? "TIM;SET;TRY;SFT\r" : "TIM;SET;STP\r" );
-	ep385.is_running = state;
+    ep385_command( state ? "TIM;SET;TRY;SFT\r" : "TIM;SET;STP\r" );
+    ep385.is_running = state;
 
-	return OK;
+    return OK;
 }
 
 
@@ -129,46 +129,46 @@ bool ep385_run( bool state )
 
 bool ep385_set_channels( void )
 {
-	int i, j, k;
-	Function_T *f;
-	Channel_T *ch;
-	char buf[ 1024 ];
+    int i, j, k;
+    Function_T *f;
+    Channel_T *ch;
+    char buf[ 1024 ];
 
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = ep385.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = ep385.function + i;
 
-		if ( f->num_channels == 0 )
-			continue;
+        if ( f->num_channels == 0 )
+            continue;
 
-		for ( j = 0; j < f->num_channels; j++ )
-		{
-			ch = f->channel[ j ];
+        for ( j = 0; j < f->num_channels; j++ )
+        {
+            ch = f->channel[ j ];
 
-			if ( ! ch->needs_update )
-				continue;
+            if ( ! ch->needs_update )
+                continue;
 
-			sprintf( buf, "DIG;SLT%d;PSD2,",
-					 f->channel[ j ]->self + CHANNEL_OFFSET );
-			if ( ch->num_active_pulses == 0 )
-				strcat( buf, "1,0,0,0,0\r" );
-			else
-			{
-				sprintf( buf + strlen( buf ), "%d,", ch->num_active_pulses );
-				for ( k = 0; k < ch->num_active_pulses; k++ )
-					sprintf( buf + strlen( buf ), "%ld,0,%ld,0,",
-							 ch->pulse_params[ k ].pos,
-							 ch->pulse_params[ k ].pos +
-							 ch->pulse_params[ k ].len );
-				buf[ strlen( buf ) - 1 ] = '\r';
-			}
+            sprintf( buf, "DIG;SLT%d;PSD2,",
+                     f->channel[ j ]->self + CHANNEL_OFFSET );
+            if ( ch->num_active_pulses == 0 )
+                strcat( buf, "1,0,0,0,0\r" );
+            else
+            {
+                sprintf( buf + strlen( buf ), "%d,", ch->num_active_pulses );
+                for ( k = 0; k < ch->num_active_pulses; k++ )
+                    sprintf( buf + strlen( buf ), "%ld,0,%ld,0,",
+                             ch->pulse_params[ k ].pos,
+                             ch->pulse_params[ k ].pos +
+                             ch->pulse_params[ k ].len );
+                buf[ strlen( buf ) - 1 ] = '\r';
+            }
 
-			ep385_command( buf );
-		}
-	}
+            ep385_command( buf );
+        }
+    }
 
-	return OK;
+    return OK;
 }
 
 
@@ -177,9 +177,9 @@ bool ep385_set_channels( void )
 
 bool ep385_command( const char * cmd )
 {
-	if ( gpib_write( ep385.device, cmd, strlen( cmd ) ) == FAILURE )
-		ep385_gpib_failure( );
-	return OK;
+    if ( gpib_write( ep385.device, cmd, strlen( cmd ) ) == FAILURE )
+        ep385_gpib_failure( );
+    return OK;
 }
 
 
@@ -188,13 +188,15 @@ bool ep385_command( const char * cmd )
 
 static void ep385_gpib_failure( void )
 {
-	print( FATAL, "Communication with device failed.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Communication with device failed.\n" );
+    THROW( EXCEPTION );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

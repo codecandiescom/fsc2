@@ -32,8 +32,8 @@
 typedef struct File_List File_List_T;
 
 struct File_List {
-	FILE *fp;
-	char *name;
+    FILE *fp;
+    char *name;
 };
 
 
@@ -55,5 +55,7 @@ Var_T *f_is_file( Var_T * /* v */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

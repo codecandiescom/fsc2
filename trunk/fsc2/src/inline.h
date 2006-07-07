@@ -41,40 +41,40 @@ static inline unsigned short int d2ushrt( double /* a */ );
 static inline unsigned short int i2ushrt( int /* a */ );
 
 static inline int i_max( int /* a */,
-						 int /* b */ );
+                         int /* b */ );
 
 static inline int i_min( int /* a */,
-						 int /* b */ );
+                         int /* b */ );
 
 static inline long l_max( long /* a */,
-						  long /* b */ );
+                          long /* b */ );
 
 static inline long l_min( long /* a */,
-						  long /* b */ );
+                          long /* b */ );
 
 static inline float f_max( float /* a */,
-						   float /* b */ );
+                           float /* b */ );
 
 static inline float f_min( float /* a */,
-						   float /* b */ );
+                           float /* b */ );
 
 static inline double d_max( double /* a */,
-							double /* b */ );
+                            double /* b */ );
 
 static inline double d_min( double /* a */,
-							double /* b */ );
+                            double /* b */ );
 
 static inline ssize_t ss_min( ssize_t /* a */,
-							  ssize_t /* b */ );
+                              ssize_t /* b */ );
 
 static inline ssize_t ss_max( ssize_t /* a */,
-							  ssize_t /* b */ );
+                              ssize_t /* b */ );
 
 static inline size_t s_min( size_t /* a */,
-							size_t /* b */ );
+                            size_t /* b */ );
 
 static inline size_t s_max( size_t /* a */,
-							size_t /* b */ );
+                            size_t /* b */ );
 
 static inline long lrnd( double /* x */ );
 
@@ -90,12 +90,12 @@ static inline unsigned int uirnd( double /* x */ );
 
 static short int d2shrt( double a )
 {
-	if ( a > SHRT_MAX_HALF )
-		return SHRT_MAX_HALF;
-	if ( a < SHRT_MIN_HALF )
-		return SHRT_MIN_HALF;
+    if ( a > SHRT_MAX_HALF )
+        return SHRT_MAX_HALF;
+    if ( a < SHRT_MIN_HALF )
+        return SHRT_MIN_HALF;
 
-	return ( short int ) ( a < 0.0 ? ceil( a - 0.5 ) : floor( a + 0.5 ) );
+    return ( short int ) ( a < 0.0 ? ceil( a - 0.5 ) : floor( a + 0.5 ) );
 }
 
 
@@ -104,12 +104,12 @@ static short int d2shrt( double a )
 
 static short int i2shrt( int a )
 {
-	if ( a > SHRT_MAX_HALF )
-		return SHRT_MAX_HALF;
-	if ( a < SHRT_MIN_HALF )
-		return SHRT_MIN_HALF;
+    if ( a > SHRT_MAX_HALF )
+        return SHRT_MAX_HALF;
+    if ( a < SHRT_MIN_HALF )
+        return SHRT_MIN_HALF;
 
-	return ( short int ) a;
+    return ( short int ) a;
 }
 
 
@@ -118,12 +118,12 @@ static short int i2shrt( int a )
 
 static unsigned short int d2ushrt( double a )
 {
-	if ( a > USHRT_MAX )
-		return USHRT_MAX;
-	if ( a < 0 )
-		return 0;
+    if ( a > USHRT_MAX )
+        return USHRT_MAX;
+    if ( a < 0 )
+        return 0;
 
-	return ( unsigned short int ) floor( a + 0.5 );
+    return ( unsigned short int ) floor( a + 0.5 );
 }
 
 
@@ -132,12 +132,12 @@ static unsigned short int d2ushrt( double a )
 
 static unsigned short int i2ushrt( int a )
 {
-	if ( a > USHRT_MAX )
-		return USHRT_MAX;
-	if ( a < 0 )
-		return 0;
+    if ( a > USHRT_MAX )
+        return USHRT_MAX;
+    if ( a < 0 )
+        return 0;
 
-	return ( unsigned short int ) a;
+    return ( unsigned short int ) a;
 }
 
 /*-------------------------------------------------------------------------*
@@ -162,12 +162,12 @@ static size_t  s_max(  size_t  a, size_t  b ) { return a < b ? a : b; }
 
 static long lrnd( double x )
 {
-	if ( x > LONG_MAX )
-		return LONG_MAX;
-	if ( x < LONG_MIN )
-		return LONG_MIN;
+    if ( x > LONG_MAX )
+        return LONG_MAX;
+    if ( x < LONG_MIN )
+        return LONG_MIN;
 
-	return ( long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
+    return ( long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
 }
 
 
@@ -176,12 +176,12 @@ static long lrnd( double x )
 
 static unsigned long ulrnd( double x )
 {
-	if ( x > ULONG_MAX )
-		return ULONG_MAX;
-	if ( x < 0 )
-		return 0;
+    if ( x > ULONG_MAX )
+        return ULONG_MAX;
+    if ( x < 0 )
+        return 0;
 
-	return ( unsigned long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
+    return ( unsigned long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
 }
 
 
@@ -190,12 +190,12 @@ static unsigned long ulrnd( double x )
 
 static int irnd( double x )
 {
-	if ( x > INT_MAX )
-		return INT_MAX;
-	if ( x < INT_MIN )
-		return INT_MIN;
+    if ( x > INT_MAX )
+        return INT_MAX;
+    if ( x < INT_MIN )
+        return INT_MIN;
 
-	return ( int ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
+    return ( int ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
 }
 
 
@@ -204,12 +204,12 @@ static int irnd( double x )
 
 static unsigned int uirnd( double x )
 {
-	if ( x > UINT_MAX )
-		return UINT_MAX;
-	if ( x < 0 )
-		return 0;
+    if ( x > UINT_MAX )
+        return UINT_MAX;
+    if ( x < 0 )
+        return 0;
 
-	return ( unsigned int ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
+    return ( unsigned int ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
 }
 
 
@@ -219,5 +219,7 @@ static unsigned int uirnd( double x )
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

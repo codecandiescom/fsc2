@@ -98,8 +98,8 @@
 
 typedef enum
 {
-	  false = 0,
-	  true  = 1
+      false = 0,
+      true  = 1
 } bool;
 
 #endif
@@ -121,117 +121,117 @@ typedef enum
 #define UNDEFINED -1
 
 enum {
-	PREPARATION = 0,
-	TEST,
-	EXPERIMENT
+    PREPARATION = 0,
+    TEST,
+    EXPERIMENT
 };
 
 
 enum {
-	AUTOMATIC = 0,
-	MANUAL
+    AUTOMATIC = 0,
+    MANUAL
 };
 
 
 /* States to be returned to the HTTP server */
 
 enum {
-	STATE_IDLE = 0,
-	STATE_RUNNING,
-	STATE_WAITING,
-	STATE_FINISHED
+    STATE_IDLE = 0,
+    STATE_RUNNING,
+    STATE_WAITING,
+    STATE_FINISHED
 };
 
 
 /* Define error severity types */
 
 enum {
-	FATAL = 0,
-	SEVERE,
-	WARN,
-	NO_ERROR
+    FATAL = 0,
+    SEVERE,
+    WARN,
+    NO_ERROR
 };
 
 
 /* Enumeration for command line flags */
 
 enum {
-	GEOMETRY = 0,
-	BROWSERFONTSIZE,
-	DISPLAYGEOMETRY,
-	DISPLAY1DGEOMETRY,
-	DISPLAY2DGEOMETRY,
-	CUTGEOMETRY,
-	TOOLGEOMETRY,
-	AXISFONT,
-	TOOLBOXFONTSIZE,
-	FILESELFONTSIZE,
-	HELPFONTSIZE,
-	STOPMOUSEBUTTON,
-	NOCRASHMAIL,
-	RESOLUTION,
-	HTTPPORT
+    GEOMETRY = 0,
+    BROWSERFONTSIZE,
+    DISPLAYGEOMETRY,
+    DISPLAY1DGEOMETRY,
+    DISPLAY2DGEOMETRY,
+    CUTGEOMETRY,
+    TOOLGEOMETRY,
+    AXISFONT,
+    TOOLBOXFONTSIZE,
+    FILESELFONTSIZE,
+    HELPFONTSIZE,
+    STOPMOUSEBUTTON,
+    NOCRASHMAIL,
+    RESOLUTION,
+    HTTPPORT
 };
 
 
 /* Definition for HIGH/LOW states */
 
 enum {
-	LOW = 0,
-	HIGH
+    LOW = 0,
+    HIGH
 };
 
 
 /* Definitions for slopes (e.g. trigger slopes etc.) */
 
 enum {
-	NEGATIVE = 0,
-	POSITIVE
+    NEGATIVE = 0,
+    POSITIVE
 };
 
 
 /* Definition for trigger modes etc. */
 
 enum {
-	INTERNAL = 0,
-	EXTERNAL
+    INTERNAL = 0,
+    EXTERNAL
 };
 
 
 /* Definition for level types */
 
 enum {
-	TTL_LEVEL = 0,
-	ECL_LEVEL
+    TTL_LEVEL = 0,
+    ECL_LEVEL
 };
 
 
 /* Some definitions used in graphic */
 
 enum {
-	X = 0,
-	Y,
-	Z
+    X = 0,
+    Y,
+    Z
 };
 
 
 enum {
-	RED = 0,
-	GREEN,
-	BLUE
+    RED = 0,
+    GREEN,
+    BLUE
 };
 
 
 /* Define the different section types */
 
 enum {
-	NO_SECTION = ( int ) OK + 1,
-	DEVICES_SECTION,
-	ASSIGNMENTS_SECTION,
-	VARIABLES_SECTION,
-	PHASES_SECTION,
-	PREPARATIONS_SECTION,
-	EXPERIMENT_SECTION
+    NO_SECTION = ( int ) OK + 1,
+    DEVICES_SECTION,
+    ASSIGNMENTS_SECTION,
+    VARIABLES_SECTION,
+    PHASES_SECTION,
+    PREPARATIONS_SECTION,
+    EXPERIMENT_SECTION
 };
 
 
@@ -240,213 +240,213 @@ enum {
    update the array with the channel names defined in global.c. */
 
 enum {
-	CHANNEL_INVALID = -1,
-	CHANNEL_CH1,
-	CHANNEL_CH2,
-	CHANNEL_CH3,
-	CHANNEL_CH4,
-	CHANNEL_MATH1,
-	CHANNEL_MATH2,
-	CHANNEL_MATH3,
-	CHANNEL_REF1,
-	CHANNEL_REF2,
-	CHANNEL_REF3,
-	CHANNEL_REF4,
-	CHANNEL_AUX,
-	CHANNEL_AUX1,
-	CHANNEL_AUX2,
-	CHANNEL_LINE,
-	CHANNEL_MEM_C,
-	CHANNEL_MEM_D,
-	CHANNEL_FUNC_E,
-	CHANNEL_FUNC_F,
-	CHANNEL_EXT,
-	CHANNEL_EXT10,
-	CHANNEL_CH0,
-	CHANNEL_CH5,
-	CHANNEL_CH6,
-	CHANNEL_CH7,
-	CHANNEL_CH8,
-	CHANNEL_CH9,
-	CHANNEL_CH10,
-	CHANNEL_CH11,
-	CHANNEL_CH12,
-	CHANNEL_CH13,
-	CHANNEL_CH14,
-	CHANNEL_CH15,
-	CHANNEL_DEFAULT_SOURCE,
-	CHANNEL_SOURCE_0,
-	CHANNEL_SOURCE_1,
-	CHANNEL_SOURCE_2,
-	CHANNEL_SOURCE_3,
-	CHANNEL_NEXT_GATE,
-	CHANNEL_TIMEBASE_1,
-	CHANNEL_TIMEBASE_2,
-	CHANNEL_CH16,
-	CHANNEL_CH17,
-	CHANNEL_CH18,
-	CHANNEL_CH19,
-	CHANNEL_CH20,
-	CHANNEL_CH21,
-	CHANNEL_CH22,
-	CHANNEL_CH23,
-	CHANNEL_CH24,
-	CHANNEL_CH25,
-	CHANNEL_CH26,
-	CHANNEL_CH27,
-	CHANNEL_CH28,
-	CHANNEL_CH29,
-	CHANNEL_CH30,
-	CHANNEL_CH31,
-	CHANNEL_CH32,
-	CHANNEL_CH33,
-	CHANNEL_CH34,
-	CHANNEL_CH35,
-	CHANNEL_A0,
-	CHANNEL_A1,
-	CHANNEL_A2,
-	CHANNEL_A3,
-	CHANNEL_A4,
-	CHANNEL_A5,
-	CHANNEL_A6,
-	CHANNEL_A7,
-	CHANNEL_A8,
-	CHANNEL_A9,
-	CHANNEL_A10,
-	CHANNEL_A11,
-	CHANNEL_A12,
-	CHANNEL_A13,
-	CHANNEL_A14,
-	CHANNEL_A15,
-	CHANNEL_B0,
-	CHANNEL_B1,
-	CHANNEL_B2,
-	CHANNEL_B3,
-	CHANNEL_B4,
-	CHANNEL_B5,
-	CHANNEL_B6,
-	CHANNEL_B7,
-	CHANNEL_B8,
-	CHANNEL_B9,
-	CHANNEL_B10,
-	CHANNEL_B11,
-	CHANNEL_B12,
-	CHANNEL_B13,
-	CHANNEL_B14,
-	CHANNEL_B15,
-	CHANNEL_C0,
-	CHANNEL_C1,
-	CHANNEL_C2,
-	CHANNEL_C3,
-	CHANNEL_C4,
-	CHANNEL_C5,
-	CHANNEL_C6,
-	CHANNEL_C7,
-	CHANNEL_C8,
-	CHANNEL_C9,
-	CHANNEL_C10,
-	CHANNEL_C11,
-	CHANNEL_C12,
-	CHANNEL_C13,
-	CHANNEL_C14,
-	CHANNEL_C15,
-	CHANNEL_D0,
-	CHANNEL_D1,
-	CHANNEL_D2,
-	CHANNEL_D3,
-	CHANNEL_D4,
-	CHANNEL_D5,
-	CHANNEL_D6,
-	CHANNEL_D7,
-	CHANNEL_D8,
-	CHANNEL_D9,
-	CHANNEL_D10,
-	CHANNEL_D11,
-	CHANNEL_D12,
-	CHANNEL_D13,
-	CHANNEL_D14,
-	CHANNEL_D15,
-	CHANNEL_E0,
-	CHANNEL_E1,
-	CHANNEL_E2,
-	CHANNEL_E3,
-	CHANNEL_E4,
-	CHANNEL_E5,
-	CHANNEL_E6,
-	CHANNEL_E7,
-	CHANNEL_E8,
-	CHANNEL_E9,
-	CHANNEL_E10,
-	CHANNEL_E11,
-	CHANNEL_E12,
-	CHANNEL_E13,
-	CHANNEL_E14,
-	CHANNEL_E15,
-	CHANNEL_F0,
-	CHANNEL_F1,
-	CHANNEL_F2,
-	CHANNEL_F3,
-	CHANNEL_F4,
-	CHANNEL_F5,
-	CHANNEL_F6,
-	CHANNEL_F7,
-	CHANNEL_F8,
-	CHANNEL_F9,
-	CHANNEL_F10,
-	CHANNEL_F11,
-	CHANNEL_F12,
-	CHANNEL_F13,
-	CHANNEL_F14,
-	CHANNEL_F15,
-	CHANNEL_G0,
-	CHANNEL_G1,
-	CHANNEL_G2,
-	CHANNEL_G3,
-	CHANNEL_G4,
-	CHANNEL_G5,
-	CHANNEL_G6,
-	CHANNEL_G7,
-	CHANNEL_G8,
-	CHANNEL_G9,
-	CHANNEL_G10,
-	CHANNEL_G11,
-	CHANNEL_G12,
-	CHANNEL_G13,
-	CHANNEL_G14,
-	CHANNEL_G15,
-	CHANNEL_H0,
-	CHANNEL_H1,
-	CHANNEL_H2,
-	CHANNEL_H3,
-	CHANNEL_H4,
-	CHANNEL_H5,
-	CHANNEL_H6,
-	CHANNEL_H7,
-	CHANNEL_H8,
-	CHANNEL_H9,
-	CHANNEL_H10,
-	CHANNEL_H11,
-	CHANNEL_H12,
-	CHANNEL_H13,
-	CHANNEL_H14,
-	CHANNEL_H15,
-	CHANNEL_TRIG_OUT,
-	CHANNEL_EXP_A,
-	CHANNEL_EXP_B,
-	CHANNEL_TRACE_A,
-	CHANNEL_TRACE_B,
-	CHANNEL_TRACE_C,
-	CHANNEL_TRACE_D,
-	CHANNEL_M1,
-	CHANNEL_M2,
-	CHANNEL_M3,
-	CHANNEL_M4,
-	CHANNEL_MATH,
-	CHANNEL_Z1,
-	CHANNEL_Z2,
-	CHANNEL_Z3,
-	CHANNEL_Z4,
-	NUM_CHANNEL_NAMES
+    CHANNEL_INVALID = -1,
+    CHANNEL_CH1,
+    CHANNEL_CH2,
+    CHANNEL_CH3,
+    CHANNEL_CH4,
+    CHANNEL_MATH1,
+    CHANNEL_MATH2,
+    CHANNEL_MATH3,
+    CHANNEL_REF1,
+    CHANNEL_REF2,
+    CHANNEL_REF3,
+    CHANNEL_REF4,
+    CHANNEL_AUX,
+    CHANNEL_AUX1,
+    CHANNEL_AUX2,
+    CHANNEL_LINE,
+    CHANNEL_MEM_C,
+    CHANNEL_MEM_D,
+    CHANNEL_FUNC_E,
+    CHANNEL_FUNC_F,
+    CHANNEL_EXT,
+    CHANNEL_EXT10,
+    CHANNEL_CH0,
+    CHANNEL_CH5,
+    CHANNEL_CH6,
+    CHANNEL_CH7,
+    CHANNEL_CH8,
+    CHANNEL_CH9,
+    CHANNEL_CH10,
+    CHANNEL_CH11,
+    CHANNEL_CH12,
+    CHANNEL_CH13,
+    CHANNEL_CH14,
+    CHANNEL_CH15,
+    CHANNEL_DEFAULT_SOURCE,
+    CHANNEL_SOURCE_0,
+    CHANNEL_SOURCE_1,
+    CHANNEL_SOURCE_2,
+    CHANNEL_SOURCE_3,
+    CHANNEL_NEXT_GATE,
+    CHANNEL_TIMEBASE_1,
+    CHANNEL_TIMEBASE_2,
+    CHANNEL_CH16,
+    CHANNEL_CH17,
+    CHANNEL_CH18,
+    CHANNEL_CH19,
+    CHANNEL_CH20,
+    CHANNEL_CH21,
+    CHANNEL_CH22,
+    CHANNEL_CH23,
+    CHANNEL_CH24,
+    CHANNEL_CH25,
+    CHANNEL_CH26,
+    CHANNEL_CH27,
+    CHANNEL_CH28,
+    CHANNEL_CH29,
+    CHANNEL_CH30,
+    CHANNEL_CH31,
+    CHANNEL_CH32,
+    CHANNEL_CH33,
+    CHANNEL_CH34,
+    CHANNEL_CH35,
+    CHANNEL_A0,
+    CHANNEL_A1,
+    CHANNEL_A2,
+    CHANNEL_A3,
+    CHANNEL_A4,
+    CHANNEL_A5,
+    CHANNEL_A6,
+    CHANNEL_A7,
+    CHANNEL_A8,
+    CHANNEL_A9,
+    CHANNEL_A10,
+    CHANNEL_A11,
+    CHANNEL_A12,
+    CHANNEL_A13,
+    CHANNEL_A14,
+    CHANNEL_A15,
+    CHANNEL_B0,
+    CHANNEL_B1,
+    CHANNEL_B2,
+    CHANNEL_B3,
+    CHANNEL_B4,
+    CHANNEL_B5,
+    CHANNEL_B6,
+    CHANNEL_B7,
+    CHANNEL_B8,
+    CHANNEL_B9,
+    CHANNEL_B10,
+    CHANNEL_B11,
+    CHANNEL_B12,
+    CHANNEL_B13,
+    CHANNEL_B14,
+    CHANNEL_B15,
+    CHANNEL_C0,
+    CHANNEL_C1,
+    CHANNEL_C2,
+    CHANNEL_C3,
+    CHANNEL_C4,
+    CHANNEL_C5,
+    CHANNEL_C6,
+    CHANNEL_C7,
+    CHANNEL_C8,
+    CHANNEL_C9,
+    CHANNEL_C10,
+    CHANNEL_C11,
+    CHANNEL_C12,
+    CHANNEL_C13,
+    CHANNEL_C14,
+    CHANNEL_C15,
+    CHANNEL_D0,
+    CHANNEL_D1,
+    CHANNEL_D2,
+    CHANNEL_D3,
+    CHANNEL_D4,
+    CHANNEL_D5,
+    CHANNEL_D6,
+    CHANNEL_D7,
+    CHANNEL_D8,
+    CHANNEL_D9,
+    CHANNEL_D10,
+    CHANNEL_D11,
+    CHANNEL_D12,
+    CHANNEL_D13,
+    CHANNEL_D14,
+    CHANNEL_D15,
+    CHANNEL_E0,
+    CHANNEL_E1,
+    CHANNEL_E2,
+    CHANNEL_E3,
+    CHANNEL_E4,
+    CHANNEL_E5,
+    CHANNEL_E6,
+    CHANNEL_E7,
+    CHANNEL_E8,
+    CHANNEL_E9,
+    CHANNEL_E10,
+    CHANNEL_E11,
+    CHANNEL_E12,
+    CHANNEL_E13,
+    CHANNEL_E14,
+    CHANNEL_E15,
+    CHANNEL_F0,
+    CHANNEL_F1,
+    CHANNEL_F2,
+    CHANNEL_F3,
+    CHANNEL_F4,
+    CHANNEL_F5,
+    CHANNEL_F6,
+    CHANNEL_F7,
+    CHANNEL_F8,
+    CHANNEL_F9,
+    CHANNEL_F10,
+    CHANNEL_F11,
+    CHANNEL_F12,
+    CHANNEL_F13,
+    CHANNEL_F14,
+    CHANNEL_F15,
+    CHANNEL_G0,
+    CHANNEL_G1,
+    CHANNEL_G2,
+    CHANNEL_G3,
+    CHANNEL_G4,
+    CHANNEL_G5,
+    CHANNEL_G6,
+    CHANNEL_G7,
+    CHANNEL_G8,
+    CHANNEL_G9,
+    CHANNEL_G10,
+    CHANNEL_G11,
+    CHANNEL_G12,
+    CHANNEL_G13,
+    CHANNEL_G14,
+    CHANNEL_G15,
+    CHANNEL_H0,
+    CHANNEL_H1,
+    CHANNEL_H2,
+    CHANNEL_H3,
+    CHANNEL_H4,
+    CHANNEL_H5,
+    CHANNEL_H6,
+    CHANNEL_H7,
+    CHANNEL_H8,
+    CHANNEL_H9,
+    CHANNEL_H10,
+    CHANNEL_H11,
+    CHANNEL_H12,
+    CHANNEL_H13,
+    CHANNEL_H14,
+    CHANNEL_H15,
+    CHANNEL_TRIG_OUT,
+    CHANNEL_EXP_A,
+    CHANNEL_EXP_B,
+    CHANNEL_TRACE_A,
+    CHANNEL_TRACE_B,
+    CHANNEL_TRACE_C,
+    CHANNEL_TRACE_D,
+    CHANNEL_M1,
+    CHANNEL_M2,
+    CHANNEL_M3,
+    CHANNEL_M4,
+    CHANNEL_MATH,
+    CHANNEL_Z1,
+    CHANNEL_Z2,
+    CHANNEL_Z3,
+    CHANNEL_Z4,
+    NUM_CHANNEL_NAMES
 };
 
 
@@ -460,33 +460,33 @@ enum {
    function names (plus the lexers dealing with channel names). */
 
 enum {
-	PULSER_CHANNEL_NO_TYPE = -1,
-	PULSER_CHANNEL_MW,
-	PULSER_CHANNEL_PULSE_SHAPE,
-	PULSER_CHANNEL_PHASE_1,
-	PULSER_CHANNEL_PHASE_2,
+    PULSER_CHANNEL_NO_TYPE = -1,
+    PULSER_CHANNEL_MW,
+    PULSER_CHANNEL_PULSE_SHAPE,
+    PULSER_CHANNEL_PHASE_1,
+    PULSER_CHANNEL_PHASE_2,
     PULSER_CHANNEL_TWT,
-	PULSER_CHANNEL_TWT_GATE,
-	PULSER_CHANNEL_DEFENSE,
-	PULSER_CHANNEL_DET,
-	PULSER_CHANNEL_DET_GATE,
-	PULSER_CHANNEL_RF,
-	PULSER_CHANNEL_RF_GATE,
-	PULSER_CHANNEL_LASER,
-	PULSER_CHANNEL_OTHER_1,
-	PULSER_CHANNEL_OTHER_2,
-	PULSER_CHANNEL_OTHER_3,
-	PULSER_CHANNEL_OTHER_4,
-	PULSER_CHANNEL_NUM_FUNC
+    PULSER_CHANNEL_TWT_GATE,
+    PULSER_CHANNEL_DEFENSE,
+    PULSER_CHANNEL_DET,
+    PULSER_CHANNEL_DET_GATE,
+    PULSER_CHANNEL_RF,
+    PULSER_CHANNEL_RF_GATE,
+    PULSER_CHANNEL_LASER,
+    PULSER_CHANNEL_OTHER_1,
+    PULSER_CHANNEL_OTHER_2,
+    PULSER_CHANNEL_OTHER_3,
+    PULSER_CHANNEL_OTHER_4,
+    PULSER_CHANNEL_NUM_FUNC
 };
 
 
 /* Define access types for functions in certain sections */
 
 enum {
-	ACCESS_PREP = 1,         /* only in preparation phase */
-	ACCESS_EXP  = 2,         /*	only in experiment phase */
-	ACCESS_ALL  = 3          /*	everywhere */
+    ACCESS_PREP = 1,         /* only in preparation phase */
+    ACCESS_EXP  = 2,         /* only in experiment phase */
+    ACCESS_ALL  = 3          /* everywhere */
 };
 
 
@@ -495,23 +495,23 @@ enum {
    forget to also extend the array of of phase type names). */
 
 enum {
-	PHASE_PLUS_X = 0,           /* this must always be 0 ! */
-	PHASE_MINUS_X,
-	PHASE_PLUS_Y,
-	PHASE_MINUS_Y,
-	NUM_PHASE_TYPES
+    PHASE_PLUS_X = 0,           /* this must always be 0 ! */
+    PHASE_MINUS_X,
+    PHASE_PLUS_Y,
+    PHASE_MINUS_Y,
+    NUM_PHASE_TYPES
 };
 
 
 /* Define the acquisition types used in phase cycling */
 
 enum {
-	ACQ_PLUS_U = 0,
-	ACQ_MINUS_U,
-	ACQ_PLUS_A,
-	ACQ_MINUS_A,
-	ACQ_PLUS_B,
-	ACQ_MINUS_B
+    ACQ_PLUS_U = 0,
+    ACQ_MINUS_U,
+    ACQ_PLUS_A,
+    ACQ_MINUS_A,
+    ACQ_PLUS_B,
+    ACQ_MINUS_B
 };
 
 
@@ -520,47 +520,47 @@ enum {
 typedef struct Compilation Compilation_T;
 
 struct Compilation {
-	/* Number of errors detected during compilation (FATAL, SEVERE and WARN) */
+    /* Number of errors detected during compilation (FATAL, SEVERE and WARN) */
 
-	int error[ 3 ];
+    int error[ 3 ];
 
-	/* Indicates which sections have already been handled to detect
-	   multiple instances of the same section */
+    /* Indicates which sections have already been handled to detect
+       multiple instances of the same section */
 
-	bool sections[ EXPERIMENT_SECTION + 1 ];
+    bool sections[ EXPERIMENT_SECTION + 1 ];
 };
 
 
 /* Access directions of pipe */
 
 enum {
-	READ = 0,
-	WRITE
+    READ = 0,
+    WRITE
 };
 
 
 enum {
-	PARENT = 0,
-	CHILD  = 1
+    PARENT = 0,
+    CHILD  = 1
 };
 
 
 /* Flags set according to the command line arguments */
 
 enum {
-	DO_LOAD       = ( 1 <<  0 ),
-	DO_TEST       = ( 1 <<  1 ),
-	DO_START      = ( 1 <<  2 ),
-	DO_SIGNAL     = ( 1 <<  3 ),
-	DO_DELETE     = ( 1 <<  4 ),
-	NO_MAIL       = ( 1 <<  5 ),
-	NO_BALLOON    = ( 1 <<  6 ),
-	NON_EXCLUSIVE = ( 1 <<  7 ),
-	BATCH_MODE    = ( 1 <<  8 ),
-	DO_CHECK      = ( 1 <<  9 ),                /* used for check runs only */
-	TEST_ONLY     = ( 1 << 10 ),
-	NO_GUI_RUN    = ( 1 << 11 ),
-	ICONIFIED_RUN = ( 1 << 12 )
+    DO_LOAD       = ( 1 <<  0 ),
+    DO_TEST       = ( 1 <<  1 ),
+    DO_START      = ( 1 <<  2 ),
+    DO_SIGNAL     = ( 1 <<  3 ),
+    DO_DELETE     = ( 1 <<  4 ),
+    NO_MAIL       = ( 1 <<  5 ),
+    NO_BALLOON    = ( 1 <<  6 ),
+    NON_EXCLUSIVE = ( 1 <<  7 ),
+    BATCH_MODE    = ( 1 <<  8 ),
+    DO_CHECK      = ( 1 <<  9 ),                /* used for check runs only */
+    TEST_ONLY     = ( 1 << 10 ),
+    NO_GUI_RUN    = ( 1 << 11 ),
+    ICONIFIED_RUN = ( 1 << 12 )
 };
 
 
@@ -568,9 +568,9 @@ enum {
    QUITTING signal */
 
 enum {
-	QUITTING_UNSET,
-	QUITTING_RAISED,
-	QUITTING_ACCEPTED
+    QUITTING_UNSET,
+    QUITTING_RAISED,
+    QUITTING_ACCEPTED
 };
 
 
@@ -586,9 +586,9 @@ enum {
 /* Return codes from function get_lib_symbol() (in func.c) */
 
 enum {
-	LIB_OK          =  0,        /*	everything fine */
-	LIB_ERR_NO_LIB  = -1,        /*	library not found */
-	LIB_ERR_NO_SYM  = -2         /*	symbol not found in library */
+    LIB_OK          =  0,        /* everything fine */
+    LIB_ERR_NO_LIB  = -1,        /* library not found */
+    LIB_ERR_NO_SYM  = -2         /* symbol not found in library */
 };
 
 
@@ -635,10 +635,10 @@ enum {
    event from the toolbox can be in. */
 
 enum {
-	TB_WAIT_NOT_RUNNING,
-	TB_WAIT_RUNNING_WITH_NO_TIMER,
-	TB_WAIT_TIMER_EXPIRED,
-	TB_WAIT_TIMER_RUNNING
+    TB_WAIT_NOT_RUNNING,
+    TB_WAIT_RUNNING_WITH_NO_TIMER,
+    TB_WAIT_TIMER_EXPIRED,
+    TB_WAIT_TIMER_RUNNING
 };
 
 
@@ -670,5 +670,7 @@ enum {
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

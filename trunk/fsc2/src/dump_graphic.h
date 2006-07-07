@@ -27,7 +27,7 @@
 
 
 void dump_window( int /* type */,
-				  int /* fd   */ );
+                  int /* fd   */ );
 
 void create_color_hash( void );
 
@@ -38,5 +38,7 @@ void create_color_hash( void );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

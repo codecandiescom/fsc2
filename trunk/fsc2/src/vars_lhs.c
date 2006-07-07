@@ -29,26 +29,26 @@
 
 
 static int vars_check_lhs_indices( Var_T ** v,
-								   int *    range_count );
+                                   int *    range_count );
 static Var_T *vars_setup_new_array( Var_T * v,
-									int     dim );
+                                    int     dim );
 static Var_T *vars_init_elements( Var_T * a,
-								  Var_T * v );
+                                  Var_T * v );
 static void vars_do_init( Var_T * src,
-						  Var_T * dest );
+                          Var_T * dest );
 static Var_T *vars_lhs_pointer( Var_T * v,
-								int     dim );
+                                int     dim );
 static Var_T *vars_lhs_sub_pointer( Var_T * v,
-									int     dim,
-									int     range_count );
+                                    int     dim,
+                                    int     range_count );
 static Var_T *vars_lhs_simple_pointer( Var_T * a,
-									   Var_T * cv,
-									   Var_T * v,
-									   int     dim );
+                                       Var_T * cv,
+                                       Var_T * v,
+                                       int     dim );
 static Var_T *vars_lhs_range_pointer( Var_T * a,
-									  Var_T * cv,
-									  Var_T * v,
-									  int     dim );
+                                      Var_T * cv,
+                                      Var_T * v,
+                                      int     dim );
 
 
 /*----------------------------------------------------------------------*
@@ -61,25 +61,25 @@ static Var_T *vars_lhs_range_pointer( Var_T * a,
 
 Var_T *vars_arr_lhs( Var_T * v )
 {
-	int dim;
-	int range_count = 0;
+    int dim;
+    int range_count = 0;
 
 
-	/* Move up the stack until we find the variable indicating the array or
-	   matrix itself */
+    /* Move up the stack until we find the variable indicating the array or
+       matrix itself */
 
-	dim = vars_check_lhs_indices( &v, &range_count );
+    dim = vars_check_lhs_indices( &v, &range_count );
 
-	/* If the array is new (i.e. we're still in the VARIABLES section) set
-	   it up, otherwise return a pointer to the referenced element or a
-	   variables of type SUB_REF_PTR if the indices did contain ranges */
+    /* If the array is new (i.e. we're still in the VARIABLES section) set
+       it up, otherwise return a pointer to the referenced element or a
+       variables of type SUB_REF_PTR if the indices did contain ranges */
 
-	if ( v->from->type == UNDEF_VAR )
-		return vars_setup_new_array( v, dim );
-	else if ( range_count == 0 )
-		return vars_lhs_pointer( v, dim );
-	else
-		return vars_lhs_sub_pointer( v, dim, range_count );
+    if ( v->from->type == UNDEF_VAR )
+        return vars_setup_new_array( v, dim );
+    else if ( range_count == 0 )
+        return vars_lhs_pointer( v, dim );
+    else
+        return vars_lhs_sub_pointer( v, dim, range_count );
 }
 
 
@@ -91,147 +91,147 @@ Var_T *vars_arr_lhs( Var_T * v )
  *--------------------------------------------------------------*/
 
 static int vars_check_lhs_indices( Var_T ** v,
-								   int *    range_count )
+                                   int *    range_count )
 {
-	Var_T *cv = *v;
-	Var_T *ref;
-	int index_count = 0;
+    Var_T *cv = *v;
+    Var_T *ref;
+    int index_count = 0;
 
 
-	/* If the index variable has the type UNDEF_VAR the whole array has to
-	   be used */
+    /* If the index variable has the type UNDEF_VAR the whole array has to
+       be used */
 
-	if ( cv->type == UNDEF_VAR )
-	{
-		*v = cv->prev;
-		fsc2_assert( ( *v )->type == REF_PTR );
-		return 0;
-	}
+    if ( cv->type == UNDEF_VAR )
+    {
+        *v = cv->prev;
+        fsc2_assert( ( *v )->type == REF_PTR );
+        return 0;
+    }
 
-	while ( cv->type != REF_PTR && cv != NULL )
-		cv = cv->prev;
+    while ( cv->type != REF_PTR && cv != NULL )
+        cv = cv->prev;
 
-	fsc2_assert( cv != NULL );
+    fsc2_assert( cv != NULL );
 
-	*v = cv;
-	ref = cv->from;
+    *v = cv;
+    ref = cv->from;
 
-	/* Loop over all indices */
+    /* Loop over all indices */
 
-	for ( cv = cv->next; cv != NULL; cv = cv->next )
-	{
-		index_count++;
+    for ( cv = cv->next; cv != NULL; cv = cv->next )
+    {
+        index_count++;
 
-		/* Do some sanity checks on the index and convert its value to
-		   something we can use internally */
+        /* Do some sanity checks on the index and convert its value to
+           something we can use internally */
 
-		vars_check( cv, INT_VAR | FLOAT_VAR );
+        vars_check( cv, INT_VAR | FLOAT_VAR );
 
-		if ( ref->type != UNDEF_VAR )
-		{
-			if ( cv->type == INT_VAR )
-				cv->val.lval -= ARRAY_OFFSET;
-			else
-			{
-				if ( cv->next == NULL || cv->next->type != STR_VAR )
-					print( WARN, "FLOAT value used as index for array '%s'.\n",
-						   ref->name );
-				else
-					print( WARN, "FLOAT value used as start of range for "
-						   "array '%s'.\n", ref->name );
-				cv->val.lval = lrnd( cv->val.dval ) - ARRAY_OFFSET;
-				cv->type = INT_VAR;
-			}
-								 
-			if ( cv->val.lval < 0 )
-			{
-				if ( cv->next == NULL || cv->next->type != STR_VAR )
-					print( FATAL, "Invalid index for array '%s'.\n",
-						   ref->name );
-				else
-					print( FATAL, "Invalid start of range for array '%s'.\n",
-						   ref->name );
-				THROW( EXCEPTION );
-			}
-		}
-		else
-		{
-			if ( cv->type == FLOAT_VAR )
-			{
-				print( WARN, "FLOAT value used as size array.\n" );
-				cv->val.lval = lrnd( cv->val.dval ) - ARRAY_OFFSET;
-				cv->type = INT_VAR;
-			}
+        if ( ref->type != UNDEF_VAR )
+        {
+            if ( cv->type == INT_VAR )
+                cv->val.lval -= ARRAY_OFFSET;
+            else
+            {
+                if ( cv->next == NULL || cv->next->type != STR_VAR )
+                    print( WARN, "FLOAT value used as index for array '%s'.\n",
+                           ref->name );
+                else
+                    print( WARN, "FLOAT value used as start of range for "
+                           "array '%s'.\n", ref->name );
+                cv->val.lval = lrnd( cv->val.dval ) - ARRAY_OFFSET;
+                cv->type = INT_VAR;
+            }
+                                 
+            if ( cv->val.lval < 0 )
+            {
+                if ( cv->next == NULL || cv->next->type != STR_VAR )
+                    print( FATAL, "Invalid index for array '%s'.\n",
+                           ref->name );
+                else
+                    print( FATAL, "Invalid start of range for array '%s'.\n",
+                           ref->name );
+                THROW( EXCEPTION );
+            }
+        }
+        else
+        {
+            if ( cv->type == FLOAT_VAR )
+            {
+                print( WARN, "FLOAT value used as size array.\n" );
+                cv->val.lval = lrnd( cv->val.dval ) - ARRAY_OFFSET;
+                cv->type = INT_VAR;
+            }
 
-			if ( ( ! ( cv->flags & IS_DYNAMIC ) && cv->val.lval < 1 ) ||
-				 cv->val.lval < 0 )
-			{
-				print( FATAL, "Invalid size for array.\n" );
-				THROW( EXCEPTION );
-			}
+            if ( ( ! ( cv->flags & IS_DYNAMIC ) && cv->val.lval < 1 ) ||
+                 cv->val.lval < 0 )
+            {
+                print( FATAL, "Invalid size for array.\n" );
+                THROW( EXCEPTION );
+            }
 
-			continue;
-		}
+            continue;
+        }
 
-		/* If we're at the end of the list of indices or if the last index
-		   wasn't a range start go back to the start of the loop */
+        /* If we're at the end of the list of indices or if the last index
+           wasn't a range start go back to the start of the loop */
 
-		if ( cv->next == NULL || cv->next->type != STR_VAR )
-			continue;
+        if ( cv->next == NULL || cv->next->type != STR_VAR )
+            continue;
 
-		cv = cv->next->next;
+        cv = cv->next->next;
 
-		/* Do some sanity checks on the end of range value and convert it
-		   to something we can use internally */
+        /* Do some sanity checks on the end of range value and convert it
+           to something we can use internally */
 
-		vars_check( cv, INT_VAR | FLOAT_VAR );
+        vars_check( cv, INT_VAR | FLOAT_VAR );
 
-		if ( cv->type == INT_VAR )
-			cv->val.lval -= ARRAY_OFFSET;
-		else
-		{
-			print( WARN, "FLOAT value used as end of range for array '%s'.\n",
-				   ref->name );
-			cv->val.lval = lrnd( cv->val.dval ) - ARRAY_OFFSET;
-			cv->type = INT_VAR;
-		}
-								 
-		if ( cv->val.lval < 0 )
-		{
-			print( FATAL, "Invalid end of range for array '%s'.\n",
-				   ref->name );
-			THROW( EXCEPTION );
-		}
+        if ( cv->type == INT_VAR )
+            cv->val.lval -= ARRAY_OFFSET;
+        else
+        {
+            print( WARN, "FLOAT value used as end of range for array '%s'.\n",
+                   ref->name );
+            cv->val.lval = lrnd( cv->val.dval ) - ARRAY_OFFSET;
+            cv->type = INT_VAR;
+        }
+                                 
+        if ( cv->val.lval < 0 )
+        {
+            print( FATAL, "Invalid end of range for array '%s'.\n",
+                   ref->name );
+            THROW( EXCEPTION );
+        }
 
-		/* Range end must be at least as large as the start of the range */
+        /* Range end must be at least as large as the start of the range */
 
-		if ( cv->prev->prev->val.lval > cv->val.lval )
-		{
-			print( FATAL, "Start of range larger than end of range for "
-				   "array '%s'.\n", ref->name );
-			THROW( EXCEPTION );
-		}
+        if ( cv->prev->prev->val.lval > cv->val.lval )
+        {
+            print( FATAL, "Start of range larger than end of range for "
+                   "array '%s'.\n", ref->name );
+            THROW( EXCEPTION );
+        }
 
-		/* If start and end of range are identical the range represents a
-		   single index, so get rid of the start of range variable and the
-		   intervening STRING variable. Otherwise also pop the STRING variable
-		   but mark the range start index by making it negative. */
+        /* If start and end of range are identical the range represents a
+           single index, so get rid of the start of range variable and the
+           intervening STRING variable. Otherwise also pop the STRING variable
+           but mark the range start index by making it negative. */
 
-		if ( cv->val.lval == cv->prev->prev->val.lval )
-		{
-			print( WARN, "Start and end of range are identical for "
-				   "array '%s'.\n", ref->name );
-			vars_pop( vars_pop( cv->prev->prev ) );
-		}
-		else
-		{
-			vars_pop( cv->prev );
-			cv->prev->val.lval = - cv->prev->val.lval -1;
-			*range_count += 1;
-		}
-	}
+        if ( cv->val.lval == cv->prev->prev->val.lval )
+        {
+            print( WARN, "Start and end of range are identical for "
+                   "array '%s'.\n", ref->name );
+            vars_pop( vars_pop( cv->prev->prev ) );
+        }
+        else
+        {
+            vars_pop( cv->prev );
+            cv->prev->val.lval = - cv->prev->val.lval -1;
+            *range_count += 1;
+        }
+    }
 
-	return index_count;
+    return index_count;
 }
 
 
@@ -242,34 +242,34 @@ static int vars_check_lhs_indices( Var_T ** v,
  *-----------------------------------------------------------------------*/
 
 static Var_T* vars_setup_new_array( Var_T * v,
-									int     dim )
+                                    int     dim )
 {
-	Var_T *a = v->from;
+    Var_T *a = v->from;
 
 
-	/* We can't continue without indices, i.e. with a definition like "a[ ]" */
+    /* We can't continue without indices, i.e. with a definition like "a[ ]" */
 
-	if ( v->next->type == UNDEF_VAR )
-	{
-		print( FATAL, "Missing sizes in definition of array '%s'.\n",
-			   v->from->name );
-		THROW( EXCEPTION );
-	}
+    if ( v->next->type == UNDEF_VAR )
+    {
+        print( FATAL, "Missing sizes in definition of array '%s'.\n",
+               v->from->name );
+        THROW( EXCEPTION );
+    }
 
-	/* Set the arrays type and create it as far as possible */
+    /* Set the arrays type and create it as far as possible */
 
-	a->type = VAR_TYPE( a ) == INT_VAR ? INT_REF : FLOAT_REF;
+    a->type = VAR_TYPE( a ) == INT_VAR ? INT_REF : FLOAT_REF;
 
-	vars_arr_create( a, v->next, dim, UNSET );
+    vars_arr_create( a, v->next, dim, UNSET );
 
-	/* Get rid of variables specifying the sizes that aren't needed anymore */
+    /* Get rid of variables specifying the sizes that aren't needed anymore */
 
-	while ( ( v = vars_pop( v ) ) != NULL )
-		/* empty */ ;
+    while ( ( v = vars_pop( v ) ) != NULL )
+        /* empty */ ;
 
-	/* Finally push a marker on the stack to be used in array initialization */
+    /* Finally push a marker on the stack to be used in array initialization */
 
-	return vars_push( REF_PTR, a );
+    return vars_push( REF_PTR, a );
 }
 
 
@@ -278,111 +278,111 @@ static Var_T* vars_setup_new_array( Var_T * v,
  *----------------------------------------------------------------------*/
 
 void vars_arr_create( Var_T * a,
-					  Var_T * v,
-					  int     dim,
-					  bool    is_temp )
+                      Var_T * v,
+                      int     dim,
+                      bool    is_temp )
 {
-	Var_T *c;
-	ssize_t i;
-	ssize_t len;
+    Var_T *c;
+    ssize_t i;
+    ssize_t len;
 
 
-	a->dim    = dim;
-	a->flags &= ~ NEW_VARIABLE;
+    a->dim    = dim;
+    a->flags &= ~ NEW_VARIABLE;
 
-	vars_check( v, INT_VAR | FLOAT_VAR );
+    vars_check( v, INT_VAR | FLOAT_VAR );
 
-	/* If the size is not defined the whole of the rest of the array must be
-	   dynamically sized and can be only set up by an assignment sometime
-	   later. */
+    /* If the size is not defined the whole of the rest of the array must be
+       dynamically sized and can be only set up by an assignment sometime
+       later. */
 
-	if ( v->flags & IS_DYNAMIC )
-	{
-		a->len = 0;
-		a->flags |= IS_DYNAMIC;
+    if ( v->flags & IS_DYNAMIC )
+    {
+        a->len = 0;
+        a->flags |= IS_DYNAMIC;
 
-		/* If we're dealing with the last index we just need to adjust the
-		   variable type */
+        /* If we're dealing with the last index we just need to adjust the
+           variable type */
 
-		if ( a->dim == 1 )
-		{
-			a->type = a->type == INT_REF ? INT_ARR : FLOAT_ARR;
-			return;
-		}
+        if ( a->dim == 1 )
+        {
+            a->type = a->type == INT_REF ? INT_ARR : FLOAT_ARR;
+            return;
+        }
 
-		/* Otherwise check that all the following sizes are also dynamically
-		   sized */
+        /* Otherwise check that all the following sizes are also dynamically
+           sized */
 
-		for ( c = v->next; c != NULL; c = c->next )
-			if ( ! ( c->flags & IS_DYNAMIC ) )
-			{
-				print( FATAL, "Fixed array size after a dynamically set "
-					   "size.\n" );
-				THROW( EXCEPTION );
-			}
+        for ( c = v->next; c != NULL; c = c->next )
+            if ( ! ( c->flags & IS_DYNAMIC ) )
+            {
+                print( FATAL, "Fixed array size after a dynamically set "
+                       "size.\n" );
+                THROW( EXCEPTION );
+            }
 
-		return;
-	}
+        return;
+    }
 
-	/* Determine the requested size */
+    /* Determine the requested size */
 
-	if ( v->type == INT_VAR )
-		len = v->val.lval;
-	else
-	{
-		print( WARN, "FLOAT value used as size of array.\n" );
-		len = lrnd( v->val.dval );
-	}
+    if ( v->type == INT_VAR )
+        len = v->val.lval;
+    else
+    {
+        print( WARN, "FLOAT value used as size of array.\n" );
+        len = lrnd( v->val.dval );
+    }
 
-	if ( len < 1 )
-	{
-		print( FATAL, "Invalid size for array.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( len < 1 )
+    {
+        print( FATAL, "Invalid size for array.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* The current dimension is obviously not dynamically sized or we
-	   wouldn't have gotten here */
+    /* The current dimension is obviously not dynamically sized or we
+       wouldn't have gotten here */
 
-	a->flags &= ~ IS_DYNAMIC;
+    a->flags &= ~ IS_DYNAMIC;
 
-	/* If this is the last dimension allocate memory (initialized to 0) for
-	   a data array */
+    /* If this is the last dimension allocate memory (initialized to 0) for
+       a data array */
 
-	if ( a->dim == 1 )
-	{
-		a->type = a->type == INT_REF ? INT_ARR : FLOAT_ARR;
-		if ( a->type == INT_ARR )
-			a->val.lpnt = LONG_P T_calloc( len, sizeof *a->val.lpnt );
-		else
-		{
-			a->val.dpnt = DOUBLE_P T_malloc( len * sizeof *a->val.dpnt );
-			for ( i = 0; i < len; i++ )
-				a->val.dpnt[ i ] = 0.0;
-		}
+    if ( a->dim == 1 )
+    {
+        a->type = a->type == INT_REF ? INT_ARR : FLOAT_ARR;
+        if ( a->type == INT_ARR )
+            a->val.lpnt = LONG_P T_calloc( len, sizeof *a->val.lpnt );
+        else
+        {
+            a->val.dpnt = DOUBLE_P T_malloc( len * sizeof *a->val.dpnt );
+            for ( i = 0; i < len; i++ )
+                a->val.dpnt[ i ] = 0.0;
+        }
 
-		a->len = len;
-		return;
-	}
-	
-	/* Otherwise we need an array of references to arrays of lower dimensions
-	   which then in turn must be created */
+        a->len = len;
+        return;
+    }
+    
+    /* Otherwise we need an array of references to arrays of lower dimensions
+       which then in turn must be created */
 
-	a->val.vptr = VAR_PP T_malloc( len * sizeof *a->val.vptr );
+    a->val.vptr = VAR_PP T_malloc( len * sizeof *a->val.vptr );
 
-	for ( i = 0; i < len; i++ )
-		a->val.vptr[ i ] = NULL;
+    for ( i = 0; i < len; i++ )
+        a->val.vptr[ i ] = NULL;
 
-	a->len = len;
+    a->len = len;
 
-	for ( i = 0; i < a->len; i++ )
-	{
-		a->val.vptr[ i ] = vars_new( NULL );
-		a->val.vptr[ i ]->type  = a->type;
-		a->val.vptr[ i ]->from  = a;
-		if ( is_temp )
-			a->val.vptr[ i ]->flags |= IS_TEMP;
-		vars_arr_create( a->val.vptr[ i ], v->next, dim - 1, is_temp );
-	}
+    for ( i = 0; i < a->len; i++ )
+    {
+        a->val.vptr[ i ] = vars_new( NULL );
+        a->val.vptr[ i ]->type  = a->type;
+        a->val.vptr[ i ]->from  = a;
+        if ( is_temp )
+            a->val.vptr[ i ]->flags |= IS_TEMP;
+        vars_arr_create( a->val.vptr[ i ], v->next, dim - 1, is_temp );
+    }
 }
 
 
@@ -400,151 +400,151 @@ void vars_arr_create( Var_T * a,
  *---------------------------------------------------------------------*/
 
 Var_T *vars_init_list( Var_T * v,
-					   ssize_t level )
+                       ssize_t level )
 {
-	ssize_t count = 0;
-	ssize_t i;
-	Var_T *cv, *nv;
-	int type = INT_VAR;
+    ssize_t count = 0;
+    ssize_t i;
+    Var_T *cv, *nv;
+    int type = INT_VAR;
 
 
-	CLOBBER_PROTECT( v );
-	CLOBBER_PROTECT( nv );
+    CLOBBER_PROTECT( v );
+    CLOBBER_PROTECT( nv );
 
-	/* Find the start of the of list initializers, marked by a variable of
-	   type REF_PTR */
+    /* Find the start of the of list initializers, marked by a variable of
+       type REF_PTR */
 
-	while ( v->type != REF_PTR )
-		v = v->prev;
+    while ( v->type != REF_PTR )
+        v = v->prev;
 
-	v = vars_pop( v );
+    v = vars_pop( v );
 
-	/* Variables of lower dimensions than the one required here are left-
-	   overs from previous calls, they are still needed for the final
-	   assignment of the initialization data to the RHS array. */
+    /* Variables of lower dimensions than the one required here are left-
+       overs from previous calls, they are still needed for the final
+       assignment of the initialization data to the RHS array. */
 
-	while ( v != NULL && v->dim < level && v->flags & INIT_ONLY )
-		v = v->next;
+    while ( v != NULL && v->dim < level && v->flags & INIT_ONLY )
+        v = v->next;
 
-	if ( v == NULL || v->dim < level )
-	{
-		print( FATAL, "Syntax error in initializer list (possibly a missing "
-			   "set of curly braces).\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL || v->dim < level )
+    {
+        print( FATAL, "Syntax error in initializer list (possibly a missing "
+               "set of curly braces).\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* Count the number of initializers, skipping variables with too low
-	   a dimension (if they are left over from previous calls) and
-	   complaining about variables with too high a dimensions */
+    /* Count the number of initializers, skipping variables with too low
+       a dimension (if they are left over from previous calls) and
+       complaining about variables with too high a dimensions */
 
-	for ( cv = v; cv != NULL; cv = cv->next )
-	{
-		if ( cv->dim > level )
-		{
-			print( FATAL, "Object with too high a dimension in initializer "
-				   "list.\n" );
-			THROW( EXCEPTION );
-		}
-		else if ( cv->dim == level )
-		{
-			count++;
-			if ( level == 0 && cv->type == FLOAT_VAR )
-				type = FLOAT_VAR;
-		}
-		else if ( ! ( cv->flags & INIT_ONLY ) )
-		{
-			print( FATAL, "Syntax error in initializer list (possibly a "
-				   "missing set of curly braces).\n" );
-			THROW( EXCEPTION );
-		}
-	}
+    for ( cv = v; cv != NULL; cv = cv->next )
+    {
+        if ( cv->dim > level )
+        {
+            print( FATAL, "Object with too high a dimension in initializer "
+                   "list.\n" );
+            THROW( EXCEPTION );
+        }
+        else if ( cv->dim == level )
+        {
+            count++;
+            if ( level == 0 && cv->type == FLOAT_VAR )
+                type = FLOAT_VAR;
+        }
+        else if ( ! ( cv->flags & INIT_ONLY ) )
+        {
+            print( FATAL, "Syntax error in initializer list (possibly a "
+                   "missing set of curly braces).\n" );
+            THROW( EXCEPTION );
+        }
+    }
 
-	/* If there's only a variable of UNDEF_TYPE this means we got just an
-	   empty list */
+    /* If there's only a variable of UNDEF_TYPE this means we got just an
+       empty list */
 
-	if ( count == 1 && v->type == UNDEF_VAR )
-	{
-		v->dim++;
-		return v;
-	}
+    if ( count == 1 && v->type == UNDEF_VAR )
+    {
+        v->dim++;
+        return v;
+    }
 
-	/* If we're at the lowest level (i.e. at the level of simple integer or
-	   floating point variables) make an array out of them */
+    /* If we're at the lowest level (i.e. at the level of simple integer or
+       floating point variables) make an array out of them */
 
-	if ( level == 0 )
-	{
-		if ( type == INT_VAR )
-		{
-			nv = vars_push( INT_ARR, NULL, count );
-			nv->flags |= INIT_ONLY;
-			nv->val.lpnt = LONG_P T_malloc( nv->len * sizeof *nv->val.lpnt );
-			for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )
-				nv->val.lpnt[ i ] = v->val.lval;
-		}
-		else
-		{
-			nv = vars_push( FLOAT_ARR, NULL, count );
-			nv->flags |= INIT_ONLY;
-			nv->val.dpnt = DOUBLE_P T_malloc( nv->len * sizeof *nv->val.dpnt );
-			for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )
-				if ( v->type == INT_VAR )
-					nv->val.dpnt[ i ] = ( double ) v->val.lval;
-				else
-					nv->val.dpnt[ i ] = v->val.dval;
-		}
+    if ( level == 0 )
+    {
+        if ( type == INT_VAR )
+        {
+            nv = vars_push( INT_ARR, NULL, count );
+            nv->flags |= INIT_ONLY;
+            nv->val.lpnt = LONG_P T_malloc( nv->len * sizeof *nv->val.lpnt );
+            for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )
+                nv->val.lpnt[ i ] = v->val.lval;
+        }
+        else
+        {
+            nv = vars_push( FLOAT_ARR, NULL, count );
+            nv->flags |= INIT_ONLY;
+            nv->val.dpnt = DOUBLE_P T_malloc( nv->len * sizeof *nv->val.dpnt );
+            for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )
+                if ( v->type == INT_VAR )
+                    nv->val.dpnt[ i ] = ( double ) v->val.lval;
+                else
+                    nv->val.dpnt[ i ] = v->val.dval;
+        }
 
-		return nv;
-	}
+        return nv;
+    }
 
-	/* Otherwise create an array of a dimension one higher than the current
-	   level, set flag of variable to avoid that popping the variable also
-	   deletes the sub-arrays it's pointing to */
+    /* Otherwise create an array of a dimension one higher than the current
+       level, set flag of variable to avoid that popping the variable also
+       deletes the sub-arrays it's pointing to */
 
-	nv = vars_push( FLOAT_REF, NULL );
-	nv->flags |= DONT_RECURSE | INIT_ONLY;
-	nv->dim = v->dim + 1;
-	nv->len = count;
+    nv = vars_push( FLOAT_REF, NULL );
+    nv->flags |= DONT_RECURSE | INIT_ONLY;
+    nv->dim = v->dim + 1;
+    nv->len = count;
 
-	TRY
-	{
-		nv->val.vptr = VAR_PP T_malloc( nv->len * sizeof *nv->val.vptr );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		nv->len = 0;
-		RETHROW( );
-	}
+    TRY
+    {
+        nv->val.vptr = VAR_PP T_malloc( nv->len * sizeof *nv->val.vptr );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        nv->len = 0;
+        RETHROW( );
+    }
 
-	for ( i = 0; i < nv->len; i++ )
-		nv->val.vptr[ i ] = NULL;
+    for ( i = 0; i < nv->len; i++ )
+        nv->val.vptr[ i ] = NULL;
 
-	for ( i = 0; i < nv->len; v = v->next )
-	{
-		if ( v->dim != level )
-			continue;
+    for ( i = 0; i < nv->len; v = v->next )
+    {
+        if ( v->dim != level )
+            continue;
 
-		v->flags |= INIT_ONLY;
+        v->flags |= INIT_ONLY;
 
-		if ( v->type == UNDEF_VAR )
-		{
-			nv->val.vptr[ i ] = vars_new( NULL );
-			nv->val.vptr[ i ]->flags |= DONT_RECURSE | INIT_ONLY;
-			nv->val.vptr[ i ]->dim = nv->dim - 1;
-			nv->val.vptr[ i ]->from = nv;
-			if ( nv->dim > 2 )
-				nv->val.vptr[ i ]->type = nv->type;
-			else
-				nv->val.vptr[ i ]->type = FLOAT_ARR;
-			nv->val.vptr[ i ]->len  = 0;
-		}
-		else
-			nv->val.vptr[ i ] = v;
+        if ( v->type == UNDEF_VAR )
+        {
+            nv->val.vptr[ i ] = vars_new( NULL );
+            nv->val.vptr[ i ]->flags |= DONT_RECURSE | INIT_ONLY;
+            nv->val.vptr[ i ]->dim = nv->dim - 1;
+            nv->val.vptr[ i ]->from = nv;
+            if ( nv->dim > 2 )
+                nv->val.vptr[ i ]->type = nv->type;
+            else
+                nv->val.vptr[ i ]->type = FLOAT_ARR;
+            nv->val.vptr[ i ]->len  = 0;
+        }
+        else
+            nv->val.vptr[ i ] = v;
 
-		nv->val.vptr[ i++ ]->from = nv;
-	}
+        nv->val.vptr[ i++ ]->from = nv;
+    }
 
-	return nv;
+    return nv;
 }
 
 
@@ -557,45 +557,45 @@ Var_T *vars_init_list( Var_T * v,
 
 void vars_arr_init( Var_T * v )
 {
-	Var_T *dest;
+    Var_T *dest;
 
 
-	/* If there aren't any initializers we get v being set to NULL. All we
-	   need to do is to clear up the variables stack that still contains
-	   reference to the new array */
+    /* If there aren't any initializers we get v being set to NULL. All we
+       need to do is to clear up the variables stack that still contains
+       reference to the new array */
 
-	if ( v == NULL )
-	{
-		vars_del_stack( );
-		return;
-	}
+    if ( v == NULL )
+    {
+        vars_del_stack( );
+        return;
+    }
 
-	/* Find the reference to the variable to be initialized */
+    /* Find the reference to the variable to be initialized */
 
-	for ( dest = v; dest->prev != NULL; dest = dest->prev )
-		/* empty */ ;
+    for ( dest = v; dest->prev != NULL; dest = dest->prev )
+        /* empty */ ;
 
-	dest = dest->from;
+    dest = dest->from;
 
-	/* If there are no initialization data this is indicated by a variable
-	   of type UNDEF_VAR - just pop it as well as the array pointer */
+    /* If there are no initialization data this is indicated by a variable
+       of type UNDEF_VAR - just pop it as well as the array pointer */
 
-	if ( v->type == UNDEF_VAR && v->dim == dest->dim )
-	{
-		vars_del_stack( );
-		return;
-	}
+    if ( v->type == UNDEF_VAR && v->dim == dest->dim )
+    {
+        vars_del_stack( );
+        return;
+    }
 
-	if ( v->dim != dest->dim )
-	{
-		print( FATAL, "Dimension of variable '%s' and initializer list "
-			   "differs.\n", dest->name );
-		vars_del_stack( );
-		THROW( EXCEPTION );
-	}
+    if ( v->dim != dest->dim )
+    {
+        print( FATAL, "Dimension of variable '%s' and initializer list "
+               "differs.\n", dest->name );
+        vars_del_stack( );
+        THROW( EXCEPTION );
+    }
 
-	vars_do_init( v, dest );
-	vars_del_stack( );
+    vars_do_init( v, dest );
+    vars_del_stack( );
 }
 
 
@@ -605,134 +605,134 @@ void vars_arr_init( Var_T * v )
  *------------------------------------------------------------------*/
 
 static void vars_do_init( Var_T * src,
-						  Var_T * dest )
+                          Var_T * dest )
 {
-	ssize_t i;
+    ssize_t i;
 
 
-	switch ( dest->type )
-	{
-		case INT_ARR :
-			if ( dest->flags & IS_DYNAMIC )
-			{
-				dest->len = src->len;
-				dest->val.lpnt = LONG_P T_malloc( dest->len
-												  * sizeof *dest->val.lpnt );
-			}
-			else if ( src->len > dest->len )
-				print( WARN, "Superfluous initialization data.\n" );
+    switch ( dest->type )
+    {
+        case INT_ARR :
+            if ( dest->flags & IS_DYNAMIC )
+            {
+                dest->len = src->len;
+                dest->val.lpnt = LONG_P T_malloc( dest->len
+                                                  * sizeof *dest->val.lpnt );
+            }
+            else if ( src->len > dest->len )
+                print( WARN, "Superfluous initialization data.\n" );
 
-			if ( src->type == INT_ARR )
-				memcpy( dest->val.lpnt, src->val.lpnt,
-						( dest->len < src->len ? dest->len : src->len )
-						* sizeof *dest->val.lpnt );
-			else
-			{
-				print( WARN, "Initialization of integer array with floating "
-					   "point values.\n" );
-				for ( i = 0; i < ( dest->len < src->len ?
-								   dest->len : src->len ); i++ )
-					dest->val.lpnt[ i ] = ( long ) src->val.dpnt[ i ];
-			}
+            if ( src->type == INT_ARR )
+                memcpy( dest->val.lpnt, src->val.lpnt,
+                        ( dest->len < src->len ? dest->len : src->len )
+                        * sizeof *dest->val.lpnt );
+            else
+            {
+                print( WARN, "Initialization of integer array with floating "
+                       "point values.\n" );
+                for ( i = 0; i < ( dest->len < src->len ?
+                                   dest->len : src->len ); i++ )
+                    dest->val.lpnt[ i ] = ( long ) src->val.dpnt[ i ];
+            }
 
-			for ( i = src->len; i < dest->len; i++ )
-				dest->val.lpnt[ i ] = 0;
+            for ( i = src->len; i < dest->len; i++ )
+                dest->val.lpnt[ i ] = 0;
 
-			return;
+            return;
 
-		case FLOAT_ARR :
-			if ( dest->flags & IS_DYNAMIC )
-			{
-				dest->len = src->len;
-				dest->val.dpnt = DOUBLE_P T_malloc( dest->len
-													* sizeof *dest->val.dpnt );
-			}
-			else if ( src->len > dest->len )
-				print( WARN, "Superfluous initialization data.\n" );
+        case FLOAT_ARR :
+            if ( dest->flags & IS_DYNAMIC )
+            {
+                dest->len = src->len;
+                dest->val.dpnt = DOUBLE_P T_malloc( dest->len
+                                                    * sizeof *dest->val.dpnt );
+            }
+            else if ( src->len > dest->len )
+                print( WARN, "Superfluous initialization data.\n" );
 
-			if ( src->type == FLOAT_ARR )
-				memcpy( dest->val.dpnt, src->val.dpnt,
-						( dest->len < src->len ? dest->len : src->len )
-						* sizeof *dest->val.dpnt );
-			else
-				for ( i = 0; i < ( dest->len < src->len ?
-								   dest->len : src->len ); i++ )
-					dest->val.dpnt[ i ] = ( double ) src->val.lpnt[ i ];
+            if ( src->type == FLOAT_ARR )
+                memcpy( dest->val.dpnt, src->val.dpnt,
+                        ( dest->len < src->len ? dest->len : src->len )
+                        * sizeof *dest->val.dpnt );
+            else
+                for ( i = 0; i < ( dest->len < src->len ?
+                                   dest->len : src->len ); i++ )
+                    dest->val.dpnt[ i ] = ( double ) src->val.lpnt[ i ];
 
-			for ( i = src->len; i < dest->len; i++ )
-				dest->val.dpnt[ i ] = 0.0;
+            for ( i = src->len; i < dest->len; i++ )
+                dest->val.dpnt[ i ] = 0.0;
 
-			return;
+            return;
 
-		case INT_REF :
-			if ( dest->flags & IS_DYNAMIC )
-			{
-				dest->val.vptr = VAR_PP T_malloc( src->len
-												  * sizeof *dest->val.vptr );
-				for ( ; dest->len < src->len; dest->len++ )
-					dest->val.vptr[ dest->len ] = NULL;
-			}
-			else if ( src->len > dest->len )
-				print( WARN, "Superfluous initialization data.\n" );
+        case INT_REF :
+            if ( dest->flags & IS_DYNAMIC )
+            {
+                dest->val.vptr = VAR_PP T_malloc( src->len
+                                                  * sizeof *dest->val.vptr );
+                for ( ; dest->len < src->len; dest->len++ )
+                    dest->val.vptr[ dest->len ] = NULL;
+            }
+            else if ( src->len > dest->len )
+                print( WARN, "Superfluous initialization data.\n" );
 
-			for ( i = 0; i < ( dest->len < src->len ?
-							   dest->len : src->len ); i++ )
-			{
-				if ( dest->val.vptr[ i ] == NULL )
-				{
-					dest->val.vptr[ i ] = vars_new( NULL );
-					dest->val.vptr[ i ]->from = dest;
-					if ( dest->flags & IS_DYNAMIC )
-						dest->val.vptr[ i ]->flags |= IS_DYNAMIC;
-					dest->val.vptr[ i ]->dim = dest->dim - 1;
-					if ( dest->dim > 2 )
-						dest->val.vptr[ i ]->type = INT_REF;
-					else
-						dest->val.vptr[ i ]->type = INT_ARR;
-				}
+            for ( i = 0; i < ( dest->len < src->len ?
+                               dest->len : src->len ); i++ )
+            {
+                if ( dest->val.vptr[ i ] == NULL )
+                {
+                    dest->val.vptr[ i ] = vars_new( NULL );
+                    dest->val.vptr[ i ]->from = dest;
+                    if ( dest->flags & IS_DYNAMIC )
+                        dest->val.vptr[ i ]->flags |= IS_DYNAMIC;
+                    dest->val.vptr[ i ]->dim = dest->dim - 1;
+                    if ( dest->dim > 2 )
+                        dest->val.vptr[ i ]->type = INT_REF;
+                    else
+                        dest->val.vptr[ i ]->type = INT_ARR;
+                }
 
-				if ( src->val.vptr[ i ] != NULL )
-					vars_do_init( src->val.vptr[ i ], dest->val.vptr[ i ] );
-			}
-			return;
+                if ( src->val.vptr[ i ] != NULL )
+                    vars_do_init( src->val.vptr[ i ], dest->val.vptr[ i ] );
+            }
+            return;
 
-		case FLOAT_REF :
-			if ( dest->flags & IS_DYNAMIC )
-			{
-				dest->val.vptr = VAR_PP T_malloc( src->len
-												  * sizeof *dest->val.vptr );
-				for ( ; dest->len < src->len; dest->len++ )
-					dest->val.vptr[ dest->len ] = NULL;
-			}
-			else if ( src->len > dest->len )
-				print( WARN, "Superfluous initialization data.\n" );
+        case FLOAT_REF :
+            if ( dest->flags & IS_DYNAMIC )
+            {
+                dest->val.vptr = VAR_PP T_malloc( src->len
+                                                  * sizeof *dest->val.vptr );
+                for ( ; dest->len < src->len; dest->len++ )
+                    dest->val.vptr[ dest->len ] = NULL;
+            }
+            else if ( src->len > dest->len )
+                print( WARN, "Superfluous initialization data.\n" );
 
-			for ( i = 0; i < ( dest->len < src->len ?
-							   dest->len : src->len ); i++ )
-			{
-				if ( dest->val.vptr[ i ] == NULL )
-				{
-					dest->val.vptr[ i ] = vars_new( NULL );
-					dest->val.vptr[ i ]->from = dest;
-					if ( dest->flags & IS_DYNAMIC )
-						dest->val.vptr[ i ]->flags |= IS_DYNAMIC;
-					dest->val.vptr[ i ]->dim = dest->dim - 1;
-					if ( dest->dim > 2 )
-						dest->val.vptr[ i ]->type = FLOAT_REF;
-					else
-						dest->val.vptr[ i ]->type = FLOAT_ARR;
-				}
+            for ( i = 0; i < ( dest->len < src->len ?
+                               dest->len : src->len ); i++ )
+            {
+                if ( dest->val.vptr[ i ] == NULL )
+                {
+                    dest->val.vptr[ i ] = vars_new( NULL );
+                    dest->val.vptr[ i ]->from = dest;
+                    if ( dest->flags & IS_DYNAMIC )
+                        dest->val.vptr[ i ]->flags |= IS_DYNAMIC;
+                    dest->val.vptr[ i ]->dim = dest->dim - 1;
+                    if ( dest->dim > 2 )
+                        dest->val.vptr[ i ]->type = FLOAT_REF;
+                    else
+                        dest->val.vptr[ i ]->type = FLOAT_ARR;
+                }
 
-				if ( src->val.vptr[ i ] != NULL )
-					vars_do_init( src->val.vptr[ i ], dest->val.vptr[ i ] );
-			}
-			return;
+                if ( src->val.vptr[ i ] != NULL )
+                    vars_do_init( src->val.vptr[ i ], dest->val.vptr[ i ] );
+            }
+            return;
 
-		default :
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-	}
+        default :
+            eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+                    __FILE__, __LINE__ );
+            THROW( EXCEPTION );
+    }
 }
 
 
@@ -742,46 +742,46 @@ static void vars_do_init( Var_T * src,
  *--------------------------------------------------------------------*/
 
 static Var_T *vars_init_elements( Var_T * a,
-								  Var_T * v )
+                                  Var_T * v )
 {
-	ssize_t i;
+    ssize_t i;
 
 
-	if ( v == NULL )
-		return NULL;
+    if ( v == NULL )
+        return NULL;
 
-	if ( a->dim == 1 )
-	{
-		for ( i = 0; i < a->len; i++ )
-		{
-			if ( a->type == INT_VAR )
-			{
-				if ( v->type == INT_VAR )
-					a->val.lpnt[ i ] = v->val.lval;
-				else
-				{
-					print( WARN, "Floating point value used in initialization "
-						   "of integer array.\n" );
-					a->val.lpnt[ i ] = ( long ) v->val.dpnt;
-				}
-			}
-			else
-			{
-				if ( v->type == INT_VAR )
-					a->val.dpnt[ i ] = v->val.lval;
-				else
-					a->val.dpnt[ i ] = v->val.dval;
-			}
+    if ( a->dim == 1 )
+    {
+        for ( i = 0; i < a->len; i++ )
+        {
+            if ( a->type == INT_VAR )
+            {
+                if ( v->type == INT_VAR )
+                    a->val.lpnt[ i ] = v->val.lval;
+                else
+                {
+                    print( WARN, "Floating point value used in initialization "
+                           "of integer array.\n" );
+                    a->val.lpnt[ i ] = ( long ) v->val.dpnt;
+                }
+            }
+            else
+            {
+                if ( v->type == INT_VAR )
+                    a->val.dpnt[ i ] = v->val.lval;
+                else
+                    a->val.dpnt[ i ] = v->val.dval;
+            }
 
-			if ( ( v = vars_pop( v ) ) == NULL )
-				return NULL;
-		}
-	}
-	else
-		for ( i = 0; v != NULL && i < a->len; i++ )
-			v = vars_init_elements( a->val.vptr[ i ], v );
+            if ( ( v = vars_pop( v ) ) == NULL )
+                return NULL;
+        }
+    }
+    else
+        for ( i = 0; v != NULL && i < a->len; i++ )
+            v = vars_init_elements( a->val.vptr[ i ], v );
 
-	return v;
+    return v;
 }
 
 
@@ -795,44 +795,44 @@ static Var_T *vars_init_elements( Var_T * a,
  *----------------------------------------------------------------------*/
 
 static Var_T *vars_lhs_pointer( Var_T * v,
-								int     dim )
+                                int     dim )
 {
-	Var_T *a = v->from;
-	Var_T *cv;
+    Var_T *a = v->from;
+    Var_T *cv;
 
 
-	v = vars_pop( v );
+    v = vars_pop( v );
 
-	if ( v->type == UNDEF_VAR )
-	{
+    if ( v->type == UNDEF_VAR )
+    {
 #ifdef NDEBUG
-		vars_pop( v );
+        vars_pop( v );
 #else
-		if ( ( v = vars_pop( v ) ) != NULL )
-		{
-			eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-					__FILE__, __LINE__ );
-			THROW( EXCEPTION );
-		}
+        if ( ( v = vars_pop( v ) ) != NULL )
+        {
+            eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+                    __FILE__, __LINE__ );
+            THROW( EXCEPTION );
+        }
 #endif
-		return vars_push( REF_PTR, a );
-	}
+        return vars_push( REF_PTR, a );
+    }
 
-	/* Check that there aren't too many indices */
+    /* Check that there aren't too many indices */
 
-	if ( dim > a->dim )
-	{
-		print( FATAL, "Array '%s' has only %d dimensions but there are "
-			   "%d indices.\n", a->dim, dim );
-		THROW( EXCEPTION );
-	}
+    if ( dim > a->dim )
+    {
+        print( FATAL, "Array '%s' has only %d dimensions but there are "
+               "%d indices.\n", a->dim, dim );
+        THROW( EXCEPTION );
+    }
 
-	cv = vars_lhs_simple_pointer( a, a, v, a->dim );
+    cv = vars_lhs_simple_pointer( a, a, v, a->dim );
 
-	while ( ( v = vars_pop( v ) ) != cv )
-		/* empty */ ;
+    while ( ( v = vars_pop( v ) ) != cv )
+        /* empty */ ;
 
-	return cv;
+    return cv;
 }
 
 
@@ -846,43 +846,43 @@ static Var_T *vars_lhs_pointer( Var_T * v,
  *------------------------------------------------------------------------*/
 
 static Var_T *vars_lhs_sub_pointer( Var_T * v,
-									int     dim,
-									int     range_count )
+                                    int     dim,
+                                    int     range_count )
 {
-	Var_T *a = v->from;
-	Var_T *sv;
-	ssize_t i;
+    Var_T *a = v->from;
+    Var_T *sv;
+    ssize_t i;
 
 
-	v = vars_pop( v );	
+    v = vars_pop( v );  
 
-	/* Check that there aren't too many indices or ranges */
+    /* Check that there aren't too many indices or ranges */
 
-	if ( dim > a->dim )
-	{
-		print( FATAL, "Array '%s' has only %d dimensions but there are "
-			   "%d indices/ranges.\n", a->dim, dim );
-		THROW( EXCEPTION );
-	}
+    if ( dim > a->dim )
+    {
+        print( FATAL, "Array '%s' has only %d dimensions but there are "
+               "%d indices/ranges.\n", a->dim, dim );
+        THROW( EXCEPTION );
+    }
 
-	/* Call the function that determines the indexed subarray - that's only
-	   necessary because we need to make sure that the array sizes are large
-	   enough, the returned pointer is of no interest */
+    /* Call the function that determines the indexed subarray - that's only
+       necessary because we need to make sure that the array sizes are large
+       enough, the returned pointer is of no interest */
 
-	if ( v->val.lval >= 0 )
-		vars_pop( vars_lhs_simple_pointer( a, a, v, a->dim ) );
-	else
-		vars_pop( vars_lhs_range_pointer( a, a, v, a->dim ) );
+    if ( v->val.lval >= 0 )
+        vars_pop( vars_lhs_simple_pointer( a, a, v, a->dim ) );
+    else
+        vars_pop( vars_lhs_range_pointer( a, a, v, a->dim ) );
 
-	/* Create a variable of type SUB_REF_PTR instead */
+    /* Create a variable of type SUB_REF_PTR instead */
 
-	sv = vars_push( SUB_REF_PTR, dim + range_count );
-	sv->from = a;
+    sv = vars_push( SUB_REF_PTR, dim + range_count );
+    sv->from = a;
 
-	for ( i = 0; v != sv; i++, v = vars_pop( v ) )
-		sv->val.index[ i ] = v->val.lval;
+    for ( i = 0; v != sv; i++, v = vars_pop( v ) )
+        sv->val.index[ i ] = v->val.lval;
 
-	return sv;
+    return sv;
 }
 
 
@@ -892,98 +892,98 @@ static Var_T *vars_lhs_sub_pointer( Var_T * v,
  *-----------------------------------------------------------------*/
 
 static Var_T *vars_lhs_simple_pointer( Var_T * a,
-									   Var_T * cv,
-									   Var_T * v,
-									   int     dim )
+                                       Var_T * cv,
+                                       Var_T * v,
+                                       int     dim )
 {
-	ssize_t ind;
-	ssize_t i;
+    ssize_t ind;
+    ssize_t i;
 
 
-	ind = v->val.lval;
-	v = v->next;
+    ind = v->val.lval;
+    v = v->next;
 
-	/* If the index is larger than the length of the array this is a
-	   fatal error for a fixed length array, but for a dynamically
-	   sized array it simply means we have to extend it */
+    /* If the index is larger than the length of the array this is a
+       fatal error for a fixed length array, but for a dynamically
+       sized array it simply means we have to extend it */
 
-	if ( ind >= cv->len )
-	{
-		if ( ! ( cv->flags & IS_DYNAMIC ) )
-		{
-			print( FATAL, "Invalid index for array '%s'.\n", a->name );
-			THROW( EXCEPTION );
-		}
+    if ( ind >= cv->len )
+    {
+        if ( ! ( cv->flags & IS_DYNAMIC ) )
+        {
+            print( FATAL, "Invalid index for array '%s'.\n", a->name );
+            THROW( EXCEPTION );
+        }
 
-		if ( dim > 1 )
-		{
-			cv->val.vptr = VAR_PP T_realloc( cv->val.vptr,
-										  ( ind + 1 ) * sizeof *cv->val.vptr );
+        if ( dim > 1 )
+        {
+            cv->val.vptr = VAR_PP T_realloc( cv->val.vptr,
+                                          ( ind + 1 ) * sizeof *cv->val.vptr );
 
-			for ( i = cv->len; i <= ind; i++ )
-			{
-				cv->val.vptr[ i ]           = vars_new( NULL );
-				cv->val.vptr[ i ]->from     = cv;
-				if ( dim > 2 )
-					cv->val.vptr[ i ]->type = cv->type;
-				else
-					cv->val.vptr[ i ]->type = 
-									 cv->type == INT_REF ? INT_ARR : FLOAT_ARR;
-				cv->val.vptr[ i ]->dim      = dim - 1;
-				cv->val.vptr[ i ]->len      = 0;
-				cv->val.vptr[ i ]->flags   |= IS_DYNAMIC;
-				cv->val.vptr[ i ]->flags   &= ~ NEW_VARIABLE;
-			}
-		}
-		else
-		{
-			switch ( cv->type )
-			{
-				case INT_ARR :
-					cv->val.lpnt = LONG_P T_realloc( cv->val.lpnt,
-										  ( ind + 1 ) * sizeof *cv->val.lpnt );
-					memset( cv->val.lpnt + cv->len, 0,
-							( ind - cv->len + 1 ) * sizeof *cv->val.lpnt );
-					break;
+            for ( i = cv->len; i <= ind; i++ )
+            {
+                cv->val.vptr[ i ]           = vars_new( NULL );
+                cv->val.vptr[ i ]->from     = cv;
+                if ( dim > 2 )
+                    cv->val.vptr[ i ]->type = cv->type;
+                else
+                    cv->val.vptr[ i ]->type = 
+                                     cv->type == INT_REF ? INT_ARR : FLOAT_ARR;
+                cv->val.vptr[ i ]->dim      = dim - 1;
+                cv->val.vptr[ i ]->len      = 0;
+                cv->val.vptr[ i ]->flags   |= IS_DYNAMIC;
+                cv->val.vptr[ i ]->flags   &= ~ NEW_VARIABLE;
+            }
+        }
+        else
+        {
+            switch ( cv->type )
+            {
+                case INT_ARR :
+                    cv->val.lpnt = LONG_P T_realloc( cv->val.lpnt,
+                                          ( ind + 1 ) * sizeof *cv->val.lpnt );
+                    memset( cv->val.lpnt + cv->len, 0,
+                            ( ind - cv->len + 1 ) * sizeof *cv->val.lpnt );
+                    break;
 
-				case FLOAT_ARR :
-					cv->val.dpnt = DOUBLE_P T_realloc( cv->val.dpnt,
-										  ( ind + 1 ) * sizeof *cv->val.dpnt );
-					for ( i = cv->len; i <= ind; i++ )
-						cv->val.dpnt[ i ] = 0.0;
-					break;
+                case FLOAT_ARR :
+                    cv->val.dpnt = DOUBLE_P T_realloc( cv->val.dpnt,
+                                          ( ind + 1 ) * sizeof *cv->val.dpnt );
+                    for ( i = cv->len; i <= ind; i++ )
+                        cv->val.dpnt[ i ] = 0.0;
+                    break;
 
-				default :
-					eprint( FATAL, UNSET, "Internal error detected at "
-							"%s:%d.\n", __FILE__, __LINE__ );
-					THROW( EXCEPTION );
-			}
-		}
+                default :
+                    eprint( FATAL, UNSET, "Internal error detected at "
+                            "%s:%d.\n", __FILE__, __LINE__ );
+                    THROW( EXCEPTION );
+            }
+        }
 
-		cv->len = ind + 1;
-	}
+        cv->len = ind + 1;
+    }
 
-	if ( v == NULL || v->type != INT_VAR )
-		switch ( cv->type )
-		{
-			case INT_ARR :
-				return vars_push( INT_PTR, cv->val.lpnt + ind );
+    if ( v == NULL || v->type != INT_VAR )
+        switch ( cv->type )
+        {
+            case INT_ARR :
+                return vars_push( INT_PTR, cv->val.lpnt + ind );
 
-			case FLOAT_ARR :
-				return vars_push( FLOAT_PTR, cv->val.dpnt + ind );
+            case FLOAT_ARR :
+                return vars_push( FLOAT_PTR, cv->val.dpnt + ind );
 
-			case INT_REF : case FLOAT_REF :
-				return vars_push( REF_PTR, cv->val.vptr[ ind ] );
+            case INT_REF : case FLOAT_REF :
+                return vars_push( REF_PTR, cv->val.vptr[ ind ] );
 
-			default :
-				eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-						__FILE__, __LINE__ );
-				THROW( EXCEPTION );
-		}
+            default :
+                eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
+                        __FILE__, __LINE__ );
+                THROW( EXCEPTION );
+        }
 
-	return v->val.lval >= 0 ?
-				vars_lhs_simple_pointer( a, cv->val.vptr[ ind ], v, --dim ) :
-				vars_lhs_range_pointer( a, cv->val.vptr[ ind ], v, --dim );
+    return v->val.lval >= 0 ?
+                vars_lhs_simple_pointer( a, cv->val.vptr[ ind ], v, --dim ) :
+                vars_lhs_range_pointer( a, cv->val.vptr[ ind ], v, --dim );
 }
 
 
@@ -993,99 +993,99 @@ static Var_T *vars_lhs_simple_pointer( Var_T * a,
  *--------------------------------------------------------------------*/
 
 static Var_T *vars_lhs_range_pointer( Var_T * a,
-									  Var_T * cv,
-									  Var_T * v,
-									  int     dim )
+                                      Var_T * cv,
+                                      Var_T * v,
+                                      int     dim )
 {
-	ssize_t i, range_start, range_end;
+    ssize_t i, range_start, range_end;
 
 
-	/* Determine start and end of range */
+    /* Determine start and end of range */
 
-	range_start = - v->val.lval - 1;
-	v = v->next;
-	range_end = v->val.lval;
-	v = v->next;
+    range_start = - v->val.lval - 1;
+    v = v->next;
+    range_end = v->val.lval;
+    v = v->next;
 
-	/* If the indexed range is larger than the (currently treated) array but
-	   the array has a fixed size we need to give up */
+    /* If the indexed range is larger than the (currently treated) array but
+       the array has a fixed size we need to give up */
 
-	if ( ! ( cv->flags & IS_DYNAMIC ) && range_end >= cv->len )
-	{
-		print( FATAL, "Invalid range for array '%s'.\n", a->name );
-		THROW( EXCEPTION );
-	}
+    if ( ! ( cv->flags & IS_DYNAMIC ) && range_end >= cv->len )
+    {
+        print( FATAL, "Invalid range for array '%s'.\n", a->name );
+        THROW( EXCEPTION );
+    }
 
-	/* Otherwise extend its size as necessary */
+    /* Otherwise extend its size as necessary */
 
-	if ( range_end >= cv->len )
-	{
-		if ( dim > 1 )
-		{
-			cv->val.vptr = VAR_PP T_realloc( cv->val.vptr,
-									( range_end + 1 ) * sizeof *cv->val.vptr );
+    if ( range_end >= cv->len )
+    {
+        if ( dim > 1 )
+        {
+            cv->val.vptr = VAR_PP T_realloc( cv->val.vptr,
+                                    ( range_end + 1 ) * sizeof *cv->val.vptr );
 
-			for ( i = cv->len; i <= range_end; i++ )
-			{
-				cv->val.vptr[ i ]           = vars_new( NULL );
-				cv->val.vptr[ i ]->from     = cv;
-				if ( dim > 2 )
-					cv->val.vptr[ i ]->type = cv->type;
-				else
-					cv->val.vptr[ i ]->type = 
-									 cv->type == INT_REF ? INT_ARR : FLOAT_ARR;
-				cv->val.vptr[ i ]->dim      = dim - 1;
-				cv->val.vptr[ i ]->len      = 0;
-				cv->val.vptr[ i ]->flags   |= IS_DYNAMIC;
-				cv->val.vptr[ i ]->flags   &= ~ NEW_VARIABLE;
-			}
-		}
-		else
-		{
-			switch ( cv->type )
-			{
-				case INT_ARR :
-					cv->val.lpnt = LONG_P T_realloc( cv->val.lpnt,
-									( range_end + 1 ) * sizeof *cv->val.lpnt );
-					memset( cv->val.lpnt + cv->len, 0,
-							( range_end - cv->len + 1 )
-							* sizeof *cv->val.lpnt );
-					break;
+            for ( i = cv->len; i <= range_end; i++ )
+            {
+                cv->val.vptr[ i ]           = vars_new( NULL );
+                cv->val.vptr[ i ]->from     = cv;
+                if ( dim > 2 )
+                    cv->val.vptr[ i ]->type = cv->type;
+                else
+                    cv->val.vptr[ i ]->type = 
+                                     cv->type == INT_REF ? INT_ARR : FLOAT_ARR;
+                cv->val.vptr[ i ]->dim      = dim - 1;
+                cv->val.vptr[ i ]->len      = 0;
+                cv->val.vptr[ i ]->flags   |= IS_DYNAMIC;
+                cv->val.vptr[ i ]->flags   &= ~ NEW_VARIABLE;
+            }
+        }
+        else
+        {
+            switch ( cv->type )
+            {
+                case INT_ARR :
+                    cv->val.lpnt = LONG_P T_realloc( cv->val.lpnt,
+                                    ( range_end + 1 ) * sizeof *cv->val.lpnt );
+                    memset( cv->val.lpnt + cv->len, 0,
+                            ( range_end - cv->len + 1 )
+                            * sizeof *cv->val.lpnt );
+                    break;
 
-				case FLOAT_ARR :
-					cv->val.dpnt = DOUBLE_P T_realloc( cv->val.dpnt,
-									( range_end + 1 ) * sizeof *cv->val.dpnt );
-					for ( i = cv->len; i <= range_end; i++ )
-						cv->val.dpnt[ i ] = 0.0;
-					break;
+                case FLOAT_ARR :
+                    cv->val.dpnt = DOUBLE_P T_realloc( cv->val.dpnt,
+                                    ( range_end + 1 ) * sizeof *cv->val.dpnt );
+                    for ( i = cv->len; i <= range_end; i++ )
+                        cv->val.dpnt[ i ] = 0.0;
+                    break;
 
 #ifndef NDEBUG
-				default :
-					eprint( FATAL, UNSET, "Internal error detected at "
-							"%s:%d.\n", __FILE__, __LINE__ );
-					THROW( EXCEPTION );
+                default :
+                    eprint( FATAL, UNSET, "Internal error detected at "
+                            "%s:%d.\n", __FILE__, __LINE__ );
+                    THROW( EXCEPTION );
 #endif
-			}
-		}
+            }
+        }
 
-		cv->len = range_end + 1;
-	}
+        cv->len = range_end + 1;
+    }
 
-	/* These return values are never going to be used... */
+    /* These return values are never going to be used... */
 
-	if ( v == NULL )
-		return vars_push( INT_VAR, 0 );
+    if ( v == NULL )
+        return vars_push( INT_VAR, 0 );
 
-	if ( v->val.lval >= 0 )
-		for ( i = range_start; i <= range_end; i++ )
-			vars_pop( vars_lhs_simple_pointer( a, cv->val.vptr[ i ],
-											   v, dim - 1 ) );
-	else
-		for ( i = range_start; i <= range_end; i++ )
-			vars_pop( vars_lhs_range_pointer( a, cv->val.vptr[ i ], v,
-											  dim - 1 ) );
+    if ( v->val.lval >= 0 )
+        for ( i = range_start; i <= range_end; i++ )
+            vars_pop( vars_lhs_simple_pointer( a, cv->val.vptr[ i ],
+                                               v, dim - 1 ) );
+    else
+        for ( i = range_start; i <= range_end; i++ )
+            vars_pop( vars_lhs_range_pointer( a, cv->val.vptr[ i ], v,
+                                              dim - 1 ) );
 
-	return vars_push( INT_VAR, 0 );
+    return vars_push( INT_VAR, 0 );
 }
 
 
@@ -1094,5 +1094,7 @@ static Var_T *vars_lhs_range_pointer( Var_T * a,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

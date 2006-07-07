@@ -32,10 +32,10 @@
 
 #if defined ( _SEM_SEMUN_UNDEFINED )
 union semun {
-	  int val;                    /* value for SETVAL */
-	  struct semid_ds *buf;       /* buffer for IPC_STAT, IPC_SET */
-	  unsigned short int *array;  /* array for GETALL, SETALL */
-	  struct seminfo *__buf;      /* buffer for IPC_INFO */
+      int val;                    /* value for SETVAL */
+      struct semid_ds *buf;       /* buffer for IPC_STAT, IPC_SET */
+      unsigned short int *array;  /* array for GETALL, SETALL */
+      struct seminfo *__buf;      /* buffer for IPC_INFO */
 };
 #endif
 
@@ -50,47 +50,47 @@ union semun {
  *-------------------------------------------------------------------*/
 
 void *get_shm( int * shm_id,
-			   long  len )
+               long  len )
 {
-	void *buf;
+    void *buf;
 
 
-	raise_permissions( );
+    raise_permissions( );
 
-	while ( ( *shm_id = shmget( IPC_PRIVATE, len + 4,
-								IPC_CREAT | S_IRUSR | S_IWUSR ) ) < 0 )
-	{
-		if ( errno == ENOSPC || errno == ENOMEM ) /* wait for 10 ms */
-			fsc2_usleep( 10000, SET );
-		else                                      /* non-recoverable failure */
-		{
-			lower_permissions( );
+    while ( ( *shm_id = shmget( IPC_PRIVATE, len + 4,
+                                IPC_CREAT | S_IRUSR | S_IWUSR ) ) < 0 )
+    {
+        if ( errno == ENOSPC || errno == ENOMEM ) /* wait for 10 ms */
+            fsc2_usleep( 10000, SET );
+        else                                      /* non-recoverable failure */
+        {
+            lower_permissions( );
 #ifndef NDEBUG
-			eprint( FATAL, UNSET, "Internal error at %s:%d, shmget() failed "
-					"with error number %d.\n*** PLEASE SEND A BUG REPORT "
-					"CITING THESE LINES *** Thank you.\n",
-					__FILE__, __LINE__, errno );
+            eprint( FATAL, UNSET, "Internal error at %s:%d, shmget() failed "
+                    "with error number %d.\n*** PLEASE SEND A BUG REPORT "
+                    "CITING THESE LINES *** Thank you.\n",
+                    __FILE__, __LINE__, errno );
 #endif
-			return NULL;
-		}
-	}
+            return NULL;
+        }
+    }
 
-	/* Attach to the shared memory segment - if this should fail (improbable)
-	   return NULL and let the calling routine deal with the mess... */
+    /* Attach to the shared memory segment - if this should fail (improbable)
+       return NULL and let the calling routine deal with the mess... */
 
-	if ( ( buf = shmat( *shm_id, NULL, 0 ) ) == ( void * ) - 1 )
-	{
-		lower_permissions( );
-		return NULL;
-	}
+    if ( ( buf = shmat( *shm_id, NULL, 0 ) ) == ( void * ) - 1 )
+    {
+        lower_permissions( );
+        return NULL;
+    }
 
-	/* Now write a "magic" string into the start of the shared memory to make
-	   it easier to identify it later */
+    /* Now write a "magic" string into the start of the shared memory to make
+       it easier to identify it later */
 
-	memcpy( buf, "fsc2", 4 );                         /* magic id */
+    memcpy( buf, "fsc2", 4 );                         /* magic id */
 
-	lower_permissions( );
-	return ( void * ) ( ( char * ) buf + 4 );
+    lower_permissions( );
+    return ( void * ) ( ( char * ) buf + 4 );
 }
 
 
@@ -102,26 +102,26 @@ void *get_shm( int * shm_id,
 
 char *attach_shm( int key )
 {
-	void *buf;
+    void *buf;
 
 
-	raise_permissions( );
+    raise_permissions( );
 
-	if ( ( buf = shmat( key, NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
-	{
+    if ( ( buf = shmat( key, NULL, SHM_RDONLY ) ) == ( void * ) - 1 )
+    {
 #ifndef NDEBUG
-		eprint( FATAL, UNSET, "Internal error at %s:%d, shmat() with "
-				"SHM_RDONLY failed for key %d with error number %d.\n"
-				"*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "
-				"Thank you.\n", __FILE__, __LINE__, key, errno );
+        eprint( FATAL, UNSET, "Internal error at %s:%d, shmat() with "
+                "SHM_RDONLY failed for key %d with error number %d.\n"
+                "*** PLEASE SEND A BUG REPORT CITING THESE LINES *** "
+                "Thank you.\n", __FILE__, __LINE__, key, errno );
 #endif
-		shmctl( key, IPC_RMID, NULL );       /* delete the segment */
-		lower_permissions( );
-		return NULL;
-	}
+        shmctl( key, IPC_RMID, NULL );       /* delete the segment */
+        lower_permissions( );
+        return NULL;
+    }
 
-	lower_permissions( );
-	return ( char * ) buf + 4;
+    lower_permissions( );
+    return ( char * ) buf + 4;
 }
 
 
@@ -132,18 +132,18 @@ char *attach_shm( int key )
  *---------------------------------------------------------------------*/
 
 void detach_shm( void * buf,
-				 int *  key )
+                 int *  key )
 {
-	raise_permissions( );
+    raise_permissions( );
 
-	shmdt( ( void * ) ( ( char * ) buf - 4 ) );
-	if ( key != NULL )
-	{
-		shmctl( *key, IPC_RMID, NULL );
-		*key = -1;
-	}
+    shmdt( ( void * ) ( ( char * ) buf - 4 ) );
+    if ( key != NULL )
+    {
+        shmctl( *key, IPC_RMID, NULL );
+        *key = -1;
+    }
 
-	lower_permissions( );
+    lower_permissions( );
 }
 
 
@@ -158,28 +158,28 @@ void detach_shm( void * buf,
 
 void delete_all_shm( void )
 {
-	int i;
+    int i;
 
 
-	if ( Comm.MQ_ID < 0 )
-		return;
+    if ( Comm.MQ_ID < 0 )
+        return;
 
-	raise_permissions( );
+    raise_permissions( );
 
-	/* If message queue exists check that all memory segments indexed in it
-	   are deleted */
+    /* If message queue exists check that all memory segments indexed in it
+       are deleted */
 
-	for ( i = 0; i < QUEUE_SIZE; i++ )
-		if ( Comm.MQ->slot[ i ].shm_id >= 0 )
-			shmctl( Comm.MQ->slot[ i ].shm_id, IPC_RMID, NULL );
+    for ( i = 0; i < QUEUE_SIZE; i++ )
+        if ( Comm.MQ->slot[ i ].shm_id >= 0 )
+            shmctl( Comm.MQ->slot[ i ].shm_id, IPC_RMID, NULL );
 
-	/* Finally delete the master key (if its ID is valid, i.e. non-negative) */
+    /* Finally delete the master key (if its ID is valid, i.e. non-negative) */
 
-	detach_shm( Comm.MQ, &Comm.MQ_ID );
-	shmctl( Comm.MQ_ID, IPC_RMID, NULL );
-	Comm.MQ_ID = -1;
+    detach_shm( Comm.MQ, &Comm.MQ_ID );
+    shmctl( Comm.MQ_ID, IPC_RMID, NULL );
+    Comm.MQ_ID = -1;
 
-	lower_permissions( );
+    lower_permissions( );
 }
 
 
@@ -209,55 +209,55 @@ void delete_all_shm( void )
 
 void delete_stale_shms( void )
 {
-	int max_id, id, shm_id;
+    int max_id, id, shm_id;
     struct shmid_ds shm_seg;
-	void *buf;
+    void *buf;
 
 
-	/* Get the current maximum shared memory segment id */
+    /* Get the current maximum shared memory segment id */
 
     max_id = shmctl( 0, SHM_INFO, &shm_seg );
 
-	/* Run through all of the possible IDs. If they belong to fsc2 and start
-	   with the "magic" string "fsc2" they are deleted. */
+    /* Run through all of the possible IDs. If they belong to fsc2 and start
+       with the "magic" string "fsc2" they are deleted. */
 
     for ( id = 0; id <= max_id; id++ )
-	{
+    {
         shm_id = shmctl( id, SHM_STAT, &shm_seg );
         if ( shm_id  < 0 )
             continue;
 
-		/* Does the segment belong to fsc2 ? */
+        /* Does the segment belong to fsc2 ? */
 
-		if ( shm_seg.shm_perm.uid == Fsc2_Internals.EUID )
-		{
-			if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
-				continue;                          /* can't attach... */
+        if ( shm_seg.shm_perm.uid == Fsc2_Internals.EUID )
+        {
+            if ( ( buf = shmat( shm_id, NULL, 0 ) ) == ( void * ) - 1 )
+                continue;                          /* can't attach... */
 
-			if ( ! strncmp( ( char * ) buf, "fsc2", 4 ) )
-			{
-				/* Take care: the shm_nattch field in the shmid_ds structure
-				   has different types in different Linux versions, in older
-				   ones it is an unsigned short, nowadays an unsigned long.
-				   To get it right for all versions we simply cast is to the
-				   largest type... */
+            if ( ! strncmp( ( char * ) buf, "fsc2", 4 ) )
+            {
+                /* Take care: the shm_nattch field in the shmid_ds structure
+                   has different types in different Linux versions, in older
+                   ones it is an unsigned short, nowadays an unsigned long.
+                   To get it right for all versions we simply cast is to the
+                   largest type... */
 
-				if ( shm_seg.shm_nattch != 0 )          /* attach count != 0 */
-					fprintf( stderr, "Stale shared memory segment has attach "
-							 "count of %lu.\nPossibly one of fsc2's processes "
-							 "survived...\n",
-							 ( unsigned long ) shm_seg.shm_nattch );
-				else
-					shmctl( shm_id, IPC_RMID, NULL );
-			}
+                if ( shm_seg.shm_nattch != 0 )          /* attach count != 0 */
+                    fprintf( stderr, "Stale shared memory segment has attach "
+                             "count of %lu.\nPossibly one of fsc2's processes "
+                             "survived...\n",
+                             ( unsigned long ) shm_seg.shm_nattch );
+                else
+                    shmctl( shm_id, IPC_RMID, NULL );
+            }
 
-			/* Detach from the memory segment - if we called shmctl() with
-			   IPC_RMID on it it will no be deleted (as long as no other
-			   process is still attached to it). */
+            /* Detach from the memory segment - if we called shmctl() with
+               IPC_RMID on it it will no be deleted (as long as no other
+               process is still attached to it). */
 
-			shmdt( buf );
-		}
-	}
+            shmdt( buf );
+        }
+    }
 }
 
 
@@ -269,28 +269,28 @@ void delete_stale_shms( void )
 
 int sema_create( int size )
 {
-	int sema_id;
-	union semun sema_arg;
+    int sema_id;
+    union semun sema_arg;
 
 
-	raise_permissions( );
+    raise_permissions( );
 
-	if ( ( sema_id = semget( IPC_PRIVATE, 1, S_IRUSR | S_IWUSR ) ) < 0 )
-	{
-		lower_permissions( );
-		return -1;
-	}
+    if ( ( sema_id = semget( IPC_PRIVATE, 1, S_IRUSR | S_IWUSR ) ) < 0 )
+    {
+        lower_permissions( );
+        return -1;
+    }
 
-	sema_arg.val = size;
-	if ( ( semctl( sema_id, 0, SETVAL, sema_arg ) ) < 0 )
-	{
-		semctl( sema_id, 0, IPC_RMID, sema_arg );
-		lower_permissions( );
-		return -1;
-	}
+    sema_arg.val = size;
+    if ( ( semctl( sema_id, 0, SETVAL, sema_arg ) ) < 0 )
+    {
+        semctl( sema_id, 0, IPC_RMID, sema_arg );
+        lower_permissions( );
+        return -1;
+    }
 
-	lower_permissions( );
-	return sema_id;
+    lower_permissions( );
+    return sema_id;
 }
 
 
@@ -301,19 +301,19 @@ int sema_create( int size )
 
 int sema_destroy( int sema_id )
 {
-	union semun sema_arg;
+    union semun sema_arg;
 
 
-	raise_permissions( );
+    raise_permissions( );
 
-	if ( semctl( sema_id, 0, IPC_RMID, sema_arg ) < 0 )
-	{
-		lower_permissions( );
-		return -1;
-	}
+    if ( semctl( sema_id, 0, IPC_RMID, sema_arg ) < 0 )
+    {
+        lower_permissions( );
+        return -1;
+    }
 
-	lower_permissions( );
-	return 0;
+    lower_permissions( );
+    return 0;
 }
 
 
@@ -326,27 +326,27 @@ int sema_destroy( int sema_id )
 
 int sema_wait( int sema_id )
 {
-	struct sembuf wait_flags = { 0, -1, 0 };
+    struct sembuf wait_flags = { 0, -1, 0 };
 
 
 
-	/* In the child process check that it hasn't become a zombie before doing
-	   the wait on the semaphore and commit controlled suicide if it is. */
+    /* In the child process check that it hasn't become a zombie before doing
+       the wait on the semaphore and commit controlled suicide if it is. */
 
-	if ( Fsc2_Internals.I_am == CHILD && getppid( ) == 1 )
-		kill( getpid( ), SIGTERM );
+    if ( Fsc2_Internals.I_am == CHILD && getppid( ) == 1 )
+        kill( getpid( ), SIGTERM );
 
-	raise_permissions( );
+    raise_permissions( );
 
-	while ( semop( sema_id, &wait_flags, 1 ) < 0 )
-		if ( errno != EINTR )
-		{
-			lower_permissions( );
-			return -1;
-		}
+    while ( semop( sema_id, &wait_flags, 1 ) < 0 )
+        if ( errno != EINTR )
+        {
+            lower_permissions( );
+            return -1;
+        }
 
-	lower_permissions( );
-	return 0;
+    lower_permissions( );
+    return 0;
 }
 
 
@@ -358,25 +358,27 @@ int sema_wait( int sema_id )
 
 int sema_post( int sema_id )
 {
-	struct sembuf post = { 0, 1, 0 };
+    struct sembuf post = { 0, 1, 0 };
 
 
-	raise_permissions( );
+    raise_permissions( );
 
-	while ( semop( sema_id, &post, 1 ) < 0 )
-		if ( errno != EINTR )
-		{
-			lower_permissions( );
-			return -1;
-		}
+    while ( semop( sema_id, &post, 1 ) < 0 )
+        if ( errno != EINTR )
+        {
+            lower_permissions( );
+            return -1;
+        }
 
-	lower_permissions( );
-	return 0;
+    lower_permissions( );
+    return 0;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

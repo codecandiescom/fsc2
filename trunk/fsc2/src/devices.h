@@ -32,20 +32,20 @@ typedef struct Device_Name Device_Name_T;
 
 
 struct Device {
-	char *name;
-	Lib_Struct_T driver;
-	bool is_loaded;
-	const char *generic_type;
-	const char *device_name;
-	Device_T *next;
-	Device_T *prev;
-	int count;
+    char *name;
+    Lib_Struct_T driver;
+    bool is_loaded;
+    const char *generic_type;
+    const char *device_name;
+    Device_T *next;
+    Device_T *prev;
+    int count;
 };
 
 
 struct Device_Name {
-	char *name;
-	Device_Name_T *next;
+    char *name;
+    Device_Name_T *next;
 };
 
 
@@ -68,5 +68,7 @@ extern bool device_list_parse( void );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

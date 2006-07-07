@@ -27,9 +27,9 @@
 /***********************************************************/
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap nounput
 
@@ -42,12 +42,12 @@
 
 #define YY_INPUT( buf, result, max_size )                         \
 {                                                                 \
-	char c;                                                       \
-	ssize_t count;                                                \
-	while ( ( count = read( fileno( phasesin ), &c, 1 ) ) < 0 &&  \
-			errno == EINTR )                                      \
-		/* empty */ ;                                             \
-	result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );      \
+    char c;                                                       \
+    ssize_t count;                                                \
+    while ( ( count = read( fileno( phasesin ), &c, 1 ) ) < 0 &&  \
+            errno == EINTR )                                      \
+        /* empty */ ;                                             \
+    result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );      \
 }
 
 
@@ -87,169 +87,169 @@ MY          "-"[yY]
 
 PA          "+"?[aA]
 MA          "-"[aA]
-PB			"+"?[bB]
-MB			"-"[bB]
+PB          "+"?[bB]
+MB          "-"[bB]
 PU          "+"
 MU          "-"
 
 WS          [\n=,:. ]+
 
 
-		/*---------------*/
-%%		/*     Rules     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     Rules     */
+        /*---------------*/
 
 
-			/* handling of file name lines */
+            /* handling of file name lines */
 {FILE}      {
-				*( phasestext + phasesleng - 1 ) = '\0';
-				EDL.Fname = CHAR_P T_free( EDL.Fname );
-				EDL.Fname = T_strdup( phasestext + 2 );
-			}
+                *( phasestext + phasesleng - 1 ) = '\0';
+                EDL.Fname = CHAR_P T_free( EDL.Fname );
+                EDL.Fname = T_strdup( phasestext + 2 );
+            }
 
-			/* handling of line number lines */
-{LNUM}		{
-				*( phasestext + phasesleng - 1 ) = '\0';
-				EDL.Lc = atol( phasestext + 2 );
-			}
+            /* handling of line number lines */
+{LNUM}      {
+                *( phasestext + phasesleng - 1 ) = '\0';
+                EDL.Lc = atol( phasestext + 2 );
+            }
 
-			/* handling of error messages from the cleaner */
-{ERR}		{
-				eprint( FATAL, UNSET, "%s\n", phasestext + 2 );
-				return 0;
-			}
+            /* handling of error messages from the cleaner */
+{ERR}       {
+                eprint( FATAL, UNSET, "%s\n", phasestext + 2 );
+                return 0;
+            }
 
-			/* handling of DEVICES: labels */
-{DEV}		{
-				Phases_next_section = DEVICES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of DEVICES: labels */
+{DEV}       {
+                Phases_next_section = DEVICES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* handling of ASSIGNMENTS: label */
-{ASS}		{
-				Phases_next_section = ASSIGNMENTS_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of ASSIGNMENTS: label */
+{ASS}       {
+                Phases_next_section = ASSIGNMENTS_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* handling of VARIABLES: label */
-{VAR}		{
-				Phases_next_section = VARIABLES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of VARIABLES: label */
+{VAR}       {
+                Phases_next_section = VARIABLES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* handling of PHASES: label */
-{PHAS}		{
-				Phases_next_section = PHASES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of PHASES: label */
+{PHAS}      {
+                Phases_next_section = PHASES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* handling of PREPARATIONS: label */
-{PREP}		{
-				Phases_next_section = PREPARATIONS_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of PREPARATIONS: label */
+{PREP}      {
+                Phases_next_section = PREPARATIONS_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* handling of EXPERIMENT: label */
-{EXP}		{
-				Phases_next_section = EXPERIMENT_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of EXPERIMENT: label */
+{EXP}       {
+                Phases_next_section = EXPERIMENT_SECTION;
+                return SECTION_LABEL;
+            }
 
             /* handling of PHASE_SEQUENCE with (optional) sequence number
-			   (if sequence number is left out 0 is used as the default) */
+               (if sequence number is left out 0 is used as the default) */
 {PS}        {
-				char *cp = phasestext + phasesleng - 1;
+                char *cp = phasestext + phasesleng - 1;
 
-				/* determine number of phase sequence (0 to ...)*/
+                /* determine number of phase sequence (0 to ...)*/
 
-				phaseslval.lval = 0;
-				if ( isdigit( ( unsigned char ) *cp ) )
-				{
-					while ( isdigit( ( unsigned char ) *cp ) )
-						cp--;
-					phaseslval.lval = T_atol( ++cp );
-				}
-				return PS_TOKEN;
-			}
+                phaseslval.lval = 0;
+                if ( isdigit( ( unsigned char ) *cp ) )
+                {
+                    while ( isdigit( ( unsigned char ) *cp ) )
+                        cp--;
+                    phaseslval.lval = T_atol( ++cp );
+                }
+                return PS_TOKEN;
+            }
 
-			/* handling of ACQUISITION_SEQUENCE */
+            /* handling of ACQUISITION_SEQUENCE */
 {AS}        {
-				char *cp = phasestext + phasesleng - 1;
+                char *cp = phasestext + phasesleng - 1;
 
-				if ( *cp == '_' )
-				    THROW( INVALID_INPUT_EXCEPTION );
+                if ( *cp == '_' )
+                    THROW( INVALID_INPUT_EXCEPTION );
 
-				/* determine type of acquisition sequence (A or B) */
+                /* determine type of acquisition sequence (A or B) */
 
-				phaseslval.lval = 0;
-				if ( *cp == '2')
-					phaseslval.lval = 1;
+                phaseslval.lval = 0;
+                if ( *cp == '2')
+                    phaseslval.lval = 1;
 
-				return AS_TOKEN;
-			}
+                return AS_TOKEN;
+            }
 
-			/* handling of phase cycle identifiers */
+            /* handling of phase cycle identifiers */
 {PX}        {
-				phaseslval.lval = PHASE_PLUS_X;
-				return P_TOKEN;
-			}
+                phaseslval.lval = PHASE_PLUS_X;
+                return P_TOKEN;
+            }
 {MX}        {
-				phaseslval.lval = PHASE_MINUS_X;
-				return P_TOKEN;
-			}
+                phaseslval.lval = PHASE_MINUS_X;
+                return P_TOKEN;
+            }
 {PY}        {
-				phaseslval.lval = PHASE_PLUS_Y;
-				return P_TOKEN;
-			}
+                phaseslval.lval = PHASE_PLUS_Y;
+                return P_TOKEN;
+            }
 {MY}        {
-				phaseslval.lval = PHASE_MINUS_Y;
-				return P_TOKEN;
-			}
+                phaseslval.lval = PHASE_MINUS_Y;
+                return P_TOKEN;
+            }
 
-			/* handling of acquisition cycle identifiers */
+            /* handling of acquisition cycle identifiers */
 {PA}       {
-				phaseslval.lval = ACQ_PLUS_A;
-				return A_TOKEN;
-		   }
+                phaseslval.lval = ACQ_PLUS_A;
+                return A_TOKEN;
+           }
 {MA}       {
-				phaseslval.lval = ACQ_MINUS_A;
-				return A_TOKEN;
-		   }
+                phaseslval.lval = ACQ_MINUS_A;
+                return A_TOKEN;
+           }
 
 {PB}       {
-				phaseslval.lval = ACQ_PLUS_B;
-				return A_TOKEN;
-		   }
+                phaseslval.lval = ACQ_PLUS_B;
+                return A_TOKEN;
+           }
 {MB}       {
-				phaseslval.lval = ACQ_MINUS_B;
-				return A_TOKEN;
-		   }
+                phaseslval.lval = ACQ_MINUS_B;
+                return A_TOKEN;
+           }
 
 {PU}       {
-				phaseslval.lval = ACQ_PLUS_U;
-				return A_TOKEN;
-		   }
+                phaseslval.lval = ACQ_PLUS_U;
+                return A_TOKEN;
+           }
 {MU}       {
-				phaseslval.lval = ACQ_MINUS_U;
-				return A_TOKEN;
-		   }
+                phaseslval.lval = ACQ_MINUS_U;
+                return A_TOKEN;
+           }
 
 {WS}        /* skip prettifying characters */
 
 ";"         return ';';              /* end of statement character */
 
-			/* handling of invalid input */
+            /* handling of invalid input */
 .           THROW( INVALID_INPUT_EXCEPTION );
 
-<<EOF>>	    {
-				Phases_next_section = NO_SECTION;
-				return 0;
-			}
+<<EOF>>     {
+                Phases_next_section = NO_SECTION;
+                return 0;
+            }
 
 
-		/*----------------------*/
-%%		/*     End of Rules     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     End of Rules     */
+        /*----------------------*/
 
 
 /*-------------------------------------------*
@@ -257,45 +257,47 @@ WS          [\n=,:. ]+
 
 int phases_parser( FILE * in )
 {
-	static bool is_restart = UNSET;
+    static bool is_restart = UNSET;
 
 
-	if ( EDL.compilation.sections[ PHASES_SECTION ] )
-	{
-		print( FATAL, "Multiple instances of PHASES section label.\n" );
-		THROW( EXCEPTION );
-	}
-	EDL.compilation.sections[ PHASES_SECTION ] = SET;
+    if ( EDL.compilation.sections[ PHASES_SECTION ] )
+    {
+        print( FATAL, "Multiple instances of PHASES section label.\n" );
+        THROW( EXCEPTION );
+    }
+    EDL.compilation.sections[ PHASES_SECTION ] = SET;
 
-	phasesin = in;
+    phasesin = in;
 
-	/* Keep the lexer happy... */
+    /* Keep the lexer happy... */
 
-	if ( is_restart )
-	    phasesrestart( phasesin );
-	else
-		 is_restart = SET;
+    if ( is_restart )
+        phasesrestart( phasesin );
+    else
+         is_restart = SET;
 
-	TRY
-	{
-		phasesparse( );
-		phases_end( );             /* do some preliminary consistency checks */
-		TRY_SUCCESS;
-	}
-	CATCH( INVALID_INPUT_EXCEPTION )
-	{
-		print( FATAL, "Invalid input near '%s'.\n", phasestext );
-		THROW( EXCEPTION );
-	}
-	OTHERWISE
-		RETHROW( );
+    TRY
+    {
+        phasesparse( );
+        phases_end( );             /* do some preliminary consistency checks */
+        TRY_SUCCESS;
+    }
+    CATCH( INVALID_INPUT_EXCEPTION )
+    {
+        print( FATAL, "Invalid input near '%s'.\n", phasestext );
+        THROW( EXCEPTION );
+    }
+    OTHERWISE
+        RETHROW( );
 
-	return Phases_next_section;
+    return Phases_next_section;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

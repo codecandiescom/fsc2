@@ -68,17 +68,17 @@ static long hjs_attenuator_att_to_step( double att );
 
 int hjs_attenuator_init_hook( void )
 {
-	fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
-	hjs_attenuator.is_open       = UNSET;
-	hjs_attenuator.is_step       = UNSET;
-	hjs_attenuator.calib_file    = NULL;
-	hjs_attenuator.att_table     = NULL;
-	hjs_attenuator.att_table_len = 0;
+    hjs_attenuator.is_open       = UNSET;
+    hjs_attenuator.is_step       = UNSET;
+    hjs_attenuator.calib_file    = NULL;
+    hjs_attenuator.att_table     = NULL;
+    hjs_attenuator.att_table_len = 0;
 
-	vars_pop( mw_attenuator_load_calibration( NULL ) );
+    vars_pop( mw_attenuator_load_calibration( NULL ) );
 
-	return 1;
+    return 1;
 }
 
 
@@ -88,8 +88,8 @@ int hjs_attenuator_init_hook( void )
 
 int hjs_attenuator_test_hook( void )
 {
-	hjs_attenuator_stored = hjs_attenuator;
-	return 1;
+    hjs_attenuator_stored = hjs_attenuator;
+    return 1;
 }
 
 
@@ -99,15 +99,15 @@ int hjs_attenuator_test_hook( void )
 
 int hjs_attenuator_exp_hook( void )
 {
-	/* Restore state from before the start of the test run (or the
-	   last experiment) */
+    /* Restore state from before the start of the test run (or the
+       last experiment) */
 
-	hjs_attenuator = hjs_attenuator_stored;
+    hjs_attenuator = hjs_attenuator_stored;
 
-	if ( ! ( hjs_attenuator.is_open = hjs_attenuator_serial_init( ) ) )
-		hjs_attenuator_comm_failure( );
-	
-	return 1;
+    if ( ! ( hjs_attenuator.is_open = hjs_attenuator_serial_init( ) ) )
+        hjs_attenuator_comm_failure( );
+    
+    return 1;
 }
 
 
@@ -117,11 +117,11 @@ int hjs_attenuator_exp_hook( void )
 
 int hjs_attenuator_end_of_exp_hook( void )
 {
-	if ( hjs_attenuator.is_open )
-		fsc2_serial_close( SERIAL_PORT );
+    if ( hjs_attenuator.is_open )
+        fsc2_serial_close( SERIAL_PORT );
 
-	hjs_attenuator.is_open = UNSET;
-	return 1;
+    hjs_attenuator.is_open = UNSET;
+    return 1;
 }
 
 
@@ -131,11 +131,11 @@ int hjs_attenuator_end_of_exp_hook( void )
 
 void hjs_attenuator_exit_hook( void )
 {
-	/* Get rid of the data from the calibration file */
+    /* Get rid of the data from the calibration file */
 
-	if ( hjs_attenuator.att_table )
-		hjs_attenuator.att_table =
-						  ATT_TABLE_ENTRY_P T_free( hjs_attenuator.att_table );
+    if ( hjs_attenuator.att_table )
+        hjs_attenuator.att_table =
+                          ATT_TABLE_ENTRY_P T_free( hjs_attenuator.att_table );
 }
 
 
@@ -146,10 +146,10 @@ void hjs_attenuator_exit_hook( void )
 
 void hjs_attenuator_child_exit_hook( void )
 {
-	if ( hjs_attenuator.is_step )
-		hjs_attenuator_set_attenuation(
-	 			lrnd( hjs_attenuator.att_table[ hjs_attenuator.att_table_len
-										    	- 1 ].step ) );
+    if ( hjs_attenuator.is_step )
+        hjs_attenuator_set_attenuation(
+                lrnd( hjs_attenuator.att_table[ hjs_attenuator.att_table_len
+                                                - 1 ].step ) );
 }
 
 
@@ -165,7 +165,7 @@ void hjs_attenuator_child_exit_hook( void )
 
 Var_T *mw_attenuator_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -182,91 +182,91 @@ Var_T *mw_attenuator_name( Var_T * v  UNUSED_ARG )
 
 Var_T *mw_attenuator_load_calibration( Var_T * v )
 {
-	FILE *tfp = NULL;
-	char *tfname;
+    FILE *tfp = NULL;
+    char *tfname;
 
 
-	CLOBBER_PROTECT( tfp );
+    CLOBBER_PROTECT( tfp );
 
-	if ( hjs_attenuator.is_step )
-	{
-		print( FATAL, "calibration file can only be loaded before an "
-			   "attenuation has been set.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( hjs_attenuator.is_step )
+    {
+        print( FATAL, "calibration file can only be loaded before an "
+               "attenuation has been set.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* If a table had already been read in get rid of it */
+    /* If a table had already been read in get rid of it */
 
-	if ( hjs_attenuator.att_table != NULL )
-	{
-		hjs_attenuator.att_table =
-						  ATT_TABLE_ENTRY_P T_free( hjs_attenuator.att_table );
-		hjs_attenuator.att_table_len = 0;
-	}
+    if ( hjs_attenuator.att_table != NULL )
+    {
+        hjs_attenuator.att_table =
+                          ATT_TABLE_ENTRY_P T_free( hjs_attenuator.att_table );
+        hjs_attenuator.att_table_len = 0;
+    }
 
-	/* Try to figure out the name of the calibration file - if no argument is
-	   given use the default calibration file, otherwise use the user supplied
-	   file name */
+    /* Try to figure out the name of the calibration file - if no argument is
+       given use the default calibration file, otherwise use the user supplied
+       file name */
 
-	if ( v == NULL )
-	{
-		if ( DEFAULT_CALIB_FILE[ 0 ] ==  '/' )
-			hjs_attenuator.calib_file = T_strdup( DEFAULT_CALIB_FILE );
-		else
-			hjs_attenuator.calib_file = get_string( "%s%s%s", libdir,
-													slash( libdir ),
-													DEFAULT_CALIB_FILE );
+    if ( v == NULL )
+    {
+        if ( DEFAULT_CALIB_FILE[ 0 ] ==  '/' )
+            hjs_attenuator.calib_file = T_strdup( DEFAULT_CALIB_FILE );
+        else
+            hjs_attenuator.calib_file = get_string( "%s%s%s", libdir,
+                                                    slash( libdir ),
+                                                    DEFAULT_CALIB_FILE );
 
-		if ( ( tfp = 
-			   hjs_attenuator_open_calibration( hjs_attenuator.calib_file ) )
-			 == NULL )
-		{
-			print( FATAL, "Calibration file '%s' not found.\n",
-				   hjs_attenuator.calib_file );
-			hjs_attenuator.calib_file =
-									CHAR_P T_free( hjs_attenuator.calib_file );
-			THROW( EXCEPTION );
-		}
-	}
-	else
-	{
-		vars_check( v, STR_VAR );
+        if ( ( tfp = 
+               hjs_attenuator_open_calibration( hjs_attenuator.calib_file ) )
+             == NULL )
+        {
+            print( FATAL, "Calibration file '%s' not found.\n",
+                   hjs_attenuator.calib_file );
+            hjs_attenuator.calib_file =
+                                    CHAR_P T_free( hjs_attenuator.calib_file );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        vars_check( v, STR_VAR );
 
-		tfname = T_strdup( v->val.sptr );
+        tfname = T_strdup( v->val.sptr );
 
-		too_many_arguments( v );
+        too_many_arguments( v );
 
-		TRY
-		{
-			tfp = hjs_attenuator_find_calibration( &tfname );
-			hjs_attenuator.calib_file = tfname;
-			TRY_SUCCESS;
-		}
-		CATCH( EXCEPTION )
-		{
-			T_free( tfname );
-			RETHROW( );
-		}
-	}
+        TRY
+        {
+            tfp = hjs_attenuator_find_calibration( &tfname );
+            hjs_attenuator.calib_file = tfname;
+            TRY_SUCCESS;
+        }
+        CATCH( EXCEPTION )
+        {
+            T_free( tfname );
+            RETHROW( );
+        }
+    }
 
-	/* Now try to read in the table file */
+    /* Now try to read in the table file */
 
-	TRY
-	{
-		hjs_attenuator_read_calibration( tfp );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		fclose( tfp );
-		hjs_attenuator.calib_file = CHAR_P T_free( hjs_attenuator.calib_file );
-		RETHROW( );
-	}
+    TRY
+    {
+        hjs_attenuator_read_calibration( tfp );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        fclose( tfp );
+        hjs_attenuator.calib_file = CHAR_P T_free( hjs_attenuator.calib_file );
+        RETHROW( );
+    }
 
-	fclose( tfp );
-	hjs_attenuator.calib_file = CHAR_P T_free( hjs_attenuator.calib_file );
+    fclose( tfp );
+    hjs_attenuator.calib_file = CHAR_P T_free( hjs_attenuator.calib_file );
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -279,23 +279,23 @@ Var_T *mw_attenuator_load_calibration( Var_T * v )
 
 Var_T *mw_attenuator_initial_attenuation( Var_T * v )
 {
-	if ( hjs_attenuator.is_step )
-	{
-		if ( FSC2_MODE == EXPERIMENT )
-		{
-			print( SEVERE, "Initial attenuation already has been set, "
-				   "discarding new value.\n" );
-			return vars_push( FLOAT_VAR, hjs_attenuator.att );
-		}
+    if ( hjs_attenuator.is_step )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+        {
+            print( SEVERE, "Initial attenuation already has been set, "
+                   "discarding new value.\n" );
+            return vars_push( FLOAT_VAR, hjs_attenuator.att );
+        }
 
-		print( FATAL, "Initial attenuation already has been set.\n" );
-		THROW( EXCEPTION );
-	}
+        print( FATAL, "Initial attenuation already has been set.\n" );
+        THROW( EXCEPTION );
+    }
 
-	hjs_attenuator.att = get_double( v, "attenuation" );
-	hjs_attenuator.step = hjs_attenuator_att_to_step( hjs_attenuator.att );
-	hjs_attenuator.is_step = SET;
-	return vars_push( FLOAT_VAR, hjs_attenuator.att );
+    hjs_attenuator.att = get_double( v, "attenuation" );
+    hjs_attenuator.step = hjs_attenuator_att_to_step( hjs_attenuator.att );
+    hjs_attenuator.is_step = SET;
+    return vars_push( FLOAT_VAR, hjs_attenuator.att );
 }
 
 
@@ -308,33 +308,33 @@ Var_T *mw_attenuator_initial_attenuation( Var_T * v )
 
 Var_T *mw_attenuator_attenuation( Var_T * v )
 {
-	double att;
-	long step;
+    double att;
+    long step;
 
 
-	if ( ! hjs_attenuator.is_step )
-	{
-		print( FATAL, "Don't know the current attenuation setting. Always "
-			   "call 'mw_attenuator_initial_attenuation()' first!\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! hjs_attenuator.is_step )
+    {
+        print( FATAL, "Don't know the current attenuation setting. Always "
+               "call 'mw_attenuator_initial_attenuation()' first!\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( v != NULL )
-	{
-		att = get_double( v, "attenuation" );
-		step = hjs_attenuator_att_to_step( att );
+    if ( v != NULL )
+    {
+        att = get_double( v, "attenuation" );
+        step = hjs_attenuator_att_to_step( att );
 
-		if ( FSC2_MODE == EXPERIMENT )
-			hjs_attenuator_set_attenuation( step );
+        if ( FSC2_MODE == EXPERIMENT )
+            hjs_attenuator_set_attenuation( step );
 
-		if ( step - hjs_attenuator.step != 0 )
-		{
-			hjs_attenuator.att = att;
-			hjs_attenuator.step = step;
-		}
-	}
+        if ( step - hjs_attenuator.step != 0 )
+        {
+            hjs_attenuator.att = att;
+            hjs_attenuator.step = step;
+        }
+    }
 
-	return vars_push( FLOAT_VAR, hjs_attenuator.att );
+    return vars_push( FLOAT_VAR, hjs_attenuator.att );
 }
 
 
@@ -350,30 +350,30 @@ Var_T *mw_attenuator_attenuation( Var_T * v )
 
 static bool hjs_attenuator_serial_init( void )
 {
-	if ( ( hjs_attenuator.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
-								 O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) )
-		 == NULL )
-		return FAIL;
+    if ( ( hjs_attenuator.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+                                 O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) )
+         == NULL )
+        return FAIL;
 
-	/* The device uses 6 bit transfers, no parity and one stop bit (8N1),
-	   a baud rate of 9600. The settings used here are the ones that one
-	   gets when opening the device file with fopen() and these seem to
-	   be settings that work with the device (there's no manual...) */
+    /* The device uses 6 bit transfers, no parity and one stop bit (8N1),
+       a baud rate of 9600. The settings used here are the ones that one
+       gets when opening the device file with fopen() and these seem to
+       be settings that work with the device (there's no manual...) */
 
-	memset( hjs_attenuator.tio, 0, sizeof *hjs_attenuator.tio );
+    memset( hjs_attenuator.tio, 0, sizeof *hjs_attenuator.tio );
 
-	hjs_attenuator.tio->c_iflag = ICRNL | IXON;
-	hjs_attenuator.tio->c_oflag = OPOST | ONLCR;
-	hjs_attenuator.tio->c_cflag = HUPCL | CSIZE| CS6 | CLOCAL;
-	hjs_attenuator.tio->c_lflag = ISIG | ICANON | ECHONL | TOSTOP | IEXTEN;
+    hjs_attenuator.tio->c_iflag = ICRNL | IXON;
+    hjs_attenuator.tio->c_oflag = OPOST | ONLCR;
+    hjs_attenuator.tio->c_cflag = HUPCL | CSIZE| CS6 | CLOCAL;
+    hjs_attenuator.tio->c_lflag = ISIG | ICANON | ECHONL | TOSTOP | IEXTEN;
 
-	cfsetispeed( hjs_attenuator.tio, SERIAL_BAUDRATE );
-	cfsetospeed( hjs_attenuator.tio, SERIAL_BAUDRATE );
+    cfsetispeed( hjs_attenuator.tio, SERIAL_BAUDRATE );
+    cfsetospeed( hjs_attenuator.tio, SERIAL_BAUDRATE );
 
-	fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-	fsc2_tcsetattr( SERIAL_PORT, TCSANOW, hjs_attenuator.tio );
+    fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
+    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, hjs_attenuator.tio );
 
-	return OK;
+    return OK;
 }
 
 
@@ -383,55 +383,55 @@ static bool hjs_attenuator_serial_init( void )
 
 static void hjs_attenuator_set_attenuation( long new_step )
 {
-	long steps;
-	char *cmd;
-	ssize_t len;
+    long steps;
+    char *cmd;
+    ssize_t len;
 
 
-	/* Figure out how many steps to go */
+    /* Figure out how many steps to go */
 
-	steps = new_step - hjs_attenuator.step;
+    steps = new_step - hjs_attenuator.step;
 
-	if ( steps == 0 )
-		return;
+    if ( steps == 0 )
+        return;
 
-	/* Assemble the command ans send it to the device */
+    /* Assemble the command ans send it to the device */
 
-	cmd = get_string( "@01\n@0A %+ld,300\n", steps );
-	len = ( ssize_t ) strlen( cmd );
+    cmd = get_string( "@01\n@0A %+ld,300\n", steps );
+    len = ( ssize_t ) strlen( cmd );
 
-	if ( fsc2_serial_write( SERIAL_PORT, cmd, ( size_t ) len,
-							100000L, UNSET ) != len )
-	{
-		T_free( cmd );
-		hjs_attenuator_comm_failure( );
-	}
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, ( size_t ) len,
+                            100000L, UNSET ) != len )
+    {
+        T_free( cmd );
+        hjs_attenuator_comm_failure( );
+    }
 
-	T_free( cmd );
+    T_free( cmd );
 
-	/* Wait for the motor to move, we're at a speed of 300 steps per second. */
+    /* Wait for the motor to move, we're at a speed of 300 steps per second. */
 
-	fsc2_usleep( lrnd( fabs( steps / 300.0 * 1000000L ) ), UNSET );
+    fsc2_usleep( lrnd( fabs( steps / 300.0 * 1000000L ) ), UNSET );
 
-	/* To always reach the end point from the same side we go a bit further
-	   up when we come from below and then back down again (obviously, the
-	   device allows to go a bit (50 steps) over the upper limit of steps
-	   given in the calibration file). */
+    /* To always reach the end point from the same side we go a bit further
+       up when we come from below and then back down again (obviously, the
+       device allows to go a bit (50 steps) over the upper limit of steps
+       given in the calibration file). */
 
     if ( steps < 0 )
-		return;
+        return;
 
-	if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A +50,100\n", 16,
-							100000L, UNSET ) != 16 )
-		hjs_attenuator_comm_failure( );
+    if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A +50,100\n", 16,
+                            100000L, UNSET ) != 16 )
+        hjs_attenuator_comm_failure( );
 
-	fsc2_usleep( 500000, UNSET );
+    fsc2_usleep( 500000, UNSET );
 
-	if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A -50,300\n", 16,
-							100000L, UNSET ) != 16 )
-		hjs_attenuator_comm_failure( );
+    if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A -50,300\n", 16,
+                            100000L, UNSET ) != 16 )
+        hjs_attenuator_comm_failure( );
 
-	fsc2_usleep( 166667L, UNSET );
+    fsc2_usleep( 166667L, UNSET );
 }
 
 
@@ -440,8 +440,8 @@ static void hjs_attenuator_set_attenuation( long new_step )
 
 static void hjs_attenuator_comm_failure( void )
 {
-	print( FATAL, "Can't access the attenuator.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Can't access the attenuator.\n" );
+    THROW( EXCEPTION );
 }
 
 
@@ -454,51 +454,51 @@ static void hjs_attenuator_comm_failure( void )
 
 static FILE *hjs_attenuator_find_calibration( char ** name )
 {
-	FILE *tfp;
-	char *new_name;
+    FILE *tfp;
+    char *new_name;
 
 
-	/* Expand a leading tilde to the users home directory */
+    /* Expand a leading tilde to the users home directory */
 
-	if ( ( *name )[ 0 ] == '~' )
-	{
-		new_name = get_string( "%s%s%s", getenv( "HOME" ),
-							   ( *name )[ 1 ] != '/' ? "/" : "", *name + 1 );
-		T_free( *name );
-		*name = new_name;
-	}
+    if ( ( *name )[ 0 ] == '~' )
+    {
+        new_name = get_string( "%s%s%s", getenv( "HOME" ),
+                               ( *name )[ 1 ] != '/' ? "/" : "", *name + 1 );
+        T_free( *name );
+        *name = new_name;
+    }
 
-	/* Now try to open the file - set calib_file entry in the device structure
-	   to the name and return the file pointer */
+    /* Now try to open the file - set calib_file entry in the device structure
+       to the name and return the file pointer */
 
-	if ( ( tfp = hjs_attenuator_open_calibration( *name ) ) != NULL )
-	{
-		hjs_attenuator.calib_file = T_strdup( *name );
-		return tfp;
-	}
+    if ( ( tfp = hjs_attenuator_open_calibration( *name ) ) != NULL )
+    {
+        hjs_attenuator.calib_file = T_strdup( *name );
+        return tfp;
+    }
 
-	/* If the file name contains a slash we give up after freeing memory */
+    /* If the file name contains a slash we give up after freeing memory */
 
-	if ( strchr( *name, '/' ) != NULL )
-	{
-		print( FATAL, "Calibration file '%s' not found.\n", *name );
-		THROW( EXCEPTION );
-	}
+    if ( strchr( *name, '/' ) != NULL )
+    {
+        print( FATAL, "Calibration file '%s' not found.\n", *name );
+        THROW( EXCEPTION );
+    }
 
-	/* Last chance: The calibration file is in the library directory... */
+    /* Last chance: The calibration file is in the library directory... */
 
-	new_name = get_string( "%s%s%s", libdir, slash( libdir ), *name );
-	T_free( *name );
-	*name = new_name;
+    new_name = get_string( "%s%s%s", libdir, slash( libdir ), *name );
+    T_free( *name );
+    *name = new_name;
 
-	if ( ( tfp = hjs_attenuator_open_calibration( *name ) ) == NULL )
-	{
-		print( FATAL, "Calibration file '%s' not found in either the current "
-			   "directory or in '%s'.\n", strip_path( *name ), libdir );
-		THROW( EXCEPTION );
-	}
+    if ( ( tfp = hjs_attenuator_open_calibration( *name ) ) == NULL )
+    {
+        print( FATAL, "Calibration file '%s' not found in either the current "
+               "directory or in '%s'.\n", strip_path( *name ), libdir );
+        THROW( EXCEPTION );
+    }
 
-	return tfp;
+    return tfp;
 }
 
 
@@ -513,28 +513,28 @@ static FILE *hjs_attenuator_find_calibration( char ** name )
 
 static FILE *hjs_attenuator_open_calibration( char * name )
 {
-	FILE *tfp;
+    FILE *tfp;
 
 
-	if ( access( name, R_OK ) == -1 )
-	{
-		if ( errno == ENOENT )       /* file not found */
-			return NULL;
+    if ( access( name, R_OK ) == -1 )
+    {
+        if ( errno == ENOENT )       /* file not found */
+            return NULL;
 
-		print( FATAL, "No read permission for calibration file '%s'.\n",
-			   name );
-		T_free( name );
-		THROW( EXCEPTION );
-	}
+        print( FATAL, "No read permission for calibration file '%s'.\n",
+               name );
+        T_free( name );
+        THROW( EXCEPTION );
+    }
 
-	if ( ( tfp = fopen( name, "r" ) ) == NULL )
-	{
-		print( FATAL, "Can't open calibration file '%s'.\n", name );
-		T_free( name );
-		THROW( EXCEPTION );
-	}
+    if ( ( tfp = fopen( name, "r" ) ) == NULL )
+    {
+        print( FATAL, "Can't open calibration file '%s'.\n", name );
+        T_free( name );
+        THROW( EXCEPTION );
+    }
 
-	return tfp;
+    return tfp;
 }
 
 
@@ -550,83 +550,85 @@ static FILE *hjs_attenuator_open_calibration( char * name )
 
 static long hjs_attenuator_att_to_step( double att )
 {
-	size_t ind;
-	size_t max_index;;
+    size_t ind;
+    size_t max_index;;
 
 
-	fsc2_assert( hjs_attenuator.att_table != NULL &&
-				 hjs_attenuator.att_table_len > 1 );
+    fsc2_assert( hjs_attenuator.att_table != NULL &&
+                 hjs_attenuator.att_table_len > 1 );
 
-	if ( att < 0.0 )
-	{
-		print( FATAL, "Invalid negative attenuation of %.1f dB.\n", att );
-		THROW( EXCEPTION );
-	}
+    if ( att < 0.0 )
+    {
+        print( FATAL, "Invalid negative attenuation of %.1f dB.\n", att );
+        THROW( EXCEPTION );
+    }
 
-	/* Check that the attenuation value is covered by the list, give it
-	   a bit of slack (0.1%) for rounding errors */
+    /* Check that the attenuation value is covered by the list, give it
+       a bit of slack (0.1%) for rounding errors */
 
-	if ( att > hjs_attenuator.max_table_att * 1.001 )
-	{
-		print( FATAL, "Attenuation of %.1f dB is too large, must not be "
-			   "larger than %.1f dB.\n", att, hjs_attenuator.max_table_att );
-		THROW( EXCEPTION );
-	}
+    if ( att > hjs_attenuator.max_table_att * 1.001 )
+    {
+        print( FATAL, "Attenuation of %.1f dB is too large, must not be "
+               "larger than %.1f dB.\n", att, hjs_attenuator.max_table_att );
+        THROW( EXCEPTION );
+    }
 
-	if ( att >= hjs_attenuator.max_table_att )
-		return lrnd( hjs_attenuator.att_table[ hjs_attenuator.att_table_len
-											   - 1 ].step );
+    if ( att >= hjs_attenuator.max_table_att )
+        return lrnd( hjs_attenuator.att_table[ hjs_attenuator.att_table_len
+                                               - 1 ].step );
 
-	if ( att < hjs_attenuator.min_table_att * 0.999 )
-	{
-		print( FATAL, "Attenuation of %.1f dB is too small, must not be "
-			   "smaller than %.1f dB.\n", att, hjs_attenuator.min_table_att );
-		THROW( EXCEPTION );
-	}
+    if ( att < hjs_attenuator.min_table_att * 0.999 )
+    {
+        print( FATAL, "Attenuation of %.1f dB is too small, must not be "
+               "smaller than %.1f dB.\n", att, hjs_attenuator.min_table_att );
+        THROW( EXCEPTION );
+    }
 
-	if ( att <= hjs_attenuator.min_table_att )
-		return lrnd( hjs_attenuator.att_table[ 0 ].step );
+    if ( att <= hjs_attenuator.min_table_att )
+        return lrnd( hjs_attenuator.att_table[ 0 ].step );
 
-	/* Do a binary search of the list for the attenuation, interpolate if
-	   necesaary */
+    /* Do a binary search of the list for the attenuation, interpolate if
+       necesaary */
 
-	ind = hjs_attenuator.att_table_len / 2;
-	max_index = hjs_attenuator.att_table_len - 1;
+    ind = hjs_attenuator.att_table_len / 2;
+    max_index = hjs_attenuator.att_table_len - 1;
 
-	while( 1 )
-	{
-		if ( att < hjs_attenuator.att_table[ ind ].att )
-		{
-			if ( att >= hjs_attenuator.att_table[ ind - 1 ].att )
-				return lrnd( hjs_attenuator.att_table[ ind - 1 ].step +
-						   ( hjs_attenuator.att_table[ ind - 1 ].step
-							 -  hjs_attenuator.att_table[ ind ].step ) /
-						   ( hjs_attenuator.att_table[ ind - 1 ].att
-						     -  hjs_attenuator.att_table[ ind ].att ) *
-						   ( att - hjs_attenuator.att_table[ ind - 1 ].att ) );
-					
-			max_index = ind;
-			ind /= 2;
-			continue;
-		}
+    while( 1 )
+    {
+        if ( att < hjs_attenuator.att_table[ ind ].att )
+        {
+            if ( att >= hjs_attenuator.att_table[ ind - 1 ].att )
+                return lrnd( hjs_attenuator.att_table[ ind - 1 ].step +
+                           ( hjs_attenuator.att_table[ ind - 1 ].step
+                             -  hjs_attenuator.att_table[ ind ].step ) /
+                           ( hjs_attenuator.att_table[ ind - 1 ].att
+                             -  hjs_attenuator.att_table[ ind ].att ) *
+                           ( att - hjs_attenuator.att_table[ ind - 1 ].att ) );
+                    
+            max_index = ind;
+            ind /= 2;
+            continue;
+        }
 
-		if ( att < hjs_attenuator.att_table[ ind + 1 ].att )
-				return lrnd( hjs_attenuator.att_table[ ind ].step +
-							 ( hjs_attenuator.att_table[ ind + 1 ].step
-							   -  hjs_attenuator.att_table[ ind ].step ) /
-							 ( hjs_attenuator.att_table[ ind + 1 ].att
-							   -  hjs_attenuator.att_table[ ind ].att ) *
-							 ( att - hjs_attenuator.att_table[ ind ].att ) );
+        if ( att < hjs_attenuator.att_table[ ind + 1 ].att )
+                return lrnd( hjs_attenuator.att_table[ ind ].step +
+                             ( hjs_attenuator.att_table[ ind + 1 ].step
+                               -  hjs_attenuator.att_table[ ind ].step ) /
+                             ( hjs_attenuator.att_table[ ind + 1 ].att
+                               -  hjs_attenuator.att_table[ ind ].att ) *
+                             ( att - hjs_attenuator.att_table[ ind ].att ) );
 
-		ind += ( max_index - ind ) / 2;
-	}
+        ind += ( max_index - ind ) / 2;
+    }
 
-	return 0;       /* we can't ever end up here */
+    return 0;       /* we can't ever end up here */
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -126,125 +126,125 @@ typedef struct Pulse Pulse_T;
 
 
 struct Rulbus_Clock_Card {
-	char *name;
-	int handle;
-	int freq;
+    char *name;
+    int handle;
+    int freq;
 };
 
 
 struct Rulbus_Delay_Card {
-	char *name;
-	int handle;
-	Ticks delay;
-	Ticks old_delay;
-	double intr_delay;
-	Rulbus_Delay_Card_T *prev;
-	Rulbus_Delay_Card_T *next;
-	int num_next;
-	bool is_active;
-	bool was_active;
+    char *name;
+    int handle;
+    Ticks delay;
+    Ticks old_delay;
+    double intr_delay;
+    Rulbus_Delay_Card_T *prev;
+    Rulbus_Delay_Card_T *next;
+    int num_next;
+    bool is_active;
+    bool was_active;
 };
 
 
 struct Function {
-	int self;                   /* the functions number */
-	const char *name;           /* name of function */
-	bool is_used;
-	bool is_declared;
+    int self;                   /* the functions number */
+    const char *name;           /* name of function */
+    bool is_used;
+    bool is_declared;
 
-	int num_pulses;             /* number of pulses assigned to the function */
-	int num_active_pulses;
-	Pulse_T **pulses;           /* list of pulse pointers */
+    int num_pulses;             /* number of pulses assigned to the function */
+    int num_active_pulses;
+    Pulse_T **pulses;           /* list of pulse pointers */
 
-	double last_pulse_len;
+    double last_pulse_len;
 
-	double delay;
-	bool is_delay;
+    double delay;
+    bool is_delay;
 
-	Rulbus_Delay_Card_T *delay_card;
+    Rulbus_Delay_Card_T *delay_card;
 };
 
 
 struct Pulse {
-	long num;                /* number of the pulse (automatically created
-								pulses have negative, normal pulses
-								positive numbers */
-	bool is_active;          /* set if the pulse is really used */
-	bool was_active;
-	bool has_been_active;    /* used to find useless pulses */
+    long num;                /* number of the pulse (automatically created
+                                pulses have negative, normal pulses
+                                positive numbers */
+    bool is_active;          /* set if the pulse is really used */
+    bool was_active;
+    bool has_been_active;    /* used to find useless pulses */
 
-	Pulse_T *next;
-	Pulse_T *prev;
+    Pulse_T *next;
+    Pulse_T *prev;
 
-	Function_T *function;    /* function the pulse is associated with */
+    Function_T *function;    /* function the pulse is associated with */
 
-	double pos;              /* current position, length, position change */
-	Ticks len;               /* and length change of pulse (in units of the */
-	double dpos;             /* pulsers time base) */
-	Ticks dlen;
+    double pos;              /* current position, length, position change */
+    Ticks len;               /* and length change of pulse (in units of the */
+    double dpos;             /* pulsers time base) */
+    Ticks dlen;
 
-	bool is_pos;             /* flags that are set when the corresponding */
-	bool is_len;             /* property has been set */
-	bool is_dpos;
-	bool is_dlen;
+    bool is_pos;             /* flags that are set when the corresponding */
+    bool is_len;             /* property has been set */
+    bool is_dpos;
+    bool is_dlen;
 
-	double initial_pos;      /* position, length, position change and length */
-	Ticks initial_len;       /* change at the start of the experiment */
-	double initial_dpos;
-	Ticks initial_dlen;
+    double initial_pos;      /* position, length, position change and length */
+    Ticks initial_len;       /* change at the start of the experiment */
+    double initial_dpos;
+    Ticks initial_dlen;
 
-	bool initial_is_pos;     /* property has initially been set */
-	bool initial_is_len;
-	bool initial_is_dpos;
-	bool initial_is_dlen;
+    bool initial_is_pos;     /* property has initially been set */
+    bool initial_is_len;
+    bool initial_is_dpos;
+    bool initial_is_dlen;
 };
 
 
 struct RB_Pulser_J {
-	bool is_needed;
+    bool is_needed;
 
-	char *config_file;
+    char *config_file;
 
-	Rulbus_Clock_Card_T clock_card[ NUM_CLOCK_CARDS ];
-	Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
+    Rulbus_Clock_Card_T clock_card[ NUM_CLOCK_CARDS ];
+    Rulbus_Delay_Card_T delay_card[ NUM_DELAY_CARDS ];
 
-	bool exists_synthesizer;
+    bool exists_synthesizer;
 
-	Pulse_T *pulses;
+    Pulse_T *pulses;
 
-	double timebase;         /* time base of pulse clock */
-	int tb_index;            /* to be used as argument for clock card */
-	bool is_timebase;
+    double timebase;         /* time base of pulse clock */
+    int tb_index;            /* to be used as argument for clock card */
+    bool is_timebase;
 
-	int trig_in_mode;        /* EXTERNAL or INTERNAL */
-	int trig_in_slope;       /* only in EXTERNAL mode */
+    int trig_in_mode;        /* EXTERNAL or INTERNAL */
+    int trig_in_slope;       /* only in EXTERNAL mode */
 
-	double rep_time;
-	bool is_rep_time;
-	int rep_time_index;      /* to be used as argument for clock card */
-	Ticks rep_time_ticks;    /* only in INTERNAL mode, used for ERT card */
+    double rep_time;
+    bool is_rep_time;
+    int rep_time_index;      /* to be used as argument for clock card */
+    Ticks rep_time_ticks;    /* only in INTERNAL mode, used for ERT card */
 
-	bool is_trig_in_mode;
-	bool is_trig_in_slope;
+    bool is_trig_in_mode;
+    bool is_trig_in_slope;
 
-	double neg_delay;
-	bool is_neg_delay;       /* if any of the functions has a negative delay */
+    double neg_delay;
+    bool is_neg_delay;       /* if any of the functions has a negative delay */
 
-	Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
+    Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
 
-	bool is_running;         /* set if the pulser is in run mode */
+    bool is_running;         /* set if the pulser is in run mode */
 
-	char *synth_state;
-	char *synth_pulse_state;
-	char *synth_pulse_width;
-	char *synth_pulse_delay;
-	char *synth_trig_slope;
+    char *synth_state;
+    char *synth_pulse_state;
+    char *synth_pulse_width;
+    char *synth_pulse_delay;
+    char *synth_trig_slope;
 
-	FILE *show_file;
-	FILE *dump_file;
+    FILE *show_file;
+    FILE *dump_file;
 
-	bool do_show_pulses;
-	bool do_dump_pulses;
+    bool do_show_pulses;
+    bool do_dump_pulses;
 };
 
 
@@ -278,7 +278,7 @@ void rb_pulser_j_cleanup( void );
 bool rb_pulser_j_store_timebase( double /* timebase */ );
 
 bool rb_pulser_j_set_function_delay( int    /* function */,
-									 double /* delay    */ );
+                                     double /* delay    */ );
 
 bool rb_pulser_j_set_trigger_mode( int /* mode */ );
 
@@ -292,46 +292,46 @@ bool rb_pulser_j_set_repeat_time( double /* rep_time */ );
 bool rb_pulser_j_new_pulse( long /* pnum */ );
 
 bool rb_pulser_j_set_pulse_function( long /* pnum     */,
-									 int  /* function */ );
+                                     int  /* function */ );
 
 bool rb_pulser_j_set_pulse_position( long   /* pnum   */,
-									 double /* p_time */ );
+                                     double /* p_time */ );
 
 bool rb_pulser_j_set_pulse_length( long   /* pnum   */,
-								   double /* p_time */ );
+                                   double /* p_time */ );
 
 bool rb_pulser_j_set_pulse_position_change( long   /* pnum   */,
-											double /* p_time */ );
+                                            double /* p_time */ );
 
 bool rb_pulser_j_set_pulse_length_change( long   /* pnum   */,
-										  double /* p_time */ );
+                                          double /* p_time */ );
 
 bool rb_pulser_j_get_pulse_function( long  /* pnum     */,
-									 int * /* function */ );
+                                     int * /* function */ );
 
 bool rb_pulser_j_get_pulse_position( long     /* pnum   */,
-									 double * /* p_time */ );
+                                     double * /* p_time */ );
 
 bool rb_pulser_j_get_pulse_length( long     /* pnum   */,
-								   double * /* p_time */ );
+                                   double * /* p_time */ );
 
 bool rb_pulser_j_get_pulse_position_change( long     /* pnum   */,
-											double * /* p_time */ );
+                                            double * /* p_time */ );
 
 bool rb_pulser_j_get_pulse_length_change( long     /* pnum   */,
-										  double * /* p_time */ );
+                                          double * /* p_time */ );
 
 bool rb_pulser_j_change_pulse_position( long   /* pnum   */,
-										double /* p_time */ );
+                                        double /* p_time */ );
 
 bool rb_pulser_j_change_pulse_length( long   /* pnum   */,
-									  double /* p_time */ );
+                                      double /* p_time */ );
 
 bool rb_pulser_j_change_pulse_position_change( long   /* pnum   */,
-											   double /* p_time */ );
+                                               double /* p_time */ );
 
 bool rb_pulser_j_change_pulse_length_change( long   /* pnum   */,
-											 double /* p_time */ );
+                                             double /* p_time */ );
 
 
 /* Functions defined in rb_pulser_j_init.c */
@@ -351,7 +351,7 @@ void rb_pulser_j_full_reset( void );
 /* Functions defined in rb_pulser_j_util.c */
 
 int rb_pulser_j_start_compare( const void * /* A */,
-							   const void * /* B */ );
+                               const void * /* B */ );
 
 Ticks rb_pulser_j_double2ticks( double /* p_time */ );
 
@@ -384,10 +384,10 @@ void rb_pulser_j_exit( void );
 void rb_pulser_j_run( bool /* state */ );
 
 void rb_pulser_j_delay_card_state( int  /* handle */,
-								   bool /* state  */ );
+                                   bool /* state  */ );
 
 void rb_pulser_j_delay_card_delay( int           /* handle */,
-								   unsigned long /* delay  */ );
+                                   unsigned long /* delay  */ );
 
 
 #endif /* ! RB_PULSER_J_HEADER */
@@ -396,5 +396,7 @@ void rb_pulser_j_delay_card_delay( int           /* handle */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

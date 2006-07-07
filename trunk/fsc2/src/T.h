@@ -30,10 +30,10 @@
 void *T_malloc( size_t /* size */ );
 
 void *T_calloc( size_t /* nmemb */,
-				size_t /* size  */ );
+                size_t /* size  */ );
 
 void *T_realloc( void * /* ptr  */,
-				 size_t /* size */ );
+                 size_t /* size */ );
 
 void *T_free( void * /* ptr */ );
 
@@ -52,5 +52,7 @@ double T_atod( const char * /* txt */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

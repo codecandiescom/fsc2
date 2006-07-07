@@ -29,23 +29,23 @@
 
 
 enum {
-	   SERIAL_INIT,
-	   SERIAL_EXIT,
-	   SERIAL_READ,
-	   SERIAL_WRITE
+       SERIAL_INIT,
+       SERIAL_EXIT,
+       SERIAL_READ,
+       SERIAL_WRITE
 };
 
 
 static void spectrapro_300i_send( const char * buf );
 
 static bool spectrapro_300i_read( char *   buf,
-								  size_t * len );
+                                  size_t * len );
 
 static char *spectrapro_300i_talk( const char * buf,
-								   size_t       len );
+                                   size_t       len );
 
 static bool spectrapro_300i_comm( int type,
-								  ... );
+                                  ... );
 
 static void spectrapro_300i_comm_fail( void );
 
@@ -57,72 +57,72 @@ static void spectrapro_300i_comm_fail( void );
 
 FILE *spectrapro_300i_find_calib( char * name )
 {
-	FILE *cfp = NULL;
-	char *new_name;
+    FILE *cfp = NULL;
+    char *new_name;
 
 
-	CLOBBER_PROTECT( new_name );
+    CLOBBER_PROTECT( new_name );
 
-	/* Expand a leading tilde to the users home directory */
+    /* Expand a leading tilde to the users home directory */
 
-	if ( name[ 0 ] == '~' )
-		new_name = get_string( "%s%s%s", getenv( "HOME" ),
-							   name[ 1 ] != '/' ? "/" : "", name + 1 );
+    if ( name[ 0 ] == '~' )
+        new_name = get_string( "%s%s%s", getenv( "HOME" ),
+                               name[ 1 ] != '/' ? "/" : "", name + 1 );
 
-	/* Now try to open the file and return the file pointer */
+    /* Now try to open the file and return the file pointer */
 
-	TRY
-	{
-		cfp = spectrapro_300i_open_calib( new_name != NULL ?
-										  new_name : name );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( new_name );
-		RETHROW( );
-	}
+    TRY
+    {
+        cfp = spectrapro_300i_open_calib( new_name != NULL ?
+                                          new_name : name );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( new_name );
+        RETHROW( );
+    }
 
-	if ( new_name != NULL )
-		T_free( new_name );
+    if ( new_name != NULL )
+        T_free( new_name );
 
-	if ( cfp )
-		return cfp;
+    if ( cfp )
+        return cfp;
 
-	/* If the file name contains a slash we give up after freeing memory */
+    /* If the file name contains a slash we give up after freeing memory */
 
-	if ( strchr( name, '/' ) != NULL )
-	{
-		print( FATAL, "Calibration file '%s' not found.\n", new_name );
-		THROW( EXCEPTION );
-	}
+    if ( strchr( name, '/' ) != NULL )
+    {
+        print( FATAL, "Calibration file '%s' not found.\n", new_name );
+        THROW( EXCEPTION );
+    }
 
-	/* Last chance: The calibration file is in the library directory... */
+    /* Last chance: The calibration file is in the library directory... */
 
-	new_name = get_string( "%s%s%s", libdir, slash( libdir ), name );
+    new_name = get_string( "%s%s%s", libdir, slash( libdir ), name );
 
-	TRY
-	{
-		cfp = spectrapro_300i_open_calib( new_name );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( new_name );
-		RETHROW( );
-	}
+    TRY
+    {
+        cfp = spectrapro_300i_open_calib( new_name );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( new_name );
+        RETHROW( );
+    }
 
-	if ( cfp == NULL )
-	{
-		print( FATAL, "Calibration file '%s' not found in either the current "
-			   "directory or in '%s'.\n", strip_path( new_name ), libdir );
-		T_free( new_name );
-		THROW( EXCEPTION );
-	}
+    if ( cfp == NULL )
+    {
+        print( FATAL, "Calibration file '%s' not found in either the current "
+               "directory or in '%s'.\n", strip_path( new_name ), libdir );
+        T_free( new_name );
+        THROW( EXCEPTION );
+    }
 
-	T_free( new_name );
+    T_free( new_name );
 
-	return cfp;
+    return cfp;
 }
 
 
@@ -135,28 +135,28 @@ FILE *spectrapro_300i_find_calib( char * name )
 
 FILE *spectrapro_300i_open_calib( char * name )
 {
-	FILE *cfp;
+    FILE *cfp;
 
 
-	if ( access( name, R_OK ) == -1 )
-	{
-		if ( errno == ENOENT )       /* file not found */
-			print( FATAL, "Calibration file '%s' not found.\n", name );
-		else if ( errno == EACCES )
-			print( FATAL, "No permission to read calibration file '%s'.\n",
-				   name );
-		else
-			print( FATAL, "Can't access calibration file '%s'.\n", name );
-		THROW( EXCEPTION );
-	}
+    if ( access( name, R_OK ) == -1 )
+    {
+        if ( errno == ENOENT )       /* file not found */
+            print( FATAL, "Calibration file '%s' not found.\n", name );
+        else if ( errno == EACCES )
+            print( FATAL, "No permission to read calibration file '%s'.\n",
+                   name );
+        else
+            print( FATAL, "Can't access calibration file '%s'.\n", name );
+        THROW( EXCEPTION );
+    }
 
-	if ( ( cfp = fopen( name, "r" ) ) == NULL )
-	{
-		print( FATAL, "Can't open calibration file '%s'.\n", name );
-		THROW( EXCEPTION );
-	}
+    if ( ( cfp = fopen( name, "r" ) ) == NULL )
+    {
+        print( FATAL, "Can't open calibration file '%s'.\n", name );
+        THROW( EXCEPTION );
+    }
 
-	return cfp;
+    return cfp;
 }
 
 
@@ -184,91 +184,91 @@ FILE *spectrapro_300i_open_calib( char * name )
  *-----------------------------------------------------------------------*/
 
 double spectrapro_300i_min( double * x,
-							void *   par )
+                            void *   par )
 {
-	double inclusion_angle_2;                 /* half of inclusion angle */
-	double focal_length;
-	double detector_angle;
-	double grating_angle;
-	double sum = 0.0;
-	double a, b;
-	size_t i;
-	Calib_Params_T *c = ( Calib_Params_T * ) par;
+    double inclusion_angle_2;                 /* half of inclusion angle */
+    double focal_length;
+    double detector_angle;
+    double grating_angle;
+    double sum = 0.0;
+    double a, b;
+    size_t i;
+    Calib_Params_T *c = ( Calib_Params_T * ) par;
 
 
-	if ( c->opt == 0 )
-	{
-		inclusion_angle_2 = 0.5 * x[ 0 ];
-		if ( inclusion_angle_2 <= 0.0 )
-			return HUGE_VAL;
+    if ( c->opt == 0 )
+    {
+        inclusion_angle_2 = 0.5 * x[ 0 ];
+        if ( inclusion_angle_2 <= 0.0 )
+            return HUGE_VAL;
 
-		focal_length = c->focal_length;
-		detector_angle = c->detector_angle;
-	}
-	else if ( c->opt == 1 )
-	{
-		focal_length = x[ 0 ];
-		if ( focal_length <= 0.0 )
-			return HUGE_VAL;
+        focal_length = c->focal_length;
+        detector_angle = c->detector_angle;
+    }
+    else if ( c->opt == 1 )
+    {
+        focal_length = x[ 0 ];
+        if ( focal_length <= 0.0 )
+            return HUGE_VAL;
 
-		inclusion_angle_2 = 0.5 * c->inclusion_angle;
-		detector_angle    = c->detector_angle;
-	}
-	else if ( c->opt == 2 )
-	{
-		detector_angle    = x[ 0 ];
+        inclusion_angle_2 = 0.5 * c->inclusion_angle;
+        detector_angle    = c->detector_angle;
+    }
+    else if ( c->opt == 2 )
+    {
+        detector_angle    = x[ 0 ];
 
-		inclusion_angle_2 = 0.5 * c->inclusion_angle;
-		focal_length      = c->focal_length;
-	}
-	else
-		THROW( EXCEPTION );
+        inclusion_angle_2 = 0.5 * c->inclusion_angle;
+        focal_length      = c->focal_length;
+    }
+    else
+        THROW( EXCEPTION );
 
-	/* For each measured value (that's the deviation of the line position
-	   from the center, expressed in pixels) calculate the theoretical value
-	   with the values for the inclusion angle, the focal length and the
-	   detector angle we got from the simplex routine. Then sum up the squares
-	   of the deviations from the measured values, which is what we want to
-	   minimize. */
+    /* For each measured value (that's the deviation of the line position
+       from the center, expressed in pixels) calculate the theoretical value
+       with the values for the inclusion angle, the focal length and the
+       detector angle we got from the simplex routine. Then sum up the squares
+       of the deviations from the measured values, which is what we want to
+       minimize. */
 
-	for ( i = 0; i < c->num_values; i++ )
-	{
-		a = c->m[ i ] * c->center_wavelengths[ i ]
-			/ ( 2.0 * c->d * cos( inclusion_angle_2 ) );
+    for ( i = 0; i < c->num_values; i++ )
+    {
+        a = c->m[ i ] * c->center_wavelengths[ i ]
+            / ( 2.0 * c->d * cos( inclusion_angle_2 ) );
 
-		if ( fabs( a ) > 1.0 )
-		{
-			sum = HUGE_VAL;
-			break;
-		}
+        if ( fabs( a ) > 1.0 )
+        {
+            sum = HUGE_VAL;
+            break;
+        }
 
-		grating_angle = asin( a );
+        grating_angle = asin( a );
 
-		a = c->m[ i ] * c->wavelengths[ i ] / c->d
-			- sin( grating_angle - inclusion_angle_2 );
+        a = c->m[ i ] * c->wavelengths[ i ] / c->d
+            - sin( grating_angle - inclusion_angle_2 );
 
-		if ( fabs( a ) > 1.0 )
-		{
-			sum = HUGE_VAL;
-			break;
-		}
+        if ( fabs( a ) > 1.0 )
+        {
+            sum = HUGE_VAL;
+            break;
+        }
 
-		a = tan( asin( a ) - grating_angle - inclusion_angle_2 );
+        a = tan( asin( a ) - grating_angle - inclusion_angle_2 );
 
-		b = cos( detector_angle ) - a * sin( detector_angle );
+        b = cos( detector_angle ) - a * sin( detector_angle );
 
-		if ( b == 0.0 )
-		{
-			sum = HUGE_VAL;
-			break;
-		}
+        if ( b == 0.0 )
+        {
+            sum = HUGE_VAL;
+            break;
+        }
 
-		b = c->n_exp[ i ] - focal_length * a / ( b * c->pixel_width );
+        b = c->n_exp[ i ] - focal_length * a / ( b * c->pixel_width );
 
-		sum += b * b;
-	}
+        sum += b * b;
+    }
 
-	return sum;
+    return sum;
 }
 
 
@@ -282,46 +282,46 @@ double spectrapro_300i_min( double * x,
 
 void spectrapro_300i_open( void )
 {
-	char reply[ 100 ];
-	size_t len;
-	size_t already_read = 0;
-	int i;
+    char reply[ 100 ];
+    size_t len;
+    size_t already_read = 0;
+    int i;
 
 
-	if ( ! spectrapro_300i_comm( SERIAL_INIT ) )
-	{
-		print( FATAL, "Can't open device file for monochromator.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ! spectrapro_300i_comm( SERIAL_INIT ) )
+    {
+        print( FATAL, "Can't open device file for monochromator.\n" );
+        THROW( EXCEPTION );
+    }
 
-	spectrapro_300i.is_open = SET;
+    spectrapro_300i.is_open = SET;
 
-	/* Now a quick check that we can talk to the monochromator, it should be
-	   able to send us its model string within one second or something is
-	   definitely hosed... */
+    /* Now a quick check that we can talk to the monochromator, it should be
+       able to send us its model string within one second or something is
+       definitely hosed... */
 
-	if ( ! spectrapro_300i_comm( SERIAL_WRITE, "MODEL\r" ) )
-		spectrapro_300i_comm_fail( );
+    if ( ! spectrapro_300i_comm( SERIAL_WRITE, "MODEL\r" ) )
+        spectrapro_300i_comm_fail( );
 
-	for ( i = 0; i < 10; i++ )
-	{
-		len = 100 - already_read;
-		if ( spectrapro_300i_comm( SERIAL_READ, reply + already_read, &len ) )
-		{
-			already_read += len;
-			if ( already_read >= 5 &&
-				 ! strncmp( reply + already_read - 5, " ok\r\n", 5 ) )
-				break;
-		}
-		stop_on_user_request( );
-	}
+    for ( i = 0; i < 10; i++ )
+    {
+        len = 100 - already_read;
+        if ( spectrapro_300i_comm( SERIAL_READ, reply + already_read, &len ) )
+        {
+            already_read += len;
+            if ( already_read >= 5 &&
+                 ! strncmp( reply + already_read - 5, " ok\r\n", 5 ) )
+                break;
+        }
+        stop_on_user_request( );
+    }
 
-	if ( i == 10 )
-		spectrapro_300i_comm_fail( );
+    if ( i == 10 )
+        spectrapro_300i_comm_fail( );
 
-	spectrapro_300i_get_gratings( );
-	spectrapro_300i.current_gn = spectrapro_300i_get_grating( );
-	spectrapro_300i.tn = spectrapro_300i_get_turret( );
+    spectrapro_300i_get_gratings( );
+    spectrapro_300i.current_gn = spectrapro_300i_get_grating( );
+    spectrapro_300i.tn = spectrapro_300i_get_turret( );
 }
 
 
@@ -332,9 +332,9 @@ void spectrapro_300i_open( void )
 
 void spectrapro_300i_close( void )
 {
-	if ( spectrapro_300i.is_open )
-		spectrapro_300i_comm( SERIAL_EXIT );
-	spectrapro_300i.is_open = UNSET;
+    if ( spectrapro_300i.is_open )
+        spectrapro_300i_comm( SERIAL_EXIT );
+    spectrapro_300i.is_open = UNSET;
 }
 
 
@@ -345,11 +345,11 @@ void spectrapro_300i_close( void )
 
 double spectrapro_300i_get_wavelength( void )
 {
-	char *reply;
+    char *reply;
 
 
-	reply = spectrapro_300i_talk( "?NM", 100 );
-	return T_atod( reply ) * 1.0e-9;
+    reply = spectrapro_300i_talk( "?NM", 100 );
+    return T_atod( reply ) * 1.0e-9;
 }
 
 
@@ -359,25 +359,25 @@ double spectrapro_300i_get_wavelength( void )
 
 void spectrapro_300i_set_wavelength( double wavelength )
 {
-	char *buf;
+    char *buf;
 
 
-	fsc2_assert( wavelength < 0.0 || wavelength <= MAX_WAVELENGTH );
+    fsc2_assert( wavelength < 0.0 || wavelength <= MAX_WAVELENGTH );
 
 
-	buf = get_string( "%.3f GOTO", 1.0e9 * wavelength );
+    buf = get_string( "%.3f GOTO", 1.0e9 * wavelength );
 
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_send( buf );
+        T_free( buf );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( buf );
+        RETHROW( );
+    }
 }
 
 
@@ -387,14 +387,14 @@ void spectrapro_300i_set_wavelength( double wavelength )
 
 long spectrapro_300i_get_turret( void )
 {
-	const char *reply;
-	long tn;
+    const char *reply;
+    long tn;
 
 
-	reply = spectrapro_300i_talk( "?TURRET", 20 );
-	tn = T_atol( reply ) - 1;
-	T_free( ( void * ) reply );
-	return tn;
+    reply = spectrapro_300i_talk( "?TURRET", 20 );
+    tn = T_atol( reply ) - 1;
+    T_free( ( void * ) reply );
+    return tn;
 }
 
 
@@ -404,29 +404,29 @@ long spectrapro_300i_get_turret( void )
 
 void spectrapro_300i_set_turret( long tn )
 {
-	char *buf;
+    char *buf;
 
 
-	CLOBBER_PROTECT( buf );
+    CLOBBER_PROTECT( buf );
 
-	fsc2_assert( tn >= 0 && tn < MAX_TURRETS );
+    fsc2_assert( tn >= 0 && tn < MAX_TURRETS );
 
-	if ( spectrapro_300i.tn == tn )
-		return;
+    if ( spectrapro_300i.tn == tn )
+        return;
 
-	buf = get_string( "%ld TURRET", tn + 1 );
+    buf = get_string( "%ld TURRET", tn + 1 );
 
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_send( buf );
+        T_free( buf );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( buf );
+        RETHROW( );
+    }
 
 }
 
@@ -437,14 +437,14 @@ void spectrapro_300i_set_turret( long tn )
 
 long spectrapro_300i_get_grating( void )
 {
-	const char *reply;
-	long gn;
+    const char *reply;
+    long gn;
 
 
-	reply = spectrapro_300i_talk( "?GRATING", 20 );
-	gn = T_atol( reply ) - 1;
-	T_free( ( void * ) reply );
-	return gn;
+    reply = spectrapro_300i_talk( "?GRATING", 20 );
+    gn = T_atol( reply ) - 1;
+    T_free( ( void * ) reply );
+    return gn;
 }
 
 
@@ -454,32 +454,32 @@ long spectrapro_300i_get_grating( void )
 
 void spectrapro_300i_set_grating( long gn )
 {
-	char *buf;
+    char *buf;
 
 
-	CLOBBER_PROTECT( buf );
+    CLOBBER_PROTECT( buf );
 
-	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS &&
-				 gn - spectrapro_300i.tn * 3 >= 0 &&
-				 gn - spectrapro_300i.tn * 3 <= 2 &&
-				 spectrapro_300i.grating[ gn ].is_installed );
+    fsc2_assert( gn >= 0 && gn < MAX_GRATINGS &&
+                 gn - spectrapro_300i.tn * 3 >= 0 &&
+                 gn - spectrapro_300i.tn * 3 <= 2 &&
+                 spectrapro_300i.grating[ gn ].is_installed );
 
-	if ( spectrapro_300i.current_gn == gn )
-		return;
+    if ( spectrapro_300i.current_gn == gn )
+        return;
 
-	buf = get_string( "%ld GRATING", gn + 1 );
+    buf = get_string( "%ld GRATING", gn + 1 );
 
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_send( buf );
+        T_free( buf );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( buf );
+        RETHROW( );
+    }
 }
 
 
@@ -491,149 +491,149 @@ void spectrapro_300i_set_grating( long gn )
 
 void spectrapro_300i_get_gratings( void )
 {
-	const char *reply;
-	const char *sp;
-	long gn, gr, bl;
-	int i;
+    const char *reply;
+    const char *sp;
+    long gn, gr, bl;
+    int i;
 
 
-	reply = spectrapro_300i_talk( "?GRATINGS", 80 * MAX_GRATINGS );
+    reply = spectrapro_300i_talk( "?GRATINGS", 80 * MAX_GRATINGS );
 
-	for ( sp = reply, i = 0; i < MAX_GRATINGS; i++ )
-	{
-		while ( *sp != '\0' && ! isdigit( ( unsigned char ) *sp ) )
-			sp++;
+    for ( sp = reply, i = 0; i < MAX_GRATINGS; i++ )
+    {
+        while ( *sp != '\0' && ! isdigit( ( unsigned char ) *sp ) )
+            sp++;
 
-		if ( *sp == '\0' )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
+        if ( *sp == '\0' )
+        {
+            T_free( ( void * ) reply );
+            spectrapro_300i_comm_fail( );
+        }
 
-		gn = 0;
-		while( *sp != '\0' && isdigit( ( unsigned char ) *sp ) )
-			gn = gn * 10 + ( long ) ( *sp++ - '0' );
+        gn = 0;
+        while( *sp != '\0' && isdigit( ( unsigned char ) *sp ) )
+            gn = gn * 10 + ( long ) ( *sp++ - '0' );
 
-		if ( *sp == '\0' || gn - 1 != i )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
+        if ( *sp == '\0' || gn - 1 != i )
+        {
+            T_free( ( void * ) reply );
+            spectrapro_300i_comm_fail( );
+        }
 
-		while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
-			sp++;
+        while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
+            sp++;
 
-		if ( *sp == '\0' )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
+        if ( *sp == '\0' )
+        {
+            T_free( ( void * ) reply );
+            spectrapro_300i_comm_fail( );
+        }
 
-		if ( ! strncmp( sp, "Not Installed", 13 ) )
-		{
-			sp += 13;
-			continue;
-		}
+        if ( ! strncmp( sp, "Not Installed", 13 ) )
+        {
+            sp += 13;
+            continue;
+        }
 
-		if ( ! isdigit( ( unsigned char ) *sp ) )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
+        if ( ! isdigit( ( unsigned char ) *sp ) )
+        {
+            T_free( ( void * ) reply );
+            spectrapro_300i_comm_fail( );
+        }
 
-		gr = 0;
-		while( *sp != '\0' && isdigit( ( unsigned char ) *sp ) )
-			gr = gr * 10 + ( long ) ( *sp++ - '0' );
+        gr = 0;
+        while( *sp != '\0' && isdigit( ( unsigned char ) *sp ) )
+            gr = gr * 10 + ( long ) ( *sp++ - '0' );
 
-		if ( *sp == '\0' )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
+        if ( *sp == '\0' )
+        {
+            T_free( ( void * ) reply );
+            spectrapro_300i_comm_fail( );
+        }
 
-		spectrapro_300i.grating[ i ].grooves = gr * 1000;
+        spectrapro_300i.grating[ i ].grooves = gr * 1000;
 
-		while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
-			sp++;
+        while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
+            sp++;
 
-		if ( *sp == '\0' )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
+        if ( *sp == '\0' )
+        {
+            T_free( ( void * ) reply );
+            spectrapro_300i_comm_fail( );
+        }
 
-		if ( strncmp( sp, "g/mm BLZ=", 9 ) )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
+        if ( strncmp( sp, "g/mm BLZ=", 9 ) )
+        {
+            T_free( ( void * ) reply );
+            spectrapro_300i_comm_fail( );
+        }
 
-		sp += 9;
+        sp += 9;
 
-		while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
-			sp++;
+        while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
+            sp++;
 
-		if ( *sp == '\0' )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
+        if ( *sp == '\0' )
+        {
+            T_free( ( void * ) reply );
+            spectrapro_300i_comm_fail( );
+        }
 
-		if ( ! isdigit( ( unsigned char ) *sp ) )
-		{
-			spectrapro_300i.grating[ i ].blaze = -1;
-			while ( *sp != '\0' && isalpha( ( unsigned char ) *sp ) )
-				sp++;
-			if ( *sp == '\0' )
-			{
-				T_free( ( void * ) reply );
-				spectrapro_300i_comm_fail( );
-			}
-		}
-		else
-		{
-			bl = 0;
-			while( *sp != '\0' && isdigit( ( unsigned char ) *sp ) )
-				bl = bl * 10 + ( long ) ( *sp++ - '0' );
+        if ( ! isdigit( ( unsigned char ) *sp ) )
+        {
+            spectrapro_300i.grating[ i ].blaze = -1;
+            while ( *sp != '\0' && isalpha( ( unsigned char ) *sp ) )
+                sp++;
+            if ( *sp == '\0' )
+            {
+                T_free( ( void * ) reply );
+                spectrapro_300i_comm_fail( );
+            }
+        }
+        else
+        {
+            bl = 0;
+            while( *sp != '\0' && isdigit( ( unsigned char ) *sp ) )
+                bl = bl * 10 + ( long ) ( *sp++ - '0' );
 
-			if ( *sp == '\0' )
-			{
-				T_free( ( void * ) reply );
-				spectrapro_300i_comm_fail( );
-			}
+            if ( *sp == '\0' )
+            {
+                T_free( ( void * ) reply );
+                spectrapro_300i_comm_fail( );
+            }
 
-			spectrapro_300i.grating[ i ].blaze = bl * 1.0e-9;
+            spectrapro_300i.grating[ i ].blaze = bl * 1.0e-9;
 
-			while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
-				sp++;
+            while ( *sp != '\0' && isspace( ( unsigned char ) *sp ) )
+                sp++;
 
-			if ( *sp == '\0' )
-			{
-				T_free( ( void * ) reply );
-				spectrapro_300i_comm_fail( );
-			}
+            if ( *sp == '\0' )
+            {
+                T_free( ( void * ) reply );
+                spectrapro_300i_comm_fail( );
+            }
 
-			if ( *sp == '\0' )
-			{
-				T_free( ( void * ) reply );
-				spectrapro_300i_comm_fail( );
-			}
+            if ( *sp == '\0' )
+            {
+                T_free( ( void * ) reply );
+                spectrapro_300i_comm_fail( );
+            }
 
-			if ( strncmp( sp, "nm", 2 ) )
-			{
-				T_free( ( void * ) reply );
-				spectrapro_300i_comm_fail( );
-			}
+            if ( strncmp( sp, "nm", 2 ) )
+            {
+                T_free( ( void * ) reply );
+                spectrapro_300i_comm_fail( );
+            }
 
-			sp += 2;
-		}
+            sp += 2;
+        }
 
-		spectrapro_300i.grating[ i ].is_installed = SET;
-	}
+        spectrapro_300i.grating[ i ].is_installed = SET;
+    }
 
-	T_free( ( void * ) reply );
+    T_free( ( void * ) reply );
 }
-	
+    
 
 /*-----------------------------------------------------*
  * Function asks the monochromator for the zero offset
@@ -642,41 +642,41 @@ void spectrapro_300i_get_gratings( void )
 
 long spectrapro_300i_get_offset( long gn )
 {
-	const char *reply;
-	char *sp, *nsp;
-	long offset = 0;
-	long i;
+    const char *reply;
+    char *sp, *nsp;
+    long offset = 0;
+    long i;
 
 
-	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
+    fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
 
-	reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096 );
+    reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096 );
 
-	if ( ( sp = strstr( reply, "offset" ) ) == NULL )
-	{
-		T_free( ( void * ) reply );
-		spectrapro_300i_comm_fail( );
-	}
+    if ( ( sp = strstr( reply, "offset" ) ) == NULL )
+    {
+        T_free( ( void * ) reply );
+        spectrapro_300i_comm_fail( );
+    }
 
-	sp += strlen( "offset" );
+    sp += strlen( "offset" );
 
-	for ( i = 0; i <= gn; i++ )
-	{
-		offset = strtol( sp, &nsp, 10 );
-		if ( sp == nsp ||
-			 ( ( offset == LONG_MIN || offset == LONG_MAX ) &&
-			   errno == ERANGE ) )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
-		sp = nsp;
-	}
+    for ( i = 0; i <= gn; i++ )
+    {
+        offset = strtol( sp, &nsp, 10 );
+        if ( sp == nsp ||
+             ( ( offset == LONG_MIN || offset == LONG_MAX ) &&
+               errno == ERANGE ) )
+        {
+            T_free( ( void * ) reply );
+            spectrapro_300i_comm_fail( );
+        }
+        sp = nsp;
+    }
 
-	T_free( ( void * ) reply );
-	return offset;
+    T_free( ( void * ) reply );
+    return offset;
 }
-	
+    
 
 /*----------------------------------------------------------*
  * Function sets a new zero offset for one of the gratings,
@@ -686,65 +686,65 @@ long spectrapro_300i_get_offset( long gn )
  *----------------------------------------------------------*/
 
 void spectrapro_300i_set_offset( long gn,
-								 long offset )
+                                 long offset )
 {
-	char *buf;
+    char *buf;
 
 
-	CLOBBER_PROTECT( buf );
-	CLOBBER_PROTECT( gn );
+    CLOBBER_PROTECT( buf );
+    CLOBBER_PROTECT( gn );
 
-	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
-	fsc2_assert( spectrapro_300i.grating[ gn ].is_installed );
-	fsc2_assert ( labs( offset ) <= lrnd( ( double ) INIT_OFFSET_RANGE /
-				  						  spectrapro_300i.grating[ gn ].grooves
-										  + ( gn % 3 ) * INIT_OFFSET ) );
+    fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
+    fsc2_assert( spectrapro_300i.grating[ gn ].is_installed );
+    fsc2_assert ( labs( offset ) <= lrnd( ( double ) INIT_OFFSET_RANGE /
+                                          spectrapro_300i.grating[ gn ].grooves
+                                          + ( gn % 3 ) * INIT_OFFSET ) );
 
-	buf = get_string( "%ld INIT-GRATING", gn + 1 );
+    buf = get_string( "%ld INIT-GRATING", gn + 1 );
 
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_send( buf );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( buf );
+        RETHROW( );
+    }
 
-	T_free( buf );
-	buf = get_string( "%.3f INIT-WAVELENGTH",
-					  1.0e9 * spectrapro_300i.wavelength );
+    T_free( buf );
+    buf = get_string( "%.3f INIT-WAVELENGTH",
+                      1.0e9 * spectrapro_300i.wavelength );
 
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_send( buf );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( buf );
+        RETHROW( );
+    }
 
-	T_free( buf );
-	buf = get_string( "%ld %ld INIT-SP300-OFFSET", offset, gn );
+    T_free( buf );
+    buf = get_string( "%ld %ld INIT-SP300-OFFSET", offset, gn );
 
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_send( buf );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( buf );
+        RETHROW( );
+    }
 
-	T_free( buf );
-	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
-	T_free( buf );
+    T_free( buf );
+    buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
+    T_free( buf );
 }
 
 
@@ -755,41 +755,41 @@ void spectrapro_300i_set_offset( long gn,
 
 long spectrapro_300i_get_adjust( long gn )
 {
-	const char *reply;
-	char *sp, *nsp;
-	long gadjust = 0;
-	long i;
+    const char *reply;
+    char *sp, *nsp;
+    long gadjust = 0;
+    long i;
 
 
-	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
+    fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
 
-	reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096 );
+    reply = spectrapro_300i_talk( "MONO-EESTATUS", 4096 );
 
-	if ( ( sp = strstr( reply, "adjust" ) ) == NULL )
-	{
-		T_free( ( void * ) reply );
-		spectrapro_300i_comm_fail( );
-	}
+    if ( ( sp = strstr( reply, "adjust" ) ) == NULL )
+    {
+        T_free( ( void * ) reply );
+        spectrapro_300i_comm_fail( );
+    }
 
-	sp += strlen( "adjust" );
+    sp += strlen( "adjust" );
 
-	for ( i = 0; i <= gn; i++ )
-	{
-		gadjust = strtol( sp, &nsp, 10 );
-		if ( sp == nsp ||
-			 ( ( gadjust == LONG_MIN || gadjust == LONG_MAX ) &&
-			   errno == ERANGE ) )
-		{
-			T_free( ( void * ) reply );
-			spectrapro_300i_comm_fail( );
-		}
-		sp = nsp;
-	}
+    for ( i = 0; i <= gn; i++ )
+    {
+        gadjust = strtol( sp, &nsp, 10 );
+        if ( sp == nsp ||
+             ( ( gadjust == LONG_MIN || gadjust == LONG_MAX ) &&
+               errno == ERANGE ) )
+        {
+            T_free( ( void * ) reply );
+            spectrapro_300i_comm_fail( );
+        }
+        sp = nsp;
+    }
 
-	T_free( ( void * ) reply );
-	return gadjust;
+    T_free( ( void * ) reply );
+    return gadjust;
 }
-	
+    
 
 /*-------------------------------------------------------------------*
  * Function sets a new grating adjust value for one of the gratings,
@@ -799,63 +799,63 @@ long spectrapro_300i_get_adjust( long gn )
  *-------------------------------------------------------------------*/
 
 void spectrapro_300i_set_adjust( long gn,
-								 long adjust )
+                                 long adjust )
 {
-	char *buf;
+    char *buf;
 
 
-	CLOBBER_PROTECT( buf );
-	CLOBBER_PROTECT( gn );
+    CLOBBER_PROTECT( buf );
+    CLOBBER_PROTECT( gn );
 
-	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
-	fsc2_assert( spectrapro_300i.grating[ gn ].is_installed );
-	fsc2_assert ( labs( adjust - INIT_ADJUST ) <= INIT_ADJUST_RANGE );
+    fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
+    fsc2_assert( spectrapro_300i.grating[ gn ].is_installed );
+    fsc2_assert ( labs( adjust - INIT_ADJUST ) <= INIT_ADJUST_RANGE );
 
-	buf = get_string( "%ld INIT-GRATING", gn + 1 );
+    buf = get_string( "%ld INIT-GRATING", gn + 1 );
 
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_send( buf );
+        T_free( buf );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( buf );
+        RETHROW( );
+    }
 
-	buf = get_string( "%.3f INIT-WAVELENGTH",
-					  1.0e9 * spectrapro_300i.wavelength );
+    buf = get_string( "%.3f INIT-WAVELENGTH",
+                      1.0e9 * spectrapro_300i.wavelength );
 
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_send( buf );
+        T_free( buf );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( buf );
+        RETHROW( );
+    }
 
-	buf = get_string( "%ld %ld INIT-SP300-GADJUST", adjust, gn );
+    buf = get_string( "%ld %ld INIT-SP300-GADJUST", adjust, gn );
 
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_send( buf );
+        T_free( buf );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( buf );
+        RETHROW( );
+    }
 
-	buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
-	T_free( buf );
+    buf = spectrapro_300i_talk( "MONO-RESET", 4096 );
+    T_free( buf );
 }
 
 
@@ -865,26 +865,26 @@ void spectrapro_300i_set_adjust( long gn,
  *-------------------------------------------------------*/
 
 void spectrapro_300i_install_grating( long         gn,
-									  const char * part_no )
+                                      const char * part_no )
 {
-	char *buf;
+    char *buf;
 
 
-	fsc2_assert( gn >= 1 && gn <= MAX_GRATINGS );
+    fsc2_assert( gn >= 1 && gn <= MAX_GRATINGS );
 
-	buf = get_string( "%s %ld INSTALL", part_no, gn + 1 );
+    buf = get_string( "%s %ld INSTALL", part_no, gn + 1 );
 
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_send( buf );
+        T_free( buf );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( buf );
+        RETHROW( );
+    }
 }
 
 
@@ -895,24 +895,24 @@ void spectrapro_300i_install_grating( long         gn,
 
 void spectrapro_300i_uninstall_grating( long gn )
 {
-	char *buf;
+    char *buf;
 
 
-	fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
+    fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
 
-	buf = get_string( "%ld UNINSTALL", gn + 1 );
+    buf = get_string( "%ld UNINSTALL", gn + 1 );
 
-	TRY
-	{
-		spectrapro_300i_send( buf );
-		T_free( buf );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( buf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_send( buf );
+        T_free( buf );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( buf );
+        RETHROW( );
+    }
 }
 
 
@@ -923,42 +923,42 @@ void spectrapro_300i_uninstall_grating( long gn )
 
 void spectrapro_300i_send( const char * buf )
 {
-	char *lbuf;
-	size_t len;
-	char reply[ 5 ];
+    char *lbuf;
+    size_t len;
+    char reply[ 5 ];
 
 
-	fsc2_assert( buf != NULL && *buf != '\0' );
+    fsc2_assert( buf != NULL && *buf != '\0' );
 
-	lbuf = get_string( "%s\r", buf );
-	len = strlen( lbuf );
+    lbuf = get_string( "%s\r", buf );
+    len = strlen( lbuf );
 
-	if ( ! spectrapro_300i_comm( SERIAL_WRITE, lbuf ) )
-	{
-		T_free( lbuf );
-		spectrapro_300i_comm_fail( );
-	}
+    if ( ! spectrapro_300i_comm( SERIAL_WRITE, lbuf ) )
+    {
+        T_free( lbuf );
+        spectrapro_300i_comm_fail( );
+    }
 
-	/* The device always echos the command, we got to get rid of the echo */
+    /* The device always echos the command, we got to get rid of the echo */
 
-	TRY
-	{
-		spectrapro_300i_read( lbuf, &len );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( lbuf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_read( lbuf, &len );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( lbuf );
+        RETHROW( );
+    }
 
-	T_free( lbuf );
+    T_free( lbuf );
 
-	/* Read the string returned by the device indicating success */
+    /* Read the string returned by the device indicating success */
 
-	len = 5;
-	if ( ! spectrapro_300i_read( reply, &len ) )
-		spectrapro_300i_comm_fail( );
+    len = 5;
+    if ( ! spectrapro_300i_read( reply, &len ) )
+        spectrapro_300i_comm_fail( );
 }
 
 
@@ -996,98 +996,98 @@ void spectrapro_300i_send( const char * buf )
  *-----------------------------------------------------------------------*/
 
 static bool spectrapro_300i_read( char *   buf,
-								  size_t * len )
+                                  size_t * len )
 {
-	size_t to_fetch = *len;
-	size_t already_read = 0;
-	char *lbuf;
-	long llen = *len;
-	bool done = UNSET;
+    size_t to_fetch = *len;
+    size_t already_read = 0;
+    char *lbuf;
+    long llen = *len;
+    bool done = UNSET;
 
 
-	CLOBBER_PROTECT( done );
-	CLOBBER_PROTECT( to_fetch );
-	CLOBBER_PROTECT( already_read );
+    CLOBBER_PROTECT( done );
+    CLOBBER_PROTECT( to_fetch );
+    CLOBBER_PROTECT( already_read );
 
-	lbuf = CHAR_P T_malloc( llen );
+    lbuf = CHAR_P T_malloc( llen );
 
-	do
-	{
-		llen = to_fetch;
-		if ( ! spectrapro_300i_comm( SERIAL_READ, buf + already_read, &llen ) )
-		{
-			T_free( lbuf );
-			spectrapro_300i_comm_fail( );
-		}
+    do
+    {
+        llen = to_fetch;
+        if ( ! spectrapro_300i_comm( SERIAL_READ, buf + already_read, &llen ) )
+        {
+            T_free( lbuf );
+            spectrapro_300i_comm_fail( );
+        }
 
-		/* Device didn't send anything yet then try again. */
+        /* Device didn't send anything yet then try again. */
 
-		if ( llen == 0 )
-			goto read_retry;
+        if ( llen == 0 )
+            goto read_retry;
 
-		already_read += llen;
-		to_fetch -= llen;
+        already_read += llen;
+        to_fetch -= llen;
 
-		/* No end marker can have been read yet */
+        /* No end marker can have been read yet */
 
-		if ( already_read < 3 )
-		{
-			if ( to_fetch == 0 )
-				break;
-			goto read_retry;
-		}
+        if ( already_read < 3 )
+        {
+            if ( to_fetch == 0 )
+                break;
+            goto read_retry;
+        }
 
-		/* Throw exception if device did signal an invalid command */
+        /* Throw exception if device did signal an invalid command */
 
-		if ( ! strncmp( buf + already_read - 3, "?\r\n", 3 ) )
-		{
-			T_free( lbuf );
-			spectrapro_300i_comm_fail( );
-		}
+        if ( ! strncmp( buf + already_read - 3, "?\r\n", 3 ) )
+        {
+            T_free( lbuf );
+            spectrapro_300i_comm_fail( );
+        }
 
-		/* No end marker indicating success can have been read yet */
+        /* No end marker indicating success can have been read yet */
 
-		if ( already_read < 4 )
-		{
-			if ( to_fetch == 0 )
-				break;
-			goto read_retry;
-		}
+        if ( already_read < 4 )
+        {
+            if ( to_fetch == 0 )
+                break;
+            goto read_retry;
+        }
 
-		/* Check if we got an indicator saying that everything the device is
-		   going to write has already been sent successfully - if yes replace
-		   the indicator by a '\0' character and break from the loop */
+        /* Check if we got an indicator saying that everything the device is
+           going to write has already been sent successfully - if yes replace
+           the indicator by a '\0' character and break from the loop */
 
-		if ( ! strncmp( buf + already_read - 4, "ok\r\n", 4 ) )
-		{
-			already_read -= 4;
-			if ( already_read > 0 && buf[ already_read - 1 ] == ' ' )
-				already_read--;
-			buf[ already_read ] = '\0';
-			done = SET;
-			break;
-		}
+        if ( ! strncmp( buf + already_read - 4, "ok\r\n", 4 ) )
+        {
+            already_read -= 4;
+            if ( already_read > 0 && buf[ already_read - 1 ] == ' ' )
+                already_read--;
+            buf[ already_read ] = '\0';
+            done = SET;
+            break;
+        }
 
-		/* When we get here we have to try again reading (more) data. Before
-		   we do we wait a bit and also check if the "Stop" button has been
-		   hit by the user. */
+        /* When we get here we have to try again reading (more) data. Before
+           we do we wait a bit and also check if the "Stop" button has been
+           hit by the user. */
 
-	read_retry:
+    read_retry:
 
-		TRY
-		{		
-			stop_on_user_request( );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( lbuf );
-			RETHROW( );
-		}
-	} while ( to_fetch > 0 );
+        TRY
+        {       
+            stop_on_user_request( );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( lbuf );
+            RETHROW( );
+        }
+    } while ( to_fetch > 0 );
 
-	*len = already_read;
-	return done;
+    *len = already_read;
+    return done;
 }
 
 
@@ -1099,64 +1099,64 @@ static bool spectrapro_300i_read( char *   buf,
  *---------------------------------------------------------------*/
 
 char *spectrapro_300i_talk( const char * buf,
-							size_t       len )
+                            size_t       len )
 {
-	char *lbuf;
-	size_t comm_len;
-	size_t already_read;
+    char *lbuf;
+    size_t comm_len;
+    size_t already_read;
 
 
-	CLOBBER_PROTECT( lbuf );
+    CLOBBER_PROTECT( lbuf );
 
-	fsc2_assert( buf != NULL && *buf != '\0' && len != 0 );
+    fsc2_assert( buf != NULL && *buf != '\0' && len != 0 );
 
-	lbuf = get_string( "%s\r", buf );
-	comm_len = strlen( lbuf );
+    lbuf = get_string( "%s\r", buf );
+    comm_len = strlen( lbuf );
 
-	if ( ! spectrapro_300i_comm( SERIAL_WRITE, lbuf ) )
-	{
-		T_free( lbuf );
-		spectrapro_300i_comm_fail( );
-	}
+    if ( ! spectrapro_300i_comm( SERIAL_WRITE, lbuf ) )
+    {
+        T_free( lbuf );
+        spectrapro_300i_comm_fail( );
+    }
 
-	/* The device always echos the command, we got to get rid of this echo. */
+    /* The device always echos the command, we got to get rid of this echo. */
 
-	TRY
-	{
-		spectrapro_300i_read( lbuf, &comm_len );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( lbuf );
-		RETHROW( );
-	}
+    TRY
+    {
+        spectrapro_300i_read( lbuf, &comm_len );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( lbuf );
+        RETHROW( );
+    }
 
-	/* Now we read the reply by the device, if necessary extending the
-	   buffer. */
+    /* Now we read the reply by the device, if necessary extending the
+       buffer. */
 
-	TRY
-	{
-		already_read = 0;
-		len += 5;
-		lbuf = CHAR_P T_realloc( lbuf, len );
+    TRY
+    {
+        already_read = 0;
+        len += 5;
+        lbuf = CHAR_P T_realloc( lbuf, len );
 
-		while ( ! spectrapro_300i_read( lbuf + already_read, &len ) )
-		{
-			lbuf = CHAR_P realloc( lbuf, 2 * len + 5 );
-			already_read += len;
-		}
-		already_read += len;
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		T_free( lbuf );
-		RETHROW( );
-	}
+        while ( ! spectrapro_300i_read( lbuf + already_read, &len ) )
+        {
+            lbuf = CHAR_P realloc( lbuf, 2 * len + 5 );
+            already_read += len;
+        }
+        already_read += len;
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( lbuf );
+        RETHROW( );
+    }
 
-	T_realloc( lbuf, already_read + 1 );
-	return lbuf;
+    T_realloc( lbuf, already_read + 1 );
+    return lbuf;
 }
 
 
@@ -1166,78 +1166,78 @@ char *spectrapro_300i_talk( const char * buf,
  *-----------------------------------------------------------------*/
 
 static bool spectrapro_300i_comm( int type,
-								  ... )
+                                  ... )
 {
-	va_list ap;
-	char *buf;
-	ssize_t len;
-	size_t *lptr;
+    va_list ap;
+    char *buf;
+    ssize_t len;
+    size_t *lptr;
 
 
-	switch ( type )
-	{
-		case SERIAL_INIT :               /* open and initialize serial port */
-			/* We need exclussive access to the serial port and we also need
-			   non-blocking mode to avoid hanging indefinitely if the other
-			   side does not react. O_NOCTTY is set because the serial port
-			   should not become the controlling terminal, otherwise line
-			   noise read as CTRL-C might kill the program. */
+    switch ( type )
+    {
+        case SERIAL_INIT :               /* open and initialize serial port */
+            /* We need exclussive access to the serial port and we also need
+               non-blocking mode to avoid hanging indefinitely if the other
+               side does not react. O_NOCTTY is set because the serial port
+               should not become the controlling terminal, otherwise line
+               noise read as CTRL-C might kill the program. */
 
-			if ( ( spectrapro_300i.tio =
-						fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
-						  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
-				return FAIL;
+            if ( ( spectrapro_300i.tio =
+                        fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+                          O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+                return FAIL;
 
-			/* Set transfer mode to 8 bit, no parity and 1 stop bit (8N1)
-			   and ignore control lines, don't use flow control. */
+            /* Set transfer mode to 8 bit, no parity and 1 stop bit (8N1)
+               and ignore control lines, don't use flow control. */
 
-			spectrapro_300i.tio->c_cflag = 0;
-			spectrapro_300i.tio->c_cflag = CLOCAL | CREAD | CS8;
-			spectrapro_300i.tio->c_iflag = IGNBRK;
-			spectrapro_300i.tio->c_oflag = 0;
-			spectrapro_300i.tio->c_lflag = 0;
-			cfsetispeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
-			cfsetospeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
+            spectrapro_300i.tio->c_cflag = 0;
+            spectrapro_300i.tio->c_cflag = CLOCAL | CREAD | CS8;
+            spectrapro_300i.tio->c_iflag = IGNBRK;
+            spectrapro_300i.tio->c_oflag = 0;
+            spectrapro_300i.tio->c_lflag = 0;
+            cfsetispeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
+            cfsetospeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
 
-			fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
-			fsc2_tcsetattr( SERIAL_PORT, TCSANOW, spectrapro_300i.tio );
-			break;
+            fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
+            fsc2_tcsetattr( SERIAL_PORT, TCSANOW, spectrapro_300i.tio );
+            break;
 
-		case SERIAL_EXIT :                    /* reset and close serial port */
-			fsc2_serial_close( SERIAL_PORT );
-			break;
+        case SERIAL_EXIT :                    /* reset and close serial port */
+            fsc2_serial_close( SERIAL_PORT );
+            break;
 
-		case SERIAL_WRITE :
-			va_start( ap, type );
-			buf = va_arg( ap, char * );
-			va_end( ap );
+        case SERIAL_WRITE :
+            va_start( ap, type );
+            buf = va_arg( ap, char * );
+            va_end( ap );
 
-			len = strlen( buf );
-			if ( fsc2_serial_write( SERIAL_PORT, buf, len, 0, UNSET ) != len )
-				return FAIL;
-			break;
+            len = strlen( buf );
+            if ( fsc2_serial_write( SERIAL_PORT, buf, len, 0, UNSET ) != len )
+                return FAIL;
+            break;
 
-		case SERIAL_READ :
-			va_start( ap, type );
-			buf = va_arg( ap, char * );
-			lptr = va_arg( ap, size_t * );
-			va_end( ap );
+        case SERIAL_READ :
+            va_start( ap, type );
+            buf = va_arg( ap, char * );
+            lptr = va_arg( ap, size_t * );
+            va_end( ap );
 
-			len = fsc2_serial_read( SERIAL_PORT, buf, *lptr,
-									SPECTRAPRO_300I_WAIT, UNSET );
-			if ( len < 0 )
-				return FAIL;
-			else
-				*lptr = len;
-			break;
+            len = fsc2_serial_read( SERIAL_PORT, buf, *lptr,
+                                    SPECTRAPRO_300I_WAIT, UNSET );
+            if ( len < 0 )
+                return FAIL;
+            else
+                *lptr = len;
+            break;
 
-		default :
-			print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
-				   __FILE__, __LINE__ );
-			THROW( EXCEPTION );
-	}
+        default :
+            print( FATAL, "INTERNAL ERROR detected at %s:%d.\n",
+                   __FILE__, __LINE__ );
+            THROW( EXCEPTION );
+    }
 
-	return OK;
+    return OK;
 }
 
 
@@ -1247,8 +1247,8 @@ static bool spectrapro_300i_comm( int type,
 
 double spectrapro_300i_wl2wn( double wl )
 {
-	fsc2_assert( wl > 0 );
-	return 0.01 / wl;
+    fsc2_assert( wl > 0 );
+    return 0.01 / wl;
 }
 
 
@@ -1258,8 +1258,8 @@ double spectrapro_300i_wl2wn( double wl )
 
 double spectrapro_300i_wn2wl( double wn )
 {
-	fsc2_assert( wn > 0 );
-	return 0.01 / wn;
+    fsc2_assert( wn > 0 );
+    return 0.01 / wn;
 }
 
 
@@ -1269,13 +1269,15 @@ double spectrapro_300i_wn2wl( double wn )
 
 static void spectrapro_300i_comm_fail( void )
 {
-	print( FATAL, "Can't access the monochromator.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Can't access the monochromator.\n" );
+    THROW( EXCEPTION );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

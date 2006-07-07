@@ -86,9 +86,9 @@
 
 #define NEEDS_UPDATE( p ) ( ( ( p )->is_active ^ ( p )->was_active ) || \
                             ( ( p )->is_old_pos &&                      \
-							  ( p )->old_pos != ( p )->pos )         || \
+                              ( p )->old_pos != ( p )->pos )         || \
                             ( ( p )->is_old_len &&                      \
-							  ( p )->old_len != ( p )->len ) )
+                              ( p )->old_len != ( p )->len ) )
 
 
 /* typedefs of structures needed in the module */
@@ -103,189 +103,189 @@ typedef struct DG2020 DG2020_T;
 
 
 struct PHS {                   /* needed in phase setup */
-	int var[ 4 ][ 2 ];
-	bool is_var[ 4 ][ 2 ];
+    int var[ 4 ][ 2 ];
+    bool is_var[ 4 ][ 2 ];
 };
 
 
 struct Function {
-	int self;                  /* the functions number */
-	const char *name;
+    int self;                  /* the functions number */
+    const char *name;
 
-	bool is_used;              /* set if the function has been declared in
-								  the ASSIGNMENTS section */
-	bool is_needed;            /* set if the function has been assigned
-								  pulses */
+    bool is_used;              /* set if the function has been declared in
+                                  the ASSIGNMENTS section */
+    bool is_needed;            /* set if the function has been assigned
+                                  pulses */
 
-	Pod_T *pod;                /* points to the pod assigned to the function */
-	Pod_T *pod2;               /* points to the second pod assigned to the
-								  function (phase functions only) */
-	PHS_T phs;                 /* phase functions only: how to translate
-								  phases to pod outputs */
-	bool is_phs;
+    Pod_T *pod;                /* points to the pod assigned to the function */
+    Pod_T *pod2;               /* points to the second pod assigned to the
+                                  function (phase functions only) */
+    PHS_T phs;                 /* phase functions only: how to translate
+                                  phases to pod outputs */
+    bool is_phs;
 
-	int num_channels;          /* number of channels assigned to function */
-	int num_needed_channels;   /* number of channels really needed */
-	Channel_T *channel[ MAX_CHANNELS ];
+    int num_channels;          /* number of channels assigned to function */
+    int num_needed_channels;   /* number of channels really needed */
+    Channel_T *channel[ MAX_CHANNELS ];
 
-	int num_pulses;            /* number of pulses assigned to the function */
-	int num_active_pulses;     /* number of pulses currently in use */
-	Pulse_T **pulses;          /* list of pulse pointers */
+    int num_pulses;            /* number of pulses assigned to the function */
+    int num_active_pulses;     /* number of pulses currently in use */
+    Pulse_T **pulses;          /* list of pulse pointers */
 
-	bool needs_phases;         /* set if phase cycling is needed */
-	int next_phase;
+    bool needs_phases;         /* set if phase cycling is needed */
+    int next_phase;
 
-	Function_T *phase_func;    /* for phase functions here is stored which
-								  function it's going to take care of while
-								  for normal functions it's a pointer to the
-								  phase function responsible for it. */
-	Ticks psd;                 /* delay due to phase switches (only needed */
-	bool is_psd;               /* for the phase functions) */
+    Function_T *phase_func;    /* for phase functions here is stored which
+                                  function it's going to take care of while
+                                  for normal functions it's a pointer to the
+                                  phase function responsible for it. */
+    Ticks psd;                 /* delay due to phase switches (only needed */
+    bool is_psd;               /* for the phase functions) */
 
-	long max_seq_len;          /* maximum length of the pulse sequence */
+    long max_seq_len;          /* maximum length of the pulse sequence */
 
-	bool is_inverted;          /* set if polarity is inverted */
+    bool is_inverted;          /* set if polarity is inverted */
 
-	Ticks delay;               /* delay for the function/pod combination */
-	bool is_delay;
+    Ticks delay;               /* delay for the function/pod combination */
+    bool is_delay;
 
-	double high_level;         /* high and low voltage levels for the pod(s) */
-	double low_level;          /* associated with the fucntion */
+    double high_level;         /* high and low voltage levels for the pod(s) */
+    double low_level;          /* associated with the fucntion */
 
-	bool is_high_level;
-	bool is_low_level;
+    bool is_high_level;
+    bool is_low_level;
 
 };
 
 
 struct Pod {
-	int self;
-	Function_T *function;
+    int self;
+    Function_T *function;
 };
 
 
 struct Channel {
-	int self;
-	Function_T *function;
+    int self;
+    Function_T *function;
 };
 
 
 struct Pulse {
-	long num;                /* number of the pulse (pulses used for realize
-								phase cycling have negative, normal pulses
-								positive numbers */
-	bool is_active;          /* set if the pulse is really used */
-	bool was_active;
-	bool has_been_active;    /* used to find useless pulses */
+    long num;                /* number of the pulse (pulses used for realize
+                                phase cycling have negative, normal pulses
+                                positive numbers */
+    bool is_active;          /* set if the pulse is really used */
+    bool was_active;
+    bool has_been_active;    /* used to find useless pulses */
 
-	Pulse_T *next;
-	Pulse_T *prev;
+    Pulse_T *next;
+    Pulse_T *prev;
 
-	Function_T *function;    /* function the pulse is associated with */
+    Function_T *function;    /* function the pulse is associated with */
 
-	Ticks pos;               /* current position, length, position change */
-	Ticks len;               /* and length change of pulse (in units of the */
-	Ticks dpos;              /* pulsers time base) */
-	Ticks dlen;
+    Ticks pos;               /* current position, length, position change */
+    Ticks len;               /* and length change of pulse (in units of the */
+    Ticks dpos;              /* pulsers time base) */
+    Ticks dlen;
 
-	Phs_Seq_T *pc;           /* the pulse sequence to be used for the pulse
-								(or NULL if none is to be used) */
+    Phs_Seq_T *pc;           /* the pulse sequence to be used for the pulse
+                                (or NULL if none is to be used) */
 
-	bool is_function;        /* flags that are set when the corresponding */
-	bool is_pos;             /* property has been set */
-	bool is_len;
-	bool is_dpos;
-	bool is_dlen;
+    bool is_function;        /* flags that are set when the corresponding */
+    bool is_pos;             /* property has been set */
+    bool is_len;
+    bool is_dpos;
+    bool is_dlen;
 
-	Ticks initial_pos;       /* position, length, position change and length */
-	Ticks initial_len;       /* change at the start of the experiment */
-	Ticks initial_dpos;
-	Ticks initial_dlen;
+    Ticks initial_pos;       /* position, length, position change and length */
+    Ticks initial_len;       /* change at the start of the experiment */
+    Ticks initial_dpos;
+    Ticks initial_dlen;
 
-	bool initial_is_pos;     /* property has initially been set */
-	bool initial_is_len;
-	bool initial_is_dpos;
-	bool initial_is_dlen;
+    bool initial_is_pos;     /* property has initially been set */
+    bool initial_is_len;
+    bool initial_is_dpos;
+    bool initial_is_dlen;
 
-	Ticks old_pos;           /* position and length of pulse before a change */
-	Ticks old_len;           /* is applied */
+    Ticks old_pos;           /* position and length of pulse before a change */
+    Ticks old_len;           /* is applied */
 
-	bool is_old_pos;
-	bool is_old_len;
+    bool is_old_pos;
+    bool is_old_len;
 
-	Channel_T *channel;      /* channel the pulse belongs to - only needed
-								for phase pulses */
+    Channel_T *channel;      /* channel the pulse belongs to - only needed
+                                for phase pulses */
 
-	Pulse_T *for_pulse;      /* only for phase cycling pulses: the pulse the
-								phase cycling pulse is used for */
+    Pulse_T *for_pulse;      /* only for phase cycling pulses: the pulse the
+                                phase cycling pulse is used for */
 
-	bool needs_update;       /* set if the pulses properties have been changed
-								in test run or experiment */
+    bool needs_update;       /* set if the pulses properties have been changed
+                                in test run or experiment */
 };
 
 
 struct Block {
-	bool is_used;
-	char blk_name[ 9 ];
-	Ticks start;
-	long repeat;
+    bool is_used;
+    char blk_name[ 9 ];
+    Ticks start;
+    long repeat;
 };
 
 
 struct DG2020 {
-	int device;              /* GPIB number of the device */
+    int device;              /* GPIB number of the device */
 
-	bool is_needed;
-	bool in_setup;
+    bool is_needed;
+    bool in_setup;
 
-	Pulse_T *pulses;
-	PHS_T phs[ 2 ];
+    Pulse_T *pulses;
+    PHS_T phs[ 2 ];
 
-	double timebase;         /* time base of the digitizer */
-	bool is_timebase;
+    double timebase;         /* time base of the digitizer */
+    bool is_timebase;
 
-	long phase_numbers[ 2 ];
+    long phase_numbers[ 2 ];
 
-	int trig_in_mode;        /* EXTERNAL or INTERNAL */
-	int trig_in_slope;       /* only in EXTERNAL mode */
-	double trig_in_level;    /* only in EXTERNAL mode */
-	int trig_in_impedance;   /* only in EXTERNAL mode */
-	Ticks repeat_time;       /* only in INTERNAL mode */
+    int trig_in_mode;        /* EXTERNAL or INTERNAL */
+    int trig_in_slope;       /* only in EXTERNAL mode */
+    double trig_in_level;    /* only in EXTERNAL mode */
+    int trig_in_impedance;   /* only in EXTERNAL mode */
+    Ticks repeat_time;       /* only in INTERNAL mode */
 
-	bool keep_all;           /* keep even unused pulses ? */
+    bool keep_all;           /* keep even unused pulses ? */
 
-	bool is_trig_in_mode;
-	bool is_trig_in_slope;
-	bool is_trig_in_level;
-	bool is_trig_in_impedance;
-	bool is_repeat_time;
+    bool is_trig_in_mode;
+    bool is_trig_in_slope;
+    bool is_trig_in_level;
+    bool is_trig_in_impedance;
+    bool is_repeat_time;
 
-	Ticks neg_delay;
-	bool is_neg_delay;       /* if any of the functions has a negative delay */
+    Ticks neg_delay;
+    bool is_neg_delay;       /* if any of the functions has a negative delay */
 
-	long max_seq_len;        /* maximum length of all pulse sequences */
-	bool is_max_seq_len;
+    long max_seq_len;        /* maximum length of all pulse sequences */
+    bool is_max_seq_len;
 
-	Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
-	Pod_T pod[ NUM_PODS ];
-	Channel_T channel[ MAX_CHANNELS ];
+    Function_T function[ PULSER_CHANNEL_NUM_FUNC ];
+    Pod_T pod[ NUM_PODS ];
+    Channel_T channel[ MAX_CHANNELS ];
 
-	int needed_channels;     /* number of channels that are going to be needed
-								for the experiment */
+    int needed_channels;     /* number of channels that are going to be needed
+                                for the experiment */
 
-	bool needs_update;       /* set if pulse properties have been changed in
-								test run or experiment */
-	bool is_running;         /* set if the pulser is in run mode */
+    bool needs_update;       /* set if pulse properties have been changed in
+                                test run or experiment */
+    bool is_running;         /* set if the pulser is in run mode */
 
-	Block_T block[ 2 ];      /* blocks needed for padding */
+    Block_T block[ 2 ];      /* blocks needed for padding */
 
-	Ticks mem_size;          /* size of the complete sequence, i.e. including
-								the memory needed for padding */
-	bool is_grace_period;
-	Ticks grace_period;
+    Ticks mem_size;          /* size of the complete sequence, i.e. including
+                                the memory needed for padding */
+    bool is_grace_period;
+    Ticks grace_period;
 
-	FILE *show_file;
-	FILE *dump_file;
+    FILE *show_file;
+    FILE *dump_file;
 };
 
 
@@ -328,21 +328,21 @@ Var_T *pulser_command(                Var_T * /* v */ );
 bool dg2020_store_timebase( double /* timebase */ );
 
 bool dg2020_assign_function( int  /* function */,
-							 long /* pod      */ );
+                             long /* pod      */ );
 
 bool dg2020_assign_channel_to_function( int  /* function */, 
-										long /* channel  */ );
+                                        long /* channel  */ );
 
 bool dg2020_invert_function( int /* function */ );
 
 bool dg2020_set_function_delay( int    /* function */,
-								double /* delay    */ );
+                                double /* delay    */ );
 
 bool dg2020_set_function_high_level( int    /* function */,
-									 double /* voltage  */ );
+                                     double /* voltage  */ );
 
 bool dg2020_set_function_low_level( int    /* function */,
-									double /* voltage  */ );
+                                    double /* voltage  */ );
 
 bool dg2020_set_trigger_mode( int /* mode */ );
 
@@ -357,20 +357,20 @@ bool dg2020_set_repeat_time( double /* rep_time */ );
 bool dg2020_set_max_seq_len( double /* seq_len */ );
 
 bool dg2020_set_phase_reference( int /* phase    */,
-								 int /* function */ );
+                                 int /* function */ );
 
 bool dg2020_phase_setup_prep( int  /* func */,
-							  int  /* type */,
-							  int  /* pod  */,
-							  long /* val  */ );
+                              int  /* type */,
+                              int  /* pod  */,
+                              long /* val  */ );
 
 bool dg2020_phase_setup( int /* func */ );
 
 bool dg2020_phase_setup_finalize( int   /* func  */,
-								  PHS_T /* p_phs */ );
+                                  PHS_T /* p_phs */ );
 
 bool dg2020_set_phase_switch_delay( int    /* func     */,
-									double /* del_time */ );
+                                    double /* del_time */ );
 
 bool dg2020_set_grace_period( double /* gp_time */ );
 
@@ -382,54 +382,54 @@ bool dg2020_keep_all( void );
 bool dg2020_new_pulse( long /* pnum */ );
 
 bool dg2020_set_pulse_function( long /* pnum     */,
-								int  /* function */ );
+                                int  /* function */ );
 
 bool dg2020_set_pulse_position( long   /* pnum   */,
-								double /* p_time */ );
+                                double /* p_time */ );
 
 bool dg2020_set_pulse_length( long   /* pnum   */,
-							  double /* p_time */ );
+                              double /* p_time */ );
 
 bool dg2020_set_pulse_position_change( long   /* pnum   */,
-									   double /* p_time */ );
+                                       double /* p_time */ );
 
 bool dg2020_set_pulse_length_change( long   /* pnum   */,
-									 double /* p_time */ );
+                                     double /* p_time */ );
 
 bool dg2020_set_pulse_phase_cycle( long /* pnum  */,
-								   long /* cycle */ );
+                                   long /* cycle */ );
 
 
 bool dg2020_get_pulse_function( long  /* pnum     */,
-								int * /* function */ );
+                                int * /* function */ );
 
 bool dg2020_get_pulse_position( long     /* pnum   */,
-								double * /* p_time */ );
+                                double * /* p_time */ );
 
 bool dg2020_get_pulse_length( long     /* pnum   */,
-							  double * /* p_time */ );
+                              double * /* p_time */ );
 
 bool dg2020_get_pulse_position_change( long     /* pnum   */,
-									   double * /* p_time */ );
+                                       double * /* p_time */ );
 
 bool dg2020_get_pulse_length_change( long     /* pnum   */,
-									 double * /* p_time */ );
+                                     double * /* p_time */ );
 
 bool dg2020_get_pulse_phase_cycle( long   /* pnum  */,
-								   long * /* cycle */ );
+                                   long * /* cycle */ );
 
 
 bool dg2020_change_pulse_position( long   /* pnum   */,
-								   double /* p_time */ );
+                                   double /* p_time */ );
 
 bool dg2020_change_pulse_length( long   /* pnum   */,
-								 double /* p_time */ );
+                                 double /* p_time */ );
 
 bool dg2020_change_pulse_position_change( long   /* pnum   */,
-										  double /* p_time */ );
+                                          double /* p_time */ );
 
 bool dg2020_change_pulse_length_change( long   /* pnum   */,
-										double /* p_time */ );
+                                        double /* p_time */ );
 
 
 /* Here come the functions from dg2020_util_f.c */
@@ -439,7 +439,7 @@ Ticks dg2020_double2ticks( double /* p_time */ );
 double dg2020_ticks2double( Ticks /* ticks */ );
 
 void dg2020_check_pod_level_diff( double /* high */,
-								  double /* low  */ );
+                                  double /* low  */ );
 
 Pulse_T *dg2020_get_pulse( long /* pnum */ );
 
@@ -450,34 +450,34 @@ const char *dg2020_pticks( Ticks /* ticks */ );
 Channel_T *dg2020_get_next_free_channel( void );
 
 int dg2020_start_compare( const void * /* A */,
-						  const void * /* B */ );
+                          const void * /* B */ );
 
 bool dg2020_find_phase_pulse( Pulse_T *   /* p   */,
-							  Pulse_T *** /* pl  */,
-							  int *       /* num */ );
+                              Pulse_T *** /* pl  */,
+                              int *       /* num */ );
 
 int dg2020_get_phase_pulse_list( Function_T * /* f       */,
-								 Channel_T *  /* channel */,
-								 Pulse_T ***  /* list    */ );
+                                 Channel_T *  /* channel */,
+                                 Pulse_T ***  /* list    */ );
 
 Ticks dg2020_get_max_seq_len( void );
 
 void dg2020_calc_padding( void );
 
 bool dg2020_prep_cmd( char ** /* cmd     */,
-					  int     /* channel */,
-					  Ticks   /* address */,
-					  Ticks   /* length  */ );
+                      int     /* channel */,
+                      Ticks   /* address */,
+                      Ticks   /* length  */ );
 
 void dg2020_set( char * /* arena  */,
-				 Ticks  /* start  */,
-				 Ticks  /* len    */,
-				 Ticks  /* offset */ );
+                 Ticks  /* start  */,
+                 Ticks  /* len    */,
+                 Ticks  /* offset */ );
 
 int dg2020_diff( char *  /* old_p  */,
-				 char *  /* new_p  */,
-				 Ticks * /* start  */,
-				 Ticks * /* length */ );
+                 char *  /* new_p  */,
+                 Ticks * /* start  */,
+                 Ticks * /* length */ );
 
 void dg2020_dump_channels( FILE * /* fp */ );
 
@@ -500,13 +500,13 @@ void dg2020_full_reset( void );
 Pulse_T *dg2020_delete_pulse( Pulse_T * /* p */ );
 
 void dg2020_reorganize_phases( Function_T * /* f    */,
-							   bool         /* flag */ );
+                               bool         /* flag */ );
 
 void dg2020_recalc_phase_pulse( Function_T * /* f       */,
-								Pulse_T *    /* phase_p */,
-								Pulse_T *    /* p       */,
-								int          /* nth     */,
-								bool         /* flag    */ );
+                                Pulse_T *    /* phase_p */,
+                                Pulse_T *    /* p       */,
+                                int          /* nth     */,
+                                bool         /* flag    */ );
 
 void dg2020_finalize_phase_pulses( int /* func */ );
 
@@ -515,10 +515,10 @@ void dg2020_set_pulses( Function_T * /* f */ );
 void dg2020_set_phase_pulses( Function_T * /* f */ );
 
 void dg2020_commit( Function_T * /* f    */,
-					bool         /* flag */ );
+                    bool         /* flag */ );
 
 void dg2020_commit_phases( Function_T * /* f    */,
-						   bool         /* flag */ );
+                           bool         /* flag */ );
 
 void dg2020_clear_padding_block( Function_T * /* f */ );
 
@@ -534,31 +534,31 @@ bool dg2020_set_timebase( double /* timebase */ );
 bool dg2020_set_memory_size( long /* mem_size */ );
 
 bool dg2020_channel_assign(  int /* channel */,
-							 int /* pod     */ );
+                             int /* pod     */ );
 
 bool dg2020_update_data( void );
 
 bool dg2020_make_blocks( int       /* num_blocks */,
-						 Block_T * /* block      */ );
+                         Block_T * /* block      */ );
 
 bool dg2020_make_seq( int       /* num_blocks */,
-					  Block_T * /* block      */ );
+                      Block_T * /* block      */ );
 
 bool pulser_set_channel( int    /* channel */,
-						 Ticks  /* address */,
-						 Ticks  /* length  */,
-						 char * /* pattern */ );
+                         Ticks  /* address */,
+                         Ticks  /* length  */,
+                         char * /* pattern */ );
 
 bool dg2020_set_constant( int   /* channel */,
-						  Ticks /* address */,
-						  Ticks /* length  */,
-						  int   /* state   */ );
+                          Ticks /* address */,
+                          Ticks /* length  */,
+                          int   /* state   */ );
 
 bool dg2020_set_pod_high_level( int    /* pod     */,
-								double /* voltage */ );
+                                double /* voltage */ );
 
 bool dg2020_set_pod_low_level( int    /* pod     */,
-							   double /* voltage */ );
+                               double /* voltage */ );
 
 bool dg2020_set_trigger_in_level( double /* voltage */ );
 
@@ -581,5 +581,7 @@ long dg2020_ch_to_num( long /* channel */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -136,22 +136,22 @@ extern int seteuid( uid_t /* euid */ );
 extern int setegid( gid_t /* egid */ );
 
 extern int vsnprintf( char *       /* str    */
-					  size_t       /* size   */,
-					  const char * /* format */,
-					  va_list      /* ap     */ );
+                      size_t       /* size   */,
+                      const char * /* format */,
+                      va_list      /* ap     */ );
 
 extern int mkstemp( char * /* template */ );
 
 extern int fchmod( int    /* fildes */,
-				   mode_t /* mode   */ );
+                   mode_t /* mode   */ );
 
 extern int snprintf( char *        /* str    */,
-					 size_t        /* size   */,
-					 const  char * /* format */,
-					 ... );
+                     size_t        /* size   */,
+                     const  char * /* format */,
+                     ... );
 
 extern int strcasecmp( const char * /* s1 */,
-					   const char * /* s2 */ );
+                       const char * /* s2 */ );
 
 extern int fileno( FILE * /* stream */ );
 #endif
@@ -161,7 +161,7 @@ extern int fileno( FILE * /* stream */ );
 void clean_up( void );
 
 bool scan_main( const char * /* name */,
-				FILE *       /* fp   */ );
+                FILE *       /* fp   */ );
 
 int  devices_parser( FILE * /* in */ );
 
@@ -198,175 +198,175 @@ typedef struct Communication Communication_T;
 typedef struct GUI_Stuff GUI_Stuff_T;
 
 struct Internals {
-	uid_t EUID;                  /* user and group ID the program got */
-	gid_t EGID;				     /* started with */
+    uid_t EUID;                  /* user and group ID the program got */
+    gid_t EGID;                  /* started with */
 
-	pid_t fsc2_clean_pid;
-	volatile sig_atomic_t fsc2_clean_status_ok;
-	volatile sig_atomic_t fsc2_clean_died;
+    pid_t fsc2_clean_pid;
+    volatile sig_atomic_t fsc2_clean_status_ok;
+    volatile sig_atomic_t fsc2_clean_died;
 
-	pid_t child_pid;             /* pid of child process doing the
+    pid_t child_pid;             /* pid of child process doing the
                                     measurement */
-	pid_t conn_pid;              /* pid of child process for handling
-									communication with scripts */
-	volatile pid_t http_pid;     /* pid of child process that is a http server
-									to allow viewing fsc2's state */
-	int http_port;               /* port the http server is running on */
+    pid_t conn_pid;              /* pid of child process for handling
+                                    communication with scripts */
+    volatile pid_t http_pid;     /* pid of child process that is a http server
+                                    to allow viewing fsc2's state */
+    int http_port;               /* port the http server is running on */
 
-	bool is_linux_i386;          /* set if running Linux on i386 processors */
+    bool is_linux_i386;          /* set if running Linux on i386 processors */
 
-	int cmdline_flags;           /* stores command line options */
+    int cmdline_flags;           /* stores command line options */
 
-	long num_test_runs;          /* number of test runs with '-X' flag */
-	long check_return;           /* result of check run, 1 is ok */
+    long num_test_runs;          /* number of test runs with '-X' flag */
+    long check_return;           /* result of check run, 1 is ok */
 
-	int I_am;                    /* indicates if we're running the parent
-									or the child process (it's either set to
-									PARENT or to CHILD) */
-	int state;
-	int mode;                    /* the mode fsc2 is currently running in,
-									either PREPARATION, TEST or EXPERIMENT */
-	bool in_hook;                /* set while module hook functions are run */
+    int I_am;                    /* indicates if we're running the parent
+                                    or the child process (it's either set to
+                                    PARENT or to CHILD) */
+    int state;
+    int mode;                    /* the mode fsc2 is currently running in,
+                                    either PREPARATION, TEST or EXPERIMENT */
+    bool in_hook;                /* set while module hook functions are run */
 
-	bool exit_hooks_are_run;     /* Set if modules exit hooks have all already
-									been run */
+    bool exit_hooks_are_run;     /* Set if modules exit hooks have all already
+                                    been run */
 
-	void *rsc_handle;            /* handle of the graphics resources library */
+    void *rsc_handle;            /* handle of the graphics resources library */
 
-	/* The following are flags that get set in signal handlers and when set
-	   indicate that certain actions have to be taken the idle callbacks */
+    /* The following are flags that get set in signal handlers and when set
+       indicate that certain actions have to be taken the idle callbacks */
 
-	volatile sig_atomic_t child_is_quitting; /* set when the child is done */
+    volatile sig_atomic_t child_is_quitting; /* set when the child is done */
 
-	volatile sig_atomic_t tb_wait; /* set if the child is waiting for the
-									  change of the state of an object in the
-									  toolbox */
+    volatile sig_atomic_t tb_wait; /* set if the child is waiting for the
+                                      change of the state of an object in the
+                                      toolbox */
 
-	volatile sig_atomic_t http_server_died; /* set when the http server dies */
+    volatile sig_atomic_t http_server_died; /* set when the http server dies */
 
-	volatile sig_atomic_t conn_request; /* set on request from the child
-										   process dealing with external
-										   connections */
-	volatile sig_atomic_t conn_child_replied;
+    volatile sig_atomic_t conn_request; /* set on request from the child
+                                           process dealing with external
+                                           connections */
+    volatile sig_atomic_t conn_child_replied;
 
-	char *title;                 /* string with title of the main window */
-	bool use_def_directory;
-	char *def_directory;         /* default directory for file open dialog */
+    char *title;                 /* string with title of the main window */
+    bool use_def_directory;
+    char *def_directory;         /* default directory for file open dialog */
 };
 
 
 struct EDL_Stuff {
-	long Lc;                     /* line number in currently parsed EDL file */
-	char *in_file;               /* name of input file */
-	char *Fname;                 /* name of currently parsed EDL file */
+    long Lc;                     /* line number in currently parsed EDL file */
+    char *in_file;               /* name of input file */
+    char *Fname;                 /* name of currently parsed EDL file */
 
-	Call_Stack_T *Call_Stack;    /* stack for storing some kind of frame
-									information during nested EDL function
-									calls */
-	Compilation_T compilation;   /* structure with infos about compilation
-									states and errors (see also global.h) */
-	Prg_Token_T *prg_token;      /* array of predigested program tokens */
+    Call_Stack_T *Call_Stack;    /* stack for storing some kind of frame
+                                    information during nested EDL function
+                                    calls */
+    Compilation_T compilation;   /* structure with infos about compilation
+                                    states and errors (see also global.h) */
+    Prg_Token_T *prg_token;      /* array of predigested program tokens */
 
-	long prg_length;             /* number of array elements in predigested
-									program (negative value indicates that
-									there is no EXPERIMENT section, not even
-									an EXPERIMENT label) */
-	Prg_Token_T *cur_prg_token;  /* pointer to the currently handled element in
-									the array of predigested program tokens */
-	long On_Stop_Pos;            /* Index of the ON_STOP command in the array
-									of predigested program tokens (negative
-									value indicates that there is no ON_STOP
-									label) */
-	Var_T *Var_List;             /* list of all user declared EDL variables */
-	Var_T *Var_Stack;            /* Stack of variables used in the evaluation
-									of expressions and function calls */
-	volatile sig_atomic_t do_quit;  /* becomes set when a running EDL program
-									has to be stopped (because STOP button
-									has been pressed) */
-	volatile sig_atomic_t react_to_do_quit;  /* set when program should not
-									react to the STOP button anymore (after the
-									ON_STOP label has been processed) */
-	File_List_T *File_List;      /* list of all files the user opened */
-	int File_List_Len;           /* length of this file list */
+    long prg_length;             /* number of array elements in predigested
+                                    program (negative value indicates that
+                                    there is no EXPERIMENT section, not even
+                                    an EXPERIMENT label) */
+    Prg_Token_T *cur_prg_token;  /* pointer to the currently handled element in
+                                    the array of predigested program tokens */
+    long On_Stop_Pos;            /* Index of the ON_STOP command in the array
+                                    of predigested program tokens (negative
+                                    value indicates that there is no ON_STOP
+                                    label) */
+    Var_T *Var_List;             /* list of all user declared EDL variables */
+    Var_T *Var_Stack;            /* Stack of variables used in the evaluation
+                                    of expressions and function calls */
+    volatile sig_atomic_t do_quit;  /* becomes set when a running EDL program
+                                    has to be stopped (because STOP button
+                                    has been pressed) */
+    volatile sig_atomic_t react_to_do_quit;  /* set when program should not
+                                    react to the STOP button anymore (after the
+                                    ON_STOP label has been processed) */
+    File_List_T *File_List;      /* list of all files the user opened */
+    int File_List_Len;           /* length of this file list */
 
     Device_T *Device_List;
     Device_Name_T *Device_Name_List;
 
     long Num_Pulsers;
 
-	long Cur_Pulse;              /* number of the current pulse during the
-									setup of a pulse in the PREPARATIONS
-									section */
-	double experiment_time;
+    long Cur_Pulse;              /* number of the current pulse during the
+                                    setup of a pulse in the PREPARATIONS
+                                    section */
+    double experiment_time;
 };
 
 
 struct Communication {
-	int pd[ 4 ];                 /* pipe descriptors for measurement child */
-	int conn_pd[ 2 ];            /* pipe for communication child */
-	int http_pd[ 4 ];            /* pipes for HTTP server */
+    int pd[ 4 ];                 /* pipe descriptors for measurement child */
+    int conn_pd[ 2 ];            /* pipe for communication child */
+    int http_pd[ 4 ];            /* pipes for HTTP server */
 
-	int mq_semaphore;            /* semaphore for message queue */
+    int mq_semaphore;            /* semaphore for message queue */
 
-	Message_Queue_T *MQ;         /* the message queue for data send from the
-									child to the parent process */
-	int MQ_ID;                   /* shared memory segment ID of the message
-									queue */
+    Message_Queue_T *MQ;         /* the message queue for data send from the
+                                    child to the parent process */
+    int MQ_ID;                   /* shared memory segment ID of the message
+                                    queue */
 };
 
 
 struct GUI_Stuff {
-	bool is_init;
-	Display *d;
+    bool is_init;
+    Display *d;
 
-	G_Funcs_T G_Funcs;
+    G_Funcs_T G_Funcs;
 
-	FD_fsc2 *main_form;
-	FD_run_1d *run_form_1d;
-	FD_run_2d *run_form_2d;
-	FD_input_form *input_form;
-	FD_cut *cut_form;
-	FD_print_comment *print_comment;
+    FD_fsc2 *main_form;
+    FD_run_1d *run_form_1d;
+    FD_run_2d *run_form_2d;
+    FD_input_form *input_form;
+    FD_cut *cut_form;
+    FD_print_comment *print_comment;
 
-	int border_offset_x;         /* width and height of window left and */
-	int border_offset_y;         /* top border */
+    int border_offset_x;         /* width and height of window left and */
+    int border_offset_y;         /* top border */
 
-	int stop_button_mask;        /* which mouse buttons to use for STOP
-									button */
+    int stop_button_mask;        /* which mouse buttons to use for STOP
+                                    button */
 
-	int win_x;
-	int win_y;
-	bool win_has_pos;
-	unsigned int win_width;
-	unsigned int win_height;
-	bool win_has_size;
+    int win_x;
+    int win_y;
+    bool win_has_pos;
+    unsigned int win_width;
+    unsigned int win_height;
+    bool win_has_size;
 
-	int display_1d_x;
-	int display_1d_y;
-	bool display_1d_has_pos;
-	unsigned int display_1d_width;
-	unsigned int display_1d_height;
-	bool display_1d_has_size;
+    int display_1d_x;
+    int display_1d_y;
+    bool display_1d_has_pos;
+    unsigned int display_1d_width;
+    unsigned int display_1d_height;
+    bool display_1d_has_size;
 
-	int display_2d_x;
-	int display_2d_y;
-	bool display_2d_has_pos;
-	unsigned int display_2d_width;
-	unsigned int display_2d_height;
-	bool display_2d_has_size;
+    int display_2d_x;
+    int display_2d_y;
+    bool display_2d_has_pos;
+    unsigned int display_2d_width;
+    unsigned int display_2d_height;
+    bool display_2d_has_size;
 
-	int cut_win_x;
-	int cut_win_y;
-	bool cut_win_has_pos;
-	unsigned int cut_win_width;
-	unsigned int cut_win_height;
-	bool cut_win_has_size;
+    int cut_win_x;
+    int cut_win_y;
+    bool cut_win_has_pos;
+    unsigned int cut_win_width;
+    unsigned int cut_win_height;
+    bool cut_win_has_size;
 
-	int toolbox_x;
-	int toolbox_y;
-	bool toolbox_has_pos;
+    int toolbox_x;
+    int toolbox_y;
+    bool toolbox_has_pos;
 
-	int toolboxFontSize;
+    int toolboxFontSize;
 };
 
 
@@ -403,5 +403,7 @@ extern long Cur_Pulser;
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

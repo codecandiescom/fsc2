@@ -35,5 +35,7 @@ void DumpStack( void * /* crash_address */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

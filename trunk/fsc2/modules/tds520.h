@@ -88,69 +88,69 @@ typedef struct TDS520 TDS520_T;
 
 
 struct Window {
-	long num;                   /* number of window                          */
-	double start;               /* start of window (in time units)           */
-	double width;               /* width of window (in time units)           */
-	long start_num;				/* first point of window                     */
-	long end_num;				/* last point of window                      */
-	bool is_start;              /* flag, set if start of window has been set */
-	bool is_width;              /* flag, set if width of window has been set */
-	long num_points;            /* number of data points between the cursors */
-	Window_T *next;             /* pointer to next window structure          */
-	Window_T *prev;             /* pointer to previous window structure      */
+    long num;                   /* number of window                          */
+    double start;               /* start of window (in time units)           */
+    double width;               /* width of window (in time units)           */
+    long start_num;             /* first point of window                     */
+    long end_num;               /* last point of window                      */
+    bool is_start;              /* flag, set if start of window has been set */
+    bool is_width;              /* flag, set if width of window has been set */
+    long num_points;            /* number of data points between the cursors */
+    Window_T *next;             /* pointer to next window structure          */
+    Window_T *prev;             /* pointer to previous window structure      */
 };
 
 
 /* Structure that describes the internal state of the digitizer */
 
 struct TDS520 {
-	int device;                          /* device number for GPIB transfers */
+    int device;                          /* device number for GPIB transfers */
 
-	bool is_reacting;
+    bool is_reacting;
 
-	double timebase;
-	bool is_timebase;
+    double timebase;
+    bool is_timebase;
 
-	double sens[ NUM_NORMAL_CHANNELS ];
-	double is_sens[ NUM_NORMAL_CHANNELS ];
+    double sens[ NUM_NORMAL_CHANNELS ];
+    double is_sens[ NUM_NORMAL_CHANNELS ];
 
-	long num_avg;
-	bool is_num_avg;
+    long num_avg;
+    bool is_num_avg;
 
-	Window_T *w;                         /* start element of list of windows */
-	bool is_equal_width;
+    Window_T *w;                         /* start element of list of windows */
+    bool is_equal_width;
 
-	int trigger_channel;
-	bool is_trigger_channel;
+    int trigger_channel;
+    bool is_trigger_channel;
 
-	long rec_len;
-	bool is_rec_len;
+    long rec_len;
+    bool is_rec_len;
 
-	double trig_pos;
-	bool is_trig_pos;
+    double trig_pos;
+    bool is_trig_pos;
 
-	double cursor_pos;                   /* current position of cursor 1 */
+    double cursor_pos;                   /* current position of cursor 1 */
 
-	int data_source;                     /* channel selected as data source */
+    int data_source;                     /* channel selected as data source */
 
-	bool channel_is_on[ NUM_DISPLAYABLE_CHANNELS ];
-	bool channels_in_use[ NUM_DISPLAYABLE_CHANNELS ];
+    bool channel_is_on[ NUM_DISPLAYABLE_CHANNELS ];
+    bool channels_in_use[ NUM_DISPLAYABLE_CHANNELS ];
 
-	bool lock_state;       /* set if keyboard is locked */
+    bool lock_state;       /* set if keyboard is locked */
 
-	bool windows_are_checked;
+    bool windows_are_checked;
 };
 
 
 enum {
-	SAMPLE,
-	AVERAGE
+    SAMPLE,
+    AVERAGE
 };
 
 
 enum {
-	GENERAL_TO_TDS520,
-	TDS520_TO_GENERAL
+    GENERAL_TO_TDS520,
+    TDS520_TO_GENERAL
 };
 
 
@@ -158,15 +158,15 @@ enum {
 
 TDS520_T tds520;
 const char *TDS520_Channel_Names[ MAX_CHANNELS ] = {
-								 			"CH1", "CH2", "CH3", "CH4",
-								 			"MATH1", "MATH2", "MATH3",
-								 			"REF1", "REF2", "REF3", "REF4",
-								 			"LINE" };
+                                            "CH1", "CH2", "CH3", "CH4",
+                                            "MATH1", "MATH2", "MATH3",
+                                            "REF1", "REF2", "REF3", "REF4",
+                                            "LINE" };
 const char *User_Channel_Names[ MAX_CHANNELS ] = {
-								 			"CH1", "CH2", "AUX1", "AUX2",
-								 			"MATH1", "MATH2", "MATH3",
-								 			"REF1", "REF2", "REF3", "REF4",
-								 			"LINE" };
+                                            "CH1", "CH2", "AUX1", "AUX2",
+                                            "MATH1", "MATH2", "MATH3",
+                                            "REF1", "REF2", "REF3", "REF4",
+                                            "LINE" };
 
 /* This array must be set to the available record lengths of the digitizer
    and must always end with a 0 */
@@ -176,23 +176,23 @@ static long record_lengths[ ] = { 500, 1000, 2500, 5000, 15000, 0 };
 /* List of all allowed time base values (in seconds) */
 
 static double tb[ ] = {                     500.0e-12,
-						  1.0e-9,   2.0e-9,   5.0e-9,
-						 10.0e-9,  20.0e-9,  50.0e-9,
-						100.0e-9, 200.0e-9, 400.0e-9,
-						  1.0e-6,   2.0e-6,   5.0e-6,
-						 10.0e-6,  20.0e-6,  50.0e-6,
-						100.0e-6, 200.0e-6, 500.0e-6,
-						  1.0e-3,   2.0e-3,   5.0e-3,
-						 10.0e-3,  20.0e-3,  50.0e-3,
-						100.0e-3, 200.0e-3, 500.0e-3,
-						  1.0,      2.0,      5.0,
-						 10.0 };
+                          1.0e-9,   2.0e-9,   5.0e-9,
+                         10.0e-9,  20.0e-9,  50.0e-9,
+                        100.0e-9, 200.0e-9, 400.0e-9,
+                          1.0e-6,   2.0e-6,   5.0e-6,
+                         10.0e-6,  20.0e-6,  50.0e-6,
+                        100.0e-6, 200.0e-6, 500.0e-6,
+                          1.0e-3,   2.0e-3,   5.0e-3,
+                         10.0e-3,  20.0e-3,  50.0e-3,
+                        100.0e-3, 200.0e-3, 500.0e-3,
+                          1.0,      2.0,      5.0,
+                         10.0 };
 
 /* Maximum and minimum sensitivity settings (in V) of the measurement
    channels */
 
 static double max_sens = 1e-3,
-	   min_sens        = 10.0;
+       min_sens        = 10.0;
 
 #else
 
@@ -252,15 +252,15 @@ void tds520_do_pre_exp_checks( void );
 void tds520_window_checks( Window_T * /* w */ );
 
 long tds520_translate_channel( int  /* dir     */,
-							   long /* channel */,
-							   bool /* flag    */);
+                               long /* channel */,
+                               bool /* flag    */);
 
 void tds520_store_state( TDS520_T * /* dest */,
-						 TDS520_T * /* src  */ );
+                         TDS520_T * /* src  */ );
 
 void tds520_state_check( double /* timebase */,
-						 long   /* rec_len  */,
-						 double /* trig_pos */ );
+                         long   /* rec_len  */,
+                         double /* trig_pos */ );
 
 Window_T *tds520_get_window_by_number( long /* win_number */ );
 
@@ -300,40 +300,40 @@ void tds520_clear_SESR( void );
 void tds520_finished( void );
 
 void tds520_set_cursor( int    /* cur_num */,
-						double /* pos     */ );
+                        double /* pos     */ );
 
 bool tds520_display_channel_state( int /* channel */ );
 
 void tds520_display_channel( int  /* channel */,
-							 bool /* on_flag */ );
+                             bool /* on_flag */ );
 
 double tds520_get_sens( int /* channel */ );
 
 void tds520_set_sens( int    /* channel */,
-					  double /* val     */ );
+                      double /* val     */ );
 
 void tds520_start_acquisition( void );
 
 double tds520_get_area( int        /* channel    */,
-						Window_T * /* w          */,
-						bool       /* use_cursor */ );
+                        Window_T * /* w          */,
+                        bool       /* use_cursor */ );
 
 void tds520_get_curve( int        /* channel    */,
-					   Window_T * /* w          */,
-					   double **  /* data       */,
-					   long *     /* length     */,
-					   bool       /* use_cursor */ );
+                       Window_T * /* w          */,
+                       double **  /* data       */,
+                       long *     /* length     */,
+                       bool       /* use_cursor */ );
 
 double tds520_get_amplitude( int        /* channel    */,
-							 Window_T * /* w          */,
-							 bool       /* use_cursor */);
+                             Window_T * /* w          */,
+                             bool       /* use_cursor */);
 
 void tds520_free_running( void );
 
 void tds520_lock_state( bool /* lock */ );
 
 void tds520_copy_curve( int /* src  */,
-						int /* dest */ );
+                        int /* dest */ );
 
 bool tds520_command( const char * /* cmd */ );
 
@@ -344,5 +344,7 @@ bool tds520_command( const char * /* cmd */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

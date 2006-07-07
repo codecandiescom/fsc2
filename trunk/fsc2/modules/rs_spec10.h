@@ -62,41 +62,41 @@
 
 
 struct RS_SPEC10 {
-	const char *dev_file;
-	int16 handle;
-	bool is_open;
-	bool lib_is_init;
+    const char *dev_file;
+    int16 handle;
+    bool is_open;
+    bool lib_is_init;
 
-	struct {
-		uns16 max_size[ 2 ];      /* number of pixels in x- and y-direction */
-		uns16 roi[ 4 ];
-		bool roi_is_set;
-		long bin[ 2 ];
-		bool bin_is_set;
-		bool bin_mode;            /* 0: hardware binning, 1: software bin. */
-		bool bin_mode_is_set;
-		double exp_res;
-		flt64 exp_min_time;
-		uns32 exp_time;           /* exposure time in multiples of 1 us */
-		uns16 clear_cycles;
+    struct {
+        uns16 max_size[ 2 ];      /* number of pixels in x- and y-direction */
+        uns16 roi[ 4 ];
+        bool roi_is_set;
+        long bin[ 2 ];
+        bool bin_is_set;
+        bool bin_mode;            /* 0: hardware binning, 1: software bin. */
+        bool bin_mode_is_set;
+        double exp_res;
+        flt64 exp_min_time;
+        uns32 exp_time;           /* exposure time in multiples of 1 us */
+        uns16 clear_cycles;
 
-		double test_min_exp_time;
-	} ccd;
+        double test_min_exp_time;
+    } ccd;
 
-	struct {
-		uns16 acc_setpoint;       /* access flags for setpoints */
-		uns16 acc_temp;           /* access flags for temperature */
+    struct {
+        uns16 acc_setpoint;       /* access flags for setpoints */
+        uns16 acc_temp;           /* access flags for temperature */
 
-		double setpoint;          /* last requested setpoint */
-		bool is_setpoint;         /* has setpoint been set in PREPARATIONS ? */
-	} temp;
+        double setpoint;          /* last requested setpoint */
+        bool is_setpoint;         /* has setpoint been set in PREPARATIONS ? */
+    } temp;
 };
 
 
 extern struct RS_SPEC10 *rs_spec10,
-						 rs_spec10_prep,
-						 rs_spec10_test,
-						 rs_spec10_exp;
+                         rs_spec10_prep,
+                         rs_spec10_test,
+                         rs_spec10_exp;
 
 
 #define RS_SPEC10_TEST_TEMP      180.0    /* in Kelvin */
@@ -155,7 +155,7 @@ int16 rs_spec10_k2ic( double /* tk */ );
 double rs_spec10_ic2k( int16 /* tci */ );
 
 bool rs_spec10_param_access( uns32   /* param */,
-							 uns16 * /* acc   */ );
+                             uns16 * /* acc   */ );
 
 const char *rs_spec10_ptime( double /* p_time */ );
 
@@ -170,5 +170,7 @@ void rs_spec10_close_on_exec_hack( int * /* fd_list */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

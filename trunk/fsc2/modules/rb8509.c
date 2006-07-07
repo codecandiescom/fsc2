@@ -38,14 +38,14 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 static struct {
-	int handle;
-	int channel;
-	int nchan;
-	int gain;
-	bool gain_is_set;
-	int trig_mode;
-	int has_ext_trigger;
-	bool trig_mode_is_set;
+    int handle;
+    int channel;
+    int nchan;
+    int gain;
+    bool gain_is_set;
+    int trig_mode;
+    int has_ext_trigger;
+    bool trig_mode_is_set;
 } rb8509, rb8509_stored;
 
 
@@ -71,28 +71,28 @@ static void rb8509_comm_failure( void );
 
 int rb8509_init_hook( void )
 {
-	RULBUS_CARD_INFO card_info;
+    RULBUS_CARD_INFO card_info;
 
 
-	Need_RULBUS = SET;
+    Need_RULBUS = SET;
 
-	if ( rulbus_get_card_info( RULBUS_CARD_NAME, &card_info ) != RULBUS_OK )
-	{
-		print( FATAL, "Failed to get RULBUS configuration: %s.\n",
-			   rulbus_strerror( ) );
-		THROW( EXCEPTION );
-	}
+    if ( rulbus_get_card_info( RULBUS_CARD_NAME, &card_info ) != RULBUS_OK )
+    {
+        print( FATAL, "Failed to get RULBUS configuration: %s.\n",
+               rulbus_strerror( ) );
+        THROW( EXCEPTION );
+    }
 
-	rb8509.handle = -1;
-	rb8509.channel = 0;
-	rb8509.nchan = card_info.num_channels;
-	rb8509.gain = RULBUS_RB8509_ADC12_GAIN_1;
-	rb8509.gain_is_set = SET;
-	rb8509.has_ext_trigger = card_info.has_ext_trigger;
-	rb8509.trig_mode = RULBUS_RB8509_ADC12_INT_TRIG;
-	rb8509.trig_mode_is_set = SET;
+    rb8509.handle = -1;
+    rb8509.channel = 0;
+    rb8509.nchan = card_info.num_channels;
+    rb8509.gain = RULBUS_RB8509_ADC12_GAIN_1;
+    rb8509.gain_is_set = SET;
+    rb8509.has_ext_trigger = card_info.has_ext_trigger;
+    rb8509.trig_mode = RULBUS_RB8509_ADC12_INT_TRIG;
+    rb8509.trig_mode_is_set = SET;
 
-	return 1;
+    return 1;
 }
 
 
@@ -102,8 +102,8 @@ int rb8509_init_hook( void )
 
 int rb8509_test_hook( void )
 {
-	rb8509_stored = rb8509;
-	return 1;
+    rb8509_stored = rb8509;
+    return 1;
 }
 
 /*------------------------------------------------*
@@ -112,62 +112,62 @@ int rb8509_test_hook( void )
 
 int rb8509_exp_hook( void )
 {
-	int ret;
+    int ret;
 
 
-	rb8509 = rb8509_stored;
-	rb8509.channel = 0;
+    rb8509 = rb8509_stored;
+    rb8509.channel = 0;
 
-	/* Open the card */
+    /* Open the card */
 
-	raise_permissions( );
-	rb8509.handle = rulbus_card_open( RULBUS_CARD_NAME );
-	lower_permissions( );
+    raise_permissions( );
+    rb8509.handle = rulbus_card_open( RULBUS_CARD_NAME );
+    lower_permissions( );
 
-	if ( rb8509.handle < 0 )
-	{
-		print( FATAL, "Initialization of card failed: %s.\n",
-			   rulbus_strerror( ) );
-		THROW( EXCEPTION );
-	}
+    if ( rb8509.handle < 0 )
+    {
+        print( FATAL, "Initialization of card failed: %s.\n",
+               rulbus_strerror( ) );
+        THROW( EXCEPTION );
+    }
 
-	/* If necessary set the gain (card switches to a gain of 1 on
-	   initialization) */
+    /* If necessary set the gain (card switches to a gain of 1 on
+       initialization) */
 
-	if ( rb8509.gain_is_set && rb8509.gain != RULBUS_RB8509_ADC12_GAIN_1 )
-	{
-		raise_permissions( );
-		ret = rulbus_rb8509_adc12_set_gain( rb8509.handle, rb8509.gain );
-		lower_permissions( );
+    if ( rb8509.gain_is_set && rb8509.gain != RULBUS_RB8509_ADC12_GAIN_1 )
+    {
+        raise_permissions( );
+        ret = rulbus_rb8509_adc12_set_gain( rb8509.handle, rb8509.gain );
+        lower_permissions( );
 
-		if ( ret != RULBUS_OK )
-		{
-			print( FATAL, "Initialization of card failed: %s.\n",
-				   rulbus_strerror( ) );
-			THROW( EXCEPTION );
-		}
-	}
+        if ( ret != RULBUS_OK )
+        {
+            print( FATAL, "Initialization of card failed: %s.\n",
+                   rulbus_strerror( ) );
+            THROW( EXCEPTION );
+        }
+    }
 
-	/* If necessary set the trigger mode (card switches to internal trigger
-	   mode on initialization) */
+    /* If necessary set the trigger mode (card switches to internal trigger
+       mode on initialization) */
 
-	if ( rb8509.trig_mode_is_set &&
-		 rb8509.trig_mode != RULBUS_RB8509_ADC12_INT_TRIG )
-	{
-		raise_permissions( );
-		ret = rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
-													rb8509.trig_mode );
-		lower_permissions( );
+    if ( rb8509.trig_mode_is_set &&
+         rb8509.trig_mode != RULBUS_RB8509_ADC12_INT_TRIG )
+    {
+        raise_permissions( );
+        ret = rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
+                                                    rb8509.trig_mode );
+        lower_permissions( );
 
-		if ( ret != RULBUS_OK )
-		{
-			print( FATAL, "Initialization of card failed: %s.\n",
-				   rulbus_strerror( ) );
-			THROW( EXCEPTION );
-		}
-	}
+        if ( ret != RULBUS_OK )
+        {
+            print( FATAL, "Initialization of card failed: %s.\n",
+                   rulbus_strerror( ) );
+            THROW( EXCEPTION );
+        }
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -177,16 +177,16 @@ int rb8509_exp_hook( void )
 
 int rb8509_end_of_exp_hook( void )
 {
-	if ( rb8509.handle >= 0 )
-	{
-		raise_permissions( );
-		rulbus_card_close( rb8509.handle );
-		lower_permissions( );
+    if ( rb8509.handle >= 0 )
+    {
+        raise_permissions( );
+        rulbus_card_close( rb8509.handle );
+        lower_permissions( );
 
-		rb8509.handle = -1;
-	}
+        rb8509.handle = -1;
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -196,7 +196,7 @@ int rb8509_end_of_exp_hook( void )
 
 Var_T *daq_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -206,73 +206,73 @@ Var_T *daq_name( Var_T * v  UNUSED_ARG )
 
 Var_T *daq_get_voltage( Var_T * v )
 {
-	int channel;
-	double volts;
-	int retval = 0;
+    int channel;
+    double volts;
+    int retval = 0;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing channel argument\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing channel argument\n" );
+        THROW( EXCEPTION );
+    }
 
-	channel = rb8509_translate_channel(
-								  get_strict_long( v, "ADC channel number" ) );
+    channel = rb8509_translate_channel(
+                                  get_strict_long( v, "ADC channel number" ) );
 
 
-	if ( channel >= rb8509.nchan )
-	{
-		print( FATAL, "Invalid channel CH%d, maximum channels number "
-			   "is CH%d\n", channel, rb8509.nchan - 1 );
-		THROW( EXCEPTION );
-	}
+    if ( channel >= rb8509.nchan )
+    {
+        print( FATAL, "Invalid channel CH%d, maximum channels number "
+               "is CH%d\n", channel, rb8509.nchan - 1 );
+        THROW( EXCEPTION );
+    }
 
-	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, TEST_VOLTS / rb8509.gain );
+    if ( FSC2_MODE == TEST )
+        return vars_push( FLOAT_VAR, TEST_VOLTS / rb8509.gain );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	/* If necessary switch the current channel */
+    /* If necessary switch the current channel */
 
-	if ( channel != rb8509.channel &&
-		 rulbus_rb8509_adc12_set_channel( rb8509.handle,
-										  channel ) != RULBUS_OK )
-		rb8509_comm_failure( );
+    if ( channel != rb8509.channel &&
+         rulbus_rb8509_adc12_set_channel( rb8509.handle,
+                                          channel ) != RULBUS_OK )
+        rb8509_comm_failure( );
 
-	rb8509.channel = channel;
+    rb8509.channel = channel;
 
-	/* In internal trigger mode just trigger a conversion and return the
-	   value */
+    /* In internal trigger mode just trigger a conversion and return the
+       value */
 
-	if ( rb8509.trig_mode == RULBUS_RB8509_ADC12_INT_TRIG )
-	{
-		raise_permissions( );
-		retval = rulbus_rb8509_adc12_convert( rb8509.handle, &volts );
-		lower_permissions( );
+    if ( rb8509.trig_mode == RULBUS_RB8509_ADC12_INT_TRIG )
+    {
+        raise_permissions( );
+        retval = rulbus_rb8509_adc12_convert( rb8509.handle, &volts );
+        lower_permissions( );
 
-		if ( retval != RULBUS_OK )
-			rb8509_comm_failure( );
+        if ( retval != RULBUS_OK )
+            rb8509_comm_failure( );
 
-		return vars_push( FLOAT_VAR, volts );
-	}
-			
-	/* In internal trigger mode continuously check if a conversion has
-	   happened and while doing so give the user a chance to bail out */
+        return vars_push( FLOAT_VAR, volts );
+    }
+            
+    /* In internal trigger mode continuously check if a conversion has
+       happened and while doing so give the user a chance to bail out */
 
-	while ( ! retval )
-	{
-		raise_permissions( );
-		retval = rulbus_rb8509_adc12_check_convert( rb8509.handle, &volts );
-		lower_permissions( );
+    while ( ! retval )
+    {
+        raise_permissions( );
+        retval = rulbus_rb8509_adc12_check_convert( rb8509.handle, &volts );
+        lower_permissions( );
 
-		if ( retval < 0 )
-			rb8509_comm_failure( );
+        if ( retval < 0 )
+            rb8509_comm_failure( );
 
-		stop_on_user_request( );
-	} 
+        stop_on_user_request( );
+    } 
 
-	return vars_push( FLOAT_VAR, volts );
+    return vars_push( FLOAT_VAR, volts );
 }
 
 
@@ -284,51 +284,51 @@ Var_T *daq_get_voltage( Var_T * v )
 
 Var_T *daq_trigger_mode( Var_T * v )
 {
-	int ret;
+    int ret;
 
 
-	if ( v == NULL )
-		return vars_push( INT_VAR, rb8509.trig_mode );
+    if ( v == NULL )
+        return vars_push( INT_VAR, rb8509.trig_mode );
 
-	vars_check( v, STR_VAR );
+    vars_check( v, STR_VAR );
 
-	if ( ! strcasecmp( v->val.sptr, "EXT" ) ||
-		 ! strcasecmp( v->val.sptr, "EXTERNAL" ) )
-	{
-		if ( ! rb8509.has_ext_trigger )
-		{
-			print( FATAL, "The ADC card does not have an exernal trigger "
-				   "input\n" );
-			THROW( EXCEPTION );
-		}
+    if ( ! strcasecmp( v->val.sptr, "EXT" ) ||
+         ! strcasecmp( v->val.sptr, "EXTERNAL" ) )
+    {
+        if ( ! rb8509.has_ext_trigger )
+        {
+            print( FATAL, "The ADC card does not have an exernal trigger "
+                   "input\n" );
+            THROW( EXCEPTION );
+        }
 
-		rb8509.trig_mode = RULBUS_RB8509_ADC12_EXT_TRIG;
-	}
-	else if ( ! strcasecmp( v->val.sptr, "INT" ) ||
-			  ! strcasecmp( v->val.sptr, "INTERNAL" ) )
-		rb8509.trig_mode = RULBUS_RB8509_ADC12_INT_TRIG;
-	else
-	{
-		print( FATAL, "Invalid trigger mode argument.\n" );
-		THROW( EXCEPTION );
-	}
+        rb8509.trig_mode = RULBUS_RB8509_ADC12_EXT_TRIG;
+    }
+    else if ( ! strcasecmp( v->val.sptr, "INT" ) ||
+              ! strcasecmp( v->val.sptr, "INTERNAL" ) )
+        rb8509.trig_mode = RULBUS_RB8509_ADC12_INT_TRIG;
+    else
+    {
+        print( FATAL, "Invalid trigger mode argument.\n" );
+        THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	rb8509.trig_mode_is_set = SET;
+    rb8509.trig_mode_is_set = SET;
 
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		raise_permissions( );
-		ret = rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
-													rb8509.trig_mode );
-		lower_permissions( );
-		 
-		if ( ret != RULBUS_OK )
-			rb8509_comm_failure( );
-	}
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        raise_permissions( );
+        ret = rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
+                                                    rb8509.trig_mode );
+        lower_permissions( );
+         
+        if ( ret != RULBUS_OK )
+            rb8509_comm_failure( );
+    }
 
-	return vars_push( INT_VAR, rb8509.trig_mode );
+    return vars_push( INT_VAR, rb8509.trig_mode );
 }
 
 
@@ -339,43 +339,43 @@ Var_T *daq_trigger_mode( Var_T * v )
 
 Var_T *daq_gain( Var_T * v )
 {
-	int gain;
-	int ret;
+    int gain;
+    int ret;
 
 
-	if ( v == NULL )
-		return vars_push( INT_VAR, rb8509.gain );
+    if ( v == NULL )
+        return vars_push( INT_VAR, rb8509.gain );
 
-	gain = get_long( v, "ADC gain" );
+    gain = get_long( v, "ADC gain" );
 
-	if ( gain != RULBUS_RB8509_ADC12_GAIN_1 &&
-		 gain != RULBUS_RB8509_ADC12_GAIN_2 &&
-		 gain != RULBUS_RB8509_ADC12_GAIN_4 &&
-		 gain != RULBUS_RB8509_ADC12_GAIN_8 )
-	{
-		print( FATAL, "Invalid gain factor, only %d, %d, %d and %d are "
-			   "possible.\n", RULBUS_RB8509_ADC12_GAIN_1,
-			   RULBUS_RB8509_ADC12_GAIN_2, RULBUS_RB8509_ADC12_GAIN_4,
-			   RULBUS_RB8509_ADC12_GAIN_8 );
-		THROW( EXCEPTION );
-	}
+    if ( gain != RULBUS_RB8509_ADC12_GAIN_1 &&
+         gain != RULBUS_RB8509_ADC12_GAIN_2 &&
+         gain != RULBUS_RB8509_ADC12_GAIN_4 &&
+         gain != RULBUS_RB8509_ADC12_GAIN_8 )
+    {
+        print( FATAL, "Invalid gain factor, only %d, %d, %d and %d are "
+               "possible.\n", RULBUS_RB8509_ADC12_GAIN_1,
+               RULBUS_RB8509_ADC12_GAIN_2, RULBUS_RB8509_ADC12_GAIN_4,
+               RULBUS_RB8509_ADC12_GAIN_8 );
+        THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	rb8509.gain = gain;
-	rb8509.gain_is_set = SET;
+    rb8509.gain = gain;
+    rb8509.gain_is_set = SET;
 
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		raise_permissions( );
-		ret = rulbus_rb8509_adc12_set_gain( rb8509.handle, rb8509.gain );
-		lower_permissions( );
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        raise_permissions( );
+        ret = rulbus_rb8509_adc12_set_gain( rb8509.handle, rb8509.gain );
+        lower_permissions( );
 
-		if ( ret != RULBUS_OK )
-			rb8509_comm_failure( );
-	}
+        if ( ret != RULBUS_OK )
+            rb8509_comm_failure( );
+    }
 
-	return vars_push( INT_VAR, rb8509.gain );
+    return vars_push( INT_VAR, rb8509.gain );
 }
 
 
@@ -386,38 +386,38 @@ Var_T *daq_gain( Var_T * v )
 
 static int rb8509_translate_channel( long channel )
 {
-	switch ( channel )
-	{
-		case CHANNEL_CH0 :
-			return 0;
+    switch ( channel )
+    {
+        case CHANNEL_CH0 :
+            return 0;
 
-		case CHANNEL_CH1 :
-			return 1;
+        case CHANNEL_CH1 :
+            return 1;
 
-		case CHANNEL_CH2 :
-			return 2;
+        case CHANNEL_CH2 :
+            return 2;
 
-		case CHANNEL_CH3 :
-			return 3;
+        case CHANNEL_CH3 :
+            return 3;
 
-		case CHANNEL_CH4 :
-			return 4;
+        case CHANNEL_CH4 :
+            return 4;
 
-		case CHANNEL_CH5 :
-			return 5;
+        case CHANNEL_CH5 :
+            return 5;
 
-		case CHANNEL_CH6 :
-			return 6;
+        case CHANNEL_CH6 :
+            return 6;
 
-		case CHANNEL_CH7 :
-			return 7;
+        case CHANNEL_CH7 :
+            return 7;
 
-		default :
-			print( FATAL, "Invalid channel number.\n" );
-			THROW( EXCEPTION );
-	}
+        default :
+            print( FATAL, "Invalid channel number.\n" );
+            THROW( EXCEPTION );
+    }
 
-	return -1;            /* we'll never get here */
+    return -1;            /* we'll never get here */
 }
 
 
@@ -427,13 +427,15 @@ static int rb8509_translate_channel( long channel )
 
 static void rb8509_comm_failure( void )
 {
-	print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
-	THROW( EXCEPTION );
+    print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
+    THROW( EXCEPTION );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

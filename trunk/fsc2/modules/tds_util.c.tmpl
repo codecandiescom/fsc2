@@ -26,7 +26,7 @@
 
 
 static void tds_tmpl_window_check_1( bool * is_start,
-									 bool * is_width );
+                                     bool * is_width );
 static void tds_tmpl_window_check_2( Window_T * w );
 static void tds_tmpl_window_check_3( Window_T * w );
 
@@ -36,19 +36,19 @@ static void tds_tmpl_window_check_3( Window_T * w );
 
 const char *tds_tmpl_ptime( double p_time )
 {
-	static char buffer[ 128 ];
+    static char buffer[ 128 ];
 
 
-	if ( fabs( p_time ) >= 1.0 )
-		sprintf( buffer, "%g s", p_time );
-	else if ( fabs( p_time ) >= 1.e-3 )
-		sprintf( buffer, "%g ms", 1.e3 * p_time );
-	else if ( fabs( p_time ) >= 1.e-6 )
-		sprintf( buffer, "%g us", 1.e6 * p_time );
-	else
-		sprintf( buffer, "%g ns", 1.e9 * p_time );
+    if ( fabs( p_time ) >= 1.0 )
+        sprintf( buffer, "%g s", p_time );
+    else if ( fabs( p_time ) >= 1.e-3 )
+        sprintf( buffer, "%g ms", 1.e3 * p_time );
+    else if ( fabs( p_time ) >= 1.e-6 )
+        sprintf( buffer, "%g us", 1.e6 * p_time );
+    else
+        sprintf( buffer, "%g ns", 1.e9 * p_time );
 
-	return buffer;
+    return buffer;
 }
 
 
@@ -58,14 +58,14 @@ const char *tds_tmpl_ptime( double p_time )
 
 void tds_tmpl_delete_windows( TDS_TMPL_T * s )
 {
-	Window_T *w;
+    Window_T *w;
 
-	while ( s->w != NULL )
-	{
-		w = s->w;
-		s->w = w->next;
-		T_free( w );
-	}
+    while ( s->w != NULL )
+    {
+        w = s->w;
+        s->w = w->next;
+        T_free( w );
+    }
 }
 
 
@@ -74,82 +74,82 @@ void tds_tmpl_delete_windows( TDS_TMPL_T * s )
 
 void tds_tmpl_do_pre_exp_checks( void )
 {
-	Window_T *w;
-	bool is_start, is_width;
+    Window_T *w;
+    bool is_start, is_width;
     double width;
 
 
-	/* Remove all unused windows and test if for all other windows the start
-	   position and the width is set */
+    /* Remove all unused windows and test if for all other windows the start
+       position and the width is set */
 
-	tds_tmpl_window_check_1( &is_start, &is_width );
+    tds_tmpl_window_check_1( &is_start, &is_width );
 
-	/* That's all if no windows have been defined we switch off gated
-	   measurement mode (unless the device can't do gated measurements),
-	   i.e. all measurement operations are automatically done on the whole
-	   curve */
+    /* That's all if no windows have been defined we switch off gated
+       measurement mode (unless the device can't do gated measurements),
+       i.e. all measurement operations are automatically done on the whole
+       curve */
 
-	if ( tds_tmpl.w == NULL )
-	{
+    if ( tds_tmpl.w == NULL )
+    {
 #ifndef NO_GATED_MEASUREMENTS
-		tds_tmpl_set_gated_meas( UNSET );
-		tds_tmpl.gated_state = UNSET;
+        tds_tmpl_set_gated_meas( UNSET );
+        tds_tmpl.gated_state = UNSET;
 #endif
-		return;
-	}
+        return;
+    }
 
-	/* Check for all windows if the position and width have been set */
+    /* Check for all windows if the position and width have been set */
 
-	if ( ! is_start )
-		for ( w = tds_tmpl.w; w != NULL; w = w->next )
-			if ( ! w->is_start )
-			{
-				w->start = tds_tmpl.cursor_pos;
-				w->is_start = SET;
-			}
+    if ( ! is_start )
+        for ( w = tds_tmpl.w; w != NULL; w = w->next )
+            if ( ! w->is_start )
+            {
+                w->start = tds_tmpl.cursor_pos;
+                w->is_start = SET;
+            }
 
-	/* If witdh hasn't been set for all windows get the distance of the
-	   cursors on the digitizer screen and use it as the default width. */
+    /* If witdh hasn't been set for all windows get the distance of the
+       cursors on the digitizer screen and use it as the default width. */
 
-	if ( ! is_width )
-	{
-		width = tds_tmpl_get_cursor_distance( );
+    if ( ! is_width )
+    {
+        width = tds_tmpl_get_cursor_distance( );
 
-		width = fabs( width );
+        width = fabs( width );
 
-		if ( width == 0.0 )
-		{
-			print( FATAL, "Can't determine a reasonable value for the missing "
-				   "window widths.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( width == 0.0 )
+        {
+            print( FATAL, "Can't determine a reasonable value for the missing "
+                   "window widths.\n" );
+            THROW( EXCEPTION );
+        }
 
-		for ( w = tds_tmpl.w; w != NULL; w = w->next )
-			if ( ! w->is_width )
-			{
-				w->width = width;
-				w->is_width = SET;
-			}
-	}
+        for ( w = tds_tmpl.w; w != NULL; w = w->next )
+            if ( ! w->is_width )
+            {
+                w->width = width;
+                w->is_width = SET;
+            }
+    }
 
-	/* Make sure the windows are ok, i.e. cursors can be positioned exactly
-	   and are still within the range of the digitizers record length */
+    /* Make sure the windows are ok, i.e. cursors can be positioned exactly
+       and are still within the range of the digitizers record length */
 
-	for ( w = tds_tmpl.w; w != NULL; w = w->next )
-		tds_tmpl_window_checks( w );
+    for ( w = tds_tmpl.w; w != NULL; w = w->next )
+        tds_tmpl_window_checks( w );
 
-	tds_tmpl.windows_are_checked = SET;
+    tds_tmpl.windows_are_checked = SET;
 
-	/* Now that all windows are properly set we switch on gated measurements */
+    /* Now that all windows are properly set we switch on gated measurements */
 
 #ifndef NO_GATED_MEASUREMENTS
-	tds_tmpl_set_gated_meas( SET );
-	tds_tmpl.gated_state = SET;
+    tds_tmpl_set_gated_meas( SET );
+    tds_tmpl.gated_state = SET;
 
-	/* If the widths of all windows are equal we switch on tracking cursor
-	   mode and set the cursors to the position of the first window */
+    /* If the widths of all windows are equal we switch on tracking cursor
+       mode and set the cursors to the position of the first window */
 
-	tds_tmpl_set_tracking( tds_tmpl.w );
+    tds_tmpl_set_tracking( tds_tmpl.w );
 #endif
 }
 
@@ -159,20 +159,20 @@ void tds_tmpl_do_pre_exp_checks( void )
  *------------------------------------------*/
 
 static void tds_tmpl_window_check_1( bool * is_start,
-									 bool * is_width )
+                                     bool * is_width )
 {
-	Window_T *w;
+    Window_T *w;
 
 
-	*is_start = *is_width = SET;
+    *is_start = *is_width = SET;
 
-	for ( w = tds_tmpl.w; w != NULL; w = w->next )
-	{
-		if ( ! w->is_start )
-			*is_start = UNSET;
-		if ( ! w->is_width )
-			*is_width = UNSET;
-	}
+    for ( w = tds_tmpl.w; w != NULL; w = w->next )
+    {
+        if ( ! w->is_start )
+            *is_start = UNSET;
+        if ( ! w->is_width )
+            *is_width = UNSET;
+    }
 }
 
 
@@ -181,8 +181,8 @@ static void tds_tmpl_window_check_1( bool * is_start,
 
 void tds_tmpl_window_checks( Window_T * w )
 {
-	tds_tmpl_window_check_2( w );
-	tds_tmpl_window_check_3( w );
+    tds_tmpl_window_check_2( w );
+    tds_tmpl_window_check_3( w );
 }
 
 
@@ -203,82 +203,82 @@ static void tds_tmpl_window_check_2( Window_T * w )
 {
     double dcs, dcd, dtb, fac;
     long tb, cs, cd;
-	char *buffer;
+    char *buffer;
 
 
-	/* Can't do checks if window position or digitizers timebase is unknown */
+    /* Can't do checks if window position or digitizers timebase is unknown */
 
-	if ( FSC2_MODE != EXPERIMENT &&
-		 ( ! w->is_start || ! tds_tmpl.is_timebase ) )
-		return;
+    if ( FSC2_MODE != EXPERIMENT &&
+         ( ! w->is_start || ! tds_tmpl.is_timebase ) )
+        return;
 
-	dcs = w->start;
-	dtb = tds_tmpl.timebase;
-	fac = 1.0;
+    dcs = w->start;
+    dtb = tds_tmpl.timebase;
+    fac = 1.0;
 
-	while ( ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 ) ||
-			fabs( dtb ) < 1.0 )
-	{
-		dcs *= 1000.0;
-		dtb *= 1000.0;
-		fac *= 0.001;
-	}
+    while ( ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 ) ||
+            fabs( dtb ) < 1.0 )
+    {
+        dcs *= 1000.0;
+        dtb *= 1000.0;
+        fac *= 0.001;
+    }
 
-	cs = lrnd( TDS_TMPL_POINTS_PER_DIV * dcs );
-	tb = lrnd( dtb );
+    cs = lrnd( TDS_TMPL_POINTS_PER_DIV * dcs );
+    tb = lrnd( dtb );
 
-	if ( cs % tb )        /* window start not multiple of a point ? */
-	{
-		cs = ( cs / tb ) * tb;
-		dcs = cs * fac / TDS_TMPL_POINTS_PER_DIV;
-		buffer = T_strdup( tds_tmpl_ptime( dcs ) );
-		print( WARN, "Start point of %ld. window had to be readjusted from "
-			   "%s to %s.\n", w->num - WINDOW_START_NUMBER,
-			   tds_tmpl_ptime( w->start ), buffer );
-		T_free( buffer );
-		w->start = dcs;
-	}
+    if ( cs % tb )        /* window start not multiple of a point ? */
+    {
+        cs = ( cs / tb ) * tb;
+        dcs = cs * fac / TDS_TMPL_POINTS_PER_DIV;
+        buffer = T_strdup( tds_tmpl_ptime( dcs ) );
+        print( WARN, "Start point of %ld. window had to be readjusted from "
+               "%s to %s.\n", w->num - WINDOW_START_NUMBER,
+               tds_tmpl_ptime( w->start ), buffer );
+        T_free( buffer );
+        w->start = dcs;
+    }
 
-	/* Can't do further checks if window width is still unknown */
+    /* Can't do further checks if window width is still unknown */
 
-	if ( ! w->is_width )
-		return;
+    if ( ! w->is_width )
+        return;
 
-	dcd = w->width;
-	dtb = tds_tmpl.timebase;
-	fac = 1.0;
+    dcd = w->width;
+    dtb = tds_tmpl.timebase;
+    fac = 1.0;
 
-	while ( fabs( dcd ) < 1.0 || fabs( dtb ) < 1.0 )
-	{
-		dcd *= 1000.0;
-		dtb *= 1000.0;
-		fac *= 0.001;
-	}
+    while ( fabs( dcd ) < 1.0 || fabs( dtb ) < 1.0 )
+    {
+        dcd *= 1000.0;
+        dtb *= 1000.0;
+        fac *= 0.001;
+    }
 
-	cd = lrnd( TDS_TMPL_POINTS_PER_DIV * dcd );
-	tb = lrnd( dtb );
+    cd = lrnd( TDS_TMPL_POINTS_PER_DIV * dcd );
+    tb = lrnd( dtb );
 
-	if ( labs( cd ) < tb )         /* window smaller than one point ? */
-	{
-		dcd = tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
-		buffer = T_strdup( tds_tmpl_ptime( dcd ) );
-		print( SEVERE, "Width of %ld. window had to be readjusted from %s to "
-			   "%s.\n", w->num - WINDOW_START_NUMBER,
-			   tds_tmpl_ptime( w->width ), buffer );
-		T_free( buffer );
-		w->width = dcd;
-	}
-	else if ( cd % tb )            /* window width not multiple of a point ? */
-	{
-		cd = ( cd / tb ) * tb;
-		dcd = cd * fac / TDS_TMPL_POINTS_PER_DIV;
-		buffer = T_strdup( tds_tmpl_ptime( dcd ) );
-		print( WARN, "Width of %ld. window had to be readjusted from %s to "
-			   "%s.\n", w->num - WINDOW_START_NUMBER,
-			   tds_tmpl_ptime( w->width ), buffer );
-		T_free( buffer );
-		w->width = dcd;
-	}
+    if ( labs( cd ) < tb )         /* window smaller than one point ? */
+    {
+        dcd = tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
+        buffer = T_strdup( tds_tmpl_ptime( dcd ) );
+        print( SEVERE, "Width of %ld. window had to be readjusted from %s to "
+               "%s.\n", w->num - WINDOW_START_NUMBER,
+               tds_tmpl_ptime( w->width ), buffer );
+        T_free( buffer );
+        w->width = dcd;
+    }
+    else if ( cd % tb )            /* window width not multiple of a point ? */
+    {
+        cd = ( cd / tb ) * tb;
+        dcd = cd * fac / TDS_TMPL_POINTS_PER_DIV;
+        buffer = T_strdup( tds_tmpl_ptime( dcd ) );
+        print( WARN, "Width of %ld. window had to be readjusted from %s to "
+               "%s.\n", w->num - WINDOW_START_NUMBER,
+               tds_tmpl_ptime( w->width ), buffer );
+        T_free( buffer );
+        w->width = dcd;
+    }
 }
 
 
@@ -291,166 +291,166 @@ static void tds_tmpl_window_check_2( Window_T * w )
 static void tds_tmpl_window_check_3( Window_T * w )
 {
     double window;
-	char *buf1, *buf2, *buf3;
-	double start, width;
+    char *buf1, *buf2, *buf3;
+    double start, width;
 
 
-	/* Can't do checks if timebase, record length, trigger position,
-	   window position or width is still unknown */
+    /* Can't do checks if timebase, record length, trigger position,
+       window position or width is still unknown */
 
-	if ( FSC2_MODE != EXPERIMENT &&
-		 ( ! tds_tmpl.is_timebase || ! tds_tmpl.is_rec_len ||
-		   ! tds_tmpl.is_trig_pos || ! w->is_start || ! w->is_width ) )
-		return;
+    if ( FSC2_MODE != EXPERIMENT &&
+         ( ! tds_tmpl.is_timebase || ! tds_tmpl.is_rec_len ||
+           ! tds_tmpl.is_trig_pos || ! w->is_start || ! w->is_width ) )
+        return;
 
-	/* Calculate the start and end position of the window in digitizer
-	   point units (take care: point numbers start with 1 and the end number
-	   is *included* when fetching a curve) */
+    /* Calculate the start and end position of the window in digitizer
+       point units (take care: point numbers start with 1 and the end number
+       is *included* when fetching a curve) */
 
     window = tds_tmpl.timebase * tds_tmpl.rec_len / TDS_TMPL_POINTS_PER_DIV;
 
-	w->start_num = lrnd( ( w->start + tds_tmpl.trig_pos * window )
-						 * TDS_TMPL_POINTS_PER_DIV / tds_tmpl.timebase ) + 1;
-	w->end_num = lrnd( ( w->start + w->width + tds_tmpl.trig_pos * window )
-						 * TDS_TMPL_POINTS_PER_DIV / tds_tmpl.timebase );
+    w->start_num = lrnd( ( w->start + tds_tmpl.trig_pos * window )
+                         * TDS_TMPL_POINTS_PER_DIV / tds_tmpl.timebase ) + 1;
+    w->end_num = lrnd( ( w->start + w->width + tds_tmpl.trig_pos * window )
+                         * TDS_TMPL_POINTS_PER_DIV / tds_tmpl.timebase );
 
-	fsc2_assert( w->start_num <= w->end_num );
+    fsc2_assert( w->start_num <= w->end_num );
 
-	/* Check that window does not start too early */
+    /* Check that window does not start too early */
 
-	if ( w->start_num < 1 )
-	{
-		if ( FSC2_MODE != EXPERIMENT )
-		{
-			print( FATAL, " %ld. window starts too early.\n",
-				   w->num - WINDOW_START_NUMBER );
-			THROW( EXCEPTION );
-		}
+    if ( w->start_num < 1 )
+    {
+        if ( FSC2_MODE != EXPERIMENT )
+        {
+            print( FATAL, " %ld. window starts too early.\n",
+                   w->num - WINDOW_START_NUMBER );
+            THROW( EXCEPTION );
+        }
 
-		/* Move the start position of the window to the first point */
+        /* Move the start position of the window to the first point */
 
-		w->start_num = 1;
-		start = - tds_tmpl.trig_pos * window;
+        w->start_num = 1;
+        start = - tds_tmpl.trig_pos * window;
 
-		/* If the end point is still within the record length nothing more
-		   got to be done, otherwise the window width has to be reduced */
+        /* If the end point is still within the record length nothing more
+           got to be done, otherwise the window width has to be reduced */
 
-		if ( w->end_num - w->start_num + 1 <= tds_tmpl.rec_len )
-		{
-			buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
-			print( SEVERE, "Position of %ld. window had to be shifted from "
-				   "%s to %s.\n", w->num - WINDOW_START_NUMBER, buf1,
-				   tds_tmpl_ptime( start ) );
-			T_free( buf1 );
+        if ( w->end_num - w->start_num + 1 <= tds_tmpl.rec_len )
+        {
+            buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
+            print( SEVERE, "Position of %ld. window had to be shifted from "
+                   "%s to %s.\n", w->num - WINDOW_START_NUMBER, buf1,
+                   tds_tmpl_ptime( start ) );
+            T_free( buf1 );
 
-			w->end_num = w->end_num - w->start_num + 1;
-			w->start = start;
-		}
-		else
-		{
-			w->end_num = tds_tmpl.rec_len;
-			width = w->end_num * tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
+            w->end_num = w->end_num - w->start_num + 1;
+            w->start = start;
+        }
+        else
+        {
+            w->end_num = tds_tmpl.rec_len;
+            width = w->end_num * tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
 
-			buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
-			buf2 = T_strdup( tds_tmpl_ptime( w->width ) );
-			buf3 = T_strdup( tds_tmpl_ptime( start ) );
+            buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
+            buf2 = T_strdup( tds_tmpl_ptime( w->width ) );
+            buf3 = T_strdup( tds_tmpl_ptime( start ) );
 
-			print( SEVERE, "Position and width of %ld. window had to be "
-				   "readjusted from %s and %s to %s and %s.\n",
-				   w->num - WINDOW_START_NUMBER, buf1, buf2, buf3,
-				   tds_tmpl_ptime( width ) );
+            print( SEVERE, "Position and width of %ld. window had to be "
+                   "readjusted from %s and %s to %s and %s.\n",
+                   w->num - WINDOW_START_NUMBER, buf1, buf2, buf3,
+                   tds_tmpl_ptime( width ) );
 
-			T_free( buf3 );
-			T_free( buf2 );
-			T_free( buf1 );
+            T_free( buf3 );
+            T_free( buf2 );
+            T_free( buf1 );
 
-			w->start = start;
-			w->width = width;
-		}
-	}
+            w->start = start;
+            w->width = width;
+        }
+    }
 
-	/* If the start position of the window is in the correct range but
-	   the end point is too late reduce the window width (at least if we're
-	   already running the experiment */
+    /* If the start position of the window is in the correct range but
+       the end point is too late reduce the window width (at least if we're
+       already running the experiment */
 
-	if ( w->start_num < tds_tmpl.rec_len && w->end_num > tds_tmpl.rec_len )
-	{
-		if ( FSC2_MODE == EXPERIMENT )
-		{
-			print( FATAL, "Width of %ld. window is too large.\n",
-				   w->num - WINDOW_START_NUMBER );
-			THROW( EXCEPTION );
-		}
+    if ( w->start_num < tds_tmpl.rec_len && w->end_num > tds_tmpl.rec_len )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+        {
+            print( FATAL, "Width of %ld. window is too large.\n",
+                   w->num - WINDOW_START_NUMBER );
+            THROW( EXCEPTION );
+        }
 
-		w->end_num = tds_tmpl.rec_len;
-		width = ( tds_tmpl.rec_len - w->start_num + 1 )
-				* tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
+        w->end_num = tds_tmpl.rec_len;
+        width = ( tds_tmpl.rec_len - w->start_num + 1 )
+                * tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
 
-		buf1 = T_strdup( tds_tmpl_ptime( w->width ) );
-		print( SEVERE, "Width of %ld. window had to be readjusted from %s to "
-			   "%s.\n", w->num - WINDOW_START_NUMBER, buf1,
-			   tds_tmpl_ptime( width ) );
-		T_free( buf1 );
+        buf1 = T_strdup( tds_tmpl_ptime( w->width ) );
+        print( SEVERE, "Width of %ld. window had to be readjusted from %s to "
+               "%s.\n", w->num - WINDOW_START_NUMBER, buf1,
+               tds_tmpl_ptime( width ) );
+        T_free( buf1 );
 
-		w->width = width;
-	}
+        w->width = width;
+    }
 
-	/* Check that the window doesn't start too late */
+    /* Check that the window doesn't start too late */
 
-	if ( w->start_num > tds_tmpl.rec_len )
-	{
-		if ( FSC2_MODE == EXPERIMENT )
-		{
-			print( FATAL, "%ld. window starts too late.\n",
-				   w->num - WINDOW_START_NUMBER );
-			THROW( EXCEPTION );
-		}
+    if ( w->start_num > tds_tmpl.rec_len )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+        {
+            print( FATAL, "%ld. window starts too late.\n",
+                   w->num - WINDOW_START_NUMBER );
+            THROW( EXCEPTION );
+        }
 
-		/* If the window width isn't larger than the record length shift
-		   the window start position to the latest possible point, otherwise
-		   use the whole record length */
+        /* If the window width isn't larger than the record length shift
+           the window start position to the latest possible point, otherwise
+           use the whole record length */
 
-		if ( w->end_num - w->start_num + 1 <= tds_tmpl.rec_len )
-		{
-			w->start_num = tds_tmpl.rec_len - ( w->end_num - w->start_num );
-			start = ( w->start_num - 1 )
-					* tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV
-					- tds_tmpl.trig_pos * window;
-			w->end_num = tds_tmpl.rec_len;
+        if ( w->end_num - w->start_num + 1 <= tds_tmpl.rec_len )
+        {
+            w->start_num = tds_tmpl.rec_len - ( w->end_num - w->start_num );
+            start = ( w->start_num - 1 )
+                    * tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV
+                    - tds_tmpl.trig_pos * window;
+            w->end_num = tds_tmpl.rec_len;
 
-			buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
-			print( SEVERE, "Position of %ld. window had to be shifted from "
-				   "%s to %s.\n", w->num - WINDOW_START_NUMBER, buf1,
-				   tds_tmpl_ptime( start ) );
-			T_free( buf1 );
+            buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
+            print( SEVERE, "Position of %ld. window had to be shifted from "
+                   "%s to %s.\n", w->num - WINDOW_START_NUMBER, buf1,
+                   tds_tmpl_ptime( start ) );
+            T_free( buf1 );
 
-			w->start = start;
-		}
-		else
-		{
-			w->start_num = 1;
-			start = - tds_tmpl.trig_pos * window;
-			w->end_num = tds_tmpl.rec_len;
-			width = tds_tmpl.rec_len
-					* tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
+            w->start = start;
+        }
+        else
+        {
+            w->start_num = 1;
+            start = - tds_tmpl.trig_pos * window;
+            w->end_num = tds_tmpl.rec_len;
+            width = tds_tmpl.rec_len
+                    * tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
 
-			buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
-			buf2 = T_strdup( tds_tmpl_ptime( w->width ) );
-			buf3 = T_strdup( tds_tmpl_ptime( start ) );
+            buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
+            buf2 = T_strdup( tds_tmpl_ptime( w->width ) );
+            buf3 = T_strdup( tds_tmpl_ptime( start ) );
 
-			print( SEVERE, "Position and width of %ld. window had to be "
-				   "readjusted from %s and %s to %s and %s.\n",
-				   w->num - WINDOW_START_NUMBER, buf1, buf2, buf3,
-				   tds_tmpl_ptime( width ) );
+            print( SEVERE, "Position and width of %ld. window had to be "
+                   "readjusted from %s and %s to %s and %s.\n",
+                   w->num - WINDOW_START_NUMBER, buf1, buf2, buf3,
+                   tds_tmpl_ptime( width ) );
 
-			T_free( buf3 );
-			T_free( buf2 );
-			T_free( buf1 );
+            T_free( buf3 );
+            T_free( buf2 );
+            T_free( buf1 );
 
-			w->start = start;
-			w->width = width;
-		}
-	}
+            w->start = start;
+            w->width = width;
+        }
+    }
 }
 
 
@@ -466,167 +466,167 @@ static void tds_tmpl_window_check_3( Window_T * w )
  *--------------------------------------------------------------*/
 
 long tds_tmpl_translate_channel( int  dir,
-								 long channel,
-								 bool flag )
+                                 long channel,
+                                 bool flag )
 {
-	if ( dir == GENERAL_TO_TDS_TMPL )
-	{
-		switch ( channel )
-		{
-			case CHANNEL_CH1 :
-				return TDS_TMPL_CH1;
+    if ( dir == GENERAL_TO_TDS_TMPL )
+    {
+        switch ( channel )
+        {
+            case CHANNEL_CH1 :
+                return TDS_TMPL_CH1;
 
-			case CHANNEL_CH2 :
-				return TDS_TMPL_CH2;
-			case CHANNEL_CH3 :
+            case CHANNEL_CH2 :
+                return TDS_TMPL_CH2;
+            case CHANNEL_CH3 :
 #ifdef TDS_TMPL_CH3
-				return TDS_TMPL_CH3;
+                return TDS_TMPL_CH3;
 #else
-				if ( flag )
-					return -1;
-				print( FATAL, "Digitizer has no channel %s.\n",
-					   Channel_Names[ channel ] );
-				THROW( EXCEPTION );
+                if ( flag )
+                    return -1;
+                print( FATAL, "Digitizer has no channel %s.\n",
+                       Channel_Names[ channel ] );
+                THROW( EXCEPTION );
 #endif
-			case CHANNEL_CH4 :
+            case CHANNEL_CH4 :
 #ifdef TDS_TMPL_CH4
-				return TDS_TMPL_CH4;
+                return TDS_TMPL_CH4;
 #else
-				if ( flag )
-					return -1;
-				print( FATAL, "Digitizer has no channel %s.\n",
-					   Channel_Names[ channel ] );
-				THROW( EXCEPTION );
+                if ( flag )
+                    return -1;
+                print( FATAL, "Digitizer has no channel %s.\n",
+                       Channel_Names[ channel ] );
+                THROW( EXCEPTION );
 #endif
-			case CHANNEL_MATH1 :
-				return TDS_TMPL_MATH1;
+            case CHANNEL_MATH1 :
+                return TDS_TMPL_MATH1;
 
-			case CHANNEL_MATH2 :
-				return TDS_TMPL_MATH2;
+            case CHANNEL_MATH2 :
+                return TDS_TMPL_MATH2;
 
-			case CHANNEL_MATH3 :
-				return TDS_TMPL_MATH3;
+            case CHANNEL_MATH3 :
+                return TDS_TMPL_MATH3;
 
-			case CHANNEL_REF1 :
-				return TDS_TMPL_REF1;
+            case CHANNEL_REF1 :
+                return TDS_TMPL_REF1;
 
-			case CHANNEL_REF2 :
-				return TDS_TMPL_REF2;
+            case CHANNEL_REF2 :
+                return TDS_TMPL_REF2;
 
-			case CHANNEL_REF3 :
-				return TDS_TMPL_REF3;
+            case CHANNEL_REF3 :
+                return TDS_TMPL_REF3;
 
-			case CHANNEL_REF4 :
-				return TDS_TMPL_REF4;
+            case CHANNEL_REF4 :
+                return TDS_TMPL_REF4;
 
-			case CHANNEL_AUX :
+            case CHANNEL_AUX :
 #ifdef TDS_TMPL_AUX
-				return TDS_TMPL_AUX;
+                return TDS_TMPL_AUX;
 #else
-				if ( flag )
-					return -1;
-				print( FATAL, "Digitizer has no channel %s.\n",
-					   Channel_Names[ channel ] );
-				THROW( EXCEPTION );
+                if ( flag )
+                    return -1;
+                print( FATAL, "Digitizer has no channel %s.\n",
+                       Channel_Names[ channel ] );
+                THROW( EXCEPTION );
 #endif
-			case CHANNEL_AUX1 :
+            case CHANNEL_AUX1 :
 #ifdef TDS_TMPL_AUX1
-				return TDS_TMPL_AUX1;
+                return TDS_TMPL_AUX1;
 #else
-				if ( flag )
-					return -1;
-				print( FATAL, "Digitizer has no channel %s.\n",
-					   Channel_Names[ channel ] );
-				THROW( EXCEPTION );
+                if ( flag )
+                    return -1;
+                print( FATAL, "Digitizer has no channel %s.\n",
+                       Channel_Names[ channel ] );
+                THROW( EXCEPTION );
 #endif
-			case CHANNEL_AUX2 :
+            case CHANNEL_AUX2 :
 #ifdef TDS_TMPL_AUX2
-				return TDS_TMPL_AUX2;
+                return TDS_TMPL_AUX2;
 #else
-				if ( flag )
-					return -1;
-				print( FATAL, "Digitizer has no channel %s.\n",
-					   Channel_Names[ channel ] );
-				THROW( EXCEPTION );
+                if ( flag )
+                    return -1;
+                print( FATAL, "Digitizer has no channel %s.\n",
+                       Channel_Names[ channel ] );
+                THROW( EXCEPTION );
 #endif
-			case CHANNEL_LINE :
-				return TDS_TMPL_LIN;
-		}
+            case CHANNEL_LINE :
+                return TDS_TMPL_LIN;
+        }
 
-		if ( channel > CHANNEL_INVALID && channel < NUM_CHANNEL_NAMES )
-		{
-			if ( flag )
-				return -1;
-			print( FATAL, "Digitizer has no channel %s.\n",
-				   Channel_Names[ channel ] );
-			THROW( EXCEPTION );
-		}
+        if ( channel > CHANNEL_INVALID && channel < NUM_CHANNEL_NAMES )
+        {
+            if ( flag )
+                return -1;
+            print( FATAL, "Digitizer has no channel %s.\n",
+                   Channel_Names[ channel ] );
+            THROW( EXCEPTION );
+        }
 
-		if ( flag )
-			return -1;
-		print( FATAL, "Invalid channel number %ld.\n", channel );
-		THROW( EXCEPTION );
-	}
-	else
-	{
-		switch ( channel )
-		{
-			case TDS_TMPL_CH1 :
-				return CHANNEL_CH1;
+        if ( flag )
+            return -1;
+        print( FATAL, "Invalid channel number %ld.\n", channel );
+        THROW( EXCEPTION );
+    }
+    else
+    {
+        switch ( channel )
+        {
+            case TDS_TMPL_CH1 :
+                return CHANNEL_CH1;
 
-			case TDS_TMPL_CH2 :
-				return CHANNEL_CH2;
+            case TDS_TMPL_CH2 :
+                return CHANNEL_CH2;
 #ifdef TDS_TMPL_CH3
-			case TDS_TMPL_CH3 :
-				return CHANNEL_CH3;
+            case TDS_TMPL_CH3 :
+                return CHANNEL_CH3;
 #endif
 #ifdef TDS_TMPL_CH4
-			case TDS_TMPL_CH4 :
-				return CHANNEL_CH4;
+            case TDS_TMPL_CH4 :
+                return CHANNEL_CH4;
 #endif
-			case TDS_TMPL_MATH1 :
-				return CHANNEL_MATH1;
+            case TDS_TMPL_MATH1 :
+                return CHANNEL_MATH1;
 
-			case TDS_TMPL_MATH2 :
-				return CHANNEL_MATH2;
+            case TDS_TMPL_MATH2 :
+                return CHANNEL_MATH2;
 
-			case TDS_TMPL_MATH3 :
-				return CHANNEL_MATH3;
+            case TDS_TMPL_MATH3 :
+                return CHANNEL_MATH3;
 
-			case TDS_TMPL_REF1 :
-				return CHANNEL_REF1;
+            case TDS_TMPL_REF1 :
+                return CHANNEL_REF1;
 
-			case TDS_TMPL_REF2 :
-				return CHANNEL_REF2;
+            case TDS_TMPL_REF2 :
+                return CHANNEL_REF2;
 
-			case TDS_TMPL_REF3 :
-				return CHANNEL_REF3;
+            case TDS_TMPL_REF3 :
+                return CHANNEL_REF3;
 
-			case TDS_TMPL_REF4 :
-				return CHANNEL_REF4;
+            case TDS_TMPL_REF4 :
+                return CHANNEL_REF4;
 #ifdef TDS_TMPL_AUX
-			case TDS_TMPL_AUX :
-				return CHANNEL_AUX;
+            case TDS_TMPL_AUX :
+                return CHANNEL_AUX;
 #endif
 #ifdef TDS_TMPL_AUX1
-			case TDS_TMPL_AUX1 :
-				return CHANNEL_AUX1;
+            case TDS_TMPL_AUX1 :
+                return CHANNEL_AUX1;
 #endif
 #ifdef TDS_TMPL_AUX2
-			case TDS_TMPL_AUX2 :
-				return CHANNEL_AUX2;
+            case TDS_TMPL_AUX2 :
+                return CHANNEL_AUX2;
 #endif
-			case TDS_TMPL_LIN :
-				return CHANNEL_LINE;
+            case TDS_TMPL_LIN :
+                return CHANNEL_LINE;
 
-			default :
-				print( FATAL, "Internal error detected at %s:%d.\n",
-					   __FILE__, __LINE__ );
-				THROW( EXCEPTION );
-		}
-	}
+            default :
+                print( FATAL, "Internal error detected at %s:%d.\n",
+                       __FILE__, __LINE__ );
+                THROW( EXCEPTION );
+        }
+    }
 
-	return -1;
+    return -1;
 }
 
 
@@ -644,38 +644,38 @@ long tds_tmpl_translate_channel( int  dir,
  *-----------------------------------------------------------------*/
 
 void tds_tmpl_store_state( TDS_TMPL_T * dest,
-						   TDS_TMPL_T * src )
+                           TDS_TMPL_T * src )
 {
-	Window_T *w, *dw;
+    Window_T *w, *dw;
 
 
-	while ( dest->w != NULL )
-	{
-		w = dest->w;
-		dest->w = w->next;
-		T_free( w );
-	}
+    while ( dest->w != NULL )
+    {
+        w = dest->w;
+        dest->w = w->next;
+        T_free( w );
+    }
 
-	*dest = *src;
+    *dest = *src;
 
-	if ( src->w == NULL )
-	{
-		dest->w = NULL;
-		return;
-	}
+    if ( src->w == NULL )
+    {
+        dest->w = NULL;
+        return;
+    }
 
-	dw = dest->w = WINDOW_P T_malloc( sizeof *dw );
-	*dest->w = *src->w;
-	dest->w->next = dest->w->prev = NULL;
+    dw = dest->w = WINDOW_P T_malloc( sizeof *dw );
+    *dest->w = *src->w;
+    dest->w->next = dest->w->prev = NULL;
 
-	for ( w = src->w->next; w != NULL; w = w->next )
-	{
-		dw->next = WINDOW_P T_malloc( sizeof *dw->next );
-		*dw->next = *w;
-		dw->next->prev = dw;
-		dw = dw->next;
-		dw->next = NULL;
-	}
+    for ( w = src->w->next; w != NULL; w = w->next )
+    {
+        dw->next = WINDOW_P T_malloc( sizeof *dw->next );
+        *dw->next = *w;
+        dw->next->prev = dw;
+        dw = dw->next;
+        dw->next = NULL;
+    }
 }
 
 
@@ -693,131 +693,131 @@ void tds_tmpl_store_state( TDS_TMPL_T * dest,
  *--------------------------------------------------------------*/
 
 void tds_tmpl_state_check( double timebase,
-						   long   rec_len,
-						   double trig_pos )
+                           long   rec_len,
+                           double trig_pos )
 {
-	Window_T *w;
-	double window;
-	char *buf1, *buf2, *buf3;
-	double start, width;
-	double w1, w2;
+    Window_T *w;
+    double window;
+    char *buf1, *buf2, *buf3;
+    double start, width;
+    double w1, w2;
 
 
-	/* During the experiment we don't care about the arguments passed to the
-	   function but ask the digitizer (and do nothing if they didn't change).
-	   During the test run or preparation we can do the checks only if the
-	   timebase, record length and trigger position have already been set. */
+    /* During the experiment we don't care about the arguments passed to the
+       function but ask the digitizer (and do nothing if they didn't change).
+       During the test run or preparation we can do the checks only if the
+       timebase, record length and trigger position have already been set. */
 
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		if ( ( timebase = tds_tmpl_get_timebase( ) ) == tds_tmpl.timebase &&
-			 ( rec_len = tds_tmpl_get_record_length( ) ) == tds_tmpl.rec_len &&
-			 ( trig_pos = tds_tmpl_get_trigger_pos( ) ) == tds_tmpl.trig_pos )
-			return;
-	}
-	else
-	{
-		if ( ! tds_tmpl.is_timebase || ! tds_tmpl.is_rec_len ||
-			 ! tds_tmpl.is_trig_pos )
-			return;
-	}
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        if ( ( timebase = tds_tmpl_get_timebase( ) ) == tds_tmpl.timebase &&
+             ( rec_len = tds_tmpl_get_record_length( ) ) == tds_tmpl.rec_len &&
+             ( trig_pos = tds_tmpl_get_trigger_pos( ) ) == tds_tmpl.trig_pos )
+            return;
+    }
+    else
+    {
+        if ( ! tds_tmpl.is_timebase || ! tds_tmpl.is_rec_len ||
+             ! tds_tmpl.is_trig_pos )
+            return;
+    }
 
-	/* In principle, the windows should simply stay at their positions (as
-	   the cursors do) but if the record length got smaller we have to do
-	   also some checking and, if necessary, readjustments.
-	   But there's a small amount of time where we may *not* do this and
-	   this is during the initialisation of the device when we just have
-	   set a new time base but haven't checked and set up the windows yet -
-	   in this case the values stored in the windows structures are still
-	   bogus and the following would lead to wrong error messages. */
+    /* In principle, the windows should simply stay at their positions (as
+       the cursors do) but if the record length got smaller we have to do
+       also some checking and, if necessary, readjustments.
+       But there's a small amount of time where we may *not* do this and
+       this is during the initialisation of the device when we just have
+       set a new time base but haven't checked and set up the windows yet -
+       in this case the values stored in the windows structures are still
+       bogus and the following would lead to wrong error messages. */
 
     window = timebase * rec_len / TDS_TMPL_POINTS_PER_DIV;
 
-	if ( tds_tmpl.windows_are_checked )
-		for ( w = tds_tmpl.w; w != NULL; w = w->next )
-		{
-			if ( rec_len < tds_tmpl.rec_len )
-			{
-				/* If the start of window is still within the valid range but
-				   the end is too late reduce the length. */
+    if ( tds_tmpl.windows_are_checked )
+        for ( w = tds_tmpl.w; w != NULL; w = w->next )
+        {
+            if ( rec_len < tds_tmpl.rec_len )
+            {
+                /* If the start of window is still within the valid range but
+                   the end is too late reduce the length. */
 
-				if ( w->start_num < rec_len && w->end_num > rec_len )
-				{
-					w->end_num = rec_len;
-					width = ( rec_len - w->start_num + 1 )
-					    	* timebase / TDS_TMPL_POINTS_PER_DIV;
+                if ( w->start_num < rec_len && w->end_num > rec_len )
+                {
+                    w->end_num = rec_len;
+                    width = ( rec_len - w->start_num + 1 )
+                            * timebase / TDS_TMPL_POINTS_PER_DIV;
 
-					buf1 = T_strdup( tds_tmpl_ptime( w->width ) );
-					print( SEVERE, "Width of %ld. window had to be readjusted "
-						   "from %s to %s.\n", w->num - WINDOW_START_NUMBER,
-						   buf1, tds_tmpl_ptime( width ) );
-					T_free( buf1 );
+                    buf1 = T_strdup( tds_tmpl_ptime( w->width ) );
+                    print( SEVERE, "Width of %ld. window had to be readjusted "
+                           "from %s to %s.\n", w->num - WINDOW_START_NUMBER,
+                           buf1, tds_tmpl_ptime( width ) );
+                    T_free( buf1 );
 
-					w->width = width;
-				}
-				else if ( w->start_num > rec_len )
-				{
-					/* If the window width isn't larger than the record length
-					   shift the window start position to the latest possible
-					   point, otherwise use the whole record length */
+                    w->width = width;
+                }
+                else if ( w->start_num > rec_len )
+                {
+                    /* If the window width isn't larger than the record length
+                       shift the window start position to the latest possible
+                       point, otherwise use the whole record length */
 
-					if ( w->end_num - w->start_num + 1 <= rec_len )
-					{
-						w->start_num = rec_len - ( w->end_num - w->start_num );
-						start = ( w->start_num - 1 )
-								* timebase / TDS_TMPL_POINTS_PER_DIV
-								- trig_pos * window;
-						w->end_num = rec_len;
+                    if ( w->end_num - w->start_num + 1 <= rec_len )
+                    {
+                        w->start_num = rec_len - ( w->end_num - w->start_num );
+                        start = ( w->start_num - 1 )
+                                * timebase / TDS_TMPL_POINTS_PER_DIV
+                                - trig_pos * window;
+                        w->end_num = rec_len;
 
-						buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
-						print( SEVERE, "Position of %ld. window had to be "
-							   "shifted from %s to %s.\n",
-							   w->num - WINDOW_START_NUMBER, buf1,
-							   tds_tmpl_ptime( start ) );
-						T_free( buf1 );
-					}
-					else
-					{
-						w->start_num = 1;
-						start = - trig_pos * window;
-						w->end_num = rec_len;
-						width = rec_len * timebase / TDS_TMPL_POINTS_PER_DIV;
+                        buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
+                        print( SEVERE, "Position of %ld. window had to be "
+                               "shifted from %s to %s.\n",
+                               w->num - WINDOW_START_NUMBER, buf1,
+                               tds_tmpl_ptime( start ) );
+                        T_free( buf1 );
+                    }
+                    else
+                    {
+                        w->start_num = 1;
+                        start = - trig_pos * window;
+                        w->end_num = rec_len;
+                        width = rec_len * timebase / TDS_TMPL_POINTS_PER_DIV;
 
-						buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
-						buf2 = T_strdup( tds_tmpl_ptime( w->width ) );
-						buf3 = T_strdup( tds_tmpl_ptime( start ) );
+                        buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
+                        buf2 = T_strdup( tds_tmpl_ptime( w->width ) );
+                        buf3 = T_strdup( tds_tmpl_ptime( start ) );
 
-						print( SEVERE, "Position and width of %ld. window had "
-							   "to be readjusted from %s and %s to %s and "
-							   "%s.\n", w->num - WINDOW_START_NUMBER, buf1,
-							   buf2, buf3, tds_tmpl_ptime( width ) );
+                        print( SEVERE, "Position and width of %ld. window had "
+                               "to be readjusted from %s and %s to %s and "
+                               "%s.\n", w->num - WINDOW_START_NUMBER, buf1,
+                               buf2, buf3, tds_tmpl_ptime( width ) );
 
-						T_free( buf3 );
-						T_free( buf2 );
-						T_free( buf1 );
-					}
-				}
-			}
+                        T_free( buf3 );
+                        T_free( buf2 );
+                        T_free( buf1 );
+                    }
+                }
+            }
 
-			/* Recalculate the windows start time and width (we assume it just
-			   stays in exacty the same position) */
+            /* Recalculate the windows start time and width (we assume it just
+               stays in exacty the same position) */
 
-			w->start = ( w->start_num - 1 ) * timebase
-					   / TDS_TMPL_POINTS_PER_DIV - trig_pos * window;
-			w->width = ( w->end_num - 1 ) * timebase / TDS_TMPL_POINTS_PER_DIV
-				   	   - trig_pos * window - w->start;
-		}
+            w->start = ( w->start_num - 1 ) * timebase
+                       / TDS_TMPL_POINTS_PER_DIV - trig_pos * window;
+            w->width = ( w->end_num - 1 ) * timebase / TDS_TMPL_POINTS_PER_DIV
+                       - trig_pos * window - w->start;
+        }
 
-	tds_tmpl.timebase = timebase;
-	tds_tmpl.rec_len  = rec_len;
-	tds_tmpl.trig_pos = trig_pos;
+    tds_tmpl.timebase = timebase;
+    tds_tmpl.rec_len  = rec_len;
+    tds_tmpl.trig_pos = trig_pos;
 
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		w1 = tds_tmpl_get_cursor_position( 1 );
-		w2 = tds_tmpl_get_cursor_position( 2 );
-		tds_tmpl.cursor_pos = d_min( w1, w2 );
-	}
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        w1 = tds_tmpl_get_cursor_position( 1 );
+        w2 = tds_tmpl_get_cursor_position( 2 );
+        tds_tmpl.cursor_pos = d_min( w1, w2 );
+    }
 }
 
 
@@ -837,49 +837,49 @@ void tds_tmpl_state_check( double timebase,
 
 void tds_tmpl_set_tracking( Window_T * w )
 {
-	Window_T *ww;
-	double window;
+    Window_T *ww;
+    double window;
 
 
-	/* Check if we can use tracking cursors, i.e. if all window widths are
-	   equal */
+    /* Check if we can use tracking cursors, i.e. if all window widths are
+       equal */
 
-	tds_tmpl.is_equal_width = SET;
+    tds_tmpl.is_equal_width = SET;
 
-	if ( tds_tmpl.w != NULL )
-		for ( ww = tds_tmpl.w->next; ww != NULL; ww = ww->next )
-			if ( tds_tmpl.w->width != ww->width )
-			{
-				tds_tmpl.is_equal_width = UNSET;
-				break;
-			}
+    if ( tds_tmpl.w != NULL )
+        for ( ww = tds_tmpl.w->next; ww != NULL; ww = ww->next )
+            if ( tds_tmpl.w->width != ww->width )
+            {
+                tds_tmpl.is_equal_width = UNSET;
+                break;
+            }
 
-	/* Set the cursor to the positions of the window we got passed as
-	   argument (switch off tracking before we do so) and then switch
-	   tracking cursors on if the window widths are all equal. */
+    /* Set the cursor to the positions of the window we got passed as
+       argument (switch off tracking before we do so) and then switch
+       tracking cursors on if the window widths are all equal. */
 
     window = tds_tmpl.timebase * tds_tmpl.rec_len / TDS_TMPL_POINTS_PER_DIV;
 
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		tds_tmpl_set_track_cursors( UNSET );
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        tds_tmpl_set_track_cursors( UNSET );
 
-		if ( w != NULL )
-		{
-			tds_tmpl_set_cursor( 1, w->start );
-			tds_tmpl_set_cursor( 2, w->start + w->width );
-		}
-		else
-		{
-			tds_tmpl_set_cursor( 1, - tds_tmpl.trig_pos * window );
-			tds_tmpl_set_cursor( 2, ( 1.0 - tds_tmpl.trig_pos ) * window );
-		}
-	}
+        if ( w != NULL )
+        {
+            tds_tmpl_set_cursor( 1, w->start );
+            tds_tmpl_set_cursor( 2, w->start + w->width );
+        }
+        else
+        {
+            tds_tmpl_set_cursor( 1, - tds_tmpl.trig_pos * window );
+            tds_tmpl_set_cursor( 2, ( 1.0 - tds_tmpl.trig_pos ) * window );
+        }
+    }
 
-	tds_tmpl.cursor_pos = w != NULL ? w->start : - tds_tmpl.trig_pos * window;
+    tds_tmpl.cursor_pos = w != NULL ? w->start : - tds_tmpl.trig_pos * window;
 
-	if ( FSC2_MODE == EXPERIMENT )
-		tds_tmpl_set_track_cursors( tds_tmpl.is_equal_width );
+    if ( FSC2_MODE == EXPERIMENT )
+        tds_tmpl_set_track_cursors( tds_tmpl.is_equal_width );
 }
 
 
@@ -895,30 +895,30 @@ void tds_tmpl_set_tracking( Window_T * w )
 
 void tds_tmpl_set_meas_window( Window_T * w )
 {
-	if ( w != NULL )
-	{
-		/* Set the cursor positions */
+    if ( w != NULL )
+    {
+        /* Set the cursor positions */
 
-		tds_tmpl_set_window( w );
+        tds_tmpl_set_window( w );
 
-		/* If not already in gated measurement state set it now */
+        /* If not already in gated measurement state set it now */
 
-		if ( ! tds_tmpl.gated_state )
-		{
-			tds_tmpl_set_gated_meas( SET );
-			tds_tmpl.gated_state = SET;
-		}
-	}
-	else
-	{
-		/* If in gated measurement state switch it off */
+        if ( ! tds_tmpl.gated_state )
+        {
+            tds_tmpl_set_gated_meas( SET );
+            tds_tmpl.gated_state = SET;
+        }
+    }
+    else
+    {
+        /* If in gated measurement state switch it off */
 
-		if ( tds_tmpl.gated_state )
-		{
-			tds_tmpl_set_gated_meas( UNSET );
-			tds_tmpl.gated_state = UNSET;
-		}
-	}
+        if ( tds_tmpl.gated_state )
+        {
+            tds_tmpl_set_gated_meas( UNSET );
+            tds_tmpl.gated_state = UNSET;
+        }
+    }
 }
 
 
@@ -931,18 +931,18 @@ void tds_tmpl_set_meas_window( Window_T * w )
 
 void tds_tmpl_set_curve_window( Window_T * w )
 {
-	if ( w != NULL )
-	{
-		tds_tmpl_set_window( w );
+    if ( w != NULL )
+    {
+        tds_tmpl_set_window( w );
 
-		tds_tmpl_set_snap( SET );
-		tds_tmpl.snap_state = SET;
-	}
-	else if ( tds_tmpl.snap_state )
-	{
-		tds_tmpl_set_snap( UNSET );
-		tds_tmpl.snap_state = UNSET;
-	}
+        tds_tmpl_set_snap( SET );
+        tds_tmpl.snap_state = SET;
+    }
+    else if ( tds_tmpl.snap_state )
+    {
+        tds_tmpl_set_snap( UNSET );
+        tds_tmpl.snap_state = UNSET;
+    }
 }
 
 
@@ -956,25 +956,25 @@ void tds_tmpl_set_curve_window( Window_T * w )
 
 void tds_tmpl_set_window( Window_T * w )
 {
-	/* If all windows have the same width we only have to set the first
-	   cursor (and only if its not already at the correct position),
-	   otherwise we have to set both cursors */
+    /* If all windows have the same width we only have to set the first
+       cursor (and only if its not already at the correct position),
+       otherwise we have to set both cursors */
 
-	if ( tds_tmpl.is_equal_width )
-	{
-		if ( tds_tmpl.cursor_pos != w->start )
-		{
-			tds_tmpl_set_cursor( 1, w->start );
-			tds_tmpl.cursor_pos = w->start;
-		}
-	}
-	else
-	{
-		tds_tmpl_set_cursor( 1, w->start );
-		tds_tmpl_set_cursor( 2, w->start + w->width );
-	}
+    if ( tds_tmpl.is_equal_width )
+    {
+        if ( tds_tmpl.cursor_pos != w->start )
+        {
+            tds_tmpl_set_cursor( 1, w->start );
+            tds_tmpl.cursor_pos = w->start;
+        }
+    }
+    else
+    {
+        tds_tmpl_set_cursor( 1, w->start );
+        tds_tmpl_set_cursor( 2, w->start + w->width );
+    }
 
-	tds_tmpl.cursor_pos = w->start;
+    tds_tmpl.cursor_pos = w->start;
 }
 
 #endif
@@ -985,22 +985,24 @@ void tds_tmpl_set_window( Window_T * w )
 
 Window_T *tds_tmpl_get_window_by_number( long win_num )
 {
-	Window_T *w;
+    Window_T *w;
 
-	if ( win_num >= WINDOW_START_NUMBER )
-		for ( w = tds_tmpl.w; w != NULL; w = w->next )
-			if ( w->num == win_num )
-				return w;
+    if ( win_num >= WINDOW_START_NUMBER )
+        for ( w = tds_tmpl.w; w != NULL; w = w->next )
+            if ( w->num == win_num )
+                return w;
 
-	print( FATAL, "Argument isn't a valid window number.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Argument isn't a valid window number.\n" );
+    THROW( EXCEPTION );
 
-	return NULL;
+    return NULL;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

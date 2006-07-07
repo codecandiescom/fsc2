@@ -22,9 +22,9 @@
  */
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap stack nounput never-interactive
 
@@ -43,7 +43,7 @@ static void set_name( char * name );
 
 static int rb_pulser_j_lex( void );
 static long rb_pulser_j_Lc,
-			rb_pulser_j_Comm_Lc;
+            rb_pulser_j_Comm_Lc;
 static int cur_delay = INVALID_DELAY_NUMBER;
 static int cur_clock = INVALID_CLOCK_NUMBER;
 
@@ -64,67 +64,67 @@ NAME     \"[^"]*\"
 %x      comm
 
 
-		/*---------------*/
-%%		/*     RULES     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     RULES     */
+        /*---------------*/
 
 
             /* handling of C++ and bash style comment spanning a whole line */
-{REM1}		rb_pulser_j_Lc++;
+{REM1}      rb_pulser_j_Lc++;
 
-			/* handling of C++/bash style comment not spanning a whole line */
-{REM2}		rb_pulser_j_Lc++;
+            /* handling of C++/bash style comment not spanning a whole line */
+{REM2}      rb_pulser_j_Lc++;
 
-			/* handling of C style comment */
-{REM3}		{
-				rb_pulser_j_Comm_Lc = rb_pulser_j_Lc;
-				yy_push_state( comm );
-			}
+            /* handling of C style comment */
+{REM3}      {
+                rb_pulser_j_Comm_Lc = rb_pulser_j_Lc;
+                yy_push_state( comm );
+            }
 
 <comm>{
 
-{REM4}		/* skipping anything that's not a '*' */
+{REM4}      /* skipping anything that's not a '*' */
 {REM5}      /* skipping all '*'s not followed by '/'s */
 
-			/* end of line character in a comment */
-\n			rb_pulser_j_Lc++;
+            /* end of line character in a comment */
+\n          rb_pulser_j_Lc++;
 
-			/* handling of EOF within a comment -> fatal error */
-<<EOF>> 	{
-				print( FATAL, "End of configuration file '%s' detected within "
-							  "a comment.\n", rb_pulser_j.config_file );
-				THROW( EXCEPTION );
-			}
+            /* handling of EOF within a comment -> fatal error */
+<<EOF>>     {
+                print( FATAL, "End of configuration file '%s' detected within "
+                              "a comment.\n", rb_pulser_j.config_file );
+                THROW( EXCEPTION );
+            }
 
-			/* end of comment but not end of line */
-{EREM1}		yy_pop_state( );
+            /* end of comment but not end of line */
+{EREM1}     yy_pop_state( );
 
-			/* end of comment and end of line */
+            /* end of comment and end of line */
 {EREM2}     {
-				rb_pulser_j_Lc++;
-				yy_pop_state( );
-			}
+                rb_pulser_j_Lc++;
+                yy_pop_state( );
+            }
 } /* end of <comm> */
 
 {EREM1}     {
-				print( FATAL, "End of comment indicator (\"*/\") without "
-					   "previous start of comment in configuration file '%s' "
-					   "at line %ld.\n", rb_pulser_j.config_file,
-					   rb_pulser_j_Lc );
-				THROW( EXCEPTION );
-			}
+                print( FATAL, "End of comment indicator (\"*/\") without "
+                       "previous start of comment in configuration file '%s' "
+                       "at line %ld.\n", rb_pulser_j.config_file,
+                       rb_pulser_j_Lc );
+                THROW( EXCEPTION );
+            }
 
-			/* dump empty line (i.e. just containing tabs and spaces) */
+            /* dump empty line (i.e. just containing tabs and spaces) */
 {WLWS}      rb_pulser_j_Lc++;
 
-			/* dumps trailing white space */
+            /* dumps trailing white space */
 {TWS}       rb_pulser_j_Lc++;
 
-			/* dump all other forms of white space as well as units */
+            /* dump all other forms of white space as well as units */
 {WS}
 
-			/* count lines */
-\n			rb_pulser_j_Lc++;
+            /* count lines */
+\n          rb_pulser_j_Lc++;
 
 "ERT_DELAY_CARD"        set_cur_delay( ERT_DELAY );
 "INIT_DELAY_CARD"       set_cur_delay( INIT_DELAY );
@@ -141,18 +141,18 @@ NAME     \"[^"]*\"
 
 {NAME}                  set_name( rb_pulser_j_text );
 
-<<EOF>>		return 0;
+<<EOF>>     return 0;
 
 .           {
-				print( FATAL, "Invalid input in configuration file '%s' at "
-					   "line %ld.\n", rb_pulser_j.config_file,
-					   rb_pulser_j_Lc );
-				THROW( EXCEPTION );
-			}
+                print( FATAL, "Invalid input in configuration file '%s' at "
+                       "line %ld.\n", rb_pulser_j.config_file,
+                       rb_pulser_j_Lc );
+                THROW( EXCEPTION );
+            }
 
-		/*----------------------*/
-%%		/*     END OF RULES     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     END OF RULES     */
+        /*----------------------*/
 
 
 /*-------------------------------------------------------------*
@@ -160,15 +160,15 @@ NAME     \"[^"]*\"
 
 static void set_cur_delay( int card_no )
 {
-	if ( cur_delay != INVALID_DELAY_NUMBER ||
-		 cur_clock != INVALID_CLOCK_NUMBER )
-	{
-		print( FATAL, "Invalid input in configuration file '%s' at "
-			   "line %ld.\n", rb_pulser_j.config_file, rb_pulser_j_Lc );
-		THROW( EXCEPTION );
-	}
+    if ( cur_delay != INVALID_DELAY_NUMBER ||
+         cur_clock != INVALID_CLOCK_NUMBER )
+    {
+        print( FATAL, "Invalid input in configuration file '%s' at "
+               "line %ld.\n", rb_pulser_j.config_file, rb_pulser_j_Lc );
+        THROW( EXCEPTION );
+    }
 
-	cur_delay = card_no;
+    cur_delay = card_no;
 }
 
 /*-------------------------------------------------------------*
@@ -176,15 +176,15 @@ static void set_cur_delay( int card_no )
 
 static void set_cur_clock( int clock_no )
 {
-	if ( cur_delay != INVALID_DELAY_NUMBER ||
-		 cur_clock != INVALID_CLOCK_NUMBER )
-	{
-		print( FATAL, "Invalid input in configuration file '%s' at "
-			   "line %ld.\n", rb_pulser_j.config_file, rb_pulser_j_Lc );
-		THROW( EXCEPTION );
-	}
+    if ( cur_delay != INVALID_DELAY_NUMBER ||
+         cur_clock != INVALID_CLOCK_NUMBER )
+    {
+        print( FATAL, "Invalid input in configuration file '%s' at "
+               "line %ld.\n", rb_pulser_j.config_file, rb_pulser_j_Lc );
+        THROW( EXCEPTION );
+    }
 
-	cur_clock = clock_no;
+    cur_clock = clock_no;
 }
 
 
@@ -193,65 +193,65 @@ static void set_cur_clock( int clock_no )
 
 static void set_name( char * name )
 {
-	/* Make sure either a delay or a clock card has been selected for the
-	   name */
+    /* Make sure either a delay or a clock card has been selected for the
+       name */
 
-	if ( cur_delay == INVALID_DELAY_NUMBER &&
-		 cur_clock == INVALID_CLOCK_NUMBER )
-	{
-		print( FATAL, "Invalid input in configuration file '%s' at "
-			   "line %ld.\n", rb_pulser_j.config_file, rb_pulser_j_Lc );
-		THROW( EXCEPTION );
-	}
+    if ( cur_delay == INVALID_DELAY_NUMBER &&
+         cur_clock == INVALID_CLOCK_NUMBER )
+    {
+        print( FATAL, "Invalid input in configuration file '%s' at "
+               "line %ld.\n", rb_pulser_j.config_file, rb_pulser_j_Lc );
+        THROW( EXCEPTION );
+    }
 
-	/* Don't accept names with an embedded line break */
+    /* Don't accept names with an embedded line break */
 
-	if ( strrchr( rb_pulser_j_text, '\n' ) != NULL )
-	{
-		print( FATAL, "Invalid input in configuration file '%s' at "
-			   "line %ld, card name contains a line break\n",
-			   rb_pulser_j.config_file, rb_pulser_j_Lc );
-		THROW( EXCEPTION );
-	}
+    if ( strrchr( rb_pulser_j_text, '\n' ) != NULL )
+    {
+        print( FATAL, "Invalid input in configuration file '%s' at "
+               "line %ld, card name contains a line break\n",
+               rb_pulser_j.config_file, rb_pulser_j_Lc );
+        THROW( EXCEPTION );
+    }
 
-	if ( cur_clock == INVALID_CLOCK_NUMBER )
-	{
-		if ( rb_pulser_j.delay_card[ cur_delay ].name != NULL )
-		{
-			print( FATAL, "Name of delay card defined twice in configuration "
-				   "file '%s' at line %ld.\n",
-				   rb_pulser_j.config_file, rb_pulser_j_Lc );
-			THROW( EXCEPTION );
-		}
+    if ( cur_clock == INVALID_CLOCK_NUMBER )
+    {
+        if ( rb_pulser_j.delay_card[ cur_delay ].name != NULL )
+        {
+            print( FATAL, "Name of delay card defined twice in configuration "
+                   "file '%s' at line %ld.\n",
+                   rb_pulser_j.config_file, rb_pulser_j_Lc );
+            THROW( EXCEPTION );
+        }
 
-		*( name + strlen( name ) - 1 ) = '\0';
-		rb_pulser_j.delay_card[ cur_delay ].name = T_strdup( name + 1 );
-		cur_delay = INVALID_DELAY_NUMBER;
-	}
-	else
-	{
-		fsc2_assert( cur_delay == INVALID_DELAY_NUMBER );
+        *( name + strlen( name ) - 1 ) = '\0';
+        rb_pulser_j.delay_card[ cur_delay ].name = T_strdup( name + 1 );
+        cur_delay = INVALID_DELAY_NUMBER;
+    }
+    else
+    {
+        fsc2_assert( cur_delay == INVALID_DELAY_NUMBER );
 
 #if defined FIXED_TIMEBASE
-		if ( cur_clock == TB_CLOCK )
-		{
-			cur_clock = INVALID_CLOCK_NUMBER;
-			return;
-		}
+        if ( cur_clock == TB_CLOCK )
+        {
+            cur_clock = INVALID_CLOCK_NUMBER;
+            return;
+        }
 #endif
 
-		if ( rb_pulser_j.clock_card[ cur_clock ].name != NULL )
-		{
-			print( FATAL, "Name of clock card defined twice in configuration "
-				   "file '%s' at line %ld.\n",
-				   rb_pulser_j.config_file, rb_pulser_j_Lc );
-			THROW( EXCEPTION );
-		}
+        if ( rb_pulser_j.clock_card[ cur_clock ].name != NULL )
+        {
+            print( FATAL, "Name of clock card defined twice in configuration "
+                   "file '%s' at line %ld.\n",
+                   rb_pulser_j.config_file, rb_pulser_j_Lc );
+            THROW( EXCEPTION );
+        }
 
-		*( name + strlen( name ) - 1 ) = '\0';
-		rb_pulser_j.clock_card[ cur_clock ].name = T_strdup( name + 1 );
-		cur_clock = INVALID_CLOCK_NUMBER;
-	}
+        *( name + strlen( name ) - 1 ) = '\0';
+        rb_pulser_j.clock_card[ cur_clock ].name = T_strdup( name + 1 );
+        cur_clock = INVALID_CLOCK_NUMBER;
+    }
 }
 
 
@@ -260,99 +260,101 @@ static void set_name( char * name )
 
 void rb_pulser_j_read_configuration( void )
 {
-	static bool is_restart = UNSET;
-	size_t i;
+    static bool is_restart = UNSET;
+    size_t i;
 
-	/* Try to open the configuration file */
+    /* Try to open the configuration file */
 
-	if ( access( rb_pulser_j.config_file, R_OK ) == -1 )
-	{
-		if ( errno == ENOENT )       /* file not found */
-			print( FATAL, "Configuration file '%s' not found.\n",
-				   rb_pulser_j.config_file );
-		else
-			print( FATAL, "No read permission for configuration file '%s'.\n",
-				   rb_pulser_j.config_file );
-		THROW( EXCEPTION );
-	}
+    if ( access( rb_pulser_j.config_file, R_OK ) == -1 )
+    {
+        if ( errno == ENOENT )       /* file not found */
+            print( FATAL, "Configuration file '%s' not found.\n",
+                   rb_pulser_j.config_file );
+        else
+            print( FATAL, "No read permission for configuration file '%s'.\n",
+                   rb_pulser_j.config_file );
+        THROW( EXCEPTION );
+    }
 
-	if ( ( rb_pulser_j_in = fopen( rb_pulser_j.config_file, "r" ) ) == NULL )
-	{
-		print( FATAL, "Can't open configuration file '%s'.\n",
-			   rb_pulser_j.config_file );
-		THROW( EXCEPTION );
-	}
+    if ( ( rb_pulser_j_in = fopen( rb_pulser_j.config_file, "r" ) ) == NULL )
+    {
+        print( FATAL, "Can't open configuration file '%s'.\n",
+               rb_pulser_j.config_file );
+        THROW( EXCEPTION );
+    }
 
-	/* Keep the lexer happy... */
+    /* Keep the lexer happy... */
 
-	if ( is_restart )
-	    rb_pulser_j_restart( rb_pulser_j_in );
-	else
-		is_restart = SET;
+    if ( is_restart )
+        rb_pulser_j_restart( rb_pulser_j_in );
+    else
+        is_restart = SET;
 
-	/* Read and interpret the configuration file */
+    /* Read and interpret the configuration file */
 
-	cur_delay = INVALID_DELAY_NUMBER;
-	cur_clock = INVALID_CLOCK_NUMBER;
-	rb_pulser_j_Lc = 1;
+    cur_delay = INVALID_DELAY_NUMBER;
+    cur_clock = INVALID_CLOCK_NUMBER;
+    rb_pulser_j_Lc = 1;
 
-	TRY
-	{
-		rb_pulser_j_lex( );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		fclose( rb_pulser_j_in );
-		rb_pulser_j_cleanup( );
-		RETHROW( );
-	}
+    TRY
+    {
+        rb_pulser_j_lex( );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        fclose( rb_pulser_j_in );
+        rb_pulser_j_cleanup( );
+        RETHROW( );
+    }
 
-	fclose( rb_pulser_j_in );
+    fclose( rb_pulser_j_in );
 
-	/* Check that we didn't end up in the middle of a keyword-value pair */
+    /* Check that we didn't end up in the middle of a keyword-value pair */
 
-	if ( cur_delay != INVALID_DELAY_NUMBER ||
-		 cur_clock != INVALID_CLOCK_NUMBER )
-	{
-		print( FATAL, "Invalid input in configuration file '%s' at "
-			   "end of file.\n", rb_pulser_j.config_file );
-		rb_pulser_j_cleanup( );
-		THROW( EXCEPTION );
-	}
+    if ( cur_delay != INVALID_DELAY_NUMBER ||
+         cur_clock != INVALID_CLOCK_NUMBER )
+    {
+        print( FATAL, "Invalid input in configuration file '%s' at "
+               "end of file.\n", rb_pulser_j.config_file );
+        rb_pulser_j_cleanup( );
+        THROW( EXCEPTION );
+    }
 
-	/* Check that all delay cards got names assigned to them */
+    /* Check that all delay cards got names assigned to them */
 
-	for ( i = 0; i < NUM_DELAY_CARDS; i++ )
-		if ( rb_pulser_j.delay_card[ i ].name == NULL )
-			break;
+    for ( i = 0; i < NUM_DELAY_CARDS; i++ )
+        if ( rb_pulser_j.delay_card[ i ].name == NULL )
+            break;
 
-	if ( i < NUM_DELAY_CARDS )
-	{
-		print( FATAL, "Not all delay cards got assigned names in "
-			   "configuration file '%s'.\n", rb_pulser_j.config_file );
-		rb_pulser_j_cleanup( );
-		THROW( EXCEPTION );
-	}
+    if ( i < NUM_DELAY_CARDS )
+    {
+        print( FATAL, "Not all delay cards got assigned names in "
+               "configuration file '%s'.\n", rb_pulser_j.config_file );
+        rb_pulser_j_cleanup( );
+        THROW( EXCEPTION );
+    }
 
-	/* Check that all clock cards got names assigned to them */
+    /* Check that all clock cards got names assigned to them */
 
-	for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
-		if ( rb_pulser_j.clock_card[ i ].name == NULL )
-			break;
+    for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
+        if ( rb_pulser_j.clock_card[ i ].name == NULL )
+            break;
 
-	if ( i < NUM_CLOCK_CARDS )
-	{
-		print( FATAL, "Not all clock cards got assigned names in "
-			   "configuration file '%s'.\n", rb_pulser_j.config_file );
-		rb_pulser_j_cleanup( );
-		THROW( EXCEPTION );
-	}
+    if ( i < NUM_CLOCK_CARDS )
+    {
+        print( FATAL, "Not all clock cards got assigned names in "
+               "configuration file '%s'.\n", rb_pulser_j.config_file );
+        rb_pulser_j_cleanup( );
+        THROW( EXCEPTION );
+    }
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

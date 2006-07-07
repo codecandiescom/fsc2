@@ -34,9 +34,9 @@
    struct LeCroy_VICP_Header {
        unsigned char  operation;
        unsigned char  header version;
-	   unsigned char  sequence_number;    // only version 1A and later
-	   unsigned char  reserved;
-	   uint_32        block_length;       // in big-endian format
+       unsigned char  sequence_number;    // only version 1A and later
+       unsigned char  reserved;
+       uint_32        block_length;       // in big-endian format
    }
 
    The bits of the 'operation' byte have the following meaning:
@@ -75,28 +75,28 @@
    VICP protocol can be used:
 
     void lecroy_vicp_init( const char * dev_name,
-					       const char * address,
-					       long         us_timeout,
-					       bool         quit_on_signal )
+                           const char * address,
+                           long         us_timeout,
+                           bool         quit_on_signal )
    
-	void lecroy_vicp_close( void )
+    void lecroy_vicp_close( void )
    
-	void lecroy_vicp_lock_out( bool lock_out )
+    void lecroy_vicp_lock_out( bool lock_out )
 
-	void lecroy_vicp_set_timeout( int  dir,
-							      long us_timeout )
+    void lecroy_vicp_set_timeout( int  dir,
+                                  long us_timeout )
 
-	int lecroy_vicp_write( const char * buffer,
-						   ssize_t    * length,
-						   bool         with_eoi,
-						   bool         quit_on_signal )
+    int lecroy_vicp_write( const char * buffer,
+                           ssize_t    * length,
+                           bool         with_eoi,
+                           bool         quit_on_signal )
 
-	int lecroy_vicp_read( char *    buffer,
-						  ssize_t * length,
-						  bool    * with_eoi,
-						  bool      quit_on_signal )
+    int lecroy_vicp_read( char *    buffer,
+                          ssize_t * length,
+                          bool    * with_eoi,
+                          bool      quit_on_signal )
 
-	void lecroy_vicp_device_clear( void )
+    void lecroy_vicp_device_clear( void )
 
    The function lecroy_vicp_init() must be the first function to be called.
    It establishes the connection to the device which then is used for all
@@ -260,28 +260,28 @@
 typedef struct LeCroy_VICP LeCroy_VICP_T;
 
 struct LeCroy_VICP {
-	int             handle;
-	unsigned char   seq_number;
-	unsigned char   partial_header[ LECROY_VICP_HEADER_SIZE ];
-	ssize_t         header_count;
-	ssize_t         remaining;
-	bool            eoi_was_set;
-	char          * name;
-	char          * address;
-	long            us_write_timeout;
-	long            us_read_timeout;
-	bool            is_locked;
+    int             handle;
+    unsigned char   seq_number;
+    unsigned char   partial_header[ LECROY_VICP_HEADER_SIZE ];
+    ssize_t         header_count;
+    ssize_t         remaining;
+    bool            eoi_was_set;
+    char          * name;
+    char          * address;
+    long            us_write_timeout;
+    long            us_read_timeout;
+    bool            is_locked;
 };
 
 
 static LeCroy_VICP_T lecroy_vicp = { -1, 0, { 0 }, 0, 0, UNSET,
-									 NULL, NULL, 0, 0, UNSET };
+                                     NULL, NULL, 0, 0, UNSET };
 
 
 static void lecroy_vicp_close_without_header( void );
 
 static inline unsigned char lecroy_vicp_get_operation(
-													  unsigned char * header );
+                                                      unsigned char * header );
 
 static inline unsigned char lecroy_vicp_get_version( unsigned char * header );
 
@@ -290,14 +290,14 @@ static inline unsigned char lecroy_vicp_get_sequence( unsigned char * header );
 static inline ssize_t lecroy_vicp_get_length( unsigned char * header );
 
 static inline void lecroy_vicp_set_operation( unsigned char * header,
-											  unsigned char   operation );
+                                              unsigned char   operation );
 
 static inline void lecroy_vicp_set_version( unsigned char * header );
 
 static inline void lecroy_vicp_set_sequence( unsigned char * header );
 
 static inline void lecroy_vicp_set_length( unsigned char * header,
-										   unsigned long   lenght );
+                                           unsigned long   lenght );
 
 
 /*--------------------------------------------------------------*
@@ -316,84 +316,84 @@ static inline void lecroy_vicp_set_length( unsigned char * header,
  *-------------------------------------------------------------*/
 
 void lecroy_vicp_init( const char * dev_name,
-					   const char * address,
-					   long         us_timeout,
-					   bool         quit_on_signal )
+                       const char * address,
+                       long         us_timeout,
+                       bool         quit_on_signal )
 {
-	int            fd;
-	unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
-	ssize_t        bytes_written;
+    int            fd;
+    unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
+    ssize_t        bytes_written;
 
 
-	CLOBBER_PROTECT( us_timeout );
+    CLOBBER_PROTECT( us_timeout );
 
-	if ( lecroy_vicp.handle >= 0 )
-	{
-		print( FATAL, "Internal error in module, connection already "
-			   "exists.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( lecroy_vicp.handle >= 0 )
+    {
+        print( FATAL, "Internal error in module, connection already "
+               "exists.\n" );
+        THROW( EXCEPTION );
+    }
 
-	fsc2_assert( dev_name != NULL );
-	fsc2_assert( address != NULL );
+    fsc2_assert( dev_name != NULL );
+    fsc2_assert( address != NULL );
 
-	if ( us_timeout < 0 )
-		us_timeout = LECROY_VICP_DEFAULT_CONNECT_TIMEOUT;
+    if ( us_timeout < 0 )
+        us_timeout = LECROY_VICP_DEFAULT_CONNECT_TIMEOUT;
 
-	if ( ( fd = fsc2_lan_open( dev_name, address, LECROY_VICP_PORT,
-							   us_timeout, quit_on_signal ) ) == -1 )
-	{
-		print( FATAL, "Failed to open connection to device.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( ( fd = fsc2_lan_open( dev_name, address, LECROY_VICP_PORT,
+                               us_timeout, quit_on_signal ) ) == -1 )
+    {
+        print( FATAL, "Failed to open connection to device.\n" );
+        THROW( EXCEPTION );
+    }
 
-	lecroy_vicp.handle           = fd;
-	lecroy_vicp.seq_number       = 0;
-	lecroy_vicp.header_count     = 0;
-	lecroy_vicp.remaining        = 0;
-	lecroy_vicp.eoi_was_set      = UNSET;
-	lecroy_vicp.us_write_timeout =
-	lecroy_vicp.us_read_timeout  = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
-	lecroy_vicp.name             =
+    lecroy_vicp.handle           = fd;
+    lecroy_vicp.seq_number       = 0;
+    lecroy_vicp.header_count     = 0;
+    lecroy_vicp.remaining        = 0;
+    lecroy_vicp.eoi_was_set      = UNSET;
+    lecroy_vicp.us_write_timeout =
+    lecroy_vicp.us_read_timeout  = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
+    lecroy_vicp.name             =
     lecroy_vicp.address          = NULL;
 
-	/* Also store name and address for the device, this information is 
-	   needed in case we have to dis- and then reconnect. */
+    /* Also store name and address for the device, this information is 
+       needed in case we have to dis- and then reconnect. */
 
-	TRY
-	{
-		lecroy_vicp.name    = T_strdup( dev_name );
-		lecroy_vicp.address = T_strdup( address );
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		lecroy_vicp_close_without_header( );
-		RETHROW( );
-	}
+    TRY
+    {
+        lecroy_vicp.name    = T_strdup( dev_name );
+        lecroy_vicp.address = T_strdup( address );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        lecroy_vicp_close_without_header( );
+        RETHROW( );
+    }
 
-	/* Finally bring the device into the remote state by sending a header
-	   where just the remote and the lockout bits in the operations byte
-	   are set */
+    /* Finally bring the device into the remote state by sending a header
+       where just the remote and the lockout bits in the operations byte
+       are set */
 
-	lecroy_vicp_set_operation( header,
-							   LECROY_VICP_REMOTE | LECROY_VICP_LOCKOUT );
-	lecroy_vicp_set_version( header );
-	lecroy_vicp_set_length( header, 0 );
+    lecroy_vicp_set_operation( header,
+                               LECROY_VICP_REMOTE | LECROY_VICP_LOCKOUT );
+    lecroy_vicp_set_version( header );
+    lecroy_vicp_set_length( header, 0 );
 
-	bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
-									LECROY_VICP_HEADER_SIZE, us_timeout,
-									UNSET );
+    bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
+                                    LECROY_VICP_HEADER_SIZE, us_timeout,
+                                    UNSET );
 
-	if ( bytes_written <= 0 )
-	{
-		lecroy_vicp_close_without_header( );
-		THROW( EXCEPTION );
-	}
+    if ( bytes_written <= 0 )
+    {
+        lecroy_vicp_close_without_header( );
+        THROW( EXCEPTION );
+    }
 
-	fsc2_assert( bytes_written == LECROY_VICP_HEADER_SIZE );
+    fsc2_assert( bytes_written == LECROY_VICP_HEADER_SIZE );
 
-	lecroy_vicp.is_locked = SET;
+    lecroy_vicp.is_locked = SET;
 }
 
 
@@ -404,15 +404,15 @@ void lecroy_vicp_init( const char * dev_name,
 
 static void lecroy_vicp_close_without_header( void )
 {
-	fsc2_lan_close( lecroy_vicp.handle );
+    fsc2_lan_close( lecroy_vicp.handle );
 
-	lecroy_vicp.handle = -1;
+    lecroy_vicp.handle = -1;
 
-	if ( lecroy_vicp.name )
-		T_free( lecroy_vicp.name );
+    if ( lecroy_vicp.name )
+        T_free( lecroy_vicp.name );
 
-	if ( lecroy_vicp.address )
-		T_free( lecroy_vicp.address );
+    if ( lecroy_vicp.address )
+        T_free( lecroy_vicp.address );
 }
 
 
@@ -423,39 +423,39 @@ static void lecroy_vicp_close_without_header( void )
 
 void lecroy_vicp_close( void )
 {
-	unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
-	long           us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
+    unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
+    long           us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
 
 
-	if ( lecroy_vicp.handle < 0 )
-	{
-		print( FATAL, "Internal error in module, no connection exists.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( lecroy_vicp.handle < 0 )
+    {
+        print( FATAL, "Internal error in module, no connection exists.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* Send a header with all bits reset in order to get device out of
-	   remote (and possibly local lockout) state */
+    /* Send a header with all bits reset in order to get device out of
+       remote (and possibly local lockout) state */
 
-	lecroy_vicp_set_version( header );
-	lecroy_vicp_set_length( header, 0 );
+    lecroy_vicp_set_version( header );
+    lecroy_vicp_set_length( header, 0 );
 
-	fsc2_lan_write( lecroy_vicp.handle, header,
-					LECROY_VICP_HEADER_SIZE, us_timeout,
-					UNSET );
+    fsc2_lan_write( lecroy_vicp.handle, header,
+                    LECROY_VICP_HEADER_SIZE, us_timeout,
+                    UNSET );
 
-	/* Now close down the connection to the device */
+    /* Now close down the connection to the device */
 
-	lecroy_vicp_close_without_header( );
+    lecroy_vicp_close_without_header( );
 
-	fsc2_lan_close( lecroy_vicp.handle );
+    fsc2_lan_close( lecroy_vicp.handle );
 
-	lecroy_vicp.handle = -1;
+    lecroy_vicp.handle = -1;
 
-	if ( lecroy_vicp.name )
-		T_free( lecroy_vicp.name );
+    if ( lecroy_vicp.name )
+        T_free( lecroy_vicp.name );
 
-	if ( lecroy_vicp.address )
-		T_free( lecroy_vicp.address );
+    if ( lecroy_vicp.address )
+        T_free( lecroy_vicp.address );
 }
 
 
@@ -468,46 +468,46 @@ void lecroy_vicp_close( void )
  
 void lecroy_vicp_lock_out( bool lock_state )
 {
-	unsigned char op = LECROY_VICP_REMOTE;
-	unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
-	ssize_t        bytes_written;
-	long           us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
+    unsigned char op = LECROY_VICP_REMOTE;
+    unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
+    ssize_t        bytes_written;
+    long           us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
 
 
-	if ( lecroy_vicp.handle >= 0 )
-	{
-		print( FATAL, "Internal error in module, connection already "
-			   "exists.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( lecroy_vicp.handle >= 0 )
+    {
+        print( FATAL, "Internal error in module, connection already "
+               "exists.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( ( lecroy_vicp.is_locked && lock_state ) ||
-		 ( ! lecroy_vicp.is_locked && ! lock_state ) )
-		return;
+    if ( ( lecroy_vicp.is_locked && lock_state ) ||
+         ( ! lecroy_vicp.is_locked && ! lock_state ) )
+        return;
 
-	if ( lock_state )
-		op |= LECROY_VICP_LOCKOUT;
+    if ( lock_state )
+        op |= LECROY_VICP_LOCKOUT;
 
-	if ( lecroy_vicp.eoi_was_set )
-		op |= LECROY_VICP_EOI;
-			
-	lecroy_vicp_set_operation( header, op );
-	lecroy_vicp_set_version( header );
-	lecroy_vicp_set_length( header, 0 );
+    if ( lecroy_vicp.eoi_was_set )
+        op |= LECROY_VICP_EOI;
+            
+    lecroy_vicp_set_operation( header, op );
+    lecroy_vicp_set_version( header );
+    lecroy_vicp_set_length( header, 0 );
 
-	bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
-									LECROY_VICP_HEADER_SIZE, us_timeout,
-									UNSET );
+    bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
+                                    LECROY_VICP_HEADER_SIZE, us_timeout,
+                                    UNSET );
 
-	if ( bytes_written <= 0 )
-	{
-		lecroy_vicp_close_without_header( );
-		THROW( EXCEPTION );
-	}
+    if ( bytes_written <= 0 )
+    {
+        lecroy_vicp_close_without_header( );
+        THROW( EXCEPTION );
+    }
 
-	fsc2_assert( bytes_written == LECROY_VICP_HEADER_SIZE );
+    fsc2_assert( bytes_written == LECROY_VICP_HEADER_SIZE );
 
-	lecroy_vicp.is_locked = lock_state;
+    lecroy_vicp.is_locked = lock_state;
 }
 
 
@@ -522,24 +522,24 @@ void lecroy_vicp_lock_out( bool lock_state )
  *----------------------------------------------------------------*/
 
 void lecroy_vicp_set_timeout( int  dir,
-							  long us_timeout )
+                              long us_timeout )
 {
-	if ( lecroy_vicp.handle < 0 )
-	{
-		print( FATAL, "Internal error in module, no connection exists.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( lecroy_vicp.handle < 0 )
+    {
+        print( FATAL, "Internal error in module, no connection exists.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( us_timeout < 0 )
-	{
-		print( FATAL, "Internal error in module, invalid timeout.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( us_timeout < 0 )
+    {
+        print( FATAL, "Internal error in module, invalid timeout.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( dir == READ )
-		lecroy_vicp.us_read_timeout  = us_timeout;
-	else
-		lecroy_vicp.us_write_timeout = us_timeout;
+    if ( dir == READ )
+        lecroy_vicp.us_read_timeout  = us_timeout;
+    else
+        lecroy_vicp.us_write_timeout = us_timeout;
 }
 
 
@@ -563,110 +563,110 @@ void lecroy_vicp_set_timeout( int  dir,
  *-------------------------------------------------------------------*/
 
 int lecroy_vicp_write( const char * buffer,
-					   ssize_t    * length,
-					   bool         with_eoi,
-					   bool         quit_on_signal )
+                       ssize_t    * length,
+                       bool         with_eoi,
+                       bool         quit_on_signal )
 {
-	unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
-	unsigned char  op = LECROY_VICP_DATA | LECROY_VICP_REMOTE;
-	struct iovec   data[ 2 ];
-	ssize_t        total_length;
-	ssize_t        bytes_written;
-	long           us_timeout = lecroy_vicp.us_write_timeout;
-	struct timeval before,
-		           after;
+    unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
+    unsigned char  op = LECROY_VICP_DATA | LECROY_VICP_REMOTE;
+    struct iovec   data[ 2 ];
+    ssize_t        total_length;
+    ssize_t        bytes_written;
+    long           us_timeout = lecroy_vicp.us_write_timeout;
+    struct timeval before,
+                   after;
 
 
-	/* Do nothing if there are no data to send */
+    /* Do nothing if there are no data to send */
 
-	if ( *length == 0 )
-		return SUCCESS;
+    if ( *length == 0 )
+        return SUCCESS;
 
-	if ( buffer == NULL )
-	{
-		print( FATAL, "Internal error in module, write data buffer "
-			   "is NULL.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( buffer == NULL )
+    {
+        print( FATAL, "Internal error in module, write data buffer "
+               "is NULL.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( lecroy_vicp.handle < 0 )
-	{
-		print( FATAL, "Internal error in module, connection "
-			   "already closed.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( lecroy_vicp.handle < 0 )
+    {
+        print( FATAL, "Internal error in module, connection "
+               "already closed.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* Set up a iovec structure in order to allow sending the header
-	   and the data in one go with writev() */
+    /* Set up a iovec structure in order to allow sending the header
+       and the data in one go with writev() */
 
-	data[ 0 ].iov_base = header;
-	data[ 0 ].iov_len  = LECROY_VICP_HEADER_SIZE;
-	data[ 1 ].iov_base = ( void * ) buffer;
-	data[ 1 ].iov_len  = *length;
+    data[ 0 ].iov_base = header;
+    data[ 0 ].iov_len  = LECROY_VICP_HEADER_SIZE;
+    data[ 1 ].iov_base = ( void * ) buffer;
+    data[ 1 ].iov_len  = *length;
 
-	/* Assemble the header, set the EOI flag if the user tells us so */
+    /* Assemble the header, set the EOI flag if the user tells us so */
 
-	if ( with_eoi )
-		op |= LECROY_VICP_EOI;
+    if ( with_eoi )
+        op |= LECROY_VICP_EOI;
 
-	lecroy_vicp_set_operation( header, op );
-	lecroy_vicp_set_version( header );
-	lecroy_vicp_set_sequence( header );
-	lecroy_vicp_set_length( header, *length );
+    lecroy_vicp_set_operation( header, op );
+    lecroy_vicp_set_version( header );
+    lecroy_vicp_set_sequence( header );
+    lecroy_vicp_set_length( header, *length );
 
-	/* Now start pushing the data over to the device. Since there is no
-	   guarantee that all of them will be written in one go (e.g. because
-	   there are more than fit into a packet) we must go on trying if less
-	   then the requested amount of bytes could be send on the first try. */
+    /* Now start pushing the data over to the device. Since there is no
+       guarantee that all of them will be written in one go (e.g. because
+       there are more than fit into a packet) we must go on trying if less
+       then the requested amount of bytes could be send on the first try. */
 
-	gettimeofday( &before, NULL );
+    gettimeofday( &before, NULL );
 
-	bytes_written = fsc2_lan_writev( lecroy_vicp.handle, data, 2,
-									 us_timeout, quit_on_signal );
+    bytes_written = fsc2_lan_writev( lecroy_vicp.handle, data, 2,
+                                     us_timeout, quit_on_signal );
 
-	if ( bytes_written < 0 )
-		THROW( EXCEPTION );
+    if ( bytes_written < 0 )
+        THROW( EXCEPTION );
 
-	if ( bytes_written == 0 )
-	{
-		*length = 0;
-		return FAILURE;
-	}
+    if ( bytes_written == 0 )
+    {
+        *length = 0;
+        return FAILURE;
+    }
 
-	total_length = bytes_written - LECROY_VICP_HEADER_SIZE;
+    total_length = bytes_written - LECROY_VICP_HEADER_SIZE;
 
-	fsc2_assert( total_length >= 0 );
+    fsc2_assert( total_length >= 0 );
 
-	while ( total_length < *length )
-	{
-		gettimeofday( &after, NULL );
-		us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-			          - ( before.tv_sec * 1000000 + before.tv_usec );
+    while ( total_length < *length )
+    {
+        gettimeofday( &after, NULL );
+        us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
+                      - ( before.tv_sec * 1000000 + before.tv_usec );
 
-		if ( us_timeout <= 0 )
-			THROW( EXCEPTION );
+        if ( us_timeout <= 0 )
+            THROW( EXCEPTION );
 
-		before = after;
+        before = after;
 
-		buffer += total_length;
+        buffer += total_length;
 
-		bytes_written = fsc2_lan_write( lecroy_vicp.handle, buffer,
-										*length - total_length, us_timeout,
-										quit_on_signal );
+        bytes_written = fsc2_lan_write( lecroy_vicp.handle, buffer,
+                                        *length - total_length, us_timeout,
+                                        quit_on_signal );
 
-		if ( bytes_written < 0 )
-			THROW( EXCEPTION );
+        if ( bytes_written < 0 )
+            THROW( EXCEPTION );
 
-		total_length += bytes_written;
+        total_length += bytes_written;
 
-		if ( bytes_written == 0 )
-		{
-			*length = total_length;
-			return FAILURE;
-		}
-	}
+        if ( bytes_written == 0 )
+        {
+            *length = total_length;
+            return FAILURE;
+        }
+    }
 
-	return SUCCESS;
+    return SUCCESS;
 }
 
 
@@ -695,155 +695,155 @@ int lecroy_vicp_write( const char * buffer,
  *---------------------------------------------------------------------*/
 
 int lecroy_vicp_read( char *    buffer,
-					  ssize_t * length,
-					  bool *    with_eoi,
-					  bool      quit_on_signal )
+                      ssize_t * length,
+                      bool *    with_eoi,
+                      bool      quit_on_signal )
 {
-	unsigned char   header[ LECROY_VICP_HEADER_SIZE ];
-	ssize_t         total_length = 0;
-	ssize_t         bytes_read;
-	unsigned long   bytes_to_expect;
-	struct timeval  before,
-		            after;
-	long            us_timeout = lecroy_vicp.us_read_timeout;
+    unsigned char   header[ LECROY_VICP_HEADER_SIZE ];
+    ssize_t         total_length = 0;
+    ssize_t         bytes_read;
+    unsigned long   bytes_to_expect;
+    struct timeval  before,
+                    after;
+    long            us_timeout = lecroy_vicp.us_read_timeout;
 
 
-	/* Do nothing if there are no data to be send */
+    /* Do nothing if there are no data to be send */
 
-	if ( *length == 0 )
-		return SUCCESS;
+    if ( *length == 0 )
+        return SUCCESS;
 
-	if ( buffer == NULL )
-	{
-		print( FATAL, "Internal error in module, read data buffer is "
-			   "NULL.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( buffer == NULL )
+    {
+        print( FATAL, "Internal error in module, read data buffer is "
+               "NULL.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( lecroy_vicp.handle < 0 )
-	{
-		print( FATAL, "Internal error in module, connection is "
-			   "already closed.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( lecroy_vicp.handle < 0 )
+    {
+        print( FATAL, "Internal error in module, connection is "
+               "already closed.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* Check if there are still outstanding bytes, i.e. bytes of wich we know
-	   from reading the last received header that they are in the process of
-	   being sent by the device. Get them first. */
+    /* Check if there are still outstanding bytes, i.e. bytes of wich we know
+       from reading the last received header that they are in the process of
+       being sent by the device. Get them first. */
 
-	gettimeofday( &before, NULL );
+    gettimeofday( &before, NULL );
 
-	if ( lecroy_vicp.remaining > 0 )
-	{
-		*with_eoi = lecroy_vicp.eoi_was_set;
+    if ( lecroy_vicp.remaining > 0 )
+    {
+        *with_eoi = lecroy_vicp.eoi_was_set;
 
-		while ( lecroy_vicp.remaining > 0 && total_length < *length )
-		{
-			gettimeofday( &after, NULL );
-			us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-				          - ( before.tv_sec * 1000000 + before.tv_usec );
+        while ( lecroy_vicp.remaining > 0 && total_length < *length )
+        {
+            gettimeofday( &after, NULL );
+            us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
+                          - ( before.tv_sec * 1000000 + before.tv_usec );
 
-			if ( us_timeout <= 0 )
-				THROW( EXCEPTION );
-			before = after;
+            if ( us_timeout <= 0 )
+                THROW( EXCEPTION );
+            before = after;
 
-			bytes_read = fsc2_lan_read( lecroy_vicp.handle, buffer,
-										ss_min( lecroy_vicp.remaining,
-												*length ),
-										us_timeout, quit_on_signal );
+            bytes_read = fsc2_lan_read( lecroy_vicp.handle, buffer,
+                                        ss_min( lecroy_vicp.remaining,
+                                                *length ),
+                                        us_timeout, quit_on_signal );
 
-			if ( bytes_read > 0 )
-			{
-				lecroy_vicp.remaining -= bytes_read;
-				total_length += bytes_read;
-				buffer += bytes_read;
-			}
+            if ( bytes_read > 0 )
+            {
+                lecroy_vicp.remaining -= bytes_read;
+                total_length += bytes_read;
+                buffer += bytes_read;
+            }
 
-			if ( bytes_read < 0 )
-				THROW( EXCEPTION );
+            if ( bytes_read < 0 )
+                THROW( EXCEPTION );
 
-			if ( bytes_read == 0 )
-				break;
-		}
+            if ( bytes_read == 0 )
+                break;
+        }
 
-		return lecroy_vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
-	}
+        return lecroy_vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
+    }
 
-	gettimeofday( &before, NULL );
-	bytes_read = fsc2_lan_read( lecroy_vicp.handle, header,
-								LECROY_VICP_HEADER_SIZE,
-								us_timeout, quit_on_signal );
-	
-	if ( bytes_read < 0 )
-		THROW( EXCEPTION );
+    gettimeofday( &before, NULL );
+    bytes_read = fsc2_lan_read( lecroy_vicp.handle, header,
+                                LECROY_VICP_HEADER_SIZE,
+                                us_timeout, quit_on_signal );
+    
+    if ( bytes_read < 0 )
+        THROW( EXCEPTION );
 
-	if ( bytes_read == 0 )
-	{
-		*length = 0;
-		return FAILURE;
-	}
+    if ( bytes_read == 0 )
+    {
+        *length = 0;
+        return FAILURE;
+    }
 
-	fsc2_assert( bytes_read == LECROY_VICP_HEADER_SIZE );
+    fsc2_assert( bytes_read == LECROY_VICP_HEADER_SIZE );
 
-	/* Check the version field - if this is not correct something must
-	   have gone seriously wrong */
+    /* Check the version field - if this is not correct something must
+       have gone seriously wrong */
 
-	if ( lecroy_vicp_get_version( header ) !=
-			                                 LECROY_VICP_HEADER_VERSION_VALUE )
-		THROW( EXCEPTION );
+    if ( lecroy_vicp_get_version( header ) !=
+                                             LECROY_VICP_HEADER_VERSION_VALUE )
+        THROW( EXCEPTION );
 
-	/* The header tells us how many bytes we can expect - if there are
-	   none something must really be going wrong */
+    /* The header tells us how many bytes we can expect - if there are
+       none something must really be going wrong */
 
-	if ( ( bytes_to_expect = lecroy_vicp_get_length( header ) ) == 0 )
-		THROW( EXCEPTION );
+    if ( ( bytes_to_expect = lecroy_vicp_get_length( header ) ) == 0 )
+        THROW( EXCEPTION );
 
-	/* Examine and store the EOI bit */
+    /* Examine and store the EOI bit */
 
-	*with_eoi = lecroy_vicp.eoi_was_set =
-						 lecroy_vicp_get_operation( header ) & LECROY_VICP_EOI;
+    *with_eoi = lecroy_vicp.eoi_was_set =
+                         lecroy_vicp_get_operation( header ) & LECROY_VICP_EOI;
 
-	/* Otherwise we can now start to read the real data. Make sure we don't
-	   try to read more than the user asked for. If we could read more we
-	   store the number of bytes we couldn't fetch. */
+    /* Otherwise we can now start to read the real data. Make sure we don't
+       try to read more than the user asked for. If we could read more we
+       store the number of bytes we couldn't fetch. */
 
-	if ( ( ssize_t ) bytes_to_expect - total_length > *length )
-	{
-		lecroy_vicp.remaining = bytes_to_expect - *length + total_length;
-		bytes_to_expect = *length - total_length;
-	}
+    if ( ( ssize_t ) bytes_to_expect - total_length > *length )
+    {
+        lecroy_vicp.remaining = bytes_to_expect - *length + total_length;
+        bytes_to_expect = *length - total_length;
+    }
 
-	while ( bytes_to_expect > 0 )
-	{
-		gettimeofday( &after, NULL );
-		us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-			          - ( before.tv_sec * 1000000 + before.tv_usec );
+    while ( bytes_to_expect > 0 )
+    {
+        gettimeofday( &after, NULL );
+        us_timeout -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
+                      - ( before.tv_sec * 1000000 + before.tv_usec );
 
-		if ( us_timeout <= 0 )
-			THROW( EXCEPTION );
-		before = after;
+        if ( us_timeout <= 0 )
+            THROW( EXCEPTION );
+        before = after;
 
-		bytes_read = fsc2_lan_read( lecroy_vicp.handle, buffer,
-									bytes_to_expect,
-									us_timeout, quit_on_signal );
+        bytes_read = fsc2_lan_read( lecroy_vicp.handle, buffer,
+                                    bytes_to_expect,
+                                    us_timeout, quit_on_signal );
 
-		if ( bytes_read == 0 )
-		{
-			lecroy_vicp.remaining += bytes_to_expect;
-			break;
-		}
+        if ( bytes_read == 0 )
+        {
+            lecroy_vicp.remaining += bytes_to_expect;
+            break;
+        }
 
-		if ( bytes_read < 0 )
-			THROW( EXCEPTION );
+        if ( bytes_read < 0 )
+            THROW( EXCEPTION );
 
-		buffer += bytes_read;
-		total_length += bytes_read;
-		bytes_to_expect -= bytes_read;
-	}
+        buffer += bytes_read;
+        total_length += bytes_read;
+        bytes_to_expect -= bytes_read;
+    }
 
-	*length = total_length;
+    *length = total_length;
 
-	return lecroy_vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
+    return lecroy_vicp.remaining == 0 ? SUCCESS : SUCCESS_BUT_MORE;
 }
 
 
@@ -861,65 +861,65 @@ int lecroy_vicp_read( char *    buffer,
 
 void lecroy_vicp_device_clear( void )
 {
-	int             fd;
-	unsigned char   header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
-	ssize_t         bytes_written;
-	long            us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
+    int             fd;
+    unsigned char   header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
+    ssize_t         bytes_written;
+    long            us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
 
 
-	if ( lecroy_vicp.handle < 0 )
-	{
-		print( FATAL, "Internal error in module, connection "
-			   "already closed.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( lecroy_vicp.handle < 0 )
+    {
+        print( FATAL, "Internal error in module, connection "
+               "already closed.\n" );
+        THROW( EXCEPTION );
+    }
 
-	/* Set up the header, no data are to be sent and the operations byte
-	   must only have the CLEAR bit set. */
+    /* Set up the header, no data are to be sent and the operations byte
+       must only have the CLEAR bit set. */
 
-	lecroy_vicp_set_operation( header, LECROY_VICP_CLEAR );
-	lecroy_vicp_set_version( header );
-	lecroy_vicp_set_length( header, 0 );
+    lecroy_vicp_set_operation( header, LECROY_VICP_CLEAR );
+    lecroy_vicp_set_version( header );
+    lecroy_vicp_set_length( header, 0 );
 
-	/* Try to send the header, don't abort on signals */
+    /* Try to send the header, don't abort on signals */
 
-	bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
-									LECROY_VICP_HEADER_SIZE, us_timeout,
-									UNSET );
+    bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
+                                    LECROY_VICP_HEADER_SIZE, us_timeout,
+                                    UNSET );
 
-	if ( bytes_written <= 0 )
-	{
-		lecroy_vicp_close( );
-		THROW( EXCEPTION );
-	}
+    if ( bytes_written <= 0 )
+    {
+        lecroy_vicp_close( );
+        THROW( EXCEPTION );
+    }
 
-	fsc2_assert( bytes_written == LECROY_VICP_HEADER_SIZE );
+    fsc2_assert( bytes_written == LECROY_VICP_HEADER_SIZE );
 
-	/* Sleeping for 100 ms after sending a clear seems to be necessary as far
-	   as I can see from the SourceForge LeCroyVICP projects sources, where
-	   some 'RebootScope' bug is mentioned as the reason. I don' know if this
-	   "bug" has been fixed (and if it's fixed for all devices), so I guess
-	   it's prudent to leave this "fix" in. */
+    /* Sleeping for 100 ms after sending a clear seems to be necessary as far
+       as I can see from the SourceForge LeCroyVICP projects sources, where
+       some 'RebootScope' bug is mentioned as the reason. I don' know if this
+       "bug" has been fixed (and if it's fixed for all devices), so I guess
+       it's prudent to leave this "fix" in. */
 
-	fsc2_usleep( 100000, UNSET );
+    fsc2_usleep( 100000, UNSET );
 
-	/* Next we seem to have to close the connection and reopen it again */
+    /* Next we seem to have to close the connection and reopen it again */
 
-	fsc2_lan_close( lecroy_vicp.handle );
+    fsc2_lan_close( lecroy_vicp.handle );
 
-	if ( ( fd = fsc2_lan_open( lecroy_vicp.name, lecroy_vicp.address,
-							   LECROY_VICP_PORT,
-							   LECROY_VICP_DEFAULT_CONNECT_TIMEOUT,
-							   UNSET ) ) == -1 )
-	{
-		print( FATAL, "Failed to clear device - can't reopen connection.\n" );
-		T_free( lecroy_vicp.name );
-		T_free( lecroy_vicp.address );
-		lecroy_vicp.handle = -1;
-		THROW( EXCEPTION );
-	}
+    if ( ( fd = fsc2_lan_open( lecroy_vicp.name, lecroy_vicp.address,
+                               LECROY_VICP_PORT,
+                               LECROY_VICP_DEFAULT_CONNECT_TIMEOUT,
+                               UNSET ) ) == -1 )
+    {
+        print( FATAL, "Failed to clear device - can't reopen connection.\n" );
+        T_free( lecroy_vicp.name );
+        T_free( lecroy_vicp.address );
+        lecroy_vicp.handle = -1;
+        THROW( EXCEPTION );
+    }
 
-	lecroy_vicp.handle = fd;
+    lecroy_vicp.handle = fd;
 }
 
 
@@ -929,7 +929,7 @@ void lecroy_vicp_device_clear( void )
 
 static inline unsigned char lecroy_vicp_get_operation( unsigned char * header )
 {
-	return header[ LECROY_VICP_HEADER_OPERATION_OFFSET ];
+    return header[ LECROY_VICP_HEADER_OPERATION_OFFSET ];
 }
 
 
@@ -939,7 +939,7 @@ static inline unsigned char lecroy_vicp_get_operation( unsigned char * header )
 
 static inline unsigned char lecroy_vicp_get_version( unsigned char * header )
 {
-	return header[ LECROY_VICP_HEADER_VERSION_OFFSET ];
+    return header[ LECROY_VICP_HEADER_VERSION_OFFSET ];
 }
 
 
@@ -949,7 +949,7 @@ static inline unsigned char lecroy_vicp_get_version( unsigned char * header )
 
 static inline unsigned char lecroy_vicp_get_sequence( unsigned char * header )
 {
-	return header[ LECROY_VICP_HEADER_SEQUENCE_OFFSET ];
+    return header[ LECROY_VICP_HEADER_SEQUENCE_OFFSET ];
 }
 
 
@@ -960,14 +960,14 @@ static inline unsigned char lecroy_vicp_get_sequence( unsigned char * header )
 
 static inline ssize_t lecroy_vicp_get_length( unsigned char * header )
 {
-	int i = LECROY_VICP_HEADER_MSB_OFFSET;
-	unsigned long val = 0;
+    int i = LECROY_VICP_HEADER_MSB_OFFSET;
+    unsigned long val = 0;
 
 
-	for ( ; i <= LECROY_VICP_HEADER_LSB_OFFSET; i++ )
-		val = ( val << 8 ) | header[ i ];
+    for ( ; i <= LECROY_VICP_HEADER_LSB_OFFSET; i++ )
+        val = ( val << 8 ) | header[ i ];
 
-	return val;
+    return val;
 }
 
 
@@ -976,9 +976,9 @@ static inline ssize_t lecroy_vicp_get_length( unsigned char * header )
  *-----------------------------------------------------------*/
 
 static inline void lecroy_vicp_set_operation( unsigned char * header,
-											  unsigned char   operation )
+                                              unsigned char   operation )
 {
-	header[ LECROY_VICP_HEADER_OPERATION_OFFSET ] = operation;
+    header[ LECROY_VICP_HEADER_OPERATION_OFFSET ] = operation;
 }
 
 
@@ -988,8 +988,8 @@ static inline void lecroy_vicp_set_operation( unsigned char * header,
 
 static inline void lecroy_vicp_set_version( unsigned char * header )
 {
-	header[ LECROY_VICP_HEADER_VERSION_OFFSET ] =
-			                                  LECROY_VICP_HEADER_VERSION_VALUE;
+    header[ LECROY_VICP_HEADER_VERSION_OFFSET ] =
+                                              LECROY_VICP_HEADER_VERSION_VALUE;
 }
 
 /*-----------------------------------------------------------------*
@@ -998,10 +998,10 @@ static inline void lecroy_vicp_set_version( unsigned char * header )
 
 static inline void lecroy_vicp_set_sequence( unsigned char * header )
 {
-	if ( ++lecroy_vicp.seq_number == 0 )
-		lecroy_vicp.seq_number++;
+    if ( ++lecroy_vicp.seq_number == 0 )
+        lecroy_vicp.seq_number++;
 
-	header[ LECROY_VICP_HEADER_SEQUENCE_OFFSET ] = lecroy_vicp.seq_number;
+    header[ LECROY_VICP_HEADER_SEQUENCE_OFFSET ] = lecroy_vicp.seq_number;
 }
 
 
@@ -1011,18 +1011,20 @@ static inline void lecroy_vicp_set_sequence( unsigned char * header )
  *--------------------------------------------------------*/
 
 static inline void lecroy_vicp_set_length( unsigned char * header,
-										   unsigned long   length )
+                                           unsigned long   length )
 {
-	int i = LECROY_VICP_HEADER_LSB_OFFSET;
+    int i = LECROY_VICP_HEADER_LSB_OFFSET;
 
 
-	for ( ; i >= LECROY_VICP_HEADER_MSB_OFFSET; length >>= 8, i-- )
-		header[ i ] = length & 0xFF;
+    for ( ; i >= LECROY_VICP_HEADER_MSB_OFFSET; length >>= 8, i-- )
+        header[ i ] = length & 0xFF;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

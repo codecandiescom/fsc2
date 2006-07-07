@@ -26,7 +26,7 @@
 
 #if 0
 static void lecroy9400_window_check_1( bool * is_start,
-									   bool * is_width );
+                                       bool * is_width );
 
 static void lecroy9400_window_check_2( void );
 
@@ -39,15 +39,15 @@ static void lecroy9400_window_check_3( void );
 
 int lecroy9400_get_tb_index( double timebase )
 {
-	size_t i;
+    size_t i;
 
 
-	for ( i = 0; i < NUM_ELEMS( tb ) - 1; i++ )
-		if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
-			return i + ( ( tb[ i ] / timebase > timebase / tb[ i + 1 ] ) ?
-						 0 : 1 );
+    for ( i = 0; i < NUM_ELEMS( tb ) - 1; i++ )
+        if ( timebase >= tb[ i ] && timebase <= tb[ i + 1 ] )
+            return i + ( ( tb[ i ] / timebase > timebase / tb[ i + 1 ] ) ?
+                         0 : 1 );
 
-	return i;
+    return i;
 }
 
 
@@ -57,19 +57,19 @@ int lecroy9400_get_tb_index( double timebase )
 
 const char *lecroy9400_ptime( double p_time )
 {
-	static char buffer[ 128 ];
+    static char buffer[ 128 ];
 
 
-	if ( fabs( p_time ) >= 1.0 )
-		sprintf( buffer, "%g s", p_time );
-	else if ( fabs( p_time ) >= 1.e-3 )
-		sprintf( buffer, "%g ms", 1.e3 * p_time );
-	else if ( fabs( p_time ) >= 1.e-6 )
-		sprintf( buffer, "%g us", 1.e6 * p_time );
-	else
-		sprintf( buffer, "%g ns", 1.e9 * p_time );
+    if ( fabs( p_time ) >= 1.0 )
+        sprintf( buffer, "%g s", p_time );
+    else if ( fabs( p_time ) >= 1.e-3 )
+        sprintf( buffer, "%g ms", 1.e3 * p_time );
+    else if ( fabs( p_time ) >= 1.e-6 )
+        sprintf( buffer, "%g us", 1.e6 * p_time );
+    else
+        sprintf( buffer, "%g ns", 1.e9 * p_time );
 
-	return buffer;
+    return buffer;
 }
 
 
@@ -80,56 +80,56 @@ const char *lecroy9400_ptime( double p_time )
 
 double lecroy9400_trigger_delay_check( void )
 {
-	double delay = lecroy9400.trigger_delay;
-	double real_delay;
+    double delay = lecroy9400.trigger_delay;
+    double real_delay;
 
 
-	/* Nothing needs to be done if the trigger delay never was set */
+    /* Nothing needs to be done if the trigger delay never was set */
 
-	if ( ! lecroy9400.is_trigger_delay )
-		return delay;
+    if ( ! lecroy9400.is_trigger_delay )
+        return delay;
 
-	/* The delay can only be set in units of 1/50 of the timebase */
+    /* The delay can only be set in units of 1/50 of the timebase */
 
-	real_delay = 0.02 * lrnd( 50.0 * delay / lecroy9400.timebase )
-		         * lecroy9400.timebase;
+    real_delay = 0.02 * lrnd( 50.0 * delay / lecroy9400.timebase )
+                 * lecroy9400.timebase;
 
-	/* Check that the trigger delay is within the limits (taking rounding
-	   errors of the order of the current time resolution into account) */
+    /* Check that the trigger delay is within the limits (taking rounding
+       errors of the order of the current time resolution into account) */
 
-	if ( real_delay > 0.0 &&
-		 real_delay >   10.0 * lecroy9400.timebase
-		              +  0.5 * tpp[ lecroy9400.tb_index ] )
-	{
-		print( FATAL, "Pre-trigger delay of %s now is too long, can't be "
-			   "longer than 10 times the timebase.\n",
-			   lecroy9400_ptime( real_delay ) );
-		THROW( EXCEPTION );
-	}
+    if ( real_delay > 0.0 &&
+         real_delay >   10.0 * lecroy9400.timebase
+                      +  0.5 * tpp[ lecroy9400.tb_index ] )
+    {
+        print( FATAL, "Pre-trigger delay of %s now is too long, can't be "
+               "longer than 10 times the timebase.\n",
+               lecroy9400_ptime( real_delay ) );
+        THROW( EXCEPTION );
+    }
 
-	if ( real_delay < 0.0 &&
-		 real_delay <   -1.0e4 * lecroy9400.timebase
-		              -  0.5 * tpp[ lecroy9400.tb_index ] )
-	{
-		print( FATAL, "Post-triger delay of %s now is too long, can't be "
-			   "longer that 10,000 times the timebase.\n",
-			   lecroy9400_ptime( real_delay ) );
-		THROW( EXCEPTION );
-	}
+    if ( real_delay < 0.0 &&
+         real_delay <   -1.0e4 * lecroy9400.timebase
+                      -  0.5 * tpp[ lecroy9400.tb_index ] )
+    {
+        print( FATAL, "Post-triger delay of %s now is too long, can't be "
+               "longer that 10,000 times the timebase.\n",
+               lecroy9400_ptime( real_delay ) );
+        THROW( EXCEPTION );
+    }
 
-	/* If the difference between the requested trigger delay and the one
-	   that can be set is larger than the time resolution warn the user */
+    /* If the difference between the requested trigger delay and the one
+       that can be set is larger than the time resolution warn the user */
 
-	if ( fabs( real_delay - delay ) > tpp[ lecroy9400.tb_index ] )
-	{
-		char *cp = T_strdup( lecroy9400_ptime( delay ) );
+    if ( fabs( real_delay - delay ) > tpp[ lecroy9400.tb_index ] )
+    {
+        char *cp = T_strdup( lecroy9400_ptime( delay ) );
 
-		print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
-			   cp, lecroy9400_ptime( real_delay ) );
-		T_free( cp );
-	}
+        print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
+               cp, lecroy9400_ptime( real_delay ) );
+        T_free( cp );
+    }
 
-	return real_delay;
+    return real_delay;
 }
 
 
@@ -139,15 +139,15 @@ double lecroy9400_trigger_delay_check( void )
 
 void lecroy9400_delete_windows( LECROY9400_T * s )
 {
-	Window_T *w;
+    Window_T *w;
 
 
-	while ( s->w != NULL )
-	{
-		w = s->w;
-		s->w = w->next;
-		T_free( w );
-	}
+    while ( s->w != NULL )
+    {
+        w = s->w;
+        s->w = w->next;
+        T_free( w );
+    }
 }
 
 
@@ -157,78 +157,78 @@ void lecroy9400_delete_windows( LECROY9400_T * s )
 void lecroy9400_do_pre_exp_checks( void )
 {
 #if 0
-	Window_T *w;
-	bool is_start, is_width;
+    Window_T *w;
+    bool is_start, is_width;
     double width;
 #endif
-	int i;
+    int i;
 
 
-	/* If a trigger channel has been set in the PREPARATIONS section send
-	   it to the digitizer */
+    /* If a trigger channel has been set in the PREPARATIONS section send
+       it to the digitizer */
 
-	if ( lecroy9400.is_trigger_channel )
-		lecroy9400_set_trigger_source( lecroy9400.trigger_channel );
+    if ( lecroy9400.is_trigger_channel )
+        lecroy9400_set_trigger_source( lecroy9400.trigger_channel );
 
-	/* Switch on all channels that are used in the measurements */
+    /* Switch on all channels that are used in the measurements */
 
-	for ( lecroy9400.num_used_channels = 0, i = 0; i <= LECROY9400_FUNC_F; i++)
-		lecroy9400_display( i, lecroy9400.channels_in_use[ i ] );
+    for ( lecroy9400.num_used_channels = 0, i = 0; i <= LECROY9400_FUNC_F; i++)
+        lecroy9400_display( i, lecroy9400.channels_in_use[ i ] );
 
-	/* Remove all unused windows and test if for all other windows the
-	   start position and width is set */
+    /* Remove all unused windows and test if for all other windows the
+       start position and width is set */
 
 #if 0
-	lecroy9400_window_check_1( &is_start, &is_width);
+    lecroy9400_window_check_1( &is_start, &is_width);
 
-	/* If there are no windows we're already done */
+    /* If there are no windows we're already done */
 
-	if ( lecroy9400.w == NULL )
+    if ( lecroy9400.w == NULL )
 #endif
-		return;
+        return;
 
 #if 0
 
-	/* If start position isn't set for all windows set it to the position of
-	   the left cursor */
+    /* If start position isn't set for all windows set it to the position of
+       the left cursor */
 
-	if ( ! is_start )
-		for ( w = lecroy9400.w; w != NULL; w = w->next )
-			if ( ! w->is_start )
-			{
-				w->start = lecroy9400.cursor_pos;
-				w->is_start = SET;
-			}
+    if ( ! is_start )
+        for ( w = lecroy9400.w; w != NULL; w = w->next )
+            if ( ! w->is_start )
+            {
+                w->start = lecroy9400.cursor_pos;
+                w->is_start = SET;
+            }
 
-	/* If no width is set for all windows get the distance of the cursors on
-	   the digitizers screen and use it as the default width. */
+    /* If no width is set for all windows get the distance of the cursors on
+       the digitizers screen and use it as the default width. */
 
-	if ( ! is_width )
-	{
-		lecroy9400_get_cursor_distance( &width );
+    if ( ! is_width )
+    {
+        lecroy9400_get_cursor_distance( &width );
 
-		width = fabs( width );
+        width = fabs( width );
 
-		if ( width == 0.0 )
-		{
-			print( FATAL, "Can't determine a reasonable value for still "
-				   "undefined window widths.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( width == 0.0 )
+        {
+            print( FATAL, "Can't determine a reasonable value for still "
+                   "undefined window widths.\n" );
+            THROW( EXCEPTION );
+        }
 
-		for ( w = lecroy9400.w; w != NULL; w = w->next )
-			if ( ! w->is_width )
-			{
-				w->width = width;
-				w->is_width = SET;
-			}
-	}
+        for ( w = lecroy9400.w; w != NULL; w = w->next )
+            if ( ! w->is_width )
+            {
+                w->width = width;
+                w->is_width = SET;
+            }
+    }
 
-	/* Make sure the windows are ok, i.e. cursors can be positioned exactly
-	   and are still within the range of the digitizers record length */
+    /* Make sure the windows are ok, i.e. cursors can be positioned exactly
+       and are still within the range of the digitizers record length */
 
-	lecroy9400_window_check_2( );
-	lecroy9400_window_check_3( );
+    lecroy9400_window_check_2( );
+    lecroy9400_window_check_3( );
 
 #endif
 }
@@ -240,21 +240,21 @@ void lecroy9400_do_pre_exp_checks( void )
  *---------------------------------------------------------------*/
 
 static void lecroy9400_window_check_1( bool * is_start,
-									   bool * is_width )
+                                       bool * is_width )
 {
-	Window_T *w;
+    Window_T *w;
 
 
-	*is_start = *is_width = SET;
+    *is_start = *is_width = SET;
 
-	for ( w = lecroy9400.w; w != NULL; w = w->next )
-	{
-		if ( ! w->is_start )
-			*is_start = UNSET;
+    for ( w = lecroy9400.w; w != NULL; w = w->next )
+    {
+        if ( ! w->is_start )
+            *is_start = UNSET;
 
-		if ( ! w->is_width )
-			*is_width = UNSET;
-	}
+        if ( ! w->is_width )
+            *is_width = UNSET;
+    }
 }
 
 
@@ -273,73 +273,73 @@ static void lecroy9400_window_check_1( bool * is_start,
 
 static void lecroy9400_window_check_2( void )
 {
-	Window_T *w;
+    Window_T *w;
     double dcs, dcd, dtb, fac;
     long rtb, cs, cd;
-	char *buffer;
+    char *buffer;
 
 
-	for ( w = lecroy9400.w; w != NULL; w = w->next )
-	{
-		dcs = w->start;
-		dtb = lecroy9400.timebase;
-		fac = 1.0;
+    for ( w = lecroy9400.w; w != NULL; w = w->next )
+    {
+        dcs = w->start;
+        dtb = lecroy9400.timebase;
+        fac = 1.0;
 
-		while ( ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 ) ||
-				fabs( dtb ) < 1.0 )
-		{
-			dcs *= 1000.0;
-			dtb *= 1000.0;
-			fac *= 0.001;
-		}
-		cs = lrnd( TDS_POINTS_PER_DIV * dcs );
-		rtb = lrnd( dtb );
+        while ( ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 ) ||
+                fabs( dtb ) < 1.0 )
+        {
+            dcs *= 1000.0;
+            dtb *= 1000.0;
+            fac *= 0.001;
+        }
+        cs = lrnd( TDS_POINTS_PER_DIV * dcs );
+        rtb = lrnd( dtb );
 
-		if ( cs % rtb )       /* window start not multiple of a point ? */
-		{
-			cs = ( cs / rtb ) * rtb;
-			dcs = cs * fac / TDS_POINTS_PER_DIV;
-			buffer = T_strdup( lecroy9400_ptime( dcs ) );
-			print( WARN, "Start point of window %ld had to be readjusted from "
-				   "%s to %s.\n",
-				   w->num, lecroy9400_ptime( w->start ), buffer );
-			T_free( buffer );
-			w->start = dcs;
-		}
+        if ( cs % rtb )       /* window start not multiple of a point ? */
+        {
+            cs = ( cs / rtb ) * rtb;
+            dcs = cs * fac / TDS_POINTS_PER_DIV;
+            buffer = T_strdup( lecroy9400_ptime( dcs ) );
+            print( WARN, "Start point of window %ld had to be readjusted from "
+                   "%s to %s.\n",
+                   w->num, lecroy9400_ptime( w->start ), buffer );
+            T_free( buffer );
+            w->start = dcs;
+        }
 
-		dcd = w->width;
-		dtb = lecroy9400.timebase;
-		fac = 1.0;
+        dcd = w->width;
+        dtb = lecroy9400.timebase;
+        fac = 1.0;
 
-		while ( fabs( dcd ) < 1.0 || fabs( dtb ) < 1.0 )
-		{
-			dcd *= 1000.0;
-			dtb *= 1000.0;
-			fac *= 0.001;
-		}
-		cd = lrnd( TDS_POINTS_PER_DIV * dcd );
-		rtb = lrnd( dtb );
+        while ( fabs( dcd ) < 1.0 || fabs( dtb ) < 1.0 )
+        {
+            dcd *= 1000.0;
+            dtb *= 1000.0;
+            fac *= 0.001;
+        }
+        cd = lrnd( TDS_POINTS_PER_DIV * dcd );
+        rtb = lrnd( dtb );
 
-		if ( labs( cd ) < rtb )    /* window smaller than one point ? */
-		{
-			dcd = lecroy9400.timebase / TDS_POINTS_PER_DIV;
-			buffer = T_strdup( lecroy9400_ptime( dcd ) );
-			print( SEVERE, "Width of window %ld had to be readjusted from %s "
-				   "to %s.\n", w->num, lecroy9400_ptime( w->width ), buffer );
-			T_free( buffer );
-			w->width = dcd;
-		}
-		else if ( cd % rtb )       /* window width not multiple of a point ? */
-		{
-			cd = ( cd / rtb ) * rtb;
-			dcd = cd * fac / TDS_POINTS_PER_DIV;
-			buffer = T_strdup( lecroy9400_ptime( dcd ) );
-			print( WARN, "Width of window %ld had to be readjusted from %s to "
-				   "%s.\n", w->num, lecroy9400_ptime( w->width ), buffer );
-			T_free( buffer );
-			w->width = dcd;
-		}
-	}
+        if ( labs( cd ) < rtb )    /* window smaller than one point ? */
+        {
+            dcd = lecroy9400.timebase / TDS_POINTS_PER_DIV;
+            buffer = T_strdup( lecroy9400_ptime( dcd ) );
+            print( SEVERE, "Width of window %ld had to be readjusted from %s "
+                   "to %s.\n", w->num, lecroy9400_ptime( w->width ), buffer );
+            T_free( buffer );
+            w->width = dcd;
+        }
+        else if ( cd % rtb )       /* window width not multiple of a point ? */
+        {
+            cd = ( cd / rtb ) * rtb;
+            dcd = cd * fac / TDS_POINTS_PER_DIV;
+            buffer = T_strdup( lecroy9400_ptime( dcd ) );
+            print( WARN, "Width of window %ld had to be readjusted from %s to "
+                   "%s.\n", w->num, lecroy9400_ptime( w->width ), buffer );
+            T_free( buffer );
+            w->width = dcd;
+        }
+    }
 }
 
 
@@ -351,7 +351,7 @@ static void lecroy9400_window_check_2( void )
 
 static void lecroy9400_window_check_3( void )
 {
-	Window_T *w;
+    Window_T *w;
     double window;
 
 
@@ -364,25 +364,25 @@ static void lecroy9400_window_check_3( void )
              w->start < - lecroy9400.trig_pos * window ||
              w->start + w->width < - lecroy9400.trig_pos * window )
         {
-			print( FATAL, "Window %ld doesn't fit into current digitizer time "
-				   "range.\n", w->num );
-			THROW( EXCEPTION );
-		}
+            print( FATAL, "Window %ld doesn't fit into current digitizer time "
+                   "range.\n", w->num );
+            THROW( EXCEPTION );
+        }
 
-		/* Take care: Numbers start from 1 ! */
+        /* Take care: Numbers start from 1 ! */
 
-		w->start_num = lrnd( ( w->start + lecroy9400.trig_pos * window )
-							 * TDS_POINTS_PER_DIV / lecroy9400.timebase ) + 1;
-		w->end_num = lrnd( ( w->start + w->width
-							 + lecroy9400.trig_pos * window )
-							 * TDS_POINTS_PER_DIV / lecroy9400.timebase ) + 1;
+        w->start_num = lrnd( ( w->start + lecroy9400.trig_pos * window )
+                             * TDS_POINTS_PER_DIV / lecroy9400.timebase ) + 1;
+        w->end_num = lrnd( ( w->start + w->width
+                             + lecroy9400.trig_pos * window )
+                             * TDS_POINTS_PER_DIV / lecroy9400.timebase ) + 1;
 
-		if ( w->end_num - w->start_num <= 0 )
+        if ( w->end_num - w->start_num <= 0 )
         {
-			print( FATAL, "Window %ld has width of less than 1 point.\n",
-				   w->num );
-			THROW( EXCEPTION );
-		}
+            print( FATAL, "Window %ld has width of less than 1 point.\n",
+                   w->num );
+            THROW( EXCEPTION );
+        }
     }
 }
 
@@ -401,94 +401,94 @@ static void lecroy9400_window_check_3( void )
  *--------------------------------------------------------------*/
 
 long lecroy9400_translate_channel( int  dir,
-								   long channel,
-								   bool flag )
+                                   long channel,
+                                   bool flag )
 {
-	if ( dir == GENERAL_TO_LECROY9400 )
-	{
-		switch ( channel )
-		{
-			case CHANNEL_CH1 :
-				return LECROY9400_CH1;
+    if ( dir == GENERAL_TO_LECROY9400 )
+    {
+        switch ( channel )
+        {
+            case CHANNEL_CH1 :
+                return LECROY9400_CH1;
 
-			case CHANNEL_CH2 :
-				return LECROY9400_CH2;
+            case CHANNEL_CH2 :
+                return LECROY9400_CH2;
 
-			case CHANNEL_MEM_C :
-				return LECROY9400_MEM_C;
+            case CHANNEL_MEM_C :
+                return LECROY9400_MEM_C;
 
-			case CHANNEL_MEM_D :
-				return LECROY9400_MEM_D;
+            case CHANNEL_MEM_D :
+                return LECROY9400_MEM_D;
 
-			case CHANNEL_FUNC_E :
-				return LECROY9400_FUNC_E;
+            case CHANNEL_FUNC_E :
+                return LECROY9400_FUNC_E;
 
-			case CHANNEL_FUNC_F :
-				return LECROY9400_FUNC_F;
+            case CHANNEL_FUNC_F :
+                return LECROY9400_FUNC_F;
 
-			case CHANNEL_LINE :
-				return LECROY9400_LIN;
+            case CHANNEL_LINE :
+                return LECROY9400_LIN;
 
-			case CHANNEL_EXT :
-				return LECROY9400_EXT;
+            case CHANNEL_EXT :
+                return LECROY9400_EXT;
 
-			case CHANNEL_EXT10 :
-				return LECROY9400_EXT10;
-		}
+            case CHANNEL_EXT10 :
+                return LECROY9400_EXT10;
+        }
 
-		if ( channel > CHANNEL_INVALID && channel < NUM_CHANNEL_NAMES )
-		{
-			if ( flag )
-				return -1;
-			print( FATAL, "Digitizer has no channel %s.\n",
-				   Channel_Names[ channel ] );
-			THROW( EXCEPTION );
-		}
+        if ( channel > CHANNEL_INVALID && channel < NUM_CHANNEL_NAMES )
+        {
+            if ( flag )
+                return -1;
+            print( FATAL, "Digitizer has no channel %s.\n",
+                   Channel_Names[ channel ] );
+            THROW( EXCEPTION );
+        }
 
-		if ( flag )
-			return -1;
-		print( FATAL, "Invalid channel number %ld.\n", channel );
-		THROW( EXCEPTION );
-	}
-	else
-	{
-		switch ( channel )
-		{
-			case LECROY9400_CH1 :
-				return CHANNEL_CH1;
+        if ( flag )
+            return -1;
+        print( FATAL, "Invalid channel number %ld.\n", channel );
+        THROW( EXCEPTION );
+    }
+    else
+    {
+        switch ( channel )
+        {
+            case LECROY9400_CH1 :
+                return CHANNEL_CH1;
 
-			case LECROY9400_CH2 :
-				return CHANNEL_CH2;
+            case LECROY9400_CH2 :
+                return CHANNEL_CH2;
 
-			case LECROY9400_MEM_C :
-				return CHANNEL_MEM_C;
+            case LECROY9400_MEM_C :
+                return CHANNEL_MEM_C;
 
-			case LECROY9400_MEM_D :
-				return CHANNEL_MEM_D;
+            case LECROY9400_MEM_D :
+                return CHANNEL_MEM_D;
 
-			case LECROY9400_FUNC_E :
-				return CHANNEL_FUNC_E;
+            case LECROY9400_FUNC_E :
+                return CHANNEL_FUNC_E;
 
-			case LECROY9400_FUNC_F :
-				return CHANNEL_FUNC_F;
+            case LECROY9400_FUNC_F :
+                return CHANNEL_FUNC_F;
 
-			case LECROY9400_LIN :
-				return CHANNEL_LINE;
+            case LECROY9400_LIN :
+                return CHANNEL_LINE;
 
-			case LECROY9400_EXT :
-				return CHANNEL_EXT;
+            case LECROY9400_EXT :
+                return CHANNEL_EXT;
 
-			case LECROY9400_EXT10 :
-				return CHANNEL_EXT10;
+            case LECROY9400_EXT10 :
+                return CHANNEL_EXT10;
 
-			default :
-				print( FATAL, "Internal error detected at %s:%d.\n",
-						__FILE__, __LINE__ );
-				THROW( EXCEPTION );
-		}
-	}
+            default :
+                print( FATAL, "Internal error detected at %s:%d.\n",
+                        __FILE__, __LINE__ );
+                THROW( EXCEPTION );
+        }
+    }
 
-	return -1;
+    return -1;
 }
 
 
@@ -496,41 +496,43 @@ long lecroy9400_translate_channel( int  dir,
  *-------------------------------------------------------------*/
 
 void lecroy9400_store_state( LECROY9400_T * dest,
-							 LECROY9400_T * src )
+                             LECROY9400_T * src )
 {
-	Window_T *w;
-	int i;
+    Window_T *w;
+    int i;
 
 
-	while ( dest->w != NULL )
-	{
-		w = dest->w;
-		dest->w = w->next;
-		T_free( w );
-	}
+    while ( dest->w != NULL )
+    {
+        w = dest->w;
+        dest->w = w->next;
+        T_free( w );
+    }
 
-	*dest = *src;
+    *dest = *src;
 
-	if ( src->num_windows == 0 )
-	{
-		dest->w = 0;
-		return;
-	}
+    if ( src->num_windows == 0 )
+    {
+        dest->w = 0;
+        return;
+    }
 
-	dest->w = WINDOW_P T_malloc( src->num_windows * sizeof *dest->w );
-	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
-	{
-		*( dest->w + i ) = *w;
-		if ( i != 0 )
-			dest->w->prev = dest->w - 1;
-		if ( w->next != NULL )
-			dest->w->next = dest->w + 1;
-	}
+    dest->w = WINDOW_P T_malloc( src->num_windows * sizeof *dest->w );
+    for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
+    {
+        *( dest->w + i ) = *w;
+        if ( i != 0 )
+            dest->w->prev = dest->w - 1;
+        if ( w->next != NULL )
+            dest->w->next = dest->w + 1;
+    }
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

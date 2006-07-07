@@ -32,7 +32,7 @@
 
 
 pid_t spawn_conn( bool   /* start_state */,
-				  FILE * /* in_file_fp  */ );
+                  FILE * /* in_file_fp  */ );
 
 
 #endif  /* ! CONN_HEADER */
@@ -41,5 +41,7 @@ pid_t spawn_conn( bool   /* start_state */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

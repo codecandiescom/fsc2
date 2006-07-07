@@ -36,19 +36,19 @@ static long lecroy94_tmpl_calc_pos( double t );
 
 const char *lecroy94_tmpl_ptime( double p_time )
 {
-	static char buffer[ 128 ];
+    static char buffer[ 128 ];
 
 
-	if ( fabs( p_time ) >= 1.0 )
-		sprintf( buffer, "%.3f s", p_time );
-	else if ( fabs( p_time ) >= 1.0e-3 )
-		sprintf( buffer, "%.3f ms", 1.0e3 * p_time );
-	else if ( fabs( p_time ) >= 1.0e-6 )
-		sprintf( buffer, "%3f us", 1.0e6 * p_time );
-	else
-		sprintf( buffer, "%.3f ns", 1.0e9 * p_time );
+    if ( fabs( p_time ) >= 1.0 )
+        sprintf( buffer, "%.3f s", p_time );
+    else if ( fabs( p_time ) >= 1.0e-3 )
+        sprintf( buffer, "%.3f ms", 1.0e3 * p_time );
+    else if ( fabs( p_time ) >= 1.0e-6 )
+        sprintf( buffer, "%3f us", 1.0e6 * p_time );
+    else
+        sprintf( buffer, "%.3f ns", 1.0e9 * p_time );
 
-	return buffer;
+    return buffer;
 }
 
 
@@ -58,15 +58,15 @@ const char *lecroy94_tmpl_ptime( double p_time )
 
 void lecroy94_tmpl_delete_windows( LECROY94_TMPL_T * s )
 {
-	Window_T *w;
+    Window_T *w;
 
 
-	while ( s->w != NULL )
-	{
-		w = s->w;
-		s->w = w->next;
-		T_free( w );
-	}
+    while ( s->w != NULL )
+    {
+        w = s->w;
+        s->w = w->next;
+        T_free( w );
+    }
 }
 
 
@@ -77,18 +77,18 @@ void lecroy94_tmpl_delete_windows( LECROY94_TMPL_T * s )
 
 Window_T *lecroy94_tmpl_get_window_by_number( long wid )
 {
-	Window_T *w;
-	
+    Window_T *w;
+    
 
-	if ( wid >= WINDOW_START_NUMBER )
-		for ( w = lecroy94_tmpl.w; w != NULL; w = w->next )
-			if ( w->num == wid )
-				return w;
+    if ( wid >= WINDOW_START_NUMBER )
+        for ( w = lecroy94_tmpl.w; w != NULL; w = w->next )
+            if ( w->num == wid )
+                return w;
 
-	print( FATAL, "Argument isn't a valid window number.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Argument isn't a valid window number.\n" );
+    THROW( EXCEPTION );
 
-	return NULL;
+    return NULL;
 }
 
 
@@ -100,17 +100,17 @@ Window_T *lecroy94_tmpl_get_window_by_number( long wid )
 
 void lecroy94_tmpl_all_windows_check( void )
 {
-	Window_T *w = lecroy94_tmpl.w;
+    Window_T *w = lecroy94_tmpl.w;
 
 
-	if ( w == NULL )
-		return;
+    if ( w == NULL )
+        return;
 
-	if ( w->next == NULL )
-		lecroy94_tmpl_window_check( w, UNSET );
-	else
-		for ( ; w != NULL; w = w->next )
-			lecroy94_tmpl_window_check( w, SET );
+    if ( w->next == NULL )
+        lecroy94_tmpl_window_check( w, UNSET );
+    else
+        for ( ; w != NULL; w = w->next )
+            lecroy94_tmpl_window_check( w, SET );
 }
 
 
@@ -121,58 +121,58 @@ void lecroy94_tmpl_all_windows_check( void )
 
 double lecroy94_tmpl_trigger_delay_check( void )
 {
-	double delay = lecroy94_tmpl.trigger_delay;
-	double real_delay;
+    double delay = lecroy94_tmpl.trigger_delay;
+    double real_delay;
 
 
-	/* Nothing needs to be done if the trigger delay never was set */
+    /* Nothing needs to be done if the trigger delay never was set */
 
-	if ( ! lecroy94_tmpl.is_trigger_delay )
-		return delay;
+    if ( ! lecroy94_tmpl.is_trigger_delay )
+        return delay;
 
-	/* The delay can only be set with a certain resolution (1/50) with respect
-	   to the current timebase, so make it a integer multiple of this */
+    /* The delay can only be set with a certain resolution (1/50) with respect
+       to the current timebase, so make it a integer multiple of this */
 
-	real_delay = LECROY94_TMPL_TRIG_DELAY_RESOLUTION * lecroy94_tmpl.timebase
-		         * lrnd( delay / ( LECROY94_TMPL_TRIG_DELAY_RESOLUTION *
-								   lecroy94_tmpl.timebase ) );
+    real_delay = LECROY94_TMPL_TRIG_DELAY_RESOLUTION * lecroy94_tmpl.timebase
+                 * lrnd( delay / ( LECROY94_TMPL_TRIG_DELAY_RESOLUTION *
+                                   lecroy94_tmpl.timebase ) );
 
-	/* Check that the trigger delay is within the limits (taking rounding
-	   errors of the order of the current time resolution into account) */
+    /* Check that the trigger delay is within the limits (taking rounding
+       errors of the order of the current time resolution into account) */
 
-	if ( real_delay > 0.0 &&
-		 real_delay >   10.0 * lecroy94_tmpl.timebase
-		              +  0.5 * lecroy94_tmpl_time_per_point( ) )
-	{
-		print( FATAL, "Pre-trigger delay of %s now is too long, can't be "
-			   "longer than 10 times the timebase.\n",
-			   lecroy94_tmpl_ptime( real_delay ) );
-		THROW( EXCEPTION );
-	}
+    if ( real_delay > 0.0 &&
+         real_delay >   10.0 * lecroy94_tmpl.timebase
+                      +  0.5 * lecroy94_tmpl_time_per_point( ) )
+    {
+        print( FATAL, "Pre-trigger delay of %s now is too long, can't be "
+               "longer than 10 times the timebase.\n",
+               lecroy94_tmpl_ptime( real_delay ) );
+        THROW( EXCEPTION );
+    }
 
-	if ( real_delay < 0.0 &&
-		 real_delay <   -1.0e4 * lecroy94_tmpl.timebase
-		              -  0.5 * lecroy94_tmpl_time_per_point( ) )
-	{
-		print( FATAL, "Post-triger delay of %s now is too long, can't be "
-			   "longer that 10,000 times the timebase.\n",
-			   lecroy94_tmpl_ptime( real_delay ) );
-		THROW( EXCEPTION );
-	}
+    if ( real_delay < 0.0 &&
+         real_delay <   -1.0e4 * lecroy94_tmpl.timebase
+                      -  0.5 * lecroy94_tmpl_time_per_point( ) )
+    {
+        print( FATAL, "Post-triger delay of %s now is too long, can't be "
+               "longer that 10,000 times the timebase.\n",
+               lecroy94_tmpl_ptime( real_delay ) );
+        THROW( EXCEPTION );
+    }
 
-	/* If the difference between the requested trigger delay and the one
-	   that can be set is larger than the time resolution warn the user */
+    /* If the difference between the requested trigger delay and the one
+       that can be set is larger than the time resolution warn the user */
 
-	if ( fabs( real_delay - delay ) > lecroy94_tmpl_time_per_point( ) )
-	{
-		char *cp = T_strdup( lecroy94_tmpl_ptime( delay ) );
+    if ( fabs( real_delay - delay ) > lecroy94_tmpl_time_per_point( ) )
+    {
+        char *cp = T_strdup( lecroy94_tmpl_ptime( delay ) );
 
-		print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
-			   cp, lecroy94_tmpl_ptime( real_delay ) );
-		T_free( cp );
-	}
+        print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
+               cp, lecroy94_tmpl_ptime( real_delay ) );
+        T_free( cp );
+    }
 
-	return real_delay;
+    return real_delay;
 }
 
 
@@ -181,65 +181,65 @@ double lecroy94_tmpl_trigger_delay_check( void )
  *------------------------------------------------------*/
 
 void lecroy94_tmpl_window_check( Window_T * w,
-								 bool       show_num )
+                                 bool       show_num )
 {
-	long start;
-	long end;
+    long start;
+    long end;
 
 
-	/* Start with calculating the start and end position of the window
-	   in points (thereby also taking care of rounding errors) */
+    /* Start with calculating the start and end position of the window
+       in points (thereby also taking care of rounding errors) */
 
-	start = lecroy94_tmpl_calc_pos( w->start );
-	end   = lecroy94_tmpl_calc_pos( w->start + w->width ) - 1;
+    start = lecroy94_tmpl_calc_pos( w->start );
+    end   = lecroy94_tmpl_calc_pos( w->start + w->width ) - 1;
 
-	if ( start < 0 )
-	{
-		if ( show_num > 0 )
-			print( FATAL, "%ld. window starts too early, earliest possible "
-				   "time is %s\n", w->num - WINDOW_START_NUMBER + 1,
-				   lecroy94_tmpl_ptime( - lecroy94_tmpl.trigger_delay ) );
-		else
-			print( FATAL, "Window starts too early, earliest possible time "
-				   "is %s\n",
-				   lecroy94_tmpl_ptime( - lecroy94_tmpl.trigger_delay ) );
-		THROW( EXCEPTION );
-	}
+    if ( start < 0 )
+    {
+        if ( show_num > 0 )
+            print( FATAL, "%ld. window starts too early, earliest possible "
+                   "time is %s\n", w->num - WINDOW_START_NUMBER + 1,
+                   lecroy94_tmpl_ptime( - lecroy94_tmpl.trigger_delay ) );
+        else
+            print( FATAL, "Window starts too early, earliest possible time "
+                   "is %s\n",
+                   lecroy94_tmpl_ptime( - lecroy94_tmpl.trigger_delay ) );
+        THROW( EXCEPTION );
+    }
 
-	if ( start >= lecroy94_tmpl_curve_length( ) )
-	{
-		double max_start_time =   10.0 * lecroy94_tmpl.timebase
-			                    - lecroy94_tmpl.trigger_delay
-			                    - lecroy94_tmpl_time_per_point( );
+    if ( start >= lecroy94_tmpl_curve_length( ) )
+    {
+        double max_start_time =   10.0 * lecroy94_tmpl.timebase
+                                - lecroy94_tmpl.trigger_delay
+                                - lecroy94_tmpl_time_per_point( );
 
-		if ( show_num > 0 )
-			print( FATAL, "%ld. window starts too late, last possible time "
-				   "is %s.\n", w->num - WINDOW_START_NUMBER + 1,
-				   lecroy94_tmpl_ptime( max_start_time ) );
-		else
-			print( FATAL, "Window starts too late, last possible time "
-				   "is %s.\n", lecroy94_tmpl_ptime( max_start_time ) );
-		THROW( EXCEPTION );
-	}
+        if ( show_num > 0 )
+            print( FATAL, "%ld. window starts too late, last possible time "
+                   "is %s.\n", w->num - WINDOW_START_NUMBER + 1,
+                   lecroy94_tmpl_ptime( max_start_time ) );
+        else
+            print( FATAL, "Window starts too late, last possible time "
+                   "is %s.\n", lecroy94_tmpl_ptime( max_start_time ) );
+        THROW( EXCEPTION );
+    }
 
-	if ( end >= lecroy94_tmpl_curve_length( ) )
-	{
-		double max_end_time =   10.0 * lecroy94_tmpl.timebase
-			                  - lecroy94_tmpl.trigger_delay - w->start;
+    if ( end >= lecroy94_tmpl_curve_length( ) )
+    {
+        double max_end_time =   10.0 * lecroy94_tmpl.timebase
+                              - lecroy94_tmpl.trigger_delay - w->start;
 
-		if ( show_num > 0 )
-			print( FATAL, "%d. window ends too late, largest possible width "
-				   "is %s.\n", w->num - WINDOW_START_NUMBER + 1,
-				   lecroy94_tmpl_ptime( max_end_time ) );
-		else
-			print( FATAL, "Window ends too late, largest possible width "
-				   "is %s.\n", lecroy94_tmpl_ptime( max_end_time ) );
-		THROW( EXCEPTION );
-	}
+        if ( show_num > 0 )
+            print( FATAL, "%d. window ends too late, largest possible width "
+                   "is %s.\n", w->num - WINDOW_START_NUMBER + 1,
+                   lecroy94_tmpl_ptime( max_end_time ) );
+        else
+            print( FATAL, "Window ends too late, largest possible width "
+                   "is %s.\n", lecroy94_tmpl_ptime( max_end_time ) );
+        THROW( EXCEPTION );
+    }
 
-	w->start_num  = start;
-	w->end_num    = end;
-	w->num_points = end - start + 1;
+    w->start_num  = start;
+    w->end_num    = end;
+    w->num_points = end - start + 1;
 }
 
 
@@ -250,17 +250,17 @@ void lecroy94_tmpl_window_check( Window_T * w,
 
 long lecroy94_tmpl_find_length( void )
 {
-	size_t i;
-	long cl = lecroy94_tmpl_curve_length( );
+    size_t i;
+    long cl = lecroy94_tmpl_curve_length( );
 
 
-	for ( i = 0; i < NUM_ELEMS( rl ); i++ )
-		if ( rl[ i ] >= cl )
-			break;
+    for ( i = 0; i < NUM_ELEMS( rl ); i++ )
+        if ( rl[ i ] >= cl )
+            break;
 
-	fsc2_assert( i != NUM_ELEMS( rl ) );     /* just to make 100% sure....*/
+    fsc2_assert( i != NUM_ELEMS( rl ) );     /* just to make 100% sure....*/
 
-	return rl[ i ];
+    return rl[ i ];
 }
 
 
@@ -271,8 +271,8 @@ long lecroy94_tmpl_find_length( void )
 
 static long lecroy94_tmpl_calc_pos( double t )
 {
-	return lrnd( ( t + lecroy94_tmpl.trigger_delay ) /
-				 lecroy94_tmpl_time_per_point( ) );
+    return lrnd( ( t + lecroy94_tmpl.trigger_delay ) /
+                 lecroy94_tmpl_time_per_point( ) );
 
 }
 
@@ -284,11 +284,11 @@ static long lecroy94_tmpl_calc_pos( double t )
 
 long lecroy94_tmpl_curve_length( void )
 {
-	return hres[ lecroy94_tmpl.tb_index ].ss_rl < 0 ||
-		   ( hres[ lecroy94_tmpl.tb_index ].ris_rl > 0 &&
-			 lecroy94_tmpl.interleaved ) ?
-		   hres[ lecroy94_tmpl.tb_index ].ris_rl :
-		   hres[ lecroy94_tmpl.tb_index ].ss_rl;
+    return hres[ lecroy94_tmpl.tb_index ].ss_rl < 0 ||
+           ( hres[ lecroy94_tmpl.tb_index ].ris_rl > 0 &&
+             lecroy94_tmpl.interleaved ) ?
+           hres[ lecroy94_tmpl.tb_index ].ris_rl :
+           hres[ lecroy94_tmpl.tb_index ].ss_rl;
 }
 
 
@@ -300,11 +300,11 @@ long lecroy94_tmpl_curve_length( void )
 
 double lecroy94_tmpl_time_per_point( void )
 {
-	return hres[ lecroy94_tmpl.tb_index ].ss_rl < 0 ||
-		   ( hres[ lecroy94_tmpl.tb_index ].ris_rl > 0 &&
-			 lecroy94_tmpl.interleaved ) ?
-		   hres[ lecroy94_tmpl.tb_index ].ris_tp :
-		   hres[ lecroy94_tmpl.tb_index ].ss_tp;
+    return hres[ lecroy94_tmpl.tb_index ].ss_rl < 0 ||
+           ( hres[ lecroy94_tmpl.tb_index ].ris_rl > 0 &&
+             lecroy94_tmpl.interleaved ) ?
+           hres[ lecroy94_tmpl.tb_index ].ris_tp :
+           hres[ lecroy94_tmpl.tb_index ].ss_tp;
 }
 
 
@@ -320,123 +320,123 @@ double lecroy94_tmpl_time_per_point( void )
  *--------------------------------------------------------------*/
 
 long lecroy94_tmpl_translate_channel( int  dir,
-									  long channel,
-									  bool flag )
+                                      long channel,
+                                      bool flag )
 {
-	if ( dir == GENERAL_TO_LECROY94_TMPL )
-	{
-		switch ( channel )
-		{
-			case CHANNEL_CH1 :
-				return LECROY94_TMPL_CH1;
+    if ( dir == GENERAL_TO_LECROY94_TMPL )
+    {
+        switch ( channel )
+        {
+            case CHANNEL_CH1 :
+                return LECROY94_TMPL_CH1;
 
-			case CHANNEL_CH2 :
-				return LECROY94_TMPL_CH2;
+            case CHANNEL_CH2 :
+                return LECROY94_TMPL_CH2;
 #ifdef LECROY94_TMPL_CH3
-			case CHANNEL_CH3 :
-				return LECROY94_TMPL_CH3;
+            case CHANNEL_CH3 :
+                return LECROY94_TMPL_CH3;
 #endif
 #ifdef LECROY94_TMPL_CH4
-			case CHANNEL_CH4 :
-				return LECROY94_TMPL_CH4;
+            case CHANNEL_CH4 :
+                return LECROY94_TMPL_CH4;
 #endif
-			case CHANNEL_EXP_A :
-				return LECROY94_TMPL_EXP_A;
+            case CHANNEL_EXP_A :
+                return LECROY94_TMPL_EXP_A;
 
-			case CHANNEL_EXP_B :
-				return LECROY94_TMPL_EXP_B;
+            case CHANNEL_EXP_B :
+                return LECROY94_TMPL_EXP_B;
 
-			case CHANNEL_MEM_C :
-				return LECROY94_TMPL_MEM_C;
+            case CHANNEL_MEM_C :
+                return LECROY94_TMPL_MEM_C;
 
-			case CHANNEL_MEM_D :
-				return LECROY94_TMPL_MEM_D;
+            case CHANNEL_MEM_D :
+                return LECROY94_TMPL_MEM_D;
 
-			case CHANNEL_FUNC_E :
-				return LECROY94_TMPL_FUNC_E;
+            case CHANNEL_FUNC_E :
+                return LECROY94_TMPL_FUNC_E;
 
-			case CHANNEL_FUNC_F :
-				return LECROY94_TMPL_FUNC_F;
+            case CHANNEL_FUNC_F :
+                return LECROY94_TMPL_FUNC_F;
 
-			case CHANNEL_LINE :
-				return LECROY94_TMPL_LIN;
+            case CHANNEL_LINE :
+                return LECROY94_TMPL_LIN;
 #ifdef LECROY94_TMPL_EXT
-			case CHANNEL_EXT :
-				return LECROY94_TMPL_EXT;
+            case CHANNEL_EXT :
+                return LECROY94_TMPL_EXT;
 #endif
 #ifdef LECROY94_TMPL_EXT10
-			case CHANNEL_EXT10 :
-				return LECROY94_TMPL_EXT10;
+            case CHANNEL_EXT10 :
+                return LECROY94_TMPL_EXT10;
 #endif
-		}
+        }
 
-		if ( channel > CHANNEL_INVALID && channel < NUM_CHANNEL_NAMES )
-		{
-			if ( flag )
-				return -1;
-			print( FATAL, "Digitizer has no channel %s.\n",
-				   Channel_Names[ channel ] );
-			THROW( EXCEPTION );
-		}
+        if ( channel > CHANNEL_INVALID && channel < NUM_CHANNEL_NAMES )
+        {
+            if ( flag )
+                return -1;
+            print( FATAL, "Digitizer has no channel %s.\n",
+                   Channel_Names[ channel ] );
+            THROW( EXCEPTION );
+        }
 
-		if ( flag )
-			return -1;
-		print( FATAL, "Invalid channel number %ld.\n", channel );
-		THROW( EXCEPTION );
-	}
-	else
-	{
-		switch ( channel )
-		{
-			case LECROY94_TMPL_CH1 :
-				return CHANNEL_CH1;
+        if ( flag )
+            return -1;
+        print( FATAL, "Invalid channel number %ld.\n", channel );
+        THROW( EXCEPTION );
+    }
+    else
+    {
+        switch ( channel )
+        {
+            case LECROY94_TMPL_CH1 :
+                return CHANNEL_CH1;
 
-			case LECROY94_TMPL_CH2 :
-				return CHANNEL_CH2;
+            case LECROY94_TMPL_CH2 :
+                return CHANNEL_CH2;
 #ifdef LECROY94_TMPL_CH3
-			case LECROY94_TMPL_CH3 :
-				return CHANNEL_CH3;
+            case LECROY94_TMPL_CH3 :
+                return CHANNEL_CH3;
 #endif
 #ifdef LECROY94_TMPL_CH4
-			case LECROY94_TMPL_CH4 :
-				return CHANNEL_CH4;
+            case LECROY94_TMPL_CH4 :
+                return CHANNEL_CH4;
 #endif
-			case LECROY94_TMPL_EXP_A :
-				return CHANNEL_EXP_A;
+            case LECROY94_TMPL_EXP_A :
+                return CHANNEL_EXP_A;
 
-			case LECROY94_TMPL_EXP_B :
-				return CHANNEL_EXP_B;
+            case LECROY94_TMPL_EXP_B :
+                return CHANNEL_EXP_B;
 
-			case LECROY94_TMPL_MEM_C :
-				return CHANNEL_MEM_C;
+            case LECROY94_TMPL_MEM_C :
+                return CHANNEL_MEM_C;
 
-			case LECROY94_TMPL_MEM_D :
-				return CHANNEL_MEM_D;
+            case LECROY94_TMPL_MEM_D :
+                return CHANNEL_MEM_D;
 
-			case LECROY94_TMPL_FUNC_E :
-				return CHANNEL_FUNC_E;
+            case LECROY94_TMPL_FUNC_E :
+                return CHANNEL_FUNC_E;
 
-			case LECROY94_TMPL_FUNC_F :
-				return CHANNEL_FUNC_F;
+            case LECROY94_TMPL_FUNC_F :
+                return CHANNEL_FUNC_F;
 
-			case LECROY94_TMPL_LIN :
-				return CHANNEL_LINE;
+            case LECROY94_TMPL_LIN :
+                return CHANNEL_LINE;
 #ifdef LECROY94_TMPL_EXT
-			case LECROY94_TMPL_EXT :
-				return CHANNEL_EXT;
+            case LECROY94_TMPL_EXT :
+                return CHANNEL_EXT;
 #endif
 #ifdef LECROY94_TMPL_EXT10
-			case LECROY94_TMPL_EXT10 :
-				return CHANNEL_EXT10;
+            case LECROY94_TMPL_EXT10 :
+                return CHANNEL_EXT10;
 #endif
-			default :
-				print( FATAL, "Internal error detected at %s:%d.\n",
-						__FILE__, __LINE__ );
-				THROW( EXCEPTION );
-		}
-	}
+            default :
+                print( FATAL, "Internal error detected at %s:%d.\n",
+                        __FILE__, __LINE__ );
+                THROW( EXCEPTION );
+        }
+    }
 
-	return -1;
+    return -1;
 }
 
 
@@ -444,41 +444,43 @@ long lecroy94_tmpl_translate_channel( int  dir,
  *-------------------------------------------------------------*/
 
 void lecroy94_tmpl_store_state( LECROY94_TMPL_T * dest,
-								LECROY94_TMPL_T * src )
+                                LECROY94_TMPL_T * src )
 {
-	Window_T *w;
-	int i;
+    Window_T *w;
+    int i;
 
 
-	while ( dest->w != NULL )
-	{
-		w = dest->w;
-		dest->w = w->next;
-		T_free( w );
-	}
+    while ( dest->w != NULL )
+    {
+        w = dest->w;
+        dest->w = w->next;
+        T_free( w );
+    }
 
-	*dest = *src;
+    *dest = *src;
 
-	if ( src->num_windows == 0 )
-	{
-		dest->w = 0;
-		return;
-	}
+    if ( src->num_windows == 0 )
+    {
+        dest->w = 0;
+        return;
+    }
 
-	dest->w = WINDOW_P T_malloc( src->num_windows * sizeof *dest->w );
-	for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
-	{
-		*( dest->w + i ) = *w;
-		if ( i != 0 )
-			dest->w->prev = dest->w - 1;
-		if ( w->next != NULL )
-			dest->w->next = dest->w + 1;
-	}
+    dest->w = WINDOW_P T_malloc( src->num_windows * sizeof *dest->w );
+    for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
+    {
+        *( dest->w + i ) = *w;
+        if ( i != 0 )
+            dest->w->prev = dest->w - 1;
+        if ( w->next != NULL )
+            dest->w->next = dest->w + 1;
+    }
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

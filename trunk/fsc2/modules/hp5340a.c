@@ -67,7 +67,7 @@ static bool hp5340a_command( const char * cmd );
 
 
 static struct {
-	int device;
+    int device;
 } hp5340a;
 
 
@@ -82,12 +82,12 @@ static struct {
 
 int hp5340a_init_hook( void )
 {
-	/* Set global variable to indicate that GPIB bus is needed */
+    /* Set global variable to indicate that GPIB bus is needed */
 
-	Need_GPIB = SET;
+    Need_GPIB = SET;
 
-	hp5340a.device = -1;
-	return 1;
+    hp5340a.device = -1;
+    return 1;
 }
 
 
@@ -96,14 +96,14 @@ int hp5340a_init_hook( void )
 
 int hp5340a_exp_hook( void )
 {
-	if ( ! hp5340a_init( device_name ) )
-	{
-		print( FATAL, "Initialization of device failed: %s\n",
-			   gpib_error_msg );
-		THROW( EXCEPTION );
-	}
+    if ( ! hp5340a_init( device_name ) )
+    {
+        print( FATAL, "Initialization of device failed: %s\n",
+               gpib_error_msg );
+        THROW( EXCEPTION );
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -112,12 +112,12 @@ int hp5340a_exp_hook( void )
 
 int hp5340a_end_of_exp_hook( void )
 {
-	/* Do a reset and switch device to local mode */
+    /* Do a reset and switch device to local mode */
 
-	gpib_write( hp5340a.device, "NH", 2 );
+    gpib_write( hp5340a.device, "NH", 2 );
 
-	hp5340a.device = -1;
-	return 1;
+    hp5340a.device = -1;
+    return 1;
 }
 
 
@@ -132,7 +132,7 @@ int hp5340a_end_of_exp_hook( void )
 
 Var_T *freq_counter_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -141,10 +141,10 @@ Var_T *freq_counter_name( Var_T * v  UNUSED_ARG )
 
 Var_T *freq_counter_measure( Var_T * v  UNUSED_ARG )
 {
-	if ( FSC2_MODE == TEST )
-		return vars_push( FLOAT_VAR, HP5340A_DEFAULT_FREQUENCY );
+    if ( FSC2_MODE == TEST )
+        return vars_push( FLOAT_VAR, HP5340A_DEFAULT_FREQUENCY );
 
-	return vars_push( FLOAT_VAR, h95340a_get_freq( ) );
+    return vars_push( FLOAT_VAR, h95340a_get_freq( ) );
 }
 
 
@@ -153,30 +153,30 @@ Var_T *freq_counter_measure( Var_T * v  UNUSED_ARG )
 
 Var_T *freq_counter_command( Var_T * v )
 {
-	char *cmd = NULL;
+    char *cmd = NULL;
 
 
-	CLOBBER_PROTECT( cmd );
+    CLOBBER_PROTECT( cmd );
 
-	vars_check( v, STR_VAR );
-	
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		TRY
-		{
-			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-			hp5340a_command( cmd );
-			T_free( cmd );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( cmd );
-			RETHROW( );
-		}
-	}
+    vars_check( v, STR_VAR );
+    
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        TRY
+        {
+            cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+            hp5340a_command( cmd );
+            T_free( cmd );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( cmd );
+            RETHROW( );
+        }
+    }
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -192,20 +192,20 @@ Var_T *freq_counter_command( Var_T * v )
 
 static bool hp5340a_init( const char * name )
 {
-	if ( gpib_init_device( name, &hp5340a.device ) == FAILURE )
+    if ( gpib_init_device( name, &hp5340a.device ) == FAILURE )
         return FAIL;
 
-	/* Tell device to use internal sample rate and to output data only if
-	   addressed as talker(don't lock the keyboard, the user is supposed
-	   to do settngs at the front panel) */
+    /* Tell device to use internal sample rate and to output data only if
+       addressed as talker(don't lock the keyboard, the user is supposed
+       to do settngs at the front panel) */
 
-	if ( gpib_write( hp5340a.device, "L", 1 ) == FAILURE )
-		return FAIL;
+    if ( gpib_write( hp5340a.device, "L", 1 ) == FAILURE )
+        return FAIL;
 
-	if ( gpib_write( hp5340a.device, "J", 1 ) == FAILURE )
-		return FAIL;
+    if ( gpib_write( hp5340a.device, "J", 1 ) == FAILURE )
+        return FAIL;
 
-	return OK;
+    return OK;
 }
 
 
@@ -214,24 +214,24 @@ static bool hp5340a_init( const char * name )
 
 static double h95340a_get_freq( void )
 {
-	char buf[ 16 ];
-	long len = 16;
+    char buf[ 16 ];
+    long len = 16;
 
-	if ( gpib_read( hp5340a.device, buf, &len ) == FAILURE ||
-		 len != 16 )
-	{
-		print( FATAL, "Communication with device failed.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( gpib_read( hp5340a.device, buf, &len ) == FAILURE ||
+         len != 16 )
+    {
+        print( FATAL, "Communication with device failed.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( buf[ 1 ] != ' ' )
-	{
-		print( FATAL, "Device detected display overflow.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( buf[ 1 ] != ' ' )
+    {
+        print( FATAL, "Device detected display overflow.\n" );
+        THROW( EXCEPTION );
+    }
 
-	buf[ 14 ] = '\0';
-	return T_atod( buf + 3 );
+    buf[ 14 ] = '\0';
+    return T_atod( buf + 3 );
 }
 
 
@@ -240,18 +240,20 @@ static double h95340a_get_freq( void )
 
 static bool hp5340a_command( const char * cmd )
 {
-	if ( gpib_write( hp5340a.device, cmd, strlen( cmd ) ) == FAILURE )
-	{
-		print( FATAL, "Communication with device failed.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( gpib_write( hp5340a.device, cmd, strlen( cmd ) ) == FAILURE )
+    {
+        print( FATAL, "Communication with device failed.\n" );
+        THROW( EXCEPTION );
+    }
 
-	return OK;
+    return OK;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

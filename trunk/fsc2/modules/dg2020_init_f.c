@@ -38,15 +38,15 @@ static void dg2020_pulse_start_setup( void );
 static void dg2020_create_phase_pulses( Function_T * f );
 
 static Pulse_T *dg2020_new_phase_pulse( Function_T * f,
-										Pulse_T *    p,
-										int          nth,
-										int          pos,
-										int          pod );
+                                        Pulse_T *    p,
+                                        int          nth,
+                                        int          pos,
+                                        int          pod );
 
 static void dg2020_set_phase_pulse_pos_and_len( Function_T * f,
-												Pulse_T *    np,
-												Pulse_T *    p,
-												int          nth );
+                                                Pulse_T *    np,
+                                                Pulse_T *    p,
+                                                int          nth );
 
 
 /*---------------------------------------------------------------------------*
@@ -56,21 +56,21 @@ static void dg2020_set_phase_pulse_pos_and_len( Function_T * f,
 
 void dg2020_init_setup( void )
 {
-	dg2020_basic_pulse_check( );
-	dg2020_basic_functions_check( );
-	dg2020_distribute_channels( );
-	dg2020_pulse_start_setup( );
+    dg2020_basic_pulse_check( );
+    dg2020_basic_functions_check( );
+    dg2020_distribute_channels( );
+    dg2020_pulse_start_setup( );
 
-	if ( dg2020.dump_file != NULL )
-	{
-		dg2020_init_print( dg2020.dump_file );
-		dg2020_dump_channels( dg2020.dump_file );
-	}
-	if ( dg2020.show_file != NULL )
-	{
-		dg2020_init_print( dg2020.show_file );
-		dg2020_dump_channels( dg2020.show_file );
-	}
+    if ( dg2020.dump_file != NULL )
+    {
+        dg2020_init_print( dg2020.dump_file );
+        dg2020_dump_channels( dg2020.dump_file );
+    }
+    if ( dg2020.show_file != NULL )
+    {
+        dg2020_init_print( dg2020.show_file );
+        dg2020_dump_channels( dg2020.show_file );
+    }
 }
 
 
@@ -79,35 +79,35 @@ void dg2020_init_setup( void )
 
 static void dg2020_init_print( FILE * fp )
 {
-	Function_T *f;
-	int i;
+    Function_T *f;
+    int i;
 
 
-	if ( fp == NULL )
-		return;
+    if ( fp == NULL )
+        return;
 
-	fprintf( fp, "TB: %g\nD: %ld\nPC:", dg2020.timebase, dg2020.neg_delay );
+    fprintf( fp, "TB: %g\nD: %ld\nPC:", dg2020.timebase, dg2020.neg_delay );
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-		if ( dg2020.function[ i ].needs_phases )
-			fprintf( fp, " %s", Function_Names[ i ] );
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+        if ( dg2020.function[ i ].needs_phases )
+            fprintf( fp, " %s", Function_Names[ i ] );
 
-	fprintf( fp, "\n===\n" );
+    fprintf( fp, "\n===\n" );
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
 
-		if ( ! f->is_used || f->num_channels == 0 )
-			continue;
+        if ( ! f->is_used || f->num_channels == 0 )
+            continue;
 
-		fprintf( fp, "%s:%d %ld%s\n", f->name, f->pod->self, f->delay,
-				 f->is_inverted ? " I" : "" );
+        fprintf( fp, "%s:%d %ld%s\n", f->name, f->pod->self, f->delay,
+                 f->is_inverted ? " I" : "" );
 
-		if ( f->pod2 != NULL )
-			fprintf( fp, "%s:%d %ld%s\n", f->name, f->pod2->self, f->delay,
-					 f->is_inverted ? " I" : "" );
-	}
+        if ( f->pod2 != NULL )
+            fprintf( fp, "%s:%d %ld%s\n", f->name, f->pod2->self, f->delay,
+                     f->is_inverted ? " I" : "" );
+    }
 }
 
 
@@ -124,84 +124,84 @@ static void dg2020_init_print( FILE * fp )
 
 static void dg2020_basic_pulse_check( void )
 {
-	Pulse_T *p;
+    Pulse_T *p;
 
 
-	for ( p = dg2020.pulses; p != NULL; p = p->next )
-	{
-		p->is_active = SET;
+    for ( p = dg2020.pulses; p != NULL; p = p->next )
+    {
+        p->is_active = SET;
 
-		/* Check the pulse function */
+        /* Check the pulse function */
 
-		if ( ! p->is_function )
-		{
-			print( FATAL, "Pulse #%ld is not associated with a function.\n",
-				   p->num );
-			THROW( EXCEPTION );
-		}
+        if ( ! p->is_function )
+        {
+            print( FATAL, "Pulse #%ld is not associated with a function.\n",
+                   p->num );
+            THROW( EXCEPTION );
+        }
 
-		if ( ! p->function->is_used )
-		{
-			print( FATAL, "Function '%s' of pulse #%ld hasn't been declared "
-				   "in the ASSIGNMENTS section.\n",
-				   p->function->name, p->num );
-			THROW( EXCEPTION );
-		}
+        if ( ! p->function->is_used )
+        {
+            print( FATAL, "Function '%s' of pulse #%ld hasn't been declared "
+                   "in the ASSIGNMENTS section.\n",
+                   p->function->name, p->num );
+            THROW( EXCEPTION );
+        }
 
-		/* Check the start position */
+        /* Check the start position */
 
-		if ( ! p->is_pos )
-			p->is_active = UNSET;
+        if ( ! p->is_pos )
+            p->is_active = UNSET;
 
-		/* Check the pulse length */
+        /* Check the pulse length */
 
-		if ( ! p->is_len )
-		{
-			if ( p->is_pos &&
-				 p->function == dg2020.function + PULSER_CHANNEL_DET )
-			{
-				print( WARN, "Length of detection pulse #%ld is being set to "
-					   "%s.\n", p->num, dg2020_pticks( 1 ) );
-				p->len = 1;
-				p->is_len = SET;
-			}
-			else
-				p->is_active = UNSET;
-		}
+        if ( ! p->is_len )
+        {
+            if ( p->is_pos &&
+                 p->function == dg2020.function + PULSER_CHANNEL_DET )
+            {
+                print( WARN, "Length of detection pulse #%ld is being set to "
+                       "%s.\n", p->num, dg2020_pticks( 1 ) );
+                p->len = 1;
+                p->is_len = SET;
+            }
+            else
+                p->is_active = UNSET;
+        }
 
-		/* Check that the pulse fits into the pulsers memory
-		   (If you check the following line real carefully, you will find that
-		   one less than the number of bits in the pulser channel is allowed -
-		   this is due to a bug in the pulsers firmware: if the very first bit
-		   in any of the channels is set to high the pulser outputs a pulse of
-		   250 us length before starting to output the real data in the
-		   channel, thus the first bit has always to be set to low, i.e. must
-		   be unused. But this is only the 'best' case when the pulser is used
-		   in repeat mode, in single mode setting the first bit of a channel
-		   leads to an obviously endless high pulse, while not setting the
-		   first bit keeps the pulser from working at all...) */
+        /* Check that the pulse fits into the pulsers memory
+           (If you check the following line real carefully, you will find that
+           one less than the number of bits in the pulser channel is allowed -
+           this is due to a bug in the pulsers firmware: if the very first bit
+           in any of the channels is set to high the pulser outputs a pulse of
+           250 us length before starting to output the real data in the
+           channel, thus the first bit has always to be set to low, i.e. must
+           be unused. But this is only the 'best' case when the pulser is used
+           in repeat mode, in single mode setting the first bit of a channel
+           leads to an obviously endless high pulse, while not setting the
+           first bit keeps the pulser from working at all...) */
 
-		if ( p->is_pos && p->is_len &&
-			 p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
-		{
-			print( FATAL, "Pulse #%ld does not fit into the pulsers memory. "
-				   "You could try a longer pulser time base.\n", p->num );
-			THROW( EXCEPTION );
-		}
+        if ( p->is_pos && p->is_len &&
+             p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
+        {
+            print( FATAL, "Pulse #%ld does not fit into the pulsers memory. "
+                   "You could try a longer pulser time base.\n", p->num );
+            THROW( EXCEPTION );
+        }
 
-		/* Check phase cycling of pulse */
+        /* Check phase cycling of pulse */
 
-		if ( p->pc && p->function->phase_func == NULL )
-		{
-			print( FATAL, "Pulse #%ld needs phase cycling but its function "
-				   "(%s) isn't associated with a phase function.\n",
-				   p->num, p->function->name );
-			THROW( EXCEPTION );
-		}
+        if ( p->pc && p->function->phase_func == NULL )
+        {
+            print( FATAL, "Pulse #%ld needs phase cycling but its function "
+                   "(%s) isn't associated with a phase function.\n",
+                   p->num, p->function->name );
+            THROW( EXCEPTION );
+        }
 
-		if ( p->is_active )
-			p->was_active = p->has_been_active = SET;
-	}
+        if ( p->is_active )
+            p->was_active = p->has_been_active = SET;
+    }
 }
 
 
@@ -209,9 +209,9 @@ static void dg2020_basic_pulse_check( void )
  * Function does a consistency check concerning the functions:
  * 1. Each function mentioned in the ASSIGMENTS section should have pulses
  *    assigned to it, otherwise it's not really needed. The exceptions
- *	 are the PHASES functions where the pulses are created automatically. On
- *	 the other hand, the PHASES functions aren't needed if no phase sequences
- *	 have been defined.
+ *   are the PHASES functions where the pulses are created automatically. On
+ *   the other hand, the PHASES functions aren't needed if no phase sequences
+ *   have been defined.
  * 2. Each function needs a pod again with the exception of the PHASES
  *    functions that need two.
  * Phase functions that are associated with useless functions or functions
@@ -226,223 +226,223 @@ static void dg2020_basic_pulse_check( void )
 
 static void dg2020_basic_functions_check( void )
 {
-	int i, j;
-	Function_T *f;
-	Pulse_T *cp;
+    int i, j;
+    Function_T *f;
+    Pulse_T *cp;
 
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
 
-		/* Don't do anything if the function has never been mentioned */
+        /* Don't do anything if the function has never been mentioned */
 
-		if ( ! f->is_used )
-			continue;
+        if ( ! f->is_used )
+            continue;
 
-		/* Check if the function that has been defined is really needed (i.e.
-		   has pulses assigned to it) - exceptions are the PHASE functions
-		   that get pulses assigned to them automatically and that are only
-		   needed if pulse sequences have been defined. If a function isn't
-		   needed also put back into the pool the channels that may have been
-		   assigned to the function. */
+        /* Check if the function that has been defined is really needed (i.e.
+           has pulses assigned to it) - exceptions are the PHASE functions
+           that get pulses assigned to them automatically and that are only
+           needed if pulse sequences have been defined. If a function isn't
+           needed also put back into the pool the channels that may have been
+           assigned to the function. */
 
-		if ( f->self != PULSER_CHANNEL_PHASE_1 &&
-			 f->self != PULSER_CHANNEL_PHASE_2 )
-		{
-			/* Function has no pulses ? */
+        if ( f->self != PULSER_CHANNEL_PHASE_1 &&
+             f->self != PULSER_CHANNEL_PHASE_2 )
+        {
+            /* Function has no pulses ? */
 
-			if ( f->is_used && ! f->is_needed )
-			{
-				print( WARN, "No pulses have been assigned to function "
-					   "'%s'.\n", f->name );
-				f->is_used = UNSET;
+            if ( f->is_used && ! f->is_needed )
+            {
+                print( WARN, "No pulses have been assigned to function "
+                       "'%s'.\n", f->name );
+                f->is_used = UNSET;
 
-				for ( j = 0; j < f->num_channels; j++ )
-				{
-					f->channel[ j ]->function = NULL;
-					f->channel[ j ] = NULL;
-				}
-				f->num_channels = 0;
+                for ( j = 0; j < f->num_channels; j++ )
+                {
+                    f->channel[ j ]->function = NULL;
+                    f->channel[ j ] = NULL;
+                }
+                f->num_channels = 0;
 
-				continue;
-			}
-		}
-		else
-		{
-			f->num_pulses = 0;
+                continue;
+            }
+        }
+        else
+        {
+            f->num_pulses = 0;
 
-			/* No phase sequences have been defined ? */
+            /* No phase sequences have been defined ? */
 
-			if ( PA_Seq.phs_seq == NULL )
-			{
-				print( WARN, "Phase functions '%s' isn't needed, because no "
-					   "phase sequences have been defined.\n", f->name );
-				f->is_used = UNSET;
+            if ( PA_Seq.phs_seq == NULL )
+            {
+                print( WARN, "Phase functions '%s' isn't needed, because no "
+                       "phase sequences have been defined.\n", f->name );
+                f->is_used = UNSET;
 
-				for ( j = 0; j < f->num_channels; j++ )
-				{
-					f->channel[ j ]->function = NULL;
-					f->channel[ j ] = NULL;
-				}
-				f->num_channels = 0;
+                for ( j = 0; j < f->num_channels; j++ )
+                {
+                    f->channel[ j ]->function = NULL;
+                    f->channel[ j ] = NULL;
+                }
+                f->num_channels = 0;
 
-				continue;
-			}
+                continue;
+            }
 
-			/* Phase function isn't associated with a function ? */
+            /* Phase function isn't associated with a function ? */
 
-			if ( f->phase_func == NULL )
-			{
-				print( WARN, "Phase function '%s' isn't needed, because it's "
-					   "not associated with a function.\n", f->name );
-				f->is_used = UNSET;
+            if ( f->phase_func == NULL )
+            {
+                print( WARN, "Phase function '%s' isn't needed, because it's "
+                       "not associated with a function.\n", f->name );
+                f->is_used = UNSET;
 
-				for ( j = 0; j < f->num_channels; j++ )
-				{
-					f->channel[ j ]->function = NULL;
-					f->channel[ j ] = NULL;
-				}
-				f->num_channels = 0;
+                for ( j = 0; j < f->num_channels; j++ )
+                {
+                    f->channel[ j ]->function = NULL;
+                    f->channel[ j ] = NULL;
+                }
+                f->num_channels = 0;
 
-				continue;
-			}
+                continue;
+            }
 
-			/* No second pod assigned to phase function ? */
+            /* No second pod assigned to phase function ? */
 
-			if ( f->pod2 == NULL)
-			{
-				print( FATAL, "Function '%s' needs two pods assigned to it.\n",
-					   f->name );
-				THROW( EXCEPTION );
-			}
+            if ( f->pod2 == NULL)
+            {
+                print( FATAL, "Function '%s' needs two pods assigned to it.\n",
+                       f->name );
+                THROW( EXCEPTION );
+            }
 
-			/* No phase setup has been done for this phase function */
+            /* No phase setup has been done for this phase function */
 
-			if ( ! f->is_phs )
-			{
-				print( FATAL, "Missing data on how to convert the pulse "
-					   "phases into pod outputs for function '%s'. Add a "
-					   "PHASE_SETUP command in the ASSIGNMENTS section.\n",
-						f->name );
-				THROW( EXCEPTION );
-			}
-		}
+            if ( ! f->is_phs )
+            {
+                print( FATAL, "Missing data on how to convert the pulse "
+                       "phases into pod outputs for function '%s'. Add a "
+                       "PHASE_SETUP command in the ASSIGNMENTS section.\n",
+                        f->name );
+                THROW( EXCEPTION );
+            }
+        }
 
-		/* Make sure there's a pod assigned to the function */
+        /* Make sure there's a pod assigned to the function */
 
-		if ( f->pod == NULL )
-		{
-			print( FATAL, "No pod has been assigned to function '%s'.\n",
-				   f->name );
-			THROW( EXCEPTION );
-		}
+        if ( f->pod == NULL )
+        {
+            print( FATAL, "No pod has been assigned to function '%s'.\n",
+                   f->name );
+            THROW( EXCEPTION );
+        }
 
-		/* Assemble a list of all pulses assigned to the function and, while
-		   doing so, also count the number of channels really needed. Finally
-		   set a flag that says if the function needs phase cycling */
+        /* Assemble a list of all pulses assigned to the function and, while
+           doing so, also count the number of channels really needed. Finally
+           set a flag that says if the function needs phase cycling */
 
-		if ( f->self != PULSER_CHANNEL_PHASE_1 &&
-			 f->self != PULSER_CHANNEL_PHASE_2 )
-		{
-			f->num_needed_channels = 1;
-			f->needs_phases = UNSET;
-			f->num_active_pulses = 0;
+        if ( f->self != PULSER_CHANNEL_PHASE_1 &&
+             f->self != PULSER_CHANNEL_PHASE_2 )
+        {
+            f->num_needed_channels = 1;
+            f->needs_phases = UNSET;
+            f->num_active_pulses = 0;
 
-			for ( cp = dg2020.pulses; cp != NULL; cp = cp->next )
-			{
-				if ( cp->function != f )
-					continue;
+            for ( cp = dg2020.pulses; cp != NULL; cp = cp->next )
+            {
+                if ( cp->function != f )
+                    continue;
 
-				f->num_pulses++;
-				f->pulses = PULSE_PP T_realloc( f->pulses,
-										   f->num_pulses * sizeof *f->pulses );
-				f->pulses[ f->num_pulses - 1 ] = cp;
+                f->num_pulses++;
+                f->pulses = PULSE_PP T_realloc( f->pulses,
+                                           f->num_pulses * sizeof *f->pulses );
+                f->pulses[ f->num_pulses - 1 ] = cp;
 
-				if ( cp->is_active )
-					f->num_active_pulses++;
+                if ( cp->is_active )
+                    f->num_active_pulses++;
 
-				if ( cp->pc )
-					f->needs_phases = SET;
-			}
+                if ( cp->pc )
+                    f->needs_phases = SET;
+            }
 
-			if ( ! f->needs_phases && f->phase_func != NULL )
-			{
-				print( WARN, "Function '%s' is associated with phase function "
-					   "'%s' but none of its pulses need phase cycling.\n",
-						f->name, f->phase_func->name );
+            if ( ! f->needs_phases && f->phase_func != NULL )
+            {
+                print( WARN, "Function '%s' is associated with phase function "
+                       "'%s' but none of its pulses need phase cycling.\n",
+                        f->name, f->phase_func->name );
 
-				for ( j = 0; j < f->phase_func->num_channels; j++ )
-				{
-					f->phase_func->channel[ j ]->function = NULL;
-					f->phase_func->channel[ j ] = NULL;
-				}
+                for ( j = 0; j < f->phase_func->num_channels; j++ )
+                {
+                    f->phase_func->channel[ j ]->function = NULL;
+                    f->phase_func->channel[ j ] = NULL;
+                }
 
-				f->phase_func->is_used = UNSET;
-				f->phase_func->num_channels = 0;
-				f->phase_func = NULL;
-			}
+                f->phase_func->is_used = UNSET;
+                f->phase_func->num_channels = 0;
+                f->phase_func = NULL;
+            }
 
-			fsc2_assert( f->num_pulses > 0 );    /* paranoia ? */
-		}
-		else
-		{
-			f->needs_phases = UNSET;
-			f->num_needed_channels = 2 * PA_Seq.phs_seq->len;
-		}
+            fsc2_assert( f->num_pulses > 0 );    /* paranoia ? */
+        }
+        else
+        {
+            f->needs_phases = UNSET;
+            f->num_needed_channels = 2 * PA_Seq.phs_seq->len;
+        }
 
-		/* Put channels not needed back into the pool */
+        /* Put channels not needed back into the pool */
 
-		if ( f->num_channels > f->num_needed_channels )
-			print( WARN, "For function '%s' only %d channel%s needed instead "
-				   "of the %d assigned to it.\n",
-				   f->name, f->num_needed_channels,
-				   f->num_needed_channels == 1 ? " is" : "s are",
-				   f->num_channels );
+        if ( f->num_channels > f->num_needed_channels )
+            print( WARN, "For function '%s' only %d channel%s needed instead "
+                   "of the %d assigned to it.\n",
+                   f->name, f->num_needed_channels,
+                   f->num_needed_channels == 1 ? " is" : "s are",
+                   f->num_channels );
 
-		while ( f->num_channels > f->num_needed_channels )
-		{
-			f->channel[ --f->num_channels ]->function = NULL;
-			f->channel[ f->num_channels ] = NULL;
-		}
-	}
+        while ( f->num_channels > f->num_needed_channels )
+        {
+            f->channel[ --f->num_channels ]->function = NULL;
+            f->channel[ f->num_channels ] = NULL;
+        }
+    }
 
-	/* Now we've got to run a second time through the pulses. We put back
+    /* Now we've got to run a second time through the pulses. We put back
        channels for functions that we found to be useless and also the
        channels for phase functions associated with useless functions */
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
 
-		if ( f->is_used )
-			continue;
+        if ( f->is_used )
+            continue;
 
-		for ( j = 0; j < f->num_channels; j++ )
-		{
-			f->channel[ j ]->function = NULL;
-			f->channel[ j ] = NULL;
-		}
-		f->num_channels = 0;
+        for ( j = 0; j < f->num_channels; j++ )
+        {
+            f->channel[ j ]->function = NULL;
+            f->channel[ j ] = NULL;
+        }
+        f->num_channels = 0;
 
-		if ( f->self != PULSER_CHANNEL_PHASE_1 &&
-			 f->self != PULSER_CHANNEL_PHASE_2 &&
-			 f->phase_func != NULL )
-		{
-			print( WARN, "Phase function '%s' isn't needed because function "
-				   "'%s' it is associated with is not used.\n",
-					f->phase_func->name, f->name );
+        if ( f->self != PULSER_CHANNEL_PHASE_1 &&
+             f->self != PULSER_CHANNEL_PHASE_2 &&
+             f->phase_func != NULL )
+        {
+            print( WARN, "Phase function '%s' isn't needed because function "
+                   "'%s' it is associated with is not used.\n",
+                    f->phase_func->name, f->name );
 
-			for ( j = 0; j < f->phase_func->num_channels; j++ )
-			{
-				f->phase_func->channel[ j ]->function = NULL;
-				f->phase_func->channel[ j ] = NULL;
-			}
-			f->phase_func->num_channels = 0;
+            for ( j = 0; j < f->phase_func->num_channels; j++ )
+            {
+                f->phase_func->channel[ j ]->function = NULL;
+                f->phase_func->channel[ j ] = NULL;
+            }
+            f->phase_func->num_channels = 0;
 
-			f->phase_func->is_used = UNSET;
-		}
-	}
+            f->phase_func->is_used = UNSET;
+        }
+    }
 }
 
 
@@ -453,51 +453,51 @@ static void dg2020_basic_functions_check( void )
 
 static void dg2020_distribute_channels( void )
 {
-	int i;
-	Function_T *f;
+    int i;
+    Function_T *f;
 
 
-	/* First count the number of channels we really need for the experiment */
+    /* First count the number of channels we really need for the experiment */
 
-	dg2020.needed_channels = 0;
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
-		if ( ! f->is_used )
-			continue;
-		dg2020.needed_channels += f->num_needed_channels;
-	}
+    dg2020.needed_channels = 0;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
+        if ( ! f->is_used )
+            continue;
+        dg2020.needed_channels += f->num_needed_channels;
+    }
 
-	/* Now we've got to check if there are at least as many channels as are
-	   needed for the experiment */
+    /* Now we've got to check if there are at least as many channels as are
+       needed for the experiment */
 
-	if ( dg2020.needed_channels > MAX_CHANNELS )
-	{
-		print( FATAL, "The experiment would require %d pulser channels but "
-			   "only %d are available.\n",
-				dg2020.needed_channels, ( int ) MAX_CHANNELS );
-		THROW( EXCEPTION );
-	}
+    if ( dg2020.needed_channels > MAX_CHANNELS )
+    {
+        print( FATAL, "The experiment would require %d pulser channels but "
+               "only %d are available.\n",
+                dg2020.needed_channels, ( int ) MAX_CHANNELS );
+        THROW( EXCEPTION );
+    }
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
 
-		/* Don't do anything for unused functions */
+        /* Don't do anything for unused functions */
 
-		if ( ! f->is_used )
-			continue;
+        if ( ! f->is_used )
+            continue;
 
-		/* If the function needs more channels than it got assigned get them
-		   now from the pool of free channels */
+        /* If the function needs more channels than it got assigned get them
+           now from the pool of free channels */
 
-		while ( f->num_channels < f->num_needed_channels )
-		{
-			f->channel[ f->num_channels ] = dg2020_get_next_free_channel( );
-			f->channel[ f->num_channels ]->function = f;
-			f->num_channels++;
-		}
-	}
+        while ( f->num_channels < f->num_needed_channels )
+        {
+            f->channel[ f->num_channels ] = dg2020_get_next_free_channel( );
+            f->channel[ f->num_channels ]->function = f;
+            f->num_channels++;
+        }
+    }
 }
 
 
@@ -508,34 +508,34 @@ static void dg2020_distribute_channels( void )
 
 static void dg2020_pulse_start_setup( void )
 {
-	Function_T *f;
-	int i, j;
+    Function_T *f;
+    int i, j;
 
 
-	/* Sort the pulses and check that they don't overlap */
+    /* Sort the pulses and check that they don't overlap */
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = dg2020.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = dg2020.function + i;
 
-		/* Nothing to be done for unused functions and the phase functions */
+        /* Nothing to be done for unused functions and the phase functions */
 
-		if ( ! f->is_used ||
-			 f->self == PULSER_CHANNEL_PHASE_1 ||
-			 f->self == PULSER_CHANNEL_PHASE_2 )
-			continue;
+        if ( ! f->is_used ||
+             f->self == PULSER_CHANNEL_PHASE_1 ||
+             f->self == PULSER_CHANNEL_PHASE_2 )
+            continue;
 
-		qsort( f->pulses, f->num_pulses, sizeof( Pulse_T * ),
-			   dg2020_start_compare );
+        qsort( f->pulses, f->num_pulses, sizeof( Pulse_T * ),
+               dg2020_start_compare );
 
-		dg2020_do_checks( f );
+        dg2020_do_checks( f );
 
-		for ( j = 0; j < f->num_pulses; j++ )
-			f->pulses[ j ]->channel = f->channel[ 0 ];
+        for ( j = 0; j < f->num_pulses; j++ )
+            f->pulses[ j ]->channel = f->channel[ 0 ];
 
-		if ( f->needs_phases )
-			dg2020_create_phase_pulses( f->phase_func );
-	}
+        if ( f->needs_phases )
+            dg2020_create_phase_pulses( f->phase_func );
+    }
 }
 
 
@@ -547,33 +547,33 @@ static void dg2020_pulse_start_setup( void )
 
 static void dg2020_create_phase_pulses( Function_T * f )
 {
-	int i, j, l;
-	Pulse_T *p;
+    int i, j, l;
+    Pulse_T *p;
 
 
-	for ( i = 0; i < f->phase_func->num_pulses; i++ )
-	{
-		f->num_active_pulses = 0;
+    for ( i = 0; i < f->phase_func->num_pulses; i++ )
+    {
+        f->num_active_pulses = 0;
 
-		for ( j = 0; j < PA_Seq.phs_seq->len; j++ )
-			for ( l = 0; l < 2; l++ )
-			{
-				p = dg2020_new_phase_pulse( f, f->phase_func->pulses[ i ], i,
-											j, l );
-				if ( p != NULL )
-				{
-					f->pulses = PULSE_PP T_realloc( f->pulses,
-										 ++f->num_pulses * sizeof *f->pulses );
-					f->pulses[ f->num_pulses - 1 ] = p;
+        for ( j = 0; j < PA_Seq.phs_seq->len; j++ )
+            for ( l = 0; l < 2; l++ )
+            {
+                p = dg2020_new_phase_pulse( f, f->phase_func->pulses[ i ], i,
+                                            j, l );
+                if ( p != NULL )
+                {
+                    f->pulses = PULSE_PP T_realloc( f->pulses,
+                                         ++f->num_pulses * sizeof *f->pulses );
+                    f->pulses[ f->num_pulses - 1 ] = p;
 
-					if ( p->is_active )
-					{
-						p->was_active = p->has_been_active = SET;
-						f->num_active_pulses++;
-					}
-				}
-			}
-	}
+                    if ( p->is_active )
+                    {
+                        p->was_active = p->has_been_active = SET;
+                        f->num_active_pulses++;
+                    }
+                }
+            }
+    }
 }
 
 
@@ -585,75 +585,75 @@ static void dg2020_create_phase_pulses( Function_T * f )
  *-------------------------------------------------------------*/
 
 static Pulse_T *dg2020_new_phase_pulse( Function_T * f,
-										Pulse_T *    p,
-										int          nth,
-										int          pos,
-										int          pod )
+                                        Pulse_T *    p,
+                                        int          nth,
+                                        int          pos,
+                                        int          pod )
 {
-	Pulse_T *np, *cp;
-	int type;
+    Pulse_T *np, *cp;
+    int type;
 
 
-	/* Figure out the phase type - its stored in the Phase_Sequence the entry
-	   in the referenced pulses points to. For pulses that don't need phase
-	   cycling but get it anyway, because they belong to a function that has
-	   other pulses that need phase cycling, the X-phase is used. */
+    /* Figure out the phase type - its stored in the Phase_Sequence the entry
+       in the referenced pulses points to. For pulses that don't need phase
+       cycling but get it anyway, because they belong to a function that has
+       other pulses that need phase cycling, the X-phase is used. */
 
-	type = p->pc != NULL ? p->pc->sequence[ pos ] : PHASE_PLUS_X;
+    type = p->pc != NULL ? p->pc->sequence[ pos ] : PHASE_PLUS_X;
 
-	/* No pulse is needed if for the current phase type / pod combination no
-	   voltage is needed */
+    /* No pulse is needed if for the current phase type / pod combination no
+       voltage is needed */
 
-	if ( f->phs.var[ type ][ pod ] == 0 )
-		return NULL;
+    if ( f->phs.var[ type ][ pod ] == 0 )
+        return NULL;
 
-	/* Get memory for a new pulse and append it to the list of pulses */
+    /* Get memory for a new pulse and append it to the list of pulses */
 
-	for ( cp = np = dg2020.pulses; np != NULL; np = np->next )
-		cp = np;
+    for ( cp = np = dg2020.pulses; np != NULL; np = np->next )
+        cp = np;
 
-	np = PULSE_P T_malloc( sizeof *np );
+    np = PULSE_P T_malloc( sizeof *np );
 
-	np->prev = cp;
-	cp->next = np;
+    np->prev = cp;
+    cp->next = np;
 
-	np->next = NULL;
-	np->pc = NULL;
+    np->next = NULL;
+    np->pc = NULL;
 
-	/* These 'artifical' pulses get negative numbers */
+    /* These 'artifical' pulses get negative numbers */
 
-	np->num = ( np->prev->num >= 0 ) ? -1 : np->prev->num - 1;
+    np->num = ( np->prev->num >= 0 ) ? -1 : np->prev->num - 1;
 
-	/* Its function is the phase function it belongs to */
+    /* Its function is the phase function it belongs to */
 
-	np->is_function = SET;
-	np->function = f;
+    np->is_function = SET;
+    np->function = f;
 
-	/* Set the channel it belongs to */
+    /* Set the channel it belongs to */
 
-	np->channel = f->channel[ 2 * pos + pod ];
+    np->channel = f->channel[ 2 * pos + pod ];
 
-	/* Its only active if the pulse it belongs to is active */
+    /* Its only active if the pulse it belongs to is active */
 
-	np->was_active = np->is_active = p->is_active;
-	np->for_pulse = p;
+    np->was_active = np->is_active = p->is_active;
+    np->for_pulse = p;
 
-	/* Calculate its position and length if possible */
+    /* Calculate its position and length if possible */
 
-	if ( np->is_active )
-		dg2020_set_phase_pulse_pos_and_len( f, np, p, nth );
+    if ( np->is_active )
+        dg2020_set_phase_pulse_pos_and_len( f, np, p, nth );
 
-	/* it doesn't needs updates yet */
+    /* it doesn't needs updates yet */
 
-	np->is_old_pos = np->is_old_len = UNSET;
-	np->needs_update = UNSET;
+    np->is_old_pos = np->is_old_len = UNSET;
+    np->needs_update = UNSET;
 
-	np->initial_pos = np->pos;
-	np->initial_is_pos = SET;
-	np->initial_pos = np->pos;
-	np->initial_is_len = SET;
+    np->initial_pos = np->pos;
+    np->initial_is_pos = SET;
+    np->initial_pos = np->pos;
+    np->initial_is_len = SET;
 
-	return np;
+    return np;
 }
 
 
@@ -661,146 +661,148 @@ static Pulse_T *dg2020_new_phase_pulse( Function_T * f,
  *-------------------------------------------------------------------------*/
 
 static void dg2020_set_phase_pulse_pos_and_len( Function_T * f,
-												Pulse_T *    np,
-												Pulse_T *    p,
-												int          nth )
+                                                Pulse_T *    np,
+                                                Pulse_T *    p,
+                                                int          nth )
 {
-	Pulse_T **pppl;               /* list of phase pulses for previous pulse */
-	int ppp_num;                  /* and the length of this list */
-	Pulse_T *pp, *pn;
-	int i;
-	Pulse_T *for_pulse = NULL;
+    Pulse_T **pppl;               /* list of phase pulses for previous pulse */
+    int ppp_num;                  /* and the length of this list */
+    Pulse_T *pp, *pn;
+    int i;
+    Pulse_T *for_pulse = NULL;
 
 
-	if ( nth == 0 )                           /* for first pulse ? */
-	{
-		/* We try to start the phase pulse for the first pulse as early as
-		   possible, i.e. even within the delay for the phase function */
+    if ( nth == 0 )                           /* for first pulse ? */
+    {
+        /* We try to start the phase pulse for the first pulse as early as
+           possible, i.e. even within the delay for the phase function */
 
-		if ( p->pos - f->delay < f->psd )
-		{
-			print( FATAL, "Pulse #%ld starts too early to allow setting of a "
-				   "phase pulse.\n", p->num );
-			THROW( EXCEPTION );
-		}
+        if ( p->pos - f->delay < f->psd )
+        {
+            print( FATAL, "Pulse #%ld starts too early to allow setting of a "
+                   "phase pulse.\n", p->num );
+            THROW( EXCEPTION );
+        }
 
-		np->pos = np->initial_pos = - f->delay;
-	}
-	else
-	{
-		pp = p->function->pulses[ nth - 1 ];
+        np->pos = np->initial_pos = - f->delay;
+    }
+    else
+    {
+        pp = p->function->pulses[ nth - 1 ];
 
-		/* If the phase switch delay does not fit between the pulse it gets
-		   associated with and its predecessor we have to complain (except
-		   when both pulses use the same phase sequence or none at all) */
+        /* If the phase switch delay does not fit between the pulse it gets
+           associated with and its predecessor we have to complain (except
+           when both pulses use the same phase sequence or none at all) */
 
-		if ( p->pos - pp->pos - pp->len < f->psd && p->pc != pp->pc )
-		{
-			print( FATAL, "Distance between pulses %ld and %ld is too small "
-				   "to allow setting of phase pulses.\n", pp->num, p->num );
-			THROW( EXCEPTION );
-		}
+        if ( p->pos - pp->pos - pp->len < f->psd && p->pc != pp->pc )
+        {
+            print( FATAL, "Distance between pulses %ld and %ld is too small "
+                   "to allow setting of phase pulses.\n", pp->num, p->num );
+            THROW( EXCEPTION );
+        }
 
-		/* Try to start the phase pulse as late as possible, i.e. just the
-		   phase switch delay before the associated pulse, because the
-		   probablity is high that the preceeding pulse is going to be
-		   shifted to later times or is lenghtened */
+        /* Try to start the phase pulse as late as possible, i.e. just the
+           phase switch delay before the associated pulse, because the
+           probablity is high that the preceeding pulse is going to be
+           shifted to later times or is lenghtened */
 
-		np->pos = np->initial_pos = p->pos - f->psd;
+        np->pos = np->initial_pos = p->pos - f->psd;
 
-		/* If this is too near to the preceeding pulse leave out the grace
-		   period, and if this still is too near to the previous pulse
-		   complain (except when both pulses use the same phase sequence since
-		   than both phase pulses get merged into one) */
+        /* If this is too near to the preceeding pulse leave out the grace
+           period, and if this still is too near to the previous pulse
+           complain (except when both pulses use the same phase sequence since
+           than both phase pulses get merged into one) */
 
-		if ( np->pos < pp->pos + pp->len + dg2020.grace_period )
-		{
-			np->pos += dg2020.grace_period;
+        if ( np->pos < pp->pos + pp->len + dg2020.grace_period )
+        {
+            np->pos += dg2020.grace_period;
 
-			if ( np->pos < pp->pos + pp->len + dg2020.grace_period &&
-				 p->pc != pp->pc && for_pulse != p )
-			{
-				print( SEVERE, "Pulses %ld and %ld are so close that problems "
-					   "with phase switching may result.\n", pp->num, p->num );
-				for_pulse = p;
-			}
-		}
+            if ( np->pos < pp->pos + pp->len + dg2020.grace_period &&
+                 p->pc != pp->pc && for_pulse != p )
+            {
+                print( SEVERE, "Pulses %ld and %ld are so close that problems "
+                       "with phase switching may result.\n", pp->num, p->num );
+                for_pulse = p;
+            }
+        }
 
-		/* Adjust the length of all phase pulses associated with the
-		   preceeding pulse */
+        /* Adjust the length of all phase pulses associated with the
+           preceeding pulse */
 
-		if ( dg2020_find_phase_pulse( pp, &pppl, &ppp_num ) )
-		{
-			for ( i = 0; i < ppp_num; i++ )
-			{
-				if ( pppl[ i ]->is_len )
-					pppl[ i ]->len = np->pos - pppl[ i ]->pos;
+        if ( dg2020_find_phase_pulse( pp, &pppl, &ppp_num ) )
+        {
+            for ( i = 0; i < ppp_num; i++ )
+            {
+                if ( pppl[ i ]->is_len )
+                    pppl[ i ]->len = np->pos - pppl[ i ]->pos;
 
-				if ( pppl[ i ]->pos + pppl[ i ]->len <
-					 pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len &&
-					 pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
-				{
-					print( FATAL, "Distance between pulses %ld and %ld is too "
-						   "small to allow setting of phase pulses.\n",
-						   p->num, pppl[ i ]->for_pulse->num );
-					THROW( EXCEPTION );
-				}
+                if ( pppl[ i ]->pos + pppl[ i ]->len <
+                     pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len &&
+                     pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
+                {
+                    print( FATAL, "Distance between pulses %ld and %ld is too "
+                           "small to allow setting of phase pulses.\n",
+                           p->num, pppl[ i ]->for_pulse->num );
+                    THROW( EXCEPTION );
+                }
 
-				if ( pppl[ i ]->pos + pppl[ i ]->len <
-					 pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len
-					 + dg2020.grace_period  &&
-					 pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc &&
-					 p != for_pulse )
-				{
-					print( SEVERE, "Pulses %ld and %ld are so close that "
-						   "problems with phase switching may result.\n",
-						   p->num, pppl[ i ]->for_pulse->num );
-					for_pulse = p;
-				}
-			}
+                if ( pppl[ i ]->pos + pppl[ i ]->len <
+                     pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len
+                     + dg2020.grace_period  &&
+                     pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc &&
+                     p != for_pulse )
+                {
+                    print( SEVERE, "Pulses %ld and %ld are so close that "
+                           "problems with phase switching may result.\n",
+                           p->num, pppl[ i ]->for_pulse->num );
+                    for_pulse = p;
+                }
+            }
 
-			T_free( pppl );
-		}
-	}
-	np->is_pos = p->is_pos == SET;
+            T_free( pppl );
+        }
+    }
+    np->is_pos = p->is_pos == SET;
 
-	/* We can't know the maximum possible length of the last phase pulse yet,
-	   this will only be known when we figured out the maximum sequence length
-	   in the test run, thus we flag our missing knowledge by setting the
-	   length to a negative value */
+    /* We can't know the maximum possible length of the last phase pulse yet,
+       this will only be known when we figured out the maximum sequence length
+       in the test run, thus we flag our missing knowledge by setting the
+       length to a negative value */
 
-	if ( nth == p->function->num_active_pulses - 1 )  /* last active pulse ? */
-		np->len = np->initial_len = -1;
-	else
-	{
-		/* This length is only tentatively and may become shorter when the
-		   following phase pulse is set */
+    if ( nth == p->function->num_active_pulses - 1 )  /* last active pulse ? */
+        np->len = np->initial_len = -1;
+    else
+    {
+        /* This length is only tentatively and may become shorter when the
+           following phase pulse is set */
 
-		pn = p->function->pulses[ nth + 1 ];
-		np->len = np->initial_len =	pn->pos - f->psd - np->pos;
+        pn = p->function->pulses[ nth + 1 ];
+        np->len = np->initial_len = pn->pos - f->psd - np->pos;
 
-		if ( np->pos + np->len < p->pos + p->len && p->pc != pn->pc )
-		{
-			print( FATAL, "Distance between pulses %ld and %ld is too small "
-				   "to allow setting of phase pulses.\n", p->num, pn->num );
-			THROW( EXCEPTION );
-		}
+        if ( np->pos + np->len < p->pos + p->len && p->pc != pn->pc )
+        {
+            print( FATAL, "Distance between pulses %ld and %ld is too small "
+                   "to allow setting of phase pulses.\n", p->num, pn->num );
+            THROW( EXCEPTION );
+        }
 
-		if ( np->pos + np->len < p->pos + p->len + dg2020.grace_period &&
-			 p->pc != pn->pc && p != for_pulse )
-		{
-			print( SEVERE, "Pulses %ld and %ld are so close that problems "
-				   "with phase switching may result.\n", p->num, pn->num );
-			for_pulse = p;
-		}
-	}
+        if ( np->pos + np->len < p->pos + p->len + dg2020.grace_period &&
+             p->pc != pn->pc && p != for_pulse )
+        {
+            print( SEVERE, "Pulses %ld and %ld are so close that problems "
+                   "with phase switching may result.\n", p->num, pn->num );
+            for_pulse = p;
+        }
+    }
 
-	np->is_len = p->is_len == SET;
+    np->is_len = p->is_len == SET;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

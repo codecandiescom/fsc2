@@ -30,8 +30,8 @@
 typedef struct RULBUS_RB8515_CLOCK_CARD RULBUS_RB8515_CLOCK_CARD;
 
 struct RULBUS_RB8515_CLOCK_CARD {
-	int handle;
-	unsigned char ctrl;
+    int handle;
+    unsigned char ctrl;
 };
 
 
@@ -50,9 +50,9 @@ static RULBUS_RB8515_CLOCK_CARD *rulbus_rb8515_clock_card_find( int handle );
 
 int rulbus_rb8515_clock_init( void )
 {
-	rulbus_rb8515_clock_card = NULL;
-	rulbus_num_clock_cards = 0;
-	return rulbus_errno = RULBUS_OK;
+    rulbus_rb8515_clock_card = NULL;
+    rulbus_num_clock_cards = 0;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -66,12 +66,12 @@ int rulbus_rb8515_clock_init( void )
 
 void rulbus_rb8515_clock_exit( void )
 {
-	if ( rulbus_rb8515_clock_card == NULL )
-		return;
+    if ( rulbus_rb8515_clock_card == NULL )
+        return;
 
-	free( rulbus_rb8515_clock_card );
-	rulbus_rb8515_clock_card = NULL;
-	rulbus_num_clock_cards = 0;
+    free( rulbus_rb8515_clock_card );
+    rulbus_rb8515_clock_card = NULL;
+    rulbus_num_clock_cards = 0;
 }
 
 
@@ -83,30 +83,30 @@ void rulbus_rb8515_clock_exit( void )
 
 int rulbus_rb8515_clock_card_init( int handle )
 {
-	RULBUS_RB8515_CLOCK_CARD *tmp;
-	int retval;
+    RULBUS_RB8515_CLOCK_CARD *tmp;
+    int retval;
 
 
-	tmp = realloc( rulbus_rb8515_clock_card,
-				   ( rulbus_num_clock_cards + 1 ) * sizeof *tmp );
+    tmp = realloc( rulbus_rb8515_clock_card,
+                   ( rulbus_num_clock_cards + 1 ) * sizeof *tmp );
 
-	if ( tmp == NULL )
-		return rulbus_errno = RULBUS_NO_MEMORY;
+    if ( tmp == NULL )
+        return rulbus_errno = RULBUS_NO_MEMORY;
 
-	rulbus_rb8515_clock_card = tmp;
-	tmp += rulbus_num_clock_cards++;
+    rulbus_rb8515_clock_card = tmp;
+    tmp += rulbus_num_clock_cards++;
 
-	tmp->handle = handle;
-	tmp->ctrl = RULBUS_RB8515_CLOCK_FREQ_OFF;
+    tmp->handle = handle;
+    tmp->ctrl = RULBUS_RB8515_CLOCK_FREQ_OFF;
 
-	/* Stop the clock */
+    /* Stop the clock */
 
-	if ( ( retval = rulbus_write( handle, 0, &tmp->ctrl, 1 ) ) != 1 )
-		return rulbus_errno = retval;
+    if ( ( retval = rulbus_write( handle, 0, &tmp->ctrl, 1 ) ) != 1 )
+        return rulbus_errno = retval;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
-	
+    
 
 /*---------------------------------------------------------------*
  * Function for deactivation a card (gets invoked automatically
@@ -116,40 +116,40 @@ int rulbus_rb8515_clock_card_init( int handle )
 
 int rulbus_rb8515_clock_card_exit( int handle )
 {
-	RULBUS_RB8515_CLOCK_CARD *card;
+    RULBUS_RB8515_CLOCK_CARD *card;
 
 
-	/* Try to find the card, if it doesn't exist just return */
+    /* Try to find the card, if it doesn't exist just return */
 
-	if ( ( card = rulbus_rb8515_clock_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_OK;
+    if ( ( card = rulbus_rb8515_clock_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_OK;
 
-	/* Remove the entry for the card */
+    /* Remove the entry for the card */
 
-	if ( rulbus_num_clock_cards > 1 )
-	{
-		if ( card != rulbus_rb8515_clock_card + rulbus_num_clock_cards - 1 )
-			memmove( card, card + 1, sizeof *card *
-					 ( rulbus_num_clock_cards -
-					   ( card - rulbus_rb8515_clock_card ) - 1 ) );
+    if ( rulbus_num_clock_cards > 1 )
+    {
+        if ( card != rulbus_rb8515_clock_card + rulbus_num_clock_cards - 1 )
+            memmove( card, card + 1, sizeof *card *
+                     ( rulbus_num_clock_cards -
+                       ( card - rulbus_rb8515_clock_card ) - 1 ) );
 
-		card = realloc( rulbus_rb8515_clock_card,
-						( rulbus_num_clock_cards - 1 ) * sizeof *card );
+        card = realloc( rulbus_rb8515_clock_card,
+                        ( rulbus_num_clock_cards - 1 ) * sizeof *card );
 
-		if ( card == NULL )
-			return rulbus_errno = RULBUS_NO_MEMORY;
+        if ( card == NULL )
+            return rulbus_errno = RULBUS_NO_MEMORY;
 
-		rulbus_rb8515_clock_card = card;
-	}
-	else
-	{
-		free( rulbus_rb8515_clock_card );
-		rulbus_rb8515_clock_card = NULL;
-	}
+        rulbus_rb8515_clock_card = card;
+    }
+    else
+    {
+        free( rulbus_rb8515_clock_card );
+        rulbus_rb8515_clock_card = NULL;
+    }
 
-	rulbus_num_clock_cards--;
+    rulbus_num_clock_cards--;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -158,29 +158,29 @@ int rulbus_rb8515_clock_card_exit( int handle )
  *-------------------------------------------------*/
 
 int rulbus_rb8515_clock_set_frequency( int handle,
-									   int freq )
+                                       int freq )
 {
-	RULBUS_RB8515_CLOCK_CARD *card;
-	int retval;
+    RULBUS_RB8515_CLOCK_CARD *card;
+    int retval;
 
 
-	/* Try to find the card, if it doesn't exist just return */
+    /* Try to find the card, if it doesn't exist just return */
 
-	if ( ( card = rulbus_rb8515_clock_card_find( handle ) ) == NULL )
-		return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
+    if ( ( card = rulbus_rb8515_clock_card_find( handle ) ) == NULL )
+        return rulbus_errno = RULBUS_INVALID_CARD_HANDLE;
 
-	if ( freq < RULBUS_RB8515_CLOCK_FREQ_OFF ||
-		 freq > RULBUS_RB8515_CLOCK_FREQ_100MHz )
-		return rulbus_errno = RULBUS_INVALID_ARGUMENT;
+    if ( freq < RULBUS_RB8515_CLOCK_FREQ_OFF ||
+         freq > RULBUS_RB8515_CLOCK_FREQ_100MHz )
+        return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
-	if ( card->ctrl == freq )
-		return rulbus_errno = RULBUS_OK;
+    if ( card->ctrl == freq )
+        return rulbus_errno = RULBUS_OK;
 
-	card->ctrl = freq;
-	if ( ( retval = rulbus_write( handle, 0, &card->ctrl, 1 ) ) != 1 )
-		return rulbus_errno = retval;
+    card->ctrl = freq;
+    if ( ( retval = rulbus_write( handle, 0, &card->ctrl, 1 ) ) != 1 )
+        return rulbus_errno = retval;
 
-	return rulbus_errno = RULBUS_OK;
+    return rulbus_errno = RULBUS_OK;
 }
 
 
@@ -190,22 +190,23 @@ int rulbus_rb8515_clock_set_frequency( int handle,
 
 static RULBUS_RB8515_CLOCK_CARD *rulbus_rb8515_clock_card_find( int handle )
 {
-	int i;
+    int i;
 
 
-	if ( handle < 0 )
-		return NULL;
+    if ( handle < 0 )
+        return NULL;
 
-	for ( i = 0; i < rulbus_num_clock_cards; i++ )
-		if ( handle == rulbus_rb8515_clock_card[ i ].handle )
-			return rulbus_rb8515_clock_card + i;
+    for ( i = 0; i < rulbus_num_clock_cards; i++ )
+        if ( handle == rulbus_rb8515_clock_card[ i ].handle )
+            return rulbus_rb8515_clock_card + i;
 
-	return NULL;
+    return NULL;
 }
 
 
 /*
  * Local variables:
- * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

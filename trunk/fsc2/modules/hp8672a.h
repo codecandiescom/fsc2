@@ -65,41 +65,41 @@ typedef struct HP8672A HP8672A_T;
 
 
 struct Att_Table_Entry {
-	double freq;
-	double att;
+    double freq;
+    double att;
 };
 
 
 struct HP8672A {
-	int device;
+    int device;
 
-	double freq;
-	bool freq_is_set;
-	double step_freq;
-	bool step_freq_is_set;
-	double start_freq;
-	bool start_freq_is_set;
-	double attenuation;
-	bool attenuation_is_set;
+    double freq;
+    bool freq_is_set;
+    double step_freq;
+    bool step_freq_is_set;
+    double start_freq;
+    bool start_freq_is_set;
+    double attenuation;
+    bool attenuation_is_set;
 
-	bool state;                     /* RF is on or off */
-	bool is_10db;                   /* 10 db extra output option */
+    bool state;                     /* RF is on or off */
+    bool is_10db;                   /* 10 db extra output option */
 
-	char *table_file;               /* name of attenuation table file */
-	bool use_table;
-	Att_Table_Entry_T *att_table;
-	long att_table_len;
-	double min_table_freq;
-	double max_table_freq;
-	double min_attenuation;
-	double att_ref_freq;
-	double att_at_ref_freq;
-	double real_attenuation;        /* might differ from attenuation due to
-									   use of table */
-	int mod_type;
-	bool mod_type_is_set;
-	int mod_ampl[ NUM_MOD_TYPES ];
-	bool mod_ampl_is_set[ NUM_MOD_TYPES ];
+    char *table_file;               /* name of attenuation table file */
+    bool use_table;
+    Att_Table_Entry_T *att_table;
+    long att_table_len;
+    double min_table_freq;
+    double max_table_freq;
+    double min_attenuation;
+    double att_ref_freq;
+    double att_at_ref_freq;
+    double real_attenuation;        /* might differ from attenuation due to
+                                       use of table */
+    int mod_type;
+    bool mod_type_is_set;
+    int mod_ampl[ NUM_MOD_TYPES ];
+    bool mod_ampl_is_set[ NUM_MOD_TYPES ];
 };
 
 
@@ -148,8 +148,8 @@ double hp8672a_get_att_from_table( double /* freq */ );
 double hp8672a_get_att( double /* freq */ );
 
 int hp8672a_set_mod_param( Var_T *  /* v    */,
-						   double * /* dres */,
-						   int *    /* ires */ );
+                           double * /* dres */,
+                           int *    /* ires */ );
 
 int hp8672_mod_ampl_check( double /* ampl */ );
 
@@ -181,5 +181,7 @@ bool hp8672a_command( const char * /* cmd */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

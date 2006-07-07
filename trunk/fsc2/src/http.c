@@ -34,14 +34,14 @@
 static void spawn_server( void );
 static void http_send_error_browser( int pd );
 static void http_send_picture( int pd,
-							   int type );
+                               int type );
 
 
 enum {
-	HTTP_PARENT_READ = 0,
-	HTTP_CHILD_WRITE,
-	HTTP_CHILD_READ,
-	HTTP_PARENT_WRITE
+    HTTP_PARENT_READ = 0,
+    HTTP_CHILD_WRITE,
+    HTTP_CHILD_READ,
+    HTTP_PARENT_WRITE
 };
 
 
@@ -51,59 +51,59 @@ enum {
  *------------------------------------------------------------*/
 
 void server_callback( FL_OBJECT * obj,
-					  long        a  UNUSED_ARG )
+                      long        a  UNUSED_ARG )
 {
-	char *www_help;
+    char *www_help;
 
 
-	if ( fl_get_button( obj ) && Fsc2_Internals.http_pid >= 0 )
-	{
-		if ( Fsc2_Internals.http_pid != 0 )
-			return;
+    if ( fl_get_button( obj ) && Fsc2_Internals.http_pid >= 0 )
+    {
+        if ( Fsc2_Internals.http_pid != 0 )
+            return;
 
-		TRY
-		{
-			spawn_server( );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			fl_set_button( obj, 0 );
-			eprint( WARN, UNSET, "Failed to start HTTP server.\n" );
-			return;
-		}
+        TRY
+        {
+            spawn_server( );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            fl_set_button( obj, 0 );
+            eprint( WARN, UNSET, "Failed to start HTTP server.\n" );
+            return;
+        }
 
-		www_help = get_string( "Kill the HTTP server (on port %d)\n"
-							   "that allows to view fsc2's current\n"
-							   "state via the internet.",
-							   Fsc2_Internals.http_port );
-		fl_set_object_helper( obj, www_help );
-		T_free( www_help );
-	}
-	else
-	{
-		/* This might get called twice: First when the button gets switched
-		   off and then again (with the pid set to -1) when the signal handler
-		   for SIGCHLD gets triggered. */
+        www_help = get_string( "Kill the HTTP server (on port %d)\n"
+                               "that allows to view fsc2's current\n"
+                               "state via the internet.",
+                               Fsc2_Internals.http_port );
+        fl_set_object_helper( obj, www_help );
+        T_free( www_help );
+    }
+    else
+    {
+        /* This might get called twice: First when the button gets switched
+           off and then again (with the pid set to -1) when the signal handler
+           for SIGCHLD gets triggered. */
 
-		if ( ! fl_get_button( obj ) && Fsc2_Internals.http_pid > 0 &&
-			 ! kill( Fsc2_Internals.http_pid, 0 ) )
-			kill( Fsc2_Internals.http_pid, SIGTERM );
-		else
-		{
-			Fsc2_Internals.http_pid = 0;
-			close( Comm.http_pd[ HTTP_PARENT_READ ] );
-			close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
+        if ( ! fl_get_button( obj ) && Fsc2_Internals.http_pid > 0 &&
+             ! kill( Fsc2_Internals.http_pid, 0 ) )
+            kill( Fsc2_Internals.http_pid, SIGTERM );
+        else
+        {
+            Fsc2_Internals.http_pid = 0;
+            close( Comm.http_pd[ HTTP_PARENT_READ ] );
+            close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
 
-			fl_set_button( obj, 0 );
-			www_help = get_string( "Run a HTTP server (on port %d)\n"
-								   "that allows to view fsc2's current\n"
-								   "state via the internet.",
-								   Fsc2_Internals.http_port );
-			fl_set_object_helper( obj, www_help );
-			T_free( www_help );
-		}
-	}
+            fl_set_button( obj, 0 );
+            www_help = get_string( "Run a HTTP server (on port %d)\n"
+                                   "that allows to view fsc2's current\n"
+                                   "state via the internet.",
+                                   Fsc2_Internals.http_port );
+            fl_set_object_helper( obj, www_help );
+            T_free( www_help );
+        }
+    }
 }
 
 
@@ -116,65 +116,65 @@ void server_callback( FL_OBJECT * obj,
 
 static void spawn_server( void )
 {
-	int pr;
-	char *a[ 4 ];
+    int pr;
+    char *a[ 4 ];
 
 
-	/* Open pipe for communication with child that's going to be spawned */
+    /* Open pipe for communication with child that's going to be spawned */
 
-	if ( ( pr = pipe( Comm.http_pd ) ) < 0 || pipe( Comm.http_pd + 2 ) < 0 )
-	{
-		if ( pr == 0 )
-		{
-			close( Comm.http_pd[ HTTP_PARENT_READ ] );
-			close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
-		}
+    if ( ( pr = pipe( Comm.http_pd ) ) < 0 || pipe( Comm.http_pd + 2 ) < 0 )
+    {
+        if ( pr == 0 )
+        {
+            close( Comm.http_pd[ HTTP_PARENT_READ ] );
+            close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
+        }
 
-		THROW( EXCEPTION );
-	}
+        THROW( EXCEPTION );
+    }
 
-	if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-		a[ 0 ] = get_string( "%s%sfsc2_http_server", srcdir, slash( srcdir ) );
-	else
-		a[ 0 ] = get_string( "%s%sfsc2_http_server", bindir, slash( bindir ) );
+    if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+        a[ 0 ] = get_string( "%s%sfsc2_http_server", srcdir, slash( srcdir ) );
+    else
+        a[ 0 ] = get_string( "%s%sfsc2_http_server", bindir, slash( bindir ) );
 
-	a[ 1 ] = get_string( "%d", Fsc2_Internals.http_port );
-	a[ 2 ] = T_strdup( auxdir );
-	a[ 3 ] = NULL;
+    a[ 1 ] = get_string( "%d", Fsc2_Internals.http_port );
+    a[ 2 ] = T_strdup( auxdir );
+    a[ 3 ] = NULL;
 
-	/* Start the HTTP server with its standard input and output redirected */
+    /* Start the HTTP server with its standard input and output redirected */
 
-	if ( ( Fsc2_Internals.http_pid = fork( ) ) == 0 )
-	{
-		close( Comm.http_pd[ HTTP_PARENT_READ ] );
-		close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
+    if ( ( Fsc2_Internals.http_pid = fork( ) ) == 0 )
+    {
+        close( Comm.http_pd[ HTTP_PARENT_READ ] );
+        close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
 
-		dup2( Comm.http_pd[ HTTP_CHILD_READ  ], STDIN_FILENO );
-		dup2( Comm.http_pd[ HTTP_CHILD_WRITE ], STDOUT_FILENO );
+        dup2( Comm.http_pd[ HTTP_CHILD_READ  ], STDIN_FILENO );
+        dup2( Comm.http_pd[ HTTP_CHILD_WRITE ], STDOUT_FILENO );
 
-		close( Comm.http_pd[ HTTP_CHILD_READ ] );
-		close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
+        close( Comm.http_pd[ HTTP_CHILD_READ ] );
+        close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
 
-		execv( a[ 0 ], a );
-		_exit( EXIT_FAILURE );
-	}
+        execv( a[ 0 ], a );
+        _exit( EXIT_FAILURE );
+    }
 
-	T_free( a[ 0 ] );
-	T_free( a[ 1 ] );
-	T_free( a[ 2 ] );
+    T_free( a[ 0 ] );
+    T_free( a[ 1 ] );
+    T_free( a[ 2 ] );
 
-	close( Comm.http_pd[ HTTP_CHILD_READ  ] );
-	close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
+    close( Comm.http_pd[ HTTP_CHILD_READ  ] );
+    close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
 
-	if ( Fsc2_Internals.http_pid < 0 )
-	{
-		close( Comm.http_pd[ HTTP_PARENT_READ  ] );
-		close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
+    if ( Fsc2_Internals.http_pid < 0 )
+    {
+        close( Comm.http_pd[ HTTP_PARENT_READ  ] );
+        close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
 
-		Fsc2_Internals.http_pid = 0;
+        Fsc2_Internals.http_pid = 0;
 
-		THROW( EXCEPTION );
-	}
+        THROW( EXCEPTION );
+    }
 }
 
 
@@ -185,78 +185,78 @@ static void spawn_server( void )
 
 void http_check( void )
 {
-	struct timeval tv;
-	fd_set rfds;
-	char reply[ 2 ];
-	char query;
+    struct timeval tv;
+    fd_set rfds;
+    char reply[ 2 ];
+    char query;
 
 
-	tv.tv_sec = tv.tv_usec = 0;
-	FD_ZERO( &rfds );
-	FD_SET( Comm.http_pd[ HTTP_PARENT_READ ], &rfds );
+    tv.tv_sec = tv.tv_usec = 0;
+    FD_ZERO( &rfds );
+    FD_SET( Comm.http_pd[ HTTP_PARENT_READ ], &rfds );
 
-	/* Answer only one reqest at a time, we don't want the experiment getting
-	   bogged down just because somone has been fallen asleep on the reload
-	   button of his browser... */
+    /* Answer only one reqest at a time, we don't want the experiment getting
+       bogged down just because somone has been fallen asleep on the reload
+       button of his browser... */
 
-	if ( select( Comm.http_pd[ HTTP_PARENT_READ ] + 1, &rfds,
-				 NULL, NULL, &tv ) > 0 )
-	{
-		read( Comm.http_pd[ HTTP_PARENT_READ ], &query, 1 );
+    if ( select( Comm.http_pd[ HTTP_PARENT_READ ] + 1, &rfds,
+                 NULL, NULL, &tv ) > 0 )
+    {
+        read( Comm.http_pd[ HTTP_PARENT_READ ], &query, 1 );
 
-		reply[ 1 ] = '\n';
+        reply[ 1 ] = '\n';
 
-		switch ( query )
-		{
-			case 'S' :                             /* state of the program ? */
-				reply[ 0 ]  = ( char ) Fsc2_Internals.state + '0';
-				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
-				break;
+        switch ( query )
+        {
+            case 'S' :                             /* state of the program ? */
+                reply[ 0 ]  = ( char ) Fsc2_Internals.state + '0';
+                write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+                break;
 
-			case 'W' :                       /* wich windows are displayed ? */
-				if ( ! G.is_init )
-					reply[ 0 ] = '0';
-				else
-				{
-					if ( G.dim == 1 )
-						reply[ 0 ] = '1';
-					else if ( G.dim == 2 )
-						reply[ 0 ] = ( G_2d.is_cut ? '6' : '2' );
-					else if ( G.dim == 3 )
-						reply[ 0 ] = ( G_2d.is_cut ? '7' : '3' );
-				}
+            case 'W' :                       /* wich windows are displayed ? */
+                if ( ! G.is_init )
+                    reply[ 0 ] = '0';
+                else
+                {
+                    if ( G.dim == 1 )
+                        reply[ 0 ] = '1';
+                    else if ( G.dim == 2 )
+                        reply[ 0 ] = ( G_2d.is_cut ? '6' : '2' );
+                    else if ( G.dim == 3 )
+                        reply[ 0 ] = ( G_2d.is_cut ? '7' : '3' );
+                }
 
-				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
-				break;
+                write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+                break;
 
-			case 'C' :            /* which 2D curve is currently displayed ? */
-				reply[ 0 ] = ( char ) ( G_2d.active_curve + 1 ) + '0';
-				write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
-				break;
+            case 'C' :            /* which 2D curve is currently displayed ? */
+                reply[ 0 ] = ( char ) ( G_2d.active_curve + 1 ) + '0';
+                write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+                break;
 
-			case 'E' :             /* send the contents of the error browser */
-				http_send_error_browser( Comm.http_pd[ HTTP_PARENT_WRITE ] );
-				break;
+            case 'E' :             /* send the contents of the error browser */
+                http_send_error_browser( Comm.http_pd[ HTTP_PARENT_WRITE ] );
+                break;
 
-			case 'a' :                         /* create file with 1D window */
-				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 1 );
-				break;
+            case 'a' :                         /* create file with 1D window */
+                http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 1 );
+                break;
 
-			case 'b' :                         /* create file with 2D window */
-				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 2 );
-				break;
+            case 'b' :                         /* create file with 2D window */
+                http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 2 );
+                break;
 
-			case 'c' :              /* create file with cross section window */
-				http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 3 );
-				break;
+            case 'c' :              /* create file with cross section window */
+                http_send_picture( Comm.http_pd[ HTTP_PARENT_WRITE ], 3 );
+                break;
 
 #if ! defined NDEBUG
-			default :
-				fprintf( stderr, "Got stray request ('%c', %d) from http "
-						 "server.\n", query, query );
+            default :
+                fprintf( stderr, "Got stray request ('%c', %d) from http "
+                         "server.\n", query, query );
 #endif
-		}
-	}
+        }
+    }
 }
 
 
@@ -270,26 +270,26 @@ void http_check( void )
 
 static void http_send_error_browser( int pd )
 {
-	FL_OBJECT *b = GUI.main_form->error_browser;
-	const char *l;
-	int i = 0;
-	char newline = '\n';
-	char space = ' ';
+    FL_OBJECT *b = GUI.main_form->error_browser;
+    const char *l;
+    int i = 0;
+    char newline = '\n';
+    char space = ' ';
 
 
-	if ( ( i = fl_get_browser_maxline( b ) - MAX_LINES_TO_SEND  ) < 0 )
-		i = 0;
+    if ( ( i = fl_get_browser_maxline( b ) - MAX_LINES_TO_SEND  ) < 0 )
+        i = 0;
 
-	while ( ( l = fl_get_browser_line( b, ++i ) ) != NULL )
-	{
-		if ( *l != '\0' )
-			write( pd, l, strlen( l ) );
-		else
-			write( pd, &space, 1 );
-		write( pd, &newline, 1 );
-	}
+    while ( ( l = fl_get_browser_line( b, ++i ) ) != NULL )
+    {
+        if ( *l != '\0' )
+            write( pd, l, strlen( l ) );
+        else
+            write( pd, &space, 1 );
+        write( pd, &newline, 1 );
+    }
 
-	write( pd, &newline, 1 );
+    write( pd, &newline, 1 );
 }
 
 
@@ -297,70 +297,72 @@ static void http_send_error_browser( int pd )
  *----------------------------------------------------------------*/
 
 static void http_send_picture( int pd,
-							   int type )
+                               int type )
 {
-	char filename[ ] = P_tmpdir "/fsc2.http.XXXXXX";
-	char reply[ 2 ];
-	int tmp_fd = -1;
+    char filename[ ] = P_tmpdir "/fsc2.http.XXXXXX";
+    char reply[ 2 ];
+    int tmp_fd = -1;
 
 
-	CLOBBER_PROTECT( tmp_fd );
+    CLOBBER_PROTECT( tmp_fd );
 
-	reply[ 1 ] = '\n';
+    reply[ 1 ] = '\n';
 
-	/* If the server asks for a window that isn't shown anymore we send a '0'
-	   to indicate that it has to send the "Not available" picture instead of
-	   the one the client is looking for. */
+    /* If the server asks for a window that isn't shown anymore we send a '0'
+       to indicate that it has to send the "Not available" picture instead of
+       the one the client is looking for. */
 
-	if ( ! G.is_init || ( type == 1 && G.dim == 2 ) ||
-		 ( type == 2 && G.dim == 1 ) || ( type == 3 && ! G_2d.is_cut ) )
-	{
-		reply[ 0 ] = '0';
-		write( pd, reply, 2 );
-		return;
-	}
+    if ( ! G.is_init || ( type == 1 && G.dim == 2 ) ||
+         ( type == 2 && G.dim == 1 ) || ( type == 3 && ! G_2d.is_cut ) )
+    {
+        reply[ 0 ] = '0';
+        write( pd, reply, 2 );
+        return;
+    }
 
-	/* Try to create a file with a unique name, dump the window into it and
-	   send the server the filename */
+    /* Try to create a file with a unique name, dump the window into it and
+       send the server the filename */
 
-	TRY
-	{
-		if ( ( tmp_fd = mkstemp( filename ) ) < 0 )
-			THROW( EXCEPTION );
+    TRY
+    {
+        if ( ( tmp_fd = mkstemp( filename ) ) < 0 )
+            THROW( EXCEPTION );
 
-		/* Older versions of libc (2.0.6 and earlier) don't set the file
-		   permissions correctly to 0600 but 0666, so we do it here... */
+        /* Older versions of libc (2.0.6 and earlier) don't set the file
+           permissions correctly to 0600 but 0666, so we do it here... */
 
-		chmod( filename, S_IRUSR | S_IWUSR );
+        chmod( filename, S_IRUSR | S_IWUSR );
 
-		dump_window( type, tmp_fd );
+        dump_window( type, tmp_fd );
 
-		reply[ 0 ] = '1';
-		write( pd, reply, 2 );
+        reply[ 0 ] = '1';
+        write( pd, reply, 2 );
 
-		write( pd, filename, strlen( filename ) );
-		write( pd, reply + 1, 1 );
+        write( pd, filename, strlen( filename ) );
+        write( pd, reply + 1, 1 );
 
-		TRY_SUCCESS;
-	}
-	OTHERWISE
-	{
-		if ( tmp_fd >= 0 )
-		{
-			unlink( filename );
-			close( tmp_fd );
-		}
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        if ( tmp_fd >= 0 )
+        {
+            unlink( filename );
+            close( tmp_fd );
+        }
 
-		reply[ 0 ] = '0';
-		write( pd, reply, 2 );
-	}
+        reply[ 0 ] = '0';
+        write( pd, reply, 2 );
+    }
 
-	close( tmp_fd );
+    close( tmp_fd );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

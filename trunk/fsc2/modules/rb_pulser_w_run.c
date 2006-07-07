@@ -60,28 +60,28 @@ static void rb_pulser_w_rf_pulse( void );
 
 void rb_pulser_w_do_update( void )
 {
-	bool restart = UNSET;
+    bool restart = UNSET;
 
 
-	/* Stop the pulser while the update is done */
+    /* Stop the pulser while the update is done */
 
-	if ( rb_pulser_w.is_running )
-	{
-		restart = SET;
-		if ( FSC2_MODE == EXPERIMENT )
-			rb_pulser_w_run( STOP );
-	}
+    if ( rb_pulser_w.is_running )
+    {
+        restart = SET;
+        if ( FSC2_MODE == EXPERIMENT )
+            rb_pulser_w_run( STOP );
+    }
 
-	/* Recount and resort the pulses according to their positions, check
-	   that the new settings are reasonable, set the defense pulse if
-	   necessary and then commit all changes */
+    /* Recount and resort the pulses according to their positions, check
+       that the new settings are reasonable, set the defense pulse if
+       necessary and then commit all changes */
 
-	rb_pulser_w_update_pulses( FSC2_MODE == TEST );
+    rb_pulser_w_update_pulses( FSC2_MODE == TEST );
 
-	/* Restart the pulser if it was running when we started */
+    /* Restart the pulser if it was running when we started */
 
-	if ( restart && FSC2_MODE == EXPERIMENT )
-		rb_pulser_w_run( START );
+    if ( restart && FSC2_MODE == EXPERIMENT )
+        rb_pulser_w_run( START );
 }
 
 
@@ -92,15 +92,15 @@ void rb_pulser_w_do_update( void )
 
 void rb_pulser_w_update_pulses( bool test_only )
 {
-	rb_pulser_w_function_init( );
-	rb_pulser_w_delay_card_setup( );
-	rb_pulser_w_rf_pulse( );
+    rb_pulser_w_function_init( );
+    rb_pulser_w_delay_card_setup( );
+    rb_pulser_w_rf_pulse( );
 
-	/* Now calculate the pulse sequence length and then commit changes */
+    /* Now calculate the pulse sequence length and then commit changes */
 
-	rb_pulser_w_seq_length_check( );
+    rb_pulser_w_seq_length_check( );
 
-	rb_pulser_w_commit( test_only );
+    rb_pulser_w_commit( test_only );
 }
 
 
@@ -113,27 +113,27 @@ void rb_pulser_w_update_pulses( bool test_only )
 
 static void rb_pulser_w_function_init( void )
 {
-	int i, j;
-	Function_T *f;
+    int i, j;
+    Function_T *f;
 
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = rb_pulser_w.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = rb_pulser_w.function + i;
 
-		if ( ! f->is_used ||
-			 ( i == PULSER_CHANNEL_DEFENSE &&
-			   rb_pulser_w.defense_pulse_mode == AUTOMATIC ) )
-			continue;
+        if ( ! f->is_used ||
+             ( i == PULSER_CHANNEL_DEFENSE &&
+               rb_pulser_w.defense_pulse_mode == AUTOMATIC ) )
+            continue;
 
-		for ( f->num_active_pulses = 0, j = 0; j < f->num_pulses; j++ )
-			if ( f->pulses[ j ]->is_active )
-				f->num_active_pulses++;
+        for ( f->num_active_pulses = 0, j = 0; j < f->num_pulses; j++ )
+            if ( f->pulses[ j ]->is_active )
+                f->num_active_pulses++;
 
-		if ( f->num_pulses > 1 )
-			qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
-				   rb_pulser_w_start_compare );
-	}
+        if ( f->num_pulses > 1 )
+            qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
+                   rb_pulser_w_start_compare );
+    }
 }
 
 
@@ -146,14 +146,14 @@ static void rb_pulser_w_function_init( void )
 
 static void rb_pulser_w_delay_card_setup( void )
 {
-	rb_pulser_w_mw_channel_setup( );
-	rb_pulser_w_rf_channel_setup( );
-	rb_pulser_w_laser_channel_setup( );
-	rb_pulser_w_detection_channel_setup( );
-	if ( rb_pulser_w.defense_pulse_mode == AUTOMATIC )
-		rb_pulser_w_auto_defense_channel_setup( );
-	else
-		rb_pulser_w_defense_channel_setup( );
+    rb_pulser_w_mw_channel_setup( );
+    rb_pulser_w_rf_channel_setup( );
+    rb_pulser_w_laser_channel_setup( );
+    rb_pulser_w_detection_channel_setup( );
+    if ( rb_pulser_w.defense_pulse_mode == AUTOMATIC )
+        rb_pulser_w_auto_defense_channel_setup( );
+    else
+        rb_pulser_w_defense_channel_setup( );
 }
 
 
@@ -164,107 +164,107 @@ static void rb_pulser_w_delay_card_setup( void )
 
 static void rb_pulser_w_mw_channel_setup( void )
 {
-	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_MW;
-	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + MW_DELAY_0;
-	Rulbus_Delay_Card_T *cur_card;
-	Pulse_T **pulses = f->pulses;
-	double start, delta, shift;
-	Ticks dT;
-	int i;
+    Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_MW;
+    Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + MW_DELAY_0;
+    Rulbus_Delay_Card_T *cur_card;
+    Pulse_T **pulses = f->pulses;
+    double start, delta, shift;
+    Ticks dT;
+    int i;
 
 
-	if ( ! f->is_used )
-		return;
+    if ( ! f->is_used )
+        return;
 
-	for ( cur_card = card; cur_card != NULL; cur_card = cur_card->next )
-	{
-		cur_card->was_active = cur_card->is_active;
-		cur_card->is_active = UNSET;
-	}
+    for ( cur_card = card; cur_card != NULL; cur_card = cur_card->next )
+    {
+        cur_card->was_active = cur_card->is_active;
+        cur_card->is_active = UNSET;
+    }
 
-	if ( ! IS_ACTIVE( *pulses ) )
-	{
-		if ( rb_pulser_w.needs_phases )
-			rb_pulser_w_phase_channel_setup( );
-		return;
-	}
+    if ( ! IS_ACTIVE( *pulses ) )
+    {
+        if ( rb_pulser_w.needs_phases )
+            rb_pulser_w_phase_channel_setup( );
+        return;
+    }
 
-	/* Now loop over the microwave pulses, setting up the cards and
-	   checking that the pulses don't get too near to each other */
+    /* Now loop over the microwave pulses, setting up the cards and
+       checking that the pulses don't get too near to each other */
 
-	cur_card = card;
-	start = rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay + f->delay;
+    cur_card = card;
+    start = rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay + f->delay;
 
-	for ( i = 0; i < f->num_pulses && IS_ACTIVE( pulses[ i ] ); i++ )
-	{
-		fsc2_assert( cur_card != NULL && cur_card->next != NULL );
+    for ( i = 0; i < f->num_pulses && IS_ACTIVE( pulses[ i ] ); i++ )
+    {
+        fsc2_assert( cur_card != NULL && cur_card->next != NULL );
 
-		/* Figure out where the microwave pulse starts and test that it
-		   neither starts too early or "collides" with its predecessor */
+        /* Figure out where the microwave pulse starts and test that it
+           neither starts too early or "collides" with its predecessor */
 
-		start += cur_card->intr_delay + cur_card->next->intr_delay;
+        start += cur_card->intr_delay + cur_card->next->intr_delay;
 
-		if ( i == 0 && pulses[ 0 ]->pos <= start )
-		{
-			print( FATAL, "Microwave pulse #%ld starts too early.\n",
-				   pulses[ 0 ]->num );
-			THROW( EXCEPTION );
-		}
+        if ( i == 0 && pulses[ 0 ]->pos <= start )
+        {
+            print( FATAL, "Microwave pulse #%ld starts too early.\n",
+                   pulses[ 0 ]->num );
+            THROW( EXCEPTION );
+        }
 
-		if ( i != 0 && pulses[ i ]->pos <= start )
-		{
-			print( FATAL, "Microwave pulse #%ld not far enough away from its "
-				   "predecessor, pulse #%ld.\n", pulses[ i ]->num,
-				   pulses[ i - 1 ]->num );
-			THROW( EXCEPTION );
-		}
+        if ( i != 0 && pulses[ i ]->pos <= start )
+        {
+            print( FATAL, "Microwave pulse #%ld not far enough away from its "
+                   "predecessor, pulse #%ld.\n", pulses[ i ]->num,
+                   pulses[ i - 1 ]->num );
+            THROW( EXCEPTION );
+        }
 
-		delta = pulses[ i ]->pos - start;
-		dT = Ticks_rnd( delta / rb_pulser_w.timebase );
-		shift = dT * rb_pulser_w.timebase - delta;
+        delta = pulses[ i ]->pos - start;
+        dT = Ticks_rnd( delta / rb_pulser_w.timebase );
+        shift = dT * rb_pulser_w.timebase - delta;
 
-		/* Make sure the delay settings for both cards aren't too long */
+        /* Make sure the delay settings for both cards aren't too long */
 
-		if ( dT > MAX_TICKS )
-		{
-			if ( i == 0 )
-				print( FATAL, "Microwave pulse #%ld starts too late.\n",
-					   pulses[ 0 ]->num );
-			else
-				print( FATAL, "Microwave pulse #%ld is too far away from its "
-					   "predecessor, pulse #%ld.\n", pulses[ i ]->num,
-					   pulses[ i - 1 ]->num );
-			THROW( EXCEPTION );
-		}
+        if ( dT > MAX_TICKS )
+        {
+            if ( i == 0 )
+                print( FATAL, "Microwave pulse #%ld starts too late.\n",
+                       pulses[ 0 ]->num );
+            else
+                print( FATAL, "Microwave pulse #%ld is too far away from its "
+                       "predecessor, pulse #%ld.\n", pulses[ i ]->num,
+                       pulses[ i - 1 ]->num );
+            THROW( EXCEPTION );
+        }
 
-		if ( pulses[ i ]->len > MAX_TICKS )
-		{
-			print( FATAL, "Microwave pulse #%ld is too long.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( pulses[ i ]->len > MAX_TICKS )
+        {
+            print( FATAL, "Microwave pulse #%ld is too long.\n" );
+            THROW( EXCEPTION );
+        }
 
-		if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
-			print( SEVERE, "Position of microwave pulse #%ld not possible, "
-				   "must shift it by %s.\n", pulses[ i ]->num,
-				   rb_pulser_w_ptime( shift ) );
+        if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
+            print( SEVERE, "Position of microwave pulse #%ld not possible, "
+                   "must shift it by %s.\n", pulses[ i ]->num,
+                   rb_pulser_w_ptime( shift ) );
 
-		cur_card->delay = dT;
-		cur_card->is_active = SET;
-		cur_card = cur_card->next;
+        cur_card->delay = dT;
+        cur_card->is_active = SET;
+        cur_card = cur_card->next;
 
-		cur_card->delay = pulses[ i ]->len;
-		cur_card->is_active = SET;
-		cur_card = cur_card->next;
+        cur_card->delay = pulses[ i ]->len;
+        cur_card->is_active = SET;
+        cur_card = cur_card->next;
 
-		start += ( dT + pulses[ i ]->len ) * rb_pulser_w.timebase;
-	}
+        start += ( dT + pulses[ i ]->len ) * rb_pulser_w.timebase;
+    }
 
-	/* Now in case that phase pulses are to be set we have to also set up
-	   the cards for the controlling the phase switch and again check the
-	   timings for the microwave pulses */
+    /* Now in case that phase pulses are to be set we have to also set up
+       the cards for the controlling the phase switch and again check the
+       timings for the microwave pulses */
 
-	if ( rb_pulser_w.needs_phases )
-		rb_pulser_w_phase_channel_setup( );
+    if ( rb_pulser_w.needs_phases )
+        rb_pulser_w_phase_channel_setup( );
 }
 
 
@@ -277,92 +277,92 @@ static void rb_pulser_w_mw_channel_setup( void )
 
 static void rb_pulser_w_phase_channel_setup( void )
 {
-	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_MW;
-	Rulbus_Delay_Card_T *mw_card = rb_pulser_w.delay_card + MW_DELAY_0;
-	Rulbus_Delay_Card_T *p_card = rb_pulser_w.delay_card + PHASE_DELAY_0;
-	Rulbus_Delay_Card_T *cur_card;
-	Pulse_T **pulses = f->pulses;
-	double mw_start, mw_end;
-	Ticks dT;
-	int i;
+    Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_MW;
+    Rulbus_Delay_Card_T *mw_card = rb_pulser_w.delay_card + MW_DELAY_0;
+    Rulbus_Delay_Card_T *p_card = rb_pulser_w.delay_card + PHASE_DELAY_0;
+    Rulbus_Delay_Card_T *cur_card;
+    Pulse_T **pulses = f->pulses;
+    double mw_start, mw_end;
+    Ticks dT;
+    int i;
 
 
-	for ( cur_card = p_card; cur_card != NULL; cur_card = cur_card->next )
-	{
-		cur_card->was_active = cur_card->is_active;
-		cur_card->is_active = UNSET;
-	}
+    for ( cur_card = p_card; cur_card != NULL; cur_card = cur_card->next )
+    {
+        cur_card->was_active = cur_card->is_active;
+        cur_card->is_active = UNSET;
+    }
 
-	/* The cards for setting phases aren't needed if there's no active
-	   microwave pulse */
+    /* The cards for setting phases aren't needed if there's no active
+       microwave pulse */
 
-	if ( ! IS_ACTIVE( *pulses ) )
-		return;
+    if ( ! IS_ACTIVE( *pulses ) )
+        return;
 
-	/* Again we loop over the microwave pulses, setting the phase card for
-	   each of them */
+    /* Again we loop over the microwave pulses, setting the phase card for
+       each of them */
 
-	cur_card = p_card;
-	mw_start = f->delay;
-	mw_end = 0.0;
+    cur_card = p_card;
+    mw_start = f->delay;
+    mw_end = 0.0;
 
-	for ( i = 0; i < f->num_pulses && IS_ACTIVE( pulses[ i ] ); i++ )
-	{
-		fsc2_assert( cur_card != NULL &&
-					 mw_card != NULL &&
-					 mw_card->next != NULL );
+    for ( i = 0; i < f->num_pulses && IS_ACTIVE( pulses[ i ] ); i++ )
+    {
+        fsc2_assert( cur_card != NULL &&
+                     mw_card != NULL &&
+                     mw_card->next != NULL );
 
-		/* Calculate where the microwave pulse really starts and from this
-		   how long the phase cards delay must be */
+        /* Calculate where the microwave pulse really starts and from this
+           how long the phase cards delay must be */
 
-		mw_start +=   mw_card->intr_delay + mw_card->next->intr_delay
-		            + mw_card->delay * rb_pulser_w.timebase;
+        mw_start +=   mw_card->intr_delay + mw_card->next->intr_delay
+                    + mw_card->delay * rb_pulser_w.timebase;
 
-		dT = Ticks_floor( ( mw_start - cur_card->intr_delay - rb_pulser_w.psd )
-						  / rb_pulser_w.timebase );
+        dT = Ticks_floor( ( mw_start - cur_card->intr_delay - rb_pulser_w.psd )
+                          / rb_pulser_w.timebase );
 
-		/* The phase pulse must have a minimum length so that Leendert's
-		   "MoNos W-band magic box" can react to it */
+        /* The phase pulse must have a minimum length so that Leendert's
+           "MoNos W-band magic box" can react to it */
 
-		if ( dT * rb_pulser_w.timebase < MINIMUM_PHASE_PULSE_LENGTH )
-		{
-			print( FATAL, "Microwave pulse #%ld starts too early for phase "
-				   "switching.\n", pulses[ i ]->num );
-			THROW( EXCEPTION );
-		}
+        if ( dT * rb_pulser_w.timebase < MINIMUM_PHASE_PULSE_LENGTH )
+        {
+            print( FATAL, "Microwave pulse #%ld starts too early for phase "
+                   "switching.\n", pulses[ i ]->num );
+            THROW( EXCEPTION );
+        }
 
-		/* And, of course, we have to make sure that a phase pulse doesn't
-		   are to be longer than we can produce with a single delay card */
+        /* And, of course, we have to make sure that a phase pulse doesn't
+           are to be longer than we can produce with a single delay card */
 
-		if ( dT > MAX_TICKS )
-		{
-			print( FATAL, "Microwave pulse #%ld comes too late to for phase "
-				   "switching.\n", pulses[ i ]->num );
-			THROW( EXCEPTION );
-		}
+        if ( dT > MAX_TICKS )
+        {
+            print( FATAL, "Microwave pulse #%ld comes too late to for phase "
+                   "switching.\n", pulses[ i ]->num );
+            THROW( EXCEPTION );
+        }
 
-		/* There also needs to be some amount of time following the previous
-		   microwave pulse before the phase can be switched */
+        /* There also needs to be some amount of time following the previous
+           microwave pulse before the phase can be switched */
 
-		if ( i != 0 &&
-			 dT * rb_pulser_w.timebase + cur_card->intr_delay <
-			 								mw_end + rb_pulser_w.grace_period )
-		{
-			print( FATAL, "Microwave pulse #%ld to near to its "
-				   "predecessor #%ld to allow phase switching.\n",
-				   pulses[ i ]->num, pulses[ i - 1 ]->num );
-			THROW( EXCEPTION );
-		}
+        if ( i != 0 &&
+             dT * rb_pulser_w.timebase + cur_card->intr_delay <
+                                            mw_end + rb_pulser_w.grace_period )
+        {
+            print( FATAL, "Microwave pulse #%ld to near to its "
+                   "predecessor #%ld to allow phase switching.\n",
+                   pulses[ i ]->num, pulses[ i - 1 ]->num );
+            THROW( EXCEPTION );
+        }
 
-		cur_card->delay = dT;
-		cur_card->is_active = SET;
-		cur_card = cur_card->next;
+        cur_card->delay = dT;
+        cur_card->is_active = SET;
+        cur_card = cur_card->next;
 
-		mw_end = mw_start + mw_card->next->delay * rb_pulser_w.timebase;
-		mw_start += mw_card->next->delay * rb_pulser_w.timebase;
+        mw_end = mw_start + mw_card->next->delay * rb_pulser_w.timebase;
+        mw_start += mw_card->next->delay * rb_pulser_w.timebase;
 
-		mw_card = mw_card->next->next;
-	}
+        mw_card = mw_card->next->next;
+    }
 
 }
 
@@ -374,54 +374,54 @@ static void rb_pulser_w_phase_channel_setup( void )
 
 static void rb_pulser_w_rf_channel_setup( void )
 {
-	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
-	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + RF_DELAY;
-	Pulse_T *p;
-	Ticks dT;
-	double start, delta, shift;
+    Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
+    Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + RF_DELAY;
+    Pulse_T *p;
+    Ticks dT;
+    double start, delta, shift;
 
 
-	if ( ! f->is_used )
-		return;
+    if ( ! f->is_used )
+        return;
 
-	card->was_active = card->is_active;
-	card->is_active = UNSET;
+    card->was_active = card->is_active;
+    card->is_active = UNSET;
 
-	p = *f->pulses;
+    p = *f->pulses;
 
-	if ( ! IS_ACTIVE( p ) )
-		return;
+    if ( ! IS_ACTIVE( p ) )
+        return;
 
-	start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
-		    + SYNTHESIZER_INTRINSIC_DELAY + f->delay;
+    start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
+            + SYNTHESIZER_INTRINSIC_DELAY + f->delay;
 
-	if ( p->pos <= start )
-	{
-		print( FATAL, "RF pulse #%ld starts too early.\n", p->num );
-		THROW( EXCEPTION );
-	}
+    if ( p->pos <= start )
+    {
+        print( FATAL, "RF pulse #%ld starts too early.\n", p->num );
+        THROW( EXCEPTION );
+    }
 
-	delta = p->pos - start;
-	dT = Ticks_rnd( delta / rb_pulser_w.timebase );
-	shift = dT * rb_pulser_w.timebase - delta;
-			
-	if ( dT > MAX_TICKS )
-	{
-		print( FATAL, "RF pulse #%ld starts too late.\n", p->num );
-		THROW( EXCEPTION );
-	}
+    delta = p->pos - start;
+    dT = Ticks_rnd( delta / rb_pulser_w.timebase );
+    shift = dT * rb_pulser_w.timebase - delta;
+            
+    if ( dT > MAX_TICKS )
+    {
+        print( FATAL, "RF pulse #%ld starts too late.\n", p->num );
+        THROW( EXCEPTION );
+    }
 
-	if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
-		print( SEVERE, "Position of RF pulse #%ld not possible, must shift it "
-			   "by %s.\n", p->num, rb_pulser_w_ptime( shift ) );
+    if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
+        print( SEVERE, "Position of RF pulse #%ld not possible, must shift it "
+               "by %s.\n", p->num, rb_pulser_w_ptime( shift ) );
 
-	card->delay = dT;
-	card->is_active = SET;
+    card->delay = dT;
+    card->is_active = SET;
 
-	/* Store the length of the pulse itself separately. there's no card for
-	   this pulse, it gets set by the synthesizer directly */ 
+    /* Store the length of the pulse itself separately. there's no card for
+       this pulse, it gets set by the synthesizer directly */ 
 
-	f->last_pulse_len = p->len * rb_pulser_w.timebase;
+    f->last_pulse_len = p->len * rb_pulser_w.timebase;
 }
 
 
@@ -431,67 +431,67 @@ static void rb_pulser_w_rf_channel_setup( void )
 
 static void rb_pulser_w_laser_channel_setup( void )
 {
-	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_LASER;
-	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + LASER_DELAY_0;
-	Pulse_T *p;
-	Ticks dT;
-	double start, delta, shift;
+    Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_LASER;
+    Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + LASER_DELAY_0;
+    Pulse_T *p;
+    Ticks dT;
+    double start, delta, shift;
 
 
-	if ( ! f->is_used )
-		return;
+    if ( ! f->is_used )
+        return;
 
-	card->was_active = card->is_active;
-	card->is_active = UNSET;
+    card->was_active = card->is_active;
+    card->is_active = UNSET;
 
-	card->next->was_active = card->is_active;
-	card->next->is_active = UNSET;
+    card->next->was_active = card->is_active;
+    card->next->is_active = UNSET;
 
-	p = *f->pulses;
+    p = *f->pulses;
 
-	if ( ! IS_ACTIVE( p ) )
-		return;
+    if ( ! IS_ACTIVE( p ) )
+        return;
 
-	/* Make sure the pulse doesn't start earlier than possible (due to the
-	   intrinsic delays of the cards) */
+    /* Make sure the pulse doesn't start earlier than possible (due to the
+       intrinsic delays of the cards) */
 
-	start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
-		    + card->intr_delay + card->next->intr_delay + f->delay;
+    start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
+            + card->intr_delay + card->next->intr_delay + f->delay;
 
-	if ( p->pos <= start )
-	{
-		print( FATAL, "Laser pulse #%ld starts too early.\n", p->num );
-		THROW( EXCEPTION );
-	}
+    if ( p->pos <= start )
+    {
+        print( FATAL, "Laser pulse #%ld starts too early.\n", p->num );
+        THROW( EXCEPTION );
+    }
 
-	/* Calculate the delay for the first card and make sure it's a multiple
-	   of the pulsers timebase */
+    /* Calculate the delay for the first card and make sure it's a multiple
+       of the pulsers timebase */
 
-	delta = p->pos - start;
-	dT = Ticks_rnd( delta / rb_pulser_w.timebase );
-	shift = dT * rb_pulser_w.timebase - delta;
+    delta = p->pos - start;
+    dT = Ticks_rnd( delta / rb_pulser_w.timebase );
+    shift = dT * rb_pulser_w.timebase - delta;
 
-	if ( dT > MAX_TICKS )
-	{
-		print( FATAL, "Laser pulse #%ld starts too late.\n", p->num );
-		THROW( EXCEPTION );
-	}
+    if ( dT > MAX_TICKS )
+    {
+        print( FATAL, "Laser pulse #%ld starts too late.\n", p->num );
+        THROW( EXCEPTION );
+    }
 
-	if ( p->len > MAX_TICKS )
-	{
-		print( FATAL, "Laser pulse #%ld is too long.\n", p->num );
-		THROW( EXCEPTION );
-	}
+    if ( p->len > MAX_TICKS )
+    {
+        print( FATAL, "Laser pulse #%ld is too long.\n", p->num );
+        THROW( EXCEPTION );
+    }
 
-	if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
-		print( SEVERE, "Position of laser pulse #%ld not possible, must shift "
-			   "it by %s.\n", rb_pulser_w_ptime( shift ) );
+    if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
+        print( SEVERE, "Position of laser pulse #%ld not possible, must shift "
+               "it by %s.\n", rb_pulser_w_ptime( shift ) );
 
-	card->delay = dT;
-	card->is_active = SET;
+    card->delay = dT;
+    card->is_active = SET;
 
-	card->next->delay = p->len;
-	card->next->is_active = SET;
+    card->next->delay = p->len;
+    card->next->is_active = SET;
 }
 
 
@@ -503,51 +503,51 @@ static void rb_pulser_w_laser_channel_setup( void )
 
 static void rb_pulser_w_detection_channel_setup( void )
 {
-	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DET;
-	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DET_DELAY;
-	Pulse_T *p;
-	Ticks dT;
-	double start, delta, shift;
+    Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DET;
+    Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DET_DELAY;
+    Pulse_T *p;
+    Ticks dT;
+    double start, delta, shift;
 
 
-	if ( ! f->is_used )
-		return;
+    if ( ! f->is_used )
+        return;
 
-	card->was_active = card->is_active;
-	card->is_active = UNSET;
+    card->was_active = card->is_active;
+    card->is_active = UNSET;
 
-	p = *f->pulses;
+    p = *f->pulses;
 
-	if ( ! IS_ACTIVE( p ) )
-		return;
+    if ( ! IS_ACTIVE( p ) )
+        return;
 
-	start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay + card->intr_delay
-		    + f->delay;
+    start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay + card->intr_delay
+            + f->delay;
 
-	if ( p->pos <= start )
-	{
-		print( FATAL, "Detection pulse #%ld starts too early.\n", p->num );
-		THROW( EXCEPTION );
-	}
+    if ( p->pos <= start )
+    {
+        print( FATAL, "Detection pulse #%ld starts too early.\n", p->num );
+        THROW( EXCEPTION );
+    }
 
-	delta = p->pos - start;
-	dT = Ticks_rnd( delta / rb_pulser_w.timebase );
-	shift = dT * rb_pulser_w.timebase - delta;
-			
-	if ( dT > MAX_TICKS )
-	{
-		print( FATAL, "Detection pulse #%ld starts too late.\n", p->num );
-		THROW( EXCEPTION );
-	}
+    delta = p->pos - start;
+    dT = Ticks_rnd( delta / rb_pulser_w.timebase );
+    shift = dT * rb_pulser_w.timebase - delta;
+            
+    if ( dT > MAX_TICKS )
+    {
+        print( FATAL, "Detection pulse #%ld starts too late.\n", p->num );
+        THROW( EXCEPTION );
+    }
 
-	if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
-		print( SEVERE, "Position of detection pulse #%ld not possible, must "
-			   "shift it by %s.\n", p->num, rb_pulser_w_ptime( shift ) );
+    if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
+        print( SEVERE, "Position of detection pulse #%ld not possible, must "
+               "shift it by %s.\n", p->num, rb_pulser_w_ptime( shift ) );
 
-	card->delay = dT;
-	card->is_active = SET;
+    card->delay = dT;
+    card->is_active = SET;
 
-	f->last_pulse_len = p->len * rb_pulser_w.timebase;
+    f->last_pulse_len = p->len * rb_pulser_w.timebase;
 }
 
 
@@ -560,32 +560,32 @@ static void rb_pulser_w_detection_channel_setup( void )
 
 static void rb_pulser_w_defense_channel_setup( void )
 {
-	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DEFENSE;
-	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DEFENSE_DELAY;
-	Pulse_T *p;
+    Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DEFENSE;
+    Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DEFENSE_DELAY;
+    Pulse_T *p;
 
 
-	if ( ! f->is_used )
-		return;
+    if ( ! f->is_used )
+        return;
 
-	card->was_active = card->is_active;
-	card->is_active = UNSET;
+    card->was_active = card->is_active;
+    card->is_active = UNSET;
 
-	p = *f->pulses;
+    p = *f->pulses;
 
-	if ( ! IS_ACTIVE( p ) )
-		return;
+    if ( ! IS_ACTIVE( p ) )
+        return;
 
-	if ( p->len > MAX_TICKS )
-	{
-		print( FATAL, "Defense pulse #%ld is too long.\n", p->num );
-		THROW( EXCEPTION );
-	}
+    if ( p->len > MAX_TICKS )
+    {
+        print( FATAL, "Defense pulse #%ld is too long.\n", p->num );
+        THROW( EXCEPTION );
+    }
 
-	card->delay = p->len;
-	card->is_active = SET;
+    card->delay = p->len;
+    card->is_active = SET;
 
-	f->last_pulse_len = p->len * rb_pulser_w.timebase;
+    f->last_pulse_len = p->len * rb_pulser_w.timebase;
 }
 
 
@@ -600,73 +600,73 @@ static void rb_pulser_w_defense_channel_setup( void )
 
 static void rb_pulser_w_auto_defense_channel_setup( void )
 {
-	Function_T *mw = rb_pulser_w.function + PULSER_CHANNEL_MW;
-	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DEFENSE;
-	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DEFENSE_DELAY;
-	Rulbus_Delay_Card_T *mw_card = rb_pulser_w.delay_card + MW_DELAY_0;
-	double mw_start, mw_end, start, end;
-	Ticks dT;
-	int i;
+    Function_T *mw = rb_pulser_w.function + PULSER_CHANNEL_MW;
+    Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DEFENSE;
+    Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DEFENSE_DELAY;
+    Rulbus_Delay_Card_T *mw_card = rb_pulser_w.delay_card + MW_DELAY_0;
+    double mw_start, mw_end, start, end;
+    Ticks dT;
+    int i;
 
 
-	card->was_active = card->is_active;
-	card->is_active = UNSET;
+    card->was_active = card->is_active;
+    card->is_active = UNSET;
 
-	/* No defense pulse needs to be set if either there are no microwave
-	   pulses */
+    /* No defense pulse needs to be set if either there are no microwave
+       pulses */
 
-	if ( ! mw->is_used || mw->num_active_pulses == 0 )
-		return;
+    if ( ! mw->is_used || mw->num_active_pulses == 0 )
+        return;
 
-	/* Determine the position of the first microwave pulse and check if the
-	   defense pulse can at least start at the same time or earlier */
+    /* Determine the position of the first microwave pulse and check if the
+       defense pulse can at least start at the same time or earlier */
 
-	mw_start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
-		       + mw_card->intr_delay
-		       + mw_card->delay * rb_pulser_w.timebase
-		       + mw_card->next->intr_delay;
+    mw_start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
+               + mw_card->intr_delay
+               + mw_card->delay * rb_pulser_w.timebase
+               + mw_card->next->intr_delay;
 
-	start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
-		    + card->intr_delay;
+    start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
+            + card->intr_delay;
 
-	if ( start > mw_start )
-	{
-		print( FATAL, "First microwave pulse #%ld starts that early that the "
-			   "automatically generated defense pulse can't start at least "
-			   "at the same time.\n", mw->pulses[ 0 ]->num );
-		THROW( EXCEPTION );
-	}
+    if ( start > mw_start )
+    {
+        print( FATAL, "First microwave pulse #%ld starts that early that the "
+               "automatically generated defense pulse can't start at least "
+               "at the same time.\n", mw->pulses[ 0 ]->num );
+        THROW( EXCEPTION );
+    }
 
-	/* Now figure out where the end of the last microwave pulse is and from
-	   that at what time the defense pulse can end */
+    /* Now figure out where the end of the last microwave pulse is and from
+       that at what time the defense pulse can end */
 
-	mw_end = rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay;
+    mw_end = rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay;
 
-	for ( i = 0; i < mw->num_active_pulses; i++ )
-	{
-		mw_end +=   mw_card->intr_delay
-			      + mw_card->delay * rb_pulser_w.timebase;
-		mw_card = mw_card->next;
-		mw_end +=   mw_card->intr_delay
-			      + mw_card->delay * rb_pulser_w.timebase;
-		mw_card = mw_card->next;
-	}
+    for ( i = 0; i < mw->num_active_pulses; i++ )
+    {
+        mw_end +=   mw_card->intr_delay
+                  + mw_card->delay * rb_pulser_w.timebase;
+        mw_card = mw_card->next;
+        mw_end +=   mw_card->intr_delay
+                  + mw_card->delay * rb_pulser_w.timebase;
+        mw_card = mw_card->next;
+    }
 
-	end = mw_end + rb_pulser_w.pulse_2_defense;
+    end = mw_end + rb_pulser_w.pulse_2_defense;
 
-	dT = Ticks_ceil( ( end - start ) / rb_pulser_w.timebase );
+    dT = Ticks_ceil( ( end - start ) / rb_pulser_w.timebase );
 
-	if ( dT > MAX_TICKS )
-	{
-		print( FATAL, "Automatically generated defense pulse becomes too "
-			   "long.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( dT > MAX_TICKS )
+    {
+        print( FATAL, "Automatically generated defense pulse becomes too "
+               "long.\n" );
+        THROW( EXCEPTION );
+    }
 
-	card->delay = dT;
-	card->is_active = SET;
+    card->delay = dT;
+    card->is_active = SET;
 
-	f->last_pulse_len = dT * rb_pulser_w.timebase;
+    f->last_pulse_len = dT * rb_pulser_w.timebase;
 }
 
 
@@ -677,48 +677,48 @@ static void rb_pulser_w_auto_defense_channel_setup( void )
 
 void rb_pulser_w_full_reset( void )
 {
-	Pulse_T *p = rb_pulser_w.pulses;
-	Function_T *f;
-	Rulbus_Delay_Card_T *card;
-	size_t i;
+    Pulse_T *p = rb_pulser_w.pulses;
+    Function_T *f;
+    Rulbus_Delay_Card_T *card;
+    size_t i;
 
 
-	while ( p != NULL )
-	{
-		p->pos     = p->initial_pos;
-		p->is_pos  = p->initial_is_pos;
-		p->len     = p->initial_len;
-		p->is_len  = p->initial_is_len;
-		p->dpos    = p->initial_dpos;
-		p->is_dpos = p->initial_is_dpos;
-		p->dlen    = p->initial_dlen;
-		p->is_dlen = p->initial_is_dlen;
+    while ( p != NULL )
+    {
+        p->pos     = p->initial_pos;
+        p->is_pos  = p->initial_is_pos;
+        p->len     = p->initial_len;
+        p->is_len  = p->initial_is_len;
+        p->dpos    = p->initial_dpos;
+        p->is_dpos = p->initial_is_dpos;
+        p->dlen    = p->initial_dlen;
+        p->is_dlen = p->initial_is_dlen;
 
-		p->is_active = IS_ACTIVE( p );
+        p->is_active = IS_ACTIVE( p );
 
-		p = p->next;
-	}
+        p = p->next;
+    }
 
-	/* Make sure all cards associated with functions are assumed to be
-	   inactive */
+    /* Make sure all cards associated with functions are assumed to be
+       inactive */
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = rb_pulser_w.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = rb_pulser_w.function + i;
 
-		if ( ! f->is_used )
-			continue;
+        if ( ! f->is_used )
+            continue;
 
-		for ( card = f->delay_card; card != NULL; card = card->next )
-		{
-			card->is_active = card->was_active = UNSET;
-			card->delay = card->old_delay = 0;
-		}
-	}
+        for ( card = f->delay_card; card != NULL; card = card->next )
+        {
+            card->is_active = card->was_active = UNSET;
+            card->delay = card->old_delay = 0;
+        }
+    }
 
-	/* Reset to the first phase */
+    /* Reset to the first phase */
 
-	rb_pulser_w.cur_phase = 0;
+    rb_pulser_w.cur_phase = 0;
 }
 
 
@@ -729,49 +729,49 @@ void rb_pulser_w_full_reset( void )
 
 static void rb_pulser_w_seq_length_check( void )
 {
-	int i;
-	Function_T *f;
-	Rulbus_Delay_Card_T *card;
-	double max_seq_len = 0.0, seq_len;
+    int i;
+    Function_T *f;
+    Rulbus_Delay_Card_T *card;
+    double max_seq_len = 0.0, seq_len;
 
 
-	if ( rb_pulser_w.trig_in_mode == EXTERNAL )
-		return;
+    if ( rb_pulser_w.trig_in_mode == EXTERNAL )
+        return;
 
-	/* Determine length of sequence lengths of the individual functions */
+    /* Determine length of sequence lengths of the individual functions */
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = rb_pulser_w.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = rb_pulser_w.function + i;
 
-		/* Nothing to be done for unused functions */
+        /* Nothing to be done for unused functions */
 
-		if ( ! f->is_used )
-			continue;
+        if ( ! f->is_used )
+            continue;
 
-		seq_len = 0.0;
-		for ( card = f->delay_card; card != NULL && card->is_active;
-			  card = card->next )
-			seq_len += card->delay * rb_pulser_w.timebase + card->intr_delay;
+        seq_len = 0.0;
+        for ( card = f->delay_card; card != NULL && card->is_active;
+              card = card->next )
+            seq_len += card->delay * rb_pulser_w.timebase + card->intr_delay;
 
-		max_seq_len = d_max( max_seq_len, seq_len );
-	}
+        max_seq_len = d_max( max_seq_len, seq_len );
+    }
 
-	/* Don't forget the cards used for phase switching */
+    /* Don't forget the cards used for phase switching */
 
-	if ( rb_pulser_w.needs_phases )
-		for ( card = rb_pulser_w.delay_card + PHASE_DELAY_0;
-			  card != NULL && card->is_active; card = card->next )
-			max_seq_len =
-			    d_max( max_seq_len,
-					   card->delay * rb_pulser_w.timebase + card->intr_delay );
+    if ( rb_pulser_w.needs_phases )
+        for ( card = rb_pulser_w.delay_card + PHASE_DELAY_0;
+              card != NULL && card->is_active; card = card->next )
+            max_seq_len =
+                d_max( max_seq_len,
+                       card->delay * rb_pulser_w.timebase + card->intr_delay );
 
-	if ( max_seq_len > rb_pulser_w.rep_time )
-	{
-		print( FATAL, "Pulse sequence is longer than the experiment "
-			   "repetition time.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( max_seq_len > rb_pulser_w.rep_time )
+    {
+        print( FATAL, "Pulse sequence is longer than the experiment "
+               "repetition time.\n" );
+        THROW( EXCEPTION );
+    }
 }
 
 
@@ -783,51 +783,51 @@ static void rb_pulser_w_seq_length_check( void )
 
 static void rb_pulser_w_commit( bool test_only )
 {
-	Rulbus_Delay_Card_T *card;
-	Function_T *f;
-	size_t i;
+    Rulbus_Delay_Card_T *card;
+    Function_T *f;
+    size_t i;
 
 
-	/* During the test run only write out information about the pulse
-	   settings (if the user asked for it) */
+    /* During the test run only write out information about the pulse
+       settings (if the user asked for it) */
 
-	if ( test_only )
-	{
-		if ( rb_pulser_w.dump_file != NULL )
-			rb_pulser_w_write_pulses( rb_pulser_w.dump_file );
-		if ( rb_pulser_w.show_file != NULL )
-			rb_pulser_w_write_pulses( rb_pulser_w.show_file );
+    if ( test_only )
+    {
+        if ( rb_pulser_w.dump_file != NULL )
+            rb_pulser_w_write_pulses( rb_pulser_w.dump_file );
+        if ( rb_pulser_w.show_file != NULL )
+            rb_pulser_w_write_pulses( rb_pulser_w.show_file );
 
-		return;
-	}
+        return;
+    }
 
-	for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-	{
-		f = rb_pulser_w.function + i;
+    for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+    {
+        f = rb_pulser_w.function + i;
 
-		if ( ! f->is_used )
-			continue;
+        if ( ! f->is_used )
+            continue;
 
-		for ( card = f->delay_card; card != NULL; card = card->next )
-		{
-			if ( card->was_active && ! card->is_active )
-			{
-				rb_pulser_w_delay_card_state( card, STOP );
-				card->delay = card->old_delay = 0;
-				continue;
-			}
+        for ( card = f->delay_card; card != NULL; card = card->next )
+        {
+            if ( card->was_active && ! card->is_active )
+            {
+                rb_pulser_w_delay_card_state( card, STOP );
+                card->delay = card->old_delay = 0;
+                continue;
+            }
 
-			if ( ! card->was_active && card->is_active )
-				rb_pulser_w_delay_card_state( card, START );
-			else if ( card->old_delay != card->delay )
-				rb_pulser_w_delay_card_delay( card, card->delay );
+            if ( ! card->was_active && card->is_active )
+                rb_pulser_w_delay_card_state( card, START );
+            else if ( card->old_delay != card->delay )
+                rb_pulser_w_delay_card_delay( card, card->delay );
 
-			card->old_delay = card->delay;
-		}
-	}
+            card->old_delay = card->delay;
+        }
+    }
 
-	if ( rb_pulser_w.needs_phases )
-		rb_pulser_w_set_phases( );
+    if ( rb_pulser_w.needs_phases )
+        rb_pulser_w_set_phases( );
 }
 
 
@@ -837,46 +837,46 @@ static void rb_pulser_w_commit( bool test_only )
 
 static void rb_pulser_w_set_phases( void )
 {
-	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_MW;
-	Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + PHASE_DELAY_0;
-	Pulse_T **pulses = f->pulses;
-	int i;
+    Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_MW;
+    Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + PHASE_DELAY_0;
+    Pulse_T **pulses = f->pulses;
+    int i;
 
 
-	if ( ! rb_pulser_w.needs_phases )
-		return;
+    if ( ! rb_pulser_w.needs_phases )
+        return;
 
-	for ( i = 0; i < f->num_pulses; card = card->next, i++ )
-	{
-		/* If the card isn't needed switch set it for end pulses for the +X
-		   phase and keep it from emitting a pulse that would trigger
-		   Leendert's "magic box" */
+    for ( i = 0; i < f->num_pulses; card = card->next, i++ )
+    {
+        /* If the card isn't needed switch set it for end pulses for the +X
+           phase and keep it from emitting a pulse that would trigger
+           Leendert's "magic box" */
 
-		if ( card->was_active && ! card->is_active )
-		{
-			rb_pulser_w_set_phase( card, PHASE_PLUS_X );
-			rb_pulser_w_delay_card_delay( card, 0 );
-			card->delay = card->old_delay = 0;
-			continue;
-		}
+        if ( card->was_active && ! card->is_active )
+        {
+            rb_pulser_w_set_phase( card, PHASE_PLUS_X );
+            rb_pulser_w_delay_card_delay( card, 0 );
+            card->delay = card->old_delay = 0;
+            continue;
+        }
 
-		/* Set the car up to emit the correct set of end pulses for the phase
-		   needed for the pulse */
+        /* Set the car up to emit the correct set of end pulses for the phase
+           needed for the pulse */
 
-		if ( pulses[ i ]->pc == NULL )
-			rb_pulser_w_set_phase( card, PHASE_PLUS_X );
-		else
-			rb_pulser_w_set_phase( card,
-						  pulses[ i ]->pc->sequence[ rb_pulser_w.cur_phase ] );
+        if ( pulses[ i ]->pc == NULL )
+            rb_pulser_w_set_phase( card, PHASE_PLUS_X );
+        else
+            rb_pulser_w_set_phase( card,
+                          pulses[ i ]->pc->sequence[ rb_pulser_w.cur_phase ] );
 
-		/* If the pulse length changed tell the card about it */
+        /* If the pulse length changed tell the card about it */
 
-		if ( card->delay != card->old_delay )
-		{
-			rb_pulser_w_delay_card_delay( card, card->delay );
-			card->old_delay = card->delay;
-		}
-	}
+        if ( card->delay != card->old_delay )
+        {
+            rb_pulser_w_delay_card_delay( card, card->delay );
+            card->old_delay = card->delay;
+        }
+    }
 }
 
 
@@ -886,71 +886,73 @@ static void rb_pulser_w_set_phases( void )
 
 static void rb_pulser_w_rf_pulse( void )
 {
-	Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
-	Pulse_T *p;
-	Var_T *func_ptr;
-	int acc;
+    Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
+    Pulse_T *p;
+    Var_T *func_ptr;
+    int acc;
 
 
-	if ( ! f->is_used )
-		return;
+    if ( ! f->is_used )
+        return;
 
-	p = *f->pulses;
+    p = *f->pulses;
 
-	if ( p->is_active )
-	{
+    if ( p->is_active )
+    {
 #if ! defined RB_PULSER_W_TEST
-		if ( ( func_ptr = func_get( rb_pulser_w.synth_pulse_width, &acc ) )
-																	  == NULL )
-		{
-			print( FATAL, "Function for setting synthesizer pulse length is "
-				   "not available.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( ( func_ptr = func_get( rb_pulser_w.synth_pulse_width, &acc ) )
+                                                                      == NULL )
+        {
+            print( FATAL, "Function for setting synthesizer pulse length is "
+                   "not available.\n" );
+            THROW( EXCEPTION );
+        }
 
-		vars_push( FLOAT_VAR, f->last_pulse_len );
-		vars_pop( func_call( func_ptr ) );
+        vars_push( FLOAT_VAR, f->last_pulse_len );
+        vars_pop( func_call( func_ptr ) );
 
 #else   /* in test mode */
-		if ( FSC2_MODE == EXPERIMENT )
-			fprintf( stderr, "synthesizer_pulse_width( %lf )\n",
-					 f->last_pulse_len );
+        if ( FSC2_MODE == EXPERIMENT )
+            fprintf( stderr, "synthesizer_pulse_width( %lf )\n",
+                     f->last_pulse_len );
 #endif
-	}
+    }
 
-	/* Switch synthesizer output on or off if the pulse just became active or
-	   inactive */
+    /* Switch synthesizer output on or off if the pulse just became active or
+       inactive */
 
-	if ( ( p->was_active && ! p->is_active ) ||
-		 ( ! p->was_active && p->is_active ) )
-	{
+    if ( ( p->was_active && ! p->is_active ) ||
+         ( ! p->was_active && p->is_active ) )
+    {
 #if ! defined RB_PULSER_W_TEST
-		if ( ( func_ptr = func_get( rb_pulser_w.synth_state, &acc ) ) == NULL )
-		{
-			print( FATAL, "Function for setting synthesizer output state is "
-				   "not available.\n" );
-			THROW( EXCEPTION );
-		}
+        if ( ( func_ptr = func_get( rb_pulser_w.synth_state, &acc ) ) == NULL )
+        {
+            print( FATAL, "Function for setting synthesizer output state is "
+                   "not available.\n" );
+            THROW( EXCEPTION );
+        }
 
-		if ( p->was_active && ! p->is_active )
-			vars_push( STR_VAR, "OFF" );
-		else
-			vars_push( STR_VAR, "ON" );
+        if ( p->was_active && ! p->is_active )
+            vars_push( STR_VAR, "OFF" );
+        else
+            vars_push( STR_VAR, "ON" );
 
-		vars_pop( func_call( func_ptr ) );
+        vars_pop( func_call( func_ptr ) );
 
 #else   /* in test mode */
-		fprintf( stderr, "synthesizer_pulse_state( \"%s\" )\n",
-				 ( p->was_active && ! p->is_active ) ? "OFF" : "ON" );
+        fprintf( stderr, "synthesizer_pulse_state( \"%s\" )\n",
+                 ( p->was_active && ! p->is_active ) ? "OFF" : "ON" );
 #endif
 
-		p->was_active = p->is_active;
-	}
+        p->was_active = p->is_active;
+    }
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

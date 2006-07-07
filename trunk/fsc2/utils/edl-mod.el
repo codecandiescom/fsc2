@@ -195,9 +195,10 @@
 
   (setq major-mode 'edl-mode)
   (setq mode-name "EDL")  
-
   (make-local-variable 'font-lock-defaults)
   (setq font-lock-defaults '(edl-font-lock-keywords nil nil))
+
+  (setq tab-width 4)
 
   ;; this is necessary for 'comment-region'
 

@@ -27,9 +27,9 @@
 /****************************************************************/
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap nounput
 
@@ -43,12 +43,12 @@
 
 #define YY_INPUT( buf, result, max_size )                         \
 {                                                                 \
-	char c;                                                       \
-	ssize_t count;                                                \
-	while ( ( count = read( fileno( assignin ), &c, 1 ) ) < 0 &&  \
-			errno == EINTR )                                      \
-		/* empty */ ;                                             \
-	result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );      \
+    char c;                                                       \
+    ssize_t count;                                                \
+    while ( ( count = read( fileno( assignin ), &c, 1 ) ) < 0 &&  \
+            errno == EINTR )                                      \
+        /* empty */ ;                                             \
+    result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );      \
 }
 
 
@@ -91,7 +91,7 @@ FLOAT       ((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 
 F           F(UNC(TION)?)?
 S           S(TART)?
-L			L(EN(GTH)?)?
+L           L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 
@@ -120,10 +120,10 @@ PH2         PH(ASE)?_?2(#{INT})?:?
 PHS1        PH(ASE)?_S(ETUP)?(_?1)?(#{INT})?:?
 PHS2        PH(ASE)?_S(ETUP)?_?2(#{INT})?:?
 
-PX			"+"?[xX]:?
-PY			"+"?[yY]:?
-PMX			"-"[xX]:?
-PMY			"-"[yY]:?
+PX          "+"?[xX]:?
+PY          "+"?[yY]:?
+PMX         "-"[xX]:?
+PMY         "-"[yY]:?
 ON          ON
 OFF         OFF
 
@@ -168,198 +168,198 @@ WS          [\n=: ]+
 
 
 
-		/*---------------*/
-%%		/*     Rules     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     Rules     */
+        /*---------------*/
 
 
-			/* handling of file name lines */
+            /* handling of file name lines */
 {FILE}      {
-				*( assigntext + assignleng - 1 ) = '\0';
-				EDL.Fname = CHAR_P T_free( EDL.Fname );
-				EDL.Fname = T_strdup( assigntext + 2 );
-			}
+                *( assigntext + assignleng - 1 ) = '\0';
+                EDL.Fname = CHAR_P T_free( EDL.Fname );
+                EDL.Fname = T_strdup( assigntext + 2 );
+            }
 
-			/* handling of line number lines */
-{LNUM}		{
-				*( assigntext + assignleng - 1 ) = '\0';
-				EDL.Lc = T_atol( assigntext + 2 );
-			}
+            /* handling of line number lines */
+{LNUM}      {
+                *( assigntext + assignleng - 1 ) = '\0';
+                EDL.Lc = T_atol( assigntext + 2 );
+            }
 
-			/* handling of error messages from the cleaner */
-{ERR}		{
-				eprint( FATAL, UNSET, "%s\n", assigntext + 2 );
-				THROW( EXCEPTION );
-			}
+            /* handling of error messages from the cleaner */
+{ERR}       {
+                eprint( FATAL, UNSET, "%s\n", assigntext + 2 );
+                THROW( EXCEPTION );
+            }
 
-{ESTR}		{
-				assigntext = strchr( assigntext, '\x03' );
-				eprint( FATAL, UNSET, "%s\n", assigntext + 2 );
-				THROW( EXCEPTION );
-			}
+{ESTR}      {
+                assigntext = strchr( assigntext, '\x03' );
+                eprint( FATAL, UNSET, "%s\n", assigntext + 2 );
+                THROW( EXCEPTION );
+            }
 
-			/* handling of DEVICES: labels */
-{DEV}		{
-				Assign_next_section = DEVICES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of DEVICES: labels */
+{DEV}       {
+                Assign_next_section = DEVICES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* handling of ASSIGNMENTS: labels */
-{ASS}		{
-				Assign_next_section = ASSIGNMENTS_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of ASSIGNMENTS: labels */
+{ASS}       {
+                Assign_next_section = ASSIGNMENTS_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* handling of VARIABLES: labels */
-{VAR}		{
-				Assign_next_section = VARIABLES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of VARIABLES: labels */
+{VAR}       {
+                Assign_next_section = VARIABLES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* handling of PHASES: labels */
-{PHAS}		{
-				Assign_next_section = PHASES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of PHASES: labels */
+{PHAS}      {
+                Assign_next_section = PHASES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* handling of PREPARATIONS: labels */
-{PREP}		{
-				Assign_next_section = PREPARATIONS_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of PREPARATIONS: labels */
+{PREP}      {
+                Assign_next_section = PREPARATIONS_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* handling of EXPERIMENT: labels */
-{EXP}		{
-				Assign_next_section = EXPERIMENT_SECTION;
-				return SECTION_LABEL;
-			}
+            /* handling of EXPERIMENT: labels */
+{EXP}       {
+                Assign_next_section = EXPERIMENT_SECTION;
+                return SECTION_LABEL;
+            }
 
-{PHS1}		{
-			    set_cur_pulser( );
-				In_phs = SET;
-  				assignlval.lval = 0;
-				return PHS_TOK;
-			}
-{PHS2}		{
-			    set_cur_pulser( );
-				In_phs = SET;
-				assignlval.lval = 1;
-				return PHS_TOK;
-			}
+{PHS1}      {
+                set_cur_pulser( );
+                In_phs = SET;
+                assignlval.lval = 0;
+                return PHS_TOK;
+            }
+{PHS2}      {
+                set_cur_pulser( );
+                In_phs = SET;
+                assignlval.lval = 1;
+                return PHS_TOK;
+            }
 
-{PX}		{
-				assignlval.lval = PHASE_PLUS_X;
-				return PXY_TOK;
-			}
-{PY}		{
-				assignlval.lval = PHASE_PLUS_Y;
-				return PXY_TOK;
-			}
-{PMX}		{
-				assignlval.lval = PHASE_MINUS_X;
-				return PXY_TOK;
-			}
-{PMY}		{
-				assignlval.lval = PHASE_MINUS_Y;
-				return PXY_TOK;
-			}
+{PX}        {
+                assignlval.lval = PHASE_PLUS_X;
+                return PXY_TOK;
+            }
+{PY}        {
+                assignlval.lval = PHASE_PLUS_Y;
+                return PXY_TOK;
+            }
+{PMX}       {
+                assignlval.lval = PHASE_MINUS_X;
+                return PXY_TOK;
+            }
+{PMY}       {
+                assignlval.lval = PHASE_MINUS_Y;
+                return PXY_TOK;
+            }
 
-{POD1}		return POD1_TOK;
-{POD2}		return POD2_TOK;
+{POD1}      return POD1_TOK;
+{POD2}      return POD2_TOK;
 
 {ON}        return ON_TOK;
 {OFF}       return OFF_TOK;
 
 {MW}        {
-				set_cur_pulser( );
-				return MW_TOKEN;
-			}
+                set_cur_pulser( );
+                return MW_TOKEN;
+            }
 
 {TWT}       {
-				set_cur_pulser( );
-				return TWT_TOKEN;
-			}
+                set_cur_pulser( );
+                return TWT_TOKEN;
+            }
 
 {TWT_GATE}  {
-				set_cur_pulser( );
-				return TWT_GATE_TOKEN;
-			}
+                set_cur_pulser( );
+                return TWT_GATE_TOKEN;
+            }
 
 {DET}       {
-				set_cur_pulser( );
-				return DET_TOKEN;
-			}
+                set_cur_pulser( );
+                return DET_TOKEN;
+            }
 
 {DET_GATE}  {
-				set_cur_pulser( );
-				return DET_GATE_TOKEN;
-			}
+                set_cur_pulser( );
+                return DET_GATE_TOKEN;
+            }
 
 {DEF}       {
-				set_cur_pulser( );
-				return DEF_TOKEN;
-			}
+                set_cur_pulser( );
+                return DEF_TOKEN;
+            }
 
 {RF}        {
-				set_cur_pulser( );
-				return RF_TOKEN;
-			}
+                set_cur_pulser( );
+                return RF_TOKEN;
+            }
 
 {RF_GATE}   {
-				set_cur_pulser( );
-				return RF_GATE_TOKEN;
-			}
+                set_cur_pulser( );
+                return RF_GATE_TOKEN;
+            }
 
 {LSR}       {
-				set_cur_pulser( );
-				return PSH_TOKEN;
-			}
+                set_cur_pulser( );
+                return PSH_TOKEN;
+            }
 
 {PSH}       {
-				set_cur_pulser( );
-				return PSH_TOKEN;
-			}
+                set_cur_pulser( );
+                return PSH_TOKEN;
+            }
 
 {PH1}       {
-				set_cur_pulser( );
-				return PH1_TOKEN;
-			}
+                set_cur_pulser( );
+                return PH1_TOKEN;
+            }
 
 {PH2}       {
-				set_cur_pulser( );
-				return PH2_TOKEN;
-			}
+                set_cur_pulser( );
+                return PH2_TOKEN;
+            }
 
 {OI}        {
-				set_cur_pulser( );
-				return OI_TOKEN;
-			}
+                set_cur_pulser( );
+                return OI_TOKEN;
+            }
 
 {OII}       {
-				set_cur_pulser( );
-				return OII_TOKEN;
-			}
+                set_cur_pulser( );
+                return OII_TOKEN;
+            }
 
 {OIII}      {
-				set_cur_pulser( );
-				return OIII_TOKEN;
-			}
+                set_cur_pulser( );
+                return OIII_TOKEN;
+            }
 
 {OIV}       {
-				set_cur_pulser( );
-				return OIV_TOKEN;
-			}
+                set_cur_pulser( );
+                return OIV_TOKEN;
+            }
 
 {PODSPEC}  {
-				assignlval.lval = T_atol( assigntext + 1 );
-				return INT_TOKEN;
+                assignlval.lval = T_atol( assigntext + 1 );
+                return INT_TOKEN;
             }
 
 {CHN}       {
-				Var_T *v = convert_to_channel_number( assigntext );
-				assignlval.lval = p_ch2num( v->val.lval );
-				vars_pop( v );
-				return INT_TOKEN;
+                Var_T *v = convert_to_channel_number( assigntext );
+                assignlval.lval = p_ch2num( v->val.lval );
+                vars_pop( v );
+                return INT_TOKEN;
             }
 
 "TTL"       return TTL_TOKEN;
@@ -379,20 +379,20 @@ WS          [\n=: ]+
 
             /* keywords related to time base and trigger mode */
 
-{TB}		{
-				set_cur_pulser( );
-				return TB_TOKEN;
-			}
+{TB}        {
+                set_cur_pulser( );
+                return TB_TOKEN;
+            }
 
-{TM}		{
-				set_cur_pulser( );
-				return TM_TOKEN;
-			}
+{TM}        {
+                set_cur_pulser( );
+                return TM_TOKEN;
+            }
 
-{MPL}		{
-				set_cur_pulser( );
-				return MPL_TOKEN;
-			}
+{MPL}       {
+                set_cur_pulser( );
+                return MPL_TOKEN;
+            }
 
 {INTERN}    return INTERN_TOKEN;
 {EXTERN}    return EXTERN_TOKEN;
@@ -403,89 +403,89 @@ WS          [\n=: ]+
 {IMP}       return IMP_TOKEN;
 {KAP}       return KAP_TOKEN;
 {LOW}       {
-				assignlval.lval = LOW;
-				return HL_TOKEN;
-			}
+                assignlval.lval = LOW;
+                return HL_TOKEN;
+            }
 {HIGH}      {
-				assignlval.lval = HIGH;
-				return HL_TOKEN;
-			}
+                assignlval.lval = HIGH;
+                return HL_TOKEN;
+            }
 {REPT}      return REPT_TOKEN;
 {REPF}      return REPF_TOKEN;
 
-{GP}		{
-				set_cur_pulser( );
-				return GP_TOKEN;
-			}
+{GP}        {
+                set_cur_pulser( );
+                return GP_TOKEN;
+            }
 
-{PSD1}		{
-				assignlval.lval	= 0;
-				return PSD_TOKEN;
-			}
+{PSD1}      {
+                assignlval.lval = 0;
+                return PSD_TOKEN;
+            }
 
-{PSD2}		{
-				assignlval.lval	= 1;
-				return PSD_TOKEN;
-			}
+{PSD2}      {
+                assignlval.lval = 1;
+                return PSD_TOKEN;
+            }
 
 {INT}/[^_a-zA-Z] {
-            	assignlval.lval = T_atol( assigntext );
+                assignlval.lval = T_atol( assigntext );
                 return INT_TOKEN;
             }
 
 {FLOAT}/[^_a-zA-Z] {
-            	assignlval.dval = T_atod( assigntext );
+                assignlval.dval = T_atod( assigntext );
                 return FLOAT_TOKEN;
             }
 
             /* handling of string constants (to be used as format strings in
-			   the print() function only */
+               the print() function only */
 {STR}       {
-				assigntext[ strlen( assigntext ) - 1 ] = '\0';
-				assignlval.sptr = assigntext + 1;
-				return STR_TOKEN;
-			}
+                assigntext[ strlen( assigntext ) - 1 ] = '\0';
+                assignlval.sptr = assigntext + 1;
+                return STR_TOKEN;
+            }
 
 {CTRL}      {
-				print( FATAL, "Flow control structures can't be used in the "
-					   "ASSIGNMENTS section.\n" );
-				THROW( EXCEPTION );
-			}
+                print( FATAL, "Flow control structures can't be used in the "
+                       "ASSIGNMENTS section.\n" );
+                THROW( EXCEPTION );
+            }
 
-			/* handling of function, variable and array identifiers */
+            /* handling of function, variable and array identifiers */
 {IDENT}     {
-				int acc;
+                int acc;
 
-				/* first check if the identifier is a function name */
+                /* first check if the identifier is a function name */
 
-				assignlval.vptr = func_get( assigntext, &acc );
-				if ( assignlval.vptr != NULL )
-				{
-					/* if it's a function check that the function can be used
-					   in the current context */
+                assignlval.vptr = func_get( assigntext, &acc );
+                if ( assignlval.vptr != NULL )
+                {
+                    /* if it's a function check that the function can be used
+                       in the current context */
 
-					if ( acc == ACCESS_EXP )
-					{
-						print( FATAL, "Function '%s' can only be used in the "
-							   "EXPERIMENT section.\n", assigntext );
-						THROW( EXCEPTION );
-					}
-					return FUNC_TOKEN;
-				}
+                    if ( acc == ACCESS_EXP )
+                    {
+                        print( FATAL, "Function '%s' can only be used in the "
+                               "EXPERIMENT section.\n", assigntext );
+                        THROW( EXCEPTION );
+                    }
+                    return FUNC_TOKEN;
+                }
 
-				/* if it's not a function it should be a variable */
+                /* if it's not a function it should be a variable */
 
-				if ( ( assignlval.vptr = vars_get( assigntext ) ) == NULL )
-				{
-					print(	FATAL, "Variable or function '%s' has not been "
-							"declared or loaded.\n", assigntext );
-					 THROW( EXCEPTION );
-				}
+                if ( ( assignlval.vptr = vars_get( assigntext ) ) == NULL )
+                {
+                    print(  FATAL, "Variable or function '%s' has not been "
+                            "declared or loaded.\n", assigntext );
+                     THROW( EXCEPTION );
+                }
 
-				return VAR_TOKEN;
-			}
+                return VAR_TOKEN;
+            }
 
-			/* stuff used with functions, arrays and math */
+            /* stuff used with functions, arrays and math */
 
 "=="        return EQ;        /* equal */
 "!="        return NE;        /* unequal */
@@ -513,26 +513,26 @@ WS          [\n=: ]+
 {WS}        /* skip prettifying characters */
 
 ";"         {
-				In_phs = UNSET;
-				return ';';
-			}
+                In_phs = UNSET;
+                return ';';
+            }
 
-			/* handling of invalid input (i.e. everything else) */
+            /* handling of invalid input (i.e. everything else) */
 .           {
-				print( FATAL, "Invalid input near '%s'.\n",
-					   assigntext );
-				THROW( EXCEPTION );
-			}
+                print( FATAL, "Invalid input near '%s'.\n",
+                       assigntext );
+                THROW( EXCEPTION );
+            }
 
-<<EOF>>	    {
-				Assign_next_section = NO_SECTION;
-				return 0;
-			}
+<<EOF>>     {
+                Assign_next_section = NO_SECTION;
+                return 0;
+            }
 
 
-		/*----------------------*/
-%%		/*     End of Rules     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     End of Rules     */
+        /*----------------------*/
 
 
 /*-------------------------------------------*
@@ -540,32 +540,32 @@ WS          [\n=: ]+
 
 int assignments_parser( FILE * in )
 {
-	static bool needs_restart = UNSET;
+    static bool needs_restart = UNSET;
 
 
-	if ( EDL.compilation.sections[ ASSIGNMENTS_SECTION ] )
-	{
-		print( FATAL, "Multiple instances of ASSIGNMENTS section label.\n" );
-		THROW( EXCEPTION );
-	}
-	EDL.compilation.sections[ ASSIGNMENTS_SECTION ] = SET;
+    if ( EDL.compilation.sections[ ASSIGNMENTS_SECTION ] )
+    {
+        print( FATAL, "Multiple instances of ASSIGNMENTS section label.\n" );
+        THROW( EXCEPTION );
+    }
+    EDL.compilation.sections[ ASSIGNMENTS_SECTION ] = SET;
 
-	assignin = in;
+    assignin = in;
 
-	/* Keep the lexer happy... */
+    /* Keep the lexer happy... */
 
-	if ( needs_restart )
-	    assignrestart( assignin );
-	else
-		 needs_restart = SET;
+    if ( needs_restart )
+        assignrestart( assignin );
+    else
+         needs_restart = SET;
 
-	assignparser_init( );
+    assignparser_init( );
 
-	Cur_Pulser = 0;
+    Cur_Pulser = 0;
 
-	assignparse( );
+    assignparse( );
 
-	return Assign_next_section;
+    return Assign_next_section;
 }
 
 
@@ -574,26 +574,28 @@ int assignments_parser( FILE * in )
 
 static void set_cur_pulser( void )
 {
-	const char *t;
+    const char *t;
 
 
-	if ( In_phs )
-		return;
+    if ( In_phs )
+        return;
 
-	Cur_Pulser = 0;
-	if ( ( t = strrchr( assigntext, '#' ) ) == NULL )
-		return;
+    Cur_Pulser = 0;
+    if ( ( t = strrchr( assigntext, '#' ) ) == NULL )
+        return;
 
-	if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >= EDL.Num_Pulsers )
-	{
-		print( FATAL, "There is no pulser #%ld\n", Cur_Pulser + 1 );
-		THROW( EXCEPTION );
-	}
+    if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >= EDL.Num_Pulsers )
+    {
+        print( FATAL, "There is no pulser #%ld\n", Cur_Pulser + 1 );
+        THROW( EXCEPTION );
+    }
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -24,8 +24,8 @@
  */
 
 
-#if ! defined RULBUS_LIB_HEADER
-#define RULBUS_LIB_HEADER
+#if ! defined RULBUS_LIBRARY_HEADER
+#define RULBUS_LIBRARY_HEADER
 
 
 #ifdef __cplusplus
@@ -104,19 +104,19 @@ extern "C" {
 typedef struct RULBUS_CARD_LIST RULBUS_CARD_LIST;
 
 struct RULBUS_CARD_LIST {
-	char                       *name;
-	char                       *rack_name;
-	int                         type;
-	unsigned char               rack;
-	unsigned char               addr;
-	unsigned char               width;
-	struct RULBUS_CARD_HANDLER *handler;
-	int                         in_use;
-	int                         num_channels;
-	double                      vpb;              /* volts per bit */
-	int                         bipolar;
-	int                         has_ext_trigger;
-	double                      intr_delay;
+        char                       * name;
+        char                       * rack_name;
+        int                          type;
+        unsigned char                rack;
+        unsigned char                addr;
+        unsigned char                width;
+        struct RULBUS_CARD_HANDLER * handler;
+        int                          in_use;
+        int                          num_channels;
+        double                       vpb;              /* volts per bit */
+        int                          bipolar;
+        int                          has_ext_trigger;
+        double                       intr_delay;
 };
 
 
@@ -125,29 +125,29 @@ extern int rulbus_errno;
 
 
 int rulbus_write( int             /* handle */,
-		  unsigned char   /* offset */,
-		  unsigned char * /* data   */,
-		  size_t          /* len    */ );
+                  unsigned char   /* offset */,
+                  unsigned char * /* data   */,
+                  size_t          /* len    */ );
 
 int rulbus_write_range( int             /* handle */,
-			unsigned char   /* offset */,
-			unsigned char * /* data   */,
-			size_t          /* len    */ );
+                        unsigned char   /* offset */,
+                        unsigned char * /* data   */,
+                        size_t          /* len    */ );
 
 int rulbus_read_range( int             /* handle */,
-		       unsigned char   /* offset */,
-		       unsigned char * /* data   */,
-		       size_t          /* len    */ );
+                       unsigned char   /* offset */,
+                       unsigned char * /* data   */,
+                       size_t          /* len    */ );
 
 int rulbus_read( int             /* handle */,
-		 unsigned char   /* offset */,
-		 unsigned char * /* data   */,
-		 size_t          /* len    */ );
+                 unsigned char   /* offset */,
+                 unsigned char * /* data   */,
+                 size_t          /* len    */ );
 
 int rulbus_read_range( int             /* handle */,
-		       unsigned char   /* offset */,
-		       unsigned char * /* data   */,
-		       size_t          /* len    */ );
+                       unsigned char   /* offset */,
+                       unsigned char * /* data   */,
+                       size_t          /* len    */ );
 
 
 /* Internal functions for 12-bit ADC cards (RB8509) */
@@ -210,20 +210,12 @@ int rulbus_generic_card_exit( int /* handle */ );
 #endif
 
 
-#endif /* ! RULBUS_LIB_HEADER */
+#endif /* ! RULBUS_LIBRARY_HEADER */
 
 
 /*
  * Local variables:
- * c-basic-offset: 8
- * c-indent-level: 8
- * c-brace-imaginary-offset: 0
- * c-brace-offset: 0
- * c-argdecl-indent: 4
- * c-label-ofset: -4
- * c-continued-statement-offset: 4
- * c-continued-brace-offset: 0
- * indent-tabs-mode: t
- * tab-width: 8
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

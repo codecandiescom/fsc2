@@ -21,6 +21,10 @@
  */
 
 
+#if ! defined NI6601_LIBRARY_HEADER
+#define NI6601_LIBRARY_HEADER
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -40,81 +44,81 @@ extern "C" {
 typedef struct {
     int is_init;              /* has board been used so far? */
     int fd;                   /* file descriptor for board */
-	int is_used[ 4 ];
-	int state[ 4 ];
+    int is_used[ 4 ];
+    int state[ 4 ];
 } NI6601_Device_Info;
 
 
 enum {
-	NI6601_IDLE = 0,
-	NI6601_BUSY,
-	NI6601_PULSER_RUNNING,
-	NI6601_CONT_PULSER_RUNNING,
-	NI6601_COUNTER_RUNNING,
-	NI6601_CONT_COUNTER_RUNNING,
-	NI6601_BUFF_COUNTER_RUNNING
+    NI6601_IDLE = 0,
+    NI6601_BUSY,
+    NI6601_PULSER_RUNNING,
+    NI6601_CONT_PULSER_RUNNING,
+    NI6601_COUNTER_RUNNING,
+    NI6601_CONT_COUNTER_RUNNING,
+    NI6601_BUFF_COUNTER_RUNNING
 };
 
 
 int ni6601_close( int /* board */ );
 
 int ni6601_start_counter( int /* board   */,
-						  int /* counter */,
-						  int /* source  */ );
+                          int /* counter */,
+                          int /* source  */ );
 
 int ni6601_start_gated_counter( int    /* board       */,
-								int    /* counter     */,
-								double /* gate_length */,
-								int    /* source      */ );
+                                int    /* counter     */,
+                                double /* gate_length */,
+                                int    /* source      */ );
 
 int ni6601_start_buffered_counter( int           /* board       */,
-								   int           /* counter     */,
-								   double        /* gate_length */,
-								   int           /* source      */,
-								   unsigned long /* num_points  */,
-								   int           /* continuous  */ );
+                                   int           /* counter     */,
+                                   double        /* gate_length */,
+                                   int           /* source      */,
+                                   unsigned long /* num_points  */,
+                                   int           /* continuous  */ );
 
 ssize_t ni6601_get_buffered_available( int /* board */ );
 
 ssize_t ni6601_get_buffered_counts( int             /* board          */,
-									unsigned long * /* counts         */,
-									size_t          /* num_points     */,
-									double          /* wait_secs      */,
-									int *           /* quit_on_signal */,
-									int *           /* timed_out      */,
-									int *           /* end_of_data    */ );
+                                    unsigned long * /* counts         */,
+                                    size_t          /* num_points     */,
+                                    double          /* wait_secs      */,
+                                    int *           /* quit_on_signal */,
+                                    int *           /* timed_out      */,
+                                    int *           /* end_of_data    */ );
 
 int ni6601_stop_counter( int /* board   */,
-						 int /* counter */ );
+                         int /* counter */ );
 
 int ni6601_get_count( int             /* board        */,
-					  int             /* counter      */,
-					  int             /* wait_for_end */,
-					  int             /* do_poll      */,
-					  unsigned long * /* count        */,
-					  int *           /* state        */ );
+                      int             /* counter      */,
+                      int             /* wait_for_end */,
+                      int             /* do_poll      */,
+                      unsigned long * /* count        */,
+                      int *           /* state        */ );
 
 int ni6601_generate_continuous_pulses( int    /* board      */,
-									   int    /* counter    */,
-									   double /* high_phase */,
-									   double /* low_phase  */ );
+                                       int    /* counter    */,
+                                       double /* high_phase */,
+                                       double /* low_phase  */ );
 int ni6601_stop_pulses( int /* board */, int  /* counter    */ );
 
 int ni6601_generate_single_pulse( int    /* board    */,
-								  int    /* counter  */,
-								  double /* duration */ );
+                                  int    /* counter  */,
+                                  double /* duration */ );
 
 int ni6601_dio_write( int           /* board */,
-					  unsigned char /* bits  */,
-					  unsigned char /* mask  */ );
+                      unsigned char /* bits  */,
+                      unsigned char /* mask  */ );
 
 int ni6601_dio_read( int             /* board */,
-					 unsigned char * /* bits  */,
-					 unsigned char   /* mask  */ );
+                     unsigned char * /* bits  */,
+                     unsigned char   /* mask  */ );
 
 int ni6601_is_counter_armed( int   /* board   */,
-							 int   /* counter */,
-							 int * /* state   */ );
+                             int   /* counter */,
+                             int * /* state   */ );
 
 int ni6601_perror( const char * /* s */ );
 
@@ -151,3 +155,14 @@ extern const int ni6601_nerr;
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
+
+
+#endif  /* NI6601_LIBRARY_HEADER */
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */

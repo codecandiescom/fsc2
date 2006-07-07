@@ -61,12 +61,12 @@ static int me6000_channel_number( long ch );
 
 
 struct ME6000 {
-	int num_dacs;
-	struct {
-		bool is_used;
-		double volts;
-		char *reserved_by;
-	} dac[ MAX_NUMBER_OF_DACS ];
+    int num_dacs;
+    struct {
+        bool is_used;
+        double volts;
+        char *reserved_by;
+    } dac[ MAX_NUMBER_OF_DACS ];
 };
 
 
@@ -78,19 +78,19 @@ static struct ME6000 me6000, me6000_stored;
 
 int me6000_init_hook( void )
 {
-	int i;
+    int i;
 
 
-	me6000.num_dacs = MAX_NUMBER_OF_DACS;
-	
-	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
-	{
-		me6000.dac[ i ].is_used = UNSET;
-		me6000.dac[ i ].volts = 0.0;
-		me6000.dac[ i ].reserved_by = NULL;
-	}
+    me6000.num_dacs = MAX_NUMBER_OF_DACS;
+    
+    for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
+    {
+        me6000.dac[ i ].is_used = UNSET;
+        me6000.dac[ i ].volts = 0.0;
+        me6000.dac[ i ].reserved_by = NULL;
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -99,16 +99,16 @@ int me6000_init_hook( void )
 
 int me6000_test_hook( void )
 {
-	int i;
+    int i;
 
 
-	me6000_stored = me6000;
+    me6000_stored = me6000;
 
-	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
-		if ( me6000.dac[ i ].reserved_by )
-			me6000_stored.dac[ i ].reserved_by =
-									   T_strdup( me6000.dac[ i ].reserved_by );
-	return 1;
+    for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
+        if ( me6000.dac[ i ].reserved_by )
+            me6000_stored.dac[ i ].reserved_by =
+                                       T_strdup( me6000.dac[ i ].reserved_by );
+    return 1;
 }
 
 
@@ -117,92 +117,92 @@ int me6000_test_hook( void )
 
 int me6000_exp_hook( void )
 {
-	unsigned int num_dacs;
-	int i;
+    unsigned int num_dacs;
+    int i;
 
 
-	me6000 = me6000_stored;
+    me6000 = me6000_stored;
 
-	/* Try to get the number of DACs the boards has, this is also a test to
-	   see if it can be opened and accessed */
+    /* Try to get the number of DACs the boards has, this is also a test to
+       see if it can be opened and accessed */
 
-	raise_permissions( );
-	switch ( me6x00_num_dacs( BOARD_NUMBER, &num_dacs ) )
-	{
-		case 0 :                    /* everything is fine */
-			break;
+    raise_permissions( );
+    switch ( me6x00_num_dacs( BOARD_NUMBER, &num_dacs ) )
+    {
+        case 0 :                    /* everything is fine */
+            break;
 
-		case ME6X00_ERR_IBN :
-			lower_permissions( );
-			print( FATAL, "Invalid board number.\n" );
-			THROW( EXCEPTION );
+        case ME6X00_ERR_IBN :
+            lower_permissions( );
+            print( FATAL, "Invalid board number.\n" );
+            THROW( EXCEPTION );
 
-		case ME6X00_ERR_NDV :
-			lower_permissions( );
-			print( FATAL, "Driver for board not loaded.\n" );
-			THROW( EXCEPTION );
+        case ME6X00_ERR_NDV :
+            lower_permissions( );
+            print( FATAL, "Driver for board not loaded.\n" );
+            THROW( EXCEPTION );
 
-		case ME6X00_ERR_NDF :
-			lower_permissions( );
-			print( FATAL, "Device file for board missing or inaccessible.\n" );
-			THROW( EXCEPTION );
+        case ME6X00_ERR_NDF :
+            lower_permissions( );
+            print( FATAL, "Device file for board missing or inaccessible.\n" );
+            THROW( EXCEPTION );
 
-		case ME6X00_ERR_BSY :
-			lower_permissions( );
-			print( FATAL, "Board already in use by another program.\n" );
-			THROW( EXCEPTION );
+        case ME6X00_ERR_BSY :
+            lower_permissions( );
+            print( FATAL, "Board already in use by another program.\n" );
+            THROW( EXCEPTION );
 
-		case ME6X00_ERR_INT :
-			lower_permissions( );
-			print( FATAL, "Internal error in driver for board.\n" );
-			THROW( EXCEPTION );
+        case ME6X00_ERR_INT :
+            lower_permissions( );
+            print( FATAL, "Internal error in driver for board.\n" );
+            THROW( EXCEPTION );
 
-		default :
-			lower_permissions( );
-			print( FATAL, "Unrecognized error when trying to access the "
-				   "board.\n" );
-			THROW( EXCEPTION );
-	}
+        default :
+            lower_permissions( );
+            print( FATAL, "Unrecognized error when trying to access the "
+                   "board.\n" );
+            THROW( EXCEPTION );
+    }
 
-	/* Now set the start voltage for all DACs that needs it to be set */
+    /* Now set the start voltage for all DACs that needs it to be set */
 
-	me6000.num_dacs = num_dacs;
+    me6000.num_dacs = num_dacs;
 
-	for ( i = 0; i < me6000.num_dacs; i++ )
-	{
-		if ( me6000.dac[ i ].is_used &&
-			 me6x00_voltage( BOARD_NUMBER, i, me6000.dac[ i ].volts ) < 0 )
-		{
-			me6x00_close( BOARD_NUMBER );
-			lower_permissions( );
-			print( FATAL, "Failed to set voltage for CH%d.\n", i );
-			THROW( EXCEPTION );
-		}
+    for ( i = 0; i < me6000.num_dacs; i++ )
+    {
+        if ( me6000.dac[ i ].is_used &&
+             me6x00_voltage( BOARD_NUMBER, i, me6000.dac[ i ].volts ) < 0 )
+        {
+            me6x00_close( BOARD_NUMBER );
+            lower_permissions( );
+            print( FATAL, "Failed to set voltage for CH%d.\n", i );
+            THROW( EXCEPTION );
+        }
 
-		if ( me6x00_keep_voltage( BOARD_NUMBER, i, 1 ) < 0 )
-		{
-			me6x00_close( BOARD_NUMBER );
-			lower_permissions( );
-			print( FATAL, "Failed to initialize board.\n" );
-			THROW( EXCEPTION );
-		}
-	}
+        if ( me6x00_keep_voltage( BOARD_NUMBER, i, 1 ) < 0 )
+        {
+            me6x00_close( BOARD_NUMBER );
+            lower_permissions( );
+            print( FATAL, "Failed to initialize board.\n" );
+            THROW( EXCEPTION );
+        }
+    }
 
-	/* Check that in the preparations section there wasn't a request for
-	   setting a voltage for a DAC that doesn't exist */
+    /* Check that in the preparations section there wasn't a request for
+       setting a voltage for a DAC that doesn't exist */
 
-	for ( i = me6000.num_dacs; i < MAX_NUMBER_OF_DACS; i++ )
-		if ( me6000.dac[ i ].is_used )
-		{
-			me6x00_close( BOARD_NUMBER );
-			lower_permissions( );
-			print( FATAL, "Can't set voltage for CH%d, board has only "
-				   "%u channels.\n", i, me6000.num_dacs );
-			THROW( EXCEPTION );
-		}
+    for ( i = me6000.num_dacs; i < MAX_NUMBER_OF_DACS; i++ )
+        if ( me6000.dac[ i ].is_used )
+        {
+            me6x00_close( BOARD_NUMBER );
+            lower_permissions( );
+            print( FATAL, "Can't set voltage for CH%d, board has only "
+                   "%u channels.\n", i, me6000.num_dacs );
+            THROW( EXCEPTION );
+        }
 
-	lower_permissions( );
-	return 1;
+    lower_permissions( );
+    return 1;
 }
 
 
@@ -211,21 +211,21 @@ int me6000_exp_hook( void )
 
 int me6000_end_of_exp_hook( void )
 {
-	int i;
+    int i;
 
 
-	raise_permissions( );
-	me6x00_close( BOARD_NUMBER );
-	lower_permissions( );
+    raise_permissions( );
+    me6x00_close( BOARD_NUMBER );
+    lower_permissions( );
 
-	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
-		if ( me6000.dac[ i ].reserved_by &&
-			 me6000.dac[ i ].reserved_by !=
-			                               me6000_stored.dac[ i ].reserved_by )
-			me6000.dac[ i ].reserved_by =
-								  CHAR_P T_free( me6000.dac[ i ].reserved_by );
+    for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
+        if ( me6000.dac[ i ].reserved_by &&
+             me6000.dac[ i ].reserved_by !=
+                                           me6000_stored.dac[ i ].reserved_by )
+            me6000.dac[ i ].reserved_by =
+                                  CHAR_P T_free( me6000.dac[ i ].reserved_by );
 
-	return 1;
+    return 1;
 }
 
 
@@ -234,12 +234,12 @@ int me6000_end_of_exp_hook( void )
 
 void me6000_exit_hook( void )
 {
-	int i;
+    int i;
 
 
-	for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
-		if ( me6000_stored.dac[ i ].reserved_by )
-			T_free( me6000_stored.dac[ i ].reserved_by );
+    for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
+        if ( me6000_stored.dac[ i ].reserved_by )
+            T_free( me6000_stored.dac[ i ].reserved_by );
 }
 
 
@@ -248,7 +248,7 @@ void me6000_exit_hook( void )
 
 Var_T *daq_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -260,70 +260,70 @@ Var_T *daq_name( Var_T * v  UNUSED_ARG )
 
 Var_T *daq_reserve_dac( Var_T * v )
 {
-	bool lock_state = SET;
-	long channel;
-	int dac;
+    bool lock_state = SET;
+    long channel;
+    int dac;
 
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	channel = get_strict_long( v, "channel number" );
+    channel = get_strict_long( v, "channel number" );
 
-	dac = me6000_channel_number( channel );
+    dac = me6000_channel_number( channel );
 
-	if ( dac >= me6000.num_dacs )
-	{
-		print( FATAL, "Can't reserve CH%d, board has only %d channels.\n",
-			   dac, me6000.num_dacs );
-		THROW( EXCEPTION );
-	}
+    if ( dac >= me6000.num_dacs )
+    {
+        print( FATAL, "Can't reserve CH%d, board has only %d channels.\n",
+               dac, me6000.num_dacs );
+        THROW( EXCEPTION );
+    }
 
-	if ( v == NULL )
-		return vars_push( INT_VAR, me6000.dac[ dac ].reserved_by ? 1L : 0L );
+    if ( v == NULL )
+        return vars_push( INT_VAR, me6000.dac[ dac ].reserved_by ? 1L : 0L );
 
-	if ( v->type != STR_VAR )
-	{
-		print( FATAL, "First argument isn't a string.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v->type != STR_VAR )
+    {
+        print( FATAL, "First argument isn't a string.\n" );
+        THROW( EXCEPTION );
+    }
 
-	if ( v->next != NULL )
-	{
-		lock_state = get_boolean( v->next );
-		too_many_arguments( v->next );
-	}
+    if ( v->next != NULL )
+    {
+        lock_state = get_boolean( v->next );
+        too_many_arguments( v->next );
+    }
 
-	if ( me6000.dac[ dac ].reserved_by )
-	{
-		if ( lock_state == SET )
-		{
-			if ( ! strcmp( me6000.dac[ dac ].reserved_by, v->val.sptr ) )
-				return vars_push( INT_VAR, 1L );
-			else
-				return vars_push( INT_VAR, 0L );
-		}
-		else
-		{
-			if ( ! strcmp( me6000.dac[ dac ].reserved_by, v->val.sptr ) )
-			{
-				me6000.dac[ dac ].reserved_by =
-								CHAR_P T_free( me6000.dac[ dac ].reserved_by );
-				return vars_push( INT_VAR, 1L );
-			}
-			else
-				return vars_push( INT_VAR, 0L );
-		}
-	}
+    if ( me6000.dac[ dac ].reserved_by )
+    {
+        if ( lock_state == SET )
+        {
+            if ( ! strcmp( me6000.dac[ dac ].reserved_by, v->val.sptr ) )
+                return vars_push( INT_VAR, 1L );
+            else
+                return vars_push( INT_VAR, 0L );
+        }
+        else
+        {
+            if ( ! strcmp( me6000.dac[ dac ].reserved_by, v->val.sptr ) )
+            {
+                me6000.dac[ dac ].reserved_by =
+                                CHAR_P T_free( me6000.dac[ dac ].reserved_by );
+                return vars_push( INT_VAR, 1L );
+            }
+            else
+                return vars_push( INT_VAR, 0L );
+        }
+    }
 
-	if ( ! lock_state )
-		return vars_push( INT_VAR, 1L );
+    if ( ! lock_state )
+        return vars_push( INT_VAR, 1L );
 
-	me6000.dac[ dac ].reserved_by = T_strdup( v->val.sptr );
-	return vars_push( INT_VAR, 1L );
+    me6000.dac[ dac ].reserved_by = T_strdup( v->val.sptr );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -332,109 +332,109 @@ Var_T *daq_reserve_dac( Var_T * v )
 
 Var_T *daq_set_voltage( Var_T * v )
 {
-	long channel;
-	int dac;
-	double volts;
-	char *pass = NULL;
-	int ret;
+    long channel;
+    int dac;
+    double volts;
+    char *pass = NULL;
+    int ret;
 
 
-	if ( v != NULL && v->type == STR_VAR )
-	{
-		pass = v->val.sptr;
-		v = v->next;
-	}
+    if ( v != NULL && v->type == STR_VAR )
+    {
+        pass = v->val.sptr;
+        v = v->next;
+    }
 
-	if ( v == NULL )
-	{
-		print( FATAL, "Missing arguments.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
 
-	channel = get_strict_long( v, "channel number" );
+    channel = get_strict_long( v, "channel number" );
 
-	dac = me6000_channel_number( channel );
+    dac = me6000_channel_number( channel );
 
-	if ( dac >= me6000.num_dacs )
-	{
-		print( FATAL, "Can't set voltage for CH%d, board has only "
-			   "%d channels.\n", dac, me6000.num_dacs );
-		THROW( EXCEPTION );
-	}
+    if ( dac >= me6000.num_dacs )
+    {
+        print( FATAL, "Can't set voltage for CH%d, board has only "
+               "%d channels.\n", dac, me6000.num_dacs );
+        THROW( EXCEPTION );
+    }
 
-	v = vars_pop( v );
+    v = vars_pop( v );
 
-	if ( v == NULL )
-	{
-		if ( ! me6000.dac[ dac ].is_used )
-		{
-			if ( FSC2_MODE == EXPERIMENT )
-				print( SEVERE, "Can't determine output voltage, it has never "
-					   "been set.\n" );
-			else
-			{
-				print( FATAL, "Can't determine output voltage, it has never "
-					   "been set.\n" );
-				THROW( EXCEPTION );
-			}
-		}
+    if ( v == NULL )
+    {
+        if ( ! me6000.dac[ dac ].is_used )
+        {
+            if ( FSC2_MODE == EXPERIMENT )
+                print( SEVERE, "Can't determine output voltage, it has never "
+                       "been set.\n" );
+            else
+            {
+                print( FATAL, "Can't determine output voltage, it has never "
+                       "been set.\n" );
+                THROW( EXCEPTION );
+            }
+        }
 
-		return vars_push( FLOAT_VAR, me6000.dac[ dac ].volts );
-	}
+        return vars_push( FLOAT_VAR, me6000.dac[ dac ].volts );
+    }
 
-	if ( me6000.dac[ dac ].reserved_by )
-	{
-		if ( pass == NULL )
-		{
-			print( FATAL, "CH%ld is reserved, phase-phrase required.\n", dac );
-			THROW( EXCEPTION );
-		}
-		else if ( strcmp( me6000.dac[ dac ].reserved_by, pass ) )
-		{
-			print( FATAL, "CH%ld is reserved, wrong phase-phrase.\n", dac );
-			THROW( EXCEPTION );
-		}
-	}		
+    if ( me6000.dac[ dac ].reserved_by )
+    {
+        if ( pass == NULL )
+        {
+            print( FATAL, "CH%ld is reserved, phase-phrase required.\n", dac );
+            THROW( EXCEPTION );
+        }
+        else if ( strcmp( me6000.dac[ dac ].reserved_by, pass ) )
+        {
+            print( FATAL, "CH%ld is reserved, wrong phase-phrase.\n", dac );
+            THROW( EXCEPTION );
+        }
+    }       
 
-	volts = get_double( v, "DAC output voltage" );
+    volts = get_double( v, "DAC output voltage" );
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( volts < MIN_VOLTS || volts > MAX_VOLTS)
-	{
-		if ( FSC2_MODE == EXPERIMENT )
-		{
-			print( SEVERE, "Output voltage of %f too %s, must be between "
-				   "%.2f V and %.2f V. Keeping current voltage of %.2f V.\n",
-				   volts, volts < MIN_VOLTS ? "low" : "high", MIN_VOLTS,
-				   MAX_VOLTS, me6000.dac[ dac ].volts );
-			return vars_push( FLOAT_VAR, me6000.dac[ dac ].volts );
-		}
-		else
-		{
-			print( FATAL, "Output voltage of %f too %s, must be between "
-				   "%.2f V and %.2f V.\n", volts,
-				   volts < MIN_VOLTS ? "low" : "high", MIN_VOLTS, MAX_VOLTS );
-			THROW( EXCEPTION );
-		}
-	}
-	
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		raise_permissions( );
-		ret = me6x00_voltage( BOARD_NUMBER, dac, volts );
-		lower_permissions( );
-		if ( ret < 0 )
-		{
-			print( FATAL, "Failed to set output voltage.\n" );
-			THROW( EXCEPTION );
-		}
-	}
+    if ( volts < MIN_VOLTS || volts > MAX_VOLTS)
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+        {
+            print( SEVERE, "Output voltage of %f too %s, must be between "
+                   "%.2f V and %.2f V. Keeping current voltage of %.2f V.\n",
+                   volts, volts < MIN_VOLTS ? "low" : "high", MIN_VOLTS,
+                   MAX_VOLTS, me6000.dac[ dac ].volts );
+            return vars_push( FLOAT_VAR, me6000.dac[ dac ].volts );
+        }
+        else
+        {
+            print( FATAL, "Output voltage of %f too %s, must be between "
+                   "%.2f V and %.2f V.\n", volts,
+                   volts < MIN_VOLTS ? "low" : "high", MIN_VOLTS, MAX_VOLTS );
+            THROW( EXCEPTION );
+        }
+    }
+    
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        raise_permissions( );
+        ret = me6x00_voltage( BOARD_NUMBER, dac, volts );
+        lower_permissions( );
+        if ( ret < 0 )
+        {
+            print( FATAL, "Failed to set output voltage.\n" );
+            THROW( EXCEPTION );
+        }
+    }
 
-	me6000.dac[ dac ].is_used = SET;
-	me6000.dac[ dac ].volts = volts;
+    me6000.dac[ dac ].is_used = SET;
+    me6000.dac[ dac ].volts = volts;
 
-	return vars_push( FLOAT_VAR, 0.0 );
+    return vars_push( FLOAT_VAR, 0.0 );
 }
 
 
@@ -445,24 +445,24 @@ Var_T *daq_set_voltage( Var_T * v )
 
 Var_T *daq_dac_parameter( Var_T * v )
 {
-	double params[ 3 ];
+    double params[ 3 ];
 
 
-	/* A channel argument does not make too much sense for tis board because
-	   the output levels etc. for all channels are identical, so just throw
-	   it away (and don't complain if there's no argument). */
+    /* A channel argument does not make too much sense for tis board because
+       the output levels etc. for all channels are identical, so just throw
+       it away (and don't complain if there's no argument). */
 
-	if ( v != NULL )
-	{
-		get_strict_long( v, "channel number" );
-		too_many_arguments( vars_pop( v ) );
-	}
-		
-	params[ 0 ] = MIN_VOLTS;
-	params[ 1 ] = MAX_VOLTS;
-	params[ 2 ] = ( params[ 1 ] - params[ 0 ] ) / 65535.0;
+    if ( v != NULL )
+    {
+        get_strict_long( v, "channel number" );
+        too_many_arguments( vars_pop( v ) );
+    }
+        
+    params[ 0 ] = MIN_VOLTS;
+    params[ 1 ] = MAX_VOLTS;
+    params[ 2 ] = ( params[ 1 ] - params[ 0 ] ) / 65535.0;
 
-	return vars_push( FLOAT_ARR, params, ( ssize_t ) 3 );
+    return vars_push( FLOAT_ARR, params, ( ssize_t ) 3 );
 }
 
 
@@ -473,67 +473,75 @@ Var_T *daq_dac_parameter( Var_T * v )
 
 static int me6000_channel_number( long ch )
 {
-	switch ( ch )
-	{
-		case CHANNEL_CH0 :
-			return ME6X00_DAC00;
+    switch ( ch )
+    {
+        case CHANNEL_CH0 :
+            return ME6X00_DAC00;
 
-		case CHANNEL_CH1 :
-			return ME6X00_DAC01;
+        case CHANNEL_CH1 :
+            return ME6X00_DAC01;
 
-		case CHANNEL_CH2 :
-			return ME6X00_DAC02;
+        case CHANNEL_CH2 :
+            return ME6X00_DAC02;
 
-		case CHANNEL_CH3 :
-			return ME6X00_DAC03;
+        case CHANNEL_CH3 :
+            return ME6X00_DAC03;
 
-		case CHANNEL_CH4 :
-			return ME6X00_DAC04;
+        case CHANNEL_CH4 :
+            return ME6X00_DAC04;
 
-		case CHANNEL_CH5 :
-			return ME6X00_DAC05;
+        case CHANNEL_CH5 :
+            return ME6X00_DAC05;
 
-		case CHANNEL_CH6 :
-			return ME6X00_DAC06;
+        case CHANNEL_CH6 :
+            return ME6X00_DAC06;
 
-		case CHANNEL_CH7 :
-			return ME6X00_DAC07;
+        case CHANNEL_CH7 :
+            return ME6X00_DAC07;
 
-		case CHANNEL_CH8 :
-			return ME6X00_DAC08;
+        case CHANNEL_CH8 :
+            return ME6X00_DAC08;
 
-		case CHANNEL_CH9 :
-			return ME6X00_DAC09;
+        case CHANNEL_CH9 :
+            return ME6X00_DAC09;
 
-		case CHANNEL_CH10 :
-			return ME6X00_DAC10;
+        case CHANNEL_CH10 :
+            return ME6X00_DAC10;
 
-		case CHANNEL_CH11 :
-			return ME6X00_DAC11;
+        case CHANNEL_CH11 :
+            return ME6X00_DAC11;
 
-		case CHANNEL_CH12 :
-			return ME6X00_DAC12;
+        case CHANNEL_CH12 :
+            return ME6X00_DAC12;
 
-		case CHANNEL_CH13 :
-			return ME6X00_DAC13;
+        case CHANNEL_CH13 :
+            return ME6X00_DAC13;
 
-		case CHANNEL_CH14 :
-			return ME6X00_DAC14;
+        case CHANNEL_CH14 :
+            return ME6X00_DAC14;
 
-		case CHANNEL_CH15 :
-			return ME6X00_DAC15;
-	}
+        case CHANNEL_CH15 :
+            return ME6X00_DAC15;
+    }
 
 
-	if ( ch > CHANNEL_INVALID && ch < NUM_CHANNEL_NAMES )
-	{
-		print( FATAL, "There's no DAC channel named %s.\n",
-			   Channel_Names[ ch ] );
-		THROW( EXCEPTION );
-	}
+    if ( ch > CHANNEL_INVALID && ch < NUM_CHANNEL_NAMES )
+    {
+        print( FATAL, "There's no DAC channel named %s.\n",
+               Channel_Names[ ch ] );
+        THROW( EXCEPTION );
+    }
 
-	print( FATAL, "Invalid channel number %ld.\n", ch );
-	THROW( EXCEPTION );
+    print( FATAL, "Invalid channel number %ld.\n", ch );
+    THROW( EXCEPTION );
 
-	return -1;
+    return -1;
 }
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */

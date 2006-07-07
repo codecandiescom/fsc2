@@ -67,12 +67,12 @@ Var_T *f_mean(    Var_T * /* v */ );
 Var_T *f_rms(     Var_T * /* v */ );
 Var_T *f_slice(   Var_T * /* v */ );
 Var_T *f_square(  Var_T * /* v */ );
-Var_T *f_G2T(  	  Var_T * /* v */ );
-Var_T *f_T2G(  	  Var_T * /* v */ );
-Var_T *f_C2K(  	  Var_T * /* v */ );
-Var_T *f_K2C(  	  Var_T * /* v */ );
-Var_T *f_D2R(  	  Var_T * /* v */ );
-Var_T *f_R2D(  	  Var_T * /* v */ );
+Var_T *f_G2T(     Var_T * /* v */ );
+Var_T *f_T2G(     Var_T * /* v */ );
+Var_T *f_C2K(     Var_T * /* v */ );
+Var_T *f_K2C(     Var_T * /* v */ );
+Var_T *f_D2R(     Var_T * /* v */ );
+Var_T *f_R2D(     Var_T * /* v */ );
 Var_T *f_WL2WN(   Var_T * /* v */ );
 Var_T *f_WN2WL(   Var_T * /* v */ );
 Var_T *f_F2WN(    Var_T * /* v */ );
@@ -89,5 +89,7 @@ Var_T *f_add2avg( Var_T * /* v */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -29,15 +29,15 @@
 typedef struct Fsc2_Assert Fsc2_Assert_T;
 
 struct Fsc2_Assert {
-	const char *expression;
-	int line;
-	const char *filename;
+    const char *expression;
+    int line;
+    const char *filename;
 };
 
 
 int fsc2_assert_print( const char * /* expression */,
-					   const char * /* filename   */,
-					   int          /* line       */ );
+                       const char * /* filename   */,
+                       int          /* line       */ );
 
 
 #ifdef NDEBUG
@@ -55,5 +55,7 @@ int fsc2_assert_print( const char * /* expression */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

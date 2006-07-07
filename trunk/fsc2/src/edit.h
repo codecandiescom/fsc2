@@ -29,7 +29,7 @@
 
 
 void edit_file( FL_OBJECT * /* a */,
-				long        /* b */ );
+                long        /* b */ );
 
 
 #endif  /* ! EDIT_HEADER */
@@ -38,5 +38,7 @@ void edit_file( FL_OBJECT * /* a */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

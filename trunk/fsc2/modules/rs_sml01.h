@@ -74,8 +74,8 @@
 #endif /* WITH_PULSE_MODULATION */
 
 struct MOD_RANGES {
-	double upper_limit_freq;
-	double upper_limit;
+    double upper_limit_freq;
+    double upper_limit;
 };
 
 extern struct MOD_RANGES fm_mod_ranges[ ], pm_mod_ranges[ ];
@@ -90,52 +90,52 @@ typedef struct RS_SML01 RS_SML01_T;
 
 
 struct Att_Table_Entry {
-	double freq;
-	double att;
+    double freq;
+    double att;
 };
 
 
 struct RS_SML01 {
-	double freq;
-	bool freq_is_set;
-	double step_freq;
-	bool step_freq_is_set;
-	double start_freq;
-	bool start_freq_is_set;
-	double attenuation;
-	bool attenuation_is_set;
+    double freq;
+    bool freq_is_set;
+    double step_freq;
+    bool step_freq_is_set;
+    double start_freq;
+    bool start_freq_is_set;
+    double attenuation;
+    bool attenuation_is_set;
 
-	bool state;
+    bool state;
 
-	char *table_file;               /* name of attenuation table file */
-	bool use_table;
-	Att_Table_Entry_T *att_table;
-	long att_table_len;
-	double min_table_freq;
-	double max_table_freq;
-	double min_attenuation;
-	double att_ref_freq;
-	double att_at_ref_freq;
-	double real_attenuation;        /* might differ from attenuation due to
-									   use of table */
-	int mod_type;
-	bool mod_type_is_set;
-	int mod_source[ NUM_MOD_TYPES ];
-	bool mod_source_is_set[ NUM_MOD_TYPES ];
-	double mod_freq[ NUM_MOD_TYPES ];
-	bool mod_freq_is_set[ NUM_MOD_TYPES ];
-	double mod_ampl[ NUM_MOD_TYPES ];
-	bool mod_ampl_is_set[ NUM_MOD_TYPES ];
+    char *table_file;               /* name of attenuation table file */
+    bool use_table;
+    Att_Table_Entry_T *att_table;
+    long att_table_len;
+    double min_table_freq;
+    double max_table_freq;
+    double min_attenuation;
+    double att_ref_freq;
+    double att_at_ref_freq;
+    double real_attenuation;        /* might differ from attenuation due to
+                                       use of table */
+    int mod_type;
+    bool mod_type_is_set;
+    int mod_source[ NUM_MOD_TYPES ];
+    bool mod_source_is_set[ NUM_MOD_TYPES ];
+    double mod_freq[ NUM_MOD_TYPES ];
+    bool mod_freq_is_set[ NUM_MOD_TYPES ];
+    double mod_ampl[ NUM_MOD_TYPES ];
+    bool mod_ampl_is_set[ NUM_MOD_TYPES ];
 
 #if defined WITH_PULSE_MODULATION
-	bool pulse_mode_state;            /* pulse mode on/off */
-	bool pulse_mode_state_is_set;
-	bool pulse_trig_slope;
-	bool pulse_trig_slope_is_set;
-	double pulse_width;
-	bool pulse_width_is_set;
-	double pulse_delay;
-	bool pulse_delay_is_set;
+    bool pulse_mode_state;            /* pulse mode on/off */
+    bool pulse_mode_state_is_set;
+    bool pulse_trig_slope;
+    bool pulse_trig_slope_is_set;
+    double pulse_width;
+    bool pulse_width_is_set;
+    double pulse_delay;
+    bool pulse_delay_is_set;
 #endif /* WITH_PULSE_MODULATION */
 };
 
@@ -192,8 +192,8 @@ double rs_sml01_get_att_from_table( double /* freq */ );
 double rs_sml01_get_att( double /* freq */ );
 
 unsigned int rs_sml01_get_mod_param( Var_T ** /* v    */,
-									 double * /* dres */,
-									 int *    /* ires */ );
+                                     double * /* dres */,
+                                     int *    /* ires */ );
 
 void rs_sml01_check_mod_ampl( double /* freq */ );
 
@@ -229,14 +229,14 @@ int rs_sml01_set_mod_type( int /* type */ );
 int rs_sml01_get_mod_type( void );
 
 int rs_sml01_set_mod_source( int    /* type   */,
-							 int    /* source */,
-							 double /* freq   */ );
+                             int    /* source */,
+                             double /* freq   */ );
 
 int rs_sml01_get_mod_source( int      /* type */,
-							 double * /* freq */ );
+                             double * /* freq */ );
 
 double rs_sml01_set_mod_ampl( int    /* type */,
-							  double /* ampl */ );
+                              double /* ampl */ );
 
 double rs_sml01_get_mod_ampl( int /* type */ );
 
@@ -256,5 +256,7 @@ void rs_sml01_set_pulse_delay( double /* delay */ );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

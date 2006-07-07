@@ -59,43 +59,43 @@
 
 
 struct PCI_MIO_16E_1 {
-	int board;
+    int board;
 
-	struct {
-		bool is_busy;
-		bool is_channel_setup;
-		bool is_acq_setup;
-		bool ampl_switch_needed;
-		bool is_acq_running;
-		int num_channels;
-		ssize_t data_per_channel;
-		double *ranges;
-		NI_DAQ_BU_POLARITY *polarities;
-	} ai_state;
+    struct {
+        bool is_busy;
+        bool is_channel_setup;
+        bool is_acq_setup;
+        bool ampl_switch_needed;
+        bool is_acq_running;
+        int num_channels;
+        ssize_t data_per_channel;
+        double *ranges;
+        NI_DAQ_BU_POLARITY *polarities;
+    } ai_state;
 
-	struct {
-		bool is_used[ 2 ];
-		double volts[ 2 ];
-		char *reserved_by[ 2 ] ;
-		NI_DAQ_STATE external_reference[ 2 ];
-		NI_DAQ_BU_POLARITY polarity[ 2 ];
-	} ao_state;
+    struct {
+        bool is_used[ 2 ];
+        double volts[ 2 ];
+        char *reserved_by[ 2 ] ;
+        NI_DAQ_STATE external_reference[ 2 ];
+        NI_DAQ_BU_POLARITY polarity[ 2 ];
+    } ao_state;
 
-	struct {
-		int states[ 2 ];
-	} gpct_state;
+    struct {
+        int states[ 2 ];
+    } gpct_state;
 
-	struct {
-		char *reserved_by;
-	} dio_state;
+    struct {
+        char *reserved_by;
+    } dio_state;
 
-	struct {
-		NI_DAQ_CLOCK_TYPE daq_clock;
-		NI_DAQ_STATE on_off;
-		NI_DAQ_CLOCK_SPEED_VALUE speed;
-		int divider;
-		char *reserved_by;
-	} msc_state;
+    struct {
+        NI_DAQ_CLOCK_TYPE daq_clock;
+        NI_DAQ_STATE on_off;
+        NI_DAQ_CLOCK_SPEED_VALUE speed;
+        int divider;
+        char *reserved_by;
+    } msc_state;
 
 } PCI_MIO_16E_1;
 
@@ -155,15 +155,15 @@ Var_T *daq_single_pulse(             Var_T * /* v */ );
 Var_T *daq_continuous_pulses(        Var_T * /* v */ );
 
 void ni_daq_two_channel_pulses( double /* delay         */,
-								double /* scan_duration */ );
+                                double /* scan_duration */ );
 
 /* Functions from pci_mio_16e_1_util.c */
 
 int pci_mio_16e_1_channel_number( long         /* ch      */,
-								  const char * /* snippet */ );
+                                  const char * /* snippet */ );
 
 double pci_mio_16e_1_check_time( double       /* t       */,
-								 const char * /* snippet */ );
+                                 const char * /* snippet */ );
 
 
 
@@ -173,5 +173,7 @@ double pci_mio_16e_1_check_time( double       /* t       */,
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

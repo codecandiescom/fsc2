@@ -41,22 +41,22 @@
  *----------------------------------------------------------------------*/
 
 int ni_daq_dio_write( int           board,
-					  unsigned char value,
-					  unsigned char mask )
+                      unsigned char value,
+                      unsigned char mask )
 {
-	NI_DAQ_DIO_ARG dio;
-	int ret;
+    NI_DAQ_DIO_ARG dio;
+    int ret;
 
 
-	if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
-		return ret;
+    if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
+        return ret;
 
-	dio.cmd = NI_DAQ_DIO_OUTPUT;
+    dio.cmd = NI_DAQ_DIO_OUTPUT;
     dio.value = value;
     dio.mask = mask;
 
     if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_DIO, &dio ) < 0 )
-		return ni_daq_errno = NI_DAQ_ERR_INT;
+        return ni_daq_errno = NI_DAQ_ERR_INT;
 
     return ni_daq_errno = NI_DAQ_OK;
 }
@@ -66,26 +66,34 @@ int ni_daq_dio_write( int           board,
  *--------------------------------------------------------------------*/
 
 int ni_daq_dio_read( int             board,
-					 unsigned char * value,
-					 unsigned char   mask )
+                     unsigned char * value,
+                     unsigned char   mask )
 {
-	NI_DAQ_DIO_ARG dio;
-	int ret;
+    NI_DAQ_DIO_ARG dio;
+    int ret;
 
 
-	if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
-		return ret;
+    if ( ( ret = ni_daq_basic_check( board ) ) < 0 )
+        return ret;
 
-	if ( value == NULL )
-		return ni_daq_errno = NI_DAQ_ERR_IVA;
+    if ( value == NULL )
+        return ni_daq_errno = NI_DAQ_ERR_IVA;
 
-	dio.cmd = NI_DAQ_DIO_INPUT;
+    dio.cmd = NI_DAQ_DIO_INPUT;
     dio.mask = mask;
 
     if ( ioctl( ni_daq_dev[ board ].fd, NI_DAQ_IOC_DIO, &dio ) < 0 )
-		return ni_daq_errno = NI_DAQ_ERR_INT;
+        return ni_daq_errno = NI_DAQ_ERR_INT;
 
     *value = dio.value;
 
     return ni_daq_errno = NI_DAQ_OK;
 }
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */

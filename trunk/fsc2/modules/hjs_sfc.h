@@ -31,25 +31,25 @@
 
 
 struct HJS_SFC {
-	double B0V;             /* Field for DAC voltage of 0 V */
-	double slope;           /* field step for 1 V DAC voltage increment */
+    double B0V;             /* Field for DAC voltage of 0 V */
+    double slope;           /* field step for 1 V DAC voltage increment */
 
-	bool B0V_has_been_used;
-	bool slope_has_been_used;
+    bool B0V_has_been_used;
+    bool slope_has_been_used;
 
-	double field;			/* the start field given by the user */
-	double field_step;		/* the field steps to be used */
+    double field;           /* the start field given by the user */
+    double field_step;      /* the field steps to be used */
 
-	bool is_field;			/* flag, set if start field is defined */
-	bool is_field_step;		/* flag, set if field step size is defined */
+    bool is_field;          /* flag, set if start field is defined */
+    bool is_field_step;     /* flag, set if field step size is defined */
 
-	char *dac_func;
-	double dac_range;
+    char *dac_func;
+    double dac_range;
 
-	double act_field;		/* used internally */
-	bool is_act_field;
+    double act_field;       /* used internally */
+    bool is_act_field;
 
-	char *calib_file;
+    char *calib_file;
 };
 
 
@@ -83,5 +83,7 @@ void hjs_sfc_read_calibration( void );
  * Local variables:
  * tags-file-name: "../TAGS"
  * End:
+ * tab-width: 4
+ * indent-tabs-mode: nil
  */
 

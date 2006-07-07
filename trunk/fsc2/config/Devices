@@ -21,14 +21,14 @@
   Boston, MA 02111-1307, USA.
 */
 
-/***********************************************************************/
-/* This is the device name data base used by fsc2. To add a new device */
-/* just append its name to this file - the names are case-insensitive  */
-/* (i.e. they are automatically converted to all lower case).          */
-/* If the device is controlled via the GPIB bus it also has to be      */
-/* listed in `/etc/gpib.conf'!                                         */
-/* C and C++ style comments can be used within this file.              */
-/***********************************************************************/
+/***********************************************************************
+ * This is the device name data base used by fsc2. To add a new device
+ * just append its name to this file - the names are case-insensitive
+ * (i.e. they are automatically converted to all lower case).
+ * If the device is controlled via the GPIB bus it also has to be
+ * listed in `/etc/gpib.conf'!
+ * C and C++ style comments can be used within this file.
+ ***********************************************************************/
 
 
 // Pulser
@@ -163,9 +163,17 @@ witio_48
 // Microwave attenuators 
 
 hjs_attenuator           // stepper motor controlled attenuator from the
-						 // group of H.-J. Steinhoff (Osnabrueck)
+                         // group of H.-J. Steinhoff (Osnabrueck)
 
 
 // Choppers
 
 gg_chopper
+
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * indent-tabs-mode: nil
+ * End:
+ */

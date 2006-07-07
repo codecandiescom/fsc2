@@ -27,9 +27,9 @@
 /*****************************************************************/
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap nounput
 
@@ -42,12 +42,12 @@
 
 #define YY_INPUT( buf, result, max_size )                        \
 {                                                                \
-	char c;                                                      \
-	ssize_t count;                                               \
-	while ( ( count = read( fileno( prepsin ), &c, 1 ) ) < 0 &&  \
-			errno == EINTR )                                     \
-		/* empty */ ;                                            \
-	result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );     \
+    char c;                                                      \
+    ssize_t count;                                               \
+    while ( ( count = read( fileno( prepsin ), &c, 1 ) ) < 0 &&  \
+            errno == EINTR )                                     \
+        /* empty */ ;                                            \
+    result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );     \
 }
 
 
@@ -107,7 +107,7 @@ P           P(ULSE)?_?{INT}(#{INT})?
 
 F           F(UNC(TION)?)?
 S           S(TART)?
-L			L(EN(GTH)?)?
+L           L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PC          PH(ASE)?_?C(YCLE)?
@@ -126,47 +126,47 @@ IDENT       [A-Za-z]+[A-Za-z0-9_]*
 FUNC        {IDENT}"#"[0-9]+
 
 
-		/*---------------*/
-%%		/*     Rules     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     Rules     */
+        /*---------------*/
 
 
-			/* Handling of file name lines */
+            /* Handling of file name lines */
 {FILE}      {
-				*( prepstext + prepsleng - 1 ) = '\0';
-				EDL.Fname = CHAR_P T_free( EDL.Fname );
-				EDL.Fname = T_strdup( prepstext + 2 );
-			}
+                *( prepstext + prepsleng - 1 ) = '\0';
+                EDL.Fname = CHAR_P T_free( EDL.Fname );
+                EDL.Fname = T_strdup( prepstext + 2 );
+            }
 
-			/* Handling of line number lines */
-{LNUM}		{
-				*( prepstext + prepsleng - 1 ) = '\0';
-				EDL.Lc = atol( prepstext + 2 );
-			}
+            /* Handling of line number lines */
+{LNUM}      {
+                *( prepstext + prepsleng - 1 ) = '\0';
+                EDL.Lc = atol( prepstext + 2 );
+            }
 
-			/* Handling of error messages from the cleaner */
-{ERR}		{
-				eprint( FATAL, UNSET, "%s\n", prepstext + 2 );
-				THROW( EXCEPTION );
-			}
+            /* Handling of error messages from the cleaner */
+{ERR}       {
+                eprint( FATAL, UNSET, "%s\n", prepstext + 2 );
+                THROW( EXCEPTION );
+            }
 
-{ESTR}		{
-				prepstext = strchr( prepstext, '\x03' );
-				eprint( FATAL, UNSET, "%s\n", prepstext + 2 );
-				THROW( EXCEPTION );
-			}
+{ESTR}      {
+                prepstext = strchr( prepstext, '\x03' );
+                eprint( FATAL, UNSET, "%s\n", prepstext + 2 );
+                THROW( EXCEPTION );
+            }
 
-			/* Handling of DEVICES: labels */
-{DEV}		{
-				Preps_next_section = DEVICES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* Handling of DEVICES: labels */
+{DEV}       {
+                Preps_next_section = DEVICES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* Handling of ASSIGNMENTS: labels */
-{ASS}		{
-				Preps_next_section = ASSIGNMENTS_SECTION;
-				return SECTION_LABEL;
-			}
+            /* Handling of ASSIGNMENTS: labels */
+{ASS}       {
+                Preps_next_section = ASSIGNMENTS_SECTION;
+                return SECTION_LABEL;
+            }
 
 "=="        return EQ;        /* equal */
 "!="        return NE;        /* unequal */
@@ -202,28 +202,28 @@ FUNC        {IDENT}"#"[0-9]+
 "^="        return EXPA;
 "?"         return '?';
 ":"         return ':';
-";"			return ';';       /* end of statement character */
+";"         return ';';       /* end of statement character */
 
-			/* Handling of VARIABLES: labels */
-{VAR}		{
-				Preps_next_section = VARIABLES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* Handling of VARIABLES: labels */
+{VAR}       {
+                Preps_next_section = VARIABLES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* Handling of PHASES: labels */
-{PHAS}		{
-				Preps_next_section = PHASES_SECTION;
-				return SECTION_LABEL;
-			}
+            /* Handling of PHASES: labels */
+{PHAS}      {
+                Preps_next_section = PHASES_SECTION;
+                return SECTION_LABEL;
+            }
 
-			/* Handling of EXPERIMENT: labels */
-{EXP}		{
-				Preps_next_section = EXPERIMENT_SECTION;
-				return SECTION_LABEL;
-			}
+            /* Handling of EXPERIMENT: labels */
+{EXP}       {
+                Preps_next_section = EXPERIMENT_SECTION;
+                return SECTION_LABEL;
+            }
 
 {INT}/[^_a-zA-Z] {
-				prepslval.lval = T_atol( prepstext );
+                prepslval.lval = T_atol( prepstext );
                 return INT_TOKEN;
             }
 
@@ -233,155 +233,155 @@ FUNC        {IDENT}"#"[0-9]+
             }
 
             /* Handling of string constants (to be used as format strings in
-			   the print() function */
+               the print() function */
 {STR}       {
-				prepstext[ prepsleng - 1 ] = '\0';
-				prepslval.sptr = prepstext + 1;
-				return STR_TOKEN;
-			}
+                prepstext[ prepsleng - 1 ] = '\0';
+                prepslval.sptr = prepstext + 1;
+                return STR_TOKEN;
+            }
 
-			/* all pulse related keywords... */
+            /* all pulse related keywords... */
 
 {F}         return F_TOK;
-{S}			return S_TOK;
-{L}			return L_TOK;
+{S}         return S_TOK;
+{L}         return L_TOK;
 {DS}        return DS_TOK;
 {DL}        return DL_TOK;
 {PC}        return PC_TOK;
 
-			/* Combinations of pulse and property, e.g. 'P3.LEN' */
+            /* Combinations of pulse and property, e.g. 'P3.LEN' */
 
 {P}"."{F}   {
-				prepslval.vptr = p_get( prepstext, P_FUNC );
-				return VAR_REF;
+                prepslval.vptr = p_get( prepstext, P_FUNC );
+                return VAR_REF;
             }
 
 {P}"."{S}   {
-				prepslval.vptr = p_get( prepstext, P_POS );
-				return VAR_REF;
+                prepslval.vptr = p_get( prepstext, P_POS );
+                return VAR_REF;
             }
 
 {P}"."{L}   {
-				prepslval.vptr = p_get( prepstext, P_LEN );
-				return VAR_REF;
+                prepslval.vptr = p_get( prepstext, P_LEN );
+                return VAR_REF;
             }
 
 {P}"."{DS}  {
-				prepslval.vptr = p_get( prepstext, P_DPOS );
-				return VAR_REF;
+                prepslval.vptr = p_get( prepstext, P_DPOS );
+                return VAR_REF;
             }
 
 {P}"."{DL}  {
-				prepslval.vptr = p_get( prepstext, P_DLEN );
-				return VAR_REF;
+                prepslval.vptr = p_get( prepstext, P_DLEN );
+                return VAR_REF;
             }
 
 {P}"."{PC}  {
-				prepslval.vptr = p_get( prepstext, P_PHASE );
-				return VAR_REF;
+                prepslval.vptr = p_get( prepstext, P_PHASE );
+                return VAR_REF;
             }
 
 {P}(":")    {
-				char *t;
+                char *t;
 
-				Cur_Pulser = 0;
-				if ( ( t = strrchr( prepstext, '#' ) ) != NULL )
-				{
-					if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >=
+                Cur_Pulser = 0;
+                if ( ( t = strrchr( prepstext, '#' ) ) != NULL )
+                {
+                    if ( ( Cur_Pulser = T_atol( t + 1 ) - 1 ) >=
                          EDL.Num_Pulsers || Cur_Pulser < 0 )
-					{
-						print( FATAL, "There is no pulser #%ld\n",
-							   Cur_Pulser + 1 );
-						THROW( EXCEPTION );
-					}
+                    {
+                        print( FATAL, "There is no pulser #%ld\n",
+                               Cur_Pulser + 1 );
+                        THROW( EXCEPTION );
+                    }
 
-					*t = '\0';
-				}
+                    *t = '\0';
+                }
 
-			    EDL.Cur_Pulse = p_new( p_num( prepstext ) );
-				return P_TOK;
-			}
+                EDL.Cur_Pulse = p_new( p_num( prepstext ) );
+                return P_TOK;
+            }
 
-{PS}		{   /* Phase sequence */
-				long val = 0;
-				char *cp = prepstext + prepsleng - 1;
+{PS}        {   /* Phase sequence */
+                long val = 0;
+                char *cp = prepstext + prepsleng - 1;
 
-				/* determine number of phase sequence */
+                /* determine number of phase sequence */
 
-				if ( isdigit( ( unsigned char ) *cp ) )
-				{
-					while ( isdigit( ( unsigned char ) *cp ) )
-						cp--;
-					val = T_atol( ++cp );
-				}
+                if ( isdigit( ( unsigned char ) *cp ) )
+                {
+                    while ( isdigit( ( unsigned char ) *cp ) )
+                        cp--;
+                    val = T_atol( ++cp );
+                }
 
-				prepslval.vptr = vars_push( INT_VAR, val );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, val );
+                return VAR_REF;
+            }
 
 {MW}        {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_MW );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_MW );
+                return VAR_REF;
+            }
 {TWT}       {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT );
+                return VAR_REF;
+            }
 {TWT_GATE}  {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT_GATE );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT_GATE );
+                return VAR_REF;
+            }
 {DET}       {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET );
+                return VAR_REF;
+            }
 {DET_GATE}  {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET_GATE );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET_GATE );
+                return VAR_REF;
+            }
 {DEF}       {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DEFENSE );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DEFENSE );
+                return VAR_REF;
+            }
 {RF}        {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF );
+                return VAR_REF;
+            }
 {RF_GATE}   {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF_GATE );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF_GATE );
+                return VAR_REF;
+            }
 
 {LSR}       {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_LASER );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_LASER );
+                return VAR_REF;
+            }
 
 {PSH}       {
-				prepslval.vptr = vars_push( INT_VAR,
-											PULSER_CHANNEL_PULSE_SHAPE );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR,
+                                            PULSER_CHANNEL_PULSE_SHAPE );
+                return VAR_REF;
+            }
 
 {OI}        {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_1 );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_1 );
+                return VAR_REF;
+            }
 
 {OII}        {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_2 );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_2 );
+                return VAR_REF;
+            }
 
 {OIII}      {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_3 );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_3 );
+                return VAR_REF;
+            }
 
 {OIV}       {
-				prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_4 );
-				return VAR_REF;
-			}
+                prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_OTHER_4 );
+                return VAR_REF;
+            }
 
 
 {CHT}       {
@@ -390,90 +390,90 @@ FUNC        {IDENT}"#"[0-9]+
             }
 
 {DIO}       {
-				prepslval.lval = T_atol( prepstext + 3 );
+                prepslval.lval = T_atol( prepstext + 3 );
                 return INT_TOKEN;
             }
 
 {CTRL}      {
-				print( FATAL, "Flow control structures can't be used in the "
-						"PREPARATIONS section.\n" );
-				THROW( EXCEPTION );
-			}
+                print( FATAL, "Flow control structures can't be used in the "
+                        "PREPARATIONS section.\n" );
+                THROW( EXCEPTION );
+            }
 
-			/* Handling of function, variable and array identifiers */
+            /* Handling of function, variable and array identifiers */
 {FUNC}      {
-				char *t;
-				int acc;
+                char *t;
+                int acc;
 
-				t = strrchr( prepstext, '#' );
+                t = strrchr( prepstext, '#' );
                 if ( t != NULL && ! strcmp( t, "#1" ) )
                     *t = '\0';
 
-				prepslval.vptr = func_get( prepstext, &acc );
-				if ( prepslval.vptr != NULL )
-				{
-					if ( acc == ACCESS_EXP )
-					{
-						print( FATAL, "Function '%s' can only be used in the "
-							   "EXPERIMENT section.\n", prepstext );
-						THROW( EXCEPTION );
-					}
-					return FUNC_TOKEN;
-				}
+                prepslval.vptr = func_get( prepstext, &acc );
+                if ( prepslval.vptr != NULL )
+                {
+                    if ( acc == ACCESS_EXP )
+                    {
+                        print( FATAL, "Function '%s' can only be used in the "
+                               "EXPERIMENT section.\n", prepstext );
+                        THROW( EXCEPTION );
+                    }
+                    return FUNC_TOKEN;
+                }
                 else
                 {
                     print( FATAL, "Function '%s' is not loaded.\n",
-						   prepstext );
-					THROW( EXCEPTION );
+                           prepstext );
+                    THROW( EXCEPTION );
                 }
             }
 
 {IDENT}     {
-				int acc;
+                int acc;
 
-				/* First check if the identifier is a function name */
+                /* First check if the identifier is a function name */
 
-				prepslval.vptr = func_get( prepstext, &acc );
-				if ( prepslval.vptr != NULL )
-				{
-					if ( acc == ACCESS_EXP )
-					{
-						print( FATAL, "Function '%s' can only be used in the "
-							   "EXPERIMENT section.\n", prepstext );
-						THROW( EXCEPTION );
-					}
-					return FUNC_TOKEN;
-				}
+                prepslval.vptr = func_get( prepstext, &acc );
+                if ( prepslval.vptr != NULL )
+                {
+                    if ( acc == ACCESS_EXP )
+                    {
+                        print( FATAL, "Function '%s' can only be used in the "
+                               "EXPERIMENT section.\n", prepstext );
+                        THROW( EXCEPTION );
+                    }
+                    return FUNC_TOKEN;
+                }
 
-				/* If it's not a function it should be a variable */
+                /* If it's not a function it should be a variable */
 
-				if ( ( prepslval.vptr = vars_get( prepstext ) ) == NULL )
-				{
-					print( FATAL, "Variable or function '%s' has not been "
-						   "declared or loaded.\n", prepstext );
-					THROW( EXCEPTION );
-				}
+                if ( ( prepslval.vptr = vars_get( prepstext ) ) == NULL )
+                {
+                    print( FATAL, "Variable or function '%s' has not been "
+                           "declared or loaded.\n", prepstext );
+                    THROW( EXCEPTION );
+                }
 
-				return VAR_TOKEN;
-			}
+                return VAR_TOKEN;
+            }
 
 {WS}        /* Skip white space */
 
-			/* Handling of invalid input */
+            /* Handling of invalid input */
 .           {
-				print( FATAL, "Invalid input near '%s'.\n", prepstext );
-				THROW( EXCEPTION );
-			}
+                print( FATAL, "Invalid input near '%s'.\n", prepstext );
+                THROW( EXCEPTION );
+            }
 
-<<EOF>>	    {
-				Preps_next_section = NO_SECTION;
-				return 0;
-			}
+<<EOF>>     {
+                Preps_next_section = NO_SECTION;
+                return 0;
+            }
 
 
-		/*----------------------*/
-%%		/*     End of Rules     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     End of Rules     */
+        /*----------------------*/
 
 
 /*-------------------------------------------*
@@ -481,36 +481,38 @@ FUNC        {IDENT}"#"[0-9]+
 
 int preparations_parser( FILE * in )
 {
-	static bool needs_restart = UNSET;
+    static bool needs_restart = UNSET;
 
 
-	if ( EDL.compilation.sections[ PREPARATIONS_SECTION ] )
-	{
-		print( FATAL, "Multiple instances of PREPARATIONS section label.\n" );
-		THROW( EXCEPTION );
-	}
-	EDL.compilation.sections[ PREPARATIONS_SECTION ] = SET;
+    if ( EDL.compilation.sections[ PREPARATIONS_SECTION ] )
+    {
+        print( FATAL, "Multiple instances of PREPARATIONS section label.\n" );
+        THROW( EXCEPTION );
+    }
+    EDL.compilation.sections[ PREPARATIONS_SECTION ] = SET;
 
-	EDL.Cur_Pulse = -1;
-	prepsin = in;
+    EDL.Cur_Pulse = -1;
+    prepsin = in;
 
-	/* Keep the lexer happy... */
+    /* Keep the lexer happy... */
 
-	if ( needs_restart )
-	    prepsrestart( prepsin );
-	else
-		 needs_restart = SET;
+    if ( needs_restart )
+        prepsrestart( prepsin );
+    else
+         needs_restart = SET;
 
-	prepsparser_init( );
+    prepsparser_init( );
 
-	prepsparse( );
+    prepsparse( );
 
-	return Preps_next_section;
+    return Preps_next_section;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

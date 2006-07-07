@@ -44,312 +44,312 @@ extern "C" {
 
 
 typedef enum {
-	NI_DAQ_NO_SUBSYSTEM    = -1,
-	NI_DAQ_AI_SUBSYSTEM    =  0,
-	NI_DAQ_AO_SUBSYSTEM    =  1,
-	NI_DAQ_GPCT0_SUBSYSTEM =  2,
-	NI_DAQ_GPCT1_SUBSYSTEM =  3
+        NI_DAQ_NO_SUBSYSTEM    = -1,
+        NI_DAQ_AI_SUBSYSTEM    =  0,
+        NI_DAQ_AO_SUBSYSTEM    =  1,
+        NI_DAQ_GPCT0_SUBSYSTEM =  2,
+        NI_DAQ_GPCT1_SUBSYSTEM =  3
 } NI_DAQ_SUBSYSTEM;
 
 
 typedef enum {
-	NI_DAQ_PFI_UNUSED = -1,
-	NI_DAQ_PFI_INPUT  =  0,
-	NI_DAQ_PFI_OUTPUT =  1
+        NI_DAQ_PFI_UNUSED = -1,
+        NI_DAQ_PFI_INPUT  =  0,
+        NI_DAQ_PFI_OUTPUT =  1
 } NI_DAQ_PFI_STATE;
 
 
 typedef enum {
-	NI_DAQ_INVALID_INPUT   = -1,
-	NI_DAQ_IN_TIMEBASE1    =  0,
-	NI_DAQ_AI_START1_Pulse =  0,
-	NI_DAQ_SI_TC           =  0,
-	NI_DAQ_SI2_TC          =  0,
-	NI_DAQ_SAME_AS_SI      =  0,
-	NI_DAQ_DIV_TC          =  0,
-	NI_DAQ_AI_IN_TIMEBASE1 =  0,
-	NI_DAQ_AO_IN_TIMEBASE1 =  0,
-	NI_DAQ_G_IN_TIMEBASE1  =  0,
-	NI_DAQ_PFI0            =  1,
-	NI_DAQ_TRIG1           =  1,
-	NI_DAQ_PFI1            =  2,
-	NI_DAQ_TRIG2           =  2,
-	NI_DAQ_PFI2            =  3,
-	NI_DAQ_CONVERT         =  3,
-	NI_DAQ_PFI3            =  4,
-	NI_DAQ_GPCTR1_SOURCE   =  4,
-	NI_DAQ_PFI4            =  5,
-	NI_DAQ_GPCTR1_GATE     =  5,
-	NI_DAQ_PFI5            =  6,
-	NI_DAQ_UPDATE          =  6,
-	NI_DAQ_PFI6            =  7,
-	NI_DAQ_WFTTRIG         =  7,
-	NI_DAQ_PFI7            =  8,
-	NI_DAQ_STARTSCAN       =  8,
-	NI_DAQ_PFI8            =  9,
-	NI_DAQ_GPCTR0_SOURCE   =  9,
-	NI_DAQ_PFI9            = 10,
-	NI_DAQ_GPCTR0_GATE     = 10,
-	NI_DAQ_RTSI_0          = 11,
-	NI_DAQ_RTSI_1          = 12,
-	NI_DAQ_RTSI_2          = 13,
-	NI_DAQ_RTSI_3          = 14,
-	NI_DAQ_RTSI_4          = 15,
-	NI_DAQ_RTSI_5          = 16,
-	NI_DAQ_RTSI_6          = 17,
-	NI_DAQ_START2          = 18,
-	NI_DAQ_AI_START_Pulse  = 18,
-	NI_DAQ_SOURCE_TC_OTHER = 19,
-	NI_DAQ_UI2_TC          = 19,
-	NI_DAQ_GOUT_0          = 19,
-	NI_DAQ_G_TC_OTHER      = 19,
-	NI_DAQ_START1          = 21,
-	NI_DAQ_LOW             = 31,
-	NI_DAQ_IN_TIMEBASE2    = 44,
-	NI_DAQ_NONE            = 55,
-	NI_DAQ_ALL             = 66,
-	NI_DAQ_NOW             = 77,
-	NI_DAQ_INTERNAL        = 88
+        NI_DAQ_INVALID_INPUT   = -1,
+        NI_DAQ_IN_TIMEBASE1    =  0,
+        NI_DAQ_AI_START1_Pulse =  0,
+        NI_DAQ_SI_TC           =  0,
+        NI_DAQ_SI2_TC          =  0,
+        NI_DAQ_SAME_AS_SI      =  0,
+        NI_DAQ_DIV_TC          =  0,
+        NI_DAQ_AI_IN_TIMEBASE1 =  0,
+        NI_DAQ_AO_IN_TIMEBASE1 =  0,
+        NI_DAQ_G_IN_TIMEBASE1  =  0,
+        NI_DAQ_PFI0            =  1,
+        NI_DAQ_TRIG1           =  1,
+        NI_DAQ_PFI1            =  2,
+        NI_DAQ_TRIG2           =  2,
+        NI_DAQ_PFI2            =  3,
+        NI_DAQ_CONVERT         =  3,
+        NI_DAQ_PFI3            =  4,
+        NI_DAQ_GPCTR1_SOURCE   =  4,
+        NI_DAQ_PFI4            =  5,
+        NI_DAQ_GPCTR1_GATE     =  5,
+        NI_DAQ_PFI5            =  6,
+        NI_DAQ_UPDATE          =  6,
+        NI_DAQ_PFI6            =  7,
+        NI_DAQ_WFTTRIG         =  7,
+        NI_DAQ_PFI7            =  8,
+        NI_DAQ_STARTSCAN       =  8,
+        NI_DAQ_PFI8            =  9,
+        NI_DAQ_GPCTR0_SOURCE   =  9,
+        NI_DAQ_PFI9            = 10,
+        NI_DAQ_GPCTR0_GATE     = 10,
+        NI_DAQ_RTSI_0          = 11,
+        NI_DAQ_RTSI_1          = 12,
+        NI_DAQ_RTSI_2          = 13,
+        NI_DAQ_RTSI_3          = 14,
+        NI_DAQ_RTSI_4          = 15,
+        NI_DAQ_RTSI_5          = 16,
+        NI_DAQ_RTSI_6          = 17,
+        NI_DAQ_START2          = 18,
+        NI_DAQ_AI_START_Pulse  = 18,
+        NI_DAQ_SOURCE_TC_OTHER = 19,
+        NI_DAQ_UI2_TC          = 19,
+        NI_DAQ_GOUT_0          = 19,
+        NI_DAQ_G_TC_OTHER      = 19,
+        NI_DAQ_START1          = 21,
+        NI_DAQ_LOW             = 31,
+        NI_DAQ_IN_TIMEBASE2    = 44,
+        NI_DAQ_NONE            = 55,
+        NI_DAQ_ALL             = 66,
+        NI_DAQ_NOW             = 77,
+        NI_DAQ_INTERNAL        = 88
 } NI_DAQ_INPUT;
 
 
 typedef enum {
-	NI_DAQ_NORMAL,
-	NI_DAQ_INVERTED
+        NI_DAQ_NORMAL,
+        NI_DAQ_INVERTED
 } NI_DAQ_POLARITY;
 
 
 typedef enum {
-	NI_DAQ_LEVEL,
-	NI_DAQ_EDGE
+        NI_DAQ_LEVEL,
+        NI_DAQ_EDGE
 } NI_DAQ_TRIGGER_MODE;
 
 
 typedef enum {
-	NI_DAQ_DISABLED,
-	NI_DAQ_ENABLED
+        NI_DAQ_DISABLED,
+        NI_DAQ_ENABLED
 } NI_DAQ_STATE;
 
 
 typedef enum {
-	NI_DAQ_FULL_SPEED,
-	NI_DAQ_HALF_SPEED
+        NI_DAQ_FULL_SPEED,
+        NI_DAQ_HALF_SPEED
 } NI_DAQ_CLOCK_SPEED_VALUE;
 
 
 typedef enum {
-	NI_DAQ_FAST_CLOCK,
-	NI_DAQ_SLOW_CLOCK
+        NI_DAQ_FAST_CLOCK,
+        NI_DAQ_SLOW_CLOCK
 } NI_DAQ_CLOCK_TYPE;
 
 
 typedef enum {
-	NI_DAQ_DIO_INPUT,
-	NI_DAQ_DIO_OUTPUT
+        NI_DAQ_DIO_INPUT,
+        NI_DAQ_DIO_OUTPUT
 } NI_DAQ_DIO_CMD;
 
 
 typedef struct {
-	NI_DAQ_DIO_CMD cmd;
-	unsigned char value;
-	unsigned char mask;
+        NI_DAQ_DIO_CMD cmd;
+        unsigned char value;
+        unsigned char mask;
 } NI_DAQ_DIO_ARG;
 
 
 typedef enum {
-	NI_DAQ_GPCT_SET_CLOCK_SPEED,
-	NI_DAQ_GPCT_GET_CLOCK_SPEED,
-	NI_DAQ_GPCT_COUNTER_OUTPUT_STATE,
-	NI_DAQ_GPCT_START_COUNTER,
-	NI_DAQ_GPCT_START_PULSER,
-	NI_DAQ_GPCT_ARM,
-	NI_DAQ_GPCT_GET_COUNT,
-	NI_DAQ_GPCT_DISARM_COUNTER,
-	NI_DAQ_GPCT_IS_BUSY
+        NI_DAQ_GPCT_SET_CLOCK_SPEED,
+        NI_DAQ_GPCT_GET_CLOCK_SPEED,
+        NI_DAQ_GPCT_COUNTER_OUTPUT_STATE,
+        NI_DAQ_GPCT_START_COUNTER,
+        NI_DAQ_GPCT_START_PULSER,
+        NI_DAQ_GPCT_ARM,
+        NI_DAQ_GPCT_GET_COUNT,
+        NI_DAQ_GPCT_DISARM_COUNTER,
+        NI_DAQ_GPCT_IS_BUSY
 } NI_DAQ_GPCT_CMD;
 
 
 typedef struct {
-	NI_DAQ_GPCT_CMD cmd;
+        NI_DAQ_GPCT_CMD cmd;
 
-	unsigned int counter;
-	NI_DAQ_STATE output_state;
+        unsigned int counter;
+        NI_DAQ_STATE output_state;
 
-	unsigned long low_ticks;
-	unsigned long high_ticks;
-	unsigned long delay_ticks;
+        unsigned long low_ticks;
+        unsigned long high_ticks;
+        unsigned long delay_ticks;
 
-	NI_DAQ_INPUT gate;
-	NI_DAQ_INPUT source;
+        NI_DAQ_INPUT gate;
+        NI_DAQ_INPUT source;
 
-	NI_DAQ_POLARITY output_polarity;
-	NI_DAQ_POLARITY source_polarity;
-	NI_DAQ_POLARITY gate_polarity;
+        NI_DAQ_POLARITY output_polarity;
+        NI_DAQ_POLARITY source_polarity;
+        NI_DAQ_POLARITY gate_polarity;
 
-	int continuous;
-	int delay_start;
-	int wait_for_end;
-	unsigned long count;
+        int continuous;
+        int delay_start;
+        int wait_for_end;
+        unsigned long count;
 
-	NI_DAQ_CLOCK_SPEED_VALUE speed;
+        NI_DAQ_CLOCK_SPEED_VALUE speed;
 
-	int is_armed;
+        int is_armed;
 } NI_DAQ_GPCT_ARG;
 
 
 typedef enum {
-	NI_DAQ_MSC_BOARD_PROPERTIES,
-	NI_DAQ_MSC_SET_CLOCK_SPEED,
-	NI_DAQ_MSC_CLOCK_OUTPUT,
-	NI_DAQ_MSC_GET_CLOCK,
-	NI_DAQ_MSC_TRIGGER_STATE
+        NI_DAQ_MSC_BOARD_PROPERTIES,
+        NI_DAQ_MSC_SET_CLOCK_SPEED,
+        NI_DAQ_MSC_CLOCK_OUTPUT,
+        NI_DAQ_MSC_GET_CLOCK,
+        NI_DAQ_MSC_TRIGGER_STATE
 } NI_DAQ_MSC_CMD;
 
 
 typedef struct {
-	char name[ 20 ];
+        char name[ 20 ];
 
-	int num_ai_channels;
-	int num_ai_bits;
-	int num_ai_ranges;
-	int ai_mV_ranges[ 2 ][ 8 ];
-	unsigned long ai_time_res;
+        int num_ai_channels;
+        int num_ai_bits;
+        int num_ai_ranges;
+        int ai_mV_ranges[ 2 ][ 8 ];
+        unsigned long ai_time_res;
 
-	int num_ao_channels;
-	int num_ao_bits;
-	int ao_does_unipolar;
-	int ao_has_ext_ref;
+        int num_ao_channels;
+        int num_ao_bits;
+        int ao_does_unipolar;
+        int ao_has_ext_ref;
 
-	int has_analog_trig;
-	int atrig_bits;
+        int has_analog_trig;
+        int atrig_bits;
 } NI_DAQ_BOARD_PROPERTIES;
 
 
 typedef enum {
-	NI_DAQ_TRIG_LOW_WINDOW = 0,
-	NI_DAQ_TRIG_HIGH_WINDOW = 1,
-	NI_DAQ_TRIG_MIDDLE_WINDOW = 2,
-	NI_DAQ_TRIG_HIGH_HYSTERESIS = 4,
-	NI_DAQ_TRIG_LOW_HYSTERESIS = 6,
-	NI_DAQ_TRIG_TTL = 8
+        NI_DAQ_TRIG_LOW_WINDOW = 0,
+        NI_DAQ_TRIG_HIGH_WINDOW = 1,
+        NI_DAQ_TRIG_MIDDLE_WINDOW = 2,
+        NI_DAQ_TRIG_HIGH_HYSTERESIS = 4,
+        NI_DAQ_TRIG_LOW_HYSTERESIS = 6,
+        NI_DAQ_TRIG_TTL = 8
 } NI_DAQ_TRIG_TYPE;
 
 
 typedef struct {
-	NI_DAQ_MSC_CMD cmd;
-	NI_DAQ_CLOCK_TYPE clock;
-	NI_DAQ_STATE output_state;
-	NI_DAQ_CLOCK_SPEED_VALUE speed;
-	unsigned int divider;
-	NI_DAQ_TRIG_TYPE trigger_type;
-	int trigger_low;
-	int trigger_high;
-	NI_DAQ_BOARD_PROPERTIES *properties;
+        NI_DAQ_MSC_CMD cmd;
+        NI_DAQ_CLOCK_TYPE clock;
+        NI_DAQ_STATE output_state;
+        NI_DAQ_CLOCK_SPEED_VALUE speed;
+        unsigned int divider;
+        NI_DAQ_TRIG_TYPE trigger_type;
+        int trigger_low;
+        int trigger_high;
+        NI_DAQ_BOARD_PROPERTIES *properties;
 } NI_DAQ_MSC_ARG;
 
 
 typedef enum {
-	NI_DAQ_AI_SET_CLOCK_SPEED,
-	NI_DAQ_AI_GET_CLOCK_SPEED,
-	NI_DAQ_AI_CHANNEL_SETUP,
-	NI_DAQ_AI_ACQ_SETUP,
-	NI_DAQ_AI_ACQ_START,
-	NI_DAQ_AI_ACQ_WAIT,
-	NI_DAQ_AI_ACQ_STOP
+        NI_DAQ_AI_SET_CLOCK_SPEED,
+        NI_DAQ_AI_GET_CLOCK_SPEED,
+        NI_DAQ_AI_CHANNEL_SETUP,
+        NI_DAQ_AI_ACQ_SETUP,
+        NI_DAQ_AI_ACQ_START,
+        NI_DAQ_AI_ACQ_WAIT,
+        NI_DAQ_AI_ACQ_STOP
 } NI_DAQ_AI_CMD;
 
 
 typedef enum {
-	NI_DAQ_AI_TYPE_UNASSIGNED = -1,
-	NI_DAQ_AI_TYPE_Calibration = 0,
-	NI_DAQ_AI_TYPE_Differential = 1,
-	NI_DAQ_AI_TYPE_NRSE = 2,
-	NI_DAQ_AI_TYPE_RSE = 3,
-	NI_DAQ_AI_TYPE_Aux = 5,
-	NI_DAQ_AI_TYPE_Ghost = 7
+        NI_DAQ_AI_TYPE_UNASSIGNED = -1,
+        NI_DAQ_AI_TYPE_Calibration = 0,
+        NI_DAQ_AI_TYPE_Differential = 1,
+        NI_DAQ_AI_TYPE_NRSE = 2,
+        NI_DAQ_AI_TYPE_RSE = 3,
+        NI_DAQ_AI_TYPE_Aux = 5,
+        NI_DAQ_AI_TYPE_Ghost = 7
 } NI_DAQ_AI_TYPE;
 
 
 typedef enum {
-	NI_DAQ_GAIN_NOT_AVAIL = -1,
-	NI_DAQ_GAIN_0_5 = 0,              /* divide by 2              */
-	NI_DAQ_GAIN_1   = 1,		  /* no amplification         */
-	NI_DAQ_GAIN_2   = 2,		  /* amplify by factor of 2   */
-	NI_DAQ_GAIN_5   = 3,		  /* amplify by factor of 5   */
-	NI_DAQ_GAIN_10  = 4,		  /* amplify by factor of 10  */
-	NI_DAQ_GAIN_20  = 5,		  /* amplify by factor of 20  */
-	NI_DAQ_GAIN_50  = 6,		  /* amplify by factor of 50  */
-	NI_DAQ_GAIN_100 = 7		  /* amplify by factor of 100 */
+        NI_DAQ_GAIN_NOT_AVAIL = -1,
+        NI_DAQ_GAIN_0_5 = 0,              /* divide by 2              */
+        NI_DAQ_GAIN_1   = 1,              /* no amplification         */
+        NI_DAQ_GAIN_2   = 2,              /* amplify by factor of 2   */
+        NI_DAQ_GAIN_5   = 3,              /* amplify by factor of 5   */
+        NI_DAQ_GAIN_10  = 4,              /* amplify by factor of 10  */
+        NI_DAQ_GAIN_20  = 5,              /* amplify by factor of 20  */
+        NI_DAQ_GAIN_50  = 6,              /* amplify by factor of 50  */
+        NI_DAQ_GAIN_100 = 7               /* amplify by factor of 100 */
 } NI_DAQ_AI_GAIN_TYPES;
 
 
 typedef enum {
-	NI_DAQ_BIPOLAR,
-	NI_DAQ_UNIPOLAR
+        NI_DAQ_BIPOLAR,
+        NI_DAQ_UNIPOLAR
 } NI_DAQ_BU_POLARITY;
 
 
 typedef struct {
-	unsigned int channel;
-	NI_DAQ_AI_TYPE channel_type;
-	NI_DAQ_STATE generate_trigger;
-	NI_DAQ_STATE dither_enable;
-	NI_DAQ_BU_POLARITY polarity;
-	NI_DAQ_AI_GAIN_TYPES gain;
+        unsigned int channel;
+        NI_DAQ_AI_TYPE channel_type;
+        NI_DAQ_STATE generate_trigger;
+        NI_DAQ_STATE dither_enable;
+        NI_DAQ_BU_POLARITY polarity;
+        NI_DAQ_AI_GAIN_TYPES gain;
 } NI_DAQ_AI_CHANNEL_ARGS;
-		
+                
 
 typedef struct {
-	NI_DAQ_INPUT START_source;
-	NI_DAQ_INPUT START1_source;
-	NI_DAQ_INPUT CONVERT_source;
-	NI_DAQ_INPUT SI_source;
-	NI_DAQ_INPUT SI2_source;
-	
-	NI_DAQ_POLARITY START_polarity;
-	NI_DAQ_POLARITY START1_polarity;
-	NI_DAQ_POLARITY CONVERT_polarity;
-	NI_DAQ_POLARITY SI_polarity;
+        NI_DAQ_INPUT START_source;
+        NI_DAQ_INPUT START1_source;
+        NI_DAQ_INPUT CONVERT_source;
+        NI_DAQ_INPUT SI_source;
+        NI_DAQ_INPUT SI2_source;
+        
+        NI_DAQ_POLARITY START_polarity;
+        NI_DAQ_POLARITY START1_polarity;
+        NI_DAQ_POLARITY CONVERT_polarity;
+        NI_DAQ_POLARITY SI_polarity;
 
-	unsigned long SI_start_delay;
-	unsigned long SI_stepping;
+        unsigned long SI_start_delay;
+        unsigned long SI_stepping;
 
-	unsigned int SI2_start_delay;
-	unsigned int SI2_stepping;
+        unsigned int SI2_start_delay;
+        unsigned int SI2_stepping;
 
-	unsigned long num_scans;
+        unsigned long num_scans;
 } NI_DAQ_ACQ_SETUP;
 
 
 typedef struct {
-	NI_DAQ_AI_CMD cmd;
-	NI_DAQ_CLOCK_SPEED_VALUE speed;
-	unsigned int num_channels;
-	NI_DAQ_AI_CHANNEL_ARGS *channel_args;
-	NI_DAQ_ACQ_SETUP *acq_args;
-	size_t num_points;
+        NI_DAQ_AI_CMD cmd;
+        NI_DAQ_CLOCK_SPEED_VALUE speed;
+        unsigned int num_channels;
+        NI_DAQ_AI_CHANNEL_ARGS *channel_args;
+        NI_DAQ_ACQ_SETUP *acq_args;
+        size_t num_points;
 } NI_DAQ_AI_ARG;
 
 
 typedef struct {
-	NI_DAQ_STATE ground_ref;
-	NI_DAQ_STATE external_ref;
-	NI_DAQ_STATE reglitch;
-	NI_DAQ_BU_POLARITY polarity;
+        NI_DAQ_STATE ground_ref;
+        NI_DAQ_STATE external_ref;
+        NI_DAQ_STATE reglitch;
+        NI_DAQ_BU_POLARITY polarity;
 } NI_DAQ_AO_CHANNEL_ARGS;
 
 
 typedef enum {
-	NI_DAQ_AO_CHANNEL_SETUP,
-	NI_DAQ_AO_DIRECT_OUTPUT
+        NI_DAQ_AO_CHANNEL_SETUP,
+        NI_DAQ_AO_DIRECT_OUTPUT
 } NI_DAQ_AO_CMD;
 
 
 typedef struct {
-	NI_DAQ_AO_CMD cmd;
-	unsigned int channel;
-	NI_DAQ_AO_CHANNEL_ARGS *channel_args;
-	int value;
+        NI_DAQ_AO_CMD cmd;
+        unsigned int channel;
+        NI_DAQ_AO_CHANNEL_ARGS *channel_args;
+        int value;
 } NI_DAQ_AO_ARG;
 
 

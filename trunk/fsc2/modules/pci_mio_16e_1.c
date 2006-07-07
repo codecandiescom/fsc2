@@ -36,38 +36,38 @@ struct PCI_MIO_16E_1 pci_mio_16e_1, pci_mio_16e_1_stored;
 
 int pci_mio_16e_1_init_hook( void )
 {
-	int i;
+    int i;
 
 
-	pci_mio_16e_1.board = -1;
+    pci_mio_16e_1.board = -1;
 
-	pci_mio_16e_1.ai_state.is_busy = UNSET;
-	pci_mio_16e_1.ai_state.is_channel_setup = UNSET;
-	pci_mio_16e_1.ai_state.is_acq_setup = UNSET;
-	pci_mio_16e_1.ai_state.num_channels = 0;
-	pci_mio_16e_1.ai_state.data_per_channel = 0;
-	pci_mio_16e_1.ai_state.ranges = NULL;
-	pci_mio_16e_1.ai_state.polarities = NULL;
+    pci_mio_16e_1.ai_state.is_busy = UNSET;
+    pci_mio_16e_1.ai_state.is_channel_setup = UNSET;
+    pci_mio_16e_1.ai_state.is_acq_setup = UNSET;
+    pci_mio_16e_1.ai_state.num_channels = 0;
+    pci_mio_16e_1.ai_state.data_per_channel = 0;
+    pci_mio_16e_1.ai_state.ranges = NULL;
+    pci_mio_16e_1.ai_state.polarities = NULL;
 
-	for ( i = 0; i < 2; i++ )
-	{
-		pci_mio_16e_1.ao_state.reserved_by[ i ] = NULL;
-		pci_mio_16e_1.ao_state.external_reference[ i ] = NI_DAQ_DISABLED;
-		pci_mio_16e_1.ao_state.polarity[ i ] = NI_DAQ_BIPOLAR;
-		pci_mio_16e_1.ao_state.is_used[ i ] = UNSET;
+    for ( i = 0; i < 2; i++ )
+    {
+        pci_mio_16e_1.ao_state.reserved_by[ i ] = NULL;
+        pci_mio_16e_1.ao_state.external_reference[ i ] = NI_DAQ_DISABLED;
+        pci_mio_16e_1.ao_state.polarity[ i ] = NI_DAQ_BIPOLAR;
+        pci_mio_16e_1.ao_state.is_used[ i ] = UNSET;
 
-		pci_mio_16e_1.gpct_state.states[ i ] = 0;
-	}
+        pci_mio_16e_1.gpct_state.states[ i ] = 0;
+    }
 
-	pci_mio_16e_1.dio_state.reserved_by = NULL;
+    pci_mio_16e_1.dio_state.reserved_by = NULL;
 
-	pci_mio_16e_1.msc_state.daq_clock = PCI_MIO_16E_1_TEST_CLOCK;
-	pci_mio_16e_1.msc_state.on_off = PCI_MIO_16E_1_TEST_STATE;
-	pci_mio_16e_1.msc_state.speed = PCI_MIO_16E_1_TEST_SPEED;
-	pci_mio_16e_1.msc_state.divider = PCI_MIO_16E_1_TEST_DIVIDER;
-	pci_mio_16e_1.msc_state.reserved_by = NULL;
+    pci_mio_16e_1.msc_state.daq_clock = PCI_MIO_16E_1_TEST_CLOCK;
+    pci_mio_16e_1.msc_state.on_off = PCI_MIO_16E_1_TEST_STATE;
+    pci_mio_16e_1.msc_state.speed = PCI_MIO_16E_1_TEST_SPEED;
+    pci_mio_16e_1.msc_state.divider = PCI_MIO_16E_1_TEST_DIVIDER;
+    pci_mio_16e_1.msc_state.reserved_by = NULL;
 
-	return 1;
+    return 1;
 }
 
 
@@ -76,25 +76,25 @@ int pci_mio_16e_1_init_hook( void )
 
 int pci_mio_16e_1_test_hook( void )
 {
-	int i;
+    int i;
 
 
-	pci_mio_16e_1_stored = pci_mio_16e_1;
+    pci_mio_16e_1_stored = pci_mio_16e_1;
 
-	for ( i = 0; i < 2; i++ )
-		if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
-			pci_mio_16e_1_stored.ao_state.reserved_by[ i ] =
-					CHAR_P T_strdup( pci_mio_16e_1.ao_state.reserved_by[ i ] );
+    for ( i = 0; i < 2; i++ )
+        if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
+            pci_mio_16e_1_stored.ao_state.reserved_by[ i ] =
+                    CHAR_P T_strdup( pci_mio_16e_1.ao_state.reserved_by[ i ] );
 
-	if ( pci_mio_16e_1.dio_state.reserved_by )
-		pci_mio_16e_1_stored.dio_state.reserved_by =
-						CHAR_P T_strdup( pci_mio_16e_1.dio_state.reserved_by );
+    if ( pci_mio_16e_1.dio_state.reserved_by )
+        pci_mio_16e_1_stored.dio_state.reserved_by =
+                        CHAR_P T_strdup( pci_mio_16e_1.dio_state.reserved_by );
 
-	if ( pci_mio_16e_1.msc_state.reserved_by )
-			pci_mio_16e_1_stored.msc_state.reserved_by =
-						CHAR_P T_strdup( pci_mio_16e_1.msc_state.reserved_by );
+    if ( pci_mio_16e_1.msc_state.reserved_by )
+            pci_mio_16e_1_stored.msc_state.reserved_by =
+                        CHAR_P T_strdup( pci_mio_16e_1.msc_state.reserved_by );
 
-	return 1;
+    return 1;
 }
 
 
@@ -103,15 +103,15 @@ int pci_mio_16e_1_test_hook( void )
 
 int pci_mio_16e_1_end_of_test_hook( void )
 {
-	if ( pci_mio_16e_1.ai_state.ranges != NULL )
-		pci_mio_16e_1.ai_state.ranges =
-							  DOUBLE_P T_free( pci_mio_16e_1.ai_state.ranges );
+    if ( pci_mio_16e_1.ai_state.ranges != NULL )
+        pci_mio_16e_1.ai_state.ranges =
+                              DOUBLE_P T_free( pci_mio_16e_1.ai_state.ranges );
 
-	if ( pci_mio_16e_1.ai_state.polarities != NULL )
-		pci_mio_16e_1.ai_state.polarities =
-			  NI_DAQ_BU_POLARITY_P T_free( pci_mio_16e_1.ai_state.polarities );
+    if ( pci_mio_16e_1.ai_state.polarities != NULL )
+        pci_mio_16e_1.ai_state.polarities =
+              NI_DAQ_BU_POLARITY_P T_free( pci_mio_16e_1.ai_state.polarities );
 
-	return 1;
+    return 1;
 }
 
 
@@ -120,109 +120,109 @@ int pci_mio_16e_1_end_of_test_hook( void )
 
 int pci_mio_16e_1_exp_hook( void )
 {
-	int i;
+    int i;
 
 
-	/* Restore state from before the start of the test run */
+    /* Restore state from before the start of the test run */
 
-	for ( i = 0; i < 2; i++ )
-		if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
-			pci_mio_16e_1.ao_state.reserved_by[ i ] =
-					  CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
+    for ( i = 0; i < 2; i++ )
+        if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
+            pci_mio_16e_1.ao_state.reserved_by[ i ] =
+                      CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
 
-	if ( pci_mio_16e_1.dio_state.reserved_by )
-		pci_mio_16e_1.dio_state.reserved_by =
-						  CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
+    if ( pci_mio_16e_1.dio_state.reserved_by )
+        pci_mio_16e_1.dio_state.reserved_by =
+                          CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
 
-	if ( pci_mio_16e_1.msc_state.reserved_by )
-		pci_mio_16e_1.msc_state.reserved_by =
-						  CHAR_P T_free( pci_mio_16e_1.msc_state.reserved_by );
+    if ( pci_mio_16e_1.msc_state.reserved_by )
+        pci_mio_16e_1.msc_state.reserved_by =
+                          CHAR_P T_free( pci_mio_16e_1.msc_state.reserved_by );
 
-	pci_mio_16e_1 = pci_mio_16e_1_stored;
+    pci_mio_16e_1 = pci_mio_16e_1_stored;
 
-	for ( i = 0; i < 2; i++ )
-		if ( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] )
-			pci_mio_16e_1.ao_state.reserved_by[ i ] =
-			 CHAR_P T_strdup( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] );
+    for ( i = 0; i < 2; i++ )
+        if ( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] )
+            pci_mio_16e_1.ao_state.reserved_by[ i ] =
+             CHAR_P T_strdup( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] );
 
-	if ( pci_mio_16e_1_stored.dio_state.reserved_by )
-		pci_mio_16e_1.dio_state.reserved_by =
-				 CHAR_P T_strdup( pci_mio_16e_1_stored.dio_state.reserved_by );
+    if ( pci_mio_16e_1_stored.dio_state.reserved_by )
+        pci_mio_16e_1.dio_state.reserved_by =
+                 CHAR_P T_strdup( pci_mio_16e_1_stored.dio_state.reserved_by );
 
-	if ( pci_mio_16e_1_stored.msc_state.reserved_by )
-		pci_mio_16e_1.msc_state.reserved_by =
-				 CHAR_P T_strdup( pci_mio_16e_1_stored.msc_state.reserved_by );
+    if ( pci_mio_16e_1_stored.msc_state.reserved_by )
+        pci_mio_16e_1.msc_state.reserved_by =
+                 CHAR_P T_strdup( pci_mio_16e_1_stored.msc_state.reserved_by );
 
-	raise_permissions( );
-	pci_mio_16e_1.board = ni_daq_open( BOARD_DEVICE_FILE, 0 );
+    raise_permissions( );
+    pci_mio_16e_1.board = ni_daq_open( BOARD_DEVICE_FILE, 0 );
 
-	if ( pci_mio_16e_1.board < 0 )
-	{
-		switch ( pci_mio_16e_1.board )
-		{
-			case NI_DAQ_OK :
-				break;
+    if ( pci_mio_16e_1.board < 0 )
+    {
+        switch ( pci_mio_16e_1.board )
+        {
+            case NI_DAQ_OK :
+                break;
 
-			case NI_DAQ_ERR_NSB :
-				print( FATAL, "Invalid board name, check configuration "
-					   "file for board.\n" );
-				break;
+            case NI_DAQ_ERR_NSB :
+                print( FATAL, "Invalid board name, check configuration "
+                       "file for board.\n" );
+                break;
 
-			case NI_DAQ_ERR_NDV :
-				print( FATAL, "Driver for board not loaded.\n" );
-				THROW( EXCEPTION );
+            case NI_DAQ_ERR_NDV :
+                print( FATAL, "Driver for board not loaded.\n" );
+                THROW( EXCEPTION );
 
-			case NI_DAQ_ERR_ACS :
-				print( FATAL, "No permissions to open device file for "
-					   "board.\n" );
-				break;
+            case NI_DAQ_ERR_ACS :
+                print( FATAL, "No permissions to open device file for "
+                       "board.\n" );
+                break;
 
-			case NI_DAQ_ERR_DFM :
-				print( FATAL, "Device file for board missing.\n" );
-				break;
+            case NI_DAQ_ERR_DFM :
+                print( FATAL, "Device file for board missing.\n" );
+                break;
 
-			case NI_DAQ_ERR_DFP :
-				print( FATAL, "Unspecified error when opening device file for "
-					   "board.\n" );
-				break;
+            case NI_DAQ_ERR_DFP :
+                print( FATAL, "Unspecified error when opening device file for "
+                       "board.\n" );
+                break;
 
-			case NI_DAQ_ERR_BBS :
-				print( FATAL, "Board already in use by another program.\n" );
-				break;
+            case NI_DAQ_ERR_BBS :
+                print( FATAL, "Board already in use by another program.\n" );
+                break;
 
-			case NI_DAQ_ERR_INT :
-				print( FATAL, "Internal error in board driver or library.\n" );
-				break;
+            case NI_DAQ_ERR_INT :
+                print( FATAL, "Internal error in board driver or library.\n" );
+                break;
 
-			default :
-				print( FATAL, "Unrecognized error when trying to access the "
-					   "board.\n" );
-				break;
-		}
+            default :
+                print( FATAL, "Unrecognized error when trying to access the "
+                       "board.\n" );
+                break;
+        }
 
-		ni_daq_close( pci_mio_16e_1.board );
-		THROW( EXCEPTION );
-	}
+        ni_daq_close( pci_mio_16e_1.board );
+        THROW( EXCEPTION );
+    }
 
-	/* Initialize the AO channels as far as required */
+    /* Initialize the AO channels as far as required */
 
-	for ( i = 0; i < 2; i++ )
-		if ( ni_daq_ao_channel_configuration( pci_mio_16e_1.board, 1, &i,
-								 pci_mio_16e_1.ao_state.external_reference + i,
-								 pci_mio_16e_1.ao_state.polarity + i ) < 0 ||
-			 ( pci_mio_16e_1.ao_state.is_used &&
-			   ni_daq_ao( pci_mio_16e_1.board, 1, &i,
-						  pci_mio_16e_1.ao_state.volts + i  ) < 0 ) )
-		{
-			ni_daq_close( pci_mio_16e_1.board );
-			lower_permissions( );
-			print( FATAL, "Failure to initialize AO channels\n ");
-			THROW( EXCEPTION );
-		}
+    for ( i = 0; i < 2; i++ )
+        if ( ni_daq_ao_channel_configuration( pci_mio_16e_1.board, 1, &i,
+                                 pci_mio_16e_1.ao_state.external_reference + i,
+                                 pci_mio_16e_1.ao_state.polarity + i ) < 0 ||
+             ( pci_mio_16e_1.ao_state.is_used &&
+               ni_daq_ao( pci_mio_16e_1.board, 1, &i,
+                          pci_mio_16e_1.ao_state.volts + i  ) < 0 ) )
+        {
+            ni_daq_close( pci_mio_16e_1.board );
+            lower_permissions( );
+            print( FATAL, "Failure to initialize AO channels\n ");
+            THROW( EXCEPTION );
+        }
 
-	lower_permissions( );
+    lower_permissions( );
 
-	return 1;
+    return 1;
 }
 
 
@@ -231,30 +231,30 @@ int pci_mio_16e_1_exp_hook( void )
 
 int pci_mio_16e_1_end_of_exp_hook( void )
 {
-	int i;
+    int i;
 
 
-	if ( pci_mio_16e_1.board >= 0 )
-	{
-		raise_permissions( );
-		ni_daq_close( pci_mio_16e_1.board );
-		lower_permissions( );
-	}
+    if ( pci_mio_16e_1.board >= 0 )
+    {
+        raise_permissions( );
+        ni_daq_close( pci_mio_16e_1.board );
+        lower_permissions( );
+    }
 
-	for ( i = 0; i < 2; i++ )
-		if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
-			pci_mio_16e_1.ao_state.reserved_by[ i ] =
-					  CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
+    for ( i = 0; i < 2; i++ )
+        if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
+            pci_mio_16e_1.ao_state.reserved_by[ i ] =
+                      CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
 
-	if ( pci_mio_16e_1.dio_state.reserved_by )
-		pci_mio_16e_1.dio_state.reserved_by =
-						  CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
+    if ( pci_mio_16e_1.dio_state.reserved_by )
+        pci_mio_16e_1.dio_state.reserved_by =
+                          CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
 
-	if ( pci_mio_16e_1.msc_state.reserved_by )
-		pci_mio_16e_1.msc_state.reserved_by =
-						  CHAR_P T_free( pci_mio_16e_1.msc_state.reserved_by );
+    if ( pci_mio_16e_1.msc_state.reserved_by )
+        pci_mio_16e_1.msc_state.reserved_by =
+                          CHAR_P T_free( pci_mio_16e_1.msc_state.reserved_by );
 
-	return 1;
+    return 1;
 }
 
 
@@ -263,35 +263,35 @@ int pci_mio_16e_1_end_of_exp_hook( void )
 
 void pci_mio_16e_1_exit_hook( void )
 {
-	int i;
+    int i;
 
 
-	for ( i = 0; i < 2; i++ )
-	{
-		if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
-			pci_mio_16e_1.ao_state.reserved_by[ i ] =
-					  CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
+    for ( i = 0; i < 2; i++ )
+    {
+        if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
+            pci_mio_16e_1.ao_state.reserved_by[ i ] =
+                      CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
 
-		if ( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] )
-			pci_mio_16e_1_stored.ao_state.reserved_by[ i ] =
-			   CHAR_P T_free( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] );
-	}
+        if ( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] )
+            pci_mio_16e_1_stored.ao_state.reserved_by[ i ] =
+               CHAR_P T_free( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] );
+    }
 
-	if ( pci_mio_16e_1.dio_state.reserved_by )
-		pci_mio_16e_1.dio_state.reserved_by =
-						  CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
+    if ( pci_mio_16e_1.dio_state.reserved_by )
+        pci_mio_16e_1.dio_state.reserved_by =
+                          CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
 
-	if ( pci_mio_16e_1_stored.dio_state.reserved_by )
-		pci_mio_16e_1_stored.dio_state.reserved_by =
-				   CHAR_P T_free( pci_mio_16e_1_stored.dio_state.reserved_by );
+    if ( pci_mio_16e_1_stored.dio_state.reserved_by )
+        pci_mio_16e_1_stored.dio_state.reserved_by =
+                   CHAR_P T_free( pci_mio_16e_1_stored.dio_state.reserved_by );
 
-	if ( pci_mio_16e_1.msc_state.reserved_by )
-		pci_mio_16e_1.msc_state.reserved_by =
-						  CHAR_P T_free( pci_mio_16e_1.msc_state.reserved_by );
+    if ( pci_mio_16e_1.msc_state.reserved_by )
+        pci_mio_16e_1.msc_state.reserved_by =
+                          CHAR_P T_free( pci_mio_16e_1.msc_state.reserved_by );
 
-	if ( pci_mio_16e_1_stored.msc_state.reserved_by )
-		pci_mio_16e_1_stored.msc_state.reserved_by =
-				   CHAR_P T_free( pci_mio_16e_1_stored.msc_state.reserved_by );
+    if ( pci_mio_16e_1_stored.msc_state.reserved_by )
+        pci_mio_16e_1_stored.msc_state.reserved_by =
+                   CHAR_P T_free( pci_mio_16e_1_stored.msc_state.reserved_by );
 }
 
 
@@ -300,12 +300,14 @@ void pci_mio_16e_1_exit_hook( void )
 
 Var_T *daq_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

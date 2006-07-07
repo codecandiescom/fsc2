@@ -35,51 +35,51 @@
 
 FILE *hp864_tmpl_find_table( char ** name )
 {
-	FILE *tfp;
-	char *new_name;
+    FILE *tfp;
+    char *new_name;
 
 
-	/* Expand a leading tilde to the users home directory */
+    /* Expand a leading tilde to the users home directory */
 
-	if ( ( *name )[ 0 ] == '~' )
-	{
-		new_name = get_string( "%s%s%s", getenv( "HOME" ),
-							   ( *name )[ 1 ] != '/' ? "/" : "", *name + 1 );
-		T_free( *name );
-		*name = new_name;
-	}
+    if ( ( *name )[ 0 ] == '~' )
+    {
+        new_name = get_string( "%s%s%s", getenv( "HOME" ),
+                               ( *name )[ 1 ] != '/' ? "/" : "", *name + 1 );
+        T_free( *name );
+        *name = new_name;
+    }
 
-	/* Now try to open the file - set table_file entry in the device structure
-	   to the name and return the file pointer */
+    /* Now try to open the file - set table_file entry in the device structure
+       to the name and return the file pointer */
 
-	if ( ( tfp = hp864_tmpl_open_table( *name ) ) != NULL )
-	{
-		hp864_tmpl.table_file = T_strdup( *name );
-		return tfp;
-	}
+    if ( ( tfp = hp864_tmpl_open_table( *name ) ) != NULL )
+    {
+        hp864_tmpl.table_file = T_strdup( *name );
+        return tfp;
+    }
 
-	/* If the file name contains a slash we give up after freeing memory */
+    /* If the file name contains a slash we give up after freeing memory */
 
-	if ( strchr( *name, '/' ) != NULL )
-	{
-		print( FATAL, "Table file '%s' not found.\n", *name );
-		THROW( EXCEPTION );
-	}
+    if ( strchr( *name, '/' ) != NULL )
+    {
+        print( FATAL, "Table file '%s' not found.\n", *name );
+        THROW( EXCEPTION );
+    }
 
-	/* Last chance: The table file is in the library directory... */
+    /* Last chance: The table file is in the library directory... */
 
-	new_name = get_string( "%s%s%s", libdir, slash( libdir ), *name );
-	T_free( *name );
-	*name = new_name;
+    new_name = get_string( "%s%s%s", libdir, slash( libdir ), *name );
+    T_free( *name );
+    *name = new_name;
 
-	if ( ( tfp = hp864_tmpl_open_table( *name ) ) == NULL )
-	{
-		print( FATAL, "Table file '%s' not found in either the current "
-			   "directory or in '%s'.\n", strip_path( *name ), libdir );
-		THROW( EXCEPTION );
-	}
+    if ( ( tfp = hp864_tmpl_open_table( *name ) ) == NULL )
+    {
+        print( FATAL, "Table file '%s' not found in either the current "
+               "directory or in '%s'.\n", strip_path( *name ), libdir );
+        THROW( EXCEPTION );
+    }
 
-	return tfp;
+    return tfp;
 }
 
 
@@ -94,27 +94,27 @@ FILE *hp864_tmpl_find_table( char ** name )
 
 FILE *hp864_tmpl_open_table( char * name )
 {
-	FILE *tfp;
+    FILE *tfp;
 
 
-	if ( access( name, R_OK ) == -1 )
-	{
-		if ( errno == ENOENT )       /* file not found */
-			return NULL;
+    if ( access( name, R_OK ) == -1 )
+    {
+        if ( errno == ENOENT )       /* file not found */
+            return NULL;
 
-		print( FATAL, "No read permission for table file '%s'.\n", name );
-		T_free( name );
-		THROW( EXCEPTION );
-	}
+        print( FATAL, "No read permission for table file '%s'.\n", name );
+        T_free( name );
+        THROW( EXCEPTION );
+    }
 
-	if ( ( tfp = fopen( name, "r" ) ) == NULL )
-	{
-		print( FATAL, "Can't open table file '%s'.\n", name );
-		T_free( name );
-		THROW( EXCEPTION );
-	}
+    if ( ( tfp = fopen( name, "r" ) ) == NULL )
+    {
+        print( FATAL, "Can't open table file '%s'.\n", name );
+        T_free( name );
+        THROW( EXCEPTION );
+    }
 
-	return tfp;
+    return tfp;
 }
 
 
@@ -125,78 +125,78 @@ FILE *hp864_tmpl_open_table( char * name )
 
 double hp864_tmpl_get_att_from_table( double freq )
 {
-	long i_low, i_high, i_cur;
-	double att;
+    long i_low, i_high, i_cur;
+    double att;
 
 
-	/* First check that the frequency is covered by the table, if it isn't
-	   print out a warning and return attenuation for the smallest or
-	   highest frequency */
+    /* First check that the frequency is covered by the table, if it isn't
+       print out a warning and return attenuation for the smallest or
+       highest frequency */
 
-	if ( freq < hp864_tmpl.min_table_freq )
-	{
-		print( WARN, "Frequency of %f MHz not covered by table, "
-			   "interpolating.\n", freq * 1.0e-6 );
-		return hp864_tmpl.att_table[ 0 ].att;
-	}
+    if ( freq < hp864_tmpl.min_table_freq )
+    {
+        print( WARN, "Frequency of %f MHz not covered by table, "
+               "interpolating.\n", freq * 1.0e-6 );
+        return hp864_tmpl.att_table[ 0 ].att;
+    }
 
-	if ( freq > hp864_tmpl.max_table_freq )
-	{
-		print( WARN, "Frequency of %f MHz not covered by table, "
-			   "interpolating.\n", freq * 1.0e-6 );
-		return hp864_tmpl.att_table[ hp864_tmpl.att_table_len - 1 ].att;
-	}
+    if ( freq > hp864_tmpl.max_table_freq )
+    {
+        print( WARN, "Frequency of %f MHz not covered by table, "
+               "interpolating.\n", freq * 1.0e-6 );
+        return hp864_tmpl.att_table[ hp864_tmpl.att_table_len - 1 ].att;
+    }
 
-	/* Find the indices of the two entries in the table (that has been sorted
-	   in ascending order of frequencies) bracketing the frequency. Since in
-	   most cases the frequencies in the table are equally spaced, we first
-	   try to find the entry by interpolating. If this doesn't succeeds the
-	   frequencies can't be uniformly spaced and we used simple bisecting.*/
+    /* Find the indices of the two entries in the table (that has been sorted
+       in ascending order of frequencies) bracketing the frequency. Since in
+       most cases the frequencies in the table are equally spaced, we first
+       try to find the entry by interpolating. If this doesn't succeeds the
+       frequencies can't be uniformly spaced and we used simple bisecting.*/
 
-	i_low = 0;
-	i_high = hp864_tmpl.att_table_len - 1;
+    i_low = 0;
+    i_high = hp864_tmpl.att_table_len - 1;
 
-	if ( freq == hp864_tmpl.att_table[ i_low ].freq )
-		return hp864_tmpl.att_table[ i_low ].att;
-	if ( freq == hp864_tmpl.att_table[ i_high ].freq )
-		return hp864_tmpl.att_table[ i_high ].att;
+    if ( freq == hp864_tmpl.att_table[ i_low ].freq )
+        return hp864_tmpl.att_table[ i_low ].att;
+    if ( freq == hp864_tmpl.att_table[ i_high ].freq )
+        return hp864_tmpl.att_table[ i_high ].att;
 
-	i_cur = lrnd( floor( ( i_high - i_low ) *
-						 ( freq - hp864_tmpl.att_table[ i_low ].freq ) /
-						 ( hp864_tmpl.att_table[ i_high ].freq
-						   - hp864_tmpl.att_table[ i_low ].freq ) ) ) + i_low;
+    i_cur = lrnd( floor( ( i_high - i_low ) *
+                         ( freq - hp864_tmpl.att_table[ i_low ].freq ) /
+                         ( hp864_tmpl.att_table[ i_high ].freq
+                           - hp864_tmpl.att_table[ i_low ].freq ) ) ) + i_low;
 
-	if ( freq > hp864_tmpl.att_table[ i_cur ].freq )
-	{
-		i_low = i_cur;
-		if ( freq < hp864_tmpl.att_table[ i_cur + 1 ].freq )
-			i_high = i_cur + 1;
-	}
-	else
-		i_high = i_cur;
+    if ( freq > hp864_tmpl.att_table[ i_cur ].freq )
+    {
+        i_low = i_cur;
+        if ( freq < hp864_tmpl.att_table[ i_cur + 1 ].freq )
+            i_high = i_cur + 1;
+    }
+    else
+        i_high = i_cur;
 
-	while ( i_high - i_low > 1 )
-	{
-		if ( freq > hp864_tmpl.att_table[ i_cur ].freq )
-			i_low = i_cur;
-		else
-			i_high = i_cur;
-		i_cur = ( i_high + i_low ) >> 1;
-	}
+    while ( i_high - i_low > 1 )
+    {
+        if ( freq > hp864_tmpl.att_table[ i_cur ].freq )
+            i_low = i_cur;
+        else
+            i_high = i_cur;
+        i_cur = ( i_high + i_low ) >> 1;
+    }
 
-	/* Now do a linear interpolation for the attenuation between the bracketing
-	   frequencies we have data for */
+    /* Now do a linear interpolation for the attenuation between the bracketing
+       frequencies we have data for */
 
-	att =   ( hp864_tmpl.att_table[ i_high ].att
-			  - hp864_tmpl.att_table[ i_low ].att )
-		  * ( freq - hp864_tmpl.att_table[ i_low ].freq )
-		  / (   hp864_tmpl.att_table[ i_high ].freq
-			  - hp864_tmpl.att_table[ i_low ].freq )
-		  + hp864_tmpl.att_table[ i_low ].att;
+    att =   ( hp864_tmpl.att_table[ i_high ].att
+              - hp864_tmpl.att_table[ i_low ].att )
+          * ( freq - hp864_tmpl.att_table[ i_low ].freq )
+          / (   hp864_tmpl.att_table[ i_high ].freq
+              - hp864_tmpl.att_table[ i_low ].freq )
+          + hp864_tmpl.att_table[ i_low ].att;
 
-	/* Reduce value to the resolution the attenuation can be set with */
+    /* Reduce value to the resolution the attenuation can be set with */
 
-	return ATT_RESOLUTION * lrnd( att / ATT_RESOLUTION );
+    return ATT_RESOLUTION * lrnd( att / ATT_RESOLUTION );
 }
 
 
@@ -205,30 +205,30 @@ double hp864_tmpl_get_att_from_table( double freq )
 
 double hp864_tmpl_get_att( double freq )
 {
-	double att;
+    double att;
 
-	if ( ! hp864_tmpl.use_table )
-		return hp864_tmpl.attenuation;
+    if ( ! hp864_tmpl.use_table )
+        return hp864_tmpl.attenuation;
 
-	att =   hp864_tmpl.attenuation + hp864_tmpl_get_att_from_table( freq )
-		  - hp864_tmpl.att_at_ref_freq;
+    att =   hp864_tmpl.attenuation + hp864_tmpl_get_att_from_table( freq )
+          - hp864_tmpl.att_at_ref_freq;
 
-	if ( att < MAX_ATTEN )
-	{
-		print( SEVERE, "Attenuation dynamic range is insufficient (f = "
-			   "%g MHz), using %f dB instead of %f dB.\n",
-			   freq * 1.0e-6, MAX_ATTEN, att );
-		att = MAX_ATTEN;
-	}
-	if ( att > hp864_tmpl.min_attenuation )
-	{
-		print( SEVERE, "Attenuation dynamic range is insufficient (f = "
-			   "%g MHz), using %f dB instead of %f dB.\n",
-			   freq * 1.0e-6, hp864_tmpl.min_attenuation, att );
-		att = hp864_tmpl.min_attenuation;
-	}
+    if ( att < MAX_ATTEN )
+    {
+        print( SEVERE, "Attenuation dynamic range is insufficient (f = "
+               "%g MHz), using %f dB instead of %f dB.\n",
+               freq * 1.0e-6, MAX_ATTEN, att );
+        att = MAX_ATTEN;
+    }
+    if ( att > hp864_tmpl.min_attenuation )
+    {
+        print( SEVERE, "Attenuation dynamic range is insufficient (f = "
+               "%g MHz), using %f dB instead of %f dB.\n",
+               freq * 1.0e-6, hp864_tmpl.min_attenuation, att );
+        att = hp864_tmpl.min_attenuation;
+    }
 
-	return att;
+    return att;
 }
 
 
@@ -236,76 +236,78 @@ double hp864_tmpl_get_att( double freq )
  *----------------------------------------------------------------------*/
 
 int hp864_tmpl_set_mod_param( Var_T *  v,
-							  double * dres,
-							  int *    ires )
+                              double * dres,
+                              int *    ires )
 {
-	const char *type[ ] =   { "FM", "AM", "PHASE", "OFF" },
-		       *source[ ] = { "EXT AC", "AC", "EXT DC", "DC",
-							  "INT 1kHz", "INT 1 kHz", "INT 1", "1kHz",
-							  "1 kHz", "1", "INT 400Hz", "INT 400 Hz",
-							  "INT 400", "400Hz", "400 Hz", "400" };
+    const char *type[ ] =   { "FM", "AM", "PHASE", "OFF" },
+               *source[ ] = { "EXT AC", "AC", "EXT DC", "DC",
+                              "INT 1kHz", "INT 1 kHz", "INT 1", "1kHz",
+                              "1 kHz", "1", "INT 400Hz", "INT 400 Hz",
+                              "INT 400", "400Hz", "400 Hz", "400" };
 
 
-	/* If the variable is an integer of floating value this means an
-	   amplitude setting */
+    /* If the variable is an integer of floating value this means an
+       amplitude setting */
 
-	if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-	{
-		*dres = get_double( v, "modulation amplitude" );
-		return 1;
-	}
+    if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+    {
+        *dres = get_double( v, "modulation amplitude" );
+        return 1;
+    }
 
-	/* Otherwise it got to be a string */
+    /* Otherwise it got to be a string */
 
-	vars_check( v, STR_VAR );
+    vars_check( v, STR_VAR );
 
-	switch ( is_in( v->val.sptr, type, NUM_MOD_TYPES ) )
-	{
-		case 0 :
-			*ires = MOD_TYPE_FM;
-			return 2;
+    switch ( is_in( v->val.sptr, type, NUM_MOD_TYPES ) )
+    {
+        case 0 :
+            *ires = MOD_TYPE_FM;
+            return 2;
 
-		case 1 :
-			*ires = MOD_TYPE_AM;
-			return 2;
+        case 1 :
+            *ires = MOD_TYPE_AM;
+            return 2;
 
-		case 2 :
-			*ires = MOD_TYPE_PHASE;
-			return 2;
+        case 2 :
+            *ires = MOD_TYPE_PHASE;
+            return 2;
 
-		case 3 :
-			*ires = MOD_TYPE_OFF;
-			return 2;
-	}
+        case 3 :
+            *ires = MOD_TYPE_OFF;
+            return 2;
+    }
 
-	switch ( is_in( v->val.sptr, source, 16 ) )
-	{
-		case 0 : case 1 :
-			*ires = MOD_SOURCE_AC;
-			return 3;
+    switch ( is_in( v->val.sptr, source, 16 ) )
+    {
+        case 0 : case 1 :
+            *ires = MOD_SOURCE_AC;
+            return 3;
 
-		case 2 : case 3 :
-			*ires = MOD_SOURCE_DC;
-			return 3;
+        case 2 : case 3 :
+            *ires = MOD_SOURCE_DC;
+            return 3;
 
-		case 4 : case 5 : case 6 : case 7 : case 8 : case 9 :
-			*ires = MOD_SOURCE_1k;
-			return 3;
+        case 4 : case 5 : case 6 : case 7 : case 8 : case 9 :
+            *ires = MOD_SOURCE_1k;
+            return 3;
 
-		case 10 : case 11 : case 12 : case 13 : case 14 : case 15 :
-			*ires = MOD_SOURCE_400;
-			return 3;
-	}
+        case 10 : case 11 : case 12 : case 13 : case 14 : case 15 :
+            *ires = MOD_SOURCE_400;
+            return 3;
+    }
 
-	print( FATAL, "Invalid parameter \"%s\".\n", v->val.sptr );
-	THROW( EXCEPTION );
+    print( FATAL, "Invalid parameter \"%s\".\n", v->val.sptr );
+    THROW( EXCEPTION );
 
-	return -1;               /* we're never going to get here... */
+    return -1;               /* we're never going to get here... */
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

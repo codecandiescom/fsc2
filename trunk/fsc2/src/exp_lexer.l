@@ -27,9 +27,9 @@
 /****************************************************************/
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 %option noyywrap nounput
 
@@ -42,12 +42,12 @@
 
 #define YY_INPUT( buf, result, max_size )                      \
 {                                                              \
-	char c;                                                    \
-	ssize_t count;                                             \
-	while ( ( count = read( fileno( expin ), &c, 1 ) ) < 0 &&  \
-			errno == EINTR )                                   \
-		/* empty */ ;                                          \
-	result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );   \
+    char c;                                                    \
+    ssize_t count;                                             \
+    while ( ( count = read( fileno( expin ), &c, 1 ) ) < 0 &&  \
+            errno == EINTR )                                   \
+        /* empty */ ;                                          \
+    result = ( count <= 0 ) ? YY_NULL : ( buf[ 0 ] = c, 1 );   \
 }
 
 
@@ -80,7 +80,7 @@ VAR         ^[ \t]*VAR(IABLE)?S?:
 PHAS        ^[ \t]*PHA(SE)?S?:
 PREP        ^[ \t]*PREP(ARATION)?S?:
 EXP         ^[ \t]*EXP(ERIMENT)?:
-ON_STOP		^[ \t]*ON_STOP:
+ON_STOP     ^[ \t]*ON_STOP:
 
 
 INT         [0-9]+
@@ -91,7 +91,7 @@ P           P(ULSE)?_?{INT}(#(INT))?
 
 F           F(UNC(TION)?)?
 S           S(TART)?
-L			L(EN(GTH)?)?
+L           L(EN(GTH)?)?
 DS          D(EL(TA)?)?_?S(TART)?
 DL          D(EL(TA)?)?_?L(EN(GTH)?)?
 PH          PH(ASE(SEQ(UENCE)?)?)?_?([0-9])?
@@ -107,47 +107,47 @@ FUNC        {IDENT}"#"[0-9]+
 
 
 
-		/*---------------*/
-%%		/*     Rules     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     Rules     */
+        /*---------------*/
 
 
-			/* Handling of file name lines */
+            /* Handling of file name lines */
 {FILE}      {
-				*( exptext + expleng - 1 ) = '\0';
-				EDL.Fname = CHAR_P T_free( EDL.Fname );
-				EDL.Fname = T_strdup( exptext + 2 );
-			}
+                *( exptext + expleng - 1 ) = '\0';
+                EDL.Fname = CHAR_P T_free( EDL.Fname );
+                EDL.Fname = T_strdup( exptext + 2 );
+            }
 
-			/* Handling of line number lines */
-{LNUM}		{
-				*( exptext + expleng - 1 ) = '\0';
-				EDL.Lc = atol( exptext + 2 );
-			}
+            /* Handling of line number lines */
+{LNUM}      {
+                *( exptext + expleng - 1 ) = '\0';
+                EDL.Lc = atol( exptext + 2 );
+            }
 
-			/* Handling of error messages from the cleaner */
-{ERR}		{
-				eprint( FATAL, UNSET, "%s\n", exptext + 2 );
-				THROW( EXCEPTION );
-			}
+            /* Handling of error messages from the cleaner */
+{ERR}       {
+                eprint( FATAL, UNSET, "%s\n", exptext + 2 );
+                THROW( EXCEPTION );
+            }
 
-{ESTR}		{
-				exptext = strchr( exptext, '\x03' );
-				eprint( FATAL, UNSET, "%s\n", exptext + 2 );
-				THROW( EXCEPTION );
-			}
+{ESTR}      {
+                exptext = strchr( exptext, '\x03' );
+                eprint( FATAL, UNSET, "%s\n", exptext + 2 );
+                THROW( EXCEPTION );
+            }
 
-			/* Handling of DEVICES: labels */
-{DEV}		{
-				Exp_next_section = DEVICES_SECTION;
-				return 0;
-			}
+            /* Handling of DEVICES: labels */
+{DEV}       {
+                Exp_next_section = DEVICES_SECTION;
+                return 0;
+            }
 
-			/* Handling of ASSIGNMENTS: labels */
-{ASS}		{
-				Exp_next_section = ASSIGNMENTS_SECTION;
-				return 0;
-			}
+            /* Handling of ASSIGNMENTS: labels */
+{ASS}       {
+                Exp_next_section = ASSIGNMENTS_SECTION;
+                return 0;
+            }
 
 "=="        return E_EQ;      /* equal */
 "!="        return E_NE;      /* unequal */
@@ -184,29 +184,29 @@ FUNC        {IDENT}"#"[0-9]+
 "^="        return E_EXPA;
 "?"         return '?';
 
-			/* Handling of VARIABLES: labels */
-{VAR}		{
-				Exp_next_section = VARIABLES_SECTION;
-				return 0;
-			}
+            /* Handling of VARIABLES: labels */
+{VAR}       {
+                Exp_next_section = VARIABLES_SECTION;
+                return 0;
+            }
 
-			/* Handling of PHASES: labels */
-{PHAS}		{
-				Exp_next_section = PHASES_SECTION;
-				return 0;
-			}
+            /* Handling of PHASES: labels */
+{PHAS}      {
+                Exp_next_section = PHASES_SECTION;
+                return 0;
+            }
 
-			/* Handling of PREPARATIONS: labels */
-{PREP}		{
-				Exp_next_section = PREPARATIONS_SECTION;
-				return 0;
-			}
+            /* Handling of PREPARATIONS: labels */
+{PREP}      {
+                Exp_next_section = PREPARATIONS_SECTION;
+                return 0;
+            }
 
-			/* Handling of EXPERIMENT: labels */
-{EXP}		{
-				Exp_next_section = EXPERIMENT_SECTION;
-				return 0;
-			}
+            /* Handling of EXPERIMENT: labels */
+{EXP}       {
+                Exp_next_section = EXPERIMENT_SECTION;
+                return 0;
+            }
 
 {ON_STOP}   return ON_STOP_TOK;
 
@@ -224,7 +224,7 @@ FUNC        {IDENT}"#"[0-9]+
 "}"         return '}';          /* block end delimiter */
 
 {INT}/[^_a-zA-Z] {
-				Exp_Val.lval = T_atol( exptext );
+                Exp_Val.lval = T_atol( exptext );
                 return E_INT_TOKEN;
             }
 
@@ -234,141 +234,141 @@ FUNC        {IDENT}"#"[0-9]+
             }
 
 {STR}       {
-				exptext[ expleng - 1 ] = '\0';
-				Exp_Val.sptr = exptext + 1;
-				return E_STR_TOKEN;
-			}
+                exptext[ expleng - 1 ] = '\0';
+                Exp_Val.sptr = exptext + 1;
+                return E_STR_TOKEN;
+            }
 
-{P}			{
-				Exp_Val.lval = p_num( exptext );
-				return E_INT_TOKEN;
-			}
+{P}         {
+                Exp_Val.lval = p_num( exptext );
+                return E_INT_TOKEN;
+            }
 
-			/* Combinations of pulse and property, e.g. 'P3.LEN' */
+            /* Combinations of pulse and property, e.g. 'P3.LEN' */
 
 {P}"."{F}   {
-				Exp_Val.vptr = p_get( exptext, P_FUNC );
-				return E_VAR_REF;
+                Exp_Val.vptr = p_get( exptext, P_FUNC );
+                return E_VAR_REF;
             }
 
 {P}"."{S}   {
-				Exp_Val.lval = p_num( exptext );
-				return E_PPOS;
+                Exp_Val.lval = p_num( exptext );
+                return E_PPOS;
             }
 
 {P}"."{L}   {
-				Exp_Val.lval = p_num( exptext );
-				return E_PLEN;
+                Exp_Val.lval = p_num( exptext );
+                return E_PLEN;
             }
 
 {P}"."{DS}  {
-				Exp_Val.lval = p_num( exptext );
-				return E_PDPOS;
+                Exp_Val.lval = p_num( exptext );
+                return E_PDPOS;
             }
 
 {P}"."{DL}  {
-				Exp_Val.lval = p_num( exptext );
-				return E_PDLEN;
+                Exp_Val.lval = p_num( exptext );
+                return E_PDLEN;
             }
 
 {CHT}       {
                 Exp_Val.vptr = convert_to_channel_number( exptext );
-				return E_VAR_REF;
+                return E_VAR_REF;
             }
 
 {DIO}       {
-				Exp_Val.lval = T_atol( exptext + 3 );
+                Exp_Val.lval = T_atol( exptext + 3 );
                 return E_INT_TOKEN;
             }
 
 {FUNC}      {
-				char *t;
-				int acc;
+                char *t;
+                int acc;
 
-				t = strrchr( exptext, '#' );
+                t = strrchr( exptext, '#' );
                 if ( t != NULL && ! strcmp( t, "#1" ) )
                     *t = '\0';
 
-				Exp_Val.vptr = func_get( exptext, &acc );
-				if ( Exp_Val.vptr != NULL )
-				{
-					if ( acc == ACCESS_PREP )
-					{
-						print( FATAL, "Function %s() can't be used in the "
-							   "EXPERIMENT section.\n", exptext );
-						THROW( EXCEPTION );
-					}
+                Exp_Val.vptr = func_get( exptext, &acc );
+                if ( Exp_Val.vptr != NULL )
+                {
+                    if ( acc == ACCESS_PREP )
+                    {
+                        print( FATAL, "Function %s() can't be used in the "
+                               "EXPERIMENT section.\n", exptext );
+                        THROW( EXCEPTION );
+                    }
 
-					if ( ! strcmp( exptext, "end" ) && EDL.On_Stop_Pos >= 0 )
-					{
-						print( FATAL, "Function %s() can not be called "
-							   "after the ON_STOP label.\n", exptext );
-						THROW( EXCEPTION );
-					}
+                    if ( ! strcmp( exptext, "end" ) && EDL.On_Stop_Pos >= 0 )
+                    {
+                        print( FATAL, "Function %s() can not be called "
+                               "after the ON_STOP label.\n", exptext );
+                        THROW( EXCEPTION );
+                    }
 
-					return E_FUNC_TOKEN;
-				}
+                    return E_FUNC_TOKEN;
+                }
                 else
                 {
                     print( FATAL, "Function '%s' is not loaded.\n", exptext );
-					THROW( EXCEPTION );
+                    THROW( EXCEPTION );
                 }
             }
 
 {IDENT}     {
-				int acc;
+                int acc;
 
-				Exp_Val.vptr = func_get( exptext, &acc );
-				if ( Exp_Val.vptr != NULL )
-				{
-					if ( acc == ACCESS_PREP )
-					{
-						print( FATAL, "Function '%s' can't be used in the "
-							   "EXPERIMENT section.\n", exptext );
-						THROW( EXCEPTION );
-					}
+                Exp_Val.vptr = func_get( exptext, &acc );
+                if ( Exp_Val.vptr != NULL )
+                {
+                    if ( acc == ACCESS_PREP )
+                    {
+                        print( FATAL, "Function '%s' can't be used in the "
+                               "EXPERIMENT section.\n", exptext );
+                        THROW( EXCEPTION );
+                    }
 
-					if ( ! strcmp( exptext, "end" ) && EDL.On_Stop_Pos >= 0 )
-					{
-						print( FATAL, "Function %s() can not be called "
-							   "after the ON_STOP label.\n", exptext );
-						THROW( EXCEPTION );
-					}
+                    if ( ! strcmp( exptext, "end" ) && EDL.On_Stop_Pos >= 0 )
+                    {
+                        print( FATAL, "Function %s() can not be called "
+                               "after the ON_STOP label.\n", exptext );
+                        THROW( EXCEPTION );
+                    }
 
-					return E_FUNC_TOKEN;
-				}
+                    return E_FUNC_TOKEN;
+                }
 
-				Exp_Val.vptr = vars_get( exptext );
-				if ( Exp_Val.vptr == NULL )
-				{
-					print( FATAL, "Variable or function '%s' has not been "
-						   "declared or loaded.\n", exptext );
-					THROW( EXCEPTION );
-				}
+                Exp_Val.vptr = vars_get( exptext );
+                if ( Exp_Val.vptr == NULL )
+                {
+                    print( FATAL, "Variable or function '%s' has not been "
+                           "declared or loaded.\n", exptext );
+                    THROW( EXCEPTION );
+                }
 
-				return E_VAR_TOKEN;
-			}
+                return E_VAR_TOKEN;
+            }
 
-			/* Handling of end of statement character */
-";"			return ';';
+            /* Handling of end of statement character */
+";"         return ';';
 
 {WS}        /* Skip white space */
 
-			/* Handling of invalid input */
+            /* Handling of invalid input */
 .           {
-				print( FATAL, "Invalid input near '%s'.\n", exptext );
-				THROW( EXCEPTION );
-			}
+                print( FATAL, "Invalid input near '%s'.\n", exptext );
+                THROW( EXCEPTION );
+            }
 
-<<EOF>>	    {
-				Exp_next_section = NO_SECTION;
-				return 0;
-			}
+<<EOF>>     {
+                Exp_next_section = NO_SECTION;
+                return 0;
+            }
 
 
-		/*----------------------*/
-%%		/*     End of Rules     */
-		/*----------------------*/
+        /*----------------------*/
+%%      /*     End of Rules     */
+        /*----------------------*/
 
 
 /*-------------------------------------------*
@@ -376,30 +376,32 @@ FUNC        {IDENT}"#"[0-9]+
 
 int experiment_parser( FILE * in )
 {
-	if ( EDL.compilation.sections[ EXPERIMENT_SECTION ] )
-	{
-		print( FATAL, "Multiple instances of EXPERIMENT section label.\n" );
-		THROW( EXCEPTION );
-	}
-	EDL.compilation.sections[ EXPERIMENT_SECTION ] = SET;
+    if ( EDL.compilation.sections[ EXPERIMENT_SECTION ] )
+    {
+        print( FATAL, "Multiple instances of EXPERIMENT section label.\n" );
+        THROW( EXCEPTION );
+    }
+    EDL.compilation.sections[ EXPERIMENT_SECTION ] = SET;
 
-	EDL.prg_length = 0;
-	store_exp( in );
-	exp_test_run( );
+    EDL.prg_length = 0;
+    store_exp( in );
+    exp_test_run( );
 
-	if ( Exp_next_section != NO_SECTION )
-	{
-		print( FATAL, "EXPERIMENT section has to be the very last "
-			   "section.\n" );
-		THROW( EXCEPTION );
-	}
+    if ( Exp_next_section != NO_SECTION )
+    {
+        print( FATAL, "EXPERIMENT section has to be the very last "
+               "section.\n" );
+        THROW( EXCEPTION );
+    }
 
-	return Exp_next_section;
+    return Exp_next_section;
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

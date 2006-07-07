@@ -69,37 +69,37 @@
 #define DNS_MAX_ANSWER_LEN  4096
 
 static int do_send( const char * rec_host,
-					const char * to,
-					const char * from,
-					const char * local_host,
-					const char * subject,
-					FILE *       fp );
+                    const char * to,
+                    const char * from,
+                    const char * local_host,
+                    const char * subject,
+                    FILE *       fp );
 static int open_mail_socket( const char * remote,
-							 const char * local );
+                             const char * local );
 static const char *get_mail_server( const char * remote,
-									const char * local );
+                                    const char * local );
 static unsigned char *analyze_dns_reply_header( unsigned char *  buf,
-												int              len,
-												unsigned short * sec_entries,
-												const char *     remote,
-												unsigned short   type );
+                                                int              len,
+                                                unsigned short * sec_entries,
+                                                const char *     remote,
+                                                unsigned short   type );
 static int check_cname_rr( unsigned char *  buf,
-						   int              len,
-						   unsigned char *  ans_sec,
-						   char *           host,
-						   unsigned short * sec_entries );
+                           int              len,
+                           unsigned char *  ans_sec,
+                           char *           host,
+                           unsigned short * sec_entries );
 static int weed_out( unsigned char * buf,
-					 int             len,
-					 unsigned char * ans_sec,
-					 unsigned short  num_ans,
-					 const char *    host );
+                     int             len,
+                     unsigned char * ans_sec,
+                     unsigned short  num_ans,
+                     const char *    host );
 static const char *get_host( unsigned char * buf,
-							 int             len,
-							 unsigned short  num_ans,
-							 unsigned char * ans_sec );
+                             int             len,
+                             unsigned short  num_ans,
+                             unsigned char * ans_sec );
 static const char *get_name( unsigned char *  buf,
-							 int              len,
-							 unsigned char ** rr );
+                             int              len,
+                             unsigned char ** rr );
 static unsigned short get_ushort( const unsigned char * p );
 
 #endif
@@ -123,98 +123,98 @@ static unsigned short get_ushort( const unsigned char * p );
 #if defined MAIL_PROGRAM
 
 int send_mail( const char * subject,
-			   const char * from  UNUSED_ARG,
-			   const char * cc_to,
-			   const char * to,
-			   FILE *       fp )
+               const char * from  UNUSED_ARG,
+               const char * cc_to,
+               const char * to,
+               FILE *       fp )
 {
-	FILE *mail;
-	char *cmd;
-	char buf[ MAX_LINE_LENGTH ];
-	size_t len;
+    FILE *mail;
+    char *cmd;
+    char buf[ MAX_LINE_LENGTH ];
+    size_t len;
 
 
-	CLOBBER_PROTECT( to );
-	CLOBBER_PROTECT( cc_to );
+    CLOBBER_PROTECT( to );
+    CLOBBER_PROTECT( cc_to );
 
-	while ( 1 )
-	{
-		TRY
-		{
-			cmd = get_string( "%s -s '%s' %s", MAIL_PROGRAM, subject, to );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-			return -1;
+    while ( 1 )
+    {
+        TRY
+        {
+            cmd = get_string( "%s -s '%s' %s", MAIL_PROGRAM, subject, to );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+            return -1;
 
-		if ( ( mail = popen( cmd, "w" ) ) == NULL )
-			return -1;
+        if ( ( mail = popen( cmd, "w" ) ) == NULL )
+            return -1;
 
-		while ( ( len = fread( buf, 1, MAX_LINE_LENGTH, fp ) ) > 0 )
-			if ( fwrite( buf, 1, len, mail ) != len )
-			{
-				pclose( mail );
-				T_free( cmd );
-				return -1;
-			}
+        while ( ( len = fread( buf, 1, MAX_LINE_LENGTH, fp ) ) > 0 )
+            if ( fwrite( buf, 1, len, mail ) != len )
+            {
+                pclose( mail );
+                T_free( cmd );
+                return -1;
+            }
 
-		pclose( mail );
-		T_free( cmd );
-		
-		if ( cc_to == NULL )
-			return 0;
+        pclose( mail );
+        T_free( cmd );
+        
+        if ( cc_to == NULL )
+            return 0;
 
-		rewind( fp );
-		to = cc_to;
-		cc_to = NULL;
-	}
+        rewind( fp );
+        to = cc_to;
+        cc_to = NULL;
+    }
 
-	return 0;
+    return 0;
 }
 
 #else
 
 int send_mail( const char * subject,
-			   const char * from,
-			   const char * cc_to,
-			   const char * to,
-			   FILE *       fp )
+               const char * from,
+               const char * cc_to,
+               const char * to,
+               FILE *       fp )
 {
-	struct hostent *hp;
-	char *rec_host;
-	char local_host[ NS_MAXDNAME ];
+    struct hostent *hp;
+    char *rec_host;
+    char local_host[ NS_MAXDNAME ];
 
 
-	/* For IPv6 suport set the RES_USE_INET6 flag, so the gethostbyname()
-	   always returns IPv6 addresses */
+    /* For IPv6 suport set the RES_USE_INET6 flag, so the gethostbyname()
+       always returns IPv6 addresses */
 
 #if USE_IPv6
-		_res.options |= RES_USE_INET6;
+        _res.options |= RES_USE_INET6;
 #endif
 
-	if ( gethostname( local_host, sizeof local_host ) != 0 )
-		return -1;
+    if ( gethostname( local_host, sizeof local_host ) != 0 )
+        return -1;
 
-	if ( ( hp = gethostbyname( local_host ) ) == NULL || hp->h_name == NULL )
-		return -1;
+    if ( ( hp = gethostbyname( local_host ) ) == NULL || hp->h_name == NULL )
+        return -1;
 
-	strncpy( local_host, hp->h_name, NS_MAXDNAME );
+    strncpy( local_host, hp->h_name, NS_MAXDNAME );
 
-	if ( ( rec_host = strchr( to, '@' ) ) == NULL )
-		rec_host = local_host;
-	else
-		rec_host++;
+    if ( ( rec_host = strchr( to, '@' ) ) == NULL )
+        rec_host = local_host;
+    else
+        rec_host++;
 
-	if ( do_send( rec_host, to, from, local_host, subject, fp ) == -1 )
-		return -1;
+    if ( do_send( rec_host, to, from, local_host, subject, fp ) == -1 )
+        return -1;
 
-	if ( cc_to != NULL )
-	{
-		rewind( fp );
-		do_send( local_host, cc_to, from, local_host, subject, fp );
-	}
+    if ( cc_to != NULL )
+    {
+        rewind( fp );
+        do_send( local_host, cc_to, from, local_host, subject, fp );
+    }
 
-	return 0;
+    return 0;
 }
 
 
@@ -224,189 +224,189 @@ int send_mail( const char * subject,
  *-----------------------------------------------------------*/
 
 static int do_send( const char * rec_host,
-					const char * to,
-					const char * from,
-					const char * local_host,
-					const char * subject,
-					FILE *       fp )
+                    const char * to,
+                    const char * from,
+                    const char * local_host,
+                    const char * subject,
+                    FILE *       fp )
 {
-	int mfd;
-	char line[ MAX_LINE_LENGTH ];
-	ssize_t len;
-	
+    int mfd;
+    char line[ MAX_LINE_LENGTH ];
+    ssize_t len;
+    
 
-	if ( ( mfd = open_mail_socket( rec_host, local_host ) ) < 0 )
-		return -1;
+    if ( ( mfd = open_mail_socket( rec_host, local_host ) ) < 0 )
+        return -1;
 
-	/* Now we have a connection to the other side, get the intro text -
-	   the other side must send at least "220\n" */
+    /* Now we have a connection to the other side, get the intro text -
+       the other side must send at least "220\n" */
 
-	do
-	{
-		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-			 strncmp( line, "220", 3 ) )
-		{
-			close( mfd );
-			return -1;
-		}
-	} while ( line[ 3 ] == '-' );
+    do
+    {
+        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
+             strncmp( line, "220", 3 ) )
+        {
+            close( mfd );
+            return -1;
+        }
+    } while ( line[ 3 ] == '-' );
 
-	/* Send the line telling the other side about ourself */
+    /* Send the line telling the other side about ourself */
 
-	if ( ( len = snprintf( line, MAX_LINE_LENGTH, "HELO %s\r\n", local_host ) )
-		 > MAX_LINE_LENGTH ||
-		 writen( mfd, line, len ) < len )
-	{
-		close( mfd );
-		return -1;
-	}
+    if ( ( len = snprintf( line, MAX_LINE_LENGTH, "HELO %s\r\n", local_host ) )
+         > MAX_LINE_LENGTH ||
+         writen( mfd, line, len ) < len )
+    {
+        close( mfd );
+        return -1;
+    }
 
-	/* Read reply, it must start with "250" to indicate success */
-	
-	do
-	{
-		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-			 strncmp( line, "250", 3 ) )
-		{
-			close( mfd );
-			return -1;
-		}
-	} while ( line[ 3 ] == '-' );
+    /* Read reply, it must start with "250" to indicate success */
+    
+    do
+    {
+        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
+             strncmp( line, "250", 3 ) )
+        {
+            close( mfd );
+            return -1;
+        }
+    } while ( line[ 3 ] == '-' );
 
-	/* Send the line about the sender of the mail */
+    /* Send the line about the sender of the mail */
 
-	if ( ( len = snprintf( line, MAX_LINE_LENGTH, "MAIL FROM:<%s@%s>\r\n",
-						   from, local_host ) )
-		 > MAX_LINE_LENGTH ||
-		 writen( mfd, line, len ) < len )
-	{
-		close( mfd );
-		return -1;
-	}
+    if ( ( len = snprintf( line, MAX_LINE_LENGTH, "MAIL FROM:<%s@%s>\r\n",
+                           from, local_host ) )
+         > MAX_LINE_LENGTH ||
+         writen( mfd, line, len ) < len )
+    {
+        close( mfd );
+        return -1;
+    }
 
-	/* Read reply, must start with "250" to indicate success */
-	
-	do
-	{
-		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-			 strncmp( line, "250", 3 ) )
-		{
-			close( mfd );
-			return -1;
-		}
-	} while ( line[ 3 ] == '-' );
+    /* Read reply, must start with "250" to indicate success */
+    
+    do
+    {
+        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
+             strncmp( line, "250", 3 ) )
+        {
+            close( mfd );
+            return -1;
+        }
+    } while ( line[ 3 ] == '-' );
 
-	/* Send the line telling the other side about the receiver of the mail */
+    /* Send the line telling the other side about the receiver of the mail */
 
-	if ( ( len = snprintf( line, MAX_LINE_LENGTH, "RCPT TO:<%s>\r\n", to ) )
-		 > MAX_LINE_LENGTH ||
-		 writen( mfd, line, len ) < len )
-	{
-		close( mfd );
-		return -1;
-	}
+    if ( ( len = snprintf( line, MAX_LINE_LENGTH, "RCPT TO:<%s>\r\n", to ) )
+         > MAX_LINE_LENGTH ||
+         writen( mfd, line, len ) < len )
+    {
+        close( mfd );
+        return -1;
+    }
 
-	/* Read reply, must start with "250" to indicate success */
-	
-	do
-	{
-		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-			 strncmp( line, "250", 3 ) )
-		{
-			close( mfd );
-			return -1;
-		}
-	} while ( line[ 3 ] == '-' );
+    /* Read reply, must start with "250" to indicate success */
+    
+    do
+    {
+        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
+             strncmp( line, "250", 3 ) )
+        {
+            close( mfd );
+            return -1;
+        }
+    } while ( line[ 3 ] == '-' );
 
-	/* Tell the other side we're no going to start with the mail body */
+    /* Tell the other side we're no going to start with the mail body */
 
-	if ( writen( mfd, "DATA\r\n", 6 ) < 6 )
-	{
-		close( mfd );
-		return -1;
-	}
+    if ( writen( mfd, "DATA\r\n", 6 ) < 6 )
+    {
+        close( mfd );
+        return -1;
+    }
 
-	/* Read reply, must start with "354" to indicate success */
-	
-	do
-	{
-		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-			 strncmp( line, "354", 3 ) )
-		{
-			close( mfd );
-			return -1;
-		}
-	} while ( line[ 3 ] == '-' );
+    /* Read reply, must start with "354" to indicate success */
+    
+    do
+    {
+        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
+             strncmp( line, "354", 3 ) )
+        {
+            close( mfd );
+            return -1;
+        }
+    } while ( line[ 3 ] == '-' );
 
-	/* Now send the message, starting with the header */
+    /* Now send the message, starting with the header */
 
-	if ( ( len = snprintf( line, MAX_LINE_LENGTH, "Subject: %s\n", subject ) )
-		 > MAX_LINE_LENGTH  ||
-		 writen( mfd, line, len ) < len ||
-		 ( len = snprintf( line, MAX_LINE_LENGTH, "From: fsc2 <fsc2@%s>\n",
-						   local_host ) ) > MAX_LINE_LENGTH  ||
-		 writen( mfd, line, len ) < len ||
-		 ( len = snprintf( line, MAX_LINE_LENGTH, "To: %s\n", to ) )
-		 > MAX_LINE_LENGTH ||
-		 writen( mfd, line, len ) < len )
-	{
-		close( mfd );
-		return -1;
-	}
+    if ( ( len = snprintf( line, MAX_LINE_LENGTH, "Subject: %s\n", subject ) )
+         > MAX_LINE_LENGTH  ||
+         writen( mfd, line, len ) < len ||
+         ( len = snprintf( line, MAX_LINE_LENGTH, "From: fsc2 <fsc2@%s>\n",
+                           local_host ) ) > MAX_LINE_LENGTH  ||
+         writen( mfd, line, len ) < len ||
+         ( len = snprintf( line, MAX_LINE_LENGTH, "To: %s\n", to ) )
+         > MAX_LINE_LENGTH ||
+         writen( mfd, line, len ) < len )
+    {
+        close( mfd );
+        return -1;
+    }
 
-	/* Copy the whole input file to the socket */
+    /* Copy the whole input file to the socket */
 
-	while ( fgets( line, MAX_LINE_LENGTH, fp ) != NULL )
-	{
-		/* Send an additional dot before lines starting with a dot (see
-		   RFC 821, section 4.5.2, for why this needs to be done) */
+    while ( fgets( line, MAX_LINE_LENGTH, fp ) != NULL )
+    {
+        /* Send an additional dot before lines starting with a dot (see
+           RFC 821, section 4.5.2, for why this needs to be done) */
 
-		if ( line[ 0 ] == '.' && writen( mfd, ".", 1 ) < 1 )
-		{
-			close( mfd );
-			return -1;
-		}
+        if ( line[ 0 ] == '.' && writen( mfd, ".", 1 ) < 1 )
+        {
+            close( mfd );
+            return -1;
+        }
 
-		len = strlen( line );
-		if ( writen( mfd, line, len ) < len )
-		{
-			close( mfd );
-			return -1;
-		}
-	}
+        len = strlen( line );
+        if ( writen( mfd, line, len ) < len )
+        {
+            close( mfd );
+            return -1;
+        }
+    }
 
-	/* Send end-of-data indicator */
+    /* Send end-of-data indicator */
 
-	if ( writen( mfd, "\r\n.\r\n", 5 ) < 5 )
-	{
-		close( mfd );
-		return -1;
-	}
+    if ( writen( mfd, "\r\n.\r\n", 5 ) < 5 )
+    {
+        close( mfd );
+        return -1;
+    }
 
-	/* Read reply, must start with "250" to indicate success */
-	
-	do
-	{
-		if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-			 strncmp( line, "250", 3 ) )
-		{
-			close( mfd );
-			return -1;
-		}
-	} while ( line[ 3 ] == '-' );
-	
-	if ( writen( mfd, "QUIT\r\n", 6 ) < 6 )
-	{
-		close( mfd );
-		return -1;
-	}
+    /* Read reply, must start with "250" to indicate success */
+    
+    do
+    {
+        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
+             strncmp( line, "250", 3 ) )
+        {
+            close( mfd );
+            return -1;
+        }
+    } while ( line[ 3 ] == '-' );
+    
+    if ( writen( mfd, "QUIT\r\n", 6 ) < 6 )
+    {
+        close( mfd );
+        return -1;
+    }
 
-	while ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) >= 4 &&
-			! strncmp( line, "221", 3 ) && line[ 3 ] == '-' )
-		/* empty */ ;
+    while ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) >= 4 &&
+            ! strncmp( line, "221", 3 ) && line[ 3 ] == '-' )
+        /* empty */ ;
 
-	close( mfd );
-	return 0;
+    close( mfd );
+    return 0;
 }
 
 
@@ -417,95 +417,95 @@ static int do_send( const char * rec_host,
  *------------------------------------------------------------------------*/
 
 static int open_mail_socket( const char * remote,
-							 const char * local )
+                             const char * local )
 {
-	int sock_fd;
+    int sock_fd;
 #ifdef USE_IPv6
-	struct sockaddr_in6 serv_addr;
+    struct sockaddr_in6 serv_addr;
 #else
-	struct sockaddr_in serv_addr;
+    struct sockaddr_in serv_addr;
 #endif
-	struct hostent *hp;
-	const char *host;
-	struct servent *se;
+    struct hostent *hp;
+    const char *host;
+    struct servent *se;
 
 
-	/* Get the number (in network byte order) of the SMTP port (this should
-	   normally be 25) */
+    /* Get the number (in network byte order) of the SMTP port (this should
+       normally be 25) */
 
-	if ( ( se = getservbyname( "smtp", "tcp" ) ) == NULL )
-		return -1;
+    if ( ( se = getservbyname( "smtp", "tcp" ) ) == NULL )
+        return -1;
 
-	/* Try to open a socket */
+    /* Try to open a socket */
 
 #ifdef USE_IPv6
-	if ( ( sock_fd = socket( AF_INET6, SOCK_STREAM, 0 ) ) == -1 )
+    if ( ( sock_fd = socket( AF_INET6, SOCK_STREAM, 0 ) ) == -1 )
 #else
-	if ( ( sock_fd = socket( AF_INET, SOCK_STREAM, 0 ) ) == -1 )
+    if ( ( sock_fd = socket( AF_INET, SOCK_STREAM, 0 ) ) == -1 )
 #endif
-		return -1;
+        return -1;
 
-	/* If this is a local message (i.e. the domain to which the mail is to
-	   be send is identical to the local host name) we try local delivery
-	   first. Without doing so it would be impossible to send local mails
-	   on machines without an internet connection. */
+    /* If this is a local message (i.e. the domain to which the mail is to
+       be send is identical to the local host name) we try local delivery
+       first. Without doing so it would be impossible to send local mails
+       on machines without an internet connection. */
 
-	if ( ! strcasecmp( remote, local ) )
-	{
-		if ( ( hp = gethostbyname( remote ) ) != NULL &&
-			 hp->h_addr_list != NULL )
-		{
-			memset( &serv_addr, 0, sizeof( serv_addr ) );
+    if ( ! strcasecmp( remote, local ) )
+    {
+        if ( ( hp = gethostbyname( remote ) ) != NULL &&
+             hp->h_addr_list != NULL )
+        {
+            memset( &serv_addr, 0, sizeof( serv_addr ) );
 #ifdef USE_IPv6
-			serv_addr.sin6_family = AF_INET6;
-			serv_addr.sin6_port = se->s_port;
-			memcpy( &serv_addr.sin6_addr.s6_addr, *hp->h_addr_list,
-					sizeof serv_addr.sin6_addr.s6_addr );
+            serv_addr.sin6_family = AF_INET6;
+            serv_addr.sin6_port = se->s_port;
+            memcpy( &serv_addr.sin6_addr.s6_addr, *hp->h_addr_list,
+                    sizeof serv_addr.sin6_addr.s6_addr );
 #else
-			serv_addr.sin_family = AF_INET;
-			serv_addr.sin_port = se->s_port;
-			memcpy( &serv_addr.sin_addr.s_addr, *hp->h_addr_list,
-					sizeof serv_addr.sin_addr.s_addr );
+            serv_addr.sin_family = AF_INET;
+            serv_addr.sin_port = se->s_port;
+            memcpy( &serv_addr.sin_addr.s_addr, *hp->h_addr_list,
+                    sizeof serv_addr.sin_addr.s_addr );
 #endif
-			if ( connect( sock_fd, ( const struct sockaddr * ) &serv_addr,
-						  sizeof( serv_addr ) ) == 0 )
-				return sock_fd;
-		}
-	}
+            if ( connect( sock_fd, ( const struct sockaddr * ) &serv_addr,
+                          sizeof( serv_addr ) ) == 0 )
+                return sock_fd;
+        }
+    }
 
-	/* Otherwise we can't simply connect to the remote domain but must first
-	   figure out which is the machine that takes care of mail for the domain
-	   and then try to connect to this machine (or machines, there can be
-	   several, so we repeat trying until we connected successfully or there
-	   are no more machines prepared that would accept mail for the domain). */
+    /* Otherwise we can't simply connect to the remote domain but must first
+       figure out which is the machine that takes care of mail for the domain
+       and then try to connect to this machine (or machines, there can be
+       several, so we repeat trying until we connected successfully or there
+       are no more machines prepared that would accept mail for the domain). */
 
-	for ( host = get_mail_server( remote, local ); host != NULL;
-		  host = get_mail_server( NULL, local ) )
-	{
-		if ( ( hp = gethostbyname( host ) ) == NULL ||
-			 hp->h_addr_list == NULL )
-			continue;
+    for ( host = get_mail_server( remote, local ); host != NULL;
+          host = get_mail_server( NULL, local ) )
+    {
+        if ( ( hp = gethostbyname( host ) ) == NULL ||
+             hp->h_addr_list == NULL )
+            continue;
 
-		memset( &serv_addr, 0, sizeof( serv_addr ) );
+        memset( &serv_addr, 0, sizeof( serv_addr ) );
 #ifdef USE_IPv6
-		serv_addr.sin6_family = AF_INET6;
-		serv_addr.sin6_port = se->s_port;
-		memcpy( &serv_addr.sin6_addr.s6_addr, *hp->h_addr_list,
-				sizeof serv_addr.sin6_addr.s6_addr );
+        serv_addr.sin6_family = AF_INET6;
+        serv_addr.sin6_port = se->s_port;
+        memcpy( &serv_addr.sin6_addr.s6_addr, *hp->h_addr_list,
+                sizeof serv_addr.sin6_addr.s6_addr );
 #else
-		serv_addr.sin_family = AF_INET;
-		serv_addr.sin_port = se->s_port;
-		memcpy( &serv_addr.sin_addr.s_addr, *hp->h_addr_list,
-				sizeof serv_addr.sin_addr.s_addr );
+        serv_addr.sin_family = AF_INET;
+        serv_addr.sin_port = se->s_port;
+        memcpy( &serv_addr.sin_addr.s_addr, *hp->h_addr_list,
+                sizeof serv_addr.sin_addr.s_addr );
 #endif
 
-		if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
-					  sizeof( serv_addr ) ) == 0 )
-			return sock_fd;
-	}
+        if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
+                      sizeof( serv_addr ) ) == 0 )
+            return sock_fd;
+    }
 
-	close( sock_fd );
-	return -1;
+    close( sock_fd );
+    return -1;
 }
 
 
@@ -535,7 +535,7 @@ static int open_mail_socket( const char * remote,
  *------------------------------------------------------------------------*/
 
 static const char *get_mail_server( const char * remote,
-									const char * local )
+                                    const char * local )
 {
     static char host[ NS_MAXDNAME ];
     static unsigned char buf[ DNS_MAX_ANSWER_LEN ];
@@ -641,7 +641,7 @@ static const char *get_mail_server( const char * remote,
  *------------------------------------------------------------------------*/
 
 static unsigned char *analyze_dns_reply_header( unsigned char *  buf,
-												int              len,
+                                                int              len,
                                                 unsigned short * sec_entries,
                                                 const char *     remote,
                                                 unsigned short   type )
@@ -741,10 +741,10 @@ static unsigned char *analyze_dns_reply_header( unsigned char *  buf,
  *------------------------------------------------------------------*/
 
 static int check_cname_rr( unsigned char *  buf,
-						   int              len,
-						   unsigned char *  ans_sec,
+                           int              len,
+                           unsigned char *  ans_sec,
                            char *           host,
-						   unsigned short * sec_entries )
+                           unsigned short * sec_entries )
 {
     unsigned int num_recs =   sec_entries[ ANCOUNT ]
                             + sec_entries[ NSCOUNT ]
@@ -792,10 +792,10 @@ static int check_cname_rr( unsigned char *  buf,
  *--------------------------------------------------------------------*/
 
 static int weed_out( unsigned char * buf,
-					 int             len,
-					 unsigned char * ans_sec,
+                     int             len,
+                     unsigned char * ans_sec,
                      unsigned short  num_ans,
-					 const char *    local )
+                     const char *    local )
 {
     unsigned short i;
     int rrs_left = num_ans;
@@ -872,9 +872,9 @@ static int weed_out( unsigned char * buf,
  *------------------------------------------------------------------*/
 
 static const char *get_host( unsigned char * buf,
-							 int             len,
+                             int             len,
                              unsigned short  num_ans,
-							 unsigned char * ans_sec )
+                             unsigned char * ans_sec )
 {
     unsigned short i;
     unsigned short prior = 0xFFFF;
@@ -920,8 +920,8 @@ static const char *get_host( unsigned char * buf,
  *-------------------------------------------------------------------------*/
 
 static const char *get_name( unsigned char *  buf,
-							 int              len,
-							 unsigned char ** rr )
+                             int              len,
+                             unsigned char ** rr )
 {
     static char for_host[ NS_MAXDNAME ];
 
@@ -973,5 +973,7 @@ static unsigned short get_ushort( const unsigned char * p )
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

@@ -42,13 +42,13 @@ my $unit_width  =  5;         # width for e.g. unit to right of the input field
 
 my @lines;
 my @vars;
-my $guify_entry = '^\s*===\s*';
-my $var_entry = $guify_entry .
+my $guify_marker = '^\s*===\s*';
+my $var_entry = $guify_marker .
     '([A-Za-z0-9_]+)\s+(int|float|menu|file|button)(\s*(.*))?';
-my $if_entry = $guify_entry . 'if\s*';
-my $elsif_entry = $guify_entry . 'elsif\s*';
-my $else_entry = $guify_entry . 'else\s*$';
-my $endif_entry = $guify_entry . 'endif\s*$';
+my $if_entry = $guify_marker . 'if\s*';
+my $elsif_entry = $guify_marker . 'elsif\s*';
+my $else_entry = $guify_marker . 'else\s*$';
+my $endif_entry = $guify_marker . 'endif\s*$';
 my $if_level = 0;
 my $lino;
 my $need_file_sel = 0;
@@ -68,21 +68,21 @@ while ( <$if> ) {
 
     # Just store lines with normal EDL code (plus the line number)
 
-    unless ( /$guify_entry/o ) {
+    unless ( /$guify_marker/o ) {
         push @lines, { line => $_, lino => $. };
         next;
     }
 
     # If a line starting with a 'guify' marker ends in a backslash append the
-	# next line to it (which then also must start with the marker)
+    # next line to it (which then also must start with the marker)
 
     my $cur_line = $_;
     $lino = $.;
     while ( $cur_line =~ /\\\s*$/ ) {
         $cur_line =~ s/(.*)\\\s*$/$1 /;
         die "Unexpected end of input file\n" unless defined( $_ = <$if> );
-        die "Missing continuation at line $.\n" unless /$guify_entry/o;
-        s/$guify_entry(.*)/$1/o;
+        die "Missing continuation at line $.\n" unless /$guify_marker/o;
+        s/$guify_marker(.*)/$1/o;
         $cur_line .= $_;
     }
 
@@ -128,14 +128,14 @@ while ( <$if> ) {
                             line => $cur_line };
         if ( defined $4 ) {
             my $option = $4;
-			$option = "\"\"" if $var_options->{ type } =~ /^file$/o and
-								$option =~ /^\s*$/;
+            $option = "\"\"" if $var_options->{ type } =~ /^file$/o and
+                                $option =~ /^\s*$/;
             die "Syntax error at line $lino, garbage after variable type\n"
                 unless $option =~ /^\s*[\"\[]/o;
             analyze_var_options( $var_options, $option );
         }
         push @vars, $var_options;
-		$need_file_sel = 1 if $var_options->{ type } =~ /^file$/o;
+        $need_file_sel = 1 if $var_options->{ type } =~ /^file$/o;
         next;
     }
 
@@ -173,7 +173,7 @@ for ( @vars ) {
         $$_{ def_value } = $$_{ value };
     } elsif ( $$_{ type } =~ /^menu$/ ) {
         $$_{ value } = $$_{ def_value } = $$_{ menu_entries }->[ 0 ];
-	} elsif ( $$_{ type } =~ /^button$/ ) {
+    } elsif ( $$_{ type } =~ /^button$/ ) {
         $$_{ value } = $$_{ def_value } = 0;
     } else {
         $$_{ value } = $$_{ def_value } = "";
@@ -400,11 +400,11 @@ sub get_default_value {
                 "line $lino\n";
         }
     } elsif ( $hr->{ type } =~ /^button$/ ) {
-		return ( $val =~ /^on|1$/io ? 1 : 0, $str )
-			if $val =~ /^on|off|1|0$/io;
-		die "Default value ($val) isn't a valid initializer for a button at " .
-			"line $lino\n";
-	} else {
+        return ( $val =~ /^on|1$/io ? 1 : 0, $str )
+            if $val =~ /^on|off|1|0$/io;
+        die "Default value ($val) isn't a valid initializer for a button at " .
+            "line $lino\n";
+    } else {
         if ( $val =~ /^\d+/o ) {
             die "Default value ($val) for $hr->{ name } is larger than the " .
                 "number of menu entries at line $lino\n"
@@ -445,17 +445,17 @@ sub get_string {
 sub cond_check {
     my $defs = "";
 
-	for ( @vars ) {
-		if ( $$_{ type } =~ /^int|float$/o ) {
-			$defs .= "my \$$$_{ name } = $$_{ value };\n" ;
-		} else {
-			$defs .= "my \$$$_{ name } = \"$$_{ value }\";\n" ;
-		}
-	}
+    for ( @vars ) {
+        if ( $$_{ type } =~ /^int|float$/o ) {
+            $defs .= "my \$$$_{ name } = $$_{ value };\n" ;
+        } else {
+            $defs .= "my \$$$_{ name } = \"$$_{ value }\";\n" ;
+        }
+    }
 
     for ( @lines ) {
-        next unless $$_{ line } =~ /$guify_entry/o;
-        $$_{ line } =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
+        next unless $$_{ line } =~ /$guify_merker/o;
+        $$_{ line } =~ /$guify_merker(if|else|elsif|endif)\s*(.*?)\s*$/;
         my ( $type, $rcmd ) = ( $1, $2 );
         next unless $type =~ /^if|elsif$/o;
         my $cmd = $rcmd;
@@ -510,7 +510,7 @@ my @fsc2_how_to_run = ( "Start experiment",
                         "Test program",
                         "Load into fsc2" );
 my $fsc2_main_window = MainWindow->new( -title =>
-							   ( split /\./, ( split /\//, $0 )[ -1 ] )[ 0 ] );
+                               ( split /\./, ( split /\//, $0 )[ -1 ] )[ 0 ] );
 my $fsc2_main_frame = $fsc2_main_window->Frame( -relief => "ridge",
                                                 -borderwidth => "1m" );
 my $fsc2_balloon = $fsc2_main_frame->Balloon( );
@@ -520,17 +520,17 @@ my $fsc2_apply_button = $fsc2_apply_frame->Button( -text => "Apply",
 $fsc2_apply_button->bind( "all", "<Alt-a>" => \&write_out );
 my $fsc2_quit_button = $fsc2_apply_frame->Button( -text => "Quit",
                  -command => sub { $fsc2_main_window->geometry =~
-							   					   /^\d+x\d+([+-]\d+[+-]\d+)$/;
-							   	   $geom = $1;
-							   	   &store_defs;
+                                                   /^\d+x\d+([+-]\d+[+-]\d+)$/;
+                                   $geom = $1;
+                                   &store_defs;
                                    $fsc2_main_window->destroy } );
 $fsc2_quit_button->bind( "all",
                          "<Alt-q>" =>
-                         		sub { $fsc2_main_window->geometry =~
-							   					   /^\d+x\d+([+-]\d+[+-]\d+)$/;
-							   		  $geom = $1;
-							   		  &store_defs;
-									  $fsc2_main_window->destroy } );
+                                sub { $fsc2_main_window->geometry =~
+                                                   /^\d+x\d+([+-]\d+[+-]\d+)$/;
+                                      $geom = $1;
+                                      &store_defs;
+                                      $fsc2_main_window->destroy } );
 $fsc2_apply_frame->pack( -side => "bottom",
                          -fill => "x",
                          -padx => "4m" );
@@ -565,7 +565,7 @@ EOT
 -balloonmsg  => \"Range: [ \" . ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} : '-inf' ) .
 \" : \" . ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} : '+inf' ) . \" ]\" );
 ";
-		} elsif ( $$_{ type } =~ /^button$/o ) {
+        } elsif ( $$_{ type } =~ /^button$/o ) {
             print "\$$$_{ name }\{ value \} = $$_{ value };
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Checkbutton( -variable => \\\$$$_{ name }\{ value \},
 -width => $entry_width );\n";
@@ -704,22 +704,22 @@ sub write_out {
 
 EOT
 
-	# The user may change variables from within the conditions. We must
-	# avoid that these changes become visible in the rest of the script and
+    # The user may change variables from within the conditions. We must
+    # avoid that these changes become visible in the rest of the script and
     # therefore use variables local to the current function.
 
-	print "    my \$$$_{ name } = \$$$_{ name }\{ value \};\n" for ( @vars );
+    print "    my \$$$_{ name } = \$$$_{ name }\{ value \};\n" for ( @vars );
 
-    # Here the body of the EDL script that the script we are just writing is
-    # going to send to fsc2 is written. For normal lines we just have to
-    # double all backslashes, escape double quotes and '$'s and prepend an
-    # (escaped) '$' to the variable names.
-    # For the possibly embedded if, else, elsif and endif commands we
+    # Here the body of the EDL script that the script we are going to send to
+	# fsc2 is written. For normal lines we just have to double all backslashes,
+    # escape double quotes and '$'s and prepend an (escaped) '$' to the
+    # variable names.
+    # For the possibly embedded 'if', 'else', 'elsif' or 'endif' commands we
     # have to built in some Perl code to allow the written script to
     # decide which parts need to be written to the EDL script depending
     # on what values or menu entries the user selected. Here the eval
     # function comes quite handy because we can simply treat the conditions
-    # as some Perl code after prepending a '$' to the variable name...
+    # as some Perl code after prepending all variable name with '$'...
     # This way the user can use even rather complicated expressions as
     # conditions (actually complete Perl scripts ;-)
 
@@ -728,9 +728,9 @@ EOT
     for ( @lines ) {
         my $line = $$_{ line };
 
-        if ( $line =~ /$guify_entry/o ) {
+        if ( $line =~ /$guify_marker/o ) {
             chomp $line;
-            $line =~ /$guify_entry(if|else|elsif|endif)\s*(.*?)\s*$/;
+            $line =~ /$guify_marker(if|else|elsif|endif)\s*(.*?)\s*$/;
             my ( $type, $cmd ) = ( $1, $2 );
 
             if ( $type =~ /^if|elsif$/o ) {
@@ -771,7 +771,7 @@ EOT
             if ( $$_{ type } =~ /^int|float|menu|button$/o ) {
                 $line =~ s/\b$$_{ name }\b/\$$$_{ name }/g;
             } elsif ( $$_{ type } =~ /^file$/o ) {
-				$line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
+                $line =~ s/\b$$_{ name }\b/\\\"\$$$_{ name }\\\"/g;
             }
         }
 
@@ -849,7 +849,7 @@ EOT
     }
 ";
         } elsif ( $$_{ type } =~ /^button$/o ) {
-			print "
+            print "
     print \$fh \"\$$$_{ name }\{ value \}\\n\";
 ";
         } elsif ( $$_{ type } =~ /^menu$|file/o ) {
@@ -864,7 +864,7 @@ EOT
 ";
 
     print <<'EOT';
-	print $fh "$geom\n" if defined $geom;
+    print $fh "$geom\n" if defined $geom;
 
     close $fh;
 };
@@ -951,18 +951,18 @@ EOT
     $fsc2_how_to_run = $ne;
 
     goto done_reading unless defined( $ne = <$fh> )
-							 and $ne =~ /^\s*([+-]\d+[+-]\d+)\s*$/;
-	$geom = $1;
+                             and $ne =~ /^\s*([+-]\d+[+-]\d+)\s*$/;
+    $geom = $1;
 
   done_reading:
     close $fh;
 };
 EOT
 
-	# Append the code for a file selector if it's going to be needed
+    # Append the code for a file selector if it's going to be needed
 
-	if ( $need_file_sel ) {
-		print <<'EOT';
+    if ( $need_file_sel ) {
+        print <<'EOT';
 
 
 ################################################################
@@ -1123,5 +1123,11 @@ sub populate_fs {
 
 1;
 EOT
-	}
+    }
 }
+
+
+# Local variables:
+# tab-width: 4
+# indent-tabs-mode: nil
+# End:

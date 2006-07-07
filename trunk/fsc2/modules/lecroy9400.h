@@ -84,7 +84,7 @@
 #define UNDEFINED_REC_LEN  -1
 
 #define MAX_DESC_LEN       160       /* amount of memory that needs to be
-										allocated for a curve descriptor */
+                                        allocated for a curve descriptor */
 
 /* Structure for description of a 'window' on the digitizer, made up from the
    area between the pair of cursors */
@@ -94,82 +94,82 @@ typedef struct LECROY9400 LECROY9400_T;
 
 
 struct Window {
-	long num;                   /* number of window                          */
-	double start;               /* start of window (in time units)           */
-	double width;               /* width of window (in time units)           */
-	long start_num;				/* first point of window                     */
-	long end_num;				/* last point of window                      */
-	bool is_start;              /* flag, set if start of window has been set */
-	bool is_width;              /* flag, set if width of window has been set */
-	long num_points;            /* number of data points between the cursors */
-	Window_T *next;             /* pointer to next window structure          */
-	Window_T *prev;             /* pointer to previous window structure      */
+    long num;                   /* number of window                          */
+    double start;               /* start of window (in time units)           */
+    double width;               /* width of window (in time units)           */
+    long start_num;             /* first point of window                     */
+    long end_num;               /* last point of window                      */
+    bool is_start;              /* flag, set if start of window has been set */
+    bool is_width;              /* flag, set if width of window has been set */
+    long num_points;            /* number of data points between the cursors */
+    Window_T *next;             /* pointer to next window structure          */
+    Window_T *prev;             /* pointer to previous window structure      */
 };
 
 
 struct LECROY9400 {
-	int device;
+    int device;
 
-	bool is_reacting;
-	int data_size;                  /* # of bytes transfered for data points */
+    bool is_reacting;
+    int data_size;                  /* # of bytes transfered for data points */
 
-	bool is_displayed[ MAX_CHANNELS ];
+    bool is_displayed[ MAX_CHANNELS ];
 
-	int num_used_channels;
+    int num_used_channels;
 
-	double timebase;
-	int tb_index;
-	bool is_timebase;
+    double timebase;
+    int tb_index;
+    bool is_timebase;
 
-	unsigned char wv_desc[ MAX_CHANNELS ][ MAX_DESC_LEN ];
+    unsigned char wv_desc[ MAX_CHANNELS ][ MAX_DESC_LEN ];
 
-	double sens[ MAX_CHANNELS ];
-	double is_sens[ MAX_CHANNELS ];
+    double sens[ MAX_CHANNELS ];
+    double is_sens[ MAX_CHANNELS ];
 
-	int coupl[ MAX_CHANNELS ];
-	double is_coupl[ MAX_CHANNELS ];
+    int coupl[ MAX_CHANNELS ];
+    double is_coupl[ MAX_CHANNELS ];
 
-	double offset[ MAX_CHANNELS ];
-	double is_offset[ MAX_CHANNELS ];
+    double offset[ MAX_CHANNELS ];
+    double is_offset[ MAX_CHANNELS ];
 
-	int coupling[ MAX_CHANNELS ];
-	double is_coupling[ MAX_CHANNELS ];
+    int coupling[ MAX_CHANNELS ];
+    double is_coupling[ MAX_CHANNELS ];
 
-	int trigger_channel;
-	bool is_trigger_channel;
+    int trigger_channel;
+    bool is_trigger_channel;
 
-	double trigger_level;
-	bool is_trigger_level;
+    double trigger_level;
+    bool is_trigger_level;
 
-	int trigger_slope;
-	bool is_trigger_slope;
+    int trigger_slope;
+    bool is_trigger_slope;
 
-	int trigger_coupling;
-	bool is_trigger_coupling;
+    int trigger_coupling;
+    bool is_trigger_coupling;
 
-	double trigger_delay;
-	bool is_trigger_delay;
+    double trigger_delay;
+    bool is_trigger_delay;
 
-	long source_ch[ MAX_CHANNELS ];
+    long source_ch[ MAX_CHANNELS ];
 
-	long rec_len[ MAX_CHANNELS ];
+    long rec_len[ MAX_CHANNELS ];
 
-	long num_avg[ MAX_CHANNELS ];
-	bool is_num_avg[ MAX_CHANNELS ];
+    long num_avg[ MAX_CHANNELS ];
+    bool is_num_avg[ MAX_CHANNELS ];
 
-	bool is_reject[ MAX_CHANNELS ];
+    bool is_reject[ MAX_CHANNELS ];
 
-	Window_T *w;           /* start element of list of windows               */
-	int num_windows;
+    Window_T *w;           /* start element of list of windows               */
+    int num_windows;
 
-	double cursor_pos;     /* current position of cursor 1                   */
+    double cursor_pos;     /* current position of cursor 1                   */
 
-	int meas_source;       /* currently selected measurements source channel */
-	int data_source;       /* currently selected data source channel         */
+    int meas_source;       /* currently selected measurements source channel */
+    int data_source;       /* currently selected data source channel         */
 
-	bool channels_in_use[ MAX_CHANNELS ];
+    bool channels_in_use[ MAX_CHANNELS ];
 
-	bool lock_state;       /* set if keyboard is locked */
+    bool lock_state;       /* set if keyboard is locked */
 };
 
 
@@ -191,8 +191,8 @@ extern bool lecroy9400_IN_SETUP;
 
 
 enum {
-	SAMPLE,
-	AVERAGE
+    SAMPLE,
+    AVERAGE
 };
 
 
@@ -235,11 +235,11 @@ double lecroy9400_trigger_delay_check( void );
 void lecroy9400_do_pre_exp_checks( void );
 
 long lecroy9400_translate_channel( int  /* dir    */,
-								   long /* channel */,
-								   bool /* flag    */ );
+                                   long /* channel */,
+                                   bool /* flag    */ );
 
 void lecroy9400_store_state( LECROY9400_T * /* src  */,
-							 LECROY9400_T * /* dest */ );
+                             LECROY9400_T * /* dest */ );
 
 bool lecroy9400_init( const char * /* name */ );
 
@@ -258,22 +258,22 @@ bool lecroy9400_set_trigger_level( double /* level */ );
 double lecroy9400_get_sens( int /* channel */ );
 
 bool lecroy9400_set_sens( int    /* channel */,
-						  double /* sens    */ );
+                          double /* sens    */ );
 
 double lecroy9400_get_offset( int /* channel */ );
 
 bool lecroy9400_set_offset( int    /* channel */,
-							double /* offset */ );
+                            double /* offset */ );
 
 int lecroy9400_get_coupling( int /* channel */ );
 
 bool lecroy9400_set_coupling( int /* channel */,
-							  int /* type    */ );
+                              int /* type    */ );
 
 bool lecroy9400_is_displayed( int /* channel */ );
 
 bool lecroy9400_display( int /* channel */,
-						 int /* on_off  */ );
+                         int /* on_off  */ );
 
 long lecroy9400_get_num_avg( int /* channel */ );
 
@@ -284,20 +284,20 @@ double lecroy9400_get_trigger_delay( void );
 void lecroy9400_set_trigger_delay( double /* delay */ );
 
 void lecroy9400_set_up_averaging( long /* channel */,
-								  long /* source  */,
-								  long /* num_avg */,
-								  bool /* reject  */,
-								  long /* rec_len */ );
+                                  long /* source  */,
+                                  long /* num_avg */,
+                                  bool /* reject  */,
+                                  long /* rec_len */ );
 
 void lecroy9400_finished( void );
 
 void lecroy9400_start_acquisition( void );
 
 void lecroy9400_get_curve( int        /* ch         */,
-						   Window_T * /* w          */,
-						   double **  /* array      */,
-						   long *     /* length     */,
-						   bool       /* use_cursor */ );
+                           Window_T * /* w          */,
+                           double **  /* array      */,
+                           long *     /* length     */,
+                           bool       /* use_cursor */ );
 
 bool lecroy9400_command( const char * /* cmd */ );
 
@@ -307,5 +307,7 @@ void lecroy9400_gpib_failure( void );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

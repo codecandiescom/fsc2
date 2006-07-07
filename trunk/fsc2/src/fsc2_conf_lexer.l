@@ -22,9 +22,9 @@
  */
 
 
-		/*---------------------*/
-		/*     DEFINITIONS     */
-		/*---------------------*/
+        /*---------------------*/
+        /*     DEFINITIONS     */
+        /*---------------------*/
 
 
 %option noyywrap nounput
@@ -41,9 +41,9 @@ FILE *fsc2_confin;
 %}
 
 
-		/*---------------*/
-%%		/*     Rules     */
-		/*---------------*/
+        /*---------------*/
+%%      /*     Rules     */
+        /*---------------*/
 
 
 "#".*                         /* Skip comments */
@@ -60,27 +60,29 @@ FILE *fsc2_confin;
 "TOOLBOX_POSITION"            return TB_POS;
 ":"|"="                       return SEPARATOR;
 [+-]*[0-9]+[+-][0-9]+         {
-						          fsc2_conflval.sval = fsc2_conftext;
-						          return POS;
+                                  fsc2_conflval.sval = fsc2_conftext;
+                                  return POS;
                               }
 [0-9]+"x"[0-9]+               {
-						          fsc2_conflval.sval = fsc2_conftext;
-						          return SZ;
+                                  fsc2_conflval.sval = fsc2_conftext;
+                                  return SZ;
                               }
 [^#\t\n:= ]+                  {
-						          fsc2_conflval.sval = fsc2_conftext;
-						          return TEXT;
-					          }
+                                  fsc2_conflval.sval = fsc2_conftext;
+                                  return TEXT;
+                              }
 <<EOF>>                       return 0;
 
 
-		/*------------------*/
-%%		/*   End of rules   */
-		/*------------------*/
+        /*------------------*/
+%%      /*   End of rules   */
+        /*------------------*/
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

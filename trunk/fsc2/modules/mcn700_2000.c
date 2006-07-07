@@ -12,7 +12,7 @@
  * 
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the
  *  GNU General Public License for more details.
  * 
  *  You should have received a copy of the GNU General Public License
@@ -36,15 +36,15 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Some constants needed for the device */
 
-#define TEST_VOLTAGE		20.0        /* in V */
-#define TEST_CURRENT		0.001	    /* in A */
+#define TEST_VOLTAGE        20.0        /* in V */
+#define TEST_CURRENT        0.001       /* in A */
 
-#define MAX_VOLTAGE			2000.0	    /* in V */
-#define MIN_VOLTAGE			0.0		    /* in V */
-#define VOLTAGE_RESOLUTION	1.0		    /* in V */
-#define MAX_CURRENT			0.300	    /* in A */
-#define MIN_CURRENT			0.000	    /* in A */
-#define CURRENT_RESOLUTION	1.0e-3	    /* in A */
+#define MAX_VOLTAGE         2000.0      /* in V */
+#define MIN_VOLTAGE         0.0         /* in V */
+#define VOLTAGE_RESOLUTION  1.0         /* in V */
+#define MAX_CURRENT         0.300       /* in A */
+#define MIN_CURRENT         0.000       /* in A */
+#define CURRENT_RESOLUTION  1.0e-3      /* in A */
 
 
 /* Declaration of exported functions */
@@ -77,16 +77,16 @@ static void mcn700_2000_set_voltage_completed( void );
 static bool mcn700_2000_command( const char * cmd );
 
 static bool mcn700_2000_talk( const char * cmd,
-							  char *       reply,
-							  long *       length );
+                              char *       reply,
+                              long *       length );
 
 static void mcn700_2000_failure( void );
 
 
 static struct {
-	int device;
-	double test_volts;
-	double test_amps;
+    int device;
+    double test_volts;
+    double test_amps;
 } mcn700_2000;
 
 
@@ -96,17 +96,17 @@ static struct {
 
 int mcn700_2000_init_hook( void )
 {
-	/* Set global variable to indicate that GPIB bus is needed */
+    /* Set global variable to indicate that GPIB bus is needed */
 
-	Need_GPIB = SET;
+    Need_GPIB = SET;
 
-	/* Reset variables in the structure describing the state of the device */
+    /* Reset variables in the structure describing the state of the device */
 
-	mcn700_2000.device     = -1;
-	mcn700_2000.test_volts = TEST_VOLTAGE;
-	mcn700_2000.test_amps  = TEST_CURRENT;
+    mcn700_2000.device     = -1;
+    mcn700_2000.test_volts = TEST_VOLTAGE;
+    mcn700_2000.test_amps  = TEST_CURRENT;
 
-	return 1;
+    return 1;
 }
 
 
@@ -116,16 +116,16 @@ int mcn700_2000_init_hook( void )
 
 int mcn700_2000_exp_hook( void )
 {
-	/* Initialize the power supply*/
+    /* Initialize the power supply*/
 
-	if ( ! mcn700_2000_init( DEVICE_NAME ) )
-	{
-		print( FATAL, "Initialization of device failed: %s\n",
-			   gpib_error_msg );
-		THROW( EXCEPTION );
-	}
+    if ( ! mcn700_2000_init( DEVICE_NAME ) )
+    {
+        print( FATAL, "Initialization of device failed: %s\n",
+               gpib_error_msg );
+        THROW( EXCEPTION );
+    }
 
-	return 1;
+    return 1;
 }
 
 
@@ -135,16 +135,16 @@ int mcn700_2000_exp_hook( void )
 
 int mcn700_2000_end_of_exp_hook( void )
 {
-	/* Switch power supply back to local mode */
+    /* Switch power supply back to local mode */
 
-	if ( mcn700_2000.device >= 0 ) {
-		mcn700_2000_command( "F0\n" );
-		gpib_local( mcn700_2000.device );
-	}
+    if ( mcn700_2000.device >= 0 ) {
+        mcn700_2000_command( "F0\n" );
+        gpib_local( mcn700_2000.device );
+    }
 
-	mcn700_2000.device = -1;
+    mcn700_2000.device = -1;
 
-	return 1;
+    return 1;
 }
 
 
@@ -153,7 +153,7 @@ int mcn700_2000_end_of_exp_hook( void )
 
 Var_T *powersupply_name( Var_T * v  UNUSED_ARG )
 {
-	return vars_push( STR_VAR, DEVICE_NAME );
+    return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
@@ -169,40 +169,40 @@ Var_T *powersupply_name( Var_T * v  UNUSED_ARG )
 
 Var_T *powersupply_voltage( Var_T * v )
 {
-	double voltage;
+    double voltage;
 
 
-	/* If no argument is specified return the actual setting */
+    /* If no argument is specified return the actual setting */
 
-	if ( v == NULL )
-	{
-		if ( FSC2_MODE == TEST )
-			return vars_push( FLOAT_VAR, mcn700_2000.test_volts );
-		return vars_push( FLOAT_VAR, mcn700_2000_get_voltage( ) );
-	}
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, mcn700_2000.test_volts );
+        return vars_push( FLOAT_VAR, mcn700_2000_get_voltage( ) );
+    }
 
-	/* Otherwise the argument must be a voltage between 0 V and 2000 V */
+    /* Otherwise the argument must be a voltage between 0 V and 2000 V */
 
-	voltage = get_double( v, "voltage" );
+    voltage = get_double( v, "voltage" );
 
-	if ( voltage < MIN_VOLTAGE || voltage > MAX_VOLTAGE )
-	{
-		print( FATAL, "Voltage of %.1f V is not within the valid range of "
-			   "(%.1f to %.1f V).\n", voltage, MIN_VOLTAGE, MAX_VOLTAGE );
-		THROW( EXCEPTION );
-	}
+    if ( voltage < MIN_VOLTAGE || voltage > MAX_VOLTAGE )
+    {
+        print( FATAL, "Voltage of %.1f V is not within the valid range of "
+               "(%.1f to %.1f V).\n", voltage, MIN_VOLTAGE, MAX_VOLTAGE );
+        THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE == TEST )
-	{
-		mcn700_2000.test_volts =
-					 lrnd( voltage / VOLTAGE_RESOLUTION ) * VOLTAGE_RESOLUTION;
-		return vars_push( FLOAT_VAR, mcn700_2000.test_volts );
-	}
+    if ( FSC2_MODE == TEST )
+    {
+        mcn700_2000.test_volts =
+                     lrnd( voltage / VOLTAGE_RESOLUTION ) * VOLTAGE_RESOLUTION;
+        return vars_push( FLOAT_VAR, mcn700_2000.test_volts );
+    }
 
-	mcn700_2000_set_voltage( voltage );
-	return vars_push( FLOAT_VAR, mcn700_2000_get_voltage( ) );
+    mcn700_2000_set_voltage( voltage );
+    return vars_push( FLOAT_VAR, mcn700_2000_get_voltage( ) );
 }
 
 
@@ -216,41 +216,41 @@ Var_T *powersupply_voltage( Var_T * v )
 
 Var_T *powersupply_current( Var_T * v )
 {
-	double current;
+    double current;
 
 
-	/* If no argument is specified return the actual setting */
+    /* If no argument is specified return the actual setting */
 
-	if ( v == NULL )
-	{
-		if ( FSC2_MODE == TEST )
-			return vars_push( FLOAT_VAR, mcn700_2000.test_amps );
-		return vars_push( FLOAT_VAR, mcn700_2000_get_current(  ) );
-	}
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, mcn700_2000.test_amps );
+        return vars_push( FLOAT_VAR, mcn700_2000_get_current(  ) );
+    }
 
-	/* Otherwise the argument must be a current between 0mA and 300mA */
+    /* Otherwise the argument must be a current between 0mA and 300mA */
 
-	current = get_double( v, "current" );
+    current = get_double( v, "current" );
 
-	if ( current < MIN_CURRENT || current > MAX_CURRENT )
-	{
-		print( FATAL, "Current of %.1f mA is not within valid range "
-			   "(%.1f to %.1f mA).\n", 1.0e3 * current,
-			   1.0e3 * MIN_CURRENT, 1.0e3 * MAX_CURRENT );
-		THROW( EXCEPTION );
-	}
+    if ( current < MIN_CURRENT || current > MAX_CURRENT )
+    {
+        print( FATAL, "Current of %.1f mA is not within valid range "
+               "(%.1f to %.1f mA).\n", 1.0e3 * current,
+               1.0e3 * MIN_CURRENT, 1.0e3 * MAX_CURRENT );
+        THROW( EXCEPTION );
+    }
 
-	too_many_arguments( v );
+    too_many_arguments( v );
 
-	if ( FSC2_MODE == TEST )
-	{
-		mcn700_2000.test_amps =
-					lrnd( current / CURRENT_RESOLUTION ) * CURRENT_RESOLUTION;
-		return vars_push( FLOAT_VAR, mcn700_2000.test_amps );
-	}
+    if ( FSC2_MODE == TEST )
+    {
+        mcn700_2000.test_amps =
+                    lrnd( current / CURRENT_RESOLUTION ) * CURRENT_RESOLUTION;
+        return vars_push( FLOAT_VAR, mcn700_2000.test_amps );
+    }
 
-	mcn700_2000_set_current( current );
-	return vars_push( FLOAT_VAR, mcn700_2000_get_current( ) );
+    mcn700_2000_set_current( current );
+    return vars_push( FLOAT_VAR, mcn700_2000_get_current( ) );
 }
 
 
@@ -260,30 +260,30 @@ Var_T *powersupply_current( Var_T * v )
 
 Var_T *powersupply_command( Var_T * v )
 {
-	char *cmd = NULL;
+    char *cmd = NULL;
 
 
-	CLOBBER_PROTECT( cmd );
+    CLOBBER_PROTECT( cmd );
 
-	vars_check( v, STR_VAR );
-	
-	if ( FSC2_MODE == EXPERIMENT )
-	{
-		TRY
-		{
-			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-			mcn700_2000_command( cmd );
-			T_free( cmd );
-			TRY_SUCCESS;
-		}
-		OTHERWISE
-		{
-			T_free( cmd );
-			RETHROW( );
-		}
-	}
+    vars_check( v, STR_VAR );
+    
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        TRY
+        {
+            cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
+            mcn700_2000_command( cmd );
+            T_free( cmd );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( cmd );
+            RETHROW( );
+        }
+    }
 
-	return vars_push( INT_VAR, 1L );
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -293,17 +293,17 @@ Var_T *powersupply_command( Var_T * v )
 
 static bool mcn700_2000_init( const char * name )
 {
-	if ( gpib_init_device( name, &mcn700_2000.device ) == FAILURE )
-		return FAIL;
+    if ( gpib_init_device( name, &mcn700_2000.device ) == FAILURE )
+        return FAIL;
 
-	/* Set maximum integration time for measurements, command terminator to
-	   none and have the device raise EOI, and switch power supply on */
+    /* Set maximum integration time for measurements, command terminator to
+       none and have the device raise EOI, and switch power supply on */
 
-	mcn700_2000_command( "S7\n" ); 
-	mcn700_2000_command( "Y2\n" );
-	mcn700_2000_command( "F1\n" );
+    mcn700_2000_command( "S7\n" ); 
+    mcn700_2000_command( "Y2\n" );
+    mcn700_2000_command( "F1\n" );
 
-	return OK;
+    return OK;
 }
 
 
@@ -312,16 +312,16 @@ static bool mcn700_2000_init( const char * name )
 
 static double mcn700_2000_set_voltage( double voltage )
 {
-	char buffer[ 100 ];
+    char buffer[ 100 ];
 
-	fsc2_assert( voltage >= MIN_VOLTAGE &&
-				 voltage <= MAX_VOLTAGE );
+    fsc2_assert( voltage >= MIN_VOLTAGE &&
+                 voltage <= MAX_VOLTAGE );
 
-	sprintf( buffer, "U%.2f\n", voltage );
-	mcn700_2000_command( buffer );
-	mcn700_2000_set_voltage_completed( );
+    sprintf( buffer, "U%.2f\n", voltage );
+    mcn700_2000_command( buffer );
+    mcn700_2000_set_voltage_completed( );
 
-	return voltage;
+    return voltage;
 }
 
 
@@ -330,16 +330,16 @@ static double mcn700_2000_set_voltage( double voltage )
 
 static double mcn700_2000_get_voltage( void )
 {
-	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
+    char buffer[ 100 ];
+    char reply[ 100 ];
+    long length = 100;
 
 
-	sprintf( buffer, "N0\n" );
-	mcn700_2000_talk( buffer, reply, &length );
-	reply[ length - 2 ] = '\0';
+    sprintf( buffer, "N0\n" );
+    mcn700_2000_talk( buffer, reply, &length );
+    reply[ length - 2 ] = '\0';
 
-	return T_atod( reply );
+    return T_atod( reply );
 }
 
 
@@ -348,15 +348,15 @@ static double mcn700_2000_get_voltage( void )
 
 static double mcn700_2000_set_current( double current )
 {
-	char buffer[ 100 ];
+    char buffer[ 100 ];
 
 
-	fsc2_assert( current >= MIN_CURRENT &&
-				 current <= MAX_CURRENT);
-	sprintf( buffer, "I%.3f\n", current );
-	mcn700_2000_command( buffer );
+    fsc2_assert( current >= MIN_CURRENT &&
+                 current <= MAX_CURRENT);
+    sprintf( buffer, "I%.3f\n", current );
+    mcn700_2000_command( buffer );
 
-	return current;
+    return current;
 }
 
 
@@ -365,16 +365,16 @@ static double mcn700_2000_set_current( double current )
 
 static double mcn700_2000_get_current( void )
 {
-	char buffer[ 100 ];
-	char reply[ 100 ];
-	long length = 100;
+    char buffer[ 100 ];
+    char reply[ 100 ];
+    long length = 100;
 
 
-	sprintf( buffer, "N1\n" );
-	mcn700_2000_talk( buffer, reply, &length );
-	reply[ length - 2 ] = '\0';
+    sprintf( buffer, "N1\n" );
+    mcn700_2000_talk( buffer, reply, &length );
+    reply[ length - 2 ] = '\0';
 
-	return T_atod( reply );
+    return T_atod( reply );
 }
 
 
@@ -384,17 +384,17 @@ static double mcn700_2000_get_current( void )
 
 void mcn700_2000_set_voltage_completed( void )
 {
-	unsigned char stb = 0; 
+    unsigned char stb = 0; 
 
 
-	while ( ! ( stb & 0x04 ) )
-	{
-		fsc2_usleep( 10000, UNSET );
-		stop_on_user_request( );
+    while ( ! ( stb & 0x04 ) )
+    {
+        fsc2_usleep( 10000, UNSET );
+        stop_on_user_request( );
 
-		if ( gpib_serial_poll( mcn700_2000.device, &stb ) == FAILURE )
-			mcn700_2000_failure( );
-	}
+        if ( gpib_serial_poll( mcn700_2000.device, &stb ) == FAILURE )
+            mcn700_2000_failure( );
+    }
 }
 
 
@@ -403,12 +403,12 @@ void mcn700_2000_set_voltage_completed( void )
 
 static bool mcn700_2000_command( const char * cmd )
 {
-	if ( gpib_write( mcn700_2000.device, cmd, strlen( cmd ) ) == FAILURE )
-		mcn700_2000_failure( );
+    if ( gpib_write( mcn700_2000.device, cmd, strlen( cmd ) ) == FAILURE )
+        mcn700_2000_failure( );
 
-	fsc2_usleep( 20000, UNSET );
+    fsc2_usleep( 20000, UNSET );
 
-	return OK;
+    return OK;
 }
 
 
@@ -416,20 +416,20 @@ static bool mcn700_2000_command( const char * cmd )
  *--------------------------------------------------------------*/
 
 static bool mcn700_2000_talk( const char * cmd,
-							  char *       reply,
-							  long *       length )
+                              char *       reply,
+                              long *       length )
 {
-	if ( gpib_write( mcn700_2000.device, cmd, strlen( cmd ) ) == FAILURE )
-		mcn700_2000_failure( );
+    if ( gpib_write( mcn700_2000.device, cmd, strlen( cmd ) ) == FAILURE )
+        mcn700_2000_failure( );
 
-	fsc2_usleep( 20000, UNSET );
+    fsc2_usleep( 20000, UNSET );
 
-	if ( gpib_read( mcn700_2000.device, reply, length ) == FAILURE )
-		mcn700_2000_failure( );
+    if ( gpib_read( mcn700_2000.device, reply, length ) == FAILURE )
+        mcn700_2000_failure( );
 
-	fsc2_usleep( 20000, UNSET );
+    fsc2_usleep( 20000, UNSET );
 
-	return OK;
+    return OK;
 }
 
 
@@ -438,13 +438,15 @@ static bool mcn700_2000_talk( const char * cmd,
 
 static void mcn700_2000_failure( void )
 {
-	print( FATAL, "Communication with device failed.\n" );
-	THROW( EXCEPTION );
+    print( FATAL, "Communication with device failed.\n" );
+    THROW( EXCEPTION );
 }
 
 
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */

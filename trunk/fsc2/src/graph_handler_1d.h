@@ -30,20 +30,20 @@
 
 
 int canvas_handler_1d( FL_OBJECT * /* obj    */,
-					   Window      /* window */,
-					   int         /* w      */,
-					   int         /* h      */,
-					   XEvent *    /* ev     */,
-					   void *      /* udata  */);
+                       Window      /* window */,
+                       int         /* w      */,
+                       int         /* h      */,
+                       XEvent *    /* ev     */,
+                       void *      /* udata  */);
 
 bool user_zoom_1d( double /* x       */,
-				   bool   /* keep_x  */,
-				   double /* xw      */,
-				   bool   /* keep_xw */,
-				   double /* y       */,
-				   bool   /* keep_y  */,
-				   double /* yw      */,
-				   bool   /* keep_yw */ );
+                   bool   /* keep_x  */,
+                   double /* xw      */,
+                   bool   /* keep_xw */,
+                   double /* y       */,
+                   bool   /* keep_y  */,
+                   double /* yw      */,
+                   bool   /* keep_yw */ );
 
 void recalc_XPoints_of_curve_1d( Curve_1d_T * /* cv */ );
 
@@ -54,18 +54,18 @@ void redraw_canvas_1d( Canvas_T * /* c */ );
 void repaint_canvas_1d( Canvas_T * /* c */ );
 
 int get_mouse_pos_1d( double *       /* pa      */,
-					  unsigned int * /* keymask */ );
+                      unsigned int * /* keymask */ );
 
 void fs_rescale_1d( bool /* vert_only */ );
 
 void make_scale_1d( Curve_1d_T * /* cv    */,
-					Canvas_T *   /* c     */,
-					int          /* coord */  );
+                    Canvas_T *   /* c     */,
+                    int          /* coord */  );
 
 void save_scale_state_1d( Curve_1d_T * /* cv */ );
 
 void set_marker_1d( long /* position */,
-					long /* color    */ );
+                    long /* color    */ );
 
 void remove_markers_1d( void );
 
@@ -76,5 +76,7 @@ void remove_markers_1d( void );
 /*
  * Local variables:
  * tags-file-name: "../TAGS"
+ * tab-width: 4
+ * indent-tabs-mode: nil
  * End:
  */
