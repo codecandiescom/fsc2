@@ -1,0 +1,60 @@
+" Vim syntax file
+"
+" $Id$
+"
+" Language:	EDL (experiment description language, used by fsc2)
+" Maintainer:	Christoph Oelmüller <oelmu@physik.fu-berlin.de>
+" Last Change:	2006 Jul 25
+" Remark:
+
+if version < 600
+    syntax clear
+elseif exists("b:current_syntax")
+    finish
+endif
+
+syn case match
+setlocal iskeyword+=#
+" EDL keywords
+syn	keyword	    edlFunction BUILTIN_FUNCTION_LIST
+syn	keyword	    edlPreProc	    #EXIT #INCLUDE #QUIT
+syn	keyword	    edlStatement    IF ELSE FOR FOREVER REPEAT UNTIL WHILE NEXT BREAK
+syn	keyword     edlUnit	    cm^-1 A cm dB dBm db dbm G GA GdB GdBm Gdb Gdbm GG GHz GK Gm Gs GV Hz K kA kdB kdBm kdb kdbm kG kHz kK km ks kV m MA MdB MdBm Mdb Mdbm MG MHz MK Mm Ms MV mA mdB mdBm mdb mdbm mG mHz mk mm ms mT mV nA ndB ndBm ndb ndbm nG nHz nK nm ns nT nV s T uA uC udB udBm udb udbm uG uHz uK um us uT uV V contained
+
+syn	region	    edlComment start="//" skip="\\$" end="$"
+
+"integer number, or floating point number without a dot and with "f".
+syn case ignore
+syn match	edlNumbers	transparent "\<\d\|\.\d" contains=edlNumber,edlFloat nextgroup=edlUnit skipwhite
+" Same, but without octal error (for comments)
+syn match	edlNumbersCom	contained transparent "\<\d\|\.\d" contains=edlNumber,edlFloat
+syn match	edlNumber	contained "\d\+\(u\=l\{0,2}\|ll\=u\)\>" nextgroup=edlUnit skipwhite
+"hex number
+syn match	edlNumber	contained "0x\x\+\(u\=l\{0,2}\|ll\=u\)\>" nextgroup=edlUnit skipwhite
+syn match	edlFloat	contained "\d\+f" nextgroup=edlUnit skipwhite
+"floating point number, with dot, optional exponent
+syn match	edlFloat	contained "\d\+\.\d*\(e[-+]\=\d\+\)\=[fl]\=" nextgroup=edlUnit skipwhite
+"floating point number, starting with a dot, optional exponent
+syn match	edlFloat	contained "\.\d\+\(e[-+]\=\d\+\)\=[fl]\=\>" nextgroup=edlUnit skipwhite
+"floating point number, without dot, with exponent
+syn match	edlFloat	contained "\d\+e[-+]\=\d\+[fl]\=\>" nextgroup=edlUnit skipwhite
+
+syn case match
+syn keyword	edlDeviceConst	    AUX AUX1 AUX2 CH CH0 CH1 CH2 CH3 CH4 CH5 CH6 CH7 CH8 CH9 CH10 CH11 CH12 CH13 CH14 CH15 CHANNEL DEFAULT_SOURCE DELAY DELTA_LENGTH DELTA_START DELTA_LENGTH DELL DEL_L DELLEN DEL_LEN DELLENGTH DEL_LENGTH DELS DEL_S DELSTART DEL_START DELTAL DELTA_L DELTALEN DELTA_LEN DELTALENGTH DELTA_LENGTH DELTASTART  DL  D_L DLEN D_LEN DLENGTH D_LENGTH DS D_S DSTART D_START FUNC FUNC_E FUNC_F FUNCE FUNCF FUNCTION LENGTH LEVEL LIN LINE MATH1 MATH2 MATH3 MEM_C MEM_D MEMC MEMD MODE NEXT NEXT_GATE SLOPE SOURCE_0  SOURCE_1 SOURCE_2     SOURCE_3    TB T_B TBASE T_BASE TIMEB TIME_B TIMEBASE TIME_BASE TIMEBASE_1 TIMEBASE_2 	
+syn region	edlString   start=/"/ skip=/\\"/ end=/"/
+syn keyword	edlSection	ASSIGNMENTS DEVICES EXPERIMENT PHASES PREPARATIONS START VARIABLES ON_STOP
+syn keyword	edlDeviceFunction DEVICE_FUNCTION_LIST
+
+hi link	    edlFunction	        Underlined
+hi link	    edlPreProc	        PreProc
+hi link	    edlStatement        Statement
+hi link	    edlUnit	            DiffAdd
+hi link	    edlComment	        Comment
+hi link	    edlNumber	        Number
+hi link	    edlFloat	        Number
+hi link	    edlDeviceConst      String
+hi link	    edlString	        String
+hi link	    edlSection	        ToDo
+hi link	    edlDeviceFunction	VisualNOS
+
+

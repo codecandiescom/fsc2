@@ -20,19 +20,32 @@
 #  Boston, MA 02111-1307, USA.
 
 
-emacs_dir := $(shell if [ -d /susr/local/share/emacs/site-lisp ]; then  \
+emacs_dir := $(shell if [ -d /usr/local/share/emacs/site-lisp ]; then  \
 						 echo /usr/local/share/emacs/site-lisp;        \
-                     else if [ -d /susr/share/emacs/site-lisp ]; then   \
+                     else if [ -d /usr/share/emacs/site-lisp ]; then   \
 						     echo /usr/share/emacs/site-lisp;          \
 					 	  fi                                           \
 					 fi )
+vim_dir := $(shell if [ -d /usr/local/share/vim/current ]; then   \
+						 echo /usr/local/share/vim/current;       \
+                     else if [ -d /usr/share/vim/current ]; then  \
+						     echo /usr/share/vim/current;         \
+					 	  fi                                      \
+					 fi )
+
 all:
 	$(MAKE) utils
 
-utils: edl-mod.elc
+utils: edl-mod.elc edl.vim
+
+edl-mod.el: edl-mod.el.template $(sdir)/func.c $(cdir)/Functions
+	sed -e 's/BUILTIN_FUNCTION_LIST/$(shell SRC_DIR=$(sdir) ./get_built_in_functions emacs)/;s/DEVICE_FUNCTION_LIST/$(shell CONF_DIR=$(cdir) ./get_device_functions emacs)/' $< > $@;
 
 edl-mod.elc: edl-mod.el
 	emacs -batch -f batch-byte-compile edl-mod.el;
+
+edl.vim: edl.vim.template $(sdir)/func.c $(cdir)/Functions
+	sed -e 's/BUILTIN_FUNCTION_LIST/$(shell SRC_DIR=$(sdir) ./get_built_in_functions vim)/;s/DEVICE_FUNCTION_LIST/$(shell CONF_DIR=$(cdir) ./get_device_functions vim)/' $< > $@;
 
 install: edl-mod.elc
 	$(INSTALL) -m 755 fsc2_guify $(bindir)
@@ -41,6 +54,9 @@ install: edl-mod.elc
 	if [ -n "$(emacs_dir)" ]; then                   \
 		$(INSTALL) -m 644 edl-mod.el $(emacs_dir);   \
 		$(INSTALL) -m 444 edl-mod.elc $(emacs_dir);  \
+	fi
+	if [ -n "$(vim_dir)" ]; then                \
+		$(INSTALL) -m 644 edl.vim $(vim_dir);   \
 	fi
 
 uninstall:
@@ -53,10 +69,16 @@ uninstall:
 			rmdir $(emacs_dir);                      \
 		fi                                           \
 	fi
+	-if [ -n "$(vim_dir)" ]; then               \
+		-$(RM) $(RMFLAGS) $(vim_dir)/edl.vim;   \
+		-if [ -z "`ls -A $(vim_dir)`" ]; then   \
+			rmdir $(vim_dir);                   \
+		fi                                      \
+	fi
 
 cleanup:
 	-$(RM) $(RMFLAGS) svn-* *~
 
 clean:
 	$(MAKE) cleanup
-	-$(RM) $(RMFLAGS) edl-mod.elc
+	-$(RM) $(RMFLAGS) edl-mod.elc edl-mod.el edl.vim

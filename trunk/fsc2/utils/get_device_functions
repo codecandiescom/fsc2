@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+# -*- cperl -*-
+#
+# $Id$
+#
+# Function to extract all the device function names from the configuration
+# file they are listed in
+
+use strict;
+use warnings;
+
+my $file = $ENV{ 'CONF_DIR' } . "/Functions";
+open my $f, "<$file" or die;
+
+my @l;
+while ( <$f> ) {
+	next unless /\s*([a-zA-Z][a-zA-Z0-9_]*)\s*,\s*-?\d+\s*,\s*(ALL|PREP|EXP)\s*;/;
+	push @l, $1;
+}
+
+close $f;
+
+my $al = '';
+if ( $ARGV[ 0 ] eq 'emacs' ) {
+	$al .= " \"$_\"" foreach sort @l;
+} elsif ( $ARGV[ 0 ] eq 'vim' ) {
+	$al .= " $_"  foreach sort @l;
+}
+print "$al\n";
+

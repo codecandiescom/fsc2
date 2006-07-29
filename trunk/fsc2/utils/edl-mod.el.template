@@ -1,11 +1,11 @@
-;;; edl-mod.el --- editing EDL files with Emacs
+;;; edl-mod.el.template --- template file for emacs EDL mode 
 ;;
 ;;  $Id$
 ;;
 ;;  Copyright (C) 1999-2006 Jens Thoms Törring
 ;;
-;;  Author: Jens Thoms Törring <jens@masklin.anorg.chemie.uni-frankfurt.de>
-;;  Maintainer: Jens Thoms Törring <jens@masklin.anorg.chemie.uni-frankfurt.de>
+;;  Author: Jens Thoms Törring <jt@toerring.de>
+;;  Maintainer: Jens Thoms Törring <jt@toerring.de>
 ;;  Keywords: languages
 ;;
 ;;  This file is part of fsc2.

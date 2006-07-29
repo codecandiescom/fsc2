@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+# -*- cperl -*-
+#
+# $Id$
+#
+# Function to extract all the built-in function names from the source file
+# where they are listed as elements of an array of Func_T type structures
+
+
+use strict;
+use warnings;
+
+my $file = $ENV{ 'SRC_DIR' } . "/func.c";
+open my $f, "<$file" or die;
+
+while ( <$f> ) {
+	last if /^\s*Func_T\s+Def_Fncts\s*\[\s*\]\s*=\s*/;
+}
+
+die unless <$f> =~ /\s*\{\s*$/;
+
+my @l;
+
+while ( <$f> ) {
+	next unless /\s*\{\s*\"([a-zA-Z][a-zA-Z0-9_]*)\",\s*f_[a-zA-Z0-9_]+,\s*((-?\d+)|INT_MIN),\s*ACCESS_(ALL|PREPS|EXP),\s*NULL,\s*UNSET\s*\},\s*$/;
+	push @l, $1;
+}
+
+close $f;
+
+my $al = '';
+if ( $ARGV[ 0 ] eq 'emacs' ) {
+	$al .= " \"$_\"" foreach sort @l;
+} elsif ( $ARGV[ 0 ] eq 'vim' ) {
+	$al .= " $_"  foreach sort @l;
+}
+print "$al\n";
