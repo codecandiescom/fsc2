@@ -20,30 +20,38 @@
 #  Boston, MA 02111-1307, USA.
 
 
-emacs_dir := /usr/share/emacs/site-lisp
-
+emacs_dir := $(shell if [ -d /susr/local/share/emacs/site-lisp ]; then  \
+						 echo /usr/local/share/emacs/site-lisp;        \
+                     else if [ -d /susr/share/emacs/site-lisp ]; then   \
+						     echo /usr/share/emacs/site-lisp;          \
+					 	  fi                                           \
+					 fi )
 all:
 	$(MAKE) utils
 
 utils: edl-mod.elc
 
 edl-mod.elc: edl-mod.el
-	emacs -batch -f batch-byte-compile edl-mod.el
+	emacs -batch -f batch-byte-compile edl-mod.el;
 
 install: edl-mod.elc
 	$(INSTALL) -m 755 fsc2_guify $(bindir)
 	$(INSTALL) -m 755 fsc2_pulses $(bindir)
 	$(INSTALL) -d $(emacs_dir)
-	$(INSTALL) -m 644 edl-mod.el $(emacs_dir)
-	$(INSTALL) -m 444 edl-mod.elc $(emacs_dir)
+	if [ -n "$(emacs_dir)" ]; then                   \
+		$(INSTALL) -m 644 edl-mod.el $(emacs_dir);   \
+		$(INSTALL) -m 444 edl-mod.elc $(emacs_dir);  \
+	fi
 
 uninstall:
 	-$(RM) $(RMFLAGS) $(bindir)/fsc2_guify
 	-$(RM) $(RMFLAGS) $(bindir)/fsc2_pulses
-	-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.el
-	-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.elc
-	-if [ -z "`ls -A $(emacs_dir)`" ]; then  \
-		rmdir $(emacs_dir);                  \
+	-if [ -n "$(emacs_dir)" ]; then                  \
+		-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.el;   \
+		-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.elc;  \
+		-if [ -z "`ls -A $(emacs_dir)`" ]; then      \
+			rmdir $(emacs_dir);                      \
+		fi                                           \
 	fi
 
 cleanup:

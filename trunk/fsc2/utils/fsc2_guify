@@ -236,8 +236,6 @@ sub analyze_var_options {
         $hr->{ value } = $res if defined $res;
     }
 
-
-
     ( $res, $str ) = get_string( $str, $hr );
     $hr->{ label } = defined $res ? $res : '""';
 
@@ -421,7 +419,7 @@ sub get_default_value {
 
 
 ################################################################
-# Function for extracting a double-quote-enclosed string
+# Function for extracting a string enclosed in double-quotes
 
 sub get_string {
     my $str = shift;
