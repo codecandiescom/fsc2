@@ -1131,7 +1131,7 @@ MW:           POD = P1, P2, P3, P4, INVERTED, V_HIGH = 5 V, V_LOW = 0 V;
 DETECTION:    POD = P0,                       V_HIGH = 5 V, V_LOW = 0 V;
       
        
-PHASE_SETUP:  MW,           // cycle microwave channel
+PHASE_SETUP:  MW,            // cycle microwave channel
               +X: POD = P1,  // POD 1 on for +X
               -X: POD = P2,  // POD 2 on for -X
               +Y: POD = P3,  // POD 3 on for +Y
