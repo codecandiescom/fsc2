@@ -20,7 +20,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Acknowledgments, Copying, EDL Mode for Emacs, Top
+@node Acknowledgments, Copying, EDL Mode for Emacs and VIM, Top
 @appendix Acknowledgments
 
 
@@ -37,9 +37,10 @@ Netherlands) supported the development by employing me to extend and improve
 the program and write further device drivers.
 
 Special thanks go to Anton Savitsky for writing the module for the
-@w{Thurlby 330} programable power supply and to Sergey Weber (Nowosibirsk)
+@w{Thurlby 330} programable power supply, to Sergey Weber (Nowosibirsk)
 for the @w{Schlumberger 7510} multimeter and allowing me to include them
-into the distribution.
+into the distribution, and to Christoph Oelm@"uller, who wrote the @code{EDL}
+mode for @code{vim}.
 
 All the people using the program so far have from time to time been (mis)used
 as alpha-testers. The first one accepting this unpleasant role has been Axel

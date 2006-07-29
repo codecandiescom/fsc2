@@ -14,114 +14,114 @@
 #include "Fcntl_Lock.h"
 
 
-MODULE = Fcntl_Lock		PACKAGE = Fcntl_Lock
+MODULE = Fcntl_Lock     PACKAGE = Fcntl_Lock
 
 PROTOTYPES: ENABLE
 
 
 SV *
 C_fcntl_lock( fd, function, flock_hash, int_err )
-	int fd
-	int function
-	SV *flock_hash
-	SV *int_err
+    int fd
+    int function
+    SV *flock_hash
+    SV *int_err
 
-	INIT:
-		unsigned char flock_struct[ STRUCT_SIZE ];
-		HV *fs;
-		SV **sv_type, **sv_whence, **sv_start, **sv_len, **sv_pid;
+    INIT:
+        unsigned char flock_struct[ STRUCT_SIZE ];
+        HV *fs;
+        SV **sv_type, **sv_whence, **sv_start, **sv_len, **sv_pid;
 
-		sv_setiv( int_err, 0 );
+        sv_setiv( int_err, 0 );
 
-		if ( ! SvROK( flock_hash ) )
-		{
-				sv_setiv( int_err, 1 );
-				XSRETURN_UNDEF;
-		}
+        if ( ! SvROK( flock_hash ) )
+        {
+                sv_setiv( int_err, 1 );
+                XSRETURN_UNDEF;
+        }
 
-		fs = ( HV * ) SvRV( flock_hash );
+        fs = ( HV * ) SvRV( flock_hash );
 
-	CODE:
-		/* Unfortunately, we can't even be sure that the constants aren't
-		   messed up... */
+    CODE:
+        /* Unfortunately, we can't even be sure that the constants aren't
+           messed up... */
 
-		switch ( function )
-		{
-			case F_GETLK :
-				function = REAL_F_GETLK;
-				break;
+        switch ( function )
+        {
+            case F_GETLK :
+                function = REAL_F_GETLK;
+                break;
 
-			case F_SETLK :
-				function = REAL_F_SETLK;
-				break;
+            case F_SETLK :
+                function = REAL_F_SETLK;
+                break;
 
-			case F_SETLKW :
-				function = REAL_F_SETLKW;
-				break;
+            case F_SETLKW :
+                function = REAL_F_SETLKW;
+                break;
 
-			default :
-				sv_setiv( int_err, 1 );
-				XSRETURN_UNDEF;
-		}
+            default :
+                sv_setiv( int_err, 1 );
+                XSRETURN_UNDEF;
+        }
 
-		/* Let's be careful and not assume that anything at all will work as
-	   	   expected (otherwise we could merge this with the following) */
+        /* Let's be careful and not assume that anything at all will work as
+           expected (otherwise we could merge this with the following) */
 
-		if ( ( sv_type   = hv_fetch( fs, "l_type",   6, 0 ) ) == NULL ||
-			 ( sv_whence = hv_fetch( fs, "l_whence", 8, 0 ) ) == NULL ||
-			 ( sv_start  = hv_fetch( fs, "l_start",  7, 0 ) ) == NULL ||
-			 ( sv_len	 = hv_fetch( fs, "l_len",    5, 0 ) ) == NULL ||
-			 ( sv_pid	 = hv_fetch( fs, "l_pid",    5, 0 ) ) == NULL )
-		{
-			sv_setiv( int_err, 1 );
-			XSRETURN_UNDEF;
-		}
+        if ( ( sv_type   = hv_fetch( fs, "l_type",   6, 0 ) ) == NULL ||
+             ( sv_whence = hv_fetch( fs, "l_whence", 8, 0 ) ) == NULL ||
+             ( sv_start  = hv_fetch( fs, "l_start",  7, 0 ) ) == NULL ||
+             ( sv_len    = hv_fetch( fs, "l_len",    5, 0 ) ) == NULL ||
+             ( sv_pid    = hv_fetch( fs, "l_pid",    5, 0 ) ) == NULL )
+        {
+            sv_setiv( int_err, 1 );
+            XSRETURN_UNDEF;
+        }
 
-		/* Set up the the flock structure expected by fcntl() with the
-		   values in the hash we got passed */
+        /* Set up the the flock structure expected by fcntl() with the
+           values in the hash we got passed */
 
-		* ( LTYPE_TYPE * ) ( flock_struct + LTYPE_OFFSET ) =
-										( LTYPE_TYPE ) SvIV( *sv_type );
-		* ( LWHENCE_TYPE * ) ( flock_struct + LWHENCE_OFFSET ) =
-										( LWHENCE_TYPE ) SvIV( *sv_whence );
-		* ( LSTART_TYPE * ) ( flock_struct + LSTART_OFFSET ) =
-										( LSTART_TYPE ) SvIV( *sv_start );
-		* ( LLEN_TYPE * ) ( flock_struct + LLEN_OFFSET ) =
-										( LLEN_TYPE ) SvIV( *sv_len );
-		* ( LPID_TYPE * ) ( flock_struct + LPID_OFFSET ) =
-										( LPID_TYPE ) SvIV( *sv_pid );
+        * ( LTYPE_TYPE * ) ( flock_struct + LTYPE_OFFSET ) =
+                                        ( LTYPE_TYPE ) SvIV( *sv_type );
+        * ( LWHENCE_TYPE * ) ( flock_struct + LWHENCE_OFFSET ) =
+                                        ( LWHENCE_TYPE ) SvIV( *sv_whence );
+        * ( LSTART_TYPE * ) ( flock_struct + LSTART_OFFSET ) =
+                                        ( LSTART_TYPE ) SvIV( *sv_start );
+        * ( LLEN_TYPE * ) ( flock_struct + LLEN_OFFSET ) =
+                                        ( LLEN_TYPE ) SvIV( *sv_len );
+        * ( LPID_TYPE * ) ( flock_struct + LPID_OFFSET ) =
+                                        ( LPID_TYPE ) SvIV( *sv_pid );
 
-		/* Now comes the great moment: fcntl() is finally called - if we want
-		   the lock immediately but some other process is holding it we return
-		   'undef' (people can find out about the reasons by checking errno).
-		   The same happens if we wait for the lock but receive a signal. */
+        /* Now comes the great moment: fcntl() is finally called - if we want
+           the lock immediately but some other process is holding it we return
+           'undef' (people can find out about the reasons by checking errno).
+           The same happens if we wait for the lock but receive a signal. */
 
-		if ( fcntl( fd, function, flock_struct ) != 0 )
-			XSRETURN_UNDEF;
+        if ( fcntl( fd, function, flock_struct ) != 0 )
+            XSRETURN_UNDEF;
 
-		/* Now to find out who's holding the lock we now must unpack the
-		   structure we got back from fcntl() and store it in the hash we
-		   got passed. */
+        /* Now to find out who's holding the lock we now must unpack the
+           structure we got back from fcntl() and store it in the hash we
+           got passed. */
 
-		if ( function == REAL_F_GETLK )
-		{
-			hv_store( fs, "l_type",   6, newSViv( * ( LTYPE_TYPE * ) 
-									  ( flock_struct + LTYPE_OFFSET ) ), 0 );
-			hv_store( fs, "l_whence", 8, newSViv( * ( LWHENCE_TYPE * ) 
-									  ( flock_struct + LWHENCE_OFFSET ) ), 0 );
-			hv_store( fs, "l_start",  7, newSViv( * ( LSTART_TYPE * ) 
-									  ( flock_struct + LSTART_OFFSET ) ), 0 );
-			hv_store( fs, "l_len",    5, newSViv( * ( LLEN_TYPE * ) 
-									  ( flock_struct + LLEN_OFFSET ) ), 0 );
-			hv_store( fs, "l_pid",    5, newSViv( * ( LPID_TYPE * ) 
-									  ( flock_struct + LPID_OFFSET ) ), 0 );
-		}
+        if ( function == REAL_F_GETLK )
+        {
+            hv_store( fs, "l_type",   6, newSViv( * ( LTYPE_TYPE * ) 
+                                      ( flock_struct + LTYPE_OFFSET ) ), 0 );
+            hv_store( fs, "l_whence", 8, newSViv( * ( LWHENCE_TYPE * ) 
+                                      ( flock_struct + LWHENCE_OFFSET ) ), 0 );
+            hv_store( fs, "l_start",  7, newSViv( * ( LSTART_TYPE * ) 
+                                      ( flock_struct + LSTART_OFFSET ) ), 0 );
+            hv_store( fs, "l_len",    5, newSViv( * ( LLEN_TYPE * ) 
+                                      ( flock_struct + LLEN_OFFSET ) ), 0 );
+            hv_store( fs, "l_pid",    5, newSViv( * ( LPID_TYPE * ) 
+                                      ( flock_struct + LPID_OFFSET ) ), 0 );
+        }
 
-		/* Return the systems return value of the fcntl() call (which is 0) but
-		   in a way that can't be mistaken as meaning false (shamelessly stolen
-		   from pp_sys.c in the the Perl sources). */
+        /* Return the systems return value of the fcntl() call (which is 0) but
+           in a way that can't be mistaken as meaning false (shamelessly stolen
+           from pp_sys.c in the the Perl sources). */
 
-		RETVAL = newSVpvn( "0 but true", 10 );
+        RETVAL = newSVpvn( "0 but true", 10 );
 
-	OUTPUT:
-		RETVAL
+    OUTPUT:
+        RETVAL

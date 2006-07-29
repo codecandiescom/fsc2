@@ -9,6 +9,7 @@ function often is based.
 Obviously, to use the module you need a system that supports the fcntl()
 system call.
 
+
 INSTALLATION
 
 To install this module type the following:
@@ -18,11 +19,13 @@ To install this module type the following:
    make test
    make install
 
+
 DEPENDENCIES
 
 The module requires the following modules:
 
   POSIX, Errno, Carp
+
 
 IMPLEMENTATION DETAILS
 
@@ -45,6 +48,7 @@ the real size and alignment of the flock structure and writes out an
 include file. The data from this file are then used to populate (or extract
 data from) the flock structure of the correct type.
 
+
 ACKNOWLEDGMENTS
 
 Thanks to Mark-Jason Dominus <mjd@plover.com> and Benjamin Goldberg
@@ -55,4 +59,4 @@ COPYRIGHT AND LICENCE
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
-Copyright (C) 2002-2005 Jens Thoms Toerring <jt@toerring.de>
+Copyright (C) 2002-2006 Jens Thoms Toerring <jt@toerring.de>

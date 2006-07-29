@@ -56,5 +56,3 @@ hi link	    edlDeviceConst      String
 hi link	    edlString	        String
 hi link	    edlSection	        ToDo
 hi link	    edlDeviceFunction	VisualNOS
-
-

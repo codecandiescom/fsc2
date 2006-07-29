@@ -25,8 +25,8 @@ our @ISA = qw(Exporter DynaLoader);
 # Items to export into callers namespace by default.
 
 our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
-				  F_RDLCK F_WRLCK F_UNLCK
-				  SEEK_SET SEEK_CUR SEEK_END
+                  F_RDLCK F_WRLCK F_UNLCK
+                  SEEK_SET SEEK_CUR SEEK_END
 );
 
 our $VERSION = '0.06';
@@ -75,53 +75,53 @@ set or it can be determined which process currently holds the lock.
 my %fcntl_error_texts;
 
 BEGIN {
-	my $err;
+    my $err;
 
-	if ( $err = eval { &Errno::EACCES } ) {
-		$fcntl_error_texts{ $err } = "File or segment already locked " .
-			                         "by other process(es) or file is " .
-									 "mmap()ed to virtual memory";
-	}
-	if ( $err = eval { &Errno::EAGAIN } ) {
-		$fcntl_error_texts{ $err } = "File or segment already locked " .
-			                         "by other process(es)";
-	}
-	if ( $err = eval { &Errno::EBADF } ) {
-		$fcntl_error_texts{ $err } = "Not an open file handle or descriptor " .
-			                         "or not open for writing (with F_WRLCK)" .
-									 " or reading (with F_RDLCK)";
-	}
-	if ( $err = eval { &Errno::EDEADLK } ) {
-		$fcntl_error_texts{ $err } = "Operation would cause a deadlock";
-	}
-	if ( $err = eval { &Errno::EFAULT } ) {
-		$fcntl_error_texts{ $err } = "Lock outside accessible address space " .
-			                         "or to many locked regions";
-	}
-	if ( $err = eval { &Errno::EINTR } ) {
-		$fcntl_error_texts{ $err } = "Operation interrupted by a signal";
-	}
-	if ( $err = eval { &Errno::ENOLCK } ) {
-		$fcntl_error_texts{ $err } = "Too many segment locks open, lock " .
-			                         "table full or remote locking protocol " .
-									 "failure (e.g. NFS)";
-	}
-	if ( $err = eval { &Errno::EINVAL } ) {
-		$fcntl_error_texts{ $err } = "Illegal parameter or file does not " .
-			                         "support locking";
-	}
-	if ( $err = eval { &Errno::EOVERFLOW } ) {
-		$fcntl_error_texts{ $err } = "One of the parameters to be returned " .
-			                         "can not be represented correctly";
-	}
-	if ( $err = eval { &Errno::ENETUNREACH } ) {
-		$fcntl_error_texts{ $err } = "File is on remote machine that can " .
-			                         "not be reached anymore";
-	}
-	if ( $err = eval { &Errno::ENOLINK } ) {
-		$fcntl_error_texts{ $err } = "File is on remote machine that can " .
-			                         "not be reached anymore";
-	}
+    if ( $err = eval { &Errno::EACCES } ) {
+        $fcntl_error_texts{ $err } = "File or segment already locked " .
+                                     "by other process(es) or file is " .
+                                     "mmap()ed to virtual memory";
+    }
+    if ( $err = eval { &Errno::EAGAIN } ) {
+        $fcntl_error_texts{ $err } = "File or segment already locked " .
+                                     "by other process(es)";
+    }
+    if ( $err = eval { &Errno::EBADF } ) {
+        $fcntl_error_texts{ $err } = "Not an open file handle or descriptor " .
+                                     "or not open for writing (with F_WRLCK)" .
+                                     " or reading (with F_RDLCK)";
+    }
+    if ( $err = eval { &Errno::EDEADLK } ) {
+        $fcntl_error_texts{ $err } = "Operation would cause a deadlock";
+    }
+    if ( $err = eval { &Errno::EFAULT } ) {
+        $fcntl_error_texts{ $err } = "Lock outside accessible address space " .
+                                     "or to many locked regions";
+    }
+    if ( $err = eval { &Errno::EINTR } ) {
+        $fcntl_error_texts{ $err } = "Operation interrupted by a signal";
+    }
+    if ( $err = eval { &Errno::ENOLCK } ) {
+        $fcntl_error_texts{ $err } = "Too many segment locks open, lock " .
+                                     "table full or remote locking protocol " .
+                                     "failure (e.g. NFS)";
+    }
+    if ( $err = eval { &Errno::EINVAL } ) {
+        $fcntl_error_texts{ $err } = "Illegal parameter or file does not " .
+                                     "support locking";
+    }
+    if ( $err = eval { &Errno::EOVERFLOW } ) {
+        $fcntl_error_texts{ $err } = "One of the parameters to be returned " .
+                                     "can not be represented correctly";
+    }
+    if ( $err = eval { &Errno::ENETUNREACH } ) {
+        $fcntl_error_texts{ $err } = "File is on remote machine that can " .
+                                     "not be reached anymore";
+    }
+    if ( $err = eval { &Errno::ENOLINK } ) {
+        $fcntl_error_texts{ $err } = "File is on remote machine that can " .
+                                     "not be reached anymore";
+    }
 }
 
 
@@ -149,25 +149,25 @@ if you plan to obtain a write lock for the first 100 bytes of a file.
 =cut
 
 sub new {
-	my $inv = shift;
+    my $inv = shift;
     my $pkg = ref( $inv ) || $inv;
 
     my $self = { 'l_type'        => F_RDLCK,
-				 'l_whence'      => SEEK_SET,
+                 'l_whence'      => SEEK_SET,
                  'l_start'       => 0,
-				 'l_len'         => 0,
-				 'l_pid'         => 0,
-				 'errno'         => undef,
-				 'error_message' => undef
-			   };
+                 'l_len'         => 0,
+                 'l_pid'         => 0,
+                 'errno'         => undef,
+                 'error_message' => undef
+               };
 
-	croak "Missing value in key-value initializer list" if @_ % 2;
-	while ( @_ ) {
-		my $key = shift;
-		no strict 'refs';
-		croak "Flock structure has no \'$key\' member" unless defined &$key;
-		&$key( $self, shift );
-	}
+    croak "Missing value in key-value initializer list" if @_ % 2;
+    while ( @_ ) {
+        my $key = shift;
+        no strict 'refs';
+        croak "Flock structure has no \'$key\' member" unless defined &$key;
+        &$key( $self, shift );
+    }
 
     bless $self, $pkg;
 }
@@ -193,12 +193,12 @@ B<F_RDLCK>, B<F_WRLCK> or B<F_UNLCK> (for read lock, write lock or unlock).
 sub l_type {
     my $flock_struct = shift;
 
-	if ( @_ ) {
-		my $l_type = shift;
-		croak "Invalid value for l_type member"
-		 unless $l_type == F_RDLCK or $l_type == F_WRLCK or $l_type == F_UNLCK;
-		$flock_struct->{ 'l_type' } = $l_type;
-	}
+    if ( @_ ) {
+        my $l_type = shift;
+        croak "Invalid value for l_type member"
+         unless $l_type == F_RDLCK or $l_type == F_WRLCK or $l_type == F_UNLCK;
+        $flock_struct->{ 'l_type' } = $l_type;
+    }
     return $flock_struct->{ l_type };
 }
 
@@ -219,14 +219,14 @@ B<SEEK_SET>, B<SEEK_CUR> and B<SEEK_END>. See also the man page for lseek(2);
 sub l_whence {
     my $flock_struct = shift;
 
-	if ( @_ ) {
-		my $l_whence = shift;
-		croak "Invalid value for l_whence member"
-			unless $l_whence == SEEK_SET or
-				   $l_whence == SEEK_CUR or
-				   $l_whence == SEEK_END;
-		$flock_struct->{ l_whence } = $l_whence;
-	}
+    if ( @_ ) {
+        my $l_whence = shift;
+        croak "Invalid value for l_whence member"
+            unless $l_whence == SEEK_SET or
+                   $l_whence == SEEK_CUR or
+                   $l_whence == SEEK_END;
+        $flock_struct->{ l_whence } = $l_whence;
+    }
     return $flock_struct->{ l_whence };
 }
 
@@ -247,7 +247,7 @@ sub l_start {
     my $flock_struct = shift;
 
     if ( @_ ) { $flock_struct->{ l_start } = shift }
-	return $flock_struct->{ l_start };
+    return $flock_struct->{ l_start };
 }
 
 
@@ -272,7 +272,7 @@ for details.
 sub l_len {
     my $flock_struct = shift;
 
-	if ( @_ ) { $flock_struct->{ l_len } = shift }
+    if ( @_ ) { $flock_struct->{ l_len } = shift }
     return $flock_struct->{ l_len };
 }
 
@@ -294,7 +294,7 @@ process holding the lock is returned in this member.
 sub l_pid {
     my $flock_struct = shift;
 
-	if ( @_ ) { $flock_struct->{ l_pid } = shift }
+    if ( @_ ) { $flock_struct->{ l_pid } = shift }
     return $flock_struct->{ l_pid };
 }
 
@@ -353,29 +353,29 @@ later time.
 =cut
 
 sub fcntl_lock {
-	my ( $flock_struct, $fh, $action ) = @_;
-	my $ret;
-	my $err;
+    my ( $flock_struct, $fh, $action ) = @_;
+    my $ret;
+    my $err;
 
-	croak "Missing arguments to fcntl_lock()"
-		unless defined $flock_struct and defined $fh and defined $action;
-	croak "Invalid action argument" unless $action == F_GETLK or
-										   $action == F_SETLK or
-										   $action == F_SETLKW;
+    croak "Missing arguments to fcntl_lock()"
+        unless defined $flock_struct and defined $fh and defined $action;
+    croak "Invalid action argument" unless $action == F_GETLK or
+                                           $action == F_SETLK or
+                                           $action == F_SETLKW;
 
-	my $fd = ref( $fh ) ? fileno( $fh ) : $fh;
-	if ( $ret = C_fcntl_lock( $fd, $action, $flock_struct, $err ) ) {
-		$flock_struct->{ errno } = $flock_struct->{ error } = undef;
-	} else {
-		# Hope this never will happen... */
-		die "Internal error in Fcntl_Lock module detected" if $err;
+    my $fd = ref( $fh ) ? fileno( $fh ) : $fh;
+    if ( $ret = C_fcntl_lock( $fd, $action, $flock_struct, $err ) ) {
+        $flock_struct->{ errno } = $flock_struct->{ error } = undef;
+    } else {
+        # Hope this never will happen... */
+        die "Internal error in Fcntl_Lock module detected" if $err;
 
-		$flock_struct->{ errno } = $! + 0;
-		$flock_struct->{ error } = defined $fcntl_error_texts{ $! + 0 } ?
-			$fcntl_error_texts{ $! + 0 } : "Unexpected error: $!";
-	}
+        $flock_struct->{ errno } = $! + 0;
+        $flock_struct->{ error } = defined $fcntl_error_texts{ $! + 0 } ?
+            $fcntl_error_texts{ $! + 0 } : "Unexpected error: $!";
+    }
 
-	return $ret;
+    return $ret;
 }
 
 
@@ -398,7 +398,7 @@ the function returns 'undef'.
 
 sub fcntl_errno {
     my $flock_struct = shift;
-	return $flock_struct->{ errno };
+    return $flock_struct->{ errno };
 }
 
 
@@ -419,7 +419,7 @@ other systems. If there was no error the function returns 'undef'.
 
 sub fcntl_error {
     my $flock_struct = shift;
-	return $flock_struct->{ error };
+    return $flock_struct->{ error };
 }
 
 
@@ -441,9 +441,9 @@ error.
 =cut
 
 sub fcntl_system_error {
-	local $!;
-	my $flock_struct = shift;
-	return $flock_struct->{ errno } ? $! = $flock_struct->{ errno } : 'undef';
+    local $!;
+    my $flock_struct = shift;
+    return $flock_struct->{ errno } ? $! = $flock_struct->{ errno } : 'undef';
 }
 
 
@@ -470,3 +470,9 @@ Jens Thoms Toerring <jt@toerring.de>
 =head1 SEE ALSO
 
 L<perl(1)>, L<fcntl(2)>, L<lseek(2)>.
+
+
+# Local variables:
+# tab-width: 4
+# indent-tabs-mode: nil
+# End:

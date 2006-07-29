@@ -1289,9 +1289,9 @@ static double ips120_10_set_target_current( double current )
     return current;
 }
 
-/*---------------------------------------------------------------*
- * Function for asking the current setting of the target current
- *---------------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for asking the setting of the target current
+ *-------------------------------------------------------*/
 
 static double ips120_10_get_target_current( void )
 {

@@ -26,7 +26,7 @@
 
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate March 8, 2006
+@set lastupdate July 29, 2006
 @iftex
 @afourpaper
 @end iftex
@@ -43,7 +43,7 @@
 @sp 4
 @center A Program for the Remote Control of Spectrometers
 @sp 2
-@center March 2006
+@center July 2006
 @sp 10
 @center Jens Thoms T@"orring
 @sp 1
@@ -88,25 +88,25 @@ extend the range of devices that can be controlled by writing new device
 modules and lots of further topics.
 
 @menu
-* Introduction::            Basic concepts of @code{fsc2}
-* GUI::                     The graphical user interface
-* Web Server::              Monitoring the experiment via the net
-* EDL::                     Description of the @code{EDL} language
-* Built-in Functions::      Description of all built-in functions
-* Device Functions::        Description of functions for accessing devices
-* Using Pulsers::           How to work with the pulsers
-* Example EDL Scripts::     A set of example scripts
-* Command Line Options::    How to invoke @code{fsc2}
-* GUI-fying::               How to add a GUI to an @code{EDL} script
-* Cloning Devices::         Creating modules for identical devices
-* Internals::               How @code{fsc2} works internally
-* Modules::                 How to create new modules
-* Device Reference::        List of devices and their functions
-* Reserved Words::          List of all reserved words
-* EDL Mode for Emacs::      Support for editing with emacs
-* Acknowledgments::         The title says it all...
-* Copying::                 The GNU General Public License
-* Index::                   List of all indexed words
+* Introduction::                Basic concepts of @code{fsc2}
+* GUI::                         The graphical user interface
+* Web Server::                  Monitoring the experiment via the net
+* EDL::                         Description of the @code{EDL} language
+* Built-in Functions::          Description of all built-in functions
+* Device Functions::            Description of functions for accessing devices
+* Using Pulsers::               How to work with the pulsers
+* Example EDL Scripts::         A set of example scripts
+* Command Line Options::        How to invoke @code{fsc2}
+* GUI-fying::                   How to add a GUI to an @code{EDL} script
+* Cloning Devices::             Creating modules for identical devices
+* Internals::                   How @code{fsc2} works internally
+* Modules::                     How to create new modules
+* Device Reference::            List of devices and their functions
+* Reserved Words::              List of all reserved words
+* EDL Mode for Emacs and VIM::  Support for editing with emacs
+* Acknowledgments::             The title says it all...
+* Copying::                     The GNU General Public License
+* Index::                       List of all indexed words
 @end menu
 
 

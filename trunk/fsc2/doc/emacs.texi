@@ -20,20 +20,39 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node EDL Mode for Emacs, Acknowledgments, Reserved Words, Top
-@appendix EDL Mode for Emacs
+@node EDL Mode for Emacs and VIM, Acknowledgments, Reserved Words, Top
+@appendix EDL Mode for Emacs and VIM
 
-There exists a still not very useful @emph{emacs} mode for editing
+There exists a still not too useful @emph{emacs} mode for editing
 @code{EDL} scripts. It currently only does syntax highlighting.  This
 makes reserved words stand out and can help e.g.@: avoiding accidentally
 using reserved words as variable names.
 
-To automatically have emacs switch to EDL mode whenever you load a file
-with the extension @code{edl} you need to add the following lines
-to your @file{.emacs} file:
+To automatically have emacs switch to @code{EDL} mode whenever you load a
+file with the extension @code{edl} you need to add the following lines
+to the @file{.emacs} file in your home directory:
 @example
 (autoload 'edl-mode "edl-mod.elc"
  "edl-mod.el -- editing EDL files with Emacs")
 (setq auto-mode-alist (append (list (cons "\\.edl\\'" 'edl-mode))
                                auto-mode-alist))
 @end example
+
+The @code{EDL} mode for @emph{vim} was written by Christoph Oelm@"uller
+<@email{oelmu@@physik.fu-berlin.de}>, who was so kind to allow me to
+distribute it together with @code{fsc2}.
+
+To automatically load @code{EDL} mode under @emph{vim} put a file named
+@file{filetyp.vim} in the @file{.vim} subdirectory in your home directory,
+containing the following lines:
+@example
+if exists("did_load_filetypes")
+  finish
+endif
+" add EDL filetype
+augroup filetypedetect
+au BufNewFile,BufRead *.edl     setfiletype edl
+augroup END
+@end example
+@noindent
+(or append the necessay lines if such a file already exists).

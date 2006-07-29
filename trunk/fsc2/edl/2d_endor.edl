@@ -15,7 +15,7 @@ er035m_sas;                  // gauss meter
 VARIABLES:
 
 start_freq  = 12 MHz;
-end_freq    =  14 MHz;
+end_freq    = 14 MHz;
 step_freq   = 40 kHz;          
 
 attenuation =  -5 dB;

@@ -39,7 +39,7 @@ all:
 utils: edl-mod.elc edl.vim
 
 edl-mod.el: edl-mod.el.template $(sdir)/func.c $(cdir)/Functions
-	sed -e 's/BUILTIN_FUNCTION_LIST/$(shell SRC_DIR=$(sdir) ./get_built_in_functions emacs)/;s/DEVICE_FUNCTION_LIST/$(shell CONF_DIR=$(cdir) ./get_device_functions emacs)/' $< > $@;
+	sed -e 's/BUILTIN_FUNCTION_LIST/$(shell SRC_DIR=$(sdir) ./get_built_in_functions emacs 2>/dev/null)/;s/DEVICE_FUNCTION_LIST/$(shell CONF_DIR=$(cdir) ./get_device_functions emacs 2>/dev/null)/' $< > $@;
 
 edl-mod.elc: edl-mod.el
 	emacs -batch -f batch-byte-compile edl-mod.el;
@@ -55,8 +55,8 @@ install: edl-mod.elc
 		$(INSTALL) -m 644 edl-mod.el $(emacs_dir);   \
 		$(INSTALL) -m 444 edl-mod.elc $(emacs_dir);  \
 	fi
-	if [ -n "$(vim_dir)" ]; then                \
-		$(INSTALL) -m 644 edl.vim $(vim_dir);   \
+	if [ -n "$(vim_dir)" ]; then                      \
+		$(INSTALL) -m 644 edl.vim $(vim_dir)/plugin;  \
 	fi
 
 uninstall:
@@ -69,11 +69,11 @@ uninstall:
 			rmdir $(emacs_dir);                      \
 		fi                                           \
 	fi
-	-if [ -n "$(vim_dir)" ]; then               \
-		-$(RM) $(RMFLAGS) $(vim_dir)/edl.vim;   \
-		-if [ -z "`ls -A $(vim_dir)`" ]; then   \
-			rmdir $(vim_dir);                   \
-		fi                                      \
+	-if [ -n "$(vim_dir)" ]; then                     \
+		-$(RM) $(RMFLAGS) $(vim_dir)/plugin/edl.vim;  \
+		-if [ -z "`ls -A $(vim_dir)/plugin`" ]; then  \
+			rmdir $(vim_dir)/plugin;                  \
+		fi                                            \
 	fi
 
 cleanup:
