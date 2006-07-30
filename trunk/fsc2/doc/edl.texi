@@ -87,7 +87,7 @@ EXPERIMENT:
   WHILE field <= end_field
   @{
       data = lockin_get_data( );
-      display( I, data );
+      display_1d( I, data );
       save( data );
       I = I + 1;
       field = sweep_up( );
@@ -113,13 +113,13 @@ another variable, @code{data}, for the data obtained from the lock-in
 amplifier, are declared.
 
 In the next section, following the @code{PREPARATIONS} section keyword,
-the devices are set up. The function @code{magnet_setup()} tells the
+the devices are set up. The function @w{@code{magnet_setup()}} tells the
 magnet to start with the field stored in the variable
 @w{@code{start_field}} and to use a field step size of
 @w{@code{field_step}}. This will also make the magnet automatically go
 to the start field (after some calibration) when the experiment starts.
 
-The next function call, @code{init_1d()}, tells the program that this is
+The next function call, @w{@code{init_1d()}}, tells the program that this is
 an 1-dimensional experiment and to use the appropriate kind of display
 for the data.
 
@@ -127,16 +127,19 @@ Now we're already done with the preparations and can start the
 experiment, as indicated by the section keyword @code{EXPERIMENT}. The
 whole experiment is done in a loop that is repeated as long as the
 actual field (stored in the variable @code{field}) isn't larger than the
-@code{end_field}. To tell the program where the loop starts and ends all
+@w{@code{end_field}}. To tell the program where the loop starts and ends all
 the statements belonging to the loop are enclosed in curly braces,
 `@code{@{}' and `@code{@}}'.
 
 The first thing to do in the experiment loop is to fetch a new data
 point from the lock-in amplifier, storing it in the variable @code{data}.
 Next, we have to display the data point, which is done via the call of
-the function @code{display()}. Here two arguments are used, the number
-of the point, stored in the variable @code{I}, and the value of the
-new data point.
+the function @w{@code{display_1d()}} (as you may have guessed there also
+exists a function called @w{@code{display_2d()}} that gets used when one wants
+to display results from an experimnt where 2 parameters are varied, but
+since here only the field is swept @w{@code{display_1d()}} will do). Here
+two arguments are used, the number of the point, stored in the variable
+@code{I}, and the value of the new data point.
 
 Of course, we also need to write the new data point to a data file. This
 is done by the call of the function @code{save()} that automatically
@@ -144,15 +147,15 @@ writes its argument to a file. When the function is called for the first
 time it prompts you for the name of the file to be used.
 
 What remains to be done is to increment the counter variable @code{I}
-and to sweep up the field. The function @code{sweep_up()} increments the
+and to sweep up the field. The function @w{@code{sweep_up()}} increments the
 field by the amount you specified previously in the call of
-@code{magnet_init()} (in the @code{PREPARATIONS} section) and returns
+@w{@code{magnet_init()}} (in the @code{PREPARATIONS} section) and returns
 the new value of the field, which is later used in the test of the loop
 condition to decide if the experiment is finished, i.e.@: the end field
 is reached.
 
 The last function call of @code{wait()} with the result of a call of the
-function @code{lockin_time_constant()} as the argument makes the program
+function @w{@code{lockin_time_constant()}} as the argument makes the program
 wait for the time constant of the lock-in amplifier to give it enough
 time to measure a new data point.
 
@@ -173,7 +176,7 @@ already run for 2 hours and you have to start all over again.
 As you can already see from the example most of an @code{EDL} script
 consists of function calls. Functions can be divided into two
 categories, built-in functions and device functions. Built-in functions
-(like @code{init_1d()}, @code{display()}, @code{save()} and
+(like @w{@code{init_1d()}}, @w{@code{display_1d()}}, @code{save()} and
 @code{wait()}) are always available, even when there is no
 @code{DEVICES} section. In contrast, device functions are bound to
 certain devices and can only be called when the device they are defined
@@ -351,9 +354,9 @@ Names of variables (and also of functions) always start with a
 character, i.e.@: A-Z or a-z. The remaining part of the variable name
 can consist of characters, numbers and underscore characters,
 '@code{_}' (or shorter, if you know regular expressions, valid names
-follow the following pattern: @code{[A-Za-z][A-Za-z_0-9]*}). Thus,
-'@code{AbC_12x}' and '@code{aBc_12X}' are legal variable names, while
-'@code{12xy}' or '@code{_Yx2}' are not. Please note that the variable
+follow the following pattern: @w{@code{[A-Za-z][A-Za-z_0-9]*}}). Thus,
+'@w{@code{AbC_12x}}' and '@w{@code{aBc_12X}}' are legal variable names,
+while '@code{12xy}' or '@code{_Yx2}' are not. Please note that the variable
 names are case sensitive, i.e.@: '@code{XY}', '@code{Xy}', '@code{xY}'
 and '@code{xy}' are all different variables!
 
