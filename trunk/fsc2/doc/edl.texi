@@ -379,8 +379,8 @@ Finally, some combinations of characters take on a special meaning when
 they follow a number directly (i.e.@: with only spaces or tabulator
 characters in between). These are some physical units with or without
 the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
-@code{k} (kilo) @code{M} (mega) and @code{G} (giga) (only wave numbers can't
-be preceeded by such a character).  Here's the complete list:
+@code{k} (kilo), @code{M} (mega) and @code{G} (giga) (only wave numbers
+can't be preceeded by such a character).  Here's the complete list:
 @quotation
 @multitable { @code{cm^-1} } {Decibel (and @code{ndbm, udbm, mdbm, kdbm, Mdbm} and @code{Gdbm})}
 @item @code{s}     @tab Seconds (and @code{ns, us, ms, ks, Ms} and @code{Gs})
