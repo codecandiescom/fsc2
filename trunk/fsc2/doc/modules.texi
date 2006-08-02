@@ -317,7 +317,7 @@ interpreted @code{EDL} file is @file{foo.edl}, the line where your
 function is called is line 17 and the device name is @code{LECRONIX},
 your function (that expects an integer but got a floating point number)
 is named @code{abc()} and the string you pass to the function
-@code{get_long()} as the second argument is @code{"bar"}, i.e.
+@code{get_long()} as the second argument is @code{"channel number"}, i.e.
 @example
 get_long( var, "channel number" );
 @end example

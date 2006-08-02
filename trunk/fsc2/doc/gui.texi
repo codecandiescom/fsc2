@@ -255,7 +255,7 @@ to enter "@code{ghostview -}" as the print command.
 
 The @code{Stop} button lets you abort the currently running experiment -
 when the experiment is finished its label changes to
-@code{Close}. Finally, the button labeled @code{FS} is the "Full scale"
+@code{Close}. Finally, the button labeled @code{FS} is the "Full Scale"
 button. While this button is active the display is resized automatically
 so that all data fit into the display area.
 
@@ -440,8 +440,9 @@ will look similar to this:
 
 @end ifnotinfo
 
-Because it would take too long to do a real 3-dimensional display the
-data values are displayed using a color code, where blue stands for the
+Because it would take too long to do a real 3-dimensional display (and
+the result often doesn't give you too good a view of the date) the data
+values are displayed using a color code, where blue stands for the
 lowest and red for the highest values. To show which color represents a
 certain value on the right hand side another axis area for the z-axis is
 drawn. The color bar in this axis area indicates the exact scaling.
@@ -450,8 +451,8 @@ In 2D-display mode only one curve can be displayed at once. Thus the buttons
 in the upper left hand corner for the different curves have a different
 meaning from the one in 1D-displays. Here they are used for switching between
 the different curves, i.e.@: only one of the buttons can be active at any time
-and will indicate which curve is currently shown. Each of the curves has each
-own scaling.
+and will indicate which curve is currently shown. Each of the curves can have
+its own scaling.
 
 As long as there are no measured data for some of the points of the
 display these points will be drawn in a dark gray.

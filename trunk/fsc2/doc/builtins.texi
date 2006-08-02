@@ -54,14 +54,17 @@ used).
 The second class of functions are interaction functions, functions that
 allow to deal with additional graphical objects like buttons, sliders and
 in- and output fields. These functions control the creation, setting,
-query and deletion of these objects.
+query and deletion of these objects (all of them can be used only during
+the @code{EXPERIMENT} section).
 
 The third class of functions are mathematical functions that one would
 expect to find in most programming languages like (i.e.@: trigonometric
-functions, logarithms etc.@:). Finally, the fourth class are auxiliary
-functions that can't be assigned to one of the other classes and
-consists of functions for dealing with time or date issues or for
-determining the sizes of arrays etc.
+functions, logarithms etc.@:).
+
+Finally, the fourth class are auxiliary functions that can't be assigned
+to one of the other classes and consists of functions for dealing with
+time or date issues, conversion between different units or for determining
+the sizes of arrays and several more.
 
 Please note that all functions, built-in functions as well as device
 functions (discussed in the next chapter), always return a value, even
@@ -75,29 +78,30 @@ if the return value sometimes doesn't make too much sense.
 Before delving into the details of the functions for drawing measured
 data into the main display window a short explanation of the basic ideas
 probably is in order. There are two ways of displaying data. If only one
-parameter gets changed (e.g.@: just the magnetic field) a 1D-display
-will be all you need. But if you do measurements where two parameters
-get changed (e..g.@: if you measure time traces of your signal after
-laser excitation at different field positions) you will need a
-2D-display to view all measured data. Finally, there can be situations
-where you need both ways to display your data. Thus, @code{fsc2} allows
-you to select either 1D-display, 2D-display or even both at once at the
-same time. You just have to tell the program in the @code{PREPARATIONS}
-section by calling the functions @code{init_1d()} and @code{init_2d()}.
-If both function are invoked in the @code{PREPARATIONS} section two
-windows will be displayed, one for the 1D-data and one for the 2D-data.
+parameter gets changed during the experiment (e.g.@: just the magnetic
+field gets sweeped) a 1D-display will be all you need. But if you do
+measurements where two parameters get changed (e..g.@: if you measure
+time traces of your signal after laser excitation at different field
+positions) you will need a 2D-display to view all measured data. Finally,
+there can be situations where you need both ways to display your data.
+Thus, @code{fsc2} allows you to select either 1D-display, 2D-display or
+even both at once at the same time. You just have to tell the program in
+the @code{PREPARATIONS} section by calling the functions @code{init_1d()}
+and @code{init_2d()}. If both function are invoked in the @code{PREPARATIONS}
+section two windows will be displayed, one for the 1D-data and one for the
+2D-data.
 
 In 1D-display to display a new data point you have to specify the @i{x}-
 and the @i{y}-coordinate of the point. The @i{x}-coordinate is always an
 integer number, where @code{1} indicates the left-most point
-(@i{x}-coordinates below @code{1} aren't allowed). As the
+(@i{x}-coordinates smaller than @code{1} aren't allowed). As the
 @i{y}-coordinate usually the measured value is specified. To be able to
 draw a meaningful @i{x}-axis the program needs another piece of
 information: the starting point of the @i{x}-axis and the difference
 between two adjacent points drawn along the @i{x}-axis. For example, if
 you do an cw-EPR experiment, starting with a field of @w{3400 G} and a
 spacing of @w{0.5 G} between the data points you will have to tell the
-program about this in the graphic initialization. If you now specify,
+program about this in the graphics initialization. If you now specify,
 when drawing a new point, an @i{x}-coordinate of @code{11} the point
 will appear at an axis position of @w{3410 G} because the point numbered
 @code{1} is drawn at @w{3400 G}, the point numbered @code{2} at
@@ -107,20 +111,21 @@ will appear at an axis position of @w{3410 G} because the point numbered
 In contrast, for a 2D-display you have to specify three coordinates for
 a new data point. Here both the @i{x}- and @i{y}-coordinate are
 integers, both starting at @code{1}. The point with both the @i{x}- and
-@i{y}-coordinate set to @code{1} is the left-most point at the bottom of
-the window. The third coordinate is the measured value, which usually
+@i{y}-coordinate set to @code{1} is at lower left-and corner of the
+display (and @i{x}- and @i{y}-coordinates with values smaller than @code{1}
+aren't allowed). The third coordinate is the measured value, which usually
 will be a floating point number. As in the case of 1D-displays also for
 2D-display the program needs additional information to be able to draw
 meaningful axis. Here not only the starting point and increment for the
-@i{x}-axis must be given but also values for the @i{y}-axis.
+@i{x}-axis must be given but also corresponding values for the @i{y}-axis.
 
-Another point: If you have not only one data point to draw but a whole
-1D-array (or in the case of 2D-display even a 2D-array, i.e.@: a
-complete "picture") you can do this without having to draw each point on
-its own. The functions for drawing also let you specify a whole array.
-The data from the array are drawn so that the first data point of the
-array appears at the @i{x}-coordinate you specified, and the following
-points further to the right. In case of 2D-arrays the @i{x}- and
+Another point to be kept in mind: if you have not only one data point to
+draw but a whole 1D-array (or in the case of 2D-display even a 2D-array,
+i.e.@: a complete "picture") you can do this without having to draw each
+point on its own. The functions for drawing also let you specify a whole
+array. The data from the array are drawn so that the first data point of
+the array appears at the @i{x}-coordinate you specified, and the following
+points further to the right of it. In case of 2D-arrays the @i{x}- and
 @i{y}-coordinate specifies the lower left hand corner of where the
 2D-array will be drawn.
 
@@ -129,8 +134,8 @@ data are always drawn automatically to the right of already displayed
 points and where the whole set of already drawn points is shifted to the
 left (and out of the viewable area when the new data points wouldn't fit
 into the display window anymore). Thus in this "sliding display" mode no
-automatic scaling happens, old data are simply discarded when they don't
-fit into the display window anymore.
+automatic scaling in horizontal direction happens, old data are simply
+discarded when they don't fit into the display window anymore.
 
 
 @noindent
@@ -203,7 +208,7 @@ The number of points, if missing, zero or negative it will be treated as
 unknown and default to 32 points. If the specified value (or the default
 value) turns out to be too small it is adjusted automatically in the
 experiment so that all data again will fit into the display (as long as
-the @code{FS} button is switched on).
+the @code{FS} (Full Scale) button is switched on).
 @item
 Start value of the @i{x}-axis. If missing (or undefined, see next point)
 point numbers are printed, starting with @code{1}.
@@ -267,7 +272,7 @@ Number of points in @i{y}-direction, if missing or less than 1 it will
 be treated as unknown and default to 16. If the specified or the default
 value turns out to be too small it is adjusted automatically in the
 experiment so that all data fit into the display (at least as long as
-the @code{FS} button is switched on).
+the @code{FS} (Full Scale) button is switched on).
 @item
 Start value of the @i{x}-axis. If missing (or undefined, see also next
 entry) point numbers are printed, starting with @code{1}.
@@ -423,11 +428,11 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex display_mode()
 @item display_mode()
 Beside the normal display mode, where data get rescaled automatically to
-fit onto the 1D display window (at least as long as the @code{FS} button
-is switched on), there's also a second display mode, where a rescaling
-is done for the @i{y}-direction only. In this mode, when the new data
-wouldn't fit into the display window anymore, the whole data set is
-shifted to the left to make room for the new data, and some of the old
+fit onto the 1D display window (at least as long as the @code{FS} (Full
+Scale) button is switched on), there's also a second display mode, where
+a rescaling is done for the @i{y}-direction only. In this mode, when the
+new data wouldn't fit into the display window anymore, the whole data set
+is shifted to the left to make room for the new data, and some of the old
 data vanish.
 
 To switch between the normal display mode and the "sliding window"
@@ -894,7 +899,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex fs_button_1d()
 @item fs_button_1d()
 If invoked without an argument the function returns @code{1} if the
-@code{FS} (full scale) button is switched on (automatic rescaling
+@code{FS} (Full Scale) button is switched on (automatic rescaling
 is enabled) and @code{0} if it's switched off. If called with a
 boolean argument (i.e. either a string,@code{"ON"} or @code{"OFF"},
 or a number with @code{0} standing for off and a non-zero number for on),
@@ -910,7 +915,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @item fs_button_2d()
 If invoked with a single argument, a number between @code{1} and the
 maximum number of curves displayed in the 2D display window, it returns
-@code{1} if the @code{FS} (full scale) button for that curve is switched
+@code{1} if the @code{FS} (Full Scale) button for that curve is switched
 on (i.e. the curve will be rescaled automatically) and @code{0} if
 the @code{FS} button for the curve is switched off.
 
@@ -1153,7 +1158,7 @@ extension but not in the filename. In this case the function
 arguments. The first one is an identifier for an already existing file as
 returned by the function @code{get_file()}. If in the call of
 @code{get_file()} the user did @b{not} to choose a file, i.e.@: pressed
-the @code{Cancel}-button, it is silently assumed that also the second
+the @code{Cancel}-button, it is silently assumed that also the new
 file to be created by @code{clone_file()} is @b{not} to be used.
 If either the numer @code{1} (for writing to @i{stdout}) or @code{2} (for
 writing to @i{stderr}) was given as the argument a warning is printed out
@@ -1163,10 +1168,14 @@ the function wouldn't have been called.
 The second and third arguments both have to be strings. The second
 argument is the expected extension of the file that was selected via the
 previous call of @code{get_file()}. And the third argument is the
-replacement for the extension of the previously selected file. If the
-second argument does not fit with the extension of the file the user had
-chosen, the new extension from the third argument is appended to the
-file name (instead of replacing the extension).
+replacement for the extension of the previously selected file. Both are
+to be specified without the starting dot. If the second argument does not
+fit with the extension of the file the user had chosen, the new extension
+from the third argument is simply appended to the file name (instead of
+replacing the extension). If the replacement extension (i.e.@: the third
+argument) is identical to the extension of the already open file (i.e.@:
+the second argument) it is also appended instead of being used for
+replacement.
 
 A typical piece of code to open two files, the first with the extension
 @code{dat} and the second with the same name but the extension
@@ -2560,7 +2569,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @item T_to_G()
 Converts a number or all elements of an 1- or more-dimensional array,
 assumed to have a unit of Tesla, to Gauss (by multiplying with
-@code{1.0e-4}).
+@code{1.0e4}).
 
 
 @anchor{G_to_T()}
