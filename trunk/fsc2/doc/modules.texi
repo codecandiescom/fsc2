@@ -353,7 +353,7 @@ integer, which is then returned, thus avoiding the termination of a
 running experiment. But usually the wrong parameter should already have
 been found during the test run, forcing the user to correct the script.
 
-There's no function for requirung double variable only because basically
+There's no function for requirung a double variable only because basically
 all functions should accept an integer in place of a double and the
 @code{get_double()} function always returns a double, if necessary
 after converting the integer value.

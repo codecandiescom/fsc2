@@ -32,32 +32,32 @@ to).
 
 
 As you will already have understood, @code{fsc2} is basically an
-interpreter for @code{EDL} scripts. Normal interpreters interpret each
-line of input individually, i.e.@: analyze a line, and, if the line is
-syntactically correct, execute it. That's what @code{fsc2} also does,
-but only for the parts before the @code{EXPERIMENT} section. In
-contrast, the interpretation of the @code{EXPERIMENT} section of an
-@code{EDL} file consists of several steps. In the first step the
-@code{EXPERIMENT} section as a whole is read in and only syntax checks
-are done. In the second step a complete test run of @code{EXPERIMENT}
-section of the script is done to avoid that the experiment will have to
-be stopped due to obvious logical errors in the @code{EDL} script. The
-device modules are involved, i.e.@: they already can do all kinds of
-checks on what can be expected to happen during the real experiment and
-detect possible problems.
+interpreter for @code{EDL} scripts. Traditional interpreters interpret
+each line of input one after another, i.e.@: they analyze a line, and,
+if the line is syntactically correct, execute it and then continue with
+the next one. That's what @code{fsc2} also does, but only for the parts
+before the @code{EXPERIMENT} section. In contrast, the interpretation of
+the @code{EXPERIMENT} section of an @code{EDL} file consists of several
+steps. In the first step the @code{EXPERIMENT} section as a whole is
+read in and only syntax checks are done. In the second step a complete
+test run of @code{EXPERIMENT} section of the script is done to avoid that
+the experiment will have to be stopped due to obvious logical errors in
+the @code{EDL} script. The device modules are involved, i.e.@: they
+already can do all kinds of checks on what can be expected to happen
+during the real experiment and detect possible problems.
 
 
-Only if all these tests succeed the third step, the execution of the
+Only if all these tests succeeded the third step, the execution of the
 @code{EXPERIMENT} section of the @code{EDL} script, is started, i.e.@:
 the experiment is run. When an experiment is restarted (without
 reloading the @code{EDL} file) only this third step is repeated.
 
 
-In the following what happens during the three steps of the execution of
-an @code{EDL} script will be explained in some more details. Then
-follows a real long section that's a @i{tour de force} through the
-sources of the program. This is hopefully going to be helpful for people
-that try eliminate bugs or even extend @code{fsc2}.
+In the following I will try to explain what happens during these three
+steps of the execution of an @code{EDL} script in some more details. Then
+follows a real long section with a @i{tour de force} through the sources
+of the program. This is hopefully going to be helpful for people that try
+eliminate bugs or even extend @code{fsc2}.
 
 
 
@@ -79,18 +79,17 @@ that try eliminate bugs or even extend @code{fsc2}.
 In the first stage of the interpretation the script is read in a token
 by token fashion, where tokens are e.g.@: variable or function names,
 numbers, braces, semicolons, section labels etc. This is mainly done by
-the code within the files which you'll find in the @file{src} directory,
+the code within the files which you'll find in the @file{src} directory
 having an extension of @code{.l}. As you will see there's such a file
-for each of the different sections an @code{EDL} script may
-contain. Actually, there are some extra ones, @file{split_lexer.l} is
-the central switch for the first stage that calls the individual
-tokenizers in turn on finding a new section label and also deals with
-error conditions that couldn't be handled by the section
-interpreters. Two extra tokenizers, @file{devices_list_lexer.l} and
-@file{func_list_lexer.l} are for analyzing the files with the list of
-device modules, @file{conf/Devices}, and the list of functions,
-@file{conf/Functions} (they also contain some additional @code{C} code
-for interpreting the tokens).
+for each of the different sections an @code{EDL} script may contain.
+Actually, there are some extra ones, @file{split_lexer.l} is the central
+switch for the first stage that calls the individual tokenizers in turn
+on finding a new section label and also deals with error conditions that
+can't be handled by the section interpreters. Two extra tokenizers,
+@file{devices_list_lexer.l} and @file{func_list_lexer.l} are for analyzing
+the files with the list of device modules, @file{conf/Devices}, and the
+list of functions, @file{conf/Functions} (they also contain some additional
+@code{C} code for interpreting the tokens).
 
 
 Finally, there is @file{fsc2_clean.l}. @code{EDL} itself expects its
@@ -100,11 +99,11 @@ directly with the input files (there can be more than one when there are
 an extra program, @file{fsc2_clean} that translates the input @code{EDL}
 script into a form that the main program understands. @code{fsc2_clean}
 for example removes all comments, includes files for @code{#INCLUDE}
-statements, adds information about line numbers and file names, deals
-with physical units etc.@:, and then passes this cleaned-up input to
-@code{fsc2}. If you are interested what @code{fsc2} really sees of an
-@code{EDL} file you can run @code{fsc2_clean} with the @code{EDL} file
-as its standard input, i.e.@:
+statements, deals with units, adds information about line numbers and
+file names, deals with physical units etc.@:, and then passes this
+cleaned-up input to @code{fsc2}. If you are interested what @code{fsc2}
+really sees of an @code{EDL} file you can run @code{fsc2_clean} with the
+@code{EDL} file as its standard input, i.e.@:
 @example
 fsc2_clean < edl_script.edl
 @end example
@@ -131,7 +130,8 @@ generated from these files). In these files, the parsers, actions
 (mostly a few lines of @code{C} code) are executed for syntactically
 correct sets of tokens. Because actions can only be executed for input
 with valid syntax, these files practically define what is syntactically
-correct and what is not.
+correct and what is not (and since the syntax differs a bit for the
+different sections there's a parser for each of the sections).
 
 
 To give you an example, here's a very simple statement from an
@@ -172,20 +172,20 @@ is syntactically correct and that for this sequence of tokens some
 into the variable @code{a}. Statements that are not in the parsers list
 are @i{per definitionem} syntactically incorrect. For example, there is
 no rule on how to deal with a sequence of tokens as the one above but
-with the integer number missing. Because the parser looks at the
-statements token by token it won't complain while getting the first four
-tokens up to and including the plus operator. Only if the end of
+with the number @code{3} at the end missing. Because the parser looks at
+the statements token by token it won't complain while getting the first
+four tokens up to and including the plus operator. Only if the end of
 statement operator, the semicolon, is found directly after the plus sign
-it will recognize that there is no rule on how to deal with the
-situation, print the error message @code{Syntax error near token ';'}
-(plus the file name and line number) and abort.
+it will recognize that there's no rule on how to deal with the situation,
+print the error message @code{Syntax error near token ';'} (plus the file
+name and line number) and abort.
 
 
 The @code{EXPERIMENT} section is handled differently. Most important,
 the code of the @code{EXPERIMENT} section is not executed at this
 stage. It is just split up into its tokens and only some rudimentary
 syntax check is done, e.g.@: undefined variables or mismatched braces
-etc.@: are detected. Instead, an internal list of all the tokens the
+etc.@: are detected. Instead an internal list of all the tokens the
 @code{EXPERIMENT} section consists of is created. This list is later
 used to test and execute the @code{EXPERIMENT} section.
 
@@ -201,12 +201,15 @@ accessing the device because neither the GPIB bus nor the serials ports
 moment.
 
 
-While handling the part of the @code{EDL} script up to the start of
-the @code{EXPERIMENT} section, functions from the modules may be called
-(unless they have been explicitely declared to be used only during the
-experiment). Usually such function calls will be used to define the
-state of the device at the start of the experiment. For example, the
-@code{PREPARATIONS} section may contain a line like
+While handling the part of the @code{EDL} script up to the start of the
+@code{EXPERIMENT} section, only thar functions from the modules may be
+called that have been explicitely declared to be usable already before
+the start of the @code{EXPERIMENT} section (and then are not allowed to
+talk to the devices during that stage). Usually such function calls will
+be used to define the state of the device at the start of the experiment.
+For example, the
+@code{PREPARATIONS} section may contain
+a line like
 @example
 lockin_sensitivity( 100 uV );
 @end example
@@ -228,10 +231,10 @@ How to deal with wrong arguments or arguments that don't fit (e.g.@: if
 the argument is @code{40 uV} but the lock-in amplifier has only
 sensitivity settings of @code{30 uV} and @code{100 uV}) is completely up
 to the writer of the module, @code{fsc2} will accept whatever the module
-returns. For example, the module may accept the argument after changing
+returns. For example the module may accept the argument after changing
 it to something to the next possible sensitivity setting and printing
-out a warning or it may bail out and tell @code{fsc2} to stop
-interpreting the @code{EDL} script.
+out a warning or it may bail out and tell @code{fsc2} to stop interpreting
+the @code{EDL} script.
 
 
 Another thing module writers should keep in mind is that this first (and
@@ -258,33 +261,33 @@ been run for several hours, necessitating the premature end of the
 experiment. For example, without a "dry" run it could happen that only
 after a long time it is detected that the field of the magnet is
 requested to be set to a value that the magnet can't produce. In this
-case there usually are only few alternatives, if any, to aborting the
+case there usually are few alternatives, if any, to aborting the
 experiment. Foreseeing and taking the appropriate measures for such
 possibly fatal situation would complicate both the writing of modules
 and @code{EDL} scripts enormously and probably would still not catch
 all of them.
 
 
-By doing a test run, on the other hand, for example the function for
+On the other hand, by doing a test run for example the function for
 setting the magnet to a new field will be called with all values that
 are to be expected during the real experiment and thus invalid field
-settings can be detected in advance. Doing a test run is much faster
-than running the experiment itself because during the test run the
-devices will not be accessed (which usually uses at least 90% of the
-whole time), calls of the @code{wait()} function do not make the program
-sleep for the requested time, no graphics are drawn etc.
+settings can be detected ilready in this "dry" run. Doing a test run
+is much faster than running the experiment itself because during the
+test run the devices will not be accessed (which usually uses at least
+90% of the whole time), calls of the @code{wait()} function do not make
+the program sleep for the requested time, no graphics are drawn etc.
 
 
 The writers of modules have an important responsibility to make running
 the test run possible. During the test run the devices can't be
-accessed. Despite this the modules have to deal in a reasonable way with
+accessed. Despite that the modules have to deal in a reasonable way with
 requests for returning data from the devices. Thus the modules must,
 during the test run, "invent" data for the real ones. This can be a bit
 tricky and special care must be taken to insure that these "invented"
 data are consistent. For example, if a module for a lock-in amplifier
 first gets asked for the sensitivity setting and then for measured data
 it may not return data that represent voltages larger than the
-sensitivity setting it "invented". There may even be situations, where
+sensitivity setting it "invented". There may even be situations where
 the module has no chance to find out if the arguments it gets passed for
 a function are acceptable without determining the real state of the
 device. If possible, incidents like this should be stored by the module
@@ -321,25 +324,26 @@ several times if the user restarts an experiment without reloading the
 @code{EDL} file.
 
 
-At the start of the third stage the GPIB bus and the serial ports are
-initialized (at least if one of the devices needs them). Next the hook
-functions in the modules are called that allow the modules to initialize
-the devices and do all checks they find necessary. If this was
-successful the graphics for the experiment are initialized, opening up
-the display windows. When all this has been done @code{fsc2} is ready to
-do the experiment, i.e.@: to interpret the @code{EXPERIMENT} section.
+At the start of the third stage the GPIB bus, the serial ports, the
+LAN connections and the RULBUS printer port are initialized (at least
+if one of the devices needs them). Next the hook functions in the
+modules are called that allow the modules to initialize the devices
+and do all checks they find necessary. If this was successful the
+graphics for the experiment are initialized, opening up the display
+windows. When all this has been done @code{fsc2} is ready to do the
+experiment, i.e.@: to interpret the @code{EXPERIMENT} section.
 
 
 But there is a twist. Just before starting to interpret the
 @code{EXPERIMENT} section @code{fsc2} splits itself into two independent
-processes by doing a @code{fork()}. If you use the @code{ps} command to
+processes by calling @code{fork()}. If you use the @code{ps} command to
 list all your running processes suddenly a new instance of @code{fsc2}
 will be listed@footnote{Please note that already before the experiment
 gets started you will find that there are three instances of @code{fsc2}
 running, during the experiment there are (at least) four.}. The new
 processes is doing the interpretation of the @code{EXPERIMENT} section,
 i.e.@: is running the experiment, while one of the other processes is
-responsible for the graphics and all interaction with the user.
+responsible for the graphics and all interactions with the user.
 
 
 The main reason for splitting the execution of the experiment into two
@@ -361,15 +365,15 @@ initiate, e.g.@: resizing of windows, magnification of data etc.
 
 
 Another advantage is, of course, that on machines with more than one
-processor the workload can be distributed on two processors.
+processor the workload can be distributed onto two processors.
 
 
 The approach requires some channels of communication between the two
 processes. Because the user interaction task has to draw the new data
-the other task, executing the experiment, is producing they will have to
-send from the experiment tasl to the user interaction task. And, the
-other way round, the user interaction task must be able to send back
-information received from the user (e.g.@: which file name got selected)
+the other task, executing the experiment, is producing the data will have
+to passed on from the experiment task to the user interaction task. And,
+the other way round, the user interaction task must be able to send back
+informations received from the user (e.g.@: which file name got selected)
 and to stop the experiment when the user hits the @code{Stop}
 button. Care has been taken that this is done in a way that usually
 can't be impeded by user interventions. The only exceptions are cases
@@ -401,10 +405,10 @@ in which case the buffer for memory segment keys would fill
 up@footnote{The buffer is guarded against overflows by a semaphore that
 is initialized to the number of slots in the buffer and on which the
 child process does a down operation before writing data into the buffer
-while the parent process posts it after removing an item.}. Only in this
-case the child process will have to suspend the experiment until the
-parent empties some of the slots for keys in the buffer. But,
-fortunately, in practice this rarely happens. And as a further safeguard
+while the parent process posts it after removing an item.}. Only if all
+the slots in the buffer are used up child process will have to suspend
+the experiment until the parent empties one or more of the slots. But
+fortunately in practice this rarely happens. And as a further safeguard
 against this happening the parent is written in a way that it will empty
 slots in the buffer as fast as possible, if necessary deferring to draw
 data or to react to user requests.
@@ -544,8 +548,8 @@ instances about what they are allowed to do and what not to avoid more
 than one instance trying to access the same devices at the same time. It
 also is supposed to remove things like lock files, shared memory
 segments etc.@: should it ever happen that @code{fsc2} crashes so badly
-that it isn't able anymore to clean up after itself (not that tis is supposed
-to happen;-).
+that it isn't able anymore to clean up after itself (not that this is
+supposed to happen;-).
 
 
 When this hurdle has been taken the initialization of the graphics is
@@ -564,7 +568,8 @@ When this part was successful some further checks of the remaining
 command line options are done and, if specified on the command line, an
 @code{EDL} script is loaded. Now we're nearly ready  to start the main
 loop of the program. But before this loop is entered another new process
-is spawned that opens a socket (of type @code{AF_UNIX}) to listen on
+is spawned that opens a socket (of type @code{AF_UNIX}, i.e.@: a socket
+to which only processes on the same machine can connect) to listen on
 incoming connections from external programs that want to send @code{EDL}
 scripts to @code{fsc2} for execution. The code for spawning this child
 process and the code for the child process itself can be found in the
@@ -639,26 +644,30 @@ The function @code{scan_main()} is located in the file
 @file{split_lexer.l}. This obviously isn't a normall @code{C} file but a
 file from which the @code{flex} utility creates a @code{C} file. If you
 don't know yet, @code{flex} is a tool that generates programs that
-perfom pattern-matching on input text. That means that a program created
-by @code{flex} will dissect an input text into the tokens according to
-the some rules given the @code{flex} input file (in this case
-@file{split_lexer.l}) and execute some action for each token found. And
-that's exactly what needs to be done with a @code{EDL} script before it
-can later be digested by @code{fsc2} (with the help of another tool,
-@code{bison}).
+perfom pattern-matching on input text, typically returning a different
+value for each token, possibly with some more information about the
+value of the token attached (i.e.@: an integer number could be a token
+and it might a certain value to indicate that it found an integer number
+as well as some extra information about the value that integer has).
+That means that a program created by @code{flex} will dissect an input
+text into the tokens according to the some rules given the @code{flex}
+input file (in this case @file{split_lexer.l}) and execute some action
+for each token found. And that's exactly what needs to be done with a
+@code{EDL} script before it can later be digested by @code{fsc2} (with
+the help of another tool, @code{bison}).
 
 
 Before @code{scan_main()} starts tokenizing the input it does some
-initalization of things that may be needed later on. This consists first
-of setting up an internal list of built-in @code{EDL} functions and
-@code{EDL} functions that might be spplied by modules by calling
-@code{functions_init()} in the file @file{func.c}. Built-in functions
-are all listed at the top of @file{func.c} and the list built from it
-contains information about the names of the functions, the @code{C}
+initalization of things that may be needed later on. This consists of
+first setting up an internal list of built-in @code{EDL} functions and
+@code{EDL} functions that might be supplied by modules; this is done by
+calling @code{functions_init()} in the file @file{func.c}. Built-in
+functions are all listed at the top of @file{func.c} and the list built
+from it contains information about the names of the functions, the @code{C}
 function that are to be called for the @code{EDL} functions, the number
 of arguments, and in which sections of the program the functions are
 allowed to be called. When @code{fsc2} is done with it's built-in
-functions it appends to the list also the functions supplied by modules.
+functions it also appends to the list the functions supplied by modules.
 These are found in the @file{Functions} file in the @file{config}
 subdirectory. To do so another @code{flex} tokenizer is invoked on this
 file, which is generated by the code in @file{func_list_lexer.l}.
@@ -687,7 +696,7 @@ simple in that it just reads in the @code{EDL} code until it finds the
 first section keyword (and this should be the first line the lexer gets
 from @code{fsc2_clean}, which already removed all comments etc.). On
 finding the first section keyword control is transfered immediately to
-another lexer, that is specifically written for dealing with the syntax
+another lexer that is specifically written for dealing with the syntax
 of this section. And that's why there are that many further files to
 generate @code{flex} scanners, i.e.@: files with names ending in
 @code{.l}, for each section there's a different tokenizer. These are
@@ -727,7 +736,7 @@ condition_parser.y      EXPERIMENT section
 @end example
 @noindent
 Since the @code{EXPERIMENT} section is somewhat special so there's not
-only one parser but three, which one is going to be used depends on
+only one parser but three, which one is going to be used depends on the
 circumstances.
 
 
@@ -773,11 +782,11 @@ This last step is getting a bit more complicated by the fact that it is
 possible to load two or more modules with the same type (e.g.@: two
 modules for lock-in amplifiers), which both will supply functions of the
 same names. @code{fsc2} recognizes this from a global variable, a string
-with the device type, each module is supposed to define. When it finds
+with the device type, that each module is supposed to define. When it finds
 that there are two or more devices with the same type (according to this
 global variable), it will accept functions of the same name more than
 one time and make the names unique by appending a hash ("@code{#}") and
-a number for the device. So, if there are the modules for two lock-in
+a number for the device. So, if there are modules for two lock-in
 amplifiers listed in the devices section, both supplying a function
 @code{lockin_get_data()}, it will create two entries in its internal
 list of non-builtin functions, one named @code{lockin_get_data#1()} and
@@ -792,7 +801,7 @@ the second lock-in amplifier is used.
 After all device libraries have been loaded successfully the functions
 @code{init_hook()} in all modules that have such a function are invoked,
 always in the same sequence as they were listed in the @code{DEVICES}
-section. The modules can use thos hook function to initialize
+section. The modules can use these hook function to initialize
 themselves.
 
 
@@ -806,26 +815,26 @@ transfer control to the lexer for that section.
 
 
 Normally, the next section will be the @code{VARIABLES} section and the
-lexer and parser, generated from @code{vars_lexer.l} ans
+lexer and parser, generated from @code{vars_lexer.l} and
 @file{vasrs_parser.y} take over. This one is a bit more interesting
-because the syntax of the @code{VARIABLES} section is a bit more
-complicated than that of the @code{DEVICES} section. But the basic
-principle is simple, the lexer splits up the @code{EDL} code and feeds
-them to the parser to "digest" them.
+because the syntax of the @code{VARIABLES} section is more complicated
+than that of the @code{DEVICES} section. But the basic principle is
+the same: the lexer splits up the @code{EDL} code and feeds them to
+the parser to "digest" them.
 
 
 @code{fsc2} maintains a linked list of all variables and these list is
 assembled from the code in the @code{VARIABLES} section. So this may be
 a good place to give an introduction about how variables look like. All
 variables are structures of type @code{Var}, which is declared (and
-typedef-ed) in the file @file{variables.h} (you may prefer to look it up
-now). It contains a string pointer for the variable name, a member for
-the type of the variable, an union for the value of the variable (since
-there are several types of variables they can have values of quit a
-range of types). Further, there are some data to keep track of array
-variables (1- or multi-dimensional) and a member for certain
-flags. Finally, there are pointers to mae the variable structure fit
-into a (doubly) linked list.
+typedef-ed to @code{Var_T}) in the file @file{variables.h} (you may
+prefer to look it up now). It contains a string pointer for the variable
+name, a member for the type of the variable, an union for the value of
+the variable (since there are several types of variables they can have
+values of quit a range of types). Further, there are some data to keep
+track of array variables (1- or multi-dimensional) and a member for
+certain flags. Finally, there are pointers to allow the variable structure
+to be inserted into a (doubly) linked list.
 
 Before going into more details here's a list of the possible variable
 types:
@@ -847,52 +856,56 @@ FUNC
 Each variable begins its life with type @code{UNDEF_VAR}. But usually it
 should become promoted to something more usful shortly afterwards, so
 you will find it only in rare cases (it's sometimes used for temporary
-variables, we're going to discuss temporary variables sometime later). A
-@code{STR_VAR} is a variable holding a string, and also this type of
-variables only wil be found in temporary variables. What an
-@code{INT_VAR} and @code{FLOAT_VAR} is will probably be quite obvious,
-these types of variables can hold a single (long) integer or floating
-point (double) value, which are stored in the @code{lval} and
-@code{dval} members of the @code{val} union of the @code{Var} structure.
+variables, we're going to discuss them sometime later). A @code{STR_VAR}
+is a variable holding a string, and also this type of variables only will
+be found in temporary variables. What an @code{INT_VAR} and @code{FLOAT_VAR}
+is will probably be quite obvious, these types of variables can hold a
+single (long) integer or floating point (double) value, which are stored
+in the @code{lval} and @code{dval} members of the @code{val} union of the
+@code{Var} structure.
 
 
 Variables of type @code{INT_ARR} and @code{FLOAT_ARR} are for holding
 one-dimensional arrays of integer and floating point values.  For
 variables of thess types the @code{len} field of the @code{Var}
 structure will contain the (current) length of the array and the
-@code{lpnt} and @code{dpnt} members of the @code{val} union are pointers
-to the array with its values.
+members @code{lpnt} or @code{dpnt} of the @code{val} union are pointers
+to an array with the data.
+
 
 Variables of type @code{INT_REF} and @code{FLOAT_REF} are for
 multidimensional arrays. These are a bit different because they don't
 store any elements of the array directly but instead pointers to lower
 dimensional arrays. These might again be multdimensional array variables
 (but with one dimension less) or @code{INT_ARR} or @code{FLOAT_ARR}
-variables, that then contain the data of an one-dimensional array. To
-make clearer what I mean lets assume that you define a 3-dimensional
-array called @code{A} in the @code{VARIABLES} section:
+variables, that then contain the data of a one-dimensional array. If
+you have ben programming in e.g.@: Perl this concept will probably not
+be new to you - there you also have one-dimensional arrays but which in
+turn can have elements that are pointers to arrays. Otherwise, to make
+clearer what I mean, lets assume that you define a 3-dimensional array
+called @code{A} in the @code{VARIABLES} section:
 @example
 A[ 4, 2, 7 ];
 @end example
 @noindent
 This will result in the creation of 9 variables. The top-most one (and
-only one that can be accessed directly from the @code{EDL} script
+only that one can be accessed directly from the @code{EDL} script
 because it's the only one having a name) is of type @code{INT_REF} and
 contains an array of 4 pointers to 2x7-dimensional arrays, stored in the
-@code{vprtr} member of the @code{val} union of the @code{Var}
-structure. It's @code{dim} member is set to 3 since it's a 3-dimensional
-variable and the @code{len} member gets set to 4 because the
-@code{val.vptr} field is an array of 4 @code{Var} pointers.  Each of the
-4 @code{Var} pointers stored in the @code{val.vptr} field point to a
-different variable, of which each is a again of type @code{INT_REF}.
-But these variables pointed to will have a dimension of 2 only, so the
-@code{dim} memberis set to 2 and since each is of dimension @w{@code{[2,
-7]}}, their @code{len} members are set to 2. And each of this
-lower-dimension variables again will have the @code{val.vptr} array
-consist of (2) pointers pointing to one.dimensional arrays, this time of
-type @code{INT_ARR}. These @code{INT_ARR} variables, two levels below
-the original variable named @code{A} will each contain an array of 7
-integer values, pointed to by @code{val.lpnt}.
+@code{vprtr} member of the @code{val} union of the @code{Var} structure.
+It's @code{dim} member is set to 3 since it's a 3-dimensional variable
+and the @code{len} member gets set to 4 because the @code{val.vptr}
+field is an array of 4 @code{Var} pointers.  Each of the 4 @code{Var}
+pointers stored in the @code{val.vptr} field point to a different
+variable, of which each is a again of type @code{INT_REF}. But these
+variables pointed to will have a dimension of 2 only, so the @code{dim}
+member is set to 2 and since each is of dimension @w{@code{[2, 7]}},
+their @code{len} members are set to 2. And each of this lower-dimension
+variables again will have the @code{val.vptr} array consist of (2)
+pointers pointing to one.dimensional arrays, this time of type
+@code{INT_ARR}. These @code{INT_ARR} variables, two levels below the
+original variable named @code{A} will each contain an array of 7 integer
+values, pointed to by @code{val.lpnt}.
 
 
 When you count the variables actually created according to the scheme
@@ -904,29 +917,28 @@ as one-dimensional arrays).
 
 The remaining variable types @code{INT_PTR}, @code{FLOAT_PTR},
 @code{REF_PTR} and @code{FUNC} are again only used with temporary
-variables and will be discussed below.
+variables and will be discussed later.
 
 
 The variables declared in the @code{VARIABLES} section are all elements
 of a doubly linked list. The pointer to the top element is a member of
-the global @code{EDL} variable. It's a structure of type
-@code{EDL_Stuff} declared in @file{fsc2.h} and countaining data relevant
-for the @code{EDL} script currently under execution. To find the first
-element of the list of variables see the @code{EDL.Var_List} member.
-Directly beneath it you will find that there's also a second variable
-named @code{EDL.Var_Stack}. This variable is also doubly linked list of
-variables, but in contrast this list is for temporary variables, which
-get created and deleted all of the time during the interpretation of an
-@code{EDL} script and is in the following often referred to as the
-"stack". In this list also the types of variables that were only
-mentioned @i{en passant} above can be found, which I will shortly
-summarize here.
+the global @code{EDL} variable. It's a structure of type @code{EDL_Stuff}
+declared in @file{fsc2.h} and countaining data relevant for the @code{EDL}
+script currently under execution. To find the first element of the list of
+variables see the @code{EDL.Var_List} member. Directly beneath it you will
+find that there's also a second variable named @code{EDL.Var_Stack}. This
+variable is also doubly linked list of variables, but in contrast this
+list is for temporary variables which get created and deleted all of the
+time during the interpretation of an @code{EDL} script and is in the
+following often referred to as the "stack". In this list also the types
+of variables that were only mentioned @i{en passant} above can be found,
+which I will shortly summarize here.
 
 
 A variable of type @code{STR_VAR} gets created whenever in the text of
 the @code{EDL} script a string is found or when an @code{EDL} function
 returns a string. Since strings are always used shortly after their
-creation (always within the statement they appear in) they are always
+creation (always within the statement they appear in) they are all
 temporary variables. Variable of type @code{INT_PTR} and
 @code{FLOAT_PTR} are variables in which the @code{val.lpnt} and
 @code{val.dpnt} members point to arrays belonging to some other
@@ -938,7 +950,7 @@ pointing to address to one of the @code{C} functions that get called
 for @code{EDL} functions.
 
 
-After this short detour about variables lets go back to what happens in
+After this detour about variables lets go back to what happens in
 the @code{VARIABLES} section. In the most simple case the
 @code{VARIABLES} section isn't much more than a list of variable names,
 which need to be created. When the lexer finds something which looks
@@ -957,7 +969,7 @@ token. If this is a comma or a semicolon it can conclude that the
 variable is a simple variable and can set its type to either
 @code{INT_VAR} or @code{FLOAT_VAR} (depending on its name starting with
 a lower or upper case character) and is done with it. But if the next
-token is a "@code{[}" the parser can only notice that this is going an
+token is a "@code{[}" the parser knows that this is going an
 array and must ask the lexer for more tokens, which should be a list of
 numbers, separated by commas and ending in a "@code{]}" (but there are
 even more complicated cases). When all these have been read in the
@@ -1006,17 +1018,17 @@ pointer to the (hopefully already defined and initialized) variable
 (first) argument, so it requests another token, which is the "@code{+}".
 From this the parser concludes that it obviously hasn't seen the end of
 it yet and gets itself another token, the "@code{5}". A stupid parser
-might now add the 5 to the value of @code{R}, but since the parser knows
-the precedence od operators it has to defer this operation at least
-until it has seen the next token. When the next token would be a comma
-(indicating that a new function argument starts) or a closing
+might now add the @code{5} to the value of @code{R}, but since the
+parser knows the precedence of operators it has to defer this operation
+at least until it has seen the next token. When the next token would be
+a comma (indicating that a new function argument starts) or a closing
 parenthesis it would now do the addition. But since the next token is a 
-"@code{*}" it has to wait and first evaluate the "@code{( 2 - 7 )}"
-part and multiply the result with 5 before again checking if it's prudent
-to add the result to the value of @code{R}. Since the next token the
-parser receives from the lexer is the "@code{)}, indicating the end of
-the function arguments, it can go on, adding the result of
-@w{"@code{5 * ( 2 - 7 )}"} to the value of @code{R}. In this process
+"@code{*}" it has to wait and first evaluate the "@code{(2 - 7)}"
+part and multiply the result with @code{5} before again checking if it's
+prudent to add the result to the value of @code{R}. Since the next token
+the parser receives from the lexer is the "@code{)}, indicating the end
+of the function arguments, it can go on, adding the result of
+@w{"@code{5 * (2 - 7)}"} to the value of @code{R}. In this process
 the temporary variable holding the pointer to the variable @code{R} gets
 popped from the stack and a new variable with the result of the
 operation is pushed onto the stack (i.e.@: is added to the end of the
@@ -1063,8 +1075,8 @@ a single variable, i.e. the variable pointed to must have its
 stack. A function may also chose to return @code{NULL}, but it's good
 practice to always return a value, if there isn't really anything to be
 returned, i.e.@: the function always get invoked for its side effects
-only, it should simply return an integer variable with a value of 1 to
-indicate that it succeeded.
+only, it should simply return an integer variable with a value of @code{1}
+to indicate that it succeeded.
 
 
 Again I have to admit that I wasn't completely honest when I wrote above
@@ -1078,19 +1090,19 @@ this variable on the stack). Before @code{func_call()} really calls
 if the variable it got is really pointing to a function. Then it checks
 how many arguments there are and compares it to the number of arguments
 the function to be called is prepared to accept. If there are too many
-it will strip of the superfluous one (and print out a warning), if there
+it will strip off the superfluous one (and print out a warning), if there
 aren't enough it will print out an error message and stop the
 interpretation of the @code{EDL} script. If these tests show that the
 function can be called without problems @code{func_call()} still has to
 create an entry on another stack (the "call stack") that keeps track of
 situations where during the execution of a function another function is
 called etc., which is e.g.@: needed for emitting reasonable error
-messages. Only then the @code{f_abs()} is called. When @code{f_abs()}
+messages. Only then @code{f_abs()} is called. When @code{f_abs()}
 returns, the @code{func_call()} first pops the last element from the
 "call stack", automatically removes what's left of the function
 arguments and the variable with the pointer to the @code{f_abs()}
 function (always checking that the called function hasn't messed up
-stack in unrecoverable ways) before it returns the pointer with the
+the stack in unrecoverable ways) before it returns the pointer with the
 result of the call of @code{f_abs()} to the parser.
 
 
@@ -1102,7 +1114,7 @@ abs( R + 5 * ( 2 - 7 ) )
 and can use it e.g.@: as the length of a new array.
 
 
-Of course, beside being defined new variables they can also become
+Of course, beside getting defined new variables can also become
 intialized in the @code{VARIABLES} section. The values used in the
 initialization can, of course, also be the results of complicated
 expressions. But these will be treated in exactly the same way as
@@ -1111,9 +1123,9 @@ parser knows that a variable is getting initialized when it sees the
 "@code{=}" operator after the definition of a variable. It then parses
 and interprets the right hand side of the equation and finally assigns
 the result to the newly defined variable on the left hand side. To do so
-which it calls the function @code{vars_assign()} from @file{variables.c}
+it calls the function @code{vars_assign()} from @file{variables.c}
 (if it's an initialization of an array also some other functions get
-involved in between).
+involved in the process).
 
 
 The creation and initialization of one- and more-dimensional arrays
@@ -1135,22 +1147,21 @@ type of the next section.
 
 
 If the @code{EDL} script is for an experiment where pulses are used
-chances are high that the next sections would be @code{ASSIGNMENTS} and
+chances are high that the next sections will be @code{ASSIGNMENTS} and
 @code{PHASES} section. But I don't want to go into the details of the
-handling of these sections. In principle, it works exactly like the
+handling of these sections. In principle, things work exactly like in the
 interpretation of the @code{VARIABLES} section, i.e.@: there's again a
 lexer for each section (generated from @file{assign_lexer.l} and
-@file{phases_lexer.l}) and a parser (generated from
-@file{assign_parser.y} and @code{phases_parser.y}), which work together
-to digest the @code{EDL} code. The interesting things happening here is
-the interaction with the module for the pulser, but this is in large
-parts already covered by the second half of next chapter about writing
-modules.
+@file{phases_lexer.l}) and a parser (generated from @file{assign_parser.y}
+and @code{phases_parser.y}), which work together to digest the @code{EDL}
+code. The interesting things happening here is the interaction with the
+module for the pulser, but this is in large parts already covered by the
+second half of next chapter about writing modules.
 
 
 The next section is usually the @code{PREPARATIONS} section. And again
 nothing much different is going on here from what we already found in
-the @code{VARIABLES} section, the lexer and parser generated from
+the @code{VARIABLES} section: the lexer and parser generated from
 @file{preps_lexer.l} and @file{preps_parser.y} play their usual game,
 one asking the other for tokens and then trying to make sense from them,
 analyzing the sequence of tokens and executing the appropriate actions.
@@ -1203,8 +1214,8 @@ able to interpret the same code over and over again. One solution would
 be to store the "predigested" @code{EDL} the program received from the
 @code{fsc2_clean} utility in memory and then make the lexer split it
 into tokens again and again when needed. But this would be a wast of CPU
-time when you can store the tokens instead of the the code, which would
-need to be processed by lexer every time round.
+time when you can store the tokens of the the code instead, which then
+can be feed to the parser again and again without the need for a tokenizer.
 
 
 So, why to repeat some or all code of the @code{EXPERIMENT} section at
@@ -1226,17 +1237,15 @@ another point is that an experiment may have to be repeated. Of course,
 the whole @code{EDL} script could be read in again when an experiment is
 restarted. But this would also require testing it again (which might
 take quite a bit of time), so it's faster to work with the already
-tested code. And, finally, when you have any kinds of loops in a script,
-the same code has to be executed again and again, which requires to jump
-back to the start of the loop.
+tested code.
 
 
-And that's why the tokens of the @code{EXPERIMENT } section need to be
-stored in memory in an array. It is done in the function
-@code{store_exp()} in @file{exp.c} (which is called from the @code{C}
-code in @file{exp_lexer.l}). The function repeatedly calls the lexer
-generated from @file{exp_lexer.l} for new tokens, storing each one in a
-new structure, until the end end of the @code{EDL} code is reached. The
+And that's why the tokens of the @code{EXPERIMENT } section are stored
+in memory e.g.@: in an array. It's done in the function @code{store_exp()}
+in @file{exp.c} (which is called from the @code{C} code in
+@file{exp_lexer.l}). The function repeatedly calls the lexer generated
+from @file{exp_lexer.l} for new tokens, storing each one in a new
+structure, until the end end of the @code{EDL} code is reached. The
 array of structures is pointed to by @code{EDL.prg_token}. While it does
 so it already runs some simple checks, e.g. for unbalances parentheses
 and braces.
@@ -1244,12 +1253,12 @@ and braces.
 
 When all tokens have been stored the function calls @code{loop_setup()}.
 The function initializes loops and @code{IF}-@code{ELSE} constructs.
-Take as an example a @code{FOR} loop. To be able later to find out where
-the statements of the body of the loop start a pointer to the first
+Take as an example a @code{FOR} loop. To later be able to find out where
+the statements of the body of the loop starts a pointer to the first
 token of the loop body is set in the structure for the @code{FOR}
 token. And since, at the end of the @code{FOR} loop, control needs to be
 transfered to the first statement after the loop body also a pointer
-pointing to the first token after the loop is also set. And for a
+pointing to the first token after the loop also is set. And for a
 keyword like @code{NEXT} a pointer to the start of the loop it belongs
 to needs to be set. Finding the start and the end of loops is simply
 done by counting levels of curly braces, '@code{@{}' and '@code{@}}'
