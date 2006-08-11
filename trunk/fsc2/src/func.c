@@ -60,11 +60,11 @@
    the variable for the function.  */
 
 
-/* The following variables are shared with loader.c which adds further
-   functions from the loaded modules */
+/* The following variables are shared with loader.c which adds the functions
+   from the loaded modules to the list of built-in functions */
 
 size_t Num_Func;     /* number of built-in and listed functions */
-Func_T *Fncts;       /* structure for list of functions */
+Func_T *Fncts;       /* array with list of functions structures */
 
 
 /* Both these variables are shared with 'func_util.c' */
@@ -77,7 +77,7 @@ bool Dont_Save;
               display() and clear_curve() if the maximum number of curves
               (defined as MAX_CURVES in graphics.h) should ever be changed. */
 
-Func_T Def_Fncts[ ] =              /* List of built-in functions */
+static Func_T Def_fncts[ ] =                  /* List of built-in functions */
 {
     { "int",                 f_int,              1, ACCESS_ALL,  NULL, UNSET },
     { "float",               f_float,            1, ACCESS_ALL,  NULL, UNSET },
@@ -214,8 +214,6 @@ Func_T Def_Fncts[ ] =              /* List of built-in functions */
     { "fs_button_2d",        f_fs_button_2d,    -2, ACCESS_EXP,  NULL, UNSET },
     { "end",                 f_stopsim,          0, ACCESS_EXP,  NULL, UNSET },
     { "abort",               f_abort,            0, ACCESS_EXP,  NULL, UNSET },
-    { NULL,                  NULL,               0, 0,           NULL, UNSET }
-                       /* last set marks the very last entry, don't remove ! */
 };
 
 
@@ -237,23 +235,19 @@ bool functions_init( void )
     No_File_Numbers = UNSET;
     Dont_Save = UNSET;
 
-    /* Count number of built-in functions */
-
-    for ( Num_Func = 0; Def_Fncts[ Num_Func ].fnct != NULL; Num_Func++ )
-        /* empty */ ;
-
-    /*
-       1. Get new memory for the functions structures and copy the built-in
+    /* 1. Get new memory for the functions structures and copy the built-in
           functions into it.
        2. Parse the function name data base 'Functions' where all additional
-          functions have to be listed.
+          (module) functions have to be listed and add them to the list.
        3. Sort the functions by name so that they can be found using bsearch()
     */
 
+    Num_Func = NUM_ELEMS( Def_fncts );     /* number of built-in functions */
+
     TRY
     {
-        Fncts = FUNC_P T_malloc( Num_Func * sizeof *Fncts );
-        memcpy( Fncts, Def_Fncts, Num_Func * sizeof *Fncts );
+        Fncts = FUNC_P T_malloc( sizeof Def_fncts );
+        memcpy( Fncts, Def_fncts, sizeof Def_fncts );
         qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp1 );
         Num_Func = func_list_parse( &Fncts, Num_Func );
         qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp1 );
@@ -269,9 +263,9 @@ bool functions_init( void )
 }
 
 
-/*-----------------------------------------------------------*
- * Function for qsort'ing functions according to their names
- *-----------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function for qsort()ing functions according to their names
+ *------------------------------------------------------------*/
 
 static int func_cmp1( const void * a,
                       const void * b )
@@ -297,7 +291,7 @@ void functions_exit( void )
     /* Get rid of the names of loaded functions (but not the built-in ones) */
 
     for ( i = 0; i < Num_Func; i++ )
-        if ( Fncts[ i ].to_be_loaded )
+        if ( Fncts[ i ].to_be_loaded && Fncts[ i ].name != NULL )
             T_free( ( char * ) Fncts[ i ].name );
 
     Fncts = FUNC_P T_free( Fncts );
@@ -389,8 +383,8 @@ Var_T *func_get( const char * name,
        4. The functions name we got as the argument hasn't already a '#'
           appended to it.
 
-       If now a function of the name passed to this function is found in
-       the module from which the call is we append the '#' plus the device
+       If now a function of the name passed to this function is found in the
+       module from which the call came we append the '#' plus the device
        count number to the name of the function and use this adorned name
        as the name of the function the caller is really looking for. */
 
@@ -674,17 +668,18 @@ Var_T *func_call( Var_T * f )
  * it should appear in error messages for the device), and, finally, the
  * number of the device (this can be larger than 1 if there's more than
  * one devices of the same generic type).
- * These informations are used in two situations: First when printing
- * messages. The print() function is supposed to prepend EDL file name
- * and line number, device name (if applicable) and function name. It
- * gets the device and function name from the current call stack entry.
- * Second, when within a module an EDL function from the same module is
- * called (via func_get() and func_call()) the writer of the module has
- * no information if there are other modules with the same generic type
- * loaded, supplying a function by the same name. The information in the
- * current call stack entry is used to determine this and thus to auto-
- * matically return the appropriate fucntion handle to the module, i.e.
- * the function from the same module the func_get() call came from.
+ * These informations are used in two situations. First when printing
+ * messages the print() function is supposed to prepend an EDL file name
+ * and line number, device name (if applicable) and function name to the
+ * message. It gets the device and function name from the current call
+ * stack entry. Second, when within a module an EDL function from the
+ * same module is called (via func_get() and func_call()) the writer of
+ * the module has no information if there are other modules with the
+ * same generic type loaded, supplying a function by the same name. The
+ * information in the current call stack entry is used to determine this
+ * and thus to automatically return the appropriate fucntion handle to
+ * the module, i.e. the function from the same module the func_get()
+ * call came from.
  *-----------------------------------------------------------------------*/
 
 Call_Stack_T *call_push( Func_T *     f,
@@ -721,10 +716,10 @@ Call_Stack_T *call_push( Func_T *     f,
     else
         cs->Cur_Pulser = Cur_Pulser;
 
-    /* If this is call of function within one of the modules during the test
-       run add an extremely rough estimate for the mean time spend in the
-       function for the call to the global variable that is used to keep
-       an estimate time for the modules. */
+    /* If this is a call of function within one of the modules during the
+       test run add an extremely rough estimate for the mean time spend in
+       the function for the call to the global variable that is used to keep
+       a time estimate for the modules. */
 
     if ( Fsc2_Internals.mode == TEST && device_name != NULL )
         EDL.experiment_time += MODULE_CALL_ESTIMATE;

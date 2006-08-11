@@ -1567,27 +1567,27 @@ markers wrap around when they reach the number of avalailable
 
 To keep the child process from sending more messages than there are free
 slots in the shared array of @code{SLOT} structures there's a semaphore
-that starts off with the number of available slots and that the child
-process has to wait for (thereby decrementing it) before using a new
-slot. The parent, on the other hand, will post the semaphore each time
-it accepted a message from the slot indexed by the @code{low}
-marker.
+that gets initialized to the number of available slots and that the child
+process has to wait on (thereby decrementing it) before using a new
+slot. The parent, on the other hand, will post (i.e.@: increment) the
+semaphore each time it accepted a message from the slot indexed by the
+@code{low} marker, thus freeing the slot.
 
 
 Beside data the child also may need to send what's called "requests" in
 the following. These requests always require an answer by the parent.
 In this case the type field of the @code{SLOT} structure is set by the
-child to the value @code{REQUEST}, indicate that this is a request. The
+child to the value @code{REQUEST}, indicating that this is a request. The
 data exchange between parent and child for requests is not done via
-shared memory segments but by using a simple set of pipes isused, both
-for the data making up the request request from the child and the reply
-by the parent. A request will induce the parent to listen on the pipe
-and, depending on the type of the request, to execute some action on
-behalf of the child. It then either returns data collected in the
-process or just an acknowledgment, telling the child process that it's
-done and can continue with its work. Because the child has always to
-wait for a reply to its request there will be never more than one
-request in the message queue.
+shared memory segments but by using a simple set of pipes, both for the
+data making up the request from the child as well as the reply by the
+parent. A request will induce the parent to listen on the pipe and,
+depending on the type of the request, to execute some action on behalf
+of the child. It then either returns data collected in the process or
+just an acknowledgment, telling the child process that it's done and
+can continue with its work. Because the child has always to wait for a
+reply to its request there never can be more than a single request in
+the message queue.
 
 
 After having run the start-of-experiment handlers in all modules,
@@ -1607,8 +1607,8 @@ clicking on one of the buttons) and to reguarly check if new data from
 the child have arrived. The latter is done from within an idle handler,
 a function invoked whenever the parent process isn't busy. The function
 is called @code{new_data_callback()} and can be found in @file{comm.c}.
-But most of the actual work, i.e.@: accepting and displaying the data is
-done in the function @code{accept_new_data()} in @file{accept.c}.
+But most of the actual work, i.e.@: accepting and displaying the data,
+is done in the function @code{accept_new_data()} in @file{accept.c}.
 
 
 The child process will have itself initialized in the mean time in the
@@ -1616,22 +1616,22 @@ function @code{run_child()} in @file{run.c}. It closes the ends of pipes
 it doesn't need anymore and sets up its own signal handlers. Then its
 main work starts by invoking the function @code{do_measurement()} where,
 just as already described above for the test run, the stored tokens from
-the @code{EXPERIMENT} section of the @code{EDL} script get
-interpreted. Again for tokens not involved with flow control the parser
-created from @file{exp_parser.y} is used. This will in turn get new
-tokens delivered from the array of stored tokens by the function
-@code{exp_runlex()} in @file{exp.c} (the same already used in the test
-run), executing the code associated with the sequences of tokens. And
-again tokens for flow control are not dealt with by the parser but by
-the code in @code{deal_with_program_tokens()}.
+the @code{EXPERIMENT} section of the @code{EDL} script get interpreted.
+Again for tokens not involved in flow control the parser created from
+@file{exp_parser.y} is used. This parser gets passed tokens delivered
+from the array of stored tokens by the function @code{exp_runlex()} in
+@file{exp.c} (the same one as used in the test run), executing the code
+associated with the sequences of tokens. And again tokens for flow control
+are not dealt with by the parser but by the code in
+@code{deal_with_program_tokens()}.
 
 
 The most notable differences to the test run is that the member
 @code{mode} of the global structure @code{Internals} is now set to a
-value of @code{EXPERIMENT}, which is tested all over the program anf the
+value of @code{EXPERIMENT}, which is tested all over the program and the
 modules, either directly or via the macro @code{FSC2_MODE}. The other
 difference is that now it is always tested if the child process got a
-signal from the parent process, telling it to quit (this happend if the
+signal from the parent process, telling it to quit (this happens if the
 member @code{do_quit} of the global structure @code{EDL} is set).  In
 this case the flow of control has to be transfered immediately (or, to
 be precise, immediately after the parser has interpreted the current
@@ -1658,7 +1658,7 @@ requests are formated a bit further.
 
 As already has been mentioned, every data exchange is triggered by the
 child process, which puts a @code{SLOT} structure in to the message
-queue, residing the in shared memory, and increments the @code{high}
+queue, residing in shared memory, and increments the @code{high}
 marker of the message queue. The @code{type} member of the @code{SLOT}
 structure is set to either @code{DATA_1D}, @code{DATA_2D} or
 @code{REQUEST}. Messages of type @code{DATA_1D} and @code{DATA_2D} are
@@ -1667,7 +1667,8 @@ for for one- or two-dimensional data. Messages of @code{REQUEST} are
 messages that ask the parent to do something on behalf of the child
 process (e.g.@: asking the user to enter a file name, click on the
 button in an alert message, create, modify or delete an element in the
-tool box etc.) and will always be replied to by the parent.
+tool box etc.) and always require a reply by the parent.
+
 
 In the @code{accept_new_data()} function new messages of the types
 @code{DATA_1D} and @code{DATA_2D} are taken from the message queue and
@@ -1709,17 +1710,18 @@ executed by the child process but only by the parent.
 
 
 Now about the handling of requests: when in @code{accept_new_data()} a
-message with this type is found contol is passed back to the calling
-function, @code{new_data_handler()} in @file{comm.c}, which then invokes
-@code{reader()}. Within this function the parent process reads on its
-side of the pipe to the child process. The child process will write a
-structure of type @code{CommStruct} (see @file{comm.h}) to the pipe.
-This structure contains a @code{type} field and a union, which in some
-cases might already contain all information associated with the request.
-Otherwise, the child will also have to send further data via the pipe to
-the parent. The layout of these additional data depends strongly on the
-type of the request and you will have to look up the functions that
-initialize the request to find out more about it.
+message of type @code{REQUEST} is found control is passed back to the
+calling function, @code{new_data_handler()} in @file{comm.c}, which
+then invokes @code{reader()}. Within this function the parent process
+reads on its side of the pipe to the child process. The child process
+will write a structure of type @code{CommStruct} (see @file{comm.h}) to
+the pipe. This structure contains a @code{type} field for the kind of
+request and a union, which in some cases might already contain all
+information associated with the request. Otherwise, the child will also
+have to send further data via the pipe to the parent. The layout o
+these additional data depends strongly on the type of the request and
+you will have to look up the functions that initialize the request to
+find out more about it.
 
 
 Writing of the data to the pipe is done by the child via the
@@ -1727,7 +1729,7 @@ Writing of the data to the pipe is done by the child via the
 successfully written its data to the pipe it must wait for the parent to
 reply by listening on its read side of the pipe by calling
 @code{reader()}. In the mean time the parent will execute whatever
-actions associated with a request and then call @code{writer()} to send
+actions are associated with a request and then call @code{writer()} to send
 back either just an acknowledgment or a set of data to the child process
 waiting in @code{reader()} for the reply.
 
@@ -1735,13 +1737,12 @@ waiting in @code{reader()} for the reply.
 Another thing that might get done while the parent process is running
 its idle handler and if there aren't any more data by the child process
 to be dealt with is checking if the HTTP server, that might have gotten
-switched of by the user is asking for either information about the
-current state of @code{fsc2} or even a file with a copy of what's
-currently displayed on the screen. This is done in the function
-@code{http_check()} in @file{http.c}. Please note that never more than a
-single request by the HTTP server is serviced to keep @code{fsc2} from
-being slowed down too much during the experiment from a large number of
-such requests.
+switched on by the user is asking for either information about the
+current state of @code{fsc2} or a file with a copy of what's currently
+displayed on the screen. This is done in the function @code{http_check()}
+in @file{http.c}. Please note that never more than a single request by
+the HTTP server is serviced to keep @code{fsc2} from being slowed down
+too much during the experiment from a large number of such requests.
 
 
 When the child exits the parent has again to do a bit of work. It
@@ -1750,7 +1751,7 @@ closes its remaining ends of the pipes and removes the shared memory
 segments and the semaphore used to protect the message queue (after
 having worked its way through all remaining messages). Then it deletes
 the tool box (if it was used at all) end runs the end-of-experiment hook
-functions in the modules. If the GPIB bus or serial ports were used the
+functions of the modules. If the GPIB bus or serial ports were used the
 appropriate function in the GPIB library is called to close the
 connection to the bus and also the device files for the serial ports are
 closed.
@@ -1761,9 +1762,10 @@ is in a state that allows a new experiment to be started. This can be
 done by repeating the same experiment, in which case the already stored
 tokens would be interpreted again, i.e.@: the @code{EDL} script would't
 have to be read in and tested again but the program would immediately go
-to the start of the @code{EXPERIMENT} section. But, of course a
+to the start of the @code{EXPERIMENT} section. But, of course, a
 completely new experiment can be done by loading a new @code{EDL}
 script.
+
 
 
 @node Coding conventions, , Reading the sources, Internals
@@ -1776,9 +1778,10 @@ of variables. And while I try to be consistent unfortunately I don't always
 follow my own rules all of the time and thus later have to try to to correct
 these mistakes. I can't promise that I am always successful in this endeavor.
 
-Local variables with function scope should always be spelled in all lower
-case, i.e.@: @code{num_points}. For local variables with file scope
-(i.e. variables that are global for a whole C file but not further) I tend
+
+Local variables with function scope should always have all lower case,
+i.e.@: @code{num_points}. For local variables with file scope (i.e.@:
+variables that are global to a whole C file but not further) I tend
 to use an upper case for the very first character of the name and all others
 in lower case, i.e.@: @code{Child_return_status}. Truely global variables
 (there are more than I am happy with but it's basically impossible to throw
@@ -1788,17 +1791,20 @@ with an upper case letter, i.e.@: @code{Function_Names}. Sometimes that
 rule gets a bit loosened up when one of the words is an acronym, where I
 then use all upper case characters for the word.
 
-When I use @code{typedef}'ed types I use a similar convention like for global
+
+When I use @code{typedef}'ed types I use a similar convention as for global
 variables but append the suffix @code{_T} to the end of the name to make them
 stick out, like in @code{GUI_Stuff_T}. For @code{#define}'d constants I try
 to use all upper case, e.g.@: @code{NUM_CHANNEL_NAMES} - the same holds for
 enumerated values.
 
+
 With a few exceptions function names are always in all lower case.
+
 
 Of course, these conventions only hold for my own variables etc. When I use
 symbols from libraries I have to use what I get, so e.g. @code{XPoint} is
-some @code{typedef}'ed type from X, even though it looks like a global
-variable. But I didn't want to go as far as refefining everything else
+some @code{typedef}'ed type from X, even though it looks a bit like a global
+variable. But I didn't want to go as far as redefining everything else
 because it would make things unreasonably difficult to read for people
 with experience with the other libraries.

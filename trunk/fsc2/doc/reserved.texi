@@ -41,14 +41,16 @@ functions and may not be used as variable names.
 @item @code{ASS:}             @tab Starts the @code{ASSIGNMENTS} section
 @item @code{ASSIGNMENT:}      @tab Starts the @code{ASSIGNMENTS} section
 @item @code{ASSIGNMENTS:}     @tab Starts the @code{ASSIGNMENTS} section
-@item @code{AUX}              @tab Digitizer channel name
-@item @code{AUX1}             @tab Digitizer channel name
-@item @code{AUX2}             @tab Digitizer channel name
+@item @code{AUX}              @tab Digitizer/pulser channel name
+@item @code{AUX1}             @tab Digitizer/pulser channel name
+@item @code{AUX2}             @tab Digitizer/pulser channel name
+@item @code{A0} - @code{A15}  @tab Digitizer/pulser channel name
 @item                         @tab
 @item @code{BREAK}            @tab Loop control statement (@ref{BREAK statement})
 @item @code{button_create}    @tab Built-in function (@ref{button_create()})
 @item @code{button_delete}    @tab Built-in function (@ref{button_delete()})
 @item @code{button_state}     @tab Built-in function (@ref{button_state()})
+@item @code{B0} - @code{B15}  @tab Digitizer/pulser channel name
 @item                         @tab
 @item @code{ceil}             @tab Built-in function (@ref{ceil()})
 @item @code{CH}               @tab
@@ -82,6 +84,7 @@ functions and may not be used as variable names.
 @item @code{clear_marker}     @tab Built-in function (@ref{clear_marker()})
 @item @code{cos}              @tab Built-in function (@ref{cos()})
 @item @code{cosh}             @tab Built-in function (@ref{cosh()})
+@item @code{C0} - @code{C15}  @tab Digitizer/pulser channel name
 @item                         @tab
 @item @code{date}             @tab Built-in function (@ref{date()})
 @item @code{DEFAULT_SOURCE}   @tab Channel Name
@@ -124,6 +127,7 @@ functions and may not be used as variable names.
 @item @code{D_S}              @tab Pulse @code{DELTA_START} keyword
 @item @code{DSTART}           @tab Pulse @code{DELTA_START} keyword
 @item @code{D_START}          @tab Pulse @code{DELTA_START} keyword
+@item @code{D0} - @code{D15}  @tab Digitizer/pulser channel name
 @item                         @tab
 @item @code{ECL}              @tab Input level keyword
 @item @code{ELSE}             @tab Part of @code{IF-ELSE} constructs (@ref{IF-ELSE constructs})
@@ -133,6 +137,7 @@ functions and may not be used as variable names.
 @item @code{EXT10}            @tab Digitizer trigger channel name
 @item @code{EXTERN}           @tab @code{EXTERNAL} keyword
 @item @code{EXTERNAL}         @tab @code{EXTERNAL} keyword
+@item @code{E0} - @code{E15}  @tab Digitizer/pulser channel name
 @item                         @tab
 @item @code{F}                @tab
 @item @code{float}            @tab Built-in function (@ref{float()})
@@ -142,18 +147,21 @@ functions and may not be used as variable names.
 @item @code{fsave}            @tab Built-in function (@ref{fsave()})
 @item @code{ffsave}           @tab Built-in function (@ref{ffsave()})
 @item @code{FUNC}             @tab
-@item @code{FUNC_E}           @tab Digitizer channel name
-@item @code{FUNC_F}           @tab Digitizer channel name
-@item @code{FUNCE}            @tab Digitizer channel name
-@item @code{FUNCF}            @tab Digitizer channel name
+@item @code{FUNC_E}           @tab Digitizer/pulser channel name
+@item @code{FUNC_F}           @tab Digitizer/pulser channel name
+@item @code{FUNCE}            @tab Digitizer/pulser channel name
+@item @code{FUNCF}            @tab Digitizer/pulser channel name
 @item @code{FUNCTION}         @tab
+@item @code{F0} - @code{F15}  @tab Digitizer/pulser channel name
 @item                         @tab
 @item @code{get_file}         @tab Built-in function (@ref{get_file()})
 @item @code{GRACE_PERIOD}     @tab Deprecated keyword
+@item @code{G0} - @code{G15}  @tab Digitizer/pulser channel name
 @item                         @tab
 @item @code{H}                @tab @code{HIGH} keyword
 @item @code{hide_toolbox}     @tab Built-in function (@ref{hide_toolbox()})
 @item @code{HIGH}             @tab @code{HIGH} keyword
+@item @code{H0} - @code{H15}  @tab Digitizer/pulser channel name
 @item                         @tab
 @item @code{IF}               @tab Part of @code{IF-ELSE} constructs (@ref{IF-ELSE constructs})
 @item @code{init_1d}          @tab Built-in function (@ref{init_1d()})
@@ -184,17 +192,16 @@ functions and may not be used as variable names.
 @item @code{LOW}              @tab @code{LOW} keyword
 @item                         @tab
 @item @code{max_of}           @tab Built-in function (@ref{max_of()})
-@item @code{MATH1}            @tab Digitizer channel name
-@item @code{MATH2}            @tab Digitizer channel name
-@item @code{MATH3}            @tab Digitizer channel name
+@item @code{MATH}             @tab Digitizer/pulser channel name
 @item @code{MAXIMUM_PATTERN_LENGTH}  @tab Deprecated keyword
 @item @code{mean}             @tab Built-in function (@ref{mean()})
-@item @code{MEM_C}            @tab Digitizer channel name
-@item @code{MEM_D}            @tab Digitizer channel name
-@item @code{MEMC}             @tab Digitizer channel name
-@item @code{MEMD}             @tab Digitizer channel name
+@item @code{MEM_C}            @tab Digitizer/pulser channel name
+@item @code{MEM_D}            @tab Digitizer/pulser channel name
+@item @code{MEMC}             @tab Digitizer/pulser channel name
+@item @code{MEMD}             @tab Digitizer/pulser channel name
 @item @code{min_of}           @tab Built-in function (@ref{min_of()})
 @item @code{MODE}             @tab
+@item @code{M1} - @code{M4}   @tab Digitizer/pulser channel name
 @item                         @tab
 @item @code{NEG}              @tab
 @item @code{NEGATIVE}         @tab
@@ -250,10 +257,10 @@ functions and may not be used as variable names.
 @item @code{REP_T}            @tab Pulser @code{REPETITION_TIME} keyword
 @item @code{REPTIME}          @tab Pulser @code{REPETITION_TIME} keyword
 @item @code{REP_TIME}         @tab Pulser @code{REPETITION_TIME} keyword
-@item @code{REF1}             @tab Digitizer channel name
-@item @code{REF2}             @tab Digitizer channel name
-@item @code{REF3}             @tab Digitizer channel name
-@item @code{REF4}             @tab Digitizer channel name
+@item @code{REF1}             @tab Digitizer/pulser channel name
+@item @code{REF2}             @tab Digitizer/pulser channel name
+@item @code{REF3}             @tab Digitizer/pulser channel name
+@item @code{REF4}             @tab Digitizer/pulser channel name
 @item @code{rescale}          @tab Built-in function (@ref{rescale()})
 @item @code{rescale_1d}       @tab Built-in function (@ref{rescale_1d()})
 @item @code{rescale_2d}       @tab Built-in function (@ref{rescale_2d()})
@@ -407,4 +414,6 @@ characters in between).
 @item @code{uT}               @tab Micro-Tesla
 @item @code{uV}               @tab Micro-Volt
 @item @code{V}                @tab Volt
+@item
+@item @code{Z1} - @code{Z4}  @tab Digitizer/pulser channel name
 @end multitable

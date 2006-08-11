@@ -371,13 +371,8 @@ static int ni6601_init_board( struct pci_dev *             dev,
 	init_waitqueue_head( &board->tc_waitqueue );
 	init_waitqueue_head( &board->dma_waitqueue );
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
-        sema_init( &board->open_mutex, 1 );
-        sema_init( &board->ioctl_mutex, 1 );
-#else
 	init_MUTEX( &board->open_mutex );
 	init_MUTEX( &board->ioctl_mutex );
-#endif
 
 	/* Get addresses of all registers and reset the board */
 
@@ -485,6 +480,7 @@ static int __init ni6601_init_board( struct pci_dev * dev,
 	init_waitqueue_head( &board->dma_waitqueue );
 
         sema_init( &board->open_mutex, 1 );
+        sema_init( &board->ioctl_mutex, 1 );
 
 	/* Get addresses of all registers and reset the board */
 

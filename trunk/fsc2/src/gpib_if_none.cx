@@ -189,26 +189,12 @@ int gpib_read( int    device  UNUSED_ARG,
 /*--------------------------------------*
  *--------------------------------------*/
 
-void gpib_log_message( const char * fmt,
+void gpib_log_message( const char * fmt  UNUSED_ARG,
                        ... )
 {
-    va_list ap;
-
-
-    /* Keep the module writers from calling the function anywhere else
-       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-       section */
-
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
                  Fsc2_Internals.state == STATE_FINISHED ||
                  Fsc2_Internals.mode  == EXPERIMENT  );
-
-    if ( gpib_log == NULL || ll == LL_NONE )
-        return;
-
-    va_start( ap, fmt );
-    fprintf( stderr, fmt, ap );
-    va_end( ap );
 }
 
 

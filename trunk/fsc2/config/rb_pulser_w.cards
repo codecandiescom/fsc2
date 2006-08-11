@@ -24,7 +24,7 @@
 ERT_DELAY_CARD        "DELAY_0"
 
 
-# 2. Name of the card creating the delay for the first microwave pulse
+# 2. Name of the card creating the delay before the first microwave pulse
 
 MW_DELAY_CARD_0       "DELAY_1"
 
@@ -35,7 +35,8 @@ MW_DELAY_CARD_0       "DELAY_1"
 MW_DELAY_CARD_1	      "DELAY_2"
 
 
-# 4. Name of the card creating the delay for the second microwave pulse
+# 4. Name of the card creating the delay between the first and the second
+#    microwave pulse
 
 MW_DELAY_CARD_2	      "DELAY_3"
 
@@ -46,17 +47,20 @@ MW_DELAY_CARD_2	      "DELAY_3"
 MW_DELAY_CARD_3	      "DELAY_4"
 
 
-# 6. Name of the card creating the delay for the third microwave pulse
+# 6. Name of the card creating the delay between the second and the third
+#    microwave pulse
 
 MW_DELAY_CARD_4	      "DELAY_5"
 
 
-# 7. Name of the card creating the third microwave pulse
+# 7. Name of the card creating the third microwave pulse (i.e. is reponsible
+#    for its length)
 
 MW_DELAY_CARD_5	      "DELAY_6"
 
 
-# 8. Name of the card for creating the defense pulse
+# 8. Name of the card for creating the defense pulse (always starts at the
+#    very beginning of the pulse sequence)
 
 DEFENSE_DELAY_CARD    "DELAY_7"
 
@@ -71,24 +75,24 @@ LASER_DELAY_CARD_0    "DELAY_8"
 LASER_DELAY_CARD_1    "DELAY_9"
 
 
-# 11. Name of the card for controlling the phase of the first pulse
+# 11. Name of the card for controlling the phase of the first microwave pulse
 
 PHASE_DELAY_CARD_0    "DELAY_10"
 
 
-# 12. Name of the card for controlling the phase of the second pulse
+# 12. Name of the card for controlling the phase of the second microwave pulse
 
 PHASE_DELAY_CARD_1    "DELAY_11"
 
 
-# 13. Name of the card for controlling the phase of the third pulse
+# 13. Name of the card for controlling the phase of the third microwave pulse
 
 PHASE_DELAY_CARD_2    "DELAY_12"
 
 
 # 14. Name of the delay card that creates the delay before the start of
 #     the RF pulse (the length of this pulse is set using the pulse mode
-#     of the Rhode & Schwarz synthesizer)
+#     of the Rhode&Schwarz synthesizer)
 
 RF_DELAY_CARD         "DELAY_13"
 
@@ -107,7 +111,8 @@ ERT_CLOCK_CARD    "CLOCK_0"
 
 # 17. Name of the clock card that's the clock for all the other delay cards,
 #     i.e. the time base clock card - but note that there's a compile time
-#     option that makes the program assume that a fixed frequency (100 MHz)
-#     clock card is used instead, in this case this setting does nothing
+#     option in the configuration file for the module, FIXED_TIMEBASE, that
+#     makes the program assume that a fixed frequency clock card is used
+#     instead, if it's defined this setting does nothing
 
 TB_CLOCK_CARD     "CLOCK_1"

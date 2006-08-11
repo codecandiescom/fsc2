@@ -70,7 +70,7 @@ int rb_pulser_w_init_hook( void )
 #endif
 
     /* First we must set up the variables the main program expects a
-       pulser module to set so it knows which functions to call */
+       pulser module to set so it knows which functions it may call */
 
     Pulser_Struct.set_timebase = rb_pulser_w_store_timebase;
     Pulser_Struct.set_trigger_mode = rb_pulser_w_set_trigger_mode;
@@ -122,7 +122,7 @@ int rb_pulser_w_init_hook( void )
 #ifndef FIXED_TIMEBASE
     rb_pulser_w.is_timebase = UNSET;
 #else
-    rb_pulser_w.timebase = 1.0e-8;         /* fixed 100 MHz clock is used */
+    rb_pulser_w.timebase = FIXED_TIMEBASE;
     rb_pulser_w.is_timebase = SET;
 #endif
 

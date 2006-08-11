@@ -30,7 +30,6 @@
 
 extern size_t Num_Func;       /* number of built-in and listed functions */
 extern Func_T *Fncts;         /* structure for list of functions */
-extern Func_T Def_Fncts[ ];   /* structures for list of built-in functions */
 
 
 static size_t num_func;
@@ -215,7 +214,7 @@ int exists_device( const char * name )
 
 /*---------------------------------------------------------------*
  * Function tests if a device driver for a device of the generic
- * type passed to the function by 'type' is loaded.
+ * type passed to the function as argument is loaded.
  *---------------------------------------------------------------*/
 
 bool exists_device_type( const char * type )
@@ -232,7 +231,7 @@ bool exists_device_type( const char * type )
 }
 
 /*-------------------------------------------------------------------*
- * Routine tests if a function passed to the routine by name exists.
+ * Function tests if a function passed to the routine by name exists
  *-------------------------------------------------------------------*/
 
 bool exists_function( const char * name )
@@ -507,7 +506,6 @@ static void resolve_device_name( Device_T * dev )
                                                "device_name" );
     if ( dlerror( ) != NULL )               /* symbol not found in library ? */
         dev->device_name = NULL;
-    return;
 }
 
 
@@ -551,9 +549,9 @@ static void resolve_generic_type( Device_T * dev )
 }
 
 
-/*-------------------------------------------------------*
- * Functions runs the test hook functions of all modules
- *-------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function runs the test hook functions of all modules
+ *------------------------------------------------------*/
 
 void run_test_hooks( void )
 {
@@ -600,9 +598,9 @@ void run_test_hooks( void )
 }
 
 
-/*--------------------------------------------------------------*
- * Functions runs the end-of-test hook functions of all modules
- *--------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function runs the end-of-test hook functions of all modules
+ *-------------------------------------------------------------*/
 
 void run_end_of_test_hooks( void )
 {
@@ -648,9 +646,9 @@ void run_end_of_test_hooks( void )
 }
 
 
-/*-------------------------------------------------------------*
- * Functions runs the experiment hook functions of all modules
- *-------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function runs the experiment hook functions of all modules
+ *------------------------------------------------------------*/
 
 void run_exp_hooks( void )
 {
@@ -710,9 +708,9 @@ void run_exp_hooks( void )
 }
 
 
-/*--------------------------------------------------------------------*
- * Functions runs the end-of-experiment hook functions of all modules
- *--------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function runs the end-of-experiment hook functions of all modules
+ *-------------------------------------------------------------------*/
 
 void run_end_of_exp_hooks( void )
 {
@@ -775,9 +773,9 @@ void run_end_of_exp_hooks( void )
 }
 
 
-/*-------------------------------------------------------*
- * Functions runs the exit hook functions of all modules
- *-------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Function runs the exit hook functions of all modules
+ *------------------------------------------------------*/
 
 void run_exit_hooks( void )
 {

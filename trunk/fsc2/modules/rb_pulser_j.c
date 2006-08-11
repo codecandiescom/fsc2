@@ -115,7 +115,7 @@ int rb_pulser_j_init_hook( void )
 #ifndef FIXED_TIMEBASE
     rb_pulser_j.is_timebase = UNSET;
 #else
-    rb_pulser_j.timebase = 1.0e-8;         /* fixed 100 MHz clock is used */
+    rb_pulser_j.timebase = FIXED_TIMEBASE;
     rb_pulser_j.is_timebase = SET;
 #endif
 

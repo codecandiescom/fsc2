@@ -24,7 +24,7 @@
 ERT_DELAY_CARD   "DELAY_0"
 
 
-# 2. Name of the card creating the initial delay for all pulses
+# 2. Name of the card creating the initial delay for all other cards
 
 INIT_DELAY_CARD  "DELAY_1"
 
@@ -60,7 +60,7 @@ MW_DELAY_CARD_4	 "DELAY_6"
 
 # 8. Name of the delay card that creates the additional delay between the end
 #    of the initial delay and the start of the RF pulse (the length of this
-#    pulse is set using the pulse mode of the Rhode & Schwarz synthesizer)
+#    pulse is set using the pulse mode of the Rhode&Schwarz synthesizer)
 
 RF_DELAY_CARD    "DELAY_7"
 
@@ -85,8 +85,9 @@ ERT_CLOCK_CARD    "CLOCK_0"
 
 # 12. Name of the clock card that's the clock for all the other delay cards,
 #     i.e. the time base clock card - but note that there's a compile time
-#     option that makes the program assume that a fixed frequency (100 MHz)
-#     clock card is used instead, in this case this setting does nothing
+#     option in the configuration file for the module, FIXED_TIMEBASE, that
+#     makes the program assume that a fixed frequency clock card is used
+#     instead, if it's defined this setting does nothing
 
 TB_CLOCK_CARD     "CLOCK_1"
 

@@ -119,16 +119,16 @@ $(MODULE): $(SOURCES:.c=.o)
 
 install:
 ifeq ($(NI6601_KERNEL_SOURCE),)
-	if [ -d /lib/modules/$KERNEL_VER ]; then                        \
-		if [ ! -d /lib/modules/$KERNEL_VER/misc ]; then             \
-			$(INSTALL) -m 755 -d /lib/modules/$KERNEL_VER/misc;     \
-		fi;                                                         \
-		$(INSTALL) -m 644 $(MODULE) /lib/modules/$KERNEL_VER/misc;  \
-	else                                                            \
-		if [ ! -d /lib/modules/misc ]; then                         \
-			$(INSTALL) -m 755 -d /lib/modules/misc;                 \
-		fi;                                                         \
-		$(INSTALL) -m 644 $(MODULE) /lib/modules/misc;              \
+	if [ -d /lib/modules/$(KERNEL_VER) ]; then                        \
+		if [ ! -d /lib/modules/$(KERNEL_VER)/misc ]; then             \
+			$(INSTALL) -m 755 -d /lib/modules/$(KERNEL_VER)/misc;     \
+		fi;                                                           \
+		$(INSTALL) -m 644 $(MODULE) /lib/modules/$(KERNEL_VER)/misc;  \
+	else                                                              \
+		if [ ! -d /lib/modules/misc ]; then                           \
+			$(INSTALL) -m 755 -d /lib/modules/misc;                   \
+		fi;                                                           \
+		$(INSTALL) -m 644 $(MODULE) /lib/modules/misc;                \
 	fi
 endif
 	$(INSTALL) -d $(prefix)/include

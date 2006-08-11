@@ -305,7 +305,7 @@ static size_t fll_count_functions( Func_T * fncts,
         if ( ret_token == IDENT_TOKEN )
         {
             if ( ( f = FUNC_P bsearch( func_listtext, fncts, num_predef_func,
-                                       sizeof( Func_T ), ffl_func_cmp2 ) )
+                                       sizeof *fncts, ffl_func_cmp2 ) )
                  != NULL )
             {
                 eprint( WARN, UNSET, "Loadable function '%s()' hides "
