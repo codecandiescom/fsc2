@@ -874,9 +874,9 @@ built:
 	                 $(sdir)/fsc2_http_server $(mdir)/Makefile               \
 			  	     $(mdir)/*.[chl] $(cdir)/Functions $(cdir)/Devices       \
 			         $(cdir)/*.conf $(udir)/check_dist $(udir)/clone_device  \
-			         $(udir)/edl-mod.el $(udir)/edl.ssh $(udir)/fsc2_guify   \
-			         $(udir)/fsc2_pulses $(udir)/ipcc $(udir)/Makefile       \
-				     $(udir)/memcheck |                                      \
+			         $(udir)/edl-mod.el.template $(udir)/edl.vim.template    \
+					 $(udir)/edl.ssh $(udir)/fsc2_guify $(udir)/fsc2_pulses  \
+					 $(udir)/ipcc $(udir)/Makefile $(udir)/memcheck |        \
 	grep -v 'sed\|grep' |                                                    \
 	sed 's/^[^\$$]\{1,\}\$$Id: \([^\$$]\{1,\}\).*$$/\1/' >> version
 	-@gzip -c -9 version | uuencode - > version.ugz

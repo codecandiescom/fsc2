@@ -2160,6 +2160,7 @@ The following mathematical function can be used in all section of an
 @item @ref{sin()}
 @item @ref{sinh()}
 @item @ref{sqrt()}
+@item @ref{square()}
 @item @ref{tan()}
 @item @ref{tanh()}
 @end table
@@ -2423,6 +2424,13 @@ of an 1- or more-dimensional array).
 Returns the square root of an integer or floating point number (or all
 the elements of an 1- or more-dimensional array). The argument must be a
 positive number.
+
+
+@anchor{square()}
+@findex square()
+@item square()
+Returns the square of an integer or floating point number (or all the
+elements of an 1- or more-dimensional array).
 
 
 @anchor{tan()}

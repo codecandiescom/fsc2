@@ -90,7 +90,7 @@ be downloaded from
 
   http://www.natinst.com
 
-Only the beta-drivers (with 2,4 kernels) have been used. The newer driver
+Only the beta-drivers (with 2.4 kernels) have been used. The newer driver
 and library (supposed to work also with 2.6) hasn't been tested, I didn't
 even get the driver to compile and linking against the library led to the
 program aborting immediately. I haven't any idea yet how to resolve that
@@ -197,13 +197,13 @@ B) Security issues
 To be able to read from and write to the device files for the devices
 fsc2 is supposed to control it needs permissions that often only the
 root account has. Therefore fsc2 per default gets installed setuid'ed
-(i.e. it starts running with the privileges of the root account, i.e.
-with the user and group ID of the root account). But most of the time
-fsc2 drops thos privileges and runs with only the effective user ID
-(EUID) and group ID (EGID) of to the users that started fsc2, i.e.
-with the permissions that user normally as. Care has been taken drop
-the extra privileges the root account has except for the few places
-where either device files are accessed or log files get written to.
+to root (i.e. it starts running with the privileges of the root account,
+i.e. with the user and group ID of the root account). But most of the
+time fsc2 drops those privileges and runs with only the effective user
+ID (EUID) and group ID (EGID) of the users that started fsc2, i.e. with
+the permissions that user normally as. Care has been taken drop the extr
+privileges the root account has except for the few places where either
+device files are accessed or log files get written to.
 
 
 Should you feel uneasy about running a program setuid'ed to root
@@ -215,25 +215,25 @@ set the program runs with the UID and GID of the account and group
 specified by these variables. If neither of them is set then they
 default to 'root' and the program gets setuid'ed to root, i.e. as
 in the default case discussed above. But if only GROUP is set then
-the program becomes setgid'ed to this group, i.e. will run with
+the program becomes setgid'ed to this group, i.e. it will run with
 the UID of the user but with the GID of the group specified by
 GROUP - this may already give it high enough access permissions for
-the device files in case the device files are set up acordingly
-(i.e. their permissions are set to allow read and write access to
-members of this group). It's also possible to specify OWNER alone
-and in this case the program runs with the UID of that process but
-the GID of the user.
+the device files if the device files are set up acordingly (i.e. their
+permission bits are set to allow read and write access to members of
+this group). It's also possible to specify OWNER alone and in this
+case the program runs with the UID of that process but the GID of the
+user.
 
 
-In the simplest case where you didn't set these variables (or both to
-'root') and fsc2 has in principle all permissions the root account
-has and you don't have to care about the permission settings for
-the device files.
+In the most simple case where you didn't set these variables (or both
+to 'root') and fsc2 has in principle all permissions the root account
+has you don't have to care about the permission settings for the device
+files.
 
 
 In all other cases you have to make sure that either the account the
 program belongs to or the group it belongs to has the necessary
-permissions to read and write to the required device files. If both
+permissions to read and write the required device files. If both
 OWNER and GROUP are set, the device files must be readable and writable
 by either that account or that group (or both). If only OWNER but not
 GROUP is set they must be accesible by the account specified by OWNER.
@@ -449,8 +449,8 @@ documentation could not be created.
 
 
 Don't try to invoke 'make' from one of the sub-directories. While in
-some cases this might work, i.e. things in the sub-directory will
-be created, in most cases it won't even work that far.
+some cases this might work, i.e. things in the sub-directory will be
+created, in most cases it won't even work that far.
 
 
 If you get more than a few warnings (about problems with fsc2, not header
