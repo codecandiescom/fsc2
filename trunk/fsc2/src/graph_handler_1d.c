@@ -66,7 +66,7 @@ int canvas_handler_1d( FL_OBJECT * obj,
                        XEvent *    ev,
                        void *      udata )
 {
-    Canvas_T *c = ( Canvas_T * ) udata;
+    Canvas_T *c = udata;
 
 
     switch ( ev->type )
@@ -77,9 +77,8 @@ int canvas_handler_1d( FL_OBJECT * obj,
             break;
 
         case ConfigureNotify :
-            if ( ( int ) c->w == w && ( int ) c->h == h )
-                break;
-            reconfigure_window_1d( c, w, h );
+            if ( ( int ) c->w != w || ( int ) c->h != h )
+            	reconfigure_window_1d( c, w, h );
             break;
 
         case ButtonPress :

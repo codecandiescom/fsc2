@@ -1581,7 +1581,7 @@ static void setup_canvas( Canvas_T *  c,
 
     create_pixmap( c );
 
-    fl_add_canvas_handler( c->obj, Expose, ch, ( void * ) c );
+    fl_add_canvas_handler( c->obj, Expose, ch, c );
 
     attributes.backing_store = NotUseful;
     attributes.background_pixmap = None;
@@ -1590,13 +1590,13 @@ static void setup_canvas( Canvas_T *  c,
                              &attributes );
     c->is_box = UNSET;
 
-    fl_add_canvas_handler( c->obj, ConfigureNotify, ch, ( void * ) c );
+    fl_add_canvas_handler( c->obj, ConfigureNotify, ch, c );
 
     if ( G.is_init )
     {
-        fl_add_canvas_handler( c->obj, ButtonPress, ch, ( void * ) c );
-        fl_add_canvas_handler( c->obj, ButtonRelease, ch, ( void * ) c );
-        fl_add_canvas_handler( c->obj, MotionNotify, ch, ( void * ) c );
+        fl_add_canvas_handler( c->obj, ButtonPress, ch, c );
+        fl_add_canvas_handler( c->obj, ButtonRelease, ch, c );
+        fl_add_canvas_handler( c->obj, MotionNotify, ch, c );
 
         /* Get motion events only when first or second button is pressed
            (this got to be set *after* requesting motion events) */
