@@ -241,7 +241,7 @@ static const int rulbus_num_card_handlers =
 /*--------------------------------------------------------------------*
  * This function has to be called before any other function from the
  * RULBUS library can be used. It will first try to read in the RULBUS
- * configuration file (usually it will be /etc/rulbus.conf) to find
+ * configuration file (usually this will be /etc/rulbus.conf) to find
  * out about the cards in the racks.
  *--------------------------------------------------------------------*/
 

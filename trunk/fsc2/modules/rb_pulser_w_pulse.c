@@ -359,12 +359,9 @@ bool rb_pulser_w_set_pulse_phase_cycle( long pnum,
 
     for ( i = 0; i < pc->len; i++ )
         if ( pc->sequence[ i ] == PHASE_MINUS_Y )
-        {
-            print( FATAL, "Phase sequence for pulse #%ld requires "
+            print( SEVERE, "Phase sequence for pulse #%ld requires "
                            "'-Y' phase which isn't available with this "
                            "setup.\n", pnum );
-            THROW( EXCEPTION );
-        }
 
     p->pc = pc;
 

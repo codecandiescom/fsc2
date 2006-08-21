@@ -244,7 +244,7 @@ const char *Channel_Names[ NUM_CHANNEL_NAMES ] =
     "M1",
     "M2",
     "M3",
-    "M4"
+    "M4",
     "MATH",
     "Z1",
     "Z2",

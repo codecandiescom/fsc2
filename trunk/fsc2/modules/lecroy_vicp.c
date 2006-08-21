@@ -409,10 +409,10 @@ static void lecroy_vicp_close_without_header( void )
     lecroy_vicp.handle = -1;
 
     if ( lecroy_vicp.name )
-        T_free( lecroy_vicp.name );
+        lecroy_vicp.name = T_free( lecroy_vicp.name );
 
     if ( lecroy_vicp.address )
-        T_free( lecroy_vicp.address );
+        lecroy_vicp.address= T_free( lecroy_vicp.address );
 }
 
 
@@ -447,15 +447,11 @@ void lecroy_vicp_close( void )
 
     lecroy_vicp_close_without_header( );
 
-    fsc2_lan_close( lecroy_vicp.handle );
-
-    lecroy_vicp.handle = -1;
-
     if ( lecroy_vicp.name )
-        T_free( lecroy_vicp.name );
+        lecroy_vicp.name = T_free( lecroy_vicp.name );
 
     if ( lecroy_vicp.address )
-        T_free( lecroy_vicp.address );
+        lecroy_vicp.address = T_free( lecroy_vicp.address );
 }
 
 
@@ -708,7 +704,7 @@ int lecroy_vicp_read( char *    buffer,
     long            us_timeout = lecroy_vicp.us_read_timeout;
 
 
-    /* Do nothing if there are no data to be send */
+    /* Do nothing if there are no data to be read */
 
     if ( *length == 0 )
         return SUCCESS;
@@ -773,7 +769,7 @@ int lecroy_vicp_read( char *    buffer,
     bytes_read = fsc2_lan_read( lecroy_vicp.handle, header,
                                 LECROY_VICP_HEADER_SIZE,
                                 us_timeout, quit_on_signal );
-    
+
     if ( bytes_read < 0 )
         THROW( EXCEPTION );
 

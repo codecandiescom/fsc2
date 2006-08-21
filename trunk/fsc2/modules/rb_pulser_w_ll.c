@@ -46,9 +46,9 @@ static void rb_pulser_w_failure( bool         rb_flag,
 static int phase_settings[ 4 ][ 2 ] = { 
               /* PHASE_PLUS_X  */       { RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                           RULBUS_RB8514_DELAY_PULSE_NONE },
-              /* PHASE_MINUS_X */       { RULBUS_RB8514_DELAY_OUTPUT_1,
+              /* PHASE_MINUS_X */       { RULBUS_RB8514_DELAY_OUTPUT_2,
                                           RULBUS_RB8514_DELAY_END_PULSE },
-              /* PHASE_PLUS_Y  */       { RULBUS_RB8514_DELAY_OUTPUT_2,
+              /* PHASE_PLUS_Y  */       { RULBUS_RB8514_DELAY_OUTPUT_1,
                                           RULBUS_RB8514_DELAY_END_PULSE },
               /* PHASE_MINUS_Y */       { RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                           RULBUS_RB8514_DELAY_END_PULSE } };
@@ -166,7 +166,7 @@ void rb_pulser_w_init( void )
     {
         if ( rulbus_rb8514_delay_set_output_pulse_polarity(
                                     rb_pulser_w.delay_card[ i ].handle,
-                                    RULBUS_RB8514_DELAY_END_PULSE,
+                                    RULBUS_RB8514_DELAY_PULSE_BOTH,
                                     RULBUS_RB8514_DELAY_POLARITY_POSITIVE )
                                                                 != RULBUS_OK )
             rb_pulser_w_failure( SET, "Failure to initialize pulser" );
@@ -237,7 +237,7 @@ void rb_pulser_w_init( void )
     {
         fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse_polarity( "
                  "%s, %s, %s )\n", rb_pulser_w.delay_card[ i ].name,
-                 "RULBUS_RB8514_DELAY_END_PULSE",
+                 "RULBUS_RB8514_DELAY_PULSE_BOTH",
                  "RULBUS_RB8514_DELAY_POLARITY_POSITIVE" );
         if ( i == ERT_DELAY )
             continue;
@@ -274,17 +274,23 @@ static void rb_pulser_w_phase_init( void )
     raise_permissions( );
 
     /* Set up all the cards for phase pulses to emit end pulses for a +X
-       phase switch setting */
+       phase switch setting. Also set them up tp emit negative polarity
+       end pulses, that's what the "magic box"expects. */
 
     for ( ; card != NULL; card = card->next )
-        if ( rulbus_rb8514_delay_set_output_pulse(
+        if ( rulbus_rb8514_delay_set_output_pulse_polarity(
+                                    card->handle,
+                                    RULBUS_RB8514_DELAY_PULSE_BOTH,
+                                    RULBUS_RB8514_DELAY_POLARITY_NEGATIVE )
+                                                                != RULBUS_OK ||
+             rulbus_rb8514_delay_set_output_pulse(
                                           card->handle,
                                           phase_settings[ PHASE_PLUS_X ][ 0 ],
                                           phase_settings[ PHASE_PLUS_X ][ 1 ] )
                                                                  != RULBUS_OK )
             rb_pulser_w_failure( SET, "Failure to inititialize pulser" );
 
-    /* Set the first of them and to emit  pulse just long enough to set the
+    /* Set the first of them and to emit a pulse just long enough to set the
        phase switch */
 
     card = rb_pulser_w.delay_card + PHASE_DELAY_0;

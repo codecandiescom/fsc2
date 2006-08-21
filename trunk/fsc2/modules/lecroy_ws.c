@@ -84,25 +84,18 @@ int lecroy_ws_init_hook( void )
 
     lecroy_ws.is_timebase       = UNSET;
     lecroy_ws.is_interleaved    = UNSET;
-    lecroy_ws.is_mem_size       = UNSET;
     lecroy_ws.is_trigger_source = UNSET;
     lecroy_ws.is_trigger_mode   = UNSET;
     lecroy_ws.is_trigger_delay  = UNSET;
 
-    lecroy_ws_numpoints_prep( );
-    lecroy_ws_tbas_prep( );
-    lecroy_ws_hori_res_prep( );
-
     lecroy_ws.tb_index       = LECROY_WS_TEST_TB_INDEX;
-    lecroy_ws.timebase       = lecroy_ws.tbas[ lecroy_ws.tb_index ];
-    lecroy_ws.ms_index       = LECROY_WS_TEST_MS_INDEX;
-    lecroy_ws.mem_size       = lecroy_ws.mem_sizes[ lecroy_ws.ms_index ];
+    lecroy_ws.timebase       = TBAS( lecroy_ws.tb_index );
+    lecroy_ws.mem_size       = LECROY_WS_LONG_MEM_SIZE;
     lecroy_ws.interleaved    = LECROY_WS_TEST_ILVD_MODE;
     lecroy_ws.trigger_source = LECROY_WS_TEST_TRIG_SOURCE;
     lecroy_ws.trigger_mode   = LECROY_WS_TEST_TRIG_MODE;
     lecroy_ws.trigger_delay  = LECROY_WS_TEST_TRIG_DELAY;
-    lecroy_ws.cur_hres      = 
-                  lecroy_ws.hres[ lecroy_ws.ms_index ] + lecroy_ws.tb_index;
+    lecroy_ws.cur_hres      =  hres[ 1 ] + lecroy_ws.tb_index;
 
     for ( i = LECROY_WS_CH1; i < LECROY_WS_CH_MAX; i++ )
     {
@@ -193,7 +186,6 @@ void lecroy_ws_exit_hook( void )
 {
     lecroy_ws_delete_windows( &lecroy_ws );
     lecroy_ws_delete_windows( &lecroy_ws_stored );
-    lecroy_ws_clean_up( );
 }
 
 
@@ -414,7 +406,7 @@ Var_T *digitizer_timebase( Var_T * v )
 {
     double timebase;
     int tb_index = -1;
-    long i;
+    size_t i;
     char *t;
 
 
@@ -447,21 +439,20 @@ Var_T *digitizer_timebase( Var_T * v )
     /* Pick the allowed timebase nearest to the user requested value, tell
        the user about problems if there's a deviation of more than 1 % */
 
-    for ( i = 0; i < lecroy_ws.num_tbas - 1; i++ )
-        if ( timebase >= lecroy_ws.tbas[ i ] &&
-             timebase <= lecroy_ws.tbas[ i + 1 ] )
+    for ( i = 0; i < NUM_TBAS - 1; i++ )
+        if ( timebase >= TBAS( i ) && timebase <= TBAS( i + 1 ) )
         {
-            tb_index = i + ( ( lecroy_ws.tbas[ i ] / timebase >
-                               timebase / lecroy_ws.tbas[ i + 1 ] ) ? 0 : 1 );
+            tb_index = i + ( ( TBAS( i ) / timebase >
+                               timebase / TBAS( i + 1 ) ) ? 0 : 1 );
             break;
         }
 
     if ( tb_index >= 0 &&                                   /* value found ? */
-         fabs( timebase - lecroy_ws.tbas[ tb_index ] ) > timebase * 1.0e-2 )
+         fabs( timebase - TBAS( tb_index ) ) > timebase * 1.0e-2 )
     {
         t = T_strdup( lecroy_ws_ptime( timebase ) );
         print( WARN, "Can't set timebase to %s, using %s instead.\n",
-               t, lecroy_ws_ptime( lecroy_ws.tbas[ tb_index ] ) );
+               t, lecroy_ws_ptime( TBAS( tb_index ) ) );
         T_free( t );
     }
 
@@ -469,27 +460,29 @@ Var_T *digitizer_timebase( Var_T * v )
     {
         t = T_strdup( lecroy_ws_ptime( timebase ) );
 
-        if ( timebase < lecroy_ws.tbas[ 0 ] )
+        if ( timebase < TBAS( 0 ) )
         {
             tb_index = 0;
             print( WARN, "Timebase of %s is too short, using %s instead.\n",
-                   t, lecroy_ws_ptime( lecroy_ws.tbas[ tb_index ] ) );
+                   t, lecroy_ws_ptime( TBAS( tb_index ) ) );
         }
         else
         {
-            tb_index = lecroy_ws.num_tbas - 1;
+            tb_index = NUM_TBAS - 1;
             print( WARN, "Timebase of %s is too long, using %s instead.\n",
-                   t, lecroy_ws_ptime( lecroy_ws.tbas[ tb_index ] ) );
+                   t, lecroy_ws_ptime( TBAS( tb_index ) ) );
         }
 
         T_free( t );
     }
 
-    lecroy_ws.timebase = lecroy_ws.tbas[ tb_index ];
+    lecroy_ws.timebase = TBAS( tb_index );
     lecroy_ws.tb_index = tb_index;
     lecroy_ws.is_timebase = SET;
-    lecroy_ws.cur_hres = 
-                  lecroy_ws.hres[ lecroy_ws.ms_index ] + lecroy_ws.tb_index;
+    if ( lecroy_ws.mem_size == LECROY_WS_SHORT_MEM_SIZE )
+        lecroy_ws.cur_hres = hres[ 0 ] + lecroy_ws.tb_index;
+    else
+        lecroy_ws.cur_hres = hres[ 1 ] + lecroy_ws.tb_index;
  
     /* Now check if the trigger delay (in case it's set) fits with the new
        timebase setting, and, based on this, the window positions and widths */
@@ -552,7 +545,6 @@ Var_T *digitizer_interleave_mode( Var_T * v )
     lecroy_ws.interleaved = ilvd;
     lecroy_ws.is_interleaved = SET;
     lecroy_ws.is_timebase = SET;            /* both must be set to be able */
-    lecroy_ws.is_mem_size = SET;             /* to set interleaved mode     */
 
     lecroy_ws.trigger_delay = lecroy_ws_trigger_delay_check( );
     lecroy_ws_all_windows_check( );
@@ -573,23 +565,15 @@ Var_T *digitizer_interleave_mode( Var_T * v )
  * Function for setting or quering the memory size
  *-------------------------------------------------*/
 
-#if 0
-
 Var_T *digitizer_memory_size( Var_T *v )
 {
     long mem_size;
-    long i;
-    long ms_index = -1;
 
 
     if ( v == NULL )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_ws.is_mem_size )
-                    no_query_possible( );
-                /* Fall through */
-
             case TEST :
                 return vars_push( INT_VAR, lecroy_ws.mem_size );
 
@@ -607,50 +591,28 @@ Var_T *digitizer_memory_size( Var_T *v )
         THROW( EXCEPTION );
     }
 
-    for ( i = 0; i < lecroy_ws.num_mem_sizes; i++ )
-        if ( mem_size >= lecroy_ws.mem_sizes[ i ] )
-        {
-            ms_index = i;
-            break;
-        }
-
-    if ( ms_index >= 0 &&                                   /* value found ? */
-         mem_size != lecroy_ws.mem_sizes[ ms_index ] )
-        print( WARN, "Can't set memory size to %ld, using %ld instead.\n",
-               mem_size, lecroy_ws.mem_sizes[ ms_index ] );
-
-    if ( ms_index < 0 )                                   /* not found yet ? */
+    if ( mem_size != LECROY_WS_SHORT_MEM_SIZE &&
+         mem_size != LECROY_WS_LONG_MEM_SIZE )
     {
-        if ( mem_size < lecroy_ws.mem_sizes[ 0 ] )
-        {
-            ms_index = 0;
-            print( WARN, "Memory size of %ld is too small, using %ld "
-                   "instead.\n", mem_size, lecroy_ws.mem_sizes[ ms_index ] );
-        }
+        if ( mem_size < LECROY_WS_SHORT_MEM_SIZE )
+            lecroy_ws.mem_size = LECROY_WS_SHORT_MEM_SIZE;
         else
-        {
-            ms_index = lecroy_ws.num_mem_sizes - 1;
-            print( WARN, "Memory size of %ld is too large, using %ld "
-                   "instead.\n", mem_size, lecroy_ws.mem_sizes[ ms_index ] );
-        }
+            lecroy_ws.mem_size = LECROY_WS_LONG_MEM_SIZE;
+
+        print( SEVERE, "Requested memory size of %ld can't be set, using "
+               "%ld instead.\n", mem_size, lecroy_ws.mem_size );
     }
 
-    lecroy_ws.mem_size = lecroy_ws.mem_sizes[ ms_index ];
-    lecroy_ws.ms_index = ms_index;
-    lecroy_ws.is_mem_size = SET;
-    lecroy_ws.cur_hres =
-                  lecroy_ws.hres[ lecroy_ws.ms_index ] + lecroy_ws.tb_index;
-
-    lecroy_ws.trigger_delay = lecroy_ws_trigger_delay_check( );
-    lecroy_ws_all_windows_check( );
+    lecroy_ws.mem_size = LECROY_WS_LONG_MEM_SIZE;
 
     if ( FSC2_MODE == EXPERIMENT )
         lecroy_ws_set_memory_size( lecroy_ws.mem_size );
 
+    lecroy_ws.trigger_delay = lecroy_ws_trigger_delay_check( );
+    lecroy_ws_all_windows_check( );
+
     return vars_push( INT_VAR, lecroy_ws.mem_size );
 }
-
-#endif
 
 
 /*------------------------------------------------------------------*

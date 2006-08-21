@@ -365,6 +365,7 @@ Var_T *daq_set_voltage( Var_T * v )
     }
 
     rb8510.volts = volts;
+    rb8510.volts_is_set = SET;
 
     return vars_push( FLOAT_VAR, volts );
 }

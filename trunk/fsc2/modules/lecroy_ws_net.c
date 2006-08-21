@@ -76,7 +76,7 @@ bool lecroy_ws_init( const char * name )
 {
     char buffer[ 100 ];
     ssize_t len;
-    int i;
+    size_t i;
     bool with_eoi;
 
 
@@ -123,19 +123,6 @@ bool lecroy_ws_init( const char * name )
             lecroy_ws.num_used_channels++;
         }
 
-        for ( i = LECROY_WS_M1; i <= LECROY_WS_M4; i++ )
-            lecroy_ws.is_displayed[ i ] = UNSET;
-
-        for ( i = LECROY_WS_Z1; i <= LECROY_WS_Z4; i++ )
-        {
-            lecroy_ws.is_displayed[ i ] = UNSET;
-            if ( lecroy_ws_is_displayed( i ) )
-            {
-                lecroy_ws.is_displayed[ i ] = SET;
-                lecroy_ws.num_used_channels++;
-            }
-        }
-
         /* Make sure the internal timebase is used */
 
         len = 9;
@@ -153,9 +140,8 @@ bool lecroy_ws_init( const char * name )
 
             lecroy_ws.timebase = lecroy_ws_get_timebase( );
 
-            for ( i = 0; i < lecroy_ws.num_tbas; i++ )
-                if ( fabs( lecroy_ws.tbas[ i ] - lecroy_ws.timebase ) /
-                     lecroy_ws.tbas[ i ] < 0.1 )
+            for ( i = 0; i < NUM_TBAS; i++ )
+                if ( fabs( TBAS( i ) - lecroy_ws.timebase ) / TBAS( i ) < 0.1 )
                 {
                     lecroy_ws.tb_index = i;
                     break;
@@ -168,24 +154,22 @@ bool lecroy_ws_init( const char * name )
             }
         }
 
-        /* According to the errata of the Remote Programming Manual the
-           memory size can't be set for the WaveSurfer. */
+        /* Memory sizes are a mess. The maual is nearly silent about them,
+           the errata fr the manual is claiming that it can't be set but
+           actuallz trzing it reveals that there seem to be two memory
+           sizes that can be set, either 10000 or 500000. But, strangly
+           enough, the later setting results in curve lengths of only
+           half that number, i.e. 250000 while setting it to 10000 gives
+           zou a record length of 10000. To be precise, the exact numbers
+           for the curve lengths are 10002 and 250002, so there are always
+           two extra points... */
 
-        lecroy_ws.mem_size = LECROY_WS_MAX_MEMORY_SIZE;
-        lecroy_ws.ms_index = lecroy_ws.num_mem_sizes - 1;
-
-#if 0
-        if ( lecroy_ws.is_mem_size )
-            lecroy_ws_set_memory_size( lecroy_ws.mem_size );
-        else
-            lecroy_ws_get_memory_size( );
-#endif
-
-        lecroy_ws.cur_hres = 
-                     lecroy_ws.hres[ lecroy_ws.ms_index ] + lecroy_ws.tb_index;
+        lecroy_ws_set_memory_size( lecroy_ws.mem_size );
 
         /* Switch interleaved (RIS) mode on if the user asked for it and it
            can be done, otherwise switch it off */
+
+        lecroy_ws.interleaved = lecroy_ws_get_interleaved( );
 
         if ( lecroy_ws.is_interleaved && lecroy_ws.interleaved &&
              lecroy_ws.cur_hres->ppd_ris > 0 )
@@ -305,7 +289,7 @@ double lecroy_ws_get_timebase( void )
     char reply[ 30 ];
     ssize_t len = 30;
     double timebase;
-    int i;
+    size_t i;
 
 
     if ( lecroy_ws_talk( "TDIV?\n", reply, &len ) != SUCCESS )
@@ -313,11 +297,11 @@ double lecroy_ws_get_timebase( void )
     reply[ len - 1 ] = '\0';
     timebase = T_atod( reply );
 
-    for ( i = 0; i < lecroy_ws.num_tbas; i++ )
-        if ( fabs( lecroy_ws.tbas[ i ] - timebase ) / timebase < 0.01 )
+    for ( i = 0; i < NUM_TBAS; i++ )
+        if ( fabs( TBAS( i ) - timebase ) / timebase < 0.01 )
             break;
 
-    if ( i == lecroy_ws.num_tbas )
+    if ( i == NUM_TBAS )
     {
         print( FATAL, "Can't determine timebase.\n" );
         THROW( EXCEPTION );
@@ -394,7 +378,6 @@ long lecroy_ws_get_memory_size( void )
     char reply[ 30 ];
     ssize_t len = 30;
     long mem_size;
-    long i;
 
 
     if ( lecroy_ws_talk( "MSIZ?\n", reply, &len ) != SUCCESS )
@@ -403,23 +386,9 @@ long lecroy_ws_get_memory_size( void )
 
     mem_size = lrnd( T_atod( reply ) );
 
-    fprintf( stderr, "%s, %ld\n", reply, mem_size );
-
-    for ( i = 0; i < lecroy_ws.num_mem_sizes; i++ )
-        fprintf( stderr, "%ld\n", lecroy_ws.mem_sizes[ i ] );
-
-    for ( i = 0; i < lecroy_ws.num_mem_sizes; i++ )
-        if ( lecroy_ws.mem_sizes[ i ] == mem_size )
-            break;
-
-    if ( i == lecroy_ws.num_mem_sizes )
-    {
-        print( FATAL, "Can't determine memory size.\n" );
-        THROW( EXCEPTION );
-    }
-
-    lecroy_ws.mem_size = mem_size;
-    lecroy_ws.ms_index = i;
+    /* For the short memory size (10000) the record length is equal to that
+       value but for the large value (500000) the record length is just
+       half of that. */
 
     return mem_size;
 }
@@ -438,6 +407,13 @@ bool lecroy_ws_set_memory_size( long mem_size )
     sprintf( cmd, "MSIZ %ld\n", mem_size );
     len = strlen( cmd );
     lecroy_vicp_write( cmd, &len, SET, UNSET );
+
+    /* The memory size influences the horizontal resolution */
+
+    if ( mem_size == LECROY_WS_SHORT_MEM_SIZE )
+        lecroy_ws.cur_hres = hres[ 0 ] + lecroy_ws.tb_index;
+    else
+        lecroy_ws.cur_hres = hres[ 1 ] + lecroy_ws.tb_index;
 
     return OK;
 }
@@ -698,7 +674,7 @@ int lecroy_ws_get_trigger_source( void )
          strncmp( reply, "EDGE,SR,", 8 ) )
     {
         print( SEVERE, "Non-standard mode trigger, switching to standard "
-               "edge trigger on to LINe input\n" );
+               "edge trigger on LINe input\n" );
         return lecroy_ws_set_trigger_source( LECROY_WS_LIN );
     }
 
@@ -985,7 +961,7 @@ int lecroy_ws_get_trigger_mode( void )
         mode = LECROY_WS_TRG_MODE_AUTO;
     else if ( buf[ 0 ] == 'N' )
         mode = LECROY_WS_TRG_MODE_NORMAL;
-    else if ( buf[ 1 ] == 'S' )
+    else if ( buf[ 1 ] == 'I' )
         mode = LECROY_WS_TRG_MODE_SINGLE;
     else if ( buf[ 1 ] == 'T' )
         mode = LECROY_WS_TRG_MODE_STOP;
@@ -1075,16 +1051,14 @@ bool lecroy_ws_set_trigger_delay( double delay )
 
 bool lecroy_ws_is_displayed( int ch )
 {
-    char cmd[ 30 ];
-    ssize_t len = 30;
+    char cmd[ 130 ];
+    ssize_t len = 130;
 
 
     if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
         sprintf( cmd, "C%d:TRA?\n", ch - LECROY_WS_CH1 + 1 );
     else if ( ch == LECROY_WS_MATH )
         sprintf( cmd, "F1:TRA?\n" );
-    else if ( ch >= LECROY_WS_Z1 && ch <= LECROY_WS_Z4 )
-        sprintf( cmd, "Z%d:TRA?\n", ch - LECROY_WS_Z1 + 5 );
     else
     {
         print( FATAL, "Internal error detected.\n" );
@@ -1110,8 +1084,8 @@ bool lecroy_ws_display( int ch,
 
     if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
         sprintf( cmd, "C%d:TRA ", ch - LECROY_WS_CH1 + 1 );
-    else if ( ch >= LECROY_WS_Z1 && ch <= LECROY_WS_Z4 )
-        sprintf( cmd, "Z%d:TRA ", ch - LECROY_WS_Z1 + 1 );
+    else if ( ch == LECROY_WS_MATH )
+        strcpy( cmd, "F1:TRA " );
     else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
     {
         print( FATAL, "Memory channels can't be displayed.\n" );
@@ -1220,7 +1194,7 @@ void lecroy_ws_start_acquisition( void )
 
     for ( i = LECROY_WS_CH1; i <= LECROY_WS_CH_MAX; i++ )
     {
-        sprintf( cmd, "VBS 'avg.Acquisition.C%d.AverageSweeps=1'\n",
+        sprintf( cmd, "VBS 'app.Acquisition.C%d.AverageSweeps=1'\n",
                  i - LECROY_WS_CH1 + 1 );
         len = strlen( cmd );
         lecroy_vicp_write( cmd, &len, SET, UNSET );
@@ -1274,7 +1248,7 @@ static void lecroy_ws_get_prep( int              ch,
 
     CLOBBER_PROTECT( data );
 
-    fsc2_assert( ( LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )  ||
+    fsc2_assert( ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )  ||
                  ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 ) ||
                  ch == LECROY_WS_MATH );
 
@@ -1366,10 +1340,7 @@ static bool lecroy_ws_can_fetch( int ch )
     if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
         return lecroy_ws_get_inr( ) & LECROY_WS_SIGNAL_ACQ;
 
-    if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
-        return TRUE;
-
-    if ( ch >= LECROY_WS_Z1 && ch <= LECROY_WS_Z4 )
+    if ( ch == LECROY_WS_MATH )
         return lecroy_ws_get_int_value( ch, "SWEEPS_PER_ACQ" ) >=
                                                        lecroy_ws.num_avg[ ch ];
 
@@ -1402,7 +1373,7 @@ void lecroy_ws_get_curve( int        ch,
        two's complement integers, which then need to be scaled by gain and
        offset. */
 
-    *array = DOUBLE_P T_malloc( *length * sizeof **array );
+    *array = DOUBLE_P T_malloc( *length * sizeof **array + 1 );
 
     for ( i = 0, dp = data; i < *length; dp += 2, i++ )
     {
@@ -1532,15 +1503,24 @@ static unsigned char *lecroy_ws_get_data( long * length )
     char len_str[ 10 ];
     ssize_t len;
     bool with_eoi;
+    ssize_t gotten;
+    ssize_t to_get;
 
 
     /* First thing we read is something like "DAT1,#[0-9]" where the number
        following the '#' is the number of bytes to be read next */
 
-    len = 7;
-    if ( lecroy_vicp_read( len_str, &len, &with_eoi, UNSET )
-                                                          != SUCCESS_BUT_MORE )
-        lecroy_ws_lan_failure( );
+    len = to_get = 7;
+    gotten = 0;
+
+    while ( gotten < len )
+    { 
+        if ( lecroy_vicp_read( len_str + gotten, &to_get, &with_eoi, UNSET )
+                                                                   == FAILURE )
+            lecroy_ws_lan_failure( );
+        gotten += to_get;
+        to_get = len - gotten;
+    }
 
     len_str [ len ] = '\0';
     len = T_atol( len_str + 6 );
@@ -1549,9 +1529,17 @@ static unsigned char *lecroy_ws_get_data( long * length )
 
     /* Now get the number of bytes to read */
 
-    if ( lecroy_vicp_read( len_str, &len, &with_eoi, UNSET )
-                                                          != SUCCESS_BUT_MORE )
-        lecroy_ws_lan_failure( );
+    to_get = len;
+    gotten = 0;
+
+    while ( gotten < len )
+    { 
+        if ( lecroy_vicp_read( len_str + gotten, &to_get, &with_eoi, UNSET )
+                                                                   == FAILURE )
+            lecroy_ws_lan_failure( );
+        gotten += to_get;
+        to_get = len - gotten;
+    }
 
     len_str[ len ] = '\0';
     len = *length = T_atol( len_str );
@@ -1560,11 +1548,19 @@ static unsigned char *lecroy_ws_get_data( long * length )
 
     /* Obtain enough memory and then read the real data */
 
-    len +=  with_eoi ? 1 : 0;
-    data = UCHAR_P T_malloc( len );
+    data = UCHAR_P T_malloc( ++len );
 
-    if ( lecroy_vicp_read( data, &len, &with_eoi, UNSET ) != SUCCESS )
-        lecroy_ws_lan_failure( );
+    to_get = len;
+    gotten = 0;
+
+    while ( gotten < len )
+    { 
+        if ( lecroy_vicp_read( data + gotten, &to_get, &with_eoi, UNSET )
+                                                                   == FAILURE )
+            lecroy_ws_lan_failure( );
+        gotten += to_get;
+        to_get = len - gotten;
+    }
 
     return data;
 }
@@ -1584,8 +1580,8 @@ static long lecroy_ws_get_int_value( int          ch,
 
     if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
         sprintf( cmd, "C%d:INSP? '%s'\n", ch - LECROY_WS_CH1 + 1, name );
-    else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
-        sprintf( cmd, "M%c:INSP? '%s'\n", ch - LECROY_WS_M1 + 1, name );
+    else if ( ch == LECROY_WS_MATH )
+        sprintf( cmd, "F1:INSP? '%s'\n", name );
     else
     {
         fsc2_assert( 1 == 0 );

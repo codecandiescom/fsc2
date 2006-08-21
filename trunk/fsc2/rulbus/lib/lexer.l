@@ -55,9 +55,9 @@ FLOAT    [+-]*((({INT}"."[0-9]*)|([0-9]*"."{INT})){EXPO}?)|({INT}{EXPO})
 BOOL_T   "true"|"yes"
 BOOL_F   "false"|"no"
 UNIT     ("f"|"p"|"n"|"u"|"m"|"k"|"M"|"G"|"T")
-OCT      "0"[0-9]*
-HEX      "0"[xX][0-9a-fA-F]*
-DEC      [+-]*[1-9][0-9]*
+OCT      "0"[0-7]+
+HEX      "0"[xX][0-9a-fA-F]+
+DEC      [+-]*("0"|([1-9][0-9]*))
 
 
 %x       comm

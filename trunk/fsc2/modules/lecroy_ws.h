@@ -92,7 +92,6 @@
    when the digitizer can't be accessed - these values must be reasonable ! */
 
 #define LECROY_WS_TEST_TB_INDEX     5           /* 50/20 ns per division */
-#define LECROY_WS_TEST_MS_INDEX     ( lecroy_ws.num_mem_sizes - 1 )
 #define LECROY_WS_TEST_ILVD_MODE    UNSET       /* interleave mode (RIS/SS) */
 #define LECROY_WS_TEST_SENSITIVITY  2.5         /* 2.5 V per division */
 #define LECROY_WS_TEST_OFFSET       0.0
@@ -106,6 +105,8 @@
 #define LECROY_WS_TEST_TRIG_COUP    LECROY_WS_TRG_CPL_DC
 #define LECROY_WS_TEST_TRIG_MODE    LECROY_WS_TRG_MODE_NORMAL
 #define LECROY_WS_TEST_BWL          LECROY_WS_BWL_OFF /* bandwidth limiter */
+#define LECROY_WS_SHORT_MEM_SIZE    10000
+#define LECROY_WS_LONG_MEM_SIZE     250000
 
 
 /* Flag from the INR (internal state change) register indicating that an
@@ -171,6 +172,7 @@
 
 
 
+
 typedef struct Window Window_T;
 typedef struct LECROY_WS LECROY_WS_T;
 typedef struct HORI_RES HORI_RES_T;
@@ -204,6 +206,104 @@ struct HORI_RES {
 };
 
 
+/* The following data are for the model 424 - unfortunately the documentation
+   is a POS and doesn't tell what to expect, so all the data had to be
+   determined by actually looking what he device does and the 424 is currently
+   the only one I have access to.
+   Just another curiosity: the record lengths are actually always to points
+   longer and the largest record length with a memory siye of 500000 is
+   only 250002 while for a memory size of 10000 it's 10002... */
+
+#if defined LECROY_WS_MAIN_
+
+HORI_RES_T hres[ 2 ][ 37 ] = { { { 1.0e-9,    1, 2.0e-11,   50 },
+                                 { 2.0e-9,    2, 2.0e-11,  100 },
+                                 { 5.0e-9,    5, 2.0e-11,  250 },
+                                 { 1.0e-8,   10, 2.0e-11,  500 },
+                                 { 2.0e-8,   20, 2.0e-11, 1000 },
+                                 { 5.0e-8,   50, 4.0e-11, 1000 },
+                                 { 1.0e-7,  100, 1.0e-10, 1000 },
+                                 { 2.0e-7,  200, 2.0e-10, 1000 },
+                                 { 5.0e-7,  500, 5.0e-10, 1000 },
+                                 { 1.0e-6, 1000,    -1.0,   -1 },
+                                 { 2.0e-6, 1000,    -1.0,   -1 },
+                                 { 5.0e-6, 1000,    -1.0,   -1 },
+                                 { 1.0e-5, 1000,    -1.0,   -1 },
+                                 { 2.0e-5, 1000,    -1.0,   -1 },
+                                 { 5.0e-5, 1000,    -1.0,   -1 },
+                                 { 1.0e-4, 1000,    -1.0,   -1 },
+                                 { 2.0e-4, 1000,    -1.0,   -1 },
+                                 { 5.0e-4, 1000,    -1.0,   -1 },
+                                 { 1.0e-3, 1000,    -1.0,   -1 },
+                                 { 2.0e-3, 1000,    -1.0,   -1 },
+                                 { 5.0e-3, 1000,    -1.0,   -1 },
+                                 { 1.0e-2, 1000,    -1.0,   -1 },
+                                 { 2.0e-2, 1000,    -1.0,   -1 },
+                                 { 5.0e-2, 1000,    -1.0,   -1 },
+                                 { 1.0e-1, 1000,    -1.0,   -1 },
+                                 { 2.0e-1, 1000,    -1.0,   -1 },
+                                 { 5.0e-1, 1000,    -1.0,   -1 },
+                                 {    1.0, 1000,    -1.0,   -1 },
+                                 {    2.0, 1000,    -1.0,   -1 },
+                                 {    5.0, 1000,    -1.0,   -1 },
+                                 {  1.0e1, 1000,    -1.0,   -1 },
+                                 {  2.0e1, 1000,    -1.0,   -1 },
+                                 {  5.0e1, 1000,    -1.0,   -1 },
+                                 {  1.0e2, 1000,    -1.0,   -1 },
+                                 {  2.0e2, 1000,    -1.0,   -1 },
+                                 {  5.0e2, 1000,    -1.0,   -1 },
+                                 {  1.0e3, 1000,    -1.0,   -1 } },
+
+                               { { 1.0e-9,     1, 2.0e-11,   50 },
+                                 { 2.0e-9,     2, 2.0e-11,  100 },
+                                 { 5.0e-9,     5, 2.0e-11,  250 },
+                                 { 1.0e-8,    10, 2.0e-11,  500 },
+                                 { 2.0e-8,    20, 2.0e-11, 1000 },
+                                 { 5.0e-8,    50, 2.0e-11, 2500 },
+                                 { 1.0e-7,   100, 2.0e-10, 5000 },
+                                 { 2.0e-7,   200, 4.0e-11, 5000 },
+                                 { 5.0e-7,   500, 1.0e-10, 5000 },
+                                 { 1.0e-6,  1000, 2.0e-10, 5000 },
+                                 { 2.0e-6,  2000, 5.0e-10, 4000 },
+                                 { 5.0e-6,  5000,    -1.0,   -1 },
+                                 { 1.0e-5, 10000,    -1.0,   -1 },
+                                 { 2.0e-5, 20000,    -1.0,   -1 },
+                                 { 5.0e-5, 25000,    -1.0,   -1 },
+                                 { 1.0e-4, 25000,    -1.0,   -1 },
+                                 { 2.0e-4, 20000,    -1.0,   -1 },
+                                 { 5.0e-4, 25000,    -1.0,   -1 },
+                                 { 1.0e-3, 25000,    -1.0,   -1 },
+                                 { 2.0e-3, 20000,    -1.0,   -1 },
+                                 { 5.0e-3, 25000,    -1.0,   -1 },
+                                 { 1.0e-2, 25000,    -1.0,   -1 },
+                                 { 2.0e-2, 20000,    -1.0,   -1 },
+                                 { 5.0e-2, 25000,    -1.0,   -1 },
+                                 { 1.0e-1, 25000,    -1.0,   -1 },
+                                 { 2.0e-1, 20000,    -1.0,   -1 },
+                                 { 5.0e-1, 25000,    -1.0,   -1 },
+                                 {    1.0, 25000,    -1.0,   -1 },
+                                 {    2.0, 20000,    -1.0,   -1 },
+                                 {    5.0, 25000,    -1.0,   -1 },
+                                 {  1.0e1, 25000,    -1.0,   -1 },
+                                 {  2.0e1, 20000,    -1.0,   -1 },
+                                 {  5.0e1, 25000,    -1.0,   -1 },
+                                 {  1.0e2, 25000,    -1.0,   -1 },
+                                 {  2.0e2, 20000,    -1.0,   -1 },
+                                 {  5.0e2, 25000,    -1.0,   -1 },
+                                 {  1.0e3, 25000,    -1.0,   -1 } } };
+
+#else
+
+extern HORI_RES_T hres[ 2 ][ 37 ];
+
+#endif
+
+
+#define TBAS( x )  hres[ 0 ][ x ].tpp
+#define NUM_TBAS   ( sizeof hres[ 0 ] / sizeof hres[ 0 ][ 0 ] )
+
+
+
 struct LECROY_WS {
     int device;
 
@@ -220,12 +320,7 @@ struct LECROY_WS {
     bool interleaved;       /* set if in RIS mode, unset in SINGLE SHOT mode */
     bool is_interleaved;
 
-    long num_mem_sizes;      /* number of memory size settings */
-    long *mem_sizes;         /* allowed memory size settings */
-
     long mem_size;
-    int ms_index;           /* index into 'mem_sizes' for current setting */
-    bool is_mem_size;
 
     double sens[ LECROY_WS_MAX_CHANNELS ];
     bool is_sens[ LECROY_WS_MAX_CHANNELS ];
@@ -270,9 +365,6 @@ struct LECROY_WS {
     long num_tbas;           /* number of timebase settings */
     double *tbas;            /* allowed timebase settings */
 
-    HORI_RES_T **hres;       /* table of points per division and time reso-
-                                lutions for the different record lengths
-                                and timebases */
     HORI_RES_T *cur_hres;    /* pointer into table to current settings */
 
     bool lock_state;
@@ -306,9 +398,7 @@ Var_T *digitizer_window_position(   Var_T * /* v */ );
 Var_T *digitizer_window_width(      Var_T * /* v */ );
 Var_T *digitizer_timebase(          Var_T * /* v */ );
 Var_T *digitizer_interleave_mode(   Var_T * /* v */ );
-#if 0
 Var_T *digitizer_memory_size(       Var_T * /* v */ );
-#endif
 Var_T *digitizer_record_length(     Var_T * /* v */ );
 Var_T *digitizer_time_per_point(    Var_T * /* v */ );
 Var_T *digitizer_sensitivity(       Var_T * /* v */ );
@@ -458,14 +548,6 @@ long lecroy_ws_translate_channel( int  /* dir     */,
 void lecroy_ws_store_state( LECROY_WS_T * /* dest */,
                             LECROY_WS_T * /* src  */ );
 
-
-void lecroy_ws_numpoints_prep( void );
-
-void lecroy_ws_tbas_prep( void );
-
-void lecroy_ws_hori_res_prep( void );
-
-void lecroy_ws_clean_up( void );
 
 /*
  * Local variables:

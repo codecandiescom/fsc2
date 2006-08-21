@@ -745,8 +745,8 @@ int gpib_write( int          device,
         return FAILURE;
     }
 
-    buf = CHAR_P T_malloc( length );
-    buf[ --length ] = '\0';
+    buf = CHAR_P T_malloc( length + 1 );
+    buf[ length ] = '\0';
     strncpy( buf, buffer, length );
 
     if ( ll > LL_ERR )

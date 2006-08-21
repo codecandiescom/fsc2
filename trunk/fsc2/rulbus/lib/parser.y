@@ -560,7 +560,7 @@ static int set_rb8514_defaults( RULBUS_CARD_LIST * card )
 		card->addr = RULBUS_RB8514_DELAY_DEF_ADDR;
 	}
 
-	if ( card->intr_delay <= 0.0 )
+	if ( card->intr_delay < 0 )
 		card->intr_delay = RULBUS_RB8514_DELAY_DEF_INTR_DELAY;
 
 	card->width = RULBUS_RB8514_DELAY_WIDTH;

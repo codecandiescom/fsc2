@@ -318,8 +318,8 @@ static void rb_pulser_w_phase_channel_setup( void )
         mw_start +=   mw_card->intr_delay + mw_card->next->intr_delay
                     + mw_card->delay * rb_pulser_w.timebase;
 
-        dT = Ticks_floor( ( mw_start - cur_card->intr_delay - rb_pulser_w.psd )
-                          / rb_pulser_w.timebase );
+        dT = Ticks_rnd( ( mw_start - cur_card->intr_delay - rb_pulser_w.psd )
+                        / rb_pulser_w.timebase );
 
         /* The phase pulse must have a minimum length so that Leendert's
            "MoNos W-band magic box" can react to it */
@@ -819,7 +819,8 @@ static void rb_pulser_w_commit( bool test_only )
 
             if ( ! card->was_active && card->is_active )
                 rb_pulser_w_delay_card_state( card, START );
-            else if ( card->old_delay != card->delay )
+
+            if ( card->old_delay != card->delay )
                 rb_pulser_w_delay_card_delay( card, card->delay );
 
             card->old_delay = card->delay;
@@ -860,7 +861,7 @@ static void rb_pulser_w_set_phases( void )
             continue;
         }
 
-        /* Set the car up to emit the correct set of end pulses for the phase
+        /* Set the card up to emit the correct set of end pulses for the phase
            needed for the pulse */
 
         if ( pulses[ i ]->pc == NULL )

@@ -58,49 +58,48 @@ MW_DELAY_CARD_4	      "DELAY_5"
 
 MW_DELAY_CARD_5	      "DELAY_6"
 
+# 8. Name of the card for controlling the phase of the first microwave pulse
 
-# 8. Name of the card for creating the defense pulse (always starts at the
-#    very beginning of the pulse sequence)
-
-DEFENSE_DELAY_CARD    "DELAY_7"
+PHASE_DELAY_CARD_0    "DELAY_7"
 
 
-# 9. Name of the card for creating the delay before the laser pulse
+# 9. Name of the card for controlling the phase of the second microwave pulse
 
-LASER_DELAY_CARD_0    "DELAY_8"
-
-
-# 10. Name of the card producing the laser pulse
-
-LASER_DELAY_CARD_1    "DELAY_9"
+PHASE_DELAY_CARD_1    "DELAY_8"
 
 
-# 11. Name of the card for controlling the phase of the first microwave pulse
+# 10. Name of the card for controlling the phase of the third microwave pulse
 
-PHASE_DELAY_CARD_0    "DELAY_10"
-
-
-# 12. Name of the card for controlling the phase of the second microwave pulse
-
-PHASE_DELAY_CARD_1    "DELAY_11"
+PHASE_DELAY_CARD_2    "DELAY_9"
 
 
-# 13. Name of the card for controlling the phase of the third microwave pulse
+# 11. Name of the card for creating the defense pulse (always starts at the
+#     very beginning of the pulse sequence)
 
-PHASE_DELAY_CARD_2    "DELAY_12"
+DEFENSE_DELAY_CARD    "DELAY_10"
 
 
-# 14. Name of the delay card that creates the delay before the start of
+# 12. Name of the delay card that creates the delay before the start of
 #     the RF pulse (the length of this pulse is set using the pulse mode
 #     of the Rhode&Schwarz synthesizer)
 
-RF_DELAY_CARD         "DELAY_13"
+RF_DELAY_CARD         "DELAY_11"
 
 
-# 15. Name of the delay cards creating the delay before detection trigger
+# 13. Name of the delay cards creating the delay before detection trigger
 #     pulse (which is one of the end pulses of this card
 
-DET_DELAY_CARD        "DELAY_14"
+DET_DELAY_CARD        "DELAY_12"
+
+
+# 14. Name of the card for creating the delay before the laser pulse
+
+LASER_DELAY_CARD_0    "DELAY_13"
+
+
+# 15. Name of the card producing the laser pulse
+
+LASER_DELAY_CARD_1    "DELAY_14"
 
 
 # 16. Name of the clock card used as the input of the delay card for

@@ -177,7 +177,10 @@ int rb8510_1_end_of_exp_hook( void )
 {
     if ( rb8510.handle >= 0 )
     {
+        raise_permissions( );
         rulbus_card_close( rb8510.handle );
+        lower_permissions( );
+
         rb8510.handle = -1;
 
         if ( rb8510.reserved_by &&
@@ -363,6 +366,7 @@ Var_T *daq_set_voltage( Var_T * v )
     }
 
     rb8510.volts = volts;
+    rb8510.volts_is_set = SET;
 
     return vars_push( FLOAT_VAR, volts );
 }
