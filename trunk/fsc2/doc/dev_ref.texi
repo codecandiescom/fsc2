@@ -1273,7 +1273,7 @@ be selected via the devices configuration file)
 @strong{Description}: Power supply for the Oxford Instruments
 (@url{http://www.oxford-instruments.com/}) superconducting
 magnet used for the Leiden W-band spektrometer. This is an older version of the
-IPS120-10 with a current resolution of only @w{10 mA}. Therefore it has been
+IPS120-10 with a current resolution of @w{10 mA}. Therefore it has been
 fitted with an external voltage input that allows to modulate the output
 current by about @w{+/- 5%} of the maximum rated current of @w{120 A} by a
 voltage in the @w{+/- 10 V} range. The external voltage is supplied by a
@@ -1284,7 +1284,9 @@ when a field is set, the tep resolution of sweeps remains unchanged (and
 sweeps thus should probably be avoided when using this device).
 
 @paragraphindent 0
-@strong{Controlled via}: Serial port
+@strong{Controlled via}: GPIB bus (the device has a (non-standard)
+serial port a @code{GPV24} interface for conversion
+between @code{RS232C} and @code{IEEE488} is employed).
 
 @paragraphindent 0
 @strong{Supported functions}:
