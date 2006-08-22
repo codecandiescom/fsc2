@@ -132,9 +132,10 @@ int ni6601_release( struct inode * inode_p,
 	iowrite32( 0, board->regs.global_irq_control );
 
 	for ( i = NI6601_COUNTER_0; i <= NI6601_COUNTER_3; i++ )
+	{
 		ni6601_tc_irq_disable( board, i );
-
-	ni6601_dma_irq_disable( board );
+		ni6601_dma_irq_disable( board, i );
+	}
 
 	if ( board->buf ) {
 		vfree( board->buf );

@@ -26,8 +26,8 @@
 
 #include "ni6601_drv.h"
 
-static void ni6601_tc_irq_handler( Board *board );
-static void ni6601_dma_irq_handler( Board *board );
+static int ni6601_tc_irq_handler( Board *board );
+static int ni6601_dma_irq_handler( Board *board );
 
 
 /*-----------------------------------------------------------*
@@ -523,8 +523,7 @@ int ni6601_get_buf_avail( Board *            board,
 int ni6601_stop_buf_counting( Board * board )
 {
 	if ( board->buf_counter >= 0 ) {
-		ni6601_dma_irq_disable( board );
-		iowrite16( DISARM, board->regs.command[ board->buf_counter ] );
+		ni6601_dma_irq_disable( board, board->buf_counter );
 		board->buf_counter = -1;
 		if ( board->buf ) {
 			vfree( board->buf );
@@ -634,13 +633,14 @@ void ni6601_dma_irq_enable( Board * board,
  * Function to disable DMA interrupts from one of the counters
  *-------------------------------------------------------------*/
 
-void ni6601_dma_irq_disable( Board * board )
+void ni6601_dma_irq_disable( Board * board,
+			     int     counter )
 {
 	if ( board->dma_irq_enabled )
 	{
-		PDEBUG( "Disabling DMA IRQ for counter %d\n",
-			board->buf_counter );
-		iowrite16( 0, board->regs.dma_config[ board->buf_counter ] );
+		PDEBUG( "Disabling DMA IRQ for counter %d\n", counter );
+		iowrite16( DISARM, board->regs.command[ counter ] );
+		iowrite16( 0, board->regs.dma_config[ counter ] );
 		board->dma_irq_enabled = 0;
 	}
 }
@@ -655,79 +655,83 @@ irqreturn_t ni6601_irq_handler( int              irq,
 				void *           data,
 				struct pt_regs * dummy )
 #else
+
+#define IRQ_HANDLED
+#define IRQ_NONE
+
 void ni6601_irq_handler( int              irq,
 			 void *           data,
 			 struct pt_regs * dummy )
 #endif
 {
-	Board *board = ( Board * ) data;
+	Board *board = data;
 
 
 	if ( irq != board->irq ) {
 		PDEBUG( "Invalid interrupt number: %d\n", irq );
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 		return IRQ_NONE;
-#else
-		return;
-#endif
 	}
 
-	if ( board->expect_tc_irq )
-		ni6601_tc_irq_handler( board );
-	else if ( board->dma_irq_enabled )
-		ni6601_dma_irq_handler( board );
-	else {
-		printk( KERN_DEBUG " " NI6601_NAME ": Spurious interrupt\n" );
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-		return IRQ_NONE;
-#endif
-	}
+	/* With 2.6 kernels we must determine if the interrupt was meant
+	   for us (it could also have been for a different device sharing
+	   the interrupt line) and return a value accordingly. */
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+	if ( ( board->expect_tc_irq && ni6601_tc_irq_handler( board ) ) ||
+	     ( board->dma_irq_enabled && ni6601_dma_irq_handler( board ) ) )
 		return IRQ_HANDLED;
-#endif
+
+	return IRQ_NONE;
 }
 
 
-/*----------------------------------*
- *----------------------------------*/
+/*--------------------------------------------------------------------*
+ * Handler for TC interrupts - returns 1 if the interrupt got handled
+ * and 0 if the interrupt wasn't due to a TC interrupt (probably it
+ * then was meant for a different device sharing the interrupt line)
+ *--------------------------------------------------------------------*/
 
-static void ni6601_tc_irq_handler( Board * board )
+static int ni6601_tc_irq_handler( Board * board )
 {
 	int i;
 	u16 state = Gi_INTERRUPT | Gi_TC_STATUS;
+	int ret = 0;
 
 
 	for ( i = 0; i < 4; i++ )
 		if ( board->tc_irq_enabled[ i ] &&
 		     ioread16( board->regs.status[ i ] ) & state ) {
 			PDEBUG( "TC Interrupt for counter %d\n", i );
+			ret |= 1;
 			iowrite16( Gi_TC_INTERRUPT_ACK,
 				   board->regs.irq_ack[ i ] );
 			board->tc_irq_raised[ i ]++;
 			wake_up_interruptible( &board->tc_waitqueue );
 		}
+
+	return ret;
 }
 
 
-/*----------------------------------*
- *----------------------------------*/
+/*---------------------------------------------------------------------*
+ * Handler for DMA interrupts - returns 1 if the interrupt got handled
+ * and 0 if the interrupt wasn't due to a DMS interrupt (probably it
+ * then was meant for a different device sharing the interrupt line)
+ *---------------------------------------------------------------------*/
 
-static void ni6601_dma_irq_handler( Board * board )
+static int ni6601_dma_irq_handler( Board * board )
 {
 	int counter = board->buf_counter;
 	u16 state = ioread16( board->regs.dma_status[ counter ] );
 
 
 	if ( ! ( state & DRQ_STATUS ) )
-		return;
+		return 0;
 
 	/* Stop immediately if data got acquired too fast and thus could
 	   not be stored correctly in the SW and HW save register */
 
 	if ( state & DRQ_ERROR ) {
-		iowrite16( DISARM, board->regs.command[ counter ] );
-		ni6601_dma_irq_disable( board );
+		ni6601_dma_irq_disable( board, counter );
 		board->too_fast = 1;
 		PDEBUG( "DMA FIFO overflow\n" );
 		goto DMA_IRQ_DONE;
@@ -742,21 +746,20 @@ static void ni6601_dma_irq_handler( Board * board )
 		else
 			ioread32( board->regs.hw_save[ counter ] );
 		board->is_just_started = 0;
-		return;
+		return 1;
 	}
 	
 	/* If in continuous mode writing the next data point into the
 	   buffer would lead to the high pointer becoming identical to
-	   the low pointer we need an emergency stop since the buffer
-	   overflows (or, to precise, we couldn't distinguish between
-	   an empty buffer and the buffer being completely filled) */
+	   the low pointer the buffer would overflow (or, to precise, we
+	   couldn't distinguish between the buffer empty and the buffer
+	   being completely filled up) and we need an  emergency stop */
 
 	if ( board->buf_continuous ) {
 		if ( ( board->high_ptr + 1 == board->buf_top &&
 		       board->low_ptr == board->buf ) ||
 		     board->high_ptr + 1 == board->low_ptr ) {
-			iowrite16( DISARM, board->regs.command[ counter ] );
-			ni6601_dma_irq_disable( board );
+			ni6601_dma_irq_disable( board, counter );
 			board->buf_overflow = 1;
 			PDEBUG( "Buffer overflow\n" );
 			goto DMA_IRQ_DONE;
@@ -777,8 +780,7 @@ static void ni6601_dma_irq_handler( Board * board )
 
 	if ( board->high_ptr == board->buf_top ) {
 		if ( ! board->buf_continuous ) {
-			iowrite16( DISARM, board->regs.command[ counter ] );
-			ni6601_dma_irq_disable( board );
+			ni6601_dma_irq_disable( board, counter );
 		} else
 			board->high_ptr = board->buf;
 	}
@@ -786,6 +788,8 @@ static void ni6601_dma_irq_handler( Board * board )
  DMA_IRQ_DONE:
 	if ( board->buf_waiting )
 		wake_up_interruptible( &board->dma_waitqueue );
+
+	return 1;
 }
 
 

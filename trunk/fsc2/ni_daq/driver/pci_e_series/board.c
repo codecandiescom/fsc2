@@ -548,6 +548,10 @@ irqreturn_t pci_board_irq_handler( int              irq,
 				   void *           data,
 				   struct pt_regs * dummy )
 #else
+
+#define IRQ_HANDLED
+#define IRQ_NONE
+
 void pci_board_irq_handler( int              irq,
 			    void *           data,
 			    struct pt_regs * dummy )
@@ -555,21 +559,29 @@ void pci_board_irq_handler( int              irq,
 {
 	u16 status;
 	Board *board = ( Board * ) data;
+	int handled = 0;
 
 
 	if ( board->irq_group_A_enabled &&
 	     ( status = pci_stc_readw( board, STC_AI_Status_1 ) ) &
 	     Interrupt_A_St )
+	{
 		pci_irq_A_handler( board, status );
+		handled = 1;
+	}
 
 	if ( board->irq_group_B_enabled &&
 	     ( status = pci_stc_readw( board, STC_AO_Status_1 ) ) &
 	     Interrupt_B_St )
+	{
 		pci_irq_B_handler( board, status );
+		handled = 1;
+	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-	return IRQ_HANDLED;
-#endif
+	if ( handled )
+		return IRQ_HANDLED;
+	else
+		return IRQ_NONE;
 }
 
 

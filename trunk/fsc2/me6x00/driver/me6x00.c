@@ -2721,6 +2721,10 @@ static irqreturn_t me6x00_isr( int              irq,
 			       void *           dev_id,
 			       struct pt_regs * dummy )
 #else
+
+#define IRQ_HANDLED
+#define IRQ_NONE
+
 static void me6x00_isr( int              irq,
 			void *           dev_id,
 			struct pt_regs * dummy )
@@ -2746,43 +2750,23 @@ static void me6x00_isr( int              irq,
 	if ( irq != info->irq ) {
 		ISR_PDEBUG( "me6x00_isr(): incorrect interrupt num: %d\n",
 			    irq );
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 		return IRQ_NONE;
-#else
-		return;
-#endif
 	}
 
 	/* Check if this board raised an interrupt */
 
 	if ( ! ( reg1 = 0xF & ( me6x00_inl( info->me6x00_regbase
 					    + ME6X00_IRQSREG_DACXX ) ) ) ) {
-		ISR_PDEBUG( "me6x00_isr(): not this board\n" );
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 		return IRQ_NONE;
-#else
-		return;
-#endif
 	}
 
-	/* Figure for which DAC the interrupt was send */
+	/* Figure for which DAC the interrupt was meant */
 
 	dac = 0;
 	while ( ! ( reg1 & 1 ) && dac <= 3 ) {
 		reg1 >>= 1;
 		dac++;
 	}
-
-	/* Something strange must be going on here... */
-
-	if ( dac > ME6X00_DAC03 )
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-		return IRQ_NONE;
-#else
-		return;
-#endif
-
-	/* Increment interrupt count for the board */
 
 	ISR_PDEBUG( "me6x00_isr(): Interrupt from DAC %d\n", dac );
 
@@ -2883,9 +2867,7 @@ static void me6x00_isr( int              irq,
 	ISR_PDEBUG( "me6x00_isr(): FIFO %d: reset interrupt\n", dac );
 	reg2 = me6x00_inl( info->me6x00_regbase + regs[ dac ].irqr );
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 	return IRQ_HANDLED;
-#endif
 }
 
 
