@@ -81,6 +81,7 @@ config/hp8648b.table
 config/hp8672a.conf
 config/ips120_10.conf
 config/ips120_10_mod.conf
+config/ips120_10_mod.conf.serial
 config/ips20_4.conf
 config/itc503.conf
 config/keithley228a.conf
@@ -539,7 +540,6 @@ src/loader.h
 src/mail.c
 src/mail.h
 src/Makefile
-src/makelog
 src/module_util.c
 src/module_util.h
 src/phases.c
@@ -648,6 +648,7 @@ ni6601/driver/ioctl.c.dma_not_working
 ni6601/driver/Makefile
 ni6601/driver/mite.c
 ni6601/driver/mite.h
+ni6601/driver/Modules.symvers
 ni6601/driver/ni6601_drv.c
 ni6601/driver/ni6601_drv.h
 ni6601/driver/ni6601_drv.h.dma_not_yet_working
