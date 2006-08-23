@@ -1,5 +1,4 @@
-/* -*-C-*-
- *
+/*
  *  $Id$
  *
  *  Copyright (C) 1999-2006 Jens Thoms Toerring
@@ -36,15 +35,12 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 LECROY_WS_T lecroy_ws;
 
-const char *LECROY_WS_Channel_Names[ 16 ] = { "CH1",  "CH2",
-                                              "CH3",  "CH4",
-                                              "MATH",
-                                              "Z1",   "Z2",
-                                              "Z3",   "Z4",
-                                              "M1",   "M2",
-                                              "M3",   "M4"
-                                              "LINE",
-                                              "EXT", "EXT10" };
+const char *LECROY_WS_Channel_Names[ LECROY_WS_TOTAL_CHANNELS ] =
+            { "CH1",  "CH2", "CH3", "CH4",     /* measurement channels */
+              "MATH",                          /* math channel */
+              "Z1",   "Z2",  "Z3",  "Z4",      /* zoom channels */
+              "M1",   "M2",  "M3",  "M4"       /* memory channels */
+              "LINE", "EXT", "EXT10" };        /* trigger channels */
 
 /* List of fixed sensivity settings where the range of the offset changes */
 
@@ -238,7 +234,7 @@ Var_T *digitizer_define_window( Var_T * v )
 
     if ( lecroy_ws.w == NULL )
     {
-        lecroy_ws.w = w = T_malloc( sizeof *w );
+        lecroy_ws.w = w = WINDOW_P T_malloc( sizeof *w );
         w->prev = NULL;
     }
     else
@@ -246,7 +242,7 @@ Var_T *digitizer_define_window( Var_T * v )
         w = lecroy_ws.w;
         while ( w->next != NULL )
             w = w->next;
-        w->next = T_malloc( sizeof *w->next );
+        w->next = WINDOW_P T_malloc( sizeof *w->next );
         w->next->prev = w;
         w = w->next;
     }

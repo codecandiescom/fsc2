@@ -784,7 +784,7 @@ Var_T *counter_get_buffered_counts( Var_T * v )
         if ( num_points == 0 )
             num_points = buffered_remaining;
 
-        buf = T_malloc( num_points * sizeof *buf );
+        buf = LONG_P T_malloc( num_points * sizeof *buf );
         for ( i = 0; i < num_points; i++ )
             buf[ i ] = lrnd( INT_MAX * ( rand( ) / ( RAND_MAX + 1.0 ) ) );
 
@@ -854,7 +854,7 @@ static Var_T *ni6601_get_data( long   to_fetch,
             return vars_push( INT_ARR, NULL, 0 );
     }
 
-    buf = T_malloc( to_fetch * sizeof *buf );
+    buf = ULONG_P T_malloc( to_fetch * sizeof *buf );
 
     while ( 1 )
     {
@@ -945,7 +945,7 @@ static Var_T *ni6601_get_data( long   to_fetch,
 
     TRY
     {
-        final_buf = T_malloc( received * sizeof *final_buf );
+        final_buf = LONG_P T_malloc( received * sizeof *final_buf );
         TRY_SUCCESS;
     }
     OTHERWISE

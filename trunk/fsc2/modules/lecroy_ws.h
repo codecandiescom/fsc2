@@ -115,10 +115,11 @@
 #define LECROY_WS_SIGNAL_ACQ      ( 1 <<  0 )
 
 
-/* Total number of channels and maximum number of channels that can be
-   displayed at once */
+/* Number of channels (except trigger only channls), total number of channels
+   and maximum number of channels that can be displayed at once */
 
 #define LECROY_WS_MAX_CHANNELS       13
+#define LECROY_WS_TOTAL_CHANNELS     16
 #define LECROY_WS_MAX_USED_CHANNELS   8
 
 
@@ -372,7 +373,7 @@ struct LECROY_WS {
 
 
 extern LECROY_WS_T lecroy_ws;
-extern const char *LECROY_WS_Channel_Names[ 16 ];
+extern const char *LECROY_WS_Channel_Names[ LECROY_WS_TOTAL_CHANNELS ];
 extern bool lecroy_ws_IN_SETUP;
 
 

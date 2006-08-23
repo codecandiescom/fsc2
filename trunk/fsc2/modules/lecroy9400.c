@@ -284,7 +284,7 @@ Var_T *digitizer_define_window( Var_T * v )
 
     if ( lecroy9400.w == NULL )
     {
-        lecroy9400.w = w = T_malloc( sizeof *w );
+        lecroy9400.w = w = WINDOW_P T_malloc( sizeof *w );
         w->prev = NULL;
     }
     else
@@ -292,7 +292,7 @@ Var_T *digitizer_define_window( Var_T * v )
         w = lecroy9400.w;
         while ( w->next != NULL )
             w = w->next;
-        w->next = T_malloc( sizeof *w->next );
+        w->next = WINDOW_P T_malloc( sizeof *w->next );
         w->next->prev = w;
         w = w->next;
     }

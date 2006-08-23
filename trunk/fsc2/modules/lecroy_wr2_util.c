@@ -1,5 +1,4 @@
-/* -*-C-*-
- *
+/*
  *  $Id$
  * 
  *  Copyright (C) 1999-2006 Jens Thoms Toerring
@@ -348,14 +347,14 @@ void lecroy_wr2_hori_res_prep( void )
     double ris_res;
 
 
-    lecroy_wr2.hres = T_malloc( lecroy_wr2.num_mem_sizes *
-                                sizeof *lecroy_wr2.hres );
+    lecroy_wr2.hres = HORI_RES_PP T_malloc( lecroy_wr2.num_mem_sizes *
+                                            sizeof *lecroy_wr2.hres );
 
     TRY
     {
-        lecroy_wr2.hres[ 0 ] = T_malloc( lecroy_wr2.num_mem_sizes * 
-                                         lecroy_wr2.num_tbas *
-                                         sizeof **lecroy_wr2.hres );
+        lecroy_wr2.hres[ 0 ] = HORI_RES_P T_malloc( lecroy_wr2.num_mem_sizes * 
+                                                    lecroy_wr2.num_tbas *
+                                                    sizeof **lecroy_wr2.hres );
         TRY_SUCCESS;
     }
     OTHERWISE

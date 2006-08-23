@@ -22,8 +22,8 @@
  */
 
 
-/* All of the following is to allow for compiling also with a C++ compiler
-   if more strict type checking would be nice... */
+/* The reason for all of the following is to be able to compilw also with a
+   C++ compiler if more strict type checking would be nice... */
 
 
 #if ! defined FSC2_TYPES_HEADER
@@ -37,6 +37,7 @@
 #define DOUBLE_P              ( double * )
 #define DOUBLE_PP             ( double ** )
 #define LONG_P                ( long * )
+#define ULONG_P               ( unsigned long * )
 #define INT_P                 ( int * )
 #define UINT_P                ( unsigned int * )
 #define CHAR_P                ( char * )
@@ -83,12 +84,15 @@
 #define FS_P                  ( FS_T * )
 #define UNS16_P               ( uns16 * )
 #define LAN_LIST_P            ( LAN_List_T * )
+#define HORI_RES_P            ( HORI_RES_T * )
+#define HORI_RES_PP           ( HORI_RES_T ** )
 
 #else
 
 #define DOUBLE_P
 #define DOUBLE_PP
 #define LONG_P
+#define ULONG_P
 #define INT_P
 #define UINT_P
 #define CHAR_P
@@ -135,6 +139,8 @@
 #define FS_P
 #define UNS16_P
 #define LAN_LIST_P
+#define HORI_RES_P
+#define HORI_RES_PP
 
 #endif
 

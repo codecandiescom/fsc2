@@ -526,23 +526,24 @@ script. The only thing of importance is the sequence in which they are
 declared, because this determines the sequence they are shown in the
 graphical user interface.
 
-Actually, you can even do a lot more in the comparisons, you may e.g.@:
-use arithmetics within the comparison. The secret behind this is that
-the comparison is done via a call of the Perl @code{eval()} function
-after a @code{$} has been prepended to the variables (to make them
-proper variables of the script generating the @code{EDL} script).
-I.e.@: a comparison like @w{@code{START_FIELD < END_FIELD}} is evaluated
-by the Perl machinery as
+Actually, you can even do a lot more after the @code{if} or @code{elsif},
+you may e.g.@: use arithmetics within the condition. The secret behind this
+is that the things following @code{if} or @code{elsif} are evaluated via a
+call of the Perl @code{eval()} function after a @code{$} has been prepended
+to the variables (to make them proper variables of the script generating the
+@code{EDL} script). I.e.@: a comparison like @w{@code{START_FIELD <
+END_FIELD}}  is evaluated by the Perl machinery as
 @example
-eval@{ START_FIELD < END_FIELD @}
+eval@{ $START_FIELD < $END_FIELD @}
 @end example
 @noindent
-Thus, in the comparisons you have the whole power of Perl at your finger
-tips, including all of its regular expression evaluation machinery. If
-you know Perl you'll be able to do really weird things with this, you
-could even put complete little Perl scripts into the @w{condition ;-)}
-Just be careful not to change the variables from within the condition
-(unless that's exactly what you want to do).
+Thus, after @code{if} or @code{elsif} you have the whole power of Perl
+at your finger tips, including all of its regular expression evaluation
+machinery. If you know Perl you'll be able to do really weird things
+with this, you can even have complete little Perl scripts (as long as
+they return a value that can be interpreted as true or false) into the
+@w{conditions ;-)} Just be careful not to change the variables from
+within the condition (unless that's exactly what you want to do).
 
 
 @node Interfacing, , fsc2_guify, GUI-fying
