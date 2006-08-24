@@ -876,7 +876,7 @@ Var_T *f_save( Var_T * v )
                 break;
 
             default :
-                fsc2_assert( 1 == 0 );
+                fsc2_impossible( );
         }
     } while ( ( v = vars_pop( v ) ) != NULL );
 
@@ -1505,7 +1505,7 @@ static long do_printf( long file_num, Var_T * v )
                             break;
 
                         default :
-                            fsc2_assert( 1 == 0 );
+                            fsc2_impossible( );
                     }
 
                     cv = vars_pop( cv );
@@ -1545,7 +1545,7 @@ static long do_printf( long file_num, Var_T * v )
                             break;
 
                         default :
-                            fsc2_assert( 1 == 0 );
+                            fsc2_impossible( );
                     }
 
                     cv = vars_pop( vars_pop( cv ) );
@@ -1591,14 +1591,14 @@ static long do_printf( long file_num, Var_T * v )
                             break;
 
                         default :
-                            fsc2_assert( 1 == 0 );
+                            fsc2_impossible( );
                     }
 
                     cv = vars_pop( vars_pop( vars_pop( cv ) ) );
                     break;
 
                 default :
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
 
             if ( store == '\0' )             /* end reached ? */

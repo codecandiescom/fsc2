@@ -629,7 +629,7 @@ FOR I = 1 : N {
     fsave( File, \"\\n% #.: Field = # G\\n\\n\", I, field );
     save( File, curve );
 
-    field = sweep_up( );
+    field = magnet_sweep_up( );
 }
 ";
 

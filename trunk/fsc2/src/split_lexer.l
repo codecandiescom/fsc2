@@ -284,7 +284,7 @@ bool section_parser( int section )
                     break;
 
                 default :              /* this should never happen, but ... */
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
                     break;
             }
         } while ( s != NO_SECTION );

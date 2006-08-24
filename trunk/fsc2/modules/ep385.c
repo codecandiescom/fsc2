@@ -50,8 +50,8 @@ int ep385_init_hook( void )
     Channel_T *ch;
 
 
-    fsc2_assert( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE > 0 );
-    fsc2_assert( DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE > 0 );
+    fsc2_assert( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE > 0 &&
+                 DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE > 0 );
 
     Pulser_Struct.name     = DEVICE_NAME;
     Pulser_Struct.has_pods = UNSET;

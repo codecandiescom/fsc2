@@ -55,8 +55,8 @@ FOR J = 1 : N_runs {
 	display( 1, I, curve[ 2 ], 1, 1, I, curve[ 2 ] - base_curve, 2 );
 	save( curve );
 
-	sweep_up( );
+	magnet_sweep_up( );
     }
 
-    reset_field( );
+    magnet_reset_field( );
 }

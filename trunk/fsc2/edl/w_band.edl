@@ -35,11 +35,11 @@ FOR I =  1 : 80 {
  	wait( 0.1 s );
 }
 
-set_field( start_current );
+magnet_field( start_current );
 save( start_current );
 
 FOR I =  81 : 160 {
-	cur = sweep_down( );
+	cur = magnet_sweep_down( );
 	data = lockin_get_data( );
 	display( I, cur, 1, I, data, 2 );
 	fsave( "I = #, cur = #, data = #\n", I, cur, data );

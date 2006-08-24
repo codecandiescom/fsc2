@@ -484,7 +484,7 @@ void lecroy94_tmpl_set_offset( int    channel,
 
 int lecroy94_tmpl_get_coupling( int channel )
 {
-    int type = LECROY94_TMPL_INVALID_COUPL;
+    int type = -1;
     char buf[ 100 ];
     long length = 100;
 
@@ -504,8 +504,8 @@ int lecroy94_tmpl_get_coupling( int channel )
         type = LECROY94_TMPL_DC_1_MOHM;
     else if ( buf[ 1 ] == '5' )
         type = LECROY94_TMPL_DC_50_OHM;
-
-    fsc2_assert( type != LECROY94_TMPL_INVALID_COUPL );  /* call me paranoid */
+    else
+        fsc2_impossible( );
 
     return type;
 }
@@ -570,7 +570,7 @@ int lecroy94_tmpl_get_trigger_source( void )
 {
     char reply[ 100 ];
     long length = 100;
-    int src = LECROY94_TMPL_UNDEF;
+    int src;
 
 
     lecroy94_tmpl_talk( "TRSE?", reply, &length );
@@ -591,8 +591,8 @@ int lecroy94_tmpl_get_trigger_source( void )
     else if ( reply[ 7 ] == 'E' )
         src = LECROY94_TMPL_EXT;
 #endif
-
-    fsc2_assert( src != LECROY94_TMPL_UNDEF );
+    else
+        fsc2_impossible( );
 
     return src;
 }
@@ -632,7 +632,7 @@ void lecroy94_tmpl_set_trigger_source( int channel )
             break;
 #endif
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     if ( gpib_write( lecroy94_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -671,7 +671,7 @@ double lecroy94_tmpl_get_trigger_level( int channel )
             break;
 #endif
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     lecroy94_tmpl_talk( ( const char * ) buf, buf, &length );
@@ -713,7 +713,7 @@ void lecroy94_tmpl_set_trigger_level( int    channel,
             break;
 #endif
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     gcvt( level, 6, cmd + strlen( cmd ) );
@@ -753,7 +753,7 @@ double lecroy94_tmpl_get_trigger_slope( int channel )
             break;
 #endif
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     lecroy94_tmpl_talk( ( const char *) buf, buf, &length );
@@ -793,7 +793,7 @@ void lecroy94_tmpl_set_trigger_slope( int channel,
             break;
 #endif
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     strcat( cmd, slope ? "POS" : "NEG" );
@@ -834,7 +834,7 @@ int lecroy94_tmpl_get_trigger_coupling( int channel )
             break;
 #endif
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     lecroy94_tmpl_talk( ( const char *) buf, buf, &length );
@@ -909,7 +909,7 @@ void lecroy94_tmpl_set_trigger_coupling( int channel,
             break;
 #endif
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     strcat( cmd, cpl_str[ cpl ] );
@@ -1055,8 +1055,9 @@ void lecroy94_tmpl_set_probe_attenuation( int ch,
 {
     char cmd[ 30 ];
 
+
     fsc2_assert( ch >= LECROY94_TMPL_CH1 && ch <= LECROY94_TMPL_CH_MAX );
-    fsc2_assert( att == 1 || att == 10 || att == 100 ||
+    fsc2_assert( att == 1    || att == 10   || att == 100 ||
                  att == 1000 || att == 10000 );
 
     sprintf( cmd, "C%d:%ld", ch, att );
@@ -1296,9 +1297,7 @@ static void lecroy94_tmpl_get_prep( int              ch,
         strcpy( ch_str, ch == LECROY94_TMPL_FUNC_E ? "FE" : "FF" );
     }
     else
-    {
-        fsc2_assert( 1 == 0 );
-    }
+        fsc2_impossible( );
 
     /* Set up the number of points to be fetched */
 
@@ -1519,7 +1518,6 @@ void lecroy94_tmpl_copy_curve( long src,
                  src == LECROY94_TMPL_MEM_C  || src == LECROY94_TMPL_MEM_D   ||
                  src == LECROY94_TMPL_FUNC_E || src == LECROY94_TMPL_FUNC_E );
     fsc2_assert( dest == LECROY94_TMPL_MEM_C || dest == LECROY94_TMPL_MEM_D );
-
 
     if ( ! lecroy94_tmpl.is_displayed[ src ] )
     {

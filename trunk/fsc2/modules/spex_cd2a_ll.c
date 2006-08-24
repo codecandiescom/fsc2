@@ -763,7 +763,7 @@ static void spex_cd2a_read_cmd_ack( const char * cmd )
             break;
 
         default :                 /* no other commands are used */
-            SPEX_CD2A_ASSERT( 1 == 0 );
+            SPEX_CD2A_IMPOSSIBLE( );
     }
 }
 

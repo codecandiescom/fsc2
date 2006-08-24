@@ -761,7 +761,7 @@ EXPERIMENT:
     print $fh "
 /* Go to the start field */
 
-field = set_field( field );
+field = magnet_field( field );
 
 /* Open the data file */
 

@@ -287,8 +287,8 @@ static void unpack_and_accept( int    dim,
                 ptr_next = ptr + len;
                 break;
 
-        default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+        default :            
+            fsc2_impossible( );       /* This can't happen... */
         }
 
         if ( dim == DATA_1D )
@@ -445,7 +445,7 @@ static void other_data_request( int    dim,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );        /* This can't happen... */
     }
 }
 
@@ -1151,13 +1151,11 @@ static long get_number_of_new_points( char **    ptr,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );        /* This can't happen... */
     }
 
-#ifndef NDEBUG
     if ( len <= 0 )
-        fsc2_assert( 1 == 0 );
-#endif
+        fsc2_impossible( );
 
     return len;
 }

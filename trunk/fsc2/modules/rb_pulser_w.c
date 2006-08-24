@@ -962,7 +962,7 @@ Var_T *pulser_pulse_minimum_specs( Var_T * v )
     else if ( p->function == rb_pulser_w.function + PULSER_CHANNEL_DET )
         t = rb_pulser_det_min_specs( p );
     else
-        fsc2_assert( 1 == 0 );
+        fsc2_impossible( );
 
     return vars_push( FLOAT_VAR, t );
 }

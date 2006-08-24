@@ -125,7 +125,7 @@ fsave( F2, "% Trigger position = #\n", int( trig_pos * Rec_len ) );
 fsave( F2, "% Time base        = # ns\n", time_base * 1.0e-9 );
 fsave( F2, "%Sensitivity       = # mV\n",
        1.0e3 * digitizer_sensitivity( Channel ) );
-fsave( F2, "% Field            = # G\n", measure_field( ) );
+fsave( F2, "% Field            = # G\n", gaussmeter_field( ) );
 save_comment( F2, "% ", "Sample: \nMicrowave frequency: \n"
               "Microwave power: \nTemperature: \n" );
 

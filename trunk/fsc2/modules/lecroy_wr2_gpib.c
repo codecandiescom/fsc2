@@ -538,8 +538,8 @@ int lecroy_wr2_get_coupling( int channel )
                "automatically disconnected.\n",
                LECROY_WR2_Channel_Names[ channel ] );
     }
-
-    fsc2_assert( type != LECROY_WR2_CPL_INVALID );  /* call me paranoid... */
+    else
+        fsc2_impossible( );
 
     return lecroy_wr2.coupling[ channel ] = type;
 }
@@ -603,8 +603,8 @@ int lecroy_wr2_get_bandwidth_limiter( int channel )
             mode = LECROY_WR2_BWL_ON;
         else if ( buf[ 0 ] == '2' )      /* 200MHZ */
             mode = LECROY_WR2_BWL_200MHZ;
-
-        fsc2_assert( mode >= 0 );
+        else
+            fsc2_impossible( );
 
         for ( i = 0; i <= LECROY_WR2_CH_MAX; i++ )
             lecroy_wr2.bandwidth_limiter[ i ] = mode;
@@ -637,8 +637,8 @@ int lecroy_wr2_get_bandwidth_limiter( int channel )
             mode = LECROY_WR2_BWL_ON;
         else if ( ptr[ 0 ] == '2' )      /* 200MHZ */
             mode = LECROY_WR2_BWL_200MHZ;
-
-        fsc2_assert( mode >= 0 );
+        else
+            fsc2_impossible( );
 
         lecroy_wr2.bandwidth_limiter[ ch ] = mode;
     } while ( ( ptr = strtok( NULL, delim ) ) != NULL );
@@ -764,8 +764,8 @@ int lecroy_wr2_get_trigger_source( void )
         src = LECROY_WR2_EXT10;
     else if ( *ptr == 'E' && ptr[ 2 ] != '1' )
         src = LECROY_WR2_EXT;
-
-    fsc2_assert( src != LECROY_WR2_UNDEF );
+    else
+        fsc2_impossible( );
 
     return lecroy_wr2.trigger_source = src;
 }
@@ -968,7 +968,7 @@ int lecroy_wr2_get_trigger_coupling( int channel )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     lecroy_wr2.trigger_coupling[ channel ] = cpl;
@@ -1032,7 +1032,7 @@ int lecroy_wr2_get_trigger_mode( void )
     else if ( buf[ 1 ] == 'T' )
         mode = LECROY_WR2_TRG_MODE_STOP;
     else
-        fsc2_assert( 1 == 0 );
+        fsc2_impossible( );
 
     return lecroy_wr2.trigger_mode = mode;
 }
@@ -1337,9 +1337,7 @@ static void lecroy_wr2_get_prep( int              ch,
         sprintf( ch_str, "T%c", ch - LECROY_WR2_TA + 'A' );
     }
     else
-    {
-        fsc2_assert( 1 == 0 );
-    }
+        fsc2_impossible( );
 
     /* Set up the number of points to be fetched */
 
@@ -1612,9 +1610,7 @@ static int lecroy_wr2_get_int_value( int          ch,
     else if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TD )
         sprintf( cmd, "T%c:INSP? '%s'", ch - LECROY_WR2_TA + 'A', name );
     else
-    {
-        fsc2_assert( 1 == 0 );
-    }
+        fsc2_impossible( );
 
     lecroy_wr2_talk( cmd, cmd, &length );
     cmd[ length - 1 ] = '\0';
@@ -1648,9 +1644,7 @@ static double lecroy_wr2_get_float_value( int          ch,
     else if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TD )
         sprintf( cmd, "T%c:INSP? '%s'", ch - LECROY_WR2_TA + 'A', name );
     else
-    {
-        fsc2_assert( 1 == 0 );
-    }
+        fsc2_impossible( );
 
     lecroy_wr2_talk( cmd, cmd, &length );
     cmd[ length - 1 ] = '\0';

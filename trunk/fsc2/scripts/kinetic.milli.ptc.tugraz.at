@@ -486,11 +486,11 @@ FOR I = 1 : N_runs {
 ";
 # === if START_FIELD <= END_FIELD
     if ( eval { $START_FIELD <= $END_FIELD } ) {
-        print $fh "            field = sweep_up( );
+        print $fh "            field = magnet_sweep_up( );
 ";
 # === else
     } else {
-        print $fh "            field = sweep_down( );
+        print $fh "            field = magnet_sweep_down( );
 ";
 # === endif
     }
@@ -504,7 +504,7 @@ FOR I = 1 : N_runs {
         clear_curve_1d( 1, 2 );
     }
     data = 0.0;
-    field = reset_field( );
+    field = magnet_reset_field( );
 }
 
 ON_STOP:

@@ -101,7 +101,7 @@ bool lecroy_ws_init( const char * name )
 
         /* Figure out which traces are displayed (only 4 can be displayed
            at the same time and we must be able to check for this when
-           th user asks for one more to be displayed) */
+           the user asks for one more to be displayed) */
 
         lecroy_ws.num_used_channels = 0;
 
@@ -538,8 +538,8 @@ int lecroy_ws_get_coupling( int channel )
                "automatically disconnected.\n",
                LECROY_WS_Channel_Names[ channel ] );
     }
-
-    fsc2_assert( type != LECROY_WS_CPL_INVALID );     /* call me paranoid... */
+    else
+        fsc2_impossible( );
 
     return lecroy_ws.coupling[ channel ] = type;
 }
@@ -607,8 +607,8 @@ int lecroy_ws_get_bandwidth_limiter( int channel )
     else if ( ptr[ 3 ] == '2' )      /* 200MHZ */
         mode = LECROY_WS_BWL_200MHZ;
 #endif
-
-    fsc2_assert( mode >= 0 );
+    else
+        fsc2_impossible( );
 
     lecroy_ws.bandwidth_limiter[ channel ] = mode;
 
@@ -661,7 +661,7 @@ int lecroy_ws_get_trigger_source( void )
 {
     char reply[ 100 ];
     ssize_t len = 100;
-    int src = LECROY_WS_UNDEF;
+    int src;
     char *ptr = reply + 7;
 
 
@@ -688,8 +688,8 @@ int lecroy_ws_get_trigger_source( void )
         src = LECROY_WS_EXT10;
     else if ( *ptr == 'E' && ptr[ 2 ] != '1' )
         src = LECROY_WS_EXT;
-
-    fsc2_assert( src != LECROY_WS_UNDEF );
+    else
+        fsc2_impossible( );
 
     return lecroy_ws.trigger_source = src;
 }
@@ -899,7 +899,7 @@ int lecroy_ws_get_trigger_coupling( int channel )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     lecroy_ws.trigger_coupling[ channel ] = cpl;
@@ -965,7 +965,7 @@ int lecroy_ws_get_trigger_mode( void )
     else if ( buf[ 1 ] == 'T' )
         mode = LECROY_WS_TRG_MODE_STOP;
     else
-        fsc2_assert( 1 == 0 );
+        fsc2_impossible( );
 
     return lecroy_ws.trigger_mode = mode;
 }
@@ -1343,7 +1343,7 @@ static bool lecroy_ws_can_fetch( int ch )
         return lecroy_ws_get_int_value( ch, "SWEEPS_PER_ACQ" ) >=
                                                        lecroy_ws.num_avg[ ch ];
 
-    fsc2_assert( 1 == 0 );
+    fsc2_impossible( );
     return FALSE;
 }
 
@@ -1582,9 +1582,7 @@ static long lecroy_ws_get_int_value( int          ch,
     else if ( ch == LECROY_WS_MATH )
         sprintf( cmd, "F1:INSP? '%s'\n", name );
     else
-    {
-        fsc2_assert( 1 == 0 );
-    }
+        fsc2_impossible( );
 
     if ( lecroy_ws_talk( cmd, cmd, &len ) != SUCCESS )
         lecroy_ws_lan_failure( );
@@ -1617,9 +1615,7 @@ static double lecroy_ws_get_float_value( int          ch,
     else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
         sprintf( cmd, "M%c:INSP? '%s'\n", ch - LECROY_WS_M1 + 1, name );
     else
-    {
-        fsc2_assert( 1 == 0 );
-    }
+        fsc2_impossible( );
 
     if ( lecroy_ws_talk( cmd, cmd, &len ) != SUCCESS )
         lecroy_ws_lan_failure( );

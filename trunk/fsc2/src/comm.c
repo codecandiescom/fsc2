@@ -1070,7 +1070,7 @@ static bool parent_reader( Comm_Struct_T * header )
             break;
 
         default :                     /* this better never gets triggered... */
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return OK;
@@ -1200,7 +1200,7 @@ static bool child_reader( void *          ret,
             return ( header->data.long_data != 0 ? OK : FAIL );
     }
 
-    fsc2_assert( 1 == 0 );            /* this better never gets triggered... */
+    fsc2_impossible( );            /* this better never gets triggered... */
     return FAIL;
 }
 
@@ -1416,7 +1416,7 @@ bool writer( int type,
 
             default :                     /* this should never be reached... */
                 va_end( ap );
-                fsc2_assert( 1 == 0 );
+                fsc2_impossible( );
         }
     }
     else                   /* if this is the parent process */
@@ -1527,7 +1527,7 @@ bool writer( int type,
 
             default :                     /* this should never be reached... */
                 va_end( ap );
-                fsc2_assert( 1 == 0 );
+                fsc2_impossible( );
         }
     }
 

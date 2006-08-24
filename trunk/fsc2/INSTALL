@@ -99,12 +99,14 @@ site anymore send me an email, I still have a copy of it around somewhere.
 
 From the documentations of the LLP and SLG libraries and the one I have
 written it should already be clear that a GPIB configuration file (that
-is typically '/etc/gpib.conf') is required, in which all devices to be
-used with are listed with their respetive properties.
+is typically '/etc/gpib.conf') is required for the accompanying libraries
+to work correctly, in which all devices to be used with are listed with
+their respetive properties.
 
-But also for the NI library fsc2 expects such a configuration file (instead
-of using the configuration method native to the GPIB library). A typical
-entry in this file looks like the following
+For the NI libraries the GPIB library doesn't need such a configuration file,
+but fsc2 does. So you have to create one, following the conventions used in
+the configuration files for the LLP library, which I also (mostly) used for
+my library). A typical entry in this file looks like the following
 
 device {
         name        = "TDS744A"
@@ -152,12 +154,14 @@ device controlling the GPIB bus and 'file' sets the name of the device
 file used for the board.
 
 Only the LLP and SLG libraries supports cards from companies other than
-National Instruments. You may also compile fsc2 without having a GPIB library,
-but then devices controlled via the GPIB bus can't be used for obvious
-reasons.
+National Instruments (actually, I have been told that my driver for ISA
+GPIB cards also works with those from some other companies but I haven't
+been able to check that). You may also compile fsc2 without having a GPIB
+library, but then devices controlled via the GPIB bus can't be used for
+obvious reasons.
 
 Please make sure that the GPIB library you want to use is already compiled
-and installed before trying to compile fsc2 (unless you don't need GPIB
+and installed _before_ trying to compile fsc2 (unless you don't need GPIB
 support built into fsc2).
 
 
@@ -302,20 +306,35 @@ The variable DEF_INCL_DIR sets a default directory for EDL include files
 
 
 The next lines are for setting the GPIB library that you are going to use.
-You may set the first variable, GPIB_LIBRARY either to LLP for the old
-(Linux Lab Project) library, to NI when using the National Instruments
-library or to JTT if you're using the library I wrote. If you don't want
-GPIB support you also may set this variable to NONE. In this case fsc2
-won't be able to run experiments requiring devices that are controlled
-via the GPIB bus (but you still can test such EDL programs). Use this
-option only if you either want to built a test version or if all your
-devices are controlled via other means (i.e via serial ports or are PCI
-or ISA cards or the Rulbus).
+You may set the first variable, GPIB_LIBRARY either to
+
+  LLP     for the old (Linux Lab Project) library, 
+  NI      for the newer National Instruments library (but up until know
+          I haven't got that to work correctly),
+  NI_OLD  for the old National Instruments library (you can distinguish
+          them from the include file they install, if it is ni488.h then
+          it's the newer version, if it's ugpib.h it's the older one)
+  SLG     for the updated version of the LLP library, now hosted on
+          SourceForge
+  JTT     for the library I wrote for some ISA GPIB cards
+  NONE    if you don't use any GPIB cards
+
+In the last case fsc2 won't be able to run experiments requiring devices
+that are controlled via the GPIB bus (but you still can test such EDL
+programs). Use this option only if you either want to built a test
+version or if all your devices are controlled via other means (i.e via
+serial ports, are PCI or ISA cards, Rulbus devices or are controlled
+via the LAN).
+
+If you use the SourceForge driver and library you also may have to define
+the name of the GPIB card as it is set in the GPIB configuration file
+by defining the variable GPB_CARD_NAME (the default is "gpib0").
 
 
 If you use the National Instruments GPIB driver you can set the location
-where fsc2 will expect the GPIB configuration file, gpib.conf. But usually
-there is no reason to change the default value which is /etc/gpib.conf.
+where fsc2 will expect the GPIB configuration file, gpib.conf (in all
+other cases fsc2 doesn|t need to know about this file). But usually there
+is no reason to change the default value, which is /etc/gpib.conf.
 
 
 While running fsc2 may write out information about the activity on the
@@ -515,7 +534,7 @@ Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
 still in fsc2's main directory) and click on the "Start" button to get an
 idea about how fsc2 displays 1- and 2-dimensional data sets.
 
-    July 5, 2006                        Much luck, Jens
+    August 25, 2006                        Much luck, Jens
 
 --
   \   Jens Thoms Toerring  ___    jt@toerring.de

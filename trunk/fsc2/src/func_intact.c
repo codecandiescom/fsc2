@@ -556,7 +556,7 @@ static void f_objdel_parent( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 }
 
@@ -1115,8 +1115,7 @@ static FL_OBJECT *append_object_to_form( Iobject_T * io,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
-            break;
+            fsc2_impossible( );
     }
 
     /* Return the maximum width and height of all objects (plus a bit for
@@ -1890,8 +1889,7 @@ static void tools_callback( FL_OBJECT * obj,
             break;
 
         default :                 /* this can never happen :) */
-            fsc2_assert( 1 == 0 );
-            break;
+            fsc2_impossible( );
     }
 }
 

@@ -373,7 +373,7 @@ int rs_sml01_set_mod_type( int type )
             break;
 
         default :                         /* should never happen... */
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return type;
@@ -438,7 +438,7 @@ int rs_sml01_set_mod_source( int    type,
             break;
 
         default :                         /* this can never happen... */
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     rs_sml01_command( cmd );
@@ -517,7 +517,7 @@ double rs_sml01_set_mod_ampl( int    type,
             break;
 
         default :                         /* this can never happen... */
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     rs_sml01_command( cmd );

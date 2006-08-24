@@ -513,7 +513,7 @@ save_comment( \"% \" );
 save_program( \"% \", \"Sample:  \\nMicrowave frequency:  \\n\"
               \"Microwave power:  \\nTemperature:  \\n\" );\n\n";
 
-print F "act_field = set_field( start_field );\n"
+print F "act_field = magnet_field( start_field );\n"
 	if $sweep_method eq 'tested';
 print F "tc = lockin_time_constant( );\n\n" if $tc eq "Don't set";
 if ( $num_runs != 1 ) {
@@ -560,9 +560,9 @@ if ( $num_runs != 1 ) {
 	print F "
 		IF ( I < N_points ) \{\n\t\t\t";
 	if ( $sweep_method eq 'simple' ) {
-		print F "sweep_up( );";
+		print F "magnet_sweep_up( );";
 	} else {
-		print F "act_field = set_field( start_field + I * field_step, " .
+		print F "act_field = magnet_field( start_field + I * field_step, " .
 			"field_error );";
 	}
 	print F "
@@ -592,9 +592,9 @@ if ( $num_runs != 1 ) {
 	fsave( \"\\n\" );
 	IF ( J < N_runs ) \{\n\t\t";
 	if ( $sweep_method eq 'simple' ) {
-		print F	"reset_field( );";
+		print F	"magnet_reset_field( );";
 	} else {
-		print F "act_field = set_field( start_field );";
+		print F "act_field = magnet_field( start_field );";
 	}
 	print F "
 		wait( ";
@@ -644,9 +644,9 @@ if ( $two_phases =~ /^X only$/ ) {
 }
 print F "\tIF ( I < N_points ) \{\n\t\t";
 if ( $sweep_method eq 'simple' ) {
-	print F "sweep_up( );";
+	print F "magnet_sweep_up( );";
 } else {
-	print F "act_field = set_field( start_field + I * field_step, field_error );";
+	print F "act_field = magnet_field( start_field + I * field_step, field_error );";
 }
 print F "
 		wait( ";

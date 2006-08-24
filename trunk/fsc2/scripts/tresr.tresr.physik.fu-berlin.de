@@ -572,7 +572,7 @@ FOREVER {
 
     print $fh "	    }
 
-		field = sweep_up( );
+		field = magnet_sweep_up( );
 
 		/* Calculate the mean of the data points before the trigger for the
 		   elimination of baseline drifts */
@@ -651,7 +651,7 @@ FOREVER {
 
 	mdata = add_to_average( mdata, data, K );
 
-	reset_field( );
+	magnet_field( );
 	field = start_field;
 
 	Scans_Done += 1;                      // Update the number of scans done

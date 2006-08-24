@@ -93,7 +93,7 @@ void vars_assign( Var_T * src,
          ! ( src->type & ( INT_VAR | FLOAT_VAR |
                            INT_ARR | FLOAT_ARR |
                            INT_REF | FLOAT_REF ) ) )
-        fsc2_assert( 1 == 0 );
+        fsc2_impossible( );
 #endif
 
     /* First we distinguish between the different possible types of variables
@@ -114,7 +114,7 @@ void vars_assign( Var_T * src,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 
     vars_pop( dest );
@@ -171,7 +171,7 @@ static long vars_assign_to_1d( Var_T * src,
                     break;
 
                 default :
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
             break;
 
@@ -199,12 +199,12 @@ static long vars_assign_to_1d( Var_T * src,
                     break;
 
                 default :
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return 1;
@@ -240,7 +240,7 @@ static long vars_assign_to_nd( Var_T * src,
                     break;
 
                 default :
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
             break;
 
@@ -263,12 +263,12 @@ static long vars_assign_to_nd( Var_T * src,
                     break;
 
                 default :
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 
     return count;

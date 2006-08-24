@@ -47,7 +47,7 @@ FOR J = 1 : N_runs {
 		display( I, ( data[ I ] + new_data[ I ] ) / float( J ), 1 );
 		display( I, new_data[ I ], 3 );
 
-		sweep_up( );
+		magnet_sweep_up( );
 		wait( tc );
 	}
 
@@ -58,7 +58,7 @@ FOR J = 1 : N_runs {
 		 display( I, data[ I ] / float( J ), 2 );
 	}
         fsave( "\n" );
-	reset_field( );
+	magnet_reset_field( );
 }
 
 ON_STOP:

@@ -895,7 +895,7 @@ static Var_T *ni6601_get_data( long   to_fetch,
                     break;
 
                 default :
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
 
             THROW( EXCEPTION );

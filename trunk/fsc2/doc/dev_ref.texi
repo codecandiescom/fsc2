@@ -133,11 +133,15 @@ with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
 @item @ref{magnet_fast_init()}
-@item @ref{set_field()}
-@item @ref{get_field()}
-@item @ref{sweep_up()}
-@item @ref{sweep_down()}
-@item @ref{reset_field()}
+@item @ref{magnet_field()}
+@item @ref{magnet_sweep_up()}
+@item @ref{magnet_sweep_down()}
+@item @ref{magnet_reset_field()}
+@item @ref{set_field()} (deprecated)
+@item @ref{get_field()} (deprecated)
+@item @ref{sweep_up()} (deprecated)
+@item @ref{sweep_down()} (deprecated)
+@item @ref{reset_field()} (deprecated)
 @end table
 
 
@@ -177,11 +181,15 @@ to @w{19900 G}, with @code{bh15} range is @w{-50 G} to @w{23000 G}.
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
 @item @ref{magnet_fast_init()}
-@item @ref{set_field()}
-@item @ref{get_field()}
-@item @ref{sweep_up()}
-@item @ref{sweep_down()}
-@item @ref{reset_field()}
+@item @ref{magnet_field()}
+@item @ref{magnet_sweep_up()}
+@item @ref{magnet_sweep_down()}
+@item @ref{magnet_reset_field()}
+@item @ref{set_field()}  (deprecated)
+@item @ref{get_field()} (deprecated)
+@item @ref{sweep_up()} (deprecated)
+@item @ref{sweep_down()} (deprecated)
+@item @ref{reset_field()} (deprecated)
 @end table
 
 
@@ -216,8 +224,8 @@ character, set @code{set-reos}, @code{set-xeos} to @code{yes} and
 @table @samp
 @item @ref{gaussmeter_name()}
 @item @ref{gaussmeter_field()}
-@item @ref{find_field()}
 @item @ref{gaussmeter_resolution()}
+@item @ref{find_field()} (deprecated)
 @item gaussmeter_wait()
 @end table
 
@@ -571,11 +579,15 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @table @samp
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
-@item @ref{set_field()}
-@item @ref{get_field()}
-@item @ref{sweep_up()}
-@item @ref{sweep_down()}
-@item @ref{reset_field()}
+@item @ref{magnet_field()}
+@item @ref{magnet_sweep_up()}
+@item @ref{magnet_sweep_down()}
+@item @ref{magnet_reset_field()}
+@item @ref{set_field()} (deprecated)
+@item @ref{get_field()} (deprecated)
+@item @ref{sweep_up()} (deprecated)
+@item @ref{sweep_down()} (deprecated)
+@item @ref{reset_field()} (deprecated)
 @end table
 
 
@@ -611,11 +623,11 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @table @samp
 @item @ref{gaussmeter_name()}
 @item @ref{gaussmeter_field()}
-@item @ref{find_field()}
 @item @ref{gaussmeter_resolution()}
 @item @ref{gaussmeter_probe_orientation()}
 @item @ref{gaussmeter_upper_search_limit()}
 @item @ref{gaussmeter_lower_search_limit()}
+@item @ref{find_field()} (deprecated)
 @item gaussmeter_wait()
 @end table
 
@@ -649,11 +661,11 @@ with @code{F1} probe the range is @w{1460 G} to @w{19900 G}.
 @table @samp
 @item @ref{gaussmeter_name()}
 @item @ref{gaussmeter_field()}
-@item @ref{find_field()}
 @item @ref{gaussmeter_resolution()}
 @item @ref{gaussmeter_probe_orientation()}
 @item @ref{gaussmeter_upper_search_limit()}
 @item @ref{gaussmeter_lower_search_limit()}
+@item @ref{find_field()} (deprecated)
 @item gaussmeter_wait()
 @end table
 
@@ -1113,13 +1125,17 @@ and AD converter can't be used, it gets reserved automatically for this module.
 @table @samp
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
-@item @ref{set_field()}
-@item @ref{sweep_up()}
-@item @ref{sweep_down()}
-@item @ref{reset_field()}
+@item @ref{magnet_field()}
+@item @ref{magnet_sweep_up()}
+@item @ref{magnet_sweep_up()}
+@item @ref{magnet_reset_field()}
 @item @ref{magnet_B0()}
 @item @ref{magnet_slope()}
 @item @ref{magnet_calibration_file()}
+@item @ref{set_field()} (deprecated)
+@item @ref{sweep_up()} (deprecated)
+@item @ref{sweep_down()} (deprecated)
+@item @ref{reset_field()} (deprecated)
 @end table
 
 
@@ -1203,12 +1219,14 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @table @samp
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
-@item @ref{get_field()}
-@item @ref{set_field()}
+@item @ref{magnet_field()}
+@item @ref{magnet_reset_field()}
 @item @ref{magnet_sweep_rate()}
 @item @ref{magnet_sweep()}
-@item @ref{reset_field()}
 @item @ref{magnet_goto_field_on_end()}
+@item @ref{set_field()} (deprecated)
+@item @ref{get_field()} (deprecated)
+@item @ref{reset_field()} (deprecated)
 @end table
 
 
@@ -1242,12 +1260,14 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @table @samp
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
-@item @ref{get_field()}
-@item @ref{set_field()}
+@item @ref{magnet_field()}
+@item @ref{magnet_reset_field()}
 @item @ref{magnet_sweep_rate()}
 @item @ref{magnet_sweep()}
-@item @ref{reset_field()}
 @item @ref{magnet_goto_field_on_end()}
+@item @ref{get_field()} (deprecated)
+@item @ref{set_field()} (deprecated)
+@item @ref{reset_field()} (deprecated)
 @end table
 
 
@@ -1293,12 +1313,14 @@ between @code{RS232C} and @code{IEEE488} is employed).
 @table @samp
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
-@item @ref{get_field()}
-@item @ref{set_field()}
+@item @ref{magnet_field()}
+@item @ref{magnet_reset_field()}
 @item @ref{magnet_sweep_rate()}
 @item @ref{magnet_sweep()}
-@item @ref{reset_field()}
 @item @ref{magnet_goto_field_on_end()}
+@item @ref{get_field()} (deprecated)
+@item @ref{set_field()} (deprecated)
+@item @ref{reset_field()} (deprecated)
 @end table
 
 
@@ -1381,13 +1403,17 @@ character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
 @table @samp
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
+@item @ref{magnet_field()}
+@item @ref{magnet_sweep_up()}
+@item @ref{magnet_sweep_down()}
+@item @ref{magnet_reset_field()}
 @item @ref{magnet_use_correction()}
 @item @ref{magnet_use_dac_port()}
-@item @ref{set_field()}
-@item @ref{get_field()}
-@item @ref{sweep_up()}
-@item @ref{sweep_down()}
-@item @ref{reset_field()}
+@item @ref{set_field()} (deprecated)
+@item @ref{get_field()} (deprecated)
+@item @ref{sweep_up()} (deprecated)
+@item @ref{sweep_down()} (deprecated)
+@item @ref{reset_field()} (deprecated)
 @end table
 
 
@@ -2519,12 +2545,16 @@ with a resolution of @w{0.5 G}.
 @table @samp
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
-@item @ref{set_field()}
-@item @ref{get_field()}
-@item @ref{sweep_up()}
-@item @ref{sweep_down()}
-@item @ref{reset_field()}
+@item @ref{magnet_field()}
+@item @ref{magnet_sweep_up()}
+@item @ref{magnet_sweep_down()}
+@item @ref{magnet_reset_field()}
 @item @ref{magnet_goto_field_on_end()}
+@item @ref{set_field()} (deprecated)
+@item @ref{get_field()} (deprecated)
+@item @ref{sweep_up()} (deprecated)
+@item @ref{sweep_down()} (deprecated)
+@item @ref{reset_field()} (deprecated)
 @end table
 
 
@@ -2557,12 +2587,16 @@ with a resolution of @w{0.1 G}.
 @table @samp
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
-@item @ref{set_field()}
-@item @ref{get_field()}
-@item @ref{sweep_up()}
-@item @ref{sweep_down()}
-@item @ref{reset_field()}
+@item @ref{magnet_field()}
+@item @ref{magnet_reset_field()}
+@item @ref{magnet_sweep_up()}
+@item @ref{magnet_sweep_down()}
 @item @ref{magnet_goto_field_on_end()}
+@item @ref{set_field()} (deprecated)
+@item @ref{get_field()} (deprecated)
+@item @ref{sweep_up()} (deprecated)
+@item @ref{sweep_down()} (deprecated)
+@item @ref{reset_field()} (deprecated)
 @end table
 
 

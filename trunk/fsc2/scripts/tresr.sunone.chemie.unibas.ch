@@ -255,7 +255,7 @@ save_program( F2 );\n\n";
 
 if ( $no_ranges > 1 ) {
     print F "FOR K = 1 : $no_ranges {
-	set_field( start_field[ K ] );
+	magnet_field( start_field[ K ] );
 	field = start_field[ K ];
 	WHILE ( start_field[ K ] <= end_field[ K ] & field <= end_field[ K ] ) |
           ( start_field[ K ] >  end_field[ K ] & field >= start_field[ K ] ) {
@@ -264,9 +264,9 @@ if ( $no_ranges > 1 ) {
 		display( 1, round( ( field - min_field ) / field_step ) + 1,
 			     data );
 		IF start_field[ K ] <= end_field[ K ] {
-	    	field = sweep_up( );
+	    	field = magnet_sweep_up( );
 		} ELSE {
-	    	field = sweep_down( );
+	    	field = magnet_sweep_down( );
 		}
 		FOR J = 1 : size( data ) {
 		    fsave( F1, \"# \", data[ J ] );
@@ -284,9 +284,9 @@ if ( $no_ranges > 1 ) {
 	data = digitizer_get_curve( FUNC_E );
 	display( 1, round( ( field - min_field ) / field_step ) + 1, data );\n";
 	if ( $rsf[ 0 ] <= $ref[ 0 ] ) {
-		print F "	field = sweep_up( );\n";
+		print F "	field = magnet_sweep_up( );\n";
 	} else {
-		print F "	field = sweep_down( );\n";
+		print F "	field = magnet_sweep_down( );\n";
 	}
 	print F "    FOR J = 1 : size( data ) {
 		fsave( F1, \"# \", data[ J ] );

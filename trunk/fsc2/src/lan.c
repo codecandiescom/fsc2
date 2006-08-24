@@ -124,7 +124,6 @@ int fsc2_lan_open( const char * dev_name,
        section */
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
                  Fsc2_Internals.mode == EXPERIMENT );
 
     fsc2_assert( dev_name != NULL );

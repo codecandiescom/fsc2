@@ -531,7 +531,7 @@ bool dg2020_set_phase_reference( int phase,
 
     /* First a sanity check... */
 
-    fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phase ) : 1 );
+    fsc2_assert( Cur_PHS != -1 && Cur_PHS == phase );
 
     /* The phase function can't be phase cycled... */
 
@@ -589,7 +589,7 @@ bool dg2020_phase_setup_prep( int  func,
 {
     /* First a sanity check... */
 
-    fsc2_assert( Cur_PHS != - 1 ? ( Cur_PHS == func ) : 1 );
+    fsc2_assert( Cur_PHS == -1 || Cur_PHS == func );
     fsc2_assert( func == 0 || func == 1 );
     fsc2_assert( pod >= -1 && pod <= 1 );
 

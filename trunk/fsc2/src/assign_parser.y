@@ -694,8 +694,8 @@ static void ass_func( int function )
     }
 
     /* The other alternative is that we're dealing with a pulser with no
-       phase switches. In this cas Cur_PHS must be set to the number of
-       the Phase_SETUP (i.e. 0 or 1 for the first or second PHASE_SETUP) */
+       phase switches. In this case Cur_PHS must be set to the number of
+       the PHASE_SETUP (i.e. 0 or 1 for the first or second PHASE_SETUP) */
 
     if ( ! Pulser_Struct[ Cur_Pulser ].needs_phase_pulses &&
          Cur_PHS != -1 )

@@ -15,6 +15,7 @@ ifeq ($(KERNEL_VERSION),$(shell echo $(KERNEL_VERSION) | sed -e 's/^2\.6\.//'))
 else
 	GPIB_LIBRARY       := SLG
 	GPIB_HEADER_DIR    := /usr/local/include/gpib
+	GPIB_CARD_NAME     .= "gpib0"
 endif
 
 BROWSER            := mozilla

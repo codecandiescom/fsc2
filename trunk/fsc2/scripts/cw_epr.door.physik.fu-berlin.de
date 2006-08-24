@@ -433,7 +433,7 @@ print F "
 		         I, new_data[ I ], 3 );
 
 		IF ( I < N_points ) \{\n\t\t\t";
-	print F "sweep_up( );";
+	print F "magnet_sweep_up( );";
 print F "
 			wait( ";
 print F "$tc_fact * " if $tc_fact != 1;
@@ -447,7 +447,7 @@ print F "tc );
 
 	fsave( \"\\n\" );
 	IF ( J < N_runs ) \{\n\t\t";
-	print F	"reset_field( );";
+	print F	"magnet_reset_field( );";
 print F "
 		wait( ";
 print F "$tc_fact * " if $tc_fact != 1;
@@ -472,7 +472,7 @@ print F "fsave( \"# #\\n\", " .
 print F "
 	display( I, data[ I ] );
 	IF ( I < N_points ) \{\n\t\t";
-	print F "sweep_up( );";
+	print F "magnet_sweep_up( );";
 print F "
 		wait( ";
 print F "$tc_fact * " if $tc_fact != 1;

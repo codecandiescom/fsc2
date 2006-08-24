@@ -41,14 +41,16 @@ int aeg_x_band_test_hook(       void );
 int aeg_x_band_exp_hook(        void );
 int aeg_x_band_end_of_exp_hook( void );
 
-Var_T *magnet_name(      Var_T * v );
-Var_T *magnet_setup(     Var_T * v );
-Var_T *magnet_fast_init( Var_T * v );
-Var_T *set_field(        Var_T * v );
-Var_T *get_field(        Var_T * v );
-Var_T *sweep_up(         Var_T * v );
-Var_T *sweep_down(       Var_T * v );
-Var_T *reset_field(      Var_T * v );
+Var_T *magnet_name(        Var_T * v );
+Var_T *magnet_setup(       Var_T * v );
+Var_T *magnet_fast_init(   Var_T * v );
+Var_T *magnet_field(       Var_T * v );
+Var_T *set_field(          Var_T * v );
+Var_T *get_field(          Var_T * v );
+Var_T *sweep_up(           Var_T * v );
+Var_T *sweep_down(         Var_T * v );
+Var_T *reset_field(        Var_T * v );
+Var_T *magnet_reset_field( Var_T * v );
 
 
 
@@ -345,6 +347,15 @@ Var_T *magnet_fast_init( Var_T * v  UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
+Var_T *magnet_field( Var_T * v )
+{
+    return v == NULL ? get_field( v ) : set_field( v );
+}
+
+
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
+
 Var_T *set_field( Var_T * v )
 {
     double field;
@@ -472,6 +483,15 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 
     magnet_sweep( -1 );
     return vars_push( FLOAT_VAR, magnet.act_field );
+}
+
+
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
+
+Var_T *magnet_reset_field( Var_T * v  UNUSED_ARG )
+{
+    return reset_field( v );
 }
 
 

@@ -91,7 +91,7 @@ init_1d( );
 
 EXPERIMENT:
 
-set_field( act_current );
+magnet_field( act_current );
 digitizer_lock_keyboard( 0 );
 
 layout( "VERT" );
@@ -133,7 +133,7 @@ FOREVER
 		}
 		ELSE
 		{
-			set_field( new_current );
+			magnet_field( new_current );
 			current = new_current;
 			act_current = new_current;
 			output_value( CDF, act_current );
@@ -168,7 +168,7 @@ FOREVER
 			NEXT;
 		}
 
-		act_current = set_field( act_current + current_step );
+		act_current = magnet_field( act_current + current_step );
 		output_value( CDF, act_current );
 	}
 
@@ -183,7 +183,7 @@ FOREVER
 			NEXT;
 		}
 
-		act_current = set_field( act_current - current_step );
+		act_current = magnet_field( act_current - current_step );
 		output_value( CDF, act_current );
 	}
 

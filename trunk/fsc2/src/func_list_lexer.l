@@ -470,8 +470,7 @@ static void fll_get_functions( Func_T * fncts,
                 break;
 
             default:                             /* this can never happen... */
-                fsc2_assert( 1 == 0 );
-                break;
+                fsc2_impossible( );
         }
     }
 }

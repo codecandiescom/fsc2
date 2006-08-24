@@ -154,7 +154,7 @@ int lecroy9400_get_trigger_source( void )
 {
     char reply[ 30 ];
     long length = 30;
-    int src = LECROY9400_UNDEF;
+    int src;
 
 
     lecroy9400_talk( "TRD,?\n", reply, &length );
@@ -165,8 +165,8 @@ int lecroy9400_get_trigger_source( void )
         src = LECROY9400_LIN;
     else if ( reply[ 0 ] == 'E' )
         src = reply[ 1 ] == 'X' ? LECROY9400_EXT : LECROY9400_EXT10;
-
-    fsc2_assert( src != LECROY9400_UNDEF );
+    else
+        fsc2_impossible( );
 
     return src;
 }
@@ -324,7 +324,7 @@ bool lecroy9400_set_offset( int channel, double offset )
 int lecroy9400_get_coupling( int channel )
 {
     char cmd[ 20 ];
-    int type = INVALID_COUPL;
+    int type;
     char reply[ 100 ];
     long length = 100;
 
@@ -341,8 +341,6 @@ int lecroy9400_get_coupling( int channel )
         type = DC_1_MOHM;
     else
         type = DC_50_OHM;
-
-    fsc2_assert( type != INVALID_COUPL );    /* call me paranoid... */
 
     return type;
 }

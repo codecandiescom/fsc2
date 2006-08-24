@@ -105,7 +105,6 @@ struct termios *fsc2_serial_open( int          sn        UNUSED_ARG,
        section */
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
                  Fsc2_Internals.mode == EXPERIMENT );
 
     errno = EACCES;

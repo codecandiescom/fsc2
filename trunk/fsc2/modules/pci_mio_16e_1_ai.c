@@ -837,7 +837,7 @@ static void pci_mio_16e_1_ai_get_trigger_args( Var_T * v )
             
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     too_many_arguments( v );

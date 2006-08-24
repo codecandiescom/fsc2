@@ -74,7 +74,7 @@ Ticks hfs9000_double2ticks( double p_time )
 double hfs9000_ticks2double( Ticks ticks )
 {
     fsc2_assert( hfs9000.is_timebase );
-    return ( double ) ( hfs9000.timebase * ticks );
+    return hfs9000.timebase * ticks;
 }
 
 

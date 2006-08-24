@@ -404,8 +404,6 @@ static void itc503_lock( int state )
     const char *cmd = NULL;
 
 
-    fsc2_assert( state >= LOCAL_AND_LOCKED && state <= REMOTE_AND_UNLOCKED );
-
     switch ( state )
     {
         case LOCAL_AND_LOCKED :
@@ -423,6 +421,9 @@ static void itc503_lock( int state )
         case REMOTE_AND_UNLOCKED :
             cmd = "C3\r";
             break;
+
+        default :
+            fsc2_impossible( );
     }
 
     itc503_command( cmd );

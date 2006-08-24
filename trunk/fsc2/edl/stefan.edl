@@ -217,14 +217,14 @@ FOR K = 1 : N_runs {
        
 		// Check the field position
 
-        set_field( start_field + ( K - 1 ) * field_step );
+        magnet_field( start_field + ( K - 1 ) * field_step );
 
         clear_curve( 1 );
 
 		pulser_update( );
     }
 
-    set_field( start_field + K * field_step );
+    magnet_field( start_field + K * field_step );
 
     pulser_pulse_reset( );
 	pulser_update( );

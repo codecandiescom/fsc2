@@ -554,7 +554,7 @@ EXPERIMENT:
     print $fh "
 /* Go to the field */
 
-set_field( field );
+magnet_field( field );
 
 /* Open the data file, ask user for comment to be written to it and the
    output the parameter to it */

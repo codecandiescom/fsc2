@@ -840,7 +840,7 @@ Var_T *synthesizer_modulation( Var_T * v )
                     break;
 
                 default :                 /* this definitely can't happen... */
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
         }
         set |= ( 1 << res );
@@ -1321,7 +1321,7 @@ Var_T *synthesizer_mod_ampl( Var_T * v )
             break;
 
         default :                         /* this can never happen... */
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     if ( FSC2_MODE == EXPERIMENT )

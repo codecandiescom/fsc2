@@ -342,7 +342,7 @@ int hp864_tmpl_set_mod_source( int type,
             break;
 
         default :                         /* this can never happen... */
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     hp864_tmpl_command( cmd1 );
@@ -420,7 +420,7 @@ double hp864_tmpl_set_mod_ampl( int    type,
             break;
 
         default :                         /* this can never happen... */
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     hp864_tmpl_command( cmd );

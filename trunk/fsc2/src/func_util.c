@@ -224,7 +224,7 @@ Var_T *f_print( Var_T * v )
                         break;
 
                     default :
-                        fsc2_assert( 1 == 0 );
+                        fsc2_impossible( );
                 }
 
             cv = cv->next;
@@ -424,7 +424,7 @@ Var_T *f_sprint( Var_T * v )
                     break;
 
                 default :
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
 
             cv = cv->next;

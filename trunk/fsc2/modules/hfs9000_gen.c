@@ -303,7 +303,6 @@ bool hfs9000_set_trigger_mode( int mode )
 {
     fsc2_assert( mode == INTERNAL || mode == EXTERNAL );
 
-
     if ( hfs9000.is_trig_in_mode )
     {
         print( FATAL, "Trigger mode has already been set.\n" );

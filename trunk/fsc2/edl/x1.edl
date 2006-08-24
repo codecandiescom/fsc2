@@ -72,7 +72,7 @@ init_1d( 1, 1024, tau * 1e6, dtau * 1e6, "tau [ us ]",
 
 EXPERIMENT:
 
-set_field( 3400 G );
+magnet_field( 3400 G );
 
 // save_program( "% " );
 
@@ -106,7 +106,7 @@ FOR I = 1 : 1024 {
 
 
 	IF I % 64 {
-	   set_field( 3400 G );
+	    magnet_field( 3400 G );
 	}
 }
 

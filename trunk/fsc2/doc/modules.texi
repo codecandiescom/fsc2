@@ -1912,27 +1912,77 @@ on signals.  The function is actually nothing else than a wrapper around
 @code{nanosleep()}, so you can @code{nanosleep()} yourself if you prefer.
 
 
+@subsection Assertions
+@cindex assertions
+@findex @code{fsc2_assert()}
+@findex @code{fsc2_impossible()}
+
+At least during development it usually is helpful to also test for
+conditions that should never happen but may anyway due to bugs. In
+this case often the standard C macro @code{assert()} is used.
+@code{fsc2} comes with two variants of this macro, @code{fsc2_assert()}
+and @code{fsc2_impossible()}. The first one is basically identical to
+@code{assert()}, the only difference being that in case the assertions
+tests true not only a text, showing the the file and line number, gets
+printed to the standard error channel but also an email is sent
+(including the text of the currently running @code{EDL} script and some
+more relevant information) to whatever email address has been set
+during the installation as the one for receiving such mails about
+crashes and other fatal states of the program. The macro
+@code{fsc2_impossible()} is for the same purpose but doesn't take an
+expression as its argument, it is meant for situations in the code
+where one would end up in in a branch that (at least theoretically)
+can never be reached - e.g. if you test in a switch all possible cases
+you could add a @code{default:} case to catch a situation where you
+actually forgot about a possible case.
+
+If, as in the case of the @code{assert()} macro, the macro @code{NDEBUG}
+is defined (before you include @file{fsc2_module.h}) both functions don't
+do anything at all. You don't have to worry about cases where one of
+these macros is used as the only statement following for example an
+@code{else} like in
+@example
+    if ( x == 1 )
+        do_something_1( );
+    else if ( x == 2 )
+        do_something_2( );
+    else
+        fsc2_impossible( );
+@end example
+@noindent
+The macros are written in a way that they form an (empty)  block also when
+@code{NDEBUG} is defined.
+
+The only thing you've got to worry about with @code{fsc2_assert()} is the
+same thing you have to with the @code{assert()} macro: if the expression
+has side effects then the programs behaviour may differ depending on
+whether @code{NDBUG} is defined and you thus may have intoduced a Heisenbug.
+
+
 @subsection Error handling with exceptions
 @cindex exceptions
 
-One of the most important but also tedious things in programming is
-error handling. In order to make a program failsafe in every place where
-there is even the remotest chance something may go wrong one has to
-include error handling code everywhere. This is especially annoying
-within deeply nested function calls where the type of the error may have
-to "bubble up" several levels before it is finally can be dealt with.
+One of the most important but also most tedious things in programming is
+rigorous error handling. In order to make a program failsafe in every
+place where there is even the remotest chance something may go wrong
+one has to include error handling code everywhere. This is especially
+annoying when an error can happen with deeply nested function calls
+where the type of the error may have to "bubble up" several levels
+before it is finally can be dealt with.
 
-In order to alleviate this problem in @code{fsc2} there is a mechanism
-called exceptions@footnote{The basic ideas for the exceptions code came
-from an article by Peter Simons in the iX magazine
-(@uref{http://www.heise.de/ix/}), No. 5, 1998, pp. 160-162, but also
-several other people implemented similar solutions. My version has
-benefited quite a lot thanks to the very constructive criticism by Chris
-Torek (@email{nospam@@elf.eng.bsdi.com}) on @uref{news:comp.lang.c}.},
-similar to the mechanism in @code{C++} by the same name. An exception
-can be seen as a kind of flag that can be raised at any instance in the
-program and leads to the flow of control being transfered to a place were
-the error can be handled (another way to see it is as a non-local
+In order to alleviate this problem several newer programming languages
+like @code{C++} introduced a concept called "exceptions". Unfortunately,
+@code{C} doesn't have them but in @code{fsc2} I use a method to "fake"
+exceptions@footnote{The basic ideas for the exceptions code came from an
+article by Peter Simons in the iX magazine (@uref{http://www.heise.de/ix/}),
+No. 5, 1998, pp. 160-162, but also several other people implemented similar
+solutions. My version has benefited a lot from the very constructive
+criticism by Chris Torek (@email{nospam@@elf.eng.bsdi.com}) on
+@uref{news:comp.lang.c} (which isn't meant to say that he would be
+responsible for its shortcomings in any way).}. An exception can be seen
+as a kind of flag that can be raised at any instance in the program and
+leads to the flow of control being immediately transfered to a place were
+the error can be dealt with (another way to see it is as a non-local
 @code{goto} which knows all by itself were to go to).
 
 There's one restriction with @code{fsc2}'s exceptions: you may @strong{not}
@@ -1950,7 +2000,7 @@ if ( non_recoverable_error )
 @findex THROW()
 @findex EXCEPTION
 @noindent
-and @code{fsc2} will take care of all error handling and will stop a
+and @code{fsc2} will take care of all error handling and the stop the
 running experiment (or the test run). That's all you need to know about
 exceptions for nearly all cases that have to be dealt within modules.
 
@@ -1963,7 +2013,7 @@ don't have to care about catching exceptions, @code{fsc2} will do this
 for you. But in some situations you might prefer to do it yourself. So
 lets assume that you have a function @code{foo()} that might run into a
 non-recoverable error that can't be handled within the module itself.
-However you may need to do some cleaning-up before you pass it up to
+However you may still need to do some cleaning-up before you pass it up to
 @code{fsc2}. The following example demonstrates how to catch an exception
 in the calling function:
 @example
@@ -1995,17 +2045,17 @@ whatever type, there are more than the simply named @code{EXCEPTION}
 exception) gets thrown the flow of control is changed immediately from
 the function the exception is thrown in to the @code{CATCH()} line.
 
-@code{CATCH} can be used to catch a specific exception and you can have
-several of them for different types of exceptions listed one after the
-other. But because flow of control will be transferred to the
-@code{CATCH()} line on every possible type of exception, not only the
-one specified as the arguments of the @code{CATCH()} calls, a
+The @code{CATCH} section can be used to catch a specific exception and
+you can have several of them for different types of exceptions listed
+one after the other. But because flow of control will be transferred to
+the @code{CATCH()} line on every possible type of exception, not only
+the one specified as the arguments of the @code{CATCH()} calls, a
 @code{CATCH()} should always followed finally by an @code{OTHERWISE}
 (unless you are absolutely sure no other exceptions than the one you're
 catching could happen). The block following @code{OTHERWISE} will deal
 with all other exceptions not dealt by @code{CATCH()}.  Normally, you
-just will rethrow the exception you're not interested in or unable to
-handle yourself by calling @code{RETHROW()}.
+just will rethrow the exception you're not interested in or which you
+are unable to handle yourself by calling @code{RETHROW()}.
 
 In cases where you aren't interested in a special type of exception but
 want to catch every exception, e.g.@: to just do some cleaning up before
@@ -2034,7 +2084,7 @@ OUT_OF_MEMORY_EXCEPTION
 USER_BREAK_EXCEPTION
 @end example
 @noindent
-@code{EXCEPTION} is a kind of cacth-all exceptions not covered by the
+@code{EXCEPTION} is a kind of catch-all exceptions not covered by the
 other two types. @code{OUT_OF_MEMORY_EXCEPTION} gets only thrown by
 @code{fsc2}s special functions for memory allocation (see next section),
 so don't throw it yourself without a very good reason. A
@@ -2048,16 +2098,18 @@ void stop_on_user_request( void )
 @end example
 @noindent
 It will detect if the user has pressed the @code{STOP} button and, if
-she did, will throw an @code{USER_BREAK_EXCEPTION}. This works from
-all parts of the module except when running the @code{end_of_exp_hook}
-and @code{exit_hook} functions because these need to run without the
-user intervening.  Thus you must make sure that these clean-up functions
-don't call other functions that may rely on user intervention.
+she did, will throw an @code{USER_BREAK_EXCEPTION} all by itself. This
+works from all parts of the module except when running the
+@code{end_of_exp_hook} and @code{exit_hook} functions because these
+need to run without the user intervening.  Thus you must make sure
+that these clean-up functions don't call other functions that may rely
+on user intervention.
 
 
-But when you need to do some cleanup within the module when the
-@code{STOP} button has been pressed you can check if the button has been
-pressed by calling the function
+But if you don't want to use @code{stop_on_user_request()} but need to
+do some cleanup within the module when the @code{STOP} button has been
+pressed you can check if the button has been pressed by calling the
+function
 @example
 void check_user_request( void )
 @end example
@@ -2079,7 +2131,7 @@ an @code{USER_BREAK_EXCEPTION}.
 while ( 1 )                   /* loop forever */
 @{
     stop_on_user_request( );
-    fsc2_sleep( 100000, UNSET );   /* give the device a bit if time */
+    fsc2_sleep( 100000, UNSET );   /* give the device a bit of time */
 
     length = 40;
     if ( gpib_write( tds754a.device, "BUSY?\n", 6 ) == FAILURE ||
@@ -2636,8 +2688,8 @@ circumstances, depending on how the pulser module is supposed to work.
 If you are writing a module that has to create phase pulses
 automatically (and thus you have set the variable
 @code{needs_phase_pulses} in the pulser structure), this function will
-be called when in the definition of a phase function the function, the
-phase pulses will be used with, is set. That means if the @code{EDL}
+be called when in the definition of a phase function the function the
+phase pulses will be used with is set. That means if the @code{EDL}
 script contains a line like
 @example
 ASSIGNMENTS:

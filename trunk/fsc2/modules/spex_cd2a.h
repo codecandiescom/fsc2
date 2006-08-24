@@ -255,18 +255,21 @@ double spex_cd2a_wl2mu( double /* wl */ );
 
 #define SPEX_CD2A_THROW( x )  do { spex_cd2a.fatal_error = SET;      \
                                    THROW( x );                       \
-                                 } while ( 0 )
+                              } while ( 0 )
 
 #define SPEX_CD2A_RETHROW( )  do { spex_cd2a.fatal_error = SET;      \
                                    RETHROW( );                       \
-                                 } while ( 0 )
+                              } while ( 0 )
 
 
 #define SPEX_CD2A_ASSERT( x ) do { if ( ! ( x ) )                    \
                                        spex_cd2a.fatal_error = SET;  \
                                    fsc2_assert( x );                 \
-                                 } while( 0 )
+                               } while( 0 )
 
+#define SPEX_CD2A_IMPOSSIBLE( ) do { spex_cd2a.fatal_error = SET;    \
+                                     fsc2_impossible( );             \
+                                } while( 0 )
 #endif /* ! SPEX_CD2A_HEADER */
 
 

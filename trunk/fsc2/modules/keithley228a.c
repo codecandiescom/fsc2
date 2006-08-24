@@ -70,10 +70,14 @@ Var_T *magnet_name(           Var_T * v );
 Var_T *magnet_setup(          Var_T * v );
 Var_T *magnet_use_correction( Var_T * v );
 Var_T *magnet_use_dac_port(   Var_T * v );
+Var_T *magnet_field(          Var_T * v );
 Var_T *set_field(             Var_T * v );
 Var_T *get_field(             Var_T * v );
 Var_T *sweep_up(              Var_T * v );
 Var_T *sweep_down(            Var_T * v );
+Var_T *magnet_sweep_up(       Var_T * v );
+Var_T *magnet_sweep_down(     Var_T * v );
+Var_T *magnet_reset_field(    Var_T * v );
 Var_T *reset_field(           Var_T * v );
 Var_T *magnet_command(        Var_T * v );
 
@@ -403,6 +407,15 @@ Var_T *magnet_use_dac_port( Var_T * v )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
+Var_T *magnet_field( Var_T * v )
+{
+    return v == NULL ? set_field( v ) : get_field( v );
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
 Var_T *set_field( Var_T * v )
 {
     double new_current;
@@ -441,6 +454,15 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
+Var_T *magnet_sweep_up( Var_T * v )
+{
+    return sweep_up( v );
+}
+
+
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
+
 Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 {
     double new_current;
@@ -465,6 +487,15 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
+Var_T *magnet_sweep_down( Var_T * v )
+{
+    return sweep_down( v );
+}
+
+
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
+
 Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 {
     double new_current;
@@ -483,6 +514,15 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 
     return vars_push( FLOAT_VAR,
                       keithley228a_goto_current( new_current ) );
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+Var_T *magnet_reset_field( Var_T * v )
+{
+    return reset_field( v );
 }
 
 

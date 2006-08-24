@@ -326,7 +326,7 @@ EXPERIMENT:
 daq_gain( 4 );
 start_temp = temp_contr_temperature( );
 
-field = set_field( start_field );
+field = magnet_field( start_field );
 IF wait_time > 1 us {
 	wait( wait_time );
 }
@@ -388,7 +388,7 @@ FOREVER {
     }
 
     print $fh "			field += field_step;
-			set_field( field );
+			magnet_field( field );
 		}
 	}
 
@@ -398,7 +398,7 @@ FOREVER {
 		BREAK;
 	}
 
-	field = set_field( start_field );
+	field = magnet_field( start_field );
 	IF wait_time > 1 us {
 		wait( wait_time );
 	}

@@ -108,14 +108,18 @@ int er032m_exp_hook(         void );
 int er032m_end_of_exp_hook(  void );
 
 
-Var_T *magnet_name(    Var_T * v );
-Var_T *magnet_setup(   Var_T * v );
-Var_T *set_field(      Var_T * v );
-Var_T *get_field(      Var_T * v );
-Var_T *sweep_up(       Var_T * v );
-Var_T *sweep_down(     Var_T * v );
-Var_T *reset_field(    Var_T * v );
-Var_T *magnet_command( Var_T * v );
+Var_T *magnet_name(        Var_T * v );
+Var_T *magnet_setup(       Var_T * v );
+Var_T *magnet_field(       Var_T * v );
+Var_T *set_field(          Var_T * v );
+Var_T *get_field(          Var_T * v );
+Var_T *sweep_up(           Var_T * v );
+Var_T *sweep_down(         Var_T * v );
+Var_T *magnet_sweep_up(    Var_T * v );
+Var_T *magnet_sweep_down(  Var_T * v );
+Var_T *reset_field(        Var_T * v );
+Var_T *magnet_reset_field( Var_T * v );
+Var_T *magnet_command(     Var_T * v );
 
 
 static void er032m_init( void );
@@ -408,6 +412,15 @@ Var_T *magnet_setup( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
+Var_T *magnet_sweep_up( Var_T * v )
+{
+    return sweep_up( v );
+}
+
+
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
+
 Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 {
     int steps;
@@ -481,6 +494,15 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
     magnet.act_field += magnet.field_step;
     DEVIATION( magnet.act_field );
     return vars_push( FLOAT_VAR, magnet.act_field );
+}
+
+
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
+
+Var_T *magnet_sweep_down( Var_T * v )
+{
+    return sweep_down( v );
 }
 
 
@@ -562,6 +584,15 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
+Var_T *magnet_reset_field( Var_T * v )
+{
+    return reset_field( v );
+}
+
+
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
+
 Var_T *reset_field( Var_T * v  UNUSED_ARG )
 {
     if ( ! magnet.is_init )
@@ -574,6 +605,15 @@ Var_T *reset_field( Var_T * v  UNUSED_ARG )
     er032m_start_field( );
 
     return vars_push( FLOAT_VAR, magnet.act_field );
+}
+
+
+/*-------------------------------------------------------------------*
+ *-------------------------------------------------------------------*/
+
+Var_T *magnet_field( Var_T *v )
+{
+    return v == NULL ? get_field( v ) : set_field( v );
 }
 
 

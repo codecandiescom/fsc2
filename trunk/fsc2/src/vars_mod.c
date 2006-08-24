@@ -284,7 +284,7 @@ static Var_T *vars_int_var_mod( Var_T * v1,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 
     return new_var;
@@ -428,7 +428,7 @@ static Var_T *vars_float_var_mod( Var_T * v1,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 
     return new_var;
@@ -542,7 +542,7 @@ static Var_T *vars_int_arr_mod( Var_T * v1,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 
     return new_var;
@@ -630,7 +630,7 @@ static Var_T *vars_float_arr_mod( Var_T * v1,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 
     return new_var;
@@ -701,7 +701,7 @@ static Var_T *vars_ref_mod( Var_T * v1,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 
     return new_var;

@@ -364,7 +364,6 @@ void spectrapro_300i_set_wavelength( double wavelength )
 
     fsc2_assert( wavelength < 0.0 || wavelength <= MAX_WAVELENGTH );
 
-
     buf = get_string( "%.3f GOTO", 1.0e9 * wavelength );
 
     TRY
@@ -408,7 +407,6 @@ void spectrapro_300i_set_turret( long tn )
 
 
     CLOBBER_PROTECT( buf );
-
     fsc2_assert( tn >= 0 && tn < MAX_TURRETS );
 
     if ( spectrapro_300i.tn == tn )
@@ -458,7 +456,6 @@ void spectrapro_300i_set_grating( long gn )
 
 
     CLOBBER_PROTECT( buf );
-
     fsc2_assert( gn >= 0 && gn < MAX_GRATINGS &&
                  gn - spectrapro_300i.tn * 3 >= 0 &&
                  gn - spectrapro_300i.tn * 3 <= 2 &&

@@ -74,7 +74,7 @@ IF magnet_sweep( ) != STOPPED {
 
 /* Get current field and write it into the corresponding output field */
 
-current_field = get_field( );
+current_field = magnet_field( );
 new_field = current_field;
 
 sweep_rate = magnet_sweep_rate( sweep_rate );
@@ -138,7 +138,7 @@ FOREVER {
 
 	/* Update the output field with the current field */
 
-	current_field = get_field( );
+	current_field = magnet_field( );
 	output_value( Current_Field, current_field );
 
 	/* Check if the magnet reached the upper or lower limit in which case
@@ -255,7 +255,7 @@ FOREVER {
 		IF new_set_field <= 114304 G AND new_set_field >= 0 G AND
 		   abs( new_set_field - new_field ) >= 0.14288 G {
 
-			new_field = set_field( new_set_field );
+			new_field = magnet_field( new_set_field );
 
 			IF Sweep_State != STOPPED {
 				IF ! Pause_State {

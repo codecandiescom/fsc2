@@ -1220,7 +1220,7 @@ Input_Res_T *exp_istate( char *    buffer,
                     break;
 
                 default :
-                    fsc2_assert( 1 == 0 );             /* this can't happen */
+                    fsc2_impossible( );             /* this can't happen */
             }
 
             vars_pop( ret );
@@ -2144,7 +2144,7 @@ bool exp_cb_1d( char *    buffer,
                 break;
 
             default :
-                fsc2_assert( 1 == 0 );
+                fsc2_impossible( );
         }
 
         old_state = fl_get_button( obj );
@@ -2237,7 +2237,7 @@ bool exp_cb_2d( char *    buffer,
                     break;
 
                 default :
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
 
             old_state = fl_get_button( obj );

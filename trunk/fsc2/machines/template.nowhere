@@ -63,11 +63,22 @@ prefix             := /usr/local
 # 'NI_OLD' for the old National Instruments library (you can distinguish
 # them from the include file they install, if it is ni488.h then it's the
 # newer version, if it's ugpib.h it's the older one), 'SLG' for the updated
-# version of the LLP library, now hosted on sourceforge, or 'JTT' for the
+# version of the LLP library, now hosted on SourceForge, or 'JTT' for the
 # library written by me for ISA GPIB cards. Alternatively, if no GPIB support
 # is needed, define GPIB_LIBRARY as 'NONE' (which is the default if not set).
 
 GPIB_LIBRARY       := JTT
+
+
+# If you're using the SourceForge GPIB driver and library you need to set
+# here the name of the GPIB card as set in the corresponding entry in th
+# GPIB configuration file (usually '/etc/gpib.conf') in the 'interface'
+# section for the card (on the line starting with 'name ='). If you use
+# the SourceForge library (i.e. you have set the variable 'GPIB_LIBRARY'
+# above to 'SLG') and don't set the following variable the name will be
+# assumed to be "gpib0".
+
+# GPIB_CARD_NAME     := "gpib0"
 
 
 # Here the location of the GPIB configuration file is set (this usually is

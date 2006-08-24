@@ -265,11 +265,10 @@ hjs_fc;
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
 @item @ref{magnet_fast_init()}
-@item @ref{set_field()}
-@item @ref{sweep_up()}
-@item @ref{sweep_down()}
-@item @ref{reset_field()}
-@item @ref{get_field()}
+@item @ref{magnet_field()}
+@item @ref{magnet_sweep_up()}
+@item @ref{magnet_sweep_down()}
+@item @ref{magnet_reset_field()}
 @item @ref{magnet_use_correction()}
 @item @ref{magnet_use_dac_port()}
 @item @ref{magnet_sweep()}
@@ -278,6 +277,11 @@ hjs_fc;
 @item @ref{magnet_B0()}
 @item @ref{magnet_slope()}
 @item @ref{magnet_calibration_file()}
+@item @ref{set_field()} (deprecated)
+@item @ref{get_field()} (deprecated)
+@item @ref{sweep_up()} (deprecated)
+@item @ref{sweep_down()} (deprecated)
+@item @ref{reset_field()} (deprecated)
 @end table
 
 
@@ -345,17 +349,30 @@ This function does not exist for the modules @code{hfs_sfc} and
 @code{hjs_fc}.
 
 
-@anchor{set_field()}
-@findex set_field()
-@item set_field()
-This function expects one floating point argument for the field value and will
-set the magnetic field to this value. For the @strong{Keithley} power supply
-(@code{keithley228a}) and the @w{360 GHz} magnet (@code{ips20_4}) specify a
-current value.
+@anchor{magnet_field()}
+@findex magnet_field()
+@item magnet_field()
+This functions allows to either query the current magnetic field or set
+a new field value.
 
-The function returns the new value of the field (which, in some cases
-might differ a bit from the requested value due to the properties of the
-device, i.e.@: restrictions of the esolution).
+If called with no arguments it returns the current magnetic field.
+For the @strong{AEG} magnets this is only a convenience function that
+just calls a function supplied by the gaussmeter used together with the
+magnet power supply to determine the current field. In contrast, for the
+@strong{ER032M Field Controller} this function returns the current field
+setting in Gauss. For both the Berlin W-band magnet (@code{keithley228a})
+and the @w{360 GHz} spectrometer magnet (@code{ips20_4}) the actual current
+through the magnets sweep coil is returned instead of the field.
+
+If called with arguments the function expects a floating point argument for
+the field value and will set the magnetic field to this value. Please note
+tah for the @strong{Keithley} power supply (@code{keithley228a}) and the
+@w{360 GHz} magnet (@code{ips20_4}) a current value instead of a field must
+be specified.
+
+The function then returns the new value of the field (which, in some
+cases might differ a bit from the requested value due to the properties
+of the device, i.e.@: restrictions of the resolution).
 
 For the @strong{AEG} magnets and the @code{hjs_fc} module the function
 also accepts a second optional parameter, the maximum acceptable
@@ -374,8 +391,8 @@ gaussmeter is used instead. The function can only be called in the
 @code{EXPERIMENT} section.
 
 For both the @strong{Oxford Instruments} magnet sweep power supplies
-(@code{ips20_4} and @code{ips120_10}) this function will automatically stop a
-running sweep.
+(@code{ips20_4} and @code{ips120_10}) this function will automatically
+stop a running sweep.
 
 For the @strong{Bruker ER032M} field controller setting a field with
 this function while also having initialized the magnet using
@@ -384,16 +401,19 @@ field and the real field of up to @w{25 mG}. If the maximum field
 deviation was larger than @w{5 mG} at the end of the test run as well
 as the experiment the maximum field deviation is printed out.
 
+The function can only be used in the @code{EXPERIMENT} section.
+.
 
-@anchor{sweep_up()}
-@findex sweep_up()
-@item sweep_up()
+@anchor{magnet_sweep_up()}
+@findex magnet_sweep_up()
+@item magnet_sweep_up()
 The function can be called in the @code{EXPERIMENT} section, but only if
 the function @ref{magnet_setup()} (see above) has been called
 before. It doesn't take an argument and will sweep up the magnet by the
-field step size value set in the @ref{magnet_setup()} function.  The
-actual size of the step is @b{not} be controlled using the gaussmeter
-and is thus faster than e.g.@: @ref{set_field()}. 
+field step size value set in the @ref{magnet_setup()} function.  For
+magnets where the field is controlled via a gaussmeter the actual size
+of the step is @b{not} tested using the gaussmeter and can thus faster
+than e.g.@: @ref{magnet_field()}. 
 
 The function returns the new field value.
 
@@ -403,22 +423,23 @@ of up to @w{1 G}, with much larger step sizes it may deteriorate quite
 significantly. It sometimes helps to add a short waiting time (use
 function @ref{wait()}) after a sweep step to allow the field to settle
 at the new point. On the other hand, it then might be faster (and more
-reliable) not to use the sweep functions at all but the
-@ref{set_field()} function (which always checks and if necessary
-re-adjusts the field if necessray) in these cases instead.
+reliable) not to use the sweep functions at all but the @ref{magnet_field()}
+function (which always checks and if necessary re-adjusts the field if
+necessray) in these cases instead.
 
 This function is not available for the @strong{Oxford Instruments} power
 supplyies (modules @code{ips20_4} and @code{ips120_10}). Use the function
 @code{magnet_sweep} instead.
 
+The function can only be called in the @code{EXPERIMENT} section.
 
-@anchor{sweep_down()}
-@findex sweep_down()
-@item sweep_down()
-This is the exact analog to the function @ref{sweep_up()} but will
+
+@anchor{magnet_sweep_down()}
+@findex magnet_sweep_down()
+@item magnet_sweep_down()
+This is the exact analog to the function @ref{magnet_sweep_up()} but will
 sweep the magnetic field down instead of up by the field step size
-defined in @ref{magnet_setup()}. The function can only be called in the
-@code{EXPERIMENT} section.
+defined in @ref{magnet_setup()}.
 
 The function returns the new field value.
 
@@ -427,9 +448,9 @@ power supplies (modules @code{ips20_4} and @code{ips120_10}). Use the function
 @ref{magnet_sweep()} instead.
 
 
-@anchor{reset_field()}
-@findex reset_field()
-@item reset_field()
+@anchor{magnet_reset_field()}
+@findex magnet_reset_field()
+@item magnet_reset_field()
 This function resets the magnetic field to the start field value defined
 in a previous call of the function @ref{magnet_setup()}.
 
@@ -440,23 +461,6 @@ Please note that for the @strong{Oxford Instruments} magnet power supplies
 stops a running sweep.
 
 The function can only be used in the @code{EXPERIMENT} section.
-
-
-@anchor{get_field()}
-@findex get_field()
-@item get_field()
-For the @strong{AEG} magnets this is only a convenience function that
-just calls a function supplied by the gaussmeter used together with the
-magnet power supply to determine the current field.
-
-In contrast, for the @strong{ER032M Field Controller} this function
-returns the current field setting in Gauss. For both the Berlin W-band
-magnet (@code{keithley228a}) and the @w{360 GHz} spectrometer magnet
-(@code{ips20_4}) the actual current through the magnets sweep coil is
-returned.
-
-The function can only be used in the @code{EXPERIMENT} section and is
-not available for the @code{hjs_sfc} module.
 
 
 @anchor{magnet_use_correction()}
@@ -602,6 +606,36 @@ lengthy measurement.
 The function can only be used in the @code{PREPARATIONS} section.
 
 
+@anchor{set_field()}
+@findex set_field()
+@item set_field()
+This function has been deprecated, please use @ref{magnet_field()} instead.
+
+
+@anchor{get_field()}
+@findex get_field()
+@item get_field()
+This function is deprecated, please use @ref{magnet_field()} instead.
+
+
+@anchor{sweep_up()}
+@findex sweep_up()
+@item sweep_up()
+This function is deprecated, please use @ref{magnet_sweep_up()} instead.
+
+
+@anchor{sweep_down()}
+@findex sweep_down()
+@item sweep_down()
+This function is deprecated, please use @ref{magnet_sweep_down()} instead.
+
+
+@anchor{reset_field()}
+@findex reset_field()
+@item reset_field()
+This function is deprecated, please use @ref{magnet_reset_field()} instead.
+
+
 @end table
 
 
@@ -670,12 +704,12 @@ already been loaded.
 @table @samp
 @item @ref{gaussmeter_name()}
 @item @ref{gaussmeter_field()}
-@item @ref{find_field()}
-@item @ref{measure_field()}
 @item @ref{gaussmeter_resolution()}
 @item @ref{gaussmeter_probe_orientation()}
 @item @ref{gaussmeter_upper_search_limit()}
 @item @ref{gaussmeter_lower_search_limit()}
+@item @ref{find_field()} (deprecated)
+@item @ref{measure_field()} (deprecated)
 @end table
 
 
@@ -703,26 +737,6 @@ and can only be used in the @code{EXPERIMENT} section.
 resolution setting of @code{0.01 G} the kG part of the field value gets
 cut off, i.e.@: with this resolution setting a field of @code{3125.63 G}
 will be reported as being @code{123.63 G}.
-
-
-@anchor{find_field()}
-@findex find_field()
-@item find_field()
-Use of this function is deprecated, use @ref{gaussmeter_field()}
-instead. It is defined in the device modules @code{er035m} and
-@code{er035m_s}. It returns the current value of the magnetic field in
-Gauss.  The function can only be called in the @code{EXPERIMENT}
-section.
-
-
-@anchor{measure_field()}
-@findex measure_field()
-@item measure_field()
-Use of this function is deprecated, use @ref{gaussmeter_field()}
-instead. It is defined in the device drivers @code{er035m_sa},
-@code{er035m_sas} and @code{pt2025}. It measures the current field and
-returns the value in Gauss. The function can only be called in the
-@code{EXPERIMENT} section.
 
 
 @anchor{gaussmeter_resolution()}
@@ -787,6 +801,20 @@ This function can be called to set of query the lower search limit (in
 Gauss) for the modules @code{er035m}, @code{er035m_s}, @code{er035m_sa}
 and @code{er035m_sas}. The function can only be called in the
 @code{EXPERIMENT} section.
+
+
+@anchor{find_field()}
+@findex find_field()
+@item find_field()
+Use of this function is deprecated, use @ref{gaussmeter_field()}
+
+
+@anchor{measure_field()}
+@findex measure_field()
+@item measure_field()
+Use of this function is deprecated, use @ref{gaussmeter_field()}
+instead.
+
 
 @end table
 

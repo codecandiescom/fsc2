@@ -457,7 +457,7 @@ FOR I = 1 : size( steps_dB ) {
 
 	WHILE ( cur_db <= limits_dB[ I ] )
 	{
-		cur_field = reset_field( );
+		cur_field = magnet_reset_field( );
 		mw_attenuator_attenuation( cur_db );
 		fsave( \"\\n\\# Attenuation: # dB\\n\\n\", cur_db );
 
@@ -477,7 +477,7 @@ FOR I = 1 : size( steps_dB ) {
 			data[ 1, J ] = daq_get_voltage( );
 			display_1d( J, data[ 1, J ] );
 			fsave( \"# G  # V\\n\", cur_field, data[ 1, J ] );
-			cur_field = sweep_up( );
+			cur_field = magnet_sweep_up( );
 		}
 
 		clear_curve_1d( 1 );

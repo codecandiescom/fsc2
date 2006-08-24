@@ -685,7 +685,7 @@ Var_T *pulser_pulse_minimum_specs( Var_T *v )
             t =   rb_pulser_j.delay_card[ MW_DELAY_3 ].intr_delay
                 + rb_pulser_j.delay_card[ MW_DELAY_4 ].intr_delay;
         else
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
     else if ( p->function == rb_pulser_j.function + PULSER_CHANNEL_RF )
         t =   rb_pulser_j.delay_card[ ERT_DELAY ].intr_delay
@@ -704,7 +704,7 @@ Var_T *pulser_pulse_minimum_specs( Var_T *v )
             + rb_pulser_j.delay_card[ DET_DELAY_1 ].intr_delay
             + p->function->delay;
     else
-        fsc2_assert( 1 == 0 );
+        fsc2_impossible( );
 
     return vars_push( FLOAT_VAR, t );
 }

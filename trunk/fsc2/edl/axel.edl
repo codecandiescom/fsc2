@@ -103,7 +103,7 @@ EXPERIMENT:
 
 pulser_update( );
 
-f=find_field( );
+f=magnet_field( );
 print("Magnetfeld = # [G]\n", f );
 save_program( "% " );
 
@@ -148,8 +148,8 @@ FOR I = 1 : 10 {
     pulser_update( );
 
     IF ( float( I ) / 50 == float( I / 50 )) {
-        print("I = #  :B = # [G] - zurückgesetzt!\n",I,find_field());
-        set_field( f );
+        print("I = #  :B = # [G] - zurückgesetzt!\n",I,magnet_field());
+        magnet_field( f );
 	}
 }
 pulser_pulse_reset();

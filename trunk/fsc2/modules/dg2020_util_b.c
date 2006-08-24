@@ -73,7 +73,7 @@ Ticks dg2020_double2ticks( double p_time )
 double dg2020_ticks2double( Ticks ticks )
 {
     fsc2_assert( dg2020.is_timebase );
-    return ( double ) ( dg2020.timebase * ticks );
+    return dg2020.timebase * ticks;
 }
 
 

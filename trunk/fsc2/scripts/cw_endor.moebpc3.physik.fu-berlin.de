@@ -532,7 +532,7 @@ EXPERIMENT:
 IF magnet_sweep( ) {
 	magnet_sweep( 0 );
 }
-set_field( current );
+magnet_field( current );
 
 synthesizer_state( \"ON\" );
 ";

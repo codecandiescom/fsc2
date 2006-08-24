@@ -397,7 +397,7 @@ Var_T *vars_push_copy( Var_T * v )
             break;
 
         default:
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return nv;
@@ -417,10 +417,8 @@ Var_T *vars_push_matrix( Var_Type_T type,
     ssize_t i;
 
 
-#ifndef NDEBUG
     if ( ! ( type & ( INT_REF | FLOAT_REF ) ) || dim < 2 )
-        fsc2_assert( 1 == 0 );
-#endif
+        fsc2_impossible( );
 
     nv = vars_push( type, NULL );
     nv->from = NULL;
@@ -433,10 +431,8 @@ Var_T *vars_push_matrix( Var_Type_T type,
     {
         sizes[ i ] = ( ssize_t ) va_arg( ap, long );
 
-#ifndef NDEBUG
         if ( sizes[ i ] == 0 )
-            fsc2_assert( 1 == 0 );
-#endif
+            fsc2_impossible( );
     }
 
     va_end( ap );
@@ -668,7 +664,7 @@ Var_T *vars_push( Var_Type_T type,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 
     va_end( ap );
@@ -776,7 +772,7 @@ Var_T *vars_make( Var_Type_T type,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return nv;
@@ -948,7 +944,7 @@ Var_T *vars_pop( Var_T * v )
         prev = stack;
 
     if ( stack == NULL )
-        fsc2_assert( 1 == 0 );
+        fsc2_impossible( );
 #endif
 
     /* Now get rid of the variable */
@@ -1039,13 +1035,13 @@ void vars_check( Var_T * v,
        though this clearly is a bug) */
 
     if ( v == NULL )
-        fsc2_assert( 1 == 0 );
+        fsc2_impossible( );
 
     /* Being real paranoid we check that the variable exists at all -
        probably this can vanish later. */
 
     if ( ! vars_exist( v ) )
-        fsc2_assert( 1 == 0 );
+        fsc2_impossible( );
 #endif
 
     /* Check that the variable has a value assigned to it */
@@ -1275,7 +1271,7 @@ void vars_save_restore( bool flag )
                     break;
 
                 default :
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
 
             src->flags |= EXISTS_BEFORE_TEST;
@@ -1327,7 +1323,7 @@ void vars_save_restore( bool flag )
                     break;
 
                 default :
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
 
             memcpy( cpy, src, sizeof *src );

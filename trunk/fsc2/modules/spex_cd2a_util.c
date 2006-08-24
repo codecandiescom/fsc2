@@ -311,7 +311,7 @@ double spex_cd2a_wn2Uwn( double wn )
             break;
 
         default:
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return wn;
@@ -341,7 +341,7 @@ double spex_cd2a_Uwn2wn( double wn )
             break;
             
         default:
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return wn;
@@ -425,7 +425,8 @@ double spex_cd2a_wl2mu( double wl )
             return ( UNITS == NANOMETER ? 1.0e9 : 1.0e10 ) * wl;
     }
 
-    fsc2_assert( 1 == 0 );            /* we'll never get here */
+    fsc2_impossible( );            /* we'll never get here */
+
     return 0.0;
 }
 

@@ -536,8 +536,7 @@ bool dg2020_set_phase_reference( int phs,
     Function_T *f;
 
 
-    fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
-    Cur_PHS = phs;
+    fsc2_assert ( Cur_PHS != -1 && Cur_PHS == phs );
 
     /* Phase function can't be used with this driver... */
 
@@ -586,9 +585,8 @@ bool dg2020_phase_setup_prep( int  phs,
                               int  dummy  UNUSED_ARG,
                               long pod )
 {
-    fsc2_assert( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
+    fsc2_assert( Cur_PHS == -1 || Cur_PHS == phs );
     fsc2_assert( phs == 0 || phs == 1 );
-
     Cur_PHS = phs;
 
     /* Make sure the phase type is supported */

@@ -84,7 +84,7 @@ Var_T *vars_negate( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 
     if ( new_var != v )
@@ -228,7 +228,7 @@ Var_T *vars_comp( int     comp_type,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 
     /* Pop the variables from the stack */
@@ -280,7 +280,7 @@ static Var_T *vars_str_comp( int     comp_type,
             THROW( EXCEPTION );
 
         default :
-            fsc2_assert( 1 == 0 );     /* This can't happen... */
+            fsc2_impossible( );     /* This can't happen... */
     }
 
     /* Pop the variables from the stack */

@@ -722,7 +722,7 @@ Var_T *synthesizer_modulation( Var_T * v )
                     break;
 
                 default :                 /* this definitely can't happen... */
-                    fsc2_assert( 1 == 0 );
+                    fsc2_impossible( );
             }
         }
         set |= ( 1 << ( res - 1 ) );

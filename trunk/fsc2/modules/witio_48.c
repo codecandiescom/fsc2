@@ -601,7 +601,7 @@ static long translate_channel( long channel )
             THROW( EXCEPTION );
     }
 
-    fsc2_assert( 1 == 0 );
+    fsc2_impossible( );
 
     return -1;        /* we can't end up here */
 }

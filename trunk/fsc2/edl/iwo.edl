@@ -50,6 +50,6 @@ WHILE field <= end_field {
 	}
 	fsave( F1, "\n" );
 	display( 1, I, data );
-	field = sweep_up( );
+	field = magnet_sweep_up( );
 	I +=1;
 }

@@ -1145,8 +1145,7 @@ void p_set( long    pnum,
                 break;
 
             default:
-                fsc2_assert( 1 == 0 );
-                break;
+                fsc2_impossible( );
         }
 
         TRY_SUCCESS;
@@ -1272,8 +1271,7 @@ Var_T *p_get_by_num( long pnum,
                 break;
 
             default :
-                fsc2_assert ( 1 == 0 );
-                break;
+                fsc2_impossible( );
         }
 
         TRY_SUCCESS;

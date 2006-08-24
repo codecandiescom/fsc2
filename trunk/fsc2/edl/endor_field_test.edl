@@ -12,5 +12,5 @@ EXPERIMENT:
 
 FOR I = 1:10 {
 	wait( 1 s );
-	print( "Field = # G\n", measure_field( ) );
+	print( "Field = # G\n", gaussmeter_field( ) );
 }

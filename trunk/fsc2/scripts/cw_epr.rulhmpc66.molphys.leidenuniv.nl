@@ -675,7 +675,7 @@ EXPERIMENT:
 
 start_temp = temp_contr_temperature( );
 magnet_sweep_rate( sweep_rate );
-set_field( start_field );
+magnet_field( start_field );
 ";
 	print F "wait( $sleep_time s );\n" if $sleep_time ne "";
 	print F "
@@ -740,7 +740,7 @@ FOREVER {
 		BREAK;
 	}
 
-	set_field( start_field );
+	magnet_field( start_field );
 ";
 	print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
 	print F "
@@ -954,7 +954,7 @@ EXPERIMENT:
 
 start_temp = temp_contr_temperature( );
 magnet_sweep_rate( sweep_rate );
-set_field( start_field );
+magnet_field( start_field );
 ";
 	print F "wait( $sleep_time s );\n" if $sleep_time ne "";
 	print F "
@@ -975,7 +975,7 @@ hide_toolbox( \"OFF\" );
 
 FOREVER {
 
-	set_field( start_field );
+	magnet_field( start_field );
 	J += 1;
 	output_value( B1, J );	              // Update the scan count display
 
@@ -1017,7 +1017,7 @@ FOREVER {
 		BREAK;
 	}
 
-	set_field( start_field + ( Num_Points - 1 ) * step_size );
+	magnet_field( start_field + ( Num_Points - 1 ) * step_size );
 ";
 	print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
 	print F
@@ -1064,7 +1064,7 @@ FOREVER {
 		BREAK;
 	}
 
-	set_field( start_field );
+	magnet_field( start_field );
 ";
 	print F "	wait( $sleep_time s );" if $sleep_time ne "";
 	print F "

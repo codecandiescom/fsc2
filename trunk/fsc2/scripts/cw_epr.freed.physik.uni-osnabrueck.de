@@ -445,7 +445,7 @@ FOR I = 1 : N_runs {
 # === endif
     }
 
-    print $fh "			field = sweep_up( );
+    print $fh "			field = magnet_sweep_up( );
 		}
 
 		wait( tc );
@@ -457,7 +457,7 @@ FOR I = 1 : N_runs {
 	clear_curve( 1 );
 	display_1d( 1, data[ 3 ], 3 );
 
-	field = reset_field( );
+	field = magnet_reset_field( );
 }
 ";
     close $fh;

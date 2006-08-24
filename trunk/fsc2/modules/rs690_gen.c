@@ -222,7 +222,7 @@ bool rs690_assign_channel_to_function( int  function,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     /* Check that the channel hasn't already been assigned to a function */
@@ -539,7 +539,7 @@ bool rs690_set_phase_reference( int phs,
     Function_T *f;
 
 
-    fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
+    fsc2_assert ( Cur_PHS == - 1 || Cur_PHS == phs );
     Cur_PHS = phs;
 
     /* Phase function can't be used with this driver... */
@@ -600,9 +600,8 @@ bool rs690_phase_setup_prep( int  phs,
                              int  dummy  UNUSED_ARG,
                              long channel )
 {
-    fsc2_assert ( Cur_PHS != - 1 ? ( Cur_PHS == phs ) : 1 );
+    fsc2_assert ( Cur_PHS == - 1 || Cur_PHS == phs );
     fsc2_assert ( phs == 0 || phs == 1 );
-
     Cur_PHS = phs;
 
     /* Make sure the phase type is supported */
@@ -675,7 +674,7 @@ bool rs690_phase_setup_prep( int  phs,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     rs690.phs[ phs ].is_set[ type ] = SET;

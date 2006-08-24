@@ -722,7 +722,7 @@ magnet_sweep_rate( sweep_rate );
 
 FOREVER {
 
-	set_field( start_current );
+	magnet_field( start_current );
 ";
 print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
 print F
@@ -922,7 +922,7 @@ magnet_sweep_rate( sweep_rate );
 
 FOREVER {
 
-	set_field( start_current );
+	magnet_field( start_current );
 ";
 print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
 print F
@@ -951,7 +951,7 @@ print F
 	clear_curve( 1, 3 );
 	display( 1, data, 3 );
 
-	set_field( start_current + ( Num_Points - 1 ) * step_size );
+	magnet_field( start_current + ( Num_Points - 1 ) * step_size );
 ";
 print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
 print F

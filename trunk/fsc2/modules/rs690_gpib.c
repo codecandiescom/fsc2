@@ -489,7 +489,7 @@ static void rs690_table_set( int    i,
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     if ( rs690_write( rs690.device, buf, strlen( buf ) ) == FAILURE )

@@ -129,7 +129,7 @@ Var_T *f_int( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -186,7 +186,7 @@ Var_T *f_float( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -250,7 +250,7 @@ Var_T *f_round( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -313,7 +313,7 @@ Var_T *f_floor( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -376,7 +376,7 @@ Var_T *f_ceil( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -453,7 +453,7 @@ Var_T *f_abs( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -660,7 +660,7 @@ Var_T *f_sin( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -719,7 +719,7 @@ Var_T *f_cos( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -788,7 +788,7 @@ Var_T *f_tan( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -864,7 +864,7 @@ Var_T *f_asin( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -940,7 +940,7 @@ Var_T *f_acos( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -995,7 +995,7 @@ Var_T *f_atan( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -1062,7 +1062,7 @@ Var_T *f_sinh( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -1129,7 +1129,7 @@ Var_T *f_cosh( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -1184,7 +1184,7 @@ Var_T *f_tanh( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -1273,7 +1273,7 @@ Var_T *f_asinh( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -1354,7 +1354,7 @@ Var_T *f_acosh( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -1433,7 +1433,7 @@ Var_T *f_atanh( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -1506,7 +1506,7 @@ Var_T *f_exp( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -1591,7 +1591,7 @@ Var_T *f_ln( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -1676,7 +1676,7 @@ Var_T *f_log( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -1753,7 +1753,7 @@ Var_T *f_sqrt( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -2166,7 +2166,7 @@ Var_T *f_size( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -2320,7 +2320,7 @@ Var_T *f_mean( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     if ( count == 0 )
@@ -2448,7 +2448,7 @@ Var_T *f_rms( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return vars_push( FLOAT_VAR, sqrt( sum ) / ( double ) count );
@@ -2552,7 +2552,7 @@ Var_T *f_slice( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -2637,7 +2637,7 @@ Var_T *f_square( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -2696,7 +2696,7 @@ Var_T *f_G2T( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -2755,7 +2755,7 @@ Var_T *f_T2G( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -2815,7 +2815,7 @@ Var_T *f_C2K( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -2875,7 +2875,7 @@ Var_T *f_K2C( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -2935,7 +2935,7 @@ Var_T *f_D2R( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -2995,7 +2995,7 @@ Var_T *f_R2D( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -3078,7 +3078,7 @@ Var_T *f_WL2WN( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -3161,7 +3161,7 @@ Var_T *f_WN2WL( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -3220,7 +3220,7 @@ Var_T *f_F2WN( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -3279,7 +3279,7 @@ Var_T *f_WN2F( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;
@@ -3504,7 +3504,7 @@ Var_T *f_reverse( Var_T * v )
             break;
 
         default :
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
     }
 
     return new_var;

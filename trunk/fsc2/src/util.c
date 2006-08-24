@@ -831,7 +831,7 @@ FILE *filter_edl( const char * name,
                    "of system resources.\n" );
 #ifndef NDEBUG
         else
-            fsc2_assert( 1 == 0 );
+            fsc2_impossible( );
 #endif
         close( pd[ 0 ] );
         return NULL;
@@ -1019,10 +1019,8 @@ Var_T *convert_to_channel_number( const char * channel_name )
             channel = CHANNEL_TRIG_OUT;
     }
 
-#ifndef NDEBUG
     if ( channel == NUM_CHANNEL_NAMES )
-        fsc2_assert( 1 == 0 );
-#endif
+        fsc2_impossible( );
 
     return vars_push( INT_VAR, channel );
 }

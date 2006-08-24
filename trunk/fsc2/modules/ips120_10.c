@@ -54,11 +54,12 @@ int ips120_10_end_of_exp_hook( void );
 
 Var_T *magnet_name(              Var_T * v );
 Var_T *magnet_setup(             Var_T * v );
+Var_T *magnet_field(             Var_T * v );
 Var_T *get_field(                Var_T * v );
 Var_T *set_field(                Var_T * v );
-Var_T *set_sweep_rate(           Var_T * v );
 Var_T *magnet_sweep(             Var_T * v );
 Var_T *magnet_sweep_rate(        Var_T * v );
+Var_T *magnet_reset_field(       Var_T * v );
 Var_T *reset_field(              Var_T * v );
 Var_T *magnet_goto_field_on_end( Var_T * v );
 Var_T *magnet_command(           Var_T * v );
@@ -379,6 +380,15 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 
 
 /*------------------------------------------------------*
+ *------------------------------------------------------*/
+
+Var_T *magnet_field( Var_T * v )
+{
+    return v == NULL ? get_field( v ) : set_field( v );
+}
+
+
+/*------------------------------------------------------*
  * Function for setting a new field value. Please note
  * that setting a new field also stops a running sweep.
  *------------------------------------------------------*/
@@ -615,6 +625,17 @@ Var_T *magnet_sweep_rate( Var_T * v )
         ips120_10_set_sweep_rate( ips120_10.sweep_rate );
 
     return vars_push( FLOAT_VAR, ips120_10.sweep_rate * F2C_RATIO );
+}
+
+
+/*--------------------------------------------------------*
+ * Function to bring the field back to its initial value,
+ * i.e. at the very start of the experiment
+ *--------------------------------------------------------*/
+
+Var_T *magnet_reset_field( Var_T * v )
+{
+    return reset_field( v );
 }
 
 

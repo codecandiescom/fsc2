@@ -39,13 +39,19 @@ int fsc2_assert_print( const char * /* expression */,
                        const char * /* filename   */,
                        int          /* line       */ );
 
+int fsc2_impossible_print( const char * /* filename */,
+                           int          /* line     */ );
+
 
 #ifdef NDEBUG
-#define fsc2_assert( expression ) ( ( void ) 0 )
+#define fsc2_assert( expression ) do { } while ( 0 )
+#define fsc2_impossible( ) do { } while ( 0 )
 #else
-#define fsc2_assert( expression )                                    \
-       ( ( void ) ( ( expression ) ?                                 \
+#define fsc2_assert( expression )                                     \
+       ( ( void ) ( ( expression ) ?                                  \
        0 : fsc2_assert_print( #expression, __FILE__, __LINE__ ) ) )
+#define fsc2_impossible( )                                            \
+       ( ( void ) fsc2_impossible_print( __FILE__, __LINE__ ) )
 #endif
 
 

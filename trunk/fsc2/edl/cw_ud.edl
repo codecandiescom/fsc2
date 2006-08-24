@@ -62,7 +62,7 @@ FOR J = 1 : 2 * N_runs {
 		display( I, ( 1.0 - 1.0 / J ) * data[ I ] + new_data[ I ] / J, 1,
 				 I, new_data[ I ], 2 );
 		IF I != N_points {
-//			sweep_up( );
+//			magnet_sweep_up( );
 		}
 		wait( tc );
 	}
@@ -83,7 +83,7 @@ FOR J = 1 : 2 * N_runs {
 		display( I, ( 1.0 - 1.0 / J ) * data[ I ] + new_data[ I ] / J, 1,
 				 I, new_data[ I ], 2 );
 		IF ( I != 1 ) {
-//			sweep_down( );
+//			magnet_sweep_down( );
 			wait( tc );
 		}
 	}
@@ -91,7 +91,7 @@ FOR J = 1 : 2 * N_runs {
     fsave( FILE1, "\n" );
 	data = ( 1.0 - 1.0 / J ) * data + new_data / J;
 	clear_curve( 2 );
-//	reset_field( );
+//	magnet_reset_field( );
 	wait( tc );
 }
 

@@ -575,7 +575,7 @@ print F "
        lockin_sensitivity( ), tc, lockin_phase( ), mod_freq * 1.0e-3,
        mod_ampl * 1.0e-3";
 if ( $use_er035m eq "Yes" ) {
-	print F " , measure_field( ) );";
+	print F " , gaussmeter_field( ) );";
 } else {
 	print F " );";
 }

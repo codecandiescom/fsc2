@@ -101,7 +101,7 @@ Ticks rb_pulser_w_double2ticks( double p_time )
 double rb_pulser_w_ticks2double( Ticks ticks )
 {
     fsc2_assert( rb_pulser_w.is_timebase );
-    return ( double ) ( rb_pulser_w.timebase * ticks );
+    return rb_pulser_w.timebase * ticks;
 }
 
 

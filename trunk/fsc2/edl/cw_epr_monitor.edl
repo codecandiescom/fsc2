@@ -70,7 +70,7 @@ EXPERIMENT:
 IF magnet_sweep( ) != STOPPED {
 	magnet_sweep( STOPPED );
 }
-current = get_field( );
+current = magnet_field( );
 sweep_rate = magnet_sweep_rate( );
 IF sweep_rate < 1.0e-2 A / 60.0 s {
 	sweep_rate = 1.0e-2 A / 60.0 s;
@@ -204,11 +204,11 @@ FOREVER {
 	new_current = input_value( Current );
 	IF abs( current - new_current ) > 0.01 mA {
 		IF new_current > 7.0 A | new_current < -7.0 A {
-			current = get_field( );
+			current = magnet_field( );
 		} ELSE {
 			lockin_auto_acquisition( "OFF" );
 			button_state( Sweep_Stop, "ON" );
-			current = set_field( new_current );
+			current = magnet_field( new_current );
 			Sweep_State = STOPPED;
 			draw_marker( I + 1, "WHITE" );
 		}

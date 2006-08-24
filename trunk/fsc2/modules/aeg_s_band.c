@@ -42,14 +42,16 @@ int aeg_s_band_test_hook(       void );
 int aeg_s_band_exp_hook(        void );
 int aeg_s_band_end_of_exp_hook( void );
 
-Var_T *magnet_name(      Var_T * v );
-Var_T *magnet_setup(     Var_T * v );
-Var_T *magnet_fast_init( Var_T * v );
-Var_T *set_field(        Var_T * v );
-Var_T *get_field(        Var_T * v );
-Var_T *sweep_up(         Var_T * v );
-Var_T *sweep_down(       Var_T * v );
-Var_T *reset_field(      Var_T * v );
+Var_T *magnet_name(        Var_T * v );
+Var_T *magnet_setup(       Var_T * v );
+Var_T *magnet_fast_init(   Var_T * v );
+Var_T *magnet_field(       Var_T * v );
+Var_T *set_field(          Var_T * v );
+Var_T *get_field(          Var_T * v );
+Var_T *sweep_up(           Var_T * v );
+Var_T *sweep_down(         Var_T * v );
+Var_T *magnet_reset_field( Var_T * v );
+Var_T *reset_field(        Var_T * v );
 
 
 /* Locally used functions */
@@ -414,6 +416,16 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 }
 
 
+/*------------------------------------*
+ * Function queries or sets the field
+ *------------------------------------*/
+
+Var_T *magnet_field( Var_T * v )
+{
+    return v == NULL ? get_field( v ) : set_field( v );
+}
+
+
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
@@ -473,6 +485,15 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 
     magnet.target_field -= magnet.field_step;
     return vars_push( FLOAT_VAR, magnet.target_field );
+}
+
+
+/*-----------------------------------------------------*
+ *-----------------------------------------------------*/
+
+Var_T *magnet_reset_field( Var_T * v )
+{
+    return reset_field( v );
 }
 
 
@@ -914,7 +935,7 @@ static void magnet_sweep( int dir )
     double over_shot;
 
 
-    /* <PARANOIA> check for unreasonable input </PARANOIA> */
+    /* Paranoia: Check for unreasonable input */
 
     fsc2_assert( dir == 1 || dir == -1 );
 

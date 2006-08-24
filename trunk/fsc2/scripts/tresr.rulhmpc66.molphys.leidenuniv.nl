@@ -469,7 +469,7 @@ B3 = output_create( \\\"FLOAT_OUTPUT\\\", \\\"Current temperature [K]\\\", \\\"%
 B4 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
 hide_toolbox( \"OFF\" );
 
-set_field( start_field );
+magnet_field( start_field );
 IF wait_time > 1 us {
 	wait( wait_time );
 }
@@ -501,8 +501,7 @@ FOREVER {
 			data[ I ] = digitizer_get_curve( $ACQ_CH );
 	    }
 
-		field += field_step;
-		set_field( field );
+		field = magnet_field( field + field_step );
 
 		/* Calculate the mean of the data points before the trigger for the
 		   elimination of baseline drifts */
@@ -555,9 +554,6 @@ FOREVER {
 
 	mdata = add_to_average( mdata, data, K );
 
-	field = start_field;
-	set_field( field );
-
 	Scans_Done += 1;                      // Update the number of scans done
 
 	IF button_state( B4 ) {               // Stop on user request
@@ -565,7 +561,7 @@ FOREVER {
 	}
 
 	field = start_field;
-	set_field( start_field );
+	magnet_field( start_field );
 	IF wait_time > 1 us {
 		wait( wait_time );
 	}

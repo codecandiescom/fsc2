@@ -616,7 +616,7 @@ print F "tc - delta_time( );
         }
         new_data[ I ] = lockin_get_data( );
 	    new_avg = add_to_average( data[ I ], new_data[ I ], J );
-	    sweep_up( );
+	    magnet_sweep_up( );
         IF N_runs > 1 {
             fsave( F1, \"# #\\n\", start_field + ( I -  1 ) * field_step,
 		   new_avg );
@@ -632,7 +632,7 @@ print F "tc - delta_time( );
     IF N_runs > 1 {
         fsave( F1, \"\\n\" );
     }
-    reset_field( );
+    magnet_reset_field( );
 }
 
 

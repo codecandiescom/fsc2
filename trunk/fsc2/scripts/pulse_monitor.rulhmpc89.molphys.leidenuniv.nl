@@ -93,7 +93,7 @@ pulser_state( "ON" );
 
 /* Get the current field value and the synthesizer settings */
 
-current_field = get_field( );
+current_field = magnet_field( );
 new_field = current_field;
 att = synthesizer_attenuation( );
 freq = synthesizer_frequency( );
@@ -440,7 +440,7 @@ FOREVER {
                 Sweep_State = STOPPED;
                 new_field = new_set_field;
                 button_state( Sweep_Stop, "ON" );
-                current_field = set_field( new_field );
+                current_field = magnet_field( new_field );
                 draw_marker( I + 1, "RED" );
             }
             output_value( Current_Field, current_field );
@@ -480,7 +480,7 @@ FOREVER {
     /* Update the output field with the current field if necessary */
 
     UNLESS Sweep_State == STOPPED {
-        current_field = get_field( );
+        current_field = magnet_field( );
         output_value( Current_Field, current_field );
     }
 

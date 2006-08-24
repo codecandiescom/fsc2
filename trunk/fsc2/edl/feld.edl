@@ -15,13 +15,13 @@ magnet_setup( 3400, 1 );
 
 EXPERIMENT:
 
-print( "B_start = # G", find_field( ) );
+print( "B_start = # G", magnet_field( ) );
 
 FOR I = 1 : 10000 {
-	set_field( 3400 G + 10 * random( ) );
-//	sweep_up( );
+	magnet_field( 3400 G + 10 * random( ) );
+//	magnet_sweep_up( );
 //	wait( 200ms );
 //	IF ( I % 20 == 0 ) {
-	  print( "#: B = # G", I, find_field( ) );
+	  print( "#: B = # G", I, magnet_field( ) );
 //  }
 }

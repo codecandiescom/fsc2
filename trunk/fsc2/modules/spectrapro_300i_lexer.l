@@ -338,7 +338,7 @@ static void spectrapro_300i_new_entry( int          type,
                 break;
 
             default :
-                fsc2_assert( 1 == 0 );
+                fsc2_impossible( );
         }
     }
 

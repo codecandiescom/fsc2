@@ -54,7 +54,7 @@ Pretrigger = int( 0.9 * trig_pos * Rec_len );
 change_scale( - trig_pos * Rec_len / 50.0 * time_base * 1.e6,
 	      time_base / 50.0 * 1e6 );
 
-set_field( start_field );
+magnet_field( start_field );
 save_program( "% " );
 fsave( "% Number of runs     = #\n", N_runs );
 fsave( "% Start field        = # G\n", start_field );
@@ -97,6 +97,6 @@ FOR J = 1 : N_runs {
 	save( curve );
 	
         field += field_step;
-        set_field( field, 0.3 G );
+        magnet_field( field, 0.3 G );
     }
 }

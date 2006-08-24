@@ -43,6 +43,20 @@ int fsc2_assert_print( const char * expression,
 }
 
 
+int fsc2_impossible_print( const char * filename,
+                           int          line )
+{
+    fprintf( stderr, "%s:%d: failed assertion: impossible situation "
+             "encountered.\n", filename, line );
+    Assert_Struct.expression = "Impossible situation encountered.";
+    Assert_Struct.line = line;
+    Assert_Struct.filename = filename;
+    abort( );
+
+    return 0;
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

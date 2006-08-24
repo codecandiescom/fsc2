@@ -75,7 +75,7 @@ EXPERIMENT:
 IF magnet_sweep( ) != STOPPED {
 	magnet_sweep( STOPPED );
 }
-current = get_field( );
+current = magnet_field( );
 
 /* Get synthesizer settings */
 
@@ -202,9 +202,9 @@ FOREVER {
 	new_current = input_value( Current );
 	IF abs( current - new_current ) > 0.01 mA {
 		IF new_current > 7.0 A OR new_current < -7.0 A {
-			current = get_field( );
+			current = magnet_field( );
 		} ELSE {
-			current = set_field( new_current );
+			current = magnet_field( new_current );
 		}
 		input_value( Current, current );
 	}

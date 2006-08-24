@@ -51,7 +51,7 @@ lockin_ref_level( 1 V );
 File1 = get_file( "File for single runs:" );
 File2 = get_file( "For final results:" );
 
-fsave( File2, "% Field at start = # G\n", measure_field( ) );
+fsave( File2, "% Field at start = # G\n", gaussmeter_field( ) );
 
 
 B1 = button_create( "PUSH_BUTTON", "Pause before next run" );
@@ -97,7 +97,7 @@ ON_STOP:
 synthesizer_state( 0 );
 clear_curve( 2 );
 display( 1, dat_mean );
-//fsave( File2, "% Field at end   = # G\n\n", measure_field( ) );
+//fsave( File2, "% Field at end   = # G\n\n", gaussmeter_field( ) );
 freq = start_freq;
 FOR I = 1 : N_points {
     fsave( File2, "# #\n", freq * 1.0e-6, dat_mean[ I ] );
