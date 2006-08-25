@@ -299,7 +299,7 @@ necessary permissions and ownnerships being set).
 
 One possible scenario is to create an account for @code{fsc2} with extremely
 low permissions (even logging in can be disabled) and set USER to that
-account, but set @code{GROUP} to a group that has read and write acces
+account, but set @code{GROUP} to a group that has read and write access
 permissions for the device files that are going to be required. This
 could be the @code{uucp} (or @code{dialout}) group that typically has the
 necessary permissions for the accessing the device files for the
