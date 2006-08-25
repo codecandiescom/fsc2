@@ -1,0 +1,611 @@
+@c  $Id$
+@c
+@c  Copyright (C) 1999-2006 Jens Thoms Toerring
+@c
+@c  This file is part of fsc2.
+@c
+@c  Fsc2 is free software; you can redistribute it and/or modify
+@c  it under the terms of the GNU General Public License as published by
+@c  the Free Software Foundation; either version 2, or (at your option)
+@c  any later version.
+@c
+@c  Fsc2 is distributed in the hope that it will be useful,
+@c  but WITHOUT ANY WARRANTY; without even the implied warranty of
+@c  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@c  GNU General Public License for more details.
+@c
+@c  You should have received a copy of the GNU General Public License
+@c  along with fsc2; see the file COPYING.  If not, write to
+@c  the Free Software Foundation, 59 Temple Place - Suite 330,
+@c  Boston, MA 02111-1307, USA.
+
+
+@node Installation, Device Reference, Modules, Top
+@chapter Installation
+
+@ifinfo
+@menu
+* Requirements::                Tools required for installation
+* Security issues::             How to avoid security problems
+* Preparing for installation::  Before you type @code{make}
+* Compiling and Installion::    Opions when running @code{make}
+@end menu
+@end ifinfo
+
+
+@node Requirements, Security issues, Installation, Installation
+@section Requirements
+
+The following tools and libraries are needed to compile, install and
+run @code{fsc2}:
+@table @samp
+@item @code{gmake}
+the GNU version of @code{make} (see @url{http://www.gnu.org/software/make/})
+@item @code{gcc}
+the GNU C compiler (see @url{http://gcc.gnu.org/}, but other C compilers
+probably will also do)
+@item @code{flex}
+the fast lexical analyzer (see @url{http://flex.sourceforge.net/})
+@item @code{bison}
+the GNU general purpose parser Generator (see
+@url{http://www.gnu.org/software/bison/})
+@item @code{install}
+from the GNU coreutils package (see
+@url{http://www.gnu.org/software/coreutils/})
+@item @code{sed}
+the GNU strean editor (see @url{http://www.gnu.org/software/sed/})
+@item XForms library
+(version 0.89 or higher) with development package, i.e. the header files (see
+@url{http://savannah.nongnu.org/projects/xforms/})
+@item GPIB library
+@code{fsc2} can also be compiled and run without it but with restricte
+functionality, see below.
+@end table
+
+Optionally, you should have:
+@table @samp
+@item @code{mail} and @code{sendmail}
+(or a @code{sendmail} replacement) or, if you want to use the built-in mail
+agent, the @code{libresolv.so} library
+@item @code{addr2line}
+from the GNU binutils package (see
+@url{http://www.gnu.org/software/binutils/})
+@item @code{Perl}
+(version 5.6 or higher) with the pTk (Perl-Tk support) package (see
+@url{http://www.perl.org/})
+@item @code{pnmtopng}
+PNM image to PNG converter
+(see @url{http://netpbm.sourceforge.net/})
+@item @code{pnmtojpeg}
+PNM inage to JPEG converter
+(see @url{http://netpbm.sourceforge.net/})
+@end table
+@noindent
+If some of these are missing the basic functionality is still there (without
+mail and addr2line no automatic bug reports can be sent and without Perl you
+won't be able to wrap a GUI around EDL scripts and the built-in web server
+(which also requires the next two utilities) and the utility for displaying
+pulse settings graphically won't work.
+
+
+To create the complete documentation beside Perl you also need:
+@table @samp
+@item @code{makeinfo} and @code{install-info}
+the GNU texinfo documentation format (see 
+@url{http://www.gnu.org/software/texinfo/})
+@item @code{TeX}
+The TeX typesetting system - if missing no PostScript and PDF documentation
+can be created (see @url{http://www.ctan.org/})
+@item @code{convert} and @code{identify}
+from the ImageMagick package - or no PostScript and PDF documentation will
+be created (see @url{http://www.imagemagick.org/})
+@item @code{dvips}
+the TeX DVI output to PostScript converter - if missing no PostScript
+documentation will be created (see @url{http://www.ctan.org/})
+@item @code{pdftex}
+TeX package for creating PDF output - if missing no PDF documentation will
+be created (see @url{http://www.ctan.org/})
+@item @code{gzip}
+GNU data compression program (see @url{http://www.gnu.org/software/gzip/})
+@end table
+
+
+@subsection GPIB support
+
+GPIB support requires a library and a driver to interface GPIB cards to
+installed in your machine (if you don't have a GPIB card @code{fsc2} can
+also compiled without GPIB support). You can choose between the following
+ones:
+@table @samp
+@item National Instruments
+There exist two versions of the library if have been trying. The older, beta
+driver and library (version 0.86) works fine, but only with 2.4 kernels.  The
+newer driver and library (version 2.xx, supposed to work also with 2.6
+kernels) hasn't been tested, I didn't even get the driver to compile and
+linking against the library led to the program aborting immediately. I haven't
+any idea yet how to resolve that problem. If you want the older beta-driver
+but can't find it on the National Insttruments web site anymore send me an
+email, I still have a copy of it around somewhere. The newe version you can
+download from @url{http://www.natinst.com}.
+
+@item Linux Lab Project
+This is a very old driver (only working with 2.0 kernels) and library,
+so you probably don't really want to use it anymore. You can download
+it from @url{http://www.llp.fu-berlin.de}.
+
+@item SourceForge driver and library
+This is the successor to the Linux Lab Project library and drivers. It
+exists in versions for 2.4 and 2.6 kernels and supports an impressive
+number of different GPIB cards. You can download it from
+@url{http://linux-gpib.sourceforge.net/}
+
+@item my own driver and library
+This driver and library should work for 2.0 to 2.6 kernels and supports
+mostly National Instruments ISA GPIB cards, but I was told that also
+cards by some other manufacturers can be used. You can download it
+from @url{http://www.physik.fu-berlin.de/~toerring/GPIB.tar.gz}.
+@end table
+
+
+From the documentations of the Linux Lab Porject and SourceForge libraries
+and the one I have written it should already be clear that a GPIB
+configuration file (that is typically @file{/etc/gpib.conf}) is required
+for the accompanying libraries to work correctly. In this configuration
+file all devices to be used with are listed with their respetive properties.
+
+
+For the National Instruments libraries the such a configuration file isn't
+needed, but @code{fsc2} does. So you have to create one, following the
+conventions used in the configuration files for the Linux Lab Project library,
+which I also (mostly) used for my library. A typical entry in this file looks
+like the following
+@example
+device @{
+        name        = "TDS744A"   /* symbolic name */
+        pad         = 26          /* primary address */
+        timeout     = 3s          /* device timeout */
+        eos         = '\n'        /* EOS character */
+        set-reos      no
+        set-xeos      no
+        set-bin       no
+        set-eot       yes
+@}
+@end example
+@noindent
+It specifies a symbolic name for the device, the primary GPIB address (you
+may also specify a secondary GPIB address, following the keyword 'sad'),
+the timeout to be used for communication with the device and a few more
+settings controlling the determination of the end of messages send to and
+read from the device. 'eos' is the character to be used as the end of trans-
+mission (EOS) character (none has to be set when no such character is to be
+used). When 'set-reos' is set he driver stops reading from a device whenever
+the EOS character is encountered in the message, even when the EOI line did
+not get raised while receiving the EOS character. When 'set-xeos' is set
+the EOI line is automatically raised when the EOS character is found in a
+message send to the device (even when there are more characters in the
+message). Setting 'set-bin' will make the driver check all 8 bits of each
+character for identity with the EOS character, while, when unset, only the
+lower 7 bits are tested (the top-most bit is excluded from the comparision).
+Finally, setting 'set-eot' makes the driver raise the EOI line automatically 
+with the last byte of a message send to a device (which is also the default),
+while unsetting it will keep the driver from doing so.
+
+Beside the entries for the devices another one for the GPIB board itself
+is required:
+@example
+device @{
+        name        = "gpib"        /* symolic name */
+        pad         = 0             /* primary address */
+        sad         = 0             /* secondary address */
+        master                      /* flag for controller */
+        file        = "/dev/gpib"   /* device file */
+@}
+@end example
+@noindent
+Here a symbolic name and the primary and secondary GPIB address are set
+for the board. The 'master' flag tells the driver that the board is the
+device controlling the GPIB bus and 'file' sets the name of the device
+file used for the board.
+
+Please make sure that the GPIB library you want to use is already compiled
+and installed _before_ trying to compile @code{fsc2} (unless you don't need
+GPIB support built into @code{fsc2}).
+
+
+@subsection Support for other devices
+
+Devices that are controlled via the serial port are always supported (at
+least as long as the number of serial ports to be used by @code{fsc2} isn't
+set to 0 in the configuration of @code{fsc2}, see below). As already
+described in the preceeding section, controlling devices via the GPIB bus
+requires one of several GPIB libraries plus the corresponding kernel driver
+to be installed correctly before an attempt is made to build @code{fsc2}.
+
+
+The same holds for several other devices that are ISA or PCI cards (or are
+controlled via an ISA or PCI card) or are controlled via the Rulbus
+(Rijksuniversiteit Leiden BUS). All of these require an additional library and
+a kernel driver to be installed prior to building @code{fsc2}. If these come
+from the makers of the device (e.g. Roper Scientific Spec-10 CCD camera)
+please see the documentation coming with the device on how to do that. For the
+other devices the sources for the libraries and kernel drivers are part of
+@code{fsc2}, see the subdirectories @file{me6x00}, @file{ni6601},
+@code{ni_daq}, @file{rulbus} and @file{witio_48}). If you need them yo must
+create and install the libraries and kernel drivers before you can create
+@code{fsc2}. Typically it's as easy as going into the subdirectory, typing
+@code{./INSTALL} and answering a few questions. Please refer to the
+documentation (@file{README} files) in these subdirectories for more details.
+After a successful installation @code{fsc2} should be able to find the
+libraries and include support for the devices.
+
+
+
+@node Security issues, Preparing for installation, Requirements, Installation
+@section Security issues
+
+
+To be able to read from and write to the device files for the devices
+@code{fsc2} is supposed to control it needs permissions that often only the
+root account has. Therefore @code{fsc2} per default gets installed setuid'ed
+to root (i.e. it starts running with the privileges of the root account,
+i.e. with the user and group ID of the root account). But most of the time
+@code{fsc2} drops those privileges and runs with only the effective user ID
+(@code{EUID}) and group ID (@code{EGID}) of the users that started
+@code{fsc2}, i.e. with the permissions that user normally as. Care has been
+taken drop the extr privileges the root account has except for the few places
+where either device files are accessed or log files get written to.
+
+
+Should you feel uneasy about running a program setuid'ed to root
+(and I would sympathize with you if you do;-) there are alternatives, but
+which may requires some extra work. There are two variables in the Makefile,
+@code{OWNER} and @code{GROUP}, that can be used to avoid running @code{fsc2}
+with the full permissions of the root account. If both are set the program
+runs with the @code{UID} and @code{GID} of the account and group specified by
+these variables. If neither of them is set then they default to 'root' and the
+program gets setuid'ed to root, i.e. as in the default case discussed
+above. But if only @code{GROUP} is set then the program becomes setgid'ed to
+this group, i.e. it will run with the @code{UID} of the user but with the
+@code{GID} of the group specified by @code{GROUP} - this may already give it
+high enough access permissions for the device files if the device files are
+set up acordingly (i.e. their permission bits are set to allow read and write
+access to members of this group). It's also possible to specify @code{OWNER}
+alone and in this case the program runs with the @code{UID} of that process
+but the GID of the user.
+
+
+In the most simple case where you didn't set these variables (or both to
+@code{root}) and @code{fsc2} has in principle all permissions the root account
+has you don't have to care about the permission settings for the device files.
+
+
+In all other cases you have to make sure that either the account the program
+belongs to or the group it belongs to has the necessary permissions to read
+and write the required device files. If both @code{OWNER} and @code{GROUP} are
+set, the device files must be readable and writable by either that account or
+that group (or both). If only @code{OWNER} but not @code{GROUP} is set they
+must be accesible by the account specified by @code{OWNER}.  And if only
+@code{GROUP} but not @code{OWNER} is set the must be readable and writable by
+that group. Please note that if you change the access permissions of the
+device files on some systems they may get reset by the system to what it
+believes to be more secure, e.g. on a reboot or as part of some daily system
+maintenance tasks etc. (or because you use udev and the device files get
+deleted on shutodwn and re-created on boot - but this can be handled by
+setting up @code{udev} correctly, i.e. to create the device files with the
+necessary permissions and ownnerships being set).
+
+
+One possible scenario is to create an account for @code{fsc2} with extremely
+low permissions (even logging in can be disabled) and set USER to that
+account, but set @code{GROUP} to a group that has read and write acces
+permissions for the device files that are going to be required. This
+could be the @code{uucp} (or @code{dialout}) group that typically has the
+necessary permissions for the accessing the device files for the
+serial ports. Of course, you need to allow read and write access for
+all other device files (e.g. GPIB card, PCI data acquisition cards
+etc.) for this group or make the account @code{fsc2} is running under member
+of the groups that have read and write access permissions to these
+devce files.
+
+
+@node Preparing for installation, Compiling and Installion, Security issues, Installation
+@section Preparing for installation
+
+After installing the required tools and libraries (see above) and extracting
+the archive with the destribution of @code{fsc2} go into the newly created
+directory @file{fsc2}. Now you have to set up @code{fsc2} for your system and
+requirements. You can use two methods. You either edit the @file{Makefile}
+directly and change the variables at its top. Alternatvely, go into the
+@file{machines} subdirectory and copy the file @file{template.nowhere} to a
+file with the fully qualified hostname of your machine (i.e. its full name,
+including the domain name) as its name. Now edit this file and it will
+automatically get evaluated during the make process. This is probably more
+convenient. When you edit the @file{Makefile} you will have to do it again
+each time you install a new version. In contrast the file in the
+@file{machines} subdirectory can just be copied from an existing installation
+to a new version and everything should stay the same.
+
+
+Now here follows a description of the variables that can be set to change
+the way @code{fsc2} is created and installed (which is more or less identical
+to the comments in the Makefile as well as the template for the machine
+file in the 'machine' directory):
+
+
+Normally, @code{fsc2} and all auxiliary files needed will be installed below
+@file{/usr/local/} (in @file{/usr/local/bin/}, @file{/usr/local/lib/fsc2/},
+@file{/usr/local/info/} and @file{/usr/local/share/doc/}). To change this
+location edit the lines defining the variable @code{prefix} in the
+@file{Makefile} or the file you're setting up for your machine.
+
+
+If you're on a rather old system that doesn't support linker version scripts
+(probably on a system with a 2.2 or 2.4 kernel) you may need to define the
+variable @code{NO_VERSION_SCRIPTS}.
+
+
+The next two variables, @code{OWNER} and @code{GROUP}, will be used when
+setting the owner of all the files that will be installed as well as its
+group. See the preceeding section for all the details and security
+implications.
+
+
+The variable @code{DEF_INCL_DIR} sets a default directory for @code{EDL}
+include files (see the documentation for the @code{EDL} @code{#INCLUDE}
+directive for details).
+
+
+The next lines are for setting the GPIB library that you are going to use.
+You may set the first variable, @code{GPIB_LIBRARY}, either to
+@table @samp
+@item @code{LLP}
+for the old Linux Lab Project library
+@item @code{SLG}
+for the updated version of the LLP library, now hosted on SourceForge
+@item @code{NI}
+for the newer National Instruments library (but up until know I haven't got
+that to work correctly),
+@item @code{NI_OLD}
+ for the old National Instruments library (you can distinguish them from the
+include file they install, if it's @file{ni488.h} then it's the newer version,
+if it's @file{ugpib.h} it's the older one)
+@item @code{JTT}
+for the library I wrote for some ISA GPIB cards
+@item @code{NONE}
+if you don't use any GPIB cards
+@end table
+
+In the last case @code{fsc2} won't be able to run experiments requiring devices
+that are controlled via the GPIB bus (but you still can test such @code{EDL}
+programs). Use this option only if you either want to built a test
+version or if all your devices are controlled via other means (i.e via
+serial ports, are PCI or ISA cards, Rulbus devices or are controlled
+via the LAN).
+
+
+If you use the SourceForge driver and library you also may have to define
+the name of the GPIB card as it is set in the GPIB configuration file
+by defining the variable @code{GPIB_CARD_NAME} (the default is @code{"gpib0"}).
+
+
+If you use the National Instruments GPIB driver you can set the location where
+@code{fsc2} will expect the GPIB configuration file, @file{gpib.conf} via
+the variable @code{GPIB_CONF_FILE} (this is only needed for the National
+Instruments library, in all other cases @code{fsc2} doesn't need to know
+about this file). But usually there is no reason to change the default value,
+which is @file{/etc/gpib.conf}.
+
+For he new National Instruments library you can also set the variable
+@code{CIB_FILE}. If this is set the @code{Makefile} will try to link
+against this file. By linking in this file the dynamic library will only
+be loaded when the first call is made into the library, otherwise the
+library gets loaded on start of the program. To be able to link the file
+in the exact location of the file is needed.
+
+
+While running @code{fsc2} may write out information about the activity on the
+GPIB bus into a log file. You can change the default log file
+@file{/tmp/fsc2_gpib.log} to something appropriate for your setup (or even to
+@file{/dev/null}) by setting the variable @code{GPIB_LOG_FILE}. You can also
+set the verbosity of the logs by changing the variable @code{GPIB_LOG_LEVEL}
+to either @code{HIGH}, @code{MEDIUM}, @code{LOW} or @code{OFF}. To help me
+find bugs in the device modules setting it to @code{HIGH} is recommended. But
+note that the file can get rather large, so better have it on a partition
+where there is a lot of free space. In order not to have it grow indefinitely
+each time a new experiment is started the log file is truncated to zero
+length, so it contains only information about the last experiment you run.
+
+
+If the header files for the GPIB library aren't in either '/usr/include'
+or '/usr/local/include' you will have to tell @code{fsc2} where to look for
+them by setting the variable GPIB_HEADER_DIR accordingly.
+
+
+The next two variables, @code{NUM_SERIAL_PORTS} and @code{SERIAL_LOCK_DIR} are
+used for dealing with the serial ports. @code{NUM_SERIAL_PORTS} should be set
+to the number of serial ports that your computer has (or to the number you
+want @code{fsc2} to have access to). If the variable is not set (or set to 0)
+serial ports can't be used.
+
+
+@code{SERIAL_LOCK_DIR} must be a string with the name of the directory where
+@code{UUCP} type lock files for the serial ports are created (there is a
+convention that programs opening a serial port create such a lock file that
+contains the process ID (PID) of the program as a decimal ASCII number, so
+that other programs can check if the port is already in use and by
+whom). According to version 2.2 of the Filesystem Hierachy Standard this
+directory should be @file{/var/lock}, but on old systems also
+@file{/usr/spool/locks} and @file{/usr/spool/uucp} were commonly used, so this
+can be adjusted via this variable. If you don't want lock files for the serial
+port to be created simply don't define this variable. A possible problem
+arises if you use programs creating lock files not in the HDB UUCP format (the
+PID being stored in a ten byte string, left-padded with spaces and with a
+trailing newline). In this case @code{fsc2} will not try to remove stale lock
+files and instead print an error message to the terminal that the lock file
+has to be removed manually.
+
+
+While running @code{fsc2} may write out information about the activity on the
+serial ports into a log file. You can change the default log file
+@file{/tmp/fsc2_serial.log} to something appropriate for your setup (or even to
+@file{/dev/null}) via the variable @code{SERIAL_LOG_FILE}. You can also set
+the verbosity of the logs by changing the variable @code{SERIAL_LOG_LEVEL} to
+either @code{HIGH}, @code{MEDIUM}, @code{LOW} or @code{OFF}. To help me find
+bugs in the device modules setting it to @code{HIGH} is recommended.  But note
+that the file can get rather large, so better have it on a partition with lots
+of free space. In order not to have it grow indefinitely each time a new
+experiment is started the log file is truncated to zero length, so it contains
+only information about the last experiment you run.
+
+
+If there are devices controlled via the LAN also a log file will get
+generated for keeping track of the communications. Again, you can change
+the default log file @file{/tmp/fsc2_lan.log} to something else(or even to
+@file{/dev/null}) via the variable @code{LAN_LOG_FILE}. And you can also set
+the verbosity of the logs by changing the variable @code{LAN_LOG_LEVEL} to
+either @code{HIGH}, @code{MEDIUM}, @code{LOW} or @code{OFF}.
+
+
+Via the @code{EDITOR} variable you can set the editor that gets invoked
+by @code{fsc2} by default when the user klicks on the @code{Edit} button
+or wants to send a bug report. The user can still override this setting by
+setting the  @code{EDITOR} environment variable.
+
+
+By setting the variable @code{BROWSER} you can select the default browser 
+to use when the @code{Help} button gets pressed and the manual is to be shown.
+Currently supported are netscape, mozilla, firefox, opera, konqueror,
+galeon, lnyx and w3m (but a user can still override this by setting an
+environment variable named '@code{BROWSER}).
+
+
+The @code{WITH_NI6601}, @code{WITH_PCI_MIO_16E_1}, @code{WITH_ME6000},
+@code{WITH_WITIO_48} and @code{WITH_RS_SPEC10} variables are only needed when
+support for the National Instruments 6601 GPCT card, the National Instruments
+PCI-MIO-16E-1 card, the Meilhaus Electronic 6000 or 6100 DAC card, the Wasco
+WITIO-48 DIO card or the Roper Scientific Spec-10 CCD camera are required. In
+these cases the lines where these variables are defined must be uncommented
+and the additional variables for the include paths and the exact locations for
+the required libraries may have to be changed. Please see the comments in the
+@file{Makefile} or the template file in the @file{machines} directory for
+details. Please note that defining @code{WITH_RS_SPEC10} will lead to a few
+warnings during the compilation of the corresponding module of @code{fsc2}
+since the header files for the PVCAM library for the Roper Scientific Spec-10
+CCD have some issues I can't do anything about.
+
+
+Moreover, support for the National Instruments PCI-MIO-16E-1 and the
+6601 GPCT cards, the Meilhaus ME6000 and ME6100 DAQ and the Wasco
+WITIO-48 DIO card requires that the drivers and libraries for the
+cards (which are part of @code{fsc2}) are already successfully install,
+otherwise the corresponding modules can't be built. For support for
+the Roper Scientific CCD Spec-10 camera the PVCAM library supplied by
+Roper Scientific is required and also must be installed together with
+its header files before you should try to compile @code{fsc2}.
+
+
+The @code{WITH_HTTP_SERVER} variable tells if support for the web server
+should be built into @code{fsc2}. Just comment out the line and the web server
+won't be available. If the web server gets included into @code{fsc2} the next
+variable, @code{DEFAULT_HTTP_PORT}, determines on which port the web server
+will listen for incoming connections by default (use a number above 1023,
+lower numbered ports are only accessible by programs with root privileges). A
+reasonable choice is 8080.
+
+
+The variable @code{NO_MAIL} can be defined if you don't wish that an email
+gets send automatically to me (or someone else adjustable via the variable
+@code{MAIL_ADDRESS}, so below) in case the program crashes.
+
+
+Normally, @code{fsc2} will try to send mails through the standard
+mail system, i.e. @code{sendmail} or one of the possible replacements.
+If you don't have @code{sendmail} or a replacement installed but want
+to send mail anyway you can built @code{fsc2} to use its built-in mail
+transport agent. For this define the variable @code{USE_FSC2_MTA}. If
+you're on a IPv6 network please also define the variable @code{USE_IPv6}.
+
+
+The final variable to be set, @code{MAIL_ADDRESS}, is the email address of the
+person that will receive bug reports and notifications if @code{fsc2}
+crashes. Usually, you should not change this variable except when you apply
+changes to the program on your own. In this case sending these kind of mails
+to me obviously doesn't make too much sense... Another obvious reason for
+changing it would be that the machine isn't connected to the internet.
+
+
+@subsection Device setup
+
+For each device there exists a configuration file in the @file{config}
+subdirectory. In most cases you don't have to change anything there,
+but e.g. for devices controlled via a serial port by may have to
+set the number of the port in the device's configuration file and
+for devices controlled via the LAN its IP number. Please take the time
+and have a look at the configuration files for the devices you are planning
+to use, what can be adjusted should be documented in the individual files.
+
+
+
+@node Compiling and Installion, , Preparing for installation, Installation
+@section Compiling and Installion
+
+
+Now you're ready to go into the main directory of the package and type
+@code{make}. This may take some time to finish. In principle no warnings should
+show up during the compilation (at least on systems with a newer libc and if
+my GPIB library is used), but warnings may occur when the documentation is
+created and some of the required tools are not available. It may even happen
+that the make process stops with an error message during this stage
+(i.e. while making the documentation). This does @strong{not} mean that the
+program didn't compile succesfully, only that parts of the documentation could
+not be created.
+
+
+Don't try to invoke @code{make} from one of the subdirectories. While in
+some cases this might work, i.e. things in the subdirectory will be
+created, in most cases it won't even work that far.
+
+
+If you get more than a few warnings (about problems with @code{fsc2}, not
+header files included by @code{fsc2}) during the compilation stage of the
+program or if the make process fails completely please send me an email with
+the output of make. You can save the output of make to a file,
+e.g. @file{makelog}, by running make with the command line
+@example
+make > makelog 2>&1
+@end example
+@noindent
+if you're using the Bourne or Korn shell (sh or ksh) or bash. Use
+@example
+make >& makelog
+@end example
+@noindent
+if you use the C shell (csh) or tcsh.
+
+
+When the compilation of the program succeeds (even though building the
+documentation failed at some stage), you can now install the program
+with the command
+@example
+make install
+@end example
+@noindent
+Normally you will need root privileges to do this. If making the
+documentation failed with an error also its installion will fail,
+but that's not something to worry too much about...
+
+
+If you want to you can also try to test your built of @code{fsc2} before
+installation by running
+@example
+make test
+@end example
+@noindent
+This will make @code{fsc2} run a set of @code{EDL} scripts that (hopefully)
+test most of its built-in functions at least once. Be prepared for lots of
+windows popping up during the test run, displaying some rather strange
+graphics.  Normally the test should run without any errors, otherwise you
+probably should contact me and complain. All these tests don't access any of
+the devices, writing a test suite for the supported devices is still on my
+to-do list.
+

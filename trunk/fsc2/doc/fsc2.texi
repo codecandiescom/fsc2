@@ -26,7 +26,7 @@
 
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate August 25, 2006
+@set lastupdate August 26, 2006
 @iftex
 @afourpaper
 @end iftex
@@ -101,6 +101,7 @@ modules and lots of further topics.
 * Cloning Devices::             Creating modules for identical devices
 * Internals::                   How @code{fsc2} works internally
 * Modules::                     How to create new modules
+* Installation::                How to install the program
 * Device Reference::            List of devices and their functions
 * Reserved Words::              List of all reserved words
 * EDL Mode for Emacs and VIM::  Support for editing with emacs
@@ -151,6 +152,7 @@ translation approved by the Free Software Foundation.
 @include cloning.texi
 @include internals.texi
 @include modules.texi
+@include install.texi
 @include dev_ref.texi
 @include reserved.texi
 @include emacs.texi
