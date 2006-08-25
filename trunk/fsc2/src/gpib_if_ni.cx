@@ -41,8 +41,6 @@ int gpib_dev_setup( GPIB_Dev_T * /* temp_dev */ );
  *----------------------------------------------------------------*/
 
 
-#define CONTROLLER  "gpib0"      /* symbolic name of the controller */
-
 #define TEST_BUS_STATE                                               \
         if ( ! gpib_is_active )                                      \
         {                                                            \
@@ -312,9 +310,6 @@ int gpib_init_device( const char * device_name,
                  Fsc2_Internals.state == STATE_FINISHED ||
                  Fsc2_Internals.mode  == EXPERIMENT  );
 
-    if ( ! strcmp( device_name, CONTROLLER ) )
-        return SUCCESS;
-
     if ( ll > LL_ERR )
         gpib_log_function_start( "gpib_init_device", device_name );
 
@@ -340,6 +335,16 @@ int gpib_init_device( const char * device_name,
         if ( ll > LL_NONE )
             gpib_log_function_end( "gpib_init_device", device_name );
         return FAILURE;
+    }
+
+    /* Nothing needs to be done for the controlling card itself it's
+       online per default */
+
+    if ( devices[ i ].flags & IS_MASTER )
+    {
+        if ( ll > LL_NONE )
+            gpib_log_function_end( "gpib_init_device", device_name );
+        return SUCCESS;
     }
 
     if ( devices[ i ].is_online )

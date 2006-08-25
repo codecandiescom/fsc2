@@ -40,26 +40,26 @@ The following tools and libraries are needed to compile, install and
 run @code{fsc2}:
 @table @samp
 @item @code{gmake}
-the GNU version of @code{make} (see @url{http://www.gnu.org/software/make/})
+GNU version of @code{make} (see @url{http://www.gnu.org/software/make/})
 @item @code{gcc}
-the GNU C compiler (see @url{http://gcc.gnu.org/}, but other C compilers
+GNU C compiler (see @url{http://gcc.gnu.org/}, but other C compilers
 probably will also do)
 @item @code{flex}
-the fast lexical analyzer (see @url{http://flex.sourceforge.net/})
+fast lexical analyzer (see @url{http://flex.sourceforge.net/})
 @item @code{bison}
-the GNU general purpose parser Generator (see
+GNU general purpose parser generator (see
 @url{http://www.gnu.org/software/bison/})
 @item @code{install}
 from the GNU coreutils package (see
 @url{http://www.gnu.org/software/coreutils/})
 @item @code{sed}
-the GNU strean editor (see @url{http://www.gnu.org/software/sed/})
+(GNU version of) stream editor (see @url{http://www.gnu.org/software/sed/})
 @item XForms library
-(version 0.89 or higher) with development package, i.e. the header files (see
+(version 0.89 or higher) with development package, i.e.@: the header files (see
 @url{http://savannah.nongnu.org/projects/xforms/})
 @item GPIB library
-@code{fsc2} can also be compiled and run without it but with restricte
-functionality, see below.
+@code{fsc2} can also be compiled and run without a GPIB library but with
+restricte functionality, see below.
 @end table
 
 Optionally, you should have:
@@ -114,10 +114,10 @@ GNU data compression program (see @url{http://www.gnu.org/software/gzip/})
 
 GPIB support requires a library and a driver to interface GPIB cards to
 installed in your machine (if you don't have a GPIB card @code{fsc2} can
-also compiled without GPIB support). You can choose between the following
-ones:
+also compiled without GPIB support, but many of the devices will then be
+not usable). You can choose between the following ones:
 @table @samp
-@item National Instruments
+@item National Instruments driver and library
 There exist two versions of the library if have been trying. The older, beta
 driver and library (version 0.86) works fine, but only with 2.4 kernels.  The
 newer driver and library (version 2.xx, supposed to work also with 2.6
@@ -128,7 +128,7 @@ but can't find it on the National Insttruments web site anymore send me an
 email, I still have a copy of it around somewhere. The newe version you can
 download from @url{http://www.natinst.com}.
 
-@item Linux Lab Project
+@item Linux Lab Project driver and library
 This is a very old driver (only working with 2.0 kernels) and library,
 so you probably don't really want to use it anymore. You can download
 it from @url{http://www.llp.fu-berlin.de}.
@@ -141,8 +141,8 @@ number of different GPIB cards. You can download it from
 
 @item my own driver and library
 This driver and library should work for 2.0 to 2.6 kernels and supports
-mostly National Instruments ISA GPIB cards, but I was told that also
-cards by some other manufacturers can be used. You can download it
+National Instruments ISA GPIB cards (but I was told that also cards by
+some other manufacturers can be used with teh driver). You can download it
 from @url{http://www.physik.fu-berlin.de/~toerring/GPIB.tar.gz}.
 @end table
 
@@ -151,14 +151,16 @@ From the documentations of the Linux Lab Porject and SourceForge libraries
 and the one I have written it should already be clear that a GPIB
 configuration file (that is typically @file{/etc/gpib.conf}) is required
 for the accompanying libraries to work correctly. In this configuration
-file all devices to be used with are listed with their respetive properties.
+file all devices to be used with must be listed with their respective
+properties.
 
 
-For the National Instruments libraries the such a configuration file isn't
-needed, but @code{fsc2} does. So you have to create one, following the
-conventions used in the configuration files for the Linux Lab Project library,
-which I also (mostly) used for my library. A typical entry in this file looks
-like the following
+For the National Instruments libraries such a configuration file isn't
+needed, but @code{fsc2} does require it to find out about the available
+devices. So you have to create one, following the conventions used in
+the configuration files for the Linux Lab Project library, which I also
+(mostly) used for my library. A typical entry in this file looks like
+the following
 @example
 device @{
         name        = "TDS744A"   /* symbolic name */
@@ -247,11 +249,11 @@ libraries and include support for the devices.
 To be able to read from and write to the device files for the devices
 @code{fsc2} is supposed to control it needs permissions that often only the
 root account has. Therefore @code{fsc2} per default gets installed setuid'ed
-to root (i.e. it starts running with the privileges of the root account,
-i.e. with the user and group ID of the root account). But most of the time
+to root (i.e.@: it starts running with the privileges of the root account,
+i.e.@: with the user and group ID of the root account). But most of the time
 @code{fsc2} drops those privileges and runs with only the effective user ID
 (@code{EUID}) and group ID (@code{EGID}) of the users that started
-@code{fsc2}, i.e. with the permissions that user normally as. Care has been
+@code{fsc2}, i.e.@: with the permissions that user normally as. Care has been
 taken drop the extr privileges the root account has except for the few places
 where either device files are accessed or log files get written to.
 
@@ -263,12 +265,12 @@ which may requires some extra work. There are two variables in the Makefile,
 with the full permissions of the root account. If both are set the program
 runs with the @code{UID} and @code{GID} of the account and group specified by
 these variables. If neither of them is set then they default to 'root' and the
-program gets setuid'ed to root, i.e. as in the default case discussed
+program gets setuid'ed to root, i.e.@: as in the default case discussed
 above. But if only @code{GROUP} is set then the program becomes setgid'ed to
-this group, i.e. it will run with the @code{UID} of the user but with the
+this group, i.e.@: it will run with the @code{UID} of the user but with the
 @code{GID} of the group specified by @code{GROUP} - this may already give it
 high enough access permissions for the device files if the device files are
-set up acordingly (i.e. their permission bits are set to allow read and write
+set up acordingly (i.e.@: their permission bits are set to allow read and write
 access to members of this group). It's also possible to specify @code{OWNER}
 alone and in this case the program runs with the @code{UID} of that process
 but the GID of the user.
@@ -291,7 +293,7 @@ device files on some systems they may get reset by the system to what it
 believes to be more secure, e.g. on a reboot or as part of some daily system
 maintenance tasks etc. (or because you use udev and the device files get
 deleted on shutodwn and re-created on boot - but this can be handled by
-setting up @code{udev} correctly, i.e. to create the device files with the
+setting up @code{udev} correctly, i.e.@: to create the device files with the
 necessary permissions and ownnerships being set).
 
 
@@ -317,13 +319,14 @@ directory @file{fsc2}. Now you have to set up @code{fsc2} for your system and
 requirements. You can use two methods. You either edit the @file{Makefile}
 directly and change the variables at its top. Alternatvely, go into the
 @file{machines} subdirectory and copy the file @file{template.nowhere} to a
-file with the fully qualified hostname of your machine (i.e. its full name,
-including the domain name) as its name. Now edit this file and it will
-automatically get evaluated during the make process. This is probably more
-convenient. When you edit the @file{Makefile} you will have to do it again
-each time you install a new version. In contrast the file in the
-@file{machines} subdirectory can just be copied from an existing installation
-to a new version and everything should stay the same.
+file with the fully qualified hostname of your machine (i.e.@: its full name,
+including the domain name - but please make also sure that your machine has a
+domain name set!) as its name. Now edit this file and it will automatically
+get evaluated during the make process. This is probably more convenient. When
+you edit the @file{Makefile} you will have to do it again each time you
+install a new version. In contrast the file in the @file{machines}
+subdirectory can just be copied from an existing installation to a new version
+and everything should stay the same.
 
 
 Now here follows a description of the variables that can be set to change
@@ -375,17 +378,19 @@ for the library I wrote for some ISA GPIB cards
 if you don't use any GPIB cards
 @end table
 
-In the last case @code{fsc2} won't be able to run experiments requiring devices
-that are controlled via the GPIB bus (but you still can test such @code{EDL}
-programs). Use this option only if you either want to built a test
-version or if all your devices are controlled via other means (i.e via
-serial ports, are PCI or ISA cards, Rulbus devices or are controlled
-via the LAN).
+
+In the last case (i.e.@: if @code{GPIB_LIBRARY} is set to @code{NONE})
+@code{fsc2} won't be able to run experiments requiring devices that are
+controlled via the GPIB bus (but you still can test such @code{EDL}
+programs). Use this option only if you either want to built a test version or
+if all your devices are controlled via other means (i.e via serial ports, are
+PCI or ISA cards, Rulbus devices or are controlled via the LAN).
 
 
-If you use the SourceForge driver and library you also may have to define
-the name of the GPIB card as it is set in the GPIB configuration file
-by defining the variable @code{GPIB_CARD_NAME} (the default is @code{"gpib0"}).
+If you use the SourceForge or the Linux Lab Project driver and library you
+also may have to define the name of the GPIB card as it is set in the GPIB
+configuration file by defining the variable @code{GPIB_CARD_NAME} (the
+default is @code{"gpib0"}).
 
 
 If you use the National Instruments GPIB driver you can set the location where
@@ -519,7 +524,7 @@ gets send automatically to me (or someone else adjustable via the variable
 
 
 Normally, @code{fsc2} will try to send mails through the standard
-mail system, i.e. @code{sendmail} or one of the possible replacements.
+mail system, i.e.@: @code{sendmail} or one of the possible replacements.
 If you don't have @code{sendmail} or a replacement installed but want
 to send mail anyway you can built @code{fsc2} to use its built-in mail
 transport agent. For this define the variable @code{USE_FSC2_MTA}. If
@@ -556,13 +561,13 @@ show up during the compilation (at least on systems with a newer libc and if
 my GPIB library is used), but warnings may occur when the documentation is
 created and some of the required tools are not available. It may even happen
 that the make process stops with an error message during this stage
-(i.e. while making the documentation). This does @strong{not} mean that the
+(i.e.@: while making the documentation). This does @strong{not} mean that the
 program didn't compile succesfully, only that parts of the documentation could
 not be created.
 
 
 Don't try to invoke @code{make} from one of the subdirectories. While in
-some cases this might work, i.e. things in the subdirectory will be
+some cases this might work, i.e.@: things in the subdirectory will be
 created, in most cases it won't even work that far.
 
 

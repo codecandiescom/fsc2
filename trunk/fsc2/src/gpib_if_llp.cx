@@ -34,9 +34,6 @@
  *----------------------------------------------------------------*/
 
 
-#define CONTROLLER  "gpib0"      /* symbolic name of the controller */
-
-
 #define SRQ      0x40    /* SRQ bit in device status register */
 #define TIMEOUT  T10s    /* GPIB timeout period set at initialization */
 
@@ -201,7 +198,7 @@ static int gpib_init_controller( void )
 
     fd_list = get_fd_list( );
 
-    if ( gpib_init_device( CONTROLLER, &controller ) != SUCCESS )
+    if ( gpib_init_device( GPIB_CARD_NAME, &controller ) != SUCCESS )
     {
         if ( fd_list )
             T_free( fd_list );
@@ -361,7 +358,7 @@ int gpib_init_device( const char * device_name,
                  Fsc2_Internals.state == STATE_FINISHED ||
                  Fsc2_Internals.mode  == EXPERIMENT  );
 
-    if ( ! gpib_is_active && strcmp( device_name, CONTROLLER ) )
+    if ( ! gpib_is_active && strcmp( device_name, GPIB_CARD_NAME ) )
     {
         strcpy( gpib_error_msg, "GPIB bus not initialized yet.\n" );
         return FAILURE;
@@ -960,7 +957,7 @@ int gpib_serial_poll( int             device,
                  Fsc2_Internals.state == STATE_FINISHED ||
                  Fsc2_Internals.mode  == EXPERIMENT  );
 
-    TEST_BUS_STATE;              /* bus not initialised yet ? */
+    TEST_BUS_STATE;              /* bus not initialized yet ? */
 
     if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
     {
@@ -1154,7 +1151,7 @@ void gpib_log_message( const char * fmt,
  * flag for the GPIB board device file. In the first function we
  * built up a list with all open file descriptor from the entries
  * in the fd subdirectory in the /proc directory for the current
- * process. Then the function for initialisation of the GPIB board
+ * process. Then the function for initialization of the GPIB board
  * gets called where the device file is opened. Afterwards, the
  * second function gets invoked that compares the fd's in the list
  * with the entries in the /proc/self/fd directory and sets the

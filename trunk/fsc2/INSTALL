@@ -310,9 +310,10 @@ version or if all your devices are controlled via other means (i.e via
 serial ports, are PCI or ISA cards, Rulbus devices or are controlled
 via the LAN).
 
-If you use the SourceForge driver and library you also may have to define
-the name of the GPIB card as it is set in the GPIB configuration file
-by defining the variable GPIB_CARD_NAME (the default is "gpib0").
+If you use the SourceForge or the Linux Lab Project driver and library you
+also may have to define the name of the GPIB card as it is set in the GPIB
+configuration file by defining the variable GPIB_CARD_NAME (the default is
+"gpib0").
 
 
 If you use the National Instruments GPIB driver you can set the location

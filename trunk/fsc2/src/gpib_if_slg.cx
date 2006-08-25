@@ -930,7 +930,7 @@ int gpib_serial_poll( int             device,
                  Fsc2_Internals.state == STATE_FINISHED ||
                  Fsc2_Internals.mode  == EXPERIMENT  );
 
-    TEST_BUS_STATE;              /* bus not initialised yet ? */
+    TEST_BUS_STATE;              /* bus not initialized yet ? */
 
     if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
     {
@@ -1123,7 +1123,7 @@ void gpib_log_message( const char * fmt,
  * flag for the GPIB board device file. In the first function we
  * built up a list with all open file descriptor from the entries
  * in the fd subdirectory in the /proc directory for the current
- * process. Then the function for initialisation of the GPIB board
+ * process. Then the function for initialization of the GPIB board
  * gets called where the device file is opened. Afterwards, the
  * second function gets invoked that compares the fd's in the list
  * with the entries in the /proc/self/fd directory and sets the
