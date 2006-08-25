@@ -293,7 +293,7 @@ static void fonts_init( void )
     if ( * ( ( char * ) Xresources[ AXISFONT ].var ) != '\0' )
         G.font = XLoadQueryFont( G.d, ( char * ) Xresources[ AXISFONT ].var );
 
-    /* If tat didn't work out try to use one of the default fonts */
+    /* If that didn't work out try to use one of the default fonts */
 
     if ( ! G.font )
         G.font = XLoadQueryFont( G.d, GI.DEFAULT_AXISFONT_1 );

@@ -515,8 +515,8 @@ bool xforms_init( int  * argc,
         if ( ( font = XLoadQueryFont( display,
                                       ( char * ) Xresources[ AXISFONT ].var ) )
              == NULL )
-            fprintf( stderr, "Error: Font '%s' not found.\n",
-                     ( char * ) Xresources[ AXISFONT ].var );
+            fprintf( stderr, "Error: Font '%s' requested for axes not "
+                     "found.\n", ( char * ) Xresources[ AXISFONT ].var );
         else
             XFreeFont( display, font );
     }

@@ -14,7 +14,8 @@ run fsc2:
  5) install
  6) sed
  7) XFORMS library (version 0.89 or higher) and development package
-    (a properly installed header file for XForms is required)
+    (a properly installed header file for XForms is required). You can
+	download it from http://savannah.nongnu.org/projects/xforms/.
  8) GPIB library (fsc2 can also be compiled and run without it but
     with restricted functionality, see below)
 
@@ -47,24 +48,7 @@ To create the complete documentation beside Perl you also need
 
 
 
-A1) Graphics support
---------------------
-
-Graphics in fsc2 are on top of the XFORMS package. While it works with
-the older XFORMS library version 0.89, which may be still available in
-binary only form you may prefer to use the newer version 1.0.90 version
-which can be downloaded from
-
-  http://savannah.nongnu.org/projects/xforms/
-
-or, if it isn't available from there for some reasons a working version
-of the sources (but probably not the newest) can be downloaded from
-
-  http://www.physik.fu-berlin.de/~toerring/xforms-1.0-release.tgz
-
-
-
-A2) GPIB support
+A1) GPIB support
 ----------------
 
 GPIB support requires a library and a driver to interface GPIB cards to
@@ -166,7 +150,7 @@ support built into fsc2).
 
 
 
-A3) Support for other devices
+A2) Support for other devices
 -----------------------------
 
 Devices that are controlled via the serial port are always supported (at
@@ -182,7 +166,7 @@ are controlled via an ISA or PCI card) or are controlled via the Rulbus
 (Rijksuniversiteit Leiden BUS). All of these require an additional library
 and a kernel driver to be installed prior to building fsc2. If these come
 from the makers of the device (e.g. Roper Scientific Spec-10 CCD camera)
-please see the documentation coming with the device on how to that. For
+please see the documentation coming with the device on how to do that. For
 the other devices the sources for the libraries and kernel drivers are
 part of fsc2, see the subdirectories 'me6x00', 'ni6601', 'ni_daq',
 'rulbus' and 'witio_48'). You must create and install the libraries and
@@ -328,13 +312,14 @@ via the LAN).
 
 If you use the SourceForge driver and library you also may have to define
 the name of the GPIB card as it is set in the GPIB configuration file
-by defining the variable GPB_CARD_NAME (the default is "gpib0").
+by defining the variable GPIB_CARD_NAME (the default is "gpib0").
 
 
 If you use the National Instruments GPIB driver you can set the location
-where fsc2 will expect the GPIB configuration file, gpib.conf (in all
-other cases fsc2 doesn|t need to know about this file). But usually there
-is no reason to change the default value, which is /etc/gpib.conf.
+where fsc2 will expect the GPIB configuration file, gpib.conf (this is
+only needed for the National Instruments library, in all other cases fsc2
+doesn't need to know about this file). But usually there is no reason to
+change the default value, which is /etc/gpib.conf.
 
 
 While running fsc2 may write out information about the activity on the
@@ -391,6 +376,27 @@ truncated to zero length, so it contains only information about the
 last experiment you run.
 
 
+If there are devices controlled via the LAN also a log file will get
+generated for keeping track of the communications. Again, you can change
+the default log file '/tmp/fsc2_lan.log' to something else(or even to
+'/dev/null') via the variable 'LAN_LOG_FILE'. And you can also set the
+verbosity of the logs by changing the variable LAN_LOG_LEVEL to either
+HIGH, MEDIUM, LOW or OFF.
+
+
+Via the EDITOR variable you can set the editor that gets invoked by fsc2
+by default when the user klicks on the "Edit" button or wants to send a
+bug report. The user can still override this setting by setting the
+EDITOR environment variable.
+
+
+By setting the variable BROWSER you can select the default browser to use
+when the "Help" button gets pressed and the manual is to be shown.
+Currently supported are netscape, mozilla, firefox, opera, konqueror,
+galeon, lnyx and w3m (but a user can still override this by setting an
+environment variable named BROWSER).
+
+
 The WITH_NI6601, WITH_PCI_MIO_16E_1, WITH_ME6000, WITH_WITIO_48 and
 WITH_RS_SPEC10 variables are only needed when support for the National
 Instruments 6601 GPCT or PCI-MIO-16E-1 cards, the Meilhaus Electronic
@@ -426,6 +432,19 @@ ports are only accessible by programs with root privileges). A reasonable
 choice is 8080.
 
 
+The variable NO_MAIL can be defined if you don't wish that an email gets
+send automatically to me (or someone else adjustable via the variable
+MAIL_ADDRESS, so below) in case the program crashes.
+
+
+Normally, fsc2 will try to send mails through the standard mail system,
+i.e. sendmail or one of the possible replacements. If you don't have
+sendmail or a replacement installed but want to send mail anyway you can
+built fsc2 to use its built-in mail transport agent. For this define the
+variable USE_FSC2_MTA. If you're on a IPv6 network please also define the
+variable USE_IPv6.
+
+
 The final variable to be set is the email address of the person that will
 receive bug reports and notifications if fsc2 crashes. Usually, you should
 not change this variable except when you apply changes to the program on
@@ -434,25 +453,20 @@ make too much sense... Another obvious reason for changing it would be that
 the machine isn't connected to the internet.
 
 
-If you're going to use devices connected via the serial port there's
-another thing you've got to check. The program needs to know to which of
-your serial ports a device is connected. This is controlled by an entry
-in the configuration file for the device in the 'config' directory. For
-each device connected via the serial port there's a line like
+C1) Device setup
+----------------
 
-#define SERIAL_PORT     1
-
-which tells the program the number of the serial port the device is
-connected to. Serial ports are numbered starting with 0. So setting
-SERIAL_PORT to 0 means that the device will be accessed via the
-device file '/dev/ttyS0'. In DOS or Windows nomenclature this means
-COM1. The serial port numbered 1 is accessed via 'dev/ttyS1' (or COM2
-in DOS-speak). Make sure to set the correct number or the program will
-complain when it tries to access the device about communication failures.
+For each device there exists a configuration file in the @file{config}
+subdirectory. In most cases you don't have to change anything there,
+but e.g. for devices controlled via a serial port by may have to
+set the number of the port in the device's configuration file and
+for devices controlled via the LAN its IP number. Please take the time
+and have a look at the configuration files for the devices you are planning
+to use, what can be adjusted should be documented in the individual files.
 
 
 
-D) Compiling and Installing
+D) Compiling and Installion
 ===========================
 
 
@@ -511,28 +525,6 @@ should contact me and complain. All these tests don't access any of the
 devices, writing a test suite for the supported devices is still on my
 to-do list.
 
-
-E) Getting started
-==================
-
-The subdirectory 'edl' contains several several EDL programs that you can
-use to get an impression of fsc2 and to become acquainted with the syntax.
-Many of the files in there are just for my private testing purposes and 
-few may not even work. But there are a few that work without any devices
-some of them are:
-
-  a.edl
-  gr.edl
-  qq.edl
-  z.edl
-  zz.edl
-  2d_endor_test.edl
-  2_td.edl
-  tools.edl
-
-Just start by typing 'fsc2 edl/qq.edl' or 'fsc2 edl/z.edl' (assuming you're
-still in fsc2's main directory) and click on the "Start" button to get an
-idea about how fsc2 displays 1- and 2-dimensional data sets.
 
     August 25, 2006                        Much luck, Jens
 
