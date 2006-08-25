@@ -28,7 +28,7 @@
 * Requirements::                Tools required for installation
 * Security issues::             How to avoid security problems
 * Preparing for installation::  Before you type @code{make}
-* Compiling and Installion::    Opions when running @code{make}
+* Compiling and Installation::  Options when running @code{make}
 @end menu
 @end ifinfo
 
@@ -59,7 +59,7 @@ from the GNU coreutils package (see
 @url{http://savannah.nongnu.org/projects/xforms/})
 @item GPIB library
 @code{fsc2} can also be compiled and run without a GPIB library but with
-restricte functionality, see below.
+restricted functionality, see below.
 @end table
 
 Optionally, you should have:
@@ -83,9 +83,9 @@ PNM inage to JPEG converter
 @noindent
 If some of these are missing the basic functionality is still there (without
 mail and addr2line no automatic bug reports can be sent and without Perl you
-won't be able to wrap a GUI around EDL scripts and the built-in web server
-(which also requires the next two utilities) and the utility for displaying
-pulse settings graphically won't work.
+won't be able to wrap a GUI around @code{EDL} scripts and the built-in web
+server (which also requires the next two utilities) and the utility for
+displaying pulse settings graphically won't work.
 
 
 To create the complete documentation beside Perl you also need:
@@ -124,9 +124,9 @@ newer driver and library (version 2.xx, supposed to work also with 2.6
 kernels) hasn't been tested, I didn't even get the driver to compile and
 linking against the library led to the program aborting immediately. I haven't
 any idea yet how to resolve that problem. If you want the older beta-driver
-but can't find it on the National Insttruments web site anymore send me an
-email, I still have a copy of it around somewhere. The newe version you can
-download from @url{http://www.natinst.com}.
+but can't find it on the National Instruments web site anymore send me an
+email, I still have a copy of it around somewhere. You can download the
+newer version from @url{http://www.natinst.com}.
 
 @item Linux Lab Project driver and library
 This is a very old driver (only working with 2.0 kernels) and library,
@@ -142,12 +142,12 @@ number of different GPIB cards. You can download it from
 @item my own driver and library
 This driver and library should work for 2.0 to 2.6 kernels and supports
 National Instruments ISA GPIB cards (but I was told that also cards by
-some other manufacturers can be used with teh driver). You can download it
+some other manufacturers can be used with the driver). You can download it
 from @url{http://www.physik.fu-berlin.de/~toerring/GPIB.tar.gz}.
 @end table
 
 
-From the documentations of the Linux Lab Porject and SourceForge libraries
+From the documentations of the Linux Lab Project and SourceForge libraries
 and the one I have written it should already be clear that a GPIB
 configuration file (that is typically @file{/etc/gpib.conf}) is required
 for the accompanying libraries to work correctly. In this configuration
@@ -174,29 +174,29 @@ device @{
 @}
 @end example
 @noindent
-It specifies a symbolic name for the device, the primary GPIB address (you
-may also specify a secondary GPIB address, following the keyword 'sad'),
-the timeout to be used for communication with the device and a few more
-settings controlling the determination of the end of messages send to and
-read from the device. 'eos' is the character to be used as the end of trans-
-mission (EOS) character (none has to be set when no such character is to be
-used). When 'set-reos' is set he driver stops reading from a device whenever
-the EOS character is encountered in the message, even when the EOI line did
-not get raised while receiving the EOS character. When 'set-xeos' is set
-the EOI line is automatically raised when the EOS character is found in a
-message send to the device (even when there are more characters in the
-message). Setting 'set-bin' will make the driver check all 8 bits of each
-character for identity with the EOS character, while, when unset, only the
-lower 7 bits are tested (the top-most bit is excluded from the comparision).
-Finally, setting 'set-eot' makes the driver raise the EOI line automatically 
-with the last byte of a message send to a device (which is also the default),
-while unsetting it will keep the driver from doing so.
+It specifies a symbolic name for the device, the primary GPIB address (you may
+also specify a secondary GPIB address, following the keyword 'sad'), the
+timeout to be used for communication with the device and a few more settings
+controlling the determination of the end of messages send to and read from the
+device. 'eos' is the character to be used as the end of transmission (EOS)
+character (none has to be set when no such character is to be used). When
+'set-reos' is set he driver stops reading from a device whenever the EOS
+character is encountered in the message, even when the EOI line did not get
+raised while receiving the EOS character. When 'set-xeos' is set the EOI line
+is automatically raised when the EOS character is found in a message send to
+the device (even when there are more characters in the message). Setting
+'set-bin' will make the driver check all 8 bits of each character for identity
+with the EOS character, while, when unset, only the lower 7 bits are tested
+(the top-most bit is excluded from the comparison).  Finally, setting
+'set-eot' makes the driver raise the EOI line automatically with the last byte
+of a message send to a device (which is also the default), while unsetting it
+will keep the driver from doing so.
 
 Beside the entries for the devices another one for the GPIB board itself
 is required:
 @example
 device @{
-        name        = "gpib"        /* symolic name */
+        name        = "gpib"        /* symbolic name */
         pad         = 0             /* primary address */
         sad         = 0             /* secondary address */
         master                      /* flag for controller */
@@ -232,7 +232,7 @@ from the makers of the device (e.g. Roper Scientific Spec-10 CCD camera)
 please see the documentation coming with the device on how to do that. For the
 other devices the sources for the libraries and kernel drivers are part of
 @code{fsc2}, see the subdirectories @file{me6x00}, @file{ni6601},
-@code{ni_daq}, @file{rulbus} and @file{witio_48}). If you need them yo must
+@code{ni_daq}, @file{rulbus} and @file{witio_48}). If you need them you must
 create and install the libraries and kernel drivers before you can create
 @code{fsc2}. Typically it's as easy as going into the subdirectory, typing
 @code{./INSTALL} and answering a few questions. Please refer to the
@@ -254,7 +254,7 @@ i.e.@: with the user and group ID of the root account). But most of the time
 @code{fsc2} drops those privileges and runs with only the effective user ID
 (@code{EUID}) and group ID (@code{EGID}) of the users that started
 @code{fsc2}, i.e.@: with the permissions that user normally as. Care has been
-taken drop the extr privileges the root account has except for the few places
+taken drop the extra privileges the root account has except for the few places
 where either device files are accessed or log files get written to.
 
 
@@ -270,7 +270,7 @@ above. But if only @code{GROUP} is set then the program becomes setgid'ed to
 this group, i.e.@: it will run with the @code{UID} of the user but with the
 @code{GID} of the group specified by @code{GROUP} - this may already give it
 high enough access permissions for the device files if the device files are
-set up acordingly (i.e.@: their permission bits are set to allow read and write
+set up accordingly (i.e.@: their permission bits are set to allow read and write
 access to members of this group). It's also possible to specify @code{OWNER}
 alone and in this case the program runs with the @code{UID} of that process
 but the GID of the user.
@@ -286,15 +286,15 @@ belongs to or the group it belongs to has the necessary permissions to read
 and write the required device files. If both @code{OWNER} and @code{GROUP} are
 set, the device files must be readable and writable by either that account or
 that group (or both). If only @code{OWNER} but not @code{GROUP} is set they
-must be accesible by the account specified by @code{OWNER}.  And if only
+must be accessible by the account specified by @code{OWNER}.  And if only
 @code{GROUP} but not @code{OWNER} is set the must be readable and writable by
 that group. Please note that if you change the access permissions of the
 device files on some systems they may get reset by the system to what it
 believes to be more secure, e.g. on a reboot or as part of some daily system
-maintenance tasks etc. (or because you use udev and the device files get
-deleted on shutodwn and re-created on boot - but this can be handled by
+maintenance tasks etc. (or because you use @code{udev} and the device files
+get deleted on shutdown and re-created on boot - but this can be handled by
 setting up @code{udev} correctly, i.e.@: to create the device files with the
-necessary permissions and ownnerships being set).
+necessary permissions and ownerships being set).
 
 
 One possible scenario is to create an account for @code{fsc2} with extremely
@@ -307,29 +307,29 @@ serial ports. Of course, you need to allow read and write access for
 all other device files (e.g. GPIB card, PCI data acquisition cards
 etc.) for this group or make the account @code{fsc2} is running under member
 of the groups that have read and write access permissions to these
-devce files.
+device files.
 
 
-@node Preparing for installation, Compiling and Installion, Security issues, Installation
+@node Preparing for installation, Compiling and Installation, Security issues, Installation
 @section Preparing for installation
 
 After installing the required tools and libraries (see above) and extracting
-the archive with the destribution of @code{fsc2} go into the newly created
+the archive with the distribution of @code{fsc2} go into the newly created
 directory @file{fsc2}. Now you have to set up @code{fsc2} for your system and
 requirements. You can use two methods. You either edit the @file{Makefile}
-directly and change the variables at its top. Alternatvely, go into the
+directly and change the variables at its top. Alternatively, go into the
 @file{machines} subdirectory and copy the file @file{template.nowhere} to a
 file with the fully qualified hostname of your machine (i.e.@: its full name,
 including the domain name - but please make also sure that your machine has a
 domain name set!) as its name. Now edit this file and it will automatically
-get evaluated during the make process. This is probably more convenient. When
+get evaluated during the make process. This is probably more convenient: when
 you edit the @file{Makefile} you will have to do it again each time you
 install a new version. In contrast the file in the @file{machines}
 subdirectory can just be copied from an existing installation to a new version
 and everything should stay the same.
 
 
-Now here follows a description of the variables that can be set to change
+Now follows a description of all the variables that can be set to change
 the way @code{fsc2} is created and installed (which is more or less identical
 to the comments in the Makefile as well as the template for the machine
 file in the 'machine' directory):
@@ -343,7 +343,7 @@ location edit the lines defining the variable @code{prefix} in the
 
 
 If you're on a rather old system that doesn't support linker version scripts
-(probably on a system with a 2.2 or 2.4 kernel) you may need to define the
+(probably on a system with a 2.0 or 2.2 kernel) you may need to define the
 variable @code{NO_VERSION_SCRIPTS}.
 
 
@@ -364,7 +364,8 @@ You may set the first variable, @code{GPIB_LIBRARY}, either to
 @item @code{LLP}
 for the old Linux Lab Project library
 @item @code{SLG}
-for the updated version of the LLP library, now hosted on SourceForge
+for the updated version of the Linux Lab Project library, now hosted on
+SourceForge
 @item @code{NI}
 for the newer National Instruments library (but up until know I haven't got
 that to work correctly),
@@ -438,7 +439,7 @@ serial ports can't be used.
 convention that programs opening a serial port create such a lock file that
 contains the process ID (PID) of the program as a decimal ASCII number, so
 that other programs can check if the port is already in use and by
-whom). According to version 2.2 of the Filesystem Hierachy Standard this
+whom). According to version 2.2 of the Filesystem Hierarchy Standard this
 directory should be @file{/var/lock}, but on old systems also
 @file{/usr/spool/locks} and @file{/usr/spool/uucp} were commonly used, so this
 can be adjusted via this variable. If you don't want lock files for the serial
@@ -472,14 +473,14 @@ either @code{HIGH}, @code{MEDIUM}, @code{LOW} or @code{OFF}.
 
 
 Via the @code{EDITOR} variable you can set the editor that gets invoked
-by @code{fsc2} by default when the user klicks on the @code{Edit} button
+by @code{fsc2} by default when the user clicks on the @code{Edit} button
 or wants to send a bug report. The user can still override this setting by
 setting the  @code{EDITOR} environment variable.
 
 
 By setting the variable @code{BROWSER} you can select the default browser 
 to use when the @code{Help} button gets pressed and the manual is to be shown.
-Currently supported are netscape, mozilla, firefox, opera, konqueror,
+Currently supported are netscape, mozilla, firefox,Opera, konqueror,
 galeon, lnyx and w3m (but a user can still override this by setting an
 environment variable named '@code{BROWSER}).
 
@@ -551,8 +552,8 @@ to use, what can be adjusted should be documented in the individual files.
 
 
 
-@node Compiling and Installion, , Preparing for installation, Installation
-@section Compiling and Installion
+@node Compiling and Installation, , Preparing for installation, Installation
+@section Compiling and Installation
 
 
 Now you're ready to go into the main directory of the package and type
@@ -562,7 +563,7 @@ my GPIB library is used), but warnings may occur when the documentation is
 created and some of the required tools are not available. It may even happen
 that the make process stops with an error message during this stage
 (i.e.@: while making the documentation). This does @strong{not} mean that the
-program didn't compile succesfully, only that parts of the documentation could
+program didn't compile successfully, only that parts of the documentation could
 not be created.
 
 
@@ -596,7 +597,7 @@ make install
 @end example
 @noindent
 Normally you will need root privileges to do this. If making the
-documentation failed with an error also its installion will fail,
+documentation failed with an error also its installation will fail,
 but that's not something to worry too much about...
 
 

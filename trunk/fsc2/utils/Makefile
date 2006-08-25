@@ -39,13 +39,13 @@ all:
 utils: edl-mod.elc edl.vim
 
 edl-mod.el: edl-mod.el.template $(sdir)/func.c $(cdir)/Functions
-	sed -e 's/BUILTIN_FUNCTION_LIST/$(shell SRC_DIR=$(sdir) ./get_built_in_functions emacs 2>/dev/null)/;s/DEVICE_FUNCTION_LIST/$(shell CONF_DIR=$(cdir) ./get_device_functions emacs 2>/dev/null)/' $< > $@;
+	@sed -e 's/BUILTIN_FUNCTION_LIST/$(shell SRC_DIR=$(sdir) ./get_built_in_functions emacs 2>/dev/null)/;s/DEVICE_FUNCTION_LIST/$(shell CONF_DIR=$(cdir) ./get_device_functions emacs 2>/dev/null)/' $< > $@;
 
 edl-mod.elc: edl-mod.el
 	emacs -batch -f batch-byte-compile edl-mod.el;
 
 edl.vim: edl.vim.template $(sdir)/func.c $(cdir)/Functions
-	sed -e 's/BUILTIN_FUNCTION_LIST/$(shell SRC_DIR=$(sdir) ./get_built_in_functions vim)/;s/DEVICE_FUNCTION_LIST/$(shell CONF_DIR=$(cdir) ./get_device_functions vim)/' $< > $@;
+	@sed -e 's/BUILTIN_FUNCTION_LIST/$(shell SRC_DIR=$(sdir) ./get_built_in_functions vim)/;s/DEVICE_FUNCTION_LIST/$(shell CONF_DIR=$(cdir) ./get_device_functions vim)/' $< > $@;
 
 install: edl-mod.elc
 	$(INSTALL) -m 755 fsc2_guify $(bindir)

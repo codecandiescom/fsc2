@@ -14,7 +14,7 @@ my $file = $ENV{ 'SRC_DIR' } . "/func.c";
 open my $f, "<$file" or die;
 
 while ( <$f> ) {
-	last if /^\s*Func_T\s+Def_Fncts\s*\[\s*\]\s*=\s*/;
+	last if /^\s*static\s+Func_T\s+Def_fncts\s*\[\s*\]\s*=\s*/;
 }
 
 die unless <$f> =~ /\s*\{\s*$/;
