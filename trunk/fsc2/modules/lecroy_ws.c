@@ -1580,9 +1580,9 @@ Var_T *digitizer_averaging( Var_T * v )
 
     too_many_arguments( v );
 
-    lecroy_ws.is_avg_setup[ channel ] = SET;
-    lecroy_ws.source_ch[ channel ]    = source_ch;
-    lecroy_ws.num_avg[ channel ]      = num_avg;
+    lecroy_ws.is_avg_setup[ LECROY_WS_MATH ] = SET;
+    lecroy_ws.source_ch[ LECROY_WS_MATH ] = source_ch;
+    lecroy_ws.num_avg[ LECROY_WS_MATH ] = num_avg;
 
     return vars_push( INT_VAR, 1L );
 }

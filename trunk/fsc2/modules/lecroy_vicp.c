@@ -33,7 +33,7 @@
    struct LeCroy_VICP_Header {
        unsigned char  operation;
        unsigned char  header version;
-       unsigned char  sequence_number;    // only version 1A and later
+       unsigned char  sequence_number;    // only for version 1A and later
        unsigned char  reserved;
        uint_32        block_length;       // in big-endian format
    }
@@ -173,7 +173,7 @@
 
    Please note: If a read or write gets aborted due to a signal there may
    still be data to be read from the device or the device may still be
-   waiting to receive remaining data. Unless you're closing the connection
+   waiting to receive more data. Unless you're closing the connection
    after receipt of a signal you must make sure that the remaining data
    are fetched from or get send to the device.
 

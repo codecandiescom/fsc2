@@ -332,6 +332,9 @@ long lecroy_ws_translate_channel( int  dir,
             case CHANNEL_Z4 :
                 return LECROY_WS_Z4;
 
+            case CHANNEL_LINE :
+                return LECROY_WS_LIN;
+
             case CHANNEL_EXT :
                 return LECROY_WS_EXT;
 

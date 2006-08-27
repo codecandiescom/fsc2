@@ -689,12 +689,12 @@ ssize_t fsc2_lan_writev( int                  handle,
 }
 
 
-/*-----------------------------------------------------------*
+/*----------------------------------------------------------------------*
  * Function for reading from the socket to a buffer. If 'us_timeout' is
  * set to a positive (non-zero) value it doesn't wait longer than that
  * many microseconds. If 'quit_on_signal' is set it returns immediately
  * if a signal gets caught.
- *-----------------------------------------------------------*/
+ *----------------------------------------------------------------------*/
 
 ssize_t fsc2_lan_read( int    handle,
                        char * buffer,

@@ -557,14 +557,14 @@ to use, what can be adjusted should be documented in the individual files.
 
 
 Now you're ready to go into the main directory of the package and type
-@code{make}. This may take some time to finish. In principle no warnings should
-show up during the compilation (at least on systems with a newer libc and if
-my GPIB library is used), but warnings may occur when the documentation is
-created and some of the required tools are not available. It may even happen
-that the make process stops with an error message during this stage
-(i.e.@: while making the documentation). This does @strong{not} mean that the
-program didn't compile successfully, only that parts of the documentation could
-not be created.
+@code{make}. This may take some time to finish. In principle no warnings
+should show up during the compilation (unless you're on Debian and use its
+flex version), at least on systems with a newer libc and if my GPIB library is
+used, but warnings may occur when the documentation is created and some of the
+required tools are not available. It may even happen that the make process
+stops with an error message during this stage (i.e.@: while making the
+documentation). This does @strong{not} mean that the program didn't compile
+successfully, only that parts of the documentation could not be created.
 
 
 Don't try to invoke @code{make} from one of the subdirectories. While in

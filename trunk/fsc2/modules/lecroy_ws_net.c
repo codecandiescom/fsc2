@@ -83,6 +83,9 @@ bool lecroy_ws_init( const char * name )
 
     lecroy_vicp_init( name, NETWORK_ADDRESS, 100000, 1 );
 
+    lecroy_vicp_set_timeout( READ, READ_TIMEOUT ); 
+    lecroy_vicp_set_timeout( WRITE, WRITE_TIMEOUT );
+
     TRY
     {
         /* Disable the local button, set digitizer to short form of replies,
@@ -1159,9 +1162,9 @@ void lecroy_ws_start_acquisition( void )
     {
         do_averaging = SET;
 
-        snprintf( cmd, 100, "F1:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld\n",
+        snprintf( cmd, 100,
+                  "F1:DEF EQN,'AVG(C%ld)',AVGTYPE,SUMMED,SWEEPS,%ld\n",
                   lecroy_ws.source_ch[ LECROY_WS_MATH ] - LECROY_WS_CH1 + 1,
-                  lecroy_ws_curve_length( ),
                   lecroy_ws.num_avg[ LECROY_WS_MATH ] );
 
         len = strlen( cmd );
@@ -1273,13 +1276,16 @@ static void lecroy_ws_get_prep( int              ch,
         strcpy( ch_str, "F1" );
     }
 
-    /* Set up the number of points to be fetched */
+    /* Set up the number of points to be fetched - take care: the device
+       always measures an extra point before and after the displayed region,
+       thus we start with one point later than we could get from it. */
 
     if ( w != NULL )
         sprintf( cmd, "WFSU SP,0,NP,%ld,FP,%ld,SN,0\n",
-                 w->num_points, w->start_num );
+                 w->num_points, w->start_num + 1 );
     else
-        sprintf( cmd, "WFSU SP,0,NP,0,FP,0,SN,0\n" );
+        sprintf( cmd, "WFSU SP,0,NP,%ld,FP,1,SN,0\n",
+                 lecroy_ws_curve_length( ) );
 
     len = strlen( cmd );
     lecroy_vicp_write( cmd, &len, SET, UNSET );
@@ -1296,23 +1302,17 @@ static void lecroy_ws_get_prep( int              ch,
 
     TRY
     {
-        /* Ask the device for the data */
+        /* Ask the device for the data... */
 
         strcpy( cmd, ch_str );
         strcat( cmd, ":WF? DAT1\n" );
         len = strlen( cmd );
         lecroy_vicp_write( cmd, &len, SET, UNSET );
 
-        /* And fetch 'em and cut back on the number of data - the device
-           seems to send 4 bytes too many, at least when asked for a
-           complete curve */
+        /* ...and fetch 'em */
 
-        *data = NULL;
         *data = lecroy_ws_get_data( length );
         *length /= 2;          /* we got word sized (16 bit) data, LSB first */
-
-        if ( w == NULL && *length > lecroy_ws_curve_length( ) )
-            *length = lecroy_ws_curve_length( );
 
         /* Get the gain factor and offset for the date we just fetched */
 
@@ -1507,7 +1507,10 @@ static unsigned char *lecroy_ws_get_data( long * length )
 
 
     /* First thing we read is something like "DAT1,#[0-9]" where the number
-       following the '#' is the number of bytes to be read next */
+       following the '#' is the number of bytes to be read next - it's
+       wrapped into a loop since for some undocumented reasons the device
+       first sends only 5 bytes (the "DAT1" part) and only then, following
+       another header, the "#[0-9]" bit. */
 
     len = to_get = 7;
     gotten = 0;
@@ -1545,9 +1548,13 @@ static unsigned char *lecroy_ws_get_data( long * length )
 
     fsc2_assert( len > 0 );
 
-    /* Obtain enough memory and then read the real data */
+    /* Obtain enough memory (one more byte than we need for the data because
+       a '\n' gets attached at the end) */
 
     data = UCHAR_P T_malloc( ++len );
+
+    /* Get the data, we need to loop since the device may send them in
+       several chunks */
 
     to_get = len;
     gotten = 0;
@@ -1581,6 +1588,8 @@ static long lecroy_ws_get_int_value( int          ch,
         sprintf( cmd, "C%d:INSP? '%s'\n", ch - LECROY_WS_CH1 + 1, name );
     else if ( ch == LECROY_WS_MATH )
         sprintf( cmd, "F1:INSP? '%s'\n", name );
+    else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
+        sprintf( cmd, "M%c:INSP? '%s'\n", ch - LECROY_WS_M1 + 1, name );
     else
         fsc2_impossible( );
 
@@ -1612,6 +1621,8 @@ static double lecroy_ws_get_float_value( int          ch,
 
     if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
         sprintf( cmd, "C%d:INSP? '%s'\n", ch - LECROY_WS_CH1 + 1, name );
+    if ( ch == LECROY_WS_MATH )
+        sprintf( cmd, "C1:INSP? '%s'\n", name );
     else if ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
         sprintf( cmd, "M%c:INSP? '%s'\n", ch - LECROY_WS_M1 + 1, name );
     else

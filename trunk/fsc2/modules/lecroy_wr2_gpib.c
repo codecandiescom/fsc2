@@ -1339,13 +1339,16 @@ static void lecroy_wr2_get_prep( int              ch,
     else
         fsc2_impossible( );
 
-    /* Set up the number of points to be fetched */
+    /* Set up the number of points to be fetched - take care: the device
+       always measures an extra point before and after the displayed region,
+       thus we start with one point later than we could get from it.*/
 
     if ( w != NULL )
         sprintf( cmd, "WFSU SP,0,NP,%ld,FP,%ld,SN,0",
-                 w->num_points, w->start_num );
+                 w->num_points, w->start_num + 1 );
     else
-        sprintf( cmd, "WFSU SP,0,NP,0,FP,0,SN,0" );
+        sprintf( cmd, "WFSU SP,0,NP,%ld,FP,1,SN,0",
+                 lecroy_wr2_curve_length( ) );
 
     if ( gpib_write( lecroy_wr2.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy_wr2_gpib_failure( );
@@ -1364,7 +1367,7 @@ static void lecroy_wr2_get_prep( int              ch,
 
     TRY
     {
-        /* Ask the device for the data */
+        /* Ask the device for the data... */
 
         strcpy( cmd, ch_str );
         strcat( cmd, ":WF? DAT1" );
@@ -1372,16 +1375,10 @@ static void lecroy_wr2_get_prep( int              ch,
              == FAILURE )
             lecroy_wr2_gpib_failure( );
 
-        /* And fetch 'em and cut back on the number of data - the device
-           seems to send 4 bytes too many, at least when asked for a
-           complete curve */
+        /* ...and fetch 'em */
 
-        *data = NULL;
         *data = lecroy_wr2_get_data( length );
         *length /= 2;          /* we got word sized (16 bit) data, LSB first */
-
-        if ( w == NULL && *length > lecroy_wr2_curve_length( ) )
-            *length = lecroy_wr2_curve_length( );
 
         /* Get the gain factor and offset for the date we just fetched */
 

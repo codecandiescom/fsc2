@@ -112,7 +112,7 @@
 /* Flag from the INR (internal state change) register indicating that an
    acquisition is finished */
 
-#define LECROY_WS_SIGNAL_ACQ      ( 1 <<  0 )
+#define LECROY_WS_SIGNAL_ACQ        ( 1 <<  0 )
 
 
 /* Number of channels (except trigger only channls), total number of channels
