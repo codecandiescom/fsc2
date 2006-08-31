@@ -1742,11 +1742,19 @@ Var_T *digitizer_get_curve( Var_T * v )
     ch = ( int ) lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( ( ch < LECROY_WR2_CH1 && ch > LECROY_WR2_CH_MAX ) &&
-         ( ch < LECROY_WR2_M1  && ch > LECROY_WR2_M4     ) &&
-         ( ch < LECROY_WR2_TA  && ch > LECROY_WR2_TD     )    )
+    if ( ! ( ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX ) ||
+             ( ch >= LECROY_WR2_M1  && ch <= LECROY_WR2_M4     ) ||
+             ( ch >= LECROY_WR2_TA  && ch <= LECROY_WR2_TD     )    ) )
     {
         print( FATAL, "Invalid channel specification.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TD &&
+         ! lecroy_wr2.is_avg_setup[ ch ] )
+    {
+        print( FATAL, "Averaging has not been initialized for "
+               "channel '%s'.\n", LECROY_WR2_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
@@ -1830,11 +1838,19 @@ Var_T *digitizer_get_area( Var_T * v )
     ch = ( int ) lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( ( ch < LECROY_WR2_CH1 && ch > LECROY_WR2_CH_MAX ) &&
-         ( ch < LECROY_WR2_M1  && ch > LECROY_WR2_M4     ) &&
-         ( ch < LECROY_WR2_TA  && ch > LECROY_WR2_TD     )    )
+    if ( ! ( ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX ) ||
+             ( ch >= LECROY_WR2_M1  && ch <= LECROY_WR2_M4     ) ||
+             ( ch >= LECROY_WR2_TA  && ch <= LECROY_WR2_TD     )    ) )
     {
         print( FATAL, "Invalid channel specification.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TD &&
+         ! lecroy_wr2.is_avg_setup[ ch ] )
+    {
+        print( FATAL, "Averaging has not been initialized for "
+               "channel '%s'.\n", LECROY_WR2_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
@@ -1975,11 +1991,19 @@ Var_T *digitizer_get_amplitude( Var_T * v )
     ch = ( int ) lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( ( ch < LECROY_WR2_CH1 && ch > LECROY_WR2_CH_MAX ) &&
-         ( ch < LECROY_WR2_M1  && ch > LECROY_WR2_M4     ) &&
-         ( ch < LECROY_WR2_TA  && ch > LECROY_WR2_TD     )    )
+    if ( ! ( ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX ) ||
+             ( ch >= LECROY_WR2_M1  && ch <= LECROY_WR2_M4     ) ||
+             ( ch >= LECROY_WR2_TA  && ch <= LECROY_WR2_TD     )    ) )
     {
         print( FATAL, "Invalid channel specification.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TD &&
+         ! lecroy_wr2.is_avg_setup[ ch ] )
+    {
+        print( FATAL, "Averaging has not been initialized for "
+               "channel '%s'.\n", LECROY_WR2_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 

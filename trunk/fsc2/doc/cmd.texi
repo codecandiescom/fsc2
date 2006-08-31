@@ -143,7 +143,10 @@ consider some possible problems:
   time. What works is for example having one instance of @code{fsc2}
   controlling devices via the GPIB bus and the first serial port and another
   instance controlling devices via the second serial port and e.g.@: a
-  built-in PCI or ISA card.
+  built-in PCI or ISA card. Devices connected via the LAN should pose no
+  problems as long as only one instance of @code{fsc2} is trying to a certain
+  device (but that's not someting @code{fsc2} itself can test for, so if
+  that should happen all kinds of weird things can happen!).
 @item
   Only the first instance of @code{fsc2} is going to be able to
   communicate with external programs (i.e.@: scripts that automatically
@@ -152,8 +155,8 @@ consider some possible problems:
   new instance which then is going to deal with external programs.
 @item
   You also won't be able to run the built-in web server for more than
-  one of the instances of @code{fsc2}, at least on the port 8080 the web
-  server is listening on per default. If you want the web server to be
+  one of the instances of @code{fsc2}, at least if both web servers listen
+  on the same port (8080 per default). If you want the web server to be
   able to run for each (or at least for more than one) instance of
   @code{fsc2} you need to specify different HTTP ports for the different
   instances via the @code{-httpPort} option.

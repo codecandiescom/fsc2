@@ -1704,7 +1704,7 @@ The first argument is the channel to be used to do the averaging, i.e.@:
 @itemx LeCroy Waverunner-2
 @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or @code{TRACE_D}
 @itemx LeCroy WaveSurfer
-@code{MATH}
+@code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}, @code{MATH}
 @end table
 The second is the source channel to be averaged, i.e.@:
 @table @samp
@@ -1725,6 +1725,17 @@ Alternatively, for all digitizers except the @strong{LeCroy9400} the
 second (and in this case final) argument can be the string @code{"OFF"}
 to switch of averaging for the channel. Normally, this won't be necessary
 unless you want to fetch a curve acquired in @code{SINGLE} trigger mode.
+
+The @code{WaveSurfer} line of oscilloscopes is somewhat special in that
+it allows the "normal" channels to be used for (continuous) averaging.
+I.e.@: the first argument can be one of the measurement channels and
+the second argument thn must be the same channel. In this case continuous
+averaging (in contrast to summed averaging as it's done via the @code{MATH}
+channel) using no @code{MATH} channel is done. Please note that when
+you do continuous averaging with a measurement channel this channel can't
+be used as the source channe for summed averaging via the @code{MATH}
+channel anymore.
+
 Normally, at the start of an acquisition, the trigger mode gets changed
 to @code{NORM} (or @code{AUTO}, if you have set the trigger mode to this).
 Only in these trigger modes averaging can be done. Only when no averaging
@@ -1732,34 +1743,36 @@ setup has been done (or all previously done setups have been deleted by
 using the @code{"OFF"} instead of a source channel) it is possible to
 start an acquisition in @code{SINGLE} trigger mode.
 
-Otherwise the third required argument is the number of averages. For the
+The third required argument is the number of averages. For the
 @strong{LeCroy9400} this has to be either @code{1}, @code{2} or @code{5},
 multiplied by @code{10}, @code{100}, @code{1,000}, @code{10,000} etc.@: up
 to @code{1,000,000} (if a number not fitting this scheme is passed to the
 function the nearest allowd number is used instead).
 
-For the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} this can be an arbitrary 
-number between @code{1} and @code{1,000} or @code{1,000,000} if the device
-is fitted with the WP01 Waveform Processing option.
+For the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} this can be an
+arbitrary  number between @code{1} and @code{1,000} (or @code{1,000,000}
+if the device is fitted with the WP01 Waveform Processing option).
 
 For the @strong{LeCroy Waverunner-2} this also can be an arbitrary
-number with an upper limit of @code{4,000} or @code{1,000,000} if it is
-fitted with the WaveAnalyzer option.
+number with an upper limit of @code{4,000} (or @code{1,000,000} if it is
+fitted with the WaveAnalyzer option).
 
 Finally, for the @code{WaveSurfer} the number of averages can be set to
-a number with an upper limit of @code{1,000,000}.
+a number with an upper limit of @code{1,000,000}. If the number of
+averages for continuous averaging of a non-@code{MATH} channel is set
+to @code{1} this is treated as another way of switching off averaging.
 
-For the @strong{LeCroy9400} two more optionals argument can be passed to
-the function. The first one is either an integer number, with a non-zero
-value representing truth and @code{0} falsehood, or a string, either
-@code{"ON"} or @code{"OFF"}, that determines if overflow rejection is
-switched on or off (if switched on all traces that overflowed the ADC
-range will be rejected automatically). The second one is the number of
-points that get included into the average. Usually it doesn't make too
-much sense to set this value because the program will make sure that at
-least as many points of a curve as can be read from the digitizer are
-included into the averaging. If the value is set only as many points as
-have been set will be returned by a @ref{digitizer_get_curve()} command.
+For the @strong{LeCroy9400} two more optionals argument can be passed to the
+function. The first one is either an integer number, with a non-zero value
+representing truth and @code{0} false, or a string, either @code{"ON"} or
+@code{"OFF"}, that determines if overflow rejection is switched on or off (if
+switched on all traces that overflowed the ADC range will be rejected
+automatically). The second one is the number of points that get included into
+the average. Usually it doesn't make too much sense to set this value because
+the program will make sure that at least as many points of a curve as can be
+read from the digitizer are included into the averaging. If the value is set
+only as many points as have been set will be returned by a
+@ref{digitizer_get_curve()} command.
 
 
 @anchor{digitizer_trigger_channel()}

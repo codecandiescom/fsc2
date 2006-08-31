@@ -1794,6 +1794,14 @@ Var_T *digitizer_get_curve( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    if ( ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F ) &&
+         ! lecroy94_tmpl.is_avg_setup[ ch ] )
+    {
+        print( FATAL, "Averaging has not been initialized for "
+               "channel '%s'.\n", LECROY94_TMPL_Channel_Names[ ch ] );
+        THROW( EXCEPTION );
+    }
+
     /* Now check if there's a variable with a window number and check it */
 
     if ( ( v = vars_pop( v ) ) != NULL )
@@ -1887,8 +1895,16 @@ Var_T *digitizer_get_area( Var_T * v )
          ch != LECROY94_TMPL_MEM_C  && ch != LECROY94_TMPL_MEM_C &&
          ch != LECROY94_TMPL_FUNC_E && ch != LECROY94_TMPL_FUNC_F )
     {
-        print( FATAL, "Can't get an area for channel %s.\n",
+        print( FATAL, "Can't get a curve from channel %s.\n",
                LECROY94_TMPL_Channel_Names[ ch ] );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F ) &&
+         ! lecroy94_tmpl.is_avg_setup[ ch ] )
+    {
+        print( FATAL, "Averaging has not been initialized for "
+               "channel '%s'.\n", LECROY94_TMPL_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
@@ -2040,8 +2056,16 @@ Var_T *digitizer_get_amplitude( Var_T * v )
          ch != LECROY94_TMPL_MEM_C  && ch != LECROY94_TMPL_MEM_C &&
          ch != LECROY94_TMPL_FUNC_E && ch != LECROY94_TMPL_FUNC_F )
     {
-        print( FATAL, "Can't get an amplitude for channel %s.\n",
+        print( FATAL, "Can't get a curve from channel %s.\n",
                LECROY94_TMPL_Channel_Names[ ch ] );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F ) &&
+         ! lecroy94_tmpl.is_avg_setup[ ch ] )
+    {
+        print( FATAL, "Averaging has not been initialized for "
+               "channel '%s'.\n", LECROY94_TMPL_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 

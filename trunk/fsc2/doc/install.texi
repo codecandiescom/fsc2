@@ -401,25 +401,29 @@ Instruments library, in all other cases @code{fsc2} doesn't need to know
 about this file). But usually there is no reason to change the default value,
 which is @file{/etc/gpib.conf}.
 
-For he new National Instruments library you can also set the variable
-@code{CIB_FILE}. If this is set the @code{Makefile} will try to link
-against this file. By linking in this file the dynamic library will only
-be loaded when the first call is made into the library, otherwise the
-library gets loaded on start of the program. To be able to link the file
-in the exact location of the file is needed.
+
+For the new National Instruments library you can also set the variable
+@code{GPIB_CIB_FILE}. If this is set the @code{Makefile} will try to link
+against this file (normally it's called @code{cib.o}). By linking in this
+file the dynamic library (libgpibapi.so) will only be loaded when the first
+call is made into the library, otherwise the library gets loaded on start
+of the program. To be able to link the file in the exact location of the
+file is needed and must be set by the variable @code{GPIB_CIB_FILE}.
 
 
 While running @code{fsc2} may write out information about the activity on the
 GPIB bus into a log file. You can change the default log file
-@file{/tmp/fsc2_gpib.log} to something appropriate for your setup (or even to
-@file{/dev/null}) by setting the variable @code{GPIB_LOG_FILE}. You can also
-set the verbosity of the logs by changing the variable @code{GPIB_LOG_LEVEL}
-to either @code{HIGH}, @code{MEDIUM}, @code{LOW} or @code{OFF}. To help me
-find bugs in the device modules setting it to @code{HIGH} is recommended. But
-note that the file can get rather large, so better have it on a partition
-where there is a lot of free space. In order not to have it grow indefinitely
-each time a new experiment is started the log file is truncated to zero
-length, so it contains only information about the last experiment you run.
+q@file{/tmp/fsc2_gpib.log} to something appropriate for your setup by setting
+the variable @code{GPIB_LOG_FILE} (if it's not set logs will be written to
+stderr unless @code{GPIB_LOG_LEVEL} is set to @code{OFF}). You can also set
+the verbosity of the logs by changing the variable @code{GPIB_LOG_LEVEL} to
+either @code{HIGH} (logs everything including messages sent over the bus)
+@code{MEDIUM} (logs function calls and errors), @code{LOW} (the default, just
+logs errors) or @code{OFF} (no logging ta all). Please note that the file can
+get rather large, so better have it on a partition where there is a lot of
+free space. In order not to have it grow indefinitely each time a new
+experiment is started the log file is truncated to zero length, so it contains
+only information about the last experiment you run.
 
 
 If the header files for the GPIB library aren't in either '/usr/include'
@@ -453,23 +457,28 @@ has to be removed manually.
 
 While running @code{fsc2} may write out information about the activity on the
 serial ports into a log file. You can change the default log file
-@file{/tmp/fsc2_serial.log} to something appropriate for your setup (or even to
-@file{/dev/null}) via the variable @code{SERIAL_LOG_FILE}. You can also set
-the verbosity of the logs by changing the variable @code{SERIAL_LOG_LEVEL} to
-either @code{HIGH}, @code{MEDIUM}, @code{LOW} or @code{OFF}. To help me find
-bugs in the device modules setting it to @code{HIGH} is recommended.  But note
-that the file can get rather large, so better have it on a partition with lots
-of free space. In order not to have it grow indefinitely each time a new
-experiment is started the log file is truncated to zero length, so it contains
-only information about the last experiment you run.
+@file{/tmp/fsc2_serial.log} to something appropriate for your setup via the
+variable @code{SERIAL_LOG_FILE} (if it's not set logs will be written to
+stderr unless @code{SERIAL_LOG_LEVEL} is set to @code{OFF}). You can set the
+verbosity of the logs by changing the variable @code{SERIAL_LOG_LEVEL} to
+either @code{HIGH} (logs everything including messages passed between the
+computer and the device), @code{MEDIUM} (logs function calls and errors),
+@code{LOW} (the default, just logs errors) or @code{OFF} (no logging at all).
+Please note that the file can get rather large, so better have it on a
+partition with enough free space. In order not to have it grow indefinitely
+each time a new experiment is started the log file is truncated to zero
+length, so it contains only information about the last experiment you run.
 
 
-If there are devices controlled via the LAN also a log file will get
-generated for keeping track of the communications. Again, you can change
-the default log file @file{/tmp/fsc2_lan.log} to something else(or even to
-@file{/dev/null}) via the variable @code{LAN_LOG_FILE}. And you can also set
-the verbosity of the logs by changing the variable @code{LAN_LOG_LEVEL} to
-either @code{HIGH}, @code{MEDIUM}, @code{LOW} or @code{OFF}.
+If there are devices controlled via the LAN also a log file will get generated
+for keeping track of the communications. Again, you can change the default log
+file @file{/tmp/fsc2_lan.log} to something else via the variable
+@code{LAN_LOG_FILE} (if it's not set logs will be written to stderr unless
+@code{LAN_LOG_LEVEL} is set to @code{OFF}). You can set the verbosity of the
+logs by changing the variable @code{LAN_LOG_LEVEL} to either @code{HIGH} (logs
+everything including data exchanged over the network), @code{MEDIUM} (logs
+function calls and errors), @code{LOW} (the default, just logs errors) or
+@code{OFF} (no logging at all).
 
 
 Via the @code{EDITOR} variable you can set the editor that gets invoked

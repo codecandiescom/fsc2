@@ -1326,13 +1326,6 @@ static void lecroy_wr2_get_prep( int              ch,
     }
     else if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TD )
     {
-        if ( ! lecroy_wr2.is_avg_setup[ ch ] )
-        {
-            print( FATAL, "Averaging has not been initialized for "
-                   "channel %s.\n", LECROY_WR2_Channel_Names[ ch ] );
-            THROW( EXCEPTION );
-        }
-
         bit_to_test = LECROY_WR2_PROC_DONE( ch );
         sprintf( ch_str, "T%c", ch - LECROY_WR2_TA + 'A' );
     }

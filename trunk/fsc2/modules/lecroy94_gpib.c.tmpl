@@ -1285,13 +1285,6 @@ static void lecroy94_tmpl_get_prep( int              ch,
     }
     else if ( ch == LECROY94_TMPL_FUNC_E || ch == LECROY94_TMPL_FUNC_F )
     {
-        if ( ! lecroy94_tmpl.is_avg_setup[ ch ] )
-        {
-            print( FATAL, "Averaging has not been initialized for "
-                   "channel %s.\n", LECROY94_TMPL_Channel_Names[ ch ] );
-            THROW( EXCEPTION );
-        }
-
         bit_to_test = ch == LECROY94_TMPL_FUNC_E ?
                       LECROY94_TMPL_INR_FE_DONE : LECROY94_TMPL_INR_FF_DONE;
         strcpy( ch_str, ch == LECROY94_TMPL_FUNC_E ? "FE" : "FF" );

@@ -1,10 +1,10 @@
 The files in these directories are used to simpify the compilation
 and installation of fsc2 on well known machines. Normally, one would
-have to edit the makefile in the main directory of the package (and
+have to edit the Makefile in the main directory of the package (and
 possibly also in the 'modules' subdirectorty) and apply the necessary
 changes to adapt it for the machine whenever one installs a new version.
 
-To avoid this, in the make and install processes the makefiles
+To avoid this in the make and install processes the makefiles
 involved will look for files with names starting with the fully
 qualified hostname of the machine in this directory and include
 them if they exist.
@@ -38,7 +38,7 @@ GPIB_CONF_FILE
 GPIB_LOG_FILE
 GPIB_LOG_LEVEL
 GPIB_HEADER_DIR
-CIB_FILE
+GPIB_CIB_FILE
 NUM_SERIAL_PORTS
 SERIAL_LOCK_DIR
 SERIAL_LOG_FILE
@@ -73,7 +73,7 @@ makefile in the main directory as well as in 'template.nowhere'
 in the 'machines' directory.
 
 If you're on the machine 'hex.unseen.edu' and there exists a file
-caaled 'hex.unseen.edu-config' with (shell) commands it will get
+called 'hex.unseen.edu-config' with (shell) commands it will get
 executed before the compilation starts. It can be used to e.g.
 automatically change configuration files for devices or with
 whatever ideas you come up with.
@@ -87,6 +87,6 @@ install-hex.unseen.edu:
 uninstall-hex.unseen.edu:
 
 Here you can list commands that are required when the modules get
-installed or un-installed. Usually, this are commands to create
+installed or un-installed. Usually, these are commands to create
 additional symbolic links to allow accessing modules with simpler
 aliases.

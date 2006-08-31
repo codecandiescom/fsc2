@@ -110,7 +110,14 @@ int lecroy_ws_init_hook( void )
         lecroy_ws.trigger_level[ i ]        = LECROY_WS_TEST_TRIG_LEVEL;
         lecroy_ws.is_bandwidth_limiter[ i ] = UNSET;
         lecroy_ws.bandwidth_limiter[ i ]    = LECROY_WS_TEST_BWL;
+        lecroy_ws.is_avg_setup[ i ]         = UNSET;
+        lecroy_ws.source_ch[ i ]            = i;
+        lecroy_ws.num_avg[ i ]              = 1;
     }
+
+    lecroy_ws.is_avg_setup[ LECROY_WS_MATH ] = UNSET;
+    lecroy_ws.source_ch[ LECROY_WS_MATH ]    = LECROY_WS_UNDEF;
+    lecroy_ws.num_avg[ LECROY_WS_MATH ]      = 1;
 
     for ( i = LECROY_WS_Z1; i <= LECROY_WS_Z4; i++ )
     {
@@ -1511,14 +1518,17 @@ Var_T *digitizer_averaging( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    /* Get the channel to use for averaging */
+    /* Get the channel to be used for averaging */
 
     channel = lecroy_ws_translate_channel( GENERAL_TO_LECROY_WS,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( channel != LECROY_WS_MATH )
+    if ( ! ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX ) &&
+         channel != LECROY_WS_MATH )
     {
-        print( FATAL, "Averaging can only be done with channel '%s'.\n",
+        print( FATAL, "Averaging can only be done with channels '%s' to '%s' "
+               "and '%s'.\n", LECROY_WS_Channel_Names[ LECROY_WS_CH1 ],
+               LECROY_WS_Channel_Names[ LECROY_WS_CH_MAX ],
                LECROY_WS_Channel_Names[ LECROY_WS_MATH ] );
         THROW( EXCEPTION );
     }
@@ -1538,6 +1548,11 @@ Var_T *digitizer_averaging( Var_T * v )
     {
         too_many_arguments( v );
         lecroy_ws.is_avg_setup[ channel ] = UNSET;
+        lecroy_ws.source_ch[ channel ] = LECROY_WS_UNDEF;
+        lecroy_ws.num_avg[ channel ] = 1;
+        if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX &&
+             FSC2_MODE == EXPERIMENT )
+            lecroy_normal_channel_averaging( channel, 1 );
         return vars_push( INT_VAR, 0L );
     }
 
@@ -1550,6 +1565,29 @@ Var_T *digitizer_averaging( Var_T * v )
                "source channels.\n",
                LECROY_WS_Channel_Names[ LECROY_WS_CH1 ],
                LECROY_WS_Channel_Names[ LECROY_WS_CH_MAX ] );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX ) &&
+         source_ch != channel )
+    {
+        print( FATAL, "When using continuous averaging on a normal (i.e. "
+               "non-MATH) channel the first and second argument must be "
+               "the same channel.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX &&
+           lecroy_ws.is_avg_setup[ LECROY_WS_MATH ] &&
+           lecroy_ws.source_ch[ LECROY_WS_MATH ] == channel ) ||
+         ( channel == LECROY_WS_MATH &&
+           lecroy_ws.is_avg_setup[ source_ch ] ) )
+    {
+        print( FATAL, "Can't have channel '%s' being (continuously ) averaged "
+               "and being used as source for averaging by the '%s' channel at "
+               "the same time.\n",
+               LECROY_WS_Channel_Names[ source_ch ],
+               LECROY_WS_Channel_Names[ LECROY_WS_MATH ] );
         THROW( EXCEPTION );
     }
 
@@ -1578,11 +1616,26 @@ Var_T *digitizer_averaging( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    /* Setting the number of averages for a measurement channel is taken to
+       mean to switch off averaging */
+
+    if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX &&
+         channel == source_ch && num_avg == 1 )
+    {
+        lecroy_ws.is_avg_setup[ channel ] = UNSET;
+        lecroy_ws.source_ch[ channel ] = LECROY_WS_UNDEF;
+        lecroy_ws.num_avg[ channel ] = 1;
+        if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX &&
+             FSC2_MODE == EXPERIMENT )
+            lecroy_normal_channel_averaging( channel, 1 );
+        return vars_push( INT_VAR, 0L );
+    }
+
     too_many_arguments( v );
 
-    lecroy_ws.is_avg_setup[ LECROY_WS_MATH ] = SET;
-    lecroy_ws.source_ch[ LECROY_WS_MATH ] = source_ch;
-    lecroy_ws.num_avg[ LECROY_WS_MATH ] = num_avg;
+    lecroy_ws.is_avg_setup[ channel ] = SET;
+    lecroy_ws.source_ch[ channel ] = source_ch;
+    lecroy_ws.num_avg[ channel ] = num_avg;
 
     return vars_push( INT_VAR, 1L );
 }
@@ -1707,6 +1760,7 @@ Var_T *digitizer_copy_curve( Var_T * v )
 
 Var_T *digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 {
+
     if ( FSC2_MODE == EXPERIMENT )
         lecroy_ws_start_acquisition( );
 
@@ -1744,6 +1798,15 @@ Var_T *digitizer_get_curve( Var_T * v )
          ch != LECROY_WS_MATH )
     {
         print( FATAL, "Invalid channel specification.\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* If this is the MATH channel check for an acquisition setup */
+
+    if ( ch == LECROY_WS_MATH && ! lecroy_ws.is_avg_setup[ ch ] )
+    {
+        print( FATAL, "Averaging has not been initialized for channel '%s'.\n",
+               LECROY_WS_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
@@ -1829,6 +1892,15 @@ Var_T *digitizer_get_area( Var_T * v )
          ch != LECROY_WS_MATH )
     {
         print( FATAL, "Invalid channel specification.\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* If this is the MATH channel check for an acquisition setup */
+
+    if ( ch == LECROY_WS_MATH && ! lecroy_ws.is_avg_setup[ ch ] )
+    {
+        print( FATAL, "Averaging has not been initialized for channel '%s'.\n",
+               LECROY_WS_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
@@ -1974,6 +2046,15 @@ Var_T *digitizer_get_amplitude( Var_T * v )
          ch != LECROY_WS_MATH )
     {
         print( FATAL, "Invalid channel specification.\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* If this is the MATH channel check for an acquisition setup */
+
+    if ( ch == LECROY_WS_MATH && ! lecroy_ws.is_avg_setup[ ch ] )
+    {
+        print( FATAL, "Averaging has not been initialized for channel '%s'.\n",
+               LECROY_WS_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 

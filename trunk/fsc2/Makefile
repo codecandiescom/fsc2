@@ -118,19 +118,20 @@ GPIB_CONF_FILE     := /etc/gpib.conf
 # Make sure that fsc2 or its users have write access to the directory the
 # log file will be created in. Don't use a partition on which you don't have
 # at least a few megabytes to spare, depending on the type of experiments
-# you will do the file can become rather long. But the file will not grow
+# you do the file can become rather long. But the file will not grow
 # indefinitely, if you start a new experiment its previous contents gets
-# overwritten. If no file is specified logs will be written to stderr.
+# overwritten. If no file is specified logs will be written to stderr (unless
+# @code{GPIB_LOG_LEVEL} is set to @{OFF}, see below).
 
 GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
 
 
 # The next variable, GPIB_LOG_LEVEL, sets the verbosity level for the GPIB
 # logs, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set to 'HIGH' all
-# GPIB function calls together with all data send to or received from devices
-# are stored. When set to 'MEDIUM' only GPIB function calls are logged. When
-# set to 'LOW' only errors messages will be written to the log file. If not
-# set it defaults to 'LOW'.
+# GPIB function calls together with all data send to or received from the
+# devices are stored. When set to 'MEDIUM' only GPIB function calls and
+# errors are logged. When set to 'LOW' only errors messages get written to
+# the log file. If not set it defaults to 'LOW'.
 
 GPIB_LOG_LEVEL     := HIGH
 
@@ -147,12 +148,12 @@ GPIB_LOG_LEVEL     := HIGH
 
 # In the case you're using the newer National Instruments library you can link
 # against a file named cib.o coming with the library. By linking in this file
-# the dynamic library will only be loaded when the first call is made into
-# the library, otherwise the library gets loaded on start of the program. To
-# be able to link the file in the exact location of the file is needed and
-# the following variable set accordingly.
+# the dynamic library (libgpibapi.so) will only be loaded when the first call
+# is made into the library, otherwise the library gets loaded on start of the
+# program. To be able to link the file in the exact location of the file is
+# needed and the following variable set accordingly.
 
-# CIB_FILE           := /home/jens/Lab/NatInst/ni488223L/driver/lib/cib.o
+# GPIB_CIB_FILE      := /usr/local/src/ni488223L/driver/lib/cib.o
 
 
 # NUM_SERIAL_PORTS defines the number of serial ports that are available on
@@ -175,9 +176,10 @@ SERIAL_LOCK_DIR    := /var/lock
 # Make sure that fsc2 or its users have write access to the directory the
 # log file will be created in. Don't use a partition on which you don't have
 # at least a few megabytes to spare, depending on the type of experiments
-# you will do the file can become rather long. But the file will not grow
+# you do the file can become rather long. But the file will not grow
 # indefinitely, if you start a new experiment its previous contents gets
-# overwritten. If no file is specified logs will be written to stderr.
+# overwritten. If no file is specified logs will be written to stderr(unless
+# @code{SERIAL_LOG_LEVEL} is set to @{OFF}, see below).
 
 SERIAL_LOG_FILE    := /tmp/fsc2_serial.log
 
@@ -185,9 +187,9 @@ SERIAL_LOG_FILE    := /tmp/fsc2_serial.log
 # The next variable, SERIAL_LOG_LEVEL, sets the verbosity level for the logs
 # for the serial port, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set
 # to 'HIGH' all serial port function calls together with all data send to or
-# received from devices are stored. When set to 'MEDIUM' only serial port
-# function calls are logged. When set to 'LOW' only errors messages will be
-# written to the log file. If not set it defaults to 'LOW'.
+# received from the devices are stored. When set to 'MEDIUM' only serial port
+# function calls and errors are logged. When set to 'LOW' only errors messages
+# get written to the log file. If not set it defaults to 'LOW'.
 
 SERIAL_LOG_LEVEL   := HIGH
 
@@ -196,16 +198,17 @@ SERIAL_LOG_LEVEL   := HIGH
 # Make sure that fsc2 or its users have write access to the directory the
 # log file will be created in. Don't use a partition on which you don't have
 # at least a few megabytes to spare, depending on the type of experiments
-# you will do the file can become rather long. But the file will not grow
+# you do the file can become rather long. But the file will not grow
 # indefinitely, if you start a new experiment its previous contents gets
-# overwritten. If no file is specified logs will be written to stderr.
+# overwritten. If no file is specified logs will be written to stderr(unless
+# @code{ALN_LOG_LEVEL} is set to @{OFF}, see below).
 
 LAN_LOG_FILE    := /tmp/fsc2_lan.log
 
 
 # The next variable, LAN_LOG_LEVEL, sets the verbosity level for the logs
 # for the LAN port, use either 'HIGH', 'MEDIUM', 'LOW' or 'OFF'. When set
-# to 'HIGH' all LAN port function calls together with all data send to or
+# to 'HIGH' all serial port function calls together with all data send to or
 # received from devices are stored. When set to 'MEDIUM' only serial port
 # function calls are logged. When set to 'LOW' only errors messages will be
 # written to the log file. If not set it defaults to 'LOW'.
@@ -215,7 +218,7 @@ LAN_LOG_LEVEL   := HIGH
 
 # Define the default editor to use for editing when the "Edit" button gets
 # pressed or for writing a bug report  (but a user can still override this
-# by setting an environment variable named 'EDITOR')
+# by setting the 'EDITOR' environment variable).
 
 EDITOR             := vi
 
@@ -223,7 +226,7 @@ EDITOR             := vi
 # Define the default browser to use when the "Help" button gets pressed and
 # the manual is to be shown, currently supported are netscape, mozilla,
 # firefox, opera, konqueror, galeon, lnyx and w3m (but a user can still
-# override this by setting an environment variable named 'BROWSER').
+# override this by setting the 'BROWSER' environment variable named).
 
 BROWSER            := netscape
 
@@ -302,19 +305,19 @@ BROWSER            := netscape
 # in a place where the linker will find it automatically (e.g. '/usr/lib' and
 # '/usr/local/lib') you need also to specify the full absolute path for the
 # library by uncommenting the line starting with 'rulbus_lib_path and change
-# the what it gets set to . You must make sure that the library for the Rulbus
+# the what it gets set to. You must make sure that the library for the Rulbus
 # interface is already properly installed if you want to build fsc2 with
 # support for it.
 
 # WITH_RULBUS        := yes
-# rulbus_incl_path   := /usr/lib/include
+# rulbus_incl_path   := /usr/local/include
 # rulbus_lib_path    := /usr/lib/local
 
 
 # Comment out the next two lines if you don't want the ability to run a HTTP
 # server that allows to monitor fsc2s current state via the Internet. The
-# default port number the HTTP server will listen on can be set by the second
-# variable, DEFAULT_HTTP_PORT, which must be a  number between 1024 and 65535.
+# default port number the HTTP server will listen on can be set via the second
+# variable, DEFAULT_HTTP_PORT, which must be a number between 1024 and 65535.
 
 WITH_HTTP_SERVER   := yes
 DEFAULT_HTTP_PORT  := 8080
@@ -447,7 +450,9 @@ EXEC_INSTALL  := install
 
 ifeq ($(findstring debug,$(MAKECMDGOALS)),debug)
 	CFLAGS += -O0
-	CFLAGS += -DFSC2_MDEBUG
+	ifeq ($(shell ls /lib/libc.so.6 2>/dev/null),/lib/libc.so.6)
+		CFLAGS += -DFSC2_MDEBUG
+	endif
 else
 	CFLAGS += $(OPTIMIZATION)
 endif
@@ -499,6 +504,7 @@ endif
 
 
 tagsfile      := $(fdir)/TAGS
+
 
 # Check that the machine has a new libc, i.e. at least version 2 (which means
 # that /lib/libc.so.6 should exist), otherwise some problems with the older
@@ -609,10 +615,10 @@ ifneq ($(GPIB_LIBRARY),NONE)
 		else
 			ifeq ($(GPIB_LIBRARY),NI)
 				GPIB_LIBRARY     := ni
-				ifeq ($(CIB_FILE),)
-					LIBS         += $(LIBS) -lgpibapi
+				ifeq ($(GPIB_CIB_FILE),)
+					LIBS         += -lgpibapi
 				else
-					LIBS         += $(CIB_FILE)
+					LIBS         += $(GPIB_CIB_FILE)
 				endif
 				CONFFLAGS        += -DGPIB_LIBRARY_NI
 			else
@@ -714,11 +720,11 @@ endif
 
 
 ifdef WITH_HTTP_SERVER
+	CONFFLAGS += -DWITH_HTTP_SERVER
 	ifdef DEFAULT_HTTP_PORT
-		CONFFLAGS += -DWITH_HTTP_SERVER \
-					  -DDEFAULT_HTTP_PORT=$(DEFAULT_HTTP_PORT)
+		CONFFLAGS += -DDEFAULT_HTTP_PORT=$(DEFAULT_HTTP_PORT)
 	else
-		CONFFLAGS += -DWITH_HTTP_SERVER -DDEFAULT_HTTP_PORT=8080
+		CONFFLAGS += -DDEFAULT_HTTP_PORT=8080
 	endif
 endif
 

@@ -498,6 +498,9 @@ long lecroy_ws_get_num_avg( int /* channel */ );
 
 bool lecroy_ws_get_desc( int /* channel */ );
 
+void lecroy_normal_channel_averaging( int  /* channel */,
+                                      long /* num_avg */ );
+
 void lecroy_ws_set_up_averaging( long /* channel */,
                                  long /* source  */,
                                  long /* num_avg */,
