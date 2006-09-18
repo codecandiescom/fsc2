@@ -25,8 +25,101 @@
 #include "lecroy_wr2.h"
 
 
+/* Structure for storing the relevant state information if a check of
+   the trigger delay can't be done during the test run */
+
+typedef struct LECROY_WR2_PTC_DELAY LECROY_WR2_PTC_DELAY_T;
+
+struct LECROY_WR2_PTC_DELAY {
+    double delay;
+    LECROY_WR2_PTC_DELAY_T * next;
+};
+
+static LECROY_WR2_PTC_DELAY_T * post_test_check_delay = NULL;
+
+
+/* Structure for storing the relevant state information if a window check
+   can't be done during the test run */
+
+typedef struct LECROY_WR2_PTC_WINDOW LECROY_WR2_PTC_WINDOW_T;
+
+struct LECROY_WR2_PTC_WINDOW {
+    bool is_timebase;               /* is timebase already set ? */
+    double timebase;                /* timebase (if set) */
+    int tb_index;                   /* index in timebase table */
+    HORI_RES_T *cur_hres;           /* time resolution settings */
+    bool is_trigger_delay;          /* is trigger delay already set ? */
+    double trigger_delay;           /* trigger delay (if set) */
+    long num;                       /* window number */
+    double start;                   /* window start position */
+    double width;                   /* window length */
+    bool show_num;                  /* add window number in error message ? */
+    LECROY_WR2_PTC_WINDOW_T * next; /* next structure in list */
+};
+
+static LECROY_WR2_PTC_WINDOW_T * post_test_check_window = NULL;
+
+
+static void lecroy_wr2_soe_trigger_delay_check( double delay );
+static void lecroy_wr2_soe_window_check( LECROY_WR2_PTC_WINDOW_T * p );
 static long lecroy_wr2_calc_pos( double t );
 
+
+
+/*--------------------------------------------------------------------------*
+ * Some checks can't be done during the test stage - they require knowledge
+ * of e.g. the timebase etc. which may still be unknown at that time (at
+ * least if the user didn't set it explecitely). So the checks have to be
+ * postponed until the start of the exeriment when we can talk with the
+ * device and thus figure them out (and they have to be repeated on each
+ * start of an experiment since the settings could have been changed during
+ * the previous experiment or afterwards). This function is for doing these
+ * tests.
+ *--------------------------------------------------------------------------*/
+
+void lecroy_wr2_soe_checks( void )
+{
+    LECROY_WR2_PTC_DELAY_T *pd;
+    LECROY_WR2_PTC_WINDOW_T *pw;
+
+
+    /* Test the trigger delay and window settings we couldn't check during
+       the test run */
+
+    for ( pd = post_test_check_delay; pd != NULL; pd = pd->next )
+        lecroy_wr2_soe_trigger_delay_check( pd->delay ); 
+
+    for ( pw = post_test_check_window; pw != NULL; pw = pw->next )
+        lecroy_wr2_soe_window_check( pw ); 
+}
+
+
+/*-----------------------------------------------------------------------*
+ * Some memory may still be allocated for the tests of trigger delays
+ * and window positions to be done at the start of the experiment. This
+ * function must be called in the exit handler to get rid of the memory.
+ *-----------------------------------------------------------------------*/
+
+void lecroy_wr2_exit_cleanup( void )
+{
+    LECROY_WR2_PTC_DELAY_T *pd;
+    LECROY_WR2_PTC_WINDOW_T *pw;
+
+    
+    while ( post_test_check_delay != NULL )
+    {
+        pd = post_test_check_delay;
+        post_test_check_delay = post_test_check_delay->next;
+        T_free( pd );
+    }
+
+    while ( post_test_check_window != NULL )
+    {
+        pw = post_test_check_window;
+        post_test_check_window = post_test_check_window->next;
+        T_free( pw );
+    }
+}
 
 
 /*----------------------------------------------------------*
@@ -67,6 +160,37 @@ double lecroy_wr2_trigger_delay_check( void )
     if ( ! lecroy_wr2.is_trigger_delay )
         return delay;
 
+    /* We can't do the check during the test run if the timebase isn't set, so
+       store the relevant state information for the time when the experiment
+       gets started and we can ask the device for the timebase */
+
+    if ( FSC2_MODE == TEST && ! lecroy_wr2.is_timebase )
+    {
+        LECROY_WR2_PTC_DELAY_T *p = post_test_check_delay;
+
+        if ( post_test_check_delay == NULL )
+            p = post_test_check_delay =
+                					 T_malloc( sizeof *post_test_check_delay );
+        else
+            while ( 1 )
+            {
+                if ( delay == p->delay )
+                    return delay;
+
+                if ( p->next == NULL )
+                {
+                    p->next = T_malloc( sizeof *p );
+                    p = p->next;
+                    break;
+                }
+
+                p = p->next;
+            }
+
+        p->delay = delay;
+        return delay;
+    }
+
     /* The delay can only be set with a certain resolution (1/10) of the
        current timebase, so make it a integer multiple of this */
 
@@ -92,7 +216,7 @@ double lecroy_wr2_trigger_delay_check( void )
                       -  0.5 * lecroy_wr2_time_per_point( ) )
     {
         print( FATAL, "Post-triger delay of %s now is too long, can't be "
-               "longer that 10,000 times the timebase.\n",
+               "longer than 10,000 times the timebase.\n",
                lecroy_wr2_ptime( real_delay ) );
         THROW( EXCEPTION );
     }
@@ -110,6 +234,56 @@ double lecroy_wr2_trigger_delay_check( void )
     }
 
     return real_delay;
+}
+
+
+/*-----------------------------------------------------------*
+ * Function for testing trigger delay settings that couldn't
+ * be checked during the test run.
+ *-----------------------------------------------------------*/
+
+static void lecroy_wr2_soe_trigger_delay_check( double delay )
+{
+    double real_delay = LECROY_WR2_TRIG_DELAY_RESOLUTION * lecroy_wr2.timebase
+                        * lrnd( delay / ( LECROY_WR2_TRIG_DELAY_RESOLUTION *
+                                          lecroy_wr2.timebase ) );
+
+    /* Check that the trigger delay is within the limits (taking rounding
+       errors of the order of the current time resolution into account) */
+
+    if ( real_delay > 0.0 &&
+         real_delay >   10.0 * lecroy_wr2.timebase
+                      +  0.5 * lecroy_wr2_time_per_point( ) )
+    {
+        print( FATAL, "During the experiment a pre-trigger delay of %s is "
+               "going to be used which is too long, it can't be longer than "
+               "10 times the timebase.\n", lecroy_wr2_ptime( real_delay ) );
+        THROW( EXCEPTION );
+    }
+
+    if ( real_delay < 0.0 &&
+         real_delay <   -1.0e4 * lecroy_wr2.timebase
+                      -  0.5 * lecroy_wr2_time_per_point( ) )
+    {
+        print( FATAL, "During the experiment the post-triger delay of %s is "
+               "going to be used wich is too long, it can't be longer than "
+               "10,000 times the timebase.\n",
+               lecroy_wr2_ptime( real_delay ) );
+        THROW( EXCEPTION );
+    }
+
+    /* If the difference between the requested trigger delay and the one
+       that can be set is larger than the time resolution warn the user */
+
+    if ( fabs( real_delay - delay ) > lecroy_wr2_time_per_point( ) )
+    {
+        char *cp = T_strdup( lecroy_wr2_ptime( delay ) );
+
+        print( WARN, "During the experiment the trigger delay will have to be "
+               "adjusted from %s to %s.\n",
+               cp, lecroy_wr2_ptime( real_delay ) );
+        T_free( cp );
+    }
 }
 
 
@@ -185,6 +359,49 @@ void lecroy_wr2_window_check( Window_T * w,
     double max_time = max_width - lecroy_wr2.trigger_delay;
 
 
+    /* During the test run the window position and width can only be checked
+       if we know the timebase and the trigger delay, so if they haven't been
+       explicitely set by the user just store them together with the window
+       settings for a test when the experiment has been started. */
+
+    if ( FSC2_MODE == TEST &&
+         ( ! lecroy_wr2.is_timebase || ! lecroy_wr2.is_trigger_delay ) )
+    {
+        LECROY_WR2_PTC_WINDOW_T *p = post_test_check_window;
+
+        if ( post_test_check_window == NULL )
+            p = post_test_check_window =
+                					T_malloc( sizeof *post_test_check_window );
+        else
+        {
+            while ( p->next != NULL )
+                p = p->next;
+
+            p->next = T_malloc( sizeof *p );
+            p = p->next;
+        }
+
+        /* Store the current settings as far as they are known */
+
+        p->is_timebase = lecroy_wr2.is_timebase;
+        if ( lecroy_wr2.is_timebase )
+        {
+            p->timebase = lecroy_wr2.timebase;
+            p->tb_index = lecroy_wr2.tb_index;
+            p->cur_hres = lecroy_wr2.cur_hres;
+        }
+
+        p->is_trigger_delay = lecroy_wr2.is_trigger_delay;
+        if ( lecroy_wr2.is_trigger_delay )
+            p->trigger_delay = lecroy_wr2.trigger_delay;
+
+        p->num = w->num;
+        p->start = w->start;
+        p->width = w->width;
+        p->show_num = show_num;
+        return;
+    }
+
     /* Start with calculating the start and end position of the window
        in points */
 
@@ -231,6 +448,103 @@ void lecroy_wr2_window_check( Window_T * w,
     w->start_num  = start;
     w->end_num    = end;
     w->num_points = end - start + 1;
+}
+
+
+/*---------------------------------------------------------------*
+ * Function for testing window settings that couldn't be checked
+ * during the test run.
+ *---------------------------------------------------------------*/
+
+static void lecroy_wr2_soe_window_check( LECROY_WR2_PTC_WINDOW_T * p )
+{
+    double real_timebase = lecroy_wr2.timebase;
+    int real_tb_index = lecroy_wr2.tb_index;
+    HORI_RES_T *real_cur_hres = lecroy_wr2.cur_hres;
+    double real_trigger_delay = lecroy_wr2.trigger_delay;
+    long start;
+    long end;
+    long max_len;
+    double max_width;
+    double max_time;
+    bool show_num = p->show_num;
+
+
+    /* Restore the internal representation of the state of the device as far
+       as necessary to the one we had when the window settings couldn't be
+       tested */
+
+    if ( p->is_timebase )
+    {
+        lecroy_wr2.timebase = p->timebase;
+        lecroy_wr2.tb_index = p->tb_index;
+        lecroy_wr2.cur_hres = p->cur_hres;
+    }
+
+    if ( p->is_trigger_delay )
+        lecroy_wr2.trigger_delay = p->trigger_delay;
+
+    /* Now do the required tests */
+
+    max_len = lecroy_wr2_curve_length( );
+    max_width = max_len * lecroy_wr2_time_per_point( );
+    max_time = max_width - lecroy_wr2.trigger_delay;
+    start = lecroy_wr2_calc_pos( p->start );
+    end   = lecroy_wr2_calc_pos( p->start + p->width );
+
+    if ( start < 0 )
+    {
+        if ( show_num > 0 )
+            print( FATAL, "During the experiment the %ld. window is going to "
+                   "start too early, earliest possible time is %s\n",
+                   p->num - WINDOW_START_NUMBER + 1,
+                   lecroy_wr2_ptime( - lecroy_wr2.trigger_delay ) );
+        else
+            print( FATAL, "During the experiment the window is going to start "
+                   "too early, earliest possible time is %s\n",
+                   lecroy_wr2_ptime( - lecroy_wr2.trigger_delay ) );
+        THROW( EXCEPTION );
+    }
+
+    if ( start > max_len )
+    {
+        if ( show_num > 0 )
+            print( FATAL, "During the experiment the %ld. window is going to "
+                   "start too late, latest possible time is %s.\n",
+                   p->num - WINDOW_START_NUMBER + 1,
+                   lecroy_wr2_ptime( max_time ) );
+        else
+            print( FATAL, "During the experiment the window is going to start "
+                   "too late, latest possible time is %s.\n",
+                   lecroy_wr2_ptime( max_time ) );
+        THROW( EXCEPTION );
+    }
+
+    if ( end > max_len )
+    {
+        if ( show_num > 0 )
+            print( FATAL, "During the experiment the %d. window is going to "
+                   "end too late, largest possible width is %s.\n",
+                   p->num - WINDOW_START_NUMBER + 1,
+                   lecroy_wr2_ptime( max_width ) );
+        else
+            print( FATAL, "During the experiment the window is going to end "
+                   "too late, largest possible width is %s.\n",
+                   lecroy_wr2_ptime( max_width ) );
+        THROW( EXCEPTION );
+    }
+
+    /* Reset the internal representation back to the real one */
+
+    if ( p->is_timebase )
+    {
+        lecroy_wr2.timebase = real_timebase;
+        lecroy_wr2.tb_index = real_tb_index;
+        lecroy_wr2.cur_hres = real_cur_hres;
+    }
+
+    if ( p->is_trigger_delay )
+        lecroy_wr2.trigger_delay = real_trigger_delay;
 }
 
 

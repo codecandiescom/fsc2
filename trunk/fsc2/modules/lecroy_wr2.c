@@ -110,12 +110,6 @@ int lecroy_wr2_init_hook( void )
         lecroy_wr2.offset[ i ]               = LECROY_WR2_TEST_OFFSET;
         lecroy_wr2.is_coupling[ i ]          = UNSET;
         lecroy_wr2.coupling[ i ]             = LECROY_WR2_TEST_COUPLING;
-        lecroy_wr2.is_trigger_slope[ i ]     = UNSET;
-        lecroy_wr2.trigger_slope[ i ]        = LECROY_WR2_TEST_TRIG_SLOPE;
-        lecroy_wr2.is_trigger_coupling[ i ]  = UNSET;
-        lecroy_wr2.trigger_coupling[ i ]     = LECROY_WR2_TEST_TRIG_COUP;
-        lecroy_wr2.is_trigger_level[ i ]     = UNSET;
-        lecroy_wr2.trigger_level[ i ]        = LECROY_WR2_TEST_TRIG_LEVEL;
         lecroy_wr2.is_bandwidth_limiter[ i ] = UNSET;
         lecroy_wr2.bandwidth_limiter[ i ]    = LECROY_WR2_TEST_BWL;
     }
@@ -129,6 +123,19 @@ int lecroy_wr2_init_hook( void )
 
     for ( i = LECROY_WR2_M1; i <= LECROY_WR2_M4; i++ )
         lecroy_wr2.channels_in_use[ i ] = UNSET;
+
+    for ( i = 0; i < ( int ) NUM_ELEMS( trg_channels ); i++ )
+    {
+        lecroy_wr2.is_trigger_slope[ trg_channels[ i ] ]    = UNSET;
+        lecroy_wr2.trigger_slope[ trg_channels[ i ] ]       =
+                                                    LECROY_WR2_TEST_TRIG_SLOPE;
+        lecroy_wr2.is_trigger_coupling[ trg_channels[ i ] ] = UNSET;
+        lecroy_wr2.trigger_coupling[ trg_channels[ i ] ]    =
+                                                     LECROY_WR2_TEST_TRIG_COUP;
+        lecroy_wr2.is_trigger_level[ trg_channels[ i ] ]    = UNSET;
+        lecroy_wr2.trigger_level[ trg_channels[ i ] ]       =
+                                                    LECROY_WR2_TEST_TRIG_LEVEL;
+    }
 
     lecroy_wr2_stored.w = NULL;
 
@@ -187,6 +194,7 @@ int lecroy_wr2_end_of_exp_hook( void )
 
 void lecroy_wr2_exit_hook( void )
 {
+    lecroy_wr2_exit_cleanup( );
     lecroy_wr2_delete_windows( &lecroy_wr2 );
     lecroy_wr2_delete_windows( &lecroy_wr2_stored );
     lecroy_wr2_clean_up( );

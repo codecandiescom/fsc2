@@ -1996,18 +1996,25 @@ acquisition), if called with a negative value start of the acquisition
 is delayed by that value relative to the trigger position (post-trigger
 acquisition).
 
-Please note that the @strong{Tektronix} oscilloscopes don't allow post-trigger
-acquisitions, post-trigger acquisitions can only done with the @strong{LeCroy}
-oszilloscopes (where the maximum pre-trigger delay is typically 10 times the
-timebase and the maximum post-trigger delay @code{10,000} times the timebase
-setting).
+Please note that the @strong{Tektronix} oscilloscopes don't allow
+post-trigger acquisitions, post-trigger acquisitions can only done
+with the @strong{LeCroy} oscilloscopes (where the maximum pre-trigger
+delay is typically 10 times the timebase (5 for the @strong{LeCroy
+WaveSurfer}) and the maximum post-trigger delay @code{10,000} times
+the timebase setting).
 
-If called without an argument the current setting of the pre- or post-trigger
-delay is returned. 
+If called without an argument the current setting of the pre- or
+post-trigger delay is returned. 
 
 Please note that, if a trigger delay has been set and a new timebase
 gets set, the program may get aborted if the requested trigger delay
 isn't possible with the changed timebase setting.
+
+Since checking the trigger delay requires knowledge about the timebase
+the oscilloscope is operating at, which may not be available already
+during the test run, it can happen that the script stops only at the
+start of the experiment if it detects that an impossible trigger delay
+is oing to be requested during the experiment.
 
 The function can be called in query mode (i.e.@: without an argument)
 only if either it has already been called with an argument or in the
@@ -2046,12 +2053,18 @@ negative, times after the trigger positive. If a window width is given
 it has to be positive and the window must fit into the time interval
 measured by the oscilloscope.
 
-Because the data measured by the oscilloscope are discreet it is not
-possible to specify arbitrary values for the starting point and window
-width but they must fit with the current minimum time resolution. If the
-specified values don't fit the requirement a warning is printed and the
-position and width are adjusted to the nearest allowed values.
+Because the data are measured by the oscilloscope at equally spaced
+time intervals is not possible to specify arbitrary values for the
+starting point and window width but they must fit with the current
+minimum time resolution. If the specified values don't fit the
+requirement a warning is printed and the position and width are adjusted
+to the nearest possible values.
 
+Since checking the window settings requires knowledge about the timebase
+the oscilloscope is operating at as well as the trigger delay, which may
+not be available already during the test run, it can happen that the script
+stops only at the start of the experiment if it detects that impossible
+window settings are going to be requested during the experiment.
 
 
 @anchor{digitizer_change_window()}
@@ -2072,6 +2085,12 @@ given the distance between the cursors on the screen is used for the
 window width.
 
 
+Since checking the window settings requires knowledge about the timebase
+the oscilloscope is operating at as well as the trigger delay, which may
+not be available already during the test run, it can happen that the script
+stops only at the start of the experiment if it detects that impossible
+window settings are going to be requested during the experiment.
+
 
 @anchor{digitizer_window_position()}
 @findex digitizer_window_position()
@@ -2082,6 +2101,11 @@ number as returned by @ref{digitizer_define_window()}. If there is no
 further argument the position of the window is returned. Otherwise the
 second parameter is taken to be the new window position.
 
+Since checking the window position requires knowledge about the timebase
+the oscilloscope is operating at as well as the trigger delay, which may
+not be available already during the test run, it can happen that the script
+stops only at the start of the experiment if it detects that an impossible
+window position is going to be requested during the experiment.
 
 
 @anchor{digitizer_window_width()}
@@ -2093,6 +2117,11 @@ number as returned by @ref{digitizer_define_window()}. If there is no
 further argument the width of the window is returned. Otherwise the
 second parameter is taken to be the new window width.
 
+Since checking the window width requires knowledge about the timebase
+the oscilloscope is operating at as well as the trigger delay, which may
+not be available already during the test run, it can happen that the script
+stops only at the start of the experiment if it detects that an impossible
+window width is going to be requested during the experiment.
 
 
 @anchor{digitizer_display_channel()}

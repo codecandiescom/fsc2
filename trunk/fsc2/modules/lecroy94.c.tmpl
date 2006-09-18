@@ -160,10 +160,10 @@ int lecroy94_tmpl_end_of_exp_hook( void )
 
 void lecroy94_tmpl_exit_hook( void )
 {
+    lecroy94_tmpl_exit_cleanup( );
     lecroy94_tmpl_delete_windows( &lecroy94_tmpl );
     lecroy94_tmpl_delete_windows( &lecroy94_tmpl_stored );
 }
-
 
 
 /*----------------------------------------------------*

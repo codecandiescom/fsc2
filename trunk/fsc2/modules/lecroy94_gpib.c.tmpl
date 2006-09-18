@@ -325,6 +325,12 @@ bool lecroy94_tmpl_init( const char * name )
         }
 
         can_fetch = lecroy94_tmpl_get_inr( );
+
+        /* Now that we know about the timebase and trigger delay settings
+           we can also do the checks on the window and trigger delay settngs
+           that may not have been possible during the test run */
+
+        lecroy94_tmpl_soe_checks( );
     }
     OTHERWISE
     {

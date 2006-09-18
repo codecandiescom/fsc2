@@ -153,7 +153,8 @@ NAME     \"[^"]*\"
 "DEFENSE_DELAY_CARD"    set_cur_delay( DEFENSE_DELAY );
 "DET_DELAY_CARD"        set_cur_delay( DET_DELAY );
 "ERT_CLOCK_CARD"        set_cur_clock( ERT_CLOCK );
-"TB_CLOCK_CARD"         set_cur_clock( TB_CLOCK );
+"TB_CLOCK_CARD_1"       set_cur_clock( TB_CLOCK_1 );
+"TB_CLOCK_CARD_2"       set_cur_clock( TB_CLOCK_2 );
 
 {NAME}                  set_name( rb_pulser_w_text );
 
@@ -250,7 +251,7 @@ static void set_name( char * name )
         fsc2_assert( cur_delay == INVALID_DELAY_NUMBER );
 
 #if defined FIXED_TIMEBASE
-        if ( cur_clock == TB_CLOCK )
+        if ( cur_clock == TB_CLOCK_1 || cur_clock == TB_CLOCK_2 )
         {
             cur_clock = INVALID_CLOCK_NUMBER;
             return;

@@ -79,17 +79,17 @@ PHASE_DELAY_CARD_2    "DELAY_9"
 DEFENSE_DELAY_CARD    "DELAY_10"
 
 
-# 12. Name of the delay card that creates the delay before the start of
+# 12. Name of the delay cards creating the delay before detection trigger
+#     pulse (which is one of the end pulses of this card
+
+DET_DELAY_CARD        "DELAY_11"
+
+
+# 13. Name of the delay card that creates the delay before the start of
 #     the RF pulse (the length of this pulse is set using the pulse mode
 #     of the Rhode&Schwarz synthesizer)
 
-RF_DELAY_CARD         "DELAY_11"
-
-
-# 13. Name of the delay cards creating the delay before detection trigger
-#     pulse (which is one of the end pulses of this card
-
-DET_DELAY_CARD        "DELAY_12"
+RF_DELAY_CARD         "DELAY_12"
 
 
 # 14. Name of the card for creating the delay before the laser pulse
@@ -108,10 +108,17 @@ LASER_DELAY_CARD_1    "DELAY_14"
 ERT_CLOCK_CARD    "CLOCK_0"
 
 
-# 17. Name of the clock card that's the clock for all the other delay cards,
-#     i.e. the time base clock card - but note that there's a compile time
-#     option in the configuration file for the module, FIXED_TIMEBASE, that
-#     makes the program assume that a fixed frequency clock card is used
-#     instead, if it's defined this setting does nothing
+# 17. Name of the first clock card that's the clock for all the pulse delay
+#     cards and the defense delay card, i.e. the frst time base clock card
+#     - but note that there's a compile time option in the configuration
+#     file for the module, FIXED_TIMEBASE, that makes the program assume
+#     that a fixed frequency clock card is used instead, if it's defined
+#     this setting does nothing
 
-TB_CLOCK_CARD     "CLOCK_1"
+TB_CLOCK_CARD_1   "CLOCK_1"
+
+
+# 18. Name of the second clock card, i.e. the timebase card for all the
+#     remaining delay cards
+
+TB_CLOCK_CARD_2   "CLOCK_2"

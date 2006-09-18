@@ -348,7 +348,7 @@ static void rb_pulser_w_phase_channel_setup( void )
              dT * rb_pulser_w.timebase + cur_card->intr_delay <
                                             mw_end + rb_pulser_w.grace_period )
         {
-            print( FATAL, "Microwave pulse #%ld to near to its "
+            print( FATAL, "Microwave pulse #%ld too near to its "
                    "predecessor #%ld to allow phase switching.\n",
                    pulses[ i ]->num, pulses[ i - 1 ]->num );
             THROW( EXCEPTION );

@@ -122,6 +122,7 @@
    displayed at once */
 
 #define LECROY_WR2_MAX_CHANNELS       12
+#define LECROY_WR2_TOTAL_CHANNELS     14
 #define LECROY_WR2_MAX_USED_CHANNELS   8
 
 
@@ -260,14 +261,14 @@ struct LECROY_WR2 {
     int trigger_source;
     bool is_trigger_source;
 
-    double trigger_level[ LECROY_WR2_MAX_CHANNELS ];
-    bool is_trigger_level[ LECROY_WR2_MAX_CHANNELS ];
+    double trigger_level[ LECROY_WR2_TOTAL_CHANNELS ];
+    bool is_trigger_level[ LECROY_WR2_TOTAL_CHANNELS ];
 
-    bool trigger_slope[ LECROY_WR2_MAX_CHANNELS ];
-    bool is_trigger_slope[ LECROY_WR2_MAX_CHANNELS ];
+    bool trigger_slope[ LECROY_WR2_TOTAL_CHANNELS ];
+    bool is_trigger_slope[ LECROY_WR2_TOTAL_CHANNELS ];
 
-    int trigger_coupling[ LECROY_WR2_MAX_CHANNELS ];
-    bool is_trigger_coupling[ LECROY_WR2_MAX_CHANNELS ];
+    int trigger_coupling[ LECROY_WR2_TOTAL_CHANNELS ];
+    bool is_trigger_coupling[ LECROY_WR2_TOTAL_CHANNELS ];
 
     double trigger_delay;
     bool is_trigger_delay;
@@ -304,6 +305,32 @@ enum {
     AVERAGE
 };
 
+
+#if defined LECROY_WR2_MAIN_
+#if defined LECROY_WR2_CH3 && defined LECROY_WR2_CH4
+int trg_channels[ 7 ] = { LECROY_WR2_CH1,
+                          LECROY_WR2_CH2,
+                          LECROY_WR2_CH3,
+                          LECROY_WR2_CH4,
+                          LECROY_WR2_LIN,
+                          LECROY_WR2_EXT,
+                          LECROY_WR2_EXT10
+                        };
+#else
+int trg_channels[ 5 ] = { LECROY_WR2_CH1,
+                          LECROY_WR2_CH2,
+                          LECROY_WR2_LIN,
+                          LECROY_WR2_EXT,
+                          LECROY_WR2_EXT10
+                        };
+#endif
+#else
+#if defined LECROY_WR2_CH3 && defined LECROY_WR2_CH4
+extern int trg_channels[ 7 ];
+#else
+extern int trg_channels[ 5 ];
+#endif
+#endif
 
 /* declaration of exported functions */
 
@@ -443,6 +470,10 @@ void lecroy_wr2_copy_curve( long /* src  */,
                             long /* dest */ );
 
 bool lecroy_wr2_command( const char * /* cmd */ );
+
+void lecroy_wr2_soe_checks( void );
+
+void lecroy_wr2_exit_cleanup( void );
 
 const char *lecroy_wr2_ptime( double /* p_time */ );
 

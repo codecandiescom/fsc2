@@ -102,17 +102,24 @@ int lecroy_ws_init_hook( void )
         lecroy_ws.is_coupling[ i ]          = UNSET;
         lecroy_ws.coupling[ i ]             = LECROY_WS_TEST_COUPLING;
         lecroy_ws.need_high_imp[ i ]        = UNSET;
-        lecroy_ws.is_trigger_slope[ i ]     = UNSET;
-        lecroy_ws.trigger_slope[ i ]        = LECROY_WS_TEST_TRIG_SLOPE;
-        lecroy_ws.is_trigger_coupling[ i ]  = UNSET;
-        lecroy_ws.trigger_coupling[ i ]     = LECROY_WS_TEST_TRIG_COUP;
-        lecroy_ws.is_trigger_level[ i ]     = UNSET;
-        lecroy_ws.trigger_level[ i ]        = LECROY_WS_TEST_TRIG_LEVEL;
         lecroy_ws.is_bandwidth_limiter[ i ] = UNSET;
         lecroy_ws.bandwidth_limiter[ i ]    = LECROY_WS_TEST_BWL;
         lecroy_ws.is_avg_setup[ i ]         = UNSET;
         lecroy_ws.source_ch[ i ]            = i;
         lecroy_ws.num_avg[ i ]              = 1;
+    }
+
+    for ( i = 0; i < ( int ) NUM_ELEMS( trg_channels ); i++ )
+    {
+        lecroy_ws.is_trigger_slope[ trg_channels[ i ] ]    = UNSET;
+        lecroy_ws.trigger_slope[ trg_channels[ i ] ]       =
+                                                     LECROY_WS_TEST_TRIG_SLOPE;
+        lecroy_ws.is_trigger_coupling[ trg_channels[ i ] ] = UNSET;
+        lecroy_ws.trigger_coupling[ trg_channels[ i ] ]    =
+                                                      LECROY_WS_TEST_TRIG_COUP;
+        lecroy_ws.is_trigger_level[ trg_channels[ i ] ]    = UNSET;
+        lecroy_ws.trigger_level[ trg_channels[ i ] ]       =
+                                                     LECROY_WS_TEST_TRIG_LEVEL;
     }
 
     lecroy_ws.is_avg_setup[ LECROY_WS_MATH ] = UNSET;
@@ -187,6 +194,7 @@ int lecroy_ws_end_of_exp_hook( void )
 
 void lecroy_ws_exit_hook( void )
 {
+    lecroy_ws_exit_cleanup( );
     lecroy_ws_delete_windows( &lecroy_ws );
     lecroy_ws_delete_windows( &lecroy_ws_stored );
 }
@@ -430,11 +438,11 @@ Var_T *digitizer_timebase( Var_T * v )
                 return vars_push( FLOAT_VAR, lecroy_ws.timebase );
         }
 
-    timebase = get_double( v, "time base" );
+    timebase = get_double( v, "timebase" );
 
     if ( timebase <= 0 )
     {
-        print( FATAL, "Invalid zero or negative time base: %s.\n",
+        print( FATAL, "Invalid zero or negative timebase: %s.\n",
                lecroy_ws_ptime( timebase ) );
         THROW( EXCEPTION );
     }
@@ -1217,14 +1225,9 @@ Var_T *digitizer_trigger_slope( Var_T * v )
                                get_strict_long( v, "channel number" ), UNSET );
     v = vars_pop( v );
 
-    if ( channel == LECROY_WS_LIN ) {
-        print( SEVERE, "Trigger slope for %s can't be determined or "
-               "changed.\n", LECROY_WS_Channel_Names[ LECROY_WS_LIN ] );
-        THROW( EXCEPTION );
-    }
-
     if ( ( channel < LECROY_WS_CH1 || channel > LECROY_WS_CH_MAX ) &&
-         channel != LECROY_WS_EXT && channel != LECROY_WS_EXT10 )
+         channel != LECROY_WS_EXT && channel != LECROY_WS_EXT10 &&
+         channel != LECROY_WS_LIN )
     {
         print( FATAL, "Invalid trigger channel.\n" );
         THROW( EXCEPTION );
@@ -1426,8 +1429,8 @@ Var_T *digitizer_trigger_mode( Var_T * v )
 /*-----------------------------------------------------------------*
  * Function to set or determine the trigger delay, positive values
  * (up to the full horizontal width of the screen, i.e. 10 times
- * the time base) are for pretrigger while negative values (up to
- * 10,000 times the time base) are for starting the acquisition
+ * the timebase) are for pretrigger while negative values (up to
+ * 10,000 times the timebase) are for starting the acquisition
  * after the trigger. Time resolution of the trigger delay is 1/10
  * of the timebase.
  *-----------------------------------------------------------------*/
@@ -1467,20 +1470,23 @@ Var_T *digitizer_trigger_delay( Var_T * v )
     /* Check that the trigger delay is within the limits (taking rounding
        errors of the order of the current time resolution into account) */
 
-    if ( delay < 0.0 && delay <   -10.0 * lecroy_ws.timebase
-                                -   0.5 * lecroy_ws_time_per_point( ) )
+    if ( FSC2_MODE != TEST || lecroy_ws.is_timebase )
     {
-        print( FATAL, "Pre-trigger delay is too long, can't be longer than "
-               "10 times the time base.\n" );
-        THROW( EXCEPTION );
-    }
+        if ( delay > 0.0 && delay >   5.0 * lecroy_ws.timebase
+                                    + 0.5 * lecroy_ws_time_per_point( ) )
+        {
+            print( FATAL, "Pre-trigger delay is too long, can't be longer "
+                   "than 5 times the timebase.\n" );
+            THROW( EXCEPTION );
+        }
 
-    if ( delay > 0.0 && delay >   1.0e4 * lecroy_ws.timebase
-                                + 0.5 * lecroy_ws_time_per_point( ) )
-    {
-        print( FATAL, "Post-triger delay is too long, can't be longer that "
-               "10,000 times the time base.\n" );
-        THROW( EXCEPTION );
+        if ( delay < 0.0 && delay <   -1.0e4 * lecroy_ws.timebase
+                                    -    0.5 * lecroy_ws_time_per_point( ) )
+        {
+            print( FATAL, "Post-triger delay is too long, can't be longer "
+                   "than 10,000 times the timebase.\n" );
+            THROW( EXCEPTION );
+        }
     }
 
     /* The delay can only be set in units of 1/50 of the timebase */

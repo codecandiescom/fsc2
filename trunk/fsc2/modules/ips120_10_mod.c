@@ -146,6 +146,8 @@ struct IPS120_10_MOD {
 	double final_target_current;
 
 	char *dac_func;           /* name of function to set DAC voltage */
+
+	bool in_init_phase;
 };
 
 
@@ -199,6 +201,8 @@ int ips120_10_mod_init_hook( void )
 
 
 	Need_GPIB = SET;
+
+	ips120_10_mod.in_init_phase = UNSET;
 
 	/* Check if the module for the DAC we need has been loaded */
 
@@ -311,12 +315,17 @@ int ips120_10_mod_exp_hook( void )
 {
 	ips120_10_mod = ips120_10_mod_stored;
 
+	ips120_10_mod.in_init_phase = SET;
+
 	if ( ! ips120_10_mod_init( DEVICE_NAME ) )
 	{
+		ips120_10_mod.in_init_phase = UNSET;
 		print( FATAL, "Initialization of device failed: %s\n",
 			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
+
+	ips120_10_mod.in_init_phase = UNSET;
 
 	return 1;
 }
@@ -1642,6 +1651,7 @@ static void  ips120_10_mod_read( char * buffer,
 	char *bp = buffer;
 	long count = 0;
 	long to_read;
+	long fails = 0;
 
 
 	while ( count < *len )
@@ -1660,8 +1670,19 @@ static void  ips120_10_mod_read( char * buffer,
 		{
 			stop_on_user_request( );
 			fsc2_usleep( 1000, SET );
+
+			/* During initialization the user can't press the "Stop" button,
+			   so we have to stop automatically if the device returns too
+			   many '\0' (in that case the power supply os either off or the
+			   GPV24 converter has to be powercycled) */
+
+			if ( ips120_10_mod.in_init_phase && ++fails > 10 * MAX_RETRIES )
+				ips120_10_mod_comm_failure( );
+
 			continue;
 		}
+
+		fails = 0;
 
 		count++;
 

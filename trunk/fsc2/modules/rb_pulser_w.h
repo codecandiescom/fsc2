@@ -55,7 +55,7 @@
 #if defined FIXED_TIMEBASE
 #define NUM_CLOCK_CARDS   1
 #else
-#define NUM_CLOCK_CARDS   2
+#define NUM_CLOCK_CARDS   3
 #endif
 
 
@@ -65,7 +65,8 @@
 #define CLOCK_CARD        1
 
 #define ERT_CLOCK         0
-#define TB_CLOCK          1
+#define TB_CLOCK_1        1
+#define TB_CLOCK_2        2
 
 #define ERT_DELAY         0
 #define MW_DELAY_0        1

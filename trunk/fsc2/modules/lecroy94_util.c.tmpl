@@ -26,8 +26,100 @@
 #include "lecroy94_tmpl.h"
 
 
+/* Structure for storing the relevant state information if a check of
+   the trigger delay can't be done during the test run */
+
+typedef struct LECROY94_TMPL_PTC_DELAY LECROY94_TMPL_PTC_DELAY_T;
+
+struct LECROY94_TMPL_PTC_DELAY {
+    double delay;
+    LECROY94_TMPL_PTC_DELAY_T * next;
+};
+
+static LECROY94_TMPL_PTC_DELAY_T * post_test_check_delay = NULL;
+
+
+/* Structure for storing the relevant state information if a window check
+   can't be done during the test run */
+
+typedef struct LECROY94_TMPL_PTC_WINDOW LECROY94_TMPL_PTC_WINDOW_T;
+
+struct LECROY94_TMPL_PTC_WINDOW {
+    bool is_timebase;                  /* is timebase already set? */
+    double timebase;                   /* timebase (if set) */
+    int tb_index;                      /* index in timebase table */
+    bool is_trigger_delay;             /* is trigger delay already set? */
+    double trigger_delay;              /* trigger delay (if set) */
+    long num;                          /* window number */
+    double start;                      /* window start position */
+    double width;                      /* window length */
+    bool show_num;                     /* add window # in error message? */
+    LECROY94_TMPL_PTC_WINDOW_T * next; /* next structure in list */
+};
+
+static LECROY94_TMPL_PTC_WINDOW_T * post_test_check_window = NULL;
+
+
+static void lecroy94_tmpl_soe_trigger_delay_check( double delay );
+static void lecroy94_tmpl_soe_window_check( LECROY94_TMPL_PTC_WINDOW_T * p );
 static long lecroy94_tmpl_calc_pos( double t );
 
+
+
+/*--------------------------------------------------------------------------*
+ * Some checks can't be done during the test stage - they require knowledge
+ * of e.g. the timebase etc. which may still be unknown at that time (at
+ * least if the user didn't set it explecitely). So the checks have to be
+ * postponed until the start of the exeriment when we can talk with the
+ * device and thus figure them out (and they have to be repeated on each
+ * start of an experiment since the settings could have been changed during
+ * the previous experiment or afterwards). This function is for doing these
+ * tests.
+ *--------------------------------------------------------------------------*/
+
+void lecroy94_tmpl_soe_checks( void )
+{
+    LECROY94_TMPL_PTC_DELAY_T *pd;
+    LECROY94_TMPL_PTC_WINDOW_T *pw;
+
+
+    /* Test the trigger delay and window settings we couldn't check during
+       the test run */
+
+    for ( pd = post_test_check_delay; pd != NULL; pd = pd->next )
+        lecroy94_tmpl_soe_trigger_delay_check( pd->delay ); 
+
+    for ( pw = post_test_check_window; pw != NULL; pw = pw->next )
+        lecroy94_tmpl_soe_window_check( pw ); 
+}
+
+
+/*-----------------------------------------------------------------------*
+ * Some memory may still be allocated for the tests of trigger delays
+ * and window positions to be done at the start of the experiment. This
+ * function must be called in the exit handler to get rid of the memory.
+ *-----------------------------------------------------------------------*/
+
+void lecroy94_tmpl_exit_cleanup( void )
+{
+    LECROY94_TMPL_PTC_DELAY_T *pd;
+    LECROY94_TMPL_PTC_WINDOW_T *pw;
+
+    
+    while ( post_test_check_delay != NULL )
+    {
+        pd = post_test_check_delay;
+        post_test_check_delay = post_test_check_delay->next;
+        T_free( pd );
+    }
+
+    while ( post_test_check_window != NULL )
+    {
+        pw = post_test_check_window;
+        post_test_check_window = post_test_check_window->next;
+        T_free( pw );
+    }
+}
 
 
 /*-----------------------------------------------------------*
@@ -114,68 +206,6 @@ void lecroy94_tmpl_all_windows_check( void )
 }
 
 
-/*-----------------------------------------------------------*
- * Function for checking the trigger delay when the timebase
- * gets changed
- *-----------------------------------------------------------*/
-
-double lecroy94_tmpl_trigger_delay_check( void )
-{
-    double delay = lecroy94_tmpl.trigger_delay;
-    double real_delay;
-
-
-    /* Nothing needs to be done if the trigger delay never was set */
-
-    if ( ! lecroy94_tmpl.is_trigger_delay )
-        return delay;
-
-    /* The delay can only be set with a certain resolution (1/50) with respect
-       to the current timebase, so make it a integer multiple of this */
-
-    real_delay = LECROY94_TMPL_TRIG_DELAY_RESOLUTION * lecroy94_tmpl.timebase
-                 * lrnd( delay / ( LECROY94_TMPL_TRIG_DELAY_RESOLUTION *
-                                   lecroy94_tmpl.timebase ) );
-
-    /* Check that the trigger delay is within the limits (taking rounding
-       errors of the order of the current time resolution into account) */
-
-    if ( real_delay > 0.0 &&
-         real_delay >   10.0 * lecroy94_tmpl.timebase
-                      +  0.5 * lecroy94_tmpl_time_per_point( ) )
-    {
-        print( FATAL, "Pre-trigger delay of %s now is too long, can't be "
-               "longer than 10 times the timebase.\n",
-               lecroy94_tmpl_ptime( real_delay ) );
-        THROW( EXCEPTION );
-    }
-
-    if ( real_delay < 0.0 &&
-         real_delay <   -1.0e4 * lecroy94_tmpl.timebase
-                      -  0.5 * lecroy94_tmpl_time_per_point( ) )
-    {
-        print( FATAL, "Post-triger delay of %s now is too long, can't be "
-               "longer that 10,000 times the timebase.\n",
-               lecroy94_tmpl_ptime( real_delay ) );
-        THROW( EXCEPTION );
-    }
-
-    /* If the difference between the requested trigger delay and the one
-       that can be set is larger than the time resolution warn the user */
-
-    if ( fabs( real_delay - delay ) > lecroy94_tmpl_time_per_point( ) )
-    {
-        char *cp = T_strdup( lecroy94_tmpl_ptime( delay ) );
-
-        print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
-               cp, lecroy94_tmpl_ptime( real_delay ) );
-        T_free( cp );
-    }
-
-    return real_delay;
-}
-
-
 /*------------------------------------------------------*
  * Checks if the window fits into the recorded data set
  *------------------------------------------------------*/
@@ -186,6 +216,48 @@ void lecroy94_tmpl_window_check( Window_T * w,
     long start;
     long end;
 
+
+    /* During the test run the window position and width can only be checked
+       if we know the timebase and the trigger delay, so if they haven't been
+       explicitely set by the user just store them together with the window
+       settings for a test when the experiment has been started. */
+
+    if ( FSC2_MODE == TEST &&
+         ( ! lecroy94_tmpl.is_timebase || ! lecroy94_tmpl.is_trigger_delay ) )
+    {
+        LECROY94_TMPL_PTC_WINDOW_T *p = post_test_check_window;
+
+        if ( post_test_check_window == NULL )
+            p = post_test_check_window =
+                					T_malloc( sizeof *post_test_check_window );
+        else
+        {
+            while ( p->next != NULL )
+                p = p->next;
+
+            p->next = T_malloc( sizeof *p );
+            p = p->next;
+        }
+
+        /* Store the current settings as far as they are known */
+
+        p->is_timebase = lecroy94_tmpl.is_timebase;
+        if ( lecroy94_tmpl.is_timebase )
+        {
+            p->timebase = lecroy94_tmpl.timebase;
+            p->tb_index = lecroy94_tmpl.tb_index;
+        }
+
+        p->is_trigger_delay = lecroy94_tmpl.is_trigger_delay;
+        if ( lecroy94_tmpl.is_trigger_delay )
+            p->trigger_delay = lecroy94_tmpl.trigger_delay;
+
+        p->num = w->num;
+        p->start = w->start;
+        p->width = w->width;
+        p->show_num = show_num;
+        return;
+    }
 
     /* Start with calculating the start and end position of the window
        in points (thereby also taking care of rounding errors) */
@@ -240,6 +312,245 @@ void lecroy94_tmpl_window_check( Window_T * w,
     w->start_num  = start;
     w->end_num    = end;
     w->num_points = end - start + 1;
+}
+
+
+/*---------------------------------------------------------------*
+ * Function for testing window settings that couldn't be checked
+ * during the test run.
+ *---------------------------------------------------------------*/
+
+static void lecroy94_tmpl_soe_window_check( LECROY94_TMPL_PTC_WINDOW_T * p )
+{
+    double real_timebase = lecroy94_tmpl.timebase;
+    int real_tb_index = lecroy94_tmpl.tb_index;
+    double real_trigger_delay = lecroy94_tmpl.trigger_delay;
+    long start;
+    long end;
+    bool show_num = p->show_num;
+
+
+    /* Restore the internal representation of the state of the device as far
+       as necessary to the one we had when the window settings couldn't be
+       tested */
+
+    if ( p->is_timebase )
+    {
+        lecroy94_tmpl.timebase = p->timebase;
+        lecroy94_tmpl.tb_index = p->tb_index;
+    }
+
+    if ( p->is_trigger_delay )
+        lecroy94_tmpl.trigger_delay = p->trigger_delay;
+
+    /* Now do the required tests */
+
+    start = lecroy94_tmpl_calc_pos( p->start );
+    end   = lecroy94_tmpl_calc_pos( p->start + p->width );
+
+    if ( start < 0 )
+    {
+        if ( show_num > 0 )
+            print( FATAL, "During the experiment the %ld. window is going to "
+                   "start too early, earliest possible time is %s\n",
+                   p->num - WINDOW_START_NUMBER + 1,
+                   lecroy94_tmpl_ptime( - lecroy94_tmpl.trigger_delay ) );
+        else
+            print( FATAL, "During the experiment the window is going to start "
+                   "too early, earliest possible time is %s\n",
+                   lecroy94_tmpl_ptime( - lecroy94_tmpl.trigger_delay ) );
+        THROW( EXCEPTION );
+    }
+
+    if ( start >= lecroy94_tmpl_curve_length( ) )
+    {
+        double max_start_time =   10.0 * lecroy94_tmpl.timebase
+                                - lecroy94_tmpl.trigger_delay
+                                - lecroy94_tmpl_time_per_point( );
+
+        if ( show_num > 0 )
+            print( FATAL, "During the experiment the %ld. window is going to "
+                   "start too late, latest possible time is %s.\n",
+                   p->num - WINDOW_START_NUMBER + 1,
+                   lecroy94_tmpl_ptime( max_start_time ) );
+        else
+            print( FATAL, "During the experiment the window is going to start "
+                   "too late, latest possible time is %s.\n",
+                   lecroy94_tmpl_ptime( max_start_time ) );
+        THROW( EXCEPTION );
+    }
+
+    if ( end >= lecroy94_tmpl_curve_length( ) )
+    {
+        double max_end_time =   10.0 * lecroy94_tmpl.timebase
+                              - lecroy94_tmpl.trigger_delay - p->start;
+
+        if ( show_num > 0 )
+            print( FATAL, "During the experiment the %d. window is going to "
+                   "end too late, largest possible width is %s.\n",
+                   p->num - WINDOW_START_NUMBER + 1,
+                   lecroy94_tmpl_ptime( max_end_time ) );
+        else
+            print( FATAL, "During the experiment the window is going to end "
+                   "too late, largest possible width is %s.\n",
+                   lecroy94_tmpl_ptime( max_end_time ) );
+        THROW( EXCEPTION );
+    }
+
+    /* Reset the internal representation back to the real one */
+
+    if ( p->is_timebase )
+    {
+        lecroy94_tmpl.timebase = real_timebase;
+        lecroy94_tmpl.tb_index = real_tb_index;
+    }
+
+    if ( p->is_trigger_delay )
+        lecroy94_tmpl.trigger_delay = real_trigger_delay;
+}
+
+
+/*-----------------------------------------------------------*
+ * Function for checking the trigger delay when the timebase
+ * gets changed
+ *-----------------------------------------------------------*/
+
+double lecroy94_tmpl_trigger_delay_check( void )
+{
+    double delay = lecroy94_tmpl.trigger_delay;
+    double real_delay;
+
+
+    /* Nothing needs to be done if the trigger delay never was set */
+
+    if ( ! lecroy94_tmpl.is_trigger_delay )
+        return delay;
+
+    /* We can't do the check during the test run if the timebase isn't set, so
+       store the relevant state information for the time when the experiment
+       gets started and we can ask the device for the timebase */
+
+    if ( FSC2_MODE == TEST && ! lecroy94_tmpl.is_timebase )
+    {
+        LECROY94_TMPL_PTC_DELAY_T *p = post_test_check_delay;
+
+        if ( post_test_check_delay == NULL )
+            p = post_test_check_delay =
+                					 T_malloc( sizeof *post_test_check_delay );
+        else
+            while ( 1 )
+            {
+                if ( delay == p->delay )
+                    return delay;
+
+                if ( p->next == NULL )
+                {
+                    p->next = T_malloc( sizeof *p );
+                    p = p->next;
+                    break;
+                }
+
+                p = p->next;
+            }
+
+        p->delay = delay;
+        return delay;
+    }
+
+    /* The delay can only be set with a certain resolution (1/50) with respect
+       to the current timebase, so make it a integer multiple of this */
+
+    real_delay = LECROY94_TMPL_TRIG_DELAY_RESOLUTION * lecroy94_tmpl.timebase
+                 * lrnd( delay / ( LECROY94_TMPL_TRIG_DELAY_RESOLUTION *
+                                   lecroy94_tmpl.timebase ) );
+
+    /* Check that the trigger delay is within the limits (taking rounding
+       errors of the order of the current time resolution into account) */
+
+    if ( real_delay > 0.0 &&
+         real_delay >   10.0 * lecroy94_tmpl.timebase
+                      +  0.5 * lecroy94_tmpl_time_per_point( ) )
+    {
+        print( FATAL, "Pre-trigger delay of %s now is too long, can't be "
+               "longer than 10 times the timebase.\n",
+               lecroy94_tmpl_ptime( real_delay ) );
+        THROW( EXCEPTION );
+    }
+
+    if ( real_delay < 0.0 &&
+         real_delay <   -1.0e4 * lecroy94_tmpl.timebase
+                      -  0.5 * lecroy94_tmpl_time_per_point( ) )
+    {
+        print( FATAL, "Post-triger delay of %s now is too long, can't be "
+               "longer than 10,000 times the timebase.\n",
+               lecroy94_tmpl_ptime( real_delay ) );
+        THROW( EXCEPTION );
+    }
+
+    /* If the difference between the requested trigger delay and the one
+       that can be set is larger than the time resolution warn the user */
+
+    if ( fabs( real_delay - delay ) > lecroy94_tmpl_time_per_point( ) )
+    {
+        char *cp = T_strdup( lecroy94_tmpl_ptime( delay ) );
+
+        print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
+               cp, lecroy94_tmpl_ptime( real_delay ) );
+        T_free( cp );
+    }
+
+    return real_delay;
+}
+
+
+/*-----------------------------------------------------------*
+ * Function for testing trigger delay settings that couldn't
+ * be checked during the test run.
+ *-----------------------------------------------------------*/
+
+static void lecroy94_tmpl_soe_trigger_delay_check( double delay )
+{
+    double real_delay = LECROY94_TMPL_TRIG_DELAY_RESOLUTION
+                        * lecroy94_tmpl.timebase
+                        * lrnd( delay / ( LECROY94_TMPL_TRIG_DELAY_RESOLUTION *
+                                          lecroy94_tmpl.timebase ) );
+
+    /* Check that the trigger delay is within the limits (taking rounding
+       errors of the order of the current time resolution into account) */
+
+    if ( real_delay > 0.0 &&
+         real_delay >   10.0 * lecroy94_tmpl.timebase
+                      +  0.5 * lecroy94_tmpl_time_per_point( ) )
+    {
+        print( FATAL, "During the experiment a pre-trigger delay of %s is "
+               "going to be used which is too long, it can't be longer than "
+               "10 times the timebase.\n", lecroy94_tmpl_ptime( real_delay ) );
+        THROW( EXCEPTION );
+    }
+
+    if ( real_delay < 0.0 &&
+         real_delay <   -1.0e4 * lecroy94_tmpl.timebase
+                      -    0.5 * lecroy94_tmpl_time_per_point( ) )
+    {
+        print( FATAL, "During the experiment the post-triger delay of %s is "
+               "going to be used wich is too long, it can't be longer than "
+               "10,000 times the timebase.\n",
+               lecroy94_tmpl_ptime( real_delay ) );
+        THROW( EXCEPTION );
+    }
+
+    /* If the difference between the requested trigger delay and the one
+       that can be set is larger than the time resolution warn the user */
+
+    if ( fabs( real_delay - delay ) > lecroy94_tmpl_time_per_point( ) )
+    {
+        char *cp = T_strdup( lecroy94_tmpl_ptime( delay ) );
+
+        print( WARN, "During the experiment the trigger delay will have to be "
+               "adjusted from %s to %s.\n",
+               cp, lecroy94_tmpl_ptime( real_delay ) );
+        T_free( cp );
+    }
 }
 
 
@@ -308,16 +619,15 @@ double lecroy94_tmpl_time_per_point( void )
 }
 
 
-/*--------------------------------------------------------------*
- * The function is used to translate back and forth between the
- * channel numbers the way the user specifies them in the EDL
- * program and the channel numbers as specified in the header
- * file. When the channel number can't be maped correctly, the
- * way the function reacts depends on the value of the third
- * argument: If this is UNSET, an error message gets printed
- * and an exception ios thrown. If it is SET -1 is returned to
- * indicate the error.
- *--------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * The function translates back and forth between the channel numbers
+ * in the way they are specified by the user in the EDL script and
+ * the channel numbers as specified in the header file. If the channel
+ * number can't be mapped correctly, the way the function reacts
+ * depends on the value of the third argument: if this is UNSET, an
+ * error message gets printed and an exception ios thrown. If it is
+ * SET -1 is returned to indicate the error.
+ *---------------------------------------------------------------------*/
 
 long lecroy94_tmpl_translate_channel( int  dir,
                                       long channel,
@@ -440,8 +750,10 @@ long lecroy94_tmpl_translate_channel( int  dir,
 }
 
 
-/*-------------------------------------------------------------*
- *-------------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function makes a copy of the stucture holding information
+ * about the current state of the oscilloscope
+ *-----------------------------------------------------------*/
 
 void lecroy94_tmpl_store_state( LECROY94_TMPL_T * dest,
                                 LECROY94_TMPL_T * src )

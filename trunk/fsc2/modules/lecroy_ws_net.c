@@ -52,19 +52,6 @@ static int lecroy_ws_talk( const char * cmd,
 static void lecroy_ws_lan_failure( void );
 
 
-static int trg_channels[ ] = { LECROY_WS_CH1,
-                               LECROY_WS_CH2,
-#if defined LECROY_WR2_CH3
-                               LECROY_WS_CH3,
-#endif
-#if defined LECROY_WR2_CH4
-                               LECROY_WS_CH4,
-#endif
-                               LECROY_WS_LIN,
-                               LECROY_WS_EXT,
-                               LECROY_WS_EXT10
-                             };
-
 
 /*---------------------------------------------------------------*
  * Function called for initialization of device and to determine
@@ -156,9 +143,9 @@ bool lecroy_ws_init( const char * name )
             }
         }
 
-        /* Memory sizes are a mess. The maual is nearly silent about them,
+        /* Memory sizes are a mess. The manual is nearly silent about them,
            the errata fr the manual is claiming that it can't be set but
-           actuallz trzing it reveals that there seem to be two memory
+           actuallz trying it reveals that there seem to be two memory
            sizes that can be set, either 10000 or 500000. But, strangly
            enough, the later setting results in curve lengths of only
            half that number, i.e. 250000 while setting it to 10000 gives
@@ -230,12 +217,21 @@ bool lecroy_ws_init( const char * name )
 
         if ( lecroy_ws.is_trigger_source )
             lecroy_ws_set_trigger_source( lecroy_ws.trigger_source );
+        else
+            lecroy_ws.trigger_source = lecroy_ws_get_trigger_source( );
 
         /* Set (if required) the trigger level, slope and coupling of the
            trigger channels */
 
         for ( i = 0; i < ( int ) NUM_ELEMS( trg_channels ); i++ )
         {
+            if ( lecroy_ws.is_trigger_slope[ trg_channels[ i ] ] )
+                lecroy_ws_set_trigger_slope( trg_channels[ i ],
+                                lecroy_ws.trigger_slope[ trg_channels[ i ] ] );
+            else
+                lecroy_ws.trigger_slope[ trg_channels[ i ] ] =
+                              lecroy_ws_get_trigger_slope( trg_channels[ i ] );
+
             if ( trg_channels[ i ] == LECROY_WS_LIN )
                 continue;
 
@@ -245,13 +241,6 @@ bool lecroy_ws_init( const char * name )
             else
                 lecroy_ws.trigger_level[ trg_channels[ i ] ] =
                               lecroy_ws_get_trigger_level( trg_channels[ i ] );
-
-            if ( lecroy_ws.is_trigger_slope[ trg_channels[ i ] ] )
-                lecroy_ws_set_trigger_slope( trg_channels[ i ],
-                                lecroy_ws.trigger_slope[ trg_channels[ i ] ] );
-            else
-                lecroy_ws.trigger_slope[ trg_channels[ i ] ] =
-                              lecroy_ws_get_trigger_slope( trg_channels[ i ] );
 
             if ( lecroy_ws.is_trigger_coupling[ trg_channels[ i ] ] )
                 lecroy_ws_set_trigger_coupling( trg_channels[ i ],
@@ -274,6 +263,12 @@ bool lecroy_ws_init( const char * name )
             lecroy_ws_set_trigger_mode( lecroy_ws.trigger_mode );
         else
             lecroy_ws_get_trigger_mode( );
+
+        /* Now that we know about the timebase and trigger delay settings
+           we can also do the checks on the window and trigger delay settngs
+           that may not have been possible during the test run */
+
+        lecroy_ws_soe_checks( );
     }
     OTHERWISE
         return FAIL;
@@ -809,6 +804,8 @@ bool lecroy_ws_get_trigger_slope( int channel )
 
     if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
         sprintf( buf, "C%1d:TRSL?\n", channel - LECROY_WS_CH1 + 1 );
+    else if ( channel == LECROY_WS_LIN )
+        strcpy( buf, "LINE:TRSL?\n" );
     else if ( channel == LECROY_WS_EXT )
         strcpy( buf, "EX:TRSL?\n" );
     else
@@ -1181,7 +1178,7 @@ void lecroy_ws_start_acquisition( void )
     /* Set up the parameter to be used for averaging for the function channels
        (as far as they have been set by the user) */
 
-    for ( ch = LECROY_WS_CH1; ch < LECROY_WS_CH_MAX; ch++ )
+    for ( ch = LECROY_WS_CH1; ch <= LECROY_WS_CH_MAX; ch++ )
     {
         if ( lecroy_ws.is_avg_setup[ ch ] )
         {

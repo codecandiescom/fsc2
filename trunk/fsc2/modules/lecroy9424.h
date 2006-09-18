@@ -452,6 +452,9 @@ void lecroy9424_copy_curve( long /* src  */,
 
 void lecroy9424_command( const char * /* cmd */ );
 
+void lecroy9424_soe_checks( void );
+
+void lecroy9424_exit_cleanup( void );
 
 const char *lecroy9424_ptime( double /* p_time */ );
 

@@ -13,6 +13,7 @@ DEVICES:
 rs_sml01;
 rb_pulser_w;
 rb8509;
+rb8510_0;
 ips120_10_mod;
 
 
@@ -20,6 +21,19 @@ ASSIGNMENTS:
 
 TRIGGER_MODE: INTERNAL, REPEAT_TIME = 10 ms;
 
+PHASES:
+
+PHASE_SEQUENCE_1: +X, +X, +X, +X, +X, +X, +X, +X, +X,
+                  +Y, +Y, +Y, +Y, +Y, +Y, +Y, +Y, +Y,
+                  -X, -X, -X, -X, -X, -X, -X, -X, -X;
+
+PHASE_SEQUENCE_2: +X, +X, +X, +Y, +Y, +Y, -X, -X, -X,
+                  +X, +X, +X, +Y, +Y, +Y, -X, -X, -X,
+				  +X, +X, +X, +Y, +Y, +Y, -X, -X, -X;
+
+PHASE_SEQUENCE_3: +X, +Y, -X, +X, +Y, -X, +X, +Y, -X,
+				  +X, +Y, -X, +X, +Y, -X, +X, +Y, -X,
+				  +X, +Y, -X, +X, +Y, -X, +X, +Y, -X;
 
 VARIABLES:
 
@@ -40,7 +54,7 @@ PL[ 5 ];            /* pulse length input fields */
 PSV[ 5 ];           /* start positions of pulses (in units of 10 ns) */
 PLV[ 5 ];           /* pulse lengths (in units of 10 ns) */
 PMS[ 5 ];           /* minimum values for pulse positions (in 10 ns units) */
-
+Phase, Cur_Phase = 1, New_Phase;
 Freq, Current_Field, New_Field, RF_ON_OFF, Att, Sweep_Rate, Sweep_Up,
 Sweep_Stop, Sweep_Down, Pause, Clear;
 Acq_Rate, New_Acq_Rate;
@@ -49,6 +63,7 @@ STOPPED = 0;
 UP = 1;
 DOWN = -1;
 I = 0;
+J;
 NP, NL;
 np, nl;
 MAX_LEN = 16777215;     /* max. delay (in ticks) */
@@ -56,17 +71,20 @@ MAX_LEN = 16777215;     /* max. delay (in ticks) */
 
 PREPARATIONS:
 
-P1:   FUNCTION = MW,
-      START    = 200 ns,
-      LENGTH   = 60 ns;
+P1:   FUNCTION    = MW,
+      START       = 200 ns,
+      LENGTH      = 60 ns,
+	  PHASE_CYCLE = PHASE_SEQUENCE_1;
 
-P2:   FUNCTION = MW,
-      START    = 460 ns,
-      LENGTH   = 60 ns;
+P2:   FUNCTION    = MW,
+      START       = 460 ns,
+      LENGTH      = 60 ns,
+	  PHASE_CYCLE = PHASE_SEQUENCE_2;
 
-P3:   FUNCTION = MW,
-      START    = 760 ns,
-      LENGTH   = 100 ns;
+P3:   FUNCTION    = MW,
+      START       = 760 ns,
+      LENGTH      = 100 ns,
+	  PHASE_CYCLE = PHASE_SEQUENCE_3;
 
 P4:   FUNCTION = RF,
       START    = 380 ns,
@@ -74,7 +92,7 @@ P4:   FUNCTION = RF,
 
 P5:   FUNCTION = DETECTION,
       START    = 310 ns,
-      LENGTH   = 100 ns;
+      LENGTH   = 10 ns;
 
 init_1d( );
 
@@ -125,6 +143,17 @@ PSV[ 5 ] = round( P5.START / 10 ns );
 PS[ 5 ] = input_create( "INT_INPUT", PSV[ 5 ] * 10, "Position of DET pulse" );
 PLV[ 5 ] = round( P5.LENGTH / 10 ns );
 PL[ 5 ] = input_create( "INT_INPUT", PLV[ 5 ] * 10, "Length of DET pulse" );
+
+Phase = menu_create( "Phase settings",
+                     "+X  +X  +X", "+X  +X  +Y", "+X  +X  -X",
+                     "+X  +Y  +X", "+X  +Y  +Y", "+X  +Y  -X",
+                     "+X  -X  +X", "+X  -X  +Y", "+X  -X  -X",
+                     "+Y  +X  +X", "+Y  +X  +Y", "+Y  +X  -X",
+                     "+Y  +Y  +X", "+Y  +Y  +Y", "+Y  +Y  -X",
+                     "+Y  -X  +X", "+Y  -X  +Y", "+Y  -X  -X",
+                     "-X  +X  +X", "-X  +X  +Y", "-X  +X  -X",
+                     "-X  +Y  +X", "-X  +Y  +Y", "-X  +Y  -X",
+                     "-X  -X  +X", "-X  -X  +Y", "-X  -X  -X" );
 
 Freq    = input_create( "FLOAT_INPUT", freq / 1 MHz, "RF frequency (MHz)" );
 Current_Field = output_create( "FLOAT_OUTPUT", current_field,
@@ -282,6 +311,23 @@ FOREVER {
                 }
             }
         }
+
+		/* Check for change of phase settings */
+
+		IF menu_changed( Phase ) {
+		    New_Phase = menu_choice( Phase );
+		    IF New_Phase > Cur_Phase {
+		        FOR J = 1 : New_Phase - Cur_Phase {
+				    pulser_next_phase( );
+			    }
+		    } ELSE IF New_Phase < Cur_Phase {
+			    pulser_phase_reset( );
+			    FOR J = 1 : New_Phase - 1 {
+				    pulser_next_phase( );
+			    }
+            }
+			Cur_Phase = New_Phase;
+		}
 
         /* Checks for the RF pulse */
 

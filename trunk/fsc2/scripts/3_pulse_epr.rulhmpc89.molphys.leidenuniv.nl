@@ -523,7 +523,7 @@ sub write_out {
     print $fh "DEVICES:
 
 rb8510_0;
-ips120_10;
+ips120_10_mod;
 rb8509;
 rb_pulser_w;
 

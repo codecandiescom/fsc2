@@ -290,7 +290,8 @@ int rb_pulser_w_test_hook( void )
     /* Set the frequency (index) of the timebase clock to the one for the
        requested timebase */
 
-    rb_pulser_w.clock_card[ TB_CLOCK ].freq = rb_pulser_w.tb_index;
+    rb_pulser_w.clock_card[ TB_CLOCK_1 ].freq = rb_pulser_w.tb_index;
+    rb_pulser_w.clock_card[ TB_CLOCK_2 ].freq = rb_pulser_w.tb_index;
 #endif
 
     /* If a repetition time has been set set up the corresponding value in

@@ -380,7 +380,9 @@ double rb_pulser_mw_min_specs( Pulse_T * p )
     double min =
             (   Ticks_ceil( rb_pulser_w.psd / rb_pulser_w.timebase )
               + Ticks_ceil( rb_pulser_w.grace_period / rb_pulser_w.timebase ) )
-            * rb_pulser_w.timebase;
+            * rb_pulser_w.timebase
+            + rb_pulser_w.psd
+            + rb_pulser_w.grace_period;
 
 
     fsc2_assert( f == rb_pulser_w.function + PULSER_CHANNEL_MW );

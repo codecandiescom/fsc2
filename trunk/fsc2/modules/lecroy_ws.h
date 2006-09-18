@@ -218,14 +218,23 @@ struct HORI_RES {
 #if defined LECROY_WS_MAIN_
 
 HORI_RES_T hres[ 2 ][ 37 ] = { { { 1.0e-9,    1, 2.0e-11,   50 },
-                                 { 2.0e-9,    2, 2.0e-11,  100 },
-                                 { 5.0e-9,    5, 2.0e-11,  250 },
-                                 { 1.0e-8,   10, 2.0e-11,  500 },
-                                 { 2.0e-8,   20, 2.0e-11, 1000 },
-                                 { 5.0e-8,   50, 4.0e-11, 1000 },
-                                 { 1.0e-7,  100, 1.0e-10, 1000 },
-                                 { 2.0e-7,  200, 2.0e-10, 1000 },
-                                 { 5.0e-7,  500, 5.0e-10, 1000 },
+                                 { 1.0e-9,    2, 2.0e-11,  100 },
+                                 { 1.0e-9,    5, 2.0e-11,  250 },
+                                 { 1.0e-9,   10, 2.0e-11,  500 },
+                                 { 1.0e-9,   20, 2.0e-11, 1000 },
+                                 { 1.0e-9,   50, 4.0e-11, 1000 },
+                                 { 1.0e-9,  100, 1.0e-10, 1000 },
+                                 { 1.0e-9,  200, 2.0e-10, 1000 },
+                                 { 1.0e-9,  500, 5.0e-10, 1000 },
+                                 { 1.0e-9, 1000,    -1.0,   -1 },
+                                 { 2.0e-9, 1000,    -1.0,   -1 },
+                                 { 5.0e-9, 1000,    -1.0,   -1 },
+                                 { 1.0e-8, 1000,    -1.0,   -1 },
+                                 { 2.0e-8, 1000,    -1.0,   -1 },
+                                 { 5.0e-8, 1000,    -1.0,   -1 },
+                                 { 1.0e-7, 1000,    -1.0,   -1 },
+                                 { 2.0e-7, 1000,    -1.0,   -1 },
+                                 { 5.0e-7, 1000,    -1.0,   -1 },
                                  { 1.0e-6, 1000,    -1.0,   -1 },
                                  { 2.0e-6, 1000,    -1.0,   -1 },
                                  { 5.0e-6, 1000,    -1.0,   -1 },
@@ -244,63 +253,78 @@ HORI_RES_T hres[ 2 ][ 37 ] = { { { 1.0e-9,    1, 2.0e-11,   50 },
                                  { 1.0e-1, 1000,    -1.0,   -1 },
                                  { 2.0e-1, 1000,    -1.0,   -1 },
                                  { 5.0e-1, 1000,    -1.0,   -1 },
-                                 {    1.0, 1000,    -1.0,   -1 },
-                                 {    2.0, 1000,    -1.0,   -1 },
-                                 {    5.0, 1000,    -1.0,   -1 },
-                                 {  1.0e1, 1000,    -1.0,   -1 },
-                                 {  2.0e1, 1000,    -1.0,   -1 },
-                                 {  5.0e1, 1000,    -1.0,   -1 },
-                                 {  1.0e2, 1000,    -1.0,   -1 },
-                                 {  2.0e2, 1000,    -1.0,   -1 },
-                                 {  5.0e2, 1000,    -1.0,   -1 },
-                                 {  1.0e3, 1000,    -1.0,   -1 } },
+                                 {    1.0, 1000,    -1.0,   -1 } },
 
                                { { 1.0e-9,     1, 2.0e-11,   50 },
-                                 { 2.0e-9,     2, 2.0e-11,  100 },
-                                 { 5.0e-9,     5, 2.0e-11,  250 },
-                                 { 1.0e-8,    10, 2.0e-11,  500 },
-                                 { 2.0e-8,    20, 2.0e-11, 1000 },
-                                 { 5.0e-8,    50, 2.0e-11, 2500 },
-                                 { 1.0e-7,   100, 2.0e-10, 5000 },
-                                 { 2.0e-7,   200, 4.0e-11, 5000 },
-                                 { 5.0e-7,   500, 1.0e-10, 5000 },
-                                 { 1.0e-6,  1000, 2.0e-10, 5000 },
-                                 { 2.0e-6,  2000, 5.0e-10, 4000 },
-                                 { 5.0e-6,  5000,    -1.0,   -1 },
-                                 { 1.0e-5, 10000,    -1.0,   -1 },
-                                 { 2.0e-5, 20000,    -1.0,   -1 },
-                                 { 5.0e-5, 25000,    -1.0,   -1 },
-                                 { 1.0e-4, 25000,    -1.0,   -1 },
-                                 { 2.0e-4, 20000,    -1.0,   -1 },
-                                 { 5.0e-4, 25000,    -1.0,   -1 },
-                                 { 1.0e-3, 25000,    -1.0,   -1 },
-                                 { 2.0e-3, 20000,    -1.0,   -1 },
-                                 { 5.0e-3, 25000,    -1.0,   -1 },
-                                 { 1.0e-2, 25000,    -1.0,   -1 },
-                                 { 2.0e-2, 20000,    -1.0,   -1 },
-                                 { 5.0e-2, 25000,    -1.0,   -1 },
-                                 { 1.0e-1, 25000,    -1.0,   -1 },
-                                 { 2.0e-1, 20000,    -1.0,   -1 },
-                                 { 5.0e-1, 25000,    -1.0,   -1 },
-                                 {    1.0, 25000,    -1.0,   -1 },
-                                 {    2.0, 20000,    -1.0,   -1 },
-                                 {    5.0, 25000,    -1.0,   -1 },
-                                 {  1.0e1, 25000,    -1.0,   -1 },
-                                 {  2.0e1, 20000,    -1.0,   -1 },
-                                 {  5.0e1, 25000,    -1.0,   -1 },
-                                 {  1.0e2, 25000,    -1.0,   -1 },
-                                 {  2.0e2, 20000,    -1.0,   -1 },
-                                 {  5.0e2, 25000,    -1.0,   -1 },
-                                 {  1.0e3, 25000,    -1.0,   -1 } } };
+                                 { 1.0e-9,     2, 2.0e-11,  100 },
+                                 { 1.0e-9,     5, 2.0e-11,  250 },
+                                 { 1.0e-9,    10, 2.0e-11,  500 },
+                                 { 1.0e-9,    20, 2.0e-11, 1000 },
+                                 { 1.0e-9,    50, 2.0e-11, 2500 },
+                                 { 1.0e-9,   100, 2.0e-10, 5000 },
+                                 { 1.0e-9,   200, 4.0e-11, 5000 },
+                                 { 1.0e-9,   500, 1.0e-10, 5000 },
+                                 { 1.0e-9,  1000, 2.0e-10, 5000 },
+                                 { 1.0e-9,  2000, 5.0e-10, 4000 },
+                                 { 1.0e-9,  5000,    -1.0,   -1 },
+                                 { 1.0e-9, 10000,    -1.0,   -1 },
+                                 { 1.0e-9, 20000,    -1.0,   -1 },
+                                 { 2.0e-9, 25000,    -1.0,   -1 },
+                                 { 4.0e-9, 25000,    -1.0,   -1 },
+                                 { 1.0e-8, 20000,    -1.0,   -1 },
+                                 { 2.0e-8, 25000,    -1.0,   -1 },
+                                 { 4.0e-8, 25000,    -1.0,   -1 },
+                                 { 1.0e-7, 20000,    -1.0,   -1 },
+                                 { 2.0e-7, 25000,    -1.0,   -1 },
+                                 { 4.0e-7, 25000,    -1.0,   -1 },
+                                 { 1.0e-6, 20000,    -1.0,   -1 },
+                                 { 2.0e-6, 25000,    -1.0,   -1 },
+                                 { 4.0e-6, 25000,    -1.0,   -1 },
+                                 { 1.0e-5, 20000,    -1.0,   -1 },
+                                 { 2.0e-5, 25000,    -1.0,   -1 },
+                                 { 4.0e-5, 25000,    -1.0,   -1 },
+                                 { 1.0e-4, 20000,    -1.0,   -1 },
+                                 { 2.0e-4, 25000,    -1.0,   -1 },
+                                 { 4.0e-4, 25000,    -1.0,   -1 },
+                                 { 1.0e-3, 20000,    -1.0,   -1 },
+                                 { 2.0e-3, 25000,    -1.0,   -1 },
+                                 { 4.0e-3, 25000,    -1.0,   -1 },
+                                 { 1.0e-2, 20000,    -1.0,   -1 },
+                                 { 2.0e-2, 25000,    -1.0,   -1 },
+                                 { 4.0e-2, 25000,    -1.0,   -1 } } };
+
+
+#if defined LECROY_WS_CH3 && defined LECROY_WS_CH4
+int trg_channels[ 7 ] = { LECROY_WS_CH1,
+                          LECROY_WS_CH2,
+                          LECROY_WS_CH3,
+                          LECROY_WS_CH4,
+                          LECROY_WS_LIN,
+                          LECROY_WS_EXT,
+                          LECROY_WS_EXT10
+                       };
+#else
+int trg_channels[ 5 ] = { LECROY_WS_CH1,
+                          LECROY_WS_CH2,
+                          LECROY_WS_LIN,
+                          LECROY_WS_EXT,
+                          LECROY_WS_EXT10
+                        };
+#endif
 
 #else
 
 extern HORI_RES_T hres[ 2 ][ 37 ];
+#if defined LECROY_WS_CH3 && defined LECROY_WS_CH4
+extern int trg_channels[ 7 ];
+#else
+extern int trg_channels[ 5 ];
+#endif
 
 #endif
 
 
-#define TBAS( x )  hres[ 0 ][ x ].tpp
+#define TBAS( x )  ( hres[ 0 ][ x ].tpp * hres[ 0 ][ x ].ppd )
 #define NUM_TBAS   ( sizeof hres[ 0 ] / sizeof hres[ 0 ][ 0 ] )
 
 
@@ -339,14 +363,14 @@ struct LECROY_WS {
     int trigger_source;
     bool is_trigger_source;
 
-    double trigger_level[ LECROY_WS_MAX_CHANNELS ];
-    bool is_trigger_level[ LECROY_WS_MAX_CHANNELS ];
+    double trigger_level[ LECROY_WS_TOTAL_CHANNELS ];
+    bool is_trigger_level[ LECROY_WS_TOTAL_CHANNELS ];
 
-    bool trigger_slope[ LECROY_WS_MAX_CHANNELS ];
-    bool is_trigger_slope[ LECROY_WS_MAX_CHANNELS ];
+    bool trigger_slope[ LECROY_WS_TOTAL_CHANNELS ];
+    bool is_trigger_slope[ LECROY_WS_TOTAL_CHANNELS ];
 
-    int trigger_coupling[ LECROY_WS_MAX_CHANNELS ];
-    bool is_trigger_coupling[ LECROY_WS_MAX_CHANNELS ];
+    int trigger_coupling[ LECROY_WS_TOTAL_CHANNELS ];
+    bool is_trigger_coupling[ LECROY_WS_TOTAL_CHANNELS ];
 
     double trigger_delay;
     bool is_trigger_delay;
@@ -528,7 +552,9 @@ void lecroy_ws_lock_state( bool /* lock_state */ );
 
 bool lecroy_ws_command( const char * /* cmd */ );
 
-const char *lecroy_ws_ptime( double /* p_time */ );
+void lecroy_ws_soe_checks( void );
+
+void lecroy_ws_exit_cleanup( void );
 
 double lecroy_ws_trigger_delay_check( void );
 
@@ -544,6 +570,8 @@ void lecroy_ws_window_check( Window_T * /* w        */,
 long lecroy_ws_curve_length( void );
 
 double lecroy_ws_time_per_point( void );
+
+const char *lecroy_ws_ptime( double /* p_time */ );
 
 long lecroy_ws_translate_channel( int  /* dir     */,
                                   long /* channel */,

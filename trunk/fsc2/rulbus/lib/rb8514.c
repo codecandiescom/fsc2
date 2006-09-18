@@ -191,9 +191,9 @@ int rulbus_rb8514_delay_card_exit( int handle )
 }
 
 
-/*-----------------------------------------*
- * Function for setting the delay duration
- *-----------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function for setting the frequency of the clock feeding the delay card
+ *------------------------------------------------------------------------*/
 
 int rulbus_rb8514_delay_set_clock_frequency( int    handle,
                                              double freq )
@@ -343,11 +343,11 @@ int rulbus_rb8514_delay_set_trigger( int handle,
     if ( ctrl == card->ctrl )
         return rulbus_errno = RULBUS_OK;
 
-    card->ctrl = ctrl;
-
     if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
-                                  &card->ctrl, 1 ) ) != 1 )
+                                  &ctrl, 1 ) ) != 1 )
         return rulbus_errno = retval;
+
+    card->ctrl = ctrl;
 
     return rulbus_errno = RULBUS_OK;
 }
@@ -379,32 +379,42 @@ int rulbus_rb8514_delay_set_output_pulse( int handle,
            type != RULBUS_RB8514_DELAY_PULSE_NONE ) )
         return rulbus_errno = RULBUS_INVALID_ARGUMENT;
 
-    ctrl = card->ctrl & 0xF0;
+    ctrl = card->ctrl;
 
     if ( output & RULBUS_RB8514_DELAY_OUTPUT_1 )
     {
         if ( type & RULBUS_RB8514_DELAY_START_PULSE )
             ctrl |= START_PULSE_OUT_1_ENABLE;
+        else
+            ctrl &= ~ START_PULSE_OUT_1_ENABLE;
+
         if ( type & RULBUS_RB8514_DELAY_END_PULSE )
             ctrl |= END_PULSE_OUT_1_ENABLE;
+        else
+            ctrl &= ~ END_PULSE_OUT_1_ENABLE;
     }
         
     if ( output & RULBUS_RB8514_DELAY_OUTPUT_2 )
     {
         if ( type & RULBUS_RB8514_DELAY_START_PULSE )
             ctrl |= START_PULSE_OUT_2_ENABLE;
+        else
+            ctrl &= ~ START_PULSE_OUT_2_ENABLE;
+
         if ( type & RULBUS_RB8514_DELAY_END_PULSE )
             ctrl |= END_PULSE_OUT_2_ENABLE;
+        else
+            ctrl &= ~ END_PULSE_OUT_2_ENABLE;
     }
 
     if ( ctrl == card->ctrl )
         return rulbus_errno = RULBUS_OK;
 
-    card->ctrl = ctrl;
-
     if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
-                                  &card->ctrl, 1 ) ) != 1 )
+                                  &ctrl, 1 ) ) != 1 )
         return rulbus_errno = retval;
+
+    card->ctrl = ctrl;
 
     return rulbus_errno = RULBUS_OK;
 }
@@ -456,7 +466,7 @@ int rulbus_rb8514_delay_set_output_pulse_polarity( int handle,
         return rulbus_errno = RULBUS_OK;
 
     if ( ( retval = rulbus_write( handle, CONTROL_ADDR,
-                                  &card->ctrl, 1 ) ) != 1 )
+                                  &ctrl, 1 ) ) != 1 )
         return rulbus_errno = retval;
 
     card->ctrl = ctrl;

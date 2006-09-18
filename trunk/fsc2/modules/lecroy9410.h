@@ -447,6 +447,10 @@ void lecroy9410_copy_curve( long /* src  */,
 
 void lecroy9410_command( const char * /* cmd */ );
 
+void lecroy9410_soe_checks( void );
+
+void lecroy9410_exit_cleanup( void );
+
 const char *lecroy9410_ptime( double /* p_time */ );
 
 void lecroy9410_delete_windows( LECROY9410_T * /* s */ );

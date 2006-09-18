@@ -98,7 +98,8 @@ void tds_tmpl_do_pre_exp_checks( void )
         return;
     }
 
-    /* Check for all windows if the position and width have been set */
+    /* Check for all windows if the position and width have both been set,
+     if not set it to the aaccording to the current cursor positions */
 
     if ( ! is_start )
         for ( w = tds_tmpl.w; w != NULL; w = w->next )
@@ -108,7 +109,7 @@ void tds_tmpl_do_pre_exp_checks( void )
                 w->is_start = SET;
             }
 
-    /* If witdh hasn't been set for all windows get the distance of the
+    /* If the width hasn't been set for a window get the distance of the
        cursors on the digitizer screen and use it as the default width. */
 
     if ( ! is_width )
