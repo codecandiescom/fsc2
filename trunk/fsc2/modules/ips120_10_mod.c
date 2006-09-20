@@ -818,8 +818,8 @@ static bool ips120_10_mod_init( const char * name )
 	if ( gpib_write( ips120_10_mod.device, "Q4\r", 3 ) == FAILURE )
 		ips120_10_mod_comm_failure( );
 
-	/* Get the status of the magnet - if it's not in the LOC/REMOTE state we
-	   set it to something is going wrong... */
+	/* Get the status of the magnet - if it's not in the LOC/REMOTE state
+	   afterwards something is going wrong... */
 
 	ips120_10_mod_get_complete_status( );
 	if ( ips120_10_mod.loc_rem_state != REMOTE_AND_UNLOCKED )
@@ -970,7 +970,7 @@ static void ips120_10_mod_get_complete_status( void )
 	   switched on, so we try to deal with situations gracefully where the
 	   device returns data that it isn't supposed to send (at least if we
 	   would still be inclined after all these years to believe in what's
-	   written in manuals ;-) */
+	   written in manuals;-) */
 
 	if ( gpib_write( ips120_10_mod.device, "X\r", 2 ) == FAILURE )
 		ips120_10_mod_comm_failure( );

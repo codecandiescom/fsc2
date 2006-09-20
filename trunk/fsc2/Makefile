@@ -497,7 +497,7 @@ ifeq ($(MPATROL),YES)
 				 -lX11 -lXpm -lm -ldl
 else
 	CONFFLAGS :=
-	LIBS      := -L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl
+	LIBS      := -L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl -L/usr/local/lib
 				 # -lmcheck   # enable for malloc debugging
 				 # -lefence   # enable to run with efence
 endif

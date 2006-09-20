@@ -970,6 +970,7 @@ void exp_test_run( void )
             /* Give the 'Stop Test' button a chance to get tested... */
 
             if ( ! ( Fsc2_Internals.cmdline_flags & TEST_ONLY ) &&
+                 ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
                  Token_count >= CHECK_FORMS_AFTER )
             {
                 fl_check_only_forms( );

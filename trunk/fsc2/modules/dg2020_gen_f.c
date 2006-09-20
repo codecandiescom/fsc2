@@ -529,9 +529,9 @@ bool dg2020_set_phase_reference( int phase,
     Function_T *p, *f;
 
 
-    /* First a sanity check... */
-
-    fsc2_assert( Cur_PHS != -1 && Cur_PHS == phase );
+    fsc2_assert ( Cur_PHS == -1 || Cur_PHS == phase );
+    fsc2_assert( phase == 0 || phase == 1 );
+    Cur_PHS = phase;
 
     /* The phase function can't be phase cycled... */
 

@@ -1300,7 +1300,7 @@ voltage in the @w{+/- 10 V} range. The external voltage is supplied by a
 RULBUS RB8510 DAC card, which has a voltage resolution of @w{5 mV},
 resulting in a current resolution of @w{0.3 mA} and a field resolution of
 ca.@: @w{0.125 G}. Please note that this improved resolution applies only
-when a field is set, the tep resolution of sweeps remains unchanged (and
+when a field is set, the sweep step resolution remains unchanged (and
 sweeps thus should probably be avoided when using this device).
 
 @paragraphindent 0

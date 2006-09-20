@@ -131,7 +131,7 @@ int show_choices( const char * text,
 
     if ( Fsc2_Internals.I_am == PARENT )
     {
-        if ( Fsc2_Internals.cmdline_flags & DO_CHECK || 
+        if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
              ( Fsc2_Internals.cmdline_flags & BATCH_MODE && is_batch ) ||
              ( Fsc2_Internals.cmdline_flags & ( TEST_ONLY | NO_GUI_RUN ) ) )
         {
