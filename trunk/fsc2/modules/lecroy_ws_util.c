@@ -35,7 +35,7 @@ struct LECROY_WS_PTC_DELAY {
     LECROY_WS_PTC_DELAY_T * next;
 };
 
-static LECROY_WS_PTC_DELAY_T * post_test_check_delay = NULL;
+static LECROY_WS_PTC_DELAY_T * lecroy_ws_ptc_delay = NULL;
 
 
 /* Structure for storing the relevant state information if a window check
@@ -57,7 +57,7 @@ struct LECROY_WS_PTC_WINDOW {
     LECROY_WS_PTC_WINDOW_T * next; /* next structure in list */
 };
 
-static LECROY_WS_PTC_WINDOW_T * post_test_check_window = NULL;
+static LECROY_WS_PTC_WINDOW_T * lecroy_ws_ptc_window = NULL;
 
 
 static void lecroy_ws_soe_trigger_delay_check( double delay );
@@ -85,10 +85,10 @@ void lecroy_ws_soe_checks( void )
     /* Test the trigger delay and window settings we couldn't check during
        the test run */
 
-    for ( pd = post_test_check_delay; pd != NULL; pd = pd->next )
+    for ( pd = lecroy_ws_ptc_delay; pd != NULL; pd = pd->next )
         lecroy_ws_soe_trigger_delay_check( pd->delay ); 
 
-    for ( pw = post_test_check_window; pw != NULL; pw = pw->next )
+    for ( pw = lecroy_ws_ptc_window; pw != NULL; pw = pw->next )
         lecroy_ws_soe_window_check( pw ); 
 }
 
@@ -105,27 +105,30 @@ void lecroy_ws_exit_cleanup( void )
     LECROY_WS_PTC_WINDOW_T *pw;
 
     
-    while ( post_test_check_delay != NULL )
+    while ( lecroy_ws_ptc_delay != NULL )
     {
-        pd = post_test_check_delay;
-        post_test_check_delay = post_test_check_delay->next;
+        pd = lecroy_ws_ptc_delay;
+        lecroy_ws_ptc_delay = lecroy_ws_ptc_delay->next;
         T_free( pd );
     }
 
-    while ( post_test_check_window != NULL )
+    while ( lecroy_ws_ptc_window != NULL )
     {
-        pw = post_test_check_window;
-        post_test_check_window = post_test_check_window->next;
+        pw = lecroy_ws_ptc_window;
+        lecroy_ws_ptc_window = lecroy_ws_ptc_window->next;
         T_free( pw );
     }
 }
 
 
-/*------------------------------------------------------------------------*
- * Function for checking the trigger delay when the timebase gets changed
- *------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Function for checking the trigger delay. The only argument is a bool,
+ * if set the call comes from directly setting the trigger delay while,
+ * if unset, it comes from a change of the timebase, te interleave mode
+ * or the memory size.
+ *-----------------------------------------------------------------------*/
 
-double lecroy_ws_trigger_delay_check( void )
+double lecroy_ws_trigger_delay_check( bool from )
 {
     double delay = lecroy_ws.trigger_delay;
     double real_delay;
@@ -142,11 +145,10 @@ double lecroy_ws_trigger_delay_check( void )
 
     if ( FSC2_MODE == TEST && ! lecroy_ws.is_timebase )
     {
-        LECROY_WS_PTC_DELAY_T *p = post_test_check_delay;
+        LECROY_WS_PTC_DELAY_T *p = lecroy_ws_ptc_delay;
 
-        if ( post_test_check_delay == NULL )
-            p = post_test_check_delay =
-                					 T_malloc( sizeof *post_test_check_delay );
+        if ( lecroy_ws_ptc_delay == NULL )
+            p = lecroy_ws_ptc_delay = T_malloc( sizeof *lecroy_ws_ptc_delay );
         else
             while ( 1 )
             {
@@ -181,9 +183,9 @@ double lecroy_ws_trigger_delay_check( void )
          real_delay >   5.0 * lecroy_ws.timebase
                       + 0.5 * lecroy_ws_time_per_point( ) )
     {
-        print( FATAL, "Pre-trigger delay of %s now is too long, can't be "
+        print( FATAL, "Pre-trigger delay of %s %sis too long, can't be "
                "longer than 5 times the timebase.\n",
-               lecroy_ws_ptime( real_delay ) );
+               lecroy_ws_ptime( real_delay ), from ? "" : "now " );
         THROW( EXCEPTION );
     }
 
@@ -191,9 +193,9 @@ double lecroy_ws_trigger_delay_check( void )
          real_delay <   -1.0e4 * lecroy_ws.timebase
                       -    0.5 * lecroy_ws_time_per_point( ) )
     {
-        print( FATAL, "Post-triger delay of %s now is too long, can't be "
+        print( FATAL, "Post-triger delay of %s %sis too long, can't be "
                "longer than 10,000 times the timebase.\n",
-               lecroy_ws_ptime( real_delay ) );
+               lecroy_ws_ptime( real_delay ), from ? "" : "now " );
         THROW( EXCEPTION );
     }
 
@@ -201,13 +203,8 @@ double lecroy_ws_trigger_delay_check( void )
        that can be set is larger than the time resolution warn the user */
 
     if ( fabs( real_delay - delay ) > lecroy_ws_time_per_point( ) )
-    {
-        char *cp = T_strdup( lecroy_ws_ptime( delay ) );
-
         print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
-               cp, lecroy_ws_ptime( real_delay ) );
-        T_free( cp );
-    }
+               lecroy_ws_ptime( delay ), lecroy_ws_ptime( real_delay ) );
 
     return real_delay;
 }
@@ -251,14 +248,9 @@ static void lecroy_ws_soe_trigger_delay_check( double delay )
        that can be set is larger than the time resolution warn the user */
 
     if ( fabs( real_delay - delay ) > lecroy_ws_time_per_point( ) )
-    {
-        char *cp = T_strdup( lecroy_ws_ptime( delay ) );
-
         print( WARN, "During the experiment the trigger delay will have to be "
                "adjusted from %s to %s.\n",
-               cp, lecroy_ws_ptime( real_delay ) );
-        T_free( cp );
-    }
+               lecroy_ws_ptime( delay ), lecroy_ws_ptime( real_delay ) );
 }
 
 
@@ -340,11 +332,11 @@ void lecroy_ws_window_check( Window_T * w,
     if ( FSC2_MODE == TEST &&
          ( ! lecroy_ws.is_timebase || ! lecroy_ws.is_trigger_delay ) )
     {
-        LECROY_WS_PTC_WINDOW_T *p = post_test_check_window;
+        LECROY_WS_PTC_WINDOW_T *p = lecroy_ws_ptc_window;
 
-        if ( post_test_check_window == NULL )
-            p = post_test_check_window =
-                					T_malloc( sizeof *post_test_check_window );
+        if ( lecroy_ws_ptc_window == NULL )
+            p = lecroy_ws_ptc_window =
+                                      T_malloc( sizeof *lecroy_ws_ptc_window );
         else
         {
             while ( p->next != NULL )
@@ -541,19 +533,22 @@ static void lecroy_ws_soe_window_check( LECROY_WS_PTC_WINDOW_T * p )
 
 const char *lecroy_ws_ptime( double p_time )
 {
-    static char buffer[ 128 ];
+    static char buffer[ 2 ][ 128 ];
+    static size_t i = 1;
 
+
+    i = ( i + 1 ) % 2;
 
     if ( fabs( p_time ) >= 1.0 )
-        sprintf( buffer, "%.3f s", p_time );
+        sprintf( buffer[ i ], "%.3f s", p_time );
     else if ( fabs( p_time ) >= 1.0e-3 )
-        sprintf( buffer, "%.3f ms", 1.0e3 * p_time );
+        sprintf( buffer[ i ], "%.3f ms", 1.0e3 * p_time );
     else if ( fabs( p_time ) >= 1.0e-6 )
-        sprintf( buffer, "%.3f us", 1.0e6 * p_time );
+        sprintf( buffer[ i ], "%.3f us", 1.0e6 * p_time );
     else
-        sprintf( buffer, "%.3f ns", 1.0e9 * p_time );
+        sprintf( buffer[ i ], "%.3f ns", 1.0e9 * p_time );
 
-    return buffer;
+    return buffer[ i ];
 }
 
 

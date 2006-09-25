@@ -418,7 +418,6 @@ Var_T *digitizer_timebase( Var_T * v )
     double timebase;
     int tb_index = -1;
     size_t i;
-    char *t;
 
 
     if ( v == NULL )
@@ -460,31 +459,26 @@ Var_T *digitizer_timebase( Var_T * v )
 
     if ( tb_index >= 0 &&                                   /* value found ? */
          fabs( timebase - TBAS( tb_index ) ) > timebase * 1.0e-2 )
-    {
-        t = T_strdup( lecroy_ws_ptime( timebase ) );
         print( WARN, "Can't set timebase to %s, using %s instead.\n",
-               t, lecroy_ws_ptime( TBAS( tb_index ) ) );
-        T_free( t );
-    }
+               lecroy_ws_ptime( timebase ),
+               lecroy_ws_ptime( TBAS( tb_index ) ) );
 
     if ( tb_index < 0 )                                   /* not found yet ? */
     {
-        t = T_strdup( lecroy_ws_ptime( timebase ) );
-
         if ( timebase < TBAS( 0 ) )
         {
             tb_index = 0;
             print( WARN, "Timebase of %s is too short, using %s instead.\n",
-                   t, lecroy_ws_ptime( TBAS( tb_index ) ) );
+                   lecroy_ws_ptime( timebase ),
+                   lecroy_ws_ptime( TBAS( tb_index ) ) );
         }
         else
         {
             tb_index = NUM_TBAS - 1;
             print( WARN, "Timebase of %s is too long, using %s instead.\n",
-                   t, lecroy_ws_ptime( TBAS( tb_index ) ) );
+                   lecroy_ws_ptime( timebase ),
+                   lecroy_ws_ptime( TBAS( tb_index ) ) );
         }
-
-        T_free( t );
     }
 
     lecroy_ws.timebase = TBAS( tb_index );
@@ -498,7 +492,7 @@ Var_T *digitizer_timebase( Var_T * v )
     /* Now check if the trigger delay (in case it's set) fits with the new
        timebase setting, and, based on this, the window positions and widths */
 
-    lecroy_ws.trigger_delay = lecroy_ws_trigger_delay_check( );
+    lecroy_ws.trigger_delay = lecroy_ws_trigger_delay_check( UNSET );
     lecroy_ws_all_windows_check( );
 
     /* In the experiment set the timebase and also the trigger delay, at least
@@ -557,7 +551,7 @@ Var_T *digitizer_interleave_mode( Var_T * v )
     lecroy_ws.is_interleaved = SET;
     lecroy_ws.is_timebase = SET;            /* both must be set to be able */
 
-    lecroy_ws.trigger_delay = lecroy_ws_trigger_delay_check( );
+    lecroy_ws.trigger_delay = lecroy_ws_trigger_delay_check( UNSET );
     lecroy_ws_all_windows_check( );
 
     if ( FSC2_MODE == EXPERIMENT )
@@ -619,7 +613,7 @@ Var_T *digitizer_memory_size( Var_T *v )
     if ( FSC2_MODE == EXPERIMENT )
         lecroy_ws_set_memory_size( lecroy_ws.mem_size );
 
-    lecroy_ws.trigger_delay = lecroy_ws_trigger_delay_check( );
+    lecroy_ws.trigger_delay = lecroy_ws_trigger_delay_check( UNSET );
     lecroy_ws_all_windows_check( );
 
     return vars_push( INT_VAR, lecroy_ws.mem_size );
@@ -1449,7 +1443,9 @@ Var_T *digitizer_trigger_delay( Var_T * v )
                 /* Fall through */
 
             case TEST :
-                return vars_push( FLOAT_VAR, lecroy_ws.trigger_delay );
+                return vars_push( FLOAT_VAR, lecroy_ws.is_trigger_delay ?
+                                  lecroy_ws.trigger_delay :
+                                  LECROY_WS_TEST_TRIG_DELAY );
 
             case EXPERIMENT :
                 lecroy_ws.trigger_delay = lecroy_ws_get_trigger_delay( );
@@ -1460,47 +1456,17 @@ Var_T *digitizer_trigger_delay( Var_T * v )
 
     too_many_arguments( v );
 
-    if ( FSC2_MODE == PREPARATION && ! lecroy_ws.is_timebase )
-    {
-        print( FATAL, "Can't set trigger delay in PREPARATION "
-               "section while tim base hasn't been set.\n" );
-        THROW( EXCEPTION );
-    }
-
-    /* Check that the trigger delay is within the limits (taking rounding
-       errors of the order of the current time resolution into account) */
-
-    if ( FSC2_MODE != TEST || lecroy_ws.is_timebase )
-    {
-        if ( delay > 0.0 && delay >   5.0 * lecroy_ws.timebase
-                                    + 0.5 * lecroy_ws_time_per_point( ) )
-        {
-            print( FATAL, "Pre-trigger delay is too long, can't be longer "
-                   "than 5 times the timebase.\n" );
-            THROW( EXCEPTION );
-        }
-
-        if ( delay < 0.0 && delay <   -1.0e4 * lecroy_ws.timebase
-                                    -    0.5 * lecroy_ws_time_per_point( ) )
-        {
-            print( FATAL, "Post-triger delay is too long, can't be longer "
-                   "than 10,000 times the timebase.\n" );
-            THROW( EXCEPTION );
-        }
-    }
-
-    /* The delay can only be set in units of 1/50 of the timebase */
-
-    delay = 0.02 * lrnd( 50.0 * delay / lecroy_ws.timebase )
-            * lecroy_ws.timebase;
-
-    if ( FSC2_MODE == EXPERIMENT )
-        lecroy_ws_set_trigger_delay( delay );
-
     lecroy_ws.trigger_delay = delay;
     lecroy_ws.is_trigger_delay = SET;
 
-    return vars_push( FLOAT_VAR, delay );
+    /* Check and correct trigger delay */
+
+    lecroy_ws.trigger_delay = lecroy_ws_trigger_delay_check( SET );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        lecroy_ws_set_trigger_delay( lecroy_ws.trigger_delay );
+
+    return vars_push( FLOAT_VAR, lecroy_ws.trigger_delay );
 }
 
 

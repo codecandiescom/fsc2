@@ -82,11 +82,10 @@ Ticks rb_pulser_j_double2ticks( double p_time )
     if ( fabs( ( Ticks_rnd( ticks ) - ticks ) / ticks ) > 1.0e-2 ||
          ( p_time > 0.99e-9 && Ticks_rnd( ticks ) == 0 ) )
     {
-        char *t = T_strdup( rb_pulser_j_ptime( p_time ) );
         print( FATAL, "Specified time of %s is not an integer multiple of the "
                "pulser time base of %s.\n",
-               t, rb_pulser_j_ptime( rb_pulser_j.timebase ) );
-        T_free( t );
+               rb_pulser_j_ptime( p_time ),
+               rb_pulser_j_ptime( rb_pulser_j.timebase ) );
         THROW( EXCEPTION );
     }
 
@@ -142,18 +141,22 @@ Pulse_T *rb_pulser_j_get_pulse( long pnum )
 
 const char *rb_pulser_j_ptime( double p_time )
 {
-    static char buffer[ 128 ];
+    static char buffer[ 2 ][ 128 ];
+    static size_t i = 1;
+
+
+    i = ( i + 1 ) % 2;
 
     if ( fabs( p_time ) >= 1.0 )
-        sprintf( buffer, "%g s", p_time );
+        sprintf( buffer[ i ], "%g s", p_time );
     else if ( fabs( p_time ) >= 1.e-3 )
-        sprintf( buffer, "%g ms", 1.e3 * p_time );
+        sprintf( buffer[ i ], "%g ms", 1.e3 * p_time );
     else if ( fabs( p_time ) >= 1.e-6 )
-        sprintf( buffer, "%g us", 1.e6 * p_time );
+        sprintf( buffer[ i ], "%g us", 1.e6 * p_time );
     else
-        sprintf( buffer, "%g ns", 1.e9 * p_time );
+        sprintf( buffer[ i ], "%g ns", 1.e9 * p_time );
 
-    return buffer;
+    return buffer[ i ];
 }
 
 

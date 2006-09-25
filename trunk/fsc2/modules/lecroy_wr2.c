@@ -419,7 +419,6 @@ Var_T *digitizer_timebase( Var_T * v )
     double timebase;
     int tb_index = -1;
     long i;
-    char *t;
 
 
     if ( v == NULL )
@@ -462,31 +461,26 @@ Var_T *digitizer_timebase( Var_T * v )
 
     if ( tb_index >= 0 &&                                   /* value found ? */
          fabs( timebase - lecroy_wr2.tbas[ tb_index ] ) > timebase * 1.0e-2 )
-    {
-        t = T_strdup( lecroy_wr2_ptime( timebase ) );
         print( WARN, "Can't set timebase to %s, using %s instead.\n",
-               t, lecroy_wr2_ptime( lecroy_wr2.tbas[ tb_index ] ) );
-        T_free( t );
-    }
+               lecroy_wr2_ptime( timebase ),
+               lecroy_wr2_ptime( lecroy_wr2.tbas[ tb_index ] ) );
 
     if ( tb_index < 0 )                                   /* not found yet ? */
     {
-        t = T_strdup( lecroy_wr2_ptime( timebase ) );
-
         if ( timebase < lecroy_wr2.tbas[ 0 ] )
         {
             tb_index = 0;
             print( WARN, "Timebase of %s is too short, using %s instead.\n",
-                   t, lecroy_wr2_ptime( lecroy_wr2.tbas[ tb_index ] ) );
+                   lecroy_wr2_ptime( timebase ),
+                   lecroy_wr2_ptime( lecroy_wr2.tbas[ tb_index ] ) );
         }
         else
         {
             tb_index = lecroy_wr2.num_tbas - 1;
             print( WARN, "Timebase of %s is too long, using %s instead.\n",
-                   t, lecroy_wr2_ptime( lecroy_wr2.tbas[ tb_index ] ) );
+                   lecroy_wr2_ptime( timebase ),
+                   lecroy_wr2_ptime( lecroy_wr2.tbas[ tb_index ] ) );
         }
-
-        T_free( t );
     }
 
     lecroy_wr2.timebase = lecroy_wr2.tbas[ tb_index ];

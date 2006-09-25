@@ -31,24 +31,30 @@ static void tds_tmpl_window_check_2( Window_T * w );
 static void tds_tmpl_window_check_3( Window_T * w );
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function returns (static) string with time in pretty format. Since
+ * up to 4 strings are needed at the same time the returned string
+ * cycles through 4 different buffers.
+ *--------------------------------------------------------------------*/
 
 const char *tds_tmpl_ptime( double p_time )
 {
-    static char buffer[ 128 ];
+    static char buffer[ 4 ][ 128 ];
+    static size_t i = 3;
 
+
+    i = ( i + 1 ) % 3;
 
     if ( fabs( p_time ) >= 1.0 )
-        sprintf( buffer, "%g s", p_time );
+        sprintf( buffer[ i ], "%g s", p_time );
     else if ( fabs( p_time ) >= 1.e-3 )
-        sprintf( buffer, "%g ms", 1.e3 * p_time );
+        sprintf( buffer[ i ], "%g ms", 1.e3 * p_time );
     else if ( fabs( p_time ) >= 1.e-6 )
-        sprintf( buffer, "%g us", 1.e6 * p_time );
+        sprintf( buffer[ i ], "%g us", 1.e6 * p_time );
     else
-        sprintf( buffer, "%g ns", 1.e9 * p_time );
+        sprintf( buffer[ i ], "%g ns", 1.e9 * p_time );
 
-    return buffer;
+    return buffer[ i ];
 }
 
 
@@ -204,7 +210,6 @@ static void tds_tmpl_window_check_2( Window_T * w )
 {
     double dcs, dcd, dtb, fac;
     long tb, cs, cd;
-    char *buffer;
 
 
     /* Can't do checks if window position or digitizers timebase is unknown */
@@ -232,11 +237,9 @@ static void tds_tmpl_window_check_2( Window_T * w )
     {
         cs = ( cs / tb ) * tb;
         dcs = cs * fac / TDS_TMPL_POINTS_PER_DIV;
-        buffer = T_strdup( tds_tmpl_ptime( dcs ) );
         print( WARN, "Start point of %ld. window had to be readjusted from "
                "%s to %s.\n", w->num - WINDOW_START_NUMBER,
-               tds_tmpl_ptime( w->start ), buffer );
-        T_free( buffer );
+               tds_tmpl_ptime( w->start ), tds_tmpl_ptime( dcs ) );
         w->start = dcs;
     }
 
@@ -262,22 +265,18 @@ static void tds_tmpl_window_check_2( Window_T * w )
     if ( labs( cd ) < tb )         /* window smaller than one point ? */
     {
         dcd = tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
-        buffer = T_strdup( tds_tmpl_ptime( dcd ) );
         print( SEVERE, "Width of %ld. window had to be readjusted from %s to "
                "%s.\n", w->num - WINDOW_START_NUMBER,
-               tds_tmpl_ptime( w->width ), buffer );
-        T_free( buffer );
+               tds_tmpl_ptime( w->width ), tds_tmpl_ptime( dcd ) );
         w->width = dcd;
     }
     else if ( cd % tb )            /* window width not multiple of a point ? */
     {
         cd = ( cd / tb ) * tb;
         dcd = cd * fac / TDS_TMPL_POINTS_PER_DIV;
-        buffer = T_strdup( tds_tmpl_ptime( dcd ) );
         print( WARN, "Width of %ld. window had to be readjusted from %s to "
                "%s.\n", w->num - WINDOW_START_NUMBER,
-               tds_tmpl_ptime( w->width ), buffer );
-        T_free( buffer );
+               tds_tmpl_ptime( w->width ), tds_tmpl_ptime( dcd ) );
         w->width = dcd;
     }
 }
@@ -292,7 +291,6 @@ static void tds_tmpl_window_check_2( Window_T * w )
 static void tds_tmpl_window_check_3( Window_T * w )
 {
     double window;
-    char *buf1, *buf2, *buf3;
     double start, width;
 
 
@@ -338,12 +336,9 @@ static void tds_tmpl_window_check_3( Window_T * w )
 
         if ( w->end_num - w->start_num + 1 <= tds_tmpl.rec_len )
         {
-            buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
             print( SEVERE, "Position of %ld. window had to be shifted from "
-                   "%s to %s.\n", w->num - WINDOW_START_NUMBER, buf1,
-                   tds_tmpl_ptime( start ) );
-            T_free( buf1 );
-
+                   "%s to %s.\n", w->num - WINDOW_START_NUMBER,
+                   tds_tmpl_ptime( w->start ), tds_tmpl_ptime( start ) );
             w->end_num = w->end_num - w->start_num + 1;
             w->start = start;
         }
@@ -352,18 +347,11 @@ static void tds_tmpl_window_check_3( Window_T * w )
             w->end_num = tds_tmpl.rec_len;
             width = w->end_num * tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
 
-            buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
-            buf2 = T_strdup( tds_tmpl_ptime( w->width ) );
-            buf3 = T_strdup( tds_tmpl_ptime( start ) );
-
             print( SEVERE, "Position and width of %ld. window had to be "
                    "readjusted from %s and %s to %s and %s.\n",
-                   w->num - WINDOW_START_NUMBER, buf1, buf2, buf3,
-                   tds_tmpl_ptime( width ) );
-
-            T_free( buf3 );
-            T_free( buf2 );
-            T_free( buf1 );
+                   w->num - WINDOW_START_NUMBER,
+                   tds_tmpl_ptime( w->start ), tds_tmpl_ptime( w->width ),
+                   tds_tmpl_ptime( start ), tds_tmpl_ptime( width ) );
 
             w->start = start;
             w->width = width;
@@ -387,11 +375,9 @@ static void tds_tmpl_window_check_3( Window_T * w )
         width = ( tds_tmpl.rec_len - w->start_num + 1 )
                 * tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
 
-        buf1 = T_strdup( tds_tmpl_ptime( w->width ) );
         print( SEVERE, "Width of %ld. window had to be readjusted from %s to "
-               "%s.\n", w->num - WINDOW_START_NUMBER, buf1,
-               tds_tmpl_ptime( width ) );
-        T_free( buf1 );
+               "%s.\n", w->num - WINDOW_START_NUMBER,
+               tds_tmpl_ptime( w->width ), tds_tmpl_ptime( width ) );
 
         w->width = width;
     }
@@ -419,11 +405,9 @@ static void tds_tmpl_window_check_3( Window_T * w )
                     - tds_tmpl.trig_pos * window;
             w->end_num = tds_tmpl.rec_len;
 
-            buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
             print( SEVERE, "Position of %ld. window had to be shifted from "
-                   "%s to %s.\n", w->num - WINDOW_START_NUMBER, buf1,
-                   tds_tmpl_ptime( start ) );
-            T_free( buf1 );
+                   "%s to %s.\n", w->num - WINDOW_START_NUMBER,
+                   tds_tmpl_ptime( w->start ), tds_tmpl_ptime( start ) );
 
             w->start = start;
         }
@@ -435,18 +419,11 @@ static void tds_tmpl_window_check_3( Window_T * w )
             width = tds_tmpl.rec_len
                     * tds_tmpl.timebase / TDS_TMPL_POINTS_PER_DIV;
 
-            buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
-            buf2 = T_strdup( tds_tmpl_ptime( w->width ) );
-            buf3 = T_strdup( tds_tmpl_ptime( start ) );
-
             print( SEVERE, "Position and width of %ld. window had to be "
                    "readjusted from %s and %s to %s and %s.\n",
-                   w->num - WINDOW_START_NUMBER, buf1, buf2, buf3,
-                   tds_tmpl_ptime( width ) );
-
-            T_free( buf3 );
-            T_free( buf2 );
-            T_free( buf1 );
+                   w->num - WINDOW_START_NUMBER,
+                   tds_tmpl_ptime( w->start ), tds_tmpl_ptime( w->width ),
+                   tds_tmpl_ptime( start ), tds_tmpl_ptime( width ) );
 
             w->start = start;
             w->width = width;
@@ -699,7 +676,6 @@ void tds_tmpl_state_check( double timebase,
 {
     Window_T *w;
     double window;
-    char *buf1, *buf2, *buf3;
     double start, width;
     double w1, w2;
 
@@ -748,11 +724,10 @@ void tds_tmpl_state_check( double timebase,
                     width = ( rec_len - w->start_num + 1 )
                             * timebase / TDS_TMPL_POINTS_PER_DIV;
 
-                    buf1 = T_strdup( tds_tmpl_ptime( w->width ) );
                     print( SEVERE, "Width of %ld. window had to be readjusted "
                            "from %s to %s.\n", w->num - WINDOW_START_NUMBER,
-                           buf1, tds_tmpl_ptime( width ) );
-                    T_free( buf1 );
+                           tds_tmpl_ptime( w->width ),
+                           tds_tmpl_ptime( width ) );
 
                     w->width = width;
                 }
@@ -770,12 +745,11 @@ void tds_tmpl_state_check( double timebase,
                                 - trig_pos * window;
                         w->end_num = rec_len;
 
-                        buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
                         print( SEVERE, "Position of %ld. window had to be "
                                "shifted from %s to %s.\n",
-                               w->num - WINDOW_START_NUMBER, buf1,
+                               w->num - WINDOW_START_NUMBER,
+                               tds_tmpl_ptime( w->start ),
                                tds_tmpl_ptime( start ) );
-                        T_free( buf1 );
                     }
                     else
                     {
@@ -784,18 +758,13 @@ void tds_tmpl_state_check( double timebase,
                         w->end_num = rec_len;
                         width = rec_len * timebase / TDS_TMPL_POINTS_PER_DIV;
 
-                        buf1 = T_strdup( tds_tmpl_ptime( w->start ) );
-                        buf2 = T_strdup( tds_tmpl_ptime( w->width ) );
-                        buf3 = T_strdup( tds_tmpl_ptime( start ) );
-
                         print( SEVERE, "Position and width of %ld. window had "
                                "to be readjusted from %s and %s to %s and "
-                               "%s.\n", w->num - WINDOW_START_NUMBER, buf1,
-                               buf2, buf3, tds_tmpl_ptime( width ) );
-
-                        T_free( buf3 );
-                        T_free( buf2 );
-                        T_free( buf1 );
+                               "%s.\n", w->num - WINDOW_START_NUMBER,
+                               tds_tmpl_ptime( w->start ),
+                               tds_tmpl_ptime( w->width ),
+                               tds_tmpl_ptime( start ),
+                               tds_tmpl_ptime( width ) );
                     }
                 }
             }

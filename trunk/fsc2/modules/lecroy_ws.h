@@ -556,7 +556,7 @@ void lecroy_ws_soe_checks( void );
 
 void lecroy_ws_exit_cleanup( void );
 
-double lecroy_ws_trigger_delay_check( void );
+double lecroy_ws_trigger_delay_check( bool /* from */ );
 
 void lecroy_ws_delete_windows( LECROY_WS_T * /* s */ );
 

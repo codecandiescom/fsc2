@@ -382,7 +382,6 @@ Var_T *digitizer_timebase( Var_T * v )
     double timebase;
     int tb_index = -1;
     size_t i;
-    char *t;
 
 
     if ( v == NULL )
@@ -424,31 +423,26 @@ Var_T *digitizer_timebase( Var_T * v )
 
     if ( tb_index >= 0 &&                                   /* value found ? */
          fabs( timebase - hres[ tb_index ].tdiv ) > timebase * 1.0e-2 )
-    {
-        t = T_strdup( lecroy94_tmpl_ptime( timebase ) );
         print( WARN, "Can't set timebase to %s, using %s instead.\n",
-               t, lecroy94_tmpl_ptime( hres[ tb_index ].tdiv ) );
-        T_free( t );
-    }
+               lecroy94_tmpl_ptime( timebase ),
+               lecroy94_tmpl_ptime( hres[ tb_index ].tdiv ) );
 
     if ( tb_index < 0 )                                   /* not found yet ? */
     {
-        t = T_strdup( lecroy94_tmpl_ptime( timebase ) );
-
         if ( timebase < hres[ 0 ].tdiv )
         {
             tb_index = 0;
             print( WARN, "Timebase of %s is too short, using %s instead.\n",
-                   t, lecroy94_tmpl_ptime( hres[ tb_index ].tdiv ) );
+                   lecroy94_tmpl_ptime( timebase ),
+                   lecroy94_tmpl_ptime( hres[ tb_index ].tdiv ) );
         }
         else
         {
             tb_index = NUM_ELEMS( hres ) - 1;
             print( WARN, "Timebase of %s is too long, using %s instead.\n",
-                   t, lecroy94_tmpl_ptime( hres[ tb_index ].tdiv ) );
+                   lecroy94_tmpl_ptime( timebase ),
+                   lecroy94_tmpl_ptime( hres[ tb_index ].tdiv ) );
         }
-
-        T_free( t );
     }
 
     lecroy94_tmpl.timebase = hres[ tb_index ].tdiv;
@@ -1469,13 +1463,9 @@ Var_T *digitizer_trigger_delay( Var_T * v )
        that can be set is larger than the time resolution warn the user */
 
     if ( fabs( real_delay - delay ) > lecroy94_tmpl_time_per_point( ) )
-    {
-        char *cp = T_strdup( lecroy94_tmpl_ptime( delay ) );
-
         print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
-               cp, lecroy94_tmpl_ptime( real_delay ) );
-        T_free( cp );
-    }
+               lecroy94_tmpl_ptime( delay ),
+               lecroy94_tmpl_ptime( real_delay ) );
 
     /* Finally set the delay */
 

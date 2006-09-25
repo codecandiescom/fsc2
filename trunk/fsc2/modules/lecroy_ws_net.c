@@ -250,10 +250,14 @@ bool lecroy_ws_init( const char * name )
                            lecroy_ws_get_trigger_coupling( trg_channels[ i ] );
         }
 
-        /* Set (if required) the trigger delay */
+        /* If required the trigger delay (after checking that it's ok, that
+           may not have been possible before), otherwise get it. */
 
         if ( lecroy_ws.is_trigger_delay )
+        {
+            lecroy_ws.trigger_delay = lecroy_ws_trigger_delay_check( SET );
             lecroy_ws_set_trigger_delay( lecroy_ws.trigger_delay );
+        }
         else
             lecroy_ws_get_trigger_delay( );
 

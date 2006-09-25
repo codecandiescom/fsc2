@@ -588,7 +588,6 @@ Var_T *digitizer_timebase( Var_T * v )
     double timebase;
     int TB = -1;
     size_t i;
-    char *t;
 
 
     /* During the experiment if the digitizer's keyboard isn't locked we
@@ -635,31 +634,23 @@ Var_T *digitizer_timebase( Var_T * v )
 
     if ( TB >= 0 &&                                         /* value found ? */
          fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )  /* error > 1% ?  */
-    {
-        t = T_strdup( tds_tmpl_ptime( timebase ) );
         print( WARN, "Can't set timebase to %s, using %s instead.\n",
-               t, tds_tmpl_ptime( tb[ TB ] ) );
-        T_free( t );
-    }
+               tds_tmpl_ptime( timebase ), tds_tmpl_ptime( tb[ TB ] ) );
 
     if ( TB < 0 )                                   /* not found yet ? */
     {
-        t = T_strdup( tds_tmpl_ptime( timebase ) );
-
         if ( timebase < tb[ 0 ] )
         {
             TB = 0;
             print( WARN, "Timebase of %s is too low, using %s instead.\n",
-                   t, tds_tmpl_ptime( tb[ TB ] ) );
+                   tds_tmpl_ptime( timebase ), tds_tmpl_ptime( tb[ TB ] ) );
         }
         else
         {
             TB = NUM_ELEMS( tb ) - 1;
             print( WARN, "Timebase of %s is too large, using %s instead.\n",
-                   t, tds_tmpl_ptime( tb[ TB ] ) );
+                   tds_tmpl_ptime( timebase ), tds_tmpl_ptime( tb[ TB ] ) );
         }
-
-        T_free( t );
     }
 
     too_many_arguments( v );

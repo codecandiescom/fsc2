@@ -128,19 +128,22 @@ void lecroy94_tmpl_exit_cleanup( void )
 
 const char *lecroy94_tmpl_ptime( double p_time )
 {
-    static char buffer[ 128 ];
+    static char buffer[ 2 ][ 128 ];
+    static size_t i = 1;
 
+
+    i = ( i + 1 ) % 2;
 
     if ( fabs( p_time ) >= 1.0 )
-        sprintf( buffer, "%.3f s", p_time );
+        sprintf( buffer[ i ], "%.3f s", p_time );
     else if ( fabs( p_time ) >= 1.0e-3 )
-        sprintf( buffer, "%.3f ms", 1.0e3 * p_time );
+        sprintf( buffer[ i ], "%.3f ms", 1.0e3 * p_time );
     else if ( fabs( p_time ) >= 1.0e-6 )
-        sprintf( buffer, "%3f us", 1.0e6 * p_time );
+        sprintf( buffer[ i ], "%3f us", 1.0e6 * p_time );
     else
-        sprintf( buffer, "%.3f ns", 1.0e9 * p_time );
+        sprintf( buffer[ i ], "%.3f ns", 1.0e9 * p_time );
 
-    return buffer;
+    return buffer[ i ];
 }
 
 
@@ -491,13 +494,9 @@ double lecroy94_tmpl_trigger_delay_check( void )
        that can be set is larger than the time resolution warn the user */
 
     if ( fabs( real_delay - delay ) > lecroy94_tmpl_time_per_point( ) )
-    {
-        char *cp = T_strdup( lecroy94_tmpl_ptime( delay ) );
-
         print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
-               cp, lecroy94_tmpl_ptime( real_delay ) );
-        T_free( cp );
-    }
+               lecroy94_tmpl_ptime( delay ),
+               lecroy94_tmpl_ptime( real_delay ) );
 
     return real_delay;
 }
@@ -543,14 +542,10 @@ static void lecroy94_tmpl_soe_trigger_delay_check( double delay )
        that can be set is larger than the time resolution warn the user */
 
     if ( fabs( real_delay - delay ) > lecroy94_tmpl_time_per_point( ) )
-    {
-        char *cp = T_strdup( lecroy94_tmpl_ptime( delay ) );
-
         print( WARN, "During the experiment the trigger delay will have to be "
                "adjusted from %s to %s.\n",
-               cp, lecroy94_tmpl_ptime( real_delay ) );
-        T_free( cp );
-    }
+               lecroy94_tmpl_ptime( delay ),
+               lecroy94_tmpl_ptime( real_delay ) );
 }
 
 
