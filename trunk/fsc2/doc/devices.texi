@@ -3230,15 +3230,18 @@ module a defense pulse is created automatically, lasting from the start of
 the pulse pattern to some time after end of the last microwave pulse, in
 order to protect amplifiers and receivers from excessive levels of microwave
 power. Using this function the minimum distance between the end of the last
-microwave pulse and the end of the defense pulse can be set (this time can
-end up being be slightly longer, up to the length of the timebase of the
-pulser).
+microwave pulse and the end of the defense pulse can be set (or queried),
+please note that this time can end up being be slightly longer, up to the
+length of the timebase of the pulser.
 
 If this function isn't called a default minimum time as defined in the
 configuration file for the device will be used.
 
-This function can only be called during the @code{PEPARATIONS} section
-of an @code{EDL} script.
+This function can be called to set the minimum defense delay only during
+the @code{PEPARATIONS} section of an @code{EDL} script. Unless compiled
+into the module by changing a configuration variable the program will
+explictely ask the user at the start of the experiment if she really
+intended to change the minimum defense delay.
 
 
 @anchor{pulser_defense_pulse_mode()}
@@ -3252,25 +3255,24 @@ from excessive levels of microwave power. But in some situations such an
 aautomatic creation of a defense pulse is not desirable, in which case this
 function can be called during the @code{PREPARATIONS} section of the
 @code{EDL} script before a defense pulse is defined. It can be called with
-a string argument of either @code{"AUTOMATIC"} or @code{"MANUAL"} (or an
-integer argument of @code{0} or @code{1}). Calling it with the argument
-@code{"AUTOMATIC"} isn't really useful since this is the default (and
+a string argument of either @code{"ON"} or @code{"OFF"} (or an integer
+argument of @code{1} or @code{0}). Calling it with the argument
+@code{"ON"} isn't really useful since this is the default (and
 switching back to automatic creation isn't possible once the function has
-been called with the @code{"MANUAL"} argument). To be able to create the
+been called with the @code{"OFF"} argument). To be able to create the
 defense pulse yourself and later control its length you need to call the
-function with an argument of @code{"MANUAL"}. Please note that you only
-can set the length of the defense pulse, it's position is fixed to the
-very start of the pulse pattern. Calling it with this argument and not
-defining a defense pulse at all allows to avoid the creation of a defense
-pulse.
+function with an argument of @code{"OFF"}. Calling the function  with this
+argument and not defining a defense pulse at all allows to avoid the
+creation of a defense pulse.
 
 Once in manual mode the module does not evaluate the value set by a call
 of @ref{pulser_minimum_defense_distance()} anymore - the user is now
-completely responsible for setting the correct length of the defense pulse.
+completely responsible for creating a defense pulse and setting its
+correct length..
 
-If the function has been called with the argument @code{"MANUAL"} the user
-will always explicitely asked if the defense pulse is really to be created
-manually.
+If the function has been called with the argument @code{"OFF"} the user
+will always explicitely asked if that's what he really wants because of
+the potential dangers involved.
 
 
 @end table

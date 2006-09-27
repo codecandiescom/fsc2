@@ -52,17 +52,18 @@ my $endif_entry = $guify_marker . 'endif\s*$';
 my @if_level = ( );
 my $lino;
 my $need_file_sel = 0;
-
-my $if = *STDIN;
-my $of = *STDOUT;
+my $if;
+my $of;
 
 
 # Open the input file (if one was specified on the command line)
 
 if ( $ARGV[ 0 ] ) {
-    usage( ) if $ARGV[ 0 ] =~ /^-h$/ or $ARGV[ 0 ] =~ /^--h(elp)?$/;
-    open( $if, "<$ARGV[ 0 ]" )
+    usage( ) if $ARGV[ 0 ] =~ /^-h$/ or $ARGV[ 0 ] =~ /^--help$/;
+    open $if, "<$ARGV[ 0 ]"
         or die "Can't open input file $ARGV[ 0 ]: $!\n";
+} else {
+    $if = *STDIN;
 }
 
 # Read in the complete input and do some parsing
@@ -199,8 +200,10 @@ cond_check( );
 # out the script
 
 if ( $ARGV[ 1 ] ) {
-    open( $of, ">$ARGV[ 1 ]" )
+    open $of, ">$ARGV[ 1 ]"
         or die "Can't open output file $ARGV[ 1 ]: $!\n";
+} else {
+    $of = *STDOUT;
 }
 
 select $of;
@@ -210,7 +213,7 @@ close $of if $ARGV[ 1 ];
 
 # Finally make the new script executable (unless we wrote to STDOUT)
 
-chmod( 0755, $ARGV[ 1 ] ) if $ARGV[ 1 ];
+chmod 0755, $ARGV[ 1 ] if $ARGV[ 1 ];
 
 # And that's it ;-)
 

@@ -162,7 +162,7 @@ int rb_pulser_w_init_hook( void )
     rb_pulser_w.is_psd = UNSET;
     rb_pulser_w.is_grace_period = UNSET;
     rb_pulser_w.is_pulse_2_defense = UNSET;
-    rb_pulser_w.defense_pulse_mode = AUTOMATIC;
+    rb_pulser_w.defense_pulse_mode = SET;
 
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
@@ -359,12 +359,12 @@ int rb_pulser_w_exp_hook( void )
     /* If the user asked to have no automatically created defense pulse ask
        if (s)he really means it */
 
-    if ( rb_pulser_w.defense_pulse_mode == MANUAL )
+    if ( ! rb_pulser_w.defense_pulse_mode )
     {
-        const char *warn = "You want to set the defense pulse manually.\n"
-                           "This can potentally destroy the signal ampli-\n"
-                           "fier if you are not extremely careful.\n"
-                           "***** Is this really what you want? *****";
+        const char *warn = "You have switched off automatic creation of\n"
+                           "the defense pulse. This can destroy the\n"
+                           "signal amplifier unless you are very careful.\n"
+                           "***** Is this really what you want to do? *****";
         if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
             THROW( EXCEPTION );
     }
@@ -373,16 +373,16 @@ int rb_pulser_w_exp_hook( void )
        delays we can't be 100% sure that the defense pulse covers the
        required region. So we better warn the user */
 
-    if ( rb_pulser_w.defense_pulse_mode == AUTOMATIC &&
+    if ( rb_pulser_w.defense_pulse_mode &&
          ( rb_pulser_w.function[ PULSER_CHANNEL_MW ].is_delay ||
            rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].is_delay ) )
     {
-        const char *warn = "You want an automatically set defense pulse\n"
+        const char *warn = "You want to automatically set a defense pulse\n"
                            "but also use function delays. The program now\n"
                            "can't guarantee the correct setting of the\n"
                            "defense pulse. This can destroy the signal\n"
                            "amplifier if you are not very careful.\n"
-                           "***** Is this really what you want? *****";
+                           "***** Is this really what you want to do? *****";
         if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
             THROW( EXCEPTION );
     }
@@ -392,16 +392,18 @@ int rb_pulser_w_exp_hook( void )
        last microwave pulse and the end of the defense pulse also ask
        if she's serious about that */
 
-    if ( rb_pulser_w.is_pulse_2_defense &&
-         rb_pulser_w.defense_pulse_mode == AUTOMATIC )
+    if ( rb_pulser_w.is_pulse_2_defense && rb_pulser_w.defense_pulse_mode &&
+         rb_pulser_w.pulse_2_defense < PULSE_2_DEFENSE_DEFAULT_MIN_DISTANCE &&
+         fabs(   rb_pulser_w.pulse_2_defense
+               - PULSE_2_DEFENSE_DEFAULT_MIN_DISTANCE ) < 1.0e-9 )
     {
         char warn[ 500 ];
         sprintf( warn, "The minimum distance between the end of the last\n"
                        "microwave pulse and the end of defense pulse has\n"
-                       "been changed to %s.\n"
-                       "***** Is this really what you want? *****",
-                 rb_pulser_w_ptime( rb_pulser_w_ticks2double(
-                                             rb_pulser_w.pulse_2_defense ) ) );
+                       "been changed from %s to %s.\n"
+                       "***** Is this really what you want to do? *****",
+                 rb_pulser_w_ptime( PULSE_2_DEFENSE_DEFAULT_MIN_DISTANCE ),
+                 rb_pulser_w_ptime( rb_pulser_w.pulse_2_defense ) );
         if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
             THROW( EXCEPTION );
     }
@@ -558,8 +560,8 @@ Var_T *pulser_grace_period( Var_T * v )
 /*------------------------------------------------------------*
  * Function for setting the minimum time between the end of a
  * microwave pulse and the end of the defense pulse. This
- * should always be large enough so that the receivers never
- * see anything of the pulses.
+ * should always be large enough so that the receiver never
+ * sees anything of the pulses.
  *------------------------------------------------------------*/
 
 Var_T *pulser_minimum_defense_distance( Var_T * v )
@@ -567,16 +569,32 @@ Var_T *pulser_minimum_defense_distance( Var_T * v )
     double s2d;
 
 
+    if ( v == NULL )
+        return vars_push( FLOAT_VAR, rb_pulser_w.is_pulse_2_defense ?
+                          rb_pulser_w.pulse_2_defense :
+                          PULSE_2_DEFENSE_DEFAULT_MIN_DISTANCE );
+
+    if ( FSC2_MODE != PREPARATION )
+    {
+        print( FATAL,"Function can only be called in PREPARATIONS "
+               "section.\n" );
+        THROW( EXCEPTION );
+    }
+
     if ( rb_pulser_w.is_pulse_2_defense )
     {
         print( FATAL, "End of last microwave pulse to end of defense pulse "
                "minimum distance has already been set to %s.\n",
-               rb_pulser_w_ptime(
-                   rb_pulser_w_ticks2double( rb_pulser_w.pulse_2_defense ) ) );
+               rb_pulser_w_ptime( rb_pulser_w.pulse_2_defense ) );
         THROW( EXCEPTION );
     }
 
-    s2d = get_double( v, "end of last microwave pulse to end of defense "
+    if ( ! rb_pulser_w.defense_pulse_mode )
+        print( SEVERE, "Automatic creation of defense pulse has been "
+               "switched off, call of this function has no effect "
+               "anymore.\n" );
+
+   s2d = get_double( v, "end of last microwave pulse to end of defense "
                       "pulse minimum distance" );
 
     if ( s2d < 0.0 )
@@ -602,53 +620,31 @@ Var_T *pulser_defense_pulse_mode( Var_T * v )
     long mode;
 
 
-    if ( ! ( v->type & ( INT_VAR | STR_VAR ) ) )
+    if ( v == NULL )
+        return vars_push( INT_VAR, rb_pulser_w.defense_pulse_mode ); 
+
+    if ( FSC2_MODE != PREPARATION )
     {
-        print( FATAL, "Invalid type of argument, must be either \"AUTOMATIC\" "
-               "or \"MANUAL\".\n" );
+        print( FATAL,"Function can only be called in PREPARATIONS "
+               "section.\n" );
         THROW( EXCEPTION );
     }
 
-    if ( v->type == INT_VAR )
-    {
-        switch ( v->val.lval )
-        {
-            case AUTOMATIC :
-                mode = AUTOMATIC;
-                break;
+    mode = get_boolean( v );
 
-            case MANUAL :
-                mode = MANUAL;
-                break;
+    too_many_arguments( v );
 
-            default :
-                print( FATAL, "Invalid argument value, must be 0 or 1 (but "
-                       "better use the strings \"AUTOMATIC\" or "
-                       "\"MANUAL\".\n" );
-                THROW( EXCEPTION );
-        }
-    }
-    else
+    if ( mode == SET && ! rb_pulser_w.defense_pulse_mode )
     {
-        if ( ! strcasecmp( v->val.sptr, "AUTOMATIC" ) ||
-             ! strcasecmp( v->val.sptr, "AUTO" ) )
-            mode = AUTOMATIC;
-        else if ( ! strcasecmp( v->val.sptr, "MANUAL" ) )
-            mode = MANUAL;
-        else
-        {
-            print( FATAL, "Invalid argument value, must be \"AUTOMATIC\" or "
-                   "\"MANUAL\".\n" );
-            THROW( EXCEPTION );
-        }
-    }
-
-    if ( mode == AUTOMATIC && rb_pulser_w.defense_pulse_mode == MANUAL )
-    {
-        print( FATAL, "Can't switch back from manual to automatic creation "
-               "of defense pulse.\n" );
+        print( FATAL, "Automatic creation of defense pulse can't be switched "
+               "on again once it has been switched off.\n" );
         THROW( EXCEPTION );
     }
+
+    if ( mode == UNSET && rb_pulser_w.is_pulse_2_defense )
+        print( SEVERE, "Switching automatic creation of defense pulse off "
+               "cancels the effect of the previous call of function "
+               "'pulser_minimum_defense_distance()'.\n" );
 
     rb_pulser_w.defense_pulse_mode = mode;
 

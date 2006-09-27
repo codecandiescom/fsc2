@@ -123,7 +123,7 @@ static void rb_pulser_w_function_init( void )
 
         if ( ! f->is_used ||
              ( i == PULSER_CHANNEL_DEFENSE &&
-               rb_pulser_w.defense_pulse_mode == AUTOMATIC ) )
+               rb_pulser_w.defense_pulse_mode ) )
             continue;
 
         for ( f->num_active_pulses = 0, j = 0; j < f->num_pulses; j++ )
@@ -150,7 +150,7 @@ static void rb_pulser_w_delay_card_setup( void )
     rb_pulser_w_rf_channel_setup( );
     rb_pulser_w_laser_channel_setup( );
     rb_pulser_w_detection_channel_setup( );
-    if ( rb_pulser_w.defense_pulse_mode == AUTOMATIC )
+    if ( rb_pulser_w.defense_pulse_mode )
         rb_pulser_w_auto_defense_channel_setup( );
     else
         rb_pulser_w_defense_channel_setup( );

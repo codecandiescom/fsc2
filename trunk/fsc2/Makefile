@@ -987,7 +987,7 @@ version:
 	fi
 
 
-# 'cleanup' deletes all the files created during the compilation but not
+# 'cleanup' deletes all the files created during the compilation and not
 # needed for an installation, while 'clean' also removes all executables,
 # shared libraries and documentation.
 
@@ -1018,6 +1018,7 @@ endif
 	$(MAKE) -C ni_daq clean
 	$(MAKE) -C rulbus clean
 	$(MAKE) -C witio_48 clean
+	$(MAKE) -C edl/leiden clean
 
 
 # Create a tags file to be used with emacs or vi

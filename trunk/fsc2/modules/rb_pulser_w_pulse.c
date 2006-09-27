@@ -97,8 +97,7 @@ bool rb_pulser_w_set_pulse_function( long pnum,
     /* Moreover, defense pulses can only be created manually if the user
        explecitely asked for it. */
 
-    if ( function == PULSER_CHANNEL_DEFENSE &&
-         rb_pulser_w.defense_pulse_mode == AUTOMATIC )
+    if ( function == PULSER_CHANNEL_DEFENSE && rb_pulser_w.defense_pulse_mode )
     {
         print( FATAL, "A DEFENSE pulse can only be created if the function "
                "'pulser_defense_pulse_mode()' has been called previously "

@@ -130,10 +130,9 @@ static void rb_pulser_w_basic_pulse_check( void )
 }
 
 
-/*-----------------------------------------------------*
- * Creates a list of pulses for each function that has
- * pulses assigned to it.
- *-----------------------------------------------------*/
+/*---------------------------------------------------------------------------*
+ * Creates a list of pulses for each function that has pulses assigned to it
+ *---------------------------------------------------------------------------*/
 
 static void rb_pulser_w_basic_functions_init( void )
 {
@@ -167,7 +166,7 @@ static void rb_pulser_w_basic_functions_init( void )
         {
             if(  f->is_declared &&
                  ! ( f == rb_pulser_w.function + PULSER_CHANNEL_DEFENSE &&
-                     rb_pulser_w.defense_pulse_mode == AUTOMATIC ) )
+                     ! rb_pulser_w.defense_pulse_mode ) )
                 print( WARN, "No pulses have been assigned to function "
                        "'%s'.\n", f->name );
             f->is_used = UNSET;
@@ -212,7 +211,7 @@ static void rb_pulser_w_defense_pulse_create( void )
     if ( ! mw->is_used )
         return;
 
-    if ( rb_pulser_w.defense_pulse_mode == MANUAL &&
+    if ( rb_pulser_w.defense_pulse_mode &&
          def->num_pulses != 0 && ! def->pulses[ 0 ]->is_pos )
     {
         def->pulses[ 0 ]->is_pos = def->pulses[ 0 ]->initial_is_pos = SET;
