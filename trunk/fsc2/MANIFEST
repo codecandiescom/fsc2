@@ -95,6 +95,7 @@ config/lecroy9424e.conf
 config/lecroy9450.conf
 config/lecroy_wr2.conf
 config/lecroy_ws.conf
+config/lecroy_ws.conf~
 config/Makefile
 config/mcn700_2000.conf
 config/me6000.conf
@@ -402,10 +403,8 @@ scripts/3_pulse_endor.rulhmpc66.molphys.leidenuniv.nl
 scripts/3_pulse_endor.rulhmpc89.molphys.leidenuniv.nl
 scripts/3_pulse_epr.rulhmpc66.molphys.leidenuniv.nl
 scripts/3_pulse_epr.rulhmpc89.molphys.leidenuniv.nl
-scripts/3_pulse_epr.rulhmpc89.molphys.leidenuniv.nl~
 scripts/3_pulse_T1.rulhmpc66.molphys.leidenuniv.nl
 scripts/3_pulse_T1.rulhmpc89.molphys.leidenuniv.nl
-scripts/3_pulse_T1.rulhmpc89.molphys.leidenuniv.nl~
 scripts/cw_endor.crowley.physik.fu-berlin.de
 scripts/cw_endor.door.physik.fu-berlin.de
 scripts/cw_endor.moebpc3.physik.fu-berlin.de
@@ -427,12 +426,10 @@ scripts/direct_detected_epr.rulhmpc66.molphys.leidenuniv.nl
 scripts/endor_monitor.crowley.physik.fu-berlin.de
 scripts/kinetic.milli.ptc.tugraz.at
 scripts/Makefile
-scripts/pm
 scripts/pulsed_exp.rulhmpc66.molphys.leidenuniv.nl
 scripts/pulsed_exp.rulhmpc89.molphys.leidenuniv.nl
 scripts/pulse_monitor.rulhmpc66.molphys.leidenuniv.nl
 scripts/pulse_monitor.rulhmpc89.molphys.leidenuniv.nl
-scripts/pulse_monitor.rulhmpc89.molphys.leidenuniv.nl~
 scripts/spectrapro_300i_calibration.single.physik.fu-berlin.de
 scripts/spex_cam.old.spex.mvl.local
 scripts/spex_cam.spex.mvl.local
