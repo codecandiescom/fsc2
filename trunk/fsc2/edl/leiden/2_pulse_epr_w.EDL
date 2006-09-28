@@ -6,7 +6,7 @@
 === PULSE_DIST int [ 100 : 167772150 ] [ 400 ] "Pulse distance" "ns"
 === DET_OFFSET int [ -167772150 : 167772150 ] [ 0 ] "Detection offset" "ns"
 === CREATE_DEFENSE button [ ON ] "Create defense pulse"
-=== PULSE_2_DEFENSE float [ 0 : ] [ 1 ] "End of MW pulse to\nend of defense\npulse distance" "us"
+=== PULSE_2_DEFENSE float [ 0 : ] [ 50 ] "End of MW pulse to\nend of defense\npulse distance" "ns"
 === START_FIELD float [ 0 : 114304 ] [ 35000 ] "Start field" "G"
 === END_FIELD float [ 0 : 114304 ] [ 36000 ] "End field" "G"
 === FIELD_STEP float [ 0.14288 :  ] [ 1 ] "Field step" "G"
@@ -67,7 +67,7 @@ PREPARATIONS:
 === if ! CREATE_DEFENSE
 pulser_defense_pulse_mode( "OFF" );
 === else
-pulser_minimum_defense_distance( PULSE_2_DEFENSE us );
+pulser_minimum_defense_distance( PULSE_2_DEFENSE ns );
 === endif
 
 P1:  FUNCTION = MICROWAVE,
@@ -159,7 +159,7 @@ FOREVER {
         BREAK;
     }
 
-    field = _magnet_field( start_field );
+    field = magnet_field( start_field );
 
     IF wait_time > 1 us {
         wait( wait_time );

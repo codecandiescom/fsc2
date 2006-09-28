@@ -1,5 +1,5 @@
 === CREATE_DEFENSE button [ ON ] "Create defense pulse"
-=== PULSE_2_DEFENSE float [ 0 : ] [ 1 ] "End of MW pulse to\nend of defense\npulse distance" "us"
+=== PULSE_2_DEFENSE float [ 0 : ] [ 50 ] "End of MW pulse to\nend of defense\npulse distance" "ns"
 
 DEVICES:
 
@@ -67,7 +67,7 @@ PREPARATIONS:
 === if ! CREATE_DEFENSE
 pulser_defense_pulse_mode( "OFF" );
 === else
-pulser_minimum_defense_distance( PULSE_2_DEFENSE us );
+pulser_minimum_defense_distance( PULSE_2_DEFENSE ns );
 === endif
 
 P1:   FUNCTION    = MW,
