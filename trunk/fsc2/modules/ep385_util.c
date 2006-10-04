@@ -86,11 +86,9 @@ Ticks ep385_double2ticks( double p_time )
     if ( fabs( Ticksrnd( ticks ) - p_time / ep385.timebase ) > 1.0e-2 ||
          ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
     {
-        char *t = T_strdup( ep385_ptime( p_time ) );
         print( FATAL, "Specified time of %s is not an integer multiple of the "
                "fixed pulser time base of %s.\n",
-               t, ep385_ptime( ep385.timebase ) );
-        T_free( t );
+               ep385_ptime( p_time ), ep385_ptime( ep385.timebase ) );
         THROW( EXCEPTION );
     }
 
@@ -174,18 +172,21 @@ Pulse_T *ep385_get_pulse( long pnum )
 
 const char *ep385_ptime( double p_time )
 {
-    static char buffer[ 128 ];
+    static char buffer[ 3 ][ 128 ];
+    static size_t i = 2;
 
+
+    i = ( i + 1 ) % 3;
     if ( fabs( p_time ) >= 1.0 )
-        sprintf( buffer, "%g s", p_time );
+        sprintf( buffer[ i ], "%g s", p_time );
     else if ( fabs( p_time ) >= 1.e-3 )
-        sprintf( buffer, "%g ms", 1.e3 * p_time );
+        sprintf( buffer[ i ], "%g ms", 1.e3 * p_time );
     else if ( fabs( p_time ) >= 1.e-6 )
-        sprintf( buffer, "%g us", 1.e6 * p_time );
+        sprintf( buffer[ i ], "%g us", 1.e6 * p_time );
     else
-        sprintf( buffer, "%g ns", 1.e9 * p_time );
+        sprintf( buffer[ i ], "%g ns", 1.e9 * p_time );
 
-    return buffer;
+    return buffer[ i ];
 }
 
 

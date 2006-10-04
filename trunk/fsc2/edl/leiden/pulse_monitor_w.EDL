@@ -532,7 +532,7 @@ FOREVER {
     IF ! Pause_Display {
         I += 1;
         wait( 0.2 s );
-        display( I, - daq_get_voltage( CH0 ) );
+        display( I, daq_get_voltage( CH0 ) );
     } ELSE {
         wait( 0.2 s );
     }

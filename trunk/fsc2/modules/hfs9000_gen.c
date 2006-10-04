@@ -35,15 +35,9 @@ bool hfs9000_store_timebase( double timebase )
 {
     if ( timebase < MIN_TIMEBASE || timebase > MAX_TIMEBASE )
     {
-        char *min =
-            T_strdup( hfs9000_ptime( ( double ) MIN_TIMEBASE ) );
-        char *max =
-            T_strdup( hfs9000_ptime( ( double ) MAX_TIMEBASE ) );
-
         print( FATAL, "Invalid time base of %s, valid range is "
-               "%s to %s.\n", hfs9000_ptime( timebase ), min, max );
-        T_free( min );
-        T_free( max );
+               "%s to %s.\n", hfs9000_ptime( timebase ),
+               hfs9000_ptime( MIN_TIMEBASE ), hfs9000_ptime( MAX_TIMEBASE ) );
         THROW( EXCEPTION );
     }
 

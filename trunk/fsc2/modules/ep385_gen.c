@@ -56,9 +56,8 @@ bool ep385_store_timebase( double timebase )
 
         TRY
         {
-            min = T_strdup( ep385_ptime( ( double ) FIXED_TIMEBASE ) );
             print( FATAL, "Invalid time base of %s, must be at least  %s.\n",
-                   ep385_ptime( timebase ), min );
+                   ep385_ptime( timebase ), ep385_ptime( FIXED_TIMEBASE );
             THROW( EXCEPTION );
         }
         OTHERWISE
@@ -256,7 +255,7 @@ bool ep385_set_repeat_time( double rep_time )
             ( old_rep_time = REPEAT_TICKS * ep385.repeat_time 
                              * ep385.timebase ) )
     {
-        print( FATAL, "A different repeat time/frequency of %s/%g Hz has "
+        print( FATAL, "A different repeat time/frequency of %s / %g Hz has "
                "already been set.\n", ep385_ptime( old_rep_time ),
                1.0 / old_rep_time );
         THROW( EXCEPTION );
@@ -277,30 +276,13 @@ bool ep385_set_repeat_time( double rep_time )
     if ( rep_time < min_repeat_time * 0.99 ||
          rep_time > max_repeat_time * 1.01 )
     {
-        char *tmin = NULL, *tmax = NULL;
-
-        CLOBBER_PROTECT( tmin );
-        CLOBBER_PROTECT( tmax );
-
-        TRY
-        {
-            tmin = T_strdup( ep385_ptime( min_repeat_time ) );
-            tmax = T_strdup( ep385_ptime( max_repeat_time ) );
-
-            print( FATAL, "Repeat time/frequency of %s/%g Hz is not within "
-                   "range of %s/%g Hz to %s/%g Hz.\n", ep385_ptime( rep_time ),
-                   1.0 / rep_time, tmin, 1.0 / min_repeat_time,
-                   tmax, 1.0 / max_repeat_time );
-            THROW( EXCEPTION );
-        }
-        OTHERWISE
-        {
-            if ( tmin )
-                T_free( tmin );
-            if ( tmax )
-                T_free( tmax );
-            RETHROW( );
-        }
+        print( FATAL, "Repeat time/frequency of %s / %g Hz is not within "
+               "range of %s / %g Hz to %s/%g Hz.\n", ep385_ptime( rep_time ),
+               1.0 / rep_time, ep385_ptime( min_repeat_time ),
+               1.0 / min_repeat_time,
+               ep385_ptime( max_repeat_time ),
+               1.0 / max_repeat_time );
+        THROW( EXCEPTION );
     }
 
     /* Now we've got to set the repetition time. This can be only done in

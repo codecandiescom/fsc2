@@ -250,7 +250,6 @@ int ep385_end_of_test_hook( void )
 {
     int i;
     Function_T *f;
-    char *min = NULL;
 
 
     CLOBBER_PROTECT( i );
@@ -323,21 +322,10 @@ int ep385_end_of_test_hook( void )
                  f->left_shape_padding <= f->min_left_shape_padding )
                 continue;
 
-            TRY
-            {
-                min = T_strdup( ep385_pticks( f->min_left_shape_padding ) );
-                print( SEVERE, "Minimum left shape padding for function '%s' "
-                       "was %s instead of the requested %s.\n", f->name,
-                       min, ep385_pticks( f->left_shape_padding ) );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                min = CHAR_P T_free( min );
-                RETHROW( );
-            }
-
-            min = CHAR_P T_free( min );
+            print( SEVERE, "Minimum left shape padding for function '%s' "
+                   "was %s instead of the requested %s.\n", f->name,
+                   ep385_pticks( f->min_left_shape_padding ),
+                   ep385_pticks( f->left_shape_padding ) );
         }
     }
 
@@ -356,21 +344,10 @@ int ep385_end_of_test_hook( void )
                  f->right_shape_padding <= f->min_right_shape_padding )
                 continue;
 
-            TRY
-            {
-                min = T_strdup( ep385_pticks( f->min_right_shape_padding ) );
-                print( SEVERE, "Minimum right shape padding for function '%s' "
-                       "was %s instead of the requested %s.\n",  f->name,
-                       min, ep385_pticks( f->right_shape_padding ) );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                min = CHAR_P T_free( min );
-                RETHROW( );
-            }
-
-            min = CHAR_P T_free( min );
+            print( SEVERE, "Minimum right shape padding for function '%s' "
+                   "was %s instead of the requested %s.\n",  f->name,
+                   ep385_pticks( f->min_right_shape_padding ),
+                   ep385_pticks( f->right_shape_padding ) );
         }
     }
 

@@ -273,7 +273,6 @@ int dg2020_b_test_hook( void )
 
 int dg2020_b_end_of_test_hook( void )
 {
-    char *min = NULL;
     int i;
     Function_T *f;
 
@@ -357,22 +356,10 @@ int dg2020_b_end_of_test_hook( void )
                  f->left_shape_padding <= f->min_left_shape_padding )
                 continue;
 
-            TRY
-            {
-                min = T_strdup( dg2020_pticks( f->min_left_shape_padding ) );
-                print( SEVERE, "Minimum left padding for function '%s' was %s "
-                       "instead of requested %s.\n", f->name,
-                       min, dg2020_pticks( f->left_shape_padding ) );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                min = CHAR_P T_free( min );
-                RETHROW( );
-            }
-
-            min = CHAR_P T_free( min );
-        }
+            print( SEVERE, "Minimum left padding for function '%s' was %s "
+                   "instead of requested %s.\n", f->name,
+                   dg2020_pticks( f->min_left_shape_padding ),
+                   dg2020_pticks( f->left_shape_padding ) );
     }
 
     if ( dg2020.right_shape_warning != 0 )
@@ -390,21 +377,10 @@ int dg2020_b_end_of_test_hook( void )
                  f->right_shape_padding <= f->min_right_shape_padding )
                 continue;
 
-            TRY
-            {
-                min = T_strdup( dg2020_pticks( f->min_right_shape_padding ) );
-                print( SEVERE, "Minimum right padding for function '%s' was "
-                       "%s instead of requested %s.\n", f->name,
-                       min, dg2020_pticks( f->right_shape_padding ) );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                min = CHAR_P T_free( min );
-                RETHROW( );
-            }
-
-            min = CHAR_P T_free( min );
+            print( SEVERE, "Minimum right padding for function '%s' was "
+                   "%s instead of requested %s.\n", f->name,
+                   dg2020_pticks( f->min_right_shape_padding ),
+                   dg2020_pticks( f->right_shape_padding ) );
         }
     }
 

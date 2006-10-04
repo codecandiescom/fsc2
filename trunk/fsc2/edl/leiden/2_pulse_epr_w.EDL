@@ -133,11 +133,11 @@ FOREVER {
         wait( 1.1 * repeat_time * N_Avg );
 
 === if ( START_FIELD <= END_FIELD )
-        data[ J, I ] = - daq_get_voltage( CH0 );
+        data[ J, I ] = daq_get_voltage( CH0 );
         display_1d( I, data[ J, I ], 1,
                     I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / J, 2 );
 === else
-        data[ J, N_Points - I + 1 ] = - daq_get_voltage( CH0 );
+        data[ J, N_Points - I + 1 ] = daq_get_voltage( CH0 );
         display_1d( N_Points - I + 1, data[ J, N_Points - I + 1 ], 1,
                     N_Points - I + 1,
                     ( ( J - 1 ) * avg[ N_Points - I + 1 ]

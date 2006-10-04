@@ -57,19 +57,21 @@ int lecroy9400_get_tb_index( double timebase )
 
 const char *lecroy9400_ptime( double p_time )
 {
-    static char buffer[ 128 ];
+    static char buffer[ 2 ][ 128 ];
+    static size_t i = 1;
 
 
+    i = ( i + 1 ) % 2;
     if ( fabs( p_time ) >= 1.0 )
-        sprintf( buffer, "%g s", p_time );
+        sprintf( buffer[ i ], "%g s", p_time );
     else if ( fabs( p_time ) >= 1.e-3 )
-        sprintf( buffer, "%g ms", 1.e3 * p_time );
+        sprintf( buffer[ i ], "%g ms", 1.e3 * p_time );
     else if ( fabs( p_time ) >= 1.e-6 )
-        sprintf( buffer, "%g us", 1.e6 * p_time );
+        sprintf( buffer[ i ], "%g us", 1.e6 * p_time );
     else
-        sprintf( buffer, "%g ns", 1.e9 * p_time );
+        sprintf( buffer[ i ], "%g ns", 1.e9 * p_time );
 
-    return buffer;
+    return buffer[ i ];
 }
 
 
@@ -121,13 +123,8 @@ double lecroy9400_trigger_delay_check( void )
        that can be set is larger than the time resolution warn the user */
 
     if ( fabs( real_delay - delay ) > tpp[ lecroy9400.tb_index ] )
-    {
-        char *cp = T_strdup( lecroy9400_ptime( delay ) );
-
         print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
-               cp, lecroy9400_ptime( real_delay ) );
-        T_free( cp );
-    }
+               lecroy9400_ptime( delay ), lecroy9400_ptime( real_delay ) );
 
     return real_delay;
 }
@@ -276,7 +273,6 @@ static void lecroy9400_window_check_2( void )
     Window_T *w;
     double dcs, dcd, dtb, fac;
     long rtb, cs, cd;
-    char *buffer;
 
 
     for ( w = lecroy9400.w; w != NULL; w = w->next )
@@ -299,11 +295,9 @@ static void lecroy9400_window_check_2( void )
         {
             cs = ( cs / rtb ) * rtb;
             dcs = cs * fac / TDS_POINTS_PER_DIV;
-            buffer = T_strdup( lecroy9400_ptime( dcs ) );
             print( WARN, "Start point of window %ld had to be readjusted from "
-                   "%s to %s.\n",
-                   w->num, lecroy9400_ptime( w->start ), buffer );
-            T_free( buffer );
+                   "%s to %s.\n", w->num, lecroy9400_ptime( w->start ),
+                   lecroy9400_ptime( dcs ) );
             w->start = dcs;
         }
 
@@ -323,20 +317,18 @@ static void lecroy9400_window_check_2( void )
         if ( labs( cd ) < rtb )    /* window smaller than one point ? */
         {
             dcd = lecroy9400.timebase / TDS_POINTS_PER_DIV;
-            buffer = T_strdup( lecroy9400_ptime( dcd ) );
             print( SEVERE, "Width of window %ld had to be readjusted from %s "
-                   "to %s.\n", w->num, lecroy9400_ptime( w->width ), buffer );
-            T_free( buffer );
+                   "to %s.\n", w->num, lecroy9400_ptime( w->width ),
+                   lecroy9400_ptime( dcd ) );
             w->width = dcd;
         }
         else if ( cd % rtb )       /* window width not multiple of a point ? */
         {
             cd = ( cd / rtb ) * rtb;
             dcd = cd * fac / TDS_POINTS_PER_DIV;
-            buffer = T_strdup( lecroy9400_ptime( dcd ) );
             print( WARN, "Width of window %ld had to be readjusted from %s to "
-                   "%s.\n", w->num, lecroy9400_ptime( w->width ), buffer );
-            T_free( buffer );
+                   "%s.\n", w->num, lecroy9400_ptime( w->width ),
+                   lecroy9400_ptime( dcd ) );
             w->width = dcd;
         }
     }

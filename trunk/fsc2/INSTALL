@@ -417,7 +417,7 @@ thing about.
 Moreover, support for the National Instruments PCI-MIO-16E-1 and the
 6601 GPCT cards, the Meilhaus ME6000 and ME6100 DAQ and the Wasco
 WITIO-48 DIO card requires that the drivers and libraries for the
-cards (which are part of fsc2) are already successfully install,
+cards (which are part of fsc2) are already successfully installed,
 otherwise the corresponding modules can't be built. For support for
 the Roper Scientific CCD Spec-10 camera the PVCAM library supplied by
 Roper Scientific is required and also must be installed together with

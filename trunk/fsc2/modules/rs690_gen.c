@@ -52,23 +52,10 @@ bool rs690_store_timebase( double timebase )
 
     if ( timebase < rs690_fixed_timebases[ 0 ] * 0.999 )
     {
-        char *min = NULL;
-
-        CLOBBER_PROTECT( min );
-
-        TRY
-        {
-            min = T_strdup( rs690_ptime( rs690_fixed_timebases[ 0 ] ) );
-            print( FATAL, "Invalid time base of %s, must be at least  %s.\n",
-                   rs690_ptime( timebase ), min );
-            THROW( EXCEPTION );
-        }
-        OTHERWISE
-        {
-            if ( min )
-                T_free( min );
-            RETHROW( );
-        }
+        print( FATAL, "Invalid time base of %s, must be at least  %s.\n",
+               rs690_ptime( timebase ),
+               rs690_ptime( rs690_fixed_timebases[ 0 ] ) );
+        THROW( EXCEPTION );
     }
 
     /* Figure out if we can use the internal clock (with time bases of
@@ -457,7 +444,7 @@ bool rs690_set_repeat_time( double rep_time )
     if ( rs690.is_repeat_time &&
          rs690.repeat_time != rs690_double2ticks( rep_time ) )
     {
-        print( FATAL, "A different repeat time/frequency of %s/%g Hz has "
+        print( FATAL, "A different repeat time/frequency of %s / %g Hz has "
                "already been set.\n", rs690_pticks( rs690.repeat_time ),
                1.0 / rs690_ticks2double( rs690.repeat_time ) );
         THROW( EXCEPTION );
@@ -476,51 +463,19 @@ bool rs690_set_repeat_time( double rep_time )
 
     if ( rs690.timebase_type == TIMEBASE_4_NS && rs690.repeat_time % 4 )
     {
-        char *o = NULL;
-
-        CLOBBER_PROTECT( o );
-
-        TRY
-        {
-            o = T_strdup( rs690_pticks( rs690.repeat_time ) );
-            rs690.repeat_time = ( rs690.repeat_time / 4 + 1 ) * 4;
-            print( WARN, "Adjusting repeat time/frequency from %s/%g Hz to "
-                   "%s/%g Hz.\n", o, 1.0 / rep_time,
-                   rs690_pticks( rs690.repeat_time ),
-                   1.0 / rs690_ticks2double( rs690.repeat_time ) );
-            TRY_SUCCESS;
-        }
-        OTHERWISE
-        {
-            o = CHAR_P T_free( o );
-            RETHROW( );
-        }
-
-        o = CHAR_P T_free( o );
+        rs690.repeat_time = ( rs690.repeat_time / 4 + 1 ) * 4;
+        print( WARN, "Adjusting repeat time/frequency from %s/%g Hz to "
+               "%s/%g Hz.\n", rs690_pticks( rs690.repeat_time ),
+               1.0 / rep_time, rs690_pticks( rs690.repeat_time ),
+               1.0 / rs690_ticks2double( rs690.repeat_time ) );
     }
     else if ( rs690.timebase_type == TIMEBASE_4_NS && rs690.repeat_time % 2 )
     {
-        char *o = NULL;
-
-        CLOBBER_PROTECT( o );
-
-        TRY
-        {
-            o = T_strdup( rs690_pticks( rs690.repeat_time ) );
-            rs690.repeat_time = ( rs690.repeat_time / 2 + 1 ) * 2;
-            print( WARN, "Adjusting repeat time/frequency from %s/%g Hz to "
-                   "%s/%g Hz.\n", o, 1.0 / rep_time,
-                   rs690_pticks( rs690.repeat_time ),
-                   1.0 / rs690_ticks2double( rs690.repeat_time ) );
-            TRY_SUCCESS;
-        }
-        OTHERWISE
-        {
-            o = CHAR_P T_free( o );
-            RETHROW( );
-        }
-
-        o = CHAR_P T_free( o );
+        rs690.repeat_time = ( rs690.repeat_time / 2 + 1 ) * 2;
+        print( WARN, "Adjusting repeat time/frequency from %s/%g Hz to "
+               "%s/%g Hz.\n", rs690_pticks( rs690.repeat_time ),
+               1.0 / rep_time, rs690_pticks( rs690.repeat_time ),
+               1.0 / rs690_ticks2double( rs690.repeat_time ) );
     }
 
     rs690.is_repeat_time = SET;

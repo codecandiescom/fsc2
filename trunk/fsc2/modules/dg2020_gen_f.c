@@ -35,13 +35,9 @@ bool dg2020_store_timebase( double timebase )
 {
     if ( timebase < MIN_TIMEBASE || timebase > MAX_TIMEBASE )
     {
-        char *min = T_strdup( dg2020_ptime( ( double ) MIN_TIMEBASE ) );
-        char *max = T_strdup( dg2020_ptime( ( double ) MAX_TIMEBASE ) );
-
         print( FATAL, "Invalid time base of %s, valid range is %s to %s.\n",
-               dg2020_ptime( timebase ), min, max );
-        T_free( min );
-        T_free( max );
+               dg2020_ptime( timebase ), dg2020_ptime( MIN_TIMEBASE ),
+               dg2020_ptime( MAX_TIMEBASE ) );
         THROW( EXCEPTION );
     }
 

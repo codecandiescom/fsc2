@@ -107,7 +107,7 @@ I = 1;
 
 FOREVER {
     wait( 1.1 * repeat_time * N_Avg );
-    data = - daq_get_voltage( CH0 );
+    data = daq_get_voltage( CH0 );
     display( I, data );
     fsave( File, "#,#\n",
            ( p1_to_p2_dist + p1_to_p2_incr * ( I - 1 ) ) / 1 ns, data );

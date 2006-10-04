@@ -1267,7 +1267,6 @@ void rs690_check_fs( void )
 {
     FS_T *nn;
     FS_T *n;
-    char *s = NULL;
 
 
     CLOBBER_PROTECT( n );
@@ -1289,21 +1288,11 @@ void rs690_check_fs( void )
     {
         if ( rs690.max_seq_len + START_OFFSET > rs690.repeat_time )
         {
-            TRY
-            {
-                s = T_strdup(
-                            rs690_pticks( rs690.max_seq_len + START_OFFSET ) );
-                print( FATAL, "Pulse sequence is longer (%s) than the "
-                       "repetition time of %s.\n",
-                       s, rs690_pticks( rs690.repeat_time ) );
-                s = CHAR_P T_free( s );
-                THROW( EXCEPTION );
-            }
-            OTHERWISE
-            {
-                s = CHAR_P T_free( s );
-                RETHROW( );
-            }
+            print( FATAL, "Pulse sequence is longer (%s) than the "
+                   "repetition time of %s.\n",
+                   rs690_pticks( rs690.max_seq_len + START_OFFSET ),
+                   rs690_pticks( rs690.repeat_time ) );
+            THROW( EXCEPTION );
         }
         else
             n->len = Ticks_max( 1, rs690.repeat_time - n->pos );
