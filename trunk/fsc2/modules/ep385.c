@@ -254,7 +254,6 @@ int ep385_end_of_test_hook( void )
 
     CLOBBER_PROTECT( i );
     CLOBBER_PROTECT( f );
-    CLOBBER_PROTECT( min );
 
     if ( ep385.dump_file != NULL )
     {

@@ -136,7 +136,7 @@ static bool hfs9000_update_pulses( bool flag )
         needed_update |= hfs9000_commit( f, flag );
     }
 
-    /* Wait for all the commands thant might have been send being finished -
+    /* Wait for all the commands that might have been send being finished -
        otherwise a new acquisition might get started before the pulser is
        really done with updating the pulses - thanks to Anton for finding
        the problem */

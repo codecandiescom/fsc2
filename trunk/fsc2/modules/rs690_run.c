@@ -1270,7 +1270,6 @@ void rs690_check_fs( void )
 
 
     CLOBBER_PROTECT( n );
-    CLOBBER_PROTECT( s );
 
     /* The very last FS, standing for the time following the pulses hasn't
        got a length yet. If a repetition time has been given we try to set

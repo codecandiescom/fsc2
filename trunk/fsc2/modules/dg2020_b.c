@@ -277,7 +277,6 @@ int dg2020_b_end_of_test_hook( void )
     Function_T *f;
 
 
-    CLOBBER_PROTECT( min );
     CLOBBER_PROTECT( i );
     CLOBBER_PROTECT( f );
 
@@ -360,6 +359,7 @@ int dg2020_b_end_of_test_hook( void )
                    "instead of requested %s.\n", f->name,
                    dg2020_pticks( f->min_left_shape_padding ),
                    dg2020_pticks( f->left_shape_padding ) );
+        }
     }
 
     if ( dg2020.right_shape_warning != 0 )

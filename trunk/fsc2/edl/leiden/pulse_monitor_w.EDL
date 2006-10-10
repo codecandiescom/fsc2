@@ -48,8 +48,9 @@ PSV[ 5 ];           /* start positions of pulses (in units of 10 ns) */
 PLV[ 5 ];           /* pulse lengths (in units of 10 ns) */
 PMS[ 5 ];           /* minimum values for pulse positions (in 10 ns units) */
 Phase, Cur_Phase = 1, New_Phase;
+ADC_Channel;
 Freq, Current_Field, New_Field, RF_ON_OFF, Att, Sweep_Rate, Sweep_Up,
-Sweep_Stop, Sweep_Down, Pause, Clear;
+Sweep_Stop, Sweep_Down, ADC_Channels, Pause, Clear;
 Acq_Rate, New_Acq_Rate;
 Pause_Display = 1;
 STOPPED = 0;
@@ -93,7 +94,7 @@ P5:   FUNCTION = DETECTION,
       START    = 310 ns,
       LENGTH   = 10 ns;
 
-init_1d( );
+init_1d( 2, "Points", "Signal" );
 
 
 EXPERIMENT:
@@ -158,15 +159,16 @@ Freq    = input_create( "FLOAT_INPUT", freq / 1 MHz, "RF frequency (MHz)" );
 Current_Field = output_create( "FLOAT_OUTPUT", current_field,
                                "Current field [G]" );
 Att = input_create( "FLOAT_INPUT", att, "RF attenuation (dB)" );
-RF_ON_OFF = button_create( "PUSH_BUTTON", "RF On/Off" );
+RF_ON_OFF    = button_create( "PUSH_BUTTON", "RF On/Off" );
 button_state( RF_ON_OFF, synthesizer_state( ) );
-New_Field  = input_create( "FLOAT_INPUT", current_field, "New field [G]" );
-Sweep_Rate = input_create( "FLOAT_INPUT", sweep_rate, "Sweep rate [G/s]" );
-Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
-Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
-Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
-Pause      = button_create( "PUSH_BUTTON", "Pause display" );
-Clear      = button_create( "NORMAL_BUTTON", "Clear screen" );
+New_Field    = input_create( "FLOAT_INPUT", current_field, "New field [G]" );
+Sweep_Rate   = input_create( "FLOAT_INPUT", sweep_rate, "Sweep rate [G/s]" );
+Sweep_Up     = button_create( "RADIO_BUTTON", "Sweep up" );
+Sweep_Stop   = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
+Sweep_Down   = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
+ADC_Channels = menu_create( "ADC channel(s) to use", "0", "1", "0 and 1" );
+Pause        = button_create( "PUSH_BUTTON", "Pause display" );
+Clear        = button_create( "NORMAL_BUTTON", "Clear screen" );
 button_state( Sweep_Stop, "ON" );
 button_state( Pause, "ON" );
 hide_toolbox( "OFF" );
@@ -532,7 +534,15 @@ FOREVER {
     IF ! Pause_Display {
         I += 1;
         wait( 0.2 s );
-        display( I, daq_get_voltage( CH0 ) );
+		ADC_Channel = menu_choice( ADC_Channels );
+		IF ADC_Channel == 1 {
+        	display( I, daq_get_voltage( CH0 ), 1 );
+		} ELSE IF ADC_Channel == 2 {
+        	display( I, daq_get_voltage( CH1 ), 2 );
+		} ELSE {
+        	display( I, daq_get_voltage( CH0 ), 1,
+					 I, daq_get_voltage( CH1 ), 2 );
+		}	 
     } ELSE {
         wait( 0.2 s );
     }
@@ -546,6 +556,8 @@ ON_STOP:
 IF Sweep_State != STOPPED {
     magnet_sweep( STOPPED );
 }
+
+/* Write out to (standord output) the current pulse settings */
 
 FOR I = 1 : 5 {
 	fsave( 1, "# #\n", PSV[ I ] * 10, PLV[ I ] * 10 );

@@ -48,6 +48,9 @@ ep385           := ep385.c ep385_gen.c ep385_pulse.c ep385_util.c  \
 			       ep385_init.c ep385_run.c ep385_gpib.c
 rs690           := rs690.c rs690_gen.c rs690_pulse.c rs690_util.c  \
 			       rs690_init.c rs690_run.c rs690_gpib.c
+tegam2714a_p    := tegam2714a_p.c tegam2714a_p_gen.c tegam2714a_p_pulse.c \
+				   tegam2714a_p_util.c tegam2714a_p_init.c \
+				   tegam2714a_p_run.c tegam2714a_p_gpib.c
 tds754a         := tds754a.c tds754a_gpib.c tds754a_util.c
 tds744a         := tds744a.c tds744a_gpib.c tds744a_util.c
 tds540          := tds540.c  tds540_gpib.c  tds540_util.c
@@ -101,8 +104,8 @@ simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a ips20_4     \
 	 			   lakeshore330 pt2025 sr510 sr530 sr810 sr830 thurlby330   \
 				   mcn700_2000 schlum7150
 
-comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a      \
-				   $(hp864_list) lecroy9400 rs690 rs_sml01  \
+comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a        \
+				   $(hp864_list) lecroy9400 rs690 tegam2714a_p rs_sml01  \
 	               $(tds_list) $(lecroy94_list) lecroy_wr2 lecroy_ws
 endif
 

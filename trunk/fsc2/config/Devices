@@ -40,6 +40,7 @@ ep385         // Bruker Pulse Programmer       (Berlin X-band)
 rs690         // Interface Technology RS-690 Word Generator (Berlin 360 GHz)
 rb_pulser_j   // Leiden Rulbus pulser in J-band configuration
 rb_pulser_w   // Leiden Rulbus pulser in W-band configuration
+tegam2714a_p; // Tegam 2714A function generator as pulse generator
 
 
 // Digital oszilloscopes
@@ -54,6 +55,7 @@ lecroy9400    // LeCroy digitizing oscilloscope 9400
 lecroy9450    // LeCroy digitizing oscilloscope 9450
 lecroy9424    // LeCroy digitizing oscilloscope 9424
 lecroy9424e   // LeCroy digitizing oscilloscope 9424e
+lecroy9410    // LeCroy digitizing oscilloscope 9410
 lecroy_wr2    // LeCroy digitizing oscilloscope Waverunner 2
 lecroy_ws     // LeCroy digitizing oscilloscope WaveSurfer
 

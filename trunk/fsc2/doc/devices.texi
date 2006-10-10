@@ -3066,6 +3066,9 @@ using the defualt length isn't desirable (e.g.@: because you need a
 higher repetition rate) you can shorten the length of the pulse sequence
 by using this function.
 
+This function can only be used in the @code{PREPARATIONS} section of an
+@code{EDL} script.
+
 
 @anchor{pulser_phase_switch_delay()}
 @findex pulser_phase_switch_delay()

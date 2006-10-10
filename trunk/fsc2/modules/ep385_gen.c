@@ -57,7 +57,7 @@ bool ep385_store_timebase( double timebase )
         TRY
         {
             print( FATAL, "Invalid time base of %s, must be at least  %s.\n",
-                   ep385_ptime( timebase ), ep385_ptime( FIXED_TIMEBASE );
+                   ep385_ptime( timebase ), ep385_ptime( FIXED_TIMEBASE ) );
             THROW( EXCEPTION );
         }
         OTHERWISE

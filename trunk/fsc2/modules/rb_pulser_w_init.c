@@ -25,10 +25,14 @@
 #include "rb_pulser_w.h"
 
 
-static void rb_pulser_w_init_print( FILE *fp );
+static void rb_pulser_w_init_print( FILE * /* fp */ );
+
 static void rb_pulser_w_basic_pulse_check( void );
+
 static void rb_pulser_w_basic_functions_init( void );
+
 static void rb_pulser_w_defense_pulse_create( void );
+
 static void rb_pulser_w_rf_synth_init( void );
 
 
@@ -60,7 +64,7 @@ void rb_pulser_w_init_setup( void )
  * and pulser_dump_pulses() EDL functions
  *------------------------------------------------------*/
 
-static void rb_pulser_w_init_print( FILE *fp )
+static void rb_pulser_w_init_print( FILE * fp )
 {
     int i;
 

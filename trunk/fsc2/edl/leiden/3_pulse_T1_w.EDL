@@ -13,6 +13,7 @@
 === N_AVG menu [ "1", "3", "10", "30", "100", "300", "1000", \
 ===              "3000", "10000" ] [ 3 ] "Number of averages"
 === FIELD float [ 0 : 114304 ] [ 35000 ] "Field" "G"
+=== ADC_CHANNELS menu [ "0", "1", "0 and 1" ] "ADC channel(s) to use"
 === SHOW_PREV button [ OFF ] "Show pulse preview"
 DEVICES:
 
@@ -37,7 +38,11 @@ field         = FIELD G;
 N_Avg         = N_AVG;
 
 I;
+=== if ( ADC_CHANNELS eq "0 and 1" )
+data[ 2 ];
+=== else
 data;
+=== endif
 File;
 B1, B2;
 
@@ -82,8 +87,14 @@ P4:  FUNCTION    = DETECTION,
 === if SHOW_PREV
 pulser_show_pulses( );
 === endif
+
+=== if ( ADC_CHANNELS eq "0 and 1" )
+init_1d( 2, 0, p1_to_p2_dist / 1 ns, p1_to_p2_incr / 1 ns,
+         "Pulse separation [ns]", "Echo amplitude [a.u.]" );
+=== else
 init_1d( 1, 0, p1_to_p2_dist / 1 ns, p1_to_p2_incr / 1 ns,
          "Pulse separation [ns]", "Echo amplitude [a.u.]" );
+=== endif
 
 
 EXPERIMENT:
@@ -91,12 +102,7 @@ EXPERIMENT:
 print( "Please make sure the repetition time is set correctly!\n" );
 === endif
 
-/* Go to the field */
-
 magnet_field( field );
-
-/* Open the data file, ask user for comment to be written to it and the
-   output the parameter to it */
 
 File = get_file( );
 
@@ -114,10 +120,23 @@ daq_gain( 4 );
 
 FOREVER {
     wait( 1.1 * repeat_time * N_Avg );
+=== if ( ADC_CHANNELS eq "0 and 1" )
+    data[ 1 ] = daq_get_voltage( CH0 );
+    data[ 2 ] = daq_get_voltage( CH1 );
+    display( I, data[ 1 ], 1, I, data[ 2 ], 2 );
+    fsave( File, "#,#,#\n",
+           ( p1_to_p2_dist + p1_to_p2_incr * ( I - 1 ) ) / 1 ns,
+		   data[ 1 ], data[ 2 ] );
+=== else
+=== if ( ADC_CHANNELS eq "0" )
     data = daq_get_voltage( CH0 );
+=== else
+    data = daq_get_voltage( CH1 );
+=== endif
     display( I, data );
     fsave( File, "#,#\n",
            ( p1_to_p2_dist + p1_to_p2_incr * ( I - 1 ) ) / 1 ns, data );
+=== endif
     pulser_shift( );
     pulser_update( );
     output_value( B1, int( ( p1_to_p2_dist + I * p1_to_p2_incr ) / 1 ns ) );
@@ -140,7 +159,8 @@ fsave( File,
        "% P1-P2 increment:        # ns\n"
        "% P2-P3 separation:       # ns\n"
        "% Number of averages:     >= #\n"
-       "% ADC gain:               4\n",
+       "% ADC gain:               4\n"
+	   "% ADC channel(s):         ADC_CHANNELS\n",
        date( ), time( ), field,  repeat_time / 1 ms, int( P1.LENGTH / 1 ns ),
        int( P2.LENGTH / 1 ns ), int( P3.LENGTH / 1 ns ),
        int( p1_to_p2_dist / 1 ns ), int( p1_to_p2_incr / 1 ns ),

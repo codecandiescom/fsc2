@@ -395,14 +395,14 @@ abbreviate @code{PULSE_SHAPE} to @code{PULSESH}, @code{PULSE_SH},
 @item @code{PHASE_1} (or @code{PHASE1}, @code{PH_1} or @code{PH1})
 @item @code{PHASE_2} (or @code{PHASE2}, @code{PH_2} or @code{PH2})
 @end itemize
-The names of the functions do not enforce what the connectors that will
-become associated with them are really going to be used for, but it is
-probably a good idea not to use e.g.@: the @code{MICROWAVE} function for
-something completely different (or other people will have major problems
-understanding what your @code{EDL} script is supposed to do and there's
-no obfuscated EDL contest yet;-). Besides, some of the pulser modules
-also define special functions (e.g.@: for automatically setting TWT
-pulses) that only work for some of these functions.
+The names of the functions of course do not enforce what the connectors
+are really going to be used for, but it is probably a good idea not to
+use e.g.@: the @code{MICROWAVE} function for something completely different
+(or other people will have major problems understanding what your @code{EDL}
+script is supposed to do and there's no obfuscated EDL contest yet;-).
+Besides, some of the pulser modules also define special functions (e.g.@:
+for automatically setting TWT pulses) that only work for some of these
+functions.
 
 The functions @code{PHASE_1} and @code{PHASE_2} are special in that they
 can only be used with the Frankfurt version of the driver for the

@@ -12,6 +12,7 @@
 === FIELD_STEP float [ 0.14288 :  ] [ 1 ] "Field step" "G"
 === N_AVG menu [ "1", "3", "10", "30", "100", "300", "1000", \
 ===              "3000", "10000" ] [ 3 ] "Number of averages"
+=== ADC_CHANNELS menu [ "0", "1", "0 and 1" ] "ADC channel(s) to use"
 === SHOW_PREV button [ OFF ] "Show pulse preview"
 === WAIT_TIME float [ 0.0 : ] [ 5.0 ] "Magnet wait time" "s"
 DEVICES:
@@ -46,8 +47,13 @@ wait_time = WAIT_TIME s;
 I = 0;
 J = 0;
 K;
+=== if ( ADC_CHANNELS eq "0 and 1" )
+data[ 2, *, * ];
+avg[ 2, N_Points ] = { float_slice( N_Points ), float_slice( N_Points ) };
+=== else
 data[ *, * ];
 avg[ N_Points ] = float_slice( N_Points );
+=== endif
 File1, File2;
 B1, B2, B3;
 
@@ -86,12 +92,22 @@ P3:  FUNCTION = DETECTION,
 pulser_show_pulses( );
 === endif
 
+=== if ( ADC_CHANNELS eq "0 and 1" )
+=== if ( START_FIELD <= END_FIELD )
+init_1d( 4, N_Points, start_field, field_step,
+         "Field [G]", "Echo amplitude [a.u.]" );
+=== else
+init_1d( 4, N_Points, end_field, - field_step,
+         "Field [G]", "Echo amplitude [a.u.]" );
+=== endif
+=== else
 === if ( START_FIELD <= END_FIELD )
 init_1d( 2, N_Points, start_field, field_step,
          "Field [G]", "Echo amplitude [a.u.]" );
 === else
 init_1d( 2, N_Points, end_field, - field_step,
          "Field [G]", "Echo amplitude [a.u.]" );
+=== endif
 === endif
 
 
@@ -109,13 +125,7 @@ IF wait_time > 1 us {
     wait( wait_time );
 }
 
-/* Open the file for averaged data */
-
 File1 = get_file( "", "*.avg", "", "", "avg" );
-
-/* Create the toolbox with two output field, one for the current scan number
-   and one for the current field as well as a push button for stopping the
-   experiment at the end of a scan */
 
 hide_toolbox( "ON" );
 B1 = output_create( "INT_OUTPUT", "Current scan" );
@@ -126,14 +136,38 @@ hide_toolbox( "OFF" );
 
 FOREVER {
     J += 1;
-    output_value( B1, J );                // Update the scan count display
+    output_value( B1, J );
 
     FOR I = 1 : N_Points {
         output_value( B2, field );
         wait( 1.1 * repeat_time * N_Avg );
 
+=== if ( ADC_CHANNELS eq "0 and 1" )
 === if ( START_FIELD <= END_FIELD )
+        data[ 1, J, I ] = daq_get_voltage( CH0 );
+        data[ 2, J, I ] = daq_get_voltage( CH1 );
+        display_1d( I, data[ 1, J, I ], 1, I, data[ 2, J, I ], 2,
+                    I, ( ( J - 1 ) * avg[ 1, I ] + data[ 1, J, I ] ) / J, 3,
+					I, ( ( J - 1 ) * avg[ 2, I ] + data[ 2, J, I ] ) / J, 4 );
+=== else
+        data[ 1, J, N_Points - I + 1 ] = daq_get_voltage( CH0 );
+        data[ 2, J, N_Points - I + 1 ] = daq_get_voltage( CH1 );
+        display_1d( N_Points - I + 1, data[ 1, J, N_Points - I + 1 ], 1,
+					N_Points - I + 1, data[ 1, J, N_Points - I + 1 ], 2,
+                    N_Points - I + 1,
+                    ( ( J - 1 ) * avg[ 1, N_Points - I + 1 ]
+                      + data[ 1, J, N_Points - I + 1 ] ) / J, 3,
+                    N_Points - I + 1,
+                    ( ( J - 1 ) * avg[ 2, N_Points - I + 1 ]
+                      + data[ 2, J, N_Points - I + 1 ] ) / J, 4 );
+=== endif
+=== else
+=== if ( START_FIELD <= END_FIELD )
+=== if ( ADC_CHANNELS eq "0" )
         data[ J, I ] = daq_get_voltage( CH0 );
+=== else
+        data[ J, I ] = daq_get_voltage( CH1 );
+=== endif
         display_1d( I, data[ J, I ], 1,
                     I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / J, 2 );
 === else
@@ -142,6 +176,7 @@ FOREVER {
                     N_Points - I + 1,
                     ( ( J - 1 ) * avg[ N_Points - I + 1 ]
                       + data[ J, N_Points - I + 1 ] ) / J, 2 );
+=== endif
 === endif
 
 === if ( START_FIELD <= END_FIELD )
@@ -153,9 +188,14 @@ FOREVER {
         }
     }
 
+=== if ( ADC_CHANNELS eq "0 and 1" )
+    avg[ 1 ] = add_to_average( avg[ 1 ], data[ 1, J ], J );
+    avg[ 2 ] = add_to_average( avg[ 2 ], data[ 2, J ], J );
+=== else
     avg = add_to_average( avg, data[ J ], J );
+=== endif
 
-    IF button_state( B3 ) {               // Stop on user request
+    IF button_state( B3 ) {
         BREAK;
     }
 
@@ -172,12 +212,22 @@ IF I != 0 {
     IF J == 1 {
 === if ( START_FIELD <= END_FIELD )
         FOR K = 1 : I - 1 {
+=== if ( ADC_CHANNELS eq "0 and 1" )
+            fsave( File1, "#,#,#\n", start_field + ( K - 1 ) * field_step,
+                   data[ 1, 1, K ], data[ 2, 1, K ] );
+=== else
             fsave( File1, "#,#\n", start_field + ( K - 1 ) * field_step,
                    data[ 1, K ] );
+=== endif
 === else
         FOR K = N_Points - I + 2 : N_Points {
+=== if ( ADC_CHANNELS eq "0 and 1" )
+            fsave( File1, "#,#,#\n", end_field - ( K - 1 ) * field_step,
+                   data[ 1, 1, K ], data[ 2, 1, K ] );
+=== else
             fsave( File1, "#,#\n", end_field - ( K - 1 ) * field_step,
                    data[ 1, K ] );
+=== endif
 === endif
         }
     } ELSE {
@@ -194,7 +244,11 @@ IF I != 0 {
                 fsave( File2, "#", end_field - ( I - 1 ) * field_step );
 === endif
                 FOR K = 1 : J {
+=== if ( ADC_CHANNELS eq "0 and 1" )
+                    fsave( File2, ",#,#", data[ 1, K, I ], data[ 2, K, I ] );
+=== else
                     fsave( File2, ",#", data[ K, I ] );
+=== endif
                 }
                 fsave( File2, "\n" );
             }
@@ -212,7 +266,8 @@ IF I != 0 {
 	               "% Pulse distance:         # ns\n"
 	               "% Number of averages:     >= #\n"
 	               "% Number of scans:        #\n"
-	               "% ADC gain:               4\n",
+	               "% ADC gain:               4\n"
+				   "% ADC channel(s):         ADC_CHANNELS\n",
 	               date( ), time( ), start_field, field, field_step,
 	               repeat_time / 1 ms, int( P1.LENGTH / 1 ns ),
 	               int( P2.LENGTH / 1 ns ), int( p1_to_p2_dist / 1 ns ),
@@ -221,11 +276,21 @@ IF I != 0 {
 
         FOR I = 1 : N_Points {
 === if ( START_FIELD <= END_FIELD )
+=== if ( ADC_CHANNELS eq "0 and 1" )
+            fsave( File1, "#,#,#\n", start_field + ( I - 1 ) * field_step,
+                   avg[ 1, I ], avg[ 2, I ] );
+=== else
             fsave( File1, "#,#\n", start_field + ( I - 1 ) * field_step,
                    avg[ I ] );
+=== endif
+=== else
+=== if ( ADC_CHANNELS eq "0 and 1" )
+            fsave( File1, "#,#,#\n", end_field - ( I - 1 ) * field_step,
+                   avg[ 1, I ], avg[ 2, I ] );
 === else
             fsave( File1, "#,#\n", end_field - ( I - 1 ) * field_step,
                    avg[ I ] );
+=== endif
 === endif
         }
     }
@@ -243,7 +308,8 @@ IF I != 0 {
            "% Pulse distance:         # ns\n"
            "% Number of averages:     >= #\n"
            "% Number of scans:        #\n"
-           "% ADC gain:               4\n",
+           "% ADC gain:               4\n"
+		   "% ADC channel(s):         ADC_CHANNELS\n",
            date( ), time( ), start_field, field, field_step,
            repeat_time / 1 ms, int( P1.LENGTH / 1 ns ),
            int( P2.LENGTH / 1 ns ), int( p1_to_p2_dist / 1 ns ), N_Avg, J );

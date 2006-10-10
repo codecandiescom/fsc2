@@ -262,12 +262,10 @@ int rs690_end_of_test_hook( void )
 {
     int i;
     Function_T *f;
-    char *min = NULL;
 
 
     CLOBBER_PROTECT( i );
     CLOBBER_PROTECT( f );
-    CLOBBER_PROTECT( min );
 
     if ( rs690.dump_file != NULL )
     {
@@ -343,6 +341,7 @@ int rs690_end_of_test_hook( void )
                    "instead of requested %s.\n", f->name,
                    rs690_pticks( f->min_left_shape_padding ),
                    rs690_pticks( f->left_shape_padding ) );
+        }
     }
 
     /* Tell the user if there had been problems with TWT pulses */
