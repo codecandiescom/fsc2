@@ -11,6 +11,7 @@ MANIFEST
 README
 README.mail
 TODO
+xxx
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
@@ -95,7 +96,6 @@ config/lecroy9424e.conf
 config/lecroy9450.conf
 config/lecroy_wr2.conf
 config/lecroy_ws.conf
-config/lecroy_ws.conf~
 config/Makefile
 config/mcn700_2000.conf
 config/me6000.conf
@@ -109,7 +109,6 @@ config/rb_pulser_j.cards
 config/rb_pulser_j.conf
 config/rb_pulser_w.cards
 config/rb_pulser_w.conf
-config/rb_pulser_w.conf~
 config/README
 config/rs690.conf
 config/rs_sml01.conf
@@ -387,8 +386,12 @@ modules/tds.map.tmpl
 modules/tds_util.c.tmpl
 modules/tegam2714a_p.c
 modules/tegam2714a_p_gen.c
+modules/tegam2714a_p_gpib.c
 modules/tegam2714a_p.h
+modules/tegam2714a_p_init.c
 modules/tegam2714a_p_pulse.c
+modules/tegam2714a_p_run.c
+modules/tegam2714a_p_util.c
 modules/thurlby330.c
 modules/User_Functions.c
 modules/witio_48.c
