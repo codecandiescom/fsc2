@@ -191,7 +191,6 @@ void rs690_show_pulses( void )
     {
         char *cmd = NULL;
 
-
         CLOBBER_PROTECT( cmd );
 
         close( pd[ 1 ] );
@@ -207,16 +206,13 @@ void rs690_show_pulses( void )
         TRY
         {
             cmd = get_string( "%s%sfsc2_pulses", bindir, slash( bindir ) );
-            TRY_SUCCESS;
+            execl( cmd, "fsc2_pulses", NULL );
         }
-        OTHERWISE
-            goto filter_failure;
-
-        execl( cmd, "fsc2_pulses", NULL );
 
     filter_failure:
 
-        T_free( cmd );
+        if ( cmd != NULL )
+            T_free( cmd );
         _exit( EXIT_FAILURE );
     }
 
@@ -250,7 +246,8 @@ void rs690_dump_pulses( void )
 
         if ( name == NULL || *name == '\0' )
         {
-            T_free( name );
+            if ( name != NULL )
+                T_free( name );
             return;
         }
 

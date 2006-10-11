@@ -413,16 +413,13 @@ Var_T *pulser_show_pulses( Var_T * v  UNUSED_ARG )
         TRY
         {
             cmd = get_string( "%s%sfsc2_pulses", bindir, slash( bindir ) );
-            TRY_SUCCESS;
+            execl( cmd, "fsc2_pulses", NULL );
         }
-        OTHERWISE
-            goto filter_failure;
-
-        execl( cmd, "fsc2_pulses", NULL );
 
     filter_failure:
 
-        T_free( cmd );
+        if ( cmd != NULL )
+            T_free( cmd );
         _exit( EXIT_FAILURE );
     }
 
@@ -460,7 +457,8 @@ Var_T *pulser_dump_pulses( Var_T * v  UNUSED_ARG )
                                             "*.pls", NULL ) );
         if ( name == NULL || *name == '\0' )
         {
-            T_free( name );
+            if ( name != NULL )
+                T_free( name );
             return vars_push( INT_VAR, 0L );
         }
 

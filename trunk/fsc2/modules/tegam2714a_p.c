@@ -1,4 +1,4 @@
-/*
+</*
  *  $Id$
  * 
  *  Copyright (C) 1999-2006 Jens Thoms Toerring
