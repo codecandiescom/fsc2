@@ -2609,6 +2609,7 @@ Currently, there are three pulser/spectrometer combinations implemented:
 @item Interface Technology RS690 (360 GHz spectrometer, Berlin)
 @item Rulbus Pulser for J-band (275 GHz spectrometer), Leiden
 @item Rulbus Pulser for W-band (95 GHz spectrometer), Leiden
+@item TEGAM 2714A Arbitrary Waveform Generator (as single channel pulser)
 @end itemize
 To load the functions for one of these pulsers use in the @code{DEVICES}
 section one of the lines
@@ -2620,6 +2621,7 @@ ep385;
 rs690;
 rb_pulser_j;
 rb_pulser_w;
+tegam2714a_p;
 @end example
 
 Pulsers are rather special and even the @code{EDL} syntax for dealing
@@ -3007,7 +3009,7 @@ either @ref{pulser_reset()}, @ref{pulser_next_phase()} or
 @anchor{pulser_keep_all_pulses()}
 @findex pulser_keep_all_pulses()
 @item pulser_keep_all_pulses()
-Usually pulses that in the test run were found to be unused (i.e.@:
+In some modules pulses that in the test run were found to be unused (i.e.@:
 always had a length of @code{0}) are deleted and a warning message is
 printed indicating this. Any further references to or use of these
 deleted pulses leads to the immediate termination of the experiment. But
@@ -3022,9 +3024,8 @@ function (without any arguments).
 @anchor{pulser_maximum_pattern_length()}
 @findex pulser_maximum_pattern_length()
 @item pulser_maximum_pattern_length()
-This function only exists for the @strong{Sony/Tektronix DG2020} pulser
-(both the @code{dg2020_b} and @code{dg2020_b} module) and the
-@strong{Tektronix HFS9003} pulser.
+This function only exists for the pulser modules @code{dg2020_b},
+@code{dg2020_b}, @code{fhs9000} and @code{tegam2714a_p} modules.
 
 For the @strong{Bruker EP385} a maximum pattern length can't be
 specified, it is fixed to 32768 times the clocks oscillation period
@@ -3033,11 +3034,11 @@ specified, it is fixed to 32768 times the clocks oscillation period
 there is no maximum pattern length. Calling the function for either of
 these pulsers does nothing.
 
-For the @strong{Sony/Tektronix DG2020} the program will in most cases be
+For the @strong{Sony/Tektronix DG2020} modules as well as for the
+@code{tegam2714a_p} module the program will in most cases be
 able to figure out automatically how long the length of the longest
 pulse pattern in the experiment is going to be when doing the test
-run. The longest pulse pattern length is needed to set up the pulser
-correctly. Unfortunately, there are certain syntax constructs that make
+run. Unfortunately, there are certain syntax constructs that make
 it difficult or even impossible to find out this maximum pattern
 length. These constructs are @code{FOREVER} loops and sometimes cases,
 where changes of pulse positions or lengths are done within
@@ -3053,16 +3054,17 @@ the maximum pulse pattern length as the only argument.
 
 Unless in the test run an even longer pattern length is found, this
 value is used. It is not a problem to specify too long a maximum pattern
-length, so a conservative guess will do. The only penalty incurred is
-longer time needed to set up the pulser at the start of the
-experiment. On the other hand, too short a pattern length will lead to
-the experiment being stopped with an error message when the actual
-pattern length becomes larger than the one specified.
+length (as long as one isn't using external trigering and the pattern
+length is longer than the repetition time), so a conservative guess will
+do. The only penalty incurred could be a longer time needed to set up the
+pulser at the start of the experiment. On the other hand, too short a
+pattern length will lead to the experiment being stopped with an error
+message when the actual pattern length becomes larger than specified.
 
 In contrast with the @strong{Tektronix HFS9003} pulser the pattern
 length is per default set to the maximum possible length of 65536 times
 the time constant. If your pulse pattern is shorter than this length and
-using the defualt length isn't desirable (e.g.@: because you need a
+using the default length isn't desirable (e.g.@: because you need a
 higher repetition rate) you can shorten the length of the pulse sequence
 by using this function.
 

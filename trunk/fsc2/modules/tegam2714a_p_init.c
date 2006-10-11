@@ -69,7 +69,7 @@ static void tegam2714a_p_init_print( FILE * fp )
 	if ( ! f->is_used )
 		return;
 
-	fprintf( fp, "%s:  %ld%s\n", f->name,
+	fprintf( fp, "%s:%d %ld%s\n", f->name, tegam2714a_p.function.channel,
               tegam2714a_p_double2ticks( f->delay ),
              f->is_inverted ? " I" : "" );
 }

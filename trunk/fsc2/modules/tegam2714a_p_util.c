@@ -483,7 +483,7 @@ void tegam2714a_p_write_pulses( FILE * fp )
     if ( ! f->is_used )
             return;
 
-    fprintf( fp, "%s:", f->name );
+    fprintf( fp, "%s:%d", f->name, tegam2714a_p.function.channel );
     for ( k = 0; k < f->num_active_pulses; k++ )
         fprintf( fp, " %ld %ld %ld",
                  f->pulses[ k ]->num,

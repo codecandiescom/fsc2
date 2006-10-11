@@ -91,6 +91,7 @@
 * tds540::          Tektronix Digitizing Oscilloscope TDS540
 * tds744a::         Tektronix Digitizing Oscilloscope TDS744A
 * tds754a::         Tektronix Digitizing Oscilloscope TDS754A
+* tegam2714a_p::    TEGAM 2714A Arbitrary Waveform Generator (as pulser)
 * thurlby330::      Thurlby & Thandar Power Supply PL330DP
 * witio_48::        Wasco WITIO-48 DIO card
 @end menu
@@ -3154,7 +3155,7 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @c #############################################################
 
 
-@node tds754a, thurlby330, tds744a, Device Reference
+@node tds754a, tegam2714a_p, tds744a, Device Reference
 @iftex
 @subheading Tektronix Digitizing Oscilloscope TDS754A
 @end iftex
@@ -3207,7 +3208,56 @@ character, set @code{set-reos} and @code{set-xeos} to @code{no} and
 @c #############################################################
 
 
-@node thurlby330, witio_48, tds754a, Device Reference
+@node tegam2714a_p, thurlby330, tds754a, Device Reference
+@iftex
+@subheading TEGAM 2714A Arbitrary Waveform Generator (as pulser)
+@end iftex
+@ifnottex
+@section TEGAM 2714A Arbitrary Waveform Generator (as pulser)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{tegam2714a_p}
+
+@paragraphindent 0
+@strong{Description}: TEGAM 2714A Arbitrary Waveform Generator (used
+as a single pulse channel pulser)
+
+@paragraphindent 0
+This device is a waveform generator that, using this module, can be
+employed as a single pulse channel pulser.@*
+Timebase: between @w{50 ns} and @w{10 s}@*
+Trigger mode: external trigger only@*
+Pulse levels: adjustable between @w{+/- 10 V}@*
+Maximum pattern length: 131036 times the selected timebase@*
+Waveform channel: adjustable betwee 0 and 99, default is 99
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
+character, set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
+@code{yes}.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{pulser_name()}
+@item @ref{pulser_state()}
+@item @ref{pulser_update()}
+@item @ref{pulser_shift()}
+@item @ref{pulser_increment()}
+@item @ref{pulser_reset()}
+@item @ref{pulser_pulse_reset()}
+@item @ref{pulser_maximum_pattern_length()}
+@item @ref{pulser_show_pulses()}
+@item @ref{pulser_dump_pulses()}
+@end table
+
+
+
+@c #############################################################
+
+@node thurlby330, witio_48, tegam2714a_p, Device Reference
 @iftex
 @subheading Thurlby & Thandar Power Supply PL330DP
 @end iftex

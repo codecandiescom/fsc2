@@ -1,4 +1,4 @@
-</*
+/*
  *  $Id$
  * 
  *  Copyright (C) 1999-2006 Jens Thoms Toerring
@@ -197,8 +197,8 @@ int tegam2714a_p_end_of_test_hook( void )
          tegam2714a_p.max_seq_len > tegam2714a_p.requested_max_seq_len )
         print( SEVERE, "Maximum pattern length had to be adjusted from %s "
                "to %s.\n",
-               tegam2714a_p_ptime( tegam2714a_p.requested_max_seq_len ),
-               tegam2714a_p_ptime( tegam2714a_p.max_seq_len ) );
+               tegam2714a_p_pticks( tegam2714a_p.requested_max_seq_len ),
+               tegam2714a_p_pticks( tegam2714a_p.max_seq_len ) );
 
     return 1;
 }

@@ -45,17 +45,21 @@ of implemented:
 @item Bruker EP385 Pulse Programmer (X-band spectrometer, Berlin)
 @item Interface Technology RS690 Word Generator (360 GHz and X-band
 spectrometer, Berlin)
-@item J-band configuration Rulbus pulser (275 GHz spectrometer, Leiden)
-@item W-band configuration Rulbus pulser (95 GHz spectrometer, Leiden)
+@item J-band configuration for Rulbus pulser (275 GHz spectrometer, Leiden)
+@item W-band configuration for Rulbus pulser (95 GHz spectrometer, Leiden)
+@item TEGAM 2714A Arbitrary Waveform generator (used as single channel
+pulser)
 @end itemize
 All pulsers can be used everywhere when no special requirements for
 phase-cycling exist, see the discussion below about the differences
 between the Frankfurt S-band and the Berlin X-band spectrometer.
 
+
 Please note that the Rubus pulsers are a bit different form the rest
 in that it they aren't stand-alone devices but are made up from a set
 of delay and clock cards connected to the Rulbus (Rijksuniversiteit
 Leiden BUS) which results in a few restrictions.
+
 
 Because of the importance of the pulser for time-resolved experiments
 there are even two additional types of sections in the @code{EDL}
@@ -72,6 +76,7 @@ is only needed when phase cycling is used.  Valid statements in these
 sections differ slightly depending on the type of the pulsers and the
 spectrometer.
 
+
 Beside these additional sections there are several other constructs for
 the creation of pulses and their subsequent manipulation. These are
 identical for all pulsers and are explained in in subsequent sections of
@@ -80,8 +85,10 @@ this chapter.
 
 @c ########################################################
 
+
 @node Setting up the Pulser, Defining Pulses, Using Pulsers, Using Pulsers
 @section Setting up the Pulser
+
 
 The basic setup of a pulser happens in the @code{ASSIGNMENTS} and the
 @code{PHASES} section. The latter section will be missing if no phase
@@ -90,9 +97,11 @@ cycling is to be done during the experiment.
 
 @c ########################################################
 
+
 @anchor{ASSIGNMENTS section}
 @subsection @code{ASSIGNMENTS} section
 @cindex @code{ASSIGNMENTS} section
+
 
 Within the @code{ASSIGNMENTS} section the pulsers timebases and trigger
 modes are set. It also deals with the basic setup of the channels,
@@ -100,7 +109,9 @@ i.e.@: associating some or more output connectors with pulse functions
 and setting the physical characteristics of the output (e.g.@: voltage
 levels, inverting the output etc.).
 
+
 @c ########################################################
+
 
 @anchor{Setting the timebase}
 @subsubsection Setting the @code{TIMEBASE}
@@ -119,11 +130,13 @@ neighboring slices to low) pulses are created.  The timebase set in the
 above it is clear that all pulses (as well as all the times between
 pulses) have to be integer multiples of the length of the timebase.
 
+
 An exception is the @strong{Bruker EP385} pulse programmer. This pulser
 has a fixed built-in timebase of @w{8 ns}. In this case a
 @code{TIMEBASE} statement (see below) may only be given if an external
 clock input is used, in which case you need to specify the inverse of
 the frequency of the external clock.
+
 
 In case of the @strong{Interface Technology RS690} the internal clock is
 automatically used for timebases of @w{4 ns}, @w{8 ns} and @w{16 ns},
@@ -137,6 +150,7 @@ neither of the two keywords is given and the specified timebase
 requires an external clock the @code{TTL} level clock input connector is
 used per default.
 
+
 In the currently used configuration the timebase for the J-band version
 of the @strong{Rulbus pulsers} is fixed to @w{10 ns}. But this is a
 compilation option that can be changed via the configuration files. After
@@ -144,6 +158,7 @@ this change and a recompilation of the modules variable timebases. In
 contrast, for the W-band version the timebase in the current configuration
 must be set, where possible settings are either @w{10 ns}, @w{100 ns},
 @w{1 us}, @w{10 us}, @w{100 us}, @w{1 ms} or @w{10 ms}.
+
 
 The statement to set the timebase, i.e.@: the length of the individual
 time slices is@footnote{Instead of @code{TIMEBASE} one may also write
@@ -159,6 +174,7 @@ clock at the @code{TTL} level input connector:
 TIMEBASE: 25 ns, TTL;
 @end example
 
+
 The minimum and maximum values for the timebase differ for the different
 pulsers:
 @itemize @bullet
@@ -168,7 +184,10 @@ pulsers:
 statement allowed), external clock @w{8 ns} and larger
 @item Interface Technology R690: @w{4 ns}, @w{8 ns} and @w{16 ns}
 for the internal clock, @w{4 ns} and larger with an external clock
+@item TEGAM 2174A Arbitrary Waveform Generator: between @w{50 ns} and
+@w{10 s}
 @end itemize
+
 
 If you're using two or more pulsers simultaneously you need as many
 @code{TIMEBASE} statements in your @code{EDL} script as you have
@@ -185,6 +204,7 @@ The additional @code{#1} in the statement for the first pulser is optional.
 
 
 @c ########################################################
+
 
 @anchor{Setting the trigger mode}
 @subsubsection Setting the trigger mode
@@ -219,6 +239,7 @@ or
 TRIGGER_MODE: EXTERNAL;
 @end example
 
+
 Especially when using the internal trigger it is useful to be able to
 set the rate or the frequency with which the experiment is to be
 repeated. Thus for the @strong{Sony/Tektronix DG2020}, the @strong{Bruker
@@ -244,15 +265,19 @@ TRIGGER_MODE: INTERNAL, REPEAT_FREQUENCY = 100 Hz;
 to set the repetition rate of the experiment to @w{100 Hz}. The repeat
 time must be an integer multiple of the timebase of the pulser.
 
+
 When using an external trigger a repetition time or frequency can't be
 enforced for obvious reasons. It can only be guaranteed that the pulse
 sequence is as long as the repetition time, thus keeping the pulser from
-getting restarted before the end of the repetition time.
+getting restarted by a stray trigger event before the end of the repetition
+time.
+
 
 For the @strong{Tektronix HFS9003} no repetition frequency or rate can
 be set, so an external trigger has to be used to determine the
 repetition rate of the experiment, otherwise the pulser will repeat the
 pulse sequence at the highest possible rate.
+
 
 For the @strong{Bruker EP385} pulse programmer the highest repetition
 frequency is about @w{976.56 Hz} (when using the internal clock,
@@ -262,9 +287,16 @@ can be only set to multiples of @w{102.4 us} (or in increments of 12800
 times the external clocks oscillation period). If necessary, repetition
 frequencies are adjusted automatically to the next lower allowed value.
 
+
 For the @strong{Interface Technology RS690} it might happen that for
 certain pulse settings the repetition time must be lengthened slightly,
 but never more than three times the timebase.
+
+
+For the @strong{TEGAM 2714A} no repetition time or frequency can be set
+(you can use the function @ref{pulser_maximum_pattern_length()} instead
+to adjust the pattern length if necessary).
+
 
 On the other hand, when using an external trigger one may want to set
 the trigger level, slope and, possibly, the trigger input impedance. For
@@ -282,15 +314,19 @@ or
 TM: EXTERNAL, LEVEL = -1.2 V, SLOPE = POSITIVE, IMPEDANCE = HIGH;
 @end example
 
+
 The @strong{Bruker EP385} does not allow the setting of any of these
 parameters.
+
 
 The trigger input impedance can only be set for the
 @strong{Sony/Tektronix DG2020}.
 
+
 For the @strong{Sony/Tektronix DG2020} the trigger level must be in the
 range between @w{-5V} and @w{+5 V}, while for the @strong{Tektronix
 HFS9003} the allowed trigger level range is @w{-4.7 V} to @w{+4.7 V}.
+
 
 For the @strong{Interface Technology RS690} no input trigger level nor
 input impedance can be set, but it has two trigger input connectors, one
@@ -299,7 +335,13 @@ distinguish between the two trigger input ports the additional keywords
 @code{TTL} and @code{ECL} may be used. If none is given the @code{TTL}
 level input port is used per default.
 
+
 The @strong{Rulbus pulsers} only allow to set the trigger slope.
+
+
+For the @strong{TEGAM 2714A} neither impedance, level or slope of the
+input trigger can be set.
+
 
 If you need to control more than one pulser you must have a
 @code{TRIGGER_MODE} statement for each of the pulsers. In this case you
@@ -308,6 +350,7 @@ need to append a @code{#} and the number of the pulser to tell
 
 
 @c ########################################################
+
 
 @anchor{Channel setup}
 @subsubsection Channel setup
@@ -336,6 +379,7 @@ need to append a @code{#} and the number of the pulser to tell
 @cindex @code{INVERTED}
 @cindex @code{DELAY}
 
+
 The statements described in the following deal with setting up the
 output channels of the pulser. The basic idea is to abstract from the
 real output connectors of the pulser and to use symbolic names for them.
@@ -353,6 +397,7 @@ output connector to use for a certain phase for each pulse, the program
 is told which connectors to use for a function (and which phase) and
 then it's left to the program to figure out when to use which of the
 output connectors.
+
 
 The following symbolic names for pulse functions are defined:
 @itemize @bullet
@@ -404,22 +449,27 @@ Besides, some of the pulser modules also define special functions (e.g.@:
 for automatically setting TWT pulses) that only work for some of these
 functions.
 
+
 The functions @code{PHASE_1} and @code{PHASE_2} are special in that they
 can only be used with the Frankfurt version of the driver for the
 @strong{Sony/Tektronix DG2020}, @code{dg2020_f}, and are used for
 controlling the phase switches, i.e.@: it's pulses are created
 automatically.
 
+
 The functions @code{OTHER_1} to @code{OTHER_4} should be used in cases
 where none of the other function names seem to fit the special purpose
 you have in mind for the pulses of this function.
 
+
 Before showing some examples it is important to point out that there are
 some differences between the different devices.
+
 
 The simplest one is the @strong{Bruker EP385}. It has 8 output
 connectors, which are named in the @code{EDL} script as @code{CH0} ti
 @code{CH7}. 
+
 
 The @strong{Tektronix HFS9003} can has at least one and up to three
 channel boards, each with 4 channels. The channels of the first board
@@ -431,6 +481,7 @@ special channel can also be associated with a function (e.g.@: for
 generating a @code{DETECTION} trigger pulse) and is named
 @code{TRIG_OUT} (or @code{TRIGOUT}, @code{TRIGGER_OUT} or
 @code{TRIGGEROUT}).
+
 
 The @strong{Interface Technology RS690} has 4 sets of output connectors
 (or even 8, if a second HSM card is installed), each with 16 output
@@ -444,6 +495,7 @@ setting: for a timebase of @w{4 ns} only the lowest 4 channels of each
 connector can be used, for a timebase of @w{8 ns} only the lower 8
 channels.
 
+
 The @strong{Sony/Tektronix DG2020} is quite a bit different. It has 36
 internal channels (named @code{CH0} to @code{CH35}) that have to be
 mapped to pod channels (named @code{P0} to @code{P11}. The pod is the
@@ -454,6 +506,7 @@ one of the (internal) channels for this device a pod channel has to be
 associated with a function. Optionally, it is also possible to tell
 @code{fsc2} which of the internal channels are to be used for a
 function.
+
 
 For the @strong{Tektronix HFS9003} simply a channel is associated with a
 function by statements like (the keyword @code{CHANNEL} can be replaced
@@ -488,6 +541,7 @@ DETECTION: POD = P11;
 @end example
 @noindent
 
+
 Optionally, for the @strong{Sony/Tektronix DG2020} you can also tell the
 program which of the 36 internal channels (numbered @code{CH0} to
 @code{CH35}) should be used for a function. If you don't the program
@@ -502,8 +556,10 @@ RF_GATE:   POD = P7              CHANNEL = CH17;
 DETECTION: POD = P11;   // leave it to the program to select the channel
 @end example
 
+
 Please note: the @strong{Tektronix HFS9003} does not allow assignment of
 more than one channel to a single function.
+
 
 Here a list of the pod and/or channel numbers that can be used for the
 pulsers:
@@ -513,7 +569,16 @@ pulsers:
 @item Bruker EP385: CH = CH0..CH7
 @item Interface Technology RS690: CH = X0..15 with X standing for A..D
 (or A..H when two HSM cards are installed)
+@item TEGAM 2714A: CH = 0..99 (default is 99)
 @end itemize
+
+
+For the @strong{TEGAM 2714A} the channel determines the number of the user
+waveform to be used to create the pulse sequence. If no such assignment
+is done channel @code{99} is used pr default and the function of the
+single channel the pulser has is determined from the setting of the
+first pulse to be defined.
+
 
 Beside defining at which of the output connectors the pulses for a
 function will appear at you can also set other properties for the pulses
@@ -531,17 +596,24 @@ RF_GATE:   POD = P7              V_HIGH = 5 V,   V_LOW = 0 V;
 The high voltage must always be larger than the low voltage, to get
 inverted pulses use the @code{INVERTED} keyword, see below.
 
+
 For the @strong{Sony/Tektronix DG2020} the high voltage can be adjusted
 to values between @w{-2 V} and @w{+7 V} and the low voltage can be in
 the range between @w{-3 V} and @w{+6 V}. The difference between the
 voltages must be between @w{0.5 V} and @w{9 V} and can be set in
 increments of @w{0.1 V}.
 
+
 For the @strong{Tektronix HFS9003} the high voltage can be adjusted to
 values between @w{-1.5 V} and @w{+5.5 V}, the low voltage has to be in
 the range from @w{-2 V} to @w{+5 V}. The minimum and maximum voltage
 swing is @w{0.5 V} and @w{5.5 V}, respectively, and the voltage
 resolution is @w{10 mV}.
+
+
+For the @strong{TEGAM 2714A} pulse levels can be set in the range between
+@w{-10 V} and @w{+ 10V}.
+
 
 If a function requires the output levels to be inverted (i.e.@: that the
 voltage is high while there are no pulses and low during pulses) use the
@@ -565,8 +637,8 @@ position of each pulse of this function:
 MICROWAVE: POD = P1, P2, P3, P4  DELAY = 50 ns;
 @end example
 @noindent
-For obvious reasons setting negative delays are only possible when in
-internal trigger mode@footnote{The obvious reason is, of course,
+For obvious reasons setting negative delays is only possible when
+internal trigger mode is used@footnote{The obvious reason is, of course,
 causality - the pulser can't know when the external trigger is going to
 happen, so starting before the trigger is detected would be a bit
 difficult. By the way, the keyword @code{DELAY} can be abbreviated to
@@ -605,10 +677,12 @@ delay to be used with this function.
 
 @c ########################################################
 
+
 @anchor{Phase channel setup}
 @subsubsection Phase channel setup
 @cindex Phase channel setup
 @cindex @code{PHASE_SETUP}
+
 
 Please note that a phase channel setup can only be done with the
 @strong{Sony/Tektronix DG2020} and the @strong{Bruker EP385}. Moerover,
@@ -616,8 +690,10 @@ there are several differences between the Frankfurt S-band and the
 Berlin X-band spectrometer. And all the following is only relevant if
 phase cycling is to be used.
 
+
 @strong{Berlin X-band spectrometer} (@strong{Sony/Tektronix DG2020},
 @strong{Bruker EP385} and @strong{Interface Technology RS690}):
+
 
 The Berlin bridge setup is rather simple in that it expects pulses with
 different phases to appear on different input connectors of the
@@ -625,6 +701,7 @@ microwave bridge. The bridge has 4 different inputs, one for each phase
 @code{+X}, @code{-X}, @code{+Y} and @code{-Y}, and the phase of the
 pulse coming from the bridge and going to the TWT amplifier depends on
 which input connector was used for the pulse.
+
 
 Now all you have to do is to tell the program once which pulser pod
 channel is connected to which phase input of the bridge (and, to allow
@@ -656,6 +733,7 @@ Since you actually can have 2 phase cycled function, you may append
 either @code{1} or @code{_1} and @code{2} or @code{_2} to distinguish
 between the two phase setups, i.e.@: @code{PHASE_SETUP_1}.
 
+
 Please note that you only have to supply settings for phases that are
 really needed during the experiment, e.g.@: if during the experiment only
 the @code{+X} and @code{-X} phases are needed only channels for both these
@@ -665,12 +743,14 @@ phases have to be specified.
 @strong{Frankurt S-band spectrometer} (@strong{Sony/Tektronix DG2020}
 only):
 
+
 The Frankfurt spectrometer is somewhat more complicated. The bridge has
 one microwave pulse input and two further input channels that control the
 setting of the bridges phase switch. So, while a microwave pulse is sent
 to the bridge, further phase pulses have to be present to control the
 phase switch. Two phase inputs are enough to differentiate between the 4
 phases @code{+X}, @code{-X}, @code{+Y} and @code{-Y}.
+
 
 In order to create the phase pulses an extra function is needed for
 these pulses, which is called @code{PHASE} (or, abbreviated @code{PH}).
@@ -685,6 +765,7 @@ PHASE:        MICROWAVE, POD = P8, P9, V_HIGH = 5 V, V_LOW = 0 V;
 @noindent
 In this example the phase function is used to phase cycle the microwave
 pulses and the pod channels assigned to it are the ones numbered 8 and 9.
+
 
 The second thing that is needed is which voltages have to be present at
 the outputs to set a certain phase. Here's an example:
@@ -705,12 +786,14 @@ stands here for the first pod channel of the phase function,
 to indicate a high output state, @code{OFF} and @code{0} stand for a low
 state.
 
+
 With these informations the program is able (or nearly is) to create the
 the additional "phase" pulses (i.e.@: the pulses that control the phase
 switch) without the user having to deal with it. So, all that needs to
 be done later is to create the microwave pulses and define the sequence
 of phases for the pulses. The program will automatically create the
 pulses necessary to set the phases of the microwave pulses.
+
 
 You can also specify how long phase pulses start before the pulse
 they are made for and how much longer they are supposed to last by using
@@ -721,6 +804,7 @@ but still supported keywords @code{PHASE_SWITCH_DELAY} and
 
 
 @c ########################################################
+
 
 @anchor{PHASES section}
 @subsection @code{PHASES} section
@@ -754,11 +838,14 @@ only one phase sequence no number is needed). For the phase number any
 number between 0 and 2147483647 @w{(2^32 - 1)} can be chosen. Of course
 the lengths of all phase sequences have to be identical.
 
+
 Please note that due to hardware limitations for the W-band configuration
 of the @strong{Rulbus pulser} the phase @code{-Y} can't be used.
 
+
 The following sections explain how the phase sequences become
 associated with certain pulses.
+
 
 Beside the phase sequences also acquisition sequences can be defined.
 These are used by some @code{EDL} functions to determine how the
@@ -772,6 +859,7 @@ would be defined as:
 @example
 ACQUISITION_SEQUENCE: +, -, -, +;
 @end example
+
 
 When one has an experiment with a quadrature mixer one also can define
 in the acquisition sequence which of the signals from the two digitizer
@@ -789,11 +877,11 @@ ACQUISITION_SEQUENCE_1 = +A, -A, +B, -B, +A, -A, +B, -B;
 ACQUISITION_SEQUENCE_2 = +B, -B, -A, +A, +B, -B, -A, +A;
 @end example
 
+
 The definition of acquisition sequences is optional and only needed if
 the function @code{get_phase_cycled_area()} (see below) is going to be
 used. If defined their lengths have to be identical to the lengths of
 the phase sequences.
-
 
 
 @c ########################################################
@@ -815,6 +903,7 @@ While the basic setup of the pulse happens in the @code{ASSIGNMENTS}
 and, possibly, in the @code{PHASES} section, the definition of the
 pulses is done in the @code{PREPARATIONS} section.
 
+
 Each pulse has at least three properties: a unique number, a function
 and a start position. Actually, pulses also need a length, so as long
 as the length is not set (or is 0) the pulse stays switched off. Here is
@@ -834,12 +923,22 @@ As usual, most of the keywords can be abbreviated, @code{PULSE_1:} to
 values like pulse positions and times variables, complex expressions and
 functions can be used.
 
+
 Pulse numbers can be chosen randomly - the only requirement is that the
 numbers are positive (including 0) and not larger than 2147483647
 @w{(2^32 - 1)} (of course there always is some limitation by the device
 that won't allow to create that many pulses). Positions and lengths of
 pulses have to be positive (including 0). A pulse of zero length is
 invisible.
+
+
+Each pulse must be assigned to a certain function (this is used to
+determine on wich output of the pulser the pulse will appear). The
+only exception is the @strong{TEGAM 2714A}. if a channel number is
+assigned to a certain function than this function is automatically
+the function of each pulse (since this device only has a single
+channel).
+
 
 If more than one pulser is used it must also be indicated which pulser
 is supposed to create the pulse. This is done by appending the @code{#}
@@ -854,6 +953,7 @@ PULSE_3#2:   FUNCTION = RADIO_FREQUENCY,
 @noindent
 Please note that in this case a @code{RADIO_FREQUENCY} function must
 have been defined for the @strong{second} pulser.
+
 
 Even when using more than one pulser the pulse numbers still have to be
 unique. If e.g.@: a pulse numbered @code{1} has been created for the
@@ -879,6 +979,8 @@ keyword is @code{PHASE_CYCLE}@footnote{@code{PHASE_CYCLE} can also be
 written as @code{PHASECYCLE}, @code{PHASE_C}, @code{PHASEC},
 @code{PH_CYCLE}, @code{PHCYCLE}, @code{PH_C} or @code{PHC}.}.
 
+
+
 With these additional properties (using, for phase cycling of the pulse,
 the first phase sequence defined in the @code{PHASES} section, see
 above) the definition of the pulse would look like this:
@@ -890,6 +992,7 @@ PULSE_1:    FUNCTION     = MICROWAVE,
             DELTA_LENGTH = 35 ns,
             PHASE_CYCLE  = PHASE_SEQUENCE_1;
 @end example
+
 
 When setting the properties of further pulses the properties of pulses
 already defined can be used. This is done by specifying the name of the
@@ -925,8 +1028,8 @@ connected to the @strong{Rhode & Schwarz SML01} synthesizer (with SML-B3
 option), which has a built-in pulse unit.
 
 
-
 @c ########################################################
+
 
 @node Using Pulses, , Defining Pulses, Using Pulsers
 @section Using Pulses
@@ -937,6 +1040,7 @@ the begin of the @code{EXPERIMENT} section) all pulses get set (as long as
 their lengths are defined and non-zero) and all channels or PODs that
 have been assigned pulses (that are really used during the experiment) are
 switched on.
+
 
 There are two methods to change the properties of pulses. The first one
 works by calling a dedicated function. To change the start position of,
@@ -952,6 +1056,7 @@ this function also accepts a (comma separated) list of pulses. If the
 function is called with no arguments at all the start positions of all
 pulses that have the @code{DELTA_START} property defined are changed.
 
+
 There is a similar function for changing the length of pulses by their
 @code{DELTA_LENGTH}, called @ref{pulser_increment()}:
 @example
@@ -962,6 +1067,7 @@ As for the @ref{pulser_shift()} function also this functions accepts a
 comma separated list of pulses, and calling it with no arguments
 automatically lengthens all pulses that have the @code{DELTA_LENGTH}
 property defined.
+
 
 The second method allows to you to change the start position or length
 of a pulse directly and in increments differing from @code{DELTA_START}
@@ -976,6 +1082,7 @@ P4.LENGTH = 120 ns;
 This method can also be used to switch off a pulse completely by
 assigning 0 to the pulse length.
 
+
 Of course, as in the definition of the pulses in the @code{PREPARATION}
 section the properties of the pulse itself and other pulses can be used
 in setting the new values, e.g.:
@@ -988,6 +1095,7 @@ As you see, these properties (i.e.@: start positions and lengths and the
 corresponding delta start positions and lengths) of pulses can be treated
 nearly as if they are just normal variables.
 
+
 Also the values for @code{DELTA_START} and @code{DELTA_LENGTH} can be
 changed in this way at any time during the experiment:
 @example
@@ -998,8 +1106,10 @@ P4.DELTA_LENGTH = 10 ns;
 This holds even if these properties haven't been defined in the
 @code{PREPARATION} section at all.
 
+
 The only pulse properties that may not be changed during the experiment
 are the function and the phase sequence associated with the pulse.
+
 
 There is only one point that needs to be taken care of: Just calling one
 of these methods to change pulse properties does not change the real
@@ -1011,6 +1121,7 @@ everything is done to call @ref{pulser_update()} in order to commit the
 changes. In this moment the program will also do all its usual checks,
 e.g.@: it will test that no pulses overlap.
 
+
 There is a further function that resets all pulses to their initial
 state, @ref{pulser_pulse_reset()}. This function can, for example, be
 used for repeating the same experiment several times without having to
@@ -1019,6 +1130,7 @@ can be either one pulse, a list of pulses or no argument, in which case
 all pulses are reset to their initial positions and lengths (i.e.@: as
 set in the initial definition of the pulse in the @code{PREPARATIONS}
 section.
+
 
 Here is now a somewhat shortened example of a 2 pulse Hahn-echo
 experiment. Two microwave pulses are needed, a pi-half and a pi pulse,
@@ -1092,12 +1204,14 @@ can not be used for phase changes of individual pulses but alway applies
 to all pulses that have been assigned a phase sequence. Thus this function
 does not accepts any arguments.
 
+
 Again, the necessary changes are only send to the pulser when the
 function @ref{pulser_update()} is called afterwards. By repeatedly
 invoking @ref{pulser_next_phase()} one can run through the complete
 phase sequence. To reset all pulses to their start phase (i.e.@: the
 first phase of the associated phase sequence) the function
 @ref{pulser_phase_reset()} can be used.
+
 
 The next (rather simplified) example is a script for a phase cycled
 (1-dimensional) stimulated echo experiment. We need three microwave
@@ -1234,6 +1348,7 @@ sets the pulse phases but also starts the digitizer acquisition, fetches
 the measured areas from the digitizer and adds up the areas according to
 the acquisition sequence.
 
+
 @code{get_phase_cycled_area()} can handle one as well as two acquisition
 sequences, see below. But also a single acquisition sequence may need
 data from two different digitizer channels, for example an acquisition
@@ -1251,6 +1366,7 @@ second digitizer channel, i.e.@: it must be called like this:
 @example
 data = get_phase_cycled_area( CH1, CH2, Window );
 @end example
+
 
 In some cases one might be interested not only in the value from just
 one digitizer window but from two or more. Thus you may specify,
@@ -1289,6 +1405,7 @@ FOR I = 1: 128 @{
     pulser_update( );
 @}
 @end example
+
 
 Finally, if there are two acquisition sequences
 @code{get_phase_cycled_area()} will return 2 values for each
