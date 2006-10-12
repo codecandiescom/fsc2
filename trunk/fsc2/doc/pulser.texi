@@ -612,7 +612,9 @@ resolution is @w{10 mV}.
 
 
 For the @strong{TEGAM 2714A} pulse levels can be set in the range between
-@w{-10 V} and @w{+ 10V}.
+@w{-10.2 V} and @w{+10.2 V}, with the maximum difference being @w{10.2 V}.
+If the level difference is below @w{1 V} the levels must be in the @w{+/-1 V}
+range and for level differences below @w{100 mV} within @w{+/-100 mV}.
 
 
 If a function requires the output levels to be inverted (i.e.@: that the

@@ -3228,7 +3228,10 @@ This device is a waveform generator that, using this module, can be
 employed as a single pulse channel pulser.@*
 Timebase: between @w{50 ns} and @w{10 s}@*
 Trigger mode: external trigger only@*
-Pulse levels: adjustable between @w{+/- 10 V}@*
+Pulse levels: adjustable between @w{+/-10.2 V} with a maximum level difference
+of @w{10.2 V} (if the difference is below @w{1 V} the levels must be within
+@w{+/-1 V} and for a difference below @w{100 mV} the levels must be in the
+@w{+/-100 mV} range.@*
 Maximum pattern length: 131036 times the selected timebase@*
 Waveform channel: adjustable betwee 0 and 99, default is 99
 

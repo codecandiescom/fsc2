@@ -630,13 +630,13 @@ bool lecroy_ws_set_bandwidth_limiter( int channel,
 
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
-    fsc2_assert( bwl >= LECROY_WS_BWL_OFF &&
 #if defined LECROY_WS_BWL_200MHZ
-                 bwl <= LECROY_WS_BWL_200MHZ
+    fsc2_assert( bwl >= LECROY_WS_BWL_OFF &&
+                 bwl <= LECROY_WS_BWL_200MHZ );
 #else
-                 bwl <= LECROY_WS_BWL_ON
+    fsc2_assert( bwl >= LECROY_WS_BWL_OFF &&
+                 bwl <= LECROY_WS_BWL_ON );
 #endif
-                                               );
 
     sprintf( buf, "BWL C%d,", channel - LECROY_WS_CH1 + 1 );
     if ( bwl == LECROY_WS_BWL_OFF )

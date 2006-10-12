@@ -88,6 +88,7 @@ int tegam2714a_p_init_hook( void )
     tegam2714a_p.is_needed = SET;
     tegam2714a_p.is_timebase = UNSET;
     tegam2714a_p.is_running = UNSET;
+    tegam2714a_p.max_seq_len = 0;
     tegam2714a_p.is_max_seq_len = UNSET;
     tegam2714a_p.max_seq_len = 0;
     tegam2714a_p.old_arena = NULL;
@@ -107,6 +108,9 @@ int tegam2714a_p_init_hook( void )
     f->is_delay = UNSET;
     f->is_used = UNSET;
     f->max_seq_len = 0;
+    f->is_high_level = UNSET;
+    f->is_low_level = UNSET;
+    f->is_inverted = UNSET;
 
     return 1;
 }
@@ -189,6 +193,23 @@ int tegam2714a_p_end_of_test_hook( void )
         fclose( tegam2714a_p.show_file );
         tegam2714a_p.show_file = NULL;
     }
+
+    /* Check that the either set both pulse levels or none at all */
+
+    if ( ( tegam2714a_p.function.is_high_level && 
+           ! tegam2714a_p.function.is_low_level ) ||
+         ( ! tegam2714a_p.function.is_high_level && 
+           tegam2714a_p.function.is_low_level ) )
+    {
+        print( FATAL, "Only high or low pulse level has been set, either set "
+               "both or none.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( tegam2714a_p.function.is_high_level &&
+         tegam2714a_p.function.is_low_level )
+         tegam2714a_p_check_levels( tegam2714a_p.function.high_level,
+                                    tegam2714a_p.function.low_level );
 
     /* Tell the user if the requested maximum pattern length wasn't long
        enough to create all pulses during the test run */

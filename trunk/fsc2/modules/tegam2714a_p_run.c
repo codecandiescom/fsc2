@@ -27,6 +27,7 @@
 
 static void tegam2714a_p_commit( void );
 
+void tegam2714a_p_set_amplitude( double ampl );
 
 /*-------------------------------------------------------------------------*
  * Function is called in the experiment after pulses have been changed to
@@ -42,12 +43,13 @@ void tegam2714a_p_do_update( void )
     if ( ! tegam2714a_p.is_needed || ! tegam2714a_p.function.is_used )
         return;
 
-    /* Stop the pulser during the update */
+    /* Set the amplitude to keep the device form outputting garbled pulse
+       sequences while we're in the process of updating the pulses */
 
     if ( tegam2714a_p.is_running && FSC2_MODE == EXPERIMENT )
     {
         restart = SET;
-        tegam2714a_p_run( STOP );
+        tegam2714a_p_set_amplitude( 0.0 );
     }
 
     /* Resort the pulses and check that the new pulse settings are reasonable,
@@ -68,7 +70,8 @@ void tegam2714a_p_do_update( void )
     }
 
     if ( restart )
-        tegam2714a_p_run( START );
+        tegam2714a_p_set_amplitude(   tegam2714a_p.function.high_level
+                                    - tegam2714a_p.function.low_level );
 }
 
 
@@ -172,8 +175,7 @@ void tegam2714a_p_set_pulses( void )
     /* Set up the pulser as well as the representation of the pulsers
        memory */
 
-    if ( tegam2714a_p.function.is_inverted )
-        tegam2714a_p_set_constant( 0, tegam2714a_p.max_seq_len, 0 );
+    tegam2714a_p_set_constant( 0, tegam2714a_p.max_seq_len, 0 );
 
     for ( p = tegam2714a_p.pulses; p != NULL; p = p->next )
         if ( p->is_active )

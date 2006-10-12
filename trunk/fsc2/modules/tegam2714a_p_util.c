@@ -28,14 +28,21 @@
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-void tegam2714a_p_check_level_diff( double high,
-									double low )
+void tegam2714a_p_check_levels( double high,
+                                double low )
 {
-	double ampl   = 0.5 * ( high - low );
-	double offset = 0.5 * ( high + low );
+    double ampl;
+    double offset;
 
 
-	if ( ampl < 0 )
+    ampl = high - low;
+
+    if ( ! tegam2714a_p.function.is_inverted )
+        offset = low;
+    else
+        offset = high;
+
+	if ( high < low )
 	{
 		print( FATAL, "Low voltage level isn't below high level, use keyword "
                "INVERT to invert the polarity.\n" );
@@ -49,22 +56,15 @@ void tegam2714a_p_check_level_diff( double high,
 		THROW( EXCEPTION );
 	}
 
-	if ( ampl < MIN_AMPLITUDE )
-	{
-		print( FATAL, "Requested pulse amplitude too small, minimum amplitude "
-               "is %g mV.\n", 1.0e3 * MIN_AMPLITUDE );
-		THROW( EXCEPTION );
-	}
-
 	/* The device has three ranges with different maximum offsets */
 
 	if ( ampl > 0.999 )
 	{
 		if ( ampl + fabs( offset ) > MAX_AMPLITUDE )
 		{
-			print( FATAL, "With the selected pulse amplitude the maximum "
-				   "voltage ampitude can't be larger than +/-%g V.\n",
-                   MAX_AMPLITUDE );
+			print( FATAL, "With the selected pulse level difference the low "
+				   "voltage level can't be higher than %g V.\n",
+                   MAX_AMPLITUDE - ampl );
 			THROW( EXCEPTION );
 		}
 	}
@@ -72,15 +72,17 @@ void tegam2714a_p_check_level_diff( double high,
 	{
 		if ( ampl + fabs( offset ) > 1.0 )
 		{
-			print( FATAL, "With the selected pulse amplitude the maximum "
-				   "voltage amplitude can't be larger than +/-1.0 V.\n" );
+			print( FATAL, "With the selected pulse level difference the low "
+				   "voltage level must be in the +/%g V range.\n",
+                   1.0 - ampl );
 			THROW( EXCEPTION );
 		}
 	}
 	else if ( ampl + fabs( offset ) > 0.1 )
 	{
-		print( FATAL, "With the selected pulse amplitude the maximum "
-			   "voltage amplitude can't be larger than +/-100 mV.\n" );
+		print( FATAL, "With the selected pulse level difference the low "
+			   "voltage level must be in the +%g mV range.\n",
+               100.0 * ( 1.0 - ampl ) );
 		THROW( EXCEPTION );
 	}
 }
@@ -177,7 +179,7 @@ int tegam2714a_p_num_len( long num )
 {
     int cnt;
 
-    for ( cnt = 1; num > 1; num /= 10, cnt++ )
+    for ( cnt = 1; num > 9; num /= 10, cnt++ )
         /* empty */ ;
 
     return cnt;

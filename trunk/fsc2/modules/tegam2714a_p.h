@@ -58,7 +58,7 @@
 
 
 #define MAX_AMPLITUDE          10.2
-#define MIN_AMPLITUDE           1.0e-2
+
 
 #define MAX_PULSER_BITS        131036  /* maximum number of bits in channel */
 
@@ -94,10 +94,10 @@ struct Function {
 
     Ticks max_seq_len;          /* maximum length of the pulse sequence */
 
-    bool is_inverted;           /* if set polarity is inverted */
-
     Ticks delay;                /* delay for the function/pod combination */
     bool is_delay;
+
+    bool is_inverted;           /* if set polarity is inverted */
 
     double high_level;          /* high and low voltage levels of the pod(s) */
     double low_level;           /* associated with the function */
@@ -255,12 +255,13 @@ void tegam2714a_p_full_reset( void );
 
 bool tegam2714a_p_init( const char * /* name */ );
 void tegam2714a_p_run( bool /* state */ );
+void tegam2714a_p_set_amplitude( double ampl );
 void  tegam2714a_p_set_constant( Ticks /* start  */ ,
                                  Ticks /* length */ ,
                                  int   /* state  */ );
 
-void tegam2714a_p_check_level_diff( double /* high */ ,
-									double /* low  */ );
+void tegam2714a_p_check_levels( double /* high */ ,
+                                double /* low  */ );
 const char *tegam2714a_p_ptime( double /* p_time */ );
 const char *tegam2714a_p_pticks( Ticks /* ticks */ );
 Ticks tegam2714a_p_double2ticks( double /* p_time */ );

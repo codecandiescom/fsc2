@@ -93,7 +93,7 @@ static void tegam2714a_p_basic_check( void )
 
     for ( p = tegam2714a_p.pulses; p != NULL; p = p->next )
     {
-        p->is_active = IS_ACTIVE( p );
+        p->has_been_active = p->is_active = IS_ACTIVE( p );
 
         /* Check the pulse function */
 

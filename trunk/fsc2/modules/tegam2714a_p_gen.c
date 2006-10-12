@@ -155,10 +155,6 @@ bool tegam2714a_p_set_function_high_level( int    function,
         THROW( EXCEPTION );
     }
 
-    if ( tegam2714a_p.function.is_low_level )
-        tegam2714a_p_check_level_diff( voltage,
-                                       tegam2714a_p.function.low_level );
-
     tegam2714a_p.function.high_level = voltage;
     tegam2714a_p.function.is_high_level = SET;
 
@@ -183,16 +179,12 @@ bool tegam2714a_p_set_function_low_level( int    function,
         THROW( EXCEPTION );
     }
 
-    if ( voltage < MAX_AMPLITUDE )
+    if ( voltage < - MAX_AMPLITUDE )
     {
-        print( FATAL, "High voltage of %g V to high, maximum is -%g V.\n",
+        print( FATAL, "Low voltage of %g V too low, manimum is -%g V.\n",
                voltage, MAX_AMPLITUDE );
         THROW( EXCEPTION );
     }
-
-    if ( tegam2714a_p.function.is_high_level )
-        tegam2714a_p_check_level_diff( tegam2714a_p.function.high_level,
-                                       voltage );
 
     tegam2714a_p.function.low_level = voltage;
     tegam2714a_p.function.is_low_level = SET;
