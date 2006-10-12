@@ -217,9 +217,22 @@ digitizer_run, 0, EXP;
 digitizer_lock_keyboard, -1, EXP;       // Lock/unlock keyboard (TDS only)
 digitizer_copy_curve, 2, EXP;
 digitizer_command, 1, EXP;
-digitizer_meas_channel_ok, -2, ALL;     // only for internal use !
 digitizer_averaging, -1, ALL;           // LeCroy digitizers only
-digitizer_memory_size, -1, ALL;         // LeCroy WR2 only
+digitizer_memory_size, -1, ALL;         // LeCroy WR2/WaveSurfer only
+digitizer_meas_channel_ok, -2, ALL;     // only for internal use !
+
+
+/* The following functions will only remain here until I got some time to
+   have a close look at the Agilent 54830B module, I guess most of them are
+   not really useful or could be replaced by one of the functions that already
+   exist for other digitizers. For the time being they are in to allow Anton
+   to continue working with the device. */
+
+digitizer_show_channel, -1, ALL;        //Agilent 54830B only
+digitizer_get_xorigin, -1, ALL;         //Agilent 54830B only
+digitizer_get_xincrement, -1, ALL;      //Agilent 54830B only
+digitizer_get_yorigin, -1, ALL;         //Agilent 54830B only
+digitizer_get_yincrement, -1, ALL;      //Agilent 54830B only
 
 
 /* Functions exported by the RF synthesizers (HP8647A, HP8648A, HP8672A,

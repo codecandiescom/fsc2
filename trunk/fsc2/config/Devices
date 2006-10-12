@@ -58,6 +58,7 @@ lecroy9424e   // LeCroy digitizing oscilloscope 9424e
 lecroy9410    // LeCroy digitizing oscilloscope 9410
 lecroy_wr2    // LeCroy digitizing oscilloscope Waverunner 2
 lecroy_ws     // LeCroy digitizing oscilloscope WaveSurfer
+ag54830b      // Agilent 54830B digitizing oscilloscope
 
 
 // Lock-In amplifiers
