@@ -11,7 +11,6 @@ MANIFEST
 README
 README.mail
 TODO
-xxx
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
@@ -50,6 +49,7 @@ aux/up_arrow.xbm
 
 config/aeg_s_band.conf
 config/aeg_x_band.conf
+config/ag54830b.conf
 config/bh15.conf
 config/bnm12.conf
 config/Devices
@@ -409,10 +409,10 @@ scripts/3_pulse_epr.rulhmpc89.molphys.leidenuniv.nl
 scripts/3_pulse_T1.rulhmpc66.molphys.leidenuniv.nl
 scripts/3_pulse_T1.rulhmpc89.molphys.leidenuniv.nl
 scripts/cw_endor.crowley.physik.fu-berlin.de
-scripts/cw_endor.door.physik.fu-berlin.de
+scripts/cw_endor.door.secnet.physik.fu-berlin.de
 scripts/cw_endor.moebpc3.physik.fu-berlin.de
 scripts/cw_endor_monitor.moebpc3.physik.fu-berlin.de
-scripts/cw_epr.door.physik.fu-berlin.de
+scripts/cw_epr.door.secnet.physik.fu-berlin.de
 scripts/cw_epr.dyson.physik.uni-osnabrueck.de
 scripts/cw_epr.freed.physik.uni-osnabrueck.de
 scripts/cw_epr.isaak.physik.fu-berlin.de
