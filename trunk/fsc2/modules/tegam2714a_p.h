@@ -61,6 +61,7 @@
 
 
 #define MAX_PULSER_BITS        131036  /* maximum number of bits in channel */
+#define MIN_PULSER_BITS        32
 
 
 #define START ( ( bool ) 1 )
@@ -250,10 +251,9 @@ void tegam2714a_p_init_setup( void );
 
 void tegam2714a_p_do_update( void );
 void tegam2714a_p_do_checks( bool /* in_setup */ );
-void tegam2714a_p_set_pulses( void );
-void tegam2714a_p_full_reset( void );
+void tegam2714a_p_pulse_setup( void );
 
-bool tegam2714a_p_init( const char * /* name */ );
+void tegam2714a_p_init( const char * /* name */ );
 void tegam2714a_p_run( bool /* state */ );
 void tegam2714a_p_set_amplitude( double ampl );
 void  tegam2714a_p_set_constant( Ticks /* start  */ ,

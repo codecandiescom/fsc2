@@ -50,11 +50,9 @@ aux/up_arrow.xbm
 config/aeg_s_band.conf
 config/aeg_x_band.conf
 config/ag54830b.conf
-config/ag54830b.conf~
 config/bh15.conf
 config/bnm12.conf
 config/Devices
-config/Devices~
 config/dg2020_b.conf
 config/dg2020_f.conf
 config/egg4402.conf
@@ -66,7 +64,6 @@ config/er035m_sa.conf
 config/er035m_sas.conf
 config/er035m_s.conf
 config/Functions
-config/Functions~
 config/gg_chopper.conf
 config/gpib.conf
 config/hfs9000.conf

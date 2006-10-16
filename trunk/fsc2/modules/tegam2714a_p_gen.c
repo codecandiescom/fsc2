@@ -238,11 +238,14 @@ bool tegam2714a_p_set_max_seq_len( double seq_len )
 
     tegam2714a_p.max_seq_len = tegam2714a_p_double2ticks( seq_len );
 
-    if ( tegam2714a_p.max_seq_len == 0 )
+    if ( tegam2714a_p.max_seq_len < MIN_PULSER_BITS )
     {
-        print( FATAL, "Minimum pattern length shorter than timebase.\n" );
-        THROW( EXCEPTION );
+        print( SEVERE, "Minimum pattern length is %s, had to increase the "
+               "requested value accordingly.\n",
+               tegam2714a_p_pticks( MIN_PULSER_BITS ) );
+        tegam2714a_p.max_seq_len = MIN_PULSER_BITS;
     }
+    else
 
     tegam2714a_p.is_max_seq_len = SET;
 

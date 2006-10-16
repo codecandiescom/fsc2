@@ -43,13 +43,20 @@ void tegam2714a_p_do_update( void )
     if ( ! tegam2714a_p.is_needed || ! tegam2714a_p.function.is_used )
         return;
 
-    /* Set the amplitude to keep the device form outputting garbled pulse
-       sequences while we're in the process of updating the pulses */
+    /* Stop the pulser (or the amplitude if the offset is lower tahn 100 mV)
+       to keep the device form outputting garbled pulse sequences while we're
+       in the process of updating the pulses */
 
     if ( tegam2714a_p.is_running && FSC2_MODE == EXPERIMENT )
     {
         restart = SET;
-        tegam2714a_p_set_amplitude( 0.0 );
+        if ( ( ! tegam2714a_p.function.is_inverted &&
+               fabs( tegam2714a_p.function.low_level ) <= 0.099 ) ||
+             ( tegam2714a_p.function.is_inverted &&
+               fabs( tegam2714a_p.function.high_level ) <= 0.099 ) )
+            tegam2714a_p_set_amplitude( 0.0 );
+        else
+            tegam2714a_p_run( STOP );
     }
 
     /* Resort the pulses and check that the new pulse settings are reasonable,
@@ -70,8 +77,16 @@ void tegam2714a_p_do_update( void )
     }
 
     if ( restart )
+    {
+        if ( ( ! tegam2714a_p.function.is_inverted &&
+               fabs( tegam2714a_p.function.low_level ) <= 0.099 ) ||
+             ( tegam2714a_p.function.is_inverted &&
+               fabs( tegam2714a_p.function.high_level ) <= 0.099 ) )
         tegam2714a_p_set_amplitude(   tegam2714a_p.function.high_level
                                     - tegam2714a_p.function.low_level );
+        else
+            tegam2714a_p_run( START );
+    }
 }
 
 
@@ -155,11 +170,13 @@ void tegam2714a_p_do_checks( bool in_setup )
 }
 
 
-/*---------------------------------------------------------------------*
- * Function creates all active pulses when the experiment gets started
- *---------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Function is called after the start of the experiment to reset all
+ * the variables describing the state of the pulser to their initial
+ * values and setting the pulses.
+ *-------------------------------------------------------------------*/
 
-void tegam2714a_p_set_pulses( void )
+void tegam2714a_p_pulse_setup( void )
 {
     Pulse_T *p;
 
@@ -172,32 +189,6 @@ void tegam2714a_p_set_pulses( void )
     tegam2714a_p.new_arena = tegam2714a_p.old_arena + tegam2714a_p.max_seq_len;
     memset( tegam2714a_p.new_arena, 0, tegam2714a_p.max_seq_len );
 
-    /* Set up the pulser as well as the representation of the pulsers
-       memory */
-
-    tegam2714a_p_set_constant( 0, tegam2714a_p.max_seq_len, 0 );
-
-    for ( p = tegam2714a_p.pulses; p != NULL; p = p->next )
-        if ( p->is_active )
-        {
-			tegam2714a_p_set( tegam2714a_p.new_arena, p->pos, p->len,
-                              p->function->delay );
-            tegam2714a_p_set_constant( p->pos + p->function->delay,
-                                       p->len, 1 );
-        }
-}
-
-
-/*-------------------------------------------------------------------*
- * Function is called after the test run to reset all the variables
- * describing the state of the pulser to their initial values
- *-------------------------------------------------------------------*/
-
-void tegam2714a_p_full_reset( void )
-{
-    Pulse_T *p;
-
-
     for ( p = tegam2714a_p.pulses; p != NULL; p = p->next )
     {
         /* First we check if the pulse has been used at all print a warning
@@ -209,7 +200,8 @@ void tegam2714a_p_full_reset( void )
             continue;
         }
 
-        /* Reset pulse properties to their initial values */
+        /* Reset pulse properties to their initial values, this is necessary
+           since they might have changed in a previous experiment */
 
         p->pos = p->initial_pos;
         p->is_pos = p->initial_is_pos;
@@ -222,6 +214,14 @@ void tegam2714a_p_full_reset( void )
 
         p->is_old_pos = p->is_old_len = UNSET;
         p->is_active = ( p->is_pos && p->is_len && p->len > 0 );
+
+        if ( p->is_active )
+        {
+			tegam2714a_p_set( tegam2714a_p.new_arena, p->pos, p->len,
+                              p->function->delay );
+            tegam2714a_p_set_constant( p->pos + p->function->delay,
+                                       p->len, 1 );
+        }
     }
 }
 

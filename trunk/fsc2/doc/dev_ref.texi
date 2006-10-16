@@ -216,9 +216,9 @@ that can be measured is from @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos}, @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"BH15"} as the device name,
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos},
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -313,9 +313,9 @@ for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
-@code{no}.
+In the GPIB configuration file use @code{"DG2020_B"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos},
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -383,9 +383,9 @@ for function/output channels declared as @code{INVERTED}).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
-@code{no}.
+In the GPIB configuration file use  @code{"DG2020_F"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos},
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -430,9 +430,9 @@ currently supported.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
-@code{no}.
+In the GPIB configuration file use  @code{"EG4402"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos},
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -475,9 +475,9 @@ Output channels: 8
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos}, @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"EP385"} as the device name,
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos},
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -522,9 +522,9 @@ amplifier with built-in analog-to-digital converter.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use  @code{"ER023M"} as the device name,
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -571,9 +571,9 @@ minimum field step width is @w{1 mG}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"ER032M"} as the device name,
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -615,9 +615,9 @@ with @code{F1} probe the range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"ER035M"} as the device name,
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -693,9 +693,9 @@ range depends on probe being used, with @code{F0} probe it is @w{460 G} to
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"ER035M"} as the device name,
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} an @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -809,9 +809,9 @@ Fixed length of TRIGGER_OUT pulse: @w{20 ns}
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} to @code{yes}.
+In the GPIB configuration file use @code{"HFS9000"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -855,9 +855,9 @@ to return the measured frequency can be used.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character and set @code{set-reos} @code{set-xeos} and @code{set-bin}
-to @code{no}.
+In the GPIB configuration file use @code{"HP5340A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -893,9 +893,9 @@ to @w{3 dB} in @w{0.1 dB} steps.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
-@code{no}.
+In the GPIB configuration file use @code{"HP8647A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos},
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -944,9 +944,9 @@ to @w{14.5 dB} in @w{0.1 dB} steps.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character and set @code{set-reos}, @code{set-xeos} and @code{set-bin}
-to @code{no}.
+In the GPIB configuration file use @code{"HP8647B"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos},
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -995,6 +995,9 @@ to @w{10 dB} in @w{1 dB} steps.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
+In the GPIB configuration file use @code{"HP8672A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos},
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1211,9 +1214,9 @@ units!
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488) via the Oxford ITC 503
 temperature controller transfering data between GPIB and Oxford ISOBUS.@*
-In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"IPS120_10"} as the device name,
+@code{'\r'} or @code{0xd} as the EOScharacter, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1252,9 +1255,9 @@ magnet used for the Leiden @w{275 GHz} (J-band) spektrometer.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488)@*
-In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"IPS120_10_MOD"} as the device name,
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1347,9 +1350,9 @@ adjustment of temperature.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\r'} or @code{0xd} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"ITC503"} as the device name,
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1395,9 +1398,9 @@ the currents through the sweep coil, not in field units!
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"KEITHLEY228A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1438,9 +1441,9 @@ voltmeter 4060, DC and AC measurements
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"KONTRON4060"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1474,9 +1477,9 @@ supported, no automatic adjustment of the temperature.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"LAKESHORE330"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1510,9 +1513,10 @@ for averaging).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} and @code{set-eot} to @code{yes}.
+In the GPIB configuration file use @code{"LECROY9400"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
+@code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1555,9 +1559,10 @@ for averaging), 2 memory channels, 150 MHz bandwidth.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} and @code{set-eot} to @code{yes}.
+In the GPIB configuration file use @code{"LECROY9410"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
+@code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1615,9 +1620,10 @@ for averaging), 2 memory channels, 350 MHz bandwidth.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} and @code{set-eot} to @code{yes}.
+In the GPIB configuration file use @code{"LECROY9420"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
+@code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1675,9 +1681,10 @@ for averaging), 2 memory channels, 350 MHz bandwidth
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} and @code{set-eot} to @code{yes}.
+In the GPIB configuration file use @code{"LECROY9424"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
+@code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1739,9 +1746,10 @@ the device has an external trigger input instead.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} and @code{set-eot} to @code{yes}.
+In the GPIB configuration file use @code{"LECROY9424E"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
+@code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1801,9 +1809,10 @@ with the 9450A, which seems to be just a 300 MHz bandwidth version of the
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} and @code{set-eot} to @code{yes}.
+In the GPIB configuration file use @code{"LECROY9450"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
+@code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1863,9 +1872,10 @@ model), 4 function channels (needed for averaging), 4 memory channels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} and @code{set-eot} to @code{yes}.
+In the GPIB configuration file use @code{"LECROY_WR2"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
+@code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2138,9 +2148,9 @@ in Gauss, not Tesla!
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"PT2025"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2176,7 +2186,10 @@ Frequency range is @w{9 kHz} to @w{1.1 GHz}, attenuation range @w{-140 dB}
 to @w{13 dB} in @w{0.1 dB} steps.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"RS_SML01"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2489,9 +2502,9 @@ may become larger by @w{8 ns}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} to @code{yes} and @code{set-xeos} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"RS690"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} to
+@code{yes} and @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2619,9 +2632,9 @@ voltage and current measurements
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} to @code{yes} and @code{set-xeos} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"SPECTRAPRO_300I"} as the device
+name, @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos}
+to @code{yes} and @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2738,9 +2751,9 @@ lock-in amplifier SR510, single channel, no internal modulation, 4 ADC and
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
-@code{no}.
+In the GPIB configuration file use @code{"SR510"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos},
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2778,9 +2791,9 @@ lock-in amplifier SR530, two channels, no internal modulation, 4 ADC and
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
-@code{no}.
+In the GPIB configuration file use @code{"SR530"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}, 
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2818,9 +2831,9 @@ lock-in amplifier SR810, one channel, auto acquisition, internal modulation,
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
-@code{no}.
+In the GPIB configuration file use @code{"SR810"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos},
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2863,9 +2876,9 @@ lock-in amplifier SR830, two channels, auto acquisition, internal modulation,
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character and set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
-@code{no}.
+In the GPIB configuration file use @code{"SR830"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos},
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2908,9 +2921,9 @@ channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} to @code{yes}.
+In the GPIB configuration file use @code{"TDS520"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2961,9 +2974,9 @@ channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} to @code{yes}.
+In the GPIB configuration file use @code{"TDS520A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -3014,9 +3027,9 @@ channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} to @code{yes}.
+In the GPIB configuration file use @code{"TDS520C"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -3067,9 +3080,9 @@ as trigger input only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} to @code{yes}.
+In the GPIB configuration file use @code{"TDS540"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -3120,9 +3133,9 @@ as trigger input only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} to @code{yes}.
+In the GPIB configuration file use @code{"TDS744A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -3173,9 +3186,9 @@ as trigger input only), 3 math channels and 4 reference channels.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{no} and
-@code{set-bin} to @code{yes}.
+In the GPIB configuration file @code{"TDS754A"} as the device name,
+use @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos}
+and @code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -3237,9 +3250,9 @@ Waveform channel: adjustable betwee 0 and 99, default is 99
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos}, @code{set-xeos} and @code{set-bin} to
-@code{yes}.
+In the GPIB configuration file use @code{"TEGAM2714A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos},
+@code{set-xeos} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -3279,9 +3292,9 @@ resolution of @w{1 mA}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-In the GPIB configuration file use @code{'\n'} or @code{0xa} as the EOS
-character, set @code{set-reos} and @code{set-xeos} to @code{yes} and
-@code{set-bin} to @code{no}.
+In the GPIB configuration file use @code{"THURLBY330"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:

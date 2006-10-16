@@ -88,9 +88,9 @@ int tegam2714a_p_init_hook( void )
     tegam2714a_p.is_needed = SET;
     tegam2714a_p.is_timebase = UNSET;
     tegam2714a_p.is_running = UNSET;
-    tegam2714a_p.max_seq_len = 0;
+    tegam2714a_p.max_seq_len = MIN_PULSER_BITS;
     tegam2714a_p.is_max_seq_len = UNSET;
-    tegam2714a_p.max_seq_len = 0;
+    tegam2714a_p.max_seq_len = MIN_PULSER_BITS;
     tegam2714a_p.old_arena = NULL;
 
     tegam2714a_p.dump_file = NULL;
@@ -235,14 +235,9 @@ int tegam2714a_p_exp_hook( void )
     if ( ! tegam2714a_p.is_needed )
         return 1;
 
-    /* Reset to the state before the test run or the previous experiment */
-
-    tegam2714a_p_full_reset( );
-
     /* Initialize the device */
 
     tegam2714a_p_init( device_name );
-    tegam2714a_p_do_update( );
 
     return 1;
 }

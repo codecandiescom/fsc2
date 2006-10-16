@@ -42,7 +42,7 @@ static void tegam2714a_p_gpib_failure( void );
  * Initialization of the device
  *------------------------------*/
 
-bool tegam2714a_p_init( const char * name )
+void tegam2714a_p_init( const char * name )
 {
     char reply[ 100 ];
     long length = 100;
@@ -52,7 +52,11 @@ bool tegam2714a_p_init( const char * name )
 
 
     if ( gpib_init_device( name, &tegam2714a_p.device ) == FAILURE )
-        return FAIL;
+    {
+        print( FATAL, "Initialization of device failed: %s\n",
+               gpib_error_msg );
+        THROW( EXCEPTION );
+    }
 
 	/* Switch off headers */
 
@@ -69,7 +73,7 @@ bool tegam2714a_p_init( const char * name )
 
 	tegam2714a_p_run( STOP );
 
-    /* Set  the timebase */
+    /* Set the timebase */
 
     tegam2714a_p_set_timebase( tegam2714a_p.timebase );
 
@@ -109,17 +113,15 @@ bool tegam2714a_p_init( const char * name )
     if ( gpib_write( tegam2714a_p.device, cmd, strlen( cmd ) ) == FAILURE )
         tegam2714a_p_gpib_failure( );
 
-	/* Set up the waveform */
+    /* Set up all pulses */
 
-    tegam2714a_p_set_pulses( );
+    tegam2714a_p_pulse_setup( );
 
-	/* Finally set device to use the newly created waveform */
+	/* Finally set device to the waveform to be used */
 
     sprintf( cmd, ":FUNC WAVE %d\n", tegam2714a_p.function.channel );
     if ( gpib_write( tegam2714a_p.device, cmd, strlen( cmd ) ) == FAILURE )
         tegam2714a_p_gpib_failure( );
-
-    return OK;
 }
 
 
