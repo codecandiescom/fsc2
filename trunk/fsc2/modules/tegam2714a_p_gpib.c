@@ -338,8 +338,8 @@ void  tegam2714a_p_set_constant( Ticks start,
     {
         for ( k = 0; k < length; k++ )
         {
-            *bpt++ = 0x8f;
-            *bpt++ = 0xff;
+            *bpt++ = 0x08;
+            *bpt++ = 0x00;
         }
         *bpt = '\n';
     }
