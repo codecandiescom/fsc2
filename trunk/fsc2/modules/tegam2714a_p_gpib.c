@@ -60,7 +60,7 @@ void tegam2714a_p_init( const char * name )
 
 	/* Switch off headers */
 
-    if ( gpib_write( tegam2714a_p.device, "HDRS OFF\n", 9  ) == FAILURE )
+    if ( gpib_write( tegam2714a_p.device, ":HDRS OFF\n", 10 ) == FAILURE )
         tegam2714a_p_gpib_failure( );	
 
 	/* Check if we can read from the device by asking for the status byte */
@@ -108,7 +108,7 @@ void tegam2714a_p_init( const char * name )
 
 	/* That out of the way set the size to what we need */
 
-    sprintf( cmd, ":WVFM:WAVE %d;SIZE %ld\n", tegam2714a_p.function.channel, 
+    sprintf( cmd, ":WVFM:WAVE %d;SIZE %ld\n", tegam2714a_p.function.channel,
              tegam2714a_p.max_seq_len );
     if ( gpib_write( tegam2714a_p.device, cmd, strlen( cmd ) ) == FAILURE )
         tegam2714a_p_gpib_failure( );
@@ -119,7 +119,7 @@ void tegam2714a_p_init( const char * name )
 
 	/* Finally set device to the waveform to be used */
 
-    sprintf( cmd, ":FUNC WAVE %d\n", tegam2714a_p.function.channel );
+    sprintf( cmd, ":FUNC WAVE,%d\n", tegam2714a_p.function.channel );
     if ( gpib_write( tegam2714a_p.device, cmd, strlen( cmd ) ) == FAILURE )
         tegam2714a_p_gpib_failure( );
 }

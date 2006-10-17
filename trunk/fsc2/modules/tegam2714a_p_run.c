@@ -189,6 +189,13 @@ void tegam2714a_p_pulse_setup( void )
     tegam2714a_p.new_arena = tegam2714a_p.old_arena + tegam2714a_p.max_seq_len;
     memset( tegam2714a_p.new_arena, 0, tegam2714a_p.max_seq_len );
 
+    /* Set all the bits of the channel to zero to clear the channel */
+
+    tegam2714a_p_set_constant( 0, tegam2714a_p.max_seq_len, 0 );
+
+    /* Now reset the internal repesentation of the pulses to their initial
+       states and set the pulser up with these */
+
     for ( p = tegam2714a_p.pulses; p != NULL; p = p->next )
     {
         /* First we check if the pulse has been used at all print a warning
