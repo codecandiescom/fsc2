@@ -850,8 +850,8 @@ ssize_t fsc2_serial_write( int          sn,
         }
     }
 
-    while ( ( write_count = write( Serial_Port[ sn ].fd, buf, count ) ) < 0 
-            && errno == EINTR && ! quit_on_signal )
+    while ( ( write_count = write( Serial_Port[ sn ].fd, buf, count ) ) < 0 &&
+            errno == EINTR && ! quit_on_signal )
         /* empty */ ;
 
 
@@ -1003,8 +1003,8 @@ ssize_t fsc2_serial_read( int    sn,
         }
     }
 
-    while ( ( read_count = read( Serial_Port[ sn ].fd, buf, count ) ) < 0 
-            && errno == EINTR && ! quit_on_signal )
+    while ( ( read_count = read( Serial_Port[ sn ].fd, buf, count ) ) < 0 &&
+            errno == EINTR && ! quit_on_signal )
         /* empty */ ;
         
     if ( read_count == 0 )
@@ -1095,8 +1095,7 @@ static bool get_serial_lock( int sn )
             /* Check if the lock file belongs to a running process, if not
                try to delete it */
 
-            if ( pid > 0 && kill( ( pid_t ) pid, 0 ) < 0 &&
-                 errno == ESRCH )
+            if ( pid > 0 && kill( ( pid_t ) pid, 0 ) < 0 && errno == ESRCH )
             {
                 if ( unlink( Serial_Port[ sn ].lock_file ) < 0 )
                 {
