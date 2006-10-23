@@ -50,13 +50,7 @@ void tegam2714a_p_do_update( void )
     if ( tegam2714a_p.is_running && FSC2_MODE == EXPERIMENT )
     {
         restart = SET;
-        if ( ( ! tegam2714a_p.function.is_inverted &&
-               fabs( tegam2714a_p.function.low_level ) <= 0.099 ) ||
-             ( tegam2714a_p.function.is_inverted &&
-               fabs( tegam2714a_p.function.high_level ) <= 0.099 ) )
-            tegam2714a_p_set_amplitude( 0.0 );
-        else
-            tegam2714a_p_run( STOP );
+        tegam2714a_p_run( STOP );
     }
 
     /* Resort the pulses and check that the new pulse settings are reasonable,
@@ -77,16 +71,7 @@ void tegam2714a_p_do_update( void )
     }
 
     if ( restart )
-    {
-        if ( ( ! tegam2714a_p.function.is_inverted &&
-               fabs( tegam2714a_p.function.low_level ) <= 0.099 ) ||
-             ( tegam2714a_p.function.is_inverted &&
-               fabs( tegam2714a_p.function.high_level ) <= 0.099 ) )
-        tegam2714a_p_set_amplitude(   tegam2714a_p.function.high_level
-                                    - tegam2714a_p.function.low_level );
-        else
-            tegam2714a_p_run( START );
-    }
+        tegam2714a_p_run( START );
 }
 
 
