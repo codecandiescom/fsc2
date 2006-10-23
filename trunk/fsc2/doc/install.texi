@@ -21,7 +21,7 @@
 
 
 @node Installation, Device Reference, Modules, Top
-@chapter Installation
+@appendix Installation
 
 @ifinfo
 @menu

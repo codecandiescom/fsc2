@@ -59,11 +59,11 @@ this comes with a small price: one has to specify clearly how the
 experiment is to be done. This is done by writing a (usually rather
 short) script. @code{fsc2} will interpret this script and do the
 experiment accordingly. Writing a script may sound difficult, especially
-wen you have no programming experience at all, but the @code{EDL}
+when you have no programming experience at all, but the @code{EDL}
 language used to describe experiments isn't too hard to learn. And when
 this hurdle has been taken you will have complete control over the way
-your experiments is going to be done and you're not at the mercy of the
-person that wrote the program anymore. Just to give a few trivial
+your experiments is going to be done and you're not anymore at the mercy
+of the person that wrote the program. Just to give a few trivial
 examples: sometimes e.g.@: EPR signals are distributed over a large
 field range with nothing of interest in between, so it would be rather
 useful to skip these regions. Most normal programs won't allow this and
@@ -83,7 +83,7 @@ going to do -- for the standard experiments, once such a script has been
 written, only the relevant parameters have to be changed. And because
 one can use variables in the script it's easy to have a block for
 defining the parameters somewhere at the start of the script and change
-only these if necessary. If this is still too much hassle it is also
+only these as far as necessary. If this is still too much hassle it is also
 possible to automatically create from the existing (and just slightly
 modified) @code{EDL} script a program that allows to set the parameters
 via a graphical user interface and then have this program generate the
@@ -120,8 +120,8 @@ new bugs into @code{fsc2} itself.
 
 The advantages of the approach taken in writing @code{fsc2} have made it
 possible to use it successfully to control spectrometers in S-, X- and
-W-band and at 360 GHz, using completely different hardware, and for all
-kinds of experiments, ranging from cw-EPR, ENDOR, EPR on transient
+W-band and at 245 and 360 GHz, using completely different hardware, and
+for all kinds of experiments, ranging from cw-EPR, ENDOR, EPR on transient
 signals to experiments with pulsed microwave excitation and phase
 cycling, but e.g.@: also an (optical) single molecule or a Raman
 spectrometer.
@@ -153,11 +153,14 @@ These are explained in the chapter following the functions for other
 devices (@pxref{Using Pulsers}).
 
 The next chapter (@pxref{Command Line Options}) lists all the command
-line options that can be passed to @code{fsc2} and the following chapter
+line options that @code{fsc2} can be called with. The following chapter
 (@pxref{GUI-fying}) explains in detail how to convert an @code{EDL} into
 a script with a graphical user interface for editing the relevant
-parameters. The remaining chapters (@pxref{Cloning Devices},
-@pxref{Internals}, @pxref{Modules}) explain in detail everything there
-is to know about writing new modules, including a short overview about
-how @code{fsc2} works internally, which may also be helpful when writing
-a new module.
+parameters. The chapters (@pxref{Cloning Devices} tells how to deal
+with the case that you want to use two (or more) identical devices
+but there's only a single module for that type of device.
+
+The final two capters, @pxref{Internals} and @pxref{Modules}) first
+give you a short overview how @code{fsc2} works internally, which may
+help you when writing a new module (but is not required), and then
+explain in detail everything there is to know about writing new modules.

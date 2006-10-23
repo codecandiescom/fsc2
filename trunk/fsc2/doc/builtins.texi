@@ -2672,7 +2672,7 @@ will return an array with 4 elements containing the data
 @end example
 
 Please note: This function is not very useful anymore because the same
-effect can be achieved by using ranges wen indexing the
+effect can be achieved by using ranges when indexing the
 array (@pxref{Array ranges}).
 
 

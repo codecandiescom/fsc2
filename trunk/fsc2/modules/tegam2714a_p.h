@@ -33,8 +33,16 @@
 #include "tegam2714a_p.conf"
 
 
-#if WAVEFORM_NUMBER < 0 || WAVEFRORM_NUMER > 99
-#error "Waveform number in configuration file invalid, not between 0 and 99."
+#if DEFAULT_WAVEFORM_NUMBER < 0 || DEFAULT_WAVEFRORM_NUMER > 99
+#error "DEFAULT_WAVEFORM_NUMBER in configuration file invalid, not between 0 and 99."
+#endif
+
+#if EMPTY_WAVEFORM_NUMBER < 0 || EMPTY_WAVEFORM_NUMBER > 99
+#error "EMPTY_WAVEFORM_NUMER in configuration file invalid, not between 0 and 99."
+#endif
+
+#if DEFAULT_WAVEFORM_NUMBER == EMPTY_WAVEFORM_NUMBER
+#error "DEFAULT_WAVEFORM_NUMBER and EMPTY_WAVEFORM_NUMBER are set to identical values in configuration file."
 #endif
 
 
@@ -60,8 +68,8 @@
 #define MAX_AMPLITUDE          10.2
 
 
-#define MAX_PULSER_BITS        131036  /* maximum number of bits in channel */
-#define MIN_PULSER_BITS        32
+#define MAX_PULSER_BITS        131036L  /* maximum number of bits in channel */
+#define MIN_PULSER_BITS        32L
 
 
 #define START ( ( bool ) 1 )

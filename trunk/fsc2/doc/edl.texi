@@ -39,14 +39,14 @@
 @end menu
 @end ifinfo
 
-To do an experiment using @code{fsc2} you have to write a script
-describing the experiment. While this may look like a daunting task if
-you have no programming experience at all it has the advantage that you
-have complete control over the way the experiment will be done. You
-don't have to rely on some programmer (who probably isn't around when
-you need him or her most) to have gotten everything right before you
-even started planning the experiment. And writing @code{EDL} scripts
-really isn't that difficult.
+To do an experiment using @code{fsc2} you may have to write a script
+describing the experiment. While this can look like a daunting task if
+you have no programming experience it has the advantage that you have
+complete control over the way the experiment will be done. You don't
+have to rely on some programmer (who probably isn't around when you
+need him or her most) to have gotten everything right before you even
+started planning the experiment. And writing @code{EDL} scripts really
+isn't that difficult as I hope I can convince you in the following.
 
 
 @node Basics, Sections, EDL, EDL
@@ -55,7 +55,7 @@ really isn't that difficult.
 An @code{EDL} script is structured similarly to the way an experiment
 is done. Before you start an experiment you first have to select the
 devices to be used and set them up. So the first part of an @code{EDL}
-script are just a few lines specifying the devices to be controlled by
+script is just a few lines specifying the devices to be controlled by
 the program and then setting their parameters, e.g.@: the timebase of
 the digitizer, the sensitivity of the lock-in amplifier or which pulses
 are to be created by the pulse generator. And as you would now start the
@@ -96,28 +96,28 @@ EXPERIMENT:
 @end example
 
 Obviously, the very first section of the script, starting with the
-section keyword @code{DEVICES}, specifies the names of the devices to be used
-(everything after the double-slashes are comments). In the example these are
-the Bruker ER035M gaussmeter, the AEG X-band magnet and the Stanford
-Research lock-in amplifier SR530.
+section keyword @code{DEVICES}, specifies the names of the devices to be
+used (everything after the double-slashes are comments). In the example
+these are the Bruker ER035M gaussmeter, the AEG X-band magnet and the
+Stanford Research lock-in amplifier SR530.
 
 In the following section, starting with the section keyword
 @code{VARIABLES}, all variables that are going to be used in the
 @code{EDL} script are listed and, if appropriate, initialized. The
 first three variables are for storing the start and end field of the
-field sweep as well as the field step width to do between measuring new
-data points. The next variable @code{field} will later be used for
-storing the actual field value and is initialized to the value of the
+field sweep as well as the field step width to be done between measuring
+new data points. The next variable @code{field} will later be used for
+storing the actual field value and it's initialized to the value of the
 start field. Finally, a counter variable @code{I}, initialized to 1, and
-another variable, @code{data}, for the data obtained from the lock-in
+another variable, @code{data}, for the data point obtained from the lock-in
 amplifier, are declared.
 
 In the next section, following the @code{PREPARATIONS} section keyword,
 the devices are set up. The function @w{@code{magnet_setup()}} tells the
 magnet to start with the field stored in the variable
-@w{@code{start_field}} and to use a field step size of
-@w{@code{field_step}}. This will also make the magnet automatically go
-to the start field (after some calibration) when the experiment starts.
+@w{@code{start_field}} and to use a field step size of @w{@code{field_step}}.
+This will also make the magnet automatically go to the start field (with
+the selected devices after some calibration) when the experiment starts.
 
 The next function call, @w{@code{init_1d()}}, tells the program that this is
 an 1-dimensional experiment and to use the appropriate kind of display
@@ -127,19 +127,19 @@ Now we're already done with the preparations and can start the
 experiment, as indicated by the section keyword @code{EXPERIMENT}. The
 whole experiment is done in a loop that is repeated as long as the
 actual field (stored in the variable @code{field}) isn't larger than the
-@w{@code{end_field}}. To tell the program where the loop starts and ends all
-the statements belonging to the loop are enclosed in curly braces,
+@w{@code{end_field}}. To tell the program where this loop starts and ends
+all the statements belonging to the loop are enclosed in curly braces,
 `@code{@{}' and `@code{@}}'.
 
 The first thing to do in the experiment loop is to fetch a new data
 point from the lock-in amplifier, storing it in the variable @code{data}.
 Next, we have to display the data point, which is done via the call of
 the function @w{@code{display_1d()}} (as you may have guessed there also
-exists a function called @w{@code{display_2d()}} that gets used when one wants
-to display results from an experimnt where 2 parameters are varied, but
-since here only the field is swept @w{@code{display_1d()}} will do). Here
-two arguments are used, the number of the point, stored in the variable
-@code{I}, and the value of the new data point.
+exists a function called @w{@code{display_2d()}} that gets used when one
+wants to display results from an experimnt where 2 parameters are varied,
+but since here only the field is swept @w{@code{display_1d()}} will do).
+Here two arguments are required, the number of the point, stored in the
+variable @code{I}, and the value of the new data point.
 
 Of course, we also need to write the new data point to a data file. This
 is done by the call of the function @code{save()} that automatically
@@ -165,8 +165,8 @@ editor) you load it into @code{fsc2} and press the @code{Test} or the
 thoroughly. It will not only check for misspelt keywords, undefined
 variables, non-existent functions, syntax errors etc.@: but will also
 repeat the loop in the experiment section as often as in the real
-experiment to find out if no errors will happen during the
-experiment. This includes, for example, checking that the field is not
+experiment to find out if no errors are going to happen during the
+experiment. This includes for example checking that the field is not
 swept into regions the magnet or the gauss-meter can not handle (e.g.@:
 by incidentally setting an end field value of @w{34500.0 G} which the
 magnet can't produce). So you can be reasonable sure that the experiment
@@ -178,9 +178,10 @@ consists of function calls. Functions can be divided into two
 categories, built-in functions and device functions. Built-in functions
 (like @w{@code{init_1d()}}, @w{@code{display_1d()}}, @code{save()} and
 @code{wait()}) are always available, even when there is no
-@code{DEVICES} section. In contrast, device functions are bound to
-certain devices and can only be called when the device they are defined
-for is listed in the @code{DEVICES} section. For example, the functions
+@code{DEVICES} section (or no devices are listed in that section). In
+contrast, device functions are bound to certain devices and can only
+be called when the device they are defined for is listed in the
+@code{DEVICES} section. For example, the functions
 @w{@code{lockin_sensitivity()}}, @w{@code{lockin_time_constant()}} and
 @w{@code{lockin_get_data()}} are obviously targeted at lock-in
 amplifiers and are only available when a lock-in amplifier module is
@@ -275,20 +276,20 @@ section label, the
 @end itemize
 @cindex @code{ON_STOP} label
 @noindent
-label (which also must be followed by a colon, @code{:}). It can only be
-used within the @code{EXPERIMENT} section. The @code{ON_STOP} label can
+label (which also must be followed by a colon, @code{:}). It can only
+appear within the @code{EXPERIMENT} section. The @code{ON_STOP} label can
 be used to guarantee that a certain part of the @code{EXPERIMENT}
 section is going to be executed even after the user hit the @code{Stop}
 button. It will probably contain code that stores previously unsaved
 data and does other things that are necessary before the experiment
-really stops.  When @code{fsc2} executes the code following the
+really is finished.  When @code{fsc2} executes the code following the
 @code{ON_STOP} label it won't react to the @code{Stop} button anymore.
 
 
 @node Syntax, Variables, Sections, EDL
 @section Syntax
 
-There are a few basic rules about the syntax of @code{EDL} script.  Each
+There are a few basic rules about the syntax of @code{EDL} scripts. Each
 script consists of one or more sections that always start with one of
 the section keywords listed above. Each section keyword has to be
 followed immediately (i.e.@: without any spaces, tabulator or newline
@@ -315,8 +316,8 @@ start_field       =               3360.0G;
 @noindent
 The only thing you have to take care of is that you don't have a line
 break between a number and its unit (e.g.@: between the @code{3360.0}
-and the @code{G}), only space and tabulator characters are allowed as
-separators.
+and the @code{G}), only spaces and tabulator characters are allowed in
+between.
 
 @code{EDL} scripts use lots of function calls. There are no obvious
 differences between variable names and function names (all start with a
@@ -354,7 +355,7 @@ Names of variables (and also of functions) always start with a
 character, i.e.@: A-Z or a-z. The remaining part of the variable name
 can consist of characters, numbers and underscore characters,
 '@code{_}' (or shorter, if you know regular expressions, valid names
-follow the following pattern: @w{@code{[A-Za-z][A-Za-z_0-9]*}}). Thus,
+must follow the pattern @w{@code{[A-Za-z][A-Za-z_0-9]*}}). Thus,
 '@w{@code{AbC_12x}}' and '@w{@code{aBc_12X}}' are legal variable names,
 while '@code{12xy}' or '@code{_Yx2}' are not. Please note that the variable
 names are case sensitive, i.e.@: '@code{XY}', '@code{Xy}', '@code{xY}'
@@ -376,7 +377,7 @@ with capitals only). In the appendix you'll find a list of (hopefully)
 all reserved words.
 
 Finally, some combinations of characters take on a special meaning when
-they follow a number directly (i.e.@: with only spaces or tabulator
+they directly follow a number (i.e.@: with only spaces or tabulator
 characters in between). These are some physical units with or without
 the characters @code{n} (nano), @code{u} (micro), @code{m} (milli),
 @code{k} (kilo), @code{M} (mega) and @code{G} (giga) (only wave numbers
@@ -408,7 +409,7 @@ functions return values in Gauss!
 @cindex Variable types
 
 Variables can be divided into two classes, variables to hold integer
-values and variables for storing floating point values.
+values and variables for storing floating point numbers.
 
 Integer variables (on machines with 32-bit processors) can hold data in
 the interval @w{[-2^31, 2^31 - 1]}, i.e.@: they run from @w{-2147483648}
@@ -437,7 +438,7 @@ more-dimensional arrays). The names of arrays follow the same convention
 as that of normal variables, i.e.@: if an array name starts with an
 upper case character it's an array consisting of integers only and if it
 starts with a lower case character it's a floating point array. To
-define a normal, fixed sized array in the @code{VARIABLES} section just
+define a normal (fixed sized) array in the @code{VARIABLES} section just
 append the sizes of the dimensions of the array, separated by commas, in
 square brackets. E.g.@: the lines
 @example
@@ -452,9 +453,9 @@ be easily changed if you adjust a single line in the code for
 @code{fsc2}...).
 
 All elements of an arrays are automatically initialized to zero. On the
-other hand, 1-dimensional arrays can also be initialized within the
-@code{EDL} file by equating the array to a list of values, enclosed in
-curly braces:
+other hand, arrays can also be initialized within the @code{EDL} file by
+equating the array (in the 1-dimensional case) to a list of values,
+enclosed in curly braces:
 @example
 C[ 3 ] = @{ 2, 1, -1 @};
 d[ 5 ] = @{ sqrt( 2.0 ), sqrt( 3.0 ) + 1 @};
@@ -524,10 +525,10 @@ h[ 2, * ];
 I[ *, *, * ];
 @end example
 @noindent
-This defines an 1-dimensional integer array @code{G} with a non-fixed
-(and still unknown) number of elements, a 2-dimensional floating point
-matrix @code{h} with two rows of unknown length and a 3-dimensional
-array with all sizes being variable sized.
+These three statements define an 1-dimensional integer array @code{G} with
+a non-fixed (and still unknown) number of elements, a 2-dimensional
+floating point matrix @code{h} with two rows of unknown length and a
+3-dimensional array with all sizes being variable sized.
 
 The only restriction in declaring variable sized matrices is that you
 can't declare matrices with only the higher dimensions being variable
@@ -554,7 +555,7 @@ M[ 50 ] = 84;
 @end example
 @noindent
 Now the array has 50 elements, the newly added elements between and
-including the 25th and 49th being initialized to zero.
+including the 26th and 49th being initialized to zero.
 
 But there's also another way to change the size of the array. You can
 assign another array to @code{M} and in this case the length of @code{M}
@@ -577,7 +578,7 @@ variable sized array by assigning another array to it. If @code{M}
 had already been given a length by e.g.@: assigning a value to its 25th
 element then assigning it the shorter array @code{H} will automatically
 shorten it to 10 elements and the values stored in the 11th to the 25th
-element are lost.
+element are lost!
 
 To understand how more-dimensional, variable sized arrays work it is
 probably best to think of them not in terms of matrices but of arrays
@@ -600,7 +601,7 @@ sub-arrays -- the 1st to the 6th sub-array are still undefined (having a
 length of 0).
 
 Only if you assign a value to the elements of one of these other
-sub-arrays it will start be created, e.g.@: by having
+sub-arrays it will spring into existence, e.g.@: by having
 @example
 j[ 3, 2 ] = 2.7182818;
 @end example
@@ -621,20 +622,20 @@ j[ 5 ] = k;
 @noindent
 will create the 5th sub-array of @code{j} with a length of 3 and its
 values being identical to the ones of the array @code{k}. From this
-example you can also see, that sub-arrays of an array can be simply
-specified by off the index for the element of the sub-array, i.e.@:
-@code{j[5]} stands for the complete 5th sub-array of @code{j} (and the
-@code{k} on the right hand side represents the complete array @code{k}).
+example you can also see that sub-arrays of an array can be simply
+specified by the index of the sub-array, i.e.@: @code{j[5]} stands
+for the complete 5th sub-array of @code{j} (and the @code{k} on the
+right hand side represents the complete array @code{k}).
 
 But @code{j} can also be set by assigning another 2-dimensional matrix
 to it.
 @example
-l[ 3, 2 ] = @{ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 @};
-j = l;
+r[ 3, 2 ] = @{ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 @};
+j = r;
 @end example
 @noindent
-Since @code{l} is a matrix of rank 3x2 after the assignment @code{j}
-will have the same rank (and the elements of @code{j} and @code{l}
+Since @code{r} is a matrix of rank 3x2 after the assignment @code{j}
+will have the same rank (and the elements of @code{j} and @code{r}
 will, of course, be identical).
 
 The same, of course, can be done with "matrices" of higher dimensions.
@@ -649,12 +650,12 @@ elements, 1-dimensional arrays to its sub-sub-arrays, 2-dimensional
 @cindex Assignment operations
 
 Assignments of the kind described above also work with fixed sized
-arrays and matrices but, of course, then the sizes of the quantities on
-the left and the right side must be identical or an error will be
+arrays and matrices but, of course, then the sizes of the quantities
+on the left and the right side must fit exactly or an error will be
 flagged.
 
 But @code{fsc2} tries to be even more clever: when the dimensions of a
-quantity the left side of an equation is larger than the dimension of
+quantity the left side of an assignment is larger than the dimension of
 the quantity on the right hand side it tries to assign the quantity on
 the right hand side to as many elements or sub-arrays on the left hand
 side as possible. You already have seen this in the discussion of the
@@ -671,9 +672,9 @@ sets all elements of the array @code{B} to 9 and all 18 elements of the
 evaluates to a quarter of pi).
 
 The same assignment can also be done for variable sized arrays and
-matrixes, but only the already existing elements can be set (if i.e.@:
-only a single sub-array of a 2-dimensional "matrix" has been created yet
-only the elements of this sub-array can be set).
+matrixes, but only for the already existing elements can be set (if
+i.e.@: only a single sub-array of a 2-dimensional "matrix" has been
+created yet only the elements of this sub-array can be set this way).
 
 But this does not only work for numbers on the right hand side but also
 for arrays and even matrices. When you have for example a 2-dimensional
@@ -689,7 +690,7 @@ this will set up both the sub-arrays of @code{z2} to have 2 elements each
 and set both sub-arrays to the same values as the ones of @code{z1}.
 
 Within the other sections you have to write this a bit differently (but
-even simpler) indicate that you want to set all sub-arrays of @code{z2}
+even simpler) to indicate that you want to set all sub-arrays of @code{z2}
 at once by just writing
 @example
 z2 = z1;
@@ -705,13 +706,14 @@ or the even longer form of
 @example
 z2[ 1, 1 ] = z1[ 1 ];
 z2[ 1, 2 ] = z1[ 2 ];
+
 z2[ 2, 1 ] = z1[ 1 ];
 z2[ 2, 2 ] = z1[ 2 ];
 @end example
 
 Of course, the same also works with arrays of higher dimensions. If you
 have e.g.@: a 3-dimensional matrix, assigning it a number will set all
-of its elements (i.e.@: the elements of the sub-sub-arrays its made up
+of its elements (i.e.@: the elements of the sub-sub-arrays it's made up
 from), assigning it an 1-dimensional arrays will set all sub-sub-arrays
 to be identical to the 1-dimensional array on the right hand side,
 assigning it a 2-dimensional matrix will set all its sub-matrices and
@@ -765,11 +767,11 @@ k[ 2 : 4, 3 : 7 ]
 @noindent
 is a two-dimensional array of rank @code{3x5}. Using
 @example
-k[ 2 : 4, 3 : 7 ] += 1;
+k[ 2 : 4, 3 : 7 ] = 1;
 @end example
 @noindent
-would add @code{1} to the third to seventh element of the second to
-fourth row of the array @code{k}.
+would set the third to seventh element of the second to the fourth row of
+the array @code{k} to 1.
 
 Array indexing with ranges can be used on both the left as well as
 the right hand side of an assignment.
@@ -998,13 +1000,13 @@ expression evaluation is done left to right.
 Finally, the lowest precedence has the conditional operator, which
 has the form
 @example
- expression_1 ? expression_2 : expression_3
+expression_1 ? expression_2 : expression_3
 @end example
 @noindent
-Which tests @code{expression_1} and then results in @code{expression_2}
-if the result of the test was positive or in @code{expression_3} if the
-test failed, a more detailed explanation is given below. The low
-precedence means that all the three expressions are always evaluated
+It tests @code{expression_1} and then results in @code{expression_2}
+being evaluated if the result of the test was non-zero, or in
+@code{expression_3} being calculated if the test failed (i.e. resulted
+in a zero value), a more detailed explanation is given below.
 
 Actually, there are also the assignment operators. But these are only
 used after all of the other operators have been evaluated, so there is
@@ -1013,8 +1015,8 @@ parenthesis. And since only one assignment operator is allowed in a
 statement you don't have to worry about the order of evaluation.
 
 Of course, the precedence of operators and the sequence they are
-evaluated in can always be changed by using parenthesis. So, if in
-doubt, use parenthesis -- this won't slow down the program but will
+evaluated in can always be changed by using parentheses. So, if in
+doubt, use parentheses -- this won't slow down the program but will
 often make the script easier to understand.
 
 
@@ -1504,7 +1506,7 @@ IF A == 0 OR B != 3 @{
 is treated as if you would have written
 @example
 IF A == 0 @{
-    do_some_thing( );
+    do_something( );
 @} ELSE IF B != 3 @{
     do_something( );
 @}
@@ -1527,7 +1529,7 @@ IF A != 0 @{
 @end example
 
 
-All comparison operators may also be used with strings. The test
+All comparison operators can also be used with strings. The test
 for equality has its usual meaning (but take care, in the comparison
 lower and upper case characters are treated as different). The
 comparison for larger or smaller than is based on the ASCII values of the
@@ -1601,8 +1603,7 @@ Now `@code{I}' starts of with the value 6 and the third value in the
 decremented until it is smaller than 1 (the second value in the
 @code{FOR} loop condition). As you see, @code{FOR} loop variables can
 not only be incremented by 1 but by any value (integer or floating point
-ones). And, of course, the loop variable don't have to be an integer
-variable!
+ones). And, of course, the loop variable doesn't have to be an integer!
 
 Please note that after the end of a @code{FOR} loop the loop variable
 does not has the value it had in the last run through the loop but that
@@ -1680,21 +1681,21 @@ loops block.
 
 Finally, there is the @code{IF-ELSE} construct, functioning as in most
 other programming languages. In the simplest case you just have the
-@code{IF} part to execute some instructions only under certain
-conditions. In this case you start with the @code{IF} keyword, followed
-by the condition that has to be met in order to run the following code
-and then the statements enclosed in curly braces. Here's an simple
-example:
+@code{IF} part to execute instructions only under certain conditions.
+In this case you start with the @code{IF} keyword, followed by the
+condition that has to be met in order to run the following code and
+then the set of statements to be enclosed in curly braces. Here's a
+simple example:
 @example
   IF x < 0 @{
       x *= -1.0;
 @}
 @end example
 @noindent
-Here the variable @code{x} is multiplied by @code{-1} only if @code{x}
+Here the variable @code{x} is multiplied by @code{-1.0} only if @code{x}
 is negative, i.e.@: it basically just sets @code{x} to its absolute
 value (there's also the built-in function @code{abs()} for calculating
-the absolute value of variable which is probably a lot faster).
+the absolute value of variable which probably is a lot faster).
 
 By using the @code{ELSE} statement you can specify an alternative with
 statements to be executed if the @code{IF} condition is not being met.
@@ -1712,12 +1713,12 @@ braces:
 But things can also get more complex -- you may follow the @code{ELSE}
 directly by another @code{IF}. Let's assume that you need to set
 @code{x} to 1 if it's larger than 1, to 0 if it belongs to the interval
-@w{[ 0, 1 ]} and to -1 if it's smaller than 0. Then you could use:
+@w{[0, 1]} and to -1 if it's smaller than 0. Then you could use:
 @example
   IF x > 1.0 @{
       x = 1.0;                 // x is larger than 1
   @} ELSE IF x >= 0.0 @{
-      x = 0.0;                 // x must be element of [ 0, 1 ]
+      x = 0.0;                 // x must be element of [0, 1]
   @} ELSE @{
       x = -1.0;                // otherwise x is less than 0
   @}
@@ -1759,7 +1760,7 @@ actual experiment stops with an error that could not be anticipated.
 @cindex Miscellaneous
 @cindex Miscellaneous
 
-The remaining of this chapter covers a few additional syntactic elements
+The remainder of this chapter covers a few additional syntactic elements
 that didn't fit into any of the previous sections.
 
 @anchor{#INCLUDE statement}
@@ -1769,19 +1770,20 @@ that didn't fit into any of the previous sections.
 Everywhere within an @code{EDL} script one can include another
 @code{EDL} file. This is done using the @code{#INCLUDE} keyword,
 followed by the name of the file to be included, and has the same effect
-as if the included file had been pasted into the current @code{EDL}
-script, replacing the @code{#INCLUDE} statement. Included files
-themselves may contain further @code{#INCLUDE} statements, up to 16
+as if the file to be included had been pasted into the current @code{EDL}
+script, replacing the line with the @code{#INCLUDE} statement. Included
+files themselves may contain further @code{#INCLUDE} statements, up to 16
 levels deep.
 
 The name of the file to be included must follow the @code{#INCLUDE}
 directly (i.e.@: on the same line and only with spaces and tab
-characters in between). It must be included either in double quotes
+characters in between). It must be enclosed either in double quotes
 (i.e.@: it must have the form @code{"..."}) or in angle braces
-'@code{<}' and '@code{>}' (i.e.@: be of the form @code{<...>}).
+('@code{<}' and '@code{>}', i.e.@: have the form @code{<...>}).
 
-When the file name is enclosed in double quotes @code{fsc2} tries to
-figure out the location where it is stored by the following algorithm:
+If the file name is enclosed in double quotes @code{fsc2} tries to
+figure out the location where it is stored according to the following
+rules:
 @itemize
 @item If the name starts with a slash, '@code{/}', it is assumed that the
       file is given with a complete, absolute path.
@@ -1798,7 +1800,7 @@ whatever the name of the file is. If no default directory has been
 compiled into @code{fsc2} an error message is printed and interpretation
 of the script stops.
 
-If the included file can't be opened an error message is printed and
+If the file to be included can't be opened an error message is printed and
 interpretation of the @code{EDL} script is abandoned.
 
 
@@ -1820,8 +1822,8 @@ the file was included from.
 @cindex #QUIT statement
 
 When the @code{#QUIT} statement is encountered in an @code{EDL} script
-@code{fsc2} treats this as the complete end of the @code{EDL} script and
-won't read any further lines. In the main file of an @code{EDL} this is
+@code{fsc2} treats this as the end of the @code{EDL} script and won't
+read any further lines. In the main file of an @code{EDL} this is
 equivalent to the @code{#EXIT} statement. But within an included
 @code{EDL} file @code{#EXIT} will induce @code{fsc2} to return to the
 including file while @code{#QUIT} makes @code{fsc2} stop completely,

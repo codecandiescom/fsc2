@@ -35,6 +35,8 @@ static void tegam2714a_p_set_offset( double offset );
 static double tegam2714a_p_get_offset( void );
 static void tegam2714a_p_set_levels( double old_ampl,
                                      double old_offset );
+static void tegam2714a_p_write( const char * buf,
+                                long         length );
 static void tegam2714a_p_gpib_failure( void );
 
 
@@ -47,6 +49,8 @@ void tegam2714a_p_init( const char * name )
     char reply[ 100 ];
     long length = 100;
     char cmd[ 100 ];
+    char *ptr;
+    size_t i;
     double ampl;
     double offset;
 
@@ -60,18 +64,13 @@ void tegam2714a_p_init( const char * name )
 
 	/* Switch off headers */
 
-    if ( gpib_write( tegam2714a_p.device, ":HDRS OFF\n", 10 ) == FAILURE )
-        tegam2714a_p_gpib_failure( );	
+    tegam2714a_p_write( ":CONF:HDRS OFF\n", 15 );
 
 	/* Check if we can read from the device by asking for the status byte */
 
-    if ( gpib_write( tegam2714a_p.device, "*STB?\n", 6 ) == FAILURE ||
-         gpib_read( tegam2714a_p.device, reply, &length ) == FAILURE )
+    tegam2714a_p_write( "*STB?\n", 6 );
+    if ( gpib_read( tegam2714a_p.device, reply, &length ) == FAILURE )
         tegam2714a_p_gpib_failure( );
-
-    /* Switch off output */
-
-	tegam2714a_p_run( STOP );
 
     /* Set the timebase */
 
@@ -83,45 +82,60 @@ void tegam2714a_p_init( const char * name )
     ampl = tegam2714a_p_get_amplitude( );
     offset = tegam2714a_p_get_offset( );
 
-    if ( ampl   !=    tegam2714a_p.function.high_level
-                    - tegam2714a_p.function.low_level ||
+    if ( ampl   != 2.0 * (   tegam2714a_p.function.high_level
+                           - tegam2714a_p.function.low_level ) ||
          offset != ( ! tegam2714a_p.function.is_inverted ?
                      tegam2714a_p.function.low_level :
                      tegam2714a_p.function.high_level ) )
         tegam2714a_p_set_levels( ampl, offset );
 
-    /* Set trigger mode to TRIGGER, i.e. a waveform is output once after
-       an external trigger */
-
-    if ( gpib_write( tegam2714a_p.device, ":MODE TRIG\n", 11 ) == FAILURE )
-        tegam2714a_p_gpib_failure( );
-
 	/* Use the internal clock as reference */
 
-    if ( gpib_write( tegam2714a_p.device, ":CLKSEL INT\n", 12 ) == FAILURE )
-        tegam2714a_p_gpib_failure( );
+    tegam2714a_p_write( ":CLKSEL INT\n", 12 );
 
 	/* Switch off the filter */
 
-    if ( gpib_write( tegam2714a_p.device, ":FILTER OFF\n", 12 ) == FAILURE )
-        tegam2714a_p_gpib_failure( );
+    tegam2714a_p_write( ":FILTER OFF\n", 12 );
 
-	/* That out of the way set the size to what we need */
+    /* Create the empty waveform that we use to "switch off" the device */
+
+    sprintf( cmd, ":WVFM:WAVE %d;SIZE %ld\n", EMPTY_WAVEFORM_NUMBER,
+             MIN_PULSER_BITS );
+    tegam2714a_p_write( cmd, strlen( cmd ) );
+
+    ptr = cmd + sprintf( cmd, ":WVFM:WAVE %d;MEM 0,#264",
+                         EMPTY_WAVEFORM_NUMBER );
+    for ( i = 0; i < MIN_PULSER_BITS; i++ )
+    {
+        *ptr++ = 0x08;
+        *ptr++ = 0x00;
+    }
+    *ptr = '\n';
+
+    tegam2714a_p_write( cmd, ptr - cmd );
+
+    sprintf( cmd, ":FUNC WAVE,%d\n", EMPTY_WAVEFORM_NUMBER );
+    tegam2714a_p_write( cmd, strlen( cmd ) );
+
+    /* Set trigger mode to TRIGGER, i.e. a waveform is output once after
+       receipt of a trigger */
+
+    tegam2714a_p_write( ":MODE TRIG\n", 11 );
+
+    /* In order to make sure the device is "off" send it a trigger command */
+
+    tegam2714a_p_write( "*TRG\n", 5 );
+    tegam2714a_p.is_running = UNSET;
+
+	/* That out of the way set the size for the "real" waveform */
 
     sprintf( cmd, ":WVFM:WAVE %d;SIZE %ld\n", tegam2714a_p.function.channel,
              tegam2714a_p.max_seq_len );
-    if ( gpib_write( tegam2714a_p.device, cmd, strlen( cmd ) ) == FAILURE )
-        tegam2714a_p_gpib_failure( );
+    tegam2714a_p_write( cmd, strlen( cmd ) );
 
-    /* Set up all pulses */
+    /* Finally set up all pulses */
 
     tegam2714a_p_pulse_setup( );
-
-	/* Finally set device to the waveform to be used */
-
-    sprintf( cmd, ":FUNC WAVE,%d\n", tegam2714a_p.function.channel );
-    if ( gpib_write( tegam2714a_p.device, cmd, strlen( cmd ) ) == FAILURE )
-        tegam2714a_p_gpib_failure( );
 }
 
 
@@ -133,9 +147,16 @@ void tegam2714a_p_run( bool state )
 	char cmd[ 50 ] = ":OUTSW ";
 
 
-	strcat( cmd, state ? "ON\n" : "MUTE\n" );
-    if ( gpib_write( tegam2714a_p.device, cmd, strlen( cmd ) ) == FAILURE )
-        tegam2714a_p_gpib_failure( );
+    sprintf( cmd, ":FUNC WAVE,%d\n",
+             state ? tegam2714a_p.function.channel : EMPTY_WAVEFORM_NUMBER );
+    tegam2714a_p_write( cmd, strlen( cmd ) );
+
+    /* If the device is to be switched off send it a trigger to make sure
+       a waveform currently still in the process of being output gets
+       aborted. */
+
+    if ( ! state )
+        tegam2714a_p_write( "*TRG\n", 5 );
 
     tegam2714a_p.is_running = state;
 }
@@ -153,8 +174,7 @@ static void tegam2714a_p_set_timebase( double timebase )
     fsc2_assert( timebase >= MIN_TIMEBASE && timebase <= MAX_TIMEBASE );
 
     sprintf( cmd, ":SCLK %g\n", 1.0 / timebase );
-    if ( gpib_write( tegam2714a_p.device, cmd, strlen( cmd ) ) == FAILURE )
-        tegam2714a_p_gpib_failure( );
+    tegam2714a_p_write( cmd, strlen( cmd ) );
 }
 
 
@@ -169,8 +189,8 @@ static double tegam2714a_p_get_timebase( void )
     long length = 100;
 
 
-    if ( gpib_write( tegam2714a_p.device, "SCLK?\n", 6 ) == FAILURE ||
-         gpib_read( tegam2714a_p.device, reply, &length ) == FAILURE )
+    tegam2714a_p_write( "SCLK?\n", 6 );
+    if ( gpib_read( tegam2714a_p.device, reply, &length ) == FAILURE )
         tegam2714a_p_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
@@ -192,8 +212,7 @@ void tegam2714a_p_set_amplitude( double ampl )
     fsc2_assert( ampl >= 0.0 && ampl <= MAX_AMPLITUDE );
 
     sprintf( cmd, ":AMPL %g\n", ampl );
-    if ( gpib_write( tegam2714a_p.device, cmd, strlen( cmd ) ) == FAILURE )
-        tegam2714a_p_gpib_failure( );
+    tegam2714a_p_write( cmd, strlen( cmd ) );
 }
 
 
@@ -207,8 +226,8 @@ static double tegam2714a_p_get_amplitude( void )
     long length = 100;
 
 
-    if ( gpib_write( tegam2714a_p.device, "AMPL?\n", 6 ) == FAILURE ||
-         gpib_read( tegam2714a_p.device, reply, &length ) == FAILURE )
+    tegam2714a_p_write( "AMPL?\n", 6 );
+    if ( gpib_read( tegam2714a_p.device, reply, &length ) == FAILURE )
         tegam2714a_p_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
@@ -229,8 +248,7 @@ static void tegam2714a_p_set_offset( double offset )
     fsc2_assert( offset >= - MAX_AMPLITUDE && offset <= MAX_AMPLITUDE );
 
     sprintf( cmd, ":OFST %g\n", offset );
-    if ( gpib_write( tegam2714a_p.device, cmd, strlen( cmd ) ) == FAILURE )
-        tegam2714a_p_gpib_failure( );
+    tegam2714a_p_write( cmd, strlen( cmd ) );
 }
 
 
@@ -245,8 +263,8 @@ static double tegam2714a_p_get_offset( void )
     long length = 100;
 
 
-    if ( gpib_write( tegam2714a_p.device, "OFST?\n", 6 ) == FAILURE ||
-         gpib_read( tegam2714a_p.device, reply, &length ) == FAILURE )
+    tegam2714a_p_write( "OFST?\n", 6 );
+    if ( gpib_read( tegam2714a_p.device, reply, &length ) == FAILURE )
         tegam2714a_p_gpib_failure( );
 
     reply[ length - 1 ] = '\0';
@@ -261,8 +279,8 @@ static double tegam2714a_p_get_offset( void )
 static void tegam2714a_p_set_levels( double old_ampl,
                                      double old_offset )
 {
-    double ampl   =   tegam2714a_p.function.high_level
-                    - tegam2714a_p.function.low_level;
+    double ampl   = 2.0 * (   tegam2714a_p.function.high_level
+                            - tegam2714a_p.function.low_level );
     double offset = ! tegam2714a_p.function.is_inverted ?
                     tegam2714a_p.function.low_level :
                     tegam2714a_p.function.high_level;
@@ -368,6 +386,17 @@ void  tegam2714a_p_set_constant( Ticks start,
     }
 
     T_free( buf );
+}
+
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+
+static void tegam2714a_p_write( const char * buf,
+                                long         length )
+{
+    if ( gpib_write( tegam2714a_p.device, buf, length ) == FAILURE )
+        tegam2714a_p_gpib_failure( );
 }
 
 

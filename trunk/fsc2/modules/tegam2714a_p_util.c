@@ -35,7 +35,7 @@ void tegam2714a_p_check_levels( double high,
     double offset;
 
 
-    ampl = high - low;
+    ampl = 2.0 * ( high - low );
 
     if ( ! tegam2714a_p.function.is_inverted )
         offset = low;

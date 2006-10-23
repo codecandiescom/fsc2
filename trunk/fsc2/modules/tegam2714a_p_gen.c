@@ -59,6 +59,13 @@ bool tegam2714a_p_assign_channel_to_function( int  function,
         THROW( EXCEPTION );
     }
 
+    if ( channel == EMPTY_WAVEFORM_NUMBER )
+    {
+        print( FATAL, "The selected waveform is already in use for internal "
+               "purposes.\n" );
+        THROW( EXCEPTION );
+    }
+
     if ( tegam2714a_p.function.self != PULSER_CHANNEL_NO_TYPE )
     {
         print( FATAL, "A function has already been assigned to the only "
