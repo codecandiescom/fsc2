@@ -132,6 +132,7 @@ config/tds540.conf
 config/tds744a.conf
 config/tds754a.conf
 config/tegam2714a_p.conf
+config/tegam2714a_p.conf~
 config/thurlby330.conf
 config/User_Functions.conf
 config/witio_48.conf
@@ -302,6 +303,7 @@ modules/lecroy_ws_net.c
 modules/lecroy_ws_util.c
 modules/Makefile
 modules/Makefile.tmpl
+modules/makelog
 modules/mcn700_2000.c
 modules/me6000.c
 modules/ni6601.c
