@@ -293,9 +293,12 @@ Var_T *f_ocreate( Var_T * var )
     }
     OTHERWISE
     {
-        T_free( new_io );
-        if ( type == FLOAT_INPUT || type == FLOAT_OUTPUT )
-            T_free( new_io->form_str );
+        if ( new_io )
+        {
+            if ( new_io->form_str )
+                T_free( new_io->form_str );
+            T_free( new_io );
+        }
         T_free( help_text );
         T_free( label );
         T_free( sptr );

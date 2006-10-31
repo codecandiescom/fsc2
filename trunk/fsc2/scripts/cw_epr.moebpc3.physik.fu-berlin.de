@@ -401,7 +401,7 @@ sub store_defs {
 sub current_check {
 
 	if ( $_[ 0 ] =~ /^[+-]?\.?$/ or
-		 ( is_float1( $_[ 0 ] ) and $_[ 0 ] >= -7.0 and $_[ 0 ] <= 7.0 ) ) {
+		 ( is_float1( $_[ 0 ] ) and $_[ 0 ] >= -7.5 and $_[ 0 ] <= 7.5 ) ) {
 		check_eval( $_[ 0 ], $end_current, $num_points );
 		$f11_a->configure( '-state' => 'disabled' )
 			if $_[ 0 ] ne $start_current;
@@ -418,7 +418,7 @@ sub current_check {
 sub end_current_check {
 
 	if ( $_[ 0 ] =~ /^[+-]?\.?$/ or
-		 ( is_float2( $_[ 0 ] ) and $_[ 0 ] >= -7.0 and $_[ 0 ] <= 7.0 ) ) {
+		 ( is_float2( $_[ 0 ] ) and $_[ 0 ] >= -7.5 and $_[ 0 ] <= 7.5 ) ) {
 		$opt_end_cur = $_[ 0 ] if $opt_end_cur ne $_[ 0 ];
 		check_eval( $start_current, $_[ 0 ], $num_points );
 		$f11_a->configure( '-state' => 'disabled' )

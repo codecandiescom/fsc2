@@ -201,7 +201,7 @@ FOREVER {
 
 	new_current = input_value( Current );
 	IF abs( current - new_current ) > 0.01 mA {
-		IF new_current > 7.0 A OR new_current < -7.0 A {
+		IF new_current > 7.5 A OR new_current < -7.5 A {
 			current = magnet_field( );
 		} ELSE {
 			current = magnet_field( new_current );

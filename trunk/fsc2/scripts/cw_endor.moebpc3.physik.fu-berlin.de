@@ -213,7 +213,7 @@ $MOD_AMPL{ tk_label }->pack( %wp );
 $MOD_AMPL{ tk_entry }->pack( %wp );
 $MOD_AMPL{ tk_unit  }->pack( %up );
 
-# === CURR float [ -7.0 : 7.0 ][ 0.0 ] "Field current:" "A"
+# === CURR float [ -7.5 : 7.5 ][ 0.0 ] "Field current:" "A"
 
 my %CURR;
 $CURR{ tk_frame } = $fsc2_main_frame->Frame( );
@@ -221,8 +221,8 @@ $CURR{ tk_label } = $CURR{ tk_frame }->Label( -text => "Field current:",
 -width => 20,
 -anchor => 'w' );
 $CURR{ value } = 0.0;
-$CURR{ min } = -7.0;
-$CURR{ max } = 7.0;
+$CURR{ min } = -7.5;
+$CURR{ max } = 7.5;
 $CURR{ tk_entry } = $CURR{ tk_frame }->Entry( -textvariable => \$CURR{ value },
 -width => 10,
 -validate => 'key',

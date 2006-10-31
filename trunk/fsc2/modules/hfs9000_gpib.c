@@ -435,7 +435,7 @@ bool hfs9000_operation_complete( void )
     {
         stop_on_user_request( );
         len = 10;
-        if ( gpib_write( hfs9000.device, "*OPC\n", 5 ) == FAILURE ||
+        if ( gpib_write( hfs9000.device, "*OPC?\n", 6 ) == FAILURE ||
              gpib_read( hfs9000.device, reply, &len ) == FAILURE )
             hfs9000_gpib_failure( );
     } while ( reply[ 0 ] != '1' );
