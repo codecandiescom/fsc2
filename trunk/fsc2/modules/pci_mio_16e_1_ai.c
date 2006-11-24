@@ -834,7 +834,6 @@ static void pci_mio_16e_1_ai_get_trigger_args( Var_T * v )
             v = pci_mio_16e_1_ai_get_T_scan( v );
             v = pci_mio_16e_1_ai_get_T_conv( v );
             break;
-            
 
         default :
             fsc2_impossible( );
@@ -935,7 +934,7 @@ static Var_T *pci_mio_16e_1_ai_get_T_scan( Var_T * v )
     pci_mio_16e_1_ai_check_T_scan( t );
     trig.scan_duration = t;
 
-    return  vars_pop( v );
+    return vars_pop( v );
 }
 
 
@@ -1047,7 +1046,7 @@ static Var_T *pci_mio_16e_1_ai_get_T_delay( Var_T * v )
     t = pci_mio_16e_1_check_time( t, "delay time" );
     trig.delay_duration = t;
 
-    return  vars_pop( v );
+    return vars_pop( v );
 }
 
 

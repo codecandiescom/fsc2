@@ -4216,7 +4216,7 @@ This function is only available for the @strong{PCI-MIO-16E-1} card. It is
 required that this function is called before analog input (AI) can be
 done to setup the properties of the input channels.
 
-In order to understand what this function (as well as the next few do)
+In order to understand what this function (as well as the next few) do
 a short explanation of the way analog input (AI) is done with the card
 is required: the most basic element of an acquisition is a single
 conversion of an input voltage into a digital value. Since there's
@@ -4437,10 +4437,10 @@ the aquisition and the trigger output appearing on the @code{GPCTR1_OUT}
 pin of the card. It can be both positive and negative (a positive value
 leads to the trigger being output after the start of the acquisition).
 
-Please note that not all timings are possible, e.g.@: when very long
-times between starts of scans are required (for example @w{1 s}) while
+Please note that not all timings are possible. E.g.@: when very long
+times between starts of scans are required (for example @w{1 s}) but
 very short time distances between starts of conversions (for example
-@w{800 ns}) it can be realized using the cards hardware and you will
+@w{800 ns}) this can't be realized using the cards hardware and you will
 have to fall back on using an external trigger for either the event that
 starts the scans or the conversions.
 

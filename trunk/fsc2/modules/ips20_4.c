@@ -865,8 +865,9 @@ static void ips20_4_to_local( void )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function that asks the magnet about its current state
+ *-------------------------------------------------------*/
 
 static void ips20_4_get_complete_status( void )
 {
@@ -1043,11 +1044,11 @@ static void ips20_4_get_complete_status( void )
                expect, but as usual the manual is shamelessly lying. At least
                for the current magnet the character 'C' seems to be returned.
                Because we don't have any better documentation we simply accept
-               whatever the device tells us...
-
+               whatever the device tells us... */
+#if 0
             print( FATAL, "Received invalid reply from device.\n" );
             THROW( EXCEPTION );
-            */
+#endif
             break;
     }
 
@@ -1093,20 +1094,21 @@ static void ips20_4_get_complete_status( void )
 
     /* The polarity status bytes are always '0' according to the manual,
      but as usual the manual is lying, the device sends '7' or '2' and '0'.
-     Due to lack of better documentation we simply ignore the P field...
-
+     Due to lack of better documentation we simply ignore the P field... */
+#if 0
     if ( reply[ 13 ] != '0' || reply[ 14 ] != '0' )
     {
         print( FATAL, "Received invalid reply from device.\n" );
         THROW( EXCEPTION );
     }
-
-    */
+#endif
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*---------------------------------------------------------------*
+ * Function for making the magnet sweep up (at least if it's not
+ * already sweeping up or very near to the maximum current)
+ *---------------------------------------------------------------*/
 
 static void ips20_4_sweep_up( void )
 {
@@ -1137,8 +1139,10 @@ static void ips20_4_sweep_up( void )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ * Function for making the magnet sweep down (at least if it's not
+ * already sweeping down or very near to the minimum current)
+ *-----------------------------------------------------------------*/
 
 static void ips20_4_sweep_down( void )
 {
@@ -1168,8 +1172,10 @@ static void ips20_4_sweep_down( void )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function that's always called before a new current value is
+ * accepted to test if it's within the limits of the magnet
+ *-------------------------------------------------------------*/
 
 static double ips20_4_current_check( double current )
 {
@@ -1214,6 +1220,8 @@ static double ips20_4_current_check( double current )
 
 
 /*-----------------------------------------------------------*
+ * Function that's always called before a sweep speed is set
+ * to test if it's within the magnets limits.
  *-----------------------------------------------------------*/
 
 static double ips20_4_sweep_rate_check( double sweep_rate )
@@ -1259,8 +1267,9 @@ static double ips20_4_sweep_rate_check( double sweep_rate )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for asking the magnet about the current
+ *--------------------------------------------------*/
 
 static double ips20_4_get_act_current( void )
 {
@@ -1278,6 +1287,8 @@ static double ips20_4_get_act_current( void )
 
 
 /*-----------------------------------------------------------*
+ * Function for setting the target current, i.e. the current
+ * the magnet is supposed to sweep to.
  *-----------------------------------------------------------*/
 
 static double ips20_4_set_target_current( double current )
@@ -1294,8 +1305,9 @@ static double ips20_4_set_target_current( double current )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for asking the setting of the target current
+ *-------------------------------------------------------*/
 
 static double ips20_4_get_target_current( void )
 {
@@ -1312,8 +1324,9 @@ static double ips20_4_get_target_current( void )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*---------------------------------------*
+ * Function for setting a new sweep rate
+ *---------------------------------------*/
 
 static double ips20_4_set_sweep_rate( double sweep_rate )
 {
@@ -1329,8 +1342,10 @@ static double ips20_4_set_sweep_rate( double sweep_rate )
     return sweep_rate;
 }
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+
+/*-------------------------------------------------------------*
+ * Function for asking the magnet about its current sweep rate
+ *-------------------------------------------------------------*/
 
 static double ips20_4_get_sweep_rate( void )
 {
@@ -1348,6 +1363,10 @@ static double ips20_4_get_sweep_rate( void )
 
 
 /*-----------------------------------------------------------*
+ * Function to move the magnet to a certain currrent setting
+ * as fast as savely possible. Can be aborted in which case
+ * a running sweep will be stopped by the end-of-experiment
+ * handler function that's then invoked automatically.
  *-----------------------------------------------------------*/
 
 static double ips20_4_goto_current( double current )
@@ -1375,8 +1394,10 @@ static double ips20_4_goto_current( double current )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Function to either stop a sweep, make the magnet sweep to a
+ * certain field value or make it sweep to zero.
+ *-------------------------------------------------------------*/
 
 static int ips20_4_set_activity( int activity )
 {
@@ -1412,8 +1433,10 @@ static int ips20_4_set_activity( int activity )
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*--------------------------------------------*
+ * Function for talking with the power supply
+ * (i.e. send a command and read the answer)
+ *--------------------------------------------*/
 
 static long ips20_4_talk( const char * message,
                           char *       reply,
@@ -1479,8 +1502,9 @@ static long ips20_4_talk( const char * message,
 }
 
 
-/*-----------------------------------------------------------*
- *-----------------------------------------------------------*/
+/*---------------------------------------------------*
+ * Function called in case of communication failures
+ *---------------------------------------------------*/
 
 static void ips20_4_comm_failure( void )
 {
