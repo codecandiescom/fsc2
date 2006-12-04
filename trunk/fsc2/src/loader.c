@@ -264,8 +264,8 @@ static void load_functions( Device_T * dev )
 
     /* Try to open the library for the device. We first try to find it
        automatically, i.e. in the directories defined by the environment
-       variable "LD_LIBRARY_PATH" (the modules should never end up in
-       the places were the linker looks for them by default). */
+       variable "LD_LIBRARY_PATH" (the modules should never end up in the
+       places were the linker looks for them by default). */
 
     lib_name = get_string( "%s.fsc2_so", dev->name );
 
@@ -274,7 +274,7 @@ static void load_functions( Device_T * dev )
     else
         T_free( lib_name );
 
-    /* If this didn't work try it the normal way using the compiled in library
+    /* If this didn't work try it the normal way, using the compiled in library
        path or, if the device name starts with an absolute path, using this
        path (this may happen when the device is specified using an alternative
        name and thus we have to follow a symbolic link). The exception is when
