@@ -314,10 +314,10 @@ static void load_functions( Device_T * dev )
 }
 
 
-/*--------------------------------------------------------------------*
- * Function tries to find out which hook functions exist for a device
- * and determines the pointers to these functions.
- *--------------------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function tries to find out which hook functions exist for
+ * a device and determines the pointers to these functions.
+ *-----------------------------------------------------------*/
 
 static void resolve_hook_functions( Device_T * dev )
 {
@@ -892,7 +892,7 @@ void run_child_exit_hooks( void )
 
 
 /*------------------------------------------------------------------------*
- * This function is intended to allow user defined modules access to the
+ * This function is intended to allow user-defined modules access to the
  * symbols defined in another module. Probably it's a BAD thing if they
  * do, but sometimes it might be inevitable, so we better include this
  * instead of having the writer of a module trying to figure out some
