@@ -196,9 +196,6 @@ endif
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_iconic_start
 
-ifdef WITH_HTTP_SERVER
-	$(EXEC_INSTALL) -m 755 -o $(OWNER) -g $(GROUP) fsc2_http_server $(bindir)
-endif
 
 uninstall:
 	$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean           \
@@ -207,9 +204,6 @@ uninstall:
 	for f in *.fsc2_so; do                                         \
 		$(RM) $(RMFLAGS) $(libdir)/$$f;                            \
 	done
-ifdef WITH_HTTP_SERVER
-	$(RM) $(RMFLAGS) $(bindir)/fsc2_http_server 
-endif
 
 
 # How to get rid of stuff not needed anymore

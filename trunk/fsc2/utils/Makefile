@@ -36,16 +36,20 @@ vim_dir := $(shell if [ -d /usr/local/share/vim/current ]; then   \
 all:
 	$(MAKE) utils
 
+
 utils: edl-mod.elc edl.vim
+
 
 edl-mod.el: edl-mod.el.template $(sdir)/func.c $(cdir)/Functions
 	@sed -e 's/BUILTIN_FUNCTION_LIST/$(shell SRC_DIR=$(sdir) ./get_built_in_functions emacs 2>/dev/null)/;s/DEVICE_FUNCTION_LIST/$(shell CONF_DIR=$(cdir) ./get_device_functions emacs 2>/dev/null)/' $< > $@;
+
 
 edl-mod.elc: edl-mod.el
 	emacs -batch -f batch-byte-compile edl-mod.el;
 
 edl.vim: edl.vim.template $(sdir)/func.c $(cdir)/Functions
 	@sed -e 's/BUILTIN_FUNCTION_LIST/$(shell SRC_DIR=$(sdir) ./get_built_in_functions vim)/;s/DEVICE_FUNCTION_LIST/$(shell CONF_DIR=$(cdir) ./get_device_functions vim)/' $< > $@;
+
 
 install: edl-mod.elc
 	$(INSTALL) -m 755 fsc2_guify $(bindir)
@@ -58,6 +62,10 @@ install: edl-mod.elc
 	if [ -n "$(vim_dir)" ]; then                      \
 		$(INSTALL) -m 644 edl.vim $(vim_dir)/plugin;  \
 	fi
+ifdef WITH_HTTP_SERVER
+	$(EXEC_INSTALL) -m 755 -o $(OWNER) -g $(GROUP) fsc2_http_server $(bindir)
+endif
+
 
 uninstall:
 	-$(RM) $(RMFLAGS) $(bindir)/fsc2_guify
@@ -75,9 +83,14 @@ uninstall:
 			rmdir $(vim_dir)/plugin;                  \
 		fi                                            \
 	fi
+ifdef WITH_HTTP_SERVER
+	$(RM) $(RMFLAGS) $(bindir)/fsc2_http_server 
+endif
+
 
 cleanup:
 	-$(RM) $(RMFLAGS) svn-* *~
+
 
 clean:
 	$(MAKE) cleanup
