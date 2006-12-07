@@ -893,14 +893,15 @@ fsc2_config.h: Makefile $(MACHINE_INCLUDE_FILE)
 built:
 	-@cat fsc2_config.h > version
 	-@echo >> version
-	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]              \
-	                 $(sdir)/fsc2_http_server $(mdir)/Makefile               \
-			  	     $(mdir)/*.[chl] $(cdir)/Functions $(cdir)/Devices       \
-			         $(cdir)/*.conf $(udir)/check_dist $(udir)/clone_device  \
-			         $(udir)/edl-mod.el.template $(udir)/edl.vim.template    \
-					 $(udir)/edl.ssh $(udir)/fsc2_guify $(udir)/fsc2_pulses  \
-					 $(udir)/ipcc $(udir)/Makefile $(udir)/memcheck |        \
-	grep -v 'sed\|grep' |                                                    \
+	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]        \
+	                 $(mdir)/Makefile $(mdir)/*.[chl]                  \
+					 $(cdir)/Functions $(cdir)/Devices $(cdir)/*.conf  \
+					 $(udir)/fsc2_http_server  $(udir)/check_dist      \
+					 $(udir)/clone_device $(udir)/edl-mod.el.template  \
+					 $(udir)/edl.vim.template $(udir)/edl.ssh          \
+					 $(udir)/fsc2_guify $(udir)/fsc2_pulses            \
+					 $(udir)/ipcc $(udir)/Makefile $(udir)/memcheck |  \
+	grep -v 'sed\|grep' |                                              \
 	sed 's/^[^\$$]\{1,\}\$$Id: \([^\$$]\{1,\}\).*$$/\1/' >> version
 	-@gzip -c -9 version | uuencode - > version.ugz
 	-@$(RM) $(RMFLAGS) version

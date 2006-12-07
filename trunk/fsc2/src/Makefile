@@ -62,6 +62,7 @@ src:
 	$(MAKE) fsc2
 	$(MAKE) fsc2_clean
 	$(MAKE) fsc2_connect
+	$(MAKE) fsc2_addr2line
 
 
 modules:
@@ -108,6 +109,12 @@ fsc2_clean.c: fsc2_clean.l
 # Make utility for interfacing with fsc2
 
 fsc2_connect: fsc2_connect.o
+	$(CC) -o $@ $^
+
+
+# Make utility for interfacing with fsc2
+
+fsc2_addr2line: fsc2_addr2line.o
 	$(CC) -o $@ $^
 
 
@@ -187,6 +194,7 @@ endif
 endif
 	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_clean $(bindir)
 	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_connect $(bindir)
+	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_addr2line $(bindir)
 	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
 
 	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test        \

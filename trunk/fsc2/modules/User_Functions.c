@@ -32,20 +32,20 @@
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-Var_T *get_phase_cycled_area( Var_T * v );
+Var_T *get_phase_cycled_area( Var_T * /* v */ );
 
-static Var_T *get_phase_cycled_area_1( Var_T * v );
+static Var_T *get_phase_cycled_area_1( Var_T * /* v */ );
 
-static Var_T *get_phase_cycled_area_2( Var_T * v );
+static Var_T *get_phase_cycled_area_2( Var_T * /* v */ );
 
-static bool get_channel_number( Var_T * v,
-                                long *  channel );
+static bool get_channel_number( Var_T * /* v       */,
+                                long *  /* channel */ );
 
-static void pc_basic_check( const char * func_1,
-                            bool *       is_1,
-                            const char * func_2,
-                            bool *       is_2,
-                            const char * str );
+static void pc_basic_check( const char * /* func_1 */,
+                            bool *       /* is_1   */,
+                            const char * /* func_2 */,
+                            bool *       /* is_2   */,
+                            const char * /* str    */ );
 
 
 /*-----------------------------------------------------------------*

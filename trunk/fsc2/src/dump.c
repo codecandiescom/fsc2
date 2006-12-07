@@ -50,12 +50,12 @@ enum {
 /*-----------------------------------------------------------------------*
  * This function is hardware depended, i.e. it will only work on i386
  * type processors, so it returns immediately without doing anything if
- * the machine is not a i386.
+ * the machine is not an i386.
  * This function is called from the signal handler for 'deadly' signals,
- * e.g. SIGSEGV etc. It tries to figure out where this signal happend,
+ * e.g. SIGSEGV etc. It tries to figure out where the signal happend,
  * creates a backtrace by running through the stackframes and determines
  * from the return addresses and with the help of the GNU utility
- * 'addr2line' the function name and the source file and line number
+ * 'addr2line' the function name, the source file and line number
  * (asuming the executable was compiled with the -g flag and wasn't
  * stripped). The result is written to the write end of a pipe that is
  * (mis)used as a temporary buffer, from which the results will be read
@@ -147,11 +147,9 @@ void DumpStack( void * crash_address )
         close( pipe_fd[ DUMP_CHILD_WRITE ] );
 
         if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-            execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", srcdir "fsc2",
-                   NULL );
+            execl( srcdir "fsc2_addr2line", srcdir "fsc2_addr2line", NULL );
         else
-            execl( ADDR2LINE, ADDR2LINE, "-C", "-f", "-e", bindir "fsc2",
-                   NULL );
+            execl( bindir "fsc2_addr2line", bindir "fsc2_addr2line", NULL );
         _exit( EXIT_FAILURE );
     }
     else if ( pid < 0 )               /* fork failed */
@@ -188,12 +186,9 @@ void DumpStack( void * crash_address )
     while ( * ( int * ) * EBP != 0 )
     {
         /* Get return address of current subroutine and ask the process
-           running ADDR2LINE to convert it into function name, source file
-           and line number. (This fails for programs competely stripped of
-           all debugging information.) If the address indicates that the
-           error hapened in a loaded library we try at least to figure out
-           if it comes from a device module and print the offset in the
-           library, which we then can later check with addr2line. */
+           finally running ADDR2LINE to convert it into function name,
+           source file and line number. (This fails for programs competely
+           stripped of all debugging information.) */
 
         sprintf( buf, "%p\n", ( void * ) * ( EBP + 1 ) );
 
@@ -235,6 +230,10 @@ void DumpStack( void * crash_address  UNUSED_ARG )
 
 
 /*-----------------------------------------------------------------------*
+ * Function converts the address information into something we can feed
+ * to the process that in the end calls the addr2line, writes it to the
+ * pip to that process, reads the answer and puts the answer, after a
+ * few modifications, into the pipe used as a temporary buffer.
  *-----------------------------------------------------------------------*/
 
 #if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
@@ -249,12 +248,9 @@ static void write_dump( int *  pipe_fd,
     Device_T *cd1, *cd2;
 
 
-    /* Since addr2line is only translating addresses from fsc2 itself we
-       also check if the current address is in one of the device modules
-       (assuming that these are located at the highest addresses) and, if
-       the address seems to be from one of them we print out enough
-       infomation to make it possible to figure out the exact location of
-       the error by manually using addr2line on the library. */
+    /* We need to figure out if the crash happened in one of the modules
+       or not in order to be able to pass the the file name beside the
+       crash address to the process deling with addr2line */
 
     for ( cd1 = EDL.Device_List; cd1 != NULL; cd1 = cd1->next )
         if ( cd1->is_loaded )
@@ -267,37 +263,44 @@ static void write_dump( int *  pipe_fd,
             if ( ! cd2->is_loaded )
                 continue;
 
-            if ( ( int ) addr >= * ( int * ) cd1->driver.handle &&
-                 ( int ) addr < * ( int * ) cd2->driver.handle )
+            if ( addr >= ( void * ) * ( int * ) cd1->driver.handle &&
+                 addr <  ( void * ) * ( int * ) cd2->driver.handle )
                 break;
 
             cd1 = cd2;
         }
 
         if ( cd1->is_loaded &&
-             ( int ) addr > * ( int * ) cd1->driver.handle )
+             ( char * ) addr > ( char * ) * ( int * ) cd1->driver.handle )
         {
-            sprintf( buf, "#%-3d %-10p  %p in %s.so\n", k, addr,
-                     ( void * ) ( ( int ) addr
-                                  - * ( int * ) cd1->driver.handle ),
-                     cd1->name );
-            write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
-            return;
+            sprintf( buf, "%s\n", cd1->driver.lib_name );
+            write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
+            sprintf( buf, "%p\n", ( void * ) ( ( char * ) addr -
+                                  ( char * ) * ( int * ) cd1->driver.handle) );
+        }
+        else
+        {
+            write( pipe_fd[ DUMP_PARENT_WRITE ], "fsc2\n", 5 );
+            sprintf( buf, "%p\n", addr );
         }
     }
+    else
+    {
+        write( pipe_fd[ DUMP_PARENT_WRITE ], "fsc2\n", 5 );
+        sprintf( buf, "%p\n", addr );
+    }
 
-    sprintf( buf, "%p\n", addr );
     write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
 
     sprintf( buf, "#%-3d %-10p  ", k, addr );
     write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
 
-    /* Copy ADDR2LINE's reply to the answer pipe */
+    /* Copy reply to the answer pipe */
 
     while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
         write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
 
-    write( answer_fd[ DUMP_ANSWER_WRITE ], "() in ", 6 );
+    write( answer_fd[ DUMP_ANSWER_WRITE ], "() at ", 6 );
 
     while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
         write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
