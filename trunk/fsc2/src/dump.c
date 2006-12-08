@@ -243,14 +243,18 @@ static void write_dump( int *  pipe_fd,
                         int    k,
                         void * addr )
 {
-    char buf[ 128 ];
+    char buf[ 256 ] = "";
     char c;
     Device_T *cd1, *cd2;
 
 
     /* We need to figure out if the crash happened in one of the modules
        or not in order to be able to pass the the file name beside the
-       crash address to the process deling with addr2line */
+       crash address to the process deling with addr2line. We can only
+       distinguish between crashes in the fsc2 executable or in the
+       modules, so traces into some library will (falsly) treated as
+       being within the fsc2 executable and the output in the mail will
+       show nothing really useful. */
 
     for ( cd1 = EDL.Device_List; cd1 != NULL; cd1 = cd1->next )
         if ( cd1->is_loaded )
@@ -278,15 +282,16 @@ static void write_dump( int *  pipe_fd,
             sprintf( buf, "%p\n", ( void * ) ( ( char * ) addr -
                                   ( char * ) * ( int * ) cd1->driver.handle) );
         }
-        else
-        {
-            write( pipe_fd[ DUMP_PARENT_WRITE ], "fsc2\n", 5 );
-            sprintf( buf, "%p\n", addr );
-        }
     }
-    else
+
+    if ( *buf == '\0' )
     {
-        write( pipe_fd[ DUMP_PARENT_WRITE ], "fsc2\n", 5 );
+        if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+            write( pipe_fd[ DUMP_PARENT_WRITE ], srcdir "fsc2\n",
+                   strlen( srcdir ) + 5 );
+        else
+            write( pipe_fd[ DUMP_PARENT_WRITE ], bindir "fsc2\n",
+                   strlen( bindir ) + 5 );
         sprintf( buf, "%p\n", addr );
     }
 

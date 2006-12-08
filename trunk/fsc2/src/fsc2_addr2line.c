@@ -48,20 +48,21 @@ int main( void )
 
 	while ( 1 )
 	{
+        /* Read in the filename (with fill path!) */
+
 		if ( fgets( file, MAX_FILE_LEN, stdin ) == NULL )
 			return EXIT_SUCCESS;
-
 		file[ strlen( file ) - 1 ] = '\0';
+
+        /* Read in the address */
 
 		if ( fgets( addr, MAX_ADDR_LEN, stdin ) == NULL )
 			return EXIT_FAILURE;
-
 		addr[ strlen( addr ) - 1 ] = '\0';
 
-		if ( ! strcmp( file, "fsc2" ) )
-			cmd = get_string( ADDR2LINE " -C -f -e " bindir "fsc2 %s", addr );
-		else
-			cmd = get_string( ADDR2LINE " -C -f -e %s %s", file, addr );
+        /* Construct command line to start addr2line and pass it to popen() */
+
+        cmd = get_string( ADDR2LINE " -C -f -e %s %s", file, addr );
 
 		if ( ( fp = popen( cmd, "r" ) ) == NULL )
 		{
@@ -70,6 +71,8 @@ int main( void )
 		}
 
 		free( cmd );
+
+        /* Read the output of addr2line and pass it on to the parent */
 
 		if ( fgets( buf, MAX_FILE_LEN, fp ) == NULL )
 			return EXIT_FAILURE;
