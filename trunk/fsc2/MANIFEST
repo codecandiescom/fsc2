@@ -5,15 +5,12 @@
 
 Changes
 COPYING
-enr
-enr.edl
 INSTALL
 Makefile
 MANIFEST
 README
 README.mail
 TODO
-xxx.edl
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
