@@ -208,7 +208,8 @@ endif
 uninstall:
 	$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean           \
 					 $(bindir)/fsc2_connect $(bindir)/fsc2_start   \
-					 $(bindir)/fsc2_test $(bindir)/fsc2_load
+					 $(bindir)/fsc2_test $(bindir)/fsc2_load       \
+					 $(bindir)/fsc2_addr2line
 	for f in *.fsc2_so; do                                         \
 		$(RM) $(RMFLAGS) $(libdir)/$$f;                            \
 	done
@@ -223,7 +224,7 @@ cleanup:
 clean:
 	$(MAKE) cleanup
 	$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch] \
-		  *.fsc2_so *.bak
+		  fsc2_addr2line *.fsc2_so *.bak
 
 
 # don't automatically delete intermediate files created by bison and flex

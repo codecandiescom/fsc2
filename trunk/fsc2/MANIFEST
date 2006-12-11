@@ -5,12 +5,15 @@
 
 Changes
 COPYING
+enr
+enr.edl
 INSTALL
 Makefile
 MANIFEST
 README
 README.mail
 TODO
+xxx.edl
 
 Fcntl_Lock/Changes
 Fcntl_Lock/Fcntl_Lock.pm
@@ -64,6 +67,7 @@ config/er035m_sa.conf
 config/er035m_sas.conf
 config/er035m_s.conf
 config/Functions
+config/Functions~
 config/gg_chopper.conf
 config/gpib.conf
 config/hfs9000.conf
@@ -132,7 +136,6 @@ config/tds540.conf
 config/tds744a.conf
 config/tds754a.conf
 config/tegam2714a_p.conf
-config/tegam2714a_p.conf~
 config/thurlby330.conf
 config/User_Functions.conf
 config/witio_48.conf
@@ -475,6 +478,7 @@ src/exp.h
 src/exp_lexer.l
 src/exp_run_parser.y
 src/exp_test_parser.y
+src/fsc2_addr2line.c
 src/fsc2_assert.c
 src/fsc2_assert.h
 src/fsc2.c
@@ -485,7 +489,6 @@ src/fsc2_connect.c
 src/fsc2d.c
 src/fsc2d.h
 src/fsc2.h
-src/fsc2_http_server
 src/fsc2.map
 src/fsc2_module.h
 src/fsc2_rsc_hr.fd
@@ -611,6 +614,7 @@ utils/edl-mod.el.template
 utils/edl.ssh
 utils/edl.vim.template
 utils/fsc2_guify
+utils/fsc2_http_server
 utils/fsc2_pulses
 utils/get_built_in_functions
 utils/get_device_functions
