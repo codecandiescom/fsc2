@@ -228,7 +228,7 @@ void bug_report_callback( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
  *-------------------------------------------------------*/
 
 #if ! defined( NDEBUG ) && defined ( MAIL_ADDRESS )
-void death_mail( int signo )
+void death_mail( void )
 {
 #define DM_BUF_SIZE 512
 
@@ -249,29 +249,26 @@ void death_mail( int signo )
 #if defined _GNU_SOURCE
     fprintf( mail, "fsc2 (%d, %s) killed by %s signal.\n\n", getpid( ),
              Fsc2_Internals.I_am == CHILD ? "CHILD" : "PARENT",
-             strsignal( signo ) );
+             strsignal( Crash.signo ) );
 #else
     fprintf( mail, "fsc2 (%d, %s) killed by signal %d.\n\n", getpid( ),
-             Fsc2_Internals.I_am == CHILD ? "CHILD" : "PARENT", signo );
+             Fsc2_Internals.I_am == CHILD ? "CHILD" : "PARENT", Crash.signo );
 #endif
 
 #ifndef NDEBUG
-    if ( signo == SIGABRT )
+    if ( Crash.signo == SIGABRT )
         fprintf( mail, "%s:%d: failed assertion: %s\n\n",
                  Assert_Struct.filename, Assert_Struct.line,
                  Assert_Struct.expression );
 #endif
 
-    if ( Fail_Mess_Fd >= 0 )
-    {
-        while ( ( count = read( Fail_Mess_Fd, buffer, DM_BUF_SIZE ) ) > 0 )
-            fwrite( buffer, count, 1, mail );
-        fprintf( mail, "\n" );
-        close( Fail_Mess_Fd );
-    }
+#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+    if ( Crash.trace_length > 0 )
+        dump_stack( mail );
+#endif
 
     if ( EDL.Fname != NULL )
-        fprintf( mail, "In EDL program %s at line = %ld\n\n",
+        fprintf( mail, "\nIn EDL program %s at line = %ld\n\n",
                  EDL.Fname, EDL.Lc );
 
     if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
@@ -325,7 +322,7 @@ void death_mail( int signo )
     fclose( mail );
 }
 #else
-void death_mail( int signo UNUSED_ARG )
+void death_mail( void )
 {
 }
 #endif

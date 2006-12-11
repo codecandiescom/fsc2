@@ -23,9 +23,11 @@
 
 
 #include <dlfcn.h>
+#include <execinfo.h>
 #include "fsc2.h"
 #include "serial.h"
 #include "gpib_if.h"
+
 
 #if defined WITH_RULBUS
 #include <rulbus.h>
@@ -650,10 +652,13 @@ static void check_for_further_errors( Compilation_T * c_old,
  * variable and reacts by sending the child a DO_QUIT signal.
  *---------------------------------------------------------------------*/
 
-static void quitting_handler( int signo  UNUSED_ARG )
+static void quitting_handler( int signo )
 {
     int errno_saved;
 
+
+    if ( signo != QUITTING )     /* should never happen... */
+        return;
 
     errno_saved = errno;
     Fsc2_Internals.child_is_quitting = QUITTING_RAISED;
@@ -726,7 +731,7 @@ static void run_sigchld_handler( int signo )
     int errno_saved;
 
 
-    if ( signo != SIGCHLD )
+    if ( signo != SIGCHLD )          /* should never happen... */
         return;
 
     errno_saved = errno;
@@ -935,7 +940,8 @@ void run_sigchld_callback( FL_OBJECT * a,
  * in (one of) the display window(s) gets pressed.
  *-------------------------------------------------------*/
 
-void run_close_button_callback( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
+void run_close_button_callback( FL_OBJECT * a  UNUSED_ARG,
+                                long        b  UNUSED_ARG )
 {
     if ( Graphics_have_been_started )
     {
@@ -1170,18 +1176,13 @@ static void setup_child_signals( void )
 
 static void child_sig_handler( int signo )
 {
-#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-    int *EBP;           /* assumes sizeof( int ) equals size of pointers */
-#endif
-
-
     switch ( signo )
     {
         case DO_QUIT :                             /* aka SIGUSR2 */
             if ( ! EDL.react_to_do_quit )
                 return;
             EDL.do_quit = SET;
-            /* fall through ! */
+            /* fall through */
 
         case SIGALRM :
             if ( Can_Jmp_Alrm )
@@ -1193,9 +1194,15 @@ static void child_sig_handler( int signo )
 
         /* Ignored signals : */
 
-        case SIGHUP :  case SIGINT :    case SIGUSR1 :
-        case SIGCHLD : case SIGCONT :   case SIGTTIN :
-        case SIGTTOU : case SIGVTALRM : case SIGTRAP :
+        case SIGHUP :
+        case SIGINT :
+        case SIGUSR1 :
+        case SIGCHLD :
+        case SIGCONT :
+        case SIGTTIN :
+        case SIGTTOU :
+        case SIGVTALRM :
+        case SIGTRAP :
             return;
 
         case SIGPIPE:
@@ -1205,19 +1212,57 @@ static void child_sig_handler( int signo )
 
     /* All remaining signals are deadly... */
 
-    close_all_files( );
+    Crash.signo = signo;
 
-    if ( signo != SIGTERM && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
+    /* We may be able to determine where the crash happened and then send
+       a mail with information about the crash. */
+
+#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+    if ( ! Crash.already_crashed &&
+         Crash.signo != SIGABRT &&
+         ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
     {
-#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
+        Crash.already_crashed = SET;
+
         if ( Fsc2_Internals.is_linux_i386 )
         {
+            unsigned int *EBP;        /* assumes size equals that of pointer */
+
             asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-            DumpStack( ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET ) );
+            EBP += CRASH_ADDRESS_OFFSET;
+            Crash.trace[ 0 ] = ( void * ) * EBP;
+
+            if ( * ( ( unsigned int * ) ( * ( EBP - 7 ) ) ) == * ( EBP - 8 ) )
+                Crash.trace_length =
+                          create_backtrace( ( unsigned int * ) * ( EBP - 7 ) );
+            else
+                Crash.trace_length =
+                          create_backtrace( ( unsigned int * ) * ( EBP - 8 ) );
         }
-#endif
-        death_mail( signo );
+        else
+        {
+            void *trace[ MAX_TRACE_LEN ];
+            int size;
+
+            Crash.trace[ 0 ] = NULL;       /* don't know how to gt at it */
+            Crash.trace_length = 1;
+            size = backtrace( trace, MAX_TRACE_LEN );
+            if ( size > 3 )
+            {
+                memcpy( Crash.trace + 1, trace + 3,
+                        ( size - 3 ) * sizeof *trace );
+                Crash.trace_length += size - 3;
+            }
+        }
     }
+
+    Crash.already_crashed = SET;
+    death_mail( );
+#endif
+
+    Crash.already_crashed = SET;
+
+    close_all_files( );
 
     /* Test if parent still exists - if not (i.e. the parent died without
        sending a SIGTERM signal) destroy the semaphore and shared memory (as

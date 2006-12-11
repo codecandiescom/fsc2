@@ -26,7 +26,8 @@
 #define DUMP__HEADER
 
 
-void DumpStack( void * /* crash_address */ );
+void dump_stack( FILE * /* fp */ );
+int create_backtrace( unsigned int * /* bt */ );
 
 
 #endif   /* ! DUMP__HEADER */

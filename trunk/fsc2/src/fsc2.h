@@ -175,8 +175,6 @@ int  preparations_parser( FILE * /* in */ );
 
 int  experiment_parser( FILE * /* in */ );
 
-void main_sig_handler( int /* signo */ );
-
 void conn_request_handler( void );
 
 void notify_conn( int /* signo */ );
@@ -193,9 +191,11 @@ int idle_handler( void );
    file the modules have to include) */
 
 typedef struct Internals Internals_T;
-typedef struct EDL_Stuff EDL_Stuff_T;
+typedef struct EDL_Info EDL_Info_T;
 typedef struct Communication Communication_T;
-typedef struct GUI_Stuff GUI_Stuff_T;
+typedef struct GUI_Info GUI_Info_T;
+typedef struct Crash_Info Crash_Info_T;
+
 
 struct Internals {
     uid_t EUID;                  /* user and group ID the program got */
@@ -255,7 +255,7 @@ struct Internals {
 };
 
 
-struct EDL_Stuff {
+struct EDL_Info {
     long Lc;                     /* line number in currently parsed EDL file */
     char *in_file;               /* name of input file */
     char *Fname;                 /* name of currently parsed EDL file */
@@ -315,7 +315,7 @@ struct Communication {
 };
 
 
-struct GUI_Stuff {
+struct GUI_Info {
     bool is_init;
     Display *d;
 
@@ -370,12 +370,22 @@ struct GUI_Stuff {
 };
 
 
+struct Crash_Info {
+    bool already_crashed;         /* set when crash has happened */
+    volatile sig_atomic_t signo;  /* signal indicating the type of crash */
+    void *address;                /* address the crash happened */
+    void *trace[ MAX_TRACE_LEN ]; /* addresses of backtrace */
+    int trace_length;             /* length of backtrace */
+};
+
+
 /* Global variables */
 
 extern Internals_T Fsc2_Internals;
-extern EDL_Stuff_T EDL;
+extern EDL_Info_T EDL;
 extern Communication_T Comm;
-extern GUI_Stuff_T GUI;
+extern GUI_Info_T GUI;
+extern Crash_Info_T Crash;
 extern Graphics_T G;
 extern Graphics_1d_T G_1d;
 extern Graphics_2d_T G_2d;

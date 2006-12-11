@@ -23,6 +23,7 @@
 
 
 #include "fsc2.h"
+#include <execinfo.h>
 
 
 Fsc2_Assert_T Assert_Struct;
@@ -37,6 +38,9 @@ int fsc2_assert_print( const char * expression,
     Assert_Struct.expression = expression;
     Assert_Struct.line = line;
     Assert_Struct.filename = filename;
+
+    Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
+    memmove( Crash.trace, Crash.trace + 1, --Crash.trace_length );
     abort( );
 
     return 0;
@@ -51,6 +55,8 @@ int fsc2_impossible_print( const char * filename,
     Assert_Struct.expression = "Impossible situation encountered.";
     Assert_Struct.line = line;
     Assert_Struct.filename = filename;
+    Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
+    memmove( Crash.trace, Crash.trace + 1, --Crash.trace_length );
     abort( );
 
     return 0;

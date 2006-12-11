@@ -548,6 +548,7 @@ endif
 # For directories make sure they end with a '/'.
 
 CONFFLAGS += -Dsrcdir=\"$(sdir:/=)/\"
+CONFFLAGS += -Dmoddir=\"$(mdir:/=)/\"
 CONFFLAGS += -Dbindir=\"$(bindir:/=)/\"
 CONFFLAGS += -Dlibdir=\"$(libdir:/=)/\"
 CONFFLAGS += -Dauxdir=\"$(auxdir:/=)/\"

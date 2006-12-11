@@ -29,6 +29,7 @@
 #include <mcheck.h>
 #endif
 
+#include <execinfo.h>
 #include <sys/utsname.h>
 #include "serial.h"
 
@@ -42,7 +43,6 @@ static FILE *In_file_fp = NULL;
 static time_t In_file_mod = 0;
 static bool Delete_file = UNSET;
 static bool Delete_old_file = UNSET;
-static volatile sig_atomic_t Fsc2_death = 0;
 
 
 /* Imported global variables */
@@ -70,7 +70,7 @@ static void final_exit_handler( void );
 static bool display_file( char * name,
                           FILE * fp );
 static void set_main_signals( void );
-
+static void main_sig_handler( int signo );
 
 
 /**************************/
@@ -302,6 +302,10 @@ static void globals_init( const char * pname )
     Fsc2_Internals.EGID = getegid( );
 
     lower_permissions( );
+
+    Crash.already_crashed = UNSET;
+    Crash.signo = 0;
+    Crash.trace_length = 0;
 
     Fsc2_Internals.child_pid = 0;
     Fsc2_Internals.fsc2_clean_pid = 0;
@@ -1218,22 +1222,22 @@ static void final_exit_handler( void )
        error print out a message and (if this feature isn't switched off) 
        send an email */
 
-    if ( Fsc2_death != 0 && Fsc2_death != SIGTERM )
+    if ( Crash.signo != 0 && Crash.signo != SIGTERM )
     {
         if ( * ( ( int * ) Xresources[ NOCRASHMAIL ].var ) == 0 &&
               ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
         {
-            death_mail( Fsc2_death );
+            death_mail( );
             fprintf( stderr, "A crash report has been sent to %s\n",
                      MAIL_ADDRESS );
         }
 
 #if defined _GNU_SOURCE
         fprintf( stderr, "fsc2 (%d) killed by %s signal.\n", getpid( ),
-                 strsignal( Fsc2_death ) );
+                 strsignal( Crash.signo ) );
 #else
         fprintf( stderr, "fsc2 (%d) killed by signal %d.\n", getpid( ),
-                 Fsc2_death);
+                 Crash.signo );
 #endif
     }
 }
@@ -2016,14 +2020,11 @@ static void set_main_signals( void )
  * Signal handler for the main program
  *-------------------------------------*/
 
-void main_sig_handler( int signo )
+static void main_sig_handler( int signo )
 {
     int errno_saved;
     pid_t pid;
     int status;
-#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-    int *EBP;           /* assumes sizeof( int ) equals size of pointers */
-#endif
 
 
     switch ( signo )
@@ -2079,36 +2080,62 @@ void main_sig_handler( int signo )
         case SIGPIPE :
             return;
 
-        /* All the remaining signals are deadly - we set 'Fsc2_death' to the
-           signal number so final_exit_handler() can do the appropriate
-           things. */
+        /* All the remaining signals are deadly - we may be able to gather
+           some information about the signal, were the crash happened and a
+           backtrace which the final_exit_handler() can use to do the right
+           thing. */
 
         default :
-            Fsc2_death = signo;
-
-            if ( ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
+#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+            if ( ! Crash.already_crashed &&
+                 signo != SIGABRT &&
+                 ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
             {
-
-#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-
-                /* Of course, we're now deep in UB-land, so we can only hope
-                   that it won't make nasal daemons come out of our nose... */
+                Crash.already_crashed = SET;
 
                 if ( Fsc2_Internals.is_linux_i386 )
                 {
+                    unsigned int *EBP;   /* assumes that sizeof(unsigned int)
+                                            equals that of a pointer */
                     asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-                    DumpStack( ( void * ) * ( EBP + CRASH_ADDRESS_OFFSET ) );
-                }
-#endif
-            }
+                    EBP += CRASH_ADDRESS_OFFSET;
+                    Crash.trace[ 0 ] = ( void * ) * EBP;
 
+                    if ( * ( ( unsigned int * ) ( * ( EBP - 7 ) ) ) ==
+                                                               * ( EBP - 8 ) )
+                        Crash.trace_length =
+                          create_backtrace( ( unsigned int * ) * ( EBP - 7 ) );
+                    else
+                        Crash.trace_length =
+                          create_backtrace( ( unsigned int * ) * ( EBP - 8 ) );
+                }
+                else
+                {
+                    void *trace[ MAX_TRACE_LEN ];
+                    int size;
+
+                    Crash.trace[ 0 ] = NULL;   /* don't know how to gt at it */
+                    Crash.trace_length = 1;
+                    size = backtrace( trace, MAX_TRACE_LEN );
+                    if ( size > 3 )
+                    {
+                        memcpy( Crash.trace + 1, trace + 3,
+                                ( size - 3 ) * sizeof *trace );
+                        Crash.trace_length += size - 3;
+                    }
+                }
+            }
+#endif
+
+            Crash.signo = signo;
+            Crash.already_crashed = SET;
             exit( EXIT_FAILURE );
     }
 }
 
 
 /*-------------------------------------------------------------------*
- * Frunction for sending signals to the child process that waits for
+ * Function for sending signals to the child process that waits for
  * external connections. It sends either BUSY_SIGNAL (aka SIGUSR1)
  * or UNBUSY_SIGNAL (aka SIGUSR2) and then waits for the child
  * to reply with its own signal.

@@ -31,9 +31,11 @@
 const char *Prog_Name;           /* Name the program was started with */
 
 Internals_T Fsc2_Internals;
-EDL_Stuff_T EDL;
+EDL_Info_T EDL;
 Communication_T Comm;
-GUI_Stuff_T GUI;
+GUI_Info_T GUI;
+Crash_Info_T Crash;
+
 
 bool Need_GPIB   = UNSET;        /* Flag, set if GPIB bus is needed */
 bool Need_RULBUS = UNSET;        /* Flag, set if RULBUS is needed */

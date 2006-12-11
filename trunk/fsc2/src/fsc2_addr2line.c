@@ -48,7 +48,7 @@ int main( void )
 
 	while ( 1 )
 	{
-        /* Read in the filename (with fill path!) */
+        /* Read in the filename (with full path!) */
 
 		if ( fgets( file, MAX_FILE_LEN, stdin ) == NULL )
 			return EXIT_SUCCESS;

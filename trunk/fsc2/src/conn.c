@@ -333,11 +333,16 @@ static void conn_sig_handler( int signo )
 
         /* Ignored signals : */
 
-        case SIGHUP :  case SIGINT :  case SIGCHLD : case SIGCONT :
-        case SIGTTIN : case SIGTTOU : case SIGVTALRM :
+        case SIGHUP :
+        case SIGINT :
+        case SIGCHLD :
+        case SIGCONT :
+        case SIGTTIN :
+        case SIGTTOU :
+        case SIGVTALRM :
             return;
 
-        /* All the remaining signals are deadly... */
+        /* All other signals are deadly... */
 
         default :
             unlink( FSC2_SOCKET );

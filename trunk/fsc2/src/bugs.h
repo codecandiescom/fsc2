@@ -26,7 +26,7 @@
 #define BUGS_HEADER
 
 
-void death_mail( int /* signo */ );
+void death_mail( void );
 
 
 #endif /* ! BUGS_HEADER */

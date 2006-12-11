@@ -116,6 +116,11 @@ typedef enum
 #endif
 
 
+/* Define the maximum backtrace length */
+
+#define MAX_TRACE_LEN  64
+
+
 /* Define some useful abbreviations - never ever change these ! */
 
 #define UNDEFINED -1
@@ -623,7 +628,7 @@ enum {
    (of course, this only will work with a i386 type processor and only with
    gcc of the versions where I tested it...) */
 
-#define CRASH_ADDRESS_OFFSET 0x11
+#define CRASH_ADDRESS_OFFSET  0x11
 
 
 /* This constant is the start number for the IDs of objects in the toolbox */

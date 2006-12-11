@@ -24,13 +24,10 @@
 
 #include "fsc2.h"
 
-int Fail_Mess_Fd = -1;
-
-#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-static void write_dump( int *  pipe_fd,
-                        int *  answer_fd,
-                        int    k,
-                        void * addr );
+static int write_dump( int  * pipe_fd,
+                       FILE * fp,
+                       int    k,
+                       void * addr );
 
 enum {
     DUMP_PARENT_READ = 0,
@@ -39,66 +36,24 @@ enum {
     DUMP_PARENT_WRITE
 };
 
-enum {
-    DUMP_ANSWER_READ = 0,
-    DUMP_ANSWER_WRITE
-};
 
-#endif
+/*--------------------------------------------------------*
+ * Function creates a new process that accepts file names
+ * and addresses in that file and returns function name
+ * and line number. This new process then gets passed the
+ * data from a backtrace created after a crash and the
+ * results get written to a file which gets passed to the
+ * function. 
+ *--------------------------------------------------------*/
 
-
-/*-----------------------------------------------------------------------*
- * This function is hardware depended, i.e. it will only work on i386
- * type processors, so it returns immediately without doing anything if
- * the machine is not an i386.
- * This function is called from the signal handler for 'deadly' signals,
- * e.g. SIGSEGV etc. It tries to figure out where the signal happend,
- * creates a backtrace by running through the stackframes and determines
- * from the return addresses and with the help of the GNU utility
- * 'addr2line' the function name, the source file and line number
- * (asuming the executable was compiled with the -g flag and wasn't
- * stripped). The result is written to the write end of a pipe that is
- * (mis)used as a temporary buffer, from which the results will be read
- * later (the read end is a global variable named 'Fail_Mess_Fd').
- * If the macro ADDR2LINE isn't defined the function will do nothing.
- * If it is defined it must be the complete path to 'addr2line'. The
- * best way to set it correctly is probably to have lines like
- * ADDR2LINE = $(shell which addr2line)
- * ifneq ($(word 1,$(ADDR2LINE)),which:)
- *     CFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
- * endif
- * in the Makefile.
- *-----------------------------------------------------------------------*/
-
-#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-void DumpStack( void * crash_address )
+void dump_stack( FILE * fp )
 {
-    int *EBP;           /* assumes sizeof( int ) equals size of pointers */
-    int answer_fd[ 2 ];
     int pipe_fd[ 4 ];
     pid_t pid;
-    int i, k = 0;
-    char buf[ 128 ];
+    int i;
     struct sigaction sact;
     Device_T *cd;
-    static bool already_crashed = UNSET;
 
-
-    /* Sometimes the program crashes again while trying to send out the
-       mail (remember, we're already deep in undefied behavior land when
-       we get here at all, so all bets are off). To avoid getting into an
-       infinite loop of crashes we bail out immediately when 'alread_crashed'
-       is set. */
-
-    if ( already_crashed )
-        return;
-    else
-        already_crashed = SET;
-
-    /* Don't do anything on a machine with a non-Intel processor */
-
-    if ( ! Fsc2_Internals.is_linux_i386 )
-        return;
 
     /* Childs death signal isn't needed anymore */
 
@@ -106,28 +61,19 @@ void DumpStack( void * crash_address )
     sact.sa_flags = 0;
     sigaction( SIGCHLD, &sact, NULL );
 
-    /* Don't crash on SIGPIPE if child process fails to exec (in this case
-       the output will only contain the addresses) */
+    /* Don't crash on SIGPIPE if child process dies unexpectedly */
 
     sact.sa_handler = ( void ( * )( int ) ) SIG_IGN;
     sact.sa_flags = 0;
     sigaction( SIGPIPE, &sact, NULL );
 
-    /* Set up the pipes, two for communication with child process and one
-       misused as a temporary buffer for the result */
+    /* Set up two pipes for communication with child process */
 
     if ( pipe( pipe_fd ) < 0 )
         return;
     if ( pipe( pipe_fd + 2 ) < 0 )
     {
         for ( i = 0; i < 2; i++ )
-            close( pipe_fd[ i ] );
-        return;
-    }
-
-    if ( pipe( answer_fd ) < 0 )
-    {
-        for ( i = 0; i < 4; i++ )
             close( pipe_fd[ i ] );
         return;
     }
@@ -156,97 +102,61 @@ void DumpStack( void * crash_address )
     {
         for ( i = 0; i < 4; i++ )
             close( pipe_fd[ i ] );
-        for ( i = 0; i < 2; i++ )
-            close( answer_fd[ i ] );
         return;
     }
 
     close( pipe_fd[ DUMP_CHILD_READ  ] );
     close( pipe_fd[ DUMP_CHILD_WRITE ] );
 
-    /* The program counter where the crash happened has been passed by the
-       signal handler from which we are called. We now feed it to ADDR2LINE
-       to get the function name, source file and line number. */
+    /* Now we're ready to write the backtrace into the file we got passed */
 
-    write_dump( pipe_fd, answer_fd, k++, crash_address );
+    for ( i = 0; i < Crash.trace_length; i++ )
+        if ( write_dump( pipe_fd, fp, i, Crash.trace[ i ] ) == -1 )
+            break;
 
-    /* Load content of ebp register into EBP - ebp always points to the stack
-       address before the return address of the current subroutine, and the
-       stack address it points to contains the value the epb register had while
-       running the next higher level subroutine */
-
-    asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-
-    /* Loop over all stackframes, starting with the second next and working
-       up the way to the top - the topmost stackframe would be reached when
-       the content of ebp is zero, but this is already _libc_start_main(),
-       so stop one frame earlier */
-
-    EBP = ( int * ) * ( int * ) * EBP;
-    while ( * ( int * ) * EBP != 0 )
-    {
-        /* Get return address of current subroutine and ask the process
-           finally running ADDR2LINE to convert it into function name,
-           source file and line number. (This fails for programs competely
-           stripped of all debugging information.) */
-
-        sprintf( buf, "%p\n", ( void * ) * ( EBP + 1 ) );
-
-        write_dump( pipe_fd, answer_fd, k++, ( void * ) * ( EBP + 1 ) );
-
-        /* Get value of ebp register for the next higher level stackframe */
-
-        EBP = ( int * ) * EBP;
-    }
-
-    kill( pid, SIGTERM );
+    /* Pipes to the child aren't needed anymore, closing them will also
+       make the child exit */
 
     close( pipe_fd[ DUMP_PARENT_READ ] );
     close( pipe_fd[ DUMP_PARENT_WRITE ] );
 
     if ( EDL.Device_List != NULL )
     {
-        write( answer_fd[ DUMP_ANSWER_WRITE ], "\nDevice handles:\n", 17 );
+        fprintf( fp, "\nDevice handles:\n" );
 
         for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
         {
             if ( ! cd->is_loaded )
                 continue;
-            sprintf( buf, "%s.so: %p\n",
+            fprintf( fp, "%s.so: %p\n",
                      cd->name, ( void * ) * ( int * ) cd->driver.handle );
-            write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
         }
     }
-
-    close( answer_fd[ DUMP_ANSWER_WRITE ] );
-
-    Fail_Mess_Fd = answer_fd[ DUMP_ANSWER_READ ];
 }
-#else
-void DumpStack( void * crash_address  UNUSED_ARG )
-{
-}
-#endif
-
 
 /*-----------------------------------------------------------------------*
  * Function converts the address information into something we can feed
  * to the process that in the end calls the addr2line, writes it to the
- * pip to that process, reads the answer and puts the answer, after a
- * few modifications, into the pipe used as a temporary buffer.
+ * pipe to that process, reads the answer and puts the answer, after a
+ * few modifications, into the the file we got passed.
  *-----------------------------------------------------------------------*/
 
-#if ! defined( NDEBUG ) && defined( ADDR2LINE ) && ! defined __STRICT_ANSI__
-
-static void write_dump( int *  pipe_fd,
-                        int *  answer_fd,
-                        int    k,
-                        void * addr )
+static int write_dump( int  * pipe_fd,
+                       FILE * fp,
+                       int    k,
+                       void * addr )
 {
     char buf[ 256 ] = "";
+    ssize_t ret;
     char c;
     Device_T *cd1, *cd2;
 
+
+    if ( addr == NULL )
+    {
+        fprintf( fp, "#%-3d Address unknown\n", k );
+        return 0;
+    }
 
     /* We need to figure out if the crash happened in one of the modules
        or not in order to be able to pass the the file name beside the
@@ -277,7 +187,12 @@ static void write_dump( int *  pipe_fd,
         if ( cd1->is_loaded &&
              ( char * ) addr > ( char * ) * ( int * ) cd1->driver.handle )
         {
-            sprintf( buf, "%s\n", cd1->driver.lib_name );
+            if ( cd1->driver.lib_name[ 0 ] == '/' )
+                sprintf( buf, "%s\n", cd1->driver.lib_name );
+            else if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+                sprintf( buf, moddir "%s\n", cd1->driver.lib_name );
+            else
+                sprintf( buf, libdir "%s\n", cd1->driver.lib_name );
             write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
             sprintf( buf, "%p\n", ( void * ) ( ( char * ) addr -
                                   ( char * ) * ( int * ) cd1->driver.handle) );
@@ -297,55 +212,71 @@ static void write_dump( int *  pipe_fd,
 
     write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
 
-    sprintf( buf, "#%-3d %-10p  ", k, addr );
-    write( answer_fd[ DUMP_ANSWER_WRITE ], buf, strlen( buf ) );
+    fprintf( fp, "#%-3d %-10p  ", k, addr );
 
     /* Copy reply to the answer pipe */
 
-    while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
-        write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
+    c = '\0';
 
-    write( answer_fd[ DUMP_ANSWER_WRITE ], "() at ", 6 );
+    while ( c != '\n' )
+    {
+        if ( ( ret = read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) ) == -1 )
+        {
+            fputs( " <error>\n", fp );
+            return -1;
+        }
 
-    while ( read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) == 1 && c != '\n' )
-        write( answer_fd[ DUMP_ANSWER_WRITE ], &c, 1 );
-    write( answer_fd[ DUMP_ANSWER_WRITE ], "\n", 1 );
+        if ( ret && c != '\n' )
+            fputc( c, fp );
+    };
+
+    fputs( "() at ", fp );
+
+    do 
+    {
+        if ( ( ret = read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) ) == -1 )
+        {
+            fputs( " <error>\n", fp );
+            return -1;
+        }
+
+        if ( ret )
+            fputc( c, fp );
+    } while ( c != '\n' );
+
+    return 0;
 }
 
-#endif  /* ! NDEBUG && ADDR2LINE && !  __STRICT_ANSI__ */
 
+/*-----------------------------------------------------*
+ * Function to assemble the addresses for a backtrace,
+ * the argument is a pointer to where the next stack
+ * frame is.
+ *-----------------------------------------------------*/
 
-
-#if 0
-
-/* An alternative method to obtain a backtrace - unfortunately this won't
-   show us crashes in modules... */
-
-#include <execinfo.h>
-
-void DumpStack( void )
+int create_backtrace( unsigned int * bt )
 {
-    int size;
-    void *buf[ 100 ];
-    int p[ 2 ];
+    unsigned int *EBP = bt;         /* assumes size equals that of pointers */
+    int size = 1;
 
-    if ( pipe( p ) < 0 )
-        return;
-    size = backtrace( buf, 100 );
-    if ( size != 0 )
+
+    /* Loop over all stackframes, working up the way to the top - the topmos
+       stackframe would be reached when the content of EBP is zero, but this
+       is already _libc_start_main(), so stop one frame earlier */
+
+    while ( size < MAX_TRACE_LEN && * ( unsigned int * ) * EBP != 0 )
     {
-        Fail_Mess_Fd = p[ 0 ];
-        backtrace_symbols_fd( buf, size, p[ 1 ] );
-        close( p[ 1 ] );
+        /* Get return address of current subroutine and ask the process
+           finally running ADDR2LINE to convert it into function name,
+           source file and line number. (This fails for programs competely
+           stripped of all debugging information.) */
+
+        Crash.trace[ size++ ] = ( void * ) * ( EBP + 1 );
+        EBP = ( unsigned int * ) * EBP;
     }
-    else
-    {
-        close( p[ 0 ] );
-        close( p[ 1 ] );
-    }
+
+    return size;
 }
-
-#endif
 
 
 /*
