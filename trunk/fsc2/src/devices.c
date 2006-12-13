@@ -60,35 +60,47 @@ void device_add( const char * name )
 
     dev_name = string_to_lower( T_strdup( name ) );
 
-    /* First we've got to check if the name refers to a device driver that is
-       a symbolic link to the 'real' device. If so get the real name by
-       following the link. This way it's possible to have more convenient,
-       locally adjustable names for the devices. As usual, we first check
-       paths defined by the environment variable 'LD_LIBRARY_PATH' and then
+    /* In case the '-l' option was used just look for device modules in
+       the source directory of the modules. Otherweise we've first got to
+       check if the name refers to a device driver that is a symbolic
+       link to the 'real' device. If so get the real name by following
+       the link. This way it's possible to have more convenient, locally
+       adjustable names for the devices. As usual, we first check paths
+       defined by the environment variable 'LD_LIBRARY_PATH' and then
        in the compiled-in path (except when this is a check run). */
 
-    if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
+    if ( Fsc2_Internals.cmdline_flags & LOCAL_EXEC )
     {
-        ld = T_strdup( ld_path );
-
-        for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
-        {
-            lib_name = get_string( "%s%s%s.fsc2_so", ldc, slash( ldc ),
-                                   dev_name );
-            if ( lstat( lib_name, &buf ) == 0 )
-                break;
-            lib_name = CHAR_P T_free( lib_name );
-        }
-
-        T_free( ld );
-    }
-
-    if ( lib_name == NULL && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
-    {
-        lib_name = get_string( "%s%s%s.fsc2_so",
-                               libdir, slash( libdir ), dev_name );
+        lib_name = get_string( moddir "%s.fsc2_so", dev_name );
         if ( lstat( lib_name, &buf ) < 0 )
             lib_name = CHAR_P T_free( lib_name );
+    }
+    else
+    {
+        if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
+        {
+            ld = T_strdup( ld_path );
+
+            for ( ldc = strtok( ld, ":" ); ldc != NULL;
+                  ldc = strtok( NULL, ":" ) )
+            {
+                lib_name = get_string( "%s%s%s.fsc2_so", ldc, slash( ldc ),
+                                       dev_name );
+                if ( lstat( lib_name, &buf ) == 0 )
+                    break;
+                lib_name = CHAR_P T_free( lib_name );
+            }
+
+            T_free( ld );
+        }
+
+        if ( lib_name == NULL &&
+             ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+        {
+            lib_name = get_string( libdir "%s.fsc2_so", dev_name );
+            if ( lstat( lib_name, &buf ) < 0 )
+                lib_name = CHAR_P T_free( lib_name );
+        }
     }
 
     if ( lib_name == NULL )

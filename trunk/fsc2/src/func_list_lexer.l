@@ -175,30 +175,44 @@ size_t func_list_parse( Func_T ** fncts,
 
     EDL.Fname = CHAR_P T_free( EDL.Fname );
 
-    /* As usual, we first check paths defined by the environment variable
-       'LD_LIBRARY_PATH' and then the compiled-in path (except when this
-       is a check run). */
+    /* If we're supposed only to use the files from the source directories
+       only try to use those */
 
-    if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
+    if ( Fsc2_Internals.cmdline_flags & LOCAL_EXEC )
     {
-        ld = T_strdup( ld_path );
-
-        for ( ldc = strtok( ld, ":" ); ldc != NULL; ldc = strtok( NULL, ":" ) )
-        {
-            EDL.Fname = get_string( "%s%sFunctions", ldc, slash( ldc ) );
-            if ( lstat( EDL.Fname, &buf ) == 0 )
-                break;
-            EDL.Fname = CHAR_P T_free( EDL.Fname );
-        }
-
-        T_free( ld );
-    }
-
-    if ( EDL.Fname == NULL && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
-    {
-        EDL.Fname = get_string( "%s%sFunctions", libdir, slash( libdir ) );
+        EDL.Fname = T_strdup( confdir "Functions" );
         if ( lstat( EDL.Fname, &buf ) < 0 )
             EDL.Fname = CHAR_P T_free( EDL.Fname );
+    }
+    else
+    {
+        /* As usual, we first check paths defined by the environment variable
+           'LD_LIBRARY_PATH' and then the compiled-in path (except when this
+           is a check run). */
+
+        if ( ( ld_path = getenv( "LD_LIBRARY_PATH" ) ) != NULL )
+        {
+            ld = T_strdup( ld_path );
+
+            for ( ldc = strtok( ld, ":" ); ldc != NULL;
+                  ldc = strtok( NULL, ":" ) )
+            {
+                EDL.Fname = get_string( "%s%sFunctions", ldc, slash( ldc ) );
+                if ( lstat( EDL.Fname, &buf ) == 0 )
+                    break;
+                EDL.Fname = CHAR_P T_free( EDL.Fname );
+            }
+
+            T_free( ld );
+        }
+
+        if ( EDL.Fname == NULL &&
+             ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+        {
+            EDL.Fname = T_strdup( libdir "Functions" );
+            if ( lstat( EDL.Fname, &buf ) < 0 )
+                EDL.Fname = CHAR_P T_free( EDL.Fname );
+        }
     }
 
     if ( EDL.Fname == NULL )

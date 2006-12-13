@@ -657,7 +657,8 @@ int fsc2_fclose( FILE * stream )
 
 const char *fsc2_config_dir( void )
 {
-    return ( Fsc2_Internals.cmdline_flags & DO_CHECK ) ? "../config" : libdir;
+    return ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) ) ? 
+           confdir : libdir;
 }
 
 

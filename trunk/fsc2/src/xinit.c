@@ -641,25 +641,39 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
 
 bool dl_fsc2_rsc( void )
 {
-    const char *lib_name = GUI.G_Funcs.size == LOW ? "fsc2_rsc_lr.fsc2_so" : 
-                                                     "fsc2_rsc_hr.fsc2_so";
+    const char *lib_name;
     char *alt_lib_name;
 
 
     /* Try to open the library with the stuff dealing with creating the forms.
-       We first try to find it in directories defined by the environment
+       Unless we are only supposed to use things from the sources directories
+       we first try to find it in directories defined by the environment
        variable "LD_LIBRARY_PATH". If this fails (and this is not part of the
        testing procedure) we also try the compiled-in path to the libraries. */
+
+    if ( GUI.G_Funcs.size == LOW )
+    {
+        if ( Fsc2_Internals.cmdline_flags & LOCAL_EXEC )
+            lib_name = srcdir "fsc2_rsc_lr.fsc2_so";
+        else
+            lib_name = "fsc2_rsc_lr.fsc2_so";
+    }
+    else
+    {
+        if ( Fsc2_Internals.cmdline_flags & LOCAL_EXEC )
+            lib_name = srcdir "fsc2_rsc_hr.fsc2_so";
+        else
+            lib_name = "fsc2_rsc_hr.fsc2_so";
+    }
 
     Fsc2_Internals.rsc_handle = NULL;
 
     Fsc2_Internals.rsc_handle = dlopen( lib_name, RTLD_NOW );
 
     if ( Fsc2_Internals.rsc_handle == NULL &&
-         ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+         ! ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) ) )
     {
-        alt_lib_name = get_string( "%s%s%s", libdir, slash( libdir ),
-                                   lib_name );
+        alt_lib_name = get_string( libdir "%s", lib_name );
         Fsc2_Internals.rsc_handle = dlopen( alt_lib_name, RTLD_NOW );
         T_free( alt_lib_name );
     }

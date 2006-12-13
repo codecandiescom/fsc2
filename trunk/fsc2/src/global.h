@@ -565,7 +565,8 @@ enum {
     DO_CHECK      = ( 1 <<  9 ),                /* used for check runs only */
     TEST_ONLY     = ( 1 << 10 ),
     NO_GUI_RUN    = ( 1 << 11 ),
-    ICONIFIED_RUN = ( 1 << 12 )
+    ICONIFIED_RUN = ( 1 << 12 ),
+    LOCAL_EXEC    = ( 1 << 13 )
 };
 
 

@@ -120,7 +120,7 @@ void bug_report_callback( FL_OBJECT * a,
     fprintf( tmp, "Current user: %s\n", ( getpwuid( getuid( ) ) )->pw_name );
     getcwd( cur_dir, PATH_MAX );
     fprintf( tmp, "Current dir:  %s\n", cur_dir );
-    fprintf( tmp, "libdir:       %s\n\n", libdir );
+    fprintf( tmp, "libdir:       " libdir "\n\n" );
 
     /* Append output of ulimit */
 
@@ -152,8 +152,7 @@ void bug_report_callback( FL_OBJECT * a,
     system( cmd );
     T_free( cmd );
 
-    cmd = get_string( "cat %s%sversion.ugz >> %s", libdir, slash( libdir ),
-                      filename );
+    cmd = get_string( "cat " libdir "version.ugz >> %s", filename );
     fflush( tmp );
     system( cmd );
     T_free( cmd );
@@ -307,7 +306,7 @@ void death_mail( void )
         }
     }
 
-    snprintf( vfn, PATH_MAX + 20, "%s%sversion.ugz", libdir, slash( libdir ) );
+    snprintf( vfn, PATH_MAX + 20, libdir "version.ugz" );
 
     if ( ( vfp = fopen( vfn, "r" ) ) != NULL )
     {

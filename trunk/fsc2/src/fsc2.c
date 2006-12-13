@@ -713,7 +713,7 @@ static int scan_args( int *   argc,
                       char *  argv[ ],
                       char ** fname )
 {
-    int flags = 0;
+    int flags = getenv( "FSC2_LOCAL_EXEC" ) != NULL ? LOCAL_EXEC : 0;
     int cur_arg = 1;
     int i;
 
@@ -723,6 +723,16 @@ static int scan_args( int *   argc,
 
     while ( cur_arg < *argc )
     {
+        if ( strlen( argv[ cur_arg ] ) == 11 &&
+             ! strcmp( argv[ cur_arg ], "-local_exec" ) )
+        {
+            flags |= LOCAL_EXEC;
+            for ( i = cur_arg; i < *argc; i++ )
+                argv[ i ] = argv[ i + 1 ];
+            *argc -= 1;
+            continue;
+        }
+
         if ( strlen( argv[ cur_arg ] ) == 2 &&
              ! strcmp( argv[ cur_arg ], "-t" ) )
         {
@@ -2224,10 +2234,9 @@ void usage( int return_status )
 #endif
              "  -h, --help\n"
              "             display this help text and exit\n\n"
-             "For a complete documentation see either %s%sfsc2.ps,\n"
-             "%s%sfsc2.pdf or %s%sfsc2.html\n"
-             "or type \"info fsc2\".\n", docdir, slash( docdir ),
-             docdir, slash( docdir ), docdir, slash( docdir ) );
+             "For a complete documentation see either " docdir "fsc2.ps,\n"
+             docdir "fsc2.pdf or " docdir "fsc2.html\n"
+             "or type \"info fsc2\".\n" );
     exit( return_status );
 }
 

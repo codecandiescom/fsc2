@@ -262,36 +262,50 @@ static void load_functions( Device_T * dev )
 
     dev->driver.handle = NULL;
 
-    /* Try to open the library for the device. We first try to find it
-       automatically, i.e. in the directories defined by the environment
-       variable "LD_LIBRARY_PATH" (the modules should never end up in the
-       places were the linker looks for them by default). */
+    /* If the '-l' option was used only look in the source directory
+       for modules */
 
-    lib_name = get_string( "%s.fsc2_so", dev->name );
-
-    if ( ( dev->driver.handle = dlopen( lib_name, RTLD_NOW ) ) != NULL )
-        dev->driver.lib_name = lib_name;
-    else
-        T_free( lib_name );
-
-    /* If this didn't work try it the normal way, using the compiled in library
-       path or, if the device name starts with an absolute path, using this
-       path (this may happen when the device is specified using an alternative
-       name and thus we have to follow a symbolic link). The exception is when
-       the DO_CHECK flag is defined, where the compiled in path is *not* what
-       we want... */
-
-    if ( dev->driver.handle == NULL &&
-         ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
-         dev->name[ 0 ] != '/' )
+    if ( Fsc2_Internals.cmdline_flags & LOCAL_EXEC )
     {
-        lib_name = get_string( "%s%s%s.fsc2_so", libdir, slash( libdir ),
-                               dev->name );
+        lib_name = get_string( moddir "%s.fsc2_so", dev->name );
+        if ( ( dev->driver.handle = dlopen( lib_name, RTLD_NOW ) ) != NULL )
+            dev->driver.lib_name = lib_name;
+        else
+            T_free( lib_name );
+    }
+    else
+    {
+        /* Try try to find the module automatically, i.e. in the directories
+           defined by the environment variable "LD_LIBRARY_PATH" (the modules
+           should never end up in the places were the linker looks for them
+           by default). */
+
+        lib_name = get_string( "%s.fsc2_so", dev->name );
 
         if ( ( dev->driver.handle = dlopen( lib_name, RTLD_NOW ) ) != NULL )
             dev->driver.lib_name = lib_name;
         else
             T_free( lib_name );
+
+        /* If this didn't work try it the normal way, using the compiled in
+           library path or, if the device name starts with an absolute path,
+           using this path (this may happen when the device is specified using
+           an alternative name and thus we have to follow a symbolic link).
+           The exception is when the DO_CHECK flag is defined, where the
+           compiled in path is *not* what we want... */
+
+        if ( dev->driver.handle == NULL &&
+             ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
+             dev->name[ 0 ] != '/' )
+        {
+            lib_name = get_string( libdir "%s.fsc2_so", dev->name );
+
+            if ( ( dev->driver.handle = dlopen( lib_name, RTLD_NOW ) )
+                                                                      != NULL )
+                dev->driver.lib_name = lib_name;
+            else
+                T_free( lib_name );
+        }
     }
 
     if ( dev->driver.handle == NULL )

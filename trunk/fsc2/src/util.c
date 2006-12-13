@@ -337,7 +337,7 @@ void eprint( int          severity,
     else                               /* simple test run ? */
     {
         if ( severity != NO_ERROR )
-            fprintf( stderr, "%c ", severity[ "FSW" ] );      /* Hehe... */
+            fprintf( stderr, "%c ", severity[ "FSW" ] );
 
         if ( print_fl && EDL.Fname )
             fprintf( severity == NO_ERROR ? stdout : stderr,
@@ -466,7 +466,7 @@ void print( int          severity,
     else                               /* simple test run ? */
     {
         if ( severity != NO_ERROR )
-            fprintf( stderr, "%c ", severity[ "FSW" ] );      /* Hehe... */
+            fprintf( stderr, "%c ", severity[ "FSW" ] );
 
         if ( ! Fsc2_Internals.in_hook && EDL.Fname )
             fprintf( severity == NO_ERROR ? stdout : stderr,
@@ -732,11 +732,6 @@ FILE *filter_edl( const char * name,
 
     if ( Fsc2_Internals.fsc2_clean_pid == 0 )
     {
-        char *cmd = NULL;
-
-
-        CLOBBER_PROTECT( cmd );
-
         /* First of all things wait for a single char from the parent, it
            doesn't matter what get written, we need just to know that the
            parent has run and thus knows about the childs PID. */
@@ -774,33 +769,24 @@ FILE *filter_edl( const char * name,
         fclose( fp );
         close( pd[ 1 ] );
 
-        TRY
+        if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
         {
-            if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-                cmd = get_string( "%s%sfsc2_clean", srcdir, slash( srcdir ) );
-            else
-                cmd = get_string( "%s%sfsc2_clean", bindir, slash( bindir ) );
-            TRY_SUCCESS;
+            execl( srcdir "fsc2_clean", "fsc2_clean", name, NULL );
+            fputs( "\x03\nStarting the test procedure failed, utility '"
+                   srcdir "fsc2_clean' probably not correctly installed.\n",
+                   fp );
         }
-        OTHERWISE
+        else
         {
-            printf( "\x03\nStarting the test procedure failed, not enough "
-                    "memory left.\n" );
-            goto filter_failure;
+            execl( bindir "fsc2_clean", "fsc2_clean", name, NULL );
+            fputs( "\x03\nStarting the test procedure failed, utility '"
+                   bindir "fsc2_clean' probably not correctly installed.\n",
+                   fp );
         }
-
-        execl( cmd, "fsc2_clean", name, NULL );
-
-        /* On failure to exec fsc2_clean we send an error message back that
-           the lexer has to deal with. */
-
-        printf( "\x03\nStarting the test procedure failed, utility '%s' "
-                "probably not correctly installed.\n", cmd );
 
     filter_failure:
 
         fclose( stdout );
-        T_free( cmd );
         _exit( EXIT_SUCCESS );
     }
 

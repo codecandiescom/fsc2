@@ -92,10 +92,10 @@ void dump_stack( FILE * fp )
         close( pipe_fd[ DUMP_CHILD_READ ] );
         close( pipe_fd[ DUMP_CHILD_WRITE ] );
 
-        if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-            execl( srcdir "fsc2_addr2line", srcdir "fsc2_addr2line", NULL );
+        if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+            execl( srcdir "fsc2_addr2line", "fsc2_addr2line", NULL );
         else
-            execl( bindir "fsc2_addr2line", bindir "fsc2_addr2line", NULL );
+            execl( bindir "fsc2_addr2line", "fsc2_addr2line", NULL );
         _exit( EXIT_FAILURE );
     }
     else if ( pid < 0 )               /* fork failed */
@@ -189,7 +189,8 @@ static int write_dump( int  * pipe_fd,
         {
             if ( cd1->driver.lib_name[ 0 ] == '/' )
                 sprintf( buf, "%s\n", cd1->driver.lib_name );
-            else if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+            else if ( Fsc2_Internals.cmdline_flags &
+                      ( DO_CHECK | LOCAL_EXEC ) )
                 sprintf( buf, moddir "%s\n", cd1->driver.lib_name );
             else
                 sprintf( buf, libdir "%s\n", cd1->driver.lib_name );
@@ -201,7 +202,7 @@ static int write_dump( int  * pipe_fd,
 
     if ( *buf == '\0' )
     {
-        if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+        if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
             write( pipe_fd[ DUMP_PARENT_WRITE ], srcdir "fsc2\n",
                    strlen( srcdir ) + 5 );
         else

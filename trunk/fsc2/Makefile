@@ -549,6 +549,10 @@ endif
 
 CONFFLAGS += -Dsrcdir=\"$(sdir:/=)/\"
 CONFFLAGS += -Dmoddir=\"$(mdir:/=)/\"
+CONFFLAGS += -Dutildir=\"$(udir:/=)/\"
+CONFFLAGS += -Dlauxdir=\"$(adir:/=)/\"
+CONFFLAGS += -Dldocdir=\"$(ddir:/=)/\"
+CONFFLAGS += -Dconfdir=\"$(cdir:/=)/\"
 CONFFLAGS += -Dbindir=\"$(bindir:/=)/\"
 CONFFLAGS += -Dlibdir=\"$(libdir:/=)/\"
 CONFFLAGS += -Dauxdir=\"$(auxdir:/=)/\"

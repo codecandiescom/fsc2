@@ -91,7 +91,7 @@ static void start_help_browser( void )
 {
     char *browser;
     char *bn;
-    char *av[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
+    const char *av[ 5 ] = { NULL, NULL, NULL, NULL, NULL };
 
 
     /* Try to figure out which browser to use, first look for user preference
@@ -116,25 +116,28 @@ static void start_help_browser( void )
     if ( browser && ! strcasecmp( bn, "opera" ) )
     {
         av[ 0 ] = T_strdup( "opera" );
-        av[ 1 ] = ( char * ) "-newwindow";
-        av[ 1 ] = get_string( "file:/%s%s%shtml/fsc2.html,new-window",
-                              docdir[ 0 ] != '/' ? "/" : "", docdir,
-                              slash( docdir ) );
+        av[ 1 ] = "-newwindow";
+        if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+            av[ 1 ] = T_strdup( "file:/" ldocdir "fsc2.html,new-window" );
+        else
+            av[ 1 ] = T_strdup( "file:/" docdir "html/fsc2.html,new-window" );
     }
     else if ( browser && ! strcasecmp( bn, "konqueror" ) )
     {
         av[ 0 ] = T_strdup( "konqueror" );
-        av[ 1 ] = get_string( "file:%s%s%shtml/fsc2.html",
-                              docdir[ 0 ] != '/' ? "/" : "", docdir,
-                              slash( docdir ) );
+        if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+            av[ 1 ] = T_strdup( "file:" ldocdir "fsc2.html" );
+        else
+            av[ 1 ] = T_strdup( "file:" docdir "html/fsc2.html" );
     }
     else if ( browser && ! strcasecmp( bn, "galeon" ) )
     {
         av[ 0 ] = T_strdup( "galeon" );
         av[ 1 ] = T_strdup( "--new-window" );
-        av[ 2 ] = get_string( "file://%s%s%shtml/fsc2.html",
-                              docdir[ 0 ] != '/' ? "/" : "", docdir,
-                              slash( docdir ) );
+        if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+            av[ 2 ] = T_strdup( "file://" ldocdir "fsc2.html" );
+        else
+            av[ 2 ] = T_strdup( "file://" docdir "html/fsc2.html" );
     }
     else if ( browser && ( ! strcasecmp( bn, "lynx" ) ||
                            ! strcasecmp( bn, "w3m" ) ) )
@@ -142,16 +145,20 @@ static void start_help_browser( void )
         av[ 0 ] = T_strdup( "xterm" );
         av[ 1 ] = T_strdup( "-e" );
         av[ 2 ] = T_strdup( browser );
-        av[ 3 ] = get_string( "%s%shtml/fsc2.html", docdir, slash( docdir ) );
+        if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+            av[ 3 ] = T_strdup( ldocdir "fsc2.html" );
+        else
+            av[ 3 ] = T_strdup( docdir "html/fsc2.html" );
     }
     else if ( browser && ( strcasecmp( bn, "mozilla" ) ||
                            strcasecmp( bn, "MozillaFirebird" ) ||
                            strcasecmp( bn, "firefox" ) ) )
     {
         av[ 0 ] = T_strdup( browser );
-        av[ 1 ] = get_string( "file:%s%s%shtml/fsc2.html",
-                              docdir[ 0 ] != '/' ? "/" : "", docdir,
-                              slash( docdir ) );
+        if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+            av[ 1 ] = T_strdup( "file:" ldocdir "fsc2.html" );
+        else
+            av[ 1 ] = T_strdup( "file:" docdir "html/fsc2.html" );
     }
     else
     {
@@ -161,20 +168,25 @@ static void start_help_browser( void )
         av[ 0 ] = browser ? T_strdup( browser ) : T_strdup( "netscape" );
 
         if ( system( "xwininfo -name Netscape >/dev/null 2>&1" ) )
-            av[ 1 ] = get_string( "file:%s%s%shtml/fsc2.html",
-                                  docdir[ 0 ] != '/' ? "/" : "", docdir,
-                                  slash( docdir ) );
+        {
+            if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+                av[ 1 ] = T_strdup( "file:" ldocdir "fsc2.html" );
+            else
+                av[ 1 ] = T_strdup( "file:" docdir "html/fsc2.html" );
+        }
         else
         {
             av[ 1 ] = T_strdup( "-remote" );
-            av[ 2 ] =
-                   get_string( "openURL(file:%s%s%shtml/fsc2.html,new-window)",
-                               docdir[ 0 ] != '/' ? "/" : "", docdir,
-                               slash( docdir ) );
+            if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+                av[ 2 ] = T_strdup( "openURL(file:" ldocdir
+                                    "fsc2.html,new-window)" );
+            else
+                av[ 2 ] = T_strdup( "openURL(file:" docdir
+                                    "html/fsc2.html,new-window)" );
         }
     }
 
-    execvp( av[ 0 ], av );
+    execvp( av[ 0 ], ( char ** ) av );
     _exit( EXIT_FAILURE );
 }
 

@@ -262,25 +262,12 @@ void start_fsc2( char * pname,
                  char * fname,
                  int    wait_flag )
 {
-    char *av[ 6 ] = { NULL, NULL, NULL, NULL, NULL, NULL };
-    int ac = 0;
+    const char *av[ 6 ] = { bindir "fsc2", NULL, NULL, NULL, NULL, NULL };
+    int ac = 1;
     char *prog_name;
     pid_t new_pid;
-    char flags[ 5 ][ 9 ] = { "--delete", "-s", "-S", "-T", "-I" };
+    const char *flags[ 5 ] = { "--delete", "-s", "-S", "-T", "-I" };
 
-
-    if ( NULL == ( av[ 0 ] =
-                 CHAR_P malloc( ( bindir ? strlen( bindir ) + 1 : 0 ) + 6 ) ) )
-    {
-        unlink ( fname );
-        exit( -1 );
-    }
-
-    if ( bindir )
-        strcpy( av[ 0 ], bindir );
-    if ( bindir != NULL && av[ 0 ][ strlen( av[ 0 ] ) - 1 ] != '/' )
-        strcat( av[ 0 ], "/" );
-    strcat( av[ ac++ ], "fsc2" );
 
     av[ ac++ ] = flags[ 0 ];
     av[ ac++ ] = flags[ 1 ];
@@ -299,7 +286,6 @@ void start_fsc2( char * pname,
     else if ( strcmp( prog_name, "fsc2_load" ) &&
               strcmp( prog_name, "fsc2_connect" ) )
     {
-        free( av[ 0 ] );
         unlink( fname );
         exit( -1 );
     }
@@ -311,11 +297,9 @@ void start_fsc2( char * pname,
 
     if ( ( new_pid = fork( ) ) == 0 )
     {
-        execvp( av[ 0 ], av );
+        execvp( av[ 0 ], ( char ** ) av );
         _exit( -1 );                 /* kill child on failed execvp() */
     }
-
-    free( av[ 0 ] );
 
     if ( new_pid < 0 )               /* fork failed ? */
     {

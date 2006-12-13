@@ -117,7 +117,7 @@ void server_callback( FL_OBJECT * obj,
 static void spawn_server( void )
 {
     int pr;
-    char *a[ 4 ];
+    const char *a[ 4 ] = { NULL, NULL, NULL, NULL };
 
 
     /* Open pipe for communication with child that's going to be spawned */
@@ -133,14 +133,30 @@ static void spawn_server( void )
         THROW( EXCEPTION );
     }
 
-    if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
-        a[ 0 ] = get_string( "%s%sfsc2_http_server", srcdir, slash( srcdir ) );
+    if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+        a[ 0 ] = srcdir "fsc2_http_server";
     else
-        a[ 0 ] = get_string( "%s%sfsc2_http_server", bindir, slash( bindir ) );
+        a[ 0 ] = bindir "fsc2_http_server";
 
-    a[ 1 ] = get_string( "%d", Fsc2_Internals.http_port );
-    a[ 2 ] = T_strdup( auxdir );
-    a[ 3 ] = NULL;
+    if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+        a[ 2 ] = lauxdir;
+    else
+        a[ 2 ] = auxdir;
+
+    TRY
+    {
+    	a[ 1 ] = get_string( "%d", Fsc2_Internals.http_port );
+        TRY_SUCCESS;
+	}
+    OTHERWISE
+    {
+        close( Comm.http_pd[ HTTP_PARENT_READ ] );
+        close( Comm.http_pd[ HTTP_PARENT_WRITE ] );
+        close( Comm.http_pd[ HTTP_CHILD_READ ] );
+        close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
+
+        RETHROW( );
+    }
 
     /* Start the HTTP server with its standard input and output redirected */
 
@@ -155,13 +171,11 @@ static void spawn_server( void )
         close( Comm.http_pd[ HTTP_CHILD_READ ] );
         close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
 
-        execv( a[ 0 ], a );
+        execv( a[ 0 ], ( char ** ) a );
         _exit( EXIT_FAILURE );
     }
 
-    T_free( a[ 0 ] );
-    T_free( a[ 1 ] );
-    T_free( a[ 2 ] );
+    T_free( ( char * ) a[ 1 ] );
 
     close( Comm.http_pd[ HTTP_CHILD_READ  ] );
     close( Comm.http_pd[ HTTP_CHILD_WRITE ] );
