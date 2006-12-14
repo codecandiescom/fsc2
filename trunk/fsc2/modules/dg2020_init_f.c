@@ -525,7 +525,7 @@ static void dg2020_pulse_start_setup( void )
              f->self == PULSER_CHANNEL_PHASE_2 )
             continue;
 
-        qsort( f->pulses, f->num_pulses, sizeof( Pulse_T * ),
+        qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
                dg2020_start_compare );
 
         dg2020_do_checks( f );

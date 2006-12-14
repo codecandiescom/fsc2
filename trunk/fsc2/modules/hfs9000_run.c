@@ -101,7 +101,7 @@ static bool hfs9000_update_pulses( bool flag )
             continue;
 
         if ( f->num_pulses > 1 )
-            qsort( f->pulses, f->num_pulses, sizeof( Pulse_T * ),
+            qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
                    hfs9000_start_compare );
 
         /* Check the new pulse positions and lengths, if they're not ok stop

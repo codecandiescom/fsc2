@@ -97,7 +97,7 @@ bool dg2020_reorganize_pulses( bool flag )
              f->self == PULSER_CHANNEL_PHASE_2 )
             continue;
 
-        qsort( f->pulses, ( size_t ) f->num_pulses, sizeof( Pulse_T * ),
+        qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
                dg2020_start_compare );
 
         /* Check the pulse positions and lengths, if test fails in test run

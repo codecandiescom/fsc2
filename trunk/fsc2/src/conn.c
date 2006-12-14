@@ -74,14 +74,14 @@ pid_t spawn_conn( bool   start_state,
 
     raise_permissions( );
     unlink( FSC2_SOCKET );
-    memset( &serv_addr, 0, sizeof( serv_addr ) );
+    memset( &serv_addr, 0, sizeof serv_addr );
     serv_addr.sun_family = AF_UNIX;
     strcpy( serv_addr.sun_path, FSC2_SOCKET );
 
     old_mask = umask( 0 );
 
     if ( bind( listen_fd, ( struct sockaddr * ) &serv_addr,
-               sizeof( serv_addr ) ) == -1 )
+               sizeof serv_addr ) == -1 )
     {
         umask( old_mask );
         unlink( FSC2_SOCKET );
@@ -152,7 +152,7 @@ static void connect_handler( int listen_fd )
     {
         /* Listen on the socket */
 
-        cli_len = sizeof( cli_addr );
+        cli_len = sizeof cli_addr;
         if ( ( conn_fd = accept( listen_fd, ( struct sockaddr * ) &cli_addr,
                                  &cli_len ) ) < 0 )
             continue;

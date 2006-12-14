@@ -2401,7 +2401,7 @@ static Var_T *f_tb_wait_child( Var_T * v )
     pos += sizeof EDL.Lc;
 
     memcpy( pos, &duration, sizeof duration );
-    pos += sizeof( duration );
+    pos += sizeof duration;
 
     memcpy( pos, &var_count, sizeof var_count );   /* number of arguments */
     pos += sizeof var_count;

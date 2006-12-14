@@ -85,7 +85,6 @@ typedef struct Curve_1d Curve_1d_T;
 typedef struct Curve_2d Curve_2d_T;
 typedef struct Canvas Canvas_T;
 typedef struct G_Hash_Entry G_Hash_Entry_T;
-typedef struct G_Hash_Entry* G_Hash_T;
 typedef struct Graphics Graphics_T;
 typedef struct Graphics_1d Graphics_1d_T;
 typedef struct Graphics_2d Graphics_2d_T;
@@ -275,7 +274,7 @@ struct Graphics {
     int z_line_width;       /* width of colour scale */
     int enlarge_box_width;  /* width of enlarge box */
 
-    G_Hash_T color_hash;
+    G_Hash_Entry_T *color_hash;
     unsigned int color_hash_size;
 
 };

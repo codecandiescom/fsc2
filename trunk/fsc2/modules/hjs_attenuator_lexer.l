@@ -256,7 +256,7 @@ static void hjs_attenuator_new_table_entry( int    type,
                                           * sizeof *hjs_attenuator.att_table );
         cur_table_len = hjs_attenuator.att_table_len;
         qsort( hjs_attenuator.att_table, hjs_attenuator.att_table_len,
-               sizeof( Att_Table_Entry_T ), hjs_attenuator_comp );
+               sizeof *hjs_attenuator.att_table, hjs_attenuator_comp );
 
         /* Finally check if the stepper motor postitions drop monotonuosly
            with increasing attenuation - otherwise something very fishy is

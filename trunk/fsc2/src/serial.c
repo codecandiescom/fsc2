@@ -665,7 +665,7 @@ struct termios *fsc2_serial_open( int          sn,
 
     tcgetattr( fd, &Serial_Port[ sn ].old_tio );
     memcpy( &Serial_Port[ sn ].new_tio, &Serial_Port[ sn ].old_tio,
-            sizeof( struct termios ) );
+            sizeof Serial_Port[ sn ].new_tio );
     lower_permissions( );
 
     Serial_Port[ sn ].fd = fd;
@@ -1067,7 +1067,7 @@ static bool get_serial_lock( int sn )
 
     if ( ( fd = open( Serial_Port[ sn ].lock_file, O_RDONLY ) ) >= 0 )
     {
-        n = read( fd, buf, sizeof( buf ) - 1 );
+        n = read( fd, buf, sizeof buf - 1 );
         close( fd );
 
         if ( n == 11 )                    /* expect standard HDB UUCP format */
@@ -1175,7 +1175,7 @@ static bool get_serial_lock( int sn )
     umask( mask );
     chown( Serial_Port[ sn ].lock_file, Fsc2_Internals.EUID,
            Fsc2_Internals.EGID );
-    snprintf( buf, sizeof( buf ), "%10ld\n", ( long ) getpid( ) );
+    snprintf( buf, sizeof buf, "%10ld\n", ( long ) getpid( ) );
     write( fd, buf, strlen( buf ) );
     close( fd );
 

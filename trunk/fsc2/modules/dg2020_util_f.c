@@ -276,7 +276,7 @@ int dg2020_get_phase_pulse_list( Function_T * f,
         *( *list + num_pulses++ ) = f->pulses[ i ];
     }
 
-    qsort( *list, num_pulses, sizeof( Pulse_T * ), dg2020_start_compare );
+    qsort( *list, num_pulses, sizeof **list, dg2020_start_compare );
 
     return num_pulses;
 }

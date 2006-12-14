@@ -239,7 +239,7 @@ static void hfs9000_pulse_start_setup( void )
 
         /* Sort the pulses of current the function */
 
-        qsort( f->pulses, f->num_pulses, sizeof( Pulse_T * ),
+        qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
                hfs9000_start_compare );
 
         hfs9000_do_checks( f );

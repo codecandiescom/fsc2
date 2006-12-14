@@ -104,7 +104,7 @@ bool dg2020_reorganize_pulses( bool flag )
             continue;
 
         if ( f->num_pulses > 1 )
-            qsort( f->pulses, f->num_pulses, sizeof( Pulse_T * ),
+            qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
                    dg2020_start_compare );
 
         /* Check the new pulse positions and lengths, if they're not ok stop

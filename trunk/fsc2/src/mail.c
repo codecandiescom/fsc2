@@ -455,7 +455,7 @@ static int open_mail_socket( const char * remote,
         if ( ( hp = gethostbyname( remote ) ) != NULL &&
              hp->h_addr_list != NULL )
         {
-            memset( &serv_addr, 0, sizeof( serv_addr ) );
+            memset( &serv_addr, 0, sizeof serv_addr );
 #ifdef USE_IPv6
             serv_addr.sin6_family = AF_INET6;
             serv_addr.sin6_port = se->s_port;
@@ -468,7 +468,7 @@ static int open_mail_socket( const char * remote,
                     sizeof serv_addr.sin_addr.s_addr );
 #endif
             if ( connect( sock_fd, ( const struct sockaddr * ) &serv_addr,
-                          sizeof( serv_addr ) ) == 0 )
+                          sizeof serv_addr ) == 0 )
                 return sock_fd;
         }
     }
@@ -486,7 +486,7 @@ static int open_mail_socket( const char * remote,
              hp->h_addr_list == NULL )
             continue;
 
-        memset( &serv_addr, 0, sizeof( serv_addr ) );
+        memset( &serv_addr, 0, sizeof serv_addr );
 #ifdef USE_IPv6
         serv_addr.sin6_family = AF_INET6;
         serv_addr.sin6_port = se->s_port;
@@ -500,7 +500,7 @@ static int open_mail_socket( const char * remote,
 #endif
 
         if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
-                      sizeof( serv_addr ) ) == 0 )
+                      sizeof serv_addr ) == 0 )
             return sock_fd;
     }
 

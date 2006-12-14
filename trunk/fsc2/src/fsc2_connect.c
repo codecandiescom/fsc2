@@ -229,7 +229,7 @@ int open_fsc2_socket( const char * fname )
         exit( -1 );
     }
 
-    memset( &serv_addr, 0, sizeof( serv_addr ) );
+    memset( &serv_addr, 0, sizeof serv_addr );
     serv_addr.sun_family = AF_UNIX;
     strcpy( serv_addr.sun_path, FSC2_SOCKET );
 
@@ -238,7 +238,7 @@ int open_fsc2_socket( const char * fname )
        and we've got to start it */
 
     if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
-                  sizeof( serv_addr ) ) == -1 )
+                  sizeof serv_addr ) == -1 )
     {
         if ( errno == ECONNREFUSED || errno == ENOENT || errno == ENOTSOCK )
         {
@@ -495,7 +495,7 @@ ssize_t do_read( int    fd,
     if ( read_cnt <= 0 )
     {
       again:
-        if ( ( read_cnt = read( fd, read_buf, sizeof( read_buf ) ) ) < 0 )
+        if ( ( read_cnt = read( fd, read_buf, sizeof read_buf ) ) < 0 )
         {
             if ( errno == EINTR )
                 goto again;

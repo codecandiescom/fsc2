@@ -1328,7 +1328,7 @@ static ssize_t do_read( int    fd,
     if ( read_cnt <= 0 )
     {
       again:
-        if ( ( read_cnt = read( fd, read_buf, sizeof( read_buf ) ) ) < 0 )
+        if ( ( read_cnt = read( fd, read_buf, sizeof read_buf ) ) < 0 )
         {
             if ( errno == EINTR )
                 goto again;

@@ -309,7 +309,7 @@ static void hp8672a_new_table_entry( int    type,
                            hp8672a.att_table_len * sizeof *hp8672a.att_table );
         cur_table_len = hp8672a.att_table_len;
         qsort( hp8672a.att_table, hp8672a.att_table_len,
-               sizeof ( Att_Table_Entry_T ), hp8672a_comp );
+               sizeof *hp8672a.att_table, hp8672a_comp );
         hp8672a.min_table_freq = hp8672a.att_table[ 0 ].freq;
         hp8672a.max_table_freq =
                            hp8672a.att_table[ hp8672a.att_table_len - 1 ].freq;

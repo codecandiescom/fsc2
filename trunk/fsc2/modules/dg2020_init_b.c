@@ -216,7 +216,7 @@ void dg2020_basic_pulse_check( void )
             if ( p->function->pm == NULL )      /* if it doesn't exist yet */
             {
                 p->function->pm = BOOL_P T_malloc( p->pc->len 
-                                                   * sizeof( *p->function->pm )
+                                                   * sizeof *p->function->pm
                                                    * NUM_PHASE_TYPES );
 
                 for ( i = 0; i < NUM_PHASE_TYPES; i++ )

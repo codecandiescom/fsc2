@@ -105,10 +105,10 @@ int check_spawn_fsc2d( bool   exclusive,
 
     /* Send the PID, the daemon must reply with "OK\n" */
 
-    snprintf( line, sizeof( line ), "%ld\n", ( long ) getpid( ) );
+    snprintf( line, sizeof line, "%ld\n", ( long ) getpid( ) );
     if ( writen( sock_fd, line, strlen( line ) ) !=
                                             ( ssize_t ) strlen( line ) ||
-         read_line( sock_fd, line, sizeof( line ) ) != 3 ||
+         read_line( sock_fd, line, sizeof line ) != 3 ||
          strncmp( line, "OK\n", 3 ) )
     {
         fprintf( stderr, "Can't start fsc2 for unknown reasons.\n" );
@@ -118,10 +118,10 @@ int check_spawn_fsc2d( bool   exclusive,
 
     /* Send the user name, the daemon must reply with "OK\n" */
 
-    snprintf( line, sizeof( line ), "%s\n", getpwuid( getuid( ) )->pw_name );
+    snprintf( line, sizeof line, "%s\n", getpwuid( getuid( ) )->pw_name );
     if ( writen( sock_fd, line, strlen( line ) ) !=
                                             ( ssize_t ) strlen( line ) ||
-         read_line( sock_fd, line, sizeof( line ) ) != 3 ||
+         read_line( sock_fd, line, sizeof line ) != 3 ||
          strncmp( line, "OK\n", 3 ) )
     {
         fprintf( stderr, "Can't start fsc2 for unknown reasons.\n" );
@@ -132,10 +132,10 @@ int check_spawn_fsc2d( bool   exclusive,
     /* Send "1" if the current instance was started in exclusive mode,
        otherwise send "0" */
 
-    snprintf( line, sizeof( line ), "%d\n", exclusive ? 1 : 0 );
+    snprintf( line, sizeof line, "%d\n", exclusive ? 1 : 0 );
     if ( writen( sock_fd, line, strlen( line ) ) !=
                                             ( ssize_t ) strlen( line ) ||
-         ( len = read_line( sock_fd, line, sizeof( line ) ) ) < 5 )
+         ( len = read_line( sock_fd, line, sizeof line ) ) < 5 )
     {
         fprintf( stderr, "Can't start fsc2 for unknown reasons.\n" );
         close( sock_fd );
@@ -209,7 +209,7 @@ static int connect_to_fsc2d( void )
     if ( ( sock_fd = socket( AF_UNIX, SOCK_STREAM, 0 ) ) == -1 )
         return -1;
 
-    memset( &serv_addr, 0, sizeof( serv_addr ) );
+    memset( &serv_addr, 0, sizeof serv_addr );
     serv_addr.sun_family = AF_UNIX;
     strcpy( serv_addr.sun_path, FSC2D_SOCKET );
 
@@ -218,7 +218,7 @@ static int connect_to_fsc2d( void )
        and we've got to start it */
 
     if ( connect( sock_fd, ( struct sockaddr * ) &serv_addr,
-                  sizeof( serv_addr ) ) == -1 )
+                  sizeof serv_addr ) == -1 )
     {
         close( sock_fd );
         if ( errno == ECONNREFUSED || errno == ENOENT )
@@ -255,14 +255,14 @@ static int start_fsc2d( bool   exclusive,
 
     unlink( FSC2_SOCKET );
     unlink( FSC2D_SOCKET );
-    memset( &serv_addr, 0, sizeof( serv_addr ) );
+    memset( &serv_addr, 0, sizeof serv_addr );
     serv_addr.sun_family = AF_UNIX;
     strcpy( serv_addr.sun_path, FSC2D_SOCKET );
 
     old_mask = umask( 0 );
 
     if ( bind( listen_fd, ( struct sockaddr * ) &serv_addr,
-               sizeof( serv_addr ) ) == -1 )
+               sizeof serv_addr ) == -1 )
     {
         umask( old_mask );
         close( listen_fd );
@@ -471,8 +471,8 @@ static int new_client( int               fd,
                        Fsc2_Instance_T * instances,
                        int               num_instances )
 {
-    socklen_t cli_len;
     struct sockaddr_un cli_addr;
+    socklen_t cli_len = sizeof cli_addr;
     int cli_fd;
     char line[ MAX_LINE_LENGTH ];
     Fsc2_Instance_T *cur_inst = instances + num_instances;
@@ -481,7 +481,6 @@ static int new_client( int               fd,
     int i;
 
 
-    cli_len = sizeof( cli_addr );
     if ( ( cli_fd = accept( fd, ( struct sockaddr * ) &cli_addr,
                             &cli_len ) ) < 0 )
         return num_instances;
