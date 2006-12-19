@@ -1,7 +1,7 @@
 # $Id$
 #
-# Makefile for drivers for National Instruments DAQ board based
-# on a DAQ-STC
+# Makefile for drivers for National Instruments PCI E Series DAQ boards
+# (based on the a DAQ-STC)
 #
 # Copyright (C) 2003-2006 Jens Thoms Toerring
 #
@@ -75,7 +75,7 @@ else                         # otherwise make kernel build system available
 PWD          := $(shell pwd)
 SOURCES      := $(shell ls pci_e_series/*.c daq_stc/*.c)
 OBJECTS      := $(SOURCES:.c=.o)
-EXTRA_CFLAGS := -I$(PWD)/include -I$(PWD)/../include
+EXTRA_CFLAGS := -I$(PWD)/include -I$(PWD)/../include -DPCI_E_SERIES
 export OBJECTS
 
 all:
