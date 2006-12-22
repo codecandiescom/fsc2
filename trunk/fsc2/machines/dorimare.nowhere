@@ -7,13 +7,14 @@ GROUP                := uucp
 EDITOR               := emacs
 
 KERNEL_VERSION       := $(shell uname -r)
-ifeq ($(KERNEL_VERSION),$(shell echo $(KERNEL_VERSION) | sed -e 's/^2\.6\.//'))
-	GPIB_LIBRARY     := NI_OLD
-else
-	GPIB_LIBRARY     := SLG
-	GPIB_HEADER_DIR  := /usr/local/include/gpib
-endif
+# ifeq ($(KERNEL_VERSION),$(shell echo $(KERNEL_VERSION) | sed -e 's/^2\.6\.//'))
+# 	GPIB_LIBRARY     := NI_OLD
+# else
+# 	GPIB_LIBRARY     := SLG
+# 	GPIB_HEADER_DIR  := /usr/local/include/gpib
+# endif
 
+GPIB_LIBRARY         := JTT
 GPIB_LOG_FILE        := /tmp/fsc2_gpib.log
 GPIB_LOG_LEVEL       := HIGH
 NUM_SERIAL_PORTS     := 2

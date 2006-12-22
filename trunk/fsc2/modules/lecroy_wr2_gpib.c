@@ -42,8 +42,6 @@ static void lecroy_wr2_get_prep( int              ch,
                                  double *         gain,
                                  double *         offset );
 
-static unsigned char *lecroy_wr2_get_data( long * len );
-
 static bool lecroy_wr2_talk( const char * cmd,
                              char *       reply,
                              long *       length );

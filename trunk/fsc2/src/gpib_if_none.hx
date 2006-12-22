@@ -100,9 +100,9 @@ extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
 #define FAILURE  -1
 
 
-/*----------------------------------------------------------*
- * definition of log levels allowed in calls of gpib_init()
- *----------------------------------------------------------*/
+/*--------------------------------------------*
+ * Log levels allowed in calls of gpib_init()
+ *--------------------------------------------*/
 
 #define  LL_NONE  0    /* log nothing */
 #define  LL_ERR   1    /* log errors only */

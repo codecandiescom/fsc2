@@ -344,8 +344,9 @@ void pci_board_reset_all( Board * board )
 
 
 /*---------------------------------------------*
- * Function clears the configuration memory by
- * writing to the Write_Strobe_0 register.
+ * Function clears the configuration memory by writing to the Write_Strobe_0
+ * register (this is identical to the Configuration Memory Clear register
+ * listed in the PCI E Series Register-Level Programming Manual).
  *---------------------------------------------*/
 
 void pci_clear_configuration_memory( Board * board )
@@ -355,7 +356,9 @@ void pci_clear_configuration_memory( Board * board )
 
 
 /*-------------------------------------------------------------------------*
- * Function clears the ADC FIFO by writing to the Write_Strobe_1 register.
+ * Function clears the ADC FIFO by writing to the Write_Strobe_1 register
+ * (this is identical to the ADC FIFO Clear register listed in the PCI E
+ * Series Register-Level Programming Manual).
  *-------------------------------------------------------------------------*/
 
 void pci_clear_ADC_FIFO( Board * board )
@@ -364,9 +367,11 @@ void pci_clear_ADC_FIFO( Board * board )
 }
 
 
-/*-------------------------------------------------------------------------*
- * Function clears the DAC FIFO by writing to the Write_Strobe_1 register.
- *-------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Function clears the DAC FIFO by writing to the Write_Strobe_1 register
+ * (this is identical to the DAC FIFO Clear register listed in the PCI E
+ * Series Register-Level Programming Manual).
+ *------------------------------------------------------------------------*/
 
 void pci_clear_DAC_FIFO( Board * board )
 {
@@ -446,13 +451,13 @@ int pci_configuration_low( Board *              board,
 		if ( board->type->ai_gains[ i ] == gain )
 			break;
 		if ( board->type->ai_gains[ i ] == NI_DAQ_GAIN_NOT_AVAIL ) {
-			PDEBUG( "Board does not support requested gain\n ");
+			PDEBUG( "Board does not support requested gain\n");
 			return -EINVAL;
 		}
 	}
 
 	if ( i >= 8 ) {
-		PDEBUG( "Invalid gain setting\n " );
+		PDEBUG( "Invalid gain setting\n" );
 		return -EINVAL;
 	}
 

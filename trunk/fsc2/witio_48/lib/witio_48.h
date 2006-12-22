@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 
-#if ! define WITIO_48_LIBRARY_HEADER
+#if ! defined WITIO_48_LIBRARY_HEADER
 #define WITIO_48_LIBRARY_HEADER
 
 

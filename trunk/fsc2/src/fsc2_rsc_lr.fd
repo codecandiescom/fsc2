@@ -1534,7 +1534,7 @@ shortcut: 1
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: 
-callback: curve_button_callback_2d
+callback: cut_curve_button_callback_2d
 argument: -1
 
 --------------------
@@ -1552,7 +1552,7 @@ shortcut: 2
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: 
-callback: curve_button_callback_2d
+callback: cut_curve_button_callback_2d
 argument: -2
 
 --------------------
@@ -1570,7 +1570,7 @@ shortcut: 3
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: 
-callback: curve_button_callback_2d
+callback: cut_curve_button_callback_2d
 argument: -3
 
 --------------------
@@ -1588,7 +1588,7 @@ shortcut: 4
 resize: FL_RESIZE_ALL
 gravity: FL_NoGravity FL_NoGravity
 name: 
-callback: curve_button_callback_2d
+callback: cut_curve_button_callback_2d
 argument: -4
 
 --------------------

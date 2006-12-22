@@ -410,6 +410,7 @@ CFLAGS           := -Wall                   \
 					-Wstrict-prototypes     \
 					-Wmissing-prototypes    \
 					-Wmissing-declarations  \
+					-Wredundant-decls       \
 					-W                      \
 					-Wshadow                \
 					-Wpointer-arith         \
@@ -485,8 +486,8 @@ endif
 
 # Set the minimum include paths and linker flags
 
-INCLUDES := -I$(fdir) -I$(adir) -I/usr/X11R6/include \
-			-I/usr/X11R6/include/X11 -I/usr/local/include
+INCLUDES := -I$(fdir) -I$(adir)  -I/usr/local/include     \
+	        -I/usr/X11R6/include -I/usr/X11R6/include/X11 
 
 LFLAGS	 := -shared -fpic
 

@@ -25,13 +25,6 @@
 #if ! defined HELP_HEADER
 #define HELP_HEADER
 
-#include "fsc2.h"
-
-
-void run_help( FL_OBJECT * /* a */,
-               long        /* b */ );
-
-
 #endif  /* ! HELP_HEADER */
 
 

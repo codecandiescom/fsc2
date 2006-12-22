@@ -26,7 +26,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack nounput noyy_top_state
+%option noyywrap stack nounput noyy_top_state never-interactive
 
 %{
 

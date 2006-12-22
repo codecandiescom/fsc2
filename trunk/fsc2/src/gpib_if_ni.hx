@@ -72,12 +72,12 @@ struct GPIB_Dev {
 };
 
 
-#if ! defined( IBERR )
+#if ! defined IBERR
 #define IBERR ERR
 #endif
 
 
-#if defined GPIB_CONF_FILE
+#if ! defined GPIB_CONF_FILE
 #define GPIB_CONF_FILE  "/etc/gpib.conf"
 #endif
 

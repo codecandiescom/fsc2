@@ -230,10 +230,6 @@ double spex_cd2a_wl2wn( double /* wl */ );
 
 double spex_cd2a_wn2wl( double /* wn */ );
 
-double spex_cd2a_wl2wn( double /* wl */ );
-
-double spex_cd2a_wn2wl( double /* wn */ );
-
 double spex_cd2a_wl2Uwl( double /* wl */ );
 
 double spex_cd2a_Uwl2wl( double /* wl */ );

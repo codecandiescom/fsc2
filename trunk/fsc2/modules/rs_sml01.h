@@ -162,7 +162,6 @@ Var_T *synthesizer_sweep_up(            Var_T * /* v */ );
 Var_T *synthesizer_sweep_down(          Var_T * /* v */ );
 Var_T *synthesizer_reset_frequency(     Var_T * /* v */ );
 Var_T *synthesizer_use_table(           Var_T * /* v */ );
-Var_T *synthesizer_attenuation(         Var_T * /* v */ );
 Var_T *synthesizer_att_ref_freq(        Var_T * /* v */ );
 Var_T *synthesizer_modulation(          Var_T * /* v */ );
 Var_T *synthesizer_mod_freq(            Var_T * /* v */ );
@@ -180,8 +179,6 @@ Var_T *synthesizer_pulse_delay(         Var_T * /* v */ );
 
 
 /* functions defined in "rs_sml01_util.c" */
-
-void rs_sml01_read_table( FILE * /* fp */ );
 
 FILE *rs_sml01_find_table( char ** /* name */ );
 

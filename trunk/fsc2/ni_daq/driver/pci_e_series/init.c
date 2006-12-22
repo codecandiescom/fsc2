@@ -33,7 +33,7 @@ Board boards[ NI_DAQ_MAX_BOARDS ];
 static int major = NI_DAQ_MAJOR;
 int board_count = 0;
 
-static Register_Addresses regs[ NI_DAQ_MAX_PCI_E_BOARDS ];
+static Register_Addresses regs[ NI_DAQ_MAX_BOARDS ];
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 static Board_Functions func = {
@@ -99,9 +99,6 @@ static int pci_e_series_init_board( struct pci_dev * dev,
 				    Board *          board );
 #endif
 
-static unsigned int num_pci_e_series_boards = 
-		sizeof pci_e_series_boards / sizeof pci_e_series_boards[ 0 ];
-
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 static struct pci_driver pci_e_series_pci_driver = {
@@ -140,14 +137,14 @@ static int __init pci_e_series_init( void )
 
 	while ( ( dev = pci_get_device( PCI_VENDOR_ID_NATINST,
 					PCI_ANY_ID, dev ) ) != NULL ) {
-		for ( i = 0; i < num_pci_e_series_boards; i++ )
+		for ( i = 0; pci_e_series_pci_tbl[ i ].vendor != 0; i++ )
 			if ( dev->device == pci_e_series_boards[ i ].id )
 				break;
 
-		if ( i == num_pci_e_series_boards )
+		if ( pci_e_series_pci_tbl[ i ].vendor == 0 )
 			continue;
 
-		if ( board_count >= NI_DAQ_MAX_PCI_E_BOARDS )
+		if ( board_count >= NI_DAQ_MAX_BOARDS )
 			break;
 
 		boards[ board_count ].dev = dev;
@@ -168,14 +165,14 @@ static int __init pci_e_series_init( void )
 
 	while ( ( dev = pci_find_device( PCI_VENDOR_ID_NATINST,
 					 PCI_ANY_ID, dev ) ) != NULL ) {
-		for ( i = 0; i < num_pci_e_series_boards; i++ )
+		for ( i = 0; pci_e_series_pci_tbl[ i ].vendor; i++ )
 			if ( dev->device == pci_e_series_boards[ i ].id )
 				break;
 
-		if ( i == num_pci_e_series_boards )
+		if ( pci_e_series_pci_tbl[ i ].vendor == 0 )
 			continue;
 
-		if ( board_count >= NI_DAQ_MAX_PCI_E_BOARDS )
+		if ( board_count >= NI_DAQ_MAX_BOARDS )
 			break;
 
 		boards[ board_count ].type = pci_e_series_boards + i;
@@ -200,10 +197,10 @@ static int __init pci_e_series_init( void )
 		return -ENODEV;
 	}
 
-	if ( board_count >= NI_DAQ_MAX_PCI_E_BOARDS && dev != NULL )
+	if ( board_count >= NI_DAQ_MAX_BOARDS && dev != NULL )
 		printk( KERN_WARNING BOARD_SERIES_NAME ": There are more than "
 			"the currently supported maximum number of %d PCI-E "
-			"series boards!\n", NI_DAQ_MAX_PCI_E_BOARDS );
+			"series boards!\n", NI_DAQ_MAX_BOARDS );
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 
@@ -300,6 +297,10 @@ static int pci_e_series_init_board( struct pci_dev * dev,
 				    const struct pci_device_id * id )
 {
 	Board *board;
+	unsigned long mite_phys;    /* physical address of MITE */
+	unsigned long mite_len;     /* length of MITE address space */
+	unsigned long daq_stc_phys; /* physical address of DAQ-STC registers */
+	unsigned long daq_stc_len;  /* length of DAQ-STC address space */
 	int i;
 
 
@@ -307,7 +308,7 @@ static int pci_e_series_init_board( struct pci_dev * dev,
 		if ( boards[ i ].dev == dev )
 			break;
 
-	if ( i == NI_DAQ_MAX_PCI_E_BOARDS ) {
+	if ( i == NI_DAQ_MAX_BOARDS ) {
 		printk( KERN_ERR BOARD_SERIES_NAME
 			": pci_e_series_init_board() called with unknown "
 			"pci_dev structure.\n" );
@@ -336,10 +337,9 @@ static int pci_e_series_init_board( struct pci_dev * dev,
 
 	/* Determine the virtual address of the MITE */
 
-	board->mite_phys = pci_resource_start( dev, 0 );
-	board->mite_len  = pci_resource_len( dev, 0 );
-	if ( ( board->mite = ioremap( board->mite_phys, board->mite_len ) )
-	     == NULL ) {
+	mite_phys = pci_resource_start( dev, 0 );
+	mite_len  = pci_resource_len( dev, 0 );
+	if ( ( board->mite = ioremap( mite_phys, mite_len ) ) == NULL ) {
 		pci_e_series_release_resources( board );
 		PDEBUG( "Can't remap MITE memory range for %d. board\n",
 			board - boards + 1);
@@ -349,17 +349,17 @@ static int pci_e_series_init_board( struct pci_dev * dev,
 	/* Determine the virtual address of the memory region with the DAQs
 	   registers and enable access to it in the MITE */
 
-	board->daq_stc_phys = pci_resource_start( dev, 1 );
-	board->daq_stc_len  = pci_resource_len( dev, 1 );
-	if ( ( board->daq_stc = ioremap( board->daq_stc_phys,
-					 board->daq_stc_len ) ) == NULL ) {
+	daq_stc_phys = pci_resource_start( dev, 1 );
+	daq_stc_len  = pci_resource_len( dev, 1 );
+	if ( ( board->daq_stc = ioremap( daq_stc_phys,
+					 daq_stc_len ) ) == NULL ) {
 		pci_e_series_release_resources( board );
 		PDEBUG( "Can't remap STC memory range for %d. board\n",
 			board - boards + 1 );
 		return -1;
 	}
 
-	iowrite32( ( board->daq_stc_phys & 0xFFFFFF00L ) | 0x80,
+	iowrite32( ( daq_stc_phys & 0xFFFFFF00L ) | 0x80,
 		   board->mite + 0xC0 );
 
 	/* Request the interrupt used by the board */
@@ -397,6 +397,12 @@ static int pci_e_series_init_board( struct pci_dev * dev,
 static int __init pci_e_series_init_board( struct pci_dev * dev,
 					   Board *          board )
 {
+	unsigned long mite_phys;    /* physical address of MITE */
+	unsigned long mite_len;     /* length of MITE address space */
+	unsigned long daq_stc_phys; /* physical address of DAQ-STC registers */
+	unsigned long daq_stc_len;  /* length of DAQ-STC address space */
+
+
 	board->dev = dev;
 	board->is_init = 0;
 	board->in_use = 0;
@@ -425,10 +431,9 @@ static int __init pci_e_series_init_board( struct pci_dev * dev,
 
 	/* Determine the virtual address of the MITE */
 
-	board->mite_phys = pci_resource_start( dev, 0 );
-	board->mite_len  = pci_resource_len( dev, 0 );
-	if ( ( board->mite = ioremap( board->mite_phys, board->mite_len ) )
-	     == NULL ) {
+	mite_phys = pci_resource_start( dev, 0 );
+	mite_len  = pci_resource_len( dev, 0 );
+	if ( ( board->mite = ioremap( mite_phys, mite_len ) ) == NULL ) {
 		PDEBUG( "Can't remap MITE memory range for %d. board\n",
 			board - boards + 1);
 		return -1;
@@ -437,16 +442,16 @@ static int __init pci_e_series_init_board( struct pci_dev * dev,
 	/* Determine the virtual address of the memory region with the DAQs
 	   registers and enable access to it in the MITE */
 
-	board->daq_stc_phys = pci_resource_start( dev, 1 );
-	board->daq_stc_len  = pci_resource_len( dev, 1 );
-	if ( ( board->daq_stc = ioremap( board->daq_stc_phys,
-					 board->daq_stc_len ) ) == NULL ) {
+	daq_stc_phys = pci_resource_start( dev, 1 );
+	daq_stc_len  = pci_resource_len( dev, 1 );
+	if ( ( board->daq_stc = ioremap( daq_stc_phys,
+					 daq_stc_len ) ) == NULL ) {
 		PDEBUG( "Can't remap STC memory range for %d. board\n",
 			board - boards + 1 );
 		return -1;
 	}
 
-	iowrite32( ( board->daq_stc_phys & 0xFFFFFF00L ) | 0x80,
+	iowrite32( ( daq_stc_phys & 0xFFFFFF00L ) | 0x80,
 		   board->mite + 0xC0 );
 
 	/* Request the interrupt used by the board */
@@ -580,7 +585,7 @@ static void pci_e_series_release_resources( Board * board )
 
 	if ( board->has_region ) {
 		pci_release_regions( board->dev );
-		board->has_region = 1;
+		board->has_region = 0;
 	}
 
 	if ( board->is_enabled ) {

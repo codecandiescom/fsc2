@@ -27,7 +27,6 @@
 
 static void tegam2714a_p_commit( void );
 
-void tegam2714a_p_set_amplitude( double ampl );
 
 /*-------------------------------------------------------------------------*
  * Function is called in the experiment after pulses have been changed to

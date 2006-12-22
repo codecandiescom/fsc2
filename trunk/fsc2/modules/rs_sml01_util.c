@@ -24,11 +24,6 @@
 
 #include "rs_sml01.h"
 
-extern size_t num_fm_mod_ranges;
-extern struct MOD_RANGES fm_mod_ranges[ ];
-extern size_t num_pm_mod_ranges;
-extern struct MOD_RANGES pm_mod_ranges[ ];
-
 
 /*----------------------------------------------------------------------*
  * If the function succeeds it returns a file pointer to the table file

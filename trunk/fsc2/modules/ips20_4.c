@@ -85,10 +85,6 @@ static double ips20_4_sweep_rate_check( double sweep_rate );
 
 static double ips20_4_get_act_current( void );
 
-static double ips20_4_current_check( double current );
-
-static double ips20_4_sweep_rate_check( double sweep_rate );
-
 static double ips20_4_set_target_current( double current );
 
 static double ips20_4_get_target_current( void );

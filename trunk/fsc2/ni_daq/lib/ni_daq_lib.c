@@ -42,7 +42,7 @@ NI_DAQ_DEV ni_daq_dev[ NI_DAQ_MAX_BOARDS ];
 
 int ni_daq_errno = 0;
 
-static const char *ni_daq_errlist[ ] = {
+const char *ni_daq_errlist[ ] = {
     "Success",                                       /* NI_DAQ_OK      */
     "No such board",                                 /* NI_DAQ_ERR_NSB */
     "Counter is busy",                               /* NI_DAQ_ERR_CBS */
@@ -178,9 +178,6 @@ int ni_daq_open( const char * name,
 
 int ni_daq_close( int board )
 {
-    int ret;
-
-
     if ( board < 0 || board > NI_DAQ_MAX_BOARDS )
         return ni_daq_errno = NI_DAQ_ERR_NSB;
 

@@ -84,9 +84,7 @@ void tegam2714a_p_init( const char * name )
 
     if ( ampl   != 2.0 * (   tegam2714a_p.function.high_level
                            - tegam2714a_p.function.low_level ) ||
-         offset != ( ! tegam2714a_p.function.is_inverted ?
-                     tegam2714a_p.function.low_level :
-                     tegam2714a_p.function.high_level ) )
+         offset != tegam2714a_p.function.low_level )
         tegam2714a_p_set_levels( ampl, offset );
 
 	/* Use the internal clock as reference */
@@ -105,12 +103,19 @@ void tegam2714a_p_init( const char * name )
 
     ptr = cmd + sprintf( cmd, ":WVFM:WAVE %d;MEM 0,#264",
                          EMPTY_WAVEFORM_NUMBER );
-    for ( i = 0; i < MIN_PULSER_BITS; i++ )
-    {
-        *ptr++ = 0x08;
-        *ptr++ = 0x00;
-    }
-    *ptr = '\n';
+    if ( tegam2714a_p.function.is_inverted )
+        for ( i = 0; i < MIN_PULSER_BITS; i++ )
+        {
+            *ptr++ = 0x0f;
+            *ptr++ = 0xff;
+        }
+    else
+        for ( i = 0; i < MIN_PULSER_BITS; i++ )
+        {
+            *ptr++ = 0x08;
+            *ptr++ = 0x00;
+        }
+    *ptr++ = '\n';
 
     tegam2714a_p_write( cmd, ptr - cmd );
 
@@ -136,6 +141,8 @@ void tegam2714a_p_init( const char * name )
     /* Finally set up all pulses */
 
     tegam2714a_p_pulse_setup( );
+
+    tegam2714a_p_write( ":FUNC WAVE,98\n", 14 );
 }
 
 
@@ -144,7 +151,7 @@ void tegam2714a_p_init( const char * name )
 
 void tegam2714a_p_run( bool state )
 {
-	char cmd[ 50 ] = ":OUTSW ";
+	char cmd[ 50 ];
 
 
     sprintf( cmd, ":FUNC WAVE,%d\n",
@@ -152,7 +159,7 @@ void tegam2714a_p_run( bool state )
     tegam2714a_p_write( cmd, strlen( cmd ) );
 
     /* If the device is to be switched off send it a trigger to make sure
-       a waveform currently still in the process of being output gets
+       an empty waveform currently still in the process of being output gets
        aborted. */
 
     if ( ! state )
@@ -213,6 +220,9 @@ void tegam2714a_p_set_amplitude( double ampl )
 
     sprintf( cmd, ":AMPL %g\n", ampl );
     tegam2714a_p_write( cmd, strlen( cmd ) );
+
+    fprintf( stderr, "AMPL: should %f, got %f\n", ampl,
+             tegam2714a_p_get_amplitude( ) );
 }
 
 
@@ -249,6 +259,9 @@ static void tegam2714a_p_set_offset( double offset )
 
     sprintf( cmd, ":OFST %g\n", offset );
     tegam2714a_p_write( cmd, strlen( cmd ) );
+
+    fprintf( stderr, "OFFSET: should %f, got %f\n", offset,
+             tegam2714a_p_get_offset( ) );
 }
 
 
@@ -281,9 +294,7 @@ static void tegam2714a_p_set_levels( double old_ampl,
 {
     double ampl   = 2.0 * (   tegam2714a_p.function.high_level
                             - tegam2714a_p.function.low_level );
-    double offset = ! tegam2714a_p.function.is_inverted ?
-                    tegam2714a_p.function.low_level :
-                    tegam2714a_p.function.high_level;
+    double offset = tegam2714a_p.function.low_level;
 
     if ( old_ampl > 0.999 )
     {
@@ -354,30 +365,36 @@ void  tegam2714a_p_set_constant( Ticks start,
 
     if ( state == 0 )
     {
-        for ( k = 0; k < length; k++ )
-        {
-            *bpt++ = 0x08;
-            *bpt++ = 0x00;
-        }
-        *bpt = '\n';
-    }
-    else
-    {
-        if ( ! tegam2714a_p.function.is_inverted )
-        {
+        if ( tegam2714a_p.function.is_inverted )
             for ( k = 0; k < length; k++ )
             {
                 *bpt++ = 0x0f;
                 *bpt++ = 0xff;
             }
-            *bpt = '\n';
-        }
         else
-        {
-            memset( bpt, 0, 2 * length );
-            *( bpt + 2 * length ) = '\n';
-        }
+            for ( k = 0; k < length; k++ )
+            {
+                *bpt++ = 0x08;
+                *bpt++ = 0x00;
+            }
     }
+    else
+    {
+        if ( tegam2714a_p.function.is_inverted )
+            for ( k = 0; k < length; k++ )
+            {
+                *bpt++ = 0x08;
+                *bpt++ = 0x00;
+            }
+        else
+            for ( k = 0; k < length; k++ )
+            {
+                *bpt++ = 0x0f;
+                *bpt++ = 0xff;
+            }
+    }
+
+    *bpt = '\n';
 
     if ( gpib_write( tegam2714a_p.device, buf, len ) == FAILURE )
     {

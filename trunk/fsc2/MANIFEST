@@ -7,6 +7,7 @@ Changes
 COPYING
 INSTALL
 Makefile
+makelog2
 MANIFEST
 README
 README.mail
@@ -64,7 +65,6 @@ config/er035m_sa.conf
 config/er035m_sas.conf
 config/er035m_s.conf
 config/Functions
-config/Functions~
 config/gg_chopper.conf
 config/gpib.conf
 config/hfs9000.conf
@@ -82,6 +82,7 @@ config/hp8648b.conf
 config/hp8648b.table
 config/hp8672a.conf
 config/ips120_10.conf
+config/ips120_10.conf~
 config/ips120_10_mod.conf
 config/ips120_10_mod.conf.serial
 config/ips20_4.conf
@@ -541,6 +542,7 @@ src/http.h
 src/inline.h
 src/ipc.c
 src/ipc.h
+src/izeif(
 src/lan.c
 src/lan.h
 src/loader.c
@@ -684,6 +686,7 @@ witio_48/README
 
 witio_48/driver/autoconf.h.example
 witio_48/driver/Makefile
+witio_48/driver/Modules.symvers
 witio_48/driver/witio_48_drv.c
 witio_48/driver/witio_48_drv.h
 witio_48/driver/witio_48_drv.txt
@@ -702,6 +705,7 @@ ni_daq/Makefile
 ni_daq/README
 
 ni_daq/driver/Makefile
+ni_daq/driver/Makefile.pci_e_series
 ni_daq/driver/ni_daq_drv.txt
 
 ni_daq/driver/daq_stc/AI.c

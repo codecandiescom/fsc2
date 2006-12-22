@@ -28,7 +28,6 @@
 
 
 void varsparser_init( void );
-int varsparse( void );
 
 extern int varslex( void );    /* defined in vars_lexer.l */
 extern char *varstext;         /* defined in vars_lexer.l */

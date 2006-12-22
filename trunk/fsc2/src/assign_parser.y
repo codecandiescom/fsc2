@@ -105,7 +105,7 @@ static int Dont_exec = 0;
 %token THRESH_TOKEN          /* THRESHOLD */
 
 %token IMP_TOKEN             /* IMPEDANCE */
-%token HL_TOKEN              /* LOW or HIGH */
+%token <lval> HL_TOKEN       /* LOW or HIGH */
 
 %token REPT_TOKEN            /* REPEAT TIME */
 %token REPF_TOKEN            /* REPEAT FREQUENCY */
@@ -115,10 +115,10 @@ static int Dont_exec = 0;
 %token MPL_TOKEN             /* MAXIMUM_PATTERN_LENGTH */
 %token KAP_TOKEN             /* KEEP_ALL_PULSES */
 
-%token PSD_TOKEN             /* PHASE SWITCH DELAY */
+%token <lval> PSD_TOKEN      /* PHASE SWITCH DELAY */
 %token GP_TOKEN              /* GRACE_PERIOD */
 
-%token <lval> PHS_TOK PSD_TOKEN HL_TOKEN
+%token <lval> PHS_TOK
 %token POD1_TOK POD2_TOK ON_TOK OFF_TOK
 
 

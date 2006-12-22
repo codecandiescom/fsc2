@@ -4828,7 +4828,7 @@ Var_T *f_mean_part_array( Var_T * v )
 
     if ( v->len == 0 )
     {
-        print( FATAL, "Size of array isn't known yet.\n" );
+        print( FATAL, "Size of array isn't known (yet).\n" );
         THROW( EXCEPTION );
     }
 

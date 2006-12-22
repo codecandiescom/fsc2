@@ -95,8 +95,14 @@
 #include "daq_stc.h"
 
 
+#if defined ( PCI_E_SERIES )
 #define NUM_MITE_DMA_CHANNELS      4
-#define BOARD_SERIES_NAME          "ni_daq"
+#define BOARD_SERIES_NAME          "ni_pci_e_series"
+#endif
+
+#if defined ( AT_MIO_E_SERIES )
+#define BOARD_SERIES_NAME          "ni_at_mio_e_series"
+#endif
 
 
 typedef struct Board_Properties Board_Properties;
@@ -109,10 +115,6 @@ typedef struct MSC_Subsystem MSC_Subsystem;
 typedef struct IRQ_Handling IRQ_Handling;
 typedef struct Critical_Section Critical_Section;
 typedef struct Board_Functions Board_Functions;
-
-
-extern int board_count;
-extern Board boards[ ];
 
 
 typedef enum {
@@ -147,7 +149,9 @@ struct Board_Properties {
 	u8	                atrig_high_ch;
 	unsigned int            atrig_bits;
 
+#if defined ( PCI_E_SERIES )
 	unsigned int            num_mite_channels;
+#endif
 
 	CALDAC_TYPES            caldac[ 3 ];
 };
@@ -247,6 +251,7 @@ struct Critical_Section {
 };
 
 
+#if defined ( PCI_E_SERIES )
 typedef struct {
 	char          *buf;       /* virtual address of buffer */
 	size_t        size;       /* size of buffer */
@@ -261,9 +266,11 @@ typedef struct {
 		u32 dar;          /* ? */
 	} lc;
 } MITE_DMA_Chain_t;
+#endif
 
 
 struct Board {
+#if defined ( PCI_E_SERIES )
 	struct pci_dev *dev;        /* PCI device structure of board */
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
@@ -271,23 +278,28 @@ struct Board {
 #else
 	void __iomem *mite;
 #endif
-	unsigned long mite_phys;    /* physical address of MITE */
-	unsigned long mite_len;     /* length of MITE address space */
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 9 )
 	u8 *daq_stc;                /* virtual address of DAQ-STC registers */
 #else
 	void __iomem *daq_stc;
 #endif
-	unsigned long daq_stc_phys; /* physical address of DAQ-STC registers */
-	unsigned long daq_stc_len;  /* length of DAQ-STC address space */
+#endif
+
+#if defined ( AT_MIO_E_SERIES )
+	PORT io_base;
+	char * name;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+	struct pnp_dev * dev;
+#endif
+#endif
 
 	unsigned int irq;           /* Interrupt the board is using */
 
 	int in_use;                 /* set when board is opened */
 	int is_init;                /* set when board is initialized */
-	int is_enabled;
-	int has_region;
+	int is_enabled;             /* set if PCI enabled */
+	int has_region;             /* set if PCI memory has been requested */
 	uid_t owner;                /* current owner of the board */
 
 	/* Mutex used when opening the board to keep multiple users
@@ -343,11 +355,19 @@ struct Board {
 
 	Critical_Section critical_section;
 
+#if defined ( PCI_E_SERIES )
 	/* Chains of DMA buffers used with the mite for AI and AO */
 
 	int mite_irq_enabled[ NUM_MITE_DMA_CHANNELS ];
 	MITE_DMA_Chain_t *mite_chain[ NUM_MITE_DMA_CHANNELS ];
+#endif
 };
+
+
+/* Some global variables */
+
+extern int board_count;
+extern Board boards[ ];
 
 
 /* Now we have the declaration of all the important structures and can

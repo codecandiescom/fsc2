@@ -31,9 +31,6 @@
 
 #include "fsc2.h"
 
-extern int exp_testlex( void );
-
-int exp_testparse( void );
 void exp_test_init( void );
 
 /* locally used functions */
@@ -56,54 +53,45 @@ static bool In_cond;
     Var_T  *vptr;
 }
 
-%token E_VAR_TOKEN    258
-%token E_VAR_REF      259
-%token E_FUNC_TOKEN   260
-%token E_INT_TOKEN    261
-%token E_FLOAT_TOKEN  262
-%token E_STR_TOKEN    263
-%token E_EQ           264
-%token E_NE           265
-%token E_LT           266
-%token E_LE           267
-%token E_GT           268
-%token E_GE           269
-%token E_NEG          270
-%token E_AND          271
-%token E_OR           272
-%token E_XOR          273
-%token E_NOT          274
-%token E_PPOS         275
-%token E_PLEN         276
-%token E_PDPOS        277
-%token E_PDLEN        278
-%token E_PLSA         279
-%token E_MINA         280
-%token E_MULA         281
-%token E_DIVA         282
-%token E_MODA         283
-%token E_EXPA         284
 
-%token IF_TOK         2049
-%token ELSE_TOK       2050
-%token UNLESS_TOK     2051
-%token WHILE_TOK      2052
-%token UNTIL_TOK      2053
-%token CONT_TOK       2054
-%token BREAK_TOK      2055
-%token REPEAT_TOK     2056
-%token FOR_TOK        2057
-%token FOREVER_TOK    2058
+%token <vptr> E_VAR_TOKEN    258       /* variable name */
+%token <vptr> E_VAR_REF      259
+%token <vptr> E_FUNC_TOKEN   260       /* function name */
+%token E_INT_TOKEN           261
+%token E_FLOAT_TOKEN         262
+%token E_STR_TOKEN           263
+%token E_EQ                  264
+%token E_NE                  265
+%token E_LT                  266
+%token E_LE                  267
+%token E_GT                  268
+%token E_GE                  269
+%token E_NEG                 270
+%token E_AND                 271
+%token E_OR                  272
+%token E_XOR                 273
+%token E_NOT                 274
+%token <lval> E_PPOS         275
+%token <lval> E_PLEN         276
+%token <lval> E_PDPOS        277
+%token <lval> E_PDLEN        278
+%token E_PLSA                279
+%token E_MINA                280
+%token E_MULA                281
+%token E_DIVA                282
+%token E_MODA                283
+%token E_EXPA                284
 
-
-%token <vptr> E_VAR_TOKEN         /* variable name */
-%token <vptr> E_VAR_REF
-%token <vptr> E_FUNC_TOKEN        /* function name */
-%token E_INT_TOKEN
-%token E_FLOAT_TOKEN
-%token E_STR_TOKEN
-%token E_EQ E_NE E_LT E_LE E_GT E_GE
-%token E_PPOS E_PLEN E_PDPOS E_PDLEN
+%token IF_TOK               2049
+%token ELSE_TOK             2050
+%token UNLESS_TOK           2051
+%token WHILE_TOK            2052
+%token UNTIL_TOK            2053
+%token CONT_TOK             2054
+%token BREAK_TOK            2055
+%token REPEAT_TOK           2056
+%token FOR_TOK              2057
+%token FOREVER_TOK          2058
 
 %left '?' ':'
 %left E_AND E_OR E_XOR

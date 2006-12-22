@@ -87,10 +87,6 @@ static double ips120_10_mod_sweep_rate_check( double sweep_rate );
 
 static double ips120_10_mod_get_act_current( void );
 
-static double ips120_10_mod_current_check( double current );
-
-static double ips120_10_mod_sweep_rate_check( double sweep_rate );
-
 static double ips120_10_mod_set_target_current( double current );
 
 static double ips120_10_mod_get_target_current( void );

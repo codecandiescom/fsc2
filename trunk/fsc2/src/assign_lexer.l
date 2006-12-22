@@ -31,7 +31,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap nounput
+%option noyywrap nounput never-interactive
 
 
 %{

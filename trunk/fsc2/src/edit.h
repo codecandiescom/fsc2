@@ -25,12 +25,6 @@
 #if ! defined EDIT_HEADER
 #define EDIT_HEADER
 
-#include "fsc2.h"
-
-
-void edit_file( FL_OBJECT * /* a */,
-                long        /* b */ );
-
 
 #endif  /* ! EDIT_HEADER */
 

@@ -353,8 +353,6 @@ bool hfs9000_change_pulse_length_change( long   /* pnum   */,
 
 void hfs9000_init_setup( void );
 
-void hfs9000_set_pulses( Function_T * /* f */ );
-
 
 /* Functions from hfs9000_util.c */
 

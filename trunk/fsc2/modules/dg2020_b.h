@@ -389,7 +389,6 @@ Var_T *pulser_next_phase(                        Var_T * /* v */ );
 Var_T *pulser_phase_reset(                       Var_T * /* v */ );
 Var_T *pulser_pulse_reset(                       Var_T * /* v */ );
 Var_T *pulser_reset(                             Var_T * /* v */ );
-Var_T *pulser_reset(                             Var_T * /* v */ );
 Var_T *pulser_lock_keyboard(                     Var_T * /* v */ );
 Var_T *pulser_command(                           Var_T * /* v */ );
 

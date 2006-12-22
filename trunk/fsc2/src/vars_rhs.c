@@ -91,7 +91,7 @@ Var_T *vars_arr_rhs( Var_T * v )
             if ( cv->len > 0 )
                 print( FATAL, "Invalid index for array '%s'.\n", a->name );
             else
-                print( FATAL, "Size of array '%s' is still unknown.\n",
+                print( FATAL, "Size of array '%s' is (still) unknown.\n",
                        a->name );
             THROW( EXCEPTION );
         }
@@ -119,7 +119,8 @@ Var_T *vars_arr_rhs( Var_T * v )
         if ( cv->len > 0 )
             print( FATAL, "Invalid index for array '%s'.\n", a->name );
         else
-            print( FATAL, "Size of array '%s' is still unknown.\n", a->name );
+            print( FATAL, "Size of array '%s' is (still) unknown.\n",
+                   a->name );
         THROW( EXCEPTION );
     }
 
@@ -278,7 +279,7 @@ static Var_T *vars_arr_rhs_slice( Var_T * a,
             if ( cv->len )
                 print( FATAL, "Invalid index for array '%s'.\n", a->name );
             else
-                print( FATAL, "Size of array '%s' is still unknown.\n",
+                print( FATAL, "Size of array '%s' is (still) unknown.\n",
                        a->name );
             THROW( EXCEPTION );
         }
@@ -364,7 +365,7 @@ static bool prune_stage_1( Var_T * nv,
                 print( FATAL, "Invalid start of range for array '%s'.\n",
                        a->name );
             else
-                print( FATAL, "Size of array '%s' is still unknown.\n",
+                print( FATAL, "Size of array '%s' is (still) unknown.\n",
                        a->name );
             THROW( EXCEPTION );
         }
@@ -391,7 +392,7 @@ static bool prune_stage_1( Var_T * nv,
                 print( FATAL, "Invalid start index for array '%s'.\n",
                        a->name );
             else
-                print( FATAL, "Size of array '%s' is still unknown.\n",
+                print( FATAL, "Size of array '%s' is (still) unknown.\n",
                        a->name );
             THROW( EXCEPTION );
         }

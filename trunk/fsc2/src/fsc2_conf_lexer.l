@@ -27,7 +27,7 @@
         /*---------------------*/
 
 
-%option noyywrap nounput
+%option noyywrap nounput never-interactive
 
 
 %{
@@ -35,8 +35,6 @@
 #include "fsc2_conf_parser.h"
 
 int fsc2_conflex( void );
-
-FILE *fsc2_confin;
 
 %}
 

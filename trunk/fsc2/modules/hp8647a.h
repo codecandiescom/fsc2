@@ -126,7 +126,6 @@ Var_T *synthesizer_sweep_up(            Var_T * /* v */ );
 Var_T *synthesizer_sweep_down(          Var_T * /* v */ );
 Var_T *synthesizer_reset_frequency(     Var_T * /* v */ );
 Var_T *synthesizer_use_table(           Var_T * /* v */ );
-Var_T *synthesizer_attenuation(         Var_T * /* v */ );
 Var_T *synthesizer_att_ref_freq(        Var_T * /* v */ );
 Var_T *synthesizer_modulation(          Var_T * /* v */ );
 Var_T *synthesizer_mod_ampl(            Var_T * /* v */ );
@@ -136,8 +135,6 @@ Var_T *synthesizer_command(             Var_T * /* v */ );
 
 
 /* Functions defined in "hp8647a_util.c" */
-
-void hp8647a_read_table( FILE */* fp */ );
 
 FILE *hp8647a_find_table( char ** /* name */e );
 

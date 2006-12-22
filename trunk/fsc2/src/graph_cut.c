@@ -3095,6 +3095,22 @@ void delete_all_cut_markers( bool redraw_flag )
 }
 
 
+/*---------------------------------------------------------*
+ * Callback for the invisible curve buttons (that can only
+ * be used via the keyboard shortcuts. This function only
+ * exists because of a bug in fdesign, that creates to
+ * declarations of curve_button_callback_2d() if it's
+ * set also as the callback for these buttons and not only
+ * for the 2D graphics form.
+ *---------------------------------------------------------*/
+
+void cut_curve_button_callback_2d( FL_OBJECT * obj,
+                                   long        data )
+{
+    return curve_button_callback_2d( obj, data );
+}
+
+
 /*
  * Local variables:
  * tags-file-name: "../TAGS"

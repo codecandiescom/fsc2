@@ -32,7 +32,6 @@
 #include "fsc2.h"
 
 
-int conditionparse( void );
 void conditionparser_init( void );
 
 /* locally used functions */
@@ -76,42 +75,33 @@ static int Dont_exec = 0;
 }
 
 
-%token E_VAR_TOKEN    258
-%token E_VAR_REF      259
-%token E_FUNC_TOKEN   260
-%token E_INT_TOKEN    261
-%token E_FLOAT_TOKEN  262
-%token E_STR_TOKEN    263
-%token E_EQ           264
-%token E_NE           265
-%token E_LT           266
-%token E_LE           267
-%token E_GT           268
-%token E_GE           269
-%token E_NEG          270
-%token E_AND          271
-%token E_OR           272
-%token E_XOR          273
-%token E_NOT          274
-%token E_PPOS         275
-%token E_PLEN         276
-%token E_PDPOS        277
-%token E_PDLEN        278
-%token E_PLSA         279
-%token E_MINA         280
-%token E_MULA         281
-%token E_DIVA         282
-%token E_MODA         283
-%token E_EXPA         284
-
-%token <vptr> E_VAR_TOKEN         /* variable name */
-%token <vptr> E_VAR_REF
-%token <vptr> E_FUNC_TOKEN        /* function name */
-%token <lval> E_INT_TOKEN
-%token <dval> E_FLOAT_TOKEN
-%token <sptr> E_STR_TOKEN
-%token E_EQ E_NE E_LT E_LE E_GT E_GE
-%token <lval> E_PPOS E_PLEN E_PDPOS E_PDLEN
+%token <vptr> E_VAR_TOKEN     258       /* variable name */
+%token <vptr> E_VAR_REF       259
+%token <vptr> E_FUNC_TOKEN    260       /* function name */
+%token <lval> E_INT_TOKEN     261
+%token <dval> E_FLOAT_TOKEN   262
+%token <sptr> E_STR_TOKEN     263
+%token E_EQ                   264
+%token E_NE                   265
+%token E_LT                   266
+%token E_LE                   267
+%token E_GT                   268
+%token E_GE                   269
+%token E_NEG                  270
+%token E_AND                  271
+%token E_OR                   272
+%token E_XOR                  273
+%token E_NOT                  274
+%token <lval> E_PPOS          275
+%token <lval> E_PLEN          276
+%token <lval> E_PDPOS         277
+%token <lval> E_PDLEN         278
+%token E_PLSA                 279
+%token E_MINA                 280
+%token E_MULA                 281
+%token E_DIVA                 282
+%token E_MODA                 283
+%token E_EXPA                 284
 
 %type <vptr> expr list1 l1e ind strs
 
@@ -140,9 +130,7 @@ expr:    E_INT_TOKEN              { if ( ! Dont_exec )
                                         $$ = vars_push_copy( $1 ); }
        | E_VAR_TOKEN '['          { if ( ! Dont_exec )
                                         vars_arr_start( $1 ); }
-         list1                    { if ( $4 == NULL && ! Dont_exec )
-                                        $$ = vars_push( UNDEF_VAR ); }
-         ']'                      { if ( ! Dont_exec )
+         list1 ']'                { if ( ! Dont_exec )
                                         $$ = vars_arr_rhs( $4 ); }
        | E_FUNC_TOKEN '('
          list2 ')'                { if ( ! Dont_exec )
