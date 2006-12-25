@@ -7,9 +7,9 @@
 === DET_OFFSET int [ -167772150 : 167772150 ] [ 0 ] "Detection offset" "ns"
 === CREATE_DEFENSE button [ ON ] "Create defense pulse"
 === PULSE_2_DEFENSE float [ 0 : ] [ 50 ] "End of MW pulse to\nend of defense\npulse distance" "ns"
-=== START_FIELD float [ 0 : 114304 ] [ 35000 ] "Start field" "G"
-=== END_FIELD float [ 0 : 114304 ] [ 36000 ] "End field" "G"
-=== FIELD_STEP float [ 0.14288 :  ] [ 1 ] "Field step" "G"
+=== START_FIELD float [ 0 : 48370.8 ] [ 35000 ] "Start field" "G"
+=== END_FIELD float [ 0 : 48370.8 ] [ 36000 ] "End field" "G"
+=== FIELD_STEP float [ 0.12456 :  ] [ 1 ] "Field step" "G"
 === N_AVG menu [ "1", "3", "10", "30", "100", "300", "1000", \
 ===              "3000", "10000" ] [ 3 ] "Number of averages"
 === ADC_CHANNELS menu [ "0", "1", "0 and 1" ] "ADC channel(s) to use"
