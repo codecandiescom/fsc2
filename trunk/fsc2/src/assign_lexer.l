@@ -57,9 +57,23 @@
 
 
 extern void assignparser_init( void );
-
-int assignlex( void );
 extern void assignparse( void );
+
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int assignget_lineno( void );
+FILE * assignget_in( void );
+FILE * assignget_out( void );
+int assignget_leng( void );
+char * assignget_text( void );
+void assignset_lineno( int );
+void assignset_in( FILE * );
+void assignset_out( FILE * );
+int assignget_debug( void );
+void assignset_debug( int );
+int assignlex_destroy( void );
 
 
 /* locally used global variables */

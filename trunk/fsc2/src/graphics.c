@@ -1265,8 +1265,8 @@ void create_label_pixmap( Canvas_T * c,
         G_1d.label_pm = XCreatePixmap( G.d, FL_ObjWin( c->obj ), height, width,
                                        fl_get_canvas_depth( c->obj ) );
 
-        G_1d.label_w = i2ushrt( height );
-        G_1d.label_h = i2ushrt( width );
+        G_1d.label_w = i2u15( height );
+        G_1d.label_h = i2u15( width );
 
         for ( i = 0, k = width - 1; i < width; k--, i++ )
             for ( j = 0; j < height; j++ )
@@ -1279,8 +1279,8 @@ void create_label_pixmap( Canvas_T * c,
                                                height, width,
                                                fl_get_canvas_depth( c->obj ) );
 
-        G_2d.label_w[ r_coord ] = i2ushrt( height );
-        G_2d.label_h[ r_coord ] = i2ushrt( width );
+        G_2d.label_w[ r_coord ] = i2u15( height );
+        G_2d.label_h[ r_coord ] = i2u15( width );
 
         for ( i = 0, k = width - 1; i < width; k--, i++ )
             for ( j = 0; j < height; j++ )

@@ -50,9 +50,24 @@
 #include "fsc2.h"
 
 
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int splitget_lineno( void );
+FILE * splitget_in( void );
+FILE * splitget_out( void );
+int splitget_leng( void );
+char * splitget_text( void );
+void splitset_lineno( int );
+void splitset_in( FILE * );
+void splitset_out( FILE * );
+int splitget_debug( void );
+void splitset_debug( int );
+int splitlex_destroy( void );
+
+
 /* local functions */
 
-static int splitlex( void );
 static bool section_parser( int section );
 
 

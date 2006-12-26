@@ -38,7 +38,7 @@ static int Max_Devices_of_a_Kind;
 static void resolve_hook_functions( Device_T * dev );
 static void load_functions( Device_T * dev );
 static void resolve_functions( Device_T * dev );
-static void add_function( int        num,
+static void add_function( size_t     num,
                           void *     new_func,
                           Device_T * new_dev );
 static int func_cmp( const void * a,
@@ -475,7 +475,7 @@ static void resolve_functions( Device_T * dev )
  * current device.
  *----------------------------------------------------------------------*/
 
-static void add_function( int        num,
+static void add_function( size_t     num,
                           void *     new_func,
                           Device_T * new_dev )
 {

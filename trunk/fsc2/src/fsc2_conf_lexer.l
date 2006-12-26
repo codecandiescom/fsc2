@@ -34,7 +34,22 @@
 
 #include "fsc2_conf_parser.h"
 
-int fsc2_conflex( void );
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int fsc2_confget_lineno( void );
+FILE * fsc2_confget_in( void );
+FILE * fsc2_confget_out( void );
+int fsc2_confget_leng( void );
+char * fsc2_confget_text( void );
+void fsc2_confset_lineno( int );
+void fsc2_confset_in( FILE * );
+void fsc2_confset_out( FILE * );
+int fsc2_confget_debug( void );
+void fsc2_confset_debug( int );
+int fsc2_conflex_destroy( void );
+
 
 %}
 

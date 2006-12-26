@@ -26,14 +26,12 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack nounput never-interactive
+%option noyywrap stack noyy_top_state nounput never-interactive
 
 %{
 
 #include "hp864_tmpl.h"
 
-
-#define YY_NO_TOP_STATE        /* no need for function yy_top_state( ) */
 
 #define IS_FREQ 1
 #define IS_ATT  2
@@ -41,7 +39,6 @@
 #define TABLE_END   0
 #define TABLE_CHUNK_SIZE 128
 
-static int hp864_tmpl_lex( void );
 static int hp864_tmpl_get_unit( void );
 static void hp864_tmpl_new_table_entry( int type,
                                         double val );
@@ -53,6 +50,21 @@ static long hp864_tmpl_Lc,
 static double unit_fac = 1.0;
 
 static long cur_table_len;
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int hp864_tmpl_get_lineno( void );
+FILE * hp864_tmpl_get_in( void );
+FILE * hp864_tmpl_get_out( void );
+int hp864_tmpl_get_leng( void );
+char * hp864_tmpl_get_text( void );
+void hp864_tmpl_set_lineno( int );
+void hp864_tmpl_set_in( FILE * );
+void hp864_tmpl_set_out( FILE * );
+int hp864_tmpl_get_debug( void );
+void hp864_tmpl_set_debug( int );
+int hp864_tmpl_lex_destroy( void );
 
 %}
 

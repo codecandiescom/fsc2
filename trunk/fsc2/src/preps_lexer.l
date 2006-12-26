@@ -56,9 +56,24 @@
 
 extern void prepsparser_init( void );
 
-int prepslex( void );
-
 extern void prepsparse( void );
+
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int prepsget_lineno( void );
+FILE * prepsget_in( void );
+FILE * prepsget_out( void );
+int prepsget_leng( void );
+char * prepsget_text( void );
+void prepsset_lineno( int );
+void prepsset_in( FILE * );
+void prepsset_out( FILE * );
+int prepsget_debug( void );
+void prepsset_debug( int );
+int prepslex_destroy( void );
+
 
 /* Locally used global variables */
 

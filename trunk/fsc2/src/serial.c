@@ -1053,7 +1053,7 @@ static bool get_serial_lock( int sn )
     const char *bp;
     int n;
     long pid = -1;
-    int mask;
+    mode_t mask;
 
 
     /* Try to open lock file - if it exists we can check its content and

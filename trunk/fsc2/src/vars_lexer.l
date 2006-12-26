@@ -57,9 +57,23 @@
 
 extern void varsparser_init( void );
 
-int varslex( void );
-
 extern void varsparse( void );
+
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int varsget_lineno( void );
+FILE * varsget_in( void );
+FILE * varsget_out( void );
+int varsget_leng( void );
+char * varsget_text( void );
+void varsset_lineno( int );
+void varsset_in( FILE * );
+void varsset_out( FILE * );
+int varsget_debug( void );
+void varsset_debug( int );
+int varslex_destroy( void );
 
 
 /* Locally used global variables */

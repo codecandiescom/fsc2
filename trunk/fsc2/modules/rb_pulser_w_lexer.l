@@ -26,14 +26,11 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack nounput never-interactive
+%option noyywrap stack noyy_top_state nounput never-interactive
 
 %{
 
 #include "rb_pulser_w.h"
-
-
-#define YY_NO_TOP_STATE        /* no need for function yy_top_state( ) */
 
 
 static void set_cur_delay( int card_no );
@@ -41,11 +38,26 @@ static void set_cur_clock( int clock_no );
 static void set_name( char * name );
 
 
-static int rb_pulser_w_lex( void );
 static long rb_pulser_w_Lc,
             rb_pulser_w_Comm_Lc;
 static int cur_delay = INVALID_DELAY_NUMBER;
 static int cur_clock = INVALID_CLOCK_NUMBER;
+
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int rb_pulser_w_get_lineno( void );
+FILE * rb_pulser_w_get_in( void );
+FILE * rb_pulser_w_get_out( void );
+int rb_pulser_w_get_leng( void );
+char * rb_pulser_w_get_text( void );
+void rb_pulser_w_set_lineno( int );
+void rb_pulser_w_set_in( FILE * );
+void rb_pulser_w_set_out( FILE * );
+int rb_pulser_w_get_debug( void );
+void rb_pulser_w_set_debug( int );
+int rb_pulser_w_lex_destroy( void );
 
 %}
 

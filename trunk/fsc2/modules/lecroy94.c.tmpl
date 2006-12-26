@@ -647,7 +647,7 @@ Var_T *digitizer_sensitivity( Var_T * v )
         else
             offset = lecroy94_tmpl.sens[ channel ];
 
-        if ( abs( offset ) >=
+        if ( fabs( offset ) >=
                   1.0001 * offset_factor[ fs_index ] * fixed_sens[ fs_index ] )
         {
             print( FATAL, "Currently set offset too large for the requested "
@@ -818,7 +818,7 @@ Var_T *digitizer_offset( Var_T * v )
         if ( i == NUM_ELEMS( fixed_sens ) )
             fs_index = i - 1;
 
-        if ( abs( offset ) >=
+        if ( fabs( offset ) >=
                  1.0001 * offset_factor[ fs_index ] * fixed_sens[ fs_index ] )
         {
             print( FATAL, "Offset too large for the currently set channel "
@@ -1059,7 +1059,7 @@ Var_T *digitizer_trigger_level( Var_T * v )
                     break;
             }
 
-            if ( lrnd( abs( 1.0e6 * level ) ) >
+            if ( lrnd( fabs( 1.0e6 * level ) ) >
                     lrnd( 1.0e6 * LECROY94_TMPL_TRG_MAX_LEVEL_CH_FAC * sens ) )
             {
                 print( FATAL, "Trigger level is too large, maximum is %f "
@@ -1071,7 +1071,7 @@ Var_T *digitizer_trigger_level( Var_T * v )
 
 #if defined LECROY94_TMPL_EXT
         case LECROY94_TMPL_EXT :
-            if ( lrnd( abs( 1.0e6 * level ) ) >
+            if ( lrnd( fabs( 1.0e6 * level ) ) >
                  lrnd( 1.0e6 * LECROY94_TMPL_TRG_MAX_LEVEL_EXT ) )
             {
                 print( FATAL, "Trigger level too large, maximum is %f V.\n",
@@ -1083,7 +1083,7 @@ Var_T *digitizer_trigger_level( Var_T * v )
 
 #if defined LECROY94_TMPL_EXT10
         case LECROY94_TMPL_EXT10 :
-            if ( lrnd( abs( 1.0e6 * level ) ) >
+            if ( lrnd( fabs( 1.0e6 * level ) ) >
                  lrnd( 1.0e6 * LECROY94_TMPL_TRG_MAX_LEVEL_EXT10 ) )
             {
                 print( FATAL, "Trigger level too large, maximum is %f V.\n",

@@ -1058,8 +1058,8 @@ static bool shift_XPoints_of_curve_1d( Canvas_T *   c,
     {
         if ( cv->points[ j ].exist )
         {
-            cv->xpoints[ k ].x = i2shrt( cv->xpoints[ k ].x + dx );
-            cv->xpoints[ k ].y = i2shrt( cv->xpoints[ k ].y + dy );
+            cv->xpoints[ k ].x = i2s15( cv->xpoints[ k ].x + dx );
+            cv->xpoints[ k ].y = i2s15( cv->xpoints[ k ].y + dy );
 
             if ( cv->xpoints[ k ].x < 0 )
                 cv->left = SET;
@@ -1096,8 +1096,8 @@ static void reconfigure_window_1d( Canvas_T * c,
 
     /* Set the new canvas sizes */
 
-    c->w = i2ushrt( w );
-    c->h = i2ushrt( h );
+    c->w = i2u15( w );
+    c->h = i2u15( h );
 
     /* Calculate the new scale factors */
 
@@ -1219,14 +1219,14 @@ void recalc_XPoints_of_curve_1d( Curve_1d_T * cv )
         if ( ! sp->exist )
             continue;
 
-        xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-        xp->y = d2shrt( G_1d.canvas.h - 1 - cv->s2d[ Y ]
+        xp->x = s15rnd( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
+        xp->y = s15rnd( G_1d.canvas.h - 1 - cv->s2d[ Y ]
                         * ( cv->points[ j ].v + cv->shift[ Y ] ) );
 
-        cv->left  |= ( xp->x < 0 );
-        cv->right |= ( xp->x >= ( int ) G_1d.canvas.w );
-        cv->up    |= ( xp->y < 0 );
-        cv->down  |= ( xp->y >= ( int ) G_1d.canvas.h );
+        cv->left  |= xp->x < 0;
+        cv->right |= xp->x >= ( int ) G_1d.canvas.w;
+        cv->up    |= xp->y < 0;
+        cv->down  |= xp->y >= ( int ) G_1d.canvas.h;
 
         xp++;
     }
@@ -1277,7 +1277,7 @@ void redraw_canvas_1d( Canvas_T * c )
             if ( cv != NULL )
                 for ( m = G_1d.marker_1d; m != NULL; m = m->next )
                 {
-                    x = d2shrt( cv->s2d[ X ]
+                    x = s15rnd( cv->s2d[ X ]
                                 * ( m->x_pos + cv->shift[ X ] ) );
                     XDrawLine( G.d, c->pm, m->gc, x, 0, x, c->h );
                 }
@@ -1730,7 +1730,7 @@ void make_scale_1d( Curve_1d_T * cv,
     {
         /* Draw coloured line of scale */
 
-        y = i2shrt( G.x_scale_offset );
+        y = i2s15( G.x_scale_offset );
         XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
 
         /* Draw all the ticks and numbers */
@@ -1738,7 +1738,7 @@ void make_scale_1d( Curve_1d_T * cv,
         for ( cur_p = d_start_fine; cur_p < c->w;
               medium++, coarse++, cur_p += d_delta_fine )
         {
-            x = d2shrt( cur_p );
+            x = s15rnd( cur_p );
 
             if ( coarse % coarse_factor == 0 )         /* long line */
             {
@@ -1756,7 +1756,7 @@ void make_scale_1d( Curve_1d_T * cv,
                     XDrawString( G.d, c->pm, c->font_gc, x - width / 2,
                                  y + G.label_dist + G.font_asc, lstr,
                                  strlen( lstr ) );
-                    last = i2shrt( x + width / 2 );
+                    last = i2s15( x + width / 2 );
                 }
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
@@ -1771,7 +1771,7 @@ void make_scale_1d( Curve_1d_T * cv,
     {
         /* Draw coloured line of scale */
 
-        x = i2shrt( c->w - G.y_scale_offset );
+        x = i2s15( c->w - G.y_scale_offset );
         XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
 
         /* Draw all the ticks and numbers */
@@ -1779,7 +1779,7 @@ void make_scale_1d( Curve_1d_T * cv,
         for ( cur_p = c->h - 1.0 - d_start_fine; cur_p > - 0.5;
               medium++, coarse++, cur_p -= d_delta_fine )
         {
-            y = d2shrt( cur_p );
+            y = s15rnd( cur_p );
 
             if ( coarse % coarse_factor == 0 )         /* long line */
             {

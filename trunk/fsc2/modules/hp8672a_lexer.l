@@ -26,22 +26,18 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack nounput never-interactive
+%option noyywrap stack noyy_top_state nounput never-interactive
 
 %{
 
 #include "hp8672a.h"
 
 
-#define YY_NO_TOP_STATE        /* no need for function yy_top_state( ) */
-
 #define IS_FREQ 1
 #define IS_ATT  2
 #define TABLE_INIT -1
 #define TABLE_END   0
 #define TABLE_CHUNK_SIZE 128
-
-static int hp8672a_lex( void );
 
 static int hp8672a_get_unit( void );
 
@@ -56,6 +52,22 @@ static long hp8672a_Lc,
 static double unit_fac = 1.0;
 
 static long cur_table_len;
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int hp8672a_get_lineno( void );
+FILE * hp8672a_get_in( void );
+FILE * hp8672a_get_out( void );
+int hp8672a_get_leng( void );
+char * hp8672a_get_text( void );
+void hp8672a_set_lineno( int );
+void hp8672a_set_in( FILE * );
+void hp8672a_set_out( FILE * );
+int hp8672a_get_debug( void );
+void hp8672a_set_debug( int );
+int hp8672a_lex_destroy( void );
+
 
 %}
 

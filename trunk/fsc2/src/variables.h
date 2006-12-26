@@ -29,13 +29,9 @@
 #include "fsc2.h"
 
 
-/* The following defines the function that decides if a variable is an integer
-   or a float variable. The function gets passed the first character of the
-   variable name. If it returns TRUE, the variable will be an integer variable
-   (or array), otherwise a float variable or array. */
-
-/* Variables with a name starting with a capital letter will be integers, all
-   others float variables */
+/* The following macro defines how it is decided if a variable is an integer
+   or a float variable - variables with a name starting with a capital letter
+   will be integers (or arrays of integers etc.), all others floats. */
 
 #define VAR_TYPE( a )  ( isupper( ( a )->name[ 0 ] ) ? INT_VAR : FLOAT_VAR )
 
@@ -73,28 +69,28 @@ enum Var_Type {
 typedef struct Var Var_T;
 
 struct Var {
-    char       *name;              /* name of the variable */
-    Var_Type_T type;               /* type of the variable */
+    char       * name;             /* name of the variable */
+    Var_Type_T   type;             /* type of the variable */
 
     union
     {
-        long        lval;          /* for integer values */
-        double      dval;          /* for float values */
-        long        *lpnt;         /* for integer arrays */
-        double      *dpnt;         /* for double arrays */
-        char        *sptr;         /* for strings */
-        Var_T       **vptr;        /* for array references */
-        struct Func *fnct;         /* for functions */
-        ssize_t     *index;        /* for indices of LHS sub-array */
+        long           lval;       /* for integer values */
+        double         dval;       /* for float values */
+        long        *  lpnt;       /* for integer arrays */
+        double      *  dpnt;       /* for double arrays */
+        char        *  sptr;       /* for strings */
+        Var_T       ** vptr;       /* for array references */
+        struct Func *  fnct;       /* for functions */
+        ssize_t     *  index;      /* for indices of LHS sub-array */
     } val;
 
     int dim;                       /* dimension of array */
     ssize_t len;                   /* total len of array */
     unsigned long flags;
 
-    Var_T *from;                   /* used in pointer variables */
-    Var_T *next;                   /* next variable in list or stack */
-    Var_T *prev;                   /* previous variable in list or stack */
+    Var_T * from;                  /* used in pointer variables */
+    Var_T * next;                  /* next variable in list or stack */
+    Var_T * prev;                  /* previous variable in list or stack */
 
 };
 
@@ -130,28 +126,28 @@ enum {
 };
 
 
-Var_T *vars_get( const char * /* name */ );
+Var_T * vars_get( const char * /* name */ );
 
-Var_T *vars_new( const char * /* name */ );
+Var_T * vars_new( const char * /* name */ );
 
 void vars_arr_create( Var_T * /* a       */,
                       Var_T * /* v       */,
                       int     /* dim     */,
                       bool    /* is_temp */ );
 
-Var_T *vars_push_copy( Var_T * /* v */ );
+Var_T * vars_push_copy( Var_T * /* v */ );
 
-Var_T *vars_push_matrix( Var_Type_T /* type */,
-                         int        /* dim  */,
-                         ... );
+Var_T * vars_push_matrix( Var_Type_T /* type */,
+                          int        /* dim  */,
+                          ... );
 
-Var_T *vars_push( Var_Type_T /* type */,
+Var_T * vars_push( Var_Type_T /* type */,
                   ... );
 
-Var_T *vars_pop( Var_T * /* v */ );
+Var_T * vars_pop( Var_T * /* v */ );
 
-Var_T *vars_make( Var_Type_T /* type */,
-                  Var_T *    /* src  */ );
+Var_T * vars_make( Var_Type_T /* type */,
+                   Var_T *    /* src  */ );
 
 void vars_del_stack( void );
 
@@ -162,14 +158,14 @@ void vars_check( Var_T * /* v    */,
 
 bool vars_exist( Var_T * /* v */ );
 
-Var_T *vars_arr_start( Var_T * /* v */ );
+Var_T * vars_arr_start( Var_T * /* v */ );
 
-void *vars_iter( Var_T * /* v */ );
+void * vars_iter( Var_T * /* v */ );
 
 void vars_save_restore( bool /* flag */ );
 
-Var_T *vars_free( Var_T * /* v             */,
-                  bool    /* also_nameless */ );
+Var_T * vars_free( Var_T * /* v             */,
+                   bool    /* also_nameless */ );
 
 
 #endif  /* ! VARIABLES_HEADER */

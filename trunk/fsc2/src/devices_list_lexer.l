@@ -34,7 +34,21 @@
 
 static long Comm_lc;
 
-int devices_listlex( void );
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int devices_listget_lineno( void );
+FILE * devices_listget_in( void );
+FILE * devices_listget_out( void );
+int devices_listget_leng( void );
+char * devices_listget_text( void );
+void devices_listset_lineno( int );
+void devices_listset_in( FILE * );
+void devices_listset_out( FILE * );
+int devices_listget_debug( void );
+void devices_listset_debug( int );
+int devices_listlex_destroy( void );
+
 
 %}
 

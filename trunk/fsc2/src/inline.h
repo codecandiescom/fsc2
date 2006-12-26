@@ -32,13 +32,33 @@
 #endif
 
 
-static inline short int d2shrt( double /* a */ );
+static inline short int i2s15( int /* i */ );
 
-static inline short int i2shrt( int /* a */ );
+static inline unsigned short int i2u15( int /* i */ );
 
-static inline unsigned short int d2ushrt( double /* a */ );
+static inline short int i2s16( int /* i */ );
 
-static inline unsigned short int i2ushrt( int /* a */ );
+static inline unsigned short int i2u16( int /* i */ );
+
+static inline short int s15rnd( double /* d */ );
+
+static inline unsigned short int u15rnd( double /* d */ );
+
+static inline short int s16rnd( double /* d */ );
+
+static inline unsigned short int u16rnd( double /* d */ );
+
+static inline short int srnd( double /* d */ );
+
+static inline unsigned short int usrnd( double /* d */ );
+
+static inline int irnd( double /* d */ );
+
+static inline unsigned int uirnd( double /* d */ );
+
+static inline long lrnd( double /* d */ );
+
+static inline unsigned long ulrnd( double /* d */ );
 
 static inline int i_max( int /* a */,
                          int /* b */ );
@@ -76,141 +96,380 @@ static inline size_t s_min( size_t /* a */,
 static inline size_t s_max( size_t /* a */,
                             size_t /* b */ );
 
-static inline long lrnd( double /* x */ );
-
-static inline unsigned long ulrnd( double /* x */ );
-
-static inline int irnd( double /* x */ );
-
-static inline unsigned int uirnd( double /* x */ );
-
 
 /*-------------------------------------------------------------------------*
+ * Converts an int to a short value in the range representable by 15 bits.
+ * If the integer is too large or too small the maximum or minimum value
+ * fron the 15 bit range gets returned and errno gets set to ERANGE.
  *-------------------------------------------------------------------------*/
 
-static short int d2shrt( double a )
+static inline short int i2s15( int i )
 {
-    if ( a > SHRT_MAX_HALF )
-        return SHRT_MAX_HALF;
-    if ( a < SHRT_MIN_HALF )
-        return SHRT_MIN_HALF;
+    if ( i > 16383 )
+    {
+        errno = ERANGE;
+        return 16383;
+    }
+#if SHRT_MIN != - SHRT_MAX         /* 2's complement machines */
+    if ( i < -16384 )
+    {
+        errno = ERANGE;
+        return -16384;
+    }
+#else
+    if ( i < -16383 )
+    {
+        errno = ERANGE;
+        return -16383;
+    }
+#endif
 
-    return ( short int ) ( a < 0.0 ? ceil( a - 0.5 ) : floor( a + 0.5 ) );
+    return ( short int ) i;
+}
+
+
+/*--------------------------------------------------------------------------*
+ * Converts an int to an unsigned short value in the range representable by
+ * 15 bits. If the integer is too large the maximum value representable by
+ * 15 bits gets returned and 0 if the integer is less than 0. In both cases
+ * errno gets set to ERANGE.
+ *--------------------------------------------------------------------------*/
+
+static inline unsigned short int i2u15( int i )
+{
+    if ( i > 32767 )
+    {
+        errno = ERANGE;
+        return 32767;
+    }
+    if ( i < 0 )
+    {
+        errno = ERANGE;
+        return 0;
+    }
+
+    return ( unsigned short int ) i;
 }
 
 
 /*-------------------------------------------------------------------------*
+ * Converts an int to a short value in the range representable by 16 bits.
+ * If the integer is too large or too small the maximum or minimum value
+ * fron the 16 bit range gets returned and errno gets set to ERANGE.
  *-------------------------------------------------------------------------*/
 
-static short int i2shrt( int a )
+static inline short int i2s16( int i )
 {
-    if ( a > SHRT_MAX_HALF )
-        return SHRT_MAX_HALF;
-    if ( a < SHRT_MIN_HALF )
-        return SHRT_MIN_HALF;
+    if ( i > 32767 )
+    {
+        errno = ERANGE;
+        return 32767;
+    }
+#if SHRT_MIN != - SHRT_MAX         /* 2's complement machines */
+    if ( i < -32768 )
+    {
+        errno = ERANGE;
+        return -32768;
+    }
+#else
+    if ( i < -32767 )
+    {
+        errno = ERANGE;
+        return -32767;
+    }
+#endif
 
-    return ( short int ) a;
+    return ( short int ) i;
+}
+
+
+/*--------------------------------------------------------------------------*
+ * Converts an int to an unsigned short value in the range representable by
+ * 16 bits. If the integer is too large the maximum value representable by
+ * 16 bits gets returned and 0 if the integer is less than 0. In both cases
+ * errno gets set to ERANGE.
+ *--------------------------------------------------------------------------*/
+
+static inline unsigned short int i2u16( int i )
+{
+    if ( i > 65535 )
+    {
+        errno = ERANGE;
+        return 65535;
+    }
+    if ( i < 0 )
+    {
+        errno = ERANGE;
+        return 0;
+    }
+
+    return ( unsigned short int ) i;
+}
+
+
+/*-----------------------------------------------------------------------*
+ * Rounds a double to the nearest signed integer value representable by
+ * 15 bits. On overflow the maximum value is returned, on underflow the
+ * smallest possible value. On both over- and underflow errno gets set
+ * to ERANGE.
+ *-----------------------------------------------------------------------*/
+
+static inline short int s15rnd( double d )
+{
+    if ( d >= 16383.5 )
+    {
+        errno = ERANGE;
+        return 16383;
+    }
+#if SHRT_MIN != - SHRT_MAX         /* 2's complement machines */
+    if ( d <= -16384.5 )
+    {
+        errno = ERANGE;
+        return -16384;
+    }
+#else
+    if ( d <= -16383.5 )
+    {
+        errno = ERANGE;
+        return -16383;
+    }
+#endif
+    return ( short int ) ( d < 0.0 ? ceil( d - 0.5 ) : floor( d + 0.5 ) );
 }
 
 
 /*-------------------------------------------------------------------------*
+ * Rounds a double to the nearest unsigned intreger value representable by
+ * 15 bits. On overflow the maximum value is returned, and 9 if the double
+ * is smaller than 0. In both these cases errno gets set to ERANGE.
  *-------------------------------------------------------------------------*/
 
-static unsigned short int d2ushrt( double a )
+static inline unsigned short int u15rnd( double d )
 {
-    if ( a > USHRT_MAX )
+    if ( d >= 32767.5 )
+    {
+        errno = ERANGE;
+        return 32767;
+    }
+    if ( d < 0 )
+    {
+        errno = ERANGE;
+        return 0;
+    }
+
+    return ( unsigned short int ) floor( d + 0.5 );
+}
+
+
+/*-------------------------------------------------------------------------*
+ * Rounds a double to the nearest signed integer value representable by
+ * 16 bits. On overflow the maximum value is returned, on underflow the
+ * smallest possible value. On both over- and underflow errno gets set
+ * to ERANGE.
+ *-------------------------------------------------------------------------*/
+
+static inline short int s16rnd( double d )
+{
+    if ( d >= 32767.5 )
+    {
+        errno = ERANGE;
+        return 32767;
+    }
+#if SHRT_MIN != - SHRT_MAX         /* 2's complement machines */
+    if ( d <= -32768.5 )
+    {
+        errno = ERANGE;
+        return -32768;
+    }
+#else
+    if ( d <= -32767.5 )
+    {
+        errno = ERANGE;
+        return -32767;
+    }
+#endif
+    return ( short int ) ( d < 0.0 ? ceil( d - 0.5 ) : floor( d + 0.5 ) );
+}
+
+
+/*-------------------------------------------------------------------------*
+ * Rounds a double to the nearest unsigned integer value representable by
+ * 16 bits. On overflow the maximum value is returned, and 9 if the double
+ * is smaller than 0. In both these cases errno gets set to ERANGE.
+ *-------------------------------------------------------------------------*/
+
+static inline unsigned short int u16rnd( double d )
+{
+    if ( d >= 65535.5 )
+    {
+        errno = ERANGE;
+        return 65535;
+    }
+    if ( d < 0 )
+    {
+        errno = ERANGE;
+        return 0;
+    }
+
+    return ( unsigned short int ) floor( d + 0.5 );
+}
+
+
+/*---------------------------------------------------------------------*
+ * Rounds a double to the nearest short int value. On overflow largest
+ * possible short int gets returned, and on underflow the smallest
+ * short int value. In both these cases errno gets set to ERANGE.
+ *---------------------------------------------------------------------*/
+
+static inline short int srnd( double d )
+{
+    if ( d >= SHRT_MAX + 0.5 )
+    {
+        errno = ERANGE;
+        return SHRT_MAX;
+    }
+    if ( d <= SHRT_MIN - 0.5 )
+    {
+        errno = ERANGE;
+        return SHRT_MIN;
+    }
+
+    return ( short int ) ( d < 0.0 ? ceil( d - 0.5 ) : floor( d + 0.5 ) );
+}
+
+
+/*----------------------------------------------------------------------*
+ * Rounds a double to the nearest unsigned short int value. On overflow
+ * the largest possible unsigned short int value gets returned, and 0
+ * if the double is less than 0. In both these cases errno gets set to
+ * ERANGE.
+ *----------------------------------------------------------------------*/
+
+static inline unsigned short int usrnd( double d )
+{
+    if ( d >= USHRT_MAX + 0.5 )
+    {
+        errno = ERANGE;
         return USHRT_MAX;
-    if ( a < 0 )
+    }
+    if ( d < 0 )
+    {
+        errno = ERANGE;
         return 0;
+    }
 
-    return ( unsigned short int ) floor( a + 0.5 );
+    return ( unsigned short int ) floor( d + 0.5 );
 }
 
 
-/*-------------------------------------------------------------------------*
- *-------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------*
+ * Rounds a double to the nearest int value. On overflow largest possible
+ * int gets returned, and on underflow the smallest int value. In both
+ * these cases errno gets set to ERANGE.
+ *------------------------------------------------------------------------*/
 
-static unsigned short int i2ushrt( int a )
+static inline int irnd( double d )
 {
-    if ( a > USHRT_MAX )
-        return USHRT_MAX;
-    if ( a < 0 )
-        return 0;
-
-    return ( unsigned short int ) a;
-}
-
-/*-------------------------------------------------------------------------*
- *-------------------------------------------------------------------------*/
-
-static int     i_max(  int     a, int     b ) { return a > b ? a : b; }
-static int     i_min(  int     a, int     b ) { return a < b ? a : b; }
-static long    l_max(  long    a, long    b ) { return a > b ? a : b; }
-static long    l_min(  long    a, long    b ) { return a < b ? a : b; }
-static float   f_max(  float   a, float   b ) { return a > b ? a : b; }
-static float   f_min(  float   a, float   b ) { return a < b ? a : b; }
-static double  d_max(  double  a, double  b ) { return a > b ? a : b; }
-static double  d_min(  double  a, double  b ) { return a < b ? a : b; }
-static ssize_t ss_min( ssize_t a, ssize_t b ) { return a < b ? a : b; }
-static ssize_t ss_max( ssize_t a, ssize_t b ) { return a < b ? a : b; }
-static size_t  s_min(  size_t  a, size_t  b ) { return a < b ? a : b; }
-static size_t  s_max(  size_t  a, size_t  b ) { return a < b ? a : b; }
-
-
-/*-------------------------------------------------------------------------*
- *-------------------------------------------------------------------------*/
-
-static long lrnd( double x )
-{
-    if ( x > LONG_MAX )
-        return LONG_MAX;
-    if ( x < LONG_MIN )
-        return LONG_MIN;
-
-    return ( long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
-}
-
-
-/*-------------------------------------------------------------------------*
- *-------------------------------------------------------------------------*/
-
-static unsigned long ulrnd( double x )
-{
-    if ( x > ULONG_MAX )
-        return ULONG_MAX;
-    if ( x < 0 )
-        return 0;
-
-    return ( unsigned long ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
-}
-
-
-/*-------------------------------------------------------------------------*
- *-------------------------------------------------------------------------*/
-
-static int irnd( double x )
-{
-    if ( x > INT_MAX )
+    if ( d >= INT_MAX + 0.5 )
+    {
+        errno = ERANGE;
         return INT_MAX;
-    if ( x < INT_MIN )
+    }
+    if ( d <= INT_MIN - 0.5 )
+    {
+        errno = ERANGE;
         return INT_MIN;
+    }
 
-    return ( int ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
+    return ( int ) ( d < 0.0 ? ceil( d - 0.5 ) : floor( d + 0.5 ) );
+}
+
+
+/*----------------------------------------------------------------------*
+ * Rounds a double to the nearest unsigned int value. On overflow the
+ * largest possible unsigned int value gets returned, and 0 if the
+ * double is less than 0. In both these cases errno gets set to ERANGE.
+ *----------------------------------------------------------------------*/
+
+static inline unsigned int uirnd( double d )
+{
+    if ( d >= UINT_MAX + 0.5 )
+    {
+        errno = ERANGE;
+        return UINT_MAX;
+    }
+    if ( d < 0 )
+    {
+        errno = ERANGE;
+        return 0;
+    }
+
+    return ( unsigned int ) floor( d + 0.5 );
+}
+
+
+/*--------------------------------------------------------------------*
+ * Rounds a double to the nearest long int value. On overflow largest
+ * possible long int gets returned, and on underflow the smallest
+ * long int value. In both these cases errno gets set to ERANGE.
+ *--------------------------------------------------------------------*/
+
+static inline long lrnd( double d )
+{
+    if ( d >= LONG_MAX + 0.5 )
+    {
+        errno = ERANGE;
+        return LONG_MAX;
+    }
+    if ( d <= LONG_MIN - 0.5 )
+    {
+        errno = ERANGE;
+        return LONG_MIN;
+    }
+
+    return ( long ) ( d < 0.0 ? ceil( d - 0.5 ) : floor( d + 0.5 ) );
 }
 
 
 /*-------------------------------------------------------------------------*
+ * Rounds a double to the nearest unsigned long int value. On overflow the
+ * largest possible unsigned long int value gets returned, and 0 if the
+ * double is less than 0. In both these cases errno gets set to ERANGE.
  *-------------------------------------------------------------------------*/
 
-static unsigned int uirnd( double x )
+static inline unsigned long ulrnd( double d )
 {
-    if ( x > UINT_MAX )
-        return UINT_MAX;
-    if ( x < 0 )
+    if ( d >= ULONG_MAX + 0.5 )
+    {
+        errno = ERANGE;
+        return ULONG_MAX;
+    }
+    if ( d < 0 )
+    {
+        errno = ERANGE;
         return 0;
+    }
 
-    return ( unsigned int ) ( x < 0.0 ? ceil( x - 0.5 ) : floor( x + 0.5 ) );
+    return ( unsigned long ) floor( d + 0.5 );
 }
+
+
+/*--------------------------------------------------------------------*
+ * Various utility functions for comparing values of different types.
+ *--------------------------------------------------------------------*/
+
+static inline int     i_max(  int     a, int     b ) { return a > b ? a : b; }
+static inline int     i_min(  int     a, int     b ) { return a < b ? a : b; }
+static inline long    l_max(  long    a, long    b ) { return a > b ? a : b; }
+static inline long    l_min(  long    a, long    b ) { return a < b ? a : b; }
+static inline float   f_max(  float   a, float   b ) { return a > b ? a : b; }
+static inline float   f_min(  float   a, float   b ) { return a < b ? a : b; }
+static inline double  d_max(  double  a, double  b ) { return a > b ? a : b; }
+static inline double  d_min(  double  a, double  b ) { return a < b ? a : b; }
+static inline ssize_t ss_min( ssize_t a, ssize_t b ) { return a < b ? a : b; }
+static inline ssize_t ss_max( ssize_t a, ssize_t b ) { return a < b ? a : b; }
+static inline size_t  s_min(  size_t  a, size_t  b ) { return a < b ? a : b; }
+static inline size_t  s_max(  size_t  a, size_t  b ) { return a < b ? a : b; }
 
 
 #endif  /* ! INLINE_HEADER */

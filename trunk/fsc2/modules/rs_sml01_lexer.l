@@ -26,22 +26,18 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack nounput never-interactive
+%option noyywrap stack noyy_top_state nounput never-interactive
 
 %{
 
 #include "rs_sml01.h"
 
 
-#define YY_NO_TOP_STATE        /* no need for function yy_top_state( ) */
-
 #define IS_FREQ 1
 #define IS_ATT  2
 #define TABLE_INIT -1
 #define TABLE_END   0
 #define TABLE_CHUNK_SIZE 128
-
-static int rs_sml01_lex( void );
 
 static int rs_sml01_get_unit( void );
 
@@ -56,6 +52,21 @@ static long rs_sml01_Lc,
 static double unit_fac = 1.0;
 
 static long cur_table_len;
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int rs_sml01_get_lineno( void );
+FILE * rs_sml01_get_in( void );
+FILE * rs_sml01_get_out( void );
+int rs_sml01_get_leng( void );
+char * rs_sml01_get_text( void );
+void rs_sml01_set_lineno( int );
+void rs_sml01_set_in( FILE * );
+void rs_sml01_set_out( FILE * );
+int rs_sml01_get_debug( void );
+void rs_sml01_set_debug( int );
+int rs_sml01_lex_destroy( void );
 
 %}
 

@@ -26,14 +26,12 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack nounput never-interactive
+%option noyywrap stack noyy_top_state nounput never-interactive
 
 %{
 
 #include "hjs_attenuator.h"
 
-
-#define YY_NO_TOP_STATE        /* no need for function yy_top_state( ) */
 
 #define TABLE_INIT        0
 #define TABLE_ENTRY       1
@@ -42,8 +40,6 @@
 #define TABLE_TYPE_STEP   4
 #define TABLE_CHUNK_SIZE 32
 
-
-static int hjs_attenuator_lex( void );
 
 static void hjs_attenuator_new_table_entry( int    type,
                                             double val );
@@ -55,6 +51,21 @@ static long hjs_attenuator_Lc,
             hjs_attenuator_Comm_Lc;
 
 static size_t cur_table_len;
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int hjs_attenuator_get_lineno( void );
+FILE * hjs_attenuator_get_in( void );
+FILE * hjs_attenuator_get_out( void );
+int hjs_attenuator_get_leng( void );
+char * hjs_attenuator_get_text( void );
+void hjs_attenuator_set_lineno( int );
+void hjs_attenuator_set_in( FILE * );
+void hjs_attenuator_set_out( FILE * );
+int hjs_attenuator_get_debug( void );
+void hjs_attenuator_set_debug( int );
+int hjs_attenuator_lex_destroy( void );
 
 %}
 

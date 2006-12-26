@@ -49,9 +49,9 @@ static void hjs_attenuator_set_attenuation( long new_step );
 static void hjs_attenuator_comm_failure( void );
 
 
-static FILE *hjs_attenuator_find_calibration( char ** name );
+static FILE * hjs_attenuator_find_calibration( char ** name );
 
-static FILE *hjs_attenuator_open_calibration( char * name );
+static FILE * hjs_attenuator_open_calibration( char * name );
 
 static long hjs_attenuator_att_to_step( double att );
 
@@ -411,7 +411,7 @@ static void hjs_attenuator_set_attenuation( long new_step )
 
     /* Wait for the motor to move, we're at a speed of 300 steps per second. */
 
-    fsc2_usleep( lrnd( fabs( steps / 300.0 * 1000000L ) ), UNSET );
+    fsc2_usleep( ulrnd( fabs( steps / 300.0 * 1000000L ) ), UNSET );
 
     /* To always reach the end point from the same side we go a bit further
        up when we come from below and then back down again (obviously, the
@@ -431,7 +431,7 @@ static void hjs_attenuator_set_attenuation( long new_step )
                             100000L, UNSET ) != 16 )
         hjs_attenuator_comm_failure( );
 
-    fsc2_usleep( 166667L, UNSET );
+    fsc2_usleep( 166667, UNSET );
 }
 
 
@@ -452,7 +452,7 @@ static void hjs_attenuator_comm_failure( void )
  * the memory used for the file name passed to the function is deallocated.
  *--------------------------------------------------------------------------*/
 
-static FILE *hjs_attenuator_find_calibration( char ** name )
+static FILE * hjs_attenuator_find_calibration( char ** name )
 {
     FILE *tfp;
     char *new_name;
@@ -511,7 +511,7 @@ static FILE *hjs_attenuator_find_calibration( char ** name )
  * deallocated.
  *------------------------------------------------------------------*/
 
-static FILE *hjs_attenuator_open_calibration( char * name )
+static FILE * hjs_attenuator_open_calibration( char * name )
 {
     FILE *tfp;
 

@@ -26,16 +26,12 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack nounput never-interactive
+%option noyywrap stack noyy_top_state nounput never-interactive
 
 %{
 
 #include "spectrapro_300i.h"
 
-
-#define YY_NO_TOP_STATE        /* no need for function yy_top_state( ) */
-
-static int spectrapro_300i_lex( void );
 
 static void spectrapro_300i_new_entry( int          type,
                                        const char * calib_file );
@@ -55,6 +51,21 @@ static struct {
 #define DATA_TYPE   4
 #define DATA_U_TYPE 5
 
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int spectrapro_300i_get_lineno( void );
+FILE * spectrapro_300i_get_in( void );
+FILE * spectrapro_300i_get_out( void );
+int spectrapro_300i_get_leng( void );
+char * spectrapro_300i_get_text( void );
+void spectrapro_300i_set_lineno( int );
+void spectrapro_300i_set_in( FILE * );
+void spectrapro_300i_set_out( FILE * );
+int spectrapro_300i_get_debug( void );
+void spectrapro_300i_set_debug( int );
+int spectrapro_300i_lex_destroy( void );
 
 %}
 

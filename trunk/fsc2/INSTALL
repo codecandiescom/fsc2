@@ -471,15 +471,18 @@ D) Compiling and Installation
 =============================
 
 
-Now go into the main directory of the package and type 'make'. This may
-take some time to finish. In principle no warnings should show up during
-the compilation (unless you're on Debian and use its flex version), at
-least on systems with a newer libc and if my GPIB library is used, but
-warnings may occur when the documentation is created and some of the
-required tools are not available. It may even happen that then the make
-process stops with an error message during this stage (i.e. while making
-the documentation). This does *not* mean that the program didn't compile
-succesfully, only that parts of the documentation could not be created.
+Now you're ready to go into the main directory of the package and type
+@code{make}. This may take some time to finish. In a perfect world no
+compiler warnings would show up even with lots of checks enabled.
+Unfortunately, this can't be always achieved. Use of different versions
+of the C library, the tools that are used to automatically create some
+of the source code as well as not 100% clean external header files not
+under may control makes achieving this goal impossible. Further warnings may
+occur when the documentation is created and some of the required tools are
+not available. It may even happen that the make process stops with an error
+message during this stage (i.e. while making the documentation). This does
+*not* mean that the program didn't compile successfully but only that
+parts of the documentation could not be created.
 
 
 Don't try to invoke 'make' from one of the sub-directories. While in
@@ -527,10 +530,10 @@ devices, writing a test suite for the supported devices is still on my
 to-do list.
 
 
-    August 25, 2006                        Much luck, Jens
+    December 24, 2006                        Much luck, Jens
 
 --
   \   Jens Thoms Toerring  ___    jt@toerring.de
    \__________________________    http://www.toerring.de
-                                  Urbanstr. 176, D-10961 Berlin
-                                  +49 (0)30 692 86 27
+                                  Hertzbergstr. 28, 12055 Berlin, Germany
+                                  Tel.: +49 (0)30 691 64 54

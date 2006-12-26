@@ -54,8 +54,23 @@
 #include "devices_parser.h"
 
 
-int deviceslex( void );
 extern void devicesparse( void );
+
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int devicesget_lineno( void );
+FILE * devicesget_in( void );
+FILE * devicesget_out( void );
+int devicesget_leng( void );
+char * devicesget_text( void );
+void devicesset_lineno( int );
+void devicesset_in( FILE * );
+void devicesset_out( FILE * );
+int devicesget_debug( void );
+void devicesset_debug( int );
+int deviceslex_destroy( void );
 
 
 /* locally used global variables */

@@ -54,8 +54,23 @@
 #include "fsc2.h"
 #include "phases_parser.h"
 
-int phaseslex( void );
 extern void phasesparse( void );
+
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int phasesget_lineno( void );
+FILE * phasesget_in( void );
+FILE * phasesget_out( void );
+int phasesget_leng( void );
+char * phasesget_text( void );
+void phasesset_lineno( int );
+void phasesset_in( FILE * );
+void phasesset_out( FILE * );
+int phasesget_debug( void );
+void phasesset_debug( int );
+int phaseslex_destroy( void );
 
 
 /* locally used global variables */

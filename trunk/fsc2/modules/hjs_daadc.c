@@ -721,7 +721,7 @@ static int hjs_daadc_in_out( int out )
 
     in_val = ( in_bytes[ 1 ] << 4 ) + ( in_bytes[ 2 ] >> 4 );
 
-    if ( in_val & ~ 0xFFF )
+    if ( in_val > 4095 )
     {
         print( FATAL, "ADC returned flawed data.\n" );
         THROW( EXCEPTION );

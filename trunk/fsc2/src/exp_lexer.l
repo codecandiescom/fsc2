@@ -54,9 +54,23 @@
 #include "fsc2.h"
 
 
-int explex( void );
-
 extern Token_Val_T Exp_Val;        /* defined in exp.c */
+
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int expget_lineno( void );
+FILE * expget_in( void );
+FILE * expget_out( void );
+int expget_leng( void );
+char * expget_text( void );
+void expset_lineno( int );
+void expset_in( FILE * );
+void expset_out( FILE * );
+int expget_debug( void );
+void expset_debug( int );
+int explex_destroy( void );
 
 
 /* Locally used global variables */

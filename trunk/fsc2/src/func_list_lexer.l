@@ -32,8 +32,6 @@
 
 #include "fsc2.h"
 
-int func_listlex( void );
-
 static size_t fll_count_functions( Func_T *fncts, size_t num_predef_func );
 static int ffl_func_cmp2( const void *a, const void *b );
 static void fll_get_functions( Func_T *fncts, size_t num_predef_func );
@@ -45,6 +43,22 @@ static long Comm_lc;
 #define EXP_TOKEN    258
 #define PREP_TOKEN   259
 #define IDENT_TOKEN  260
+
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int func_listget_lineno( void );
+FILE * func_listget_in( void );
+FILE * func_listget_out( void );
+int func_listget_leng( void );
+char * func_listget_text( void );
+void func_listset_lineno( int );
+void func_listset_in( FILE * );
+void func_listset_out( FILE * );
+int func_listget_debug( void );
+void func_listset_debug( int );
+int func_listlex_destroy( void );
 
 
 %}

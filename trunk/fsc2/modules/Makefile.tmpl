@@ -68,11 +68,15 @@ $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
 # done because 'ECHO' (which is #defined in these files) is already defined
 # in termios.h (which must be included for serial port support). The second
 # replacement is for avoiding compiler warnings about unitialized variables
-# in the flex generated files.
+# in the flex generated files. The third avoids another warning (at least for
+# newer versions of flex) about a comparison betwen a signed and an unsigned
+# int.
 
 %_lexer.c: %_lexer.l $(src_header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %lexer.l,%,$<) -o$@ $<
-	sed 's/\bECHO\b/FLEX_ECHO/g' $@ > $@.x
-	sed 's/register char \*yy_cp, \*yy_bp;/\
-			register char \*yy_cp = NULL, \*yy_bp = NULL;/' $@.x > $@
+	sed -e 's/\bECHO\b/FLEX_ECHO/g;\
+			s/for ( n = 0; n < max_size && \\$$/for ( n = 0; n < ( size_t ) max_size \&\& \\/;' $@ > $@.x
+		mv $@.x $@
+
+
 	-$(RM) $(RMFLAGS) $@.x

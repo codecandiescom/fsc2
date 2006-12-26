@@ -1196,13 +1196,13 @@ static bool shift_XPoints_of_curve_2d( Canvas_T *   c,
         {
             count--;
 
-            xp->x = i2shrt( xp->x + dx );
-            xp->y = i2shrt( xp->y + dy );
+            xp->x = i2s15( xp->x + dx );
+            xp->y = i2s15( xp->y + dy );
 
-            cv->left  &= ( xp->x + cv->w <= 0 );
-            cv->right &= ( xp->x >= ( int ) G_2d.canvas.w );
-            cv->up    &= ( xp->y + cv->h <= 0 );
-            cv->down  &= ( xp->y >= ( int ) G_2d.canvas.h );
+            cv->left  &= xp->x + cv->w <= 0;
+            cv->right &= xp->x >= ( int ) G_2d.canvas.w;
+            cv->up    &= xp->y + cv->h <= 0;
+            cv->down  &= xp->y >= ( int ) G_2d.canvas.h;
     }
 
     return SET;
@@ -1227,8 +1227,8 @@ static void reconfigure_window_2d( Canvas_T * c,
 
     /* Set the new canvas sizes */
 
-    c->w = i2ushrt( w );
-    c->h = i2ushrt( h );
+    c->w = i2u15( w );
+    c->h = i2u15( h );
 
     /* Calculate the new scale factors */
 
@@ -1375,10 +1375,10 @@ void recalc_XPoints_of_curve_2d( Curve_2d_T * cv )
 
     cv->up = cv->down = cv->left = cv->right = ( cv->count != 0 );
 
-    cv->w = d2ushrt( ceil( cv->s2d[ X ] ) );
-    cv->h = d2ushrt( ceil( cv->s2d[ Y ] ) );
-    dw = i2shrt( cv->w / 2 );
-    dh = i2shrt( cv->h / 2 );
+    cv->w = u15rnd( ceil( cv->s2d[ X ] ) );
+    cv->h = u15rnd( ceil( cv->s2d[ Y ] ) );
+    dw = i2s15( cv->w / 2 );
+    dh = i2s15( cv->h / 2 );
 
     for ( sp = cv->points, i = 0, count = cv->count;
           i < G_2d.ny && count != 0; i++ )
@@ -1387,16 +1387,16 @@ void recalc_XPoints_of_curve_2d( Curve_2d_T * cv )
             {
                 count--;
 
-                p.x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-                p.y = i2shrt( G_2d.canvas.h ) - 1
-                        - d2shrt( cv->s2d[ Y ] * ( i + cv->shift[ Y ] ) );
-                xp->x = i2shrt( p.x - dw );
-                xp->y = i2shrt( p.y - dh );
+                p.x = s15rnd( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
+                p.y =   i2s15( G_2d.canvas.h ) - 1
+                      - s15rnd( cv->s2d[ Y ] * ( i + cv->shift[ Y ] ) );
+                xp->x = i2s15( p.x - dw );
+                xp->y = i2s15( p.y - dh );
 
-                cv->left  &= ( xp->x + cv->w <= 0 );
-                cv->right &= ( xp->x >= ( int ) G_2d.canvas.w );
-                cv->up    &= ( xp->y + cv->h <= 0 );
-                cv->down  &= ( xp->y >= ( int ) G_2d.canvas.h );
+                cv->left  &= xp->x + cv->w <= 0;
+                cv->right &= xp->x >= ( int ) G_2d.canvas.w;
+                cv->up    &= xp->y + cv->h <= 0;
+                cv->down  &= xp->y >= ( int ) G_2d.canvas.h;
             }
 
     cv->needs_recalc = UNSET;
@@ -1453,8 +1453,8 @@ void redraw_canvas_2d( Canvas_T * c )
 
             if ( cv->marker_2d != NULL )
             {
-                dw = i2shrt( ( cv->w + 1 ) / 2 );
-                dh = i2shrt( ( cv->h + 1 ) / 2 );
+                dw = i2s15( ( cv->w + 1 ) / 2 );
+                dh = i2s15( ( cv->h + 1 ) / 2 );
                 if ( dw < 3 )
                     dw = 3;
                 if ( dh < 3 )
@@ -1474,15 +1474,15 @@ void redraw_canvas_2d( Canvas_T * c )
 
                 for ( m = cv->marker_2d; m != NULL; m = m->next )
                 {
-                    points[ 0 ].x =   d2shrt( cv->s2d[ X ] 
+                    points[ 0 ].x =   s15rnd( cv->s2d[ X ] 
                                               * ( m->x_pos + cv->shift[ X ] ) )
                                     - dw;
                     if ( points[ 0 ].x + 2 * dw < 0 ||
-                         points[ 0 ].x > ( short int ) c->w )
+                         points[ 0 ].x > ( int ) c->w )
                          continue;
 
-                    points[ 0 ].y =   i2shrt( G_2d.canvas.h ) - 1
-                                    - d2shrt( cv->s2d[ Y ] 
+                    points[ 0 ].y =   i2s15( G_2d.canvas.h ) - 1
+                                    - s15rnd( cv->s2d[ Y ] 
                                               * ( m->y_pos + cv->shift[ Y ] ) )
                                     - dh;
                     if ( points[ 1 ].y + 2 * dh < 0 ||
@@ -2124,7 +2124,7 @@ void make_scale_2d( Curve_2d_T * cv,
     {
         /* Draw coloured line of scale */
 
-        y = i2shrt( G.x_scale_offset );
+        y = i2s15( G.x_scale_offset );
         XSetForeground( G.d, cv->gc,
                         fl_get_pixel( G.colors[ G_2d.active_curve ] ) );
         XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
@@ -2134,7 +2134,7 @@ void make_scale_2d( Curve_2d_T * cv,
         for ( cur_p = d_start_fine; cur_p < c->w;
               medium++, coarse++, cur_p += d_delta_fine )
         {
-            x = d2shrt( cur_p );
+            x = s15rnd( cur_p );
 
             if ( coarse % coarse_factor == 0 )         /* long line */
             {
@@ -2151,7 +2151,7 @@ void make_scale_2d( Curve_2d_T * cv,
                     XDrawString( G.d, c->pm, c->font_gc, x - width / 2,
                                  y + G.label_dist + G.font_asc, lstr,
                                  strlen( lstr ) );
-                    last = i2shrt( x + width / 2 );
+                    last = i2s15( x + width / 2 );
                 }
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
@@ -2166,7 +2166,7 @@ void make_scale_2d( Curve_2d_T * cv,
     {
         /* Draw coloured line of scale */
 
-        x = i2shrt( c->w - G.y_scale_offset );
+        x = i2s15( c->w - G.y_scale_offset );
         XSetForeground( G.d, cv->gc,
                         fl_get_pixel( G.colors[ G_2d.active_curve ] ) );
         XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
@@ -2176,7 +2176,7 @@ void make_scale_2d( Curve_2d_T * cv,
         for ( cur_p = c->h - 1.0 - d_start_fine; cur_p > - 0.5;
               medium++, coarse++, cur_p -= d_delta_fine )
         {
-            y = d2shrt( cur_p );
+            y = s15rnd( cur_p );
 
             if ( coarse % coarse_factor == 0 )         /* long line */
             {
@@ -2204,7 +2204,7 @@ void make_scale_2d( Curve_2d_T * cv,
     {
         /* Draw coloured line of scale */
 
-        x = i2shrt( G.z_scale_offset );
+        x = i2s15( G.z_scale_offset );
         XSetForeground( G.d, cv->gc,
                         fl_get_pixel( G.colors[ G_2d.active_curve ] ) );
         XFillRectangle( G.d, c->pm, cv->gc, x - 2, 0, 3, c->h );
@@ -2214,7 +2214,7 @@ void make_scale_2d( Curve_2d_T * cv,
         for ( cur_p = c->h - 1.0 - d_start_fine; cur_p > -0.5;
               medium++, coarse++, cur_p -= d_delta_fine )
         {
-            y = d2shrt( cur_p );
+            y = s15rnd( cur_p );
 
             if ( coarse % coarse_factor == 0 )         /* long line */
             {
@@ -2253,7 +2253,7 @@ static void make_color_scale( Canvas_T * c )
     XPoint p[ 2 ];
 
 
-    h = d2ushrt( ceil( ( double ) c->h / NUM_COLORS ) );
+    h = usrnd( ceil( ( double ) c->h / NUM_COLORS ) );
     h_inc = ( double ) c->h / NUM_COLORS;
 
     XDrawLine( G.d, c->pm, c->font_gc, G.z_line_offset, 0,
@@ -2263,9 +2263,10 @@ static void make_color_scale( Canvas_T * c )
 
     if ( h_inc > 1.0 )
         for ( i = 0; i < NUM_COLORS; i++ )
-            XFillRectangle( G.d, c->pm, G_2d.gcs[ i ], G.z_line_offset + 1,
-                        d2shrt( c->h - ( i + 1 ) * h_inc ),
-                        G.z_line_width, h );
+            XFillRectangle( G.d, c->pm, G_2d.gcs[ i ],
+                            G.z_line_offset + 1,
+                            s15rnd( c->h - ( i + 1 ) * h_inc ),
+                            G.z_line_width, h );
     else
     {
         p[ 0 ].x = G.z_line_offset + 1;
@@ -2276,7 +2277,7 @@ static void make_color_scale( Canvas_T * c )
         for ( i = 0; i < NUM_COLORS; i++ )
         {
             hp += h_inc;
-            p[ 0 ].y = d2shrt( hp );
+            p[ 0 ].y = s15rnd( hp );
             XDrawLines( G.d, c->pm, G_2d.gcs[ i ], p, 2, CoordModePrevious );
         }
     }

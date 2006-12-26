@@ -26,20 +26,32 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack nounput never-interactive
+%option noyywrap stack noyy_top_state nounput never-interactive
 
 %{
 
 #include "hjs_fc.h"
 
 
-#define YY_NO_TOP_STATE        /* no need for function yy_top_state( ) */
-
-
-static int hjs_fc_lex( void );
-
 static long hjs_fc_Lc,
             hjs_fc_Comm_Lc;
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int hjs_fc_get_lineno( void );
+FILE * hjs_fc_get_in( void );
+FILE * hjs_fc_get_out( void );
+int hjs_fc_get_leng( void );
+char * hjs_fc_get_text( void );
+void hjs_fc_set_lineno( int );
+void hjs_fc_set_in( FILE * );
+void hjs_fc_set_out( FILE * );
+int hjs_fc_get_debug( void );
+void hjs_fc_set_debug( int );
+int hjs_fc_lex_destroy( void );
+
+
 %}
 
 REM1     ^[\t ]*("//"|"#").*\n

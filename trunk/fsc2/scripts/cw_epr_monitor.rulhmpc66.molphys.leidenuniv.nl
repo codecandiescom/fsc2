@@ -252,7 +252,7 @@ FOREVER {
 
 		new_set_field = input_value( New_Field );
 
-		IF new_set_field <= 114304 G AND new_set_field >= 0 G AND
+		IF new_set_field <= 142880.0 G AND new_set_field >= 0.0 G AND
 		   abs( new_set_field - new_field ) >= 0.14288 G {
 
 			new_field = magnet_field( new_set_field );

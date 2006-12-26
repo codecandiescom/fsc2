@@ -33,7 +33,7 @@ extern bool Dont_Save;                 /* defined in func.c */
 
 static int get_save_file( Var_T ** /* v */ );
 
-static Var_T *batch_mode_file_open( char * /* name */ );
+static Var_T * batch_mode_file_open( char * /* name */ );
 
 static long arr_save( long    /* file_num */,
                       Var_T * /* v        */ );
@@ -64,7 +64,7 @@ static long T_fprintf( long         /* fn  */,
  * so just return a value indicating success.
  *----------------------------------------------------------------*/
 
-Var_T *f_is_file( Var_T * v  UNUSED_ARG )
+Var_T * f_is_file( Var_T * v  UNUSED_ARG )
 {
     return vars_push( INT_VAR, 1L );
 }
@@ -84,7 +84,7 @@ Var_T *f_is_file( Var_T * v  UNUSED_ARG )
  * 6. Default extension to add (in case it's not already there) (optional)
  *---------------------------------------------------------------------------*/
 
-Var_T *f_openf( Var_T * v )
+Var_T * f_openf( Var_T * v )
 {
     Var_T *cur;
     int i;
@@ -255,7 +255,7 @@ Var_T *f_openf( Var_T * v )
  * 5. Default extension to add (in case it's not already there)
  *---------------------------------------------------------------------------*/
 
-Var_T *f_getf( Var_T * v )
+Var_T * f_getf( Var_T * v )
 {
     Var_T *cur;
     int i;
@@ -481,7 +481,7 @@ getfile_retry:
  * after applying some changes according to the input arguments.
  *-------------------------------------------------------------------*/
 
-Var_T *f_clonef( Var_T * v )
+Var_T * f_clonef( Var_T * v )
 {
     char *fn;
     char *n;
@@ -836,7 +836,7 @@ void close_all_files( void )
  * slices. It returns the number of characters written.
  *----------------------------------------------------------------------*/
 
-Var_T *f_save( Var_T * v )
+Var_T * f_save( Var_T * v )
 {
     long file_num;
     long count = 0;
@@ -935,7 +935,7 @@ static long arr_save( long    file_num,
  * The function returns the number of chars it wrote to the file.
  *--------------------------------------------------------------------------*/
 
-Var_T *f_fsave( Var_T * v )
+Var_T * f_fsave( Var_T * v )
 {
     long file_num;
 
@@ -1085,7 +1085,7 @@ static void f_format_check( Var_T * v )
  * The function returns the number of chars written to the file.
  *-------------------------------------------------------------------------*/
 
-Var_T *f_ffsave( Var_T * v )
+Var_T * f_ffsave( Var_T * v )
 {
     long file_num;
 
@@ -1632,7 +1632,7 @@ static long do_printf( long file_num, Var_T * v )
  * character).
  *-------------------------------------------------------------------------*/
 
-Var_T *f_save_p( Var_T * v )
+Var_T * f_save_p( Var_T * v )
 {
     long file_num;
 
@@ -1664,7 +1664,7 @@ Var_T *f_save_p( Var_T * v )
  * that gets prepended to each line of the output (i.e. a comment char).
  *--------------------------------------------------------------------------*/
 
-Var_T *f_save_o( Var_T * v )
+Var_T * f_save_o( Var_T * v )
 {
     long file_num;
 
@@ -1937,7 +1937,7 @@ static long print_include( int          fid,
  * 4. The label for the editor
  *---------------------------------------------------------------------*/
 
-Var_T *f_save_c( Var_T * v )
+Var_T * f_save_c( Var_T * v )
 {
     long file_num;
     const char *cc = NULL;

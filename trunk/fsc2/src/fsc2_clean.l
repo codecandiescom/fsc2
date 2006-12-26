@@ -85,8 +85,6 @@ extern int fileno( FILE * stream );
 #define MAX_INCLUDE_DEPTH  16
 
 
-int yylex( void );
-
 static void include_handler( char * file );
 static void xclose( YY_BUFFER_STATE   primary_buf,
                     YY_BUFFER_STATE * buf_state,
@@ -112,6 +110,22 @@ long Lc,
      Str_Lc;
 char *Fname;
 bool Eol;
+
+
+/* We need these to avoid unnecessary warnings from the flex-generated
+   C code when newer versions of flex are used */
+
+int yyget_lineno( void );
+FILE * yyget_in( void );
+FILE * yyget_out( void );
+int yyget_leng( void );
+char * yyget_text( void );
+void yyset_lineno( int );
+void yyset_in( FILE * );
+void yyset_out( FILE * );
+int yyget_debug( void );
+void yyset_debug( int );
+int yylex_destroy( void );
 
 
 %}

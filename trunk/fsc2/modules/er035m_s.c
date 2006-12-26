@@ -121,8 +121,8 @@ static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 /* The gaussmeter seems to be more cooperative if we wait for some time
    (i.e. 200 ms) after each write operation... */
 
-#define E2_US         100000    /* 100 ms, used in calls of usleep() */
-#define ER035M_S_WAIT 200000    /* this means 200 ms for usleep() */
+#define E2_US         100000U    /* 100 ms, used in calls of usleep() */
+#define ER035M_S_WAIT 200000U    /* this means 200 ms for usleep() */
 
 
 /* If the field is unstable the gausmeter might never get to the state where
@@ -700,7 +700,7 @@ Var_T *gaussmeter_command( Var_T * v )
 Var_T *gaussmeter_wait( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == EXPERIMENT && nmr.is_needed )
-        fsc2_usleep( ( nmr.resolution == LOW ? 10 : 20 ) * E2_US, UNSET );
+        fsc2_usleep( ( nmr.resolution == LOW ? 10U : 20U ) * E2_US, UNSET );
 
     return vars_push( INT_VAR, 1L );
 }

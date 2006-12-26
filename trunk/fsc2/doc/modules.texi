@@ -117,20 +117,20 @@ the structure for variables:
 @example
 typedef struct Var
 @{
-    Var_Type_T type;         /* type of the variable */
+    Var_Type_T type;           /* type of the variable */
     union
     @{
-        long    lval;        /* value of integer values */
-        double  dval;        /* value of float values */
-        long   *lpnt;        /* pointer to integer arrays */
-        double *dpnt;        /* pointer to floating point arrays */
-        char   *sptr;        /* for string constants */
-        struct Var **vptr;   /* for array references, used for
+        long          lval;   /* value of integer values */
+        double        dval;   /* value of float values */
+        long   *      lpnt;   /* pointer to integer arrays */
+        double *      dpnt;   /* pointer to floating point arrays */
+        char   *      sptr;   /* for string constants */
+        struct Var ** vptr;   /* for array references, used for
                                 multi-dimensional arrays */
     @} val;
-    int dim;                 /* dimension of array */
-    ssize_t len;             /* length of array */
-    struct Var *next;        /* next variable on stack */
+    int dim;                  /* dimension of array */
+    ssize_t len;              /* length of array */
+    struct Var * next;        /* next variable on stack */
 @} Var_T;
 @end example
 
@@ -165,10 +165,10 @@ get_curve_between_cursors( cursor_1, cursor_2 )
 @noindent
 A typical C declaration for this function is
 @example
-Var_T *get_curve_between_cursors( Var_T *var );
+Var_T * get_curve_between_cursors( Var_T * var );
 @end example
 @noindent
-Surprisingly, there seems to be only one input variable! And how to return
+Surprisingly, there seems to be only a single argument! And how to return
 an array of data?
 
 Actually, it's not too complicated. The pointer to the variable
@@ -261,9 +261,9 @@ the variable actually exists and has been assigned a value.
 A function that expects just integer arguments could start like the
 following example, just running through the linked list of parameters:
 @example
-Var_T *my_function( Var_T *var )
+Var_T * my_function( Var_T * var )
 @{
-    Var_T *current;
+    Var_T * current;
 
     for ( current = var; current != NULL; current = current->next )
         vars_check( current, INT_VAR );
@@ -297,13 +297,14 @@ to get the address of the start of a string variable.
 
 There are some utility functions that make it even easier to evaluate
 the parameters your function receives (and, if you use those, you don't
-need to check them with the @code{var_chek()} function). The first one
+need to check them with the @code{var_check()} function). The first one
 is for the case that you expect an integer variable but would also be
 prepared to deal with a floating point number after it has been rounded
-to the nearest integer. This is the function @code{get_long()}, defined
+to the nearest integer. This is the function @code{get_long()}, declared
 as
 @example
-long get_long( Var_T *var, const char *snippet )
+long get_long( Var_T *      var,
+               const char * snippet );
 @end example
 @noindent
 The first argument is a pointer to the variable you want to
@@ -330,7 +331,8 @@ foo.edl:17: LECRONIX: abc(): Floating point number used as channel number.
 If, on the other hand, you expect a floating point number but are also
 prepared to accept an integer, you can use the function
 @example
-long get_double( Var_T *var, const char *snippet )
+long get_double( Var_T *     var,
+                const char * snippet );
 @end example
 @noindent
 The arguments of this function are the same you would pass to the
@@ -341,7 +343,8 @@ integer variable instead of the expected floating point variable.
 If your function can accept an integer variable only there's a third
 function:
 @example
-long get_strict_long( Var_T *var, const char *snippet )
+long get_strict_long( Var_T *      var,
+                      const char * snippet );
 @end example
 @noindent
 This function has the same arguments as the two other functions but it
@@ -362,7 +365,7 @@ Then there is a function for the case where you want a boolean
 variable, i.e.@: a variable that can be either true or false. This
 function is declared as
 @example
-bool get_boolean( Var_T *var )
+bool get_boolean( Var_T * var );
 @end example
 This function will return true (i.e.@: a value of @code{1}) when the
 variable passed to it is either an integer variable with a non-zero
@@ -460,7 +463,7 @@ But there's also a function that does all the required checks
 automatically and returns an element. It is called @code{get_element()}
 and is declared as
 @example
-   Var_T *get_element( Var_T *v, int len, ... );
+   Var_T * get_element( Var_T * v, int len, ... );
 @end example
 @noindent
 It takes a variable number of arguments, but at least three. The
@@ -534,11 +537,11 @@ assuming that @code{data} is an array of @code{long int}s.
 As a complete example here is a rather simple but working function named
 @code{square()} that returns the square of the value it got passed:
 @example
-Var_T *square( Var_T *var )
+Var_T * square( Var_T * var )
 @{
     long int_square;
     double float_square;
-    Var_T *ret_val;
+    Var_T * ret_val;
 
     vars_check( var, INT_VAR | FLOAT_VAR );   /* is it a number ? */ 
 
@@ -569,7 +572,7 @@ floating point variable. Finally, we return the variable pointer
 
 Of course, we could also have written the function in a more compact way:
 @example
-Var_T *square( Var_T *var )
+Var_T * square( Var_T * var )
 @{
     vars_check( var, INT_VAR | FLOAT_VAR );
 
@@ -592,7 +595,7 @@ digitizer are stored in an array of integers called @code{data} which
 has @code{len} elements (where @code{len} is a @code{long}). Now all
 you've got to do is call the function @code{vars_push()} as
 @example
-Var_T *ret_var;
+Var_T * ret_var;
 
 ...
 ret = vars_push( INT_ARR, data, len );
@@ -626,7 +629,7 @@ V2 = Dummy[ 2 ];
 @noindent
 and the C code for function @code{my_function()} would look like
 @example
-Var_T *my_function( Var_T *var )
+Var_T * my_function( Var_T * var )
 @{
     long v[ 2 ];
 
@@ -653,7 +656,7 @@ while the C code would define both functions as
 @example
 static double v2;   /* global variable used by my_function_1() 
                        and my_function_2() */
-Var_T *my_function_1( Var_T *v )
+Var_T * my_function_1( Var_T * v )
 @{
     long V1;
 
@@ -663,7 +666,7 @@ Var_T *my_function_1( Var_T *v )
     return vars_push( INT_VAR, V1 );
 @}
 
-Var_T *my_function_2( Var_T *v )
+Var_T * my_function_2( Var_T * v )
 @{
     return vars_push( FLOAT_VAR, v2 );
 @}
@@ -679,7 +682,7 @@ v2 = my_function( );
 @noindent
 with the corresponding C code
 @example
-Var_T *my_function( Var_T *v )
+Var_T * my_function( Var_T * v )
 @{
     long V1;
     static double v2;
@@ -823,8 +826,8 @@ const char generic_type[ ] = DEVICE_TYPE;
 @end example
 or
 @example
-const char *device_name  = DEVICE_NAME;
-const char *generic_type = DEVICE_TYPE;
+const char * device_name  = DEVICE_NAME;
+const char * generic_type = DEVICE_TYPE;
 @end example
 @noindent
 @code{fsc2} will use the first variable with the device name while printing
@@ -936,7 +939,8 @@ The first other thing to do is to announce the device to the library
 dealing with the GPIB bus. This should be done in the @code{exp_hook}
 function (see below) via a call of the function
 @example
-int gpib_init_device( const char *name, int *device );
+int gpib_init_device( const char * name,
+                      int *        device );
 @end example
 @noindent
 This function expects the name of the device (which will be used to look
@@ -949,8 +953,13 @@ rest of this section return these values.
 
 The next two most important functions are
 @example
-int gpib_write( int device, const char *buffer, long length );
-int gpib_read( int device, char *buffer, long *length );
+int gpib_write( int          device,
+                const char * buffer,
+                long         length );
+
+int gpib_read( int    device,
+               char * buffer,
+               long * length );
 @end example
 @noindent
 The first functions sends @code{length} data contained in @code{buffer}
@@ -972,7 +981,8 @@ in the @code{end_of_exp_hook} function (see below).
 
 Using the function
 @example
-int gpib_timeout( int device, int period );
+int gpib_timeout( int device,
+                  int period );
 @end example
 @noindent
 a new timeout value can be set for the device. The value of
@@ -997,7 +1007,7 @@ Finally, there is an additional function to let you directly write to
 the log file that stores information about the details of the
 communication on the GPIB bus:
 @example
-void gpib_log_message( const char *fmt, ... );
+void gpib_log_message( const char * fmt, ... );
 @end example
 @noindent
 It expects a format string as you would use in the @code{C printf()}
@@ -1076,8 +1086,9 @@ The only functions that are different from their normal counterparts are
 
 @code{fsc2_serial_open()} is defined as
 @example
-struct termios *fsc2_serial_open( int sn, const char *devname,
-                                  int flags )
+struct termios * fsc2_serial_open( int          sn,
+                                   const char * devname,
+                                   int          flags )
 @end example
 @noindent
 where @code{sn} is the number of the serial port as already used in
@@ -1093,10 +1104,17 @@ file failed and you can determine the reasons by checking @code{errno}.
 
 @code{fsc2_serial_write()} and @code{fsc2_serial_read()} are defined as
 @example
-ssize_t fsc2_serial_write( int sn, void *buf, size_t count,
-                           long us_timeout, bool quit_on_signal );
-ssize_t fsc2_serial_read( int sn, void *buf, size_t count,
-                          long us_timeout, bool quit_on_signal );
+ssize_t fsc2_serial_write( int    sn,
+                           void * buf,
+                           size_t count,
+                           long   us_timeout,
+                           bool   quit_on_signal );
+
+ssize_t fsc2_serial_read( int    sn,
+                          void * buf,
+                          size_t count,
+                          long   us_timeout,
+                          bool   quit_on_signal );
 @end example
 @noindent
 where @code{sn} is the number of the serial port as already used in
@@ -1134,7 +1152,7 @@ The only other additional function that can be called is
 the log file that stores information about the details of the
 communication over the serial port:
 @example
-void fsc2_serial_log_message( const char *fmt, ... );
+void fsc2_serial_log_message( const char * fmt, ... );
 @end example
 @noindent
 It expects a format string as you would use in the @code{C printf()}
@@ -1287,7 +1305,7 @@ The only other additional function that can be called is
 the log file that stores information about the details of the
 communication over the LAN:
 @example
-void fsc2_lan_log_message( const char *fmt, ... );
+void fsc2_lan_log_message( const char * fmt, ... );
 @end example
 @noindent
 It expects a format string as you would use in the @code{C printf()}
@@ -1321,15 +1339,15 @@ don't have to be declared in the function data base file,
 @code{_init_hook}, @code{_test_hook}, @code{_end_of_test_hook},
 @code{_exp_hook}, @code{_end_of_exp_hook} and @code{_exit_hook}. Thus,
 if the new device is named `SR510' (as the lock-in amplifier mentioned
-at the start) and thus the module is `sr510' these functions are
+at the start and thus the module is `sr510') these functions are
 (together with the parameters):
 @example
-int sr510_init_hook( void )
-int sr510_test_hook( void )
-int sr510_end_of_test_hook( void )
-int sr510_exp_hook( void )
-int sr510_end_of_exp_hook( void )
-void sr510_exit_hook( void )
+int sr510_init_hook( void );
+int sr510_test_hook( void );
+int sr510_end_of_test_hook( void );
+int sr510_exp_hook( void );
+int sr510_end_of_exp_hook( void );
+void sr510_exit_hook( void );
 @end example
 
 
@@ -1746,10 +1764,10 @@ As an example let's assume there is an @code{EDL} function named
 arguments, an integer and a floating point value. Then a typical piece
 of C code to call the function would be
 @example
-Var_T *my_function( Var_T *var )
+Var_T * my_function( Var_T * var )
 @{
-    Var_T *func_ptr;
-    Var_T *ret_value;
+    Var_T * func_ptr;
+    Var_T * ret_value;
     int access;
 
     if ( ! func_exists( "foo" ) )              /* test if function exists */
@@ -1811,18 +1829,22 @@ example in @code{C++}. Unfortunately, @code{C} does not have this kind
 of mechanism, but when being a bit careful one can implement something
 very similar also in @code{C} using a few macros. 
 
-When writing the program I had to deal a lot with memory leaks,
+When writing the program I had to deal with my share of memory leaks,
 segmentation faults etc.@: and hacked together a few routines for
 allocation and deallocation of memory that have some build in code to
 help me with debugging (and which throw exceptions when an allocation
 fails). You might find it useful to also use these routines for your
 modules.
 
-Finally, a boolean type is something that was missing until the new C99
+A boolean type is something that was missing until the new C99
 standard (which only a few compilers support yet), so there's already a
 @code{typedef} for this type included in @code{fsc2} that you can
 use. It's also documented here in order to avoid confusion should you
 accidentally try to redefine it.
+
+Finally, there exist some utility function for rounding of double values
+to the different integer types as well as converting integers to types
+of smaller width.
 
 
 @subsection Printing out messages
@@ -1857,7 +1879,9 @@ appropriate) as well as the device and function name is prepended.
 
 The full @code{C} declaration of this function is:
 @example
-void print( int severity, const char *fmt, ... )
+void print( int          severity,
+            const char * fmt,
+            ... );
 @end example
 @noindent
 
@@ -1878,7 +1902,7 @@ than an order of magnitude.
 
 The full @code{C} declaration of this function is:
 @example
-double experiment_time( void )
+double experiment_time( void );
 @end example
 @noindent
 
@@ -1901,7 +1925,8 @@ should not be used anymore.
 As a replacement for @code{usleep()} (which you shouldn't use in a
 module) there is a function
 @example
-int fsc2_usleep( unsigned long us_duration, bool quit_on_signal )
+int fsc2_usleep( unsigned long us_duration,
+                 bool          quit_on_signal );
 @end example
 @noindent
 It takes two parameters, an @code{unsigned long}, which is the duration
@@ -2094,7 +2119,7 @@ device to become ready or doing some calibration) and the user has
 pressed the @code{STOP} button. In many cases it's probably simpler not
 to throw the @code{USER_BREAK_EXCEPTION} directly but use the function
 @example
-void stop_on_user_request( void )
+void stop_on_user_request( void );
 @end example
 @noindent
 It will detect if the user has pressed the @code{STOP} button and, if
@@ -2111,7 +2136,7 @@ do some cleanup within the module when the @code{STOP} button has been
 pressed you can check if the button has been pressed by calling the
 function
 @example
-void check_user_request( void )
+void check_user_request( void );
 @end example
 @noindent
 It will return @code{true} if the @code{STOP} button has been pressed.
@@ -2144,7 +2169,7 @@ while ( 1 )                   /* loop forever */
 @end example
 
 
-@subsubsection Problems with using exceptions
+@subsubsection Problems with exceptions
 
 There is a caveat when using exceptions. The exception mechanism is
 using the standard C functions @code{setjmp()} and @code{longjmp()} to
@@ -2169,16 +2194,17 @@ module.c:123: warning: variable `i' might be clobbered by
 
 You might get this warning for code like this:
 @example
-long **foo( size_t count, size_t len )
+long ** foo( size_t count,
+             size_t len )
 @{
-    long **buffer;
-    size_t i;
+    long ** buffer;
+    size_t  i;
 
 
     TRY
     @{
         for ( i = 0; i < count; i++ )
-            buffer[ i ] = T_malloc( len * sizeof **buffer );
+            buffer[ i ] = T_malloc( len * sizeof ** buffer );
         buffer[ 0 ] = 123;
         TRY_SUCCESS;
     @}
@@ -2195,8 +2221,8 @@ long **foo( size_t count, size_t len )
 @noindent
 Chances are high that the compiler will use a register for the variable
 @code{i} to speed up execution. But when an exception happens the value
-of @code{i} might have gotten discarded in the process, even though it
-is still needed.
+@code{i} had in the loop of the @code{TRY} block might hav gotten discarded
+in the process, even though it is still needed.
 
 But there's a way to get rid of this problem. All you need is to add an
 additional statement before @code{TRY} is invoked:
@@ -2236,13 +2262,20 @@ called @code{T_realloc()} and @code{T_calloc()}. For the duplication of
 strings you should use @code{T_strdup()} instead of the normal
 @code{strdup()}. And, to make things complete, the replacement for
 @code{free()} is called @code{T_free()}. All five functions accept the
-same input and return values as their normal counterparts, i.e.@:
+same input and return values as their normal counterparts, i.e.@ they
+have the prototypes:
 @example
-void *T_malloc( size_t size )
-void *T_calloc( size_t nmemb, size_t size )
-void *T_realloc( void *ptr, size_t size )
-char *T_strdup( const char *string )
-void *T_free( void *ptr )
+void * T_malloc( size_t size );
+
+void * T_calloc( size_t nmemb,
+                 size_t size );
+
+void * T_realloc( void * ptr,
+                  size_t size );
+
+char * T_strdup( const char * string );
+
+void * T_free( void * ptr );
 @end example
 @noindent
 For @code{T_free()} there's is small deviation from the behavior of
@@ -2301,6 +2334,35 @@ if ( flag == SET )
 @end example
 
 
+@subsection Numerical conversions and comparisons
+@cindex numerical conversions and comparisons
+
+It's a rather common task to round floating point numbers to some type
+of integer (signed or unsigned). Therefore, a set of utility functions
+exists for the more common of these tasks. They are:
+@example
+short int srnd( double a );
+unsigned short usrnd( double a );
+int irnd( double x );
+unsigned int uirnd( double x );
+long lrnd( double x );
+unsigned long ulrnd( double x );
+@end example
+@noindent
+@code{srnd()}, @code{usrnd()}, @code{irnd()}, @code{uirnd()}, @code{lrnd()}
+and @code{ulrnd()} round a double value to the next @code{short int},
+@code{unsigned short int}, @code{int}, @code{unsigned int}, @code{long int}
+or @code{unsigned long int} value, respectively. If the double value is
+smaller than the smallest value of the target range (0 for conversion to an
+unsigned integer type) the turn value is the smallest value in the target
+range and @code{errno} is set to @code{ERANGE}. If the value is too large
+to fit into the traget range the return value is the largest possible value
+in the target range and @code{errno} is also set to @code{ERANGE} (if the
+conversion does not result in an out-of-range value @code{errno} is not
+modified). If you plan to check for an out-of-range error you thus have to
+zero-out errno before calling the functions.
+
+
 @node Pulser Modules, , Programming Utils, Modules
 @section Writing modules for pulsers
 
@@ -2348,55 +2410,55 @@ variables. Pointers to all of these needed functions are collected in one
 structure, @code{Pulser_Struct}:
 @example
 struct @{
-    const char *name;
+    const char * name;
     bool needs_phase_pulses;
     bool has_pods;
 
-    bool ( *assign_channel_to_function )( int function, long channel );
-    bool ( *assign_function )( int function, long connector );
-    bool ( *set_function_high_level )( int function, double high_voltage );
-    bool ( *set_function_low_level )( int function, double low_voltage );
-    bool ( *invert_function )( int function );
-    bool ( *set_function_delay )( int function, double delay );
+    bool ( * assign_channel_to_function )( int function, long channel );
+    bool ( * assign_function )( int function, long connector );
+    bool ( * set_function_high_level )( int function, double high_voltage );
+    bool ( * set_function_low_level )( int function, double low_voltage );
+    bool ( * invert_function )( int function );
+    bool ( * set_function_delay )( int function, double delay );
 
-    bool ( *set_timebase )( double timebase );
-    bool ( *set_timebase_level )( int level );
+    bool ( * set_timebase )( double timebase );
+    bool ( * set_timebase_level )( int level );
 
-    bool ( *set_trigger_mode )( int mode );
-    bool ( *set_repeat_time )( double rep_time );
-    bool ( *set_trig_in_level )( double voltage );
-    bool ( *set_trig_in_slope )( int slope );
-    bool ( *set_trig_in_impedance )( int state );
+    bool ( * set_trigger_mode )( int mode );
+    bool ( * set_repeat_time )( double rep_time );
+    bool ( * set_trig_in_level )( double voltage );
+    bool ( * set_trig_in_slope )( int slope );
+    bool ( * set_trig_in_impedance )( int state );
 
-    bool ( *set_phase_reference )( int phase, int function );
+    bool ( * set_phase_reference )( int phase, int function );
 
-    bool ( *phase_setup_prep )( int func, int type, int pod, long val );
-    bool ( *phase_setup )( int func );
+    bool ( * phase_setup_prep )( int func, int type, int pod, long val );
+    bool ( * phase_setup )( int func );
 
-    bool ( *new_pulse )( long pulse_number );
-    bool ( *set_pulse_function )( long pulse_number, int function );
-    bool ( *set_pulse_position )( long pulse_number, double ptime );
-    bool ( *set_pulse_length )( long pulse_number, double ptime );
-    bool ( *set_pulse_position_change )( long pulse_number, double ptime );
-    bool ( *set_pulse_length_change )( long pulse_number, double ptime );
-    bool ( *set_pulse_phase_cycle )( long pulse_number, long cycle );
+    bool ( * new_pulse )( long pulse_number );
+    bool ( * set_pulse_function )( long pulse_number, int function );
+    bool ( * set_pulse_position )( long pulse_number, double ptime );
+    bool ( * set_pulse_length )( long pulse_number, double ptime );
+    bool ( * set_pulse_position_change )( long pulse_number, double ptime );
+    bool ( * set_pulse_length_change )( long pulse_number, double ptime );
+    bool ( * set_pulse_phase_cycle )( long pulse_number, long cycle );
 
-    bool ( *get_pulse_function )( long pulse_number, int *function );
-    bool ( *get_pulse_position )( long pulse_number, double *ptime );
-    bool ( *get_pulse_length )( long pulse_number, double *ptime );
-    bool ( *get_pulse_position_change )( long pulse_number, double *ptime );
-    bool ( *get_pulse_length_change )( long pulse_number, double *ptime );
-    bool ( *get_pulse_phase_cycle )( long pulse_number, long *cycle );
+    bool ( * get_pulse_function )( long pulse_number, int * function );
+    bool ( * get_pulse_position )( long pulse_number, double * ptime );
+    bool ( * get_pulse_length )( long pulse_number, double * ptime );
+    bool ( * get_pulse_position_change )( long pulse_number, double * ptime );
+    bool ( * get_pulse_length_change )( long pulse_number, double * ptime );
+    bool ( * get_pulse_phase_cycle )( long pulse_number, long * cycle );
 
-    long ( *ch_to_num )( long channel );
+    long ( * ch_to_num )( long channel );
 
     /* The following entries are deprecated and exist for backward
        compatibility only */
 
-    bool ( *set_max_seq_len )( double seq_len );
-    bool ( *keep_all_pulses )( void );
-    bool ( *set_phase_switch_delay )( int function, double del_time );
-    bool ( *set_grace_period )( double gp_time );
+    bool ( * set_max_seq_len )( double seq_len );
+    bool ( * keep_all_pulses )( void );
+    bool ( * set_phase_switch_delay )( int function, double del_time );
+    bool ( * set_grace_period )( double gp_time );
 @} Pulser_Struct;
 @end example
 @noindent
@@ -2529,7 +2591,7 @@ using a hardcoded value of 15 use instead the
 Beside the definition of pulse function numbers there is also an array
 with the full names for the functions (to be used in error messages).
 @example
-const char *Function_Names[ ] = @{
+const char * Function_Names[ ] = @{
     "MW", "TWT", "TWT_GATE","DETECTION", "DETECTION_GATE",
     "DEFENSE", "RF", "RF_GATE", "PULSE_SHAPE", "PHASE_1",
     "PHASE_2", "OTHER_1", "OTHER_2", "OTHER_3", "OTHER_4" @};
@@ -2960,7 +3022,7 @@ avoid the necessity of changes of the module it is probably a good idea
 to test this value within the function.
 
 
-@item bool get_pulse_function(long pulse_number, int *function)
+@item bool get_pulse_function(long pulse_number, int * function)
 This function is called by @code{fsc2} to find out about the function of
 a pulse from the module. If a pulse with the number passed to the
 function exists (if it doesn't the module should print out an error
@@ -2970,7 +3032,7 @@ true value. If no function has been set for the pulse an error message
 should be printed out and an exception has to be thrown.
 
 
-@item bool get_pulse_position(long pulse_number, double *ptime)
+@item bool get_pulse_position(long pulse_number, double * ptime)
 This function is called by @code{fsc2} to find out about the current
 position of a pulse (@strong{not} including function delays) from the
 module. If a pulse with the number passed to the function exists
@@ -2981,7 +3043,7 @@ has been set for the pulse an error message should be printed out and an
 exception has to be thrown.
 
 
-@item bool get_pulse_length(long pulse_number, double *ptime)
+@item bool get_pulse_length(long pulse_number, double * ptime)
 This function in the module is called to determine the current length of
 a pulse. If a pulse with the number passed as the first argument exists
 the variable the second argument points to has to be set to the length
@@ -2989,7 +3051,7 @@ of the pulse (in seconds).  If no length has been set for the pulse an
 error message should be printed out and an exception has to be thrown.
 
 
-@item bool get_pulse_position_change(long pulse_number, double *ptime)
+@item bool get_pulse_position_change(long pulse_number, double * ptime)
 This function should return the current setting of the position change
 setting for the pulse indexed by the argument in the variable pointed to
 by the second argument. If no start position change vale has been set
@@ -2997,7 +3059,7 @@ for the pulse an error message should be printed out and an exception
 has to be thrown.
 
 
-@item bool get_pulse_length_change(long pulse_number, double *ptime)
+@item bool get_pulse_length_change(long pulse_number, double * ptime)
 This function should return the current setting of the length change
 setting for the pulse indexed by the argument in the variable pointed to
 by the second argument. If no length change value has been set for the
@@ -3005,7 +3067,7 @@ pulse an error message should be printed out and an exception has to be
 thrown.
 
 
-@item bool get_pulse_phase_cycle(long pulse_number, long *cycle)
+@item bool get_pulse_phase_cycle(long pulse_number, long * cycle)
 The function should return the number of the phase sequence (i.e.@:
 @code{1} or @code{2}) associated with the pulse associated with pulse
 with the number passed to the function as the first argument. If a phase

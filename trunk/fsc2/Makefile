@@ -416,14 +416,12 @@ CFLAGS           := -Wall                   \
 					-Wpointer-arith         \
 					-Waggregate-return      \
 					-Wnested-externs        \
-					-Wcast-align            \
-				    # -Wconversion
+					-Wcast-align
+				    # -Wconversion        # too many false positives
 				    # -Wsign-compare      # missing in older gcc versions
 				    # -Wbad-function-cast # too many false positives
 				    # -Wcast-qual         # too many false positives
 				    # -Wundef             # fails for bison/flex created files
-				    # -ansi               # fails on inline/asm
-				    # -pedantic           # ditto
 
 
 BISON         := bison

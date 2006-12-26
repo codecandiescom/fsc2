@@ -151,19 +151,19 @@
 /* locally used functions */
 
 static void free_all_vars( void );
-static Var_T *vars_push_submatrix( Var_T *    from,
-                                   Var_Type_T type,
-                                   int        dim,
-                                   ssize_t *  sizes );
+static Var_T * vars_push_submatrix( Var_T *    from,
+                                    Var_Type_T type,
+                                    int        dim,
+                                    ssize_t *  sizes );
 static void vars_ref_copy( Var_T * nsv,
                            Var_T * cp,
                            bool    exact_copy );
 static void vars_ref_copy_create( Var_T * nsv,
                                   Var_T * src,
                                   bool    exact_copy );
-static void *vars_get_pointer( ssize_t * iter,
-                               ssize_t   depth,
-                               Var_T *   p );
+static void * vars_get_pointer( ssize_t * iter,
+                                ssize_t   depth,
+                                Var_T *   p );
 
 
 /*----------------------------------------------------------------------*
@@ -177,7 +177,7 @@ static void *vars_get_pointer( ssize_t * iter,
  *   * pointer to VAR structure or NULL
  *----------------------------------------------------------------------*/
 
-Var_T *vars_get( const char * name )
+Var_T * vars_get( const char * name )
 {
     Var_T *v;
 
@@ -205,7 +205,7 @@ Var_T *vars_get( const char * name )
  *   * pointer to variable structure
  *----------------------------------------------------------*/
 
-Var_T *vars_new( const char * name )
+Var_T * vars_new( const char * name )
 {
     static Var_T template = { NULL, UNDEF_VAR, { 0 }, 0, 0,
                               NEW_VARIABLE, NULL, NULL, NULL };
@@ -242,7 +242,7 @@ Var_T *vars_new( const char * name )
  *-------------------------------------------------------------------*/
 
 
-Var_T *vars_arr_start( Var_T * v )
+Var_T * vars_arr_start( Var_T * v )
 {
     if ( v->type != UNDEF_VAR )
         vars_check( v, INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF );
@@ -260,8 +260,8 @@ Var_T *vars_arr_start( Var_T * v )
  * variables for more-dimensional arrays get deleted).
  *--------------------------------------------------------------*/
 
-Var_T *vars_free( Var_T * v,
-                  bool    also_nameless )
+Var_T * vars_free( Var_T * v,
+                   bool    also_nameless )
 {
     ssize_t i;
     Var_T *ret;
@@ -363,7 +363,7 @@ void vars_clean_up( void )
  * variable to be copied isn't already a stack variable).
  *-------------------------------------------------------------*/
 
-Var_T *vars_push_copy( Var_T * v )
+Var_T * vars_push_copy( Var_T * v )
 {
     Var_T *nv = NULL;
 
@@ -407,9 +407,9 @@ Var_T *vars_push_copy( Var_T * v )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-Var_T *vars_push_matrix( Var_Type_T type,
-                         int        dim,
-                         ... )
+Var_T * vars_push_matrix( Var_Type_T type,
+                          int        dim,
+                          ... )
 {
     Var_T *nv;
     va_list ap;
@@ -477,10 +477,10 @@ Var_T *vars_push_matrix( Var_Type_T type,
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-static Var_T *vars_push_submatrix( Var_T *    from,
-                                   Var_Type_T type,
-                                   int        dim,
-                                   ssize_t *  sizes )
+static Var_T * vars_push_submatrix( Var_T *    from,
+                                    Var_Type_T type,
+                                    int        dim,
+                                    ssize_t *  sizes )
 {
     Var_T *nv;
     ssize_t i;
@@ -546,8 +546,8 @@ static Var_T *vars_push_submatrix( Var_T *    from,
  * FUNC_PTR, struct Func_T *
  *-----------------------------------------------------------------------*/
 
-Var_T *vars_push( Var_Type_T type,
-                  ... )
+Var_T * vars_push( Var_Type_T type,
+                   ... )
 {
     Var_T *nsv, *stack, *src;
     va_list ap;
@@ -693,8 +693,8 @@ Var_T *vars_push( Var_Type_T type,
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
-Var_T *vars_make( Var_Type_T type,
-                  Var_T *    src )
+Var_T * vars_make( Var_Type_T type,
+                   Var_T *    src )
 {
     Var_T *nv = NULL;
     Var_T *stack;
@@ -921,7 +921,7 @@ static void vars_ref_copy_create( Var_T * nsv,
  * successor).
  *-----------------------------------------------------------------*/
 
-Var_T *vars_pop( Var_T * v )
+Var_T * vars_pop( Var_T * v )
 {
     Var_T *ret = NULL;
     ssize_t i;
@@ -1113,7 +1113,7 @@ bool vars_exist( Var_T * v )
  *            done, must be called with a NULL argument.
  *-------------------------------------------------------------------*/
 
-void *vars_iter( Var_T * v )
+void * vars_iter( Var_T * v )
 {
     static ssize_t *iter = NULL;
     void *ret;
@@ -1164,9 +1164,9 @@ void *vars_iter( Var_T * v )
  * element a NULL pointer is returned.
  *--------------------------------------------------------------*/
 
-static void *vars_get_pointer( ssize_t * iter,
-                               ssize_t   depth,
-                               Var_T *   p )
+static void * vars_get_pointer( ssize_t * iter,
+                                ssize_t   depth,
+                                Var_T *   p )
 {
     Var_T *p_next;
 

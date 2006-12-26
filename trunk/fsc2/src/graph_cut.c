@@ -799,9 +799,9 @@ static void cut_recalc_XPoints( void )
         if ( ! sp->exist )
             continue;
 
-        xp->x = d2shrt( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
-        xp->y = i2shrt( G_2d.cut_canvas.h ) - 1 -
-               d2shrt( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
+        xp->x = s15rnd( cv->s2d[ X ] * ( j + cv->shift[ X ] ) );
+        xp->y = i2s15( G_2d.cut_canvas.h ) - 1 -
+               s15rnd( cv->s2d[ Y ] * ( cv->points[ j ].v + cv->shift[ Y ] ) );
         sp->xp_ref = k;
 
         cv->left  |= ( xp->x < 0 );
@@ -984,8 +984,8 @@ bool cut_data_rescaled( long   curve,
             if ( ssp->exist )
             {
                 sp->v = ssp->v;
-                cv->xpoints[ sp->xp_ref ].y = i2shrt( G_2d.cut_canvas.h ) - 1
-                         - d2shrt( cv->s2d[ Y ] * ( sp->v + cv->shift[ Y ] ) );
+                cv->xpoints[ sp->xp_ref ].y = i2s15( G_2d.cut_canvas.h ) - 1
+                         - s15rnd( cv->s2d[ Y ] * ( sp->v + cv->shift[ Y ] ) );
             }
     }
     else
@@ -996,8 +996,8 @@ bool cut_data_rescaled( long   curve,
             if ( ssp->exist )
             {
                 sp->v = ssp->v;
-                cv->xpoints[ sp->xp_ref ].y = i2shrt( G_2d.cut_canvas.h ) - 1
-                         - d2shrt( cv->s2d[ Y ] * ( sp->v + cv->shift[ Y ] ) );
+                cv->xpoints[ sp->xp_ref ].y = i2s15( G_2d.cut_canvas.h ) - 1
+                         - s15rnd( cv->s2d[ Y ] * ( sp->v + cv->shift[ Y ] ) );
             }
     }
 
@@ -1054,7 +1054,7 @@ bool cut_num_points_changed( int  dir,
 
         for ( sp = cv->points, k = 0; k < G_cut.nx; sp++, k++ )
             if ( sp->exist )
-                cv->xpoints[ sp->xp_ref ].x = d2shrt( cv->s2d[ X ] * k );
+                cv->xpoints[ sp->xp_ref ].x = s15rnd( cv->s2d[ X ] * k );
     }
 
     /* Signal calling routine that redraw of cut curve is needed */
@@ -1166,7 +1166,7 @@ static void cut_integrate_point( long   p_index,
         /* Calculate the x-coordinate of the new point and figure out if it
            exceeds the borders of the canvas */
 
-        cv->xpoints[ xp_index ].x = d2shrt( cv->s2d[ X ]
+        cv->xpoints[ xp_index ].x = s15rnd( cv->s2d[ X ]
                                             * ( p_index + cv->shift[ X ] ) );
         if ( cv->xpoints[ xp_index ].x < 0 )
             cv->left = SET;
@@ -1188,8 +1188,8 @@ static void cut_integrate_point( long   p_index,
     /* Calculate the y-coordinate of the (new) point and figure out if it
        exceeds the borders of the canvas */
 
-    cv->xpoints[ xp_index ].y = i2shrt( G_2d.cut_canvas.h ) - 1
-                            - d2shrt( cv->s2d[ Y ]
+    cv->xpoints[ xp_index ].y = i2s15( G_2d.cut_canvas.h ) - 1
+                              - s15rnd( cv->s2d[ Y ]
                               * ( cv->points[ p_index ].v + cv->shift[ Y ] ) );
 
     if ( cv->xpoints[ xp_index ].y < 0 )
@@ -1260,8 +1260,8 @@ static void cut_reconfigure_window( Canvas_T * c,
 
     /* Set the new canvas sizes */
 
-    c->w = i2ushrt( w );
-    c->h = i2ushrt( h );
+    c->w = i2u15( w );
+    c->h = i2u15( h );
 
     /* Calculate the new scale factors */
 
@@ -1976,7 +1976,7 @@ static void redraw_cut_canvas( Canvas_T * c )
         for ( m = G_2d.curve_2d[ G_2d.active_curve ]->cut_marker;
               m != NULL; m = m->next )
         {
-            x = d2shrt( cv->s2d[ X ] * ( m->x_pos + cv->shift[ X ] ) );
+            x = s15rnd( cv->s2d[ X ] * ( m->x_pos + cv->shift[ X ] ) );
             XDrawLine( G.d, c->pm, m->gc, x, 0, x, c->h );
         }
 
@@ -2426,7 +2426,7 @@ static void cut_make_scale( Canvas_T * c,
     {
         /* Draw coloured line of scale */
 
-        y = i2shrt( G.x_scale_offset );
+        y = i2s15( G.x_scale_offset );
         XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
 
         /* Draw all the ticks and numbers */
@@ -2434,7 +2434,7 @@ static void cut_make_scale( Canvas_T * c,
         for ( cur_p = d_start_fine; cur_p < c->w;
               medium++, coarse++, cur_p += d_delta_fine )
         {
-            x = d2shrt( cur_p );
+            x = s15rnd( cur_p );
 
             if ( coarse % coarse_factor == 0 )         /* long line */
             {
@@ -2451,7 +2451,7 @@ static void cut_make_scale( Canvas_T * c,
                     XDrawString( G.d, c->pm, c->font_gc, x - width / 2,
                                  y + G.label_dist + G.font_asc, lstr,
                                  strlen( lstr ) );
-                    last = i2shrt( x + width / 2 );
+                    last = i2s15( x + width / 2 );
                 }
             }
             else if ( medium % medium_factor == 0 )    /* medium line */
@@ -2466,7 +2466,7 @@ static void cut_make_scale( Canvas_T * c,
     {
         /* Draw coloured line of scale */
 
-        x = i2shrt( c->w - G.y_scale_offset );
+        x = i2s15( c->w - G.y_scale_offset );
         XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
 
         /* Draw all the ticks and numbers */
@@ -2474,7 +2474,7 @@ static void cut_make_scale( Canvas_T * c,
         for ( cur_p = c->h - 1.0 - d_start_fine; cur_p > - 0.5;
               medium++, coarse++, cur_p -= d_delta_fine )
         {
-            y = d2shrt( cur_p );
+            y = s15rnd( cur_p );
 
             if ( coarse % coarse_factor == 0 )         /* long line */
             {
@@ -2502,7 +2502,7 @@ static void cut_make_scale( Canvas_T * c,
     {
         /* Draw coloured line of scale */
 
-        x = i2shrt( G.z_scale_offset );
+        x = i2s15( G.z_scale_offset );
         XFillRectangle( G.d, c->pm, cv->gc, x - 2, 0, 3, c->h );
 
         /* Draw all the ticks and numbers */
@@ -2510,7 +2510,7 @@ static void cut_make_scale( Canvas_T * c,
         for ( cur_p = c->h - 1.0 - d_start_fine; cur_p > -0.5;
               medium++, coarse++, cur_p -= d_delta_fine )
         {
-            y = d2shrt( cur_p );
+            y = s15rnd( cur_p );
 
             if ( coarse % coarse_factor == 0 )         /* long line */
             {
@@ -2536,21 +2536,21 @@ static void cut_make_scale( Canvas_T * c,
 
         /* Finally draw the triangle indicating the position of the cut */
 
-        triangle[ 0 ].x = i2shrt( x - G.long_tick_len - 1 );
+        triangle[ 0 ].x = i2s15( x - G.long_tick_len - 1 );
 
         if ( G_cut.cut_dir == X )
-            triangle[ 0 ].y = d2shrt( ( G_2d.cut_z_axis.h - 1 )
+            triangle[ 0 ].y = s15rnd( ( G_2d.cut_z_axis.h - 1 )
                                       * ( 1.0 - G_cut.index /
                                           ( G_2d.nx - 1.0 ) ) );
         else
             triangle[ 0 ].y = 
-                         d2shrt( ( G_2d.cut_z_axis.h - 1 )
+                         s15rnd( ( G_2d.cut_z_axis.h - 1 )
                                  * ( 1.0 - G_cut.index / ( G_2d.ny - 1.0 ) ) );
 
         triangle[ 1 ].x = - ( G.z_scale_offset - G.long_tick_len - 7 );
-        triangle[ 1 ].y = i2shrt( - G.long_tick_len / 3 );
+        triangle[ 1 ].y = i2s15( - G.long_tick_len / 3 );
         triangle[ 2 ].x = 0;
-        triangle[ 2 ].y = i2shrt( 2 * ( G.long_tick_len / 3 ) );
+        triangle[ 2 ].y = i2s15( 2 * ( G.long_tick_len / 3 ) );
 
         XFillPolygon( G.d, c->pm, G_2d.curve_2d[ 0 ]->gc, triangle, 3,
                       Convex, CoordModePrevious );
@@ -2604,8 +2604,8 @@ static void shift_XPoints_of_cut_curve( Canvas_T * c )
         if ( ! cv->points[ j ].exist )
             continue;
 
-        cv->xpoints[ k ].x = i2shrt( cv->xpoints[ k ].x + dx );
-        cv->xpoints[ k ].y = i2shrt( cv->xpoints[ k ].y + dy );
+        cv->xpoints[ k ].x = i2s15( cv->xpoints[ k ].x + dx );
+        cv->xpoints[ k ].y = i2s15( cv->xpoints[ k ].y + dy );
 
         if ( cv->xpoints[ k ].x < 0 )
             cv->left = SET;
