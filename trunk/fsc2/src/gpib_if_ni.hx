@@ -109,7 +109,6 @@ void gpib_log_message( const char * /* fmt */,
 
 
 extern char gpib_error_msg[ 1024 ]; /* global for GPIB error messages */
-extern int gpiblineno;
 
 #define SUCCESS   0
 #define FAILURE  -1

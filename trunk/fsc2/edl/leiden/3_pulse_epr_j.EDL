@@ -9,8 +9,8 @@
 === DET_OFFSET int [ -167772150 : 167772150 ] [ 0 ] "Detection offset" "ns"
 === N_AVG menu [ "1", "3", "10", "30", "100", "300", "1000", \
 ===			     "3000", "10000" ] [ 3 ] "Number of averages"
-=== START_FIELD float [ 0 : 142880 ] [ 80000 ] "Start field" "G"
-=== END_FIELD float [ 0 : 142880 ] [ 82000 ] "End field" "G"
+=== START_FIELD float [ 0 : 139022.24 ] [ 80000 ] "Start field" "G"
+=== END_FIELD float [ 0 : 139022.24 ] [ 82000 ] "End field" "G"
 === FIELD_STEP float [ 0.14288 :  ] [ 1 ] "Field step" "G"
 === SHOW_PREV button [ OFF ] "Show pulse preview"
 === WAIT_TIME float [ 0.0 : ] [ 5.0 ] "Magnet wait time" "s"

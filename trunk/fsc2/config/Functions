@@ -33,11 +33,11 @@
  * number of arguments - use a negative number for functions with
  * variable number of arguments. The optional parameter `access'
  * is the access flag, where ALL means that it can be used in all
- * sections of an EDL file while EXP says that the function can
- * be used only in the EXPERIMENTS section, e.g. when it is a
- * function that accesses a device. The default is EXP. Finally,
+ * sections of an EDL file while EXP tells that the function can
+ * be used only in the EXPERIMENTS section, e.g. it's a function
+ * that needs to accesses the device. The default is EXP. Finally,
  * PREP says that the function may only be used in the PREPARATION
- * section (and thus will never really talk with the device).
+ * section (and thus will never access the device).
  *
  *******************************************************************/
 
@@ -50,12 +50,13 @@ get_phase_cycled_area, -1, EXP;
 
 magnet_name, 0, ALL;            // returns the device name
 magnet_setup, 2, ALL;           // set start field and sweep step size
-magnet_fast_init, 0, ALL;       // shortens magnet setup time (X,S)
+magnet_fast_init, 0, ALL;       // shortens magnet setup time (X-, S-band)
 magnet_field, -1, EXP;          // set or query the field
-set_field, -1, EXP;             // go to to a field value
-get_field, 0, EXP;              // returns the current field 
-reset_field, 0, EXP;            // go back to start field
 magnet_reset_field, 0, EXP;     // go back to start field
+
+set_field, -1, EXP;             // go to a field value (deprecated)
+get_field, 0, EXP;              // returns the current field (deprecated)
+reset_field, 0, EXP;            // go back to start field (deprecated)
 
 
 /* Functions supported by the Steinhoff magnets (hjs_sfc, hjs_fc) only */
@@ -67,10 +68,11 @@ magnet_calibration_file, -1, PREP;
 
 /* Functions not supported by the Oxford IPS20-4 sweep power supply driver */
 
-sweep_up, 0, EXP;               // sweep magnet up
-sweep_down, 0, EXP;             // sweep magnet down
 magnet_sweep_up, 0, EXP;        // sweep magnet up
 magnet_sweep_down, 0, EXP;      // sweep magnet down
+
+sweep_up, 0, EXP;               // sweep magnet up (deprecated)
+sweep_down, 0, EXP;             // sweep magnet down (deprecated)
 
 
 /* Functions for the W-band power supply (Keithley 228A) driver only */
@@ -99,17 +101,17 @@ magnet_command, 1, EXP;
 
 gaussmeter_name, 0, ALL;        // returns the device name
 gaussmeter_field, 0, EXP;       // returns current field
-find_field, 0, EXP;             // return current field value
 gaussmeter_resolution, -1, ALL; // returns resolution of field meter
 gaussmeter_wait, 0, EXP;        // wait for field to stabilize
 
-measure_field, 0, EXP;          // return field value (ER035M_SA, ER035M_SAS
-                                // and PT2025)
 gaussmeter_probe_orientation, -1, ALL;
-gaussmeter_command, 1, EXP;
 gaussmeter_upper_search_limit, -1, EXP;  // er035m family only
 gaussmeter_lower_search_limit, -1, EXP;  // er035m family only
+gaussmeter_command, 1, EXP;
 
+find_field, 0, EXP;             // return current field value (deprecated)
+measure_field, 0, EXP;          // return field value (ER035M_SA, ER035M_SAS
+                                // and PT2025) (deprecated)
 
 /* Functions exported by the pulser drivers (DG2020, HFS9000, EP385, RS690)
    (functions involving phases and keyboard for DG2020 and RS690 only) */
@@ -137,51 +139,55 @@ pulser_automatic_twt_pulses, -1, PREP;
 pulser_command, 1, EXP;
 pulser_pulse_minimum_specs, 1, EXP;        // rb_pulser only!
 
+
 /* Functions exported by DG2020 and HFS9000 only */
 
 pulser_keep_all_pulses, 0, PREP;
 pulser_maximum_pattern_length, 1, PREP;
+
 
 /* Functions exported by the Frankfurt version of DG2020 only */
 
 pulser_phase_switch_delay, -1, PREP;
 pulser_grace_period, 1, PREP;
 
+
 /* Functions exported by the W-band configuration of the Rulbus pulser only */
 
 pulser_minimum_defense_distance,  1, PREP;
 pulser_defense_pulse_mode, 1, PREP;
 
+
 /* Functions exported by the lock-in amplifier drivers
    (Stanford Research 510, 530, 810, 830, and Bruker ER023M signal channel) */
 
-lockin_name, 0, ALL;            // returns the device name
-lockin_get_data, -1, EXP;       // returns the lock-in voltage 
-lockin_get_adc_data, 1, EXP;    // returns a ADC voltage
-lockin_dac_voltage, -1, ALL;    // gets or sets DAC voltage
-lockin_sensitivity, -1, ALL;    // gets or sets the sensitivity
-lockin_time_constant, -1, ALL;  // gets or sets the time constant
-lockin_phase, -1, ALL;          // gets or sets the phase
-lockin_ref_freq, -1, ALL;       // Get/set mod. frequency (SR8x0, ER023M)
-lockin_ref_mode, 0, EXP;        // Get mod. mode (SR8x0, ER023M)
-lockin_ref_level, -1, EXP;      // Get/set mod. level (SR8x0 only)
-lockin_harmonic, -1, EXP;       // Get/set harmonic (SR8x0, ER023M)
-lockin_lock_keyboard, -1, EXP;  // Lock or unlock the keyboard (SRxy0)
+lockin_name, 0, ALL;               // returns the device name
+lockin_get_data, -1, EXP;          // returns the lock-in voltage 
+lockin_get_adc_data, 1, EXP;       // returns a ADC voltage
+lockin_dac_voltage, -1, ALL;       // gets or sets DAC voltage
+lockin_sensitivity, -1, ALL;       // gets or sets the sensitivity
+lockin_time_constant, -1, ALL;     // gets or sets the time constant
+lockin_phase, -1, ALL;             // gets or sets the phase
+lockin_ref_freq, -1, ALL;          // Get/set mod. frequency (SR8x0, ER023M)
+lockin_ref_mode, 0, EXP;           // Get mod. mode (SR8x0, ER023M)
+lockin_ref_level, -1, EXP;         // Get/set mod. level (SR8x0 only)
+lockin_harmonic, -1, EXP;          // Get/set harmonic (SR8x0, ER023M)
+lockin_lock_keyboard, -1, EXP;     // Lock or unlock the keyboard (SRxy0)
 lockin_command, 1, EXP;
 
 lockin_auto_setup, -1, ALL;        // (SR830)
 lockin_get_sample_time, 0, EXP;    // (SR830)
 lockin_auto_acquisition, -1, EXP;  // (SR830)
 
-lockin_is_overload, 0, EXP;     // (ER023M)
-lockin_offset, -1, ALL;         // (ER023M)
-lockin_conversion_time, -1, ALL;// (ER023M)
-lockin_resonator, -1, ALL;      // (ER023M)
-lockin_rg, -1, ALL;             // (ER023M)
-lockin_tc, -1, ALL;             // (ER023M)
-lockin_ma, -1, ALL;             // (ER023M)
-lockin_ct, -1, ALL;             // (ER023M)
-lockin_mf, -1, ALL;             // (ER023M)
+lockin_is_overload, 0, EXP;        // (ER023M)
+lockin_offset, -1, ALL;            // (ER023M)
+lockin_conversion_time, -1, ALL;   // (ER023M)
+lockin_resonator, -1, ALL;         // (ER023M)
+lockin_rg, -1, ALL;                // (ER023M)
+lockin_tc, -1, ALL;                // (ER023M)
+lockin_ma, -1, ALL;                // (ER023M)
+lockin_ct, -1, ALL;                // (ER023M)
+lockin_mf, -1, ALL;                // (ER023M)
 
 
 /* Functions exported by the digitizer
@@ -274,6 +280,7 @@ boxcar_stop_acquisition, 0, EXP;
 boxcar_single_shot, -1, EXP;
 boxcar_command, 1, EXP;
 
+
 /* Functions exported by the multimeters (Kontron 4060, Schlumberger 7150) */
 
 multimeter_name, 0, ALL;
@@ -339,6 +346,7 @@ daq_trigger_setup, -1, EXP;
 
 daq_trigger_mode, -1, ALL;              // RB8905 only
 daq_gain, -1, ALL;                      // RB8905 only
+
 
 /* Functions exported by event counters (NatInst 6601) */
 

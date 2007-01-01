@@ -434,7 +434,7 @@ FOREVER {
 
         new_set_field = input_value( New_Field );
         IF abs( new_set_field - new_field ) > 0.14288 G {
-            IF new_set_field > 142880.0 G OR new_set_field < 0.0 G {
+            IF new_set_field > 139022.24 G OR new_set_field < 0.0 G {
                 input_value( New_Field, new_field );
             } ELSE {
                 Sweep_State = STOPPED;

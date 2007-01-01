@@ -381,7 +381,7 @@ sub store_defs {
 sub field_check {
 
 	if ( $_[ 0 ] =~ /^[+-]?\.?$/ or
-		 ( is_float1( $_[ 0 ] ) and $_[ 0 ] >= 0 and $_[ 0 ] <= 142880.0 ) ) {
+		 ( is_float1( $_[ 0 ] ) and $_[ 0 ] >= 0 and $_[ 0 ] <= 139022.24 ) ) {
 		check_eval( $_[ 0 ], $end_field, $num_points );
 		$f11_a->configure( '-state' => 'disabled' )
 			if $_[ 0 ] ne $start_field;
@@ -398,7 +398,7 @@ sub field_check {
 sub end_field_check {
 
 	if ( $_[ 0 ] =~ /^[+-]?\.?$/ or
-		 ( is_float2( $_[ 0 ] ) and $_[ 0 ] >= 0 and $_[ 0 ] <= 142880.0 ) ) {
+		 ( is_float2( $_[ 0 ] ) and $_[ 0 ] >= 0 and $_[ 0 ] <= 139022.24 ) ) {
 		$opt_end_fld = $_[ 0 ] if $opt_end_fld ne $_[ 0 ];
 		check_eval( $start_field, $_[ 0 ], $num_points );
 		$f11_a->configure( '-state' => 'disabled' )

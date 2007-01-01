@@ -71,10 +71,10 @@ static bool In_cond;
 %token E_OR                  272
 %token E_XOR                 273
 %token E_NOT                 274
-%token <lval> E_PPOS         275
-%token <lval> E_PLEN         276
-%token <lval> E_PDPOS        277
-%token <lval> E_PDLEN        278
+%token E_PPOS                275
+%token E_PLEN                276
+%token E_PDPOS               277
+%token E_PDLEN               278
 %token E_PLSA                279
 %token E_MINA                280
 %token E_MULA                281
@@ -151,15 +151,16 @@ et:      ls
          expr ls                 { In_cond = UNSET; }
 ;
 
-line:    E_VAR_TOKEN ass                              { }
-       | E_VAR_TOKEN '[' list1 ']' ass                { }
-       | E_FUNC_TOKEN '(' list2 ')'                   { }
-       | E_FUNC_TOKEN              { print( FATAL, "'%s' is a predefined "
-                                            "function.\n", $1->name );
-                                     THROW( EXCEPTION ); }
-       | E_VAR_TOKEN '('
-          { print( FATAL, "'%s' is a variable, not a funnction.\n", $1->name );
-            THROW( EXCEPTION ); }
+line:    E_VAR_TOKEN ass               { }
+       | E_VAR_TOKEN '[' list1 ']' ass { }
+       | E_FUNC_TOKEN '(' list2 ')'    { }
+       | E_FUNC_TOKEN                  { print( FATAL, "'%s' is a predefined "
+                                                "function.\n", $1->name );
+                                         THROW( EXCEPTION ); }
+       | E_VAR_TOKEN '('               { print( FATAL, "'%s' is a variable, "
+                                                "not a funnction.\n",
+                                                $1->name );
+                                         THROW( EXCEPTION ); }
        | pt ass
        | BREAK_TOK
        | CONT_TOK
@@ -190,9 +191,9 @@ expr:    E_INT_TOKEN                  { }
                                                "not a function.\n", $1->name );
                                         THROW( EXCEPTION ); }
        | E_FUNC_TOKEN '(' list2 ')'   { }
-       | E_FUNC_TOKEN              { print( FATAL, "'%s' is a predefined "
-                                            "function.\n", $1->name );
-                                     THROW( EXCEPTION ); }
+       | E_FUNC_TOKEN                 { print( FATAL, "'%s' is a predefined "
+                                               "function.\n", $1->name );
+                                        THROW( EXCEPTION ); }
        | pt
        | bin
        | '+' expr %prec E_NEG
