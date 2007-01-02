@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 2003-2006 Jens Thoms Toerring
+ *  Copyright (C) 2003-2007 Jens Thoms Toerring
  * 
  *  This library should simplify accessing the WITIO-48 DIO board by Wasco
  *  by avoiding to be forced to make ioctl() calls and use higher level

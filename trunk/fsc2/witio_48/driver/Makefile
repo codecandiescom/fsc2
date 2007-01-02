@@ -4,7 +4,7 @@
 #
 # Makefile for Wasco WITIO-48 ISA DIO card kernel (2.4 series) module
 #
-# Copyright (C) 2003-2006 Jens Thoms Toerring
+# Copyright (C) 2003-2007 Jens Thoms Toerring
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -136,7 +136,7 @@ cleanup:
 	$(RM) $(RMFLAGS) svn-* *~
 
 clean:
-	$(RM) $(RMFLAGS) *.o svn-* *~
+	$(RM) $(RMFLAGS) *.o svn-* Modules.symvers *~
 
 endif
 endif

@@ -3,7 +3,7 @@
 /*
   $Id$
 
-  Copyright (C) 2003-2006 Jens Thoms Toerring
+  Copyright (C) 2003-2007 Jens Thoms Toerring
 
   This file is part of fsc2.
 

@@ -2,7 +2,7 @@
 
 @c  $Id$
 @c
-@c  Copyright (C) 1999-2006 Jens Thoms Toerring
+@c  Copyright (C) 1999-2007 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c
@@ -26,7 +26,7 @@
 
 @setfilename fsc2.info
 @settitle fsc2
-@set lastupdate August 25, 2006
+@set lastupdate January 2, 2007
 @iftex
 @afourpaper
 @end iftex
@@ -43,13 +43,13 @@
 @sp 4
 @center A Program for the Remote Control of Spectrometers
 @sp 2
-@center August 2006
+@center January 2007
 @sp 10
 @center Jens Thoms T@"orring
 @sp 1
 @center @email{jt@@toerring.de}
 @sp 16
-@center Copyright @copyright{} 1999--2006 Jens Thoms T@"orring
+@center Copyright @copyright{} 1999--2007 Jens Thoms T@"orring
 Permission is granted to make and distribute verbatim
 copies of this manual provided the copyright notice and
 this permission notice are preserved on all copies.

@@ -3,7 +3,7 @@
 #
 # Makefile for National Instruments 6601 board
 #
-# Copyright (C) 2002-2006 Jens Thoms Toerring
+# Copyright (C) 2002-2007 Jens Thoms Toerring
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -138,7 +138,7 @@ cleanup:
 	$(RM) $(RMFLAGS) ni6601_drv.o util.o svn-* *~
 
 clean:
-	$(RM) $(RMFLAGS) autoconf.h *.o svn-* *~
+	$(RM) $(RMFLAGS) autoconf.h *.o svn-*  Modules.symvers *~
 
 endif
 endif

@@ -1,9 +1,9 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 2003-2006 Jens Thoms Toerring
+ *  Copyright (C) 2003-2007 Jens Thoms Toerring
  *
- *  Library for Rulbus (Rijksuniversiteit Leiden BUS)
+ *  Include file for the ibrary for the Rulbus (Rijksuniversiteit Leiden BUS)
  *
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

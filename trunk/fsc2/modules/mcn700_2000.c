@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2006 Anton Savitsky / Jens Thoms Toerring
+ *  Copyright (C) 1999-2007 Anton Savitsky / Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 

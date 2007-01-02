@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2006 Jens Thoms Toerring
+ *  Copyright (C) 1999-2007 Jens Thoms Toerring
  * 
  *  Thanks to Anton Savitsky for re-measuring the data for the corrections
  *  and including them into the code.

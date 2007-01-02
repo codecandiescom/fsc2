@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 2006 Sergey Weber, Jens Thoms Toerring
+ *  Copyright (C) 2006-2007 Sergey Weber, Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  * 
