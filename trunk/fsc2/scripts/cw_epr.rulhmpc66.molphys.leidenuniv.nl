@@ -651,7 +651,6 @@ avg[ Num_Points ];
 start_temp;
 I = 0, J = 0, K;
 File1, File2;
-field = start_field;
 ";
 	if ( $start_field <= $end_field ) {
 		print F "step_size = sweep_rate / kd;\n";
@@ -689,8 +688,10 @@ File1 = get_file( \"\", \"*.avg\", \"\", \"\", \"avg\" );
 
 hide_toolbox( \"ON\" );
 B1 = output_create( \"INT_OUTPUT\", \"Current scan\" );
-B2 = output_create( \"FLOAT_OUTPUT\", \"Current field [G]\", \"%.3f\" );
-B3 = output_create( \"FLOAT_OUTPUT\", \"Current temperature [K]\", \"%.1f\" );
+B2 = output_create( \"FLOAT_OUTPUT\", start_field,
+                    \"Current field [G]\", \"%.3f\" );
+B3 = output_create( \"FLOAT_OUTPUT\", start_temp,
+                    \"Current temperature [K]\", \"%.1f\" );
 B4 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
 hide_toolbox( \"OFF\" );
 
@@ -718,7 +719,7 @@ FOREVER {
 		print F "
 	FOR I = Num_Points : 1 : - 1 {
 		data[ J, I ] = lockin_get_data( );
-		output_value( B2, end_field + ( I - 1 ) * step_size );
+		output_value( B2, end_field - ( I - 1 ) * step_size );
 		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
 					I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / ( J  * 1 uV ),
@@ -741,6 +742,7 @@ FOREVER {
 	}
 
 	magnet_field( start_field );
+	output_value( B2, start_field );
 ";
 	print F "	wait( $sleep_time s );\n" if $sleep_time ne "";
 	print F "
@@ -755,33 +757,49 @@ IF magnet_sweep( ) {
 
 lockin_auto_acquisition( \"OFF\" );
 
-IF I != 0 {
+IF J > 0 {
 	IF J == 1 {";
+
 	if ( $start_field < $end_field ) {
 		print F "
-		FOR K = 1 : I - 1 {
-			fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
-				   data[ 1, K ] );
+		IF I != 0 {
+			FOR K = 1 : I - 1 {
+				fsave( File1, \"#,#\\n\", start_field + ( K - 1 ) * step_size,
+					   data[ 1, K ] );
+			}
 		}
+	} ELSE {
+	IF I < Num_Points {
+		J -= 1;
+	}
 ";
 	} else {
 		print F "
-		FOR K = I + 1 : Num_Points {
-			fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
-				   data[ 1, K ] );
+		IF I < Num_Points {
+			FOR K = I + 1 : Num_Points {
+				fsave( File1, \"#,#\\n\", end_field - ( K - 1 ) * step_size,
+				   	   data[ 1, K ] );
+			}
+		}
+	} ELSE {
+		IF I > 1 {
+			J -= 1;
 		}
 ";
 	}
 
-	print F "	} ELSE {
-		IF I <= Num_Points {
-			J -= 1;
-		}
-
+	print F "
 		IF J > 1 {
 			File2 = clone_file( File1, \"avg\", \"scans\" );
-			FOR I = 1 : Num_Points {
-				fsave( File2, \"#\", field + ( I - 1 ) * step_size );
+			FOR I = 1 : Num_Points {";
+	if ( $start_field < $end_field ) {
+		print F "
+				fsave( File2, \"#\", start_field + ( I - 1 ) * step_size );";
+	} else {
+		print F "
+				fsave( File2, \"#\", end_field - ( I - 1 ) * step_size );";
+	}
+	print F "
 				FOR K = 1 : J {
 					fsave( File2, \",#\", data[ K, I ] );
 				}
@@ -817,8 +835,15 @@ IF I != 0 {
 		}
 
 		FOR I = 1 : Num_Points {
-			fsave( File1, \"#,#\\n\",
-                   field + ( I - 1 ) * step_size, avg[ I ] );
+			fsave( File1, \"#,#\\n\",";
+	if ( $start_field < $end_field ) {
+		print F "
+                   start_field + ( I - 1 ) * step_size, avg[ I ] );";
+	} else {
+		print F "
+                   end_field - ( I - 1 ) * step_size, avg[ I ] );";
+	}
+	print F "
 		}
 	}
 
@@ -932,7 +957,6 @@ I = 0, J = 0, K;
 B1, B2, B3, B4;
 start_temp;
 File1, File2;
-field = start_field;
 ";
 	if ( $start_field < $end_field ) {
 		print F "step_size = sweep_rate / kd;\n\n";
@@ -968,8 +992,10 @@ File1 = get_file( \"\", \"*.avg\", \"\", \"\", \"avg\" );
 
 hide_toolbox( \"ON\" );
 B1 = output_create( \"INT_OUTPUT\", \"Current scan\" );
-B2 = output_create( \"FLOAT_OUTPUT\", \"Current field [G]\", \"%.3f\" );
-B3 = output_create( \"FLOAT_OUTPUT\", \"Current temperature [K]\", \"%.1f\" );
+B2 = output_create( \"FLOAT_OUTPUT\", start_field,
+                    \"Current field [G]\", \"%.3f\" );
+B3 = output_create( \"FLOAT_OUTPUT\", start_temp,
+                    \"Current temperature [K]\", \"%.1f\" );
 B4 = button_create( \"PUSH_BUTTON\", \"Stop after end of scan\" );
 hide_toolbox( \"OFF\" );
 
@@ -986,8 +1012,15 @@ FOREVER {
 
 	if ( $dir eq "UP" ) {
 		print F "	FOR I = 1 : Num_Points {
-		data[ J, I ] = lockin_get_data( );
-		output_value( B2, start_field + ( I - 1 ) * step_size );
+		data[ J, I ] = lockin_get_data( );";
+		if ( $start_field < $end_field ) {
+			print F "
+		output_value( B2, start_field + ( I - 1 ) * step_size );";
+		} else {
+			print F "
+		output_value( B2, end_field - ( I - 1 ) * step_size );";
+		}
+		print F "
 		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
 					I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / ( J * 1 uV ),
@@ -996,8 +1029,15 @@ FOREVER {
 ";
 	} else {
 		print F "	FOR I = Num_Points : 1 : -1 {
-		data[ J, I ] = lockin_get_data( );
-		output_value( B2, start_field + ( I - 1 ) * step_size );
+		data[ J, I ] = lockin_get_data( );";
+		if ( $start_field < $end_field ) {
+			print F "
+		output_value( B2, start_field + ( I - 1 ) * step_size );";
+		} else {
+			print F "
+		output_value( B2, end_field - ( I - 1 ) * step_size );";
+		}
+		print F "
 		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
 					I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / ( J * 1 uV ),
@@ -1030,8 +1070,15 @@ FOREVER {
     lockin_auto_acquisition( \"ON\" );
 
 	FOR I = Num_Points : 1 : -1 {
-		data[ J, I ] = lockin_get_data( );
-		output_value( B2, start_field + ( I - 1 ) * step_size );
+		data[ J, I ] = lockin_get_data( );";
+		if ( $start_field < $end_field ) {
+			print F "
+		output_value( B2, start_field + ( I - 1 ) * step_size );";
+		} else {
+			print F "
+		output_value( B2, end_field - ( I - 1 ) * step_size );";
+		}
+		print F "
 		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
 					I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / ( J * 1 uV ),
@@ -1043,8 +1090,15 @@ FOREVER {
     lockin_auto_acquisition( \"ON\" );
 
 	FOR I = 1 : Num_Points {
-		data[ J, I ] = lockin_get_data( );
-		output_value( B2, start_field + ( I - 1 ) * step_size );
+		data[ J, I ] = lockin_get_data( );";
+		if ( $start_field < $end_field ) {
+			print F "
+		output_value( B2, start_field + ( I - 1 ) * step_size );";
+		} else {
+			print F "
+		output_value( B2, end_field - ( I - 1 ) * step_size );";
+		}
+		print F "
 		output_value( B3, temp_contr_temperature( ) );
 		display_1d( I, data[ J, I ] / 1 uV, 1,
 					I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / ( J * 1 uV ),
@@ -1053,7 +1107,7 @@ FOREVER {
 ";
 	}
 	print F "
-    lockin_auto_acquisition( \"OFF\" );
+	lockin_auto_acquisition( \"OFF\" );
 	magnet_sweep( \"STOP\" );
 
 	avg = add_to_average( avg, data[ J ], J );
@@ -1078,10 +1132,17 @@ IF magnet_sweep( ) {
 	magnet_sweep( \"STOP\" );
 }
 
-IF I != 0 {
+IF J != 0 {
 	IF J == 1 {
-		FOR K = 1 : I - 1 {
-			fsave( File1, \"#,#\\n\", field + ( K - 1 ) * step_size,
+		FOR K = 1 : I - 1 {";
+	if ( $start_field < $end_field ) {
+		print F "
+			fsave( File1, \"#,#\\n\", start_field + ( K - 1 ) * step_size,";
+	} else {
+		print F "
+			fsave( File1, \"#,#\\n\", end_field - ( K - 1 ) * step_size,";
+	}
+	print F "
 				   data[ 1, K ] );
 		}
 	} ELSE {
@@ -1091,8 +1152,15 @@ IF I != 0 {
 
 		IF J > 1 {
 			File2 = clone_file( File1, \"avg\", \"scans\" );
-			FOR I = 1 : Num_Points {
-				fsave( File2, \"#\", field + ( I - 1 ) * step_size );
+			FOR I = 1 : Num_Points {";
+	if ( $start_field < $end_field ) {
+		print F "
+				fsave( File2, \"#\", start_field + ( I - 1 ) * step_size );";
+	} else {
+		print F "
+				fsave( File2, \"#\", end_field - ( I - 1 ) * step_size );";
+	}
+	print F "
 				FOR K = 1 : J {
 					fsave( File2, \",#\", data[ K, I ] );
 				}
@@ -1128,8 +1196,15 @@ IF I != 0 {
 		}
 
 		FOR I = 1 : Num_Points {
-			fsave( File1, \"#,#\\n\",
-                   field + ( I - 1 ) * step_size, avg[ I ] );
+			fsave( File1, \"#,#\\n\",";
+	if ( $start_field < $end_field ) {
+		print F "
+                   start_field + ( I - 1 ) * step_size, avg[ I ] );";
+	} else {
+		print F "
+                   end_field - ( I - 1 ) * step_size, avg[ I ] );";
+	}
+	print F "
 		}
 	}
 
