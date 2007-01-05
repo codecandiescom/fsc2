@@ -22,28 +22,28 @@
  */
 
 
-#include "lecroy_wr2.h"
+#include "lecroy_wr.h"
 
 
 /* Structure for storing the relevant state information if a check of
    the trigger delay can't be done during the test run */
 
-typedef struct LECROY_WR2_PTC_DELAY LECROY_WR2_PTC_DELAY_T;
+typedef struct LECROY_WR_PTC_DELAY LECROY_WR_PTC_DELAY_T;
 
-struct LECROY_WR2_PTC_DELAY {
+struct LECROY_WR_PTC_DELAY {
     double delay;
-    LECROY_WR2_PTC_DELAY_T * next;
+    LECROY_WR_PTC_DELAY_T * next;
 };
 
-static LECROY_WR2_PTC_DELAY_T * lecroy_wr2_ptc_delay = NULL;
+static LECROY_WR_PTC_DELAY_T * lecroy_wr_ptc_delay = NULL;
 
 
 /* Structure for storing the relevant state information if a window check
    can't be done during the test run */
 
-typedef struct LECROY_WR2_PTC_WINDOW LECROY_WR2_PTC_WINDOW_T;
+typedef struct LECROY_WR_PTC_WINDOW LECROY_WR_PTC_WINDOW_T;
 
-struct LECROY_WR2_PTC_WINDOW {
+struct LECROY_WR_PTC_WINDOW {
     bool is_timebase;               /* is timebase already set ? */
     double timebase;                /* timebase (if set) */
     int tb_index;                   /* index in timebase table */
@@ -54,15 +54,15 @@ struct LECROY_WR2_PTC_WINDOW {
     double start;                   /* window start position */
     double width;                   /* window length */
     bool show_num;                  /* add window number in error message ? */
-    LECROY_WR2_PTC_WINDOW_T * next; /* next structure in list */
+    LECROY_WR_PTC_WINDOW_T * next;  /* next structure in list */
 };
 
-static LECROY_WR2_PTC_WINDOW_T * lecroy_wr2_ptc_window = NULL;
+static LECROY_WR_PTC_WINDOW_T * lecroy_wr_ptc_window = NULL;
 
 
-static void lecroy_wr2_soe_trigger_delay_check( double delay );
-static void lecroy_wr2_soe_window_check( LECROY_WR2_PTC_WINDOW_T * p );
-static long lecroy_wr2_calc_pos( double t );
+static void lecroy_wr_soe_trigger_delay_check( double delay );
+static void lecroy_wr_soe_window_check( LECROY_WR_PTC_WINDOW_T * p );
+static long lecroy_wr_calc_pos( double t );
 
 
 
@@ -77,20 +77,20 @@ static long lecroy_wr2_calc_pos( double t );
  * tests.
  *--------------------------------------------------------------------------*/
 
-void lecroy_wr2_soe_checks( void )
+void lecroy_wr_soe_checks( void )
 {
-    LECROY_WR2_PTC_DELAY_T *pd;
-    LECROY_WR2_PTC_WINDOW_T *pw;
+    LECROY_WR_PTC_DELAY_T *pd;
+    LECROY_WR_PTC_WINDOW_T *pw;
 
 
     /* Test the trigger delay and window settings we couldn't check during
        the test run */
 
-    for ( pd = lecroy_wr2_ptc_delay; pd != NULL; pd = pd->next )
-        lecroy_wr2_soe_trigger_delay_check( pd->delay ); 
+    for ( pd = lecroy_wr_ptc_delay; pd != NULL; pd = pd->next )
+        lecroy_wr_soe_trigger_delay_check( pd->delay ); 
 
-    for ( pw = lecroy_wr2_ptc_window; pw != NULL; pw = pw->next )
-        lecroy_wr2_soe_window_check( pw ); 
+    for ( pw = lecroy_wr_ptc_window; pw != NULL; pw = pw->next )
+        lecroy_wr_soe_window_check( pw ); 
 }
 
 
@@ -100,23 +100,23 @@ void lecroy_wr2_soe_checks( void )
  * function must be called in the exit handler to get rid of the memory.
  *-----------------------------------------------------------------------*/
 
-void lecroy_wr2_exit_cleanup( void )
+void lecroy_wr_exit_cleanup( void )
 {
-    LECROY_WR2_PTC_DELAY_T *pd;
-    LECROY_WR2_PTC_WINDOW_T *pw;
+    LECROY_WR_PTC_DELAY_T *pd;
+    LECROY_WR_PTC_WINDOW_T *pw;
 
     
-    while ( lecroy_wr2_ptc_delay != NULL )
+    while ( lecroy_wr_ptc_delay != NULL )
     {
-        pd = lecroy_wr2_ptc_delay;
-        lecroy_wr2_ptc_delay = lecroy_wr2_ptc_delay->next;
+        pd = lecroy_wr_ptc_delay;
+        lecroy_wr_ptc_delay = lecroy_wr_ptc_delay->next;
         T_free( pd );
     }
 
-    while ( lecroy_wr2_ptc_window != NULL )
+    while ( lecroy_wr_ptc_window != NULL )
     {
-        pw = lecroy_wr2_ptc_window;
-        lecroy_wr2_ptc_window = lecroy_wr2_ptc_window->next;
+        pw = lecroy_wr_ptc_window;
+        lecroy_wr_ptc_window = lecroy_wr_ptc_window->next;
         T_free( pw );
     }
 }
@@ -126,7 +126,7 @@ void lecroy_wr2_exit_cleanup( void )
  * Returns a string with a time value with a resonable unit
  *----------------------------------------------------------*/
 
-const char *lecroy_wr2_ptime( double p_time )
+const char *lecroy_wr_ptime( double p_time )
 {
     static char buffer[ 2 ][ 128 ];
     static size_t i = 1;
@@ -152,28 +152,27 @@ const char *lecroy_wr2_ptime( double p_time )
  * gets changed
  *-----------------------------------------------------------*/
 
-double lecroy_wr2_trigger_delay_check( void )
+double lecroy_wr_trigger_delay_check( void )
 {
-    double delay = lecroy_wr2.trigger_delay;
+    double delay = lecroy_wr.trigger_delay;
     double real_delay;
 
 
     /* Nothing needs to be done if the trigger delay never was set */
 
-    if ( ! lecroy_wr2.is_trigger_delay )
+    if ( ! lecroy_wr.is_trigger_delay )
         return delay;
 
     /* We can't do the check during the test run if the timebase isn't set, so
        store the relevant state information for the time when the experiment
        gets started and we can ask the device for the timebase */
 
-    if ( FSC2_MODE == TEST && ! lecroy_wr2.is_timebase )
+    if ( FSC2_MODE == TEST && ! lecroy_wr.is_timebase )
     {
-        LECROY_WR2_PTC_DELAY_T *p = lecroy_wr2_ptc_delay;
+        LECROY_WR_PTC_DELAY_T *p = lecroy_wr_ptc_delay;
 
-        if ( lecroy_wr2_ptc_delay == NULL )
-            p = lecroy_wr2_ptc_delay =
-                					  T_malloc( sizeof *lecroy_wr2_ptc_delay );
+        if ( lecroy_wr_ptc_delay == NULL )
+            p = lecroy_wr_ptc_delay = T_malloc( sizeof *lecroy_wr_ptc_delay );
         else
             while ( 1 )
             {
@@ -197,39 +196,39 @@ double lecroy_wr2_trigger_delay_check( void )
     /* The delay can only be set with a certain resolution (1/10) of the
        current timebase, so make it a integer multiple of this */
 
-    real_delay = LECROY_WR2_TRIG_DELAY_RESOLUTION * lecroy_wr2.timebase
-                 * lrnd( delay / ( LECROY_WR2_TRIG_DELAY_RESOLUTION *
-                                   lecroy_wr2.timebase ) );
+    real_delay = LECROY_WR_TRIG_DELAY_RESOLUTION * lecroy_wr.timebase
+                 * lrnd( delay / ( LECROY_WR_TRIG_DELAY_RESOLUTION *
+                                   lecroy_wr.timebase ) );
 
     /* Check that the trigger delay is within the limits (taking rounding
        errors of the order of the current time resolution into account) */
 
     if ( real_delay > 0.0 &&
-         real_delay >   10.0 * lecroy_wr2.timebase
-                      +  0.5 * lecroy_wr2_time_per_point( ) )
+         real_delay >   10.0 * lecroy_wr.timebase
+                      +  0.5 * lecroy_wr_time_per_point( ) )
     {
         print( FATAL, "Pre-trigger delay of %s now is too long, can't be "
                "longer than 10 times the timebase.\n",
-               lecroy_wr2_ptime( real_delay ) );
+               lecroy_wr_ptime( real_delay ) );
         THROW( EXCEPTION );
     }
 
     if ( real_delay < 0.0 &&
-         real_delay <   -1.0e4 * lecroy_wr2.timebase
-                      -  0.5 * lecroy_wr2_time_per_point( ) )
+         real_delay <   -1.0e4 * lecroy_wr.timebase
+                      -  0.5 * lecroy_wr_time_per_point( ) )
     {
         print( FATAL, "Post-triger delay of %s now is too long, can't be "
                "longer than 10,000 times the timebase.\n",
-               lecroy_wr2_ptime( real_delay ) );
+               lecroy_wr_ptime( real_delay ) );
         THROW( EXCEPTION );
     }
 
     /* If the difference between the requested trigger delay and the one
        that can be set is larger than the time resolution warn the user */
 
-    if ( fabs( real_delay - delay ) > lecroy_wr2_time_per_point( ) )
+    if ( fabs( real_delay - delay ) > lecroy_wr_time_per_point( ) )
         print( WARN, "Trigger delay had to be adjusted from %s to %s.\n",
-               lecroy_wr2_ptime( delay ), lecroy_wr2_ptime( real_delay ) );
+               lecroy_wr_ptime( delay ), lecroy_wr_ptime( real_delay ) );
 
     return real_delay;
 }
@@ -240,43 +239,43 @@ double lecroy_wr2_trigger_delay_check( void )
  * be checked during the test run.
  *-----------------------------------------------------------*/
 
-static void lecroy_wr2_soe_trigger_delay_check( double delay )
+static void lecroy_wr_soe_trigger_delay_check( double delay )
 {
-    double real_delay = LECROY_WR2_TRIG_DELAY_RESOLUTION * lecroy_wr2.timebase
-                        * lrnd( delay / ( LECROY_WR2_TRIG_DELAY_RESOLUTION *
-                                          lecroy_wr2.timebase ) );
+    double real_delay = LECROY_WR_TRIG_DELAY_RESOLUTION * lecroy_wr.timebase
+                        * lrnd( delay / ( LECROY_WR_TRIG_DELAY_RESOLUTION *
+                                          lecroy_wr.timebase ) );
 
     /* Check that the trigger delay is within the limits (taking rounding
        errors of the order of the current time resolution into account) */
 
     if ( real_delay > 0.0 &&
-         real_delay >   10.0 * lecroy_wr2.timebase
-                      +  0.5 * lecroy_wr2_time_per_point( ) )
+         real_delay >   10.0 * lecroy_wr.timebase
+                      +  0.5 * lecroy_wr_time_per_point( ) )
     {
         print( FATAL, "During the experiment a pre-trigger delay of %s is "
                "going to be used which is too long, it can't be longer than "
-               "10 times the timebase.\n", lecroy_wr2_ptime( real_delay ) );
+               "10 times the timebase.\n", lecroy_wr_ptime( real_delay ) );
         THROW( EXCEPTION );
     }
 
     if ( real_delay < 0.0 &&
-         real_delay <   -1.0e4 * lecroy_wr2.timebase
-                      -  0.5 * lecroy_wr2_time_per_point( ) )
+         real_delay <   -1.0e4 * lecroy_wr.timebase
+                      -  0.5 * lecroy_wr_time_per_point( ) )
     {
         print( FATAL, "During the experiment the post-triger delay of %s is "
                "going to be used wich is too long, it can't be longer than "
                "10,000 times the timebase.\n",
-               lecroy_wr2_ptime( real_delay ) );
+               lecroy_wr_ptime( real_delay ) );
         THROW( EXCEPTION );
     }
 
     /* If the difference between the requested trigger delay and the one
        that can be set is larger than the time resolution warn the user */
 
-    if ( fabs( real_delay - delay ) > lecroy_wr2_time_per_point( ) )
+    if ( fabs( real_delay - delay ) > lecroy_wr_time_per_point( ) )
         print( WARN, "During the experiment the trigger delay will have to be "
                "adjusted from %s to %s.\n",
-               lecroy_wr2_ptime( delay ), lecroy_wr2_ptime( real_delay ) );
+               lecroy_wr_ptime( delay ), lecroy_wr_ptime( real_delay ) );
 }
 
 
@@ -284,7 +283,7 @@ static void lecroy_wr2_soe_trigger_delay_check( double delay )
  * Deletes all windows
  *---------------------*/
 
-void lecroy_wr2_delete_windows( LECROY_WR2_T * s )
+void lecroy_wr_delete_windows( LECROY_WR_T * s )
 {
     Window_T *w;
 
@@ -302,13 +301,13 @@ void lecroy_wr2_delete_windows( LECROY_WR2_T * s )
  * Returns a pointer to the window given it's ID
  *-----------------------------------------------*/
 
-Window_T *lecroy_wr2_get_window_by_number( long wid )
+Window_T *lecroy_wr_get_window_by_number( long wid )
 {
     Window_T *w;
     
 
     if ( wid >= WINDOW_START_NUMBER )
-        for ( w = lecroy_wr2.w; w != NULL; w = w->next )
+        for ( w = lecroy_wr.w; w != NULL; w = w->next )
             if ( w->num == wid )
                 return w;
 
@@ -325,14 +324,14 @@ Window_T *lecroy_wr2_get_window_by_number( long wid )
  * switching interleaved mode on or off
  *-----------------------------------------------------------*/
 
-void lecroy_wr2_all_windows_check( void )
+void lecroy_wr_all_windows_check( void )
 {
-    Window_T *w = lecroy_wr2.w;
+    Window_T *w = lecroy_wr.w;
 
 
     while ( w != NULL )
     {
-        lecroy_wr2_window_check( w, SET );
+        lecroy_wr_window_check( w, SET );
         w = w->next;
     }
 }
@@ -342,14 +341,14 @@ void lecroy_wr2_all_windows_check( void )
  * Checks if the window fits into the recorded data set
  *------------------------------------------------------*/
 
-void lecroy_wr2_window_check( Window_T * w,
-                              bool       show_num )
+void lecroy_wr_window_check( Window_T * w,
+                             bool       show_num )
 {
     long start;
     long end;
-    long max_len = lecroy_wr2_curve_length( );
-    double max_width = max_len * lecroy_wr2_time_per_point( );
-    double max_time = max_width - lecroy_wr2.trigger_delay;
+    long max_len = lecroy_wr_curve_length( );
+    double max_width = max_len * lecroy_wr_time_per_point( );
+    double max_time = max_width - lecroy_wr.trigger_delay;
 
 
     /* During the test run the window position and width can only be checked
@@ -358,13 +357,13 @@ void lecroy_wr2_window_check( Window_T * w,
        settings for a test when the experiment has been started. */
 
     if ( FSC2_MODE == TEST &&
-         ( ! lecroy_wr2.is_timebase || ! lecroy_wr2.is_trigger_delay ) )
+         ( ! lecroy_wr.is_timebase || ! lecroy_wr.is_trigger_delay ) )
     {
-        LECROY_WR2_PTC_WINDOW_T *p = lecroy_wr2_ptc_window;
+        LECROY_WR_PTC_WINDOW_T *p = lecroy_wr_ptc_window;
 
-        if ( lecroy_wr2_ptc_window == NULL )
-            p = lecroy_wr2_ptc_window =
-                					 T_malloc( sizeof *lecroy_wr2_ptc_window );
+        if ( lecroy_wr_ptc_window == NULL )
+            p = lecroy_wr_ptc_window =
+                					  T_malloc( sizeof *lecroy_wr_ptc_window );
         else
         {
             while ( p->next != NULL )
@@ -376,17 +375,17 @@ void lecroy_wr2_window_check( Window_T * w,
 
         /* Store the current settings as far as they are known */
 
-        p->is_timebase = lecroy_wr2.is_timebase;
-        if ( lecroy_wr2.is_timebase )
+        p->is_timebase = lecroy_wr.is_timebase;
+        if ( lecroy_wr.is_timebase )
         {
-            p->timebase = lecroy_wr2.timebase;
-            p->tb_index = lecroy_wr2.tb_index;
-            p->cur_hres = lecroy_wr2.cur_hres;
+            p->timebase = lecroy_wr.timebase;
+            p->tb_index = lecroy_wr.tb_index;
+            p->cur_hres = lecroy_wr.cur_hres;
         }
 
-        p->is_trigger_delay = lecroy_wr2.is_trigger_delay;
-        if ( lecroy_wr2.is_trigger_delay )
-            p->trigger_delay = lecroy_wr2.trigger_delay;
+        p->is_trigger_delay = lecroy_wr.is_trigger_delay;
+        if ( lecroy_wr.is_trigger_delay )
+            p->trigger_delay = lecroy_wr.trigger_delay;
 
         p->num = w->num;
         p->start = w->start;
@@ -398,19 +397,19 @@ void lecroy_wr2_window_check( Window_T * w,
     /* Start with calculating the start and end position of the window
        in points */
 
-    start = lecroy_wr2_calc_pos( w->start );
-    end   = lecroy_wr2_calc_pos( w->start + w->width );
+    start = lecroy_wr_calc_pos( w->start );
+    end   = lecroy_wr_calc_pos( w->start + w->width );
 
     if ( start < 0 )
     {
         if ( show_num > 0 )
             print( FATAL, "%ld. window starts too early, earliest possible "
                    "time is %s\n", w->num - WINDOW_START_NUMBER + 1,
-                   lecroy_wr2_ptime( - lecroy_wr2.trigger_delay ) );
+                   lecroy_wr_ptime( - lecroy_wr.trigger_delay ) );
         else
             print( FATAL, "Window starts too early, earliest possible time "
                    "is %s\n",
-                   lecroy_wr2_ptime( - lecroy_wr2.trigger_delay ) );
+                   lecroy_wr_ptime( - lecroy_wr.trigger_delay ) );
         THROW( EXCEPTION );
     }
 
@@ -419,10 +418,10 @@ void lecroy_wr2_window_check( Window_T * w,
         if ( show_num > 0 )
             print( FATAL, "%ld. window starts too late, last possible time "
                    "is %s.\n", w->num - WINDOW_START_NUMBER + 1,
-                   lecroy_wr2_ptime( max_time ) );
+                   lecroy_wr_ptime( max_time ) );
         else
             print( FATAL, "Window starts too late, last possible time "
-                   "is %s.\n", lecroy_wr2_ptime( max_time ) );
+                   "is %s.\n", lecroy_wr_ptime( max_time ) );
         THROW( EXCEPTION );
     }
 
@@ -431,10 +430,10 @@ void lecroy_wr2_window_check( Window_T * w,
         if ( show_num > 0 )
             print( FATAL, "%d. window ends too late, largest possible width "
                    "is %s.\n", w->num - WINDOW_START_NUMBER + 1,
-                   lecroy_wr2_ptime( max_width ) );
+                   lecroy_wr_ptime( max_width ) );
         else
             print( FATAL, "Window ends too late, largest possible width "
-                   "is %s.\n", lecroy_wr2_ptime( max_width ) );
+                   "is %s.\n", lecroy_wr_ptime( max_width ) );
         THROW( EXCEPTION );
     }
 
@@ -449,12 +448,12 @@ void lecroy_wr2_window_check( Window_T * w,
  * during the test run.
  *---------------------------------------------------------------*/
 
-static void lecroy_wr2_soe_window_check( LECROY_WR2_PTC_WINDOW_T * p )
+static void lecroy_wr_soe_window_check( LECROY_WR_PTC_WINDOW_T * p )
 {
-    double real_timebase = lecroy_wr2.timebase;
-    int real_tb_index = lecroy_wr2.tb_index;
-    HORI_RES_T *real_cur_hres = lecroy_wr2.cur_hres;
-    double real_trigger_delay = lecroy_wr2.trigger_delay;
+    double real_timebase = lecroy_wr.timebase;
+    int real_tb_index = lecroy_wr.tb_index;
+    HORI_RES_T *real_cur_hres = lecroy_wr.cur_hres;
+    double real_trigger_delay = lecroy_wr.trigger_delay;
     long start;
     long end;
     long max_len;
@@ -469,21 +468,21 @@ static void lecroy_wr2_soe_window_check( LECROY_WR2_PTC_WINDOW_T * p )
 
     if ( p->is_timebase )
     {
-        lecroy_wr2.timebase = p->timebase;
-        lecroy_wr2.tb_index = p->tb_index;
-        lecroy_wr2.cur_hres = p->cur_hres;
+        lecroy_wr.timebase = p->timebase;
+        lecroy_wr.tb_index = p->tb_index;
+        lecroy_wr.cur_hres = p->cur_hres;
     }
 
     if ( p->is_trigger_delay )
-        lecroy_wr2.trigger_delay = p->trigger_delay;
+        lecroy_wr.trigger_delay = p->trigger_delay;
 
     /* Now do the required tests */
 
-    max_len = lecroy_wr2_curve_length( );
-    max_width = max_len * lecroy_wr2_time_per_point( );
-    max_time = max_width - lecroy_wr2.trigger_delay;
-    start = lecroy_wr2_calc_pos( p->start );
-    end   = lecroy_wr2_calc_pos( p->start + p->width );
+    max_len = lecroy_wr_curve_length( );
+    max_width = max_len * lecroy_wr_time_per_point( );
+    max_time = max_width - lecroy_wr.trigger_delay;
+    start = lecroy_wr_calc_pos( p->start );
+    end   = lecroy_wr_calc_pos( p->start + p->width );
 
     if ( start < 0 )
     {
@@ -491,11 +490,11 @@ static void lecroy_wr2_soe_window_check( LECROY_WR2_PTC_WINDOW_T * p )
             print( FATAL, "During the experiment the %ld. window is going to "
                    "start too early, earliest possible time is %s\n",
                    p->num - WINDOW_START_NUMBER + 1,
-                   lecroy_wr2_ptime( - lecroy_wr2.trigger_delay ) );
+                   lecroy_wr_ptime( - lecroy_wr.trigger_delay ) );
         else
             print( FATAL, "During the experiment the window is going to start "
                    "too early, earliest possible time is %s\n",
-                   lecroy_wr2_ptime( - lecroy_wr2.trigger_delay ) );
+                   lecroy_wr_ptime( - lecroy_wr.trigger_delay ) );
         THROW( EXCEPTION );
     }
 
@@ -505,11 +504,11 @@ static void lecroy_wr2_soe_window_check( LECROY_WR2_PTC_WINDOW_T * p )
             print( FATAL, "During the experiment the %ld. window is going to "
                    "start too late, latest possible time is %s.\n",
                    p->num - WINDOW_START_NUMBER + 1,
-                   lecroy_wr2_ptime( max_time ) );
+                   lecroy_wr_ptime( max_time ) );
         else
             print( FATAL, "During the experiment the window is going to start "
                    "too late, latest possible time is %s.\n",
-                   lecroy_wr2_ptime( max_time ) );
+                   lecroy_wr_ptime( max_time ) );
         THROW( EXCEPTION );
     }
 
@@ -519,11 +518,11 @@ static void lecroy_wr2_soe_window_check( LECROY_WR2_PTC_WINDOW_T * p )
             print( FATAL, "During the experiment the %d. window is going to "
                    "end too late, largest possible width is %s.\n",
                    p->num - WINDOW_START_NUMBER + 1,
-                   lecroy_wr2_ptime( max_width ) );
+                   lecroy_wr_ptime( max_width ) );
         else
             print( FATAL, "During the experiment the window is going to end "
                    "too late, largest possible width is %s.\n",
-                   lecroy_wr2_ptime( max_width ) );
+                   lecroy_wr_ptime( max_width ) );
         THROW( EXCEPTION );
     }
 
@@ -531,13 +530,13 @@ static void lecroy_wr2_soe_window_check( LECROY_WR2_PTC_WINDOW_T * p )
 
     if ( p->is_timebase )
     {
-        lecroy_wr2.timebase = real_timebase;
-        lecroy_wr2.tb_index = real_tb_index;
-        lecroy_wr2.cur_hres = real_cur_hres;
+        lecroy_wr.timebase = real_timebase;
+        lecroy_wr.tb_index = real_tb_index;
+        lecroy_wr.cur_hres = real_cur_hres;
     }
 
     if ( p->is_trigger_delay )
-        lecroy_wr2.trigger_delay = real_trigger_delay;
+        lecroy_wr.trigger_delay = real_trigger_delay;
 }
 
 
@@ -546,43 +545,42 @@ static void lecroy_wr2_soe_window_check( LECROY_WR2_PTC_WINDOW_T * p )
  * position relative to the trigger position
  *-------------------------------------------------------------*/
 
-static long lecroy_wr2_calc_pos( double t )
+static long lecroy_wr_calc_pos( double t )
 {
-    return lrnd( ( t + lecroy_wr2.trigger_delay ) /
-                 lecroy_wr2_time_per_point( ) );
+    return lrnd( ( t + lecroy_wr.trigger_delay ) /
+                 lecroy_wr_time_per_point( ) );
 
 }
 
 
 /*-------------------------------------------------------------*
  * Function allocates and sets up the array with the possible
- * memory sizes, using the LECROY_WR2_MAX_MEMORY_SIZE macro
+ * memory sizes, using the LECROY_WR_MAX_MEMORY_SIZE macro
  * defined in the configuration file. Assumes that the memory
  * sizes always follow an 1-2.5-5 scheme and that the smallest
- * memory size is 500 (LECROY_WR2_MIN_MEMORY_SIZE) samples.
+ * memory size is 500 (LECROY_WR_MIN_MEMORY_SIZE) samples.
  *-------------------------------------------------------------*/
 
-void lecroy_wr2_numpoints_prep( void )
+void lecroy_wr_numpoints_prep( void )
 {
-    long cur_mem_size = LECROY_WR2_MIN_MEMORY_SIZE;
+    long cur_mem_size = LECROY_WR_MIN_MEMORY_SIZE;
     long len;
 
 
-    for ( len = 0; cur_mem_size < LECROY_WR2_MAX_MEMORY_SIZE; len++ )
+    for ( len = 0; cur_mem_size < LECROY_WR_MAX_MEMORY_SIZE; len++ )
         if ( len % 3 == 1 )
             cur_mem_size = ( 5 * cur_mem_size ) / 2;
         else
             cur_mem_size *= 2;
 
-    lecroy_wr2.num_mem_sizes = len;
-    lecroy_wr2.mem_sizes =
-                         LONG_P T_malloc( len * sizeof *lecroy_wr2.mem_sizes );
+    lecroy_wr.num_mem_sizes = len;
+    lecroy_wr.mem_sizes = LONG_P T_malloc( len * sizeof *lecroy_wr.mem_sizes );
 
-    cur_mem_size = LECROY_WR2_MIN_MEMORY_SIZE;
+    cur_mem_size = LECROY_WR_MIN_MEMORY_SIZE;
 
-    for ( len = 0; len < lecroy_wr2.num_mem_sizes; len++ )
+    for ( len = 0; len < lecroy_wr.num_mem_sizes; len++ )
     {
-        lecroy_wr2.mem_sizes[ len ] = cur_mem_size;
+        lecroy_wr.mem_sizes[ len ] = cur_mem_size;
 
         if ( len % 3 == 1 )
             cur_mem_size = ( 5 * cur_mem_size ) / 2;
@@ -596,24 +594,24 @@ void lecroy_wr2_numpoints_prep( void )
  * Function allocates and sets up the array of possible timebases.
  *-----------------------------------------------------------------*/
 
-void lecroy_wr2_tbas_prep( void )
+void lecroy_wr_tbas_prep( void )
 {
     double cur_tbas = 1000.0;
     long i;
     long k = 0;
 
 
-    lecroy_wr2.num_tbas = LECROY_WR2_NUM_TBAS;
+    lecroy_wr.num_tbas = LECROY_WR_NUM_TBAS;
 
-    lecroy_wr2.tbas =
-           DOUBLE_P T_malloc( lecroy_wr2.num_tbas  * sizeof *lecroy_wr2.tbas );
+    lecroy_wr.tbas =
+             DOUBLE_P T_malloc( lecroy_wr.num_tbas  * sizeof *lecroy_wr.tbas );
 
     /* All timebase settings follow a 1-2-5 scheme with 1000 s/div being
        the largest possible setting */
 
-    for ( i = lecroy_wr2.num_tbas - 1; i >= 0; i--, k++ )
+    for ( i = lecroy_wr.num_tbas - 1; i >= 0; i--, k++ )
     {
-        lecroy_wr2.tbas[ i ] = cur_tbas;
+        lecroy_wr.tbas[ i ] = cur_tbas;
         if ( k % 3 == 1 )
             cur_tbas *= 0.4;
         else
@@ -629,7 +627,7 @@ void lecroy_wr2_tbas_prep( void )
  * leaved sampling mode.
  *---------------------------------------------------------------*/
 
-void lecroy_wr2_hori_res_prep( void )
+void lecroy_wr_hori_res_prep( void )
 {
     long i;
     long j;
@@ -638,38 +636,37 @@ void lecroy_wr2_hori_res_prep( void )
     double ss_res;
 
 
-    lecroy_wr2.hres = HORI_RES_PP T_malloc( lecroy_wr2.num_mem_sizes *
-                                            sizeof *lecroy_wr2.hres );
+    lecroy_wr.hres = HORI_RES_PP T_malloc( lecroy_wr.num_mem_sizes *
+                                           sizeof *lecroy_wr.hres );
 
     TRY
     {
-        *lecroy_wr2.hres = HORI_RES_P T_malloc(   lecroy_wr2.num_mem_sizes
-                                                * LECROY_WR2_NUM_TBAS
-                                                * sizeof **lecroy_wr2.hres );
+        *lecroy_wr.hres = HORI_RES_P T_malloc(   lecroy_wr.num_mem_sizes
+                                               * LECROY_WR_NUM_TBAS
+                                               * sizeof **lecroy_wr.hres );
         TRY_SUCCESS;
     }
     OTHERWISE
     {
-        T_free( lecroy_wr2.hres );
+        T_free( lecroy_wr.hres );
         RETHROW( );
     }
 
-    for ( i = 0; i < lecroy_wr2.num_mem_sizes; i++ )
+    for ( i = 0; i < lecroy_wr.num_mem_sizes; i++ )
     {
         if ( i != 0 )
-            lecroy_wr2.hres[ i ] = 
-                				lecroy_wr2.hres[ i - 1 ] + LECROY_WR2_NUM_TBAS;
+            lecroy_wr.hres[ i ] = lecroy_wr.hres[ i - 1 ] + LECROY_WR_NUM_TBAS;
 
         /* Set up entries for Random Interleaved Sampling (RIS) mode */
 
-        ris_res = LECROY_WR2_RIS_SAMPLE_RATE * 1.0e9;
-        for ( k = LECROY_WR2_RIS_SAMPLE_RATE; k > 10; k = k / 10 )
+        ris_res = LECROY_WR_RIS_SAMPLE_RATE * 1.0e9;
+        for ( k = LECROY_WR_RIS_SAMPLE_RATE; k > 10; k = k / 10 )
             /* empty */ ;
 
-        for ( j = 0; j < LECROY_WR2_NUM_RIS_TBAS; j++ )
+        for ( j = 0; j < LECROY_WR_NUM_RIS_TBAS; j++ )
         {
-            if ( 10 * lrnd( lecroy_wr2.tbas[ j ] * ris_res ) >
-                                                  lecroy_wr2.mem_sizes[ i ] ) {
+            if ( 10 * lrnd( lecroy_wr.tbas[ j ] * ris_res ) >
+                                                   lecroy_wr.mem_sizes[ i ] ) {
                 if ( k == 5 )
                 {
                     ris_res *= 0.4;
@@ -682,33 +679,33 @@ void lecroy_wr2_hori_res_prep( void )
                 }
             }
 
-            lecroy_wr2.hres[ i ][ j ].tpp_ris = 1.0 / ris_res;
-            lecroy_wr2.hres[ i ][ j ].ppd_ris =
-                                        lrnd( lecroy_wr2.tbas[ j ] * ris_res );
+            lecroy_wr.hres[ i ][ j ].tpp_ris = 1.0 / ris_res;
+            lecroy_wr.hres[ i ][ j ].ppd_ris =
+                                         lrnd( lecroy_wr.tbas[ j ] * ris_res );
         }
 
-        for ( ; j < LECROY_WR2_NUM_TBAS; j++ )
+        for ( ; j < LECROY_WR_NUM_TBAS; j++ )
         {
-            lecroy_wr2.hres[ i ][ j ].tpp_ris = 0.0;
-            lecroy_wr2.hres[ i ][ j ].ppd_ris = 0;
+            lecroy_wr.hres[ i ][ j ].tpp_ris = 0.0;
+            lecroy_wr.hres[ i ][ j ].ppd_ris = 0;
         }
 
         /* Set up entries for Single Shot (SS) mode */
 
-        ss_res = LECROY_WR2_SS_SAMPLE_RATE * 1.0e6;
-        for ( k = LECROY_WR2_SS_SAMPLE_RATE; k > 10; k = k / 10 )
+        ss_res = LECROY_WR_SS_SAMPLE_RATE * 1.0e6;
+        for ( k = LECROY_WR_SS_SAMPLE_RATE; k > 10; k = k / 10 )
             /* empty */ ;
 
-        for ( j = 0; j < LECROY_WR2_NUM_TBAS - LECROY_WR2_NUM_SS_TBAS; j++ )
+        for ( j = 0; j < LECROY_WR_NUM_TBAS - LECROY_WR_NUM_SS_TBAS; j++ )
         {
-            lecroy_wr2.hres[ i ][ j ].tpp = 0.0;
-            lecroy_wr2.hres[ i ][ j ].ppd = 0;
+            lecroy_wr.hres[ i ][ j ].tpp = 0.0;
+            lecroy_wr.hres[ i ][ j ].ppd = 0;
         }
 
-        for ( ; j < LECROY_WR2_NUM_TBAS; j++ )
+        for ( ; j < LECROY_WR_NUM_TBAS; j++ )
         {
-            if ( 10 * lrnd( lecroy_wr2.tbas[ j ] * ss_res ) >
-                                                  lecroy_wr2.mem_sizes[ i ] ) {
+            if ( 10 * lrnd( lecroy_wr.tbas[ j ] * ss_res ) >
+                                                   lecroy_wr.mem_sizes[ i ] ) {
                 if ( k == 5 )
                 {
                     ss_res *= 0.4;
@@ -721,20 +718,10 @@ void lecroy_wr2_hori_res_prep( void )
                 }
             }
 
-            lecroy_wr2.hres[ i ][ j ].tpp = 1.0 / ss_res;
-            lecroy_wr2.hres[ i ][ j ].ppd =
-                                         lrnd( lecroy_wr2.tbas[ j ] * ss_res );
+            lecroy_wr.hres[ i ][ j ].tpp = 1.0 / ss_res;
+            lecroy_wr.hres[ i ][ j ].ppd =
+                                          lrnd( lecroy_wr.tbas[ j ] * ss_res );
         }
-
-
-        fprintf( stderr, "\nMemory size = %ld\n\n", lecroy_wr2.mem_sizes[ i ] );
-        for ( j = 0; j < LECROY_WR2_NUM_TBAS; j++ )
-            fprintf( stderr, "%g : %g %ld : %g %ld\n",
-                     lecroy_wr2.tbas[ j ],
-                     lecroy_wr2.hres[ i ][ j ].tpp,
-                     lecroy_wr2.hres[ i ][ j ].ppd,
-                     lecroy_wr2.hres[ i ][ j ].tpp_ris,
-                     lecroy_wr2.hres[ i ][ j ].ppd_ris );
     }
 }
 
@@ -746,21 +733,21 @@ void lecroy_wr2_hori_res_prep( void )
  * the module.
  *--------------------------------------------------------------*/
 
-void lecroy_wr2_clean_up( void )
+void lecroy_wr_clean_up( void )
 {
-    if ( lecroy_wr2.hres )
+    if ( lecroy_wr.hres )
     {
-        if ( lecroy_wr2.hres[ 0 ] != NULL )
-            T_free( lecroy_wr2.hres[ 0 ] );
+        if ( lecroy_wr.hres[ 0 ] != NULL )
+            T_free( lecroy_wr.hres[ 0 ] );
 
-        T_free( lecroy_wr2.hres );
+        T_free( lecroy_wr.hres );
     }
 
-    if ( lecroy_wr2.tbas )
-        T_free( lecroy_wr2.tbas );
+    if ( lecroy_wr.tbas )
+        T_free( lecroy_wr.tbas );
 
-    if ( lecroy_wr2.mem_sizes )
-        T_free( lecroy_wr2.mem_sizes );
+    if ( lecroy_wr.mem_sizes )
+        T_free( lecroy_wr.mem_sizes );
 }
 
 
@@ -769,11 +756,11 @@ void lecroy_wr2_clean_up( void )
  * of the timebase and interleaved mode
  *-----------------------------------------------------------------*/
 
-long lecroy_wr2_curve_length( void )
+long lecroy_wr_curve_length( void )
 {
     return 10 *
-           ( ( lecroy_wr2.cur_hres->ppd_ris > 0 && lecroy_wr2.interleaved ) ?
-             lecroy_wr2.cur_hres->ppd_ris : lecroy_wr2.cur_hres->ppd );
+           ( ( lecroy_wr.cur_hres->ppd_ris > 0 && lecroy_wr.interleaved ) ?
+             lecroy_wr.cur_hres->ppd_ris : lecroy_wr.cur_hres->ppd );
 }
 
 
@@ -782,10 +769,10 @@ long lecroy_wr2_curve_length( void )
  * current setting of the timebase and interleaved mode
  *-----------------------------------------------------------------*/
 
-double lecroy_wr2_time_per_point( void )
+double lecroy_wr_time_per_point( void )
 {
-    return ( lecroy_wr2.cur_hres->ppd_ris > 0 && lecroy_wr2.interleaved ) ?
-           lecroy_wr2.cur_hres->tpp_ris : lecroy_wr2.cur_hres->tpp;
+    return ( lecroy_wr.cur_hres->ppd_ris > 0 && lecroy_wr.interleaved ) ?
+           lecroy_wr.cur_hres->tpp_ris : lecroy_wr.cur_hres->tpp;
 }
 
 
@@ -800,56 +787,56 @@ double lecroy_wr2_time_per_point( void )
  * indicate the error.
  *--------------------------------------------------------------*/
 
-long lecroy_wr2_translate_channel( int  dir,
-                                   long channel,
-                                   bool flag )
+long lecroy_wr_translate_channel( int  dir,
+                                  long channel,
+                                  bool flag )
 {
-    if ( dir == GENERAL_TO_LECROY_WR2 )
+    if ( dir == GENERAL_TO_LECROY_WR )
     {
         switch ( channel )
         {
             case CHANNEL_CH1 :
-                return LECROY_WR2_CH1;
+                return LECROY_WR_CH1;
 
             case CHANNEL_CH2 :
-                return LECROY_WR2_CH2;
-#ifdef LECROY_WR2_CH3
+                return LECROY_WR_CH2;
+#ifdef LECROY_WR_CH3
             case CHANNEL_CH3 :
-                return LECROY_WR2_CH3;
+                return LECROY_WR_CH3;
 #endif
-#ifdef LECROY_WR2_CH4
+#ifdef LECROY_WR_CH4
             case CHANNEL_CH4 :
-                return LECROY_WR2_CH4;
+                return LECROY_WR_CH4;
 #endif
             case CHANNEL_TRACE_A :
-                return LECROY_WR2_TA;
+                return LECROY_WR_TA;
 
             case CHANNEL_TRACE_B :
-                return LECROY_WR2_TB;
+                return LECROY_WR_TB;
 
             case CHANNEL_TRACE_C :
-                return LECROY_WR2_TC;
+                return LECROY_WR_TC;
 
             case CHANNEL_TRACE_D :
-                return LECROY_WR2_TD;
+                return LECROY_WR_TD;
 
             case CHANNEL_M1 :
-                return LECROY_WR2_M1;
+                return LECROY_WR_M1;
 
             case CHANNEL_M2 :
-                return LECROY_WR2_M2;
+                return LECROY_WR_M2;
 
             case CHANNEL_M3 :
-                return LECROY_WR2_M3;
+                return LECROY_WR_M3;
 
             case CHANNEL_M4 :
-                return LECROY_WR2_M4;
+                return LECROY_WR_M4;
 
             case CHANNEL_EXT :
-                return LECROY_WR2_EXT;
+                return LECROY_WR_EXT;
 
             case CHANNEL_EXT10 :
-                return LECROY_WR2_EXT10;
+                return LECROY_WR_EXT10;
         }
 
         if ( channel > CHANNEL_INVALID && channel < NUM_CHANNEL_NAMES )
@@ -870,50 +857,50 @@ long lecroy_wr2_translate_channel( int  dir,
     {
         switch ( channel )
         {
-            case LECROY_WR2_CH1 :
+            case LECROY_WR_CH1 :
                 return CHANNEL_CH1;
 
-            case LECROY_WR2_CH2 :
+            case LECROY_WR_CH2 :
                 return CHANNEL_CH2;
-#ifdef LECROY_WR2_CH3
-            case LECROY_WR2_CH3 :
+#ifdef LECROY_WR_CH3
+            case LECROY_WR_CH3 :
                 return CHANNEL_CH3;
 #endif
-#ifdef LECROY_WR2_CH4
-            case LECROY_WR2_CH4 :
+#ifdef LECROY_WR_CH4
+            case LECROY_WR_CH4 :
                 return CHANNEL_CH4;
 #endif
-            case LECROY_WR2_TA :
+            case LECROY_WR_TA :
                 return CHANNEL_TRACE_A;
 
-            case LECROY_WR2_TB :
+            case LECROY_WR_TB :
                 return CHANNEL_TRACE_B;
 
-            case LECROY_WR2_TC :
+            case LECROY_WR_TC :
                 return CHANNEL_TRACE_C;
 
-            case LECROY_WR2_TD :
+            case LECROY_WR_TD :
                 return CHANNEL_TRACE_D;
 
-            case LECROY_WR2_M1 :
+            case LECROY_WR_M1 :
                 return CHANNEL_M1;
 
-            case LECROY_WR2_M2 :
+            case LECROY_WR_M2 :
                 return CHANNEL_M2;
 
-            case LECROY_WR2_M3 :
+            case LECROY_WR_M3 :
                 return CHANNEL_M3;
 
-            case LECROY_WR2_M4 :
+            case LECROY_WR_M4 :
                 return CHANNEL_M4;
 
-            case LECROY_WR2_LIN :
+            case LECROY_WR_LIN :
                 return CHANNEL_LINE;
 
-            case LECROY_WR2_EXT :
+            case LECROY_WR_EXT :
                 return CHANNEL_EXT;
 
-            case LECROY_WR2_EXT10 :
+            case LECROY_WR_EXT10 :
                 return CHANNEL_EXT10;
 
             default :
@@ -932,8 +919,8 @@ long lecroy_wr2_translate_channel( int  dir,
  * about the current state of the oscilloscope
  *-----------------------------------------------------------*/
 
-void lecroy_wr2_store_state( LECROY_WR2_T * dest,
-                             LECROY_WR2_T * src )
+void lecroy_wr_store_state( LECROY_WR_T * dest,
+                            LECROY_WR_T * src )
 {
     Window_T *w;
     int i;

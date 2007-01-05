@@ -21,12 +21,12 @@
 #  Boston, MA 02111-1307, USA.
 
 
-LECROY_WR2 {
+LECROY_WR {
 
 	global:
 				generic_type;
 				device_name;
-				lecroy_wr2_*_hook;
+				lecroy_wr_*_hook;
 				digitizer_*;
 
 	local:      *;

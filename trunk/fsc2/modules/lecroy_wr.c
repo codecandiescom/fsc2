@@ -22,8 +22,8 @@
  */
 
 
-#define LECROY_WR2_MAIN_
-#include "lecroy_wr2.h"
+#define LECROY_WR_MAIN_
+#include "lecroy_wr.h"
 
 
 /*--------------------------------*/
@@ -33,16 +33,16 @@
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
-LECROY_WR2_T lecroy_wr2;
+LECROY_WR_T lecroy_wr;
 
-const char *LECROY_WR2_Channel_Names[ 15 ] = { "CH1",     "CH2",
-                                               "CH3",     "CH4",
-                                               "TRACE_A", "TRACE_B",
-                                               "TRACE_C", "TRACE_D",
-                                               "M1",      "M2",
-                                               "M3",      "M4"
-                                               "LINE",    "EXT",
-                                               "EXT10" };
+const char *LECROY_WR_Channel_Names[ 15 ] = { "CH1",     "CH2",
+                                              "CH3",     "CH4",
+                                              "TRACE_A", "TRACE_B",
+                                              "TRACE_C", "TRACE_D",
+                                              "M1",      "M2",
+                                              "M3",      "M4"
+                                              "LINE",    "EXT",
+                                              "EXT10" };
 
 /* List of fixed sensivity settings where the range of the offset changes */
 
@@ -52,7 +52,7 @@ double fixed_sens[ ] = { 1.0e-1, 1.0, 10.0 };
 
 int max_offsets[ ] = { 1.0, 10.0, 100.0 };
 
-static LECROY_WR2_T lecroy_wr2_stored;
+static LECROY_WR_T lecroy_wr_stored;
 
 
 
@@ -64,7 +64,7 @@ static LECROY_WR2_T lecroy_wr2_stored;
  * Init hook function for the module.
  *------------------------------------*/
 
-int lecroy_wr2_init_hook( void )
+int lecroy_wr_init_hook( void )
 {
     size_t i;
 
@@ -75,69 +75,69 @@ int lecroy_wr2_init_hook( void )
 
     /* Initialize some variables in the digitizers structure */
 
-    lecroy_wr2.num_used_channels = 0;
+    lecroy_wr.num_used_channels = 0;
 
-    lecroy_wr2.w                 = NULL;
-    lecroy_wr2.num_windows       = 0;
+    lecroy_wr.w                 = NULL;
+    lecroy_wr.num_windows       = 0;
 
-    lecroy_wr2.is_timebase       = UNSET;
-    lecroy_wr2.is_interleaved    = UNSET;
-    lecroy_wr2.is_mem_size       = UNSET;
-    lecroy_wr2.is_trigger_source = UNSET;
-    lecroy_wr2.is_trigger_mode   = UNSET;
-    lecroy_wr2.is_trigger_delay  = UNSET;
+    lecroy_wr.is_timebase       = UNSET;
+    lecroy_wr.is_interleaved    = UNSET;
+    lecroy_wr.is_mem_size       = UNSET;
+    lecroy_wr.is_trigger_source = UNSET;
+    lecroy_wr.is_trigger_mode   = UNSET;
+    lecroy_wr.is_trigger_delay  = UNSET;
 
-    lecroy_wr2_numpoints_prep( );
-    lecroy_wr2_tbas_prep( );
-    lecroy_wr2_hori_res_prep( );
+    lecroy_wr_numpoints_prep( );
+    lecroy_wr_tbas_prep( );
+    lecroy_wr_hori_res_prep( );
 
-    lecroy_wr2.tb_index       = LECROY_WR2_TEST_TB_INDEX;
-    lecroy_wr2.timebase       = lecroy_wr2.tbas[ lecroy_wr2.tb_index ];
-    lecroy_wr2.ms_index       = LECROY_WR2_TEST_MS_INDEX;
-    lecroy_wr2.mem_size       = lecroy_wr2.mem_sizes[ lecroy_wr2.ms_index ];
-    lecroy_wr2.interleaved    = LECROY_WR2_TEST_ILVD_MODE;
-    lecroy_wr2.trigger_source = LECROY_WR2_TEST_TRIG_SOURCE;
-    lecroy_wr2.trigger_mode   = LECROY_WR2_TEST_TRIG_MODE;
-    lecroy_wr2.trigger_delay  = LECROY_WR2_TEST_TRIG_DELAY;
-    lecroy_wr2.cur_hres      = 
-                  lecroy_wr2.hres[ lecroy_wr2.ms_index ] + lecroy_wr2.tb_index;
+    lecroy_wr.tb_index       = LECROY_WR_TEST_TB_INDEX;
+    lecroy_wr.timebase       = lecroy_wr.tbas[ lecroy_wr.tb_index ];
+    lecroy_wr.ms_index       = LECROY_WR_TEST_MS_INDEX;
+    lecroy_wr.mem_size       = lecroy_wr.mem_sizes[ lecroy_wr.ms_index ];
+    lecroy_wr.interleaved    = LECROY_WR_TEST_ILVD_MODE;
+    lecroy_wr.trigger_source = LECROY_WR_TEST_TRIG_SOURCE;
+    lecroy_wr.trigger_mode   = LECROY_WR_TEST_TRIG_MODE;
+    lecroy_wr.trigger_delay  = LECROY_WR_TEST_TRIG_DELAY;
+    lecroy_wr.cur_hres      = 
+                  lecroy_wr.hres[ lecroy_wr.ms_index ] + lecroy_wr.tb_index;
 
-    for ( i = LECROY_WR2_CH1; i < LECROY_WR2_CH_MAX; i++ )
+    for ( i = LECROY_WR_CH1; i < LECROY_WR_CH_MAX; i++ )
     {
-        lecroy_wr2.is_sens[ i ]              = UNSET;
-        lecroy_wr2.sens[ i ]                 = LECROY_WR2_TEST_SENSITIVITY;
-        lecroy_wr2.is_offset[ i ]            = UNSET;
-        lecroy_wr2.offset[ i ]               = LECROY_WR2_TEST_OFFSET;
-        lecroy_wr2.is_coupling[ i ]          = UNSET;
-        lecroy_wr2.coupling[ i ]             = LECROY_WR2_TEST_COUPLING;
-        lecroy_wr2.is_bandwidth_limiter[ i ] = UNSET;
-        lecroy_wr2.bandwidth_limiter[ i ]    = LECROY_WR2_TEST_BWL;
+        lecroy_wr.is_sens[ i ]              = UNSET;
+        lecroy_wr.sens[ i ]                 = LECROY_WR_TEST_SENSITIVITY;
+        lecroy_wr.is_offset[ i ]            = UNSET;
+        lecroy_wr.offset[ i ]               = LECROY_WR_TEST_OFFSET;
+        lecroy_wr.is_coupling[ i ]          = UNSET;
+        lecroy_wr.coupling[ i ]             = LECROY_WR_TEST_COUPLING;
+        lecroy_wr.is_bandwidth_limiter[ i ] = UNSET;
+        lecroy_wr.bandwidth_limiter[ i ]    = LECROY_WR_TEST_BWL;
     }
 
-    for ( i = LECROY_WR2_TA; i <= LECROY_WR2_TD; i++ )
+    for ( i = LECROY_WR_TA; i <= LECROY_WR_TD; i++ )
     {
-        lecroy_wr2.channels_in_use[ i ] = UNSET;
-        lecroy_wr2.source_ch[ i ]       = LECROY_WR2_CH1;
-        lecroy_wr2.is_avg_setup[ i ]    = UNSET;
+        lecroy_wr.channels_in_use[ i ] = UNSET;
+        lecroy_wr.source_ch[ i ]       = LECROY_WR_CH1;
+        lecroy_wr.is_avg_setup[ i ]    = UNSET;
     }
 
-    for ( i = LECROY_WR2_M1; i <= LECROY_WR2_M4; i++ )
-        lecroy_wr2.channels_in_use[ i ] = UNSET;
+    for ( i = LECROY_WR_M1; i <= LECROY_WR_M4; i++ )
+        lecroy_wr.channels_in_use[ i ] = UNSET;
 
     for ( i = 0; i < ( int ) NUM_ELEMS( trg_channels ); i++ )
     {
-        lecroy_wr2.is_trigger_slope[ trg_channels[ i ] ]    = UNSET;
-        lecroy_wr2.trigger_slope[ trg_channels[ i ] ]       =
-                                                    LECROY_WR2_TEST_TRIG_SLOPE;
-        lecroy_wr2.is_trigger_coupling[ trg_channels[ i ] ] = UNSET;
-        lecroy_wr2.trigger_coupling[ trg_channels[ i ] ]    =
-                                                     LECROY_WR2_TEST_TRIG_COUP;
-        lecroy_wr2.is_trigger_level[ trg_channels[ i ] ]    = UNSET;
-        lecroy_wr2.trigger_level[ trg_channels[ i ] ]       =
-                                                    LECROY_WR2_TEST_TRIG_LEVEL;
+        lecroy_wr.is_trigger_slope[ trg_channels[ i ] ]    = UNSET;
+        lecroy_wr.trigger_slope[ trg_channels[ i ] ]       =
+                                                     LECROY_WR_TEST_TRIG_SLOPE;
+        lecroy_wr.is_trigger_coupling[ trg_channels[ i ] ] = UNSET;
+        lecroy_wr.trigger_coupling[ trg_channels[ i ] ]    =
+                                                      LECROY_WR_TEST_TRIG_COUP;
+        lecroy_wr.is_trigger_level[ trg_channels[ i ] ]    = UNSET;
+        lecroy_wr.trigger_level[ trg_channels[ i ] ]       =
+                                                     LECROY_WR_TEST_TRIG_LEVEL;
     }
 
-    lecroy_wr2_stored.w = NULL;
+    lecroy_wr_stored.w = NULL;
 
     return 1;
 }
@@ -147,9 +147,9 @@ int lecroy_wr2_init_hook( void )
  * Test hook function for the module
  *-----------------------------------*/
 
-int lecroy_wr2_test_hook( void )
+int lecroy_wr_test_hook( void )
 {
-    lecroy_wr2_store_state( &lecroy_wr2_stored, &lecroy_wr2 );
+    lecroy_wr_store_state( &lecroy_wr_stored, &lecroy_wr );
     return 1;
 }
 
@@ -158,14 +158,14 @@ int lecroy_wr2_test_hook( void )
  * Start of experiment hook function for the module
  *--------------------------------------------------*/
 
-int lecroy_wr2_exp_hook( void )
+int lecroy_wr_exp_hook( void )
 {
     /* Reset structure describing the state of the digitizer to what it
        was before the test run */
 
-    lecroy_wr2_store_state( &lecroy_wr2, &lecroy_wr2_stored );
+    lecroy_wr_store_state( &lecroy_wr, &lecroy_wr_stored );
 
-    if ( ! lecroy_wr2_init( DEVICE_NAME ) )
+    if ( ! lecroy_wr_init( DEVICE_NAME ) )
     {
         print( FATAL, "Initialization of device failed: %s\n",
                gpib_error_msg );
@@ -180,9 +180,9 @@ int lecroy_wr2_exp_hook( void )
  * End of experiment hook function for the module
  *------------------------------------------------*/
 
-int lecroy_wr2_end_of_exp_hook( void )
+int lecroy_wr_end_of_exp_hook( void )
 {
-    lecroy_wr2_finished( );
+    lecroy_wr_finished( );
     return 1;
 }
 
@@ -192,12 +192,12 @@ int lecroy_wr2_end_of_exp_hook( void )
  *------------------------------------------*/
 
 
-void lecroy_wr2_exit_hook( void )
+void lecroy_wr_exit_hook( void )
 {
-    lecroy_wr2_exit_cleanup( );
-    lecroy_wr2_delete_windows( &lecroy_wr2 );
-    lecroy_wr2_delete_windows( &lecroy_wr2_stored );
-    lecroy_wr2_clean_up( );
+    lecroy_wr_exit_cleanup( );
+    lecroy_wr_delete_windows( &lecroy_wr );
+    lecroy_wr_delete_windows( &lecroy_wr_stored );
+    lecroy_wr_clean_up( );
 }
 
 
@@ -248,14 +248,14 @@ Var_T *digitizer_define_window( Var_T * v )
 
     /* Create a new window structure and append it to the list of windows */
 
-    if ( lecroy_wr2.w == NULL )
+    if ( lecroy_wr.w == NULL )
     {
-        lecroy_wr2.w = w = WINDOW_P T_malloc( sizeof *w );
+        lecroy_wr.w = w = WINDOW_P T_malloc( sizeof *w );
         w->prev = NULL;
     }
     else
     {
-        w = lecroy_wr2.w;
+        w = lecroy_wr.w;
         while ( w->next != NULL )
             w = w->next;
         w->next = WINDOW_P T_malloc( sizeof *w->next );
@@ -264,12 +264,12 @@ Var_T *digitizer_define_window( Var_T * v )
     }
 
     w->next = NULL;
-    w->num = lecroy_wr2.num_windows++ + WINDOW_START_NUMBER;
+    w->num = lecroy_wr.num_windows++ + WINDOW_START_NUMBER;
 
     w->start = win_start;
     w->width = win_width;
 
-    lecroy_wr2_window_check( w, UNSET );
+    lecroy_wr_window_check( w, UNSET );
 
     return vars_push( INT_VAR, w->num );
 }
@@ -284,7 +284,7 @@ Var_T *digitizer_change_window( Var_T * v )
     Window_T *w;
 
 
-    if ( lecroy_wr2.w == NULL )
+    if ( lecroy_wr.w == NULL )
     {
         print( FATAL, "No windows have been defined.\n" );
         THROW( EXCEPTION );
@@ -299,7 +299,7 @@ Var_T *digitizer_change_window( Var_T * v )
     /* Figure out the window number and test if a window with this number
        exists at all */
 
-    w = lecroy_wr2_get_window_by_number( get_strict_long( v, "window ID" ) );
+    w = lecroy_wr_get_window_by_number( get_strict_long( v, "window ID" ) );
     v = vars_pop( v );
 
     if ( v == NULL )
@@ -326,7 +326,7 @@ Var_T *digitizer_change_window( Var_T * v )
 
     too_many_arguments( v );
 
-    lecroy_wr2_window_check( w, UNSET );
+    lecroy_wr_window_check( w, UNSET );
 
     return vars_push( INT_VAR, w->num );
 }
@@ -341,7 +341,7 @@ Var_T *digitizer_window_position( Var_T * v )
     Window_T *w;
 
 
-    if ( lecroy_wr2.w == NULL )
+    if ( lecroy_wr.w == NULL )
     {
         print( FATAL, "No windows have been defined.\n" );
         THROW( EXCEPTION );
@@ -356,7 +356,7 @@ Var_T *digitizer_window_position( Var_T * v )
     /* Figure out the window number and test if a window with this number
        exists at all */
 
-    w = lecroy_wr2_get_window_by_number( get_strict_long( v, "window ID" ) );
+    w = lecroy_wr_get_window_by_number( get_strict_long( v, "window ID" ) );
 
     if ( ( v = vars_pop( v ) ) == NULL )
         return vars_push( FLOAT_VAR, w->start );
@@ -365,7 +365,7 @@ Var_T *digitizer_window_position( Var_T * v )
 
     too_many_arguments( v );
 
-    lecroy_wr2_window_check( w, UNSET );
+    lecroy_wr_window_check( w, UNSET );
 
     return vars_push( FLOAT_VAR, w->start );
 }
@@ -380,7 +380,7 @@ Var_T *digitizer_window_width( Var_T * v )
     Window_T *w;
 
 
-    if ( lecroy_wr2.w == NULL )
+    if ( lecroy_wr.w == NULL )
     {
         print( FATAL, "No windows have been defined.\n" );
         THROW( EXCEPTION );
@@ -395,7 +395,7 @@ Var_T *digitizer_window_width( Var_T * v )
     /* Figure out the window number and test if a window with this number
        exists at all */
 
-    w = lecroy_wr2_get_window_by_number( get_strict_long( v, "window ID" ) );
+    w = lecroy_wr_get_window_by_number( get_strict_long( v, "window ID" ) );
 
     if ( ( v = vars_pop( v ) ) == NULL )
         return vars_push( FLOAT_VAR, w->width );
@@ -404,7 +404,7 @@ Var_T *digitizer_window_width( Var_T * v )
 
     too_many_arguments( v );
 
-    lecroy_wr2_window_check( w, UNSET );
+    lecroy_wr_window_check( w, UNSET );
 
     return vars_push( FLOAT_VAR, w->width );
 }
@@ -425,17 +425,17 @@ Var_T *digitizer_timebase( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_timebase )
+                if ( ! lecroy_wr.is_timebase )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
-                return vars_push( FLOAT_VAR, lecroy_wr2.timebase );
+                return vars_push( FLOAT_VAR, lecroy_wr.timebase );
 
             case EXPERIMENT :
-                lecroy_wr2.timebase = lecroy_wr2_get_timebase( );
-                lecroy_wr2.is_timebase = SET;
-                return vars_push( FLOAT_VAR, lecroy_wr2.timebase );
+                lecroy_wr.timebase = lecroy_wr_get_timebase( );
+                lecroy_wr.is_timebase = SET;
+                return vars_push( FLOAT_VAR, lecroy_wr.timebase );
         }
 
     timebase = get_double( v, "time base" );
@@ -443,70 +443,70 @@ Var_T *digitizer_timebase( Var_T * v )
     if ( timebase <= 0 )
     {
         print( FATAL, "Invalid zero or negative time base: %s.\n",
-               lecroy_wr2_ptime( timebase ) );
+               lecroy_wr_ptime( timebase ) );
         THROW( EXCEPTION );
     }
 
     /* Pick the allowed timebase nearest to the user requested value, tell
        the user about problems if there's a deviation of more than 1 % */
 
-    for ( i = 0; i < lecroy_wr2.num_tbas - 1; i++ )
-        if ( timebase >= lecroy_wr2.tbas[ i ] &&
-             timebase <= lecroy_wr2.tbas[ i + 1 ] )
+    for ( i = 0; i < lecroy_wr.num_tbas - 1; i++ )
+        if ( timebase >= lecroy_wr.tbas[ i ] &&
+             timebase <= lecroy_wr.tbas[ i + 1 ] )
         {
-            tb_index = i + ( ( lecroy_wr2.tbas[ i ] / timebase >
-                               timebase / lecroy_wr2.tbas[ i + 1 ] ) ? 0 : 1 );
+            tb_index = i + ( ( lecroy_wr.tbas[ i ] / timebase >
+                               timebase / lecroy_wr.tbas[ i + 1 ] ) ? 0 : 1 );
             break;
         }
 
     if ( tb_index >= 0 &&                                   /* value found ? */
-         fabs( timebase - lecroy_wr2.tbas[ tb_index ] ) > timebase * 1.0e-2 )
+         fabs( timebase - lecroy_wr.tbas[ tb_index ] ) > timebase * 1.0e-2 )
         print( WARN, "Can't set timebase to %s, using %s instead.\n",
-               lecroy_wr2_ptime( timebase ),
-               lecroy_wr2_ptime( lecroy_wr2.tbas[ tb_index ] ) );
+               lecroy_wr_ptime( timebase ),
+               lecroy_wr_ptime( lecroy_wr.tbas[ tb_index ] ) );
 
     if ( tb_index < 0 )                                   /* not found yet ? */
     {
-        if ( timebase < lecroy_wr2.tbas[ 0 ] )
+        if ( timebase < lecroy_wr.tbas[ 0 ] )
         {
             tb_index = 0;
             print( WARN, "Timebase of %s is too short, using %s instead.\n",
-                   lecroy_wr2_ptime( timebase ),
-                   lecroy_wr2_ptime( lecroy_wr2.tbas[ tb_index ] ) );
+                   lecroy_wr_ptime( timebase ),
+                   lecroy_wr_ptime( lecroy_wr.tbas[ tb_index ] ) );
         }
         else
         {
-            tb_index = lecroy_wr2.num_tbas - 1;
+            tb_index = lecroy_wr.num_tbas - 1;
             print( WARN, "Timebase of %s is too long, using %s instead.\n",
-                   lecroy_wr2_ptime( timebase ),
-                   lecroy_wr2_ptime( lecroy_wr2.tbas[ tb_index ] ) );
+                   lecroy_wr_ptime( timebase ),
+                   lecroy_wr_ptime( lecroy_wr.tbas[ tb_index ] ) );
         }
     }
 
-    lecroy_wr2.timebase = lecroy_wr2.tbas[ tb_index ];
-    lecroy_wr2.tb_index = tb_index;
-    lecroy_wr2.is_timebase = SET;
-    lecroy_wr2.cur_hres = 
-                  lecroy_wr2.hres[ lecroy_wr2.ms_index ] + lecroy_wr2.tb_index;
+    lecroy_wr.timebase = lecroy_wr.tbas[ tb_index ];
+    lecroy_wr.tb_index = tb_index;
+    lecroy_wr.is_timebase = SET;
+    lecroy_wr.cur_hres = 
+                  lecroy_wr.hres[ lecroy_wr.ms_index ] + lecroy_wr.tb_index;
  
     /* Now check if the trigger delay (in case it's set) fits with the new
        timebase setting, and, based on this, the window positions and widths */
 
-    lecroy_wr2.trigger_delay = lecroy_wr2_trigger_delay_check( );
-    lecroy_wr2_all_windows_check( );
+    lecroy_wr.trigger_delay = lecroy_wr_trigger_delay_check( );
+    lecroy_wr_all_windows_check( );
 
     /* In the experiment set the timebase and also the trigger delay, at least
        if it was already set */
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        lecroy_wr2_set_timebase( lecroy_wr2.timebase );
+        lecroy_wr_set_timebase( lecroy_wr.timebase );
 
-        if ( lecroy_wr2.is_trigger_delay )
-            lecroy_wr2_set_trigger_delay( lecroy_wr2.trigger_delay );
+        if ( lecroy_wr.is_trigger_delay )
+            lecroy_wr_set_trigger_delay( lecroy_wr.trigger_delay );
     }
 
-    return vars_push( FLOAT_VAR, lecroy_wr2.timebase );
+    return vars_push( FLOAT_VAR, lecroy_wr.timebase );
 }
 
 
@@ -523,44 +523,44 @@ Var_T *digitizer_interleave_mode( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_interleaved )
+                if ( ! lecroy_wr.is_interleaved )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
-                return vars_push( INT_VAR, ( long ) lecroy_wr2.interleaved );
+                return vars_push( INT_VAR, ( long ) lecroy_wr.interleaved );
 
             case EXPERIMENT :
-                lecroy_wr2.interleaved = lecroy_wr2_get_interleaved( );
-                lecroy_wr2.is_interleaved = SET;
-                return vars_push( INT_VAR, ( long ) lecroy_wr2.interleaved );
+                lecroy_wr.interleaved = lecroy_wr_get_interleaved( );
+                lecroy_wr.is_interleaved = SET;
+                return vars_push( INT_VAR, ( long ) lecroy_wr.interleaved );
         }
 
     ilvd = get_boolean( v );
 
     too_many_arguments( v );
 
-    if ( ilvd && lecroy_wr2.cur_hres->ppd_ris < 0 )
+    if ( ilvd && lecroy_wr.cur_hres->ppd_ris < 0 )
     {
         print( FATAL, "Can't switch to RIS mode for timebase of %s.\n",
-               lecroy_wr2_ptime( lecroy_wr2.timebase ) );
+               lecroy_wr_ptime( lecroy_wr.timebase ) );
         THROW( EXCEPTION );
     }
 
-    lecroy_wr2.interleaved = ilvd;
-    lecroy_wr2.is_interleaved = SET;
-    lecroy_wr2.is_timebase = SET;            /* both must be set to be able */
-    lecroy_wr2.is_mem_size = SET;            /* to set interleaved mode     */
+    lecroy_wr.interleaved = ilvd;
+    lecroy_wr.is_interleaved = SET;
+    lecroy_wr.is_timebase = SET;            /* both must be set to be able */
+    lecroy_wr.is_mem_size = SET;            /* to set interleaved mode     */
 
-    lecroy_wr2.trigger_delay = lecroy_wr2_trigger_delay_check( );
-    lecroy_wr2_all_windows_check( );
+    lecroy_wr.trigger_delay = lecroy_wr_trigger_delay_check( );
+    lecroy_wr_all_windows_check( );
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        lecroy_wr2_set_interleaved( ilvd );
+        lecroy_wr_set_interleaved( ilvd );
 
-        if ( lecroy_wr2.is_trigger_delay )
-            lecroy_wr2_set_trigger_delay( lecroy_wr2.trigger_delay );
+        if ( lecroy_wr.is_trigger_delay )
+            lecroy_wr_set_trigger_delay( lecroy_wr.trigger_delay );
     }
 
     return vars_push( INT_VAR, ( long ) ilvd );
@@ -582,15 +582,15 @@ Var_T *digitizer_memory_size( Var_T *v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_mem_size )
+                if ( ! lecroy_wr.is_mem_size )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
-                return vars_push( INT_VAR, lecroy_wr2.mem_size );
+                return vars_push( INT_VAR, lecroy_wr.mem_size );
 
             case EXPERIMENT :
-                return vars_push( INT_VAR, lecroy_wr2_get_memory_size( ) );
+                return vars_push( INT_VAR, lecroy_wr_get_memory_size( ) );
         }
 
     mem_size = get_long( v, "memory size" );
@@ -603,38 +603,38 @@ Var_T *digitizer_memory_size( Var_T *v )
         THROW( EXCEPTION );
     }
 
-    for ( i = 0; i < lecroy_wr2.num_mem_sizes; i++ )
-        if ( mem_size <= lecroy_wr2.mem_sizes[ i ] )
+    for ( i = 0; i < lecroy_wr.num_mem_sizes; i++ )
+        if ( mem_size <= lecroy_wr.mem_sizes[ i ] )
         {
             ms_index = i;
             break;
         }
 
     if ( ms_index >= 0 &&
-         mem_size != lecroy_wr2.mem_sizes[ ms_index ] )
+         mem_size != lecroy_wr.mem_sizes[ ms_index ] )
         print( WARN, "Can't set memory size to %ld, using %ld instead.\n",
-               mem_size, lecroy_wr2.mem_sizes[ ms_index ] );
+               mem_size, lecroy_wr.mem_sizes[ ms_index ] );
 
     if ( ms_index < 0 )                                   /* not found yet ? */
     {
-        ms_index = lecroy_wr2.num_mem_sizes - 1;
+        ms_index = lecroy_wr.num_mem_sizes - 1;
         print( WARN, "Memory size of %ld is too large, using %ld instead.\n",
-               mem_size, lecroy_wr2.mem_sizes[ ms_index ] );
+               mem_size, lecroy_wr.mem_sizes[ ms_index ] );
     }
 
-    lecroy_wr2.mem_size = lecroy_wr2.mem_sizes[ ms_index ];
-    lecroy_wr2.ms_index = ms_index;
-    lecroy_wr2.is_mem_size = SET;
-    lecroy_wr2.cur_hres =
-                  lecroy_wr2.hres[ lecroy_wr2.ms_index ] + lecroy_wr2.tb_index;
+    lecroy_wr.mem_size = lecroy_wr.mem_sizes[ ms_index ];
+    lecroy_wr.ms_index = ms_index;
+    lecroy_wr.is_mem_size = SET;
+    lecroy_wr.cur_hres =
+                     lecroy_wr.hres[ lecroy_wr.ms_index ] + lecroy_wr.tb_index;
 
-    lecroy_wr2.trigger_delay = lecroy_wr2_trigger_delay_check( );
-    lecroy_wr2_all_windows_check( );
+    lecroy_wr.trigger_delay = lecroy_wr_trigger_delay_check( );
+    lecroy_wr_all_windows_check( );
 
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_set_memory_size( lecroy_wr2.mem_size );
+        lecroy_wr_set_memory_size( lecroy_wr.mem_size );
 
-    return vars_push( INT_VAR, lecroy_wr2.mem_size );
+    return vars_push( INT_VAR, lecroy_wr.mem_size );
 }
 
 
@@ -655,7 +655,7 @@ Var_T *digitizer_record_length( Var_T *v UNUSED_ARG )
     if ( FSC2_MODE == PREPARATION )
         no_query_possible( );
 
-    return vars_push( INT_VAR, lecroy_wr2_curve_length( ) );
+    return vars_push( INT_VAR, lecroy_wr_curve_length( ) );
 }
 
 
@@ -667,12 +667,12 @@ Var_T *digitizer_record_length( Var_T *v UNUSED_ARG )
 Var_T *digitizer_time_per_point( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == PREPARATION &&
-         ( ! lecroy_wr2.is_timebase || ! lecroy_wr2.is_interleaved ) )
+         ( ! lecroy_wr.is_timebase || ! lecroy_wr.is_interleaved ) )
         no_query_possible( );
 
-    return vars_push( FLOAT_VAR, lecroy_wr2.interleaved ?
-                                 lecroy_wr2.cur_hres->tpp_ris :
-                                 lecroy_wr2.cur_hres->tpp );
+    return vars_push( FLOAT_VAR, lecroy_wr.interleaved ?
+                                 lecroy_wr.cur_hres->tpp_ris :
+                                 lecroy_wr.cur_hres->tpp );
 }
 
 
@@ -692,13 +692,13 @@ Var_T *digitizer_sensitivity( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( channel < LECROY_WR2_CH1 || channel > LECROY_WR2_CH_MAX )
+    if ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
     {
         print( FATAL, "Can't set or obtain sensitivity for channel %s.\n",
-               LECROY_WR2_Channel_Names[ channel ] );
+               LECROY_WR_Channel_Names[ channel ] );
         THROW( EXCEPTION );
     }
 
@@ -706,16 +706,16 @@ Var_T *digitizer_sensitivity( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_sens[ channel ] )
+                if ( ! lecroy_wr.is_sens[ channel ] )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
-                return vars_push( FLOAT_VAR, lecroy_wr2.sens[ channel ] );
+                return vars_push( FLOAT_VAR, lecroy_wr.sens[ channel ] );
 
             case EXPERIMENT :
-                lecroy_wr2.sens[ channel ] = lecroy_wr2_get_sens( channel );
-                return vars_push( FLOAT_VAR, lecroy_wr2.sens[ channel ] );
+                lecroy_wr.sens[ channel ] = lecroy_wr_get_sens( channel );
+                return vars_push( FLOAT_VAR, lecroy_wr.sens[ channel ] );
         }
 
     sens = get_double( v, "sensitivity" );
@@ -731,25 +731,25 @@ Var_T *digitizer_sensitivity( Var_T * v )
     /* Check that the sensitivity setting isn't out of range (taking care
        of rounding errors) */
 
-    if ( sens < 0.9999 * LECROY_WR2_MAX_SENS ||
-         sens > 1.0001 * LECROY_WR2_MIN_SENS )
+    if ( sens < 0.9999 * LECROY_WR_MAX_SENS ||
+         sens > 1.0001 * LECROY_WR_MIN_SENS )
     {
         print( FATAL, "Requested sensitivity setting is out of range.\n" );
         THROW( EXCEPTION );
     }
 
-    if ( sens < LECROY_WR2_MAX_SENS )
-        sens = LECROY_WR2_MAX_SENS;
-    if ( sens > LECROY_WR2_MIN_SENS )
-        sens = LECROY_WR2_MIN_SENS;
+    if ( sens < LECROY_WR_MAX_SENS )
+        sens = LECROY_WR_MAX_SENS;
+    if ( sens > LECROY_WR_MIN_SENS )
+        sens = LECROY_WR_MIN_SENS;
 
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_set_sens( channel, sens );
+        lecroy_wr_set_sens( channel, sens );
 
-    lecroy_wr2.sens[ channel ] = sens;
-    lecroy_wr2.is_sens[ channel ] = SET;
+    lecroy_wr.sens[ channel ] = sens;
+    lecroy_wr.is_sens[ channel ] = SET;
 
-    return vars_push( FLOAT_VAR, lecroy_wr2.sens[ channel ] );
+    return vars_push( FLOAT_VAR, lecroy_wr.sens[ channel ] );
 }
 
 
@@ -772,13 +772,13 @@ Var_T *digitizer_offset( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( channel < LECROY_WR2_CH1 || channel > LECROY_WR2_CH_MAX )
+    if ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
     {
         print( FATAL, "Can't set or obtain offset for channel %s.\n",
-               LECROY_WR2_Channel_Names[ channel ] );
+               LECROY_WR_Channel_Names[ channel ] );
         THROW( EXCEPTION );
     }
 
@@ -786,24 +786,23 @@ Var_T *digitizer_offset( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_offset[ channel ] )
+                if ( ! lecroy_wr.is_offset[ channel ] )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
-                return vars_push( FLOAT_VAR, lecroy_wr2.offset[ channel ] );
+                return vars_push( FLOAT_VAR, lecroy_wr.offset[ channel ] );
 
             case EXPERIMENT :
-                lecroy_wr2.offset[ channel ] =
-                                              lecroy_wr2_get_offset( channel );
-                return vars_push( FLOAT_VAR, lecroy_wr2.offset[ channel ] );
+                lecroy_wr.offset[ channel ] = lecroy_wr_get_offset( channel );
+                return vars_push( FLOAT_VAR, lecroy_wr.offset[ channel ] );
         }
 
     offset = get_double( v, "offset" );
 
     too_many_arguments( v );
 
-    if ( FSC2_MODE == PREPARATION && ! lecroy_wr2.is_sens[ channel ] )
+    if ( FSC2_MODE == PREPARATION && ! lecroy_wr.is_sens[ channel ] )
     {
         print( FATAL, "Can't set offset unless the channels sensitivity "
                "has been set.\n" );
@@ -811,7 +810,7 @@ Var_T *digitizer_offset( Var_T * v )
     }
 
     for ( i = 1; i < ( ssize_t ) NUM_ELEMS( fixed_sens ); i++ )
-        if ( lecroy_wr2.sens[ channel ] <= 0.9999 * fixed_sens[ i ] )
+        if ( lecroy_wr.sens[ channel ] <= 0.9999 * fixed_sens[ i ] )
         {
             fs_index = i - 1;
             break;
@@ -827,13 +826,13 @@ Var_T *digitizer_offset( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    lecroy_wr2.offset[ channel ] = offset;
-    lecroy_wr2.is_offset[ channel ] = SET;
+    lecroy_wr.offset[ channel ] = offset;
+    lecroy_wr.is_offset[ channel ] = SET;
 
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_set_offset( channel, offset );
+        lecroy_wr_set_offset( channel, offset );
 
-    return vars_push( FLOAT_VAR, lecroy_wr2.offset[ channel ] );
+    return vars_push( FLOAT_VAR, lecroy_wr.offset[ channel ] );
 }
 
 
@@ -844,7 +843,7 @@ Var_T *digitizer_offset( Var_T * v )
 Var_T *digitizer_bandwidth_limiter( Var_T * v )
 {
     long channel;
-    long bwl = LECROY_WR2_BWL_OFF;
+    long bwl = LECROY_WR_BWL_OFF;
 
 
     if ( v == NULL )
@@ -853,13 +852,13 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( channel < LECROY_WR2_CH1 || channel > LECROY_WR2_CH_MAX )
+    if ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
     {
         print( FATAL, "Can't set or obtain offset for channel %s.\n",
-               LECROY_WR2_Channel_Names[ channel ] );
+               LECROY_WR_Channel_Names[ channel ] );
         THROW( EXCEPTION );
     }
 
@@ -867,50 +866,50 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_bandwidth_limiter[ channel] )
+                if ( ! lecroy_wr.is_bandwidth_limiter[ channel] )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST:
                 return vars_push( INT_VAR,
-                            ( long ) lecroy_wr2.bandwidth_limiter[ channel ] );
+                             ( long ) lecroy_wr.bandwidth_limiter[ channel ] );
 
             case EXPERIMENT :
-                lecroy_wr2.bandwidth_limiter[ channel ] =
-                                   lecroy_wr2_get_bandwidth_limiter( channel );
+                lecroy_wr.bandwidth_limiter[ channel ] =
+                                    lecroy_wr_get_bandwidth_limiter( channel );
                 return vars_push( INT_VAR,
-                            ( long ) lecroy_wr2.bandwidth_limiter[ channel ] );
+                             ( long ) lecroy_wr.bandwidth_limiter[ channel ] );
         }
 
     if ( v->type & ( INT_VAR | FLOAT_VAR ) )
     {
         bwl = get_long( v, "banndwith limiter type" );
-        if ( bwl < LECROY_WR2_BWL_OFF || bwl > LECROY_WR2_BWL_200MHZ )
+        if ( bwl < LECROY_WR_BWL_OFF || bwl > LECROY_WR_BWL_200MHZ )
         {
             print( FATAL, "Invalid argument, bandwidth limiter can only be "
                    "set to 'OFF' (%d), 'ON' (%d) or '200MHZ' "
-                   "(%d).\n", LECROY_WR2_BWL_OFF, LECROY_WR2_BWL_ON,
-                   LECROY_WR2_BWL_200MHZ );
+                   "(%d).\n", LECROY_WR_BWL_OFF, LECROY_WR_BWL_ON,
+                   LECROY_WR_BWL_200MHZ );
             THROW( EXCEPTION );
         }
     }
     else if ( v->type == STR_VAR )
     {
         if ( strcasecmp( v->val.sptr, "OFF" ) )
-            bwl = LECROY_WR2_BWL_OFF;
+            bwl = LECROY_WR_BWL_OFF;
         else if ( strcasecmp( v->val.sptr, "ON" ) )
-            bwl = LECROY_WR2_BWL_ON;
+            bwl = LECROY_WR_BWL_ON;
         else if ( strcasecmp( v->val.sptr, "200MHZ" ) )
-#define ! LECROY_WR2_MAX_BW_IS_200MHz
-            bwl = LECROY_WR2_BWL_200MHZ;
+#define ! LECROY_WR_MAX_BW_IS_200MHz
+            bwl = LECROY_WR_BWL_200MHZ;
 #else
-            bwl = LECROY_WR2_BWL_OFF;
+            bwl = LECROY_WR_BWL_OFF;
 #endif
         else
             print( FATAL, "Invalid argument, bandwidth limiter can only be "
                    "set to 'OFF' (%d), 'ON' (%d) or '200MHZ' "
-                   "(%d).\n", LECROY_WR2_BWL_OFF, LECROY_WR2_BWL_ON,
-                   LECROY_WR2_BWL_200MHZ );
+                   "(%d).\n", LECROY_WR_BWL_OFF, LECROY_WR_BWL_ON,
+                   LECROY_WR_BWL_200MHZ );
     }
     else
     {
@@ -920,11 +919,11 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
 
     too_many_arguments( v );
 
-    lecroy_wr2.is_bandwidth_limiter[ channel ] = SET;
-    lecroy_wr2.bandwidth_limiter[ channel ] = bwl;
+    lecroy_wr.is_bandwidth_limiter[ channel ] = SET;
+    lecroy_wr.bandwidth_limiter[ channel ] = bwl;
 
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_set_bandwidth_limiter( channel, bwl );
+        lecroy_wr_set_bandwidth_limiter( channel, bwl );
 
     return vars_push( INT_VAR, ( long ) bwl );
 }
@@ -937,7 +936,7 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
 Var_T *digitizer_coupling( Var_T * v )
 {
     long channel;
-    long cpl = LECROY_WR2_CPL_INVALID;
+    long cpl = LECROY_WR_CPL_INVALID;
     const char *cpl_str[ ] = { "A1M", "D1M", "D50", "GND" };
     size_t i;
 
@@ -948,13 +947,13 @@ Var_T *digitizer_coupling( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( channel < LECROY_WR2_CH1 || channel > LECROY_WR2_CH_MAX )
+    if ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
     {
         print( FATAL, "Can't set or obtain coupling for channel %s.\n",
-               LECROY_WR2_Channel_Names[ channel ] );
+               LECROY_WR_Channel_Names[ channel ] );
         THROW( EXCEPTION );
     }
 
@@ -964,19 +963,19 @@ Var_T *digitizer_coupling( Var_T * v )
         switch( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_coupling[ channel ] )
+                if ( ! lecroy_wr.is_coupling[ channel ] )
                     no_query_possible( );
                 /* Fall through */
         
             case TEST:
                 return vars_push( INT_VAR,
-                                  ( long ) lecroy_wr2.coupling[ channel ] );
+                                  ( long ) lecroy_wr.coupling[ channel ] );
 
             case EXPERIMENT :
-                lecroy_wr2.coupling[ channel ] =
-                                            lecroy_wr2_get_coupling( channel );
+                lecroy_wr.coupling[ channel ] =
+                                             lecroy_wr_get_coupling( channel );
                 return vars_push( INT_VAR,
-                                  ( long ) lecroy_wr2.coupling[ channel ] );
+                                  ( long ) lecroy_wr.coupling[ channel ] );
         }
 
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
@@ -993,7 +992,7 @@ Var_T *digitizer_coupling( Var_T * v )
     else
         cpl = get_long( v, "coupling type" );
 
-    if ( cpl < LECROY_WR2_CPL_AC_1_MOHM || cpl > LECROY_WR2_CPL_GND )
+    if ( cpl < LECROY_WR_CPL_AC_1_MOHM || cpl > LECROY_WR_CPL_GND )
     {
         print( FATAL, "Invalid coupling type.\n" );
         THROW( EXCEPTION );
@@ -1002,10 +1001,10 @@ Var_T *digitizer_coupling( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_set_coupling( channel, cpl );
+        lecroy_wr_set_coupling( channel, cpl );
 
-    lecroy_wr2.is_coupling[ channel ] = SET;
-    lecroy_wr2.coupling[ channel ] = cpl;
+    lecroy_wr.is_coupling[ channel ] = SET;
+    lecroy_wr.coupling[ channel ] = cpl;
 
     return vars_push( INT_VAR, cpl );
 }
@@ -1025,59 +1024,59 @@ Var_T *digitizer_trigger_channel( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_trigger_source )
+                if ( ! lecroy_wr.is_trigger_source )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
                 return vars_push( INT_VAR,
-                                  lecroy_wr2_translate_channel(
-                                                     LECROY_WR2_TO_GENERAL,
-                                                     lecroy_wr2.trigger_source,
-                                                     UNSET ) );
+                                  lecroy_wr_translate_channel(
+                                                      LECROY_WR_TO_GENERAL,
+                                                      lecroy_wr.trigger_source,
+                                                      UNSET ) );
 
             case EXPERIMENT :
-                lecroy_wr2.trigger_source = lecroy_wr2_get_trigger_source( );
+                lecroy_wr.trigger_source = lecroy_wr_get_trigger_source( );
                 return vars_push( INT_VAR,
-                                  lecroy_wr2_translate_channel(
-                                                     LECROY_WR2_TO_GENERAL,
-                                                     lecroy_wr2.trigger_source,
-                                                     UNSET ) );
+                                  lecroy_wr_translate_channel(
+                                                      LECROY_WR_TO_GENERAL,
+                                                      lecroy_wr.trigger_source,
+                                                      UNSET ) );
         }
 
-    channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
     switch ( channel )
     {
-        case LECROY_WR2_CH1 : case LECROY_WR2_CH2 :
-#if defined LECROY_WR2_CH3
-        case LECROY_WR2_CH3 :
+        case LECROY_WR_CH1 : case LECROY_WR_CH2 :
+#if defined LECROY_WR_CH3
+        case LECROY_WR_CH3 :
 #endif
-#if defined LECROY_WR2_CH4
-        case LECROY_WR2_CH4 :
+#if defined LECROY_WR_CH4
+        case LECROY_WR_CH4 :
 #endif
-        case LECROY_WR2_LIN :
-        case LECROY_WR2_EXT :
-        case LECROY_WR2_EXT10 :
+        case LECROY_WR_LIN :
+        case LECROY_WR_EXT :
+        case LECROY_WR_EXT10 :
             if ( FSC2_MODE == EXPERIMENT )
-                lecroy_wr2_set_trigger_source( channel );
-            lecroy_wr2.trigger_source = channel;
-            lecroy_wr2.is_trigger_source = SET;
+                lecroy_wr_set_trigger_source( channel );
+            lecroy_wr.trigger_source = channel;
+            lecroy_wr.is_trigger_source = SET;
             break;
 
         default :
             print( FATAL, "Channel %s can't be used as trigger channel.\n",
-                   LECROY_WR2_Channel_Names[ channel ] );
+                   LECROY_WR_Channel_Names[ channel ] );
             THROW( EXCEPTION );
     }
 
     too_many_arguments( v );
 
     return vars_push( INT_VAR,
-                      lecroy_wr2_translate_channel( LECROY_WR2_TO_GENERAL,
-                                                    lecroy_wr2.trigger_source,
-                                                    UNSET ) );
+                      lecroy_wr_translate_channel( LECROY_WR_TO_GENERAL,
+                                                   lecroy_wr.trigger_source,
+                                                   UNSET ) );
 }
 
 
@@ -1092,18 +1091,18 @@ Var_T *digitizer_trigger_level( Var_T * v )
     double level;
 
 
-    channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
     v = vars_pop( v );
 
-    if ( channel == LECROY_WR2_LIN ) {
+    if ( channel == LECROY_WR_LIN ) {
         print( SEVERE, "Trigger level for LINE can't be determined nor "
                "changed.\n" );
         return vars_push( FLOAT_VAR, 0.0 );
     }
 
-    if ( ( channel < LECROY_WR2_CH1 || channel > LECROY_WR2_CH_MAX ) &&
-         channel != LECROY_WR2_EXT && channel != LECROY_WR2_EXT10 )
+    if ( ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX ) &&
+         channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
     {
         print( FATAL, "Invalid trigger channel.\n" );
         THROW( EXCEPTION );
@@ -1114,19 +1113,19 @@ Var_T *digitizer_trigger_level( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_trigger_level[ channel ] )
+                if ( ! lecroy_wr.is_trigger_level[ channel ] )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
                 return vars_push( FLOAT_VAR, 
-                                  lecroy_wr2.trigger_level[ channel ] );
+                                  lecroy_wr.trigger_level[ channel ] );
 
             case EXPERIMENT :
-                lecroy_wr2.trigger_level[ channel ] =
-                                       lecroy_wr2_get_trigger_level( channel );
+                lecroy_wr.trigger_level[ channel ] =
+                                        lecroy_wr_get_trigger_level( channel );
                 return vars_push( FLOAT_VAR,
-                                  lecroy_wr2.trigger_level[ channel ] );
+                                  lecroy_wr.trigger_level[ channel ] );
         }
     }
 
@@ -1136,15 +1135,15 @@ Var_T *digitizer_trigger_level( Var_T * v )
 
     switch ( channel )
     {
-        case LECROY_WR2_CH1 : case LECROY_WR2_CH2 :
-#if defined LECROY_WR2_CH3
-        case LECROY_WR2_CH3 :
+        case LECROY_WR_CH1 : case LECROY_WR_CH2 :
+#if defined LECROY_WR_CH3
+        case LECROY_WR_CH3 :
 #endif
-#if defined LECROY_WR2_CH4
-        case LECROY_WR2_CH4 :
+#if defined LECROY_WR_CH4
+        case LECROY_WR_CH4 :
 #endif
             if ( FSC2_MODE == PREPARATION &&
-                 ! lecroy_wr2.is_sens[ channel ] )
+                 ! lecroy_wr.is_sens[ channel ] )
             {
                 print( FATAL, "Can't set trigger level in PREPARATION section "
                        "while sensitivity for the chaannel hasn't been "
@@ -1153,42 +1152,42 @@ Var_T *digitizer_trigger_level( Var_T * v )
             }
 
             if ( lrnd( fabs( 1.0e6 * level ) ) >
-                      lrnd( 1.0e6 * LECROY_WR2_TRG_MAX_LEVEL_CH_FAC *
-                            lecroy_wr2_get_sens( channel ) ) )
+                      lrnd( 1.0e6 * LECROY_WR_TRG_MAX_LEVEL_CH_FAC *
+                            lecroy_wr_get_sens( channel ) ) )
             {
                 print( FATAL, "Trigger level is too large, maximum is %f "
                        "times the current channel sensitivity.\n",
-                       LECROY_WR2_TRG_MAX_LEVEL_CH_FAC );
+                       LECROY_WR_TRG_MAX_LEVEL_CH_FAC );
                 THROW( EXCEPTION );
             }
             break;
 
-        case LECROY_WR2_EXT :
+        case LECROY_WR_EXT :
             if ( lrnd( fabs( 1.0e6 * level ) ) >
-                 lrnd( 1.0e6 * LECROY_WR2_TRG_MAX_LEVEL_EXT ) )
+                 lrnd( 1.0e6 * LECROY_WR_TRG_MAX_LEVEL_EXT ) )
             {
                 print( FATAL, "Trigger level too large, maximum is %f V.\n",
-                       LECROY_WR2_TRG_MAX_LEVEL_EXT );
+                       LECROY_WR_TRG_MAX_LEVEL_EXT );
                 THROW( EXCEPTION );
             }
             break;
 
-        case LECROY_WR2_EXT10 :
+        case LECROY_WR_EXT10 :
             if ( lrnd( fabs( 1.0e6 * level ) ) >
-                 lrnd( 1.0e6 * LECROY_WR2_TRG_MAX_LEVEL_EXT10 ) )
+                 lrnd( 1.0e6 * LECROY_WR_TRG_MAX_LEVEL_EXT10 ) )
             {
                 print( FATAL, "Trigger level too large, maximum is %f V.\n",
-                       LECROY_WR2_TRG_MAX_LEVEL_EXT10 );
+                       LECROY_WR_TRG_MAX_LEVEL_EXT10 );
                 THROW( EXCEPTION );
             }
             break;
     }
 
-    lecroy_wr2.is_trigger_level[ channel ] = SET;
-    lecroy_wr2.trigger_level[ channel ] = level;
+    lecroy_wr.is_trigger_level[ channel ] = SET;
+    lecroy_wr.trigger_level[ channel ] = level;
 
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_set_trigger_level( channel, level );
+        lecroy_wr_set_trigger_level( channel, level );
 
     return vars_push( FLOAT_VAR, level );
 }
@@ -1205,18 +1204,18 @@ Var_T *digitizer_trigger_slope( Var_T * v )
     int slope;
 
 
-    channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
     v = vars_pop( v );
 
-    if ( channel == LECROY_WR2_LIN ) {
+    if ( channel == LECROY_WR_LIN ) {
         print( SEVERE, "Trigger slope for LINE can't be determined or "
                "changed.\n" );
         return vars_push( INT_VAR, 0 );
     }
 
-    if ( ( channel < LECROY_WR2_CH1 || channel > LECROY_WR2_CH_MAX ) &&
-         channel != LECROY_WR2_EXT && channel != LECROY_WR2_EXT10 )
+    if ( ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX ) &&
+         channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
     {
         print( FATAL, "Invalid trigger channel.\n" );
         THROW( EXCEPTION );
@@ -1232,19 +1231,19 @@ Var_T *digitizer_trigger_slope( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_trigger_slope[ channel ] )
+                if ( ! lecroy_wr.is_trigger_slope[ channel ] )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
                 return vars_push( INT_VAR,
-                                ( long ) lecroy_wr2.trigger_slope[ channel ] );
+                                 ( long ) lecroy_wr.trigger_slope[ channel ] );
 
             case EXPERIMENT :
-                lecroy_wr2.trigger_slope[ channel ] =
-                                       lecroy_wr2_get_trigger_slope( channel );
+                lecroy_wr.trigger_slope[ channel ] =
+                                        lecroy_wr_get_trigger_slope( channel );
                 return vars_push( INT_VAR,
-                                ( long ) lecroy_wr2.trigger_slope[ channel ] );
+                                 ( long ) lecroy_wr.trigger_slope[ channel ] );
         }
     }
 
@@ -1267,13 +1266,13 @@ Var_T *digitizer_trigger_slope( Var_T * v )
 
     too_many_arguments( v );
 
-    lecroy_wr2.is_trigger_slope[ channel ] = SET;
-    lecroy_wr2.trigger_slope[ channel ] = slope ? POSITIVE : NEGATIVE;
+    lecroy_wr.is_trigger_slope[ channel ] = SET;
+    lecroy_wr.trigger_slope[ channel ] = slope ? POSITIVE : NEGATIVE;
 
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_set_trigger_slope( channel, slope ? POSITIVE : NEGATIVE );
+        lecroy_wr_set_trigger_slope( channel, slope ? POSITIVE : NEGATIVE );
 
-    return vars_push( INT_VAR, lecroy_wr2.trigger_slope[ channel ] );
+    return vars_push( INT_VAR, lecroy_wr.trigger_slope[ channel ] );
 }
 
 
@@ -1290,19 +1289,19 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
     size_t i;
 
 
-    channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
     v = vars_pop( v );
 
-    if ( channel == LECROY_WR2_LIN ) {
+    if ( channel == LECROY_WR_LIN ) {
         print( SEVERE, "Trigger coupling for LINE can't be determined or "
                "changed.\n" );
         return vars_push( FLOAT_VAR, 0.0 );
     }
 
-    if ( ( channel < LECROY_WR2_CH1 || channel > LECROY_WR2_CH_MAX ) &&
-         channel != LECROY_WR2_EXT && channel != LECROY_WR2_EXT10 )
+    if ( ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX ) &&
+         channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
     {
         print( FATAL, "Invalid trigger channel.\n" );
         THROW( EXCEPTION );
@@ -1312,19 +1311,19 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_trigger_coupling[ channel ] )
+                if ( ! lecroy_wr.is_trigger_coupling[ channel ] )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
                 return vars_push( INT_VAR,
-                             ( long ) lecroy_wr2.trigger_coupling[ channel ] );
+                              ( long ) lecroy_wr.trigger_coupling[ channel ] );
 
             case EXPERIMENT :
-                lecroy_wr2.trigger_coupling[ channel ] =
-                                    lecroy_wr2_get_trigger_coupling( channel );
+                lecroy_wr.trigger_coupling[ channel ] =
+                                     lecroy_wr_get_trigger_coupling( channel );
                 return vars_push( INT_VAR,
-                             ( long )lecroy_wr2.trigger_coupling[ channel ] );
+                              ( long )lecroy_wr.trigger_coupling[ channel ] );
         }
 
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
@@ -1341,7 +1340,7 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
     else
         cpl = get_long( v, "trigger coupling type" );
 
-    if ( cpl < LECROY_WR2_TRG_CPL_AC || cpl > LECROY_WR2_TRG_CPL_HF )
+    if ( cpl < LECROY_WR_TRG_CPL_AC || cpl > LECROY_WR_TRG_CPL_HF )
     {
         print( FATAL, "Invalid trigger coupling type.\n" );
         THROW( EXCEPTION );
@@ -1350,18 +1349,18 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_set_trigger_coupling( channel, cpl );
+        lecroy_wr_set_trigger_coupling( channel, cpl );
 
-    lecroy_wr2.is_trigger_coupling[ channel ] = SET;
-    lecroy_wr2.trigger_coupling[ channel ] = cpl;
+    lecroy_wr.is_trigger_coupling[ channel ] = SET;
+    lecroy_wr.trigger_coupling[ channel ] = cpl;
 
     /* Settting the HF trigger coupling automatically switches to positive
        trigger slope */
 
-    if ( cpl == LECROY_WR2_TRG_CPL_HF )
+    if ( cpl == LECROY_WR_TRG_CPL_HF )
     {
-        lecroy_wr2.is_trigger_slope[ channel ] = SET;
-        lecroy_wr2.trigger_slope[ channel ] = POSITIVE;
+        lecroy_wr.is_trigger_slope[ channel ] = SET;
+        lecroy_wr.trigger_slope[ channel ] = POSITIVE;
     }
 
     return vars_push( INT_VAR, cpl );
@@ -1382,16 +1381,16 @@ Var_T *digitizer_trigger_mode( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_trigger_mode )
+                if ( ! lecroy_wr.is_trigger_mode )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
-                return vars_push( INT_VAR, ( long ) lecroy_wr2.trigger_mode );
+                return vars_push( INT_VAR, ( long ) lecroy_wr.trigger_mode );
 
             case EXPERIMENT :
-                lecroy_wr2.trigger_mode = lecroy_wr2_get_trigger_mode( );
-                return vars_push( INT_VAR, ( long ) lecroy_wr2.trigger_mode );
+                lecroy_wr.trigger_mode = lecroy_wr_get_trigger_mode( );
+                return vars_push( INT_VAR, ( long ) lecroy_wr.trigger_mode );
         }
 
     if ( v->type == STR_VAR )
@@ -1413,10 +1412,10 @@ Var_T *digitizer_trigger_mode( Var_T * v )
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_set_trigger_mode( mode );
+        lecroy_wr_set_trigger_mode( mode );
 
-    lecroy_wr2.trigger_mode = ( int ) mode;
-    lecroy_wr2.is_trigger_mode = SET;
+    lecroy_wr.trigger_mode = ( int ) mode;
+    lecroy_wr.is_trigger_mode = SET;
 
     return vars_push( INT_VAR, mode );
 }
@@ -1440,23 +1439,23 @@ Var_T *digitizer_trigger_delay( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! lecroy_wr2.is_trigger_delay )
+                if ( ! lecroy_wr.is_trigger_delay )
                     no_query_possible( );
                 /* Fall through */
 
             case TEST :
-                return vars_push( FLOAT_VAR, lecroy_wr2.trigger_delay );
+                return vars_push( FLOAT_VAR, lecroy_wr.trigger_delay );
 
             case EXPERIMENT :
-                lecroy_wr2.trigger_delay = lecroy_wr2_get_trigger_delay( );
-                return vars_push( FLOAT_VAR, lecroy_wr2.trigger_delay );
+                lecroy_wr.trigger_delay = lecroy_wr_get_trigger_delay( );
+                return vars_push( FLOAT_VAR, lecroy_wr.trigger_delay );
         }
 
     delay = get_double( v, "trigger delay" );
 
     too_many_arguments( v );
 
-    if ( FSC2_MODE == PREPARATION && ! lecroy_wr2.is_timebase )
+    if ( FSC2_MODE == PREPARATION && ! lecroy_wr.is_timebase )
     {
         print( FATAL, "Can't set trigger delay in PREPARATION "
                "section while tim base hasn't been set.\n" );
@@ -1466,16 +1465,16 @@ Var_T *digitizer_trigger_delay( Var_T * v )
     /* Check that the trigger delay is within the limits (taking rounding
        errors of the order of the current time resolution into account) */
 
-    if ( delay < 0.0 && delay <   -10.0 * lecroy_wr2.timebase
-                                -   0.5 * lecroy_wr2_time_per_point( ) )
+    if ( delay < 0.0 && delay <   -10.0 * lecroy_wr.timebase
+                                -   0.5 * lecroy_wr_time_per_point( ) )
     {
         print( FATAL, "Pre-trigger delay is too long, can't be longer than "
                "10 times the time base.\n" );
         THROW( EXCEPTION );
     }
 
-    if ( delay > 0.0 && delay >   1.0e4 * lecroy_wr2.timebase
-                                + 0.5 * lecroy_wr2_time_per_point( ) )
+    if ( delay > 0.0 && delay >   1.0e4 * lecroy_wr.timebase
+                                + 0.5 * lecroy_wr_time_per_point( ) )
     {
         print( FATAL, "Post-triger delay is too long, can't be longer that "
                "10,000 times the time base.\n" );
@@ -1484,14 +1483,14 @@ Var_T *digitizer_trigger_delay( Var_T * v )
 
     /* The delay can only be set in units of 1/50 of the timebase */
 
-    delay = 0.02 * lrnd( 50.0 * delay / lecroy_wr2.timebase )
-            * lecroy_wr2.timebase;
+    delay = 0.02 * lrnd( 50.0 * delay / lecroy_wr.timebase )
+            * lecroy_wr.timebase;
 
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_set_trigger_delay( delay );
+        lecroy_wr_set_trigger_delay( delay );
 
-    lecroy_wr2.trigger_delay = delay;
-    lecroy_wr2.is_trigger_delay = SET;
+    lecroy_wr.trigger_delay = delay;
+    lecroy_wr.is_trigger_delay = SET;
 
     return vars_push( FLOAT_VAR, delay );
 }
@@ -1519,14 +1518,14 @@ Var_T *digitizer_averaging( Var_T * v )
 
     /* Get the channel to use for averaging */
 
-    channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( channel < LECROY_WR2_TA && channel > LECROY_WR2_TD )
+    if ( channel < LECROY_WR_TA && channel > LECROY_WR_TD )
     {
         print( FATAL, "Averaging can only be done with channels %s to %s.\n",
-               LECROY_WR2_Channel_Names[ LECROY_WR2_TA ],
-               LECROY_WR2_Channel_Names[ LECROY_WR2_TD ] );
+               LECROY_WR_Channel_Names[ LECROY_WR_TA ],
+               LECROY_WR_Channel_Names[ LECROY_WR_TD ] );
         THROW( EXCEPTION );
     }
 
@@ -1544,19 +1543,19 @@ Var_T *digitizer_averaging( Var_T * v )
     if ( v->type == STR_VAR && ! strcasecmp( v->val.sptr, "OFF" ) )
     {
         too_many_arguments( v );
-        lecroy_wr2.is_avg_setup[ channel ] = UNSET;
+        lecroy_wr.is_avg_setup[ channel ] = UNSET;
         return vars_push( INT_VAR, 0L );
     }
 
-    source_ch = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    source_ch = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( source_ch < LECROY_WR2_CH1 || source_ch > LECROY_WR2_CH_MAX )
+    if ( source_ch < LECROY_WR_CH1 || source_ch > LECROY_WR_CH_MAX )
     {
         print( FATAL, "Averaging can only be done on channels %s to %s as "
                "source channels.\n",
-               LECROY_WR2_Channel_Names[ LECROY_WR2_CH1 ],
-               LECROY_WR2_Channel_Names[ LECROY_WR2_CH_MAX ] );
+               LECROY_WR_Channel_Names[ LECROY_WR_CH1 ],
+               LECROY_WR_Channel_Names[ LECROY_WR_CH_MAX ] );
         THROW( EXCEPTION );
     }
 
@@ -1578,18 +1577,18 @@ Var_T *digitizer_averaging( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( num_avg > LECROY_WR2_MAX_AVERAGES )
+    if ( num_avg > LECROY_WR_MAX_AVERAGES )
     {
         print( FATAL, "Requested number of averages too large, maximum is "
-               "%ld.\n", LECROY_WR2_MAX_AVERAGES );
+               "%ld.\n", LECROY_WR_MAX_AVERAGES );
         THROW( EXCEPTION );
     }
 
     too_many_arguments( v );
 
-    lecroy_wr2.is_avg_setup[ channel ] = SET;
-    lecroy_wr2.source_ch[ channel ]    = source_ch;
-    lecroy_wr2.num_avg[ channel ]      = num_avg;
+    lecroy_wr.is_avg_setup[ channel ] = SET;
+    lecroy_wr.source_ch[ channel ]    = source_ch;
+    lecroy_wr.num_avg[ channel ]      = num_avg;
 
     return vars_push( INT_VAR, 1L );
 }
@@ -1617,23 +1616,23 @@ Var_T *digitizer_num_averages( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( channel < LECROY_WR2_TA || channel > LECROY_WR2_TD )
+    if ( channel < LECROY_WR_TA || channel > LECROY_WR_TD )
     {
         print( FATAL, "Averaging can only be done using channels %s to %s.\n",
-               LECROY_WR2_Channel_Names[ LECROY_WR2_TA ],
-               LECROY_WR2_Channel_Names[ LECROY_WR2_TD ] );
+               LECROY_WR_Channel_Names[ LECROY_WR_TA ],
+               LECROY_WR_Channel_Names[ LECROY_WR_TD ] );
         THROW( EXCEPTION );
     }
 
-    if ( lecroy_wr2.is_avg_setup[ channel ] )
-        num_avg = lecroy_wr2.num_avg[ channel ];
+    if ( lecroy_wr.is_avg_setup[ channel ] )
+        num_avg = lecroy_wr.num_avg[ channel ];
     else
     {
         print( WARN, "No averaging has been setup for channel %s.\n",
-               LECROY_WR2_Channel_Names[ channel ] );
+               LECROY_WR_Channel_Names[ channel ] );
         num_avg = 0;
     }
 
@@ -1658,10 +1657,10 @@ Var_T *digitizer_meas_channel_ok( Var_T * v )
 
     flag = v->next != NULL;
 
-    channel = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    channel = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                 get_strict_long( v, "channel number" ), flag );
 
-    if ( channel >= LECROY_WR2_CH1 && channel <= LECROY_WR2_CH_MAX )
+    if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
         return vars_push( INT_VAR, 1L );
     else
         return vars_push( INT_VAR, 0L );
@@ -1678,33 +1677,33 @@ Var_T *digitizer_copy_curve( Var_T * v )
     long src, dest;
 
 
-    src = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    src = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                         get_strict_long( v, "source channel number" ), UNSET );
 
-    if ( ! ( src >= LECROY_WR2_CH1 && src <= LECROY_WR2_CH_MAX ) &&
-         ! ( src >= LECROY_WR2_TA && src >= LECROY_WR2_TD ) )
+    if ( ! ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX ) &&
+         ! ( src >= LECROY_WR_TA && src >= LECROY_WR_TD ) )
     {
         print( FATAL, "Invalid source channel %s, must be one of the "
                "measurement or TRACE channels.\n",
-               LECROY_WR2_Channel_Names[ src ] );
+               LECROY_WR_Channel_Names[ src ] );
         THROW( EXCEPTION );
     }
 
     v = vars_pop( v );
 
-    dest = lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    dest = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                    get_strict_long( v, "destination channel number" ), UNSET );
 
-    if ( dest != LECROY_WR2_M1 && dest != LECROY_WR2_M2 &&
-         dest != LECROY_WR2_M3 && dest != LECROY_WR2_M4 )
+    if ( dest != LECROY_WR_M1 && dest != LECROY_WR_M2 &&
+         dest != LECROY_WR_M3 && dest != LECROY_WR_M4 )
     {
         print( FATAL, "Invalid destination channel %s, must be one of the "
-               "MEM channels\n", LECROY_WR2_Channel_Names[ dest ] );
+               "MEM channels\n", LECROY_WR_Channel_Names[ dest ] );
         THROW( EXCEPTION );
     }
 
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_copy_curve( src, dest );
+        lecroy_wr_copy_curve( src, dest );
 
     return vars_push( INT_VAR, 1L );
 }
@@ -1717,7 +1716,7 @@ Var_T *digitizer_copy_curve( Var_T * v )
 Var_T *digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == EXPERIMENT )
-        lecroy_wr2_start_acquisition( );
+        lecroy_wr_start_acquisition( );
 
     return vars_push( INT_VAR, 1L );
 }
@@ -1745,22 +1744,22 @@ Var_T *digitizer_get_curve( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    ch = ( int ) lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    ch = ( int ) lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( ! ( ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX ) ||
-             ( ch >= LECROY_WR2_M1  && ch <= LECROY_WR2_M4     ) ||
-             ( ch >= LECROY_WR2_TA  && ch <= LECROY_WR2_TD     )    ) )
+    if ( ! ( ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX ) ||
+             ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4     ) ||
+             ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD     )    ) )
     {
         print( FATAL, "Invalid channel specification.\n" );
         THROW( EXCEPTION );
     }
 
-    if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TD &&
-         ! lecroy_wr2.is_avg_setup[ ch ] )
+    if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD &&
+         ! lecroy_wr.is_avg_setup[ ch ] )
     {
         print( FATAL, "Averaging has not been initialized for "
-               "channel '%s'.\n", LECROY_WR2_Channel_Names[ ch ] );
+               "channel '%s'.\n", LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
@@ -1770,7 +1769,7 @@ Var_T *digitizer_get_curve( Var_T * v )
     {
         long win_num;
 
-        if ( lecroy_wr2.w == NULL )
+        if ( lecroy_wr.w == NULL )
         {
             print( FATAL, "No measurement windows have been defined.\n" );
             THROW( EXCEPTION );
@@ -1778,7 +1777,7 @@ Var_T *digitizer_get_curve( Var_T * v )
 
         win_num = get_strict_long( v, "window number" );
 
-        for ( w = lecroy_wr2.w; w != NULL && w->num != win_num;
+        for ( w = lecroy_wr.w; w != NULL && w->num != win_num;
               w = w->next )
             /* empty */ ;
 
@@ -1798,15 +1797,15 @@ Var_T *digitizer_get_curve( Var_T * v )
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        lecroy_wr2_get_curve( ch, w, &array, &length );
+        lecroy_wr_get_curve( ch, w, &array, &length );
         nv = vars_push( FLOAT_ARR, array, length );
     }
     else
     {
-        if ( lecroy_wr2.is_mem_size )
-            length = lecroy_wr2.mem_size;
+        if ( lecroy_wr.is_mem_size )
+            length = lecroy_wr.mem_size;
         else
-            length = lecroy_wr2_curve_length( );
+            length = lecroy_wr_curve_length( );
         array = DOUBLE_P T_malloc( length * sizeof *array );
         for ( i = 0; i < length; i++ )
             array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
@@ -1841,22 +1840,22 @@ Var_T *digitizer_get_area( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    ch = ( int ) lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    ch = ( int ) lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( ! ( ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX ) ||
-             ( ch >= LECROY_WR2_M1  && ch <= LECROY_WR2_M4     ) ||
-             ( ch >= LECROY_WR2_TA  && ch <= LECROY_WR2_TD     )    ) )
+    if ( ! ( ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX ) ||
+             ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4     ) ||
+             ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD     )    ) )
     {
         print( FATAL, "Invalid channel specification.\n" );
         THROW( EXCEPTION );
     }
 
-    if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TD &&
-         ! lecroy_wr2.is_avg_setup[ ch ] )
+    if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD &&
+         ! lecroy_wr.is_avg_setup[ ch ] )
     {
         print( FATAL, "Averaging has not been initialized for "
-               "channel '%s'.\n", LECROY_WR2_Channel_Names[ ch ] );
+               "channel '%s'.\n", LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
@@ -1883,7 +1882,7 @@ Var_T *digitizer_get_area( Var_T * v )
     /* Complain when we got something that could be a window handle but no
        windows have been defined */
 
-    if ( win_count > 0 && lecroy_wr2.w == NULL )
+    if ( win_count > 0 && lecroy_wr.w == NULL )
     {
         print( FATAL, "No measurement windows have been defined.\n" );
         THROW( EXCEPTION );
@@ -1906,7 +1905,7 @@ Var_T *digitizer_get_area( Var_T * v )
         {
             if ( v->type == INT_VAR )
             {
-                w = lecroy_wr2_get_window_by_number(
+                w = lecroy_wr_get_window_by_number(
                                        get_strict_long( v, "window number" ) );
 
                 if ( win_count == 1 )
@@ -1918,7 +1917,7 @@ Var_T *digitizer_get_area( Var_T * v )
 
             for ( j = 0; j < v->len; j++ )
             {
-                w = lecroy_wr2_get_window_by_number( v->val.lpnt[ j ] );
+                w = lecroy_wr_get_window_by_number( v->val.lpnt[ j ] );
 
                 /* Take care of the hopefully rather unlikely situation that
                    we've got an array of length 1 */
@@ -1936,7 +1935,7 @@ Var_T *digitizer_get_area( Var_T * v )
     /* Now comes the part that gets run in a real experiment. */
 
     if ( win_count == 0 )
-        return vars_push( FLOAT_VAR, lecroy_wr2_get_area( ch, NULL ) );
+        return vars_push( FLOAT_VAR, lecroy_wr_get_area( ch, NULL ) );
 
     /* Otherwise loop over the window numbers and fill the array with areas
        for the different windows. */
@@ -1945,25 +1944,25 @@ Var_T *digitizer_get_area( Var_T * v )
     {
         if ( v->type == INT_VAR )
         {
-            w = lecroy_wr2_get_window_by_number(
+            w = lecroy_wr_get_window_by_number(
                                        get_strict_long( v, "window number" ) );
 
             if ( win_count == 1 )
-                return vars_push( FLOAT_VAR, lecroy_wr2_get_area( ch, w ) );
+                return vars_push( FLOAT_VAR, lecroy_wr_get_area( ch, w ) );
 
-            ret->val.dpnt[ i++ ] = lecroy_wr2_get_area( ch, w );
+            ret->val.dpnt[ i++ ] = lecroy_wr_get_area( ch, w );
 
             continue;
         }
 
         for ( j = 0; j < v->len; j++ )
         {
-            w = lecroy_wr2_get_window_by_number( v->val.lpnt[ j ] );
+            w = lecroy_wr_get_window_by_number( v->val.lpnt[ j ] );
 
             if ( win_count == 1 )
-                return vars_push( FLOAT_VAR, lecroy_wr2_get_area( ch, w ) );
+                return vars_push( FLOAT_VAR, lecroy_wr_get_area( ch, w ) );
 
-            ret->val.dpnt[ i++ ] = lecroy_wr2_get_area( ch, w );
+            ret->val.dpnt[ i++ ] = lecroy_wr_get_area( ch, w );
 
         }
     }
@@ -1994,22 +1993,22 @@ Var_T *digitizer_get_amplitude( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    ch = ( int ) lecroy_wr2_translate_channel( GENERAL_TO_LECROY_WR2,
+    ch = ( int ) lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( ! ( ( ch >= LECROY_WR2_CH1 && ch <= LECROY_WR2_CH_MAX ) ||
-             ( ch >= LECROY_WR2_M1  && ch <= LECROY_WR2_M4     ) ||
-             ( ch >= LECROY_WR2_TA  && ch <= LECROY_WR2_TD     )    ) )
+    if ( ! ( ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX ) ||
+             ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4     ) ||
+             ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD     )    ) )
     {
         print( FATAL, "Invalid channel specification.\n" );
         THROW( EXCEPTION );
     }
 
-    if ( ch >= LECROY_WR2_TA && ch <= LECROY_WR2_TD &&
-         ! lecroy_wr2.is_avg_setup[ ch ] )
+    if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD &&
+         ! lecroy_wr.is_avg_setup[ ch ] )
     {
         print( FATAL, "Averaging has not been initialized for "
-               "channel '%s'.\n", LECROY_WR2_Channel_Names[ ch ] );
+               "channel '%s'.\n", LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
@@ -2036,7 +2035,7 @@ Var_T *digitizer_get_amplitude( Var_T * v )
     /* Complain when we got something that could be a window handle but no
        windows have been defined */
 
-    if ( win_count > 0 && lecroy_wr2.w == NULL )
+    if ( win_count > 0 && lecroy_wr.w == NULL )
     {
         print( FATAL, "No measurement windows have been defined.\n" );
         THROW( EXCEPTION );
@@ -2059,7 +2058,7 @@ Var_T *digitizer_get_amplitude( Var_T * v )
         {
             if ( v->type == INT_VAR )
             {
-                w = lecroy_wr2_get_window_by_number(
+                w = lecroy_wr_get_window_by_number(
                                        get_strict_long( v, "window number" ) );
 
                 if ( win_count == 1 )
@@ -2071,7 +2070,7 @@ Var_T *digitizer_get_amplitude( Var_T * v )
 
             for ( j = 0; j < v->len; j++ )
             {
-                w = lecroy_wr2_get_window_by_number( v->val.lpnt[ j ] );
+                w = lecroy_wr_get_window_by_number( v->val.lpnt[ j ] );
 
                 /* Take care of the hopefully rather unlikely situation that
                    we've got an array of length 1 */
@@ -2089,7 +2088,7 @@ Var_T *digitizer_get_amplitude( Var_T * v )
     /* Now comes the part that gets run in a real experiment. */
 
     if ( win_count == 0 )
-        return vars_push( FLOAT_VAR, lecroy_wr2_get_amplitude( ch, NULL ) );
+        return vars_push( FLOAT_VAR, lecroy_wr_get_amplitude( ch, NULL ) );
 
     /* Otherwise loop over the window numbers and fill the array with areas
        for the different windows. */
@@ -2098,27 +2097,27 @@ Var_T *digitizer_get_amplitude( Var_T * v )
     {
         if ( v->type == INT_VAR )
         {
-            w = lecroy_wr2_get_window_by_number(
+            w = lecroy_wr_get_window_by_number(
                                        get_strict_long( v, "window number" ) );
 
             if ( win_count == 1 )
                 return vars_push( FLOAT_VAR,
-                                  lecroy_wr2_get_amplitude( ch, w ) );
+                                  lecroy_wr_get_amplitude( ch, w ) );
 
-            ret->val.dpnt[ i++ ] = lecroy_wr2_get_amplitude( ch, w );
+            ret->val.dpnt[ i++ ] = lecroy_wr_get_amplitude( ch, w );
 
             continue;
         }
 
         for ( j = 0; j < v->len; j++ )
         {
-            w = lecroy_wr2_get_window_by_number( v->val.lpnt[ j ] );
+            w = lecroy_wr_get_window_by_number( v->val.lpnt[ j ] );
 
             if ( win_count == 1 )
                 return vars_push( FLOAT_VAR,
-                                  lecroy_wr2_get_amplitude( ch, w ) );
+                                  lecroy_wr_get_amplitude( ch, w ) );
 
-            ret->val.dpnt[ i++ ] = lecroy_wr2_get_amplitude( ch, w );
+            ret->val.dpnt[ i++ ] = lecroy_wr_get_amplitude( ch, w );
         }
     }
 
@@ -2144,7 +2143,7 @@ Var_T *digitizer_command( Var_T * v )
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-            lecroy_wr2_command( cmd );
+            lecroy_wr_command( cmd );
             T_free( cmd );
             TRY_SUCCESS;
         }
