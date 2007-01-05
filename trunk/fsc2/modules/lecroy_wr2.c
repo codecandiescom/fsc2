@@ -901,7 +901,11 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
         else if ( strcasecmp( v->val.sptr, "ON" ) )
             bwl = LECROY_WR2_BWL_ON;
         else if ( strcasecmp( v->val.sptr, "200MHZ" ) )
+#define ! LECROY_WR2_MAX_BW_IS_200MHz
             bwl = LECROY_WR2_BWL_200MHZ;
+#else
+            bwl = LECROY_WR2_BWL_OFF;
+#endif
         else
             print( FATAL, "Invalid argument, bandwidth limiter can only be "
                    "set to 'OFF' (%d), 'ON' (%d) or '200MHZ' "

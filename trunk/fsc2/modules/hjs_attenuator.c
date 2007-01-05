@@ -183,7 +183,6 @@ Var_T *mw_attenuator_name( Var_T * v  UNUSED_ARG )
 Var_T *mw_attenuator_load_calibration( Var_T * v )
 {
     FILE *tfp = NULL;
-    char *tfname;
 
 
     CLOBBER_PROTECT( tfp );
@@ -230,10 +229,12 @@ Var_T *mw_attenuator_load_calibration( Var_T * v )
     }
     else
     {
+        char *tfname;
+
+        CLOBBER_PROTECT( tfname );
+
         vars_check( v, STR_VAR );
-
         tfname = T_strdup( v->val.sptr );
-
         too_many_arguments( v );
 
         TRY

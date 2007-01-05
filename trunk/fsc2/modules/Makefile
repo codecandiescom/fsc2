@@ -170,12 +170,14 @@ modules:
 		for m in "" _util _gpib; do                                 \
 			if [ ! -e $$n$$m.c -o tds$$m.c.tmpl -nt $$n$$m.c        \
 				 -o $$n.h -nt $$n$$m.c ]; then                      \
-				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g"             \
+				sed -e "s/tds_tmpl/$$n/g"                           \
+					-e "s/TDS_TMPL/$$o/g"                           \
 					tds$$m.c.tmpl > $$n$$m.c;                       \
 			fi;                                                     \
 		done;                                                       \
 		if [ ! -e tds$$n.map -a -e tds.map.tmpl ]; then             \
-				sed "s/tds_tmpl/$$n/g;s/TDS_TMPL/$$o/g"             \
+				sed -e "s/tds_tmpl/$$n/g"                           \
+					-e "s/TDS_TMPL/$$o/g"                           \
 					tds.map.tmpl > $$n.map;                         \
 		fi;                                                         \
 	done;
@@ -184,12 +186,14 @@ modules:
 		for m in "" _util _gpib; do                                 \
 			if [ ! -e $$n$$m.c -o lecroy94$$m.c.tmpl -nt $$n$$m.c   \
 				 -o $$n.h -nt $$n$$m.c ]; then                      \
-				sed "s/lecroy94_tmpl/$$n/g;s/LECROY94_TMPL/$$o/g"   \
+				sed -e "s/lecroy94_tmpl/$$n/g"                      \
+					-e "s/LECROY94_TMPL/$$o/g"                      \
 					lecroy94$$m.c.tmpl > $$n$$m.c;                  \
 			fi;                                                     \
 		done;                                                       \
 		if [ ! -e lecroy94$$n.map -a -e lecroy94.map.tmpl ]; then   \
-				sed "s/lecroy94_tmpl/$$n/g;s/LECROY94_TMPL/$$o/g"   \
+				sed -e "s/lecroy94_tmpl/$$n/g"                      \
+					-e "s/LECROY94_TMPL/$$o/g"                      \
 					lecroy94.map.tmpl > $$n.map;                    \
 		fi;                                                         \
 	done;
@@ -198,12 +202,14 @@ modules:
 		for m in .c _util.c _gpib.c _lexer.l; do                    \
 			if [ ! -e $$n$$m -o hp864$$m.tmpl -nt $$n$$m            \
 				 -o $$n.h -nt $$n$$m ]; then                        \
-				sed "s/hp864_tmpl/$$n/g;s/HP864_TMPL/$$o/g"         \
+				sed -e "s/hp864_tmpl/$$n/g"                         \
+					-e ";s/HP864_TMPL/$$o/g"                        \
 					hp864$$m.tmpl > $$n$$m;                         \
 			fi;                                                     \
 		done;                                                       \
 		if [ ! -e $$n.map -a -e hp864.map.tmpl ]; then              \
-				sed "s/hp864_tmpl/$$n/g;s/HP864_TMPL/$$o/g"         \
+				sed -e "s/hp864_tmpl/$$n/g"                         \
+					-e "s/HP864_TMPL/$$o/g"                         \
 					hp864.map.tmpl > $$n.map;                       \
 		fi;                                                         \
 	done;
@@ -271,7 +277,8 @@ $(addsuffix .o,$(simp_modules)): %.o: %.c $(cdir)/%.conf $(src_headers)
 $(addsuffix .c,$(s_band_list)): %.c: s_band_magnet.c.tmpl
 	n=$(subst .c,,$(subst s_band_magnet_,,$@));                    \
 	o=`echo $$n | tr "a-z" "A-Z"`;                                 \
-	sed "s/s_band_magnet_tmpl/s_band_magnet_$$n/g;s/S_BAND_MAGNET_TMPL/S_BAND_MAGNET_$$o/g" $^ > $@
+	sed -e "s/s_band_magnet_tmpl/s_band_magnet_$$n/g"              \
+	    -e "s/S_BAND_MAGNET_TMPL/S_BAND_MAGNET_$$o/g" $^ > $@
 
 
 # How to install the modules

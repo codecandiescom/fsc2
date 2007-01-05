@@ -593,65 +593,49 @@ void lecroy_wr2_numpoints_prep( void )
 
 
 /*-----------------------------------------------------------------*
- * Function allocates and sets up the array of possible timebases,
- * based on the sample rate of the model (the only possibly not
- * represened timebase is for the LT354, where the sample rate
- * according to the manual is 1 GS but which still is supposed to
- * have a minimum timebase setting of 500 ps, meaning that there
- * would be only a point at each second division, about which I
- * have my doubts - I am more inclined to believe that the docs
- * are inaccurate).
+ * Function allocates and sets up the array of possible timebases.
  *-----------------------------------------------------------------*/
 
 void lecroy_wr2_tbas_prep( void )
 {
-    double cur_tbas = 1.0e-9;
-    long len;
+    double cur_tbas = 1000.0;
+    long i;
+    long k = 0;
 
 
-    /* All timebase settings follow a 1-2-5 scheme with 1000 s/div being
-       the largest possible setting and 1 ns/div or 500 ps/div (depending
-       on the model) the smallest. Thus we have 37 or 38 timebase settings. */
-
-    lecroy_wr2.num_tbas = 37;
-    if ( LECROY_WR2_MAX_SAMPLE_RATE > 1000000000L )
-    {
-        lecroy_wr2.num_tbas += 1;
-        cur_tbas *= 0.5;
-    }
+    lecroy_wr2.num_tbas = LECROY_WR2_NUM_TBAS;
 
     lecroy_wr2.tbas =
            DOUBLE_P T_malloc( lecroy_wr2.num_tbas  * sizeof *lecroy_wr2.tbas );
 
-    for ( len = 0; len < lecroy_wr2.num_tbas; len++ )
+    /* All timebase settings follow a 1-2-5 scheme with 1000 s/div being
+       the largest possible setting */
+
+    for ( i = lecroy_wr2.num_tbas - 1; i >= 0; i--, k++ )
     {
-        lecroy_wr2.tbas[ len ] = cur_tbas;
-        if ( ( len % 3 == 1 && lecroy_wr2.num_tbas == 37 ) ||
-             ( len % 3 == 2 && lecroy_wr2.num_tbas == 38 ) )
-            cur_tbas *= 2.5;
+        lecroy_wr2.tbas[ i ] = cur_tbas;
+        if ( k % 3 == 1 )
+            cur_tbas *= 0.4;
         else
-            cur_tbas *= 2.0;
+            cur_tbas *= 0.5;
     }
 }
 
 
-/*-------------------------------------------------------------------*
+/*---------------------------------------------------------------*
  * Function to allocate and set up the table with the points per
  * division and time resolutions for the different record length
- * and timebase settings, both in single shot and interleaved mode.
- * Assumes that the longest timebase setting in RIS mode is the one
- * where the time resolution is still better than the maximum sample
- * rate (i.e. for a model with 1 GS the maximum timebase setting is
- * the one where the time resolution is 500 ps, while for a model
- * with 2 GS it's the one where the time resolution is 200 ps).
- *-------------------------------------------------------------------*/
+ * and timebase settings, both in single shot and random inter-
+ * leaved sampling mode.
+ *---------------------------------------------------------------*/
 
 void lecroy_wr2_hori_res_prep( void )
 {
     long i;
     long j;
-    double ss_res;
+    long k;
     double ris_res;
+    double ss_res;
 
 
     lecroy_wr2.hres = HORI_RES_PP T_malloc( lecroy_wr2.num_mem_sizes *
@@ -659,9 +643,9 @@ void lecroy_wr2_hori_res_prep( void )
 
     TRY
     {
-        lecroy_wr2.hres[ 0 ] = HORI_RES_P T_malloc( lecroy_wr2.num_mem_sizes * 
-                                                    lecroy_wr2.num_tbas *
-                                                    sizeof **lecroy_wr2.hres );
+        *lecroy_wr2.hres = HORI_RES_P T_malloc(   lecroy_wr2.num_mem_sizes
+                                                * LECROY_WR2_NUM_TBAS
+                                                * sizeof **lecroy_wr2.hres );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -672,94 +656,85 @@ void lecroy_wr2_hori_res_prep( void )
 
     for ( i = 0; i < lecroy_wr2.num_mem_sizes; i++ )
     {
-        int k = 1;
+        if ( i != 0 )
+            lecroy_wr2.hres[ i ] = 
+                				lecroy_wr2.hres[ i - 1 ] + LECROY_WR2_NUM_TBAS;
 
-        if ( i > 0 )
-            lecroy_wr2.hres[ i ] =
-                                lecroy_wr2.hres[ i - 1 ] + lecroy_wr2.num_tbas;
+        /* Set up entries for Random Interleaved Sampling (RIS) mode */
 
-        if ( LECROY_WR2_MAX_SAMPLE_RATE > 1000000000L )
+        ris_res = LECROY_WR2_RIS_SAMPLE_RATE * 1.0e9;
+        for ( k = LECROY_WR2_RIS_SAMPLE_RATE; k > 10; k = k / 10 )
+            /* empty */ ;
+
+        for ( j = 0; j < LECROY_WR2_NUM_RIS_TBAS; j++ )
         {
-            ss_res = 5.0-10;            /* best SS time resolution is 500 ps */
-            k = 0;
-        }
-        else
-            ss_res = 1.0e-9;            /* best SS time resolution is 1 ns */
+            if ( 10 * lrnd( lecroy_wr2.tbas[ j ] * ris_res ) >
+                                                  lecroy_wr2.mem_sizes[ i ] ) {
+                if ( k == 5 )
+                {
+                    ris_res *= 0.4;
+                    k = 2;
+                }
+                else
+                {
+                    ris_res *= 0.5;
+                    k = k == 2 ? 1 : 5;
+                }
+            }
 
-        /* For the shorter timebases the SS time resolution is always the
-           same, i.e. the highest one. This changes when the number of samples
-           starts to exceed the memory size */
-
-        for ( j = 0; j < lecroy_wr2.num_tbas && 
-                     10 * lrnd( lecroy_wr2.tbas[ j ] / ss_res ) <=
-                                                     lecroy_wr2.mem_sizes[ i ];
-              j++ )
-        {
-            lecroy_wr2.hres[ i ][ j ].tpp = ss_res;
-            lecroy_wr2.hres[ i ][ j ].ppd =
-                                         lrnd( lecroy_wr2.tbas[ j ] / ss_res );
-        }
-
-        /* Above that the SS time resolution changes, either according to a
-           1-2-5 scheme if the memory size is a power of 10 (in which case
-           'i' gives a remainder of 1 since the smallest memory size is
-           always 500 samples), or a 1-2-4 scheme for other memory sizes */
-
-        ss_res *= 2.0;
-
-        for ( ; j < lecroy_wr2.num_tbas; j++ )
-        {
-            lecroy_wr2.hres[ i ][ j ].tpp = ss_res;
-            lecroy_wr2.hres[ i ][ j ].ppd =
-                                         lrnd( lecroy_wr2.tbas[ j ] / ss_res );
-            
-            if ( i % 3 == 1 )             /* 10^x memory size */
-                ss_res *= ( k++ % 3 == 1 ) ? 2.5 : 2.0;      /* 1-2-5 scheme */
-            else
-                ss_res *= ( k++ % 3 == 2 ) ? 2.5 : 2.0;      /* 1-2-4 scheme */
-
-        }
-
-        ris_res = 2.0e-11;           /* maximum RIS time resolution is 20 ps */
-
-        for ( j = 0; j < lecroy_wr2.num_tbas && 
-                     10 * lrnd( lecroy_wr2.tbas[ j ] / ris_res ) <=
-                                                     lecroy_wr2.mem_sizes[ i ];
-              j++ )
-        {
-            lecroy_wr2.hres[ i ][ j ].tpp_ris = ris_res;
+            lecroy_wr2.hres[ i ][ j ].tpp_ris = 1.0 / ris_res;
             lecroy_wr2.hres[ i ][ j ].ppd_ris =
-                                        lrnd( lecroy_wr2.tbas[ j ] / ris_res );
+                                        lrnd( lecroy_wr2.tbas[ j ] * ris_res );
         }
 
-        lecroy_wr2.hres[ i ][ j ].tpp_ris = 5.0e-11;
-        lecroy_wr2.hres[ i ][ j ].ppd_ris =
-                                        lrnd( lecroy_wr2.tbas[ j ] / 5.0e-11 );
-        j++;
-
-        lecroy_wr2.hres[ i ][ j ].tpp_ris = 1.0e-10;
-        lecroy_wr2.hres[ i ][ j ].ppd_ris =
-                                        lrnd( lecroy_wr2.tbas[ j ] / 1.0e-10 );
-        j++;
-
-        lecroy_wr2.hres[ i ][ j ].tpp_ris = 2.0e-10;
-        lecroy_wr2.hres[ i ][ j ].ppd_ris =
-                                        lrnd( lecroy_wr2.tbas[ j ] / 2.0e-10 );
-        j++;
-
-        if ( LECROY_WR2_MAX_SAMPLE_RATE <= 1000000000L )
-        {
-            lecroy_wr2.hres[ i ][ j ].tpp_ris = 5.0e-10;
-            lecroy_wr2.hres[ i ][ j ].ppd_ris =
-                                        lrnd( lecroy_wr2.tbas[ j ] / 5.0e-10 );
-            j++;
-        }
-
-        for ( ; j < lecroy_wr2.num_tbas; j++ )
+        for ( ; j < LECROY_WR2_NUM_TBAS; j++ )
         {
             lecroy_wr2.hres[ i ][ j ].tpp_ris = 0.0;
             lecroy_wr2.hres[ i ][ j ].ppd_ris = 0;
         }
+
+        /* Set up entries for Single Shot (SS) mode */
+
+        ss_res = LECROY_WR2_SS_SAMPLE_RATE * 1.0e6;
+        for ( k = LECROY_WR2_SS_SAMPLE_RATE; k > 10; k = k / 10 )
+            /* empty */ ;
+
+        for ( j = 0; j < LECROY_WR2_NUM_TBAS - LECROY_WR2_NUM_SS_TBAS; j++ )
+        {
+            lecroy_wr2.hres[ i ][ j ].tpp = 0.0;
+            lecroy_wr2.hres[ i ][ j ].ppd = 0;
+        }
+
+        for ( ; j < LECROY_WR2_NUM_TBAS; j++ )
+        {
+            if ( 10 * lrnd( lecroy_wr2.tbas[ j ] * ss_res ) >
+                                                  lecroy_wr2.mem_sizes[ i ] ) {
+                if ( k == 5 )
+                {
+                    ss_res *= 0.4;
+                    k = 2;
+                }
+                else
+                {
+                    ss_res *= 0.5;
+                    k = k == 2 ? 1 : 5;
+                }
+            }
+
+            lecroy_wr2.hres[ i ][ j ].tpp = 1.0 / ss_res;
+            lecroy_wr2.hres[ i ][ j ].ppd =
+                                         lrnd( lecroy_wr2.tbas[ j ] * ss_res );
+        }
+
+
+        fprintf( stderr, "\nMemory size = %ld\n\n", lecroy_wr2.mem_sizes[ i ] );
+        for ( j = 0; j < LECROY_WR2_NUM_TBAS; j++ )
+            fprintf( stderr, "%g : %g %ld : %g %ld\n",
+                     lecroy_wr2.tbas[ j ],
+                     lecroy_wr2.hres[ i ][ j ].tpp,
+                     lecroy_wr2.hres[ i ][ j ].ppd,
+                     lecroy_wr2.hres[ i ][ j ].tpp_ris,
+                     lecroy_wr2.hres[ i ][ j ].ppd_ris );
     }
 }
 
