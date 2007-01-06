@@ -26,7 +26,7 @@
 
 /******************************************************************/
 /* Please note: this is *NOT* a normal header file that should be */
-/*              included somewhere. This file is only for setting */
+/*              included anywhere. This file is only for setting  */
 /*              up an array of structures to be included in the   */
 /*              file init.c to define the properties of different */
 /*              boards of the PCI E series.                       */

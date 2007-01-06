@@ -101,7 +101,9 @@
 #endif
 
 #if defined ( AT_MIO_E_SERIES )
+#include <linux/isapnp.h>
 #define BOARD_SERIES_NAME          "ni_at_mio_e_series"
+#define PORT  unsigned int
 #endif
 
 

@@ -6,7 +6,7 @@ OWNER                := fsc2
 GROUP                := uucp
 EDITOR               := emacs
 
-KERNEL_VERSION       := $(shell uname -r)
+#KERNEL_VERSION       := $(shell uname -r)
 # ifeq ($(KERNEL_VERSION),$(shell echo $(KERNEL_VERSION) | sed -e 's/^2\.6\.//'))
 # 	GPIB_LIBRARY     := NI_OLD
 # else

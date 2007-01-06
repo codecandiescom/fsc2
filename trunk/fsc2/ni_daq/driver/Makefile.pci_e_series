@@ -22,7 +22,7 @@
 # To contact the author send email to:  jt@toerring.de
 
 
-MODULE  := ni_pci_e_series.o
+MODULE  := pci_e_series.o
 
 
 # Unless the user set the environment variable NI6601_KERNEL_SOURCE
@@ -68,7 +68,7 @@ ifeq ($(findstring 2.6,$(KERNEL_VER)),2.6)
 
 ifneq ($(KERNELRELEASE),)    # if can use the kernel build system
 	obj-m                := $(MODULE)
-	ni_pci_e_series-objs := $(OBJECTS)
+	pci_e_series-objs    := $(OBJECTS)
 
 else                         # otherwise make kernel build system available
 

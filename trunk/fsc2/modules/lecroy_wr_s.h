@@ -23,12 +23,12 @@
 
 
 #include "fsc2_module.h"
-#include "gpib_if.h"
+#include "serial.h"
 
 
 /* Include configuration information for the device */
 
-#include "lecroy_wr.conf"
+#include "lecroy_wr_s.conf"
 
 
 #define LECROY_WR_UNDEF   -1
@@ -121,8 +121,8 @@
 
 /* Maximum and minimum sensitivity (in V/div) */
 
-#define LECROY_WR_MAX_SENS     2.0e-3     /* 2 mV */
-#define LECROY_WR_MIN_SENS     10.0       /* 10 V */
+#define LECROY_WR_MAX_SENS           2.0e-3     /* 2 mV */
+#define LECROY_WR_MIN_SENS           10.0       /* 10 V */
 
 
 /* The trigger delay can be set with a resolution of 1/10 of the timebase */
@@ -154,7 +154,7 @@
 #define LECROY_WR_NUM_TBAS                     35     /* # of timebases */
 #define LECROY_WR_NUM_SS_TBAS                  33     /* # of SS timebases */
 #define LECROY_WR_NUM_RIS_TBAS                 10     /* # of RIS timebases */
-#define LECROY_WR_SS_SAMPLE_RATE              200     /* 200 MS/s */
+#define LECROY_WR_SS_SAMPLE_RATE               200     /* 200 MS/s */
 #define LECROY_WR_RIS_SAMPLE_RATE              10     /* 10 Gs/s */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE         100000L     /* 100 kpts */
@@ -439,7 +439,7 @@ struct HORI_RES {
 
 
 struct LECROY_WR {
-    int device;
+    struct termios *tio;    /* serial port terminal interface structure */
 
     unsigned int INR;
 
@@ -521,7 +521,7 @@ enum {
 };
 
 
-#if defined LECROY_WR_MAIN_
+#if defined LECROY_WR_S_MAIN_
 #if defined LECROY_WR_CH3 && defined LECROY_WR_CH4
 int trg_channels[ 7 ] = { LECROY_WR_CH1,
                           LECROY_WR_CH2,
@@ -549,11 +549,11 @@ extern int trg_channels[ 5 ];
 
 /* declaration of exported functions */
 
-int lecroy_wr_init_hook(       void );
-int lecroy_wr_test_hook(       void );
-int lecroy_wr_exp_hook(        void );
-int lecroy_wr_end_of_exp_hook( void );
-void lecroy_wr_exit_hook(      void );
+int lecroy_wr_s_init_hook(       void );
+int lecroy_wr_s_test_hook(       void );
+int lecroy_wr_s_exp_hook(        void );
+int lecroy_wr_s_end_of_exp_hook( void );
+void lecroy_wr_s_exit_hook(      void );
 
 
 Var_T *digitizer_name(              Var_T * /* v */ );
@@ -590,7 +590,7 @@ Var_T *digitizer_command(           Var_T * /* v */ );
 
 /* declaration of internally used functions */
 
-bool lecroy_wr_init( const char * /* name */ );
+bool lecroy_wr_init( void );
 
 double lecroy_wr_get_timebase( void );
 

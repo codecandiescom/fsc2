@@ -22,7 +22,7 @@
  */
 
 
-#include "lecroy_wr.h"
+#include "lecroy_wr_s.h"
 
 
 static unsigned char *lecroy_wr_get_data( long * len );
@@ -42,15 +42,48 @@ static void lecroy_wr_get_prep( int              ch,
                                 double *         gain,
                                 double *         offset );
 
+static int lecroy_wr_s_hex_to_int( unsigned char * dp );
+
+static inline unsigned int lecroy_wr_s_hex_to_nibble( unsigned char c );
+
 static bool lecroy_wr_talk( const char * cmd,
                             char *       reply,
                             long *       length );
 
-static void lecroy_wr_gpib_failure( void );
+static void lecroy_wr_comm_failure( void );
+
+static bool lecroy_wr_serial_open( void );
 
 
 static unsigned int can_fetch = 0;
 
+
+/* The following variable and defines are for calculating the upper limit
+   we're prepared to wait when writting to or reading from the serial port.
+   This consists of a default minimum timeout plus an additional timeout
+   that depends on the amount of data we're sending or prepared to receive.
+   All values are in micro-seconds. */
+
+static double Serial_Delay_Factor;
+
+#define DEFAULT_TIMEOUT  30000000L      /* 3 s */
+
+#define TIMEOUT_FROM_STRING( cmd ) \
+        ( lrnd( strlen( cmd ) * Serial_Delay_Factor ) + DEFAULT_TIMEOUT )
+
+#define TIMEOUT_FROM_LENGTH( length ) \
+        ( lrnd( ( length ) * Serial_Delay_Factor ) + DEFAULT_TIMEOUT )
+
+
+/* Different short command strings */
+
+#define ECHO_ON               "\033]"
+#define ECHO_OFF              "\033["
+#define DEVICE_CLEAR          "\033c"
+#define REMOTE_ENABLE         "\033r"
+#define GO_TO_LOCAL           "\033l"
+#define LOCAL_LOCKOUT         "\033f"
+#define GROUP_EXEC_TRIGGER    "\033t"
 
 
 /*---------------------------------------------------------------*
@@ -58,28 +91,28 @@ static unsigned int can_fetch = 0;
  * its state
  *---------------------------------------------------------------*/
 
-bool lecroy_wr_init( const char * name )
+bool lecroy_wr_init( void )
 {
-    char buffer[ 100 ];
-    long len = 100;
+    char buffer[ 10 ];
     int i;
 
 
-    if ( gpib_init_device( name, &lecroy_wr.device ) == FAILURE )
+    if ( ! lecroy_wr_serial_open( ) )
         return FAIL;
 
-    /* Disable the local button, set digitizer to short form of replies,
-       transmit data in one block in binary word (2 byte) format with LSB
-       first. Then ask for the status byte to make sure the device reacts. */
+    /* Set digitizer to short form of replies, transmit data in one block in
+       hex word (4 byte) format with MSB first. Then ask for the status byte
+       to make sure the device reacts. */
 
-    if ( //gpib_local_lockout( lecroy_wr.device ) == FAILURE  ||
-         gpib_write( lecroy_wr.device,
-                     "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO", 44 )
-                                                                  == FAILURE ||
-         gpib_write( lecroy_wr.device, "*STB?", 5 ) == FAILURE ||
-         gpib_read( lecroy_wr.device, buffer, &len ) == FAILURE )
+    if ( fsc2_serial_write( SERIAL_PORT,
+                            "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,HEX;CORD HI\r",
+                            45, TIMEOUT_FROM_LENGTH( 45 ), SET ) != 45 ||
+         fsc2_serial_write( SERIAL_PORT, "*STB?\r", 6,
+                            TIMEOUT_FROM_LENGTH( 6 ), SET ) != 6 ||
+         fsc2_serial_read( SERIAL_PORT, buffer, 10,
+                           TIMEOUT_FROM_LENGTH( 10 ), SET ) <= 0 )
     {
-        gpib_local( lecroy_wr.device );
+        lecroy_wr_finished( );
         return FAIL;
     }
 
@@ -116,8 +149,9 @@ bool lecroy_wr_init( const char * name )
 
         /* Make sure the internal timebase is used */
 
-        if ( gpib_write( lecroy_wr.device, "SCLK INT", 8 ) == FAILURE )
-            lecroy_wr_gpib_failure( );
+        if ( fsc2_serial_write( SERIAL_PORT, "SCLK INT\r", 9,
+                                TIMEOUT_FROM_LENGTH( 9 ), SET ) != 9 )
+            lecroy_wr_comm_failure( );
 
         /* Set or get the timebase (including the index in the table of
            possible timebases) while also taking care of the mode, i.e.
@@ -255,7 +289,7 @@ bool lecroy_wr_init( const char * name )
     }
     OTHERWISE
     {
-        gpib_local( lecroy_wr.device );
+        lecroy_wr_finished( );
         return FAIL;
     }
         
@@ -303,11 +337,15 @@ double lecroy_wr_get_timebase( void )
 bool lecroy_wr_set_timebase( double timebase )
 {
     char cmd[ 40 ] = "TDIV ";
+    ssize_t to_send;
 
 
     gcvt( timebase, 8, cmd + strlen( cmd ) );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    strcat( cmd, "\r" );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -323,7 +361,7 @@ bool lecroy_wr_get_interleaved( void )
     long length = 30;
 
 
-    lecroy_wr_talk( "ILVD?", reply, &length );
+    lecroy_wr_talk( "ILVD?\r", reply, &length );
     lecroy_wr.interleaved = reply[ 1 ] == 'N';
 
     return lecroy_wr.interleaved;
@@ -337,10 +375,14 @@ bool lecroy_wr_get_interleaved( void )
 bool lecroy_wr_set_interleaved( bool state )
 {
     char cmd[ 30 ] = "ILVD ";
+    ssize_t to_send;
 
-    strcat( cmd, state ? "ON" : "OFF" );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+
+    strcat( cmd, state ? "ON\r" : "OFF\r" );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -359,7 +401,7 @@ long lecroy_wr_get_memory_size( void )
     char *end_p;
 
 
-    lecroy_wr_talk( "MSIZ?", reply, &length );
+    lecroy_wr_talk( "MSIZ?\r", reply, &length );
     reply[ length - 1 ] = '\0';
 
     mem_size = strtol( reply, &end_p, 10 );
@@ -405,10 +447,14 @@ long lecroy_wr_get_memory_size( void )
 bool lecroy_wr_set_memory_size( long mem_size )
 {
     char cmd[ 30 ];
+    ssize_t to_send;
 
-    sprintf( cmd, "MSIZ %ld", mem_size );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+
+    sprintf( cmd, "MSIZ %ld\r", mem_size );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -442,14 +488,18 @@ bool lecroy_wr_set_sens( int    channel,
                          double sens )
 {
     char cmd[ 40 ];
+    ssize_t to_send;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
     sprintf( cmd, "C%1d:VDIV ", channel + 1 );
     gcvt( sens, 8, cmd + strlen( cmd ) );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    strcat( cmd, "\r" );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -482,14 +532,18 @@ bool lecroy_wr_set_offset( int    channel,
                            double offset )
 {
     char cmd[ 40 ];
+    ssize_t to_send;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
     sprintf( cmd, "C%1d:OFST ", channel + 1 );
     gcvt( offset, 8, cmd + strlen( cmd ) );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    strcat( cmd, "\r" );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -543,15 +597,18 @@ bool lecroy_wr_set_coupling( int channel,
 {
     char cmd[ 30 ];
     char const *cpl[ ] = { "A1M", "D1M", "D50", "GND" };
+    ssize_t to_send;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
     fsc2_assert( type >= LECROY_WR_CPL_AC_1_MOHM &&
                  type <= LECROY_WR_CPL_GND );
 
-    sprintf( cmd, "C%1d:CPL %s", channel + 1, cpl[ type ] );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    sprintf( cmd, "C%1d:CPL %s\r", channel + 1, cpl[ type ] );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -646,6 +703,7 @@ bool lecroy_wr_set_bandwidth_limiter( int channel,
     char buf[ 50 ] = "GBWL?";
     long length;
     int i;
+    ssize_t to_send;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -676,14 +734,17 @@ bool lecroy_wr_set_bandwidth_limiter( int channel,
     {
         sprintf( buf, "BWL C%d,", channel + 1 );
         if ( bwl == LECROY_WR_BWL_OFF )
-            strcat( buf, "OFF" );
+            strcat( buf, "OFF\r" );
         else if ( bwl == LECROY_WR_BWL_ON )
-            strcat( buf, "ON" );
+            strcat( buf, "ON\r" );
         else
-            strcat( buf, "200MHZ" );
+            strcat( buf, "200MHZ\r" );
         
-        if ( gpib_write( lecroy_wr.device, buf, strlen( buf ) ) == FAILURE )
-            lecroy_wr_gpib_failure( );
+        to_send = strlen( buf );
+        if ( fsc2_serial_write( SERIAL_PORT, buf, to_send,
+                                TIMEOUT_FROM_LENGTH( to_send ), SET ) 
+                                                                   != to_send )
+            lecroy_wr_comm_failure( );
 
         return OK;
     }
@@ -693,9 +754,11 @@ bool lecroy_wr_set_bandwidth_limiter( int channel,
        interested in and set up the remaining channel to what the user asked
        us to */
 
-    strcpy( buf, "GBWL OFF" );
-    if ( gpib_write( lecroy_wr.device, buf, strlen( buf ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    strcpy( buf, "GBWL OFF\r" );
+    to_send = strlen( buf );
+    if ( fsc2_serial_write( SERIAL_PORT, buf, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     strcpy( buf, "BWL " );
 
@@ -710,10 +773,13 @@ bool lecroy_wr_set_bandwidth_limiter( int channel,
             strcat( buf, "200MHZ," );
     }
 
-    buf[ strlen( buf ) - 2 ] = '\0';
+    buf[ strlen( buf ) - 2 ] = '\r';
+    buf[ strlen( buf ) - 1 ] = '\0';
 
-    if ( gpib_write( lecroy_wr.device, buf, strlen( buf ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    to_send = strlen( buf );
+    if ( fsc2_serial_write( SERIAL_PORT, buf, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -767,6 +833,7 @@ int lecroy_wr_get_trigger_source( void )
 bool lecroy_wr_set_trigger_source( int channel )
 {
     char cmd[ 40 ] = "TRSE STD,SR,";
+    ssize_t to_send;
 
 
     fsc2_assert( ( channel >= LECROY_WR_CH1 &&
@@ -776,16 +843,18 @@ bool lecroy_wr_set_trigger_source( int channel )
                  channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
-        sprintf( cmd + 11, "C%1d", channel + 1 );
+        sprintf( cmd + 11, "C%1d\r", channel + 1 );
     else if ( channel == LECROY_WR_LIN )
-        strcat( cmd, "LINE" );
+        strcat( cmd, "LINE\r" );
     else if ( channel == LECROY_WR_EXT )
-        strcat( cmd, "EX" );
+        strcat( cmd, "EX\r" );
     else
-        strcat( cmd, "EX10" );
+        strcat( cmd, "EX10\r" );
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -806,11 +875,11 @@ double lecroy_wr_get_trigger_level( int channel )
                  channel == LECROY_WR_EXT || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
-        sprintf( buf, "C%1d:TRLV?", channel + 1 );
+        sprintf( buf, "C%1d:TRLV?\r", channel + 1 );
     else if ( channel == LECROY_WR_EXT )
-        strcpy( buf, "EX:TRLV?" );
+        strcpy( buf, "EX:TRLV?\r" );
     else
-        strcpy( buf, "EX10:TRLV?" );
+        strcpy( buf, "EX10:TRLV?\r" );
 
     lecroy_wr_talk( buf, buf, &length );
     buf[ length - 1 ] = '\0';
@@ -826,6 +895,7 @@ bool lecroy_wr_set_trigger_level( int    channel,
                                   double level )
 {
     char cmd[ 40 ];
+    ssize_t to_send;
 
 
     fsc2_assert( ( channel >= LECROY_WR_CH1 &&
@@ -841,8 +911,12 @@ bool lecroy_wr_set_trigger_level( int    channel,
         strcpy( cmd, "EX10:TRLV " );
 
     gcvt( level, 6, cmd + strlen( cmd ) );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    strcat( cmd, "\r" );
+
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -890,6 +964,7 @@ bool lecroy_wr_set_trigger_slope( int channel,
                                   bool slope )
 {
     char cmd[ 40 ];
+    ssize_t to_send;
 
 
     fsc2_assert( ( channel >= LECROY_WR_CH1 &&
@@ -907,9 +982,12 @@ bool lecroy_wr_set_trigger_slope( int channel,
     else
         strcpy( cmd, "EX10:TRSL " );
 
-    strcat( cmd, slope ? "POS" : "NEG" );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    strcat( cmd, slope ? "POS\r" : "NEG\r" );
+
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -932,11 +1010,11 @@ int lecroy_wr_get_trigger_coupling( int channel )
                  channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
-        sprintf( buf, "C%1d:TRCP?", channel + 1 );
+        sprintf( buf, "C%1d:TRCP?\r", channel + 1 );
     else if ( channel == LECROY_WR_EXT )
-        strcpy( buf, "EX:TRCP?" );
+        strcpy( buf, "EX:TRCP?\r" );
     else
-        strcpy( buf, "EX10:TRCP?" );
+        strcpy( buf, "EX10:TRCP?\r" );
 
     lecroy_wr_talk( ( const char *) buf, buf, &length );
 
@@ -976,7 +1054,8 @@ int lecroy_wr_set_trigger_coupling( int channel,
                                     int cpl )
 {
     char cmd[ 40 ];
-    const char *cpl_str[ ] = { "AC", "DC", "LFREJ", "HFREJ" };
+    const char *cpl_str[ ] = { "AC\r", "DC\r", "LFREJ\r", "HFREJ\r" };
+    ssize_t to_send;
 
 
     fsc2_assert( ( channel >= LECROY_WR_CH1 &&
@@ -994,8 +1073,10 @@ int lecroy_wr_set_trigger_coupling( int channel,
 
     strcat( cmd, cpl_str[ cpl ] );
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -1012,7 +1093,7 @@ int lecroy_wr_get_trigger_mode( void )
     int mode = -1;
 
 
-    lecroy_wr_talk( "TRMD?", buf, &length );
+    lecroy_wr_talk( "TRMD?\r", buf, &length );
 
     if ( buf[ 0 ] == 'A' )
         mode = LECROY_WR_TRG_MODE_AUTO;
@@ -1036,15 +1117,19 @@ int lecroy_wr_get_trigger_mode( void )
 int lecroy_wr_set_trigger_mode( int mode )
 {
     char cmd[ 40 ] = "TRMD ";
-    const char *mode_str[ ] = { "AUTO", "NORM", "SINGLE", "STOP" };
+    const char *mode_str[ ] = { "AUTO\r", "NORM\r", "SINGLE\r", "STOP\r" };
+    ssize_t to_send;
 
 
     fsc2_assert( mode >= LECROY_WR_TRG_MODE_AUTO &&
                  mode <= LECROY_WR_TRG_MODE_STOP );
 
     strcat( cmd, mode_str[ mode ] );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -1060,7 +1145,7 @@ double lecroy_wr_get_trigger_delay( void )
     long length = 40;
 
 
-    lecroy_wr_talk( "TRDL?", reply, &length );
+    lecroy_wr_talk( "TRDL?\r", reply, &length );
     reply[ length - 1 ] = '\0';
     lecroy_wr.trigger_delay = T_atod( reply );
 
@@ -1082,6 +1167,7 @@ double lecroy_wr_get_trigger_delay( void )
 bool lecroy_wr_set_trigger_delay( double delay )
 {
     char cmd[ 40 ] = "TRDL ";
+    ssize_t to_send;
 
 
     /* For positive delay (i.e. pretrigger) the delay must be set as a
@@ -1091,8 +1177,12 @@ bool lecroy_wr_set_trigger_delay( double delay )
         delay = 10.0 * delay / lecroy_wr.timebase;
 
     gcvt( delay, 8, cmd + strlen( cmd ) );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    strcat( cmd, "\r" );
+
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -1109,9 +1199,9 @@ bool lecroy_wr_is_displayed( int ch )
 
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
-        sprintf( cmd, "C%d:TRA?", ch - LECROY_WR_CH1 + 1 );
+        sprintf( cmd, "C%d:TRA?\r", ch - LECROY_WR_CH1 + 1 );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
-        sprintf( cmd, "T%c:TRA?", ch - LECROY_WR_TA + 'A' );
+        sprintf( cmd, "T%c:TRA?\r", ch - LECROY_WR_TA + 'A' );
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
     {
         print( FATAL, "A memory channel can't be displayed.\n");
@@ -1136,6 +1226,7 @@ bool lecroy_wr_display( int ch,
                         int on_off )
 {
     char cmd[ 30 ];
+    ssize_t to_send;
         
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
@@ -1153,7 +1244,7 @@ bool lecroy_wr_display( int ch,
         THROW( EXCEPTION );
     }
 
-    strcat( cmd, on_off ? "ON" : "OFF" );
+    strcat( cmd, on_off ? "ON\r" : "OFF\r" );
 
     if ( on_off &&
          lecroy_wr.num_used_channels >= LECROY_WR_MAX_USED_CHANNELS )
@@ -1164,8 +1255,10 @@ bool lecroy_wr_display( int ch,
         THROW( EXCEPTION );
     }
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     if ( on_off )
     {
@@ -1187,7 +1280,9 @@ bool lecroy_wr_display( int ch,
 
 void lecroy_wr_finished( void )
 {
-    gpib_local( lecroy_wr.device );
+    fsc2_serial_write( SERIAL_PORT, GO_TO_LOCAL, strlen( GO_TO_LOCAL ),
+                       TIMEOUT_FROM_STRING( GO_TO_LOCAL ), SET );
+    fsc2_serial_close( SERIAL_PORT );
 }
 
 
@@ -1200,12 +1295,14 @@ void lecroy_wr_start_acquisition( void )
     int ch;
     char cmd[ 100 ];
     bool do_averaging = UNSET;
+    ssize_t to_send;
 
 
     /* Stop the digitizer (also switches to "STOPPED" trigger mode) */
 
-    if ( gpib_write( lecroy_wr.device, "STOP", 4 ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    if ( fsc2_serial_write( SERIAL_PORT, "STOP\r", 5,
+                            TIMEOUT_FROM_LENGTH( 5 ), SET ) != 5 )
+        lecroy_wr_comm_failure( );
 
     /* Set up the parameter to be used for averaging for the function channels
        (as far as they have been set by the user) */
@@ -1217,15 +1314,17 @@ void lecroy_wr_start_acquisition( void )
 
         do_averaging = SET;
 
-        snprintf( cmd, 100, "T%c:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld",
+        snprintf( cmd, 100, "T%c:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld\r",
                   'A' + LECROY_WR_TA - ch,
                   lecroy_wr.source_ch[ ch ] - LECROY_WR_CH1 + 1,
                   lecroy_wr_curve_length( ),
                   lecroy_wr.num_avg[ ch ] );
 
-        if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) )
-             == FAILURE )
-            lecroy_wr_gpib_failure( );
+        to_send = strlen( cmd );
+        if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                                TIMEOUT_FROM_LENGTH( to_send ), SET )
+                                                                   != to_send )
+            lecroy_wr_comm_failure( );
 
         /* If we want to use a trace it must be switched on (but not the
            channel that gets averaged) */
@@ -1236,19 +1335,25 @@ void lecroy_wr_start_acquisition( void )
         /* Switch off horizontal zoom and shift - if it's on the curve fetched
            from the device isn't what one would expect... */
 
-        sprintf( cmd, "T%c:HMAG 1;T%c:HPOS 5", 'A' + LECROY_WR_TA - ch,
+        sprintf( cmd, "T%c:HMAG 1;T%c:HPOS 5\r", 'A' + LECROY_WR_TA - ch,
                  'A' + LECROY_WR_TA - ch ) ;
 
-        if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-            lecroy_wr_gpib_failure( );
+        to_send = strlen( cmd );
+        if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                                TIMEOUT_FROM_LENGTH( to_send ), SET )
+                                                                   != to_send )
+            lecroy_wr_comm_failure( );
 
         /* Finally reset what's currently stored in the trace (otherwise a
            new acquisition may not get started) */
 
-        sprintf( cmd, "T%c:FRST", 'A' + LECROY_WR_TA - ch );
+        sprintf( cmd, "T%c:FRST\r", 'A' + LECROY_WR_TA - ch );
 
-        if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-            lecroy_wr_gpib_failure( );
+        to_send = strlen( cmd );
+        if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                                TIMEOUT_FROM_LENGTH( to_send ), SET )
+                                                                   != to_send )
+            lecroy_wr_comm_failure( );
     }
 
     /* Reset the bits in the word that tells us later that the data in the
@@ -1265,17 +1370,19 @@ void lecroy_wr_start_acquisition( void )
        the user requested it, also AUTO, or, if there's no averaging setup,
        even SINGLE mode will do) */
 
-    strcpy( cmd, "TRMD NORM" );
+    strcpy( cmd, "TRMD NORM\r" );
     if ( ! do_averaging &&
          lecroy_wr.trigger_mode == LECROY_WR_TRG_MODE_SINGLE )
-        strcpy( cmd + 5, "SINGLE" );
+        strcpy( cmd + 5, "SINGLE\r" );
     else if ( lecroy_wr.trigger_mode == LECROY_WR_TRG_MODE_AUTO )
-        strcpy( cmd + 5, "AUTO" );
+        strcpy( cmd + 5, "AUTO\r" );
     else
         lecroy_wr.trigger_mode = LECROY_WR_TRG_MODE_NORMAL;
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
 }
 
@@ -1297,6 +1404,7 @@ static void lecroy_wr_get_prep( int              ch,
     char cmd[ 100 ];
     char ch_str[ 3 ];
     bool is_mem_ch = UNSET;
+    ssize_t to_send;
 
 
     CLOBBER_PROTECT( data );
@@ -1308,12 +1416,12 @@ static void lecroy_wr_get_prep( int              ch,
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
     {
         bit_to_test = LECROY_WR_SIGNAL_ACQ;
-        sprintf( ch_str, "C%d", ch - LECROY_WR_CH1 + 1 );
+        sprintf( ch_str, "C%1d", ch - LECROY_WR_CH1 + 1 );
     }
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
     {
         is_mem_ch = SET;
-        sprintf( ch_str, "M%d", ch - LECROY_WR_M1 + 1 );
+        sprintf( ch_str, "M%1d", ch - LECROY_WR_M1 + 1 );
     }
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
     {
@@ -1328,14 +1436,16 @@ static void lecroy_wr_get_prep( int              ch,
        thus we start with one point later than we could get from it.*/
 
     if ( w != NULL )
-        sprintf( cmd, "WFSU SP,0,NP,%ld,FP,%ld,SN,0",
+        sprintf( cmd, "WFSU SP,0,NP,%ld,FP,%ld,SN,0\r",
                  w->num_points, w->start_num + 1 );
     else
-        sprintf( cmd, "WFSU SP,0,NP,%ld,FP,1,SN,0",
+        sprintf( cmd, "WFSU SP,0,NP,%ld,FP,1,SN,0\r",
                  lecroy_wr_curve_length( ) );
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 
     /* When a non-memory curve is to be fetched and the acquisition isn't
        finished yet poll until the bit that tells that the acquisition for
@@ -1354,15 +1464,18 @@ static void lecroy_wr_get_prep( int              ch,
         /* Ask the device for the data... */
 
         strcpy( cmd, ch_str );
-        strcat( cmd, ":WF? DAT1" );
-        if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) )
-             == FAILURE )
-            lecroy_wr_gpib_failure( );
+        strcat( cmd, ":WF? DAT1\r" );
+        to_send = strlen( cmd );
+        if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                                TIMEOUT_FROM_LENGTH( to_send ), SET )
+                                                                   != to_send )
+            lecroy_wr_comm_failure( );
 
         /* ...and fetch 'em */
 
         *data = lecroy_wr_get_data( length );
-        *length /= 2;          /* we got word sized (16 bit) data, LSB first */
+        *length = ( *length - 2 ) / 4; /* we got hex encoded 16 bit data
+                                          (MSB first) with trailing <LF><CR> */
 
         /* Get the gain factor and offset for the date we just fetched */
 
@@ -1393,27 +1506,28 @@ void lecroy_wr_get_curve( int        ch,
     unsigned char *data;
     unsigned char *dp;
     long i;
-    int val;
 
 
     /* Get the curve from the device */
 
     lecroy_wr_get_prep( ch, w, &data, length, &gain, &offset );
 
-    /* Calculate the voltages from the data, data are two byte (LSB first),
-       two's complement integers, which then need to be scaled by gain and
-       offset. */
+    /* Calculate the voltages from the data (data are hex encoded 16 bit (MSB
+       first), two's complement integers) which then need to be scaled by
+       gain and offset. */
 
     *array = DOUBLE_P T_malloc( *length * sizeof **array );
 
-    for ( i = 0, dp = data; i < *length; dp += 2, i++ )
+    TRY
     {
-        val = dp[ 0 ] + 0x100 * dp[ 1 ];
-
-        if ( dp[ 1 ] & 0x80  )
-            val -= 0x10000;
-
-        ( *array )[ i ] = gain * val - offset;
+        for ( i = 0, dp = data; i < *length; dp += 4, i++ )
+            ( *array )[ i ] = gain * lecroy_wr_s_hex_to_int( dp ) - offset;
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( data );
+        RETHROW( );
     }
 
     T_free( data );
@@ -1431,26 +1545,29 @@ double lecroy_wr_get_area( int        ch,
     long i;
     double gain, offset;
     double area = 0.0;
-    int val;
     long length;
 
+
+    CLOBBER_PROTECT( area );
 
     /* Get the curve from the device */
 
     lecroy_wr_get_prep( ch, w, &data, &length, &gain, &offset );
 
-    /* Calculate the voltages from the data, data are two byte (LSB first),
-       two's complement integers, which then need to be scaled by gain and
-       offset. */
+    /* Calculate the voltages from the data (data are hex encoded 16 bit (MSB
+       first), two's complement integers) which then need to be scaled by
+       gain and offset. */
 
-    for ( i = 0, dp = data; i < length; dp += 2, i++ )
+    TRY
     {
-        val = dp[ 0 ] + 0x100 * dp[ 1 ];
-
-        if ( dp[ 1 ] & 0x80 ) 
-            val -= 0x10000;
-
-        area += gain * val - offset;
+        for ( i = 0, dp = data; i < length; dp += 4, i++ )
+            area += gain * lecroy_wr_s_hex_to_int( dp ) - offset;
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( data );
+        RETHROW( );
     }
 
     T_free( data );
@@ -1474,25 +1591,35 @@ double lecroy_wr_get_amplitude( int        ch,
     long length;
 
 
+    CLOBBER_PROTECT( min );
+    CLOBBER_PROTECT( max );
+
     /* Get the curve from the device */
 
     lecroy_wr_get_prep( ch, w, &data, &length, &gain, &offset );
 
-    /* Calculate the maximum and minimum voltages from the data, data are two
-       byte (LSB first), two's complement integers */
+    /* Calculate the maximum and minimum voltages from the data (data are
+       hex encoded 16 bit (MSB first), two's complement integers) */
 
     min = LONG_MAX;
     max = LONG_MIN;
 
-    for ( i = 0, dp = data; i < length; i++, dp += 2 )
+    TRY
     {
-        val = dp[ 0 ] + 0x100 * dp[ 1 ];
+        for ( i = 0, dp = data; i < length; dp += 4, i++ )
+        {
+            val = lecroy_wr_s_hex_to_int( dp );
 
-        if ( dp[ 1 ] & 0x80 )
-            val -= 0x10000;
+            max = l_max( val, max );
+            min = l_min( val, min );
+        }
 
-        max = l_max( val, max );
-        min = l_min( val, min );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( data );
+        RETHROW( );
     }
 
     T_free( data );
@@ -1503,6 +1630,47 @@ double lecroy_wr_get_amplitude( int        ch,
 }
 
 
+/*---------------------------------------------------------------------*
+ * Converts an array of 4 hexadecimal chars to a 16 bit signed integer *
+ * (with the mostt sinificant byte in the first two chars)
+ *---------------------------------------------------------------------*/
+
+static int lecroy_wr_s_hex_to_int( unsigned char * dp )
+{
+
+    int val =   ( lecroy_wr_s_hex_to_nibble( dp[ 0 ] ) << 12 )
+              + ( lecroy_wr_s_hex_to_nibble( dp[ 1 ] ) <<  8 )
+              + ( lecroy_wr_s_hex_to_nibble( dp[ 2 ] ) <<  4 )
+              +   lecroy_wr_s_hex_to_nibble( dp[ 3 ] );
+
+    if ( val > 32767 )
+        val -= 65536;
+
+    return val;
+}
+
+
+/*--------------------------------------------------------*
+ * Converts an unsigned hexadicimal char to a 4 bit value 
+ *--------------------------------------------------------*/
+
+static inline unsigned int lecroy_wr_s_hex_to_nibble( unsigned char c )
+{
+    if ( isdigit( c ) )
+        return c - '0';
+
+    if ( isxdigit( c ) )
+        return toupper( c ) - 'A' + 10;
+
+    /* If we end up here some transmission failure must have happened,
+       so we tell the user about it and throw an excpetion */
+
+    lecroy_wr_comm_failure( );
+
+    return -1;              /* We'll never end oup here */
+}
+
+
 /*----------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
@@ -1510,6 +1678,7 @@ void lecroy_wr_copy_curve( long src,
                            long dest )
 {
     char cmd[ 100 ] = "STO ";
+    ssize_t to_send;
 
 
     fsc2_assert( ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX ) ||
@@ -1523,10 +1692,12 @@ void lecroy_wr_copy_curve( long src,
         sprintf( cmd + strlen( cmd ), "T%c,",
                  ( char ) ( src - LECROY_WR_TA + 'A' ) );
 
-    sprintf( cmd + strlen( cmd ), "M%ld", dest - LECROY_WR_M1 + 1 );
+    sprintf( cmd + strlen( cmd ), "M%ld\r", dest - LECROY_WR_M1 + 1 );
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    to_send = strlen( cmd );
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
 }
 
 
@@ -1542,19 +1713,20 @@ static unsigned char *lecroy_wr_get_data( long * len )
     /* First thing we read is something like "DAT1,#[0-9]" where the number
        following the '#' is the number of bytes to be read next */
 
-    *len = 7;
-    if ( gpib_read( lecroy_wr.device, len_str, len ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    if ( fsc2_serial_read( SERIAL_PORT, len_str, 7,
+                           TIMEOUT_FROM_LENGTH( 7 ), SET ) != 7 )
+        lecroy_wr_comm_failure( );
 
-    len_str [ *len ] = '\0';
+    len_str [ 7 ] = '\0';
     *len = T_atol( len_str + 6 );
 
     fsc2_assert( *len > 0 );
 
     /* Now get the number of bytes to read */
 
-    if ( gpib_read( lecroy_wr.device, len_str, len ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    if ( fsc2_serial_read( SERIAL_PORT, len_str, *len,
+                           TIMEOUT_FROM_LENGTH( *len ), SET ) != *len )
+        lecroy_wr_comm_failure( );
     
     len_str[ *len ] = '\0';
     *len = T_atol( len_str );
@@ -1565,8 +1737,9 @@ static unsigned char *lecroy_wr_get_data( long * len )
 
     data = UCHAR_P T_malloc( *len );
 
-    if ( gpib_read( lecroy_wr.device, data, len ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    if ( fsc2_serial_read( SERIAL_PORT, data, *len,
+                           TIMEOUT_FROM_LENGTH( *len ), SET ) != *len )
+        lecroy_wr_comm_failure( );
 
     return data;
 }
@@ -1585,11 +1758,11 @@ static int lecroy_wr_get_int_value( int          ch,
 
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
-        sprintf( cmd, "C%d:INSP? '%s'", ch - LECROY_WR_CH1 + 1, name );
+        sprintf( cmd, "C%d:INSP? '%s'\r", ch - LECROY_WR_CH1 + 1, name );
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
-        sprintf( cmd, "M%c:INSP? '%s'", ch - LECROY_WR_M1 + 1, name );
+        sprintf( cmd, "M%c:INSP? '%s'\r", ch - LECROY_WR_M1 + 1, name );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
-        sprintf( cmd, "T%c:INSP? '%s'", ch - LECROY_WR_TA + 'A', name );
+        sprintf( cmd, "T%c:INSP? '%s'\r", ch - LECROY_WR_TA + 'A', name );
     else
         fsc2_impossible( );
 
@@ -1600,7 +1773,7 @@ static int lecroy_wr_get_int_value( int          ch,
         /* empty */ ;
 
     if ( ! *ptr )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return T_atoi( ptr );
 }
@@ -1619,11 +1792,11 @@ static double lecroy_wr_get_float_value( int          ch,
 
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
-        sprintf( cmd, "C%d:INSP? '%s'", ch - LECROY_WR_CH1 + 1, name );
+        sprintf( cmd, "C%d:INSP? '%s'\r", ch - LECROY_WR_CH1 + 1, name );
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
-        sprintf( cmd, "M%c:INSP? '%s'", ch - LECROY_WR_M1 + 1, name );
+        sprintf( cmd, "M%c:INSP? '%s'\r", ch - LECROY_WR_M1 + 1, name );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
-        sprintf( cmd, "T%c:INSP? '%s'", ch - LECROY_WR_TA + 'A', name );
+        sprintf( cmd, "T%c:INSP? '%s'\r", ch - LECROY_WR_TA + 'A', name );
     else
         fsc2_impossible( );
 
@@ -1634,7 +1807,7 @@ static double lecroy_wr_get_float_value( int          ch,
         /* empty */ ;
 
     if ( ! *ptr )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return T_atod( ptr );
 }
@@ -1645,8 +1818,12 @@ static double lecroy_wr_get_float_value( int          ch,
 
 bool lecroy_wr_command( const char * cmd )
 {
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    ssize_t to_send = strlen( cmd );
+
+
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
+        lecroy_wr_comm_failure( );
     return OK;
 }
 
@@ -1665,7 +1842,7 @@ static unsigned int lecroy_wr_get_inr( void )
     long length = 10;
 
 
-    lecroy_wr_talk( "INR?", reply, &length );
+    lecroy_wr_talk( "INR?\r", reply, &length );
     reply[ length - 1 ] = '\0';
     return ( unsigned int ) T_atoi( reply );
 }
@@ -1678,9 +1855,15 @@ static bool lecroy_wr_talk( const char * cmd,
                             char *       reply,
                             long *       length )
 {
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( lecroy_wr.device, reply, length ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+    ssize_t to_send = strlen( cmd );
+
+
+    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send ||
+         ( *length = fsc2_serial_read( SERIAL_PORT, reply, *length,
+                                       TIMEOUT_FROM_LENGTH( *length ), SET ) )
+                                                                         <= 0 )
+        lecroy_wr_comm_failure( );
     return OK;
 }
 
@@ -1688,10 +1871,141 @@ static bool lecroy_wr_talk( const char * cmd,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static void lecroy_wr_gpib_failure( void )
+static void lecroy_wr_comm_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static bool lecroy_wr_serial_open( void )
+{
+    /* Calculate a rough estimate of how many micro-seconds transmitting
+       a single byte will take */
+
+    switch ( SERIAL_BAUDRATE )
+    {
+        case B50 :
+            Serial_Delay_Factor = 1.0e7 / 50;
+            break;
+
+        case B75 :
+            Serial_Delay_Factor = 1.0e7 / 75;
+            break;
+
+        case B110 :
+            Serial_Delay_Factor = 1.0e7 / 110;
+            break;
+
+        case B134 :
+            Serial_Delay_Factor = 1.0e7 / 134;
+            break;
+
+        case B150 :
+            Serial_Delay_Factor = 1.0e7 / 150;
+            break;
+
+        case B200 :
+            Serial_Delay_Factor = 1.0e7 / 200;
+            break;
+
+        case B300 :
+            Serial_Delay_Factor = 1.0e7 / 300;
+            break;
+
+        case B600 :
+            Serial_Delay_Factor = 1.0e7 / 600;
+            break;
+
+        case B1200 :
+            Serial_Delay_Factor = 1.0e7 / 1200;
+            break;
+
+        case B1800 :
+            Serial_Delay_Factor = 1.0e7 / 1800;
+            break;
+
+        case B2400 :
+            Serial_Delay_Factor = 1.0e7 / 2400;
+            break;
+
+        case B4800 :
+            Serial_Delay_Factor = 1.0e7 / 4800;
+            break;
+
+        case B9600 :
+            Serial_Delay_Factor = 1.0e7 / 9600;
+            break;
+
+        case B19200 :
+            Serial_Delay_Factor = 1.0e7 / 19200;
+            break;
+
+        case B38400 :
+            Serial_Delay_Factor = 1.0e7 / 38400;
+            break;
+
+        case B57600 :
+            Serial_Delay_Factor = 1.0e7 / 57600;
+            break;
+
+        case B115200 :
+            Serial_Delay_Factor = 1.0e7 / 115200;
+            break;
+
+        case B230400 :
+            Serial_Delay_Factor = 1.0e7 / 230400;
+            break;
+
+        default :
+            print( FATAL, "Invalid baud rate set in configuration file "
+                   "for device.\n" );
+            return FAIL;
+    }
+
+    if ( ( lecroy_wr.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+                        O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
+        return FAIL;
+
+    /* Switch off parity checking (8N1) and use of 2 stop bits and clear
+       character size mask, then set character size mask to CS8, allow flow
+       control and finally set the baud rate */
+
+    lecroy_wr.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
+    lecroy_wr.tio->c_cflag |= CS8 | CRTSCTS;
+    cfsetispeed( lecroy_wr.tio, SERIAL_BAUDRATE );
+    cfsetospeed( lecroy_wr.tio, SERIAL_BAUDRATE );
+
+    fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
+    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, lecroy_wr.tio );
+
+    /* Switch off echoing of device (which is on by default), place device in
+       remote mote, lock the keyboard, swtich off sending of SRQ messages and
+       disable the splitting of lines after a certain number of bytes */
+
+    if ( fsc2_serial_write( SERIAL_PORT, ECHO_OFF, strlen( ECHO_OFF ),
+                            TIMEOUT_FROM_STRING( ECHO_OFF ), SET )
+                                                       != strlen( ECHO_OFF ) ||
+         fsc2_serial_write( SERIAL_PORT, REMOTE_ENABLE,
+                            strlen( REMOTE_ENABLE ),
+                            TIMEOUT_FROM_STRING( REMOTE_ENABLE ), SET )
+                                                  != strlen( REMOTE_ENABLE ) ||
+         fsc2_serial_write( SERIAL_PORT, LOCAL_LOCKOUT,
+                            strlen( LOCAL_LOCKOUT ),
+                            TIMEOUT_FROM_STRING( LOCAL_LOCKOUT ), SET )
+                                                  != strlen( LOCAL_LOCKOUT ) ||
+         fsc2_serial_write( SERIAL_PORT,
+                            "CORS SRQ,\"\",LS,OFF\r", 19,
+                            TIMEOUT_FROM_LENGTH( 19 ), SET ) != 19 )
+    {
+        lecroy_wr_finished( );
+        return FAIL;
+    }
+
+    return OK;
 }
 
 

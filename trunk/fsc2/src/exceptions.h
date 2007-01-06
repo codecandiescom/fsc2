@@ -107,7 +107,7 @@ Exception_Types_T get_exception_type( const char * /* file */,
    about statements with no effect, which we get when the statement consists
    of e.g. just taking the address of the variable. */
 
-#define CLOBBER_PROTECT( a )  do { if ( &( a ) ) ( a ) = ( a ); } while( 0 )
+#define CLOBBER_PROTECT( a )  do { if ( ! &( a ) ) ( a ) = 0; } while( 0 )
 
 
 #endif  /* ! EXCEPTIONS_HEADER */

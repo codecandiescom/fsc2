@@ -45,28 +45,29 @@ tegam2714a_p; // Tegam 2714A function generator as pulse generator
 
 // Digital oszilloscopes
 
-tds520        // Tektronix digitizing oscilloscope 520
-tds520a       // Tektronix digitizing oscilloscope 520A
-tds520c       // Tektronix digitizing oscilloscope 520C
-tds540        // Tektronix digitizing oscilloscope 540
-tds744a       // Tektronix digitizing oscilloscope 744A
-tds754a       // Tektronix digitizing oscilloscope 754A
-lecroy9400    // LeCroy digitizing oscilloscope 9400
-lecroy9450    // LeCroy digitizing oscilloscope 9450
-lecroy9424    // LeCroy digitizing oscilloscope 9424
-lecroy9424e   // LeCroy digitizing oscilloscope 9424e
-lecroy9410    // LeCroy digitizing oscilloscope 9410
-lecroy_wr2    // LeCroy digitizing oscilloscope Waverunner 2
-lecroy_ws     // LeCroy digitizing oscilloscope WaveSurfer
-ag54830b      // Agilent 54830B digitizing oscilloscope
+tds520        // Tektronix 520
+tds520a       // Tektronix 520A
+tds520c       // Tektronix 520C
+tds540        // Tektronix 540
+tds744a       // Tektronix 744A
+tds754a       // Tektronix 754A
+lecroy9400    // LeCroy 9400
+lecroy9450    // LeCroy 9450
+lecroy9424    // LeCroy 9424
+lecroy9424e   // LeCroy 9424e
+lecroy9410    // LeCroy 9410
+lecroy_wr     // LeCroy Waverunner and Waverunner 2 (GPIB)
+lecroy_wr_s   // LeCroy Waverunner and Waverunner 2 (serial)
+lecroy_ws     // LeCroy WaveSurfer (LAN)
+ag54830b      // Agilent 54830B oscilloscope
 
 
 // Lock-In amplifiers
 
-sr510         // Stanford Research lock-in amplifier 510
-sr530         // Stanford Research lock-in amplifier 530
-sr810         // Stanford Research lock-in amplifier 810
-sr830         // Stanford Research lock-in amplifier 830
+sr510         // Stanford Research 510
+sr530         // Stanford Research 530
+sr810         // Stanford Research 810
+sr830         // Stanford Research 830
 er023m        // Bruker Signal Channel ER 023 M
 
 
@@ -87,10 +88,10 @@ hjs_fc;       // field control with field checking for Steinhoff group
 
 // Field meter
 
-er035m        // Bruker NMR gaussmeter (connected to IEEE bus)
-er035m_s      // Bruker NMR gaussmeter (connected to serial port)
-er035m_sa     // Bruker NMR gaussmeter (connected to IEEE bus, stand alone)
-er035m_sas    // Bruker NMR gaussmeter (connected to serial port, stand alone)
+er035m        // Bruker NMR gaussmeter (GPIB)
+er035m_s      // Bruker NMR gaussmeter (serial)
+er035m_sa     // Bruker NMR gaussmeter (GPIB, stand alone)
+er035m_sas    // Bruker NMR gaussmeter (serial, stand alone)
 bh15          // Bruker Hall effect field controller
 pt2025        // Metrolab NMR teslameter
 bnm12         // Bruker NMR gaussmeter (requires WITIO-48 card)

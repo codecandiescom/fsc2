@@ -38,9 +38,11 @@ extern "C" {
    (a simple change of this number allows to recompile the module for a
    different number of boards) */
 
-#define NI_DAQ_MAX_BOARDS         8
-#define NI_DAQ_MAX_PCI_E_BOARDS   4
-#define NI_DAQ_MAX_AT_MIO_BOARDS  4
+#define NI_DAQ_MAX_PCI_E_BOARDS     4
+#define NI_DAQ_MAX_AT_MIO_E_BOARDS  4
+
+#define NI_DAQ_MAX_BOARDS         \
+	( NI_DAQ_MAX_PCI_E_BOARDS + NI_DAQ_MAX_AT_MIO_E_BOARDS )
 
 
 typedef enum {

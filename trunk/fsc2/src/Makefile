@@ -93,8 +93,8 @@ fsc2: $(objects)
 
 %.c: %.l $(headers)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.l,%,$<) -o$@ $<
-	sed -e 's/\bECHO\b/FLEX_ECHO/g;\
-			s/for ( n = 0; n < max_size && \\$$/for ( n = 0; n < ( size_t ) max_size \&\& \\/;' $@ > $@.x
+	sed 's/\bECHO\b/FLEX_ECHO/g;\
+		 s/for ( n = 0; n < max_size && \\$$/for ( n = 0; n < ( size_t ) max_size \&\& \\/;' $@ > $@.x
 		mv $@.x $@
 
 

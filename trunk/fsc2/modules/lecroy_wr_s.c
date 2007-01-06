@@ -22,8 +22,8 @@
  */
 
 
-#define LECROY_WR_MAIN_
-#include "lecroy_wr.h"
+#define LECROY_WR_S_MAIN_
+#include "lecroy_wr_s.h"
 
 
 /*--------------------------------*/
@@ -64,14 +64,14 @@ static LECROY_WR_T lecroy_wr_stored;
  * Init hook function for the module.
  *------------------------------------*/
 
-int lecroy_wr_init_hook( void )
+int lecroy_wr_s_init_hook( void )
 {
     size_t i;
 
 
-    /* Set global variable to indicate that GPIB bus is needed */
+    /* Claim the serial port (throws exception on failure) */
 
-    Need_GPIB = SET;
+    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
     /* Initialize some variables in the digitizers structure */
 
@@ -147,7 +147,7 @@ int lecroy_wr_init_hook( void )
  * Test hook function for the module
  *-----------------------------------*/
 
-int lecroy_wr_test_hook( void )
+int lecroy_wr_s_test_hook( void )
 {
     lecroy_wr_store_state( &lecroy_wr_stored, &lecroy_wr );
     return 1;
@@ -158,17 +158,16 @@ int lecroy_wr_test_hook( void )
  * Start of experiment hook function for the module
  *--------------------------------------------------*/
 
-int lecroy_wr_exp_hook( void )
+int lecroy_wr_s_exp_hook( void )
 {
     /* Reset structure describing the state of the digitizer to what it
        was before the test run */
 
     lecroy_wr_store_state( &lecroy_wr, &lecroy_wr_stored );
 
-    if ( ! lecroy_wr_init( DEVICE_NAME ) )
+    if ( ! lecroy_wr_init( ) )
     {
-        print( FATAL, "Initialization of device failed: %s\n",
-               gpib_error_msg );
+        print( FATAL, "Initialization of device failed.\n" );
         THROW( EXCEPTION );
     }
 
@@ -180,7 +179,7 @@ int lecroy_wr_exp_hook( void )
  * End of experiment hook function for the module
  *------------------------------------------------*/
 
-int lecroy_wr_end_of_exp_hook( void )
+int lecroy_wr_s_end_of_exp_hook( void )
 {
     lecroy_wr_finished( );
     return 1;
@@ -192,7 +191,7 @@ int lecroy_wr_end_of_exp_hook( void )
  *------------------------------------------*/
 
 
-void lecroy_wr_exit_hook( void )
+void lecroy_wr_s_exit_hook( void )
 {
     lecroy_wr_exit_cleanup( );
     lecroy_wr_delete_windows( &lecroy_wr );
@@ -891,11 +890,11 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
                    "(%d).\n", LECROY_WR_BWL_OFF, LECROY_WR_BWL_ON,
                    LECROY_WR_BWL_200MHZ );
             THROW( EXCEPTION );
-#if defined LECROY_WR_MAX_BW_IS_200MHz
-            if ( bwl == bwl > LECROY_WR_BWL_200MHZ )
-                bwl = LECROY_WR_BWL_OFF;
-#endif
         }
+#if defined LECROY_WR_MAX_BW_IS_200MHz
+        if ( bwl == LECROY_WR_BWL_200MHZ )
+            bwl = LECROY_WR_BWL_OFF;
+#endif
     }
     else if ( v->type == STR_VAR )
     {

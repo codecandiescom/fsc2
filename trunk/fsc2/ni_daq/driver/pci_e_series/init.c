@@ -29,11 +29,11 @@
 #include "board_props.h"
 
 
-Board boards[ NI_DAQ_MAX_BOARDS ];
+Board boards[ NI_DAQ_MAX_PCI_E_BOARDS ];
 static int major = NI_DAQ_MAJOR;
 int board_count = 0;
 
-static Register_Addresses regs[ NI_DAQ_MAX_BOARDS ];
+static Register_Addresses regs[ NI_DAQ_MAX_PCI_E_BOARDS ];
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 static Board_Functions func = {
@@ -144,7 +144,7 @@ static int __init pci_e_series_init( void )
 		if ( pci_e_series_pci_tbl[ i ].vendor == 0 )
 			continue;
 
-		if ( board_count >= NI_DAQ_MAX_BOARDS )
+		if ( board_count >= NI_DAQ_MAX_PCI_E_BOARDS )
 			break;
 
 		boards[ board_count ].dev = dev;
@@ -172,7 +172,7 @@ static int __init pci_e_series_init( void )
 		if ( pci_e_series_pci_tbl[ i ].vendor == 0 )
 			continue;
 
-		if ( board_count >= NI_DAQ_MAX_BOARDS )
+		if ( board_count >= NI_DAQ_MAX_PCI_E_BOARDS )
 			break;
 
 		boards[ board_count ].type = pci_e_series_boards + i;
@@ -197,10 +197,10 @@ static int __init pci_e_series_init( void )
 		return -ENODEV;
 	}
 
-	if ( board_count >= NI_DAQ_MAX_BOARDS && dev != NULL )
+	if ( board_count >= NI_DAQ_MAX_PCI_E_BOARDS && dev != NULL )
 		printk( KERN_WARNING BOARD_SERIES_NAME ": There are more than "
 			"the currently supported maximum number of %d PCI-E "
-			"series boards!\n", NI_DAQ_MAX_BOARDS );
+			"series boards!\n", NI_DAQ_MAX_PCI_E_BOARDS );
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 
@@ -308,7 +308,7 @@ static int pci_e_series_init_board( struct pci_dev * dev,
 		if ( boards[ i ].dev == dev )
 			break;
 
-	if ( i == NI_DAQ_MAX_BOARDS ) {
+	if ( i == NI_DAQ_MAX_PCI_E_BOARDS ) {
 		printk( KERN_ERR BOARD_SERIES_NAME
 			": pci_e_series_init_board() called with unknown "
 			"pci_dev structure.\n" );

@@ -16,7 +16,7 @@ DEVICES:
 
 ips120_10;
 itc503;
-lecroy_wr2;
+lecroy_wr;
 
 
 VARIABLES:

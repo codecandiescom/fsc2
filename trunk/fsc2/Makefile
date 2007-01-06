@@ -887,15 +887,15 @@ fsc2_config.h: Makefile $(MACHINE_INCLUDE_FILE)
 		echo "Creating fsc2_config.h...";    \
 	fi
 	@echo "/*--- Created automatically, don't change ---*/" > fsc2_config.h
-	@echo -e $(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS))) >> \
-		  fsc2_config.h
+	@printf '%b\n' "$(patsubst -D%,\\n#define %,$(subst =, ,$(CONFFLAGS)))" \
+		    >> fsc2_config.h
 
 
 # Create a file with as much as possible information about the files
 # involved in the make process
 
 built:
-	-@cat fsc2_config.h > version
+	-@cp -f fsc2_config.h version
 	-@echo >> version
 	-@grep '$$Id\: ' Makefile $(sdir)/Makefile $(sdir)/*.[chly]        \
 	                 $(mdir)/Makefile $(mdir)/*.[chl]                  \
