@@ -1191,10 +1191,8 @@ static bool er035m_s_comm( int type,
                           O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
                 return FAIL;
 
-            /* Switch off parity checking (8N1) and use of 2 stop bits and
-               clear character size mask, set character size mask to CS8 and
-               the flag for ignoring modem lines, enable reading and, finally,
-               set the baud rate. */
+            /* Use 8-N-1, allow flow control, ignore modem lines, enable
+               reading and set the baud rate. */
 
             nmr.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
             nmr.tio->c_cflag |= CS8 | CLOCAL | CREAD;

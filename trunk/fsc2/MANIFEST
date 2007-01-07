@@ -7,7 +7,6 @@ Changes
 COPYING
 INSTALL
 Makefile
-makelog2
 MANIFEST
 README
 README.mail
@@ -82,9 +81,7 @@ config/hp8648b.conf
 config/hp8648b.table
 config/hp8672a.conf
 config/ips120_10.conf
-config/ips120_10.conf~
 config/ips120_10_mod.conf
-config/ips120_10_mod.conf.serial
 config/ips20_4.conf
 config/itc503.conf
 config/keithley228a.conf
@@ -96,7 +93,8 @@ config/lecroy9420.conf
 config/lecroy9424.conf
 config/lecroy9424e.conf
 config/lecroy9450.conf
-config/lecroy_wr2.conf
+config/lecroy_wr.conf
+config/lecroy_wr_s.conf
 config/lecroy_ws.conf
 config/Makefile
 config/mcn700_2000.conf
@@ -292,11 +290,15 @@ modules/lecroy94.map.tmpl
 modules/lecroy94_util.c.tmpl
 modules/lecroy_vicp.c
 modules/lecroy_vicp.h
-modules/lecroy_wr2.c
-modules/lecroy_wr2_gpib.c
-modules/lecroy_wr2.h
-modules/lecroy_wr2.map
-modules/lecroy_wr2_util.c
+modules/lecroy_wr.c
+modules/lecroy_wr_gpib.c
+modules/lecroy_wr.h
+modules/lecroy_wr.map
+modules/lecroy_wr_s.c
+modules/lecroy_wr_serial.c
+modules/lecroy_wr_s.h
+modules/lecroy_wr_s.map
+modules/lecroy_wr_util.c
 modules/lecroy_ws.c
 modules/lecroy_ws.h
 modules/lecroy_ws.map
@@ -304,7 +306,6 @@ modules/lecroy_ws_net.c
 modules/lecroy_ws_util.c
 modules/Makefile
 modules/Makefile.tmpl
-modules/makelog
 modules/mcn700_2000.c
 modules/me6000.c
 modules/ni6601.c
@@ -704,8 +705,12 @@ ni_daq/INSTALL
 ni_daq/Makefile
 ni_daq/README
 
-ni_daq/driver/Makefile
+ni_daq/driver/Makefile@
+ni_daq/driver/Makefile.at_mio_e_series
+ni_daq/driver/Makefile.old
 ni_daq/driver/Makefile.pci_e_series
+ni_daq/driver/makelog
+ni_daq/driver/Modules.symvers
 ni_daq/driver/ni_daq_drv.txt
 
 ni_daq/driver/daq_stc/AI.c

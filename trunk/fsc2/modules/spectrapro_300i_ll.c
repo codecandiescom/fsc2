@@ -1185,7 +1185,7 @@ static bool spectrapro_300i_comm( int type,
                           O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
                 return FAIL;
 
-            /* Set transfer mode to 8 bit, no parity and 1 stop bit (8N1)
+            /* Set transfer mode to 8 bit, no parity and 1 stop bit (8-N-1)
                and ignore control lines, don't use flow control. */
 
             spectrapro_300i.tio->c_cflag = 0;

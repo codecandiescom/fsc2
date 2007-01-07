@@ -643,7 +643,7 @@ static bool hjs_daadc_serial_init( void )
          == NULL )
         return FAIL;
 
-    /* The device uses 8 bit transfers, no parity and one stop bit (8N1),
+    /* The device uses 8 bit transfers, no parity and one stop bit (8-N-1),
        a baud rate of 9600 and has no control lines (only RTX, DTX and
        ground are connected internally). Of course, canonical mode can't
        be used here.*/

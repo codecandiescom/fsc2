@@ -1031,9 +1031,7 @@ bool magnet_do( int command )
                         O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
                 return FAIL;
 
-            /* Switch off parity checking (8N1) and use of 2 stop bits and
-               clear character size mask, then set character size mask to CS8,
-               allow flow control and finally set the baud rate */
+            /* Use 8-N-1, allow flow control and set the baud rate */
 
             magnet.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
             magnet.tio->c_cflag |= CS8 | CRTSCTS;

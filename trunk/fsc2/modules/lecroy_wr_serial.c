@@ -79,6 +79,8 @@ static double Serial_Delay_Factor;
 
 #define ECHO_ON               "\033]"
 #define ECHO_OFF              "\033["
+#define XON_XOFF_ON           "\033)"
+#define XON_XOFF_OFF          "\033("
 #define DEVICE_CLEAR          "\033c"
 #define REMOTE_ENABLE         "\033r"
 #define GO_TO_LOCAL           "\033l"
@@ -93,7 +95,6 @@ static double Serial_Delay_Factor;
 
 bool lecroy_wr_init( void )
 {
-    char buffer[ 10 ];
     int i;
 
 
@@ -101,23 +102,15 @@ bool lecroy_wr_init( void )
         return FAIL;
 
     /* Set digitizer to short form of replies, transmit data in one block in
-       hex word (4 byte) format with MSB first. Then ask for the status byte
-       to make sure the device reacts. */
-
-    if ( fsc2_serial_write( SERIAL_PORT,
-                            "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,HEX;CORD HI\r",
-                            45, TIMEOUT_FROM_LENGTH( 45 ), SET ) != 45 ||
-         fsc2_serial_write( SERIAL_PORT, "*STB?\r", 6,
-                            TIMEOUT_FROM_LENGTH( 6 ), SET ) != 6 ||
-         fsc2_serial_read( SERIAL_PORT, buffer, 10,
-                           TIMEOUT_FROM_LENGTH( 10 ), SET ) <= 0 )
-    {
-        lecroy_wr_finished( );
-        return FAIL;
-    }
+       hex word (4 byte) format with MSB first. */
 
     TRY
     {
+        if ( fsc2_serial_write( SERIAL_PORT,
+                              "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,HEX;CORD HI\r",
+                              45, TIMEOUT_FROM_LENGTH( 45 ), SET ) != 45 )
+            THROW( EXCEPTION );
+
         /* Figure out which traces are displayed (only 8 can be displayed
            at the same time and we must be able to check for this when
            the user asks for one more to be displayed) */
@@ -151,7 +144,7 @@ bool lecroy_wr_init( void )
 
         if ( fsc2_serial_write( SERIAL_PORT, "SCLK INT\r", 9,
                                 TIMEOUT_FROM_LENGTH( 9 ), SET ) != 9 )
-            lecroy_wr_comm_failure( );
+            THROW( EXCEPTION );
 
         /* Set or get the timebase (including the index in the table of
            possible timebases) while also taking care of the mode, i.e.
@@ -1883,86 +1876,82 @@ static void lecroy_wr_comm_failure( void )
 
 static bool lecroy_wr_serial_open( void )
 {
+    char buf[ 10 ];
+    int bits = 1;           /* one for the start bit */
+
+
+    /* Check the settings from the configuration file */
+
+    if ( SERIAL_DATA_BITS != 7 && SERIAL_DATA_BITS != 8 )
+    {
+        print( FATAL, "Invalid or unsupported number of data bits set in "
+               "configuration file for device.\n" );
+        return FAIL;
+    }
+    bits += SERIAL_DATA_BITS;
+
+    if ( SERIAL_PARITY < -1 || SERIAL_PARITY > 1 )
+    {
+        print( FATAL, "Invalid setting for parity in configuration file "
+               "for device.\n" );
+        return FAIL;
+    }
+    bits += abs( SERIAL_PARITY );
+
+    if ( SERIAL_STOP_BITS != 1 && SERIAL_STOP_BITS != 2 )
+    {
+        print( FATAL, "Invalid number of stop bits set in configuration file "
+               "for device.\n" );
+        return FAIL;
+    }
+    bits += SERIAL_STOP_BITS;
+
+    if ( SERIAL_FLOW_CONTROL != 0 && SERIAL_FLOW_CONTROL != 1 )
+    {
+        print( FATAL, "Invalid setting for flow control in configuration file "
+               "for device.\n" );
+        return FAIL;
+    }
+
     /* Calculate a rough estimate of how many micro-seconds transmitting
        a single byte will take */
 
     switch ( SERIAL_BAUDRATE )
     {
-        case B50 :
-            Serial_Delay_Factor = 1.0e7 / 50;
-            break;
-
-        case B75 :
-            Serial_Delay_Factor = 1.0e7 / 75;
-            break;
-
-        case B110 :
-            Serial_Delay_Factor = 1.0e7 / 110;
-            break;
-
-        case B134 :
-            Serial_Delay_Factor = 1.0e7 / 134;
-            break;
-
-        case B150 :
-            Serial_Delay_Factor = 1.0e7 / 150;
-            break;
-
-        case B200 :
-            Serial_Delay_Factor = 1.0e7 / 200;
-            break;
-
         case B300 :
-            Serial_Delay_Factor = 1.0e7 / 300;
-            break;
-
-        case B600 :
-            Serial_Delay_Factor = 1.0e7 / 600;
+            Serial_Delay_Factor = ( 1.0e6 * bits ) / 300;
             break;
 
         case B1200 :
-            Serial_Delay_Factor = 1.0e7 / 1200;
+            Serial_Delay_Factor = ( 1.0e6 * bits ) / 1200;
             break;
-
-        case B1800 :
-            Serial_Delay_Factor = 1.0e7 / 1800;
-            break;
-
         case B2400 :
-            Serial_Delay_Factor = 1.0e7 / 2400;
+            Serial_Delay_Factor = ( 1.0e6 * bits ) / 2400;
             break;
 
         case B4800 :
-            Serial_Delay_Factor = 1.0e7 / 4800;
+            Serial_Delay_Factor = ( 1.0e6 * bits ) / 4800;
             break;
 
         case B9600 :
-            Serial_Delay_Factor = 1.0e7 / 9600;
+            Serial_Delay_Factor = ( 1.0e6 * bits ) / 9600;
             break;
 
         case B19200 :
-            Serial_Delay_Factor = 1.0e7 / 19200;
-            break;
-
-        case B38400 :
-            Serial_Delay_Factor = 1.0e7 / 38400;
+            Serial_Delay_Factor = ( 1.0e6 * bits ) / 19200;
             break;
 
         case B57600 :
-            Serial_Delay_Factor = 1.0e7 / 57600;
+            Serial_Delay_Factor = ( 1.0e6 * bits ) / 57600;
             break;
 
         case B115200 :
-            Serial_Delay_Factor = 1.0e7 / 115200;
-            break;
-
-        case B230400 :
-            Serial_Delay_Factor = 1.0e7 / 230400;
+            Serial_Delay_Factor = ( 1.0e6 * bits ) / 115200;
             break;
 
         default :
-            print( FATAL, "Invalid baud rate set in configuration file "
-                   "for device.\n" );
+            print( FATAL, "Invalid or unsupported baud rate set in "
+                   "configuration file for device.\n" );
             return FAIL;
     }
 
@@ -1970,25 +1959,68 @@ static bool lecroy_wr_serial_open( void )
                         O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
         return FAIL;
 
-    /* Switch off parity checking (8N1) and use of 2 stop bits and clear
-       character size mask, then set character size mask to CS8, allow flow
-       control and finally set the baud rate */
+    /* Set up the serial port according to the settings in the configuration
+       file */
 
-    lecroy_wr.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE );
-    lecroy_wr.tio->c_cflag |= CS8 | CRTSCTS;
+    lecroy_wr.tio->c_cflag &= ~ ( PARENB | CSTOPB | CSIZE | CRTSCTS );
+
+    if ( SERIAL_DATA_BITS == 8 )
+        lecroy_wr.tio->c_cflag |= CS8;
+    else
+        lecroy_wr.tio->c_cflag |= CS7;
+
+    if ( SERIAL_STOP_BITS == 2 )
+        lecroy_wr.tio->c_cflag |= CSTOPB;
+
+    if ( SERIAL_PARITY == 1 )
+        lecroy_wr.tio->c_cflag |= PARENB;
+    else if ( SERIAL_PARITY == -1 )
+        lecroy_wr.tio->c_cflag |= PARENB | PARODD;
+
+    if ( SERIAL_FLOW_CONTROL == 1 )
+        lecroy_wr.tio->c_cflag |= CRTSCTS;
+
     cfsetispeed( lecroy_wr.tio, SERIAL_BAUDRATE );
     cfsetospeed( lecroy_wr.tio, SERIAL_BAUDRATE );
 
     fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
     fsc2_tcsetattr( SERIAL_PORT, TCSANOW, lecroy_wr.tio );
 
+    /* Send command to enable either hardware or software flow control */
+
+    if ( SERIAL_FLOW_CONTROL == 1 )
+    {
+        if ( fsc2_serial_write( SERIAL_PORT, XON_XOFF_OFF,
+                                strlen( XON_XOFF_OFF ),
+                                TIMEOUT_FROM_STRING( XON_XOFF_OFF ), SET )
+                                                    != strlen( XON_XOFF_OFF ) )
+        {
+            lecroy_wr_finished( );
+            return FAIL;
+        }
+    }
+    else
+    {
+        if ( fsc2_serial_write( SERIAL_PORT, XON_XOFF_ON,
+                                strlen( XON_XOFF_ON ),
+                                TIMEOUT_FROM_STRING( XON_XOFF_ON ), SET )
+                                                     != strlen( XON_XOFF_ON ) )
+        {
+            lecroy_wr_finished( );
+            return FAIL;
+        }
+    }
+
     /* Switch off echoing of device (which is on by default), place device in
-       remote mote, lock the keyboard, swtich off sending of SRQ messages and
-       disable the splitting of lines after a certain number of bytes */
+       remote mode, lock the keyboard, set message terminators and switch off
+       sending of SRQ messages and splitting of lines. */
 
     if ( fsc2_serial_write( SERIAL_PORT, ECHO_OFF, strlen( ECHO_OFF ),
                             TIMEOUT_FROM_STRING( ECHO_OFF ), SET )
                                                        != strlen( ECHO_OFF ) ||
+         fsc2_serial_write( SERIAL_PORT, ECHO_OFF, strlen( XON_XOFF_OFF ),
+                            TIMEOUT_FROM_STRING( XON_XOFF_OFF ), SET )
+                                                   != strlen( XON_XOFF_OFF ) ||
          fsc2_serial_write( SERIAL_PORT, REMOTE_ENABLE,
                             strlen( REMOTE_ENABLE ),
                             TIMEOUT_FROM_STRING( REMOTE_ENABLE ), SET )
@@ -1998,8 +2030,10 @@ static bool lecroy_wr_serial_open( void )
                             TIMEOUT_FROM_STRING( LOCAL_LOCKOUT ), SET )
                                                   != strlen( LOCAL_LOCKOUT ) ||
          fsc2_serial_write( SERIAL_PORT,
-                            "CORS SRQ,\"\",LS,OFF\r", 19,
-                            TIMEOUT_FROM_LENGTH( 19 ), SET ) != 19 )
+                          "CORS EO,\"\n\r\",EI,\"\r\",SRQ,\"\",LS,OFF;*STB?\r",
+                            40, TIMEOUT_FROM_LENGTH( 40 ), SET ) != 40 ||
+         fsc2_serial_read( SERIAL_PORT, buf, 10,
+                           TIMEOUT_FROM_LENGTH( 10 ), SET ) <= 0 )
     {
         lecroy_wr_finished( );
         return FAIL;

@@ -856,8 +856,8 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
 
     if ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
     {
-        print( FATAL, "Can't set or obtain offset for channel %s.\n",
-               LECROY_WR_Channel_Names[ channel ] );
+        print( FATAL, "Can't set or obtain bandwidth limiter setting for "
+               "channel %s.\n", LECROY_WR_Channel_Names[ channel ] );
         THROW( EXCEPTION );
     }
 
@@ -885,12 +885,18 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
         bwl = get_long( v, "banndwith limiter type" );
         if ( bwl < LECROY_WR_BWL_OFF || bwl > LECROY_WR_BWL_200MHZ )
         {
+#if ! defined LECROY_WR_MAX_BW_IS_200MHz
             print( FATAL, "Invalid argument, bandwidth limiter can only be "
-                   "set to 'OFF' (%d), 'ON' (%d) or '200MHZ' "
-                   "(%d).\n", LECROY_WR_BWL_OFF, LECROY_WR_BWL_ON,
-                   LECROY_WR_BWL_200MHZ );
+                   "set to \"OFF\" (%d), \"ON\" (%d) or \"200MHZ\" (%d).\n",
+                   LECROY_WR_BWL_OFF, LECROY_WR_BWL_ON, LECROY_WR_BWL_200MHZ );
+#else
+            print( FATAL, "Invalid argument, bandwidth limiter can only be "
+                   "set to \"OFF\" (%d) or \"ON\" (%d).\n",
+                   LECROY_WR_BWL_OFF, LECROY_WR_BWL_ON );
+#endif
             THROW( EXCEPTION );
         }
+
 #if defined LECROY_WR_MAX_BW_IS_200MHz
         if ( bwl == LECROY_WR_BWL_200MHZ )
             bwl = LECROY_WR_BWL_OFF;
@@ -955,7 +961,7 @@ Var_T *digitizer_coupling( Var_T * v )
 
     if ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
     {
-        print( FATAL, "Can't set or obtain coupling for channel %s.\n",
+        print( FATAL, "Can't set or obtain coupling type for channel %s.\n",
                LECROY_WR_Channel_Names[ channel ] );
         THROW( EXCEPTION );
     }
@@ -1107,7 +1113,8 @@ Var_T *digitizer_trigger_level( Var_T * v )
     if ( ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX ) &&
          channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
     {
-        print( FATAL, "Invalid trigger channel.\n" );
+        print( FATAL, "Invalid trigger channel %s.\n",
+               LECROY_WR_Channel_Names[ channel ] );
         THROW( EXCEPTION );
     }
 
@@ -1149,7 +1156,7 @@ Var_T *digitizer_trigger_level( Var_T * v )
                  ! lecroy_wr.is_sens[ channel ] )
             {
                 print( FATAL, "Can't set trigger level in PREPARATION section "
-                       "while sensitivity for the chaannel hasn't been "
+                       "while sensitivity for the channel hasn't been "
                        "set.\n" );
                 THROW( EXCEPTION );
             }
@@ -1220,12 +1227,8 @@ Var_T *digitizer_trigger_slope( Var_T * v )
     if ( ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX ) &&
          channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
     {
-        print( FATAL, "Invalid trigger channel.\n" );
-        THROW( EXCEPTION );
-    }
-
-    {
-        print( FATAL, "Invalid trigger channel.\n" );
+        print( FATAL, "Invalid trigger channel %s.\n",
+               LECROY_WR_Channel_Names[ channel ] );
         THROW( EXCEPTION );
     }
 
@@ -1306,7 +1309,8 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
     if ( ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX ) &&
          channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
     {
-        print( FATAL, "Invalid trigger channel.\n" );
+        print( FATAL, "Invalid trigger channel %s.\n",
+               LECROY_WR_Channel_Names[ channel ] );
         THROW( EXCEPTION );
     }
 
@@ -1461,7 +1465,7 @@ Var_T *digitizer_trigger_delay( Var_T * v )
     if ( FSC2_MODE == PREPARATION && ! lecroy_wr.is_timebase )
     {
         print( FATAL, "Can't set trigger delay in PREPARATION "
-               "section while tim base hasn't been set.\n" );
+               "section while time base hasn't been set.\n" );
         THROW( EXCEPTION );
     }
 
@@ -1754,7 +1758,8 @@ Var_T *digitizer_get_curve( Var_T * v )
              ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4     ) ||
              ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD     )    ) )
     {
-        print( FATAL, "Invalid channel specification.\n" );
+        print( FATAL, "Can't fetch curve from channel %s.\n",
+               LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
@@ -1850,7 +1855,8 @@ Var_T *digitizer_get_area( Var_T * v )
              ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4     ) ||
              ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD     )    ) )
     {
-        print( FATAL, "Invalid channel specification.\n" );
+        print( FATAL, "Can't determine area from channel %s.\n",
+               LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
@@ -2003,7 +2009,8 @@ Var_T *digitizer_get_amplitude( Var_T * v )
              ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4     ) ||
              ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD     )    ) )
     {
-        print( FATAL, "Invalid channel specification.\n" );
+        print( FATAL, "Can't determine amplitude for channel %s.\n",
+               LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
@@ -2048,7 +2055,6 @@ Var_T *digitizer_get_amplitude( Var_T * v )
 
     if ( win_count > 1 )
         ret = vars_push( FLOAT_ARR, NULL, ( long ) win_count );
-
 
     /* When we're still in the test phase we got to return a dummy value */
 
