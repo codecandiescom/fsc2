@@ -56,18 +56,28 @@ fsc2.info: $(docs)
 html: fsc2.html
 
 fsc2.html: $(docs) $(figures)
-	./texi2html -split chapter -menu -number -sec_nav -iso fsc2.texi
+	./texi2html -split section -menu -number -sec_nav -iso fsc2.texi
 
 	@printf '%b\n' "  <div id=\"links\">\n  <img src=\"fsc2.gif\" alt=\"fsc2 logo\">\n  <br><br>" >> TOC
 	@for i in fsc2.html fsc2_[1-9].html; do \
-		if [ -z "`grep -h '^<title>fsc2: Index:' $$i`" ]; then \
+		if [    -z "`grep -h '^<title>fsc2: Index:' $$i`" \
+			 -a -n "`grep -h '^<h1>' $$i`" ]; then \
 			echo -n '  <a href="'$$i'">' >> TOC; \
 			grep -h '^<title>fsc2: [^<]*</title>$$' $$i | \
 			sed 's/^<title>fsc2: \([^<]*\)<\/title>$$/\1<\/a><br>/' >> TOC; \
 		fi; \
 	done
 	@for i in fsc2_[1-9][0-9].html; do \
-		if [ -z "`grep -h '^<title>fsc2: Index:' $$i`" ]; then \
+		if [    -z "`grep -h '^<title>fsc2: Index:' $$i`" \
+			 -a -n "`grep -h '^<h1>' $$i`" ]; then \
+			echo -n '  <a href="'$$i'">' >> TOC; \
+			grep -h '^<title>fsc2: [^<]*</title>$$' $$i | \
+			sed 's/^<title>fsc2: \([^<]*\)<\/title>$$/\1<\/a><br>/' >> TOC; \
+		fi; \
+	done
+	@for i in fsc2_[1-9][0-9][0-9].html; do \
+		if [    -z "`grep -h '^<title>fsc2: Index:' $$i`" \
+			 -a -n "`grep -h '^<h1>' $$i`" ]; then \
 			echo -n '  <a href="'$$i'">' >> TOC; \
 			grep -h '^<title>fsc2: [^<]*</title>$$' $$i | \
 			sed 's/^<title>fsc2: \([^<]*\)<\/title>$$/\1<\/a><br>/' >> TOC; \

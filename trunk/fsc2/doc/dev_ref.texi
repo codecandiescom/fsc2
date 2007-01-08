@@ -722,6 +722,9 @@ In the GPIB configuration file use @code{"ER035M"} as the device name,
 @end ifnottex
 
 @paragraphindent 0
+@strong{Module name}: @code{er035m_sas}
+
+@paragraphindent 0
 @strong{Description}: Bruker (@url{http://www.bruker-biospin.com/}) NMR
 gaussmeter @w{ER 035 M} used as simple, stand-alone gaussmeter. Field
 range depends on probe being used, with @code{F0} probe it is @w{460 G} to

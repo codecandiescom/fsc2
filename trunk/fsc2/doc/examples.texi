@@ -94,14 +94,14 @@ the field range:
 37       wait( tc );
 38       data = lockin_get_data( );
 39       mean_data[ J ] += data;
-40       display_1d( J, 1.0e6 * data, 1,
-41                   J, 1.0e6 * mean_data[ J ] / I, 2 );
+40       display_1d( J, data / 1 uV, 1,
+41                   J, mean_data[ J ] / ( I * 1 uV ), 2 );
 42       fsave( File_1, "# #\n", field, data );
 43       field = sweep_up( );
 44     @}
 45 
 46     fsave( File_1, "\n" );
-47     field = reset_field( );
+47     field = magnet_reset_field( );
 48     clear_curve( 1 );
 49   @}
 50 
@@ -109,7 +109,7 @@ the field range:
 52   fsave( File_2, "% End field       = # G\n", end_field );
 53   fsave( File_2, "% Field step      = # G\n", field_step );
 54   fsave( File_2, "% Number of runs  = #\n", Number_of_runs );
-55   fsave( File_2, "% Time constant   = # ms\n", tc * 1.0e3 );
+55   fsave( File_2, "% Time constant   = # ms\n", tc / 1 ms );
 56   save( File_2, mean_data / Number_of_runs );
 @end example
 
@@ -184,7 +184,7 @@ In line 40/41 the new data value and the new mean value both are
 displayed on the screen. The first three arguments of the call of the
 function @code{display_1d()} (@pxref{display_1d()}) are the
 @i{x}-coordinate, which is just the loop counter variable, the
-@i{y}-coordinate, the new data value but multiplied by @code{1.0e6}
+@i{y}-coordinate, the new data value but devided by @code{1 uV}
 because the value returned by the lock-in amplifiers is always in Volts
 and we want to display the value in code micro-Volts, and the number of
 the curve, @code{1}. The next three arguments are for the new mean
@@ -223,15 +223,15 @@ have reached the end field and now have to start a new scan. First we
 write an empty line into the file for the data of all runs in order to
 have a visual indication where the data of the new run start. Then we
 have to set the field back to the start field, which can be done by
-calling the function @code{reset_field()} (@pxref{reset_field()})
-(you actually also could also tell the magnet to go to a field of
-@code{start_field()} by calling @code{set_field()} (@pxref{set_field()})
-with @code{start_field()} as its only argument). Finally, we have to
-remove the data of the last run from the screen but keeping the curve
-with the mean values. This is done by calling the function
-@code{clear_curve()} (@pxref{clear_curve()}) with the number of the
-curve to be removed (which is 1) as the parameter. Then we proceed with
-the inner loop.
+calling the function @code{magnet_reset_field()}
+(@pxref{magnet_reset_field()}) (you actually also could also tell
+the magnet to go to a field of @code{start_field()} by calling
+@code{magnet_field()} (@pxref{magnet_field()}) with @code{start_field()}
+as its only argument). Finally, we have to remove the data of the last
+run from the screen but keeping the curve with the mean values. This is
+done by calling the function @code{clear_curve()} (@pxref{clear_curve()})
+with the number of the curve to be removed (which is 1) as the parameter.
+Then we proceed with the inner loop.
 
 When the experiment finally is done, i.e.@: when we're finished doing the
 @code{Number_of_runs} repetitions of the field sweep we end up at line
@@ -305,14 +305,14 @@ All what's needed is to add and change a few lines.:
 47       wait( tc );
 48       data = lockin_get_data( );
 49       mean_data[ J ] += data;
-50       display_1d( J, 1.0e6 * data, 1,
-51                   J, 1.0e6 * mean_data[ J ] / I, 2 );
+50       display_1d( J, data / 1 uV, 1,
+51                   J, mean_data[ J ] / ( I * 1 uV ), 2 );
 52       fsave( File_1, "# #\n", field, data );
 53       field = sweep_up( );
 54     @}
 55 
 56     fsave( File_1, "\n" );
-57     field = reset_field( );
+57     field = magnet_reset_field( );
 58     clear_curve( 1 );
 59   @}
 60 
@@ -320,7 +320,7 @@ All what's needed is to add and change a few lines.:
 62   fsave( File_2, "% End field       = # G\n", end_field );
 63   fsave( File_2, "% Field step      = # G\n", field_step );
 64   fsave( File_2, "% Number of runs  = #\n", Number_of_runs );
-65   fsave( File_2, "% Time constant   = # ms\n", tc * 1.0e3 );
+65   fsave( File_2, "% Time constant   = # ms\n", tc / 1 ms );
 66   save( File_2, mean / Number_of_runs );
 @end example
 
@@ -458,7 +458,7 @@ Now here is the complete @code{EDL} script:
  37 EXPERIMENT:
  38 
  39 lockin_lock_keyboard( "OFF" );
- 40 field = get_field( field );
+ 40 field = magnet_field( field );
  41 last_field = field;
  42 
  43 hide_toolbox( "ON" );
@@ -487,8 +487,8 @@ Now here is the complete @code{EDL} script:
  66   IF Pause_State == 0
  67   @{
  68     data = lockin_get_data( 1, 2 );
- 69     display_1d( I, data[ 1 ] * 1.0e6, 1,
- 70                 I, data[ 2 ] * 1.0e6, 2 );
+ 69     display_1d( I, data[ 1 ] / 1 uV, 1,
+ 70                 I, data[ 2 ] / 1 uV, 2 );
  71     I += 1;
  72   @} 
  73 
@@ -511,7 +511,7 @@ Now here is the complete @code{EDL} script:
  90 
  91   IF Sweep_State == 1 @{
  92      IF field + field_step <= max_field @{
- 93        field = set_field( field + field_step );
+ 93        field = magnet_field( field + field_step );
  94        output_value( Field_Out, field );
  95      @} ELSE @{
  96        Sweep_State = 0;
@@ -520,7 +520,7 @@ Now here is the complete @code{EDL} script:
  99      @}
 100    @} ELSE IF Sweep_State == -1 @{
 101      IF field - field_step >= min_field @{
-102        field = set_field( field - field_step );
+102        field = magnet_field( field - field_step );
 103        output_value( Field_Out, field );       
 104      @} ELSE @{
 105        Sweep_State = 0;
@@ -532,7 +532,7 @@ Now here is the complete @code{EDL} script:
 111   new_field = input_value( Field_In );
 112   IF new_field != last_field @{
 113     IF ( new_field >= min_field AND new_field <= max_field @{
-114       field = set_field( new_field );
+114       field = magnet_field( new_field );
 115       output_field( Field_Out, field );
 116       last_field = new_field;
 117     @} ELSE @{
@@ -779,13 +779,14 @@ simply refusing to sweep the field out of the allowed limits, but you
 shouldn't count on this.)
 
 If the new field value is still within the allowed range we tell the
-magnet to set the new field by calling the function @code{set_field()}
-(@pxref{set_field()}).  It returns the value of the new field, which we
-store in the @code{field} variable. When done with this we still have to
-update the output field for displaying the current field by calling the
-@code{output_value()} function (@pxref{output_value()}). It takes two
-arguments, the handle of the output field we got when it was created and
-the new value to be displayed.
+magnet to set the new field by calling the function @code{magnet_field()}
+(@pxref{magnet_field()}) with the field to be set as the argument.  It
+returns the value of the new field, which we store in the @code{field}
+variable. When done with this we still have to update the output field
+for displaying the current field by calling the @code{output_value()}
+function (@pxref{output_value()}). It takes two arguments, the handle
+of the output field we got when it was created and the new value to be
+displayed.
 
 But if the new field is not within the magnets limits we have to
 automatically stop the sweep and give the user a visual feedback. This
@@ -1130,12 +1131,12 @@ part is probably how the pulses are moved during the experiment.
 43      DELTA_START = p2_to_p3_incr,
 44      LENGTH      = 100 ns;
 45 
-46 init_1d( 1, 0, p2_to_p3_dist * 1.0e9, p2_to_p3_incr * 1.0e9,
+46 init_1d( 1, 0, p2_to_p3_dist / 1 ns, p2_to_p3_incr / 1 ns,
 47          "Pulse separation [ns]", "Echo amplitude [a.u.]" );
 48 
 49 EXPERIMENT:
 50 
-51 set_field( field );
+51 magnet_field( field );
 52 
 53 File = get_file( );
 54 
@@ -1148,7 +1149,7 @@ part is probably how the pulses are moved during the experiment.
 61     data = daq_get_voltage( CH0 );
 62     display( I, data );
 63     fsave( File, "#,#\n",
-64            ( p2_to_p3_dist + p2_to_p3_incr * ( I - 1 ) ) * 1.0e9, data );
+64            ( p2_to_p3_dist + p2_to_p3_incr * ( I - 1 ) ) / 1 ns, data );
 65     pulser_shift( );
 66     pulser_update( );	
 67     I += 1;
@@ -1159,6 +1160,78 @@ part is probably how the pulses are moved during the experiment.
 72 save_comment( File, "%" );
 @end example
 
+
+In the @code{DEVICES} section three devices are needed, the magnet power
+supply, the pulser and a device or measuring the data, here it's a
+analog/digital converter which has it's input connected to a boxcar
+integrator. The signal goes to the boxcar and integrates a number of
+signals on each trigger it receives (the set-up of the boxcar is done
+manually).
+
+In the @code{VARIABLES} section we first have a variable for the
+repetition time of the pulse sequence. The next two are the
+center-to-center distances between the first and second and second
+and third microwave pulse as well as the increment of the distance
+between the second and third pulse. Then follow the lenghts of all
+three pulses. Finally, we need the field at which the experiment is#
+to be done and the number of averages to do for each pulse separation
+step and, as usual, a counter, a value for storing a data point and
+a file handle.
+
+The @code{ASSIGNMENTS} section for the pulser used is rather simlple:
+since the functions of the pulses can't be changed only the trigger
+mode and, with te mode, the repetition time needs to be set.
+
+In the @code{PREPARATIONS} section first the pulses must be defined.
+The first microwave pulse can't start earlier then at @w{120 ns},
+so that's used as the start time of the first pulse. The start
+positions of both the other microwave pulses need a bit of
+calculations since the values in the @code{VARIABLES} section
+are center-to-center pulse separations, but here start positions
+are needed. The fourth pulse is the detection pulse that triggers
+the boxcar integrator - it's required position can be calculated
+from the ones of the three microwave pulses.
+
+The other thing to be done in the @code{PREPARATIONS} section is
+the initialization of the graphics with @code{init_1d()}
+(@pxref{init_1d()}) - we need an @code{x}-axis that shows the
+distance between the second and third microwave pulse.
+
+The first things to be done in the @code{EXPERIMENT} section are
+telling the magnet power supply to go to the required field value
+using the @code{magnet_field()} function (@pxref{magnet_field()}),
+open a file for saving the data using @code{get_file()}
+(@pxref{get_file()}), switch on the pulser by a call of
+@code{pulser_state()} (@pxref{pulser_state()}) and set a gain factor
+for the DAC with @code{daq_gain()} (@pxref{daq_gain()}). Then the
+usual loop starts.
+
+Within the loop we first need to wait long enough for the boxcar
+to average over as many pulse sequences as required - we wait
+for 10% longer than necessary to be on the safe side, that's what
+the additional factor of @code{1.1} is meant for. Then the DAC is
+told to convert the voltage from the boxcar using @code{daq_get_voltage()}
+(@pxref{daq_get_voltage()}) and this value is displayed and,
+together with the current pulse separation in nano-seconds, written
+into the data file. All then left to be done is to shift the third
+microwave and the detection pulse using @code{pulser_shift()}
+(@pxref{pulser_shift()}) and asking the pulser to update the pulse
+sequence with @code{pulser_update()} (@pxref{pulser_update()}).
+
+Since one usually doesn't know at which pulse separation the signal
+will have become undetectable the whole loop is an infinite loop,
+i.e.@: the experiment only stops when the user presses the @code{STOP}
+button.
+
+Once the user has just done that it should still be possible to enter
+some comments, e.g.@: which sample was used and other experimental
+conditions. For this we need the @code{ON_STOP} pseudo-section: the
+program will jump to this point when the @code{STOP} button gets
+pressed and the remaining code following this label is executed
+(while this happens the @code{STOP} button has no function anymore).
+Calling the function @code{save_comment()} (@pxref{save_comment()})
+opens up a new window where the user can input arbitrary text that
+then will get appended to the data file.
 
 
 @node Time-resolved EPR script, , ESEEM script, Example EDL Scripts
@@ -1213,8 +1286,8 @@ written to a file.
 39 time_res  = digitizer_time_per_point( );
 40 Pretrigger = int( 0.9 * trig_pos * Rec_len );
 41
-42 change_scale( ( - trig_pos * Rec_len * time_res ) * 1.0e6,
-43               digitizer_time_per_point( ) * 1.0e6 );
+42 change_scale( ( - trig_pos * Rec_len * time_res ) / 1 us,
+43               digitizer_time_per_point( ) / 1 us );
 44
 45 File = get_file( );
 46 fsave( File, "% Start field     = # G\n"
@@ -1225,7 +1298,7 @@ written to a file.
 51              "% Trigger pos.    = #\n"
 52              "% Record length   = #\n",
 53        start_field, end_field, field_step, Num_avg,
-54        digitizer_time_per_point( ) * 1.0e6,
+54        digitizer_time_per_point( ) / 1 us,
 55        trig_pos * Rec_len, Rec_len );
 56 save_program( File, "% " );
 57 save_comment( File, "% " );
@@ -1237,8 +1310,8 @@ written to a file.
 63
 64     background = mean( curve, 1, Pretrigger );
 65
-66     display( 1, I, curve * 1.0e3, 1,
-67              1, I, ( curve - background ) * 1.0e3, 2 );
+66     display( 1, I, curve / 1 mV, 1,
+67              1, I, ( curve - background ) / 1 mV, 2 );
 68
 69     fsave( File, "\n% #.: Field = # G\n\n", I, field );
 70     save( File, curve );
@@ -1311,7 +1384,7 @@ points before the laser flash.
 
 Now we only have to display and store the new curve. In line 66 we
 display both the raw curve and the curve after background subtraction
-(in both cases multiplied by @code{1.0e-3} because we want to display
+(in both cases divided by @code{1 mV} because we want to display
 the measured voltage in units uf milli-volts). 
 
 Before each new set of data we write the current field value into the
