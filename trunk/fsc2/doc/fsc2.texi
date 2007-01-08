@@ -56,12 +56,12 @@ this permission notice are preserved on all copies.
 
 Permission is granted to copy and distribute modified
 versions of this manual under the conditions for
-verbatim copying, provided also that the sections
-entitled ``Copying'' and ``GNU General Public License''
-are included exactly as in the original, and provided
-that the entire resulting derived work is distributed
-under the terms of a permission notice identical to this
-one.
+verbatim copying, provided also that the section
+entitled ``Copying'', containing the GNU General Public
+License (GPL), is included exactly as in the original,
+and provided that the entire resulting derived work is
+distributed under the terms of a permission notice
+identical to this one.
 
 Permission is granted to copy and distribute
 translations of this manual into another language,
