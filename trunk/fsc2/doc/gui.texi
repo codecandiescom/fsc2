@@ -197,8 +197,18 @@ parameter is changed during the experiment. Sometimes it also might be
 useful to display curves as well as surfaces, in which case a window for
 both display modes can be created.
 
+@ifinfo
 
-@anchor{1D-Display}
+@menu
+* 1D-Display::      Displaying data for one-dimensional experiments
+* 2D-Display::      Displaying data for two-dimensional experiments
+* Cross Sections::  Displaying cross sections through two-dimensional data
+@end menu
+
+@end ifinfo
+
+
+@node 1D-Display, 2D-Display, , Experiment Window
 @subsection 1D-Display
 @cindex 1D-Display
 
@@ -265,6 +275,17 @@ more data than would fit into the window the oldest data get shifted out
 of the window to the left -- similar to a news-ticker.
 
 
+@ifinfo
+
+@menu
+* Examining data::         Finding out more about your data
+* Rescaling and moving::   Zooming in and out
+@end menu
+
+@end ifinfo
+
+
+@node Examining data, Rescaling and moving, , 1D-Display
 @subsubsection Examining data
 
 If you want to find out the exact values of your newly measured data
@@ -312,6 +333,7 @@ shown (and updated whenever you move the mouse). Again, for each curve a
 pair of values is displayed in the color of the curve they belong to.
 
 
+@node Rescaling and moving, , Examining data, 1D-Display
 @subsubsection Rescaling and moving
 
 
@@ -425,7 +447,7 @@ the display area. To switch this behavior off simply deactivate the
 @code{FS} button.
 
 
-@anchor{2D-Display}
+@node 2D-Display, Cross Sections, 1D-Display, Experiment Window
 @subsection 2D-Display
 @cindex 2D-Display
 
@@ -464,8 +486,17 @@ When the surface with the data set is moved out of the area of the
 display arrows will be shown at the sides of the display area where you
 have to look for the data set.
 
+@ifinfo
 
-@subsubsection Rescaling and moving
+@menu
+* Rescaling and moving in 2D-Display::
+@end menu
+
+@end ifinfo
+
+
+@node Rescaling and moving in 2D-Display, , , 2D-Display
+@subsubsection Rescaling and moving in 2D-Display
 
 All the methods for rescaling and moving are the same as in 1D-display
 mode. Additionally, you also can change the z-scaling. This will result
@@ -486,7 +517,9 @@ the top of the high-field signal are too large and thus drawn in white.
 @end ifnotinfo
 
 
-@subsection Cross sections
+@node Cross Sections, , 2D-Display, Experiment Window
+@subsection Cross Sections
+@cindex Cross sections
 
 Quite often one needs to examine cross sections through a 2D-data
 set. This can achieved by holding down the @code{<Shift>} key and

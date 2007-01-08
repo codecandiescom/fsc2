@@ -25,6 +25,7 @@
 @cindex @code{EDL}
 
 @ifinfo
+
 @menu
 * Basics::                  Basic principles.
 * Sections::                The sections of an EDL script.
@@ -37,7 +38,9 @@
 * Control structures::      Flow control in EDL scripts.
 * Miscellaneous::           Additional syntactic elements
 @end menu
+
 @end ifinfo
+
 
 To do an experiment using @code{fsc2} you may have to write a script
 describing the experiment. While this can look like a daunting task if
@@ -346,8 +349,19 @@ stating
 VARIABLES:
 @end example
 
+@ifinfo
 
-@anchor{Variable names}
+@menu
+* Variable names::
+* Variable types::
+* Arrays and matrices::
+* Variable sized arrays and matrices::
+@end menu
+
+@end ifinfo
+
+
+@node Variable names, Variable types, , Variables
 @subsection Variable names
 @cindex Variable names
 
@@ -404,7 +418,7 @@ of these units. While you can use Tesla in the @code{EDL} script all
 functions return values in Gauss!
 
 
-@anchor{Variable types}
+@node Variable types, Arrays and matrices, Variable names, Variables
 @subsection Variable types
 @cindex Variable types
 
@@ -429,7 +443,7 @@ floating point variables. (Actually, changing just one line of
 @code{fsc2} allows to change to a completely different behavior.)
 
 
-@anchor{Arrays and matrices}
+@node Arrays and matrices, Variable sized arrays and matrices, Variable types, Variables
 @subsection Arrays and matrices
 @cindex Arrays and matrices
 
@@ -508,7 +522,7 @@ the square root of 42 to all 18 elements of the 2-dimensional matrix
 @code{f}.
 
 
-@anchor{Variable sized arrays and matrices}
+@node Variable sized arrays and matrices, , Arrays and matrices, Variables
 @subsection Variable sized arrays and matrices
 @cindex Variable sized arrays and matrices
 
@@ -869,8 +883,18 @@ For the exponentiation the caret character @code{^} is to be used, e.g.@:
 As mathematics dictate non-integer exponents can only be used with
 non-negative bases!
 
+@ifinfo
 
-@anchor{Arithmetic-assignment operators}
+@menu
+* Arithmetic-assignment operators::
+* Operator precedence::
+* Arithmetic with arrays and matrices::
+@end menu
+
+@end ifinfo
+
+
+@node Arithmetic-assignment operators, Operator precedence, , Arithmetic
 @subsection Arithmetic-assignment operators
 @cindex Arithmetic-assignment operators
 @cindex @code{+=} (add and assign)
@@ -902,7 +926,7 @@ assignment operators
 @end example
 
 
-@anchor{Operator precedence}
+@node Operator precedence, Arithmetic with arrays and matrices, Arithmetic-assignment operators, Arithmetic
 @subsection Operator precedence
 @cindex Operator precedence
 
@@ -1020,7 +1044,7 @@ doubt, use parentheses -- this won't slow down the program but will
 often make the script easier to understand.
 
 
-@anchor{Arithmetic with arrays and matrices}
+@node Arithmetic with arrays and matrices, , Operator precedence, Arithmetic
 @subsection Arithmetic with arrays and matrices
 @cindex Arithmetic with arrays and matrices
 
@@ -1348,8 +1372,24 @@ has to be enclosed in curly braces (@code{@{} and @code{@}}) and may
 contain as many statements as needed (and still fit into the computers
 memory).
 
+@ifinfo
 
-@anchor{REPEAT loops}
+@menu
+* REPEAT loops::
+* WHILE loops::
+* UNTIL loops::
+* FOR loops::
+* FOREVER loops::
+* NEXT statement::
+* BREAK statement::
+* IF-ELSE constructs::
+* UNLESS-ELSE constructs::
+@end menu
+
+@end ifinfo
+
+
+@node REPEAT loops, WHILE loops, , Control structures
 @subsection REPEAT loops
 @cindex REPEAT loops
 
@@ -1384,7 +1424,7 @@ expression) within the loop the number of repetitions won't change.
 
 
 
-@anchor{WHILE loops}
+@node WHILE loops, UNTIL loops, REPEAT loops, Control structures
 @subsection WHILE loops
 @cindex WHILE loops
 
@@ -1540,7 +1580,7 @@ characters where the strings differ, @code{'N'} and @code{'F'},
 @code{'N'} has a higher ASCII value than @code{'F'}.
 
 
-@anchor{UNTIL loops}
+@node UNTIL loops, FOR loops, WHILE loops, Control structures
 @subsection UNTIL loops
 @cindex UNTIL loops
 
@@ -1561,7 +1601,7 @@ the factorial of 6 also could have been written as
 
 
 
-@anchor{FOR loops}
+@node FOR loops, FOREVER loops, UNTIL loops, Control structures
 @subsection FOR loops
 @cindex FOR loops
 
@@ -1618,7 +1658,7 @@ end of the loop
 the loop variable @code{I} has the value @code{11} and not @code{9}.
 
 
-@anchor{FOREVER loops}
+@node FOREVER loops, NEXT statement, FOR loops, Control structures
 @subsection FOREVER loops
 @cindex FOREVER loops
 
@@ -1648,7 +1688,7 @@ an experiment, unless you're quite sure you know what you are doing.
 @end quotation
 
 
-@anchor{NEXT statement}
+@node NEXT statement, BREAK statement, FOREVER loops, Control structures
 @subsection NEXT statement
 @cindex NEXT
 
@@ -1660,7 +1700,7 @@ all the remaining statements are skipped and the program jumps directly
 back to the test of the loop condition.
 
 
-@anchor{BREAK statement}
+@node BREAK statement, IF-ELSE constructs, NEXT statement, Control structures
 @subsection BREAK statement
 @cindex BREAK
 
@@ -1672,7 +1712,7 @@ loop the program immediately jumps to the first statement following the
 loops block.
 
 
-@anchor{IF-ELSE constructs}
+@node IF-ELSE constructs, UNLESS-ELSE constructs, BREAK statement, Control structures
 @subsection IF-ELSE constructs
 @cindex IF
 @cindex ELSE 
@@ -1726,7 +1766,7 @@ directly by another @code{IF}. Let's assume that you need to set
 @noindent
 
 
-@anchor{UNLESS-ELSE constructs}
+@node UNLESS-ELSE constructs, , IF-ELSE constructs, Control structures
 @subsection UNLESS-ELSE constructs
 @cindex UNLESS
 @cindex ELSE 
@@ -1763,9 +1803,20 @@ actual experiment stops with an error that could not be anticipated.
 The remainder of this chapter covers a few additional syntactic elements
 that didn't fit into any of the previous sections.
 
-@anchor{#INCLUDE statement}
-@subsection @code{#INCLUDE} statement
-@cindex #INCLUDE statement
+@ifinfo
+
+@menu
+* #INCLUDE statement::
+* #EXIT statement::
+* #QUIT statement::
+@end menu
+
+@end ifinfo
+
+
+@node #INCLUDE statement, #EXIT statement, , Miscellaneous
+@subsection #INCLUDE statement
+@cindex @code{#INCLUDE} statement
 
 Everywhere within an @code{EDL} script one can include another
 @code{EDL} file. This is done using the @code{#INCLUDE} keyword,
@@ -1804,9 +1855,9 @@ If the file to be included can't be opened an error message is printed and
 interpretation of the @code{EDL} script is abandoned.
 
 
-@anchor{#EXIT statement}
-@subsection @code{#EXIT} statement
-@cindex #EXIT statement
+@node #EXIT statement, #QUIT statement, #INCLUDE statement, Miscellaneous
+@subsection #EXIT statement
+@cindex @code{#EXIT} statement
 
 When the @code{#EXIT} statement is found in an @code{EDL} script this is
 equivalent to the end of the file - everything following the statement
@@ -1817,9 +1868,9 @@ statement above) @code{fsc2} will immediately return to reading the file
 the file was included from.
 
 
-@anchor{#QUIT statement}
-@subsection @code{#QUIT} statement
-@cindex #QUIT statement
+@node #QUIT statement, , #EXIT statement, Miscellaneous
+@subsection #QUIT statement
+@cindex @code{#QUIT} statement
 
 When the @code{#QUIT} statement is encountered in an @code{EDL} script
 @code{fsc2} treats this as the end of the @code{EDL} script and won't

@@ -59,9 +59,8 @@ follows a real long section with a @i{tour de force} through the sources
 of the program. This is hopefully going to be helpful for people that try
 eliminate bugs or even extend @code{fsc2}.
 
-
-
 @ifinfo
+
 @menu
 * First stage of interpretation::
 * Second stage of interpretation::
@@ -69,6 +68,7 @@ eliminate bugs or even extend @code{fsc2}.
 * Reading the sources::
 * Coding conventions::
 @end menu
+
 @end ifinfo
 
 

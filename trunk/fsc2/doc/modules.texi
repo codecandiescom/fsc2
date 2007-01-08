@@ -30,14 +30,14 @@ This chapter tries to describe how to write new modules for use with
 @ifinfo
 @menu
 * Module Overview::       What modules are good for.
-* fsc2s Variables::       How to use fsc2's variables.
-* New Modules::           How to write new modules.
+* fsc2's Variables::      How to use fsc2's variables.
+* Writing New Modules::   How to write new modules.
 * Programming Utils::     Functions that help in programming modules
 * Pulser Modules::        Writing modules for pulsers
 @end menu
 @end ifinfo
 
-@node Module Overview, fsc2s Variables, Modules, Modules
+@node Module Overview, fsc2's Variables, Modules, Modules
 @section What modules are good for
 
 
@@ -103,7 +103,7 @@ variables used within @code{fsc2}.
 
 
 
-@node fsc2s Variables, New Modules, Module Overview, Modules
+@node fsc2's Variables, Writing New Modules, Module Overview, Modules
 @section How fsc2's variables work and how to use them
 
 All functions in a module that are going to be invoked from @code{EDL}
@@ -292,7 +292,19 @@ in which case you get a value of type @code{double}. Finally you may use
 @end quotation
 to get the address of the start of a string variable.
 
+@ifinfo
 
+@menu
+* Utility functions to determine variables values::
+* Getting at the data of one-dimensional arrays::
+* More-dimensional arrays::
+* Returning data from EDL functions::
+@end menu
+
+@end ifinfo
+
+
+@node Utility functions to determine variables values, Getting at the data of one-dimensional arrays, , fsc2's Variables
 @subsection Utility functions to determine variables values
 
 There are some utility functions that make it even easier to evaluate
@@ -401,6 +413,7 @@ an exception is thrown in all cases, even during the experiment, since
 there is no obvious way how to determine the truth value of some string.
 
 
+@node Getting at the data of one-dimensional arrays, More-dimensional arrays, Utility functions to determine variables values, fsc2's Variables
 @subsection Getting at the data of one-dimensional arrays
 
 When a complete one-dimensional array gets passed to your function the
@@ -423,6 +436,7 @@ numbers the values (of type @code{double}) are stored in
 @w{@code{val->var.dpnt[0]}} to @w{@code{var->val.dpnt[var->len - 1]}}.
 
 
+@node More-dimensional arrays, Returning data from EDL functions, Getting at the data of one-dimensional arrays, fsc2's Variables
 @subsection More-dimensional arrays
 
 For arrays of 2 or more dimensions (i.e.@: variables of type
@@ -500,6 +514,7 @@ dimensions. In this case the function returns a variable pointing to
 the indexed array or sub-matrix.
 
 
+@node Returning data from EDL functions, , More-dimensional arrays, fsc2's Variables
 @subsection Returning data from EDL functions
 
 If your function just wants to return an integer or a float, things are
@@ -707,9 +722,31 @@ correct sequence, so it's not completely foolproof.
 
 
 
-@node New Modules, Programming Utils, fsc2s Variables, Modules
+@node Writing New Modules, Programming Utils, fsc2's Variables, Modules
 @section How to write a new module
 
+@ifinfo
+
+@menu
+* EDL Functions::
+* Files to be included::
+* Variables a module must define::
+* Global variables::
+* Handling GPIB Devices::
+* Serial Port Handling::
+* Handling devices connected via the LAN::
+* Hook functions::
+* Caveats for the test run::
+* How to compile a module::
+* Linker scripts::
+* Making fsc2 aware of the module::
+* Calling EDL functions from a modules::
+@end menu
+
+@end ifinfo
+
+
+@node EDL Functions, Files to be included, , Writing New Modules
 @subsection EDL Functions
 
 Each module has its own unique name, usually you will pick name of the
@@ -742,6 +779,7 @@ in the form of the variables as described above and return a pointer to
 such a variable.
 
 
+@node Files to be included, Variables a module must define, EDL Functions, Writing New Modules
 @subsection Files to be included
 
 First of all, each module has to include the header file
@@ -810,6 +848,7 @@ is similar enough to one of the existing devices pick the same device
 type string, otherwise pick a new and descriptive name.
 
 
+@node Variables a module must define, Global variables, Files to be included, Writing New Modules
 @subsection Variables a module must define
 
 In the previous section the meanings of the device name and type strings
@@ -846,6 +885,7 @@ must be avoided to use identical @code{EDL} function names in modules
 for devices of different types.
 
 
+@node Global variables, Handling GPIB Devices, Variables a module must define, Writing New Modules
 @subsection Global variables
 
 First, there is a global variable@footnote{Actually, @code{FSC2_MODE}
@@ -918,7 +958,8 @@ Finally, for devices where the LAN is used for communicaation the variable
 function.
 
 
-@subsection Handling GPIB devices
+@node Handling GPIB Devices, Serial Port Handling, Global variables, Writing New Modules
+@subsection Handling GPIB Devices
 
 To make dealing with the GPIB bus simpler there are several routines
 that can be used when writing a module, which then call the needed
@@ -1015,7 +1056,8 @@ function plus arguments corresponding to the conversion specifiers in
 the format string.
 
 
-@subsection Serial port handling
+@node Serial Port Handling, Handling devices connected via the LAN, Handling GPIB Devices, Writing New Modules
+@subsection Serial Port Handling
 
 To be able use @code{fsc2}'s interface to the serial ports you must
 include the appropriate header file, i.e.@: you need
@@ -1160,6 +1202,7 @@ function plus arguments corresponding to the conversion specifiers in
 the format string.
 
 
+@node Handling devices connected via the LAN, Hook functions, Serial Port Handling, Writing New Modules
 @subsection Handling devices connected via the LAN
 
 There are some functions for the communication with devices connected
@@ -1313,6 +1356,7 @@ function plus arguments corresponding to the conversion specifiers in
 the format string.
 
 
+@node Hook functions, Caveats for the test run, Handling devices connected via the LAN, Writing New Modules
 @subsection Hook functions
 @cindex hook functions
 @findex init_hook()
@@ -1413,6 +1457,7 @@ remaining functions, @code{sr510_exp_hook()} and
 started.
 
 
+@node Caveats for the test run, How to compile a module, Hook functions, Writing New Modules
 @subsection Caveats for the test run
 
 There is one rather nasty problem with the test run. In the test run the
@@ -1434,6 +1479,7 @@ within the @code{EDL} file they must be prepared to write the @code{EDL}
 script to accept some unexpected values.
 
 
+@node How to compile a module, Linker scripts, Caveats for the test run, Writing New Modules
 @subsection How to compile a module
 
 A module is a shareable library (with an extension of @file{.fsc2_so})
@@ -1535,6 +1581,7 @@ or need to set the environment variable @code{LD_LIBRARY_PATH} to
 point to the place where the library can be found.
 
 
+@node Linker scripts, Making fsc2 aware of the module, How to compile a module, Writing New Modules
 @subsection Linker scripts
 
 As you may have noticed, for every of the modules made of more than a
@@ -1635,7 +1682,8 @@ the shared library for the module. But if it does not exist creating the
 module will also work without pronblems.
 
 
-@subsection Making @code{fsc2} aware of the module
+@node Making fsc2 aware of the module, Calling EDL functions from a modules, Linker scripts, Writing New Modules
+@subsection Making fsc2 aware of the module
 
 @code{fsc2} must be made aware of the existence of a new module and of
 the @code{EDL} functions supplied by the module. Thus a new device
@@ -1724,6 +1772,8 @@ program can't talk with the lock-in, i.e.@: while not in the
 @code{EXPERIMENT} section the function must test for this case and emit
 an appropriate error message all by itself.
 
+
+@node Calling EDL functions from a modules, , Making fsc2 aware of the module, Writing New Modules
 @subsection Calling EDL functions from a modules
 
 Calling an @code{EDL} function (built-in as well as @code{EDL}
@@ -1816,7 +1866,7 @@ care about appending a @code{#} and a device number to the function name
 -- @code{fsc2} will do this automatically when necessary.
 
 
-@node Programming Utils, Pulser Modules, New Modules, Modules
+@node Programming Utils, Pulser Modules, Writing New Modules, Modules
 @section Additional utilities provided by fsc2
 
 When writing a module some of the following information might be useful:
@@ -1846,7 +1896,23 @@ Finally, there exist some utility function for rounding of double values
 to the different integer types as well as converting integers to types
 of smaller width.
 
+@ifinfo
 
+@menu
+* Printing out messages::
+* Determining the time::
+* Waiting for short times::
+* Assertions::
+* Error handling with exceptions::
+* Functions for memory allocation::
+* The bool type::
+* Numerical conversions and comparisons::
+@end menu
+
+@end ifinfo
+
+
+@node Printing out messages, Determining the time, , Programming Utils
 @subsection Printing out messages
 @cindex print()
 @findex print()
@@ -1886,6 +1952,7 @@ void print( int          severity,
 @noindent
 
 
+@node Determining the time, Waiting for short times, Printing out messages, Programming Utils
 @subsection Determining the time
 @cindex experiment_time()
 @findex experiment_time()
@@ -1907,6 +1974,7 @@ double experiment_time( void );
 @noindent
 
 
+@node Waiting for short times, Assertions, Determining the time, Programming Utils
 @subsection Waiting for short times
 @cindex fsc2_usleep()
 @findex fsc2_usleep()
@@ -1937,6 +2005,7 @@ on signals.  The function is actually nothing else than a wrapper around
 @code{nanosleep()}, so you can @code{nanosleep()} yourself if you prefer.
 
 
+@node Assertions, Error handling with exceptions, Waiting for short times, Programming Utils
 @subsection Assertions
 @cindex assertions
 @findex @code{fsc2_assert()}
@@ -1984,6 +2053,7 @@ has side effects then the programs behaviour may differ depending on
 whether @code{NDBUG} is defined and you thus may have intoduced a Heisenbug.
 
 
+@node Error handling with exceptions, Functions for memory allocation, Assertions, Programming Utils
 @subsection Error handling with exceptions
 @cindex exceptions
 
@@ -2029,7 +2099,17 @@ and @code{fsc2} will take care of all error handling and the stop the
 running experiment (or the test run). That's all you need to know about
 exceptions for nearly all cases that have to be dealt within modules.
 
+@ifinfo
 
+@menu
+* More on programming with exceptions::
+* Problems with exceptions::
+@end menu
+
+@end ifinfo
+
+
+@node More on programming with exceptions, Problems with exceptions, , Error handling with exceptions
 @subsubsection More on programming with exceptions
 
 Of course, when an exception is 'thrown', there must be a place where it
@@ -2169,6 +2249,7 @@ while ( 1 )                   /* loop forever */
 @end example
 
 
+@node Problems with exceptions, , More on programming with exceptions, Error handling with exceptions
 @subsubsection Problems with exceptions
 
 There is a caveat when using exceptions. The exception mechanism is
@@ -2241,6 +2322,7 @@ documentation for the standard C functions @code{setjmp()} and
 @code{longjmp()}.
 
 
+@node Functions for memory allocation, The bool type, Error handling with exceptions, Programming Utils
 @subsection Functions for memory allocation
 @cindex memory allocation
 @findex T_malloc()
@@ -2300,8 +2382,9 @@ CATCH( OUT_OF_MEMORY_EXCEPTION )
 @end example
 
 
-@subsection The @code{bool} type
-@cindex bool type
+@node The bool type, Numerical conversions and comparisons, Functions for memory allocation, Programming Utils
+@subsection The bool type
+@cindex @code{bool} type
 
 @code{fsc2} already has a @code{typedef} for the @code{bool} type,
 i.e.@: for variables that can have only two values, either @code{1} or
@@ -2334,6 +2417,7 @@ if ( flag == SET )
 @end example
 
 
+@node Numerical conversions and comparisons, , The bool type, Programming Utils
 @subsection Numerical conversions and comparisons
 @cindex numerical conversions and comparisons
 
@@ -2495,8 +2579,17 @@ internal channels for storing pulse sequences which get mapped to
 certain output connectors (pods), like the @code{Sony/Tektronix DG2020}.
 Per default the variable is set to false.
 
+@ifinfo
 
-@subsection Pulse functions
+@menu
+* Pulse Functions::
+@end menu
+
+@end ifinfo
+
+
+@node Pulse Functions, , , Pulser Modules
+@subsection Pulse Functions
 
 
 Now follows a list of all functions that can be defined within a pulser

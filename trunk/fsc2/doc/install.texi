@@ -109,7 +109,17 @@ be created (see @url{http://www.ctan.org/})
 GNU data compression program (see @url{http://www.gnu.org/software/gzip/})
 @end table
 
+@ifinfo
 
+@menu
+* GPIB support::
+* Support for other devices::
+@end menu
+
+@end ifinfo
+
+
+@node GPIB support, Support for other devices, , Requirements
 @subsection GPIB support
 
 GPIB support requires a library and a driver to interface GPIB cards to
@@ -214,6 +224,7 @@ and installed _before_ trying to compile @code{fsc2} (unless you don't need
 GPIB support built into @code{fsc2}).
 
 
+@node Support for other devices, , GPIB support, Requirements
 @subsection Support for other devices
 
 Devices that are controlled via the serial port are always supported (at
@@ -548,7 +559,16 @@ changes to the program on your own. In this case sending these kind of mails
 to me obviously doesn't make too much sense... Another obvious reason for
 changing it would be that the machine isn't connected to the internet.
 
+@ifinfo
 
+@menu
+* Device setup::
+@end menu
+
+@end ifinfo
+
+
+@node Device setup, , , Preparing for installation
 @subsection Device setup
 
 For each device there exists a configuration file in the @file{config}
@@ -558,7 +578,6 @@ set the number of the port in the device's configuration file and
 for devices controlled via the LAN its IP number. Please take the time
 and have a look at the configuration files for the devices you are planning
 to use, what can be adjusted should be documented in the individual files.
-
 
 
 @node Compiling and Installation, , Preparing for installation, Installation
