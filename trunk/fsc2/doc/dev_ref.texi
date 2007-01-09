@@ -1867,23 +1867,94 @@ In the GPIB configuration file use @code{"LECROY9450"} as the device name,
 
 @paragraphindent 0
 @strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
-Oscilloscope Waverunner (models @code{LT224}, @code{LT322}, @code{LT342},
-@code{LT342L},  @code{LT344}, @code{LT344L}, @code{LT364}, and @code{LT364L})
-and Waverunner-2 (models @code{LT262}, @code{LT262ML}, @code{LT264},
-@code{LT264M}, @code{LT264ML}, @code{LT354}, @code{LT354M}, @code{LT354ML},
-@code{LT372}, @code{LT372L}, @code{LT374}, @code{LT374L}, @code{LT584},
-@code{LT584M} and @code{LT584L}). The exact model must be set in the
-configuration file, together with information about further available
-options.. 2 or 4 measurement channels (depending on model), 4 function
-channels (needed for averaging), 4 memory channels.
+Oscilloscope Waverunner models
+@table @samp
+@item LT224
+4 channels, bandwidth 200 MHz, sample rate 200 MS/s (SS)/10 GS/s (RIS),
+acquisition memory 100 kpts/channel
+@item LT322
+2 channels, bandwidth 200 MHz, sample rate 200 MS/s (SS)/10 GS/s (RIS),
+acquisition memory 100 kpts/channel
+@item LT342
+2 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 25 GS/s (RIS),
+acquisition memory 250 kpts/channel
+@item LT342L
+2 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 25 GS/s (RIS),
+acquisition memory 1 Mpts/channel
+@item LT344
+4 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 25 GS/s (RIS),
+acquisition memory 250 kpts/channel
+@item LT344L
+4 channels, bandwidth 500 MHz, sample rate 1 GS/s (SS) / 25 GS/s (RIS),
+acquisition memory 1 Mpts/channel
+@item LT364
+4 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 25 GS/s (RIS),
+acquisition memory 500 kpts/channel
+@item LT364L
+4 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 25 GS/s (RIS),
+acquisition memory 2 Mpts/channel
+@end table
+and Waverunner-2 models
+@table @samp
+@item LT262
+2 channels, bandwidth 350 MHz, sample rate 1 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 100 kpts/channel
+@item LT264
+4 channels, bandwidth 350 MHz, sample rate 1 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 100 kpts/channel
+@item LT264M
+4 channels, bandwidth 350 MHz, sample rate 1 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 1 Mpts/channel
+@item LT354
+4 channels, bandwidth 500 MHz, sample rate 1 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 250 kpts/channel
+@item LT354M
+4 channels, bandwidth 500 MHz, sample rate 1 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 1 Mpts/channel
+@item LT354ML
+4 channels, bandwidth 500 MHz, sample rate 1 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 2 Mpts/channel
+@item LT372
+2 channels, bandwidth 500 MHz, sample rate 1 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 250 kpts/channel
+@item LT372M
+2 channels, bandwidth 500 MHz, sample rate 1 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 1 Mpts/channel
+@item LT374
+4 channels, bandwidth 500 MHz, sample rate 2 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 250 kpts/channel
+@item LT374M
+4 channels, bandwidth 500 MHz, sample rate 2 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 1 Mpts/channel
+@item LT374L
+4 channels, bandwidth 500 MHz, sample rate 2 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 4 Mpts/channel
+@item LT584
+4 channels, bandwidth 1 GHz, sample rate 2 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 250 kpts/channel
+@item LT584M
+4 channels, bandwidth 1 GHz, sample rate 2 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 1 Mpts/channel
+@item LT584L
+4 channels, bandwidth 1 GHz, sample rate 2 GS/s (SS) / 50 GS/s (RIS),
+acquisition memory 4 Mpts/channel
+@end table
+The exact model must be set in the configuration file, together with
+information about further available options. All models have 4 function
+channels (used for averaging) and 4 memory channels.
 
 @paragraphindent 0
-@strong{Please note:} Due to the huge number of different models it
-was not possible to thoroughly test the module with all those models.
-Moreover, specification data from the LeCroy web site had to be used.
-I can neither guarantee that the used data are correct nor that support
-for all the modules will work flawlessly. Please send bug reports if
-you have such a model and you experience problems.
+@strong{Please note:} For some models that allow setting a timebase
+where there's less than a single data point per division (@w{500 ps}
+with a sampling rate of @w{1 GHz}) is SINGLE SHOT mode this timebase
+can't be used (if the device has this timebase set it will switched
+automatically to the slower supported timebase). And due to the huge
+number of different models it was not possible to test the module
+with all those models. Moreover, specification data from the LeCroy
+web site had to be used. I can neither guarantee that the used data
+are correct nor that support for all the modules works flawlessly.
+Please send bug reports if you have such a model and you experience
+problems.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).

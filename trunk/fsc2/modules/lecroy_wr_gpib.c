@@ -170,6 +170,21 @@ bool lecroy_wr_init( const char * name )
             lecroy_wr.interleaved = UNSET;
         }
 
+        /* Some models have SINGLE SHOT timebase where there is less than
+           a single data point per division - if the device is set to this
+           timebase switch it to a timebase where there's at least one
+           point per division. */
+
+        if ( ! lecroy_wr.is_interleaved && lecroy_wr.cur_hres->ppd == 0 )
+        {
+            while ( lecroy_wr.cur_hres->ppd == 0 ) {
+                lecroy_wr.cur_hres++;
+                lecroy_wr.timebase = lecroy_wr.tbas[ ++lecroy_wr.tb_index ];
+            }
+
+            lecroy_wr_set_timebase( lecroy_wr.timebase );
+        }
+
         /* Set (if required) the sensitivies, offsets coupling types and
            bandwidth limiters of all measurement channels */
 

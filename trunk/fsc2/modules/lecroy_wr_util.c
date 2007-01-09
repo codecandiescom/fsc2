@@ -596,7 +596,7 @@ void lecroy_wr_numpoints_prep( void )
 
 void lecroy_wr_tbas_prep( void )
 {
-    double cur_tbas = 1000.0;
+    double cur_tbas = LECROY_WE_MAX_TIMEBASE;
     long i;
     long k = 0;
 
@@ -606,8 +606,8 @@ void lecroy_wr_tbas_prep( void )
     lecroy_wr.tbas =
              DOUBLE_P T_malloc( lecroy_wr.num_tbas  * sizeof *lecroy_wr.tbas );
 
-    /* All timebase settings follow a 1-2-5 scheme with 1000 s/div being
-       the largest possible setting */
+    /* All timebase settings follow a 1-2-5 scheme with LECROY_WE_MAX_TIMEBASE
+       (in s/div) being the largest possible setting */
 
     for ( i = lecroy_wr.num_tbas - 1; i >= 0; i--, k++ )
     {
