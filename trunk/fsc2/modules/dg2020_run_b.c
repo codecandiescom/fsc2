@@ -92,7 +92,6 @@ bool dg2020_reorganize_pulses( bool flag )
 
 
     CLOBBER_PROTECT( i );
-    CLOBBER_PROTECT( f );
 
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {

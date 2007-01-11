@@ -264,9 +264,6 @@ int rs690_end_of_test_hook( void )
     Function_T *f;
 
 
-    CLOBBER_PROTECT( i );
-    CLOBBER_PROTECT( f );
-
     if ( rs690.dump_file != NULL )
     {
         fclose( rs690.dump_file );

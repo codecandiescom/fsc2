@@ -101,8 +101,6 @@ static bool rs690_update_pulses( bool flag )
 
     CLOBBER_PROTECT( i );
     CLOBBER_PROTECT( j );
-    CLOBBER_PROTECT( f );
-    CLOBBER_PROTECT( ch );
 
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
@@ -1268,8 +1266,6 @@ void rs690_check_fs( void )
     FS_T *nn;
     FS_T *n;
 
-
-    CLOBBER_PROTECT( n );
 
     /* The very last FS, standing for the time following the pulses hasn't
        got a length yet. If a repetition time has been given we try to set
