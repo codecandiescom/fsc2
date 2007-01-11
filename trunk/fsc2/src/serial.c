@@ -435,9 +435,6 @@ void fsc2_serial_exp_init( const char * log_file_name,
         return;
     }
 
-    if ( i == NUM_SERIAL_PORTS )
-        return;
-
     if ( ll > LL_ALL )
         ll = LL_ALL;
 

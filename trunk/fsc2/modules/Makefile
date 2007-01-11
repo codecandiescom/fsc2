@@ -107,14 +107,13 @@ simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a ips20_4     \
 
 comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a        \
 				   $(hp864_list) lecroy9400 rs690 tegam2714a_p rs_sml01  \
-	               $(tds_list) $(lecroy94_list) lecroy_wr lecroy_wr_s    \
-				   lecroy_ws
+	               $(tds_list) $(lecroy94_list) lecroy_wr lecroy_ws
 endif
 
 ifneq ($(NUM_SERIAL_PORTS),0)
 simp_modules    += aeg_s_band aeg_x_band er035m_s er035m_sas hjs_daadc  \
 				   $(s_band_list)
-comp_modules    += hjs_attenuator spectrapro_300i spex_cd2a
+comp_modules    += hjs_attenuator spectrapro_300i spex_cd2a lecroy_wr_s
 endif
 
 ifdef WITH_ME6000
