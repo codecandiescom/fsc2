@@ -48,7 +48,7 @@ Var_T *f_mcreate( Var_T * var )
     long num_strs = 0;
     size_t len = 0;
     Iobject_T *new_io = NULL;
-    Iobject_T *ioi;
+    Iobject_T *ioi = NULL;
     long i;
 
 

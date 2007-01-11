@@ -193,6 +193,63 @@ void *T_realloc( void * ptr,
 }
 
 
+/*-----------------------------------------------------------------*
+ * Replacement for realloc(), frees already allocated memory and
+ * throws an OUT_OF_MEMORY_EXCEPTION if realloc() does not succeed,
+ * checks (as long as NDEBUG isn't defined) that the 'size' argument
+ * isn't zero (which would be a hint that there's some bug in the
+ * calling code) and, if FSC2_MDEBUG writes out information about
+ * the previous and the new address of the memory segment, the
+ * amount of memory allocated and the address the call came from
+ * to stderr.
+ *-----------------------------------------------------------------*/
+
+void *T_realloc_or_free( void * ptr,
+                         size_t size )
+{
+    void *new_ptr;
+#if defined FSC2_MDEBUG
+    int *EBP;             /* assumes sizeof(int) equals size of pointers */
+#endif
+
+
+#ifndef NDEBUG
+    if ( size == 0 )
+    {
+        if ( ptr != NULL )
+            T_free( ptr );
+        eprint( FATAL, UNSET,
+                "Internal error detected at %s:%d (realloc with size 0).\n",
+                __FILE__, __LINE__ );
+        THROW( EXCEPTION );
+    }
+#endif
+
+    if ( ( new_ptr = realloc( ptr, size ) ) == NULL )
+    {
+        if ( ptr != NULL )
+            T_free( ptr );
+        print( FATAL, "Running out of memory.\n" );
+        THROW( OUT_OF_MEMORY_EXCEPTION );
+    }
+
+#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
+    if ( Fsc2_Internals.is_linux_i386 )
+    {
+        asm( "mov %%ebp, %0" : "=g" ( EBP ) );
+        fprintf( stderr, "(%d) realloc: %p -> %p (%u) from %p\n",
+                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size,
+                 ( void * ) * ( EBP + 1 ) );
+    }
+    else
+        fprintf( stderr, "(%d) realloc: %p -> %p (%u)\n",
+                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size );
+#endif
+
+    return new_ptr;
+}
+
+
 /*------------------------------------------------------------------*
  * Replacement for free() with the difference that it returns NULL.
  * If FSC2_MDEBUG is defined information about the address of the

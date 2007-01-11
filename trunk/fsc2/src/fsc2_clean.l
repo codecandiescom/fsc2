@@ -97,6 +97,8 @@ static char *T_strdup( const char * string );
 static void *T_malloc( size_t size );
 static void *T_realloc( void * ptr,
                         size_t size );
+static void *T_realloc_or_free( void * ptr,
+                                size_t size );
 static void *T_free( void * ptr );
 static void lower_permissions( void );
 static ssize_t output( const char * fmt,
@@ -865,6 +867,31 @@ static void *T_realloc( void * ptr,
 }
 
 
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
+
+static void *T_realloc_or_free( void * ptr,
+                                size_t size )
+{
+    void *new_ptr;
+
+#if defined FSC2_MDEBUG
+    fprintf( stderr, "malloc:  %p (%u)\n", ptr, size );
+#endif
+
+    new_ptr = realloc( ptr, size );
+
+    if ( new_ptr == NULL )
+    {
+        if ( ptr != NULL )
+            T_free( ptr );
+        THROW( OUT_OF_MEMORY_EXCEPTION );
+    }
+
+    return new_ptr;
+}
+
+
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
@@ -946,7 +973,7 @@ static ssize_t output( const char * fmt,
         if ( wr >= 0 && ( size_t ) wr + 1 > new_len )
             new_len = ( size_t ) wr + 1;
 
-        c = CHAR_P T_realloc( c, new_len );
+        c = CHAR_P T_realloc_or_free( c, new_len );
         len = new_len;
     }
 

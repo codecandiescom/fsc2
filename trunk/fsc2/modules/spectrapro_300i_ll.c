@@ -58,7 +58,7 @@ static void spectrapro_300i_comm_fail( void );
 FILE *spectrapro_300i_find_calib( char * name )
 {
     FILE *cfp = NULL;
-    char *new_name;
+    char *new_name = NULL;
 
 
     CLOBBER_PROTECT( new_name );
@@ -406,7 +406,6 @@ void spectrapro_300i_set_turret( long tn )
     char *buf;
 
 
-    CLOBBER_PROTECT( buf );
     fsc2_assert( tn >= 0 && tn < MAX_TURRETS );
 
     if ( spectrapro_300i.tn == tn )
@@ -455,7 +454,6 @@ void spectrapro_300i_set_grating( long gn )
     char *buf;
 
 
-    CLOBBER_PROTECT( buf );
     fsc2_assert( gn >= 0 && gn < MAX_GRATINGS &&
                  gn - spectrapro_300i.tn * 3 >= 0 &&
                  gn - spectrapro_300i.tn * 3 <= 2 &&
@@ -689,7 +687,6 @@ void spectrapro_300i_set_offset( long gn,
 
 
     CLOBBER_PROTECT( buf );
-    CLOBBER_PROTECT( gn );
 
     fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
     fsc2_assert( spectrapro_300i.grating[ gn ].is_installed );
@@ -802,7 +799,6 @@ void spectrapro_300i_set_adjust( long gn,
 
 
     CLOBBER_PROTECT( buf );
-    CLOBBER_PROTECT( gn );
 
     fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
     fsc2_assert( spectrapro_300i.grating[ gn ].is_installed );
@@ -1002,9 +998,9 @@ static bool spectrapro_300i_read( char *   buf,
     bool done = UNSET;
 
 
-    CLOBBER_PROTECT( done );
     CLOBBER_PROTECT( to_fetch );
     CLOBBER_PROTECT( already_read );
+    CLOBBER_PROTECT( done );
 
     lbuf = CHAR_P T_malloc( llen );
 

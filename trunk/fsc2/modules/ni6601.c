@@ -824,7 +824,7 @@ static Var_T *ni6601_get_data( long   to_fetch,
     unsigned long *buf;
     long *final_buf;
     ssize_t i;
-    long us_wait;
+    long us_wait = 0;
     struct timeval before,
                    after;
     Var_T *nv;
@@ -836,7 +836,7 @@ static Var_T *ni6601_get_data( long   to_fetch,
     CLOBBER_PROTECT( wait_secs );
 
     if ( wait_secs > 0.0 )
-        us_wait = ( long ) floor( wait_secs * 1.0e6 + 0.5 );
+        us_wait = lrnd( wait_secs * 1.0e6 );
 
     if ( to_fetch == 0 )
     {

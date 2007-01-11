@@ -100,14 +100,15 @@ Exception_Types_T get_exception_type( const char * /* file */,
 
 #define OTHERWISE  else
 
-/* Automatic variables are not required to be restored after a longjmp() when
-   they were stored in a register but we can keep the compiler (at least gcc)
-   from putting a variable in a register by taking its address. We also do
-   some dummy stuff with the variable to keep the compiler from complaining
-   about statements with no effect, which we get when the statement consists
-   of e.g. just taking the address of the variable. */
+/* Automatic variables are not necessarily restored after a longjmp() when
+   they were stored in a register, so we have to keep the compiler from
+   putting automatic variable that could be clobbered into a register.
+   The following hack seems to do the trick for all gcc versions. */
 
-#define CLOBBER_PROTECT( a )  do { if ( ! &( a ) ) ( a ) = 0; } while( 0 )
+#define CLOBBER_PROTECT( a )  do { \
+                         unsigned char *xI3_2sYzii = ( unsigned char * ) &a; \
+                         *( unsigned char * ) &a = *xI3_2sYzii; \
+                              } while( 0 )
 
 
 #endif  /* ! EXCEPTIONS_HEADER */

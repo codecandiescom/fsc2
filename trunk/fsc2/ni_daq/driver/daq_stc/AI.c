@@ -112,9 +112,9 @@ void AI_reset_all( Board * board )
 	board->func->stc_writew( board, STC_Joint_Reset, data );
 	board->stc.Joint_Reset &= ~ AI_Configuration_End;
 
-	/* Switch off DMA and free DMA buffers */
+	/* Switch off transfer of data from the board and free buffers */
 
-	board->func->dma_shutdown( board, NI_DAQ_AI_SUBSYSTEM );
+	board->func->data_shutdown( board, NI_DAQ_AI_SUBSYSTEM );
 
 	/* Reset internal variables */
 
@@ -920,8 +920,9 @@ static void AI_acq_register_setup( Board * board )
  * - it arms all counters needed according to the acquisition
  * setup and, if the acquisition isn't to be initiated by an
  * external trigger, raises the START1 signal. It also allocates
- * memory for the data, initializes the DMA hardware and enables
- * the SC TC interrupt, indicating the end of the acquisition.
+ * memory for the data, initializes the transfer of data from
+ * the board (possibly via DMA) and enables the SC TC interrupt,
+ * indicating the end of the acquisition.
  *---------------------------------------------------------------*/
 
 int AI_start_acq( Board * board )
@@ -981,17 +982,18 @@ int AI_start_acq( Board * board )
 		return -EINVAL;
 	}
 
-	/* Get a DMA buffer big enough to hold the data to be expected */
+	/* Get a data buffer big enough to hold the data to be expected */
 
-	if ( ( ret = board->func->dma_buf_setup( board, NI_DAQ_AI_SUBSYSTEM,
-					     board->AI.num_data_per_scan
-					     * board->AI.num_scans, 0 ) ) < 0 )
+	if ( ( ret = board->func->data_buf_setup( board, NI_DAQ_AI_SUBSYSTEM,
+						  board->AI.num_data_per_scan
+						  * board->AI.num_scans, 0 ) )
+	                                                                  < 0 )
 		return ret;
 
-	/* Enable DMA */
+	/* Enable hardware as far as necessary for transfer of data */
 
-	if ( ( ret = board->func->dma_setup( board,
-					     NI_DAQ_AI_SUBSYSTEM ) ) < 0 )
+	if ( ( ret = board->func->data_setup( board,
+					      NI_DAQ_AI_SUBSYSTEM ) ) < 0 )
 		return ret;
 		       
 	/* Set up all registers, then arm the required counters */
@@ -1081,7 +1083,7 @@ int AI_start_acq( Board * board )
 
 static int AI_acq_wait( Board * board )
 {
-	if ( board->mite_chain[ NI_DAQ_AI_SUBSYSTEM ] == NULL )
+	if ( board->data_buffer[ NI_DAQ_AI_SUBSYSTEM ] == NULL )
 		return -EIO;
 
 	/* Wait for the SC TC interrupt, indicating end of acquisition */
@@ -1113,7 +1115,7 @@ static int AI_acq_stop( Board * board )
 	u16 data;
 
 
-	if ( board->mite_chain[ NI_DAQ_AI_SUBSYSTEM ] == NULL )
+	if ( board->data_buffer[ NI_DAQ_AI_SUBSYSTEM ] == NULL )
 		return 0;
 
 	if ( board->AI.is_running ) {
@@ -1136,7 +1138,7 @@ static int AI_acq_stop( Board * board )
 	MSC_PFI_setup( board, NI_DAQ_AI_SUBSYSTEM, NI_DAQ_ALL,
 		       NI_DAQ_PFI_UNUSED );
 
-	board->func->dma_shutdown( board, NI_DAQ_AI_SUBSYSTEM );
+	board->func->data_shutdown( board, NI_DAQ_AI_SUBSYSTEM );
 
 	return 0;
 }

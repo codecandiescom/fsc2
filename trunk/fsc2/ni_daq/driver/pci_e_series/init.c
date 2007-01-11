@@ -36,6 +36,7 @@ int board_count = 0;
 static Register_Addresses regs[ NI_DAQ_MAX_PCI_E_BOARDS ];
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+
 static Board_Functions func = {
 	.board_reset_all =            pci_board_reset_all,
 	.stc_writew =                 pci_stc_writew,
@@ -51,14 +52,16 @@ static Board_Functions func = {
 	.configuration_low =          pci_configuration_low,
 	.ao_configuration =           pci_ao_configuration,
 	.dac_direct_data =            pci_dac_direct_data,
-	.dma_setup =                  pci_dma_setup,
-	.dma_buf_setup =              pci_dma_buf_setup,
-	.dma_buf_get =                pci_dma_buf_get,
-	.dma_get_available =          pci_dma_get_available,
-	.dma_shutdown =               pci_dma_shutdown,
+	.data_setup =                 pci_dma_setup,
+	.data_buf_setup =             pci_dma_buf_setup,
+	.data_buf_get =               pci_dma_buf_get,
+	.data_get_available =         pci_dma_get_available,
+	.data_shutdown =              pci_dma_shutdown,
 	.set_trigger_levels =         pci_set_trigger_levels
 };
+
 #else
+
 static Board_Functions func = {
 	board_reset_all:            pci_board_reset_all,
 	stc_writew:                 pci_stc_writew,
@@ -74,13 +77,14 @@ static Board_Functions func = {
 	configuration_low:          pci_configuration_low,
 	ao_configuration:           pci_ao_configuration,
 	dac_direct_data:            pci_dac_direct_data,
-	dma_setup:                  pci_dma_setup,
-	dma_buf_setup:              pci_dma_buf_setup,
-	dma_buf_get:                pci_dma_buf_get,
-	dma_get_available:          pci_dma_get_available,
-	dma_shutdown:               pci_dma_shutdown,
+	data_setup:                 pci_dma_setup,
+	data_buf_setup:             pci_dma_buf_setup,
+	data_buf_get:               pci_dma_buf_get,
+	data_get_available:         pci_dma_get_available,
+	data_shutdown:              pci_dma_shutdown,
 	set_trigger_levels:         pci_set_trigger_levels
 };
+
 #endif
 
 extern struct file_operations ni_daq_file_ops;   /* from daq_stc/fops.c */

@@ -2328,6 +2328,7 @@ documentation for the standard C functions @code{setjmp()} and
 @findex T_malloc()
 @findex T_calloc()
 @findex T_realloc()
+@findex T_realloc_or_free()
 @findex T_free()
 @findex T_strdup()
 
@@ -2337,20 +2338,31 @@ allocation really returned as much memory as you asked for (on failure
 the program is stopped and an appropriate error message is
 printed). That means that you don't have to care for error handling --
 if these memory allocation functions return everything is ok, otherwise
-they won't return at all. The first of these functions called
-@code{T_malloc()} (think about it as @i{tested malloc}). And, of course,
-there is also a replacement for @code{realloc()} and @code{calloc()},
-called @code{T_realloc()} and @code{T_calloc()}. For the duplication of
-strings you should use @code{T_strdup()} instead of the normal
-@code{strdup()}. And, to make things complete, the replacement for
-@code{free()} is called @code{T_free()}. All five functions accept the
-same input and return values as their normal counterparts, i.e.@ they
-have the prototypes:
+they won't return at all.
+
+The first of these functions called @code{T_malloc()} (think about it
+as @i{tested malloc}). And, of course, there is also a replacement for
+@code{realloc()} and @code{calloc()}, called @code{T_realloc()} and
+@code{T_calloc()}. There's an also additional function for reallocation,
+@code{T_realloc_or_free()} which does the same as @code{T_realloc()} but
+additionally frees already allocated memory, so you don't have to catch
+failures of allocation and deallocate the original memory it was called
+with yourself.
+
+For the duplication of strings you should use @code{T_strdup()} instead 
+f the normal @code{strdup()}. And, to make things complete, the replacement
+for @code{free()} is called @code{T_free()}.
+
+ All functions accept the same input and return values as their normal
+counterparts, i.e.@ they have the prototypes:
 @example
 void * T_malloc( size_t size );
 
 void * T_calloc( size_t nmemb,
                  size_t size );
+
+void * T_realloc_or_free( void * ptr,
+                          size_t size );
 
 void * T_realloc( void * ptr,
                   size_t size );

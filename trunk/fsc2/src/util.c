@@ -59,7 +59,7 @@ char *get_string( const char * fmt,
 
     while ( 1 )
     {
-        c = CHAR_P T_realloc( c, len );
+        c = CHAR_P T_realloc_or_free( c, len );
         va_start( ap, fmt );
         wr = vsnprintf( c, len, fmt, ap );
         va_end( ap );
@@ -83,7 +83,7 @@ char *get_string( const char * fmt,
        older glibc, up to 2.0.6). */
 
     if ( ( size_t ) wr + 1 < len )
-        T_realloc( c, ( size_t ) wr + 1 );
+        T_realloc_or_free( c, ( size_t ) wr + 1 );
 
     return c;
 }

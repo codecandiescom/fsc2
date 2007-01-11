@@ -55,7 +55,6 @@ void device_add( const char * name )
     char *ldc;
 
 
-    CLOBBER_PROTECT( dev_name );
     CLOBBER_PROTECT( real_name );
 
     dev_name = string_to_lower( T_strdup( name ) );

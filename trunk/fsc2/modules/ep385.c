@@ -252,9 +252,6 @@ int ep385_end_of_test_hook( void )
     Function_T *f;
 
 
-    CLOBBER_PROTECT( i );
-    CLOBBER_PROTECT( f );
-
     if ( ep385.dump_file != NULL )
     {
         fclose( ep385.dump_file );

@@ -207,25 +207,25 @@ static unsigned int ni_daq_poll( struct file *              file_p,
 	} else if ( down_interruptible( &board->use_mutex ) )
 		return -ERESTARTSYS;
 
-	if ( board->mite_chain[ NI_DAQ_AI_SUBSYSTEM ] ) {
+	if ( board->data_buffer[ NI_DAQ_AI_SUBSYSTEM ] != NULL ) {
 
 		/* As long as the acquisition hasn't ended (in which case
 		   the SC TC interrupt would have been raised) and there are
-		   no new data in the DMA buffer enable the STOP interrupt
+		   no new data in the data buffer enable the STOP interrupt
 		   (indicating that new data are available) and let
 		   poll_wait() do whatever it needs to do. When the STOP
 		   interrupts finally arrives disable it again, otherwise
 		   we would get flooded with these interrupts... */
 
-		if ( board->func->dma_get_available( board,
-						     NI_DAQ_AI_SUBSYSTEM ) )
+		if ( board->func->data_get_available( board,
+						      NI_DAQ_AI_SUBSYSTEM ) )
 			mask |= POLLIN | POLLRDNORM;
 		else if ( ! board->irq_hand[ IRQ_AI_SC_TC ].raised ) {
 			daq_irq_enable( board, IRQ_AI_STOP, AI_irq_handler );
 			poll_wait( file_p, &board->AI.waitqueue, pt );
 			daq_irq_disable( board, IRQ_AI_STOP );
 
-			if ( board->func->dma_get_available( board,
+			if ( board->func->data_get_available( board,
 							NI_DAQ_AI_SUBSYSTEM ) )
 				mask |= POLLIN | POLLRDNORM;
 		}
@@ -233,8 +233,8 @@ static unsigned int ni_daq_poll( struct file *              file_p,
 	else
 		mask |= POLLHUP;
 	
-	if ( board->mite_chain[ NI_DAQ_AO_SUBSYSTEM ] &&
-	     board->func->dma_get_available( board, NI_DAQ_AO_SUBSYSTEM ) )
+	if ( board->data_buffer[ NI_DAQ_AO_SUBSYSTEM ] != NULL &&
+	     board->func->data_get_available( board, NI_DAQ_AO_SUBSYSTEM ) )
 		mask |= POLLOUT | POLLWRNORM;
 
 	up( &board->use_mutex );
@@ -242,7 +242,7 @@ static unsigned int ni_daq_poll( struct file *              file_p,
 }
 
 
-/*----------------------------------------------------------------------*
+/*-----------------------------------------------------------------------*
  * Function for reading from the device file associated with the board.
  * Reading the device file only works for data from the AI subsystem.
  * 1. If no valid acquisition set up has been done return -EINVAL
@@ -253,9 +253,10 @@ static unsigned int ni_daq_poll( struct file *              file_p,
  * 4. Return as many data as are available (or as many as requested)
  * 5. If the acquisition is finished and all data to be expected are
  *    getting passed on to the user a reset of the AI subsystem is
- *    done, i.e. DMA is automatically disabled, buffers are deallocated
- *    and trigger input lines are released back into the pool
- *----------------------------------------------------------------------*/
+ *    done, i.e. tarnsfer of data from the DAQ to the data buffer
+ *    (possibly via DMA) is automatically disabled, buffers are de-
+ *    allocated and trigger input lines are released back into the pool
+ *-----------------------------------------------------------------------*/
 
 static ssize_t ni_daq_read( struct file * file_p,
 			    char __user * buff,
@@ -299,7 +300,7 @@ static ssize_t ni_daq_read( struct file * file_p,
 	/* If an acquisition has been set up but hasn't been started yet
 	   trying to read data triggers the start of the acquisition */
 
-	if ( ! board->mite_chain[ NI_DAQ_AI_SUBSYSTEM ] &&
+	if ( board->data_buffer[ NI_DAQ_AI_SUBSYSTEM ] == NULL &&
 	     ( ret = AI_start_acq( board ) ) < 0 ) {
 		up( &board->use_mutex );
 		return ret;
@@ -312,8 +313,8 @@ static ssize_t ni_daq_read( struct file * file_p,
 	   end of the acquisition). */
 
 	if ( ! ( file_p->f_flags & O_NONBLOCK ) &&
-	     ! board->func->dma_get_available( board,
-					       NI_DAQ_AI_SUBSYSTEM ) ) {
+	     ! board->func->data_get_available( board,
+						NI_DAQ_AI_SUBSYSTEM ) ) {
 		daq_irq_enable( board, IRQ_AI_STOP, AI_irq_handler );
 
 		if ( wait_event_interruptible( board->AI.waitqueue,
@@ -329,8 +330,8 @@ static ssize_t ni_daq_read( struct file * file_p,
 
 	/* Now get as many new data as possible */
 
-        ret = board->func->dma_buf_get( board, NI_DAQ_AI_SUBSYSTEM,
-					( void __user * ) buff, &count, 0 );
+        ret = board->func->data_buf_get( board, NI_DAQ_AI_SUBSYSTEM,
+					 ( void __user * ) buff, &count, 0 );
 
 	/* If there are no new data and the device file was opened in non-
 	   blocking mode return -EAGAIN */
@@ -342,8 +343,9 @@ static ssize_t ni_daq_read( struct file * file_p,
 
 	/* If all points to be expected from the acquisition have been fetched
 	   or if there was an unrecoverable error disable AI SC_TC interrupt
-	   and release all AI trigger inputs as well as switching off DMA and
-	   releasing the associated buffers. */
+	   and release all AI trigger inputs as well as switching off data
+	   transfer from the DAQ to the bufers (possibly via DMA) and releasing
+	   the associated buffers. */
 
 	if ( ret != 0 && board->AI.is_running ){
 		board->AI.is_running = 0;
@@ -353,7 +355,7 @@ static ssize_t ni_daq_read( struct file * file_p,
 	}
 
 	if ( ret < 0 ) {
-		board->func->dma_shutdown( board, NI_DAQ_AI_SUBSYSTEM );
+		board->func->data_shutdown( board, NI_DAQ_AI_SUBSYSTEM );
 		up( &board->use_mutex );
 		return ret;
 	}
@@ -376,7 +378,7 @@ static ssize_t ni_daq_write( struct file *        file_p,
 			     size_t               count,
 			     loff_t *             offp )
 {
-	return 0;
+	return -ENOSYS;
 }
 
 

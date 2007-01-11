@@ -277,9 +277,6 @@ int dg2020_b_end_of_test_hook( void )
     Function_T *f;
 
 
-    CLOBBER_PROTECT( i );
-    CLOBBER_PROTECT( f );
-
     if ( ! dg2020.is_needed )
     {
         dg2020.max_seq_len = dg2020_get_max_seq_len( );

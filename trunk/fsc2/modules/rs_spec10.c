@@ -522,10 +522,8 @@ Var_T *ccd_camera_get_image( Var_T * v  UNUSED_ARG )
     CLOBBER_PROTECT( width );
     CLOBBER_PROTECT( height );
     CLOBBER_PROTECT( nv );
-    CLOBBER_PROTECT( bin[ X ] );
-    CLOBBER_PROTECT( bin[ Y ] );
-    CLOBBER_PROTECT( urc[ X ] );
-    CLOBBER_PROTECT( urc[ Y ] );
+    CLOBBER_PROTECT( bin );
+    CLOBBER_PROTECT( urc );
 
     /* Store the original binning size and the position of the upper right
        hand corner, they might become adjusted and need to be reset at the
@@ -722,10 +720,8 @@ Var_T *ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
     CLOBBER_PROTECT( frame );
     CLOBBER_PROTECT( width );
     CLOBBER_PROTECT( nv );
-    CLOBBER_PROTECT( bin[ X ] );
-    CLOBBER_PROTECT( bin[ Y ] );
-    CLOBBER_PROTECT( urc[ X ] );
-    CLOBBER_PROTECT( urc[ Y ] );
+    CLOBBER_PROTECT( bin );
+    CLOBBER_PROTECT( urc );
 
     /* Store the original binning sizes and the position of the upper right
        hand corner, they might become re-adjusted and need to be reset at the

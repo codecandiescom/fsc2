@@ -1295,8 +1295,6 @@ static void lecroy_ws_get_prep( int              ch,
     bool is_mem_ch = UNSET;
 
 
-    CLOBBER_PROTECT( data );
-
     fsc2_assert( ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )  ||
                  ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 ) ||
                  ch == LECROY_WS_MATH );
@@ -1728,7 +1726,7 @@ static int lecroy_ws_talk( const char * cmd,
                            ssize_t *    length )
 {
     ssize_t len = strlen( cmd );
-    int ret;
+    int ret = 0;
     bool with_eoi;
 
 

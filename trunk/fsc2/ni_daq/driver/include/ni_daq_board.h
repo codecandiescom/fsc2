@@ -96,12 +96,13 @@
 
 
 #if defined ( PCI_E_SERIES )
-#define NUM_MITE_DMA_CHANNELS      4
+#define NUM_MAX_DATA_CHANNELS      4
 #define BOARD_SERIES_NAME          "ni_pci_e_series"
 #endif
 
 #if defined ( AT_MIO_E_SERIES )
 #include <linux/isapnp.h>
+#define NUM_MAX_DATA_CHANNELS      4
 #define BOARD_SERIES_NAME          "ni_at_mio_e_series"
 #define PORT  unsigned int
 #endif
@@ -184,13 +185,13 @@ struct Board_Functions {
 				    NI_DAQ_STATE, NI_DAQ_STATE,
 				    NI_DAQ_BU_POLARITY );
 	int ( *dac_direct_data )( Board *, unsigned int, int );
-	int ( *dma_setup )( Board *, NI_DAQ_SUBSYSTEM );
-	int ( *dma_buf_setup )( Board *, NI_DAQ_SUBSYSTEM, size_t, int );
-	int ( *dma_buf_get )( Board *, NI_DAQ_SUBSYSTEM, void __user *,
+	int ( *data_setup )( Board *, NI_DAQ_SUBSYSTEM );
+	int ( *data_buf_setup )( Board *, NI_DAQ_SUBSYSTEM, size_t, int );
+	int ( *data_buf_get )( Board *, NI_DAQ_SUBSYSTEM, void __user *,
 			      size_t *, int );
-	size_t ( *dma_get_available )( Board *, NI_DAQ_SUBSYSTEM );
-	void ( *dma_buf_release )( Board *, NI_DAQ_SUBSYSTEM );
-	int ( *dma_shutdown )( Board *, NI_DAQ_SUBSYSTEM );
+	size_t ( *data_get_available )( Board *, NI_DAQ_SUBSYSTEM );
+	void ( *data_buf_release )( Board *, NI_DAQ_SUBSYSTEM );
+	int ( *data_shutdown )( Board *, NI_DAQ_SUBSYSTEM );
 	void ( *set_trigger_levels )( Board *, u16 th, u16 tl );
 };
 
@@ -360,8 +361,14 @@ struct Board {
 #if defined ( PCI_E_SERIES )
 	/* Chains of DMA buffers used with the mite for AI and AO */
 
-	int mite_irq_enabled[ NUM_MITE_DMA_CHANNELS ];
-	MITE_DMA_Chain_t *mite_chain[ NUM_MITE_DMA_CHANNELS ];
+	int mite_irq_enabled[ NUM_MAX_DATA_CHANNELS ];
+	MITE_DMA_Chain_t *data_buffer[ NUM_MAX_DATA_CHANNELS ];
+#endif
+
+#if defined ( AT_MIO_E_SERIES )
+	/* Pointers to buffers for transfer of data from and to the board */
+
+	unsigned char *data_buffer[ NUM_MAX_DATA_CHANNELS ];
 #endif
 };
 

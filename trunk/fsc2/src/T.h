@@ -35,6 +35,9 @@ void *T_calloc( size_t /* nmemb */,
 void *T_realloc( void * /* ptr  */,
                  size_t /* size */ );
 
+void *T_realloc_or_free( void * /* ptr  */,
+                         size_t /* size */ );
+
 void *T_free( void * /* ptr */ );
 
 char *T_strdup( const char * /* str */ );

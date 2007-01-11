@@ -172,10 +172,11 @@ void GPCT_reset_all( Board * board )
 	  board->func->stc_writew( board, STC_Clock_and_FOUT,
 				   board->stc.Clock_and_FOUT );
 
-	/* Switch off DMA and free DMA buffers */
+	/* Switch off transfer of data fromt he DAQ to the buffers and 
+	   free teh buffers */
 
-	board->func->dma_shutdown( board, NI_DAQ_GPCT0_SUBSYSTEM );
-	board->func->dma_shutdown( board, NI_DAQ_GPCT1_SUBSYSTEM );
+	board->func->data_shutdown( board, NI_DAQ_GPCT0_SUBSYSTEM );
+	board->func->data_shutdown( board, NI_DAQ_GPCT1_SUBSYSTEM );
 
 	/* Zero out the auto-increment values */
 

@@ -485,7 +485,7 @@ endif
 # Set the minimum include paths and linker flags
 
 INCLUDES := -I$(fdir) -I$(adir)  -I/usr/local/include     \
-	        -I/usr/X11R6/include -I/usr/X11R6/include/X11 
+	        -I/usr/include/X11 -I/usr/X11/include -I/usr/X11/include/X11 
 
 LFLAGS	 := -shared -fpic
 
@@ -835,7 +835,6 @@ config: fsc2_config.h
 	fi
 	$(MAKE) -C $(sdir) gpib_setup
 	$(MAKE) built
-	$(MAKE) tags
 
 
 src:
@@ -1000,11 +999,11 @@ cleanup:
 	$(MAKE) -C $(sdir) cleanup
 	$(MAKE) -C $(mdir) cleanup
 	$(MAKE) -C $(ddir) cleanup
-	$(MAKE) -C me6x00 cleanup
-	$(MAKE) -C ni6601 cleanup
-	$(MAKE) -C ni_daq cleanup
-	$(MAKE) -C rulbus cleanup
-	$(MAKE) -C witio_48 cleanup
+	-$(MAKE) -C me6x00 cleanup
+	-$(MAKE) -C ni6601 cleanup
+	-$(MAKE) -C ni_daq cleanup
+	-$(MAKE) -C rulbus cleanup
+	-$(MAKE) -C witio_48 cleanup
 
 clean:
 	$(MAKE) -C $(sdir) clean
@@ -1018,12 +1017,12 @@ ifdef WITH_HTTP_SERVER
 endif
 	$(MAKE) -C $(udir) clean
 	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h svn-* *~
-	$(MAKE) -C me6x00 clean
-	$(MAKE) -C ni6601 clean
-	$(MAKE) -C ni_daq clean
-	$(MAKE) -C rulbus clean
-	$(MAKE) -C witio_48 clean
-	$(MAKE) -C edl/leiden clean
+	-$(MAKE) -C me6x00 clean
+	-$(MAKE) -C ni6601 clean
+	-$(MAKE) -C ni_daq clean
+	-$(MAKE) -C rulbus clean
+	-$(MAKE) -C witio_48 clean
+	-$(MAKE) -C edl/leiden clean
 
 
 # Create a tags file to be used with emacs or vi

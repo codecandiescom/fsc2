@@ -77,6 +77,7 @@ MODULE_DEVICE_TABLE( pci, pci_e_series_pci_tbl );
 
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+
 static Board_Properties pci_e_series_boards[ ]= {
 
 	/* PCI-MIO-16E-1 */
@@ -103,7 +104,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		.atrig_low_ch =      11,
 		.atrig_high_ch =     12,
 		.atrig_bits =        8,
-		.num_mite_channels = 4,
+		.num_data_channels = 4,
 		.caldac =            { mb88341 }
 	},
 
@@ -131,7 +132,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		.atrig_low_ch =      11,
 		.atrig_high_ch =     12,
 		.atrig_bits =        8,
-		.num_mite_channels = 4,
+		.num_data_channels = 4,
 		.caldac =            { mb88341 }
 	},
 
@@ -160,7 +161,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		.atrig_low_ch =      0,
 		.atrig_high_ch =     1,
 		.atrig_bits =        12,
-		.num_mite_channels = 4,
+		.num_data_channels = 4,
 		.caldac =            { dac8800, dac8043, ad8522 }
 	},
 
@@ -182,7 +183,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		.ao_fifo_depth =     0,
 		.ao_unipolar =       0,
 		.has_analog_trig =   0,
-		.num_mite_channels = 4,
+		.num_data_channels = 4,
 		.caldac =            { dac8800, dac8043 }
 	},
 
@@ -204,7 +205,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		.ao_unipolar =       0,
 		.ao_has_ext_ref =    0,
 		.has_analog_trig =   0,
-		.num_mite_channels = 4,
+		.num_data_channels = 4,
 		.caldac =            { mb88341 }
 	},
 
@@ -231,7 +232,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		.atrig_low_ch =      11,
 		.atrig_high_ch =     12,
 		.atrig_bits =        8,
-		.num_mite_channels = 4,
+		.num_data_channels = 4,
 		.caldac =            { mb88341 }
 	},
 
@@ -260,7 +261,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		.atrig_low_ch =      0,
 		.atrig_high_ch =     1,
 		.atrig_bits =        12,
-		.num_mite_channels = 4,
+		.num_data_channels = 4,
 		.caldac =            { dac8800, dac8043, ad8522 }
 	},
 
@@ -289,7 +290,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		.atrig_low_ch =      0,
 		.atrig_high_ch =     1,
 		.atrig_bits =        12,
-		.num_mite_channels = 4,
+		.num_data_channels = 4,
 		.caldac =            { dac8800, dac8043, ad8522 }
 	},
 
@@ -318,7 +319,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		.atrig_low_ch =      0,
 		.atrig_high_ch =     1,
 		.atrig_bits =        12,
-		.num_mite_channels = 4,
+		.num_data_channels = 4,
 		.caldac =            { dac8800, dac8043, ad8522 }
 	},
 
@@ -346,7 +347,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		.atrig_low_ch =      0,
 		.atrig_high_ch =     1,
 		.atrig_bits =        12,
-		.num_mite_channels = 4,
+		.num_data_channels = 4,
 		.caldac =            { mb88341, ad8522 }
 	},
 
@@ -374,11 +375,13 @@ static Board_Properties pci_e_series_boards[ ]= {
 		.atrig_low_ch =      11,
 		.atrig_high_ch =     12,
 		.atrig_bits =        8,
-		.num_mite_channels = 4,
+		.num_data_channels = 4,
 		.caldac =            { mb88341 }
 	},
 };
+
 #else
+
 static Board_Properties pci_e_series_boards[ ]= {
 
 	/* PCI-MIO-16E-1 */
@@ -405,7 +408,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		atrig_low_ch:       11,
 		atrig_high_ch:      12,
 		atrig_bits:         8,
-		num_mite_channels:  4,
+		num_data_channels:  4,
 		caldac:             { mb88341 }
 	},
 
@@ -433,7 +436,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		atrig_low_ch:       11,
 		atrig_high_ch:      12,
 		atrig_bits:         8,
-		num_mite_channels:  4,
+		num_data_channels:  4,
 		caldac:             { mb88341 }
 	},
 
@@ -461,7 +464,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		atrig_low_ch:       0,
 		atrig_high_ch:      1,
 		atrig_bits:         12,
-		num_mite_channels:  4,
+		num_data_channels:  4,
 		caldac:             { dac8800, dac8043, ad8522 }
 	},
 
@@ -483,7 +486,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		ao_fifo_depth:      0,
 		ao_unipolar:        0,
 		has_analog_trig:    0,
-		num_mite_channels:  4,
+		num_data_channels:  4,
 		caldac:             { dac8800, dac8043 }
 	},
 
@@ -505,7 +508,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		ao_unipolar:        0,
 		ao_has_ext_ref:     0,
 		has_analog_trig:    0,
-		num_mite_channels:  4,
+		num_data_channels:  4,
 		caldac:             { mb88341 }
 	},
 
@@ -532,7 +535,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		atrig_low_ch:       11,
 		atrig_high_ch:      12,
 		atrig_bits:         8,
-		num_mite_channels:  4,
+		num_data_channels:  4,
 		caldac:             { mb88341 }
 	},
 
@@ -560,7 +563,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		atrig_low_ch:       0,
 		atrig_high_ch:      1,
 		atrig_bits:         12,
-		num_mite_channels:  4,
+		num_data_channels:  4,
 		caldac:             { dac8800, dac8043, ad8522 }
 	},
 
@@ -588,7 +591,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		atrig_low_ch:       0,
 		atrig_high_ch:      1,
 		atrig_bits:         12,
-		num_mite_channels:  4,
+		num_data_channels:  4,
 		caldac:             { dac8800, dac8043, ad8522 }
 	},
 
@@ -616,7 +619,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		atrig_low_ch:       0,
 		atrig_high_ch:      1,
 		atrig_bits:         12,
-		num_mite_channels:  4,
+		num_data_channels:  4,
 		caldac:             { dac8800, dac8043, ad8522 }
 	},
 
@@ -644,7 +647,7 @@ static Board_Properties pci_e_series_boards[ ]= {
 		atrig_low_ch:       0,
 		atrig_high_ch:      1,
 		atrig_bits:         12,
-		num_mite_channels:  4,
+		num_data_channels:  4,
 		caldac:             { mb88341, ad8522 }
 	},
 
@@ -672,10 +675,11 @@ static Board_Properties pci_e_series_boards[ ]= {
 		atrig_low_ch:       11,
 		atrig_high_ch:      12,
 		atrig_bits:         8,
-		num_mite_channels:  4,
+		num_data_channels:  4,
 		caldac:             { mb88341 }
 	},
 };
+
 #endif
 
 

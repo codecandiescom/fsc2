@@ -1408,15 +1408,12 @@ static void lecroy_wr_get_prep( int              ch,
                                 double *         gain,
                                 double *         offset )
 {
-    unsigned int bit_to_test;
+    unsigned int bit_to_test = 0;
     char cmd[ 100 ];
     char ch_str[ 3 ];
     bool is_mem_ch = UNSET;
     ssize_t to_send;
 
-
-    CLOBBER_PROTECT( data );
-    CLOBBER_PROTECT( bit_to_test );
 
     /* Figure out which channel is to be used and set a few variables
        needed later accordingly */

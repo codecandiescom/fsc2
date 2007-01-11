@@ -167,8 +167,6 @@ static bool get_print_file( FILE ** fp,
     struct stat stat_buf;
 
 
-    CLOBBER_PROTECT( obj );
-
     print_form = GUI.G_Funcs.create_form_print( );
 
     fl_set_form_atclose( print_form->print, print_form_close_handler, NULL );
@@ -640,8 +638,6 @@ static void print_header( FILE *       fp,
     char *tstr = NULL;
 
 
-    CLOBBER_PROTECT( tstr );
-
     /* Writes EPS header plus some routines into the file */
 
     d = time( NULL );
@@ -926,17 +922,13 @@ static void eps_make_scale( FILE * fp,
     char *label;
 
 
-    CLOBBER_PROTECT( d_delta_fine );
     CLOBBER_PROTECT( d_start_fine );
-    CLOBBER_PROTECT( d_start_medium );
-    CLOBBER_PROTECT( d_start_coarse );
     CLOBBER_PROTECT( medium_factor );
     CLOBBER_PROTECT( coarse_factor );
     CLOBBER_PROTECT( medium );
     CLOBBER_PROTECT( coarse );
     CLOBBER_PROTECT( rwc_coarse );
     CLOBBER_PROTECT( x );
-    CLOBBER_PROTECT( y );
 
     if ( dim == 1 )
     {
@@ -1579,10 +1571,10 @@ static char **split_into_lines( int * num_lines )
 
 
     CLOBBER_PROTECT( lines );
-    CLOBBER_PROTECT( cp );
     CLOBBER_PROTECT( nl );
     CLOBBER_PROTECT( cur_size );
     CLOBBER_PROTECT( i );
+
 
     TRY
     {
@@ -1595,44 +1587,38 @@ static char **split_into_lines( int * num_lines )
     /* Count the number of lines by detecting the '\n' characters and set up
        an array of pointers to the starts of the lines */
 
-    TRY
-    {
-        for ( lines[ nl = 0 ] = cp = pc_string; *cp != '\0'; cp++ )
-            if ( *cp == '\n' )
+    for ( lines[ nl = 0 ] = cp = pc_string; *cp != '\0'; cp++ )
+        if ( *cp == '\n' )
+        {
+            if ( nl++ == cur_size )
             {
-                if ( nl++ == cur_size )
-                {
-                    cur_size += GUESS_NUM_LINES;
-                    lines = CHAR_PP T_realloc( lines,
-                                               cur_size * sizeof *lines );
-                }
-
-                lines[ nl ] = cp + 1;
+                cur_size += GUESS_NUM_LINES;
+                lines = CHAR_PP T_realloc_or_free( lines,
+                                                   cur_size * sizeof *lines );
             }
 
-        if ( *--cp == '\n' )
-        {
-            while ( nl != 0 && *--cp == '\n')
-                nl--;
-
-            if ( nl == 0 )
-                THROW( EXCEPTION );
-
-            lines = CHAR_PP T_realloc( lines, ( nl + 1 ) * sizeof *lines );
-        }
-        else
-        {
-            if ( nl++ >= cur_size )
-                lines = CHAR_PP T_realloc( lines, ( nl + 1 ) * sizeof *lines );
-            lines[ nl ] = cp + 2;
+            lines[ nl ] = cp + 1;
         }
 
-        TRY_SUCCESS;
-    }
-    OTHERWISE
+    if ( *--cp == '\n' )
     {
-        T_free( lines );
-        return NULL;
+        while ( nl != 0 && *--cp == '\n')
+            nl--;
+
+        if ( nl == 0 ) {
+            if ( lines != NULL )
+                T_free( lines );
+            THROW( EXCEPTION );
+        }
+
+        lines = CHAR_PP T_realloc_or_free( lines, ( nl + 1 ) * sizeof *lines );
+    }
+    else
+    {
+        if ( nl++ >= cur_size )
+            lines = CHAR_PP T_realloc_or_free( lines,
+                                               ( nl + 1 ) * sizeof *lines );
+        lines[ nl ] = cp + 2;
     }
 
     /* Now split the string into single lines and copy them into the array

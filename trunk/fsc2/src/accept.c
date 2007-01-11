@@ -509,9 +509,11 @@ static void accept_1d_data( long       x_index,
               cv = G_1d.curve[ ++i ] )
         {
             cv->points = SCALED_POINT_P T_realloc( cv->points,
-                                              end_index * sizeof *cv->points );
+                                                   end_index
+                                                   * sizeof *cv->points );
             cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
-                                             end_index * sizeof *cv->xpoints );
+                                              end_index
+                                              * sizeof *cv->xpoints );
 
             for ( j = G_1d.nx, sp = cv->points + j; j < end_index; sp++, j++ )
                 sp->exist = UNSET;

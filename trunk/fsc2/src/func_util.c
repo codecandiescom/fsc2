@@ -2614,16 +2614,7 @@ static dpoint_T *eval_display_args( Var_T * v,
     {
         /* Get (more) memory for the sets */
 
-        TRY
-        {
-            dp = DPOINT_P T_realloc( dp, ( *nsets + 1 ) * sizeof *dp );
-            TRY_SUCCESS;
-        }
-        OTHERWISE
-        {
-            T_free( dp );
-            RETHROW( );
-        }
+        dp = DPOINT_P T_realloc_or_free( dp, ( *nsets + 1 ) * sizeof *dp );
 
         /* Check and store the x-index */
 
@@ -2936,7 +2927,7 @@ Var_T * f_clearcv_1d( Var_T * v )
 
             /* Store curve number */
 
-            ca = LONG_P T_realloc( ca, ( count + 1 ) * sizeof *ca );
+            ca = LONG_P T_realloc_or_free( ca, ( count + 1 ) * sizeof *ca );
             ca[ count++ ] = curve - 1;
 
         } while ( ( v = v->next ) != NULL );
@@ -3084,7 +3075,7 @@ Var_T * f_clearcv_2d( Var_T * v )
 
             /* Store curve number */
 
-            ca = LONG_P T_realloc( ca, ( count + 1 ) * sizeof *ca );
+            ca = LONG_P T_realloc_or_free( ca, ( count + 1 ) * sizeof *ca );
             ca[ count++ ] = curve - 1;
 
         } while ( ( v = v->next ) != NULL );
@@ -4909,7 +4900,7 @@ Var_T * f_spike_rem( Var_T * v )
     double m, stdev = 0.0, mean = 0.0;
     double r;
     double sigmas = 5.0;
-    ssize_t *ol_indices = NULL, *old_ol_indices;
+    ssize_t *ol_indices = NULL;
     ssize_t ol_len = 0, ol_count = 0;
     long max_spike_width = 3;
     Var_T *nv;
@@ -5020,18 +5011,16 @@ Var_T * f_spike_rem( Var_T * v )
         {
             if ( ol_count >= ol_len )
             {
-                old_ol_indices = ol_indices;
+                ol_len += OUTLIER_DEF_NUMBER;
                 TRY
                 {
-                    ol_len += OUTLIER_DEF_NUMBER;
-                    ol_indices = T_realloc( ol_indices,
-                                            ol_len * sizeof *ol_indices );
+                    ol_indices = T_realloc_or_free( ol_indices,
+                                                    ol_len
+                                                    * sizeof *ol_indices );
                     TRY_SUCCESS;
                 }
                 OTHERWISE
                 {
-                    if ( old_ol_indices != NULL )
-                        T_free( old_ol_indices );
                     T_free( diffs );
                     RETHROW( );
                 }

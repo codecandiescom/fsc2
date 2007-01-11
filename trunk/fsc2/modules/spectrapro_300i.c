@@ -309,8 +309,6 @@ Var_T *monochromator_wavelength( Var_T * v )
     double wl;
 
 
-    CLOBBER_PROTECT( wl );
-
     if ( v == NULL )
     {
         if ( FSC2_MODE == EXPERIMENT )
@@ -376,8 +374,6 @@ Var_T *monochromator_wavenumber( Var_T * v )
 {
     double wl, wn;
 
-
-    CLOBBER_PROTECT( wl );
 
     if ( v == NULL )
     {
@@ -569,8 +565,8 @@ Var_T *monochromator_load_calibration( Var_T * v )
     FILE *cfp = NULL;
 
 
-    CLOBBER_PROTECT( cfp );
     CLOBBER_PROTECT( calib_file );
+    CLOBBER_PROTECT( cfp );
 
     if ( v == NULL )
     {

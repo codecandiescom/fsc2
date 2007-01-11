@@ -261,10 +261,7 @@ bool scan_main( const char * name,
 
 bool section_parser( int section )
 {
-    int s = section;
-
-
-    CLOBBER_PROTECT( s );
+    CLOBBER_PROTECT( section );
 
     TRY
     {
@@ -272,37 +269,37 @@ bool section_parser( int section )
         {
             /* First run the appropriate lexer/parser combination */
 
-            switch ( s )
+            switch ( section )
             {
                 case DEVICES_SECTION :
-                    s = devices_parser( splitin );
+                    section = devices_parser( splitin );
                     break;
 
                 case ASSIGNMENTS_SECTION :
-                    s = assignments_parser( splitin );
+                    section = assignments_parser( splitin );
                     break;
 
                 case VARIABLES_SECTION :
-                    s = variables_parser( splitin );
+                    section = variables_parser( splitin );
                     break;
 
                 case PHASES_SECTION :
-                    s = phases_parser( splitin );
+                    section = phases_parser( splitin );
                     break;
 
                 case PREPARATIONS_SECTION :
-                    s = preparations_parser( splitin );
+                    section = preparations_parser( splitin );
                     break;
 
                 case EXPERIMENT_SECTION :
-                    s = experiment_parser( splitin );
+                    section = experiment_parser( splitin );
                     break;
 
                 default :              /* this should never happen, but ... */
                     fsc2_impossible( );
                     break;
             }
-        } while ( s != NO_SECTION );
+        } while ( section != NO_SECTION );
 
         TRY_SUCCESS;
         return OK;

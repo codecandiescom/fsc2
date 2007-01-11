@@ -401,8 +401,8 @@ Var_T *monochromator_scan_setup( Var_T * v )
     double vals[ 2 ];
 
 
-    CLOBBER_PROTECT( v );
     CLOBBER_PROTECT( start );
+    CLOBBER_PROTECT( v );
 
     if ( v == NULL )
     {

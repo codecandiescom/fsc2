@@ -57,10 +57,10 @@ void pci_mite_init( Board * board )
 	   initialize the pointers to the DMA chain memory (one for each
 	   logical DMA channel) */
 
-	for ( i = 0; i < board->type->num_mite_channels; i++ ) {
+	for ( i = 0; i < board->type->num_data_channels; i++ ) {
 		iowrite32( CHOR_DMARESET | CHOR_FRESET, mite_CHOR( i ) );
 		iowrite32( 0, mite_CHCR( i ) );
-		board->mite_chain[ i ] = NULL;
+		board->data_buffer[ i ] = NULL;
 		sys_data[ i ].num_links = 0;
 		sys_data[ i ].transfered = 0;
 	}
@@ -88,7 +88,7 @@ void pci_mite_close( Board * board )
 	int i;
 
 
-	for ( i = 0; i < board->type->num_mite_channels; i++ )
+	for ( i = 0; i < board->type->num_data_channels; i++ )
 		pci_dma_shutdown( board, i );
 
 	iowrite8( 0, board->regs->AI_AO_Select );
@@ -163,11 +163,11 @@ int pci_dma_buf_setup( Board *          board,
 	/* Get memory for the link chain (plus an additional one as the
 	   terminator) */
 
-	board->mite_chain[ sys ] = kmalloc( ( num_links + 1 )
-					    * sizeof *board->mite_chain[ sys ],
-					    GFP_KERNEL );
+	board->data_buffer[ sys ] = kmalloc( ( num_links + 1 )
+					     * sizeof **board->data_buffer,
+					     GFP_KERNEL );
 
-	if ( board->mite_chain[ sys ] == NULL ) {
+	if ( board->data_buffer[ sys ] == NULL ) {
 		PDEBUG( "Not enough memory for DMA chain links\n" );
 		return -ENOMEM;
 	}
@@ -175,9 +175,9 @@ int pci_dma_buf_setup( Board *          board,
 	/* Allocate memory for the DMA buffer(s) and put their addresses into
 	   the non-MITE-related part of the link chain structures */
 
-	board->mite_chain[ sys ][ num_links ].buf = NULL;
+	board->data_buffer[ sys ][ num_links ].buf = NULL;
 
-	for ( mdc = board->mite_chain[ sys ], i = 0; i < num_links;
+	for ( mdc = board->data_buffer[ sys ], i = 0; i < num_links;
 	      i++, mdc++ ) {
 		if ( size >= buf_size ) {
 			mdc->buf = ( char * ) __get_free_pages( GFP_KERNEL,
@@ -188,7 +188,7 @@ int pci_dma_buf_setup( Board *          board,
 		} else {
 			mdc->buf = ( char * ) __get_free_pages( GFP_KERNEL,
 								last_order );
-			board->mite_chain[ sys ][ i ].size = size;
+			board->data_buffer[ sys ][ i ].size = size;
 			mdc->order = last_order;
 		}
 
@@ -204,8 +204,8 @@ int pci_dma_buf_setup( Board *          board,
 	if ( i < num_links ) {
 		for ( i--, mdc--; i >= 0; i--, mdc-- )
 			free_pages( ( unsigned long ) mdc->buf, mdc->order );
-		kfree( board->mite_chain[ sys ] );
-		board->mite_chain[ sys ] = NULL;
+		kfree( board->data_buffer[ sys ] );
+		board->data_buffer[ sys ] = NULL;
 		PDEBUG( "Not enough memory for DMA buffer\n" );
 		return -ENOMEM;
 	}
@@ -216,7 +216,7 @@ int pci_dma_buf_setup( Board *          board,
 	   they can be passed to the MITE). Take care, the link chain pointers
 	   (LKAR) must be bus addresses. */
 
-	for ( mdc = board->mite_chain[ sys ]; mdc->buf != NULL; mdc++ ) {
+	for ( mdc = board->data_buffer[ sys ]; mdc->buf != NULL; mdc++ ) {
 
 		mdc->lc.tcr = cpu_to_le32( mdc->size );
 
@@ -243,8 +243,8 @@ int pci_dma_buf_setup( Board *          board,
 	/* If the streaming mapping failed all mapped buffers must be unmapped
 	   and then all memory released */
 
-	if ( mdc != board->mite_chain[ sys ] + num_links ) {
-		for ( mdc = board->mite_chain[ sys ]; mdc->buf != NULL;
+	if ( mdc != board->data_buffer[ sys ] + num_links ) {
+		for ( mdc = board->data_buffer[ sys ]; mdc->buf != NULL;
 		      mdc++ ) {
 			if ( mdc->is_mapped )
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
@@ -261,8 +261,8 @@ int pci_dma_buf_setup( Board *          board,
 			free_pages( ( unsigned long ) mdc->buf, mdc->order );
 		}
 
-		kfree( board->mite_chain[ sys ] );
-		board->mite_chain[ sys ] = NULL;
+		kfree( board->data_buffer[ sys ] );
+		board->data_buffer[ sys ] = NULL;
 		PDEBUG( "Failed to set up DMA stream mapping\n" );
 		return -ENOMEM;
 	}
@@ -277,9 +277,9 @@ int pci_dma_buf_setup( Board *          board,
 	   element */
 
 	if ( continuous )
-		board->mite_chain[ sys ][ num_links - 1 ].lc.lkar =
+		board->data_buffer[ sys ][ num_links - 1 ].lc.lkar =
 			cpu_to_le32( virt_to_bus(
-					 &board->mite_chain[ sys ][ 0 ].lc ) );
+					&board->data_buffer[ sys ][ 0 ].lc ) );
 
 	return 0;
 }
@@ -324,7 +324,7 @@ int pci_dma_buf_get( Board *          board,
 	/* When no DMA buffers are allocated calling the function is a bad
 	   mistake */
 
-	if ( board->mite_chain[ sys ] == NULL ) {
+	if ( board->data_buffer[ sys ] == NULL ) {
 		PDEBUG( "Can't read DMA buffers, none allocated\n" );
 		return -EINVAL;
 	}
@@ -346,7 +346,7 @@ int pci_dma_buf_get( Board *          board,
 	/* Copy as many of the newly acquired bytes as requested or possible
 	   to the user supplied buffer */
 
-	for ( mdc = board->mite_chain[ sys ]; *size > 0 && mdc->buf != NULL;
+	for ( mdc = board->data_buffer[ sys ]; *size > 0 && mdc->buf != NULL;
 	      mdc++ ) {
 
 		/* Skip the current link if it has already been used up, i.e.
@@ -474,10 +474,10 @@ void pci_dma_buf_release( Board *          board,
 	MITE_DMA_Chain_t *mdc;
 
 
-	if ( board->mite_chain[ sys ] == NULL )
+	if ( board->data_buffer[ sys ] == NULL )
 		return;
 
-	for ( mdc = board->mite_chain[ sys ]; mdc->buf != NULL; mdc++ ) {
+	for ( mdc = board->data_buffer[ sys ]; mdc->buf != NULL; mdc++ ) {
 		if ( mdc->is_mapped )
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 			dma_unmap_single( &board->dev->dev,
@@ -497,8 +497,8 @@ void pci_dma_buf_release( Board *          board,
 		free_pages( ( unsigned long ) mdc->buf, mdc->order );
 	}
 
-	kfree( board->mite_chain[ sys ] );
-	board->mite_chain[ sys ] = NULL;
+	kfree( board->data_buffer[ sys ] );
+	board->data_buffer[ sys ] = NULL;
 
 	sys_data[ sys ].num_links = 0;
 	sys_data[ sys ].transfered = 0;
@@ -519,7 +519,7 @@ int pci_dma_setup( Board *          board,
 	u32 lkar;
 
 
-	if ( board->mite_chain[ sys ] == NULL ) {
+	if ( board->data_buffer[ sys ] == NULL ) {
 		PDEBUG( "No DMA buffers allocated\n" );
 		return -EINVAL;
 	}
@@ -563,7 +563,7 @@ int pci_dma_setup( Board *          board,
 	/* Before finally passing the pointer to the link chain to the MITE
 	   make sure all buffers are streaming mapped */
 
-	for ( mdc = board->mite_chain[ sys ]; mdc->buf != NULL; mdc++ ) {
+	for ( mdc = board->data_buffer[ sys ]; mdc->buf != NULL; mdc++ ) {
 
 		if ( mdc->is_mapped )
 			continue;
@@ -592,7 +592,7 @@ int pci_dma_setup( Board *          board,
 
 	/* Set start address for link chaining */
 
-	lkar = virt_to_bus( &board->mite_chain[ sys ][ 0 ].lc );
+	lkar = virt_to_bus( &board->data_buffer[ sys ][ 0 ].lc );
 	iowrite32( cpu_to_le32( lkar ), mite_LKAR( sys ) );
 
 	/* Arm the MITE for DMA transfers */
@@ -603,9 +603,9 @@ int pci_dma_setup( Board *          board,
 }
 
 
-/*-----------------------------------------------------*
- * Disables DMA ad releases DMA memory for a subsystem
- *-----------------------------------------------------*/
+/*------------------------------------------------------*
+ * Disables DMA and releases DMA memory for a subsystem
+ *------------------------------------------------------*/
 
 int pci_dma_shutdown( Board *          board,
 		      NI_DAQ_SUBSYSTEM sys )

@@ -2706,10 +2706,10 @@ void rescale_2d( long * new_dims )
 
         T_free( old_sp );
 
-        G_2d.curve_2d[ k ]->xpoints = XPOINT_P
-             T_realloc( G_2d.curve_2d[ k ]->xpoints,
-                        new_nx * new_ny
-                        * sizeof *G_2d.curve_2d[ k ]->xpoints );
+        G_2d.curve_2d[ k ]->xpoints =
+             	   XPOINT_P T_realloc( G_2d.curve_2d[ k ]->xpoints,
+                        			   new_nx * new_ny
+                        			   * sizeof *G_2d.curve_2d[ k ]->xpoints );
 
         if ( G_2d.curve_2d[ k ]->is_fs )
         {

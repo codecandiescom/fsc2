@@ -124,16 +124,16 @@ Var_T *daq_ai_channel_setup( Var_T * v )
 
     CLOBBER_PROTECT( channels );
     CLOBBER_PROTECT( ranges );
-    CLOBBER_PROTECT( types );
     CLOBBER_PROTECT( type );
-    CLOBBER_PROTECT( polarities );
+    CLOBBER_PROTECT( types );
     CLOBBER_PROTECT( pol );
-    CLOBBER_PROTECT( dither_enables );
+    CLOBBER_PROTECT( polarities );
     CLOBBER_PROTECT( dither_enable );
+    CLOBBER_PROTECT( dither_enables );
     CLOBBER_PROTECT( num_channels );
     CLOBBER_PROTECT( old_range_index );
-    CLOBBER_PROTECT( v );
     CLOBBER_PROTECT( ret );
+    CLOBBER_PROTECT( v );
 
 
     if ( v == NULL )
@@ -652,8 +652,6 @@ Var_T *daq_ai_get_curve( Var_T * v  UNUSED_ARG )
 
 
     CLOBBER_PROTECT( volts );
-    CLOBBER_PROTECT( nv );
-    CLOBBER_PROTECT( to_be_fetched );
 
     if ( ! pci_mio_16e_1.ai_state.is_acq_running )
     {

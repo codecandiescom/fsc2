@@ -137,9 +137,9 @@ void AO_reset_all( Board * board )
 	board->func->stc_writew( board, STC_Joint_Reset, data );
 	board->stc.Joint_Reset &= ~ AO_Configuration_End;
 
-	/* Switch off DMA and free DMA buffers */
+	/* Switch off transfer off data to the DAQ and free buffers */
 
-	board->func->dma_shutdown( board, NI_DAQ_AO_SUBSYSTEM );
+	board->func->data_shutdown( board, NI_DAQ_AO_SUBSYSTEM );
 
 	board->AO.is_channel_setup[ 0 ] = board->AO.is_channel_setup[ 1 ] = 0;
 

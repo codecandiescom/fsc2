@@ -32,9 +32,12 @@
 
 #include "fsc2.h"
 
-static size_t fll_count_functions( Func_T *fncts, size_t num_predef_func );
-static int ffl_func_cmp2( const void *a, const void *b );
-static void fll_get_functions( Func_T *fncts, size_t num_predef_func );
+static size_t fll_count_functions( Func_T * fncts,
+                                   size_t   num_predef_func );
+static int ffl_func_cmp2( const void * a,
+                          const void * b );
+static void fll_get_functions( Func_T * fncts,
+                               size_t   num_predef_func );
 
 static long Comm_lc;
 

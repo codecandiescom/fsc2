@@ -95,6 +95,7 @@ Var_T * f_openf( Var_T * v )
     File_List_T *old_File_List = NULL;
 
 
+    CLOBBER_PROTECT( fn );
     CLOBBER_PROTECT( fp );
     CLOBBER_PROTECT( old_File_List );
 
@@ -1336,7 +1337,6 @@ static long do_printf( long file_num, Var_T * v )
     int need_type;
 
 
-    CLOBBER_PROTECT( fmt_start );
     CLOBBER_PROTECT( fmt_end );
     CLOBBER_PROTECT( sptr );
     CLOBBER_PROTECT( cv );
@@ -2053,11 +2053,6 @@ static long T_fprintf( long         fn,
     long written = 0;
 
 
-    CLOBBER_PROTECT( size );
-    CLOBBER_PROTECT( written );
-    CLOBBER_PROTECT( p );
-    CLOBBER_PROTECT( file_num );
-
     /* If the file has been closed because of insufficient space and no
        replacement file has been given just don't print */
 
@@ -2117,19 +2112,9 @@ static long T_fprintf( long         fn,
             }
         }
 
-        TRY
-        {
-            if ( p == initial_buffer )
-                p = NULL;
-            p = CHAR_P T_realloc( p, size );
-            TRY_SUCCESS;
-        }
-        OTHERWISE
-        {
-            if ( p != NULL )
-                T_free( p );
-            RETHROW( );
-        }
+        if ( p == initial_buffer )
+            p = NULL;
+        p = CHAR_P T_realloc_or_free( p, size );
     }
 
     if ( Fsc2_Internals.mode == TEST )

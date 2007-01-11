@@ -134,8 +134,8 @@ int send_mail( const char * subject,
     size_t len;
 
 
-    CLOBBER_PROTECT( to );
     CLOBBER_PROTECT( cc_to );
+    CLOBBER_PROTECT( to );
 
     while ( 1 )
     {

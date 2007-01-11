@@ -213,8 +213,6 @@ void p_assign_pod( long    func,
     long pod;
 
 
-    CLOBBER_PROTECT( pod );
-
     is_pulser_driver( );
 
     fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
@@ -274,8 +272,6 @@ void p_assign_channel( long    func,
 {
     long channel;
 
-
-    CLOBBER_PROTECT( channel );
 
     is_pulser_driver( );
 
@@ -419,8 +415,6 @@ void p_set_v_high( long    func,
     double voltage;
 
 
-    CLOBBER_PROTECT( voltage );
-
     is_pulser_driver( );
 
     fsc2_assert( func >= 0 && func < PULSER_CHANNEL_NUM_FUNC );
@@ -467,8 +461,6 @@ void p_set_v_low( long    func,
 {
     double voltage;
 
-
-    CLOBBER_PROTECT( voltage );
 
     is_pulser_driver( );
 
@@ -600,8 +592,6 @@ void p_set_trigger_mode( Var_T * v )
     int mode;
 
 
-    CLOBBER_PROTECT( mode );
-
     is_pulser_driver( );
 
     /* Check the variable and get its value */
@@ -649,8 +639,6 @@ void p_set_trigger_slope( Var_T * v )
 {
     int slope;
 
-
-    CLOBBER_PROTECT( slope );
 
     is_pulser_driver( );
 
@@ -701,8 +689,6 @@ void p_set_trigger_level( Var_T * v )
     double level;
 
 
-    CLOBBER_PROTECT( level );
-
     is_pulser_driver( );
 
     /* Check the variable and get its value */
@@ -745,8 +731,6 @@ void p_set_trigger_impedance( Var_T * v )
 {
     int state;
 
-
-    CLOBBER_PROTECT( state );
 
     is_pulser_driver( );
 
@@ -843,9 +827,6 @@ void p_set_rep_freq( Var_T * v )
 {
     double freq, rep_time;
 
-
-    CLOBBER_PROTECT( freq );
-    CLOBBER_PROTECT( rep_time );
 
     is_pulser_driver( );
 
@@ -1049,8 +1030,6 @@ void p_set( long    pnum,
     P_List_T *cur_p;
     long stored_Cur_Pulser;
 
-
-    CLOBBER_PROTECT( dev_num );
 
     for ( cur_p = plist; cur_p != NULL; cur_p = cur_p->next )
         if ( cur_p->num == pnum )

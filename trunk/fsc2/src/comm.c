@@ -1101,18 +1101,12 @@ static bool child_reader( void *          ret,
                 return OK;
             }
 
-            T_free( retstr );
-
             TRY
             {
                 retstr = CHAR_P T_malloc( ( size_t ) header->data.len + 1 );
                 if ( header->data.len > 0 )
-                {
                     pipe_read( retstr, ( size_t ) header->data.len );
-                    retstr[ header->data.len ] = '\0';
-                }
-                else
-                    strcpy( retstr, "" );
+                retstr[ header->data.len ] = '\0';
                 TRY_SUCCESS;
             }
             OTHERWISE
@@ -1168,12 +1162,8 @@ static bool child_reader( void *          ret,
             {
                 retstr = CHAR_P T_malloc( ( size_t ) header->data.len + 1 );
                 if ( header->data.len > 0 )
-                {
                     pipe_read( retstr, ( size_t ) header->data.len );
-                    retstr[ header->data.len ] = '\0';
-                }
-                else
-                    strcpy( retstr, "" );
+                retstr[ header->data.len ] = '\0';
                 TRY_SUCCESS;
             }
             OTHERWISE

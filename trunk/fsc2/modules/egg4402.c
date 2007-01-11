@@ -214,11 +214,9 @@ Var_T *boxcar_get_curve( Var_T * v )
     bool size_dynamic = UNSET;
 
 
-    CLOBBER_PROTECT( buffer );
+    CLOBBER_PROTECT( curve_type );
     CLOBBER_PROTECT( first );
     CLOBBER_PROTECT( last );
-    CLOBBER_PROTECT( old_timo );
-    CLOBBER_PROTECT( curve_type );
 
     if ( v == NULL )
     {
