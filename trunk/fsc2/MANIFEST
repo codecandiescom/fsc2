@@ -710,7 +710,6 @@ ni_daq/driver/Makefile.at_mio_e_series
 ni_daq/driver/Makefile.old
 ni_daq/driver/Makefile.pci_e_series
 ni_daq/driver/makelog
-ni_daq/driver/Modules.symvers
 ni_daq/driver/ni_daq_drv.txt
 
 ni_daq/driver/daq_stc/AI.c
