@@ -359,7 +359,7 @@ static bool hjs_attenuator_serial_init( void )
     /* The device uses 6 bit transfers, no parity and one stop bit (6-N-1),
        and a baud rate of 9600. The settings used here are the ones that
        one gets when opening the device file with fopen() and these seem
-       to be settings that work with the device (there's no manual...) */
+       just to be settings that work with the device (there's no manual...) */
 
     memset( hjs_attenuator.tio, 0, sizeof *hjs_attenuator.tio );
 

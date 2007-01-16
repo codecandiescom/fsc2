@@ -81,6 +81,7 @@ struct HP8647A {
     bool attenuation_is_set;
 
     bool state;
+    bool state_is_set;
 
     char *table_file;               /* name of attenuation table file */
     bool use_table;

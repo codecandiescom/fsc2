@@ -123,6 +123,9 @@ bool hp864_tmpl_init( const char * name )
             hp864_tmpl_set_mod_ampl( i, hp864_tmpl.mod_ampl[ i ] );
     }
 
+    if ( hp864_tmpl.state_is_set )
+        hp864_tmpl.state = hp864_tmpl_set_output_state( hp864_tmpl.state );
+
     return OK;
 }
 

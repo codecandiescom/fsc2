@@ -35,10 +35,8 @@
 * ep385::           Bruker Pulse Programmer EP385
 * er023m::          Bruker Signal Channel ER 023 M
 * er032m::          Bruker Field controller ER 032 M 
-* er035m::          Bruker NMR Gaussmeter ER 035 M (GPIB)
-* er035m_s::        Bruker NMR Gaussmeter ER 035 M (Serial)
-* er035m_sa::       Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
-* er035m_sas::      Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
+* er035m::          Bruker NMR Gaussmeter ER 035 M
+* er035m_sa::       Bruker NMR Gaussmeter ER 035 M (Stand-Alone)
 * gg_chopper::      Light chopper (Gescheidt group, Graz)
 * hfs9000::         Tektronix Stimulus System HFS9000 (Berlin W-Band)
 * hp5340a::         HP Frequency Counter HP5340A
@@ -119,11 +117,11 @@ or @code{bh15}
 @paragraphindent 0
 @strong{Description}: Power supply for AEG magnet with home-built
 computer control to be used with an S-band spectrometer. Requires either
-the @code{er035m} or @code{er035_s} NMR gaussmeter (with @code{F0}
+the @code{er035m} or @code{er035m_s} NMR gaussmeter (with @code{F0}
 probe) or the @code{bh15} Hall effect field controller, which must be
 listed before the magnet power supply module. Field range depends on the
-gaussmeter used, with @code{er035m} range is @w{460 G} to @w{2390 G},
-with @code{bh15} range is @w{-50 G} to @w{23000 G}.
+gaussmeter used, with @code{er035m} or @code{er035m_s} the range is
+@w{460 G} to @w{2390 G}, with @code{bh15} it is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -167,11 +165,12 @@ or @code{bh15}
 @paragraphindent 0
 @strong{Description}: Power supply for AEG magnet with home-built
 computer control to be used with an X-band spectrometer. Requires either
-the @code{er035m} or @code{er035_s} NMR gaussmeter (with @code{F1}
+the @code{er035m} or @code{er035m_s} NMR gaussmeter (with @code{F1}
 probe) or the @code{bh15} Hall effect field controller to work, which
 must be listed before the magnet power supply module. Field range
-depends on the gaussmeter used, with @code{er035m} range is @w{1460 G}
-to @w{19900 G}, with @code{bh15} range is @w{-50 G} to @w{23000 G}.
+depends on the gaussmeter used, with @code{er035m} or @code{er035m_s}
+the range is @w{1460 G} to @w{19900 G}, with @code{bh15} it is @w{-50 G}
+to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -595,67 +594,38 @@ In the GPIB configuration file use @code{"ER032M"} as the device name,
 @c #############################################################
 
 
-@node er035m, er035m_s, er032m, Device Reference
+@node er035m, er035m_sa, er032m, Device Reference
 @iftex
-@subheading Bruker NMR Gaussmeter ER 035 M (GPIB)
+@subheading Bruker NMR Gaussmeter ER 035 M
 @end iftex
 @ifnottex
-@section Bruker NMR Gaussmeter ER 035 M (GPIB)
+@section Bruker NMR Gaussmeter ER 035 M
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{er035m}
+@strong{Module name}: @code{er035m} (GPIB version) or @code{er035m_s}
+(serial port version)
 
 @paragraphindent 0
 @strong{Description}: Bruker (@url{http://www.bruker-biospin.com/})
-NMR gaussmeter @w{ER 035 M} used in conjunction with the magnet power
-supply controllers @code{aeg_s_band} and @code{aeg_x_band}. Field range
-depends on probe used, with @code{F0} probe it is @w{460 G} to @w{2390 G},
-with @code{F1} probe the range is @w{1460 G} to @w{19900 G}.
+NMR gaussmeter @w{ER 035 M} used n conjunction with the magnet power
+supply controllers @code{aeg_s_band} and @code{aeg_x_band}. Field
+range depends on probe used, with @code{F0} probe it is @w{460 G}
+to @w{2390 G}, with @code{F1} probe the range is @w{1460 G} to
+@w{19900 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).@*
+@strong{Controlled via} (@code{er035m}): GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{"ER035M"} as the device name,
 @code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
-@strong{Supported functions}:
-@table @samp
-@item @ref{gaussmeter_name()}
-@item @ref{gaussmeter_field()}
-@item @ref{gaussmeter_resolution()}
-@item @ref{gaussmeter_probe_orientation()}
-@item @ref{gaussmeter_upper_search_limit()}
-@item @ref{gaussmeter_lower_search_limit()}
-@item @ref{find_field()} (deprecated)
-@item gaussmeter_wait()
-@end table
-
-
-@c #############################################################
-
-
-@node er035m_s, er035m_sa, er035m, Device Reference
-@iftex
-@subheading Bruker NMR Gaussmeter ER 035 M (Serial)
-@end iftex
-@ifnottex
-@section Bruker NMR Gaussmeter ER 035 M (Serial)
-@end ifnottex
+@strong{or}
 
 @paragraphindent 0
-@strong{Module name}: @code{er035m_s}
+@strong{Controlled via} (@code{er035m_s}): Serial port
 
-@paragraphindent 0
-@strong{Description}: Bruker (@url{http://www.bruker-biospin.com/}) NMR
-gaussmeter @w{ER 035 M} used in conjunction with the magnet power supply
-controllers @code{aeg_x_band} and @code{aeg_x_band}. Field range depends
-on probe being used, with @code{F0} probe it is @w{460 G} to @w{2390 G},
-with @code{F1} probe the range is @w{1460 G} to @w{19900 G}.
-
-@paragraphindent 0
-@strong{Controlled via}: Serial port
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -674,16 +644,17 @@ with @code{F1} probe the range is @w{1460 G} to @w{19900 G}.
 @c #############################################################
 
 
-@node er035m_sa, er035m_sas, er035m_s, Device Reference
+@node er035m_sa, gg_chopper, er035m, Device Reference
 @iftex
-@subheading Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
+@subheading Bruker NMR Gaussmeter ER 035 M (Stand-Alone)
 @end iftex
 @ifnottex
-@section Bruker NMR Gaussmeter ER 035 M (GPIB, Stand-Alone)
+@section Bruker NMR Gaussmeter ER 035 M (Stand-Alone)
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{er035m_sa}
+@strong{Module name}: @code{er035m_sa} (GPIB version) or @code{er035m_sas}
+(serial port version)
 
 @paragraphindent 0
 @strong{Description}: Bruker (@url{http://www.bruker-biospin.com/}) NMR
@@ -692,46 +663,16 @@ range depends on probe being used, with @code{F0} probe it is @w{460 G} to
 @w{2390 G}, with @code{F1} probe the range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).@*
+@strong{Controlled via} (@code{er035m_sa}): GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{"ER035M"} as the device name,
 @code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{yes} an @code{set-bin} to @code{no}.
 
 @paragraphindent 0
-@strong{Supported functions}:
-@table @samp
-@item @ref{gaussmeter_name()}
-@item @ref{gaussmeter_field()}
-@item @ref{measure_field()}
-@item @ref{gaussmeter_resolution()}
-@item @ref{gaussmeter_probe_orientation()}
-@item @ref{gaussmeter_upper_search_limit()}
-@item @ref{gaussmeter_lower_search_limit()}
-@end table
-
-
-@c #############################################################
-
-
-@node er035m_sas, gg_chopper, er035m_sa, Device Reference
-@iftex
-@subheading Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
-@end iftex
-@ifnottex
-@section Bruker NMR Gaussmeter ER 035 M (Serial, Stand-Alone)
-@end ifnottex
+@strong{or}
 
 @paragraphindent 0
-@strong{Module name}: @code{er035m_sas}
-
-@paragraphindent 0
-@strong{Description}: Bruker (@url{http://www.bruker-biospin.com/}) NMR
-gaussmeter @w{ER 035 M} used as simple, stand-alone gaussmeter. Field
-range depends on probe being used, with @code{F0} probe it is @w{460 G} to
-@w{2390 G}, with @code{F1} probe the range is @w{1460 G} to @w{19900 G}.
-
-@paragraphindent 0
-@strong{Controlled via}: Serial port
+@strong{Controlled via} (@code{er035m_sas}): Serial port
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -748,7 +689,7 @@ range depends on probe being used, with @code{F0} probe it is @w{460 G} to
 
 @c #############################################################
 
-@node gg_chopper, hfs9000, er035m_sas, Device Reference
+@node gg_chopper, hfs9000, er035m_sa, Device Reference
 @iftex
 @subheading Light chopper (Gescheidt group, Graz)
 @end iftex
@@ -1870,10 +1811,10 @@ In the GPIB configuration file use @code{"LECROY9450"} as the device name,
 Oscilloscope Waverunner models
 @table @samp
 @item LT224
-4 channels, bandwidth 200 MHz, sample rate 200 MS/s (SS)/10 GS/s (RIS),
+4 channels, bandwidth 200 MHz, sample rate 200 MS/s (SS) / 10 GS/s (RIS),
 acquisition memory 100 kpts/channel
 @item LT322
-2 channels, bandwidth 200 MHz, sample rate 200 MS/s (SS)/10 GS/s (RIS),
+2 channels, bandwidth 200 MHz, sample rate 200 MS/s (SS) / 10 GS/s (RIS),
 acquisition memory 100 kpts/channel
 @item LT342
 2 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 25 GS/s (RIS),
@@ -1944,17 +1885,13 @@ information about further available options. All models have 4 function
 channels (used for averaging) and 4 memory channels.
 
 @paragraphindent 0
-@strong{Please note:} For some models that allow setting a timebase
-where there's less than a single data point per division (@w{500 ps}
-with a sampling rate of @w{1 GHz}) is SINGLE SHOT mode this timebase
-can't be used (if the device has this timebase set it will switched
-automatically to the slower supported timebase). And due to the huge
-number of different models it was not possible to test the module
-with all those models. Moreover, specification data from the LeCroy
-web site had to be used. I can neither guarantee that the used data
-are correct nor that support for all the modules works flawlessly.
-Please send bug reports if you have such a model and you experience
-problems.
+@strong{Please note:} Due to the huge number of different models it
+was not possible to test the module with all those models. Moreover,
+specification data from the manuals as well as the LeCroy web site
+had to be used which sometimes contradict each other. Thus I can
+neither guarantee that the used data are correct nor that support
+for all the modules works flawlessly. Please send me a bug report
+if you have such a model and you experience problems.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).

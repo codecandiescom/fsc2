@@ -28,10 +28,10 @@
 static unsigned char *lecroy_wr_get_data( long * len );
 
 static unsigned int lecroy_wr_get_inr( void );
-#if 0
-static int lecroy_wr_get_int_value( int          ch,
-                                    const char * name );
-#endif
+
+static long lecroy_wr_get_int_value( int          ch,
+                                     const char * name );
+
 static double lecroy_wr_get_float_value( int          ch,
                                          const char * name );
 
@@ -160,29 +160,14 @@ bool lecroy_wr_init( const char * name )
            can be done, otherwise switch it off */
 
         if ( lecroy_wr.is_interleaved && lecroy_wr.interleaved &&
-             lecroy_wr.cur_hres->ppd_ris > 0 )
+             lecroy_wr.cur_hres->cl_ris > 0 )
             lecroy_wr_set_interleaved( SET );
 
         if ( ( lecroy_wr.is_interleaved && ! lecroy_wr.interleaved ) ||
-             lecroy_wr.cur_hres->ppd_ris == 0 )
+             lecroy_wr.cur_hres->cl_ris == 0 )
         {
             lecroy_wr_set_interleaved( UNSET );
             lecroy_wr.interleaved = UNSET;
-        }
-
-        /* Some models have SINGLE SHOT timebase where there is less than
-           a single data point per division - if the device is set to this
-           timebase switch it to a timebase where there's at least one
-           point per division. */
-
-        if ( ! lecroy_wr.is_interleaved && lecroy_wr.cur_hres->ppd == 0 )
-        {
-            while ( lecroy_wr.cur_hres->ppd == 0 ) {
-                lecroy_wr.cur_hres++;
-                lecroy_wr.timebase = lecroy_wr.tbas[ ++lecroy_wr.tb_index ];
-            }
-
-            lecroy_wr_set_timebase( lecroy_wr.timebase );
         }
 
         /* Set (if required) the sensitivies, offsets coupling types and
@@ -1297,7 +1282,7 @@ void lecroy_wr_start_acquisition( void )
 
 /*------------------------------------------------------------*
  * Function for fetching data from the digitizer - the calling
- * function than does the remaining specific manipulations on
+ * function then does the remaining specific manipulations on
  * these data
  *------------------------------------------------------------*/
 
@@ -1337,6 +1322,19 @@ static void lecroy_wr_get_prep( int              ch,
     }
     else
         fsc2_impossible( );
+
+#if 0
+    /* We probably have to check if two or mor channels are combined - I found#
+       no way this can be checked via the program and we can only loogk for
+       the number of points and compare that with what we expect. To make
+       things a bit more exciting, the device always seems to send us 2 more
+       points than it should and I don't know if that become 4 when to curves
+       are combined ... */
+
+    /* Get the number of byztes of the curve */
+
+    len = lecroy_wr_get_int_value( ch, "WAVE_ARRAY_1" ) / 2;
+#endif
 
     /* Set up the number of points to be fetched - take care: the device
        always measures an extra point before and after the displayed region,
@@ -1589,15 +1587,19 @@ static unsigned char *lecroy_wr_get_data( long * len )
 
 /*----------------------------------------------------------------------*
  * Function for obtaining an integer value from the waveform descriptor
- *---------------------------------------------------------------------*/
-#if 0
-static int lecroy_wr_get_int_value( int          ch,
-                                    const char * name )
+ *----------------------------------------------------------------------*/
+
+static long lecroy_wr_get_int_value( int          ch,
+                                     const char * name )
 {
     char cmd[ 100 ];
     long length = 100;
     char *ptr = cmd;
+    long val = 0;
 
+
+    CLOBBER_PROTECT( ptr );
+    CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%d:INSP? '%s'", ch - LECROY_WR_CH1 + 1, name );
@@ -1617,9 +1619,17 @@ static int lecroy_wr_get_int_value( int          ch,
     if ( ! *ptr )
         lecroy_wr_gpib_failure( );
 
-    return T_atoi( ptr );
+    TRY
+    {
+        val = T_atol( ptr );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+        lecroy_wr_gpib_failure( );
+
+    return val;
 }
-#endif
+
 
 /*-------------------------------------------------------------------*
  * Function for obtaining a float value from the waveform descriptor
@@ -1631,7 +1641,11 @@ static double lecroy_wr_get_float_value( int          ch,
     char cmd[ 100 ];
     long length = 100;
     char *ptr = cmd;
+    double val = 0.0;
 
+
+    CLOBBER_PROTECT( ptr );
+    CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%d:INSP? '%s'", ch - LECROY_WR_CH1 + 1, name );
@@ -1651,7 +1665,15 @@ static double lecroy_wr_get_float_value( int          ch,
     if ( ! *ptr )
         lecroy_wr_gpib_failure( );
 
-    return T_atod( ptr );
+    TRY
+    {
+        val = T_atod( ptr );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+        lecroy_wr_gpib_failure( );
+
+    return val;
 }
 
 

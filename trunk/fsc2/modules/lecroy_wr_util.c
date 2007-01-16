@@ -665,7 +665,7 @@ void lecroy_wr_hori_res_prep( void )
 
         for ( j = 0; j < LECROY_WR_NUM_RIS_TBAS; j++ )
         {
-            if ( 10 * lrnd( lecroy_wr.tbas[ j ] * ris_res ) >
+            if ( lrnd( 10 * lecroy_wr.tbas[ j ] * ris_res ) >
                                                    lecroy_wr.mem_sizes[ i ] ) {
                 if ( k == 5 )
                 {
@@ -680,14 +680,14 @@ void lecroy_wr_hori_res_prep( void )
             }
 
             lecroy_wr.hres[ i ][ j ].tpp_ris = 1.0 / ris_res;
-            lecroy_wr.hres[ i ][ j ].ppd_ris =
-                                         lrnd( lecroy_wr.tbas[ j ] * ris_res );
+            lecroy_wr.hres[ i ][ j ].cl_ris =
+                                    lrnd( 10 * lecroy_wr.tbas[ j ] * ris_res );
         }
 
         for ( ; j < LECROY_WR_NUM_TBAS; j++ )
         {
             lecroy_wr.hres[ i ][ j ].tpp_ris = 0.0;
-            lecroy_wr.hres[ i ][ j ].ppd_ris = 0;
+            lecroy_wr.hres[ i ][ j ].cl_ris = 0;
         }
 
         /* Set up entries for Single Shot (SS) mode */
@@ -699,12 +699,12 @@ void lecroy_wr_hori_res_prep( void )
         for ( j = 0; j < LECROY_WR_NUM_TBAS - LECROY_WR_NUM_SS_TBAS; j++ )
         {
             lecroy_wr.hres[ i ][ j ].tpp = 0.0;
-            lecroy_wr.hres[ i ][ j ].ppd = 0;
+            lecroy_wr.hres[ i ][ j ].cl = 0;
         }
 
         for ( ; j < LECROY_WR_NUM_TBAS; j++ )
         {
-            if ( 10 * lrnd( lecroy_wr.tbas[ j ] * ss_res ) >
+            if ( lrnd( 10 * lecroy_wr.tbas[ j ] * ss_res ) >
                                                    lecroy_wr.mem_sizes[ i ] ) {
                 if ( k == 5 )
                 {
@@ -719,8 +719,8 @@ void lecroy_wr_hori_res_prep( void )
             }
 
             lecroy_wr.hres[ i ][ j ].tpp = 1.0 / ss_res;
-            lecroy_wr.hres[ i ][ j ].ppd =
-                                          lrnd( lecroy_wr.tbas[ j ] * ss_res );
+            lecroy_wr.hres[ i ][ j ].cl =
+                                     lrnd( 10 * lecroy_wr.tbas[ j ] * ss_res );
         }
     }
 }
@@ -758,9 +758,8 @@ void lecroy_wr_clean_up( void )
 
 long lecroy_wr_curve_length( void )
 {
-    return 10 *
-           ( ( lecroy_wr.cur_hres->ppd_ris > 0 && lecroy_wr.interleaved ) ?
-             lecroy_wr.cur_hres->ppd_ris : lecroy_wr.cur_hres->ppd );
+    return ( lecroy_wr.cur_hres->cl_ris > 0 && lecroy_wr.interleaved ) ?
+           lecroy_wr.cur_hres->cl_ris : lecroy_wr.cur_hres->cl;
 }
 
 
@@ -771,7 +770,7 @@ long lecroy_wr_curve_length( void )
 
 double lecroy_wr_time_per_point( void )
 {
-    return ( lecroy_wr.cur_hres->ppd_ris > 0 && lecroy_wr.interleaved ) ?
+    return ( lecroy_wr.cur_hres->cl_ris > 0 && lecroy_wr.interleaved ) ?
            lecroy_wr.cur_hres->tpp_ris : lecroy_wr.cur_hres->tpp;
 }
 

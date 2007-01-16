@@ -539,9 +539,16 @@ Var_T *digitizer_interleave_mode( Var_T * v )
 
     too_many_arguments( v );
 
-    if ( ilvd && lecroy_wr.cur_hres->ppd_ris < 0 )
+    if ( ilvd && lecroy_wr.cur_hres->cl_ris == 0 )
     {
         print( FATAL, "Can't switch to RIS mode for timebase of %s.\n",
+               lecroy_wr_ptime( lecroy_wr.timebase ) );
+        THROW( EXCEPTION );
+    }
+
+    if ( ! ilvd && lecroy_wr.cur_hres->cl == 0 )
+    {
+        print( FATAL, "Can't switch to SS mode for timebase of %s.\n",
                lecroy_wr_ptime( lecroy_wr.timebase ) );
         THROW( EXCEPTION );
     }

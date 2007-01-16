@@ -86,16 +86,15 @@ fsc2: $(objects)
 
 # The replacement of 'ECHO' by 'FLEX_ECHO' in the files created by flex is
 # done because 'ECHO' (which is #defined in these files) is already also
-# defined in termios.h. The second replacement is for avoiding other compiler
-# warnings about unitialized variables in the files created by flex. The
-# third avoids another warning (at least for newer versions of flex) about
-# a comparison betwen a signed and an unsigned int .
+# defined in termios.h. The second replacement is for avoiding a warning (at
+# least for newer versions of flex) about a comparison betwen a signed and
+# an unsigned int .
 
 %.c: %.l $(headers)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.l,%,$<) -o$@ $<
 	sed -e 's/\bECHO\b/FLEX_ECHO/g' \
-		-e 's/for ( n = 0; n < max_size && \\$$/for ( n = 0; n < ( size_t ) max_size \&\& \\/;' $@ > $@.x
-		mv $@.x $@
+		-e 's/for ( n = 0; n < max_size && \\$$/for ( n = 0; n < ( size_t ) max_size \&\& \\/' $@ > $@.x
+	mv $@.x $@
 
 
 # Make the primary lexer (which does the cleanup of the input EDL files)

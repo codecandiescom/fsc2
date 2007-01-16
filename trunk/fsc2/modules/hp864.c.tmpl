@@ -62,6 +62,7 @@ int hp864_tmpl_init_hook( void )
     hp864_tmpl.start_freq_is_set = UNSET;
     hp864_tmpl.attenuation_is_set = UNSET;
     hp864_tmpl.min_attenuation = MIN_ATTEN;
+    hp864_tmpl.state_is_set = UNSET;
 
     hp864_tmpl.table_file = NULL;
     hp864_tmpl.use_table = UNSET;
@@ -204,12 +205,14 @@ Var_T *synthesizer_state( Var_T * v )
     state = get_boolean( v );
     too_many_arguments( v );
 
-    hp864_tmpl.state = state;
+    if ( FSC2_MODE == EXPERIMENT )
+        hp864_tmpl.state = hp864_tmpl_set_output_state( state );
+    else
+        hp864_tmpl.state = state;
 
-    if ( FSC2_MODE != EXPERIMENT )
-        return vars_push( INT_VAR, ( long ) state );
+    hp864_tmpl.state_is_set = SET;
 
-    return vars_push( INT_VAR, ( long ) hp864_tmpl_set_output_state( state ) );
+    return vars_push( INT_VAR, ( long ) hp864_tmpl.state );
 }
 
 
@@ -294,6 +297,7 @@ Var_T *synthesizer_frequency( Var_T * v )
         case TEST :
             hp864_tmpl.freq = freq;
             hp864_tmpl.freq_is_set = SET;
+
             if ( ! hp864_tmpl.start_freq_is_set )
             {
                 hp864_tmpl.start_freq = freq;

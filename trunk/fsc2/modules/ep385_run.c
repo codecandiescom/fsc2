@@ -83,6 +83,7 @@ static bool ep385_update_pulses( bool flag )
 
     CLOBBER_PROTECT( i );
     CLOBBER_PROTECT( j );
+    CLOBBER_PROTECT( f );
     CLOBBER_PROTECT( ch );
 
     ep385.needs_update = UNSET;
