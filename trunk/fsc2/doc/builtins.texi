@@ -2531,7 +2531,8 @@ manual page for this function (type "@w{@code{man 3 strftime}"} at the
 command prompt to read it) to find out how such a format string must
 look like. Allowed conversion specifiers are
 "@code{"aAbBcCdDeFGghHIjklmMnPrRsStTuUVWxXyYzZ+%}", where "@code{cCxXyY}"
-may be preceeded by an "@code{E} and "@code{deHImMSuUVwWy}" by an @code{O}.
+may be preceeded by '@code{E}' and "@code{deHImMSuUVwWy}" by '@code{O}'
+to request use of an alternative format.
 
 
 @anchor{time()}

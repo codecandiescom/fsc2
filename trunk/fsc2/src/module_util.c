@@ -335,14 +335,14 @@ char *translate_escape_sequences( char * str )
  * of the time since the start of the test run. This is useful for
  * example in cases where an automatic sweep is done and during the
  * test run an estimate for the swept value has to be returned that
- * is not completely bogus. But take care, the value returned by the
- * function might easily be off by an order of magnitude.
+ * is not completely bogus. But take care, the value returned by
+ * the function might easily be off by an order of magnitude.
  * The method to estimate the time is as simple as possible: To the
  * real time used for interpretating the EDL program is added the
  * time spend in calls of the EDL function wait() (see f_wait() in
  * func_util.c) plus the value MODULE_CALL ESTIMATE (defined in the
  * header file) for each module function call.
- * During the experiment the fucntion returns the correct time since
+ * During the experiment the function returns the actual time since
  * the start of the experiment.
  *-------------------------------------------------------------------*/
 
@@ -350,18 +350,15 @@ double experiment_time( void )
 {
     struct timeval t_new;
     static struct timeval t_old = { 0, 0 };
-    long dsec, dusec;
+    double delta;
 
 
     gettimeofday( &t_new, NULL );
+    delta = t_new.tv_sec  - t_old.tv_sec
+            + 1.0e-6 * ( t_new.tv_usec - t_old.tv_usec );
+    t_old  = t_new;
 
-    dsec = t_new.tv_sec - t_old.tv_sec;
-    dusec = t_new.tv_usec - t_old.tv_usec;
-
-    t_old.tv_sec = t_new.tv_sec;
-    t_old.tv_usec = t_new.tv_usec;
-
-    return EDL.experiment_time += dsec + 1.e-6 * dusec;
+    return EDL.experiment_time += delta;
 }
 
 

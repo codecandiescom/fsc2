@@ -64,7 +64,7 @@ struct RULBUS_RB8509_ADC12_CARD {
 #define STATUS_DATA_MASK               ( 0x0F << 0 )
 #define STATUS_STS                     (    1 << 4 )
 #define STATUS_EOC                     (    1 << 5 )
-#define STATUS_INTERRUPTT              (    1 << 6 )
+#define STATUS_INTERRUPT               (    1 << 6 )
 #define STATUS_EXT_TRIGGER             (    1 << 7 )
 
 

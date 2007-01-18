@@ -58,7 +58,7 @@ int tds_tmpl_init_hook( void )
 
     /* Set global variable to indicate that GPIB bus is needed */
 
-    Need_GPIB = SET;
+//    Need_GPIB = SET;
 
     /* Initialize some variables in the digitizers structure */
 
@@ -655,12 +655,11 @@ Var_T *digitizer_timebase( Var_T * v )
 
     too_many_arguments( v );
 
-    tds_tmpl.is_timebase = SET;
-
     if ( FSC2_MODE == EXPERIMENT )
         tds_tmpl_set_timebase( tb[ TB ] );
 
     tds_tmpl.timebase = tb[ TB ];
+    tds_tmpl.is_timebase = SET;
 
     tds_tmpl_state_check( tb[ TB ], tds_tmpl.rec_len, tds_tmpl.trig_pos );
 
@@ -679,7 +678,6 @@ Var_T *digitizer_time_per_point( Var_T * v  UNUSED_ARG )
 
     if ( FSC2_MODE == EXPERIMENT && ! tds_tmpl.lock_state )
         tds_tmpl_state_check( 0.0, 0, 0.0 );
-
 
     if ( FSC2_MODE == PREPARATION && ! tds_tmpl.is_timebase )
         no_query_possible( );
@@ -878,8 +876,8 @@ Var_T *digitizer_record_length( Var_T * v )
             }
 
             print( SEVERE, "Record length %ld too long, using %ld instead.\n",
-                   rec_len, record_lengths[ i  - 1] );
-            rec_len = record_lengths[ i  - 1];
+                   rec_len, record_lengths[ i  - 1 ] );
+            rec_len = record_lengths[ i  - 1 ];
         }
 
         if ( rec_len == record_lengths[ i ] )
@@ -896,15 +894,14 @@ Var_T *digitizer_record_length( Var_T * v )
         i++;
     }
 
-    tds_tmpl.is_rec_len = SET;
-
     if ( FSC2_MODE == EXPERIMENT )
         tds_tmpl_set_record_length( record_lengths[ i ] );
-    else
-        tds_tmpl.rec_len = record_lengths[ i ];
 
-    tds_tmpl_state_check( tds_tmpl.timebase, record_lengths[ i ],
-                         tds_tmpl.trig_pos );
+    tds_tmpl.rec_len = record_lengths[ i ];
+    tds_tmpl.is_rec_len = SET;
+
+    tds_tmpl_state_check( tds_tmpl.timebase, tds_tmpl.rec_len,
+                          tds_tmpl.trig_pos );
 
     return vars_push( INT_VAR, tds_tmpl.rec_len );
 }
@@ -962,12 +959,15 @@ Var_T *digitizer_trigger_position( Var_T * v )
 
     too_many_arguments( v );
 
-    tds_tmpl.is_trig_pos = SET;
 
     if ( FSC2_MODE  == EXPERIMENT )
         tds_tmpl_set_trigger_pos( trig_pos );
 
-    tds_tmpl_state_check( tds_tmpl.timebase, tds_tmpl.rec_len, trig_pos );
+    tds_tmpl.trig_pos = trig_pos;
+    tds_tmpl.is_trig_pos = SET;
+
+    tds_tmpl_state_check( tds_tmpl.timebase, tds_tmpl.rec_len,
+                          tds_tmpl.trig_pos );
 
     return vars_push( FLOAT_VAR, tds_tmpl.trig_pos );
 }
@@ -1051,12 +1051,14 @@ Var_T *digitizer_trigger_delay( Var_T * v )
 
     too_many_arguments( v );
 
-    tds_tmpl.is_trig_pos = SET;
-
     if ( FSC2_MODE  == EXPERIMENT )
         tds_tmpl_set_trigger_pos( trig_pos );
 
-    tds_tmpl_state_check( tds_tmpl.timebase, tds_tmpl.rec_len, trig_pos );
+    tds_tmpl.trig_pos = trig_pos;
+    tds_tmpl.is_trig_pos = SET;
+
+   tds_tmpl_state_check( tds_tmpl.timebase, tds_tmpl.rec_len,
+                         tds_tmpl.trig_pos );
 
     return vars_push( FLOAT_VAR, delay );
 }
@@ -1087,10 +1089,10 @@ Var_T *digitizer_meas_channel_ok( Var_T * v )
 }
 
 
-/*-------------------------------------------------------------------*
- * digitizer_set_trigger_channel() sets the channel that is used for
- * triggering.
- *-------------------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * digitizer_trigger_channel() queries or sets the channel
+ * that is used for triggering.
+ *---------------------------------------------------------*/
 
 Var_T *digitizer_trigger_channel( Var_T * v )
 {
@@ -1651,10 +1653,11 @@ Var_T *digitizer_copy_curve( Var_T * v )
     src = ( int ) tds_tmpl_translate_channel( GENERAL_TO_TDS_TMPL,
                         get_strict_long( v, "source channel number" ), UNSET );
 
-    if ( src >= NUM_MEAS_CHANNELS )
+    if ( src < TDS_TMPL_CH1 && src > TDS_TMPL_REF4 )
     {
-        print( FATAL, "Invalid source channel %s, must be one of the normal "
-               "or the MATH channels.\n", TDS_TMPL_Channel_Names[ src ] );
+        print( FATAL, "Invalid source channel %s, must be one of the normal, "
+               "the MATH or the REF channels.\n",
+               TDS_TMPL_Channel_Names[ src ] );
         THROW( EXCEPTION );
     }
 
@@ -1668,6 +1671,13 @@ Var_T *digitizer_copy_curve( Var_T * v )
         print( FATAL, "Invalid destination channel %s, must be one of the REF "
                "channel\n", TDS_TMPL_Channel_Names[ dest ] );
         THROW( EXCEPTION );
+    }
+
+    if ( src == dest )
+    {
+        print( WARN, "Source and destination channel are identical, nothing "
+               "will be copied.\n" );
+        return vars_push( INT_VAR, 0L );
     }
 
     if ( FSC2_MODE == EXPERIMENT )

@@ -1944,7 +1944,8 @@ static bool lecroy_wr_serial_open( void )
     }
     bits += SERIAL_STOP_BITS;
 
-    if ( SERIAL_FLOW_CONTROL != 0 && SERIAL_FLOW_CONTROL != 1 )
+    if ( SERIAL_HARDWARE_FLOW_CONTROL != 0 &&
+         SERIAL_HARDWARE_FLOW_CONTROL != 1 )
     {
         print( FATAL, "Invalid setting for flow control in configuration file "
                "for device.\n" );
@@ -2028,7 +2029,7 @@ static bool lecroy_wr_serial_open( void )
         lecroy_wr.tio->c_iflag |= IXON | IXOFF | IXANY;
 
     lecroy_wr.tio->c_cc[ VSTART ] = 0x11;       /* DC1, CRTL-Q */
-    lecroy_wr.tio->c_cc[ VEND ]   = 0x13;       /* DC3, CRTL-S */
+    lecroy_wr.tio->c_cc[ VSTOP ]   = 0x13;      /* DC3, CRTL-S */
     lecroy_wr.tio->c_cc[ VMIN ]   = 0;          /* non-blocking read */
     lecroy_wr.tio->c_cc[ VTIME ]  = 0;          /* non-blocking read */
 

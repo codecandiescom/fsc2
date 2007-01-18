@@ -2175,7 +2175,6 @@ of the digitizer:
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @item TDS540
 @itemx TDS744A
@@ -2183,7 +2182,6 @@ of the digitizer:
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @item LeCroy 9400
 @itemx LeCroy 9410
@@ -2269,7 +2267,6 @@ the digitizer:
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @item TDS540
 @itemx TDS744A
@@ -2277,7 +2274,6 @@ the digitizer:
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4} 
 @end itemize
 @item LeCroy 9410
 @itemx LeCroy 9420
@@ -2386,7 +2382,6 @@ choices of the data channel depend on the model of the digitizer:
 @itemize @bullet
 @item @code{CH1} or @code{CH2}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @item TDS540
 @itemx TDS744A
@@ -2394,7 +2389,6 @@ choices of the data channel depend on the model of the digitizer:
 @itemize @bullet
 @item @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}
 @item @code{MATH1}, @code{MATH2} or @code{MATH3}
-@item @code{REF1}, @code{REF2}, @code{REF3} or @code{REF4}
 @end itemize
 @item LeCroy 9410
 @itemx LeCroy 9420

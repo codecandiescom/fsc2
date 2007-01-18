@@ -1992,7 +1992,7 @@ Var_T * f_time( Var_T * v )
  * since the last call of the function (in us resolution).
  * The function should be called automatically at the start
  * of an experiment so that the user gets the time since
- * the start of the experiment when she calls this function
+ * the start of the experiment when calling this function
  * for the very first time.
  *----------------------------------------------------------*/
 

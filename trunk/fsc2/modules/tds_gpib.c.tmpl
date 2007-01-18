@@ -1163,8 +1163,11 @@ void tds_tmpl_copy_curve( int src,
     char reply[ 20 ];
 
 
-    fsc2_assert( src < NUM_MEAS_CHANNELS );
+    fsc2_assert( src >= TDS_TMPL_CH1 && src < TDS_TMPL_REF4 );
     fsc2_assert( dest >= TDS_TMPL_REF1 && dest < TDS_TMPL_REF4 );
+
+    if ( src == dest )
+        return;
 
     /* Wait until a still running acquisition is finished */
 
