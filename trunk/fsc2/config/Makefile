@@ -162,3 +162,6 @@ endif
 	if [ -n "$$hjs_sfc_calib" ]; then                \
 		$(RM) $(RMFLAGS) $(libdir)/$$hjs_sfc_calib;  \
 	fi
+
+clean:
+	$(RM) $(RMFLAGS) *~ svn-*

@@ -1594,8 +1594,8 @@ static unsigned char *lecroy_ws_get_data( long * length )
 
     while ( gotten < len )
     { 
-        if ( lecroy_vicp_read( data + gotten, &to_get, &with_eoi, UNSET )
-                                                                   == FAILURE )
+        if ( lecroy_vicp_read( ( char * ) data + gotten, &to_get,
+                               &with_eoi, UNSET ) == FAILURE )
             lecroy_ws_lan_failure( );
         gotten += to_get;
         to_get = len - gotten;
@@ -1613,7 +1613,7 @@ static long lecroy_ws_get_int_value( int          ch,
                                      const char * name )
 {
     char cmd[ 100 ];
-    size_t len = 100;
+    ssize_t len = 100;
     char *ptr = cmd;
 
 

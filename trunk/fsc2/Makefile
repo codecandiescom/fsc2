@@ -1006,6 +1006,7 @@ cleanup:
 	-$(MAKE) -C witio_48 cleanup
 
 clean:
+	$(MAKE) -C $(cdir) clean
 	$(MAKE) -C $(sdir) clean
 	$(MAKE) -C $(mdir) clean
 	$(MAKE) -C $(ddir) clean

@@ -1519,17 +1519,16 @@ static void sr810_get_xy_auto_data( double * data,
 {
     int i, nk;
     bool need_auto_data = UNSET;
+    long new_channels[ MAX_DATA_AT_ONCE - 1 ];
     struct {
         int pos;
         long type;
         double data;
-    } auto_channel;
-    long new_channels[ MAX_DATA_AT_ONCE - 1 ];
+    } auto_channel = { 0, 0, 0.0 };
 
 
-    /* First we've got to figure out is data must be fetched from the
-       lock-in's internal buffer and at which position in the data buffer
-       it has to be returned. */
+    /* Figure out if data must be fetched from the lock-in's internal buffer
+       and from which position in the data buffer it has to be returned. */
 
     for ( nk = i = 0; i < num_channels; i++ )
     {

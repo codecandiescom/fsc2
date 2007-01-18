@@ -347,7 +347,7 @@ void  tegam2714a_p_set_constant( Ticks start,
                                  Ticks length,
                                  int   state )
 {
-    char *buf;
+    unsigned char *buf;
     unsigned char *bpt;
     size_t len =   20 + tegam2714a_p_num_len( tegam2714a_p.function.channel )
                  + tegam2714a_p_num_len( start )
@@ -357,11 +357,11 @@ void  tegam2714a_p_set_constant( Ticks start,
 
     fsc2_assert( start >= 0 && start + length < MAX_PULSER_BITS );
 
-    buf =  CHAR_P T_malloc( len );
-    bpt = buf + sprintf( buf, ":WVFM:WAVE %d;MEM %ld,#%1d%ld",
-                         tegam2714a_p.function.channel,
-                         start, tegam2714a_p_num_len( 2 * length ),
-                         2 * length );
+    buf = UCHAR_P T_malloc( len );
+    bpt =   ( unsigned char * ) buf
+          + sprintf( buf, ":WVFM:WAVE %d;MEM %ld,#%1d%ld",
+                     tegam2714a_p.function.channel,
+                     start, tegam2714a_p_num_len( 2 * length ), 2 * length );
 
     if ( state == 0 )
     {

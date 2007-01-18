@@ -943,7 +943,7 @@ int gpib_serial_poll( int             device,
         gpib_log_function_start( "gpib_serial_poll", dev_name );
 
     raise_permissions( );
-    ibrsp( device, stb );
+    ibrsp( device, ( char * ) stb );
     lower_permissions( );
 
     if ( ll > LL_NONE )

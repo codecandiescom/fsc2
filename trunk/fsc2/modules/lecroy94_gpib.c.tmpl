@@ -1575,7 +1575,7 @@ static unsigned char *lecroy94_tmpl_get_data( long * len )
 
     data = UCHAR_P T_malloc( *len );
 
-    if ( gpib_read( lecroy94_tmpl.device, data, len ) == FAILURE )
+    if ( gpib_read( lecroy94_tmpl.device, ( char * ) data, len ) == FAILURE )
         lecroy94_tmpl_gpib_failure( );
 
     return data;

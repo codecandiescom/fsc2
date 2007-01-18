@@ -380,7 +380,7 @@ void lecroy_vicp_init( const char * dev_name,
     lecroy_vicp_set_version( header );
     lecroy_vicp_set_length( header, 0 );
 
-    bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
+    bytes_written = fsc2_lan_write( lecroy_vicp.handle, ( char * ) header,
                                     LECROY_VICP_HEADER_SIZE, us_timeout,
                                     UNSET );
 
@@ -438,7 +438,7 @@ void lecroy_vicp_close( void )
     lecroy_vicp_set_version( header );
     lecroy_vicp_set_length( header, 0 );
 
-    fsc2_lan_write( lecroy_vicp.handle, header,
+    fsc2_lan_write( lecroy_vicp.handle, ( char * ) header,
                     LECROY_VICP_HEADER_SIZE, us_timeout,
                     UNSET );
 
@@ -490,7 +490,7 @@ void lecroy_vicp_lock_out( bool lock_state )
     lecroy_vicp_set_version( header );
     lecroy_vicp_set_length( header, 0 );
 
-    bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
+    bytes_written = fsc2_lan_write( lecroy_vicp.handle, ( char * ) header,
                                     LECROY_VICP_HEADER_SIZE, us_timeout,
                                     UNSET );
 
@@ -878,7 +878,7 @@ void lecroy_vicp_device_clear( void )
 
     /* Try to send the header, don't abort on signals */
 
-    bytes_written = fsc2_lan_write( lecroy_vicp.handle, header,
+    bytes_written = fsc2_lan_write( lecroy_vicp.handle, ( char * ) header,
                                     LECROY_VICP_HEADER_SIZE, us_timeout,
                                     UNSET );
 
