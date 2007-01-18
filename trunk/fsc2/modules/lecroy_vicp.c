@@ -765,7 +765,7 @@ int lecroy_vicp_read( char *    buffer,
     }
 
     gettimeofday( &before, NULL );
-    bytes_read = fsc2_lan_read( lecroy_vicp.handle, header,
+    bytes_read = fsc2_lan_read( lecroy_vicp.handle, ( char * ) header,
                                 LECROY_VICP_HEADER_SIZE,
                                 us_timeout, quit_on_signal );
 
