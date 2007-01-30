@@ -317,20 +317,20 @@ start_field       =               3360.0G;
         3360.0 G;
 @end example
 @noindent
-The only thing you have to take care of is that you don't have a line
-break between a number and its unit (e.g.@: between the @code{3360.0}
-and the @code{G}), only spaces and tabulator characters are allowed in
-between.
+The only thing you have to avoid is having a line break between a number
+and its unit (e.g.@: between the @code{3360.0} and the @code{G}), only
+spaces and tabulator characters are allowed in between (oterwise the
+unit will be treated as if were a variable name).
 
 @code{EDL} scripts use lots of function calls. There are no obvious
 differences between variable names and function names (all start with a
 character, followed by more characters, numbers or underscore
 characters). To make clear that a word is a function it has to
 be followed by a pair of parenthesis, `@code{(}' and `@code{)}', even if
-the function doesn't accept arguments (spaces, tabulator or newline
+the function does not accept arguments (spaces, tabulator or newline
 characters are allowed between the function name and the opening
 parenthesis). If a function does accept more than one argument its
-arguments have to be separated by commas.
+arguments are separated by commas.
 
 
 @node Variables, Assignment operations, Syntax, EDL
@@ -368,22 +368,23 @@ VARIABLES:
 Names of variables (and also of functions) always start with a
 character, i.e.@: A-Z or a-z. The remaining part of the variable name
 can consist of characters, numbers and underscore characters,
-'@code{_}' (or shorter, if you know regular expressions, valid names
+'@code{_}' (if you understand regular expressions, valid names
 must follow the pattern @w{@code{[A-Za-z][A-Za-z_0-9]*}}). Thus,
 '@w{@code{AbC_12x}}' and '@w{@code{aBc_12X}}' are legal variable names,
-while '@code{12xy}' or '@code{_Yx2}' are not. Please note that the variable
+while '@code{12xy}' or '@code{_Yx2}' are not. Please note that variable
 names are case sensitive, i.e.@: '@code{XY}', '@code{Xy}', '@code{xY}'
 and '@code{xy}' are all different variables!
 
-The name of a variable can, in principle, consist of as many characters
+There's no built-in upper limit on te length of variable (or function)
+names, they can, at least in principle, consist of as many characters
 as you wish (I hope nobody is going to the trouble of creating a variable
 name with, say, a few hundred thousand characters just to prove me wrong
 -- I tested it only with two variables with names consisting of 10000
 characters each and differing only in the last character...)
 
 There are some combinations of characters that can't be used as variable
-names. First of all, variable names may not be identical to function
-names, neither built-in nor device function names.
+names. First of all, variable names are not allowed to be identical to
+function names, neither to names of built-in nor device function.
 
 Further, the keywords used by @code{EDL} also may not be used as
 variable names (to make it easier to avoid these, they are all spelled
@@ -527,12 +528,13 @@ the square root of 42 to all 18 elements of the 2-dimensional matrix
 @cindex Variable sized arrays and matrices
 
 There are some situations where one doesn't know the size of an array in
-advance, e.g.@: the size of the array to be used for storing a trace
-from a digitizer or the of the 2-dimensional field for a complete
+advance, e.g.@: the size of an array to be used for storing a trace
+from a digitizer or the size of a 2-dimensional field for a complete
 picture from a CCD-camera. So declaring the size in advance in the
-@code{VARIABLES} section is not possible. Therefore it is also possible
-to create arrays with sizes that change automatically when required. This
-is done by specifying a @code{*} instead of a number for the size:
+@code{VARIABLES} section is harly possible. To handle these kinds o
+situations one can create arrays with sizes that change automatically
+when required. This is done by specifying a @code{*} instead of a number
+for the size:
 @example
 M[ * ];
 h[ 2, * ];
@@ -546,7 +548,7 @@ floating point matrix @code{h} with two rows of unknown length and a
 
 The only restriction in declaring variable sized matrices is that you
 can't declare matrices with only the higher dimensions being variable
-sized but the lower ones fixed. I.e.@: the following definition is
+sized but the lower ones being fixed. I.e.@: the following definition is
 @strong{not} possible:
 @example
 h[ *, 2 ];  /* WRONG! */

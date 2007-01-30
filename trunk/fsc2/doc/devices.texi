@@ -155,6 +155,8 @@ Currently the following magnet power supplies are supported:
 AEG magnet for X-band with homebuilt controller
 @item aeg_s_band
 AEG magnet for S-band with homebuilt controller
+@item bh15_fc
+Bruker BF15 Field Controller
 @item er032m
 Bruker ER032M Field Controller
 @item keithley228a
@@ -319,14 +321,14 @@ be the sweep rate in units of @code{A/s}.
 Similarly, for the @strong{Oxford Instruments IPS120-10} power supply
 (@code{ips120_10}) the second argument is the sweep rate in @code{G/s}.
 
-For the @strong{Bruker ER032M} field controller for some combinations of
-the start field and field step size deviations between the requested
-field and the real field may result of up to @w{25 mG}. If the maximum
-field deviation was larger than @w{5 mG} at the end of the test run as
-well as the experiment the maximum field deviation is printed out. To
-minimize these deviations use a start field that is a multiple of @w{50
-mG} and avoid sweeps with more than about 2000 steps away from the start
-field.
+For the @strong{Bruker BH15} and  @strong{Bruker ER032M} field controllers
+for some combinations of the start field and field step size deviations
+between the requested field and the real field may result of up to
+@w{25 mG}. If the maximum field deviation was larger than @w{5 mG} at
+the end of the test run as well as the experiment the maximum field
+deviation is printed out. To minimize these deviations use a start field
+that is a multiple of @w{50 mG} and avoid sweeps with more than about
+2000 steps away from the start field.
 
 Please note that at least with some of the drivers it is not possible to
 specify a negative field step size or sweep rate. Therefore it is
@@ -359,10 +361,11 @@ If called with no arguments it returns the current magnetic field.
 For the @strong{AEG} magnets this is only a convenience function that
 just calls a function supplied by the gaussmeter used together with the
 magnet power supply to determine the current field. In contrast, for the
-@strong{ER032M Field Controller} this function returns the current field
-setting in Gauss. For both the Berlin W-band magnet (@code{keithley228a})
-and the @w{360 GHz} spectrometer magnet (@code{ips20_4}) the actual current
-through the magnets sweep coil is returned instead of the field.
+@strong{Bruker BH15} and @strong{Bruker ER032M} field controllers this
+function returns the current field setting in Gauss. For both the Berlin
+W-band magnet (@code{keithley228a}) and the @w{360 GHz} spectrometer
+magnet (@code{ips20_4}) the actual current through the magnets sweep
+coil is returned instead of the field.
 
 If called with arguments the function expects a floating point argument for
 the field value and will set the magnetic field to this value. Please note
@@ -394,12 +397,12 @@ For both the @strong{Oxford Instruments} magnet sweep power supplies
 (@code{ips20_4} and @code{ips120_10}) this function will automatically
 stop a running sweep.
 
-For the @strong{Bruker ER032M} field controller setting a field with
-this function while also having initialized the magnet using
-@ref{magnet_setup()} may result in deviations between the requested
-field and the real field of up to @w{25 mG}. If the maximum field
-deviation was larger than @w{5 mG} at the end of the test run as well
-as the experiment the maximum field deviation is printed out.
+For the @strong{Bruker BH15} and @strong{Bruker ER032M} field controllers
+setting a field with this function while also having initialized the
+magnet using @ref{magnet_setup()} may result in deviations between the
+requested field and the real field of up to @w{25 mG}. If the maximum
+field deviation was larger than @w{5 mG} at the end of the test run as
+well as the experiment the maximum field deviation is printed out.
 
 The function can only be used in the @code{EXPERIMENT} section.
 .
@@ -644,9 +647,9 @@ This function is deprecated, please use @ref{magnet_reset_field()} instead.
 @cindex Gaussmeter Functions
 
 
-Currently, four types of gaussmeters are implemented, the @strong{Bruker
-ER035M} NMR gaussmeter, the @strong{Bruker BH15} hall probe field controller,
-the @strong{Metrolab PT2025} NMR gaussmeter and, finally, the @strong{Bruke
+Currently, the following gaussmeters are implemented: @strong{Bruker BH15}
+Hall probe controller, @strong{Bruker ER035M} NMR gaussmeter,
+@strong{Metrolab PT2025} NMR gaussmeter and, finally, the @strong{Bruke
 BNM12 NMR} gaussmeter. The range of fields that can be measured with the
 @strong{Bruker ER035M} NMR gaussmeter depends on the probe being used. With
 the F0 probe (S-band) the range is @w{460 G} to @w{2390 G} while with the F1
@@ -680,18 +683,24 @@ setups, the @code{pt2025} module is for the @strong{Metrolab} NMR gaussmeter
 from the Berlin W-Band spectrometer. The last module, @code{bnm12}, is for
 the @strong{Bruker BNM12} gaussmeter.
 
+@strong{Please note}: the @strong{Bruker BH15} Hall field controller can
+also be used to directly control the field of a magnet by outputting an
+appropriate voltage to be used as the controlling input for a magnet power
+supply. For this purpose a different module exists, @code{bh15_fc}. The
+module @code{bh15} described in this section only supports the use of the
+device as a gaussmeter.
 
 The three gaussmeter modules, @code{er035m}, @code{er035m_s} and
-@code{bh15}, are only to be used for controlling the sweep of a magnet
-power supply. Thus only one of these gaussmeter drivers can be loaded at
-the same time. If other gaussmeters are also to be used the
-@code{er035m}, @code{er035m_s} or @code{bh15} module must be listed
-first in the @code{DEVICES} section and specified @b{before} the magnet
-module (see above) which relies on its existence,
+@code{bh15} can be used in conjunction with the modules for controlling
+a magnet, @code{aeg_s_band} and @code{aeg_x_band}. In that case the
+gaussmeter module to be used for this purpose must be listed in the
+@code{DEVICES} section before the magnet module that relies on it and,
+if more than one of these gausmeter modules is to be used, as the first
+gaussmeter module.
 
-In contrast, the four other modules, @code{er035m_sa},
-@code{er035m_sas}, @code{pt2025} and @code{bnm12}, are only to be used
-for field measurements but not for direct field control.
+The remaining modules, @code{er035m_sa}, @code{er035m_sas}, @code{pt2025}
+and @code{bnm12}, are only to be used for field measurements but are not
+involved in field control.
 
 The @strong{Bruker BNM12} NMR gaussmeter can only be read out when the
 @strong{WITIO-48 DIO} card (module @code{witio_48}and the home-built

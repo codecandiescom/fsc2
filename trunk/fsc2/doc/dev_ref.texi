@@ -27,7 +27,8 @@
 @menu
 * aeg_s_band::      S-band AEG Magnet Power Supply
 * aeg_x_band::      X-band AEG Magnet Power Supply
-* bh15::            Bruker Hall Effect Field Controller BH 15
+* bh15::            Bruker Hall Effect Field Controller BH 15 (as gaussmeter)
+* bh15_fc::         Bruker Hall Effect Field Controller BH 15 (as field controller)
 * bnm12::           Bruker NMR Gaussmeter BNM12
 * dg2020_b::        Sony/Tektronix Data Generator DG2020 (Berlin Version)
 * dg2020_f::        Sony/Tektronix Data Generator DG2020 (Frankfurt Version)
@@ -196,12 +197,12 @@ to @w{23000 G}.
 @c #############################################################
 
 
-@node bh15, bnm12, aeg_x_band, Device Reference
+@node bh15, bh15_fc, aeg_x_band, Device Reference
 @iftex
-@subheading Bruker Hall Effect Field Controller BH 15
+@subheading Bruker Hall Effect Field Controller BH 15 (as gaussmeter)
 @end iftex
 @ifnottex
-@section Bruker Hall Effect Field Controller BH 15
+@section Bruker Hall Effect Field Controller BH 15 (as gaussmeter)
 @end ifnottex
 
 @paragraphindent 0
@@ -211,7 +212,9 @@ to @w{23000 G}.
 @strong{Description}: Bruker (@url{http://www.bruker-biospin.com/})
 BH15 Hall effect controller for measuring magnetic fields in combination with
 power supply controllers @code{aeg_s_band} and @code{aeg_x_band}. Field range
-that can be measured is from @w{-50 G} to @w{23000 G}.
+that can be measured is from @w{-50 G} to @w{23000 G}. (For use as a field
+controller use module @code{bh15_fc}).
+
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -233,7 +236,49 @@ In the GPIB configuration file use @code{"BH15"} as the device name,
 @c #############################################################
 
 
-@node bnm12, dg2020_b, bh15, Device Reference
+@node bh15_fc, bnm12, bh15, Device Reference
+@iftex
+@subheading Bruker Hall Effect Field Controller BH 15 (as field controller)
+@end iftex
+@ifnottex
+@section Bruker Hall Effect Field Controller BH 15 (as field controller)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{bh15_fc}
+
+@paragraphindent 0
+@strong{Description}: Bruker (@url{http://www.bruker-biospin.com/})
+BH15 Hall effect controller. Field range: @w{-50 G} to @w{23000 G}.
+(For use as a gaussmeter only use module @code{bh15}).
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"BH15_FC"} as the device name,
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos},
+@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{magnet_name()}
+@item @ref{magnet_setup()}
+@item @ref{magnet_field()}
+@item @ref{magnet_sweep_up()}
+@item @ref{magnet_sweep_down()}
+@item @ref{magnet_reset_field()}
+@item @ref{set_field()} (deprecated)
+@item @ref{get_field()} (deprecated)
+@item @ref{sweep_up()} (deprecated)
+@item @ref{sweep_down()} (deprecated)
+@item @ref{reset_field()} (deprecated)
+@end table
+
+
+@c #############################################################
+
+
+@node bnm12, dg2020_b, bh15_fc, Device Reference
 @iftex
 @subheading Bruker NMR Gaussmeter BNM12
 @end iftex

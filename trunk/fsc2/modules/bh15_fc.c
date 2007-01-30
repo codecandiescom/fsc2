@@ -43,13 +43,13 @@
 
 /* Include configuration information for the device */
 
-#include "er032m.conf"
+#include "bh15_fc.conf"
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-#define ER032M_TEST_FIELD  3480.0   /* returned as current field in test run */
+#define BH15_FC_TEST_FIELD  3480.0  /* returned as current field in test run */
 
 #define MIN_SWA            0
 #define CENTER_SWA         2048
@@ -61,38 +61,43 @@ const char generic_type[ ] = DEVICE_TYPE;
    it doesn't seem to make too much sense to set a new field when the
    difference from the current field is below this resolution. */
 
-#define ER032M_RESOLUTION   5.0e-3
+#define BH15_FC_RESOLUTION   5.0e-3
 
 
 /* Maximum resolution that can be used for sweep ranges */
 
-#define ER032M_SW_RESOLUTION 0.1
+#define BH15_FC_SW_RESOLUTION 0.1
 
 
 /* As Mr. Antoine Wolff from Bruker pointed out to me the center field
-   can only be set with a resolution of 50 mG. */
+   can only be set with a resolution of 50 mG (at least for the ER032M,
+   but I guess that also holds for the BH15). */
 
-#define ER032M_CF_RESOLUTION 5.0e-2
+#define BH15_FC_CF_RESOLUTION 5.0e-2
 
 
 /* Defines the time before we test again if it is found that the overload
    LED is still on. */
 
-#define ER032M_WAIT_TIME   100000     /* in us */
+#define BH15_FC_WAIT_TIME   100000     /* in us */
 
 
 /* Define the maximum number of retries before giving up if the
    overload LED is on. */
 
-#define ER032M_MAX_RETRIES   300
+#define BH15_FC_MAX_RETRIES   300
 
 
-/* When setting a new center field or sweep width the value send to the
-   device is read back to check if it really got set. If the values differ
-   the ER032M_MAX_SET_RETRIES times the value is again set and also checked
-   before we give up. */
+/* To make sure the new setting for a center field or sweep width setting
+   does arrive at the device we send it BH15_FC_MAX_SET_RETRIES times.
+   Remember, this is a device by Bruker... */
 
-#define ER032M_MAX_SET_RETRIES 3
+#define BH15_FC_MAX_SET_RETRIES 3
+
+
+/* Number of retries when the field is measured during initialization */
+
+#define BH15_FC_MAX_MEASURE_TRIES   20
 
 
 #define SEARCH_UP   1
@@ -101,11 +106,11 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 /* Exported functions */
 
-int er032m_init_hook(        void );
-int er032m_test_hook(        void );
-int er032m_end_of_test_hook( void );
-int er032m_exp_hook(         void );
-int er032m_end_of_exp_hook(  void );
+int bh15_fc_init_hook(        void );
+int bh15_fc_test_hook(        void );
+int bh15_fc_end_of_test_hook( void );
+int bh15_fc_exp_hook(         void );
+int bh15_fc_end_of_exp_hook(  void );
 
 
 Var_T *magnet_name(        Var_T * v );
@@ -122,68 +127,68 @@ Var_T *magnet_reset_field( Var_T * v );
 Var_T *magnet_command(     Var_T * v );
 
 
-static void er032m_init( void );
+static void bh15_fc_init( void );
 
-static void er032m_field_check( double field );
+static void bh15_fc_field_check( double field );
 
-static void er032m_start_field( void );
+static void bh15_fc_start_field( void );
 
-static double er032m_get_field( void );
+static double bh15_fc_set_field( double field );
 
-static double er032m_set_field( double field );
+static void bh15_fc_change_field_and_set_sw( double field );
 
-static void er032m_change_field_and_set_sw( double field );
+static void bh15_fc_change_field_and_sw( double field );
 
-static void er032m_change_field_and_sw( double field );
+static void bh15_fc_change_field_and_keep_sw( double field );
 
-static void er032m_change_field_and_keep_sw( double field );
+static bool bh15_fc_guess_sw( double field_diff );
 
-static bool er032m_guess_sw( double field_diff );
+static double bh15_fc_set_cf( double center_field );
 
-static double er032m_set_cf( double center_field );
+static double bh15_fc_set_sw( double sweep_width );
 
-static double er032m_get_cf( void );
+static int bh15_fc_set_swa( int sweep_address );
 
-static double er032m_set_sw( double sweep_width );
+static void bh15_fc_deviation( double field );
 
-static double er032m_get_sw( void );
+static double bh15_fc_get_initial_field( void );
 
-static int er032m_set_swa( int sweep_address );
+static void bh15_fc_test_leds( void );
 
-#if 0
-static int er032m_get_swa( void );        /* currently not needed */
-#endif
+static bool bh15_fc_command( const char *cmd );
 
-static void er032m_test_leds( void );
-
-static bool er032m_command( const char *cmd );
-
-static bool er032m_talk( const char * cmd,
+static bool bh15_fc_talk( const char * cmd,
                          char *       reply,
                          long *       length );
 
-static void er032m_failure( void );
+static void bh15_fc_failure( void );
 
-static int er032m_best_fit_search( double * cf,
+static int bh15_fc_best_fit_search( double * cf,
                                    int *    swa,
                                    bool     dir,
                                    int fac );
 
+enum {
+    BH15_FC_FAR_OFF = 0,
+    BH15_FC_STILL_OFF,
+    BH15_FC_LOCKED
+};
+
 
 static struct
 {
-    int device;
+    int device;             /* device handle */
 
     double act_field;       /* the real current field */
 
-    double cf;              /* the current CF setting */
-    double sw;              /* the current SW setting */
-    int swa;                /* the current SWA setting */
+    double cf;              /* the current center field (CF) setting */
+    double sw;              /* the current sweep width (SW) setting */
+    int swa;                /* the current sweep address (SWA) setting */
 
-    bool is_sw;             /* set if SW is known */
+    bool is_sw;             /* set if sweep width is known */
     double max_sw;          /* maximum sweep width */
 
-    double swa_step;        /* field step between two SWAs */
+    double swa_step;        /* field step between two sweep addresses (SWAs) */
     int step_incr;          /* how many SWAs to step for a sweep step */
 
     double start_field;     /* the start field given by the user */
@@ -195,19 +200,10 @@ static struct
 } magnet;
 
 
-#define DEVIATION( f )                                                 \
-    do {                                                               \
-        double d = fabs( ( f ) - magnet.cf                             \
-                   - ( magnet.swa - CENTER_SWA ) * magnet.swa_step );  \
-        if ( d > magnet.max_field_dev )                                \
-            magnet.max_field_dev = d;                                  \
-    } while ( 0 )
-
-
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-int er032m_init_hook( void )
+int bh15_fc_init_hook( void )
 {
     /* Set global variable to indicate that GPIB bus is needed. */
 
@@ -223,9 +219,9 @@ int er032m_init_hook( void )
     /* Make sure the maximum sweep width isn't larger than the difference
        between the maximum and minimum field. */
 
-    magnet.max_sw = ER032M_MAX_SWEEP_WIDTH;
-    if ( magnet.max_sw > ER032M_MAX_FIELD - ER032M_MIN_FIELD )
-        magnet.max_sw = ER032M_MAX_FIELD - ER032M_MIN_FIELD;
+    magnet.max_sw = BH15_FC_MAX_SWEEP_WIDTH;
+    if ( magnet.max_sw > BH15_FC_MAX_FIELD - BH15_FC_MIN_FIELD )
+        magnet.max_sw = BH15_FC_MAX_FIELD - BH15_FC_MIN_FIELD;
 
     return 1;
 }
@@ -234,37 +230,39 @@ int er032m_init_hook( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int er032m_test_hook( void )
+int bh15_fc_test_hook( void )
 {
     double rem;
 
 
     if ( magnet.is_init )
-        er032m_start_field( );
+        bh15_fc_start_field( );
     else
     {
-        magnet.act_field = ER032M_TEST_FIELD;
+        magnet.act_field = BH15_FC_TEST_FIELD;
 
-        rem = ( lrnd( magnet.act_field / ER032M_MIN_FIELD_STEP )
-                % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP )
-              ) * ER032M_MIN_FIELD_STEP;
+        rem = ( lrnd( magnet.act_field / BH15_FC_MIN_FIELD_STEP )
+                % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP ) )
+              * BH15_FC_MIN_FIELD_STEP;
 
-        if ( rem <= 2 * ER032M_MIN_FIELD_STEP )
+        if ( rem <= 2 * BH15_FC_MIN_FIELD_STEP )
         {
-            magnet.swa = er032m_set_swa( CENTER_SWA );
-            magnet.sw = er032m_set_sw( 0.0 );
-            magnet.cf = er032m_set_cf( magnet.act_field );
+            magnet.swa = bh15_fc_set_swa( CENTER_SWA );
+            magnet.sw = bh15_fc_set_sw( 0.0 );
+            magnet.cf = bh15_fc_set_cf( magnet.act_field );
         }
         else
         {
-            er032m_set_sw( 0.0 );
-            magnet.cf = er032m_set_cf( magnet.act_field - rem );
-            er032m_set_swa( magnet.swa = CENTER_SWA + 1 );
-            magnet.sw = er032m_set_sw( MAX_SWA * rem );
+            bh15_fc_set_sw( 0.0 );
+            magnet.cf = bh15_fc_set_cf( magnet.act_field - rem );
+            bh15_fc_set_swa( magnet.swa = CENTER_SWA + 1 );
+            magnet.sw = bh15_fc_set_sw( MAX_SWA * rem );
         }
+
+        magnet.act_field =
+                     magnet.cf + ( magnet.swa - CENTER_SWA ) * magnet.swa_step;
     }
 
-    magnet.act_field = magnet.is_init ? magnet.start_field : ER032M_TEST_FIELD;
     return 1;
 }
 
@@ -272,7 +270,7 @@ int er032m_test_hook( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int er032m_end_of_test_hook( void )
+int bh15_fc_end_of_test_hook( void )
 {
     /* Tell user if field maximum field deviation was more than 1% of the
        field step width (if one was set) or was larger than the resolution
@@ -281,7 +279,7 @@ int er032m_end_of_test_hook( void )
     if ( ( magnet.is_init &&
            magnet.max_field_dev / magnet.field_step >= 0.01 ) ||
          ( ! magnet.is_init &&
-           floor( magnet.max_field_dev / ER032M_RESOLUTION ) >= 1 ) )
+           floor( magnet.max_field_dev / BH15_FC_RESOLUTION ) >= 1 ) )
         print( NO_ERROR, "Maximum field error during test run was %.0f mG.\n",
                 magnet.max_field_dev * 1.0e3 );
     magnet.max_field_dev = 0.0;
@@ -292,9 +290,9 @@ int er032m_end_of_test_hook( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int er032m_exp_hook( void )
+int bh15_fc_exp_hook( void )
 {
-    er032m_init( );
+    bh15_fc_init( );
     return 1;
 }
 
@@ -302,7 +300,7 @@ int er032m_exp_hook( void )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-int er032m_end_of_exp_hook( void )
+int bh15_fc_end_of_exp_hook( void )
 {
     /* Tell user if field maximum field deviation was more than 1% of the
        field step width (if one was set) or was larger than the resolution
@@ -311,7 +309,7 @@ int er032m_end_of_exp_hook( void )
     if ( ( magnet.is_init &&
            magnet.max_field_dev / magnet.field_step >= 0.01 ) ||
          ( ! magnet.is_init &&
-           floor( magnet.max_field_dev / ER032M_RESOLUTION ) >= 1 ) )
+           floor( magnet.max_field_dev / BH15_FC_RESOLUTION ) >= 1 ) )
         print( NO_ERROR, "Maximum field error during experiment was "
                "%.0f mG.\n", magnet.max_field_dev * 1.0e3 );
     magnet.max_field_dev = 0.0;
@@ -353,9 +351,9 @@ Var_T *magnet_setup( Var_T * v )
     }
 
     start_field = lrnd( get_double( v, "start field" )
-                        / ER032M_MIN_FIELD_STEP ) * ER032M_MIN_FIELD_STEP;
+                        / BH15_FC_MIN_FIELD_STEP ) * BH15_FC_MIN_FIELD_STEP;
 
-    er032m_field_check( start_field );
+    bh15_fc_field_check( start_field );
 
     /* Get the field step size and round it to the next allowed value
        (resulting in a sweep step resolution of about 25 uG with the
@@ -369,15 +367,15 @@ Var_T *magnet_setup( Var_T * v )
 
     field_step = get_double( v, "field step width" );
 
-    if ( field_step < ER032M_MIN_FIELD_STEP )
+    if ( field_step < BH15_FC_MIN_FIELD_STEP )
     {
         print( FATAL, "Field sweep step size (%lf G) too small, minimum is "
-               "%f G.\n", VALUE( v ), ER032M_MIN_FIELD_STEP );
+               "%f G.\n", VALUE( v ), BH15_FC_MIN_FIELD_STEP );
         THROW( EXCEPTION );
     }
 
-    field_step = lrnd( MAX_SWA * field_step / ER032M_SW_RESOLUTION )
-                 * ER032M_SW_RESOLUTION / MAX_SWA;
+    field_step = lrnd( MAX_SWA * field_step / BH15_FC_SW_RESOLUTION )
+                 * BH15_FC_SW_RESOLUTION / MAX_SWA;
 
     too_many_arguments( v );
 
@@ -387,15 +385,15 @@ Var_T *magnet_setup( Var_T * v )
        to shift the center field during a longer sweep. Thus we readjust
        the start field in these cases. */
 
-    rem = lrnd( start_field / ER032M_MIN_FIELD_STEP )
-          % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP );
+    rem = lrnd( start_field / BH15_FC_MIN_FIELD_STEP )
+          % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP );
 
     if ( rem > 0 &&
-         lrnd( field_step / ER032M_MIN_FIELD_STEP ) %
-         lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP ) == 0 )
+         lrnd( field_step / BH15_FC_MIN_FIELD_STEP ) %
+         lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP ) == 0 )
     {
-        start_field = lrnd( start_field / ER032M_CF_RESOLUTION )
-                      * ER032M_CF_RESOLUTION;
+        start_field = lrnd( start_field / BH15_FC_CF_RESOLUTION )
+                      * BH15_FC_CF_RESOLUTION;
         print( SEVERE, "Readjusting start field to %.3f G.\n",
                start_field );
         THROW( EXCEPTION );
@@ -412,16 +410,16 @@ Var_T *magnet_setup( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_sweep_up( Var_T * v )
+Var_T *sweep_up( Var_T * v )
 {
-    return sweep_up( v );
+    return magnet_sweep_up( v );
 }
 
 
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *sweep_up( Var_T * v  UNUSED_ARG )
+Var_T *magnet_sweep_up( Var_T * v  UNUSED_ARG )
 {
     int steps;
     int new_swa;
@@ -438,7 +436,7 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 
     /* Check that the new field value is still within the allowed range */
 
-    er032m_field_check( magnet.act_field + magnet.field_step );
+    bh15_fc_field_check( magnet.act_field + magnet.field_step );
 
     /* If the new field is still within the sweep range set the new field by
        changing the SWA, otherwise shift the center field up by a quarter of
@@ -447,13 +445,13 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
        possible. */
 
     if ( magnet.swa + magnet.step_incr <= MAX_SWA )
-        er032m_set_swa( magnet.swa += magnet.step_incr );
+        bh15_fc_set_swa( magnet.swa += magnet.step_incr );
     else
     {
-        if ( magnet.cf + 0.75 * magnet.sw < ER032M_MAX_FIELD )
+        if ( magnet.cf + 0.75 * magnet.sw < BH15_FC_MAX_FIELD )
             steps = MAX_SWA / 4;
         else
-            steps = irnd( floor( ( ER032M_MAX_FIELD - magnet.cf )
+            steps = irnd( floor( ( BH15_FC_MAX_FIELD - magnet.cf )
                                  / magnet.swa_step ) ) - CENTER_SWA;
 
         /* We also need the center field to be a multiple of the center field
@@ -472,27 +470,28 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
            the field can't be set with a useful combination of CF and SWA. */
 
         if ( new_swa > MAX_SWA ||
-             new_cf + 0.5 * magnet.sw > ER032M_MAX_FIELD )
+             new_cf + 0.5 * magnet.sw > BH15_FC_MAX_FIELD )
         {
             print( FATAL, "Can't set field of %.3f G.\n", 
                    magnet.act_field + magnet.field_step );
             THROW( EXCEPTION );
         }
 
-        er032m_best_fit_search( &new_cf, &new_swa, SEARCH_UP, 2 );
+        bh15_fc_best_fit_search( &new_cf, &new_swa, SEARCH_UP, 2 );
 
         fsc2_assert( new_swa >= MIN_SWA && new_swa <= MAX_SWA &&
-                     new_cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD &&
-                     new_cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
+                     new_cf - 0.5 * magnet.sw >= BH15_FC_MIN_FIELD &&
+                     new_cf + 0.5 * magnet.sw <= BH15_FC_MAX_FIELD );
 
-        er032m_set_swa( magnet.swa = new_swa );
-        magnet.cf = er032m_set_cf( new_cf );
+        bh15_fc_set_swa( magnet.swa = new_swa );
+        magnet.cf = bh15_fc_set_cf( new_cf );
     }
 
-    er032m_test_leds( );
+    bh15_fc_test_leds( );
 
-    magnet.act_field += magnet.field_step;
-    DEVIATION( magnet.act_field );
+    bh15_fc_deviation( magnet.act_field + magnet.field_step );
+    magnet.act_field =
+                     magnet.cf + ( magnet.swa - CENTER_SWA ) * magnet.swa_step;
     return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
@@ -500,16 +499,16 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_sweep_down( Var_T * v )
+Var_T *sweep_down( Var_T * v )
 {
-    return sweep_down( v );
+    return magnet_sweep_down( v );
 }
 
 
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *sweep_down( Var_T * v  UNUSED_ARG )
+Var_T *magnet_sweep_down( Var_T * v  UNUSED_ARG )
 {
     int steps;
     int new_swa;
@@ -524,7 +523,7 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
         THROW( EXCEPTION );
     }
 
-    er032m_field_check( magnet.act_field - magnet.field_step );
+    bh15_fc_field_check( magnet.act_field - magnet.field_step );
 
     /* If the new field is still within the sweep range set the new field by
        changing the SWA, otherwise shift the center field down by a quarter of
@@ -533,13 +532,13 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
        possible. */
 
     if ( ( magnet.swa - magnet.step_incr ) >= MIN_SWA )
-        er032m_set_swa( magnet.swa -= magnet.step_incr );
+        bh15_fc_set_swa( magnet.swa -= magnet.step_incr );
     else
     {
-        if ( magnet.cf - 0.75 * magnet.sw > ER032M_MIN_FIELD )
+        if ( magnet.cf - 0.75 * magnet.sw > BH15_FC_MIN_FIELD )
             steps = MAX_SWA / 4;
         else
-            steps = irnd( floor( ( magnet.cf - ER032M_MIN_FIELD )
+            steps = irnd( floor( ( magnet.cf - BH15_FC_MIN_FIELD )
                                  / magnet.swa_step ) ) - CENTER_SWA;
 
         /* We also need the center field to be a multiple of the center field
@@ -556,27 +555,28 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
            the field can't be set with a useful combination of CF and SWA. */
 
         if ( new_swa < MIN_SWA ||
-             new_cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
+             new_cf - 0.5 * magnet.sw < BH15_FC_MIN_FIELD )
         {
             print( FATAL, "Can't set field of %.3f G.\n", 
                    magnet.act_field + magnet.field_step );
             THROW( EXCEPTION );
         }
 
-        er032m_best_fit_search( &new_cf, &new_swa, SEARCH_DOWN, 2 );
+        bh15_fc_best_fit_search( &new_cf, &new_swa, SEARCH_DOWN, 2 );
 
         fsc2_assert( new_swa >= MIN_SWA && new_swa <= MAX_SWA &&
-                     new_cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD &&
-                     new_cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
+                     new_cf - 0.5 * magnet.sw >= BH15_FC_MIN_FIELD &&
+                     new_cf + 0.5 * magnet.sw <= BH15_FC_MAX_FIELD );
 
-        er032m_set_swa( magnet.swa = new_swa );
-        magnet.cf = er032m_set_cf( new_cf );
+        bh15_fc_set_swa( magnet.swa = new_swa );
+        magnet.cf = bh15_fc_set_cf( new_cf );
     }
 
-    er032m_test_leds( );
+    bh15_fc_test_leds( );
 
-    magnet.act_field -= magnet.field_step;
-    DEVIATION( magnet.act_field );
+    bh15_fc_deviation( magnet.act_field - magnet.field_step );
+    magnet.act_field =
+                     magnet.cf + ( magnet.swa - CENTER_SWA ) * magnet.swa_step;
     return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
@@ -584,16 +584,16 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_reset_field( Var_T * v )
+Var_T *reset_field( Var_T * v )
 {
-    return reset_field( v );
+    return magnet_reset_field( v );
 }
 
 
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *reset_field( Var_T * v  UNUSED_ARG )
+Var_T *magnet_reset_field( Var_T * v  UNUSED_ARG )
 {
     if ( ! magnet.is_init )
     {
@@ -602,7 +602,7 @@ Var_T *reset_field( Var_T * v  UNUSED_ARG )
         THROW( EXCEPTION );
     }
 
-    er032m_start_field( );
+    bh15_fc_start_field( );
 
     return vars_push( FLOAT_VAR, magnet.act_field );
 }
@@ -622,7 +622,7 @@ Var_T *magnet_field( Var_T *v )
 
 Var_T *get_field( Var_T * v  UNUSED_ARG )
 {
-    return vars_push( FLOAT_VAR, er032m_get_field( ) );
+    return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
 
@@ -647,9 +647,9 @@ Var_T *set_field( Var_T * v )
 
     too_many_arguments( v );
 
-    er032m_field_check( field );
+    bh15_fc_field_check( field );
 
-    return vars_push( FLOAT_VAR, er032m_set_field( field ) );
+    return vars_push( FLOAT_VAR, bh15_fc_set_field( field ) );
 }
 
 
@@ -670,7 +670,7 @@ Var_T *magnet_command( Var_T * v )
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-            er032m_command( cmd );
+            bh15_fc_command( cmd );
             T_free( cmd );
             TRY_SUCCESS;
         }
@@ -689,7 +689,7 @@ Var_T *magnet_command( Var_T * v )
  * Initialization of the device
  *------------------------------*/
 
-static void er032m_init( void )
+static void bh15_fc_init( void )
 {
     double rem;
 
@@ -702,80 +702,72 @@ static void er032m_init( void )
         THROW( EXCEPTION );
     }
 
-    /* Switch to computer mode. */
-
-    er032m_command( "CO\r" );
-
-    /* Enable Hall controller. */
-
-    er032m_command( "EC\r" );
-
-    /* Switch to mode 0. */
-
-    er032m_command( "MO0\r" );
-
     /* Switch off service requests. */
 
-    er032m_command( "SR0\r" );
+    bh15_fc_command( "SR0\r" );
+
+    /* Determine the value the field is currently set to */
+
+    magnet.act_field = bh15_fc_get_initial_field( );
+
+    /* Switch to mode 0, i.e. field-controller mode via internal sweep-
+       address-generator. */
+
+    bh15_fc_command( "MO0\r" );
 
     /* Set IM0 sweep mode (we don't use it, just to make sure we don't
        trigger a sweep start inadvertently). */
 
-    er032m_command( "IM0\r" );
-
-    /* Check the status of the LEDs. */
-
-    er032m_test_leds( );
+    bh15_fc_command( "IM0\r" );
 
     /* Set the start field and the field step if magnet_setup() has been
        called, otherwise measure current field and make CF identical to
        the current field. */
 
     if ( magnet.is_init )
-        er032m_start_field( );
+        bh15_fc_start_field( );
     else
     {
-        magnet.act_field = er032m_get_field( );
+        rem = ( lrnd( magnet.act_field / BH15_FC_MIN_FIELD_STEP )
+                % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP ) )
+              * BH15_FC_MIN_FIELD_STEP;
 
-        rem = ( lrnd( magnet.act_field / ER032M_MIN_FIELD_STEP )
-                % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP )
-              ) * ER032M_MIN_FIELD_STEP;
-
-        if ( rem <= 2 * ER032M_MIN_FIELD_STEP )
+        if ( rem <= 2 * BH15_FC_MIN_FIELD_STEP )
         {
-            magnet.swa = er032m_set_swa( CENTER_SWA );
-            magnet.sw = er032m_set_sw( 0.0 );
-            magnet.cf = er032m_set_cf( magnet.act_field );
+            magnet.swa = bh15_fc_set_swa( CENTER_SWA );
+            magnet.sw = bh15_fc_set_sw( 0.0 );
+            magnet.cf = bh15_fc_set_cf( magnet.act_field );
         }
         else
         {
-            er032m_set_sw( 0.0 );
-            magnet.cf = er032m_set_cf( magnet.act_field - rem );
-            er032m_set_swa( magnet.swa = CENTER_SWA + 1 );
-            magnet.sw = er032m_set_sw( MAX_SWA * rem );
+            bh15_fc_set_sw( 0.0 );
+            magnet.cf = bh15_fc_set_cf( magnet.act_field - rem );
+            bh15_fc_set_swa( magnet.swa = CENTER_SWA + 1 );
+            magnet.sw = bh15_fc_set_sw( MAX_SWA * rem );
         }
 
-        DEVIATION( magnet.act_field );
-        er032m_test_leds( );
+        bh15_fc_test_leds( );
+
+        bh15_fc_deviation( magnet.act_field );
+        magnet.act_field =   magnet.cf
+                           + ( magnet.swa - CENTER_SWA ) * magnet.swa_step;
     }
 }
 
 
-/*--------------------------------------------------------------------*
- * Function sets up the magnet in case magnet_setp() had been called,
+/*---------------------------------------------------------------------*
+ * Function sets up the magnet in case magnet_setup() had been called,
  * assuming that field will be changed via sweep_up() or sweep_down()
  * calls, in which case the sweep usually can be done via changes of
  * the SWA and without changing the center field. The center field is
- * set to the required start field, so that up and down sweeps can be
- * done without changing the center field.
- *--------------------------------------------------------------------*/
+ * set to the required start field trying to achieve that up and down
+ * sweeps can be done without changing the center field.
+ *---------------------------------------------------------------------*/
 
-static void er032m_start_field( void )
+static void bh15_fc_start_field( void )
 {
     int factor;
     int shift;
-    double cur_cf;
-    double cur_sw;
 
 
     magnet.cf = magnet.start_field;
@@ -785,7 +777,7 @@ static void er032m_start_field( void )
     magnet.step_incr = 1;
 
     /* Make sure that the sweep width isn't larger than the maximum sweep
-       width otherwise divide it by two as often as needed and remember
+       width, otherwise divide it by two as often as needed and remember
        that we now have to step not by one SWA but by a power of 2 SWAs. */
 
     if ( magnet.sw > magnet.max_sw )
@@ -797,12 +789,12 @@ static void er032m_start_field( void )
         magnet.step_incr *= factor;
     }
 
-    /* Sweep range must be a multiple of ER032M_SW_RESOLUTION and we adjust
+    /* Sweep range must be a multiple of BH15_FC_SW_RESOLUTION and we adjust
        it silently to fit this requirement - hopefully, this isn't going to
        lead to any real field precision problems. */
 
-    magnet.sw = ER032M_SW_RESOLUTION
-                * lrnd( magnet.sw / ER032M_SW_RESOLUTION );
+    magnet.sw = BH15_FC_SW_RESOLUTION
+                * lrnd( magnet.sw / BH15_FC_SW_RESOLUTION );
     magnet.swa_step = magnet.sw / MAX_SWA;
     magnet.field_step = magnet.step_incr * magnet.swa_step;
 
@@ -811,16 +803,16 @@ static void er032m_start_field( void )
        in this case. When the start field is extremely near to the limits
        it can happen that it's not possible to set the start field. */
 
-    if ( magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD )
+    if ( magnet.cf + 0.5 * magnet.sw > BH15_FC_MAX_FIELD )
     {
         shift = irnd( ceil( ( magnet.cf + 0.5 * magnet.sw
-                              - ER032M_MAX_FIELD ) / magnet.swa_step ) );
+                              - BH15_FC_MAX_FIELD ) / magnet.swa_step ) );
         magnet.swa += shift;
         magnet.cf -= shift * magnet.swa_step;
     }
-    else if ( magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
+    else if ( magnet.cf - 0.5 * magnet.sw < BH15_FC_MIN_FIELD )
     {
-        shift = irnd( ceil( ( ER032M_MIN_FIELD
+        shift = irnd( ceil( ( BH15_FC_MIN_FIELD
                               - ( magnet.cf - 0.5 * magnet.sw ) )
                             / magnet.swa_step ) );
         magnet.swa -= shift;
@@ -829,8 +821,8 @@ static void er032m_start_field( void )
 
     if ( magnet.swa > MAX_SWA ||
          magnet.swa < MIN_SWA ||
-         magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD ||
-         magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
+         magnet.cf + 0.5 * magnet.sw > BH15_FC_MAX_FIELD ||
+         magnet.cf - 0.5 * magnet.sw < BH15_FC_MIN_FIELD )
     {
         print( FATAL, "Can't set field of %.3f G\n", magnet.start_field );
         THROW( EXCEPTION );
@@ -844,49 +836,28 @@ static void er032m_start_field( void )
        with a combination of a slightly shifted CF plus not too large number
        of SWA steps (typically not more than 100). */
 
-    er032m_best_fit_search( &magnet.cf, &magnet.swa, magnet.cf >=
-                            0.5 * ( ER032M_MAX_FIELD - ER032M_MIN_FIELD ), 2 );
+    bh15_fc_best_fit_search( &magnet.cf, &magnet.swa, magnet.cf >=
+                          0.5 * ( BH15_FC_MAX_FIELD - BH15_FC_MIN_FIELD ), 2 );
 
     fsc2_assert( magnet.swa >= MIN_SWA && magnet.swa <= MAX_SWA &&
-                 magnet.cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD &&
-                 magnet.cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
+                 magnet.cf - 0.5 * magnet.sw >= BH15_FC_MIN_FIELD &&
+                 magnet.cf + 0.5 * magnet.sw <= BH15_FC_MAX_FIELD );
 
-    /* Set the new field but avoid that center field plus/minus half the
-       sweep range to ever exceed the field limits. */
+    /* Set the new field, sweep width and sweep address - in order to avoid
+       accidentally going over the field limits in the process set the
+       sweep width first to 0. */
 
-    cur_cf  = er032m_get_cf( );
-    cur_sw  = er032m_get_sw( );
+    bh15_fc_set_sw( 0.0 );
+    bh15_fc_set_cf( magnet.cf );
+    bh15_fc_set_swa( magnet.swa );
+    bh15_fc_set_sw( magnet.sw );
 
-    if ( magnet.cf + 0.5 * cur_sw <= ER032M_MAX_FIELD &&
-         magnet.cf - 0.5 * cur_sw >= ER032M_MIN_FIELD )
-    {
-        er032m_set_cf( magnet.cf );
-        er032m_set_sw( magnet.sw );
-        er032m_set_swa( magnet.swa );
-    }
-    else if ( cur_cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD &&
-              cur_cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD )
-    {
-        er032m_set_sw( magnet.sw );
-        er032m_set_cf( magnet.cf );
-        er032m_set_swa( magnet.swa );
-    }
-    else
-    {
-        er032m_set_sw( 0.5 * d_min( ER032M_MAX_FIELD -
-                                    d_min( magnet.cf, cur_cf ),
-                                    d_min( magnet.cf, cur_cf )
-                                    - ER032M_MIN_FIELD ) );
-        er032m_set_cf( magnet.cf );
-        er032m_set_swa( magnet.swa );
-        er032m_set_sw( magnet.sw );
-    }
-
-    er032m_test_leds( );
+    bh15_fc_test_leds( );
 
     magnet.is_sw = SET;
-    magnet.act_field = magnet.start_field;
-    DEVIATION( magnet.act_field );
+    bh15_fc_deviation( magnet.start_field );
+    magnet.act_field =
+                     magnet.cf + ( magnet.swa - CENTER_SWA ) * magnet.swa_step;
 }
 
 
@@ -907,41 +878,42 @@ static void er032m_start_field( void )
  *    Because our guess about the typical field changes didn't work
  *    out we also have to adapt the sweep width.
  * 3. If magnet_setup() has been called changing the sweep width can't
- *    be done. If possible field change is done via changing the SWA,
- *    otherwise a combination of changing the SWA and shifting the
- *    center field is used.
+ *    be done. If possible the field change is done via changing the
+ *    SWA, otherwise a combination of changing the SWA and shifting
+ *    the center field is used.
  *---------------------------------------------------------------------*/
 
-static double er032m_set_field( double field )
+static double bh15_fc_set_field( double field )
 {
-    fsc2_assert( field >= ER032M_MIN_FIELD && field <= ER032M_MAX_FIELD );
+    fsc2_assert( field >= BH15_FC_MIN_FIELD && field <= BH15_FC_MAX_FIELD );
 
     /* We don't try to set a new field when the change is extremely small,
        i.e. lower than the accuracy for setting a center field. */
 
-    if ( fabs( magnet.act_field - field ) <= ER032M_RESOLUTION )
+    if ( fabs( magnet.act_field - field ) <= BH15_FC_RESOLUTION )
         return magnet.act_field;
 
     if ( ! magnet.is_sw )
-        er032m_change_field_and_set_sw( field );
+        bh15_fc_change_field_and_set_sw( field );
     else
     {
         if ( ! magnet.is_init )
-            er032m_change_field_and_sw( field );
+            bh15_fc_change_field_and_sw( field );
         else
-            er032m_change_field_and_keep_sw( field );
+            bh15_fc_change_field_and_keep_sw( field );
     }
 
-    er032m_test_leds( );
-    DEVIATION( field );
-    return magnet.act_field = field;
+    bh15_fc_test_leds( );
+    bh15_fc_deviation( field );
+    return magnet.act_field =
+                     magnet.cf + ( magnet.swa - CENTER_SWA ) * magnet.swa_step;
 }
 
 
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-static void er032m_change_field_and_set_sw( double field )
+static void bh15_fc_change_field_and_set_sw( double field )
 {
     double rem;
 
@@ -949,67 +921,65 @@ static void er032m_change_field_and_set_sw( double field )
     /* Try to determine a sweep width so that we can set the field without
        changing the center field, i.e. alone by setting a SWA. */
 
-    magnet.is_sw = er032m_guess_sw( fabs( field - magnet.cf ) );
+    magnet.is_sw = bh15_fc_guess_sw( fabs( field - magnet.cf ) );
 
     /* If this fails we have to change the center field, otherwise we use the
        newly calculated sweep width. */
 
     if ( ! magnet.is_sw )
     {
-        rem = ( lrnd( field / ER032M_MIN_FIELD_STEP )
-                % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP ) )
-              * ER032M_MIN_FIELD_STEP;
-        if ( rem > ER032M_MIN_FIELD_STEP )
+        rem = ( lrnd( field / BH15_FC_MIN_FIELD_STEP )
+                % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP ) )
+              * BH15_FC_MIN_FIELD_STEP;
+        if ( rem > BH15_FC_MIN_FIELD_STEP )
         {
-            magnet.cf = er032m_set_cf( field - rem );
-            er032m_set_swa( magnet.swa = CENTER_SWA + 1 );
-            magnet.sw = er032m_set_sw( MAX_SWA * rem );
+            magnet.cf = bh15_fc_set_cf( field - rem );
+            bh15_fc_set_swa( magnet.swa = CENTER_SWA + 1 );
+            magnet.sw = bh15_fc_set_sw( MAX_SWA * rem );
         }
         else
         {
-            magnet.sw = er032m_set_sw( 0.0 );
-            magnet.cf = er032m_set_cf( field );
+            magnet.sw = bh15_fc_set_sw( 0.0 );
+            magnet.cf = bh15_fc_set_cf( field );
         }
     }
     else
     {
         magnet.swa += irnd( ( field - magnet.cf ) / magnet.swa_step );
 
-        er032m_best_fit_search( &magnet.cf, &magnet.swa, magnet.cf >=
-                                0.5 * ( ER032M_MAX_FIELD - ER032M_MIN_FIELD ),
-                                2 );
+        bh15_fc_best_fit_search( &magnet.cf, &magnet.swa, magnet.cf >=
+                          0.5 * ( BH15_FC_MAX_FIELD - BH15_FC_MIN_FIELD ), 2 );
 
         if ( magnet.swa < MIN_SWA || magnet.swa > MAX_SWA ||
-             magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD ||
-             magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD ||
-             field -
-             ( magnet.cf + ( magnet.swa - CENTER_SWA ) * magnet.swa_step ) >
-             ER032M_RESOLUTION )
+             magnet.cf - 0.5 * magnet.sw < BH15_FC_MIN_FIELD ||
+             magnet.cf + 0.5 * magnet.sw > BH15_FC_MAX_FIELD ||
+             field - ( magnet.cf
+                       + ( magnet.swa - CENTER_SWA ) * magnet.swa_step ) >
+                                                           BH15_FC_RESOLUTION )
         {
-            rem = ( lrnd( field / ER032M_MIN_FIELD_STEP )
-                    % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP ) )
-                  * ER032M_MIN_FIELD_STEP;
-            er032m_set_sw( 0.0 );
-            magnet.cf = er032m_set_cf( field - rem );
-            er032m_set_swa( magnet.swa = CENTER_SWA + 1 );
-            magnet.sw = er032m_set_sw( MAX_SWA * rem );
+            rem = ( lrnd( field / BH15_FC_MIN_FIELD_STEP )
+                    % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP ) )
+                  * BH15_FC_MIN_FIELD_STEP;
+            bh15_fc_set_sw( 0.0 );
+            magnet.cf = bh15_fc_set_cf( field - rem );
+            bh15_fc_set_swa( magnet.swa = CENTER_SWA + 1 );
+            magnet.sw = bh15_fc_set_sw( MAX_SWA * rem );
         }
         else
         {
-            er032m_set_sw( 0.0 );
-            magnet.cf = er032m_set_cf( magnet.cf );
-            er032m_set_swa( magnet.swa );
-            magnet.sw = er032m_set_sw( magnet.sw );
+            bh15_fc_set_sw( 0.0 );
+            magnet.cf = bh15_fc_set_cf( magnet.cf );
+            bh15_fc_set_swa( magnet.swa );
+            magnet.sw = bh15_fc_set_sw( magnet.sw );
         }
     }
-
 }
 
 
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-static void er032m_change_field_and_sw( double field )
+static void bh15_fc_change_field_and_sw( double field )
 {
     int steps;
 
@@ -1023,11 +993,11 @@ static void er032m_change_field_and_sw( double field )
                - magnet.swa_step * abs( steps ) ) < 0.01 * magnet.swa_step &&
          magnet.swa + steps <= MAX_SWA && magnet.swa + steps >= MIN_SWA )
     {
-        er032m_set_swa( magnet.swa += steps );
+        bh15_fc_set_swa( magnet.swa += steps );
         return;
     }
 
-    er032m_change_field_and_set_sw( field );
+    bh15_fc_change_field_and_set_sw( field );
 }
 
 
@@ -1041,7 +1011,7 @@ static void er032m_change_field_and_sw( double field )
  * from the requested field.
  *------------------------------------------------------------------*/
 
-static void er032m_change_field_and_keep_sw( double field )
+static void bh15_fc_change_field_and_keep_sw( double field )
 {
     int steps;
     long rem;
@@ -1056,7 +1026,7 @@ static void er032m_change_field_and_keep_sw( double field )
                - magnet.swa_step * abs( steps ) ) < 1e-2 * magnet.swa_step &&
          magnet.swa + steps <= MAX_SWA && magnet.swa + steps >= MIN_SWA )
     {
-        er032m_set_swa( magnet.swa += steps );
+        bh15_fc_set_swa( magnet.swa += steps );
         return;
     }
 
@@ -1069,17 +1039,17 @@ static void er032m_change_field_and_keep_sw( double field )
     /* Make sure we don't get over the field limits (including halve the
        sweep range) */
 
-    if ( magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD )
+    if ( magnet.cf + 0.5 * magnet.sw > BH15_FC_MAX_FIELD )
     {
-        steps = irnd( ceil( ( magnet.cf + 0.5 * magnet.sw - ER032M_MAX_FIELD )
+        steps = irnd( ceil( ( magnet.cf + 0.5 * magnet.sw - BH15_FC_MAX_FIELD )
                             / magnet.swa_step ) );
 
         magnet.swa += steps;
         magnet.cf  -= steps * magnet.swa_step;
     }
-    else if ( magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
+    else if ( magnet.cf - 0.5 * magnet.sw < BH15_FC_MIN_FIELD )
     {
-        steps = irnd( ceil( ( ER032M_MIN_FIELD - magnet.cf + 0.5 * magnet.sw )
+        steps = irnd( ceil( ( BH15_FC_MIN_FIELD - magnet.cf + 0.5 * magnet.sw )
                             / magnet.swa_step ) );
 
         magnet.cf += steps * magnet.swa_step;
@@ -1091,8 +1061,8 @@ static void er032m_change_field_and_keep_sw( double field )
 
     if ( magnet.swa > MAX_SWA ||
          magnet.swa < MIN_SWA ||
-         magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD ||
-         magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
+         magnet.cf + 0.5 * magnet.sw > BH15_FC_MAX_FIELD ||
+         magnet.cf - 0.5 * magnet.sw < BH15_FC_MIN_FIELD )
     {
         print( FATAL, "Can't set field of %.3f G\n", field );
         THROW( EXCEPTION );
@@ -1101,8 +1071,8 @@ static void er032m_change_field_and_keep_sw( double field )
     /* Now we again got to deal with cases where the resulting center field
        isn't a multiple of the CF resoultion... */
 
-    rem = lrnd( magnet.cf / ER032M_MIN_FIELD_STEP )
-          % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP );
+    rem = lrnd( magnet.cf / BH15_FC_MIN_FIELD_STEP )
+          % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP );
 
     if ( rem > 0 )
     {
@@ -1110,26 +1080,26 @@ static void er032m_change_field_and_keep_sw( double field )
            step size is we can't adjust the field to the required value and
            must use the nearest possible field instead. */
 
-        if ( lrnd( magnet.swa_step / ER032M_MIN_FIELD_STEP ) %
-             lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP ) == 0 )
-            magnet.cf = lrnd( magnet.cf / ER032M_CF_RESOLUTION )
-                        * ER032M_CF_RESOLUTION;
+        if ( lrnd( magnet.swa_step / BH15_FC_MIN_FIELD_STEP ) %
+             lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP ) == 0 )
+            magnet.cf = lrnd( magnet.cf / BH15_FC_CF_RESOLUTION )
+                        * BH15_FC_CF_RESOLUTION;
         else
         {
             /* Otherwise try to adjust the field by a few additional SWA
                steps in the right direction */
 
-            er032m_best_fit_search( &magnet.cf, &magnet.swa, magnet.cf >=
-                            0.5 * ( ER032M_MAX_FIELD - ER032M_MIN_FIELD ), 2 );
+            bh15_fc_best_fit_search( &magnet.cf, &magnet.swa, magnet.cf >=
+                          0.5 * ( BH15_FC_MAX_FIELD - BH15_FC_MIN_FIELD ), 2 );
 
             fsc2_assert( magnet.swa >= MIN_SWA && magnet.swa <= MAX_SWA &&
-                         magnet.cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD &&
-                         magnet.cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
+                         magnet.cf - 0.5 * magnet.sw >= BH15_FC_MIN_FIELD &&
+                         magnet.cf + 0.5 * magnet.sw <= BH15_FC_MAX_FIELD );
         }
     }
 
-    magnet.cf = er032m_set_cf( magnet.cf );
-    er032m_set_swa( magnet.swa );
+    magnet.cf = bh15_fc_set_cf( magnet.cf );
+    bh15_fc_set_swa( magnet.swa );
 }
 
 
@@ -1141,7 +1111,7 @@ static void er032m_change_field_and_keep_sw( double field )
  * swa and swa_step in the magnet structure get set and OK is returned.
  *-----------------------------------------------------------------------*/
 
-static bool er032m_guess_sw( double field_diff )
+static bool bh15_fc_guess_sw( double field_diff )
 {
     int i;
     double swa_step;
@@ -1151,15 +1121,15 @@ static bool er032m_guess_sw( double field_diff )
 
     /* For very small or huge changes we can't deduce a sweep range. */
 
-    if ( field_diff * MAX_SWA < ER032M_SW_RESOLUTION ||
+    if ( field_diff * MAX_SWA < BH15_FC_SW_RESOLUTION ||
          field_diff > magnet.max_sw / 2 )
         return FAIL;
 
     /* This also doesn't work if the center field is nearer to one of the
        limits than to the new field value. */
 
-    if ( ER032M_MAX_FIELD - magnet.cf < field_diff ||
-         magnet.cf - ER032M_MIN_FIELD < field_diff )
+    if ( BH15_FC_MAX_FIELD - magnet.cf < field_diff ||
+         magnet.cf - BH15_FC_MIN_FIELD < field_diff )
         return FAIL;
 
     /* Now start with the step size set to the field difference */
@@ -1188,17 +1158,17 @@ static bool er032m_guess_sw( double field_diff )
        field (keeping the center field) thus we must reduce it further as
        far as necessary */
 
-    for ( i = 1; magnet.cf + 0.5 * sw / i > ER032M_MAX_FIELD; i++ )
+    for ( i = 1; magnet.cf + 0.5 * sw / i > BH15_FC_MAX_FIELD; i++ )
         /* empty */ ;
     sw /= i;
     swa_step /= i;
 
-    for ( i = 1; magnet.cf - 0.5 * sw / i < ER032M_MIN_FIELD; i++ )
+    for ( i = 1; magnet.cf - 0.5 * sw / i < BH15_FC_MIN_FIELD; i++ )
         /* empty */ ;
     sw /= i;
     swa_step /= i;
 
-    sw = ER032M_SW_RESOLUTION * lrnd( sw / ER032M_SW_RESOLUTION );
+    sw = BH15_FC_SW_RESOLUTION * lrnd( sw / BH15_FC_SW_RESOLUTION );
     swa_step = sw / MAX_SWA;
 
     if ( swa_step * ( CENTER_SWA - 1 ) < field_diff )
@@ -1215,19 +1185,19 @@ static bool er032m_guess_sw( double field_diff )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-static void er032m_field_check( double field )
+static void bh15_fc_field_check( double field )
 {
-    if ( field > ER032M_MAX_FIELD )
+    if ( field > BH15_FC_MAX_FIELD )
     {
         print( FATAL, "Field of %f G is too high, maximum field is %f G.\n",
-               field, ER032M_MAX_FIELD );
+               field, BH15_FC_MAX_FIELD );
         THROW( EXCEPTION );
     }
 
-    if ( field < ER032M_MIN_FIELD )
+    if ( field < BH15_FC_MIN_FIELD )
     {
         print( FATAL, "Field of %f G is too low, minimum field is %f G.\n",
-               field, ER032M_MIN_FIELD );
+               field, BH15_FC_MIN_FIELD );
         THROW( EXCEPTION );
     }
 }
@@ -1236,12 +1206,12 @@ static void er032m_field_check( double field )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-static void er032m_test_leds( void )
+static void bh15_fc_test_leds( void )
 {
     char buf[ 20 ];
     long length;
     char *bp;
-    int max_retries = ER032M_MAX_RETRIES;
+    int max_retries = BH15_FC_MAX_RETRIES;
     bool is_overload;
     bool is_remote;
 
@@ -1256,7 +1226,7 @@ static void er032m_test_leds( void )
         is_overload = is_remote = UNSET;
 
         length = 20;
-        er032m_talk( "LE\r", buf, &length );
+        bh15_fc_talk( "LE\r", buf, &length );
 
         bp = buf;
         while ( *bp && *bp != '\r' )
@@ -1299,7 +1269,7 @@ static void er032m_test_leds( void )
             break;
 
         if ( max_retries-- > 0  )
-            fsc2_usleep( ER032M_WAIT_TIME, UNSET );
+            fsc2_usleep( BH15_FC_WAIT_TIME, UNSET );
         else
         {
             print( FATAL, "Field regulation loop not balanced.\n" );
@@ -1312,53 +1282,25 @@ static void er032m_test_leds( void )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static double er032m_get_field( void )
-{
-    char buf[ 30 ];
-    long length = 30;
-
-
-    if ( FSC2_MODE != EXPERIMENT )
-        return magnet.act_field;
-
-    er032m_talk( "FC\r", buf, &length );
-    buf[ length ] = '\0';
-    return T_atod( buf + 2 );
-}
-
-
-/*-------------------------------------------------------*
- *-------------------------------------------------------*/
-
-static double er032m_set_cf( double center_field )
+static double bh15_fc_set_cf( double center_field )
 {
     char buf[ 30 ];
     int i;
 
 
-    center_field = ER032M_CF_RESOLUTION
-                   * lrnd( center_field / ER032M_CF_RESOLUTION );
+    center_field = BH15_FC_CF_RESOLUTION
+                   * lrnd( center_field / BH15_FC_CF_RESOLUTION );
 
-    fsc2_assert( center_field >= ER032M_MIN_FIELD &&
-                 center_field <= ER032M_MAX_FIELD );
+    fsc2_assert( center_field >= BH15_FC_MIN_FIELD &&
+                 center_field <= BH15_FC_MAX_FIELD );
 
     if ( FSC2_MODE != EXPERIMENT )
         return center_field;
 
     sprintf( buf, "CF%.3f\r", center_field );
 
-    for ( i = ER032M_MAX_SET_RETRIES; i > 0; i-- )
-    {
-        er032m_command( buf );
-        if ( fabs( center_field - er032m_get_cf( ) ) < ER032M_CF_RESOLUTION )
-            break;
-    }
-
-    if ( i == 0 )
-    {
-        print( FATAL, "Failed to set center field.\n" );
-        THROW( EXCEPTION );
-    }
+    for ( i = BH15_FC_MAX_SET_RETRIES; i > 0; i-- )
+        bh15_fc_command( buf );
 
     return center_field;
 }
@@ -1367,25 +1309,7 @@ static double er032m_set_cf( double center_field )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static double er032m_get_cf( void )
-{
-    char buf[ 30 ];
-    long len = 30;
-
-
-    if ( FSC2_MODE != EXPERIMENT )
-        return ER032M_TEST_FIELD;
-
-    er032m_talk( "CF\r", buf, &len );
-    buf[ len ] = '\0';
-    return T_atod( buf + 2 );
-}
-
-
-/*-------------------------------------------------------*
- *-------------------------------------------------------*/
-
-static double er032m_set_sw( double sweep_width )
+static double bh15_fc_set_sw( double sweep_width )
 {
     char buf[ 30 ];
     int i;
@@ -1393,10 +1317,10 @@ static double er032m_set_sw( double sweep_width )
 
     fsc2_assert( sweep_width >= 0.0 && sweep_width <= magnet.max_sw );
 
-    sweep_width = ER032M_SW_RESOLUTION
-                  * lrnd( sweep_width / ER032M_SW_RESOLUTION );
+    sweep_width = BH15_FC_SW_RESOLUTION
+                  * lrnd( sweep_width / BH15_FC_SW_RESOLUTION );
 
-    if ( lrnd( sweep_width / ER032M_SW_RESOLUTION ) != 0 )
+    if ( lrnd( sweep_width / BH15_FC_SW_RESOLUTION ) != 0 )
     {
         magnet.swa_step = sweep_width / MAX_SWA;
         magnet.is_sw = SET;
@@ -1412,18 +1336,8 @@ static double er032m_set_sw( double sweep_width )
 
     sprintf( buf, "SW%.3f\r", sweep_width );
 
-    for ( i = ER032M_MAX_SET_RETRIES; i > 0; i-- )
-    {
-        er032m_command( buf );
-        if ( fabs( sweep_width - er032m_get_sw( ) ) < ER032M_SW_RESOLUTION )
-            break;
-    }
-
-    if ( i == 0 )
-    {
-        print( FATAL, "Failed to set sweep width.\n" );
-        THROW( EXCEPTION );
-    }
+    for ( i = BH15_FC_MAX_SET_RETRIES; i > 0; i-- )
+        bh15_fc_command( buf );
 
     return sweep_width;
 }
@@ -1432,25 +1346,7 @@ static double er032m_set_sw( double sweep_width )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static double er032m_get_sw( void )
-{
-    char buf[ 30 ];
-    long len = 30;
-
-
-    if ( FSC2_MODE != EXPERIMENT )
-        return CENTER_SWA;
-
-    er032m_talk( "SW\r", buf, &len );
-    buf[ len ] = '\0';
-    return T_atod( buf + 2 );
-}
-
-
-/*-------------------------------------------------------*
- *-------------------------------------------------------*/
-
-static int er032m_set_swa( int sweep_address )
+static int bh15_fc_set_swa( int sweep_address )
 {
     char buf[ 30 ];
 
@@ -1461,38 +1357,168 @@ static int er032m_set_swa( int sweep_address )
         return sweep_address;
 
     sprintf( buf, "SS%d\r", sweep_address );
-    er032m_command( buf );
+    bh15_fc_command( buf );
     return sweep_address;
 }
 
 
-/*-------------------------------------------------------*
- *-------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Function for calculating the new maximum value for the deviation
+ * between a requested and an achieved field.
+ *--------------------------------------------------------------*/
 
-#if 0
-static int er032m_get_swa( void )
+static void bh15_fc_deviation( double field )
 {
-    char buf[ 30 ];
-    long len = 30;
+    double d = fabs( ( field ) - magnet.cf
+                     - ( magnet.swa - CENTER_SWA ) * magnet.swa_step );
 
-
-    if ( FSC2_MODE != EXPERIMENT )
-        return magnet.swa;
-
-    er032m_talk( "SA\r", buf, &len );
-    buf[ len ] = '\0';
-    return T_atoi( buf + 2 );
+    if ( d > magnet.max_field_dev )
+        magnet.max_field_dev = d;
 }
-#endif
+
+
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+static double bh15_fc_get_initial_field( void )
+{
+    double field;
+    char buffer[ 20 ];
+    long len;
+    int tries = 0;
+    char *val;
+    char *endptr;
+    int state;
+
+
+    /* Switch to gaussmeter mode and bring device into running condition */
+
+    bh15_fc_command( "MO5\r" );
+    bh15_fc_command( "RU\r" );
+
+    /* Wait for the overload condition to become cleared */
+
+    do
+    {
+        stop_on_user_request( );
+
+        fsc2_usleep( 100000, UNSET );
+
+        len = 20;
+        bh15_fc_talk( "LE\r", buffer, &len );
+
+        if ( strchr( buffer, '2' ) != NULL )
+        {
+            print( FATAL, "Probehead thermostat not in equilibrilum.\n" );
+            THROW( EXCEPTION );
+        }
+
+        if ( strchr( buffer, '4' ) != NULL )
+        {
+            print( FATAL, "Device isn't in remote state.\n" );
+            THROW( EXCEPTION );
+        }
+
+    } while ( ++tries < BH15_FC_MAX_MEASURE_TRIES &&
+              strchr( buffer, '1' ) != NULL );
+
+    tries = 0;
+    state = BH15_FC_FAR_OFF;
+
+    do
+    {
+        stop_on_user_request( );
+
+        fsc2_usleep( 100000, UNSET );
+
+        len = 20;
+        bh15_fc_talk( "FV\r", buffer, &len );
+
+        /* Try to find the qualifier */
+
+        val = buffer;
+        while ( *val && ! isdigit( ( unsigned char ) *val ) )
+            val++;
+
+        if ( *val == '\0' )    /* no qualifier found ? */
+        {
+            print( FATAL, "Invalid data returned by device.\n" );
+            THROW( EXCEPTION );
+        }
+
+        switch ( *val )
+        {
+            case '0' :                             /* correct within 50 mG */
+                state = BH15_FC_LOCKED;
+                break;
+
+            case '1' :                             /* correct within 1 G */
+                if ( state == BH15_FC_FAR_OFF )
+                {
+                    state = BH15_FC_STILL_OFF;
+                    tries = 0;
+                }
+                break;
+
+            case '2' :                             /* error larger than 1 G */
+                state = BH15_FC_FAR_OFF;
+                tries = 0;
+                break;
+
+            case '3' :                            /* BH15_FC not in RUN mode */
+                print( FATAL, "Dropped out of run mode.\n" );
+                THROW( EXCEPTION );
+                break;
+
+            default :
+                print( FATAL, "Invalid data returned by Bruker BH15_FC field "
+                       "controller.\n" );
+                THROW( EXCEPTION );
+        }
+
+    } while ( state != BH15_FC_LOCKED && ++tries < BH15_FC_MAX_MEASURE_TRIES );
+
+    if ( state != BH15_FC_LOCKED )
+    {
+        print( FATAL, "Can't find the field.\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* Try to locate the start of the field value */
+
+    val++;
+    while ( *val && ! isdigit( ( unsigned char )*val ) &&
+            *val != '+' && *val != '-' )
+        val++;
+
+    if ( *val == '\0' )    /* no field value found ? */
+    {
+        print( FATAL, "Invalid data returned by Bruker BH15_FC field "
+               "controller.\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* Convert the string and check for errors */
+
+    field = strtod( val, &endptr );
+    if ( endptr == val || errno == ERANGE )
+    {
+        print( FATAL, "Invalid data returned by Bruker BH15_FC field "
+               "controller.\n" );
+        THROW( EXCEPTION );
+    }
+
+    return field;
+}
 
 
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool er032m_command( const char * cmd )
+static bool bh15_fc_command( const char * cmd )
 {
     if ( gpib_write( magnet.device, cmd, strlen( cmd ) ) == FAILURE )
-        er032m_failure( );
+        bh15_fc_failure( );
     return OK;
 }
 
@@ -1500,13 +1526,13 @@ static bool er032m_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool er032m_talk( const char * cmd,
-                         char *       reply,
-                         long *       length )
+static bool bh15_fc_talk( const char * cmd,
+                          char *       reply,
+                          long *       length )
 {
     if ( gpib_write( magnet.device, cmd, strlen( cmd ) ) == FAILURE ||
          gpib_read( magnet.device, reply, length ) == FAILURE )
-        er032m_failure( );
+        bh15_fc_failure( );
     return OK;
 }
 
@@ -1514,7 +1540,7 @@ static bool er032m_talk( const char * cmd,
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void er032m_failure( void )
+static void bh15_fc_failure( void )
 {
     print( FATAL, "Can't access the field controller.\n" );
     THROW( EXCEPTION );
@@ -1528,10 +1554,10 @@ static void er032m_failure( void )
 #define MAX_ADD_STEPS 100         /* maximum number of additional SWA steps */
 
 
-static int er032m_best_fit_search( double * cf,
-                                   int *    swa,
-                                   bool     dir,
-                                   int      fac )
+static int bh15_fc_best_fit_search( double * cf,
+                                    int *    swa,
+                                    bool     dir,
+                                    int      fac )
 {
     long rem;
     int add_steps = 0;
@@ -1542,8 +1568,8 @@ static int er032m_best_fit_search( double * cf,
 
 
     fsc2_assert( new_swa >= MIN_SWA && new_swa <= MAX_SWA &&
-                 new_cf - 0.5 * magnet.swa_step >= ER032M_MIN_FIELD &&
-                 new_cf + 0.5 * magnet.swa_step <= ER032M_MAX_FIELD );
+                 new_cf - 0.5 * magnet.swa_step >= BH15_FC_MIN_FIELD &&
+                 new_cf + 0.5 * magnet.swa_step <= BH15_FC_MAX_FIELD );
 
     if ( dir == SEARCH_UP )
     {
@@ -1551,10 +1577,10 @@ static int er032m_best_fit_search( double * cf,
             return MAX_ADD_STEPS;
 
         while ( new_swa < MAX_SWA &&
-                new_cf - 0.5 * magnet.swa_step > ER032M_MIN_FIELD )
+                new_cf - 0.5 * magnet.swa_step > BH15_FC_MIN_FIELD )
         {
-            rem = lrnd( fabs( new_cf ) / ER032M_MIN_FIELD_STEP )
-                  % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP );
+            rem = lrnd( fabs( new_cf ) / BH15_FC_MIN_FIELD_STEP )
+                  % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP );
             if ( rem <= fac || ++add_steps >= MAX_ADD_STEPS )
                 break;
             new_swa++;
@@ -1567,10 +1593,10 @@ static int er032m_best_fit_search( double * cf,
             return MAX_ADD_STEPS;
 
         while ( new_swa > MIN_SWA &&
-                new_cf + 0.5 * magnet.swa_step < ER032M_MAX_FIELD )
+                new_cf + 0.5 * magnet.swa_step < BH15_FC_MAX_FIELD )
         {
-            rem = lrnd( fabs( new_cf ) / ER032M_MIN_FIELD_STEP )
-                  % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP );
+            rem = lrnd( fabs( new_cf ) / BH15_FC_MIN_FIELD_STEP )
+                  % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP );
             if ( rem <= fac || ++add_steps >= MAX_ADD_STEPS )
                 break;
             new_swa--;
@@ -1582,22 +1608,22 @@ static int er032m_best_fit_search( double * cf,
     {
         if ( new_swa <= MIN_SWA ||
              new_swa >= MAX_SWA || 
-             new_cf - 0.5 * magnet.sw < ER032M_MIN_FIELD ||
-             new_cf + 0.5 * magnet.sw > ER032M_MAX_FIELD ||
+             new_cf - 0.5 * magnet.sw < BH15_FC_MIN_FIELD ||
+             new_cf + 0.5 * magnet.sw > BH15_FC_MAX_FIELD ||
              add_steps >= MAX_ADD_STEPS )
         {
             new_cf = *cf;
             new_swa = *swa;
 
             dir_change = SET;
-            add_steps = er032m_best_fit_search( &new_cf, &new_swa,
+            add_steps = bh15_fc_best_fit_search( &new_cf, &new_swa,
                                                 ! dir, fac );
             dir_change = UNSET;
         }
 
         if ( new_swa <= MIN_SWA || new_swa >= MAX_SWA || 
-             new_cf - 0.5 * magnet.sw < ER032M_MIN_FIELD ||
-             new_cf + 0.5 * magnet.sw > ER032M_MAX_FIELD ||
+             new_cf - 0.5 * magnet.sw < BH15_FC_MIN_FIELD ||
+             new_cf + 0.5 * magnet.sw > BH15_FC_MAX_FIELD ||
              add_steps >= MAX_ADD_STEPS )
         {
             if ( recursion_count >= MAX_RECURSION )
@@ -1607,12 +1633,12 @@ static int er032m_best_fit_search( double * cf,
             new_swa = *swa;
 
             recursion_count++;
-            er032m_best_fit_search( &new_cf, &new_swa, dir, fac + 1 );
+            bh15_fc_best_fit_search( &new_cf, &new_swa, dir, fac + 1 );
             recursion_count--;
         }
     }
 
-    *cf = lrnd( new_cf / ER032M_CF_RESOLUTION ) * ER032M_CF_RESOLUTION;
+    *cf = lrnd( new_cf / BH15_FC_CF_RESOLUTION ) * BH15_FC_CF_RESOLUTION;
     *swa = new_swa;
 
     return add_steps;
