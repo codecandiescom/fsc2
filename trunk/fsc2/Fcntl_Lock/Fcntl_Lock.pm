@@ -1,7 +1,7 @@
 # -*- cperl -*-
 #
-# This program is free software; you can redistribute it and/or modify it
-# under the same terms as Perl itself.
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
 #
 # Copyright (C) 2002-2007 Jens Thoms Toerring <jt@toerring.de>
 #
@@ -29,7 +29,7 @@ our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
                   SEEK_SET SEEK_CUR SEEK_END
 );
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 
 =pod
@@ -177,16 +177,17 @@ sub new {
 
 =pod
 
-The following functions are for setting and quering the properties of
+The following functions are for setting and querying the properties of
 the object simulating the flock structure:
 
 =over 4
 
 =item B<l_type>
 
-If called without an argument returns the current setting of the lock type,
-otherwise the lock type is set to the argument, which must be either
-B<F_RDLCK>, B<F_WRLCK> or B<F_UNLCK> (for read lock, write lock or unlock).
+If called without an argument returns the current setting of the
+lock type, otherwise the lock type is set to the argument, which
+must be either B<F_RDLCK>, B<F_WRLCK> or B<F_UNLCK> (for read lock,
+write lock or unlock).
 
 =cut
 
@@ -209,10 +210,11 @@ sub l_type {
 
 =item B<l_whence>
 
-Queries or sets the B<l_whence> member of the flock structure, determining
-if the B<l_start> value is relative to the start of the file, to the current
-position in the file or to the end of the file. The corresponding values are
-B<SEEK_SET>, B<SEEK_CUR> and B<SEEK_END>. See also the man page for lseek(2);
+Queries or sets the B<l_whence> member of the flock structure,
+determining if the B<l_start> value is relative to the start of
+the file, to the current position in the file or to the end of
+the file. The corresponding values are B<SEEK_SET>, B<SEEK_CUR>
+and B<SEEK_END>. See also the man page for lseek(2);
 
 =cut
 
@@ -237,9 +239,9 @@ sub l_whence {
 
 =item B<l_start>
 
-Queries or sets the start position (offset) of the lock in the file according
-to the mode selected by the B<l_whence> member. See also the man page for
-lseek(2).
+Queries or sets the start position (offset) of the lock in the
+file according to the mode selected by the B<l_whence> member.
+See also the man page for lseek(2).
 
 =cut
 
@@ -257,15 +259,15 @@ sub l_start {
 
 =item B<l_len>
 
-Queries or sets the length of the region (in bytes) in the file to be
-locked. A value of 0 means a lock (starting at B<l_start>) to the very
-end of the file.
+Queries or sets the length of the region (in bytes) in the file
+to be locked. A value of 0 means a lock (starting at B<l_start>)
+to the very end of the file.
 
-According to SUSV3 negative values for B<l_start> are allowed (resulting
-in a lock ranging from B<l_start + l_len> to B<l_start - 1>) Unfortunately,
-not all systems allow this and will return an error when you try to obtain
-the lock, so please read the fcntl(2) man page for your system carefully
-for details.
+According to SUSV3 negative values for B<l_start> are allowed
+(resulting in a lock ranging from B<l_start + l_len> to
+B<l_start - 1>) Unfortunately, not all systems allow this and
+will return an error when you try to obtain the lock, so please
+read the fcntl(2) man page for your system carefully for details.
 
 =cut
 
@@ -283,9 +285,10 @@ sub l_len {
 
 =item B<l_pid>
 
-This member of the structure queried or set by the function is only useful
-when determining the current owner of a lock, in which case the PID of the
-process holding the lock is returned in this member.
+This member of the structure queried or set by the function is
+only useful when determining the current owner of a lock, in
+which case the PID of the process holding the lock is returned
+in this member.
 
 =back
 
@@ -303,16 +306,17 @@ sub l_pid {
 
 =pod
 
-When not initialized the flock structure entry B<l_type> is set to
-B<F_RDLCK> by default, B<l_whence> to B<SEEK_SET>, and both B<l_start>
-and B<l_len> to 0, i.e. the settings for a read lock on the whole file.
+When not initialized the flock structure entry B<l_type> is set
+to B<F_RDLCK> by default, B<l_whence> to B<SEEK_SET>, and both
+B<l_start> and B<l_len> to 0, i.e. the settings for a read lock
+on the whole file.
 
 
-After having set up the flock structure object you now can determine the
-current holder of a lock or try to obtain a lock by invoking the function
-B<fcntl_lock> with two arguments, a file handle (or a file descriptor, the
-module figures out automatically what it got) and a flag indicating the
-action to be taken, i.e.
+After having set up the flock structure object you now can
+determine the current holder of a lock or try to obtain a lock
+by invoking the function B<fcntl_lock> with two arguments, a file
+handle (or a file descriptor, the module figures out automatically
+what it got) and a flag indicating the action to be taken, i.e.
 
   $fs->fcntl_lock( $fh, F_SETLK );
 
@@ -322,33 +326,34 @@ There are three actions:
 
 =item B<F_GETLK>
 
-For B<F_GETLK> the function determines if and who currently is holding the
-lock.  If no other process is holding the lock the B<l_type> field is set to
-F_UNLCK. Otherwise the flock structure object is set to the values that
-prevent us from obtaining a lock, with the B<l_pid> entry set to the
-PID of the process holding the lock.
+For B<F_GETLK> the function determines if and who currently is
+holding the lock.  If no other process is holding the lock the
+B<l_type> field is set to B<F_UNLCK>. Otherwise the flock structure
+object is set to the values that prevent us from obtaining a lock,
+with the B<l_pid> entry set to the PID of the process holding the
+lock.
 
 =item B<F_SETLK>
 
-For B<F_SETLK> the function tries to obtain the lock (when B<l_type> is set to
-either B<F_WRLCK> or B<F_RDLCK>) or releases the lock (if B<l_type> is set to
-B<F_UNLCK>). If the lock is held by someone else the function call returns
-'undef' and errno is set to B<EACCESS> or B<EAGAIN> (please see the the man
-page for fcntl(2) for the details).
+For B<F_SETLK> the function tries to obtain the lock (when B<l_type>
+is set to either B<F_WRLCK> or B<F_RDLCK>) or releases the lock (if
+B<l_type> is set to B<F_UNLCK>). If the lock is held by someone else
+the function call returns 'undef' and errno is set to B<EACCESS> or
+B<EAGAIN> (please see the the man page for fcntl(2) for the details).
 
 =item B<F_SETLKW>
 
 is similar to B<F_SETLK> but instead of returning an error if the
-lock can't be obtained immediately it blocks until the lock is obtained. If a
-signal is received while waiting for the lock the function returns 'undef' and
-errno is set to B<EINTR>.
+lock can't be obtained immediately it blocks until the lock is
+obtained. If a signal is received while waiting for the lock the
+function returns 'undef' and errno is set to B<EINTR>.
 
 =back
 
-On success the function returns the string "0 but true". If the function fails
-(as indicated by an 'undef' return value) you can either immediately evaluate
-the error number ($!, $ERRNO or $OS_ERROR) directly or check for it at some
-later time.
+On success the function returns the string "0 but true". If the
+function fails (as indicated by an 'undef' return value) you can
+either immediately evaluate the error number ($!, $ERRNO or
+$OS_ERROR) directly or check for it at some later time.
 
 =cut
 
@@ -383,16 +388,16 @@ sub fcntl_lock {
 
 =pod
 
-There exist three functions for obtaining information about the errors
-from a call of B<fcntl_lock> at some later time:
+There are hree functions for obtaining information about the errors
+from a call of B<fcntl_lock>:
 
 =over 4
 
 =item B<fcntl_errno>
 
-This function returns the error number from the latest call of B<fcntl_lock>
-for the flock structure object. If the last call did not result in an error
-the function returns 'undef'.
+Returns the error number from the latest call of B<fcntl_lock>
+for the flock structure object. If the last call did not result
+in an error the function returns 'undef'.
 
 =cut
 
@@ -408,12 +413,13 @@ sub fcntl_errno {
 
 =item B<fcntl_error>
 
-The function returns a short description of the error that happened during the
-latest call of B<fcntl_lock> with the flock structure object. Please take the
-messages with a grain of salt, they represent what SUSV3 (IEEE 1003.1-2001)
-and the Linux, TRUE64, OpenBSD3 and Solaris8 man pages tell what the error
-numbers mean, there could be differences (and additional error numbers) on
-other systems. If there was no error the function returns 'undef'.
+Returns a short description of the error that happened during the
+latest call of B<fcntl_lock> with the flock structure object. Please
+take the messages with a grain of salt, they represent what SUSV3
+(IEEE 1003.1-2001) and the Linux, TRUE64, OpenBSD3 and Solaris8 man
+pages tell what the error numbers mean, there could be differences
+(and additional error numbers) on other systems. If there was no
+error the function returns 'undef'.
 
 =cut
 
@@ -429,12 +435,11 @@ sub fcntl_error {
 
 =item B<fcntl_system_error>
 
-The previous function, B<fcntl_error>, tries to return a string with some
-relevance to the locking operation (i.e. "File or segment already locked
-by other process(es)" instead of "Permission denied"). If you want to obtain
-the normal system error message one gets when using $! B<fcntl_system_error>
-can be called instead. Also this function returns 'undef' if there was no
-error.
+While the previous function, B<fcntl_error>, tries to return a string
+with some relevance to the locking operation (i.e. "File or segment
+already locked by other process(es)" instead of "Permission denied")
+this function returns the "normal" system error message associated
+with errno. This function returns also 'undef' if there was no error.
 
 =back
 
@@ -460,7 +465,7 @@ SEEK_SET SEEK_CUR SEEK_END
 
 =head1 CREDITS
 
-Thanks to Mark-Jason Dominus <mjd@plover.com> and Benjamin Goldberg
+Thanks to Mark Jason Dominus <mjd@plover.com> and Benjamin Goldberg
 <goldbb2@earthlink.net> for discussions, code and encouragement.
 
 =head1 AUTHOR
