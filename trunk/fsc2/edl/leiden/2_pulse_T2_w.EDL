@@ -142,7 +142,7 @@ ON_STOP:
 fsave( File,
 	   "\n"
        "% Date:                   # #\n"
-       "% Script:                 2_pulse_T2 (J-band, Leiden)\n"
+       "% Script:                 2_pulse_T2 (W-band, Leiden)\n"
        "% Field:                  # G\n"
        "% Repetition time:        # ms\n"
        "% Length of 1st MW pulse: # ns\n"
@@ -154,6 +154,6 @@ fsave( File,
        "% ADC channel(s):         ADC_CHANNELS\n",
        date( ), time( ), field,  repeat_time / 1 ms,
        int( P1.LENGTH / 1 ns ), int( P2.LENGTH / 1 ns ),
-       int( p1_to_p2_dist / 1 ns ), int( p1_to_p2_incr / 1 ns  N_Avg );
+       int( p1_to_p2_dist / 1 ns ), int( p1_to_p2_incr / 1 ns), N_Avg );
 
 save_comment( File, "% " );
