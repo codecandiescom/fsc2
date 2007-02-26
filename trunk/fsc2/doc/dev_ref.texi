@@ -2794,6 +2794,8 @@ via the CD2A Compudrive (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 @item @ref{monochromator_wavenumber_axis()}
 @item @ref{monochromator_calibrate()}
 @item @ref{monochromator_shutter_limits()}
+@item @ref{monochromator_wavenumber_scan_limits()}
+@item @ref{monochromator_wavelength_scan_limits()}
 @item @ref{monochromator_groove_density()}
 @end table
 

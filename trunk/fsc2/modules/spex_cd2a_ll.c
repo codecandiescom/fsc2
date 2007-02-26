@@ -948,8 +948,8 @@ static void spex_cd2a_pos_mess_check( const char * bp )
        otherwise either a 'N' or 'A', depending if it's set up to use
        nanometer or Angstrom units */
        
-    if ( ( spex_cd2a.mode == WN && *bp == 'W' ) ||
-         ( spex_cd2a.mode == WND && *bp == 'D' ) ||
+    if ( ( spex_cd2a.mode == WN_ABS && *bp == 'W' ) ||
+         ( spex_cd2a.mode == WN_REL && *bp == 'D' ) ||
          ( spex_cd2a.mode == WL &&
            ( ( spex_cd2a.units == NANOMETER && *bp == 'N' ) ||
              ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )

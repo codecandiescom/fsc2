@@ -298,11 +298,11 @@ double spex_cd2a_wn2Uwn( double wn )
 {
     switch ( spex_cd2a.mode )
     {
-        case WND :
+        case WN_REL :
             wn = spex_cd2a.laser_line - wn;
             /* fall through */
 
-        case WN :
+        case WN_ABS :
             wn -= spex_cd2a.offset;
             break;
 
@@ -328,11 +328,11 @@ double spex_cd2a_Uwn2wn( double wn )
 {
     switch ( spex_cd2a.mode )
     {
-        case WND :
+        case WN_REL :
             wn = spex_cd2a.laser_line - wn;
             /* fall through */
 
-        case WN :
+        case WN_ABS :
             wn += spex_cd2a.offset;
             break;
 
@@ -415,10 +415,10 @@ double spex_cd2a_wl2mu( double wl )
 {
     switch ( spex_cd2a.mode )
     {
-        case WN :
+        case WN_ABS :
             return spex_cd2a_wl2wn( wl );
 
-        case WND :
+        case WN_REL :
             return spex_cd2a.laser_line - spex_cd2a_wl2wn( wl );
 
         case WL :

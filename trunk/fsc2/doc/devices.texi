@@ -5989,6 +5989,8 @@ the supported monochromatore).
 @item @ref{monochromator_scan_setup()}
 @item @ref{monochromator_start_scan()}
 @item @ref{monochromator_scan_step()}
+@item @ref{monochromator_wavenumber_scan_limits()}
+@item @ref{monochromator_wavelength_scan_limits()}
 @item @ref{monochromator_shutter_limits()}
 @item @ref{monochromator_groove_density()}
 @item @ref{monochromator_grating()}
@@ -6137,6 +6139,26 @@ units).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
+
+@anchor{monochromator_wavenumber_scan_limits()}
+@findex monochromator_wavenumber_scan_limits()
+@item monochromator_wavenumber_scan_limits()
+The function does not take any arguments and returns an array with two
+elements, the first being the lower scan limit in absolute wavenumbers
+(in @code{cm^-1} and the second the upper scan limit.
+
+Currently this function is only available for @strong{SPEX} monochromators.
+
+
+@anchor{monochromator_wavelength_scan_limits()}
+@findex monochromator_wavelength_scan_limits()
+@item monochromator_wavenumber_scan_limits()
+The function does not take any arguments and returns an array with two
+elements, the first being the lower scan limit in wavelengths (in
+@code{m}) and the second the upper scan limit.
+
+Currently this function is only available for @strong{SPEX} monochromators.
 
 
 @anchor{monochromator_shutter_limits()}

@@ -64,7 +64,7 @@ int spex_cd2a_init_hook( void )
             break;
 
         case WAVENUMBER :
-            spex_cd2a.mode = WN;
+            spex_cd2a.mode = WN_ABS;
             break;
 
         default :
@@ -97,7 +97,7 @@ int spex_cd2a_init_hook( void )
 #endif
 
     if ( spex_cd2a.mode & WN_MODES && spex_cd2a.laser_line != 0.0 )
-        spex_cd2a.mode = WND;
+        spex_cd2a.mode = WN_REL;
 
     /* If it's wavelength driven find out the units the controller expects
        (either nanometer or Angstrom) */
@@ -376,6 +376,38 @@ int spex_cd2a_end_of_exp_hook( void )
 Var_T *monochromator_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
+}
+
+
+/*---------------------------------------------------------------------------*
+ * Returns an array with the scan limits in absolute wavenumbers (in cm^.1)
+ * with the lower scan limit as the first and the upper limit as the second
+ * array element.
+ *--------------------------------------------------------------------------*/
+
+Var_T *monochromator_wavenumber_scan_limits( Var_T *v  UNUSED_ARG )
+{
+    double vals[ 2 ] = { UPPER_LIMIT * ( ( double ) GROOVE_DENSITY 
+                                         / STANDARD_GROOVE_DENSITY ),
+                         LOWER_LIMIT * ( ( double ) GROOVE_DENSITY 
+                                         / STANDARD_GROOVE_DENSITY ) };
+    return vars_push( FLOAT_ARR, vals, 2 );
+}
+
+
+/*----------------------------------------------------------------------*
+ * Returns an array with the scan limits in wavelengths /in m) with the 
+ * lower scan limit as the first and the upper limit as the second array
+ * element.
+ *----------------------------------------------------------------------*/
+
+Var_T *monochromator_wavelength_scan_limits( Var_T *v  UNUSED_ARG )
+{
+    double vals[ 2 ] = { 0.01 / LOWER_LIMIT * ( STANDARD_GROOVE_DENSITY /
+                                                ( double ) GROOVE_DENSITY ),
+                         0.01 / UPPER_LIMIT * ( STANDARD_GROOVE_DENSITY /
+                                                ( double ) GROOVE_DENSITY ) };
+    return vars_push( FLOAT_ARR, vals, 2 );
 }
 
 
@@ -706,10 +738,10 @@ Var_T *monochromator_wavenumber( Var_T * v )
     {
         print( FATAL, "Requested %s wavenumber of %.4f cm^-1 is %s than the "
                "%s wavenumber limit of %.4f cm^-1.\n",
-               spex_cd2a.mode == WND ? "(relative)" : "(absolute)",
+               spex_cd2a.mode == WN_REL ? "(relative)" : "(absolute)",
                spex_cd2a_wl2Uwn( wl ),
-               spex_cd2a.mode == WN ? "larger" : "lower",
-               spex_cd2a.mode == WN ? "upper" : "lower",
+               spex_cd2a.mode == WN_ABS ? "larger" : "lower",
+               spex_cd2a.mode == WN_ABS ? "upper" : "lower",
                spex_cd2a_wl2Uwn( spex_cd2a.lower_limit ) );
         SPEX_CD2A_THROW( EXCEPTION );
     }
@@ -718,10 +750,10 @@ Var_T *monochromator_wavenumber( Var_T * v )
     {
         print( FATAL, "Requested %s wavenumber of %.4f cm^-1 is %s than the "
                "%s wavenumber limit of %.4f cm^-1.\n",
-               spex_cd2a.mode == WND ? "(relative)" : "(absolute)",
+               spex_cd2a.mode == WN_REL ? "(relative)" : "(absolute)",
                spex_cd2a_wl2Uwn( wl ),
-               spex_cd2a.mode == WN ? "lower" : "larger",
-               spex_cd2a.mode == WN ? "lower" : "upper",
+               spex_cd2a.mode == WN_ABS ? "lower" : "larger",
+               spex_cd2a.mode == WN_ABS ? "lower" : "upper",
                spex_cd2a_wl2Uwn( spex_cd2a.upper_limit ) );
         SPEX_CD2A_THROW( EXCEPTION );
     }
@@ -862,12 +894,12 @@ Var_T *monochromator_laser_line( Var_T * v )
 
     if ( wn <= 0.0 )
     {
-        spex_cd2a.mode = WN;
+        spex_cd2a.mode = WN_ABS;
         spex_cd2a.laser_line = 0.0;
     }
     else
     {
-        spex_cd2a.mode = WND;
+        spex_cd2a.mode = WN_REL;
 
         /* Abort if the monochromator has a shutter, the laser line is within
            it's range but the laser line is outside of the shutter range. */
@@ -980,10 +1012,10 @@ Var_T *monochromator_shutter_limits( Var_T * v )
 
         if ( tl[ 0 ] < spex_cd2a.lower_limit )
         {
-            if ( spex_cd2a.mode == WN )
+            if ( spex_cd2a.mode == WN_ABS )
                 print( WARN, "Upper shutter limit larger than upper "
                        "wavenumber limit of monochromator.\n" );
-            else if ( spex_cd2a.mode == WND )
+            else if ( spex_cd2a.mode == WN_REL )
                 print( WARN, "Lower shutter limit lower than lower "
                        "wavenumber limit of monochromator.\n" );
             else
@@ -994,10 +1026,10 @@ Var_T *monochromator_shutter_limits( Var_T * v )
 
         if ( tl[ 1 ] > spex_cd2a.upper_limit )
         {
-            if ( spex_cd2a.mode == WN )
+            if ( spex_cd2a.mode == WN_ABS )
                 print( WARN, "Lower shutter limit lower than lower "
                        "wavenumber limit of monochromator.\n" );
-            else if ( spex_cd2a.mode == WND )
+            else if ( spex_cd2a.mode == WN_REL )
                 print( WARN, "Upper shutter limit larger than upper "
                        "wavenumber limit of monochromator.\n" );
             else
@@ -1006,7 +1038,7 @@ Var_T *monochromator_shutter_limits( Var_T * v )
             tl[ 1 ] = spex_cd2a.upper_limit;
         }
 
-        if ( spex_cd2a.mode == WND )
+        if ( spex_cd2a.mode == WN_REL )
         {
             lwl = spex_cd2a_wn2wl( spex_cd2a.laser_line );
             if ( lwl < tl[ 0 ] || lwl > tl[ 1 ] )
@@ -1085,7 +1117,7 @@ Var_T *monochromator_calibrate( Var_T * v )
     if ( spex_cd2a.mode & WN_MODES )
     {
         new_offset = get_double( v, "wavenumber offset" );
-        if ( spex_cd2a.mode == WND )
+        if ( spex_cd2a.mode == WN_REL )
             new_offset *= -1;
     }
     else
@@ -1133,7 +1165,8 @@ Var_T *monochromator_calibrate( Var_T * v )
     spex_cd2a.offset = offset;
     spex_cd2a.pixel_diff = pixel_diff;
 
-    field[ 0 ] = spex_cd2a.mode == WND ? - spex_cd2a.offset : spex_cd2a.offset;
+    field[ 0 ] =
+              spex_cd2a.mode == WN_REL ? - spex_cd2a.offset : spex_cd2a.offset;
     field[ 1 ] = spex_cd2a.pixel_diff;
 
     spex_cd2a.new_calibration = SET;
@@ -1313,7 +1346,7 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
                                             * spex_cd2a.pixel_diff )
                           - cv->val.dpnt[ 0 ] ) / ( num_pixels - 1 );
 
-    if ( spex_cd2a.mode == WN )
+    if ( spex_cd2a.mode == WN_ABS )
         cv->val.dpnt[ 1 ] *= -1.0;
 
     return cv;

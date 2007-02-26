@@ -178,7 +178,7 @@ sub check_status {
 	my $mw = MainWindow->new;
 	$mw->title( 'Status Check' );
 
-	$laser_line = Laser_Line::get_line( $mw );
+	$laser_line = ( Laser_Line::get_line( $mw ) )[ 0 ];
 
 	exit 1 if ! defined $laser_line;
 
@@ -423,7 +423,7 @@ use IO::Handle;
 
 sub run {
 	my ( $top, $geom ) = @_;
-	my $ll = get_line( $top );
+	my ( $ll, @limits ) = get_line( $top );
 	return unless defined $ll;
 
 	$top->withdraw;
@@ -484,7 +484,7 @@ sub run {
 	# Add a validation handler for the data in the entry field
 
 	$f[ 3 ]->configure( -validate => 'key',
-						-vcmd => sub{ ll_valid( shift, $f[ 6 ] ) } );
+						-vcmd => sub{ ll_valid( shift, $f[ 6 ], @limits ) } );
 
 	# Focus should be in the entry field and cursor after the last character
 
@@ -502,11 +502,11 @@ sub run {
 # the laser line can be set to.
 
 sub ll_valid {
-	my ( $new, $start_button ) = @_;
+	my ( $new, $start_button, @limits ) = @_;
     my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE]\+?\d+)?';
 
     if ( $new =~ /^$float_rep$/ ) {
-        if ( $new != 0.0 and ( $new < 46000.0 / 3 or $new > 44000 ) ) {
+        if ( $new != 0.0 and ( $new < $limits[ 0 ] or $new > $limits[ 1 ] ) ) {
             $start_button->configure( -state => 'disabled' );
         } else {
             $start_button->configure( -state => 'normal' );
@@ -540,10 +540,10 @@ sub get_line {
 DEVICES:
 spex_cd2a;
 VARIABLES:
-LL;
+LL, limits;
 EXPERIMENT:
 LL = round( 1000 * monochromator_laser_line( ) );
-print( "#.###\\n", LL / 1000, ( LL % 1000 ) / 100,
+print( "#.### # #\\n", LL / 1000, ( LL % 1000 ) / 100,
        ( LL % 100 ) / 10, LL % 10 );
 EOF
 
@@ -561,9 +561,9 @@ EOF
 	}
 
 	my $reply = <$g>;
-	chomp $reply;
 	close $g;
 	unlink $fn;
+	chomp $reply;
 
 	if ( defined $reply and $reply =~ /^Please press the "REMOTE" button/ ) {
 		main::show_message( $top, "Please press the \"REMOTE\" button at\n" .
@@ -573,16 +573,20 @@ EOF
 	}
 
 	if ( defined $reply and $reply =~ /^F\s+SPEX_CD2A:\s+(.+)$/ ) {
-		$reply = $1;
-	}
-
-	unless ( defined $reply and $reply =~ /^\d+(\.\d*)?$/ ) {
 		main::show_message( $top, "Can't determine monochromators laser " .
-							"line setting:\n$reply" );
+							"line setting:\n$1" );
 		return;
 	}
 
-	return $reply;
+	my @res = split ' ', $reply;
+
+	unless ( @res == 3 ) {
+		main::show_message( $top, "Can't determine monochromators laser " .
+							"line setting." );
+		return;
+	}
+
+	return @res;
 }
 
 
@@ -657,6 +661,8 @@ sub run {
 	my ( $top, $geom ) = @_;
 	my $cwn;
 
+	my @limits = ( Laser_Line::get_line( $top ) )[ 1 .. 2 ];
+
 	$cwn = $center_line - $offset;
  	$cwn = main::round( $laser_line - $cwn, 3 ) if $laser_line != 0.0;
 
@@ -725,7 +731,7 @@ sub run {
 	# Add a validation handler for the data in the entry field
 
 	$f[ 3 ]->configure( -validate => 'key',
-						-vcmd => sub{ cwn_valid( shift, $f[ 6 ] ) } );
+						-vcmd => sub{ cwn_valid( shift, $f[ 6 ], @limits ) } );
 
 	# Focus should be in the entry field and cursor after the last character
 
@@ -795,12 +801,12 @@ EOF
 # the center line can be set to.
 
 sub cwn_valid {
-	my ( $new, $start_button ) = @_;
+	my ( $new, $start_button, @limits ) = @_;
     my $float_rep = '-?((\d+(\.(\d+)?)?)|(\.\d+))([eE]\+?\d+)?';
 
     if ( $new =~ /^$float_rep$/ ) {
 		$new = $laser_line - $new unless $laser_line == 0.0;
-		if ( $new < 46000.0 / 3 or $new > 44000 ) {
+		if ( $new < $limits[ 0 ] or $new > $limits[ 1 ] ) {
             $start_button->configure( -state => 'disabled' );
         } else {
             $start_button->configure( -state => 'normal' );
@@ -869,9 +875,10 @@ ROI[ 4 ] = ccd_camera_roi( );
 BIN[ 2 ] = ccd_camera_binning( );
 pixel_diff = 0.0;
 center_dev;
+cd, xm, lm, lc;
 exposure_time = $rm_exp_time s;
-NO_PIXELS = ROI[ 3 ] - ROI[ 1 ] + 1;
-lpos = 0.5 * ( NO_PIXELS + 1 );
+NUM_PIXELS = ROI[ 3 ] - ROI[ 1 ] + 1;
+lpos = 0.5 * ( NUM_PIXELS + 1 );
 new;
 Spec[ * ];
 lines[ * ] = { 1, 2 };        // in absolute wavenumbers !
@@ -885,7 +892,7 @@ I;
 
 PREPARATIONS:
 
-init_1d( 1, NO_PIXELS / BIN[ 1 ],
+init_1d( 1, NUM_PIXELS / BIN[ 1 ],
 		 BIN[ 1 ] == 1 ? "Position [pixel]" : "Position [pixel (binned)]",
 		 "Counts" );
 
@@ -928,7 +935,7 @@ FOREVER {
 		}
 		L_count = 1;
 		FOR I = 1 : LP_count {
-			IF lines[ I ] != new {
+			IF lines[ I ] != 0.01 / new {
 				L_count += 1;
 			}
 		}
@@ -956,7 +963,7 @@ FOREVER {
 
 	IF toolbox_changed( B_lpos ) {
 		new = input_value( B_lpos );
-		IF new < 1 | new > NO_PIXELS {
+		IF new < 1 | new > NUM_PIXELS {
 			input_value( B_lpos, lpos );
 			object_enable( B_conf, "OFF" );
 			NEXT;
@@ -978,9 +985,10 @@ FOREVER {
 	IF button_state( B_conf ) {
 		LP_count += 1;
 		positions[ LP_count ] = input_value( B_lpos );
-		lines[ LP_count ] = input_value( B_wn );
-		IF ll != 0 cm^-1 {
-			lines[ LP_count ] = ll - lines[ LP_count ];
+		IF ll == 0 cm^-1 {
+			lines[ LP_count ] = 0.01 / input_value( B_wn );
+		} ELSE {
+			lines[ LP_count ] = 0.01 / ( ll - lines[ LP_count ] );
 		}
 
         clear_marker( );
@@ -991,26 +999,16 @@ FOREVER {
 	}
 }
 
-
-pixel_diff = ( 0.01 / lines[ 2 ] - 0.01 / lines[ 1 ] ) /
+pixel_diff = ( lines[ 2 ] - lines[ 1 ] ) /
 	         ( BIN[ 1 ] * ( positions[ 2 ] - positions[ 1 ] ) );
 IF ll == 0 cm^-1 {
-	pixel_diff *= -1;
+	pixel_diff *= -1.0;
 }
 
-center_dev = 0 nm;
-FOR I = 1 : 2 {
-	center_dev += ( positions[ I ] - 0.5 * ( NO_PIXELS + 1 ) )
-			      * BIN[ 1 ] * pixel_diff - 0.01 / lines[ I ];
-}
-
-center_dev /= 2;
-center_dev += 0.01 / abs_cl;
-IF center_dev > 0 nm {
-	center_dev = abs_cl - 0.01 / ( 0.01 / abs_cl + center_dev );
-} ELSE {
-	center_dev = 0.01 / ( 0.01 / abs_cl - center_dev ) - abs_cl;
-}
+xm = 0.5 * ( positions[ 1 ] + positions[ 2 ] );
+lm = 0.5 * ( lines[ 1 ] + lines[ 2 ] );
+lc = ( xm - 0.5 * ( NUM_PIXELS + 1 ) ) * BIN[ 1 ] * pixel_diff + lm;
+center_dev = abs_cl - 0.01 / lc;
 
 hide_toolbox( "ON" );
 B_pd = output_create( "FLOAT_OUTPUT", 1.0e9 * pixel_diff, "Pixel width [nm]" );
@@ -1031,7 +1029,7 @@ FOREVER {
 		}
 		L_count = 1;
 		FOR I = 1 : LP_count {
-			IF lines[ I ] != new {
+			IF lines[ I ] != 0.01 / new {
 				L_count += 1;
 			}
 		}
@@ -1058,7 +1056,7 @@ FOREVER {
 
 	IF toolbox_changed( B_lpos ) {
 		new = input_value( B_lpos );
-		IF new < 1 | new > NO_PIXELS {
+		IF new < 1 | new > NUM_PIXELS {
 			input_value( B_lpos, lpos );
 			object_enable( B_conf, "OFF" );
 			NEXT;
@@ -1080,9 +1078,10 @@ FOREVER {
 	IF button_state( B_conf ) {
 		LP_count += 1;
 		positions[ LP_count ] = input_value( B_lpos );
-		lines[ LP_count ] = input_value( B_wn );
-		IF ll != 0 cm^-1 {
-			lines[ LP_count ] = ll - lines[ LP_count ];
+		IF ll == 0 cm^-1 {
+			lines[ LP_count ] = 0.01 / input_value( B_wn );
+		} ELSE {
+			lines[ LP_count ] = 0.01 / ( ll - lines[ LP_count ] );
 		}
 
 		object_enable( B_conf, "OFF" );
@@ -1090,23 +1089,24 @@ FOREVER {
 
 		pixel_diff = 0 nm;
 		FOR I = 2 : LP_count {
-			pixel_diff += ( 0.01 / lines[ 1 ] - 0.01 / lines[ I ] ) /
-	                      ( BIN[ 1 ] * ( positions[ 1 ] - positions[ I ] ) );
+			pixel_diff += ( lines[ I ] - lines[ 1 ] ) /
+	                      ( BIN[ 1 ] * ( positions[ I ] - positions[ 1 ] ) );
 		}
 		pixel_diff /= LP_count - 1;
+        IF ll == 0 cm^-1 {
+	        pixel_diff *= -1.0;
+        }
 
-		center_dev = 0 nm;
+		xm = 0.0;
+		lm = 0.0;
 		FOR I = 1 : LP_count {
-			center_dev += ( positions[ I ] - 0.5 * ( NO_PIXELS + 1 ) )
-					      * BIN[ 1 ] * pixel_diff - 0.01 / lines[ I ];
+			xm += positions[ I ];
+			lm += lines[ I ];
 		}
-		center_dev /= LP_count;
-		center_dev += 0.01 / abs_cl;
-		IF center_dev > 0 nm {
-			center_dev = abs_cl - 0.01 / ( 0.01 / abs_cl + center_dev );
-		} ELSE {
-			center_dev = 0.01 / ( 0.01 / abs_cl - center_dev ) - abs_cl;
-		}
+		xm /= LP_count;
+		lm /= LP_count;
+		lc = ( xm - 0.5 * ( NUM_PIXELS + 1 ) ) * BIN[ 1 ] * pixel_diff + lm;
+		center_dev = abs_cl - 0.01 / lc;
 
 		output_value( B_pd, 1.0e9 * pixel_diff );
 		output_value( B_cd, center_dev );
@@ -2467,20 +2467,27 @@ EOF
 		return;
 	}
 
-	my @res = split " ", <$g>;
-
+	my $reply = <$g>;
 	close $g;
 	unlink $fn;
+	chomp $reply;
 
-	if ( defined $res[ 0 ] and
-		 $res[ 0 ] =~ /^Please press the "REMOTE" button/ ) {
+	if ( defined $reply and $reply =~ /^Please press the "REMOTE" button/ ) {
 		main::show_message( $top, "Please press the \"REMOTE\" button at\n" .
 							"the console to allow computer control\n" .
 							"of the monochromator." );
 		return;
 	}
 
-	unless ( @res == 10 ) {
+	if ( $reply =~ /^F\s+SPEX_CD2A:\s+(.+)$/ ) {
+		main::show_message( $top, "Can't determine monochromator and camera " .
+							"settings:\n$1" );
+		return;
+	}
+
+	my @res = split ' ', $reply;
+
+	if ( @res != 10 ) {
 		main::show_message( $top, "Can't determine monochromator and camera " .
 							"settings." );
 		return;

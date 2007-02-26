@@ -9,7 +9,7 @@
 #    the position of the laser line (as set at the SPEX CD2A)
 # 5. a flag that indicates if a new calibration has been done.
 
-555.55555 cm^-1
+555.55555 nm
 0.0000 cm^-1
 0.1500 nm
 20000.0000 cm^-1

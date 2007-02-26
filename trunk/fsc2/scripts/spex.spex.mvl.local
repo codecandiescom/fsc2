@@ -149,6 +149,7 @@ P_count = 0;
 offset;
 calib[ 2 ];
 Accepted = 0;
+limits[ 2 ];
 
 
 PREPARATIONS:
@@ -158,14 +159,15 @@ init_1d( 1, "Wavenumber [cm-^1]", "Counts per second" );
 
 EXPERIMENT:
 
+limits = monochromator_wavelength_limits( );
 laser_line = monochromator_laser_line( );
 nll = laser_line;
 monochromator_laser_line( 0.0 );
 calib = monochromator_calibrate( );
 offset = calib[ 1 ];
 
-IF laser_line - offset >= 46000.0 / 3.0 + 2 AND
-   laser_line - offset <= 43998.0 {
+IF laser_line - offset >= limits[ 1 ] + 2.0 AND
+   laser_line - offset <= limits[ 2 ] - 2.0 {
 	start_wn = laser_line + 2 cm^-1;
 	end_wn   = laser_line - 2 cm^-1;
 	P_count  = 2;
@@ -225,7 +227,7 @@ FOREVER {
 			NEXT;
 		}
 
-		IF new - offset > 44000.0 OR new - offset < 46000.0 / 3.0 {
+		IF new - offset < limits[ 1 ] OR new - offset > limits[ 2 ] {
 			input_value( B_swn, start_wn );
 			NEXT;
 		}
@@ -246,7 +248,7 @@ FOREVER {
 			NEXT;
 		}
 
-		IF new - offset > 44000.0 OR new - offset < 46000.0 / 3.0 {
+		IF new - offset < limits[ 1 ] OR new - offset > limits[ 2 ]  {
 			input_value( B_ewn, end_wn );
 			NEXT;
 		}
@@ -457,6 +459,7 @@ I_start = 1;
 
 B_swn, B_goto, B_stsz, B_mt, B_scan, B_samp,
 B_cwn, B_stop, B_rel, B_abs, B_clr;
+limits[ 2 ];
 
 RELATIVE = 0,
 ABSOLUTE = 1;
@@ -489,6 +492,8 @@ B_clr  = button_create( "NORMAL_BUTTON", "Clear screen" );
 hide_toolbox( "OFF" );
 
 ll = monochromator_laser_line( );
+limits = monochromator_wavelength_scan_limits( );
+
 
 FOREVER {
 
@@ -526,9 +531,9 @@ FOREVER {
 			new = input_value( B_swn );
 
 			IF ( Mode == RELATIVE AND
-				 ( ll - new > 44000.0 OR ll - new < 46000.0 / 3.0 ) ) OR
+				 ( ll - new < limits[ 1] OR ll - new > limits[ 2 ] ) ) OR
 			   ( Mode == ABSOLUTE AND
-				 ( new > 44000.0 OR new < 46000.0 / 3.0 ) ) {
+				 ( new < limits[ 1 ] OR new > limits[ 2 ] ) ) {
 				input_value( B_swn,
 							 Mode == RELATIVE ? start_wn : ll - start_wn);
 				NEXT;
@@ -655,7 +660,7 @@ FOREVER {
 		display( I, data );
 		I += 1;
 
-		IF ll - cwn > 46000.0 / 3.0 + step_size {
+		IF ll - cwn > limits[ 1 ] + step_size {
 	        cwn = monochromator_scan_step( );
 			output_value( B_cwn, Mode == RELATIVE ? cwn : ll - cwn );
 

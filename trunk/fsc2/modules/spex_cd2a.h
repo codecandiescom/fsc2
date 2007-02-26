@@ -77,9 +77,9 @@
 #define WITH_LINEFEED  1
 
 
-#define WN        1
-#define WND       2
-#define WL        4
+#define WN_ABS    1         /* absolute wavenumber mode */
+#define WN_REL    2         /* relative wavenumber mode */
+#define WL        4         /* wavelength mode */
 #define WN_MODES  3
 
 /* Include configuration information for the device */
@@ -126,7 +126,7 @@ struct Spex_CD2A {
     bool has_shutter;
 
     int mode;                       /* wavelength (WL) or wavenumber
-                                       (absolute (WN) relative (WND)) */
+                                       absolute (WN_ABS), relative (WN_REL) */
 
     double wavelength;              /* in m */
     bool is_wavelength;
@@ -178,19 +178,21 @@ int spex_cd2a_exp_hook(         void );
 void spex_cd2a_child_exit_hook( void );
 int spex_cd2a_end_of_exp_hook(  void );
 
-Var_T *monochromator_name(            Var_T * /* v */ );
-Var_T *monochromator_scan_setup(      Var_T * /* v */ );
-Var_T *monochromator_wavelength(      Var_T * /* v */ );
-Var_T *monochromator_wavenumber(      Var_T * /* v */ );
-Var_T *monochromator_offset(          Var_T * /* v */ );
-Var_T *monochromator_start_scan(      Var_T * /* v */ );
-Var_T *monochromator_scan_step(       Var_T * /* v */ );
-Var_T *monochromator_laser_line(      Var_T * /* v */ );
-Var_T *monochromator_groove_density(  Var_T * /* v */ );
-Var_T *monochromator_shutter_limits(  Var_T * /* v */ );
-Var_T *monochromator_calibrate(       Var_T * /* v */ );
-Var_T *monochromator_wavelength_axis( Var_T * /* v */ );
-Var_T *monochromator_wavenumber_axis( Var_T * /* v */ );
+Var_T *monochromator_name(                   Var_T * /* v */ );
+Var_T *monochromator_wavenumber_scan_limits( Var_T * /* v */ );
+Var_T *monochromator_wavelength_scan_limits( Var_T * /* v */ );
+Var_T *monochromator_scan_setup(             Var_T * /* v */ );
+Var_T *monochromator_wavelength(             Var_T * /* v */ );
+Var_T *monochromator_wavenumber(             Var_T * /* v */ );
+Var_T *monochromator_offset(                 Var_T * /* v */ );
+Var_T *monochromator_start_scan(             Var_T * /* v */ );
+Var_T *monochromator_scan_step(              Var_T * /* v */ );
+Var_T *monochromator_laser_line(             Var_T * /* v */ );
+Var_T *monochromator_groove_density(         Var_T * /* v */ );
+Var_T *monochromator_shutter_limits(         Var_T * /* v */ );
+Var_T *monochromator_calibrate(              Var_T * /* v */ );
+Var_T *monochromator_wavelength_axis(        Var_T * /* v */ );
+Var_T *monochromator_wavenumber_axis(        Var_T * /* v */ );
 
 
 /* Functions from spex_cd2a_ll.c */

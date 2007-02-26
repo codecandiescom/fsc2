@@ -2124,7 +2124,7 @@ static void main_sig_handler( int signo )
                     void *trace[ MAX_TRACE_LEN ];
                     int size;
 
-                    Crash.trace[ 0 ] = NULL;   /* don't know how to gt at it */
+                    Crash.trace[ 0 ] = NULL;  /* don't know how to get at it */
                     Crash.trace_length = 1;
                     size = backtrace( trace, MAX_TRACE_LEN );
                     if ( size > 3 )
