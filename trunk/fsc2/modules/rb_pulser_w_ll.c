@@ -207,6 +207,16 @@ void rb_pulser_w_init( void )
 
     rb_pulser_w_synthesizer_init( );
 
+    /* Set the length of the defense pulse to zero if the user switched off
+       automatic generation of the defense pulse but didn't set her/his own
+       defense pulse */
+
+    if ( ! rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
+         rulbus_rb8514_delay_set_raw_delay(
+                         rb_pulser_w.delay_card[ DEFENSE_DELAY ].handle, 0, 1 )
+                                                                 != RULBUS_OK )
+        rb_pulser_w_failure( SET, "Failure to initialize pulser" );
+
     lower_permissions( );
 
 #else     /* in test mode */
@@ -231,8 +241,8 @@ void rb_pulser_w_init( void )
                  ( rb_pulser_w.trig_in_slope == POSITIVE ) ?
                  "RULBUS_RB8514_DELAY_RAISING_EDGE" :
                  "RULBUS_RB8514_DELAY_FALLING_EDGE" );
-        fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %s, %d, %d )\n",
-                 rb_pulser_w.delay_card[ ERT_DELAY ].name, 0, 1 );
+        fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %s, 0, 1 )\n",
+                 rb_pulser_w.delay_card[ ERT_DELAY ].name );
         fprintf( stderr, "rulbus_rb8515_clock_set_frequency( %s, %s)\n",
                  rb_pulser_w.clock_card[ ERT_CLOCK ].name,
                  "RULBUS_RB8515_CLOCK_FREQ_100MHz" );
@@ -259,11 +269,16 @@ void rb_pulser_w_init( void )
                  rb_pulser_w.delay_card[ i ].name,
                  "RULBUS_RB8514_DELAY_RAISING_EDGE" );
         fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %s, "
-                 "RULBUS_RB8514_DELAY_OUTPUT_BOTH"
+                 "RULBUS_RB8514_DELAY_OUTPUT_BOTH, "
                  "RULBUS_RB8514_DELAY_PULSE_NONE )\n",
                  rb_pulser_w.delay_card[ i ].name );
     }
+
     rb_pulser_w_phase_init( );
+
+    if ( ! rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].is_used )
+        fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %s, 0, 1 )\n",
+                 rb_pulser_w.delay_card[ DEFENSE_DELAY ].name );
 #endif
 }
 
@@ -349,7 +364,6 @@ static void rb_pulser_w_phase_init( void )
     lower_permissions( );
 
 #else /* in test mode */
-
     for ( ; card != NULL; card = card->next )
         fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %s, %s, "
                  "%s )\n", card->name, ps_str[ PHASE_PLUS_X ][ 0 ],
@@ -627,7 +641,7 @@ static void rb_pulser_w_start_internal_trigger( void )
         rb_pulser_w_failure( SET, "Failure to start pulser" );
 
 #else   /* in test mode */
-    fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %s, %lu )\n",
+    fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %s, %lu, 1 )\n",
              rb_pulser_w.delay_card[ ERT_DELAY ].name,
              rb_pulser_w.delay_card[ ERT_DELAY ].delay );
     fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %s, %s %s )\n",

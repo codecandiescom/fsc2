@@ -540,11 +540,12 @@ sub get_line {
 DEVICES:
 spex_cd2a;
 VARIABLES:
-LL, limits;
+LL, limits[ 2 ];
 EXPERIMENT:
 LL = round( 1000 * monochromator_laser_line( ) );
+limits = monochromator_wavenumber_scan_limits( );
 print( "#.### # #\\n", LL / 1000, ( LL % 1000 ) / 100,
-       ( LL % 100 ) / 10, LL % 10 );
+       ( LL % 100 ) / 10, LL % 10, limits[ 1 ], limits[ 2 ] );
 EOF
 
 	close $f;
@@ -683,6 +684,9 @@ sub run {
 	$f[ 1 ] = $f[ 0 ]->Frame( );
 	$f[ 2 ] = $f[ 1 ]->Label( -text => "Center position:  " );
 	$f[ 3 ] = $f[ 1 ]->Entry( -textvariable => \$cwn );
+	my $balloon = $f[ 1 ]->Ballon( );
+	$balloon->attach( $f[ 3 ],
+					  -bolloonmsg => "Range: $linits[0] - $limits[1] cm^-1" );
 	$f[ 4 ] = $f[ 1 ]->Label( -text => "  cm^-1 " .
 							  ( $laser_line != 0 ? "rel." : "abs." ) );
 
@@ -873,11 +877,13 @@ ll;
 abs_cl;
 ROI[ 4 ] = ccd_camera_roi( );
 BIN[ 2 ] = ccd_camera_binning( );
+ccd_size[ 2 ] = ccd_camera_pixel_area( );
 pixel_diff = 0.0;
 center_dev;
-cd, xm, lm, lc;
+xm, lm, lc;
 exposure_time = $rm_exp_time s;
 NUM_PIXELS = ROI[ 3 ] - ROI[ 1 ] + 1;
+x_cwl = 0.5 * ccd_size[ 1 ] - ROI[ 1 ] + 1;
 lpos = 0.5 * ( NUM_PIXELS + 1 );
 new;
 Spec[ * ];
@@ -910,7 +916,7 @@ monochromator_wavenumber( cl );
 
 hide_toolbox( "ON" );
 B_wn = input_create( "FLOAT_INPUT", cl, "Expected line position [cm^-1" +
-                                     ( ll == 0 cm^-1 ? " abs.]" : " rel.]" ) );
+                     ( ll == 0 cm^-1 ? " abs.]" : " rel.]" ), "", "%.4f" );
 B_et = input_create( "FLOAT_INPUT", exposure_time, "Exposure time [s]" );
 B_gs = button_create( "NORMAL_BUTTON", "Get spectrum" );
 B_lpos = input_create( "FLOAT_INPUT", lpos, "Observed line position [pixel]",
@@ -1007,11 +1013,12 @@ IF ll == 0 cm^-1 {
 
 xm = 0.5 * ( positions[ 1 ] + positions[ 2 ] );
 lm = 0.5 * ( lines[ 1 ] + lines[ 2 ] );
-lc = ( xm - 0.5 * ( NUM_PIXELS + 1 ) ) * BIN[ 1 ] * pixel_diff + lm;
+lc = ( xm * BIN[ 1 ] - x_cwl ) * pixel_diff + lm;
 center_dev = abs_cl - 0.01 / lc;
 
 hide_toolbox( "ON" );
-B_pd = output_create( "FLOAT_OUTPUT", 1.0e9 * pixel_diff, "Pixel width [nm]" );
+B_pd = output_create( "FLOAT_OUTPUT", - 1.0e9 * pixel_diff,
+                      "Pixel width [nm]" );
 B_cd = output_create( "FLOAT_OUTPUT", center_dev, "Center offset [cm^-1]" );
 B_acc = button_create( "PUSH_BUTTON", "Accept calibration" );
 hide_toolbox( "OFF" );
@@ -1105,10 +1112,10 @@ FOREVER {
 		}
 		xm /= LP_count;
 		lm /= LP_count;
-		lc = ( xm - 0.5 * ( NUM_PIXELS + 1 ) ) * BIN[ 1 ] * pixel_diff + lm;
+		lc = ( xm * BIN[ 1 ] - x_cwl ) * pixel_diff + lm;
 		center_dev = abs_cl - 0.01 / lc;
 
-		output_value( B_pd, 1.0e9 * pixel_diff );
+		output_value( B_pd, - 1.0e9 * pixel_diff );
 		output_value( B_cd, center_dev );
 	}
 }
@@ -1117,7 +1124,7 @@ FOREVER {
 ON_STOP:
 
 IF B_acc != -1 AND button_state( B_acc ) {
-	monochromator_calibrate( center_dev, pixel_diff );
+	monochromator_calibrate( center_dev, - pixel_diff );
 }
 EOF
 
@@ -1826,19 +1833,18 @@ ccd_camera_exposure_time( exposure_time );
 
 hide_toolbox( 1 );
 
+B_wl  = button_create( "RADIO_BUTTON", "Wavelengths" );
+B_abs = button_create( "RADIO_BUTTON", B_wl, "Absolute wavenumbers" );
+change_label_1d( "Wavelength [nm]" );
 IF laser_line != 0.0 {
-	B_rel = button_create( "RADIO_BUTTON", "Relative wavenumbers" );
-	B_abs = button_create( "RADIO_BUTTON", B_rel, "Absolute wavenumbers" );
-	B_wl  = button_create( "RADIO_BUTTON", B_rel, "Wavelengths" );
+	B_rel = button_create( "RADIO_BUTTON", B_wl, "Relative wavenumbers" );
+	change_scale_1d( 1.0e7 / ( laser_line - start_wn ),
+					 1.0e7 / ( laser_line - cwn ) -
+				     1.0e7 / ( laser_line - cwn + step_wn ) );
 
-	change_label_1d( "Wavenumbers [cm^-1 rel.]", "Counts" );
-	change_scale( start_wn, step_wn );
 } ELSE {
-	B_abs = button_create( "RADIO_BUTTON", "Absolute wavenumbers" );
-	B_wl  = button_create( "RADIO_BUTTON", B_abs, "Wavelengths" );
-
-	change_label_1d( "Wavenumbers [cm^-1 abs.]", "Counts" );
-	change_scale( start_wn, - step_wn );
+	change_scale_1d( 1.0e7 / start_wn,
+					 1.0e7 / cwn - 1.0e7 / ( cwn + step_wn ) );
 }
 
 hide_toolbox( 0 );
@@ -2242,19 +2248,14 @@ ccd_camera_exposure_time( exposure_time );
 hide_toolbox( 1 );
 I_scan = output_create( "INT_OUTPUT", 0,
                         sprint( "Current scan (of #)", N_scans ) );
+change_label_1d( "Wavelength [nm]" );
+change_scale_1d( $p{ 'wl_start' } / 1 nm,
+				 $p{ 'wl_resolution' } / 1 nm );
+
+B_wl  = button_create( "RADIO_BUTTON", "Wavelengths" );
+B_abs = button_create( "RADIO_BUTTON", B_wl, "Absolute wavenumbers" );
 IF laser_line != 0.0 {
-	B_rel = button_create( "RADIO_BUTTON", "Relative wavenumbers" );
-	B_abs = button_create( "RADIO_BUTTON", B_rel, "Absolute wavenumbers" );
-	B_wl  = button_create( "RADIO_BUTTON", B_rel, "Wavelengths" );
-
-	change_label_1d( "Wavenumbers [rel. cm^-1]", "Counts" );
-	change_scale( start_wn, step_wn );
-} ELSE {
-	B_abs = button_create( "RADIO_BUTTON", "Absolute wavenumbers" );
-	B_wl  = button_create( "RADIO_BUTTON", B_abs, "Wavelengths" );
-
-	change_label_1d( "Wavenumbers [abs. cm^-1]", "Counts" );
-	change_scale( start_wn, - step_wn );
+	B_rel = button_create( "RADIO_BUTTON", B_wl, "Relative wavenumbers" );
 }
 
 

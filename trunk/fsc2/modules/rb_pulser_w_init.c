@@ -206,16 +206,17 @@ static void rb_pulser_w_defense_pulse_create( void )
     Pulse_T *lp = NULL;
 
 
-    /* No defense pulse is created if there aren't any microwave pulses or the
-       user explicitely told us that (s)he will take care of that pulse. In the
-       latter case add a pulse position (always the start of the pulse pattern)
-       if a pulse exists but its position hasn't been set by the user. If the
-       user has set the length the pulse must also be marked as active. */
+    /* No defense pulse is created if there aren't any microwave pulses or
+       the user explicitely told us that (s)he will take care of that pulse.
+       In the latter case add a pulse position (always the start of the pulse
+       pattern) if a pulse exists but its position hasn't been set by the
+       user. If the user has set the length the pulse must also be marked as
+       active. */
 
     if ( ! mw->is_used )
         return;
 
-    if ( rb_pulser_w.defense_pulse_mode &&
+    if ( ! rb_pulser_w.defense_pulse_mode &&
          def->num_pulses != 0 && ! def->pulses[ 0 ]->is_pos )
     {
         def->pulses[ 0 ]->is_pos = def->pulses[ 0 ]->initial_is_pos = SET;
@@ -227,8 +228,18 @@ static void rb_pulser_w_defense_pulse_create( void )
             def->num_active_pulses = 1;
         }
 
+        def->is_used = SET;
+
         return;
     }
+
+    /* Also return if the user asked not to set an automatically generated
+       defense pulse but didn't create a defense pulse (thus switching off
+       the defense pulse completely, hopefully only for testing purposes...) */
+
+    if ( ! rb_pulser_w.defense_pulse_mode &&
+         def->num_pulses == 0 )
+        return;
 
     def->is_used = SET;
 

@@ -197,7 +197,7 @@ static bool hp5340a_init( const char * name )
 
     /* Tell device to use internal sample rate and to output data only if
        addressed as talker(don't lock the keyboard, the user is supposed
-       to do settngs at the front panel) */
+       to do settings at the front panel) */
 
     if ( gpib_write( hp5340a.device, "L", 1 ) == FAILURE )
         return FAIL;

@@ -817,10 +817,13 @@ static void rb_pulser_w_commit( bool test_only )
                 continue;
             }
 
+            /* If the card as just become active set it to active state
+               (thereby also setting the delay), otherwise just set the
+               new delay if that changed. */
+
             if ( ! card->was_active && card->is_active )
                 rb_pulser_w_delay_card_state( card, START );
-
-            if ( card->old_delay != card->delay )
+            else if ( card->old_delay != card->delay )
                 rb_pulser_w_delay_card_delay( card, card->delay );
 
             card->old_delay = card->delay;

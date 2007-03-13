@@ -591,8 +591,8 @@ Var_T *pulser_minimum_defense_distance( Var_T * v )
 
     if ( ! rb_pulser_w.defense_pulse_mode )
         print( SEVERE, "Automatic creation of defense pulse has been "
-               "switched off, call of this function has no effect "
-               "anymore.\n" );
+               "switched off, the call of this function has no effect "
+               "anymore!\n" );
 
    s2d = get_double( v, "end of last microwave pulse to end of defense "
                       "pulse minimum distance" );
@@ -612,7 +612,7 @@ Var_T *pulser_minimum_defense_distance( Var_T * v )
 
 
 /*---------------------------------------------------------------*
- * Function for setting the pulser not to create a defense pulse
+ * Function for telling the pulser not to create a defense pulse
  *---------------------------------------------------------------*/
 
 Var_T *pulser_defense_pulse_mode( Var_T * v )
@@ -625,7 +625,7 @@ Var_T *pulser_defense_pulse_mode( Var_T * v )
 
     if ( FSC2_MODE != PREPARATION )
     {
-        print( FATAL,"Function can only be called in PREPARATIONS "
+        print( FATAL,"Function can only be called in the PREPARATIONS "
                "section.\n" );
         THROW( EXCEPTION );
     }
@@ -643,8 +643,8 @@ Var_T *pulser_defense_pulse_mode( Var_T * v )
 
     if ( mode == UNSET && rb_pulser_w.is_pulse_2_defense )
         print( SEVERE, "Switching automatic creation of defense pulse off "
-               "cancels the effect of the previous call of function "
-               "'pulser_minimum_defense_distance()'.\n" );
+               "cancels the effect of the previous call of the function "
+               "'pulser_minimum_defense_distance()'!\n" );
 
     rb_pulser_w.defense_pulse_mode = mode;
 

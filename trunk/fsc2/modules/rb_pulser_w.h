@@ -43,9 +43,9 @@
    instead of outputting pulses have a line printed to stderr for each
    call for setting a deleay or clock card. */
 
-#if 0
+//#if 0
 #define RB_PULSER_W_TEST
-#endif
+//#endif
 
 
 /* Defines for the number of delay and clock cards */

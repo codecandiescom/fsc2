@@ -101,7 +101,7 @@ bool rb_pulser_w_set_pulse_function( long pnum,
     {
         print( FATAL, "A DEFENSE pulse can only be created if the function "
                "'pulser_defense_pulse_mode()' has been called previously "
-               "with the argument \"MANUAL\" to switch off automatic creation "
+               "with the argument \"OFF\" to switch off automatic creation "
                "of the defense pulse.\n" );
         THROW( EXCEPTION );
     }

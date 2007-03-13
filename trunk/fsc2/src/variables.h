@@ -75,9 +75,9 @@ struct Var {
     union
     {
         long           lval;       /* for integer values */
-        double         dval;       /* for float values */
+        double         dval;       /* for floating point values */
         long        *  lpnt;       /* for integer arrays */
-        double      *  dpnt;       /* for double arrays */
+        double      *  dpnt;       /* for floating point arrays */
         char        *  sptr;       /* for strings */
         Var_T       ** vptr;       /* for array references */
         struct Func *  fnct;       /* for functions */
