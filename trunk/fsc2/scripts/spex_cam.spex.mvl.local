@@ -484,7 +484,7 @@ sub run {
 	# Add a validation handler for the data in the entry field
 
 	$f[ 3 ]->configure( -validate => 'key',
-						-vcmd => sub{ ll_valid( shift, $f[ 6 ], @limits ) } );
+						-vcmd => sub{ ll_valid( shift, $f[ 6 ] ) } );
 
 	# Focus should be in the entry field and cursor after the last character
 
@@ -497,20 +497,16 @@ sub run {
 
 #############################################
 # Function for checking if a laser line value is valid - it accepts only
-# strings that can be taken to be floating point values and disables the
-# "Apply" button of the form if the value isn't within the range of values
-# the laser line can be set to.
+# characters that can be parts of a (non-negative) floating point values
+# and disables the "Apply" button of the form unless te complete string
+# makes up a non-negative floating point number.
 
 sub ll_valid {
-	my ( $new, $start_button, @limits ) = @_;
+	my ( $new, $start_button ) = @_;
     my $float_rep = '((\d+(\.(\d+)?)?)|(\.\d+))([eE]\+?\d+)?';
 
     if ( $new =~ /^$float_rep$/ ) {
-        if ( $new != 0.0 and ( $new < $limits[ 0 ] or $new > $limits[ 1 ] ) ) {
-            $start_button->configure( -state => 'disabled' );
-        } else {
-            $start_button->configure( -state => 'normal' );
-        }
+		$start_button->configure( -state => 'normal' );
         return 1;
     }
 
@@ -679,14 +675,13 @@ sub run {
 			   -expand => 1 );
 	my %up = ( -side => 'left' );
 
-
 	$f[ 0 ] = $top->Toplevel( '-title' => 'Center Position' );
 	$f[ 1 ] = $f[ 0 ]->Frame( );
 	$f[ 2 ] = $f[ 1 ]->Label( -text => "Center position:  " );
 	$f[ 3 ] = $f[ 1 ]->Entry( -textvariable => \$cwn );
 	my $balloon = $f[ 1 ]->Ballon( );
 	$balloon->attach( $f[ 3 ],
-					  -bolloonmsg => "Range: $linits[0] - $limits[1] cm^-1" );
+					  -bolloonmsg => "Range: $limits[0] - $limits[1] cm^-1" );
 	$f[ 4 ] = $f[ 1 ]->Label( -text => "  cm^-1 " .
 							  ( $laser_line != 0 ? "rel." : "abs." ) );
 
