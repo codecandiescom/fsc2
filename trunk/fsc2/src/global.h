@@ -116,7 +116,7 @@ typedef enum
 #endif
 
 
-/* Define the maximum backtrace length */
+/* Define of the maximum backtrace length */
 
 #define MAX_TRACE_LEN  64
 
@@ -132,19 +132,15 @@ enum {
 };
 
 
-enum {
-    AUTOMATIC = 0,
-    MANUAL
-};
-
-
-/* States to be returned to the HTTP server */
+/* States to be returned to the HTTP server but also checked for in the
+   interface layer for GPIB, serial port and LAN to prevent execution of
+   device commands by modules unless the experiment is under way */
 
 enum {
-    STATE_IDLE = 0,
-    STATE_RUNNING,
-    STATE_WAITING,
-    STATE_FINISHED
+    STATE_IDLE = 0,      /* no experiment is running */
+    STATE_RUNNING,       /* experiment is running */
+    STATE_WAITING,       /* child is waiting for user input via parent */
+    STATE_FINISHED       /* experiment done but display window not closed */
 };
 
 

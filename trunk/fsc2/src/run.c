@@ -120,8 +120,6 @@ bool run( void )
 
     /* Start the GPIB bus (and do some changes to the graphics) */
 
-    Fsc2_Internals.state = STATE_RUNNING;
-
     if ( ! start_gpib_and_rulbus( ) )
     {
         if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
@@ -233,6 +231,7 @@ static bool start_gpib_and_rulbus( void )
     /* Disable some buttons and show a watch cursor */
 
     set_buttons_for_run( 1 );
+    Fsc2_Internals.state = STATE_RUNNING;
 
     /* If there are devices that need the GPIB bus initialize it now */
 
