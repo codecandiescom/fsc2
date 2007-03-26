@@ -34,6 +34,8 @@
  *     claims), SWA settings can range from 0 to 4095, the generated field
  *     is equal to CF for SWA = 2048
  *  7. Repeatability of CF setting: 5 mG
+ *  8. The current field can't be measured since when switching to measurement
+ *     mode th currently set field isn't kept but is set back to zero.
  */
 
 
@@ -95,11 +97,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define BH15_FC_MAX_SET_RETRIES 3
 
 
-/* Number of retries when the field is measured during initialization */
-
-#define BH15_FC_MAX_MEASURE_TRIES   20
-
-
 #define SEARCH_UP   1
 #define SEARCH_DOWN 0
 
@@ -135,6 +132,8 @@ static void bh15_fc_start_field( void );
 
 static double bh15_fc_set_field( double field );
 
+static double bh15_fc_initial_field_setup( double field );
+
 static void bh15_fc_change_field_and_set_sw( double field );
 
 static void bh15_fc_change_field_and_sw( double field );
@@ -151,22 +150,20 @@ static int bh15_fc_set_swa( int sweep_address );
 
 static void bh15_fc_deviation( double field );
 
-static double bh15_fc_get_initial_field( void );
-
 static void bh15_fc_test_leds( void );
 
 static bool bh15_fc_command( const char *cmd );
 
 static bool bh15_fc_talk( const char * cmd,
-                         char *       reply,
-                         long *       length );
+                          char *       reply,
+                          long *       length );
 
 static void bh15_fc_failure( void );
 
 static int bh15_fc_best_fit_search( double * cf,
-                                   int *    swa,
-                                   bool     dir,
-                                   int fac );
+                                    int *    swa,
+                                    bool     dir,
+                                    int      fac );
 
 enum {
     BH15_FC_FAR_OFF = 0,
@@ -180,6 +177,7 @@ static struct
     int device;             /* device handle */
 
     double act_field;       /* the real current field */
+    bool is_act_field;      /* set if current field is known */
 
     double cf;              /* the current center field (CF) setting */
     double sw;              /* the current sweep width (SW) setting */
@@ -213,6 +211,7 @@ int bh15_fc_init_hook( void )
 
     magnet.device = -1;
     magnet.is_init = UNSET;
+    magnet.is_act_field = UNSET;
     magnet.is_sw = UNSET;
     magnet.max_field_dev = 0.0;
 
@@ -232,36 +231,8 @@ int bh15_fc_init_hook( void )
 
 int bh15_fc_test_hook( void )
 {
-    double rem;
-
-
     if ( magnet.is_init )
         bh15_fc_start_field( );
-    else
-    {
-        magnet.act_field = BH15_FC_TEST_FIELD;
-
-        rem = ( lrnd( magnet.act_field / BH15_FC_MIN_FIELD_STEP )
-                % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP ) )
-              * BH15_FC_MIN_FIELD_STEP;
-
-        if ( rem <= 2 * BH15_FC_MIN_FIELD_STEP )
-        {
-            magnet.swa = bh15_fc_set_swa( CENTER_SWA );
-            magnet.sw = bh15_fc_set_sw( 0.0 );
-            magnet.cf = bh15_fc_set_cf( magnet.act_field );
-        }
-        else
-        {
-            bh15_fc_set_sw( 0.0 );
-            magnet.cf = bh15_fc_set_cf( magnet.act_field - rem );
-            bh15_fc_set_swa( magnet.swa = CENTER_SWA + 1 );
-            magnet.sw = bh15_fc_set_sw( MAX_SWA * rem );
-        }
-
-        magnet.act_field =
-                     magnet.cf + ( magnet.swa - CENTER_SWA ) * magnet.swa_step;
-    }
 
     return 1;
 }
@@ -278,11 +249,12 @@ int bh15_fc_end_of_test_hook( void )
 
     if ( ( magnet.is_init &&
            magnet.max_field_dev / magnet.field_step >= 0.01 ) ||
-         ( ! magnet.is_init &&
+         ( ! magnet.is_init && magnet.is_act_field &&
            floor( magnet.max_field_dev / BH15_FC_RESOLUTION ) >= 1 ) )
         print( NO_ERROR, "Maximum field error during test run was %.0f mG.\n",
                 magnet.max_field_dev * 1.0e3 );
     magnet.max_field_dev = 0.0;
+    magnet.is_act_field = UNSET;
     return 1;
 }
 
@@ -308,11 +280,12 @@ int bh15_fc_end_of_exp_hook( void )
 
     if ( ( magnet.is_init &&
            magnet.max_field_dev / magnet.field_step >= 0.01 ) ||
-         ( ! magnet.is_init &&
+         ( ! magnet.is_init && magnet.is_act_field &&
            floor( magnet.max_field_dev / BH15_FC_RESOLUTION ) >= 1 ) )
         print( NO_ERROR, "Maximum field error during experiment was "
                "%.0f mG.\n", magnet.max_field_dev * 1.0e3 );
     magnet.max_field_dev = 0.0;
+    magnet.is_act_field = UNSET;
 
     if ( magnet.device >= 0 )
         gpib_local( magnet.device );
@@ -622,6 +595,12 @@ Var_T *magnet_field( Var_T *v )
 
 Var_T *get_field( Var_T * v  UNUSED_ARG )
 {
+    if ( ! magnet.is_act_field ) {
+        print( FATAL, "Field hasn't been set yet and is thus still "
+               "unknown.\n" );
+        THROW( EXCEPTION );
+    }
+
     return vars_push( FLOAT_VAR, magnet.act_field );
 }
 
@@ -648,6 +627,9 @@ Var_T *set_field( Var_T * v )
     too_many_arguments( v );
 
     bh15_fc_field_check( field );
+
+    if ( ! magnet.is_act_field )
+        return vars_push( FLOAT_VAR, bh15_fc_initial_field_setup( field ) );
 
     return vars_push( FLOAT_VAR, bh15_fc_set_field( field ) );
 }
@@ -691,9 +673,6 @@ Var_T *magnet_command( Var_T * v )
 
 static void bh15_fc_init( void )
 {
-    double rem;
-
-
     if ( gpib_init_device( DEVICE_NAME, &magnet.device ) == FAILURE )
     {
         magnet.device = -1;
@@ -705,10 +684,6 @@ static void bh15_fc_init( void )
     /* Switch off service requests. */
 
     bh15_fc_command( "SR0\r" );
-
-    /* Determine the value the field is currently set to */
-
-    magnet.act_field = bh15_fc_get_initial_field( );
 
     /* Switch to mode 0, i.e. field-controller mode via internal sweep-
        address-generator. */
@@ -726,32 +701,6 @@ static void bh15_fc_init( void )
 
     if ( magnet.is_init )
         bh15_fc_start_field( );
-    else
-    {
-        rem = ( lrnd( magnet.act_field / BH15_FC_MIN_FIELD_STEP )
-                % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP ) )
-              * BH15_FC_MIN_FIELD_STEP;
-
-        if ( rem <= 2 * BH15_FC_MIN_FIELD_STEP )
-        {
-            magnet.swa = bh15_fc_set_swa( CENTER_SWA );
-            magnet.sw = bh15_fc_set_sw( 0.0 );
-            magnet.cf = bh15_fc_set_cf( magnet.act_field );
-        }
-        else
-        {
-            bh15_fc_set_sw( 0.0 );
-            magnet.cf = bh15_fc_set_cf( magnet.act_field - rem );
-            bh15_fc_set_swa( magnet.swa = CENTER_SWA + 1 );
-            magnet.sw = bh15_fc_set_sw( MAX_SWA * rem );
-        }
-
-        bh15_fc_test_leds( );
-
-        bh15_fc_deviation( magnet.act_field );
-        magnet.act_field =   magnet.cf
-                           + ( magnet.swa - CENTER_SWA ) * magnet.swa_step;
-    }
 }
 
 
@@ -858,6 +807,7 @@ static void bh15_fc_start_field( void )
     bh15_fc_deviation( magnet.start_field );
     magnet.act_field =
                      magnet.cf + ( magnet.swa - CENTER_SWA ) * magnet.swa_step;
+    magnet.is_act_field = SET;
 }
 
 
@@ -887,11 +837,14 @@ static double bh15_fc_set_field( double field )
 {
     fsc2_assert( field >= BH15_FC_MIN_FIELD && field <= BH15_FC_MAX_FIELD );
 
+    /* If no field has been set before (and thus the module doesn't even
+       know what's the current field) do the initialization now */
+
+    if ( ! magnet.is_act_field )
+        return bh15_fc_initial_field_setup( field );
+
     /* We don't try to set a new field when the change is extremely small,
        i.e. lower than the accuracy for setting a center field. */
-
-    if ( fabs( magnet.act_field - field ) <= BH15_FC_RESOLUTION )
-        return magnet.act_field;
 
     if ( ! magnet.is_sw )
         bh15_fc_change_field_and_set_sw( field );
@@ -907,6 +860,45 @@ static double bh15_fc_set_field( double field )
     bh15_fc_deviation( field );
     return magnet.act_field =
                      magnet.cf + ( magnet.swa - CENTER_SWA ) * magnet.swa_step;
+}
+
+
+/*--------------------------------------------------------------------*
+ * Function for initializing everything related to the field setting,
+ * called if there was no call of magnet_init() and the field gets
+ * set for the very first time.
+ *--------------------------------------------------------------------*/
+
+static double bh15_fc_initial_field_setup( double field )
+{
+    double rem;
+
+
+    magnet.act_field = field;
+    magnet.is_act_field = SET;
+
+    rem = ( lrnd( magnet.act_field / BH15_FC_MIN_FIELD_STEP )
+            % lrnd( BH15_FC_CF_RESOLUTION / BH15_FC_MIN_FIELD_STEP ) )
+          * BH15_FC_MIN_FIELD_STEP;
+
+    if ( rem <= 2 * BH15_FC_MIN_FIELD_STEP )
+    {
+        magnet.swa = bh15_fc_set_swa( CENTER_SWA );
+        magnet.sw = bh15_fc_set_sw( 0.0 );
+        magnet.cf = bh15_fc_set_cf( magnet.act_field );
+    }
+    else
+    {
+        bh15_fc_set_sw( 0.0 );
+        magnet.cf = bh15_fc_set_cf( magnet.act_field - rem );
+        bh15_fc_set_swa( magnet.swa = CENTER_SWA + 1 );
+        magnet.sw = bh15_fc_set_sw( MAX_SWA * rem );
+    }
+
+    bh15_fc_test_leds( );
+    bh15_fc_deviation( magnet.act_field );
+    return magnet.act_field = magnet.cf
+                              + ( magnet.swa - CENTER_SWA ) * magnet.swa_step;
 }
 
 
@@ -1374,141 +1366,6 @@ static void bh15_fc_deviation( double field )
 
     if ( d > magnet.max_field_dev )
         magnet.max_field_dev = d;
-}
-
-
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
-
-static double bh15_fc_get_initial_field( void )
-{
-    double field;
-    char buffer[ 20 ];
-    long len;
-    int tries = 0;
-    char *val;
-    char *endptr;
-    int state;
-
-
-    /* Switch to gaussmeter mode and bring device into running condition */
-
-    bh15_fc_command( "MO5\r" );
-    bh15_fc_command( "RU\r" );
-
-    /* Wait for the overload condition to become cleared */
-
-    do
-    {
-        stop_on_user_request( );
-
-        fsc2_usleep( 100000, UNSET );
-
-        len = 20;
-        bh15_fc_talk( "LE\r", buffer, &len );
-
-        if ( strchr( buffer, '2' ) != NULL )
-        {
-            print( FATAL, "Probehead thermostat not in equilibrilum.\n" );
-            THROW( EXCEPTION );
-        }
-
-        if ( strchr( buffer, '4' ) != NULL )
-        {
-            print( FATAL, "Device isn't in remote state.\n" );
-            THROW( EXCEPTION );
-        }
-
-    } while ( ++tries < BH15_FC_MAX_MEASURE_TRIES &&
-              strchr( buffer, '1' ) != NULL );
-
-    tries = 0;
-    state = BH15_FC_FAR_OFF;
-
-    do
-    {
-        stop_on_user_request( );
-
-        fsc2_usleep( 100000, UNSET );
-
-        len = 20;
-        bh15_fc_talk( "FV\r", buffer, &len );
-
-        /* Try to find the qualifier */
-
-        val = buffer;
-        while ( *val && ! isdigit( ( unsigned char ) *val ) )
-            val++;
-
-        if ( *val == '\0' )    /* no qualifier found ? */
-        {
-            print( FATAL, "Invalid data returned by device.\n" );
-            THROW( EXCEPTION );
-        }
-
-        switch ( *val )
-        {
-            case '0' :                             /* correct within 50 mG */
-                state = BH15_FC_LOCKED;
-                break;
-
-            case '1' :                             /* correct within 1 G */
-                if ( state == BH15_FC_FAR_OFF )
-                {
-                    state = BH15_FC_STILL_OFF;
-                    tries = 0;
-                }
-                break;
-
-            case '2' :                             /* error larger than 1 G */
-                state = BH15_FC_FAR_OFF;
-                tries = 0;
-                break;
-
-            case '3' :                            /* BH15_FC not in RUN mode */
-                print( FATAL, "Dropped out of run mode.\n" );
-                THROW( EXCEPTION );
-                break;
-
-            default :
-                print( FATAL, "Invalid data returned by Bruker BH15_FC field "
-                       "controller.\n" );
-                THROW( EXCEPTION );
-        }
-
-    } while ( state != BH15_FC_LOCKED && ++tries < BH15_FC_MAX_MEASURE_TRIES );
-
-    if ( state != BH15_FC_LOCKED )
-    {
-        print( FATAL, "Can't find the field.\n" );
-        THROW( EXCEPTION );
-    }
-
-    /* Try to locate the start of the field value */
-
-    val++;
-    while ( *val && ! isdigit( ( unsigned char )*val ) &&
-            *val != '+' && *val != '-' )
-        val++;
-
-    if ( *val == '\0' )    /* no field value found ? */
-    {
-        print( FATAL, "Invalid data returned by Bruker BH15_FC field "
-               "controller.\n" );
-        THROW( EXCEPTION );
-    }
-
-    /* Convert the string and check for errors */
-
-    field = strtod( val, &endptr );
-    if ( endptr == val || errno == ERANGE )
-    {
-        print( FATAL, "Invalid data returned by Bruker BH15_FC field "
-               "controller.\n" );
-        THROW( EXCEPTION );
-    }
-
-    return field;
 }
 
 

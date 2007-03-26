@@ -404,6 +404,10 @@ requested field and the real field of up to @w{25 mG}. If the maximum
 field deviation was larger than @w{5 mG} at the end of the test run as
 well as the experiment the maximum field deviation is printed out.
 
+For the module @code{bh15_fc} requesting the current value of the
+field is only possible when either the function @code{magnet_init()}
+has been called or a field already as been set.
+
 The function can only be used in the @code{EXPERIMENT} section.
 .
 
