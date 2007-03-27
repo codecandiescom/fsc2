@@ -695,6 +695,11 @@ static void bh15_fc_init( void )
 
     bh15_fc_command( "IM0\r" );
 
+    /* The device seems to need a bit of time after being switched to
+       remote mode */
+
+    fsc2_sleep( 1000000, UNSET );
+
     /* Set the start field and the field step if magnet_setup() has been
        called, otherwise measure current field and make CF identical to
        the current field. */

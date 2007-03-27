@@ -77,6 +77,7 @@ aeg_s_band    // S-band AEG magnet power supply (Frankfurt)
 aeg_x_band    // X-band AEG magnet power supply (Berlin)
 keithley228a  // W-band magnet power supply (Berlin)
 er032m        // Bruker ER 032 M field controller
+bh15_fc       // Bruker Hall effect field controller
 ips20_4       // Oxford sweep power supply
 ips120_10     // Oxford sweep power supply
 ips120_10_mod // Oxford sweep power supply
@@ -92,7 +93,7 @@ er035m        // Bruker NMR gaussmeter (GPIB)
 er035m_s      // Bruker NMR gaussmeter (serial)
 er035m_sa     // Bruker NMR gaussmeter (GPIB, stand alone)
 er035m_sas    // Bruker NMR gaussmeter (serial, stand alone)
-bh15          // Bruker Hall effect field controller
+bh15          // Bruker Hall effect field controller (as gaussmeter)
 pt2025        // Metrolab NMR teslameter
 bnm12         // Bruker NMR gaussmeter (requires WITIO-48 card)
 
