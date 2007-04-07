@@ -989,7 +989,7 @@ FOREVER {
 		IF ll == 0 cm^-1 {
 			lines[ LP_count ] = 0.01 / input_value( B_wn );
 		} ELSE {
-			lines[ LP_count ] = 0.01 / ( ll - lines[ LP_count ] );
+			lines[ LP_count ] = 0.01 / ( ll - input_value( B_wn ) ] );
 		}
 
         clear_marker( );
@@ -1083,7 +1083,7 @@ FOREVER {
 		IF ll == 0 cm^-1 {
 			lines[ LP_count ] = 0.01 / input_value( B_wn );
 		} ELSE {
-			lines[ LP_count ] = 0.01 / ( ll - lines[ LP_count ] );
+			lines[ LP_count ] = 0.01 / ( ll - input_value( B_wn ) );
 		}
 
 		object_enable( B_conf, "OFF" );
