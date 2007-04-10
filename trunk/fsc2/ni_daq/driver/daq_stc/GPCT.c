@@ -173,7 +173,7 @@ void GPCT_reset_all( Board * board )
 				   board->stc.Clock_and_FOUT );
 
 	/* Switch off transfer of data fromt he DAQ to the buffers and 
-	   free teh buffers */
+	   free the buffers */
 
 	board->func->data_shutdown( board, NI_DAQ_GPCT0_SUBSYSTEM );
 	board->func->data_shutdown( board, NI_DAQ_GPCT1_SUBSYSTEM );
