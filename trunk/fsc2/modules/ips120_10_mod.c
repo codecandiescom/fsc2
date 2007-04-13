@@ -928,7 +928,6 @@ static void ips120_10_mod_to_local( void )
 	   the function magnet_current_field_on_end() has been called the magnet
 	   instead sweeps to the current value passed to the function. */
 
-
 	if ( ips120_10_mod.goto_field_on_end )
 	{
 		ips120_10_mod_set_target_current( ips120_10_mod.final_target_current );

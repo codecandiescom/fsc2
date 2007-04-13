@@ -837,7 +837,9 @@ void run_sigchld_callback( FL_OBJECT * a,
     else                              /* normal death of child */
         mess = "Experiment finished after ";
 
-    Fsc2_Internals.state = STATE_FINISHED;
+    /* Remove the tool box */
+
+    tools_clear( );
 
     /* Get and display all remaining data the child sent before it died,
        then close the communication channels */
@@ -848,9 +850,7 @@ void run_sigchld_callback( FL_OBJECT * a,
 
     sigaction( QUITTING, &Quitting_old_act, NULL );
 
-    /* Remove the tool box */
-
-    tools_clear( );
+    Fsc2_Internals.state = STATE_FINISHED;
 
     /* Reset all the devices and finally the GPIB bus, RULBUS, LAN and serial
        port(s) */

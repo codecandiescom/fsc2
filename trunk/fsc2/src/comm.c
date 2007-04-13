@@ -263,7 +263,7 @@ int new_data_handler( void )
         {
             if ( Comm.MQ->slot[ Comm.MQ->low ].type != REQUEST )
                 accept_new_data( Fsc2_Internals.child_is_quitting
-                                 != QUITTING_UNSET );
+                                                           != QUITTING_UNSET );
 
             if ( Comm.MQ->low != Comm.MQ->high &&
                  Comm.MQ->slot[ Comm.MQ->low ].type == REQUEST )
