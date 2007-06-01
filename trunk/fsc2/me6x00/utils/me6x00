@@ -63,7 +63,7 @@ fi
 
 case "$1" in
     start)
-		insmod me6x00 > /dev/null 2>&1
+	    modprobe me6x00 > /dev/null 2>&1
 		if [ $? != 0 ]; then
 			log_failure_msg "Loading ME6X00 module failed."
 			exit 1

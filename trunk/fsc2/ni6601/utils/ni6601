@@ -63,7 +63,7 @@ fi
 
 case "$1" in
     start)
-		insmod ni6601 > /dev/null 2>&1
+		modprobe ni6601 > /dev/null 2>&1
 		if [ $? != 0 ]; then
 			log_failure_msg "Loading NI6601 module failed."
 			exit 1

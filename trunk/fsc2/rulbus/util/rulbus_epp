@@ -65,13 +65,13 @@ case "$1" in
     start)
 		lsmod | grep 'parport' > /dev/null 2>&1
 		if [ $? != 0 ]; then
-			modprobe -k parport > /dev/null 2>&1
+			modprobe parport > /dev/null 2>&1
 			if [ $? != 0 ]; then
 				log_failure_msg "Loading Rulbus EPP module failed because parport module can't be loaded."
 				exit 1
 			fi
 		fi
-		modprobe -k rulbus_epp > /dev/null 2>&1
+		modprobe rulbus_epp > /dev/null 2>&1
 		if [ $? != 0 ]; then
 			log_failure_msg "Loading Rulbus EPP module failed."
 			exit 1

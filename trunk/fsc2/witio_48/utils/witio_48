@@ -63,7 +63,7 @@ fi
 
 case "$1" in
     start)
-		insmod witio_48 > /dev/null 2>&1
+		modprobe witio_48 > /dev/null 2>&1
 		if [ $? != 0 ]; then
 			log_failure_msg "Loading WITIO-48 module failed."
 			exit 1
