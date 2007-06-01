@@ -519,15 +519,14 @@ endif
 # machines subdirectory are still for the old name but a symbolic link has
 # been set from the new machine name to the old one)
 
-machine_name  := $(shell                                 \
-					mn=`hostname -f 2>/dev/null`;        \
-					if [    -n $$mn                      \
-						 -a -L $(mchdir)/$$mn ]; then    \
-						ls -l $(mchdir)/$$mn |           \
-						sed 's/^.*->[ \t]\+\(.*\)/\1/';  \
-					else                                 \
-						echo $$mn;                       \
-					fi; )
+machine_name := $(shell mn=`hostname -f 2>/dev/null`;        \
+					    if [    $$? -eq 0                     \
+						     -a -L $(mchdir)/$$mn ]; then    \
+						    ls -l $(mchdir)/$$mn |           \
+						    sed 's/^.*->[ \t]\+\(.*\)/\1/';  \
+						else                                 \
+							echo $(mn);                      \
+					    fi )
 
 # Try to include a configuration file for machines that are listed in the
 # 'machines' subdirectory. This makes configuring a new fsc2 version for a
@@ -537,7 +536,9 @@ machine_name  := $(shell                                 \
 # to be included (if one exists, and only then we can include it;-) in
 # order to be able to automatically recompile when the file changed.
 
-MACHINE_INCLUDE_FILE := $(shell ls $(mchdir)/$(machine_name) 2>/dev/null)
+MACHINE_INCLUDE_FILE := $(shell if [ -n "$(machine_name)" ]; then \
+	                                ls $(mchdir)/$(machine_name) 2>/dev/null; \
+	                            fi )
 ifneq ($(MACHINE_INCLUDE_FILE),)
 	include $(MACHINE_INCLUDE_FILE)
 endif
@@ -827,11 +828,13 @@ all release debug mdebug:
 	$(MAKE) docs
 
 config: fsc2_config.h
-	@if [ -n "$(machine_name)" ]; then                      \
-		echo "Configuring for machine $(machine_name)...";  \
-		if [ -r $(mchdir)/$(machine_name)-config ]; then    \
-			$(SHELL) $(mchdir)/$(machine_name)-config;      \
-		fi                                                  \
+	@if [ -n "$(machine_name)" ]; then                     \
+		echo "Configuring for machine $(machine_name)";    \
+		if [ -r $(mchdir)/$(machine_name)-config ]; then   \
+			$(SHELL) $(mchdir)/$(machine_name)-config;     \
+		fi;                                                \
+	else                                                   \
+		echo "Using default configuration";                \
 	fi
 	$(MAKE) -C $(sdir) gpib_setup
 	$(MAKE) built

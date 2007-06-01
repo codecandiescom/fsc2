@@ -51,7 +51,7 @@ bool er023m_init( const char * name )
     {
         dont_print_on_error = SET;
 
-        /* Make lock-in send its status byte to test that it reacts */
+        /* Make the lock-in send its status byte to test that it reacts */
 
         er023m.st = er023m_st( );
         er023m.st_is_valid = SET;
@@ -182,8 +182,8 @@ bool er023m_init( const char * name )
 
 /*----------------------------------------------------------------*
  * This function only works if the data fit into an unsigned int
- * but has already been checked when er023m_nb() was called (when
- * setting the conversion time)
+ * but this has already been checked when er023m_nb() was called
+ * (when setting the conversion time)
  *----------------------------------------------------------------*/
 
 unsigned int er023m_get_data( void )
@@ -332,7 +332,7 @@ void er023m_set_ct( int ct_mult )
 
     /* Be careful with the constants used in the following - they are
        determined experimentally (and don't work for CT settings in the
-       region between 125 and 200, i.e. 40 ms and 64 ms) */
+       region between 125 and 200, i.e. between 40 ms and 64 ms) */
 
     er023m.min = lrnd( 102.4 * ct_mult );
     er023m.scale_factor = 2.0 / ( double ) ( 529.28 * ct_mult - er023m.min );
@@ -542,7 +542,7 @@ void er023m_set_re( int re )
  * Returns the number of bytes to be expected when fetching
  * ADC data in single mode (SM) - again the manual is lying
  * by claiming that the maximum number is 3 while in reality
- * it 4 (actually, only 2 or 4 can happen).
+ * it's 4 (actually, only 2 or 4 can happen).
  *-----------------------------------------------------------*/
 
 int er023m_nb( void )

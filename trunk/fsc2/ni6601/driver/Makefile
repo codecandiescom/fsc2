@@ -44,15 +44,27 @@ KERNELDIR ?= $(shell if [ -d /lib/modules/`uname -r`/build ]; then \
 						 echo "/usr/src/linux"; \
 					 fi )
 
-# If KERNEL_VER isn't set determine it from the the kernel source directory
-# and then call make again with KERNEL_VER now being set. If KERNEL_VER
-# couldn't be found out that way give up and print an error message
+# If KERNEL_VER isn't set determine it from the the kernel headers (it used
+# to be defined in linux/version.h but on new systems its' now in its own
+# file linux/utsrelease.h) and then call make again with KERNEL_VER now being
+# set. If KERNEL_VER couldn't be found out that way print an error message
+# and bail out.
 
 ifndef KERNEL_VER
 
-KERNEL_VER := $(shell grep UTS_RELEASE $(KERNELDIR)/include/linux/version.h \
-				      2>/dev/null | \
-				      sed 's/^[^"]\{1,\}"\([^"]\{1,\}\)".*$$/\1/' 2>/dev/null)
+KERNEL_VER := $(shell if [ -e $(KERNELDIR)/include/linux/utsrelease.h ]; then \
+	                       grep UTS_RELEASE                                   \
+                                $(KERNELDIR)/include/linux/utsrelease.h       \
+				                2>/dev/null |                                 \
+				                sed 's/^[^"]\{1,\}"\([^"]\{1,\}\)".*$$/\1/  ' \
+                                2>/dev/null;                                  \
+                      else                                                    \
+	                       grep UTS_RELEASE                                   \
+                                $(KERNELDIR)/include/linux/version.h          \
+				                2>/dev/null |                                 \
+				                sed 's/^[^"]\{1,\}"\([^"]\{1,\}\)".*$$/\1/'   \
+                                2>/dev/null;                                  \
+                      fi )
 
 all $(MODULE) install check clean:
 	@if [ -z "$(KERNEL_VER)" ]; then \

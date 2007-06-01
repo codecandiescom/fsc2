@@ -921,7 +921,7 @@ EOT
     chomp \$ne;
     \$found = 0;
     for ( \@$$_{ name } ) {
-        if ( \$ne eq \$_) {
+        if ( \$ne eq \$_ ) {
             \$found = 1;
             last;
         }
@@ -950,7 +950,7 @@ EOT
     chomp $ne;
     $found = 0;
     for ( @fsc2_how_to_run ) {
-        if ( $ne eq $_) {
+        if ( $ne eq $_ ) {
             $found = 1;
             last;
         }

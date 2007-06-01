@@ -98,7 +98,7 @@ print( "Please make sure the repetition time is set correctly!\n" );
 pulser_state( "ON" );
 daq_gain( 4 );
 magnet_field( field );
-File = get_file( );
+File = get_file( "", "*.avg" );
 
 hide_toolbox( "ON" );
 B1 = output_create( "INT_OUTPUT", "Current pulse separation [ns]" );

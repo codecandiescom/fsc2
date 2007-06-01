@@ -1426,7 +1426,7 @@ static double ips120_10_mod_set_target_current( double current )
 		           * DAC_CURRENT_RESOLUTION;
 
 	/* Set the power supplies current - please note that it expects the
-	   current as a n integer in units of 0.01 A (which just seems to be
+	   current as an integer in units of 0.01 A (which just seems to be
 	   the current resolution). */
 
 	sprintf( cmd, "I%5ld\r", lrnd( norm_current / CURRENT_RESOLUTION ) );

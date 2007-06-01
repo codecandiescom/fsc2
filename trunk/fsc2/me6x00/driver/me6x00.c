@@ -1666,6 +1666,7 @@ static long me6x00_ioctl( struct file *  file_p,
 		case ME6X00_KEEP_VOLTAGE :
 			ret = me6x00_board_keep_volts( ( void __user * ) arg,
 						       minor );
+			break;
 
 		default :
 			PDEBUG( "me6x00_ioctl(): invalid ioctl number\n" );
@@ -1755,7 +1756,7 @@ static int me6x00_board_keep_volts( void __user * arg,
 	me6x00_keep_st keep;
 	
 
-	CALL_PDEBUG( "me6x00_board_keep() is executed\n" );
+	CALL_PDEBUG( "me6x00_board_keep_volts() is executed\n" );
 
 	if ( copy_from_user( &keep, arg, sizeof keep ) )
 		return -EFAULT;

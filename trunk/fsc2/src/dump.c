@@ -185,7 +185,7 @@ static int write_dump( int  * pipe_fd,
         }
 
         if ( cd1->is_loaded &&
-             ( char * ) addr > ( char * ) * ( int * ) cd1->driver.handle )
+             ( char * ) addr >= ( char * ) * ( int * ) cd1->driver.handle )
         {
             if ( cd1->driver.lib_name[ 0 ] == '/' )
                 sprintf( buf, "%s\n", cd1->driver.lib_name );
@@ -195,7 +195,8 @@ static int write_dump( int  * pipe_fd,
             else
                 sprintf( buf, libdir "%s\n", cd1->driver.lib_name );
             write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
-            sprintf( buf, "%p\n", ( void * ) ( ( char * ) addr -
+            sprintf( buf, "%p\n",
+                     ( void * ) ( ( char * ) addr -
                                   ( char * ) * ( int * ) cd1->driver.handle) );
         }
     }
@@ -261,8 +262,8 @@ int create_backtrace( unsigned int * bt )
     int size = 1;
 
 
-    /* Loop over all stackframes, working up the way to the top - the topmos
-       stackframe would be reached when the content of EBP is zero, but this
+    /* Loop over all stackframes, working up the way to the top - the topmost
+       stack frame would be reached when the content of EBP is zero, but this
        is already _libc_start_main(), so stop one frame earlier */
 
     while ( size < MAX_TRACE_LEN && * ( unsigned int * ) * EBP != 0 )
