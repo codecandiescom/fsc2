@@ -1020,7 +1020,6 @@ ifdef WITH_HTTP_SERVER
 	fi
 endif
 	$(MAKE) -C $(udir) clean
-	$(MAKE) -C $(mchdir) clean
 	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h svn-* *~
 	-$(MAKE) -C me6x00 clean
 	-$(MAKE) -C ni6601 clean
