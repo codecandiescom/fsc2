@@ -299,6 +299,10 @@ double rs_sml01_set_frequency( double freq )
     sprintf( cmd, "FREQ:CW %.0f\n", freq );
     rs_sml01_command( cmd );
 
+    /* Wait or some time for the new frequency to be really set */
+
+    fsc2_usleep( ulrnd( FREQUENCY_SETTING_DELAY * 1.0e6  ), UNSET );
+
     return freq;
 }
 

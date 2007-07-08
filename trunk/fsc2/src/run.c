@@ -187,7 +187,7 @@ bool run( void )
     close( Comm.pd[ 3 ] );
     Comm.pd[ READ ] = Comm.pd[ 2 ];
 
-    if ( Fsc2_Internals.child_pid > 0 )   /* fork() did succeeded */
+    if ( Fsc2_Internals.child_pid > 0 )   /* fork() was succeeded */
     {
         sigprocmask( SIG_SETMASK, &old_mask, NULL );
         Fsc2_Internals.mode = PREPARATION;
@@ -688,8 +688,7 @@ void run_stop_button_callback( FL_OBJECT * a,
         return;
     }
 
-    /* Only send DO_QUIT signal if the mouse button has been used
-       the user told us he/she would use... */
+    /* Only send DO_QUIT signal if the correct mouse button has been used */
 
     if ( GUI.stop_button_mask != 0 )
     {

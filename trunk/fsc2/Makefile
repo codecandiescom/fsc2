@@ -525,7 +525,7 @@ machine_name := $(shell mn=`hostname -f 2>/dev/null`;        \
 						    ls -l $(mchdir)/$$mn |           \
 						    sed 's/^.*->[ \t]\+\(.*\)/\1/';  \
 						else                                 \
-							echo $(mn);                      \
+							echo $$mn;                       \
 					    fi )
 
 # Try to include a configuration file for machines that are listed in the

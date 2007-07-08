@@ -15,14 +15,13 @@
 ===			     "3000", "10000" ] [ 3 ] "Number of averages"
 === START_FIELD float [ 0 : 48370.8 ] [ 35000 ] "Start field" "G"
 === END_FIELD float [ 0 : 48370.8 ] [ 36000 ] "End field" "G"
-=== FIELD_STEP float [ 0.12456 :  ] [ 1 ] "Field step" "G"
+=== FIELD_STEP float [ 0.04152 :  ] [ 1 ] "Field step" "G"
 === ADC_CHANNELS menu [ "0", "1", "0 and 1" ] "ADC channel(s) to use"
 === SHOW_PREV button [ OFF ] "Show pulse preview"
 === WAIT_TIME float [ 0.0 : ] [ 5.0 ] "Magnet wait time" "s"
 DEVICES:
 
-rb8510_0;
-ips120_10_mod;
+ips120_10;
 rb8509;
 rb_pulser_w;
 

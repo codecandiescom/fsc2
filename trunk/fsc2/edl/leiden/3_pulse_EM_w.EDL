@@ -19,8 +19,7 @@
 === SHOW_PREV button [ OFF ] "Show pulse preview"
 DEVICES:
 
-rb8510_0;
-ips120_10_mod;
+ips120_10;
 rb8509;
 rb_pulser_w;
 

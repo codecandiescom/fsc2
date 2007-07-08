@@ -246,9 +246,9 @@ void death_mail( void )
         return;
 
 #if defined _GNU_SOURCE
-    fprintf( mail, "fsc2 (%d, %s) killed by %s signal.\n\n", getpid( ),
+    fprintf( mail, "fsc2 (%d, %s) killed by %s signal (%d).\n\n", getpid( ),
              Fsc2_Internals.I_am == CHILD ? "CHILD" : "PARENT",
-             strsignal( Crash.signo ) );
+             strsignal( Crash.signo ), Crash.signo );
 #else
     fprintf( mail, "fsc2 (%d, %s) killed by signal %d.\n\n", getpid( ),
              Fsc2_Internals.I_am == CHILD ? "CHILD" : "PARENT", Crash.signo );

@@ -8,8 +8,7 @@ DEVICES:
 rs_sml01;
 rb_pulser_w;
 rb8509;
-rb8510_0;
-ips120_10_mod;
+ips120_10;
 
 
 ASSIGNMENTS:
@@ -482,7 +481,7 @@ FOREVER {
 	       within the allowed limits */
 
         new_set_field = input_value( New_Field );
-        IF abs( new_set_field - new_field ) > 0.12456 G {
+        IF abs( new_set_field - new_field ) >= 0.04152 G {
             IF new_set_field > 48370.8 G OR new_set_field < 0.0 G {
                 input_value( New_Field, new_field );
             } ELSE {

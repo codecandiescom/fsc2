@@ -25,8 +25,7 @@
 === WAIT_TIME float [ 0.0 : ] [ 5 ] "Delay between scans" "s"
 DEVICES:
 
-rb8510_0;
-ips120_10_mod;
+ips120_10;
 rs_sml01;
 rb8509;
 rb_pulser_w;
@@ -211,8 +210,10 @@ FOREVER {
 === else
         IF I > 1 {
 === endif
+			pulser_state( "OFF" );
             freq += freq_step;
             synthesizer_frequency( freq );
+			pulser_state( "ON" );
         }
     }
 

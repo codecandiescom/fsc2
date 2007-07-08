@@ -167,8 +167,10 @@ FOREVER {
 === else
         IF I > 1 {
 === endif
+			pulser_state( "OFF" );
             freq += freq_step;
             synthesizer_frequency( freq );
+			pulser_state( "ON" );
         }
     }
 

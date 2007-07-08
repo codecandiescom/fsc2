@@ -358,7 +358,7 @@ long T_atol( const char * txt )
 
     ret = strtol( txt, &end_p, 10 );
 
-    if ( errno == ERANGE )
+    if ( ( ret == LONG_MIN || ret == LONG_MAX ) && errno == ERANGE )
     {
         print( FATAL, "Long integer number out of range: %s.\n", txt );
         THROW( EXCEPTION );
@@ -366,7 +366,7 @@ long T_atol( const char * txt )
 
     if ( end_p == ( char * ) txt )
     {
-        print( FATAL, "Not an integer number: %s.\n", txt );
+        print( FATAL, "Not a long integer number: %s.\n", txt );
         THROW( EXCEPTION );
     }
 
@@ -384,30 +384,11 @@ long T_atol( const char * txt )
 
 int T_atoi( const char * txt )
 {
-    long ret;
-    char *end_p;
+    long ret = T_atol( txt );
 
-
-#ifndef NDEBUG
-    if ( txt == NULL || *txt == '\0' )
-    {
-        eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
-                __FILE__, __LINE__ );
-        THROW( EXCEPTION );
-    }
-#endif
-
-    ret = strtol( txt, &end_p, 10 );
-
-    if ( errno == ERANGE || ret > INT_MAX || ret < INT_MIN )
+    if ( ret > INT_MAX || ret < INT_MIN )
     {
         print( FATAL, "Integer number out of range: %s.\n", txt );
-        THROW( EXCEPTION );
-    }
-
-    if ( end_p == ( char * ) txt )
-    {
-        print( FATAL, "Not an integer number: %s.\n", txt );
         THROW( EXCEPTION );
     }
 

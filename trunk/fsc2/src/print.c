@@ -642,9 +642,9 @@ static void print_header( FILE *       fp,
 
     d = time( NULL );
 
-    fprintf( fp, "%%!PS-Adobe-3.0 EPSF-3.0\n"
+    fprintf( fp, "%%!PS-Adobe-3.0\n"
                  "%%%%BoundingBox: 0 0 %d %d\n"
-                 "%%%%Creator: fsc2, Mar 2002\n"
+                 "%%%%Creator: fsc2\n"
                  "%%%%CreationDate: %s"
                  "%%%%Title: %s\n"
                  "%%%%For: %s (%s)\n"

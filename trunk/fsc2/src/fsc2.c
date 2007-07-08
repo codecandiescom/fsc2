@@ -592,16 +592,33 @@ static bool get_edl_file( char * fname )
 
 static void no_gui_run( void )
 {
+    /* Read in the EDL file and analyze it */
+
     if ( ! scan_main( EDL.in_file, In_file_fp ) ||
          EDL.compilation.error[ FATAL ]  != 0 ||
          EDL.compilation.error[ SEVERE ] != 0 ||
          EDL.compilation.error[ WARN ]   != 0 )
         exit( EXIT_FAILURE );
 
+    /* Start the child process for running the experiment */
+
     if ( ! run( ) )
         exit( EXIT_FAILURE );
 
-    while ( Fsc2_Internals.child_is_quitting == QUITTING_UNSET )
+    /* Wait until the child process raised the QUITTING signal, then run
+       the handler for new data (which sends a confirmation to the child
+       to allow it to finally quit) and then wait for it to finally die
+       before exiting. Also ake care of the case that the chidl died for
+       some unforseen reason. */
+
+    while ( Fsc2_Internals.child_is_quitting == QUITTING_UNSET &&
+            Fsc2_Internals.child_pid > 0 )
+        pause( );
+
+    if ( Fsc2_Internals.child_pid > 0 )
+        new_data_handler( );
+
+    while ( Fsc2_Internals.child_pid > 0 )
         pause( );
 
     run_sigchld_callback( NULL, Fsc2_Internals.check_return );

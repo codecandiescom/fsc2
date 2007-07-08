@@ -1240,11 +1240,15 @@ In the GPIB configuration file use @code{"IPS120_10"} as the device name,
 @paragraphindent 0
 @strong{Description}: Power supply for the Oxford Instruments
 (@url{http://www.oxford-instruments.com/}) superconducting
-magnet used for the Leiden @w{275 GHz} (J-band) spektrometer.
+magnet used for the Leiden @w{275 GHz} (J-band) and @w{95 GHz}
+(W-band) spektrometers. To adapt the module for use with other
+magnets please use one of the files in @file{config/ips120_10_j.conf}
+or @file{config/ips120_10_w.conf} as template and name it
+@file{config/ips120_10.conf}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488)@*
-In the GPIB configuration file use @code{"IPS120_10_MOD"} as the device name,
+In the GPIB configuration file use @code{"IPS120_10"} as the device name,
 @code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
@@ -1285,16 +1289,17 @@ be selected via the devices configuration file)
 @paragraphindent 0
 @strong{Description}: Power supply for the Oxford Instruments
 (@url{http://www.oxford-instruments.com/}) superconducting
-magnet used for the Leiden W-band spektrometer. This is an older version of the
-IPS120-10 with a current resolution of @w{10 mA}. Therefore it has been
-fitted with an external voltage input that allows to modulate the output
-current by about @w{+/- 5%} of the maximum rated current of @w{120 A} by a
-voltage in the @w{+/- 10 V} range. The external voltage is supplied by a
-RULBUS RB8510 DAC card, which has a voltage resolution of @w{5 mV},
-resulting in a current resolution of @w{0.3 mA} and a field resolution of
-ca.@: @w{0.125 G}. Please note that this improved resolution applies only
-when a field is set, the sweep step resolution remains unchanged (and
-sweeps thus should probably be avoided when using this device).
+magnet previously used for the Leiden W-band spektrometer. This is
+an older version of the IPS120-10 with a current resolution of @w{10 mA}.
+Therefore it has been fitted with an external voltage input that allows
+to modulate the output current by about @w{+/- 5%} of the maximum rated
+current of @w{120 A} by a voltage in the @w{+/- 10 V} range. The external
+voltage is supplied by a RULBUS RB8510 DAC card, which has a voltage
+resolution of @w{5 mV}, resulting in a current resolution of @w{0.3 mA}
+and a field resolution of ca.@: @w{0.125 G}. Please note that this
+improved resolution applies only when a field is set, the sweep step
+resolution remains unchanged (and sweeps thus should probably be avoided
+when using this device).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (the device has a (non-standard)
