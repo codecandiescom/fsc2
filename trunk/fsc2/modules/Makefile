@@ -77,6 +77,7 @@ hjs_attenuator  := hjs_attenuator.c hjs_attenuator_lexer.c
 hjs_sfc         := hjs_sfc.c hjs_sfc_lexer.c
 hjs_fc          := hjs_fc.c hjs_fc_lexer.c
 spex_cd2a       := spex_cd2a.c spex_cd2a_ll.c spex_cd2a_util.c
+spex232          := spex232.c spex232_ll.c spex232_util.c
 pci_mio_16e_1   := pci_mio_16e_1.c pci_mio_16e_1_ai.c pci_mio_16e_1_ao.c \
 				   pci_mio_16e_1_dio.c pci_mio_16e_1_gpct.c \
 				   pci_mio_16e_1_msc.c pci_mio_16e_1_util.c
@@ -113,7 +114,7 @@ endif
 ifneq ($(NUM_SERIAL_PORTS),0)
 simp_modules    += aeg_s_band aeg_x_band er035m_s er035m_sas hjs_daadc  \
 				   $(s_band_list)
-comp_modules    += hjs_attenuator spectrapro_300i spex_cd2a lecroy_wr_s
+comp_modules    += hjs_attenuator spectrapro_300i spex_cd2a spex232 lecroy_wr_s
 endif
 
 ifdef WITH_ME6000

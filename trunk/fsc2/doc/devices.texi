@@ -5941,12 +5941,13 @@ the number of pixels in the (vertical) @i{y}-direction.
 
 Currently the @strong{SpectraPro-300i} series of monochromator (actually, the
 module has only been tested with the @strong{308i}) by @strong{Acton Research
-Corporation} and monochromators by @strong{SPEX} controlled via the CD2A
-Compudrive interface are supported. The modules for the monochromators
-get loaded by specifying
+Corporation} and monochromators by @strong{SPEX} controlled via either the
+CD2A Compudrive or the SPEX232 interface are supported. The modules for the
+monochromators get loaded by specifying
 @example
 spectrapro_300i
 spex_cd2a
+spex232
 @end example
 in the @code{DEVICES} section. 
 
@@ -5962,13 +5963,13 @@ line position is set values are expected or returned in relative
 wavenumber units, i.e.@: as differences between the wavenumber of the
 laser line and the absolute wavenumber.
 
-Another important point is that for @strong{SPEX} type monochromators an offset
-(between the wavelength or -number displayed by the CD2A unit and the
-"real" wavelength or -number is automatically taken into account. Thus
-the position reported by the program and at the console of the CD2A unit
-may differ because the program tries to take care of the offset (see the
-description of the function @ref{monochromator_calibrate()} below for
-more information). Furthermore, for wavenumber-driven SPEX
+Another important point is that for @strong{SPEX} type monochromators an
+offset (between the wavelength or -number displayed by the CD2A unit and
+the "real" wavelength or -number is automatically taken into account. Thus
+the position reported by the program and shown e.g.@: at the console of the
+CD2A interface unit may differ because the program tries to take care of the
+offset (see the description of the function @ref{monochromator_calibrate()}
+below for more information). Furthermore, for wavenumber-driven SPEX
 monochromators also the position of the laser line gets remembered
 between experiments. These informations are stored in a file in the same
 directory where the module for the device resides (under the name
@@ -6150,14 +6151,14 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item monochromator_wavenumber_scan_limits()
 The function does not take any arguments and returns an array with two
 elements, the first being the lower scan limit in absolute wavenumbers
-(in @code{cm^-1} and the second the upper scan limit.
+(in @code{cm^-1}) and the second the upper scan limit.
 
 Currently this function is only available for @strong{SPEX} monochromators.
 
 
 @anchor{monochromator_wavelength_scan_limits()}
 @findex monochromator_wavelength_scan_limits()
-@item monochromator_wavenumber_scan_limits()
+@item monochromator_wavelength_scan_limits()
 The function does not take any arguments and returns an array with two
 elements, the first being the lower scan limit in wavelengths (in
 @code{m}) and the second the upper scan limit.
@@ -6168,9 +6169,10 @@ Currently this function is only available for @strong{SPEX} monochromators.
 @anchor{monochromator_shutter_limits()}
 @findex monochromator_shutter_limits()
 @item monochromator_shutter_limits()
-The function is only supported for @strong{SPEX} monochromators that have
-shutters to protect the PMT or APD etc.@: from excitation light in a
-certain frequency range. The function can be used to query or set these
+The function is only supported for @strong{SPEX} monochromators when
+driven by the CD2A interface (but not the SPEX232) that have shutters
+to protect the PMT or APD etc.@: from excitation light in a certain
+frequency range. The function can be used to query or set these
 shutter limits. To set the shutter limits the function expects two
 arguments, the lower and the upper shutter limit. If a laser line
 position has been set the function won't allow to set the shutter limits
@@ -6230,12 +6232,20 @@ The function can only be used in the @code{EXPERIMENT} section of an
 The function requires that the module for a CCD camera is available that
 returns information about the number of pixels of the CCD chip and the
 distance between pixels. It then returns an array with two elements,
-with the first element being the wavelength at the leftmost pixel of the
+the first element being the wavelength at the leftmost pixel of the
 chip and the second element being the wavelength difference between
-neighboring pixels. The function can also be called with up to two
-arguments, an integer for the grating number and the wavelength at the
-center of the chip. If these arguments aren't given, the currently used
-grating and wavelength of the monochromator are used.
+neighboring pixels.
+
+For the @strong{SpectraPro-300i} monochronator the function can be
+called with up to two arguments, an integer for the grating number
+and the wavelength at the center of the chip. If these arguments
+aren't given, the currently used grating and wavelength of the
+monochromator are used.
+
+For the @strong{SPEX} monochromators the function accepts a single
+argument, the the wavelength at the center of the chip. If no
+argument is given the currently set wavelength of the monochromator
+is used.
 
 For @strong{SpectraPro-300i} monochromators it is required that a
 calibration for the grating has been loaded, either by calling
@@ -6287,7 +6297,9 @@ The function can only be used in the @code{EXPERIMENT} section of an
 This function is similar to the function
 @ref{monochromator_wavelength_axis()} but instead of returning values
 to be used for setting a wavelength axis the values are suitable for
-setting up a wavenumber axis.
+setting up a wavenumber axis (and, if given, instead of the wavelength
+at the center position of the chip, the wavenumber at this position must
+be passed to the function).
 
 @strong{Please note}: The function assumes that the spectra taken with
 the camera show decreasing absolute wavenumbers and increasing relative

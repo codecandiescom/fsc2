@@ -26,8 +26,10 @@
 #define DUMP__HEADER
 
 
+#if ! defined( NDEBUG ) && defined( ADDR2LINE )
 void dump_stack( FILE * /* fp */ );
 int create_backtrace( unsigned int * /* bt */ );
+#endif
 
 
 #endif   /* ! DUMP__HEADER */

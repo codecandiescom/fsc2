@@ -22,8 +22,8 @@
  */
 
 
-#if ! defined SPEX_CD2A_HEADER
-#define SPEX_CD2A_HEADER
+#if ! defined SPEX232_HEADER
+#define SPEX232_HEADER
 
 
 #include "fsc2_module.h"
@@ -34,7 +34,7 @@
    with the monochromator is supposed to happen */
 
 /*
-#define SPEX_CD2A_TEST
+#define SPEX232_TEST
 */
 
 /* Defines for the parity used by the device */
@@ -82,9 +82,14 @@
 #define WL        4         /* wavelength mode */
 #define WN_MODES  3
 
+
+#define MIN_RAMP_TIME    100   /* minimal possible ramp time */
+#define MAX_RAMP_TIME  65535   /* maximal possible ramp time */
+
+
 /* Include configuration information for the device */
 
-#include "spex_cd2a.conf"
+#include "spex232.conf"
 
 
 /* Please note: within the module we do all calculations in wavelengths
@@ -118,15 +123,17 @@
    position (which only makes sense at all in wavenumber mode) and the
    scan step width and the minimum value for a scan step. */
 
-struct Spex_CD2A {
+struct Spex232 {
     bool is_needed;
     bool is_open;
     int method;
     int units;
-    bool has_shutter;
 
     int mode;                       /* wavelength (WL) or wavenumber
                                        absolute (WN_ABS), relative (WN_REL) */
+
+    long motor_position;            /* current position of motor in steps */
+    long max_motor_position;        /* current position of motor in steps */
 
     double wavelength;              /* in m */
     bool is_wavelength;
@@ -145,14 +152,18 @@ struct Spex_CD2A {
     double mini_step;               /* in m or cm^-1, depending on mode */
 
     double lower_limit;             /* wavelength in m */
+    double abs_lower_limit;         /* wavelength in m */
     double upper_limit;             /* wavelength in m */
 
     double grooves;                 /* in grooves per m */
     double standard_grooves;        /* in grooves per m */
 
-    double shutter_low_limit;       /* wavelength in m */
-    double shutter_high_limit;      /* wavelength in m */
-    bool shutter_limits_are_set;
+    long min_rate;                  /* minimum steps per s */
+    long max_rate;                  /* minimum steps per s */
+
+    long ramp_time;                 /* ramp time in ms */
+
+    long backslash_steps;           /* steps to be used for backslash */
 
     struct termios *tio;            /* serial port terminal interface
                                        structure */
@@ -162,18 +173,20 @@ struct Spex_CD2A {
     bool sends_lf;
 
     bool fatal_error;               /* set on exceptions etc. */
+
+    bool need_motor_init;           /* set if the motor must be initialized */
 };
 
-extern struct Spex_CD2A spex_cd2a;
+extern struct Spex232 spex232;
 
 
-/* Functions from spex_cd2a.c */
+/* Functions from spex232.c */
 
-int spex_cd2a_init_hook(        void );
-int spex_cd2a_test_hook(        void );
-int spex_cd2a_exp_hook(         void );
-void spex_cd2a_child_exit_hook( void );
-int spex_cd2a_end_of_exp_hook(  void );
+int spex232_init_hook(        void );
+int spex232_test_hook(        void );
+int spex232_exp_hook(         void );
+void spex232_child_exit_hook( void );
+int spex232_end_of_exp_hook(  void );
 
 Var_T *monochromator_name(                   Var_T * /* v */ );
 Var_T *monochromator_wavenumber_scan_limits( Var_T * /* v */ );
@@ -186,88 +199,81 @@ Var_T *monochromator_start_scan(             Var_T * /* v */ );
 Var_T *monochromator_scan_step(              Var_T * /* v */ );
 Var_T *monochromator_laser_line(             Var_T * /* v */ );
 Var_T *monochromator_groove_density(         Var_T * /* v */ );
-Var_T *monochromator_shutter_limits(         Var_T * /* v */ );
 Var_T *monochromator_calibrate(              Var_T * /* v */ );
 Var_T *monochromator_wavelength_axis(        Var_T * /* v */ );
 Var_T *monochromator_wavenumber_axis(        Var_T * /* v */ );
 
 
-/* Functions from spex_cd2a_ll.c */
+/* Functions from spex232_ll.c */
 
-void spex_cd2a_init( void );
+bool spex232_init( void );
 
-void spex_cd2a_set_wavelength( void );
+double spex232_set_wavelength( double /* wl */ );
 
-void spex_cd2a_halt( void );
+void spex232_halt( void );
 
-void spex_cd2a_scan_start( void );
+void spex232_scan_start( void );
 
-void spex_cd2a_scan_step( void );
+void spex232_scan_step( void );
 
-void spex_cd2a_start_scan( void );
+void spex232_start_scan( void );
 
-void spex_cd2a_trigger( void );
+void spex232_open( void );
 
-void spex_cd2a_set_laser_line( void );
+void spex232_close( void );
 
-void spex_cd2a_set_shutter_limits( void );
+double spex232_p2wl( long /* pos */ );
 
-void spex_cd2a_sweep_up( void );
-
-void spex_cd2a_open( void );
-
-void spex_cd2a_close( void );
+long spex232_wl2p( double /* wl */ );
 
 
-/* Functions from spex_cd2a_util.c */
+/* Functions from spex232_util.c */
 
-bool spex_cd2a_read_state( void );
+bool spex232_read_state( void );
 
-bool spex_cd2a_store_state( void );
+bool spex232_store_state( void );
 
-double spex_cd2a_wl2wn( double /* wl */ );
+double spex232_wl2wn( double /* wl */ );
 
-double spex_cd2a_wn2wl( double /* wn */ );
+double spex232_wn2wl( double /* wn */ );
 
-double spex_cd2a_wl2Uwl( double /* wl */ );
+double spex232_wl2Uwl( double /* wl */ );
 
-double spex_cd2a_Uwl2wl( double /* wl */ );
+double spex232_Uwl2wl( double /* wl */ );
 
-double spex_cd2a_wn2Uwn( double /* wn */ );
+double spex232_wn2Uwn( double /* wn */ );
 
-double spex_cd2a_Uwn2wn( double /* wn */ );
+double spex232_Uwn2wn( double /* wn */ );
 
-double spex_cd2a_wn2Uwl( double /* wn */ );
+double spex232_wn2Uwl( double /* wn */ );
 
-double spex_cd2a_Uwl2wn( double /* wl */ );
+double spex232_Uwl2wn( double /* wl */ );
 
-double spex_cd2a_wl2Uwn( double /* wl */ );
+double spex232_wl2Uwn( double /* wl */ );
 
-double spex_cd2a_Uwn2wl( double /* wn */ );
+double spex232_Uwn2wl( double /* wn */ );
 
-double spex_cd2a_wl2mu( double /* wl */ );
+double spex232_wl2mu( double /* wl */ );
 
 
-#define SPEX_CD2A_THROW( x )  do { spex_cd2a.fatal_error = SET;      \
-                                   THROW( x );                       \
+#define SPEX232_THROW( x )  do { spex232.fatal_error = SET;       \
+                                   THROW( x );                    \
                               } while ( 0 )
 
-#define SPEX_CD2A_RETHROW( )  do { spex_cd2a.fatal_error = SET;      \
-                                   RETHROW( );                       \
+#define SPEX232_RETHROW( )  do { spex232.fatal_error = SET;        \
+                                   RETHROW( );                     \
                               } while ( 0 )
 
 
-#define SPEX_CD2A_ASSERT( x ) do { if ( ! ( x ) )                    \
-                                       spex_cd2a.fatal_error = SET;  \
-                                   fsc2_assert( x );                 \
+#define SPEX232_ASSERT( x ) do { if ( ! ( x ) )                    \
+                                       spex232.fatal_error = SET;  \
+                                   fsc2_assert( x );               \
                                } while( 0 )
 
-#define SPEX_CD2A_IMPOSSIBLE( ) do { spex_cd2a.fatal_error = SET;    \
-                                     fsc2_impossible( );             \
+#define SPEX232_IMPOSSIBLE( ) do { spex232.fatal_error = SET;      \
+                                     fsc2_impossible( );           \
                                 } while( 0 )
-
-
-#endif /* ! SPEX_CD2A_HEADER */
+#endif /* ! SPEX232_HEADER */
 
 
 /*

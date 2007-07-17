@@ -80,6 +80,7 @@
 * schlum7150::      Schlumberger Solartron 7150 Multimeter
 * spectrapro_300i:: Acton Research SpectraPro-300i Monochromator
 * spex_cd2a::       SPEX Monochromators with CD2A Compudrive
+* spex232::         SPEX Monochromators with SPEX232 interface
 * sr510::           Stanford Research Lock-In Amplifier SR510
 * sr530::           Stanford Research Lock-In Amplifier SR530
 * sr810::           Stanford Research Lock-In Amplifier SR810
@@ -2766,7 +2767,7 @@ wavelength range @w{0 nm} to @w{1400 nm}.
 @c #############################################################
 
 
-@node spex_cd2a, sr510, spectrapro_300i, Device Reference
+@node spex_cd2a, spex232, spectrapro_300i, Device Reference
 @iftex
 @subheading SPEX Monochromators with CD2A Compudrive
 @end iftex
@@ -2808,7 +2809,48 @@ via the CD2A Compudrive (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 @c #############################################################
 
 
-@node sr510, sr530, spex_cd2a, Device Reference
+@node spex232, sr510, spex_cd2a, Device Reference
+@iftex
+@subheading SPEX Monochromators with SPEX232 interface
+@end iftex
+@ifnottex
+@section SPEX Monochromators with SPEX232 interface
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{spex232}
+
+@paragraphindent 0
+@strong{Description}: Monochromators by SPEX controlled by the computer
+via the SPEX232 interface (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
+1702, 1703, 1704, 1870B, 1870C).
+
+@paragraphindent 0
+@strong{Controlled via}:  Serial port
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{monochromator_name()}
+@item @ref{monochromator_wavelength()}
+@item @ref{monochromator_wavenumber()}
+@item @ref{monochromator_laser_line()}
+@item @ref{monochromator_scan_setup()}
+@item @ref{monochromator_start_scan()}
+@item @ref{monochromator_scan_step()}
+@item @ref{monochromator_wavelength_axis()}
+@item @ref{monochromator_wavenumber_axis()}
+@item @ref{monochromator_calibrate()}
+@item @ref{monochromator_wavenumber_scan_limits()}
+@item @ref{monochromator_wavelength_scan_limits()}
+@item @ref{monochromator_groove_density()}
+@end table
+
+
+@c #############################################################
+
+
+@node sr510, sr530, spex232, Device Reference
 @iftex
 @subheading Stanford Research Lock-In Amplifier SR510
 @end iftex

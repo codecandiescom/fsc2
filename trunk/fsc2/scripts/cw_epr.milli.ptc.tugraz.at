@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # -*- cperl -*-
 #
-# $Id$
+# $Id: cw_epr.tresr.physik.fu-berlin.de 7955 2006-08-24 23:00:28Z jens $
 #
 # Copyright (C) 1999-2003 Jens Thoms Toerring
 #
@@ -53,6 +53,7 @@ my $old_sens2          = $sens2;
 my $phase;
 my $mod_freq           = "Don't set";
 my $mod_amp            = 0.1;
+my $sec_freq           = 200;
 my $how                = 'Start experiment';
 
 
@@ -271,6 +272,26 @@ $f8_l1->pack( %wp );
 $f8_v->pack( %wp );
 $f8_l2->pack( %wp );
 
+
+my $f12 = $mw->Frame( );
+my $f12_l1 = $f12->Label( '-text'           => 'Chopper sector freq.:',
+						  '-width'          => '20',
+						  'anchor'          => 'w' );
+my $f12_v = $f12->Entry( '-textvariable'    => \$sec_freq,
+						 '-width'           => '8',
+						 '-validate'        => 'key',
+						 '-validatecommand' => \&is_numeric,
+						 '-relief'          => 'sunken' );
+my $f12_l2 = $f12->Label( '-text'           => 'Hz',
+						  '-width'          => 1 );
+$balloon->attach( $f12_v, '-balloonmsg'    =>
+                  "Set the chopper's sector rotation frequency\n" );
+$f12->pack( %fp );
+$f12_l1->pack( %wp );
+$f12_v->pack( %wp );
+$f12_l2->pack( %wp );
+
+
 $mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
                                    'Load into fsc2' ) ],
                  '-textvariable' => \$how,
@@ -356,6 +377,12 @@ sub get_defs {
     goto done_reading if $ne !~ /^$/ and $ne < 0;
     $mod_amp = $ne;
 
+    goto done_reading unless defined( $ne = <$f> ) and
+		              ( is_numeric( $ne ) or $ne =~ /^$/ );
+    chomp $ne;
+    goto done_reading if $ne !~ /^$/ and $ne < 0;
+    $sec_freq = $ne;
+
     goto done_reading unless defined( $ne = <$f> )
         and $ne =~ /^(Start experiment)|(Test program)|(Load into fsc2)$/;
     chomp $ne;
@@ -391,7 +418,7 @@ sub store_defs {
         print $f "unset\n";
     }
 
-    print $f "$mod_freq\n$mod_amp\n$how\n";
+    print $f "$mod_freq\n$mod_amp\n$sec_freq\n$how\n";
 
     close $f;
 }
@@ -536,19 +563,16 @@ sub write_out {
 
 er032m;
 er023m;
+pci_mio_16e_1;
+gg_chopper;
 
 
 VARIABLES:
 
 start_field = $start_field G;
-end_field = $end_field G;\n";
-    if ( $start_field < $end_field ) {
-        print F "field_step = $field_step G;\n";
-    } else {
-        print F "field_step = -$field_step G;\n";
-    }
-
-print F "N_runs = $num_runs;
+end_field = $end_field G;
+field_step = $field_step G;
+N_runs = $num_runs;
 N_points = ceil( abs( end_field - start_field ) / abs( field_step ) ) + 1;
 data[ N_points ];
 new_data[ N_points ];
@@ -556,13 +580,14 @@ new_avg;
 I, J;
 File1, File2;
 tc, wt;
+sec_freq = $sec_freq;
 Scans_Done = 0;
 
 
 PREPARATIONS:
 
 magnet_setup( start_field, field_step );
-
+chopper_sector_frequency( sec_freq );
 init_1d( 3, N_points, start_field, field_step, \"Magnetic Field / G\",
          \"Signal / V\" );
 
@@ -604,22 +629,34 @@ print F "
 FOR J = 1 : N_runs {
 
     print( \"Starting #. run of #\\n\", J, N_runs );
-    delta_time( );
+    delta_time( );\n\n";
 
-    FOR I = 1 : N_points {
-
-        wt = ";
+if ( $start_field <= $end_field ) {
+	print F "    FOR I = 1 : N_points {\n";
+} else {
+	print F "    FOR I = N_points : 1 : -1 {\n";
+}
+print F "        wt = ";
 print F "$tc_fact * " if $tc_fact != 1;
 print F "tc - delta_time( );
         IF ( wt > 1 ms ) {
             wait( wt );
         }
         new_data[ I ] = lockin_get_data( );
-	    new_avg = add_to_average( data[ I ], new_data[ I ], J );
-	    magnet_sweep_up( );
-        IF N_runs > 1 {
-            fsave( File1, \"# #\\n\", start_field + ( I -  1 ) * field_step,
-		   new_avg );
+	    new_avg = add_to_average( data[ I ], new_data[ I ], J );\n";
+if ( $start_field <= $end_field ) {
+	print F "        magnet_sweep_up( );\n";
+} else {
+	print F "        magnet_sweep_down( );\n";
+}
+print F "        IF N_runs > 1 {
+            fsave( File1, \"# #\\n\", ";
+if ( $start_field <= $end_field ) {
+	print F "start_field + ( I -  1 ) * field_step,\n";
+} else {
+	print F "end_field + ( I -  1 ) * field_step,\n";
+}
+print F "		           new_avg );
         }
         display( I, new_avg, 1 );
         display( I, new_data[ I ], 3 );
@@ -653,10 +690,16 @@ IF N_runs == 1 OR Scans_Done > 0 {
     fsave( File2, \"\\# Receiver Gain: # \\n\", lockin_sensitivity( ) );
     fsave( File2, \"\\# Time Constant: # \\n\", lockin_time_constant( ) );
     fsave( File2, \"\\# Conversion Time: # \\n\", lockin_conversion_time( ) );
+    fsave( File2, \"\\# Chopper sector freq: # Hz\\n\", sec_freq );
 
     FOR I = 1 : N_points {
-        fsave( File2, \"# #\\n\", start_field + ( I - 1 ) * field_step,
-               data[ I ] );
+        fsave( File2, \"# #\\n\", ";
+if ( $start_field <= $end_field ) {
+	print F "start_field + ( I - 1 ) * field_step,\n";
+} else {
+	print F "end_field + ( I - 1 ) * field_step,\n";
+}
+print F "               data[ I ] );
     }
 }
 ";

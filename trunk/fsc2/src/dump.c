@@ -24,6 +24,12 @@
 
 #include "fsc2.h"
 
+
+/* The functions defined here are only needed in builts where NDEBUG
+   and ADDR2LINE are defined ! */
+
+#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+
 static int write_dump( int  * pipe_fd,
                        FILE * fp,
                        int    k,
@@ -279,6 +285,8 @@ int create_backtrace( unsigned int * bt )
 
     return size;
 }
+
+#endif
 
 
 /*

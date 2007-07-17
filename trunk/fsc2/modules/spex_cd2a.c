@@ -293,7 +293,6 @@ int spex_cd2a_init_hook( void )
     spex_cd2a.is_wavelength = UNSET;
     spex_cd2a.scan_is_init = UNSET;
     spex_cd2a.shutter_limits_are_set = UNSET;
-    spex_cd2a.new_calibration = UNSET;
 
     return 1;
 }
@@ -683,9 +682,6 @@ Var_T *monochromator_wavelength( Var_T * v )
     spex_cd2a.wavelength = wl;
     spex_cd2a.is_wavelength = SET;
 
-    if ( spex_cd2a.in_scan )
-        spex_cd2a_halt( );
-
     spex_cd2a_set_wavelength( );
 
     return vars_push( FLOAT_VAR, spex_cd2a_wl2Uwl( spex_cd2a.wavelength ) );
@@ -762,9 +758,6 @@ Var_T *monochromator_wavenumber( Var_T * v )
 
     spex_cd2a.wavelength = wl;
     spex_cd2a.is_wavelength = SET;
-
-    if ( spex_cd2a.in_scan )
-        spex_cd2a_halt( );
 
     spex_cd2a_set_wavelength( );
 
@@ -1169,8 +1162,6 @@ Var_T *monochromator_calibrate( Var_T * v )
               spex_cd2a.mode == WN_REL ? - spex_cd2a.offset : spex_cd2a.offset;
     field[ 1 ] = spex_cd2a.pixel_diff;
 
-    spex_cd2a.new_calibration = SET;
-
     return vars_push( FLOAT_ARR, field, 2 );
 }
 
@@ -1212,10 +1203,15 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
         OTHERWISE
             SPEX_CD2A_RETHROW( );
     }
-    else if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
+    else
     {
-        print( FATAL, "Wavelength hasn't been set yet.\n ");
-        SPEX_CD2A_THROW( EXCEPTION );
+        if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
+        {
+            print( FATAL, "Wavelength hasn't been set yet.\n ");
+            SPEX_CD2A_THROW( EXCEPTION );
+        }
+
+        wl = spex_cd2a.wavelength;
     }
 
     too_many_arguments( v );
@@ -1298,10 +1294,15 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
         OTHERWISE
             SPEX_CD2A_RETHROW( );
     }
-    else if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
+    else
     {
-        print( FATAL, "Wavenumber hasn't been set yet.\n ");
-        SPEX_CD2A_THROW( EXCEPTION );
+        if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
+        {
+            print( FATAL, "Wavenumber hasn't been set yet.\n ");
+            SPEX_CD2A_THROW( EXCEPTION );
+        }
+
+        wl = spex_cd2a.wavelength;
     }
 
     too_many_arguments( v );

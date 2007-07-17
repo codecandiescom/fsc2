@@ -105,7 +105,7 @@ struct termios *fsc2_serial_open( int          sn        UNUSED_ARG,
        section */
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EACCES;
     return NULL;
@@ -137,7 +137,7 @@ ssize_t fsc2_serial_write( int          sn              UNUSED_ARG,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -160,7 +160,7 @@ ssize_t fsc2_serial_read( int    sn              UNUSED_ARG,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -180,7 +180,7 @@ int fsc2_tcgetattr( int              sn         UNUSED_ARG,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -201,7 +201,7 @@ int fsc2_tcsetattr( int              sn                UNUSED_ARG,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -221,7 +221,7 @@ int fsc2_tcsendbreak( int sn        UNUSED_ARG,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -240,7 +240,7 @@ int fsc2_tcdrain( int sn UNUSED_ARG )
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -260,7 +260,7 @@ int fsc2_tcflush( int sn              UNUSED_ARG,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -280,7 +280,7 @@ int fsc2_tcflow( int sn      UNUSED_ARG,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -387,7 +387,7 @@ void fsc2_request_serial_port( int          sn,
     Serial_Port[ sn ].in_use    = SET;
     Serial_Port[ sn ].have_lock = UNSET;
     Serial_Port[ sn ].is_open   = UNSET;
-    Serial_Port[ sn ].dev_name   = dev_name;
+    Serial_Port[ sn ].dev_name  = dev_name;
 
     /* Assemble name of device file and (optionally) lock file */
 
@@ -545,8 +545,8 @@ void fsc2_final_serial_cleanup( void )
                                    CHAR_P T_free( Serial_Port[ i ].lock_file );
         }
 
-        Serial_Port[ i ].dev_name   = NULL;
-        Serial_Port[ i ].in_use    = UNSET;
+        Serial_Port[ i ].dev_name = NULL;
+        Serial_Port[ i ].in_use   = UNSET;
     }
 }
 
@@ -574,7 +574,7 @@ struct termios *fsc2_serial_open( int          sn,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that the device name argument is reasonable */
 
@@ -688,7 +688,7 @@ void fsc2_serial_close( int sn )
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     if ( Serial_Port[ sn ].dev_name )
         fsc2_serial_log_function_start( "fsc2_serial_close",
@@ -907,7 +907,7 @@ ssize_t fsc2_serial_read( int    sn,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1269,7 +1269,7 @@ int fsc2_tcsetattr( int              sn,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1305,7 +1305,7 @@ int fsc2_tcsendbreak( int sn,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1340,7 +1340,7 @@ int fsc2_tcdrain( int sn )
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1376,7 +1376,7 @@ int fsc2_tcflush( int sn,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1412,7 +1412,7 @@ int fsc2_tcflow( int sn,
 
     fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
                  Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+                 Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
