@@ -1,0 +1,12 @@
+# --- Do *not* edit this file, it gets created automatically ---
+
+# In this file state information for the rs_spec10 driver is stored:
+# 1. ROI (LLX, LLY, URX, URY)
+# 2. Binning factors
+# 3. Binning mode (hardware = 0, software = 1)
+# 4. Number of pre-exposure clear cycles
+
+0 0 1339 399 
+1 1
+0
+0

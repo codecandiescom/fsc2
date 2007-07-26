@@ -1,0 +1,16 @@
+# --- Do *not* edit this file, it gets created automatically ---
+
+# In this file state information for the spex232 driver is stored:
+# 1. The wavelength the monochromator is set to
+# 2. An offset of the monochromator, i.e. a number that always has to be
+#    added to wavenumbers or -lengths specified by the user
+# 3. The wavelength difference between two pixels of the connected CCD camera
+# 4. For wavenumber driven monochromators only: the current setting of
+#    the position of the laser line
+# 5. a flag that indicates if a new calibration has been done.
+
+555.55555 nm
+0.0000 cm^-1
+0.1500 nm
+20000.0000 cm^-1
+0

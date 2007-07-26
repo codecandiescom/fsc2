@@ -148,10 +148,11 @@ ni6601
 rs_spec10
 
 
-// Monochromators (Acton SpectaPro-300i)
+// Monochromators
 
-spectrapro_300i
-spex_cd2a
+spectrapro_300i     // Acton SpectaPro-300i
+spex_cd2a           // SPEX monocromator with CD2A interface
+spex232             // SPEX monocromator with SPEX232 interface
 
 
 // Power Supplies (Thurlby&Thandar PL330DP, F.u.G. MCN700-2000)

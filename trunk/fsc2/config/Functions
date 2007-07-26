@@ -404,6 +404,9 @@ monochromator_laser_line, -1, EXP;
 monochromator_shutter_limits, -1, ALL;
 monochromator_wavenumber_scan_limits, 0, ALL;
 monochromator_wavelength_scan_limits, 0, ALL;
+monochromtor_init_motor, 0, PREP;
+monochromator_enforce_wavelength, 1, PREP;
+monochromator_enforce_wavenumber, 1, PREP;
 
 
 /* Functions exported by the power supply (Thurlby&Thandar PL330DP,
