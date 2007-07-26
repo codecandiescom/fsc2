@@ -66,6 +66,16 @@ prefix             := /usr/local
 # GROUP              := uucp
 
 
+# Uncomment the following only if you compile the program for a non-i386 type
+# processor, i.e. a 64-bit processor or a processor not by Intel or AMD
+# (undefining the variable disables sending me a mail with informations
+# about the place were it happened in case the program crashes - this requires
+# a bit of assembler, which only works on i386 type processors but makes
+# compiling the program otherwise fail).
+
+# IS_NOT_A_I386       :+ yes
+
+
 # The next variable should only be set for very old Linux systems where
 # linker map files don't work and the program crashes after loading
 # a module. Only in that case the following line should be activated.
@@ -76,7 +86,7 @@ prefix             := /usr/local
 # Now set the system wide path for files to be included by EDL files when
 # after the '#INCLUDE' directive a file name enclosed in '<' and '>' is
 # found. This is for the case where a system wide set of EDL files has been
-# set up from which users may use include files without going to the hassle
+# set up from which users may use as include files without going to the hassle
 # of always having to write out the full path. If no such repository exists
 # it's save to leave this variable undefined.
 
@@ -768,14 +778,16 @@ endif
 
 # Define a variable with the full path of the 'addr2line' program and make
 # sure addr2line gets found by 'which', otherwise don't set the variable.
-# If NO_MAIL has been defined never send crash mails (which requires
-# ADDR2LINE to be set).
+# If NO_MAIL or IS_NOT_A_I386 has been defined never send crash mails (which
+# in turn requires ADDR2LINE to be set).
 
 ifndef NO_MAIL
+ifndef IS_NOT_A_I386
 	ADDR2LINE     := $(shell which addr2line)
 	ifneq ($(word 1,$(ADDR2LINE)),which:)
 		CONFFLAGS += -DADDR2LINE=\"$(ADDR2LINE)\"
 	endif
+endif
 endif
 
 
