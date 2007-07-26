@@ -132,8 +132,8 @@ struct Spex232 {
     int mode;                       /* wavelength (WL) or wavenumber
                                        absolute (WN_ABS), relative (WN_REL) */
 
-    long motor_position;            /* current position of motor in steps */
-    long max_motor_position;        /* current position of motor in steps */
+    long int motor_position;        /* current position of motor in steps */
+    long int max_motor_position;    /* current position of motor in steps */
 
     double wavelength;              /* in m */
     bool is_wavelength;
@@ -158,12 +158,12 @@ struct Spex232 {
     double grooves;                 /* in grooves per m */
     double standard_grooves;        /* in grooves per m */
 
-    long min_rate;                  /* minimum steps per s */
-    long max_rate;                  /* minimum steps per s */
+    long int min_rate;              /* minimum steps per s */
+    long int max_rate;              /* minimum steps per s */
 
-    long ramp_time;                 /* ramp time in ms */
+    long int ramp_time;             /* ramp time in ms */
 
-    long backslash_steps;           /* steps to be used for backslash */
+    long int backslash_steps;       /* steps to be used for backslash */
 
     struct termios *tio;            /* serial port terminal interface
                                        structure */
@@ -175,6 +175,9 @@ struct Spex232 {
     bool fatal_error;               /* set on exceptions etc. */
 
     bool need_motor_init;           /* set if the motor must be initialized */
+
+    bool do_enforce_position;
+    long int enforced_position;
 };
 
 extern struct Spex232 spex232;
@@ -189,6 +192,8 @@ void spex232_child_exit_hook( void );
 int spex232_end_of_exp_hook(  void );
 
 Var_T *monochromator_name(                   Var_T * /* v */ );
+Var_T *monochromator_enforce_wavelength(     Var_T * /* v */ );
+Var_T *monochromator_enforce_wavenumber(     Var_T * /* v */ );
 Var_T *monochromator_wavenumber_scan_limits( Var_T * /* v */ );
 Var_T *monochromator_wavelength_scan_limits( Var_T * /* v */ );
 Var_T *monochromator_scan_setup(             Var_T * /* v */ );
@@ -222,9 +227,9 @@ void spex232_open( void );
 
 void spex232_close( void );
 
-double spex232_p2wl( long /* pos */ );
+double spex232_p2wl( long int /* pos */ );
 
-long spex232_wl2p( double /* wl */ );
+long int spex232_wl2p( double /* wl */ );
 
 
 /* Functions from spex232_util.c */

@@ -102,7 +102,7 @@ clean:
 	$(MAKE) -C pci_e_series cleanup
 	$(MAKE) -C daq_stc cleanup
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
-	$(RM) $(RMFLAGS) svn-* *~
+	$(RM) $(RMFLAGS) Module.symvers svn-* *~
 
 endif
 
@@ -157,7 +157,7 @@ cleanup:
 
 clean:
 	$(MAKE) cleanup
-	$(RM) $(RMFLAGS) pci_e_series.o
+	$(RM) $(RMFLAGS) pci_e_series.o Module.symvers
 
 endif
 endif

@@ -29,8 +29,10 @@ static unsigned char *lecroy_wr_get_data( long * len );
 
 static unsigned int lecroy_wr_get_inr( void );
 
+#if 0
 static long lecroy_wr_get_int_value( int          ch,
                                      const char * name );
+#endif
 
 static double lecroy_wr_get_float_value( int          ch,
                                          const char * name );
@@ -1752,6 +1754,7 @@ static unsigned char *lecroy_wr_get_data( long * len )
  * Function for obtaining an integer value from the waveform descriptor
  *----------------------------------------------------------------------*/
 
+#if 0
 static long lecroy_wr_get_int_value( int          ch,
                                      const char * name )
 {
@@ -1794,6 +1797,7 @@ static long lecroy_wr_get_int_value( int          ch,
 
     return val;
 }
+#endif
 
 
 /*-------------------------------------------------------------------*

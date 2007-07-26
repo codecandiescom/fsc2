@@ -257,8 +257,8 @@ $fsc2_main_window->Optionmenu( -options => \@fsc2_how_to_run,
                               )->pack( -padx => '3m',
                                        -pady => '3m' );
 
-$fsc2_apply_button->pack( %wp, padx => '5m', -pady => '3m' );
-$fsc2_quit_button->pack(  %wp, padx => '5m', -pady => '3m' );
+$fsc2_apply_button->pack( %wp, -padx => '5m', -pady => '3m' );
+$fsc2_quit_button->pack(  %wp, -padx => '5m', -pady => '3m' );
 
 load_defs( );
 $fsc2_main_window->geometry( $geom ) if defined $geom;

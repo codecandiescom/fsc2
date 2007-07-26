@@ -36,7 +36,7 @@ die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
 
 # This variable tells where the monochromator state file can be found
 
-my $state_file = '/usr/local/lib/fsc2/spex_cd2a.state';
+my $state_file = '/usr/local/lib/fsc2/spex232.state';
 
 
 # This variable tells the minimum number of pixels we cut off from spectra
@@ -230,7 +230,7 @@ sub check_status {
 	$fc[ 3 ]->pack( -side => "bottom",
 					-fill => "x",
 					-padx => "4m" );
-	$_->pack( %wp, padx => '5m', -pady => '3m' ) foreach @bc;
+	$_->pack( %wp, -padx => '5m', -pady => '3m' ) foreach @bc;
 
 	MainLoop;
 }
@@ -462,8 +462,8 @@ sub run {
 	$f[ 5 ]->pack( -side => "bottom",
 				   -fill => "x",
 				   -padx => "4m" );
-	$f[ 6 ]->pack( %wp, padx => '5m', -pady => '3m' );
-	$f[ 7 ]->pack( %wp, padx => '5m', -pady => '3m' );
+	$f[ 6 ]->pack( %wp, -padx => '5m', -pady => '3m' );
+	$f[ 7 ]->pack( %wp, -padx => '5m', -pady => '3m' );
 
 	# New window should appear on top of the button that started it
 
@@ -534,7 +534,7 @@ sub get_line {
 
 	print $f <<EOF;
 DEVICES:
-spex_cd2a;
+spex232;
 VARIABLES:
 LL, limits[ 2 ];
 EXPERIMENT:
@@ -562,14 +562,7 @@ EOF
 	unlink $fn;
 	chomp $reply;
 
-	if ( defined $reply and $reply =~ /^Please press the "REMOTE" button/ ) {
-		main::show_message( $top, "Please press the \"REMOTE\" button at\n" .
-							"the console to allow computer control\n" .
-							"of the monochromator." );
-		return;
-	}
-
-	if ( defined $reply and $reply =~ /^F\s+SPEX_CD2A:\s+(.+)$/ ) {
+	if ( defined $reply and $reply =~ /^F\s+SPEX232:\s+(.+)$/ ) {
 		main::show_message( $top, "Can't determine monochromators laser " .
 							"line setting:\n$1" );
 		return;
@@ -603,7 +596,7 @@ sub set_line {
 
 	print $f <<EOF;
 DEVICES:
-spex_cd2a;
+spex232;
 VARIABLES:
 LL;
 EXPERIMENT:
@@ -708,8 +701,8 @@ sub run {
 	$f[ 5 ]->pack( -side => "bottom",
 				   -fill => "x",
 				   -padx => "4m" );
-	$f[ 6 ]->pack( %wp, padx => '5m', -pady => '3m' );
-	$f[ 7 ]->pack( %wp, padx => '5m', -pady => '3m' );
+	$f[ 6 ]->pack( %wp, -padx => '5m', -pady => '3m' );
+	$f[ 7 ]->pack( %wp, -padx => '5m', -pady => '3m' );
 
 	# New window should appear on top of the button that started it
 
@@ -756,7 +749,7 @@ sub set_cwn {
 
 	print $f <<EOF;
 DEVICES:
-spex_cd2a;
+spex232;
 EXPERIMENT:
 monochromator_wavenumber( $cwn cm^-1 );
 EOF
@@ -861,7 +854,7 @@ sub run {
 	print $fh <<EOF;
 DEVICES:
 
-spex_cd2a;
+spex232;
 rs_spec10;
 
 
@@ -1288,7 +1281,7 @@ sub run {
     print $fh <<EOF;
 DEVICES:
 
-spex_cd2a;
+spex232;
 rs_spec10;
 
 
@@ -1716,8 +1709,8 @@ sub run {
 	$f[ 17 ]->pack( -side => "bottom",
 				   -fill => "x",
 				   -padx => "4m" );
-	$f[ 18 ]->pack( %wp, padx => '5m', -pady => '3m' );
-	$f[ 19 ]->pack( %wp, padx => '5m', -pady => '3m' );
+	$f[ 18 ]->pack( %wp, -padx => '5m', -pady => '3m' );
+	$f[ 19 ]->pack( %wp, -padx => '5m', -pady => '3m' );
 
 	# Add validation handlers for the data in the entry fields
 
@@ -1801,7 +1794,7 @@ sub realtime_run {
     print $fh <<EOF;
 DEVICES:
 
-spex_cd2a;
+spex232;
 rs_spec10;
 
 
@@ -2099,8 +2092,8 @@ sub run {
 	$f[ 21 ]->pack( -side => "bottom",
 				   -fill => "x",
 				   -padx => "4m" );
-	$f[ 22 ]->pack( %wp, padx => '5m', -pady => '3m' );
-	$f[ 23 ]->pack( %wp, padx => '5m', -pady => '3m' );
+	$f[ 22 ]->pack( %wp, -padx => '5m', -pady => '3m' );
+	$f[ 23 ]->pack( %wp, -padx => '5m', -pady => '3m' );
 
 	# Add validation handlers for the data in the entry fields
 
@@ -2206,7 +2199,7 @@ sub single_run {
     print $fh <<EOF;
 DEVICES:
 
-spex_cd2a;
+spex232;
 rs_spec10;
 
 
@@ -2435,7 +2428,7 @@ sub get {
 	print $f <<EOF;
 DEVICES:
 rs_spec10;
-spex_cd2a;
+spex232;
 VARIABLES:
 LL, ROI[ 4 ], BIN[ 2 ], calib[ 2 ], CCD_size[ 2 ];
 EXPERIMENT:
@@ -2468,16 +2461,9 @@ EOF
 	unlink $fn;
 	chomp $reply;
 
-	if ( defined $reply and $reply =~ /^Please press the "REMOTE" button/ ) {
-		main::show_message( $top, "Please press the \"REMOTE\" button at\n" .
-							"the console to allow computer control\n" .
-							"of the monochromator." );
-		return;
-	}
-
-	if ( $reply =~ /^F\s+SPEX_CD2A:\s+(.+)$/ ) {
+	if ( $reply =~ /^F\s+(SPEX232|RS_SPEC10):\s+(.+)$/ ) {
 		main::show_message( $top, "Can't determine monochromator and camera " .
-							"settings:\n$1" );
+							"settings:\n$2" );
 		return;
 	}
 

@@ -2007,7 +2007,10 @@ model must be set in the configuration file). 2 or 4 measurement
 channels (depending on model), 1 function channel, 4 memory channels.
 
 @paragraphindent 0
-@strong{Controlled via}: LAN (LeCroy VICP protocol)
+@strong{Controlled via}: LAN (LeCroy VICP protocol)@*
+The IP address of the device (or alernatively its hostname if it has a
+DNS entry must be set in the configuration file for the device
+@file{config/lecroy_ws.conf}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2320,6 +2323,15 @@ configuration file to agree with the properties of the camera. There
 also can be set up that images or spectra fetched from the camera are
 automatically mirrored (i.e.@: left and right side exchanged) or images
 turned upside-down.
+
+@paragraphindent 0
+Some information about the state of the device (the ROI setting, the
+amount of binning and the mode mode as well as the number of
+pre-exposure clear cycles) are stored in a state file, in a normal
+installation this is @file{/usr/local/lib/fsc2/rs_spec10.state}. In
+case this file has been deleted or has become garbled use the file
+@file{config/rs_spec10.state} to replace it. Take care to set the
+permissions and ownership of the file correctly.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2787,6 +2799,15 @@ via the CD2A Compudrive (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 @strong{Controlled via}:  Serial port
 
 @paragraphindent 0
+The state of the device (i.e. current wavelength setting, offset
+correction, setting of laser line, width of a pixel of an attached
+camera) are stored in a state file, in a normal installation this
+is @file{/usr/local/lib/fsc2/spex_cd2a.state}. In case this file
+has been deleted or has become garbled use the file
+@file{config/spex_cd2a.state} to replace it. Take care to set the
+permissions and ownership of the file correctly.
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{monochromator_name()}
@@ -2829,6 +2850,15 @@ via the SPEX232 interface (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 @strong{Controlled via}:  Serial port
 
 @paragraphindent 0
+The state of the device (i.e. current wavelength setting, offset
+correction, setting of laser line, width of a pixel of an attached
+camera) are stored in a state file, in a normal installation this
+is @file{/usr/local/lib/fsc2/spex232.state}. In case this file
+has been deleted or has become garbled use the file
+@file{config/spex232.state} to replace it. Take care to set the
+permissions and ownership of the file correctly.
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{monochromator_name()}
@@ -2844,6 +2874,9 @@ via the SPEX232 interface (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 @item @ref{monochromator_wavenumber_scan_limits()}
 @item @ref{monochromator_wavelength_scan_limits()}
 @item @ref{monochromator_groove_density()}
+@item @ref{monochromator_init_motor()}
+@item @ref{monochromator_enforce_wavelength()}
+@item @ref{monochromator_enforce_wavenumber()}
 @end table
 
 

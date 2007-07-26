@@ -243,7 +243,7 @@ $(addsuffix .fsc2_so,$(simp_modules)): %.fsc2_so: %.o
 		chmod 644 $@;                                              \
 	else                                                           \
 		for l in "$($(patsubst %.fsc2_so,%_libs,$@))"; do          \
-			if [ "$(notdir $$l)" == "$$l" ]; then                  \
+			if [ "$(notdir $$l)" = "$$l" ]; then                  \
 				l=$${l%.so};                                       \
 				libs="$$libs -l$${l#lib}";                         \
 			else                                                   \

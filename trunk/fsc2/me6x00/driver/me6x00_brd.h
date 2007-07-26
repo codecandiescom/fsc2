@@ -366,14 +366,17 @@ static long me6x00_ioctl( struct file  * /* file_p  */,
 #endif
 
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 19 )
+static irqreturn_t me6x00_isr( int              /* irq    */,
+			       void *           /* dev_id */ );
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 static irqreturn_t me6x00_isr( int              /* irq    */,
 			       void *           /* dev_id */,
-			       struct pt_regs * /* dummy  */);
+			       struct pt_regs * /* dummy  */ );
 #else
 static void me6x00_isr( int              /* irq    */,
 			void *           /* dev_id */,
-			struct pt_regs * /* dummy  */);
+			struct pt_regs * /* dummy  */ );
 #endif
 
 static int me6x00_find_boards( void );

@@ -104,12 +104,12 @@ fsc2.html: $(docs) $(figures)
 ps: fsc2.ps.gz
 
 fsc2.ps.gz: $(docs) $(eps_pics)
-	@if [ "`eval tex -help 2>/dev/null`" -a           \
-		 "`eval dvips --help 2>/dev/null`" ]; then    \
-		./texi2dvi -c fsc2.texi &&                    \
-		dvips fsc2.dvi -o fsc2.ps;                    \
-		gzip -f -9 fsc2.ps;                           \
-	else                                              \
+	@if [    "`eval tex -help 2>/dev/null`"             \
+		  -a "`eval dvips --help 2>/dev/null`" ]; then  \
+		./texi2dvi -c fsc2.texi &&                      \
+		dvips fsc2.dvi -o fsc2.ps;                      \
+		gzip -f -9 fsc2.ps;                             \
+	else                                                \
 		echo "Can't make PostScript documentation, programs tex and/or dvips not found";  \
 	fi
 

@@ -98,7 +98,7 @@ install:
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
-	$(RM) $(RMFLAGS) svn-* *~
+	$(RM) $(RMFLAGS) Module.symvers svn-* *~
 
 endif
 
@@ -134,7 +134,7 @@ ifeq ($(RULBUS_EPP_KERNEL_SOURCE),)
 endif
 
 clean:
-	$(RM) $(RMFLAGS) *.o svn- Modules.symvers *~
+	$(RM) $(RMFLAGS) *.o svn- Module.symvers *~
 
 endif
 endif

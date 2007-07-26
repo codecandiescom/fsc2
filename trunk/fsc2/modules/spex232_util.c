@@ -163,7 +163,7 @@ bool spex232_read_state( void )
 
 
 /*---------------------------------------------------------------*
- * Function for writing the state of teh monochromator to a file
+ * Function for writing the state of the monochromator to a file
  *---------------------------------------------------------------*/
 
 bool spex232_store_state( void )

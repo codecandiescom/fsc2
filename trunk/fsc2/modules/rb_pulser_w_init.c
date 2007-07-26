@@ -265,7 +265,7 @@ static void rb_pulser_w_defense_pulse_create( void )
 
     cp->has_been_active = cp->was_active = UNSET;
         
-    def->pulses == PULSE_PP T_malloc( sizeof *def->pulses );
+    def->pulses = PULSE_PP T_malloc( sizeof *def->pulses );
     *def->pulses = cp;
 
     cp->is_pos = cp->initial_is_pos = SET;

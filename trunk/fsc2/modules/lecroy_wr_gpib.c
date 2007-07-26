@@ -29,8 +29,10 @@ static unsigned char *lecroy_wr_get_data( long * len );
 
 static unsigned int lecroy_wr_get_inr( void );
 
+#if 0
 static long lecroy_wr_get_int_value( int          ch,
                                      const char * name );
+#endif
 
 static double lecroy_wr_get_float_value( int          ch,
                                          const char * name );
@@ -1324,10 +1326,10 @@ static void lecroy_wr_get_prep( int              ch,
         fsc2_impossible( );
 
 #if 0
-    /* We probably have to check if two or mor channels are combined - I found#
-       no way this can be checked via the program and we can only loogk for
+    /* We probably have to check if two or mor channels are combined - I found
+       no way this can be checked via the program and we can only look for
        the number of points and compare that with what we expect. To make
-       things a bit more exciting, the device always seems to send us 2 more
+       things a bit more interesting, the device always seems to send us 2 more
        points than it should and I don't know if that become 4 when to curves
        are combined ... */
 
@@ -1589,6 +1591,7 @@ static unsigned char *lecroy_wr_get_data( long * len )
  * Function for obtaining an integer value from the waveform descriptor
  *----------------------------------------------------------------------*/
 
+#if 0
 static long lecroy_wr_get_int_value( int          ch,
                                      const char * name )
 {
@@ -1629,6 +1632,7 @@ static long lecroy_wr_get_int_value( int          ch,
 
     return val;
 }
+#endif
 
 
 /*-------------------------------------------------------------------*

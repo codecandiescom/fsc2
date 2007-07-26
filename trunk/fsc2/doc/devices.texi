@@ -330,10 +330,14 @@ deviation is printed out. To minimize these deviations use a start field
 that is a multiple of @w{50 mG} and avoid sweeps with more than about
 2000 steps away from the start field.
 
-Please note that at least with some of the drivers it is not possible to
-specify a negative field step size or sweep rate. Therefore it is
-probably prudent never to try this and use in all cases the functions
-for sweeping down if a sweep to lower field values is required.
+@table @strong
+@item Please note:
+With at least with some of the drivers it is not possible to specify
+a negative field step size or sweep rate. Therefore it is probably
+prudent never to try this and use in all cases the functions for
+sweeping down if a sweep to lower field values is required.
+@end table
+
 
 
 @anchor{magnet_fast_init()}
@@ -369,7 +373,7 @@ coil is returned instead of the field.
 
 If called with arguments the function expects a floating point argument for
 the field value and will set the magnetic field to this value. Please note
-tah for the @strong{Keithley} power supply (@code{keithley228a}) and the
+that for the @strong{Keithley} power supply (@code{keithley228a}) and the
 @w{360 GHz} magnet (@code{ips20_4}) a current value instead of a field must
 be specified.
 
@@ -687,12 +691,15 @@ setups, the @code{pt2025} module is for the @strong{Metrolab} NMR gaussmeter
 from the Berlin W-Band spectrometer. The last module, @code{bnm12}, is for
 the @strong{Bruker BNM12} gaussmeter.
 
-@strong{Please note}: the @strong{Bruker BH15} Hall field controller can
-also be used to directly control the field of a magnet by outputting an
-appropriate voltage to be used as the controlling input for a magnet power
-supply. For this purpose a different module exists, @code{bh15_fc}. The
-module @code{bh15} described in this section only supports the use of the
+@table @strong
+@item Please note:
+The @strong{Bruker BH15} Hall field controller can also be used to
+directly control the field of a magnet by outputting an appropriate
+voltage to be used as the controlling input for a magnet power supply.
+For this purpose a different module exists, @code{bh15_fc}. The module
+@code{bh15} described in this section only supports the use of the
 device as a gaussmeter.
+@end table
 
 The three gaussmeter modules, @code{er035m}, @code{er035m_s} and
 @code{bh15} can be used in conjunction with the modules for controlling
@@ -746,10 +753,13 @@ Returns a string with the name of the gaussmeter being used.
 The function returns the current field in Gauss. It takes no arguments
 and can only be used in the @code{EXPERIMENT} section.
 
-@strong{Please note}: for the @strong{Bruker BNM12} NMR gaussmeter with a field
-resolution setting of @code{0.01 G} the kG part of the field value gets
-cut off, i.e.@: with this resolution setting a field of @code{3125.63 G}
-will be reported as being @code{123.63 G}.
+@table @strong
+@item Please note:
+For the @strong{Bruker BNM12} NMR gaussmeter with a field resolution
+setting of @code{0.01 G} the kG part of the field value gets cut off,
+i.e.@: with this resolution setting a field of @code{3125.63 G} will
+be reported as being @code{123.63 G}.
+@end table
 
 
 @anchor{gaussmeter_resolution()}
@@ -768,21 +778,24 @@ To set a resolution the values @code{0.1 G}, @code{0.01 G} and
 Finally, for the @strong{Bruker BNM12} NMR gaussmeter the values @code{1.0 G},
 @code{0.1 G} and @code{0.01 G} can be used.
 
-@strong{Please note}: for the modules @code{er035m} and @code{er035m_s},
-i.e.@: the modules for direct field control, the resolution will be
-increased automatically from @code{0.1 G} to @code{0.01 G} at the
-initialization (i.e.@: at the very start of the experiment) unless 
-the low resolution has been set explicitely during the
-@code{PREPARATIONS} section.
+@table @strong
+@item Please note:
+For the modules @code{er035m} and @code{er035m_s}, i.e.@: the modules
+for direct field control, the resolution will be increased
+automatically from @code{0.1 G} to @code{0.01 G} at the initialization
+(i.e.@: at the very start of the experiment) unless the low resolution
+has been set explicitely during the @code{PREPARATIONS} section.
 
-@strong{Also note}: for the @strong{Bruker BNM12} gaussmeter changing the
-resolution won't effect the device directly, it can only be read
-out. The device has a switch at its front panel where the resolution can
-be set and calling this function is for making the module aware of the
-setting of the switch (its position can't be determined from within the
-program). This is @strong{necessary} to be able to interpret the data
-received from the device correctly. Per default the module will assume
-that the resolution is set to @code{0.1 G}.
+@item Also note
+for the @strong{Bruker BNM12} gaussmeter changing the resolution won't
+effect the device directly, it can only be read out. The device has a
+switch at its front panel where the resolution can be set and calling
+this function is for making the module aware of the setting of the
+switch (its position can't be determined from within the program).
+This is @strong{necessary} to be able to interpret the data received
+from the device correctly. Per default the module will assume that the
+resolution is set to @code{0.1 G}.
+@end table
 
 
 @anchor{gaussmeter_probe_orientation()}
@@ -1050,17 +1063,20 @@ auto-acquisition is stopped and the internal buffer of the lock-in is
 cleared. Following calls of @ref{lockin_get_data()} will then return
 values measured in the 'normal' way.
 
-@strong{Please note}: The sizes of the internal buffers of the lock-in
-amplifiers are restricted: while the @strong{SR830} can store up to 16383
-data points for each of the two channel, the @strong{SR810} can only store
-a maximum of 8191 samples. If the program detects when fetching new data
-that the maximum number of data have already been fetched from the
-lock-in the internal buffer is cleared. In this case data which should
-have been acquired between the time the lock-in's internal buffer got
-filled up and the moment the program noticed that the buffers are full
-will be lost and an error message will be printed. Thus prudence
-dictates to stop auto-acquisition, thereby automatically clearing the
-lock-in's internal buffers, whenever possible.
+@table @strong
+@item Please note:
+The sizes of the internal buffers of the lock-in amplifiers are
+restricted: while the @strong{SR830} can store up to 16383 data
+points for each of the two channel, the @strong{SR810} can only store
+a maximum of 8191 samples. If the program detects when fetching new
+data that the maximum number of data have already been fetched from
+the lock-in the internal buffer is cleared. In this case data which
+should have been acquired between the time the lock-in's internal
+buffer got filled up and the moment the program noticed that the
+buffers are full will be lost and an error message will be printed.
+Thus prudence dictates to stop auto-acquisition, thereby automatically
+clearing the lock-in's internal buffers, whenever possible.
+@end table
 
 
 @anchor{lockin_get_adc_data()}
@@ -1695,14 +1711,17 @@ argument, the the channel used to do the averaging, i.e.@: either
 9424E, 9450} and @code{TRACE_A}, @code{TRACE_B}, @code{TRACE_C} or
 @code{TRACE_D} for the @strong{LeCroy Waverunner}.
 
-@strong{Please note}: Anton Savitzky noticed that there seems to be
-firmware bug in the @strong{Tektronix} digitzers from the 500 series
-(i.e. @strong{TDS520}, @strong{TDS520A}, @strong{TDS520C} and @strong{TDS540}).
+@table @strong
+@item Please note:
+Anton Savitzky noticed that there seems to be firmware bug in the
+@strong{Tektronix} digitzers from the 500 series (i.e.
+@strong{TDS520}, @strong{TDS520A}, @strong{TDS520C} and @strong{TDS540}).
 For numbers of averages above about 16 only half of the number of
 averages seem to be taken by the device it has been instructed to do.
 It's hard to say which is the exact number of averages this bug starts
 at because it only shows up in the signal-to-noise ratio being worse
 by a factor of the square root of 2 than is to be expected.
+@end table
 
 
 @anchor{digitizer_averaging()}
@@ -1881,8 +1900,11 @@ with a second argument it must be either the string @code{"POSITIVE"} or
 @code{"NEGATIVE"} or @code{"NEG"} (or the number @code{0}) to set a negative
 trigger slope for that channel.
 
-Please note: setting a trigger slope for a trigger channel does @strong{not}
+@table @strong
+@item Please note:
+Setting a trigger slope for a trigger channel does @strong{not}
 automatically make this channel the selected trigger channel.
+@end table
 
 
 
@@ -1903,9 +1925,11 @@ argument, either an integer as it gets returnedon queries, or one of the
 strings @code{"AC"}, @code{"DC"}, @code{"LF REF"}, @code{"HF REJ"} or
 (exceptt for the @strong{LeCroy 9410}) @code{"HF"} .
 
-Please note: setting a trigger coupling for a trigger channel does @strong{not}
+@table @strong
+@item Please note:
+Setting a trigger coupling for a trigger channel does @strong{not}
 automatically make this channel the selected trigger channel.
-
+@end table
 
 
 @anchor{digitizer_trigger_mode()}
@@ -2643,12 +2667,15 @@ Pulsers}. Several of the aspects of the following short descriptions of
 the pulser functions will probably only become understandable after
 reading the chapter about pulsers and pulses.
 
-@strong{Please note}: Most functions for changing pulses will
-@strong{not} lead to an immediate change of the pulse sequence the
-pulser outputs. E.g.@: calling the function @ref{pulser_shift()} (for
-moving pulses) will not shift the pulses immediately. Instead, all
-changes to pulses are recorded and but only executed when the function
-@ref{pulser_update()} gets called.
+@table @strong
+@item Please note:
+Most functions for changing pulses will @strong{not} lead to an
+immediate change of the pulse sequence the pulser outputs. E.g.@:
+calling the function @ref{pulser_shift()} (for moving pulses) will
+not shift the pulses immediately. Instead, all changes to pulses are
+recorded and but only executed when the function @ref{pulser_update()}
+gets called.
+@end table
 
 The reason for this is twofold: Changes to only parts of the pulses
 might lead to a pulse sequence, which can't be output, e.g.@: because
@@ -4579,12 +4606,14 @@ will fail. The second required argument is the length of time the
 counter is supposed to count. This time must be at least @w{100 ns} and
 an integer multiple of @w{50 ns}.
 
-@strong{Please note}: This function requires not only one counter
-channel, i.e.@: the one passed to the function as the first argument,
-but also the second counter. If @code{CH0} is specified as the
-counter channel also @code{CH1} will be needed and vice versa. If
-the adjacent counter is already in use for some other purpose the
-function fails.
+@table @strong
+@item Please note:
+This function requires not only one counter channel, i.e.@: the one
+passed to the function as the first argument, but also a second
+counter. If @code{CH0} is specified as the counter channel also
+@code{CH1} will be needed and vice versa. If the adjacent counter
+is already in use for some other purpose the function fails.
+@end table
 
 As the third argument the source of events to be counted must be
 specified by one of the following symbolic names: @code{PFI0} to
@@ -4817,13 +4846,16 @@ that can be derived from these frequencies by a division by an integer
 number between 2 and 16. If the frequency doesn't fit these requirements
 a frequency as near as possible to the allowed values is output.
 
-@strong{Please note:} Under certain circumstances it is possible that
-changing the output frequency between a value that can only be derived
-from @w{200 Khz} to one only derivable from @w{100 kHz} and vive versa
-can also change the timing of both a currently runing analog input data
-acquisition as well as that of counters or pulsers. Thus this function
-should only be used while the analog input (AI) subsystem as well as the
-counter and pulser subsystem of the card isn't active.
+@table @strong
+@item Please note:
+Under certain circumstances it is possible that changing the output
+frequency between a value that can only be derived from @w{200 Khz}
+to one only derivable from @w{100 kHz} and vice versa can also change
+the timing of both a currently runing analog input data acquisition
+as well as that of counters or pulsers. Thus this function should only
+be used while the analog input (AI) subsystem as well as the counter
+and pulser subsystem of the card isn't active.
+@end table
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -4906,22 +4938,27 @@ If an output voltage has already been set for an output port the last
 set voltage is returned when the function is called without a second
 argument.
 
-@strong{Please note}: the latest set output voltage will still appear on
-the output port after the program is finished. If it is required that
-the output voltage reverts to a default value at the end of the
-experiment please put a command for setting this voltage into the
-@code{ON_STOP} section of the @code{EDL} script.
+@table @strong
+@item Please note:
+The latest set output voltage will still appear on the output port
+after the program is finished. If it is required that the output
+voltage reverts to a default value at the end of the experiment
+please put a command for setting this voltage into the @code{ON_STOP}
+section of the @code{EDL} script.
+@end table
 
 For the home-built DA and AD card the output voltage will automatically
 drop to @w{0 V} if the function @ref{daq_get_voltage()} (see below)
 is called without a previous call of the function for setting an output
 voltage.
 
-@strong{Please note}: if the DAC channel had previously been reserved by
-a call of the function @ref{daq_reserve_dac()} the pass-phrase
-specified in that call has to be passed to the function as the very
-first argument if you want to be able to change the output voltage of
-the DAC channel.
+@table @strong
+@item Please note:
+If the DAC channel had previously been reserved by a call of the
+function @ref{daq_reserve_dac()} the pass-phrase specified in that
+call has to be passed to the function as the very first argument if
+you want to be able to change the output voltage of the DAC channel.
+@end table
 
 The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
@@ -4946,11 +4983,13 @@ If this function hasn't been called the program will assume that the
 potentiometer is set to its maximum of 10 and output voltages of the
 DA converter are between @w{0 V} and @w{+10 V}.
 
-@strong{Please note}: if the DAC channel had previously been reserved by
-a call of the function @ref{daq_reserve_dac()} the pass-phrase
-specified in that call has to be passed to the function as the very
-first argument if you want to be able to change the maximum output
-voltage.
+@table @strong
+@item Please note:
+If the DAC channel had previously been reserved by a call of the
+function @ref{daq_reserve_dac()} the pass-phrase specified in that
+call has to be passed to the function as the very first argument if
+you want to be able to change the maximum output voltage.
+@end table
 
 The function can be used in the @code{EXPERIMENT} as well as in the
 @code{PREPARATIONS} section.
@@ -5003,17 +5042,20 @@ The function can be used in the @code{EXPERIMENT} section only.
 
 The following remarks apply to the home-built AD and DA converter only:
 
-@strong{Please note}: If this function is called without a previous call
-of the function @ref{daq_set_voltage()} (see above) the voltage at the
-output of the DA converter will switch to @w{0 V} automatically. So you
-should call @ref{daq_set_voltage()} always before
-@ref{daq_get_voltage()} if something is connected to the DA output!
+@table @strong
+@item Please note:
+If this function is called without a previous call of the function
+@ref{daq_set_voltage()} (see above) the voltage at the output of the
+DA converter will switch to @w{0 V} automatically. So you should call
+@ref{daq_set_voltage()} always before @ref{daq_get_voltage()} if
+something is connected to the DA output!
 
-@strong{Note also}: if the ADC had previously been reserved by a call of
+@item Note also
+if the ADC had previously been reserved by a call of
 the function @ref{daq_reserve_adc()} the pass-phrase specified in that
 call has to be passed to the function as the very first argument if you
 want to be able to read in the voltage at the ADC.
-
+@end table
 
 @anchor{daq_dac_parameter()}
 @findex daq_dac_parameter()
@@ -5048,7 +5090,7 @@ external trigger mode.
 The Rulbus @strong{RB8509 ADC} card has a pre-amplifier with a gain factor
 that can be set to either @code{1}, @code{2}, @code{4} or @code{8} using
 this function. Trying to set it to any other values will result in an
-error message an the running experiment is immediately stopped.
+error message and the running experiment is stopped immediately.
 
 
 @end table
@@ -5159,10 +5201,13 @@ the function @ref{dio_value()}.
 If no mode is set for a DIO the mode for 24-bit input and output is used
 per default.
 
-@strong{Please note}: if the DIO had previously been reserved by a call
-of the function @ref{dio_reserve_dio()} the pass-phrase specified in
-that call has to be passed to the function as the very first argument if
-you want to be able to change the mode of the DIO.
+@table @strong
+@item Please note:
+If the DIO had previously been reserved by a call of the function
+@ref{dio_reserve_dio()} the pass-phrase specified in that call has to
+be passed to the function as the very first argument if you want to be
+able to change the mode of the DIO.
+@end table
 
 
 
@@ -5231,16 +5276,20 @@ output the value for @code{CH2}.
 
 @end table
 
-@strong{Please note}: trying to output a negative value will make the
-program abort immediately as will trying to output too large a value
-during the test run. During the experiment a too large value will be
-truncated to the allowed range by stripping off the higher order bits
-and a warning message is printed out.
+@table @strong
+@item Please note:
+Trying to output a negative value will make the program abort
+immediately as will trying to output too large a value during the
+test run. During the experiment a too large value will be truncated
+to the allowed range by stripping off the higher order bits and a
+warning message is printed out.
 
-@strong{Note also}: if the DIO had previously been reserved by a call of
-the function @ref{dio_reserve_dio()} the pass-phrase specified in that
-call has to be passed to the function as the very first argument if you
+@item Note also
+if the DIO had previously been reserved by a call of the function
+@ref{dio_reserve_dio()} the pass-phrase specified in that call has
+to be passed to the function as the very first argument if you
 want to be able to read from or write to the DIO.
+@end table
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -5339,13 +5388,15 @@ the length of time the counter is supposed to count. This time must be
 between @w{100 ns} and about @w{214.748 s} and must be an integer
 multiple of @w{50 ns}.
 
-@strong{Please note}: This function requires not only one counter
-channel, i.e.@: the one passed to the function as the first argument,
-but also a second, adjacent counter. If @code{CH0} is specified as the
-counter channel also @code{CH1} will be needed and vice versa, and if
-@code{CH2} is specified also @code{CH3} is required and vice versa. If
-the adjacent counter is already in use for some other purpose the
-function fails.
+@table @strong
+@item Please note:
+This function requires not only one counter channel, i.e.@: the one
+passed to the function as the first argument, but also a second,
+adjacent counter. If @code{CH0} is specified as the counter channel
+also @code{CH1} will be needed and vice versa, and if @code{CH2} is
+specified also @code{CH3} is required and vice versa. If the adjacent
+counter is already in use for some other purpose the function fails.
+@end table
 
 If called without a further argument the counter will count events on
 its default input. Alternatively, as a second argument, the source of
@@ -5437,13 +5488,15 @@ between the symbolic values and channel numbers is non-trivial).
 If the requested counter is already running the function will fail. 
 Moreover, only a single counter can be used as a buffered counter at once.
 
-@strong{Please note}: This function requires not only one counter
-channel, i.e.@: the one passed to the function as the first argument,
-but also a second, adjacent counter. If @code{CH0} is specified as the
-counter channel also @code{CH1} will be needed and vice versa, and if
-@code{CH2} is specified also @code{CH3} is required and vice versa. If
-the adjacent counter is already in use for some other purpose the
-function fails.
+@table @strong
+@item Please note:
+This function requires not only one counter channel, i.e.@: the one
+passed to the function as the first argument, but also a second,
+adjacent counter. If @code{CH0} is specified as the counter channel
+also @code{CH1} will be needed and vice versa, and if @code{CH2} is
+specified also @code{CH3} is required and vice versa. If the adjacent
+counter is already in use for some other purpose the function fails.
+@end table
 
 The second required argument is the length of time the counter is suppose
 to count before being reset to 0. This time must be between @w{100 ns} and
@@ -5684,18 +5737,22 @@ be installed. To to be able to work with the camera also the Linux device
 driver for the PCI board used for the communication with camera, also supplied
 by Roper Scientific, must be installed.
 
-@strong{Please note}: By setting two variables the configuration file
-the orientation of the spectra or images taken by the camera can be
-influenced. They allow to mirror the spectra or images (i.e. exchanging
-right and left side) and/or turn images upside-down. Since some
-functions assume spectra to have an increasing wavelength or relative
-wavenumber axis (or decreasing absolute wavenumber axis) this option
-can be used to satisfy the requirement.
+@table @strong
+@item Please note:
+By setting two variables the configuration file the orientation of the
+spectra or images taken by the camera can be influenced. They allow to
+mirror the spectra or images (i.e. exchanging right and left side)
+and/or turn images upside-down. Since some functions assume spectra to
+have an increasing wavelength or relative wavenumber axis (or
+decreasing absolute wavenumber axis) this option can be used to
+satisfy the requirement.
 
-@strong{Please note}: At the start of the experiment the target
-temperature for the camera is set to the lowest possible value unless a
-target temperature is explicitely set using the function
-@ref{ccd_camera_temperature()} (see below).
+@item Please note also:
+At the start of the experiment the target temperature for the camera
+is set to the lowest possible value unless a target temperature is
+explicitely set using the function @ref{ccd_camera_temperature()}
+(see below).
+@end table
 
 The values for the region of interest, the binning values, the binning
 mode and the number of clear cycles are stored internally between
@@ -6009,6 +6066,9 @@ the supported monochromatore).
 @item @ref{monochromator_zero_offset()}
 @item @ref{monochromator_grating_adjust()}
 @item @ref{monochromator_calibrate()}
+@item @ref{monochromator_init_motor()}
+@item @ref{monochromator_enforce_wavelength()}
+@item @ref{monochromator_enforce_wavenumber()}
 @end table
 
 @noindent
@@ -6272,10 +6332,12 @@ change_scale_1d( scale[ 1 ] + 0.5 * xbin * scale[ 2 ],
                  xbin * scale[ 2 ] );
 @end example
 
-@strong{Please note}: The wavelength difference between two neighboring
-pixels isn't really constant over the whole width of the CCD chip. When
-you use the returned values only for the center of the chip the results
-are in quite good agreement with the real wavelengths, but for the edges
+@table @strong
+@item Please note:
+The wavelength difference between two neighboring pixels isn't really
+constant over the whole width of the CCD chip. When you use the
+returned values only for the center of the chip the results are in
+quite good agreement with the real wavelengths, but for the edges
 of the chip the accuracy deteriorates significantly. For example for a
 grating with 1200 grooves per mm the deviation is about @w{0.5 nm} and
 for gratings with lower groove densities the deviation gets even larger,
@@ -6283,9 +6345,10 @@ proportional to the inverse of the groove density. To obtain the exact
 wavelength for a certain pixel on the chip use the function
 @ref{monochromator_calc_wavelength()} discussed below.
 
-@strong{Please note}: The function assumes that the spectra taken with
-the camera show increasing wavelengths going from the left to the right
-side!
+@item Please note also:
+The function assumes that the spectra taken with the camera show
+increasing wavelengths going from the left to the right side!
+@end table
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -6301,9 +6364,12 @@ setting up a wavenumber axis (and, if given, instead of the wavelength
 at the center position of the chip, the wavenumber at this position must
 be passed to the function).
 
-@strong{Please note}: The function assumes that the spectra taken with
-the camera show decreasing absolute wavenumbers and increasing relative
-wavenumbers going from the left to the right side!
+@table @strong
+@item Please note:
+The function assumes that the spectra taken with the camera show
+decreasing absolute wavenumbers and increasing relative wavenumbers
+going from the left to the right side!
+@end table
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -6579,6 +6645,49 @@ argument!.
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
+
+@anchor{monochromator_init_motor()}
+@findex monochromator_init_motor()
+@item monochromator_init_motor()
+This function onky exists for @strong{SPEX} monochromators controlled
+via the @strong{SPEX232} interface and only for those that have
+autocalibration capabiliy. If for these types of monochromators the
+function is called in the @code{PREPARATIONS} section an
+autocalibration is executed when the monochromator is initialized.
+Please note that this is usually not necessary and can take a
+rather long time.
+
+
+@anchor{monochromator_enforce_wavelength()}
+@findex monochromator_enforce_wavelength()
+@item monochromator_enforce_wavelength()
+This function only exists for @strong{SPEX} monochromators controlled
+via the @strong{SPEX232} interface. It allows, when called in the
+@code{PREPARATIONS} section, to set the wavelength the monochromator
+is currently set to, which then overrules the setting read from
+the file in which the state of the monochromator in the last run of
+the program is stored. This function should only be used when the
+data in the state file have gotten out of synch from the real setting
+of the monochromator (e.g.@: because  different program was used
+in between that drove the monochromator to a different wavelength
+from the one stored in the state file).
+
+
+@anchor{monochromator_enforce_wavenumber()}
+@findex monochromator_enforce_wavenumber()
+@item monochromator_enforce_wavenumber()
+This function only exists for @strong{SPEX} monochromators controlled
+via the @strong{SPEX232} interface. It allows, when called in the
+@code{PREPARATIONS} section, to set the wavenumber the monochromator
+is currently set to, which then overrules the setting read from
+the file in which the state of the monochromator in the last run of
+the program is stored. This function should only be used when the
+data in the state file have gotten out of synch from the real setting
+of the monochromator (e.g.@: because  different program was used
+in between that drove the monochromator to a different wavenumber
+from the one stored in the state file).
+
+
 @end table
 
 
@@ -6853,10 +6962,12 @@ invocation of the function @ref{mw_attenuator_load_calibration()}.
 Attenuation values within this range but not listed in the table are
 handled by linear interpolation of the nearest neighboring values.
 
-@strong{Please note}: The function
-@ref{mw_attenuator_initial_attenuation()} must be called before the
-first invocation of this function to make the module aware about the
-setting of the attenuation when the experiment was started.
+@table @strong
+@item Please note:
+The function @ref{mw_attenuator_initial_attenuation()} must be called
+before the first invocation of this function to make the module aware
+about the setting of the attenuation when the experiment was started.
+@end table
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.

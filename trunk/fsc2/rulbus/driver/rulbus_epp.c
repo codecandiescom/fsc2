@@ -1,32 +1,35 @@
 /*
- *  $Id$
+ *	$Id$
  * 
- *  Driver for the RULBUS EPP interface
+ *	Driver for the RULBUS EPP interface
  *
- *  Copyright (C) 2003-2007 Jens Thoms Toerring
+ *	Copyright (C) 2003-2007 Jens Thoms Toerring
  *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2, or (at your option)
- *  any later version.
+ *	This program is free software; you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation; either version 2, or (at your option)
+ *	any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 59 Temple Place - Suite 330,
- *  Boston, MA 02111-1307, USA.
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program; see the file COPYING.	If not, write to
+ *	the Free Software Foundation, 59 Temple Place - Suite 330,
+ *	Boston, MA 02111-1307, USA.
  *
- *  To contact the author send email to jt@toerring.de
+ *	To contact the author send email to jt@toerring.de
  */
 
 
 #include <linux/version.h>
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 19 )
 #include <linux/config.h>
-
+#else
+#include <linux/autoconf.h>
+#endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 
@@ -82,43 +85,43 @@
  *****************************************/
 
 
-#define RULBUS_EPP_NAME  "rulbus_epp"
+#define RULBUS_EPP_NAME	 "rulbus_epp"
 
 
-#define RULBUS_MAX_BUFFER_SIZE  10       /* may never be smaller than 1 ! */
+#define RULBUS_MAX_BUFFER_SIZE	10		 /* may never be smaller than 1 ! */
 
-#define WRITE_TO_DEVICE     0
-#define READ_FROM_DEVICE    1
+#define WRITE_TO_DEVICE		0
+#define READ_FROM_DEVICE	1
 
 
-#define STATUS_BYTE         ( base + 1 )
-#define CTRL_BYTE           ( base + 2 )
-#define ADDR_BYTE           ( base + 3 )
-#define DATA_BYTE           ( base + 4 )
+#define STATUS_BYTE			( base + 1 )
+#define CTRL_BYTE			( base + 2 )
+#define ADDR_BYTE			( base + 3 )
+#define DATA_BYTE			( base + 4 )
 
 
 /* Bits in SPP status byte */
 
-#define EPP_Timeout         ( 1 << 0 )   /* EPP timeout (reserved in SPP) */
-#define SPP_Reserved2       ( 1 << 1 )   /* SPP reserved2 */
-#define SPP_nIRQ            ( 1 << 2 )   /* SPP !IRQ */
-#define SPP_nError          ( 1 << 3 )   /* SPP !error */
-#define SPP_SelectIn        ( 1 << 4 )   /* SPP select in */
-#define SPP_PaperOut        ( 1 << 5 )   /* SPP paper out */
-#define SPP_nAck            ( 1 << 6 )   /* SPP !acknowledge */
-#define SPP_nBusy           ( 1 << 7 )   /* SPP !busy */
+#define EPP_Timeout			( 1 << 0 )	 /* EPP timeout (reserved in SPP) */
+#define SPP_Reserved2		( 1 << 1 )	 /* SPP reserved2 */
+#define SPP_nIRQ			( 1 << 2 )	 /* SPP !IRQ */
+#define SPP_nError			( 1 << 3 )	 /* SPP !error */
+#define SPP_SelectIn		( 1 << 4 )	 /* SPP select in */
+#define SPP_PaperOut		( 1 << 5 )	 /* SPP paper out */
+#define SPP_nAck			( 1 << 6 )	 /* SPP !acknowledge */
+#define SPP_nBusy			( 1 << 7 )	 /* SPP !busy */
 
 
 /* Bits in SPP control byte */
 
-#define SPP_Strobe          ( 1 << 0 )   /* SPP strobe */
-#define SPP_AutoLF          ( 1 << 1 )   /* SPP auto linefeed */
-#define SPP_nReset          ( 1 << 2 )   /* SPP !reset */
-#define SPP_SelectPrinter   ( 1 << 3 )   /* SPP select printer */
-#define SPP_EnaIRQVAL       ( 1 << 4 )   /* SPP enable IRQ */
-#define SPP_EnaBiDirect     ( 1 << 5 )   /* SPP enable bidirectional */
-#define SPP_Unused1         ( 1 << 6 )   /* SPP unused1 */
-#define SPP_Unused2	        ( 1 << 7 )   /* SPP unused2 */
+#define SPP_Strobe			( 1 << 0 )	 /* SPP strobe */
+#define SPP_AutoLF			( 1 << 1 )	 /* SPP auto linefeed */
+#define SPP_nReset			( 1 << 2 )	 /* SPP !reset */
+#define SPP_SelectPrinter	( 1 << 3 )	 /* SPP select printer */
+#define SPP_EnaIRQVAL		( 1 << 4 )	 /* SPP enable IRQ */
+#define SPP_EnaBiDirect		( 1 << 5 )	 /* SPP enable bidirectional */
+#define SPP_Unused1			( 1 << 6 )	 /* SPP unused1 */
+#define SPP_Unused2			( 1 << 7 )	 /* SPP unused2 */
 
 
 
@@ -132,20 +135,20 @@ static int __init rulbus_init( void );
 static void __exit rulbus_cleanup( void );
 
 static int rulbus_open( struct inode * /* inode_p */,
-						struct file *  /* filep   */ );
+						struct file *  /* filep	  */ );
 
 static int rulbus_release( struct inode * /* inode_p */,
-						   struct file *  /* filep   */ );
+						   struct file *  /* filep	 */ );
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 static int rulbus_ioctl( struct inode * /* inode_p */,
-						 struct file *  /* filep   */,
-						 unsigned int   /* cmd     */,
-						 unsigned long  /* arg     */ );
+						 struct file *	/* filep   */,
+						 unsigned int	/* cmd	   */,
+						 unsigned long	/* arg	   */ );
 #else
 static long rulbus_ioctl( struct file * /* filep */,
-						  unsigned int  /* cmd   */,
-						  unsigned long /* arg   */ );
+						  unsigned int	/* cmd	 */,
+						  unsigned long /* arg	 */ );
 #endif
 
 static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * /* rulbus_arg */ );
@@ -178,8 +181,8 @@ static struct parport_driver rulbus_drv = { RULBUS_EPP_NAME,
 											rulbus_epp_detach };
 
 static struct rulbus_device {
-        struct parport *port;
-        struct pardevice *dev;
+		struct parport *port;
+		struct pardevice *dev;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 		struct cdev ch_dev;
 		dev_t dev_no;
@@ -187,41 +190,49 @@ static struct rulbus_device {
 		struct class *rb_class;
 #endif
 #endif
-        int in_use;                   /* set when device is opened */
-        int is_claimed;               /* set while we have exclusive access */
-        struct semaphore open_mutex;  /* mutex for open call */
+		int in_use;					  /* set when device is opened */
+		int is_claimed;				  /* set while we have exclusive access */
+		struct semaphore open_mutex;  /* mutex for open call */
 		struct semaphore ioctl_mutex; /* mutex for ioctl calls */
-		unsigned char exclusive;      /* for exclusive access to device file */
-        unsigned char rack;           /* currently addressed rack */
-        unsigned char direction;      /* current transfer direction */
-} rulbus = { NULL, NULL, 
+		unsigned char exclusive;	  /* for exclusive access to device file */
+		unsigned char rack;			  /* currently addressed rack */
+		unsigned char direction;	  /* current transfer direction */
+} rulbus = { NULL,
+			 NULL,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-             { }, ( dev_t ) 0,
+			 { },
+			 ( dev_t ) 0,
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
-
 			 NULL,
 #endif
 #endif
-			 0, 0, { }, { }, 0, 0x0F, WRITE_TO_DEVICE };
+			 0,
+			 0,
+			 { },
+			 { },
+			 0,
+			 0x0F,
+			 WRITE_TO_DEVICE
+		   };
 
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
 struct file_operations rulbus_file_ops = {
-        owner:            THIS_MODULE,
-        ioctl:            rulbus_ioctl,
-        open:             rulbus_open,
-        release:          rulbus_release,
+		owner:			  THIS_MODULE,
+		ioctl:			  rulbus_ioctl,
+		open:			  rulbus_open,
+		release:		  rulbus_release,
 };
 #else
 struct file_operations rulbus_file_ops = {
-        .owner =          THIS_MODULE,
+		.owner =		  THIS_MODULE,
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
-        .ioctl =          rulbus_ioctl,
+		.ioctl =		  rulbus_ioctl,
 #else
 		.unlocked_ioctl = rulbus_ioctl,
 #endif
-        .open =           rulbus_open,
-        .release =        rulbus_release,
+		.open =			  rulbus_open,
+		.release =		  rulbus_release,
 };
 #endif
 
@@ -267,7 +278,7 @@ module_exit( rulbus_cleanup );
 
 inline static unsigned char rulbus_epp_timeout_check( void )
 {
-        return inb( STATUS_BYTE ) & EPP_Timeout;
+		return inb( STATUS_BYTE ) & EPP_Timeout;
 }
 
 
@@ -277,26 +288,24 @@ inline static unsigned char rulbus_epp_timeout_check( void )
 
 inline static int rulbus_clear_epp_timeout( void )
 {
-        unsigned char status;
+		unsigned char status;
 
 
-        if ( ! rulbus_epp_timeout_check( ) )
-                return 1;
+		if ( ! rulbus_epp_timeout_check( ) )
+				return 1;
 
-        printk( KERN_NOTICE "EPP Timeout\n" );
+		/* To clear timeout some chips require a double read */
 
-        /* To clear timeout some chips require double read */
-
-        inb( STATUS_BYTE );
-        status = inb( STATUS_BYTE );
+		inb( STATUS_BYTE );
+		status = inb( STATUS_BYTE );
 
 		/* Some chips reset the timeout condition by setting the lowest bit,
 		   others by resetting it */
 
-        outb( status | EPP_Timeout, STATUS_BYTE );
-        outb( status & ~ EPP_Timeout, STATUS_BYTE );
+		outb( status | EPP_Timeout, STATUS_BYTE );
+		outb( status & ~ EPP_Timeout, STATUS_BYTE );
 
-        return ! rulbus_epp_timeout_check( );
+		return ! rulbus_epp_timeout_check( );
 }
 
 
@@ -306,8 +315,8 @@ inline static int rulbus_clear_epp_timeout( void )
 
 inline static void rulbus_parport_reverse( void )
 {
-        rulbus.direction ^= 1;
-        outb( inb( CTRL_BYTE ) ^ SPP_EnaBiDirect, CTRL_BYTE );
+		rulbus.direction ^= 1;
+		outb( inb( CTRL_BYTE ) ^ SPP_EnaBiDirect, CTRL_BYTE );
 }
 
 
@@ -318,10 +327,10 @@ inline static void rulbus_parport_reverse( void )
 
 inline static unsigned char rulbus_parport_read_data( void )
 {
-        if ( rulbus.direction != READ_FROM_DEVICE )
-                rulbus_parport_reverse( );
-        rulbus_clear_epp_timeout( );
-        return inb( DATA_BYTE );
+		if ( rulbus.direction != READ_FROM_DEVICE )
+				rulbus_parport_reverse( );
+		rulbus_clear_epp_timeout( );
+		return inb( DATA_BYTE );
 }
 
 
@@ -332,10 +341,10 @@ inline static unsigned char rulbus_parport_read_data( void )
 
 inline static unsigned char rulbus_parport_read_addr( void )
 {
-        if ( rulbus.direction != READ_FROM_DEVICE )
-                rulbus_parport_reverse( );
-        rulbus_clear_epp_timeout( );
-        return inb( ADDR_BYTE );
+		if ( rulbus.direction != READ_FROM_DEVICE )
+				rulbus_parport_reverse( );
+		rulbus_clear_epp_timeout( );
+		return inb( ADDR_BYTE );
 }
 
 
@@ -349,12 +358,12 @@ inline static unsigned char rulbus_parport_read_addr( void )
 
 inline static void rulbus_parport_write_data( unsigned char data )
 {
-        if ( rulbus.direction != WRITE_TO_DEVICE )
-                rulbus_parport_reverse( );
-        rulbus_clear_epp_timeout( );
-        outb( data, DATA_BYTE );
+		if ( rulbus.direction != WRITE_TO_DEVICE )
+				rulbus_parport_reverse( );
+		rulbus_clear_epp_timeout( );
+		outb( data, DATA_BYTE );
 		ndelay( 100 );
-        outb( data, DATA_BYTE );
+		outb( data, DATA_BYTE );
 }
 
 
@@ -365,10 +374,10 @@ inline static void rulbus_parport_write_data( unsigned char data )
 
 inline static void rulbus_parport_write_addr( unsigned char addr )
 {
-        if ( rulbus.direction != WRITE_TO_DEVICE )
-                rulbus_parport_reverse( );
-        rulbus_clear_epp_timeout( );
-        outb( addr, ADDR_BYTE );
+		if ( rulbus.direction != WRITE_TO_DEVICE )
+				rulbus_parport_reverse( );
+		rulbus_clear_epp_timeout( );
+		outb( addr, ADDR_BYTE );
 }
 
 
@@ -385,12 +394,12 @@ static int __init rulbus_init( void )
 		int result;
 
 
-        /* All we do at the moment is registering a driver and a char device,
-           everything else is deferred until we get notified about the
-           parports of the system and when the device file gets opened. */
+		/* All we do at the moment is registering a driver and a char device,
+		   everything else is deferred until we get notified about the
+		   parports of the system and when the device file gets opened. */
 
-        if ( parport_register_driver( &rulbus_drv ) != 0 )
-                return -EIO;
+		if ( parport_register_driver( &rulbus_drv ) != 0 )
+				return -EIO;
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 		if ( major == 0 )
@@ -403,8 +412,8 @@ static int __init rulbus_init( void )
 		}
 
 		if ( result < 0 ) {
-                printk( KERN_ERR RULBUS_EPP_NAME ": Can't register as char "
-                        "device.\n" );
+				printk( KERN_ERR RULBUS_EPP_NAME ": Can't register as char "
+						"device.\n" );
 				parport_unregister_driver( &rulbus_drv );
 				return -EIO;
 		}
@@ -413,8 +422,8 @@ static int __init rulbus_init( void )
 		rulbus.ch_dev.owner = THIS_MODULE;
 
 		if ( cdev_add( &rulbus.ch_dev, rulbus.dev_no, 1 ) < 0 ) {
-                printk( KERN_ERR RULBUS_EPP_NAME ": Can't register as char "
-                        "device.\n" );
+				printk( KERN_ERR RULBUS_EPP_NAME ": Can't register as char "
+						"device.\n" );
 				unregister_chrdev_region( rulbus.dev_no, 1 );
 				parport_unregister_driver( &rulbus_drv );
 				return -EIO;
@@ -423,8 +432,8 @@ static int __init rulbus_init( void )
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
 		rulbus.rb_class = class_create( THIS_MODULE, RULBUS_EPP_NAME );
 		if ( IS_ERR( rulbus.rb_class ) ) {
-                printk( KERN_ERR RULBUS_EPP_NAME ": Can't create a class for "
-                        "the device.\n" );
+				printk( KERN_ERR RULBUS_EPP_NAME ": Can't create a class for "
+						"the device.\n" );
 				cdev_del( &rulbus.ch_dev );
 				unregister_chrdev_region( rulbus.dev_no, 1 );
 				parport_unregister_driver( &rulbus_drv );
@@ -436,30 +445,30 @@ static int __init rulbus_init( void )
 #endif
 
 #else
-        if ( ( result = register_chrdev( major, RULBUS_EPP_NAME,
+		if ( ( result = register_chrdev( major, RULBUS_EPP_NAME,
 										 &rulbus_file_ops ) ) < 0 ) {
-                printk( KERN_ERR RULBUS_EPP_NAME ": Can't register as char "
-                        "device.\n" );
+				printk( KERN_ERR RULBUS_EPP_NAME ": Can't register as char "
+						"device.\n" );
 				parport_unregister_driver( &rulbus_drv );
-                return -EIO;
-        }
+				return -EIO;
+		}
 
-        if ( major == 0 )
-                major = result;
+		if ( major == 0 )
+				major = result;
 #endif
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
-        sema_init( &rulbus.open_mutex, 1 );
-        sema_init( &rulbus.ioctl_mutex, 1 );
+		sema_init( &rulbus.open_mutex, 1 );
+		sema_init( &rulbus.ioctl_mutex, 1 );
 #else
 		init_MUTEX( &rulbus.open_mutex );
 		init_MUTEX( &rulbus.ioctl_mutex );
 #endif
 
-        printk( KERN_INFO RULBUS_EPP_NAME
-                ": Module successfully installed\n" );
+		printk( KERN_INFO RULBUS_EPP_NAME
+				": Module successfully installed\n" );
 
-        return 0;
+		return 0;
 }
 
 
@@ -473,29 +482,29 @@ static void __exit rulbus_cleanup( void )
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
 		class_device_destroy( rulbus.rb_class, rulbus.dev_no );
-        class_destroy( rulbus.rb_class );
+		class_destroy( rulbus.rb_class );
 #endif
 
 		cdev_del( &rulbus.ch_dev );
 		unregister_chrdev_region( rulbus.dev_no, 1 );
 #else
-        if ( unregister_chrdev( major, RULBUS_EPP_NAME ) < 0 )
+		if ( unregister_chrdev( major, RULBUS_EPP_NAME ) < 0 )
 		{
-                printk( KERN_ERR RULBUS_EPP_NAME
-                        ": Device busy or other module error.\n" );
+				printk( KERN_ERR RULBUS_EPP_NAME
+						": Device busy or other module error.\n" );
 				return;
 		}
 #endif
 
-        /* Unregister the device (but only if it's registered) */
+		/* Unregister the device (but only if it's registered) */
 
-        if ( rulbus.dev )
-                rulbus_epp_detach( rulbus.port );
+		if ( rulbus.dev )
+				rulbus_epp_detach( rulbus.port );
 
-        parport_unregister_driver( &rulbus_drv );
+		parport_unregister_driver( &rulbus_drv );
 
-        printk( KERN_INFO RULBUS_EPP_NAME
-                ": Module successfully removed\n" );
+		printk( KERN_INFO RULBUS_EPP_NAME
+				": Module successfully removed\n" );
 }
 
 
@@ -507,23 +516,23 @@ static void __exit rulbus_cleanup( void )
 
 static void rulbus_epp_attach( struct parport * port )
 {
-        /* Check that the port has the base address we're looking for and
-           that we don't already have a device registered for this port */
+		/* Check that the port has the base address we're looking for and
+		   that we don't already have a device registered for this port */
 
-        if ( port->base != base || rulbus.dev )
-                return;
+		if ( port->base != base || rulbus.dev )
+				return;
 
-        /* Register a device for this parport */
+		/* Register a device for this parport */
 
-        if ( ( rulbus.dev = parport_register_device( port,
-                                                     RULBUS_EPP_NAME,
-                                                     NULL, NULL, NULL,
-                                                     0, NULL ) ) == NULL ) {
-                printk( KERN_NOTICE "Failed to register device\n" );
-                return;
-        }
+		if ( ( rulbus.dev = parport_register_device( port,
+													 RULBUS_EPP_NAME,
+													 NULL, NULL, NULL,
+													 0, NULL ) ) == NULL ) {
+				printk( KERN_NOTICE "Failed to register device\n" );
+				return;
+		}
 
-        rulbus.port = port;
+		rulbus.port = port;
 }
 
 
@@ -535,13 +544,13 @@ static void rulbus_epp_attach( struct parport * port )
 
 static void rulbus_epp_detach( struct parport * port )
 {
-        if ( rulbus.dev == NULL || rulbus.port != port )
-                return;
+		if ( rulbus.dev == NULL || rulbus.port != port )
+				return;
 
-        if ( rulbus.is_claimed )
-                parport_release( rulbus.dev );
-        parport_unregister_device( rulbus.dev );
-        rulbus.dev = NULL;
+		if ( rulbus.is_claimed )
+				parport_release( rulbus.dev );
+		parport_unregister_device( rulbus.dev );
+		rulbus.dev = NULL;
 }
 
 
@@ -586,7 +595,7 @@ static int rulbus_open( struct inode * inode_p,
 		/* If the device file hasn't already been opened by another caller
 		   do all the required initializations. */
 
-        if ( rulbus.in_use == 0 ) {
+		if ( rulbus.in_use == 0 ) {
 				/* Check that a device is registered for the port we need */
 
 				if ( rulbus.dev == NULL ) {
@@ -630,15 +639,15 @@ static int rulbus_open( struct inode * inode_p,
 						rulbus.exclusive = 1;
 		}
 
-        rulbus.in_use++;
+		rulbus.in_use++;
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
-        MOD_INC_USE_COUNT;
+		MOD_INC_USE_COUNT;
 #endif
 
-        up( &rulbus.open_mutex );
+		up( &rulbus.open_mutex );
 
-        return 0;
+		return 0;
 }
 
 
@@ -650,10 +659,10 @@ static int rulbus_open( struct inode * inode_p,
 static int rulbus_release( struct inode * inode_p,
 						   struct file *  filep )
 {
-        if ( rulbus.in_use == 0 ) {
-                printk( KERN_NOTICE "Device not open\n" );
-                return -ENODEV;
-        }
+		if ( rulbus.in_use == 0 ) {
+				printk( KERN_NOTICE "Device not open\n" );
+				return -ENODEV;
+		}
 
 		if ( down_interruptible( &rulbus.open_mutex ) )
 				return -ERESTARTSYS;
@@ -663,24 +672,24 @@ static int rulbus_release( struct inode * inode_p,
 				return -EBADF;
 		}
 
-        /* Unclaim and unregister the parallel port */
+		/* Unclaim and unregister the parallel port */
 
-        if ( --rulbus.in_use == 0 &&
-             rulbus.dev != NULL &&
-             rulbus.is_claimed ) {
-                parport_release( rulbus.dev );
-                rulbus.is_claimed = 0;
-        }
+		if ( --rulbus.in_use == 0 &&
+			 rulbus.dev != NULL &&
+			 rulbus.is_claimed ) {
+				parport_release( rulbus.dev );
+				rulbus.is_claimed = 0;
+		}
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 0 )
-        MOD_DEC_USE_COUNT;
+		MOD_DEC_USE_COUNT;
 #endif
 
 		rulbus.exclusive = 0;
 
 		up( &rulbus.open_mutex );
 
-        return 0;
+		return 0;
 }
 
 
@@ -690,23 +699,23 @@ static int rulbus_release( struct inode * inode_p,
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 11 )
 static int rulbus_ioctl( struct inode * inode_p,
-						 struct file *  filep,
-						 unsigned int   cmd,
-						 unsigned long  arg )
+						 struct file *	filep,
+						 unsigned int	cmd,
+						 unsigned long	arg )
 #else
 static long rulbus_ioctl( struct file * filep,
-						  unsigned int  cmd,
+						  unsigned int	cmd,
 						  unsigned long arg )
 #endif
 {
-        RULBUS_EPP_IOCTL_ARGS rulbus_arg;
-        int ret;
+		RULBUS_EPP_IOCTL_ARGS rulbus_arg;
+		int ret;
 
 
-        if ( rulbus.dev == NULL || ! rulbus.is_claimed ) {
-                printk( KERN_NOTICE "Device is not open\n" );
-                return -ENODEV;
-        }
+		if ( rulbus.dev == NULL || ! rulbus.is_claimed ) {
+				printk( KERN_NOTICE "Device is not open\n" );
+				return -ENODEV;
+		}
 
 		/* The ioctl() calls can't be handled for two or more callers at once.
 		   Thus callers must wait for a mutex (or, in the case where instant
@@ -718,41 +727,41 @@ static long rulbus_ioctl( struct file * filep,
 		} else if ( down_interruptible( &rulbus.ioctl_mutex ) )
 				return -ERESTARTSYS;
 
-        if ( copy_from_user( &rulbus_arg, ( const void __user * ) arg,
-                             sizeof rulbus_arg ) ) {
+		if ( copy_from_user( &rulbus_arg, ( const void __user * ) arg,
+							 sizeof rulbus_arg ) ) {
 				up( &rulbus.ioctl_mutex );
-                printk( KERN_NOTICE "Can't read from user space\n" );
-                return -EFAULT;
-        }
+				printk( KERN_NOTICE "Can't read from user space\n" );
+				return -EFAULT;
+		}
 
-        switch ( cmd )
-        {
-                case RULBUS_EPP_IOC_READ :
-                        ret = rulbus_read( ( RULBUS_EPP_IOCTL_ARGS * ) arg );
-                        break;
+		switch ( cmd )
+		{
+				case RULBUS_EPP_IOC_READ :
+						ret = rulbus_read( ( RULBUS_EPP_IOCTL_ARGS * ) arg );
+						break;
 
-                case RULBUS_EPP_IOC_READ_RANGE :
-                        ret =
+				case RULBUS_EPP_IOC_READ_RANGE :
+						ret =
 						  rulbus_read_range( ( RULBUS_EPP_IOCTL_ARGS * ) arg );
-                        break;
+						break;
 
-                case RULBUS_EPP_IOC_WRITE :
-                        ret = rulbus_write( ( RULBUS_EPP_IOCTL_ARGS * ) arg );
-                        break;
+				case RULBUS_EPP_IOC_WRITE :
+						ret = rulbus_write( ( RULBUS_EPP_IOCTL_ARGS * ) arg );
+						break;
 
-                case RULBUS_EPP_IOC_WRITE_RANGE :
-                        ret = 
+				case RULBUS_EPP_IOC_WRITE_RANGE :
+						ret = 
 						 rulbus_write_range( ( RULBUS_EPP_IOCTL_ARGS * ) arg );
-                        break;
+						break;
 
-                default :
-                        printk( KERN_NOTICE "Invalid ioctl() call %d\n", cmd );
-                        ret = -EINVAL;
-        }
+				default :
+						printk( KERN_NOTICE "Invalid ioctl() call %d\n", cmd );
+						ret = -EINVAL;
+		}
 
 		up( &rulbus.ioctl_mutex );
 
-        return ret;
+		return ret;
 }
 
 
@@ -762,35 +771,35 @@ static long rulbus_ioctl( struct file * filep,
 
 static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
-        unsigned char *data;
+		unsigned char *data;
 		unsigned char buffer[ RULBUS_MAX_BUFFER_SIZE ];
-        unsigned char *bp;
-        size_t i;
+		unsigned char *bp;
+		size_t i;
 
 
 		/* Plausibility checks */
 
-        if ( rulbus_arg->rack & 0xF0 ) {
-                printk( KERN_NOTICE "Invalid rack number.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->rack & 0xF0 ) {
+				printk( KERN_NOTICE "Invalid rack number.\n" );
+				return -EINVAL;
+		}
 
-        if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
-                printk( KERN_NOTICE "Invalid address offset.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
+				printk( KERN_NOTICE "Invalid address offset.\n" );
+				return -EINVAL;
+		}
 
-        if ( rulbus_arg->len < 1 ) {
-                printk( KERN_NOTICE "Invalid number of bytes to read.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->len < 1 ) {
+				printk( KERN_NOTICE "Invalid number of bytes to read.\n" );
+				return -EINVAL;
+		}
 
 		if ( rulbus_arg->data == NULL ) {
 				printk( KERN_NOTICE "Invalid read data pointer.\n" );
 				return -EINVAL;
 		}
 
-        /* If there are not more that RULBUS_MAX_BUFFER_SIZE to be read
+		/* If there are not more that RULBUS_MAX_BUFFER_SIZE to be read
 		   (the typical case) use a local buffer (which should be faster),
 		   otherwise allocate as much memory as needed */
 
@@ -806,21 +815,21 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 				}
 		}
 
-        /* Select the rack (unless it's not already selected) */
+		/* Select the rack (unless it's not already selected) */
 
-        if ( rulbus.rack != rulbus_arg->rack ) {
-                rulbus_parport_write_addr( 0 );
-                rulbus_parport_write_data( rulbus_arg->rack );
-                rulbus.rack = rulbus_arg->rack;
-        }
+		if ( rulbus.rack != rulbus_arg->rack ) {
+				rulbus_parport_write_addr( 0 );
+				rulbus_parport_write_data( rulbus_arg->rack );
+				rulbus.rack = rulbus_arg->rack;
+		}
 
-        /* Write the rulbus address and then read as many data as required */
+		/* Write the rulbus address and then read as many data as required */
 
-        rulbus_parport_write_addr( rulbus_arg->offset );
-        for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- )
-                *bp = rulbus_parport_read_data( );
+		rulbus_parport_write_addr( rulbus_arg->offset );
+		for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- )
+				*bp = rulbus_parport_read_data( );
 
-        /* Copy all that has just been read to the user space buffer and, if
+		/* Copy all that has just been read to the user space buffer and, if
 		   necessary, deallocate the kernel buffer */
 
 		if ( copy_to_user( ( void __user * ) rulbus_arg->data,
@@ -834,7 +843,7 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 		if ( rulbus_arg->len > RULBUS_MAX_BUFFER_SIZE )
 				kfree( data );
 
-        return rulbus_arg->len;
+		return rulbus_arg->len;
 }
 
 
@@ -846,8 +855,8 @@ static int rulbus_read( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 
 static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
-        unsigned char data[ 254 ];
-        size_t i;
+		unsigned char data[ 254 ];
+		size_t i;
 
 
 		/* If only a single byte is to be read call rulbus_read() */
@@ -857,48 +866,48 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 
 		/* Plausibility checks */
 
-        if ( rulbus_arg->rack & 0xF0 ) {
-                printk( KERN_NOTICE "Invalid rack number.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->rack & 0xF0 ) {
+				printk( KERN_NOTICE "Invalid rack number.\n" );
+				return -EINVAL;
+		}
 
-        if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
-                printk( KERN_NOTICE "Invalid address offset.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
+				printk( KERN_NOTICE "Invalid address offset.\n" );
+				return -EINVAL;
+		}
 
-        if ( rulbus_arg->len < 1 ) {
-                printk( KERN_NOTICE "Invalid number of bytes to read.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->len < 1 ) {
+				printk( KERN_NOTICE "Invalid number of bytes to read.\n" );
+				return -EINVAL;
+		}
 
-        if ( ( unsigned long ) rulbus_arg->offset + rulbus_arg->len > 0xFE ) {
-                printk( KERN_NOTICE "Address range too large.\n" );
-                return -EINVAL;
-        }
+		if ( ( unsigned long ) rulbus_arg->offset + rulbus_arg->len > 0xFE ) {
+				printk( KERN_NOTICE "Address range too large.\n" );
+				return -EINVAL;
+		}
 
 		if ( rulbus_arg->data == NULL ) {
 				printk( KERN_NOTICE "Invalid read data pointer.\n" );
 				return -EINVAL;
 		}
 
-        /* Select the rack (unless it's not already selected) */
+		/* Select the rack (unless it's not already selected) */
 
-        if ( rulbus.rack != rulbus_arg->rack ) {
-                rulbus_parport_write_addr( 0 );
-                rulbus_parport_write_data( rulbus_arg->rack );
-                rulbus.rack = rulbus_arg->rack;
-        }
-
-        /* Now read as many data as required from consecutive rulbus
-		   addresses*/
-
-        for ( i = 0; i < rulbus_arg->len; i++ ) {
-				rulbus_parport_write_addr( rulbus_arg->offset + i );
-                data[ i ] = rulbus_parport_read_data( );
+		if ( rulbus.rack != rulbus_arg->rack ) {
+				rulbus_parport_write_addr( 0 );
+				rulbus_parport_write_data( rulbus_arg->rack );
+				rulbus.rack = rulbus_arg->rack;
 		}
 
-        /* Copy all that has just been read to the user space buffer and
+		/* Now read as many data as required from consecutive rulbus
+		   addresses*/
+
+		for ( i = 0; i < rulbus_arg->len; i++ ) {
+				rulbus_parport_write_addr( rulbus_arg->offset + i );
+				data[ i ] = rulbus_parport_read_data( );
+		}
+
+		/* Copy all that has just been read to the user space buffer and
 		   deallocate the kernel buffer */
 
 		if ( copy_to_user( ( void __user * ) rulbus_arg->data,
@@ -907,7 +916,7 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 				return -EFAULT;
 		}
 
-        return rulbus_arg->len;
+		return rulbus_arg->len;
 }
 
 
@@ -918,36 +927,36 @@ static int rulbus_read_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
 		unsigned char buffer[ RULBUS_MAX_BUFFER_SIZE ];
-        unsigned char *data;
-        unsigned char *bp;
-        size_t i;
+		unsigned char *data;
+		unsigned char *bp;
+		size_t i;
 
 
 		/* Plausibility checks */
 
-        if ( rulbus_arg->rack & 0xF0 ) {
-                printk( KERN_NOTICE "Invalid rack number.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->rack & 0xF0 ) {
+				printk( KERN_NOTICE "Invalid rack number.\n" );
+				return -EINVAL;
+		}
 
-        if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
-                printk( KERN_NOTICE "Invalid address offset.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
+				printk( KERN_NOTICE "Invalid address offset.\n" );
+				return -EINVAL;
+		}
 
-        if ( rulbus_arg->len < 1 ) {
-                printk( KERN_NOTICE
-                        "Invalid number of bytes to be written.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->len < 1 ) {
+				printk( KERN_NOTICE
+						"Invalid number of bytes to be written.\n" );
+				return -EINVAL;
+		}
 
-        /* If there's just a single byte to be written the 'byte' field of
-           the RULBUS_EPP_IOCTL_ARGS structure gets used, for not more than
+		/* If there's just a single byte to be written the 'byte' field of
+		   the RULBUS_EPP_IOCTL_ARGS structure gets used, for not more than
 		   RULBUS_MAX_BUFFER_SIZE (which is the typical case) copy everything
-		   to a local buffer and only for "huge" amounts of data allocate
+		   to a local buffer, and only for "huge" amounts of data allocate
 		   memory and then copy the data there. */
 
-        if ( rulbus_arg->len == 1 )
+		if ( rulbus_arg->len == 1 )
 				data = &rulbus_arg->byte;
 		else {
 				if ( rulbus_arg->len <= RULBUS_MAX_BUFFER_SIZE )
@@ -962,10 +971,10 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 						}
 				}
 
-                if ( rulbus_arg->data == NULL ) {
-                        printk( KERN_NOTICE "Invalid write data pointer.\n" );
-                        return -EINVAL;
-                }
+				if ( rulbus_arg->data == NULL ) {
+						printk( KERN_NOTICE "Invalid write data pointer.\n" );
+						return -EINVAL;
+				}
 
 				if ( copy_from_user( data,
 									 ( const void __user * ) rulbus_arg->data,
@@ -975,28 +984,28 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 						printk( KERN_NOTICE "Can't read from user space\n" );
 						return -EFAULT;
 				}
-        }
+		}
 
-        /* Select the rack (if necessary) */
+		/* Select the rack (if necessary) */
 
-        if ( rulbus.rack != rulbus_arg->rack ) {
-                rulbus_parport_write_addr( 0 );
-                rulbus_parport_write_data( rulbus_arg->rack );
-                rulbus.rack = rulbus_arg->rack;
-        }
+		if ( rulbus.rack != rulbus_arg->rack ) {
+				rulbus_parport_write_addr( 0 );
+				rulbus_parport_write_data( rulbus_arg->rack );
+				rulbus.rack = rulbus_arg->rack;
+		}
 
-        /* Now write the rulbus address and then as many data as required */
+		/* Now write the rulbus address and then as many data as required */
 
-        rulbus_parport_write_addr( rulbus_arg->offset );
-        for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- )
-                rulbus_parport_write_data( *bp );
+		rulbus_parport_write_addr( rulbus_arg->offset );
+		for ( bp = data, i = rulbus_arg->len; i > 0; bp++, i-- )
+				rulbus_parport_write_data( *bp );
 
 		/* If we had to allocate a buffer get rid of it */
 
-        if ( rulbus_arg->len > RULBUS_MAX_BUFFER_SIZE )
-                kfree( data );
+		if ( rulbus_arg->len > RULBUS_MAX_BUFFER_SIZE )
+				kfree( data );
 
-        return rulbus_arg->len;
+		return rulbus_arg->len;
 }
 
 
@@ -1009,8 +1018,8 @@ static int rulbus_write( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 
 static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 {
-        unsigned char data[ 254 ];
-        size_t i;
+		unsigned char data[ 254 ];
+		size_t i;
 
 
 		/* If only a single byte is to be written call rulbus_write() */
@@ -1020,26 +1029,26 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 
 		/* Plausibility checks */
 
-        if ( rulbus_arg->rack & 0xF0 ) {
-                printk( KERN_NOTICE "Invalid rack number.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->rack & 0xF0 ) {
+				printk( KERN_NOTICE "Invalid rack number.\n" );
+				return -EINVAL;
+		}
 
-        if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
-                printk( KERN_NOTICE "Invalid address offset.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->offset < 1 || rulbus_arg->offset > 0xFE ) {
+				printk( KERN_NOTICE "Invalid address offset.\n" );
+				return -EINVAL;
+		}
 
-        if ( rulbus_arg->len < 1 ) {
-                printk( KERN_NOTICE
-                        "Invalid number of bytes to be written.\n" );
-                return -EINVAL;
-        }
+		if ( rulbus_arg->len < 1 ) {
+				printk( KERN_NOTICE
+						"Invalid number of bytes to be written.\n" );
+				return -EINVAL;
+		}
 
-        if ( ( unsigned long ) rulbus_arg->offset + rulbus_arg->len > 0xFE ) {
-                printk( KERN_NOTICE "Address range too large.\n" );
-                return -EINVAL;
-        }
+		if ( ( unsigned long ) rulbus_arg->offset + rulbus_arg->len > 0xFE ) {
+				printk( KERN_NOTICE "Address range too large.\n" );
+				return -EINVAL;
+		}
 
 		if ( rulbus_arg->data == NULL ) {
 				printk( KERN_NOTICE "Invalid write data pointer.\n" );
@@ -1053,23 +1062,23 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 				return -EFAULT;
 		}
 
-        /* Select the rack (if necessary) */
+		/* Select the rack (if necessary) */
 
-        if ( rulbus.rack != rulbus_arg->rack ) {
-                rulbus_parport_write_addr( 0 );
-                rulbus_parport_write_data( rulbus_arg->rack );
-                rulbus.rack = rulbus_arg->rack;
-        }
-
-        /* Now write as many data as required to consecutive rulbus
-		   addresses. */
-
-        for ( i = 0; i < rulbus_arg->len; i++ ) {
-				rulbus_parport_write_addr( rulbus_arg->offset + i );
-                rulbus_parport_write_data( data[ i ] );
+		if ( rulbus.rack != rulbus_arg->rack ) {
+				rulbus_parport_write_addr( 0 );
+				rulbus_parport_write_data( rulbus_arg->rack );
+				rulbus.rack = rulbus_arg->rack;
 		}
 
-        return rulbus_arg->len;
+		/* Now write as many data as required to consecutive rulbus
+		   addresses. */
+
+		for ( i = 0; i < rulbus_arg->len; i++ ) {
+				rulbus_parport_write_addr( rulbus_arg->offset + i );
+				rulbus_parport_write_data( data[ i ] );
+		}
+
+		return rulbus_arg->len;
 }
 
 
@@ -1079,19 +1088,19 @@ static int rulbus_write_range( RULBUS_EPP_IOCTL_ARGS * rulbus_arg )
 
 static int rulbus_epp_init( void )
 {
-        unsigned char ctrl;
+		unsigned char ctrl;
 
 
-        outb( SPP_nReset, CTRL_BYTE );
+		outb( SPP_nReset, CTRL_BYTE );
 
-        /* Reset the device by toggling the !reset bit - afterwards always
+		/* Reset the device by toggling the !reset bit - afterwards always
 		   wait a bit for the RC-network to follow the reset line (thanks
 		   to Martin Moene for sending me a patch to do that correctly). */
 
-        ctrl = inb( CTRL_BYTE );
-        outb( ctrl & ~ SPP_nReset, CTRL_BYTE );
+		ctrl = inb( CTRL_BYTE );
+		outb( ctrl & ~ SPP_nReset, CTRL_BYTE );
 		udelay( 1000 );
-        outb( ctrl | SPP_nReset, CTRL_BYTE );
+		outb( ctrl | SPP_nReset, CTRL_BYTE );
 		udelay( 1000 );
 
 		/* Finally check if the interface can be detected */
@@ -1108,33 +1117,33 @@ static int rulbus_epp_init( void )
 
 static int rulbus_epp_interface_present( void )
 {
-        const int p1 = 0xE5;         // write/read address bit-pattern 1
-        const int p2 = 0x5E;         // write/read address bit-pattern 2
+		const int p1 = 0xE5;		 // write/read address bit-pattern 1
+		const int p2 = 0x5E;		 // write/read address bit-pattern 2
 
 
-        rulbus_parport_write_addr( p1 );
+		rulbus_parport_write_addr( p1 );
 
-        if ( rulbus_epp_timeout_check( ) )
-                return 1;
+		if ( rulbus_epp_timeout_check( ) )
+				return 1;
 
-        if ( rulbus_parport_read_addr( ) != p1 )
-                return 1;
+		if ( rulbus_parport_read_addr( ) != p1 )
+				return 1;
 
-        if ( rulbus_epp_timeout_check( ) )
-                return 1;
+		if ( rulbus_epp_timeout_check( ) )
+				return 1;
 
-        rulbus_parport_write_addr( p2 );
+		rulbus_parport_write_addr( p2 );
 
-        if ( rulbus_epp_timeout_check( ) )
-                return 1;
+		if ( rulbus_epp_timeout_check( ) )
+				return 1;
 
-        if ( rulbus_parport_read_addr( ) != p2 )
-                return 1;
+		if ( rulbus_parport_read_addr( ) != p2 )
+				return 1;
 
-        if ( rulbus_epp_timeout_check( ) )
-                return 1;
+		if ( rulbus_epp_timeout_check( ) )
+				return 1;
 
-        return 0;
+		return 0;
 }
 
 

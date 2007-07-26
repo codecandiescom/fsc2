@@ -2717,7 +2717,10 @@ static int me6x00_write_wraparound( me6x00_write_st * arg,
  * Modification: JTT
  */
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 19 )
+static irqreturn_t me6x00_isr( int              irq,
+			       void *           dev_id )
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 static irqreturn_t me6x00_isr( int              irq,
 			       void *           dev_id,
 			       struct pt_regs * dummy )
@@ -2741,7 +2744,9 @@ static void me6x00_isr( int              irq,
 	int i;
 
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION( 2, 6, 19 )
 	dummy = dummy;
+#endif
 	ISR_PDEBUG( "me6x00_isr() is executed\n" );
 
 	info = dev_id;

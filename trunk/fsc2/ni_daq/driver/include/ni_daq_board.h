@@ -156,6 +156,8 @@ struct Board_Properties {
 	unsigned int            num_mite_channels;
 #endif
 
+	unsigned int            num_data_channels;
+
 	CALDAC_TYPES            caldac[ 3 ];
 };
 

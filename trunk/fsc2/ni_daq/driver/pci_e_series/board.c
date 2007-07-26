@@ -548,7 +548,10 @@ int pci_dac_direct_data( Board *      board,
  * Handler for interrupts raised by the boards
  *---------------------------------------------*/
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 19 )
+irqreturn_t pci_board_irq_handler( int              irq,
+				   void *           data )
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 irqreturn_t pci_board_irq_handler( int              irq,
 				   void *           data,
 				   struct pt_regs * dummy )

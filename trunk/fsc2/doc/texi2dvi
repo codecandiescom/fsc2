@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 # texi2dvi --- produce DVI (or PDF) files from Texinfo (or LaTeX) sources.
 #
 ############################################################################
@@ -713,4 +713,4 @@ for command_line_filename in ${1+"$@"}; do
 done
 
 $verbose "$0 done."
-exit 0 # exit successfully, not however we ended the loop.
+exit 0

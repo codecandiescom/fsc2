@@ -39,11 +39,13 @@ static bool spex232_check_confirmation( void );
 
 static void spex232_motor_init( void );
 
-static void spex232_set_motor_position( long /* pos */ );
+static void spex232_set_motor_position( long int /* pos */ );
 
-static void spex232_get_motor_position( void );
+#if 0
+static long int spex232_get_motor_position( void );
+#endif
 
-static void spex232_move_relative( long /* steps */ );
+static void spex232_move_relative( long int /* steps */ );
 
 static bool spex232_motor_is_busy( void );
 
@@ -88,6 +90,9 @@ bool spex232_init( void )
 
 	if ( spex232.is_wavelength )
 		spex232.wavelength = spex232_set_wavelength( spex232.wavelength );
+    else
+        spex232.wavelength = spex232_p2wl( spex232.motor_position );
+
 	spex232.is_wavelength = SET;
 
 	return OK;
@@ -273,7 +278,7 @@ static void spex232_reboot( void )
 	unsigned char buf = 248;
 
 
-	/* Switch to "inteligent communication mode" */
+	/* Switch to "inteligent communication mode", then wait for 200 ms*/
 
 	if ( fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1 )
 		spex232_comm_fail( );
@@ -390,14 +395,22 @@ static void spex232_motor_init( void )
 				        spex_wl2p( spex232_wl2wn( AUTOCALIBRATION_POSITION ) );
 	}
 	else
-		spex232_set_motor_position( spex232.motor_position );
+    {
+        if ( ! spex232.do_enforce_position )
+            spex232_set_motor_position( spex232.motor_position );
+        else
+            spex232_set_motor_position( spex232.enforced_position );
+    }
 #else
-	spex232_set_motor_position( spex232.motor_position );
+    if ( ! spex232.do_enforce_position )
+        spex232_set_motor_position( spex232.motor_position );
+    else
+        spex232_set_motor_position( spex232.enforced_position );
 #endif
 
 	/* Set the motor minimum and maximum speed and the ramp time */
 
-	len = snprintf( buf, MOTOR_INIT_BUF_SIZE, "B,0,%d,%d,%d\r",
+	len = snprintf( ( char * ) buf, MOTOR_INIT_BUF_SIZE, "B0,%d,%d,%d\r",
 					MIN_STEPS_PER_SECOND, MAX_STEPS_PER_SECOND, RAMP_TIME );
 	SPEX232_ASSERT( len < MOTOR_INIT_BUF_SIZE );
 
@@ -411,35 +424,30 @@ static void spex232_motor_init( void )
  * Converts an (uncorrected abolute) wavelength to a motor position
  *------------------------------------------------------------------*/
 
-long spex232_wl2p( double wl )
+long int spex232_wl2p( double wl )
 {
+    SPEX232_ASSERT( wl - spex232.abs_lower_limit >= 0.0 &&
+                    spex232.upper_limit - wl >= 0.0 );
+
 	if ( spex232.mode == WL )
-	{
-		SPEX232_ASSERT( wl - spex232.abs_lower_limit >= 0 );
 		return lrnd( ( wl - spex232.abs_lower_limit ) / spex232.mini_step );
-	}
 	else
-	{
-		SPEX232_ASSERT( spex232_wl2wn( wl )
-					 - spex232_wl2wn( spex232.abs_lower_limit ) >= 0 );
-		return lrnd( ( spex232_wl2wn( wl )
-					   - spex232_wl2wn( spex232.abs_lower_limit ) )
-					 / spex232.mini_step );
-	}
+		return lrnd( ( spex232_wl2wn( spex232.abs_lower_limit )
+					   - spex232_wl2wn( wl ) ) / spex232.mini_step );
 }
 				
 		
-/*------------------------------------------------------------------*
- * Converts a motor position to an (uncorrected abolute) wavelength
- *------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Converts a motor position to an (uncorrected absolute) wavelength
+ *-------------------------------------------------------------------*/
 
-double spex232_p2wl( long pos )
+double spex232_p2wl( long int pos )
 {
 	if ( spex232.mode == WL )
-		return pos * spex232.mini_step + spex232.lower_limit;
+		return pos * spex232.mini_step + spex232.abs_lower_limit;
 	else
-		return spex232_wn2wl( pos * spex232.mini_step
-							  + spex232_wl2wn( spex232.lower_limit ) );
+		return spex232_wn2wl( spex232_wl2wn( spex232.abs_lower_limit )
+                              - pos * spex232.mini_step );
 }
 
 
@@ -460,8 +468,14 @@ void spex232_scan_start( void )
 
 void spex232_scan_step( void )
 {
-	spex232.wavelength =
+    if ( spex232.mode == WL )
+        spex232.wavelength =
 		      spex232_set_wavelength( spex232.wavelength + spex232.scan_step );
+    else
+        spex232.wavelength =
+            spex232_set_wavelength( spex232_wn2wl( 
+                                            spex232_wl2wn( spex232.wavelength )
+                                            - spex232.scan_step ) );
 }
 
 
@@ -471,7 +485,7 @@ void spex232_scan_step( void )
 
 double spex232_set_wavelength( double wl )
 {
-	long new_pos;
+	long int new_pos;
 
 
 	new_pos = spex232_wl2p( wl );
@@ -481,7 +495,7 @@ double spex232_set_wavelength( double wl )
 					new_pos - spex232.backslash_steps >= 0 );
 
 #ifndef SPEX232_TEST
-    if ( FSC2_MODE != EXPERIMENT )
+    if ( FSC2_MODE == EXPERIMENT )
 	{
 		/* If we're driving to lower wavelenths (or higher wavenumbers) we have
 		   to first add backslash and then drive up again, otherwise we can go
@@ -507,9 +521,9 @@ double spex232_set_wavelength( double wl )
  * Function for telling the device the current position of the motor
  *-------------------------------------------------------------------*/
 
-static void spex232_set_motor_position( long pos )
+static void spex232_set_motor_position( long int pos )
 {
-	unsigned char buf[ 30 ];
+    char buf[ 30 ];
 
 
 	sprintf( buf, "G0,%ld\r", pos );
@@ -522,13 +536,14 @@ static void spex232_set_motor_position( long pos )
 }
 
 
-/*--------------------------------------------------------------------*
- * Function for querying the device the current position of the motor
- *--------------------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function for querying the device the current position of the motor.
+ *---------------------------------------------------------------------*/
 
-static void spex232_get_motor_position( void )
+#if 0
+static long int spex232_get_motor_position( void )
 {
-	unsigned char buf[ 30 ] = "H0\r";
+	char buf[ 30 ] = "H0\r";
 	ssize_t len = 0;
 
 
@@ -540,24 +555,31 @@ static void spex232_get_motor_position( void )
 		spex232_comm_fail( );
 
 	buf[ len - 1 ] = '\0';
-	spex232.motor_position = T_atol( buf );
+	return T_atol( buf );
 }
+#endif
 
 
 /*------------------------------------------------------------*
  * Function for moving the motor by a certain number of steps
  *------------------------------------------------------------*/
 
-static void spex232_move_relative( long steps )
+static void spex232_move_relative( long int steps )
 {
-	unsigned char buf[ 30 ];
+	char buf[ 30 ];
 
+
+    /* Ask the monochromator to move. Wait 200 ms before asking it if it's
+       finished (that's not required in the manual but if the query gets
+       send earlier the interface doesn't answer and we get a timeout) */
 
 	sprintf( buf, "F0,%ld\r", steps );
 	if ( fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
 						   SERIAL_WAIT, UNSET ) != ( ssize_t ) strlen( buf ) ||
 		 ! spex232_check_confirmation( ) )
 		spex232_comm_fail( );
+
+    fsc2_usleep( 200000, UNSET );
 
 	while ( spex232_motor_is_busy( ) )
 		/* empty */ ;
@@ -571,7 +593,7 @@ static void spex232_move_relative( long steps )
  
 static bool spex232_motor_is_busy( void )
 {
-	unsigned char cmd = 'E';
+	char cmd = 'E';
 
 	if ( fsc2_serial_write( SERIAL_PORT, &cmd, 1, SERIAL_WAIT, UNSET ) != 1 ||
 		 ! spex232_check_confirmation( ) ||

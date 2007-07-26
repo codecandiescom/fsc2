@@ -3,7 +3,7 @@
 # $Id$
 
 OWNER                := fsc2
-GROUP                := uucp
+GROUP                := dialout
 EDITOR               := emacs
 
 #KERNEL_VERSION       := $(shell uname -r)

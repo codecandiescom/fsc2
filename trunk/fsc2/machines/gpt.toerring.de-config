@@ -1,6 +1,6 @@
 # -*-sh-*-
 #
-# $Id$
+# $Id: gpt.toerring.de-config 7130 2004-07-29 15:36:35Z jens $
 
 grep -E '^[ \t]*#define[ \t]+CCD_PIXEL_WIDTH[ \t]+1340[[:space:]]*$' $cdir/rs_spec10.conf > /dev/null
 if [ $? -ne 0 ]; then

@@ -650,7 +650,10 @@ void ni6601_dma_irq_disable( Board * board,
  * Interrupt handler for all boards
  *----------------------------------*/
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 19 )
+irqreturn_t ni6601_irq_handler( int              irq,
+				void *           data )
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 irqreturn_t ni6601_irq_handler( int              irq,
 				void *           data,
 				struct pt_regs * dummy )

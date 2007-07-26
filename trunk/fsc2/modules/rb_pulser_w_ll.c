@@ -300,8 +300,6 @@ static void rb_pulser_w_phase_init( void )
     int is_busy;
 
 
-    raise_permissions( );
-
     /* Set up all the cards for phase pulses to emit end pulses for a +X
        phase switch setting. Also set them up tp emit negative polarity
        end pulses, that's what the "magic box"expects. */
@@ -331,6 +329,7 @@ static void rb_pulser_w_phase_init( void )
     rb_pulser_w_delay_card_delay( card,
                                   Ticks_ceil( MINIMUM_PHASE_PULSE_LENGTH /
                                               rb_pulser_w.timebase ) );
+    raise_permissions( );
 
     /* Now start this card to make it emit a singe pulse that in turn sets
        the phase switch to +X */
@@ -360,8 +359,6 @@ static void rb_pulser_w_phase_init( void )
 
         card->old_delay = card->old_delay = 0;
     }
-
-    lower_permissions( );
 
 #else /* in test mode */
     for ( ; card != NULL; card = card->next )
@@ -526,11 +523,11 @@ void rb_pulser_w_run( bool state )
 #if ! defined RB_PULSER_W_TEST
     Rulbus_Delay_Card_T *card;
     Function_T *f;
-    int is_busy;
     int i;
+    Ticks ticks;
+    Ticks max_ticks = 0;
 
 
-    raise_permissions( );
 #endif
 
     if ( state == START )
@@ -548,6 +545,8 @@ void rb_pulser_w_run( bool state )
            the following cards. */
 
 #if ! defined RB_PULSER_W_TEST
+        raise_permissions( );
+
         if ( rulbus_rb8514_delay_set_output_pulse(
                                     rb_pulser_w.delay_card[ ERT_DELAY ].handle,
                                     RULBUS_RB8514_DELAY_OUTPUT_BOTH,
@@ -555,27 +554,30 @@ void rb_pulser_w_run( bool state )
                                                                 != RULBUS_OK )
             rb_pulser_w_failure( SET, "Failure to stop pulser" );
 
-        /* Wait until all cards (except the ERT card) are quiet, i.e. aren't
-           outputting pulses anymore - the sleep of 1 us is in there to avoid
-           missing cards getting started by their predecessors. */
+        lower_permissions( );
+
+        /* Wait until all cards are quiet, i.e. aren't outputting pulses 
+           anymore (we don't test the cards directly since that takes
+           about 8 ms per card but rely on the pulser being quit after
+           the longest function) */
 
         for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
         {
             f = rb_pulser_w.function + i;
 
-            for ( card = f->delay_card; card != NULL; card = card->next )
-                do
-                {
-                    fsc2_usleep( 1, UNSET );
-                    is_busy = rulbus_rb8514_delay_busy( card->handle );
+            if ( ! f->is_used )
+                continue;
 
-                    if ( rulbus_errno != RULBUS_OK )
-                        rb_pulser_w_failure( SET, "Failure to stop pulser" );
-                } while ( is_busy );
+            for ( ticks = 0, card = f->delay_card;
+                  card != NULL && card->is_active;
+                  card = card->next )
+                ticks += card->delay;
+
+            max_ticks = Ticks_max( ticks, max_ticks );
         }
 
-        lower_permissions( );
-
+        fsc2_usleep( lrnd( ceil( max_ticks *
+                                 rb_pulser_w.timebase * 1.0e6 ) ), UNSET );
 #else   /* in test mode */
         fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( ERT_DELAY "
                  "RULBUS_RB8514_DELAY_OUTPUT_BOTH, "
@@ -597,13 +599,16 @@ static void rb_pulser_w_start_external_trigger( void )
        the start/end pulse output connector. */
 
 #if ! defined RB_PULSER_W_TEST
+    raise_permissions( );
+
     if ( rulbus_rb8514_delay_set_output_pulse(
                                     rb_pulser_w.delay_card[ ERT_DELAY ].handle,
                                     RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                     RULBUS_RB8514_DELAY_END_PULSE )
                                                                  != RULBUS_OK )
-        rb_pulser_w_failure( SET, "Failure to start pulser" );
+    	rb_pulser_w_failure( SET, "Failure to start pulser" );
 
+    lower_permissions( );
 #else   /* in test mode */
     fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %s, %s, %s )\n",
              rb_pulser_w.delay_card[ ERT_DELAY ].name,
@@ -626,6 +631,8 @@ static void rb_pulser_w_start_internal_trigger( void )
        pulse output connectors and then start it via software */
 
 #if ! defined RB_PULSER_W_TEST
+    raise_permissions( );
+
     if ( rulbus_rb8514_delay_set_raw_delay(
                                    rb_pulser_w.delay_card[ ERT_DELAY ].handle,
                                    rb_pulser_w.delay_card[ ERT_DELAY ].delay,
@@ -640,6 +647,7 @@ static void rb_pulser_w_start_internal_trigger( void )
                                                                  != RULBUS_OK )
         rb_pulser_w_failure( SET, "Failure to start pulser" );
 
+    lower_permissions( );
 #else   /* in test mode */
     fprintf( stderr, "rulbus_rb8514_delay_set_raw_delay( %s, %lu, 1 )\n",
              rb_pulser_w.delay_card[ ERT_DELAY ].name,

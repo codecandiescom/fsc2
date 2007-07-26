@@ -73,16 +73,6 @@ int spex232_init_hook( void )
             SPEX232_THROW( EXCEPTION );
     }
 
-    /* Read in the file where the state of the monochromator gets stored
-       to find out about the offset between the values displayed at the
-       CD2A and the "true" wavelengths or -numbers and, for wavenumber-
-       driven monochromators the setting of the laser line position as
-       used in the previous invocation of the program. (The file has also
-       to be read each time at the start of an experiment since it's
-       contents are rewritten at the end of each experiment.) */
-
-    spex232_read_state( );
-
 #if defined SPEX232_MAX_OFFSET
     if ( fabs( spex232.offset ) > SPEX232_MAX_OFFSET )
     {
@@ -95,9 +85,6 @@ int spex232_init_hook( void )
         SPEX232_THROW( EXCEPTION );
     }
 #endif
-
-    if ( spex232.mode & WN_MODES && spex232.laser_line != 0.0 )
-        spex232.mode = WN_REL;
 
     /* If it's wavelength driven find out the units the controller expects
        (either nanometer or Angstrom) */
@@ -329,6 +316,19 @@ int spex232_init_hook( void )
         SPEX232_THROW( EXCEPTION );
     }
 
+    /* Read in the file where the state of the monochromator gets stored
+       to find out about the offset between the values displayed at the
+       CD2A and the "true" wavelengths or -numbers and, for wavenumber-
+       driven monochromators the setting of the laser line position as
+       used in the previous invocation of the program. (The file has also
+       to be read each time at the start of an experiment since it's
+       contents are rewritten at the end of each experiment.) */
+
+    spex232_read_state( );
+
+    if ( spex232.mode & WN_MODES && spex232.laser_line != 0.0 )
+        spex232.mode = WN_REL;
+
     /* Calculate the maximum motor position */
 
     spex232.max_motor_position = spex232_wl2p( spex232.upper_limit );
@@ -336,6 +336,7 @@ int spex232_init_hook( void )
     spex232.is_wavelength = UNSET;
     spex232.scan_is_init = UNSET;
     spex232.need_motor_init = UNSET;
+    spex232.do_enforce_position = UNSET;
 
     return 1;
 }
@@ -396,7 +397,11 @@ int spex232_exp_hook( void )
 
     /* Test if the device reacts */
 
-    spex232_init( );
+    if ( ! spex232_init( ) )
+    {
+        print( FATAL, "Can't access the monochromator\n" );
+        SPEX232_THROW( EXCEPTION );
+    }
 
     return 1;
 }
@@ -444,17 +449,78 @@ Var_T *monochromator_name( Var_T * v  UNUSED_ARG )
 #if defined AUTOCALIBRATION_POSITION
 Var_T *monochromtor_init_motor( Var_T * v  UNUSED_ARG )
 {
-    if ( FSC2_MODE != PREPARATIONS )
-    {
-        print( FATAL, "This function can only be called in the PREPARRATIONS "
-               "section.\n" );
-        THROW( EXCEPTION );
-    }
-
     spex232.need_init_motor = SET;
     return vars_push( INT_VAR, 1L );
 }
 #endif
+
+
+/*---------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
+
+Var_T *monochromator_enforce_wavelength( Var_T * v )
+{
+    double wl;
+
+
+    if ( spex232.do_enforce_position )
+    {
+        print( WARN, "A wavelength or -number to enforce already has been "
+               "set, disregarding this call.\n" );
+        return vars_push( INT_VAR, 0L );
+    }
+
+    wl = get_double( v, "wavelength to enforce" );
+
+    if ( wl < spex232.abs_lower_limit || wl > spex232.upper_limit )
+    {
+        print( FATAL, "Wavelength not within limits of monochromator.\n" );
+        THROW( EXCEPTION );
+    }
+
+    spex232.do_enforce_position = SET;
+    spex232.enforced_position = spex232_wl2p( wl );
+ 
+    return vars_push( INT_VAR, 1L );
+}
+
+
+/*---------------------------------------------------------------------------*
+ *--------------------------------------------------------------------------*/
+
+Var_T *monochromator_enforce_wavenumber( Var_T * v )
+{
+    double wl, wn;
+
+
+    if ( spex232.do_enforce_position )
+    {
+        print( WARN, "A wavelength or -number to enforce already has been "
+               "set, disregarding this call.\n" );
+        return vars_push( INT_VAR, 0L );
+    }
+
+    wn = get_double( v, "wavenumber to enforce" );
+
+    if ( wn <= 0.0 )
+    {
+        print( FATAL, "Invalid wavenumber of %g cm^-1.\n" );
+        THROW( EXCEPTION );
+    }
+
+    wl = spex232_wn2wl( wn );
+
+    if ( wl < spex232.abs_lower_limit || wl > spex232.upper_limit )
+    {
+        print( FATAL, "Wavenumber not within limits of monochromator.\n" );
+        THROW( EXCEPTION );
+    }
+
+    spex232.do_enforce_position = SET;
+    spex232.enforced_position = spex232_wl2p( wl );
+ 
+    return vars_push( INT_VAR, 1L );
+}
 
 
 /*---------------------------------------------------------------------------*
@@ -655,7 +721,7 @@ Var_T *monochromator_scan_setup( Var_T * v )
 {
     double start = 0.0;
     double step;
-    long num_steps;
+    long int num_steps;
     double vals[ 2 ];
 
 
@@ -857,7 +923,7 @@ Var_T *monochromator_start_scan( Var_T * v  UNUSED_ARG )
 
     /* Move monochromator to start position of the scan */
 
-    spex232_start_scan( );
+    spex232_scan_start( );
 
     if ( spex232.mode & WN_MODES )
         return vars_push( FLOAT_VAR,
@@ -1115,7 +1181,7 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
 {
     double wl = spex232.wavelength;
     Var_T *cv;
-    long num_pixels;
+    long int num_pixels;
     int acc;
 
 
@@ -1207,7 +1273,7 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
 {
     double wl = spex232.wavelength;
     Var_T *cv;
-    long num_pixels;
+    long int num_pixels;
     int acc;
 
 

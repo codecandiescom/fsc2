@@ -50,6 +50,8 @@ void rb_pulser_j_init( void )
 
 
 #if ! defined RB_PULSER_J_TEST
+    raise_permissions( );
+
     /* Try to get handles for all Rulbus (clock and delay) cards used by
        the pulser */
 
@@ -158,6 +160,7 @@ void rb_pulser_j_init( void )
 
     rb_pulser_j_synthesizer_init( );
 
+    lower_permissions( );
 #else     /* in test mode */
 
     fprintf( stderr, "rulbus_rb8514_delay_set_output_puls( %d, "
@@ -276,6 +279,8 @@ void rb_pulser_j_exit( void )
 
 
 #if ! defined RB_PULSER_J_TEST
+    raise_permissions( );
+
     /* Stop all open clock cards and close them */
 
     for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
@@ -312,6 +317,8 @@ void rb_pulser_j_exit( void )
             rulbus_card_close( rb_pulser_j.delay_card[ i ].handle );
             rb_pulser_j.delay_card[ i ].handle = -1;
         }
+
+    lower_permissions( );
 #endif
 }
 
@@ -322,8 +329,11 @@ void rb_pulser_j_exit( void )
 
 void rb_pulser_j_run( bool state )
 {
+    Rulbus_Delay_Card_T *card;
+    Function_T *f;
     int i;
-    int is_busy;
+    Ticks ticks;
+    Ticks max_ticks = 0;
 
 
     if ( state == START )
@@ -342,6 +352,8 @@ void rb_pulser_j_run( bool state )
            feeding the ERT delay card and finally set its delay to 0 */
 
 #if ! defined RB_PULSER_J_TEST
+        raise_permissions( );
+
         if ( rulbus_rb8514_delay_set_output_pulse(
                                     rb_pulser_j.delay_card[ ERT_DELAY ].handle,
                                     RULBUS_RB8514_DELAY_OUTPUT_BOTH,
@@ -353,21 +365,30 @@ void rb_pulser_j_run( bool state )
                                                                 != RULBUS_OK )
             rb_pulser_j_failure( SET, "Failure to stop pulser" );
 
-        /* Wait until all cards (except the ERT card) are quiet, i.e. aren't
-           outputting pulses anymore */
+        lower_permissions( );
 
-        do {
-            for ( is_busy = 0, i = 0; i < NUM_DELAY_CARDS && ! is_busy; i++ )
-            {
-                if ( i == ERT_DELAY )
-                    continue;
+        /* Wait until all cards are quiet, i.e. aren't outputting pulses 
+           anymore (we don't test the cards directly since that takes
+           about 8 ms per card but rely on the pulser being quit after
+           the longest function) */
 
-                is_busy = rulbus_rb8514_delay_busy(
-                                          rb_pulser_j.delay_card[ i ].handle );
-                if ( rulbus_errno != RULBUS_OK )
-                    rb_pulser_j_failure( SET, "Failure to stop pulser" );
-            }
-        } while ( is_busy );
+        for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
+        {
+            f = rb_pulser_j.function + i;
+
+            if ( ! f->is_used )
+                continue;
+
+            for ( ticks = 0, card = f->delay_card;
+                  card != NULL && card->is_active;
+                  card = card->next )
+                ticks += card->delay;
+
+            max_ticks = Ticks_max( ticks, max_ticks );
+        }
+
+        fsc2_usleep( lrnd( ceil( max_ticks *
+                                 rb_pulser_j.timebase * 1.0e6 ) ), UNSET );
 
         rb_pulser_j.is_running = UNSET;
 
@@ -399,6 +420,8 @@ static void rb_pulser_j_start_external_trigger( void )
        end pulses on the first start/end pulse output connector. */
 
 #if ! defined RB_PULSER_J_TEST
+    raise_permissions( );
+
     if ( rulbus_rb8514_delay_set_output_pulse(
                                    rb_pulser_j.delay_card[ INIT_DELAY ].handle,
                                    RULBUS_RB8514_DELAY_OUTPUT_BOTH,
@@ -415,6 +438,7 @@ static void rb_pulser_j_start_external_trigger( void )
                                                                 != RULBUS_OK )
         rb_pulser_j_failure( SET, "Failure to start pulser" );
 
+    lower_permissions( );
 #else   /* in test mode */
     fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %d, "
              "RULBUS_RB8514_DELAY_OUTPUT_BOTH, "
@@ -443,6 +467,8 @@ static void rb_pulser_j_start_internal_trigger( void )
        experiment with external trigger) and then start a delay via software */
 
 #if ! defined RB_PULSER_J_TEST
+    raise_permissions( );
+
     if ( rulbus_rb8515_clock_set_frequency(
                                    rb_pulser_j.clock_card[ ERT_CLOCK ].handle,
                                    rb_pulser_j.clock_card[ ERT_CLOCK ].freq )
@@ -452,6 +478,7 @@ static void rb_pulser_j_start_internal_trigger( void )
 
     rb_pulser_j_delay_card_delay( rb_pulser_j.delay_card[ ERT_DELAY ].handle,
                                   rb_pulser_j.delay_card[ ERT_DELAY ].delay );
+    raise_permissions( );
 
     if ( rulbus_rb8514_delay_set_output_pulse(
                                    rb_pulser_j.delay_card[ ERT_DELAY ].handle,
@@ -468,6 +495,7 @@ static void rb_pulser_j_start_internal_trigger( void )
                                                                  != RULBUS_OK )
         rb_pulser_j_failure( SET, "Failure to start pulser" );
 
+    lower_permissions( );
 #else   /* in test mode */
     fprintf( stderr, "rulbus_rb8515_clock_set_frequency( %d, %d )\n",
              ERT_CLOCK, rb_pulser_j.clock_card[ ERT_CLOCK ].freq );
@@ -499,10 +527,14 @@ void rb_pulser_j_delay_card_state( int  handle,
                 RULBUS_RB8514_DELAY_END_PULSE : RULBUS_RB8514_DELAY_PULSE_NONE;
 
 
+    raise_permissions( );
+
     if ( rulbus_rb8514_delay_set_output_pulse(
                                        handle, RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                        type ) != RULBUS_OK )
         rb_pulser_j_failure( SET, "Failure to set card trigger out mode" );
+
+    lower_permissions( );
 }
 
 
@@ -519,12 +551,16 @@ void rb_pulser_j_delay_card_delay( int           handle,
     /* Set the new delay but wait until the card is finished with outputting
        a pulse */
 
+    raise_permissions( );
+
     while ( ( ret = rulbus_rb8514_delay_set_raw_delay( handle, delay, 0 ) )
                                                        == RULBUS_CARD_IS_BUSY )
         /* empty */ ;
 
     if ( ret != RULBUS_OK )
         rb_pulser_j_failure( SET, "Failure to set card delay length" );
+
+    lower_permissions( );
 }
 
 
@@ -547,6 +583,7 @@ static void rb_pulser_j_failure( bool         rb_flag,
     else
         print( FATAL, "%s.\n", mess );
     rb_pulser_j_exit( );
+    lower_permissions( );
     calls--;
     THROW( EXCEPTION );
 }
