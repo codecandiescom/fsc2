@@ -472,6 +472,14 @@ Var_T *monochromator_enforce_wavelength( Var_T * v )
 
     wl = get_double( v, "wavelength to enforce" );
 
+    if ( wl < spex232.abs_lower_limit &&
+         ( spex232.abs_lower_limit - wl ) / spex232.abs_lower_limit < 1.0e-5 )
+        wl = spex232.abs_lower_limit;
+
+    if ( wl > spex232.upper_limit &&
+         ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
+        wl = spex232.upper_limit;
+
     if ( wl < spex232.abs_lower_limit || wl > spex232.upper_limit )
     {
         print( FATAL, "Wavelength not within limits of monochromator.\n" );
@@ -509,6 +517,14 @@ Var_T *monochromator_enforce_wavenumber( Var_T * v )
     }
 
     wl = spex232_wn2wl( wn );
+
+    if ( wl < spex232.abs_lower_limit &&
+         ( spex232.abs_lower_limit - wl ) / spex232.abs_lower_limit < 1.0e-5 )
+        wl = spex232.abs_lower_limit;
+
+    if ( wl > spex232.upper_limit &&
+         ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
+        wl = spex232.upper_limit;
 
     if ( wl < spex232.abs_lower_limit || wl > spex232.upper_limit )
     {
@@ -599,6 +615,14 @@ Var_T *monochromator_wavelength( Var_T * v )
     OTHERWISE
         SPEX232_RETHROW( );
 
+    if ( wl < spex232.lower_limit &&
+         ( spex232.lower_limit - wl ) / spex232.lower_limit < 1.0e-5 )
+        wl = spex232.lower_limit;
+
+    if ( wl > spex232.upper_limit &&
+         ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
+        wl = spex232.upper_limit;
+
     if ( wl < spex232.lower_limit )
     {
         print( FATAL, "Requested wavelength of %.5f nm is lower than the "
@@ -668,6 +692,14 @@ Var_T *monochromator_wavenumber( Var_T * v )
     }
     OTHERWISE
         SPEX232_RETHROW( );
+
+    if ( wl < spex232.lower_limit &&
+         ( spex232.lower_limit - wl ) / spex232.lower_limit < 1.0e-5 )
+        wl = spex232.lower_limit;
+
+    if ( wl > spex232.upper_limit &&
+         ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
+        wl = spex232.upper_limit;
 
     if ( wl < spex232.lower_limit )
     {
@@ -783,6 +815,14 @@ Var_T *monochromator_scan_setup( Var_T * v )
     }
     OTHERWISE
         SPEX232_RETHROW( );
+
+    if ( start < spex232.lower_limit &&
+         ( spex232.lower_limit - start ) / spex232.lower_limit < 1.0e-5 )
+        start = spex232.lower_limit;
+
+    if ( start > spex232.upper_limit &&
+         ( start - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
+        start = spex232.upper_limit;
 
     if ( start < spex232.lower_limit )
     {
