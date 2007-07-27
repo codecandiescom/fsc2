@@ -1083,7 +1083,7 @@ static void timeout_init( int                dir,
     iwait.it_interval.tv_sec  =
     iwait.it_interval.tv_usec = 0;
 
-    /* Now trea the cases where we can either use a socket option or have
+    /* Now treat the cases where we can either use a socket option or have
        to start a timer (kernels older than 2.3.41) */
 
     if ( ll->so_timeo_avail )
