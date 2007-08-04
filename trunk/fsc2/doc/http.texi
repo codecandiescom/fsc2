@@ -28,53 +28,53 @@ It often can be quite useful to be able to find out about the current
 state of an experiment without having to sit around in the lab all the
 time or constantly coming back just to check that everything is still
 working fine. Instead @code{fsc2} lets you start a built-in web server
-that allows to monitor the current state of the experiment via a browser
-via the internet. The web server gets switched on by clicking on the
-@code{WWW server} button. The button remains green (instead of being
-grey) while the web server is running.
+that allows you to monitor the current state of the experiment via a
+browser via the internet. The web server gets switched on by clicking
+on the @code{WWW server} button. The button remains green (instead of
+being grey) while the web server is running.
 
-Normal web servers listen for incoming requests from the outside world
-on a predefined port, numbered 80. Thus you usually don't have to tell
-your browser to which port of the server to connect, it will use port 80
-by default. This is a bit different with @code{fsc2}. Because it does
-not run with very high privileges it can't use port 80 (ports in the
-range between 0 and 1023 can only be used by programs running with the
-rights of the root user, i.e.@: very high privileges). Instead per
-default it uses the alternate HTTP port, which has the number 8080. Thus
-you have to tell your browser explicitely to connect to this port
-instead of the default port 80. This is done by specifying also the port
-number in the URL, just add a colon and the port number to the machine
-name like this:
+Normally web servers listen for incoming requests from the outside
+world on the port numbered 80. Thus you usually don't have to tell
+your browser to which port of the server to connect, it will use port
+80 by default. This is a bit different with @code{fsc2}. Because it
+does not run with very high privileges it can't use port 80 (ports
+in the range between 0 and 1023 can only be used by programs running
+with the rights of the root user, i.e.@: very high privileges).
+Instead per default it uses the alternate HTTP port, which has the
+number 8080. Thus you have to tell your browser explicitely to connect
+to this port instead of the default port 80. This is done by
+specifying the port number in the URL, you have to just add a colon
+and the port number to the machine name like this:
 @example
 http://name.of.computer:8080
 @end example
 @noindent
-where @code{name.of.computer} is the Internet name of the computer the
+where @code{name.of.computer} is the internet name of the computer the
 experiment is running on (@strong{don't} prepend a @code{www.}). You
 also may tell @code{fsc2} to use a different port instead of 8080
 through the @code{-httpPort} command line option.
 
 When @code{fsc2}'s web server is running your browser will display a
 page telling you @code{fsc2}'s current state, i.e.@: whether it is idle,
-running and experiment, waiting for user input (when e.g.@: a file
+running an experiment, waiting for user input (when e.g.@: a file
 selector is shown) or has finished the experiment. Furthermore, it
-displays a copy of the display windows and, if @code{fsc2} is showing
-it, of the cross section window. Both are shown in exactly the same way
+displays a copy of the display window(s) and, if @code{fsc2} is showing
+it, of the cross section window. They are shown in exactly the same way
 as they are displayed on the screen. Finally, it shows the last 30 lines
 of the browser for error messages and other output from the running
 @code{EDL} program.
 
 Currently, graphics will only be sent in either PNG or JPEG format, thus
-your browser must support one of these formats. While there is no
-technical problem not to support also graphics in GIF format some legal
-issues which keep me from doing so (as far as I know the LWZ compression
-method used with the GIF format is patented by Unisys and I am not going
-to buy a license).  Perhaps this will change in 2003 when the patent
-is due to expire.
+your browser must support one of these formats (most do). While there
+is no technical problem not to support also graphics in GIF format
+some legal issues which keep me from doing so (as far as I know the
+LWZ compression method used with the GIF format is patented by Unisys
+and I am not going to buy a license).  Perhaps this will change after
+the patent expired.
 
 Please note that serving web pages is a rather low priority task. When
-the @code{fsc2} is very busy acquiring and displaying data the reaction
-time to a request for a new page might be rather long.
+@code{fsc2} is very busy acquiring and displaying data the reaction
+time to a request for a new page might be long.
 
 Under certain conditions you may get a "Not available" message instead
 of a graphic with the current state of a window. This happens when you
@@ -82,14 +82,14 @@ just reload a graphic (but not the complete page) and someone else,
 sitting directly at the computer where the experiment is running, has
 closed the corresponding window.
 
-Interacting directly with requests from the Internet always raises some
+Interacting directly with requests from the internet always raises some
 concerns about security. First of all, the web server built into
 @code{fsc2} is that simple (and is running with the privileges of the
 user only) that I am quite convinced that there are no bugs that could
 be exploited to gain access to data an outsider shouldn't be able to
 obtain. And because the server is written in Perl (and running in
 tainted mode) also buffer overflows shouldn't be an issue. All you have
-to worry about is that, in principle, everybody in the world can have a
+to worry about is that in principle everybody in the world can have a
 look at your measurement while the web server is up and running. If you
 are deeply concerned about this you can also build @code{fsc2} without
 support for the web server.
@@ -98,7 +98,7 @@ The only other conceivable problem would be that someone really
 malicious would constantly send requests to the server which, in turn,
 must bother @code{fsc2} to tell it about its current status and to
 create graphics with the window contents. In cases when @code{fsc2} is
-already having problems acquiring and displaying the measured data fast
+already having problems acquiring and displaying measured data fast
 enough this could further increase its workload and, in extreme cases,
 might slow down the experiment a bit. If you have reasons to suspect
 something like this to happen simply switching off the web server (or
@@ -108,4 +108,4 @@ Please note: If multiple instances of @code{fsc2} are running only one
 of them can run the web server on the default port 8080. So if you want
 more than one of the instances to run a web server you must assign a
 different port the web server is going to listen on to the different
-instances using the @code{-httpPort} option.
+instances, using the @code{-httpPort} option.

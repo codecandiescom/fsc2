@@ -97,7 +97,7 @@ extern double ma_list[ MAX_MA_INDEX + 1 ];
 #define UNDEF_CT_MULT         -1
 #define BASE_CT               3.2e-4   /* minimum conversion time */
 
-/* Conversion times between 40 ms and 64 ms (i.e. for CT values between 125
+/* Conversion times between 40 ms and 64 ms (i.e. for CT values between 123
    and 200) lead, according to my tests, to garbled data for large signal
    amplitudes. Until someone at Bruker is able to tell me how to deal with
    this problem we'll have to avoid using these conversion times. */

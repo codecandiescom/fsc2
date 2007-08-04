@@ -568,8 +568,8 @@ amplifier with built-in analog-to-digital converter.
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use  @code{"ER023M"} as the device name,
-@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
-@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos},
+@code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -586,11 +586,11 @@ In the GPIB configuration file use  @code{"ER023M"} as the device name,
 @item @ref{lockin_harmonic()}
 @item @ref{lockin_resonator()}
 @item @ref{lockin_is_overload()}
-@item lockin_rg()
-@item lockin_tc()
-@item lockin_ma()
-@item lockin_ct()
-@item lockin_mf()
+@item @ref{lockin_rg()}
+@item @ref{lockin_tc()}
+@item @ref{lockin_ma()}
+@item @ref{lockin_ct()}
+@item @ref{lockin_mf()}
 @end table
 
 
@@ -617,8 +617,8 @@ minimum field step width is @w{1 mG}.
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{"ER032M"} as the device name,
-@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} and
-@code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
+@code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos} to
+@code{yes} and @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -744,7 +744,7 @@ In the GPIB configuration file use @code{"ER035M"} as the device name,
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{hfs9000}
+@strong{Module name}: @code{gg_chopper}
 
 @paragraphindent 0
 @strong{Additionally required module}: @code{pci_mio_16e_1}
@@ -762,7 +762,7 @@ Torsten Zytowski's PhD thesis, University Z@"urich, 1998.
 @strong{Supported functions}:
 @table @samp
 @item @ref{chopper_name()}
-@item @ref{chopper_rotation_frequency()}
+@item @ref{chopper_sector_frequency()}
 @item @ref{chopper_create_trigger()}
 @end table
 
@@ -2009,7 +2009,7 @@ channels (depending on model), 1 function channel, 4 memory channels.
 @paragraphindent 0
 @strong{Controlled via}: LAN (LeCroy VICP protocol)@*
 The IP address of the device (or alernatively its hostname if it has a
-DNS entry must be set in the configuration file for the device
+DNS entry) must be set in the configuration file for the device
 @file{config/lecroy_ws.conf}.
 
 @paragraphindent 0

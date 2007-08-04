@@ -84,8 +84,9 @@ int er023m_init_hook( void )
 
     /* Set up the (uncalibrated) modulation amplitude list */
 
-    for ( i = 0; i <= MAX_MA_INDEX; i++ )
+    for ( i = 0; i < MAX_MA_INDEX; i++ )
         ma_list[ i ] = 100.0 * pow( 10.0, ( double ) -i / 20.0 );
+    ma_list[ i ] = 0.0;
 
     /* Clear the calibration list */
 
@@ -374,7 +375,7 @@ Var_T *lockin_time_constant( Var_T * v )
 
     er023m.tc_index = tc_index;
     if ( FSC2_MODE == EXPERIMENT )
-            er023m_set_tc( tc_index );
+        er023m_set_tc( tc_index );
 
     return vars_push( FLOAT_VAR, tc_list[ tc_index ] );
 }
@@ -537,7 +538,7 @@ Var_T *lockin_conversion_time( Var_T * v )
        conversion times in this range by the nearest conversion time that
        still leads to correct data. */
 
-    if ( ct_mult >= BAD_LOW_CT_MULT && ct_mult < BAD_HIGH_CT_MULT )
+    if ( ct_mult >= BAD_LOW_CT_MULT && ct_mult <= BAD_HIGH_CT_MULT )
     {
         long new_ct_mult;
 
@@ -657,7 +658,7 @@ Var_T *lockin_ref_freq( Var_T * v )
 
 /*--------------------------------------------------------------------------*
  * Returns or sets the modulation amplitude. If called without an argument
- * the modulation amplitude is returned (in G). If called with an argument
+ * the modulation amplitude is returned (in %). If called with an argument
  * the modulation amplitude is set to this value.
  *--------------------------------------------------------------------------*/
 
@@ -698,11 +699,11 @@ Var_T *lockin_ref_level( Var_T * v )
 
     /* Find a valid amplitude nearest to the one we got */
 
-    for ( i = 0; i < MAX_MA_INDEX; i++ )
+    for ( i = 0; i < MAX_MA_INDEX - 1; i++ )
         if ( ma <= ma_list[ i ] && ma > ma_list[ i + 1 ] )
         {
             ma_index = i
-                   + ( ( ma / ma_list[ i ] > ma_list[ i + 1 ] / ma ) ? 0 : 1 );
+                + ( ( ma / ma_list[ i ] > ma_list[ i + 1 ] / ma ) ? 0 : 1 );
             break;
         }
 
@@ -713,13 +714,13 @@ Var_T *lockin_ref_level( Var_T * v )
         else
             ma_index = MAX_MA_INDEX;
 
-        print( WARN, "Modulation amplitude of %.2f G is too %s, using %.2 G "
-               "instead.\n",
+        print( WARN, "Modulation amplitude of %.2f %% is too %s, using "
+               "%.2f %% instead.\n",
                ma, ma_index == 0 ? "high" : "low", ma_list[ ma_index ] );
     }
     else if ( fabs( ma - ma_list[ ma_index ] ) > ma * 5.0e-2 )
-        print( WARN, "Can't set modulation amplitude to %.2f G, using %.2f G "
-               "instead.\n", ma, ma_list[ ma_index ] );
+        print( WARN, "Can't set modulation amplitude to %.2f %%, using "
+               "%.2f %% instead.\n", ma, ma_list[ ma_index ] );
 
     er023m.ma_index = ma_index;
     if ( FSC2_MODE == EXPERIMENT )

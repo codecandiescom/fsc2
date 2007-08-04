@@ -176,6 +176,7 @@ bool er023m_init( const char * name )
         return FAIL;
     }
 
+    dont_print_on_error = UNSET;
     return OK;
 }
 

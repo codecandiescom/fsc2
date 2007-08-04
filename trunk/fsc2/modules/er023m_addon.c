@@ -210,25 +210,13 @@ Var_T *lockin_ct( Var_T * v )
     }
 
     /* Unfortunately, conversion time multipliers between 125 and 200 lead
-       to garbled data (at least for large signals) so we have to replace
-       conversion time multipliers in this range by the nearest conversion
-       time multiplier that still leads to correct data. */
+       to garbled data (at least for large signals) so we have to warn the
+       user. */
 
-    if ( ct_mult >= BAD_LOW_CT_MULT && ct_mult < BAD_HIGH_CT_MULT )
-    {
-        long new_ct_mult;
-
-        if ( ( double ) BAD_LOW_CT_MULT / ( double ) ct_mult >
-             ( double ) ct_mult / ( double ) BAD_HIGH_CT_MULT )
-            new_ct_mult = BAD_LOW_CT_MULT - 1;
-        else
-            new_ct_mult = BAD_HIGH_CT_MULT + 1;
-
+    if ( ct_mult >= BAD_LOW_CT_MULT && ct_mult <= BAD_HIGH_CT_MULT )
         print( SEVERE, "Conversion time multiplier of %ld might result in "
-               "garbled data, using %ld instead.\n", ct_mult, new_ct_mult );
-
-        ct_mult = new_ct_mult;
-    }
+               "garbled data, better use one below %d or above %d.\n",
+               ct_mult, BAD_LOW_CT_MULT, BAD_HIGH_CT_MULT );
 
     too_many_arguments( v );
 

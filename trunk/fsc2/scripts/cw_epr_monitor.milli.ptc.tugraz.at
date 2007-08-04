@@ -1,0 +1,310 @@
+#!/usr/bin/perl -w
+# -*- cperl -*-
+#
+# $Id$
+#
+# Copyright (C) 1999-2007 Jens Thoms Toerring
+#
+# This file is part of fsc2.
+#
+# Fsc2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# Fsc2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with fsc2; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+use strict;
+use warnings;
+use Tk;
+
+
+my $text;
+
+open my $file, "|fsc2_start"
+	or &show_message( "Can't find program 'fsc2_start'." );
+
+select $file;
+print <<EOF;
+/**********************************************************/
+/*    EDL program for running cw-EPR test measurements    */
+/*            with a Bruker spectrometer.                 */
+/**********************************************************/
+
+DEVICES:
+
+er023m;
+er032m;
+pci_mio_16e_1;
+gg_chopper;
+
+
+VARIABLES:
+
+field;
+max_field = 19.9 kG;
+min_field = 1.46 kG;
+field_step = 0.5 G;     /* field step size (for "sweeps") */
+min_field_step = 1 mG;
+max_field_step = 16 kG;
+tc;
+Ampl;
+mod_amp;
+min_mod_amp = 10 mG;
+max_mod_amp = 100 G;
+Sweep_State = 0;
+Acq_State = 1;
+
+sec_freq = 0.0;         /* sector frequency */
+new;
+
+I = 1;
+
+Field, Field_Step, Sweep_Up, Sweep_Stop, Sweep_Down,
+TC, Ampl_Out, Ampl_Up, Ampl_Down,
+Mod_Freq, Mod_Amp, Mod_Phase,
+Sec_Freq, Clear, Start_Stop;
+SWEEP_STOPPED = 0;
+SWEEP_UP = 1;
+SWEEP_DOWN = -1;
+
+
+PREPARATIONS:
+
+init_1d( 1, "Point #", "Signal [V]" );
+
+
+EXPERIMENT:
+
+hide_toolbox( "ON" );
+field = magnet_field( );
+Field = input_create( "FLOAT_INPUT", field, "Field [G]" );
+Field_Step = input_create( "FLOAT_INPUT", field_step, "Field step [G]" );
+
+Sweep_Up = button_create( "RADIO_BUTTON", "Sweep up" );
+Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
+Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
+button_state( Sweep_Stop, "ON" );
+
+IF lockin_tc( ) < 8 {
+   lockin_tc( 8 );
+}
+
+tc = lockin_time_constant( );
+TC = menu_create( "Time constant", "2.5 ms", "5 ms", "10 ms", "20 ms",
+	               "40 ms", "80 ms", "160 ms", "320 ms", "640 ms", "1.25 s",
+				   "2.5 s", "5 s" );
+menu_choice( TC, lockin_tc( ) - 7 );
+
+Ampl_Out = output_create( "FLOAT_OUTPUT", lockin_sensitivity( ),
+                          "Sensitivity", "%.2e" );
+Ampl_Up = button_create( "NORMAL_BUTTON", "Increase sensitivity" );
+Ampl_Down = button_create( "NORMAL_BUTTON", "Decrease sensitivity" );
+Ampl = lockin_rg( );
+IF Ampl == 0 {
+    object_enable( Ampl_Down, "OFF" );
+}
+IF Ampl == 57 {
+    object_enable( Ampl_Up, "OFF" );
+}
+
+mod_amp = lockin_ref_level( );
+Mod_Freq = menu_create( "Modulation frequency", "100 KHz", "50 kHz", "25 kHz",
+		                "12.5 kHz", "6.25 kHz", "3.125 kHz", "1.5625 kHz" );
+menu_choice( Mod_Freq, lockin_mf( ) + 1 );
+
+Mod_Amp = input_create( "FLOAT_INPUT", mod_amp,
+		                 "Modulation amplitude [%]" );
+
+Mod_Phase = input_create( "FLOAT_INPUT", lockin_phase( ), "Modulation phase" );
+
+chopper_sector_frequency( sec_freq );
+Sec_Freq = input_create( "FLOAT_INPUT", sec_freq, "Sector frequency [Hz]" );
+
+Clear = button_create( "NORMAL_BUTTON", "Clear Screen" );
+Start_Stop = button_create( "PUSH_BUTTON", "Aquisition running/stopped" );
+button_state( Start_Stop, "ON" );
+hide_toolbox( "OFF" );
+
+
+FOREVER {
+	IF toolbox_changed( ) {
+		IF button_changed( Sweep_Stop ) {
+			button_state( Sweep_Stop );
+			draw_marker( I, "YELLOW" );
+			Sweep_State = SWEEP_STOPPED;
+		}
+
+		IF button_changed( Sweep_Up ) {
+			button_state( Sweep_Up );
+			draw_marker( I, "RED" );
+			Sweep_State = SWEEP_UP;
+		}
+
+		IF button_changed( Sweep_Down ) {
+			button_state( Sweep_Down );
+			draw_marker( I, "GREEN" );
+			Sweep_State = SWEEP_DOWN;
+		}
+
+		IF button_state( Sweep_Stop ) {
+		    IF input_changed( Field ) {
+				new = input_value( Field );
+				IF new <= max_field AND new >= min_field {
+			    	field = magnet_field( new );
+				}	
+				input_value( Field, field );
+			}
+
+			IF input_changed( Field_Step ) {
+				new = input_value( Field_Step );
+				IF field_step >= min_field_step AND
+                   field_step <= max_field_step {
+					field_step = new;
+				} ELSE {
+					input_value( Field_Step, field_step );
+				}
+			}
+		}
+
+		IF menu_changed( TC ) {
+		    lockin_tc( menu_choice( TC ) + 7 );
+			tc = lockin_time_constant( );
+    	}
+
+    	IF button_state( Ampl_Up ) AND Ampl <= 57 {
+	   		Ampl += 1;
+			lockin_rg( Ampl );
+			output_value( Ampl_Out, lockin_sensitivity( ) );
+			IF Ampl == 1 {
+				object_enable( Ampl_Down, "ON" );
+			}
+			IF Ampl == 57 {
+				object_enable( Ampl_Up, "OFF" );
+			}
+		}
+
+    	IF button_state( Ampl_Down ) AND Ampl > 0 {
+	    	Ampl -= 1;
+			lockin_rg( Ampl );
+			output_value( Ampl_Out, lockin_sensitivity( ) );
+			IF Ampl == 0 {
+				object_enable( Ampl_Down, "OFF" );
+			}
+			IF Ampl == 56 {
+				object_enable( Ampl_Up, "ON" );
+			}
+		}
+
+		IF menu_changed( Mod_Freq ) {
+	    	lockin_mf( menu_choice( Mod_Freq ) - 1 );
+    	}
+
+		IF input_changed( Mod_Amp ) {
+			new = input_value( 	Mod_Amp );
+			IF new >= min_mod_amp AND new <= max_mod_amp {
+				mod_amp = new;
+				lockin_ref_level( mod_amp );
+			} ELSE {
+		    	input_value( Mod_Amp, mod_amp );
+			}
+		}
+
+		IF input_changed( Mod_Phase ) {
+			new = input_value( Mod_Phase );
+			input_value( Mod_Phase, lockin_phase( new ) );
+		}
+
+		IF input_changed( Sec_Freq ) {
+			new = input_value( Sec_Freq );
+			IF ( new >= 39.22 AND new <= 200 ) OR new == 0.0 {
+				sec_freq = chopper_sector_frequency( new );
+			} ELSE {
+		    	input_value( Sec_Freq, sec_freq );
+			}
+		}
+
+		IF button_state( Clear ) {
+			clear_curve( );
+			clear_marker( );
+			I = 1;
+			rescale( 64 );
+		}
+
+		IF button_changed( Start_Stop ) {
+			Acq_State = button_state( Start_Stop );
+		}
+	}
+
+	IF Sweep_State == SWEEP_UP {
+		IF field + field_step <= max_field {
+		    field = magnet_field( field + field_step );
+			input_value( Field, field );
+		} ELSE {
+		    button_state( Sweep_Stop, "ON" );
+			Sweep_State = SWEEP_STOPPED;
+		}
+	}
+
+	IF Sweep_State == SWEEP_DOWN {
+		IF field - field_step >= min_field {
+		    field = magnet_field( field - field_step );
+			input_value( Field, field );
+		} ELSE {
+		    button_state( Sweep_Stop, "ON" );
+			Sweep_State = SWEEP_STOPPED;
+		}
+	}
+
+	IF Acq_State {
+		wait( tc );
+		display_1d( I, lockin_get_data( ) );
+		I += 1;
+	} ELSE {
+		wait( 0.25 s );
+	}
+}
+EOF
+
+close $file;
+
+# Notify the user if sending the program to fsc2 failed for some reasons
+
+if ( $? != 0 ) {
+    if ( $? >> 8 == 255 ) {
+        $text = "Internal error.";
+    } elsif ( $? >> 8 == 1 ) {
+        $text = "Someone else is running fsc2.";
+    } elsif ( $? >> 8 == 2 ) {
+        $text = "fsc2 is already testing or\nrunning an experiment.";
+    } elsif ( $? >> 8 == 3 ) {
+        $text = "Internal error of fsc2.";
+    } elsif ( $? >> 8 == 4 ) {
+        $text = "Could not start fsc2.";
+    } else {
+        $text = "Something strange\nis going on here.";
+    }
+
+    &show_message( $text ) if $? >> 8 != 0;
+}
+
+#############################################
+#
+
+sub show_message {
+	my $mw = MainWindow->new;
+	$mw->geometry( "-2000-2000" );
+	$mw->messageBox( '-icon' => 'error',
+					 '-type' => 'Ok',
+					 '-title' => 'Error',
+					 '-message' => $_[ 0 ] );
+	exit;
+}

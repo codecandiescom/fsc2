@@ -894,6 +894,11 @@ check the arguments to achieve the desired results.
 @item @ref{lockin_conversion_time()}
 @item @ref{lockin_resonator()}
 @item @ref{lockin_is_overload()}
+@item @ref{lockin_rg()}
+@item @ref{lockin_tc()}
+@item @ref{lockin_ma()}
+@item @ref{lockin_ct()}
+@item @ref{lockin_mf()}
 @end table
 
 
@@ -1181,8 +1186,8 @@ as the @strong{SR510} and the @strong{SR530}.
 
 For the @strong{ER023M} the following (approximate) time constant
 settings can be used: @code{2.5 ms}, @code{5 ms}, @code{10 ms}, @code{20
-ms}, @code{40 ms}, @code{65 ms}, @code{130 ms}, @code{330 ms}, @code{650
-ms}, @code{1.3 s}, @code{2.6 s} and @code{5.2 s}.
+ms}, @code{40 ms}, @code{80 ms}, @code{160 ms}, @code{320 ms}, @code{640
+ms}, @code{1.25 s}, @code{2.5 s} and @code{5 s}.
 
 In the @code{PREPARATIONS} section this function can't be called as a
 query, i.e.@: without an argument.
@@ -1321,6 +1326,100 @@ find out if an overload has occurred while the data value was measured
 otherwise @code{0} is returned). Calling this function (or fetching the
 data value) will reset the overload condition and calls of the function
 will return @code{0} as long as no further overloads occur.
+
+The function can only be used in the @code{EXPERIMENT} section.
+
+
+@anchor{lockin_rg()}
+@findex lockin_rg()
+@item lockin_rg()
+This function exists for the @strong{Bruker ER023M} signal channel
+only. It can be used to set or query the receiver gain. If called with
+an argument the receiver gain can be set. In this case the argument
+must be an integer in the range between @code{0} and @code{57} where
+@code{0} sets the receiver gain to the lowest possible value of
+@code{2.0E+2} and @code{57} sets it to the highest of @code{1.0E+7}.
+An increment of the argument by @code{1} represents an increase of the
+receiver gain by @code{2dB}. If called without an argument the
+function returns an integer for the current setting of the receiver
+gain.
+
+The function can only be used in the @code{EXPERIMENT} section.
+
+
+@anchor{lockin_tc()}
+@findex lockin_tc()
+@item lockin_tc()
+This function exists for the @strong{Bruker ER023M} signal channel
+only. It can be used to set or query the time constant. If called with
+an argument the time constant can be set. In this case the argument
+must be an integer in the range between @code{0} and @code{19} where
+@code{0} sets the time constant to the lowest possible value of
+@w{10 us} and @code{19} sets it to the highest of @w{5 s}. An
+increment of the argument by @code{1} represents an increase of the
+time constant by a factor of @code{2}.  If called without an argument
+the function returns an integer for the current setting of the time
+constant.
+
+The function can only be used in the @code{EXPERIMENT} section.
+
+
+@anchor{lockin_ma()}
+@findex lockin_ma()
+@item lockin_ma()
+This function exists for the @strong{Bruker ER023M} signal channel
+only. It can be used to set or query the attenuation of the modulation
+amplitude. If called with an argument the modulation amplitude
+attenuation can be set. In this case the argument must be an integer
+ in the range between @code{0} and @code{80}. @code{0} sets minimum
+attenuation and thus maximum modulation amplitude while @code{79}
+sets the maximum attenuation of the modulation. @code{80} switches
+modulation off. The modulation attenuation is a logarithmic setting,
+the attenuation is @code{10} to the power of one twentieth of the
+negative of the argument (this then has to be multiplied by the
+maximum modulation amplitude, which should be in the order of @w{100 G}.
+If called with no argument the current setting for the modulation
+attenuation is set.
+
+The function can only be used in the @code{EXPERIMENT} section.
+
+
+@anchor{lockin_ct()}
+@findex lockin_ct()
+@item lockin_ct()
+This function exists for the @strong{Bruker ER023M} signal channel
+only. It can be used to set or query the conversion time of the
+digital-to-analog converter (longer conversion times result in a
+better voltage resolution). If called with an argument the conversion
+time can be set. In this case the argument must be an integer in the
+range between @code{10} and @code{9999} where @code{10} sets the
+conversion time to the lowest possible value of @w{3.2 ms} and
+@code{9999} sets it to the highest of about @w{3.2 s} - multiply
+the argument by @w{320 us} to arrive at the conversion time.
+
+Unfortunately, according to my tests, for conversion times between
+@code{123} and @code{200} the data the signal channels sends for
+large signal amplitudes were garbled, so it might be prudent to
+avoid values from this range!
+
+If the function is called without an argument the current setting
+of the conversion time isn returned.
+
+The function can only be used in the @code{EXPERIMENT} section.
+
+
+@anchor{lockin_mf()}
+@findex lockin_mf()
+@item lockin_mf()
+This function exists for the @strong{Bruker ER023M} signal channel
+only. It can be used to set or query the modulation frequency.
+If called with an argument the modulation frequency can be set. In
+this case the argument must be an integer in the range between
+@code{0} and @code{6}. @code{0} sets maximum modulation frequency
+of @w{100 kHz} and @code{6} sets the minimum frequency of @w{1.5625 kHz}.
+An increment of @code{1} of the argument decreases the modulation
+frequency by a factor of @code{2}. If called with no argument the
+value for the currently set modulation frequency gets returned.
 
 The function can only be used in the @code{EXPERIMENT} section.
 
@@ -6993,18 +7092,18 @@ in the @code{DEVICES} section. Please note that the name of the module
 for the DAQ device (@code{pci_mio_16e_1}) must be listed before this
 module.
 
-Unless a rotation frequency has set already during the
+Unless a choppers frequency has already been set during the
 @code{PREPARATIONS} section the chopper will only start to rotate
-when a resonable rotation frequency is set by calling the function
-@ref{chopper_rotation_frequency()}. At the end of an experiment the
-chopper gets stopped automatically.
+when a resonable rotation (sector) frequency is set by calling the
+function @ref{chopper_sector_frequency()}. At the end of an experiment
+the chopper gets stopped automatically.
 
 
 @noindent
 @strong{List of all chopper functions}:
 @table @samp
 @item @ref{chopper_name()}
-@item @ref{chopper_rotation_frequency()}
+@item @ref{chopper_sector_frequency()}
 @item @ref{chopper_create_trigger()}
 @end table
 
@@ -7022,22 +7121,23 @@ chopper gets stopped automatically.
 @item chopper_name()
 Returns a string with the name of the chopper being used.
 
-@anchor{chopper_rotation_frequency()}
-@findex chopper_rotation_frequency()
-@item chopper_rotation_frequency()
+@anchor{chopper_sector_frequency()}
+@findex chopper_sector_frequency()
+@item chopper_sector_frequency()
 This function allows to either query or set the rotation speed of the
-chopper. When called without an argument the function returns the
-current rotation frequency or @w{0 Hz} when the chopper is stopped.  If
-called with an argument between @w{39.22 Hz} and @w{200 Hz} the chopper
-rotation frequency gets set to this value (if it is not possible to set
-the frequency with an accuracy of at least @w{1%} a warning is output,
-informing the user about the real rotation frequency, which is also the
+chopper (or, to be exact, the inverse of the number of sectors of the
+chopper per second). When called without an argument the function
+returns the current frequency (@w{0 Hz} when the chopper is stopped).
+If called with an argument between @w{39.22 Hz} and @w{200 Hz} the chopper
+frequency gets set to this value (if it is not possible to set the
+frequency with an accuracy of at least @w{1%} a warning is output,
+informing the user about the real sector frequency, which is also the
 value returned by the function). If the function is called with a zero
 or negative argument the chopper is stopped.
 
 When called during the @code{PREPARATIONS} section of thr @code{EDL}
-script the choppers rotation frequency is set to this value when the
-experiment is started.
+script the choppers frequency is set to this value when the experiment
+is started.
 
 
 @anchor{chopper_create_trigger()}

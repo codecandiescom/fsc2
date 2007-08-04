@@ -114,7 +114,7 @@ else
 SOURCES  := $(shell ls pci_e_series/*.c daq_stc/*.c)
 INCLUDES := -I$(KERNELDIR)/include -I.
 CC       := gcc
-CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -O2 -Wall -Wstrict-prototypes -s
+CFLAGS   := -D__KERNEL__ -DMODULE -DLINUX -DPCI_E_SERIES -O2 -Wall -Wstrict-prototypes -s
 
 
 export CC CFLAGS INCLUDES
