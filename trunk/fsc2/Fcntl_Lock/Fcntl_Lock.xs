@@ -35,8 +35,8 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
 
         if ( ! SvROK( flock_hash ) )
         {
-                sv_setiv( int_err, 1 );
-                XSRETURN_UNDEF;
+            sv_setiv( int_err, 1 );
+            XSRETURN_UNDEF;
         }
 
         fs = ( HV * ) SvRV( flock_hash );
@@ -71,36 +71,37 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
              ( sv_whence = hv_fetch( fs, "l_whence", 8, 0 ) ) == NULL ||
              ( sv_start  = hv_fetch( fs, "l_start",  7, 0 ) ) == NULL ||
              ( sv_len    = hv_fetch( fs, "l_len",    5, 0 ) ) == NULL ||
-             ( sv_pid    = hv_fetch( fs, "l_pid",    5, 0 ) ) == NULL )
+             ( sv_pid    = hv_fetch( fs, "l_pid",    5, 0 ) ) == NULL    )
         {
             sv_setiv( int_err, 1 );
             XSRETURN_UNDEF;
         }
 
-        /* Set up the the flock structure expected by fcntl() with the
+        /* Set up the the flock structure expected by fcntl(2) with the
            values in the hash we got passed */
 
         * ( LTYPE_TYPE * ) ( flock_struct + LTYPE_OFFSET ) =
-                                        ( LTYPE_TYPE ) SvIV( *sv_type );
+                                           ( LTYPE_TYPE ) SvIV( *sv_type );
         * ( LWHENCE_TYPE * ) ( flock_struct + LWHENCE_OFFSET ) =
-                                        ( LWHENCE_TYPE ) SvIV( *sv_whence );
+                                           ( LWHENCE_TYPE ) SvIV( *sv_whence );
         * ( LSTART_TYPE * ) ( flock_struct + LSTART_OFFSET ) =
-                                        ( LSTART_TYPE ) SvIV( *sv_start );
+                                           ( LSTART_TYPE ) SvIV( *sv_start );
         * ( LLEN_TYPE * ) ( flock_struct + LLEN_OFFSET ) =
-                                        ( LLEN_TYPE ) SvIV( *sv_len );
+                                           ( LLEN_TYPE ) SvIV( *sv_len );
         * ( LPID_TYPE * ) ( flock_struct + LPID_OFFSET ) =
-                                        ( LPID_TYPE ) SvIV( *sv_pid );
+                                           ( LPID_TYPE ) SvIV( *sv_pid );
 
-        /* Now comes the great moment: fcntl() is finally called - if we want
+        /* Now comes the great moment: fcntl(2) is finally called - if we want
            the lock immediately but some other process is holding it we return
            'undef' (people can find out about the reasons by checking errno).
-           The same happens if we wait for the lock but receive a signal. */
+           The same happens if we wait for the lock but receive a signal
+           before we obtain the lock. */
 
         if ( fcntl( fd, function, flock_struct ) != 0 )
             XSRETURN_UNDEF;
 
         /* Now to find out who's holding the lock we now must unpack the
-           structure we got back from fcntl() and store it in the hash we
+           structure we got back from fcntl(2) and store it in the hash we
            got passed. */
 
         if ( function == REAL_F_GETLK )
@@ -117,9 +118,9 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
                                       ( flock_struct + LPID_OFFSET ) ), 0 );
         }
 
-        /* Return the systems return value of the fcntl() call (which is 0) but
-           in a way that can't be mistaken as meaning false (shamelessly stolen
-           from pp_sys.c in the the Perl sources). */
+        /* Return the systems return value of the fcntl(2) call (which is 0)
+           but in a way that can't be mistaken as meaning false (shamelessly
+           stolen from pp_sys.c in the the Perl sources). */
 
         RETVAL = newSVpvn( "0 but true", 10 );
 

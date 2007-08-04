@@ -13,36 +13,35 @@
 #########################
 
 use Test;
-BEGIN { plan tests => 17 };
+BEGIN { plan tests => 16 };
 use POSIX;
 use Fcntl_Lock;
 
-ok(1); # If we made it this far, we're in business...
+##############################################
+# 1. If we made it this far, we're in business...
 
-#########################
-
-# Insert your test code below, the Test module is use()ed here so read
-# its man page ( perldoc Test ) for help writing this test script.
+ok( 1 ); 
 
 ##############################################
 # 2. Most basic test: create an object
 
-ok( $fs = Fcntl_Lock->new );
+ok( $fs = new Fcntl_Lock );
 
 ##############################################
 # 3. Also basic: create an object with initalization
 
-ok( $fs = $fs->new( 'l_type'   => F_RDLCK,
-                    'l_whence' => SEEK_CUR,
-                    'l_start'  => 123,
-                    'l_len'    => 234,
-                    'l_pid'    => $$ ) );
+ok( $fs = $fs->new( l_type   => F_RDLCK,
+                    l_whence => SEEK_CUR,
+                    l_start  => 123,
+                    l_len    => 234       ) );
 
 ##############################################
 # 4. Check if properties of created objects are what they are supposed to be
 
-ok( $fs->l_type == F_RDLCK and $fs->l_whence == SEEK_CUR and
-    $fs->l_start == 123 and $fs->l_len == 234 and $fs->l_pid == $$ );
+ok( $fs->l_type == F_RDLCK    and
+    $fs->l_whence == SEEK_CUR and
+    $fs->l_start == 123       and
+    $fs->l_len == 234             );
 
 ##############################################
 # 5. Change l_type property to F_UNLCK and check
@@ -81,121 +80,109 @@ $fs->l_len( 3 );
 ok( $fs->l_len, 3 );
 
 ##############################################
-# 11. Change l_pid property and check
+# 11. Test if we can get an write lock on STDOUT
 
-$fs->l_pid( 1234 );
-ok( $fs->l_pid, 1234 );
-
-##############################################
-# 12. Test if we can get an write lock on STDOUT
-
-ok( defined $fs->fcntl_lock( STDOUT_FILENO, F_SETLK ) );
+ok( defined $fs->lock( STDOUT_FILENO, F_SETLK ) );
 
 ##############################################
-# 13. Test if we can release the lock on STDOUT
+# 12. Test if we can release the lock on STDOUT
 
 $fs->l_type( F_UNLCK );
-ok( defined $fs->fcntl_lock( STDOUT_FILENO, F_SETLK ) );
+ok( defined $fs->lock( STDOUT_FILENO, F_SETLK ) );
 
 ##############################################
-# 14. Test if we can get a read lock on the script we're just running
+# 13. Test if we can get a read lock on the script we're just running
 
 $fs->l_type( F_RDLCK );
 open( $fh, "./test.pl" );
-ok( defined $fs->fcntl_lock( $fh, F_SETLK ) );
+ok( defined $fs->lock( $fh, F_SETLK ) );
 
 ##############################################
-# 15. Test if we can release this lock
+# 14. Test if we can release this lock
 
 $fs->l_type( F_UNLCK );
-ok( defined $fs->fcntl_lock( $fh, F_SETLK ) );
+ok( defined $fs->lock( $fh, F_SETLK ) );
 close $fh;
 
 ##############################################
-# 16. Now a real test: the child process grabs a write lock on a test file
-#     for 2 secs while the parent repeatedly tries to get the lock. After
-#     the child finally releases the lock the parent should be able to
-#     obtain it (this test isn't real clean because under extremely high
-#     system load it might not work as expected...)
+# 15. Now a "real" test: the child process grabs a write lock on a test file
+#     for 2 secs while the parent repeatedly tests if it could get the lock.
+#     After the child finally releases the lock the parent should be able to
+#     obtain and again release it.
 
-$fs = $fs->new( 'l_type'   => F_WRLCK,
-                'l_whence' => SEEK_SET,
-                'l_start'  => 0,
-                'l_len'    => 0 );
-if ( open( $fh, ">./fcntl_locking_test" ) ) {
-    unlink( "./fcntl_locking_test" );
-    if ( my $pid = fork ) {
-        sleep 1;
-        $i = 13;
-        for ( 1..12 ) {
-            $i = $_;
-            unless ( $fs->fcntl_lock( $fh, F_GETLK ) and 
-                     $fs->l_type == F_UNLCK or $fs->l_pid == $pid ) {
-                $i = 13;
-                last;
-            }
-            last if $fs->l_type == F_UNLCK;
-            select undef, undef, undef, 0.25;
+$fs = $fs->new( l_type   => F_WRLCK,
+                l_whence => SEEK_SET,
+                l_start  => 0,
+                l_len    => 0 );
+unless ( open( $fh, ">./fcntl_locking_test" ) ) {
+    print STDERR "Can't open a file for writing: $!\n";
+    ok( 0 );
+}
+unlink( "./fcntl_locking_test" );
+if ( my $pid = fork ) {
+    sleep 1;
+    $failed = 1;
+    while ( 1 ) {
+        last if $pid == waitpid( $pid, WNOHANG ) and $?;
+        last unless $fs->lock( $fh, F_GETLK );
+        if ( $fs->l_type == F_UNLCK ) {
+            $failed = 0;
+            last;
         }
-        if ( $i < 13 ) {
-            $fs->l_type( F_WRLCK );
-            ok( $state = $fs->fcntl_lock( $fh, F_SETLK ) );
-            $fs->l_type( F_UNLCK );
-            $fs->fcntl_lock( $fh, F_SETLK );
-        } else {
-            ok( 0 );
-        }
-        close $fh;
-    } elsif ( defined $pid ) {
-        $fs->fcntl_lock( $fh, F_SETLKW );
-        sleep 2;
-        $fs->l_type( F_UNLCK );
-        $fs->fcntl_lock( $fh, F_SETLK );
-        exit 0;
+        select undef, undef, undef, 0.25;
+    }
+    if ( ! $failed ) {
+        $fs->l_type( F_WRLCK );
+        ok( $fs->lock( $fh, F_SETLK ) and 
+            $fs->l_type( F_UNLCK ), $fs->lock( $fh, F_SETLK ) );
     } else {
         ok( 0 );
-        print STDERR "Can't fork: $!\n";
     }
+    close $fh;
+} elsif ( defined $pid ) {
+    $fs->lock( $fh, F_SETLKW ) or exit 1;
+    sleep 2;
+    $fs->l_type( F_UNLCK );
+    $fs->lock( $fh, F_SETLK ) or exit 1;
+    exit 0;
 } else {
-    print STDERR "Can't open a file for writing: $!\n";
+    print STDERR "Can't fork: $!\n";
     ok( 0 );
 }
 
 ##############################################
-# 17. Now another real test: basically the same as the previous one
+# 16. Finally another "real" test: basically the same as the previous one
 #     but instead of locking a file both processes try to lock STDOUT
 
-$fs = $fs->new( 'l_type'   => F_WRLCK,
-                'l_whence' => SEEK_SET,
-                'l_start'  => 0,
-                'l_len'    => 0 );
+$fs = $fs->new( l_type   => F_WRLCK,
+                l_whence => SEEK_SET,
+                l_start  => 0,
+                l_len    => 0 );
 if ( my $pid = fork ) {
     sleep 1;
-    $i = 13;
-    for ( 1..12 ) {
-        $i = $_;
-        unless ( $fs->fcntl_lock( STDOUT_FILENO, F_GETLK ) and
-                 $fs->l_type == F_UNLCK or $fs->l_pid == $pid ) {
-            $i = 13;
+    $failed = 1;
+    while ( 1 ) {
+        last if $pid == waitpid( $pid, WNOHANG ) and $?;
+        last unless $fs->lock( STDOUT_FILENO, F_GETLK );
+        if ( $fs->l_type == F_UNLCK ) {
+            $failed = 0;
             last;
         }
-        last if $fs->l_type == F_UNLCK;
         select undef, undef, undef, 0.25;
     }
-    if ( $i < 13 ) {
+    if ( ! $failed ) {
         $fs->l_type( F_WRLCK );
-        ok( $fs->fcntl_lock( STDOUT_FILENO, F_SETLK ) );
-        $fs->l_type( F_UNLCK );
-        $fs->fcntl_lock( STDOUT_FILENO, F_SETLK );
+        ok( $fs->lock( STDOUT_FILENO, F_SETLK ) and
+            $fs->l_type( F_UNLCK ), $fs->lock( STDOUT_FILENO, F_SETLK ) );
     } else {
         ok( 0 );
     }
     close STDOUT_FILENO;
 } elsif ( defined $pid ) {
-    $fs->fcntl_lock( STDOUT_FILENO, F_SETLKW );
+    $fs->lock( STDOUT_FILENO, F_SETLKW ) or exit 1;
     sleep 2;
     $fs->l_type( F_UNLCK );
-    $fs->fcntl_lock( STDOUT_FILENO, F_SETLK );
+    $fs->lock( STDOUT_FILENO, F_SETLK ) or exit 1;
     exit 0;
 } else {
     print STDERR "Can't fork: $!\n";
