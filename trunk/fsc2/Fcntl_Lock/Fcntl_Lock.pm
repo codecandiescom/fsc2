@@ -8,7 +8,7 @@
 # $Id$
 
 
-package Fcntl_Lock;
+package File::Fcntl_Lock;
 
 use 5.006;
 use strict;
@@ -20,36 +20,35 @@ use Carp;
 require Exporter;
 require DynaLoader;
 
-our @ISA = qw(Exporter DynaLoader);
+our @ISA = qw( Exporter DynaLoader );
 
 # Items to export into callers namespace by default.
 
 our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
                   F_RDLCK F_WRLCK F_UNLCK
-                  SEEK_SET SEEK_CUR SEEK_END
-);
+                  SEEK_SET SEEK_CUR SEEK_END );
 
-our $VERSION = '1.00';
+our $VERSION = '0.07';
 
 
 =pod
 
-=head1 NAME
+=head1 name
 
-Fcntl_Lock - Perl extension for file locking with L<fcntl(2)>
+File::Fcntl_Lock - File locking with L<fcntl(2)>
 
 =head1 SYNOPSIS
 
-  use Fcntl_Lock;
+  use File::Fcntl_Lock;
 
-  my $fs = new Fcntl_Lock;
+  my $fs = new Fcntl::Fcntl_Lock;
   $fs->l_type( F_RDLCK );
   $fs->l_whence( SEEK_CUR );
   $fs->l_start( 100 );
   $fs->l_len( 123 );
 
   my $fh;
-  open( $fh, "<file_name" ) or die "Can't open file: $!\n";
+  open $fh, "<file_name" or die "Can't open file: $!\n";
   $fs->lock( $fh, F_SETLK ) ) or
       print "Locking failed: " . $fs->error . "\n";
   $fs->l_type( F_UNLCK );
@@ -58,7 +57,7 @@ Fcntl_Lock - Perl extension for file locking with L<fcntl(2)>
 
 =head1 DESCRIPTION
 
-File locking in Perl is usually done using the L<flock(2)> function.
+File locking in Perl is usually done using the L<flock()> function.
 Unfortunately, this only allows locks on whole files and is often
 implemented in terms of L<flock(2)>, which has some shortcomings.
 
@@ -67,12 +66,12 @@ this restricts the use of the module to systems that have a L<fcntl(2)>
 system call). Before a file (or parts of a file) can be locked, an
 object simulating a flock structure must be created and its properties
 set. Afterwards, by calling the B<lock> method a lock can be set or it
-can be determined which process currently holds the lock.
+can be determined if and which process currently holds the lock.
 
 =cut
 
 # Set up a hash with the error messages, but only for errno's that Errno
-# knows about. The texts represent what's written in SUSV3 and in the man
+# knows about. The texts represent what's written in SUSv3 and in the man
 # pages for Linux, TRUE64, OpenBSD3 and Solaris8.
 
 my %fcntl_error_texts;
@@ -128,24 +127,24 @@ BEGIN {
 }
 
 
-bootstrap Fcntl_Lock $VERSION;
+bootstrap File::Fcntl_Lock $VERSION;
 
 
 ###########################################################
 
 =pod
 
-To create a new flock structure object simple call B<new>:
+To create a new object representing a flock structure call B<new>:
 
-  $fs = new Fcntl_Lock;
+  $fs = new File::Fcntl_Lock;
 
 You also can pass the B<new> method a set of key-value pairs to
 initialize the members of the flock structure, e.g.
 
-  $fs = new Fcntl_Lock( l_type   => F_WRLCK,
-                        l_whence => SEEK_SET,
-                        l_start  => 0,
-                        l_len    => 100 );
+  $fs = new File::Fcntl_Lock( l_type   => F_WRLCK,
+                              l_whence => SEEK_SET,
+                              l_start  => 0,
+                              l_len    => 100 );
 
 if you plan to obtain a write lock for the first 100 bytes of a file.
 
@@ -155,13 +154,13 @@ sub new {
     my $inv = shift;
     my $pkg = ref( $inv ) || $inv;
 
-    my $self = { 'l_type'        => F_RDLCK,
-                 'l_whence'      => SEEK_SET,
-                 'l_start'       => 0,
-                 'l_len'         => 0,
-                 'l_pid'         => 0,
-                 'errno'         => undef,
-                 'error_message' => undef
+    my $self = { l_type        => F_RDLCK,
+                 l_whence      => SEEK_SET,
+                 l_start       => 0,
+                 l_len         => 0,
+                 l_pid         => 0,
+                 errno         => undef,
+                 error_message => undef
                };
 
     croak "Missing value in key-value initializer list" if @_ % 2;
@@ -182,7 +181,7 @@ sub new {
 
 Once you have created the object simulating the flock structure
 the following methods allow to query and in most cases also to
-modifz the properties of the object:
+modify the properties of the object:
 
 =over 4
 
@@ -201,8 +200,10 @@ sub l_type {
     if ( @_ ) {
         my $l_type = shift;
         croak "Invalid value for l_type member"
-         unless $l_type == F_RDLCK or $l_type == F_WRLCK or $l_type == F_UNLCK;
-        $flock_struct->{ 'l_type' } = $l_type;
+            unless $l_type == F_RDLCK or
+                   $l_type == F_WRLCK or
+                   $l_type == F_UNLCK;
+        $flock_struct->{ l_type } = $l_type;
     }
     return $flock_struct->{ l_type };
 }
@@ -267,7 +268,7 @@ Queries or sets the length of the region (in bytes) in the file
 to be locked. A value of 0 means a lock (starting at B<l_start>)
 to the very end of the file.
 
-According to SUSV3 negative values for B<l_start> are allowed
+According to SUSv3 negative values for B<l_start> are allowed
 (resulting in a lock ranging from B<l_start + l_len> to
 B<l_start - 1>) Unfortunately, not all systems allow negative
 arguments and will return an error when you try to obtain the
@@ -354,8 +355,9 @@ method returns C<undef> and errno is set to B<EINTR>.
 
 On success the method returns the string "0 but true". If the
 method fails (as indicated by an C<undef> return value) you can
-either immediately evaluate the error number ($!, $ERRNO or
-$OS_ERROR) directly or check for it at some later time.
+either immediately evaluate the error number (usingf $!, $ERRNO
+or $OS_ERROR) or check for it at some later time via the methods
+discussed below.
 
 =cut
 
@@ -365,20 +367,21 @@ sub lock {
 
     croak "Missing arguments to lock()"
         unless defined $flock_struct and defined $fh and defined $action;
+
     croak "Invalid action argument" unless $action == F_GETLK or
                                            $action == F_SETLK or
                                            $action == F_SETLKW;
 
     my $fd = ref( $fh ) ? fileno( $fh ) : $fh;
+
     if ( $ret = C_fcntl_lock( $fd, $action, $flock_struct, $err ) ) {
         $flock_struct->{ errno } = $flock_struct->{ error } = undef;
-    } elsif ( defined $err ) {
-        # Let's hope this never happens... */
-        die "Internal error in Fcntl_Lock module detected" if $err;
-
+    } elsif ( $err ) {
+        die "Internal error in File::Fcntl_Lock module detected";
+    } else {
         $flock_struct->{ errno } = $! + 0;
         $flock_struct->{ error } = defined $fcntl_error_texts{ $! + 0 } ?
-            $fcntl_error_texts{ $! + 0 } : "Unexpected error: $!";
+                         $fcntl_error_texts{ $! + 0 } : "Unexpected error: $!";
     }
 
     return $ret;
@@ -389,22 +392,20 @@ sub lock {
 
 =pod
 
-There are three methods for obtaining information about the errors
-from a call of B<lock>:
+There are three methods for obtaining information about the
+reason the the last call of B<lock> for the object failed:
 
 =over 4
 
 =item B<lock_errno>
 
-Returns the error number from the latest call of B<lock> for the
-flock structure object. If the last call did not result in an
-error the method returns C<undef>.
+Returns the error number from the latest call of B<lock>. If the
+last call did not result in an error the method returns C<undef>.
 
 =cut
 
 sub lock_errno {
-    my $flock_struct = shift;
-    return $flock_struct->{ errno };
+    return shift->{ errno };
 }
 
 
@@ -415,18 +416,17 @@ sub lock_errno {
 =item B<error>
 
 Returns a short description of the error that happened during the
-latest call of B<lock> with the flock structure object. Please
-take the messages with a grain of salt, they represent what SUSV3
-(IEEE 1003.1-2001) and the Linux, TRUE64, OpenBSD3 and Solaris8 man
-pages tell what the error numbers mean, there could be differences
-(and additional error numbers) on other systems. If there was no
-error the method returns C<undef>.
+latest call of B<lock> with the object. Please take the messages
+with a grain of salt, they represent what SUSv3 (IEEE 1003.1-2001)
+and the Linux, TRUE64, OpenBSD3 and Solaris8 man pages tell what
+the error numbers mean, there could be differences (and additional
+error numbers) on other systems. If there was no error the method
+returns C<undef>.
 
 =cut
 
 sub error {
-    my $flock_struct = shift;
-    return $flock_struct->{ error };
+    return shift->{ error };
 }
 
 
@@ -453,8 +453,6 @@ sub system_error {
 }
 
 
-1;
-
 =pod
 
 =head2 EXPORT
@@ -465,8 +463,8 @@ SEEK_SET SEEK_CUR SEEK_END
 
 =head1 CREDITS
 
-Thanks to Mark-Jason Dominus and Benjamin Goldberg for discussions,
-code and encouragement.
+Thanks to Mark-Jason Dominus (MJD) and Benjamin Goldberg (GOLDBB) for
+helpful discussions, code examples and encouragement.
 
 =head1 AUTHOR
 
@@ -477,6 +475,9 @@ Jens Thoms Toerring <jt@toerring.de>
 L<perl(1)>, L<fcntl(2)>, L<lseek(2)>.
 
 =cut
+
+
+1;
 
 # Local variables:
 # tab-width: 4
