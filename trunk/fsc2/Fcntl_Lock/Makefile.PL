@@ -26,15 +26,16 @@ unlink 'cc_test.c';
 
 open $fh, '>fcntl_test.c' or die "Can't open a file for writing: $!\n";
 print $fh <<EOF;
-#include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
 int main(void) {
 struct flock f;
 f.l_type = F_RDLCK;
 f.l_whence = SEEK_SET;
 f.l_start = 0;
 f.l_len = 0;
-return fcntl( 0, F_SETLK, &f ) == -1;
+return fcntl( 0, F_SETLK, &f ) == -1 ? 
 };
 EOF
 close $fh;
