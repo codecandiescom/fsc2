@@ -10,7 +10,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <fcntl.h>
 
 
@@ -39,7 +38,6 @@ int main( void )
     else
     {
         fclose( fp );
-        unlink( "Fcntl_Lock.h" );
         return EXIT_FAILURE;
     }
 
@@ -56,7 +54,6 @@ int main( void )
     else
     {
         fclose( fp );
-        unlink( "Fcntl_Lock.h" );
         return EXIT_FAILURE;
     }
 
@@ -73,7 +70,6 @@ int main( void )
     else
     {
         fclose( fp );
-        unlink( "Fcntl_Lock.h" );
         return EXIT_FAILURE;
     }
 
@@ -90,7 +86,6 @@ int main( void )
     else
     {
         fclose( fp );
-        unlink( "Fcntl_Lock.h" );
         return EXIT_FAILURE;
     }
 
@@ -107,7 +102,6 @@ int main( void )
     else
     {
         fclose( fp );
-        unlink( "Fcntl_Lock.h" );
         return EXIT_FAILURE;
     }
 

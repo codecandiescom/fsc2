@@ -13,18 +13,18 @@ use Config;
 # Check if we can run the C compiler and if using fcntl() works - if the
 # later fails the system may not have a fcntl(2) system call at all.
 
-open $fh, ">cc_test.c" or die "Can't open a file for writing: $!\n";
+open $fh, '>cc_test.c' or die "Can't open a file for writing: $!\n";
 print $fh "int main(void)\n{\nreturn 0;\n}\n";
 close $fh;
 
 if ( system $Config{cc}, qw( -o cc_test cc_test.c ) ) {
-    unlink "cc_test.c";
+    unlink 'cc_test.c';
     die "Can't run C compiler $Config{cc}\n";
 }
-unlink "cc_test";
-unlink "cc_test.c";
+unlink 'cc_test';
+unlink 'cc_test.c';
 
-open $fh, ">fcntl_test.c" or die "Can't open a file for writing: $!\n";
+open $fh, '>fcntl_test.c' or die "Can't open a file for writing: $!\n";
 print $fh <<EOF;
 #include <fcntl.h>
 #include <stdio.h>
@@ -40,25 +40,26 @@ EOF
 close $fh;
 
 if ( system $Config{cc}, qw( -o fcntl_test fcntl_test.c ) ) {
-    unlink "fcntl_test.c";
+    unlink 'fcntl_test.c';
     die "Can't compile a program that uses fcntl(). Does your system " .
         "have a fcntl(2) system call?\n";
 }
-unlink "fcntl_test";
-unlink "fcntl_test.c";
+unlink 'fcntl_test';
+unlink 'fcntl_test.c';
 
 
 # Compile and run the program that creates the include file (first try a
 # version that also tries 'long long', then one that only uses 'long').
 
-if ( ( system $Config{cc}, qw( -o sizes1 sizes1.c ) or system "./sizes1" ) and
-     ( system $Config{cc}, qw( -o sizes2 sizes2.c ) or system "./sizes2" ) ) {
-    unlink( "sizes1" ) if -e "sizes1";
-    unlink( "sizes2" ) if -e "sizes2";
+if ( ( system $Config{cc}, qw( -o sizes1 sizes1.c ) or system './sizes1' ) and
+     ( system $Config{cc}, qw( -o sizes2 sizes2.c ) or system './sizes2' ) ) {
+    unlink( 'sizes1' ) if -e 'sizes1';
+    unlink( 'sizes2' ) if -e 'sizes2';
+	unlink( 'Fnctl_Lock.h' );
     die "Can't create the necessary header file.\n";
 }
-unlink "sizes1" if -e "sizes1";
-unlink "sizes2" if -e "sizes2";
+unlink 'sizes1' if -e 'sizes1';
+unlink 'sizes2' if -e 'sizes2';
 
 
 # Now create the Makefile
@@ -78,5 +79,5 @@ WriteMakefile(
     PERL_MALLOC_OK    => TRUE,
     C                 => [ 'Fcntl_Lock.xs' ],
     test              => { TESTS => 't/*.t' },
-    clean             => { FILES => "Fcntl_Lock.h" }
+    clean             => { FILES => 'Fcntl_Lock.h' }
 );
