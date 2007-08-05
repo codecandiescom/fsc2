@@ -1,5 +1,3 @@
-# -*- cperl -*-
-#
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
@@ -13,7 +11,7 @@ use Config;
 
 
 # Check if we can run the C compiler and if using fcntl() works - if the
-# later fails the system may not have a fcntl() system call at all.
+# later fails the system may not have a fcntl(2) system call at all.
 
 open $fh, ">cc_test.c" or die "Can't open a file for writing: $!\n";
 print $fh "int main(void)\n{\nreturn 0;\n}\n";
@@ -44,7 +42,7 @@ close $fh;
 if ( system $Config{cc}, qw( -o fcntl_test fcntl_test.c ) ) {
     unlink "fcntl_test.c";
     die "Can't compile a program that uses fcntl(). Does your system " .
-        "really have a fcntl() system call?\n";
+        "have a fcntl(2) system call?\n";
 }
 unlink "fcntl_test";
 unlink "fcntl_test.c";
@@ -62,33 +60,23 @@ if ( ( system $Config{cc}, qw( -o sizes1 sizes1.c ) or system "./sizes1" ) and
 unlink "sizes1" if -e "sizes1";
 unlink "sizes2" if -e "sizes2";
 
-open $fh, ">MANIFEST.SKIP" or die "Can't open a file for writing: $!\n";
-print $fh <<EOF;
-\\B\\.svn\\b
-MAKEFILE\\.SKIP
-EOF
-close $fh;
 
 # Now create the Makefile
 
 WriteMakefile(
-    'NAME'          => 'Fcntl_Lock',
-    'VERSION_FROM'  => 'Fcntl_Lock.pm',
-    'PREREQ_PM'     => {},
+    NAME              => 'File::Fcntl_Lock',
     ( $] >= 5.005 ?
-      ( ABSTRACT_FROM => 'Fcntl_Lock.pm', # retrieve abstract from module
-        AUTHOR     => 'Jens Thoms Toerring <jt@toerring.de>' ) :
+      ( VERSION_FROM  => 'lib/File/Fcntl_Lock.pm',
+        ABSTRACT_FROM => 'lib/File/Fcntl_Lock.pm',
+        AUTHOR        => 'Jens Thoms Toerring <jt@toerring.de>' ) :
       ( ) ),
-    'LIBS'      => [ '' ],
-    'DEFINE'    => '',
-    'INC'       => '',
-    'PERL_MALLOC_OK' => 1,
-    'C'              => [ qw( Fcntl_Lock.c ) ],
-    clean => { FILES => "Fcntl_Lock.h" }
+    PREREQ_PM         => { POSIX      => 0,
+                           Errno      => 0,
+                           Carp       => 0,
+                           Exporter   => 0,
+                           DynaLoader => 0 },
+    PERL_MALLOC_OK    => TRUE,
+    C                 => [ 'Fcntl_Lock.xs' ],
+    test              => { TESTS => 't/*.t' },
+    clean             => { FILES => "Fcntl_Lock.h" }
 );
-
-
-# Local variables:
-# tab-width: 4
-# indent-tabs-mode: nil
-# End:

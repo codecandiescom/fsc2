@@ -14,7 +14,7 @@
 #include "Fcntl_Lock.h"
 
 
-MODULE = Fcntl_Lock     PACKAGE = Fcntl_Lock
+MODULE = File::Fcntl_Lock     PACKAGE = File::Fcntl_Lock
 
 PROTOTYPES: ENABLE
 
@@ -70,8 +70,7 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
         if ( ( sv_type   = hv_fetch( fs, "l_type",   6, 0 ) ) == NULL ||
              ( sv_whence = hv_fetch( fs, "l_whence", 8, 0 ) ) == NULL ||
              ( sv_start  = hv_fetch( fs, "l_start",  7, 0 ) ) == NULL ||
-             ( sv_len    = hv_fetch( fs, "l_len",    5, 0 ) ) == NULL ||
-             ( sv_pid    = hv_fetch( fs, "l_pid",    5, 0 ) ) == NULL    )
+             ( sv_len    = hv_fetch( fs, "l_len",    5, 0 ) ) == NULL    )
         {
             sv_setiv( int_err, 1 );
             XSRETURN_UNDEF;
@@ -88,8 +87,6 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
                                            ( LSTART_TYPE ) SvIV( *sv_start );
         * ( LLEN_TYPE * ) ( flock_struct + LLEN_OFFSET ) =
                                            ( LLEN_TYPE ) SvIV( *sv_len );
-        * ( LPID_TYPE * ) ( flock_struct + LPID_OFFSET ) =
-                                           ( LPID_TYPE ) SvIV( *sv_pid );
 
         /* Now comes the great moment: fcntl(2) is finally called - if we want
            the lock immediately but some other process is holding it we return

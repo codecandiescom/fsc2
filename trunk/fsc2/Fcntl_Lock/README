@@ -1,13 +1,16 @@
-Fcntl_Lock version 0.06
-=======================
+File::Fcntl_Lock version 0.07
+=============================
 
-Fcntl_Lock is a module to do file locking using the fcntl(2) system call.
-This allows locks on parts of a file as well as the whole file and
-overcomes some known problems with flock(2), on which Perls flock()
-function often is based.
+Fcntl_Lock is a module to do file locking in an object oriented
+fashion using the fcntl(2) system call. This allows locks on parts
+of a file as well as the whole file and overcomes some known problems
+with flock(2), on which Perls flock() function often is based.
 
-Obviously, to use the module you need a system that supports the fcntl()
-system call.
+
+PORTABILITY
+
+To use the module the system must supports the fcntl() system call
+which probably will restrict its use to POSIX compliant systems.
 
 
 INSTALLATION
@@ -22,41 +25,51 @@ To install this module type the following:
 
 DEPENDENCIES
 
-The module requires the following modules:
+The module requires the following other modules:
 
-  POSIX, Errno, Carp
+  POSIX, Errno, Carp, Exporter, DynaLoader
+
+To install the module a C compiler must be available and the
+system must support the use of shared libraries (or DLLs).
 
 
 IMPLEMENTATION DETAILS
 
 Basically, the module isn't much more than a wrapper for the fcntl()
-function available in C. The somewhat trickier part was setting up the
-required flock structure correctly in a hopefully system-independent way.
-The concrete layout of this structure will be quite different on different
-systems/architectures. The obvious solution would be to include fcntl.h
-in the XS file and simply populate the members of the structure with the
-data passed by the user.
+system call. The somewhat tricky part was setting up the required
+flock structure correctly in a hopefully system-independent way. The
+concrete layout of this structure will be quite different on different
+systems/architectures. The naive solution would be to include fcntl.h
+in the XS file and simply populate the members of the structure with
+the data passed by the user.
 
-Unfortunately, it isn't always that simple. E.g., on my system Perl has
-been built with the flags LARGEFILE_SOURCE and FILE_OFFSET_BITS=64, which
-differ from the settings that have been used when compiling the kernel.
-This results in the declaration of the flock structure to be different
-when including fcntl.h in the XS file (where the compilation flags Perl was
-built with are set) from the one needed to call fcntl(). Thus, before the
-XS file is compiled a C program is run (without the flags) that determines
-the real size and alignment of the flock structure and writes out an
-include file. The data from this file are then used to populate (or extract
-data from) the flock structure of the correct type.
+Unfortunately, it isn't always that simple. E.g. on a system where Perl
+has been built with the flags LARGEFILE_SOURCE and FILE_OFFSET_BITS=64
+and where those differ from the settings that have been used when
+compiling the system itself this results in the declaration of the flock
+structure to be different when including fcntl.h in the XS file (where
+the flags Perl was built with are set) from the ones needed to call
+fcntl(). Thus, before the XS file is compiled a C program is run
+(without the flags) that determines the real size and alignment of
+the flock structure and writes out an include file. The data from this
+file are then used to populate (or extract data from) the flock structure
+of the correct type.
 
 
 ACKNOWLEDGMENTS
 
-Thanks to Mark Jason Dominus <mjd@plover.com> and Benjamin Goldberg
-<goldbb2@earthlink.net> for discussions, code and encouragement.
+Thanks to Mark-Jason Dominus (MJD) and Benjamin Goldberg (GOLDBB) for
+helpful discussions, code examples and encouragement.
+
+
+AUTHOR
+
+Jens Thoms Toerring <jt@toerring.de>
+
 
 COPYRIGHT AND LICENCE
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
-Copyright (C) 2002-2006 Jens Thoms Toerring <jt@toerring.de>
+Copyright (C) 2002-2007 Jens Thoms Toerring <jt@toerring.de>
