@@ -58,9 +58,9 @@ unlink 'fcntl_test.c';
 
 if ( ( system $Config{cc}, qw( -o sizes1 sizes1.c ) or system './sizes1' ) and
      ( system $Config{cc}, qw( -o sizes2 sizes2.c ) or system './sizes2' ) ) {
-    unlink( 'sizes1' ) if -e 'sizes1';
-    unlink( 'sizes2' ) if -e 'sizes2';
-	unlink( 'Fnctl_Lock.h' );
+    unlink 'sizes1' if -e 'sizes1';
+    unlink 'sizes2' if -e 'sizes2';
+	unlink 'Fnctl_Lock.h' if -e 'Fnctl_Lock.h';
     die "Failed to create the necessary header file.\n";
 }
 unlink 'sizes1' if -e 'sizes1';
