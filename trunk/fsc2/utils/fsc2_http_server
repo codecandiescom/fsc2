@@ -27,7 +27,7 @@ use strict;
 use warnings;
 use IO::Socket::INET;
 use POSIX;
-use Fcntl_Lock;
+use File::Fcntl_Lock;
 
 # Reduce PATH to the minmum necessary (we're running in tainted mode)
 
@@ -642,12 +642,12 @@ sub rfc_1123_date {
 
 sub stdout_lock {
     if ( shift ) {
-        $fs = Fcntl_Lock->new( 'l_type' => F_WRLCK );
+        $fs = new File::Fcntl_Lock( 'l_type' => F_WRLCK );
     } else {
         $fs->l_type( F_UNLCK );
     }
 
-    return defined $fs->fcntl_lock( STDOUT_FILENO, F_SETLKW );
+    return defined $fs->lock( STDOUT_FILENO, F_SETLKW );
 }
 
 
