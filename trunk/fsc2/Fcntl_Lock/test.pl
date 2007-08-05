@@ -1,3 +1,4 @@
+#!perl
 # -*- cperl -*-
 #
 # $Id$
@@ -13,19 +14,22 @@
 #########################
 
 use Test;
+use strict;
+use warnings;
 BEGIN { plan tests => 16 };
 use POSIX;
-use Fcntl_Lock;
+use File::Fcntl_Lock;
+
 
 ##############################################
-# 1. If we made it this far, we're in business...
+# 1. If we made it this far we're in business...
 
 ok( 1 ); 
 
 ##############################################
 # 2. Most basic test: create an object
 
-ok( $fs = new Fcntl_Lock );
+ok( my $fs = new File::Fcntl_Lock );
 
 ##############################################
 # 3. Also basic: create an object with initalization
@@ -36,12 +40,12 @@ ok( $fs = $fs->new( l_type   => F_RDLCK,
                     l_len    => 234       ) );
 
 ##############################################
-# 4. Check if properties of created objects are what they are supposed to be
+# 4. Check if properties of the created object are what they are supposed to be
 
-ok( $fs->l_type == F_RDLCK    and
+ok( $fs->l_type   == F_RDLCK  and
     $fs->l_whence == SEEK_CUR and
-    $fs->l_start == 123       and
-    $fs->l_len == 234             );
+    $fs->l_start  == 123      and
+    $fs->l_len    == 234          );
 
 ##############################################
 # 5. Change l_type property to F_UNLCK and check
@@ -94,11 +98,15 @@ ok( defined $fs->lock( STDOUT_FILENO, F_SETLK ) );
 # 13. Test if we can get a read lock on the script we're just running
 
 $fs->l_type( F_RDLCK );
-open( $fh, "./test.pl" );
+my $fh;
+unless ( open $fh, 't/Fcntl_Lock.t' ) {
+    print STDERR "Can't open a file for reading: $!\n";
+    ok( 0 );
+}
 ok( defined $fs->lock( $fh, F_SETLK ) );
 
 ##############################################
-# 14. Test if we can release this lock
+# 14. Test if we can release the lock
 
 $fs->l_type( F_UNLCK );
 ok( defined $fs->lock( $fh, F_SETLK ) );
@@ -113,7 +121,7 @@ close $fh;
 $fs = $fs->new( l_type   => F_WRLCK,
                 l_whence => SEEK_SET,
                 l_start  => 0,
-                l_len    => 0 );
+                l_len    => 0         );
 unless ( open( $fh, ">./fcntl_locking_test" ) ) {
     print STDERR "Can't open a file for writing: $!\n";
     ok( 0 );
@@ -121,7 +129,7 @@ unless ( open( $fh, ">./fcntl_locking_test" ) ) {
 unlink( "./fcntl_locking_test" );
 if ( my $pid = fork ) {
     sleep 1;
-    $failed = 1;
+    my $failed = 1;
     while ( 1 ) {
         last if $pid == waitpid( $pid, WNOHANG ) and $?;
         last unless $fs->lock( $fh, F_GETLK );
@@ -157,10 +165,10 @@ if ( my $pid = fork ) {
 $fs = $fs->new( l_type   => F_WRLCK,
                 l_whence => SEEK_SET,
                 l_start  => 0,
-                l_len    => 0 );
+                l_len    => 0         );
 if ( my $pid = fork ) {
     sleep 1;
-    $failed = 1;
+    my $failed = 1;
     while ( 1 ) {
         last if $pid == waitpid( $pid, WNOHANG ) and $?;
         last unless $fs->lock( STDOUT_FILENO, F_GETLK );
@@ -177,7 +185,6 @@ if ( my $pid = fork ) {
     } else {
         ok( 0 );
     }
-    close STDOUT_FILENO;
 } elsif ( defined $pid ) {
     $fs->lock( STDOUT_FILENO, F_SETLKW ) or exit 1;
     sleep 2;
