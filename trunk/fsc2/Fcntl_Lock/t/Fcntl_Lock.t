@@ -1,4 +1,3 @@
-#!perl
 # -*- cperl -*-
 #
 # $Id$
@@ -9,7 +8,7 @@
 #  Copyright (C) 2002-2007 Jens Thoms Toerring <jt@toerring.de>
 #
 # Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.pl'
+# `make test'. After `make install' it should work as `perl Fcntl_Lock.t'
 
 #########################
 
