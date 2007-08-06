@@ -254,14 +254,14 @@ void tds520a_set_window( Window_T * /* w */ );
 
 long tds520a_translate_channel( int  /* dir     */,
                                 long /* channel */,
-                                bool /* flag    */ );
+                                bool /* flag    */  );
 
 void tds520a_store_state( TDS520A_T * /* dest */,
-                          TDS520A_T * /* src  */ );
+                          TDS520A_T * /* src  */  );
 
 void tds520a_state_check( double /* timebase */,
                           long   /* rec_len  */,
-                          double /* trig_pos */ );
+                          double /* trig_pos */  );
 
 Window_T *tds520a_get_window_by_number( long /* win_number */ );
 
@@ -271,7 +271,7 @@ double tds520a_get_timebase( void );
 
 void tds520a_set_timebase( double /* timebase */);
 
-void tds520a_set_record_length( long /* num_points */);
+void tds520a_set_record_length( long /* num_points */ );
 
 long tds520a_get_record_length( void );
 
@@ -300,7 +300,7 @@ void tds520a_clear_SESR( void );
 void tds520a_finished( void );
 
 void tds520a_set_cursor( int    /* cur_num */,
-                         double /* pos     */ );
+                         double /* pos     */  );
 
 void tds520a_set_track_cursors( bool /* flag */ );
 
@@ -311,35 +311,35 @@ void tds520a_set_snap( bool /* flag */ );
 bool tds520a_display_channel_state( int /* channel */ );
 
 void tds520a_display_channel( int  /* channel */,
-                              bool /* on_flag */ );
+                              bool /* on_flag */  );
 
 double tds520a_get_sens( int /* channel */ );
 
 void tds520a_set_sens( int    /* channel */,
-                       double /* val     */);
+                       double /* val     */  );
 
 void tds520a_start_acquisition( void );
 
 double tds520a_get_area( int        /* channel    */,
                          Window_T * /* w          */,
-                         bool       /* use_cursor */ );
+                         bool       /* use_cursor */  );
 
 void tds520a_get_curve( int        /* channel    */,
                         Window_T * /* w          */,
                         double **  /* data       */,
                         long *     /* length     */,
-                        bool       /* use_cursor */ );
+                        bool       /* use_cursor */  );
 
 double tds520a_get_amplitude( int        /* channel    */,
                               Window_T * /* w          */,
-                              bool       /* use_cursor */ );
+                              bool       /* use_cursor */  );
 
 void tds520a_free_running( void );
 
 void tds520a_lock_state( bool /* lock */ );
 
 void tds520a_copy_curve( int /* src  */,
-                         int /* dest */ );
+                         int /* dest */  );
 
 bool tds520a_command( const char * /* cmd */ );
 

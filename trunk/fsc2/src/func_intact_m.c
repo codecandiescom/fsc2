@@ -59,7 +59,7 @@ Var_T *f_mcreate( Var_T * var )
 
     /* At least a label and two menu entries must be specified */
 
-    if ( v == NULL || v->next == NULL || v->next->next == NULL)
+    if ( v == NULL || v->next == NULL || v->next->next == NULL )
     {
         print( FATAL, "Missing arguments.\n" );
         THROW( EXCEPTION );
@@ -255,9 +255,9 @@ Var_T *f_mdelete( Var_T * v )
             f_mdelete_parent( v );
     } while ( ( v = vars_pop( v ) ) != NULL );
 
-    if ( Fsc2_Internals.I_am == CHILD ||
-         Fsc2_Internals.mode == TEST  ||
-         ! Toolbox )
+    if (    Fsc2_Internals.I_am == CHILD
+         || Fsc2_Internals.mode == TEST
+         || ! Toolbox )
         return vars_push( INT_VAR, 1L );
 
     /* Redraw the tool box without the menu */

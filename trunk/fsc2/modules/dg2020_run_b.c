@@ -60,8 +60,8 @@ bool dg2020_do_update( void )
     /* Resort the pulses and check that the new pulse settings are
        reasonable and finally commit all changes */
 
-    if ( ( state = dg2020_reorganize_pulses( FSC2_MODE == TEST ) ) &&
-         FSC2_MODE == EXPERIMENT )
+    if (    ( state = dg2020_reorganize_pulses( FSC2_MODE == TEST ) )
+         && FSC2_MODE == EXPERIMENT )
         dg2020_update_data( );
 
     if ( FSC2_MODE == TEST )
@@ -148,8 +148,8 @@ bool dg2020_reorganize_pulses( bool flag )
        needs to be tested - thanks to Celine Elsaesser for pointing this
        out. */
 
-    if ( dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-         dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
+    if (    dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used
+         && dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
     {
         Ticks add;
         Function_T *fs = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE,
@@ -288,26 +288,29 @@ void dg2020_do_checks( Function_T * f )
 
         if ( ppn != NULL && pp->pulse->pos + pp->pulse->len > ppn->pulse->pos )
         {
-            if ( f->self == PULSER_CHANNEL_TWT &&
-                 ( pp->pulse->tp != NULL || ppn->pulse->tp != NULL ) )
-                 continue;
+            if (    f->self == PULSER_CHANNEL_TWT
+                 && ( pp->pulse->tp != NULL || ppn->pulse->tp != NULL ) )
+                continue;
 
-            if ( dg2020.auto_shape_pulses &&
-                 f->self == PULSER_CHANNEL_PULSE_SHAPE )
+            if (    dg2020.auto_shape_pulses
+                 && f->self == PULSER_CHANNEL_PULSE_SHAPE )
             {
-                if ( pp->pulse->sp != NULL && ppn->pulse->sp != NULL &&
-                     pp->pulse->sp->function != ppn->pulse->sp->function )
+                if (    pp->pulse->sp != NULL
+                     && ppn->pulse->sp != NULL
+                     && pp->pulse->sp->function != ppn->pulse->sp->function )
                     print( FATAL, "Shape pulses for pulses #%ld function "
                            "'%s') and #%ld (function '%s') start to "
                            "overlap.\n", pp->pulse->sp->num,
                            pp->pulse->sp->function->name, ppn->pulse->sp->num,
                            ppn->pulse->sp->function->name );
-                if ( pp->pulse->sp != NULL && ppn->pulse->sp == NULL )
+                if (    pp->pulse->sp != NULL
+                     && ppn->pulse->sp == NULL )
                     print( FATAL, "Automatically created shape pulse for "
                            "pulse #%ld (function '%s') and PULSE_SHAPE pulse "
                            "#%ld start to overlap.\n", pp->pulse->sp->num,
                            pp->pulse->sp->function->name, ppn->pulse->num );
-                else if ( pp->pulse->sp == NULL && ppn->pulse->sp != NULL )
+                else if (    pp->pulse->sp == NULL
+                          && ppn->pulse->sp != NULL )
                     print( FATAL, "Automatically created shape pulse for "
                            "pulse #%ld (function '%s') and PULSE_SHAPE pulse "
                            "#%ld star to overlap.\n", ppn->pulse->sp->num,
@@ -321,11 +324,12 @@ void dg2020_do_checks( Function_T * f )
         }
     }
 
-    if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
-         dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-         ( dg2020.is_shape_2_defense || dg2020.is_defense_2_shape ||
-           dg2020.function[ PULSER_CHANNEL_TWT ].is_used ||
-           dg2020.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
+    if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+         && dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used
+         && (    dg2020.is_shape_2_defense
+              || dg2020.is_defense_2_shape
+              || dg2020.function[ PULSER_CHANNEL_TWT ].is_used
+              || dg2020.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
         dg2020_defense_shape_check( f );
 }
 
@@ -339,9 +343,9 @@ static void dg2020_shape_padding_check_1( Function_T * f )
     int i;
 
 
-    if ( f->self == PULSER_CHANNEL_PULSE_SHAPE ||
-         ! f->uses_auto_shape_pulses ||
-         f->num_params == 0 )
+    if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+         || ! f->uses_auto_shape_pulses
+         || f->num_params == 0 )
         return;
 
     /* Check that first pulse don't starts to early */
@@ -475,10 +479,10 @@ static void dg2020_shape_padding_check_2( void )
                 {
                     pp2 = f2->pulse_params + l;
 
-                    if ( ( pp1->pos <= pp2->pos &&
-                           pp1->pos + pp1->len > pp2->pos ) ||
-                         ( pp1->pos > pp2->pos &&
-                           pp1->pos < pp2->pos + pp2->len ) )
+                    if (    (    pp1->pos <= pp2->pos
+                              && pp1->pos + pp1->len > pp2->pos )
+                         || (    pp1->pos > pp2->pos
+                              && pp1->pos < pp2->pos + pp2->len ) )
                     {
                         print( FATAL, "Distance between pulses #%ld and #%ld "
                                "too short to set shape padding.\n",
@@ -781,9 +785,9 @@ static void dg2020_defense_shape_check( Function_T * shape )
             if ( ! defense_p->is_active )
                 continue;
 
-            if ( shape_p->pos <= defense_p->pos &&
-                 shape_p->pos + shape_p->len + dg2020.shape_2_defense >
-                 defense_p->pos )
+            if (    shape_p->pos <= defense_p->pos
+                 && shape_p->pos + shape_p->len + dg2020.shape_2_defense >
+                                                               defense_p->pos )
             {
                 if ( FSC2_MODE == EXPERIMENT )
                 {
@@ -813,9 +817,9 @@ static void dg2020_defense_shape_check( Function_T * shape )
                 dg2020.shape_2_defense_too_near++;
             }
 
-            if ( defense_p->pos < shape_p->pos &&
-                 defense_p->pos + defense_p->len + dg2020.defense_2_shape >
-                 shape_p->pos )
+            if (    defense_p->pos < shape_p->pos
+                 && defense_p->pos + defense_p->len + dg2020.defense_2_shape >
+                                                                 shape_p->pos )
             {
                 if ( FSC2_MODE == EXPERIMENT )
                 {
@@ -861,8 +865,8 @@ void dg2020_set_pulses( Function_T * f )
     int what;
 
 
-    fsc2_assert( f->self != PULSER_CHANNEL_PHASE_1 &&
-                 f->self != PULSER_CHANNEL_PHASE_2 );
+    fsc2_assert(    f->self != PULSER_CHANNEL_PHASE_1
+                 && f->self != PULSER_CHANNEL_PHASE_2 );
 
     /* Always set the very first bit to LOW state, see the rant about the bugs
        in the pulser firmware at the start of dg2020_gpib_b.c. Then set the
@@ -941,8 +945,9 @@ void dg2020_full_reset( void )
            a warning and delete it if it hasn't (unless we haven't ben told
            to keep all pulses, even unused ones) */
 
-        if ( FSC2_MODE != EXPERIMENT &&
-             ! p->has_been_active && ! dg2020.keep_all )
+        if (    FSC2_MODE != EXPERIMENT
+             && ! p->has_been_active
+             && ! dg2020.keep_all )
         {
             if ( p->num >=0 )
                 print( WARN, "Pulse #%ld is never used.\n", p->num );
@@ -965,8 +970,9 @@ void dg2020_full_reset( void )
 
         p->is_old_pos = p->is_old_len = UNSET;
 
-        p->is_active = ( p->is_pos && p->is_len &&
-                         ( p->len > 0 || p->len == -1 ) );
+        p->is_active = (    p->is_pos
+                         && p->is_len
+                         && ( p->len > 0 || p->len == -1 ) );
         p = p->next;
     }
 
@@ -1019,8 +1025,9 @@ Pulse_T *dg2020_delete_pulse( Pulse_T * p,
     /* First we've got to remove the pulse from its functions pulse list (if
        it already made it into the functions pulse list) */
 
-    if ( p->is_function && p->function->num_pulses > 0 &&
-         p->function->pulses != NULL )
+    if (    p->is_function
+         && p->function->num_pulses > 0
+         && p->function->pulses != NULL )
     {
         f = p->function;
 

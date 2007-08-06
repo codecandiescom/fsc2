@@ -295,8 +295,8 @@ static bool get_print_file( FILE ** fp,
 
     do
         obj = fl_do_forms( );
-    while ( obj != print_form->print_button &&
-            obj != print_form->cancel_button );
+    while (    obj != print_form->print_button
+            && obj != print_form->cancel_button );
 
     /* Store state of form */
 
@@ -347,10 +347,10 @@ static bool get_print_file( FILE ** fp,
     /* In print-to-file mode ask for confirmation if the file already exists
        and try to open it for writing */
 
-    if  ( 0 == stat( *name, &stat_buf ) &&
-          1 != show_choices( "The selected file does already exist:\n"
-                             "Are you sure you want to overwrite it?",
-                             2, "Yes", "No", NULL, 2, UNSET ) )
+    if  (    0 == stat( *name, &stat_buf )
+          && 1 != show_choices( "The selected file does already exist:\n"
+                                "Are you sure you want to overwrite it?",
+                                2, "Yes", "No", NULL, 2, UNSET ) )
     {
         *name = CHAR_P T_free( *name );
         return FAIL;
@@ -575,8 +575,8 @@ static void start_printing( FILE *       fp,
 
     if ( print_type == S2P )
     {
-        if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
-             ( fp = fdopen( tmp_fd, "w" ) ) == NULL )
+        if (    ( tmp_fd = mkstemp( filename ) ) < 0
+             || ( fp = fdopen( tmp_fd, "w" ) ) == NULL )
         {
             if ( tmp_fd >= 0 )
             {
@@ -1687,8 +1687,8 @@ static char *paren_replace( const char * str )
     {
         if ( *sp < 0x1B || *sp == 0x7F )
         {
-            if ( *sp == 0x7F ||
-                 ( *sp != 0x09 && *sp != 0x0A && *sp != 0x0D ) )
+            if (    *sp == 0x7F
+                 || ( *sp != 0x09 && *sp != 0x0A && *sp != 0x0D ) )
                 *sp = ' ';
         }
 

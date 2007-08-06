@@ -204,9 +204,10 @@ static void connect_handler( int listen_fd )
             strcpy( line, ( unsigned int ) extern_UID == getuid( ) ?
                     "OK\n" : "FAIL\n" );
 
-        if ( writen( conn_fd, line, strlen( line ) )
-             != ( ssize_t ) strlen( line ) ||
-             Is_busy || ( unsigned int ) extern_UID != getuid( ) )
+        if (    writen( conn_fd, line, strlen( line ) )
+                                                  != ( ssize_t ) strlen( line )
+             || Is_busy
+             || ( unsigned int ) extern_UID != getuid( ) )
         {
             close( conn_fd );
             continue;
@@ -218,9 +219,9 @@ static void connect_handler( int listen_fd )
            to tell fsc2 to delete the file after it has been used. If there
            is no 'd' replace the newline with a space */
 
-        if ( ( count = read_line( conn_fd, line, MAX_LINE_LENGTH ) ) <= 0 ||
-             ( line[ 0 ] != 'S' && line[ 0 ] != 'T' && line[ 0 ] != 'L' ) ||
-             ( line[ 1 ] != '\n' && line[ 1 ] != 'd' ) )
+        if (    ( count = read_line( conn_fd, line, MAX_LINE_LENGTH ) ) <= 0
+             || ( line[ 0 ] != 'S' && line[ 0 ] != 'T' && line[ 0 ] != 'L' )
+             || ( line[ 1 ] != '\n' && line[ 1 ] != 'd' ) )
         {
             close( conn_fd );
             continue;
@@ -232,8 +233,9 @@ static void connect_handler( int listen_fd )
         /* Return "OK\n" unless parent has become busy */
 
         strcpy( line + 2, Is_busy ? "BUSY\n" : "OK\n" );
-        if ( writen( conn_fd, line + 2, strlen( line + 2 ) )
-             != ( ssize_t ) strlen( line + 2 ) || Is_busy )
+        if (    writen( conn_fd, line + 2, strlen( line + 2 ) )
+                                              != ( ssize_t ) strlen( line + 2 )
+             || Is_busy )
         {
             close( conn_fd );
             continue;

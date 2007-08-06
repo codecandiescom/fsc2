@@ -28,7 +28,7 @@ our @EXPORT = qw( F_GETLK F_SETLK F_SETLKW
                   F_RDLCK F_WRLCK F_UNLCK
                   SEEK_SET SEEK_CUR SEEK_END );
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 
 =pod
@@ -141,10 +141,10 @@ To create a new object representing a flock structure call B<new>:
 You also can pass the B<new> method a set of key-value pairs to
 initialize the members of the flock structure, e.g.
 
-  $fs = new File::Fcntl_Lock( l_type   => F_WRLCK,
-                              l_whence => SEEK_SET,
-                              l_start  => 0,
-                              l_len    => 100 );
+  $fs = new File::Fcntl_Lock l_type   => F_WRLCK,
+                             l_whence => SEEK_SET,
+                             l_start  => 0,
+                             l_len    => 100 );
 
 if you plan to obtain a write lock for the first 100 bytes of a file.
 
@@ -200,9 +200,9 @@ sub l_type {
     if ( @_ ) {
         my $l_type = shift;
         croak "Invalid value for l_type member"
-            unless $l_type == F_RDLCK or
-                   $l_type == F_WRLCK or
-                   $l_type == F_UNLCK;
+            unless    $l_type == F_RDLCK
+                   or $l_type == F_WRLCK
+                   or $l_type == F_UNLCK;
         $flock_struct->{ l_type } = $l_type;
     }
     return $flock_struct->{ l_type };
@@ -229,9 +229,9 @@ sub l_whence {
     if ( @_ ) {
         my $l_whence = shift;
         croak "Invalid value for l_whence member"
-            unless $l_whence == SEEK_SET or
-                   $l_whence == SEEK_CUR or
-                   $l_whence == SEEK_END;
+            unless    $l_whence == SEEK_SET
+                   or $l_whence == SEEK_CUR
+                   or $l_whence == SEEK_END;
         $flock_struct->{ l_whence } = $l_whence;
     }
     return $flock_struct->{ l_whence };
@@ -368,9 +368,9 @@ sub lock {
     croak "Missing arguments to lock()"
         unless defined $flock_struct and defined $fh and defined $action;
 
-    croak "Invalid action argument" unless $action == F_GETLK or
-                                           $action == F_SETLK or
-                                           $action == F_SETLKW;
+    croak "Invalid action argument" unless    $action == F_GETLK
+                                           or $action == F_SETLK
+                                           or $action == F_SETLKW;
 
     my $fd = ref( $fh ) ? fileno( $fh ) : $fh;
 

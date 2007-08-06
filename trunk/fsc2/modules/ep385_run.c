@@ -138,8 +138,8 @@ static bool ep385_update_pulses( bool flag )
                 /* Extend the pulses a bit for which a shape pulse has been
                    defined */
 
-                if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
-                     p->sp != NULL )
+                if (    p->function->self != PULSER_CHANNEL_PULSE_SHAPE
+                     && p->sp != NULL )
                 {
                     pp->pos -= p->function->left_shape_padding;
                     pp->len +=   p->function->left_shape_padding
@@ -148,8 +148,8 @@ static bool ep385_update_pulses( bool flag )
 
                 /* Extend TWT pulses that were automatically created */
 
-                if ( p->function->self == PULSER_CHANNEL_TWT &&
-                     p->tp != NULL )
+                if (    p->function->self == PULSER_CHANNEL_TWT
+                     && p->tp != NULL )
                 {
                     pp->pos -= p->tp->function->left_twt_padding;
                     pp->len +=   p->tp->function->left_twt_padding
@@ -175,10 +175,10 @@ static bool ep385_update_pulses( bool flag )
             if ( ch->num_active_pulses == ch->old_num_active_pulses )
             {
                 for ( m = 0; m < ch->num_active_pulses; m++ )
-                if ( ch->pulse_params[ m ].pos !=
-                     ch->old_pulse_params[ m ].pos ||
-                     ch->pulse_params[ m ].len !=
-                     ch->old_pulse_params[ m ].len )
+                if (    ch->pulse_params[ m ].pos !=
+                                                ch->old_pulse_params[ m ].pos
+                     || ch->pulse_params[ m ].len !=
+                                                ch->old_pulse_params[ m ].len )
                     break;
 
                 if ( m == ch->num_active_pulses )
@@ -213,11 +213,13 @@ static bool ep385_update_pulses( bool flag )
                    minimum distances has been set or TWT or TWT_GATE pulses
                    are used) */
 
-                if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
-                     ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-                     ( ep385.is_shape_2_defense || ep385.is_defense_2_shape ||
-                       ep385.function[ PULSER_CHANNEL_TWT ].is_used ||
-                       ep385.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
+                if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+                     && ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used
+                     && (    ep385.is_shape_2_defense
+                          || ep385.is_defense_2_shape
+                          || ep385.function[ PULSER_CHANNEL_TWT ].is_used
+                          || ep385.function[ PULSER_CHANNEL_TWT_GATE ].is_used
+                         ) )
                     ep385_defense_shape_check( f );
 
                 TRY_SUCCESS;
@@ -262,9 +264,9 @@ static bool ep385_update_pulses( bool flag )
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
         f = ep385.function + i;
-        if ( ( ! f->is_used && f->num_channels == 0 ) ||
-             i == PULSER_CHANNEL_PHASE_1 ||
-             i == PULSER_CHANNEL_PHASE_2 )
+        if (    ( ! f->is_used && f->num_channels == 0 )
+             || i == PULSER_CHANNEL_PHASE_1
+             || i == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         for ( j = 0; j < f->num_channels; j++ )
@@ -279,8 +281,8 @@ static bool ep385_update_pulses( bool flag )
         }
     }
 
-    if ( ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-         ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
+    if (    ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used
+         && ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
     {
         Ticks add;
         Channel_T *cs =
@@ -321,9 +323,9 @@ static bool ep385_update_pulses( bool flag )
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
         f = ep385.function + i;
-        if ( ( ! f->is_used && f->num_channels == 0 ) ||
-             i == PULSER_CHANNEL_PHASE_1 ||
-             i == PULSER_CHANNEL_PHASE_2 )
+        if (    ( ! f->is_used && f->num_channels == 0 )
+             || i == PULSER_CHANNEL_PHASE_1
+             || i == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         if ( f->max_seq_len > MAX_PULSER_BITS )
@@ -383,8 +385,8 @@ static void ep385_pulse_check( Function_T * f )
         /* Skip checks for inactive pulses and automatically generated
            TWT pulses */
 
-        if ( ! p1->is_active ||
-             ( f->self == PULSER_CHANNEL_TWT && p1->tp != NULL ) )
+        if (    ! p1->is_active
+             || ( f->self == PULSER_CHANNEL_TWT && p1->tp != NULL ) )
             continue;
 
         for ( j = i + 1; j < f->num_pulses; j++ )
@@ -393,19 +395,20 @@ static void ep385_pulse_check( Function_T * f )
 
             /* Skip checks for inactive pulses */
 
-            if ( ! p2->is_active ||
-                 ( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
+            if (    ! p2->is_active
+                 || ( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
                 continue;
 
-            if ( p1->pos == p2->pos ||
-                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-                 ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
+            if (    p1->pos == p2->pos
+                 || ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos )
+                 || ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
             {
-                if ( ep385.auto_shape_pulses &&
-                     f->self == PULSER_CHANNEL_PULSE_SHAPE )
+                if (    ep385.auto_shape_pulses
+                     && f->self == PULSER_CHANNEL_PULSE_SHAPE )
                 {
-                    if ( p1->sp != NULL && p2->sp != NULL &&
-                         p1->sp->function != p2->sp->function )
+                    if (    p1->sp != NULL
+                         && p2->sp != NULL
+                         && p1->sp->function != p2->sp->function )
                         print( FATAL, "Shape pulses for pulses #%ld (function "
                                "'%s') and #%ld (function '%s') start to "
                                "overlap.\n", p1->sp->num,
@@ -467,9 +470,9 @@ static void ep385_defense_shape_check( Function_T * shape )
             if ( ! defense_p->is_active )
                 continue;
 
-            if ( shape_p->pos <= defense_p->pos &&
-                 shape_p->pos + shape_p->len + ep385.shape_2_defense >
-                 defense_p->pos )
+            if (    shape_p->pos <= defense_p->pos
+                 && shape_p->pos + shape_p->len + ep385.shape_2_defense >
+                                                               defense_p->pos )
             {
                 if ( FSC2_MODE == EXPERIMENT )
                 {
@@ -499,9 +502,9 @@ static void ep385_defense_shape_check( Function_T * shape )
                 ep385.shape_2_defense_too_near++;
             }
 
-            if ( defense_p->pos < shape_p->pos &&
-                 defense_p->pos + defense_p->len + ep385.defense_2_shape >
-                 shape_p->pos )
+            if (    defense_p->pos < shape_p->pos
+                 && defense_p->pos + defense_p->len + ep385.defense_2_shape >
+                                                                 shape_p->pos )
             {
                 if ( FSC2_MODE == EXPERIMENT )
                 {
@@ -557,8 +560,9 @@ void ep385_full_reset( void )
            a warning and delete it if it hasn't (unless we haven't been told
            to keep all pulses, even unused ones) */
 
-        if ( FSC2_MODE != EXPERIMENT &&
-             ! p->has_been_active && ! ep385.keep_all )
+        if (    FSC2_MODE != EXPERIMENT
+             && ! p->has_been_active
+             && ! ep385.keep_all )
         {
             print( WARN, "Pulse #%ld is never used.\n", p->num );
             p = ep385_delete_pulse( p, SET );
@@ -622,9 +626,9 @@ void ep385_shape_padding_check_1( Channel_T * ch )
     int i;
 
 
-    if ( ch->function->self == PULSER_CHANNEL_PULSE_SHAPE ||
-         ! ch->function->uses_auto_shape_pulses ||
-         ch->num_active_pulses == 0 )
+    if (    ch->function->self == PULSER_CHANNEL_PULSE_SHAPE
+         || ! ch->function->uses_auto_shape_pulses
+         || ch->num_active_pulses == 0 )
         return;
 
     /* Check that first pulse don't starts to early */
@@ -733,10 +737,10 @@ void ep385_shape_padding_check_2( void )
                         {
                             pp2 = ch2->pulse_params + n;
 
-                            if ( ( pp1->pos <= pp2->pos &&
-                                   pp1->pos + pp1->len > pp2->pos ) ||
-                                 ( pp1->pos > pp2->pos &&
-                                   pp1->pos < pp2->pos + pp2->len ) )
+                            if (    (    pp1->pos <= pp2->pos
+                                      && pp1->pos + pp1->len > pp2->pos )
+                                 || (    pp1->pos > pp2->pos
+                                      && pp1->pos < pp2->pos + pp2->len ) )
                             {
                                 print( FATAL, "Distance between pulses #%ld "
                                        "and #%ld too short to set shape "
@@ -935,8 +939,9 @@ Pulse_T *ep385_delete_pulse( Pulse_T * p,
     /* First we've got to remove the pulse from its functions pulse list (if
        it already made it into the functions pulse list) */
 
-    if ( p->is_function && p->function->num_pulses > 0 &&
-         p->function->pulses != NULL )
+    if ( p->is_function
+         && p->function->num_pulses > 0
+         && p->function->pulses != NULL )
     {
         f = p->function;
 

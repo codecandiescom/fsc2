@@ -27,7 +27,7 @@
 
 
 void dump_window( int /* type */,
-                  int /* fd   */ );
+                  int /* fd   */  );
 
 void create_color_hash( void );
 

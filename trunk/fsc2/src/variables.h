@@ -133,13 +133,13 @@ Var_T * vars_new( const char * /* name */ );
 void vars_arr_create( Var_T * /* a       */,
                       Var_T * /* v       */,
                       int     /* dim     */,
-                      bool    /* is_temp */ );
+                      bool    /* is_temp */  );
 
 Var_T * vars_push_copy( Var_T * /* v */ );
 
 Var_T * vars_push_matrix( Var_Type_T /* type */,
                           int        /* dim  */,
-                          ... );
+                          ...                    );
 
 Var_T * vars_push( Var_Type_T /* type */,
                   ... );
@@ -147,14 +147,14 @@ Var_T * vars_push( Var_Type_T /* type */,
 Var_T * vars_pop( Var_T * /* v */ );
 
 Var_T * vars_make( Var_Type_T /* type */,
-                   Var_T *    /* src  */ );
+                   Var_T *    /* src  */  );
 
 void vars_del_stack( void );
 
 void vars_clean_up( void );
 
 void vars_check( Var_T * /* v    */,
-                 int     /* type */ );
+                 int     /* type */  );
 
 bool vars_exist( Var_T * /* v */ );
 
@@ -165,7 +165,7 @@ void * vars_iter( Var_T * /* v */ );
 void vars_save_restore( bool /* flag */ );
 
 Var_T * vars_free( Var_T * /* v             */,
-                   bool    /* also_nameless */ );
+                   bool    /* also_nameless */  );
 
 
 #endif  /* ! VARIABLES_HEADER */

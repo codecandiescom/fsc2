@@ -164,8 +164,8 @@ void accept_new_data( bool empty_queue )
            the child has to wait for a reply and which gets handled by the
            calling routine) */
 
-        if ( Comm.MQ->low == Comm.MQ->high ||
-             Comm.MQ->slot[ Comm.MQ->low ].type == REQUEST )
+        if (    Comm.MQ->low == Comm.MQ->high
+             || Comm.MQ->slot[ Comm.MQ->low ].type == REQUEST )
             break;
 
         /* Also break from the loop after about MAX_ACCEPT_TIME seconds unless
@@ -889,18 +889,18 @@ static void accept_2d_data( long       x_index,
         if ( y_index + y_len >= G_2d.ny )
         {
             Need_cut_redraw |= incr_x_and_y( x_index, x_len, y_index + y_len);
-            if ( ( cv->active && cv->is_fs ) ||
-                 ( G_2d.active_curve != -1 &&
-                   G_2d.curve_2d[ G_2d.active_curve ]->is_fs ) )
+            if (    ( cv->active && cv->is_fs )
+                 || (    G_2d.active_curve != -1
+                      && G_2d.curve_2d[ G_2d.active_curve ]->is_fs ) )
                 Scale_2d_changed[ X ] = Scale_2d_changed[ Y ] = SET;
         }
         else
         {
             Need_cut_redraw |= incr_x( x_index, x_len );
             Scale_2d_changed[ X ] |= 
-                                 ( cv->active && cv->is_fs ) ||
-                                 ( G_2d.active_curve != -1 &&
-                                   G_2d.curve_2d[ G_2d.active_curve ]->is_fs );
+                              ( cv->active && cv->is_fs )
+                           || (    G_2d.active_curve != -1
+                                && G_2d.curve_2d[ G_2d.active_curve ]->is_fs );
         }
 
         size_changed = SET;
@@ -908,9 +908,10 @@ static void accept_2d_data( long       x_index,
     else if ( y_index + y_len >= G_2d.ny )
     {
         Need_cut_redraw |= incr_y( y_index + y_len );
-        Scale_2d_changed[ Y ] |= ( cv->active && cv->is_fs  ) ||
-                                 ( G_2d.active_curve != -1 &&
-                                   G_2d.curve_2d[ G_2d.active_curve ]->is_fs );
+        Scale_2d_changed[ Y ] |= 
+                              ( cv->active && cv->is_fs )
+                           || (    G_2d.active_curve != -1
+                                && G_2d.curve_2d[ G_2d.active_curve ]->is_fs );
         size_changed = SET;
     }
 
@@ -1093,9 +1094,9 @@ static void accept_2d_data( long       x_index,
        in full scale mode or because new data points got added to the curve. */
 
     if ( G_2d.active_curve != -1 )
-        Need_2d_redraw |= G_2d.curve_2d[ G_2d.active_curve ]->needs_recalc &&
-                          ( G_2d.curve_2d[ G_2d.active_curve ]->is_fs ||
-                            G_2d.curve_2d[ G_2d.active_curve ] == cv );
+        Need_2d_redraw |=    G_2d.curve_2d[ G_2d.active_curve ]->needs_recalc
+                          && (    G_2d.curve_2d[ G_2d.active_curve ]->is_fs
+                               || G_2d.curve_2d[ G_2d.active_curve ] == cv );
 }
 
 

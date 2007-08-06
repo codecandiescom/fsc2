@@ -271,8 +271,8 @@ int hfs9000_exp_hook( void )
        all needed channels */
 
     for ( i = 0; i <= MAX_CHANNEL; i++ )
-        if ( hfs9000.channel[ i ].function != NULL &&
-             hfs9000.channel[ i ].function->is_used )
+        if (    hfs9000.channel[ i ].function != NULL
+             && hfs9000.channel[ i ].function->is_used )
         {
             hfs9000_set_pulses( hfs9000.channel[ i ].function );
             if ( IS_NORMAL_CHANNEL( i ) )
@@ -334,8 +334,8 @@ void hfs9000_exit_hook( void )
     hfs9000.pulses = NULL;
 
     for ( i = 0; i <= MAX_CHANNEL; i++ )
-        if ( hfs9000.channel[ i ].function != NULL &&
-             hfs9000.channel[ i ].function->pulses != NULL )
+        if (    hfs9000.channel[ i ].function != NULL
+             && hfs9000.channel[ i ].function->pulses != NULL )
             T_free( hfs9000.channel[ i ].function->pulses );
 }
 

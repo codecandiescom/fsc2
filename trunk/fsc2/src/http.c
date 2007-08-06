@@ -86,8 +86,9 @@ void server_callback( FL_OBJECT * obj,
            off and then again (with the pid set to -1) when the signal handler
            for SIGCHLD gets triggered. */
 
-        if ( ! fl_get_button( obj ) && Fsc2_Internals.http_pid > 0 &&
-             ! kill( Fsc2_Internals.http_pid, 0 ) )
+        if (    ! fl_get_button( obj )
+             && Fsc2_Internals.http_pid > 0
+             && ! kill( Fsc2_Internals.http_pid, 0 ) )
             kill( Fsc2_Internals.http_pid, SIGTERM );
         else
         {
@@ -326,8 +327,10 @@ static void http_send_picture( int pd,
        to indicate that it has to send the "Not available" picture instead of
        the one the client is looking for. */
 
-    if ( ! G.is_init || ( type == 1 && G.dim == 2 ) ||
-         ( type == 2 && G.dim == 1 ) || ( type == 3 && ! G_2d.is_cut ) )
+    if (    ! G.is_init
+         || ( type == 1 && G.dim == 2 )
+         || ( type == 2 && G.dim == 1 )
+         || ( type == 3 && ! G_2d.is_cut ) )
     {
         reply[ 0 ] = '0';
         write( pd, reply, 2 );

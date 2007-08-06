@@ -125,8 +125,8 @@ int spex232_init_hook( void )
 
     /* Find out which is the lowest wavelength that can be set */
 
-    if ( LOWER_LIMIT < 0 ||
-         ( spex232.mode & WN_MODES && LOWER_LIMIT <= 0 ) )
+    if (    LOWER_LIMIT < 0
+         || ( spex232.mode & WN_MODES && LOWER_LIMIT <= 0 ) )
     {
         if ( spex232.mode & WN_MODES )
             print( FATAL, "Invalid setting for upper wavenumber limit in "
@@ -158,8 +158,8 @@ int spex232_init_hook( void )
 
     /* Find out which is the highest wavelength that can be set */
 
-    if ( UPPER_LIMIT < 0 ||
-         ( spex232.mode & WN_MODES && UPPER_LIMIT <= 0.0 ) )
+    if (    UPPER_LIMIT < 0
+         || ( spex232.mode & WN_MODES && UPPER_LIMIT <= 0.0 ) )
     {
         if ( spex232.mode & WN_MODES )
             print( FATAL, "Invalid setting for lower wavenumber limit in "
@@ -472,12 +472,13 @@ Var_T *monochromator_enforce_wavelength( Var_T * v )
 
     wl = get_double( v, "wavelength to enforce" );
 
-    if ( wl < spex232.abs_lower_limit &&
-         ( spex232.abs_lower_limit - wl ) / spex232.abs_lower_limit < 1.0e-5 )
+    if (    wl < spex232.abs_lower_limit
+         && ( spex232.abs_lower_limit - wl ) / spex232.abs_lower_limit
+                                                                     < 1.0e-5 )
         wl = spex232.abs_lower_limit;
 
-    if ( wl > spex232.upper_limit &&
-         ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
+    if (    wl > spex232.upper_limit
+         && ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
         wl = spex232.upper_limit;
 
     if ( wl < spex232.abs_lower_limit || wl > spex232.upper_limit )
@@ -518,12 +519,13 @@ Var_T *monochromator_enforce_wavenumber( Var_T * v )
 
     wl = spex232_wn2wl( wn );
 
-    if ( wl < spex232.abs_lower_limit &&
-         ( spex232.abs_lower_limit - wl ) / spex232.abs_lower_limit < 1.0e-5 )
+    if (    wl < spex232.abs_lower_limit
+         && ( spex232.abs_lower_limit - wl ) / spex232.abs_lower_limit
+                                                                     < 1.0e-5 )
         wl = spex232.abs_lower_limit;
 
-    if ( wl > spex232.upper_limit &&
-         ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
+    if (    wl > spex232.upper_limit
+         && ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
         wl = spex232.upper_limit;
 
     if ( wl < spex232.abs_lower_limit || wl > spex232.upper_limit )
@@ -615,12 +617,12 @@ Var_T *monochromator_wavelength( Var_T * v )
     OTHERWISE
         SPEX232_RETHROW( );
 
-    if ( wl < spex232.lower_limit &&
-         ( spex232.lower_limit - wl ) / spex232.lower_limit < 1.0e-5 )
+    if (    wl < spex232.lower_limit
+         && ( spex232.lower_limit - wl ) / spex232.lower_limit < 1.0e-5 )
         wl = spex232.lower_limit;
 
-    if ( wl > spex232.upper_limit &&
-         ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
+    if (    wl > spex232.upper_limit
+         && ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
         wl = spex232.upper_limit;
 
     if ( wl < spex232.lower_limit )
@@ -693,12 +695,12 @@ Var_T *monochromator_wavenumber( Var_T * v )
     OTHERWISE
         SPEX232_RETHROW( );
 
-    if ( wl < spex232.lower_limit &&
-         ( spex232.lower_limit - wl ) / spex232.lower_limit < 1.0e-5 )
+    if (    wl < spex232.lower_limit
+         && ( spex232.lower_limit - wl ) / spex232.lower_limit < 1.0e-5 )
         wl = spex232.lower_limit;
 
-    if ( wl > spex232.upper_limit &&
-         ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
+    if (    wl > spex232.upper_limit
+         && ( wl - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
         wl = spex232.upper_limit;
 
     if ( wl < spex232.lower_limit )
@@ -816,12 +818,12 @@ Var_T *monochromator_scan_setup( Var_T * v )
     OTHERWISE
         SPEX232_RETHROW( );
 
-    if ( start < spex232.lower_limit &&
-         ( spex232.lower_limit - start ) / spex232.lower_limit < 1.0e-5 )
+    if (    start < spex232.lower_limit
+         && ( spex232.lower_limit - start ) / spex232.lower_limit < 1.0e-5 )
         start = spex232.lower_limit;
 
-    if ( start > spex232.upper_limit &&
-         ( start - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
+    if ( start > spex232.upper_limit
+         && ( start - spex232.upper_limit ) / spex232.upper_limit < 1.0e-5 )
         start = spex232.upper_limit;
 
     if ( start < spex232.lower_limit )
@@ -881,23 +883,24 @@ Var_T *monochromator_scan_setup( Var_T * v )
         SPEX232_THROW( EXCEPTION );
     }
 
-    if ( spex232.mode & WN_MODES &&
-         spex232_wn2wl( spex232_wl2wn( start ) - step ) > spex232.upper_limit )
+    if (    spex232.mode & WN_MODES
+         && spex232_wn2wl( spex232_wl2wn( start ) - step ) >
+                                                          spex232.upper_limit )
     {
         print( FATAL, "Step size of %.4f cm^-1 is too large.\n", step );
         SPEX232_THROW( EXCEPTION );
     }
 
-    if ( spex232.mode & WN_MODES &&
-         lrnd( 1.0e4 * step ) < lrnd( 1.0e4 * spex232.mini_step ) )
+    if (    spex232.mode & WN_MODES
+         && lrnd( 1.0e4 * step ) < lrnd( 1.0e4 * spex232.mini_step ) )
     {
         print( FATAL, "Step size of %.4f cm^-1 is smaller than the "
                "minimum possible step size of %.4f cm^-1.\n",
                step, spex232.mini_step );
     }
 
-    if ( spex232.mode == WL &&
-         lrnd( 1.0e5 * step ) < lrnd( 1.0e5 * spex232.mini_step ) )
+    if (    spex232.mode == WL
+         && lrnd( 1.0e5 * step ) < lrnd( 1.0e5 * spex232.mini_step ) )
     {
         print( FATAL, "Step size of %.5f nm is smaller than the "
                "minimum possible step size of %.5f.\n",
@@ -999,8 +1002,8 @@ Var_T *monochromator_scan_step( Var_T * v  UNUSED_ARG )
 
     /* Check that the nex scan step can be done */
 
-    if ( spex232.mode == WL &&
-         spex232.wavelength + spex232.scan_step > spex232.upper_limit )
+    if (    spex232.mode == WL
+         && spex232.wavelength + spex232.scan_step > spex232.upper_limit )
     {
         if ( FSC2_MODE == EXPERIMENT )
         {
@@ -1013,9 +1016,9 @@ Var_T *monochromator_scan_step( Var_T * v  UNUSED_ARG )
         SPEX232_THROW( EXCEPTION );
     }
 
-    if ( spex232.mode & WN_MODES &&
-         spex232_wn2wl( spex232_wl2wn( spex232.wavelength )
-                        - spex232.scan_step ) > spex232.upper_limit )
+    if (    spex232.mode & WN_MODES
+         && spex232_wn2wl( spex232_wl2wn( spex232.wavelength )
+                           - spex232.scan_step ) > spex232.upper_limit )
     {
         if ( FSC2_MODE == EXPERIMENT )
         {
@@ -1169,8 +1172,7 @@ Var_T *monochromator_calibrate( Var_T * v )
         SPEX232_THROW( EXCEPTION );
     }
 
-    if ( spex232.mode == WL && fabs( 1.0e9 * offset )
-                                                       > SPEX232_MAX_OFFSET )
+    if ( spex232.mode == WL && fabs( 1.0e9 * offset ) > SPEX232_MAX_OFFSET )
     {
         print( FATAL, "Offset of %.5f nm is unrealistically high. If this "
                "isn't an error change the \"SPEX232_MAX_OFFSET\" setting in "
@@ -1279,8 +1281,8 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
 
     cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
 
-    if ( cv->type != INT_ARR ||
-         cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
     {
         print( FATAL, "Function of CCD for determining the size of the chip "
                "does not return a useful value.\n" );
@@ -1370,8 +1372,8 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
 
     cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
 
-    if ( cv->type != INT_ARR ||
-         cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
     {
         print( FATAL, "Function of CCD for determining the size of the chip "
                "does not return a useful value.\n" );

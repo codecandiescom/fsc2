@@ -120,8 +120,8 @@ int tds_tmpl_end_of_test_hook( void )
     for ( count = 0, ch = 0; ch < NUM_DISPLAYABLE_CHANNELS; ch++ )
     {
         tds_tmpl_stored.channels_in_use[ ch ] = tds_tmpl.channels_in_use[ ch ];
-        if ( tds_tmpl.channels_in_use[ ch ] &&
-             ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS )
+        if (    tds_tmpl.channels_in_use[ ch ]
+             && ch >= TDS_TMPL_CH1 && ch < NUM_NORMAL_CHANNELS )
             count++;
     }
 
@@ -245,8 +245,8 @@ Var_T *digitizer_define_window( Var_T * v )
 
             /* Allow window width to be zero in test run... */
 
-            if ( ( FSC2_MODE == TEST && win_width < 0.0 ) ||
-                 ( FSC2_MODE != TEST && win_width <= 0.0 ) )
+            if (    ( FSC2_MODE == TEST && win_width < 0.0 )
+                 || ( FSC2_MODE != TEST && win_width <= 0.0 ) )
             {
                 print( FATAL, "Zero or negative window width.\n" );
                 THROW( EXCEPTION );
@@ -632,8 +632,8 @@ Var_T *digitizer_timebase( Var_T * v )
             break;
         }
 
-    if ( TB >= 0 &&                                         /* value found ? */
-         fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )  /* error > 1% ?  */
+    if (    TB >= 0                                         /* value found ? */
+         && fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )
         print( WARN, "Can't set timebase to %s, using %s instead.\n",
                tds_tmpl_ptime( timebase ), tds_tmpl_ptime( tb[ TB ] ) );
 
@@ -1003,8 +1003,9 @@ Var_T *digitizer_trigger_delay( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( ! tds_tmpl.is_trig_pos || ! tds_tmpl.is_timebase ||
-                     ! tds_tmpl.is_rec_len )
+                if (    ! tds_tmpl.is_trig_pos
+                     || ! tds_tmpl.is_timebase
+                     || ! tds_tmpl.is_rec_len )
                     no_query_possible( );
                 trig_pos = tds_tmpl.trig_pos;
                 break;

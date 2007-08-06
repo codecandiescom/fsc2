@@ -50,8 +50,8 @@ int ep385_init_hook( void )
     Channel_T *ch;
 
 
-    fsc2_assert( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE > 0 &&
-                 DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE > 0 );
+    fsc2_assert(    SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE > 0
+                 && DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE > 0 );
 
     Pulser_Struct.name     = DEVICE_NAME;
     Pulser_Struct.has_pods = UNSET;
@@ -297,8 +297,8 @@ int ep385_end_of_test_hook( void )
                ep385.defense_2_shape_too_near,
                ep385_pticks( ep385.defense_2_shape ) );
 
-    if ( ep385.shape_2_defense_too_near != 0 ||
-         ep385.defense_2_shape_too_near != 0 )
+    if (    ep385.shape_2_defense_too_near != 0
+         || ep385.defense_2_shape_too_near != 0 )
         THROW( EXCEPTION );
 
     /* Tell the users about problems when setting shape pulses */
@@ -314,8 +314,8 @@ int ep385_end_of_test_hook( void )
         {
             f = ep385.function + i;
 
-            if ( ! f->uses_auto_shape_pulses ||
-                 f->left_shape_padding <= f->min_left_shape_padding )
+            if (    ! f->uses_auto_shape_pulses
+                 || f->left_shape_padding <= f->min_left_shape_padding )
                 continue;
 
             print( SEVERE, "Minimum left shape padding for function '%s' "
@@ -336,8 +336,8 @@ int ep385_end_of_test_hook( void )
         {
             f = ep385.function + i;
 
-            if ( ! f->uses_auto_shape_pulses ||
-                 f->right_shape_padding <= f->min_right_shape_padding )
+            if (    ! f->uses_auto_shape_pulses
+                 || f->right_shape_padding <= f->min_right_shape_padding )
                 continue;
 
             print( SEVERE, "Minimum right shape padding for function '%s' "
@@ -387,8 +387,8 @@ int ep385_exp_hook( void )
        "ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION" */
 
 #if defined ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION
-    if ( ! ep385.is_confirmation &&
-         ( ep385.is_shape_2_defense || ep385.is_defense_2_shape ) )
+    if (    ! ep385.is_confirmation
+         && ( ep385.is_shape_2_defense || ep385.is_defense_2_shape ) )
     {
         char mstr[ 500 ];
 
@@ -547,11 +547,11 @@ Var_T *pulser_automatic_shape_pulses( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( func == PULSER_CHANNEL_PULSE_SHAPE ||
-         func == PULSER_CHANNEL_TWT ||
-         func == PULSER_CHANNEL_TWT_GATE ||
-         func == PULSER_CHANNEL_PHASE_1 ||
-         func == PULSER_CHANNEL_PHASE_2 )
+    if (    func == PULSER_CHANNEL_PULSE_SHAPE
+         || func == PULSER_CHANNEL_TWT
+         || func == PULSER_CHANNEL_TWT_GATE
+         || func == PULSER_CHANNEL_PHASE_1
+         || func == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "Shape pulses can't be set for function '%s'.\n",
                Function_Names[ func ] );
@@ -670,11 +670,11 @@ Var_T *pulser_automatic_twt_pulses( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( func == PULSER_CHANNEL_TWT ||
-         func == PULSER_CHANNEL_TWT_GATE ||
-         func == PULSER_CHANNEL_PULSE_SHAPE ||
-         func == PULSER_CHANNEL_PHASE_1 ||
-         func == PULSER_CHANNEL_PHASE_2 )
+    if (    func == PULSER_CHANNEL_TWT
+         || func == PULSER_CHANNEL_TWT_GATE
+         || func == PULSER_CHANNEL_PULSE_SHAPE
+         || func == PULSER_CHANNEL_PHASE_1
+         || func == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "TWT pulses can't be set for function '%s'.\n",
                Function_Names[ func ] );
@@ -1142,8 +1142,8 @@ Var_T *pulser_reset( Var_T * v  UNUSED_ARG )
 
     In_reset = SET;
 
-    if ( ep385.phs[ 0 ].function != NULL ||
-         ep385.phs[ 1 ].function != NULL )
+    if (    ep385.phs[ 0 ].function != NULL
+         || ep385.phs[ 1 ].function != NULL )
         vars_pop( pulser_phase_reset( NULL ) );
     vars_pop( pulser_pulse_reset( NULL ) );
 
@@ -1265,9 +1265,9 @@ Var_T *pulser_next_phase( Var_T * v )
 
     if ( v == NULL )
     {
-        if ( ep385.phs[ 0 ].function == NULL &&
-             ep385.phs[ 1 ].function == NULL &&
-             FSC2_MODE == TEST )
+        if (    ep385.phs[ 0 ].function == NULL
+             && ep385.phs[ 1 ].function == NULL
+             && FSC2_MODE == TEST )
         {
             print( SEVERE, "Phase cycling isn't used for any function.\n" );
             return vars_push( INT_VAR, 0L );
@@ -1331,9 +1331,9 @@ Var_T *pulser_phase_reset( Var_T * v )
 
     if ( v == NULL )
     {
-        if ( ep385.phs[ 0 ].function == NULL &&
-             ep385.phs[ 1 ].function == NULL &&
-             FSC2_MODE == TEST )
+        if (    ep385.phs[ 0 ].function == NULL
+             && ep385.phs[ 1 ].function == NULL
+             && FSC2_MODE == TEST )
         {
             print( SEVERE, "Phase cycling isn't used for any function.\n" );
             return vars_push( INT_VAR, 0L );

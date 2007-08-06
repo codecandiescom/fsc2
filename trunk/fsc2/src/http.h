@@ -27,7 +27,7 @@
 
 
 void server_callback( FL_OBJECT * /* obj */,
-                      long        /* a   */ );
+                      long        /* a   */  );
 
 void http_check( void );
 

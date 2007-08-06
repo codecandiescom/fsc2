@@ -163,8 +163,8 @@ static int vars_check_lhs_indices( Var_T ** v,
                 cv->type = INT_VAR;
             }
 
-            if ( ( ! ( cv->flags & IS_DYNAMIC ) && cv->val.lval < 1 ) ||
-                 cv->val.lval < 0 )
+            if (    ( ! ( cv->flags & IS_DYNAMIC ) && cv->val.lval < 1 )
+                 || cv->val.lval < 0 )
             {
                 print( FATAL, "Invalid size for array.\n" );
                 THROW( EXCEPTION );

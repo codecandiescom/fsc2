@@ -183,15 +183,15 @@ static int write_dump( int  * pipe_fd,
             if ( ! cd2->is_loaded )
                 continue;
 
-            if ( addr >= ( void * ) * ( int * ) cd1->driver.handle &&
-                 addr <  ( void * ) * ( int * ) cd2->driver.handle )
+            if (    addr >= ( void * ) * ( int * ) cd1->driver.handle
+                 && addr <  ( void * ) * ( int * ) cd2->driver.handle )
                 break;
 
             cd1 = cd2;
         }
 
-        if ( cd1->is_loaded &&
-             ( char * ) addr >= ( char * ) * ( int * ) cd1->driver.handle )
+        if (    cd1->is_loaded
+             && ( char * ) addr >= ( char * ) * ( int * ) cd1->driver.handle )
         {
             if ( cd1->driver.lib_name[ 0 ] == '/' )
                 sprintf( buf, "%s\n", cd1->driver.lib_name );

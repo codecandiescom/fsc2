@@ -203,9 +203,9 @@ double lecroy_wr_trigger_delay_check( void )
     /* Check that the trigger delay is within the limits (taking rounding
        errors of the order of the current time resolution into account) */
 
-    if ( real_delay > 0.0 &&
-         real_delay >   10.0 * lecroy_wr.timebase
-                      +  0.5 * lecroy_wr_time_per_point( ) )
+    if (    real_delay > 0.0
+         && real_delay >   10.0 * lecroy_wr.timebase
+                         +  0.5 * lecroy_wr_time_per_point( ) )
     {
         print( FATAL, "Pre-trigger delay of %s now is too long, can't be "
                "longer than 10 times the timebase.\n",
@@ -213,9 +213,9 @@ double lecroy_wr_trigger_delay_check( void )
         THROW( EXCEPTION );
     }
 
-    if ( real_delay < 0.0 &&
-         real_delay <   -1.0e4 * lecroy_wr.timebase
-                      -  0.5 * lecroy_wr_time_per_point( ) )
+    if (    real_delay < 0.0
+         && real_delay <   -1.0e4 * lecroy_wr.timebase
+                         -  0.5 * lecroy_wr_time_per_point( ) )
     {
         print( FATAL, "Post-triger delay of %s now is too long, can't be "
                "longer than 10,000 times the timebase.\n",
@@ -248,9 +248,9 @@ static void lecroy_wr_soe_trigger_delay_check( double delay )
     /* Check that the trigger delay is within the limits (taking rounding
        errors of the order of the current time resolution into account) */
 
-    if ( real_delay > 0.0 &&
-         real_delay >   10.0 * lecroy_wr.timebase
-                      +  0.5 * lecroy_wr_time_per_point( ) )
+    if (    real_delay > 0.0
+         && real_delay >   10.0 * lecroy_wr.timebase
+                         +  0.5 * lecroy_wr_time_per_point( ) )
     {
         print( FATAL, "During the experiment a pre-trigger delay of %s is "
                "going to be used which is too long, it can't be longer than "
@@ -258,9 +258,9 @@ static void lecroy_wr_soe_trigger_delay_check( double delay )
         THROW( EXCEPTION );
     }
 
-    if ( real_delay < 0.0 &&
-         real_delay <   -1.0e4 * lecroy_wr.timebase
-                      -  0.5 * lecroy_wr_time_per_point( ) )
+    if (    real_delay < 0.0
+         && real_delay <   -1.0e4 * lecroy_wr.timebase
+                         -  0.5 * lecroy_wr_time_per_point( ) )
     {
         print( FATAL, "During the experiment the post-triger delay of %s is "
                "going to be used wich is too long, it can't be longer than "
@@ -356,8 +356,8 @@ void lecroy_wr_window_check( Window_T * w,
        explicitely set by the user just store them together with the window
        settings for a test when the experiment has been started. */
 
-    if ( FSC2_MODE == TEST &&
-         ( ! lecroy_wr.is_timebase || ! lecroy_wr.is_trigger_delay ) )
+    if (    FSC2_MODE == TEST
+         && ( ! lecroy_wr.is_timebase || ! lecroy_wr.is_trigger_delay ) )
     {
         LECROY_WR_PTC_WINDOW_T *p = lecroy_wr_ptc_window;
 

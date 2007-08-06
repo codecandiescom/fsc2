@@ -76,9 +76,9 @@ Var_T *f_bcreate( Var_T * var )
     {
         type = get_strict_long( v, "button type" ) + FIRST_BUTTON_TYPE;
 
-        if ( type != NORMAL_BUTTON &&
-             type != PUSH_BUTTON   &&
-             type != RADIO_BUTTON     )
+        if (    type != NORMAL_BUTTON
+             && type != PUSH_BUTTON
+             && type != RADIO_BUTTON )
         {
             print( FATAL, "Invalid button type (%ld).\n",
                    ( long ) ( type - FIRST_BUTTON_TYPE ) );
@@ -391,9 +391,9 @@ Var_T *f_bdelete( Var_T * v )
     /* The child process is already done here and also a test run (or when the
        tool box is already deleted) */
 
-    if ( Fsc2_Internals.I_am == CHILD ||
-         Fsc2_Internals.mode == TEST  ||
-         ! Toolbox )
+    if (    Fsc2_Internals.I_am == CHILD
+         || Fsc2_Internals.mode == TEST
+         || ! Toolbox )
         return vars_push( INT_VAR, 1L );
 
     /* Redraw the form without the deleted buttons */
@@ -522,8 +522,8 @@ static void f_bdelete_parent( Var_T * v )
 
         if ( nio != NULL )
             for ( nio = nio->next; nio != NULL; nio = nio->next )
-                if ( nio->type == RADIO_BUTTON &&
-                     nio->partner == io->ID )
+                if (    nio->type == RADIO_BUTTON
+                     && nio->partner == io->ID )
                     nio->partner = new_anchor;
     }
 
@@ -639,8 +639,9 @@ Var_T *f_bstate( Var_T * v )
     {
         for ( oio = Toolbox->objs; oio != NULL; oio = oio->next )
         {
-            if ( oio == io || oio->type != RADIO_BUTTON ||
-                 oio->group != io->group )
+            if (    oio == io
+                 || oio->type != RADIO_BUTTON
+                 || oio->group != io->group )
                 continue;
 
             oio->state = 0;

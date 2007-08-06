@@ -79,8 +79,8 @@ Ticks rb_pulser_w_double2ticks( double p_time )
         THROW( EXCEPTION );
     }
 
-    if ( fabs( ( Ticks_rnd( ticks ) - ticks ) / ticks ) > 1.0e-2 ||
-         ( p_time > 0.99e-9 && Ticks_rnd( ticks ) == 0 ) )
+    if (    fabs( ( Ticks_rnd( ticks ) - ticks ) / ticks ) > 1.0e-2
+         || ( p_time > 0.99e-9 && Ticks_rnd( ticks ) == 0 ) )
     {
         print( FATAL, "Specified time of %s is not an integer multiple of the "
                "pulser time base of %s.\n",

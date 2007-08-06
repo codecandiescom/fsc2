@@ -98,11 +98,11 @@
 /* A pulse needs to be updated if either its activity state changed, its
    position changed or its length changed */
 
-#define NEEDS_UPDATE( p ) ( ( ( p )->is_active ^ ( p )->was_active ) || \
-                            ( ( p )->is_old_pos &&                      \
-                              ( p )->old_pos != ( p )->pos )         || \
-                            ( ( p )->is_old_len &&                      \
-                              ( p )->old_len != ( p )->len ) )
+#define NEEDS_UPDATE( p ) (    ( ( p )->is_active ^ ( p )->was_active )  \
+                            || (    ( p )->is_old_pos                    \
+                                 && ( p )->old_pos != ( p )->pos )       \
+                            || (    ( p )->is_old_len                    \
+                                 && ( p )->old_len != ( p )->len ) )
 
 
 /* typedefs of structures used in the module */
@@ -349,22 +349,22 @@ Var_T *pulser_maximum_pattern_length(            Var_T * /* v */ );
 bool ep385_store_timebase( double /* timebase */ );
 
 bool ep385_assign_channel_to_function( int  /* function */,
-                                       long /* channel  */ );
+                                       long /* channel  */  );
 
 bool ep385_set_function_delay( int    /* function */,
-                               double /* delay    */ );
+                               double /* delay    */  );
 
 bool ep385_set_trigger_mode( int /* mode */ );
 
 bool ep385_set_repeat_time( double /* rep_time */ );
 
 bool ep385_set_phase_reference( int /* phase    */,
-                                int /* function */ );
+                                int /* function */  );
 
 bool ep385_phase_setup_prep( int  /* func    */,
                              int  /* type    */,
                              int  /* dummy   */,
-                             long /* channel */ );
+                             long /* channel */  );
 
 bool ep385_phase_setup( int /* func */ );
 
@@ -376,52 +376,52 @@ bool ep385_keep_all( void );
 bool ep385_new_pulse( long /* pnum */ );
 
 bool ep385_set_pulse_function( long /* pnum     */,
-                               int  /* function */ );
+                               int  /* function */  );
 
 bool ep385_set_pulse_position( long   /* pnum   */,
-                               double /* p_time */ );
+                               double /* p_time */  );
 
 bool ep385_set_pulse_length( long   /* pnum   */,
-                             double /* p_time */ );
+                             double /* p_time */  );
 
 bool ep385_set_pulse_position_change( long   /* pnum   */,
-                                      double /* p_time */ );
+                                      double /* p_time */  );
 
 bool ep385_set_pulse_length_change( long   /* pnum   */,
-                                    double /* p_time */ );
+                                    double /* p_time */  );
 
 bool ep385_set_pulse_phase_cycle( long /* pnum  */,
-                                  long /* cycle */ );
+                                  long /* cycle */  );
 
 bool ep385_get_pulse_function( long  /* pnum     */,
-                               int * /* function */ );
+                               int * /* function */  );
 
 bool ep385_get_pulse_position( long     /* pnum   */,
-                               double * /* p_time */ );
+                               double * /* p_time */  );
 
 bool ep385_get_pulse_length( long     /* pnum   */,
-                             double * /* p_time */ );
+                             double * /* p_time */  );
 
 bool ep385_get_pulse_position_change( long     /* pnum   */,
-                                      double * /* p_time */ );
+                                      double * /* p_time */  );
 
 bool ep385_get_pulse_length_change( long     /* pnum   */,
-                                    double * /* p_time */ );
+                                    double * /* p_time */  );
 
 bool ep385_get_pulse_phase_cycle( long   /* pnum  */,
-                                  long * /* cycle */ );
+                                  long * /* cycle */  );
 
 bool ep385_change_pulse_position( long   /* pnum   */,
-                                  double /* p_time */ );
+                                  double /* p_time */  );
 
 bool ep385_change_pulse_length( long   /* pnum   */,
-                                double /* tp_ime */ );
+                                double /* tp_ime */  );
 
 bool ep385_change_pulse_position_change( long   /* pnum   */,
-                                         double /* p_time */ );
+                                         double /* p_time */  );
 
 bool ep385_change_pulse_length_change( long   /* pnum   */,
-                                       double /* p_time */ );
+                                       double /* p_time */  );
 
 
 /* Functions from ep385_init.c */
@@ -446,7 +446,7 @@ const char *ep385_ptime( double /* p_time */ );
 const char *ep385_pticks( Ticks /* ticks */ );
 
 int ep385_pulse_compare( const void * /* A */,
-                         const void * /* B */ );
+                         const void * /* B */  );
 
 void ep385_show_pulses( void );
 
@@ -472,7 +472,7 @@ void ep385_set_pulses( Function_T * /* f */ );
 void ep385_full_reset( void );
 
 Pulse_T *ep385_delete_pulse( Pulse_T * /* p    */,
-                             bool      /* warn */ );
+                             bool      /* warn */  );
 
 void ep385_shape_padding_check_1( Channel_T * /* ch */ );
 

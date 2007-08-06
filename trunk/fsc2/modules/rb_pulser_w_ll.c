@@ -118,10 +118,10 @@ void rb_pulser_w_init( void )
     /* If the cards are connected to an adjustable frequency clock card start
        the clock to run at the desired frequency */
 
-    if ( rulbus_rb8515_clock_set_frequency(
+    if (    rulbus_rb8515_clock_set_frequency(
                                  rb_pulser_w.clock_card[ TB_CLOCK_1 ].handle,
-                                 rb_pulser_w.clock_card[ TB_CLOCK_1 ].freq ) ||
-         rulbus_rb8515_clock_set_frequency(
+                                 rb_pulser_w.clock_card[ TB_CLOCK_1 ].freq )
+         || rulbus_rb8515_clock_set_frequency(
                                  rb_pulser_w.clock_card[ TB_CLOCK_2 ].handle,
                                  rb_pulser_w.clock_card[ TB_CLOCK_2 ].freq )
                                                                  != RULBUS_OK )
@@ -140,16 +140,16 @@ void rb_pulser_w_init( void )
 
     if ( rb_pulser_w.trig_in_mode == EXTERNAL )
     {
-        if ( rulbus_rb8514_delay_set_trigger(
+        if (    rulbus_rb8514_delay_set_trigger(
                                    rb_pulser_w.delay_card[ ERT_DELAY ].handle,
                                    ( rb_pulser_w.trig_in_slope == POSITIVE ) ?
                                    RULBUS_RB8514_DELAY_RAISING_EDGE :
                                    RULBUS_RB8514_DELAY_FALLING_EDGE )
-                                                                != RULBUS_OK ||
-         rulbus_rb8514_delay_set_raw_delay(
+                                                                != RULBUS_OK
+             || rulbus_rb8514_delay_set_raw_delay(
                                    rb_pulser_w.delay_card[ ERT_DELAY ].handle,
-                                   1, 1 )                       != RULBUS_OK ||
-         rulbus_rb8515_clock_set_frequency(
+                                   1, 1 )                       != RULBUS_OK
+             || rulbus_rb8515_clock_set_frequency(
                                    rb_pulser_w.clock_card[ ERT_CLOCK ].handle,
                                    RULBUS_RB8515_CLOCK_FREQ_100MHz )
                                                                 != RULBUS_OK )
@@ -157,11 +157,11 @@ void rb_pulser_w_init( void )
     }
     else  /* in internal trigger mode */
     {
-        if ( rulbus_rb8514_delay_set_trigger(
+        if (    rulbus_rb8514_delay_set_trigger(
                                     rb_pulser_w.delay_card[ ERT_DELAY ].handle,
                                     RULBUS_RB8514_DELAY_FALLING_EDGE )
-                                                                != RULBUS_OK ||
-             rulbus_rb8515_clock_set_frequency(
+                                                                != RULBUS_OK
+             || rulbus_rb8515_clock_set_frequency(
                                    rb_pulser_w.clock_card[ ERT_CLOCK ].handle,
                                    rb_pulser_w.clock_card[ ERT_CLOCK ].freq )
                                                                 != RULBUS_OK )
@@ -185,11 +185,11 @@ void rb_pulser_w_init( void )
         if ( i == ERT_DELAY )
             continue;
 
-        if ( rulbus_rb8514_delay_set_trigger(
+        if (    rulbus_rb8514_delay_set_trigger(
                                             rb_pulser_w.delay_card[ i ].handle,
                                             RULBUS_RB8514_DELAY_RAISING_EDGE )
-                                                                != RULBUS_OK ||
-             rulbus_rb8514_delay_set_output_pulse(
+                                                                != RULBUS_OK
+             || rulbus_rb8514_delay_set_output_pulse(
                                             rb_pulser_w.delay_card[ i ].handle,
                                             RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                             RULBUS_RB8514_DELAY_PULSE_NONE )
@@ -211,8 +211,8 @@ void rb_pulser_w_init( void )
        automatic generation of the defense pulse but didn't set her/his own
        defense pulse */
 
-    if ( ! rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-         rulbus_rb8514_delay_set_raw_delay(
+    if (    ! rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].is_used
+         && rulbus_rb8514_delay_set_raw_delay(
                          rb_pulser_w.delay_card[ DEFENSE_DELAY ].handle, 0, 1 )
                                                                  != RULBUS_OK )
         rb_pulser_w_failure( SET, "Failure to initialize pulser" );
@@ -305,17 +305,17 @@ static void rb_pulser_w_phase_init( void )
        end pulses, that's what the "magic box"expects. */
 
     for ( ; card != NULL; card = card->next )
-        if ( rulbus_rb8514_delay_set_output_pulse_polarity(
+        if (    rulbus_rb8514_delay_set_output_pulse_polarity(
                                     card->handle,
                                     RULBUS_RB8514_DELAY_PULSE_BOTH,
                                     RULBUS_RB8514_DELAY_POLARITY_NEGATIVE )
-                                                                != RULBUS_OK ||
-             rulbus_rb8514_delay_set_output_pulse(
+                                                                != RULBUS_OK
+             || rulbus_rb8514_delay_set_output_pulse(
                                     card->handle,
                                     phase_settings[ PHASE_PLUS_X ][ 0 ][ 0 ],
                                     phase_settings[ PHASE_PLUS_X ][ 0 ][ 1 ] )
-                                                                != RULBUS_OK ||
-             rulbus_rb8514_delay_set_output_pulse(
+                                                                != RULBUS_OK
+             || rulbus_rb8514_delay_set_output_pulse(
                                     card->handle,
                                     phase_settings[ PHASE_PLUS_X ][ 1 ][ 0 ],
                                     phase_settings[ PHASE_PLUS_X ][ 1 ][ 1 ] )
@@ -633,16 +633,16 @@ static void rb_pulser_w_start_internal_trigger( void )
 #if ! defined RB_PULSER_W_TEST
     raise_permissions( );
 
-    if ( rulbus_rb8514_delay_set_raw_delay(
+    if (    rulbus_rb8514_delay_set_raw_delay(
                                    rb_pulser_w.delay_card[ ERT_DELAY ].handle,
                                    rb_pulser_w.delay_card[ ERT_DELAY ].delay,
-                                   1 )                          != RULBUS_OK ||
-         rulbus_rb8514_delay_set_output_pulse(
+                                   1 )                          != RULBUS_OK
+         || rulbus_rb8514_delay_set_output_pulse(
                                    rb_pulser_w.delay_card[ ERT_DELAY ].handle,
                                    RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                    RULBUS_RB8514_DELAY_END_PULSE )
-                                                                != RULBUS_OK ||
-         rulbus_rb8514_software_start(
+                                                                != RULBUS_OK
+         || rulbus_rb8514_software_start(
                                    rb_pulser_w.delay_card[ ERT_DELAY ].handle )
                                                                  != RULBUS_OK )
         rb_pulser_w_failure( SET, "Failure to start pulser" );
@@ -685,8 +685,8 @@ void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
        pulses to make the card active, or the predecessor must be kept from
        outputting end pulses in order to deactivate the card */
 
-    if ( card->prev != NULL &&
-         rulbus_rb8514_delay_set_output_pulse( card->prev->handle,
+    if (    card->prev != NULL
+         && rulbus_rb8514_delay_set_output_pulse( card->prev->handle,
                                                RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                                type )            != RULBUS_OK )
         rb_pulser_w_failure( SET, "Failure to set card state" );
@@ -694,8 +694,8 @@ void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
     /* Special handling for the cards of the DETECTION and RF function: here
        the card itself must output end pulses to be active */
 
-    if ( card->prev == NULL && card->next == NULL &&
-         rulbus_rb8514_delay_set_output_pulse( card->handle,
+    if (    card->prev == NULL && card->next == NULL
+         && rulbus_rb8514_delay_set_output_pulse( card->handle,
                                                RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                                type )            != RULBUS_OK )
         rb_pulser_w_failure( SET, "Failure to set card state" );
@@ -703,14 +703,15 @@ void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
     /* For deactivating the card also keep it from outputting a pulse by
        setting its delay to 0 */
 
-    if ( state == STOP &&
-         rulbus_rb8514_delay_set_raw_delay( card->handle, 0, 1 ) != RULBUS_OK )
+    if (    state == STOP
+         && rulbus_rb8514_delay_set_raw_delay( card->handle, 0, 1 )
+                                                                 != RULBUS_OK )
         rb_pulser_w_failure( SET, "Failure to set card state" );    
 
     /* For activating the card also set the delay to the required value */
 
-    if ( state == START &&
-         rulbus_rb8514_delay_set_raw_delay( card->handle, card->delay, 1 )
+    if (    state == START
+         && rulbus_rb8514_delay_set_raw_delay( card->handle, card->delay, 1 )
                                                                  != RULBUS_OK )
         rb_pulser_w_failure( SET, "Failure to set card state" );    
 
@@ -781,11 +782,11 @@ void rb_pulser_w_set_phase( Rulbus_Delay_Card_T * card,
 #if ! defined RB_PULSER_W_TEST
     raise_permissions( );
 
-    if ( rulbus_rb8514_delay_set_output_pulse( card->handle,
+    if (    rulbus_rb8514_delay_set_output_pulse( card->handle,
                                           phase_settings[ phase ][ 0 ][ 0 ],
                                           phase_settings[ phase ][ 0 ][ 1 ] )
-                                                                != RULBUS_OK ||
-         rulbus_rb8514_delay_set_output_pulse( card->handle,
+                                                                != RULBUS_OK
+         || rulbus_rb8514_delay_set_output_pulse( card->handle,
                                           phase_settings[ phase ][ 1 ][ 0 ],
                                           phase_settings[ phase ][ 1 ][ 1 ] )
                                                                 != RULBUS_OK )

@@ -102,8 +102,8 @@ int gg_chopper_init_hook( void )
     else
         func = get_string( "daq_reserve_dio#%d", dev_num );
 
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         T_free( func );
         print( FATAL, "Function for reserving the DIO is missing from "
@@ -133,8 +133,8 @@ int gg_chopper_init_hook( void )
     else
         func = get_string( "daq_reserve_freq_out#%d", dev_num );
 
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         T_free( func );
         print( FATAL, "Function for reserving the FREQ_OUT pin is missing "

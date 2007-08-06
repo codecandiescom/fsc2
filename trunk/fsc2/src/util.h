@@ -27,12 +27,12 @@
 
 
 char *get_string( const char * /* fmt */,
-                  ... );
+                  ...                     );
 
 char *string_to_lower( char * /* str */ );
 
 void *get_memcpy( const void * /* array */,
-                  size_t       /* size  */ );
+                  size_t       /* size  */  );
 
 char *correct_line_breaks( char * /* str */ );
 
@@ -41,16 +41,16 @@ const char *strip_path( const char * /* path */ );
 const char *slash( const char * /* path */ );
 
 long get_file_length( FILE * /* fp  */,
-                      int *  /* len */ );
+                      int *  /* len */  );
 
 void eprint( int          /* severity */,
              bool         /* print_fl */,
              const char * /* fmt      */,
-             ... );
+             ...                          );
 
 void print( int          /* severity */,
             const char * /* fmt      */,
-            ... );
+            ...                          );
 
 void raise_permissions( void );
 
@@ -59,14 +59,14 @@ void lower_permissions( void );
 char *handle_escape( char * /* str */ );
 
 FILE *filter_edl( const char * /* name */,
-                  FILE *       /* fp   */ );
+                  FILE *       /* fp   */  );
 
 int fsc2_usleep( unsigned long /* us_dur         */,
-                 bool          /* quit_on_signal */ );
+                 bool          /* quit_on_signal */  );
 
 int is_in( const char *  /* supplied_in  */,
            const char ** /* alternatives */,
-           int           /* max          */ );
+           int           /* max          */  );
 
 void i2rgb( double /* h   */,
             int *  /* rgb */ );
@@ -80,12 +80,12 @@ double fsc2_simplex( size_t     /* n         */,
                      double *   /* dx        */,
                      void *     /* par       */,
                      double ( * /* func_name */ )( double * /* x   */,
-                                                   void *   /* par */ ),
-                     double     /* epsilon   */ );
+                                                   void *   /* par */  ),
+                     double     /* epsilon   */                           );
 
 ssize_t read_line( int    /* fd      */,
                    void * /* vptr    */,
-                   size_t /* max_len */ );
+                   size_t /* max_len */  );
 
 ssize_t writen( int          /* fd   */,
                 const void * /* vptr */,
@@ -94,11 +94,11 @@ ssize_t writen( int          /* fd   */,
 const char *fsc2_show_fselector( const char * /* message  */,
                                  const char * /* dir      */,
                                  const char * /* pattern  */,
-                                 const char * /* def_name */ );
+                                 const char * /* def_name */  );
 
 void get_form_position( FL_FORM * /* form */,
                         int *     /* x    */,
-                        int *     /* y    */ );
+                        int *     /* y    */  );
 
 
 #endif  /* ! UTIL_HEADER */

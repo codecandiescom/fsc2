@@ -530,8 +530,8 @@ Var_T *pulser_phase_switch_delay( Var_T * v )
 
     func = get_strict_long( v, "pulser function" );
 
-    if ( func != PULSER_CHANNEL_PHASE_1 ||
-         func != PULSER_CHANNEL_PHASE_2 )
+    if (    func != PULSER_CHANNEL_PHASE_1
+         || func != PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "A phase switch delay can only be set for the two PHASE "
                "functions.\n" );
@@ -797,9 +797,9 @@ Var_T *pulser_next_phase( Var_T * v )
 
     if ( v == NULL )
     {
-        if ( ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used &&
-             ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used &&
-             FSC2_MODE == TEST )
+        if (    ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used
+             && ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used
+             && FSC2_MODE == TEST )
         {
             print( SEVERE, "No phase functions are in use.\n" );
             return vars_push( INT_VAR, 0L );
@@ -835,11 +835,13 @@ Var_T *pulser_next_phase( Var_T * v )
 
         if ( FSC2_MODE == EXPERIMENT )
         {
-            if ( ! dg2020_channel_assign( f->channel[ f->next_phase++ ]->self,
-                                          f->pod->self ) ||
-                 ! dg2020_channel_assign( f->channel[ f->next_phase++ ]->self,
-                                          f->pod2->self ) ||
-                 ! dg2020_update_data( ) )
+            if (    ! dg2020_channel_assign(
+                                           f->channel[ f->next_phase++ ]->self,
+                                           f->pod->self )
+                 || ! dg2020_channel_assign(
+                                           f->channel[ f->next_phase++ ]->self,
+                                           f->pod2->self )
+                 || ! dg2020_update_data( ) )
                 return vars_push( INT_VAR, 0L );
         }
         else
@@ -864,8 +866,8 @@ Var_T *pulser_reset( Var_T * v  UNUSED_ARG )
     if ( ! dg2020.is_needed )
         return vars_push( INT_VAR, 1L );
 
-    if ( dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used ||
-         dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
+    if (    dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used
+         || dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used )
         vars_pop( pulser_pulse_reset( NULL ) );
     vars_pop( pulser_pulse_reset( NULL ) );
 
@@ -887,9 +889,9 @@ Var_T *pulser_phase_reset( Var_T * v )
 
     if ( v == NULL )
     {
-        if ( ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used &&
-             ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used &&
-             FSC2_MODE == TEST )
+        if (    ! dg2020.function[ PULSER_CHANNEL_PHASE_1 ].is_used
+             && ! dg2020.function[ PULSER_CHANNEL_PHASE_2 ].is_used
+             && FSC2_MODE == TEST )
         {
             print( SEVERE, "No phase functions are in use.\n" );
             return vars_push( INT_VAR, 0L );
@@ -922,11 +924,11 @@ Var_T *pulser_phase_reset( Var_T * v )
 
         if ( FSC2_MODE == EXPERIMENT )
         {
-            if ( ! dg2020_channel_assign( f->channel[ 0 ]->self,
-                                          f->pod->self ) ||
-                 ! dg2020_channel_assign( f->channel[ 1 ]->self,
-                                          f->pod2->self ) ||
-                 ! dg2020_update_data( ) )
+            if (    ! dg2020_channel_assign( f->channel[ 0 ]->self,
+                                             f->pod->self )
+                 || ! dg2020_channel_assign( f->channel[ 1 ]->self,
+                                             f->pod2->self )
+                 || ! dg2020_update_data( ) )
                 return vars_push( INT_VAR, 0L );
         }
         else

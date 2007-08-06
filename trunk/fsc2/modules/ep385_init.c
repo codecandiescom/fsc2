@@ -76,9 +76,9 @@ void ep385_init_setup( void )
         for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
         {
             f = ep385.function + i;
-            if ( ( ! f->is_used && f->num_channels == 0 ) ||
-                 i == PULSER_CHANNEL_PHASE_1 ||
-                 i == PULSER_CHANNEL_PHASE_2 )
+            if (    ( ! f->is_used && f->num_channels == 0 )
+                 || i == PULSER_CHANNEL_PHASE_1
+                 || i == PULSER_CHANNEL_PHASE_2 )
                 continue;
 
             if ( f->max_seq_len > MAX_PULSER_BITS )
@@ -240,8 +240,8 @@ static void ep385_create_shape_pulses( void )
         /* No shape pulses can be set for the PULSE_SHAPE function itself
            and functions that don't need shape pulses */
 
-        if ( f->self == PULSER_CHANNEL_PULSE_SHAPE ||
-             ! f->uses_auto_shape_pulses )
+        if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+             || ! f->uses_auto_shape_pulses )
             continue;
 
         np = PULSE_P T_malloc( sizeof *np );
@@ -316,19 +316,19 @@ static void ep385_create_shape_pulses( void )
 
     for ( p1 = ep385.pulses; p1 != old_end->next; p1 = p1->next )
     {
-        if ( ! p1->is_active ||
-             p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+        if (    ! p1->is_active
+             || p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
             continue;
 
         for ( p2 = old_end->next; p2 != NULL; p2 = p2->next )
         {
-            if ( ! p2->is_active ||
-                 p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+            if (    ! p2->is_active
+                 || p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
                 continue;
 
-            if ( p1->pos == p2->pos ||
-                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-                 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
+            if (    p1->pos == p2->pos
+                 || ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos )
+                 || ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
             {
                 print( FATAL, "PULSE_SHAPE pulse #%ld and automatically "
                        "created shape pulse for pulse #%ld (function '%s') "
@@ -356,9 +356,9 @@ static void ep385_create_shape_pulses( void )
             if ( p1->sp->function == p2->sp->function )
                 continue;
 
-            if ( p1->pos == p2->pos ||
-                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-                 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
+            if (    p1->pos == p2->pos
+                 || ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos )
+                 || ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
             {
                 print( FATAL, "Automatically created shape pulses for pulse "
                        "#%ld (function '%s') and #%ld (function '%s') "
@@ -404,9 +404,9 @@ static void ep385_create_twt_pulses( void )
         /* No TWT pulses can be set for the TWT or TWT_GATE function and
            functions that don't need TWT pulses */
 
-        if ( f->self == PULSER_CHANNEL_TWT ||
-             f->self == PULSER_CHANNEL_TWT_GATE ||
-             ! f->uses_auto_twt_pulses )
+        if (    f->self == PULSER_CHANNEL_TWT
+             || f->self == PULSER_CHANNEL_TWT_GATE
+             || ! f->uses_auto_twt_pulses )
             continue;
 
         np = PULSE_P T_malloc( sizeof *np );
@@ -494,8 +494,8 @@ static void ep385_basic_functions_check( void )
 
         /* Phase functions are not supported in this driver... */
 
-        fsc2_assert( i != PULSER_CHANNEL_PHASE_1 &&
-                     i != PULSER_CHANNEL_PHASE_2 );
+        fsc2_assert(    i != PULSER_CHANNEL_PHASE_1
+                     && i != PULSER_CHANNEL_PHASE_2 );
 
         /* Check if the function has pulses assigned to it */
 
@@ -532,8 +532,8 @@ static void ep385_basic_functions_check( void )
         delay = MAX_PULSER_BITS;
 
         for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-            if ( ep385.function[ i ].is_used &&
-                 delay > ep385.function[ i ].delay )
+            if (    ep385.function[ i ].is_used
+                 && delay > ep385.function[ i ].delay )
                 delay = ep385.function[ i ].delay;
         if ( delay != 0 )
             for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -552,8 +552,8 @@ static void ep385_basic_functions_check( void )
                function but there's no PHASE_SETUP that we're going to use
                only the very first channel for creating pulses */
 
-            if ( ep385.function[ i ].phase_setup == NULL &&
-                 ep385.function[ i ].num_channels > 1 )
+            if (    ep385.function[ i ].phase_setup == NULL
+                 && ep385.function[ i ].num_channels > 1 )
                 print( NO_ERROR, "Using only channel %d for %s pulses.\n",
                        ep385.function[ i ].channel[ 0 ]->self,
                        ep385.function[ i ].name );
@@ -785,9 +785,9 @@ static void ep385_pulse_start_setup( void )
 
         /* Nothing to be done for unused functions and the phase functions */
 
-        if ( ( ! f->is_used && f->num_channels == 0 ) ||
-             i == PULSER_CHANNEL_PHASE_1 ||
-             i == PULSER_CHANNEL_PHASE_2 )
+        if (    ( ! f->is_used && f->num_channels == 0 )
+             || i == PULSER_CHANNEL_PHASE_1
+             || i == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         ep385_pulse_init_check( f );
@@ -827,8 +827,8 @@ static void ep385_pulse_start_setup( void )
                 /* Extend pulses for which a shape pulse has been created
                    automatically a bit */
 
-                if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
-                     p->sp != NULL )
+                if (    p->function->self != PULSER_CHANNEL_PULSE_SHAPE
+                     && p->sp != NULL )
                 {
                     pp->pos -= p->function->left_shape_padding;
                     pp->len +=   p->function->left_shape_padding
@@ -850,11 +850,12 @@ static void ep385_pulse_start_setup( void )
             ep385_channel_start_check( ch );
         }
 
-        if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
-             ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-             ( ep385.is_shape_2_defense || ep385.is_defense_2_shape ||
-               ep385.function[ PULSER_CHANNEL_TWT ].is_used ||
-               ep385.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
+        if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+             && ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used
+             && (    ep385.is_shape_2_defense
+                  || ep385.is_defense_2_shape
+                  || ep385.function[ PULSER_CHANNEL_TWT ].is_used
+                  || ep385.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
             ep385_defense_shape_init_check( f );
     }
 
@@ -863,9 +864,9 @@ static void ep385_pulse_start_setup( void )
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
         f = ep385.function + i;
-        if ( ( ! f->is_used && f->num_channels == 0 ) ||
-             i == PULSER_CHANNEL_PHASE_1 ||
-             i == PULSER_CHANNEL_PHASE_2 )
+        if (    ( ! f->is_used && f->num_channels == 0 )
+             || i == PULSER_CHANNEL_PHASE_1
+             || i == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         for ( j = 0; j < f->num_channels; j++ )
@@ -886,8 +887,8 @@ static void ep385_pulse_start_setup( void )
        needs to be tested - thanks to Celine Elsaesser for pointing this
        out. */
 
-    if ( ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-         ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
+    if (    ep385.function[ PULSER_CHANNEL_DEFENSE ].is_used
+         && ep385.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
     {
         Ticks add;
         Channel_T *cs =
@@ -929,9 +930,9 @@ static void ep385_pulse_start_setup( void )
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
         f = ep385.function + i;
-        if ( ( ! f->is_used && f->num_channels == 0 ) ||
-             i == PULSER_CHANNEL_PHASE_1 ||
-             i == PULSER_CHANNEL_PHASE_2 )
+        if (    ( ! f->is_used && f->num_channels == 0 )
+             || i == PULSER_CHANNEL_PHASE_1
+             || i == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         if ( f->max_seq_len > MAX_PULSER_BITS )
@@ -1001,9 +1002,9 @@ static void ep385_pulse_init_check( Function_T * f )
         /* Skip checks for inactive pulses and automatically generated
            shape and TWT pulses */
 
-        if ( ! p1->is_active ||
-             ( f->self == PULSER_CHANNEL_PULSE_SHAPE && p1->sp != NULL ) ||
-             ( f->self == PULSER_CHANNEL_TWT && p1->tp != NULL ) )
+        if (    ! p1->is_active
+             || ( f->self == PULSER_CHANNEL_PULSE_SHAPE && p1->sp != NULL )
+             || ( f->self == PULSER_CHANNEL_TWT && p1->tp != NULL ) )
             continue;
 
         for ( j = i + 1; j < f->num_pulses; j++ )
@@ -1013,14 +1014,14 @@ static void ep385_pulse_init_check( Function_T * f )
             /* Skip checks for inactive pulses and automatically generated
                shape and TWT pulses */
 
-            if ( ! p2->is_active ||
-                 ( f->self == PULSER_CHANNEL_PULSE_SHAPE && p2->sp != NULL ) ||
-                 ( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
+            if (    ! p2->is_active
+                 || ( f->self == PULSER_CHANNEL_PULSE_SHAPE && p2->sp != NULL )
+                 || ( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
                 continue;
 
-            if ( p1->pos == p2->pos ||
-                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-                 ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
+            if (    p1->pos == p2->pos
+                 || ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos )
+                 || ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
             {
                 print( FATAL, "Pulses #%ld and #%ld (function '%s') "
                        "overlap.\n", p1->num, p2->num, f->name );
@@ -1065,9 +1066,9 @@ static void ep385_defense_shape_init_check( Function_T * shape )
             if ( ! defense_p->is_active )
                 continue;
 
-            if ( shape_p->pos <= defense_p->pos &&
-                 shape_p->pos + shape_p->len + ep385.shape_2_defense >
-                 defense_p->pos )
+            if (    shape_p->pos <= defense_p->pos
+                 && shape_p->pos + shape_p->len + ep385.shape_2_defense >
+                                                               defense_p->pos )
             {
                 if ( ep385.shape_2_defense_too_near == 0 )
                 {
@@ -1088,9 +1089,9 @@ static void ep385_defense_shape_init_check( Function_T * shape )
                 ep385.shape_2_defense_too_near++;
             }
 
-            if ( defense_p->pos < shape_p->pos &&
-                 defense_p->pos + defense_p->len + ep385.defense_2_shape >
-                 shape_p->pos )
+            if (    defense_p->pos < shape_p->pos
+                 && defense_p->pos + defense_p->len + ep385.defense_2_shape >
+                                                                 shape_p->pos )
             {
                 if ( ep385.defense_2_shape_too_near == 0 )
                 {

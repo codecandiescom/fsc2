@@ -151,8 +151,8 @@ int rb8509_exp_hook( void )
     /* If necessary set the trigger mode (card switches to internal trigger
        mode on initialization) */
 
-    if ( rb8509.trig_mode_is_set &&
-         rb8509.trig_mode != RULBUS_RB8509_ADC12_INT_TRIG )
+    if (    rb8509.trig_mode_is_set
+         && rb8509.trig_mode != RULBUS_RB8509_ADC12_INT_TRIG )
     {
         raise_permissions( );
         ret = rulbus_rb8509_adc12_set_trigger_mode( rb8509.handle,
@@ -235,9 +235,9 @@ Var_T *daq_get_voltage( Var_T * v )
 
     /* If necessary switch the current channel */
 
-    if ( channel != rb8509.channel &&
-         rulbus_rb8509_adc12_set_channel( rb8509.handle,
-                                          channel ) != RULBUS_OK )
+    if (    channel != rb8509.channel
+         && rulbus_rb8509_adc12_set_channel( rb8509.handle,
+                                             channel ) != RULBUS_OK )
         rb8509_comm_failure( );
 
     rb8509.channel = channel;
@@ -292,8 +292,8 @@ Var_T *daq_trigger_mode( Var_T * v )
 
     vars_check( v, STR_VAR );
 
-    if ( ! strcasecmp( v->val.sptr, "EXT" ) ||
-         ! strcasecmp( v->val.sptr, "EXTERNAL" ) )
+    if (    ! strcasecmp( v->val.sptr, "EXT" )
+         || ! strcasecmp( v->val.sptr, "EXTERNAL" ) )
     {
         if ( ! rb8509.has_ext_trigger )
         {
@@ -304,8 +304,8 @@ Var_T *daq_trigger_mode( Var_T * v )
 
         rb8509.trig_mode = RULBUS_RB8509_ADC12_EXT_TRIG;
     }
-    else if ( ! strcasecmp( v->val.sptr, "INT" ) ||
-              ! strcasecmp( v->val.sptr, "INTERNAL" ) )
+    else if (    ! strcasecmp( v->val.sptr, "INT" )
+              || ! strcasecmp( v->val.sptr, "INTERNAL" ) )
         rb8509.trig_mode = RULBUS_RB8509_ADC12_INT_TRIG;
     else
     {
@@ -348,10 +348,10 @@ Var_T *daq_gain( Var_T * v )
 
     gain = get_long( v, "ADC gain" );
 
-    if ( gain != RULBUS_RB8509_ADC12_GAIN_1 &&
-         gain != RULBUS_RB8509_ADC12_GAIN_2 &&
-         gain != RULBUS_RB8509_ADC12_GAIN_4 &&
-         gain != RULBUS_RB8509_ADC12_GAIN_8 )
+    if (    gain != RULBUS_RB8509_ADC12_GAIN_1
+         && gain != RULBUS_RB8509_ADC12_GAIN_2
+         && gain != RULBUS_RB8509_ADC12_GAIN_4
+         && gain != RULBUS_RB8509_ADC12_GAIN_8 )
     {
         print( FATAL, "Invalid gain factor, only %d, %d, %d and %d are "
                "possible.\n", RULBUS_RB8509_ADC12_GAIN_1,

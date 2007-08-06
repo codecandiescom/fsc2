@@ -93,8 +93,8 @@ bool ep385_assign_channel_to_function( int  function,
     fsc2_assert( function >= 0 && function < PULSER_CHANNEL_NUM_FUNC );
 
 
-    if ( function == PULSER_CHANNEL_PHASE_1 ||
-         function == PULSER_CHANNEL_PHASE_2 )
+    if (    function == PULSER_CHANNEL_PHASE_1
+         || function == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "Phase pulse functions can't be used with this "
                "driver.\n" );
@@ -127,9 +127,9 @@ bool ep385_assign_channel_to_function( int  function,
     /* The PULSE_SHAPE and TWT function can only have one channel assigned
        to it */
 
-    if ( ( function == PULSER_CHANNEL_PULSE_SHAPE ||
-           function == PULSER_CHANNEL_TWT ) &&
-         f->num_channels > 0 )
+    if (    (    function == PULSER_CHANNEL_PULSE_SHAPE
+              || function == PULSER_CHANNEL_TWT )
+         && f->num_channels > 0 )
     {
         print( FATAL, "Only one channel can be assigned to function '%s'.\n",
                Function_Names[ function ] );
@@ -250,10 +250,9 @@ bool ep385_set_repeat_time( double rep_time )
 
     /* Complain if a different time base already has been set */
 
-    if ( ep385.is_repeat_time &&
-         rep_time != 
-            ( old_rep_time = REPEAT_TICKS * ep385.repeat_time 
-                             * ep385.timebase ) )
+    if (    ep385.is_repeat_time
+         && rep_time != ( old_rep_time = REPEAT_TICKS * ep385.repeat_time 
+                          * ep385.timebase ) )
     {
         print( FATAL, "A different repeat time/frequency of %s / %g Hz has "
                "already been set.\n", ep385_ptime( old_rep_time ),
@@ -273,8 +272,8 @@ bool ep385_set_repeat_time( double rep_time )
     min_repeat_time = ( MIN_REPEAT_TIMES * REPEAT_TICKS ) * ep385.timebase;
     max_repeat_time = ( MAX_REPEAT_TIMES * REPEAT_TICKS ) * ep385.timebase;
 
-    if ( rep_time < min_repeat_time * 0.99 ||
-         rep_time > max_repeat_time * 1.01 )
+    if (    rep_time < min_repeat_time * 0.99
+         || rep_time > max_repeat_time * 1.01 )
     {
         print( FATAL, "Repeat time/frequency of %s / %g Hz is not within "
                "range of %s / %g Hz to %s/%g Hz.\n", ep385_ptime( rep_time ),
@@ -324,8 +323,8 @@ bool ep385_set_phase_reference( int phs,
 
     /* Phase function can't be used with this driver... */
 
-    if ( function == PULSER_CHANNEL_PHASE_1 ||
-         function == PULSER_CHANNEL_PHASE_2 )
+    if (    function == PULSER_CHANNEL_PHASE_1
+         || function == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "PHASE function can't be used with this driver.\n" );
         THROW( EXCEPTION );
@@ -333,8 +332,8 @@ bool ep385_set_phase_reference( int phs,
 
     /* The PULSE_SHAPE and TWT functions can't be phase-cycled */
 
-    if ( function == PULSER_CHANNEL_PULSE_SHAPE ||
-         function == PULSER_CHANNEL_TWT )
+    if (    function == PULSER_CHANNEL_PULSE_SHAPE
+         || function == PULSER_CHANNEL_TWT )
     {
         print( FATAL, "Function '%s' can't be phase-cycled.\n",
                Function_Names[ PULSER_CHANNEL_PULSE_SHAPE ] );
@@ -468,8 +467,8 @@ bool ep385_phase_setup( int phs )
         /* Check that the channel isn't already used for a different phase */
 
         for ( j = 0; j < i; j++ )
-            if ( ep385.phs[ phs ].is_set[ j ] &&
-                 ep385.phs[ phs ].channels[ i ] ==
+            if (    ep385.phs[ phs ].is_set[ j ]
+                 && ep385.phs[ phs ].channels[ i ] ==
                                                ep385.phs[ phs ].channels[ j ] )
             {
                 print( FATAL, "The same channel %d is used for phases '%s' "

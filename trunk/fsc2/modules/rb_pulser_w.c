@@ -176,11 +176,11 @@ int rb_pulser_w_init_hook( void )
         f->delay = 0.0;
         f->is_delay = UNSET;
 
-        if ( i != PULSER_CHANNEL_MW &&
-             i != PULSER_CHANNEL_RF &&
-             i != PULSER_CHANNEL_DEFENSE &&
-             i != PULSER_CHANNEL_DET &&
-             i != PULSER_CHANNEL_LASER )
+        if (    i != PULSER_CHANNEL_MW
+             && i != PULSER_CHANNEL_RF
+             && i != PULSER_CHANNEL_DEFENSE
+             && i != PULSER_CHANNEL_DET
+             && i != PULSER_CHANNEL_LASER )
             f->is_used = UNSET;
         else
             f->is_used = SET;
@@ -254,8 +254,8 @@ int rb_pulser_w_test_hook( void )
 
     TRY
     {
-        if ( rb_pulser_w.trig_in_mode == INTERNAL &&
-             ! rb_pulser_w.is_rep_time )
+        if (    rb_pulser_w.trig_in_mode == INTERNAL
+             && ! rb_pulser_w.is_rep_time )
         {
             print( FATAL, "No experiment repetition time/frequency has been "
                    "set.\n" );
@@ -373,9 +373,9 @@ int rb_pulser_w_exp_hook( void )
        delays we can't be 100% sure that the defense pulse covers the
        required region. So we better warn the user */
 
-    if ( rb_pulser_w.defense_pulse_mode &&
-         ( rb_pulser_w.function[ PULSER_CHANNEL_MW ].is_delay ||
-           rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].is_delay ) )
+    if (    rb_pulser_w.defense_pulse_mode
+         && (    rb_pulser_w.function[ PULSER_CHANNEL_MW ].is_delay
+              || rb_pulser_w.function[ PULSER_CHANNEL_DEFENSE ].is_delay ) )
     {
         const char *warn = "You want to automatically set a defense pulse\n"
                            "but also use function delays. The program now\n"
@@ -392,10 +392,11 @@ int rb_pulser_w_exp_hook( void )
        last microwave pulse and the end of the defense pulse also ask
        if she's serious about that */
 
-    if ( rb_pulser_w.is_pulse_2_defense && rb_pulser_w.defense_pulse_mode &&
-         rb_pulser_w.pulse_2_defense < PULSE_2_DEFENSE_DEFAULT_MIN_DISTANCE &&
-         fabs(   rb_pulser_w.pulse_2_defense
-               - PULSE_2_DEFENSE_DEFAULT_MIN_DISTANCE ) < 1.0e-9 )
+    if (    rb_pulser_w.is_pulse_2_defense
+         && rb_pulser_w.defense_pulse_mode
+         && rb_pulser_w.pulse_2_defense < PULSE_2_DEFENSE_DEFAULT_MIN_DISTANCE
+         && fabs(   rb_pulser_w.pulse_2_defense
+                  - PULSE_2_DEFENSE_DEFAULT_MIN_DISTANCE ) < 1.0e-9 )
     {
         char warn[ 500 ];
         sprintf( warn, "The minimum distance between the end of the last\n"

@@ -99,9 +99,9 @@ double lecroy9400_trigger_delay_check( void )
     /* Check that the trigger delay is within the limits (taking rounding
        errors of the order of the current time resolution into account) */
 
-    if ( real_delay > 0.0 &&
-         real_delay >   10.0 * lecroy9400.timebase
-                      +  0.5 * tpp[ lecroy9400.tb_index ] )
+    if (    real_delay > 0.0
+         && real_delay >   10.0 * lecroy9400.timebase
+                         +  0.5 * tpp[ lecroy9400.tb_index ] )
     {
         print( FATAL, "Pre-trigger delay of %s now is too long, can't be "
                "longer than 10 times the timebase.\n",
@@ -109,9 +109,9 @@ double lecroy9400_trigger_delay_check( void )
         THROW( EXCEPTION );
     }
 
-    if ( real_delay < 0.0 &&
-         real_delay <   -1.0e4 * lecroy9400.timebase
-                      -  0.5 * tpp[ lecroy9400.tb_index ] )
+    if (    real_delay < 0.0
+         && real_delay <   -1.0e4 * lecroy9400.timebase
+                         -  0.5 * tpp[ lecroy9400.tb_index ] )
     {
         print( FATAL, "Post-triger delay of %s now is too long, can't be "
                "longer that 10,000 times the timebase.\n",
@@ -281,8 +281,8 @@ static void lecroy9400_window_check_2( void )
         dtb = lecroy9400.timebase;
         fac = 1.0;
 
-        while ( ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 ) ||
-                fabs( dtb ) < 1.0 )
+        while (    ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 )
+                || fabs( dtb ) < 1.0 )
         {
             dcs *= 1000.0;
             dtb *= 1000.0;
@@ -351,10 +351,10 @@ static void lecroy9400_window_check_3( void )
 
     for ( w = lecroy9400.w; w != NULL; w = w->next )
     {
-        if ( w->start > ( 1.0 - lecroy9400.trig_pos ) * window ||
-             w->start + w->width > ( 1.0 - lecroy9400.trig_pos ) * window ||
-             w->start < - lecroy9400.trig_pos * window ||
-             w->start + w->width < - lecroy9400.trig_pos * window )
+        if (    w->start > ( 1.0 - lecroy9400.trig_pos ) * window
+             || w->start + w->width > ( 1.0 - lecroy9400.trig_pos ) * window
+             || w->start < - lecroy9400.trig_pos * window
+             || w->start + w->width < - lecroy9400.trig_pos * window )
         {
             print( FATAL, "Window %ld doesn't fit into current digitizer time "
                    "range.\n", w->num );

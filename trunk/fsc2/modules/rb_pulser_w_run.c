@@ -121,9 +121,9 @@ static void rb_pulser_w_function_init( void )
     {
         f = rb_pulser_w.function + i;
 
-        if ( ! f->is_used ||
-             ( i == PULSER_CHANNEL_DEFENSE &&
-               rb_pulser_w.defense_pulse_mode ) )
+        if (    ! f->is_used
+             || (    i == PULSER_CHANNEL_DEFENSE
+                  && rb_pulser_w.defense_pulse_mode ) )
             continue;
 
         for ( f->num_active_pulses = 0, j = 0; j < f->num_pulses; j++ )
@@ -308,9 +308,9 @@ static void rb_pulser_w_phase_channel_setup( void )
 
     for ( i = 0; i < f->num_pulses && IS_ACTIVE( pulses[ i ] ); i++ )
     {
-        fsc2_assert( cur_card != NULL &&
-                     mw_card != NULL &&
-                     mw_card->next != NULL );
+        fsc2_assert(    cur_card != NULL
+                     && mw_card != NULL
+                     && mw_card->next != NULL );
 
         /* Calculate where the microwave pulse really starts and from this
            how long the phase cards delay must be */
@@ -344,8 +344,8 @@ static void rb_pulser_w_phase_channel_setup( void )
         /* There also needs to be some amount of time following the previous
            microwave pulse before the phase can be switched */
 
-        if ( i != 0 &&
-             dT * rb_pulser_w.timebase + cur_card->intr_delay <
+        if (    i != 0
+             && dT * rb_pulser_w.timebase + cur_card->intr_delay <
                                             mw_end + rb_pulser_w.grace_period )
         {
             print( FATAL, "Microwave pulse #%ld too near to its "
@@ -925,8 +925,8 @@ static void rb_pulser_w_rf_pulse( void )
     /* Switch synthesizer output on or off if the pulse just became active or
        inactive */
 
-    if ( ( p->was_active && ! p->is_active ) ||
-         ( ! p->was_active && p->is_active ) )
+    if (    ( p->was_active && ! p->is_active )
+         || ( ! p->was_active && p->is_active ) )
     {
 #if ! defined RB_PULSER_W_TEST
         if ( ( func_ptr = func_get( rb_pulser_w.synth_state, &acc ) ) == NULL )

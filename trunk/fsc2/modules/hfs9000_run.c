@@ -229,8 +229,8 @@ void hfs9000_set_pulses( Function_T * f )
     int i;
 
 
-    fsc2_assert( f->self != PULSER_CHANNEL_PHASE_1 &&
-                 f->self != PULSER_CHANNEL_PHASE_2 );
+    fsc2_assert(    f->self != PULSER_CHANNEL_PHASE_1
+                 && f->self != PULSER_CHANNEL_PHASE_2 );
 
     if ( f->channel->self == HFS9000_TRIG_OUT )
     {

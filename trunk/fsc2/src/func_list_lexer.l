@@ -223,8 +223,8 @@ size_t func_list_parse( Func_T ** fncts,
             T_free( ld );
         }
 
-        if ( EDL.Fname == NULL &&
-             ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+        if (    EDL.Fname == NULL
+             && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
         {
             EDL.Fname = T_strdup( libdir "Functions" );
             if ( lstat( EDL.Fname, &buf ) < 0 )
@@ -448,8 +448,8 @@ static void fll_get_functions( Func_T * fncts,
                     THROW( EXCEPTION );
                 }
 
-                if ( ! strcmp( func_listtext, "-" ) ||
-                     ( fncts[ act ].nargs = atol( func_listtext ) ) < 0 )
+                if (    ! strcmp( func_listtext, "-" )
+                     || ( fncts[ act ].nargs = atol( func_listtext ) ) < 0 )
                     fncts[ act ].nargs = INT_MIN;
 
                 state = 2;

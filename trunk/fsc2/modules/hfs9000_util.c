@@ -52,8 +52,8 @@ Ticks hfs9000_double2ticks( double p_time )
         THROW( EXCEPTION );
     }
 
-    if ( fabs( Ticksrnd( ticks ) - p_time / hfs9000.timebase ) > 1.0e-2 ||
-         ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
+    if (    fabs( Ticksrnd( ticks ) - p_time / hfs9000.timebase ) > 1.0e-2
+         || ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
     {
         print( FATAL, "Specified time of %s is not an integer multiple of the "
                "pulser time base of %s.\n",
@@ -217,9 +217,9 @@ Ticks hfs9000_get_max_seq_len( void )
 
         /* Nothing to be done for unused functions and the phase functions */
 
-        if ( ! f->is_used ||
-             f->self == PULSER_CHANNEL_PHASE_1 ||
-             f->self == PULSER_CHANNEL_PHASE_2 )
+        if (    ! f->is_used
+             || f->self == PULSER_CHANNEL_PHASE_1
+             || f->self == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         max = Ticks_max( max, f->max_seq_len + f->delay );

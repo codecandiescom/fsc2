@@ -82,9 +82,9 @@ bool rb_pulser_j_set_pulse_function( long pnum,
 
     /* The pulser has only tree functions */
 
-    if ( function != PULSER_CHANNEL_MW &&
-         function != PULSER_CHANNEL_RF &&
-         function != PULSER_CHANNEL_DET )
+    if (    function != PULSER_CHANNEL_MW
+         && function != PULSER_CHANNEL_RF
+         && function != PULSER_CHANNEL_DET )
     {
         print( FATAL, "Pulse function '%s' can't be used with this "
                "driver.\n", Function_Names[ function ] );
@@ -98,8 +98,8 @@ bool rb_pulser_j_set_pulse_function( long pnum,
         THROW( EXCEPTION );
     }
 
-    if ( p->is_pos &&
-         p->pos + p->function->delay <
+    if (    p->is_pos
+         && p->pos + p->function->delay <
                               rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay )
     {
         print( FATAL, "Start position for pulse #%ld is too early.\n", pnum );
@@ -129,8 +129,8 @@ bool rb_pulser_j_set_pulse_position( long   pnum,
         THROW( EXCEPTION );
     }
 
-    if ( p->function != NULL &&
-         p_time + p->function->delay <
+    if (    p->function != NULL
+         && p_time + p->function->delay <
                               rb_pulser_j.delay_card[ INIT_DELAY ].intr_delay )
     {
         print( FATAL, "Start position for pulse #%ld is too early.\n", pnum );
@@ -389,8 +389,8 @@ bool rb_pulser_j_change_pulse_position( long   pnum,
         THROW( EXCEPTION );
     }
 
-    if ( p->is_pos &&
-         fabs( p_time - p->pos ) <= PRECISION * rb_pulser_j.timebase )
+    if (    p->is_pos
+         && fabs( p_time - p->pos ) <= PRECISION * rb_pulser_j.timebase )
     {
         print( WARN, "Old and new position of pulse #%ld are identical.\n",
                pnum );

@@ -392,11 +392,11 @@ void stop_graphics( void );
 
 void make_label_string( char * /* lstr */,
                         double /* num  */,
-                        int    /* res  */ );
+                        int    /* res  */  );
 
 void create_label_pixmap( Canvas_T * /* c     */,
                           int        /* coord */,
-                          char *     /* label */ );
+                          char *     /* label */  );
 
 void switch_off_special_cursors( void );
 
@@ -413,10 +413,10 @@ void redraw_axis_1d( int /* coord */ );
 void redraw_axis_2d( int /* coord */ );
 
 void change_scale_1d( int    /* is_set */,
-                      void * /* ptr    */ );
+                      void * /* ptr    */  );
 
 void change_scale_2d( int    /* is_set */,
-                      void * /* ptr    */ );
+                      void * /* ptr    */  );
 
 void change_label_1d( char ** /* label */ );
 
@@ -433,10 +433,10 @@ void fs_vert_rescale_2d( void );
 void redraw_canvas_2d( Canvas_T * /* c */ );
 
 void change_mode( long /* mode  */,
-                  long /* width */ );
+                  long /* width */  );
 
 int form_event_handler( FL_FORM * /* form   */,
-                        void *    /* xevent */ );
+                        void *    /* xevent */  );
 
 
 #endif   /* ! GRAPHICS_HEADER */

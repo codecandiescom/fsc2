@@ -50,7 +50,7 @@ void run_child_exit_hooks( void );
 
 int get_lib_symbol( const char * /* from       */,
                     const char * /* symbol     */,
-                    void **      /* symbol_ptr */ );
+                    void **      /* symbol_ptr */  );
 
 void unload_device( Device_T * /* dev */ );
 

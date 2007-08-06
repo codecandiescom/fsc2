@@ -258,14 +258,14 @@ void tds744a_set_window( Window_T * /* w */ );
 
 long tds744a_translate_channel( int  /* dir     */,
                                 long /* channel */,
-                                bool /* flag    */ );
+                                bool /* flag    */  );
 
 void tds744a_store_state( TDS744A_T * /* dest */,
-                          TDS744A_T * /* src  */ );
+                          TDS744A_T * /* src  */  );
 
 void tds744a_state_check( double /* timebase */,
                           long   /* rec_len  */,
-                          double /* trig_pos */ );
+                          double /* trig_pos */  );
 
 Window_T *tds744a_get_window_by_number( long /* win_number */ );
 
@@ -304,7 +304,7 @@ void tds744a_clear_SESR( void );
 void tds744a_finished( void );
 
 void tds744a_set_cursor( int    /* cur_num */,
-                         double /* pos     */ );
+                         double /* pos     */  );
 
 void tds744a_set_track_cursors( bool /* flag */ );
 
@@ -315,35 +315,35 @@ void tds744a_set_snap( bool /* flag */ );
 bool tds744a_display_channel_state( int /* channel */ );
 
 void tds744a_display_channel( int  /* channel */,
-                              bool /* on_flag */ );
+                              bool /* on_flag */  );
 
 double tds744a_get_sens( int /* channel */ );
 
 void tds744a_set_sens( int    /* channel */,
-                       double /* val     */ );
+                       double /* val     */  );
 
 void tds744a_start_acquisition( void );
 
 double tds744a_get_area( int        /* channel     */,
                          Window_T * /* w           */,
-                         bool       /* use_cursors */ );
+                         bool       /* use_cursors */  );
 
 void tds744a_get_curve( int        /* channel    */,
                         Window_T * /* w          */,
                         double **  /* data       */,
                         long *     /* length     */,
-                        bool       /* use_cursor */ );
+                        bool       /* use_cursor */  );
 
 double tds744a_get_amplitude( int        /* channel     */,
                               Window_T * /* w           */,
-                              bool       /* use_cursors */ );
+                              bool       /* use_cursors */  );
 
 void tds744a_free_running( void );
 
 void tds744a_lock_state( bool /* lock */ );
 
 void tds744a_copy_curve( int /* src  */,
-                         int /* dest */ );
+                         int /* dest */  );
 
 bool tds744a_command( const char */* cmd */ );
 
@@ -354,7 +354,7 @@ bool tds744a_command( const char */* cmd */ );
    I found empirically that waiting 2 ms seems to get rid of the problem. */
 
 #define gpib_read( a, b, c ) \
-        ( usleep( 2000 ), gpib_read( ( a ), ( b ), ( c ) ) )
+        ( fsc2_usleep( 2000, UNSET ), gpib_read( ( a ), ( b ), ( c ) ) )
 
 
 #endif /* ! TDS744A_HEADER */

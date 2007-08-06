@@ -95,8 +95,8 @@ bool dg2020_set_pulse_function( long pnum,
         THROW( EXCEPTION );
     }
 
-    if ( function == PULSER_CHANNEL_PHASE_1 ||
-         function == PULSER_CHANNEL_PHASE_2 )
+    if (    function == PULSER_CHANNEL_PHASE_1
+         || function == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "Pulses for the PHASE function can't be set, all phase "
                "pulses are created automatically.\n" );
@@ -283,10 +283,10 @@ bool dg2020_set_pulse_phase_cycle( long pnum,
         THROW( EXCEPTION );
     }
 
-    if ( dg2020.phase_numbers[ 0 ] != -1    &&
-         dg2020.phase_numbers[ 0 ] != cycle &&
-         dg2020.phase_numbers[ 1 ] != -1    &&
-         dg2020.phase_numbers[ 1 ] != cycle )
+    if (    dg2020.phase_numbers[ 0 ] != -1
+         && dg2020.phase_numbers[ 0 ] != cycle
+         && dg2020.phase_numbers[ 1 ] != -1
+         && dg2020.phase_numbers[ 1 ] != cycle )
     {
         print( FATAL, "Only two different phase sequences can be used for "
                "pulses. \n" );

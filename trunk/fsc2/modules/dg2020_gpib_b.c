@@ -264,14 +264,16 @@ bool dg2020_init( const char * name )
     /* If additional padding is needed or trigger mode is EXTERNAL create
        sequence and blocks */
 
-    if ( dg2020.block[ 0 ].is_used && dg2020.block[ 1 ].is_used &&
-         ( ! dg2020_make_blocks( 2, dg2020.block ) ||
-           ! dg2020_make_seq( 2, dg2020.block ) ) )
+    if (    dg2020.block[ 0 ].is_used
+         && dg2020.block[ 1 ].is_used
+         && (    ! dg2020_make_blocks( 2, dg2020.block )
+              || ! dg2020_make_seq( 2, dg2020.block ) ) )
         dg2020_gpib_failure( );
 
-    if ( dg2020.block[ 0 ].is_used && ! dg2020.block[ 1 ].is_used &&
-         ( ! dg2020_make_blocks( 1, dg2020.block ) ||
-           ! dg2020_make_seq( 1, dg2020.block ) ) )
+    if (    dg2020.block[ 0 ].is_used
+         && ! dg2020.block[ 1 ].is_used
+         && (    ! dg2020_make_blocks( 1, dg2020.block )
+              || ! dg2020_make_seq( 1, dg2020.block ) ) )
         dg2020_gpib_failure( );
 
     /* Do the assignment of channels to pods */
@@ -344,8 +346,8 @@ static bool dg2020_set_timebase( double timebase )
     char cmd[ 30 ] = "SOUR:OSC:INT:FREQ ";
 
 
-    if ( timebase < MIN_TIMEBASE * 0.99999 ||
-         timebase > MAX_TIMEBASE * 1.00001 )
+    if (    timebase < MIN_TIMEBASE * 0.99999
+         || timebase > MAX_TIMEBASE * 1.00001 )
         return FAIL;
 
     gcvt( 1.0 / timebase, 4, cmd + strlen( cmd ) );
@@ -396,8 +398,8 @@ bool dg2020_channel_assign( int channel,
     char cmd[ 50 ];
 
 
-    fsc2_assert( channel >= 0 && channel < MAX_CHANNELS &&
-                 pod >= 0 && pod < NUM_PODS );
+    fsc2_assert( channel >= 0 && channel < MAX_CHANNELS
+                 && pod >= 0 && pod < NUM_PODS );
 
     sprintf( cmd, "OUTP:PODA:CH%d:ASSIGN %d\n", pod, channel );
     dg2020_command( cmd );

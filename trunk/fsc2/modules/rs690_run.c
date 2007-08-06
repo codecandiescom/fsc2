@@ -151,8 +151,8 @@ static bool rs690_update_pulses( bool flag )
                     /* Extend pulses for which a shape pulse has been defined
                        a bit */
 
-                    if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
-                         p->sp != NULL )
+                    if (    p->function->self != PULSER_CHANNEL_PULSE_SHAPE
+                         && p->sp != NULL )
                     {
                         pp->pos -= p->function->left_shape_padding;
                         pp->len +=   p->function->left_shape_padding
@@ -161,8 +161,8 @@ static bool rs690_update_pulses( bool flag )
 
                     /* Extend TWT pulses that were automatically created */
 
-                    if ( p->function->self == PULSER_CHANNEL_TWT &&
-                         p->tp != NULL )
+                    if (    p->function->self == PULSER_CHANNEL_TWT
+                         && p->tp != NULL )
                     {
                         pp->pos -= p->tp->function->left_twt_padding;
                         pp->len +=   p->tp->function->left_twt_padding
@@ -185,10 +185,10 @@ static bool rs690_update_pulses( bool flag )
             if ( ch->num_active_pulses == ch->old_num_active_pulses )
             {
                 for ( m = 0; m < ch->num_active_pulses; m++ )
-                if ( ch->pulse_params[ m ].pos !=
-                     ch->old_pulse_params[ m ].pos ||
-                     ch->pulse_params[ m ].len !=
-                     ch->old_pulse_params[ m ].len )
+                if (    ch->pulse_params[ m ].pos !=
+                                                ch->old_pulse_params[ m ].pos
+                     || ch->pulse_params[ m ].len !=
+                                                ch->old_pulse_params[ m ].len )
                     break;
 
                 if ( m == ch->num_active_pulses )
@@ -212,11 +212,13 @@ static bool rs690_update_pulses( bool flag )
                    minimum distances has been set or TWT or TWT_GATE pulses
                    are used) */
 
-                if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
-                     rs690.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-                     ( rs690.is_shape_2_defense || rs690.is_defense_2_shape ||
-                       rs690.function[ PULSER_CHANNEL_TWT ].is_used ||
-                       rs690.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
+                if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+                     && rs690.function[ PULSER_CHANNEL_DEFENSE ].is_used
+                     && (    rs690.is_shape_2_defense
+                          || rs690.is_defense_2_shape
+                          || rs690.function[ PULSER_CHANNEL_TWT ].is_used
+                          || rs690.function[ PULSER_CHANNEL_TWT_GATE ].is_used
+                         ) )
                     rs690_defense_shape_check( f );
 
                 TRY_SUCCESS;
@@ -302,8 +304,8 @@ static void rs690_pulse_check( Function_T * f )
         /* Skip checks for inactive pulses and automatically generated
            TWT pulses */
 
-        if ( ! p1->is_active ||
-             ( f->self == PULSER_CHANNEL_TWT && p1->tp != NULL ) )
+        if (    ! p1->is_active
+             || ( f->self == PULSER_CHANNEL_TWT && p1->tp != NULL ) )
             continue;
 
         for ( j = i + 1; j < f->num_pulses; j++ )
@@ -313,19 +315,20 @@ static void rs690_pulse_check( Function_T * f )
             /* Skip checks for inactive pulses and automatically generated
                TWT pulses */
 
-            if ( ! p2->is_active ||
-                ( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
+            if (    ! p2->is_active
+                 || ( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
                 continue;
 
-            if ( p1->pos == p2->pos ||
-                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-                 ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
+            if (    p1->pos == p2->pos
+                 || ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos )
+                 || ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
             {
-                if ( rs690.auto_shape_pulses &&
-                     f->self == PULSER_CHANNEL_PULSE_SHAPE )
+                if (    rs690.auto_shape_pulses
+                     && f->self == PULSER_CHANNEL_PULSE_SHAPE )
                 {
-                    if ( p1->sp != NULL && p2->sp != NULL &&
-                         p1->sp->function != p2->sp->function )
+                    if (    p1->sp != NULL
+                         && p2->sp != NULL
+                         && p1->sp->function != p2->sp->function )
                         print( FATAL, "Shape pulses for pulses #%ld function "
                                "'%s') and #%ld (function '%s') start to "
                                "overlap.\n", p1->sp->num,
@@ -387,9 +390,9 @@ static void rs690_defense_shape_check( Function_T * shape )
             if ( ! defense_p->is_active )
                 continue;
 
-            if ( shape_p->pos <= defense_p->pos &&
-                 shape_p->pos + shape_p->len + rs690.shape_2_defense >
-                 defense_p->pos )
+            if (    shape_p->pos <= defense_p->pos
+                 && shape_p->pos + shape_p->len + rs690.shape_2_defense >
+                                                               defense_p->pos )
             {
                 if ( FSC2_MODE == EXPERIMENT )
                 {
@@ -425,9 +428,9 @@ static void rs690_defense_shape_check( Function_T * shape )
                 rs690.shape_2_defense_too_near++;
             }
 
-            if ( defense_p->pos < shape_p->pos &&
-                 defense_p->pos + defense_p->len + rs690.defense_2_shape >
-                 shape_p->pos )
+            if (    defense_p->pos < shape_p->pos
+                 && defense_p->pos + defense_p->len + rs690.defense_2_shape >
+                                                                 shape_p->pos )
             {
                 if ( FSC2_MODE == EXPERIMENT )
                 {
@@ -550,9 +553,9 @@ void rs690_shape_padding_check_1( Channel_T * ch )
     int i;
 
 
-    if ( ch->function->self == PULSER_CHANNEL_PULSE_SHAPE ||
-         ! ch->function->uses_auto_shape_pulses ||
-         ch->num_active_pulses == 0 )
+    if (    ch->function->self == PULSER_CHANNEL_PULSE_SHAPE
+         || ! ch->function->uses_auto_shape_pulses
+         || ch->num_active_pulses == 0 )
         return;
 
     /* Check that first pulse don't starts to early */
@@ -641,10 +644,10 @@ void rs690_shape_padding_check_2( void )
                         {
                             pp2 = ch2->pulse_params + n;
 
-                            if ( ( pp1->pos <= pp2->pos &&
-                                   pp1->pos + pp1->len > pp2->pos ) ||
-                                 ( pp1->pos > pp2->pos &&
-                                   pp1->pos < pp2->pos + pp2->len ) )
+                            if (    (    pp1->pos <= pp2->pos
+                                      && pp1->pos + pp1->len > pp2->pos )
+                                 || (    pp1->pos > pp2->pos
+                                      && pp1->pos < pp2->pos + pp2->len ) )
                             {
                                 print( FATAL, "Distance between pulses #%ld "
                                        "and #%ld too short to set shape "
@@ -803,9 +806,9 @@ void rs690_seq_length_check( void )
 
         /* Nothing to be done for unused functions and the phase functions */
 
-        if ( ( ! f->is_used && f->num_channels == 0 ) ||
-             i == PULSER_CHANNEL_PHASE_1 ||
-             i == PULSER_CHANNEL_PHASE_2 )
+        if (    ( ! f->is_used && f->num_channels == 0 )
+             || i == PULSER_CHANNEL_PHASE_1
+             || i == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         for ( j = 0; j < f->num_channels; j++ )
@@ -827,8 +830,8 @@ void rs690_seq_length_check( void )
        needs to be tested - thanks to Celine Elsaesser for pointing this
        out. */
 
-    if ( rs690.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-         rs690.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
+    if (    rs690.function[ PULSER_CHANNEL_DEFENSE ].is_used
+         && rs690.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
     {
         Ticks add;
         Channel_T *cs =
@@ -874,9 +877,9 @@ void rs690_seq_length_check( void )
 
         /* Nothing to be done for unused functions and the phase functions */
 
-        if ( ( ! f->is_used && f->num_channels == 0 ) ||
-             i == PULSER_CHANNEL_PHASE_1 ||
-             i == PULSER_CHANNEL_PHASE_2 )
+        if (    ( ! f->is_used && f->num_channels == 0 )
+             || i == PULSER_CHANNEL_PHASE_1
+             || i == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         rs690.max_seq_len = Ticks_max( rs690.max_seq_len, f->max_seq_len );
@@ -921,8 +924,9 @@ Pulse_T *rs690_delete_pulse( Pulse_T * p,
     /* First we've got to remove the pulse from its functions pulse list (if
        it already made it into the functions pulse list) */
 
-    if ( p->is_function && p->function->num_pulses > 0 &&
-         p->function->pulses != NULL )
+    if (    p->is_function
+         && p->function->num_pulses > 0
+         && p->function->pulses != NULL )
     {
         f = p->function;
 
@@ -1188,8 +1192,8 @@ static void rs690_make_fs( FS_T * start_fs )
                             break;
                         }
 
-                        if ( n->next != NULL &&
-                             n->next->pos <= pp->pos + pp->len )
+                        if (    n->next != NULL
+                             && n->next->pos <= pp->pos + pp->len )
                             continue;
 
                         n = rs690_insert_fs( n, pp->pos + pp->len );
@@ -1300,8 +1304,8 @@ void rs690_check_fs( void )
        is zero). */
 
     for ( n = rs690.new_fs; n != NULL && n->next != NULL; n = n->next )
-        while ( n->next != NULL &&
-                ! memcmp( n->fields, n->next->fields, sizeof n->fields ) )
+        while (    n->next != NULL
+                && ! memcmp( n->fields, n->next->fields, sizeof n->fields ) )
         {
             n->len += n->next->len;
             rs690_delete_fs_successor( n );

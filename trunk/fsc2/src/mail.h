@@ -33,7 +33,7 @@ int send_mail( const char * /* subject */,
                const char * /* from    */,
                const char * /* cc_to   */,
                const char * /* to      */,
-               FILE *       /* fp      */ );
+               FILE *       /* fp      */  );
 
 
 #endif  /* ! MAIL_HEADER */

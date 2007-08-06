@@ -53,11 +53,11 @@ bool lecroy9400_init( const char * name )
        2 byte length. Then ask it for the status byte 1 to test if the device
        reacts. */
 
-    if ( gpib_write( lecroy9400.device,
-                     "CHDR,OFF;CTRL,LF;CHLP,OFF;CBLS,-1;CFMT,A,WORD",
-                     45 ) == FAILURE ||
-         gpib_write( lecroy9400.device, "STB,1", 5 ) == FAILURE ||
-         gpib_read( lecroy9400.device, buffer, &len ) == FAILURE )
+    if (    gpib_write( lecroy9400.device,
+                        "CHDR,OFF;CTRL,LF;CHLP,OFF;CBLS,-1;CFMT,A,WORD",
+                        45 ) == FAILURE
+         || gpib_write( lecroy9400.device, "STB,1", 5 ) == FAILURE
+         || gpib_read( lecroy9400.device, buffer, &len ) == FAILURE )
     {
         gpib_local( lecroy9400.device );
         return FAIL;
@@ -185,9 +185,9 @@ bool lecroy9400_set_trigger_source( int channel )
     char cmd[ 40 ] = "TRS,";
 
 
-    fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 ||
-                 ( channel >= LECROY9400_LIN && channel <= LECROY9400_EXT10 )
-               );
+    fsc2_assert(    channel == LECROY9400_CH1 || channel == LECROY9400_CH2
+                 || (    channel >= LECROY9400_LIN
+                      && channel <= LECROY9400_EXT10 ) );
 
     if ( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 )
         sprintf( cmd + 4, "C%1d", channel + 1 );
@@ -442,8 +442,8 @@ long lecroy9400_get_num_avg( int channel )
     long num_avg;
 
 
-    fsc2_assert( channel == LECROY9400_FUNC_E ||
-                 channel == LECROY9400_FUNC_F );
+    fsc2_assert(    channel == LECROY9400_FUNC_E
+                 || channel == LECROY9400_FUNC_F );
 
     /* Check that the channel is in averaging mode (in which case the byte
        at offset 34 of the waveform description is 0), if not return -1 */
@@ -539,8 +539,8 @@ void lecroy9400_set_up_averaging( long channel,
     size_t i;
 
 
-    fsc2_assert( channel >= LECROY9400_FUNC_E &&
-                 channel <= LECROY9400_FUNC_F );
+    fsc2_assert(    channel >= LECROY9400_FUNC_E
+                 && channel <= LECROY9400_FUNC_F );
     fsc2_assert( source >= LECROY9400_CH1 && source <= LECROY9400_CH2 );
 
     lecroy9400.channels_in_use[ channel ] = SET;
@@ -759,8 +759,8 @@ static bool lecroy9400_talk( const char * cmd,
                              char *       reply,
                              long *       length )
 {
-    if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( lecroy9400.device, reply, length ) == FAILURE )
+    if (    gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE
+         || gpib_read( lecroy9400.device, reply, length ) == FAILURE )
         lecroy9400_gpib_failure( );
     return OK;
 }

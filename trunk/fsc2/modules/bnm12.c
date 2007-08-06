@@ -135,8 +135,8 @@ int bnm12_init_hook( void )
 
     func = get_string( "dio_reserve_dio#%d", dev_num );
 
-    if ( ! func_exists( func ) ||
-         ( Func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( Func_ptr = func_get( func, &acc ) ) == NULL )
     {
         T_free( func );
         print( FATAL, "Function for reserving a DIO is missing.\n" );
@@ -161,8 +161,8 @@ int bnm12_init_hook( void )
 
     func = get_string( "dio_mode#%d", dev_num );
 
-    if ( ! func_exists( "dio_mode" ) ||
-         ( Func_ptr = func_get( "dio_mode", &acc ) ) == NULL )
+    if (    ! func_exists( "dio_mode" )
+         || ( Func_ptr = func_get( "dio_mode", &acc ) ) == NULL )
     {
         T_free( func );
         print( FATAL, "Function for setting the DIO mode is missing.\n" );
@@ -309,8 +309,8 @@ Var_T *gaussmeter_resolution( Var_T * v )
             res_index = RESOLUTION_VERY_HIGH;
     }
 
-    fsc2_assert( res_index >= RESOLUTION_VERY_HIGH &&
-                 res_index <= RESOLUTION_EXTREMELY_LOW );
+    fsc2_assert(    res_index >= RESOLUTION_VERY_HIGH
+                 && res_index <= RESOLUTION_EXTREMELY_LOW );
 
     if ( fabs( bnm12.res_list[ res_index ] - res ) >
                                          1.0e-2 * bnm12.res_list[ res_index ] )

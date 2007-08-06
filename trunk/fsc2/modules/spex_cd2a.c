@@ -121,8 +121,8 @@ int spex_cd2a_init_hook( void )
 
     /* Find out which is the lowest wavelength that can be set */
 
-    if ( LOWER_LIMIT < 0 ||
-         ( spex_cd2a.mode & WN_MODES && LOWER_LIMIT <= 0 ) )
+    if (    LOWER_LIMIT < 0
+         || ( spex_cd2a.mode & WN_MODES && LOWER_LIMIT <= 0 ) )
     {
         if ( spex_cd2a.mode & WN_MODES )
             print( FATAL, "Invalid setting for upper wavenumber limit in "
@@ -154,8 +154,8 @@ int spex_cd2a_init_hook( void )
 
     /* Find out which is the highest wavelength that can be set */
 
-    if ( UPPER_LIMIT < 0 ||
-         ( spex_cd2a.mode & WN_MODES && UPPER_LIMIT <= 0.0 ) )
+    if (    UPPER_LIMIT < 0
+         || ( spex_cd2a.mode & WN_MODES && UPPER_LIMIT <= 0.0 ) )
     {
         if ( spex_cd2a.mode & WN_MODES )
             print( FATAL, "Invalid setting for lower wavenumber limit in "
@@ -274,8 +274,8 @@ int spex_cd2a_init_hook( void )
     /* Determine the format data are send by the device */
 
     spex_cd2a.data_format = DATA_FORMAT;
-    if ( spex_cd2a.data_format != STANDARD &&
-         spex_cd2a.data_format != DATALOGGER )
+    if (    spex_cd2a.data_format != STANDARD
+         && spex_cd2a.data_format != DATALOGGER )
     {
         print( FATAL, "Invalid setting for data format in configuration file "
                "for the device.\n" );
@@ -542,24 +542,24 @@ Var_T *monochromator_scan_setup( Var_T * v )
         SPEX_CD2A_THROW( EXCEPTION );
     }
 
-    if ( spex_cd2a.mode & WN_MODES &&
-         spex_cd2a_wn2wl( spex_cd2a_wl2wn( start ) - step ) >
+    if (    spex_cd2a.mode & WN_MODES
+         && spex_cd2a_wn2wl( spex_cd2a_wl2wn( start ) - step ) >
                                                         spex_cd2a.upper_limit )
     {
         print( FATAL, "Step size of %.4f cm^-1 is too large.\n", step );
         SPEX_CD2A_THROW( EXCEPTION );
     }
 
-    if ( spex_cd2a.mode & WN_MODES &&
-         lrnd( 1.0e4 * step ) < lrnd( 1.0e4 * spex_cd2a.mini_step ) )
+    if (    spex_cd2a.mode & WN_MODES
+         && lrnd( 1.0e4 * step ) < lrnd( 1.0e4 * spex_cd2a.mini_step ) )
     {
         print( FATAL, "Step size of %.4f cm^-1 is smaller than the "
                "minimum possible step size of %.4f cm^-1.\n",
                step, spex_cd2a.mini_step );
     }
 
-    if ( spex_cd2a.mode == WL &&
-         lrnd( 1.0e5 * step ) < lrnd( 1.0e5 * spex_cd2a.mini_step ) )
+    if (    spex_cd2a.mode == WL
+         && lrnd( 1.0e5 * step ) < lrnd( 1.0e5 * spex_cd2a.mini_step ) )
     {
         print( FATAL, "Step size of %.5f nm is smaller than the "
                "minimum possible step size of %.5f.\n",
@@ -809,8 +809,9 @@ Var_T *monochromator_scan_step( Var_T * v  UNUSED_ARG )
         SPEX_CD2A_THROW( EXCEPTION );
     }
 
-    if ( spex_cd2a.mode == WL &&
-         spex_cd2a.wavelength + spex_cd2a.scan_step > spex_cd2a.upper_limit )
+    if (    spex_cd2a.mode == WL
+         && spex_cd2a.wavelength + spex_cd2a.scan_step >
+                                                        spex_cd2a.upper_limit )
     {
         if ( FSC2_MODE == EXPERIMENT )
         {
@@ -823,9 +824,9 @@ Var_T *monochromator_scan_step( Var_T * v  UNUSED_ARG )
         SPEX_CD2A_THROW( EXCEPTION );
     }
 
-    if ( spex_cd2a.mode & WN_MODES &&
-         spex_cd2a_wn2wl( spex_cd2a_wl2wn( spex_cd2a.wavelength )
-                          - spex_cd2a.scan_step ) > spex_cd2a.upper_limit )
+    if (    spex_cd2a.mode & WN_MODES
+         && spex_cd2a_wn2wl( spex_cd2a_wl2wn( spex_cd2a.wavelength )
+                             - spex_cd2a.scan_step ) > spex_cd2a.upper_limit )
     {
         if ( FSC2_MODE == EXPERIMENT )
         {
@@ -898,10 +899,10 @@ Var_T *monochromator_laser_line( Var_T * v )
            it's range but the laser line is outside of the shutter range. */
 
         wl = spex_cd2a_wn2wl( wn );
-        if ( spex_cd2a.has_shutter && spex_cd2a.shutter_limits_are_set &&
-             wl >= spex_cd2a.lower_limit && wl <= spex_cd2a.upper_limit &&
-             ( wl < spex_cd2a.shutter_low_limit ||
-               wl > spex_cd2a.shutter_high_limit ) )
+        if (    spex_cd2a.has_shutter && spex_cd2a.shutter_limits_are_set
+             && wl >= spex_cd2a.lower_limit && wl <= spex_cd2a.upper_limit
+             && (    wl < spex_cd2a.shutter_low_limit
+                  || wl > spex_cd2a.shutter_high_limit ) )
         {
             print( FATAL, "Laser line position is not within the shutter "
                    "range.\n" );
@@ -1236,8 +1237,8 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
 
     cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
 
-    if ( cv->type != INT_ARR ||
-         cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
     {
         print( FATAL, "Function of CCD for determining the size of the chip "
                "does not return a useful value.\n" );
@@ -1327,8 +1328,8 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
 
     cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
 
-    if ( cv->type != INT_ARR ||
-         cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
     {
         print( FATAL, "Function of CCD for determining the size of the chip "
                "does not return a useful value.\n" );

@@ -555,8 +555,8 @@ static long hjs_attenuator_att_to_step( double att )
     size_t max_index;;
 
 
-    fsc2_assert( hjs_attenuator.att_table != NULL &&
-                 hjs_attenuator.att_table_len > 1 );
+    fsc2_assert(    hjs_attenuator.att_table != NULL
+                 && hjs_attenuator.att_table_len > 1 );
 
     if ( att < 0.0 )
     {

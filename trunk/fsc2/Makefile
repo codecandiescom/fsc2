@@ -1067,16 +1067,19 @@ pack-with-svn:
 # Make distributions of the device modules etc.
 
 packages:
-	@for dir in Fcntl_Lock me6x00 ni6601 ni_daq rulbus witio_48; do  \
+	@for dir in me6x00 ni6601 ni_daq rulbus witio_48; do  \
 		$(MAKE) -C $$dir clean;                                      \
 		tar -c $$dir --exclude=.svn | gzip -c -9 > ../$$dir.tar.gz;  \
 	done
+	$(MAKE) -C Fcntl_Lock realclean
 
 packages-with-svn:
 	@for dir in Fcntl_Lock me6x00 ni6601 ni_daq rulbus witio_48; do  \
 		$(MAKE) -C $$dir clean;                                      \
 		tar -c $$dir | gzip -c -9 > ../$$dir-with-svn.tar.gz;        \
 	done
+	$(MAKE) -C Fcntl_Lock realclean
+
 
 # Creates the MANIFEST file with the list of relevant files
 

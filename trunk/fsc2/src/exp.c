@@ -570,15 +570,15 @@ static void loop_setup( void )
             case FOR_TOK   : case UNTIL_TOK :
                 cur_pos = i;
                 setup_while_or_repeat( EDL.prg_token[ i ].token, &i );
-                fsc2_assert( ! ( cur_pos < EDL.On_Stop_Pos &&
-                                 i > EDL.On_Stop_Pos ) );
+                fsc2_assert( ! (    cur_pos < EDL.On_Stop_Pos
+                                 && i > EDL.On_Stop_Pos ) );
                 break;
 
             case IF_TOK : case UNLESS_TOK :
                 cur_pos = i;
                 setup_if_else( &i, NULL );
-                fsc2_assert( ! ( cur_pos < EDL.On_Stop_Pos &&
-                                 i > EDL.On_Stop_Pos ) );
+                fsc2_assert( ! (    cur_pos < EDL.On_Stop_Pos
+                                 && i > EDL.On_Stop_Pos ) );
                 break;
         }
     }
@@ -787,9 +787,9 @@ static void setup_else( Prg_Token_T * cur,
         THROW( EXCEPTION );
     }
 
-    if ( EDL.prg_token[ i + 1 ].token != '{' &&
-         EDL.prg_token[ i + 1 ].token != IF_TOK &&
-         EDL.prg_token[ i + 1 ].token != UNLESS_TOK )
+    if (    EDL.prg_token[ i + 1 ].token != '{'
+         && EDL.prg_token[ i + 1 ].token != IF_TOK
+         && EDL.prg_token[ i + 1 ].token != UNLESS_TOK )
     {
         eprint( FATAL, UNSET, "%s:%ld: Missing '{' after ELSE.\n",
                 EDL.prg_token[ i ].Fname, EDL.prg_token[ i ].Lc );
@@ -804,8 +804,8 @@ static void setup_else( Prg_Token_T * cur,
         THROW( EXCEPTION );
     }
 
-    if (  EDL.prg_token[ i + 1 ].token == IF_TOK ||
-          EDL.prg_token[ i + 1 ].token == UNLESS_TOK )
+    if (     EDL.prg_token[ i + 1 ].token == IF_TOK
+          || EDL.prg_token[ i + 1 ].token == UNLESS_TOK )
     {
         cur->end = EDL.prg_token + i;
         *dont_need_close_parens = SET;
@@ -848,8 +848,8 @@ static bool setup_close_brace_in_if_else( long *        pos,
     if ( *in_if )
     {
         *in_if = UNSET;
-        if ( i + 1 < EDL.prg_length &&
-             EDL.prg_token[ i + 1 ].token == ELSE_TOK )
+        if (    i + 1 < EDL.prg_length
+             && EDL.prg_token[ i + 1 ].token == ELSE_TOK )
             return FALSE;
     }
 
@@ -906,8 +906,8 @@ static void exp_syntax_check( void )
 
 int exp_testlex( void )
 {
-    if ( EDL.cur_prg_token != NULL &&
-         EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
+    if (    EDL.cur_prg_token != NULL
+         && EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
     {
         EDL.Fname = EDL.cur_prg_token->Fname;
         EDL.Lc = EDL.cur_prg_token->Lc;
@@ -962,16 +962,16 @@ void exp_test_run( void )
         EDL.cur_prg_token = EDL.prg_token;
         Token_count = 0;
 
-        while ( EDL.cur_prg_token != NULL &&
-                EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
+        while (    EDL.cur_prg_token != NULL
+                && EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
         {
             Token_count++;
 
             /* Give the 'Stop Test' button a chance to get tested... */
 
-            if ( ! ( Fsc2_Internals.cmdline_flags & TEST_ONLY ) &&
-                 ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
-                 Token_count >= CHECK_FORMS_AFTER )
+            if (    ! ( Fsc2_Internals.cmdline_flags & TEST_ONLY )
+                 && ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+                 && Token_count >= CHECK_FORMS_AFTER )
             {
                 fl_check_only_forms( );
                 Token_count %= CHECK_FORMS_AFTER;
@@ -1148,8 +1148,8 @@ int exp_runlex( void )
     Var_T *ret, *from, *next, *prev;
 
 
-    if ( EDL.cur_prg_token != NULL &&
-         EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
+    if (    EDL.cur_prg_token != NULL
+         && EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
     {
         Token_count++;
 
@@ -1220,8 +1220,8 @@ int conditionlex( void )
     Var_T *ret, *from, *next, *prev;
 
 
-    if ( EDL.cur_prg_token != NULL &&
-         EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
+    if (    EDL.cur_prg_token != NULL
+         && EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
     {
         Token_count++;
 
@@ -1393,8 +1393,8 @@ void get_for_cond( Prg_Token_T * cur )
 
     /* Make sure token is a variable and next token is '=' */
 
-    if ( EDL.cur_prg_token->token != E_VAR_TOKEN ||
-         ( EDL.cur_prg_token + 1 )->token != '=' )
+    if (    EDL.cur_prg_token->token != E_VAR_TOKEN
+         || ( EDL.cur_prg_token + 1 )->token != '=' )
     {
         cur++;
         eprint( FATAL, UNSET, "%s:%ld: Syntax error in condition of FOR "
@@ -1498,8 +1498,8 @@ void get_for_cond( Prg_Token_T * cur )
 
     /* If loop variable is integer 'end' must also be integer */
 
-    if ( cur->count.forl.act->type == INT_VAR &&
-         EDL.Var_Stack->type == FLOAT_VAR )
+    if (    cur->count.forl.act->type == INT_VAR
+         && EDL.Var_Stack->type == FLOAT_VAR )
     {
         cur++;
         In_for_lex = UNSET;
@@ -1554,8 +1554,8 @@ void get_for_cond( Prg_Token_T * cur )
 
         /* If loop variable is an integer, 'incr' must also be integer */
 
-        if ( cur->count.forl.act->type == INT_VAR &&
-             EDL.Var_Stack->type == FLOAT_VAR )
+        if (    cur->count.forl.act->type == INT_VAR
+             && EDL.Var_Stack->type == FLOAT_VAR )
         {
             cur++;
             In_for_lex = UNSET;
@@ -1625,10 +1625,10 @@ bool test_for_cond( Prg_Token_T * cur )
 
     /* Get sign of increment */
 
-    if ( ( cur->count.forl.incr.type == INT_VAR &&
-           cur->count.forl.incr.lval < 0 ) ||
-         ( cur->count.forl.incr.type == FLOAT_VAR &&
-           cur->count.forl.incr.dval < 0 ) )
+    if (    (    cur->count.forl.incr.type == INT_VAR
+              && cur->count.forl.incr.lval < 0 )
+         || (    cur->count.forl.incr.type == FLOAT_VAR
+              && cur->count.forl.incr.dval < 0 ) )
         sign = SET;
 
     /* If the increment is positive test if loop variable is less or equal to

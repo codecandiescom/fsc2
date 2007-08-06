@@ -145,8 +145,8 @@ int hjs_fc_init_hook( void )
 
         func = get_string( "daq_reserve_dac#%d", dev_num );
 
-        if ( ! func_exists( func ) ||
-             ( func_ptr = func_get( func, &acc ) ) == NULL )
+        if (    ! func_exists( func )
+             || ( func_ptr = func_get( func, &acc ) ) == NULL )
         {
             print( FATAL, "Function for reserving the DAC is missing.\n" );
             THROW( EXCEPTION );
@@ -184,8 +184,8 @@ int hjs_fc_init_hook( void )
 
         func = get_string( "daq_dac_parameter#%d", dev_num );
 
-        if ( ! func_exists( func ) ||
-             ( func_ptr = func_get( func, &acc ) ) == NULL )
+        if (    ! func_exists( func )
+             || ( func_ptr = func_get( func, &acc ) ) == NULL )
         {
             print( FATAL, "Function for determining the DAC parameters is "
                    "missing.\n" );
@@ -304,8 +304,8 @@ int hjs_fc_exp_hook( void )
        small that it can't be produced with the voltage resolution of
        the DAC. */
 
-    if ( hjs_fc.is_field_step &&
-         fabs( hjs_fc.field_step / hjs_fc.slope ) < hjs_fc.dac_resolution )
+    if (    hjs_fc.is_field_step
+         && fabs( hjs_fc.field_step / hjs_fc.slope ) < hjs_fc.dac_resolution )
     {
         print( FATAL, "Field step size for sweeps is too small, the minimum "
                "possible step size is %.2lf G.\n",
@@ -705,10 +705,11 @@ static void hjs_fc_init_with_measured_data( void )
 
     for ( i = 1; i < num_test_data; i++ )
     {
-        if ( test_volts[ i ] < hjs_fc.dac_min_volts ||
-             test_volts[ i ] > hjs_fc.dac_max_volts ||
-             ( i > 0 && fabs( test_volts[ i - 1 ] - test_volts[ i ] )
-                        < hjs_fc.dac_resolution ) )
+        if (    test_volts[ i ] < hjs_fc.dac_min_volts
+             || test_volts[ i ] > hjs_fc.dac_max_volts
+             || (    i > 0
+                  && fabs( test_volts[ i - 1 ] - test_volts[ i ] )
+                                                   < hjs_fc.dac_resolution ) )
         {
             print( FATAL, "Internal error detected at %s:%d.\n",
                    __FILE__, __LINE__ );
@@ -813,10 +814,10 @@ static void hjs_fc_init_with_calib_file( void )
 
     hjs_fc.act_field = hjs_fc_get_field( );
 
-    if ( hjs_fc.act_field <
-            hjs_fc.B_min - 0.05 * hjs_fc.slope * hjs_fc.dac_max_volts ||
-         hjs_fc.act_field >
-            hjs_fc.B_max + 0.05 * hjs_fc.slope * hjs_fc.dac_max_volts )
+    if (    hjs_fc.act_field <
+                   hjs_fc.B_min - 0.05 * hjs_fc.slope * hjs_fc.dac_max_volts
+         || hjs_fc.act_field >
+                   hjs_fc.B_max + 0.05 * hjs_fc.slope * hjs_fc.dac_max_volts )
     {
         print( FATAL, "Measured field of %.2f G too far outside the range "
                "specified in calibration file '%s'.\n", hjs_fc.act_field,
@@ -863,26 +864,28 @@ static double hjs_fc_set_field( double field,
         else
             mini_step = - fabs( mini_step );
 
-        while ( ( mini_step > 0.0 && cur_volts < v_step ) ||
-                ( mini_step < 0.0 && cur_volts > v_step ) )
+        while (    ( mini_step > 0.0 && cur_volts < v_step )
+                || ( mini_step < 0.0 && cur_volts > v_step ) )
         {
             cur_volts += mini_step;
 
-            if ( ( mini_step > 0.0 && cur_volts > v_step ) ||
-                 ( mini_step < 0.0 && cur_volts < v_step ) )
+            if (    ( mini_step > 0.0 && cur_volts > v_step )
+                 || ( mini_step < 0.0 && cur_volts < v_step ) )
                 cur_volts = v_step;
 
-            if ( ( cur_volts < hjs_fc.dac_min_volts && hjs_fc.slope > 0.0 ) ||
-                 ( cur_volts > hjs_fc.dac_max_volts && hjs_fc.slope < 0.0 ) )
+            if (    (    cur_volts < hjs_fc.dac_min_volts
+                      && hjs_fc.slope > 0.0 )
+                 || (    cur_volts > hjs_fc.dac_max_volts
+                      && hjs_fc.slope < 0.0 ) )
             {
                 print( FATAL, "Can't sweep field to %.2f G, it's too low.\n",
                        field );
                 THROW( EXCEPTION );
             }
-            else if ( ( cur_volts < hjs_fc.dac_min_volts &&
-                        hjs_fc.slope < 0.0 ) ||
-                      ( cur_volts > hjs_fc.dac_max_volts &&
-                        hjs_fc.slope > 0.0 ) )
+            else if (    (    cur_volts < hjs_fc.dac_min_volts
+                           && hjs_fc.slope < 0.0 )
+                      || (    cur_volts > hjs_fc.dac_max_volts
+                           && hjs_fc.slope > 0.0 ) )
             {
                 print( FATAL, "Can't sweep field to %.2f G, it's too high.\n",
                        field );
@@ -942,15 +945,15 @@ static double hjs_fc_sweep_to( double new_field )
     cur_volts = hjs_fc.cur_volts;
     v_step = cur_volts + ( new_field - hjs_fc.act_field ) / hjs_fc.slope;
 
-    if ( ( v_step < hjs_fc.dac_min_volts && hjs_fc.slope > 0.0 ) ||
-         ( v_step > hjs_fc.dac_max_volts && hjs_fc.slope < 0.0 ) )
+    if (    ( v_step < hjs_fc.dac_min_volts && hjs_fc.slope > 0.0 )
+         || ( v_step > hjs_fc.dac_max_volts && hjs_fc.slope < 0.0 ) )
     {
         print( FATAL, "Can't sweep field to %.2f G, it's too low.\n",
                new_field );
         THROW( EXCEPTION );
     }
-    else if ( ( v_step < hjs_fc.dac_min_volts && hjs_fc.slope < 0.0 ) ||
-              ( v_step > hjs_fc.dac_max_volts && hjs_fc.slope > 0.0 ) )
+    else if (    ( v_step < hjs_fc.dac_min_volts && hjs_fc.slope < 0.0 )
+              || ( v_step > hjs_fc.dac_max_volts && hjs_fc.slope > 0.0 ) )
     {
         print( FATAL, "Can't sweep field to %.2f G, it's too high.\n",
                new_field );
@@ -965,13 +968,13 @@ static double hjs_fc_sweep_to( double new_field )
     else
         mini_step = - fabs( mini_step );
 
-    while ( ( mini_step > 0.0 && cur_volts < v_step ) ||
-            ( mini_step < 0.0 && cur_volts > v_step ) )
+    while (    ( mini_step > 0.0 && cur_volts < v_step )
+            || ( mini_step < 0.0 && cur_volts > v_step ) )
     {
         cur_volts += mini_step;
 
-        if ( ( mini_step > 0.0 && cur_volts > v_step ) ||
-             ( mini_step < 0.0 && cur_volts < v_step ) )
+        if (    ( mini_step > 0.0 && cur_volts > v_step )
+             || ( mini_step < 0.0 && cur_volts < v_step ) )
             cur_volts = v_step;
 
         hjs_fc_set_dac( cur_volts );
@@ -1013,8 +1016,9 @@ static double hjs_fc_get_field( void )
        have to decide that we can't get one... */
 
     for ( repeat_count = 0, ident_count = 0, old_field = LONG_MIN;
-          ident_count < MIN_NUM_IDENTICAL_READINGS &&
-          repeat_count < MAX_GET_FIELD_RETRIES; repeat_count++ )
+             ident_count < MIN_NUM_IDENTICAL_READINGS
+          && repeat_count < MAX_GET_FIELD_RETRIES;
+          repeat_count++ )
     {
         if ( repeat_count )
             fsc2_usleep( WAIT_LENGTH, UNSET );

@@ -116,8 +116,8 @@ void load_all_drivers( void )
 
             if ( cd->is_loaded && cd->driver.is_init_hook )
             {
-                if ( cd->generic_type != NULL &&
-                     ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+                if (    cd->generic_type != NULL
+                     && ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
                     Cur_Pulser++;
 
                 call_push( NULL, cd, cd->device_name, cd->count );
@@ -204,8 +204,8 @@ int exists_device( const char * name )
 
 
     for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
-        if ( cd->is_loaded &&
-             ! strcasecmp( strip_path( cd->name ), name ) )
+        if (    cd->is_loaded
+             && ! strcasecmp( strip_path( cd->name ), name ) )
             return cd->count;
 
     return 0;
@@ -223,8 +223,8 @@ bool exists_device_type( const char * type )
 
 
     for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
-        if ( cd->is_loaded &&
-             ! strcasecmp( strip_path( cd->generic_type ), type ) )
+        if (    cd->is_loaded
+             && ! strcasecmp( strip_path( cd->generic_type ), type ) )
             return OK;
 
     return FAIL;
@@ -240,8 +240,9 @@ bool exists_function( const char * name )
 
 
     for ( i = 0; i < Num_Func; i++ )
-        if ( Fncts[ i ].name != NULL && ! strcmp( Fncts[ i ].name, name ) &&
-             Fncts[ i ].fnct != NULL )
+        if (    Fncts[ i ].name != NULL
+             && ! strcmp( Fncts[ i ].name, name )
+             && Fncts[ i ].fnct != NULL )
             return OK;
 
     return FAIL;
@@ -294,9 +295,9 @@ static void load_functions( Device_T * dev )
            The exception is when the DO_CHECK flag is defined, where the
            compiled in path is *not* what we want... */
 
-        if ( dev->driver.handle == NULL &&
-             ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
-             dev->name[ 0 ] != '/' )
+        if (    dev->driver.handle == NULL
+             && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+             && dev->name[ 0 ] != '/' )
         {
             lib_name = get_string( libdir "%s.fsc2_so", dev->name );
 
@@ -482,11 +483,11 @@ static void add_function( size_t     num,
     Func_T *f;
 
 
-    if ( new_dev->count == 1 ||
-         ( new_dev->generic_type != NULL &&
-           Fncts[ num ].device->generic_type != NULL &&
-           strcasecmp( new_dev->generic_type,
-                       Fncts[ num ].device->generic_type ) != 0 ) )
+    if (    new_dev->count == 1
+         || (    new_dev->generic_type != NULL
+              && Fncts[ num ].device->generic_type != NULL
+              && strcasecmp( new_dev->generic_type,
+                             Fncts[ num ].device->generic_type ) != 0 ) )
     {
         eprint( FATAL, UNSET, "Functions with name %s() are defined in "
                 "modules of different types, '%s' and '%s'.\n",
@@ -551,14 +552,14 @@ static void resolve_generic_type( Device_T * dev )
     }
 
     for ( cd = EDL.Device_List; cd != dev; cd = cd->next )
-        if ( cd->generic_type != NULL &&
-             ! strcasecmp( cd->generic_type, dev->generic_type ) )
+        if (    cd->generic_type != NULL
+             && ! strcasecmp( cd->generic_type, dev->generic_type ) )
             dev->count++;
 
     Max_Devices_of_a_Kind = i_max( Max_Devices_of_a_Kind, dev->count );
 
-    if ( dev->generic_type &&
-         ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
+    if (    dev->generic_type
+         && ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
         EDL.Num_Pulsers++;
 }
 
@@ -584,8 +585,8 @@ void run_test_hooks( void )
 
             if ( cd->is_loaded && cd->driver.is_test_hook )
             {
-                if ( cd->generic_type != NULL &&
-                     ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+                if (    cd->generic_type != NULL
+                     && ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
                     Cur_Pulser++;
 
                 call_push( NULL, cd, cd->device_name, cd->count );
@@ -632,8 +633,8 @@ void run_end_of_test_hooks( void )
 
             if ( cd->is_loaded && cd->driver.is_end_of_test_hook )
             {
-                if ( cd->generic_type != NULL &&
-                     ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+                if (    cd->generic_type != NULL
+                     && ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
                     Cur_Pulser++;
 
                 call_push( NULL, cd, cd->device_name, cd->count );
@@ -680,8 +681,8 @@ void run_exp_hooks( void )
 
             if ( cd->is_loaded && cd->driver.is_exp_hook )
             {
-                if ( cd->generic_type != NULL &&
-                     ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+                if (    cd->generic_type != NULL
+                     && ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
                     Cur_Pulser++;
 
                 call_push( NULL, cd, cd->device_name, cd->count );
@@ -754,8 +755,8 @@ void run_end_of_exp_hooks( void )
     {
         fsc2_assert( EDL.Call_Stack == NULL );
 
-        if ( cd->generic_type != NULL &&
-             ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+        if (    cd->generic_type != NULL
+             && ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
             Cur_Pulser++;
 
         if ( ! cd->driver.exp_hook_is_run )
@@ -814,8 +815,8 @@ void run_exit_hooks( void )
     {
         fsc2_assert( EDL.Call_Stack == NULL );
 
-        if ( cd->generic_type != NULL &&
-             ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+        if (    cd->generic_type != NULL
+             && ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
             Cur_Pulser = EDL.Num_Pulsers - 1;
 
         if ( ! cd->is_loaded || ! cd->driver.is_exit_hook )
@@ -835,8 +836,8 @@ void run_exit_hooks( void )
             vars_del_stack( );
         }
 
-        if ( cd->generic_type != NULL &&
-             ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+        if (    cd->generic_type != NULL
+             && ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
             EDL.Num_Pulsers--;
     }
 
@@ -875,8 +876,8 @@ void run_child_exit_hooks( void )
     {
         fsc2_assert( EDL.Call_Stack == NULL );
 
-        if ( cd->generic_type != NULL &&
-             ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+        if (    cd->generic_type != NULL
+             && ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
             Cur_Pulser = EDL.Num_Pulsers - 1;
 
         if ( ! cd->is_loaded || ! cd->driver.is_child_exit_hook )
@@ -896,8 +897,8 @@ void run_child_exit_hooks( void )
             vars_del_stack( );
         }
 
-        if ( cd->generic_type != NULL &&
-             ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+        if (    cd->generic_type != NULL
+             && ! strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
             EDL.Num_Pulsers--;
     }
 
@@ -934,8 +935,8 @@ int get_lib_symbol( const char * from,
     /* Try to find the library fitting the name */
 
     for ( cd = EDL.Device_List; cd != 0; cd = cd->next )
-        if ( cd->is_loaded &&
-             ! strcasecmp( strip_path( cd->name ), from ) )
+        if (    cd->is_loaded
+             && ! strcasecmp( strip_path( cd->name ), from ) )
             break;
 
     if ( cd == NULL )                    /* library not found ? */
@@ -963,13 +964,13 @@ void unload_device( Device_T * dev )
 {
     fsc2_assert( EDL.Call_Stack == NULL );
 
-    if ( dev->driver.handle &&
-         ! Fsc2_Internals.exit_hooks_are_run && 
-         dev->driver.init_hook_is_run &&
-         dev->driver.is_exit_hook )
+    if (    dev->driver.handle
+         && ! Fsc2_Internals.exit_hooks_are_run
+         && dev->driver.init_hook_is_run
+         && dev->driver.is_exit_hook )
     {
-        if ( dev->generic_type != NULL &&
-             ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
+        if (    dev->generic_type != NULL
+             && ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
             Cur_Pulser = EDL.Num_Pulsers - 1;
 
         Fsc2_Internals.in_hook = SET;
@@ -987,8 +988,8 @@ void unload_device( Device_T * dev )
             vars_del_stack( );
         }
 
-        if ( dev->generic_type != NULL &&
-             ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
+        if (    dev->generic_type != NULL
+             && ! strcasecmp( dev->generic_type, PULSER_GENERIC_TYPE ) )
             EDL.Num_Pulsers--;
         Fsc2_Internals.in_hook = UNSET;
     }

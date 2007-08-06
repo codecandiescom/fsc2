@@ -57,14 +57,14 @@ struct PA_Seq {
 void phases_clear( void );
 
 void acq_seq_start( long /* acq_num  */,
-                    long /* acq_type */ );
+                    long /* acq_type */  );
 
 void acq_seq_cont(  long /* acq_type */ );
 
 Phs_Seq_T * phase_seq_start( long /* phase_seq_num */ );
 
 void phases_add_phase( Phs_Seq_T * /* p          */,
-                       int         /* phase_type */ );
+                       int         /* phase_type */  );
 
 void acq_miss_list( void );
 

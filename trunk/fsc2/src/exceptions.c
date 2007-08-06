@@ -186,8 +186,8 @@ jmp_buf *throw_exception( Exception_Types_T type )
 Exception_Types_T get_exception_type( const char * file,
                                       int          line )
 {
-    if ( Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION ||
-         ! Exception_stack[ Exception_stack_pos + 1 ].is_thrown )
+    if (    Exception_stack_pos + 1 >= MAX_NESTED_EXCEPTION
+         || ! Exception_stack[ Exception_stack_pos + 1 ].is_thrown )
     {
         fprintf( stderr, "%s: Request for type of an exception that never had "
                  "been thrown at %s:%d.\n", Prog_Name, file, line );

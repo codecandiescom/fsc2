@@ -87,8 +87,8 @@ bool hfs9000_set_pulse_function( long pnum,
     Function_T *f = hfs9000.function + function;
 
 
-    if ( function == PULSER_CHANNEL_PHASE_1 ||
-         function == PULSER_CHANNEL_PHASE_2 )
+    if (    function == PULSER_CHANNEL_PHASE_1
+         || function == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "Phase functions can't be used with this driver.\n" );
         THROW( EXCEPTION );
@@ -223,8 +223,9 @@ bool hfs9000_set_pulse_length( long   pnum,
         THROW( EXCEPTION );
     }
 
-    if ( p->is_function && p->function->channel &&
-         p->function->channel->self == HFS9000_TRIG_OUT )
+    if (    p->is_function
+         && p->function->channel
+         && p->function->channel->self == HFS9000_TRIG_OUT )
     {
         p->len = 1;
         print( SEVERE, "Length of Trigger Out pulse #%ld is fixed to 20 ns\n",
@@ -306,8 +307,9 @@ bool hfs9000_set_pulse_length_change( long   pnum,
         return FAIL;
     }
 
-    if ( p->is_function && p->function->channel &&
-         p->function->channel->self == HFS9000_TRIG_OUT )
+    if (    p->is_function
+         && p->function->channel
+         && p->function->channel->self == HFS9000_TRIG_OUT )
     {
         print( FATAL, "Length of Trigger Out pulse #%ld can't be changed.\n",
                pnum );
@@ -383,8 +385,9 @@ bool hfs9000_get_pulse_length( long     pnum,
         THROW( EXCEPTION );
     }
 
-    if ( p->is_function && p->function->channel &&
-         p->function->channel->self == HFS9000_TRIG_OUT )
+    if (    p->is_function
+         && p->function->channel
+         && p->function->channel->self == HFS9000_TRIG_OUT )
     {
         print( FATAL, "Length of Trigger Out pulse #%ld can't be "
                "referenced.\n",
@@ -631,8 +634,9 @@ bool hfs9000_change_pulse_length_change( long   pnum,
 
     CLOBBER_PROTECT( new_dlen );
 
-    if ( p->is_function && p->function->channel &&
-         p->function->channel->self == HFS9000_TRIG_OUT )
+    if (    p->is_function
+         && p->function->channel
+         && p->function->channel->self == HFS9000_TRIG_OUT )
     {
         print( FATAL, "Length change of Trigger Out pulse #%ld can't be "
                "set.\n", pnum );

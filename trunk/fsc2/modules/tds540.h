@@ -252,14 +252,14 @@ void tds540_set_window( Window_T * /* w */ );
 
 long tds540_translate_channel( int  /* dir     */,
                                long /* channel */,
-                               bool /* flag    */ );
+                               bool /* flag    */  );
 
 void tds540_store_state( TDS540_T * /* dest */,
-                         TDS540_T * /* src  */ );
+                         TDS540_T * /* src  */  );
 
 void tds540_state_check( double /* timebase */,
                          long   /* rec_len  */,
-                         double /* trig_pos */ );
+                         double /* trig_pos */  );
 
 Window_T *tds540_get_window_by_number( long /* win_number */ );
 
@@ -298,7 +298,7 @@ void tds540_clear_SESR( void );
 void tds540_finished( void );
 
 void tds540_set_cursor( int    /* cur_num */,
-                        double /* pos     */ );
+                        double /* pos     */  );
 
 void tds540_set_track_cursors( bool /* flag */ );
 
@@ -309,35 +309,35 @@ void tds540_set_snap( bool /* flag */ );
 bool tds540_display_channel_state( int /* channel */ );
 
 void tds540_display_channel( int  /* channel */,
-                             bool /* on_flag */ );
+                             bool /* on_flag */  );
 
 double tds540_get_sens( int /* channel */ );
 
 void tds540_set_sens( int    /* channel */,
-                      double /* val     */ );
+                      double /* val     */  );
 
 void tds540_start_acquisition( void );
 
 double tds540_get_area( int        /* channel    */,
                         Window_T * /* w          */,
-                        bool       /* use_cursor */ );
+                        bool       /* use_cursor */  );
 
 void tds540_get_curve( int        /* channel    */,
                        Window_T * /* w          */,
                        double **  /* data       */,
                        long *     /* length     */,
-                       bool       /* use_cursor */ );
+                       bool       /* use_cursor */  );
 
 double tds540_get_amplitude( int        /* channel    */,
                              Window_T * /* w          */,
-                             bool       /* use_cursor */);
+                             bool       /* use_cursor */  );
 
 void tds540_free_running( void );
 
 void tds540_lock_state( bool /* lock */ );
 
 void tds540_copy_curve( int /* src  */,
-                        int /* dest */ );
+                        int /* dest */  );
 
 bool tds540_command( const char * /* cmd */ );
 

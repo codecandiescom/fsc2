@@ -388,8 +388,10 @@ Var_T *func_get( const char * name,
        count number to the name of the function and use this adorned name
        as the name of the function the caller is really looking for. */
 
-    if ( EDL.Call_Stack != NULL && EDL.Call_Stack->device != NULL &&
-         EDL.Call_Stack->dev_count > 1 && strrchr( name, '#' ) == NULL )
+    if (    EDL.Call_Stack != NULL
+         && EDL.Call_Stack->device != NULL
+         && EDL.Call_Stack->dev_count > 1
+         && strrchr( name, '#' ) == NULL )
     {
         dlerror( );
         dlsym( EDL.Call_Stack->device->driver.handle, name );
@@ -597,8 +599,8 @@ Var_T *func_call( Var_T * f )
 #ifndef NDEBUG
         if ( ! vars_exist( f ) )
         {
-            if ( EDL.Call_Stack->f != NULL &&
-                 ! EDL.Call_Stack->f->to_be_loaded )
+            if (    EDL.Call_Stack->f != NULL
+                 && ! EDL.Call_Stack->f->to_be_loaded )
                 eprint( FATAL, UNSET, "Internal error detected at %s:%d.\n",
                         __FILE__, __LINE__ );
             else
@@ -707,8 +709,10 @@ Call_Stack_T *call_push( Func_T *     f,
     /* If this is a function for a pulser figure out the number of the pulser
        (there might be more than one pulser) */
 
-    if ( f != NULL && f->device != NULL && f->device->generic_type != NULL &&
-         ! strcasecmp( f->device->generic_type, PULSER_GENERIC_TYPE ) )
+    if (    f != NULL
+         && f->device != NULL
+         && f->device->generic_type != NULL
+         && ! strcasecmp( f->device->generic_type, PULSER_GENERIC_TYPE ) )
     {
         if ( ( t = strrchr( f->name, '#' ) ) != NULL )
             Cur_Pulser = cs->Cur_Pulser = T_atol( t + 1 ) - 1;

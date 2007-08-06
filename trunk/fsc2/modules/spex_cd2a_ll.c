@@ -600,9 +600,9 @@ static void spex_cd2a_read_ack( void )
             spex_cd2a_comm_fail( );
     } while ( *buf == CAN );
 
-    if ( *buf != NAK &&
-         ( received = fsc2_serial_read( SERIAL_PORT, buf + 1,
-                                        1, 1000000, UNSET ) ) <= 0 )
+    if (    *buf != NAK
+         && ( received = fsc2_serial_read( SERIAL_PORT, buf + 1,
+                                           1, 1000000, UNSET ) ) <= 0 )
         spex_cd2a_comm_fail( );
 
     /* A <NAK> character means that there are communication problems */
@@ -695,8 +695,8 @@ static char *spex_cd2a_read_mess( ssize_t to_be_read )
         else
         {
             for ( i = old_already_read;
-                  i < already_read &&
-                      i < to_be_read - ( spex_cd2a.sends_lf ? 4 : 3 );
+                  i < already_read
+                  && i < to_be_read - ( spex_cd2a.sends_lf ? 4 : 3 );
                   i++ )
                 if ( buf[ i ] == CAN )
                     memmove( buf + i, buf + i + 1, --already_read - i );
@@ -948,11 +948,11 @@ static void spex_cd2a_pos_mess_check( const char * bp )
        otherwise either a 'N' or 'A', depending if it's set up to use
        nanometer or Angstrom units */
        
-    if ( ( spex_cd2a.mode == WN_ABS && *bp == 'W' ) ||
-         ( spex_cd2a.mode == WN_REL && *bp == 'D' ) ||
-         ( spex_cd2a.mode == WL &&
-           ( ( spex_cd2a.units == NANOMETER && *bp == 'N' ) ||
-             ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )
+    if (    ( spex_cd2a.mode == WN_ABS && *bp == 'W' )
+         || ( spex_cd2a.mode == WN_REL && *bp == 'D' )
+         || ( spex_cd2a.mode == WL
+              && (    ( spex_cd2a.units == NANOMETER && *bp == 'N' )
+                   || ( spex_cd2a.units == ANGSTROEM && *bp == 'A' ) ) ) )
         bp++;
     else
         spex_cd2a_wrong_data( );

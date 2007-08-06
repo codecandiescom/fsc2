@@ -188,12 +188,13 @@ bool lecroy_wr_init( void )
         /* Switch interleaved (RIS) mode on if the user asked for it and it
            can be done, otherwise switch it off */
 
-        if ( lecroy_wr.is_interleaved && lecroy_wr.interleaved &&
-             lecroy_wr.cur_hres->cl_ris > 0 )
+        if (    lecroy_wr.is_interleaved
+             && lecroy_wr.interleaved
+             && lecroy_wr.cur_hres->cl_ris > 0 )
             lecroy_wr_set_interleaved( SET );
 
-        if ( ( lecroy_wr.is_interleaved && ! lecroy_wr.interleaved ) ||
-             lecroy_wr.cur_hres->cl_ris == 0 )
+        if (    ( lecroy_wr.is_interleaved && ! lecroy_wr.interleaved )
+             || lecroy_wr.cur_hres->cl_ris == 0 )
         {
             lecroy_wr_set_interleaved( UNSET );
             lecroy_wr.interleaved = UNSET;
@@ -596,8 +597,8 @@ bool lecroy_wr_set_coupling( int channel,
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
-    fsc2_assert( type >= LECROY_WR_CPL_AC_1_MOHM &&
-                 type <= LECROY_WR_CPL_GND );
+    fsc2_assert(    type >= LECROY_WR_CPL_AC_1_MOHM
+                 && type <= LECROY_WR_CPL_GND );
 
     sprintf( cmd, "C%1d:CPL %s\r", channel + 1, cpl[ type ] );
     to_send = strlen( cmd );
@@ -663,8 +664,8 @@ int lecroy_wr_get_bandwidth_limiter( int channel )
 
     do
     {
-        if ( sscanf( ptr + 1, "%d", &ch ) != 1 ||
-             ( ptr = strtok( NULL, delim ) ) == NULL )
+        if (    sscanf( ptr + 1, "%d", &ch ) != 1
+             || ( ptr = strtok( NULL, delim ) ) == NULL )
         {
             print( FATAL, "Can't determine bandwidth limiter settings.\n" );
             THROW( EXCEPTION );
@@ -795,8 +796,8 @@ int lecroy_wr_get_trigger_source( void )
     lecroy_wr_talk( "TRSE?", reply, &length );
     reply[ length - 1 ] = '\0';
 
-    if ( strncmp( reply, "STD,SR,", 7 ) &&
-         strncmp( reply, "EDGE,SR,", 8 ) )
+    if (    strncmp( reply, "STD,SR,", 7 )
+         && strncmp( reply, "EDGE,SR,", 8 ) )
     {
         print( SEVERE, "Non-standard mode trigger, switching to standard "
                "edge trigger on to LINe input\n" );
@@ -831,11 +832,11 @@ bool lecroy_wr_set_trigger_source( int channel )
     ssize_t to_send;
 
 
-    fsc2_assert( ( channel >= LECROY_WR_CH1 &&
-                   channel <= LECROY_WR_CH_MAX ) ||
-                 channel == LECROY_WR_LIN        ||
-                 channel == LECROY_WR_EXT        ||
-                 channel == LECROY_WR_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WR_CH1
+                      && channel <= LECROY_WR_CH_MAX )
+                 || channel == LECROY_WR_LIN
+                 || channel == LECROY_WR_EXT
+                 || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
         sprintf( cmd + 11, "C%1d\r", channel + 1 );
@@ -865,9 +866,10 @@ double lecroy_wr_get_trigger_level( int channel )
     long length = 30;
 
 
-    fsc2_assert( ( channel >= LECROY_WR_CH1 &&
-                   channel <= LECROY_WR_CH_MAX ) ||
-                 channel == LECROY_WR_EXT || channel == LECROY_WR_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WR_CH1
+                      && channel <= LECROY_WR_CH_MAX )
+                 || channel == LECROY_WR_EXT
+                 || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
         sprintf( buf, "C%1d:TRLV?\r", channel + 1 );
@@ -893,10 +895,10 @@ bool lecroy_wr_set_trigger_level( int    channel,
     ssize_t to_send;
 
 
-    fsc2_assert( ( channel >= LECROY_WR_CH1 &&
-                   channel <= LECROY_WR_CH_MAX ) ||
-                 channel == LECROY_WR_EXT        ||
-                 channel == LECROY_WR_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WR_CH1
+                      && channel <= LECROY_WR_CH_MAX )
+                 || channel == LECROY_WR_EXT
+                 || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%1d:TRLV ", channel + 1 );
@@ -927,11 +929,11 @@ bool lecroy_wr_get_trigger_slope( int channel )
     long length = 30;
 
 
-    fsc2_assert( ( channel >= LECROY_WR_CH1 &&
-                   channel <= LECROY_WR_CH_MAX ) ||
-                 channel == LECROY_WR_LIN        ||
-                 channel == LECROY_WR_EXT        ||
-                 channel == LECROY_WR_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WR_CH1
+                      && channel <= LECROY_WR_CH_MAX )
+                 || channel == LECROY_WR_LIN
+                 || channel == LECROY_WR_EXT
+                 || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
         sprintf( buf, "C%1d:TRSL?", channel + 1 );
@@ -962,11 +964,11 @@ bool lecroy_wr_set_trigger_slope( int channel,
     ssize_t to_send;
 
 
-    fsc2_assert( ( channel >= LECROY_WR_CH1 &&
-                   channel <= LECROY_WR_CH_MAX ) ||
-                 channel == LECROY_WR_LIN        ||
-                 channel == LECROY_WR_EXT        ||
-                 channel == LECROY_WR_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WR_CH1
+                      && channel <= LECROY_WR_CH_MAX )
+                 || channel == LECROY_WR_LIN
+                 || channel == LECROY_WR_EXT
+                 || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%1d:TRSL ", channel + 1 );
@@ -999,10 +1001,10 @@ int lecroy_wr_get_trigger_coupling( int channel )
     int cpl = -1;
 
 
-    fsc2_assert( ( channel >= LECROY_WR_CH1 &&
-                   channel <= LECROY_WR_CH_MAX ) ||
-                 channel == LECROY_WR_EXT        ||
-                 channel == LECROY_WR_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WR_CH1
+                      && channel <= LECROY_WR_CH_MAX )
+                 || channel == LECROY_WR_EXT
+                 || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
         sprintf( buf, "C%1d:TRCP?\r", channel + 1 );
@@ -1053,10 +1055,10 @@ int lecroy_wr_set_trigger_coupling( int channel,
     ssize_t to_send;
 
 
-    fsc2_assert( ( channel >= LECROY_WR_CH1 &&
-                   channel <= LECROY_WR_CH_MAX ) ||
-                 channel == LECROY_WR_EXT        ||
-                 channel == LECROY_WR_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WR_CH1
+                      && channel <= LECROY_WR_CH_MAX )
+                 || channel == LECROY_WR_EXT
+                 || channel == LECROY_WR_EXT10 );
     fsc2_assert( cpl >= LECROY_WR_TRG_AC && cpl <= LECROY_WR_TRG_HF_REJ );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
@@ -1116,8 +1118,8 @@ int lecroy_wr_set_trigger_mode( int mode )
     ssize_t to_send;
 
 
-    fsc2_assert( mode >= LECROY_WR_TRG_MODE_AUTO &&
-                 mode <= LECROY_WR_TRG_MODE_STOP );
+    fsc2_assert(    mode >= LECROY_WR_TRG_MODE_AUTO
+                 && mode <= LECROY_WR_TRG_MODE_STOP );
 
     strcat( cmd, mode_str[ mode ] );
 
@@ -1241,8 +1243,8 @@ bool lecroy_wr_display( int ch,
 
     strcat( cmd, on_off ? "ON\r" : "OFF\r" );
 
-    if ( on_off &&
-         lecroy_wr.num_used_channels >= LECROY_WR_MAX_USED_CHANNELS )
+    if (    on_off
+         && lecroy_wr.num_used_channels >= LECROY_WR_MAX_USED_CHANNELS )
     {
         print( FATAL, "Can't switch on another trace, there are already as "
                "many as possible (%d) displayed.\n",
@@ -1366,8 +1368,8 @@ void lecroy_wr_start_acquisition( void )
        even SINGLE mode will do) */
 
     strcpy( cmd, "TRMD NORM\r" );
-    if ( ! do_averaging &&
-         lecroy_wr.trigger_mode == LECROY_WR_TRG_MODE_SINGLE )
+    if (    ! do_averaging
+         && lecroy_wr.trigger_mode == LECROY_WR_TRG_MODE_SINGLE )
         strcpy( cmd + 5, "SINGLE\r" );
     else if ( lecroy_wr.trigger_mode == LECROY_WR_TRG_MODE_AUTO )
         strcpy( cmd + 5, "AUTO\r" );
@@ -1456,8 +1458,8 @@ static void lecroy_wr_get_prep( int              ch,
        finished yet poll until the bit that tells that the acquisition for
        the requested channel is finished has become set */
 
-    if ( ! is_mem_ch &&
-         ! ( can_fetch & bit_to_test ) )
+    if (    ! is_mem_ch
+         && ! ( can_fetch & bit_to_test ) )
         while ( ! ( ( can_fetch |= lecroy_wr_get_inr( ) ) & bit_to_test ) )
         {
             stop_on_user_request( );
@@ -1686,8 +1688,8 @@ void lecroy_wr_copy_curve( long src,
     ssize_t to_send;
 
 
-    fsc2_assert( ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX ) ||
-                 ( src >= LECROY_WR_TA && src <= LECROY_WR_TD ) );
+    fsc2_assert(    ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX )
+                 || ( src >= LECROY_WR_TA && src <= LECROY_WR_TD ) );
     fsc2_assert( dest >= LECROY_WR_M1 && dest <= LECROY_WR_M4 );
 
 
@@ -1893,10 +1895,10 @@ static bool lecroy_wr_talk( const char * cmd,
     ssize_t to_send = strlen( cmd );
 
 
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
-                            TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send ||
-         ( *length = fsc2_serial_read( SERIAL_PORT, reply, *length,
-                                       TIMEOUT_FROM_LENGTH( *length ), SET ) )
+    if (    fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+                               TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send
+         || ( *length = fsc2_serial_read( SERIAL_PORT, reply, *length,
+                                        TIMEOUT_FROM_LENGTH( *length ), SET ) )
                                                                          <= 0 )
         lecroy_wr_comm_failure( );
     return OK;
@@ -1948,8 +1950,8 @@ static bool lecroy_wr_serial_open( void )
     }
     bits += SERIAL_STOP_BITS;
 
-    if ( SERIAL_HARDWARE_FLOW_CONTROL != 0 &&
-         SERIAL_HARDWARE_FLOW_CONTROL != 1 )
+    if (    SERIAL_HARDWARE_FLOW_CONTROL != 0
+         && SERIAL_HARDWARE_FLOW_CONTROL != 1 )
     {
         print( FATAL, "Invalid setting for flow control in configuration file "
                "for device.\n" );
@@ -2070,25 +2072,25 @@ static bool lecroy_wr_serial_open( void )
        sending of SRQ messages and splitting of lines. Check that communication
        works by asking for the status byte. */
 
-    if ( fsc2_serial_write( SERIAL_PORT, ECHO_OFF, strlen( ECHO_OFF ),
-                            TIMEOUT_FROM_STRING( ECHO_OFF ), SET )
-                                                       != strlen( ECHO_OFF ) ||
-         fsc2_serial_write( SERIAL_PORT, ECHO_OFF, strlen( XON_XOFF_OFF ),
-                            TIMEOUT_FROM_STRING( XON_XOFF_OFF ), SET )
-                                                   != strlen( XON_XOFF_OFF ) ||
-         fsc2_serial_write( SERIAL_PORT, REMOTE_ENABLE,
-                            strlen( REMOTE_ENABLE ),
-                            TIMEOUT_FROM_STRING( REMOTE_ENABLE ), SET )
-                                                  != strlen( REMOTE_ENABLE ) ||
-         fsc2_serial_write( SERIAL_PORT, LOCAL_LOCKOUT,
-                            strlen( LOCAL_LOCKOUT ),
-                            TIMEOUT_FROM_STRING( LOCAL_LOCKOUT ), SET )
-                                                  != strlen( LOCAL_LOCKOUT ) ||
-         fsc2_serial_write( SERIAL_PORT,
+    if (    fsc2_serial_write( SERIAL_PORT, ECHO_OFF, strlen( ECHO_OFF ),
+                               TIMEOUT_FROM_STRING( ECHO_OFF ), SET )
+                                                          != strlen( ECHO_OFF )
+         || fsc2_serial_write( SERIAL_PORT, ECHO_OFF, strlen( XON_XOFF_OFF ),
+                               TIMEOUT_FROM_STRING( XON_XOFF_OFF ), SET )
+                                                      != strlen( XON_XOFF_OFF )
+         || fsc2_serial_write( SERIAL_PORT, REMOTE_ENABLE,
+                               strlen( REMOTE_ENABLE ),
+                               TIMEOUT_FROM_STRING( REMOTE_ENABLE ), SET )
+                                                     != strlen( REMOTE_ENABLE )
+         || fsc2_serial_write( SERIAL_PORT, LOCAL_LOCKOUT,
+                               strlen( LOCAL_LOCKOUT ),
+                               TIMEOUT_FROM_STRING( LOCAL_LOCKOUT ), SET )
+                                                     != strlen( LOCAL_LOCKOUT )
+         || fsc2_serial_write( SERIAL_PORT,
                           "CORS EO,\"\n\r\",EI,\"\r\",SRQ,\"\",LS,OFF;*STB?\r",
-                            40, TIMEOUT_FROM_LENGTH( 40 ), SET ) != 40 ||
-         fsc2_serial_read( SERIAL_PORT, buf, 10,
-                           TIMEOUT_FROM_LENGTH( 10 ), SET ) <= 0 )
+                          40, TIMEOUT_FROM_LENGTH( 40 ), SET ) != 40
+         || fsc2_serial_read( SERIAL_PORT, buf, 10,
+                              TIMEOUT_FROM_LENGTH( 10 ), SET ) <= 0 )
     {
         lecroy_wr_finished( );
         return FAIL;

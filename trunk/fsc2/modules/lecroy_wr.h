@@ -354,22 +354,22 @@ bool lecroy_wr_set_memory_size( long /* mem_size */ );
 double lecroy_wr_get_sens( int /* channel */ );
 
 bool lecroy_wr_set_sens( int    /* channel */,
-                         double /* sens    */ );
+                         double /* sens    */  );
 
 double lecroy_wr_get_offset( int /* channel */ );
 
 bool lecroy_wr_set_offset( int    /* channel */,
-                           double /* offset  */ );
+                           double /* offset  */  );
 
 int lecroy_wr_get_coupling( int /* channel */ );
 
 bool lecroy_wr_set_coupling( int /* channel */,
-                             int /* type    */ );
+                             int /* type    */  );
 
 int lecroy_wr_get_bandwidth_limiter( int /* channel */ );
 
 bool lecroy_wr_set_bandwidth_limiter( int /* channel */,
-                                      int /* bwl     */ );
+                                      int /* bwl     */  );
 
 int lecroy_wr_get_trigger_source( void );
 
@@ -378,17 +378,17 @@ bool lecroy_wr_set_trigger_source( int /* channel */ );
 double lecroy_wr_get_trigger_level( int /* channel */ );
 
 bool lecroy_wr_set_trigger_level( int    /* channel */,
-                                  double /* level   */ );
+                                  double /* level   */  );
 
 bool lecroy_wr_get_trigger_slope( int /* channel */ );
 
 bool lecroy_wr_set_trigger_slope( int  /* channel */,
-                                  bool /* slope   */ );
+                                  bool /* slope   */  );
 
 int lecroy_wr_get_trigger_coupling( int /* channel */ );
 
 int lecroy_wr_set_trigger_coupling( int /* channel */,
-                                    int /* cpl     */ );
+                                    int /* cpl     */  );
 
 int lecroy_wr_get_trigger_mode( void );
 
@@ -401,7 +401,7 @@ bool lecroy_wr_set_trigger_delay( double /* delay */ );
 bool lecroy_wr_is_displayed( int /* channel */ );
 
 bool lecroy_wr_display( int /* channel */,
-                        int /* on_off  */ );
+                        int /* on_off  */  );
 
 long lecroy_wr_get_num_avg( int /* channel */ );
 
@@ -410,7 +410,7 @@ bool lecroy_wr_get_desc( int /* channel */ );
 void lecroy_wr_set_up_averaging( long /* channel */,
                                  long /* source  */,
                                  long /* num_avg */,
-                                 long /* rec_len */ );
+                                 long /* rec_len */  );
 
 void lecroy_wr_finished( void );
 
@@ -419,16 +419,16 @@ void lecroy_wr_start_acquisition( void );
 void lecroy_wr_get_curve( int        /* ch     */,
                           Window_T * /* w      */,
                           double **  /* array  */,
-                          long *     /* length */ );
+                          long *     /* length */  );
 
 double lecroy_wr_get_area( int        /* ch */,
-                           Window_T * /* w  */ );
+                           Window_T * /* w  */  );
 
 double lecroy_wr_get_amplitude( int        /* ch */,
-                                Window_T * /* w  */ );
+                                Window_T * /* w  */  );
 
 void lecroy_wr_copy_curve( long /* src  */,
-                           long /* dest */ );
+                           long /* dest */  );
 
 bool lecroy_wr_command( const char * /* cmd */ );
 
@@ -447,7 +447,7 @@ Window_T *lecroy_wr_get_window_by_number( long /* wid */ );
 void lecroy_wr_all_windows_check( void );
 
 void lecroy_wr_window_check( Window_T * /* w        */,
-                             bool       /* show_num */ );
+                             bool       /* show_num */  );
 
 long lecroy_wr_curve_length( void );
 
@@ -455,10 +455,10 @@ double lecroy_wr_time_per_point( void );
 
 long lecroy_wr_translate_channel( int  /* dir     */,
                                   long /* channel */,
-                                  bool /* flag    */ );
+                                  bool /* flag    */  );
 
 void lecroy_wr_store_state( LECROY_WR_T * /* dest */,
-                            LECROY_WR_T * /* src  */ );
+                            LECROY_WR_T * /* src  */  );
 
 
 void lecroy_wr_numpoints_prep( void );
@@ -468,6 +468,7 @@ void lecroy_wr_tbas_prep( void );
 void lecroy_wr_hori_res_prep( void );
 
 void lecroy_wr_clean_up( void );
+
 
 /*
  * Local variables:

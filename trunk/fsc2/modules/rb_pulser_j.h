@@ -278,7 +278,7 @@ void rb_pulser_j_cleanup( void );
 bool rb_pulser_j_store_timebase( double /* timebase */ );
 
 bool rb_pulser_j_set_function_delay( int    /* function */,
-                                     double /* delay    */ );
+                                     double /* delay    */  );
 
 bool rb_pulser_j_set_trigger_mode( int /* mode */ );
 
@@ -292,46 +292,46 @@ bool rb_pulser_j_set_repeat_time( double /* rep_time */ );
 bool rb_pulser_j_new_pulse( long /* pnum */ );
 
 bool rb_pulser_j_set_pulse_function( long /* pnum     */,
-                                     int  /* function */ );
+                                     int  /* function */  );
 
 bool rb_pulser_j_set_pulse_position( long   /* pnum   */,
-                                     double /* p_time */ );
+                                     double /* p_time */  );
 
 bool rb_pulser_j_set_pulse_length( long   /* pnum   */,
-                                   double /* p_time */ );
+                                   double /* p_time */  );
 
 bool rb_pulser_j_set_pulse_position_change( long   /* pnum   */,
-                                            double /* p_time */ );
+                                            double /* p_time */  );
 
 bool rb_pulser_j_set_pulse_length_change( long   /* pnum   */,
-                                          double /* p_time */ );
+                                          double /* p_time */  );
 
 bool rb_pulser_j_get_pulse_function( long  /* pnum     */,
-                                     int * /* function */ );
+                                     int * /* function */  );
 
 bool rb_pulser_j_get_pulse_position( long     /* pnum   */,
-                                     double * /* p_time */ );
+                                     double * /* p_time */  );
 
 bool rb_pulser_j_get_pulse_length( long     /* pnum   */,
-                                   double * /* p_time */ );
+                                   double * /* p_time */  );
 
 bool rb_pulser_j_get_pulse_position_change( long     /* pnum   */,
-                                            double * /* p_time */ );
+                                            double * /* p_time */  );
 
 bool rb_pulser_j_get_pulse_length_change( long     /* pnum   */,
-                                          double * /* p_time */ );
+                                          double * /* p_time */  );
 
 bool rb_pulser_j_change_pulse_position( long   /* pnum   */,
-                                        double /* p_time */ );
+                                        double /* p_time */  );
 
 bool rb_pulser_j_change_pulse_length( long   /* pnum   */,
-                                      double /* p_time */ );
+                                      double /* p_time */  );
 
 bool rb_pulser_j_change_pulse_position_change( long   /* pnum   */,
-                                               double /* p_time */ );
+                                               double /* p_time */  );
 
 bool rb_pulser_j_change_pulse_length_change( long   /* pnum   */,
-                                             double /* p_time */ );
+                                             double /* p_time */  );
 
 
 /* Functions defined in rb_pulser_j_init.c */
@@ -351,7 +351,7 @@ void rb_pulser_j_full_reset( void );
 /* Functions defined in rb_pulser_j_util.c */
 
 int rb_pulser_j_start_compare( const void * /* A */,
-                               const void * /* B */ );
+                               const void * /* B */  );
 
 Ticks rb_pulser_j_double2ticks( double /* p_time */ );
 
@@ -384,10 +384,10 @@ void rb_pulser_j_exit( void );
 void rb_pulser_j_run( bool /* state */ );
 
 void rb_pulser_j_delay_card_state( int  /* handle */,
-                                   bool /* state  */ );
+                                   bool /* state  */  );
 
 void rb_pulser_j_delay_card_delay( int           /* handle */,
-                                   unsigned long /* delay  */ );
+                                   unsigned long /* delay  */  );
 
 
 #endif /* ! RB_PULSER_J_HEADER */

@@ -73,8 +73,8 @@ bool tegam2714a_p_assign_channel_to_function( int  function,
         THROW( EXCEPTION );
     }
 
-    if ( function == PULSER_CHANNEL_PHASE_1 ||
-         function == PULSER_CHANNEL_PHASE_2 )
+    if (    function == PULSER_CHANNEL_PHASE_1
+         || function == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "PHASE functions can't be used with this pulser.\n" );
         THROW( EXCEPTION );
@@ -224,8 +224,8 @@ bool tegam2714a_p_set_trigger_mode( int mode )
 
 bool tegam2714a_p_set_max_seq_len( double seq_len )
 {
-    if ( tegam2714a_p.is_max_seq_len &&
-         tegam2714a_p.max_seq_len != tegam2714a_p_double2ticks( seq_len ) )
+    if (    tegam2714a_p.is_max_seq_len
+         && tegam2714a_p.max_seq_len != tegam2714a_p_double2ticks( seq_len ) )
     {
         print( FATAL, "A different minimum pattern length of %s has already "
                "been set.\n",

@@ -615,8 +615,8 @@ Var_T *daq_dac_parameter( Var_T * v )
 
 static int hjs_daadc_da_volts_to_val( double volts )
 {
-    fsc2_assert( volts >= MIN_OUT_VOLTS &&
-                 volts < hjs_daadc.max_volts * 1.0001 );
+    fsc2_assert(    volts >= MIN_OUT_VOLTS
+                 && volts < hjs_daadc.max_volts * 1.0001 );
 
     return irnd( volts / hjs_daadc.max_volts * 4095.0 );
 }
@@ -708,8 +708,8 @@ static int hjs_daadc_in_out( int out )
        cosmetics ;-). The data from the ADC should have arrived within
        20 ms. */
 
-    if ( fsc2_serial_write( SERIAL_PORT, out_bytes, 4, 0, UNSET ) != 4 ||
-         fsc2_serial_read( SERIAL_PORT, in_bytes, 4, 20000, UNSET ) != 4 )
+    if (    fsc2_serial_write( SERIAL_PORT, out_bytes, 4, 0, UNSET ) != 4
+         || fsc2_serial_read( SERIAL_PORT, in_bytes, 4, 20000, UNSET ) != 4 )
         hjs_daadc_comm_failure( );
 
     /* The results of the conversion by the ADC is stored in the second and

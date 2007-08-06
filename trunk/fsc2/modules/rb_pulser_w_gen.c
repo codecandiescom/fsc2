@@ -124,8 +124,8 @@ bool rb_pulser_w_set_function_delay( int    function,
 
     if ( delay < 0.0 )
     {
-        if ( rb_pulser_w.is_trig_in_mode &&
-             rb_pulser_w.trig_in_mode == EXTERNAL )
+        if (    rb_pulser_w.is_trig_in_mode
+             && rb_pulser_w.trig_in_mode == EXTERNAL )
         {
             print( FATAL, "Negative delays are not possible in EXTERNAL "
                    "trigger mode.\n" );
@@ -209,9 +209,9 @@ bool rb_pulser_w_set_trig_in_slope( int slope )
         return FAIL;
     }
 
-    if ( rb_pulser_w.is_neg_delay &&
-         ! ( rb_pulser_w.is_trig_in_mode &&
-             rb_pulser_w.trig_in_mode == INTERNAL ) )
+    if (    rb_pulser_w.is_neg_delay
+         && ! (    rb_pulser_w.is_trig_in_mode
+                && rb_pulser_w.trig_in_mode == INTERNAL ) )
     {
         print( FATAL, "Setting a trigger slope (requiring EXTERNAL "
                "trigger mode) and using negative delays for functions is "

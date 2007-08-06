@@ -170,8 +170,8 @@ int me6000_exp_hook( void )
 
     for ( i = 0; i < me6000.num_dacs; i++ )
     {
-        if ( me6000.dac[ i ].is_used &&
-             me6x00_voltage( BOARD_NUMBER, i, me6000.dac[ i ].volts ) < 0 )
+        if (    me6000.dac[ i ].is_used
+             && me6x00_voltage( BOARD_NUMBER, i, me6000.dac[ i ].volts ) < 0 )
         {
             me6x00_close( BOARD_NUMBER );
             lower_permissions( );
@@ -219,8 +219,8 @@ int me6000_end_of_exp_hook( void )
     lower_permissions( );
 
     for ( i = 0; i < MAX_NUMBER_OF_DACS; i++ )
-        if ( me6000.dac[ i ].reserved_by &&
-             me6000.dac[ i ].reserved_by !=
+        if (    me6000.dac[ i ].reserved_by
+             && me6000.dac[ i ].reserved_by !=
                                            me6000_stored.dac[ i ].reserved_by )
             me6000.dac[ i ].reserved_by =
                                   CHAR_P T_free( me6000.dac[ i ].reserved_by );

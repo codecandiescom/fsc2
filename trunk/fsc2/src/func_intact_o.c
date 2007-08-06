@@ -236,8 +236,9 @@ Var_T *f_ocreate( Var_T * var )
         TRY
         {
             vars_check( v, STR_VAR );
-            if ( type == INT_INPUT || type == INT_OUTPUT ||
-                 type == STRING_OUTPUT )
+            if (    type == INT_INPUT
+                 || type == INT_OUTPUT
+                 || type == STRING_OUTPUT )
                 print( WARN, "Can't set format string for integer or "
                        "string data.\n" );
             else
@@ -383,8 +384,9 @@ static Var_T *f_ocreate_child( Var_T *        v,
             if ( v->next->next != NULL )
             {
                 vars_check( v->next->next, STR_VAR );
-                if ( type == INT_INPUT || type == INT_OUTPUT ||
-                     type == STRING_OUTPUT )
+                if (    type == INT_INPUT
+                     || type == INT_OUTPUT
+                     || type == STRING_OUTPUT )
                     print( WARN, "Can't set format string for integer "
                            "data.\n" );
                 form_str = v->next->next->val.sptr;
@@ -542,9 +544,9 @@ Var_T *f_odelete( Var_T * v )
 
     /* The child process is already done here, and in a test run we're also */
 
-    if ( Fsc2_Internals.I_am == CHILD ||
-         Fsc2_Internals.mode == TEST  ||
-         ! Toolbox )
+    if (    Fsc2_Internals.I_am == CHILD
+         || Fsc2_Internals.mode == TEST
+         || ! Toolbox )
         return vars_push( INT_VAR, 1L );
 
     /* Redraw the form without the deleted objects */

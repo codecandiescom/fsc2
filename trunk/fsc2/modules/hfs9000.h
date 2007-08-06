@@ -107,11 +107,11 @@
 /* A pulse needs to be updated if either its activity state changed, its
    position changed or its length changed */
 
-#define NEEDS_UPDATE( p ) ( ( ( p )->is_active ^ ( p )->was_active ) || \
-                            ( ( p )->is_old_pos &&                      \
-                              ( p )->old_pos != ( p )->pos )         || \
-                            ( ( p )->is_old_len &&                      \
-                              ( p )->old_len != ( p )->len ) )
+#define NEEDS_UPDATE( p ) (    ( ( p )->is_active ^ ( p )->was_active )  \
+                            || (    ( p )->is_old_pos                    \
+                                 && ( p )->old_pos != ( p )->pos )       \
+                            || (    ( p )->is_old_len                    \
+                                 && ( p )->old_len != ( p )->len ) )
 
 
 /* typedefs of structures needed in the module */
@@ -289,64 +289,78 @@ Var_T *pulser_command(                Var_T * /* v */ );
 
 /* Here follow the functions from hfs9000_gen.c */
 
-bool hfs9000_store_timebase( double timebase );
-bool hfs9000_assign_channel_to_function( int function, long channel );
-bool hfs9000_invert_function( int function );
-bool hfs9000_set_function_delay( int function, double delay );
-bool hfs9000_set_function_high_level( int function, double voltage );
-bool hfs9000_set_function_low_level( int function, double voltage );
-bool hfs9000_set_trigger_mode( int mode );
-bool hfs9000_set_trig_in_level( double voltage );
-bool hfs9000_set_trig_in_slope( int slope );
-bool hfs9000_set_max_seq_len( double seq_len );
+bool hfs9000_store_timebase( double /* timebase */ );
+
+bool hfs9000_assign_channel_to_function( int  /* function */,
+                                         long /* channel */  );
+
+bool hfs9000_invert_function( int /* function */ );
+
+bool hfs9000_set_function_delay( int    /* function */,
+                                 double /* delay    */  );
+
+bool hfs9000_set_function_high_level( int    /* function */,
+                                      double /* voltage  */  );
+
+bool hfs9000_set_function_low_level( int    /* function */,
+                                     double /* voltage  */  );
+
+bool hfs9000_set_trigger_mode( int /* mode */ );
+
+bool hfs9000_set_trig_in_level( double /* voltage */ );
+
+bool hfs9000_set_trig_in_slope( int /* slope */ );
+
+bool hfs9000_set_max_seq_len( double /* seq_len */ );
+
 bool hfs9000_keep_all( void );
 
 
 /* These are the functions from hfs9000_pulse.c */
 
-bool hfs9000_new_pulse( long pnum );
+bool hfs9000_new_pulse( long /* pnum */ );
 
 bool hfs9000_set_pulse_function( long /* pnum     */,
-                                 int  /* function */ );
+                                 int  /* function */  );
 
 bool hfs9000_set_pulse_position( long   /* pnum   */,
-                                 double /* p_time */ );
+                                 double /* p_time */  );
 
 bool hfs9000_set_pulse_length( long   /* pnum   */,
-                               double /* p_time */ );
+                               double /* p_time */  );
 
 bool hfs9000_set_pulse_position_change( long   /* pnum   */,
-                                        double /* p_time */ );
+                                        double /* p_time */  );
 
 bool hfs9000_set_pulse_length_change( long   /* pnum   */,
-                                      double /* p_time */ );
+                                      double /* p_time */  );
 
 bool hfs9000_get_pulse_function( long  /* pnum     */,
-                                 int * /* function */ );
+                                 int * /* function */  );
 
 bool hfs9000_get_pulse_position( long     /* pnum   */,
-                                 double * /* p_time */ );
+                                 double * /* p_time */  );
 
 bool hfs9000_get_pulse_length( long     /* pnum   */,
-                               double * /* p_time */ );
+                               double * /* p_time */  );
 
 bool hfs9000_get_pulse_position_change( long     /* pnum   */,
-                                        double * /* p_time */ );
+                                        double * /* p_time */  );
 
 bool hfs9000_get_pulse_length_change( long     /* pnum   */,
-                                      double * /* p_time */ );
+                                      double * /* p_time */  );
 
 bool hfs9000_change_pulse_position( long   /* pnum   */,
-                                    double /* p_time */ );
+                                    double /* p_time */  );
 
 bool hfs9000_change_pulse_length( long   /* pnum   */,
-                                  double /* tp_ime */ );
+                                  double /* tp_ime */  );
 
 bool hfs9000_change_pulse_position_change( long   /* pnum   */,
-                                           double /* p_time */ );
+                                           double /* p_time */  );
 
 bool hfs9000_change_pulse_length_change( long   /* pnum   */,
-                                         double /* p_time */ );
+                                         double /* p_time */  );
 
 
 /* Functions from hfs9000_init.c */
@@ -361,7 +375,7 @@ Ticks hfs9000_double2ticks( double /* p_time */ );
 double hfs9000_ticks2double( Ticks /* ticks */ );
 
 void hfs9000_check_pod_level_diff( double /* high */,
-                                   double /* low  */ );
+                                   double /* low  */  );
 
 Pulse_T *hfs9000_get_pulse( long /* pnum */ );
 
@@ -370,19 +384,19 @@ const char *hfs9000_ptime( double /* p_time */ );
 const char *hfs9000_pticks( Ticks /* ticks */ );
 
 int hfs9000_start_compare( const void * /* A */,
-                           const void * /* B */ );
+                           const void * /* B */  );
 
 Ticks hfs9000_get_max_seq_len( void );
 
 void hfs9000_set( char * /* arena  */,
                   Ticks  /* start  */,
                   Ticks  /* len    */,
-                  Ticks  /* offset */ );
+                  Ticks  /* offset */  );
 
 int hfs9000_diff( char *  /* old_p  */,
                   char *  /* new_p  */,
                   Ticks * /* start  */,
-                  Ticks * /* length */ );
+                  Ticks * /* length */  );
 
 void hfs9000_dump_channels( FILE * /* fp */ );
 
@@ -405,7 +419,7 @@ bool hfs9000_init( const char * /* name */ );
 bool hfs9000_set_constant( int   /* channel */,
                            Ticks /* start   */,
                            Ticks /* length  */,
-                           int   /* state   */ );
+                           int   /* state   */  );
 
 bool hfs9000_set_trig_out_pulse( void );
 
@@ -414,7 +428,7 @@ bool hfs9000_run( bool /* flag */ );
 bool hfs9000_get_channel_state( int /* channel */ );
 
 bool hfs9000_set_channel_state( int  /* channel */,
-                                bool /* flag    */ );
+                                bool /* flag    */  );
 
 bool hfs9000_command( const char * /* cmd */ );
 

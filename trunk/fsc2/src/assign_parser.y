@@ -697,8 +697,8 @@ static void ass_func( int function )
        phase switches. In this case Cur_PHS must be set to the number of
        the PHASE_SETUP (i.e. 0 or 1 for the first or second PHASE_SETUP) */
 
-    if ( ! Pulser_Struct[ Cur_Pulser ].needs_phase_pulses &&
-         Cur_PHS != -1 )
+    if (    ! Pulser_Struct[ Cur_Pulser ].needs_phase_pulses
+         && Cur_PHS != -1 )
         p_phase_ref( Cur_PHS, function );
     else
     {

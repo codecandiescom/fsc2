@@ -125,10 +125,10 @@ static void press_handler_2d( FL_OBJECT * obj,
        if the pressed buttons have lost there meaning, there's no curve or
        the curve has no scaling set yet */
 
-    if ( ( c != &G_2d.canvas && G.raw_button_state != 0 ) ||
-         ( G.button_state == 0 && G.raw_button_state != 0 ) ||
-         G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    ( c != &G_2d.canvas && G.raw_button_state != 0 )
+         || ( G.button_state == 0 && G.raw_button_state != 0 )
+         || G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
     {
         G.raw_button_state |= 1 << ( ev->xbutton.button - 1 );
         return;
@@ -138,8 +138,9 @@ static void press_handler_2d( FL_OBJECT * obj,
 
     /* Middle and right or all three buttons at once don't mean a thing */
 
-    if ( G.raw_button_state >= 6 &&
-         G.raw_button_state != 8 && G.raw_button_state != 16 )
+    if (    G.raw_button_state >= 6
+         && G.raw_button_state != 8
+         && G.raw_button_state != 16 )
         return;
 
     G.button_state |= ( 1 << ( ev->xbutton.button - 1 ) );
@@ -323,8 +324,8 @@ static void release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
     /* If the released button didn't has a meaning just clear it from the
        button state pattern and then forget about it */
 
-    if ( ! ( ( 1 << ( ev->xbutton.button - 1 ) ) & G.button_state ) ||
-         G_2d.active_curve == -1 )
+    if (    ! ( ( 1 << ( ev->xbutton.button - 1 ) ) & G.button_state )
+         || G_2d.active_curve == -1 )
     {
         G.raw_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
         return;
@@ -362,8 +363,8 @@ static void release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
                         if ( ( scale_changed = change_x_range_2d( c ) ) )
                             redraw_canvas_2d( &G_2d.x_axis );
                     }
-                    else if ( G_2d.cut_select == CUT_SELECT_X &&
-                              keymask & ShiftMask )
+                    else if (    G_2d.cut_select == CUT_SELECT_X
+                              && keymask & ShiftMask )
                         cut_show( X, lrnd(
                           ( c->box_x + c->box_w )
                           / G_2d.curve_2d[ G_2d.active_curve ]->s2d[ X ]
@@ -376,8 +377,8 @@ static void release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
                         if ( ( scale_changed = change_y_range_2d( c ) ) )
                             redraw_canvas_2d( &G_2d.y_axis );
                     }
-                    else if ( G_2d.cut_select == CUT_SELECT_Y &&
-                              keymask & ShiftMask )
+                    else if (    G_2d.cut_select == CUT_SELECT_Y
+                              && keymask & ShiftMask )
                         cut_show( Y, lrnd(
                            ( G_2d.y_axis.h - 1.0 - ( c->box_y + c->box_h ) )
                            / G_2d.curve_2d[ G_2d.active_curve]->s2d[ Y ]
@@ -445,21 +446,21 @@ static void release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
             {
                 G_2d.x_axis.ppos[ X ] = G.start[ X ] - G_2d.x_axis.w / 10;
 
-                if ( G_2d.active_curve != -1 &&
-                     G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set &&
-                    ( scale_changed =
-                           shift_XPoints_of_curve_2d( c,
+                if (    G_2d.active_curve != -1
+                     && G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set
+                     && ( scale_changed =
+                              shift_XPoints_of_curve_2d( c,
                                        G_2d.curve_2d[ G_2d.active_curve ] ) ) )
-                        redraw_canvas_2d( &G_2d.x_axis );
+                    redraw_canvas_2d( &G_2d.x_axis );
             }
 
             if ( G.drag_canvas == DRAG_2D_Y )
             {
                 G_2d.y_axis.ppos[ Y ] = G.start[ Y ] + G_2d.y_axis.h / 10;
 
-                if ( G_2d.active_curve != -1 &&
-                     G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set &&
-                     ( scale_changed = shift_XPoints_of_curve_2d( c,
+                if (    G_2d.active_curve != -1
+                     && G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set
+                     && ( scale_changed = shift_XPoints_of_curve_2d( c,
                                        G_2d.curve_2d[ G_2d.active_curve ] ) ) )
                     redraw_canvas_2d( &G_2d.y_axis );
             }
@@ -468,9 +469,9 @@ static void release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
             {
                 G_2d.z_axis.ppos[ Y ] = G.start[ Y ] + G_2d.z_axis.h / 10;
 
-                if ( G_2d.active_curve != -1 &&
-                     G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set &&
-                     ( scale_changed = shift_XPoints_of_curve_2d( c,
+                if (    G_2d.active_curve != -1
+                     && G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set
+                     && ( scale_changed = shift_XPoints_of_curve_2d( c,
                                        G_2d.curve_2d[ G_2d.active_curve ] ) ) )
                     redraw_canvas_2d( &G_2d.z_axis );
             }
@@ -481,9 +482,9 @@ static void release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
             {
                 G_2d.x_axis.ppos[ X ] = G.start[ X ] + G_2d.x_axis.w / 10;
 
-                if ( G_2d.active_curve != -1 &&
-                     G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set &&
-                     ( scale_changed = shift_XPoints_of_curve_2d( c,
+                if (    G_2d.active_curve != -1
+                     && G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set
+                     && ( scale_changed = shift_XPoints_of_curve_2d( c,
                                        G_2d.curve_2d[ G_2d.active_curve ] ) ) )
                     redraw_canvas_2d( &G_2d.x_axis );
             }
@@ -492,9 +493,9 @@ static void release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
             {
                 G_2d.y_axis.ppos[ Y ] = G.start[ Y ] - G_2d.y_axis.h / 10;
 
-                if ( G_2d.active_curve != -1 &&
-                     G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set &&
-                     ( scale_changed = shift_XPoints_of_curve_2d( c,
+                if (    G_2d.active_curve != -1
+                     && G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set
+                     && ( scale_changed = shift_XPoints_of_curve_2d( c,
                                        G_2d.curve_2d[ G_2d.active_curve ] ) ) )
                 redraw_canvas_2d( &G_2d.y_axis );
             }
@@ -503,9 +504,9 @@ static void release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
             {
                 G_2d.z_axis.ppos[ Y ] = G.start[ Y ] - G_2d.z_axis.h / 10;
 
-                if ( G_2d.active_curve != -1 &&
-                     G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set &&
-                     ( scale_changed = shift_XPoints_of_curve_2d( c,
+                if (    G_2d.active_curve != -1
+                     && G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set
+                     && ( scale_changed = shift_XPoints_of_curve_2d( c,
                                        G_2d.curve_2d[ G_2d.active_curve ] ) ) )
                     redraw_canvas_2d( &G_2d.z_axis );
             }
@@ -569,8 +570,8 @@ static void motion_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
         /* Stop looking ahead if the next one isn't a motion event or is for
            a different window */
 
-        if ( new_ev.type != MotionNotify ||
-             new_ev.xmotion.window != ev->xmotion.window )
+        if (    new_ev.type != MotionNotify
+             || new_ev.xmotion.window != ev->xmotion.window )
             break;
 
         fl_XNextEvent( ev );                  /* get the next event */
@@ -585,9 +586,9 @@ static void motion_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
             /* If we were in cut select mode and the shift button has
                become released get out of this mode */
 
-            if ( ( G_2d.cut_select == CUT_SELECT_X ||
-                   G_2d.cut_select == CUT_SELECT_Y ) &&
-                 ! ( keymask & ShiftMask ) )
+            if (    (    G_2d.cut_select == CUT_SELECT_X
+                      || G_2d.cut_select == CUT_SELECT_Y )
+                 && ! ( keymask & ShiftMask ) )
             {
                 G_2d.cut_select = CUT_SELECT_BREAK;
                 fl_reset_cursor( window );
@@ -633,8 +634,8 @@ static void motion_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
             break;
 
         case 2 :                               /* middle button */
-            if ( G_2d.active_curve != -1 &&
-                 G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+            if (    G_2d.active_curve != -1
+                 && G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
                 scale_changed = shift_XPoints_of_curve_2d( c,
                                           G_2d.curve_2d[ G_2d.active_curve ] );
 
@@ -702,8 +703,9 @@ static bool change_x_range_2d( Canvas_T * c )
     double x1, x2;
 
 
-    if ( abs( G.start[ X ] - c->ppos[ X ] ) <= 4 || G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    abs( G.start[ X ] - c->ppos[ X ] ) <= 4
+         || G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         return UNSET;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
@@ -732,8 +734,9 @@ static bool change_y_range_2d( Canvas_T * c )
     double new_s2d_y;
 
 
-    if ( abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4 || G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4
+         || G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         return UNSET;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
@@ -859,8 +862,8 @@ static bool change_xy_range_2d( Canvas_T * c )
     double cx1, cx2, cy1, cy2;
 
 
-    if ( G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         return UNSET;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
@@ -911,8 +914,9 @@ static bool change_z_range_2d( Canvas_T * c )
     double z1, z2;
 
 
-    if ( abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4 || G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4
+         || G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         return UNSET;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
@@ -941,8 +945,9 @@ static bool zoom_x_2d( Canvas_T * c )
     double px;
 
 
-    if ( abs( G.start[ X ] - c->ppos[ X ] ) <= 4 || G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    abs( G.start[ X ] - c->ppos[ X ] ) <= 4
+         || G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         return UNSET;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
@@ -983,8 +988,9 @@ static bool zoom_y_2d( Canvas_T * c )
     double py;
 
 
-    if ( abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4 || G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4
+         || G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         return UNSET;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
@@ -1031,8 +1037,8 @@ static bool zoom_xy_2d( Canvas_T * c )
     double px, py;
 
 
-    if ( G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         return UNSET;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
@@ -1098,8 +1104,9 @@ static bool zoom_z_2d( Canvas_T * c )
     double factor;
 
 
-    if ( abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4 || G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    abs( G.start[ Y ] - c->ppos[ Y ] ) <= 4
+         || G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         return UNSET;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];
@@ -1441,9 +1448,9 @@ void redraw_canvas_2d( Canvas_T * c )
         /* First draw the active curve (unless the magnification isn't too
            large) */
 
-        if ( G_2d.active_curve != -1 &&
-             G_2d.curve_2d[ G_2d.active_curve ]->count > 1 &&
-             G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+        if (    G_2d.active_curve != -1
+             && G_2d.curve_2d[ G_2d.active_curve ]->count > 1
+             && G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         {
             cv = G_2d.curve_2d[ G_2d.active_curve ];
 
@@ -1477,16 +1484,16 @@ void redraw_canvas_2d( Canvas_T * c )
                     points[ 0 ].x =   s15rnd( cv->s2d[ X ] 
                                               * ( m->x_pos + cv->shift[ X ] ) )
                                     - dw;
-                    if ( points[ 0 ].x + 2 * dw < 0 ||
-                         points[ 0 ].x > ( int ) c->w )
-                         continue;
+                    if (    points[ 0 ].x + 2 * dw < 0
+                         || points[ 0 ].x > ( int ) c->w )
+                        continue;
 
                     points[ 0 ].y =   i2s15( G_2d.canvas.h ) - 1
                                     - s15rnd( cv->s2d[ Y ] 
                                               * ( m->y_pos + cv->shift[ Y ] ) )
                                     - dh;
-                    if ( points[ 1 ].y + 2 * dh < 0 ||
-                         points[ 0 ].y > ( short int ) c->h )
+                    if (    points[ 1 ].y + 2 * dh < 0
+                         || points[ 0 ].y > ( short int ) c->h )
                         continue;
 
                     XDrawLines( G.d, c->pm, m->gc, points, 5,
@@ -1561,8 +1568,8 @@ static void draw_2d_points( Canvas_T *   c,
     if ( cv->needs_recalc )
         recalc_XPoints_of_curve_2d( cv );
 
-    if ( G_2d.curve_2d[ G_2d.active_curve ]->w > 2 * c->w ||
-         G_2d.curve_2d[ G_2d.active_curve ]->h > 2 * c->h )
+    if (    G_2d.curve_2d[ G_2d.active_curve ]->w > 2 * c->w
+         || G_2d.curve_2d[ G_2d.active_curve ]->h > 2 * c->h )
         return;
 
     if ( cv->w == 1 && cv->h == 1 )
@@ -1576,8 +1583,10 @@ static void draw_2d_points( Canvas_T *   c,
 
             /* Skip points that are not within the shown part of the canvas */
 
-            if ( xp->x >= ( short int ) c->w || xp->y >= ( short int ) c->h ||
-                 xp->x < 0 || xp->y < 0 )
+            if (    xp->x >= ( short int ) c->w
+                 || xp->y >= ( short int ) c->h
+                 || xp->x < 0
+                 || xp->y < 0 )
                 continue;
 
             XDrawPoint( G.d, c->pm,
@@ -1600,8 +1609,10 @@ static void draw_2d_points( Canvas_T *   c,
 
             /* Skip points that are not within the shown part of the canvas */
 
-            if ( xp->x >= ( short int ) c->w || xp->y >= ( short int ) c->h ||
-                 xp->x + cv->w < 1 || xp->y + cv->h < 1 )
+            if (    xp->x >= ( short int ) c->w
+                 || xp->y >= ( short int ) c->h
+                 || xp->x + cv->w < 1
+                 || xp->y + cv->h < 1 )
                 continue;
 
             p[ 0 ].x = xp->x;
@@ -1624,8 +1635,10 @@ static void draw_2d_points( Canvas_T *   c,
 
             /* Skip points that are not within the shown part of the canvas */
 
-            if ( xp->x >= ( short int ) c->w || xp->y >= ( short int ) c->h ||
-                 xp->x + cv->w < 1 || xp->y + cv->h < 1 )
+            if (    xp->x >= ( short int ) c->w
+                 || xp->y >= ( short int ) c->h
+                 || xp->x + cv->w < 1
+                 || xp->y + cv->h < 1 )
                 continue;
 
             XFillRectangle( G.d, c->pm,
@@ -1728,8 +1741,9 @@ void repaint_canvas_2d( Canvas_T * c )
 
     if ( c == &G_2d.canvas )
     {
-        if ( G.coord_display == 2 && G_2d.active_curve != -1 &&
-             G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+        if (    G.coord_display == 2
+             && G_2d.active_curve != -1
+             && G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         {
             cv = G_2d.curve_2d[ G_2d.active_curve ];
 
@@ -1738,9 +1752,9 @@ void repaint_canvas_2d( Canvas_T * c )
             y_pos = ( G_2d.canvas.h - 1.0 - c->ppos[ Y ] + cv->h / 2 )
                     / cv->s2d[ Y ] - cv->shift[ Y ];
 
-            if ( x_pos < 0 || floor( x_pos ) >= G_2d.nx ||
-                 y_pos < 0 || floor( y_pos ) >= G_2d.ny ||
-                 ! cv->is_scale_set )
+            if (    x_pos < 0 || floor( x_pos ) >= G_2d.nx
+                 || y_pos < 0 || floor( y_pos ) >= G_2d.ny
+                 || ! cv->is_scale_set )
                 a_index = -1;
             else
             {
@@ -1784,8 +1798,8 @@ void repaint_canvas_2d( Canvas_T * c )
 
         if ( G.dist_display == 2 )            /* left and right mouse button */
         {
-            if ( G_2d.active_curve != -1 &&
-                 G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+            if (    G_2d.active_curve != -1
+                 && G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
             {
                 cv = G_2d.curve_2d[ G_2d.active_curve ];
 
@@ -1794,9 +1808,9 @@ void repaint_canvas_2d( Canvas_T * c )
                 y_pos = ( G_2d.canvas.h - 1.0 - c->ppos[ Y ] + cv->h / 2 )
                         / cv->s2d[ Y ] - cv->shift[ Y ];
 
-                if ( x_pos < 0 || floor( x_pos ) >= G_2d.nx ||
-                     y_pos < 0 || floor( y_pos ) >= G_2d.ny ||
-                     ! cv->is_scale_set )
+                if (    x_pos < 0 || floor( x_pos ) >= G_2d.nx
+                     || y_pos < 0 || floor( y_pos ) >= G_2d.ny
+                     || ! cv->is_scale_set )
                     index_1 = -1;
                 else
                 {
@@ -1815,9 +1829,9 @@ void repaint_canvas_2d( Canvas_T * c )
                 y_pos = ( G_2d.canvas.h - 1.0 - G.start[ Y ] + cv->h / 2 )
                         / cv->s2d[ Y ] - cv->shift[ Y ];
 
-                if ( x_pos < 0 || floor( x_pos ) >= G_2d.nx ||
-                     y_pos < 0 || floor( y_pos ) >= G_2d.ny ||
-                     ! cv->is_scale_set )
+                if (    x_pos < 0 || floor( x_pos ) >= G_2d.nx
+                     || y_pos < 0 || floor( y_pos ) >= G_2d.ny
+                     || ! cv->is_scale_set )
                     index_2 = -1;
                 else
                 {
@@ -1884,10 +1898,10 @@ int get_mouse_pos_2d( double *       pa,
        no scaling has been set for the active curve or the mouse isn't within
        the canvas */
 
-    if ( G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set ||
-         ppos[ X ] < 0 || ppos[ X ] > ( int ) G_2d.canvas.w - 1 ||
-         ppos[ Y ] < 0 || ppos[ Y ] > ( int ) G_2d.canvas.h - 1 )
+    if (    G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set
+         || ppos[ X ] < 0 || ppos[ X ] > ( int ) G_2d.canvas.w - 1
+         || ppos[ Y ] < 0 || ppos[ Y ] > ( int ) G_2d.canvas.h - 1 )
         return 0;
 
     cv = G_2d.curve_2d[ G_2d.active_curve ];

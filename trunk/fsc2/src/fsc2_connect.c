@@ -283,8 +283,8 @@ void start_fsc2( char * pname,
         av[ ac++ ] = flags[ 3 ];
     else if ( ! strcmp( prog_name, "fsc2_iconic_start" ) )
         av[ ac++ ] = flags[ 4 ];
-    else if ( strcmp( prog_name, "fsc2_load" ) &&
-              strcmp( prog_name, "fsc2_connect" ) )
+    else if (    strcmp( prog_name, "fsc2_load" )
+              && strcmp( prog_name, "fsc2_connect" ) )
     {
         unlink( fname );
         exit( -1 );
@@ -386,8 +386,8 @@ void contact_fsc2( int    sock_fd,
         line[ 0 ] = 'T';
     if ( ! strcmp( prog_name, "fsc2_iconic_start" ) )
         line[ 0 ] = 'I';
-    if ( ! strcmp( prog_name, "fsc2_load" ) ||
-         ! strcmp( prog_name, "fsc2_connect" ) )
+    if (    ! strcmp( prog_name, "fsc2_load" )
+         || ! strcmp( prog_name, "fsc2_connect" ) )
         line[ 0 ] = 'L';
 
     if ( line[ 0 ] == ' ' )

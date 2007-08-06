@@ -33,18 +33,18 @@ ok( my $fs = new File::Fcntl_Lock );
 ##############################################
 # 3. Also basic: create an object with initalization
 
-ok( $fs = $fs->new( l_type   => F_RDLCK,
-                    l_whence => SEEK_CUR,
-                    l_start  => 123,
-                    l_len    => 234       ) );
+ok( $fs = new File::Fcntl_Lock l_type   => F_RDLCK,
+                               l_whence => SEEK_CUR,
+                               l_start  => 123,
+                               l_len    => 234       );
 
 ##############################################
 # 4. Check if properties of the created object are what they are supposed to be
 
-ok( $fs->l_type   == F_RDLCK  and
-    $fs->l_whence == SEEK_CUR and
-    $fs->l_start  == 123      and
-    $fs->l_len    == 234          );
+ok(     $fs->l_type   == F_RDLCK 
+    and $fs->l_whence == SEEK_CUR
+    and $fs->l_start  == 123
+    and $fs->l_len    == 234      );
 
 ##############################################
 # 5. Change l_type property to F_UNLCK and check
@@ -85,13 +85,19 @@ ok( $fs->l_len, 3 );
 ##############################################
 # 11. Test if we can get an write lock on STDOUT
 
-ok( defined $fs->lock( STDOUT_FILENO, F_SETLK ) );
+my $res = $fs->lock( STDOUT_FILENO, F_SETLK );
+print STDERR "Write lock failed: $! (" . $fs->lock_errno . ")\n"
+    unless defined $res;
+ok( defined $res );
 
 ##############################################
-# 12. Test if we can release the lock on STDOUT
+# 12. Test if we can release the write lock on STDOUT
 
 $fs->l_type( F_UNLCK );
-ok( defined $fs->lock( STDOUT_FILENO, F_SETLK ) );
+$res = $fs->lock( STDOUT_FILENO, F_SETLK ),
+print STDERR "Removing write lock failed: $! (" . $fs->lock_errno . ")\n"
+    unless defined $res;
+ok( defined $res );
 
 ##############################################
 # 13. Test if we can get a read lock on the script we're just running
@@ -102,13 +108,19 @@ unless ( open $fh, 't/Fcntl_Lock.t' ) {
     print STDERR "Can't open a file for reading: $!\n";
     ok( 0 );
 }
-ok( defined $fs->lock( $fh, F_SETLK ) );
+$res = $fs->lock( $fh, F_SETLK );
+print STDERR "Read lock failed: $! (" . $fs->lock_errno . ")\n"
+    unless defined $res;
+ok( defined $res );
 
 ##############################################
-# 14. Test if we can release the lock
+# 14. Test if we can release the read lock
 
 $fs->l_type( F_UNLCK );
-ok( defined $fs->lock( $fh, F_SETLK ) );
+$res = $fs->lock( $fh, F_SETLK );
+print STDERR "Removing read lock failed: $! (" . $fs->lock_errno . ")\n"
+    unless defined $res;
+ok( defined $res );
 close $fh;
 
 ##############################################
@@ -140,8 +152,8 @@ if ( my $pid = fork ) {
     }
     if ( ! $failed ) {
         $fs->l_type( F_WRLCK );
-        ok( $fs->lock( $fh, F_SETLK ) and 
-            $fs->l_type( F_UNLCK ), $fs->lock( $fh, F_SETLK ) );
+        ok(     $fs->lock( $fh, F_SETLK )
+            and $fs->l_type( F_UNLCK ), $fs->lock( $fh, F_SETLK ) );
     } else {
         ok( 0 );
     }
@@ -179,8 +191,8 @@ if ( my $pid = fork ) {
     }
     if ( ! $failed ) {
         $fs->l_type( F_WRLCK );
-        ok( $fs->lock( STDOUT_FILENO, F_SETLK ) and
-            $fs->l_type( F_UNLCK ), $fs->lock( STDOUT_FILENO, F_SETLK ) );
+        ok(     $fs->lock( STDOUT_FILENO, F_SETLK )
+            and $fs->l_type( F_UNLCK ), $fs->lock( STDOUT_FILENO, F_SETLK ) );
     } else {
         ok( 0 );
     }

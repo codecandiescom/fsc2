@@ -308,8 +308,8 @@ Var_T *counter_start_timed_counter( Var_T * v )
                 THROW( EXCEPTION );
         }
     }
-    else if ( FSC2_MODE == TEST &&
-              states[ counter ] == COUNTER_IS_BUSY )
+    else if (    FSC2_MODE == TEST
+              && states[ counter ] == COUNTER_IS_BUSY )
     {
         print( FATAL, "Counter CH%d is already running.\n", counter );
         THROW( EXCEPTION );
@@ -388,8 +388,8 @@ Var_T *counter_timed_count( Var_T * v )
                 THROW( EXCEPTION );
         }
     }
-    else if ( FSC2_MODE == TEST &&
-              states[ counter ] == COUNTER_IS_BUSY )
+    else if (    FSC2_MODE == TEST
+              && states[ counter ] == COUNTER_IS_BUSY )
     {
         print( FATAL, "Counter CH%d is already running.\n", counter );
         THROW( EXCEPTION );
@@ -570,8 +570,8 @@ Var_T *counter_start_buffered_counter( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( buffered_counter >= NI6601_COUNTER_0 &&
-         buffered_counter <= NI6601_COUNTER_3 )
+    if (    buffered_counter >= NI6601_COUNTER_0
+         && buffered_counter <= NI6601_COUNTER_3 )
     {
         print( FATAL, "Counter %d is already doing buffered counting, only "
                "one buffered counter is possible at once.\n",
@@ -659,8 +659,8 @@ Var_T *counter_start_buffered_counter( Var_T * v )
                 THROW( EXCEPTION );
         }
     }
-    else if ( FSC2_MODE == TEST &&
-              states[ counter ] == COUNTER_IS_BUSY )
+    else if (    FSC2_MODE == TEST
+              && states[ counter ] == COUNTER_IS_BUSY )
     {
         print( FATAL, "Counter CH%d is already running.\n", counter );
         THROW( EXCEPTION );
@@ -690,8 +690,8 @@ Var_T *counter_get_buffered_counts( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( buffered_counter < NI6601_COUNTER_0 ||
-         buffered_counter > NI6601_COUNTER_3 )
+    if (    buffered_counter < NI6601_COUNTER_0
+         || buffered_counter > NI6601_COUNTER_3 )
     {
         print( FATAL, "There is no buffered counter running.\n" );
         THROW( EXCEPTION );
@@ -1049,8 +1049,8 @@ Var_T *counter_single_pulse( Var_T * v )
                 THROW( EXCEPTION );
         }
     }
-    else if ( FSC2_MODE == TEST &&
-              states[ counter ] == COUNTER_IS_BUSY )
+    else if (    FSC2_MODE == TEST
+              && states[ counter ] == COUNTER_IS_BUSY )
     {
         print( FATAL, "Counter CH%d requested for pulse is already "
                "running.\n", counter );
@@ -1124,8 +1124,8 @@ Var_T *counter_continuous_pulses( Var_T * v )
                 THROW( EXCEPTION );
         }
     }
-    else if ( FSC2_MODE == TEST &&
-              states[ counter ] == COUNTER_IS_BUSY )
+    else if (    FSC2_MODE == TEST
+              && states[ counter ] == COUNTER_IS_BUSY )
     {
         print( FATAL, "Counter CH%d requested for continuous pulses is "
                "already running.\n", counter );
@@ -1348,8 +1348,8 @@ static double ni6601_time_check( double       duration,
     unsigned long ticks;
 
 
-    if ( 1.01 * duration < 2 * NI6601_TIME_RESOLUTION ||
-         duration / NI6601_TIME_RESOLUTION - 1 >= ULONG_MAX + 0.5 )
+    if (    1.01 * duration < 2 * NI6601_TIME_RESOLUTION
+         || duration / NI6601_TIME_RESOLUTION - 1 >= ULONG_MAX + 0.5 )
     {
         static char *mint = NULL;
         static char *maxt = NULL;

@@ -311,7 +311,7 @@ void rb_pulser_w_cleanup( void );
 bool rb_pulser_w_store_timebase( double /* timebase */ );
 
 bool rb_pulser_w_set_function_delay( int    /* function */,
-                                     double /* delay    */ );
+                                     double /* delay    */  );
 
 bool rb_pulser_w_set_trigger_mode( int /* mode */ );
 
@@ -319,10 +319,10 @@ bool rb_pulser_w_set_trig_in_slope( int /* slope */ );
 
 bool rb_pulser_w_set_repeat_time( double /* rep_time */ );
 
-bool rb_pulser_w_set_phase_switch_delay( int    dummy,
-                                         double del_time );
+bool rb_pulser_w_set_phase_switch_delay( int    /* dummy    */,
+                                         double /* del_time */  );
 
-bool rb_pulser_w_set_grace_period( double gp_time );
+bool rb_pulser_w_set_grace_period( double /* gp_time */ );
 
 
 /* Functions defined in rb_pulser_w_pulse.c */
@@ -330,52 +330,52 @@ bool rb_pulser_w_set_grace_period( double gp_time );
 bool rb_pulser_w_new_pulse( long /* pnum */ );
 
 bool rb_pulser_w_set_pulse_function( long /* pnum     */,
-                                     int  /* function */ );
+                                     int  /* function */  );
 
 bool rb_pulser_w_set_pulse_position( long   /* pnum   */,
-                                     double /* p_time */ );
+                                     double /* p_time */  );
 
 bool rb_pulser_w_set_pulse_length( long   /* pnum   */,
-                                   double /* p_time */ );
+                                   double /* p_time */  );
 
 bool rb_pulser_w_set_pulse_position_change( long   /* pnum   */,
-                                            double /* p_time */ );
+                                            double /* p_time */  );
 
 bool rb_pulser_w_set_pulse_length_change( long   /* pnum   */,
-                                          double /* p_time */ );
+                                          double /* p_time */  );
 
 bool rb_pulser_w_set_pulse_phase_cycle( long /* pnum  */,
-                                        long /* cycle */ );
+                                        long /* cycle */  );
 
 bool rb_pulser_w_get_pulse_function( long  /* pnum     */,
-                                     int * /* function */ );
+                                     int * /* function */  );
 
 bool rb_pulser_w_get_pulse_position( long     /* pnum   */,
-                                     double * /* p_time */ );
+                                     double * /* p_time */  );
 
 bool rb_pulser_w_get_pulse_length( long     /* pnum   */,
-                                   double * /* p_time */ );
+                                   double * /* p_time */  );
 
 bool rb_pulser_w_get_pulse_position_change( long     /* pnum   */,
-                                            double * /* p_time */ );
+                                            double * /* p_time */  );
 
 bool rb_pulser_w_get_pulse_length_change( long     /* pnum   */,
-                                          double * /* p_time */ );
+                                          double * /* p_time */  );
 
 bool rb_pulser_w_get_pulse_phase_cycle( long   /* pnum  */,
-                                        long * /* cycle */ );
+                                        long * /* cycle */  );
 
 bool rb_pulser_w_change_pulse_position( long   /* pnum   */,
-                                        double /* p_time */ );
+                                        double /* p_time */  );
 
 bool rb_pulser_w_change_pulse_length( long   /* pnum   */,
-                                      double /* p_time */ );
+                                      double /* p_time */  );
 
 bool rb_pulser_w_change_pulse_position_change( long   /* pnum   */,
-                                               double /* p_time */ );
+                                               double /* p_time */  );
 
 bool rb_pulser_w_change_pulse_length_change( long   /* pnum   */,
-                                             double /* p_time */ );
+                                             double /* p_time */  );
 
 
 /* Functions defined in rb_pulser_w_init.c */
@@ -395,7 +395,7 @@ void rb_pulser_w_full_reset( void );
 /* Functions defined in rb_pulser_w_util.c */
 
 int rb_pulser_w_start_compare( const void * /* A */,
-                               const void * /* B */ );
+                               const void * /* B */  );
 
 Ticks rb_pulser_w_double2ticks( double /* p_time */ );
 
@@ -435,14 +435,14 @@ void rb_pulser_w_exit( void );
 
 void rb_pulser_w_run( bool /* state */ );
 
-void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * /* card */,
-                                   bool                  /* state  */ );
+void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * /* card  */,
+                                   bool                  /* state */  );
 
-void rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * /* card */,
-                                   unsigned long         /* delay  */ );
+void rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * /* card  */,
+                                   unsigned long         /* delay */  );
 
-void rb_pulser_w_set_phase( Rulbus_Delay_Card_T * /* card */,
-                            int                   /* phase */ );
+void rb_pulser_w_set_phase( Rulbus_Delay_Card_T * /* card  */,
+                            int                   /* phase */  );
 
 
 #endif /* ! RB_PULSER_W_HEADER */

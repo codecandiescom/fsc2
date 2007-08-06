@@ -290,8 +290,8 @@ unsigned int rs_sml01_get_mod_param( Var_T ** v,
 
         case 4 :
             *ires = MOD_SOURCE_INT;
-            if ( ( *v = vars_pop( *v ) ) == NULL || 
-                 ! ( (*v)->type & ( INT_VAR | FLOAT_VAR ) ) )
+            if (    ( *v = vars_pop( *v ) ) == NULL
+                 || ! ( (*v)->type & ( INT_VAR | FLOAT_VAR ) ) )
             {
                 print( FATAL, "Argument setting to internal modulation must "
                        "be immediately followed by the modulation "
@@ -324,8 +324,8 @@ void rs_sml01_check_mod_ampl( double freq )
 
     /* Now checks required if modulation is off or if AM modulation is used */
 
-    if ( rs_sml01.mod_type == MOD_TYPE_AM ||
-         rs_sml01.mod_type == MOD_TYPE_OFF )
+    if (    rs_sml01.mod_type == MOD_TYPE_AM
+         || rs_sml01.mod_type == MOD_TYPE_OFF )
         return;
 
     if ( rs_sml01.mod_type == MOD_TYPE_FM )

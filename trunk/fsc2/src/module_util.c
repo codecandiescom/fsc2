@@ -132,8 +132,8 @@ long get_long( Var_T *      v,
     if ( v->type == FLOAT_VAR && snippet != NULL )
         print( WARN, "Floating point number used as %s.\n", snippet );
 
-    if ( v->type == FLOAT_VAR && 
-         ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN ) )
+    if (    v->type == FLOAT_VAR
+         && ( v->val.dval > LONG_MAX || v->val.dval < LONG_MIN ) )
         print( SEVERE, "Integer argument overflow.\n" );
 
     return v->type == INT_VAR ? v->val.lval : lrnd( v->val.dval );

@@ -198,8 +198,8 @@ bool device_list_parse( void )
             T_free( ld );
         }
 
-        if ( EDL.Fname == NULL &&
-             ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+        if (    EDL.Fname == NULL
+             && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
         {
             EDL.Fname = T_strdup( libdir "Devices" );
             if ( lstat( EDL.Fname, &buf ) < 0 )

@@ -34,12 +34,12 @@
 
 /* Locally used global variables */
 
-static bool Is_loaded = UNSET;       /* set when EDL file is loaded */
-static bool Is_tested = UNSET;       /* set when EDL file has been tested */
-static bool Parse_result = UNSET;    /* set when EDL passed the tests */
-static FILE *In_file_fp = NULL;
-static time_t In_file_mod = 0;
-static bool Delete_file = UNSET;
+static bool Is_loaded       = UNSET;    /* set when EDL file is loaded */
+static bool Is_tested       = UNSET;    /* set when EDL file has been tested */
+static bool Parse_result    = UNSET;    /* set when EDL passed the tests */
+static FILE *In_file_fp     = NULL;
+static time_t In_file_mod   = 0;
+static bool Delete_file     = UNSET;
 static bool Delete_old_file = UNSET;
 
 
@@ -120,8 +120,8 @@ int main( int    argc,
 
     /* Initialize xforms stuff, quit on error */
 
-    else if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
-              ! xforms_init( &argc, argv ) )
+    else if (    ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+              && ! xforms_init( &argc, argv ) )
     {
         fprintf( stderr, "Graphic setup failed.\n" );
         return EXIT_FAILURE;
@@ -208,10 +208,11 @@ int main( int    argc,
     /* Only if starting the server for external connections succeeds really
        start the main loop */
 
-    if ( Fsc2_Internals.conn_pid == 0 ||
-         ( Fsc2_Internals.conn_pid =
-               spawn_conn( Fsc2_Internals.cmdline_flags &
-                   ( DO_TEST | DO_START ) && Is_loaded, In_file_fp ) ) != -1 )
+    if (    Fsc2_Internals.conn_pid == 0
+         || ( Fsc2_Internals.conn_pid =
+                  spawn_conn( Fsc2_Internals.cmdline_flags &
+                              ( DO_TEST | DO_START )
+                              && Is_loaded, In_file_fp ) ) != -1 )
     {
         /* Trigger test or start of current EDL program if the appropriate
            flags were passed to the program on the command line */
@@ -398,8 +399,9 @@ static void fsc2_get_conf( void )
     Fsc2_Internals.use_def_directory = UNSET;
     Fsc2_Internals.def_directory = NULL;
 
-    if ( ( ue = getpwuid( getuid( ) ) ) == NULL ||
-         ue->pw_dir == NULL || *ue->pw_dir == '\0' )
+    if (    ( ue = getpwuid( getuid( ) ) ) == NULL
+         || ue->pw_dir == NULL
+         || *ue->pw_dir == '\0' )
          return;
 
     TRY
@@ -443,10 +445,10 @@ static void fsc2_get_conf( void )
        directory is going to be used for reading only or also writing, so
        we only check for the lowest hurdle). */
 
-    if ( *Fsc2_Internals.def_directory == '\0' ||
-         stat( Fsc2_Internals.def_directory, &buf ) < 0 ||
-         ( ! S_ISDIR( buf.st_mode ) && ! S_ISLNK( buf.st_mode ) ) ||
-         ! ( buf.st_mode & ( S_IRUSR | S_IRGRP | S_IROTH ) ) )
+    if (    *Fsc2_Internals.def_directory == '\0'
+         || stat( Fsc2_Internals.def_directory, &buf ) < 0
+         || ( ! S_ISDIR( buf.st_mode ) && ! S_ISLNK( buf.st_mode ) )
+         || ! ( buf.st_mode & ( S_IRUSR | S_IRGRP | S_IROTH ) ) )
     {
         Fsc2_Internals.def_directory =
                                  CHAR_P T_free( Fsc2_Internals.def_directory );
@@ -470,8 +472,9 @@ static void fsc2_save_conf( void )
     FILE *fp;
 
 
-    if ( ( ue = getpwuid( getuid( ) ) ) == NULL ||
-         ue->pw_dir == NULL || *ue->pw_dir == '\0' )
+    if (    ( ue = getpwuid( getuid( ) ) ) == NULL
+         || ue->pw_dir == NULL
+         || *ue->pw_dir == '\0' )
     {
          if ( Fsc2_Internals.def_directory != NULL )
              Fsc2_Internals.def_directory =
@@ -501,8 +504,8 @@ static void fsc2_save_conf( void )
     fprintf( fp, "# Don't edit this file - it gets overwritten "
              "automatically\n\n" );
 
-    if ( Fsc2_Internals.use_def_directory &&
-         Fsc2_Internals.def_directory != NULL )
+    if (    Fsc2_Internals.use_def_directory
+         && Fsc2_Internals.def_directory != NULL )
         fprintf( fp, "DEFAULT_DIRECTORY: %s\n", Fsc2_Internals.def_directory );
     else
         fprintf( fp, "DEFAULT_DIRECTORY: %s\n", fl_get_directory( ) );
@@ -592,10 +595,10 @@ static void no_gui_run( void )
 {
     /* Read in the EDL file and analyze it */
 
-    if ( ! scan_main( EDL.in_file, In_file_fp ) ||
-         EDL.compilation.error[ FATAL ]  != 0 ||
-         EDL.compilation.error[ SEVERE ] != 0 ||
-         EDL.compilation.error[ WARN ]   != 0 )
+    if (    ! scan_main( EDL.in_file, In_file_fp )
+         || EDL.compilation.error[ FATAL ]  != 0
+         || EDL.compilation.error[ SEVERE ] != 0
+         || EDL.compilation.error[ WARN ]   != 0 )
         exit( EXIT_FAILURE );
 
     /* Start the child process for running the experiment */
@@ -609,8 +612,8 @@ static void no_gui_run( void )
        before exiting. Also ake care of the case that the chidl died for
        some unforseen reason. */
 
-    while ( Fsc2_Internals.child_is_quitting == QUITTING_UNSET &&
-            Fsc2_Internals.child_pid > 0 )
+    while (    Fsc2_Internals.child_is_quitting == QUITTING_UNSET
+            && Fsc2_Internals.child_pid > 0 )
         pause( );
 
     if ( Fsc2_Internals.child_pid > 0 )
@@ -655,10 +658,11 @@ static void check_run( void )
 
     fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 
-    if ( ! scan_main( EDL.in_file, In_file_fp ) || user_break ||
-         EDL.compilation.error[ FATAL ]  != 0 ||
-         EDL.compilation.error[ SEVERE ] != 0 ||
-         EDL.compilation.error[ WARN ]   != 0 )
+    if (    ! scan_main( EDL.in_file, In_file_fp )
+         || user_break
+         || EDL.compilation.error[ FATAL ]  != 0
+         || EDL.compilation.error[ SEVERE ] != 0
+         || EDL.compilation.error[ WARN ]   != 0 )
         exit( EXIT_FAILURE );
 
     fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
@@ -707,12 +711,12 @@ static void test_machine_type( void )
     struct utsname utsbuf;
 
 
-    if ( sizeof( int ) == sizeof( void * ) && 
-         uname( &utsbuf ) == 0 &&
-         utsbuf.machine[ 0 ] == 'i' &&
-         utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6' &&
-         ! strncmp( utsbuf.machine + 2, "86", 2 ) &&
-         ! strcasecmp( utsbuf.sysname, "linux" ) )
+    if (    sizeof( int ) == sizeof( void * )
+         && uname( &utsbuf ) == 0
+         && utsbuf.machine[ 0 ] == 'i'
+         && utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6'
+         && ! strncmp( utsbuf.machine + 2, "86", 2 )
+         && ! strcasecmp( utsbuf.sysname, "linux" ) )
         Fsc2_Internals.is_linux_i386 = SET;
 }
 
@@ -738,8 +742,8 @@ static int scan_args( int *   argc,
 
     while ( cur_arg < *argc )
     {
-        if ( strlen( argv[ cur_arg ] ) == 11 &&
-             ! strcmp( argv[ cur_arg ], "-local_exec" ) )
+        if (    strlen( argv[ cur_arg ] ) == 11
+             && ! strcmp( argv[ cur_arg ], "-local_exec" ) )
         {
             flags |= LOCAL_EXEC;
             for ( i = cur_arg; i < *argc; i++ )
@@ -748,8 +752,8 @@ static int scan_args( int *   argc,
             continue;
         }
 
-        if ( strlen( argv[ cur_arg ] ) == 2 &&
-             ! strcmp( argv[ cur_arg ], "-t" ) )
+        if (    strlen( argv[ cur_arg ] ) == 2
+             && ! strcmp( argv[ cur_arg ], "-t" ) )
         {
             if ( flags & DO_CHECK )
             {
@@ -794,9 +798,9 @@ static int scan_args( int *   argc,
                   EXIT_SUCCESS : EXIT_FAILURE );
         }
 
-        if ( strlen( argv[ cur_arg ] ) == 3 &&
-             ( ! strcmp( argv[ cur_arg ], "-ng" ) ||
-               ! strcmp( argv[ cur_arg ], "-nw" ) ) )
+        if (    strlen( argv[ cur_arg ] ) == 3
+             && (    ! strcmp( argv[ cur_arg ], "-ng" )
+                  || ! strcmp( argv[ cur_arg ], "-nw" ) ) )
         {
             if ( flags & DO_CHECK )
             {
@@ -848,13 +852,13 @@ static int scan_args( int *   argc,
             return flags;
         }
 
-        if ( ( strlen( argv[ cur_arg ] ) == 2 &&
-               ! strcmp( argv[ cur_arg ], "-h" ) ) ||
-             ! strcmp( argv[ cur_arg ], "--help" ) )
+        if (    (    strlen( argv[ cur_arg ] ) == 2
+                  && ! strcmp( argv[ cur_arg ], "-h" ) )
+             || ! strcmp( argv[ cur_arg ], "--help" ) )
             usage( EXIT_SUCCESS );
 
-        if ( strlen( argv[ cur_arg ] ) == 2 &&
-             ! strcmp( argv[ cur_arg ], "-s" ) )
+        if (    strlen( argv[ cur_arg ] ) == 2
+             && ! strcmp( argv[ cur_arg ], "-s" ) )
         {
             flags |= DO_SIGNAL;
             for ( i = cur_arg; i < *argc; i++ )
@@ -1002,8 +1006,8 @@ static int scan_args( int *   argc,
             break;
         }
 
-        if ( strlen( argv[ cur_arg ] ) == 2 &&
-             ! strcmp( argv[ cur_arg ], "-B" ) )
+        if (    strlen( argv[ cur_arg ] ) == 2
+             && ! strcmp( argv[ cur_arg ], "-B" ) )
         {
             if ( flags & DO_CHECK )
             {
@@ -1052,8 +1056,8 @@ static int scan_args( int *   argc,
             break;
         }
 
-        if ( strlen( argv[ cur_arg ] ) == 2 &&
-             ! strcmp( argv[ cur_arg ], "-I" ) )
+        if (    strlen( argv[ cur_arg ] ) == 2
+             && ! strcmp( argv[ cur_arg ], "-I" ) )
         {
             if ( flags & DO_CHECK )
             {
@@ -1249,8 +1253,8 @@ static void final_exit_handler( void )
 
     if ( Crash.signo != 0 && Crash.signo != SIGTERM )
     {
-        if ( * ( ( int * ) Xresources[ NOCRASHMAIL ].var ) == 0 &&
-              ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
+        if (    * ( ( int * ) Xresources[ NOCRASHMAIL ].var ) == 0
+             && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
         {
             death_mail( );
             fprintf( stderr, "A crash report has been sent to %s\n",
@@ -1296,8 +1300,8 @@ void load_file( FL_OBJECT * a  UNUSED_ARG,
 
     if ( ! reload )
     {
-        if ( GUI.main_form->Load->u_ldata == 0 &&
-             GUI.main_form->Load->u_cdata == NULL )
+        if (    GUI.main_form->Load->u_ldata == 0
+             && GUI.main_form->Load->u_cdata == NULL )
         {
             fn = fsc2_show_fselector( "Select input file:", NULL, "*.edl",
                                       NULL );
@@ -1583,10 +1587,10 @@ void test_file( FL_OBJECT * a,
        again. */
 
     stat( EDL.in_file, &file_stat );
-    if ( In_file_mod != file_stat.st_mtime &&
-         2 == fl_show_choice( "EDL file on disk is newer than the loaded ",
-                              "file. Reload file from disk?",
-                              "", 2, "No", "Yes", "", 1 ) )
+    if (    In_file_mod != file_stat.st_mtime
+         && 2 == fl_show_choice( "EDL file on disk is newer than the loaded ",
+                                 "file. Reload file from disk?",
+                                 "", 2, "No", "Yes", "", 1 ) )
     {
         load_file( GUI.main_form->browser, 1 );
         if ( ! Is_loaded )
@@ -1700,10 +1704,10 @@ void run_file( FL_OBJECT * a  UNUSED_ARG,
     else
     {
         stat( EDL.in_file, &file_stat );
-        if ( In_file_mod != file_stat.st_mtime &&
-             2 == fl_show_choice( "EDL file on disk is newer than loaded",
-                                  "file. Reload the file from disk?",
-                                  "", 2, "No", "Yes", "", 1 ) )
+        if (    In_file_mod != file_stat.st_mtime
+             && 2 == fl_show_choice( "EDL file on disk is newer than loaded",
+                                     "file. Reload the file from disk?",
+                                     "", 2, "No", "Yes", "", 1 ) )
         {
             load_file( GUI.main_form->browser, 1 );
             if ( ! Is_loaded )
@@ -1738,9 +1742,9 @@ void run_file( FL_OBJECT * a  UNUSED_ARG,
     /* If there were non-fatal errors ask user if she wants to continue.
        In batch mode run even if there were non-fatal errors. */
 
-    if ( ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
-         ( EDL.compilation.error[ SEVERE ] != 0 ||
-           EDL.compilation.error[ WARN ] != 0 ) )
+    if (    ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
+         && (    EDL.compilation.error[ SEVERE ] != 0
+              || EDL.compilation.error[ WARN ] != 0 ) )
     {
         if ( EDL.compilation.error[ SEVERE ] != 0 )
         {
@@ -1837,8 +1841,9 @@ static bool display_file( char * name,
         sprintf( line, "%*ld: ", len, i );
         lp = line + len + 2;
         cc = 0;
-        while ( ( key = fgetc( fp ) ) != '\n' &&
-                key != EOF && ++cc < FL_BROWSER_LINELENGTH - len - 9 )
+        while (    ( key = fgetc( fp ) ) != '\n'
+                && key != EOF
+                && ++cc < FL_BROWSER_LINELENGTH - len - 9 )
         {
             if ( ( char ) key != '\t' )
                 *lp++ = ( char ) key;
@@ -1846,8 +1851,8 @@ static bool display_file( char * name,
             {
                 do
                     *lp++ = ' ';
-                while ( cc++ % TAB_LENGTH &&
-                        cc < FL_BROWSER_LINELENGTH - len - 3 )
+                while (    cc++ % TAB_LENGTH
+                        && cc < FL_BROWSER_LINELENGTH - len - 3 )
                     /* empty */ ;
                 cc--;
             }
@@ -1857,36 +1862,31 @@ static bool display_file( char * name,
         /* Color section headings */
 
         lp = line + len + 2;
-        if ( ! strncmp( lp, "DEVICES:", 8 ) ||
-             ! strncmp( lp, "DEVICE:", 7 ) ||
-             ! strncmp( lp, "DEVS:\n", 7 ) ||
-             ! strncmp( lp, "DEV:", 4 ) ||
-             ! strncmp( lp, "VARIABLES:", 10 ) ||
-             ! strncmp( lp, "VARIABLE:", 9 ) ||
-             ! strncmp( lp, "VARS:", 5 ) ||
-             ! strncmp( lp, "VAR:", 4 ) ||
-             ! strncmp( lp, "ASSIGNMENTS:", 12 ) ||
-             ! strncmp( lp, "ASSIGNMENT:", 11 ) ||
-             ! strncmp( lp, "ASS:", 4 ) ||
-             ! strncmp( lp, "PHA:", 4 ) ||
-             ! strncmp( lp, "PHAS:", 5 ) ||
-             ! strncmp( lp, "PHASE:", 6 ) ||
-             ! strncmp( lp, "PHASES:", 7 ) ||
-             ! strncmp( lp, "PREPARATIONS:", 13 ) ||
-             ! strncmp( lp, "PREPARATION:", 12 ) ||
-             ! strncmp( lp, "PREPS:", 6 ) ||
-             ! strncmp( lp, "PREP:", 5 ) ||
-             ! strncmp( lp, "EXPERIMENT:", 11 ) ||
-             ! strncmp( lp, "EXP:", 4 ) ||
-             ! strncmp( lp, "ON_STOP:", 8 ) )
+        if (    ! strncmp( lp, "DEVICES:", 8 )
+             || ! strncmp( lp, "DEVICE:", 7 )
+             || ! strncmp( lp, "DEVS:\n", 7 )
+             || ! strncmp( lp, "DEV:", 4 )
+             || ! strncmp( lp, "VARIABLES:", 10 )
+             || ! strncmp( lp, "VARIABLE:", 9 )
+             || ! strncmp( lp, "VARS:", 5 )
+             || ! strncmp( lp, "VAR:", 4 )
+             || ! strncmp( lp, "ASSIGNMENTS:", 12 )
+             || ! strncmp( lp, "ASSIGNMENT:", 11 )
+             || ! strncmp( lp, "ASS:", 4 )
+             || ! strncmp( lp, "PHA:", 4 )
+             || ! strncmp( lp, "PHAS:", 5 )
+             || ! strncmp( lp, "PHASE:", 6 )
+             || ! strncmp( lp, "PHASES:", 7 )
+             || ! strncmp( lp, "PREPARATIONS:", 13 )
+             || ! strncmp( lp, "PREPARATION:", 12 )
+             || ! strncmp( lp, "PREPS:", 6 )
+             || ! strncmp( lp, "PREP:", 5 )
+             || ! strncmp( lp, "EXPERIMENT:", 11 )
+             || ! strncmp( lp, "EXP:", 4 )
+             || ! strncmp( lp, "ON_STOP:", 8 ) )
         {
             memmove( line + 6, line, strlen( line ) + 1 );
-            line[ 0 ] = '@';
-            line[ 1 ] = 'C';
-            line[ 2 ] = '2';
-            line[ 3 ] = '4';
-            line[ 4 ] = '@';
-            line[ 5 ] = 'f';
+            memcpy( line, "@C24@f", 6 );
         }
 
         /* Also color all lines staring with a '#' */
@@ -1894,11 +1894,7 @@ static bool display_file( char * name,
         if ( *lp == '#' )
         {
             memmove( line + 5, line, strlen( line ) + 1 );
-            line[ 0 ] = '@';
-            line[ 1 ] = 'C';
-            line[ 2 ] = '4';
-            line[ 3 ] = '@';
-            line[ 4 ] = 'f';
+            memcpy( line, "@C4@f", 5 );
         }
 
         fl_add_browser_line( GUI.main_form->browser, line );
@@ -1997,8 +1993,8 @@ void conn_request_handler( void )
     int count;
 
 
-    while ( ( count = read( Comm.conn_pd[ READ ], line, MAXLINE ) ) == -1 &&
-            errno == EINTR )
+    while (    ( count = read( Comm.conn_pd[ READ ], line, MAXLINE ) ) == -1
+            && errno == EINTR )
         /* empty */ ;
     line[ count - 1 ] = '\0';
     GUI.main_form->Load->u_ldata = ( long ) line[ 0 ];
@@ -2070,8 +2066,8 @@ static void main_sig_handler( int signo )
                 /* Also store the return status of the child process running
                    'fsc2_clean', it's used to check if everything went fine */
 
-                if ( ! Fsc2_Internals.fsc2_clean_died &&
-                     pid == Fsc2_Internals.fsc2_clean_pid )
+                if (    ! Fsc2_Internals.fsc2_clean_died
+                     && pid == Fsc2_Internals.fsc2_clean_pid )
                 {
                     Fsc2_Internals.fsc2_clean_pid = 0;
                     Fsc2_Internals.fsc2_clean_died = SET;
@@ -2112,9 +2108,9 @@ static void main_sig_handler( int signo )
 
         default :
 #if ! defined( NDEBUG ) && defined( ADDR2LINE )
-            if ( ! Crash.already_crashed &&
-                 signo != SIGABRT &&
-                 ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
+            if (    ! Crash.already_crashed
+                 && signo != SIGABRT
+                 && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
             {
                 Crash.already_crashed = SET;
 
@@ -2173,8 +2169,9 @@ void notify_conn( int signo )
        experiment is running - in this case fsc2 is busy anyway and the
        connection process has already been informed about this. */
 
-    if ( Fsc2_Internals.conn_pid <= 0 || Fsc2_Internals.child_pid > 0 ||
-         Fsc2_Internals.cmdline_flags & DO_CHECK )
+    if (    Fsc2_Internals.conn_pid <= 0
+         || Fsc2_Internals.child_pid > 0
+         || Fsc2_Internals.cmdline_flags & DO_CHECK )
         return;
 
     kill( Fsc2_Internals.conn_pid, signo );

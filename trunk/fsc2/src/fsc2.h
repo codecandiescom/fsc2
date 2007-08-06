@@ -161,7 +161,7 @@ extern int fileno( FILE * /* stream */ );
 void clean_up( void );
 
 bool scan_main( const char * /* name */,
-                FILE *       /* fp   */ );
+                FILE *       /* fp   */  );
 
 int  devices_parser( FILE * /* in */ );
 

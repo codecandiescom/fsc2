@@ -194,28 +194,28 @@ int tegam2714a_p_end_of_test_hook( void )
         tegam2714a_p.show_file = NULL;
     }
 
-    /* Check that the either set both pulse levels or none at all */
+    /* Check that the either both pulse levels are set or none at all */
 
-    if ( ( tegam2714a_p.function.is_high_level && 
-           ! tegam2714a_p.function.is_low_level ) ||
-         ( ! tegam2714a_p.function.is_high_level && 
-           tegam2714a_p.function.is_low_level ) )
+    if (    (    tegam2714a_p.function.is_high_level
+              && ! tegam2714a_p.function.is_low_level )
+         || (    ! tegam2714a_p.function.is_high_level
+              && tegam2714a_p.function.is_low_level ) )
     {
         print( FATAL, "Only high or low pulse level has been set, either set "
                "both or none.\n" );
         THROW( EXCEPTION );
     }
 
-    if ( tegam2714a_p.function.is_high_level &&
-         tegam2714a_p.function.is_low_level )
-         tegam2714a_p_check_levels( tegam2714a_p.function.high_level,
-                                    tegam2714a_p.function.low_level );
+    if (    tegam2714a_p.function.is_high_level
+         && tegam2714a_p.function.is_low_level )
+        tegam2714a_p_check_levels( tegam2714a_p.function.high_level,
+                                   tegam2714a_p.function.low_level );
 
     /* Tell the user if the requested maximum pattern length wasn't long
        enough to create all pulses during the test run */
 
-    if ( tegam2714a_p.is_max_seq_len &&
-         tegam2714a_p.max_seq_len > tegam2714a_p.requested_max_seq_len )
+    if (    tegam2714a_p.is_max_seq_len
+         && tegam2714a_p.max_seq_len > tegam2714a_p.requested_max_seq_len )
         print( SEVERE, "Maximum pattern length had to be adjusted from %s "
                "to %s.\n",
                tegam2714a_p_pticks( tegam2714a_p.requested_max_seq_len ),

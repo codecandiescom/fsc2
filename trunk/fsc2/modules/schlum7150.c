@@ -243,8 +243,8 @@ Var_T *multimeter_mode( Var_T *v )
 
     /* Set the new mode when we're doing an experiment */
 
-    if ( FSC2_MODE == EXPERIMENT &&
-         gpib_write( schlum7150.device, cmd, strlen( cmd ) ) == FAILURE )
+    if (    FSC2_MODE == EXPERIMENT
+         && gpib_write( schlum7150.device, cmd, strlen( cmd ) ) == FAILURE )
         schlum7150_failure( );
 
     return vars_push( INT_VAR, ( long ) schlum7150.mode );
@@ -317,8 +317,8 @@ Var_T *multimeter_precision( Var_T *v )
 
     /* Set the new precision if we're doing an experiment */
 
-    if ( FSC2_MODE == EXPERIMENT &&
-         gpib_write( schlum7150.device, cmd, strlen( cmd ) ) == FAILURE )
+    if (    FSC2_MODE == EXPERIMENT
+         && gpib_write( schlum7150.device, cmd, strlen( cmd ) ) == FAILURE )
         schlum7150_failure( );
 
     return vars_push( INT_VAR, ( long ) schlum7150.prec );
@@ -373,8 +373,8 @@ Var_T *multimeter_get_data( Var_T *v )
 
     if ( FSC2_MODE != EXPERIMENT )
     {
-        if ( schlum7150.mode == SCHLUM7150_MODE_VDC ||
-             schlum7150.mode == SCHLUM7150_MODE_VAC )
+        if (    schlum7150.mode == SCHLUM7150_MODE_VDC
+             || schlum7150.mode == SCHLUM7150_MODE_VAC )
             return vars_push( FLOAT_VAR, SCHLUM7150_TEST_VOLTAGE );
         else
             return vars_push( FLOAT_VAR, SCHLUM7150_TEST_CURRENT );
@@ -459,8 +459,8 @@ Var_T *multimeter_lock_keyboard( Var_T *v )
 
     cmd[ 1 ] = lock ? '1' : '0';
 
-    if ( FSC2_MODE == EXPERIMENT &&
-         gpib_write( schlum7150.device, "K1\n", 3 ) == FAILURE )
+    if (    FSC2_MODE == EXPERIMENT
+         && gpib_write( schlum7150.device, "K1\n", 3 ) == FAILURE )
         schlum7150_failure( );
 
     return vars_push( INT_VAR, lock ? 1L : 0L );

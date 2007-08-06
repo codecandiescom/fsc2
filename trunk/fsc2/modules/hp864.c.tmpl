@@ -96,8 +96,8 @@ int hp864_tmpl_test_hook( void )
 
     if ( hp864_tmpl.use_table )
     {
-        if ( hp864_tmpl.att_ref_freq < hp864_tmpl.min_table_freq ||
-             hp864_tmpl.att_ref_freq > hp864_tmpl.max_table_freq )
+        if (    hp864_tmpl.att_ref_freq < hp864_tmpl.min_table_freq
+             || hp864_tmpl.att_ref_freq > hp864_tmpl.max_table_freq )
         {
             print( FATAL, "Reference frequency for attenuation settings of "
                    "%g MHz is not covered by the table.\n",
@@ -715,8 +715,8 @@ Var_T *synthesizer_att_ref_freq( Var_T * v )
 
     if ( hp864_tmpl.use_table )
     {
-        if ( hp864_tmpl.att_ref_freq < hp864_tmpl.min_table_freq ||
-             hp864_tmpl.att_ref_freq > hp864_tmpl.max_table_freq )
+        if (    hp864_tmpl.att_ref_freq < hp864_tmpl.min_table_freq
+             || hp864_tmpl.att_ref_freq > hp864_tmpl.max_table_freq )
         {
             print( FATAL, "Reference frequency for attenuation settings of "
                    "%g MHz is not covered by the table.\n",

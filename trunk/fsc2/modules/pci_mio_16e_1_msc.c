@@ -208,8 +208,8 @@ Var_T *daq_freq_out( Var_T * v )
 
     for ( i = 0; i < 4; i++ )
         for ( j = 1; j < 16; j++ )
-            if ( new_freq <= freqs[ i ] / j &&
-                 new_freq > freqs[ i ] / ( j + 1 ) )
+            if (    new_freq <= freqs[ i ] / j
+                 && new_freq > freqs[ i ] / ( j + 1 ) )
             {
                 if ( ( new_freq * j ) / freqs[ i ] >
                                     freqs[ i + 1 ] / ( ( j + 1 ) * new_freq ) )
@@ -246,10 +246,10 @@ Var_T *daq_freq_out( Var_T * v )
     speed = NI_DAQ_FULL_SPEED;
     divider = indx[ 0 ];
 
-    if ( ( indx[ 0 ] == 0 && indx[ 1 ] != 0 ) ||
-         ( indx[ 0 ] != 0 && indx[ 1 ] != 0 &&
-           fabs( freq / indx[ 0 ] - new_freq ) >
-           fabs( 0.5 * freq / indx[ 1 ] - new_freq ) ) )
+    if (    ( indx[ 0 ] == 0 && indx[ 1 ] != 0 )
+         || (    indx[ 0 ] != 0 && indx[ 1 ] != 0
+              && fabs( freq / indx[ 0 ] - new_freq ) >
+                                  fabs( 0.5 * freq / indx[ 1 ] - new_freq ) ) )
     {
         speed = NI_DAQ_HALF_SPEED;
         divider = indx[ 1 ];
@@ -272,10 +272,10 @@ Var_T *daq_freq_out( Var_T * v )
     if ( FSC2_MODE == EXPERIMENT )
     {
         raise_permissions( );
-        if ( ni_daq_msc_set_clock_speed( pci_mio_16e_1.board, speed,
-                                         divider ) < 0 ||
-             ni_daq_msc_set_clock_output( pci_mio_16e_1.board, daq_clock,
-                                          on_off ) < 0 )
+        if (    ni_daq_msc_set_clock_speed( pci_mio_16e_1.board, speed,
+                                            divider ) < 0
+             || ni_daq_msc_set_clock_output( pci_mio_16e_1.board, daq_clock,
+                                             on_off ) < 0 )
         {
             lower_permissions( );
             print( FATAL, "Failed to set frequency output.\n ");

@@ -32,7 +32,7 @@
 
 
 pid_t spawn_conn( bool   /* start_state */,
-                  FILE * /* in_file_fp  */ );
+                  FILE * /* in_file_fp  */  );
 
 
 #endif  /* ! CONN_HEADER */

@@ -139,7 +139,7 @@ Var_T *synthesizer_command(             Var_T * /* v */ );
 
 FILE *hp8647a_find_table( char ** /* name */e );
 
-FILE *hp8647a_open_table( char */* name */ );
+FILE *hp8647a_open_table( char * /* name */ );
 
 double hp8647a_get_att_from_table( double /* freq */ );
 
@@ -147,7 +147,7 @@ double hp8647a_get_att( double /* freq */ );
 
 int hp8647a_set_mod_param( Var_T *  /* v    */,
                            double * /* dres */,
-                           int *    /* ires */ );
+                           int *    /* ires */  );
 
 
 /* Functions defined in "hp8647a_lexer.l" */
@@ -178,12 +178,12 @@ int hp8647a_set_mod_type( int /* type */ );
 int hp8647a_get_mod_type( void );
 
 int hp8647a_set_mod_source( int /* type   */,
-                            int /* source */ );
+                            int /* source */  );
 
 int hp8647a_get_mod_source( int /* type */ );
 
 double hp8647a_set_mod_ampl( int    /* type */,
-                             double /* ampl */ );
+                             double /* ampl */  );
 
 double hp8647a_get_mod_ampl( int /* type */ );
 

@@ -268,8 +268,8 @@ Var_T *digitizer_define_window( Var_T * v )
 
             /* Allow window width to be zero in test run... */
 
-            if ( ( FSC2_MODE == TEST && win_width < 0.0 ) ||
-                 ( FSC2_MODE != TEST && win_width <= 0.0 ) )
+            if (    ( FSC2_MODE == TEST && win_width < 0.0 )
+                 || ( FSC2_MODE != TEST && win_width <= 0.0 ) )
             {
                 print( FATAL, "Zero or negative window width.\n" );
                 THROW( EXCEPTION );
@@ -362,8 +362,8 @@ Var_T *digitizer_timebase( Var_T * v )
             break;
         }
 
-    if ( TB >= 0 &&                                         /* value found ? */
-         fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )  /* error > 1% ?  */
+    if (    TB >= 0                                         /* value found ? */
+         && fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )
     {
         t = T_strdup( lecroy9400_ptime( timebase ) );
         print( WARN, "Can't set timebase to %s, using %s instead.\n",
@@ -648,8 +648,8 @@ Var_T *digitizer_averaging( Var_T * v )
                 THROW( EXCEPTION );
             }
 
-            if ( FSC2_MODE != EXPERIMENT &&
-                 rec_len > ml[ NUM_ELEMS( ml ) - 1 ] )
+            if (    FSC2_MODE != EXPERIMENT
+                 && rec_len > ml[ NUM_ELEMS( ml ) - 1 ] )
             {
                 print( FATAL, "Record length %ld too long.\n",
                        rec_len );
@@ -819,9 +819,9 @@ Var_T *digitizer_trigger_delay( Var_T * v )
     /* Check that the trigger delay is within the limits (taking rounding
        errors of the order of the current time resolution into account) */
 
-    if ( real_delay > 0.0 &&
-         real_delay >   10.0 * lecroy9400.timebase
-                      +  0.5 * tpp[ lecroy9400.tb_index ] )
+    if (    real_delay > 0.0
+         && real_delay >   10.0 * lecroy9400.timebase
+                         +  0.5 * tpp[ lecroy9400.tb_index ] )
     {
         print( FATAL, "Pre-trigger delay of %s is too long, can't be longer "
                "than 10 times the timebase.\n",
@@ -829,9 +829,9 @@ Var_T *digitizer_trigger_delay( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( real_delay < 0.0 &&
-         real_delay <   -1.0e4 * lecroy9400.timebase
-                      -  0.5 * tpp[ lecroy9400.tb_index ] )
+    if (    real_delay < 0.0
+         && real_delay <   -1.0e4 * lecroy9400.timebase
+                         -  0.5 * tpp[ lecroy9400.tb_index ] )
     {
         print( FATAL, "Post-trigger delay of %s is too long, can't be longer "
                "than 10,000 times the timebase.\n",
@@ -1014,9 +1014,9 @@ static Var_T *get_curve( Var_T * v,
     ch = ( int ) lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( ch < LECROY9400_CH1 ||
-         ( ch > LECROY9400_CH2 && ch < LECROY9400_FUNC_E ) ||
-         ch > LECROY9400_FUNC_F )
+    if (    ch < LECROY9400_CH1
+         || ( ch > LECROY9400_CH2 && ch < LECROY9400_FUNC_E )
+         || ch > LECROY9400_FUNC_F )
     {
         print( FATAL, "Invalid channel specification.\n" );
         THROW( EXCEPTION );

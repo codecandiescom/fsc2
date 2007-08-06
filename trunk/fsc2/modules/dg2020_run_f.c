@@ -92,9 +92,9 @@ bool dg2020_reorganize_pulses( bool flag )
 
         /* Nothing to be done for unused functions and the phase functions */
 
-        if ( ! f->is_used ||
-             f->self == PULSER_CHANNEL_PHASE_1 ||
-             f->self == PULSER_CHANNEL_PHASE_2 )
+        if (    ! f->is_used
+             || f->self == PULSER_CHANNEL_PHASE_1
+             || f->self == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
@@ -185,8 +185,9 @@ void dg2020_do_checks( Function_T * f )
             f->num_active_pulses = i + 1;
         }
 
-        if ( i + 1 < f->num_pulses && f->pulses[ i + 1 ]->is_active &&
-             p->pos + p->len > f->pulses[ i + 1 ]->pos )
+        if (    i + 1 < f->num_pulses
+             && f->pulses[ i + 1 ]->is_active
+             && p->pos + p->len > f->pulses[ i + 1 ]->pos )
         {
             if ( dg2020.in_setup )
                 print( FSC2_MODE == TEST ? FATAL : SEVERE,
@@ -218,8 +219,9 @@ void dg2020_reorganize_phases( Function_T * f,
     bool need_update = UNSET;
 
 
-    fsc2_assert( f->is_used && ( f->self == PULSER_CHANNEL_PHASE_1 ||
-                                 f->self == PULSER_CHANNEL_PHASE_2 ) );
+    fsc2_assert(    f->is_used
+                 && (    f->self == PULSER_CHANNEL_PHASE_1
+                      || f->self == PULSER_CHANNEL_PHASE_2 ) );
 
     /* First check if any of the phase pulses needs to be updated */
 
@@ -344,10 +346,11 @@ void dg2020_recalc_phase_pulse( Function_T * f,
            the pulse its associated with and not too near to the previous
            pulse */
 
-        if ( phase_p->is_pos &&
-             ( ( phase_p->pos <= p->pos - f->psd &&
-                 phase_p->pos >= pp->pos + pp->len + dg2020.grace_period ) ||
-               p->pc == pp->pc ) )
+        if (    phase_p->is_pos
+             && (    (    phase_p->pos <= p->pos - f->psd
+                       && phase_p->pos >=
+                                      pp->pos + pp->len + dg2020.grace_period )
+                  || p->pc == pp->pc ) )
             goto set_length;
 
         /* If the phase switch delay does not fit between the pulse it's
@@ -388,8 +391,9 @@ void dg2020_recalc_phase_pulse( Function_T * f,
         {
             phase_p->pos += dg2020.grace_period;
 
-            if ( phase_p->pos < pp->pos + pp->len + dg2020.grace_period &&
-                 p->pc != pp->pc && for_pulse != p )
+            if (    phase_p->pos < pp->pos + pp->len + dg2020.grace_period
+                 && p->pc != pp->pc
+                 && for_pulse != p )
             {
                 print( SEVERE, "Pulses %ld and %ld become so close that "
                        "problems with phase switching may result.\n",
@@ -421,9 +425,10 @@ void dg2020_recalc_phase_pulse( Function_T * f,
                     pppl[ i ]->needs_update = NEEDS_UPDATE( pppl[ i ] );
                 }
 
-                if ( pppl[ i ]->pos + pppl[ i ]->len <
-                     pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len &&
-                     pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
+                if (    pppl[ i ]->pos + pppl[ i ]->len <
+                                                 pppl[ i ]->for_pulse->pos
+                                                 + pppl[ i ]->for_pulse->len
+                     && pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
                 {
                     print( FATAL, "Distance between pulses %ld and %ld "
                            "becomes too small to allow setting of phase "
@@ -431,11 +436,12 @@ void dg2020_recalc_phase_pulse( Function_T * f,
                     THROW( EXCEPTION );
                 }
 
-                if ( pppl[ i ]->pos + pppl[ i ]->len <
-                     pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len
-                     + dg2020.grace_period  &&
-                     pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc &&
-                     p != for_pulse )
+                if (    pppl[ i ]->pos + pppl[ i ]->len <
+                                               pppl[ i ]->for_pulse->pos
+                                               + pppl[ i ]->for_pulse->len
+                                               + dg2020.grace_period
+                     && pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc
+                     && p != for_pulse )
                 {
                     print( SEVERE, "Pulses %ld and %ld become so close that "
                            "problems with phase switching may result.\n",
@@ -467,8 +473,8 @@ set_length:
         phase_p->is_old_len = SET;
     }
 
-    if ( nth == p->function->num_pulses - 1 ||        /* last active pulse ? */
-         ! p->function->pulses[ nth  + 1 ]->is_active )
+    if (    nth == p->function->num_pulses - 1        /* last active pulse ? */
+         || ! p->function->pulses[ nth  + 1 ]->is_active )
     {
         if ( flag )                /* in test run */
             phase_p->len = -1;
@@ -485,12 +491,14 @@ set_length:
         /* This length is only tentatively and may become shorter when the
            following phase pulse is set */
 
-        if ( phase_p->is_len &&
-             ( ( phase_p->pos + phase_p->len >=
-                 p->pos + p->len + dg2020.grace_period || p->pc == pn->pc ) &&
-               phase_p->pos + phase_p->len <= dg2020.max_seq_len - f->delay &&
-               ( phase_p->pos + phase_p->len <= pn->pos - f->psd ||
-                 p->pc == pn->pc ) ) )
+        if (    phase_p->is_len
+             && (   (    phase_p->pos + phase_p->len >=
+                                          p->pos + p->len + dg2020.grace_period
+                      || p->pc == pn->pc )
+                  && phase_p->pos + phase_p->len <=
+                                                  dg2020.max_seq_len - f->delay
+                  && (    phase_p->pos + phase_p->len <= pn->pos - f->psd
+                       || p->pc == pn->pc ) ) )
             goto done_setting;
 
         phase_p->len = pn->pos - f->psd - phase_p->pos;
@@ -503,9 +511,10 @@ set_length:
             THROW( EXCEPTION );
         }
 
-        if ( phase_p->pos + phase_p->len <
-             p->pos + p->len + dg2020.grace_period &&
-             p->pc != pn->pc && p != for_pulse )
+        if (    phase_p->pos + phase_p->len <
+                                          p->pos + p->len + dg2020.grace_period
+             && p->pc != pn->pc
+             && p != for_pulse )
         {
             print( SEVERE, "Pulses %ld and %ld become so close that problems "
                    "with phase switching may result.\n", p->num, pn->num );
@@ -566,8 +575,9 @@ void dg2020_full_reset( void )
 
         p->is_old_pos = p->is_old_len = UNSET;
 
-        p->is_active = ( p->is_pos && p->is_len &&
-                         ( p->len > 0 || p->len == -1 ) );
+        p->is_active = (    p->is_pos
+                         && p->is_len
+                         && ( p->len > 0 || p->len == -1 ) );
 
         p = p->next;
     }
@@ -664,8 +674,8 @@ void dg2020_finalize_phase_pulses( int func )
     Pulse_T *p;
 
 
-    fsc2_assert( func == PULSER_CHANNEL_PHASE_1 ||
-                 func == PULSER_CHANNEL_PHASE_2 );
+    fsc2_assert(    func == PULSER_CHANNEL_PHASE_1
+                 || func == PULSER_CHANNEL_PHASE_2 );
 
     f = dg2020.function + func;
     if ( ! f->is_used )
@@ -700,8 +710,8 @@ void dg2020_set_pulses( Function_T * f )
 
     /* As usual we need a special treatment of phase pulses... */
 
-    if ( f->self == PULSER_CHANNEL_PHASE_1 ||
-         f->self == PULSER_CHANNEL_PHASE_2 )
+    if (    f->self == PULSER_CHANNEL_PHASE_1
+         || f->self == PULSER_CHANNEL_PHASE_2 )
         return;
 
     /* Always set the very first bit to LOW state, see the rant about the bugs
@@ -830,8 +840,8 @@ void dg2020_commit( Function_T * f,
 
     /* As so often the phase functions need some special treatment */
 
-    if ( f->self == PULSER_CHANNEL_PHASE_1 ||
-         f->self == PULSER_CHANNEL_PHASE_2 )
+    if (    f->self == PULSER_CHANNEL_PHASE_1
+         || f->self == PULSER_CHANNEL_PHASE_2 )
     {
         dg2020_commit_phases( f, flag );
         return;
@@ -947,8 +957,7 @@ void dg2020_clear_padding_block( Function_T * f )
     int i;
 
 
-    if ( ! f->is_used ||
-         ! dg2020.block[ 1 ].is_used )
+    if ( ! f->is_used || ! dg2020.block[ 1 ].is_used )
         return;
 
     for ( i = 0; i < f->num_channels; i++ )

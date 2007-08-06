@@ -51,8 +51,8 @@ Ticks dg2020_double2ticks( double p_time )
         THROW( EXCEPTION );
     }
 
-    if ( fabs( Ticksrnd( ticks ) - p_time / dg2020.timebase ) > 1.0e-2 ||
-         ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
+    if ( fabs( Ticksrnd( ticks ) - p_time / dg2020.timebase ) > 1.0e-2
+         || ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
     {
         print( FATAL, "Specified time of %s is not an integer multiple of the "
                "pulser time base of %s.\n",
@@ -238,9 +238,9 @@ Ticks dg2020_get_max_seq_len( void )
 
         /* Nothing to be done for unused functions and the phase functions */
 
-        if ( ! f->is_used ||
-             f->self == PULSER_CHANNEL_PHASE_1 ||
-             f->self == PULSER_CHANNEL_PHASE_2 )
+        if (    ! f->is_used
+             || f->self == PULSER_CHANNEL_PHASE_1
+             || f->self == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         max = Ticks_max( max, f->max_seq_len ); 
@@ -387,9 +387,9 @@ bool dg2020_prep_cmd( char ** cmd,
 
     /* Check the parameters */
 
-    if ( channel < 0 || channel > MAX_CHANNELS ||
-         address < 0 || address + length > MAX_PULSER_BITS ||
-         length <= 0 || length > MAX_PULSER_BITS )
+    if (    channel < 0 || channel > MAX_CHANNELS
+         || address < 0 || address + length > MAX_PULSER_BITS
+         || length <= 0 || length > MAX_PULSER_BITS )
         return FAIL;
 
     /* Get enough memory for the command string */
@@ -517,10 +517,11 @@ void dg2020_duty_check( void )
     for ( i = 0; i < 2; i++ )
     {
         f = dg2020.function + fns[ i ];
-        if ( f->is_used && f->num_channels > 0 &&
-             dg2020_calc_max_length( f ) > 
-                                    MAX_TWT_DUTY_CYCLE * dg2020.repeat_time &&
-             f->max_duty_warning++ == 0 ) 
+        if (    f->is_used
+             && f->num_channels > 0
+             && dg2020_calc_max_length( f ) > 
+                                        MAX_TWT_DUTY_CYCLE * dg2020.repeat_time
+             && f->max_duty_warning++ == 0 ) 
             print( SEVERE, "Duty cycle of TWT exceeded due to length of %s "
                    "pulses.\n", f->name );
     }
@@ -718,23 +719,23 @@ void dg2020_dump_channels( FILE * fp )
             {
                 pp = f->pulse_params + k;
 
-                if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
-                     pp->pulse->sp != NULL )
+                if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+                     && pp->pulse->sp != NULL )
                     fprintf( fp, " (%ld) %ld %ld",
                              pp->pulse->sp->num, pp->pos, pp->len );
-                else if ( f->self == PULSER_CHANNEL_TWT &&
-                          pp->pulse->tp != NULL )
+                else if (    f->self == PULSER_CHANNEL_TWT
+                          && pp->pulse->tp != NULL )
                     fprintf( fp, " (%ld) %ld %ld",
                              pp->pulse->tp->num, pp->pos, pp->len );
-                else if ( pp->pulse->pc == NULL ||
-                          f->phase_setup->
+                else if (    pp->pulse->pc == NULL
+                          || f->phase_setup->
                                 pod[ pp->pulse->pc->sequence[ f->next_phase ] ]
                                                                        == pod )
                     fprintf( fp, " %ld %ld %ld",
                              pp->pulse->num, pp->pos, pp->len );
 
-                if ( f->phase_setup != NULL &&
-                     f->phase_setup->
+                if (    f->phase_setup != NULL
+                     && f->phase_setup->
                                 pod[ pp->pulse->pc->sequence[ f->next_phase ] ]
                                                                        == pod )
                 {

@@ -78,8 +78,8 @@ bool hfs9000_init( const char * name )
 
     for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
     {
-        if ( hfs9000.channel[ i ].function == NULL ||
-             ! hfs9000.channel[ i ].function->is_used )
+        if (    hfs9000.channel[ i ].function == NULL
+             || ! hfs9000.channel[ i ].function->is_used )
             continue;
 
         sprintf( cmd, "PGEN%c:CH%c:OUTP OFF\n",
@@ -92,8 +92,8 @@ bool hfs9000_init( const char * name )
     strcpy( cmd, "PGEN*:CH*:LDEL MIN\n" );
     for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
     {
-        if ( hfs9000.channel[ i ].function == NULL ||
-             ! hfs9000.channel[ i ].function->is_used )
+        if (    hfs9000.channel[ i ].function == NULL
+             || ! hfs9000.channel[ i ].function->is_used )
             continue;
         cmd[ 4 ] = CHANNEL_LETTER( i );
         cmd[ 8 ] = CHANNEL_NUMBER( i );
@@ -105,8 +105,8 @@ bool hfs9000_init( const char * name )
     strcpy( cmd, "PGEN*:CH*:DCYC 100\n" );
     for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
     {
-        if ( hfs9000.channel[ i ].function == NULL ||
-             ! hfs9000.channel[ i ].function->is_used )
+        if (    hfs9000.channel[ i ].function == NULL
+             || ! hfs9000.channel[ i ].function->is_used )
             continue;
         cmd[ 4 ] = CHANNEL_LETTER( i );
         cmd[ 8 ] = CHANNEL_NUMBER( i );
@@ -117,8 +117,8 @@ bool hfs9000_init( const char * name )
 
     for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
     {
-        if ( hfs9000.channel[ i ].function == NULL ||
-             ! hfs9000.channel[ i ].function->is_used )
+        if (    hfs9000.channel[ i ].function == NULL
+             || ! hfs9000.channel[ i ].function->is_used )
             continue;
         sprintf( cmd, "PGEN%c:CH%c:POL %s\n",
                  CHANNEL_LETTER( i ), CHANNEL_NUMBER( i ),
@@ -131,8 +131,8 @@ bool hfs9000_init( const char * name )
 
     for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
     {
-        if ( hfs9000.channel[ i ].function == NULL ||
-             ! hfs9000.channel[ i ].function->is_used )
+        if (    hfs9000.channel[ i ].function == NULL
+             || ! hfs9000.channel[ i ].function->is_used )
             continue;
         sprintf( cmd, "PGEN%c:CH%c:TRANS MIN\n",
                  CHANNEL_LETTER( i ), CHANNEL_NUMBER( i ) );
@@ -144,8 +144,8 @@ bool hfs9000_init( const char * name )
     strcpy( cmd, "PGEN*:CH*:TYPE RZ\n");
     for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
     {
-        if ( hfs9000.channel[ i ].function == NULL ||
-             ! hfs9000.channel[ i ].function->is_used )
+        if (    hfs9000.channel[ i ].function == NULL
+             || ! hfs9000.channel[ i ].function->is_used )
             continue;
         cmd[ 4 ] = CHANNEL_LETTER( i );
         cmd[ 8 ] = CHANNEL_NUMBER( i );
@@ -156,8 +156,8 @@ bool hfs9000_init( const char * name )
 
     for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
     {
-        if ( hfs9000.channel[ i ].function == NULL ||
-             ! hfs9000.channel[ i ].function->is_used )
+        if (    hfs9000.channel[ i ].function == NULL
+             || ! hfs9000.channel[ i ].function->is_used )
             continue;
 
         if ( hfs9000.channel[ i ].function->is_high_level )
@@ -193,8 +193,8 @@ bool hfs9000_init( const char * name )
 
     for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
     {
-        if ( hfs9000.channel[ i ].function == NULL ||
-             ! hfs9000.channel[ i ].function->is_used )
+        if (    hfs9000.channel[ i ].function == NULL
+             || ! hfs9000.channel[ i ].function->is_used )
             continue;
 
         sprintf( cmd, "PGEN%c:CH%c:SIGN \"%s\"\n",
@@ -207,8 +207,8 @@ bool hfs9000_init( const char * name )
 
     for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
     {
-        if ( hfs9000.channel[ i ].function == NULL ||
-             ! hfs9000.channel[ i ].function->is_used )
+        if (    hfs9000.channel[ i ].function == NULL
+             || ! hfs9000.channel[ i ].function->is_used )
             continue;
 
         sprintf( cmd, "PGEN%c:CH%c:OUTP %s\n",
@@ -289,8 +289,8 @@ static void hfs9000_setup_trig_in( void )
 
         for ( i = MIN_CHANNEL; i <= MAX_CHANNEL; i++ )
         {
-            if ( hfs9000.channel[ i ].function == NULL ||
-                 ! hfs9000.channel[ i ].function->is_used )
+            if (    hfs9000.channel[ i ].function == NULL
+                 || ! hfs9000.channel[ i ].function->is_used )
                 continue;
 
             sprintf( cmd, "PGEN%c:CH%c:CDEL MIN\n",
@@ -298,8 +298,8 @@ static void hfs9000_setup_trig_in( void )
             hfs9000_command( cmd );
         }
 
-        if ( hfs9000.channel[ HFS9000_TRIG_OUT ].function == NULL ||
-             hfs9000.channel[ HFS9000_TRIG_OUT ].function->is_used )
+        if (    hfs9000.channel[ HFS9000_TRIG_OUT ].function == NULL
+             || hfs9000.channel[ HFS9000_TRIG_OUT ].function->is_used )
             hfs9000_command( "TBAS:TOUT:PRET 60E-9\n" );
     }
 }
@@ -435,8 +435,8 @@ bool hfs9000_operation_complete( void )
     {
         stop_on_user_request( );
         len = 10;
-        if ( gpib_write( hfs9000.device, "*OPC?\n", 6 ) == FAILURE ||
-             gpib_read( hfs9000.device, reply, &len ) == FAILURE )
+        if (    gpib_write( hfs9000.device, "*OPC?\n", 6 ) == FAILURE
+             || gpib_read( hfs9000.device, reply, &len ) == FAILURE )
             hfs9000_gpib_failure( );
     } while ( reply[ 0 ] != '1' );
 

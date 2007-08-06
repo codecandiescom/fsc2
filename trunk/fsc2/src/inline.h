@@ -61,40 +61,40 @@ static inline long lrnd( double /* d */ );
 static inline unsigned long ulrnd( double /* d */ );
 
 static inline int i_max( int /* a */,
-                         int /* b */ );
+                         int /* b */  );
 
 static inline int i_min( int /* a */,
-                         int /* b */ );
+                         int /* b */  );
 
 static inline long l_max( long /* a */,
-                          long /* b */ );
+                          long /* b */  );
 
 static inline long l_min( long /* a */,
-                          long /* b */ );
+                          long /* b */  );
 
 static inline float f_max( float /* a */,
-                           float /* b */ );
+                           float /* b */  );
 
 static inline float f_min( float /* a */,
-                           float /* b */ );
+                           float /* b */  );
 
 static inline double d_max( double /* a */,
-                            double /* b */ );
+                            double /* b */  );
 
 static inline double d_min( double /* a */,
-                            double /* b */ );
+                            double /* b */  );
 
 static inline ssize_t ss_min( ssize_t /* a */,
-                              ssize_t /* b */ );
+                              ssize_t /* b */  );
 
 static inline ssize_t ss_max( ssize_t /* a */,
-                              ssize_t /* b */ );
+                              ssize_t /* b */  );
 
 static inline size_t s_min( size_t /* a */,
-                            size_t /* b */ );
+                            size_t /* b */  );
 
 static inline size_t s_max( size_t /* a */,
-                            size_t /* b */ );
+                            size_t /* b */  );
 
 
 /*-------------------------------------------------------------------------*

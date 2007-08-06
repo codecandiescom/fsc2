@@ -183,8 +183,8 @@ int rb8510_1_end_of_exp_hook( void )
 
         rb8510.handle = -1;
 
-        if ( rb8510.reserved_by &&
-             rb8510.reserved_by != rb8510_stored.reserved_by )
+        if (    rb8510.reserved_by
+             && rb8510.reserved_by != rb8510_stored.reserved_by )
             rb8510.reserved_by = CHAR_P T_free( rb8510.reserved_by );
     }
 

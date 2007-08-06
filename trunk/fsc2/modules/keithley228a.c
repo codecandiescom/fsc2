@@ -202,18 +202,18 @@ int keithley228a_init_hook( void )
     keithley228a.lockindac_port = dac_ports[ i ];
 #endif
 
-    if ( get_lib_symbol( keithley228a.lockin_name, "first_DAC_port",
-                         &first_DAC_port ) != LIB_OK ||
-         get_lib_symbol( keithley228a.lockin_name, "last_DAC_port",
-                         &last_DAC_port ) != LIB_OK )
+    if (    get_lib_symbol( keithley228a.lockin_name, "first_DAC_port",
+                            &first_DAC_port ) != LIB_OK
+         || get_lib_symbol( keithley228a.lockin_name, "last_DAC_port",
+                            &last_DAC_port ) != LIB_OK )
     {
         print( FATAL, "Can't find necessary symbols in library for lock-in "
                "amplifier '%s'.\n", keithley228a.lockin_name );
         THROW( EXCEPTION );
     }
 
-    if ( keithley228a.lockin_dac_port < * ( int * ) first_DAC_port ||
-         keithley228a.lockin_dac_port > * ( int * ) last_DAC_port )
+    if (    keithley228a.lockin_dac_port < * ( int * ) first_DAC_port
+         || keithley228a.lockin_dac_port > * ( int * ) last_DAC_port )
     {
         print( FATAL, "Invalid DAC port number %d, valid range for lock-in "
                "'%s' is %d to %d\n", keithley228a.lockin_dac_port,
@@ -380,18 +380,18 @@ Var_T *magnet_use_dac_port( Var_T * v )
 
     port = ( int ) get_long( v, "DAC port" );
 
-    if ( get_lib_symbol( keithley228a.lockin_name, "first_DAC_port",
-                         &first_DAC_port ) != LIB_OK ||
-         get_lib_symbol( keithley228a.lockin_name, "last_DAC_port",
-                         &last_DAC_port ) != LIB_OK )
+    if (    get_lib_symbol( keithley228a.lockin_name, "first_DAC_port",
+                            &first_DAC_port ) != LIB_OK
+         || get_lib_symbol( keithley228a.lockin_name, "last_DAC_port",
+                            &last_DAC_port ) != LIB_OK )
     {
         print( FATAL, "Can't find necessary symbols in library for lock-in "
                "amplifier '%s'.\n", keithley228a.lockin_name );
         THROW( EXCEPTION );
     }
 
-    if ( port < * ( int * ) first_DAC_port ||
-         port > * ( int * ) last_DAC_port )
+    if (    port < * ( int * ) first_DAC_port
+         || port > * ( int * ) last_DAC_port )
     {
         print( FATAL, "Invalid DAC port number %d, valid range for lock-in "
                "'%s' is %d to %d\n", port, keithley228a.lockin_name,
@@ -805,8 +805,8 @@ static double keithley228a_goto_current( double new_current )
             if ( gpib_read( keithley228a.device, reply, &length ) == FAILURE )
                 keithley228a_gpib_failure( );
             sscanf( reply, "%lf,%lf", &dummy, &act_amps );
-        } while ( fabs( act_amps - keithley228a.current ) > 0.05 &&
-                  max_tries-- > 0 );
+        } while (    fabs( act_amps - keithley228a.current ) > 0.05
+                  && max_tries-- > 0 );
 
         if ( max_tries < 0 )
         {
@@ -1128,8 +1128,8 @@ static void keithley228a_get_corrected_current( double   c,
          i = 0;
          do
          {
-             if ( lrnd( 1.0e6 * c ) <= lrnd( 1.0e6 * neg_jumps[ i     ] ) &&
-                  lrnd( 1.0e6 * c ) >  lrnd( 1.0e6 * neg_jumps[ i + 1 ] ) )
+             if (    lrnd( 1.0e6 * c ) <= lrnd( 1.0e6 * neg_jumps[ i     ] )
+                  && lrnd( 1.0e6 * c ) >  lrnd( 1.0e6 * neg_jumps[ i + 1 ] ) )
              {
                  c -= neg_jumps[ i ];
                  if ( i & 1 )

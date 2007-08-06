@@ -146,9 +146,9 @@ void cut_show( int  dir,
     /* Don't do anything if no curve is currently displayed or if mouse didn't
        got released in one of the axis canvases */
 
-    if ( G_2d.active_curve == -1 || u_index < 0 ||
-         ( dir == X && u_index >= G_2d.nx ) ||
-         ( dir == Y && u_index >= G_2d.ny ) )
+    if (    G_2d.active_curve == -1 || u_index < 0
+         || ( dir == X && u_index >= G_2d.nx )
+         || ( dir == Y && u_index >= G_2d.ny ) )
         return;
 
     /* If the cross section window hasn't been shown before create and
@@ -159,8 +159,8 @@ void cut_show( int  dir,
     {
         fl_set_object_shortcutkey( GUI.cut_form->change_button, XK_space );
 
-        if ( ! cut_has_been_shown &&
-             * ( ( char * ) Xresources[ CUTGEOMETRY ].var ) != '\0' )
+        if (    ! cut_has_been_shown
+             && ( ( char * ) Xresources[ CUTGEOMETRY ].var ) != '\0' )
         {
             flags = XParseGeometry( ( char * ) Xresources[ CUTGEOMETRY ].var,
                                     &x, &y, &w, &h );
@@ -1394,10 +1394,10 @@ static void cut_press_handler( FL_OBJECT * obj,
        if the pressed buttons have lost there meaning, there is no curve
        displayed or the curve has no scaling yet */
 
-    if ( ( c != &G_2d.cut_canvas && G.raw_button_state != 0 ) ||
-         ( G.button_state == 0 && G.raw_button_state != 0 ) ||
-         G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    ( c != &G_2d.cut_canvas && G.raw_button_state != 0 )
+         || ( G.button_state == 0 && G.raw_button_state != 0 )
+         || G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
     {
         G.raw_button_state |= 1 << ( ev->xbutton.button - 1 );
         return;
@@ -1407,8 +1407,9 @@ static void cut_press_handler( FL_OBJECT * obj,
 
     /* Middle and right or all three buttons at once don't mean a thing */
 
-    if ( G.raw_button_state >= 6 &&
-         G.raw_button_state != 8 && G.raw_button_state != 16 )
+    if (    G.raw_button_state >= 6
+         && G.raw_button_state != 8
+         && G.raw_button_state != 16 )
         return;
 
     G.button_state |= ( 1 << ( ev->xbutton.button - 1 ) );
@@ -1559,8 +1560,8 @@ static void cut_release_handler( FL_OBJECT * obj  UNUSED_ARG,
     /* If the released button didn't has a meaning just clear it from the
        button state pattern and then forget about it */
 
-    if ( ! ( ( 1 << ( ev->xbutton.button - 1 ) ) & G.button_state ) ||
-         G_2d.active_curve == -1 )
+    if (    ! ( ( 1 << ( ev->xbutton.button - 1 ) ) & G.button_state )
+         || G_2d.active_curve == -1 )
     {
         G.raw_button_state &= ~ ( 1 << ( ev->xbutton.button - 1 ) );
         return;
@@ -1760,8 +1761,8 @@ static void cut_motion_handler( FL_OBJECT * obj  UNUSED_ARG,
         /* Stop looking ahead if the next one isn't a motion event or is for
            a different window */
 
-        if ( new_ev.type != MotionNotify ||
-             new_ev.xmotion.window != ev->xmotion.window )
+        if (    new_ev.type != MotionNotify
+             || new_ev.xmotion.window != ev->xmotion.window )
             break;
 
         fl_XNextEvent( ev );                  /* get the next event */
@@ -2178,10 +2179,13 @@ int get_mouse_pos_cut( double *       pa,
     fl_get_win_mouse( FL_ObjWin( G_2d.cut_canvas.obj ),
                       ppos + X, ppos + Y, keymask );
 
-    if ( ! G_2d.is_cut || G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set ||
-         ppos[ X ] < 0 || ppos[ X ] > ( int ) G_2d.cut_canvas.w - 1 ||
-         ppos[ Y ] < 0 || ppos[ Y ] > ( int ) G_2d.cut_canvas.h - 1 )
+    if (    ! G_2d.is_cut
+         || G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set
+         || ppos[ X ] < 0
+         || ppos[ X ] > ( int ) G_2d.cut_canvas.w - 1
+         || ppos[ Y ] < 0
+         || ppos[ Y ] > ( int ) G_2d.cut_canvas.h - 1 )
         return 0;
 
     scv = G_2d.curve_2d[ G_2d.active_curve ];
@@ -2258,8 +2262,8 @@ void redraw_cut_axis( int coord )
                        c->w - 5 - G_2d.label_w[ coord + 3 ], 0 );
     }
 
-    if ( G_2d.active_curve != -1 &&
-         G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    G_2d.active_curve != -1
+         && G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         cut_make_scale( c, coord );
 
     XCopyArea( G.d, c->pm, FL_ObjWin( c->obj ), c->gc,
@@ -3077,8 +3081,8 @@ void delete_all_cut_markers( bool redraw_flag )
     Marker_1d_T *m, *mn;
 
 
-    if ( G_cut.curve == -1 ||
-         G_2d.curve_2d[ G_cut.curve ]->cut_marker == NULL )
+    if (    G_cut.curve == -1
+         || G_2d.curve_2d[ G_cut.curve ]->cut_marker == NULL )
         return;
 
     for ( m = G_2d.curve_2d[ G_cut.curve ]->cut_marker; m != NULL; m = mn )

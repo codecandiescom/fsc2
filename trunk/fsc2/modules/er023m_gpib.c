@@ -99,8 +99,8 @@ bool er023m_init( const char * name )
             if ( er023m.ct_mult < MIN_CT_MULT )
                 er023m.ct_mult = MIN_CT_MULT;
 
-            if ( er023m.ct_mult >= BAD_LOW_CT_MULT &&
-                 er023m.ct_mult <= BAD_HIGH_CT_MULT )
+            if (    er023m.ct_mult >= BAD_LOW_CT_MULT
+                 && er023m.ct_mult <= BAD_HIGH_CT_MULT )
             {
                 long new_ct_mult;
 
@@ -618,8 +618,8 @@ static bool er023m_talk( const char * cmd,
                          char *       reply,
                          long *       length )
 {
-    if ( gpib_write( er023m.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( er023m.device, reply, length ) == FAILURE )
+    if (    gpib_write( er023m.device, cmd, strlen( cmd ) ) == FAILURE
+         || gpib_read( er023m.device, reply, length ) == FAILURE )
         er023m_failure( );
     return OK;
 }

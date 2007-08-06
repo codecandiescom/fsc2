@@ -185,8 +185,8 @@ Var_T *gaussmeter_resolution( Var_T * v )
 
     if ( v == NULL )
     {
-        if ( FSC2_MODE == PREPARATION &&
-             pt2025.resolution == UNDEF_RESOLUTION )
+        if (    FSC2_MODE == PREPARATION
+             && pt2025.resolution == UNDEF_RESOLUTION )
         {
             no_query_possible( );
             THROW( EXCEPTION );
@@ -331,8 +331,8 @@ static bool pt2025_init( const char * name )
     do
     {
         len = 50;
-        if ( gpib_write( pt2025.device, "S3\r\n", 4 ) == FAILURE ||
-             gpib_read( pt2025.device, ( char * ) buf, &len ) == FAILURE )
+        if (    gpib_write( pt2025.device, "S3\r\n", 4 ) == FAILURE
+             || gpib_read( pt2025.device, ( char * ) buf, &len ) == FAILURE )
             return FAIL;
     } while ( buf[ 0 ] != 'S' || len != 3 );
 
@@ -341,33 +341,33 @@ static bool pt2025_init( const char * name )
 
     /* If necessary switch to field display mode (i.e. send data in Tesla) */
 
-    if ( ! ( status & 1 ) &&
-         gpib_write( pt2025.device, "D1\r\n", 4 ) == FAILURE )
+    if (    ! ( status & 1 )
+         && gpib_write( pt2025.device, "D1\r\n", 4 ) == FAILURE )
         return FAIL;
 
     /* If necessary switch to multiplexer A */
 
-    if ( status & 0x70 &&
-         gpib_write( pt2025.device, "PA\r\n", 4 ) == FAILURE )
+    if (    status & 0x70
+         && gpib_write( pt2025.device, "PA\r\n", 4 ) == FAILURE )
         return FAIL;
 
     /* If necessary switch to field AUTO mode */
 
-    if ( ! ( status & 2 ) &&
-         gpib_write( pt2025.device, "A1\r\n", 4 ) == FAILURE )
+    if (    ! ( status & 2 )
+         && gpib_write( pt2025.device, "A1\r\n", 4 ) == FAILURE )
         return FAIL;
 
     /* If the probe orientation isn't the way the user asked for set it,
        otherwise keep the current setting */
 
-    if ( pt2025.probe_orientation != PROBE_ORIENTATION_UNDEFINED &&
-         ( ( status & 4 &&
-             pt2025.probe_orientation == PROBE_ORIENTATION_MINUS ) ||
-           ( ! ( status & 4 ) &&
-             pt2025.probe_orientation == PROBE_ORIENTATION_PLUS ) ) &&
-         gpib_write( pt2025.device,
-                     pt2025.probe_orientation == PROBE_ORIENTATION_PLUS ?
-                     "F1\r\n" : "F0\r\n", 4 ) == FAILURE )
+    if (    pt2025.probe_orientation != PROBE_ORIENTATION_UNDEFINED
+         && (    (    status & 4
+                   && pt2025.probe_orientation == PROBE_ORIENTATION_MINUS )
+              || (    ! ( status & 4 )
+                   && pt2025.probe_orientation == PROBE_ORIENTATION_PLUS ) )
+         && gpib_write( pt2025.device,
+                        pt2025.probe_orientation == PROBE_ORIENTATION_PLUS ?
+                        "F1\r\n" : "F0\r\n", 4 ) == FAILURE )
          return FAIL;
     else
         pt2025.probe_orientation = status & 4;
@@ -376,11 +376,11 @@ static bool pt2025_init( const char * name )
 
     if ( pt2025.resolution == UNDEF_RESOLUTION )
         pt2025.resolution = status & 0x80 ? LOW : HIGH;
-    else if ( ( ( pt2025.resolution == LOW && ! ( status & 0x80 ) ) ||
-                ( pt2025.resolution == HIGH && status & 0x80 ) ) &&
-              gpib_write( pt2025.device,
-                          pt2025.resolution == LOW ? "V1\r\n" : "V0\r\n", 4 )
-              == FAILURE )
+    else if (    (    ( pt2025.resolution == LOW && ! ( status & 0x80 ) )
+                   || ( pt2025.resolution == HIGH && status & 0x80 ) )
+              && gpib_write( pt2025.device,
+                             pt2025.resolution == LOW ? "V1\r\n" : "V0\r\n",
+                             4 ) == FAILURE )
         return FAIL;
 
     /* Activate the search, starting at about 3.15 T */

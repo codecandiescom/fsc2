@@ -125,8 +125,8 @@ bool hfs9000_assign_channel_to_function( int  function,
 
 bool hfs9000_invert_function( int function )
 {
-    if ( hfs9000.function[ function ].channel != NULL &&
-         hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
+    if (    hfs9000.function[ function ].channel != NULL
+         && hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
     {
         print( FATAL, "Polarity of function '%s' associated with TRIG_OUT "
                "can't be inverted.\n", Function_Names[ function ] );
@@ -160,9 +160,9 @@ bool hfs9000_set_function_delay( int    function,
 
     if ( Delay < 0 )
     {
-        if ( ( hfs9000.is_trig_in_mode &&
-               hfs9000.trig_in_mode == EXTERNAL ) ||
-             hfs9000.is_trig_in_slope || hfs9000.is_trig_in_level )
+        if (    ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == EXTERNAL )
+             || hfs9000.is_trig_in_slope
+             || hfs9000.is_trig_in_level )
         {
             print( FATAL, "Negative delays are invalid in EXTERNAL trigger "
                    "mode.\n" );
@@ -219,8 +219,8 @@ bool hfs9000_set_function_high_level( int    function,
 
     v = lrnd( voltage / VOLTAGE_RESOLUTION );
 
-    if ( v < lrnd( MIN_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION ) ||
-         v > lrnd( MAX_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION ) )
+    if (    v < lrnd( MIN_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION )
+         || v > lrnd( MAX_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION ) )
     {
         print( FATAL, "Invalid high level of %g V for function '%s', valid "
                "range is %g V to %g V.\n", voltage, Function_Names[ function ],
@@ -268,8 +268,8 @@ bool hfs9000_set_function_low_level( int    function,
 
     v = lrnd( voltage / VOLTAGE_RESOLUTION );
 
-    if ( v < lrnd( MIN_POD_LOW_VOLTAGE / VOLTAGE_RESOLUTION ) ||
-         v > lrnd( MAX_POD_LOW_VOLTAGE / VOLTAGE_RESOLUTION ) )
+    if (    v < lrnd( MIN_POD_LOW_VOLTAGE / VOLTAGE_RESOLUTION )
+         || v > lrnd( MAX_POD_LOW_VOLTAGE / VOLTAGE_RESOLUTION ) )
     {
         print( FATAL, "Invalid low level of %g V for function '%s', valid "
                "range is %g V to %g V.\n", voltage, Function_Names[ function ],
@@ -358,8 +358,8 @@ bool hfs9000_set_trig_in_level( double voltage )
         return FAIL;
     }
 
-    if ( hfs9000.is_neg_delay &&
-         ! ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) )
+    if (    hfs9000.is_neg_delay
+         && ! ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) )
     {
         print( FATAL, "Setting a trigger level (thus implicitly selecting "
                "EXTERNAL trigger mode) and using negative delays for "
@@ -369,8 +369,8 @@ bool hfs9000_set_trig_in_level( double voltage )
 
     v = lrnd( voltage / VOLTAGE_RESOLUTION );
 
-    if ( v > lrnd( MAX_TRIG_IN_LEVEL / VOLTAGE_RESOLUTION ) ||
-         v < lrnd( MIN_TRIG_IN_LEVEL / VOLTAGE_RESOLUTION ) )
+    if (    v > lrnd( MAX_TRIG_IN_LEVEL / VOLTAGE_RESOLUTION )
+         || v < lrnd( MIN_TRIG_IN_LEVEL / VOLTAGE_RESOLUTION ) )
     {
         print( FATAL, "Invalid level for trigger of %g V, valid range is %g V "
                "to %g V.\n", MIN_TRIG_IN_LEVEL, MAX_TRIG_IN_LEVEL );
@@ -407,8 +407,8 @@ bool hfs9000_set_trig_in_slope( int slope )
         return FAIL;
     }
 
-    if ( hfs9000.is_neg_delay &&
-         ! ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) )
+    if (    hfs9000.is_neg_delay
+         && ! ( hfs9000.is_trig_in_mode && hfs9000.trig_in_mode == INTERNAL ) )
     {
         print( FATAL, "Setting a trigger slope (implicitly selecting EXTERNAL "
                "trigger mode) and using negative delays for functions is "
@@ -428,8 +428,8 @@ bool hfs9000_set_trig_in_slope( int slope )
 
 bool hfs9000_set_max_seq_len( double seq_len )
 {
-    if ( hfs9000.is_max_seq_len &&
-         hfs9000.max_seq_len != hfs9000_double2ticks( seq_len ) )
+    if (    hfs9000.is_max_seq_len
+         && hfs9000.max_seq_len != hfs9000_double2ticks( seq_len ) )
     {
         print( FATAL, "A differrent minimum pattern length of %s has already "
                "been set.\n", hfs9000_pticks( hfs9000.max_seq_len ) );

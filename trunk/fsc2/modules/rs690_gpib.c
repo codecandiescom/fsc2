@@ -76,8 +76,8 @@ bool rs690_init( const char * name )
     /* Try to read the device indentification string to check if the pulser
        responds. */
 
-    if ( rs690_write( rs690.device, "RUI!", 4 ) == FAILURE ||
-         gpib_read( rs690.device, reply, &length ) == FAILURE )
+    if (    rs690_write( rs690.device, "RUI!", 4 ) == FAILURE
+         || gpib_read( rs690.device, reply, &length ) == FAILURE )
         rs690_gpib_failure( );
 
     /* Disable the front panel and stop the pulser */
@@ -153,8 +153,8 @@ bool rs690_run( bool state )
     if ( rs690_write( rs690.device, state ? "RUN!" : "RST!" , 4 ) == FAILURE )
         rs690_gpib_failure( );
 
-    if ( state && rs690.trig_in_mode == INTERNAL &&
-         rs690_write( rs690.device, "TRG!", 4 ) == FAILURE )
+    if (    state && rs690.trig_in_mode == INTERNAL
+         && rs690_write( rs690.device, "TRG!", 4 ) == FAILURE )
         rs690_gpib_failure( );
 
     rs690.is_running = state;
@@ -303,9 +303,9 @@ bool rs690_set_channels( void )
     /* If necessary change the loop counts for the tables making up the
        repetition time */
 
-    if ( rs690.new_table.table_loops_1 != rs690.old_table.table_loops_1 ||
-         rs690.new_table.table_loops_2 != rs690.old_table.table_loops_2 ||
-         rs690.new_table.middle_loops  != rs690.old_table.middle_loops )
+    if (    rs690.new_table.table_loops_1 != rs690.old_table.table_loops_1
+         || rs690.new_table.table_loops_2 != rs690.old_table.table_loops_2
+         || rs690.new_table.middle_loops  != rs690.old_table.middle_loops )
     {
         sprintf( buf, "LOS,%s,M1,1,T0,1,T1,%d,M2,%d,T2,%d!",
                  rs690.trig_in_mode == EXTERNAL ? "1" : "CONT",
@@ -413,8 +413,8 @@ static void rs690_calc_tables( void )
     /* If no repetition time is to be used or the length of the last FS
        structure is not larger than MAX_TICKS_PER_ENTRY we're already done */
 
-    if ( ! rs690.is_repeat_time ||
-        rs690.last_new_fs->len <= MAX_TICKS_PER_ENTRY )
+    if (    ! rs690.is_repeat_time
+         || rs690.last_new_fs->len <= MAX_TICKS_PER_ENTRY )
         return;
 
     /* Otherwise we reduce the last FS's length to something that isn't a
@@ -534,9 +534,9 @@ static int rs690_write( int          device_no,
                         const char * s,
                         long         len )
 {
-    if ( gpib_write( device_no, s, len ) == FAILURE &&
-         GPIB_IS_TIMEOUT &&
-         gpib_write( device_no, s, len ) == FAILURE )
+    if (    gpib_write( device_no, s, len ) == FAILURE
+         && GPIB_IS_TIMEOUT
+         && gpib_write( device_no, s, len ) == FAILURE )
         return FAILURE;
     return SUCCESS;
 }

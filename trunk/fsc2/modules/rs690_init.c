@@ -234,8 +234,8 @@ static void rs690_create_shape_pulses( void )
         /* No shape pulses can be set for the PULSE_SHAPE function itself
            and functions that don't need shape pulses */
 
-        if ( f->self == PULSER_CHANNEL_PULSE_SHAPE ||
-             ! f->uses_auto_shape_pulses )
+        if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+             || ! f->uses_auto_shape_pulses )
             continue;
 
         np = PULSE_P T_malloc( sizeof *np );
@@ -310,19 +310,19 @@ static void rs690_create_shape_pulses( void )
 
     for ( p1 = rs690.pulses; p1 != old_end->next; p1 = p1->next )
     {
-        if ( ! p1->is_active ||
-             p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+        if (    ! p1->is_active
+             || p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
             continue;
 
         for ( p2 = old_end->next; p2 != NULL; p2 = p2->next )
         {
-            if ( ! p2->is_active ||
-                 p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+            if (    ! p2->is_active
+                 || p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
                 continue;
 
-            if ( p1->pos == p2->pos ||
-                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-                 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
+            if (    p1->pos == p2->pos
+                 || ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos )
+                 || ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
             {
                 print( FATAL, "PULSE_SHAPE pulse #%ld and automatically "
                        "created shape pulse for pulse #%ld (function '%s') "
@@ -350,9 +350,9 @@ static void rs690_create_shape_pulses( void )
             if ( p1->sp->function == p2->sp->function )
                 continue;
 
-            if ( p1->pos == p2->pos ||
-                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-                 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
+            if (    p1->pos == p2->pos
+                 || ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos )
+                 || ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
             {
                 print( FATAL, "Automatically created shape pulses for pulse "
                        "#%ld (function '%s') and #%ld (function '%s') "
@@ -399,9 +399,9 @@ static void rs690_create_twt_pulses( void )
         /* No TWT pulses can be set for the TWT or TWT_GATE function and
            functions that don't need TWT pulses */
 
-        if ( f->self == PULSER_CHANNEL_TWT ||
-             f->self == PULSER_CHANNEL_TWT_GATE ||
-             ! f->uses_auto_twt_pulses )
+        if (    f->self == PULSER_CHANNEL_TWT
+             || f->self == PULSER_CHANNEL_TWT_GATE
+             || ! f->uses_auto_twt_pulses )
             continue;
 
         np = PULSE_P T_malloc( sizeof *np );
@@ -489,8 +489,8 @@ static void rs690_basic_functions_check( void )
 
         /* Phase functions are not supported in this driver... */
 
-        fsc2_assert( i != PULSER_CHANNEL_PHASE_1 &&
-                     i != PULSER_CHANNEL_PHASE_2 );
+        fsc2_assert(    i != PULSER_CHANNEL_PHASE_1
+                     && i != PULSER_CHANNEL_PHASE_2 );
 
         /* Check if the function has pulses assigned to it */
 
@@ -529,8 +529,8 @@ static void rs690_basic_functions_check( void )
         delay = LONG_MAX;
 
         for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
-            if ( rs690.function[ i ].is_used &&
-                 delay > rs690.function[ i ].delay )
+            if (    rs690.function[ i ].is_used
+                 && delay > rs690.function[ i ].delay )
                 delay = rs690.function[ i ].delay;
         if ( delay != 0 )
             for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
@@ -549,8 +549,8 @@ static void rs690_basic_functions_check( void )
                function but there's no PHASE_SETUP that we're going to use
                only the very first channel for creating pulses */
 
-            if ( rs690.function[ i ].phase_setup == NULL &&
-                 rs690.function[ i ].num_channels > 1 )
+            if (    rs690.function[ i ].phase_setup == NULL
+                 && rs690.function[ i ].num_channels > 1 )
                 print( NO_ERROR, "Using only channel %d for %s pulses.\n",
                        rs690.function[ i ].channel[ 0 ]->self,
                        rs690.function[ i ].name );
@@ -805,9 +805,9 @@ static void rs690_pulse_start_setup( void )
 
         /* Nothing to be done for unused functions and the phase functions */
 
-        if ( ( ! f->is_used && f->num_channels == 0 ) ||
-             i == PULSER_CHANNEL_PHASE_1 ||
-             i == PULSER_CHANNEL_PHASE_2 )
+        if (    ( ! f->is_used && f->num_channels == 0 )
+             || i == PULSER_CHANNEL_PHASE_1
+             || i == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         rs690_pulse_init_check( f );
@@ -847,8 +847,8 @@ static void rs690_pulse_start_setup( void )
                 /* Extend pulses for which a shape pulse has been created
                    automatically a bit */
 
-                if ( p->function->self != PULSER_CHANNEL_PULSE_SHAPE &&
-                     p->sp != NULL )
+                if (    p->function->self != PULSER_CHANNEL_PULSE_SHAPE
+                     && p->sp != NULL )
                 {
                     pp->pos -= p->function->left_shape_padding;
                     pp->len +=   p->function->left_shape_padding
@@ -870,11 +870,12 @@ static void rs690_pulse_start_setup( void )
             rs690_channel_start_check( ch );
         }
 
-        if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
-             rs690.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-             ( rs690.is_shape_2_defense || rs690.is_defense_2_shape ||
-               rs690.function[ PULSER_CHANNEL_TWT ].is_used ||
-               rs690.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
+        if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+             && rs690.function[ PULSER_CHANNEL_DEFENSE ].is_used
+             && (    rs690.is_shape_2_defense
+                  || rs690.is_defense_2_shape
+                  || rs690.function[ PULSER_CHANNEL_TWT ].is_used
+                  || rs690.function[ PULSER_CHANNEL_TWT_GATE ].is_used ) )
             rs690_defense_shape_init_check( f );
     }
 
@@ -930,9 +931,9 @@ static void rs690_pulse_init_check( Function_T * f )
         /* Skip checks for inactive pulses and automatically generated
            shape and TWT pulses */
 
-        if ( ! p1->is_active ||
-             ( f->self == PULSER_CHANNEL_PULSE_SHAPE && p1->sp != NULL ) ||
-             ( f->self == PULSER_CHANNEL_TWT && p1->tp != NULL ) )
+        if (    ! p1->is_active
+             || ( f->self == PULSER_CHANNEL_PULSE_SHAPE && p1->sp != NULL )
+             || ( f->self == PULSER_CHANNEL_TWT && p1->tp != NULL ) )
             continue;
 
         for ( j = i + 1; j < f->num_pulses; j++ )
@@ -942,14 +943,14 @@ static void rs690_pulse_init_check( Function_T * f )
             /* Skip checks for inactive pulses and automatically generated
                TWT pulses */
 
-            if ( ! p2->is_active ||
-                 ( f->self == PULSER_CHANNEL_PULSE_SHAPE && p2->sp != NULL ) ||
-                 ( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
+            if (    ! p2->is_active
+                 || ( f->self == PULSER_CHANNEL_PULSE_SHAPE && p2->sp != NULL )
+                 || ( f->self == PULSER_CHANNEL_TWT && p2->tp != NULL ) )
                 continue;
 
-            if ( p1->pos == p2->pos ||
-                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-                 ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
+            if (    p1->pos == p2->pos
+                 || ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos )
+                 || ( p2->pos < p1->pos && p2->pos + p2->len > p1->pos ) )
             {
                 print( FATAL, "Pulses #%ld and #%ld (function '%s') "
                        "overlap.\n", p1->num, p2->num, f->name );
@@ -994,9 +995,9 @@ static void rs690_defense_shape_init_check( Function_T * shape )
             if ( ! defense_p->is_active )
                 continue;
 
-            if ( shape_p->pos <= defense_p->pos &&
-                 shape_p->pos + shape_p->len + rs690.shape_2_defense >
-                 defense_p->pos )
+            if (    shape_p->pos <= defense_p->pos
+                 && shape_p->pos + shape_p->len + rs690.shape_2_defense
+                                                             > defense_p->pos )
             {
                 if ( rs690.shape_2_defense_too_near == 0 )
                 {
@@ -1017,9 +1018,9 @@ static void rs690_defense_shape_init_check( Function_T * shape )
                 rs690.shape_2_defense_too_near++;
             }
 
-            if ( defense_p->pos < shape_p->pos &&
-                 defense_p->pos + defense_p->len + rs690.defense_2_shape >
-                 shape_p->pos )
+            if (    defense_p->pos < shape_p->pos
+                 && defense_p->pos + defense_p->len + rs690.defense_2_shape
+                                                               > shape_p->pos )
             {
                 if ( rs690.defense_2_shape_too_near == 0 )
                 {

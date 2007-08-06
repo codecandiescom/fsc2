@@ -243,8 +243,8 @@ static int do_send( const char * rec_host,
 
     do
     {
-        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-             strncmp( line, "220", 3 ) )
+        if (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4
+             || strncmp( line, "220", 3 ) )
         {
             close( mfd );
             return -1;
@@ -253,9 +253,9 @@ static int do_send( const char * rec_host,
 
     /* Send the line telling the other side about ourself */
 
-    if ( ( len = snprintf( line, MAX_LINE_LENGTH, "HELO %s\r\n", local_host ) )
-         > MAX_LINE_LENGTH ||
-         writen( mfd, line, len ) < len )
+    if (    ( len = snprintf( line, MAX_LINE_LENGTH,
+                              "HELO %s\r\n", local_host ) ) > MAX_LINE_LENGTH
+         || writen( mfd, line, len ) < len )
     {
         close( mfd );
         return -1;
@@ -265,8 +265,8 @@ static int do_send( const char * rec_host,
     
     do
     {
-        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-             strncmp( line, "250", 3 ) )
+        if (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4
+             || strncmp( line, "250", 3 ) )
         {
             close( mfd );
             return -1;
@@ -275,10 +275,9 @@ static int do_send( const char * rec_host,
 
     /* Send the line about the sender of the mail */
 
-    if ( ( len = snprintf( line, MAX_LINE_LENGTH, "MAIL FROM:<%s@%s>\r\n",
-                           from, local_host ) )
-         > MAX_LINE_LENGTH ||
-         writen( mfd, line, len ) < len )
+    if (    ( len = snprintf( line, MAX_LINE_LENGTH, "MAIL FROM:<%s@%s>\r\n",
+                              from, local_host ) ) > MAX_LINE_LENGTH
+         || writen( mfd, line, len ) < len )
     {
         close( mfd );
         return -1;
@@ -288,8 +287,8 @@ static int do_send( const char * rec_host,
     
     do
     {
-        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-             strncmp( line, "250", 3 ) )
+        if (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4
+             || strncmp( line, "250", 3 ) )
         {
             close( mfd );
             return -1;
@@ -298,9 +297,9 @@ static int do_send( const char * rec_host,
 
     /* Send the line telling the other side about the receiver of the mail */
 
-    if ( ( len = snprintf( line, MAX_LINE_LENGTH, "RCPT TO:<%s>\r\n", to ) )
-         > MAX_LINE_LENGTH ||
-         writen( mfd, line, len ) < len )
+    if (    ( len = snprintf( line, MAX_LINE_LENGTH,
+                              "RCPT TO:<%s>\r\n", to ) ) > MAX_LINE_LENGTH
+         || writen( mfd, line, len ) < len )
     {
         close( mfd );
         return -1;
@@ -310,8 +309,8 @@ static int do_send( const char * rec_host,
     
     do
     {
-        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-             strncmp( line, "250", 3 ) )
+        if (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4
+             || strncmp( line, "250", 3 ) )
         {
             close( mfd );
             return -1;
@@ -330,8 +329,8 @@ static int do_send( const char * rec_host,
     
     do
     {
-        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-             strncmp( line, "354", 3 ) )
+        if (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4
+             || strncmp( line, "354", 3 ) )
         {
             close( mfd );
             return -1;
@@ -340,15 +339,15 @@ static int do_send( const char * rec_host,
 
     /* Now send the message, starting with the header */
 
-    if ( ( len = snprintf( line, MAX_LINE_LENGTH, "Subject: %s\n", subject ) )
-         > MAX_LINE_LENGTH  ||
-         writen( mfd, line, len ) < len ||
-         ( len = snprintf( line, MAX_LINE_LENGTH, "From: fsc2 <fsc2@%s>\n",
-                           local_host ) ) > MAX_LINE_LENGTH  ||
-         writen( mfd, line, len ) < len ||
-         ( len = snprintf( line, MAX_LINE_LENGTH, "To: %s\n", to ) )
-         > MAX_LINE_LENGTH ||
-         writen( mfd, line, len ) < len )
+    if (    ( len = snprintf( line, MAX_LINE_LENGTH,
+                              "Subject: %s\n", subject ) ) > MAX_LINE_LENGTH
+         || writen( mfd, line, len ) < len
+         || ( len = snprintf( line, MAX_LINE_LENGTH, "From: fsc2 <fsc2@%s>\n",
+                              local_host ) ) > MAX_LINE_LENGTH
+         || writen( mfd, line, len ) < len
+         || ( len = snprintf( line, MAX_LINE_LENGTH,
+                              "To: %s\n", to ) ) > MAX_LINE_LENGTH
+         || writen( mfd, line, len ) < len )
     {
         close( mfd );
         return -1;
@@ -387,8 +386,8 @@ static int do_send( const char * rec_host,
     
     do
     {
-        if ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4 ||
-             strncmp( line, "250", 3 ) )
+        if (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4
+             || strncmp( line, "250", 3 ) )
         {
             close( mfd );
             return -1;
@@ -401,8 +400,9 @@ static int do_send( const char * rec_host,
         return -1;
     }
 
-    while ( ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) >= 4 &&
-            ! strncmp( line, "221", 3 ) && line[ 3 ] == '-' )
+    while (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) >= 4
+            && ! strncmp( line, "221", 3 )
+            && line[ 3 ] == '-' )
         /* empty */ ;
 
     close( mfd );
@@ -452,8 +452,8 @@ static int open_mail_socket( const char * remote,
 
     if ( ! strcasecmp( remote, local ) )
     {
-        if ( ( hp = gethostbyname( remote ) ) != NULL &&
-             hp->h_addr_list != NULL )
+        if (    ( hp = gethostbyname( remote ) ) != NULL
+             && hp->h_addr_list != NULL )
         {
             memset( &serv_addr, 0, sizeof serv_addr );
 #ifdef USE_IPv6
@@ -482,8 +482,8 @@ static int open_mail_socket( const char * remote,
     for ( host = get_mail_server( remote, local ); host != NULL;
           host = get_mail_server( NULL, local ) )
     {
-        if ( ( hp = gethostbyname( host ) ) == NULL ||
-             hp->h_addr_list == NULL )
+        if (    ( hp = gethostbyname( host ) ) == NULL
+             || hp->h_addr_list == NULL )
             continue;
 
         memset( &serv_addr, 0, sizeof serv_addr );
@@ -575,10 +575,10 @@ static const char *get_mail_server( const char * remote,
         /* Ask the DNS server for the MX RRs for the remote machine, check
            the header and skip the question section of the reply. */
 
-        if ( ( len = res_query( host, ns_c_in, ns_t_mx,
-                                buf, sizeof buf ) ) == -1 ||
-             ( ans_sec = analyze_dns_reply_header( buf, len, sec_entries,
-                                                   host, ns_t_mx ) ) == NULL )
+        if (    ( len = res_query( host, ns_c_in, ns_t_mx,
+                                   buf, sizeof buf ) ) == -1
+             || ( ans_sec = analyze_dns_reply_header( buf, len, sec_entries,
+                                                    host, ns_t_mx ) ) == NULL )
             return NULL;
 
         /* Check that the answer didn't contain a CNAME RR for the remote
@@ -761,9 +761,9 @@ static int check_cname_rr( unsigned char *  buf,
         /* If the RR isn't a CNAME entry or is not of class Internet or if
            it's for different host skip it and check the next one */
 
-        if ( get_ushort( ans_sec ) != ns_t_cname ||
-             get_ushort( ans_sec + 2 ) != ns_c_in ||
-             strcasecmp( host, for_host ) )
+        if (    get_ushort( ans_sec ) != ns_t_cname
+             || get_ushort( ans_sec + 2 ) != ns_c_in
+             || strcasecmp( host, for_host ) )
         {
             ans_sec += 10 + get_ushort( ans_sec + 8 );
             continue;
@@ -811,8 +811,8 @@ static int weed_out( unsigned char * buf,
 
     for ( i = 0; i < num_ans; i++ )
     {
-        if ( get_name( buf, len, &cur_pos ) == NULL ||
-             get_ushort( cur_pos ) != ns_t_mx )
+        if (    get_name( buf, len, &cur_pos ) == NULL
+             || get_ushort( cur_pos ) != ns_t_mx )
             return -1;
 
         rpq = get_ushort( cur_pos + 10 );
@@ -852,8 +852,8 @@ static int weed_out( unsigned char * buf,
         if ( ( host = get_name( buf, len, &cur_pos ) ) == NULL )
             return -1;
 
-        if ( rpq > prior_level ||
-             ( rpq == prior_level && strcmp( host, local ) ) )
+        if (    rpq > prior_level
+             || ( rpq == prior_level && strcmp( host, local ) ) )
         {
             *non_local_prior = 0xFFFF;
             rrs_left--;

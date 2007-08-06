@@ -406,8 +406,8 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 		   until now is fetched, multiplied by the sweep rate and added to
 		   the current field */
 
-		if ( ips120_10_mod.sweep_state != STOPPED &&
-			 ips120_10_mod.activity == TO_SET_POINT )
+		if (    ips120_10_mod.sweep_state != STOPPED
+			 && ips120_10_mod.activity == TO_SET_POINT )
 		{
 			double cur_time, dtime;
 
@@ -432,12 +432,12 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 
 	/* If a sweep reached one of the current limits stop the sweep */
 
-	if ( ( ( ips120_10_mod.sweep_state == SWEEPING_UP ||
-			 ips120_10_mod.activity == TO_SET_POINT ) &&
-		   ips120_10_mod.act_current >= ips120_10_mod.max_current ) ||
-		 ( ( ips120_10_mod.sweep_state == SWEEPING_DOWN ||
-			 ips120_10_mod.activity == TO_SET_POINT ) &&
-		   ips120_10_mod.act_current <= ips120_10_mod.min_current ) )
+	if (    (    (    ips120_10_mod.sweep_state == SWEEPING_UP
+				   || ips120_10_mod.activity == TO_SET_POINT )
+			  && ips120_10_mod.act_current >= ips120_10_mod.max_current )
+		 || (    (    ips120_10_mod.sweep_state == SWEEPING_DOWN
+				   || ips120_10_mod.activity == TO_SET_POINT )
+			  && ips120_10_mod.act_current <= ips120_10_mod.min_current ) )
 	{
 		print( WARN, "Sweep had to be stopped because current limit was "
 			   "reached.\n" );
@@ -474,8 +474,8 @@ Var_T *set_field( Var_T * v )
 
 	/* Stop sweeping */
 
-	if ( ips120_10_mod.sweep_state != STOPPED ||
-		 ips120_10_mod.activity != HOLD )
+	if (    ips120_10_mod.sweep_state != STOPPED
+		 || ips120_10_mod.activity != HOLD )
 	{
 		if ( FSC2_MODE == EXPERIMENT )
 			ips120_10_mod.activity = ips120_10_mod_set_activity( HOLD );
@@ -690,8 +690,8 @@ Var_T *magnet_sweep_rate( Var_T * v )
 	sweep_rate = ips120_10_mod_sweep_rate_check(
 								   get_double( v, "sweep rate" ) / F2C_RATIO );
 
-	if ( ips120_10_mod.is_sweep_rate &&
-		 sweep_rate == ips120_10_mod.sweep_rate )
+	if (    ips120_10_mod.is_sweep_rate
+		 && sweep_rate == ips120_10_mod.sweep_rate )
 		return vars_push( FLOAT_VAR, ips120_10_mod.sweep_rate * F2C_RATIO );
 
 	ips120_10_mod.sweep_rate = sweep_rate;
@@ -1324,8 +1324,8 @@ static double ips120_10_mod_current_check( double current )
 
 static double ips120_10_mod_sweep_rate_check( double sweep_rate )
 {
-	if ( sweep_rate > MAX_SWEEP_RATE &&
-		 ( sweep_rate - MAX_SWEEP_RATE ) / sweep_rate > 0.0001 )
+	if (    sweep_rate > MAX_SWEEP_RATE
+		 && ( sweep_rate - MAX_SWEEP_RATE ) / sweep_rate > 0.0001 )
 	{
 		if ( FSC2_MODE != EXPERIMENT )
 		{
@@ -1343,8 +1343,8 @@ static double ips120_10_mod_sweep_rate_check( double sweep_rate )
 		}
 	}
 
-	if ( sweep_rate < MIN_SWEEP_RATE &&
-		 ( MIN_SWEEP_RATE - sweep_rate ) / MIN_SWEEP_RATE > 0.0001 )
+	if (    sweep_rate < MIN_SWEEP_RATE
+		 && ( MIN_SWEEP_RATE - sweep_rate ) / MIN_SWEEP_RATE > 0.0001 )
 	{
 		if ( FSC2_MODE != EXPERIMENT )
 		{

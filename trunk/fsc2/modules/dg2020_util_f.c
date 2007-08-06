@@ -51,8 +51,8 @@ Ticks dg2020_double2ticks( double p_time )
         THROW( EXCEPTION );
     }
 
-    if ( fabs( Ticksrnd( ticks ) - p_time / dg2020.timebase ) > 1.0e-2 ||
-         ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
+    if ( fabs( Ticksrnd( ticks ) - p_time / dg2020.timebase ) > 1.0e-2
+         || ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
     {
         print( FATAL, "Specified time of %s is not an integer multiple of "
                "the pulser time base of %s.\n",
@@ -298,9 +298,9 @@ Ticks dg2020_get_max_seq_len( void )
 
         /* Nothing to be done for unused functions and the phase functions */
 
-        if ( ! f->is_used ||
-             f->self == PULSER_CHANNEL_PHASE_1 ||
-             f->self == PULSER_CHANNEL_PHASE_2 )
+        if (    ! f->is_used
+             || f->self == PULSER_CHANNEL_PHASE_1
+             || f->self == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         max = Ticks_max( max, f->max_seq_len + f->delay );
@@ -447,9 +447,9 @@ bool dg2020_prep_cmd( char ** cmd,
 
     /* Check the parameters */
 
-    if ( channel < 0 || channel > MAX_CHANNELS ||
-         address < 0 || address + length > MAX_PULSER_BITS ||
-         length <= 0 || length > MAX_PULSER_BITS )
+    if (    channel < 0 || channel > MAX_CHANNELS
+         || address < 0 || address + length > MAX_PULSER_BITS
+         || length <= 0 || length > MAX_PULSER_BITS )
         return FAIL;
 
     /* Get enough memory for the command string */
@@ -573,8 +573,8 @@ void dg2020_dump_channels( FILE * fp )
         if ( ! f->is_used || f->pulses == NULL )
             continue;
 
-        if ( f->self != PULSER_CHANNEL_PHASE_1 &&
-             f->self != PULSER_CHANNEL_PHASE_2 )
+        if (    f->self != PULSER_CHANNEL_PHASE_1
+             && f->self != PULSER_CHANNEL_PHASE_2 )
         {
             fprintf( fp, "%s:%d", f->name, f->pod->self );
 

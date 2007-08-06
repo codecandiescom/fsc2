@@ -257,14 +257,14 @@ void tds754a_set_window( Window_T * /* w */ );
 
 long tds754a_translate_channel( int  /* dir     */,
                                 long /* channel */,
-                                bool /* flag    */ );
+                                bool /* flag    */  );
 
 void tds754a_store_state( TDS754A_T * /* dest */,
-                          TDS754A_T * /* src  */ );
+                          TDS754A_T * /* src  */  );
 
 void tds754a_state_check( double /* timebase */,
                           long   /* rec_len  */,
-                          double /* trig_pos */ );
+                          double /* trig_pos */  );
 
 Window_T *tds754a_get_window_by_number( long /* win_number */ );
 
@@ -303,7 +303,7 @@ void tds754a_clear_SESR( void );
 void tds754a_finished( void );
 
 void tds754a_set_cursor( int    /* cur_num */,
-                         double /* pos     */ );
+                         double /* pos     */  );
 
 void tds754a_set_track_cursors( bool /* flag */ );
 
@@ -314,35 +314,35 @@ void tds754a_set_snap( bool /* flag */ );
 bool tds754a_display_channel_state( int /* channel */ );
 
 void tds754a_display_channel( int  /* channel */,
-                              bool /* on_flag */ );
+                              bool /* on_flag */  );
 
 double tds754a_get_sens( int /* channel */ );
 
 void tds754a_set_sens( int    /* channel */,
-                       double /* val     */ );
+                       double /* val     */  );
 
 void tds754a_start_acquisition( void );
 
 double tds754a_get_area( int        /* channel    */,
                          Window_T * /* w          */,
-                         bool       /* use_cursor */ );
+                         bool       /* use_cursor */  );
 
 void tds754a_get_curve( int        /* channel    */,
                         Window_T * /* w          */,
                         double **  /* data       */,
                         long *     /* length     */,
-                        bool       /* use_cursor */ );
+                        bool       /* use_cursor */  );
 
 double tds754a_get_amplitude( int        /* channel    */,
                               Window_T * /* w          */,
-                              bool       /* use_cursor */ );
+                              bool       /* use_cursor */  );
 
 void tds754a_free_running( void );
 
 void tds754a_lock_state( bool /* lock */ );
 
 void tds754a_copy_curve( int /* src  */,
-                         int /* dest */ );
+                         int /* dest */  );
 
 bool tds754a_command( const char * /* cmd */ );
 
@@ -352,7 +352,7 @@ bool tds754a_command( const char * /* cmd */ );
    I found empirically that waiting 2 ms seems to get rid of the problem. */
 
 #define gpib_read( a, b, c ) \
-        ( usleep( 2000 ), gpib_read( ( a ), ( b ), ( c ) ) )
+        ( fsc2_usleep( 2000, UNSET ), gpib_read( ( a ), ( b ), ( c ) ) )
 
 
 #endif /* ! TDS754A_HEADER */

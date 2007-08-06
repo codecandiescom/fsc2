@@ -45,7 +45,7 @@ bool xforms_init( int *  /* argc */,
 void xforms_close( void );
 
 int is_iconic( Display * /* d */,
-               Window    /* w */ );
+               Window    /* w */  );
 
 
 #endif   /* ! XINIT__HEADER */

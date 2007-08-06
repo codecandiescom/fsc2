@@ -1219,8 +1219,8 @@ void ag54830b_get_curve( int channel, double **data, long *length,
 
 	CLOBBER_PROTECT ( buffer );
 
-	fsc2_assert( channel >= AG54830B_CH1 &&
-				 channel < NUM_DISPLAYABLE_CHANNELS );
+	fsc2_assert(    channel >= AG54830B_CH1
+				 && channel < NUM_DISPLAYABLE_CHANNELS );
 
 	*data = NULL;
 
@@ -1306,8 +1306,9 @@ void ag54830b_get_curve( int channel, double **data, long *length,
 	yinc = 1.0;
 	yorg = 1.0;
 
-	if ( get_scaling &&
-		 channel >= AG54830B_CH1 && channel < NUM_DISPLAYABLE_CHANNELS )
+	if (    get_scaling
+		 && channel >= AG54830B_CH1
+		 && channel < NUM_DISPLAYABLE_CHANNELS )
 	{
 		blength = 32;
 		ag54830b_talk(":WAV:YINC?\n", reply, &blength ); /* get y-increment */
@@ -1446,8 +1447,8 @@ double ag54830b_get_xorigin( int channel )
     long length = 30;
 
 
-	fsc2_assert( channel >= AG54830B_CH1 &&
-				 channel < NUM_DISPLAYABLE_CHANNELS );
+	fsc2_assert(    channel >= AG54830B_CH1
+				 && channel < NUM_DISPLAYABLE_CHANNELS );
 
 	/* Set the source of the data if not set */
 
@@ -1477,8 +1478,8 @@ double ag54830b_get_xincrement( int channel )
     long length = 30;
 
 
-	fsc2_assert( channel >= AG54830B_CH1 &&
-				 channel < NUM_DISPLAYABLE_CHANNELS );
+	fsc2_assert(    channel >= AG54830B_CH1
+				 && channel < NUM_DISPLAYABLE_CHANNELS );
     
     /* Set the source of the data if not set */
 
@@ -1508,8 +1509,8 @@ double ag54830b_get_yorigin( int channel )
     long length = 30;
 
 
-	fsc2_assert( channel >= AG54830B_CH1 &&
-				 channel < NUM_DISPLAYABLE_CHANNELS );
+	fsc2_assert(    channel >= AG54830B_CH1
+				 && channel < NUM_DISPLAYABLE_CHANNELS );
 
 	/* Set the source of the data if not set */
 
@@ -1539,8 +1540,8 @@ double ag54830b_get_yincrement( int channel )
     long length = 30;
 
 
-	fsc2_assert( channel >= AG54830B_CH1 &&
-				 channel < NUM_DISPLAYABLE_CHANNELS );
+	fsc2_assert(    channel >= AG54830B_CH1
+				 && channel < NUM_DISPLAYABLE_CHANNELS );
     
     /* Set the source of the data if not set */
 
@@ -1570,8 +1571,8 @@ bool ag54830b_display_channel_state( int channel )
     long length = 10;
 
 
-	fsc2_assert( channel >= AG54830B_CH1 &&
-				 channel < NUM_DISPLAYABLE_CHANNELS );
+	fsc2_assert(    channel >= AG54830B_CH1
+				 && channel < NUM_DISPLAYABLE_CHANNELS );
 
 	sprintf( cmd, ":%s:DISP?\n", AG54830B_Channel_Names[ channel ] );
 	ag54830b_talk( cmd, reply, &length );

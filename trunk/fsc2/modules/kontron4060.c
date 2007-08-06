@@ -199,8 +199,8 @@ Var_T *multimeter_mode( Var_T *v )
             THROW( EXCEPTION );
     }
 
-    if ( FSC2_MODE == EXPERIMENT &&
-         gpib_write( kontron4060.device, cmd, strlen( cmd ) ) == FAILURE )
+    if (    FSC2_MODE == EXPERIMENT
+         && gpib_write( kontron4060.device, cmd, strlen( cmd ) ) == FAILURE )
         kontron4060_failure( );
 
     return vars_push( INT_VAR, ( long ) kontron4060.mode );
@@ -213,8 +213,8 @@ Var_T *multimeter_mode( Var_T *v )
 
 Var_T *multimeter_ac_measurement( Var_T * v  UNUSED_ARG )
 {
-    if ( FSC2_MODE == EXPERIMENT &&
-         gpib_write( kontron4060.device, "M1\n", 3 ) == FAILURE )
+    if (    FSC2_MODE == EXPERIMENT
+         && gpib_write( kontron4060.device, "M1\n", 3 ) == FAILURE )
         kontron4060_failure( );
 
     kontron4060.mode = KONTRON4060_MODE_VAC;
@@ -228,8 +228,8 @@ Var_T *multimeter_ac_measurement( Var_T * v  UNUSED_ARG )
 
 Var_T *multimeter_dc_measurement( Var_T * v  UNUSED_ARG )
 {
-    if ( FSC2_MODE == EXPERIMENT &&
-         gpib_write( kontron4060.device, "M0\n", 3 ) == FAILURE )
+    if (    FSC2_MODE == EXPERIMENT
+         && gpib_write( kontron4060.device, "M0\n", 3 ) == FAILURE )
         kontron4060_failure( );
 
     kontron4060.mode = KONTRON4060_MODE_VDC;
@@ -252,9 +252,9 @@ Var_T *multimeter_get_data( Var_T * v  UNUSED_ARG )
     if ( FSC2_MODE == TEST )
         return vars_push( FLOAT_VAR, KONTRON4060_TEST_VOLTAGE );
 
-    if ( gpib_write( kontron4060.device, "G\n", 2 ) == FAILURE      ||
-         gpib_read( kontron4060.device, reply, &length ) == FAILURE ||
-         sscanf( reply, "%s %lf", buffer, &val ) != 2 )
+    if (    gpib_write( kontron4060.device, "G\n", 2 ) == FAILURE
+         || gpib_read( kontron4060.device, reply, &length ) == FAILURE
+         || sscanf( reply, "%s %lf", buffer, &val ) != 2 )
         kontron4060_failure( );
 
     return vars_push( FLOAT_VAR, val );

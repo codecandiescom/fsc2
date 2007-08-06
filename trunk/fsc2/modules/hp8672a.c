@@ -92,8 +92,8 @@ int hp8672a_test_hook( void )
 
     if ( hp8672a.use_table )
     {
-        if ( hp8672a.att_ref_freq < hp8672a.min_table_freq ||
-             hp8672a.att_ref_freq > hp8672a.max_table_freq )
+        if (    hp8672a.att_ref_freq < hp8672a.min_table_freq
+             || hp8672a.att_ref_freq > hp8672a.max_table_freq )
         {
             print( FATAL, "Reference frequency for attenuation settings of "
                    "%g MHz is not covered by the table.\n",
@@ -664,8 +664,8 @@ Var_T *synthesizer_att_ref_freq( Var_T * v )
 
     if ( hp8672a.use_table )
     {
-        if ( hp8672a.att_ref_freq < hp8672a.min_table_freq ||
-             hp8672a.att_ref_freq > hp8672a.max_table_freq )
+        if (    hp8672a.att_ref_freq < hp8672a.min_table_freq
+             || hp8672a.att_ref_freq > hp8672a.max_table_freq )
         {
             print( FATAL, "Reference frequency for attenuation settings of "
                    "%g MHz is not covered by the table.\n",
@@ -796,8 +796,8 @@ Var_T *synthesizer_mod_type( Var_T * v )
     hp8672a.mod_type = res;
     hp8672a.mod_type_is_set = SET;
 
-    if ( FSC2_MODE == EXPERIMENT &&
-         hp8672a.mod_ampl_is_set[ hp8672a.mod_type ] )
+    if (    FSC2_MODE == EXPERIMENT
+         && hp8672a.mod_ampl_is_set[ hp8672a.mod_type ] )
         hp8672a_set_modulation( );
 
     return vars_push( INT_VAR, ( long ) res );

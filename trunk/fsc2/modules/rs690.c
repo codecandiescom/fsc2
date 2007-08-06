@@ -51,8 +51,8 @@ int rs690_init_hook( void )
     Channel_T *ch;
 
 
-    fsc2_assert( SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE > 0 &&
-                 DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE > 0 );
+    fsc2_assert(    SHAPE_2_DEFENSE_DEFAULT_MIN_DISTANCE > 0
+                 && DEFENSE_2_SHAPE_DEFAULT_MIN_DISTANCE > 0 );
 
     Pulser_Struct.name     = DEVICE_NAME;
     Pulser_Struct.has_pods = UNSET;
@@ -313,8 +313,8 @@ int rs690_end_of_test_hook( void )
                rs690.defense_2_shape_too_near,
                rs690_pticks( rs690.defense_2_shape ) );
 
-    if ( rs690.shape_2_defense_too_near != 0 ||
-         rs690.defense_2_shape_too_near != 0 )
+    if (    rs690.shape_2_defense_too_near != 0
+         || rs690.defense_2_shape_too_near != 0 )
         THROW( EXCEPTION );
 
     /* Tell the user if there had been problems with shape pulses */
@@ -330,8 +330,8 @@ int rs690_end_of_test_hook( void )
         {
             f = rs690.function + i;
 
-            if ( ! f->uses_auto_shape_pulses ||
-                 f->left_shape_padding <= f->min_left_shape_padding )
+            if (    ! f->uses_auto_shape_pulses
+                 || f->left_shape_padding <= f->min_left_shape_padding )
                 continue;
 
             print( SEVERE, "Minimum left padding for function '%s' was %s "
@@ -373,8 +373,8 @@ int rs690_exp_hook( void )
        "ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION" */
 
 #if defined ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION
-    if ( ! rs690.is_confirmation &&
-         ( rs690.is_shape_2_defense || rs690.is_defense_2_shape ) )
+    if (    ! rs690.is_confirmation
+         && ( rs690.is_shape_2_defense || rs690.is_defense_2_shape ) )
     {
         char mstr[ 500 ];
 
@@ -535,11 +535,11 @@ Var_T *pulser_automatic_shape_pulses( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( func == PULSER_CHANNEL_PULSE_SHAPE ||
-         func == PULSER_CHANNEL_TWT ||
-         func == PULSER_CHANNEL_TWT_GATE ||
-         func == PULSER_CHANNEL_PHASE_1 ||
-         func == PULSER_CHANNEL_PHASE_2 )
+    if (    func == PULSER_CHANNEL_PULSE_SHAPE
+         || func == PULSER_CHANNEL_TWT
+         || func == PULSER_CHANNEL_TWT_GATE
+         || func == PULSER_CHANNEL_PHASE_1
+         || func == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "Shape pulses can't be set for function '%s'.\n",
                Function_Names[ func ] );
@@ -654,11 +654,11 @@ Var_T *pulser_automatic_twt_pulses( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( func == PULSER_CHANNEL_TWT ||
-         func == PULSER_CHANNEL_TWT_GATE ||
-         func == PULSER_CHANNEL_PULSE_SHAPE ||
-         func == PULSER_CHANNEL_PHASE_1 ||
-         func == PULSER_CHANNEL_PHASE_2 )
+    if (    func == PULSER_CHANNEL_TWT
+         || func == PULSER_CHANNEL_TWT_GATE
+         || func == PULSER_CHANNEL_PULSE_SHAPE
+         || func == PULSER_CHANNEL_PHASE_1
+         || func == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "TWT pulses can't be set for function '%s'.\n",
                Function_Names[ func ] );
@@ -1123,8 +1123,8 @@ Var_T *pulser_reset( Var_T * v  UNUSED_ARG )
     In_reset = SET;
 
     vars_pop( pulser_pulse_reset( NULL ) );
-    if ( rs690.phs[ 0 ].function != NULL ||
-         rs690.phs[ 1 ].function != NULL )
+    if (    rs690.phs[ 0 ].function != NULL
+         || rs690.phs[ 1 ].function != NULL )
         vars_pop( pulser_phase_reset( NULL ) );
 
     In_reset = UNSET;
@@ -1245,9 +1245,9 @@ Var_T *pulser_next_phase( Var_T * v )
 
     if ( v == NULL )
     {
-        if ( rs690.phs[ 0 ].function == NULL &&
-             rs690.phs[ 1 ].function == NULL &&
-             FSC2_MODE == TEST )
+        if (    rs690.phs[ 0 ].function == NULL
+             && rs690.phs[ 1 ].function == NULL
+             && FSC2_MODE == TEST )
         {
             print( SEVERE, "Phase cycling isn't used for any function.\n" );
             return vars_push( INT_VAR, 0L );
@@ -1311,9 +1311,9 @@ Var_T *pulser_phase_reset( Var_T * v )
 
     if ( v == NULL )
     {
-        if ( rs690.phs[ 0 ].function == NULL &&
-             rs690.phs[ 1 ].function == NULL &&
-             FSC2_MODE == TEST )
+        if (    rs690.phs[ 0 ].function == NULL
+             && rs690.phs[ 1 ].function == NULL
+             && FSC2_MODE == TEST )
         {
             print( SEVERE, "Phase cycling isn't used for any function.\n" );
             return vars_push( INT_VAR, 0L );

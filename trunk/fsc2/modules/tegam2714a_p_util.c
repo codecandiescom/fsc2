@@ -146,8 +146,8 @@ Ticks tegam2714a_p_double2ticks( double p_time )
         THROW( EXCEPTION );
     }
 
-    if ( fabs( Ticksrnd( ticks ) - p_time / tegam2714a_p.timebase ) > 1.0e-2 ||
-         ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
+    if (    fabs( Ticksrnd( ticks ) - p_time / tegam2714a_p.timebase ) > 1.0e-2
+         || ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
     {
         print( FATAL, "Specified time of %s is not an integer multiple of the "
                "pulser time base of %s.\n",

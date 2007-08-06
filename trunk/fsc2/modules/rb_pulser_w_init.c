@@ -168,9 +168,9 @@ static void rb_pulser_w_basic_functions_init( void )
 
         if ( f->num_pulses == 0 )
         {
-            if(  f->is_declared &&
-                 ! ( f == rb_pulser_w.function + PULSER_CHANNEL_DEFENSE &&
-                     ! rb_pulser_w.defense_pulse_mode ) )
+            if (    f->is_declared
+                 && ! (    f == rb_pulser_w.function + PULSER_CHANNEL_DEFENSE
+                        && ! rb_pulser_w.defense_pulse_mode ) )
                 print( WARN, "No pulses have been assigned to function "
                        "'%s'.\n", f->name );
             f->is_used = UNSET;
@@ -216,8 +216,9 @@ static void rb_pulser_w_defense_pulse_create( void )
     if ( ! mw->is_used )
         return;
 
-    if ( ! rb_pulser_w.defense_pulse_mode &&
-         def->num_pulses != 0 && ! def->pulses[ 0 ]->is_pos )
+    if (    ! rb_pulser_w.defense_pulse_mode
+         && def->num_pulses != 0
+         && ! def->pulses[ 0 ]->is_pos )
     {
         def->pulses[ 0 ]->is_pos = def->pulses[ 0 ]->initial_is_pos = SET;
         def->pulses[ 0 ]->pos = def->pulses[ 0 ]->initial_pos = - def->delay;
@@ -237,8 +238,8 @@ static void rb_pulser_w_defense_pulse_create( void )
        defense pulse but didn't create a defense pulse (thus switching off
        the defense pulse completely, hopefully only for testing purposes...) */
 
-    if ( ! rb_pulser_w.defense_pulse_mode &&
-         def->num_pulses == 0 )
+    if (    ! rb_pulser_w.defense_pulse_mode
+         && def->num_pulses == 0 )
         return;
 
     def->is_used = SET;
@@ -309,8 +310,8 @@ static void rb_pulser_w_rf_synth_init( void )
     else
         func = get_string( SYNTHESIZER_PULSE_STATE "#%d", dev_num );
     
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         T_free( func );
         print( FATAL, "Function for switching pulse modulation on or off is "
@@ -327,8 +328,8 @@ static void rb_pulser_w_rf_synth_init( void )
     else
         func = get_string( SYNTHESIZER_PULSE_WIDTH "#%d", dev_num );
     
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         rb_pulser_w.synth_pulse_state =
                                 CHAR_P T_free( rb_pulser_w.synth_pulse_state );
@@ -346,8 +347,8 @@ static void rb_pulser_w_rf_synth_init( void )
     else
         func = get_string( SYNTHESIZER_PULSE_DELAY "#%d", dev_num );
     
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         rb_pulser_w.synth_pulse_state =
                                 CHAR_P T_free( rb_pulser_w.synth_pulse_state );
@@ -367,8 +368,8 @@ static void rb_pulser_w_rf_synth_init( void )
     else
         func = get_string( SYNTHESIZER_TRIG_SLOPE "#%d", dev_num );
     
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         rb_pulser_w.synth_pulse_state =
                                 CHAR_P T_free( rb_pulser_w.synth_pulse_state );
@@ -390,8 +391,8 @@ static void rb_pulser_w_rf_synth_init( void )
     else
         func = get_string( SYNTHESIZER_STATE "#%d", dev_num );
     
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         rb_pulser_w.synth_pulse_state =
                                 CHAR_P T_free( rb_pulser_w.synth_pulse_state );

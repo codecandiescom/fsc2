@@ -109,9 +109,9 @@ int spectrapro_300i_exp_hook( void )
        the function for installing the grating was called) */
 
     for ( i = 0; i < MAX_GRATINGS; i++ )
-        if ( spectrapro_300i.grating[ i ].used_in_test &&
-             ! spectrapro_300i.grating[ i ].is_installed  &&
-             ! spectrapro_300i.grating[ i ].installed_in_test )
+        if (    spectrapro_300i.grating[ i ].used_in_test
+             && ! spectrapro_300i.grating[ i ].is_installed
+             && ! spectrapro_300i.grating[ i ].installed_in_test )
         {
             print( FATAL, "Found during test run that grating #%ld is used "
                    "which isn't installed.\n", i + 1 );
@@ -198,8 +198,8 @@ Var_T *monochromator_grating( Var_T * v )
             return vars_push( INT_VAR, spectrapro_300i.current_gn + 1 );
         }
 
-        if ( gn - spectrapro_300i.tn * 3 < 0 ||
-             gn - spectrapro_300i.tn * 3 > 2 )
+        if (    gn - spectrapro_300i.tn * 3 < 0
+             || gn - spectrapro_300i.tn * 3 > 2 )
         {
             print( FATAL, "Can't switch to grating #ld while turret #ld is "
                    "in use.\n", grating, spectrapro_300i.tn + 1 );
@@ -444,8 +444,9 @@ Var_T *monochromator_install_grating( Var_T * v )
 
     gn = grating - 1;
 
-    if ( FSC2_MODE == EXPERIMENT && ! strcmp( v->val.sptr, "UNINSTALL" ) &&
-         ! spectrapro_300i.grating[ gn ].is_installed )
+    if (    FSC2_MODE == EXPERIMENT
+         && ! strcmp( v->val.sptr, "UNINSTALL" )
+         && ! spectrapro_300i.grating[ gn ].is_installed )
     {
         print( SEVERE,  "Grating #%ld is not installed, can't uninstall "
                "it.\n" );
@@ -471,14 +472,14 @@ Var_T *monochromator_install_grating( Var_T * v )
 
     /* Do some minimal checks on the part number */
 
-    if ( strcmp( v->val.sptr, "UNINSTALL" ) &&
-         ( ! isdigit( ( unsigned char ) v->val.sptr[ 0 ] ) ||
-           v->val.sptr[ 0 ] != '-'                         ||
-           ! isdigit( ( unsigned char ) v->val.sptr[ 2 ] ) ||
-           ! isdigit( ( unsigned char ) v->val.sptr[ 3 ] ) ||
-           ! isdigit( ( unsigned char ) v->val.sptr[ 4 ] ) ||
-           ! v->val.sptr[ 5 ] != '-' || 
-           strlen( v->val.sptr ) > 10 ) )
+    if (    strcmp( v->val.sptr, "UNINSTALL" )
+         && (    ! isdigit( ( unsigned char ) v->val.sptr[ 0 ] )
+              || v->val.sptr[ 0 ] != '-'         
+              || ! isdigit( ( unsigned char ) v->val.sptr[ 2 ] )
+              || ! isdigit( ( unsigned char ) v->val.sptr[ 3 ] )
+              || ! isdigit( ( unsigned char ) v->val.sptr[ 4 ] )
+              || ! v->val.sptr[ 5 ] != '-'
+              || strlen( v->val.sptr ) > 10 ) )
     {
         print( FATAL, "First argument doesn't look like a valid part "
                "number.\n" );
@@ -670,8 +671,8 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
 
     cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
 
-    if ( cv->type != INT_ARR ||
-         cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
     {
         print( FATAL, "Function of CCD for determining the size of the chip "
                "does not return a useful value.\n" );
@@ -842,8 +843,8 @@ Var_T *monochromator_calc_wavelength( Var_T * v )
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
 
-    if ( v->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF ) &&
-         v->len == 0 )
+    if (    v->type & ( INT_ARR | FLOAT_ARR | INT_REF | FLOAT_REF )
+         && v->len == 0 )
     {
         print( FATAL, "Array of pixel positions has no defined size.\n ");
         THROW( EXCEPTION );
@@ -915,8 +916,8 @@ Var_T *monochromator_calc_wavelength( Var_T * v )
 
     cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
 
-    if ( cv->type != INT_ARR ||
-         cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
     {
         print( FATAL, "Function of CCD for determining the size of the chip "
                "does not return a useful value.\n" );

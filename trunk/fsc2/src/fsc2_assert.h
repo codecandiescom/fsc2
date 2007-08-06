@@ -37,10 +37,10 @@ struct Fsc2_Assert {
 
 int fsc2_assert_print( const char * /* expression */,
                        const char * /* filename   */,
-                       int          /* line       */ );
+                       int          /* line       */  );
 
 int fsc2_impossible_print( const char * /* filename */,
-                           int          /* line     */ );
+                           int          /* line     */  );
 
 
 #ifdef NDEBUG

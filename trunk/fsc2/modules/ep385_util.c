@@ -83,8 +83,8 @@ Ticks ep385_double2ticks( double p_time )
         THROW( EXCEPTION );
     }
 
-    if ( fabs( Ticksrnd( ticks ) - p_time / ep385.timebase ) > 1.0e-2 ||
-         ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
+    if (    fabs( Ticksrnd( ticks ) - p_time / ep385.timebase ) > 1.0e-2
+         || ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
     {
         print( FATAL, "Specified time of %s is not an integer multiple of the "
                "fixed pulser time base of %s.\n",
@@ -388,14 +388,14 @@ void ep385_dump_channels( FILE * fp )
 
             for ( k = 0; k < ch->num_active_pulses; k++ )
             {
-                if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
-                     ch->pulse_params[ k ].pulse->sp != NULL )
+                if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+                     && ch->pulse_params[ k ].pulse->sp != NULL )
                     fprintf( fp, " (%ld) %ld %ld",
                              ch->pulse_params[ k ].pulse->sp->num,
                              ch->pulse_params[ k ].pos,
                              ch->pulse_params[ k ].len );
-                else if ( f->self == PULSER_CHANNEL_TWT &&
-                          ch->pulse_params[ k ].pulse->tp != NULL )
+                else if (    f->self == PULSER_CHANNEL_TWT
+                          && ch->pulse_params[ k ].pulse->tp != NULL )
                     fprintf( fp, " (%ld) %ld %ld",
                              ch->pulse_params[ k ].pulse->tp->num,
                              ch->pulse_params[ k ].pos,
@@ -439,11 +439,12 @@ void ep385_duty_check( void )
     for ( i = 0; i < 2; i++ )
     {
         f = ep385.function + fns[ i ];
-        if ( f->is_used && f->num_channels > 0 &&
-             ep385_calc_max_length( f ) > MAX_TWT_DUTY_CYCLE
-                              * ( MAX_MEMORY_BLOCKS * BITS_PER_MEMORY_BLOCK +
-                                  REPEAT_TICKS * ep385.repeat_time ) &&
-                 f->max_duty_warning++ == 0 )
+        if (    f->is_used
+             && f->num_channels > 0
+             && ep385_calc_max_length( f ) > MAX_TWT_DUTY_CYCLE
+                                 * ( MAX_MEMORY_BLOCKS * BITS_PER_MEMORY_BLOCK
+                                     + REPEAT_TICKS * ep385.repeat_time )
+             && f->max_duty_warning++ == 0 )
                 print( SEVERE, "Duty cycle of TWT exceeded due to length of "
                        "%s pulses.\n", f->name );
     }

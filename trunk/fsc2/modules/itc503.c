@@ -201,8 +201,10 @@ Var_T *temp_contr_sample_channel( Var_T * v )
     }
     else
     {
-        if ( ( *v->val.sptr != 'A' && *v->val.sptr != 'B' &&
-               *v->val.sptr != 'C' ) || strlen( v->val.sptr ) != 1 )
+        if (    (    *v->val.sptr != 'A'
+                  && *v->val.sptr != 'B'
+                  && *v->val.sptr != 'C' )
+             || strlen( v->val.sptr ) != 1 )
         {
             print( FATAL, "Invalid sample channel (\"%s\").\n", v->val.sptr );
             THROW( EXCEPTION );
@@ -377,8 +379,9 @@ static double itc503_sens_data( void )
     cmd[ 1 ] = itc503.sample_channel + '0';
     len = itc503_talk( cmd, buf, sizeof buf );
 
-    if ( buf[ 1 ] != '-' && buf[ 1 ] != '+' &&
-         ! isdigit( ( unsigned char ) buf[ 1 ] ) )
+    if (    buf[ 1 ] != '-'
+         && buf[ 1 ] != '+'
+         && ! isdigit( ( unsigned char ) buf[ 1 ] ) )
     {
         print( FATAL, "Error reading temperature.\n" );
         THROW( EXCEPTION );

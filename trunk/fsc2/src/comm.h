@@ -174,10 +174,10 @@ int new_data_handler( void );
 bool reader( void * /* ret */ );
 
 bool writer( int /* type */,
-             ... );
+             ...             );
 
 void send_data( int /* type   */,
-                int /* shm_id */ );
+                int /* shm_id */  );
 
 
 #endif  /* ! COMM_HEADER */

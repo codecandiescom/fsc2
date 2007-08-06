@@ -487,11 +487,11 @@ Var_T *dio_value( Var_T * v )
 
     ch = translate_channel( get_strict_long( v, "channel number" ) );
 
-    if ( ( witio_48.mode[ dio ] == WITIO_48_MODE_1x24 &&
-           ch > WITIO_48_CHANNEL_0 ) ||
-         ( ( witio_48.mode[ dio ] == WITIO_48_MODE_2x12 ||
-             witio_48.mode[ dio ] == WITIO_48_MODE_16_8 ) &&
-           ch > WITIO_48_CHANNEL_1 ) )
+    if (    (    witio_48.mode[ dio ] == WITIO_48_MODE_1x24
+              && ch > WITIO_48_CHANNEL_0 )
+         || (    (    witio_48.mode[ dio ] == WITIO_48_MODE_2x12
+                   || witio_48.mode[ dio ] == WITIO_48_MODE_16_8 )
+              && ch > WITIO_48_CHANNEL_1 ) )
     {
         print( FATAL, "Invalid channel argument 'CH%ld' for current I/O mode "
                "of selected DIO.\n", ch + 1 );
@@ -527,15 +527,16 @@ Var_T *dio_value( Var_T * v )
 
     uval = ( unsigned long ) val;
 
-    if ( ( witio_48.mode[ dio ] == WITIO_48_MODE_1x24 &&
-           uval >= 1UL << 24 ) ||
-         ( witio_48.mode[ dio ] == WITIO_48_MODE_16_8 &&
-           ch == WITIO_48_CHANNEL_0 && uval >= 1UL << 16 ) ||
-         ( witio_48.mode[ dio ] == WITIO_48_MODE_2x12 &&
-           uval >= 1UL << 12 ) ||
-         ( ( witio_48.mode[ dio ] == WITIO_48_MODE_3x8 ||
-             ( witio_48.mode[ dio ] == WITIO_48_MODE_16_8
-               && ch == WITIO_48_CHANNEL_1 ) ) && uval > 1UL << 8 ) )
+    if (    (    witio_48.mode[ dio ] == WITIO_48_MODE_1x24
+              && uval >= 1UL << 24 )
+         || (    witio_48.mode[ dio ] == WITIO_48_MODE_16_8
+              && ch == WITIO_48_CHANNEL_0 && uval >= 1UL << 16 )
+         || (    witio_48.mode[ dio ] == WITIO_48_MODE_2x12
+              && uval >= 1UL << 12 )
+         || (    (    witio_48.mode[ dio ] == WITIO_48_MODE_3x8
+                   || ( witio_48.mode[ dio ] == WITIO_48_MODE_16_8
+                           && ch == WITIO_48_CHANNEL_1 ) )
+              && uval > 1UL << 8 ) )
     {
         if ( FSC2_MODE != EXPERIMENT )
         {
@@ -547,8 +548,8 @@ Var_T *dio_value( Var_T * v )
         {
             if ( witio_48.mode[ dio ] == WITIO_48_MODE_1x24 )
                 uval &= 0xFFFFFFUL;
-            else if ( witio_48.mode[ dio ] == WITIO_48_MODE_16_8 &&
-                      ch == WITIO_48_CHANNEL_0 )
+            else if (    witio_48.mode[ dio ] == WITIO_48_MODE_16_8
+                      && ch == WITIO_48_CHANNEL_0 )
                 uval &= 0xFFFFUL;
             else if ( witio_48.mode[ dio ] == WITIO_48_MODE_2x12 )
                 uval &= 0xFFFUL;

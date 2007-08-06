@@ -160,12 +160,13 @@ bool lecroy_ws_init( const char * name )
 
         lecroy_ws.interleaved = lecroy_ws_get_interleaved( );
 
-        if ( lecroy_ws.is_interleaved && lecroy_ws.interleaved &&
-             lecroy_ws.cur_hres->ppd_ris > 0 )
+        if (    lecroy_ws.is_interleaved
+             && lecroy_ws.interleaved
+             && lecroy_ws.cur_hres->ppd_ris > 0 )
             lecroy_ws_set_interleaved( SET );
 
-        if ( ( lecroy_ws.is_interleaved && ! lecroy_ws.interleaved ) ||
-             lecroy_ws.cur_hres->ppd_ris == 0 )
+        if (    ( lecroy_ws.is_interleaved && ! lecroy_ws.interleaved )
+             || lecroy_ws.cur_hres->ppd_ris == 0 )
         {
             lecroy_ws_set_interleaved( UNSET );
             lecroy_ws.interleaved = UNSET;
@@ -184,8 +185,8 @@ bool lecroy_ws_init( const char * name )
             else
             {
                 lecroy_ws.coupling[ i ] = lecroy_ws_get_coupling( i );
-                if ( lecroy_ws.need_high_imp[ i ] &&
-                     lecroy_ws.coupling[ i ] == LECROY_WS_CPL_DC_50_OHM )
+                if (    lecroy_ws.need_high_imp[ i ]
+                     && lecroy_ws.coupling[ i ] == LECROY_WS_CPL_DC_50_OHM )
                 {
                     print( FATAL, "Sensitivity setting requested either in "
                            "PREPARATIONS section or during TEST run would "
@@ -560,8 +561,8 @@ bool lecroy_ws_set_coupling( int channel,
 
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
-    fsc2_assert( type >= LECROY_WS_CPL_AC_1_MOHM &&
-                 type <= LECROY_WS_CPL_GND );
+    fsc2_assert(    type >= LECROY_WS_CPL_AC_1_MOHM
+                 && type <= LECROY_WS_CPL_GND );
 
     sprintf( cmd, "C%1d:CPL %s\n", channel - LECROY_WS_CH1 + 1, cpl[ type ] );
     len = strlen( cmd );
@@ -631,11 +632,11 @@ bool lecroy_ws_set_bandwidth_limiter( int channel,
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 #if defined LECROY_WS_BWL_200MHZ
-    fsc2_assert( bwl >= LECROY_WS_BWL_OFF &&
-                 bwl <= LECROY_WS_BWL_200MHZ );
+    fsc2_assert(    bwl >= LECROY_WS_BWL_OFF
+                 && bwl <= LECROY_WS_BWL_200MHZ );
 #else
-    fsc2_assert( bwl >= LECROY_WS_BWL_OFF &&
-                 bwl <= LECROY_WS_BWL_ON );
+    fsc2_assert(    bwl >= LECROY_WS_BWL_OFF
+                 && bwl <= LECROY_WS_BWL_ON );
 #endif
 
     sprintf( buf, "BWL C%d,", channel - LECROY_WS_CH1 + 1 );
@@ -671,8 +672,8 @@ int lecroy_ws_get_trigger_source( void )
         lecroy_ws_lan_failure( );
     reply[ len - 1 ] = '\0';
 
-    if ( strncmp( reply, "STD,SR,", 7 ) &&
-         strncmp( reply, "EDGE,SR,", 8 ) )
+    if (    strncmp( reply, "STD,SR,", 7 )
+         && strncmp( reply, "EDGE,SR,", 8 ) )
     {
         print( SEVERE, "Non-standard mode trigger, switching to standard "
                "edge trigger on LINe input\n" );
@@ -707,11 +708,11 @@ bool lecroy_ws_set_trigger_source( int channel )
     ssize_t len;
 
 
-    fsc2_assert( ( channel >= LECROY_WS_CH1 &&
-                   channel <= LECROY_WS_CH_MAX ) ||
-                 channel == LECROY_WS_LIN        ||
-                 channel == LECROY_WS_EXT        ||
-                 channel == LECROY_WS_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WS_CH1
+                      && channel <= LECROY_WS_CH_MAX )
+                 || channel == LECROY_WS_LIN
+                 || channel == LECROY_WS_EXT
+                 || channel == LECROY_WS_EXT10 );
 
     if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
         sprintf( cmd + 11, "C%1d\n", channel - LECROY_WS_CH1 + 1 );
@@ -739,10 +740,10 @@ double lecroy_ws_get_trigger_level( int channel )
     ssize_t len = 30;
 
 
-    fsc2_assert( ( channel >= LECROY_WS_CH1 &&
-                   channel <= LECROY_WS_CH_MAX ) ||
-                 channel == LECROY_WS_EXT ||
-                 channel == LECROY_WS_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WS_CH1
+                      && channel <= LECROY_WS_CH_MAX )
+                 || channel == LECROY_WS_EXT
+                 || channel == LECROY_WS_EXT10 );
 
     if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
         sprintf( buf, "C%1d:TRLV?\n", channel - LECROY_WS_CH1 + 1 );
@@ -769,10 +770,10 @@ bool lecroy_ws_set_trigger_level( int    channel,
     ssize_t len;
 
 
-    fsc2_assert( ( channel >= LECROY_WS_CH1 &&
-                   channel <= LECROY_WS_CH_MAX ) ||
-                 channel == LECROY_WS_EXT        ||
-                 channel == LECROY_WS_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WS_CH1
+                      && channel <= LECROY_WS_CH_MAX )
+                 || channel == LECROY_WS_EXT
+                 || channel == LECROY_WS_EXT10 );
 
     if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
         sprintf( cmd, "C%1d:TRLV ", channel - LECROY_WS_CH1 + 1 );
@@ -800,11 +801,11 @@ bool lecroy_ws_get_trigger_slope( int channel )
     ssize_t len = 30;
 
 
-    fsc2_assert( ( channel >= LECROY_WS_CH1 &&
-                   channel <= LECROY_WS_CH_MAX ) ||
-                 channel == LECROY_WS_LIN        ||
-                 channel == LECROY_WS_EXT        ||
-                 channel == LECROY_WS_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WS_CH1
+                      && channel <= LECROY_WS_CH_MAX )
+                 || channel == LECROY_WS_LIN
+                 || channel == LECROY_WS_EXT
+                 || channel == LECROY_WS_EXT10 );
 
     if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
         sprintf( buf, "C%1d:TRSL?\n", channel - LECROY_WS_CH1 + 1 );
@@ -835,11 +836,11 @@ bool lecroy_ws_set_trigger_slope( int channel,
     ssize_t len;
 
 
-    fsc2_assert( ( channel >= LECROY_WS_CH1 &&
-                   channel <= LECROY_WS_CH_MAX ) ||
-                 channel == LECROY_WS_LIN        ||
-                 channel == LECROY_WS_EXT        ||
-                 channel == LECROY_WS_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WS_CH1
+                      && channel <= LECROY_WS_CH_MAX )
+                 || channel == LECROY_WS_LIN
+                 || channel == LECROY_WS_EXT
+                 || channel == LECROY_WS_EXT10 );
 
     if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
         sprintf( cmd, "C%1d:TRSL ", channel - LECROY_WS_CH1 + 1 );
@@ -869,10 +870,10 @@ int lecroy_ws_get_trigger_coupling( int channel )
     int cpl = -1;
 
 
-    fsc2_assert( ( channel >= LECROY_WS_CH1 &&
-                   channel <= LECROY_WS_CH_MAX ) ||
-                 channel == LECROY_WS_EXT        ||
-                 channel == LECROY_WS_EXT10 );
+    fsc2_assert(     (    channel >= LECROY_WS_CH1
+                       && channel <= LECROY_WS_CH_MAX )
+                 || channel == LECROY_WS_EXT
+                 || channel == LECROY_WS_EXT10 );
 
     if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
         sprintf( buf, "C%1d:TRCP?\n", channel - LECROY_WS_CH1 + 1 );
@@ -924,10 +925,10 @@ int lecroy_ws_set_trigger_coupling( int channel,
     const char *cpl_str[ ] = { "AC\n", "DC\n", "LFREJ\n", "HFREJ\n" };
 
 
-    fsc2_assert( ( channel >= LECROY_WS_CH1 &&
-                   channel <= LECROY_WS_CH_MAX ) ||
-                 channel == LECROY_WS_EXT        ||
-                 channel == LECROY_WS_EXT10 );
+    fsc2_assert(    (    channel >= LECROY_WS_CH1
+                      && channel <= LECROY_WS_CH_MAX )
+                 || channel == LECROY_WS_EXT
+                 || channel == LECROY_WS_EXT10 );
     fsc2_assert( cpl >= LECROY_WS_TRG_AC && cpl <= LECROY_WS_TRG_HF_REJ );
 
     if ( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX )
@@ -986,8 +987,8 @@ int lecroy_ws_set_trigger_mode( int mode )
     const char *mode_str[ ] = { "AUTO\n", "NORM\n", "SINGLE\n", "STOP\n" };
 
 
-    fsc2_assert( mode >= LECROY_WS_TRG_MODE_AUTO &&
-                 mode <= LECROY_WS_TRG_MODE_STOP );
+    fsc2_assert(    mode >= LECROY_WS_TRG_MODE_AUTO
+                 && mode <= LECROY_WS_TRG_MODE_STOP );
 
     strcat( cmd, mode_str[ mode ] );
     len = strlen( cmd );
@@ -1102,8 +1103,8 @@ bool lecroy_ws_display( int ch,
 
     strcat( cmd, on_off ? "ON\n" : "OFF\n" );
 
-    if ( on_off &&
-         lecroy_ws.num_used_channels >= LECROY_WS_MAX_USED_CHANNELS )
+    if (    on_off
+         && lecroy_ws.num_used_channels >= LECROY_WS_MAX_USED_CHANNELS )
     {
         print( FATAL, "Can't switch on another trace, there are already as "
                "many as possible (%d) displayed.\n",
@@ -1263,8 +1264,8 @@ void lecroy_ws_start_acquisition( void )
        even SINGLE mode will do) */
 
     strcpy( cmd, "TRMD NORM\n" );
-    if ( ! do_averaging &&
-         lecroy_ws.trigger_mode == LECROY_WS_TRG_MODE_SINGLE )
+    if (    ! do_averaging
+         && lecroy_ws.trigger_mode == LECROY_WS_TRG_MODE_SINGLE )
         strcpy( cmd + 5, "SINGLE\n" );
     else if ( lecroy_ws.trigger_mode == LECROY_WS_TRG_MODE_AUTO )
         strcpy( cmd + 5, "AUTO\n" );
@@ -1295,9 +1296,9 @@ static void lecroy_ws_get_prep( int              ch,
     bool is_mem_ch = UNSET;
 
 
-    fsc2_assert( ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )  ||
-                 ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 ) ||
-                 ch == LECROY_WS_MATH );
+    fsc2_assert(    ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
+                 || ( ch >= LECROY_WS_M1 && ch <= LECROY_WS_M4 )
+                 || ch == LECROY_WS_MATH );
 
     /* Figure out which channel is to be used and set a few variables
        needed later accordingly */
@@ -1372,8 +1373,8 @@ static void lecroy_ws_get_prep( int              ch,
 
 static bool lecroy_ws_can_fetch( int ch )
 {
-    if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX &&
-         ! lecroy_ws.is_avg_setup[ ch ] )
+    if (    ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX
+         && ! lecroy_ws.is_avg_setup[ ch ] )
         return lecroy_ws_get_inr( ) & LECROY_WS_SIGNAL_ACQ;
 
     return lecroy_ws_get_int_value( ch, "SWEEPS_PER_ACQ" ) >=

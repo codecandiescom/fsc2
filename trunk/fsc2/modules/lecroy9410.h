@@ -369,17 +369,17 @@ void lecroy9410_set_interleaved( bool /* state */ );
 double lecroy9410_get_sens( int /* channel */ );
 
 void lecroy9410_set_sens( int    /* channel */,
-                          double /* sens    */ );
+                          double /* sens    */  );
 
 double lecroy9410_get_offset( int /* channel */ );
 
 void lecroy9410_set_offset( int    /* channel */,
-                            double /* offset  */ );
+                            double /* offset  */  );
 
 int lecroy9410_get_coupling( int /* channel */ );
 
 void lecroy9410_set_coupling( int /* channel */,
-                              int /* type    */ );
+                              int /* type    */  );
 
 int lecroy9410_get_bandwidth_limiter( void );
 
@@ -392,17 +392,17 @@ void lecroy9410_set_trigger_source( int /* channel */ );
 double lecroy9410_get_trigger_level( int /* channel */ );
 
 void lecroy9410_set_trigger_level( int    /* channel */,
-                                   double /* level   */ );
+                                   double /* level   */  );
 
 double lecroy9410_get_trigger_slope( int /* channel */ );
 
 void lecroy9410_set_trigger_slope( int /* channel */,
-                                   int /* slope   */ );
+                                   int /* slope   */  );
 
 int lecroy9410_get_trigger_coupling( int /* channel */ );
 
 void lecroy9410_set_trigger_coupling( int /* channel */,
-                                      int /* cpl     */ );
+                                      int /* cpl     */  );
 
 int lecroy9410_get_trigger_mode( void );
 
@@ -414,18 +414,18 @@ void lecroy9410_set_trigger_delay( double /* delay */ );
 
 long lecroy9410_get_probe_attenuation( int /* ch */ );
 
-void lecroy9410_set_probe_attenuation( int /* ch */,
-                                       long /* att */ );
+void lecroy9410_set_probe_attenuation( int /* ch   */,
+                                       long /* att */  );
 
 bool lecroy9410_is_displayed( int /* ch */ );
 
 void lecroy9410_display( int /* ch     */,
-                         int /* on_off */ );
+                         int /* on_off */  );
 
 void lecroy9410_set_up_averaging( long /* channel */,
                                   long /* source  */,
                                   long /* num_avg */,
-                                  long /* rec_len */ );
+                                  long /* rec_len */  );
 
 void lecroy9410_finished( void );
 
@@ -434,16 +434,16 @@ void lecroy9410_start_acquisition( void );
 void lecroy9410_get_curve( int        /* ch     */,
                            Window_T * /* w      */,
                            double **  /* array  */,
-                           long *     /* length */ );
+                           long *     /* length */  );
 
 double lecroy9410_get_area( int        /* ch */,
-                            Window_T * /* w */ );
+                            Window_T * /* w */  );
 
 double lecroy9410_get_amplitude( int        /* ch */,
-                                 Window_T * /* w  */ );
+                                 Window_T * /* w  */  );
 
 void lecroy9410_copy_curve( long /* src  */,
-                            long /* dest */ );
+                            long /* dest */  );
 
 void lecroy9410_command( const char * /* cmd */ );
 
@@ -462,7 +462,7 @@ double lecroy9410_trigger_delay_check( void );
 void lecroy9410_all_windows_check( void );
 
 void lecroy9410_window_check( Window_T * /* w        */,
-                              bool       /* show_num */ );
+                              bool       /* show_num */  );
 
 long lecroy9410_find_length( void );
 
@@ -472,10 +472,10 @@ double lecroy9410_time_per_point( void );
 
 long lecroy9410_translate_channel( int  /* dir     */,
                                    long /* channel */,
-                                   bool /* flag    */ );
+                                   bool /* flag    */  );
 
 void lecroy9410_store_state( LECROY9410_T * /* dest */,
-                             LECROY9410_T * /* src  */ );
+                             LECROY9410_T * /* src  */  );
 
 
 #endif /* ! LECROY9410_HEADER */

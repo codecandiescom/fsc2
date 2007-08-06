@@ -79,11 +79,11 @@
 /* A pulse needs to be updated if either its activity state changed, its
    position changed or its length changed */
 
-#define NEEDS_UPDATE( p ) ( ( ( p )->is_active ^ ( p )->was_active ) || \
-                            ( ( p )->is_old_pos &&                      \
-                              ( p )->old_pos != ( p )->pos )         || \
-                            ( ( p )->is_old_len &&                      \
-                              ( p )->old_len != ( p )->len ) )
+#define NEEDS_UPDATE( p ) (    ( ( p )->is_active ^ ( p )->was_active )  \
+                            || (    ( p )->is_old_pos                    \
+                                 && ( p )->old_pos != ( p )->pos )       \
+                            || (    ( p )->is_old_len                    \
+                                 && ( p )->old_len != ( p )->len ) )
 
 
 /* typedefs of structures needed in the module */
@@ -375,10 +375,10 @@ bool rs690_store_timebase( double /* timebase */ );
 bool rs690_store_timebase_level( int /* level_type */ );
 
 bool rs690_assign_channel_to_function( int  /* function */,
-                                       long /* channel  */ );
+                                       long /* channel  */  );
 
 bool rs690_set_function_delay( int    /* function */,
-                               double /* delay    */ );
+                               double /* delay    */  );
 
 bool rs690_set_trigger_mode( int /* mode */ );
 
@@ -391,12 +391,12 @@ bool rs690_set_repeat_time( double /* rep_time */ );
 bool rs690_invert_function( int /* function */ );
 
 bool rs690_set_phase_reference( int /* phase    */,
-                                int /* function */ );
+                                int /* function */  );
 
 bool rs690_phase_setup_prep( int  /* func    */,
                              int  /* type    */,
                              int  /* dummy   */,
-                             long /* channel */ );
+                             long /* channel */  );
 
 bool rs690_phase_setup( int /* func */ );
 
@@ -408,52 +408,52 @@ bool rs690_keep_all( void );
 bool rs690_new_pulse( long /* pnum */ );
 
 bool rs690_set_pulse_function( long /* pnum     */,
-                               int  /* function */ );
+                               int  /* function */  );
 
 bool rs690_set_pulse_position( long   /* pnum   */,
-                               double /* p_time */ );
+                               double /* p_time */  );
 
 bool rs690_set_pulse_length( long   /* pnum   */,
-                             double /* p_time */ );
+                             double /* p_time */  );
 
 bool rs690_set_pulse_position_change( long   /* pnum   */,
-                                      double /* p_time */ );
+                                      double /* p_time */  );
 
 bool rs690_set_pulse_length_change( long   /* pnum   */,
-                                    double /* p_time */ );
+                                    double /* p_time */  );
 
 bool rs690_set_pulse_phase_cycle( long /* pnum  */,
-                                  long /* cycle */ );
+                                  long /* cycle */  );
 
 bool rs690_get_pulse_function( long  /* pnum     */,
-                               int * /* function */ );
+                               int * /* function */  );
 
 bool rs690_get_pulse_position( long     /* pnum   */,
-                               double * /* p_time */ );
+                               double * /* p_time */  );
 
 bool rs690_get_pulse_length( long     /* pnum   */,
-                             double * /* p_time */ );
+                             double * /* p_time */  );
 
 bool rs690_get_pulse_position_change( long     /* pnum   */,
-                                      double * /* p_time */ );
+                                      double * /* p_time */  );
 
 bool rs690_get_pulse_length_change( long     /* pnum   */,
-                                    double * /* p_time */ );
+                                    double * /* p_time */  );
 
 bool rs690_get_pulse_phase_cycle( long   /* pnum  */,
-                                  long * /* cycle */ );
+                                  long * /* cycle */  );
 
 bool rs690_change_pulse_position( long   /* pnum   */,
-                                  double /* p_time */ );
+                                  double /* p_time */  );
 
 bool rs690_change_pulse_length( long   /* pnum   */,
-                                double /* tp_ime */ );
+                                double /* tp_ime */  );
 
 bool rs690_change_pulse_position_change( long   /* pnum   */,
-                                         double /* p_time */ );
+                                         double /* p_time */  );
 
 bool rs690_change_pulse_length_change( long   /* pnum   */,
-                                       double /* p_time */ );
+                                       double /* p_time */  );
 
 
 /* Functions from rs690_init.c */
@@ -474,7 +474,7 @@ const char *rs690_ptime( double /* p_time */ );
 const char *rs690_pticks( Ticks /* ticks */ );
 
 int rs690_pulse_compare( const void * /* A */,
-                         const void * /* B */ );
+                         const void * /* B */  );
 
 void rs690_show_pulses( void );
 
@@ -502,7 +502,7 @@ void rs690_set_pulses( Function_T * /* f */ );
 void rs690_full_reset( void );
 
 Pulse_T *rs690_delete_pulse( Pulse_T * /* p    */,
-                             bool      /* warn */ );
+                             bool      /* warn */  );
 
 void rs690_shape_padding_check_1( Channel_T * /* ch */ );
 

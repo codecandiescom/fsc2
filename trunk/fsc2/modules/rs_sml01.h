@@ -190,7 +190,7 @@ double rs_sml01_get_att( double /* freq */ );
 
 unsigned int rs_sml01_get_mod_param( Var_T ** /* v    */,
                                      double * /* dres */,
-                                     int *    /* ires */ );
+                                     int *    /* ires */  );
 
 void rs_sml01_check_mod_ampl( double /* freq */ );
 
@@ -227,13 +227,13 @@ int rs_sml01_get_mod_type( void );
 
 int rs_sml01_set_mod_source( int    /* type   */,
                              int    /* source */,
-                             double /* freq   */ );
+                             double /* freq   */  );
 
 int rs_sml01_get_mod_source( int      /* type */,
-                             double * /* freq */ );
+                             double * /* freq */  );
 
 double rs_sml01_set_mod_ampl( int    /* type */,
-                              double /* ampl */ );
+                              double /* ampl */  );
 
 double rs_sml01_get_mod_ampl( int /* type */ );
 

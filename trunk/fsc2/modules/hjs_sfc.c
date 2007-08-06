@@ -89,8 +89,8 @@ int hjs_sfc_init_hook( void )
     else
         func = get_string( "daq_reserve_dac#%d", dev_num );
 
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         T_free( func );
         print( FATAL, "Function for reserving the DAC is missing.\n" );
@@ -130,8 +130,8 @@ int hjs_sfc_init_hook( void )
 
     func = get_string( "daq_dac_parameter#%d", dev_num );
 
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         print( FATAL, "Function for determining the DAC parameters is "
                "missing.\n" );

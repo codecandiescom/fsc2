@@ -274,11 +274,13 @@ bool xforms_init( int  * argc,
 
     if ( * ( ( char * ) Xresources[ RESOLUTION ].var ) != '\0' )
     {
-        if ( ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var, "s" ) ||
-             ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var, "small" ) )
+        if (    ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var, "s" )
+             || ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var,
+                              "small" ) )
             GUI.G_Funcs.size = ( bool ) LOW;
-        if ( ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var, "l" ) ||
-             ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var, "large" ) )
+        if (    ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var, "l" )
+             || ! strcasecmp( ( char * ) Xresources[ RESOLUTION ].var,
+                              "large" ) )
             GUI.G_Funcs.size = ( bool ) HIGH;
     }
 
@@ -332,19 +334,21 @@ bool xforms_init( int  * argc,
     GUI.stop_button_mask = 0;
     if ( * ( char * ) Xresources[ STOPMOUSEBUTTON ].var != '\0' )
     {
-        if ( ! strcmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var, "1" )
+        if (    ! strcmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var, "1" )
              || ! strcasecmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
                               "left" ) )
             GUI.stop_button_mask = FL_LEFT_MOUSE;
-        else if ( ! strcmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
-                            "2" ) ||
-                  ! strcasecmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
-                                "middle" ) )
+        else if (    ! strcmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
+                               "2" )
+                  || ! strcasecmp( ( char * ) 
+                                   Xresources[ STOPMOUSEBUTTON ].var,
+                                   "middle" ) )
             GUI.stop_button_mask = FL_MIDDLE_MOUSE;
-        else if ( ! strcmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
-                            "3" ) ||
-                  ! strcasecmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
-                                "right" ) )
+        else if (    ! strcmp( ( char * ) Xresources[ STOPMOUSEBUTTON ].var,
+                            "3" )
+                  || ! strcasecmp( ( char * )
+                                   Xresources[ STOPMOUSEBUTTON ].var,
+                                   "right" ) )
             GUI.stop_button_mask = FL_RIGHT_MOUSE;
     }
 
@@ -369,8 +373,8 @@ bool xforms_init( int  * argc,
     Fsc2_Internals.http_port = 8080;
 
 #if defined DEFAULT_HTTP_PORT
-    if ( * ( ( int * ) Xresources[ HTTPPORT ].var ) >= 1024 &&
-         * ( ( int * ) Xresources[ HTTPPORT ].var ) <= 65535 )
+    if (    * ( ( int * ) Xresources[ HTTPPORT ].var ) >= 1024
+         && * ( ( int * ) Xresources[ HTTPPORT ].var ) <= 65535 )
         Fsc2_Internals.http_port = * ( ( int * ) Xresources[ HTTPPORT ].var );
     else if ( DEFAULT_HTTP_PORT >= 1024 && DEFAULT_HTTP_PORT <= 65535 )
         Fsc2_Internals.http_port = DEFAULT_HTTP_PORT;
@@ -670,8 +674,8 @@ bool dl_fsc2_rsc( void )
 
     Fsc2_Internals.rsc_handle = dlopen( lib_name, RTLD_NOW );
 
-    if ( Fsc2_Internals.rsc_handle == NULL &&
-         ! ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) ) )
+    if (    Fsc2_Internals.rsc_handle == NULL
+         && ! ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) ) )
     {
         alt_lib_name = get_string( libdir "%s", lib_name );
         Fsc2_Internals.rsc_handle = dlopen( alt_lib_name, RTLD_NOW );
@@ -890,8 +894,10 @@ int is_iconic( Display * d,
                                  &actual_type, &actual_format,
                                  &nitems, &leftover, &property );
 
-    if ( status != Success || property == NULL ||
-         xa_wm_state != actual_type || nitems != 1 )
+    if (    status != Success
+         || property == NULL
+         || xa_wm_state != actual_type
+         || nitems != 1 )
     {
         if ( property != NULL )
             XFree( property );

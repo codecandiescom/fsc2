@@ -104,8 +104,9 @@ struct termios *fsc2_serial_open( int          sn        UNUSED_ARG,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EACCES;
     return NULL;
@@ -135,9 +136,9 @@ ssize_t fsc2_serial_write( int          sn              UNUSED_ARG,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -158,9 +159,9 @@ ssize_t fsc2_serial_read( int    sn              UNUSED_ARG,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -178,9 +179,9 @@ int fsc2_tcgetattr( int              sn         UNUSED_ARG,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -199,9 +200,9 @@ int fsc2_tcsetattr( int              sn                UNUSED_ARG,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -219,9 +220,9 @@ int fsc2_tcsendbreak( int sn        UNUSED_ARG,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -238,9 +239,9 @@ int fsc2_tcdrain( int sn UNUSED_ARG )
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -258,9 +259,9 @@ int fsc2_tcflush( int sn              UNUSED_ARG,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -278,9 +279,9 @@ int fsc2_tcflow( int sn      UNUSED_ARG,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     errno = EBADF;
     return -1;
@@ -572,9 +573,9 @@ struct termios *fsc2_serial_open( int          sn,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that the device name argument is reasonable */
 
@@ -601,8 +602,8 @@ struct termios *fsc2_serial_open( int          sn,
 
     /* Check if serial port has been requested by the module */
 
-    if ( ! Serial_Port[ sn ].in_use ||
-         strcmp( Serial_Port[ sn ].dev_name, dev_name ) )
+    if (    ! Serial_Port[ sn ].in_use
+         || strcmp( Serial_Port[ sn ].dev_name, dev_name ) )
     {
         fsc2_serial_log_message( "Error: Serial port %d hasn't been claimed "
                                  "by module %s\n", sn, dev_name );
@@ -686,9 +687,9 @@ void fsc2_serial_close( int sn )
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     if ( Serial_Port[ sn ].dev_name )
         fsc2_serial_log_function_start( "fsc2_serial_close",
@@ -754,9 +755,9 @@ ssize_t fsc2_serial_write( int          sn,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -847,8 +848,9 @@ ssize_t fsc2_serial_write( int          sn,
         }
     }
 
-    while ( ( write_count = write( Serial_Port[ sn ].fd, buf, count ) ) < 0 &&
-            errno == EINTR && ! quit_on_signal )
+    while (    ( write_count = write( Serial_Port[ sn ].fd, buf, count ) ) < 0
+            && errno == EINTR
+            && ! quit_on_signal )
         /* empty */ ;
 
 
@@ -905,9 +907,9 @@ ssize_t fsc2_serial_read( int    sn,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1000,8 +1002,9 @@ ssize_t fsc2_serial_read( int    sn,
         }
     }
 
-    while ( ( read_count = read( Serial_Port[ sn ].fd, buf, count ) ) < 0 &&
-            errno == EINTR && ! quit_on_signal )
+    while (    ( read_count = read( Serial_Port[ sn ].fd, buf, count ) ) < 0
+            && errno == EINTR
+            && ! quit_on_signal )
         /* empty */ ;
         
     if ( read_count == 0 )
@@ -1230,9 +1233,9 @@ int fsc2_tcgetattr( int              sn,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1267,9 +1270,9 @@ int fsc2_tcsetattr( int              sn,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1303,9 +1306,9 @@ int fsc2_tcsendbreak( int sn,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1338,9 +1341,9 @@ int fsc2_tcdrain( int sn )
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1374,9 +1377,9 @@ int fsc2_tcflush( int sn,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1410,9 +1413,9 @@ int fsc2_tcflow( int sn,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     /* Check that serial port number is reasonable */
 
@@ -1513,9 +1516,9 @@ void fsc2_serial_log_message( const char * fmt,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     if ( fsc2_serial_log == NULL || ll == LL_NONE )
         return;

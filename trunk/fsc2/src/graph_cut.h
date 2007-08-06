@@ -75,19 +75,19 @@ struct Cut_Graphics {
 void cut_init( void );
 
 void cut_show( int  /* dir     */,
-               long /* u_index */ );
+               long /* u_index */  );
 
 bool cut_data_rescaled( long   /* curve */,
                         double /* y_min */,
-                        double /* y_max */ );
+                        double /* y_max */  );
 
 bool cut_num_points_changed( int  /* dir        */,
-                             long /* num_points */ );
+                             long /* num_points */  );
 
 bool cut_new_points( long /* curve   */,
                      long /* x_index */,
                      long /* y_index */,
-                     long /* len     */ );
+                     long /* len     */  );
 
 void redraw_all_cut_canvases( void );
 
@@ -100,14 +100,14 @@ void cut_form_close( void );
 void cut_clear_curve( long /* curve */ );
 
 void set_cut_marker( long /* x_pos */,
-                     long /* color */ );
+                     long /* color */  );
 
 void delete_cut_marker( long /* x_pos */ );
 
 void delete_all_cut_markers( bool /* redraw_flag */ );
 
 int get_mouse_pos_cut( double *       /* pa      */,
-                       unsigned int * /* keymask */ );
+                       unsigned int * /* keymask */  );
 
 
 #endif   /* ! GRAPH_CUT_HEADER */

@@ -210,8 +210,8 @@ Var_T *f_freeze( Var_T * v )
 
     is_now_frozen = get_boolean( v );
 
-    if ( Fsc2_Internals.I_am == CHILD &&
-         ! writer( C_FREEZE, ( int ) is_now_frozen ) )
+    if (    Fsc2_Internals.I_am == CHILD
+         && ! writer( C_FREEZE, ( int ) is_now_frozen ) )
         THROW( EXCEPTION );
 
     return vars_push( INT_VAR, ( long ) is_now_frozen );
@@ -952,8 +952,8 @@ void recreate_Toolbox( void )
     {
         Toolbox->Tools = fl_bgn_form( FL_UP_BOX, 1, 1 );
 
-        if ( ! Has_been_shown &&
-             * ( char * ) Xresources[ TOOLGEOMETRY ].var != '\0' )
+        if (    ! Has_been_shown
+             && * ( char * ) Xresources[ TOOLGEOMETRY ].var != '\0' )
         {
             flags = XParseGeometry( ( char * ) Xresources[ TOOLGEOMETRY ].var,
                                     &tool_x, &tool_y, &dummy, &dummy );
@@ -1130,9 +1130,9 @@ static FL_OBJECT *append_object_to_form( Iobject_T * io,
     /* Check that the box still fits onto the screen, otherwise try to change
        the layout to make it still fit. */
 
-    if ( io->prev != NULL &&
-         ( ( Toolbox->layout == VERT && fl_scrh - *h < 30 ) ||
-           ( Toolbox->layout == HORI && fl_scrw - *w < 30 ) ) )
+    if (    io->prev != NULL
+         && (    ( Toolbox->layout == VERT && fl_scrh - *h < 30 )
+              || ( Toolbox->layout == HORI && fl_scrw - *w < 30 ) ) )
     {
         fl_delete_object( io->self );
         fl_free_object( io->self );
@@ -1310,8 +1310,9 @@ static void radio_button_setup( Iobject_T * io )
     if ( Toolbox->layout == HORI )
         for ( nio = Toolbox->objs; nio != io; nio = nio->next )
         {
-            if ( nio->type != RADIO_BUTTON || nio->group != io->group ||
-                 nio->y != io->y )
+            if (    nio->type != RADIO_BUTTON
+                 || nio->group != io->group
+                 || nio->y != io->y )
                 continue;
 
             if ( io->y + ( io->ht - io->h ) / 2 >
@@ -1777,8 +1778,10 @@ static void tools_callback( FL_OBJECT * obj,
             {
                 for ( oio = Toolbox->objs; oio != NULL; oio = oio->next )
                 {
-                    if ( oio == io || oio->type != RADIO_BUTTON ||
-                         oio->group != io->group || io->state == 0 )
+                    if (    oio == io
+                         || oio->type != RADIO_BUTTON
+                         || oio->group != io->group
+                         || io->state == 0 )
                         continue;
                     oio->state = 0;
                 }
@@ -1911,9 +1914,9 @@ bool check_format_string( char * buf )
         return FAIL;
 
     lcp = bp + strlen( bp ) - 1;      /* last char must be g, f or e */
-    if ( *lcp != 'g' && *lcp != 'G' &&
-         *lcp != 'f' && *lcp != 'F' &&
-         *lcp != 'e' && *lcp != 'E' )
+    if (    toupper( ( int ) *lcp ) != 'G'
+         && toupper( ( int ) *lcp ) != 'F'
+         && toupper( ( int ) *lcp ) != 'E' )
         return FAIL;
 
 
@@ -2019,8 +2022,9 @@ void check_label( char * str )
     }
     else if ( *p == '-' )
     {
-        if ( ! isdigit( ( unsigned char ) *( p + 1 ) ) &&
-             *( p + 1 ) != '>' && *( p + 1 ) != '-' )
+        if (    ! isdigit( ( unsigned char ) *( p + 1 ) )
+             && * ( p + 1 ) != '>'
+             && *( p + 1 ) != '-' )
             goto bad_label_string;
 
         if ( isdigit( ( unsigned char ) *( p + 1 ) ) )
@@ -2045,9 +2049,9 @@ void check_label( char * str )
             goto bad_label_string;
         else if ( *p == '0' )
         {
-            if ( ! isdigit( ( unsigned char ) *( p + 1 ) ) ||
-                 ! isdigit( ( unsigned char ) *( p + 2 ) ) ||
-                 ! isdigit( ( unsigned char ) *( p + 3 ) ) )
+            if (    ! isdigit( ( unsigned char ) *( p + 1 ) )
+                 || ! isdigit( ( unsigned char ) *( p + 2 ) )
+                 || ! isdigit( ( unsigned char ) *( p + 3 ) ) )
                 goto bad_label_string;
             p += 4;
         }

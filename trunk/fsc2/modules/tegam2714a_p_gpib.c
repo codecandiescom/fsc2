@@ -82,9 +82,9 @@ void tegam2714a_p_init( const char * name )
     ampl = tegam2714a_p_get_amplitude( );
     offset = tegam2714a_p_get_offset( );
 
-    if ( ampl   != 2.0 * (   tegam2714a_p.function.high_level
-                           - tegam2714a_p.function.low_level ) ||
-         offset != tegam2714a_p.function.low_level )
+    if (    ampl != 2.0 * (   tegam2714a_p.function.high_level
+                            - tegam2714a_p.function.low_level )
+         || offset != tegam2714a_p.function.low_level )
         tegam2714a_p_set_levels( ampl, offset );
 
 	/* Use the internal clock as reference */

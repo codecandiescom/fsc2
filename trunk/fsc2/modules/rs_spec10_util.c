@@ -58,8 +58,8 @@ bool rs_spec10_read_state( void )
 
     do
     {
-        while ( ( c = fsc2_fgetc( fp ) ) != EOF && c != '\n' &&
-                isspace( ( unsigned char ) c ) )
+        while ( ( c = fsc2_fgetc( fp ) ) != EOF && c != '\n'
+                && isspace( ( unsigned char ) c ) )
             /* empty */ ;
 
         switch ( c )
@@ -130,8 +130,8 @@ bool rs_spec10_read_state( void )
                         break;
 
                     case 2 :
-                        if ( val < rs_spec10->ccd.roi[ X ] ||
-                             val >= CCD_PIXEL_WIDTH )
+                        if (    val < rs_spec10->ccd.roi[ X ]
+                             || val >= CCD_PIXEL_WIDTH )
                         {
                             print( FATAL, "Invalid line %d in state file "
                                    "'%s'.\n", line, fn );
@@ -144,8 +144,8 @@ bool rs_spec10_read_state( void )
                         break;
 
                     case 3 :
-                        if ( val < rs_spec10->ccd.roi[ Y ] ||
-                             val >= CCD_PIXEL_HEIGHT )
+                        if (    val < rs_spec10->ccd.roi[ Y ]
+                             || val >= CCD_PIXEL_HEIGHT )
                         {
                             print( FATAL, "Invalid line %d in state file "
                                    "'%s'.\n", line, fn );
@@ -158,9 +158,9 @@ bool rs_spec10_read_state( void )
                         break;
 
                     case 4 :
-                        if ( val < 1 ||
-                             ( rs_spec10->ccd.roi[ X + 2 ]
-                               - rs_spec10->ccd.roi[ X ] + 1 ) % val != 0 )
+                        if (    val < 1
+                             || ( rs_spec10->ccd.roi[ X + 2 ]
+                                  - rs_spec10->ccd.roi[ X ] + 1 ) % val != 0 )
                         {
                             print( FATAL, "Invalid line %d in state file "
                                    "'%s'.\n", line, fn );
@@ -173,9 +173,9 @@ bool rs_spec10_read_state( void )
                         break;
 
                     case 5 :
-                        if ( val < 1 ||
-                             ( rs_spec10->ccd.roi[ Y + 2 ]
-                               - rs_spec10->ccd.roi[ Y ] + 1 ) % val != 0 )
+                        if (    val < 1
+                             || ( rs_spec10->ccd.roi[ Y + 2 ]
+                                  - rs_spec10->ccd.roi[ Y ] + 1 ) % val != 0 )
                         {
                             print( FATAL, "Invalid line %d in state file "
                                    "'%s'.\n", line, fn );
@@ -188,8 +188,8 @@ bool rs_spec10_read_state( void )
                         break;
 
                     case 6 :
-                        if ( val != HARDWARE_BINNING &&
-                             val != SOFTWARE_BINNING )
+                        if (    val != HARDWARE_BINNING
+                             && val != SOFTWARE_BINNING )
                         {
                             print( FATAL, "Invalid line %d in state file "
                                    "'%s'.\n", line, fn );
@@ -202,8 +202,8 @@ bool rs_spec10_read_state( void )
                         break;
 
                     case 7 :
-                        if ( val < CCD_MIN_CLEAR_CYCLES ||
-                             val > CCD_MAX_CLEAR_CYCLES )
+                        if (    val < CCD_MIN_CLEAR_CYCLES
+                             || val > CCD_MAX_CLEAR_CYCLES )
                         {
                             print( FATAL, "Invalid line %d in state file "
                                    "'%s'.\n", line, fn );
@@ -492,8 +492,8 @@ void rs_spec10_close_on_exec_hack( int * fd_list )
         for ( found = UNSET, j = 0; fd_list[ j ] != -1 && ! found; j++ )
             found = new_fd_list[ i ] == fd_list[ j ];
 
-        if ( ! found &&
-             ( flags = fcntl( new_fd_list [ i ], F_GETFD, 0 ) ) != -1 )
+        if (    ! found
+             && ( flags = fcntl( new_fd_list [ i ], F_GETFD, 0 ) ) != -1 )
             fcntl( new_fd_list [ i ], F_SETFD, flags | FD_CLOEXEC );
     }
 

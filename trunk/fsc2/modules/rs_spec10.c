@@ -390,11 +390,11 @@ Var_T *ccd_camera_binning_method( Var_T * v )
             break;
 
         case STR_VAR :
-            if ( ! strcasecmp( v->val.sptr, "soft" ) ||
-                 ! strcasecmp( v->val.sptr, "software" ) )
+            if (    ! strcasecmp( v->val.sptr, "soft" )
+                 || ! strcasecmp( v->val.sptr, "software" ) )
                 rs_spec10->ccd.bin_mode = SOFTWARE_BINNING;
-            else if ( ! strcasecmp( v->val.sptr, "hard" ) ||
-                      ! strcasecmp( v->val.sptr, "hardware" ) )
+            else if (    ! strcasecmp( v->val.sptr, "hard" )
+                      || ! strcasecmp( v->val.sptr, "hardware" ) )
                 rs_spec10->ccd.bin_mode = HARDWARE_BINNING;
             else
             {
@@ -481,8 +481,8 @@ Var_T *ccd_camera_clear_cycles( Var_T * v )
 
     count = get_strict_long( v, "number of clear cycles" );
 
-    if ( count < CCD_MIN_CLEAR_CYCLES ||
-         count > CCD_MAX_CLEAR_CYCLES )
+    if (    count < CCD_MIN_CLEAR_CYCLES
+         || count > CCD_MAX_CLEAR_CYCLES )
     {
         print( FATAL, "Invalid number of clear clear cycles, valid range is "
                "%d to %d.\n", CCD_MIN_CLEAR_CYCLES, CCD_MAX_CLEAR_CYCLES );
@@ -555,8 +555,8 @@ Var_T *ccd_camera_get_image( Var_T * v  UNUSED_ARG )
         height = 1;
     }
 
-    if ( rs_spec10->ccd.bin[ X ] != bin[ X ] ||
-         rs_spec10->ccd.bin[ Y ] != bin[ Y ] )
+    if (    rs_spec10->ccd.bin[ X ] != bin[ X ]
+         || rs_spec10->ccd.bin[ Y ] != bin[ Y ] )
         print( SEVERE, "Binning parameters had to be changed from (%ld, %ld) "
                "to (%ld, %ld) because binning area was larger than ROI.\n",
                bin[ X ], bin[ Y ], rs_spec10->ccd.bin[ X ],
@@ -573,8 +573,8 @@ Var_T *ccd_camera_get_image( Var_T * v  UNUSED_ARG )
     rs_spec10->ccd.roi[ Y + 2 ] =
                 rs_spec10->ccd.roi[ Y ] + height * rs_spec10->ccd.bin[ Y ] - 1;
 
-    if ( rs_spec10->ccd.roi[ X + 2 ] != urc[ X ] ||
-         rs_spec10->ccd.roi[ Y + 2 ] != urc[ Y ] )
+    if (    rs_spec10->ccd.roi[ X + 2 ] != urc[ X ]
+         || rs_spec10->ccd.roi[ Y + 2 ] != urc[ Y ] )
         print( SEVERE, "Upper right hand corner of ROI had to changed from "
                "(%u, %u) to (%u, %u) to fit the binning factors.\n",
                urc[ X ] + 1, urc[ Y ] + 1, rs_spec10->ccd.roi[ X + 2 ] + 1,
@@ -619,9 +619,10 @@ Var_T *ccd_camera_get_image( Var_T * v  UNUSED_ARG )
            here we also have to turn the image upside-down or mirror it if
            required. */
 
-        if ( FSC2_MODE == TEST ||
-             rs_spec10->ccd.bin_mode == HARDWARE_BINNING ||
-             ( rs_spec10->ccd.bin[ X ] == 1 && rs_spec10->ccd.bin[ Y ] == 1 ) )
+        if (    FSC2_MODE == TEST
+             || rs_spec10->ccd.bin_mode == HARDWARE_BINNING
+             || (    rs_spec10->ccd.bin[ X ] == 1
+                  && rs_spec10->ccd.bin[ Y ] == 1 ) )
         {
             for ( i = 0; i < height; i++ )
             {
@@ -801,8 +802,8 @@ Var_T *ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
            the work to the camera, otherwise we have to do add up the rows
            of the image and do the vertical binning ourselves */
 
-        if ( FSC2_MODE == TEST ||
-             rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
+        if (    FSC2_MODE == TEST
+             || rs_spec10->ccd.bin_mode == HARDWARE_BINNING )
         {
             if ( RS_SPEC10_MIRROR == 1 )
             {
@@ -887,9 +888,9 @@ Var_T *ccd_camera_temperature( Var_T * v )
        function has been well hidden within e.g. an IF construct, so it
        wasn't run already during the test run) */
 
-    if ( FSC2_MODE == EXPERIMENT &&
-         rs_spec10->temp.acc_setpoint != ACC_READ_WRITE &&
-         rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY )
+    if (    FSC2_MODE == EXPERIMENT
+         && rs_spec10->temp.acc_setpoint != ACC_READ_WRITE
+         && rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY )
     {
         print( SEVERE, "Camera does not allow setting a temperature "
                "setpoint.\n" );

@@ -57,8 +57,8 @@ void bug_report_callback( FL_OBJECT * a,
 
     /* Create a temporary file for the mail */
 
-    if ( ( tmp_fd = mkstemp( filename ) ) < 0 ||
-         ( tmp = fdopen( tmp_fd, "w+" ) ) == NULL )
+    if (    ( tmp_fd = mkstemp( filename ) ) < 0
+         || ( tmp = fdopen( tmp_fd, "w+" ) ) == NULL )
     {
         if ( tmp_fd >= 0 )
         {

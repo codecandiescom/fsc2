@@ -204,8 +204,8 @@ static void rb_pulser_j_rf_synth_init( void )
     else
         func = get_string( SYNTHESIZER_PULSE_STATE "#%d", dev_num );
     
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         T_free( func );
         print( FATAL, "Function for switching pulse modulation on or off is "
@@ -222,8 +222,8 @@ static void rb_pulser_j_rf_synth_init( void )
     else
         func = get_string( SYNTHESIZER_PULSE_WIDTH "#%d", dev_num );
     
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         rb_pulser_j.synth_pulse_state =
                                 CHAR_P T_free( rb_pulser_j.synth_pulse_state );
@@ -241,8 +241,8 @@ static void rb_pulser_j_rf_synth_init( void )
     else
         func = get_string( SYNTHESIZER_PULSE_DELAY "#%d", dev_num );
     
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         rb_pulser_j.synth_pulse_state =
                                 CHAR_P T_free( rb_pulser_j.synth_pulse_state );
@@ -262,8 +262,8 @@ static void rb_pulser_j_rf_synth_init( void )
     else
         func = get_string( SYNTHESIZER_TRIG_SLOPE "#%d", dev_num );
     
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         rb_pulser_j.synth_pulse_state =
                                 CHAR_P T_free( rb_pulser_j.synth_pulse_state );
@@ -285,8 +285,8 @@ static void rb_pulser_j_rf_synth_init( void )
     else
         func = get_string( SYNTHESIZER_STATE "#%d", dev_num );
     
-    if ( ! func_exists( func ) ||
-         ( func_ptr = func_get( func, &acc ) ) == NULL )
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
         rb_pulser_j.synth_pulse_state =
                                 CHAR_P T_free( rb_pulser_j.synth_pulse_state );

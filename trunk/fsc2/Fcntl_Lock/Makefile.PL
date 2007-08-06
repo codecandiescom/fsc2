@@ -10,7 +10,7 @@ use ExtUtils::MakeMaker;
 use Config;
 
 
-# Check if there's a C compiler that we can use.
+# Check if there's a C compiler we can use.
 
 open $fh, '>cc_test.c' or die "Failed to open a file for writing: $!\n";
 print $fh "int main(void)\n{\nreturn 0;\n}\n";
@@ -56,8 +56,10 @@ unlink 'fcntl_test.c';
 # a version that also tries 'long long', then one that only uses 'long'
 # since 'long long' may not exist on all systems).
 
-if ( ( system $Config{cc}, qw( -o sizes1 sizes1.c ) or system './sizes1' ) and
-     ( system $Config{cc}, qw( -o sizes2 sizes2.c ) or system './sizes2' ) ) {
+if (     (    system $Config{cc}, qw( -o sizes1 sizes1.c )
+		   or system './sizes1' ) 
+     and (    system $Config{cc}, qw( -o sizes2 sizes2.c )
+		   or system './sizes2' ) ) {
     unlink 'sizes1' if -e 'sizes1';
     unlink 'sizes2' if -e 'sizes2';
 	unlink 'Fnctl_Lock.h' if -e 'Fnctl_Lock.h';

@@ -146,7 +146,7 @@ double hp8672a_get_att( double /* freq */ );
 
 int hp8672a_set_mod_param( Var_T *  /* v    */,
                            double * /* dres */,
-                           int *    /* ires */ );
+                           int *    /* ires */  );
 
 int hp8672_mod_ampl_check( double /* ampl */ );
 

@@ -80,13 +80,13 @@ bool spex232_read_state( void )
 
                 fsc2_fseek( fp, -1, SEEK_CUR );
 
-                if ( ( spex232.mode & WL && i > 3 ) || i > 4 ||
-                     ( ( ( spex232.mode & WL && i < 3 ) ||
-                         ( spex232.mode & WN_MODES && i < 4 ) ) && 
-                       fsc2_fscanf( fp, "%lf", val + i ) != 1 ) ||
-                     ( ( ( spex232.mode & WL && i == 3 ) ||
-                         ( spex232.mode & WN_MODES && i == 4 ) ) &&
-                       fsc2_fscanf( fp, "%d", &new ) != 1 ) )
+                if (    ( spex232.mode & WL && i > 3 ) || i > 4
+                     || (    (    ( spex232.mode & WL && i < 3 )
+                               || ( spex232.mode & WN_MODES && i < 4 ) )
+                          && fsc2_fscanf( fp, "%lf", val + i ) != 1 )
+                     || (    (    ( spex232.mode & WL && i == 3 )
+                               || ( spex232.mode & WN_MODES && i == 4 ) )
+                          && fsc2_fscanf( fp, "%d", &new ) != 1 ) )
                 {
                     print( FATAL, "Invalid state file '%s'.\n", fn );
                     T_free( fn );
@@ -97,13 +97,14 @@ bool spex232_read_state( void )
                 while ( ( c = fsc2_fgetc( fp ) ) != EOF && isspace( c ) )
                     /* empty */ ;
 
-                if ( ( c == EOF &&
-                       ( ( i != 3 && spex232.mode & WL ) ||
-                         ( i != 4 && spex232.mode & WN_MODES ) ) ) ||
-                     ( ( i == 0 || i == 2 || spex232.mode & WL ) &&
-                       c != 'n' ) ||
-                     ( ( i == 1 || i == 3 ) && spex232.mode & WN_MODES &&
-                       c != 'c' ) )
+                if ( (    c == EOF
+                       && (    ( i != 3 && spex232.mode & WL )
+                            || ( i != 4 && spex232.mode & WN_MODES ) ) )
+                     || (    ( i == 0 || i == 2 || spex232.mode & WL )
+                          && c != 'n' )
+                     || (    ( i == 1 || i == 3 )
+                          && spex232.mode & WN_MODES
+                          && c != 'c' ) )
                 {
                     print( FATAL, "Invalid state file '%s'.\n", fn );
                     T_free( fn );
@@ -111,12 +112,12 @@ bool spex232_read_state( void )
                     SPEX232_THROW( EXCEPTION );
                 }
 
-                if ( ( ( spex232.mode & WL && i != 3 ) || i != 4 ) &&
-                     ( fsc2_fgetc( fp ) != 'm' ||
-                       ( c == 'c' &&
-                         ( fsc2_fgetc( fp ) != '^' ||
-                           fsc2_fgetc( fp ) != '-' ||
-                           fsc2_fgetc( fp ) != '1' ) ) ) )
+                if (    ( ( spex232.mode & WL && i != 3 ) || i != 4 )
+                     && (    fsc2_fgetc( fp ) != 'm'
+                          || (    c == 'c'
+                               && ( fsc2_fgetc( fp ) != '^'
+                                    || fsc2_fgetc( fp ) != '-'
+                                    || fsc2_fgetc( fp ) != '1' ) ) ) )
                 {
                     print( FATAL, "Invalid state file '%s'.\n", fn );
                     T_free( fn );

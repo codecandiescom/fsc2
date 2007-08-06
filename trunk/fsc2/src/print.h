@@ -27,7 +27,7 @@
 
 
 void print_it( FL_OBJECT * /* obj  */,
-               long        /* data */ );
+               long        /* data */  );
 
 
 #endif   /* ! PRINT_HEADER */

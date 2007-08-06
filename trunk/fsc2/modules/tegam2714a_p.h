@@ -38,7 +38,7 @@
 #endif
 
 #if EMPTY_WAVEFORM_NUMBER < 0 || EMPTY_WAVEFORM_NUMBER > 99
-#error "EMPTY_WAVEFORM_NUMER in configuration file invalid, not between 0 and 99."
+#error "EMPTY_WAVEFORM_NUMBER in configuration file invalid, not between 0 and 99."
 #endif
 
 #if DEFAULT_WAVEFORM_NUMBER == EMPTY_WAVEFORM_NUMBER
@@ -211,89 +211,122 @@ Var_T *pulser_pulse_reset(            Var_T * /* v */ );
 
 
 bool tegam2714a_p_store_timebase( double /* timebase */ );
-bool tegam2714a_p_assign_channel_to_function( int  /* function */ ,
-                                              long /* channel  */ );
+
+bool tegam2714a_p_assign_channel_to_function( int  /* function */,
+                                              long /* channel  */  );
+
 bool tegam2714a_p_invert_function( int /* function */ );
-bool tegam2714a_p_set_function_delay( int    /* function */ ,
-                                      double /* delay    */ );
-bool tegam2714a_p_set_function_high_level( int    /* function */ ,
-                                           double /* voltage  */ );
-bool tegam2714a_p_set_function_low_level( int    /* function */ ,
-                                          double /* voltage  */ );
+
+bool tegam2714a_p_set_function_delay( int    /* function */,
+                                      double /* delay    */  );
+
+bool tegam2714a_p_set_function_high_level( int    /* function */,
+                                           double /* voltage  */  );
+
+bool tegam2714a_p_set_function_low_level( int    /* function */,
+                                          double /* voltage  */  );
+
 bool tegam2714a_p_set_trigger_mode( int /* mode */ );
+
 bool tegam2714a_p_set_max_seq_len( double /* seq_len */ );
 
 
 bool tegam2714a_p_new_pulse( long /* pnum */ );
-bool tegam2714a_p_set_pulse_function( long /* pnum     */ , 
-                                      int  /* function */ );
-bool tegam2714a_p_set_pulse_position( long   /* pnum   */ ,
-                                      double /* p_time */ );
-bool tegam2714a_p_set_pulse_length( long   /* pnum   */ ,
-                                    double /* p_time */ );
-bool tegam2714a_p_set_pulse_position_change( long   /* pnum   */ ,
-                                             double /* p_time */ );
-bool tegam2714a_p_set_pulse_length_change( long   /* pnum   */ ,
-                                           double /* p_time */ );
-bool tegam2714a_p_get_pulse_function( long  /* pnum     */ ,
-                                      int * /* function */ );
-bool tegam2714a_p_get_pulse_position( long     /* pnum   */ ,
-                                      double * /* p_time */ );
-bool tegam2714a_p_get_pulse_length( long     /* pnum   */ ,
-                                    double * /* p_time */ );
-bool tegam2714a_p_get_pulse_position_change( long     /* pnum   */ ,
-                                             double * /* p_time */ );
-bool tegam2714a_p_get_pulse_length_change( long     /* pnum   */ ,
-                                           double * /* p_time */ );
-bool tegam2714a_p_change_pulse_position( long   /* pnum   */ ,
-                                         double /* p_time */ );
-bool tegam2714a_p_change_pulse_length( long   /* pnum   */ ,
-                                       double /* p_time */ );
-bool tegam2714a_p_change_pulse_position_change( long   /* pnum   */ ,
-                                                double /* p_time */ );
-bool tegam2714a_p_change_pulse_length_change( long   /* pnum   */ , 
-                                              double /* p_time */ );
+
+bool tegam2714a_p_set_pulse_function( long /* pnum     */, 
+                                      int  /* function */  );
+
+bool tegam2714a_p_set_pulse_position( long   /* pnum   */,
+                                      double /* p_time */  );
+
+bool tegam2714a_p_set_pulse_length( long   /* pnum   */,
+                                    double /* p_time */  );
+
+bool tegam2714a_p_set_pulse_position_change( long   /* pnum   */,
+                                             double /* p_time */  );
+
+bool tegam2714a_p_set_pulse_length_change( long   /* pnum   */,
+                                           double /* p_time */  );
+
+bool tegam2714a_p_get_pulse_function( long  /* pnum     */,
+                                      int * /* function */  );
+
+bool tegam2714a_p_get_pulse_position( long     /* pnum   */,
+                                      double * /* p_time */  );
+
+bool tegam2714a_p_get_pulse_length( long     /* pnum   */,
+                                    double * /* p_time */  );
+
+bool tegam2714a_p_get_pulse_position_change( long     /* pnum   */,
+                                             double * /* p_time */  );
+
+bool tegam2714a_p_get_pulse_length_change( long     /* pnum   */,
+                                           double * /* p_time */  );
+
+bool tegam2714a_p_change_pulse_position( long   /* pnum   */,
+                                         double /* p_time */  );
+
+bool tegam2714a_p_change_pulse_length( long   /* pnum   */,
+                                       double /* p_time */  );
+
+bool tegam2714a_p_change_pulse_position_change( long   /* pnum   */,
+                                                double /* p_time */  );
+
+bool tegam2714a_p_change_pulse_length_change( long   /* pnum   */, 
+                                              double /* p_time */  );
 
 
 void tegam2714a_p_init_setup( void );
 
 void tegam2714a_p_do_update( void );
+
 void tegam2714a_p_do_checks( bool /* in_setup */ );
+
 void tegam2714a_p_pulse_setup( void );
 
 void tegam2714a_p_init( const char * /* name */ );
+
 void tegam2714a_p_run( bool /* state */ );
+
 void tegam2714a_p_set_amplitude( double ampl );
-void  tegam2714a_p_set_constant( Ticks /* start  */ ,
-                                 Ticks /* length */ ,
-                                 int   /* state  */ );
 
-void tegam2714a_p_check_levels( double /* high */ ,
-                                double /* low  */ );
+void  tegam2714a_p_set_constant( Ticks /* start  */,
+                                 Ticks /* length */,
+                                 int   /* state  */  );
+
+void tegam2714a_p_check_levels( double /* high */,
+                                double /* low  */  );
+
 const char *tegam2714a_p_ptime( double /* p_time */ );
+
 const char *tegam2714a_p_pticks( Ticks /* ticks */ );
+
 Ticks tegam2714a_p_double2ticks( double /* p_time */ );
+
 double tegam2714a_p_ticks2double( Ticks /* ticks */ );
+
 int tegam2714a_p_num_len( long /* num */ );
+
 Pulse_T *tegam2714a_p_get_pulse( long /* pnum */ );
-int tegam2714a_p_start_compare( const void * /* A */ ,
-                                const void * /* B */ );
-void tegam2714a_p_set( char * /* arena  */ ,
-                       Ticks  /* start  */ ,
-                       Ticks  /* len    */ ,
-                       Ticks  /* offset */ );
-int tegam2714a_p_diff( char *  /* old_p  */ ,
-                       char *  /* new_p  */ ,
-                       Ticks * /* start  */ ,
-                       Ticks * /* length */ );
+
+int tegam2714a_p_start_compare( const void * /* A */,
+                                const void * /* B */  );
+
+void tegam2714a_p_set( char * /* arena  */,
+                       Ticks  /* start  */,
+                       Ticks  /* len    */,
+                       Ticks  /* offset */  );
+
+int tegam2714a_p_diff( char *  /* old_p  */,
+                       char *  /* new_p  */,
+                       Ticks * /* start  */,
+                       Ticks * /* length */  );
+
 void tegam2714a_p_show_pulses( void );
+
 void tegam2714a_p_dump_pulses( void );
+
 void tegam2714a_p_write_pulses( FILE * /* fp */ );
-
-
-
-
-
 
 
 #endif /* ! TEGAM2714A_P_HEADER */

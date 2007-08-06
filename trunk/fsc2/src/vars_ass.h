@@ -30,7 +30,7 @@
 
 
 void vars_assign( Var_T * /* src */,
-                  Var_T * /* dest */ );
+                  Var_T * /* dest */  );
 
 
 #endif  /* ! VARS_ASS_HEADER */

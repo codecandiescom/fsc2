@@ -446,8 +446,9 @@ Var_T *find_field( Var_T * v  UNUSED_ARG )
        Starting with searching down is just as probable the wrong decision
        as searching up... */
 
-    if ( nmr.state == ER035M_OU_ACTIVE || nmr.state == ER035M_OD_ACTIVE ||
-         nmr.state == ER035M_UNKNOWN )
+    if (    nmr.state == ER035M_OU_ACTIVE
+         || nmr.state == ER035M_OD_ACTIVE
+         || nmr.state == ER035M_UNKNOWN )
          er035m_command( "SD\r" );
 
     /* Wait for gaussmeter to go into lock state (or FAILURE) */

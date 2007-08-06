@@ -369,17 +369,17 @@ void lecroy9450_set_interleaved( bool /* state */ );
 double lecroy9450_get_sens( int /* channel */ );
 
 void lecroy9450_set_sens( int    /* channel */,
-                          double /* sens    */ );
+                          double /* sens    */  );
 
 double lecroy9450_get_offset( int /* channel */ );
 
 void lecroy9450_set_offset( int    /* channel */,
-                            double /* offset  */ );
+                            double /* offset  */  );
 
 int lecroy9450_get_coupling( int /* channel */ );
 
 void lecroy9450_set_coupling( int /* channel */,
-                              int /* type    */ );
+                              int /* type    */  );
 
 int lecroy9450_get_bandwidth_limiter( void );
 
@@ -392,17 +392,17 @@ void lecroy9450_set_trigger_source( int /* channel */ );
 double lecroy9450_get_trigger_level( int /* channel */ );
 
 void lecroy9450_set_trigger_level( int    /* channel */,
-                                   double /* level   */ );
+                                   double /* level   */  );
 
 double lecroy9450_get_trigger_slope( int /* channel */ );
 
 void lecroy9450_set_trigger_slope( int /* channel */,
-                                   int /* slope   */ );
+                                   int /* slope   */  );
 
 int lecroy9450_get_trigger_coupling( int /* channel */ );
 
 void lecroy9450_set_trigger_coupling( int /* channel */,
-                                      int /* cpl     */ );
+                                      int /* cpl     */  );
 
 int lecroy9450_get_trigger_mode( void );
 
@@ -414,8 +414,8 @@ void lecroy9450_set_trigger_delay( double /* delay */ );
 
 long lecroy9450_get_probe_attenuation( int /* ch */ );
 
-void lecroy9450_set_probe_attenuation( int /* ch */,
-                                       long /* att */ );
+void lecroy9450_set_probe_attenuation( int  /* ch  */,
+                                       long /* att */  );
 
 bool lecroy9450_is_displayed( int /* ch */ );
 
@@ -425,7 +425,7 @@ void lecroy9450_display( int /* ch     */,
 void lecroy9450_set_up_averaging( long /* channel */,
                                   long /* source  */,
                                   long /* num_avg */,
-                                  long /* rec_len */ );
+                                  long /* rec_len */  );
 
 void lecroy9450_finished( void );
 
@@ -434,13 +434,13 @@ void lecroy9450_start_acquisition( void );
 void lecroy9450_get_curve( int        /* ch     */,
                            Window_T * /* w      */,
                            double **  /* array  */,
-                           long *     /* length */ );
+                           long *     /* length */  );
 
 double lecroy9450_get_area( int        /* ch */,
                             Window_T * /* w  */ );
 
 double lecroy9450_get_amplitude( int        /* ch */,
-                                 Window_T * /* w  */ );
+                                 Window_T * /* w  */  );
 
 void lecroy9450_copy_curve( long /* src  */,
                             long /* dest */ );
@@ -462,7 +462,7 @@ double lecroy9450_trigger_delay_check( void );
 void lecroy9450_all_windows_check( void );
 
 void lecroy9450_window_check( Window_T * /* w */,
-                              bool       /* show_num */ );
+                              bool       /* show_num */  );
 
 long lecroy9450_find_length( void );
 
@@ -472,10 +472,10 @@ double lecroy9450_time_per_point( void );
 
 long lecroy9450_translate_channel( int  /* dir     */,
                                    long /* channel */,
-                                   bool /* flag    */ );
+                                   bool /* flag    */  );
 
 void lecroy9450_store_state( LECROY9450_T * /* dest */,
-                             LECROY9450_T * /* src  */ );
+                             LECROY9450_T * /* src  */  );
 
 
 #endif /* LECROY9450_HEADER */

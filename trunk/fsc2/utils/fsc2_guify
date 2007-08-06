@@ -137,8 +137,8 @@ while ( <$if> ) {
                             line => $cur_line };
         if ( defined $4 ) {
             my $option = $4;
-            $option = "\"\"" if $var_options->{ type } =~ /^file$/o and
-                                $option =~ /^\s*$/;
+            $option = "\"\"" if     $var_options->{ type } =~ /^file$/o
+                                and $option =~ /^\s*$/;
             die "Syntax error at line $lino, garbage after variable type\n"
                 unless $option =~ /^\s*[\"\[]/o;
             analyze_var_options( $var_options, $option );
@@ -838,9 +838,9 @@ EOT
     for ( @vars ) {
         if ( $$_{ type } =~ /^int$/o ) {
             print "
-    if ( \$$$_{ name }\{ value \} =~ /^[+-]?\\d+\$/o and
-         ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 ) and
-         ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) {
+    if (     \$$$_{ name }\{ value \} =~ /^[+-]?\\d+\$/o
+         and ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 )
+         and ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) {
         print \$fh \"\$$$_{ name }\{ value \}\\n\";
     } else {
         print \$fh \"$$_{ def_value }\\n\";
@@ -848,9 +848,9 @@ EOT
 ";
         } elsif ( $$_{ type } =~ /^float$/o ) {
             print "
-    if ( \$$$_{ name }\{ value \} =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o and
-         ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 ) and
-         ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) {
+    if (     \$$$_{ name }\{ value \} =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o
+         and (     defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 )
+         and ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) {
         print \$fh \"\$$$_{ name }\{ value \}\\n\";
     } else {
         print \$fh \"$$_{ def_value }\\n\";
@@ -899,20 +899,20 @@ EOT
     for ( @vars ) {
         if ( $$_{ type } =~ /^int$/o ) {
             print "
-    goto done_reading unless defined( \$ne = <\$fh> )
-        and \$ne =~ /^[+-]?\\d+\$/;
+    goto done_reading unless     defined( \$ne = <\$fh> )
+                             and \$ne =~ /^[+-]?\\d+\$/;
     chomp \$ne;
-    goto done_reading if ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} ) or
-                         ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
+    goto done_reading if    ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} )
+                         or ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
     \$$$_{ name }\{ value \} = \$ne;
 ";
         } elsif ( $$_{ type } =~ /^float$/o ) {
             print "
-    goto done_reading unless defined( \$ne = <\$fh> )
-        and \$ne =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o;
+    goto done_reading unless     defined( \$ne = <\$fh> )
+                             and \$ne =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o;
     chomp \$ne;
-    goto done_reading if ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} ) or
-                         ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
+    goto done_reading if    ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} )
+                         or ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
     \$$$_{ name }\{ value \} = \$ne;
 ";
         } elsif ( $$_{ type } =~ /^menu$/o ) {
@@ -958,7 +958,7 @@ EOT
     goto done_reading unless $found;
     $fsc2_how_to_run = $ne;
 
-    goto done_reading unless defined( $ne = <$fh> )
+    goto done_reading unless     defined( $ne = <$fh> )
                              and $ne =~ /^\s*([+-]\d+[+-]\d+)\s*$/;
     $geom = $1;
 

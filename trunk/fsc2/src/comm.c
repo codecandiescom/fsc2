@@ -234,8 +234,8 @@ int new_data_handler( void )
 
     if ( Fsc2_Internals.child_is_quitting == QUITTING_RAISED )
     {
-        if ( Fsc2_Internals.child_pid > 0 &&
-             ! kill( Fsc2_Internals.child_pid, 0 ) )
+        if (    Fsc2_Internals.child_pid > 0
+             && ! kill( Fsc2_Internals.child_pid, 0 ) )
             kill( Fsc2_Internals.child_pid, DO_QUIT );
         Fsc2_Internals.child_is_quitting = QUITTING_ACCEPTED;
 
@@ -265,8 +265,8 @@ int new_data_handler( void )
                 accept_new_data( Fsc2_Internals.child_is_quitting
                                                            != QUITTING_UNSET );
 
-            if ( Comm.MQ->low != Comm.MQ->high &&
-                 Comm.MQ->slot[ Comm.MQ->low ].type == REQUEST )
+            if (    Comm.MQ->low != Comm.MQ->high
+                 && Comm.MQ->slot[ Comm.MQ->low ].type == REQUEST )
             {
                 Comm.MQ->low = ( Comm.MQ->low + 1 ) % QUEUE_SIZE;
                 sema_post( Comm.mq_semaphore );
@@ -285,8 +285,8 @@ int new_data_handler( void )
                the SIGCHLD handlers in run.c, so no need to worry about it
                here. */
 
-            if ( Fsc2_Internals.child_pid > 0 &&
-                 ! kill( Fsc2_Internals.child_pid, 0 ) )
+            if (    Fsc2_Internals.child_pid > 0
+                 && ! kill( Fsc2_Internals.child_pid, 0 ) )
                 kill( Fsc2_Internals.child_pid, SIGTERM );
 
             Comm.MQ->low = Comm.MQ->high;
@@ -300,8 +300,8 @@ int new_data_handler( void )
        to slow down the experiment by serving pages when the process is
        already struggling to keep up with data the child sends). */
 
-    if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
-         Comm.MQ->low == Comm.MQ->high )
+    if (    ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+         && Comm.MQ->low == Comm.MQ->high )
     {
         if ( Fsc2_Internals.http_pid > 0 )
             http_check( );
@@ -315,8 +315,8 @@ int new_data_handler( void )
 
     /* Check if a request from the child for external conections came in */
 
-    if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
-         Fsc2_Internals.conn_request )
+    if (    ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+         && Fsc2_Internals.conn_request )
     {
         Fsc2_Internals.conn_request = UNSET;
         conn_request_handler( );
@@ -1239,8 +1239,8 @@ bool writer( int type,
                 if ( ! pipe_write( ( char * ) &header, sizeof header ) )
                     return FAIL;
 
-                if ( header.data.str_len[ 0 ] > 0 &&
-                     ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
+                if (    header.data.str_len[ 0 ] > 0
+                     && ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
                     return FAIL;
                 break;
 
@@ -1256,8 +1256,8 @@ bool writer( int type,
 
                 if ( ! pipe_write( ( char * ) &header, sizeof header ) )
                     return FAIL;
-                if ( header.data.str_len[ 0 ] > 0 &&
-                     ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
+                if (    header.data.str_len[ 0 ] > 0
+                     && ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
                     return FAIL;
                 break;
 
@@ -1274,8 +1274,8 @@ bool writer( int type,
                 if ( ! pipe_write( ( char * ) &header, sizeof header ) )
                     return FAIL;
                  
-                if ( header.data.str_len[ 0 ] > 0 &&
-                     ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
+                if (    header.data.str_len[ 0 ] > 0
+                     && ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
                     return FAIL;
                 break;
 
@@ -1305,9 +1305,9 @@ bool writer( int type,
                 n2 = va_arg( ap, int );
                 va_end( ap );
 
-                if ( ! pipe_write( ( char * ) &header, sizeof header ) ||
-                     ! pipe_write( ( char * ) &n1, sizeof( int ) ) ||
-                     ! pipe_write( ( char * ) &n2, sizeof( int ) ) )
+                if (    ! pipe_write( ( char * ) &header, sizeof header )
+                     || ! pipe_write( ( char * ) &n1, sizeof( int ) )
+                     || ! pipe_write( ( char * ) &n2, sizeof( int ) ) )
                     return FAIL;
 
                 for ( i = 0; i < 4; i++ )
@@ -1371,9 +1371,9 @@ bool writer( int type,
                 if ( ! pipe_write( ( char * ) &header, sizeof header ) )
                     return FAIL;
                 for ( i = 0; i < 2; i++ )
-                    if ( header.data.str_len[ i ] > 0 &&
-                         ! pipe_write( str[ i ],
-                                       ( size_t ) header.data.str_len[ i ] ) )
+                    if (    header.data.str_len[ i ] > 0
+                         && ! pipe_write( str[ i ],
+                                        ( size_t ) header.data.str_len[ i ] ) )
                         return FAIL;
                 break;
 
@@ -1430,8 +1430,8 @@ bool writer( int type,
                 /* Don't try to continue writing on EPIPE (SIGPIPE is
                    ignored) */
 
-                if ( ! pipe_write( ( char * ) &header, sizeof header ) &&
-                     errno == EPIPE )
+                if (    ! pipe_write( ( char * ) &header, sizeof header )
+                     && errno == EPIPE )
                 {
                     va_end( ap );
                     return FAIL;
@@ -1448,8 +1448,8 @@ bool writer( int type,
                 /* Don't try to continue writing on EPIPE (SIGPIPE is
                    ignored) */
 
-                if ( ! pipe_write( ( char * ) &header, sizeof header ) &&
-                     errno == EPIPE )
+                if (    ! pipe_write( ( char * ) &header, sizeof header )
+                     && errno == EPIPE )
                 {
                     va_end( ap );
                     return FAIL;
@@ -1486,12 +1486,12 @@ bool writer( int type,
                 /* Don't try to continue writing on EPIPE (SIGPIPE is
                    ignored) */
 
-                if ( ! pipe_write( ( char * ) &header, sizeof header ) &&
-                     errno == EPIPE )
+                if (    ! pipe_write( ( char * ) &header, sizeof header )
+                     && errno == EPIPE )
                     return FAIL;
 
-                if ( header.data.len > 0 &&
-                     ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
+                if (    header.data.len > 0
+                     && ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
                     return FAIL;
                 break;
 

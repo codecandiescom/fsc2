@@ -66,8 +66,8 @@ bool rs690_store_timebase( double timebase )
     if ( ! rs690.is_timebase_level )
         for ( i = 0; i < NUM_FIXED_TIMEBASES; i++ )
         {
-            if ( timebase >= rs690_fixed_timebases[ i ] * 0.999 &&
-                 timebase <= rs690_fixed_timebases[ i ] * 1.001 )
+            if (    timebase >= rs690_fixed_timebases[ i ] * 0.999
+                 && timebase <= rs690_fixed_timebases[ i ] * 1.001 )
             {
                 rs690.timebase_type = i;
                 rs690.timebase = rs690_fixed_timebases[ i ];
@@ -151,8 +151,8 @@ bool rs690_assign_channel_to_function( int  function,
     fsc2_assert( function >= 0 && function < PULSER_CHANNEL_NUM_FUNC );
 
 
-    if ( function == PULSER_CHANNEL_PHASE_1 ||
-         function == PULSER_CHANNEL_PHASE_2 )
+    if (    function == PULSER_CHANNEL_PHASE_1
+         || function == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "Phase pulse functions can't be used with this "
                "driver.\n" );
@@ -231,9 +231,9 @@ bool rs690_assign_channel_to_function( int  function,
     /* The PULSE_SHAPE and TWT function can only have one channel assigned
        to it */
 
-    if ( ( function == PULSER_CHANNEL_PULSE_SHAPE ||
-           function == PULSER_CHANNEL_TWT ) &&
-         f->num_channels > 0 )
+    if (    (    function == PULSER_CHANNEL_PULSE_SHAPE
+              || function == PULSER_CHANNEL_TWT )
+         && f->num_channels > 0 )
     {
         print( FATAL, "Only one channel can be assigned to function '%s'.\n",
                Function_Names[ function ] );
@@ -365,8 +365,8 @@ bool rs690_set_trig_in_slope( int slope )
         return FAIL;
     }
 
-    if ( rs690.is_neg_delay &&
-         ! ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) )
+    if (    rs690.is_neg_delay
+         && ! ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) )
     {
         print( FATAL, "Setting a trigger slope (requiring EXTERNAL "
                "trigger mode) and using negative delays for functions is "
@@ -399,8 +399,8 @@ bool rs690_set_trig_in_level_type( double type )
         THROW( EXCEPTION );
     }
 
-    if ( rs690.is_trig_in_level_type &&
-         rs690.trig_in_level_type != level_type )
+    if (    rs690.is_trig_in_level_type
+         && rs690.trig_in_level_type != level_type )
     {
         print( FATAL, "A different trigger level type of '%s' has already "
                "been set.\n",
@@ -415,8 +415,8 @@ bool rs690_set_trig_in_level_type( double type )
         return FAIL;
     }
 
-    if ( rs690.is_neg_delay &&
-         ! ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) )
+    if (    rs690.is_neg_delay
+         && ! ( rs690.is_trig_in_mode && rs690.trig_in_mode == INTERNAL ) )
     {
         print( FATAL, "Setting a trigger level type (thus implicitly "
                "selecting EXTERNAL trigger mode) and using negative delays "
@@ -441,8 +441,8 @@ bool rs690_set_repeat_time( double rep_time )
 {
     /* Complain if a different repetition time has already been set */
 
-    if ( rs690.is_repeat_time &&
-         rs690.repeat_time != rs690_double2ticks( rep_time ) )
+    if (    rs690.is_repeat_time
+         && rs690.repeat_time != rs690_double2ticks( rep_time ) )
     {
         print( FATAL, "A different repeat time/frequency of %s / %g Hz has "
                "already been set.\n", rs690_pticks( rs690.repeat_time ),
@@ -499,8 +499,8 @@ bool rs690_set_phase_reference( int phs,
 
     /* Phase function can't be used with this driver... */
 
-    if ( function == PULSER_CHANNEL_PHASE_1 ||
-         function == PULSER_CHANNEL_PHASE_2 )
+    if (    function == PULSER_CHANNEL_PHASE_1
+         || function == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "PHASE function can't be used with this driver.\n" );
         THROW( EXCEPTION );
@@ -508,8 +508,8 @@ bool rs690_set_phase_reference( int phs,
 
     /* The PULSE_SHAPE and TWT functions can't be phase-cycled */
 
-    if ( function == PULSER_CHANNEL_PULSE_SHAPE ||
-         function == PULSER_CHANNEL_TWT )
+    if (    function == PULSER_CHANNEL_PULSE_SHAPE
+         || function == PULSER_CHANNEL_TWT )
     {
         print( FATAL, "Function '%s' can't be phase-cycled.\n",
                Function_Names[ PULSER_CHANNEL_PULSE_SHAPE ] );
@@ -688,8 +688,8 @@ bool rs690_phase_setup( int phs )
         /* Check that the channel isn't already used for a different phase */
 
         for ( j = 0; j < i; j++ )
-            if ( rs690.phs[ phs ].is_set[ j ] &&
-                 rs690.phs[ phs ].channels[ i ] ==
+            if (    rs690.phs[ phs ].is_set[ j ]
+                 && rs690.phs[ phs ].channels[ i ] ==
                                                rs690.phs[ phs ].channels[ j ] )
             {
                 print( FATAL, "The same channel %d is used for phases '%s' "

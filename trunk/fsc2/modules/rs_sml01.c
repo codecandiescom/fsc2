@@ -116,8 +116,8 @@ int rs_sml01_test_hook( void )
 
     if ( rs_sml01.use_table )
     {
-        if ( rs_sml01.att_ref_freq < rs_sml01.min_table_freq ||
-             rs_sml01.att_ref_freq > rs_sml01.max_table_freq )
+        if (    rs_sml01.att_ref_freq < rs_sml01.min_table_freq
+             || rs_sml01.att_ref_freq > rs_sml01.max_table_freq )
         {
             print( FATAL, "Reference frequency for attenuation settings of "
                    "%g MHz is not covered by the table.\n",
@@ -767,8 +767,8 @@ Var_T *synthesizer_att_ref_freq( Var_T * v )
 
     if ( rs_sml01.use_table )
     {
-        if ( rs_sml01.att_ref_freq < rs_sml01.min_table_freq ||
-             rs_sml01.att_ref_freq > rs_sml01.max_table_freq )
+        if (    rs_sml01.att_ref_freq < rs_sml01.min_table_freq
+             || rs_sml01.att_ref_freq > rs_sml01.max_table_freq )
         {
             print( FATAL, "Reference frequency for attenuation settings of "
                    "%g MHz is not covered by the table.\n",
@@ -1040,8 +1040,8 @@ Var_T *synthesizer_mod_source( Var_T * v )
 
     if ( source == MOD_SOURCE_INT )
     {
-        if ( ( v = vars_pop( v ) ) == NULL || 
-             ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) )
+        if (    ( v = vars_pop( v ) ) == NULL
+             || ! ( v->type & ( INT_VAR | FLOAT_VAR ) ) )
         {
             print( FATAL, "Argument setting to internal modulation must "
                    "be immediately followed by the modulation frequency.\n" );
@@ -1129,8 +1129,8 @@ Var_T *synthesizer_mod_freq( Var_T * v )
             THROW( EXCEPTION );
         }
 
-        if ( FSC2_MODE == PREPARATION &&
-             ! rs_sml01.mod_freq_is_set[ rs_sml01.mod_type ] )
+        if (    FSC2_MODE == PREPARATION
+             && ! rs_sml01.mod_freq_is_set[ rs_sml01.mod_type ] )
             print( FATAL, "Can't determine modulation frequency, it has "
                    "not been set yet.\n" );
 
@@ -1390,11 +1390,11 @@ Var_T *synthesizer_pulse_trigger_slope( Var_T * v )
 
     vars_check( v, STR_VAR );
 
-    if ( ! strcasecmp( v->val.sptr, "POS" ) ||
-         ! strcasecmp( v->val.sptr, "POSITIVE" ) )
+    if (    ! strcasecmp( v->val.sptr, "POS" )
+         || ! strcasecmp( v->val.sptr, "POSITIVE" ) )
         state = SLOPE_RAISE;
-    else if ( ! strcasecmp( v->val.sptr, "NEG" ) ||
-              ! strcasecmp( v->val.sptr, "NEGATIVE" ) )
+    else if (    ! strcasecmp( v->val.sptr, "NEG" )
+              || ! strcasecmp( v->val.sptr, "NEGATIVE" ) )
         state = SLOPE_FALL;
     else
     {

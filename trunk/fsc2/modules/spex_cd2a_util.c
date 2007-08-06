@@ -80,13 +80,13 @@ bool spex_cd2a_read_state( void )
 
                 fsc2_fseek( fp, -1, SEEK_CUR );
 
-                if ( ( spex_cd2a.mode & WL && i > 3 ) || i > 4 ||
-                     ( ( ( spex_cd2a.mode & WL && i < 3 ) ||
-                         ( spex_cd2a.mode & WN_MODES && i < 4 ) ) && 
-                       fsc2_fscanf( fp, "%lf", val + i ) != 1 ) ||
-                     ( ( ( spex_cd2a.mode & WL && i == 3 ) ||
-                         ( spex_cd2a.mode & WN_MODES && i == 4 ) ) &&
-                       fsc2_fscanf( fp, "%d", &new ) != 1 ) )
+                if (    ( spex_cd2a.mode & WL && i > 3 ) || i > 4
+                     || (    (    ( spex_cd2a.mode & WL && i < 3 )
+                               || ( spex_cd2a.mode & WN_MODES && i < 4 ) )
+                          && fsc2_fscanf( fp, "%lf", val + i ) != 1 )
+                     || (    ( (    spex_cd2a.mode & WL && i == 3 )
+                               || ( spex_cd2a.mode & WN_MODES && i == 4 ) )
+                          && fsc2_fscanf( fp, "%d", &new ) != 1 ) )
                 {
                     print( FATAL, "Invalid state file '%s'.\n", fn );
                     T_free( fn );
@@ -97,13 +97,13 @@ bool spex_cd2a_read_state( void )
                 while ( ( c = fsc2_fgetc( fp ) ) != EOF && isspace( c ) )
                     /* empty */ ;
 
-                if ( ( c == EOF &&
-                       ( ( i != 3 && spex_cd2a.mode & WL ) ||
-                         ( i != 4 && spex_cd2a.mode & WN_MODES ) ) ) ||
-                     ( ( i == 0 || i == 2 || spex_cd2a.mode & WL ) &&
-                       c != 'n' ) ||
-                     ( ( i == 1 || i == 3 ) && spex_cd2a.mode & WN_MODES &&
-                       c != 'c' ) )
+                if (    (    c == EOF
+                          && (    ( i != 3 && spex_cd2a.mode & WL )
+                               || ( i != 4 && spex_cd2a.mode & WN_MODES ) ) )
+                     || (    ( i == 0 || i == 2 || spex_cd2a.mode & WL )
+                          && c != 'n' )
+                     || (    ( i == 1 || i == 3 ) && spex_cd2a.mode & WN_MODES
+                          && c != 'c' ) )
                 {
                     print( FATAL, "Invalid state file '%s'.\n", fn );
                     T_free( fn );
@@ -111,12 +111,12 @@ bool spex_cd2a_read_state( void )
                     SPEX_CD2A_THROW( EXCEPTION );
                 }
 
-                if ( ( ( spex_cd2a.mode & WL && i != 3 ) || i != 4 ) &&
-                     ( fsc2_fgetc( fp ) != 'm' ||
-                       ( c == 'c' &&
-                         ( fsc2_fgetc( fp ) != '^' ||
-                           fsc2_fgetc( fp ) != '-' ||
-                           fsc2_fgetc( fp ) != '1' ) ) ) )
+                if (    ( ( spex_cd2a.mode & WL && i != 3 ) || i != 4 )
+                     && (    fsc2_fgetc( fp ) != 'm'
+                          || (    c == 'c'
+                               && ( fsc2_fgetc( fp ) != '^'
+                                    || fsc2_fgetc( fp ) != '-'
+                                    || fsc2_fgetc( fp ) != '1' ) ) ) )
                 {
                     print( FATAL, "Invalid state file '%s'.\n", fn );
                     T_free( fn );

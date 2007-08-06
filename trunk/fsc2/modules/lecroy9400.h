@@ -236,10 +236,10 @@ void lecroy9400_do_pre_exp_checks( void );
 
 long lecroy9400_translate_channel( int  /* dir    */,
                                    long /* channel */,
-                                   bool /* flag    */ );
+                                   bool /* flag    */  );
 
 void lecroy9400_store_state( LECROY9400_T * /* src  */,
-                             LECROY9400_T * /* dest */ );
+                             LECROY9400_T * /* dest */  );
 
 bool lecroy9400_init( const char * /* name */ );
 
@@ -258,22 +258,22 @@ bool lecroy9400_set_trigger_level( double /* level */ );
 double lecroy9400_get_sens( int /* channel */ );
 
 bool lecroy9400_set_sens( int    /* channel */,
-                          double /* sens    */ );
+                          double /* sens    */  );
 
 double lecroy9400_get_offset( int /* channel */ );
 
 bool lecroy9400_set_offset( int    /* channel */,
-                            double /* offset */ );
+                            double /* offset */  );
 
 int lecroy9400_get_coupling( int /* channel */ );
 
 bool lecroy9400_set_coupling( int /* channel */,
-                              int /* type    */ );
+                              int /* type    */  );
 
 bool lecroy9400_is_displayed( int /* channel */ );
 
 bool lecroy9400_display( int /* channel */,
-                         int /* on_off  */ );
+                         int /* on_off  */  );
 
 long lecroy9400_get_num_avg( int /* channel */ );
 
@@ -287,7 +287,7 @@ void lecroy9400_set_up_averaging( long /* channel */,
                                   long /* source  */,
                                   long /* num_avg */,
                                   bool /* reject  */,
-                                  long /* rec_len */ );
+                                  long /* rec_len */  );
 
 void lecroy9400_finished( void );
 
@@ -297,7 +297,7 @@ void lecroy9400_get_curve( int        /* ch         */,
                            Window_T * /* w          */,
                            double **  /* array      */,
                            long *     /* length     */,
-                           bool       /* use_cursor */ );
+                           bool       /* use_cursor */  );
 
 bool lecroy9400_command( const char * /* cmd */ );
 

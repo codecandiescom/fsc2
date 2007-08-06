@@ -238,8 +238,8 @@ static void rb_pulser_j_delay_card_setup( void )
                is not the delay card for the initial delay and which must be
                set to get the pulse to start at the correct moment */
 
-            if ( f->self != PULSER_CHANNEL_MW ||
-                 ( f->self == PULSER_CHANNEL_MW && j != 0 ) )
+            if (    f->self != PULSER_CHANNEL_MW
+                 || ( f->self == PULSER_CHANNEL_MW && j != 0 ) )
             {
                 /* Find out the first possible moment the following pulse
                    could start at - if there's no following delay card
@@ -521,8 +521,8 @@ static void rb_pulser_j_rf_pulse( void )
     /* Switch synthesizer output on or off if the pulse just became active or
        inactive */
 
-    if ( ( p->was_active && ! p->is_active ) ||
-         ( ! p->was_active && p->is_active ) )
+    if (    ( p->was_active && ! p->is_active )
+         || ( ! p->was_active && p->is_active ) )
     {
 #if ! defined RB_PULSER_J_TEST
         if ( ( func_ptr = func_get( rb_pulser_j.synth_state, &acc ) ) == NULL )

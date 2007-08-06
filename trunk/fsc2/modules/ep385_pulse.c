@@ -98,8 +98,8 @@ bool ep385_set_pulse_function( long pnum,
     Function_T *f = &ep385.function[ function ];
 
 
-    if ( function == PULSER_CHANNEL_PHASE_1 ||
-         function == PULSER_CHANNEL_PHASE_2 )
+    if (    function == PULSER_CHANNEL_PHASE_1
+         || function == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "Phase functions can't be used with this driver.\n" );
         THROW( EXCEPTION );
@@ -619,8 +619,10 @@ bool ep385_change_pulse_length( long   pnum,
     OTHERWISE
         RETHROW( );
 
-    if ( p->is_len && p->is_function && p->function->channel &&
-         p->len == new_len )
+    if (    p->is_len
+         && p->is_function
+         && p->function->channel
+         && p->len == new_len )
     {
         print( WARN, "Old and new length of pulse #%ld are identical.\n",
                pnum );

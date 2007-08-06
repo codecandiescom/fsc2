@@ -379,15 +379,14 @@ Var_T *lockin_sensitivity( Var_T * v )
             break;
         }
 
-    if ( sens_index == UNDEF_SENS_INDEX &&
-         sens >= sens_list[ NUM_ELEMS( sens_list ) - 1 ] / 1.01 &&
-         sens < sens_list[ NUM_ELEMS( sens_list ) - 1 ] )
+    if (    sens_index == UNDEF_SENS_INDEX
+         && sens >= sens_list[ NUM_ELEMS( sens_list ) - 1 ] / 1.01
+         && sens < sens_list[ NUM_ELEMS( sens_list ) - 1 ] )
         sens_index = NUM_ELEMS( sens_list ) - 1;
 
-    if ( sens_index >= 0 &&                         /* value found ? */
-         fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
-                                                    /* error > 1% ? */
-         ! sr530.sens_warn  )                       /* no warn message yet ? */
+    if ( sens_index >= 0
+         &&  fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2
+         && ! sr530.sens_warn )
     {
         if ( sens >= 1.0e-3 )
             print( WARN, "Can't set sensitivity to %.0lf mV, using %.0lf mV "
@@ -488,8 +487,8 @@ Var_T *lockin_time_constant( Var_T * v )
             break;
         }
 
-    if ( tc_index >= 0 &&                                   /* value found ? */
-         fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 )   /* error > 1% ?  */
+    if ( tc_index >= 0
+         && fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 )
     {
         if ( tc >= 1.0 )
             print( WARN, "Can't set time constant to %g s, using %.0lf s "
@@ -759,8 +758,8 @@ bool sr530_init( const char * name )
 
     /* Ask lock-in to send status byte and test if it does */
 
-    if ( gpib_write( sr530.device, "Y\n", 2 ) == FAILURE ||
-         gpib_read( sr530.device, buffer, &length ) == FAILURE )
+    if (    gpib_write( sr530.device, "Y\n", 2 ) == FAILURE
+         || gpib_read( sr530.device, buffer, &length ) == FAILURE )
         return FAIL;
 
     /* Check that there's reference input and the internal reference is
@@ -1061,8 +1060,8 @@ static bool sr530_talk( const char * cmd,
                         char *       reply,
                         long *       length )
 {
-    if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( sr530.device, reply, length ) == FAILURE )
+    if (    gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE
+         || gpib_read( sr530.device, reply, length ) == FAILURE )
         sr530_failure( );
     return OK;
 }

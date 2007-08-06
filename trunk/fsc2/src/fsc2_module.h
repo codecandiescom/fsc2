@@ -88,10 +88,10 @@ extern int show_choices( const char * /* text     */,
                          const char * /* b2       */,
                          const char * /* b3       */,
                          int          /* def      */,
-                         bool         /* is_batch */ );
+                         bool         /* is_batch */  );
 
 extern const char *show_input( const char * /* content */,
-                               const char * /* label   */ );
+                               const char * /* label   */  );
 
 
 /* Global variables that must be visible for modules */

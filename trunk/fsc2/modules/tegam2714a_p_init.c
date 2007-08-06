@@ -106,8 +106,8 @@ static void tegam2714a_p_basic_check( void )
 
         /* Check start position and pulse length */
 
-        if ( p->is_active &&
-             p->pos + p->len + f->delay >= MAX_PULSER_BITS )
+        if (    p->is_active
+             && p->pos + p->len + f->delay >= MAX_PULSER_BITS )
         {
             print( FATAL, "Pulse #%ld does not fit into the pulsers memory.\n",
                    p->num );

@@ -355,10 +355,10 @@ getfile_retry:
     if ( r == NULL )
         r = T_strdup( show_fselector( s[ 0 ], s[ 2 ], s[ 1 ], s[ 3 ] ) );
 
-    if ( ( r == NULL || *r == '\0' ) &&
-         show_choices( "Do you really want to cancel saving data?\n"
-                       "        The data will be lost!",
-                       2, "Yes", "No", NULL, 2, SET ) != 1 )
+    if (    ( r == NULL || *r == '\0' )
+         && show_choices( "Do you really want to cancel saving data?\n"
+                          "        The data will be lost!",
+                          2, "Yes", "No", NULL, 2, SET ) != 1 )
     {
         r = CHAR_P T_free( r );
         goto getfile_retry;
@@ -376,9 +376,9 @@ getfile_retry:
     /* If given append default extension to the file name (but only if the
        user didn't entered one when telling us about the file name) */
 
-    if ( s[ 4 ] != NULL &&
-         ( strrchr( r, '.' ) == NULL ||
-           strcmp( strrchr( r, '.' ) + 1, s[ 4 ] ) ) )
+    if (    s[ 4 ] != NULL
+         && (    strrchr( r, '.' ) == NULL
+              || strcmp( strrchr( r, '.' ) + 1, s[ 4 ] ) ) )
     {
         new_r = get_string( "%s.%s", r, s[ 4 ] );
         T_free( r );
@@ -495,9 +495,9 @@ Var_T * f_clonef( Var_T * v )
        opening a file for this file handle did not happen, so we also don't
        open the new file */
 
-    if ( v->type == INT_VAR &&
-         ( v->val.lval == FILE_NUMBER_STDOUT ||
-           v->val.lval == FILE_NUMBER_STDERR ) )
+    if (    v->type == INT_VAR
+         && (    v->val.lval == FILE_NUMBER_STDOUT
+              || v->val.lval == FILE_NUMBER_STDERR ) )
     {
         print( WARN, "std%s can't be cloned.\n",
                v->val.lval == FILE_NUMBER_STDOUT ? "out" : "err" );
@@ -509,9 +509,9 @@ Var_T * f_clonef( Var_T * v )
 
     /* Check all the parameter */
 
-    if ( v->type != INT_VAR ||
-         v->val.lval < FILE_NUMBER_OFFSET ||
-         v->val.lval >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
+    if (    v->type != INT_VAR
+         || v->val.lval < FILE_NUMBER_OFFSET
+         || v->val.lval >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
     {
          print( FATAL, "First argument isn't a vaild file handle.\n" );
          THROW( EXCEPTION );
@@ -525,8 +525,8 @@ Var_T * f_clonef( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( v->next->next->type != STR_VAR ||
-         *v->next->next->val.sptr == '\0' )
+    if (    v->next->next->type != STR_VAR
+         || *v->next->next->val.sptr == '\0' )
     {
         print( FATAL, "Invalid third argument.\n" );
         THROW( EXCEPTION );
@@ -540,8 +540,7 @@ Var_T * f_clonef( Var_T * v )
     strcpy( fn, EDL.File_List[ file_num ].name );
 
     n = fn + strlen( fn ) - strlen( v->next->val.sptr );
-    if ( n > fn + 1 && *( n - 1 ) == '.' &&
-         ! strcmp( n, v->next->val.sptr ) )
+    if ( n > fn + 1 && *( n - 1 ) == '.' && ! strcmp( n, v->next->val.sptr ) )
         strcpy( n, v->next->next->val.sptr );
     else
     {
@@ -716,9 +715,10 @@ static int get_save_file( Var_T ** v )
     /* If the first argument is an integer variable and has the value 1
        or 2 return the index for stdout or stderr */
 
-    if ( *v != NULL && ( *v )->type == INT_VAR &&
-         ( ( *v )->val.lval == STDOUT_FILENO ||
-           ( *v )->val.lval == STDERR_FILENO ) )
+    if (    *v != NULL
+         && ( *v )->type == INT_VAR
+         && (    ( *v )->val.lval == STDOUT_FILENO
+              || ( *v )->val.lval == STDERR_FILENO ) )
     {
         file_num = ( *v )->val.lval == STDOUT_FILENO ?
                             FILE_NUMBER_STDOUT : FILE_NUMBER_STDERR;
@@ -787,8 +787,8 @@ static int get_save_file( Var_T ** v )
         return FILE_NUMBER_NOT_OPEN;
     }
 
-    if ( file_num < FILE_NUMBER_OFFSET ||
-         file_num >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
+    if (    file_num < FILE_NUMBER_OFFSET
+         || file_num >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
     {
         print( FATAL, "Invalid file handle.\n" );
         THROW( EXCEPTION );
@@ -1158,8 +1158,11 @@ static void ff_format_check( Var_T * v )
 
         /* First thing to be expected in a conversion specifier are flags */
 
-        while ( *sptr == '-' || *sptr == '+' || *sptr == ' ' ||
-                *sptr == '0' || *sptr == '#' )
+        while (    *sptr == '-'
+                || *sptr == '+'
+                || *sptr == ' '
+                || *sptr == '0'
+                || *sptr == '#' )
         {
             sptr++;
             if ( *sptr == '\0' )
@@ -1233,7 +1236,7 @@ static void ff_format_check( Var_T * v )
         }
 
         /* Now the conversion specifier has to follow, this can be either
-           's', 'd', 'i', 'f', 'e', 'g', 'E', 'G', or 'n'. For 'n' no
+           's', 'd', 'i', 'f', 'e', 'g', 'F', 'E', 'G', or 'n'. For 'n' no
            argument is needed because it just prints the number of character
            written up to the moment the 'n' is found in the format string. */
 
@@ -1278,8 +1281,8 @@ static void ff_format_check( Var_T * v )
             continue;
         }
 
-        if ( *sptr == 'f' || *sptr == 'e' || *sptr == 'g' ||
-             *sptr == 'E' || *sptr == 'G' )
+        if (    *sptr == 'f' || *sptr == 'e' || *sptr == 'g'
+             || *sptr == 'F' || *sptr == 'E' || *sptr == 'G' )
         {
             if ( vptr == NULL )
             {
@@ -1395,8 +1398,11 @@ static long do_printf( long file_num, Var_T * v )
 
             /* Skip over flags */
 
-            while ( *fmt_end == '-' || *fmt_end == '+' || *fmt_end == ' ' ||
-                    *fmt_end == '0' || *fmt_end == '#' )
+            while (    *fmt_end == '-'
+                    || *fmt_end == '+'
+                    || *fmt_end == ' '
+                    || *fmt_end == '0'
+                    || *fmt_end == '#' )
                 fmt_end++;
 
             /* Deal with the minumum length and precision fields, checking
@@ -1443,8 +1449,8 @@ static long do_printf( long file_num, Var_T * v )
                 need_vars++;
             }
 
-            if ( *fmt_end == 'f' || *fmt_end == 'e' || *fmt_end == 'g' ||
-                 *fmt_end == 'E' || *fmt_end == 'G' )
+            if (    *fmt_end == 'f' || *fmt_end == 'e' || *fmt_end == 'g'
+                 || *fmt_end == 'F' || *fmt_end == 'E' || *fmt_end == 'G' )
             {
                 need_type = 2;       /* float */
                 need_vars++;
@@ -1984,8 +1990,8 @@ Var_T * f_save_c( Var_T * v )
     /* Show the comment editor and get the returned contents (just one string
        with embedded newline chars) */
 
-    if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
-         ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) )
+    if (    ! ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+         && ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) )
          r = T_strdup( show_input( c, l ) );
 
     if ( r == NULL )
@@ -2061,8 +2067,8 @@ static long T_fprintf( long         fn,
         if ( file_num == FILE_NUMBER_NOT_OPEN )
             return 0;
 
-        if ( file_num < FILE_NUMBER_OFFSET ||
-             file_num >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
+        if (    file_num < FILE_NUMBER_OFFSET
+             || file_num >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
         {
             print( FATAL, "Invalid file handle.\n" );
             THROW( EXCEPTION );
@@ -2176,10 +2182,10 @@ get_repl_retry:
     new_name = T_strdup( show_fselector( "Replacement file:", NULL,
                                          NULL, NULL ) );
 
-    if ( ( new_name == NULL || *new_name == '\0' ) &&
-         1 != show_choices( "Do you really want to stop saving data?\n"
-                            "     All further data will be lost!",
-                            2, "Yes", "No", NULL, 2, SET ) )
+    if (    ( new_name == NULL || *new_name == '\0' )
+         && 1 != show_choices( "Do you really want to stop saving data?\n"
+                               "     All further data will be lost!",
+                               2, "Yes", "No", NULL, 2, SET ) )
     {
         if ( new_name != NULL )
             new_name = CHAR_P T_free( new_name );
@@ -2200,12 +2206,12 @@ get_repl_retry:
     }
 
     stat( EDL.File_List[ file_num ].name, &old_stat );
-    if ( 0 == stat( new_name, &new_stat ) &&
-         ( old_stat.st_dev != new_stat.st_dev ||
-           old_stat.st_ino != new_stat.st_ino ) &&
-          1 != show_choices( "The selected file does already exist!\n"
-                             " Do you really want to overwrite it?",
-                             2, "Yes", "No", NULL, 2, SET ) )
+    if (    0 == stat( new_name, &new_stat )
+         && (    old_stat.st_dev != new_stat.st_dev
+              || old_stat.st_ino != new_stat.st_ino )
+         && 1 != show_choices( "The selected file does already exist!\n"
+                               " Do you really want to overwrite it?",
+                               2, "Yes", "No", NULL, 2, SET ) )
     {
         new_name = CHAR_P T_free( new_name );
         goto get_repl_retry;
@@ -2214,9 +2220,9 @@ get_repl_retry:
     /* Try to open the new file */
 
     new_fp = NULL;
-    if ( ( old_stat.st_dev != new_stat.st_dev ||
-           old_stat.st_ino != new_stat.st_ino ) &&
-         ( new_fp = fopen( new_name, "w+" ) ) == NULL )
+    if (    (    old_stat.st_dev != new_stat.st_dev
+              || old_stat.st_ino != new_stat.st_ino )
+         && ( new_fp = fopen( new_name, "w+" ) ) == NULL )
     {
         switch( errno )
         {
@@ -2248,8 +2254,8 @@ get_repl_retry:
        to the old file, otherwise copy everything from the old to the new file
        and then get rid of the old one. */
 
-    if ( old_stat.st_dev == new_stat.st_dev &&
-         old_stat.st_ino == new_stat.st_ino )
+    if (    old_stat.st_dev == new_stat.st_dev
+         && old_stat.st_ino == new_stat.st_ino )
         T_free( new_name );
     else
     {

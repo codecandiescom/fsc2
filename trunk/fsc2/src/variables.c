@@ -1287,13 +1287,13 @@ void vars_save_restore( bool flag )
 
         for ( cpy = EDL.Var_List; cpy != NULL; cpy = cpy->next )
         {
-            if ( cpy->name == NULL ||
-                 ! ( cpy->type & ( INT_REF | FLOAT_REF ) ) )
+            if (    cpy->name == NULL
+                 || ! ( cpy->type & ( INT_REF | FLOAT_REF ) ) )
                 continue;
 
             for ( i = 0; i < cpy->len; i++ )
-                if ( cpy->val.vptr != NULL &&
-                     ! ( cpy->val.vptr[ i ]->flags & EXISTS_BEFORE_TEST ) )
+                if (    cpy->val.vptr != NULL
+                     && ! ( cpy->val.vptr[ i ]->flags & EXISTS_BEFORE_TEST ) )
                     vars_free( cpy->val.vptr[ i ], SET );
         }
 

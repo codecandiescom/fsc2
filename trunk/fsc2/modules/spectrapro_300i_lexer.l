@@ -301,8 +301,8 @@ static void spectrapro_300i_new_entry( int          type,
 
     value_type = spectrapro_300i_lex( );
 
-    if ( ( value_type != DATA_TYPE && value_type != DATA_U_TYPE ) ||
-         ( type != FL_ENTRY - 1 && value_type == DATA_U_TYPE ) )
+    if (    ( value_type != DATA_TYPE && value_type != DATA_U_TYPE )
+         || ( type != FL_ENTRY - 1 && value_type == DATA_U_TYPE ) )
     {
         print( FATAL, "Invalid entry in calibration file '%s' at line %ld.\n",
                calib_file, spectrapro_300i_Lc );

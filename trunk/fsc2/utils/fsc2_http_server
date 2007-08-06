@@ -48,8 +48,10 @@ chomp $hostname;
 # Check if we got a port number as the first command line argument...
 
 my $port = 8080;
-$port = $ARGV[ 0 ] if defined $ARGV[ 0 ] and $ARGV[ 0 ] =~ /\d+/o
-                      and $ARGV[ 0 ] >= 1024 and $ARGV[ 0 ] <= 65535;
+$port = $ARGV[ 0 ] if     defined $ARGV[ 0 ]
+                      and $ARGV[ 0 ] =~ /\d+/o
+                      and $ARGV[ 0 ] >= 1024
+                      and $ARGV[ 0 ] <= 65535;
 
 
 # The second argument is supposed to be the place where to look for the
@@ -234,9 +236,9 @@ sub serve_main {
     my ( $f, $req, $maj, $min ) = @_;
     my @st1 = ( "IDLE", "RUNNING" , "WAITING", "FINISHED" );
     my @st2 = ( "Idle", "Experiment running",
-                "<FONT COLOR=#FF0000>Waiting for user input</FONT>",
+                "<font color=#ff0000>Waiting for user input</font>",
                 "Experiment finished" );
-    my @colors = ( "FF0000", "00FF00", "000000", "0000FF" );
+    my @colors = ( "ff0000", "00ff00", "000000", "0000ff" );
     my ( $body, $state, $pic, $txt, $ext, $curve, $logo_file );
 
 
@@ -260,10 +262,10 @@ sub serve_main {
     # Start to cobble together the page
 
     $body = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 2.0//EN\">$crlf" .
-            "<HTML>$crlf<HEAD>$crlf" .
-            "<META content=\"iso-8859-1\" http-equiv=\"charset\">$crlf" .
-            "<META name=\"author\" content=\"fsc2\">$crlf" .
-            "<META name=\"robots\" content=\"noindex\">$crlf";
+            "<html>$crlf<head>$crlf" .
+            "<meta content=\"iso-8859-1\" http-equiv=\"charset\">$crlf" .
+            "<meta name=\"author\" content=\"fsc2\">$crlf" .
+            "<meta name=\"robots\" content=\"noindex\">$crlf";
 
     # Add the logo (per default the GIF version because some browsers don't
     # seem to deal correctly with transparency in PNG files even though they
@@ -274,27 +276,26 @@ sub serve_main {
             if $f->{ 'gif' } or $f->{ 'png' } or $f->{ 'jpeg' };
 
     if ( $state =~ /^[0-3]$/o ) {
-        $body .= "<TITLE>fsc2: $st1[ $state ]</TITLE></HEAD>$crlf";
+        $body .= "<title>fsc2: $st1[ $state ]</title></head>$crlf<body>$crlf";
 
-        $body .= "<P><CENTER><IMG SRC=\"$logo_file\" " .
-                 "ALT=\"fsc2\"></CENTER></P>" if defined $logo_file;
+        $body .= "<p><center><img src=\"$logo_file\" " .
+                 "alt=\"fsc2\"></center></p>" if defined $logo_file;
 
-        $body .=  "<P><CENTER><H1>Status:  $st2[ $state ]</H1></CENTER>$crlf" .
-                  "<CENTER>(" . strftime( "%a", localtime ) . ", "  .
+        $body .=  "<center><h1>Status:  $st2[ $state ]</h1></center>$crlf" .
+                  "<p><center>(" . strftime( "%a", localtime ) . ", "  .
                   strftime( "%d %b %G %T %Z", localtime ) .
-                  ")</CENTER></P>$crlf";
+                  ")</center></p>$crlf";
     } else {
-        $body .= "<TITLE>fsc2: WEIRD</TITLE></HEAD>$crlf";
+        $body .= "<title>fsc2: WEIRD</title></head>$crlf<body>$crlf";
 
-        $body .= "<P><CENTER><IMG SRC=\"$logo_file\" " .
-                 "ALT=\"fsc2\"></CENTER></P>" if defined $logo_file;
+        $body .= "<p><center><img src=\"$logo_file\" " .
+                 "alt=\"fsc2\"></center></p>" if defined $logo_file;
 
-        $body .= "<P><CENTER><H1>Status:  Something weird is " .
-                 "happening here...$crlf" .
-                 "</H1></CENTER>$crlf" .
-                 "<P>Ok, you seem to have found a bug in fsc2. " .
+        $body .= "<center><h1>Status:  Something weird is " .
+                 "happening here...$crlf</h1></center>$crlf" .
+                 "<p>Ok, you seem to have found a bug in fsc2. " .
                  "Please tell nobody ;-)$crlf" .
-                 "</P>$crlf</BODY></HTML>$crlf";
+                 "</p>$crlf</body></html>$crlf";
 
         print "Content-Length: " . length( $body ) . "$crlf$crlf";
         print $body;
@@ -323,9 +324,9 @@ sub serve_main {
             return;
         }
 
-        $body .= "<H2>1D-Display window:</H2>" .
-            "<P><CENTER><IMG SRC=\"fsc2_a.$ext\" " .
-            "ALT=\"1D-Display window\"></CENTER></P>$crlf" if $pic & 1;
+        $body .= "<h2>1D-Display window:</h2>" .
+                 "<p><center><img src=\"fsc2_a.$ext\" " .
+                 "alt=\"1D-Display window\"></center></p>$crlf" if $pic & 1;
 
         if ( $pic & 2 ) {
 
@@ -342,18 +343,18 @@ sub serve_main {
 
             chomp $curve;
 
-            $body .= "<H2>2D-Display window:</H2>" .
-                "<P><CENTER><IMG SRC=\"fsc2_b.$ext\" " .
-                "ALT=\"2D-Display window\"></CENTER></P>$crlf";
+            $body .= "<h2>2D-Display window:</h2>" .
+                     "<p><center><img src=\"fsc2_b.$ext\" " .
+                     "alt=\"2D-Display window\"></center></p>$crlf";
 
-            $body .= "<P><CENTER>Curve $curve</CENTER></P>$crlf"
+            $body .= "<p><center>Curve $curve</center></p>$crlf"
                 if $curve =~ /^[1-4]$/;
         }
 
-        $body .= "<H2>Cross section window:</H2>" .
-                 "<P><CENTER><IMG SRC=\"fsc2_c.$ext\" " .
-                 "ALT=\"Cross section window\"></CENTER>$crlf"
-                     if $pic & 4;
+        $body .= "<h2>Cross section window:</h2>" .
+                 "<p><center><img src=\"fsc2_c.$ext\" " .
+                 "alt=\"Cross section window\"></center></p>$crlf"
+            if $pic & 4;
     }
 
     # Finally, ask fsc2 for the contents of the error browser and, when we
@@ -369,16 +370,16 @@ sub serve_main {
         if ( ! ( defined $2 and defined $colors[ $2 - 1 ] ) ) {
             $txt .= "$_$crlf";
         } else {
-            $txt .= "<FONT COLOR=#" . $colors[ $2 - 1 ] .
-                    ">$_</FONT>$crlf";
+            $txt .= "<font color=#" . $colors[ $2 - 1 ] .
+                    ">$_</font>$crlf";
         }
     }
     stdout_lock( 0 );
 
-    $body .= "<H2>Output browser:</H2>$crlf<P><PRE>$txt</PRE></P>$crlf"
+    $body .= "<h2>Output browser:</h2>$crlf<p><pre>$txt</pre></p>$crlf"
         if defined $txt;
-    $body .= "<HR><ADDRESS>fsc2 HTTP server v$version at $hostname Port " .
-             "$port</ADDRESS>$crlf</BODY></HTML>$crlf";
+    $body .= "<hr><address>fsc2 HTTP server v$version at $hostname Port " .
+             "$port</address>$crlf</body></html>$crlf";
 
     print "Content-Length: " . length( $body ) . "$crlf$crlf";
     print $body;
@@ -443,9 +444,9 @@ sub serve_pics {
     # requested graphic in ppm format, which we then have to convert to png
     # or jpeg before passing it on to the browser
 
-    if ( $state !~ /^0$/o and
-         ( ( $ext eq "png" and $has_pnmtopng ) or
-           ( $ext eq "jpeg" and $has_pnmtojpeg ) ) ) {
+    if (     $state !~ /^0$/o
+         and (    ( $ext eq "png"  and $has_pnmtopng )
+               or ( $ext eq "jpeg" and $has_pnmtojpeg ) ) ) {
         $file = <STDIN>;
         stdout_lock( 0 );
         chomp $file;
@@ -480,9 +481,9 @@ sub serve_pics {
           "Accept-Ranges: none$crlf" .
           "Content-Type: image/$ext$crlf";
 
-    if ( $state !~ /^0$/o and
-         ( ( $ext eq "png" and $has_pnmtopng ) or
-           ( $ext eq "jpeg" and $has_pnmtojpeg ) ) ) {
+    if (     $state !~ /^0$/o
+         and (    ( $ext eq "png"  and $has_pnmtopng )
+               or ( $ext eq "jpeg" and $has_pnmtojpeg ) ) ) {
         print "Content-Length: " . length( $data ) . "$crlf$crlf";
         print $data if $req =~ /^GET$/io;
     } else {
@@ -500,13 +501,13 @@ sub not_found {
     my ( $file, $req, $maj, $min ) = @_;
 
     my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
-               "<HTML><HEAD>$crlf" .
-               "<TITLE>404 Not Found</TITLE>$crlf" .
-               "</HEAD><BODY>$crlf" .
-               "<H1>Not Found</H1>$crlf" .
-               "<P>The requested URL ($file) was not found.</P>$crlf" .
-               "<HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
-               "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
+               "<html><head>$crlf" .
+               "<title>404 Not Found</title>$crlf" .
+               "</head><body>$crlf" .
+               "<h1>Not Found</h1>$crlf" .
+               "<p>The requested URL ($file) was not found.</p>$crlf" .
+               "<hr><address>fsc2 HTTP server v$version at $hostname " .
+               "Port $port</address>$crlf</body></html>$crlf";
 
     print "HTTP/1.1 404 Not Found$crlf" . def_txt( 0, $maj, $min ) .
           "Content-Type: text/html; charset=iso-8859-1$crlf" .
@@ -527,14 +528,14 @@ sub unsupported_request {
     my ( $req, $maj, $min ) = @_;
 
     my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
-               "<HTML><HEAD>$crlf" .
-               "<TITLE>501 Not implemented</TITLE>$crlf" .
-               "</HEAD><BODY>$crlf" .
-               "<H1>Not implemented</H1>$crlf" .
-               "<P>Sorry, the server understands GET and HEAD requests " .
-               "only.</P>$crlf" .
-               "</HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
-               "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
+               "<html><head>$crlf" .
+               "<title>501 Not implemented</title>$crlf" .
+               "</head><body>$crlf" .
+               "<h1>Not implemented</h1>$crlf" .
+               "<p>Sorry, the server understands GET and HEAD requests " .
+               "only.</p>$crlf" .
+               "<hr><address>fsc2 HTTP server v$version at $hostname " .
+               "Port $port</address>$crlf</body></html>$crlf";
 
     print "HTTP/1.1 501 Not implemented$crlf" . def_txt( 0, $maj, $min ) .
           "Content-Type: text/html; charset=iso-8859-1$crlf" .
@@ -553,14 +554,14 @@ sub unsupported_request {
 sub illegal_request {
 
     my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
-               "<HTML><HEAD>$crlf" .
-               "<TITLE>400 Bad Request</TITLE>$crlf" .
-               "</HEAD><BODY>$crlf" .
-               "<H1>Bad Request</H1>$crlf" .
-               "<P>Your browser send a request that the server does not " .
-               "understand</P>$crlf" .
-               "<HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
-               "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
+               "<html><head>$crlf" .
+               "<title>400 Bad Request</title>$crlf" .
+               "</head><body>$crlf" .
+               "<h1>Bad Request</h1>$crlf" .
+               "<p>Your browser send a request that the server does not " .
+               "understand</p>$crlf" .
+               "<hr><address>fsc2 HTTP server v$version at $hostname " .
+               "Port $port</address>$crlf</body></html>$crlf";
 
     print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0, 1, 1 ) .
           "Content-Type: text/html; charset=iso-8859-1$crlf" .
@@ -581,16 +582,16 @@ sub missing_host_field {
     my ( $req, $maj, $min ) = @_;
 
     my $body = "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">$crlf" .
-               "<HTML>$crlf<HEAD>$crlf" .
-               "<TITLE>400 Bad Request</TITLE>$crlf" .
-               "</HEAD><BODY>$crlf" .
-               "<H1>Bad Request</H1>$crlf" .
-               "<P>Your browser send a request that this server didn't " .
+               "<html>$crlf<head>$crlf" .
+               "<title>400 Bad Request</title>$crlf" .
+               "</head><body>$crlf" .
+               "<h1>Bad Request</h1>$crlf" .
+               "<p>Your browser send a request that this server doesn't " .
                "understand:$crlf" .
                "Client sent HTTP/1.1 request without a hostname (see " .
-               "RFC2616 section 14.23)</P>$crlf" .
-               "</HR><ADDRESS>fsc2 HTTP server v$version at $hostname " .
-               "Port $port</ADDRESS>$crlf</BODY></HTML>$crlf";
+               "RFC2616 section 14.23)</p>$crlf" .
+               "<hr><address>fsc2 HTTP server v$version at $hostname " .
+               "Port $port</address>$crlf</body></html>$crlf";
 
     print "HTTP/1.1 400 Bad Request$crlf" . def_txt( 0, $maj, $min ) .
           "Content-Type: text/html; charset=iso-8859-1$crlf" .

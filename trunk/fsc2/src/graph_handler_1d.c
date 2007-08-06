@@ -119,8 +119,8 @@ static void press_handler_1d( FL_OBJECT * obj,
        have a special meaning, so don't care about another button. Also don't
        react if the pressed buttons have lost there meaning */
 
-    if ( ( c != &G_1d.canvas && G.raw_button_state != 0 ) ||
-         ( G.button_state == 0 && G.raw_button_state != 0 ) )
+    if (    ( c != &G_1d.canvas && G.raw_button_state != 0 )
+         || ( G.button_state == 0 && G.raw_button_state != 0 ) )
     {
         G.raw_button_state |= 1 << ( ev->xbutton.button - 1 );
         return;
@@ -130,8 +130,9 @@ static void press_handler_1d( FL_OBJECT * obj,
 
     /* Middle and right or all three buttons at once don't mean a thing */
 
-    if ( G.raw_button_state >= 6 &&
-         G.raw_button_state != 8 && G.raw_button_state != 16 )
+    if (    G.raw_button_state >= 6
+         && G.raw_button_state != 8
+         && G.raw_button_state != 16 )
         return;
 
     G.button_state |= ( 1 << ( ev->xbutton.button - 1 ) );
@@ -531,8 +532,8 @@ static void motion_handler_1d( FL_OBJECT * obj  UNUSED_ARG,
         /* Stop looking ahead if the next one isn't a motion event or is for
            a different window */
 
-        if ( new_ev.type != MotionNotify ||
-             new_ev.xmotion.window != ev->xmotion.window )
+        if (    new_ev.type != MotionNotify
+             || new_ev.xmotion.window != ev->xmotion.window )
             break;
 
         fl_XNextEvent( ev );                  /* get the next event */
@@ -1494,9 +1495,11 @@ int get_mouse_pos_1d( double *       pa,
     fl_get_win_mouse( FL_ObjWin( G_1d.canvas.obj ),
                       ppos + X, ppos + Y, keymask );
 
-    if ( ! G_1d.is_scale_set ||
-         ppos[ X ] < 0 || ppos[ X ] > ( int ) G_1d.canvas.w - 1 ||
-         ppos[ Y ] < 0 || ppos[ Y ] > ( int ) G_1d.canvas.h - 1 )
+    if (    ! G_1d.is_scale_set
+         || ppos[ X ] < 0
+         || ppos[ X ] > ( int ) G_1d.canvas.w - 1
+         || ppos[ Y ] < 0
+         || ppos[ Y ] > ( int ) G_1d.canvas.h - 1 )
         return 0;
 
     for ( i = 0; i < G_1d.nc; i++ )

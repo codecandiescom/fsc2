@@ -189,8 +189,8 @@ NAME     \"[^"]*\"
 
 static void set_cur_delay( int card_no )
 {
-    if ( cur_delay != INVALID_DELAY_NUMBER ||
-         cur_clock != INVALID_CLOCK_NUMBER )
+    if (    cur_delay != INVALID_DELAY_NUMBER
+         || cur_clock != INVALID_CLOCK_NUMBER )
     {
         print( FATAL, "Invalid input in configuration file '%s' at "
                "line %ld.\n", rb_pulser_w.config_file, rb_pulser_w_Lc );
@@ -206,8 +206,8 @@ static void set_cur_delay( int card_no )
 
 static void set_cur_clock( int clock_no )
 {
-    if ( cur_delay != INVALID_DELAY_NUMBER ||
-         cur_clock != INVALID_CLOCK_NUMBER )
+    if (    cur_delay != INVALID_DELAY_NUMBER
+         || cur_clock != INVALID_CLOCK_NUMBER )
     {
         print( FATAL, "Invalid input in configuration file '%s' at "
                "line %ld.\n", rb_pulser_w.config_file, rb_pulser_w_Lc );
@@ -226,8 +226,8 @@ static void set_name( char * name )
     /* Make sure either a delay or a clock card has been selected for the
        name */
 
-    if ( cur_delay == INVALID_DELAY_NUMBER &&
-         cur_clock == INVALID_CLOCK_NUMBER )
+    if (    cur_delay == INVALID_DELAY_NUMBER
+         && cur_clock == INVALID_CLOCK_NUMBER )
     {
         print( FATAL, "Invalid input in configuration file '%s' at "
                "line %ld.\n", rb_pulser_w.config_file, rb_pulser_w_Lc );
@@ -342,8 +342,8 @@ void rb_pulser_w_read_configuration( void )
 
     /* Check that we didn't end up in the middle of a keyword-value pair */
 
-    if ( cur_delay != INVALID_DELAY_NUMBER ||
-         cur_clock != INVALID_CLOCK_NUMBER )
+    if (    cur_delay != INVALID_DELAY_NUMBER
+         || cur_clock != INVALID_CLOCK_NUMBER )
     {
         print( FATAL, "Invalid input in configuration file '%s' at "
                "end of file.\n", rb_pulser_w.config_file );

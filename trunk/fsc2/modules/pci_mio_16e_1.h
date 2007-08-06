@@ -155,15 +155,15 @@ Var_T *daq_single_pulse(             Var_T * /* v */ );
 Var_T *daq_continuous_pulses(        Var_T * /* v */ );
 
 void ni_daq_two_channel_pulses( double /* delay         */,
-                                double /* scan_duration */ );
+                                double /* scan_duration */  );
 
 /* Functions from pci_mio_16e_1_util.c */
 
 int pci_mio_16e_1_channel_number( long         /* ch      */,
-                                  const char * /* snippet */ );
+                                  const char * /* snippet */  );
 
 double pci_mio_16e_1_check_time( double       /* t       */,
-                                 const char * /* snippet */ );
+                                 const char * /* snippet */  );
 
 
 

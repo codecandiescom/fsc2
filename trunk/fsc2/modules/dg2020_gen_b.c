@@ -84,8 +84,8 @@ bool dg2020_assign_function( int  function,
 
     /* In this driver we don't have any use for phase functions */
 
-    if ( f->self == PULSER_CHANNEL_PHASE_1 ||
-         f->self == PULSER_CHANNEL_PHASE_2 )
+    if (    f->self == PULSER_CHANNEL_PHASE_1
+         || f->self == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "Phase functions can't be used with this driver.\n" );
         THROW( EXCEPTION );
@@ -142,9 +142,9 @@ bool dg2020_assign_channel_to_function( int  function,
     /* The PULSE_SHAPE and TWT function can only have one channel assigned
        to it */
 
-    if ( ( function == PULSER_CHANNEL_PULSE_SHAPE ||
-           function == PULSER_CHANNEL_TWT ) &&
-         f->num_channels > 0 )
+    if (    (    function == PULSER_CHANNEL_PULSE_SHAPE
+              || function == PULSER_CHANNEL_TWT )
+         && f->num_channels > 0 )
     {
         print( FATAL, "Only one channel can be assigned to function '%s'.\n",
                Function_Names[ function ] );
@@ -191,9 +191,10 @@ bool dg2020_set_function_delay( int    function,
 
     if ( Delay < 0 )
     {
-        if ( ( dg2020.is_trig_in_mode && dg2020.trig_in_mode ) ||
-             dg2020.is_trig_in_slope || dg2020.is_trig_in_level ||
-             dg2020.is_trig_in_impedance )
+        if (    ( dg2020.is_trig_in_mode && dg2020.trig_in_mode )
+             || dg2020.is_trig_in_slope
+             || dg2020.is_trig_in_level
+             || dg2020.is_trig_in_impedance )
         {
             print( FATAL, "Negative delays are invalid in EXTERNAL trigger "
                    "mode.\n" );
@@ -234,8 +235,8 @@ bool dg2020_set_function_high_level( int    function,
 
     v = lrnd( voltage / VOLTAGE_RESOLUTION );
 
-    if ( v < lrnd( MIN_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION ) ||
-         v > lrnd( MAX_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION ) )
+    if (    v < lrnd( MIN_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION )
+         || v > lrnd( MAX_POD_HIGH_VOLTAGE / VOLTAGE_RESOLUTION ) )
     {
         print( FATAL, "Invalid high level of %g V for function '%s', valid "
                "range is %g V to %g V.\n", voltage, Function_Names[ function ],
@@ -268,8 +269,8 @@ bool dg2020_set_function_low_level( int    function,
 
     v = lrnd( voltage / VOLTAGE_RESOLUTION );
 
-    if ( v < lrnd( MIN_POD_LOW_VOLTAGE / VOLTAGE_RESOLUTION ) ||
-         v > lrnd( MAX_POD_LOW_VOLTAGE / VOLTAGE_RESOLUTION ) )
+    if (    v < lrnd( MIN_POD_LOW_VOLTAGE / VOLTAGE_RESOLUTION )
+         || v > lrnd( MAX_POD_LOW_VOLTAGE / VOLTAGE_RESOLUTION ) )
     {
         print( FATAL, "Invalid low level of %g V for function '%s', valid "
                "range is %g V to %g V.\n", voltage, Function_Names[ function ],
@@ -368,8 +369,8 @@ bool dg2020_set_trig_in_level( double voltage )
         return FAIL;
     }
 
-    if ( dg2020.is_neg_delay &&
-         ! ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) )
+    if (    dg2020.is_neg_delay
+         && ! ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) )
     {
         print( FATAL, "Setting a trigger level (thus implicitly selecting "
                "EXTERNAL trigger mode) and using negative delays for "
@@ -377,8 +378,8 @@ bool dg2020_set_trig_in_level( double voltage )
         THROW( EXCEPTION );
     }
 
-    if ( v > lrnd( MAX_TRIG_IN_LEVEL / VOLTAGE_RESOLUTION ) ||
-         v < lrnd( MIN_TRIG_IN_LEVEL / VOLTAGE_RESOLUTION ) )
+    if (    v > lrnd( MAX_TRIG_IN_LEVEL / VOLTAGE_RESOLUTION )
+         || v < lrnd( MIN_TRIG_IN_LEVEL / VOLTAGE_RESOLUTION ) )
     {
         print( FATAL, "Invalid level for trigger of %g V, valid range is %g V "
                "to %g V.\n", voltage, MIN_TRIG_IN_LEVEL, MAX_TRIG_IN_LEVEL );
@@ -413,8 +414,8 @@ bool dg2020_set_trig_in_slope( int slope )
         return FAIL;
     }
 
-    if ( dg2020.is_neg_delay &&
-         ! ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) )
+    if (    dg2020.is_neg_delay
+         && ! ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) )
     {
         print( FATAL, "Setting a trigger slope (implicitly selecting EXTERNAL "
                "trigger mode) and using negative delays for functions is "
@@ -450,8 +451,8 @@ bool dg2020_set_trig_in_impedance( int state )
         return FAIL;
     }
 
-    if ( dg2020.is_neg_delay &&
-         ! ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) )
+    if (    dg2020.is_neg_delay
+         && ! ( dg2020.is_trig_in_mode && dg2020.trig_in_mode == INTERNAL ) )
     {
         print( FATAL, "Setting a trigger impedance (implicitly selecting "
                "EXTERNAL trigger mode) and using negative delays for "
@@ -471,8 +472,8 @@ bool dg2020_set_trig_in_impedance( int state )
 
 bool dg2020_set_repeat_time( double rep_time )
 {
-    if ( dg2020.is_repeat_time &&
-         dg2020.repeat_time != dg2020_double2ticks( rep_time ) )
+    if (    dg2020.is_repeat_time
+         && dg2020.repeat_time != dg2020_double2ticks( rep_time ) )
     {
         print( FATAL, "A different repeat time/frequency of %s/%g Hz has "
                "already been set.\n", dg2020_pticks( dg2020.repeat_time ),
@@ -500,8 +501,8 @@ bool dg2020_set_repeat_time( double rep_time )
 
 bool dg2020_set_max_seq_len( double seq_len )
 {
-    if ( dg2020.is_max_seq_len &&
-         dg2020.max_seq_len != dg2020_double2ticks( seq_len ) )
+    if (    dg2020.is_max_seq_len
+         && dg2020.max_seq_len != dg2020_double2ticks( seq_len ) )
     {
         print( FATAL, "A different minimum pattern length of %s has already "
                "been set.\n", dg2020_pticks( dg2020.max_seq_len ) );
@@ -538,8 +539,8 @@ bool dg2020_set_phase_reference( int phs,
 
     /* Phase function can't be used with this driver... */
 
-    if ( function == PULSER_CHANNEL_PHASE_1 ||
-         function == PULSER_CHANNEL_PHASE_2 )
+    if (    function == PULSER_CHANNEL_PHASE_1
+         || function == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "PHASE function can't be used with this driver.\n" );
         THROW( EXCEPTION );
@@ -671,8 +672,8 @@ bool dg2020_phase_setup( int phs )
         /* Check that the pod isn't already used for a different phase */
 
         for ( j = 0; j < i; j++ )
-            if ( dg2020.phs[ phs ].is_set[ j ] &&
-                 dg2020.phs[ phs ].pod[ i ] == dg2020.phs[ phs ].pod[ j ] )
+            if (    dg2020.phs[ phs ].is_set[ j ]
+                 && dg2020.phs[ phs ].pod[ i ] == dg2020.phs[ phs ].pod[ j ] )
             {
                 print( FATAL, "The same pod %d is used for phases '%s' and "
                        "'%s'.\n", dg2020.phs[ phs ].pod[ i ]->self,

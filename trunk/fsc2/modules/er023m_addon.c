@@ -126,8 +126,8 @@ Var_T *lockin_ma( Var_T * v )
     long ma;
 
 
-    if ( er023m.mf_index == UNDEF_MF_INDEX ||
-         ! er023m.calib[ er023m.mf_index ].is_ma )
+    if (    er023m.mf_index == UNDEF_MF_INDEX
+         || ! er023m.calib[ er023m.mf_index ].is_ma )
         print( NO_ERROR, "MA is not calibrated.\n" );
 
     if ( v == NULL )
@@ -279,16 +279,16 @@ Var_T *lockin_mf( Var_T * v )
     /* Warn the user if for the new modulation frequency there's no phase
        or attenuation calibration while we had one for the old frequency */
 
-    if ( old_mf_index != UNDEF_MF_INDEX &&
-         old_mf_index != ( int ) mf_index )
+    if (    old_mf_index != UNDEF_MF_INDEX
+         && old_mf_index != ( int ) mf_index )
     {
-        if ( er023m.ha != UNDEF_HARMONIC &&
-             er023m.calib[ old_mf_index ].is_ph[ er023m.ha ] &&
-             ! er023m.calib[ mf_index ].is_ph[ er023m.ha ] )
+        if (    er023m.ha != UNDEF_HARMONIC
+             && er023m.calib[ old_mf_index ].is_ph[ er023m.ha ]
+             && ! er023m.calib[ mf_index ].is_ph[ er023m.ha ] )
             print( SEVERE, "Setting new modulation frequency makes phase "
                    "uncalibrated.\n" );
-        if ( er023m.calib[ old_mf_index ].is_ma &&
-             ! er023m.calib[ mf_index ].is_ma )
+        if (    er023m.calib[ old_mf_index ].is_ma
+             && ! er023m.calib[ mf_index ].is_ma )
             print( SEVERE, "Setting new modulation frequency makes modulation "
                    "amplitude uncalibrated.\n" );
     }

@@ -237,15 +237,16 @@ void phases_end( void )
 
     /* Return immediately if no sequences were defined at all */
 
-    if ( ! PA_Seq.acq_seq[ 0 ].defined && ! PA_Seq.acq_seq[ 1 ].defined &&
-         PA_Seq.phs_seq == NULL )
+    if (    ! PA_Seq.acq_seq[ 0 ].defined
+         && ! PA_Seq.acq_seq[ 1 ].defined
+         && PA_Seq.phs_seq == NULL )
         return;
 
     /* Check that there is a phase sequence if there's a acquisition
        sequence */
 
-    if ( ( PA_Seq.acq_seq[ 0 ].defined || PA_Seq.acq_seq[ 1 ].defined ) &&
-         PA_Seq.phs_seq == NULL )
+    if (    ( PA_Seq.acq_seq[ 0 ].defined || PA_Seq.acq_seq[ 1 ].defined )
+         && PA_Seq.phs_seq == NULL )
     {
         eprint( FATAL, UNSET, "Aquisition sequence(s) defined but no phase "
                 "sequences in PHASES section.\n" );
@@ -270,10 +271,10 @@ void phases_end( void )
 
     /* Check that lengths of acquisition and phase sequences are identical */
 
-    if ( ( PA_Seq.acq_seq[ 0 ].defined &&
-           PA_Seq.acq_seq[ 0 ].len != PA_Seq.phs_seq->len ) ||
-         ( PA_Seq.acq_seq[ 1 ].defined &&
-           PA_Seq.acq_seq[ 1 ].len != PA_Seq.phs_seq->len ) )
+    if (    (    PA_Seq.acq_seq[ 0 ].defined
+              && PA_Seq.acq_seq[ 0 ].len != PA_Seq.phs_seq->len )
+         || (    PA_Seq.acq_seq[ 1 ].defined
+              && PA_Seq.acq_seq[ 1 ].len != PA_Seq.phs_seq->len ) )
     {
         eprint( FATAL, UNSET, "Lengths of phase and acquisition sequences "
                 "defined in PHASES section differ.\n" );

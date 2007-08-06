@@ -76,15 +76,15 @@ enum Exception_Types {
 
 
 jmp_buf *push_exception_frame( const char * /* file */,
-                               int          /* line */ );
+                               int          /* line */  );
 
 void pop_exception_frame( const char * /* file */,
-                          int          /* line */ );
+                          int          /* line */  );
 
 jmp_buf *throw_exception( Exception_Types_T /* type */ );
 
 Exception_Types_T get_exception_type( const char * /* file */,
-                                      int          /* line */ );
+                                      int          /* line */  );
 
 
 #define TRY  if ( setjmp( *push_exception_frame( __FILE__, __LINE__ ) ) == 0 )
@@ -105,10 +105,11 @@ Exception_Types_T get_exception_type( const char * /* file */,
    putting automatic variable that could be clobbered into a register.
    The following hack seems to do the trick for all gcc versions. */
 
-#define CLOBBER_PROTECT( a )  do { \
-                         unsigned char *xI3_2sYzii = ( unsigned char * ) &a; \
-                         *( unsigned char * ) &a = *xI3_2sYzii; \
-                              } while( 0 )
+#define CLOBBER_PROTECT( a )                                 \
+     do {                                                    \
+         unsigned char *xI3_2sYzii = ( unsigned char * ) &a; \
+         * ( unsigned char * ) &a = *xI3_2sYzii;             \
+     } while( 0 )
 
 
 #endif  /* ! EXCEPTIONS_HEADER */

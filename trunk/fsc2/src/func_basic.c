@@ -215,8 +215,8 @@ Var_T * f_round( Var_T * v )
             break;
 
         case FLOAT_VAR :
-            if ( v->val.dval >= LONG_MAX - 0.5 ||
-                 v->val.dval <= LONG_MIN + 0.5 )
+            if (    v->val.dval >= LONG_MAX - 0.5
+                 || v->val.dval <= LONG_MIN + 0.5 )
                 print( SEVERE, "Integer argument overflow.\n" );
             new_var = vars_push( INT_VAR, lrnd( v->val.dval ) );
             break;
@@ -1300,8 +1300,8 @@ Var_T * f_acosh( Var_T * v )
     {
         case INT_VAR : case FLOAT_VAR :
             arg = VALUE( v );
-            if ( arg < 1.0 ||
-                 ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >= 1.0 )
+            if (    arg < 1.0
+                 || ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >= 1.0 )
             {
                 print( FATAL, "Argument (%f) out of range.\n", arg );
                 THROW( EXCEPTION );
@@ -1315,8 +1315,9 @@ Var_T * f_acosh( Var_T * v )
                   i < v->len; i++, lsrc++, dest++ )
             {
                 arg = ( double ) *lsrc;
-                if ( arg < 1.0 ||
-                     ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >= 1.0 )
+                if (    arg < 1.0
+                     || ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >=
+                                                                          1.0 )
                 {
                     print( FATAL, "Argument (%f) out of range.\n", arg );
                     THROW( EXCEPTION );
@@ -1331,8 +1332,9 @@ Var_T * f_acosh( Var_T * v )
                   i < v->len; i++, dsrc++, dest++ )
             {
                 arg = *dsrc;
-                if ( arg < 1.0 ||
-                     ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >= 1.0 )
+                if (    arg < 1.0
+                     || ( new_arg = sqrt( 1.0 - 1.0 / ( arg * arg ) ) ) >=
+                                                                          1.0 )
                 {
                     print( FATAL, "Argument (%f) out of range.\n", arg );
                     THROW( EXCEPTION );

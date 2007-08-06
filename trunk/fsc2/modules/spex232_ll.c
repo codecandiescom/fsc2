@@ -142,16 +142,16 @@ static bool spex232_comm_init( void )
 
 	/* The device now should react by sending '*' */
 
-	if ( fsc2_serial_read( SERIAL_PORT, buf, 1, SERIAL_WAIT, SET )  != 1 ||
-		 buf[ 0 ] != '*' )
+	if (    fsc2_serial_read( SERIAL_PORT, buf, 1, SERIAL_WAIT, SET )  != 1
+         || buf[ 0 ] != '*' )
 		spex232_comm_fail( );
 
 
 	/* Test if the device is really running the MAIN program */
 
 	buf[ 0 ] = ' ';
-	if ( fsc2_serial_write( SERIAL_PORT, buf, 1, SERIAL_WAIT, SET ) != 1 ||
-		 fsc2_serial_read( SERIAL_PORT, buf, 1, SERIAL_WAIT, SET )  != 1 )
+	if (    fsc2_serial_write( SERIAL_PORT, buf, 1, SERIAL_WAIT, SET ) != 1
+         || fsc2_serial_read( SERIAL_PORT, buf, 1, SERIAL_WAIT, SET )  != 1 )
 		spex232_comm_fail( );
 
 	switch ( buf[ 0 ] )
@@ -249,14 +249,14 @@ static unsigned char spex232_autobaud( void )
 	   communication mode". The device is supposed to react by sending '='. */
 
 	buf = 247;
-	if ( fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1 ||
-		 fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1 ||
-		 buf != '=' )
+	if (    fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1
+         || fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1
+         || buf != '=' )
 		spex232_comm_fail( );
 
 	buf = ' ';
-	if ( fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1 ||
-		 fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1 )
+	if (    fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1
+         || fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1 )
 		spex232_comm_fail( );
 
 	if ( buf == 'B' )
@@ -331,8 +331,8 @@ static unsigned char spex232_switch_to_int_mode( void )
 	/* Check if this worked and which program we're talking to */
 
 	buf = ' ';
-	if ( fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1 ||
-		 fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1 )
+	if (    fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1
+         || fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1 )
 		spex232_comm_fail( );
 
 	return ( buf == 'F' || buf == 'B' ) ? buf : '\0';
@@ -349,8 +349,8 @@ static bool spex232_check_confirmation( void )
 {
 	unsigned char buf;
 
-	if ( fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1 ||
-		 ( buf != 'o' && buf != 'b' ) )
+	if (    fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1
+         || ( buf != 'o' && buf != 'b' ) )
 		spex232_comm_fail( );
 
 	return buf == 'o';
@@ -385,8 +385,8 @@ static void spex232_motor_init( void )
 #if defined AUTOCALIBRATION_POSITION
 	if ( spex232.need_motor_init )
 	{
-		if ( fsc2_serial_write( SERIAL_PORT, buf, 1, 100000000, SET ) != 1 ||
-			 ! spex232_check_confirmation( ) )
+		if (    fsc2_serial_write( SERIAL_PORT, buf, 1, 100000000, SET ) != 1
+             || ! spex232_check_confirmation( ) )
 			spex232_comm_fail( );
 		if ( spex232.mode = WL )
 			spex232.motor_position = spex_wl2p( AUTOCALIBRATION_POSITION );
@@ -414,8 +414,8 @@ static void spex232_motor_init( void )
 					MIN_STEPS_PER_SECOND, MAX_STEPS_PER_SECOND, RAMP_TIME );
 	SPEX232_ASSERT( len < MOTOR_INIT_BUF_SIZE );
 
-	if ( fsc2_serial_write( SERIAL_PORT, buf, len, SERIAL_WAIT, SET ) != len ||
-		 ! spex232_check_confirmation( ) )
+	if (    fsc2_serial_write( SERIAL_PORT, buf, len, SERIAL_WAIT, SET ) != len
+         || ! spex232_check_confirmation( ) )
 		spex232_comm_fail( );
 }
 
@@ -426,8 +426,8 @@ static void spex232_motor_init( void )
 
 long int spex232_wl2p( double wl )
 {
-    SPEX232_ASSERT( wl - spex232.abs_lower_limit >= 0.0 &&
-                    spex232.upper_limit - wl >= 0.0 );
+    SPEX232_ASSERT(    wl - spex232.abs_lower_limit >= 0.0
+                    && spex232.upper_limit - wl >= 0.0 );
 
 	if ( spex232.mode == WL )
 		return lrnd( ( wl - spex232.abs_lower_limit ) / spex232.mini_step );
@@ -491,8 +491,8 @@ double spex232_set_wavelength( double wl )
 	new_pos = spex232_wl2p( wl );
 
 	SPEX232_ASSERT( new_pos >= 0 && new_pos <= spex232.max_motor_position );
-	SPEX232_ASSERT( new_pos > spex232.motor_position ||
-					new_pos - spex232.backslash_steps >= 0 );
+	SPEX232_ASSERT(    new_pos > spex232.motor_position
+                    || new_pos - spex232.backslash_steps >= 0 );
 
 #ifndef SPEX232_TEST
     if ( FSC2_MODE == EXPERIMENT )
@@ -527,9 +527,9 @@ static void spex232_set_motor_position( long int pos )
 
 
 	sprintf( buf, "G0,%ld\r", pos );
-	if ( fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
-						   SERIAL_WAIT, UNSET ) != ( ssize_t ) strlen( buf ) ||
-		 ! spex232_check_confirmation( ) )
+	if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+						   SERIAL_WAIT, UNSET ) != ( ssize_t ) strlen( buf )
+         || ! spex232_check_confirmation( ) )
 		spex232_comm_fail( );
 
 	spex232.motor_position = pos;
@@ -547,11 +547,11 @@ static long int spex232_get_motor_position( void )
 	ssize_t len = 0;
 
 
-	if ( fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
-							SERIAL_WAIT, UNSET ) != ( ssize_t )strlen( buf ) ||
-		 ! spex232_check_confirmation( ) ||
-		 ( len = fsc2_serial_read( SERIAL_PORT, buf, sizeof buf,
-								   SERIAL_WAIT, UNSET ) ) < 2 )
+	if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+                               SERIAL_WAIT, UNSET ) != ( ssize_t )strlen( buf )
+         || ! spex232_check_confirmation( )
+         || ( len = fsc2_serial_read( SERIAL_PORT, buf, sizeof buf,
+                                      SERIAL_WAIT, UNSET ) ) < 2 )
 		spex232_comm_fail( );
 
 	buf[ len - 1 ] = '\0';
@@ -574,9 +574,9 @@ static void spex232_move_relative( long int steps )
        send earlier the interface doesn't answer and we get a timeout) */
 
 	sprintf( buf, "F0,%ld\r", steps );
-	if ( fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
-						   SERIAL_WAIT, UNSET ) != ( ssize_t ) strlen( buf ) ||
-		 ! spex232_check_confirmation( ) )
+	if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+                              SERIAL_WAIT, UNSET ) != ( ssize_t ) strlen( buf )
+         || ! spex232_check_confirmation( ) )
 		spex232_comm_fail( );
 
     fsc2_usleep( 200000, UNSET );
@@ -595,10 +595,10 @@ static bool spex232_motor_is_busy( void )
 {
 	char cmd = 'E';
 
-	if ( fsc2_serial_write( SERIAL_PORT, &cmd, 1, SERIAL_WAIT, UNSET ) != 1 ||
-		 ! spex232_check_confirmation( ) ||
-		 fsc2_serial_read( SERIAL_PORT, &cmd, 1, SERIAL_WAIT, UNSET ) != 1 ||
-		 ( cmd != 'q' && cmd != 'z' ) )
+	if (    fsc2_serial_write( SERIAL_PORT, &cmd, 1, SERIAL_WAIT, UNSET ) != 1
+         || ! spex232_check_confirmation( )
+         || fsc2_serial_read( SERIAL_PORT, &cmd, 1, SERIAL_WAIT, UNSET ) != 1
+         || ( cmd != 'q' && cmd != 'z' ) )
 		spex232_comm_fail( );
 
 	return cmd == 'q';

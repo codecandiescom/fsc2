@@ -69,12 +69,12 @@ void rb_pulser_j_init( void )
        in turn trigger the following cards), stop the clock card feeding the
        ERT delay card and set the delay for the card to 0 */
 
-    if ( rulbus_rb8514_delay_set_output_pulse(
+    if (    rulbus_rb8514_delay_set_output_pulse(
                                     rb_pulser_j.delay_card[ ERT_DELAY ].handle,
                                     RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                     RULBUS_RB8514_DELAY_PULSE_NONE )
-                                                                != RULBUS_OK ||
-         rulbus_rb8515_clock_set_frequency(
+                                                                != RULBUS_OK
+         || rulbus_rb8515_clock_set_frequency(
                                     rb_pulser_j.clock_card[ ERT_CLOCK ].handle,
                                     RULBUS_RB8515_CLOCK_FREQ_OFF )
                                                                 != RULBUS_OK ) 
@@ -89,13 +89,13 @@ void rb_pulser_j_init( void )
 
     if ( rb_pulser_j.trig_in_mode == EXTERNAL )
     {
-        if ( rulbus_rb8514_delay_set_trigger(
+        if (   rulbus_rb8514_delay_set_trigger(
                                     rb_pulser_j.delay_card[ ERT_DELAY ].handle,
                                     ( rb_pulser_j.trig_in_slope == POSITIVE ) ?
                                     RULBUS_RB8514_DELAY_RAISING_EDGE :
                                     RULBUS_RB8514_DELAY_FALLING_EDGE )
-                                                                != RULBUS_OK ||
-             rulbus_rb8514_delay_set_raw_delay(
+                                                                != RULBUS_OK
+             || rulbus_rb8514_delay_set_raw_delay(
                                     rb_pulser_j.delay_card[ ERT_DELAY ].handle,
                                     1, 1 )                    != RULBUS_OK )
             rb_pulser_j_failure( SET, "Failure to initialize pulser" );
@@ -354,12 +354,12 @@ void rb_pulser_j_run( bool state )
 #if ! defined RB_PULSER_J_TEST
         raise_permissions( );
 
-        if ( rulbus_rb8514_delay_set_output_pulse(
+        if (    rulbus_rb8514_delay_set_output_pulse(
                                     rb_pulser_j.delay_card[ ERT_DELAY ].handle,
                                     RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                     RULBUS_RB8514_DELAY_PULSE_NONE )
-                                                                != RULBUS_OK ||
-             rulbus_rb8515_clock_set_frequency(
+                                                                != RULBUS_OK
+             || rulbus_rb8515_clock_set_frequency(
                                     rb_pulser_j.clock_card[ ERT_CLOCK ].handle,
                                     RULBUS_RB8515_CLOCK_FREQ_OFF )
                                                                 != RULBUS_OK )
@@ -422,17 +422,17 @@ static void rb_pulser_j_start_external_trigger( void )
 #if ! defined RB_PULSER_J_TEST
     raise_permissions( );
 
-    if ( rulbus_rb8514_delay_set_output_pulse(
+    if (    rulbus_rb8514_delay_set_output_pulse(
                                    rb_pulser_j.delay_card[ INIT_DELAY ].handle,
                                    RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                    RULBUS_RB8514_DELAY_END_PULSE )
-                                                                != RULBUS_OK ||
-         rulbus_rb8514_delay_set_output_pulse(
+                                                                != RULBUS_OK
+         || rulbus_rb8514_delay_set_output_pulse(
                                     rb_pulser_j.delay_card[ ERT_DELAY ].handle,
                                     RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                     RULBUS_RB8514_DELAY_END_PULSE )
-                                                                != RULBUS_OK ||
-         rulbus_rb8515_clock_set_frequency(
+                                                                != RULBUS_OK
+         || rulbus_rb8515_clock_set_frequency(
                                     rb_pulser_j.clock_card[ ERT_CLOCK ].handle,
                                     RULBUS_RB8515_CLOCK_FREQ_100MHz )
                                                                 != RULBUS_OK )
@@ -480,17 +480,17 @@ static void rb_pulser_j_start_internal_trigger( void )
                                   rb_pulser_j.delay_card[ ERT_DELAY ].delay );
     raise_permissions( );
 
-    if ( rulbus_rb8514_delay_set_output_pulse(
+    if (    rulbus_rb8514_delay_set_output_pulse(
                                    rb_pulser_j.delay_card[ ERT_DELAY ].handle,
                                    RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                    RULBUS_RB8514_DELAY_END_PULSE )
-                                                                != RULBUS_OK ||
-         rulbus_rb8514_delay_set_output_pulse(
+                                                                != RULBUS_OK
+         || rulbus_rb8514_delay_set_output_pulse(
                                    rb_pulser_j.delay_card[ INIT_DELAY ].handle,
                                    RULBUS_RB8514_DELAY_OUTPUT_BOTH,
                                    RULBUS_RB8514_DELAY_END_PULSE )
-                                                                != RULBUS_OK ||
-        rulbus_rb8514_software_start(
+                                                                != RULBUS_OK
+         || rulbus_rb8514_software_start(
                                    rb_pulser_j.delay_card[ ERT_DELAY ].handle )
                                                                  != RULBUS_OK )
         rb_pulser_j_failure( SET, "Failure to start pulser" );

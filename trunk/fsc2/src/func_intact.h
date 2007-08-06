@@ -130,13 +130,13 @@ struct Toolbox {
 
 
 #define IS_BUTTON( type )  \
-        ( ( type ) >= FIRST_BUTTON_TYPE && ( type ) <= LAST_BUTTON_TYPE )
+        ( ( type ) >= FIRST_BUTTON_TYPE   && ( type ) <= LAST_BUTTON_TYPE )
 #define IS_SLIDER( type )  \
-        ( ( type ) >= FIRST_SLIDER_TYPE && ( type ) <= LAST_SLIDER_TYPE )
+        ( ( type ) >= FIRST_SLIDER_TYPE   && ( type ) <= LAST_SLIDER_TYPE )
 #define IS_INPUT( type )   \
-        ( ( type ) >= FIRST_INPUT_TYPE && ( type ) <= LAST_INPUT_TYPE )
+        ( ( type ) >= FIRST_INPUT_TYPE    && ( type ) <= LAST_INPUT_TYPE )
 #define IS_OUTPUT( type )   \
-        ( ( type )>= FIRST_OUTPUT_TYPE && ( type ) <= LAST_OUTPUT_TYPE )
+        ( ( type )>= FIRST_OUTPUT_TYPE    && ( type ) <= LAST_OUTPUT_TYPE )
 #define IS_INOUTPUT( type )   \
         ( ( type ) >= FIRST_INOUTPUT_TYPE && ( type ) <= LAST_INOUTPUT_TYPE )
 

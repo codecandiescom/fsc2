@@ -157,8 +157,8 @@ static void dg2020_basic_pulse_check( void )
 
         if ( ! p->is_len )
         {
-            if ( p->is_pos &&
-                 p->function == dg2020.function + PULSER_CHANNEL_DET )
+            if (    p->is_pos
+                 && p->function == dg2020.function + PULSER_CHANNEL_DET )
             {
                 print( WARN, "Length of detection pulse #%ld is being set to "
                        "%s.\n", p->num, dg2020_pticks( 1 ) );
@@ -181,8 +181,9 @@ static void dg2020_basic_pulse_check( void )
            leads to an obviously endless high pulse, while not setting the
            first bit keeps the pulser from working at all...) */
 
-        if ( p->is_pos && p->is_len &&
-             p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
+        if (    p->is_pos
+             && p->is_len
+             && p->pos + p->len + p->function->delay >= MAX_PULSER_BITS )
         {
             print( FATAL, "Pulse #%ld does not fit into the pulsers memory. "
                    "You could try a longer pulser time base.\n", p->num );
@@ -247,8 +248,8 @@ static void dg2020_basic_functions_check( void )
            needed also put back into the pool the channels that may have been
            assigned to the function. */
 
-        if ( f->self != PULSER_CHANNEL_PHASE_1 &&
-             f->self != PULSER_CHANNEL_PHASE_2 )
+        if (    f->self != PULSER_CHANNEL_PHASE_1
+             && f->self != PULSER_CHANNEL_PHASE_2 )
         {
             /* Function has no pulses ? */
 
@@ -342,8 +343,8 @@ static void dg2020_basic_functions_check( void )
            doing so, also count the number of channels really needed. Finally
            set a flag that says if the function needs phase cycling */
 
-        if ( f->self != PULSER_CHANNEL_PHASE_1 &&
-             f->self != PULSER_CHANNEL_PHASE_2 )
+        if (    f->self != PULSER_CHANNEL_PHASE_1
+             && f->self != PULSER_CHANNEL_PHASE_2 )
         {
             f->num_needed_channels = 1;
             f->needs_phases = UNSET;
@@ -425,9 +426,9 @@ static void dg2020_basic_functions_check( void )
         }
         f->num_channels = 0;
 
-        if ( f->self != PULSER_CHANNEL_PHASE_1 &&
-             f->self != PULSER_CHANNEL_PHASE_2 &&
-             f->phase_func != NULL )
+        if (    f->self != PULSER_CHANNEL_PHASE_1
+             && f->self != PULSER_CHANNEL_PHASE_2
+             && f->phase_func != NULL )
         {
             print( WARN, "Phase function '%s' isn't needed because function "
                    "'%s' it is associated with is not used.\n",
@@ -520,9 +521,9 @@ static void dg2020_pulse_start_setup( void )
 
         /* Nothing to be done for unused functions and the phase functions */
 
-        if ( ! f->is_used ||
-             f->self == PULSER_CHANNEL_PHASE_1 ||
-             f->self == PULSER_CHANNEL_PHASE_2 )
+        if (    ! f->is_used
+             || f->self == PULSER_CHANNEL_PHASE_1
+             || f->self == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         qsort( f->pulses, f->num_pulses, sizeof *f->pulses,
@@ -717,8 +718,9 @@ static void dg2020_set_phase_pulse_pos_and_len( Function_T * f,
         {
             np->pos += dg2020.grace_period;
 
-            if ( np->pos < pp->pos + pp->len + dg2020.grace_period &&
-                 p->pc != pp->pc && for_pulse != p )
+            if (    np->pos < pp->pos + pp->len + dg2020.grace_period
+                 && p->pc != pp->pc
+                 && for_pulse != p )
             {
                 print( SEVERE, "Pulses %ld and %ld are so close that problems "
                        "with phase switching may result.\n", pp->num, p->num );
@@ -737,8 +739,8 @@ static void dg2020_set_phase_pulse_pos_and_len( Function_T * f,
                     pppl[ i ]->len = np->pos - pppl[ i ]->pos;
 
                 if ( pppl[ i ]->pos + pppl[ i ]->len <
-                     pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len &&
-                     pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
+                          pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len
+                     && pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc )
                 {
                     print( FATAL, "Distance between pulses %ld and %ld is too "
                            "small to allow setting of phase pulses.\n",
@@ -746,11 +748,12 @@ static void dg2020_set_phase_pulse_pos_and_len( Function_T * f,
                     THROW( EXCEPTION );
                 }
 
-                if ( pppl[ i ]->pos + pppl[ i ]->len <
-                     pppl[ i ]->for_pulse->pos + pppl[ i ]->for_pulse->len
-                     + dg2020.grace_period  &&
-                     pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc &&
-                     p != for_pulse )
+                if (    pppl[ i ]->pos + pppl[ i ]->len <
+                                          pppl[ i ]->for_pulse->pos
+                                          + pppl[ i ]->for_pulse->len
+                                          + dg2020.grace_period
+                     && pppl[ i ]->for_pulse->pc != pppl[ i ]->for_pulse->pc
+                     && p != for_pulse )
                 {
                     print( SEVERE, "Pulses %ld and %ld are so close that "
                            "problems with phase switching may result.\n",
@@ -786,8 +789,9 @@ static void dg2020_set_phase_pulse_pos_and_len( Function_T * f,
             THROW( EXCEPTION );
         }
 
-        if ( np->pos + np->len < p->pos + p->len + dg2020.grace_period &&
-             p->pc != pn->pc && p != for_pulse )
+        if (    np->pos + np->len < p->pos + p->len + dg2020.grace_period
+             && p->pc != pn->pc
+             && p != for_pulse )
         {
             print( SEVERE, "Pulses %ld and %ld are so close that problems "
                    "with phase switching may result.\n", p->num, pn->num );

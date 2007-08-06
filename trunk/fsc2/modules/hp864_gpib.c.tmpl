@@ -494,8 +494,8 @@ static bool hp864_tmpl_talk( const char * cmd,
                              char *       reply,
                              long *       length )
 {
-    if ( gpib_write( hp864_tmpl.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( hp864_tmpl.device, reply, length ) == FAILURE )
+    if (    gpib_write( hp864_tmpl.device, cmd, strlen( cmd ) ) == FAILURE
+         || gpib_read( hp864_tmpl.device, reply, length ) == FAILURE )
         hp864_tmpl_comm_failure( );
     return OK;
 }

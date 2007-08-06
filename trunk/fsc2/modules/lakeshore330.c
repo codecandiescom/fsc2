@@ -196,8 +196,8 @@ Var_T *temp_contr_sample_channel( Var_T * v )
     }
     else
     {
-        if ( ( *v->val.sptr != 'A' && *v->val.sptr != 'B' ) ||
-             strlen( v->val.sptr ) != 1 )
+        if (    ( *v->val.sptr != 'A' && *v->val.sptr != 'B' )
+             || strlen( v->val.sptr ) != 1 )
         {
             print( FATAL, "Invalid sample channel (\"%s\").\n", v->val.sptr );
             THROW( EXCEPTION );
@@ -360,12 +360,12 @@ static bool lakeshore330_init( const char * name )
 
     /* Set end of EOS character to '\n' */
 
-    if ( gpib_write( lakeshore330.device, "TERM 2\r\n", 8 ) == FAILURE ||
-         gpib_write( lakeshore330.device, "END 0\n", 6 ) == FAILURE )
+    if (    gpib_write( lakeshore330.device, "TERM 2\r\n", 8 ) == FAILURE
+         || gpib_write( lakeshore330.device, "END 0\n", 6 ) == FAILURE )
         return FAIL;
 
-    if ( gpib_write( lakeshore330.device, "*STB?\n", 6 ) == FAILURE ||
-         gpib_read( lakeshore330.device, buf, &len ) == FAILURE )
+    if (    gpib_write( lakeshore330.device, "*STB?\n", 6 ) == FAILURE
+         || gpib_read( lakeshore330.device, buf, &len ) == FAILURE )
         return FAIL;
 
     sprintf( buf, "SUNI %c\n", in_units[ lakeshore330.unit ] );
@@ -503,8 +503,8 @@ static bool lakeshore330_talk( const char * cmd,
                                char *       reply,
                                long *       length )
 {
-    if ( gpib_write( lakeshore330.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( lakeshore330.device, reply, length ) == FAILURE )
+    if (    gpib_write( lakeshore330.device, cmd, strlen( cmd ) ) == FAILURE
+         || gpib_read( lakeshore330.device, reply, length ) == FAILURE )
         lakeshore330_gpib_failure( );
 
     return OK;

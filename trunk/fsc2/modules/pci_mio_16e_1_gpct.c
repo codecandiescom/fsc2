@@ -178,8 +178,9 @@ Var_T *daq_start_timed_counter( Var_T * v )
                 THROW( EXCEPTION );
         }
     }
-    else if ( FSC2_MODE == TEST &&
-              pci_mio_16e_1.gpct_state.states[ counter ] == COUNTER_IS_BUSY )
+    else if (    FSC2_MODE == TEST
+              && pci_mio_16e_1.gpct_state.states[ counter ]
+                                                           == COUNTER_IS_BUSY )
     {
         print( FATAL, "Counter CH%d is already running.\n", counter );
         THROW( EXCEPTION );
@@ -270,8 +271,9 @@ Var_T *daq_timed_count( Var_T * v )
                 THROW( EXCEPTION );
         }
     }
-    else if ( FSC2_MODE == TEST &&
-              pci_mio_16e_1.gpct_state.states[ counter ] == COUNTER_IS_BUSY )
+    else if (    FSC2_MODE == TEST
+              && pci_mio_16e_1.gpct_state.states[ counter ]
+                                                           == COUNTER_IS_BUSY )
     {
         print( FATAL, "Counter CH%d is already running.\n", counter );
         THROW( EXCEPTION );
@@ -499,8 +501,9 @@ Var_T *daq_single_pulse( Var_T * v )
                 THROW( EXCEPTION );
         }
     }
-    else if ( FSC2_MODE == TEST &&
-              pci_mio_16e_1.gpct_state.states[ counter ] == COUNTER_IS_BUSY )
+    else if (    FSC2_MODE == TEST
+              && pci_mio_16e_1.gpct_state.states[ counter ]
+                                                           == COUNTER_IS_BUSY )
     {
         print( FATAL, "Counter CH%d requested for pulse is already "
                "running.\n", counter );
@@ -577,8 +580,9 @@ Var_T *daq_continuous_pulses( Var_T * v )
                 THROW( EXCEPTION );
         }
     }
-    else if ( FSC2_MODE == TEST &&
-              pci_mio_16e_1.gpct_state.states[ counter ] == COUNTER_IS_BUSY )
+    else if (    FSC2_MODE == TEST
+              && pci_mio_16e_1.gpct_state.states[ counter ]
+                                                           == COUNTER_IS_BUSY )
     {
         print( FATAL, "Counter CH%d requested for continuous pulses is "
                "already running.\n", counter );
@@ -636,8 +640,8 @@ void ni_daq_two_channel_pulses( double delay,
 
     if ( FSC2_MODE == TEST )
     {
-        if ( pci_mio_16e_1.gpct_state.states[ 0 ] == COUNTER_IS_BUSY ||
-             pci_mio_16e_1.gpct_state.states[ 1 ] == COUNTER_IS_BUSY )
+        if (    pci_mio_16e_1.gpct_state.states[ 0 ] == COUNTER_IS_BUSY
+             || pci_mio_16e_1.gpct_state.states[ 1 ] == COUNTER_IS_BUSY )
         {
             print( FATAL, "Required counter is already in use.\n" );
             THROW( EXCEPTION );

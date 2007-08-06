@@ -444,8 +444,8 @@ Var_T *lockin_get_data( Var_T * v )
     {
         channels[ i ] = get_long( v, "channel number" );
 
-        if ( channels[ i ] == DSP_CH_Xnoise ||
-             channels[ i ] == DSP_CH_Ynoise )
+        if (    channels[ i ] == DSP_CH_Xnoise
+             || channels[ i ] == DSP_CH_Ynoise )
         {
             if ( ! sr830.is_auto_running )
             {
@@ -667,15 +667,14 @@ Var_T *lockin_sensitivity( Var_T * v )
             break;
         }
 
-    if ( sens_index == UNDEF_SENS_INDEX &&
-         sens > sens_list[ NUM_ELEMS( sens_list ) - 1 ] &&
-         sens <= sens_list[ NUM_ELEMS( sens_list ) - 1 ] * 1.01 )
+    if (    sens_index == UNDEF_SENS_INDEX
+         && sens > sens_list[ NUM_ELEMS( sens_list ) - 1 ]
+         && sens <= sens_list[ NUM_ELEMS( sens_list ) - 1 ] * 1.01 )
         sens_index = NUM_ELEMS( sens_list ) - 1;
 
-    if ( sens_index >= 0 &&                                 /* value found ? */
-         fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
-                                                            /* error > 1% ? */
-         ! sr830.sens_warn  )                            /* no warning yet ? */
+    if (    sens_index >= 0
+         && fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2
+         && ! sr830.sens_warn )
     {
         if ( sens >= 1.0e-3 )
             print( WARN, "Can't set sensitivity to %.0lf mV, using %.0lf mV "
@@ -777,9 +776,9 @@ Var_T *lockin_time_constant( Var_T * v )
             break;
         }
 
-    if ( tc_index >= 0 &&                                   /* value found ? */
-         fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 &&  /* error > 1% ? */
-         ! sr830.tc_warn )                          /* no warning yet ? */
+    if ( tc_index >= 0
+         && fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2
+         && ! sr830.tc_warn )
     {
         if ( tc > 1.0e3 )
             print( WARN, "Can't set time constant to %.0lf ks, using %.0lf ks "
@@ -1143,8 +1142,7 @@ Var_T *lockin_auto_setup( Var_T * v )
            if it fits in between two of the valid values and setting it to the
            nearer one and, if this doesn't work, we set it to the minimum or
            maximum value, depending on the size of the argument. If the value
-           does not fit within 5 percent, we utter a warning message (but only
-           once). */
+           does not fit within 5% output a warning message (but only once). */
 
         for ( i = 0; i < ST_ENTRIES - 1; i++ )
             if ( st >= st_list[ i ] && st <= st_list[ i + 1 ] )
@@ -1154,8 +1152,8 @@ Var_T *lockin_auto_setup( Var_T * v )
                 break;
             }
 
-        if ( st_index >= 0 &&                               /* value found ? */
-             fabs( st - st_list[ st_index ] ) > st * 5.0e-2 )/* error > 5% ? */
+        if ( st_index >= 0
+             && fabs( st - st_list[ st_index ] ) > st * 5.0e-2 )
         {
             if ( st >= 1.0 )
                 print( WARN, "Can't set sample time to %.0lf s, using %.0lf s "
@@ -1242,8 +1240,8 @@ Var_T *lockin_auto_setup( Var_T * v )
 
         sr830_set_sample_time( st_index );
 
-        for ( i = 0; i < DISPLAY_CHANNELS &&
-                     sr830.dsp_ch[ i ] != DSP_CH_UNDEF; i++ )
+        for ( i = 0; i < DISPLAY_CHANNELS
+              && sr830.dsp_ch[ i ] != DSP_CH_UNDEF; i++ )
             sr830_set_display_channel( i, sr830.dsp_ch[ i ] );
 
         if ( sr830.is_auto_running )
@@ -1401,16 +1399,16 @@ static bool sr830_init( const char * name )
     /* Tell the lock-in to use the GPIB bus for communication, clear all
        the relevant registers  and make sure the keyboard is locked */
 
-    if ( gpib_write( sr830.device, "OUTX 1\n", 7 ) == FAILURE ||
-         gpib_write( sr830.device, "*CLS\n", 5 )   == FAILURE ||
-         gpib_write( sr830.device, "OVRM 0\n", 7 ) == FAILURE )
+    if (    gpib_write( sr830.device, "OUTX 1\n", 7 ) == FAILURE
+         || gpib_write( sr830.device, "*CLS\n", 5 )   == FAILURE
+         || gpib_write( sr830.device, "OVRM 0\n", 7 ) == FAILURE )
         return FAIL;
 
     /* Ask lock-in to send the error status byte and test if it does */
 
     length = 20;
-    if ( gpib_write( sr830.device, "ERRS?\n", 6 ) == FAILURE ||
-         gpib_read( sr830.device, buffer, &length ) == FAILURE )
+    if (    gpib_write( sr830.device, "ERRS?\n", 6 ) == FAILURE
+         || gpib_read( sr830.device, buffer, &length ) == FAILURE )
         return FAIL;
 
     /* If the lock-in did send more than 2 byte this means its write buffer
@@ -1422,8 +1420,8 @@ static bool sr830_init( const char * name )
         {
             stop_on_user_request( );
             length = 20;
-        } while ( gpib_read( sr830.device, buffer, &length ) != FAILURE &&
-                  length == 20 );
+        } while (    gpib_read( sr830.device, buffer, &length ) != FAILURE
+                  && length == 20 );
     }
 
     /* If sensitivity, time constant or phase were set in one of the
@@ -1627,8 +1625,8 @@ static void sr830_get_xy_auto_data( double * data,
                 new_channels[ 1 ] =
                     new_channels[ i ] % NUM_DIRECT_CHANNELS + 1;
                 for ( j = 0; j < DISPLAY_CHANNELS; j++ )
-                    if ( new_channels[ 1 ] == sr830.dsp_ch[ j ] ||
-                         new_channels[ 1 ] == new_channels[ 0 ] )
+                    if (    new_channels[ 1 ] == sr830.dsp_ch[ j ]
+                         || new_channels[ 1 ] == new_channels[ 0 ] )
                     {
                         i = ( i + 1 ) % MAX_DATA_AT_ONCE;
                         cont = SET;
@@ -1983,8 +1981,8 @@ static long sr830_set_sample_time( long st_index )
     char cmd[ 100 ];
 
 
-    fsc2_assert( st_index != ST_TRIGGRED ||
-                 ( st_index >= 0 && st_index < ST_ENTRIES ) );
+    fsc2_assert( st_index != ST_TRIGGRED
+                 || ( st_index >= 0 && st_index < ST_ENTRIES ) );
 
     if ( st_index == ST_TRIGGRED )
         sprintf( cmd, "SRAT 14\n" );
@@ -2272,8 +2270,8 @@ static bool sr830_talk( const char * cmd,
                         char *       reply,
                         long *       length )
 {
-    if ( gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( sr830.device, reply, length ) == FAILURE )
+    if (    gpib_write( sr830.device, cmd, strlen( cmd ) ) == FAILURE
+         || gpib_read( sr830.device, reply, length ) == FAILURE )
         sr830_failure( );
     return OK;
 }

@@ -426,10 +426,10 @@ Var_T *measure_field( Var_T * v  UNUSED_ARG )
        field. Starting with searching down is just as probable the wrong
        decision as searching up... */
 
-    if ( ( nmr.state == ER035M_SAS_OU_ACTIVE ||
-           nmr.state == ER035M_SAS_OD_ACTIVE ||
-           nmr.state == ER035M_SAS_UNKNOWN ) &&
-         er035m_sas_write( "SD" ) == FAIL )
+    if (    (    nmr.state == ER035M_SAS_OU_ACTIVE
+			  || nmr.state == ER035M_SAS_OD_ACTIVE
+			  || nmr.state == ER035M_SAS_UNKNOWN )
+		 && er035m_sas_write( "SD" ) == FAIL )
         er035m_sas_comm_fail( );
 
     /* Wait for gaussmeter to go into lock state (or FAIL) */
@@ -1071,8 +1071,8 @@ static bool er035m_sas_read( char *   buf,
 
     buf[ *len ] = '\0';         /* make sure there's an end of string marker */
 
-    if ( ( ptr = strchr( buf, '\r' ) ) ||
-         ( ptr = strchr( buf, '\n' ) )    )
+    if (    ( ptr = strchr( buf, '\r' ) )
+		 || ( ptr = strchr( buf, '\n' ) ) )
     {
         *ptr = '\0';
         *len = ptr - buf;

@@ -395,9 +395,9 @@ Var_T *f_sdelete( Var_T * v )
             f_sdelete_parent( v );
     } while ( ( v = vars_pop( v ) ) != NULL );
 
-    if ( Fsc2_Internals.I_am == CHILD ||
-         Fsc2_Internals.mode == TEST  ||
-         ! Toolbox )
+    if (    Fsc2_Internals.I_am == CHILD
+         || Fsc2_Internals.mode == TEST
+         || ! Toolbox )
         return vars_push( INT_VAR, 1L );
 
     /* Redraw the tool box without the slider */

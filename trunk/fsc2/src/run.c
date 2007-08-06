@@ -108,8 +108,8 @@ bool run( void )
 
     if ( EDL.prg_length < 0 )
     {
-        if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
-             Fsc2_Internals.cmdline_flags & BATCH_MODE )
+        if (    Fsc2_Internals.cmdline_flags & DO_CHECK
+             || Fsc2_Internals.cmdline_flags & BATCH_MODE )
             fl_trigger_object( GUI.main_form->quit );
 
         if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
@@ -611,12 +611,12 @@ static void check_for_further_errors( Compilation_T * c_old,
     for ( i = FATAL; i < NO_ERROR; i++ )
         diff.error[ i ] = c_all->error[ i ] - c_old->error[ i ];
 
-    if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN &&
-         ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
+    if (    Fsc2_Internals.cmdline_flags & NO_GUI_RUN
+         && ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
         THROW( EXCEPTION );
 
-    if ( ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
-         ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
+    if (    ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
+         && ( diff.error[ SEVERE ] != 0 || diff.error[ WARN ] != 0 ) )
     {
         if ( diff.error[ SEVERE ] != 0 )
         {
@@ -681,8 +681,8 @@ void run_stop_button_callback( FL_OBJECT * a,
        not be possible, but to make real sure (in case of some real
        subtle timing problems) we better check */
 
-    if ( Fsc2_Internals.child_pid == 0 ||
-         kill( Fsc2_Internals.child_pid, 0 ) == -1 )
+    if (    Fsc2_Internals.child_pid == 0
+         || kill( Fsc2_Internals.child_pid, 0 ) == -1 )
     {
         fl_set_object_callback( a, NULL, 0 );
         return;
@@ -797,9 +797,9 @@ void run_sigchld_callback( FL_OBJECT * a,
     if ( Fsc2_Internals.child_is_quitting == QUITTING_UNSET )
                                     /* missing notification by the child ? */
     {
-        if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) && 
-             ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
-             ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        if (    ! ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+             && ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
+             && ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
         {
             Fsc2_Internals.state = STATE_WAITING;
             fl_show_alert( "Fatal Error", "Experiment stopped unexpectedly.",
@@ -813,13 +813,13 @@ void run_sigchld_callback( FL_OBJECT * a,
         mess = "Experiment stopped unexpectedly after ";
         state = EXIT_FAILURE;
     }
-    else if ( ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN && b ) ||
-              ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) &&
-                a->u_ldata ) )
+    else if (    ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN && b )
+              || (    ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
+                   && a->u_ldata ) )
     {
-        if ( ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) &&
-             ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE ) &&
-             ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+        if (    ! ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+             && ! ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
+             && ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
         {
             Fsc2_Internals.state = STATE_WAITING;
             fl_show_alert( "Fatal Error", "Experiment had to be stopped.",
@@ -923,8 +923,8 @@ void run_sigchld_callback( FL_OBJECT * a,
         fl_unfreeze_form( GUI.run_form_2d->run_2d );
     }
 
-    if ( Fsc2_Internals.cmdline_flags & DO_CHECK ||
-         Fsc2_Internals.cmdline_flags & BATCH_MODE )
+    if (    Fsc2_Internals.cmdline_flags & DO_CHECK
+         || Fsc2_Internals.cmdline_flags & BATCH_MODE )
     {
         run_close_button_callback( NULL, 0 );
         Fsc2_Internals.check_return = state;
@@ -1216,9 +1216,9 @@ static void child_sig_handler( int signo )
        a mail with information about the crash. */
 
 #if ! defined( NDEBUG ) && defined( ADDR2LINE )
-    if ( ! Crash.already_crashed &&
-         Crash.signo != SIGABRT &&
-         ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
+    if (    ! Crash.already_crashed
+         && Crash.signo != SIGABRT
+         && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
     {
         Crash.already_crashed = SET;
 
@@ -1341,8 +1341,8 @@ static void do_measurement( void )
 
     exp_runparser_init( );
 
-    while ( EDL.cur_prg_token != NULL &&
-            EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
+    while (    EDL.cur_prg_token != NULL
+            && EDL.cur_prg_token < EDL.prg_token + EDL.prg_length )
     {
         TRY
         {

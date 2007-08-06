@@ -476,8 +476,8 @@ void lecroy_vicp_lock_out( bool lock_state )
         THROW( EXCEPTION );
     }
 
-    if ( ( lecroy_vicp.is_locked && lock_state ) ||
-         ( ! lecroy_vicp.is_locked && ! lock_state ) )
+    if (    ( lecroy_vicp.is_locked && lock_state )
+         || ( ! lecroy_vicp.is_locked && ! lock_state ) )
         return;
 
     if ( lock_state )

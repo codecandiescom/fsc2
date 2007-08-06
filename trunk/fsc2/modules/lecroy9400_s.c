@@ -270,8 +270,8 @@ Var_T *digitizer_define_window( Var_T *v )
 
             /* Allow window width to be zero in test run... */
 
-            if ( ( FSC2_MODE == TEST && win_width < 0.0 ) ||
-                 ( FSC2_MODE != TEST && win_width <= 0.0 ) )
+            if (    ( FSC2_MODE == TEST && win_width < 0.0 )
+                 || ( FSC2_MODE != TEST && win_width <= 0.0 ) )
             {
                 print( FATAL, "Zero or negative window width.\n" );
                 THROW( EXCEPTION );
@@ -377,8 +377,8 @@ Var_T *digitizer_timebase( Var_T *v )
             break;
         }
 
-    if ( TB >= 0 &&                                         /* value found ? */
-         fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )  /* error > 1% ?  */
+    if (    TB >= 0                                         /* value found ? */
+         && fabs( timebase - tb[ TB ] ) > timebase * 1.0e-2 )
     {
         t = T_strdup( lecroy9400_ptime( timebase ) );
         print( WARN, "Can't set timebase to %s, using %s instead.\n",
@@ -647,8 +647,8 @@ Var_T *digitizer_averaging( Var_T *v )
                 THROW( EXCEPTION );
             }
 
-            if ( FSC2_MODE != EXPERIMENT &&
-                 rec_len > ml[ NUM_ELEMS( ml ) - 1 ] )
+            if (    FSC2_MODE != EXPERIMENT
+                 && rec_len > ml[ NUM_ELEMS( ml ) - 1 ] )
             {
                 print( FATAL, "Record length %ld too long.\n",
                        rec_len );
@@ -808,8 +808,8 @@ Var_T *digitizer_trigger_position( Var_T *v )
     lecroy9400.trig_pos = trig_pos;
     lecroy9400.is_trig_pos = SET;
 
-    if ( FSC2_MODE == EXPERIMENT &&
-         ! lecroy9400_set_trigger_pos( lecroy9400.trig_pos ) )
+    if (    FSC2_MODE == EXPERIMENT
+         && ! lecroy9400_set_trigger_pos( lecroy9400.trig_pos ) )
         lecroy9400_comm_failure( );
 
     return vars_push( FLOAT_VAR, lecroy9400.trig_pos );
@@ -968,9 +968,9 @@ static Var_T *get_curve( Var_T *v, bool use_cursor )
     ch = ( int ) lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( ch < LECROY9400_CH1 ||
-         ( ch > LECROY9400_CH2 && ch < LECROY9400_FUNC_E ) ||
-         ch > LECROY9400_FUNC_F )
+    if (    ch < LECROY9400_CH1
+         || ( ch > LECROY9400_CH2 && ch < LECROY9400_FUNC_E )
+         || ch > LECROY9400_FUNC_F )
     {
         print( FATAL, "Invalid channel specification.\n" );
         THROW( EXCEPTION );

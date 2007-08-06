@@ -309,8 +309,8 @@ void spectrapro_300i_open( void )
         if ( spectrapro_300i_comm( SERIAL_READ, reply + already_read, &len ) )
         {
             already_read += len;
-            if ( already_read >= 5 &&
-                 ! strncmp( reply + already_read - 5, " ok\r\n", 5 ) )
+            if (    already_read >= 5
+                 && ! strncmp( reply + already_read - 5, " ok\r\n", 5 ) )
                 break;
         }
         stop_on_user_request( );
@@ -454,10 +454,10 @@ void spectrapro_300i_set_grating( long gn )
     char *buf;
 
 
-    fsc2_assert( gn >= 0 && gn < MAX_GRATINGS &&
-                 gn - spectrapro_300i.tn * 3 >= 0 &&
-                 gn - spectrapro_300i.tn * 3 <= 2 &&
-                 spectrapro_300i.grating[ gn ].is_installed );
+    fsc2_assert(    gn >= 0 && gn < MAX_GRATINGS
+                 && gn - spectrapro_300i.tn * 3 >= 0
+                 && gn - spectrapro_300i.tn * 3 <= 2
+                 && spectrapro_300i.grating[ gn ].is_installed );
 
     if ( spectrapro_300i.current_gn == gn )
         return;
@@ -658,9 +658,9 @@ long spectrapro_300i_get_offset( long gn )
     for ( i = 0; i <= gn; i++ )
     {
         offset = strtol( sp, &nsp, 10 );
-        if ( sp == nsp ||
-             ( ( offset == LONG_MIN || offset == LONG_MAX ) &&
-               errno == ERANGE ) )
+        if (    sp == nsp
+             || (    ( offset == LONG_MIN || offset == LONG_MAX )
+                  && errno == ERANGE ) )
         {
             T_free( ( void * ) reply );
             spectrapro_300i_comm_fail( );
@@ -770,9 +770,9 @@ long spectrapro_300i_get_adjust( long gn )
     for ( i = 0; i <= gn; i++ )
     {
         gadjust = strtol( sp, &nsp, 10 );
-        if ( sp == nsp ||
-             ( ( gadjust == LONG_MIN || gadjust == LONG_MAX ) &&
-               errno == ERANGE ) )
+        if (    sp == nsp
+             || (    ( gadjust == LONG_MIN || gadjust == LONG_MAX )
+                  && errno == ERANGE ) )
         {
             T_free( ( void * ) reply );
             spectrapro_300i_comm_fail( );

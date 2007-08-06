@@ -30,7 +30,7 @@
 
 
 Var_T *vars_add( Var_T * /* v1 */,
-                 Var_T * /* v2 */ );
+                 Var_T * /* v2 */  );
 
 
 #endif  /* ! VARS_ADD_HEADER */

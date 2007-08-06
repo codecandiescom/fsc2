@@ -697,8 +697,8 @@ static bool rs_sml01_talk( const char * cmd,
                            char *       reply,
                            long *       length )
 {
-    if ( gpib_write( dev_handle, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( dev_handle, reply, length ) == FAILURE )
+    if (    gpib_write( dev_handle, cmd, strlen( cmd ) ) == FAILURE
+         || gpib_read( dev_handle, reply, length ) == FAILURE )
         rs_sml01_comm_failure( );
     return OK;
 }

@@ -53,8 +53,8 @@ Var_T *vars_add( Var_T * v1,
                     INT_PTR | FLOAT_PTR | SUB_REF_PTR );
     vars_check( v2, STR_VAR | RHS_TYPES );
 
-    if ( ( v1->type == STR_VAR && v2->type != STR_VAR ) ||
-         ( v1->type != STR_VAR && v2->type == STR_VAR ) )
+    if (    ( v1->type == STR_VAR && v2->type != STR_VAR )
+         || ( v1->type != STR_VAR && v2->type == STR_VAR ) )
     {
         print( FATAL, "Variable of type STRING can't be used in this "
                "context.\n" );

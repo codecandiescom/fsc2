@@ -33,13 +33,13 @@ Var_T *vars_negate( Var_T * /* v */ );
 
 Var_T *vars_comp( int     /* comp_type */,
                   Var_T * /* v1        */,
-                  Var_T * /* v2        */ );
+                  Var_T * /* v2        */  );
 
 Var_T *vars_lnegate( Var_T * /* v */ );
 
 void vars_arith_len_check( Var_T *      /* v1 */,
                            Var_T *      /* v2 */,
-                           const char * /* op */ );
+                           const char * /* op */  );
 
 
 #endif  /* ! VARS_UTIL_HEADER */

@@ -468,22 +468,22 @@ bool lecroy_ws_set_memory_size( long /* mem_size */ );
 double lecroy_ws_get_sens( int /* channel */ );
 
 bool lecroy_ws_set_sens( int    /* channel */,
-                         double /* sens    */ );
+                         double /* sens    */  );
 
 double lecroy_ws_get_offset( int /* channel */ );
 
 bool lecroy_ws_set_offset( int    /* channel */,
-                           double /* offset  */ );
+                           double /* offset  */  );
 
 int lecroy_ws_get_coupling( int /* channel */ );
 
 bool lecroy_ws_set_coupling( int /* channel */,
-                             int /* type    */ );
+                             int /* type    */  );
 
 int lecroy_ws_get_bandwidth_limiter( int /* channel */ );
 
 bool lecroy_ws_set_bandwidth_limiter( int /* channel */,
-                                      int /* bwl     */ );
+                                      int /* bwl     */  );
 
 int lecroy_ws_get_trigger_source( void );
 
@@ -492,17 +492,17 @@ bool lecroy_ws_set_trigger_source( int /* channel */ );
 double lecroy_ws_get_trigger_level( int /* channel */ );
 
 bool lecroy_ws_set_trigger_level( int    /* channel */,
-                                  double /* level   */ );
+                                  double /* level   */  );
 
 bool lecroy_ws_get_trigger_slope( int /* channel */ );
 
 bool lecroy_ws_set_trigger_slope( int  /* channel */,
-                                  bool /* slope   */ );
+                                  bool /* slope   */  );
 
 int lecroy_ws_get_trigger_coupling( int /* channel */ );
 
 int lecroy_ws_set_trigger_coupling( int /* channel */,
-                                    int /* cpl     */ );
+                                    int /* cpl     */  );
 
 int lecroy_ws_get_trigger_mode( void );
 
@@ -515,19 +515,19 @@ bool lecroy_ws_set_trigger_delay( double /* delay */ );
 bool lecroy_ws_is_displayed( int /* channel */ );
 
 bool lecroy_ws_display( int /* channel */,
-                        int /* on_off  */ );
+                        int /* on_off  */  );
 
 long lecroy_ws_get_num_avg( int /* channel */ );
 
 bool lecroy_ws_get_desc( int /* channel */ );
 
 void lecroy_normal_channel_averaging( int  /* channel */,
-                                      long /* num_avg */ );
+                                      long /* num_avg */  );
 
 void lecroy_ws_set_up_averaging( long /* channel */,
                                  long /* source  */,
                                  long /* num_avg */,
-                                 long /* rec_len */ );
+                                 long /* rec_len */  );
 
 void lecroy_ws_finished( void );
 
@@ -539,13 +539,13 @@ void lecroy_ws_get_curve( int        /* ch     */,
                           long *     /* length */ );
 
 double lecroy_ws_get_area( int        /* ch */,
-                           Window_T * /* w  */ );
+                           Window_T * /* w  */  );
 
 double lecroy_ws_get_amplitude( int        /* ch */,
-                                Window_T * /* w  */ );
+                                Window_T * /* w  */  );
 
 void lecroy_ws_copy_curve( long /* src  */,
-                           long /* dest */ );
+                           long /* dest */  );
 
 void lecroy_ws_lock_state( bool /* lock_state */ );
 
@@ -564,7 +564,7 @@ Window_T *lecroy_ws_get_window_by_number( long /* wid */ );
 void lecroy_ws_all_windows_check( void );
 
 void lecroy_ws_window_check( Window_T * /* w        */,
-                             bool       /* show_num */ );
+                             bool       /* show_num */  );
 
 long lecroy_ws_curve_length( void );
 
@@ -574,10 +574,10 @@ const char *lecroy_ws_ptime( double /* p_time */ );
 
 long lecroy_ws_translate_channel( int  /* dir     */,
                                   long /* channel */,
-                                  bool /* flag    */ );
+                                  bool /* flag    */  );
 
 void lecroy_ws_store_state( LECROY_WS_T * /* dest */,
-                            LECROY_WS_T * /* src  */ );
+                            LECROY_WS_T * /* src  */  );
 
 
 /*

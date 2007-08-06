@@ -51,8 +51,8 @@ Ticks rs690_double2ticks( double p_time )
         THROW( EXCEPTION );
     }
 
-    if ( fabs( Ticksrnd( ticks ) - p_time / rs690.timebase ) > 1.0e-2 ||
-         ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
+    if (    fabs( Ticksrnd( ticks ) - p_time / rs690.timebase ) > 1.0e-2
+         || ( p_time > 0.99e-9 && Ticksrnd( ticks ) == 0 ) )
     {
         print( FATAL, "Specified time of %s is not an integer multiple of the "
                "fixed pulser the time base of %s.\n",
@@ -334,14 +334,14 @@ void rs690_dump_channels( FILE * fp )
 
             for ( k = 0; k < ch->num_active_pulses; k++ )
             {
-                if ( f->self == PULSER_CHANNEL_PULSE_SHAPE &&
-                     ch->pulse_params[ k ].pulse->sp != NULL )
+                if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+                     && ch->pulse_params[ k ].pulse->sp != NULL )
                     fprintf( fp, " (%ld) %ld %ld",
                              ch->pulse_params[ k ].pulse->sp->num,
                              ch->pulse_params[ k ].pos,
                              ch->pulse_params[ k ].len );
-                else if ( f->self == PULSER_CHANNEL_TWT &&
-                          ch->pulse_params[ k ].pulse->tp != NULL )
+                else if (    f->self == PULSER_CHANNEL_TWT
+                          && ch->pulse_params[ k ].pulse->tp != NULL )
                     fprintf( fp, " (%ld) %ld %ld",
                              ch->pulse_params[ k ].pulse->tp->num,
                              ch->pulse_params[ k ].pos,
@@ -385,10 +385,11 @@ void rs690_duty_check( void )
     for ( i = 0; i < 2; i++ )
     {
         f = rs690.function + fns[ i ];
-        if ( f->is_used && f->num_channels > 0 &&
-             rs690_calc_max_length( f ) >
-                                    MAX_TWT_DUTY_CYCLE * rs690.repeat_time &&
-                 f->max_duty_warning++ == 0 )
+        if (    f->is_used
+             && f->num_channels > 0
+             && rs690_calc_max_length( f ) >
+                                        MAX_TWT_DUTY_CYCLE * rs690.repeat_time
+             && f->max_duty_warning++ == 0 )
                 print( SEVERE, "Duty cycle of TWT exceeded due to length of "
                        "%s pulses.\n", f->name );
     }
@@ -450,9 +451,9 @@ bool rs690_set_max_seq_len( double seq_len  UNUSED_ARG )
 
 long rs690_ch_to_num( long channel )
 {
-    if ( channel < CHANNEL_A0 ||
-         ( channel > CHANNEL_D15 && NUM_HSM_CARDS == 1 ) ||
-         ( channel > CHANNEL_H15 && NUM_HSM_CARDS == 2 ) )
+    if ( channel < CHANNEL_A0
+         || ( channel > CHANNEL_D15 && NUM_HSM_CARDS == 1 )
+         || ( channel > CHANNEL_H15 && NUM_HSM_CARDS == 2 ) )
     {
          print( FATAL, "Pulser has no channel named '%s'.\n",
                 Channel_Names[ channel ] );

@@ -326,8 +326,8 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
            until now is fetched, multiplied by the sweep rate and added to
            the current field */
 
-        if ( ips20_4.sweep_state != STOPPED &&
-             ips20_4.activity == TO_SET_POINT )
+        if (    ips20_4.sweep_state != STOPPED
+             && ips20_4.activity == TO_SET_POINT )
         {
             double cur_time, dtime;
 
@@ -352,12 +352,12 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 
     /* If a sweep reached one of the current limits stop the sweep */
 
-    if ( ( ( ips20_4.sweep_state == SWEEPING_UP ||
-             ips20_4.activity == TO_SET_POINT ) &&
-           ips20_4.act_current >= ips20_4.max_current ) ||
-         ( ( ips20_4.sweep_state == SWEEPING_DOWN ||
-             ips20_4.activity == TO_SET_POINT ) &&
-           ips20_4.act_current <= ips20_4.min_current ) )
+    if (    (    (    ips20_4.sweep_state == SWEEPING_UP
+                   || ips20_4.activity == TO_SET_POINT )
+              && ips20_4.act_current >= ips20_4.max_current )
+         || (    (    ips20_4.sweep_state == SWEEPING_DOWN
+                   || ips20_4.activity == TO_SET_POINT )
+              && ips20_4.act_current <= ips20_4.min_current ) )
     {
         print( WARN, "Sweep had to be stopped because current limit was "
                "reached.\n" );
@@ -395,8 +395,8 @@ Var_T *set_field( Var_T * v )
 
     /* Stop sweeping */
 
-    if ( ips20_4.sweep_state != STOPPED ||
-         ips20_4.activity != HOLD )
+    if (    ips20_4.sweep_state != STOPPED
+         || ips20_4.activity != HOLD )
     {
         if ( FSC2_MODE == EXPERIMENT )
             ips20_4.activity = ips20_4_set_activity( HOLD );

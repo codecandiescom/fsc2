@@ -32,7 +32,7 @@
 Var_T *vars_arr_lhs( Var_T * /* v */ );
 
 Var_T *vars_init_list( Var_T * /* v     */,
-                       ssize_t /* level */ );
+                       ssize_t /* level */  );
 
 void vars_arr_init( Var_T * /* dest */ );
 

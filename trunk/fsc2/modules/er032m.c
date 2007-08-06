@@ -278,10 +278,10 @@ int er032m_end_of_test_hook( void )
        field step width (if one was set) or was larger than the resolution
        reasonably to be expected */
 
-    if ( ( magnet.is_init &&
-           magnet.max_field_dev / magnet.field_step >= 0.01 ) ||
-         ( ! magnet.is_init &&
-           floor( magnet.max_field_dev / ER032M_RESOLUTION ) >= 1 ) )
+    if (    (    magnet.is_init
+              && magnet.max_field_dev / magnet.field_step >= 0.01 )
+         || (    ! magnet.is_init
+              && floor( magnet.max_field_dev / ER032M_RESOLUTION ) >= 1 ) )
         print( NO_ERROR, "Maximum field error during test run was %.0f mG.\n",
                 magnet.max_field_dev * 1.0e3 );
     magnet.max_field_dev = 0.0;
@@ -308,10 +308,10 @@ int er032m_end_of_exp_hook( void )
        field step width (if one was set) or was larger than the resolution
        reasonably to be expected */
 
-    if ( ( magnet.is_init &&
-           magnet.max_field_dev / magnet.field_step >= 0.01 ) ||
-         ( ! magnet.is_init &&
-           floor( magnet.max_field_dev / ER032M_RESOLUTION ) >= 1 ) )
+    if (    (    magnet.is_init
+              && magnet.max_field_dev / magnet.field_step >= 0.01 )
+         || (    ! magnet.is_init
+              && floor( magnet.max_field_dev / ER032M_RESOLUTION ) >= 1 ) )
         print( NO_ERROR, "Maximum field error during experiment was "
                "%.0f mG.\n", magnet.max_field_dev * 1.0e3 );
     magnet.max_field_dev = 0.0;
@@ -390,9 +390,9 @@ Var_T *magnet_setup( Var_T * v )
     rem = lrnd( start_field / ER032M_MIN_FIELD_STEP )
           % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP );
 
-    if ( rem > 0 &&
-         lrnd( field_step / ER032M_MIN_FIELD_STEP ) %
-         lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP ) == 0 )
+    if (    rem > 0
+         && lrnd( field_step / ER032M_MIN_FIELD_STEP ) %
+                    lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP ) == 0 )
     {
         start_field = lrnd( start_field / ER032M_CF_RESOLUTION )
                       * ER032M_CF_RESOLUTION;
@@ -471,8 +471,8 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
         /* When we're extremely near to the maximum field it may happen that
            the field can't be set with a useful combination of CF and SWA. */
 
-        if ( new_swa > MAX_SWA ||
-             new_cf + 0.5 * magnet.sw > ER032M_MAX_FIELD )
+        if (    new_swa > MAX_SWA
+             || new_cf + 0.5 * magnet.sw > ER032M_MAX_FIELD )
         {
             print( FATAL, "Can't set field of %.3f G.\n", 
                    magnet.act_field + magnet.field_step );
@@ -481,9 +481,9 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 
         er032m_best_fit_search( &new_cf, &new_swa, SEARCH_UP, 2 );
 
-        fsc2_assert( new_swa >= MIN_SWA && new_swa <= MAX_SWA &&
-                     new_cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD &&
-                     new_cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
+        fsc2_assert(    new_swa >= MIN_SWA && new_swa <= MAX_SWA
+                     && new_cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD
+                     && new_cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
 
         er032m_set_swa( magnet.swa = new_swa );
         magnet.cf = er032m_set_cf( new_cf );
@@ -555,8 +555,8 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
         /* When we're extremely near to the minimum field it may happen that
            the field can't be set with a useful combination of CF and SWA. */
 
-        if ( new_swa < MIN_SWA ||
-             new_cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
+        if (    new_swa < MIN_SWA
+             || new_cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
         {
             print( FATAL, "Can't set field of %.3f G.\n", 
                    magnet.act_field + magnet.field_step );
@@ -565,9 +565,9 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 
         er032m_best_fit_search( &new_cf, &new_swa, SEARCH_DOWN, 2 );
 
-        fsc2_assert( new_swa >= MIN_SWA && new_swa <= MAX_SWA &&
-                     new_cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD &&
-                     new_cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
+        fsc2_assert(    new_swa >= MIN_SWA && new_swa <= MAX_SWA
+                     && new_cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD
+                     && new_cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
 
         er032m_set_swa( magnet.swa = new_swa );
         magnet.cf = er032m_set_cf( new_cf );
@@ -827,10 +827,9 @@ static void er032m_start_field( void )
         magnet.cf += shift * magnet.swa_step;
     }
 
-    if ( magnet.swa > MAX_SWA ||
-         magnet.swa < MIN_SWA ||
-         magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD ||
-         magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
+    if (    magnet.swa > MAX_SWA || magnet.swa < MIN_SWA
+         || magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD
+         || magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
     {
         print( FATAL, "Can't set field of %.3f G\n", magnet.start_field );
         THROW( EXCEPTION );
@@ -847,9 +846,9 @@ static void er032m_start_field( void )
     er032m_best_fit_search( &magnet.cf, &magnet.swa, magnet.cf >=
                             0.5 * ( ER032M_MAX_FIELD - ER032M_MIN_FIELD ), 2 );
 
-    fsc2_assert( magnet.swa >= MIN_SWA && magnet.swa <= MAX_SWA &&
-                 magnet.cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD &&
-                 magnet.cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
+    fsc2_assert(    magnet.swa >= MIN_SWA && magnet.swa <= MAX_SWA
+                 && magnet.cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD
+                 && magnet.cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
 
     /* Set the new field but avoid that center field plus/minus half the
        sweep range to ever exceed the field limits. */
@@ -857,15 +856,15 @@ static void er032m_start_field( void )
     cur_cf  = er032m_get_cf( );
     cur_sw  = er032m_get_sw( );
 
-    if ( magnet.cf + 0.5 * cur_sw <= ER032M_MAX_FIELD &&
-         magnet.cf - 0.5 * cur_sw >= ER032M_MIN_FIELD )
+    if (    magnet.cf + 0.5 * cur_sw <= ER032M_MAX_FIELD
+         && magnet.cf - 0.5 * cur_sw >= ER032M_MIN_FIELD )
     {
         er032m_set_cf( magnet.cf );
         er032m_set_sw( magnet.sw );
         er032m_set_swa( magnet.swa );
     }
-    else if ( cur_cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD &&
-              cur_cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD )
+    else if (    cur_cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD
+              && cur_cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD )
     {
         er032m_set_sw( magnet.sw );
         er032m_set_cf( magnet.cf );
@@ -979,12 +978,11 @@ static void er032m_change_field_and_set_sw( double field )
                                 0.5 * ( ER032M_MAX_FIELD - ER032M_MIN_FIELD ),
                                 2 );
 
-        if ( magnet.swa < MIN_SWA || magnet.swa > MAX_SWA ||
-             magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD ||
-             magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD ||
-             field -
-             ( magnet.cf + ( magnet.swa - CENTER_SWA ) * magnet.swa_step ) >
-             ER032M_RESOLUTION )
+        if (    magnet.swa < MIN_SWA || magnet.swa > MAX_SWA
+             || magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD
+             || magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD
+             || field - ( magnet.cf + ( magnet.swa - CENTER_SWA )
+                          * magnet.swa_step ) > ER032M_RESOLUTION )
         {
             rem = ( lrnd( field / ER032M_MIN_FIELD_STEP )
                     % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP ) )
@@ -1019,9 +1017,10 @@ static void er032m_change_field_and_sw( double field )
 
     steps = irnd( ( field - magnet.act_field ) / magnet.swa_step );
 
-    if ( fabs( fabs( field - magnet.act_field )
-               - magnet.swa_step * abs( steps ) ) < 0.01 * magnet.swa_step &&
-         magnet.swa + steps <= MAX_SWA && magnet.swa + steps >= MIN_SWA )
+    if (    fabs( fabs( field - magnet.act_field )
+                  - magnet.swa_step * abs( steps ) ) < 0.01 * magnet.swa_step
+         && magnet.swa + steps <= MAX_SWA
+         && magnet.swa + steps >= MIN_SWA )
     {
         er032m_set_swa( magnet.swa += steps );
         return;
@@ -1052,9 +1051,10 @@ static void er032m_change_field_and_keep_sw( double field )
 
     steps = irnd( ( field - magnet.act_field ) / magnet.swa_step );
 
-    if ( fabs( fabs( field - magnet.act_field )
-               - magnet.swa_step * abs( steps ) ) < 1e-2 * magnet.swa_step &&
-         magnet.swa + steps <= MAX_SWA && magnet.swa + steps >= MIN_SWA )
+    if (    fabs( fabs( field - magnet.act_field )
+                  - magnet.swa_step * abs( steps ) ) < 1e-2 * magnet.swa_step
+         && magnet.swa + steps <= MAX_SWA
+         && magnet.swa + steps >= MIN_SWA )
     {
         er032m_set_swa( magnet.swa += steps );
         return;
@@ -1089,10 +1089,9 @@ static void er032m_change_field_and_keep_sw( double field )
     /* When we're extremely near to the limits it's possible that there is
        no combination of CF and SWA that can be used. */
 
-    if ( magnet.swa > MAX_SWA ||
-         magnet.swa < MIN_SWA ||
-         magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD ||
-         magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
+    if (    magnet.swa > MAX_SWA || magnet.swa < MIN_SWA
+         || magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD
+         || magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
     {
         print( FATAL, "Can't set field of %.3f G\n", field );
         THROW( EXCEPTION );
@@ -1122,9 +1121,9 @@ static void er032m_change_field_and_keep_sw( double field )
             er032m_best_fit_search( &magnet.cf, &magnet.swa, magnet.cf >=
                             0.5 * ( ER032M_MAX_FIELD - ER032M_MIN_FIELD ), 2 );
 
-            fsc2_assert( magnet.swa >= MIN_SWA && magnet.swa <= MAX_SWA &&
-                         magnet.cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD &&
-                         magnet.cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
+            fsc2_assert( magnet.swa >= MIN_SWA && magnet.swa <= MAX_SWA
+                         && magnet.cf - 0.5 * magnet.sw >= ER032M_MIN_FIELD
+                         && magnet.cf + 0.5 * magnet.sw <= ER032M_MAX_FIELD );
         }
     }
 
@@ -1151,15 +1150,15 @@ static bool er032m_guess_sw( double field_diff )
 
     /* For very small or huge changes we can't deduce a sweep range. */
 
-    if ( field_diff * MAX_SWA < ER032M_SW_RESOLUTION ||
-         field_diff > magnet.max_sw / 2 )
+    if (    field_diff * MAX_SWA < ER032M_SW_RESOLUTION
+         || field_diff > magnet.max_sw / 2 )
         return FAIL;
 
     /* This also doesn't work if the center field is nearer to one of the
        limits than to the new field value. */
 
-    if ( ER032M_MAX_FIELD - magnet.cf < field_diff ||
-         magnet.cf - ER032M_MIN_FIELD < field_diff )
+    if (    ER032M_MAX_FIELD - magnet.cf < field_diff
+         || magnet.cf - ER032M_MIN_FIELD < field_diff )
         return FAIL;
 
     /* Now start with the step size set to the field difference */
@@ -1339,8 +1338,8 @@ static double er032m_set_cf( double center_field )
     center_field = ER032M_CF_RESOLUTION
                    * lrnd( center_field / ER032M_CF_RESOLUTION );
 
-    fsc2_assert( center_field >= ER032M_MIN_FIELD &&
-                 center_field <= ER032M_MAX_FIELD );
+    fsc2_assert(    center_field >= ER032M_MIN_FIELD
+                 && center_field <= ER032M_MAX_FIELD );
 
     if ( FSC2_MODE != EXPERIMENT )
         return center_field;
@@ -1504,8 +1503,8 @@ static bool er032m_talk( const char * cmd,
                          char *       reply,
                          long *       length )
 {
-    if ( gpib_write( magnet.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( magnet.device, reply, length ) == FAILURE )
+    if (    gpib_write( magnet.device, cmd, strlen( cmd ) ) == FAILURE
+         || gpib_read( magnet.device, reply, length ) == FAILURE )
         er032m_failure( );
     return OK;
 }
@@ -1541,17 +1540,17 @@ static int er032m_best_fit_search( double * cf,
     static bool dir_change = UNSET;
 
 
-    fsc2_assert( new_swa >= MIN_SWA && new_swa <= MAX_SWA &&
-                 new_cf - 0.5 * magnet.swa_step >= ER032M_MIN_FIELD &&
-                 new_cf + 0.5 * magnet.swa_step <= ER032M_MAX_FIELD );
+    fsc2_assert(    new_swa >= MIN_SWA && new_swa <= MAX_SWA
+                 && new_cf - 0.5 * magnet.swa_step >= ER032M_MIN_FIELD
+                 && new_cf + 0.5 * magnet.swa_step <= ER032M_MAX_FIELD );
 
     if ( dir == SEARCH_UP )
     {
         if ( new_swa == MAX_SWA )
             return MAX_ADD_STEPS;
 
-        while ( new_swa < MAX_SWA &&
-                new_cf - 0.5 * magnet.swa_step > ER032M_MIN_FIELD )
+        while (    new_swa < MAX_SWA
+                && new_cf - 0.5 * magnet.swa_step > ER032M_MIN_FIELD )
         {
             rem = lrnd( fabs( new_cf ) / ER032M_MIN_FIELD_STEP )
                   % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP );
@@ -1566,8 +1565,8 @@ static int er032m_best_fit_search( double * cf,
         if ( new_swa == MIN_SWA )
             return MAX_ADD_STEPS;
 
-        while ( new_swa > MIN_SWA &&
-                new_cf + 0.5 * magnet.swa_step < ER032M_MAX_FIELD )
+        while (    new_swa > MIN_SWA
+                && new_cf + 0.5 * magnet.swa_step < ER032M_MAX_FIELD )
         {
             rem = lrnd( fabs( new_cf ) / ER032M_MIN_FIELD_STEP )
                   % lrnd( ER032M_CF_RESOLUTION / ER032M_MIN_FIELD_STEP );
@@ -1580,11 +1579,10 @@ static int er032m_best_fit_search( double * cf,
 
     if ( dir_change == UNSET )
     {
-        if ( new_swa <= MIN_SWA ||
-             new_swa >= MAX_SWA || 
-             new_cf - 0.5 * magnet.sw < ER032M_MIN_FIELD ||
-             new_cf + 0.5 * magnet.sw > ER032M_MAX_FIELD ||
-             add_steps >= MAX_ADD_STEPS )
+        if (    new_swa <= MIN_SWA || new_swa >= MAX_SWA
+             || new_cf - 0.5 * magnet.sw < ER032M_MIN_FIELD
+             || new_cf + 0.5 * magnet.sw > ER032M_MAX_FIELD
+             || add_steps >= MAX_ADD_STEPS )
         {
             new_cf = *cf;
             new_swa = *swa;
@@ -1595,10 +1593,10 @@ static int er032m_best_fit_search( double * cf,
             dir_change = UNSET;
         }
 
-        if ( new_swa <= MIN_SWA || new_swa >= MAX_SWA || 
-             new_cf - 0.5 * magnet.sw < ER032M_MIN_FIELD ||
-             new_cf + 0.5 * magnet.sw > ER032M_MAX_FIELD ||
-             add_steps >= MAX_ADD_STEPS )
+        if (    new_swa <= MIN_SWA || new_swa >= MAX_SWA
+             || new_cf - 0.5 * magnet.sw < ER032M_MIN_FIELD
+             || new_cf + 0.5 * magnet.sw > ER032M_MAX_FIELD
+             || add_steps >= MAX_ADD_STEPS )
         {
             if ( recursion_count >= MAX_RECURSION )
                 return MAX_ADD_STEPS;

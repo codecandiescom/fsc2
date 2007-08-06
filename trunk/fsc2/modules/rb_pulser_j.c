@@ -160,9 +160,9 @@ int rb_pulser_j_init_hook( void )
         f->delay_card = NULL;
         f->delay = 0.0;
         f->is_delay = UNSET;
-        if ( i != PULSER_CHANNEL_MW &&
-             i != PULSER_CHANNEL_RF &&
-             i != PULSER_CHANNEL_DET )
+        if (    i != PULSER_CHANNEL_MW
+             && i != PULSER_CHANNEL_RF
+             && i != PULSER_CHANNEL_DET )
             f->is_used = UNSET;
         else
             f->is_used = SET;
@@ -213,8 +213,8 @@ int rb_pulser_j_test_hook( void )
 
     TRY
     {
-        if ( rb_pulser_j.trig_in_mode == INTERNAL &&
-             ! rb_pulser_j.is_rep_time )
+        if (    rb_pulser_j.trig_in_mode == INTERNAL
+             && ! rb_pulser_j.is_rep_time )
         {
             print( FATAL, "No experiment repetition time/frequency has been "
                    "set.\n" );

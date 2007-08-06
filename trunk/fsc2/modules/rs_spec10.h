@@ -155,7 +155,7 @@ int16 rs_spec10_k2ic( double /* tk */ );
 double rs_spec10_ic2k( int16 /* tci */ );
 
 bool rs_spec10_param_access( uns32   /* param */,
-                             uns16 * /* acc   */ );
+                             uns16 * /* acc   */  );
 
 const char *rs_spec10_ptime( double /* p_time */ );
 

@@ -96,8 +96,8 @@ bool dg2020_set_pulse_function( long pnum,
     Pulse_T *p = dg2020_get_pulse( pnum );
 
 
-    if ( function == PULSER_CHANNEL_PHASE_1 ||
-         function == PULSER_CHANNEL_PHASE_2 )
+    if (    function == PULSER_CHANNEL_PHASE_1
+         || function == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "Phase functions can't be used with this driver.\n" );
         THROW( EXCEPTION );
@@ -146,8 +146,8 @@ bool dg2020_set_pulse_position( long   pnum,
         THROW( EXCEPTION );
     }
 
-    if ( p->is_function &&
-         p_time + p->function->delay * dg2020.timebase < 0.0 )
+    if (    p->is_function
+         && p_time + p->function->delay * dg2020.timebase < 0.0 )
     {
         print( FATAL, "Invalid (negative) start position for pulse #%ld: "
                "%s.\n", pnum, dg2020_ptime( p_time ) );

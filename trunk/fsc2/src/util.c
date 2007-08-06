@@ -649,8 +649,9 @@ char *handle_escape( char * str )
                     *cp = *cp * 8 + *( cp + 2 ) - '0';
                     esc_len++;
 
-                    if ( *( cp + 3 ) >= '0' && *( cp + 3 ) <= '7' &&
-                         *cp <= 0x1F )
+                    if (    *( cp + 3 ) >= '0'
+                         && *( cp + 3 ) <= '7'
+                         && *cp <= 0x1F )
                     {
                         *cp = *cp * 8 + *( cp + 3 ) - '0';
                         esc_len++;
@@ -749,8 +750,8 @@ FILE *filter_edl( const char * name,
 
         close( pd[ 0 ] );
 
-        if ( dup2( fileno( fp ), STDIN_FILENO ) == -1 ||
-             dup2( pd[ 1 ], STDOUT_FILENO ) == -1 )
+        if (    dup2( fileno( fp ), STDIN_FILENO ) == -1
+             || dup2( pd[ 1 ], STDOUT_FILENO ) == -1 )
         {
             if ( errno == EMFILE )
                  write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
@@ -805,7 +806,7 @@ FILE *filter_edl( const char * name,
 
     FD_ZERO( &rfds );
     FD_SET( pd[ 0 ], &rfds );
-    while ( ( rs = select( pd[ 0 ] + 1, &rfds, NULL, NULL, NULL ) ) == -1
+    while (    ( rs = select( pd[ 0 ] + 1, &rfds, NULL, NULL, NULL ) ) == -1
             && errno == EINTR )
         /* empty */ ;
 
@@ -998,9 +999,9 @@ Var_T *convert_to_channel_number( const char * channel_name )
     {
         if ( ! strcmp( channel_name, "LIN" ) )
             channel = CHANNEL_LINE;
-        if ( ! strcmp( channel_name, "TRIGGER_OUT" ) ||
-             ! strcmp( channel_name, "TRIGOUT" ) ||
-             ! strcmp( channel_name, "TRIGGEROUT" ) )
+        if (    ! strcmp( channel_name, "TRIGGER_OUT" )
+             || ! strcmp( channel_name, "TRIGOUT" )
+             || ! strcmp( channel_name, "TRIGGEROUT" ) )
             channel = CHANNEL_TRIG_OUT;
     }
 

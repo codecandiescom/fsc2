@@ -93,8 +93,8 @@ void device_add( const char * name )
             T_free( ld );
         }
 
-        if ( lib_name == NULL &&
-             ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
+        if (    lib_name == NULL
+             && ! ( Fsc2_Internals.cmdline_flags & DO_CHECK ) )
         {
             lib_name = get_string( libdir "%s.fsc2_so", dev_name );
             if ( lstat( lib_name, &buf ) < 0 )
@@ -173,8 +173,9 @@ void device_add( const char * name )
     search_name = real_name != NULL ? strip_path( real_name ) : NULL;
 
     for ( dl = EDL.Device_Name_List; dl != NULL; dl = dl->next )
-        if ( ! strcmp( dl->name, dev_name ) ||
-             ( search_name != NULL && ! strcmp( dl->name, search_name ) ) )
+        if (    ! strcmp( dl->name, dev_name )
+             || (    search_name != NULL
+                  && ! strcmp( dl->name, search_name ) ) )
             break;
 
     if ( dl == NULL )
@@ -189,8 +190,9 @@ void device_add( const char * name )
     /* Make sure the device isn't already loaded */
 
     for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
-        if ( ! strcmp( cd->name, dev_name ) ||
-             ( real_name != NULL && ! strcmp( cd->name, real_name ) ) )
+        if (    ! strcmp( cd->name, dev_name )
+             || (    real_name != NULL
+                  && ! strcmp( cd->name, real_name ) ) )
         {
             print( FATAL, "Device '%s' is listed twice in the DEVICES "
                    "section%s%s.\n", dev_name, real_name != NULL ?

@@ -29,12 +29,12 @@
 
 
 void *get_shm( int * /* shm_id */,
-               long  /* len    */ );
+               long  /* len    */  );
 
 char *attach_shm( int /* key */ );
 
 void detach_shm( void * /* buf */,
-                 int *  /* key */ );
+                 int *  /* key */  );
 
 void delete_all_shm( void );
 

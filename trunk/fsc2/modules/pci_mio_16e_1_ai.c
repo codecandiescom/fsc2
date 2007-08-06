@@ -211,9 +211,9 @@ Var_T *daq_ai_channel_setup( Var_T * v )
            there can be not more than three */
 
         other_count = 0;
-        while ( ( v = vars_pop( v ) ) != NULL &&
-                other_count < 3 &&
-                v->type == STR_VAR )
+        while (    ( v = vars_pop( v ) ) != NULL
+                && other_count < 3
+                && v->type == STR_VAR )
         {
             other_count++;
 
@@ -307,8 +307,8 @@ Var_T *daq_ai_channel_setup( Var_T * v )
                 break;
             }
 
-        if ( range_index >= 0 &&
-             fabs( range - r_list[ range_index ] ) > range * 1.0e-2 )
+        if (    range_index >= 0
+             && fabs( range - r_list[ range_index ] ) > range * 1.0e-2 )
             print( WARN, "Can't set range to %.2f V, using %.2f V "
                    "instead.\n", range, r_list[ range_index ] );
 
@@ -608,8 +608,8 @@ Var_T *daq_ai_start_acquisition( Var_T * v  UNUSED_ARG )
         /* Start the acquisition (unless the board starts the acquisition all
            by itself, i.e. in TRIGGER_NONE mode) */
 
-        if ( trig.type != TRIGGER_NONE &&
-             ( ret = ni_daq_ai_start_acq( pci_mio_16e_1.board ) )
+        if (    trig.type != TRIGGER_NONE
+             && ( ret = ni_daq_ai_start_acq( pci_mio_16e_1.board ) )
                                                                  != NI_DAQ_OK )
         {
             lower_permissions( );
@@ -622,8 +622,9 @@ Var_T *daq_ai_start_acquisition( Var_T * v  UNUSED_ARG )
             THROW( EXCEPTION );
         }
 
-        if ( trig.type == TRIGGER_OUT &&
-             ni_daq_gpct_start_pulses( pci_mio_16e_1.board, 2 ) != NI_DAQ_OK )
+        if (    trig.type == TRIGGER_OUT
+             && ni_daq_gpct_start_pulses( pci_mio_16e_1.board, 2 )
+                                                                 != NI_DAQ_OK )
         {
             lower_permissions( );
 
@@ -903,8 +904,8 @@ static Var_T *pci_mio_16e_1_ai_get_S_start( Var_T * v )
     trig.start = pci_mio_16e_1_ai_get_trigger( v->val.sptr, "start trigger" );
     v = vars_pop( v );
 
-    if ( v && v->type == STR_VAR &&
-         pci_mio_16e_1_ai_get_polarity( v->val.sptr, &pol ) )
+    if (    v && v->type == STR_VAR
+         && pci_mio_16e_1_ai_get_polarity( v->val.sptr, &pol ) )
     {
         trig.start_polarity = pol;
         v = vars_pop( v );
@@ -960,8 +961,8 @@ static Var_T *pci_mio_16e_1_ai_get_S_scan( Var_T * v )
                                                     "scan trigger" );
     v = vars_pop( v );
 
-    if ( v && v->type == STR_VAR &&
-         pci_mio_16e_1_ai_get_polarity( v->val.sptr, &pol ) )
+    if (    v && v->type == STR_VAR
+         && pci_mio_16e_1_ai_get_polarity( v->val.sptr, &pol ) )
     {
         trig.scan_polarity = pol;
         v = vars_pop( v );
@@ -1016,7 +1017,7 @@ static Var_T *pci_mio_16e_1_ai_get_S_conv( Var_T * v )
                                                      "conversion trigger" );
     v = vars_pop( v );
 
-    if ( v && v->type == STR_VAR
+    if (    v && v->type == STR_VAR
          && pci_mio_16e_1_ai_get_polarity( v->val.sptr, &pol ) )
     {
         trig.conv_polarity = pol;

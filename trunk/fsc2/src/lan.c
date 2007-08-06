@@ -123,8 +123,9 @@ int fsc2_lan_open( const char * dev_name,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     fsc2_assert( dev_name != NULL );
 
@@ -157,8 +158,8 @@ int fsc2_lan_open( const char * dev_name,
 
     while ( ll != NULL )
     {
-        if ( ! memcmp( &ll->address.s_addr, &dev_addr.sin_addr.s_addr, 4 ) &&
-             port == ll->port )
+        if (    ! memcmp( &ll->address.s_addr, &dev_addr.sin_addr.s_addr, 4 )
+             && port == ll->port )
             print( SEVERE, "IP addresses and ports for devices %s and %s "
                    "are identical.\n", ll->name, dev_name );
         ll = ll->next;
@@ -245,8 +246,10 @@ int fsc2_lan_open( const char * dev_name,
     {
         conn_ret = connect( sock_fd, ( const struct sockaddr * ) &dev_addr,
                             sizeof dev_addr );
-    } while ( conn_ret == -1 && errno == EINTR &&
-              ! quit_on_signal && ! got_sigalrm );
+    } while (    conn_ret == -1
+              && errno == EINTR
+              && ! quit_on_signal
+              && ! got_sigalrm );
 
     /* Stop the timer for the timeout and reset the signal handler */
 
@@ -267,8 +270,10 @@ int fsc2_lan_open( const char * dev_name,
     if ( conn_ret == -1 )
     {
         close( sock_fd );
-        if ( us_timeout > 0 && errno == EINTR &&
-             quit_on_signal && ! got_sigalrm )
+        if (    us_timeout > 0
+             && errno == EINTR
+             && quit_on_signal
+             && ! got_sigalrm )
         {
             fsc2_lan_log_message( "Error: connect() to socket failed due "
                                   "to signal\n" );
@@ -337,10 +342,10 @@ int fsc2_lan_open( const char * dev_name,
     /* Check if we really can set a timeout for sending and receiving -
        this only became possible with 2.3.41 kernels */
 
-    if ( getsockopt( sock_fd, SOL_SOCKET, SO_RCVTIMEO,
-                     &wait_for_connect.it_value, &len ) == -1 ||
-         getsockopt( sock_fd, SOL_SOCKET, SO_SNDTIMEO,
-                     &wait_for_connect.it_value, &len ) == -1 )
+    if (    getsockopt( sock_fd, SOL_SOCKET, SO_RCVTIMEO,
+                        &wait_for_connect.it_value, &len ) == -1
+         || getsockopt( sock_fd, SOL_SOCKET, SO_SNDTIMEO,
+                        &wait_for_connect.it_value, &len ) == -1 )
         ll->so_timeo_avail = UNSET;
 
     if ( lan_log_level == LL_ALL )
@@ -366,9 +371,9 @@ int fsc2_lan_close( int handle )
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode == EXPERIMENT );
 
     /* Figure out which device connection it's meant for */
 
@@ -436,9 +441,9 @@ ssize_t fsc2_lan_write( int          handle,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode == EXPERIMENT );
 
     /* Figure out which device connection it's meant for */
 
@@ -501,9 +506,11 @@ ssize_t fsc2_lan_write( int          handle,
         if ( ll->so_timeo_avail )
             errno = 0;
         bytes_written = write( ll->fd, buffer, length );
-    } while ( bytes_written == -1 && errno == EINTR &&
-              ! quit_on_signal && ! got_sigalrm &&
-              timeout_reset( WRITE, ll, &us_timeout, &old_sact, &before ) );
+    } while (    bytes_written == -1
+              && errno == EINTR
+              && ! quit_on_signal
+              && ! got_sigalrm
+              && timeout_reset( WRITE, ll, &us_timeout, &old_sact, &before ) );
 
     /* Get rid of the timeout machinery */
 
@@ -517,8 +524,10 @@ ssize_t fsc2_lan_write( int          handle,
             fsc2_lan_log_message( "Error: writing aborted due to signal\n" );
             bytes_written = 0;
         }
-        else if ( ( ll->so_timeo_avail && errno == EWOULDBLOCK ) ||
-                  ( ! ll->so_timeo_avail && errno == EINTR && got_sigalrm ) )
+        else if (    ( ll->so_timeo_avail && errno == EWOULDBLOCK )
+                  || (    ! ll->so_timeo_avail
+                       && errno == EINTR
+                       && got_sigalrm ) )
         {
             fsc2_lan_log_message( "Error: writing aborted due to timeout\n" );
             bytes_written = -1;
@@ -562,9 +571,9 @@ ssize_t fsc2_lan_writev( int                  handle,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode == EXPERIMENT );
 
     /* Figure out which device connection it's meant for */
 
@@ -653,9 +662,11 @@ ssize_t fsc2_lan_writev( int                  handle,
         if ( ll->so_timeo_avail )
             errno = 0;
         bytes_written = writev( ll->fd, data, count );
-    } while ( bytes_written == -1 && errno == EINTR &&
-              ! quit_on_signal && ! got_sigalrm &&
-              timeout_reset( WRITE, ll, &us_timeout, &old_sact, &before ) );
+    } while (    bytes_written == -1
+              && errno == EINTR
+              && ! quit_on_signal
+              && ! got_sigalrm
+              && timeout_reset( WRITE, ll, &us_timeout, &old_sact, &before ) );
 
     /* Get rid of the timeout machinery */
 
@@ -669,8 +680,10 @@ ssize_t fsc2_lan_writev( int                  handle,
             fsc2_lan_log_message( "Error: writing aborted due to signal\n" );
             bytes_written = 0;
         }
-        else if ( ( ll->so_timeo_avail && errno == EWOULDBLOCK ) ||
-                  ( ! ll->so_timeo_avail && errno == EINTR && got_sigalrm ) )
+        else if (    ( ll->so_timeo_avail && errno == EWOULDBLOCK )
+                  || (    ! ll->so_timeo_avail
+                       && errno == EINTR
+                       && got_sigalrm ) )
         {
             fsc2_lan_log_message( "Error: writing aborted due to timeout\n" );
             bytes_written = -1;
@@ -712,9 +725,9 @@ ssize_t fsc2_lan_read( int    handle,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode == EXPERIMENT );
 
     /* Figure out which device connection it's meant for */
 
@@ -778,9 +791,11 @@ ssize_t fsc2_lan_read( int    handle,
         if ( ll->so_timeo_avail )
             errno = 0;
         bytes_read = read( ll->fd, buffer, length );
-    } while ( bytes_read == -1 && errno == EINTR &&
-              ! quit_on_signal && ! got_sigalrm &&
-              timeout_reset( READ, ll, &us_timeout, &old_sact, &before ) );
+    } while (    bytes_read == -1
+              && errno == EINTR
+              && ! quit_on_signal
+              && ! got_sigalrm
+              && timeout_reset( READ, ll, &us_timeout, &old_sact, &before ) );
 
     /* Get rid of the timeout machinery */
 
@@ -794,8 +809,10 @@ ssize_t fsc2_lan_read( int    handle,
             fsc2_lan_log_message( "Error: reading aborted due to signal\n" );
             bytes_read = 0;
         }
-        else if ( ( ll->so_timeo_avail && errno == EWOULDBLOCK ) ||
-                  ( ! ll->so_timeo_avail && errno == EINTR && got_sigalrm ) )
+        else if (    ( ll->so_timeo_avail && errno == EWOULDBLOCK )
+                  || (    ! ll->so_timeo_avail
+                       && errno == EINTR
+                       && got_sigalrm ) )
         {
             fsc2_lan_log_message( "Error: reading aborted due to timeout\n" );
             bytes_read = -1;
@@ -846,9 +863,9 @@ ssize_t fsc2_lan_readv( int            handle,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING  ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode == EXPERIMENT );
 
     /* Figure out which device connection it's meant for */
 
@@ -934,9 +951,11 @@ ssize_t fsc2_lan_readv( int            handle,
         if ( ll->so_timeo_avail )
             errno = 0;
         bytes_read = readv( ll->fd, data, count );
-    } while ( bytes_read == -1 && errno == EINTR &&
-              ! quit_on_signal && ! got_sigalrm &&
-              timeout_reset( READ, ll, &us_timeout, &old_sact, &before ) );
+    } while (    bytes_read == -1
+              && errno == EINTR
+              && ! quit_on_signal
+              && ! got_sigalrm
+              && timeout_reset( READ, ll, &us_timeout, &old_sact, &before ) );
 
     /* Get rid of the timeout machinery */
 
@@ -950,8 +969,10 @@ ssize_t fsc2_lan_readv( int            handle,
             fsc2_lan_log_message( "Error: reading aborted due to signal\n" );
             bytes_read = 0;
         }
-        else if ( ( ll->so_timeo_avail && errno == EWOULDBLOCK ) ||
-                  ( ! ll->so_timeo_avail && errno == EINTR && got_sigalrm ) )
+        else if (    ( ll->so_timeo_avail && errno == EWOULDBLOCK )
+                  || (    ! ll->so_timeo_avail
+                       && errno == EINTR
+                       && got_sigalrm ) )
         {
             fsc2_lan_log_message( "Error: reading aborted due to timeout\n" );
             bytes_read = -1;
@@ -1091,8 +1112,8 @@ static void timeout_init( int                dir,
         /* If the timeout didn't change nothing is to be done, the socket
            option is already set to the correct value */
 
-        if ( ( dir == READ  && *us_timeout == ll->us_read_timeout  ) ||
-             ( dir == WRITE && *us_timeout == ll->us_write_timeout ) )
+        if (    ( dir == READ  && *us_timeout == ll->us_read_timeout  )
+             || ( dir == WRITE && *us_timeout == ll->us_write_timeout ) )
             return;
 
         /* Try to set the socket option - if this doesn't work disregard the
@@ -1264,8 +1285,9 @@ static void get_ip_address( const char *     address,
 
     /* If this didn't do the trick try to resolve the name via a DNS query */
 
-    if ( ( he = gethostbyname( address ) ) == NULL ||
-         he->h_addrtype != AF_INET || *he->h_addr_list == NULL )
+    if (    ( he = gethostbyname( address ) ) == NULL
+         || he->h_addrtype != AF_INET
+         || *he->h_addr_list == NULL )
         ip_addr->s_addr = 0;
     else
         memcpy( &ip_addr->s_addr, *he->h_addr_list, 4 );
@@ -1403,9 +1425,9 @@ void fsc2_lan_log_message( const char * fmt,
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
        section */
 
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     if ( fsc2_lan_log == NULL || lan_log_level == LL_NONE )
         return;
@@ -1425,9 +1447,9 @@ void fsc2_lan_log_message( const char * fmt,
 
 static void fsc2_lan_log_data( long length, const char *buffer )
 {
-    fsc2_assert( Fsc2_Internals.state == STATE_RUNNING ||
-                 Fsc2_Internals.state == STATE_FINISHED ||
-                 Fsc2_Internals.mode  == EXPERIMENT );
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
 
     if ( fsc2_lan_log == NULL || lan_log_level == LL_NONE )
         return;

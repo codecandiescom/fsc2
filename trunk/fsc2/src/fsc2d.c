@@ -106,10 +106,10 @@ int check_spawn_fsc2d( bool   exclusive,
     /* Send the PID, the daemon must reply with "OK\n" */
 
     snprintf( line, sizeof line, "%ld\n", ( long ) getpid( ) );
-    if ( writen( sock_fd, line, strlen( line ) ) !=
-                                            ( ssize_t ) strlen( line ) ||
-         read_line( sock_fd, line, sizeof line ) != 3 ||
-         strncmp( line, "OK\n", 3 ) )
+    if (    writen( sock_fd, line, strlen( line ) ) !=
+                                                     ( ssize_t ) strlen( line )
+         || read_line( sock_fd, line, sizeof line ) != 3
+         || strncmp( line, "OK\n", 3 ) )
     {
         fprintf( stderr, "Can't start fsc2 for unknown reasons.\n" );
         close( sock_fd );
@@ -119,10 +119,10 @@ int check_spawn_fsc2d( bool   exclusive,
     /* Send the user name, the daemon must reply with "OK\n" */
 
     snprintf( line, sizeof line, "%s\n", getpwuid( getuid( ) )->pw_name );
-    if ( writen( sock_fd, line, strlen( line ) ) !=
-                                            ( ssize_t ) strlen( line ) ||
-         read_line( sock_fd, line, sizeof line ) != 3 ||
-         strncmp( line, "OK\n", 3 ) )
+    if (    writen( sock_fd, line, strlen( line ) ) !=
+                                                     ( ssize_t ) strlen( line )
+         || read_line( sock_fd, line, sizeof line ) != 3
+         || strncmp( line, "OK\n", 3 ) )
     {
         fprintf( stderr, "Can't start fsc2 for unknown reasons.\n" );
         close( sock_fd );
@@ -133,9 +133,9 @@ int check_spawn_fsc2d( bool   exclusive,
        otherwise send "0" */
 
     snprintf( line, sizeof line, "%d\n", exclusive ? 1 : 0 );
-    if ( writen( sock_fd, line, strlen( line ) ) !=
-                                            ( ssize_t ) strlen( line ) ||
-         ( len = read_line( sock_fd, line, sizeof line ) ) < 5 )
+    if (    writen( sock_fd, line, strlen( line ) ) !=
+                                                     ( ssize_t ) strlen( line )
+         || ( len = read_line( sock_fd, line, sizeof line ) ) < 5 )
     {
         fprintf( stderr, "Can't start fsc2 for unknown reasons.\n" );
         close( sock_fd );
@@ -171,8 +171,9 @@ int check_spawn_fsc2d( bool   exclusive,
         return -1;
     }
 
-    if ( strncmp( line, "OK N\n", 5 ) && strncmp( line, "OK C\n", 5 ) &&
-         strncmp( line, "OK M\n", 5 ) )
+    if (    strncmp( line, "OK N\n", 5 )
+         && strncmp( line, "OK C\n", 5 )
+         && strncmp( line, "OK M\n", 5 ) )
     {
         fprintf( stderr, "Can't start fsc2 for unknown reasons.\n" );
         return -1;
@@ -450,8 +451,8 @@ static int check_instances( Fsc2_Instance_T * instances,
         if ( Cwd_ok == 0 && ( dir = opendir( "." ) ) != NULL )
         {
             while ( ( ent = readdir( dir ) ) != NULL )
-                if ( strlen( ent->d_name ) == 15 &&
-                     ! strncmp( ent->d_name, "fsc2.edl.", 9 ) )
+                if (    strlen( ent->d_name ) == 15
+                     && ! strncmp( ent->d_name, "fsc2.edl.", 9 ) )
                     unlink( ent->d_name );
 
             closedir( dir );

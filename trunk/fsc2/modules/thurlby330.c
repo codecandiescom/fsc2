@@ -267,8 +267,8 @@ Var_T *powersupply_voltage( Var_T * v )
 
     voltage = get_double( v, "voltage" );
 
-    if ( voltage < MIN_VOLTAGE ||
-         voltage >= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION )
+    if (    voltage < MIN_VOLTAGE
+         || voltage >= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION )
     {
         print( FATAL, "Voltage of %.1f V is out of valid range "
                "(%.1f to %.1f V).\n", voltage, MIN_VOLTAGE, MAX_VOLTAGE );
@@ -323,8 +323,8 @@ Var_T *powersupply_voltage_limit( Var_T * v )
 
     voltage = get_double( v, "voltage limit" );
 
-    if ( voltage < MIN_VOLTAGE ||
-         voltage >= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION )
+    if (    voltage < MIN_VOLTAGE
+         || voltage >= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION )
     {
         print( FATAL, "Voltage limit of %f A is out of valid range "
                "(%.1f to %.1f A).\n", voltage, MIN_VOLTAGE, MAX_VOLTAGE );
@@ -379,8 +379,8 @@ Var_T *powersupply_current( Var_T * v )
 
     current = get_double( v, "current" );
 
-    if ( current < MIN_CURRENT ||
-         current >= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION )
+    if (    current < MIN_CURRENT
+         || current >= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION )
     {
         print( FATAL, "Current of %f A is out of valid range "
                "(%.1f to %.1f A).\n", current, MIN_CURRENT, MAX_CURRENT );
@@ -434,8 +434,8 @@ Var_T *powersupply_current_limit( Var_T * v )
 
     current = get_double( v, "current limit" );
 
-    if ( current < MIN_CURRENT ||
-         current >= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION )
+    if (    current < MIN_CURRENT
+         || current >= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION )
     {
         print( FATAL, "Current limit of %f A is out of valid range "
                "(%.1f to %.1f A).\n", current, MIN_CURRENT, MAX_CURRENT );
@@ -507,8 +507,8 @@ static double thurlby330_set_voltage( long   channel,
 
 
     fsc2_assert( channel == 1 || channel == 2 );
-    fsc2_assert( voltage >= MIN_VOLTAGE &&
-                 voltage <= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION );
+    fsc2_assert(    voltage >= MIN_VOLTAGE
+                 && voltage <= MAX_VOLTAGE + 0.5 * VOLTAGE_RESOLUTION );
 
     sprintf( buffer, "V%ld %.2f\n", channel, voltage );
     thurlby330_command( buffer );
@@ -564,8 +564,8 @@ static double thurlby330_set_current( long   channel,
 
 
     fsc2_assert( channel == 1 || channel == 2 );
-    fsc2_assert( current >= MIN_CURRENT &&
-                 current <= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION );
+    fsc2_assert(    current >= MIN_CURRENT
+                 && current <= MAX_CURRENT + 0.5 * CURRENT_RESOLUTION );
 
     sprintf( buffer, "I%ld %.3f\n", channel, current );
     thurlby330_command( buffer );

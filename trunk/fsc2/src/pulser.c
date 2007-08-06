@@ -61,8 +61,8 @@ void pulser_struct_init( void )
     {
         Pulser_Struct[ i ].name                       = NULL;
 
-        while ( ! cd->generic_type ||
-                strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
+        while (    ! cd->generic_type
+                || strcasecmp( cd->generic_type, PULSER_GENERIC_TYPE ) )
             cd = cd->next;
         Pulser_Struct[ i ].device                     = cd;
 
@@ -912,16 +912,16 @@ void p_phase_ref( int func,
             }
 #endif
 
-            if ( func != PULSER_CHANNEL_PHASE_1 &&
-                 func != PULSER_CHANNEL_PHASE_2 )
+            if (    func != PULSER_CHANNEL_PHASE_1
+                 && func != PULSER_CHANNEL_PHASE_2 )
             {
                 print( FATAL, "Function '%s' can't be used as PHASE "
                        "function.\n", Function_Names[ func ] );
                 THROW( EXCEPTION );
             }
 
-            if ( ref == PULSER_CHANNEL_PHASE_1 ||
-                 ref == PULSER_CHANNEL_PHASE_2 )
+            if (    ref == PULSER_CHANNEL_PHASE_1
+                 || ref == PULSER_CHANNEL_PHASE_2 )
             {
                 print( FATAL, "A PHASE function can't be phase cycled.\n" );
                 THROW( EXCEPTION );
@@ -930,8 +930,9 @@ void p_phase_ref( int func,
         else
         {
 #ifndef NDEBUG
-            if ( ( func != 0 && func != 1 )    ||
-                 ref < 0 || ref >= PULSER_CHANNEL_NUM_FUNC )
+            if (    ( func != 0 && func != 1 )
+                 || ref < 0
+                 || ref >= PULSER_CHANNEL_NUM_FUNC )
             {
                 eprint( FATAL, UNSET, "Internal error detected at s:%d.\n",
                         __FILE__, __LINE__ );
@@ -939,8 +940,8 @@ void p_phase_ref( int func,
             }
 #endif
 
-            if ( ref == PULSER_CHANNEL_PHASE_1 ||
-                 ref == PULSER_CHANNEL_PHASE_2 )
+            if (    ref == PULSER_CHANNEL_PHASE_1
+                 || ref == PULSER_CHANNEL_PHASE_2 )
             {
                 print( FATAL, "Phase functions can't be used with this "
                        "driver.\n" );
@@ -1384,9 +1385,9 @@ void p_exists_function( int function )
 
     fsc2_assert( function >= 0 && function < PULSER_CHANNEL_NUM_FUNC );
 
-    if ( ( function == PULSER_CHANNEL_PHASE_1 ||
-           function == PULSER_CHANNEL_PHASE_2 ) &&
-         ! Pulser_Struct[ Cur_Pulser ].needs_phase_pulses )
+    if (    (    function == PULSER_CHANNEL_PHASE_1
+              || function == PULSER_CHANNEL_PHASE_2 )
+         && ! Pulser_Struct[ Cur_Pulser ].needs_phase_pulses )
     {
         print( FATAL, "%s: Pulser driver does not support phase "
                "switches, so PHASE functions can't be used.\n",

@@ -37,7 +37,7 @@
 void lecroy_vicp_init( const char * /* dev_name       */,
                        const char * /* address        */,
                        long         /* us_timeout     */,
-                       bool         /* quit_on_signal */ );
+                       bool         /* quit_on_signal */  );
 
 void lecroy_vicp_close( void );
 
@@ -49,12 +49,12 @@ void lecroy_vicp_set_timeout( int  /* dir        */,
 int lecroy_vicp_write( const char * /* buffer         */,
                        ssize_t    * /* length         */,
                        bool         /* with_eoi       */,
-                       bool         /* quit_on_signal */ );
+                       bool         /* quit_on_signal */  );
 
 int lecroy_vicp_read( char *    /* buffer         */,
                       ssize_t * /* length         */,
                       bool    * /* with_eoi       */,
-                      bool      /* quit_on_signal */ );
+                      bool      /* quit_on_signal */  );
 
 void lecroy_vicp_device_clear( void );
 

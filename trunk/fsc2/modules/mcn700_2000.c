@@ -314,8 +314,8 @@ static double mcn700_2000_set_voltage( double voltage )
 {
     char buffer[ 100 ];
 
-    fsc2_assert( voltage >= MIN_VOLTAGE &&
-                 voltage <= MAX_VOLTAGE );
+    fsc2_assert(    voltage >= MIN_VOLTAGE
+                 && voltage <= MAX_VOLTAGE );
 
     sprintf( buffer, "U%.2f\n", voltage );
     mcn700_2000_command( buffer );
@@ -351,8 +351,8 @@ static double mcn700_2000_set_current( double current )
     char buffer[ 100 ];
 
 
-    fsc2_assert( current >= MIN_CURRENT &&
-                 current <= MAX_CURRENT);
+    fsc2_assert(    current >= MIN_CURRENT
+                 && current <= MAX_CURRENT);
     sprintf( buffer, "I%.3f\n", current );
     mcn700_2000_command( buffer );
 

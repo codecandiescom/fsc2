@@ -337,15 +337,14 @@ Var_T *lockin_sensitivity( Var_T * v )
             break;
         }
 
-    if ( sens_index == UNDEF_SENS_INDEX &&
-         sens >= sens_list[ NUM_ELEMS( sens_list ) - 1 ] / 1.01 &&
-         sens < sens_list[ NUM_ELEMS( sens_list ) - 1 ] )
+    if (    sens_index == UNDEF_SENS_INDEX
+         && sens >= sens_list[ NUM_ELEMS( sens_list ) - 1 ] / 1.01
+         && sens < sens_list[ NUM_ELEMS( sens_list ) - 1 ] )
         sens_index = NUM_ELEMS( sens_list ) - 1;
 
-    if ( sens_index >= 0 &&                                 /* value found ? */
-         fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2 &&
-                                                           /* error > 1% ? */
-         ! sr510.sens_warn  )                       /* no warn message yet ? */
+    if (    sens_index >= 0
+         && fabs( sens - sens_list[ sens_index ] ) > sens * 1.0e-2
+         && ! sr510.sens_warn  )
     {
         if ( sens >= 1.0e-3 )
             print( WARN, "Can't set sensitivity to %.0lf mV, using %.0lf V "
@@ -445,9 +444,9 @@ Var_T *lockin_time_constant( Var_T * v )
             break;
         }
 
-    if ( tc_index >= 0 &&                                   /* value found ? */
-         fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2 &&  /* error > 1%? */
-         ! sr510.tc_warn )                          /* no warn message yet ? */
+    if (    tc_index >= 0
+         && fabs( tc - tc_list[ tc_index ] ) > tc * 1.0e-2
+         && ! sr510.tc_warn )
     {
         if ( tc >= 1.0 )
             print( WARN, "Can't set time constant to %.0lf s, using %.0lf s "
@@ -721,8 +720,8 @@ bool sr510_init( const char * name )
 
     /* Ask lock-in to send status byte and test if it does */
 
-    if ( gpib_write( sr510.device, "Y\n", 2 ) == FAILURE ||
-         gpib_read( sr510.device, buffer, &length ) == FAILURE )
+    if (    gpib_write( sr510.device, "Y\n", 2 ) == FAILURE
+         || gpib_read( sr510.device, buffer, &length ) == FAILURE )
         return FAIL;
 
     /* Check that there's reference input and the internal reference is
@@ -908,8 +907,8 @@ void sr510_set_tc( int tc_index )
     if ( tc_index < 4 && gpib_write( sr510.device, "T2,0\n", 5 ) == FAILURE )
         sr510_failure( );
 
-    if ( tc_index >= 4 && tc_index < 6 &&
-         gpib_write( sr510.device, "T2,1\n", 5 ) == FAILURE )
+    if ( tc_index >= 4 && tc_index < 6
+         && gpib_write( sr510.device, "T2,1\n", 5 ) == FAILURE )
         sr510_failure( );
 
     if ( tc_index >= 6 && gpib_write( sr510.device, "T2,2\n", 5 ) == FAILURE )
@@ -1036,8 +1035,8 @@ static bool sr510_talk( const char * cmd,
                         char *       reply,
                         long *       length )
 {
-    if ( gpib_write( sr510.device, cmd, strlen( cmd ) ) == FAILURE ||
-         gpib_read( sr510.device, reply, length ) == FAILURE )
+    if (    gpib_write( sr510.device, cmd, strlen( cmd ) ) == FAILURE
+         || gpib_read( sr510.device, reply, length ) == FAILURE )
         sr510_failure( );
     return OK;
 }

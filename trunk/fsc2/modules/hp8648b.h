@@ -147,7 +147,7 @@ double hp8648b_get_att( double /* freq */ );
 
 int hp8648b_set_mod_param( Var_T *  /* v    */,
                            double * /* dres */,
-                           int *    /* ires */ );
+                           int *    /* ires */  );
 
 
 /* functions defined in "hp8648b_lexer.l" */
@@ -178,12 +178,12 @@ int hp8648b_set_mod_type( int /* type */ );
 int hp8648b_get_mod_type( void );
 
 int hp8648b_set_mod_source( int /* type   */,
-                            int /* source */ );
+                            int /* source */  );
 
 int hp8648b_get_mod_source( int /* type */ );
 
 double hp8648b_set_mod_ampl( int    /* type */,
-                             double /* ampl */ );
+                             double /* ampl */  );
 
 double hp8648b_get_mod_ampl( int /* type */ );
 

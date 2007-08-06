@@ -130,10 +130,10 @@ static void rs_spec10_ccd_init( void )
     uns32 i;
 
 
-    if ( ! rs_spec10_param_access( PARAM_SER_SIZE, &acc ) ||
-         ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) ||
-         ! rs_spec10_param_access( PARAM_PAR_SIZE, &acc ) ||
-         ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
+    if (    ! rs_spec10_param_access( PARAM_SER_SIZE, &acc )
+         || ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE )
+         || ! rs_spec10_param_access( PARAM_PAR_SIZE, &acc )
+         || ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
     {
         print( FATAL, "Can't determine number of pixels of CCD\n" );
         THROW( EXCEPTION );
@@ -154,8 +154,8 @@ static void rs_spec10_ccd_init( void )
     /* Make sure the sizes are identical to what the configuration file
        claims, we did rely on the values during the test run */
 
-    if ( rs_spec10->ccd.max_size[ X ] != CCD_PIXEL_WIDTH ||
-         rs_spec10->ccd.max_size[ Y ] != CCD_PIXEL_HEIGHT )
+    if (    rs_spec10->ccd.max_size[ X ] != CCD_PIXEL_WIDTH
+         || rs_spec10->ccd.max_size[ Y ] != CCD_PIXEL_HEIGHT )
     {
         print( FATAL, "Configuration file for camera has invalid CCD "
                "size, real size is %ldx%ld.\n",
@@ -168,8 +168,8 @@ static void rs_spec10_ccd_init( void )
        like the most reasonable mode for both cameras with and without a
        shutter */
 
-    if ( rs_spec10_param_access( PARAM_CLEAR_MODE, &acc ) &&
-         ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY ) )
+    if (    rs_spec10_param_access( PARAM_CLEAR_MODE, &acc )
+         && ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY ) )
     {
         clear_mode = CLEAR_PRE_EXPOSURE;
         if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_MODE, 
@@ -180,8 +180,8 @@ static void rs_spec10_ccd_init( void )
     /* If the camera has a shutter set open mode to OPEN_PRE_EXPOSURE, i.e.
        the normal default mode */
 
-    if ( rs_spec10_param_access( PARAM_SHTR_OPEN_MODE, &acc ) &&
-         ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY ) )
+    if (    rs_spec10_param_access( PARAM_SHTR_OPEN_MODE, &acc )
+         && ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY ) )
     {
         shutter_open_mode = OPEN_PRE_EXPOSURE;
         if ( ! pl_set_param( rs_spec10->handle, PARAM_SHTR_OPEN_MODE, 
@@ -192,8 +192,8 @@ static void rs_spec10_ccd_init( void )
     /* Try to get figure out if the exposure time resolution can be set and
        how many settings there are */
 
-    if ( ! rs_spec10_param_access( PARAM_EXP_RES_INDEX, &acc ) ||
-         ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
+    if (    ! rs_spec10_param_access( PARAM_EXP_RES_INDEX, &acc )
+         || ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
     {
         print( FATAL, "Can't determine exposure time resolution.\n" );
         THROW( EXCEPTION );
@@ -287,9 +287,9 @@ static void rs_spec10_ccd_init( void )
 
     /* Now also figure out (if possible) the minimum exposure time */
 
-    if ( ! rs_spec10_param_access( PARAM_EXP_MIN_TIME, &acc ) ||
-         ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
-            rs_spec10->ccd.exp_min_time = rs_spec10->ccd.exp_res;
+    if (    ! rs_spec10_param_access( PARAM_EXP_MIN_TIME, &acc )
+         || ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
+        rs_spec10->ccd.exp_min_time = rs_spec10->ccd.exp_res;
     else if ( ! pl_get_param( rs_spec10->handle, PARAM_EXP_MIN_TIME,
                               ATTR_DEFAULT,
                               ( void_ptr ) &rs_spec10->ccd.exp_min_time ) )
@@ -307,8 +307,8 @@ static void rs_spec10_ccd_init( void )
 
     /* Find out if we can read and write the number of clear cycles */
 
-    if ( ! rs_spec10_param_access( PARAM_CLEAR_CYCLES, &acc ) ||
-         acc != ACC_READ_WRITE )
+    if (    ! rs_spec10_param_access( PARAM_CLEAR_CYCLES, &acc )
+         || acc != ACC_READ_WRITE )
     {
         print( FATAL, "Can't determine or set number of clear cycles.\n" );
         THROW( EXCEPTION );
@@ -370,8 +370,8 @@ static void rs_spec10_temperature_init( void )
        values in the configuration file are correct, we did rely on them in
        the PREAPARATIONS section and during the test run */
 
-    if ( rs_spec10->temp.acc_setpoint == ACC_READ_ONLY ||
-         rs_spec10->temp.acc_setpoint == ACC_READ_WRITE )
+    if (    rs_spec10->temp.acc_setpoint == ACC_READ_ONLY
+         || rs_spec10->temp.acc_setpoint == ACC_READ_WRITE )
     {
         if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, ATTR_MAX,
                              ( void_ptr ) &temp ) )
@@ -383,8 +383,8 @@ static void rs_spec10_temperature_init( void )
             rs_spec10_error_handling( );
         min_temp = ( long )temp;
 
-        if ( max_temp != lrnd( CCD_MAX_TEMPERATURE * 100.0 ) ||
-             min_temp != lrnd( CCD_MIN_TEMPERATURE * 100.0 ) )
+        if (    max_temp != lrnd( CCD_MAX_TEMPERATURE * 100.0 )
+             || min_temp != lrnd( CCD_MIN_TEMPERATURE * 100.0 ) )
         {
             print( FATAL, "Configuration file for camera has invalid CCD "
                    "temperature range, valid range is %.2f K (%.2fC) to "
@@ -395,9 +395,9 @@ static void rs_spec10_temperature_init( void )
         }
     }
 
-    if ( rs_spec10->temp.is_setpoint &&
-         rs_spec10->temp.acc_setpoint != ACC_READ_WRITE &&
-         rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY )
+    if (    rs_spec10->temp.is_setpoint
+         && rs_spec10->temp.acc_setpoint != ACC_READ_WRITE
+         && rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY )
     {
         print( FATAL, "During the PREPARATIONS section or the test run a "
                "temperature setpoint was set, but camera doesn't allow to "
@@ -415,8 +415,8 @@ static void rs_spec10_temperature_init( void )
 
     /* Check if we can read the temperature and, in case we can, get it */
 
-    if ( ! rs_spec10_param_access( PARAM_TEMP, &acc ) ||
-         ! ( acc == ACC_READ_ONLY || acc == ACC_READ_WRITE ) )
+    if (    ! rs_spec10_param_access( PARAM_TEMP, &acc )
+         || ! ( acc == ACC_READ_ONLY || acc == ACC_READ_WRITE ) )
     {
         print( FATAL, "Can't determine the current temperature.\n" );
         THROW( EXCEPTION );
@@ -438,8 +438,8 @@ void rs_spec10_clear_cycles( uns16 cycles )
     long count = cycles;
 
 
-    fsc2_assert( count >= CCD_MIN_CLEAR_CYCLES &&
-                 count <= CCD_MAX_CLEAR_CYCLES );
+    fsc2_assert(    count >= CCD_MIN_CLEAR_CYCLES
+                 && count <= CCD_MAX_CLEAR_CYCLES );
 
     if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_CYCLES, &cycles ) )
         rs_spec10_error_handling( );
@@ -487,12 +487,12 @@ uns16 *rs_spec10_get_pic( uns32 * size )
 
     /* Last chance for plausibility checks... */
 
-    fsc2_assert( region.s2 < rs_spec10->ccd.max_size[ X ] &&
-                 region.s2 > region.s1 &&
-                 region.p2 < rs_spec10->ccd.max_size[ Y ] &&
-                 region.p2 > region.p1 &&
-                 ( region.s2 - region.s1 + 1 ) % region.sbin == 0 &&
-                 ( region.p2 - region.p1 + 1 ) % region.pbin == 0 );
+    fsc2_assert(    region.s2 < rs_spec10->ccd.max_size[ X ]
+                 && region.s2 > region.s1
+                 && region.p2 < rs_spec10->ccd.max_size[ Y ]
+                 && region.p2 > region.p1
+                 && ( region.s2 - region.s1 + 1 ) % region.sbin == 0
+                 && ( region.p2 - region.p1 + 1 ) % region.pbin == 0 );
 
     /* If the image is to be mirrored or to be returned upside down we
        need to adjust the region of interest settings accordingly. */
@@ -624,8 +624,8 @@ uns16 *rs_spec10_get_pic( uns32 * size )
         do
         {
             stop_on_user_request( );
-            if ( ! pl_exp_check_status( rs_spec10->handle, &status, &dummy ) ||
-                 status == READOUT_NOT_ACTIVE || status == READOUT_FAILED )
+            if (    ! pl_exp_check_status( rs_spec10->handle, &status, &dummy )
+                 || status == READOUT_NOT_ACTIVE || status == READOUT_FAILED )
                 rs_spec10_error_handling( );
         } while ( status != READOUT_COMPLETE );
 
@@ -728,8 +728,8 @@ double rs_spec10_set_temperature( double temp )
 
     /* A bit of paranoia... */
 
-    fsc2_assert( itemp <= lrnd( CCD_MAX_TEMPERATURE * 100.0 ) &&
-                 itemp >= lrnd( CCD_MIN_TEMPERATURE * 100.0 ) );
+    fsc2_assert(    itemp <= lrnd( CCD_MAX_TEMPERATURE * 100.0 )
+                 && itemp >= lrnd( CCD_MIN_TEMPERATURE * 100.0 ) );
 
 #if ! defined RS_SPEC10_TEST
 

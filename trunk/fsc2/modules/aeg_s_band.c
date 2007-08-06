@@ -127,9 +127,9 @@ int aeg_s_band_init_hook( void )
 
     /* Check if there's a field meter */
 
-    if ( ! exists_device( "er035m" ) &&
-         ! exists_device( "er035m_s" ) &&
-         ! exists_device( "bh15" ) )
+    if (    ! exists_device( "er035m" )
+         && ! exists_device( "er035m_s" )
+         && ! exists_device( "bh15" ) )
     {
         print( FATAL, "Can't find a field meter.\n" );
         THROW( EXCEPTION );
@@ -788,9 +788,11 @@ bool magnet_goto_field( double field,
     static double last_mini_steps = 0.0;
 
 
-    if ( last_mini_steps != 0.0 &&
-         fabs( field - magnet.act_field ) <= fabs( last_field_step ) + error &&
-         fabs( field - magnet.act_field ) >= fabs( last_field_step ) - error )
+    if (    last_mini_steps != 0.0
+         && fabs( field - magnet.act_field ) <=
+                                              fabs( last_field_step ) + error
+         && fabs( field - magnet.act_field ) >=
+                                              fabs( last_field_step ) - error )
     {
         if ( last_field_step != 0.0 )
              last_mini_steps *= fabs( field - magnet.act_field ) /
@@ -916,8 +918,8 @@ static bool magnet_goto_field_rec( double   field,
     max_dev = magnet.max_deviation > fabs( error ) ?
               magnet.max_deviation : error;
 
-    if ( fabs( field - magnet.meas_field ) > max_dev &&
-         ! magnet_goto_field_rec( field, error, 1, hint ) )
+    if (    fabs( field - magnet.meas_field ) > max_dev
+         && ! magnet_goto_field_rec( field, error, 1, hint ) )
         return FAIL;
 
     return OK;

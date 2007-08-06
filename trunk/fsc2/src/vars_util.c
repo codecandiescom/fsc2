@@ -138,36 +138,40 @@ Var_T *vars_comp( int     comp_type,
             if ( v1->type == INT_VAR && v2->type == INT_VAR )
                 new_var = vars_push( INT_VAR, v1->INT == v2->INT );
             else
-                new_var = vars_push( INT_VAR, VALUE( v1 ) == VALUE( v2 ) ||
-                                     nextafter( VALUE( v1 ), VALUE( v2 ) )
-                                     == VALUE( v2 ) );
+                new_var = vars_push(   INT_VAR,
+                                          VALUE( v1 ) == VALUE( v2 )
+                                       || nextafter( VALUE( v1 ), VALUE( v2 ) )
+                                                              == VALUE( v2 ) );
             break;
 
         case COMP_UNEQUAL :
             if ( v1->type == INT_VAR && v2->type == INT_VAR )
                 new_var = vars_push( INT_VAR, v1->INT != v2->INT );
             else
-                new_var = vars_push( INT_VAR, VALUE( v1 ) != VALUE( v2 ) &&
-                                     nextafter( VALUE( v1 ), VALUE( v2 ) )
-                                     != VALUE( v2 ) );
+                new_var = vars_push( INT_VAR,
+                                        VALUE( v1 ) != VALUE( v2 )
+                                     && nextafter( VALUE( v1 ), VALUE( v2 ) )
+                                                              != VALUE( v2 ) );
             break;
 
         case COMP_LESS :
             if ( v1->type == INT_VAR && v2->type == INT_VAR )
                 new_var = vars_push( INT_VAR, v1->INT < v2->INT );
             else
-                new_var = vars_push( INT_VAR, VALUE( v1 ) < VALUE( v2 ) &&
-                                     nextafter( VALUE( v1 ), VALUE( v2 ) )
-                                     < VALUE( v2 ) );
+                new_var = vars_push( INT_VAR,
+                                        VALUE( v1 ) < VALUE( v2 )
+                                     && nextafter( VALUE( v1 ), VALUE( v2 ) )
+                                                               < VALUE( v2 ) );
             break;
 
         case COMP_LESS_EQUAL :
             if ( v1->type == INT_VAR && v2->type == INT_VAR )
                 new_var = vars_push( INT_VAR, v1->INT <= v2->INT );
             else
-                new_var = vars_push( INT_VAR, VALUE( v1 ) <= VALUE( v2 ) ||
-                                     nextafter( VALUE( v1 ), VALUE( v2 ) )
-                                     <= VALUE( v2 ) );
+                new_var = vars_push( INT_VAR,
+                                        VALUE( v1 ) <= VALUE( v2 )
+                                     || nextafter( VALUE( v1 ), VALUE( v2 ) )
+                                                              <= VALUE( v2 ) );
             break;
 #else
         case COMP_EQUAL :
@@ -204,27 +208,29 @@ Var_T *vars_comp( int     comp_type,
             if ( v1->type == INT_VAR && v2->type == INT_VAR )
                 new_var = vars_push( INT_VAR, v1->INT != 0 && v2->INT != 0 );
             else
-                new_var = vars_push( INT_VAR, VALUE( v1 ) != 0.0 &&
-                                              VALUE( v2 ) != 0.0 );
+                new_var = vars_push( INT_VAR,
+                                        VALUE( v1 ) != 0.0
+                                     && VALUE( v2 ) != 0.0 );
             break;
 
         case COMP_OR :
             if ( v1->type == INT_VAR && v2->type == INT_VAR )
                 new_var = vars_push( INT_VAR, v1->INT != 0 || v2->INT != 0 );
             else
-                new_var = vars_push( INT_VAR, VALUE( v1 ) != 0.0 ||
-                                              VALUE( v2 ) != 0.0 );
+                new_var = vars_push( INT_VAR,
+                                        VALUE( v1 ) != 0.0
+                                     || VALUE( v2 ) != 0.0 );
             break;
 
         case COMP_XOR :
             if ( v1->type == INT_VAR && v2->type == INT_VAR )
                 new_var = vars_push( INT_VAR,
-                                     ( v1->INT != 0 && v2->INT == 0 ) ||
-                                     ( v1->INT == 0 && v2->INT != 0 ) );
+                                        ( v1->INT != 0 && v2->INT == 0 )
+                                     || ( v1->INT == 0 && v2->INT != 0 ) );
             else
                 new_var = vars_push( INT_VAR,
-                                ( VALUE( v1 ) != 0.0 && VALUE( v2 ) == 0.0 ) ||
-                                ( VALUE( v1 ) == 0.0 && VALUE( v2 ) != 0.0 ) );
+                                ( VALUE( v1 ) != 0.0 && VALUE( v2 ) == 0.0 )
+                             || ( VALUE( v1 ) == 0.0 && VALUE( v2 ) != 0.0 ) );
             break;
 
         default :
@@ -305,8 +311,8 @@ Var_T *vars_lnegate( Var_T * v )
 
     vars_check( v, INT_VAR | FLOAT_VAR );
 
-    if ( ( v->type == INT_VAR && v->INT == 0 ) ||
-         ( v->type == FLOAT_VAR && v->FLOAT == 0.0 ) )
+    if (    ( v->type == INT_VAR && v->INT == 0 )
+         || ( v->type == FLOAT_VAR && v->FLOAT == 0.0 ) )
         new_var = vars_push( INT_VAR, 1L );
     else
         new_var = vars_push( INT_VAR, 0L );

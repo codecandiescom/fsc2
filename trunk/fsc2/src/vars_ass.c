@@ -89,10 +89,12 @@ void vars_assign( Var_T * src,
 #ifndef NDEBUG
     /* Check that both variables exist and src has a reasonable type */
 
-    if ( ! vars_exist( src ) || ! vars_exist( dest ) || src->type == STR_VAR ||
-         ! ( src->type & ( INT_VAR | FLOAT_VAR |
-                           INT_ARR | FLOAT_ARR |
-                           INT_REF | FLOAT_REF ) ) )
+    if (    ! vars_exist( src )
+         || ! vars_exist( dest )
+         || src->type == STR_VAR
+         || ! ( src->type & ( INT_VAR | FLOAT_VAR |
+                              INT_ARR | FLOAT_ARR |
+                              INT_REF | FLOAT_REF ) ) )
         fsc2_impossible( );
 #endif
 

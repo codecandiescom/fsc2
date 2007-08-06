@@ -214,16 +214,16 @@ static void tds_tmpl_window_check_2( Window_T * w )
 
     /* Can't do checks if window position or digitizers timebase is unknown */
 
-    if ( FSC2_MODE != EXPERIMENT &&
-         ( ! w->is_start || ! tds_tmpl.is_timebase ) )
+    if (    FSC2_MODE != EXPERIMENT
+         && ( ! w->is_start || ! tds_tmpl.is_timebase ) )
         return;
 
     dcs = w->start;
     dtb = tds_tmpl.timebase;
     fac = 1.0;
 
-    while ( ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 ) ||
-            fabs( dtb ) < 1.0 )
+    while (    ( fabs( dcs ) != 0.0 && fabs( dcs ) < 1.0 )
+            || fabs( dtb ) < 1.0 )
     {
         dcs *= 1000.0;
         dtb *= 1000.0;
@@ -297,9 +297,12 @@ static void tds_tmpl_window_check_3( Window_T * w )
     /* Can't do checks if timebase, record length, trigger position,
        window position or width is still unknown */
 
-    if ( FSC2_MODE != EXPERIMENT &&
-         ( ! tds_tmpl.is_timebase || ! tds_tmpl.is_rec_len ||
-           ! tds_tmpl.is_trig_pos || ! w->is_start || ! w->is_width ) )
+    if (    FSC2_MODE != EXPERIMENT
+         && (    ! tds_tmpl.is_timebase
+              || ! tds_tmpl.is_rec_len
+              || ! tds_tmpl.is_trig_pos
+              || ! w->is_start
+              || ! w->is_width ) )
         return;
 
     /* Calculate the start and end position of the window in digitizer
@@ -687,15 +690,17 @@ void tds_tmpl_state_check( double timebase,
 
     if ( FSC2_MODE == EXPERIMENT )
     {
-        if ( ( timebase = tds_tmpl_get_timebase( ) ) == tds_tmpl.timebase &&
-             ( rec_len = tds_tmpl_get_record_length( ) ) == tds_tmpl.rec_len &&
-             ( trig_pos = tds_tmpl_get_trigger_pos( ) ) == tds_tmpl.trig_pos )
+        if (    ( timebase = tds_tmpl_get_timebase( ) ) == tds_tmpl.timebase
+             && ( rec_len = tds_tmpl_get_record_length( ) ) == tds_tmpl.rec_len
+             && ( trig_pos = tds_tmpl_get_trigger_pos( ) ) ==
+                                                            tds_tmpl.trig_pos )
             return;
     }
     else
     {
-        if ( ! tds_tmpl.is_timebase || ! tds_tmpl.is_rec_len ||
-             ! tds_tmpl.is_trig_pos )
+        if (    ! tds_tmpl.is_timebase
+             || ! tds_tmpl.is_rec_len
+             || ! tds_tmpl.is_trig_pos )
             return;
     }
 

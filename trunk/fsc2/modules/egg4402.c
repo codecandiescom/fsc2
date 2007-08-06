@@ -234,13 +234,13 @@ Var_T *boxcar_get_curve( Var_T * v )
         curve_type = get_long( v, "curve type" );
     else                             /* first argument is a string */
     {
-        if ( ! strcmp( v->val.sptr, "LC" ) ||
-             ! strcmp( v->val.sptr, "LIVECURVE" ) ||
-             ! strcmp( v->val.sptr, "LIVE_CURVE" ) )
+        if (    ! strcmp( v->val.sptr, "LC" )
+             || ! strcmp( v->val.sptr, "LIVECURVE" )
+             || ! strcmp( v->val.sptr, "LIVE_CURVE" ) )
             curve_type = 0;
-        else if ( ! strcmp( v->val.sptr, "MC" ) ||
-                  ! strcmp( v->val.sptr, "MEMORYCURVE" ) ||
-                  ! strcmp( v->val.sptr, "MEMORY_CURVE" ) )
+        else if (    ! strcmp( v->val.sptr, "MC" )
+                  || ! strcmp( v->val.sptr, "MEMORYCURVE" )
+                  || ! strcmp( v->val.sptr, "MEMORY_CURVE" ) )
             curve_type = 1;
     }
 
@@ -636,8 +636,8 @@ static void egg4402_query( char * buffer,
     {
         if ( gpib_serial_poll( egg4402.device, &stb ) == FAILURE )
             egg4402_failure( );
-        if ( ( ! wait_for_stop && stb & 0x80 ) ||
-             ( wait_for_stop && stb & 4 && stb & 0x80 ) )
+        if (    ( ! wait_for_stop && stb & 0x80 )
+             || ( wait_for_stop && stb & 4 && stb & 0x80 ) )
             break;
         stop_on_user_request( );
         fsc2_usleep( 100000, UNSET );

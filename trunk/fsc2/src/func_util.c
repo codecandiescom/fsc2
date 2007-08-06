@@ -700,8 +700,8 @@ Var_T * f_init_1d( Var_T * v )
 
     if ( v->type & ( INT_VAR | FLOAT_VAR ) )
     {
-        if ( v->next == NULL ||
-             ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
+        if (    v->next == NULL
+             || ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
         {
             print( FATAL, "Start x value found but delta x is missing.\n" );
             THROW( EXCEPTION );
@@ -826,8 +826,8 @@ Var_T * f_init_2d( Var_T * v )
 
     if ( v->type & ( INT_VAR | FLOAT_VAR ) )
     {
-        if ( v->next == NULL ||
-             ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
+        if (    v->next == NULL
+             || ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
         {
             print( FATAL, "Start x value found but delta x is missing.\n" );
             THROW( EXCEPTION );
@@ -855,8 +855,8 @@ Var_T * f_init_2d( Var_T * v )
 
     if ( v->type & ( INT_VAR | FLOAT_VAR ) )
     {
-        if ( v->next == NULL ||
-             ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
+        if (    v->next == NULL
+             || ! ( v->next->type & ( INT_VAR | FLOAT_VAR ) ) )
         {
             print( FATAL, "Start y value found but delta y is missing.\n" );
             THROW( EXCEPTION );
@@ -965,12 +965,12 @@ Var_T * f_dmode( Var_T * v )
         mode = v->val.lval == 0 ? NORMAL_DISPLAY : SLIDING_DISPLAY;
     else
     {
-        if ( ! strcasecmp( v->val.sptr, "NORMAL" ) ||
-             ! strcasecmp( v->val.sptr, "NORMAL_DISPLAY" ) )
-             mode = NORMAL_DISPLAY;
-        else if ( ! strcasecmp( v->val.sptr, "SLIDING" ) ||
-                  ! strcasecmp( v->val.sptr, "SLIDING_DISPLAY" ) )
-             mode = SLIDING_DISPLAY;
+        if (    ! strcasecmp( v->val.sptr, "NORMAL" )
+             || ! strcasecmp( v->val.sptr, "NORMAL_DISPLAY" ) )
+            mode = NORMAL_DISPLAY;
+        else if (    ! strcasecmp( v->val.sptr, "SLIDING" )
+                  || ! strcasecmp( v->val.sptr, "SLIDING_DISPLAY" ) )
+            mode = SLIDING_DISPLAY;
         else
         {
             print( FATAL, "Invalid argument: '%s'.\n", v->val.sptr );
@@ -2793,8 +2793,8 @@ static dpoint_T *eval_display_args( Var_T * v,
 
         v = v->next;
 
-        if ( dp[ *nsets ].nc < 0 ||
-             dp[ *nsets ].nc >= ( dim == 1 ? G_1d.nc : G_2d.nc ) )
+        if (    dp[ *nsets ].nc < 0
+             || dp[ *nsets ].nc >= ( dim == 1 ? G_1d.nc : G_2d.nc ) )
         {
             print( FATAL, "Invalid curve number (%ld).\n",
                    dp[ *nsets ].nc + 1 );
@@ -5070,11 +5070,11 @@ Var_T * f_spike_rem( Var_T * v )
        for the region in between */
 
     for ( i = start; i < end - 1; i++ )
-        if ( ol_indices[ i + 1 ] - ol_indices[ i ] <= max_spike_width &&
-             ( ( diffs[ ol_indices[ i ] ] > mean &&
-                 diffs[ ol_indices[ i + 1 ] ] < mean ) ||
-               ( diffs[ ol_indices[ i ] ] < mean &&
-                 diffs[ ol_indices[ i + 1 ] ] > mean ) ) )
+        if (    ol_indices[ i + 1 ] - ol_indices[ i ] <= max_spike_width
+             && (    (    diffs[ ol_indices[ i ] ] > mean
+                       && diffs[ ol_indices[ i + 1 ] ] < mean )
+                  || (    diffs[ ol_indices[ i ] ] < mean
+                       && diffs[ ol_indices[ i + 1 ] ] > mean ) ) )
         {
             if ( v->type == INT_ARR )
             {
@@ -5108,8 +5108,9 @@ Var_T * f_spike_rem( Var_T * v )
     {
         start = ol_indices[ 0 ];
 
-        if ( ol_count == 1 || ol_indices[ 1 ] == -1 ||
-             ol_indices[ 1 ] - start > max_spike_width )
+        if (    ol_count == 1
+             || ol_indices[ 1 ] == -1
+             || ol_indices[ 1 ] - start > max_spike_width )
         {
             for ( i = 0; i <= start; i++ ) 
                 if ( v->type == INT_ARR )
@@ -5118,12 +5119,12 @@ Var_T * f_spike_rem( Var_T * v )
                     nv->val.dpnt[ i ] = nv->val.dpnt[ start + 1 ];
             ol_indices[ 0 ] = -1;
         }
-        else if ( ol_count > 1 &&
-                  ol_indices[ 1 ] - start <= max_spike_width &&
-                  ( ( diffs[ start ] > mean &&
-                      diffs[ ol_indices[ 1 ] ] < mean ) ||
-                    ( diffs[ start ] < mean &&
-                      diffs[ ol_indices[ 1 ] ] > mean ) ) )
+        else if (    ol_count > 1
+                  && ol_indices[ 1 ] - start <= max_spike_width
+                  && (    (    diffs[ start ] > mean
+                            && diffs[ ol_indices[ 1 ] ] < mean )
+                       || (    diffs[ start ] < mean
+                            && diffs[ ol_indices[ 1 ] ] > mean ) ) )
         {
             next = ol_indices[ 1 ] + 1;
             if ( v->type == INT_ARR )
@@ -5152,8 +5153,9 @@ Var_T * f_spike_rem( Var_T * v )
     {
         end = ol_indices[ end ];
 
-        if ( ol_count == 1 || ol_indices[ ol_count - 2 ] == -1 ||
-             end - ol_indices[ ol_count - 2 ] > max_spike_width )
+        if (    ol_count == 1
+             || ol_indices[ ol_count - 2 ] == -1
+             || end - ol_indices[ ol_count - 2 ] > max_spike_width )
         {
             for ( i = end + 1; i < nv->len; i++ ) 
                 if ( v->type == INT_ARR )
@@ -5161,12 +5163,12 @@ Var_T * f_spike_rem( Var_T * v )
                 else
                     nv->val.dpnt[ i ] = nv->val.dpnt[ end ];
         }
-        else if ( ol_count > 1 &&
-                  end - ol_indices[ ol_count - 2 ] <= max_spike_width &&
-                  ( ( diffs[ end ] > mean &&
-                      diffs[ ol_indices[ ol_count - 2 ] ] < mean ) ||
-                    ( diffs[ end ] < mean &&
-                      diffs[ ol_indices[ ol_count - 2 ] ] > mean ) ) )
+        else if ( ol_count > 1
+                  && end - ol_indices[ ol_count - 2 ] <= max_spike_width
+                  && (    (    diffs[ end ] > mean
+                            && diffs[ ol_indices[ ol_count - 2 ] ] < mean )
+                       || (    diffs[ end ] < mean
+                            && diffs[ ol_indices[ ol_count - 2 ] ] > mean ) ) )
         {
             start = ol_indices[ ol_count - 2 ];
             end++;

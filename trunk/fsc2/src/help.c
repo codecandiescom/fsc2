@@ -139,8 +139,8 @@ static void start_help_browser( void )
         else
             av[ 2 ] = T_strdup( "file://" docdir "html/fsc2.html" );
     }
-    else if ( browser && ( ! strcasecmp( bn, "lynx" ) ||
-                           ! strcasecmp( bn, "w3m" ) ) )
+    else if ( browser && (    ! strcasecmp( bn, "lynx" )
+                           || ! strcasecmp( bn, "w3m" ) ) )
     {
         av[ 0 ] = T_strdup( "xterm" );
         av[ 1 ] = T_strdup( "-e" );
@@ -150,9 +150,9 @@ static void start_help_browser( void )
         else
             av[ 3 ] = T_strdup( docdir "html/fsc2.html" );
     }
-    else if ( browser && ( strcasecmp( bn, "mozilla" ) ||
-                           strcasecmp( bn, "MozillaFirebird" ) ||
-                           strcasecmp( bn, "firefox" ) ) )
+    else if ( browser && (    strcasecmp( bn, "mozilla" )
+                           || strcasecmp( bn, "MozillaFirebird" )
+                           || strcasecmp( bn, "firefox" ) ) )
     {
         av[ 0 ] = T_strdup( browser );
         if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )

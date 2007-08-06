@@ -1226,10 +1226,10 @@ void create_label_pixmap( Canvas_T * c,
 
     /* Make sure we don't do something stupid... */
 
-    fsc2_assert( ( coord == Y &&
-                   ( c == &G_1d.y_axis || c == &G_2d.y_axis ) ) ||
-                 ( coord == Z &&
-                   ( c == &G_2d.z_axis || c == &G_2d.cut_z_axis ) ) );
+    fsc2_assert(    (    coord == Y
+                      && ( c == &G_1d.y_axis || c == &G_2d.y_axis ) )
+                 || (    coord == Z
+                      && ( c == &G_2d.z_axis || c == &G_2d.cut_z_axis ) ) );
 
     /* Distinguish between labels for the primary window and the cut window
        (this function is never called for the cut windows y-axis) */
@@ -1777,8 +1777,8 @@ void redraw_axis_2d( int coord )
                        c->w - 5 - G_2d.label_w[ coord ], 0 );
     }
 
-    if ( G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
+    if (    G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->is_scale_set )
         return;
 
     /* Find out the active curve for the axis */
@@ -1973,8 +1973,8 @@ void undo_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
     int j;
 
 
-    if ( G_2d.active_curve == -1 ||
-         ! G_2d.curve_2d[ G_2d.active_curve ]->can_undo )
+    if (    G_2d.active_curve == -1
+         || ! G_2d.curve_2d[ G_2d.active_curve ]->can_undo )
         return;
 
     cv2 = G_2d.curve_2d[ G_2d.active_curve ];
@@ -2181,10 +2181,10 @@ void curve_button_callback_2d( FL_OBJECT * obj,
     int bstate;
 
 
-    if ( G.drag_canvas == DRAG_2D_X  || G.drag_canvas == DRAG_2D_Y  ||
-         G.drag_canvas == DRAG_2D_Z  || G.drag_canvas == DRAG_2D_C  ||
-         G.drag_canvas == DRAG_CUT_X || G.drag_canvas == DRAG_CUT_Y ||
-         G.drag_canvas == DRAG_CUT_Z || G.drag_canvas == DRAG_CUT_C )
+    if (    G.drag_canvas == DRAG_2D_X  || G.drag_canvas == DRAG_2D_Y
+         || G.drag_canvas == DRAG_2D_Z  || G.drag_canvas == DRAG_2D_C
+         || G.drag_canvas == DRAG_CUT_X || G.drag_canvas == DRAG_CUT_Y
+         || G.drag_canvas == DRAG_CUT_Z || G.drag_canvas == DRAG_CUT_C )
     {
         G.button_state = 0;
         G.coord_display &= ~ 6;
@@ -2266,8 +2266,8 @@ void curve_button_callback_2d( FL_OBJECT * obj,
     else
     {
         bstate = fl_get_button( obj );
-        if ( ( bstate && data - 1 == G_2d.active_curve ) ||
-             ( ! bstate && G_2d.active_curve == -1 ) )
+        if (    ( bstate && data - 1 == G_2d.active_curve )
+             || ( ! bstate && G_2d.active_curve == -1 ) )
             return;
     }
 

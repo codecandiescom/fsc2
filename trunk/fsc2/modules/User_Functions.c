@@ -39,13 +39,13 @@ static Var_T *get_phase_cycled_area_1( Var_T * /* v */ );
 static Var_T *get_phase_cycled_area_2( Var_T * /* v */ );
 
 static bool get_channel_number( Var_T * /* v       */,
-                                long *  /* channel */ );
+                                long *  /* channel */  );
 
 static void pc_basic_check( const char * /* func_1 */,
                             bool *       /* is_1   */,
                             const char * /* func_2 */,
                             bool *       /* is_2   */,
-                            const char * /* str    */ );
+                            const char * /* str    */  );
 
 
 
@@ -132,8 +132,8 @@ static Var_T *get_phase_cycled_area_1( Var_T * v )
        two are needed there must be two channel arguments */
 
     for ( i = 0; i < aseq->len; i++ )
-        if ( aseq->sequence[ i ] == ACQ_PLUS_B ||
-             aseq->sequence[ i ] == ACQ_MINUS_B )
+        if (    aseq->sequence[ i ] == ACQ_PLUS_B
+             || aseq->sequence[ i ] == ACQ_MINUS_B )
             channels_needed = 2;
 
     /* The first parameter must always be a channel number, ask digitizer
@@ -229,8 +229,8 @@ static Var_T *get_phase_cycled_area_1( Var_T * v )
 
                 /* Push the correct channel number onto the stack */
 
-                if ( aseq->sequence[ i ] == ACQ_PLUS_A ||
-                     aseq->sequence[ i ] == ACQ_MINUS_A )
+                if (    aseq->sequence[ i ] == ACQ_PLUS_A
+                     || aseq->sequence[ i ] == ACQ_MINUS_A )
                     vars_push( INT_VAR, channel[ 0 ] );
                 else
                     vars_push( INT_VAR, channel[ 1 ] );
@@ -246,8 +246,8 @@ static Var_T *get_phase_cycled_area_1( Var_T * v )
 
                 /* Now add (or subtract the result */
 
-                if ( aseq->sequence[ i ] == ACQ_PLUS_A ||
-                     aseq->sequence[ i ] == ACQ_PLUS_B )
+                if (    aseq->sequence[ i ] == ACQ_PLUS_A
+                     || aseq->sequence[ i ] == ACQ_PLUS_B )
                     data[ j ] += vn->val.dval;
                 else
                     data[ j ] -= vn->val.dval;
@@ -349,11 +349,11 @@ static Var_T *get_phase_cycled_area_2( Var_T * v )
     for ( i = 0; i < aseq[ 0 ]->len; i++ )
         for ( j = 0; j < 2; j++ )
         {
-            if ( aseq[ j ]->sequence[ i ] == ACQ_PLUS_A  ||
-                 aseq[ j ]->sequence[ i ] == ACQ_MINUS_A )
+            if (    aseq[ j ]->sequence[ i ] == ACQ_PLUS_A
+                 || aseq[ j ]->sequence[ i ] == ACQ_MINUS_A )
                 need_A = SET;
-            if ( aseq[ j ]->sequence[ i ] == ACQ_PLUS_B  ||
-                 aseq[ j ]->sequence[ i ] == ACQ_MINUS_B )
+            if (    aseq[ j ]->sequence[ i ] == ACQ_PLUS_B
+                 || aseq[ j ]->sequence[ i ] == ACQ_MINUS_B )
                 need_B = SET;
         }
 
@@ -452,8 +452,8 @@ static Var_T *get_phase_cycled_area_2( Var_T * v )
 
                 /* Push the correct channel number onto the stack */
 
-                if ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A ||
-                     aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_A )
+                if (    aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A
+                     || aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_A )
                     vars_push( INT_VAR, channel[ 0 ] );
                 else
                     vars_push( INT_VAR, channel[ 1 ] );
@@ -469,8 +469,8 @@ static Var_T *get_phase_cycled_area_2( Var_T * v )
 
                 /* Now add (or subtract the result */
 
-                if ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A ||
-                     aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_B )
+                if (    aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A
+                     || aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_B )
                     data[ 2 * j ] += vn->val.dval;
                 else
                     data[ 2 * j ] -= vn->val.dval;
@@ -478,17 +478,17 @@ static Var_T *get_phase_cycled_area_2( Var_T * v )
                 /* If the second acquisition sequence uses the same digitizer
                    channel we don't have to measure the area again... */
 
-                if ( ( ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A ||
-                         aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_A ) &&
-                       ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A ||
-                         aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_A ) ) ||
-                     ( ( aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_B ||
-                         aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_B ) &&
-                       ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_B ||
-                         aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_B ) ) )
+                if (    (    (    aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_A
+                               || aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_A )
+                          && (    aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A
+                               || aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_A ) )
+                     || (    (    aseq[ 0 ]->sequence[ i ] == ACQ_PLUS_B
+                               || aseq[ 0 ]->sequence[ i ] == ACQ_MINUS_B )
+                          && (    aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_B
+                               || aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_B ) ) )
                 {
-                    if ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A ||
-                         aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_B )
+                    if (    aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A
+                         || aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_B )
                         data[ 2 * j + 1 ] += vn->val.dval;
                     else
                         data[ 2 * j + 1 ] -= vn->val.dval;
@@ -511,8 +511,8 @@ static Var_T *get_phase_cycled_area_2( Var_T * v )
 
                 /* Push the correct channel number onto the stack */
 
-                if ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A ||
-                     aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_A )
+                if (    aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A
+                     || aseq[ 1 ]->sequence[ i ] == ACQ_MINUS_A )
                     vars_push( INT_VAR, channel[ 0 ] );
                 else
                     vars_push( INT_VAR, channel[ 1 ] );
@@ -528,8 +528,8 @@ static Var_T *get_phase_cycled_area_2( Var_T * v )
 
                 /* Now add (or subtract the result */
 
-                if ( aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A ||
-                     aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_B )
+                if (    aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_A
+                     || aseq[ 1 ]->sequence[ i ] == ACQ_PLUS_B )
                     data[ 2 * j + 1 ] += vn->val.dval;
                 else
                     data[ 2 * j + 1 ] -= vn->val.dval;

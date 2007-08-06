@@ -236,8 +236,8 @@ Var_T *digitizer_define_window( Var_T * v )
 
     /* Allow window width to be zero in test run only... */
     
-    if ( ( FSC2_MODE == TEST && win_width < 0.0 ) ||
-         ( FSC2_MODE != TEST && win_width <= 0.0 ) )
+    if (    ( FSC2_MODE == TEST && win_width < 0.0 )
+         || ( FSC2_MODE != TEST && win_width <= 0.0 ) )
     {
         print( FATAL, "Zero or negative window width.\n" );
         THROW( EXCEPTION );
@@ -450,16 +450,16 @@ Var_T *digitizer_timebase( Var_T * v )
        the user about problems if there's a deviation of more than 1 % */
 
     for ( i = 0; i < lecroy_wr.num_tbas - 1; i++ )
-        if ( timebase >= lecroy_wr.tbas[ i ] &&
-             timebase <= lecroy_wr.tbas[ i + 1 ] )
+        if (    timebase >= lecroy_wr.tbas[ i ]
+             && timebase <= lecroy_wr.tbas[ i + 1 ] )
         {
             tb_index = i + ( ( lecroy_wr.tbas[ i ] / timebase >
                                timebase / lecroy_wr.tbas[ i + 1 ] ) ? 0 : 1 );
             break;
         }
 
-    if ( tb_index >= 0 &&                                   /* value found ? */
-         fabs( timebase - lecroy_wr.tbas[ tb_index ] ) > timebase * 1.0e-2 )
+    if (    tb_index >= 0
+         && fabs( timebase - lecroy_wr.tbas[ tb_index ] ) > timebase * 1.0e-2 )
         print( WARN, "Can't set timebase to %s, using %s instead.\n",
                lecroy_wr_ptime( timebase ),
                lecroy_wr_ptime( lecroy_wr.tbas[ tb_index ] ) );
@@ -616,8 +616,8 @@ Var_T *digitizer_memory_size( Var_T *v )
             break;
         }
 
-    if ( ms_index >= 0 &&
-         mem_size != lecroy_wr.mem_sizes[ ms_index ] )
+    if (    ms_index >= 0
+         && mem_size != lecroy_wr.mem_sizes[ ms_index ] )
         print( WARN, "Can't set memory size to %ld, using %ld instead.\n",
                mem_size, lecroy_wr.mem_sizes[ ms_index ] );
 
@@ -672,8 +672,8 @@ Var_T *digitizer_record_length( Var_T *v UNUSED_ARG )
 
 Var_T *digitizer_time_per_point( Var_T * v  UNUSED_ARG )
 {
-    if ( FSC2_MODE == PREPARATION &&
-         ( ! lecroy_wr.is_timebase || ! lecroy_wr.is_interleaved ) )
+    if (    FSC2_MODE == PREPARATION
+         && ( ! lecroy_wr.is_timebase || ! lecroy_wr.is_interleaved ) )
         no_query_possible( );
 
     return vars_push( FLOAT_VAR, lecroy_wr.interleaved ?
@@ -737,8 +737,8 @@ Var_T *digitizer_sensitivity( Var_T * v )
     /* Check that the sensitivity setting isn't out of range (taking care
        of rounding errors) */
 
-    if ( sens < 0.9999 * LECROY_WR_MAX_SENS ||
-         sens > 1.0001 * LECROY_WR_MIN_SENS )
+    if (    sens < 0.9999 * LECROY_WR_MAX_SENS
+         || sens > 1.0001 * LECROY_WR_MIN_SENS )
     {
         print( FATAL, "Requested sensitivity setting is out of range.\n" );
         THROW( EXCEPTION );
@@ -1117,8 +1117,8 @@ Var_T *digitizer_trigger_level( Var_T * v )
         return vars_push( FLOAT_VAR, 0.0 );
     }
 
-    if ( ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX ) &&
-         channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
+    if (    ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
+         && channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
     {
         print( FATAL, "Invalid trigger channel %s.\n",
                LECROY_WR_Channel_Names[ channel ] );
@@ -1159,8 +1159,8 @@ Var_T *digitizer_trigger_level( Var_T * v )
 #if defined LECROY_WR_CH4
         case LECROY_WR_CH4 :
 #endif
-            if ( FSC2_MODE == PREPARATION &&
-                 ! lecroy_wr.is_sens[ channel ] )
+            if (    FSC2_MODE == PREPARATION
+                 && ! lecroy_wr.is_sens[ channel ] )
             {
                 print( FATAL, "Can't set trigger level in PREPARATION section "
                        "while sensitivity for the channel hasn't been "
@@ -1231,8 +1231,8 @@ Var_T *digitizer_trigger_slope( Var_T * v )
         return vars_push( INT_VAR, 0 );
     }
 
-    if ( ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX ) &&
-         channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
+    if (    ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
+         && channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
     {
         print( FATAL, "Invalid trigger channel %s.\n",
                LECROY_WR_Channel_Names[ channel ] );
@@ -1262,11 +1262,11 @@ Var_T *digitizer_trigger_slope( Var_T * v )
 
     if ( v->type == STR_VAR )
     {
-        if ( ! strcasecmp( v->val.sptr, "POSITIVE" ) ||
-             ! strcasecmp( v->val.sptr, "POS" ) )
+        if (    ! strcasecmp( v->val.sptr, "POSITIVE" )
+             || ! strcasecmp( v->val.sptr, "POS" ) )
             slope = 1;
-        else if ( ! strcasecmp( v->val.sptr, "NEGATIVE" ) ||
-                  ! strcasecmp( v->val.sptr, "NEG" ) ) 
+        else if (    ! strcasecmp( v->val.sptr, "NEGATIVE" )
+                  || ! strcasecmp( v->val.sptr, "NEG" ) ) 
             slope = 0;
         else
         {
@@ -1313,8 +1313,8 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
         return vars_push( FLOAT_VAR, 0.0 );
     }
 
-    if ( ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX ) &&
-         channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
+    if (    ( channel < LECROY_WR_CH1 || channel > LECROY_WR_CH_MAX )
+         && channel != LECROY_WR_EXT && channel != LECROY_WR_EXT10 )
     {
         print( FATAL, "Invalid trigger channel %s.\n",
                LECROY_WR_Channel_Names[ channel ] );
@@ -1694,8 +1694,8 @@ Var_T *digitizer_copy_curve( Var_T * v )
     src = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                         get_strict_long( v, "source channel number" ), UNSET );
 
-    if ( ! ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX ) &&
-         ! ( src >= LECROY_WR_TA && src >= LECROY_WR_TD ) )
+    if (    ! ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX )
+         && ! ( src >= LECROY_WR_TA && src >= LECROY_WR_TD ) )
     {
         print( FATAL, "Invalid source channel %s, must be one of the "
                "measurement or TRACE channels.\n",
@@ -1708,8 +1708,8 @@ Var_T *digitizer_copy_curve( Var_T * v )
     dest = lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                    get_strict_long( v, "destination channel number" ), UNSET );
 
-    if ( dest != LECROY_WR_M1 && dest != LECROY_WR_M2 &&
-         dest != LECROY_WR_M3 && dest != LECROY_WR_M4 )
+    if (    dest != LECROY_WR_M1 && dest != LECROY_WR_M2
+         && dest != LECROY_WR_M3 && dest != LECROY_WR_M4 )
     {
         print( FATAL, "Invalid destination channel %s, must be one of the "
                "MEM channels\n", LECROY_WR_Channel_Names[ dest ] );
@@ -1761,17 +1761,17 @@ Var_T *digitizer_get_curve( Var_T * v )
     ch = ( int ) lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( ! ( ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX ) ||
-             ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4     ) ||
-             ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD     )    ) )
+    if ( ! (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+             || ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4 )
+             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD ) ) )
     {
         print( FATAL, "Can't fetch curve from channel %s.\n",
                LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
-    if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD &&
-         ! lecroy_wr.is_avg_setup[ ch ] )
+    if (    ch >= LECROY_WR_TA && ch <= LECROY_WR_TD
+         && ! lecroy_wr.is_avg_setup[ ch ] )
     {
         print( FATAL, "Averaging has not been initialized for "
                "channel '%s'.\n", LECROY_WR_Channel_Names[ ch ] );
@@ -1858,17 +1858,17 @@ Var_T *digitizer_get_area( Var_T * v )
     ch = ( int ) lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( ! ( ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX ) ||
-             ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4     ) ||
-             ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD     )    ) )
+    if ( ! (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+             || ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4 )
+             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD ) ) )
     {
         print( FATAL, "Can't determine area from channel %s.\n",
                LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
-    if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD &&
-         ! lecroy_wr.is_avg_setup[ ch ] )
+    if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD
+         && ! lecroy_wr.is_avg_setup[ ch ] )
     {
         print( FATAL, "Averaging has not been initialized for "
                "channel '%s'.\n", LECROY_WR_Channel_Names[ ch ] );
@@ -2012,17 +2012,17 @@ Var_T *digitizer_get_amplitude( Var_T * v )
     ch = ( int ) lecroy_wr_translate_channel( GENERAL_TO_LECROY_WR,
                                get_strict_long( v, "channel number" ), UNSET );
 
-    if ( ! ( ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX ) ||
-             ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4     ) ||
-             ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD     )    ) )
+    if ( ! (    ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
+             || ( ch >= LECROY_WR_M1  && ch <= LECROY_WR_M4 )
+             || ( ch >= LECROY_WR_TA  && ch <= LECROY_WR_TD ) ) )
     {
         print( FATAL, "Can't determine amplitude for channel %s.\n",
                LECROY_WR_Channel_Names[ ch ] );
         THROW( EXCEPTION );
     }
 
-    if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD &&
-         ! lecroy_wr.is_avg_setup[ ch ] )
+    if (    ch >= LECROY_WR_TA && ch <= LECROY_WR_TD
+         && ! lecroy_wr.is_avg_setup[ ch ] )
     {
         print( FATAL, "Averaging has not been initialized for "
                "channel '%s'.\n", LECROY_WR_Channel_Names[ ch ] );

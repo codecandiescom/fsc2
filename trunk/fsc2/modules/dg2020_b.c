@@ -331,8 +331,8 @@ int dg2020_b_end_of_test_hook( void )
                dg2020.defense_2_shape_too_near == 1 ? "" : "s",
                dg2020_pticks( dg2020.defense_2_shape ) );
 
-    if ( dg2020.shape_2_defense_too_near != 0 ||
-         dg2020.defense_2_shape_too_near != 0 )
+    if (    dg2020.shape_2_defense_too_near != 0
+         || dg2020.defense_2_shape_too_near != 0 )
         THROW( EXCEPTION );
 
     /* Tell the user if there had been problems with shape pulses */
@@ -348,8 +348,8 @@ int dg2020_b_end_of_test_hook( void )
         {
             f = dg2020.function + i;
 
-            if ( ! f->uses_auto_shape_pulses ||
-                 f->left_shape_padding <= f->min_left_shape_padding )
+            if (    ! f->uses_auto_shape_pulses
+                 || f->left_shape_padding <= f->min_left_shape_padding )
                 continue;
 
             print( SEVERE, "Minimum left padding for function '%s' was %s "
@@ -370,8 +370,8 @@ int dg2020_b_end_of_test_hook( void )
         {
             f = dg2020.function + i;
 
-            if ( ! f->uses_auto_shape_pulses ||
-                 f->right_shape_padding <= f->min_right_shape_padding )
+            if (    ! f->uses_auto_shape_pulses
+                 || f->right_shape_padding <= f->min_right_shape_padding )
                 continue;
 
             print( SEVERE, "Minimum right padding for function '%s' was "
@@ -431,8 +431,8 @@ int dg2020_b_exp_hook( void )
        "ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION" */
 
 #if defined ASK_FOR_SHAPE_DEFENSE_DISTANCE_CONFORMATION
-    if ( ! dg2020.is_confirmation &&
-         ( dg2020.is_shape_2_defense || dg2020.is_defense_2_shape ) )
+    if (    ! dg2020.is_confirmation
+         && ( dg2020.is_shape_2_defense || dg2020.is_defense_2_shape ) )
     {
         char mstr[ 500 ];
 
@@ -589,11 +589,11 @@ Var_T *pulser_automatic_shape_pulses( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( func == PULSER_CHANNEL_PULSE_SHAPE ||
-         func == PULSER_CHANNEL_TWT ||
-         func == PULSER_CHANNEL_TWT_GATE ||
-         func == PULSER_CHANNEL_PHASE_1 ||
-         func == PULSER_CHANNEL_PHASE_2 )
+    if (    func == PULSER_CHANNEL_PULSE_SHAPE
+         || func == PULSER_CHANNEL_TWT
+         || func == PULSER_CHANNEL_TWT_GATE
+         || func == PULSER_CHANNEL_PHASE_1
+         || func == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "Shape pulses can't be set for function '%s'.\n",
                Function_Names[ func ] );
@@ -708,11 +708,11 @@ Var_T *pulser_automatic_twt_pulses( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( func == PULSER_CHANNEL_TWT ||
-         func == PULSER_CHANNEL_TWT_GATE ||
-         func == PULSER_CHANNEL_PULSE_SHAPE ||
-         func == PULSER_CHANNEL_PHASE_1 ||
-         func == PULSER_CHANNEL_PHASE_2 )
+    if (    func == PULSER_CHANNEL_TWT
+         || func == PULSER_CHANNEL_TWT_GATE
+         || func == PULSER_CHANNEL_PULSE_SHAPE
+         || func == PULSER_CHANNEL_PHASE_1
+         || func == PULSER_CHANNEL_PHASE_2 )
     {
         print( FATAL, "TWT pulses can't be set for function '%s'.\n",
                Function_Names[ func ] );
@@ -1235,9 +1235,9 @@ Var_T *pulser_next_phase( Var_T * v )
         long res = 1;
 
 
-        if ( dg2020.phs[ 0 ].function == NULL &&
-             dg2020.phs[ 1 ].function == NULL &&
-             FSC2_MODE == TEST )
+        if (    dg2020.phs[ 0 ].function == NULL
+             && dg2020.phs[ 1 ].function == NULL
+             && FSC2_MODE == TEST )
         {
             print( SEVERE, "Phase cycling isn't used for any function.\n" );
             return vars_push( INT_VAR, 0L );
@@ -1284,10 +1284,10 @@ Var_T *pulser_next_phase( Var_T * v )
 
         if ( FSC2_MODE == EXPERIMENT )
             for ( j = 0; j < NUM_PHASE_TYPES; j++ )
-                if ( f->phase_setup->is_set[ j ] &&
-                     ! dg2020_channel_assign(
-                         f->pcm[ j * f->pc_len + f->next_phase ]->self,
-                         f->phase_setup->pod[ j ]->self ) )
+                if (    f->phase_setup->is_set[ j ]
+                     && ! dg2020_channel_assign(
+                                 f->pcm[ j * f->pc_len + f->next_phase ]->self,
+                                 f->phase_setup->pod[ j ]->self ) )
                     return vars_push( INT_VAR, 0L );
     }
 
@@ -1304,8 +1304,8 @@ Var_T *pulser_reset( Var_T * v  UNUSED_ARG )
         return vars_push( INT_VAR, 1L );
 
     vars_pop( pulser_pulse_reset( NULL ) );
-    if ( dg2020.phs[ 0 ].function != NULL ||
-         dg2020.phs[ 1 ].function != NULL )
+    if (    dg2020.phs[ 0 ].function != NULL
+         || dg2020.phs[ 1 ].function != NULL )
         vars_pop( pulser_phase_reset( NULL ) );
 
     return pulser_update( NULL );
@@ -1327,9 +1327,9 @@ Var_T *pulser_phase_reset( Var_T * v )
 
     if ( v == NULL )
     {
-        if ( dg2020.phs[ 0 ].function == NULL &&
-             dg2020.phs[ 1 ].function == NULL &&
-             FSC2_MODE == TEST )
+        if (    dg2020.phs[ 0 ].function == NULL
+             && dg2020.phs[ 1 ].function == NULL
+             && FSC2_MODE == TEST )
         {
             print( SEVERE, "Phase cycling isn't used for any function.\n" );
             return vars_push( INT_VAR, 0L );
@@ -1368,8 +1368,8 @@ Var_T *pulser_phase_reset( Var_T * v )
 
         if ( FSC2_MODE == EXPERIMENT )
             for ( j = 0; j < NUM_PHASE_TYPES; j++ )
-                if ( f->phase_setup->is_set[ j ] &&
-                     ! dg2020_channel_assign(
+                if (    f->phase_setup->is_set[ j ]
+                     && ! dg2020_channel_assign(
                                             f->pcm[ j * f->pc_len + 0 ]->self,
                                             f->phase_setup->pod[ j ]->self ) )
                     return vars_push( INT_VAR, 0L );
@@ -1395,8 +1395,8 @@ Var_T *pulser_pulse_reset( Var_T * v )
 
     if ( v == NULL )
     {
-        if ( dg2020.phs[ 0 ].function != NULL ||
-             dg2020.phs[ 1 ].function != NULL )
+        if (    dg2020.phs[ 0 ].function != NULL
+             || dg2020.phs[ 1 ].function != NULL )
             vars_pop( pulser_phase_reset( NULL ) );
 
         for ( p = dg2020.pulses; p != NULL; p = p->next )

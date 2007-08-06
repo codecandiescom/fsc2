@@ -180,8 +180,8 @@ void dg2020_basic_pulse_check( void )
             {
                 cur_type = p->pc->sequence[ i ];
 
-                fsc2_assert( cur_type >= PHASE_PLUS_X &&
-                             cur_type < NUM_PHASE_TYPES );
+                fsc2_assert(    cur_type >= PHASE_PLUS_X
+                             && cur_type < NUM_PHASE_TYPES );
                 p->function->phase_setup->is_needed[ cur_type ] = SET;
             }
         }
@@ -251,10 +251,10 @@ static void dg2020_basic_functions_check( void )
 
         /* Phase functions are not supported in this driver... */
 
-        fsc2_assert( ! f->is_used ||
-                     ( f->is_used &&
-                       i != PULSER_CHANNEL_PHASE_1 &&
-                       i != PULSER_CHANNEL_PHASE_2 ) );
+        fsc2_assert(    ! f->is_used
+                     || (    f->is_used
+                          && i != PULSER_CHANNEL_PHASE_1
+                          && i != PULSER_CHANNEL_PHASE_2 ) );
 
         /* Don't do anything if the function has never been mentioned */
 
@@ -448,9 +448,9 @@ static void dg2020_phase_setup_check( Function_T * f )
             if ( i == j )
                 continue;
 
-            if ( f->phase_setup->is_needed[ i ] &&
-                 f->phase_setup->is_set[ j ] &&
-                 f->phase_setup->pod[ i ] == f->phase_setup->pod[ j ] )
+            if (    f->phase_setup->is_needed[ i ]
+                 && f->phase_setup->is_set[ j ]
+                 && f->phase_setup->pod[ i ] == f->phase_setup->pod[ j ] )
             {
 
                 /* Distinguish between the cases that either both phase types
@@ -583,9 +583,9 @@ static void dg2020_pulse_start_setup( void )
 
         /* Nothing to be done for unused functions and the phase functions */
 
-        if ( ! f->is_used ||
-             i == PULSER_CHANNEL_PHASE_1 ||
-             i == PULSER_CHANNEL_PHASE_2 )
+        if (    ! f->is_used
+             || i == PULSER_CHANNEL_PHASE_1
+             || i == PULSER_CHANNEL_PHASE_2 )
             continue;
 
         /* Sort the pulses of current the function */
@@ -622,8 +622,8 @@ static void dg2020_pulse_start_setup( void )
        needs to be tested - thanks to Celine Elsaesser for pointing this
        out. */
 
-    if ( dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used &&
-         dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
+    if (    dg2020.function[ PULSER_CHANNEL_DEFENSE ].is_used
+         && dg2020.function[ PULSER_CHANNEL_PULSE_SHAPE ].is_used )
     {
         Ticks add;
         Function_T *fs = dg2020.function + PULSER_CHANNEL_PULSE_SHAPE,
@@ -799,8 +799,8 @@ static void dg2020_create_shape_pulses( void )
         /* No shape pulses are set for the PULSE_SHAPE function itself
            and functions that don't are marked for needing shape pulses */
 
-        if ( f->self == PULSER_CHANNEL_PULSE_SHAPE ||
-             ! f->uses_auto_shape_pulses )
+        if (    f->self == PULSER_CHANNEL_PULSE_SHAPE
+             || ! f->uses_auto_shape_pulses )
             continue;
 
         /* Append a new pulse to the list of pulses */
@@ -877,19 +877,19 @@ static void dg2020_create_shape_pulses( void )
 
     for ( p1 = dg2020.pulses; p1 != old_end->next; p1 = p1->next )
     {
-        if ( ! p1->is_active ||
-             p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+        if (    ! p1->is_active
+             || p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
             continue;
 
         for ( p2 = old_end->next; p2 != NULL; p2 = p2->next )
         {
-            if ( ! p2->is_active ||
-                 p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+            if (    ! p2->is_active
+                 || p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
                 continue;
 
-            if ( p1->pos == p2->pos ||
-                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-                 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
+            if (    p1->pos == p2->pos
+                 || ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos )
+                 || ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
             {
                 print( FATAL, "PULSE_SHAPE pulse #%ld and automatically "
                        "created shape pulse for pulse #%ld (function '%s') "
@@ -902,22 +902,22 @@ static void dg2020_create_shape_pulses( void )
 
     for ( p1 = old_end->next; p1 != NULL && p1->next != NULL; p1 = p1->next )
     {
-        if ( ! p1->is_active ||
-             p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+        if (    ! p1->is_active
+             || p1->function->self != PULSER_CHANNEL_PULSE_SHAPE )
             continue;
 
         for ( p2 = p1->next; p2 != NULL; p2 = p2->next )
         {
-            if ( ! p2->is_active ||
-                 p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
+            if (    ! p2->is_active
+                 || p2->function->self != PULSER_CHANNEL_PULSE_SHAPE )
                 continue;
 
             if ( p1->sp->function == p2->sp->function )
                 continue;
 
-            if ( p1->pos == p2->pos ||
-                 ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos ) ||
-                 ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
+            if (    p1->pos == p2->pos
+                 || ( p1->pos < p2->pos && p1->pos + p1->len > p2->pos )
+                 || ( p1->pos > p2->pos && p1->pos < p2->pos + p2->pos ) )
             {
                 print( FATAL, "Automatically created shape pulses for pulse "
                        "#%ld (function '%s') and #%ld (function '%s') would "
@@ -967,9 +967,9 @@ static void dg2020_create_twt_pulses( void )
         /* No TWT pulses can be set for the TWT or TWT_GATE function and
            functions that don't need TWT pulses */
 
-        if ( f->self == PULSER_CHANNEL_TWT ||
-             f->self == PULSER_CHANNEL_TWT_GATE ||
-             ! f->uses_auto_twt_pulses )
+        if (    f->self == PULSER_CHANNEL_TWT
+             || f->self == PULSER_CHANNEL_TWT_GATE
+             || ! f->uses_auto_twt_pulses )
             continue;
 
         /* Append a new pulse to the list of pulses */
