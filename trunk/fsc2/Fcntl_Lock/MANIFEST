@@ -3,7 +3,6 @@ lib/File/Fcntl_Lock.pm
 Fcntl_Lock.xs
 Makefile.PL
 MANIFEST
-MANIFEST.SKIP
 README
 t/Fcntl_Lock.t
 sizes1.c

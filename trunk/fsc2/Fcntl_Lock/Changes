@@ -1,36 +1,43 @@
 Revision history for Perl extension File::Fcntl_Lock
 
-0.07  Sun Aug 5 18:49:58 2007
+0.08  Sun Aug 12 2007
+    - Changes in error handling within the module
+    - Makefile.PL changed so that it hopefully won't fail on
+      (Net|Free|Open)BSD (and perhaps Cygwin) where locks on STDIN
+      and STDOUT are not supported
+    - Tests changed for the same reasons
+
+0.07  Sun Aug 5 2007
     - Module made ready for upload to CPAN
     - Changed name from Fcntl_Lock to File::Fcntl_Lock
     - Renamed some methods
     - Corrected some of the test cases
     - Updated documentation
 
-0.06  Sun Apr 28 14:08:34 2002
+0.06  Sun Apr 28 2002
     - Error texts changed to reflect SUSv3
     - Documentation updated
 
-0.05  Mon Apr 22 18:42:41 2002
+0.05  Mon Apr 22 2002
     - Error texts changed to reflect TRUE64 man page
     - Internal module errors now call die instead of setting errno to EINVAL
     - Small bug fixes
 
-0.04  Mon Apr 22 00:14:43 2002
+0.04  Mon Apr 22 2002
     - Added further test cases
     - Improved check on availability of fcntl(2) in Makefile.PL
     - Methods for simpler error determination
     - Update of documentation
 
-0.03  Sat Apr 20 16:54:32 2002
+0.03  Sat Apr 20 2002
     - Removed a bug in Makefile.PL pointed out by "Frodo Baggins"
     - Added checks in Makefile.PL for compiler and <fcntl.h>
 
-0.02  Sat Apr 20 01:10:52 2002
+0.02  Sat Apr 20 2002
     - Added tests in test.pl
     - Some changes in Makefile.PL thanks to Mark-Jason Dominus
     - Module now recognizes file handles and descriptors correctly
     - Update of documentation
 
-0.01  Thu Apr 18 14:39:19 2002
+0.01  Thu Apr 18 2002
     - original version; created by h2xs 1.21 with options -A -n Fcntl_Lock

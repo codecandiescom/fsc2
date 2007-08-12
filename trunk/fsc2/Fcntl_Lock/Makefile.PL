@@ -33,12 +33,13 @@ print $fh <<EOF;
 #include <stdlib.h>
 #include <fcntl.h>
 int main( void ) {
+	int fd = fileno( fopen( "./fcntl_test.c", "r" ) );
     struct flock f;
     f.l_type = F_RDLCK;
     f.l_whence = SEEK_SET;
     f.l_start = 0;
     f.l_len = 0;
-    return fcntl( 0, F_SETLK, &f ) != -1 ? EXIT_SUCCESS : EXIT_FAILURE;
+    return fcntl( fd, F_SETLK, &f ) != -1 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 EOF
 close $fh;
@@ -63,7 +64,7 @@ if (     (    system $Config{cc}, qw( -o sizes1 sizes1.c )
     unlink 'sizes1' if -e 'sizes1';
     unlink 'sizes2' if -e 'sizes2';
 	unlink 'Fnctl_Lock.h' if -e 'Fnctl_Lock.h';
-    die "Failed to create the necessary header file.\n";
+    die "Failed to create the required header file.\n";
 }
 unlink 'sizes1' if -e 'sizes1';
 unlink 'sizes2' if -e 'sizes2';

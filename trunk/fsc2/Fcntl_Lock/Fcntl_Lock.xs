@@ -58,10 +58,6 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
             case F_SETLKW :
                 function = REAL_F_SETLKW;
                 break;
-
-            default :
-                sv_setiv( int_err, 1 );
-                XSRETURN_UNDEF;
         }
 
         /* Let's be careful and not assume that anything at all will work as
