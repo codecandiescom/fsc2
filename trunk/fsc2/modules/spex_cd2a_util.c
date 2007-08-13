@@ -38,9 +38,10 @@ bool spex_cd2a_read_state( void )
     char *fn;
     const char *dn;
     FILE *fp;
+    int ret;
     int c;
     double val[ 4 ];
-    int new;
+    double new;
     int i = 0;
     bool in_comment = UNSET;
     bool found_end = UNSET;
@@ -75,35 +76,36 @@ bool spex_cd2a_read_state( void )
                 break;
 
             default :
-                if ( in_comment )
+                if ( in_comment || isspace( c ) )
                     break;
 
                 fsc2_fseek( fp, -1, SEEK_CUR );
 
-                if (    ( spex_cd2a.mode & WL && i > 3 ) || i > 4
-                     || (    (    ( spex_cd2a.mode & WL && i < 3 )
-                               || ( spex_cd2a.mode & WN_MODES && i < 4 ) )
-                          && fsc2_fscanf( fp, "%lf", val + i ) != 1 )
-                     || (    ( (    spex_cd2a.mode & WL && i == 3 )
-                               || ( spex_cd2a.mode & WN_MODES && i == 4 ) )
-                          && fsc2_fscanf( fp, "%d", &new ) != 1 ) )
+                ret = fsc2_fscanf( fp, "%lf", &new );
+
+                if (    ( ret == 1
+                          && (    ( spex_cd2a.mode & WL && i >= 3 )
+                                  || ( spex_cd2a.mode & WN_MODES && i >= 4 ) )
+                        )
+                     || ret != 1 )
                 {
                     print( FATAL, "Invalid state file '%s'.\n", fn );
                     T_free( fn );
                     fsc2_fclose( fp );
                     SPEX_CD2A_THROW( EXCEPTION );
                 }
+
+                val[ i++ ] = new;
 
                 while ( ( c = fsc2_fgetc( fp ) ) != EOF && isspace( c ) )
                     /* empty */ ;
 
-                if (    (    c == EOF
-                          && (    ( i != 3 && spex_cd2a.mode & WL )
-                               || ( i != 4 && spex_cd2a.mode & WN_MODES ) ) )
-                     || (    ( i == 0 || i == 2 || spex_cd2a.mode & WL )
-                          && c != 'n' )
-                     || (    ( i == 1 || i == 3 ) && spex_cd2a.mode & WN_MODES
-                          && c != 'c' ) )
+                if (    c == EOF
+                     || fgetc( fp ) != 'm'
+                     || (    spex_cd2a.mode & WN_MODES && i == 4 && c != 'c'
+                          && fgetc( fp ) != '^' && fgetc( fp ) != '-'
+                          && fgetc( fp ) != '1' )
+                     || ( i < 4 && c != 'n' ) )
                 {
                     print( FATAL, "Invalid state file '%s'.\n", fn );
                     T_free( fn );
@@ -111,21 +113,7 @@ bool spex_cd2a_read_state( void )
                     SPEX_CD2A_THROW( EXCEPTION );
                 }
 
-                if (    ( ( spex_cd2a.mode & WL && i != 3 ) || i != 4 )
-                     && (    fsc2_fgetc( fp ) != 'm'
-                          || (    c == 'c'
-                               && ( fsc2_fgetc( fp ) != '^'
-                                    || fsc2_fgetc( fp ) != '-'
-                                    || fsc2_fgetc( fp ) != '1' ) ) ) )
-                {
-                    print( FATAL, "Invalid state file '%s'.\n", fn );
-                    T_free( fn );
-                    fsc2_fclose( fp );
-                    SPEX_CD2A_THROW( EXCEPTION );
-                }
-
-                i++;
-                break;
+                in_comment = SET;
         }
     } while ( ! found_end );
 
@@ -138,13 +126,13 @@ bool spex_cd2a_read_state( void )
         SPEX_CD2A_THROW( EXCEPTION );
     }   
 
-    spex_cd2a.wavelength = 1.0e-9 * val[ 0 ];
+    if ( ! spex_cd2a.is_wavelength )
+        spex_cd2a.wavelength = 1.0e-9 * val[ 0 ];
+    spex_cd2a.offset     = 1.0e-9 * val[ 1 ];
     spex_cd2a.pixel_diff = 1.0e-9 * val[ 2 ];
 
     if ( spex_cd2a.mode & WN_MODES )
     {
-        spex_cd2a.offset = val[ 1 ];
-
         if ( val[ 3 ] < 0.0 )
         {
             print( FATAL, "Invalid state file '%s'.\n", fn );
@@ -190,8 +178,7 @@ bool spex_cd2a_store_state( void )
                   "# 1. The wavelength the monochromator is set to\n"
                   "# 2. An offset of the monochromator, i.e. a number that "
                   "always has to be\n"
-                  "#    added to wavenumbers or -lengths specified by the "
-                  "user\n"
+                  "#    added to wavelengths specified by the user\n"
                   "# 3. The wavelength difference between two pixels of the "
                   "connected CCD camera\n"
                   "# 4. For wavenumber driven monochromators only: the "
@@ -200,9 +187,9 @@ bool spex_cd2a_store_state( void )
                   "SPEX CD2A)\n\n" );
 
     if ( spex_cd2a.mode & WN_MODES )
-        fsc2_fprintf( fp, "%.5f nm\n%.4f cm^-1\n%.7f nm\n%.4f cm^-1\n",
-                      1.0e9 * spex_cd2a.wavelength,
-                      spex_cd2a.offset,
+        fsc2_fprintf( fp, "%.5f nm\n%.5f nm\n%.7f nm\n%.4f cm^-1\n",
+                      1.0e9 * spex_cd2a_wl2wn( spex_cd2a.wavelength ),
+                      1.0e9 * spex_cd2a.offset,
                       1.0e9 * spex_cd2a.pixel_diff,
                       spex_cd2a.laser_line );
     else
@@ -258,11 +245,9 @@ double spex_cd2a_wn2wl( double wn )
 
 double spex_cd2a_wl2Uwl( double wl )
 {
-    if ( spex_cd2a.mode & WL )
-        wl -= spex_cd2a.offset;
-    else
-        wl = spex_cd2a_wn2wl( spex_cd2a_wl2wn( wl ) - spex_cd2a.offset );
-
+    wl -= spex_cd2a.offset;
+    if ( wl <= 0.0 )
+        SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
     return wl;
 }
 
@@ -274,40 +259,25 @@ double spex_cd2a_wl2Uwl( double wl )
 
 double spex_cd2a_Uwl2wl( double wl )
 {
-    if ( spex_cd2a.mode & WL )
-        wl += spex_cd2a.offset;
-    else
-        wl = spex_cd2a_wn2wl( spex_cd2a_wl2wn( wl ) + spex_cd2a.offset );
-
+    wl += spex_cd2a.offset;
+    if ( wl <= 0.0 )
+        SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
     return wl;
 }
 
 
 /*-----------------------------------------------------------*
  * Converts internally used wavenumber to the value expected
- * by the user (i.e. inlcuding the correction and converting
+ * by the user (i.e. including the correction and converting
  * it to relative units if a laser line is set).
  *-----------------------------------------------------------*/
 
 double spex_cd2a_wn2Uwn( double wn )
 {
-    switch ( spex_cd2a.mode )
-    {
-        case WN_REL :
-            wn = spex_cd2a.laser_line - wn;
-            /* fall through */
+    wn = spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( spex_cd2a_wn2wl( wn ) ) );
 
-        case WN_ABS :
-            wn -= spex_cd2a.offset;
-            break;
-
-        case WL :
-            wn = spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( spex_cd2a_wn2wl( wn ) ) );
-            break;
-
-        default:
-            fsc2_impossible( );
-    }
+    if ( spex_cd2a.mode == WN_REL )
+        wn = spex_cd2a.laser_line - wn;
 
     return wn;
 }
@@ -321,39 +291,27 @@ double spex_cd2a_wn2Uwn( double wn )
 
 double spex_cd2a_Uwn2wn( double wn )
 {
-    switch ( spex_cd2a.mode )
-    {
-        case WN_REL :
-            wn = spex_cd2a.laser_line - wn;
-            /* fall through */
+    if ( spex_cd2a.mode == WN_REL )
+        wn = spex_cd2a.laser_line - wn;
 
-        case WN_ABS :
-            wn += spex_cd2a.offset;
-            break;
-
-        case WL :
-            wn = spex_cd2a_wl2wn( spex_cd2a_Uwl2wl( spex_cd2a_wn2wl( wn ) ) );
-            break;
-            
-        default:
-            fsc2_impossible( );
-    }
-
-    return wn;
+    return spex_cd2a_wl2wn( spex_cd2a_Uwl2wl( spex_cd2a_wn2wl( wn ) ) );
 }
 
 
-/*--------------------------------------------------------*
- * Converts internally used wavenumber to a wavelength as
- * seen by the user (i.e. including offset correction).
- *--------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Converts from internally used wavelength to a wavenumber
+ * as expected by the user (i.e. including offset correction
+ * and relative to the laser line if one is set).
+ *-----------------------------------------------------------*/
 
-double spex_cd2a_wn2Uwl( double wn )
+double spex_cd2a_wl2Uwn( double wl )
 {
-    if ( spex_cd2a.mode & WN_MODES )
-        return spex_cd2a_wn2wl( wn - spex_cd2a.offset );
+    double wn = spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( wl ) );
 
-    return spex_cd2a_wl2Uwl( spex_cd2a_wn2wl( wn ) );
+    if ( spex_cd2a.mode == WN_REL )
+        wn = spex_cd2a.laser_line - wn;
+
+    return wn;
 }
 
 
@@ -364,25 +322,18 @@ double spex_cd2a_wn2Uwl( double wn )
 
 double spex_cd2a_Uwl2wn( double wl )
 {
-    if ( spex_cd2a.mode & WN_MODES )
-        return spex_cd2a_wl2wn( wl ) + spex_cd2a.offset;
-
-    return spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( wl ) );
+    return spex_cd2a_wl2wn( spex_cd2a_Uwl2wl( wl ) );
 }
 
 
-/*-----------------------------------------------------------*
- * Converts from internally used wavelength to wavenumber as
- * seen by the user (i.e. including offset correction and
- * in relative wavenumber mode if necessary).
- *-----------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Converts internally used wavenumber to a wavelength as
+ * seen by the user (i.e. including offset correction).
+ *--------------------------------------------------------*/
 
-double spex_cd2a_wl2Uwn( double wl )
+double spex_cd2a_wn2Uwl( double wn )
 {
-    if ( spex_cd2a.mode & WN_MODES )
-        return spex_cd2a_wn2Uwn( spex_cd2a_wl2wn( wl ) );
-
-    return spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( wl ) );
+    return spex_cd2a_wl2Uwl( spex_cd2a_wn2wl( wn ) );
 }
 
 
@@ -394,10 +345,7 @@ double spex_cd2a_wl2Uwn( double wl )
 
 double spex_cd2a_Uwn2wl( double wn )
 {
-    if ( spex_cd2a.mode & WN_MODES )
-        return spex_cd2a_wn2wl( spex_cd2a_Uwn2wn( wn ) );
-
-    return spex_cd2a_Uwl2wl( spex_cd2a_wn2wl( wn ) );
+    return spex_cd2a_wn2wl( spex_cd2a_Uwn2wn( wn ) );
 }
 
 

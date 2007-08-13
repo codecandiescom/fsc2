@@ -1,0 +1,10 @@
+=== WN float [ 11000 : 33000 ] [ 27000.0 ] "Wavenumber\n(see scale at right\nhad side of mono-\nchromator)" " cm^-1"
+
+DEVICES:
+spex232;
+
+PREPARATIONS:
+monochromator_enforce_wavenumber( 2.0 * WN / 3.0 );
+
+EXPERIMENT:
+

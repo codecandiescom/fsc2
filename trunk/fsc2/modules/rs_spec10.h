@@ -32,7 +32,6 @@
 #define RS_SPEC10_TEST
 */
 
-
 /* The following sequence of includes and undefining BIG_ENDIAN is
    required to avoid some compiler warnings. The include files coming
    with the PVCAM library must go first - make sure the include path

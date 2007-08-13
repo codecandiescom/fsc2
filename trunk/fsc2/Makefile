@@ -378,7 +378,7 @@ MAIL_ADDRESS       := fsc2@toerring.de
 
 # Set the optimization level
 
-OPTIMIZATION     := -O0
+OPTIMIZATION     := -O2
 
 
 # Define this in order to use mpatrol
@@ -537,6 +537,8 @@ machine_name := $(shell mn=`hostname -f 2>/dev/null`;        \
 						else                                 \
 							echo $$mn;                       \
 					    fi )
+
+machine_name := spex.mvl.local
 
 # Try to include a configuration file for machines that are listed in the
 # 'machines' subdirectory. This makes configuring a new fsc2 version for a

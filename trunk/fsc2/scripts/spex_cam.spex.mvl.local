@@ -3,7 +3,7 @@
 #
 # $Id$
 #
-# Copyright (C) 1999-2006 Jens Thoms Toerring
+# Copyright (C) 1999-2007 Jens Thoms Toerring
 #
 # This file is part of fsc2.
 #
@@ -22,6 +22,7 @@
 # the Free Software Foundation, 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+
 use strict;
 use warnings;
 use Tk;
@@ -34,17 +35,12 @@ die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
     if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
 
 
-# This variable tells where the monochromator state file can be found
+########################################################################
 
-my $state_file = '/usr/local/lib/fsc2/spex232.state';
-
-
-# This variable tells the minimum number of pixels we cut off from spectra
-# fetched from the camera during "real" measurements, i.e. the single-window
-# and multi-window experiments
-
-my $Dead_Points = 5;
-
+my $sm_exp_time = 0.1;       # single window mode exp time
+my $sm_N_scans = 1;          # single window mode number of runs
+my $rm_exp_time = 0.1;       # realtime mode exp time
+my $geom = get_defs( );
 
 # This variable is the minimum distance a wavenumber may have from the laser
 # line. In most cases the user is getting asked if he really wants to
@@ -54,23 +50,8 @@ my $Dead_Points = 5;
 my $Min_Dist = 200.0;                  # in cm^-1
 
 
-########################################################################
-
-
-my $sm_exp_time = 0.1;       # single window mode exp time
-my $sm_N_scans = 1;          # single window mode number of runs
-my $rm_exp_time = 0.1;       # realtime mode exp time
-my $center_line = 0.0;
-my $offset = 0.0;
-my $laser_line = 0.0;
-my $is_calibrated = 0;
-my $geom = get_defs( );
-
-
 $SIG{ CHLD } = sub { };
 
-
-check_status( $geom );
 create_gui( $geom );
 MainLoop;
 
@@ -106,8 +87,7 @@ sub create_gui {
 									 store_defs( $1 );
 									 $mw->destroy } );
 
-	$b[ 0 ]->configure( '-state' => $is_calibrated ? 'normal' : 'disabled',
-						'-command' =>
+	$b[ 0 ]->configure( '-command' =>
 						sub { Single_Measurement::run( $mw,\$sm_exp_time,
 													   \$sm_N_scans,
 													   $b[ 0 ]->geometry ) } );
@@ -115,145 +95,16 @@ sub create_gui {
 						sub { Realtime::run( $mw, \$rm_exp_time,
 											 $b[ 1 ]->geometry ) } );
 	$b[ 2 ]->configure( '-command' => sub { ROI_Bin::run( $mw ); } );
-	$b[ 3 ]->configure( '-command' =>
-						sub { Calibration::run( $mw );
-							  $b[ 0 ]->configure( '-state' => $is_calibrated ?
-												  'normal' : 'disabled' ); } );
+	$b[ 3 ]->configure( '-command' => sub { Calibration::run( $mw ); } );
 	$b[ 4 ]->configure( '-command' =>
-						sub { Center_Line::run( $mw, $b[ 4 ]->geometry );
-							  $b[ 0 ]->configure( '-state' => 'disabled' )
-								  unless $is_calibrated; } );
+						sub { Center_Line::run( $mw, $b[ 4 ]->geometry ); } );
 	$b[ 5 ]->configure( '-command' =>
-						sub { Laser_Line::run( $mw, $b[ 4 ]->geometry );
-							  $b[ 0 ]->configure( '-state' => 'disabled' )
-								  unless $is_calibrated; } );
+						sub { Laser_Line::run( $mw, $b[ 4 ]->geometry ); } );
 	$b[ 6 ]->configure( '-command' => sub { Temperature::run( $mw ); } );
 
 	$f[ 0 ]->pack( %fp );
 	$f[ 1 ]->pack( %fp );
 	$_->pack( %fp ) foreach @b;
-}
-
-
-#############################################
-
-sub check_status {
-	my ( $geom ) = shift;
-	my ( @vals, @fc, @t, @bc );
-
-	my %fp = ( '-side' => 'top',
-			   '-fill' => 'x',
-			   '-padx' => '2m',
-			   '-pady' => '2m' );
-	my %wp = ( -side => 'left',
-			   -fill => 'x',
-			   -expand => 1 );
-
-	my $mf;
-	return unless open $mf, "<$state_file";
-
-	my $mode = "WL";
-	while ( <$mf> ) {
-		next if /^(#|\s*$)/;
-		if ( /^\s*([+-]?\d+\.\d+)\s+nm\s*$/ ) {
-			push @vals, $1;
-		} elsif ( /^\s*([+-]?\d+\.\d+)\s+cm\^\-1\s*$/ ) {
-			push @vals, $1;
-			if ( @vals == 2 or @vals == 4 ) {
-				$mode = "WN";
-			} else {
-				return;
-			}
-		} elsif ( /^\s*(\d+)\s*$/ and ( ( $mode eq "WN" and @vals == 4 ) or
-									  ( $mode eq "WL" and @vals == 3 ) ) ) {
-			$is_calibrated = $1 eq '1' ? 1 : 0;
-		} else {
-			return;
-		}
-	}
-	close $mf;
-
-	return unless $vals[ 0 ] >= 0 and $vals[ 3 ] >= 0;
-
-	my $mw = MainWindow->new;
-	$mw->title( 'Status Check' );
-
-	$laser_line = ( Laser_Line::get_line( $mw ) )[ 0 ];
-
-	exit 1 if ! defined $laser_line;
-
-	$center_line = 1.0e7 / $vals[ 0 ];
-
-	my $cwn = $center_line;
-	$cwn = $laser_line - $cwn unless $laser_line == 0.0;
-	$cwn = round( $cwn, 3 );
-
-	$offset = $vals[ 1 ];
-
-	unless ( defined $laser_line and $laser_line == $vals[ 3 ] ) {
-		$is_calibrated = 0;
-		$mw->destroy;
-		return;
-	}
-
-	$fc[ 0 ] = $mw->Frame( );
-	push @t, $fc[ 0 ]->Label( '-text' => 'Please check if monochromator is ' .
-							  'still set to:' );
-
-	$fc[ 1 ] = $mw->Frame( );
-	push @t, $fc[ 1 ]->Label( '-text' => 'Center wavenumber:',
-							  '-width' => 20 );
-	push @t, $fc[ 1 ]->Label( '-text' => $cwn,
-							 '-width' => 10 );
-	push @t, $fc[ 1 ]->Label( '-text' => ' cm^-1' .
-							  ( $laser_line == 0.0 ?
-								' abs.' : ' rel.' ),
-							  '-width' => 10 );
-
-	$fc[ 2 ] = $mw->Frame( );
-	push @t, $fc[ 2 ]->Label( '-text' => '(Compare to value shown on the ' .
-							             'SPEX display)' );
-
-
-	$fc[ 3 ] = $mw->Frame( );
-	push @bc, $fc[ 3 ]->Button( -text => "Yes",
-								-command => sub { $is_calibrated = 1;
-												  is_safe_warn( $mw );
-												  $mw->destroy; } );
-	push @bc, $fc[ 3 ]->Button( -text => "No",
-								-command => sub { $mw->destroy; } );
-
-	$fc[ 0 ]->pack( %fp );
-	$fc[ 1 ]->pack( %fp );
-	$_->pack( %wp ) foreach @t;
-	$fc[ 2 ]->pack( %fp );
-	$fc[ 3 ]->pack( -side => "bottom",
-					-fill => "x",
-					-padx => "4m" );
-	$_->pack( %wp, -padx => '5m', -pady => '3m' ) foreach @bc;
-
-	MainLoop;
-}
-
-
-#############################################
-
-sub is_safe_warn {
-	my $mw = shift;
-	return if $laser_line == 0.0 or
-		      abs( $center_line - $laser_line ) >= $Min_Dist;
-
-	show_message( $mw, "Take care: the laser line and the " .
-				       "monochromators center posision are " .
-				       "less the $Min_Dist cm^-1 apart." );
-}
-
-
-#############################################
-
-sub round {
-	my ( $x, $digits ) = @_;
-	return 10 ** - $digits * int( 10 ** $digits * $x + 0.5 * ( $x <=> 0 ) );
 }
 
 
@@ -286,10 +137,6 @@ sub get_defs {
 		$ne =~ /^(\d+)?\.?(\d+)?([Ee]\+?(\d+)?)?$/;
 	chomp $ne;
 	$rm_exp_time = $ne;
-	goto done_reading unless defined( $ne = <$f> ) and
-		$ne =~ /^(\d+)$/;
-	chomp $ne;
-	$is_calibrated = $ne;
 
   done_reading:
 	close $f;
@@ -312,26 +159,10 @@ $geom
 $sm_exp_time
 $sm_N_scans
 $rm_exp_time
-$is_calibrated
 EOF
 	close $f;
 }
 
-
-#############################################
-# Displays a message box
-
-sub show_message {
-	my ( $mw, $text ) = @_;
-
-    $mw->messageBox( '-icon' => 'error',
-                     '-type' => 'Ok',
-	                 '-title' => 'Error',
-                     '-message' => $text );
-}
-
-
-1;
 
 
 #############################################
@@ -348,29 +179,23 @@ sub run {
 
 	no warnings "exec";
     unless ( open $fh, "|fsc2_start -w" ) {
-		main::show_message( $top, "Can't start fsc2" );
+		Tools::show_message( $top, "Can't start fsc2" );
 		$top->deiconify;
 		return;
 	}
 
     print $fh <<EOF;
 DEVICES:
-
 rs_spec10;
 
-
 VARIABLES:
-
 I = 1;
 temp;
 
-
 PREPARATIONS:
-
 init_1d( 1, "", "Temperature [K]" );
 
 EXPERIMENT:
-
 FOREVER {
 	temp =  ccd_camera_temperature( );
 	print( "# K (# C)\\n", temp, K_to_C( temp ) );
@@ -398,7 +223,7 @@ EOF
             $text = "Something strange\nis going on here.";
         }
 
-        main::show_message( $top, $text ) if $? >> 8 != 0;
+        show_message( $top, $text ) if $? >> 8 != 0;
     }
 
 	$top->deiconify;
@@ -423,7 +248,7 @@ use IO::Handle;
 
 sub run {
 	my ( $top, $geom ) = @_;
-	my ( $ll, @limits ) = get_line( $top );
+	my $ll = Tools::get_laser_line( $top );
 	return unless defined $ll;
 
 	$top->withdraw;
@@ -446,9 +271,7 @@ sub run {
 
 	$f[ 5 ] = $f[ 0 ]->Frame( );
 	$f[ 6 ] = $f[ 5 ]->Button( -text => "Apply",
-							   -command => sub { $laser_line =
-													 set_line( $top, $ll );
-												 $is_calibrated = 0;
+							   -command => sub { set_line( $top, $ll );
 												 $top->deiconify;
 												 $f[ 0 ]->destroy; } );
 	$f[ 7 ] = $f[ 5 ]->Button( -text => "Quit",
@@ -520,77 +343,15 @@ sub ll_valid {
 
 
 #############################################
-# Function invokes fsc2 (in non-graphics mode) to figure out the current
-# setting of the laser line
-
-sub get_line {
-	my $top = shift;
-	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam_laserlineXXXXXX" );
-
-	$f->autoflush( 1 );
-
-	# Create EDL script for determining the laser line (with three digits
-	# after the decimal point)
-
-	print $f <<EOF;
-DEVICES:
-spex232;
-VARIABLES:
-LL, limits[ 2 ];
-EXPERIMENT:
-LL = round( 1000 * monochromator_laser_line( ) );
-limits = monochromator_wavenumber_scan_limits( );
-print( "#.### # #\\n", LL / 1000, ( LL % 1000 ) / 100,
-       ( LL % 100 ) / 10, LL % 10, limits[ 1 ], limits[ 2 ] );
-EOF
-
-	close $f;
-
-	# Run the script and read in the result
-
-	my $g;
-	no warnings "exec";
-	unless ( open $g, "-|", "fsc2 -ng $fn 2>&1" ) {
-		close $f;
-		unlink $fn;
-		main::show_message( $top, "Can't start fsc2" );
-		return;
-	}
-
-	my $reply = <$g>;
-	close $g;
-	unlink $fn;
-	chomp $reply;
-
-	if ( defined $reply and $reply =~ /^F\s+SPEX232:\s+(.+)$/ ) {
-		main::show_message( $top, "Can't determine monochromators laser " .
-							"line setting:\n$1" );
-		return;
-	}
-
-	my @res = split ' ', $reply;
-
-	unless ( @res == 3 ) {
-		main::show_message( $top, "Can't determine monochromators laser " .
-							"line setting." );
-		return;
-	}
-
-	return @res;
-}
-
-
-#############################################
 # Function invokes fsc2 (in non-graphics mode) to set a new value of the
 # laser line
 
 sub set_line {
 	my ( $top, $ll ) = @_;
-	$ll = main::round( $ll, 3 );
+	$ll = Tools::round( $ll, 3 );
+	return unless Tools::is_laser_line_safe( $top, $ll );
 
-	return unless Laser_Check::ask_if_safe( $top, $ll, $center_line );
-
-	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam_laserlineXXXXXXX" );
+	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam.XXXXXX" );
 
 	$f->autoflush( 1 );
 
@@ -598,36 +359,27 @@ sub set_line {
 DEVICES:
 spex232;
 VARIABLES:
-LL;
 EXPERIMENT:
-LL = round( 1000 * monochromator_laser_line( $ll cm^-1 ) );
-print( "#.###\\n", LL / 1000, ( LL % 1000 ) / 100,
-       ( LL % 100 ) / 10, LL % 10 );
+monochromator_laser_line( $ll cm^-1 );
 EOF
 
 	close $f;
-	my $g;
-	no warnings "exec";
 
-	unless ( open $g, "-|", "fsc2 -ng $fn 2>&1" ) {
+	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
-		main::show_message( $top, "Can't start fsc2" );
+		Tools::show_message( $top, "Can't start fsc2" );
 		return;
 	}
 
-	my $reply = <$g>;
-	close $g;
+	my $reply = <$f>;
+	close $f;
 	unlink $fn;
 
-	if ( defined $reply and $reply =~ /^Please press the "REMOTE" button/ ) {
-		main::show_message( $top, "Please press the \"REMOTE\" button at" .
-							"the console to allow computer control" .
-							"of the monochromator." );
-		return;
+	if ( defined $reply and $reply =~ /^F\s+spex232:\s+(.+)$/ ) {
+		Tools::show_message( $top, "Can't set monochromators laser " .
+							 "line:\n$1" );
 	}
-
-	return $reply;
 }
 
 
@@ -649,13 +401,16 @@ use IO::Handle;
 
 sub run {
 	my ( $top, $geom ) = @_;
-	my $cwn;
 
-	my @limits = ( Laser_Line::get_line( $top ) )[ 1 .. 2 ];
-
-	$cwn = $center_line - $offset;
- 	$cwn = main::round( $laser_line - $cwn, 3 ) if $laser_line != 0.0;
-
+	my $cwn = Tools::get_wavenumber( $top );
+	my $laser_line = Tools::get_laser_line( $top );
+	my @limits = Tools::get_wavenumber_limits( $top );
+	if ( $laser_line != 0.0 ) {
+		my $x = $laser_line - $limits[ 0 ];
+		$limits[ 0 ] = $laser_line - $limits[ 1 ];
+		$limits[ 1 ] = $x;
+} 
+	
 	$top->withdraw;
 
 	my @f;
@@ -672,23 +427,17 @@ sub run {
 	$f[ 1 ] = $f[ 0 ]->Frame( );
 	$f[ 2 ] = $f[ 1 ]->Label( -text => "Center position:  " );
 	$f[ 3 ] = $f[ 1 ]->Entry( -textvariable => \$cwn );
-	my $balloon = $f[ 1 ]->Ballon( );
+	my $balloon = $f[ 1 ]->Balloon( );
 	$balloon->attach( $f[ 3 ],
-					  -bolloonmsg => "Range: $limits[0] - $limits[1] cm^-1" );
+					  -balloonmsg => "Range: $limits[0] - $limits[1] cm^-1" );
 	$f[ 4 ] = $f[ 1 ]->Label( -text => "  cm^-1 " .
-							  ( $laser_line != 0 ? "rel." : "abs." ) );
+							  ( $laser_line != 0.0 ? "rel." : "abs." ) );
 
 	$f[ 5 ] = $f[ 0 ]->Frame( );
 	$f[ 6 ] = $f[ 5 ]->Button( -text => "Apply",
 							   -command => sub { $f[ 0 ]->destroy;
-												 if ( set_cwn( $top, $cwn ) ) {
-								   					 $is_calibrated = 0;
-													 $center_line =
-														 ( $laser_line == 0 ?
-														   $cwn :
-														   $laser_line - $cwn )
-															 + $offset;
-												 }
+												 set_cwn( $top, $cwn,
+														  $laser_line );
 												 $top->deiconify; } );
 	$f[ 7 ] = $f[ 5 ]->Button( -text => "Quit",
 							   -command => sub { $top->deiconify;
@@ -738,12 +487,11 @@ sub run {
 # Function for setting a new center position for the monochromator
 
 sub set_cwn {
-	my ( $top, $cwn ) = @_;
+	my ( $top, $cwn, $laser_line ) = @_;
 
-	Laser_Check::ask_if_safe( $top, $laser_line, $laser_line - $cwn )
-		  if $laser_line != 0.0;
+	Tools::is_laser_line_safe( $top, $laser_line, $cwn ) or return;
 
-	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam_laserlineXXXXXXX" );
+	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam.XXXXXX" );
 
 	$f->autoflush( 1 );
 
@@ -761,7 +509,7 @@ EOF
 	unless ( open $g, "-|", "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
-		main::show_message( "Can't start fsc2" );
+		Tools::show_message( "Can't start fsc2" );
 		return;
 	}
 
@@ -769,16 +517,9 @@ EOF
 	close $g;
 	unlink $fn;
 
-	if ( defined $reply and $reply =~ /^Please press the "REMOTE" button/ ) {
-		main::show_message( "Please press the \"REMOTE\" button at" .
-							"the console to allow computer control" .
-							"of the monochromator." );
-		return 0;
-	}
-
 	if ( defined $reply ) {
-		main::show_message( "Can't set monochromators center position line\n" .
-							"$reply" );
+		Tools::show_message( "Can't set monochromators center position " .
+							 "line:\n$reply" );
 		return 0;
 	}
 
@@ -797,7 +538,6 @@ sub cwn_valid {
     my $float_rep = '-?((\d+(\.(\d+)?)?)|(\.\d+))([eE]\+?\d+)?';
 
     if ( $new =~ /^$float_rep$/ ) {
-		$new = $laser_line - $new unless $laser_line == 0.0;
 		if ( $new < $limits[ 0 ] or $new > $limits[ 1 ] ) {
             $start_button->configure( -state => 'disabled' );
         } else {
@@ -828,26 +568,16 @@ package Calibration;
 use Tk;
 use strict;
 use warnings;
-use File::Temp ':mktemp';
-use IO::Handle;
 
 
 sub run {
 	my $top = shift;
 	my ( $fh, $cl );
 
-	return unless Laser_Check::ask_if_safe( $top, $laser_line,
-											$center_line - $offset );
-
-	$cl = $center_line - $offset;
-	$cl = $laser_line - $cl unless $laser_line == 0.0;
-	$cl = main::round( $cl, 3 );
-
 	$top->withdraw;
 
-	no warnings "exec";
     unless ( open $fh, "|fsc2_start -w" ) {
-		main::show_message( $top, "Can't start fsc2" );
+		Tools::show_message( $top, "Can't start fsc2" );
 		return;
 	}
 
@@ -857,54 +587,59 @@ DEVICES:
 spex232;
 rs_spec10;
 
-
 VARIABLES:
 
-cl = $cl cm^-1;
+cl;
 ll;
-abs_cl;
 ROI[ 4 ] = ccd_camera_roi( );
 BIN[ 2 ] = ccd_camera_binning( );
 ccd_size[ 2 ] = ccd_camera_pixel_area( );
-pixel_diff = 0.0;
-center_dev;
-xm, lm, lc;
+
 exposure_time = $rm_exp_time s;
-NUM_PIXELS = ROI[ 3 ] - ROI[ 1 ] + 1;
-x_cwl = 0.5 * ccd_size[ 1 ] - ROI[ 1 ] + 1;
-lpos = 0.5 * ( NUM_PIXELS + 1 );
+NUM_Points = ( ROI[ 3 ] - ROI[ 1 ] + 1 ) / BIN[ 1 ];
+lpos = 0.5 * ( ccd_size[ 1 ] - ROI[ 1 ] + 1 ) / BIN[ 1 ] + 0.5;
 new;
 Spec[ * ];
-lines[ * ] = { 1, 2 };        // in absolute wavenumbers !
-positions[ * ] = { 1, 2 };
+lambda[ * ] = { 1, 2 };        // wavelengths of the lines
+pos[ * ] = { 1, 2 };           // positions of the lines in pixels, counting
+                               // from the left border of the camera chip
 LP_count = 0;
 L_count = 1;
 P_count = 1;
+pixel_diff;                    // wavelength difference between two pixels of
+                               // the camera chip
+lambda_center;                 // assumed wavelength at center of the chip
+delta_lambda_theo;             // theoretical deviation between wavelength
+                               // center of chip and CoG of the lines
+delta_lambda_exp;              // observed deviation between wavelength at
+                               // center of chip  and CoG of the lines
+                               // (using the wavelength difference between
+                               // pixels of the chip)
+center_dev;
+xm, lm;
 B_wn, B_et, B_gs, B_lpos, B_conf, B_pd, B_cd, B_acc = -1;
 I;
 
-
 PREPARATIONS:
 
-init_1d( 1, NUM_PIXELS / BIN[ 1 ],
+init_1d( 1, NUM_Points,
 		 BIN[ 1 ] == 1 ? "Position [pixel]" : "Position [pixel (binned)]",
 		 "Counts" );
 
-
 EXPERIMENT:
 
+cl = monochromator_wavenumber( );
 ll = monochromator_laser_line( );
-IF ll == 0 cm^-1 {
-	abs_cl = cl;
-} ELSE {
-	abs_cl = ll - cl;
-}
 
-monochromator_wavenumber( cl );
+IF ll == 0 cm^-1 {
+    lambda_center = 0.01 / cl;
+} ELSE {
+    lambda_center = 0.01 / ( ll - cl );
+}
 
 hide_toolbox( "ON" );
 B_wn = input_create( "FLOAT_INPUT", cl, "Expected line position [cm^-1" +
-                     ( ll == 0 cm^-1 ? " abs.]" : " rel.]" ), "", "%.4f" );
+                     ( ll == 0 cm^-1 ? " abs.]" : " rel.]" ), "", "%.3f" );
 B_et = input_create( "FLOAT_INPUT", exposure_time, "Exposure time [s]" );
 B_gs = button_create( "NORMAL_BUTTON", "Get spectrum" );
 B_lpos = input_create( "FLOAT_INPUT", lpos, "Observed line position [pixel]",
@@ -929,7 +664,7 @@ FOREVER {
 		}
 		L_count = 1;
 		FOR I = 1 : LP_count {
-			IF lines[ I ] != 0.01 / new {
+			IF lambda[ I ] != 0.01 / new {
 				L_count += 1;
 			}
 		}
@@ -957,7 +692,7 @@ FOREVER {
 
 	IF toolbox_changed( B_lpos ) {
 		new = input_value( B_lpos );
-		IF new < 1 | new > NUM_PIXELS {
+		IF new < 1 | new > NUM_Points {
 			input_value( B_lpos, lpos );
 			object_enable( B_conf, "OFF" );
 			NEXT;
@@ -965,7 +700,7 @@ FOREVER {
 
 		P_count = 1;
 		FOR I = 1 : LP_count {
-			IF positions[ I ] != new {
+			IF pos[ I ] != new {
 				P_count += 1;
 			}
 		}
@@ -978,11 +713,21 @@ FOREVER {
 
 	IF button_state( B_conf ) {
 		LP_count += 1;
-		positions[ LP_count ] = input_value( B_lpos );
+
+        /* Convert the position of the lines the user entered to positions
+         * in pixels (relative to the left-most pixel on the chip without
+         * binning or ROI) */
+
+		pos[ LP_count ] = input_value( B_lpos ) * BIN[ 1 ]
+                          + 0.5 * ( BIN[ 1 ] - 1 ) + ROI[ 1 ] - 1;
+
+        /* ...and convert the (absolute or relative) wavenumbers for the lines
+         *  to wavelengths (in nm) */
+
 		IF ll == 0 cm^-1 {
-			lines[ LP_count ] = 0.01 / input_value( B_wn );
+			lambda[ LP_count ] = 0.01 / input_value( B_wn );
 		} ELSE {
-			lines[ LP_count ] = 0.01 / ( ll - input_value( B_wn ) ] );
+			lambda[ LP_count ] = 0.01 / ( ll - input_value( B_wn ) );
 		}
 
         clear_marker( );
@@ -993,21 +738,39 @@ FOREVER {
 	}
 }
 
-pixel_diff = ( lines[ 2 ] - lines[ 1 ] ) /
-	         ( BIN[ 1 ] * ( positions[ 2 ] - positions[ 1 ] ) );
-IF ll == 0 cm^-1 {
-	pixel_diff *= -1.0;
-}
+/* Calculate the wavelength difference between two pixels on the chip (this
+ * assumes that diffraction for a grating is linear in wavelength). */
 
-xm = 0.5 * ( positions[ 1 ] + positions[ 2 ] );
-lm = 0.5 * ( lines[ 1 ] + lines[ 2 ] );
-lc = ( xm * BIN[ 1 ] - x_cwl ) * pixel_diff + lm;
-center_dev = abs_cl - 0.01 / lc;
+pixel_diff = ( lambda[ 2 ] - lambda[ 1 ] ) / ( pos[ 2 ] - pos[ 1 ] );
+
+/* Calculate the wavelength difference between the wavelength at the center
+ * of the chip (that's where the light with the wavelength the monochromator
+ * is set to is supposed to arrive) and the wavelength of the "center of
+ * gravity" of the lines the user used for the calibration. */
+
+delta_lambda_theo = lambda_center - 0.5 * ( lambda[ 1 ] + lambda[ 2 ] );
+
+/* Now calculate difference between the center pixel position on the chip and
+ * the "center of gravity" of the positions the user observed. This gets
+ * multiplied by the wavelength difference between to pixels on the chip to
+ * arrive at an "observed" wavelength difference.*/
+
+delta_lambda_exp  = 0.5 * pixel_diff
+                    * ( ccd_size[ 1 ] + 1 - pos[ 1 ] - pos[ 2 ] );
+
+/* The difference between the "theoretical" difference between the center and
+ * the CoG of the lines used for the calibration and the "observed" difference
+ * tells us how far off the wavelength at the center is from what we set at
+ * the monochromator and thus how much we have to change the offset we use
+ * for the monochromator. */
+
+center_dev = delta_lambda_theo - delta_lambda_exp;
 
 hide_toolbox( "ON" );
-B_pd = output_create( "FLOAT_OUTPUT", - 1.0e9 * pixel_diff,
+B_pd = output_create( "FLOAT_OUTPUT", pixel_diff / 1 nm,
                       "Pixel width [nm]" );
-B_cd = output_create( "FLOAT_OUTPUT", center_dev, "Center offset [cm^-1]" );
+B_cd = output_create( "FLOAT_OUTPUT", center_dev / 1 nm,
+                      "Center offset [nm]" );
 B_acc = button_create( "PUSH_BUTTON", "Accept calibration" );
 hide_toolbox( "OFF" );
 
@@ -1024,7 +787,7 @@ FOREVER {
 		}
 		L_count = 1;
 		FOR I = 1 : LP_count {
-			IF lines[ I ] != 0.01 / new {
+			IF lambda[ I ] != 0.01 / new {
 				L_count += 1;
 			}
 		}
@@ -1051,7 +814,7 @@ FOREVER {
 
 	IF toolbox_changed( B_lpos ) {
 		new = input_value( B_lpos );
-		IF new < 1 | new > NUM_PIXELS {
+		IF new < 1 | new > NUM_Points {
 			input_value( B_lpos, lpos );
 			object_enable( B_conf, "OFF" );
 			NEXT;
@@ -1059,7 +822,7 @@ FOREVER {
 
 		P_count = 1;
 		FOR I = 1 : LP_count {
-			IF positions[ I ] != new {
+			IF pos[ I ] != new {
 				P_count += 1;
 			}
 		}
@@ -1072,11 +835,12 @@ FOREVER {
 
 	IF button_state( B_conf ) {
 		LP_count += 1;
-		positions[ LP_count ] = input_value( B_lpos );
+		pos[ LP_count ] = input_value( B_lpos ) * BIN[ 1 ]
+                          + 0.5 * ( BIN[ 1 ] - 1 ) + ROI[ 1 ] - 1;
 		IF ll == 0 cm^-1 {
-			lines[ LP_count ] = 0.01 / input_value( B_wn );
+			lambda[ LP_count ] = 0.01 / input_value( B_wn );
 		} ELSE {
-			lines[ LP_count ] = 0.01 / ( ll - input_value( B_wn ) );
+			lambda[ LP_count ] = 0.01 / ( ll - input_value( B_wn ) );
 		}
 
 		object_enable( B_conf, "OFF" );
@@ -1084,35 +848,33 @@ FOREVER {
 
 		pixel_diff = 0 nm;
 		FOR I = 2 : LP_count {
-			pixel_diff += ( lines[ I ] - lines[ 1 ] ) /
-	                      ( BIN[ 1 ] * ( positions[ I ] - positions[ 1 ] ) );
+			pixel_diff +=   ( lambda[ I ] - lambda[ 1 ] )
+                          / ( pos[ I ] - pos[ 1 ] );
 		}
 		pixel_diff /= LP_count - 1;
-        IF ll == 0 cm^-1 {
-	        pixel_diff *= -1.0;
-        }
 
 		xm = 0.0;
 		lm = 0.0;
 		FOR I = 1 : LP_count {
-			xm += positions[ I ];
-			lm += lines[ I ];
+			xm += pos[ I ];
+			lm += lambda[ I ];
 		}
 		xm /= LP_count;
 		lm /= LP_count;
-		lc = ( xm * BIN[ 1 ] - x_cwl ) * pixel_diff + lm;
-		center_dev = abs_cl - 0.01 / lc;
 
-		output_value( B_pd, - 1.0e9 * pixel_diff );
-		output_value( B_cd, center_dev );
+        delta_lambda_theo = lambda_center - lm;
+        delta_lambda_exp  = pixel_diff * ( 0.5 * ( ccd_size[ 1 ] + 1 ) - xm );
+        center_dev = delta_lambda_theo - delta_lambda_exp;
+
+		output_value( B_pd, pixel_diff / 1 nm );
+		output_value( B_cd, center_dev / 1 nm );
 	}
 }
-
 
 ON_STOP:
 
 IF B_acc != -1 AND button_state( B_acc ) {
-	monochromator_calibrate( center_dev, - pixel_diff );
+	monochromator_calibrate( center_dev, pixel_diff );
 }
 EOF
 
@@ -1134,120 +896,11 @@ EOF
             $text = "Something strange\nis going on here.";
         }
 
-        main::show_message( $top, $text ) if $? >> 8 != 0;
-    } else {
-		if ( ! open $fh, "<$state_file" ) {
-			show_message( $top,
-						  "Can't open monchromator state file '$state_file'" );
-		} else {
-			my @vals;
-			my $mode = "WL";
-			while ( <$fh> ) {
-				next if /^(#|\s*$)/;
-				if ( /^\s*([+-]?\d+\.\d+)\s+nm\s*$/ ) {
-					push @vals, $1;
-				} elsif ( /^\s*([+-]?\d+\.\d+)\s+cm\^\-1\s*$/ ) {
-					push @vals, $1;
-					if ( @vals == 2 or @vals == 4 ) {
-						$mode = "WN";
-					} else {
-						show_message( $top, "Invalid monchromator state " .
-									  "file '$state_file'" );
-					}
-				} elsif ( /^\s*(\d+)\s*$/ and
-						  ( ( $mode eq "WN" and @vals == 4 ) or
-							( $mode eq "WL" and @vals == 3 ) ) ) {
-					$is_calibrated = 1 if $1 == 1;
-				} else {
-					show_message( $top, "Invalid monchromator state " .
-								  "file '$state_file'" );
-				}
-			}
-
-			$offset = $vals[ 1 ];
-			close $fh;
-		}
-	}
+        Tools::show_message( $top, $text ) if $? >> 8 != 0;
+    }
 
 	$top->deiconify;
 }
-
-1;
-
-
-#############################################
-# Package to check if the wavenumber range used in
-# an experiment is far enough from the laser line
-#############################################
-
-package Laser_Check;
-
-use strict;
-use warnings;
-use Tk;
-
-
-sub ask_if_safe {
-
-	my ( $mw, $laser_line, $swn, $ewn ) = @_;
-
-	return 1 if $laser_line == 0.0;
-
-	if ( $swn >= $laser_line and defined $ewn and $ewn <= $laser_line ) {
-		return $mw->Dialog( '-text' =>
-							"The spectral range includes\n" .
-							"the the laser line.\n ".
-							"Do you really want this?",
-							'-buttons' => [ "Yes", "No" ],
-							'-default_button' => "No" )->Show( ) eq "Yes";
-	}
-
-	if ( abs( $swn - $laser_line ) < $Min_Dist ) {
-		if ( defined $ewn and abs( $ewn - $laser_line ) < $Min_Dist ) {
-			return $mw->Dialog( '-text' =>
-								"Both the start and end\n" .
-								"wavenumber are less than\n" .
-								"$Min_Dist cm^-1 away from the\n" .
-								"laser line.\n" .
-								"Do you really want this?",
-								'-buttons' => [ "Yes", "No" ],
-								'-default_button' => "No" )->Show( ) eq "Yes";
-		}
-
-		if ( defined $ewn and abs( $ewn - $laser_line ) >= $Min_Dist ) {
-			return $mw->Dialog( '-text' =>
-								"The start wavenumber is\n" .
-								"less than $Min_Dist cm^-1 away\n" .
-								"from the laser line.\n" .
-								"Do you really want do this?",
-								'-buttons' => [ "Yes", "No" ],
-								'-default_button' => "No" )->Show( ) eq "Yes";
-		}
-
-		if ( ! defined $ewn ) {
-			return $mw->Dialog( '-text' =>
-								"The center wavenumber is\n" .
-								"less than $Min_Dist cm^-1 away\n" .
-								"from the laser line.\n" .
-								"Do you really want this?",
-								'-buttons' => [ "Yes", "No" ],
-								'-default_button' => "No" )->Show( ) eq "Yes";
-		}
-	}
-
-	if ( defined $ewn and abs( $ewn - $laser_line ) < $Min_Dist ) {
-		return $mw->Dialog( '-text' =>
-							"The end wavenumber is\n" .
-							"less than $Min_Dist cm^-1 away\n" .
-							"from the laser line.\n" .
-							"Do you really want this?",
-							'-buttons' => [ "Yes", "No" ],
-							'-default_button' => "No" )->Show( ) eq "Yes";
-	}
-
-	return 1;
-}
-
 
 1;
 
@@ -1267,13 +920,10 @@ sub run {
 	my $top = shift;
     my $fh;
 
-	return unless Laser_Check::ask_if_safe( $top, $laser_line, $center_line );
-
 	$top->withdraw;
 
-	no warnings "exec";
     unless ( open $fh, "|fsc2_start -w" ) {
-		main::show_message( $top, "Can't start fsc2" );
+		Tools::show_message( $top, "Can't start fsc2" );
 		$top->deiconify;
 		return;
 	}
@@ -1283,7 +933,6 @@ DEVICES:
 
 spex232;
 rs_spec10;
-
 
 VARIABLES:
 
@@ -1299,7 +948,6 @@ New, new;
 data[ * ];
 I, J, K, L;
 A[ 1, 1 ];
-
 
 PREPARATIONS:
 
@@ -1527,7 +1175,7 @@ EOF
             $text = "Something strange\nis going on here.";
         }
 
-        main::show_message( $top, $text ) if $? >> 8 != 0;
+        Tools::show_message( $top, $text ) if $? >> 8 != 0;
     }
 
 	$top->deiconify;
@@ -1548,78 +1196,44 @@ package Realtime;
 use strict;
 use warnings;
 use Tk;
-use File::Temp ':mktemp';
-use IO::Handle;
 
-
-our ( @ROI,                    # array of ROI
-	  @BIN,                    # x- and y-binning factors
-	  $offset,                 # offset of monochromator
-	  $pixel_diff,             # wavenumber difference between camera pixels
-	  $exp_time );             # exposure time
 
 sub run {
-	my ( $top, $geom, $ccd_w );
-	( $top, $exp_time, $geom ) = @_;
-	( $laser_line, $ROI[ 0 ], $ROI[ 1 ], $ROI[ 2 ], $ROI[ 3 ], $BIN[ 0 ],
-	  $BIN[ 1 ], $offset, $pixel_diff, $ccd_w ) = State::get( $top );
-	return unless defined $laser_line;
+	my ( $top, $exp_time, $geom ) = @_;
+
+	my $cwl        = Tools::get_wavelength( $top );
+	my $laser_line = Tools::get_laser_line( $top );
+	my $pixel_diff = Tools::get_pixel_width( $top );
+	my ( $roi_left, $roi_right, $bin, $num_pixel ) =
+		                                    Tools::get_camera_settings( $top );
 
 	$top->withdraw;
 
-	my $cwn = $center_line - $offset;
-	$cwn = $laser_line - $cwn if $laser_line != 0.0;
-
 	if ( $pixel_diff <= 0.0 ) {
-		main::show_message( $top,
-							"Please do a CCD camera calibration first." );
+		Tools::show_message( $top, "Please do calibration first." );
 		$top->deiconify;
 		return;
 	}
 
-	if ( $ROI[ 2 ] <= $ROI[ 0 ] or $ROI[ 3 ] <= $ROI[ 1 ] or
-		 $ROI[ 0 ] < 1 or $ROI[ 1 ] < 1 or $BIN[ 0 ] < 1 or $BIN[ 1 ] < 1 or
-		 ( $ROI[ 2 ] - $ROI[ 0 ] + 1 ) % $BIN[ 0 ] != 0 or
-		 ( $ROI[ 3 ] - $ROI[ 1 ] + 1 ) % $BIN[ 1 ] != 0 ) {
-		main::show_message( $top,
+	if (    $roi_right <= $roi_left or $roi_left < 1 or $bin  < 1
+		 or ( $roi_right - $roi_left + 1 ) % $bin != 0 ) {
+		Tools::show_message( $top,
 							"Please set ROI and binning parameters first." );
 		$top->deiconify;
 		return;
 	}
 
+	my $wl_start = $cwl + $pixel_diff
+		           * (   0.5 * ( $bin - 1 ) + ( $roi_left - 1 )
+					   - 0.5 * ( $num_pixel - 1 ) );
+	my $wl_end = $wl_start + $pixel_diff * ( $roi_right - $roi_left );
+
 	my %p;
 
-	$p{ 'wl_ccd_center' } = 0.01 / ( $center_line - $offset );
-	$p{ 'left_pixels'  }  = 0.5 * ( $ccd_w + 1 ) - $ROI[ 0 ];
-	$p{ 'right_pixels' } = $ROI[ 2 ] - 0.5 * ( $ccd_w + 1 );
-
-	$p{ 'wl_start' } =   $p{ 'wl_ccd_center' }
-					   - $p{ 'left_pixels' }  * $pixel_diff;
-	$p{ 'wl_end' }   =   $p{ 'wl_ccd_center' }
-					   + $p{ 'right_pixels' } * $pixel_diff;
-	$p{ 'wl_center' } = 0.5 * ( $p{ 'wl_start' } + $p{ 'wl_end' } );
-
-	if ( $laser_line == 0.0 ) {
-		$p{ 'wn_ccd_center' } = main::round( $center_line - $offset, 3 );
-		$p{ 'wn_center' }     = main::round( 0.01 / $p{ 'wl_center' }, 3 );
-		$p{ 'wn_start' }      = main::round( 0.01 / $p{ 'wl_start' }, 3 );
-		$p{ 'wn_end' }        = main::round( 0.01 / $p{ 'wl_end' }, 3 );
-		$p{ 'wn_width' }      = $p{ 'wn_start' } - $p{ 'wn_end' }
-	} else {
-		$p{ 'wn_ccd_center' } = main::round( $laser_line - $center_line
-											 + $offset, 3 );
-		$p{ 'wn_center' }     = main::round( $laser_line
-										      - 0.01 / $p{ 'wl_center' }, 3 );
-		$p{ 'wn_start' }      = main::round( $laser_line
-											 - 0.01 / $p{ 'wl_start' }, 3 );
-		$p{ 'wn_end' }        = main::round( $laser_line
-											 - 0.01 / $p{ 'wl_end' }, 3 );
-		$p{ 'wn_width' }      = main::round( $p{ 'wn_end' }
-											 - $p{ 'wn_start' }, 3 );
-	}
-
-	$p{ 'wn_pixel_diff' } = $BIN[ 0 ] * $p{ 'wn_width' } /
-							( $ROI[ 2 ] - $ROI[ 0 ] + 1 );
+	$p{ wn_center } = Tools::wl2wn( $cwl );
+	$p{ wn_center } = $laser_line - $p{ wn_center } if $laser_line != 0.0;
+	$p{ wn_width }  = Tools::wl2wn( $wl_start ) - Tools::wl2wn( $wl_end );
+	$p{ wn_res }    = $bin * $p{ wn_width } / ( $roi_right - $roi_left + 1 );
 
 	my @f;
 	my %fp = ( -side => 'top',
@@ -1631,7 +1245,7 @@ sub run {
 			   -expand => 1 );
 	my %up = ( -side => 'left' );
 
-	$$exp_time = main::round( $$exp_time, 6 );
+	$$exp_time = Tools::round( $$exp_time, 6 );
 
 	$f[ 0 ] = $top->Toplevel( '-title' => 'Realtime Mode' );
 
@@ -1645,10 +1259,10 @@ sub run {
 							  -width => 9 );
 
 	$f[ 5 ] = $f[ 0 ]->Frame( );
-	$f[ 6 ] = $f[ 5 ]->Label( -text => "Center wavenumber:",
+	$f[ 6 ] = $f[ 5 ]->Label( -text => "Wavenumber:",
 							  -width => 20,
 							  -anchor => 'w' );
-	$f[ 7 ] = $f[ 5 ]->Label( -text => main::round( $p{ 'wn_center' }, 3 ),
+	$f[ 7 ] = $f[ 5 ]->Label( -text => Tools::round( $p{ wn_center }, 3 ),
 							  -width => 10,
 							  -anchor => 'w' );
 	$f[ 8 ] = $f[ 5 ]->Label( -text => " cm^-1 " .
@@ -1659,7 +1273,7 @@ sub run {
 	$f[ 10 ] = $f[ 9 ]->Label( -text => "Spectral width:",
 							   -width => 20,
 							   -anchor => 'w' );
-	$f[ 11 ] = $f[ 9 ]->Label( -text => $p{ 'wn_width' },
+	$f[ 11 ] = $f[ 9 ]->Label( -text => Tools::round( $p{ wn_width }, 3 ),
 							   -width => 10,
 							   -anchor => 'w' );
 	$f[ 12 ] = $f[ 9 ]->Label( -text => " cm^-1",
@@ -1669,8 +1283,7 @@ sub run {
 	$f[ 14 ] = $f[ 13 ]->Label( -text => "Spectral resolution:",
 								-width => 20,
 								-anchor => 'w' );
-	$f[ 15 ] = $f[ 13 ]->Label( -text => main::round( $p{ 'wn_pixel_diff' },
-													  5 ),
+	$f[ 15 ] = $f[ 13 ]->Label( -text => Tools::round( $p{ wn_res }, 5 ),
 								-width => 10,
 								-anchor => 'w' );
 	$f[ 16 ] = $f[ 13 ]->Label( -text => " cm^-1",
@@ -1679,8 +1292,11 @@ sub run {
 
 	$f[ 17 ] = $f[ 0 ]->Frame( );
 	$f[ 18 ] = $f[ 17 ]->Button( -text => "Start measurement",
-								 -command => sub { $f[ 0 ]->destroy;
-												   realtime_run( $top, %p );
+								 -command => sub { $f[ 0 ]->withdraw;
+												   $f[ 0 ]->destroy;
+												   realtime_run( $top,
+																 $exp_time,
+																 %p );
 												   $top->deiconify; } );
 	$f[ 19 ] = $f[ 17 ]->Button( -text => "Quit",
 								 -command => sub { $f[ 0 ]->destroy;
@@ -1766,28 +1382,12 @@ sub exp_time_check {
 # Runs the actual experiment
 
 sub realtime_run {
-	my ( $top, %p ) = @_;
-    my ( $fh, $lcwn );
+	my ( $top, $exp_time, %p ) = @_;
 
-	if ( $laser_line == 0.0 ) {
-		return unless Laser_Check::ask_if_safe( $top, $laser_line,
-												$p{ 'wn_start' },
-												$p{ 'wn_end' } );
-	} else {
-		return unless Laser_Check::ask_if_safe( $top, $laser_line,
-												$laser_line - $p{ 'wn_start' },
-												$laser_line - $p{ 'wn_end' } );
-	}
+	my $fh;
 
-	if ( $laser_line != 0.0 ) {
-		$lcwn = $laser_line - $center_line + $offset;
-	} else {
-		$lcwn = $center_line - $offset;
-	}
-
-	no warnings "exec";
     unless ( open $fh, "|fsc2_start -w" ) {
-		main::show_message( $top, "Can't start fsc2" );
+		Tools::show_message( $top, "Can't start fsc2" );
 		return;
 	}
 
@@ -1800,24 +1400,21 @@ rs_spec10;
 
 VARIABLES:
 
-cwn = $p{ 'wn_center' } cm^-1;
 exposure_time = $$exp_time s;
-start_wn = $p{ 'wn_start' } cm^-1;
-step_wn = $p{ 'wn_pixel_diff' } cm^-1;
-laser_line = $laser_line;
+laser_line;
 spec[ * ];
 B_rel,B_abs, B_wl;
 I, J;
-
+axis[ 4 ];
 
 PREPARATIONS:
 
 init_1d( 1 );
 
-
 EXPERIMENT:
 
 ccd_camera_exposure_time( exposure_time );
+laser_line = monochromator_laser_line( );
 
 hide_toolbox( 1 );
 
@@ -1826,14 +1423,9 @@ B_abs = button_create( "RADIO_BUTTON", B_wl, "Absolute wavenumbers" );
 change_label_1d( "Wavelength [nm]" );
 IF laser_line != 0.0 {
 	B_rel = button_create( "RADIO_BUTTON", B_wl, "Relative wavenumbers" );
-	change_scale_1d( 1.0e7 / ( laser_line - start_wn ),
-					 1.0e7 / ( laser_line - cwn ) -
-				     1.0e7 / ( laser_line - cwn + step_wn ) );
-
-} ELSE {
-	change_scale_1d( 1.0e7 / start_wn,
-					 1.0e7 / cwn - 1.0e7 / ( cwn + step_wn ) );
 }
+axis = monochromator_wavelength_axis( );
+change_scale( axis[ 3 ] / 1 nm, axis[ 4 ] / 1 nm );
 
 hide_toolbox( 0 );
 
@@ -1847,28 +1439,20 @@ FOREVER {
 
 	IF button_state( B_wl ) {
 		change_label_1d( "Wavelength [nm]" );
-		IF ( laser_line != 0.0 ) {
-			change_scale_1d( 1.0e7 / ( laser_line - start_wn ),
-							 1.0e7 / ( laser_line - cwn ) -
-						     1.0e7 / ( laser_line - cwn + step_wn ) );
-		} ELSE {
-			change_scale_1d( 1.0e7 / start_wn,
-							 1.0e7 / cwn - 1.0e7 / ( cwn + step_wn ) );
-		}
+        axis = monochromator_wavelength_axis( );
+        change_scale( axis[ 3 ] / 1 nm, axis[ 4 ] / 1 nm );
 	}
 
 	IF button_state( B_abs ) {
 		change_label_1d( "Wavenumbers [cm^-1 abs.]" );
-		IF ( laser_line != 0.0 ) {
-			change_scale( laser_line - start_wn, - step_wn );
-		} ELSE {
-			change_scale( start_wn, - step_wn );
-		}
+		axis = monochromator_wavenumber_axis( );
+		change_scale( axis[ 3 ], axis[ 4 ] );
 	}
 
 	IF laser_line != 0.0 AND button_state( B_rel ) {
 		change_label_1d( "Wavenumbers [cm^-1 rel.]" );
-		change_scale( start_wn, step_wn );
+		axis = monochromator_wavenumber_axis( );
+		change_scale( laser_line - axis[ 3 ], - axis[ 4 ] );
 	}
 }
 EOF
@@ -1890,7 +1474,7 @@ EOF
             $text = "Something strange\nis going on here.";
         }
 
-        main::show_message( $top, $text ) if $? >> 8 != 0;
+        Tools::show_message( $top, $text ) if $? >> 8 != 0;
     }
 }
 
@@ -1910,89 +1494,49 @@ package Single_Measurement;
 use strict;
 use warnings;
 use Tk;
-use File::Temp ':mktemp';
-use IO::Handle;
 
-
-our ( $laser_line,             # position of laser line (abs. cm^-1)
-	  @ROI,                    # array of ROI
-	  @BIN,                    # x- and y-binning factors
-	  $offset,                 # offset of monochromator
-	  $pixel_diff,             # wavenumber difference between camera pixels
-	  $exp_time,               # exposure time
-	  $N_scans );              # number of repetitions of experiment
 
 sub run {
-	my ( $top, $geom, $ccd_w );
-	( $top, $exp_time, $N_scans, $geom ) = @_;
-	( $laser_line, $ROI[ 0 ], $ROI[ 1 ], $ROI[ 2 ], $ROI[ 3 ], $BIN[ 0 ],
-	  $BIN[ 1 ], $offset, $pixel_diff, $ccd_w ) = State::get( $top );
-	return unless defined $laser_line;
+	my ( $top, $exp_time, $N_scans, $geom ) = @_;
+
+	my $cwl        = Tools::get_wavelength( $top );
+	my $laser_line = Tools::get_laser_line( $top );
+	my $pixel_diff = Tools::get_pixel_width( $top );
+	my ( $roi_left, $roi_right, $bin, $num_pixel ) =
+		                                    Tools::get_camera_settings( $top );
 
 	$top->withdraw;
 
-	my $cwn = $center_line - $offset;
-	$cwn = $laser_line - $cwn if $laser_line != 0.0;
-
 	if ( $pixel_diff <= 0.0 ) {
-		main::show_message( $top,
-							"Please do a CCD camera calibration first." );
+		Tools::show_message( $top, "Please do a calibration first." );
 		$top->deiconify;
 		return;
 	}
 
-	if ( $ROI[ 2 ] <= $ROI[ 0 ] or $ROI[ 3 ] <= $ROI[ 1 ] or
-		 $ROI[ 0 ] < 1 or $ROI[ 1 ] < 1 or $BIN[ 0 ] < 1 or $BIN[ 1 ] < 1 or
-		 ( $ROI[ 2 ] - $ROI[ 0 ] + 1 ) % $BIN[ 0 ] != 0 or
-		 ( $ROI[ 3 ] - $ROI[ 1 ] + 1 ) % $BIN[ 1 ] != 0 ) {
-		main::show_message( $top,
+	if (    $roi_right <= $roi_left or $roi_left < 1 or $bin  < 1
+		 or ( $roi_right - $roi_left + 1 ) % $bin != 0 ) {
+		Tools::show_message( $top,
 							"Please set ROI and binning parameters first." );
 		$top->deiconify;
 		return;
 	}
 
-	if ( $Dead_Points % $BIN[ 0 ] ) {
-		$ROI[ 0 ] += ( int( $Dead_Points / $BIN[ 0 ] ) + 1 ) * $BIN[ 0 ];
-	} else {
-		$ROI[ 0 ] += $Dead_Points;
-	}
+	my $wl_start = $cwl + $pixel_diff
+		           * (   0.5 * ( $bin - 1 ) + ( $roi_left - 1 )
+					   - 0.5 * ( $num_pixel - 1 ) );
+	my $wl_end = $wl_start + $pixel_diff * ( $roi_right - $roi_left );
 
 	my %p;
 
-	$p{ 'wl_ccd_center' } = 0.01 / ( $center_line - $offset );
-	$p{ 'left_pixels'  }  = 0.5 * ( $ccd_w + 1 ) - $ROI[ 0 ];
-	$p{ 'right_pixels' } = $ROI[ 2 ] - 0.5 * ( $ccd_w + 1 );
+	$p{ wn_center } = Tools::wl2wn( $cwl );
+	$p{ wl_start }  = $wl_start;
+	$p{ wl_end }    = $wl_end;
+	$p{ wl_res }    = $pixel_diff * $bin;
+	$p{ wn_center } = $laser_line - $p{ wn_center } if $laser_line != 0.0;
+	$p{ wn_width }  = Tools::wl2wn( $wl_start ) - Tools::wl2wn( $wl_end );
+	$p{ wn_res }    = $bin * $p{ wn_width } / ( $roi_right - $roi_left + 1 );
 
-	$p{ 'wl_start' } =   $p{ 'wl_ccd_center' }
-					   - $p{ 'left_pixels' }  * $pixel_diff;
-	$p{ 'wl_end' }   =   $p{ 'wl_ccd_center' }
-					   + $p{ 'right_pixels' } * $pixel_diff;
-	$p{ 'wl_center' } = 0.5 * ( $p{ 'wl_start' } + $p{ 'wl_end' } );
-	$p{ 'wl_resolution' } = $BIN[ 0 ] * $pixel_diff;
-
-	if ( $laser_line == 0.0 ) {
-		$p{ 'wn_ccd_center' } = main::round( $center_line - $offset, 3 );
-		$p{ 'wn_center' }     = main::round( 0.01 / $p{ 'wl_center' }, 3 );
-		$p{ 'wn_start' }      = main::round( 0.01 / $p{ 'wl_start' }, 3 );
-		$p{ 'wn_end' }        = main::round( 0.01 / $p{ 'wl_end' }, 3 );
-		$p{ 'wn_width' }      = $p{ 'wn_start' } - $p{ 'wn_end' }
-	} else {
-		$p{ 'wn_ccd_center' } = main::round( $laser_line - $center_line
-											 + $offset, 3 );
-		$p{ 'wn_center' }     = main::round( $laser_line
-										      - 0.01 / $p{ 'wl_center' }, 3 );
-		$p{ 'wn_start' }      = main::round( $laser_line
-											 - 0.01 / $p{ 'wl_start' }, 3 );
-		$p{ 'wn_end' }        = main::round( $laser_line
-											 - 0.01 / $p{ 'wl_end' }, 3 );
-		$p{ 'wn_width' }      = main::round( $p{ 'wn_end' }
-											 - $p{ 'wn_start' }, 3 );
-	}
-
-	$p{ 'wl_pixel_diff' } = $pixel_diff;
-	$p{ 'wn_pixel_diff' } = $BIN[ 0 ] * $p{ 'wn_width' } /
-							( $ROI[ 2 ] - $ROI[ 0 ] + 1 );
-	$$exp_time = main::round( $$exp_time, 6 );
+	$$exp_time = Tools::round( $$exp_time, 6 );
 
 	my @f;
 	my %fp = ( -side => 'top',
@@ -2027,7 +1571,7 @@ sub run {
 	$f[ 10 ] = $f[ 9 ]->Label( -text => "Center wavenumber:",
 							   -width => 20,
 							   -anchor => 'w' );
-	$f[ 11 ] = $f[ 9 ]->Label( -text => main::round( $p{ 'wn_center' }, 3 ),
+	$f[ 11 ] = $f[ 9 ]->Label( -text => Tools::round( $p{ wn_center }, 3 ),
 							   -width => 10 );
 	$f[ 12 ] = $f[ 9 ]->Label( -text => " cm^-1 " .
 							  ( $laser_line != 0 ? "rel." : "abs." ),
@@ -2037,7 +1581,7 @@ sub run {
 	$f[ 14 ] = $f[ 13 ]->Label( -text => "Spectral width:",
 								-width => 20,
 								-anchor => 'w' );
-	$f[ 15 ] = $f[ 13 ]->Label( -text => $p{ 'wn_width' },
+	$f[ 15 ] = $f[ 13 ]->Label( -text => $p{ wn_width },
 							  -width => 10,
 							  -anchor => 'w' );
 	$f[ 16 ] = $f[ 13 ]->Label( -text => " cm^-1",
@@ -2047,7 +1591,7 @@ sub run {
 	$f[ 18 ] = $f[ 17 ]->Label( -text => "Spectral resolution:",
 								-width => 20,
 								-anchor => 'w' );
-	$f[ 19 ] = $f[ 17 ]->Label( -text => main::round( $p{ 'wn_pixel_diff' },
+	$f[ 19 ] = $f[ 17 ]->Label( -text => Tools::round( $p{ wn_res },
 													  5 ),
 								-width => 10,
 								-anchor => 'w' );
@@ -2057,8 +1601,10 @@ sub run {
 
 	$f[ 21 ] = $f[ 0 ]->Frame( );
 	$f[ 22 ] = $f[ 21 ]->Button( -text => "Start measurement",
-								 -command => sub { $f[ 0 ]->destroy;
-												   single_run( $top, %p );
+								 -command => sub { $f[ 0 ]->withdraw;
+												   $f[ 0 ]->destroy;
+												   single_run( $top, $N_scans,
+															   $exp_time, %p );
 												   $top->deiconify; } );
 	$f[ 23 ] = $f[ 21 ]->Button( -text => "Quit",
 								 -command => sub { $f[ 0 ]->destroy;
@@ -2098,7 +1644,7 @@ sub run {
 	# Add validation handlers for the data in the entry fields
 
 	$f[ 3 ]->configure( -validate => 'key',
-						-vcmd => sub { exp_time_check( shift,
+						-vcmd => sub { exp_time_check( shift, $N_scans,
 													   $f[ 22 ] ); } );
 	$f[ 7 ]->configure( -validate => 'key',
 						-vcmd => sub { my $N = shift;
@@ -2138,7 +1684,7 @@ sub run {
 # Checks for input in the experiment time field
 
 sub exp_time_check {
-	my ( $new, $start_button ) = @_;
+	my ( $new, $N_scans, $start_button ) = @_;
     my $float_rep = '(((\d+(\.(\d+)?)?)|(\.\d+))([eE]([+-]?\d*)?)?)';
 
 	return 0 if $new ne "" and $new !~ /^($float_rep)?$/;
@@ -2169,30 +1715,11 @@ sub check_all_parms {
 # Runs the actual experiment
 
 sub single_run {
-	my ( $top, %p ) = @_;
-    my ( $fh, $lcwn );
+	my ( $top, $N_scans, $exp_time, %p ) = @_;
 
-	if ( $laser_line == 0.0 ) {
-		return unless Laser_Check::ask_if_safe( $top, $laser_line,
-												$p{ 'wn_start' },
-												$p{ 'wn_end' } );
-	} else {
-		return unless Laser_Check::ask_if_safe( $top, $laser_line,
-												$laser_line - $p{ 'wn_start' },
-												$laser_line - $p{ 'wn_end' } );
-	}
-
-	if ( $laser_line != 0.0 ) {
-		$lcwn = $laser_line - $center_line + $offset;
-	} else {
-		$lcwn = $center_line - $offset;
-	}
-
-	my $N_Points = ( $ROI[ 2 ] - $ROI[ 0 ] + 1 ) / $BIN[ 0 ];
-
-	no warnings "exec";
+	my $fh;
     unless ( open $fh, "|fsc2_start -w" ) {
-		main::show_message( $top, "Can't start fsc2" );
+		Tools::show_message( $top, "Can't start fsc2" );
 		return;
 	}
 
@@ -2202,43 +1729,36 @@ DEVICES:
 spex232;
 rs_spec10;
 
-
 VARIABLES:
 
-cwn = $lcwn cm^-1;
 exposure_time = $$exp_time s;
-start_wn = $p{ 'wn_start' } cm^-1;
-step_wn = $p{ 'wn_pixel_diff' } cm^-1;
-N_Points = $N_Points;
 N_scans = $$N_scans;
-laser_line = $laser_line;
+laser_line;
 cwn_offset;
 spec[ * ];
 avg[ * ];
-wl[ * ] = lin_space( $p{ 'wl_start' } / 1 nm , $p{ 'wl_end' } / 1 nm, N_Points );
+wl[ * ];
 mp[ * ];
 B_rel, B_abs, B_wl, B_eas, I_scan, MP_rel, MP_abs, MP_wl;
 I, J;
-Dead_Points = $Dead_Points;
 F_all, F_cur;
-
+axis[ * ];
 
 PREPARATIONS:
 
 init_1d( 2 );
 
-
 EXPERIMENT:
 
-
 ccd_camera_exposure_time( exposure_time );
+laser_line = monochromator_laser_line( );
 
 hide_toolbox( 1 );
 I_scan = output_create( "INT_OUTPUT", 0,
                         sprint( "Current scan (of #)", N_scans ) );
 change_label_1d( "Wavelength [nm]" );
-change_scale_1d( $p{ 'wl_start' } / 1 nm,
-				 $p{ 'wl_resolution' } / 1 nm );
+axis = monochromator_wavelength_axis( );
+change_scale_1d( axis[ 3 ] / 1 nm, axis[ 4 ] / 1 nm );
 
 B_wl  = button_create( "RADIO_BUTTON", "Wavelengths" );
 B_abs = button_create( "RADIO_BUTTON", B_wl, "Absolute wavenumbers" );
@@ -2246,24 +1766,29 @@ IF laser_line != 0.0 {
 	B_rel = button_create( "RADIO_BUTTON", B_wl, "Relative wavenumbers" );
 }
 
-
 B_eas = button_create( "PUSH_BUTTON", "Stop at end of running scan" );
 hide_toolbox( 0 );
 
-avg[ N_Points ] = 0.0;
 F_all = get_file( "", "*.dat", "", "", "dat" );
 
 FOR I = 1 : N_scans {
 	output_value( I_scan, I );
-	spec = slice( ccd_camera_get_spectrum( ), Dead_Points + 1 );
+	spec = ccd_camera_get_spectrum( );
+
+	IF I == 1 {
+		avg[ size( spec ) ] = 0.0;
+		axis = monochromator_wavelength_axis( );
+	    wl[ 1 ] = axis[ 3 ];
+		FOR J = 2 : size( spec ) {
+			wl[ J ] = wl[ J - 1 ] + axis[ 4 ];
+		}
 
 	F_cur = clone_file( F_all, "dat", sprint( "scan_#.dat", I ) );
-	FOR J = 1 : N_Points {
-		fsave( F_cur, "# #\\n", wl[ J ], spec[ J ] );
+	FOR J = 1 : size( spec ) {
+		fsave( F_cur, "# #\\n", wl[ J ] / 1 nm, spec[ J ] );
 	}
 
 	spec = spike_remove( spec );
-	avg += spec;
 	display_1d( 1, spec, 2, 1, avg / I, 1 );
 
 	IF ! toolbox_changed( ) {
@@ -2276,22 +1801,20 @@ FOR I = 1 : N_scans {
 
 	IF button_state( B_wl ) {
 		change_label_1d( "Wavelength [nm]" );
-		change_scale_1d( $p{ 'wl_start' } / 1 nm,
-						 $p{ 'wl_resolution' } / 1 nm );
+        axis = monochromator_wavelength_axis( );
+        change_scale_1d( axis[ 3 ] / 1 nm, axis[ 4 ] / 1 nm );
 	}
 
 	IF button_state( B_abs ) {
 		change_label_1d( "Wavenumbers [cm^-1 abs.]" );
-		IF ( laser_line != 0 cm^-1 ) {
-			change_scale( laser_line - start_wn, - step_wn );
-		} ELSE {
-			change_scale( start_wn, - step_wn );
-		}
+		axis = monochromator_wavenumber_axis( );
+		change_scale( axis[ 3 ], axis[ 4 ] );
 	}
 
 	IF laser_line != 0 cm^-1 AND button_state( B_rel ) {
 		change_label_1d( "Wavenumbers [cm^-1 rel.]" );
-		change_scale( start_wn, step_wn );
+		axis = monochromator_wavenumber_axis( );
+		change_scale( laser_line - axis[ 3 ], - axis[ 4 ] );
 	}
 }
 
@@ -2311,7 +1834,8 @@ MP_wl = output_create( "FLOAT_OUTPUT", -1.0, "Mouse position [nm]", "",
                        "%.6f" );
 hide_toolbox( 0 );
 change_label_1d( "Wavelength [nm]" );
-change_scale_1d( $p{ 'wl_start' } / 1 nm, $p{ 'wl_resolution' } / 1 nm );
+axis = monochromator_wavelength_axis( );
+change_scale_1d( axis[ 3 ] / 1 nm, axis[ 4 ] / 1 nm );
 
 FOREVER {
 	IF ! toolbox_changed( ) {
@@ -2334,23 +1858,21 @@ FOREVER {
 	}
 
 	IF button_state( B_wl ) {
+		axis = monochromator_wavelength_axis( );
 		change_label_1d( "Wavelength [nm]" );
-		change_scale_1d( $p{ 'wl_start' } / 1 nm,
-						 $p{ 'wl_resolution' } / 1 nm );
+		change_scale_1d( axis[ 3 ] / 1 nm, axis[ 4 ] / 1 nm );
 	}
 
 	IF button_state( B_abs ) {
+		axis = monochromator_wavenumber_axis( );
 		change_label_1d( "Wavenumbers [cm^-1 abs.]" );
-		IF laser_line != 0 cm^-1 {
-			change_scale( laser_line - start_wn, - step_wn );
-		} ELSE {
-			change_scale( start_wn, - step_wn );
-		}
+		change_scale( axis[ 3 ], axis[ 4 ] );
 	}
 
 	IF laser_line != 0 cm^-1 AND button_state( B_rel ) {
+		axis = monochromator_wavenumber_axis( );
 		change_label_1d( "Wavenumbers [cm^-1 rel.]" );
-		change_scale( start_wn, step_wn );
+		change_scale( laser_line - axis[ 3 ], - axis[ 4 ] );
 	}
 }
 
@@ -2363,8 +1885,8 @@ fsave( F_all, "\\# Date:               # #\\n"
               "\\# Resolution        = # nm\\n"
               "\\# Exposure time     = # s\\n"
               "\\# Number of scans   = #\\n",
-              date( ), time( ), $p{ 'wl_start' } / 1 nm, $p{ 'wl_end' } / 1 nm,
-			  $p{ 'wl_resolution' } / 1 nm, exposure_time, N_scans );
+              date( ), time( ), $p{ wl_start } / 1 nm, $p{ wl_end } / 1 nm,
+			  $p{ wl_res } / 1 nm, exposure_time, N_scans );
 
 IF laser_line != 0.0 {
     fsave( F_all, "\\# Laser line        = # cm^-1\\n\\n", laser_line );
@@ -2372,7 +1894,7 @@ IF laser_line != 0.0 {
 	fsave( F_all, "\\n" );
 }
 
-FOR J = 1 : N_Points {
+FOR J = 1 : size( avg ) {
 	fsave( F_all, "# #\\n", wl[ J ], avg[ J ] / I );
 }
 EOF
@@ -2394,7 +1916,7 @@ EOF
             $text = "Something strange\nis going on here.";
         }
 
-        main::show_message( $top, $text ) if $? >> 8 != 0;
+        Tools::show_message( $top, $text ) if $? >> 8 != 0;
     }
 }
 
@@ -2403,11 +1925,10 @@ EOF
 
 
 #############################################
-# Package to determine a lot of the current settings for both the
-# Roper Scientific Spec-10 CCD camera and the SPEX CD2A monochromator.
+# Often used function
 #############################################
 
-package State;
+package Tools;
 
 use strict;
 use warnings;
@@ -2415,67 +1936,368 @@ use File::Temp ':mktemp';
 use IO::Handle;
 
 
-sub get {
+#############################################
+# Returns the wavelength the monochromator is set to
+
+sub get_wavelength {
 	my $top = shift;
-	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam_state_XXXXXX" );
+	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam.XXXXXX" );
 
 	$f->autoflush( 1 );
 
-	# Create EDL script for determining the laser line (with three digits
-	# after the decimal point), the ROI and binning settings, the offset
-	# and the wavenumber width of a single pixel of the camera
+	# Create EDL script for determining the monochromators wavenumber
+	# (with three digits after the decimal point)
 
 	print $f <<EOF;
 DEVICES:
-rs_spec10;
 spex232;
-VARIABLES:
-LL, ROI[ 4 ], BIN[ 2 ], calib[ 2 ], CCD_size[ 2 ];
 EXPERIMENT:
-LL = round( 1000 * monochromator_laser_line( ) );
-ROI = ccd_camera_roi( );
-CCD_size = ccd_camera_pixel_area( );
-BIN = ccd_camera_binning( );
-calib = monochromator_calibrate( );
-print( "#.### # # # # # # # # #", LL / 1000,
-       ( LL % 1000 ) / 100, ( LL % 100 ) / 10, LL % 10, ROI[ 1 ], ROI[ 2 ],
-       ROI[ 3 ], ROI[ 4 ], BIN[ 1 ], BIN[ 2 ], calib[ 1 ], calib[ 2 ],
-       CCD_size[ 1 ] );
+print( "#", monochromator_wavelength( ) / 1 nm );
 EOF
 
 	close $f;
 
 	# Run the script and read in the result
 
-	my $g;
-	no warnings "exec";
-	unless ( open $g, "-|", "fsc2 -ng $fn 2>&1" ) {
+	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
-		main::show_message( $top, "Can't start fsc2" );
+		show_message( $top, "Can't start fsc2" );
 		return;
 	}
 
-	my $reply = <$g>;
-	close $g;
+	my $reply = <$f>;
+	close $f;
 	unlink $fn;
-	chomp $reply;
 
-	if ( $reply =~ /^F\s+(SPEX232|RS_SPEC10):\s+(.+)$/ ) {
-		main::show_message( $top, "Can't determine monochromator and camera " .
-							"settings:\n$2" );
+	if ( ! defined $reply or $reply =~ /^F\s+($fn:\d+|spex232):\s+(.+)$/i ) {
+		show_message( $top, "Can't determine monochromators postion:\n$1" );
+		return;
+	}
+
+	unless ( $reply =~ /\d+(\.\d*)?$/ ) {
+		show_message( $top, "Can't determine monochromators position." );
+		return;
+	}
+
+	return 1.0e-9 * $reply;
+}
+
+
+#############################################
+# Returns the wavenumber the monochromator is set to
+
+sub get_wavenumber {
+	my $top = shift;
+	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam.XXXXXX" );
+
+	$f->autoflush( 1 );
+
+	# Create EDL script for determining the monochromators wavenumber
+	# (with three digits after the decimal point)
+
+	print $f <<EOF;
+DEVICES:
+spex232;
+EXPERIMENT:
+print( "#", monochromator_wavenumber( ) );
+EOF
+
+	close $f;
+
+	# Run the script and read in the result
+
+	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+		close $f;
+		unlink $fn;
+		show_message( $top, "Can't start fsc2" );
+		return;
+	}
+
+	my $reply = <$f>;
+	close $f;
+	unlink $fn;
+
+	if ( ! defined $reply or $reply =~ /^F\s+($fn:\d+|spex232):\s+(.+)$/i ) {
+		show_message( $top, "Can't determine monochromators postion:\n$1" );
+		return;
+	}
+
+	unless ( $reply =~ /\d+(\.\d*)?$/ ) {
+		show_message( $top, "Can't determine monochromators position." );
+		return;
+	}
+
+	return round( $reply, 3 );
+}
+
+
+#############################################
+# Returns the current setting of the laser line
+
+sub get_laser_line {
+	my $top = shift;
+	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam.XXXXXX" );
+
+	$f->autoflush( 1 );
+
+	# Create EDL script for determining the laser line (with three digits
+	# after the decimal point)
+
+	print $f <<EOF;
+DEVICES:
+spex232;
+EXPERIMENT:
+print( "#", monochromator_laser_line( )  );
+EOF
+
+	close $f;
+
+	# Run the script and read in the result
+
+	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+		close $f;
+		unlink $fn;
+		show_message( $top, "Can't start fsc2" );
+		return;
+	}
+
+	my $reply = <$f>;
+	close $f;
+	unlink $fn;
+
+	if ( ! defined $reply and $reply =~ /^F\s+($fn:\d+|spex232):\s+(.+)$/i ) {
+		show_message( $top, "Can't determine monochromators laser line " .
+					  "setting:\n$1" );
+		return;
+	}
+
+	unless ( $reply =~ /\d+(\.\d*)?$/ ) {
+		show_message( $top, "Can't determine monochromators laser " .
+					  "line setting." );
+		return;
+	}
+
+	return round( $reply, 3 );
+}
+
+
+#############################################
+# Returns the lower and upper wavenumber limit of the monochromator
+
+sub get_wavenumber_limits {
+	my $top = shift;
+	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam.XXXXXX" );
+
+	$f->autoflush( 1 );
+
+	# Create EDL script for determining the monochrmator wavenumber limits
+
+	print $f <<EOF;
+DEVICES:
+spex232;
+VARIABLES:
+limits[ 2 ];
+EXPERIMENT:
+limits = monochromator_wavenumber_scan_limits( );
+print( "# #", limits[ 1 ], limits[ 2 ] );
+EOF
+
+	close $f;
+
+	# Run the script and read in the result
+
+	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+		close $f;
+		unlink $fn;
+		show_message( $top, "Can't start fsc2" );
+		return;
+	}
+
+	my $reply = <$f>;
+	close $f;
+	unlink $fn;
+
+	if ( ! defined $reply and $reply =~ /^F\s+($fn:\d+|spex232):\s+(.+)$/i ) {
+		show_message( $top, "Can't determine monochromators limits:\n$1" );
+		return;
+	}
+
+	my @res = map { round( $_, 3 ) } split ' ', $reply;
+
+	unless ( @res == 2 ) {
+		show_message( $top, "Can't determine monochromator limits." );
+		return;
+	}
+
+	return @res;
+}
+
+
+#############################################
+
+sub get_pixel_width {
+	my $top = shift;
+	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam.XXXXXX" );
+
+	$f->autoflush( 1 );
+
+	# Create EDL script for determining the width of a pixel
+
+	print $f <<EOF;
+DEVICES:
+spex232;
+rs_spec10;
+VARIABLES:
+wla[ 4 ];
+EXPERIMENT:
+wla = monochromator_wavelength_axis( );
+print( "#", wla[ 2 ] );
+EOF
+
+	close $f;
+
+	# Run the script and read in the result
+
+	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+		close $f;
+		unlink $fn;
+		show_message( $top, "Can't start fsc2" );
+		return;
+	}
+
+	my $reply = <$f>;
+	close $f;
+	unlink $fn;
+
+	if ( ! defined $reply and $reply =~ /^F\s+($fn:\d+|spex232|rs_spec10):\s+(.+)$/i ) {
+		show_message( $top, "Can't determine width of a pixel:\n$1" );
+		return;
+	}
+
+	return $reply;
+}
+
+
+#############################################
+# Determines the current settings for the camera (ROI, binning and chip size)
+
+sub get_camera_settings {
+	my $top = shift;
+	my ( $f, $fn ) = mkstemp( "/tmp/spex_cam.XXXXXX" );
+
+	$f->autoflush( 1 );
+
+	# Create EDL script for determining the camera settings
+
+	print $f <<EOF;
+DEVICES:
+rs_spec10;
+VARIABLES:
+ROI[ 4 ], BIN[ 2 ], CCD_size[ 2 ];
+EXPERIMENT:
+ROI = ccd_camera_roi( );
+BIN = ccd_camera_binning( );
+CCD_size = ccd_camera_pixel_area( );
+print( "# # # #", ROI[ 1 ], ROI[ 3 ], BIN[ 1 ], CCD_size[ 1 ] );
+EOF
+
+	close $f;
+
+	# Run the script and read in the result
+
+	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+		close $f;
+		unlink $fn;
+		show_message( $top, "Can't start fsc2" );
+		return;
+	}
+
+	my $reply = <$f>;
+	close $f;
+	unlink $fn;
+
+	if ( ! defined $reply and $reply =~ /^F\s+($fn:\d+|rs_spec10):\s+(.+)$/i ) {
+		Tools::show_message( $top, "Can't determine camera settings:\n$1" );
 		return;
 	}
 
 	my @res = split ' ', $reply;
 
-	if ( @res != 10 ) {
-		main::show_message( $top, "Can't determine monochromator and camera " .
-							"settings." );
+	unless ( @res == 4 ) {
+		show_message( $top, "Can't determine camera settings." );
 		return;
 	}
 
 	return @res;
+}
+
+
+#############################################
+# Displays a message box
+
+sub show_message {
+	my ( $mw, $text ) = @_;
+
+    $mw->messageBox( '-icon' => 'error',
+                     '-type' => 'Ok',
+	                 '-title' => 'Error',
+                     '-message' => $text );
+}
+
+
+#############################################
+# Function for rounding a value to a certain number of digits
+
+sub round {
+	my ( $x, $digits ) = @_;
+	return 10 ** - $digits * int( 10 ** $digits * $x + 0.5 * ( $x <=> 0 ) );
+}
+
+
+sub is_laser_line_safe {
+	my ( $mw, $laser_line, $cwn ) = @_;
+	return 1 if $laser_line == 0.0;
+
+	$cwn = get_wavenumber( $mw ) unless defined $cwn;
+	$cwn = $laser_line - $cwn;
+
+	my ( undef, undef, undef, $num_pixel ) = get_camera_settings( $mw );
+	my $pixel_width = get_pixel_width( $mw );
+	
+	my $swn = wl2wn( wn2wl( $cwn ) - 0.5 * $pixel_width * ( $num_pixel - 1 ) );
+	my $ewn = wl2wn( wn2wl( $cwn ) + 0.5 * $pixel_width * ( $num_pixel - 1 ) );
+
+	if ( $swn >= $laser_line and $ewn <= $laser_line ) {
+		return $mw->Dialog( '-text' =>
+							"The spectral range includes the the " .
+							"laser line.\n" .
+							"Do you really want this?",
+							'-buttons' => [ "Yes", "No" ],
+							'-default_button' => "No" )->Show( ) eq "Yes";
+	}
+
+	if ( abs( $swn - $laser_line ) < $Min_Dist or
+		 abs( $ewn - $laser_line ) < $Min_Dist ) {
+		return $mw->Dialog( '-text' =>
+							"Start or end wavenumber are less than " .
+							"$Min_Dist cm^-1 away from the laser line.\n" .
+							"Do you really want this?",
+							'-buttons' => [ "Yes", "No" ],
+							'-default_button' => "No" )->Show( ) eq "Yes";
+	}
+
+	return 1;
+}
+
+
+sub wn2wl {
+	return 0.01 / shift;
+}
+
+
+sub wl2wn {
+	return 0.01 / shift;
 }
 
 

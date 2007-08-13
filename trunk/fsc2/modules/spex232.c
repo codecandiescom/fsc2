@@ -317,12 +317,12 @@ int spex232_init_hook( void )
     }
 
     /* Read in the file where the state of the monochromator gets stored
-       to find out about the offset between the values displayed at the
-       CD2A and the "true" wavelengths or -numbers and, for wavenumber-
-       driven monochromators the setting of the laser line position as
-       used in the previous invocation of the program. (The file has also
-       to be read each time at the start of an experiment since it's
-       contents are rewritten at the end of each experiment.) */
+       to find out about the offset between the values set via the SPEX232
+       and the "true" wavelength and, for wavenumber- driven monochromators
+       the setting of the laser line position as used in the previous
+       invocation of the program. (The file has also to be read each time
+       at the start of an experiment since it's contents are rewritten at
+       the end of each experiment.) */
 
     spex232_read_state( );
 
@@ -556,7 +556,7 @@ Var_T *monochromator_wavenumber_scan_limits( Var_T *v  UNUSED_ARG )
 
     if ( spex232.mode == WN_REL )
         for ( i = 0; i < 2; i++ )
-            vals[ i ] = spex232.laser_line -  vals[ i ];
+            vals[ i ] = spex232.laser_line - vals[ i ];
 
     return vars_push( FLOAT_ARR, vals, 2 );
 }
@@ -610,8 +610,7 @@ Var_T *monochromator_wavelength( Var_T * v )
     }
     CATCH( INVALID_INPUT_EXCEPTION )
     {
-        print( FATAL, "Invalid wavelength of %.5f nm.\n",
-               1.0e9 * spex232_wl2Uwl( wl ) );
+        print( FATAL, "Invalid wavelength of %.5f nm.\n", 1.0e9 * wl );
         SPEX232_THROW( EXCEPTION );
     }
     OTHERWISE
@@ -627,8 +626,8 @@ Var_T *monochromator_wavelength( Var_T * v )
 
     if ( wl < spex232.lower_limit )
     {
-        print( FATAL, "Requested wavelength of %.5f nm is lower than the "
-               "lower wavelength limit of %.5f nm.\n",
+        print( FATAL, "Requested wavelength of %.5f nm is below the lower "
+               "wavelength limit of %.5f nm.\n",
                1.0e9 * spex232_wl2Uwl( wl ),
                1.0e9 * spex232_wl2Uwl( spex232.lower_limit ) );
         SPEX232_THROW( EXCEPTION );
@@ -636,8 +635,8 @@ Var_T *monochromator_wavelength( Var_T * v )
 
     if ( wl > spex232.upper_limit )
     {
-        print( FATAL, "Requested wavelength of %.5f nm is larger than the "
-               "upper wavelength limit of %.5f nm.\n",
+        print( FATAL, "Requested wavelength of %.5f nm is above the upper "
+               "wavelength limit of %.5f nm.\n",
                1,0e9 * spex232_wl2Uwl( wl ),
                1.0e9 * spex232_wl2Uwl( spex232.upper_limit ) );
         SPEX232_THROW( EXCEPTION );
@@ -655,9 +654,9 @@ Var_T *monochromator_wavelength( Var_T * v )
 
 /*----------------------------------------------------------------------*
  * Queries the current wavenumber (in cm^-1) of the monochromator. When
- * in wavenumber offset mode the difference to the laser line is used.
- * If the monochromator is currently doing scan and a new wavenumber is
- * set the currently running scan is aborted.
+ * the monochromator is wavenumber driven the difference to the laser
+ * line is used. If the monochromator is currently doing scan a and a
+ * new wavenumber is set the currently running scan is aborted.
  *----------------------------------------------------------------------*/
 
 Var_T *monochromator_wavenumber( Var_T * v )
@@ -688,8 +687,7 @@ Var_T *monochromator_wavenumber( Var_T * v )
     }
     CATCH( INVALID_INPUT_EXCEPTION )
     {
-        print( FATAL, "Invalid wavenumber of %.4f cm^-1.\n",
-               spex232_wl2Uwn( wl ) );
+        print( FATAL, "Invalid wavenumber of %.4f cm^-1.\n", wl );
         SPEX232_THROW( EXCEPTION );
     }
     OTHERWISE
@@ -705,11 +703,10 @@ Var_T *monochromator_wavenumber( Var_T * v )
 
     if ( wl < spex232.lower_limit )
     {
-        print( FATAL, "Requested %s wavenumber of %.4f cm^-1 is %s than the "
+        print( FATAL, "Requested wavenumber of %.4f cm^-1 is %s the "
                "%s wavenumber limit of %.4f cm^-1.\n",
-               spex232.mode == WN_REL ? "(relative)" : "(absolute)",
                spex232_wl2Uwn( wl ),
-               spex232.mode == WN_ABS ? "larger" : "lower",
+               spex232.mode == WN_ABS ? "above" : "below",
                spex232.mode == WN_ABS ? "upper" : "lower",
                spex232_wl2Uwn( spex232.lower_limit ) );
         SPEX232_THROW( EXCEPTION );
@@ -717,11 +714,10 @@ Var_T *monochromator_wavenumber( Var_T * v )
 
     if ( wl > spex232.upper_limit )
     {
-        print( FATAL, "Requested %s wavenumber of %.4f cm^-1 is %s than the "
+        print( FATAL, "Requested wavenumber of %.4f cm^-1 is %s the "
                "%s wavenumber limit of %.4f cm^-1.\n",
-               spex232.mode == WN_REL ? "(relative)" : "(absolute)",
                spex232_wl2Uwn( wl ),
-               spex232.mode == WN_ABS ? "lower" : "larger",
+               spex232.mode == WN_ABS ? "below" : "above",
                spex232.mode == WN_ABS ? "lower" : "upper",
                spex232_wl2Uwn( spex232.upper_limit ) );
         SPEX232_THROW( EXCEPTION );
@@ -808,11 +804,10 @@ Var_T *monochromator_scan_setup( Var_T * v )
     CATCH( INVALID_INPUT_EXCEPTION )
     {
         if ( spex232.mode & WN_MODES )
-            print( FATAL, "Invalid start wavenumber of %.4f cm^-1.\n",
-                   spex232_wl2Uwn( start ) );
+            print( FATAL, "Invalid start wavenumber of %.4f cm^-1.\n", start );
         else
             print( FATAL, "Invalid start wavelength of %.5f nm.\n",
-                   1.0e9 * spex232_wl2Uwl( start ) );
+                   1.0e9 * start );
         SPEX232_THROW( EXCEPTION );
     }
     OTHERWISE
@@ -829,9 +824,11 @@ Var_T *monochromator_scan_setup( Var_T * v )
     if ( start < spex232.lower_limit )
     {
         if ( spex232.mode & WN_MODES )
-            print( FATAL, "(Absolute) start wavenumber of %.4f cm^-1 is "
-                   "higher than the upper limit of the device of %.4f "
-                   "cm^-1.\n", spex232_wl2Uwn( start ),
+            print( FATAL, "Start wavenumber of %.4f cm^-1 is %s limit of "
+                   "%.4f.\n",
+                   spex232.mode & WN_ABS ?
+                   "above the upper" : "below the lower",
+                   spex232_wl2Uwn( start ),
                    spex232_wl2Uwn( spex232.lower_limit ) );
         else
             print( FATAL, "Start wavelength of %.5f nm is below the lower "
@@ -845,9 +842,11 @@ Var_T *monochromator_scan_setup( Var_T * v )
     if ( start > spex232.upper_limit )
     {
         if ( spex232.mode & WN_MODES )
-            print( FATAL, "(Absolute) start wavenumber of %.4f cm^-1 is below "
-                   "the the lower limit of the device of %.4f cm^-1.\n",
-                   "cm^-1.\n", spex232_wl2Uwn( start ),
+            print( FATAL, "Start wavenumber of %.4f cm^-1 is %s limit of "
+                   "%.4f cm^-1.\n",
+                   spex232.mode & WN_ABS ?
+                   "below the lower" : "above the upper",
+                   spex232_wl2Uwn( start ),
                    spex232_wl2Uwn( spex232.upper_limit ) );
         else
             print( FATAL, "Start wavelength of %.5f nm is higher than the "
@@ -1063,7 +1062,7 @@ Var_T *monochromator_laser_line( Var_T * v )
 
 
     /* Setting a laser line (and thereby switching to wavenumber offset
-       mode) only works when the device is in wavenumber mode */
+       mode) only works when the device is wavenumber drivem */
 
     if ( spex232.mode == WL )
     {
@@ -1111,17 +1110,12 @@ Var_T *monochromator_groove_density( Var_T * v )
 
 /*--------------------------------------------------------------------*
  * Function for calibration of the monochromator. It tells the driver
- * 1. about an offset between what the driver reports to the user and
- *    where a line is supposed to be.
+ * 1. about an offset between what the driver reports to the user as
+ *    the wavelength and where a line is supposed to be.
  * 2. (optionally) the width of a single pixel on the CCD camera
  *
  * The function is to be called at least with the difference between
- * the position where the line appears and the expected position (in
- * wavenumber modes in units of cm^-1 and in wavelength mode in nm).
- *
- * For wavelength driven monochromators the offset must be given in
- * wavelength units, while for wavenumber driven monochromators in
- * wavenumber units (i.e. cm^-1).
+ * the position where the line appears and the expected position in nm.
  *
  * If there's another argument it has to be the wavelength difference
  * between two pixels of the CCD camera (always to be given in wave-
@@ -1149,30 +1143,12 @@ Var_T *monochromator_calibrate( Var_T * v )
         return vars_push( FLOAT_ARR, field, 2 );
     }
 
-    /* A new offset can only be set for wavenumber driven monochromators
-       while in absolute wavenumber mode */
-
-    if ( spex232.mode & WN_MODES )
-    {
-        new_offset = get_double( v, "wavenumber offset" );
-        if ( spex232.mode == WN_REL )
-            new_offset *= -1;
-    }
-    else
-        new_offset = get_double( v, "wavelength offset" );
+    new_offset = get_double( v, "offset" );
 
     offset = spex232.offset + new_offset;
 
 #if defined SPEX232_MAX_OFFSET
-    if ( spex232.mode & WN_MODES && offset > SPEX232_MAX_OFFSET )
-    {
-        print( FATAL, "Offset of %.4f cm^-1 is unrealistically high. If this "
-               "isn't an error change the \"SPEX232_MAX_OFFSET\" setting in "
-               "the device configuration file and recompile.\n", new_offset );
-        SPEX232_THROW( EXCEPTION );
-    }
-
-    if ( spex232.mode == WL && fabs( 1.0e9 * offset ) > SPEX232_MAX_OFFSET )
+    if ( fabs( 1.0e9 * offset ) > SPEX232_MAX_OFFSET )
     {
         print( FATAL, "Offset of %.5f nm is unrealistically high. If this "
                "isn't an error change the \"SPEX232_MAX_OFFSET\" setting in "
@@ -1202,51 +1178,36 @@ Var_T *monochromator_calibrate( Var_T * v )
     spex232.offset = offset;
     spex232.pixel_diff = pixel_diff;
 
-    field[ 0 ] =
-              spex232.mode == WN_REL ? - spex232.offset : spex232.offset;
+    field[ 0 ] = spex232.offset;
     field[ 1 ] = spex232.pixel_diff;
 
     return vars_push( FLOAT_ARR, field, 2 );
 }
 
 
-/*----------------------------------------------------------------------*
- * Function returns an array of two wavelength values that are suitable
- * for use as axis description parameters (start of axis and increment)
- * required by by the change_scale() function (if the camera uses
- * binning the second element may have to be multiplied by the x-binning
- * width). Please note: since the axis is not really linear the axis
- * displayed when using these values isn't absolutely correct!
- *----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function returns an array of 4 values. The first two are suitable for
+ * creating a wavelength axis description (start of axis and increment)
+ * when no binning has been set and the ROI covers the whole camera chip
+ * (at least in vertical direction). The third and fourth values are
+ * the start and increment with the currently set binning and ROI of
+ * the camera taken into account.
+ *-----------------------------------------------------------------------*/
 
 Var_T *monochromator_wavelength_axis( Var_T * v )
 {
-    double wl = spex232.wavelength;
+    double wl;
     Var_T *cv;
     long int num_pixels;
     int acc;
+    long roi;
+    long bin;
 
 
     CLOBBER_PROTECT( wl );
 
     if ( v != NULL )
-    {
         wl = get_double( v, "wavelength" );
-
-        TRY
-        {
-            wl = spex232_Uwl2wl( wl );
-            TRY_SUCCESS;
-        }
-        CATCH( INVALID_INPUT_EXCEPTION )
-        {
-            print( FATAL, "Invalid center wavelength of %.5f nm.\n",
-                   1.0e9 * spex232_wl2Uwl( wl ) );
-            SPEX232_THROW( EXCEPTION );
-        }
-        OTHERWISE
-            SPEX232_RETHROW( );
-    }
     else
     {
         if ( ! spex232.is_wavelength )
@@ -1256,7 +1217,7 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
         }
 
         if ( spex232.is_wavelength )
-            wl = spex232.wavelength;
+            wl = spex232_wl2Uwl( spex232.wavelength );
     }
 
     too_many_arguments( v );
@@ -1292,48 +1253,97 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
     num_pixels = cv->val.lpnt[ 0 ];
     vars_pop( cv );
 
-    cv = vars_push( FLOAT_ARR, NULL, 2 );
+    if ( ! func_exists( "ccd_camera_roi" ) )
+    {
+        print( FATAL, "CCD camera has no function for determining the "
+               "ROI settings.\n" );
+        SPEX232_THROW( EXCEPTION );
+    }
 
-    cv->val.dpnt[ 0 ] = spex232_wl2Uwl( wl - 0.5 * ( num_pixels - 1 )
-                                        * spex232.pixel_diff );
+    cv = func_call( func_get( "ccd_camera_roi", &acc ) );
+
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0
+         || cv->val.lpnt[ 2 ] <= 0 || cv->val.lpnt[ 3 ] <= 0
+         || cv->val.lpnt[ 0 ] >= cv->val.lpnt[ 2 ]
+         || cv->val.lpnt[ 1 ] >= cv->val.lpnt[ 3 ] )
+    {
+        print( FATAL, "Function of CCD for determining the ROI settings "
+               "does not return a useful value.\n" );
+        SPEX232_THROW( EXCEPTION );
+    }
+
+    roi = cv->val.lpnt[ 0 ];
+    vars_pop( cv );
+
+    if ( ! func_exists( "ccd_camera_binning" ) )
+    {
+        print( FATAL, "CCD camera has no function for determining the "
+               "binning settings.\n" );
+        SPEX232_THROW( EXCEPTION );
+    }
+
+    cv = func_call( func_get( "ccd_camera_binning", &acc ) );
+
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0
+         || num_pixels % cv->val.lpnt[ 0 ] != 0 )
+    {
+        print( FATAL, "Function of CCD for determining binning does not "
+               "return a useful value.\n" );
+        SPEX232_THROW( EXCEPTION );
+    }
+
+    bin = cv->val.lpnt[ 0 ];
+    vars_pop( cv );
+
+    cv = vars_push( FLOAT_ARR, NULL, 4 );
+
+    cv->val.dpnt[ 0 ] = wl - 0.5 * ( num_pixels - 1 ) * spex232.pixel_diff;
     cv->val.dpnt[ 1 ] = spex232.pixel_diff;
+    cv->val.dpnt[ 2 ] = cv->val.dpnt[ 0 ] + spex232.pixel_diff
+                        * ( 0.5 * ( bin - 1 ) + ( roi - 1 ) );
+    cv->val.dpnt[ 3 ] = bin * cv->val.dpnt[ 1 ];
 
     return cv;
 }
 
 
-/*----------------------------------------------------------------------*
- * Function returns an array of two wavenumber values that are suitable
- * for use as axis description parameters (start of axis and increment)
- * required by by the change_scale() function (if the camera uses
- * binning the second element may have to be multiplied by the x-binning
- * width). Please note: since the axis is not really linear the axis
- * displayed when using these values isn't absolutely correct!
- *----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function returns an array of 4 values. The first two are suitable for
+ * creating a wavenumber axis description (start of axis in absolute
+ * wavenumbers and increment) when no binning has been set and the ROI
+ * covers the whole camera chip (at least in vertical direction). The
+ * third and fourth values are the start and increment with the cur-
+ * rently set binning and ROI of the camera taken into account.
+ * Please note: since the measured data are linear in wavelength the
+ * axis displyed using linear wavenumber values isn't really correct!
+ *-----------------------------------------------------------------------*/
 
 Var_T *monochromator_wavenumber_axis( Var_T * v )
 {
-    double wl = spex232.wavelength;
+    double wl;
     Var_T *cv;
+    Var_T *fv;
     long int num_pixels;
     int acc;
+    long bin;
 
 
     CLOBBER_PROTECT( wl );
 
     if ( v != NULL )
     {
-        wl = get_double( v, "wavenumber" );
+        wl = get_double( v, "center wavenumber" );
 
         TRY
         {
-            wl = spex232_Uwn2wl( wl );
+            wl = spex232_wn2wl( wl );
             TRY_SUCCESS;
         }
         CATCH( INVALID_INPUT_EXCEPTION )
         {
-            print( FATAL, "Invalid wavenumber of %.4f cm^-1.\n",
-                   spex232_wl2Uwn( wl ) );
+            print( FATAL, "Invalid wavenumber of %.4f cm^-1.\n", wl );
             SPEX232_THROW( EXCEPTION );
         }
         OTHERWISE
@@ -1347,19 +1357,14 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
             SPEX232_THROW( EXCEPTION );
         }
 
-        wl = spex232.wavelength;
+        wl = spex232_wl2Uwl( spex232.wavelength );
     }
 
     too_many_arguments( v );
 
-    /* Check that we can talk with the camera */
+    v = vars_push( FLOAT_VAR, wl );
 
-    if ( ! exists_device_type( "ccd camera" ) )
-    {
-        print( FATAL, "Function can only be used when the module for a "
-               "CCD camera is loaded.\n" );
-        SPEX232_THROW( EXCEPTION );
-    }
+    cv = monochromator_wavelength_axis( v );
 
     /* Get the width (in pixels) of the chip of the camera */
 
@@ -1370,30 +1375,36 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
         SPEX232_THROW( EXCEPTION );
     }
 
-    cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
+    fv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
 
-    if (    cv->type != INT_ARR
-         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+    if (    fv->type != INT_ARR
+         || fv->val.lpnt[ 0 ] <= 0 || fv->val.lpnt[ 1 ] <= 0 )
     {
         print( FATAL, "Function of CCD for determining the size of the chip "
                "does not return a useful value.\n" );
         SPEX232_THROW( EXCEPTION );
     }
 
-    num_pixels = cv->val.lpnt[ 0 ];
-    vars_pop( cv );
+    num_pixels = fv->val.lpnt[ 0 ];
+    vars_pop( fv );
 
-    cv = vars_push( FLOAT_ARR, NULL, 2 );
+    /* The wavenumber difference between adjacent points is calculated
+       as the difference between the wavenumbers at both ends of the
+       chip, divided by the number of pixel on the chip minus one. Please
+       always remember that this is an average since the axis isn't really
+       linear in wavenumbers but in wavelengths */
 
-    cv->val.dpnt[ 0 ] = spex232_wl2Uwn( wl + 0.5 * ( num_pixels - 1 )
-                                        * spex232.pixel_diff );
+    bin = lround( cv->val.dpnt[ 3 ] / cv->val.dpnt[ 1 ] );
 
-    cv->val.dpnt[ 1 ] = ( spex232_wl2Uwn( wl - 0.5 * ( num_pixels - 1 )
-                                          * spex232.pixel_diff )
-                          - cv->val.dpnt[ 0 ] ) / ( num_pixels - 1 );
+    cv->val.dpnt[ 1 ] = 
+                  (   spex232_wl2wn(   cv->val.dpnt[ 0 ] 
+                                     + ( num_pixels - 1 ) * cv->val.dpnt[ 1 ] )
+                    - spex232_wl2wn( cv->val.dpnt[ 0 ] ) )
+                  / ( num_pixels - 1 );
+    cv->val.dpnt[ 0 ] = spex232_wl2wn( cv->val.dpnt[ 0 ] );
 
-    if ( spex232.mode == WN_ABS )
-        cv->val.dpnt[ 1 ] *= -1.0;
+    cv->val.dpnt[ 2 ] = spex232_wl2wn( cv->val.dpnt[ 2 ] );
+    cv->val.dpnt[ 3 ] = cv->val.dpnt[ 1 ] * bin;
 
     return cv;
 }

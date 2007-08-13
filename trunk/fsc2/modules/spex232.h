@@ -145,7 +145,7 @@ struct Spex232 {
     bool scan_is_init;
     bool in_scan;                   /* set while scanning */
 
-    double offset;                  /* in m or abs. cm^-1, depending on mode */
+    double offset;                  /* in m */
 
     double pixel_diff;              /* in m */
 
@@ -257,8 +257,6 @@ double spex232_Uwl2wn( double /* wl */ );
 double spex232_wl2Uwn( double /* wl */ );
 
 double spex232_Uwn2wl( double /* wn */ );
-
-double spex232_wl2mu( double /* wl */ );
 
 
 #define SPEX232_THROW( x )  do { spex232.fatal_error = SET;       \

@@ -629,15 +629,14 @@ Var_T *monochromator_load_calibration( Var_T * v )
 }
 
 
-/*----------------------------------------------------------------------*
- * Function returns an array of two wavelength values that are suitable
- * for use as axis description parameters (start of axis and increment)
- * required by by the change_scale() function (if the camera uses
- * binning the second element may have to be multiplied by the
- * x-binning width). Please note: since the axis is not really
- * completely linear, the axis that gets displyed when using these
- * values is not 100% correct!
- *----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function returns an array of 4 values. The first two are suitable for
+ * creating a wavelength axis description (start of axis and increment)
+ * when no binning has been set and the ROI covers the whole camera chip
+ * (at least in vertical direction). The third and fourth values are
+ * the start and increment with the currently set binning and ROI of
+ * the camera taken into account.
+ *-----------------------------------------------------------------------*/
 
 Var_T *monochromator_wavelength_axis( Var_T * v )
 {
@@ -649,6 +648,8 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
     double wl_low;
     double wl_hi;
     int acc;
+    long roi;
+    long bin;
 
 
     /* Check if there's a CCD camera module loaded */
@@ -703,15 +704,60 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
     pixel_width = cv->val.dval;
     vars_pop( cv );
 
+    if ( ! func_exists( "ccd_camera_roi" ) )
+    {
+        print( FATAL, "CCD camera has no function for determining the "
+               "ROI settings.\n" );
+        THROW( EXCEPTION );
+    }
+
+    cv = func_call( func_get( "ccd_camera_roi", &acc ) );
+
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0
+         || cv->val.lpnt[ 2 ] <= 0 || cv->val.lpnt[ 3 ] <= 0
+         || cv->val.lpnt[ 0 ] >= cv->val.lpnt[ 2 ]
+         || cv->val.lpnt[ 1 ] >= cv->val.lpnt[ 3 ] )
+    {
+        print( FATAL, "Function of CCD for determining the ROI settings "
+               "does not return a useful value.\n" );
+        THROW( EXCEPTION );
+    }
+
+    roi = cv->val.lpnt[ 0 ];
+    vars_pop( cv );
+
+    if ( ! func_exists( "ccd_camera_binning" ) )
+    {
+        print( FATAL, "CCD camera has no function for determining the "
+               "binning settings.\n" );
+        THROW( EXCEPTION );
+    }
+
+    cv = func_call( func_get( "ccd_camera_binning", &acc ) );
+
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0
+         || num_pixels % cv->val.lpnt[ 0 ] != 0 )
+    {
+        print( FATAL, "Function of CCD for determining the binning "
+               "settings does not return a useful value.\n" );
+        THROW( EXCEPTION );
+    }
+
+    bin = cv->val.lpnt[ 0 ];
+    vars_pop( cv );
+
     /* If no calibration file has been read or there is no (complete)
        calibration for the current grating we just return values for
        a pixel count scale */
 
     if ( ! spectrapro_300i.use_calib )
     {
-        cv = vars_push( FLOAT_ARR, NULL, 2 );
-        cv->val.dpnt[ 0 ] = - 0.5 * ( double ) ( num_pixels - 1 );
-        cv->val.dpnt[ 1 ] = 1;
+        cv = vars_push( FLOAT_ARR, NULL, 4 );
+        cv->val.dpnt[ 0 ] = cv->val.dpnt[ 2 ] =
+                                        - 0.5 * ( double ) ( num_pixels - 1 );
+        cv->val.dpnt[ 1 ] = cv->val.dpnt[ 3 ] = 1;
         return cv;
     }
 
@@ -752,26 +798,31 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
     too_many_arguments( v );
 
     wl_low = spectrapro_300i_conv( gn, wl, num_pixels, pixel_width, 1 );
-    wl_hi = spectrapro_300i_conv( gn, wl, num_pixels, pixel_width,
-                                  num_pixels );
+    wl_hi  = spectrapro_300i_conv( gn, wl, num_pixels, pixel_width,
+                                   num_pixels );
 
-    cv = vars_push( FLOAT_ARR, NULL, 2 );
+    cv = vars_push( FLOAT_ARR, NULL, 4 );
+
     cv->val.dpnt[ 1 ] = ( wl_hi - wl_low ) / ( num_pixels - 1 );
     cv->val.dpnt[ 0 ] = wl - 0.5 * cv->val.dpnt[ 1 ] * ( num_pixels - 1 );
+    cv->val.dpnt[ 2 ] = cv->val.dpnt[ 0 ] + cv->val.dpnt[ 1 ]
+                        * ( 0.5 * ( bin - 1 ) + ( roi - 1 ) );
+    cv->val.dpnt[ 3 ] = bin * cv->val.dpnt[ 1 ];
 
     return cv;
 }
 
 
-/*----------------------------------------------------------------------*
- * Function returns an array of two wavenumber values that are suitable
- * for use as axis description parameters (start of axis and increment)
- * required by by the change_scale() function (if the camera uses
- * binning the second element may have to be multiplied by the
- * x-binning width). Please note: since the axis is not really
- * completely linear, the axis that gets displyed when using these
- * values is not 100% correct!
- *----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function returns an array of 4 values. The first two are suitable for
+ * creating a wavenumber axis description (start of axis in absolute
+ * wavenumbers and increment) when no binning has been set and the ROI
+ * covers the whole camera chip (at least in vertical direction). The
+ * third and fourth values are the start and increment with the cur-
+ * rently set binning and ROI of the camera taken into account.
+ * Please note: since the measured data are linear in wavelength the
+ * axis displyed using linear wavenumber values isn't really correct!
+ *-----------------------------------------------------------------------*/
 
 Var_T *monochromator_wavenumber_axis( Var_T * v )
 {
@@ -780,18 +831,19 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
     double wn;
     int acc;
     long num_pixels;
+    long bin;
 
 
-    if ( v != NULL )
+    if ( v->next != NULL )
     {
-        wn = get_double( v, "center wavenumber" );
+        wn = get_double( v->next, "center wavenumber" );
         if ( wn <= 0.0 )
         {
             print( FATAL, "Invalid zero or negative center wavenumber\n" );
             THROW( EXCEPTION );
         }
-        too_many_arguments( v );
-        v = vars_push( FLOAT_VAR, 0.01 / wn );
+        too_many_arguments( v->next );
+        v->next = vars_push( FLOAT_VAR, 0.01 / wn );
     }
 
     cv = monochromator_wavelength_axis( v );
@@ -800,14 +852,22 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
     num_pixels = fv->val.lpnt[ 0 ];
     vars_pop( fv );
 
-    cv->val.dpnt[ 1 ] =
-                (   0.01 / (   cv->val.dpnt[ 0 ]
-                             + 0.5 * ( num_pixels - 1 ) * cv->val.dpnt[ 1 ] )
-                  - 0.01 / (   cv->val.dpnt[ 0 ]
-                             - 0.5 * ( num_pixels - 1 ) * cv->val.dpnt[ 1 ] ) )
-                / ( num_pixels - 1 );
+    /* The wavenumber difference between adjacent points is calculated
+       as the difference between the wavenumbers at both ends of the
+       chip, divided by the number of pixel on the chip minus one. Please
+       always remember that this is an average since the axis isn't really
+       linear in wavenumbers but in wavelengths */
 
+    bin = lround( cv->val.dpnt[ 3 ] / cv->val.dpnt[ 1 ] );
+
+    cv->val.dpnt[ 1 ] = (   0.01 / (   cv->val.dpnt[ 0 ]
+                                     + ( num_pixels - 1 ) * cv->val.dpnt[ 1 ] )
+                          - 0.01 / cv->val.dpnt[ 0 ] )
+                        / ( num_pixels - 1 );
     cv->val.dpnt[ 0 ] = 0.01 / cv->val.dpnt[ 0 ];
+
+    cv->val.dpnt[ 2 ] = 0.01 / cv->val.dpnt[ 2 ];
+    cv->val.dpnt[ 3 ] = cv->val.dpnt[ 1 ] * bin;
 
     return cv;
 }
@@ -1009,10 +1069,11 @@ static void spectrapro_300i_arr_conv( long    gn,
 }
 
 
-/*--------------------------------------------------------------------*
+/*---------------------------------------------------------------------*
  * Function takes an index (relative to the left edge of the CCD chip
- * and starting there with 1) into the wavelength at that position.
- *--------------------------------------------------------------------*/
+ * and starting there with 1) into and converts it into the wavelength
+ * at that position.
+ *---------------------------------------------------------------------*/
 
 static double spectrapro_300i_conv( long   gn,
                                     double cwl,

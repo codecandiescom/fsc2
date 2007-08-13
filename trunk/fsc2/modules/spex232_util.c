@@ -39,8 +39,9 @@ bool spex232_read_state( void )
     const char *dn;
     FILE *fp;
     int c;
+    int ret;
     double val[ 4 ];
-    int new;
+    double new;
     int i = 0;
     bool in_comment = UNSET;
     bool found_end = UNSET;
@@ -75,36 +76,35 @@ bool spex232_read_state( void )
                 break;
 
             default :
-                if ( in_comment )
+                if ( in_comment || isspace( c ) )
                     break;
 
                 fsc2_fseek( fp, -1, SEEK_CUR );
 
-                if (    ( spex232.mode & WL && i > 3 ) || i > 4
-                     || (    (    ( spex232.mode & WL && i < 3 )
-                               || ( spex232.mode & WN_MODES && i < 4 ) )
-                          && fsc2_fscanf( fp, "%lf", val + i ) != 1 )
-                     || (    (    ( spex232.mode & WL && i == 3 )
-                               || ( spex232.mode & WN_MODES && i == 4 ) )
-                          && fsc2_fscanf( fp, "%d", &new ) != 1 ) )
+                ret = fsc2_fscanf( fp, "%lf", &new );
+
+                if (    ( ret == 1
+                          && (    ( spex232.mode & WL && i >= 3 )
+                                  || ( spex232.mode & WN_MODES && i >= 4 ) ) )
+                     || ret != 1 )
                 {
                     print( FATAL, "Invalid state file '%s'.\n", fn );
                     T_free( fn );
                     fsc2_fclose( fp );
                     SPEX232_THROW( EXCEPTION );
                 }
+
+                val[ i++ ] = new;
 
                 while ( ( c = fsc2_fgetc( fp ) ) != EOF && isspace( c ) )
                     /* empty */ ;
 
-                if ( (    c == EOF
-                       && (    ( i != 3 && spex232.mode & WL )
-                            || ( i != 4 && spex232.mode & WN_MODES ) ) )
-                     || (    ( i == 0 || i == 2 || spex232.mode & WL )
-                          && c != 'n' )
-                     || (    ( i == 1 || i == 3 )
-                          && spex232.mode & WN_MODES
-                          && c != 'c' ) )
+                if (    c == EOF
+                     || fgetc( fp ) != 'm'
+                     || (    spex232.mode & WN_MODES && i == 4 && c != 'c'
+                          && fgetc( fp ) != '^' && fgetc( fp ) != '-'
+                          && fgetc( fp ) != '1' )
+                     || ( i < 4 && c != 'n' ) )
                 {
                     print( FATAL, "Invalid state file '%s'.\n", fn );
                     T_free( fn );
@@ -112,21 +112,7 @@ bool spex232_read_state( void )
                     SPEX232_THROW( EXCEPTION );
                 }
 
-                if (    ( ( spex232.mode & WL && i != 3 ) || i != 4 )
-                     && (    fsc2_fgetc( fp ) != 'm'
-                          || (    c == 'c'
-                               && ( fsc2_fgetc( fp ) != '^'
-                                    || fsc2_fgetc( fp ) != '-'
-                                    || fsc2_fgetc( fp ) != '1' ) ) ) )
-                {
-                    print( FATAL, "Invalid state file '%s'.\n", fn );
-                    T_free( fn );
-                    fsc2_fclose( fp );
-                    SPEX232_THROW( EXCEPTION );
-                }
-
-                i++;
-                break;
+                in_comment = SET;
         }
     } while ( ! found_end );
 
@@ -140,12 +126,11 @@ bool spex232_read_state( void )
     }   
 
     spex232.motor_position = spex232_wl2p( 1.0e-9 * val[ 0 ] );
-    spex232.pixel_diff = 1.0e-9 * val[ 2 ];
+    spex232.offset         = 1.0e-9 * val[ 1 ];
+    spex232.pixel_diff     = 1.0e-9 * val[ 2 ];
 
     if ( spex232.mode & WN_MODES )
     {
-        spex232.offset = val[ 1 ];
-
         if ( val[ 3 ] < 0.0 )
         {
             print( FATAL, "Invalid state file '%s'.\n", fn );
@@ -155,8 +140,6 @@ bool spex232_read_state( void )
 
         spex232.laser_line = val[ 3 ];
     }
-    else
-        spex232.offset = 1.0e-9 * val[ 1 ];
 
     T_free( fn );
     return OK;
@@ -191,8 +174,7 @@ bool spex232_store_state( void )
                   "# 1. The wavelength the monochromator is set to\n"
                   "# 2. An offset of the monochromator, i.e. a number that "
                   "always has to be\n"
-                  "#    added to wavenumbers or -lengths specified by the "
-                  "user\n"
+                  "#    added to wavelengths specified by the user\n"
                   "# 3. The wavelength difference between two pixels of the "
                   "connected CCD camera\n"
                   "# 4. For wavenumber driven monochromators only: the "
@@ -200,9 +182,9 @@ bool spex232_store_state( void )
                   "#    the position of the laser line\n\n" );
 
     if ( spex232.mode & WN_MODES )
-        fsc2_fprintf( fp, "%.5f nm\n%.4f cm^-1\n%.7f nm\n%.4f cm^-1\n",
+        fsc2_fprintf( fp, "%.5f nm\n%.5f nm\n%.7f nm\n%.4f cm^-1\n",
                       1.0e9 * spex232_p2wl( spex232.motor_position ),
-                      spex232.offset,
+                      1.0e9 * spex232.offset,
                       1.0e9 * spex232.pixel_diff,
                       spex232.laser_line );
     else
@@ -258,11 +240,9 @@ double spex232_wn2wl( double wn )
 
 double spex232_wl2Uwl( double wl )
 {
-    if ( spex232.mode & WL )
-        wl -= spex232.offset;
-    else
-        wl = spex232_wn2wl( spex232_wl2wn( wl ) - spex232.offset );
-
+    wl -= spex232.offset;
+    if ( wl <= 0.0 )
+        SPEX232_THROW( INVALID_INPUT_EXCEPTION );
     return wl;
 }
 
@@ -274,11 +254,9 @@ double spex232_wl2Uwl( double wl )
 
 double spex232_Uwl2wl( double wl )
 {
-    if ( spex232.mode & WL )
-        wl += spex232.offset;
-    else
-        wl = spex232_wn2wl( spex232_wl2wn( wl ) + spex232.offset );
-
+    wl += spex232.offset;
+    if ( wl <= 0.0 )
+        SPEX232_THROW( INVALID_INPUT_EXCEPTION );
     return wl;
 }
 
@@ -291,23 +269,10 @@ double spex232_Uwl2wl( double wl )
 
 double spex232_wn2Uwn( double wn )
 {
-    switch ( spex232.mode )
-    {
-        case WN_REL :
-            wn = spex232.laser_line - wn;
-            /* fall through */
+    wn = spex232_wl2wn( spex232_wl2Uwl( spex232_wn2wl( wn ) ) );
 
-        case WN_ABS :
-            wn -= spex232.offset;
-            break;
-
-        case WL :
-            wn = spex232_wl2wn( spex232_wl2Uwl( spex232_wn2wl( wn ) ) );
-            break;
-
-        default:
-            fsc2_impossible( );
-    }
+    if ( spex232.mode == WN_REL )
+        wn = spex232.laser_line - wn;
 
     return wn;
 }
@@ -321,39 +286,27 @@ double spex232_wn2Uwn( double wn )
 
 double spex232_Uwn2wn( double wn )
 {
-    switch ( spex232.mode )
-    {
-        case WN_REL :
-            wn = spex232.laser_line - wn;
-            /* fall through */
+    if ( spex232.mode == WN_REL )
+        wn = spex232.laser_line - wn;
 
-        case WN_ABS :
-            wn += spex232.offset;
-            break;
-
-        case WL :
-            wn = spex232_wl2wn( spex232_Uwl2wl( spex232_wn2wl( wn ) ) );
-            break;
-            
-        default:
-            fsc2_impossible( );
-    }
-
-    return wn;
+    return spex232_wl2wn( spex232_Uwl2wl( spex232_wn2wl( wn ) ) );
 }
 
 
-/*--------------------------------------------------------*
- * Converts internally used wavenumber to a wavelength as
- * seen by the user (i.e. including offset correction).
- *--------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Converts from internally used wavelength to a wavenumber
+ * as expected by the user (i.e. including offset correction
+ * and relative to the laser line if one is set).
+ *-----------------------------------------------------------*/
 
-double spex232_wn2Uwl( double wn )
+double spex232_wl2Uwn( double wl )
 {
-    if ( spex232.mode & WN_MODES )
-        return spex232_wn2wl( wn - spex232.offset );
+    double wn = spex232_wl2wn( spex232_wl2Uwl( wl ) );
 
-    return spex232_wl2Uwl( spex232_wn2wl( wn ) );
+    if ( spex232.mode == WN_REL )
+        wn = spex232.laser_line - wn;
+
+    return wn;
 }
 
 
@@ -364,25 +317,18 @@ double spex232_wn2Uwl( double wn )
 
 double spex232_Uwl2wn( double wl )
 {
-    if ( spex232.mode & WN_MODES )
-        return spex232_wl2wn( wl ) + spex232.offset;
-
-    return spex232_wl2wn( spex232_wl2Uwl( wl ) );
+    return spex232_wl2wn( spex232_Uwl2wl( wl ) );
 }
 
 
-/*-----------------------------------------------------------*
- * Converts from internally used wavelength to wavenumber as
- * seen by the user (i.e. including offset correction and
- * in relative wavenumber mode if necessary).
- *-----------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Converts internally used wavenumber to a wavelength as
+ * seen by the user (i.e. including offset correction).
+ *--------------------------------------------------------*/
 
-double spex232_wl2Uwn( double wl )
+double spex232_wn2Uwl( double wn )
 {
-    if ( spex232.mode & WN_MODES )
-        return spex232_wn2Uwn( spex232_wl2wn( wl ) );
-
-    return spex232_wl2wn( spex232_wl2Uwl( wl ) );
+    return spex232_wl2Uwl( spex232_wn2wl( wn ) );
 }
 
 
@@ -394,35 +340,7 @@ double spex232_wl2Uwn( double wl )
 
 double spex232_Uwn2wl( double wn )
 {
-    if ( spex232.mode & WN_MODES )
-        return spex232_wn2wl( spex232_Uwn2wn( wn ) );
-
-    return spex232_Uwl2wl( spex232_wn2wl( wn ) );
-}
-
-
-/*-----------------------------------------------------------*
- * Converts from an internally used wavelength to a value as
- * to be send to the monochromator under its current setting.
- *-----------------------------------------------------------*/
-
-double spex232_wl2mu( double wl )
-{
-    switch ( spex232.mode )
-    {
-        case WN_ABS :
-            return spex232_wl2wn( wl );
-
-        case WN_REL :
-            return spex232.laser_line - spex232_wl2wn( wl );
-
-        case WL :
-            return ( UNITS == NANOMETER ? 1.0e9 : 1.0e10 ) * wl;
-    }
-
-    fsc2_impossible( );            /* we'll never get here */
-
-    return 0.0;
+    return spex232_wn2wl( spex232_Uwn2wn( wn ) );
 }
 
 

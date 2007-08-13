@@ -6389,11 +6389,18 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex monochromator_wavelength_axis()
 @item monochromator_wavelength_axis()
 The function requires that the module for a CCD camera is available that
-returns information about the number of pixels of the CCD chip and the
-distance between pixels. It then returns an array with two elements,
-the first element being the wavelength at the leftmost pixel of the
-chip and the second element being the wavelength difference between
+returns information about the settings of the camera. It returns an
+array with four elements.
+
+ The first first element is the wavelength at the leftmost pixel of
+he chip and second element being the wavelength difference between
 neighboring pixels.
+
+The third value is the wavelength at the first data point returned
+by the camera, taking its setting for the ROI and binning already
+into account, while the fourth value is the wavelength difference
+between data points (which will be different from the difference
+between neighbouring pixels when horizontal binning is used).
 
 For the @strong{SpectraPro-300i} monochronator the function can be
 called with up to two arguments, an integer for the grating number
@@ -6401,10 +6408,10 @@ and the wavelength at the center of the chip. If these arguments
 aren't given, the currently used grating and wavelength of the
 monochromator are used.
 
-For the @strong{SPEX} monochromators the function accepts a single
-argument, the the wavelength at the center of the chip. If no
-argument is given the currently set wavelength of the monochromator
-is used.
+For the @strong{SPEX_CD2A} and @strong{ SPEX232} monochromators the
+function accepts a single argument, the the wavelength at the center
+of the chip. If no argument is given the currently set wavelength of
+the monochromator is used.
 
 For @strong{SpectraPro-300i} monochromators it is required that a
 calibration for the grating has been loaded, either by calling
@@ -6416,35 +6423,13 @@ chip, not wavelengths.
 
 The function is mostly meant to make it easy to obtain a wavelength
 scale to be used with the functions @ref{change_scale_1d()} and
-@ref{change_scale_2d()}. If binning is used in @i{x}-direction the
-elements of the returned array can't be used directly as arguments for
-the functions for changing the scale but to the first element you will
-have to add halve the number of pixels binned together and multiplied by
-the second element while the second element needs to be multiplied by
-the number of pixels binned together. Here's an example on how to use
-the function to set a wavelength @code{x}-axis, assuming that
-@code{xbin} is the number of bits binned together in @i{x}-direction and
-@code{scale} is an array with two elements:
-@example
-scale = monochromator_wavelength_axis( );
-change_scale_1d( scale[ 1 ] + 0.5 * xbin * scale[ 2 ],
-                 xbin * scale[ 2 ] );
-@end example
+@ref{change_scale_2d()}. Normally you will rather use the third
+element of the array returned by the function as the start value
+for the axis and the fourth element as the step width, since
+these already are adjusted for the ROI and binning of the camera.
 
 @table @strong
 @item Please note:
-The wavelength difference between two neighboring pixels isn't really
-constant over the whole width of the CCD chip. When you use the
-returned values only for the center of the chip the results are in
-quite good agreement with the real wavelengths, but for the edges
-of the chip the accuracy deteriorates significantly. For example for a
-grating with 1200 grooves per mm the deviation is about @w{0.5 nm} and
-for gratings with lower groove densities the deviation gets even larger,
-proportional to the inverse of the groove density. To obtain the exact
-wavelength for a certain pixel on the chip use the function
-@ref{monochromator_calc_wavelength()} discussed below.
-
-@item Please note also:
 The function assumes that the spectra taken with the camera show
 increasing wavelengths going from the left to the right side!
 @end table
@@ -6468,6 +6453,11 @@ be passed to the function).
 The function assumes that the spectra taken with the camera show
 decreasing absolute wavenumbers and increasing relative wavenumbers
 going from the left to the right side!
+@item Please also note:
+Since the data returned from the camera are linear in wavelength
+and not in wavenumbers the scale shown when using these values
+isn't really correct and should only be taken to be a rough
+estimate!
 @end table
 
 The function can only be used in the @code{EXPERIMENT} section of an

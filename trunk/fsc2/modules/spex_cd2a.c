@@ -477,11 +477,10 @@ Var_T *monochromator_scan_setup( Var_T * v )
     CATCH( INVALID_INPUT_EXCEPTION )
     {
         if ( spex_cd2a.mode & WN_MODES )
-            print( FATAL, "Invalid start wavenumber of %.4f cm^-1.\n",
-                   spex_cd2a_wl2Uwn( start ) );
+            print( FATAL, "Invalid start wavenumber of %.4f cm^-1.\n", start );
         else
             print( FATAL, "Invalid start wavelength of %.5f nm.\n",
-                   1.0e9 * spex_cd2a_wl2Uwl( start ) );
+                   1.0e9 * start );
         SPEX_CD2A_THROW( EXCEPTION );
     }
     OTHERWISE
@@ -652,8 +651,7 @@ Var_T *monochromator_wavelength( Var_T * v )
     }
     CATCH( INVALID_INPUT_EXCEPTION )
     {
-        print( FATAL, "Invalid wavelength of %.5f nm.\n",
-               1.0e9 * spex_cd2a_wl2Uwl( wl ) );
+        print( FATAL, "Invalid wavelength of %.5f nm.\n", 1.0e9 * wl );
         SPEX_CD2A_THROW( EXCEPTION );
     }
     OTHERWISE
@@ -723,8 +721,7 @@ Var_T *monochromator_wavenumber( Var_T * v )
     }
     CATCH( INVALID_INPUT_EXCEPTION )
     {
-        print( FATAL, "Invalid wavenumber of %.4f cm^-1.\n",
-               spex_cd2a_wl2Uwn( wl ) );
+        print( FATAL, "Invalid wavenumber of %.4f cm^-1.\n", wl );
         SPEX_CD2A_THROW( EXCEPTION );
     }
     OTHERWISE
@@ -881,7 +878,7 @@ Var_T *monochromator_laser_line( Var_T * v )
         return vars_push( FLOAT_VAR,spex_cd2a.laser_line == 0.0 ? 0.0 :
                           spex_cd2a.laser_line );
 
-    wn = get_double( v, "wavenumber of laser line" );
+    wn = get_double( v, "wavenumber" );
 
     /* A zero or negative laser line wavenumber switches delta wavelength
        mode off! */
@@ -1167,43 +1164,29 @@ Var_T *monochromator_calibrate( Var_T * v )
 }
 
 
-/*----------------------------------------------------------------------*
- * Function returns an array of two wavelength values that are suitable
- * for use as axis description parameters (start of axis and increment)
- * required by by the change_scale() function (if the camera uses
- * binning the second element may have to be multiplied by the x-binning
- * width). Please note: since the axis is not really linear the axis
- * displayed when using these values isn't absolutely correct!
- *----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function returns an array of 4 values. The first two are suitable for
+ * creating a wavelength axis description (start of axis and increment)
+ * when no binning has been set and the ROI covers the whole camera chip
+ * (at least in vertical direction). The third and fourth values are
+ * the start and increment wavelength with the currently set binning and
+ * ROI of the camera taken into account.
+ *-----------------------------------------------------------------------*/
 
 Var_T *monochromator_wavelength_axis( Var_T * v )
 {
-    double wl = spex_cd2a.wavelength;
+    double wl;
     Var_T *cv;
     long num_pixels;
     int acc;
+    long roi;
+    long bin;
 
 
     CLOBBER_PROTECT( wl );
 
     if ( v != NULL )
-    {
-        wl = get_double( v, "wavelength" );
-
-        TRY
-        {
-            wl = spex_cd2a_Uwl2wl( wl );
-            TRY_SUCCESS;
-        }
-        CATCH( INVALID_INPUT_EXCEPTION )
-        {
-            print( FATAL, "Invalid center wavelength of %.5f nm.\n",
-                   1.0e9 * spex_cd2a_wl2Uwl( wl ) );
-            SPEX_CD2A_THROW( EXCEPTION );
-        }
-        OTHERWISE
-            SPEX_CD2A_RETHROW( );
-    }
+        wl = get_double( v, "center wavelength" );
     else
     {
         if ( ! spex_cd2a.is_wavelength && ! spex_cd2a.scan_is_init )
@@ -1212,7 +1195,7 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
             SPEX_CD2A_THROW( EXCEPTION );
         }
 
-        wl = spex_cd2a.wavelength;
+        wl = spex_cd2a_wl2Uwl( spex_cd2a.wavelength );
     }
 
     too_many_arguments( v );
@@ -1248,48 +1231,97 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
     num_pixels = cv->val.lpnt[ 0 ];
     vars_pop( cv );
 
-    cv = vars_push( FLOAT_ARR, NULL, 2 );
+    if ( ! func_exists( "ccd_camera_roi" ) )
+    {
+        print( FATAL, "CCD camera has no function for determining "
+               "the ROI settings.\n" );
+        SPEX_CD2A_THROW( EXCEPTION );
+    }
 
-    cv->val.dpnt[ 0 ] = spex_cd2a_wl2Uwl( wl - 0.5 * ( num_pixels - 1 )
-                                          * spex_cd2a.pixel_diff );
+    cv = func_call( func_get( "ccd_camera_roi", &acc ) );
+
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0
+         || cv->val.lpnt[ 2 ] <= 0 || cv->val.lpnt[ 3 ] <= 0
+         || cv->val.lpnt[ 0 ] >= cv->val.lpnt[ 2 ]
+         || cv->val.lpnt[ 1 ] >= cv->val.lpnt[ 3 ] )
+    {
+        print( FATAL, "Function of CCD for determining the ROI settings "
+               "does not return a useful value.\n" );
+        SPEX_CD2A_THROW( EXCEPTION );
+    }
+
+    roi = cv->val.lpnt[ 0 ];
+    vars_pop( cv );
+
+    if ( ! func_exists( "ccd_camera_binning" ) )
+    {
+        print( FATAL, "CCD camera has no function for determining the "
+               "binning settings.\n" );
+        SPEX_CD2A_THROW( EXCEPTION );
+    }
+
+    cv = func_call( func_get( "ccd_camera_binning", &acc ) );
+
+    if (    cv->type != INT_ARR
+         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0
+         || num_pixels % cv->val.lpnt[ 0 ] != 0 )
+    {
+        print( FATAL, "Function of CCD for determining binning settings "
+               "does not return a useful value.\n" );
+        SPEX_CD2A_THROW( EXCEPTION );
+    }
+
+    bin = cv->val.lpnt[ 0 ];
+    vars_pop( cv );
+
+    cv = vars_push( FLOAT_ARR, NULL, 4 );
+
+    cv->val.dpnt[ 0 ] = wl - 0.5 * ( num_pixels - 1 ) * spex_cd2a.pixel_diff;
     cv->val.dpnt[ 1 ] = spex_cd2a.pixel_diff;
+    cv->val.dpnt[ 2 ] = cv->val.dpnt[ 0 ] + spex_cd2a.pixel_diff
+                        * ( 0.5 * ( bin - 1 ) + ( roi - 1 ) );
+    cv->val.dpnt[ 3 ] = bin * cv->val.dpnt[ 1 ];
 
     return cv;
 }
 
 
-/*----------------------------------------------------------------------*
- * Function returns an array of two wavenumber values that are suitable
- * for use as axis description parameters (start of axis and increment)
- * required by by the change_scale() function (if the camera uses
- * binning the second element may have to be multiplied by the x-binning
- * width). Please note: since the axis is not really linear the axis
- * displayed when using these values isn't absolutely correct!
- *----------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function returns an array of 4 values. The first two are suitable for
+ * creating a wavenumber axis description (start of axis in absolute
+ * wavenumbers and increment) when no binning has been set and the ROI
+ * covers the whole camera chip (at least in vertical direction). The
+ * third and fourth values are the start and increment wavenumbers with
+ * the currently set binning and ROI of the camera taken into account.
+ * Please note: since the measured data are linear in wavelength the
+ * axis displyed using linear wavenumber values isn't really correct!
+ *-----------------------------------------------------------------------*/
 
 Var_T *monochromator_wavenumber_axis( Var_T * v )
 {
     double wl = spex_cd2a.wavelength;
     Var_T *cv;
+    Var_T *fv;
     long num_pixels;
     int acc;
+    long bin;
 
 
     CLOBBER_PROTECT( wl );
 
     if ( v != NULL )
     {
-        wl = get_double( v, "wavenumber" );
+        wl = get_double( v, "center wavenumber" );
 
         TRY
         {
-            wl = spex_cd2a_Uwn2wl( wl );
+            wl = spex_cd2a_wn2wl( wl );
             TRY_SUCCESS;
         }
         CATCH( INVALID_INPUT_EXCEPTION )
         {
-            print( FATAL, "Invalid wavenumber of %.4f cm^-1.\n",
-                   spex_cd2a_wl2Uwn( wl ) );
+            print( FATAL, "Invalid wavenumber of %.4f cm^-1.\n", wl );
             SPEX_CD2A_THROW( EXCEPTION );
         }
         OTHERWISE
@@ -1303,19 +1335,13 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
             SPEX_CD2A_THROW( EXCEPTION );
         }
 
-        wl = spex_cd2a.wavelength;
+        wl = spex_cd2a_wl2Uwl( spex_cd2a.wavelength );
     }
 
     too_many_arguments( v );
 
-    /* Check that we can talk with the camera */
-
-    if ( ! exists_device_type( "ccd camera" ) )
-    {
-        print( FATAL, "Function can only be used when the module for a "
-               "CCD camera is loaded.\n" );
-        SPEX_CD2A_THROW( EXCEPTION );
-    }
+    v = vars_push( FLOAT_VAR, wl );
+    cv = monochromator_wavelength_axis( v );
 
     /* Get the width (in pixels) of the chip of the camera */
 
@@ -1326,30 +1352,36 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
         SPEX_CD2A_THROW( EXCEPTION );
     }
 
-    cv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
+    fv = func_call( func_get( "ccd_camera_pixel_area", &acc ) );
 
-    if (    cv->type != INT_ARR
-         || cv->val.lpnt[ 0 ] <= 0 || cv->val.lpnt[ 1 ] <= 0 )
+    if (    fv->type != INT_ARR
+         || fv->val.lpnt[ 0 ] <= 0 || fv->val.lpnt[ 1 ] <= 0 )
     {
         print( FATAL, "Function of CCD for determining the size of the chip "
                "does not return a useful value.\n" );
         SPEX_CD2A_THROW( EXCEPTION );
     }
 
-    num_pixels = cv->val.lpnt[ 0 ];
-    vars_pop( cv );
+    num_pixels = fv->val.lpnt[ 0 ];
+    vars_pop( fv );
 
-    cv = vars_push( FLOAT_ARR, NULL, 2 );
+    /* The wavenumber difference between adjacent points is calculated
+       as the difference between the wavenumbers at both ends of the
+       chip, divided by the number of pixel on the chip minus one. Please
+       always remember that this is an average since the axis isn't really
+       linear in wavenumbers but in wavelengths */
 
-    cv->val.dpnt[ 0 ] = spex_cd2a_wl2Uwn( wl + 0.5 * ( num_pixels - 1 )
-                                          * spex_cd2a.pixel_diff );
+    bin = lround( cv->val.dpnt[ 3 ] / cv->val.dpnt[ 1 ] );
 
-    cv->val.dpnt[ 1 ] = ( spex_cd2a_wl2Uwn( wl - 0.5 * ( num_pixels - 1 )
-                                            * spex_cd2a.pixel_diff )
-                          - cv->val.dpnt[ 0 ] ) / ( num_pixels - 1 );
+    cv->val.dpnt[ 1 ] = 
+                (   spex_cd2a_wl2wn(   cv->val.dpnt[ 0 ]
+                                     + ( num_pixels - 1 ) * cv->val.dpnt[ 1 ] )
+                  - spex_cd2a_wl2wn( cv->val.dpnt[ 0 ] ) )
+                  / ( num_pixels - 1 );
+    cv->val.dpnt[ 0 ] = spex_cd2a_wl2wn( cv->val.dpnt[ 0 ] );
 
-    if ( spex_cd2a.mode == WN_ABS )
-        cv->val.dpnt[ 1 ] *= -1.0;
+    cv->val.dpnt[ 2 ] = spex_cd2a_wl2wn( cv->val.dpnt[ 2 ] );
+    cv->val.dpnt[ 3 ] = cv->val.dpnt[ 1 ] * bin;
 
     return cv;
 }

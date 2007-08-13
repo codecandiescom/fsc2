@@ -582,7 +582,7 @@ static void spex232_move_relative( long int steps )
     fsc2_usleep( 200000, UNSET );
 
 	while ( spex232_motor_is_busy( ) )
-		/* empty */ ;
+        fsc2_usleep( 100000, UNSET );
 }
 	
 

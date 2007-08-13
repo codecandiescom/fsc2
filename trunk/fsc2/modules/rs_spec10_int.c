@@ -668,7 +668,7 @@ uns16 *rs_spec10_get_pic( uns32 * size )
         for ( i = 0; i < abs( region.s2 - region.s1 + 1 ) / region.sbin; i++ )
         {
             uns16 val = 0;
-            if ( i == 370 || i == 969 )
+            if ( i == 116 || i == 1186 )
                 val = 20000;
             for ( j = 0; j < labs( region.p2 - region.p1 + 1 ) / region.pbin;
                   j++ )
