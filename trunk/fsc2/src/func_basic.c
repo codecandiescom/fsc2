@@ -3570,8 +3570,8 @@ Var_T * f_add2avg( Var_T * v )
        pointer to the counter variable from the arguments or, if what was
        v->next got removed, a pointer to nothing at all, or to 'avg' or to
        'scans_done' - one simply can't tell. But the way the function is
-       written now one can be sure that everything left on the stack at the
-       end of the function is the return value - as it should. */
+       written now one can be sure that everything left on the stack at
+       the end of the function is the return value - as it should. */
 
     return vars_div( vars_add( vars_mult( avg, scans_done ), data ), cnt );
 }

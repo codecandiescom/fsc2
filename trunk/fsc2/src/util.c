@@ -79,7 +79,7 @@ char *get_string( const char * fmt,
         break;
     }
 
-    /* Trim the string to the number of required characters */
+    /* Trim the string down to the number of required characters */
 
     if ( ( size_t ) wr + 1 < len )
         T_realloc_or_free( c, ( size_t ) wr + 1 );
@@ -557,25 +557,21 @@ char *handle_escape( char * str )
             case 'b' :
                 *cp++ = '\b';
                 memmove( cp, cp + 1, strlen( cp ) );
-                cp++;
                 break;
 
             case 'f' :
                 *cp++ = '\f';
                 memmove( cp, cp + 1, strlen( cp ) );
-                cp++;
                 break;
 
             case 'n' :
                 *cp++ = '\n';
                 memmove( cp, cp + 1, strlen( cp ) );
-                cp++;
                 break;
 
             case 'r' :
                 *cp++ = '\r';
                 memmove( cp, cp + 1, strlen( cp ) );
-                cp++;
                 break;
 
             case 't' :

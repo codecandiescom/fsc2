@@ -2163,6 +2163,7 @@ The following mathematical function can be used in all section of an
 @item @ref{square()}
 @item @ref{tan()}
 @item @ref{tanh()}
+@item @ref{add_to_average()}
 @end table
 
 
@@ -2446,6 +2447,34 @@ angle in radian.
 @item tanh()
 Returns the hyperbolic tangent of the argument (simple number or all
 elements of an 1- or more-dimensional array).
+
+
+@anchor{add_to_average()}
+@findex add_to_average()
+@item add_to_average()
+This is a utility functions to simplify (and speed up) the calculation
+of averaged data. It takes three arguments, as the first an already
+averaged (floating point) value or an array of such values, as the
+second a new value to be added to the average or an array of such
+data (obviously, both the first and the second argument must be either
+both simple values or arrays, and if they are arrays, must have the
+same lengths), and the third argument must be the an integer value
+which is the new count of the number of data sets having contributed
+to the average (i.e.@: if the average consists of already @code{N}
+data sets and now a new one gets added then this value must be
+@w{@code{N + 1}}).
+
+With this function you can simply write
+@example
+avg = add_to_average( avg, data, N + 1 );
+@end example
+@noindent
+instead of
+@example
+avg = ( N * avg + data ) / ( N + 1 );
+@end example
+@noindent
+which is not only simpler to read but also a lot faster.
 
 
 @end table

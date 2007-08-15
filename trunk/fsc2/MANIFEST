@@ -450,10 +450,10 @@ scripts/pulse_monitor.rulhmpc66.molphys.leidenuniv.nl
 scripts/pulse_monitor.rulhmpc89.molphys.leidenuniv.nl
 scripts/pulsed_exp.rulhmpc66.molphys.leidenuniv.nl
 scripts/pulsed_exp.rulhmpc89.molphys.leidenuniv.nl
-scripts/set_spex.spex.mvl.local
 scripts/spectrapro_300i_calibration.single.physik.fu-berlin.de
 scripts/spex.spex.mvl.local
 scripts/spex_cam.spex.mvl.local
+scripts/spex_set.spex.mvl.local
 scripts/trepr.isaak.physik.fu-berlin.de
 scripts/tresr.rulhmpc66.molphys.leidenuniv.nl
 scripts/tresr.sunone.chemie.unibas.ch
