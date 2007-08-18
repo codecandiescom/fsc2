@@ -57,8 +57,8 @@ td.example  { background-color:  #DDDDDD;
             }
 
 table.navi  { background-color:  #e6e6e6;
-              cellpadding:       10px;
-              cellspacing:       0px;
+              padding:           10px;
+              border-spacing:    0px;
               border:            none;
               width:             100%;
             }
