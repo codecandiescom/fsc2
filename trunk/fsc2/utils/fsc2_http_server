@@ -39,7 +39,6 @@ my $max_reqs = 16;     # how many simultaneous requests get accepted
 my $crlf = "\r\n";     # RFC 2616 requires this as the newline character
 my $has_pnmtopng;      # does the pnmtopng utility exist?
 my $has_pnmtojpeg;     # does the pnmtojpeg utility exist?
-my $fs;                # flock structure for locking of STDOUT
 my $version = 0.5;
 my $hostname = `hostname -f`;
 chomp $hostname;
@@ -642,12 +641,7 @@ sub rfc_1123_date {
 # Creates (or releases) an advisory lock on STDOUT.
 
 sub stdout_lock {
-    if ( shift ) {
-        $fs = new File::Fcntl_Lock( 'l_type' => F_WRLCK );
-    } else {
-        $fs->l_type( F_UNLCK );
-    }
-
+    my $fs = new File::Fcntl_Lock 'l_type' => shift? F_WRLCK : F_UNLCK;
     return defined $fs->lock( STDOUT_FILENO, F_SETLKW );
 }
 

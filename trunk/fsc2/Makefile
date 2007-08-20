@@ -1041,10 +1041,14 @@ endif
 	-$(MAKE) -C edl/leiden clean
 
 
-# Create a tags file to be used with emacs or vi
+# Create a tags file to be used with emacs
 
 tags:
-	-find . -name "*.[chly]" -print | etags -o $(tagsfile) -
+	$(RM) $(RMFLAGS) $(tagsfile)
+	touch $(tagsfile)
+	for file in `find . -name "*.[chly]" -print`; do  \
+		etags -a $(tagsfile) $$file;                  \
+	done
 
 
 # Run a set of test EDL programs

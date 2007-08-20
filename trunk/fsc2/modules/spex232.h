@@ -33,9 +33,9 @@
 /* Define the following for test purposes only where no real communication
    with the monochromator is supposed to happen */
 
-
+/*
 #define SPEX232_TEST
-
+*/
 
 /* Defines for the parity used by the device */
 
