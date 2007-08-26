@@ -8,7 +8,7 @@
 #  Copyright (C) 2002-2007 Jens Thoms Toerring <jt@toerring.de>
 #
 # Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl Fcntl_Lock.t'
+# `make test'. After `make install' it should work as `perl FcntlLock.t'
 
 #########################
 
@@ -17,25 +17,25 @@ use strict;
 use warnings;
 BEGIN { plan tests => 11 };
 use POSIX;
-use File::Fcntl_Lock;
+use File::FcntlLock;
 
 
 ##############################################
 # 1. Most basic test: create an object
 
-my $fs = new File::Fcntl_Lock;
-ok( defined $fs and $fs->isa( 'File::Fcntl_Lock' ) );
+my $fs = new File::FcntlLock;
+ok( defined $fs and $fs->isa( 'File::FcntlLock' ) );
 
 ##############################################
 # 2. Also basic: create an object with initalization and check thet the
 #    properties of the created object are what they are supposed to be
 
-$fs = new File::Fcntl_Lock l_type   => F_RDLCK,
-                           l_whence => SEEK_CUR,
-                           l_start  => 123,
-                           l_len    => 234;
+$fs = new File::FcntlLock l_type   => F_RDLCK,
+                          l_whence => SEEK_CUR,
+                          l_start  => 123,
+                          l_len    => 234;
 ok(     defined $fs
-    and $fs->isa( 'File::Fcntl_Lock' )
+    and $fs->isa( 'File::FcntlLock' )
     and $fs->l_type   == F_RDLCK 
     and $fs->l_whence == SEEK_CUR
     and $fs->l_start  == 123
@@ -81,12 +81,12 @@ ok( $fs->l_len, 3 );
 # 9. Test if we can get a read lock on a file and release it again
 
 my $fh;
-if ( defined open $fh, '>', './fcntl_locking_test' ) {
+if ( defined open $fh, '>', './fcntllock_test' ) {
     close $fh;
-    if ( defined open $fh, '<', './fcntl_locking_test' ) {
+    if ( defined open $fh, '<', './fcntllock_test' ) {
         $fs->l_type( F_RDLCK );
         my $res = $fs->lock( $fh, F_SETLK );
-        unlink './fcntl_locking_test';
+        unlink './fcntllock_test';
         if ( defined $res ) {
             $fs->l_type( F_UNLCK );
             $res = $fs->lock( $fh, F_SETLK );
@@ -109,8 +109,8 @@ if ( defined open $fh, '>', './fcntl_locking_test' ) {
 ##############################################
 # 10. Test if we can get an write lock on a test file and release it again
 
-if ( defined open $fh, '>', './fcntl_locking_test' ) {
-    unlink './fcntl_locking_test';
+if ( defined open $fh, '>', './fcntllock_test' ) {
+    unlink './fcntllock_test';
     $fs->l_type( F_WRLCK );
     my $res = $fs->lock( $fh, F_SETLK );
     if ( defined $res ) {
@@ -135,8 +135,8 @@ if ( defined open $fh, '>', './fcntl_locking_test' ) {
 #     obtain and again release it.
 
 
-if ( defined open $fh, '>', './fcntl_locking_test' ) {
-    unlink './fcntl_locking_test';
+if ( defined open $fh, '>', './fcntllock_test' ) {
+    unlink './fcntllock_test';
     $fs = $fs->new( l_type   => F_WRLCK,
                     l_whence => SEEK_SET,
                     l_start  => 0,

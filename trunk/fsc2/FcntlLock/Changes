@@ -1,4 +1,8 @@
-Revision history for Perl extension File::Fcntl_Lock
+Revision history for Perl extension File::FcntlLock
+
+0.10  Sun Aug 26 CEST 2007
+    - Renamed module to FcntlLock to make it fit into the namespace
+      on CPAN
 
 0.08  Sun Aug 12 2007
     - Changes in error handling within the module

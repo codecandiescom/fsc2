@@ -8,7 +8,7 @@
 # $Id$
 
 
-package File::Fcntl_Lock;
+package File::FcntlLock;
 
 use 5.006;
 use strict;
@@ -35,13 +35,13 @@ our $VERSION = '0.08';
 
 =head1 name
 
-File::Fcntl_Lock - File locking with L<fcntl(2)>
+File::FcntlLock - File locking with L<fcntl(2)>
 
 =head1 SYNOPSIS
 
-  use File::Fcntl_Lock;
+  use File::FcntlLock;
 
-  my $fs = new Fcntl::Fcntl_Lock;
+  my $fs = new Fcntl::FcntlLock;
   $fs->l_type( F_RDLCK );
   $fs->l_whence( SEEK_CUR );
   $fs->l_start( 100 );
@@ -127,7 +127,7 @@ BEGIN {
 }
 
 
-bootstrap File::Fcntl_Lock $VERSION;
+bootstrap File::FcntlLock $VERSION;
 
 
 ###########################################################
@@ -136,15 +136,15 @@ bootstrap File::Fcntl_Lock $VERSION;
 
 To create a new object representing a flock structure call C<new()>:
 
-  $fs = new File::Fcntl_Lock;
+  $fs = new File::FcntlLock;
 
 You also can pass the C<new()> method a set of key-value pairs to
 initialize the members of the flock structure, e.g.
 
-  $fs = new File::Fcntl_Lock l_type   => F_WRLCK,
-                             l_whence => SEEK_SET,
-                             l_start  => 0,
-                             l_len    => 100;
+  $fs = new File::FcntlLock l_type   => F_WRLCK,
+                            l_whence => SEEK_SET,
+                            l_start  => 0,
+                            l_len    => 100;
 
 if you plan to obtain a write lock for the first 100 bytes of a file.
 
@@ -393,7 +393,7 @@ sub lock {
     if ( $ret = C_fcntl_lock( $fd, $action, $flock_struct, $err ) ) {
         $flock_struct->{ errno } = $flock_struct->{ error } = undef;
     } elsif ( $err ) {
-        die "Internal error in File::Fcntl_Lock module detected";
+        die "Internal error in File::FcntlLock module detected";
     } else {
         $flock_struct->{ errno } = $! + 0;
         $flock_struct->{ error } = defined $fcntl_error_texts{ $! + 0 } ?

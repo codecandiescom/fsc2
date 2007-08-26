@@ -11,10 +11,10 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include "Fcntl_Lock.h"
+#include "FcntlLock.h"
 
 
-MODULE = File::Fcntl_Lock     PACKAGE = File::Fcntl_Lock
+MODULE = File::FcntlLock     PACKAGE = File::FcntlLock
 
 PROTOTYPES: ENABLE
 

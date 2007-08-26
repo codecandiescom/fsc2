@@ -1,9 +1,9 @@
 Changes
-lib/File/Fcntl_Lock.pm
-Fcntl_Lock.xs
+lib/File/FcntlLock.pm
+FcntlLock.xs
 Makefile.PL
 MANIFEST
 README
-t/Fcntl_Lock.t
+t/FcntlLock.t
 sizes1.c
 sizes2.c

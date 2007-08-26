@@ -73,10 +73,10 @@ unlink 'sizes2' if -e 'sizes2';
 # Finally create the Makefile
 
 WriteMakefile(
-    NAME              => 'File::Fcntl_Lock',
+    NAME              => 'File::FcntlLock',
     ( $] >= 5.005 ?
-      ( VERSION_FROM  => 'lib/File/Fcntl_Lock.pm',
-        ABSTRACT_FROM => 'lib/File/Fcntl_Lock.pm',
+      ( VERSION_FROM  => 'lib/File/FcntlLock.pm',
+        ABSTRACT_FROM => 'lib/File/FcntlLock.pm',
         AUTHOR        => 'Jens Thoms Toerring <jt@toerring.de>' ) :
       ( ) ),
     PREREQ_PM         => { POSIX      => 0,
@@ -85,7 +85,7 @@ WriteMakefile(
                            Exporter   => 0,
                            DynaLoader => 0 },
     PERL_MALLOC_OK    => TRUE,
-    C                 => [ 'Fcntl_Lock.xs' ],
+    C                 => [ 'FcntlLock.xs' ],
     test              => { TESTS => 't/*.t' },
-    clean             => { FILES => 'Fcntl_Lock.h' }
+    clean             => { FILES => 'FcntlLock.h' }
 );

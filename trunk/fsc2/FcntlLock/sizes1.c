@@ -19,7 +19,7 @@ int main( void )
     FILE *fp;
 
 
-    if ( ( fp = fopen( "Fcntl_Lock.h", "w" ) ) == NULL )
+    if ( ( fp = fopen( "FcntlLock.h", "w" ) ) == NULL )
          return EXIT_FAILURE;
 
     fprintf( fp, "/* Please don't change - created automatically during "
