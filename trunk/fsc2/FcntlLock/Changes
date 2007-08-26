@@ -1,14 +1,14 @@
 Revision history for Perl extension File::FcntlLock
 
-0.10  Sun Aug 26 CEST 2007
-    - Renamed module to FcntlLock to make it fit into the namespace
-      on CPAN
+0.09  Sun Aug 26 2007
+    - Renamed module from Fcntl_Lock to FcntlLock to make it
+      fit into the namespace newly allocated on CPAN
 
 0.08  Sun Aug 12 2007
     - Changes in error handling within the module
     - Makefile.PL changed so that it hopefully won't fail on
-      (Net|Free|Open)BSD (and perhaps Cygwin) where locks on STDIN
-      and STDOUT are not supported
+      (Net|Free|Open)BSD (and perhaps Cygwin) where locks on
+      STDIN and STDOUT are not supported
     - Tests changed for the same reasons
 
 0.07  Sun Aug 5 2007
