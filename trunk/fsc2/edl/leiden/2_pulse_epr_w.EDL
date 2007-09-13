@@ -172,7 +172,11 @@ FOREVER {
         display_1d( I, data[ J, I ], 1,
                     I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / J, 2 );
 === else
+=== if ( ADC_CHANNELS eq "0" )
         data[ J, N_Points - I + 1 ] = daq_get_voltage( CH0 );
+=== else
+        data[ J, N_Points - I + 1 ] = daq_get_voltage( CH1 );
+=== endif
         display_1d( N_Points - I + 1, data[ J, N_Points - I + 1 ], 1,
                     N_Points - I + 1,
                     ( ( J - 1 ) * avg[ N_Points - I + 1 ]
@@ -180,11 +184,7 @@ FOREVER {
 === endif
 === endif
 
-=== if ( START_FIELD <= END_FIELD )
         IF I < N_Points {
-=== else
-        IF I > 1 {
-=== endif
             field = magnet_field( field + field_step );
         }
     }

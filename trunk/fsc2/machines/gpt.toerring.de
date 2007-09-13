@@ -10,7 +10,7 @@ EDITOR               := emacs
 # ifeq ($(KERNEL_VERSION),$(shell echo $(KERNEL_VERSION) | sed -e 's/^2\.6\.//'))
 # 	GPIB_LIBRARY     := NI_OLD
 # else
-# 	GPIB_LIBRARY     := SLG
+#	GPIB_LIBRARY     := SLG
 # 	GPIB_HEADER_DIR  := /usr/local/include/gpib
 # endif
 

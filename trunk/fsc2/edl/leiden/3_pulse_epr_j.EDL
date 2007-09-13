@@ -145,13 +145,8 @@ FOREVER {
                       + data[ J, N_Points - I + 1 ] ) / J, 2 );
 === endif
 
-=== if ( START_FIELD <= END_FIELD )
 		IF I < N_Points {
-=== else
-		IF I > 1 {
-=== endif
-			field += field_step;
-			magnet_field( field );
+			field = magnet_field( field + field_step );
 		}
 	}
 

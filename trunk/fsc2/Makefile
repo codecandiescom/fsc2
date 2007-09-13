@@ -409,7 +409,7 @@ adir             := $(fdir)/aux
 udir             := $(fdir)/utils
 ddir             := $(fdir)/doc
 cdir             := $(fdir)/config
-ldir             := $(fdir)/Fcntl_Lock
+ldir             := $(fdir)/FcntlLock
 mchdir           := $(fdir)/machines
 
 
@@ -963,7 +963,7 @@ install:
 	$(MAKE) -C $(cdir) install
 	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) version.ugz $(libdir)
 ifdef WITH_HTTP_SERVER
-	$(MAKE) -C Fcntl_Lock install
+	$(MAKE) -C FcntlLock install
 endif
 	$(MAKE) -C $(udir) install
 	$(MAKE) -C scripts install
@@ -1075,14 +1075,14 @@ packages:
 		$(MAKE) -C $$dir clean;                                      \
 		tar -c $$dir --exclude=.svn | gzip -c -9 > ../$$dir.tar.gz;  \
 	done
-	$(MAKE) -C Fcntl_Lock realclean
+	$(MAKE) -C FcntlLock realclean
 
 packages-with-svn:
-	@for dir in Fcntl_Lock me6x00 ni6601 ni_daq rulbus witio_48; do  \
+	@for dir in FcntlLock me6x00 ni6601 ni_daq rulbus witio_48; do  \
 		$(MAKE) -C $$dir clean;                                      \
 		tar -c $$dir | gzip -c -9 > ../$$dir-with-svn.tar.gz;        \
 	done
-	$(MAKE) -C Fcntl_Lock realclean
+	$(MAKE) -C FcntlLock realclean
 
 
 # Creates the MANIFEST file with the list of relevant files
