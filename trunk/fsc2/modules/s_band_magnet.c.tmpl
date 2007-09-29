@@ -41,14 +41,15 @@ int s_band_magnet_tmpl_test_hook( void );
 int s_band_magnet_tmpl_exp_hook( void );
 int s_band_magnet_tmpl_end_of_exp_hook( void );
 
-Var_T *magnet_name( Var_T * v );
-Var_T *magnet_setup( Var_T * v );
-Var_T *magnet_fast_init( Var_T * v );
-Var_T *set_field( Var_T * v );
-Var_T *get_field( Var_T * v );
-Var_T *sweep_up( Var_T * v );
-Var_T *sweep_down( Var_T * v );
-Var_T *reset_field( Var_T * v );
+Var_T *magnet_name(              Var_T * v );
+Var_T *magnet_setup(             Var_T * v );
+Var_T *magnet_fast_init(         Var_T * v );
+Var_T *set_field(                Var_T * v );
+Var_T *get_field(                Var_T * v );
+Var_T *magnet_field_step_size(   Var_T * v );
+Var_T *sweep_up(                 Var_T * v );
+Var_T *sweep_down(               Var_T * v );
+Var_T *reset_field(              Var_T * v );
 Var_T *magnet_goto_field_on_end( Var_T * v );
 
 
@@ -319,6 +320,38 @@ Var_T *set_field( Var_T * v )
 Var_T *get_field( Var_T * v  UNUSED_ARG )
 {
     return vars_push( FLOAT_VAR, magnet.field );
+}
+
+
+/*----------------------------------------------------------------*
+ * Function returns the minimum field step size if called without
+ * an argument and the possible field step size nearest to the
+ * argument.
+ *----------------------------------------------------------------*/
+
+Var_T *magnet_field_step_size( Var_T * v )
+{
+    double field_step;
+    long steps;
+
+
+    if ( v == NULL )
+        return vars_push( FLOAT_VAR, magnet.resolution );
+
+    field_step = get_double( v, "field step size" );
+
+    too_many_arguments( v );
+
+    if ( field_step < 0.0 )
+    {
+        print( FATAL, "Invalid negative field step size\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( steps = lrnd( field_step / magnet.resolution ) ) == 0 )
+        steps++;
+
+    return vars_push( FLOAT_VAR, steps * magnet.resolution );
 }
 
 

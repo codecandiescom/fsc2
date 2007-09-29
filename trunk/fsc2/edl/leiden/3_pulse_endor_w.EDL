@@ -70,7 +70,7 @@ data[ *, *];
 avg[ N_Points ];
 === endif
 File1, File2;
-B1, B2, B3;
+B1, B2;
 
 
 ASSIGNMENTS:
@@ -153,8 +153,7 @@ daq_gain( 4 );
 
 hide_toolbox( "ON" );
 B1 = output_create( "INT_OUTPUT", "Current scan" );
-B2 = output_create( "FLOAT_OUTPUT", "Current frequency [MHz]", "%.3f" );
-B3 = button_create( "PUSH_BUTTON", "Stop after end of scan" );
+B2 = button_create( "PUSH_BUTTON", "Stop after end of scan" );
 hide_toolbox( "OFF" );
 
 FOREVER {
@@ -165,7 +164,6 @@ FOREVER {
 	wait( pre_scan_delay );
 
     FOR I = 1 : N_Points {
-        output_value( B2, freq / 1 MHz );
         wait( 1.1 * repeat_time * N_Avg );
 === if ( ADC_CHANNELS eq "0 and 1" )
 === if ( START_FREQ <= END_FREQ )
@@ -224,7 +222,7 @@ FOREVER {
     avg = add_to_average( avg, data[ J ], J );
 === endif
 
-    IF button_state( B3 ) {
+    IF button_state( B2 ) {
         BREAK;
     }
 }

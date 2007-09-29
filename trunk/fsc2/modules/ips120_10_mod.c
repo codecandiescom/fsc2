@@ -58,6 +58,7 @@ Var_T *magnet_setup(             Var_T * v );
 Var_T *magnet_field(             Var_T * v );
 Var_T *get_field(                Var_T * v );
 Var_T *set_field(                Var_T * v );
+Var_T *magnet_field_step_size(   Var_T * v );
 Var_T *magnet_sweep(             Var_T * v );
 Var_T *magnet_sweep_rate(        Var_T * v );
 Var_T *magnet_reset_field(       Var_T * v );
@@ -494,6 +495,38 @@ Var_T *set_field( Var_T * v )
 	ips120_10_mod.act_current = cur;
 
 	return vars_push( FLOAT_VAR, ips120_10_mod.act_current * F2C_RATIO );
+}
+
+
+/*----------------------------------------------------------------*
+ * Function returns the minimum field step size if called without
+ * an argument and the possible field step size nearest to the
+ * argument.
+ *----------------------------------------------------------------*/
+
+Var_T *magnet_field_step_size( Var_T * v )
+{
+    double cur_step;
+    long steps;
+
+
+    if ( v == NULL )
+        return vars_push( FLOAT_VAR, DAC_CURRENT_RESOLUTION * F2C_RATIO );
+
+    cur_step = get_double( v, "field step size" ) / F2C_RATIO;
+
+    too_many_arguments( v );
+
+    if ( cur_step < 0.0 )
+    {
+        print( FATAL, "Invalid negative field step size\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( steps = lrnd( cur_step / DAC_CURRENT_RESOLUTION ) ) == 0 )
+		steps++;
+
+    return vars_push( FLOAT_VAR, steps * DAC_CURRENT_RESOLUTION * F2C_RATIO );
 }
 
 

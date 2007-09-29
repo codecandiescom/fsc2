@@ -135,6 +135,7 @@ gaussmeter used, with @code{er035m} or @code{er035m_s} the range is
 @item @ref{magnet_setup()}
 @item @ref{magnet_fast_init()}
 @item @ref{magnet_field()}
+@item @ref{magnet_field_step_size()}
 @item @ref{magnet_sweep_up()}
 @item @ref{magnet_sweep_down()}
 @item @ref{magnet_reset_field()}
@@ -184,6 +185,7 @@ to @w{23000 G}.
 @item @ref{magnet_setup()}
 @item @ref{magnet_fast_init()}
 @item @ref{magnet_field()}
+@item @ref{magnet_field_step_size()}
 @item @ref{magnet_sweep_up()}
 @item @ref{magnet_sweep_down()}
 @item @ref{magnet_reset_field()}
@@ -265,6 +267,7 @@ In the GPIB configuration file use @code{"BH15_FC"} as the device name,
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
 @item @ref{magnet_field()}
+@item @ref{magnet_field_step_size()}
 @item @ref{magnet_sweep_up()}
 @item @ref{magnet_sweep_down()}
 @item @ref{magnet_reset_field()}
@@ -626,6 +629,7 @@ In the GPIB configuration file use @code{"ER032M"} as the device name,
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
 @item @ref{magnet_field()}
+@item @ref{magnet_field_step_size()}
 @item @ref{magnet_sweep_up()}
 @item @ref{magnet_sweep_down()}
 @item @ref{magnet_reset_field()}
@@ -1027,7 +1031,7 @@ In the GPIB configuration file use @code{"HP8672A"} as the device name,
 @paragraphindent 0
 @strong{Description}: Home-built computer controlled microwave
 attenuator from the group of H.-J.@: Steinhoff at the University of
-Osnabrueck (@url{http://www.physik.uni-osnabrueck.de/mts/}). Works with
+Osnabrueck (@url{http://www.macromol.uni-osnabrueck.de/index.php}). Works with
 a stepper motor to mechanically adjust a microwave attenuator. Requires
 a default calibration table file that gets read in when the module is
 loaded. The name of the file can be set in the configuration file for the
@@ -1065,7 +1069,7 @@ the module about the initial attenuation setting.
 @paragraphindent 0
 @strong{Description}: Home-built single channel AD and DA converter from
 the group of H.-J.@: Steinhoff at the University of Osnabrueck
-(@url{http://www.physik.uni-osnabrueck.de/mts/}). Output voltage can be
+(@url{http://www.macromol.uni-osnabrueck.de/index.php}). Output voltage can be
 reduced via a potentiometer at the front panel.
 
 @paragraphindent 0
@@ -1104,7 +1108,7 @@ reduced via a potentiometer at the front panel.
 @paragraphindent 0
 @strong{Description}: Pseudo-device module used for controlling magnets
 in the group of H.-J.@: Steinhoff at the University of Osnabrueck
-(@url{http://www.physik.uni-osnabrueck.de/mts/}). It's not for a device
+(@url{http://www.macromol.uni-osnabrueck.de/index.php}). It's not for a device
 that gets controlled directly by this module but instead the magnetic
 field is controlled indirectly via the output voltage of a home-built DA
 and AD converter, using the module @code{hjs_daadc}. The module requires
@@ -1154,7 +1158,7 @@ and @code{bnm12}
 @paragraphindent 0
 @strong{Description}: Pseudo-device module used for controlling magnets
 in the group of H.-J.@: Steinhoff at the University of
-Osnabrueck (@url{http://www.physik.uni-osnabrueck.de/mts/}). There's not
+Osnabrueck (@url{http://www.macromol.uni-osnabrueck.de/index.php}). There's not
 just one device that gets controlled directly by this module but instead
 the magnetic field is controlled via the output voltage of a home-built
 DA and AD converter, using the module @code{hjs_daadc}, and the field is
@@ -1259,6 +1263,7 @@ In the GPIB configuration file use @code{"IPS120_10"} as the device name,
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
 @item @ref{magnet_field()}
+@item @ref{magnet_field_step_size()}
 @item @ref{magnet_reset_field()}
 @item @ref{magnet_sweep_rate()}
 @item @ref{magnet_sweep()}
@@ -1313,6 +1318,7 @@ between @code{RS232C} and @code{IEEE488} is employed).
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
 @item @ref{magnet_field()}
+@item @ref{magnet_field_step_size()}
 @item @ref{magnet_reset_field()}
 @item @ref{magnet_sweep_rate()}
 @item @ref{magnet_sweep()}
@@ -2644,6 +2650,7 @@ with a resolution of @w{0.5 G}.
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
 @item @ref{magnet_field()}
+@item @ref{magnet_field_step_size()}
 @item @ref{magnet_sweep_up()}
 @item @ref{magnet_sweep_down()}
 @item @ref{magnet_reset_field()}
@@ -2686,6 +2693,7 @@ with a resolution of @w{0.1 G}.
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
 @item @ref{magnet_field()}
+@item @ref{magnet_field_step_size()}
 @item @ref{magnet_reset_field()}
 @item @ref{magnet_sweep_up()}
 @item @ref{magnet_sweep_down()}

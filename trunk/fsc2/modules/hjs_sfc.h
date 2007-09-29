@@ -90,4 +90,3 @@ void hjs_sfc_read_calibration( void );
  * tab-width: 4
  * indent-tabs-mode: nil
  */
-

@@ -48,15 +48,16 @@ get_phase_cycled_area, -1, EXP;
 
 /* Functions exported by the magnet power supply drivers */
 
-magnet_name, 0, ALL;            // returns the device name
-magnet_setup, 2, ALL;           // set start field and sweep step size
-magnet_fast_init, 0, ALL;       // shortens magnet setup time (X-, S-band)
-magnet_field, -1, EXP;          // set or query the field
-magnet_reset_field, 0, EXP;     // go back to start field
+magnet_name, 0, ALL;             // returns the device name
+magnet_setup, 2, ALL;            // set start field and sweep step size
+magnet_fast_init, 0, ALL;        // shortens magnet setup time (X-, S-band)
+magnet_field, -1, EXP;           // set or query the field
+magnet_field_step_size, -1, ALL; // queries field step size
+magnet_reset_field, 0, EXP;      // go back to start field
 
-set_field, -1, EXP;             // go to a field value (deprecated)
-get_field, 0, EXP;              // returns the current field (deprecated)
-reset_field, 0, EXP;            // go back to start field (deprecated)
+set_field, -1, EXP;              // go to a field value (deprecated)
+get_field, 0, EXP;               // returns the current field (deprecated)
+reset_field, 0, EXP;             // go back to start field (deprecated)
 
 
 /* Functions supported by the Steinhoff magnets (hjs_sfc, hjs_fc) only */

@@ -292,16 +292,17 @@ bool rs_sml01_get_output_state( void )
 double rs_sml01_set_frequency( double freq )
 {
     char cmd[ 100 ];
+    long length = 100;
 
 
     fsc2_assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
 
-    sprintf( cmd, "FREQ:CW %.0f\n", freq );
-    rs_sml01_command( cmd );
+    /* We have to wait here for the GPIB command for setting the frequency
+       to be finished since otherwise sometimes pulses created afterwards
+       were missing */
 
-    /* Wait or some time for the new frequency to be really set */
-
-    fsc2_usleep( ulrnd( FREQUENCY_SETTING_DELAY * 1.0e6  ), UNSET );
+    sprintf( cmd, "FREQ:CW %.0f;*WAI;*OPC?\n", freq );
+    rs_sml01_talk( ( const char * ) cmd, cmd, &length );
 
     return freq;
 }

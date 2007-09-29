@@ -152,9 +152,9 @@ All the following functions may be used to control the field of a magnet.
 Currently the following magnet power supplies are supported:
 @table @samp
 @item aeg_x_band
-AEG magnet for X-band with homebuilt controller
+AEG magnet for X-band with home-built controller
 @item aeg_s_band
-AEG magnet for S-band with homebuilt controller
+AEG magnet for S-band with home-built controller
 @item bh15_fc
 Bruker BF15 Field Controller
 @item er032m
@@ -169,9 +169,9 @@ Leiden J-band spectrometer Oxford Instruments magnet power supply
 Leiden W-band spectrometer Oxford Instruments magnet power supply (with
 additional modulation input)
 @item s_band_magnet_broad
-Frankfurt S-band magnet via homebuilt DAC, broad field range
+Frankfurt S-band magnet via home-built DAC, broad field range
 @item s_band_magnet_narrow
-Frankfurt S-band magnet via homebuilt DAC, narrow field range
+Frankfurt S-band magnet via home-built DAC, narrow field range
 @item hjs_sfc
 Pseudo-device for magnet control in the Osnabrueck group (without field
 measurement)
@@ -268,6 +268,7 @@ hjs_fc;
 @item @ref{magnet_setup()}
 @item @ref{magnet_fast_init()}
 @item @ref{magnet_field()}
+@item @ref{magnet_field_step_size()}
 @item @ref{magnet_sweep_up()}
 @item @ref{magnet_sweep_down()}
 @item @ref{magnet_reset_field()}
@@ -414,6 +415,22 @@ has been called or a field already as been set.
 
 The function can only be used in the @code{EXPERIMENT} section.
 .
+
+@anchor{magnet_field_step_size()}
+@findex magnet_field_step_size()
+@item magnet_field_step_size()
+This function exists for the modules @code{aeg_s_band},
+@code{aeg_x_band}, @code{bh15_fc}, @code{er032m}, @code{ips120_10} and
+@code{ips120_10_mod}. It can be used from all sections of an @code{EDL}
+script except for @code{aeg_s_band} and @code{aeg_x_band}, where it's
+use is restricted to the @code{EXPERIMENT} section.
+
+The function allows to determine the exact value of field steps that
+can be done when the field resolution is taken into account. If called
+with no argument it returns the minimum possible field step size. If,
+on the other hand, called with a proposed (positive) field step size
+it returns the nearest possible field step size.
+
 
 @anchor{magnet_sweep_up()}
 @findex magnet_sweep_up()
@@ -7069,7 +7086,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @cindex Light Chopper Functions
 Currently there's just a single supported light chopper. It is a chopper
 used in the group of G.@: Gescheidt (Graz University of Technology,
-Austria), that, via some homebuild electronics@footnote{see Ph.D.@:
+Austria), that, via some home-build electronics@footnote{see Ph.D.@:
 thesis by Torsten Zytowski, Z@"urich 1998} is indirectly controlled by a
 data acquisition device, currently the @strong{National Instruments
 PCI-MIO-16E-1} DAQ card. The module for the device is loaded by

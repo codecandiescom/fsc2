@@ -34,17 +34,18 @@ det_offset    = DET_OFFSET ns;
 start_field   = START_FIELD G;
 end_field     = END_FIELD G;
 === if ( START_FIELD <= END_FIELD )
-field_step    = FIELD_STEP G;
+field_step    = magnet_field_step_size( FIELD_STEP G );
 === else
-field_step    = - FIELD_STEP G;
+field_step    = - magnet_field_step_size( FIELD_STEP G );
 === endif
 
-field;
 N_Avg    = N_AVG;
 N_Points = ceil( ( end_field - start_field ) / field_step ) + 1;
+field[ N_Points ];
 wait_time = WAIT_TIME s;
 I = 0;
 J = 0;
+L = 0;
 K;
 data[ *, * ];
 avg[ N_Points ] = float_slice( N_Points );
@@ -80,13 +81,7 @@ P3:  FUNCTION = DETECTION,
 pulser_show_pulses( );
 === endif
 
-=== if ( START_FIELD <= END_FIELD )
-init_1d( 2, N_Points, start_field, field_step,
-         "Field [G]", "Echo amplitude [a.u.]" );
-=== else
-init_1d( 2, N_Points, end_field, - field_step,
-         "Field [G]", "Echo amplitude [a.u.]" );
-=== endif
+init_1d( 2, N_Points, "Field [G]", "Echo amplitude [a.u.]" );
 
 
 EXPERIMENT:
@@ -98,7 +93,25 @@ pulser_state( "ON" );
 daq_gain( 4 );
 start_temp = temp_contr_temperature( );
 
-field = magnet_field( start_field );
+field[ 1 ] = magnet_field( start_field );
+
+IF abs( field[ 1 ] - start_field ) > 0.05 * FIELD_STEP G {
+   print( "Start field had to be adjusted from # G to # G.\n",
+          start_field, field[ 1 ] );
+}
+
+IF abs( FIELD_STEP G - abs( field_step ) ) > 0.05 * FIELD_STEP G {
+	print( "Field step size had to be adjusted from # G to # G.\n",
+	       FIELD_STEP G, abs( field_step ) );
+}
+
+start_field = field[ 1 ];
+end_field = start_field + ( N_Points - 1 ) * field_step;
+=== if ( START_FIELD >= END_FIELD )
+change_scale( start_field, field_step );
+=== else
+change_scale( end_field, - field_step );
+=== endif
 
 IF wait_time > 1 us {
     wait( wait_time );
@@ -121,20 +134,27 @@ hide_toolbox( "OFF" );
 
 
 FOREVER {
+	L = 0;
     J += 1;
     output_value( B1, J );                // Update the scan count display
 
     FOR I = 1 : N_Points {
-        output_value( B2, field );
+        output_value( B2, field[ I ] );
         output_value( B3, temp_contr_temperature( ) );
         wait( 1.1 * repeat_time * N_Avg );
 
 === if ( START_FIELD <= END_FIELD )
         data[ J, I ] = - daq_get_voltage( CH0 );
+		avg[ I ] = add_to_average( avg[ I ], data[ J, I ], J );
+		L += 1;
         display_1d( I, data[ J, I ], 1,
                     I, ( ( J - 1 ) * avg[ I ] + data[ J, I ] ) / J, 2 );
 === else
         data[ J, N_Points - I + 1 ] = - daq_get_voltage( CH0 );
+		avg[ N_Points - I + 1 ] =
+                                add_average( avg[ N_Points - I + 1 ],
+		                                     data[ J, N_Points - I + 1 ] ), J );
+        L += 1;
         display_1d( N_Points - I + 1, data[ J, N_Points - I + 1 ], 1,
                     N_Points - I + 1,
                     ( ( J - 1 ) * avg[ N_Points - I + 1 ]
@@ -142,17 +162,15 @@ FOREVER {
 === endif
 
         IF I < N_Points {
-            field = magnet_field( field + field_step );
+            field[ I + 1 ] = magnet_field( field[ I ] + field_step );
         }
     }
-
-    avg = add_to_average( avg, data[ J ], J );
 
     IF button_state( B4 ) {               // Stop on user request
         BREAK;
     }
 
-    field = magnet_field( start_field );
+    field[ 1 ] = magnet_field( start_field );
 
     IF wait_time > 1 us {
         wait( wait_time );
@@ -161,68 +179,71 @@ FOREVER {
 
 ON_STOP:
 
-IF I != 0 {
-    IF J == 1 {
-=== if ( START_FIELD <= END_FIELD )
-        FOR K = 1 : I - 1 {
-            fsave( File1, "#,#\n", start_field + ( K - 1 ) * field_step,
-                   data[ 1, K ] );
-=== else
-        FOR K = N_Points - I + 2 : N_Points {
-            fsave( File1, "#,#\n", end_field - ( K - 1 ) * field_step,
-                   data[ 1, K ] );
-=== endif
-        }
-    } ELSE {
-        IF I <= N_Points {
-            J -= 1;
-        }
+// If L is 0 and J is 1 the first scan hadn't even started
 
+IF L > 0 OR J > 1 {
+
+    // If J is greater than 1 but L less than N_Points we got stopped during
+    // a scan and have to throw away the last, unfinished one
+
+    IF J > 1 AND L < N_Points {
+	    L = N_Points;
+	    J -= 1;
         IF J > 1 {
-            File2 = clone_file( File1, "avg", "scans" );
-            FOR I = 1 : N_Points {
-=== if ( START_FIELD <= END_FIELD )
-                fsave( File2, "#", start_field + ( I - 1 ) * field_step );
-=== else
-                fsave( File2, "#", end_field - ( I - 1 ) * field_step );
-=== endif
-                FOR K = 1 : J {
-                    fsave( File2, ",#", data[ K, I ] );
-                }
-                fsave( File2, "\n" );
+            avg = float_slice( N_Points );
+            FOR K = 1 : J {
+                avg = add_to_average( avg, data[ K ], K );
             }
-
-	        fsave( File2,
-				   "\n"
-	               "% Date:                   # #\n"
-	               "% Script:                 2_pulse_epr (J-band, Leiden)\n"
-	               "% Start field:            # G\n"
-	               "% End field:              # G\n"
-	               "% Field step:             # G\n"
-	               "% Repetition time:        # ms\n"
-	               "% Length of 1st MW pulse: # ns\n"
-	               "% Length of 2nd MW pulse: # ns\n"
-	               "% Pulse distance:         # ns\n"
-	               "% Number of averages:     >= #\n"
-	               "% Number of scans:        #\n"
-	               "% ADC gain:               4\n"
-	               "% Temperature at start:   # K\n"
-	               "% Temperature at end:     # K\n",
-	               date( ), time( ), start_field, field, field_step,
-	               repeat_time / 1 ms, round( P1.LENGTH / 1 ns ),
-	               round( P2.LENGTH / 1 ns ), round( p1_to_p2_dist / 1 ns ),
-                   N_Avg, J, start_temp, temp_contr_temperature( ) );
         }
+    }
 
+    // If there was more than one scan write out all single scan data
+
+    IF J > 1 {
+        File2 = clone_file( File1, "avg", "scans" );
         FOR I = 1 : N_Points {
 === if ( START_FIELD <= END_FIELD )
-            fsave( File1, "#,#\n", start_field + ( I - 1 ) * field_step,
-                   avg[ I ] );
+            fsave( File2, "#", field[ I ] );
 === else
-            fsave( File1, "#,#\n", end_field - ( I - 1 ) * field_step,
-                   avg[ I ] );
+            fsave( File2, "#", field[ N_Points - I + 1 ] );
 === endif
+            FOR K = 1 : J {
+                fsave( File2, ",#", data[ K, I ] );
+            }
+            fsave( File2, "\n" );
         }
+
+        fsave( File2,
+			   "\n"
+               "% Date:                   # #\n"
+               "% Script:                 2_pulse_epr (J-band, Leiden)\n"
+               "% Start field:            # G\n"
+               "% End field:              # G\n"
+               "% Field step:             # G\n"
+               "% Repetition time:        # ms\n"
+               "% Length of 1st MW pulse: # ns\n"
+               "% Length of 2nd MW pulse: # ns\n"
+               "% Pulse distance:         # ns\n"
+               "% Number of averages:     >= #\n"
+               "% Number of scans:        #\n"
+               "% ADC gain:               4\n"
+               "% Temperature at start:   # K\n"
+               "% Temperature at end:     # K\n",
+               date( ), time( ), field[ 1 ], field[ N_Points ], field_step,
+               repeat_time / 1 ms, round( P1.LENGTH / 1 ns ),
+               round( P2.LENGTH / 1 ns ), round( p1_to_p2_dist / 1 ns ),
+               N_Avg, J, start_temp, temp_contr_temperature( ) );
+    }
+
+    // Write the averaged data into the first file 
+
+=== if ( START_FIELD <= END_FIELD )
+    FOR K = 1 : L {
+        fsave( File1, "#,#\n", field[ K ], avg[ K ] );
+=== else
+    FOR K = N_Points - L + 1 : N_Points {
+        fsave( File1, "#,#\n", field[ N_Points - K + 1 ], avg[ K ] );
+=== endif
     }
 
     fsave( File1,
@@ -241,7 +262,7 @@ IF I != 0 {
            "% ADC gain:               4\n"
            "% Temperature at start:   # K\n"
            "% Temperature at end:     # K\n",
-           date( ), time( ), start_field, field, field_step,
+           date( ), time( ), field[ 1 ], field[ L ], field_step,
            repeat_time / 1 ms, round( P1.LENGTH / 1 ns ),
            round( P2.LENGTH / 1 ns ), round( p1_to_p2_dist / 1 ns ), N_Avg, J,
            start_temp, temp_contr_temperature( ) );

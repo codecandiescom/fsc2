@@ -108,18 +108,19 @@ int er032m_exp_hook(         void );
 int er032m_end_of_exp_hook(  void );
 
 
-Var_T *magnet_name(        Var_T * v );
-Var_T *magnet_setup(       Var_T * v );
-Var_T *magnet_field(       Var_T * v );
-Var_T *set_field(          Var_T * v );
-Var_T *get_field(          Var_T * v );
-Var_T *sweep_up(           Var_T * v );
-Var_T *sweep_down(         Var_T * v );
-Var_T *magnet_sweep_up(    Var_T * v );
-Var_T *magnet_sweep_down(  Var_T * v );
-Var_T *reset_field(        Var_T * v );
-Var_T *magnet_reset_field( Var_T * v );
-Var_T *magnet_command(     Var_T * v );
+Var_T *magnet_name(            Var_T * v );
+Var_T *magnet_setup(           Var_T * v );
+Var_T *magnet_field(           Var_T * v );
+Var_T *set_field(              Var_T * v );
+Var_T *get_field(              Var_T * v );
+Var_T *magnet_field_step_size( Var_T * v );
+Var_T *sweep_up(               Var_T * v );
+Var_T *sweep_down(             Var_T * v );
+Var_T *magnet_sweep_up(        Var_T * v );
+Var_T *magnet_sweep_down(      Var_T * v );
+Var_T *reset_field(            Var_T * v );
+Var_T *magnet_reset_field(     Var_T * v );
+Var_T *magnet_command(         Var_T * v );
 
 
 static void er032m_init( void );
@@ -650,6 +651,38 @@ Var_T *set_field( Var_T * v )
     er032m_field_check( field );
 
     return vars_push( FLOAT_VAR, er032m_set_field( field ) );
+}
+
+
+/*----------------------------------------------------------------*
+ * Function returns the minimum field step size if called without
+ * an argument and the possible field step size nearest to the
+ * argument.
+ *----------------------------------------------------------------*/
+
+Var_T *magnet_field_step_size( Var_T * v )
+{
+    double field_step;
+    long steps;
+
+
+    if ( v == NULL )
+        return vars_push( FLOAT_VAR, ER032M_RESOLUTION );
+
+    field_step = get_double( v, "field step size" );
+
+    too_many_arguments( v );
+
+    if ( field_step < 0.0 )
+    {
+        print( FATAL, "Invalid negative field step size\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( steps = lrnd( field_step / ER032M_RESOLUTION ) ) == 0 )
+        steps++;
+
+    return vars_push( FLOAT_VAR, steps * ER032M_RESOLUTION );
 }
 
 
