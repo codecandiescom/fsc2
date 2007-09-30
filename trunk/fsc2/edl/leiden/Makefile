@@ -12,21 +12,40 @@ SIMPLE_SCRIPTS := $(patsubst %_j.edl,%.$(J_BAND),$(SIMPLE_J)) \
 all: $(SIMPLE_SCRIPTS) $(EDL_SCRIPTS)
 
 %.$(J_BAND): %_j.EDL
-	fsc2_guify $< $@
+	@if [ ! -e $@ -o $< -nt $@ ]; then  \
+		echo "fsc2_guify $< $@";        \
+		fsc2_guify $< $@;               \
+	fi
 
 %.$(W_BAND): %_w.EDL
-	fsc2_guify $< $@
+	@if [ ! -e $@ -o $< -nt $@ ]; then  \
+		echo "fsc2_guify $< $@";        \
+		fsc2_guify $< $@;               \
+	fi
 
 %.$(J_BAND): %_j.edl
-	cp $< $@
-	chmod 755 $@
+	@if [ ! -e $@ -o $< -nt $@ ]; then  \
+		echo "cp $< $@";                \
+		echo "chmod 755 $@";            \
+		cp $< $@;                       \
+		chmod 755 $@ ;                  \
+	fi
 
 %.$(W_BAND): %_w.edl
-	cp $< $@
-	chmod 755 $@
+	@if [ ! -e $@ -o $< -nt $@ ]; then  \
+		echo "cp $< $@";                \
+		echo "chmod 755 $@";            \
+		cp $< $@;                       \
+		chmod 755 $@                    \
+	fi
 
 install:
-	cp *.molphys.leidenuniv.nl ../../scripts
+	@for f in *.molphys.leidenuniv.nl; do       \
+		if [ $$f -nt ../../scripts/$$f ]; then  \
+			echo "cp $$f ../../scripts";        \
+	    	cp $$f ../../scripts;               \
+		fi;                                     \
+	done
 
 clean:
 	rm -f *.molphys.leidenuniv.nl *~
