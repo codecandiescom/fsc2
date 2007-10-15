@@ -38,4 +38,5 @@ WITH_RULBUS          := yes
 rulbus_incl_path     := /usr/local/include
 rulbus_lib_path      := /usr/local/lib
 MAIL_ADDRESS         := jens
-BROWSER              := firefox/firefox 
+BROWSER              := /usr/bin/firefox 
+DESCRIPTION          := "Test machine"

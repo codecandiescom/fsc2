@@ -119,10 +119,10 @@ void print_it( FL_OBJECT * obj,
         return;
     }
 
-    /* There's a race condition here, if the user is extremely fast she
-       might already press another print button before it gets deactivated,
-       but chances are very low and I'm too busy at the moment to implement
-       a 100% safe method... */
+    /* There's a race condition here, if the user is extremely fast she might
+       already press another print button before it gets deactivated, but
+       chances are very low and I'm too busy at the moment to implement a 100%
+       safe method... */
 
     if ( GUI.run_form_1d )
         fl_deactivate_object( GUI.run_form_1d->print_button_1d );
@@ -339,10 +339,11 @@ static bool get_print_file( FILE ** fp,
     fl_hide_form( print_form->print );
     fl_free_form( print_form->print );
 
-    /* In send-to-printer mode we're already done */
+    /* In send-to-printer mode we're already done, we just return if the
+       user pressed the 'Print' button */
 
     if ( print_type == S2P )
-        return OK;
+        return obj == print_form->print_button;
 
     /* In print-to-file mode ask for confirmation if the file already exists
        and try to open it for writing */
@@ -363,7 +364,7 @@ static bool get_print_file( FILE ** fp,
         return FAIL;
     }
 
-    return OK;
+    return obj == print_form->print_button;
 }
 
 
@@ -636,29 +637,44 @@ static void print_header( FILE *       fp,
 {
     time_t d;
     char *tstr = NULL;
+    struct passwd *pwd;
+    struct utsname un;
 
 
     /* Writes EPS header plus some routines into the file */
 
     d = time( NULL );
 
-    fprintf( fp, "%%!PS-Adobe-3.0\n"
-                 "%%%%BoundingBox: 0 0 %d %d\n"
-                 "%%%%Creator: fsc2\n"
-                 "%%%%CreationDate: %s"
-                 "%%%%Title: %s\n"
-                 "%%%%For: %s (%s)\n"
-                 "%%%%Orientation: Landscape\n"
-                 "%%%%DocumentData: Clean8Bit\n"
-                 "%%%%DocumentNeededResources: font Times-Roman\n"
-                 "%%%%EndComments\n",
-             irnd( 72.0 * paper_width / INCH ),
-             irnd( 72.0 * paper_height / INCH ),
-             ctime( &d ), name ? name : "(none)",
-             getpwuid( getuid( ) )->pw_name,
-             getpwuid( getuid( ) )->pw_gecos );
+    if ( ( pwd = getpwuid( getuid( ) ) ) != NULL )
+        fprintf( fp, "%%!PS-Adobe-3.0\n"
+                     "%%%%BoundingBox: 0 0 %d %d\n"
+                     "%%%%Creator: fsc2\n"
+                     "%%%%CreationDate: %s"
+                     "%%%%Title: %s\n"
+                     "%%%%For: %s (%s)\n"
+                     "%%%%Orientation: Landscape\n"
+                     "%%%%DocumentData: Clean8Bit\n"
+                     "%%%%DocumentNeededResources: font Times-Roman\n"
+                     "%%%%EndComments\n",
+                 irnd( 72.0 * paper_width / INCH ),
+                 irnd( 72.0 * paper_height / INCH ),
+                 ctime( &d ), name ? name : "(none)",
+                 pwd->pw_name, pwd->pw_gecos );
+    else
+        fprintf( fp, "%%!PS-Adobe-3.0\n"
+                     "%%%%BoundingBox: 0 0 %d %d\n"
+                     "%%%%Creator: fsc2\n"
+                     "%%%%CreationDate: %s"
+                     "%%%%Title: %s\n"
+                     "%%%%Orientation: Landscape\n"
+                     "%%%%DocumentData: Clean8Bit\n"
+                     "%%%%DocumentNeededResources: font Times-Roman\n"
+                     "%%%%EndComments\n",
+                 irnd( 72.0 * paper_width / INCH ),
+                 irnd( 72.0 * paper_height / INCH ),
+                 ctime( &d ), name ? name : "(none)" );
 
-    /* Create a dictonary with the commands used in all the following */
+    /* Create a dictonary with the commands used in the following */
 
     fprintf( fp, "%%%%BeginProlog\n"
                  "%%%%BeginResource: procset fsc2Dict\n"
@@ -746,13 +762,40 @@ static void print_header( FILE *       fp,
     {
         tstr = T_strdup( ctime( &d ) );
         tstr[ strlen( tstr ) - 1 ] = '\0';
-        fprintf( fp, "5 5 m (%s %s) show\n", tstr,
-                 getpwuid( getuid( ) )->pw_name );
+        if ( uname( &un ) != -1 && pwd != NULL )
+#if defined DESCRIPTION
+            fprintf( fp, "5 5 m (%s %s@%s [%s]) show\n",
+                     tstr, pwd->pw_name, un.nodename, DESCRIPTION );
+#else
+            fprintf( fp, "5 5 m (%s %s@%s) show\n",
+                     tstr, pwd->pw_name, un.nodename );
+#endif
+        else if ( pwd != NULL )
+#if defined DESCRIPTION
+            fprintf( fp, "5 5 m (%s %s [%s]) show\n",
+                     tstr, pwd->pw_name, DESCRIPTION );
+#else
+            fprintf( fp, "5 5 m (%s %s) show\n", tstr, pwd->pw_name );
+#endif
         T_free( tstr );
         TRY_SUCCESS;
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )
-        fprintf( fp, "5 5 m (%s) show\n", getpwuid( getuid( ) )->pw_name );
+    {
+        if ( uname( &un ) != -1 && pwd != NULL )
+#if defined DESCRIPTION
+            fprintf( fp, "5 5 m (%s@%s [%s]) show\n",
+                     pwd->pw_name, un.nodename, DESCRIPTION );
+#else
+            fprintf( fp, "5 5 m (%s@%s) show\n", pwd->pw_name, un.nodename );
+#endif
+        else if ( pwd != NULL )
+#if defined DESCRIPTION
+            fprintf( fp, "5 5 m (%s [%s]) show\n", pwd->pw_name, DESCRIPTION );
+#else
+            fprintf( fp, "5 5 m (%s) show\n", pwd->pw_name );
+#endif
+    }
 }
 
 

@@ -793,19 +793,38 @@ endif
 
 # IF USE_FSC2_MTA has not been defined also create a variable with the full
 # name of the 'mail' program. Otherwise we need the libresolv.so library
-# for the built-in mail transport agent.
+# for the built-in mail transport agent (but if the 'mail' program can't be
+# found revert to using the built-in MTA)
 
 ifdef MAIL_ADDRESS
 	CONFFLAGS += -DMAIL_ADDRESS=\"$(patsubst % ,%,$(MAIL_ADDRESS))\"
 	ifndef USE_FSC2_MTA
-		MAIL_PROGRAM  := $(shell which mail)
-		ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
-			CONFFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
+		MAIL_PROGRAM := $(shell which mail)
+		ifneq ($(MAIL_PROGRAM),)
+			ifneq ($(word 1,$(MAIL_PROGRAM)),which:)
+				CONFFLAGS += -DMAIL_PROGRAM=\"$(MAIL_PROGRAM)\"
+			else
+				LIBS      += -lresolv
+				CONFFLAGS += -DUSE_FSC2_MTA
+			endif
+		else
+			LIBS      += -lresolv
+			CONFFLAGS += -DUSE_FSC2_MTA
 		endif
 	else
 		LIBS      += -lresolv
 		CONFFLAGS += -DUSE_FSC2_MTA
 	endif
+endif
+
+
+# Deal with spectrometer description string
+
+ifdef DESCRIPTION
+     comma := ,
+     empty :=
+     space := $(empty) $(empty)
+	CONFFLAGS += -DDESCRIPTION=\"$(subst $(space),\\x20,$(subst \",,$(DESCRIPTION)))\"
 endif
 
 
@@ -840,6 +859,7 @@ all release debug mdebug:
 	$(MAKE) docs
 
 config: fsc2_config.h
+	echo $(CONFFLAGS)
 	@if [ -n "$(machine_name)" ]; then                     \
 		echo "Configuring for machine $(machine_name)";    \
 		if [ -r $(mchdir)/$(machine_name)-config ]; then   \
