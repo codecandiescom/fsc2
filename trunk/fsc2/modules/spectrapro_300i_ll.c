@@ -863,7 +863,7 @@ void spectrapro_300i_install_grating( long         gn,
     char *buf;
 
 
-    fsc2_assert( gn >= 1 && gn <= MAX_GRATINGS );
+    fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
 
     buf = get_string( "%s %ld INSTALL", part_no, gn + 1 );
 

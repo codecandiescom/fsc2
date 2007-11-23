@@ -217,6 +217,7 @@ Var_T *boxcar_get_curve( Var_T * v )
     CLOBBER_PROTECT( curve_type );
     CLOBBER_PROTECT( first );
     CLOBBER_PROTECT( last );
+    CLOBBER_PROTECT( old_timo );
 
     if ( v == NULL )
     {

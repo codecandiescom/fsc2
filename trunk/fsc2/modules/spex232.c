@@ -1330,6 +1330,7 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
     long bin;
 
 
+    CLOBBER_PROTECT( v );
     CLOBBER_PROTECT( wl );
 
     if ( v != NULL )
