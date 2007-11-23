@@ -433,7 +433,7 @@ Var_T *monochromator_install_grating( Var_T * v )
     long gn;
 
 
-    grating = get_strict_long( v->next, "grating position" );
+    grating = get_strict_long( v, "grating position" );
 
     if ( grating < 1 || grating > MAX_GRATINGS )
     {
@@ -443,6 +443,15 @@ Var_T *monochromator_install_grating( Var_T * v )
     }
 
     gn = grating - 1;
+
+    v = vars_pop( v );
+
+    if ( v->type != STR_VAR )
+    {
+        print( FATAL, "First variable must be a string with the part "
+               "number, e.g. \"1-120-750\", or \"UNINSTALL\".\n" );
+        THROW( EXCEPTION );
+    }
 
     if (    FSC2_MODE == EXPERIMENT
          && ! strcmp( v->val.sptr, "UNINSTALL" )
@@ -461,24 +470,15 @@ Var_T *monochromator_install_grating( Var_T * v )
             spectrapro_300i.grating[ gn ].installed_in_test = SET;
     }
 
-    v = vars_pop( v );
-
-    if ( v->type != STR_VAR )
-    {
-        print( FATAL, "First variable must be a string with the part "
-               "number, e.g. \"1-120-750\", or \"UNINSTALL\".\n" );
-        THROW( EXCEPTION );
-    }
-
     /* Do some minimal checks on the part number */
 
     if (    strcmp( v->val.sptr, "UNINSTALL" )
          && (    ! isdigit( ( unsigned char ) v->val.sptr[ 0 ] )
-              || v->val.sptr[ 0 ] != '-'         
+              || v->val.sptr[ 1 ] != '-'         
               || ! isdigit( ( unsigned char ) v->val.sptr[ 2 ] )
               || ! isdigit( ( unsigned char ) v->val.sptr[ 3 ] )
               || ! isdigit( ( unsigned char ) v->val.sptr[ 4 ] )
-              || ! v->val.sptr[ 5 ] != '-'
+              || v->val.sptr[ 5 ] != '-'
               || strlen( v->val.sptr ) > 10 ) )
     {
         print( FATAL, "First argument doesn't look like a valid part "
