@@ -36,6 +36,36 @@ enum {
 };
 
 
+/* List of all "officially supported" gratings - others exist but trying to
+   install them simply using the INSTALL command results in the device getting
+   into a garbled state. Instead a similar grating with the same number of
+   grooves per millimeter has to be "installed" and then the blaze wavelength
+   to be corrected (actually, the blaze wavelength is irrelevant for the
+   performance of the device as far as I was told by tech support). */
+   
+
+static const char *good_gratings[ ] = { "1-002-45",
+                                        "1-050-12"
+                                        "1-075-8",
+                                        "1-015-500",
+                                        "1-015-4",
+                                        "1-030-300",
+                                        "1-030-2",
+                                        "1-060-300",
+                                        "1-060-1",
+                                        "1-060-1.6",
+                                        "1-120-300",
+                                        "1-120-500",
+                                        "1-120-750",
+                                        "1-120-HUV",
+                                        "1-120-HVIS",
+                                        "1-180-250",
+                                        "1-180-500",
+                                        "1-240-240",
+                                        "1-240-H",
+                                        "1-360-240" };
+
+
 static void spectrapro_300i_send( const char * buf );
 
 static bool spectrapro_300i_read( char *   buf,
@@ -346,10 +376,13 @@ void spectrapro_300i_close( void )
 double spectrapro_300i_get_wavelength( void )
 {
     char *reply;
+    double wl;
 
 
     reply = spectrapro_300i_talk( "?NM", 100 );
-    return T_atod( reply ) * 1.0e-9;
+    wl =  T_atod( reply ) * 1.0e-9;
+    T_free( ( void * ) reply );
+    return wl;
 }
 
 
@@ -852,20 +885,57 @@ void spectrapro_300i_set_adjust( long gn,
 }
 
 
-/*-------------------------------------------------------*
- * Function installs a new grating into the non-volatile
- * memory of the monochromator.
- *-------------------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Function installs a new grating into the non-volatile memory of the
+ * monochromator. But there's a twist: there are a number of gratings
+ * listed in the manual for the device and the device only accepts
+ * those. For other gratings (which are officially sold as gratings
+ * for the device) there seems to be a frimware bug, resulting in the
+ * non-volatile memory becoming garbled. For these gratings a standard
+ * grating has to be installed with the "INSTALL" command first and
+ * then the blaze wavelength has to be adjusted.
+ *---------------------------------------------------------------------*/
 
 void spectrapro_300i_install_grating( long         gn,
                                       const char * part_no )
 {
     char *buf;
+    size_t i;
+    bool is_supported = SET;
+    const char *blaze_id = part_no + 6;
+    char reply[ 8 ];
+    char blaze[ ] = "       ";    /* seven spaces and a '\0' character */
 
+
+    CLOBBER_PROTECT( is_supported );
 
     fsc2_assert( gn >= 0 && gn < MAX_GRATINGS );
 
-    buf = get_string( "%s %ld INSTALL", part_no, gn + 1 );
+    /* Test if this is one of the gratings listed in the manual */
+
+    for ( i = 0; i < NUM_ELEMS( good_gratings ); i++ )
+        if ( ! strcmp( good_gratings[ i ], part_no ) )
+            break;
+
+    /* If it's not pick one with the same number of grooves but a different
+       blaze wavelength (if possible) */
+
+    if ( i == NUM_ELEMS( good_gratings ) )
+    {
+        is_supported = UNSET;
+        for ( i = 0; i < NUM_ELEMS( good_gratings ); i++ )
+            if ( ! strncmp( good_gratings[ i ], part_no, 6 ) )
+                break;
+    }
+
+    if ( i == NUM_ELEMS( good_gratings ) )
+    {
+        print( FATAL, "Grating with part no. '%s' isn't a supported grating.\n",
+               part_no );
+        THROW( EXCEPTION );
+    }
+
+    buf = get_string( "%s %ld INSTALL", good_gratings[ i ], gn + 1 );
 
     TRY
     {
@@ -878,6 +948,62 @@ void spectrapro_300i_install_grating( long         gn,
         T_free( buf );
         RETHROW( );
     }
+
+    /* If this was for one of the gratings from the manual were done */
+
+    if ( is_supported )
+        return;
+
+    /* For "non-standard gratings the blaze part is either a three-digit
+       number for the blaze wavelength in nm, a one- or two-digit string
+       or two digits, separated by a dot for the blaze wavelenght in um,
+       or some string not all being numbers. We have to convert this to
+       a string to be set as the blaze part in the grating identifier. */
+
+    strncpy( blaze, blaze_id, strlen( blaze_id ) );
+
+    if (    strlen( blaze_id ) == 3
+         && isdigit( ( int ) blaze_id[ 0 ] )
+         && isdigit( ( int ) blaze_id[ 1 ] )
+         && isdigit( ( int ) blaze_id[ 2 ] ) )
+        strncpy( blaze + 4, "nm", 2 );
+    else if (    ( strlen( blaze_id ) == 1 &&
+                   isdigit( ( int ) blaze_id[ 0 ] ) )
+              || (   strlen( blaze_id ) == 2
+                   && isdigit( ( int ) blaze_id[ 0 ] )
+                   && isdigit( ( int ) blaze_id[ 1 ] ) )
+                 || ( strlen( blaze_id ) == 3
+                   && isdigit( ( int ) blaze_id[ 0 ] )
+                   && blaze_id[ 1 ] == '.'
+                   && isdigit( ( int ) blaze_id[ 2 ] ) ) )
+        strncpy( blaze + strlen( blaze_id ) + 1, "um", 2 );
+
+    /* Setting the blaze wavelenght is a bit of bother since the BLAZE command
+       works differently from all other commands. It requires first sending
+       "BLAZE\r", then reading in a string consisting of 7 chars (I don't know
+       exactly what they are) and a CR ('\r'), and then sending a string
+       consisting of 7 characters (and no final CR as with other commands).
+       As a reply the device is supposed to send "ok\r\n" or " ok\r\n". */
+
+    i = 8;
+    if (    ! spectrapro_300i_comm( SERIAL_WRITE, "BLAZE\r" )
+         || ! spectrapro_300i_comm( SERIAL_READ, reply, &i )
+         || i != 8 )
+        spectrapro_300i_comm_fail( );
+
+    if ( reply[ 7 ] != '\r' )
+        spectrapro_300i_comm_fail( );
+
+    if ( ! spectrapro_300i_comm( SERIAL_WRITE, blaze ) )
+        spectrapro_300i_comm_fail( );
+
+    i = 5;
+    if (    ! spectrapro_300i_comm( SERIAL_READ, reply, &i )
+         || i < 4 )
+        spectrapro_300i_comm_fail( );
+
+    if ( strncmp( reply, "ok\r\n", 4 ) && strncmp( reply, " ok\r\n", 5 ) )
+        spectrapro_300i_comm_fail( );
 }
 
 
@@ -968,7 +1094,7 @@ void spectrapro_300i_send( const char * buf )
  *    the string ready in is returned in len (could actually be 0 when
  *    the "ok\r\n" part was everything we got) and the function returns
  *    a status indicating success.
- * 2. The returned string ended ended neither in " ok\r\n", "ok\r\n" or
+ * 2. The returned string ended ended neither in "ok\r\n", " ok\r\n" or
  *    "?\r\n", indicating that there are more data coming. In 'len' the
  *    length of what we got is returned and the function returns a
  *    status indicating failure. No '\0' is appended to the returned

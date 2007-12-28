@@ -838,16 +838,12 @@ static void do_1d_printing( FILE * fp,
         /* Draw the scale for the active curve (if there is an active curve) */
 
         for ( i = 0; i < G_1d.nc; i++ )
-        {
             if ( G_1d.curve[ i ]->active )
+            {
+                eps_make_scale( fp, ( void * ) G_1d.curve[ i ], X, 1 );
+                eps_make_scale( fp, ( void * ) G_1d.curve[ i ], Y, 1 );
                 break;
-        }
-
-        if ( i != G_1d.nc )
-        {
-            eps_make_scale( fp, ( void * ) G_1d.curve[ i ], X, 1 );
-            eps_make_scale( fp, ( void * ) G_1d.curve[ i ], Y, 1 );
-        }
+            }
     }
     else                /* when printing a cross section */
     {

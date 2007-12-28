@@ -60,17 +60,17 @@ int get_batch_state( void )
 }
 
 
-/*--------------------------------------------------------------*
+/*---------------------------------------------------------------*
  * Function returns true if the user has hit the "Stop" button.
- * It's the users resonsibility to throw a USER_BREAK_EXCEPTION
+ * It's the users responsibility to throw a USER_BREAK_EXCEPTION
  * in this case.
- *--------------------------------------------------------------*/
+ *---------------------------------------------------------------*/
 
 bool check_user_request( void )
 {
     if ( Fsc2_Internals.I_am == PARENT )
         fl_check_only_forms( );
-    return  EDL.do_quit && EDL.react_to_do_quit;
+    return EDL.do_quit && EDL.react_to_do_quit;
 }
 
 

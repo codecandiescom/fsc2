@@ -1075,7 +1075,7 @@ Var_T *lockin_auto_setup( Var_T * v )
             if ( FSC2_MODE != PREPARATION )
             {
                 if ( FSC2_MODE == TEST )
-                    tc = sr810.tc_index != UNDEF_TC_INDEX ?
+                    tc = sr810.tc_index == UNDEF_TC_INDEX ?
                         SR810_TEST_TIME_CONSTANT : tc_list[ sr810.tc_index ];
                 else
                     tc = sr810_get_tc( );
@@ -1216,7 +1216,7 @@ Var_T *lockin_get_sample_time( Var_T * v  UNUSED_ARG )
         case TEST :
             if ( st_index == UNDEF_ST_INDEX )
             {
-                tc = sr810.tc_index != UNDEF_TC_INDEX ?
+                tc = sr810.tc_index == UNDEF_TC_INDEX ?
                     SR810_TEST_TIME_CONSTANT : tc_list[ sr810.tc_index ];
                 st_index = 0;
                 while ( st_index < ST_ENTRIES - 1 && st_list[ st_index ] < tc )

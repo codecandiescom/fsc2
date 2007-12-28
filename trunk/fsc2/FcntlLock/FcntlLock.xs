@@ -29,7 +29,7 @@ C_fcntl_lock( fd, function, flock_hash, int_err )
     INIT:
         unsigned char flock_struct[ STRUCT_SIZE ];
         HV *fs;
-        SV **sv_type, **sv_whence, **sv_start, **sv_len, **sv_pid;
+        SV **sv_type, **sv_whence, **sv_start, **sv_len;
 
         sv_setiv( int_err, 0 );
 

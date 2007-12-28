@@ -2103,8 +2103,8 @@ static void main_sig_handler( int signo )
 
         /* All the remaining signals are deadly - we may be able to gather
            some information about the signal, were the crash happened and a
-           backtrace which the final_exit_handler() can use to do the right
-           thing. */
+           backtrace which the final_exit_handler() function can use to do
+           the right thing. */
 
         default :
 #if ! defined( NDEBUG ) && defined( ADDR2LINE )

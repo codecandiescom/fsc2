@@ -479,9 +479,9 @@ Var_T *monochromator_install_grating( Var_T * v )
               || ! isdigit( ( unsigned char ) v->val.sptr[ 3 ] )
               || ! isdigit( ( unsigned char ) v->val.sptr[ 4 ] )
               || v->val.sptr[ 5 ] != '-'
-              || strlen( v->val.sptr ) > 10 ) )
+              || strlen( v->val.sptr ) > 13  ) )
     {
-        print( FATAL, "First argument doesn't look like a valid part "
+        print( FATAL, "First argument doesn't look like a valid grating part "
                "number.\n" );
         THROW( EXCEPTION );
     }

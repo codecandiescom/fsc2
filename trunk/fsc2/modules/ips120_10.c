@@ -315,6 +315,15 @@ Var_T *magnet_setup( Var_T * v )
 }
 
 
+/*------------------------------------------------------*
+ *------------------------------------------------------*/
+
+Var_T *magnet_field( Var_T * v )
+{
+    return v == NULL ? get_field( v ) : set_field( v );
+}
+
+
 /*-----------------------------------------------------------------------*
  * Function returns the momentary field. During the test run an estimate
  * of the field is returned, based on the sweep rate and a guess of the
@@ -374,15 +383,6 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
     }
 
     return vars_push( FLOAT_VAR, ips120_10.act_current * F2C_RATIO );
-}
-
-
-/*------------------------------------------------------*
- *------------------------------------------------------*/
-
-Var_T *magnet_field( Var_T * v )
-{
-    return v == NULL ? get_field( v ) : set_field( v );
 }
 
 
@@ -1313,12 +1313,23 @@ static double ips120_10_get_act_current( void )
 {
     char reply[ 100 ];
     long length;
+    int retries = 3;
 
 
-    length = ips120_10_talk( "R0\r", reply, 100 );
+    CLOBBER_PROTECT( retries );
 
-    reply[ length - 1 ] = '\0';
-    return T_atod( reply + 1 );
+    while ( retries-- )
+    {
+        length = ips120_10_talk( "R0\r", reply, 100 );
+
+        reply[ length - 1 ] = '\0';
+        TRY
+            return T_atod( reply + 1 );
+    }
+
+    ips120_10_comm_failure( );
+
+    return 0.0;     /* we'll never get here, just to keep the compiler happy */
 }
 
 
@@ -1348,11 +1359,22 @@ static double ips120_10_get_target_current( void )
 {
     char reply[ 100 ];
     long length;
+    int retries = 3;
 
 
-    length = ips120_10_talk( "R5\r", reply, 100 );
-    reply[ length - 1 ] = '\0';
-    return T_atod( reply + 1 );
+    CLOBBER_PROTECT( retries );
+
+    while ( retries-- )
+    {
+        length = ips120_10_talk( "R5\r", reply, 100 );
+        reply[ length - 1 ] = '\0';
+        TRY
+            return T_atod( reply + 1 );
+    }
+
+    ips120_10_comm_failure( );
+
+    return 0.0;     /* we'll never get here, just to keep the compiler happy */
 }
 
 
@@ -1382,11 +1404,22 @@ static double ips120_10_get_sweep_rate( void )
 {
     char reply[ 100 ];
     long length;
+    int retries = 3;
 
 
-    length = ips120_10_talk( "R6\r", reply, 100 );
-    reply[ length - 1 ] = '\0';
-    return T_atod( reply + 1 ) / 60.0;
+    CLOBBER_PROTECT( retries );
+
+    while ( retries-- )
+    {
+        length = ips120_10_talk( "R6\r", reply, 100 );
+        reply[ length - 1 ] = '\0';
+        TRY
+            return T_atod( reply + 1 ) / 60.0;
+    }
+
+    ips120_10_comm_failure( );
+
+    return 0.0;     /* we'll never get here, just to keep the compiler happy */
 }
 
 

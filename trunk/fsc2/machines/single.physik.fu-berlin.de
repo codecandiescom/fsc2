@@ -3,7 +3,7 @@
 # $Id$
 
 OWNER              := fsc2
-GROUP              := uucp
+GROUP              := dialout
 GPIB_LIBRARY       := NONE
 NUM_SERIAL_PORTS   := 2
 SERIAL_LOCK_DIR    := /var/lock

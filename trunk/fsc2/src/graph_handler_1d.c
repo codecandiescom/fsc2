@@ -1479,10 +1479,10 @@ void repaint_canvas_1d( Canvas_T * c )
 }
 
 
-/*---------------------------------------------------------*
- * Function for returning th current mouse position to the
+/*----------------------------------------------------------*
+ * Function for returning the current mouse position to the
  * user for the EDL function mouse_position()
- *---------------------------------------------------------*/
+ *----------------------------------------------------------*/
 
 int get_mouse_pos_1d( double *       pa,
                       unsigned int * keymask )

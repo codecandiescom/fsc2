@@ -5,16 +5,8 @@
 OWNER                := fsc2
 GROUP                := dialout
 EDITOR               := emacs
-
-#KERNEL_VERSION       := $(shell uname -r)
-# ifeq ($(KERNEL_VERSION),$(shell echo $(KERNEL_VERSION) | sed -e 's/^2\.6\.//'))
-# 	GPIB_LIBRARY     := NI_OLD
-# else
-#	GPIB_LIBRARY     := SLG
-# 	GPIB_HEADER_DIR  := /usr/local/include/gpib
-# endif
-
-GPIB_LIBRARY         := JTT
+GPIB_LIBRARY         := SLG
+GPIB_HEADER_DIR      := /usr/local/include/gpib
 GPIB_LOG_FILE        := /tmp/fsc2_gpib.log
 GPIB_LOG_LEVEL       := HIGH
 NUM_SERIAL_PORTS     := 2
@@ -28,7 +20,6 @@ ni6601_libs          := libni6601.so
 WITH_ME6000          := yes
 me6000_libs          := libme6x00.so
 WITH_RS_SPEC10       := yes
-rs_spec10_incl       := /usr/local/include/pvcam
 rs_spec10_libs       := libpvcam.so
 WITH_WITIO_48        := yes
 witio_48_libs        := libwitio_48.so
@@ -37,6 +28,6 @@ pci_mio_16e_1_libs   := libni_daq.so
 WITH_RULBUS          := yes
 rulbus_incl_path     := /usr/local/include
 rulbus_lib_path      := /usr/local/lib
-MAIL_ADDRESS         := jens
+MAIL_ADDRESS         := jens@localhost
 BROWSER              := /usr/bin/firefox 
 DESCRIPTION          := "Test machine"

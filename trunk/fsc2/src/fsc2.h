@@ -103,6 +103,7 @@
 #include "run.h"
 #include "chld_func.h"
 #include "graphics.h"
+#include "graphics_edl.h"
 #include "accept.h"
 #include "graph_handler_1d.h"
 #include "graph_handler_2d.h"

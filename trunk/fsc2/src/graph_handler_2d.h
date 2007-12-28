@@ -54,6 +54,8 @@ void recalc_XPoints_of_curve_2d( Curve_2d_T * /* cv */ );
 
 void redraw_all_2d( void );
 
+void redraw_canvas_2d( Canvas_T * /* c */ );
+
 void repaint_canvas_2d( Canvas_T * /* c */ );
 
 int get_mouse_pos_2d( double *       /* pa      */,

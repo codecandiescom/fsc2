@@ -1880,8 +1880,10 @@ void repaint_canvas_2d( Canvas_T * c )
 }
 
 
-/*---------------------------------------------------------*
- *---------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function for returning the current mouse position to the
+ * user for the EDL function mouse_position()
+ *----------------------------------------------------------*/
 
 int get_mouse_pos_2d( double *       pa,
                       unsigned int * keymask )
@@ -2384,8 +2386,9 @@ void set_marker_2d( long x_pos,
 }
 
 
-/*------------------------------------------*
- *------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function gets called to delete a 2D marker at a certain position
+ *------------------------------------------------------------------*/
 
 static void delete_marker_2d( long x_pos,
                               long y_pos,

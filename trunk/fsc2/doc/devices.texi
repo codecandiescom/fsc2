@@ -6582,12 +6582,19 @@ another dash and an identifier for the blaze wavelength or type of the
 grating. Thus a valid part number string would be e.g.@:
 @code{"1-120-750"} for a grating with 1200 grooves per mm and a blazing
 wavelength of @w{750 nm}. Another possible part number string is
-@code{"2-030-HVIS"}. The total length of the string may not excceed 10
+@code{"2-030-HVIS"}. The total length of the string may not excceed 13
 characters.
 
 Alternatively, the function can also be used to tell the monochromator
 that a grating has been removed. In this case the part number string has
 to be replaced by the string @code{"UNINSTALL"}.
+
+@strong{Please note}: There's a list of supported gratings in the
+manual on page 29. Other gratings, while sold as gratings for the
+device, can't be installed by the normal INSTALL command. I tried to
+implement a solution for these gratings, but which hasn't been tested
+yet. So, if you have such a grating and installing it doesn't work,
+please send me a bug report!
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.

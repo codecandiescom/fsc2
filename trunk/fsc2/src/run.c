@@ -1218,6 +1218,7 @@ static void child_sig_handler( int signo )
 #if ! defined( NDEBUG ) && defined( ADDR2LINE )
     if (    ! Crash.already_crashed
          && Crash.signo != SIGABRT
+         && Crash.signo != SIGTERM
          && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
     {
         Crash.already_crashed = SET;
@@ -1252,10 +1253,11 @@ static void child_sig_handler( int signo )
                 Crash.trace_length += size - 3;
             }
         }
+
+        death_mail( );
     }
 
     Crash.already_crashed = SET;
-    death_mail( );
 #endif
 
     Crash.already_crashed = SET;
