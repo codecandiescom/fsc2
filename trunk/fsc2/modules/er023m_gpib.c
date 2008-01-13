@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -37,7 +37,8 @@ static bool er023m_talk( const char * cmd,
  * Here everything is done to bring the device into a known, useful state
  *------------------------------------------------------------------------*/
 
-bool er023m_init( const char * name )
+bool
+er023m_init( const char * name )
 {
     /* Bring device in remote state */
 
@@ -187,7 +188,8 @@ bool er023m_init( const char * name )
  * (when setting the conversion time)
  *----------------------------------------------------------------*/
 
-unsigned int er023m_get_data( void )
+unsigned int
+er023m_get_data( void )
 {
     unsigned char buf[ 30 ];
     long len = 30;
@@ -226,7 +228,8 @@ unsigned int er023m_get_data( void )
  * and 1e+7) is returned.
  *----------------------------------------------------------------*/
 
-int er023m_get_rg( void )
+int
+er023m_get_rg( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -242,7 +245,8 @@ int er023m_get_rg( void )
  * Sets a receiver gain, allowed range of values is 0 - 57
  *---------------------------------------------------------*/
 
-void er023m_set_rg( int rg_index )
+void
+er023m_set_rg( int rg_index )
 {
     char buf[ 30 ];
 
@@ -260,7 +264,8 @@ void er023m_set_rg( int rg_index )
  * between 10 ms and 5.24288 s)
  *----------------------------------------------------------------*/
 
-int er023m_get_tc( void )
+int
+er023m_get_tc( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -278,7 +283,8 @@ int er023m_get_tc( void )
  * sense because the minimum conversion time is 3.2 ms)
  *---------------------------------------------------------*/
 
-void er023m_set_tc( int tc_index )
+void
+er023m_set_tc( int tc_index )
 {
     char buf[ 30 ];
 
@@ -295,7 +301,8 @@ void er023m_set_tc( int tc_index )
  * between 320 us and 3.19968 s)
  *------------------------------------------------------------------*/
 
-int er023m_get_ct( void )
+int
+er023m_get_ct( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -319,7 +326,8 @@ int er023m_get_ct( void )
  * manual tells nothing about how to do it...).
  *--------------------------------------------------------------*/
 
-void er023m_set_ct( int ct_mult )
+void
+er023m_set_ct( int ct_mult )
 {
     char buf[ 30 ];
 
@@ -345,7 +353,8 @@ void er023m_set_ct( int ct_mult )
  * a value between 0 and 359 will be returned.
  *------------------------------------------------*/
 
-int er023m_get_ph( void )
+int
+er023m_get_ph( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -361,7 +370,8 @@ int er023m_get_ph( void )
  * Sets the phase, allowed values are between 0 and 359
  *------------------------------------------------------*/
 
-void er023m_set_ph( int ph_index )
+void
+er023m_set_ph( int ph_index )
 {
     char buf[ 30 ];
 
@@ -378,7 +388,8 @@ void er023m_set_ph( int ph_index )
  * returned values are in the range between 0 and 80.
  *----------------------------------------------------------------*/
 
-int er023m_get_ma( void )
+int
+er023m_get_ma( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -394,7 +405,8 @@ int er023m_get_ma( void )
  * Sets the modulation attenuation, allowed values are between 0 and 80
  *----------------------------------------------------------------------*/
 
-void er023m_set_ma( int ma_index )
+void
+er023m_set_ma( int ma_index )
 {
     char buf[ 30 ];
 
@@ -413,7 +425,8 @@ void er023m_set_ma( int ma_index )
  * positive offset.
  *-----------------------------------------------------------------*/
 
-int er023m_get_of( void )
+int
+er023m_get_of( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -429,7 +442,8 @@ int er023m_get_of( void )
  * Sets the offset, allowed values are between 0 and 99
  *------------------------------------------------------*/
 
-void er023m_set_of( int of )
+void
+er023m_set_of( int of )
 {
     char buf[ 30 ];
 
@@ -447,7 +461,8 @@ void er023m_set_of( int of )
  * modulation frequencioes between 100 kHz and 1.5625 kHz)
  *----------------------------------------------------------------*/
 
-int er023m_get_mf( void )
+int
+er023m_get_mf( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -463,7 +478,8 @@ int er023m_get_mf( void )
  * Sets the modulation frequency, allowed values are between 0 and 6
  *-------------------------------------------------------------------*/
 
-void er023m_set_mf( int mf_index )
+void
+er023m_set_mf( int mf_index )
 {
     char buf[ 30 ];
 
@@ -479,7 +495,8 @@ void er023m_set_mf( int mf_index )
  * Returns the currently used harmonic, returns either 1 or 2
  *------------------------------------------------------------*/
 
-int er023m_get_ha( void )
+int
+er023m_get_ha( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -495,7 +512,8 @@ int er023m_get_ha( void )
  * Sets the harmonic, accepts either 1 or 2
  *------------------------------------------*/
 
-void er023m_set_ha( int ha )
+void
+er023m_set_ha( int ha )
 {
     char buf[ 30 ];
 
@@ -511,7 +529,8 @@ void er023m_set_ha( int ha )
  * Returns the currently used resonator, returns either 1 or 2
  *-------------------------------------------------------------*/
 
-int er023m_get_re( void )
+int
+er023m_get_re( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -527,7 +546,8 @@ int er023m_get_re( void )
  * Sets the resonator, accepts either 1 or 2
  *-------------------------------------------*/
 
-void er023m_set_re( int re )
+void
+er023m_set_re( int re )
 {
     char buf[ 30 ];
 
@@ -539,14 +559,15 @@ void er023m_set_re( int re )
 }
 
 
-/*-----------------------------------------------------------*
+/*----------------------------------------------------------*
  * Returns the number of bytes to be expected when fetching
  * ADC data in single mode (SM) - again the manual is lying
- * by claiming that the maximum number is 3 while in reality
+ * claiming that the maximum number is 3, while in reality
  * it's 4 (actually, only 2 or 4 can happen).
- *-----------------------------------------------------------*/
+ *----------------------------------------------------------*/
 
-int er023m_nb( void )
+int
+er023m_nb( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -567,7 +588,8 @@ int er023m_nb( void )
  * Switches the service request option on (1) or off (0)
  *-------------------------------------------------------*/
 
-void er023m_srq( int on_off )
+void
+er023m_srq( int on_off )
 {
     char buf[ 30 ] = "SR*\r";
 
@@ -583,7 +605,8 @@ void er023m_srq( int on_off )
  * Reads the status byte from the device
  *---------------------------------------*/
 
-unsigned char er023m_st( void )
+unsigned char
+er023m_st( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -603,7 +626,8 @@ unsigned char er023m_st( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool er023m_command( const char * cmd )
+bool
+er023m_command( const char * cmd )
 {
     if ( gpib_write( er023m.device, cmd, strlen( cmd ) ) == FAILURE )
         er023m_failure( );
@@ -614,9 +638,10 @@ bool er023m_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool er023m_talk( const char * cmd,
-                         char *       reply,
-                         long *       length )
+static bool
+er023m_talk( const char * cmd,
+             char *       reply,
+             long *       length )
 {
     if (    gpib_write( er023m.device, cmd, strlen( cmd ) ) == FAILURE
          || gpib_read( er023m.device, reply, length ) == FAILURE )
@@ -629,7 +654,8 @@ static bool er023m_talk( const char * cmd,
  * Called whenever there are communication problems with the device
  *------------------------------------------------------------------*/
 
-void er023m_failure( void )
+void
+er023m_failure( void )
 {
     if ( ! dont_print_on_error )
         print( FATAL, "Can't access the signal channel.\n" );

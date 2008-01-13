@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,8 +28,9 @@
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-void tegam2714a_p_check_levels( double high,
-                                double low )
+void
+tegam2714a_p_check_levels( double high,
+                           double low )
 {
     double ampl;
     double offset;
@@ -91,7 +92,8 @@ void tegam2714a_p_check_levels( double high,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *tegam2714a_p_ptime( double p_time )
+const char *
+tegam2714a_p_ptime( double p_time )
 {
     static char buffer[ 3 ][ 128 ];
     static size_t i = 2;
@@ -114,7 +116,8 @@ const char *tegam2714a_p_ptime( double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *tegam2714a_p_pticks( Ticks ticks )
+const char *
+tegam2714a_p_pticks( Ticks ticks )
 {
     return tegam2714a_p_ptime( tegam2714a_p_ticks2double( ticks ) );
 }
@@ -125,7 +128,8 @@ const char *tegam2714a_p_pticks( Ticks ticks )
  * i.e. an integer multiple of the time base
  *-----------------------------------------------------------------*/
 
-Ticks tegam2714a_p_double2ticks( double p_time )
+Ticks
+tegam2714a_p_double2ticks( double p_time )
 {
     double ticks;
 
@@ -164,7 +168,8 @@ Ticks tegam2714a_p_double2ticks( double p_time )
  * Does the exact opposite of the previous function...
  *-----------------------------------------------------*/
 
-double tegam2714a_p_ticks2double( Ticks ticks )
+double
+tegam2714a_p_ticks2double( Ticks ticks )
 {
     fsc2_assert( tegam2714a_p.is_timebase );
     return tegam2714a_p.timebase * ticks;
@@ -175,7 +180,8 @@ double tegam2714a_p_ticks2double( Ticks ticks )
  * Calculates the number of digits in a long int 
  *-----------------------------------------------*/
 
-int tegam2714a_p_num_len( long num )
+int
+tegam2714a_p_num_len( long num )
 {
     int cnt;
 
@@ -190,7 +196,8 @@ int tegam2714a_p_num_len( long num )
  * Returns the structure for pulse numbered pnum
  *-----------------------------------------------*/
 
-Pulse_T *tegam2714a_p_get_pulse( long pnum )
+Pulse_T *
+tegam2714a_p_get_pulse( long pnum )
 {
     Pulse_T *cp = tegam2714a_p.pulses;
 
@@ -225,8 +232,9 @@ Pulse_T *tegam2714a_p_get_pulse( long pnum )
  * second pulse starts earlier.
  *--------------------------------------------------------------------*/
 
-int tegam2714a_p_start_compare( const void * A,
-                                const void * B )
+int
+tegam2714a_p_start_compare( const void * A,
+                            const void * B )
 {
     Pulse_T *a = *( Pulse_T ** ) A,
             *b = *( Pulse_T ** ) B;
@@ -249,10 +257,11 @@ int tegam2714a_p_start_compare( const void * A,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void tegam2714a_p_set( char * arena,
-                       Ticks  start,
-                       Ticks  len,
-                       Ticks  offset )
+void
+tegam2714a_p_set( char * arena,
+                  Ticks  start,
+                  Ticks  len,
+                  Ticks  offset )
 {
     fsc2_assert( start + len + offset <= tegam2714a_p.max_seq_len );
 
@@ -263,10 +272,11 @@ void tegam2714a_p_set( char * arena,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-int tegam2714a_p_diff( char *  old_p,
-                       char *  new_p,
-                       Ticks * start,
-                       Ticks * length )
+int
+tegam2714a_p_diff( char *  old_p,
+                   char *  new_p,
+                   Ticks * start,
+                   Ticks * length )
 {
     static Ticks where = 0;
     int ret;
@@ -331,7 +341,8 @@ int tegam2714a_p_diff( char *  old_p,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void tegam2714a_p_dump_pulses( void )
+void
+tegam2714a_p_dump_pulses( void )
 {
     char *name;
     char *m;
@@ -410,7 +421,8 @@ void tegam2714a_p_dump_pulses( void )
  * settings of the pulses as determined during the test run
  *------------------------------------------------------------*/
 
-void tegam2714a_p_show_pulses( void )
+void
+tegam2714a_p_show_pulses( void )
 {
     int pd[ 2 ];
     pid_t pid;
@@ -471,7 +483,8 @@ void tegam2714a_p_show_pulses( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void tegam2714a_p_write_pulses( FILE * fp )
+void
+tegam2714a_p_write_pulses( FILE * fp )
 {
     Function_T *f = &tegam2714a_p.function;
     int k;

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -30,7 +30,8 @@
  * i.e. an integer multiple of the time base
  *-----------------------------------------------------------------*/
 
-Ticks rs690_double2ticks( double p_time )
+Ticks
+rs690_double2ticks( double p_time )
 {
     double ticks;
 
@@ -68,7 +69,8 @@ Ticks rs690_double2ticks( double p_time )
  * Does the exact opposite of the previous function...
  *-----------------------------------------------------*/
 
-double rs690_ticks2double( Ticks ticks )
+double
+rs690_ticks2double( Ticks ticks )
 {
     if ( ! rs690.is_timebase )
     {
@@ -85,7 +87,8 @@ double rs690_ticks2double( Ticks ticks )
  * Returns the structure for pulse numbered pnum
  *-----------------------------------------------*/
 
-Pulse_T *rs690_get_pulse( long pnum )
+Pulse_T *
+rs690_get_pulse( long pnum )
 {
     Pulse_T *cp = rs690.pulses;
 
@@ -116,7 +119,8 @@ Pulse_T *rs690_get_pulse( long pnum )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *rs690_ptime( double p_time )
+const char *
+rs690_ptime( double p_time )
 {
     static char buffer[ 3 ][ 128 ];
     static size_t i = 2;
@@ -139,7 +143,8 @@ const char *rs690_ptime( double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *rs690_pticks( Ticks ticks )
+const char *
+rs690_pticks( Ticks ticks )
 {
     return rs690_ptime( rs690_ticks2double( ticks ) );
 }
@@ -152,8 +157,9 @@ const char *rs690_pticks( Ticks ticks )
  * second pulse starts earlier.
  *-------------------------------------------------------------------*/
 
-int rs690_pulse_compare( const void * A,
-                         const void * B )
+int
+rs690_pulse_compare( const void * A,
+                     const void * B )
 {
     Pulse_Params_T *a = ( Pulse_Params_T * ) A,
                    *b = ( Pulse_Params_T * ) B;
@@ -165,7 +171,8 @@ int rs690_pulse_compare( const void * A,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void rs690_show_pulses( void )
+void
+rs690_show_pulses( void )
 {
     int pd[ 2 ];
     pid_t pid;
@@ -226,7 +233,8 @@ void rs690_show_pulses( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void rs690_dump_pulses( void )
+void
+rs690_dump_pulses( void )
 {
     char *name;
     char *m;
@@ -303,7 +311,8 @@ void rs690_dump_pulses( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void rs690_dump_channels( FILE * fp )
+void
+rs690_dump_channels( FILE * fp )
 {
     Function_T *f;
     Channel_T *ch;
@@ -372,7 +381,8 @@ void rs690_dump_channels( FILE * fp )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void rs690_duty_check( void )
+void
+rs690_duty_check( void )
 {
     Function_T *f;
     int i;
@@ -399,7 +409,8 @@ void rs690_duty_check( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Ticks rs690_calc_max_length( Function_T * f )
+Ticks
+rs690_calc_max_length( Function_T * f )
 {
     int i, j;
     Channel_T *ch;
@@ -424,7 +435,8 @@ Ticks rs690_calc_max_length( Function_T * f )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-char *rs690_num_2_channel( int num )
+char *
+rs690_num_2_channel( int num )
 {
     static char name[ 4 ];
 
@@ -439,7 +451,8 @@ char *rs690_num_2_channel( int num )
  * because some other pulsers also have it.
  *-----------------------------------------------*/
 
-bool rs690_set_max_seq_len( double seq_len  UNUSED_ARG )
+bool
+rs690_set_max_seq_len( double seq_len  UNUSED_ARG )
 {
     print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
     return OK;
@@ -449,7 +462,8 @@ bool rs690_set_max_seq_len( double seq_len  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-long rs690_ch_to_num( long channel )
+long
+rs690_ch_to_num( long channel )
 {
     if ( channel < CHANNEL_A0
          || ( channel > CHANNEL_D15 && NUM_HSM_CARDS == 1 )

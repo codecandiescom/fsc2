@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -46,7 +46,8 @@ static struct ER023M er023m_store;
  * Init hook function for the module.
  *------------------------------------*/
 
-int er023m_init_hook( void )
+int
+er023m_init_hook( void )
 {
     int i;
     double fac;
@@ -115,7 +116,8 @@ int er023m_init_hook( void )
  * Start of test run hook function for the module
  *------------------------------------------------*/
 
-int er023m_test_hook( void )
+int
+er023m_test_hook( void )
 {
     er023m_store = er023m;
     return 1;
@@ -126,7 +128,8 @@ int er023m_test_hook( void )
  * Start of experiment hook function for the module
  *--------------------------------------------------*/
 
-int er023m_exp_hook( void )
+int
+er023m_exp_hook( void )
 {
     /* Store the current state and initialize the lock-in */
 
@@ -147,7 +150,8 @@ int er023m_exp_hook( void )
  * End of experiment hook function for the module
  *------------------------------------------------*/
 
-int er023m_end_of_exp_hook( void )
+int
+er023m_end_of_exp_hook( void )
 {
     /* Switch lock-in back to local mode */
 
@@ -164,7 +168,8 @@ int er023m_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *lockin_name( Var_T * v  UNUSED_ARG )
+Var_T *
+lockin_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -174,7 +179,8 @@ Var_T *lockin_name( Var_T * v  UNUSED_ARG )
  * Function returns a lock-in data value
  *---------------------------------------*/
 
-Var_T *lockin_get_data( Var_T * v )
+Var_T *
+lockin_get_data( Var_T * v )
 {
     double val;
 
@@ -202,7 +208,8 @@ Var_T *lockin_get_data( Var_T * v )
  * a power of 10).
  *-----------------------------------------------------------------------*/
 
-Var_T *lockin_sensitivity( Var_T * v )
+Var_T *
+lockin_sensitivity( Var_T * v )
 {
     double rg;
     int rg_index = UNDEF_RG_INDEX;
@@ -286,7 +293,8 @@ Var_T *lockin_sensitivity( Var_T * v )
  * usuable time constant is 2.56 ms.
  *------------------------------------------------------------------------*/
 
-Var_T *lockin_time_constant( Var_T * v )
+Var_T *
+lockin_time_constant( Var_T * v )
 {
     double tc;
     int tc_index = UNDEF_TC_INDEX;
@@ -388,7 +396,8 @@ Var_T *lockin_time_constant( Var_T * v )
  * 0-359 range).
  *-----------------------------------------------------------------------*/
 
-Var_T *lockin_phase( Var_T * v )
+Var_T *
+lockin_phase( Var_T * v )
 {
     int phase;
 
@@ -440,7 +449,8 @@ Var_T *lockin_phase( Var_T * v )
  * argument the offset is set to this value.
  *------------------------------------------------------------------------*/
 
-Var_T *lockin_offset( Var_T * v )
+Var_T *
+lockin_offset( Var_T * v )
 {
     int of;
 
@@ -486,7 +496,8 @@ Var_T *lockin_offset( Var_T * v )
  * time constant is 3.2 ms.
  *------------------------------------------------------------------------*/
 
-Var_T *lockin_conversion_time( Var_T * v )
+Var_T *
+lockin_conversion_time( Var_T * v )
 {
     double ct;
     int ct_mult;
@@ -569,7 +580,8 @@ Var_T *lockin_conversion_time( Var_T * v )
  * the modulation frequency is set to this value.
  *--------------------------------------------------------------------------*/
 
-Var_T *lockin_ref_freq( Var_T * v )
+Var_T *
+lockin_ref_freq( Var_T * v )
 {
     double mf;
     int mf_index = UNDEF_MF_INDEX;
@@ -662,7 +674,8 @@ Var_T *lockin_ref_freq( Var_T * v )
  * the modulation amplitude is set to this value.
  *--------------------------------------------------------------------------*/
 
-Var_T *lockin_ref_level( Var_T * v )
+Var_T *
+lockin_ref_level( Var_T * v )
 {
     double ma;
     int ma_index = UNDEF_MA_INDEX;
@@ -736,7 +749,8 @@ Var_T *lockin_ref_level( Var_T * v )
  * called with an argument the harmonic is set to this value.
  *----------------------------------------------------------------------*/
 
-Var_T *lockin_harmonic( Var_T * v )
+Var_T *
+lockin_harmonic( Var_T * v )
 {
     int ha;
 
@@ -781,7 +795,8 @@ Var_T *lockin_harmonic( Var_T * v )
  * called with an argument the resonator is set to this value.
  *-----------------------------------------------------------------------*/
 
-Var_T *lockin_resonator( Var_T * v )
+Var_T *
+lockin_resonator( Var_T * v )
 {
     int re;
 
@@ -826,7 +841,8 @@ Var_T *lockin_resonator( Var_T * v )
  * last data fetched from the device an overload occurred, otherwise 0.
  *-----------------------------------------------------------------------*/
 
-Var_T *lockin_is_overload( Var_T * v  UNUSED_ARG )
+Var_T *
+lockin_is_overload( Var_T * v  UNUSED_ARG )
 {
     long res;
 
@@ -847,7 +863,8 @@ Var_T *lockin_is_overload( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *lockin_command( Var_T * v )
+Var_T *
+lockin_command( Var_T * v )
 {
     char *cmd = NULL;
 

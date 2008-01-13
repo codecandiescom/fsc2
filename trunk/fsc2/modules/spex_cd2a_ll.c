@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -47,7 +47,7 @@ static size_t spex_cd2a_write( int          type,
 
 static void spex_cd2a_read_ack( void );
 
-static char *spex_cd2a_read_mess( ssize_t to_be_read );
+static char * spex_cd2a_read_mess( ssize_t to_be_read );
 
 static void spex_cd2a_read_cmd_ack( const char * cmd );
 
@@ -75,7 +75,8 @@ static bool spex_cd2a_do_print_message = UNSET;
  * a well-defined state.
  *--------------------------------------------------------------*/
 
-void spex_cd2a_init( void )
+void
+spex_cd2a_init( void )
 {
     /* First calculate the length of position messages, so we don't have to
        recalculate it all of the time. */
@@ -156,7 +157,8 @@ void spex_cd2a_init( void )
  * Function for setting a new wavelength or -number
  *--------------------------------------------------*/
 
-void spex_cd2a_set_wavelength( void )
+void
+spex_cd2a_set_wavelength( void )
 {
     char mess[ 11 ] = "SE";
 
@@ -186,7 +188,8 @@ void spex_cd2a_set_wavelength( void )
  * Function for stopping a scan
  *------------------------------*/
 
-void spex_cd2a_halt( void )
+void
+spex_cd2a_halt( void )
 {
     if ( FSC2_MODE == EXPERIMENT )
         spex_cd2a_write( COMMAND, "H" );
@@ -198,7 +201,8 @@ void spex_cd2a_halt( void )
  * Function for starting a (triggered burst) scan
  *------------------------------------------------*/
 
-void spex_cd2a_start_scan( void )
+void
+spex_cd2a_start_scan( void )
 {
     fsc2_assert( spex_cd2a.scan_is_init );
 
@@ -219,7 +223,8 @@ void spex_cd2a_start_scan( void )
  * Function sends a trigger (only possible during a scan)
  *--------------------------------------------------------*/
 
-void spex_cd2a_trigger( void )
+void
+spex_cd2a_trigger( void )
 {
     fsc2_assert( spex_cd2a.in_scan );
 
@@ -249,7 +254,8 @@ void spex_cd2a_trigger( void )
  * to absolute positions) by setting the laser line position to 0.
  *-------------------------------------------------------------------*/
 
-void spex_cd2a_set_laser_line( void )
+void
+spex_cd2a_set_laser_line( void )
 {
     char mess[ 11 ] = "LL";
 
@@ -275,7 +281,8 @@ void spex_cd2a_set_laser_line( void )
  * Function for setting the shutter limits of the device
  *-------------------------------------------------------*/
 
-void spex_cd2a_set_shutter_limits( void )
+void
+spex_cd2a_set_shutter_limits( void )
 {
     char mess[ 11 ] = "SL";
 
@@ -307,7 +314,8 @@ void spex_cd2a_set_shutter_limits( void )
  * Function for setting the start position of scans
  *--------------------------------------------------*/
 
-void spex_cd2a_scan_start( void )
+void
+spex_cd2a_scan_start( void )
 {
     char mess[ 11 ] = "ST";
 
@@ -334,7 +342,8 @@ void spex_cd2a_scan_start( void )
  * minimum wavenumber).
  *---------------------------------------------------------------------*/
 
-static void spex_cd2a_scan_end( void )
+static void
+spex_cd2a_scan_end( void )
 {
     char mess[ 11 ] = "EN";
 
@@ -347,7 +356,8 @@ static void spex_cd2a_scan_end( void )
  * Function for setting the step size of scans
  *---------------------------------------------*/
 
-void spex_cd2a_scan_step( void )
+void
+spex_cd2a_scan_step( void )
 {
     char mess[ 9 ] = "BI";
 
@@ -370,9 +380,10 @@ void spex_cd2a_scan_step( void )
  * The string is never going to be longer than 'digits'.
  *-----------------------------------------------------------------------*/
 
-static void spex_cd2a_print( char * mess,
-                             int    digits,
-                             double val )
+static void
+spex_cd2a_print( char * mess,
+                 int    digits,
+                 double val )
 {
     int pre_digits, after_digits;
     char *buf;
@@ -413,7 +424,8 @@ static void spex_cd2a_print( char * mess,
  * and setting up the communication parameters.
  *-----------------------------------------------------*/
 
-void spex_cd2a_open( void )
+void
+spex_cd2a_open( void )
 {
 #ifndef SPEX_CD2A_TEST
 
@@ -520,8 +532,9 @@ void spex_cd2a_open( void )
  * checksum and <CR>).
  *-----------------------------------------------------------------------*/
 
-static size_t spex_cd2a_write( int          type,
-                               const char * mess )
+static size_t
+spex_cd2a_write( int          type,
+                 const char * mess )
 {
     unsigned char *tmx;
     unsigned long cs = 0;
@@ -585,7 +598,8 @@ static size_t spex_cd2a_write( int          type,
  * of communication problems.
  *-------------------------------------------------------------*/
 
-static void spex_cd2a_read_ack( void )
+static void
+spex_cd2a_read_ack( void )
 {
     char buf[ 8 ];
     ssize_t received, len, count;
@@ -664,7 +678,8 @@ static void spex_cd2a_read_ack( void )
  * Function for reading in a message sent by the CD2A
  *----------------------------------------------------*/
 
-static char *spex_cd2a_read_mess( ssize_t to_be_read )
+static char *
+spex_cd2a_read_mess( ssize_t to_be_read )
 {
     static char buf[ 20 ];
     ssize_t already_read = 0;
@@ -743,7 +758,8 @@ static char *spex_cd2a_read_mess( ssize_t to_be_read )
  * throwing an exception if it isn't coming from the device.
  *-------------------------------------------------------------*/
 
-static void spex_cd2a_read_cmd_ack( const char * cmd )
+static void
+spex_cd2a_read_cmd_ack( const char * cmd )
 {
     switch ( *cmd )
     {
@@ -773,7 +789,8 @@ static void spex_cd2a_read_cmd_ack( const char * cmd )
  * ("P") has been send to the device.
  *---------------------------------------------------------------------*/
 
-static void spex_cd2a_read_set_pos_ack( void )
+static void
+spex_cd2a_read_set_pos_ack( void )
 {
     char *bp; 
 
@@ -807,7 +824,8 @@ static void spex_cd2a_read_set_pos_ack( void )
  * command ("T") has been send to the device.
  *-----------------------------------------------------------------------*/
 
-static void spex_cd2a_read_start_scan_ack( void )
+static void
+spex_cd2a_read_start_scan_ack( void )
 {
     char *bp;
 
@@ -841,7 +859,8 @@ static void spex_cd2a_read_start_scan_ack( void )
  * ("E") during a burst scan has been send to the device.
  *--------------------------------------------------------------------*/
 
-static void spex_cd2a_read_scan_ack( void )
+static void
+spex_cd2a_read_scan_ack( void )
 {
     char *bp;
 
@@ -873,7 +892,8 @@ static void spex_cd2a_read_scan_ack( void )
  * Function that gets called to close the device file for the device
  *-------------------------------------------------------------------*/
 
-void spex_cd2a_close( void )
+void
+spex_cd2a_close( void )
 {
     if ( spex_cd2a.is_open )
         fsc2_serial_close( SERIAL_PORT );
@@ -886,7 +906,8 @@ void spex_cd2a_close( void )
  * with the device failed completely.
  *-------------------------------------------------------*/
 
-static void spex_cd2a_comm_fail( void )
+static void
+spex_cd2a_comm_fail( void )
 {
     if ( spex_cd2a_do_print_message )
         print( FATAL, "Can't access the monochromator.\n" );
@@ -899,7 +920,8 @@ static void spex_cd2a_comm_fail( void )
  * but send a message it wasn't supposed to send.
  *--------------------------------------------------*/
 
-static void spex_cd2a_wrong_data( void )
+static void
+spex_cd2a_wrong_data( void )
 {
     print( FATAL, "Device send unexpected data.\n" );
     SPEX_CD2A_THROW( EXCEPTION );
@@ -917,7 +939,8 @@ static void spex_cd2a_wrong_data( void )
  * send at the end of the string.
  *-------------------------------------------------------------------------*/
 
-static ssize_t spex_cd2a_calc_pos_mess_len( void )
+static ssize_t
+spex_cd2a_calc_pos_mess_len( void )
 {
     ssize_t len = 11;
 
@@ -937,7 +960,8 @@ static ssize_t spex_cd2a_calc_pos_mess_len( void )
  * Reads in data send from the device with information about its position
  *------------------------------------------------------------------------*/
 
-static void spex_cd2a_pos_mess_check( const char * bp )
+static void
+spex_cd2a_pos_mess_check( const char * bp )
 {
     char *ep;
     const char *eu = bp;

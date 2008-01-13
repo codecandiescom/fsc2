@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -37,7 +37,8 @@ static void lecroy9400_window_check_3( void );
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int lecroy9400_get_tb_index( double timebase )
+int
+lecroy9400_get_tb_index( double timebase )
 {
     size_t i;
 
@@ -55,7 +56,8 @@ int lecroy9400_get_tb_index( double timebase )
  * Returns a string with a time value with a resonable unit.
  *-----------------------------------------------------------*/
 
-const char *lecroy9400_ptime( double p_time )
+const char *
+lecroy9400_ptime( double p_time )
 {
     static char buffer[ 2 ][ 128 ];
     static size_t i = 1;
@@ -80,7 +82,8 @@ const char *lecroy9400_ptime( double p_time )
  * gets changed
  *-----------------------------------------------------------*/
 
-double lecroy9400_trigger_delay_check( void )
+double
+lecroy9400_trigger_delay_check( void )
 {
     double delay = lecroy9400.trigger_delay;
     double real_delay;
@@ -134,7 +137,8 @@ double lecroy9400_trigger_delay_check( void )
  * Deletes a window by removing it from the linked list of windows
  *-----------------------------------------------------------------*/
 
-void lecroy9400_delete_windows( LECROY9400_T * s )
+void
+lecroy9400_delete_windows( LECROY9400_T * s )
 {
     Window_T *w;
 
@@ -151,7 +155,8 @@ void lecroy9400_delete_windows( LECROY9400_T * s )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_do_pre_exp_checks( void )
+void
+lecroy9400_do_pre_exp_checks( void )
 {
 #if 0
     Window_T *w;
@@ -236,8 +241,9 @@ void lecroy9400_do_pre_exp_checks( void )
  * a width is set - this is returned to the calling function
  *---------------------------------------------------------------*/
 
-static void lecroy9400_window_check_1( bool * is_start,
-                                       bool * is_width )
+static void
+lecroy9400_window_check_1( bool * is_start,
+                           bool * is_width )
 {
     Window_T *w;
 
@@ -268,7 +274,8 @@ static void lecroy9400_window_check_1( bool * is_start,
  * equal - than we can use tracking cursors.
  *---------------------------------------------------------------------*/
 
-static void lecroy9400_window_check_2( void )
+static void
+lecroy9400_window_check_2( void )
 {
     Window_T *w;
     double dcs, dcd, dtb, fac;
@@ -341,7 +348,8 @@ static void lecroy9400_window_check_2( void )
  * and the end of the windows in units of points.
  *-------------------------------------------------------------*/
 
-static void lecroy9400_window_check_3( void )
+static void
+lecroy9400_window_check_3( void )
 {
     Window_T *w;
     double window;
@@ -392,9 +400,10 @@ static void lecroy9400_window_check_3( void )
  * indicate the error.
  *--------------------------------------------------------------*/
 
-long lecroy9400_translate_channel( int  dir,
-                                   long channel,
-                                   bool flag )
+long
+lecroy9400_translate_channel( int  dir,
+                              long channel,
+                              bool flag )
 {
     if ( dir == GENERAL_TO_LECROY9400 )
     {
@@ -487,8 +496,9 @@ long lecroy9400_translate_channel( int  dir,
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void lecroy9400_store_state( LECROY9400_T * dest,
-                             LECROY9400_T * src )
+void
+lecroy9400_store_state( LECROY9400_T * dest,
+                        LECROY9400_T * src )
 {
     Window_T *w;
     int i;

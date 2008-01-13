@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -230,7 +230,8 @@ static int func_cmp2( const void * a,
  * a complete list of all built-in and user-supplied functions.
  *--------------------------------------------------------------------*/
 
-bool functions_init( void )
+bool
+functions_init( void )
 {
     No_File_Numbers = UNSET;
     Dont_Save = UNSET;
@@ -267,8 +268,9 @@ bool functions_init( void )
  * Function for qsort()ing functions according to their names
  *------------------------------------------------------------*/
 
-static int func_cmp1( const void * a,
-                      const void * b )
+static
+int func_cmp1( const void * a,
+               const void * b )
 {
     return strcmp( ( ( const Func_T * ) a )->name,
                    ( ( const Func_T * ) b )->name );
@@ -280,7 +282,8 @@ static int func_cmp1( const void * a,
  * modules). It also closes all files opened due to user requests.
  *-----------------------------------------------------------------*/
 
-void functions_exit( void )
+void
+functions_exit( void )
 {
     size_t i;
 
@@ -318,7 +321,8 @@ void functions_exit( void )
  * function exists.
  *-------------------------------------------------------------------*/
 
-int func_exists( const char * name )
+int
+func_exists( const char * name )
 {
     char *fn;
     char *hp;
@@ -355,8 +359,9 @@ int func_exists( const char * name )
  *    exists but has not been loaded an exception is thrown.
  *----------------------------------------------------------------------*/
 
-Var_T *func_get( const char * name,
-                 int *        acc )
+Var_T *
+func_get( const char * name,
+          int *        acc )
 {
     char *sec_name;
     Var_T *func_ptr;
@@ -424,9 +429,10 @@ Var_T *func_get( const char * name,
  * printed and an exception is thrown or simply NULL is returned.
  *----------------------------------------------------------------*/
 
-Var_T *func_get_long( const char * name,
-                      int *        acc,
-                      bool         flag )
+Var_T *
+func_get_long( const char * name,
+               int *        acc,
+               bool         flag )
 {
     Func_T *f;
     Var_T *ret;
@@ -479,8 +485,9 @@ Var_T *func_get_long( const char * name,
  * Function for bsearch to search for a function by its name.
  *------------------------------------------------------------*/
 
-static int func_cmp2( const void * a,
-                      const void * b )
+static int
+func_cmp2( const void * a,
+           const void * b )
 {
     return strcmp( ( const char * ) a, ( ( const Func_T * ) b )->name );
 }
@@ -493,7 +500,8 @@ static int func_cmp2( const void * a,
  * that then is caught by the first function etc.
  *----------------------------------------------------------------*/
 
-Var_T *func_call( Var_T * f )
+Var_T *
+func_call( Var_T * f )
 {
     Var_T *ap;
     Var_T *ret = NULL;
@@ -684,10 +692,11 @@ Var_T *func_call( Var_T * f )
  * call came from.
  *-----------------------------------------------------------------------*/
 
-Call_Stack_T *call_push( Func_T *     f,
-                         Device_T *   device,
-                         const char * device_name,
-                         int          dev_count )
+Call_Stack_T *
+call_push( Func_T *     f,
+           Device_T *   device,
+           const char * device_name,
+           int          dev_count )
 {
     const char *t;
     Call_Stack_T *cs;
@@ -735,7 +744,8 @@ Call_Stack_T *call_push( Func_T *     f,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Call_Stack_T *call_pop( void )
+Call_Stack_T *
+call_pop( void )
 {
     Call_Stack_T *cs;
 

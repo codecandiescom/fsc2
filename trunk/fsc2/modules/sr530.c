@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -57,16 +57,16 @@ int sr530_test_hook(       void );
 int sr530_exp_hook(        void );
 int sr530_end_of_exp_hook( void );
 
-Var_T *lockin_name(          Var_T * v );
-Var_T *lockin_get_data(      Var_T * v );
-Var_T *lockin_get_adc_data(  Var_T * v );
-Var_T *lockin_sensitivity(   Var_T * v );
-Var_T *lockin_time_constant( Var_T * v );
-Var_T *lockin_phase(         Var_T * v );
-Var_T *lockin_ref_freq(      Var_T * v );
-Var_T *lockin_dac_voltage(   Var_T * v );
-Var_T *lockin_lock_keyboard( Var_T * v );
-Var_T *lockin_command(       Var_T * v );
+Var_T * lockin_name(          Var_T * v );
+Var_T * lockin_get_data(      Var_T * v );
+Var_T * lockin_get_adc_data(  Var_T * v );
+Var_T * lockin_sensitivity(   Var_T * v );
+Var_T * lockin_time_constant( Var_T * v );
+Var_T * lockin_phase(         Var_T * v );
+Var_T * lockin_ref_freq(      Var_T * v );
+Var_T * lockin_dac_voltage(   Var_T * v );
+Var_T * lockin_lock_keyboard( Var_T * v );
+Var_T * lockin_command(       Var_T * v );
 
 
 /* Exported symbols (used by W-band power supply driver) */
@@ -153,7 +153,8 @@ static void sr530_failure( void );
  * Init hook function for the module.
  *------------------------------------*/
 
-int sr530_init_hook( void )
+int
+sr530_init_hook( void )
 {
     int i;
 
@@ -182,7 +183,8 @@ int sr530_init_hook( void )
  * Test hook function for the module
  *-----------------------------------*/
 
-int sr530_test_hook( void )
+int
+sr530_test_hook( void )
 {
     sr530_stored = sr530;
     return 1;
@@ -193,7 +195,8 @@ int sr530_test_hook( void )
  * Start of experiment hook function for the module
  *--------------------------------------------------*/
 
-int sr530_exp_hook( void )
+int
+sr530_exp_hook( void )
 {
     /* Reset the device structure to the state it had before the test run */
 
@@ -216,7 +219,8 @@ int sr530_exp_hook( void )
  * End of experiment hook function for the module
  *------------------------------------------------*/
 
-int sr530_end_of_exp_hook( void )
+int
+sr530_end_of_exp_hook( void )
 {
     /* Switch lock-in back to local mode */
 
@@ -234,7 +238,8 @@ int sr530_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *lockin_name( Var_T * v  UNUSED_ARG )
+Var_T *
+lockin_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -249,7 +254,8 @@ Var_T *lockin_name( Var_T * v  UNUSED_ARG )
  * which will return an array of the voltages at both the channels.
  *-------------------------------------------------------------------------*/
 
-Var_T *lockin_get_data( Var_T * v )
+Var_T *
+lockin_get_data( Var_T * v )
 {
     double val[ 2 ];
 
@@ -272,7 +278,8 @@ Var_T *lockin_get_data( Var_T * v )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-static double get_single_channel_data( Var_T * v )
+static double
+get_single_channel_data( Var_T * v )
 {
     long channel;
 
@@ -304,7 +311,8 @@ static double get_single_channel_data( Var_T * v )
  * Returned values are in the interval [ -10.24V, +10.24V ].
  *-----------------------------------------------------------------*/
 
-Var_T *lockin_get_adc_data( Var_T * v )
+Var_T *
+lockin_get_adc_data( Var_T * v )
 {
     long port;
 
@@ -332,7 +340,8 @@ Var_T *lockin_get_adc_data( Var_T * v )
  * be increased by a factor of 10.
  *-------------------------------------------------------------------------*/
 
-Var_T *lockin_sensitivity( Var_T * v )
+Var_T *
+lockin_sensitivity( Var_T * v )
 {
     double sens;
     int sens_index = UNDEF_SENS_INDEX;
@@ -441,7 +450,8 @@ Var_T *lockin_sensitivity( Var_T * v )
  * with an argumet the time constant is set to this value.
  *------------------------------------------------------------------------*/
 
-Var_T *lockin_time_constant( Var_T * v )
+Var_T *
+lockin_time_constant( Var_T * v )
 {
     double tc;
     int tc_index = UNDEF_TC_INDEX;
@@ -537,7 +547,8 @@ Var_T *lockin_time_constant( Var_T * v )
  * and the value the phase is set to is returned.
  *-----------------------------------------------------------------*/
 
-Var_T *lockin_phase( Var_T * v )
+Var_T *
+lockin_phase( Var_T * v )
 {
     double phase;
 
@@ -590,7 +601,8 @@ Var_T *lockin_phase( Var_T * v )
  * for queries.
  *------------------------------------------------------------*/
 
-Var_T *lockin_ref_freq( Var_T * v )
+Var_T *
+lockin_ref_freq( Var_T * v )
 {
     if ( v != NULL )
     {
@@ -620,7 +632,8 @@ Var_T *lockin_ref_freq( Var_T * v )
  * voltage is returned (which is initially set to 0 V).
  *-----------------------------------------------------------*/
 
-Var_T *lockin_dac_voltage( Var_T * v )
+Var_T *
+lockin_dac_voltage( Var_T * v )
 {
     long channel;
     double voltage;
@@ -680,7 +693,8 @@ Var_T *lockin_dac_voltage( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *lockin_lock_keyboard( Var_T * v )
+Var_T *
+lockin_lock_keyboard( Var_T * v )
 {
     bool lock;
 
@@ -703,7 +717,8 @@ Var_T *lockin_lock_keyboard( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *lockin_command( Var_T * v )
+Var_T *
+lockin_command( Var_T * v )
 {
     char *cmd = NULL;
 
@@ -743,7 +758,8 @@ Var_T *lockin_command( Var_T * v )
  * it can be accessed by asking it to send its status byte.
  *------------------------------------------------------------------*/
 
-bool sr530_init( const char * name )
+static bool
+sr530_init( const char * name )
 {
     char buffer[ 20 ];
     long length = 20;
@@ -797,7 +813,8 @@ bool sr530_init( const char * name )
  * lockin_data() returns the measured voltage of the lock-in.
  *------------------------------------------------------------*/
 
-double sr530_get_data( int channel )
+static double
+sr530_get_data( int channel )
 {
     char cmd[ 5 ] = "Q*\n";
     char buffer[ 20 ];
@@ -819,7 +836,8 @@ double sr530_get_data( int channel )
  * -> Number of the ADC channel (1-4)
  *----------------------------------------------------------*/
 
-double sr530_get_adc_data( long channel )
+static double
+sr530_get_adc_data( long channel )
 {
     char buffer[ 16 ] = "X*\n";
     long length = 16;
@@ -836,7 +854,8 @@ double sr530_get_adc_data( long channel )
  * Function determines the sensitivity setting of the lock-in amplifier.
  *-----------------------------------------------------------------------*/
 
-double sr530_get_sens( void )
+static double
+sr530_get_sens( void )
 {
     char buffer[ 10 ];
     long length = 10;
@@ -868,7 +887,8 @@ double sr530_get_sens( void )
  * To achieve sensitivities below 100 nV EXPAND has to switched on.
  *----------------------------------------------------------------------*/
 
-void sr530_set_sens( int sens_index )
+static void
+sr530_set_sens( int sens_index )
 {
     char buffer[ 10 ];
 
@@ -907,7 +927,8 @@ void sr530_set_sens( int sens_index )
  * at the start of the file.
  *----------------------------------------------------------------------*/
 
-double sr530_get_tc( void )
+static double
+sr530_get_tc( void )
 {
     char buffer[10];
     long length = 10;
@@ -926,7 +947,8 @@ double sr530_get_tc( void )
  * are listed in the global array 'tc_list' (cf. start of file)
  *-------------------------------------------------------------------------*/
 
-void sr530_set_tc( int tc_index )
+static void
+sr530_set_tc( int tc_index )
 {
     char buffer[ 10 ];
 
@@ -951,7 +973,8 @@ void sr530_set_tc( int tc_index )
  * amplifier (in degree between 0 and 359).
  *-----------------------------------------------------------*/
 
-double sr530_get_phase( void )
+static double
+sr530_get_phase( void )
 {
     char buffer[ 20 ];
     long length = 20;
@@ -976,7 +999,8 @@ double sr530_get_phase( void )
  * Functions sets the phase to a value between 0 and 360 degree.
  *---------------------------------------------------------------*/
 
-double sr530_set_phase( double phase )
+static double
+sr530_set_phase( double phase )
 {
     char buffer[ 20 ];
 
@@ -991,7 +1015,8 @@ double sr530_set_phase( double phase )
  * Function returns the reference frequency
  *------------------------------------------*/
 
-static double sr530_get_ref_freq( void )
+static double
+sr530_get_ref_freq( void )
 {
     char buffer[ 50 ];
     long length = 50;
@@ -1007,8 +1032,9 @@ static double sr530_get_ref_freq( void )
  * Functions sets the DAC output voltage.
  *----------------------------------------*/
 
-static double sr530_set_dac_voltage( long   channel,
-                                     double voltage )
+static double
+sr530_set_dac_voltage( long   channel,
+                       double voltage )
 {
     char buffer[ 30 ];
 
@@ -1032,7 +1058,8 @@ static double sr530_set_dac_voltage( long   channel,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static void sr530_lock_state( bool lock )
+static void
+sr530_lock_state( bool lock )
 {
     char cmd[ 100 ];
 
@@ -1045,7 +1072,8 @@ static void sr530_lock_state( bool lock )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool sr530_command( const char * cmd )
+static bool
+sr530_command( const char * cmd )
 {
     if ( gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE )
         sr530_failure( );
@@ -1056,9 +1084,10 @@ static bool sr530_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool sr530_talk( const char * cmd,
-                        char *       reply,
-                        long *       length )
+static bool
+sr530_talk( const char * cmd,
+            char *       reply,
+            long *       length )
 {
     if (    gpib_write( sr530.device, cmd, strlen( cmd ) ) == FAILURE
          || gpib_read( sr530.device, reply, length ) == FAILURE )
@@ -1070,7 +1099,8 @@ static bool sr530_talk( const char * cmd,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static void sr530_failure( void )
+static void
+sr530_failure( void )
 {
     print( FATAL, "Can't access the lock-in amplifier.\n" );
     THROW( EXCEPTION );

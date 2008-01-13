@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -34,7 +34,8 @@ static void tegam2714a_p_commit( void );
  * test run.
  *-------------------------------------------------------------------------*/
 
-void tegam2714a_p_do_update( void )
+void
+tegam2714a_p_do_update( void )
 {
     bool restart = UNSET;
 
@@ -80,7 +81,8 @@ void tegam2714a_p_do_update( void )
  * and don't overlap.
  *-------------------------------------------------------------------------*/
 
-void tegam2714a_p_do_checks( bool in_setup )
+void
+tegam2714a_p_do_checks( bool in_setup )
 {
     Function_T *f = &tegam2714a_p.function;
     Pulse_T *p;
@@ -160,7 +162,8 @@ void tegam2714a_p_do_checks( bool in_setup )
  * values and setting the pulses.
  *-------------------------------------------------------------------*/
 
-void tegam2714a_p_pulse_setup( void )
+void
+tegam2714a_p_pulse_setup( void )
 {
     Pulse_T *p;
 
@@ -223,7 +226,8 @@ void tegam2714a_p_pulse_setup( void )
  * to minimize the number of commands and their length.
  *--------------------------------------------------------------------*/
 
-void tegam2714a_p_commit( void )
+void
+tegam2714a_p_commit( void )
 {
     Pulse_T *p;
     Ticks start, len;

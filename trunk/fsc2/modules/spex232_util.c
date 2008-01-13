@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -33,7 +33,8 @@
  * driven monochromators, the position of the laser line.
  *---------------------------------------------------------------------*/
 
-bool spex232_read_state( void )
+bool
+spex232_read_state( void )
 {
     char *fn;
     const char *dn;
@@ -150,7 +151,8 @@ bool spex232_read_state( void )
  * Function for writing the state of the monochromator to a file
  *---------------------------------------------------------------*/
 
-bool spex232_store_state( void )
+bool
+spex232_store_state( void )
 {
     char *fn;
     const char *dn;
@@ -213,7 +215,8 @@ bool spex232_store_state( void )
  * Converts a wavelength into an absolute wavenumber
  *---------------------------------------------------*/
 
-double spex232_wl2wn( double wl )
+double
+spex232_wl2wn( double wl )
 {
     if ( wl <= 0.0 )
         SPEX232_THROW( INVALID_INPUT_EXCEPTION );
@@ -225,7 +228,8 @@ double spex232_wl2wn( double wl )
  * Converts an absolute wavenumber into a wavelength
  *---------------------------------------------------*/
 
-double spex232_wn2wl( double wn )
+double
+spex232_wn2wl( double wn )
 {
     if ( wn <= 0.0 )
         SPEX232_THROW( INVALID_INPUT_EXCEPTION );
@@ -238,7 +242,8 @@ double spex232_wn2wl( double wn )
  * by the user (i.e. with correction included)
  *-----------------------------------------------------------*/
 
-double spex232_wl2Uwl( double wl )
+double
+spex232_wl2Uwl( double wl )
 {
     wl -= spex232.offset;
     if ( wl <= 0.0 )
@@ -252,7 +257,8 @@ double spex232_wl2Uwl( double wl )
  * correction included) to the internally used value.
  *------------------------------------------------------*/
 
-double spex232_Uwl2wl( double wl )
+double
+spex232_Uwl2wl( double wl )
 {
     wl += spex232.offset;
     if ( wl <= 0.0 )
@@ -267,7 +273,8 @@ double spex232_Uwl2wl( double wl )
  * it to relative units if a laser line is set).
  *-----------------------------------------------------------*/
 
-double spex232_wn2Uwn( double wn )
+double
+spex232_wn2Uwn( double wn )
 {
     wn = spex232_wl2wn( spex232_wl2Uwl( spex232_wn2wl( wn ) ) );
 
@@ -284,7 +291,8 @@ double spex232_wn2Uwn( double wn )
  * line is set) to the internally used value.
  *-----------------------------------------------------------*/
 
-double spex232_Uwn2wn( double wn )
+double
+spex232_Uwn2wn( double wn )
 {
     if ( spex232.mode == WN_REL )
         wn = spex232.laser_line - wn;
@@ -299,7 +307,8 @@ double spex232_Uwn2wn( double wn )
  * and relative to the laser line if one is set).
  *-----------------------------------------------------------*/
 
-double spex232_wl2Uwn( double wl )
+double
+spex232_wl2Uwn( double wl )
 {
     double wn = spex232_wl2wn( spex232_wl2Uwl( wl ) );
 
@@ -315,7 +324,8 @@ double spex232_wl2Uwn( double wl )
  * offset correction) to internally used wavenumber.
  *----------------------------------------------------------------*/
 
-double spex232_Uwl2wn( double wl )
+double
+spex232_Uwl2wn( double wl )
 {
     return spex232_wl2wn( spex232_Uwl2wl( wl ) );
 }
@@ -326,7 +336,8 @@ double spex232_Uwl2wn( double wl )
  * seen by the user (i.e. including offset correction).
  *--------------------------------------------------------*/
 
-double spex232_wn2Uwl( double wn )
+double
+spex232_wn2Uwl( double wn )
 {
     return spex232_wl2Uwl( spex232_wn2wl( wn ) );
 }
@@ -338,7 +349,8 @@ double spex232_wn2Uwl( double wn )
  * necessary) to internally used wavelength.
  *-----------------------------------------------------------*/
 
-double spex232_Uwn2wl( double wn )
+double
+spex232_Uwn2wl( double wn )
 {
     return spex232_wn2wl( spex232_Uwn2wn( wn ) );
 }

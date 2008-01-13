@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -34,8 +34,9 @@ static void start_help_browser( void );
  * documentation.
  *-------------------------------------------------------------*/
 
-void run_help( FL_OBJECT * a,
-               long        b  UNUSED_ARG )
+void
+run_help( FL_OBJECT * a,
+          long        b  UNUSED_ARG )
 {
     int res;
     int bn;
@@ -87,7 +88,8 @@ void run_help( FL_OBJECT * a,
  * BROWSER isn't set Netscape is used as the default.
  *--------------------------------------------------------------*/
 
-static void start_help_browser( void )
+static void
+start_help_browser( void )
 {
     char *browser;
     char *bn;

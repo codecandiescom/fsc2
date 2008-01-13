@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -36,7 +36,8 @@ static void tegam2714a_p_basic_check( void );
  * the start of a test run.
  *-------------------------------------------------------------*/
 
-void tegam2714a_p_init_setup( void )
+void
+tegam2714a_p_init_setup( void )
 {
     tegam2714a_p_basic_check( );
 
@@ -56,7 +57,8 @@ void tegam2714a_p_init_setup( void )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void tegam2714a_p_init_print( FILE * fp )
+static void
+tegam2714a_p_init_print( FILE * fp )
 {
     Function_T *f = &tegam2714a_p.function;
 
@@ -78,7 +80,8 @@ static void tegam2714a_p_init_print( FILE * fp )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void tegam2714a_p_basic_check( void )
+static void
+tegam2714a_p_basic_check( void )
 {
     Pulse_T *p;
     Function_T *f = &tegam2714a_p.function;

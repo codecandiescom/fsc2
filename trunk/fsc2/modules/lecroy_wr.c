@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -64,7 +64,8 @@ static LECROY_WR_T lecroy_wr_stored;
  * Init hook function for the module.
  *------------------------------------*/
 
-int lecroy_wr_init_hook( void )
+int
+lecroy_wr_init_hook( void )
 {
     size_t i;
 
@@ -147,7 +148,8 @@ int lecroy_wr_init_hook( void )
  * Test hook function for the module
  *-----------------------------------*/
 
-int lecroy_wr_test_hook( void )
+int
+lecroy_wr_test_hook( void )
 {
     lecroy_wr_store_state( &lecroy_wr_stored, &lecroy_wr );
     return 1;
@@ -158,7 +160,8 @@ int lecroy_wr_test_hook( void )
  * Start of experiment hook function for the module
  *--------------------------------------------------*/
 
-int lecroy_wr_exp_hook( void )
+int
+lecroy_wr_exp_hook( void )
 {
     /* Reset structure describing the state of the digitizer to what it
        was before the test run */
@@ -180,7 +183,8 @@ int lecroy_wr_exp_hook( void )
  * End of experiment hook function for the module
  *------------------------------------------------*/
 
-int lecroy_wr_end_of_exp_hook( void )
+int
+lecroy_wr_end_of_exp_hook( void )
 {
     lecroy_wr_finished( );
     return 1;
@@ -192,7 +196,8 @@ int lecroy_wr_end_of_exp_hook( void )
  *------------------------------------------*/
 
 
-void lecroy_wr_exit_hook( void )
+void
+lecroy_wr_exit_hook( void )
 {
     lecroy_wr_exit_cleanup( );
     lecroy_wr_delete_windows( &lecroy_wr );
@@ -205,7 +210,8 @@ void lecroy_wr_exit_hook( void )
  * Function returns a string with the name of the device
  *-------------------------------------------------------*/
 
-Var_T *digitizer_name( Var_T * v  UNUSED_ARG )
+Var_T *
+digitizer_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -215,7 +221,8 @@ Var_T *digitizer_name( Var_T * v  UNUSED_ARG )
  * Function for creating a new window
  *------------------------------------*/
 
-Var_T *digitizer_define_window( Var_T * v )
+Var_T *
+digitizer_define_window( Var_T * v )
 {
     double win_start = 0,
            win_width = 0;
@@ -279,7 +286,8 @@ Var_T *digitizer_define_window( Var_T * v )
  * Function for changing the properties of an already existing window
  *--------------------------------------------------------------------*/
 
-Var_T *digitizer_change_window( Var_T * v )
+Var_T *
+digitizer_change_window( Var_T * v )
 {
     Window_T *w;
 
@@ -336,7 +344,8 @@ Var_T *digitizer_change_window( Var_T * v )
  * Function queries or changes the position of an already existing window
  *------------------------------------------------------------------------*/
 
-Var_T *digitizer_window_position( Var_T * v )
+Var_T *
+digitizer_window_position( Var_T * v )
 {
     Window_T *w;
 
@@ -375,7 +384,8 @@ Var_T *digitizer_window_position( Var_T * v )
  * Function queries or changes he width of an already existing window
  *--------------------------------------------------------------------*/
 
-Var_T *digitizer_window_width( Var_T * v )
+Var_T *
+digitizer_window_width( Var_T * v )
 {
     Window_T *w;
 
@@ -414,7 +424,8 @@ Var_T *digitizer_window_width( Var_T * v )
  * Function for determining or setting the tim base (in s/div)
  *-------------------------------------------------------------*/
 
-Var_T *digitizer_timebase( Var_T * v )
+Var_T *
+digitizer_timebase( Var_T * v )
 {
     double timebase;
     int tb_index = -1;
@@ -514,7 +525,8 @@ Var_T *digitizer_timebase( Var_T * v )
  * Function to determine or set the measurement mode (i.e. RIS or SS)
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_interleave_mode( Var_T * v )
+Var_T *
+digitizer_interleave_mode( Var_T * v )
 {
     bool ilvd;
 
@@ -578,7 +590,8 @@ Var_T *digitizer_interleave_mode( Var_T * v )
  * Function for setting or quering the memory size
  *-------------------------------------------------*/
 
-Var_T *digitizer_memory_size( Var_T *v )
+Var_T *
+digitizer_memory_size( Var_T *v )
 {
     long mem_size;
     long i;
@@ -651,7 +664,8 @@ Var_T *digitizer_memory_size( Var_T *v )
  * on the other.
  *------------------------------------------------------------------*/
 
-Var_T *digitizer_record_length( Var_T *v UNUSED_ARG )
+Var_T *
+digitizer_record_length( Var_T *v UNUSED_ARG )
 {
     if ( v != NULL )
     {
@@ -671,7 +685,8 @@ Var_T *digitizer_record_length( Var_T *v UNUSED_ARG )
  * timebase and mode (i.e. RIS or SS)
  *----------------------------------------------------------------*/
 
-Var_T *digitizer_time_per_point( Var_T * v  UNUSED_ARG )
+Var_T *
+digitizer_time_per_point( Var_T * v  UNUSED_ARG )
 {
     if (    FSC2_MODE == PREPARATION
          && ( ! lecroy_wr.is_timebase || ! lecroy_wr.is_interleaved ) )
@@ -687,7 +702,8 @@ Var_T *digitizer_time_per_point( Var_T * v  UNUSED_ARG )
  * Function for setting or determining the sensitivity (in V/div)
  *----------------------------------------------------------------*/
 
-Var_T *digitizer_sensitivity( Var_T * v )
+Var_T *
+digitizer_sensitivity( Var_T * v )
 {
     long channel;
     double sens;
@@ -764,7 +780,8 @@ Var_T *digitizer_sensitivity( Var_T * v )
  * Function for setting or determining the vertical offset (in V)
  *----------------------------------------------------------------*/
 
-Var_T *digitizer_offset( Var_T * v )
+Var_T *
+digitizer_offset( Var_T * v )
 {
     long channel;
     double offset;
@@ -847,7 +864,8 @@ Var_T *digitizer_offset( Var_T * v )
  * Function sets or determines the bandwidth limiter
  *---------------------------------------------------*/
 
-Var_T *digitizer_bandwidth_limiter( Var_T * v )
+Var_T *
+digitizer_bandwidth_limiter( Var_T * v )
 {
     long channel;
     long bwl = LECROY_WR_BWL_OFF;
@@ -950,7 +968,8 @@ Var_T *digitizer_bandwidth_limiter( Var_T * v )
  * Function for setting the coupling of a (measurement) channel
  *--------------------------------------------------------------*/
 
-Var_T *digitizer_coupling( Var_T * v )
+Var_T *
+digitizer_coupling( Var_T * v )
 {
     long channel;
     long cpl = LECROY_WR_CPL_INVALID;
@@ -1032,7 +1051,8 @@ Var_T *digitizer_coupling( Var_T * v )
  * used for triggering.
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_trigger_channel( Var_T * v )
+Var_T *
+digitizer_trigger_channel( Var_T * v )
 {
     long channel;
 
@@ -1102,7 +1122,8 @@ Var_T *digitizer_trigger_channel( Var_T * v )
  * one of the possible trigger channels
  *--------------------------------------------------------------------*/
 
-Var_T *digitizer_trigger_level( Var_T * v )
+Var_T *
+digitizer_trigger_level( Var_T * v )
 {
     int channel;
     double level;
@@ -1216,7 +1237,8 @@ Var_T *digitizer_trigger_level( Var_T * v )
  * one of the trigger channels
  *---------------------------------------------------*/
 
-Var_T *digitizer_trigger_slope( Var_T * v )
+Var_T *
+digitizer_trigger_slope( Var_T * v )
 {
     int channel;
     int slope;
@@ -1295,7 +1317,8 @@ Var_T *digitizer_trigger_slope( Var_T * v )
  * of one of the trigger channels
  *--------------------------------------------------*/
 
-Var_T *digitizer_trigger_coupling( Var_T * v )
+Var_T *
+digitizer_trigger_coupling( Var_T * v )
 {
     long channel;
     long cpl = -1;
@@ -1386,7 +1409,8 @@ Var_T *digitizer_trigger_coupling( Var_T * v )
  * Function to set or determine the current trigger mode
  *-------------------------------------------------------*/
 
-Var_T *digitizer_trigger_mode( Var_T * v )
+Var_T *
+digitizer_trigger_mode( Var_T * v )
 {
     long mode = -1;
     const char *mode_str[ ] = { "AUTO", "NORMAL", "SINGLE", "STOP" };
@@ -1445,7 +1469,8 @@ Var_T *digitizer_trigger_mode( Var_T * v )
  * of the timebase.
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_trigger_delay( Var_T * v )
+Var_T *
+digitizer_trigger_delay( Var_T * v )
 {
     double delay;
 
@@ -1518,7 +1543,8 @@ Var_T *digitizer_trigger_delay( Var_T * v )
  *  3rd argument is the number of averages to be done
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_averaging( Var_T * v )
+Var_T *
+digitizer_averaging( Var_T * v )
 {
     long channel;
     long source_ch;
@@ -1613,7 +1639,8 @@ Var_T *digitizer_averaging( Var_T * v )
  * Function for quering the number of averages for one of the trace channels
  *---------------------------------------------------------------------------*/
 
-Var_T *digitizer_num_averages( Var_T * v )
+Var_T *
+digitizer_num_averages( Var_T * v )
 {
     long channel;
     long num_avg = 0;
@@ -1664,7 +1691,8 @@ Var_T *digitizer_num_averages( Var_T * v )
  * argument it returns with either 0 or 1, indicating false or true.
  *----------------------------------------------------------------------*/
 
-Var_T *digitizer_meas_channel_ok( Var_T * v )
+Var_T *
+digitizer_meas_channel_ok( Var_T * v )
 {
     long channel;
     bool flag;
@@ -1687,7 +1715,8 @@ Var_T *digitizer_meas_channel_ok( Var_T * v )
  * of the memory channels
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_copy_curve( Var_T * v )
+Var_T *
+digitizer_copy_curve( Var_T * v )
 {
     long src, dest;
 
@@ -1728,7 +1757,8 @@ Var_T *digitizer_copy_curve( Var_T * v )
  * Function for starting an acquisition
  *--------------------------------------*/
 
-Var_T *digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
+Var_T *
+digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == EXPERIMENT )
         lecroy_wr_start_acquisition( );
@@ -1742,7 +1772,8 @@ Var_T *digitizer_start_acquisition( Var_T * v  UNUSED_ARG )
  * possibly using a window
  *---------------------------------------------------------*/
 
-Var_T *digitizer_get_curve( Var_T * v )
+Var_T *
+digitizer_get_curve( Var_T * v )
 {
     Window_T *w;
     int ch, i;
@@ -1839,7 +1870,8 @@ Var_T *digitizer_get_curve( Var_T * v )
  * possibly using one or more windows
  *------------------------------------------------------------------------*/
 
-Var_T *digitizer_get_area( Var_T * v )
+Var_T *
+digitizer_get_area( Var_T * v )
 {
     Window_T *w;
     int ch, i, j;
@@ -1993,7 +2025,8 @@ Var_T *digitizer_get_area( Var_T * v )
  * one of the channels, possibly using one or more windows
  *-----------------------------------------------------------*/
 
-Var_T *digitizer_get_amplitude( Var_T * v )
+Var_T *
+digitizer_get_amplitude( Var_T * v )
 {
     Window_T *w;
     int ch, i, j;
@@ -2146,7 +2179,8 @@ Var_T *digitizer_get_amplitude( Var_T * v )
  * Function for sending a command string to the device
  *-----------------------------------------------------*/
 
-Var_T *digitizer_command( Var_T * v )
+Var_T *
+digitizer_command( Var_T * v )
 {
     char *cmd = NULL;
 

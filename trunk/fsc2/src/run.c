@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -92,7 +92,8 @@ static bool Graphics_have_been_started = UNSET;
  * child process is started and thus the experiments begins.
  *------------------------------------------------------------------*/
 
-bool run( void )
+bool
+run( void )
 {
     int stored_errno;
     sigset_t new_mask, old_mask;
@@ -208,7 +209,8 @@ bool run( void )
  * the main window must be de-iconified.
  *----------------------------------------------------------*/
 
-static void error_while_iconified( void )
+static void
+error_while_iconified( void )
 {
     Fsc2_Internals.cmdline_flags &= ~ ICONIFIED_RUN;
     fl_raise_form( GUI.main_form->fsc2 );
@@ -222,7 +224,8 @@ static void error_while_iconified( void )
  * serial port subsystem.
  *-------------------------------------------------------------------*/
 
-static bool start_gpib_and_rulbus( void )
+static bool
+start_gpib_and_rulbus( void )
 {
 #if defined WITH_RULBUS
     int retval;
@@ -298,7 +301,8 @@ static bool start_gpib_and_rulbus( void )
  * already return.
  *----------------------------------------------------------------------*/
 
-static bool no_prog_to_run( void )
+static bool
+no_prog_to_run( void )
 {
     bool ret;
 
@@ -373,7 +377,8 @@ static bool no_prog_to_run( void )
  * parent and child process.
  *--------------------------------------------------------------------------*/
 
-static bool init_devs_and_graphics( void )
+static bool
+init_devs_and_graphics( void )
 {
     Compilation_T compile_test;
 
@@ -489,7 +494,8 @@ static bool init_devs_and_graphics( void )
  * displaying of new data.
  *-----------------------------------------------------------------*/
 
-static void setup_signal_handlers( void )
+static void
+setup_signal_handlers( void )
 {
     struct sigaction sact;
 
@@ -512,8 +518,9 @@ static void setup_signal_handlers( void )
  * at this early stage).
  *-----------------------------------------------------------*/
 
-static void stop_while_exp_hook( FL_OBJECT * a  UNUSED_ARG,
-                                 long        b  UNUSED_ARG )
+static void
+stop_while_exp_hook( FL_OBJECT * a  UNUSED_ARG,
+                     long        b  UNUSED_ARG )
 {
     EDL.do_quit = EDL.react_to_do_quit = SET;
 }
@@ -523,7 +530,8 @@ static void stop_while_exp_hook( FL_OBJECT * a  UNUSED_ARG,
  * Things that remain to be done when forking the child process failed...
  *------------------------------------------------------------------------*/
 
-static void fork_failure( int stored_errno )
+static void
+fork_failure( int stored_errno )
 {
     sigaction( SIGCHLD,  &Sigchld_old_act,  NULL );
     sigaction( QUITTING, &Quitting_old_act, NULL );
@@ -598,8 +606,9 @@ static void fork_failure( int stored_errno )
  * exception was thrown.
  *-------------------------------------------------------------------*/
 
-static void check_for_further_errors( Compilation_T * c_old,
-                                      Compilation_T * c_all )
+static void
+check_for_further_errors( Compilation_T * c_old,
+                          Compilation_T * c_all )
 {
     Compilation_T diff;
     char str1[ 128 ],
@@ -651,7 +660,8 @@ static void check_for_further_errors( Compilation_T * c_old,
  * variable and reacts by sending the child a DO_QUIT signal.
  *---------------------------------------------------------------------*/
 
-static void quitting_handler( int signo )
+static void
+quitting_handler( int signo )
 {
     int errno_saved;
 
@@ -671,8 +681,9 @@ static void quitting_handler( int signo )
  * used for this button, see run_close_button_callback().
  *-------------------------------------------------------------------*/
 
-void run_stop_button_callback( FL_OBJECT * a,
-                               long        b  UNUSED_ARG )
+void
+run_stop_button_callback( FL_OBJECT * a,
+                          long        b  UNUSED_ARG )
 {
     int bn;
 
@@ -722,7 +733,8 @@ void run_stop_button_callback( FL_OBJECT * a,
  * of its callback function, run_sigchld_callback().
  *-------------------------------------------------------------------*/
 
-static void run_sigchld_handler( int signo )
+static void
+run_sigchld_handler( int signo )
 {
     int return_status;
     int pid;
@@ -786,8 +798,9 @@ static void run_sigchld_handler( int signo )
  * gets pressed.
  *----------------------------------------------------------------*/
 
-void run_sigchld_callback( FL_OBJECT * a,
-                           long        b )
+void
+run_sigchld_callback( FL_OBJECT * a,
+                      long        b )
 {
     int hours, mins, secs;
     const char *mess;
@@ -938,8 +951,9 @@ void run_sigchld_callback( FL_OBJECT * a,
  * in (one of) the display window(s) gets pressed.
  *-------------------------------------------------------*/
 
-void run_close_button_callback( FL_OBJECT * a  UNUSED_ARG,
-                                long        b  UNUSED_ARG )
+void
+run_close_button_callback( FL_OBJECT * a  UNUSED_ARG,
+                           long        b  UNUSED_ARG )
 {
     if ( Graphics_have_been_started )
     {
@@ -975,7 +989,8 @@ void run_close_button_callback( FL_OBJECT * a  UNUSED_ARG,
  * again when the experiment is finished.
  *----------------------------------------------------------*/
 
-static void set_buttons_for_run( int run_state )
+static void
+set_buttons_for_run( int run_state )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
         return;
@@ -1044,7 +1059,8 @@ static void set_buttons_for_run( int run_state )
  * not return from do_measurement() but dies in the signal handler.
  *-------------------------------------------------------------------*/
 
-static void run_child( void )
+static void
+run_child( void )
 {
 #ifndef NDEBUG
     const char *fcd;
@@ -1121,7 +1137,8 @@ static void run_child( void )
  * (in case it was killed by a signal it couldn't catch).
  *-------------------------------------------------------------------*/
 
-static void setup_child_signals( void )
+static void
+setup_child_signals( void )
 {
     struct sigaction sact;
     int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
@@ -1172,7 +1189,8 @@ static void setup_child_signals( void )
  * unexpected happens.
  *----------------------------------------------------------------*/
 
-static void child_sig_handler( int signo )
+static void
+child_sig_handler( int signo )
 {
     switch ( signo )
     {
@@ -1290,7 +1308,8 @@ static void child_sig_handler( int signo )
  * parent and then waits for the parent to allow it to exit.
  *---------------------------------------------------------------------*/
 
-static void wait_for_confirmation( void )
+static void
+wait_for_confirmation( void )
 {
     struct sigaction sact;
 
@@ -1325,7 +1344,8 @@ static void wait_for_confirmation( void )
  * Child's handler for the DO_QUIT signal while its waiting to die
  *-----------------------------------------------------------------*/
 
-static void child_confirmation_handler( int signo )
+static void
+child_confirmation_handler( int signo )
 {
     if ( signo == DO_QUIT )
         _exit( Child_return_status );                /* ...and that's it ! */
@@ -1337,7 +1357,8 @@ static void child_confirmation_handler( int signo )
  * is executed by the child it has got to honor the 'do_quit' flag.
  *-------------------------------------------------------------------*/
 
-static void do_measurement( void )
+static void
+do_measurement( void )
 {
     EDL.react_to_do_quit = SET;
 
@@ -1402,7 +1423,8 @@ static void do_measurement( void )
  * the flow control tokens.
  *-----------------------------------------------------------------------*/
 
-static void deal_with_program_tokens( void )
+static void
+deal_with_program_tokens( void )
 {
     Prg_Token_T *cur = EDL.cur_prg_token;
 

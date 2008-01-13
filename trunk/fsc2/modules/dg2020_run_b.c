@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -49,7 +49,8 @@ static void dg2020_defense_shape_check( Function_T * shape );
  * reset to their original positions.
  *-------------------------------------------------------------------------*/
 
-bool dg2020_do_update( void )
+bool
+dg2020_do_update( void )
 {
     bool state;
 
@@ -83,7 +84,8 @@ bool dg2020_do_update( void )
  * Function sorts the pulses and checks that the pulses don't overlap.
  *---------------------------------------------------------------------*/
 
-bool dg2020_reorganize_pulses( bool flag )
+bool
+dg2020_reorganize_pulses( bool flag )
 {
     int i;
     int j;
@@ -213,7 +215,8 @@ bool dg2020_reorganize_pulses( bool flag )
  * and don't overlap.
  *-------------------------------------------------------------------------*/
 
-void dg2020_do_checks( Function_T * f )
+void
+dg2020_do_checks( Function_T * f )
 {
     Pulse_T *p;
     Pulse_Params_T *pp, *ppn;
@@ -337,7 +340,8 @@ void dg2020_do_checks( Function_T * f )
 /*------------------------------------------------*
  *------------------------------------------------*/
 
-static void dg2020_shape_padding_check_1( Function_T * f )
+static void
+dg2020_shape_padding_check_1( Function_T * f )
 {
     Pulse_Params_T *pp, *ppp;
     int i;
@@ -450,7 +454,8 @@ static void dg2020_shape_padding_check_1( Function_T * f )
 /*------------------------------------------------*
  *------------------------------------------------*/
 
-static void dg2020_shape_padding_check_2( void )
+static void
+dg2020_shape_padding_check_2( void )
 {
     Function_T *f1, *f2;
     Pulse_Params_T *pp1, *pp2;
@@ -509,7 +514,8 @@ static void dg2020_shape_padding_check_2( void )
  * longer than the repetition time or the maximum pulse sequence duration).
  *--------------------------------------------------------------------------*/
 
-static void dg2020_twt_padding_check( Function_T * f )
+static void
+dg2020_twt_padding_check( Function_T * f )
 {
     Pulse_Params_T *pp, *ppp, tmp_pp;
     int i, j;
@@ -739,8 +745,9 @@ static void dg2020_twt_padding_check( Function_T * f )
  * the second pulse starts earlier than the first.
  *------------------------------------------------------------------*/
 
-static int dg2020_twt_pulse_compare( const void * A,
-                                     const void * B )
+static int
+dg2020_twt_pulse_compare( const void * A,
+                          const void * B )
 {
     Pulse_Params_T *a = ( Pulse_Params_T * ) A,
                    *b = ( Pulse_Params_T * ) B;
@@ -764,7 +771,8 @@ static int dg2020_twt_pulse_compare( const void * A,
  * mentioned EDL functions have been called.
  *-------------------------------------------------------------------------*/
 
-static void dg2020_defense_shape_check( Function_T * shape )
+static void
+dg2020_defense_shape_check( Function_T * shape )
 {
     Function_T *defense = dg2020.function + PULSER_CHANNEL_DEFENSE;
     Pulse_T *shape_p, *defense_p;
@@ -857,7 +865,8 @@ static void dg2020_defense_shape_check( Function_T * shape )
  * pulser assigned to the function passed as argument.
  *-----------------------------------------------------------*/
 
-void dg2020_set_pulses( Function_T * f )
+void
+dg2020_set_pulses( Function_T * f )
 {
     Pulse_Params_T *pp;
     int i, j;
@@ -934,7 +943,8 @@ void dg2020_set_pulses( Function_T * f )
  * describing the state of the pulser to their initial values.
  *------------------------------------------------------------------*/
 
-void dg2020_full_reset( void )
+void
+dg2020_full_reset( void )
 {
     Pulse_T *p = dg2020.pulses;
 
@@ -988,8 +998,9 @@ void dg2020_full_reset( void )
  * to the next pulse in the pulse list.
  *------------------------------------------------*/
 
-Pulse_T *dg2020_delete_pulse( Pulse_T * p,
-                              bool      warn )
+Pulse_T *
+dg2020_delete_pulse( Pulse_T * p,
+                     bool      warn )
 {
     Pulse_T *pp;
     Function_T *f;
@@ -1087,8 +1098,9 @@ Pulse_T *dg2020_delete_pulse( Pulse_T * p,
  * commands and their length.
  *---------------------------------------------------------------------*/
 
-void dg2020_commit( Function_T * f,
-                    bool         flag )
+void
+dg2020_commit( Function_T * f,
+               bool         flag )
 {
     Pulse_T *p;
     int i, j;

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -43,29 +43,29 @@ int ni6601_exp_hook(        void );
 int ni6601_end_of_exp_hook( void );
 
 
-Var_T *counter_name(                     Var_T * v );
-Var_T *counter_start_continuous_counter( Var_T * v );
-Var_T *counter_start_timed_counter(      Var_T * v );
-Var_T *counter_start_buffered_counter(   Var_T * v );
-Var_T *counter_get_buffered_counts(      Var_T * v );
-Var_T *counter_intermediate_count(       Var_T * v );
-Var_T *counter_timed_count(              Var_T * v );
-Var_T *counter_final_count(              Var_T * v );
-Var_T *counter_stop_counter(             Var_T * v );
-Var_T *counter_single_pulse(             Var_T * c );
-Var_T *counter_continuous_pulses(        Var_T * v );
-Var_T *counter_dio_read(                 Var_T * v );
-Var_T *counter_dio_write(                Var_T * v );
+Var_T * counter_name(                     Var_T * v );
+Var_T * counter_start_continuous_counter( Var_T * v );
+Var_T * counter_start_timed_counter(      Var_T * v );
+Var_T * counter_start_buffered_counter(   Var_T * v );
+Var_T * counter_get_buffered_counts(      Var_T * v );
+Var_T * counter_intermediate_count(       Var_T * v );
+Var_T * counter_timed_count(              Var_T * v );
+Var_T * counter_final_count(              Var_T * v );
+Var_T * counter_stop_counter(             Var_T * v );
+Var_T * counter_single_pulse(             Var_T * c );
+Var_T * counter_continuous_pulses(        Var_T * v );
+Var_T * counter_dio_read(                 Var_T * v );
+Var_T * counter_dio_write(                Var_T * v );
 
 
-static Var_T *ni6601_get_data( long   to_fetch,
-                               double wait_secs );
+static Var_T * ni6601_get_data( long   to_fetch,
+                                double wait_secs );
 
 static int ni6601_counter_number( long ch );
 
 static int ni6601_source_number( long ch );
 
-static const char *ni6601_ptime( double p_time );
+static const char * ni6601_ptime( double p_time );
 
 static double ni6601_time_check( double       duration,
                                  const char * text );
@@ -83,7 +83,8 @@ static long buffered_remaining = -1;
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int ni6601_init_hook( void )
+int
+ni6601_init_hook( void )
 {
     int i;
 
@@ -102,7 +103,8 @@ int ni6601_init_hook( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int ni6601_exp_hook( void )
+int
+ni6601_exp_hook( void )
 {
     int s;
     int ret;
@@ -164,7 +166,8 @@ int ni6601_exp_hook( void )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-int ni6601_end_of_exp_hook( void )
+int
+ni6601_end_of_exp_hook( void )
 {
     raise_permissions( );
     ni6601_close( BOARD_NUMBER );
@@ -178,7 +181,8 @@ int ni6601_end_of_exp_hook( void )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *counter_name( Var_T * v  UNUSED_ARG )
+Var_T *
+counter_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -187,7 +191,8 @@ Var_T *counter_name( Var_T * v  UNUSED_ARG )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *counter_start_continuous_counter( Var_T * v )
+Var_T *
+counter_start_continuous_counter( Var_T * v )
 {
     int counter;
     int source;
@@ -248,7 +253,8 @@ Var_T *counter_start_continuous_counter( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *counter_start_timed_counter( Var_T * v )
+Var_T *
+counter_start_timed_counter( Var_T * v )
 {
     int counter;
     int source;
@@ -325,7 +331,8 @@ Var_T *counter_start_timed_counter( Var_T * v )
  * for the count interval finish and then fetches the count.
  *-----------------------------------------------------------------*/
 
-Var_T *counter_timed_count( Var_T * v )
+Var_T *
+counter_timed_count( Var_T * v )
 {
     int counter;
     int source;
@@ -461,7 +468,8 @@ Var_T *counter_timed_count( Var_T * v )
  * Gets a count even while the counter is still running
  *------------------------------------------------------*/
 
-Var_T *counter_intermediate_count( Var_T * v )
+Var_T *
+counter_intermediate_count( Var_T * v )
 {
     int counter;
     unsigned long count;
@@ -501,7 +509,8 @@ Var_T *counter_intermediate_count( Var_T * v )
  * Get a count after waiting until the counter is finished counting
  *------------------------------------------------------------------*/
 
-Var_T *counter_final_count( Var_T * v )
+Var_T *
+counter_final_count( Var_T * v )
 {
     int counter;
     unsigned long count;
@@ -554,7 +563,8 @@ Var_T *counter_final_count( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *counter_start_buffered_counter( Var_T * v )
+Var_T *
+counter_start_buffered_counter( Var_T * v )
 {
     int counter;
     double interval;
@@ -675,7 +685,8 @@ Var_T *counter_start_buffered_counter( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *counter_get_buffered_counts( Var_T * v )
+Var_T *
+counter_get_buffered_counts( Var_T * v )
 {
     int counter; 
     long num_points;
@@ -813,8 +824,9 @@ Var_T *counter_get_buffered_counts( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static Var_T *ni6601_get_data( long   to_fetch,
-                               double wait_secs )
+static Var_T *
+ni6601_get_data( long   to_fetch,
+                 double wait_secs )
 {
     ssize_t ret = 0;
     int quit_on_signal;
@@ -987,7 +999,8 @@ static Var_T *ni6601_get_data( long   to_fetch,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *counter_stop_counter( Var_T * v )
+Var_T *
+counter_stop_counter( Var_T * v )
 {
     int counter;
     int ret;
@@ -1017,7 +1030,8 @@ Var_T *counter_stop_counter( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *counter_single_pulse( Var_T * v )
+Var_T *
+counter_single_pulse( Var_T * v )
 {
     int counter;
     double duration;
@@ -1064,7 +1078,8 @@ Var_T *counter_single_pulse( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *counter_continuous_pulses( Var_T * v )
+Var_T *
+counter_continuous_pulses( Var_T * v )
 {
     int counter;
     double len_hi, len_low;
@@ -1139,7 +1154,8 @@ Var_T *counter_continuous_pulses( Var_T * v )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-Var_T *counter_dio_read( Var_T * v )
+Var_T *
+counter_dio_read( Var_T * v )
 {
     long mask;
     unsigned char bits = 0;
@@ -1180,7 +1196,8 @@ Var_T *counter_dio_read( Var_T * v )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-Var_T *counter_dio_write( Var_T * v )
+Var_T *
+counter_dio_write( Var_T * v )
 {
     long bits;
     long mask;
@@ -1241,7 +1258,8 @@ Var_T *counter_dio_write( Var_T * v )
  * into a real counter number.
  *---------------------------------------------------------------*/
 
-static int ni6601_counter_number( long ch )
+static int
+ni6601_counter_number( long ch )
 {
     switch ( ch )
     {
@@ -1277,7 +1295,8 @@ static int ni6601_counter_number( long ch )
  * into a real source channel number.
  *---------------------------------------------------------------*/
 
-static int ni6601_source_number( long ch )
+static int
+ni6601_source_number( long ch )
 {
     switch ( ch )
     {
@@ -1322,7 +1341,8 @@ static int ni6601_source_number( long ch )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static const char *ni6601_ptime( double p_time )
+static const char *
+ni6601_ptime( double p_time )
 {
     static char buffer[ 128 ];
 
@@ -1342,8 +1362,9 @@ static const char *ni6601_ptime( double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static double ni6601_time_check( double       duration,
-                                 const char * text )
+static double
+ni6601_time_check( double       duration,
+                   const char * text )
 {
     unsigned long ticks;
 

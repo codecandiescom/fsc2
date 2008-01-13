@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -80,7 +80,8 @@ static long vars_assign_snd_range_from_nd_2( Var_T * dest,
  * This is the central function for assigning new values.
  *--------------------------------------------------------*/
 
-void vars_assign( Var_T * src,
+void
+vars_assign( Var_T * src,
                   Var_T * dest )
 {
     long count = 0;
@@ -128,8 +129,9 @@ void vars_assign( Var_T * src,
  * Assignment to a variable or a single element of an array
  *----------------------------------------------------------*/
 
-static long vars_assign_to_1d( Var_T * src,
-                               Var_T * dest )
+static long
+vars_assign_to_1d( Var_T * src,
+                   Var_T * dest )
 {
     /* If the destination variable is still completely new set its type */
 
@@ -217,8 +219,9 @@ static long vars_assign_to_1d( Var_T * src,
  * Assignment to an one- or more-dimensional array
  *-------------------------------------------------*/
 
-static long vars_assign_to_nd( Var_T * src,
-                               Var_T * dest )
+static long
+vars_assign_to_nd( Var_T * src,
+                   Var_T * dest )
 {
     long count = 0;
 
@@ -282,8 +285,9 @@ static long vars_assign_to_nd( Var_T * src,
  * dimensional array
  *------------------------------------------------------------------*/
 
-static long vars_assign_to_nd_from_1d( Var_T * src,
-                                       Var_T * dest )
+static long
+vars_assign_to_nd_from_1d( Var_T * src,
+                           Var_T * dest )
 {
     long lval = 0;
     double dval = 0.0;
@@ -326,9 +330,10 @@ static long vars_assign_to_nd_from_1d( Var_T * src,
  * more-dimensional array.
  *-----------------------------------------------------*/
 
-static long vars_set_all( Var_T * v,
-                          long    l,
-                          double  d )
+static long
+vars_set_all( Var_T * v,
+              long    l,
+              double  d )
 {
     long count = 0;
     ssize_t i;
@@ -359,9 +364,10 @@ static long vars_set_all( Var_T * v,
  * more dimensional array
  *-------------------------------------------------*/
 
-static long vars_assign_to_snd_from_1d( Var_T * src,
-                                        Var_T * dest,
-                                        Var_T * sub )
+static long
+vars_assign_to_snd_from_1d( Var_T * src,
+                            Var_T * dest,
+                            Var_T * sub )
 {
     long lval = 0;
     double dval = 0.0;
@@ -396,11 +402,12 @@ static long vars_assign_to_snd_from_1d( Var_T * src,
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-static long vars_assign_to_snd_range_from_1d( Var_T * dest,
-                                              Var_T * sub,
-                                              ssize_t cur,
-                                              long    l,
-                                              double  d )
+static long
+vars_assign_to_snd_range_from_1d( Var_T * dest,
+                                  Var_T * sub,
+                                  ssize_t cur,
+                                  long    l,
+                                  double  d )
 {
     long count = 0;
     ssize_t i, ind, range_start, range_end;
@@ -459,8 +466,9 @@ static long vars_assign_to_snd_range_from_1d( Var_T * dest,
  * Assign of an array to an array
  *--------------------------------*/
 
-static long vars_assign_to_nd_from_nd( Var_T * src,
-                                       Var_T * dest )
+static long
+vars_assign_to_nd_from_nd( Var_T * src,
+                           Var_T * dest )
 {
     ssize_t i;
     long count = 0;
@@ -496,8 +504,9 @@ static long vars_assign_to_nd_from_nd( Var_T * src,
  * Checks if the sizes of two arrays are identical
  *-------------------------------------------------*/
 
-static void vars_size_check( Var_T * src,
-                             Var_T * dest )
+static void
+vars_size_check( Var_T * src,
+                 Var_T * dest )
 {
     ssize_t i;
 
@@ -523,8 +532,9 @@ static void vars_size_check( Var_T * src,
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-static long vars_arr_assign( Var_T * src,
-                             Var_T * dest )
+static long
+vars_arr_assign( Var_T * src,
+                 Var_T * dest )
 {
     return src->type & ( INT_ARR | FLOAT_ARR ) ?
            vars_arr_assign_1d( src, dest ) : vars_arr_assign_nd( src, dest );
@@ -534,8 +544,9 @@ static long vars_arr_assign( Var_T * src,
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-static long vars_arr_assign_1d( Var_T * src,
-                                Var_T * dest )
+static long
+vars_arr_assign_1d( Var_T * src,
+                    Var_T * dest )
 {
     ssize_t i;
 
@@ -597,8 +608,9 @@ static long vars_arr_assign_1d( Var_T * src,
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-static long vars_arr_assign_nd( Var_T * src,
-                                Var_T * dest )
+static long
+vars_arr_assign_nd( Var_T * src,
+                    Var_T * dest )
 {
     ssize_t i;
     long count = 0;
@@ -660,9 +672,10 @@ static long vars_arr_assign_nd( Var_T * src,
  * Assignment of an array to an array specified with ranges
  *----------------------------------------------------------*/
 
-static long vars_assign_to_snd_from_nd( Var_T * src,
-                                        Var_T * dest,
-                                        Var_T * sub )
+static long
+vars_assign_to_snd_from_nd( Var_T * src,
+                            Var_T * dest,
+                            Var_T * sub )
 {
     ssize_t cur = 0;
     ssize_t single_indices = 0;
@@ -697,10 +710,11 @@ static long vars_assign_to_snd_from_nd( Var_T * src,
 /*--------------------------------------------*
  *--------------------------------------------*/
 
-static long vars_assign_snd_range_from_nd( Var_T * dest,
-                                           Var_T * sub,
-                                           ssize_t cur,
-                                           Var_T  *src )
+static long
+vars_assign_snd_range_from_nd( Var_T * dest,
+                               Var_T * sub,
+                               ssize_t cur,
+                               Var_T * src )
 {
     ssize_t ind, start, end, i;
     long count = 0;
@@ -746,12 +760,13 @@ static long vars_assign_snd_range_from_nd( Var_T * dest,
 /*--------------------------------------------*
  *--------------------------------------------*/
 
-static long vars_assign_snd_range_from_nd_1( Var_T * dest,
-                                             Var_T * src,
-                                             Var_T * sub,
-                                             ssize_t start,
-                                             ssize_t end,
-                                             ssize_t cur )
+static long
+vars_assign_snd_range_from_nd_1( Var_T * dest,
+                                 Var_T * src,
+                                 Var_T * sub,
+                                 ssize_t start,
+                                 ssize_t end,
+                                 ssize_t cur )
 {
     ssize_t range = end - start + 1;
     ssize_t i;
@@ -801,12 +816,13 @@ static long vars_assign_snd_range_from_nd_1( Var_T * dest,
 /*--------------------------------------------*
  *--------------------------------------------*/
 
-static long vars_assign_snd_range_from_nd_2( Var_T * dest,
-                                             Var_T * src,
-                                             Var_T * sub,
-                                             ssize_t start,
-                                             ssize_t end,
-                                             ssize_t cur )
+static long
+vars_assign_snd_range_from_nd_2( Var_T * dest,
+                                 Var_T * src,
+                                 Var_T * sub,
+                                 ssize_t start,
+                                 ssize_t end,
+                                 ssize_t cur )
 {
     ssize_t range = end - start + 1;
     ssize_t i;

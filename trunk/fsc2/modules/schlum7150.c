@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 2006-2007 Sergey Weber, Jens Thoms Toerring
+ *  Copyright (C) 2006-2008 Sergey Weber, Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  * 
@@ -36,19 +36,19 @@ int schlum7150_test_hook( void );
 int schlum7150_exp_hook( void );
 int schlum7150_end_of_exp_hook( void );
 
-Var_T *multimeter_name( Var_T *v );
-Var_T *multimeter_mode( Var_T *v );
-Var_T *multimeter_precision( Var_T *v );
-Var_T *multimeter_get_data( Var_T *v );
-Var_T *multimeter_lock_keyboard( Var_T *v );
-Var_T *multimeter_command( Var_T *v );
+Var_T * multimeter_name( Var_T * v );
+Var_T * multimeter_mode( Var_T * v );
+Var_T * multimeter_precision( Var_T * v );
+Var_T * multimeter_get_data( Var_T * v );
+Var_T * multimeter_lock_keyboard( Var_T * v );
+Var_T * multimeter_command( Var_T * v );
 
 
 /* Locally used functions */
 
-static bool schlum7150_init( const char *name );
+static bool schlum7150_init( const char * name );
 
-static void schlum7150_command( const char *cmd );
+static void schlum7150_command( const char * cmd );
 
 static void schlum7150_failure( void );
 
@@ -97,7 +97,8 @@ Schlum7150_T schlum7150, schlum7150_store;
  * Init hook function for the module.
  *------------------------------------*/
 
-int schlum7150_init_hook( void )
+int
+schlum7150_init_hook( void )
 {
     /* Set global variable to indicate that GPIB bus is needed */
 
@@ -118,7 +119,8 @@ int schlum7150_init_hook( void )
  * Start of test hook function for the module
  *--------------------------------------------*/
 
-int schlum7150_test_hook( void )
+int
+schlum7150_test_hook( void )
 {
     /* Store the state of the device as it is before the test run */
 
@@ -131,7 +133,8 @@ int schlum7150_test_hook( void )
  * Start of experiment hook function for the module
  *--------------------------------------------------*/
 
-int schlum7150_exp_hook( void )
+int
+schlum7150_exp_hook( void )
 {
     /* Restore the structure for the multimeter to the way it was after
        the PREPARATIONS section had been processed */
@@ -155,7 +158,8 @@ int schlum7150_exp_hook( void )
  * End of experiment hook function for the module
  *------------------------------------------------*/
 
-int schlum7150_end_of_exp_hook( void )
+int
+schlum7150_end_of_exp_hook( void )
 {
     /* Switch multimeter back to local mode */
 
@@ -171,7 +175,8 @@ int schlum7150_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *multimeter_name( Var_T *v UNUSED_ARG )
+Var_T *
+multimeter_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -181,7 +186,8 @@ Var_T *multimeter_name( Var_T *v UNUSED_ARG )
  * Multimeter mode selection
  *---------------------------*/
 
-Var_T *multimeter_mode( Var_T *v )
+Var_T *
+multimeter_mode( Var_T * v )
 {
     char cmd[ ] = "Mx\n";
     int old_mode = schlum7150.mode;
@@ -255,7 +261,8 @@ Var_T *multimeter_mode( Var_T *v )
  * Multimeter precision selection
  *---------------------------------*/
 
-Var_T *multimeter_precision( Var_T *v )
+Var_T *
+multimeter_precision( Var_T * v )
 {
     char cmd[ ] = "Ix\n";
     int old_prec = schlum7150.prec;
@@ -329,7 +336,8 @@ Var_T *multimeter_precision( Var_T *v )
  * Returns the result of a measurement from the multimeter
  *---------------------------------------------------------*/
 
-Var_T *multimeter_get_data( Var_T *v )
+Var_T *
+multimeter_get_data( Var_T * v )
 {
     char cmd[ ] = "Rx\n";
     char reply[ 100 ];
@@ -442,8 +450,8 @@ Var_T *multimeter_get_data( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *multimeter_lock_keyboard( Var_T *v )
-
+Var_T *
+multimeter_lock_keyboard( Var_T * v )
 {
     bool lock;
     char cmd[ ] = "Kx\n";
@@ -471,7 +479,8 @@ Var_T *multimeter_lock_keyboard( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *multimeter_command( Var_T *v )
+Var_T *
+multimeter_command( Var_T * v )
 {
     char *cmd = NULL;
 
@@ -504,7 +513,8 @@ Var_T *multimeter_command( Var_T *v )
 /*--------------------------------------------------*
  *--------------------------------------------------*/
 
-static bool schlum7150_init( const char *name )
+static bool
+schlum7150_init( const char * name )
 {
     char cmd[ ] = "C0D0I3J0K1M3N0Q0R0T0U7Y0Z0\n";
 
@@ -578,7 +588,8 @@ static bool schlum7150_init( const char *name )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static void schlum7150_command( const char *cmd )
+static void
+schlum7150_command( const char * cmd )
 {
     if ( gpib_write( schlum7150.device, cmd, strlen( cmd ) ) == FAILURE )
         schlum7150_failure( );
@@ -588,7 +599,8 @@ static void schlum7150_command( const char *cmd )
 /*--------------------------------------------------*
  *--------------------------------------------------*/
 
-static void schlum7150_failure( void )
+static void
+schlum7150_failure( void )
 {
     print( FATAL, "Communication with multimeter failed.\n" );
     THROW( EXCEPTION );

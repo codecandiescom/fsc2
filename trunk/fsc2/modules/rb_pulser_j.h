@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -260,16 +260,16 @@ int rb_pulser_j_exp_hook(         void );
 int rb_pulser_j_end_of_exp_hook(  void );
 void rb_pulser_j_exit_hook(       void );
 
-Var_T *pulser_name(                Var_T * /* v */ );
-Var_T *pulser_show_pulses(         Var_T * /* v */ );
-Var_T *pulser_dump_pulses(         Var_T * /* v */ );
-Var_T *pulser_state(               Var_T * /* v */ );
-Var_T *pulser_update(              Var_T * /* v */ );
-Var_T *pulser_shift(               Var_T * /* v */ );
-Var_T *pulser_increment(           Var_T * /* v */ );
-Var_T *pulser_reset(               Var_T * /* v */ );
-Var_T *pulser_pulse_reset(         Var_T * /* v */ );
-Var_T *pulser_pulse_minimum_specs( Var_T * /* v */ );
+Var_T * pulser_name(                Var_T * /* v */ );
+Var_T * pulser_show_pulses(         Var_T * /* v */ );
+Var_T * pulser_dump_pulses(         Var_T * /* v */ );
+Var_T * pulser_state(               Var_T * /* v */ );
+Var_T * pulser_update(              Var_T * /* v */ );
+Var_T * pulser_shift(               Var_T * /* v */ );
+Var_T * pulser_increment(           Var_T * /* v */ );
+Var_T * pulser_reset(               Var_T * /* v */ );
+Var_T * pulser_pulse_reset(         Var_T * /* v */ );
+Var_T * pulser_pulse_minimum_specs( Var_T * /* v */ );
 
 void rb_pulser_j_cleanup( void );
 
@@ -357,11 +357,11 @@ Ticks rb_pulser_j_double2ticks( double /* p_time */ );
 
 double rb_pulser_j_ticks2double( Ticks /* ticks */ );
 
-Pulse_T *rb_pulser_j_get_pulse( long /* pnum */ );
+Pulse_T * rb_pulser_j_get_pulse( long /* pnum */ );
 
-const char *rb_pulser_j_ptime( double /* p_time */ );
+const char * rb_pulser_j_ptime( double /* p_time */ );
 
-const char *rb_pulser_j_pticks( Ticks /* ticks */ );
+const char * rb_pulser_j_pticks( Ticks /* ticks */ );
 
 void rb_pulser_j_show_pulses( void );
 

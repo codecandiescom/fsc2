@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -323,7 +323,8 @@ strs:    E_STR_TOKEN               { if ( ! Dont_exec )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void exp_runerror( const char * s  UNUSED_ARG )
+static void
+exp_runerror( const char * s  UNUSED_ARG )
 {
     print( FATAL, "Syntax error in EXPERIMENT section.\n" );
     THROW( EXCEPTION );
@@ -333,7 +334,8 @@ static void exp_runerror( const char * s  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void exp_runparser_init( void )
+void
+exp_runparser_init( void )
 {
     Dont_exec = 0;
 }

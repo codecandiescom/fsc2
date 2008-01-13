@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -155,7 +155,8 @@ IDENT    [A-Za-z0-9][A-Za-z_0-9]*
 /*-------------------------------------------*
  *-------------------------------------------*/
 
-bool device_list_parse( void )
+bool
+device_list_parse( void )
 {
     static bool is_restart = UNSET;
     Device_Name_T *new_device_name;

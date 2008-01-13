@@ -1,20 +1,20 @@
 /*
  *  $Id$
- * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
- * 
+ *
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -42,7 +42,8 @@ static void rb_pulser_w_rf_synth_init( void );
  * the start of a test run.
  *-------------------------------------------------------------*/
 
-void rb_pulser_w_init_setup( void )
+void
+rb_pulser_w_init_setup( void )
 {
     rb_pulser_w_basic_pulse_check( );
     rb_pulser_w_basic_functions_init( );
@@ -64,7 +65,8 @@ void rb_pulser_w_init_setup( void )
  * and pulser_dump_pulses() EDL functions
  *------------------------------------------------------*/
 
-static void rb_pulser_w_init_print( FILE * fp )
+static void
+rb_pulser_w_init_print( FILE * fp )
 {
     int i;
 
@@ -95,7 +97,8 @@ static void rb_pulser_w_init_print( FILE * fp )
  * 3. its length is set
  *------------------------------------------------------------*/
 
-static void rb_pulser_w_basic_pulse_check( void )
+static void
+rb_pulser_w_basic_pulse_check( void )
 {
     Pulse_T *p;
 
@@ -138,7 +141,8 @@ static void rb_pulser_w_basic_pulse_check( void )
  * Creates a list of pulses for each function that has pulses assigned to it
  *---------------------------------------------------------------------------*/
 
-static void rb_pulser_w_basic_functions_init( void )
+static void
+rb_pulser_w_basic_functions_init( void )
 {
     Function_T *f;
     int i;
@@ -198,7 +202,8 @@ static void rb_pulser_w_basic_functions_init( void )
  * user told us not to create one)
  *--------------------------------------------------------------------*/
 
-static void rb_pulser_w_defense_pulse_create( void )
+static void
+rb_pulser_w_defense_pulse_create( void )
 {
     Function_T *mw = rb_pulser_w.function + PULSER_CHANNEL_MW;
     Function_T *def = rb_pulser_w.function + PULSER_CHANNEL_DEFENSE;
@@ -283,7 +288,8 @@ static void rb_pulser_w_defense_pulse_create( void )
  * marked as belonging to the RF function)
  *------------------------------------------------------------------*/
 
-static void rb_pulser_w_rf_synth_init( void )
+static void
+rb_pulser_w_rf_synth_init( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
     int dev_num;

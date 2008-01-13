@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -174,7 +174,8 @@ static bool dg2020_gpib_do_check( dg2020_store_T * params );
  *  * 1: ok, 0: error
  *------------------------------------------------------*/
 
-bool dg2020_init( const char * name )
+bool
+dg2020_init( const char * name )
 {
     int i;
     Function_T *f;
@@ -307,7 +308,8 @@ bool dg2020_init( const char * name )
  *  * 1: ok, 0: error
  *--------------------------------------------------------------------*/
 
-bool dg2020_run( bool flag )
+bool
+dg2020_run( bool flag )
 {
     dg2020_command( flag ? "*WAI;STAR\n": "*WAI;STOP\n" );
     dg2020.is_running = flag;
@@ -325,7 +327,8 @@ bool dg2020_run( bool flag )
  *  * 2: 1: ok, 0: error
  *---------------------------------------------------------------*/
 
-bool dg2020_set_timebase( double timebase )
+bool
+dg2020_set_timebase( double timebase )
 {
     char cmd[ 30 ] = "SOUR:OSC:INT:FREQ ";
 
@@ -352,7 +355,8 @@ bool dg2020_set_timebase( double timebase )
  *  * 1: ok, 0: error
  *------------------------------------------------------------*/
 
-bool dg2020_set_memory_size( long mem_size )
+bool
+dg2020_set_memory_size( long mem_size )
 {
     char cmd[ 20 ] = "DATA:MSIZ ";
 
@@ -377,8 +381,9 @@ bool dg2020_set_memory_size( long mem_size )
  *  * 1: ok, 0: error
  *-----------------------------------------------------*/
 
-bool dg2020_channel_assign( int channel,
-                            int pod )
+bool
+dg2020_channel_assign( int channel,
+                       int pod )
 {
     char cmd[ 50 ];
 
@@ -402,7 +407,8 @@ bool dg2020_channel_assign( int channel,
  *  * 1: ok, 0: error
  *--------------------------------------------------------------*/
 
-bool dg2020_update_data( void )
+bool
+dg2020_update_data( void )
 {
     dg2020_command( "DATA:UPD\n" );
     return dg2020_gpib_check( );
@@ -418,8 +424,9 @@ bool dg2020_update_data( void )
  *  * 1: ok, 0: error
  *-----------------------------------------------------------------------*/
 
-bool dg2020_make_blocks( int       num_blocks,
-                         Block_T * block )
+bool
+dg2020_make_blocks( int       num_blocks,
+                    Block_T * block )
 {
     char cmd[ 1024 ] = "",
          dummy[ 1000 ];
@@ -496,8 +503,9 @@ bool dg2020_make_blocks( int       num_blocks,
  *  * 1: ok, 0: error
  *----------------------------------------------------------------*/
 
-bool dg2020_make_seq( int       num_blocks,
-                      Block_T * block )
+bool
+dg2020_make_seq( int       num_blocks,
+                 Block_T * block )
 {
     char cmd[ 1024 ] = "",
          dummy[ 10 ];
@@ -544,10 +552,11 @@ bool dg2020_make_seq( int       num_blocks,
  *  * 1: ok, 0: error
  *-----------------------------------------------------*/
 
-bool dg2020_set_constant( int   channel,
-                          Ticks address,
-                          Ticks length,
-                          int   state )
+bool
+dg2020_set_constant( int   channel,
+                     Ticks address,
+                     Ticks length,
+                     int   state )
 {
     char *cmd, *cptr;
 #if defined ( DMA_SIZE )
@@ -615,8 +624,9 @@ bool dg2020_set_constant( int   channel,
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-bool dg2020_set_pod_high_level( int    pod,
-                                double voltage )
+bool
+dg2020_set_pod_high_level( int    pod,
+                           double voltage )
 {
     char cmd[ 100 ];
 
@@ -632,8 +642,9 @@ bool dg2020_set_pod_high_level( int    pod,
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-bool dg2020_set_pod_low_level( int    pod,
-                               double voltage )
+bool
+dg2020_set_pod_low_level( int    pod,
+                          double voltage )
 {
     char cmd[ 100 ];
 
@@ -649,7 +660,8 @@ bool dg2020_set_pod_low_level( int    pod,
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-bool dg2020_set_trigger_in_level( double voltage )
+bool
+dg2020_set_trigger_in_level( double voltage )
 {
     char cmd[ 100 ];
 
@@ -665,7 +677,8 @@ bool dg2020_set_trigger_in_level( double voltage )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-bool dg2020_set_trigger_in_slope( int slope )
+bool
+dg2020_set_trigger_in_slope( int slope )
 {
     char cmd[ 100 ];
 
@@ -680,7 +693,8 @@ bool dg2020_set_trigger_in_slope( int slope )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-bool dg2020_set_trigger_in_impedance( int state )
+bool
+dg2020_set_trigger_in_impedance( int state )
 {
     char cmd[ 100 ];
 
@@ -695,7 +709,8 @@ bool dg2020_set_trigger_in_impedance( int state )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-void dg2020_gpib_failure( void )
+void
+dg2020_gpib_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );
@@ -734,10 +749,11 @@ static int check_retries = 0;
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-static void dg2020_gpib_store( int   channel,
-                               Ticks address,
-                               Ticks length,
-                               int   state )
+static void
+dg2020_gpib_store( int   channel,
+                   Ticks address,
+                   Ticks length,
+                   int   state )
 {
     dg2020_store_T *cur = dst;
 
@@ -770,7 +786,8 @@ static void dg2020_gpib_store( int   channel,
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-static bool dg2020_gpib_check( void )
+static bool
+dg2020_gpib_check( void )
 {
     dg2020_store_T *cur = dst,
                    *tmp,
@@ -891,7 +908,8 @@ static bool dg2020_gpib_check( void )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-static bool dg2020_gpib_do_check( dg2020_store_T * params )
+static bool
+dg2020_gpib_do_check( dg2020_store_T * params )
 {
     char cmd[ 100 ] = "DATA:PATT:BIT? ";
     char *reply;
@@ -984,7 +1002,8 @@ static bool dg2020_gpib_do_check( dg2020_store_T * params )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool dg2020_lock_state( bool lock )
+bool
+dg2020_lock_state( bool lock )
 {
     char cmd[ 10 ];
 
@@ -998,7 +1017,8 @@ bool dg2020_lock_state( bool lock )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool dg2020_command( const char * cmd )
+bool
+dg2020_command( const char * cmd )
 {
     if ( gpib_write( dg2020.device, cmd, strlen( cmd ) ) == FAILURE )
         dg2020_gpib_failure( );

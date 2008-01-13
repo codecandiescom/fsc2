@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -53,7 +53,8 @@ static void resolve_generic_type( Device_T * dev );
  * listed in 'Functions' and stores pointers to the functions in 'Fncts'.
  *-------------------------------------------------------------------------*/
 
-void load_all_drivers( void )
+void
+load_all_drivers( void )
 {
     Device_T *cd;
     bool saved_need_GPIB;
@@ -184,8 +185,9 @@ void load_all_drivers( void )
  * for sorting the function names by binary search.
  *----------------------------------------------------------*/
 
-static int func_cmp( const void * a,
-                     const void * b )
+static int
+func_cmp( const void * a,
+          const void * b )
 {
     return strcmp( ( ( const Func_T * ) a )->name,
                    ( ( const Func_T * ) b )->name );
@@ -198,7 +200,8 @@ static int func_cmp( const void * a,
  * to be appended to the function names, otherwise 0.
  *---------------------------------------------------------------*/
 
-int exists_device( const char * name )
+int
+exists_device( const char * name )
 {
     Device_T *cd;
 
@@ -217,7 +220,8 @@ int exists_device( const char * name )
  * type passed to the function as argument is loaded.
  *---------------------------------------------------------------*/
 
-bool exists_device_type( const char * type )
+bool
+exists_device_type( const char * type )
 {
     Device_T *cd;
 
@@ -234,7 +238,8 @@ bool exists_device_type( const char * type )
  * Function tests if a function passed to the routine by name exists
  *-------------------------------------------------------------------*/
 
-bool exists_function( const char * name )
+bool
+exists_function( const char * name )
 {
     size_t i;
 
@@ -256,7 +261,8 @@ bool exists_function( const char * name )
  * data base 'Functions'.
  *-------------------------------------------------------------*/
 
-static void load_functions( Device_T * dev )
+static void
+load_functions( Device_T * dev )
 {
     char *lib_name;
 
@@ -334,7 +340,8 @@ static void load_functions( Device_T * dev )
  * a device and determines the pointers to these functions.
  *-----------------------------------------------------------*/
 
-static void resolve_hook_functions( Device_T * dev )
+static void
+resolve_hook_functions( Device_T * dev )
 {
     char *hook_func_name;
     char *app;
@@ -423,7 +430,8 @@ static void resolve_hook_functions( Device_T * dev )
  * to be resolved try to find them in the device driver functions.
  *---------------------------------------------------------------------*/
 
-static void resolve_functions( Device_T * dev )
+static void
+resolve_functions( Device_T * dev )
 {
     size_t num;
     void *cur;
@@ -476,9 +484,10 @@ static void resolve_functions( Device_T * dev )
  * current device.
  *----------------------------------------------------------------------*/
 
-static void add_function( size_t     num,
-                          void *     new_func,
-                          Device_T * new_dev )
+static void
+add_function( size_t     num,
+              void *     new_func,
+              Device_T * new_dev )
 {
     Func_T *f;
 
@@ -514,7 +523,8 @@ static void add_function( size_t     num,
  * the module and stores it in the Device structure.
  *-------------------------------------------------------------------*/
 
-static void resolve_device_name( Device_T * dev )
+static void
+resolve_device_name( Device_T * dev )
 {
     dlerror( );
     dev->device_name = ( const char * ) dlsym( dev->driver.handle,
@@ -535,7 +545,8 @@ static void resolve_device_name( Device_T * dev )
  * are - the result is stored in the Device structure.
  *----------------------------------------------------------------------*/
 
-static void resolve_generic_type( Device_T * dev )
+static void
+resolve_generic_type( Device_T * dev )
 {
     Device_T *cd;
 
@@ -568,7 +579,8 @@ static void resolve_generic_type( Device_T * dev )
  * Function runs the test hook functions of all modules
  *------------------------------------------------------*/
 
-void run_test_hooks( void )
+void
+run_test_hooks( void )
 {
     Device_T *cd;
 
@@ -617,7 +629,8 @@ void run_test_hooks( void )
  * Function runs the end-of-test hook functions of all modules
  *-------------------------------------------------------------*/
 
-void run_end_of_test_hooks( void )
+void
+run_end_of_test_hooks( void )
 {
     Device_T *cd;
 
@@ -665,7 +678,8 @@ void run_end_of_test_hooks( void )
  * Function runs the experiment hook functions of all modules
  *------------------------------------------------------------*/
 
-void run_exp_hooks( void )
+void
+run_exp_hooks( void )
 {
     Device_T *cd;
 
@@ -727,7 +741,8 @@ void run_exp_hooks( void )
  * Function runs the end-of-experiment hook functions of all modules
  *-------------------------------------------------------------------*/
 
-void run_end_of_exp_hooks( void )
+void
+run_end_of_exp_hooks( void )
 {
     Device_T *cd;
 
@@ -792,7 +807,8 @@ void run_end_of_exp_hooks( void )
  * Function runs the exit hook functions of all modules
  *------------------------------------------------------*/
 
-void run_exit_hooks( void )
+void
+run_exit_hooks( void )
 {
     Device_T *cd;
 
@@ -853,7 +869,8 @@ void run_exit_hooks( void )
  * Function runs the child exit hooks in all modules
  *---------------------------------------------------*/
 
-void run_child_exit_hooks( void )
+void
+run_child_exit_hooks( void )
 {
     Device_T *cd;
 
@@ -925,9 +942,10 @@ void run_child_exit_hooks( void )
  *    the address of the symbol.
  *------------------------------------------------------------------------*/
 
-int get_lib_symbol( const char * from,
-                    const char * symbol,
-                    void **      symbol_ptr )
+int
+get_lib_symbol( const char * from,
+                const char * symbol,
+                void **      symbol_ptr )
 {
     Device_T *cd;
 
@@ -960,7 +978,8 @@ int get_lib_symbol( const char * from,
  * than closes the connection to the modules.
  *-------------------------------------------------------------*/
 
-void unload_device( Device_T * dev )
+void
+unload_device( Device_T * dev )
 {
     fsc2_assert( EDL.Call_Stack == NULL );
 

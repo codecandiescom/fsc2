@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -116,29 +116,29 @@ int hp8672a_end_of_exp_hook( void );
 void hp8672a_exit_hook(      void );
 
 
-Var_T *synthesizer_name(                Var_T * /* v */ );
-Var_T *synthesizer_state(               Var_T * /* v */ );
-Var_T *synthesizer_frequency(           Var_T * /* v */ );
-Var_T *synthesizer_step_frequency(      Var_T * /* v */ );
-Var_T *synthesizer_attenuation(         Var_T * /* v */ );
-Var_T *synthesizer_minimum_attenuation( Var_T * /* v */ );
-Var_T *synthesizer_sweep_up(            Var_T * /* v */ );
-Var_T *synthesizer_sweep_down(          Var_T * /* v */ );
-Var_T *synthesizer_reset_frequency(     Var_T * /* v */ );
-Var_T *synthesizer_use_table(           Var_T * /* v */ );
-Var_T *synthesizer_att_ref_freq(        Var_T * /* v */ );
-Var_T *synthesizer_modulation(          Var_T * /* v */ );
-Var_T *synthesizer_mod_ampl(            Var_T * /* v */ );
-Var_T *synthesizer_mod_type(            Var_T * /* v */ );
-Var_T *synthesizer_mod_source(          Var_T * /* v */ );
-Var_T *synthesizer_command(             Var_T * /* v */ );
+Var_T * synthesizer_name(                Var_T * /* v */ );
+Var_T * synthesizer_state(               Var_T * /* v */ );
+Var_T * synthesizer_frequency(           Var_T * /* v */ );
+Var_T * synthesizer_step_frequency(      Var_T * /* v */ );
+Var_T * synthesizer_attenuation(         Var_T * /* v */ );
+Var_T * synthesizer_minimum_attenuation( Var_T * /* v */ );
+Var_T * synthesizer_sweep_up(            Var_T * /* v */ );
+Var_T * synthesizer_sweep_down(          Var_T * /* v */ );
+Var_T * synthesizer_reset_frequency(     Var_T * /* v */ );
+Var_T * synthesizer_use_table(           Var_T * /* v */ );
+Var_T * synthesizer_att_ref_freq(        Var_T * /* v */ );
+Var_T * synthesizer_modulation(          Var_T * /* v */ );
+Var_T * synthesizer_mod_ampl(            Var_T * /* v */ );
+Var_T * synthesizer_mod_type(            Var_T * /* v */ );
+Var_T * synthesizer_mod_source(          Var_T * /* v */ );
+Var_T * synthesizer_command(             Var_T * /* v */ );
 
 
 /* functions defined in "hp8672a_util.c" */
 
 FILE *hp8672a_find_table( char ** /* name */ );
 
-FILE *hp8672a_open_table( char * /* name */ );
+FILE * hp8672a_open_table( char * /* name */ );
 
 double hp8672a_get_att_from_table( double /* freq */ );
 

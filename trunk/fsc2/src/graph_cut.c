@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -108,7 +108,8 @@ static bool cut_has_been_shown = UNSET;
  * Function to initialize the minimum sizes of the cut graphic window
  *--------------------------------------------------------------------*/
 
-void cut_init( void )
+void
+cut_init( void )
 {
     if ( GUI.G_Funcs.size == LOW )
     {
@@ -134,8 +135,9 @@ void cut_init( void )
  * dir: axis canvas the mouse button was pressed in (X or Y)
  *-----------------------------------------------------------------------*/
 
-void cut_show( int  dir,
-               long u_index )
+void
+cut_show( int  dir,
+          long u_index )
 {
     int flags;
     int x, y;
@@ -294,8 +296,9 @@ void cut_show( int  dir,
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static void cut_setup_canvas( Canvas_T *  c,
-                              FL_OBJECT * obj )
+static void
+cut_setup_canvas( Canvas_T *  c,
+                  FL_OBJECT * obj )
 {
     XSetWindowAttributes attributes;
     FL_HANDLE_CANVAS ch = cut_canvas_handler;
@@ -357,8 +360,9 @@ static void cut_setup_canvas( Canvas_T *  c,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static void cut_canvas_off( Canvas_T *  c,
-                            FL_OBJECT * obj )
+static void
+cut_canvas_off( Canvas_T *  c,
+                FL_OBJECT * obj )
 {
     FL_HANDLE_CANVAS ch = cut_canvas_handler;
 
@@ -381,7 +385,8 @@ static void cut_canvas_off( Canvas_T *  c,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void G_init_cut_curve( void )
+void
+G_init_cut_curve( void )
 {
     static bool first_time = SET;
     Curve_1d_T *cv = &G_2d.cut_curve;
@@ -527,8 +532,9 @@ void G_init_cut_curve( void )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-static int cut_form_close_handler( FL_FORM * a  UNUSED_ARG,
-                                   void    * b  UNUSED_ARG )
+static int
+cut_form_close_handler( FL_FORM * a  UNUSED_ARG,
+                        void    * b  UNUSED_ARG )
 {
     cut_close_callback( GUI.cut_form->cut_close_button, 0 );
     return FL_IGNORE;
@@ -538,7 +544,8 @@ static int cut_form_close_handler( FL_FORM * a  UNUSED_ARG,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void cut_form_close( void )
+void
+cut_form_close( void )
 {
     int i;
     Curve_1d_T *cv = &G_2d.cut_curve;
@@ -602,8 +609,9 @@ void cut_form_close( void )
  * first delete and later to recreate lots of stuff).
  *-------------------------------------------------------------*/
 
-void cut_close_callback( FL_OBJECT * a  UNUSED_ARG,
-                         long        b  UNUSED_ARG )
+void
+cut_close_callback( FL_OBJECT * a  UNUSED_ARG,
+                    long        b  UNUSED_ARG )
 {
     int i;
 
@@ -639,9 +647,10 @@ void cut_close_callback( FL_OBJECT * a  UNUSED_ARG,
  * this curve.
  *----------------------------------------------------------*/
 
-static void cut_calc_curve( int  dir,
-                            long p_index,
-                            bool has_been_shown )
+static void
+cut_calc_curve( int  dir,
+                long p_index,
+                bool has_been_shown )
 {
     long i;
     Curve_1d_T *cv = &G_2d.cut_curve;
@@ -784,7 +793,8 @@ static void cut_calc_curve( int  dir,
  * be shown and counts the number of displayed points.
  *-------------------------------------------------------*/
 
-static void cut_recalc_XPoints( void )
+static void
+cut_recalc_XPoints( void )
 {
     long k, j;
     Curve_1d_T *cv = &G_2d.cut_curve;
@@ -821,7 +831,8 @@ static void cut_recalc_XPoints( void )
  * Called whenever a different curve is to be displayed
  *------------------------------------------------------*/
 
-void cut_new_curve_handler( void )
+void
+cut_new_curve_handler( void )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;
     int i;
@@ -924,9 +935,10 @@ void cut_new_curve_handler( void )
  * and thus also the y-scaling of the cut curve
  *---------------------------------------------------------------------------*/
 
-bool cut_data_rescaled( long   curve,
-                        double y_min,
-                        double y_max )
+bool
+cut_data_rescaled( long   curve,
+                   double y_min,
+                   double y_max )
 {
     long i;
     Curve_1d_T *cv  = &G_2d.cut_curve;
@@ -1016,8 +1028,9 @@ bool cut_data_rescaled( long   curve,
  * the memory that will be used for them.
  *------------------------------------------------------------------------*/
 
-bool cut_num_points_changed( int  dir,
-                             long num_points )
+bool
+cut_num_points_changed( int  dir,
+                        long num_points )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;
     Scaled_Point_T *sp;
@@ -1070,10 +1083,11 @@ bool cut_num_points_changed( int  dir,
  * but are for positions where no data have been shown yet.
  *--------------------------------------------------------------------------*/
 
-bool cut_new_points( long curve,
-                     long x_index,
-                     long y_index,
-                     long len )
+bool
+cut_new_points( long curve,
+                long x_index,
+                long y_index,
+                long len )
 {
     Scaled_Point_T *sp;
     long p_index;
@@ -1119,8 +1133,9 @@ bool cut_new_points( long curve,
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void cut_integrate_point( long   p_index,
-                                 double val )
+static void
+cut_integrate_point( long   p_index,
+                     double val )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;
     Scaled_Point_T *cvp;
@@ -1203,12 +1218,13 @@ static void cut_integrate_point( long   p_index,
  * Handler for all events the cut graphics window may receive
  *------------------------------------------------------------*/
 
-static int cut_canvas_handler( FL_OBJECT * obj,
-                               Window      window,
-                               int         w,
-                               int         h,
-                               XEvent *    ev,
-                               void *      udata )
+static int
+cut_canvas_handler( FL_OBJECT * obj,
+                    Window      window,
+                    int         w,
+                    int         h,
+                    XEvent *    ev,
+                    void *      udata )
 {
     Canvas_T *c = udata;
 
@@ -1246,9 +1262,10 @@ static int cut_canvas_handler( FL_OBJECT * obj,
  * Handler for ConfigureNotify events the cut graphic window gets
  *----------------------------------------------------------------*/
 
-static void cut_reconfigure_window( Canvas_T * c,
-                                    int        w,
-                                    int        h )
+static void
+cut_reconfigure_window( Canvas_T * c,
+                        int        w,
+                        int        h )
 {
     long i;
     static bool is_reconf[ 3 ] = { UNSET, UNSET, UNSET };
@@ -1380,10 +1397,11 @@ static void cut_reconfigure_window( Canvas_T * c,
  * Handler for ButtonPress events the cut graphic gets
  *-----------------------------------------------------*/
 
-static void cut_press_handler( FL_OBJECT * obj,
-                               Window      window,
-                               XEvent *    ev,
-                               Canvas_T *  c )
+static void
+cut_press_handler( FL_OBJECT * obj,
+                   Window      window,
+                   XEvent *    ev,
+                   Canvas_T *  c )
 {
     int old_button_state = G.button_state;
     unsigned int keymask;
@@ -1548,10 +1566,11 @@ static void cut_press_handler( FL_OBJECT * obj,
  * Handler for ButtonRelease events the cut graphic window gets
  *--------------------------------------------------------------*/
 
-static void cut_release_handler( FL_OBJECT * obj  UNUSED_ARG,
-                                 Window      window,
-                                 XEvent *    ev,
-                                 Canvas_T *  c )
+static void
+cut_release_handler( FL_OBJECT * obj  UNUSED_ARG,
+                     Window      window,
+                     XEvent *    ev,
+                     Canvas_T *  c )
 {
     unsigned int keymask;
     bool scale_changed = UNSET;
@@ -1739,10 +1758,11 @@ static void cut_release_handler( FL_OBJECT * obj  UNUSED_ARG,
  * Handler for MotionNotify events the cut graphic window gets
  *-------------------------------------------------------------*/
 
-static void cut_motion_handler( FL_OBJECT * obj  UNUSED_ARG,
-                                Window      window,
-                                XEvent *    ev,
-                                Canvas_T *  c )
+static void
+cut_motion_handler( FL_OBJECT * obj  UNUSED_ARG,
+                    Window      window,
+                    XEvent *    ev,
+                    Canvas_T *  c )
 {
     XEvent new_ev;
     bool scale_changed = UNSET;
@@ -1863,8 +1883,9 @@ static void cut_motion_handler( FL_OBJECT * obj  UNUSED_ARG,
  * Handler for the undo button in the cut graphic window
  *-------------------------------------------------------*/
 
-void cut_undo_button_callback( FL_OBJECT * a  UNUSED_ARG,
-                               long        b  UNUSED_ARG )
+void
+cut_undo_button_callback( FL_OBJECT * a  UNUSED_ARG,
+                          long        b  UNUSED_ARG )
 {
     double temp_s2d,
            temp_shift;
@@ -1907,8 +1928,9 @@ void cut_undo_button_callback( FL_OBJECT * a  UNUSED_ARG,
  * Handler for the full scale button in the cut graphic window
  *-------------------------------------------------------------*/
 
-void cut_fs_button_callback( FL_OBJECT * a  UNUSED_ARG,
-                             long        b  UNUSED_ARG )
+void
+cut_fs_button_callback( FL_OBJECT * a  UNUSED_ARG,
+                        long        b  UNUSED_ARG )
 {
     int state;
 
@@ -1943,7 +1965,8 @@ void cut_fs_button_callback( FL_OBJECT * a  UNUSED_ARG,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void redraw_all_cut_canvases( void )
+void
+redraw_all_cut_canvases( void )
 {
     if ( ! G_2d.is_cut )
         return;
@@ -1958,7 +1981,8 @@ void redraw_all_cut_canvases( void )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static void redraw_cut_canvas( Canvas_T * c )
+static void
+redraw_cut_canvas( Canvas_T * c )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;
     Marker_1d_T *m;
@@ -2025,7 +2049,8 @@ static void redraw_cut_canvas( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static void repaint_cut_canvas( Canvas_T * c )
+static void
+repaint_cut_canvas( Canvas_T * c )
 {
     Pixmap pm;
     Curve_1d_T *cv = &G_2d.cut_curve;
@@ -2167,8 +2192,9 @@ static void repaint_cut_canvas( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-int get_mouse_pos_cut( double *       pa,
-                       unsigned int * keymask )
+int
+get_mouse_pos_cut( double *       pa,
+                   unsigned int * keymask )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;
     Curve_2d_T *scv;
@@ -2210,7 +2236,8 @@ int get_mouse_pos_cut( double *       pa,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void redraw_cut_axis( int coord )
+void
+redraw_cut_axis( int coord )
 {
     Canvas_T *c;
     int width;
@@ -2274,8 +2301,9 @@ void redraw_cut_axis( int coord )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void cut_make_scale( Canvas_T * c,
-                            int        coord )
+static void
+cut_make_scale( Canvas_T * c,
+                int        coord )
 {
     Curve_1d_T *cv  = &G_2d.cut_curve;
     Curve_2d_T *cv2 = G_2d.curve_2d[ G_2d.active_curve ];
@@ -2568,7 +2596,8 @@ static void cut_make_scale( Canvas_T * c,
  * offset to all XPoints instead of going through all the scalings...
  *-------------------------------------------------------------------*/
 
-static void shift_XPoints_of_cut_curve( Canvas_T * c )
+static void
+shift_XPoints_of_cut_curve( Canvas_T * c )
 {
     long j, k;
     int dx = 0,
@@ -2628,7 +2657,8 @@ static void shift_XPoints_of_cut_curve( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool cut_change_x_range( Canvas_T * c )
+static bool
+cut_change_x_range( Canvas_T * c )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;
     double x1, x2;
@@ -2652,7 +2682,8 @@ static bool cut_change_x_range( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool cut_change_y_range( Canvas_T * c )
+static bool
+cut_change_y_range( Canvas_T * c )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;
     double cy1, cy2;
@@ -2679,7 +2710,8 @@ static bool cut_change_y_range( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool cut_change_xy_range( Canvas_T * c )
+static bool
+cut_change_xy_range( Canvas_T * c )
 {
     bool scale_changed = UNSET;
     Curve_1d_T *cv = &G_2d.cut_curve;
@@ -2728,7 +2760,8 @@ static bool cut_change_xy_range( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool cut_zoom_x( Canvas_T * c )
+static bool
+cut_zoom_x( Canvas_T * c )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;
     double px;
@@ -2767,7 +2800,8 @@ static bool cut_zoom_x( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool cut_zoom_y( Canvas_T * c )
+static bool
+cut_zoom_y( Canvas_T * c )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;
     double py;
@@ -2809,7 +2843,8 @@ static bool cut_zoom_y( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool cut_zoom_xy( Canvas_T * c )
+static bool
+cut_zoom_xy( Canvas_T * c )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;
     double px, py;
@@ -2871,7 +2906,8 @@ static bool cut_zoom_xy( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static void cut_save_scale_state( void )
+static void
+cut_save_scale_state( void )
 {
     int i;
     Curve_1d_T *cv = &G_2d.cut_curve;
@@ -2890,7 +2926,8 @@ static void cut_save_scale_state( void )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void cut_clear_curve( long curve )
+void
+cut_clear_curve( long curve )
 {
     long i;
     Scaled_Point_T *sp;
@@ -2908,8 +2945,9 @@ void cut_clear_curve( long curve )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void cut_next_index( FL_OBJECT * a  UNUSED_ARG,
-                     long        b )
+void
+cut_next_index( FL_OBJECT * a  UNUSED_ARG,
+                long        b )
 {
     delete_all_cut_markers( UNSET );
     switch( b )
@@ -2937,8 +2975,9 @@ void cut_next_index( FL_OBJECT * a  UNUSED_ARG,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void cut_change_dir( FL_OBJECT * a  UNUSED_ARG,
-                     long        b  UNUSED_ARG )
+void
+cut_change_dir( FL_OBJECT * a  UNUSED_ARG,
+                long        b  UNUSED_ARG )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;
     Curve_2d_T *scv = G_2d.curve_2d[ G_2d.active_curve ];
@@ -3003,8 +3042,9 @@ void cut_change_dir( FL_OBJECT * a  UNUSED_ARG,
  * Gets called to create a marker at 'x_pos'
  *-------------------------------------------*/
 
-void set_cut_marker( long x_pos,
-                     long color )
+void
+set_cut_marker( long x_pos,
+                long color )
 {
     Marker_1d_T *m, *cm;
     XGCValues gcv;
@@ -3045,7 +3085,8 @@ void set_cut_marker( long x_pos,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void delete_cut_marker( long x_pos )
+void
+delete_cut_marker( long x_pos )
 {
     Marker_1d_T *m, *mn = NULL;
 
@@ -3076,7 +3117,8 @@ void delete_cut_marker( long x_pos )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void delete_all_cut_markers( bool redraw_flag )
+void
+delete_all_cut_markers( bool redraw_flag )
 {
     Marker_1d_T *m, *mn;
 
@@ -3108,8 +3150,9 @@ void delete_all_cut_markers( bool redraw_flag )
  * for the 2D graphics form.
  *---------------------------------------------------------*/
 
-void cut_curve_button_callback_2d( FL_OBJECT * obj,
-                                   long        data )
+void
+cut_curve_button_callback_2d( FL_OBJECT * obj,
+                              long        data )
 {
     return curve_button_callback_2d( obj, data );
 }

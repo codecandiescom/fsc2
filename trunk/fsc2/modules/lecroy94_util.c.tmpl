@@ -2,7 +2,7 @@
  *
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -77,7 +77,8 @@ static long lecroy94_tmpl_calc_pos( double t );
  * tests.
  *--------------------------------------------------------------------------*/
 
-void lecroy94_tmpl_soe_checks( void )
+void
+lecroy94_tmpl_soe_checks( void )
 {
     LECROY94_TMPL_PTC_DELAY_T *pd;
     LECROY94_TMPL_PTC_WINDOW_T *pw;
@@ -100,7 +101,8 @@ void lecroy94_tmpl_soe_checks( void )
  * function must be called in the exit handler to get rid of the memory.
  *-----------------------------------------------------------------------*/
 
-void lecroy94_tmpl_exit_cleanup( void )
+void
+lecroy94_tmpl_exit_cleanup( void )
 {
     LECROY94_TMPL_PTC_DELAY_T *pd;
     LECROY94_TMPL_PTC_WINDOW_T *pw;
@@ -126,7 +128,8 @@ void lecroy94_tmpl_exit_cleanup( void )
  * Returns a string with a time value with a resonable unit.
  *-----------------------------------------------------------*/
 
-const char *lecroy94_tmpl_ptime( double p_time )
+const char *
+lecroy94_tmpl_ptime( double p_time )
 {
     static char buffer[ 2 ][ 128 ];
     static size_t i = 1;
@@ -151,7 +154,8 @@ const char *lecroy94_tmpl_ptime( double p_time )
  * Deletes a window by removing it from the linked list of windows
  *-----------------------------------------------------------------*/
 
-void lecroy94_tmpl_delete_windows( LECROY94_TMPL_T * s )
+void
+lecroy94_tmpl_delete_windows( LECROY94_TMPL_T * s )
 {
     Window_T *w;
 
@@ -170,7 +174,8 @@ void lecroy94_tmpl_delete_windows( LECROY94_TMPL_T * s )
  * argument gets set to the windows number.
  *------------------------------------------------------------*/
 
-Window_T *lecroy94_tmpl_get_window_by_number( long wid )
+Window_T *
+lecroy94_tmpl_get_window_by_number( long wid )
 {
     Window_T *w;
     
@@ -193,7 +198,8 @@ Window_T *lecroy94_tmpl_get_window_by_number( long wid )
  * switching interleaved mode on or off.
  *-----------------------------------------------------------*/
 
-void lecroy94_tmpl_all_windows_check( void )
+void
+lecroy94_tmpl_all_windows_check( void )
 {
     Window_T *w = lecroy94_tmpl.w;
 
@@ -213,8 +219,9 @@ void lecroy94_tmpl_all_windows_check( void )
  * Checks if the window fits into the recorded data set
  *------------------------------------------------------*/
 
-void lecroy94_tmpl_window_check( Window_T * w,
-                                 bool       show_num )
+void
+lecroy94_tmpl_window_check( Window_T * w,
+                            bool       show_num )
 {
     long start;
     long end;
@@ -324,7 +331,8 @@ void lecroy94_tmpl_window_check( Window_T * w,
  * during the test run.
  *---------------------------------------------------------------*/
 
-static void lecroy94_tmpl_soe_window_check( LECROY94_TMPL_PTC_WINDOW_T * p )
+static void
+lecroy94_tmpl_soe_window_check( LECROY94_TMPL_PTC_WINDOW_T * p )
 {
     double real_timebase = lecroy94_tmpl.timebase;
     int real_tb_index = lecroy94_tmpl.tb_index;
@@ -419,7 +427,8 @@ static void lecroy94_tmpl_soe_window_check( LECROY94_TMPL_PTC_WINDOW_T * p )
  * gets changed
  *-----------------------------------------------------------*/
 
-double lecroy94_tmpl_trigger_delay_check( void )
+double
+lecroy94_tmpl_trigger_delay_check( void )
 {
     double delay = lecroy94_tmpl.trigger_delay;
     double real_delay;
@@ -508,7 +517,8 @@ double lecroy94_tmpl_trigger_delay_check( void )
  * be checked during the test run.
  *-----------------------------------------------------------*/
 
-static void lecroy94_tmpl_soe_trigger_delay_check( double delay )
+static void
+lecroy94_tmpl_soe_trigger_delay_check( double delay )
 {
     double real_delay = LECROY94_TMPL_TRIG_DELAY_RESOLUTION
                         * lecroy94_tmpl.timebase
@@ -555,7 +565,8 @@ static void lecroy94_tmpl_soe_trigger_delay_check( double delay )
  * with the current timebase
  *-----------------------------------------------------------------------*/
 
-long lecroy94_tmpl_find_length( void )
+long
+lecroy94_tmpl_find_length( void )
 {
     size_t i;
     long cl = lecroy94_tmpl_curve_length( );
@@ -576,7 +587,8 @@ long lecroy94_tmpl_find_length( void )
  * position relative to the trigger position
  *-------------------------------------------------------------*/
 
-static long lecroy94_tmpl_calc_pos( double t )
+static long
+lecroy94_tmpl_calc_pos( double t )
 {
     return lrnd( ( t + lecroy94_tmpl.trigger_delay ) /
                  lecroy94_tmpl_time_per_point( ) );
@@ -589,7 +601,8 @@ static long lecroy94_tmpl_calc_pos( double t )
  * set timebase and acquisition mode (SS or RIS) setting
  *-------------------------------------------------------------------*/
 
-long lecroy94_tmpl_curve_length( void )
+long
+lecroy94_tmpl_curve_length( void )
 {
     return    hres[ lecroy94_tmpl.tb_index ].ss_rl < 0
            || ( hres[ lecroy94_tmpl.tb_index ].ris_rl > 0
@@ -605,7 +618,8 @@ long lecroy94_tmpl_curve_length( void )
  * timebase and acquisition (SS or RIS) mode
  *--------------------------------------------------------------*/
 
-double lecroy94_tmpl_time_per_point( void )
+double
+lecroy94_tmpl_time_per_point( void )
 {
     return    hres[ lecroy94_tmpl.tb_index ].ss_rl < 0
            || ( hres[ lecroy94_tmpl.tb_index ].ris_rl > 0
@@ -625,7 +639,8 @@ double lecroy94_tmpl_time_per_point( void )
  * SET -1 is returned to indicate the error.
  *---------------------------------------------------------------------*/
 
-long lecroy94_tmpl_translate_channel( int  dir,
+long
+lecroy94_tmpl_translate_channel( int  dir,
                                       long channel,
                                       bool flag )
 {
@@ -751,8 +766,9 @@ long lecroy94_tmpl_translate_channel( int  dir,
  * about the current state of the oscilloscope
  *-----------------------------------------------------------*/
 
-void lecroy94_tmpl_store_state( LECROY94_TMPL_T * dest,
-                                LECROY94_TMPL_T * src )
+void
+lecroy94_tmpl_store_state( LECROY94_TMPL_T * dest,
+                           LECROY94_TMPL_T * src )
 {
     Window_T *w;
     int i;

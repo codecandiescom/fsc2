@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -41,7 +41,8 @@ static void avg_data_check( Var_T * avg,
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-Var_T * f_abort( Var_T * v  UNUSED_ARG )
+Var_T *
+f_abort( Var_T * v  UNUSED_ARG )
 {
     char *str;
 
@@ -66,7 +67,8 @@ Var_T * f_abort( Var_T * v  UNUSED_ARG )
  * This is called for the end() EDL function
  *-------------------------------------------*/
 
-Var_T * f_stopsim( Var_T * v  UNUSED_ARG )
+Var_T *
+f_stopsim( Var_T * v  UNUSED_ARG )
 {
     EDL.do_quit = SET;
     return NULL;
@@ -77,7 +79,8 @@ Var_T * f_stopsim( Var_T * v  UNUSED_ARG )
  * Conversion float to integer (result is integer)
  *-------------------------------------------------*/
 
-Var_T * f_int( Var_T * v )
+Var_T *
+f_int( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -140,7 +143,8 @@ Var_T * f_int( Var_T * v )
  * Conversion int to floating point (result is float)
  *----------------------------------------------------*/
 
-Var_T * f_float( Var_T * v )
+Var_T *
+f_float( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -197,7 +201,8 @@ Var_T * f_float( Var_T * v )
  * Rounding of floating point numbers (result is integer)
  *--------------------------------------------------------*/
 
-Var_T * f_round( Var_T * v )
+Var_T *
+f_round( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -261,7 +266,8 @@ Var_T * f_round( Var_T * v )
  * Floor value (result is integer)
  *---------------------------------*/
 
-Var_T * f_floor( Var_T * v )
+Var_T *
+f_floor( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -324,7 +330,8 @@ Var_T * f_floor( Var_T * v )
  * Ceiling value (result is integer)
  *-----------------------------------*/
 
-Var_T * f_ceil( Var_T * v )
+Var_T *
+f_ceil( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -387,7 +394,8 @@ Var_T * f_ceil( Var_T * v )
  * abs of value (result has same as type argument)
  *-------------------------------------------------*/
 
-Var_T * f_abs( Var_T * v )
+Var_T *
+f_abs( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -465,7 +473,8 @@ Var_T * f_abs( Var_T * v )
  * all inputs were integer values)
  *------------------------------------------------------*/
 
-Var_T * f_lmax( Var_T * v )
+Var_T *
+f_lmax( Var_T * v )
 {
     double m = - HUGE_VAL;
     bool all_int = SET;
@@ -539,7 +548,8 @@ Var_T * f_lmax( Var_T * v )
  * all inputs were integer values)
  *------------------------------------------------------*/
 
-Var_T * f_lmin( Var_T * v )
+Var_T *
+f_lmin( Var_T * v )
 {
     double m = HUGE_VAL;
     bool all_int = SET;
@@ -612,7 +622,8 @@ Var_T * f_lmin( Var_T * v )
  * sin of argument (in radian) (result is float)
  *-----------------------------------------------*/
 
-Var_T * f_sin( Var_T * v )
+Var_T *
+f_sin( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -671,7 +682,8 @@ Var_T * f_sin( Var_T * v )
  * cos of argument (in radian) (result is float)
  *-----------------------------------------------*/
 
-Var_T * f_cos( Var_T * v )
+Var_T *
+f_cos( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -730,7 +742,8 @@ Var_T * f_cos( Var_T * v )
  * tan of argument (in radian) (result is float)
  *-----------------------------------------------*/
 
-Var_T * f_tan( Var_T * v )
+Var_T *
+f_tan( Var_T * v )
 {
     double res;
     Var_T *new_var = NULL;
@@ -799,7 +812,8 @@ Var_T * f_tan( Var_T * v )
  * asin (in radian) of argument (with -1 <= x <= 1) (result is float)
  *--------------------------------------------------------------------*/
 
-Var_T * f_asin( Var_T * v )
+Var_T *
+f_asin( Var_T * v )
 {
     double arg;
     Var_T *new_var = NULL;
@@ -875,7 +889,8 @@ Var_T * f_asin( Var_T * v )
  * acos (in radian) of argument (with -1 <= x <= 1) (result is float)
  *--------------------------------------------------------------------*/
 
-Var_T * f_acos( Var_T * v )
+Var_T *
+f_acos( Var_T * v )
 {
     double arg;
     Var_T *new_var = NULL;
@@ -951,7 +966,8 @@ Var_T * f_acos( Var_T * v )
  * atan (in radian) of argument (result is float)
  *------------------------------------------------*/
 
-Var_T * f_atan( Var_T * v )
+Var_T *
+f_atan( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -1006,7 +1022,8 @@ Var_T * f_atan( Var_T * v )
  * sinh of argument (result is float)
  *------------------------------------*/
 
-Var_T * f_sinh( Var_T * v )
+Var_T *
+f_sinh( Var_T * v )
 {
     double res;
     Var_T *new_var = NULL;
@@ -1073,7 +1090,8 @@ Var_T * f_sinh( Var_T * v )
  * cosh of argument (result is float)
  *------------------------------------*/
 
-Var_T * f_cosh( Var_T * v )
+Var_T *
+f_cosh( Var_T * v )
 {
     double res;
     Var_T *new_var = NULL;
@@ -1140,7 +1158,8 @@ Var_T * f_cosh( Var_T * v )
  * tanh of argument (result is float)
  *------------------------------------*/
 
-Var_T * f_tanh( Var_T * v )
+Var_T *
+f_tanh( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -1195,7 +1214,8 @@ Var_T * f_tanh( Var_T * v )
  * Inverse of sinh of argument (result is float)
  *-----------------------------------------------*/
 
-Var_T * f_asinh( Var_T * v )
+Var_T *
+f_asinh( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -1284,7 +1304,8 @@ Var_T * f_asinh( Var_T * v )
  * Inverse of cosh of argument (result is float)
  *-----------------------------------------------*/
 
-Var_T * f_acosh( Var_T * v )
+Var_T *
+f_acosh( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -1367,7 +1388,8 @@ Var_T * f_acosh( Var_T * v )
  * Inverse of tanh of argument (result is float)
  *-----------------------------------------------*/
 
-Var_T * f_atanh( Var_T * v )
+Var_T *
+f_atanh( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -1446,7 +1468,8 @@ Var_T * f_atanh( Var_T * v )
  * exp of argument (result is float)
  *-----------------------------------*/
 
-Var_T * f_exp( Var_T * v )
+Var_T *
+f_exp( Var_T * v )
 {
     Var_T *new_var = NULL;
     double res;
@@ -1519,7 +1542,8 @@ Var_T * f_exp( Var_T * v )
  * ln of argument (with x > 0) (result is float)
  *-----------------------------------------------*/
 
-Var_T * f_ln( Var_T * v )
+Var_T *
+f_ln( Var_T * v )
 {
     double arg, res;
     Var_T *new_var = NULL;
@@ -1604,7 +1628,8 @@ Var_T * f_ln( Var_T * v )
  * log of argument (with x > 0) (result is float)
  *------------------------------------------------*/
 
-Var_T * f_log( Var_T * v )
+Var_T *
+f_log( Var_T * v )
 {
     double arg, res;
     Var_T *new_var = NULL;
@@ -1689,7 +1714,8 @@ Var_T * f_log( Var_T * v )
  * sqrt of argument (with x >= 0) (result is float)
  *--------------------------------------------------*/
 
-Var_T * f_sqrt( Var_T * v )
+Var_T *
+f_sqrt( Var_T * v )
 {
     double arg;
     Var_T *new_var = NULL;
@@ -1766,7 +1792,8 @@ Var_T * f_sqrt( Var_T * v )
  * Returns a random number between 0 and 1 (i.e. result is float)
  *----------------------------------------------------------------*/
 
-Var_T * f_random( Var_T * v )
+Var_T *
+f_random( Var_T * v )
 {
     long len;
     long i;
@@ -1802,7 +1829,8 @@ Var_T * f_random( Var_T * v )
 
 static bool grand_is_old = UNSET;
 
-Var_T * f_grand( Var_T * v )
+Var_T *
+f_grand( Var_T * v )
 {
     long len;
     long i;
@@ -1840,7 +1868,8 @@ Var_T * f_grand( Var_T * v )
  * University Press 1992, pp. 288-290, for all the gory details.
  *----------------------------------------------------------------------*/
 
-static double gauss_random( void )
+static double
+gauss_random( void )
 {
     static double next_val;
     double factor, radius, val_1, val_2;
@@ -1871,7 +1900,8 @@ static double gauss_random( void )
  * since 00:00:00 UTC, January 1, 1970) is used.
  *---------------------------------------------------------------------------*/
 
-Var_T * f_setseed( Var_T * v )
+Var_T *
+f_setseed( Var_T * v )
 {
     unsigned int arg;
 
@@ -1923,7 +1953,8 @@ Var_T * f_setseed( Var_T * v )
  * including) 0x20 and 0x7E for a 7-bit ASCII character set.
  *--------------------------------------------------------------*/
 
-Var_T * f_time( Var_T * v )
+Var_T *
+f_time( Var_T * v )
 {
     time_t tp;
     char ts[ 100 ];
@@ -1998,7 +2029,8 @@ Var_T * f_time( Var_T * v )
  * for the very first time.
  *----------------------------------------------------------*/
 
-Var_T * f_dtime( Var_T * v  UNUSED_ARG )
+Var_T *
+f_dtime( Var_T * v  UNUSED_ARG )
 {
     double new_time;
     static double old_time = 0.0;
@@ -2025,7 +2057,8 @@ Var_T * f_dtime( Var_T * v  UNUSED_ARG )
 #define DATE_FLAGS_WITH_E_MODIFIER   "cCxXyY"
 #define DATE_FLAGS_WITH_O_MODIFIER   "deHImMSuUVwWy"
 
-Var_T * f_date( Var_T * v )
+Var_T *
+f_date( Var_T * v )
 {
     time_t tp;
     char ts[ 256 ];
@@ -2128,7 +2161,8 @@ Var_T * f_date( Var_T * v )
  * Function returns the dimension of an array.
  *---------------------------------------------*/
 
-Var_T * f_dim( Var_T * v )
+Var_T *
+f_dim( Var_T * v )
 {
     vars_check( v, INT_VAR | FLOAT_VAR | INT_ARR | FLOAT_ARR |
                    INT_REF | FLOAT_REF );
@@ -2144,7 +2178,8 @@ Var_T * f_dim( Var_T * v )
  * when no elements exist yet.
  *-----------------------------------------------------------------*/
 
-Var_T * f_size( Var_T * v )
+Var_T *
+f_size( Var_T * v )
 {
     Var_T *new_var = NULL;
 
@@ -2184,7 +2219,8 @@ Var_T * f_size( Var_T * v )
  * be the number of elements to be included into the mean.
  *----------------------------------------------------------------------*/
 
-Var_T * f_mean( Var_T * v )
+Var_T *
+f_mean( Var_T * v )
 {
     ssize_t i;
     long start;
@@ -2338,7 +2374,8 @@ Var_T * f_mean( Var_T * v )
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-Var_T * f_rms( Var_T * v )
+Var_T *
+f_rms( Var_T * v )
 {
     ssize_t i;
     long start;
@@ -2462,7 +2499,8 @@ Var_T * f_rms( Var_T * v )
  * or a submatrix of a more-dimensional matrix
  *----------------------------------------------*/
 
-Var_T * f_slice( Var_T * v )
+Var_T *
+f_slice( Var_T * v )
 {
     long start;
     ssize_t len;
@@ -2564,7 +2602,8 @@ Var_T * f_slice( Var_T * v )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-Var_T * f_square( Var_T * v )
+Var_T *
+f_square( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -2650,7 +2689,8 @@ Var_T * f_square( Var_T * v )
  * Function for converting magnetic fields from Gauss to Tesla
  *-------------------------------------------------------------*/
 
-Var_T * f_G2T( Var_T * v )
+Var_T *
+f_G2T( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -2709,7 +2749,8 @@ Var_T * f_G2T( Var_T * v )
  * Function for converting magnetic fields from Tesla to Gauss
  *-------------------------------------------------------------*/
 
-Var_T * f_T2G( Var_T * v )
+Var_T *
+f_T2G( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -2768,7 +2809,8 @@ Var_T * f_T2G( Var_T * v )
  * Function for converting temperatures from degree Celsius to Kevin
  *-------------------------------------------------------------------*/
 
-Var_T * f_C2K( Var_T * v )
+Var_T *
+f_C2K( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -2828,7 +2870,8 @@ Var_T * f_C2K( Var_T * v )
  * Function for converting temperatures from Kevin to degree Celsius
  *-------------------------------------------------------------------*/
 
-Var_T * f_K2C( Var_T * v )
+Var_T *
+f_K2C( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -2888,7 +2931,8 @@ Var_T * f_K2C( Var_T * v )
  * Function for converting values in degrees to radians
  *------------------------------------------------------*/
 
-Var_T * f_D2R( Var_T * v )
+Var_T *
+f_D2R( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -2948,7 +2992,8 @@ Var_T * f_D2R( Var_T * v )
  * Function for converting values in radians to degrees
  *------------------------------------------------------*/
 
-Var_T * f_R2D( Var_T * v )
+Var_T *
+f_R2D( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -3008,7 +3053,8 @@ Var_T * f_R2D( Var_T * v )
  * Function for converting wave lengths (in m) to wavenumbers (i.e. cm^-1)
  *-------------------------------------------------------------------------*/
 
-Var_T * f_WL2WN( Var_T * v )
+Var_T *
+f_WL2WN( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -3091,7 +3137,8 @@ Var_T * f_WL2WN( Var_T * v )
  * Function for converting wavenumbers (i.e. cm^-1) to wave lengths (in m)
  *-------------------------------------------------------------------------*/
 
-Var_T * f_WN2WL( Var_T * v )
+Var_T *
+f_WN2WL( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -3174,7 +3221,8 @@ Var_T * f_WN2WL( Var_T * v )
  * Function for converting frequencies (in Hz) to wavenumbers (i.e. cm^-1)
  *-------------------------------------------------------------------------*/
 
-Var_T * f_F2WN( Var_T * v )
+Var_T *
+f_F2WN( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -3233,7 +3281,8 @@ Var_T * f_F2WN( Var_T * v )
  * Function for converting wavenumbers (i.e. cm^-1) to frequencies (in Hz)
  *-------------------------------------------------------------------------*/
 
-Var_T * f_WN2F( Var_T * v )
+Var_T *
+f_WN2F( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -3291,7 +3340,8 @@ Var_T * f_WN2F( Var_T * v )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-Var_T * f_islice( Var_T * v )
+Var_T *
+f_islice( Var_T * v )
 {
     long size;
     Var_T *ret;
@@ -3345,7 +3395,8 @@ Var_T * f_islice( Var_T * v )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-Var_T * f_fslice( Var_T * v )
+Var_T *
+f_fslice( Var_T * v )
 {
     long size;
     Var_T *ret;
@@ -3399,7 +3450,8 @@ Var_T * f_fslice( Var_T * v )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-Var_T * f_lspace( Var_T * v )
+Var_T *
+f_lspace( Var_T * v )
 {
     Var_T *nv;
     ssize_t i;
@@ -3434,7 +3486,8 @@ Var_T * f_lspace( Var_T * v )
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-Var_T * f_reverse( Var_T * v )
+Var_T *
+f_reverse( Var_T * v )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -3518,7 +3571,8 @@ Var_T * f_reverse( Var_T * v )
  * asinh(), acosh() and atanh() functions.
  *--------------------------------------------*/
 
-static double datanh( double arg )
+static double
+datanh( double arg )
 {
     int sgn;
 
@@ -3540,7 +3594,8 @@ static double datanh( double arg )
  * that the new average (always as a float number of array) gets returned
  *------------------------------------------------------------------------*/
 
-Var_T * f_add2avg( Var_T * v )
+Var_T *
+f_add2avg( Var_T * v )
 {
     Var_T *avg = ( v->type & ( INT_VAR | INT_ARR | INT_REF ) ) ?
                  f_float( v ) : v;
@@ -3583,9 +3638,10 @@ Var_T * f_add2avg( Var_T * v )
  * tthe size(s) of the average and initializing to zero)
  *------------------------------------------------------------------------*/
 
-static void avg_data_check( Var_T * avg,
-                            Var_T * data,
-                            long count )
+static void
+avg_data_check( Var_T * avg,
+                Var_T * data,
+                long    count )
 {
     ssize_t i;
 

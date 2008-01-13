@@ -1,7 +1,7 @@
 #/*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -66,7 +66,8 @@ static long hjs_attenuator_att_to_step( double att );
  * Function called when the module has just been loaded
  *------------------------------------------------------*/
 
-int hjs_attenuator_init_hook( void )
+int
+hjs_attenuator_init_hook( void )
 {
     fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
@@ -86,7 +87,8 @@ int hjs_attenuator_init_hook( void )
  * Function called at the start of the test run
  *----------------------------------------------*/
 
-int hjs_attenuator_test_hook( void )
+int
+hjs_attenuator_test_hook( void )
 {
     hjs_attenuator_stored = hjs_attenuator;
     return 1;
@@ -97,7 +99,8 @@ int hjs_attenuator_test_hook( void )
  * Function called at the start of an experiment
  *-----------------------------------------------*/
 
-int hjs_attenuator_exp_hook( void )
+int
+hjs_attenuator_exp_hook( void )
 {
     /* Restore state from before the start of the test run (or the
        last experiment) */
@@ -115,7 +118,8 @@ int hjs_attenuator_exp_hook( void )
  * Function called at the end of an experiment
  *---------------------------------------------*/
 
-int hjs_attenuator_end_of_exp_hook( void )
+int
+hjs_attenuator_end_of_exp_hook( void )
 {
     if ( hjs_attenuator.is_open )
         fsc2_serial_close( SERIAL_PORT );
@@ -129,7 +133,8 @@ int hjs_attenuator_end_of_exp_hook( void )
  * Function called just before the module gets unloaded
  *------------------------------------------------------*/
 
-void hjs_attenuator_exit_hook( void )
+void
+hjs_attenuator_exit_hook( void )
 {
     /* Get rid of the data from the calibration file */
 
@@ -144,7 +149,8 @@ void hjs_attenuator_exit_hook( void )
  * process. It set the attenuator to the maximum attenuation.
  *--------------------------------------------------------------------*/
 
-void hjs_attenuator_child_exit_hook( void )
+void
+hjs_attenuator_child_exit_hook( void )
 {
     if ( hjs_attenuator.is_step )
         hjs_attenuator_set_attenuation(
@@ -163,7 +169,8 @@ void hjs_attenuator_child_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *mw_attenuator_name( Var_T * v  UNUSED_ARG )
+Var_T *
+mw_attenuator_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -180,7 +187,8 @@ Var_T *mw_attenuator_name( Var_T * v  UNUSED_ARG )
  * used.
  *-----------------------------------------------------------*/
 
-Var_T *mw_attenuator_load_calibration( Var_T * v )
+Var_T *
+mw_attenuator_load_calibration( Var_T * v )
 {
     FILE *tfp = NULL;
 
@@ -278,7 +286,8 @@ Var_T *mw_attenuator_load_calibration( Var_T * v )
  * calculate the number of steps needed to change to a new attenuation.
  *----------------------------------------------------------------------*/
 
-Var_T *mw_attenuator_initial_attenuation( Var_T * v )
+Var_T *
+mw_attenuator_initial_attenuation( Var_T * v )
 {
     if ( hjs_attenuator.is_step )
     {
@@ -307,7 +316,8 @@ Var_T *mw_attenuator_initial_attenuation( Var_T * v )
  * attenuation set at the device.
  *----------------------------------------------------------------*/
 
-Var_T *mw_attenuator_attenuation( Var_T * v )
+Var_T *
+mw_attenuator_attenuation( Var_T * v )
 {
     double att;
     long step;
@@ -349,7 +359,8 @@ Var_T *mw_attenuator_attenuation( Var_T * v )
  * Initialization of the serial port the device is connected to.
  *---------------------------------------------------------------*/
 
-static bool hjs_attenuator_serial_init( void )
+static bool
+hjs_attenuator_serial_init( void )
 {
     if ( ( hjs_attenuator.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
                                  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) )
@@ -382,7 +393,8 @@ static bool hjs_attenuator_serial_init( void )
  * Function for setting the new attenuation by moving the stepper motor.
  *-----------------------------------------------------------------------*/
 
-static void hjs_attenuator_set_attenuation( long new_step )
+static void
+hjs_attenuator_set_attenuation( long new_step )
 {
     long steps;
     char *cmd;
@@ -439,7 +451,8 @@ static void hjs_attenuator_set_attenuation( long new_step )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-static void hjs_attenuator_comm_failure( void )
+static void
+hjs_attenuator_comm_failure( void )
 {
     print( FATAL, "Can't access the attenuator.\n" );
     THROW( EXCEPTION );
@@ -453,7 +466,8 @@ static void hjs_attenuator_comm_failure( void )
  * the memory used for the file name passed to the function is deallocated.
  *--------------------------------------------------------------------------*/
 
-static FILE * hjs_attenuator_find_calibration( char ** name )
+static FILE *
+hjs_attenuator_find_calibration( char ** name )
 {
     FILE *tfp;
     char *new_name;
@@ -512,7 +526,8 @@ static FILE * hjs_attenuator_find_calibration( char ** name )
  * deallocated.
  *------------------------------------------------------------------*/
 
-static FILE * hjs_attenuator_open_calibration( char * name )
+static FILE *
+hjs_attenuator_open_calibration( char * name )
 {
     FILE *tfp;
 
@@ -549,7 +564,8 @@ static FILE * hjs_attenuator_open_calibration( char * name )
  * the neighboring entries is used.
  *--------------------------------------------------------------------*/
 
-static long hjs_attenuator_att_to_step( double att )
+static long
+hjs_attenuator_att_to_step( double att )
 {
     size_t ind;
     size_t max_index;;

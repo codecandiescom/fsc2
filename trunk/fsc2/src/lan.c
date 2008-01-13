@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -101,11 +101,12 @@ static void fsc2_lan_log_data( long         length,
  * failure.
  *----------------------------------------------------------*/
 
-int fsc2_lan_open( const char * dev_name,
-                   const char * address,
-                   int          port,
-                   long         us_timeout,
-                   bool         quit_on_signal )
+int
+fsc2_lan_open( const char * dev_name,
+               const char * address,
+               int          port,
+               long         us_timeout,
+               bool         quit_on_signal )
 {
     LAN_List_T *       ll = lan_list;
     int                sock_fd;
@@ -362,7 +363,8 @@ int fsc2_lan_open( const char * dev_name,
  * Function for closing the connection to a device on the LAN
  *------------------------------------------------------------*/
 
-int fsc2_lan_close( int handle )
+int
+fsc2_lan_close( int handle )
 {
     LAN_List_T * ll;
 
@@ -425,11 +427,12 @@ int fsc2_lan_close( int handle )
  * a signal gets caught.
  *---------------------------------------------------------------------------*/
 
-ssize_t fsc2_lan_write( int          handle,
-                        const char * buffer,
-                        long         length,
-                        long         us_timeout,
-                        bool         quit_on_signal )
+ssize_t
+fsc2_lan_write( int          handle,
+                const char * buffer,
+                long         length,
+                long         us_timeout,
+                bool         quit_on_signal )
 {
     LAN_List_T     * ll;
     ssize_t          bytes_written;
@@ -553,11 +556,12 @@ ssize_t fsc2_lan_write( int          handle,
  * is set it returns immediately when a signal gets caught.
  *----------------------------------------------------------------*/
 
-ssize_t fsc2_lan_writev( int                  handle,
-                         const struct iovec * data,
-                         int                  count,
-                         long                 us_timeout,
-                         bool                 quit_on_signal )
+ssize_t
+fsc2_lan_writev( int                  handle,
+                 const struct iovec * data,
+                 int                  count,
+                 long                 us_timeout,
+                 bool                 quit_on_signal )
 {
     LAN_List_T       * ll;
     ssize_t            bytes_written;
@@ -709,11 +713,12 @@ ssize_t fsc2_lan_writev( int                  handle,
  * if a signal gets caught.
  *----------------------------------------------------------------------*/
 
-ssize_t fsc2_lan_read( int    handle,
-                       char * buffer,
-                       long   length,
-                       long   us_timeout,
-                       bool   quit_on_signal )
+ssize_t
+fsc2_lan_read( int    handle,
+               char * buffer,
+               long   length,
+               long   us_timeout,
+               bool   quit_on_signal )
 {
     LAN_List_T       * ll;
     ssize_t            bytes_read;
@@ -845,11 +850,12 @@ ssize_t fsc2_lan_read( int    handle,
  * as const as it is for the readv() fucntion).
  *-----------------------------------------------------------------*/
 
-ssize_t fsc2_lan_readv( int            handle,
-                        struct iovec * data,
-                        int            count,
-                        long           us_timeout,
-                        bool           quit_on_signal )
+ssize_t
+fsc2_lan_readv( int            handle,
+                struct iovec * data,
+                int            count,
+                long           us_timeout,
+                bool           quit_on_signal )
 {
     LAN_List_T       * ll;
     ssize_t            bytes_read;
@@ -1020,7 +1026,8 @@ ssize_t fsc2_lan_readv( int            handle,
  * all remaining memory
  *--------------------------------------------------*/
 
-void fsc2_lan_cleanup( void )
+void
+fsc2_lan_cleanup( void )
 {
     LAN_List_T * ll;
     int          failed = 0;
@@ -1071,11 +1078,12 @@ void fsc2_lan_cleanup( void )
  * the function was called at.
  *--------------------------------------------------------------------*/
 
-static void timeout_init( int                dir,
-                          LAN_List_T *       ll,
-                          long *             us_timeout,
-                          struct sigaction * old_sact,
-                          struct timeval   * now )
+static void
+timeout_init( int                dir,
+              LAN_List_T *       ll,
+              long *             us_timeout,
+              struct sigaction * old_sact,
+              struct timeval   * now )
 {
     struct sigaction sact;
     struct itimerval iwait;
@@ -1165,11 +1173,12 @@ static void timeout_init( int                dir,
  * be resumed. Returns true if resuming is ok, otherwise false.
  *--------------------------------------------------------------------*/
 
-static bool timeout_reset( int                dir,
-                           LAN_List_T *       ll,
-                           long *             us_timeout,
-                           struct sigaction * old_sact,
-                           struct timeval *   before )
+static bool
+timeout_reset( int                dir,
+               LAN_List_T *       ll,
+               long *             us_timeout,
+               struct sigaction * old_sact,
+               struct timeval *   before )
 {
     struct timeval now;
 
@@ -1211,8 +1220,9 @@ static bool timeout_reset( int                dir,
  * stops the timer and resets the SIGALRM signal handler.
  *------------------------------------------------------------------*/
 
-static void timeout_exit( LAN_List_T *       ll,
-                          struct sigaction * old_sact )
+static void
+timeout_exit( LAN_List_T *       ll,
+              struct sigaction * old_sact )
 {
     struct itimerval iwait = { { 0, 0 }, { 0, 0 } };
     int              ret;
@@ -1234,7 +1244,8 @@ static void timeout_exit( LAN_List_T *       ll,
  * Handler for SIGALRM signals during connect(), write() and read()
  *------------------------------------------------------------------*/
 
-static void wait_alarm_handler( int sig_no  UNUSED_ARG )
+static void
+wait_alarm_handler( int sig_no  UNUSED_ARG )
 {
     if ( sig_no == SIGALRM )
         got_sigalrm = 1;
@@ -1246,7 +1257,8 @@ static void wait_alarm_handler( int sig_no  UNUSED_ARG )
  * of devices from its file descriptor
  *-------------------------------------------*/
 
-static LAN_List_T * find_lan_entry( int handle )
+static LAN_List_T *
+find_lan_entry( int handle )
 {
     LAN_List_T * ll = lan_list;
 
@@ -1268,8 +1280,9 @@ static LAN_List_T * find_lan_entry( int handle )
  * value that then can be used in a socket() call.
  *------------------------------------------------------*/
 
-static void get_ip_address( const char *     address,
-                            struct in_addr * ip_addr )
+static void
+get_ip_address( const char *     address,
+                struct in_addr * ip_addr )
 {
     struct hostent * he;
 
@@ -1304,8 +1317,9 @@ static void get_ip_address( const char *     address,
  *    (if log level is LL_NONE 'log_file_name' is not used at all)
  *-----------------------------------------------------------------------*/
 
-void fsc2_lan_exp_init( const char * log_file_name,
-                        int          log_level )
+void
+fsc2_lan_exp_init( const char * log_file_name,
+                   int          log_level )
 {
     lan_log_level = log_level;
 
@@ -1349,7 +1363,8 @@ void fsc2_lan_exp_init( const char * log_file_name,
  * fsc2_lan_log_date() writes the date to the log file.
  *------------------------------------------------------*/
 
-static void fsc2_lan_log_date( void )
+static void
+fsc2_lan_log_date( void )
 {
     char         tc[ 26 ];
     struct timeb mt;
@@ -1375,8 +1390,9 @@ static void fsc2_lan_log_date( void )
  *  * name of the device involved
  *-----------------------------------------------------------*/
 
-static void fsc2_lan_log_function_start( const char * function,
-                                         const char * dev_name )
+static void
+fsc2_lan_log_function_start( const char * function,
+                             const char * dev_name )
 {
     if ( fsc2_lan_log == NULL || lan_log_level < LL_CE )
         return;
@@ -1397,8 +1413,9 @@ static void fsc2_lan_log_function_start( const char * function,
  *  * name of the device involved
  *--------------------------------------------------------*/
 
-static void fsc2_lan_log_function_end( const char * function,
-                                       const char * dev_name )
+static void
+fsc2_lan_log_function_end( const char * function,
+                           const char * dev_name )
 {
     if ( fsc2_lan_log == NULL || lan_log_level < LL_CE )
         return;
@@ -1415,8 +1432,9 @@ static void fsc2_lan_log_function_end( const char * function,
  * Function for writing a message to the log file
  *------------------------------------------------*/
 
-void fsc2_lan_log_message( const char * fmt,
-                           ... )
+void
+fsc2_lan_log_message( const char * fmt,
+                      ... )
 {
     va_list ap;
 
@@ -1445,7 +1463,8 @@ void fsc2_lan_log_message( const char * fmt,
 /*------------------------------------------------*
  *------------------------------------------------*/
 
-static void fsc2_lan_log_data( long length, const char *buffer )
+static void
+fsc2_lan_log_data( long length, const char *buffer )
 {
     fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
                  || Fsc2_Internals.state == STATE_FINISHED

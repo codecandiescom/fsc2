@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -294,7 +294,8 @@ strs:    E_STR_TOKEN                { if ( ! Dont_exec )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-static void conditionerror( const char * s  UNUSED_ARG )
+static void
+conditionerror( const char * s  UNUSED_ARG )
 {
     print( FATAL, "Syntax error in loop or IF/UNLESS condition.\n" );
     THROW( EXCEPTION );
@@ -304,7 +305,8 @@ static void conditionerror( const char * s  UNUSED_ARG )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-void conditionparser_init( void )
+void
+conditionparser_init( void )
 {
     Dont_exec = 0;
 }

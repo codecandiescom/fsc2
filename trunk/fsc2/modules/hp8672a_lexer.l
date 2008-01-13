@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -166,7 +166,8 @@ DU       {IU}|{FU}
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void hp8672a_read_table( FILE * fp )
+void
+hp8672a_read_table( FILE * fp )
 {
     static bool is_restart = UNSET;
     int type;
@@ -221,7 +222,8 @@ void hp8672a_read_table( FILE * fp )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static int hp8672a_get_unit( void )
+static int
+hp8672a_get_unit( void )
 {
     char *cp;
     bool done = UNSET;
@@ -273,8 +275,9 @@ static int hp8672a_get_unit( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void hp8672a_new_table_entry( int    type,
-                                     double val )
+static void
+hp8672a_new_table_entry( int    type,
+                         double val )
 {
     static bool is_freq = UNSET, is_att = UNSET;
 
@@ -416,8 +419,9 @@ static void hp8672a_new_table_entry( int    type,
  * order of frequencies.
  *---------------------------------------------------------------*/
 
-static int hp8672a_comp( const void * a,
-                         const void  *b )
+static int
+hp8672a_comp( const void * a,
+              const void  *b )
 {
     Att_Table_Entry_T *A = ( Att_Table_Entry_T * ) a,
                       *B = ( Att_Table_Entry_T * ) b;

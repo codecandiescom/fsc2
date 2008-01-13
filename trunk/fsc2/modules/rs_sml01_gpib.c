@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -49,7 +49,8 @@ static int dev_handle;
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-bool rs_sml01_init( const char * name )
+bool
+rs_sml01_init( const char * name )
 {
     double att;
     int i;
@@ -182,7 +183,8 @@ bool rs_sml01_init( const char * name )
  * switched to STANDARD.
  *--------------------------------------------------------------*/
 
-static void rs_sml01_initial_mod_setup( void )
+static void
+rs_sml01_initial_mod_setup( void )
 {
     unsigned flags = 0;
     const char *types[ ] = { "FM", "AM", "PM" };
@@ -251,7 +253,8 @@ static void rs_sml01_initial_mod_setup( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void rs_sml01_finished( void )
+void
+rs_sml01_finished( void )
 {
     gpib_local( dev_handle );
 }
@@ -260,7 +263,8 @@ void rs_sml01_finished( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-bool rs_sml01_set_output_state( bool state )
+bool
+rs_sml01_set_output_state( bool state )
 {
     char cmd[ 100 ];
 
@@ -275,7 +279,8 @@ bool rs_sml01_set_output_state( bool state )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-bool rs_sml01_get_output_state( void )
+bool
+rs_sml01_get_output_state( void )
 {
     char buffer[ 10 ];
     long length = 10;
@@ -289,7 +294,8 @@ bool rs_sml01_get_output_state( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double rs_sml01_set_frequency( double freq )
+double
+rs_sml01_set_frequency( double freq )
 {
     char cmd[ 100 ];
     long length = 100;
@@ -311,7 +317,8 @@ double rs_sml01_set_frequency( double freq )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double rs_sml01_get_frequency( void )
+double
+rs_sml01_get_frequency( void )
 {
     char buffer[ 100 ];
     long length = 100;
@@ -326,7 +333,8 @@ double rs_sml01_get_frequency( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double rs_sml01_set_attenuation( double att )
+double
+rs_sml01_set_attenuation( double att )
 {
     char cmd[ 100 ];
 
@@ -343,7 +351,8 @@ double rs_sml01_set_attenuation( double att )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double rs_sml01_get_attenuation( void )
+double
+rs_sml01_get_attenuation( void )
 {
     char buffer[ 100 ];
     long length = 100;
@@ -357,7 +366,8 @@ double rs_sml01_get_attenuation( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-int rs_sml01_set_mod_type( int type )
+int
+rs_sml01_set_mod_type( int type )
 {
     switch ( type )
     {
@@ -391,7 +401,8 @@ int rs_sml01_set_mod_type( int type )
  * or -1 if none is switched on.
  *--------------------------------------------------------------*/
 
-int rs_sml01_get_mod_type( void )
+int
+rs_sml01_get_mod_type( void )
 {
     const char *types[ ] = { "FM", "AM", "PM" };
     char cmd[ 100 ];
@@ -417,9 +428,10 @@ int rs_sml01_get_mod_type( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-int rs_sml01_set_mod_source( int    type,
-                             int    source,
-                             double freq )
+int
+ rs_sml01_set_mod_source( int    type,
+                          int    source,
+                          double freq )
 {
     const char *types[ ] = { "FM", "AM", "PM" };
     char cmd[ 100 ];
@@ -455,8 +467,9 @@ int rs_sml01_set_mod_source( int    type,
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-int rs_sml01_get_mod_source( int      type,
-                             double * freq )
+int
+rs_sml01_get_mod_source( int      type,
+                         double * freq )
 {
     const char *types[ ] = { "FM", "AM", "PM" };
     char cmd[ 100 ];
@@ -499,8 +512,9 @@ int rs_sml01_get_mod_source( int      type,
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double rs_sml01_set_mod_ampl( int    type,
-                              double ampl )
+double
+rs_sml01_set_mod_ampl( int    type,
+                       double ampl )
 {
     char cmd[ 100 ];
 
@@ -534,7 +548,8 @@ double rs_sml01_set_mod_ampl( int    type,
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double rs_sml01_get_mod_ampl( int type )
+double
+rs_sml01_get_mod_ampl( int type )
 {
     const char *cmds[ ] = { "FM?\n", "AM?\n", "PM?\n" };
     char buffer[ 100 ];
@@ -554,7 +569,8 @@ double rs_sml01_get_mod_ampl( int type )
 
 #if defined WITH_PULSE_MODULATION
 
-void rs_sml01_set_pulse_state( bool state )
+void
+rs_sml01_set_pulse_state( bool state )
 {
     char cmd[ 100 ] = "PULM:STAT ";
 
@@ -570,7 +586,8 @@ void rs_sml01_set_pulse_state( bool state )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static bool rs_sml01_get_pulse_state( void )
+static bool
+rs_sml01_get_pulse_state( void )
 {
     char buffer[ 20 ];
     long length = 20;
@@ -584,7 +601,8 @@ static bool rs_sml01_get_pulse_state( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void rs_sml01_set_pulse_trig_slope( bool state )
+void
+rs_sml01_set_pulse_trig_slope( bool state )
 {
     char cmd[ 100 ] = ":TRIG:PULS:SLOP ";
 
@@ -601,7 +619,8 @@ void rs_sml01_set_pulse_trig_slope( bool state )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static bool rs_sml01_get_pulse_trig_slope( void )
+static bool
+rs_sml01_get_pulse_trig_slope( void )
 {
     char buffer[ 20 ];
     long length = 20;
@@ -615,7 +634,8 @@ static bool rs_sml01_get_pulse_trig_slope( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void rs_sml01_set_pulse_width( double width )
+void
+rs_sml01_set_pulse_width( double width )
 {
     char cmd[ 100 ];
 
@@ -628,7 +648,8 @@ void rs_sml01_set_pulse_width( double width )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static double rs_sml01_get_pulse_width( void )
+static double
+rs_sml01_get_pulse_width( void )
 {
     char buffer[ 100 ];
     long length = 100;
@@ -643,7 +664,8 @@ static double rs_sml01_get_pulse_width( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void rs_sml01_set_pulse_delay( double delay )
+void
+rs_sml01_set_pulse_delay( double delay )
 {
     char cmd[ 100 ];
 
@@ -656,7 +678,8 @@ void rs_sml01_set_pulse_delay( double delay )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static double rs_sml01_get_pulse_delay( void )
+static double
+rs_sml01_get_pulse_delay( void )
 {
     char buffer[ 100 ];
     long length = 100;
@@ -673,7 +696,8 @@ static double rs_sml01_get_pulse_delay( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void rs_sml01_comm_failure( void )
+static void
+rs_sml01_comm_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );
@@ -683,7 +707,8 @@ static void rs_sml01_comm_failure( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool rs_sml01_command( const char * cmd )
+bool
+rs_sml01_command( const char * cmd )
 {
     if ( gpib_write( dev_handle, cmd, strlen( cmd ) ) == FAILURE )
         rs_sml01_comm_failure( );
@@ -694,9 +719,10 @@ bool rs_sml01_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool rs_sml01_talk( const char * cmd,
-                           char *       reply,
-                           long *       length )
+static bool
+rs_sml01_talk( const char * cmd,
+               char *       reply,
+               long *       length )
 {
     if (    gpib_write( dev_handle, cmd, strlen( cmd ) ) == FAILURE
          || gpib_read( dev_handle, reply, length ) == FAILURE )

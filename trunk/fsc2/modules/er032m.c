@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -108,19 +108,19 @@ int er032m_exp_hook(         void );
 int er032m_end_of_exp_hook(  void );
 
 
-Var_T *magnet_name(            Var_T * v );
-Var_T *magnet_setup(           Var_T * v );
-Var_T *magnet_field(           Var_T * v );
-Var_T *set_field(              Var_T * v );
-Var_T *get_field(              Var_T * v );
-Var_T *magnet_field_step_size( Var_T * v );
-Var_T *sweep_up(               Var_T * v );
-Var_T *sweep_down(             Var_T * v );
-Var_T *magnet_sweep_up(        Var_T * v );
-Var_T *magnet_sweep_down(      Var_T * v );
-Var_T *reset_field(            Var_T * v );
-Var_T *magnet_reset_field(     Var_T * v );
-Var_T *magnet_command(         Var_T * v );
+Var_T * magnet_name(            Var_T * v );
+Var_T * magnet_setup(           Var_T * v );
+Var_T * magnet_field(           Var_T * v );
+Var_T * set_field(              Var_T * v );
+Var_T * get_field(              Var_T * v );
+Var_T * magnet_field_step_size( Var_T * v );
+Var_T * sweep_up(               Var_T * v );
+Var_T * sweep_down(             Var_T * v );
+Var_T * magnet_sweep_up(        Var_T * v );
+Var_T * magnet_sweep_down(      Var_T * v );
+Var_T * reset_field(            Var_T * v );
+Var_T * magnet_reset_field(     Var_T * v );
+Var_T * magnet_command(         Var_T * v );
 
 
 static void er032m_init( void );
@@ -208,7 +208,8 @@ static struct
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-int er032m_init_hook( void )
+int
+er032m_init_hook( void )
 {
     /* Set global variable to indicate that GPIB bus is needed. */
 
@@ -235,7 +236,8 @@ int er032m_init_hook( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int er032m_test_hook( void )
+int
+er032m_test_hook( void )
 {
     double rem;
 
@@ -273,7 +275,8 @@ int er032m_test_hook( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int er032m_end_of_test_hook( void )
+int
+er032m_end_of_test_hook( void )
 {
     /* Tell user if field maximum field deviation was more than 1% of the
        field step width (if one was set) or was larger than the resolution
@@ -293,7 +296,8 @@ int er032m_end_of_test_hook( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int er032m_exp_hook( void )
+int
+er032m_exp_hook( void )
 {
     er032m_init( );
     return 1;
@@ -303,7 +307,8 @@ int er032m_exp_hook( void )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-int er032m_end_of_exp_hook( void )
+int
+er032m_end_of_exp_hook( void )
 {
     /* Tell user if field maximum field deviation was more than 1% of the
        field step width (if one was set) or was larger than the resolution
@@ -326,7 +331,8 @@ int er032m_end_of_exp_hook( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_name( Var_T * v  UNUSED_ARG )
+Var_T *
+magnet_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -337,7 +343,8 @@ Var_T *magnet_name( Var_T * v  UNUSED_ARG )
  * field step size during the PREPARATIONS section.
  *--------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T * v )
+Var_T *
+magnet_setup( Var_T * v )
 {
     double start_field;
     double field_step;
@@ -413,7 +420,8 @@ Var_T *magnet_setup( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_sweep_up( Var_T * v )
+Var_T *
+magnet_sweep_up( Var_T * v )
 {
     return sweep_up( v );
 }
@@ -422,7 +430,8 @@ Var_T *magnet_sweep_up( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *sweep_up( Var_T * v  UNUSED_ARG )
+Var_T *
+sweep_up( Var_T * v  UNUSED_ARG )
 {
     int steps;
     int new_swa;
@@ -501,7 +510,8 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_sweep_down( Var_T * v )
+Var_T *
+magnet_sweep_down( Var_T * v )
 {
     return sweep_down( v );
 }
@@ -510,7 +520,8 @@ Var_T *magnet_sweep_down( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *sweep_down( Var_T * v  UNUSED_ARG )
+Var_T *
+sweep_down( Var_T * v  UNUSED_ARG )
 {
     int steps;
     int new_swa;
@@ -585,7 +596,8 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_reset_field( Var_T * v )
+Var_T *
+magnet_reset_field( Var_T * v )
 {
     return reset_field( v );
 }
@@ -594,7 +606,8 @@ Var_T *magnet_reset_field( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *reset_field( Var_T * v  UNUSED_ARG )
+Var_T *
+reset_field( Var_T * v  UNUSED_ARG )
 {
     if ( ! magnet.is_init )
     {
@@ -612,7 +625,8 @@ Var_T *reset_field( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_field( Var_T *v )
+Var_T *
+magnet_field( Var_T *v )
 {
     return v == NULL ? get_field( v ) : set_field( v );
 }
@@ -621,7 +635,8 @@ Var_T *magnet_field( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *get_field( Var_T * v  UNUSED_ARG )
+Var_T *
+get_field( Var_T * v  UNUSED_ARG )
 {
     return vars_push( FLOAT_VAR, er032m_get_field( ) );
 }
@@ -630,7 +645,8 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *set_field( Var_T * v )
+Var_T *
+set_field( Var_T * v )
 {
     double field;
 
@@ -660,7 +676,8 @@ Var_T *set_field( Var_T * v )
  * argument.
  *----------------------------------------------------------------*/
 
-Var_T *magnet_field_step_size( Var_T * v )
+Var_T *
+magnet_field_step_size( Var_T * v )
 {
     double field_step;
     long steps;
@@ -689,7 +706,8 @@ Var_T *magnet_field_step_size( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *magnet_command( Var_T * v )
+Var_T *
+magnet_command( Var_T * v )
 {
     char *cmd = NULL;
 
@@ -722,7 +740,8 @@ Var_T *magnet_command( Var_T * v )
  * Initialization of the device
  *------------------------------*/
 
-static void er032m_init( void )
+static void
+er032m_init( void )
 {
     double rem;
 
@@ -803,7 +822,8 @@ static void er032m_init( void )
  * done without changing the center field.
  *--------------------------------------------------------------------*/
 
-static void er032m_start_field( void )
+static void
+er032m_start_field( void )
 {
     int factor;
     int shift;
@@ -944,7 +964,8 @@ static void er032m_start_field( void )
  *    center field is used.
  *---------------------------------------------------------------------*/
 
-static double er032m_set_field( double field )
+static double
+er032m_set_field( double field )
 {
     fsc2_assert( field >= ER032M_MIN_FIELD && field <= ER032M_MAX_FIELD );
 
@@ -973,7 +994,8 @@ static double er032m_set_field( double field )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-static void er032m_change_field_and_set_sw( double field )
+static void
+er032m_change_field_and_set_sw( double field )
 {
     double rem;
 
@@ -1040,7 +1062,8 @@ static void er032m_change_field_and_set_sw( double field )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-static void er032m_change_field_and_sw( double field )
+static void
+er032m_change_field_and_sw( double field )
 {
     int steps;
 
@@ -1073,7 +1096,8 @@ static void er032m_change_field_and_sw( double field )
  * from the requested field.
  *------------------------------------------------------------------*/
 
-static void er032m_change_field_and_keep_sw( double field )
+static void
+er032m_change_field_and_keep_sw( double field )
 {
     int steps;
     long rem;
@@ -1173,7 +1197,8 @@ static void er032m_change_field_and_keep_sw( double field )
  * swa and swa_step in the magnet structure get set and OK is returned.
  *-----------------------------------------------------------------------*/
 
-static bool er032m_guess_sw( double field_diff )
+static bool
+er032m_guess_sw( double field_diff )
 {
     int i;
     double swa_step;
@@ -1247,7 +1272,8 @@ static bool er032m_guess_sw( double field_diff )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-static void er032m_field_check( double field )
+static void
+er032m_field_check( double field )
 {
     if ( field > ER032M_MAX_FIELD )
     {
@@ -1268,7 +1294,8 @@ static void er032m_field_check( double field )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-static void er032m_test_leds( void )
+static void
+er032m_test_leds( void )
 {
     char buf[ 20 ];
     long length;
@@ -1344,7 +1371,8 @@ static void er032m_test_leds( void )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static double er032m_get_field( void )
+static double
+er032m_get_field( void )
 {
     char buf[ 30 ];
     long length = 30;
@@ -1362,7 +1390,8 @@ static double er032m_get_field( void )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static double er032m_set_cf( double center_field )
+static double
+er032m_set_cf( double center_field )
 {
     char buf[ 30 ];
     int i;
@@ -1399,7 +1428,8 @@ static double er032m_set_cf( double center_field )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static double er032m_get_cf( void )
+static double
+er032m_get_cf( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -1417,7 +1447,8 @@ static double er032m_get_cf( void )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static double er032m_set_sw( double sweep_width )
+static double
+er032m_set_sw( double sweep_width )
 {
     char buf[ 30 ];
     int i;
@@ -1464,7 +1495,8 @@ static double er032m_set_sw( double sweep_width )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static double er032m_get_sw( void )
+static double
+er032m_get_sw( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -1502,7 +1534,8 @@ static int er032m_set_swa( int sweep_address )
  *-------------------------------------------------------*/
 
 #if 0
-static int er032m_get_swa( void )
+static int
+er032m_get_swa( void )
 {
     char buf[ 30 ];
     long len = 30;
@@ -1521,7 +1554,8 @@ static int er032m_get_swa( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool er032m_command( const char * cmd )
+static bool
+er032m_command( const char * cmd )
 {
     if ( gpib_write( magnet.device, cmd, strlen( cmd ) ) == FAILURE )
         er032m_failure( );
@@ -1532,9 +1566,10 @@ static bool er032m_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool er032m_talk( const char * cmd,
-                         char *       reply,
-                         long *       length )
+static bool
+er032m_talk( const char * cmd,
+             char *       reply,
+             long *       length )
 {
     if (    gpib_write( magnet.device, cmd, strlen( cmd ) ) == FAILURE
          || gpib_read( magnet.device, reply, length ) == FAILURE )
@@ -1546,7 +1581,8 @@ static bool er032m_talk( const char * cmd,
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void er032m_failure( void )
+static void
+er032m_failure( void )
 {
     print( FATAL, "Can't access the field controller.\n" );
     THROW( EXCEPTION );
@@ -1560,10 +1596,11 @@ static void er032m_failure( void )
 #define MAX_ADD_STEPS 100         /* maximum number of additional SWA steps */
 
 
-static int er032m_best_fit_search( double * cf,
-                                   int *    swa,
-                                   bool     dir,
-                                   int      fac )
+static int
+er032m_best_fit_search( double * cf,
+                        int *    swa,
+                        bool     dir,
+                        int      fac )
 {
     long rem;
     int add_steps = 0;

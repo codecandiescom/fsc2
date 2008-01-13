@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -204,37 +204,37 @@ int tds540_end_of_exp_hook( void );
 void tds540_exit_hook( void );
 
 
-Var_T *digitizer_name(               Var_T * /* v */ );
-Var_T *digitizer_define_window(      Var_T * /* v */ );
-Var_T *digitizer_change_window(      Var_T * /* v */ );
-Var_T *digitizer_window_position(    Var_T * /* v */ );
-Var_T *digitizer_window_width(       Var_T * /* v */ );
-Var_T *digitizer_display_channel(    Var_T * /* v */ );
-Var_T *digitizer_timebase(           Var_T * /* v */ );
-Var_T *digitizer_time_per_point(     Var_T * /* v */ );
-Var_T *digitizer_sensitivity(        Var_T * /* v */ );
-Var_T *digitizer_num_averages(       Var_T * /* v */ );
-Var_T *digitizer_record_length(      Var_T * /* v */ );
-Var_T *digitizer_trigger_position(   Var_T * /* v */ );
-Var_T *digitizer_trigger_delay(      Var_T * /* v */ );
-Var_T *digitizer_meas_channel_ok(    Var_T * /* v */ );
-Var_T *digitizer_trigger_channel(    Var_T * /* v */ );
-Var_T *digitizer_start_acquisition(  Var_T * /* v */ );
-Var_T *digitizer_get_area(           Var_T * /* v */ );
-Var_T *digitizer_get_area_fast(      Var_T * /* v */ );
-Var_T *digitizer_get_curve(          Var_T * /* v */ );
-Var_T *digitizer_get_curve_fast(     Var_T * /* v */ );
-Var_T *digitizer_get_amplitude(      Var_T * /* v */ );
-Var_T *digitizer_get_amplitude_fast( Var_T * /* v */ );
-Var_T *digitizer_run(                Var_T * /* v */ );
-Var_T *digitizer_lock_keyboard(      Var_T * /* v */ );
-Var_T *digitizer_copy_curve(         Var_T * /* v */ );
-Var_T *digitizer_command(            Var_T * /* v */ );
+Var_T * digitizer_name(               Var_T * /* v */ );
+Var_T * digitizer_define_window(      Var_T * /* v */ );
+Var_T * digitizer_change_window(      Var_T * /* v */ );
+Var_T * digitizer_window_position(    Var_T * /* v */ );
+Var_T * digitizer_window_width(       Var_T * /* v */ );
+Var_T * digitizer_display_channel(    Var_T * /* v */ );
+Var_T * digitizer_timebase(           Var_T * /* v */ );
+Var_T * digitizer_time_per_point(     Var_T * /* v */ );
+Var_T * digitizer_sensitivity(        Var_T * /* v */ );
+Var_T * digitizer_num_averages(       Var_T * /* v */ );
+Var_T * digitizer_record_length(      Var_T * /* v */ );
+Var_T * digitizer_trigger_position(   Var_T * /* v */ );
+Var_T * digitizer_trigger_delay(      Var_T * /* v */ );
+Var_T * digitizer_meas_channel_ok(    Var_T * /* v */ );
+Var_T * digitizer_trigger_channel(    Var_T * /* v */ );
+Var_T * digitizer_start_acquisition(  Var_T * /* v */ );
+Var_T * digitizer_get_area(           Var_T * /* v */ );
+Var_T * digitizer_get_area_fast(      Var_T * /* v */ );
+Var_T * digitizer_get_curve(          Var_T * /* v */ );
+Var_T * digitizer_get_curve_fast(     Var_T * /* v */ );
+Var_T * digitizer_get_amplitude(      Var_T * /* v */ );
+Var_T * digitizer_get_amplitude_fast( Var_T * /* v */ );
+Var_T * digitizer_run(                Var_T * /* v */ );
+Var_T * digitizer_lock_keyboard(      Var_T * /* v */ );
+Var_T * digitizer_copy_curve(         Var_T * /* v */ );
+Var_T * digitizer_command(            Var_T * /* v */ );
 
 
 /* Declaration of internally used functions */
 
-const char *tds540_ptime( double /* p_time */ );
+const char * tds540_ptime( double /* p_time */ );
 
 void tds540_delete_windows( TDS540_T * /* s */ );
 
@@ -261,7 +261,7 @@ void tds540_state_check( double /* timebase */,
                          long   /* rec_len  */,
                          double /* trig_pos */  );
 
-Window_T *tds540_get_window_by_number( long /* win_number */ );
+Window_T * tds540_get_window_by_number( long /* win_number */ );
 
 bool tds540_init( const char * /* name */ );
 

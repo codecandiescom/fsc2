@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -68,10 +68,10 @@ void hjs_attenuator_exit_hook(       void );
 void hjs_attenuator_child_exit_hook( void );
 
 
-Var_T *mw_attenuator_name(                Var_T * /* v */ );
-Var_T *mw_attenuator_load_calibration(    Var_T * /* v */ );
-Var_T *mw_attenuator_initial_attenuation( Var_T * /* v */ );
-Var_T *mw_attenuator_attenuation(         Var_T * /* v */ );
+Var_T * mw_attenuator_name(                Var_T * /* v */ );
+Var_T * mw_attenuator_load_calibration(    Var_T * /* v */ );
+Var_T * mw_attenuator_initial_attenuation( Var_T * /* v */ );
+Var_T * mw_attenuator_attenuation(         Var_T * /* v */ );
 
 
 /* Functions from hjs_attenuator_lexer.l */

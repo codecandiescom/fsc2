@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -41,7 +41,8 @@ HFS9000_T hfs9000;
  * initializes all global variables that are needed in the module.
  *-------------------------------------------------------------------*/
 
-int hfs9000_init_hook( void )
+int
+hfs9000_init_hook( void )
 {
     int i;
 
@@ -161,7 +162,8 @@ int hfs9000_init_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-int hfs9000_test_hook( void )
+int
+hfs9000_test_hook( void )
 {
     if ( hfs9000.pulses == NULL )
     {
@@ -217,7 +219,8 @@ int hfs9000_test_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-int hfs9000_end_of_test_hook( void )
+int
+hfs9000_end_of_test_hook( void )
 {
     if ( hfs9000.dump_file != NULL )
     {
@@ -250,7 +253,8 @@ int hfs9000_end_of_test_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-int hfs9000_exp_hook( void )
+int
+hfs9000_exp_hook( void )
 {
     int i;
 
@@ -295,7 +299,8 @@ int hfs9000_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-int hfs9000_end_of_exp_hook( void )
+int
+hfs9000_end_of_exp_hook( void )
 {
     const char *cmd = "FPAN:MESS \"\"\n";
 
@@ -314,7 +319,8 @@ int hfs9000_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void hfs9000_exit_hook( void )
+void
+hfs9000_exit_hook( void )
 {
     Pulse_T *p, *np;
     int i;
@@ -343,7 +349,8 @@ void hfs9000_exit_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_name( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -352,7 +359,8 @@ Var_T *pulser_name( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_show_pulses( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_show_pulses( Var_T * v  UNUSED_ARG )
 {
     int pd[ 2 ];
     pid_t pid;
@@ -421,7 +429,8 @@ Var_T *pulser_show_pulses( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_dump_pulses( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_dump_pulses( Var_T * v  UNUSED_ARG )
 {
     char *name;
     char *m;
@@ -502,7 +511,8 @@ Var_T *pulser_dump_pulses( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_keep_all_pulses( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_keep_all_pulses( Var_T * v  UNUSED_ARG )
 {
     hfs9000_keep_all( );
     return vars_push( INT_VAR, 1L );
@@ -512,7 +522,8 @@ Var_T *pulser_keep_all_pulses( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_maximum_pattern_length( Var_T * v )
+Var_T *
+pulser_maximum_pattern_length( Var_T * v )
 {
     double pl;
 
@@ -527,7 +538,8 @@ Var_T *pulser_maximum_pattern_length( Var_T * v )
  * Switches the output of the pulser on or off
  *---------------------------------------------*/
 
-Var_T *pulser_state( Var_T * v )
+Var_T *
+pulser_state( Var_T * v )
 {
     bool state;
 
@@ -550,7 +562,8 @@ Var_T *pulser_state( Var_T * v )
  * if called with just one argument, returns the state.
  *------------------------------------------------------------*/
 
-Var_T *pulser_channel_state( Var_T * v )
+Var_T *
+pulser_channel_state( Var_T * v )
 {
     int channel;
     bool state;
@@ -604,7 +617,8 @@ Var_T *pulser_channel_state( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_update( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_update( Var_T * v  UNUSED_ARG )
 {
     if ( ! hfs9000.is_needed )
         return vars_push( INT_VAR, 1L );
@@ -626,7 +640,8 @@ Var_T *pulser_update( Var_T * v  UNUSED_ARG )
  *            function pulser_update() !
  *----------------------------------------------------------------------*/
 
-Var_T *pulser_shift( Var_T * v )
+Var_T *
+pulser_shift( Var_T * v )
 {
     Pulse_T *p;
 
@@ -698,7 +713,8 @@ Var_T *pulser_shift( Var_T * v )
  *            function pulser_update() !
  *-------------------------------------------------------------------------*/
 
-Var_T *pulser_increment( Var_T * v )
+Var_T *
+pulser_increment( Var_T * v )
 {
     Pulse_T *p;
 
@@ -774,7 +790,8 @@ Var_T *pulser_increment( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_reset( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_reset( Var_T * v  UNUSED_ARG )
 {
     vars_pop( pulser_pulse_reset( NULL ) );
     return pulser_update( NULL );
@@ -784,7 +801,8 @@ Var_T *pulser_reset( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_pulse_reset( Var_T * v )
+Var_T *
+pulser_pulse_reset( Var_T * v )
 {
     Pulse_T *p;
 
@@ -850,7 +868,8 @@ Var_T *pulser_pulse_reset( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_lock_keyboard( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_lock_keyboard( Var_T * v  UNUSED_ARG )
 {
     print( SEVERE, "Function can't be used for this device.\n" );
     return vars_push( INT_VAR, 1L );
@@ -860,7 +879,8 @@ Var_T *pulser_lock_keyboard( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_stop_on_update( Var_T * v )
+Var_T *
+pulser_stop_on_update( Var_T * v )
 {
     hfs9000.stop_on_update = get_strict_long( v, "boolean value" ) == 0 ?
                              UNSET : SET;
@@ -872,7 +892,8 @@ Var_T *pulser_stop_on_update( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_command( Var_T * v )
+Var_T *
+pulser_command( Var_T * v )
 {
     char *cmd = NULL;
 

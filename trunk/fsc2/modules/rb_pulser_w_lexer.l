@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -187,7 +187,8 @@ NAME     \"[^"]*\"
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void set_cur_delay( int card_no )
+static void
+set_cur_delay( int card_no )
 {
     if (    cur_delay != INVALID_DELAY_NUMBER
          || cur_clock != INVALID_CLOCK_NUMBER )
@@ -204,7 +205,8 @@ static void set_cur_delay( int card_no )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void set_cur_clock( int clock_no )
+static void
+set_cur_clock( int clock_no )
 {
     if (    cur_delay != INVALID_DELAY_NUMBER
          || cur_clock != INVALID_CLOCK_NUMBER )
@@ -221,7 +223,8 @@ static void set_cur_clock( int clock_no )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void set_name( char * name )
+static void
+set_name( char * name )
 {
     /* Make sure either a delay or a clock card has been selected for the
        name */
@@ -288,7 +291,8 @@ static void set_name( char * name )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void rb_pulser_w_read_configuration( void )
+void
+rb_pulser_w_read_configuration( void )
 {
     static bool is_restart = UNSET;
     size_t i;

@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -388,7 +388,8 @@ FUNC        {IDENT}"#"[0-9]+
 /*-------------------------------------------*
  *-------------------------------------------*/
 
-int experiment_parser( FILE * in )
+int
+experiment_parser( FILE * in )
 {
     if ( EDL.compilation.sections[ EXPERIMENT_SECTION ] )
     {

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -101,7 +101,8 @@ p_list:  /* empty */
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void phaseserror( const char * s  UNUSED_ARG )
+static void
+phaseserror( const char * s  UNUSED_ARG )
 {
     if ( *phasestext == '\0' )
         print( FATAL, "Unexpected end of file in PHASES section.\n" );

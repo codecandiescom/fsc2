@@ -1,20 +1,20 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
- * 
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -287,22 +287,22 @@ int rb_pulser_w_exp_hook(         void );
 int rb_pulser_w_end_of_exp_hook(  void );
 void rb_pulser_w_exit_hook(       void );
 
-Var_T *pulser_name(                     Var_T * /* v */ );
-Var_T *pulser_show_pulses(              Var_T * /* v */ );
-Var_T *pulser_dump_pulses(              Var_T * /* v */ );
-Var_T *pulser_phase_switch_delay(       Var_T * /* v */ );
-Var_T *pulser_grace_period(             Var_T * /* v */ );
-Var_T *pulser_minimum_defense_distance( Var_T * /* v */ );
-Var_T *pulser_defense_pulse_mode(       Var_T * /* v */ );
-Var_T *pulser_state(                    Var_T * /* v */ );
-Var_T *pulser_update(                   Var_T * /* v */ );
-Var_T *pulser_shift(                    Var_T * /* v */ );
-Var_T *pulser_increment(                Var_T * /* v */ );
-Var_T *pulser_next_phase(               Var_T * /* v */ );
-Var_T *pulser_phase_reset(              Var_T * /* v */ );
-Var_T *pulser_reset(                    Var_T * /* v */ );
-Var_T *pulser_pulse_reset(              Var_T * /* v */ );
-Var_T *pulser_pulse_minimum_specs(      Var_T * /* v */ );
+Var_T * pulser_name(                     Var_T * /* v */ );
+Var_T * pulser_show_pulses(              Var_T * /* v */ );
+Var_T * pulser_dump_pulses(              Var_T * /* v */ );
+Var_T * pulser_phase_switch_delay(       Var_T * /* v */ );
+Var_T * pulser_grace_period(             Var_T * /* v */ );
+Var_T * pulser_minimum_defense_distance( Var_T * /* v */ );
+Var_T * pulser_defense_pulse_mode(       Var_T * /* v */ );
+Var_T * pulser_state(                    Var_T * /* v */ );
+Var_T * pulser_update(                   Var_T * /* v */ );
+Var_T * pulser_shift(                    Var_T * /* v */ );
+Var_T * pulser_increment(                Var_T * /* v */ );
+Var_T * pulser_next_phase(               Var_T * /* v */ );
+Var_T * pulser_phase_reset(              Var_T * /* v */ );
+Var_T * pulser_reset(                    Var_T * /* v */ );
+Var_T * pulser_pulse_reset(              Var_T * /* v */ );
+Var_T * pulser_pulse_minimum_specs(      Var_T * /* v */ );
 
 void rb_pulser_w_cleanup( void );
 
@@ -401,11 +401,11 @@ Ticks rb_pulser_w_double2ticks( double /* p_time */ );
 
 double rb_pulser_w_ticks2double( Ticks /* ticks */ );
 
-Pulse_T *rb_pulser_w_get_pulse( long /* pnum */ );
+Pulse_T * rb_pulser_w_get_pulse( long /* pnum */ );
 
-const char *rb_pulser_w_ptime( double /* p_time */ );
+const char * rb_pulser_w_ptime( double /* p_time */ );
 
-const char *rb_pulser_w_pticks( Ticks /* ticks */ );
+const char * rb_pulser_w_pticks( Ticks /* ticks */ );
 
 void rb_pulser_w_start_show_pulses( void );
 

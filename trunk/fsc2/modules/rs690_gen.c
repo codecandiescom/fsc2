@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -36,7 +36,8 @@ static double rs690_fixed_timebases[ NUM_FIXED_TIMEBASES ] =
  * other functions depend on the timebase setting !
  *------------------------------------------------------------------*/
 
-bool rs690_store_timebase( double timebase )
+bool
+rs690_store_timebase( double timebase )
 {
     int i;
 
@@ -113,7 +114,8 @@ bool rs690_store_timebase( double timebase )
 /*------------------------------------------------*
  *------------------------------------------------*/
 
-bool rs690_store_timebase_level( int level_type )
+bool
+rs690_store_timebase_level( int level_type )
 {
     fsc2_assert( level_type == TTL_LEVEL || level_type == ECL_LEVEL );
 
@@ -141,8 +143,9 @@ bool rs690_store_timebase_level( int level_type )
  * Function for assigning a channel to a function
  *------------------------------------------------*/
 
-bool rs690_assign_channel_to_function( int  function,
-                                       long channel )
+bool
+rs690_assign_channel_to_function( int  function,
+                                  long channel )
 {
     Function_T *f = rs690.function + function;
     Channel_T *c = rs690.channel + channel;
@@ -255,8 +258,9 @@ bool rs690_assign_channel_to_function( int  function,
  * are only possible for INTERNAL trigger mode!
  *---------------------------------------------------------------*/
 
-bool rs690_set_function_delay( int    function,
-                               double delay )
+bool
+rs690_set_function_delay( int    function,
+                          double delay )
 {
     Ticks Delay = rs690_double2ticks( delay );
     int i;
@@ -307,7 +311,8 @@ bool rs690_set_function_delay( int    function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool rs690_invert_function( int function )
+bool
+rs690_invert_function( int function )
 {
     rs690.function[ function ].is_inverted = SET;
     return OK;
@@ -318,7 +323,8 @@ bool rs690_invert_function( int function )
  * Function for setting the trigger mode, either INTERNAL or EXTERNAL
  *--------------------------------------------------------------------*/
 
-bool rs690_set_trigger_mode( int mode )
+bool
+rs690_set_trigger_mode( int mode )
 {
     fsc2_assert( mode == INTERNAL || mode == EXTERNAL );
 
@@ -347,7 +353,8 @@ bool rs690_set_trigger_mode( int mode )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool rs690_set_trig_in_slope( int slope )
+bool
+rs690_set_trig_in_slope( int slope )
 {
     fsc2_assert( slope == POSITIVE || slope == NEGATIVE );
 
@@ -385,7 +392,8 @@ bool rs690_set_trig_in_slope( int slope )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool rs690_set_trig_in_level_type( double type )
+bool
+rs690_set_trig_in_level_type( double type )
 {
     int level_type;
 
@@ -437,7 +445,8 @@ bool rs690_set_trig_in_level_type( double type )
  * Function for setting the repetition time for the pulse sequences
  *------------------------------------------------------------------*/
 
-bool rs690_set_repeat_time( double rep_time )
+bool
+rs690_set_repeat_time( double rep_time )
 {
     /* Complain if a different repetition time has already been set */
 
@@ -488,8 +497,9 @@ bool rs690_set_repeat_time( double rep_time )
  * Function associates a phase sequence with one of the functions
  *----------------------------------------------------------------*/
 
-bool rs690_set_phase_reference( int phs,
-                                int function )
+bool
+rs690_set_phase_reference( int phs,
+                           int function )
 {
     Function_T *f;
 
@@ -550,10 +560,11 @@ bool rs690_set_phase_reference( int phs,
  * association in a PHASE_SETUP commmand.
  *-------------------------------------------------------------*/
 
-bool rs690_phase_setup_prep( int  phs,
-                             int  type,
-                             int  dummy  UNUSED_ARG,
-                             long channel )
+bool
+rs690_phase_setup_prep( int  phs,
+                        int  type,
+                        int  dummy  UNUSED_ARG,
+                        long channel )
 {
     fsc2_assert ( Cur_PHS == - 1 || Cur_PHS == phs );
     fsc2_assert ( phs == 0 || phs == 1 );
@@ -644,7 +655,8 @@ bool rs690_phase_setup_prep( int  phs,
  * has been parsed.
  *------------------------------------------------------------------*/
 
-bool rs690_phase_setup( int phs )
+bool
+rs690_phase_setup( int phs )
 {
     bool is_set = UNSET;
     int i, j;
@@ -717,7 +729,8 @@ bool rs690_phase_setup( int phs )
  * driver to keep all pulses, even unused ones.
  *----------------------------------------------*/
 
-bool rs690_keep_all( void )
+bool
+rs690_keep_all( void )
 {
     rs690.keep_all = SET;
     return OK;

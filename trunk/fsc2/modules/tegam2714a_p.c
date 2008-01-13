@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -35,11 +35,13 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 TEGAM2714A_P_T tegam2714a_p;
 
+
 /*------------------------------------------------------------------------*
  * Function that gets called immediately after the module has been loaded
  *------------------------------------------------------------------------*/
 
-int tegam2714a_p_init_hook( void )
+int
+tegam2714a_p_init_hook( void )
 {
     Function_T *f = &tegam2714a_p.function;
 
@@ -120,7 +122,8 @@ int tegam2714a_p_init_hook( void )
  * Function gets called just before the test run is started
  *----------------------------------------------------------*/
 
-int tegam2714a_p_test_hook( void )
+int
+tegam2714a_p_test_hook( void )
 {
     /* Check consistency of pulse settings and do everything to setup the
        pulser for the test run */
@@ -177,7 +180,8 @@ int tegam2714a_p_test_hook( void )
  * have been set to during the experiment
  *----------------------------------------------------------------------*/
 
-int tegam2714a_p_end_of_test_hook( void )
+int
+tegam2714a_p_end_of_test_hook( void )
 {
     if ( ! tegam2714a_p.is_needed )
         return 1;
@@ -230,7 +234,8 @@ int tegam2714a_p_end_of_test_hook( void )
  * got to initialize the pulser and, if required, start it
  *---------------------------------------------------------------*/
 
-int tegam2714a_p_exp_hook( void )
+int
+tegam2714a_p_exp_hook( void )
 {
     if ( ! tegam2714a_p.is_needed )
         return 1;
@@ -247,7 +252,8 @@ int tegam2714a_p_exp_hook( void )
  * Function called at the end of the experiment
  *----------------------------------------------*/
 
-int tegam2714a_p_end_of_exp_hook( void )
+int
+tegam2714a_p_end_of_exp_hook( void )
 {
     if ( ! tegam2714a_p.is_needed )
         return 1;
@@ -266,7 +272,8 @@ int tegam2714a_p_end_of_exp_hook( void )
  * used to get rid of memory allocated for the module
  *---------------------------------------------------------------*/
 
-void tegam2714a_p_exit_hook( void )
+void
+tegam2714a_p_exit_hook( void )
 {
     Pulse_T *p, *pn;
     Function_T *f = &tegam2714a_p.function;
@@ -291,7 +298,8 @@ void tegam2714a_p_exit_hook( void )
  * EDL function that returns the device name
  *-------------------------------------------*/
 
-Var_T *pulser_name( Var_T *v UNUSED_ARG )
+Var_T *
+pulser_name( Var_T *v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -302,7 +310,8 @@ Var_T *pulser_name( Var_T *v UNUSED_ARG )
  * of all pulses used during the experiment displayed
  *----------------------------------------------------*/
 
-Var_T *pulser_show_pulses( Var_T *v UNUSED_ARG )
+Var_T *
+pulser_show_pulses( Var_T *v  UNUSED_ARG )
 {
     if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
         tegam2714a_p.do_show_pulses = SET;
@@ -316,7 +325,8 @@ Var_T *pulser_show_pulses( Var_T *v UNUSED_ARG )
  * of all pulses during the experiment gets written to a file
  *------------------------------------------------------------*/
 
-Var_T *pulser_dump_pulses( Var_T *v UNUSED_ARG )
+Var_T *
+pulser_dump_pulses( Var_T *v  UNUSED_ARG )
 {
     if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
         tegam2714a_p.do_dump_pulses = SET;
@@ -329,7 +339,8 @@ Var_T *pulser_dump_pulses( Var_T *v UNUSED_ARG )
  * Switches the output of the pulser on or off
  *---------------------------------------------*/
 
-Var_T *pulser_state( Var_T *v )
+Var_T *
+pulser_state( Var_T *v )
 {
     bool state;
 
@@ -351,7 +362,8 @@ Var_T *pulser_state( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_maximum_pattern_length( Var_T * v )
+Var_T *
+pulser_maximum_pattern_length( Var_T * v )
 {
     double pl;
 
@@ -371,7 +383,8 @@ Var_T *pulser_maximum_pattern_length( Var_T * v )
  * not the state of the "real" pulser
  *---------------------------------------------------------*/
 
-Var_T *pulser_update( Var_T *v UNUSED_ARG )
+Var_T *
+pulser_update( Var_T *v UNUSED_ARG )
 {
     if ( ! tegam2714a_p.is_needed )
         return vars_push( INT_VAR, 1L );
@@ -392,7 +405,8 @@ Var_T *pulser_update( Var_T *v UNUSED_ARG )
  *            the function pulser_update() !
  *----------------------------------------------------------------------*/
 
-Var_T *pulser_shift( Var_T *v )
+Var_T *
+pulser_shift( Var_T *v )
 {
     Pulse_T *p;
 
@@ -443,7 +457,8 @@ Var_T *pulser_shift( Var_T *v )
  * incremented, otherwise all pulses passed as arguments to the function.
  *------------------------------------------------------------------------*/
 
-Var_T *pulser_increment( Var_T *v )
+Var_T *
+pulser_increment( Var_T *v )
 {
     Pulse_T *p;
 
@@ -498,7 +513,8 @@ Var_T *pulser_increment( Var_T *v )
  * Function for resetting the pulser back to its initial state
  *-------------------------------------------------------------*/
 
-Var_T *pulser_reset( Var_T *v UNUSED_ARG )
+Var_T *
+pulser_reset( Var_T *v UNUSED_ARG )
 {
     if ( ! tegam2714a_p.is_needed )
         return vars_push( INT_VAR, 1L );
@@ -513,7 +529,8 @@ Var_T *pulser_reset( Var_T *v UNUSED_ARG )
  * Function for resetting one or more pulses back to the initial state
  *---------------------------------------------------------------------*/
 
-Var_T *pulser_pulse_reset( Var_T *v )
+Var_T *
+pulser_pulse_reset( Var_T *v )
 {
     Pulse_T *p;
 

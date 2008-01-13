@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -48,7 +48,8 @@ static void hp8672a_comm_failure( void );
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-bool hp8672a_init( const char * name )
+bool
+hp8672a_init( const char * name )
 {
     double att;
     char buffer[ 10 ];
@@ -120,7 +121,8 @@ bool hp8672a_init( const char * name )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void hp8672a_finished( void )
+void
+hp8672a_finished( void )
 {
     gpib_local( hp8672a.device );
 }
@@ -129,7 +131,8 @@ void hp8672a_finished( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-bool hp8672a_set_output_state( bool state )
+bool
+hp8672a_set_output_state( bool state )
 {
     char cmd[ 10 ];
 
@@ -152,7 +155,8 @@ bool hp8672a_set_output_state( bool state )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-bool hp8672a_get_output_state( void )
+bool
+hp8672a_get_output_state( void )
 {
     char buffer[ 10 ];
     long length = 10;
@@ -168,7 +172,8 @@ bool hp8672a_get_output_state( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double hp8672a_set_frequency( double freq )
+double
+hp8672a_set_frequency( double freq )
 {
     char cmd[ 100 ];
     long ifreq, tfreq;
@@ -214,7 +219,8 @@ double hp8672a_set_frequency( double freq )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double hp8672a_set_attenuation( double att )
+double
+hp8672a_set_attenuation( double att )
 {
     char cmd[ 100 ];
     int a;
@@ -255,7 +261,8 @@ double hp8672a_set_attenuation( double att )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-int hp8672a_set_modulation( void )
+int
+hp8672a_set_modulation( void )
 {
     char cmd[ 10 ];
 
@@ -287,7 +294,8 @@ int hp8672a_set_modulation( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool hp8672a_command( const char * cmd )
+bool
+hp8672a_command( const char * cmd )
 {
     if ( gpib_write( hp8672a.device, cmd, strlen( cmd ) ) == FAILURE )
         hp8672a_comm_failure( );
@@ -298,7 +306,8 @@ bool hp8672a_command( const char * cmd )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void hp8672a_comm_failure( void )
+static void
+hp8672a_comm_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2002 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -41,7 +41,8 @@ struct Spex232 spex232, spex232_stored;
  * Function that gets called when the module has been loaded.
  *------------------------------------------------------------*/
 
-int spex232_init_hook( void )
+int
+spex232_init_hook( void )
 {
     spex232.fatal_error = UNSET;
 
@@ -346,7 +347,8 @@ int spex232_init_hook( void )
  * Function called (in the parents context) at the start of the experiment
  *-------------------------------------------------------------------------*/
 
-int spex232_test_hook( void )
+int
+spex232_test_hook( void )
 {
     spex232_stored = spex232;
 
@@ -378,7 +380,8 @@ int spex232_test_hook( void )
  * Function gets called always at the start of an experiment
  *-----------------------------------------------------------*/
 
-int spex232_exp_hook( void )
+int
+spex232_exp_hook( void )
 {
     spex232 = spex232_stored;
 
@@ -412,7 +415,8 @@ int spex232_exp_hook( void )
  * experiment exits.
  *--------------------------------------------------------------*/
 
-void spex232_child_exit_hook( void )
+void
+spex232_child_exit_hook( void )
 {
     if ( ! spex232.fatal_error )
         spex232_store_state( );
@@ -423,7 +427,8 @@ void spex232_child_exit_hook( void )
  * Function called (in the parents context) at the end of the experiment
  *-----------------------------------------------------------------------*/
 
-int spex232_end_of_exp_hook( void )
+int
+spex232_end_of_exp_hook( void )
 {
     spex232_close( );
     return 1;
@@ -434,7 +439,8 @@ int spex232_end_of_exp_hook( void )
  * Returns a string with the name of the device
  *----------------------------------------------*/
 
-Var_T *monochromator_name( Var_T * v  UNUSED_ARG )
+Var_T *
+monochromator_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -447,7 +453,8 @@ Var_T *monochromator_name( Var_T * v  UNUSED_ARG )
  *-----------------------------------------------------------------------*/
 
 #if defined AUTOCALIBRATION_POSITION
-Var_T *monochromtor_init_motor( Var_T * v  UNUSED_ARG )
+Var_T *
+monochromtor_init_motor( Var_T * v  UNUSED_ARG )
 {
     spex232.need_init_motor = SET;
     return vars_push( INT_VAR, 1L );
@@ -458,7 +465,8 @@ Var_T *monochromtor_init_motor( Var_T * v  UNUSED_ARG )
 /*---------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-Var_T *monochromator_enforce_wavelength( Var_T * v )
+Var_T *
+monochromator_enforce_wavelength( Var_T * v )
 {
     double wl;
 
@@ -497,7 +505,8 @@ Var_T *monochromator_enforce_wavelength( Var_T * v )
 /*---------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-Var_T *monochromator_enforce_wavenumber( Var_T * v )
+Var_T *
+monochromator_enforce_wavenumber( Var_T * v )
 {
     double wl, wn;
 
@@ -547,7 +556,8 @@ Var_T *monochromator_enforce_wavenumber( Var_T * v )
  * array element.
  *--------------------------------------------------------------------------*/
 
-Var_T *monochromator_wavenumber_scan_limits( Var_T *v  UNUSED_ARG )
+Var_T *
+monochromator_wavenumber_scan_limits( Var_T *v  UNUSED_ARG )
 {
     double vals[ 2 ] = { spex232_wl2Uwn( spex232.upper_limit ),
                          spex232_wl2Uwn( spex232.lower_limit ) };
@@ -568,7 +578,8 @@ Var_T *monochromator_wavenumber_scan_limits( Var_T *v  UNUSED_ARG )
  * element.
  *----------------------------------------------------------------------*/
 
-Var_T *monochromator_wavelength_scan_limits( Var_T *v  UNUSED_ARG )
+Var_T *
+monochromator_wavelength_scan_limits( Var_T *v  UNUSED_ARG )
 {
     double vals[ 2 ] = { spex232.lower_limit, spex232.upper_limit };
     return vars_push( FLOAT_ARR, vals, 2 );
@@ -582,7 +593,8 @@ Var_T *monochromator_wavelength_scan_limits( Var_T *v  UNUSED_ARG )
  * a scan and a new wavelength is set the scan is aborted.
  *----------------------------------------------------------*/
 
-Var_T *monochromator_wavelength( Var_T * v )
+Var_T *
+monochromator_wavelength( Var_T * v )
 {
     double wl;
 
@@ -659,7 +671,8 @@ Var_T *monochromator_wavelength( Var_T * v )
  * new wavenumber is set the currently running scan is aborted.
  *----------------------------------------------------------------------*/
 
-Var_T *monochromator_wavenumber( Var_T * v )
+Var_T *
+monochromator_wavenumber( Var_T * v )
 {
     double wl;
 
@@ -747,7 +760,8 @@ Var_T *monochromator_wavenumber( Var_T * v )
  * in relative, otherwise in absolute units.
  *-------------------------------------------------------------------------*/
 
-Var_T *monochromator_scan_setup( Var_T * v )
+Var_T *
+monochromator_scan_setup( Var_T * v )
 {
     double start = 0.0;
     double step;
@@ -953,7 +967,8 @@ Var_T *monochromator_scan_setup( Var_T * v )
  * doing a scan the old scan is aborted.
  *------------------------------------------------------------------*/
 
-Var_T *monochromator_start_scan( Var_T * v  UNUSED_ARG )
+Var_T *
+monochromator_start_scan( Var_T * v  UNUSED_ARG )
 {
     /* Check that a scan setup has been done */
 
@@ -981,7 +996,8 @@ Var_T *monochromator_start_scan( Var_T * v  UNUSED_ARG )
  * has been done and a scan already has been started.
  *------------------------------------------------------------*/
 
-Var_T *monochromator_scan_step( Var_T * v  UNUSED_ARG )
+Var_T *
+monochromator_scan_step( Var_T * v  UNUSED_ARG )
 {
     /* Check that a scan setup has been done */
 
@@ -1056,7 +1072,8 @@ Var_T *monochromator_scan_step( Var_T * v  UNUSED_ARG )
  * position has been set.
  *----------------------------------------------------------------*/
 
-Var_T *monochromator_laser_line( Var_T * v )
+Var_T *
+monochromator_laser_line( Var_T * v )
 {
     double wn;
 
@@ -1099,7 +1116,8 @@ Var_T *monochromator_laser_line( Var_T * v )
  * Function returns the number of grooves per meter of the grating
  *-----------------------------------------------------------------*/
 
-Var_T *monochromator_groove_density( Var_T * v )
+Var_T *
+monochromator_groove_density( Var_T * v )
 {
     if ( v != NULL )
         print( WARN, "There's only one grating, argument is discarded.\n" );
@@ -1128,7 +1146,8 @@ Var_T *monochromator_groove_density( Var_T * v )
  * been done.
  *--------------------------------------------------------------------*/
 
-Var_T *monochromator_calibrate( Var_T * v )
+Var_T *
+monochromator_calibrate( Var_T * v )
 {
     double pixel_diff;
     double offset;
@@ -1194,7 +1213,8 @@ Var_T *monochromator_calibrate( Var_T * v )
  * the camera taken into account.
  *-----------------------------------------------------------------------*/
 
-Var_T *monochromator_wavelength_axis( Var_T * v )
+Var_T *
+monochromator_wavelength_axis( Var_T * v )
 {
     double wl;
     Var_T *cv;
@@ -1320,7 +1340,8 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
  * axis displyed using linear wavenumber values isn't really correct!
  *-----------------------------------------------------------------------*/
 
-Var_T *monochromator_wavenumber_axis( Var_T * v )
+Var_T *
+monochromator_wavenumber_axis( Var_T * v )
 {
     double wl;
     Var_T *cv;

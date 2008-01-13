@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -189,25 +189,25 @@ int er023m_end_of_exp_hook( void );
 void er023m_exit_hook(      void );
 
 
-Var_T *lockin_name(            Var_T * /* v */ );
-Var_T *lockin_get_data(        Var_T * /* v */ );
-Var_T *lockin_sensitivity(     Var_T * /* v */ );
-Var_T *lockin_time_constant(   Var_T * /* v */ );
-Var_T *lockin_phase(           Var_T * /* v */ );
-Var_T *lockin_offset(          Var_T * /* v */ );
-Var_T *lockin_conversion_time( Var_T * /* v */ );
-Var_T *lockin_ref_freq(        Var_T * /* v */ );
-Var_T *lockin_ref_level(       Var_T * /* v */ );
-Var_T *lockin_harmonic(        Var_T * /* v */ );
-Var_T *lockin_resonator(       Var_T * /* v */ );
-Var_T *lockin_is_overload(     Var_T * /* v */ );
-Var_T *lockin_command(         Var_T * /* v */ );
+Var_T * lockin_name(            Var_T * /* v */ );
+Var_T * lockin_get_data(        Var_T * /* v */ );
+Var_T * lockin_sensitivity(     Var_T * /* v */ );
+Var_T * lockin_time_constant(   Var_T * /* v */ );
+Var_T * lockin_phase(           Var_T * /* v */ );
+Var_T * lockin_offset(          Var_T * /* v */ );
+Var_T * lockin_conversion_time( Var_T * /* v */ );
+Var_T * lockin_ref_freq(        Var_T * /* v */ );
+Var_T * lockin_ref_level(       Var_T * /* v */ );
+Var_T * lockin_harmonic(        Var_T * /* v */ );
+Var_T * lockin_resonator(       Var_T * /* v */ );
+Var_T * lockin_is_overload(     Var_T * /* v */ );
+Var_T * lockin_command(         Var_T * /* v */ );
 
-Var_T *lockin_rg(              Var_T * /* v */ );
-Var_T *lockin_tc(              Var_T * /* v */ );
-Var_T *lockin_ma(              Var_T * /* v */ );
-Var_T *lockin_ct(              Var_T * /* v */ );
-Var_T *lockin_mf(              Var_T * /* v */ );
+Var_T * lockin_rg(              Var_T * /* v */ );
+Var_T * lockin_tc(              Var_T * /* v */ );
+Var_T * lockin_ma(              Var_T * /* v */ );
+Var_T * lockin_ct(              Var_T * /* v */ );
+Var_T * lockin_mf(              Var_T * /* v */ );
 
 
 bool er023m_init( const char * /* name */ );

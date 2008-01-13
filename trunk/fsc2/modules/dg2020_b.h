@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -370,27 +370,27 @@ int dg2020_b_end_of_exp_hook(  void );
 void dg2020_b_exit_hook(       void );
 
 
-Var_T *pulser_name(                              Var_T * /* v */ );
-Var_T *pulser_automatic_shape_pulses(            Var_T * /* v */ );
-Var_T *pulser_automatic_twt_pulses(              Var_T * /* v */ );
-Var_T *pulser_show_pulses(                       Var_T * /* v */ );
-Var_T *pulser_dump_pulses(                       Var_T * /* v */ );
-Var_T *pulser_shape_to_defense_minimum_distance( Var_T * /* v */ );
-Var_T *pulser_defense_to_shape_minimum_distance( Var_T * /* v */ );
-Var_T *pulser_minimum_twt_pulse_distance(        Var_T * /* v */ );
-Var_T *pulser_keep_all_pulses(                   Var_T * /* v */ );
-Var_T *pulser_maximum_pattern_length(            Var_T * /* v */ );
-Var_T *pulser_state(                             Var_T * /* v */ );
-Var_T *pulser_channel_state(                     Var_T * /* v */ );
-Var_T *pulser_update(                            Var_T * /* v */ );
-Var_T *pulser_shift(                             Var_T * /* v */ );
-Var_T *pulser_increment(                         Var_T * /* v */ );
-Var_T *pulser_next_phase(                        Var_T * /* v */ );
-Var_T *pulser_phase_reset(                       Var_T * /* v */ );
-Var_T *pulser_pulse_reset(                       Var_T * /* v */ );
-Var_T *pulser_reset(                             Var_T * /* v */ );
-Var_T *pulser_lock_keyboard(                     Var_T * /* v */ );
-Var_T *pulser_command(                           Var_T * /* v */ );
+Var_T * pulser_name(                              Var_T * /* v */ );
+Var_T * pulser_automatic_shape_pulses(            Var_T * /* v */ );
+Var_T * pulser_automatic_twt_pulses(              Var_T * /* v */ );
+Var_T * pulser_show_pulses(                       Var_T * /* v */ );
+Var_T * pulser_dump_pulses(                       Var_T * /* v */ );
+Var_T * pulser_shape_to_defense_minimum_distance( Var_T * /* v */ );
+Var_T * pulser_defense_to_shape_minimum_distance( Var_T * /* v */ );
+Var_T * pulser_minimum_twt_pulse_distance(        Var_T * /* v */ );
+Var_T * pulser_keep_all_pulses(                   Var_T * /* v */ );
+Var_T * pulser_maximum_pattern_length(            Var_T * /* v */ );
+Var_T * pulser_state(                             Var_T * /* v */ );
+Var_T * pulser_channel_state(                     Var_T * /* v */ );
+Var_T * pulser_update(                            Var_T * /* v */ );
+Var_T * pulser_shift(                             Var_T * /* v */ );
+Var_T * pulser_increment(                         Var_T * /* v */ );
+Var_T * pulser_next_phase(                        Var_T * /* v */ );
+Var_T * pulser_phase_reset(                       Var_T * /* v */ );
+Var_T * pulser_pulse_reset(                       Var_T * /* v */ );
+Var_T * pulser_reset(                             Var_T * /* v */ );
+Var_T * pulser_lock_keyboard(                     Var_T * /* v */ );
+Var_T * pulser_command(                           Var_T * /* v */ );
 
 
 /* Here follow the functions from dg2020_gen_b.c */

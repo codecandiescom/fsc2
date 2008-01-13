@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -49,7 +49,8 @@ static int tb_index[ ] = { RULBUS_RB8515_CLOCK_FREQ_100MHz,
  * case this function never will be called).
  *-----------------------------------------------------------------*/
 
-bool rb_pulser_j_store_timebase( double timebase )
+bool
+rb_pulser_j_store_timebase( double timebase )
 {
 #ifndef FIXED_TIMEBASE
     int i;
@@ -103,8 +104,9 @@ bool rb_pulser_j_store_timebase( double timebase )
  * are only possible for INTERNAL trigger mode!
  *---------------------------------------------------------------*/
 
-bool rb_pulser_j_set_function_delay( int    function,
-                                     double delay )
+bool
+rb_pulser_j_set_function_delay( int    function,
+                                double delay )
 {
     Function_T *f = rb_pulser_j.function + function;
     int i;
@@ -161,7 +163,8 @@ bool rb_pulser_j_set_function_delay( int    function,
  * Function for setting the trigger mode, either INTERNAL or EXTERNAL
  *--------------------------------------------------------------------*/
 
-bool rb_pulser_j_set_trigger_mode( int mode )
+bool
+rb_pulser_j_set_trigger_mode( int mode )
 {
     fsc2_assert( mode == INTERNAL || mode == EXTERNAL );
 
@@ -191,7 +194,8 @@ bool rb_pulser_j_set_trigger_mode( int mode )
  * runs in external trigger mode
  *-----------------------------------.-------------------*/
 
-bool rb_pulser_j_set_trig_in_slope( int slope )
+bool
+rb_pulser_j_set_trig_in_slope( int slope )
 {
     fsc2_assert( slope == POSITIVE || slope == NEGATIVE );
 
@@ -232,7 +236,8 @@ bool rb_pulser_j_set_trig_in_slope( int slope )
  * when pulser runs in internal trigger mode
  *------------------------------------------------------------------*/
 
-bool rb_pulser_j_set_repeat_time( double rep_time )
+bool
+rb_pulser_j_set_repeat_time( double rep_time )
 {
     int i;
 

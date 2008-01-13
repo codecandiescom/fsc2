@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -45,10 +45,10 @@ int witio_48_end_of_exp_hook( void );
 void witio_48_exit_hook(      void );
 
 
-Var_T *dio_name(        Var_T * v );
-Var_T *dio_reserve_dio( Var_T * v );
-Var_T *dio_mode(        Var_T * v );
-Var_T *dio_value(       Var_T * v );
+Var_T * dio_name(        Var_T * v );
+Var_T * dio_reserve_dio( Var_T * v );
+Var_T * dio_mode(        Var_T * v );
+Var_T * dio_value(       Var_T * v );
 
 
 #define NUMBER_OF_DIOS   2
@@ -73,7 +73,8 @@ static struct WITIO_48 witio_48, witio_48_saved;
  * Function that gets called when the module is loaded.
  *------------------------------------------------------*/
 
-int witio_48_init_hook( void )
+int
+witio_48_init_hook( void )
 {
     int i;
 
@@ -94,7 +95,8 @@ int witio_48_init_hook( void )
  * Function that gets called at the start of the test run
  *--------------------------------------------------------*/
 
-int witio_48_test_hook( void )
+int
+witio_48_test_hook( void )
 {
     int i;
 
@@ -115,7 +117,8 @@ int witio_48_test_hook( void )
  * Function that gets called at the start of an experiment
  *---------------------------------------------------------*/
 
-int witio_48_exp_hook( void )
+int
+witio_48_exp_hook( void )
 {
     int i;
 
@@ -159,7 +162,8 @@ int witio_48_exp_hook( void )
  * Function that gets called at the end of an experiment
  *-------------------------------------------------------*/
 
-int witio_48_end_of_exp_hook( void )
+int
+witio_48_end_of_exp_hook( void )
 {
     if ( witio_48.is_open )
     {
@@ -174,7 +178,8 @@ int witio_48_end_of_exp_hook( void )
  * Function that gets called just before the module is unloaded
  *--------------------------------------------------------------*/
 
-void witio_48_exit_hook( void )
+void
+witio_48_exit_hook( void )
 {
     int i;
 
@@ -195,7 +200,8 @@ void witio_48_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *dio_name( Var_T * v  UNUSED_ARG )
+Var_T *
+dio_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -217,7 +223,8 @@ Var_T *dio_name( Var_T * v  UNUSED_ARG )
  * basically a NOP.
  *-----------------------------------------------------------*/
 
-Var_T *dio_reserve_dio( Var_T * v )
+Var_T *
+dio_reserve_dio( Var_T * v )
 {
     long dio;
     bool lock_state = SET;
@@ -302,7 +309,8 @@ Var_T *dio_reserve_dio( Var_T * v )
  * pass-phrase agreed upon in the lock operation.
  *---------------------------------------------------------------*/
 
-Var_T *dio_mode( Var_T * v )
+Var_T *
+dio_mode( Var_T * v )
 {
     long dio;
     long mode;
@@ -420,7 +428,8 @@ Var_T *dio_mode( Var_T * v )
  * be the correct pass-phrase agreed upon in the lock operation.
  *-----------------------------------------------------------------*/
 
-Var_T *dio_value( Var_T * v )
+Var_T *
+dio_value( Var_T * v )
 {
     long dio;
     long ch;
@@ -582,7 +591,8 @@ Var_T *dio_value( Var_T * v )
  * file of the device library.
  *--------------------------------------------------------------*/
 
-static long translate_channel( long channel )
+static long
+translate_channel( long channel )
 {
     switch ( channel )
     {
@@ -611,7 +621,8 @@ static long translate_channel( long channel )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static void check_ret( int ret_val )
+static void
+check_ret( int ret_val )
 {
     lower_permissions( );
     if ( ret_val == WITIO_48_OK )

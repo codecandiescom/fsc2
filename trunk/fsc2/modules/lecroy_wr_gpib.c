@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -25,7 +25,7 @@
 #include "lecroy_wr.h"
 
 
-static unsigned char *lecroy_wr_get_data( long * len );
+static unsigned char * lecroy_wr_get_data( long * len );
 
 static unsigned int lecroy_wr_get_inr( void );
 
@@ -60,7 +60,8 @@ static unsigned int can_fetch = 0;
  * its state
  *---------------------------------------------------------------*/
 
-bool lecroy_wr_init( const char * name )
+bool
+lecroy_wr_init( const char * name )
 {
     char buffer[ 100 ];
     long len = 100;
@@ -269,7 +270,8 @@ bool lecroy_wr_init( const char * name )
  * Function for determing the digitizers timebase 
  *-------------------------------------------------*/
 
-double lecroy_wr_get_timebase( void )
+double
+lecroy_wr_get_timebase( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -302,7 +304,8 @@ double lecroy_wr_get_timebase( void )
  * Function for setting the digitizers timebase 
  *-----------------------------------------------*/
 
-bool lecroy_wr_set_timebase( double timebase )
+bool
+lecroy_wr_set_timebase( double timebase )
 {
     char cmd[ 40 ] = "TDIV ";
 
@@ -319,7 +322,8 @@ bool lecroy_wr_set_timebase( double timebase )
  * Function for determining if digitizer is in RIS or SS mode
  *------------------------------------------------------------*/
 
-bool lecroy_wr_get_interleaved( void )
+bool
+lecroy_wr_get_interleaved( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -336,7 +340,8 @@ bool lecroy_wr_get_interleaved( void )
  * Function for switching between RIS and SS mode
  *------------------------------------------------*/
 
-bool lecroy_wr_set_interleaved( bool state )
+bool
+lecroy_wr_set_interleaved( bool state )
 {
     char cmd[ 30 ] = "ILVD ";
 
@@ -352,7 +357,8 @@ bool lecroy_wr_set_interleaved( bool state )
  * Function for determining the memory size currently used.
  *----------------------------------------------------------*/
 
-long lecroy_wr_get_memory_size( void )
+long
+lecroy_wr_get_memory_size( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -404,7 +410,8 @@ long lecroy_wr_get_memory_size( void )
  * Function for setting the memory size
  *--------------------------------------*/
 
-bool lecroy_wr_set_memory_size( long mem_size )
+bool
+lecroy_wr_set_memory_size( long mem_size )
 {
     char cmd[ 30 ];
 
@@ -420,7 +427,8 @@ bool lecroy_wr_set_memory_size( long mem_size )
  * Function for determining the sensitivity (in V/div) of a channel
  *------------------------------------------------------------------*/
 
-double lecroy_wr_get_sens( int channel )
+double
+lecroy_wr_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
@@ -440,8 +448,9 @@ double lecroy_wr_get_sens( int channel )
  * Function for setting the sensitivity (in V/div) of a channel
  *--------------------------------------------------------------*/
 
-bool lecroy_wr_set_sens( int    channel,
-                         double sens )
+bool
+lecroy_wr_set_sens( int    channel,
+                    double sens )
 {
     char cmd[ 40 ];
 
@@ -461,7 +470,8 @@ bool lecroy_wr_set_sens( int    channel,
  * Function for determining the offset voltage for a channel
  *-----------------------------------------------------------*/
 
-double lecroy_wr_get_offset( int channel )
+double
+lecroy_wr_get_offset( int channel )
 {
     char buf[ 30 ];
     long length = 30;
@@ -480,8 +490,9 @@ double lecroy_wr_get_offset( int channel )
  * Function for setting the offset voltage for a channel
  *-------------------------------------------------------*/
 
-bool lecroy_wr_set_offset( int    channel,
-                           double offset )
+bool
+lecroy_wr_set_offset( int    channel,
+                      double offset )
 {
     char cmd[ 40 ];
 
@@ -501,7 +512,8 @@ bool lecroy_wr_set_offset( int    channel,
  * Function for determining the coupling type for a channel
  *----------------------------------------------------------*/
 
-int lecroy_wr_get_coupling( int channel )
+int
+lecroy_wr_get_coupling( int channel )
 {
     int type = LECROY_WR_CPL_INVALID;
     char buf[ 100 ];
@@ -540,8 +552,9 @@ int lecroy_wr_get_coupling( int channel )
  * Function for setting the coupling type for a channel
  *------------------------------------------------------*/
 
-bool lecroy_wr_set_coupling( int channel,
-                             int type )
+bool
+lecroy_wr_set_coupling( int channel,
+                        int type )
 {
     char cmd[ 30 ];
     char const *cpl[ ] = { "A1M", "D1M", "D50", "GND" };
@@ -563,7 +576,8 @@ bool lecroy_wr_set_coupling( int channel,
  * Function for determining the bandwidth limiter of one of the channels
  *-----------------------------------------------------------------------*/
 
-int lecroy_wr_get_bandwidth_limiter( int channel )
+int
+lecroy_wr_get_bandwidth_limiter( int channel )
 {
     char buf[ 30 ] = "BWL?";
     long length = 30;
@@ -642,8 +656,9 @@ int lecroy_wr_get_bandwidth_limiter( int channel )
  * Function for setting the bandwidth limiter for one of the channels
  *--------------------------------------------------------------------*/
 
-bool lecroy_wr_set_bandwidth_limiter( int channel,
-                                      int bwl )
+bool
+lecroy_wr_set_bandwidth_limiter( int channel,
+                                 int bwl )
 {
     char buf[ 50 ] = "GBWL?";
     long length;
@@ -725,7 +740,8 @@ bool lecroy_wr_set_bandwidth_limiter( int channel,
  * Function for finding out the current trigger source channel
  *-------------------------------------------------------------*/
 
-int lecroy_wr_get_trigger_source( void )
+int
+lecroy_wr_get_trigger_source( void )
 {
     char reply[ 100 ];
     long length = 100;
@@ -766,7 +782,8 @@ int lecroy_wr_get_trigger_source( void )
  * Function for setting the current trigger source channel
  *---------------------------------------------------------*/
 
-bool lecroy_wr_set_trigger_source( int channel )
+bool
+lecroy_wr_set_trigger_source( int channel )
 {
     char cmd[ 40 ] = "TRSE STD,SR,";
 
@@ -797,7 +814,8 @@ bool lecroy_wr_set_trigger_source( int channel )
  * Function for finding out the trigger level of one of the channels
  *-------------------------------------------------------------------*/
 
-double lecroy_wr_get_trigger_level( int channel )
+double
+lecroy_wr_get_trigger_level( int channel )
 {
     char buf[ 30 ];
     long length = 30;
@@ -825,8 +843,9 @@ double lecroy_wr_get_trigger_level( int channel )
  * Function for setting the trigger slope for one of the channels
  *----------------------------------------------------------------*/
 
-bool lecroy_wr_set_trigger_level( int    channel,
-                                  double level )
+bool
+lecroy_wr_set_trigger_level( int    channel,
+                             double level )
 {
     char cmd[ 40 ];
 
@@ -855,7 +874,8 @@ bool lecroy_wr_set_trigger_level( int    channel,
  * Function for finding out the trigger slope of one of the channels
  *-------------------------------------------------------------------*/
 
-bool lecroy_wr_get_trigger_slope( int channel )
+bool
+lecroy_wr_get_trigger_slope( int channel )
 {
     char buf[ 30 ];
     long length = 30;
@@ -889,8 +909,9 @@ bool lecroy_wr_get_trigger_slope( int channel )
  * Function for setting the trigger slope for one of the channels
  *----------------------------------------------------------------*/
 
-bool lecroy_wr_set_trigger_slope( int channel,
-                                  bool slope )
+bool
+lecroy_wr_set_trigger_slope( int channel,
+                             bool slope )
 {
     char cmd[ 40 ];
 
@@ -922,7 +943,8 @@ bool lecroy_wr_set_trigger_slope( int channel,
  * Function for finding out the trigger coupling for one of the channels
  *-----------------------------------------------------------------------*/
 
-int lecroy_wr_get_trigger_coupling( int channel )
+int
+lecroy_wr_get_trigger_coupling( int channel )
 {
     char buf[ 40 ];
     long length = 40;
@@ -975,8 +997,9 @@ int lecroy_wr_get_trigger_coupling( int channel )
  * Function for setting the trigger coupling for one of the channels
  *-------------------------------------------------------------------*/
 
-int lecroy_wr_set_trigger_coupling( int channel,
-                                    int cpl )
+int
+lecroy_wr_set_trigger_coupling( int channel,
+                                int cpl )
 {
     char cmd[ 40 ];
     const char *cpl_str[ ] = { "AC", "DC", "LFREJ", "HFREJ" };
@@ -1008,7 +1031,8 @@ int lecroy_wr_set_trigger_coupling( int channel,
  * Function for finding out the current trigger mode
  *---------------------------------------------------*/
 
-int lecroy_wr_get_trigger_mode( void )
+int
+lecroy_wr_get_trigger_mode( void )
 {
     char buf[ 40 ];
     long length = 40;
@@ -1036,7 +1060,8 @@ int lecroy_wr_get_trigger_mode( void )
  * Function for setting the trigger mode 
  *---------------------------------------*/
 
-int lecroy_wr_set_trigger_mode( int mode )
+int
+lecroy_wr_set_trigger_mode( int mode )
 {
     char cmd[ 40 ] = "TRMD ";
     const char *mode_str[ ] = { "AUTO", "NORM", "SINGLE", "STOP" };
@@ -1057,7 +1082,8 @@ int lecroy_wr_set_trigger_mode( int mode )
  * Function for determining the current trigger delay
  *----------------------------------------------------*/
 
-double lecroy_wr_get_trigger_delay( void )
+double
+lecroy_wr_get_trigger_delay( void )
 {
     char reply[ 40 ];
     long length = 40;
@@ -1082,7 +1108,8 @@ double lecroy_wr_get_trigger_delay( void )
  * Function for setting the trigger delay 
  *----------------------------------------*/
 
-bool lecroy_wr_set_trigger_delay( double delay )
+bool
+lecroy_wr_set_trigger_delay( double delay )
 {
     char cmd[ 40 ] = "TRDL ";
 
@@ -1105,7 +1132,8 @@ bool lecroy_wr_set_trigger_delay( double delay )
  * Function for checking if a certain channel is displayed
  *---------------------------------------------------------*/
 
-bool lecroy_wr_is_displayed( int ch )
+bool
+lecroy_wr_is_displayed( int ch )
 {
     char cmd[ 30 ];
     long length = 30;
@@ -1135,8 +1163,9 @@ bool lecroy_wr_is_displayed( int ch )
  * Function to switch  display of a channel on or off
  *----------------------------------------------------*/
 
-bool lecroy_wr_display( int ch,
-                        int on_off )
+bool
+lecroy_wr_display( int ch,
+                   int on_off )
 {
     char cmd[ 30 ];
         
@@ -1188,7 +1217,8 @@ bool lecroy_wr_display( int ch,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy_wr_finished( void )
+void
+lecroy_wr_finished( void )
 {
     gpib_local( lecroy_wr.device );
 }
@@ -1198,7 +1228,8 @@ void lecroy_wr_finished( void )
  * Function for starting a new acquisition
  *-----------------------------------------*/
 
-void lecroy_wr_start_acquisition( void )
+void
+lecroy_wr_start_acquisition( void )
 {
     int ch;
     char cmd[ 100 ];
@@ -1289,12 +1320,13 @@ void lecroy_wr_start_acquisition( void )
  * these data
  *------------------------------------------------------------*/
 
-static void lecroy_wr_get_prep( int              ch,
-                                Window_T *       w,
-                                unsigned char ** data,
-                                long *           length,
-                                double *         gain,
-                                double *         offset )
+static void
+lecroy_wr_get_prep( int              ch,
+                    Window_T *       w,
+                    unsigned char ** data,
+                    long *           length,
+                    double *         gain,
+                    double *         offset )
 {
     unsigned int bit_to_test;
     char cmd[ 100 ];
@@ -1400,10 +1432,11 @@ static void lecroy_wr_get_prep( int              ch,
  * Function for fetching a curve from the oscilloscope
  *-----------------------------------------------------*/
 
-void lecroy_wr_get_curve( int        ch,
-                          Window_T * w,
-                          double **  array,
-                          long *     length )
+void
+lecroy_wr_get_curve( int        ch,
+                     Window_T * w,
+                     double **  array,
+                     long *     length )
 {
     double gain, offset;
     unsigned char *data;
@@ -1439,8 +1472,9 @@ void lecroy_wr_get_curve( int        ch,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy_wr_get_area( int        ch,
-                           Window_T * w )
+double
+lecroy_wr_get_area( int        ch,
+                    Window_T * w )
 {
     unsigned char *data;
     unsigned char *dp;
@@ -1478,8 +1512,9 @@ double lecroy_wr_get_area( int        ch,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy_wr_get_amplitude( int        ch,
-                                Window_T * w )
+double
+lecroy_wr_get_amplitude( int        ch,
+                         Window_T * w )
 {
     unsigned char *data = NULL;
     unsigned char *dp;
@@ -1522,8 +1557,9 @@ double lecroy_wr_get_amplitude( int        ch,
 /*----------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-void lecroy_wr_copy_curve( long src,
-                           long dest )
+void
+lecroy_wr_copy_curve( long src,
+                      long dest )
 {
     char cmd[ 100 ] = "STO ";
 
@@ -1549,7 +1585,8 @@ void lecroy_wr_copy_curve( long src,
 /*----------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-static unsigned char *lecroy_wr_get_data( long * len )
+static unsigned char *
+lecroy_wr_get_data( long * len )
 {
     unsigned char *data;
     char len_str[ 10 ];
@@ -1593,8 +1630,9 @@ static unsigned char *lecroy_wr_get_data( long * len )
  *----------------------------------------------------------------------*/
 
 #if 0
-static long lecroy_wr_get_int_value( int          ch,
-                                     const char * name )
+static long
+lecroy_wr_get_int_value( int          ch,
+                         const char * name )
 {
     char cmd[ 100 ];
     long length = 100;
@@ -1640,8 +1678,9 @@ static long lecroy_wr_get_int_value( int          ch,
  * Function for obtaining a float value from the waveform descriptor
  *-------------------------------------------------------------------*/
 
-static double lecroy_wr_get_float_value( int          ch,
-                                         const char * name )
+static double
+lecroy_wr_get_float_value( int          ch,
+                           const char * name )
 {
     char cmd[ 100 ];
     long length = 100;
@@ -1685,7 +1724,8 @@ static double lecroy_wr_get_float_value( int          ch,
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool lecroy_wr_command( const char * cmd )
+bool
+lecroy_wr_command( const char * cmd )
 {
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy_wr_gpib_failure( );
@@ -1701,7 +1741,8 @@ bool lecroy_wr_command( const char * cmd )
  * condition that led to the bit becoming set.
  *-----------------------------------------------------------------------*/
 
-static unsigned int lecroy_wr_get_inr( void )
+static unsigned int
+lecroy_wr_get_inr( void )
 {
     char reply[ 10 ] = "INR?";
     long length = 10;
@@ -1730,7 +1771,8 @@ static bool lecroy_wr_talk( const char * cmd,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static void lecroy_wr_gpib_failure( void )
+static void
+lecroy_wr_gpib_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );

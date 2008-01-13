@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -37,7 +37,8 @@
  * reset to their original positions.
  *-------------------------------------------------------------------------*/
 
-bool dg2020_do_update( void )
+bool
+dg2020_do_update( void )
 {
     if ( ! dg2020.is_needed )
         return OK;
@@ -77,7 +78,8 @@ bool dg2020_do_update( void )
  * also checks that the pulses don't overlap.
  *----------------------------------------------------------------*/
 
-bool dg2020_reorganize_pulses( bool flag )
+bool
+dg2020_reorganize_pulses( bool flag )
 {
     int i;
     Function_T *f;
@@ -150,7 +152,8 @@ bool dg2020_reorganize_pulses( bool flag )
  * if the new settings are still ok.
  *----------------------------------------------------------------*/
 
-void dg2020_do_checks( Function_T * f )
+void
+dg2020_do_checks( Function_T * f )
 {
     Pulse_T *p;
     int i;
@@ -211,8 +214,9 @@ void dg2020_do_checks( Function_T * f )
  * with.
  *---------------------------------------------------------------------------*/
 
-void dg2020_reorganize_phases( Function_T * f,
-                               bool         flag )
+void
+dg2020_reorganize_phases( Function_T * f,
+                          bool         flag )
 {
     int i, j;
     Pulse_T *p;
@@ -259,11 +263,12 @@ void dg2020_reorganize_phases( Function_T * f,
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-void dg2020_recalc_phase_pulse( Function_T * f,
-                                Pulse_T *    phase_p,
-                                Pulse_T *    p,
-                                int          nth,
-                                bool         flag )
+void
+dg2020_recalc_phase_pulse( Function_T * f,
+                           Pulse_T *    phase_p,
+                           Pulse_T *    p,
+                           int          nth,
+                           bool         flag )
 {
     Pulse_T **pppl;               /* list of phase pulses for previous pulse */
     int ppp_num;                  /* and the length of this list */
@@ -460,7 +465,7 @@ void dg2020_recalc_phase_pulse( Function_T * f,
         phase_p->needs_update = SET;
     }
 
-set_length:
+ set_length:
 
     if ( phase_p->is_old_pos && phase_p->old_pos == phase_p->pos )
         phase_p->is_old_pos = UNSET;
@@ -522,7 +527,7 @@ set_length:
         }
     }
 
-done_setting:
+ done_setting:
 
     phase_p->is_len = SET;
 
@@ -541,7 +546,8 @@ done_setting:
  * describing the state of the pulser to their initial values
  *------------------------------------------------------------------*/
 
-void dg2020_full_reset( void )
+void
+dg2020_full_reset( void )
 {
     Pulse_T *p = dg2020.pulses;
 
@@ -589,7 +595,8 @@ void dg2020_full_reset( void )
  * pulse list.
  *-------------------------------------------------------------------------*/
 
-Pulse_T *dg2020_delete_pulse( Pulse_T * p )
+Pulse_T *
+dg2020_delete_pulse( Pulse_T * p )
 {
     Pulse_T *pp;
     int i;
@@ -667,7 +674,8 @@ Pulse_T *dg2020_delete_pulse( Pulse_T * p )
  * last to the end of the pulse sequence.
  *-----------------------------------------------------------------------*/
 
-void dg2020_finalize_phase_pulses( int func )
+void
+dg2020_finalize_phase_pulses( int func )
 {
     Function_T *f;
     int i;
@@ -700,7 +708,8 @@ void dg2020_finalize_phase_pulses( int func )
  * assigned to the function passed as argument.
  *------------------------------------------------------------------*/
 
-void dg2020_set_pulses( Function_T * f )
+void
+dg2020_set_pulses( Function_T * f )
 {
     Pulse_T *p,
             *pp;
@@ -778,7 +787,8 @@ void dg2020_set_pulses( Function_T * f )
  * real work.
  *---------------------------------------------------------------------------*/
 
-void dg2020_set_phase_pulses( Function_T * f )
+void
+dg2020_set_phase_pulses( Function_T * f )
 {
     Function_T dummy_f;
     int i;
@@ -826,8 +836,9 @@ void dg2020_set_phase_pulses( Function_T * f )
  * and their length.
  *--------------------------------------------------------------------*/
 
-void dg2020_commit( Function_T * f,
-                    bool         flag )
+void
+dg2020_commit( Function_T * f,
+               bool         flag )
 {
     Pulse_T *p;
     int i;
@@ -921,8 +932,9 @@ void dg2020_commit( Function_T * f,
  * representation. Actually, the real work is done in dg2020_commit().
  *--------------------------------------------------------------------------*/
 
-void dg2020_commit_phases( Function_T * f,
-                           bool         flag )
+void
+dg2020_commit_phases( Function_T * f,
+                      bool         flag )
 {
     Function_T dummy_f;
     int i;
@@ -952,7 +964,8 @@ void dg2020_commit_phases( Function_T * f,
  * to the low state
  *---------------------------------------------------------------------------*/
 
-void dg2020_clear_padding_block( Function_T * f )
+void
+dg2020_clear_padding_block( Function_T * f )
 {
     int i;
 

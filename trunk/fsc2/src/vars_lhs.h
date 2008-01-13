@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -29,10 +29,10 @@
 #include "fsc2.h"
 
 
-Var_T *vars_arr_lhs( Var_T * /* v */ );
+Var_T * vars_arr_lhs( Var_T * /* v */ );
 
-Var_T *vars_init_list( Var_T * /* v     */,
-                       ssize_t /* level */  );
+Var_T * vars_init_list( Var_T * /* v     */,
+                        ssize_t /* level */  );
 
 void vars_arr_init( Var_T * /* dest */ );
 

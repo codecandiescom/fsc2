@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -44,7 +44,8 @@ static void rb_pulser_j_start_internal_trigger( void );
  * pulse
  *---------------------------------------------------------------*/
 
-void rb_pulser_j_init( void )
+void
+rb_pulser_j_init( void )
 {
     int i;
 
@@ -217,7 +218,8 @@ void rb_pulser_j_init( void )
  * in the configuration file under the name SYNTHESIZER_INTRINSIC_DELAY)
  *------------------------------------------------------------------------*/
 
-static void rb_pulser_j_synthesizer_init( void )
+static void
+rb_pulser_j_synthesizer_init( void )
 {
     Function_T *f = rb_pulser_j.function + PULSER_CHANNEL_RF;
     Var_T *func_ptr;
@@ -273,7 +275,8 @@ static void rb_pulser_j_synthesizer_init( void )
  * cards the pulser is mode of
  *-----------------------------------------------------------*/
 
-void rb_pulser_j_exit( void )
+void
+rb_pulser_j_exit( void )
 {
     int i;
 
@@ -327,7 +330,8 @@ void rb_pulser_j_exit( void )
  * Function to "start" or "stop" the pulser
  *------------------------------------------*/
 
-void rb_pulser_j_run( bool state )
+void
+rb_pulser_j_run( bool state )
 {
     Rulbus_Delay_Card_T *card;
     Function_T *f;
@@ -409,8 +413,8 @@ void rb_pulser_j_run( bool state )
  * in external trigger mode
  *----------------------------------------------------------------*/
 
-
-static void rb_pulser_j_start_external_trigger( void )
+static void
+rb_pulser_j_start_external_trigger( void )
 {
     /* In external trigger mode with the external trigger going to the
        ERT_DELAY card set the rate of the clock feeding the ERT delay
@@ -457,7 +461,8 @@ static void rb_pulser_j_start_external_trigger( void )
  * external trigger mode.
  *-----------------------------------------------------------*/
 
-static void rb_pulser_j_start_internal_trigger( void )
+static void
+rb_pulser_j_start_internal_trigger( void )
 {
     /* In internal trigger mode set the clock frequency to the value required
        for the experiment repetition time, set the delay of the ERT card
@@ -520,8 +525,9 @@ static void rb_pulser_j_start_internal_trigger( void )
  * pulses).
  *-----------------------------------------------------------*/
 
-void rb_pulser_j_delay_card_state( int  handle,
-                                   bool state )
+void
+rb_pulser_j_delay_card_state( int  handle,
+                              bool state )
 {
     unsigned char type = state == START ?
                 RULBUS_RB8514_DELAY_END_PULSE : RULBUS_RB8514_DELAY_PULSE_NONE;
@@ -542,8 +548,9 @@ void rb_pulser_j_delay_card_state( int  handle,
  * Function to set the delay for a delay card
  *--------------------------------------------*/
 
-void rb_pulser_j_delay_card_delay( int           handle,
-                                   unsigned long delay )
+void
+rb_pulser_j_delay_card_delay( int           handle,
+                              unsigned long delay )
 {
     int ret;
 
@@ -569,8 +576,9 @@ void rb_pulser_j_delay_card_delay( int           handle,
  * fails. It stops the running experiment.
  *---------------------------------------------------------*/
 
-static void rb_pulser_j_failure( bool         rb_flag,
-                                 const char * mess )
+static void
+rb_pulser_j_failure( bool         rb_flag,
+                     const char * mess )
 {
     static int calls = 0;
 

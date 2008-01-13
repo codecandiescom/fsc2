@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -49,8 +49,9 @@ union semun {
  * to the following memory. If it fails completely it returns NULL.
  *-------------------------------------------------------------------*/
 
-void *get_shm( int * shm_id,
-               long  len )
+void *
+get_shm( int * shm_id,
+         long  len )
 {
     void *buf;
 
@@ -100,7 +101,8 @@ void *get_shm( int * shm_id,
  * (skipping the magic string "fsc2"), on error it returns NULL.
  *---------------------------------------------------------------*/
 
-char *attach_shm( int key )
+void *
+attach_shm( int key )
 {
     void *buf;
 
@@ -121,7 +123,7 @@ char *attach_shm( int key )
     }
 
     lower_permissions( );
-    return ( char * ) buf + 4;
+    return ( void * ) ( ( char * ) buf + 4 );
 }
 
 
@@ -131,8 +133,9 @@ char *attach_shm( int key )
  * the shared memory region.
  *---------------------------------------------------------------------*/
 
-void detach_shm( void * buf,
-                 int *  key )
+void
+detach_shm( void * buf,
+            int *  key )
 {
     raise_permissions( );
 
@@ -156,7 +159,8 @@ void detach_shm( void * buf,
  * the 'master key'.
  *-----------------------------------------------------------------*/
 
-void delete_all_shm( void )
+void
+delete_all_shm( void )
 {
     int i;
 
@@ -207,7 +211,8 @@ void delete_all_shm( void )
 #endif
 
 
-void delete_stale_shms( void )
+void
+delete_stale_shms( void )
 {
     int max_id, id, shm_id;
     struct shmid_ds shm_seg;
@@ -267,7 +272,8 @@ void delete_stale_shms( void )
  * of the new semaphore or -1 on error.
  *----------------------------------------------------------------------*/
 
-int sema_create( int size )
+int
+sema_create( int size )
 {
     int sema_id;
     union semun sema_arg;
@@ -299,7 +305,8 @@ int sema_create( int size )
  * It returns 0 on success and -1 on error.
  *--------------------------------------------------------------*/
 
-int sema_destroy( int sema_id )
+int
+sema_destroy( int sema_id )
 {
     union semun sema_arg;
 
@@ -324,7 +331,8 @@ int sema_destroy( int sema_id )
  * wait when signals are received.
  *-------------------------------------------------------------------------*/
 
-int sema_wait( int sema_id )
+int
+sema_wait( int sema_id )
 {
     struct sembuf wait_flags = { 0, -1, 0 };
 
@@ -356,7 +364,8 @@ int sema_wait( int sema_id )
  * return but continue to wait when signals are received.
  *--------------------------------------------------------------------*/
 
-int sema_post( int sema_id )
+int
+sema_post( int sema_id )
 {
     struct sembuf post = { 0, 1, 0 };
 

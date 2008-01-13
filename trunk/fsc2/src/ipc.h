@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,10 +28,10 @@
 #include "fsc2.h"
 
 
-void *get_shm( int * /* shm_id */,
-               long  /* len    */  );
+void * get_shm( int * /* shm_id */,
+                long  /* len    */  );
 
-char *attach_shm( int /* key */ );
+void * attach_shm( int /* key */ );
 
 void detach_shm( void * /* buf */,
                  int *  /* key */  );

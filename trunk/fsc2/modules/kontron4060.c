@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -41,12 +41,12 @@ int kontron4060_test_hook(       void );
 int kontron4060_exp_hook(        void );
 int kontron4060_end_of_exp_hook( void );
 
-Var_T *multimeter_name(           Var_T * v );
-Var_T *multimeter_mode(           Var_T * v );
-Var_T *multimeter_get_data(       Var_T * v );
-Var_T *multimeter_ac_measurement( Var_T * v );
-Var_T *multimeter_dc_measurement( Var_T * v );
-Var_T *multimeter_command(        Var_T * v );
+Var_T * multimeter_name(           Var_T * v );
+Var_T * multimeter_mode(           Var_T * v );
+Var_T * multimeter_get_data(       Var_T * v );
+Var_T * multimeter_ac_measurement( Var_T * v );
+Var_T * multimeter_dc_measurement( Var_T * v );
+Var_T * multimeter_command(        Var_T * v );
 
 
 /* Locally used functions */
@@ -80,7 +80,8 @@ static Kontron4060_T kontron4060, kontron4060_store;
  * Init hook function for the module.
  *------------------------------------*/
 
-int kontron4060_init_hook( void )
+int
+kontron4060_init_hook( void )
 {
     /* Set global variable to indicate that GPIB bus is needed */
 
@@ -99,7 +100,8 @@ int kontron4060_init_hook( void )
  * Start of test hook function for the module
  *--------------------------------------------*/
 
-int kontron4060_test_hook( void )
+int
+kontron4060_test_hook( void )
 {
     kontron4060_store = kontron4060;
     return 1;
@@ -110,7 +112,8 @@ int kontron4060_test_hook( void )
  * Start of experiment hook function for the module
  *--------------------------------------------------*/
 
-int kontron4060_exp_hook( void )
+int
+kontron4060_exp_hook( void )
 {
     kontron4060 = kontron4060_store;
 
@@ -131,7 +134,8 @@ int kontron4060_exp_hook( void )
  * End of experiment hook function for the module
  *------------------------------------------------*/
 
-int kontron4060_end_of_exp_hook( void )
+int
+kontron4060_end_of_exp_hook( void )
 {
     /* Switch lock-in back to local mode */
 
@@ -147,13 +151,18 @@ int kontron4060_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *multimeter_name( Var_T * v  UNUSED_ARG )
+Var_T *
+multimeter_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
 
 
-Var_T *multimeter_mode( Var_T *v )
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+multimeter_mode( Var_T *v )
 {
     int old_mode = kontron4060.mode;
     char cmd[ ] = "x\n";
@@ -211,7 +220,8 @@ Var_T *multimeter_mode( Var_T *v )
  * Switches the multimeter to AC measurement mode
  *------------------------------------------------*/
 
-Var_T *multimeter_ac_measurement( Var_T * v  UNUSED_ARG )
+Var_T *
+multimeter_ac_measurement( Var_T * v  UNUSED_ARG )
 {
     if (    FSC2_MODE == EXPERIMENT
          && gpib_write( kontron4060.device, "M1\n", 3 ) == FAILURE )
@@ -226,7 +236,8 @@ Var_T *multimeter_ac_measurement( Var_T * v  UNUSED_ARG )
  * Switches the multimeter to DC measurement mode
  *-----------------------------------------------*/
 
-Var_T *multimeter_dc_measurement( Var_T * v  UNUSED_ARG )
+Var_T *
+multimeter_dc_measurement( Var_T * v  UNUSED_ARG )
 {
     if (    FSC2_MODE == EXPERIMENT
          && gpib_write( kontron4060.device, "M0\n", 3 ) == FAILURE )
@@ -241,7 +252,8 @@ Var_T *multimeter_dc_measurement( Var_T * v  UNUSED_ARG )
  * Returns the current voltage from the multimeter
  *------------------------------------------------*/
 
-Var_T *multimeter_get_data( Var_T * v  UNUSED_ARG )
+Var_T *
+multimeter_get_data( Var_T * v  UNUSED_ARG )
 {
     char reply[ 100 ];
     long length = 100;
@@ -264,7 +276,8 @@ Var_T *multimeter_get_data( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *multimeter_command( Var_T * v )
+Var_T *
+multimeter_command( Var_T * v )
 {
     char *cmd = NULL;
 
@@ -296,7 +309,8 @@ Var_T *multimeter_command( Var_T * v )
 /*--------------------------------------------------*
  *--------------------------------------------------*/
 
-static bool kontron4060_init( const char * name )
+static bool
+kontron4060_init( const char * name )
 {
     Var_T *v = vars_push( INT_VAR, ( long ) kontron4060.mode );
 
@@ -337,7 +351,8 @@ static bool kontron4060_init( const char * name )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool kontron4060_command( const char * cmd )
+static bool
+kontron4060_command( const char * cmd )
 {
     if ( gpib_write( kontron4060.device, cmd, strlen( cmd ) ) == FAILURE )
         kontron4060_failure( );
@@ -349,7 +364,8 @@ static bool kontron4060_command( const char * cmd )
 /*--------------------------------------------------*
  *--------------------------------------------------*/
 
-static void kontron4060_failure( void )
+static void
+kontron4060_failure( void )
 {
     print( FATAL, "Communication with multimeter failed.\n" );
     THROW( EXCEPTION );

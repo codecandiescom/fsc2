@@ -3,7 +3,7 @@
  * 
  *	Driver for the RULBUS EPP interface
  *
- *	Copyright (C) 2003-2007 Jens Thoms Toerring
+ *	Copyright (C) 2003-2008 Jens Thoms Toerring
  *
  *	This program is free software; you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -1157,7 +1157,7 @@ static int rulbus_epp_interface_present( void )
  * c-label-ofset: -4
  * c-continued-statement-offset: 4
  * c-continued-brace-offset: 0
- * indent-tabs-mod
+ * indent-tabs-mod:
  * tab-width: 8
  * End:
  */

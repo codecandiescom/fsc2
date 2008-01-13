@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -71,8 +71,8 @@ static void spectrapro_300i_send( const char * buf );
 static bool spectrapro_300i_read( char *   buf,
                                   size_t * len );
 
-static char *spectrapro_300i_talk( const char * buf,
-                                   size_t       len );
+static char * spectrapro_300i_talk( const char * buf,
+                                    size_t       len );
 
 static bool spectrapro_300i_comm( int type,
                                   ... );
@@ -85,7 +85,8 @@ static void spectrapro_300i_comm_fail( void );
  * calibration file. Otherwise an exception is thrown.
  *-----------------------------------------------------------*/
 
-FILE *spectrapro_300i_find_calib( char * name )
+FILE *
+spectrapro_300i_find_calib( char * name )
 {
     FILE *cfp = NULL;
     char *new_name = NULL;
@@ -163,7 +164,8 @@ FILE *spectrapro_300i_find_calib( char * name )
  *  with the permissions or other, unknown reasons).
  *------------------------------------------------------------------*/
 
-FILE *spectrapro_300i_open_calib( char * name )
+FILE *
+spectrapro_300i_open_calib( char * name )
 {
     FILE *cfp;
 
@@ -191,7 +193,7 @@ FILE *spectrapro_300i_open_calib( char * name )
 
 
 /*-----------------------------------------------------------------------*
- * Function for calculation of the sum of the squares of the differences
+ * Function for calculating the sum of the squares of the differences
  * between the measured offsets of the lines from he center (in pixels)
  * and the calculated offsets. The formulas used are (in TeX notation):
  * $n$: deviation in numbers of pixels
@@ -213,8 +215,9 @@ FILE *spectrapro_300i_open_calib( char * name )
  * \end{eqnarray*}
  *-----------------------------------------------------------------------*/
 
-double spectrapro_300i_min( double * x,
-                            void *   par )
+double
+spectrapro_300i_min( double * x,
+                     void *   par )
 {
     double inclusion_angle_2;                 /* half of inclusion angle */
     double focal_length;
@@ -310,7 +313,8 @@ double spectrapro_300i_min( double * x,
  * current grating and turret.
  *----------------------------------------------------------------*/
 
-void spectrapro_300i_open( void )
+void
+spectrapro_300i_open( void )
 {
     char reply[ 100 ];
     size_t len;
@@ -360,7 +364,8 @@ void spectrapro_300i_open( void )
  * monochromator is attached to.
  *--------------------------------------------------------------*/
 
-void spectrapro_300i_close( void )
+void
+spectrapro_300i_close( void )
 {
     if ( spectrapro_300i.is_open )
         spectrapro_300i_comm( SERIAL_EXIT );
@@ -373,7 +378,8 @@ void spectrapro_300i_close( void )
  * is currently set to.
  *-------------------------------------------------------*/
 
-double spectrapro_300i_get_wavelength( void )
+double
+spectrapro_300i_get_wavelength( void )
 {
     char *reply;
     double wl;
@@ -390,7 +396,8 @@ double spectrapro_300i_get_wavelength( void )
  * Function sets the monochromator to a new wavelength.
  *------------------------------------------------------*/
 
-void spectrapro_300i_set_wavelength( double wavelength )
+void
+spectrapro_300i_set_wavelength( double wavelength )
 {
     char *buf;
 
@@ -417,7 +424,8 @@ void spectrapro_300i_set_wavelength( double wavelength )
  * Function asks the monochromator for the turret currently used.
  *----------------------------------------------------------------*/
 
-long spectrapro_300i_get_turret( void )
+long
+spectrapro_300i_get_turret( void )
 {
     const char *reply;
     long tn;
@@ -434,7 +442,8 @@ long spectrapro_300i_get_turret( void )
  * Function tells the monochromator to switch to a different turret.
  *-------------------------------------------------------------------*/
 
-void spectrapro_300i_set_turret( long tn )
+void
+spectrapro_300i_set_turret( long tn )
 {
     char *buf;
 
@@ -465,7 +474,8 @@ void spectrapro_300i_set_turret( long tn )
  * Function asks the monochromator for the currently used grating.
  *-----------------------------------------------------------------*/
 
-long spectrapro_300i_get_grating( void )
+long
+spectrapro_300i_get_grating( void )
 {
     const char *reply;
     long gn;
@@ -482,7 +492,8 @@ long spectrapro_300i_get_grating( void )
  * Function tells to monochromator to switch to a different grating.
  *-------------------------------------------------------------------*/
 
-void spectrapro_300i_set_grating( long gn )
+void
+spectrapro_300i_set_grating( long gn )
 {
     char *buf;
 
@@ -517,7 +528,8 @@ void spectrapro_300i_set_grating( long gn )
  * information) in the internal structure for the monochromator.
  *-----------------------------------------------------------------*/
 
-void spectrapro_300i_get_gratings( void )
+void
+spectrapro_300i_get_gratings( void )
 {
     const char *reply;
     const char *sp;
@@ -668,7 +680,8 @@ void spectrapro_300i_get_gratings( void )
  * setting for one of the gratings.
  *-----------------------------------------------------*/
 
-long spectrapro_300i_get_offset( long gn )
+long
+spectrapro_300i_get_offset( long gn )
 {
     const char *reply;
     char *sp, *nsp;
@@ -713,8 +726,9 @@ long spectrapro_300i_get_offset( long gn )
  * time, mainly because of the required reset.
  *----------------------------------------------------------*/
 
-void spectrapro_300i_set_offset( long gn,
-                                 long offset )
+void
+spectrapro_300i_set_offset( long gn,
+                            long offset )
 {
     char *buf;
 
@@ -780,7 +794,8 @@ void spectrapro_300i_set_offset( long gn,
  * setting for one of the gratings.
  *--------------------------------------------------------*/
 
-long spectrapro_300i_get_adjust( long gn )
+long
+spectrapro_300i_get_adjust( long gn )
 {
     const char *reply;
     char *sp, *nsp;
@@ -825,8 +840,9 @@ long spectrapro_300i_get_adjust( long gn )
  * because of the required reset.
  *-------------------------------------------------------------------*/
 
-void spectrapro_300i_set_adjust( long gn,
-                                 long adjust )
+void
+spectrapro_300i_set_adjust( long gn,
+                            long adjust )
 {
     char *buf;
 
@@ -896,8 +912,9 @@ void spectrapro_300i_set_adjust( long gn,
  * then the blaze wavelength has to be adjusted.
  *---------------------------------------------------------------------*/
 
-void spectrapro_300i_install_grating( long         gn,
-                                      const char * part_no )
+void
+spectrapro_300i_install_grating( long         gn,
+                                 const char * part_no )
 {
     char *buf;
     size_t i;
@@ -1012,7 +1029,8 @@ void spectrapro_300i_install_grating( long         gn,
  * non-volatile memory of the monochromator.
  *--------------------------------------------------------*/
 
-void spectrapro_300i_uninstall_grating( long gn )
+void
+spectrapro_300i_uninstall_grating( long gn )
 {
     char *buf;
 
@@ -1040,7 +1058,8 @@ void spectrapro_300i_uninstall_grating( long gn )
  * and don't expect any replies.
  *--------------------------------------------------------*/
 
-void spectrapro_300i_send( const char * buf )
+void
+spectrapro_300i_send( const char * buf )
 {
     char *lbuf;
     size_t len;
@@ -1114,8 +1133,9 @@ void spectrapro_300i_send( const char * buf )
  * the "Stop" button a USER_BREAK_EXCEPTION is thrown.
  *-----------------------------------------------------------------------*/
 
-static bool spectrapro_300i_read( char *   buf,
-                                  size_t * len )
+static
+bool spectrapro_300i_read( char *   buf,
+                           size_t * len )
 {
     size_t to_fetch = *len;
     size_t already_read = 0;
@@ -1217,8 +1237,9 @@ static bool spectrapro_300i_read( char *   buf,
  * buffer gets returned. The buffer always ends in a '\0'.
  *---------------------------------------------------------------*/
 
-char *spectrapro_300i_talk( const char * buf,
-                            size_t       len )
+char *
+spectrapro_300i_talk( const char * buf,
+                      size_t       len )
 {
     char *lbuf;
     size_t comm_len;
@@ -1284,8 +1305,9 @@ char *spectrapro_300i_talk( const char * buf,
  * via the serial port.
  *-----------------------------------------------------------------*/
 
-static bool spectrapro_300i_comm( int type,
-                                  ... )
+static bool
+spectrapro_300i_comm( int type,
+                      ... )
 {
     va_list ap;
     char *buf;
@@ -1364,7 +1386,8 @@ static bool spectrapro_300i_comm( int type,
  * Converts a wavelength into a wavenumber
  *-----------------------------------------*/
 
-double spectrapro_300i_wl2wn( double wl )
+double
+spectrapro_300i_wl2wn( double wl )
 {
     fsc2_assert( wl > 0 );
     return 0.01 / wl;
@@ -1375,7 +1398,8 @@ double spectrapro_300i_wl2wn( double wl )
  * Converts a wavenumber into a wavelength
  *-----------------------------------------*/
 
-double spectrapro_300i_wn2wl( double wn )
+double
+spectrapro_300i_wn2wl( double wn )
 {
     fsc2_assert( wn > 0 );
     return 0.01 / wn;
@@ -1386,7 +1410,8 @@ double spectrapro_300i_wn2wl( double wn )
  * Function called on communication failure with the device
  *----------------------------------------------------------*/
 
-static void spectrapro_300i_comm_fail( void )
+static
+void spectrapro_300i_comm_fail( void )
 {
     print( FATAL, "Can't access the monochromator.\n" );
     THROW( EXCEPTION );

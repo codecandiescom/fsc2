@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -322,38 +322,38 @@ int lecroy9424e_end_of_exp_hook( void );
 void lecroy9424e_exit_hook(      void );
 
 
-Var_T *digitizer_name(               Var_T * /* v */ );
-Var_T *digitizer_define_window(      Var_T * /* v */ );
-Var_T *digitizer_change_window(      Var_T * /* v */ );
-Var_T *digitizer_window_position(    Var_T * /* v */ );
-Var_T *digitizer_window_width(       Var_T * /* v */ );
-Var_T *digitizer_timebase(           Var_T * /* v */ );
-Var_T *digitizer_interleave_mode(    Var_T * /* v */ );
-Var_T *digitizer_time_per_point(     Var_T * /* v */ );
-Var_T *digitizer_sensitivity(        Var_T * /* v */ );
-Var_T *digitizer_coupling(           Var_T * /* v */ );
-Var_T *digitizer_offset(             Var_T * /* v */ );
-Var_T *digitizer_bandwidth_limiter(  Var_T * /* v */ );
-Var_T *digitizer_trigger_channel(    Var_T * /* v */ );
-Var_T *digitizer_trigger_level(      Var_T * /* v */ );
-Var_T *digitizer_trigger_slope(      Var_T * /* v */ );
-Var_T *digitizer_trigger_coupling(   Var_T * /* v */ );
-Var_T *digitizer_trigger_mode(       Var_T * /* v */ );
-Var_T *digitizer_trigger_delay(      Var_T * /* v */ );
-Var_T *digitizer_averaging(          Var_T * /* v */ );
-Var_T *digitizer_num_averages(       Var_T * /* v */ );
-Var_T *digitizer_record_length(      Var_T * /* v */ );
-Var_T *digitizer_trigger_position(   Var_T * /* v */ );
-Var_T *digitizer_meas_channel_ok(    Var_T * /* v */ );
-Var_T *digitizer_start_acquisition(  Var_T * /* v */ );
-Var_T *digitizer_get_curve(          Var_T * /* v */ );
-Var_T *digitizer_get_curve_fast(     Var_T * /* v */ );
-Var_T *digitizer_get_area(           Var_T * /* v */ );
-Var_T *digitizer_get_area_fast(      Var_T * /* v */ );
-Var_T *digitizer_get_amplitude(      Var_T * /* v */ );
-Var_T *digitizer_get_amplitude_fast( Var_T * /* v */ );
-Var_T *digitizer_copy_curve(         Var_T * /* v */ );
-Var_T *digitizer_command(            Var_T * /* v */ );
+Var_T * digitizer_name(               Var_T * /* v */ );
+Var_T * digitizer_define_window(      Var_T * /* v */ );
+Var_T * digitizer_change_window(      Var_T * /* v */ );
+Var_T * digitizer_window_position(    Var_T * /* v */ );
+Var_T * digitizer_window_width(       Var_T * /* v */ );
+Var_T * digitizer_timebase(           Var_T * /* v */ );
+Var_T * digitizer_interleave_mode(    Var_T * /* v */ );
+Var_T * digitizer_time_per_point(     Var_T * /* v */ );
+Var_T * digitizer_sensitivity(        Var_T * /* v */ );
+Var_T * digitizer_coupling(           Var_T * /* v */ );
+Var_T * digitizer_offset(             Var_T * /* v */ );
+Var_T * digitizer_bandwidth_limiter(  Var_T * /* v */ );
+Var_T * digitizer_trigger_channel(    Var_T * /* v */ );
+Var_T * digitizer_trigger_level(      Var_T * /* v */ );
+Var_T * digitizer_trigger_slope(      Var_T * /* v */ );
+Var_T * digitizer_trigger_coupling(   Var_T * /* v */ );
+Var_T * digitizer_trigger_mode(       Var_T * /* v */ );
+Var_T * digitizer_trigger_delay(      Var_T * /* v */ );
+Var_T * digitizer_averaging(          Var_T * /* v */ );
+Var_T * digitizer_num_averages(       Var_T * /* v */ );
+Var_T * digitizer_record_length(      Var_T * /* v */ );
+Var_T * digitizer_trigger_position(   Var_T * /* v */ );
+Var_T * digitizer_meas_channel_ok(    Var_T * /* v */ );
+Var_T * digitizer_start_acquisition(  Var_T * /* v */ );
+Var_T * digitizer_get_curve(          Var_T * /* v */ );
+Var_T * digitizer_get_curve_fast(     Var_T * /* v */ );
+Var_T * digitizer_get_area(           Var_T * /* v */ );
+Var_T * digitizer_get_area_fast(      Var_T * /* v */ );
+Var_T * digitizer_get_amplitude(      Var_T * /* v */ );
+Var_T * digitizer_get_amplitude_fast( Var_T * /* v */ );
+Var_T * digitizer_copy_curve(         Var_T * /* v */ );
+Var_T * digitizer_command(            Var_T * /* v */ );
 
 
 /* declaration of internally used functions */
@@ -453,11 +453,11 @@ void lecroy9424e_soe_checks( void );
 
 void lecroy9424e_exit_cleanup( void );
 
-const char *lecroy9424e_ptime( double /* p_time */ );
+const char * lecroy9424e_ptime( double /* p_time */ );
 
 void lecroy9424e_delete_windows( LECROY9424E_T * /* s */ );
 
-Window_T *lecroy9424e_get_window_by_number( long /* wid */ );
+Window_T * lecroy9424e_get_window_by_number( long /* wid */ );
 
 double lecroy9424e_trigger_delay_check( void );
 

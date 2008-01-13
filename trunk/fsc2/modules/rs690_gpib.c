@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -63,7 +63,8 @@ static int rs690_write( int          device_no,
  *------------------------------*/
 
 #ifndef RS690_GPIB_DEBUG
-bool rs690_init( const char * name )
+bool
+rs690_init( const char * name )
 {
     char reply[ 100 ];
     long length = 100;
@@ -135,7 +136,8 @@ bool rs690_init( const char * name )
     return OK;
 }
 #else
-bool rs690_init( const char * name  UNUSED_ARG )
+bool
+rs690_init( const char * name  UNUSED_ARG )
 {
     return OK;
 }
@@ -148,7 +150,8 @@ bool rs690_init( const char * name  UNUSED_ARG )
  * trigger the pulser by software).
  *-----------------------------------------------------------------*/
 
-bool rs690_run( bool state )
+bool
+rs690_run( bool state )
 {
     if ( rs690_write( rs690.device, state ? "RUN!" : "RST!" , 4 ) == FAILURE )
         rs690_gpib_failure( );
@@ -167,7 +170,8 @@ bool rs690_run( bool state )
  * Function locks or unlocks the front panel keyboard.
  *-----------------------------------------------------*/
 
-bool rs690_lock_state( bool lock )
+bool
+rs690_lock_state( bool lock )
 {
     if ( rs690_write( rs690.device, lock ? "LOC!" : "LCL!", 4 ) == FAILURE )
         rs690_gpib_failure( );
@@ -197,7 +201,8 @@ bool rs690_lock_state( bool lock )
  * bits of needed fields.
  *--------------------------------------------------------------------*/
 
-static bool rs690_field_channel_setup( void )
+static bool
+rs690_field_channel_setup( void )
 {
     int i, j;
     int field_list[ 4 * NUM_HSM_CARDS ][ 16 ];
@@ -279,7 +284,8 @@ static bool rs690_field_channel_setup( void )
  * includes sending only data for fields that are really used.
  *---------------------------------------------------------------*/
 
-bool rs690_set_channels( void )
+bool
+rs690_set_channels( void )
 {
     char buf[ 100 ];
     int i, k;
@@ -341,7 +347,8 @@ bool rs690_set_channels( void )
  * entries that need to be changed).
  *----------------------------------------------------------------*/
 
-static bool rs690_init_channels( void )
+static bool
+rs690_init_channels( void )
 {
     int i, j, k;
     FS_T *n;
@@ -399,7 +406,8 @@ static bool rs690_init_channels( void )
  * needed to produce the current pulse sequence.
  *-------------------------------------------------------------*/
 
-static void rs690_calc_tables( void )
+static void
+rs690_calc_tables( void )
 {
     Ticks count = 0;
 
@@ -452,9 +460,10 @@ static void rs690_calc_tables( void )
  * to and 'n' points to the FS structure with the data and length.
  *-----------------------------------------------------------------*/
 
-static void rs690_table_set( int    i,
-                             int    k,
-                             FS_T * n )
+static void
+rs690_table_set( int    i,
+                 int    k,
+                 FS_T * n )
 {
     char buf[ 256 ];
 
@@ -501,7 +510,8 @@ static void rs690_table_set( int    i,
  * Funcion to be called when the pulser does not react properly.
  *---------------------------------------------------------------*/
 
-static void rs690_gpib_failure( void )
+static void
+rs690_gpib_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     rs690_check( );
@@ -513,7 +523,8 @@ static void rs690_gpib_failure( void )
  * Function for debugging purposes only.
  *---------------------------------------*/
 
-static void rs690_check( void )
+static void
+rs690_check( void )
 {
 #ifndef RS690_GPIB_DEBUG
     char b[ 100 ];
@@ -530,9 +541,10 @@ static void rs690_check( void )
  *--------------------------------------*/
 
 #ifndef RS690_GPIB_DEBUG
-static int rs690_write( int          device_no,
-                        const char * s,
-                        long         len )
+static int
+rs690_write( int          device_no,
+             const char * s,
+             long         len )
 {
     if (    gpib_write( device_no, s, len ) == FAILURE
          && GPIB_IS_TIMEOUT
@@ -541,8 +553,10 @@ static int rs690_write( int          device_no,
     return SUCCESS;
 }
 #else
-static int rs690_write( int device_no UNUSED_ARG, const char *s UNUSED_ARG,
-                        long len UNUSED_ARG )
+static int
+rs690_write( int         device_no  UNUSED_ARG,
+             const char *s          UNUSED_ARG,
+             long        len        UNUSED_ARG )
 {
     return SUCCESS;
 }
@@ -552,7 +566,8 @@ static int rs690_write( int device_no UNUSED_ARG, const char *s UNUSED_ARG,
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool rs690_command( const char * cmd )
+bool
+rs690_command( const char * cmd )
 {
     if ( gpib_write( rs690.device, cmd, strlen( cmd ) ) == FAILURE )
         rs690_gpib_failure( );

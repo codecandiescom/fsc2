@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -29,8 +29,8 @@
 #include "fsc2.h"
 
 
-Var_T *vars_sub( Var_T * /* v1 */,
-                 Var_T * /* v2 */  );
+Var_T * vars_sub( Var_T * /* v1 */,
+                  Var_T * /* v2 */  );
 
 
 #endif  /* ! VARS_SUB_HEADER */

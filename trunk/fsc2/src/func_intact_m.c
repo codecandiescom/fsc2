@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -41,7 +41,8 @@ static Var_T *f_mchanged_child( Var_T * v );
  * Function for appending a new menu object to the toolbox
  *---------------------------------------------------------*/
 
-Var_T *f_mcreate( Var_T * var )
+Var_T *
+f_mcreate( Var_T * var )
 {
     Var_T *v = var;
     Var_T *lv;
@@ -170,9 +171,10 @@ Var_T *f_mcreate( Var_T * var )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *f_mcreate_child( Var_T * v,
-                               size_t  len,
-                               long    num_strs )
+static Var_T *
+f_mcreate_child( Var_T * v,
+                 size_t  len,
+                 long    num_strs )
 {
     char *buffer, *pos;
     long new_ID;
@@ -234,7 +236,8 @@ static Var_T *f_mcreate_child( Var_T * v,
  * Deletes one or more menu objects, parameter(s) are one or more menu IDs.
  *--------------------------------------------------------------------------*/
 
-Var_T *f_mdelete( Var_T * v )
+Var_T *
+f_mdelete( Var_T * v )
 {
     /* At least one menu ID is needed... */
 
@@ -274,7 +277,8 @@ Var_T *f_mdelete( Var_T * v )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static void f_mdelete_child( Var_T * v )
+static void
+f_mdelete_child( Var_T * v )
 {
     char *buffer, *pos;
     size_t len;
@@ -326,7 +330,8 @@ static void f_mdelete_child( Var_T * v )
  * process, which actually removes the menu.
  *---------------------------------------------------------*/
 
-static void f_mdelete_parent( Var_T * v )
+static void
+f_mdelete_parent( Var_T * v )
 {
     Iobject_T *io;
     long i;
@@ -392,7 +397,8 @@ static void f_mdelete_parent( Var_T * v )
  * Sets or returns the selected item in a menu object
  *----------------------------------------------------*/
 
-Var_T *f_mchoice( Var_T * v )
+Var_T *
+f_mchoice( Var_T * v )
 {
     Iobject_T *io;
     long select_item = 0;
@@ -487,7 +493,8 @@ Var_T *f_mchoice( Var_T * v )
  * the message passing mechanism.
  *-----------------------------------------------------------------*/
 
-static Var_T *f_mchoice_child( Var_T * v )
+static Var_T *
+f_mchoice_child( Var_T * v )
 {
     long ID;
     char *buffer, *pos;
@@ -578,7 +585,8 @@ static Var_T *f_mchoice_child( Var_T * v )
  * Returns if the selected item of a menu object changed
  *-------------------------------------------------------*/
 
-Var_T *f_mchanged( Var_T * v )
+Var_T *
+f_mchanged( Var_T * v )
 {
     Iobject_T *io;
 
@@ -625,7 +633,8 @@ Var_T *f_mchanged( Var_T * v )
  * the message passing mechanism.
  *------------------------------------------------------------------*/
 
-static Var_T *f_mchanged_child( Var_T * v )
+static Var_T *
+f_mchanged_child( Var_T * v )
 {
     long ID;
     char *buffer, *pos;

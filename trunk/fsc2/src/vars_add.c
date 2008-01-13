@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -43,8 +43,9 @@ static Var_T *vars_ref_add( Var_T * v1,
  * Function for adding of two variables of arbitrary types
  *---------------------------------------------------------*/
 
-Var_T *vars_add( Var_T * v1,
-                 Var_T * v2 )
+Var_T *
+vars_add( Var_T * v1,
+          Var_T * v2 )
 {
     Var_T *new_var = NULL;
 
@@ -121,8 +122,9 @@ Var_T *vars_add( Var_T * v1,
  * Function for "adding" (i.e. concatenation) of two strings
  *-----------------------------------------------------------*/
 
-static Var_T *vars_str_var_add( Var_T * v1,
-                                Var_T * v2 )
+static Var_T *
+vars_str_var_add( Var_T * v1,
+                  Var_T * v2 )
 {
     Var_T *new_var = NULL;
     char *new_str;
@@ -141,8 +143,9 @@ static Var_T *vars_str_var_add( Var_T * v1,
  * Function for adding a variable of arbitrary type to an integer variable
  *-------------------------------------------------------------------------*/
 
-static Var_T *vars_int_var_add( Var_T * v1,
-                                Var_T * v2 )
+static Var_T *
+vars_int_var_add( Var_T * v1,
+                  Var_T * v2 )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -242,8 +245,9 @@ static Var_T *vars_int_var_add( Var_T * v1,
  * to a floating point variable
  *--------------------------------------------------*/
 
-static Var_T *vars_float_var_add( Var_T * v1,
-                                  Var_T * v2 )
+static Var_T *
+vars_float_var_add( Var_T * v1,
+                    Var_T * v2 )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -331,8 +335,9 @@ static Var_T *vars_float_var_add( Var_T * v1,
  * Function for adding a variable of arbitrary type to an 1D integer array
  *-------------------------------------------------------------------------*/
 
-static Var_T *vars_int_arr_add( Var_T * v1,
-                                Var_T * v2 )
+static Var_T *
+vars_int_arr_add( Var_T * v1,
+                  Var_T * v2 )
 {
     Var_T *new_var = NULL;
     Var_T *vt;
@@ -417,8 +422,9 @@ static Var_T *vars_int_arr_add( Var_T * v1,
  * to an 1D floating point array
  *--------------------------------------------------*/
 
-static Var_T *vars_float_arr_add( Var_T * v1,
-                                  Var_T * v2 )
+static Var_T *
+vars_float_arr_add( Var_T * v1,
+                    Var_T * v2 )
 {
     Var_T *new_var = NULL;
     Var_T *vt;
@@ -496,8 +502,9 @@ static Var_T *vars_float_arr_add( Var_T * v1,
  * a more-dimensional integer or floating point array
  *-----------------------------------------------------*/
 
-static Var_T *vars_ref_add( Var_T * v1,
-                            Var_T * v2 )
+static Var_T *
+vars_ref_add( Var_T * v1,
+              Var_T * v2 )
 {
     Var_T *new_var = NULL;
     Var_T *vt;

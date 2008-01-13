@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -47,7 +47,8 @@ static void rs_spec10_temperature_init( void );
  * initializes it and temperature control system.
  *----------------------------------------------------------------------*/
 
-void rs_spec10_init_camera( void )
+void
+rs_spec10_init_camera( void )
 {
 #if ! defined RS_SPEC10_TEST
 
@@ -117,7 +118,8 @@ void rs_spec10_init_camera( void )
  * and capabilities of the camera determined.
  *-----------------------------------------------------------------------*/
 
-static void rs_spec10_ccd_init( void )
+static void
+rs_spec10_ccd_init( void )
 {
     uns16 acc;
     uns16 num_pix;
@@ -349,7 +351,8 @@ static void rs_spec10_ccd_init( void )
  * Function for initializing the temperature control system of the camera
  *------------------------------------------------------------------------*/
 
-static void rs_spec10_temperature_init( void )
+static void
+rs_spec10_temperature_init( void )
 {
     uns16 acc;
     int16 temp;
@@ -431,7 +434,8 @@ static void rs_spec10_temperature_init( void )
  * done before a picture is taken with the camera.
  *-------------------------------------------------*/
 
-void rs_spec10_clear_cycles( uns16 cycles )
+void
+rs_spec10_clear_cycles( uns16 cycles )
 {
 #if ! defined RS_SPEC10_TEST
 
@@ -459,7 +463,8 @@ void rs_spec10_clear_cycles( uns16 cycles )
  * just using a longer exposure time.
  *------------------------------------------------------------------*/
 
-uns16 *rs_spec10_get_pic( uns32 * size )
+uns16 *
+rs_spec10_get_pic( uns32 * size )
 {
     rgn_type region;
     uns16 *frame;
@@ -690,7 +695,8 @@ uns16 *rs_spec10_get_pic( uns32 * size )
  * Returns the current temperature of the camera
  *-----------------------------------------------*/
 
-double rs_spec10_get_temperature( void )
+double
+rs_spec10_get_temperature( void )
 {
     int16 itemp;
 
@@ -719,7 +725,8 @@ double rs_spec10_get_temperature( void )
  * Sets a target temperature for the camera.
  *-------------------------------------------*/
 
-double rs_spec10_set_temperature( double temp )
+double
+rs_spec10_set_temperature( double temp )
 {
     int16 itemp;
 
@@ -748,7 +755,8 @@ double rs_spec10_set_temperature( double temp )
 /*-----------------------------------------*
  *-----------------------------------------*/
 
-void rs_spec10_error_handling( void )
+void
+rs_spec10_error_handling( void )
 {
     char pcam_err_msg[ ERROR_MSG_LEN ];
 

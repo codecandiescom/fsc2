@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -116,43 +116,43 @@ Var_T *daq_name( Var_T *v );
 
 /* Functions from pci_mio_16e_1_ai.c */
 
-Var_T *daq_ai_channel_setup(         Var_T * /* v */ );
-Var_T *daq_ai_acq_setup(             Var_T * /* v */ );
-Var_T *daq_ai_start_acquisition(     Var_T * /* v */ );
-Var_T *daq_ai_get_curve(             Var_T * /* v */ );
+Var_T * daq_ai_channel_setup(         Var_T * /* v */ );
+Var_T * daq_ai_acq_setup(             Var_T * /* v */ );
+Var_T * daq_ai_start_acquisition(     Var_T * /* v */ );
+Var_T * daq_ai_get_curve(             Var_T * /* v */ );
 
 
 /* Functions from pci_mio_16e_1_ao.c */
 
-Var_T *daq_reserve_dac(              Var_T * /* v */ );
-Var_T *daq_ao_channel_setup(         Var_T * /* v */ );
-Var_T *daq_set_voltage(              Var_T * /* v */ );
+Var_T * daq_reserve_dac(              Var_T * /* v */ );
+Var_T * daq_ao_channel_setup(         Var_T * /* v */ );
+Var_T * daq_set_voltage(              Var_T * /* v */ );
 
 
 /* Functions from pci_mio_16e_1_dio.c */
 
-Var_T *daq_reserve_dio(              Var_T * /* v */ );
-Var_T *daq_dio_read(                 Var_T * /* v */ );
-Var_T *daq_dio_write(                Var_T * /* v */ );
+Var_T * daq_reserve_dio(              Var_T * /* v */ );
+Var_T * daq_dio_read(                 Var_T * /* v */ );
+Var_T * daq_dio_write(                Var_T * /* v */ );
 
 
 /* Functions from pci_mio_16e_1_msc.c */
 
-Var_T *daq_reserve_freq_out(         Var_T * /* v */ );
-Var_T *daq_freq_out(                 Var_T * /* v */ );
-Var_T *daq_trigger_setup(            Var_T * /* v */ );
+Var_T * daq_reserve_freq_out(         Var_T * /* v */ );
+Var_T * daq_freq_out(                 Var_T * /* v */ );
+Var_T * daq_trigger_setup(            Var_T * /* v */ );
 
 
 /* Functions from pci_mio_16e_1_gpct.c */
 
-Var_T *daq_start_continuous_counter( Var_T * /* v */ );
-Var_T *daq_start_timed_counter(      Var_T * /* v */ );
-Var_T *daq_intermediate_count(       Var_T * /* v */ );
-Var_T *daq_timed_count(              Var_T * /* v */ );
-Var_T *daq_final_count(              Var_T * /* v */ );
-Var_T *daq_stop_counter(             Var_T * /* v */ );
-Var_T *daq_single_pulse(             Var_T * /* v */ );
-Var_T *daq_continuous_pulses(        Var_T * /* v */ );
+Var_T * daq_start_continuous_counter( Var_T * /* v */ );
+Var_T * daq_start_timed_counter(      Var_T * /* v */ );
+Var_T * daq_intermediate_count(       Var_T * /* v */ );
+Var_T * daq_timed_count(              Var_T * /* v */ );
+Var_T * daq_final_count(              Var_T * /* v */ );
+Var_T * daq_stop_counter(             Var_T * /* v */ );
+Var_T * daq_single_pulse(             Var_T * /* v */ );
+Var_T * daq_continuous_pulses(        Var_T * /* v */ );
 
 void ni_daq_two_channel_pulses( double /* delay         */,
                                 double /* scan_duration */  );

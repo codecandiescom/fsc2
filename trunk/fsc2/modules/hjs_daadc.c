@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -51,13 +51,13 @@ int hjs_daadc_exp_hook(        void );
 int hjs_daadc_end_of_exp_hook( void );
 void hjs_daadc_exit_hook(      void );
 
-Var_T *daq_name(                   Var_T *v );
-Var_T *daq_reserve_dac(            Var_T *v );
-Var_T *daq_reserve_adc(            Var_T *v );
-Var_T *daq_maximum_output_voltage( Var_T *v );
-Var_T *daq_set_voltage(            Var_T *v );
-Var_T *daq_get_voltage(            Var_T *v );
-Var_T *daq_dac_parameter(          Var_T *v );
+Var_T * daq_name(                   Var_T *v );
+Var_T * daq_reserve_dac(            Var_T *v );
+Var_T * daq_reserve_adc(            Var_T *v );
+Var_T * daq_maximum_output_voltage( Var_T *v );
+Var_T * daq_set_voltage(            Var_T *v );
+Var_T * daq_get_voltage(            Var_T *v );
+Var_T * daq_dac_parameter(          Var_T *v );
 
 
 static int hjs_daadc_da_volts_to_val( double volts );
@@ -100,7 +100,8 @@ struct HJS_DAADC hjs_daadc, hjs_daadc_stored;
  * Function called when the module has just been loaded
  *------------------------------------------------------*/
 
-int hjs_daadc_init_hook( void )
+int
+hjs_daadc_init_hook( void )
 {
     fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
@@ -120,7 +121,8 @@ int hjs_daadc_init_hook( void )
  * Function called at the start of the test run
  *----------------------------------------------*/
 
-int hjs_daadc_test_hook( void )
+int
+hjs_daadc_test_hook( void )
 {
     hjs_daadc_stored = hjs_daadc;
 
@@ -140,7 +142,8 @@ int hjs_daadc_test_hook( void )
  * Function called at the start of an experiment
  *-----------------------------------------------*/
 
-int hjs_daadc_exp_hook( void )
+int
+hjs_daadc_exp_hook( void )
 {
     /* Restore state from before the start of the test run (or the
        last experiment) */
@@ -175,7 +178,8 @@ int hjs_daadc_exp_hook( void )
  * Function called at the end of an experiment
  *---------------------------------------------*/
 
-int hjs_daadc_end_of_exp_hook( void )
+int
+hjs_daadc_end_of_exp_hook( void )
 {
     if ( hjs_daadc.is_open )
         fsc2_serial_close( SERIAL_PORT );
@@ -188,7 +192,8 @@ int hjs_daadc_end_of_exp_hook( void )
  * Function called just before the module gets unloaded
  *------------------------------------------------------*/
 
-void hjs_daadc_exit_hook( void )
+void
+hjs_daadc_exit_hook( void )
 {
     if ( hjs_daadc.dac_reserved_by )
         T_free( hjs_daadc.dac_reserved_by );
@@ -212,7 +217,8 @@ void hjs_daadc_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *daq_name( Var_T * v  UNUSED_ARG )
+Var_T *
+daq_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -225,7 +231,8 @@ Var_T *daq_name( Var_T * v  UNUSED_ARG )
  * daq_set_voltage().
  *--------------------------------------------------------------------*/
 
-Var_T *daq_reserve_dac( Var_T * v )
+Var_T *
+daq_reserve_dac( Var_T * v )
 {
     bool lock_state = SET;
 
@@ -288,7 +295,8 @@ Var_T *daq_reserve_dac( Var_T * v )
  * argument to the function daq_get_voltage().
  *--------------------------------------------------------------------*/
 
-Var_T *daq_reserve_adc( Var_T * v )
+Var_T *
+daq_reserve_adc( Var_T * v )
 {
     bool lock_state = SET;
 
@@ -359,7 +367,8 @@ Var_T *daq_reserve_adc( Var_T * v )
  * passed to the function about the potentiometer setting was correct.
  *----------------------------------------------------------------------*/
 
-Var_T *daq_maximum_output_voltage( Var_T * v )
+Var_T *
+daq_maximum_output_voltage( Var_T * v )
 {
     double volts;
     char *pass = NULL;
@@ -439,7 +448,8 @@ Var_T *daq_maximum_output_voltage( Var_T * v )
  * to the highest possible value of 10 V).
  *----------------------------------------------------------------------*/
 
-Var_T *daq_set_voltage( Var_T * v )
+Var_T *
+daq_set_voltage( Var_T * v )
 {
     double volts;
     char *pass = NULL;
@@ -523,7 +533,8 @@ Var_T *daq_set_voltage( Var_T * v )
  * called yet).
  *---------------------------------------------------------------------*/
 
-Var_T *daq_get_voltage( Var_T * v )
+Var_T *
+daq_get_voltage( Var_T * v )
 {
     char *pass = NULL;
 
@@ -576,7 +587,8 @@ Var_T *daq_get_voltage( Var_T * v )
  * maximum output voltage and voltage resolution).
  *------------------------------------------------------*/
 
-Var_T *daq_dac_parameter( Var_T * v )
+Var_T *
+daq_dac_parameter( Var_T * v )
 {
     double params[ 3 ];
 
@@ -613,7 +625,8 @@ Var_T *daq_dac_parameter( Var_T * v )
  * Conversion of a voltage to a DAC output value
  *-----------------------------------------------*/
 
-static int hjs_daadc_da_volts_to_val( double volts )
+static int
+hjs_daadc_da_volts_to_val( double volts )
 {
     fsc2_assert(    volts >= MIN_OUT_VOLTS
                  && volts < hjs_daadc.max_volts * 1.0001 );
@@ -626,7 +639,8 @@ static int hjs_daadc_da_volts_to_val( double volts )
  * Conversion of an ADC input value to a voltage
  *-----------------------------------------------*/
 
-static double hjs_daadc_val_to_ad_volts( int val )
+static double
+hjs_daadc_val_to_ad_volts( int val )
 {
     return MAX_IN_VOLTS * val / 2047.0;
 }
@@ -636,7 +650,8 @@ static double hjs_daadc_val_to_ad_volts( int val )
  * Initialization of the serial port the device is connected to.
  *---------------------------------------------------------------*/
 
-static bool hjs_daadc_serial_init( void )
+static bool
+hjs_daadc_serial_init( void )
 {
     if ( ( hjs_daadc.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
                                  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) )
@@ -665,7 +680,8 @@ static bool hjs_daadc_serial_init( void )
  * Function for outputting a value at the DAC output
  *---------------------------------------------------*/
 
-static void hjs_daadc_out( int out )
+static void
+hjs_daadc_out( int out )
 {
     fsc2_assert( out >= 0 && out <= 4095 );
     hjs_daadc_in_out( out );
@@ -677,7 +693,8 @@ static void hjs_daadc_out( int out )
  * Function for getting a new value from the ADC
  *-----------------------------------------------*/
 
-static int hjs_daadc_in( void )
+static int
+hjs_daadc_in( void )
 {
     return hjs_daadc_in_out( hjs_daadc.out_val );
 }
@@ -686,7 +703,8 @@ static int hjs_daadc_in( void )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-static int hjs_daadc_in_out( int out )
+static int
+hjs_daadc_in_out( int out )
 {
     unsigned char out_bytes[ 4 ] = { 0x00, 0x60, 0xd0, 0x70 };
     unsigned char in_bytes[ 4 ];
@@ -734,7 +752,8 @@ static int hjs_daadc_in_out( int out )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-static void hjs_daadc_comm_failure( void )
+static void
+hjs_daadc_comm_failure( void )
 {
     print( FATAL, "Can't access the AD/DA converter.\n" );
     THROW( EXCEPTION );

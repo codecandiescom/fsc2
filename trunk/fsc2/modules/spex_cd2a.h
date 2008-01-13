@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -175,21 +175,21 @@ int spex_cd2a_exp_hook(         void );
 void spex_cd2a_child_exit_hook( void );
 int spex_cd2a_end_of_exp_hook(  void );
 
-Var_T *monochromator_name(                   Var_T * /* v */ );
-Var_T *monochromator_wavenumber_scan_limits( Var_T * /* v */ );
-Var_T *monochromator_wavelength_scan_limits( Var_T * /* v */ );
-Var_T *monochromator_scan_setup(             Var_T * /* v */ );
-Var_T *monochromator_wavelength(             Var_T * /* v */ );
-Var_T *monochromator_wavenumber(             Var_T * /* v */ );
-Var_T *monochromator_offset(                 Var_T * /* v */ );
-Var_T *monochromator_start_scan(             Var_T * /* v */ );
-Var_T *monochromator_scan_step(              Var_T * /* v */ );
-Var_T *monochromator_laser_line(             Var_T * /* v */ );
-Var_T *monochromator_groove_density(         Var_T * /* v */ );
-Var_T *monochromator_shutter_limits(         Var_T * /* v */ );
-Var_T *monochromator_calibrate(              Var_T * /* v */ );
-Var_T *monochromator_wavelength_axis(        Var_T * /* v */ );
-Var_T *monochromator_wavenumber_axis(        Var_T * /* v */ );
+Var_T * monochromator_name(                   Var_T * /* v */ );
+Var_T * monochromator_wavenumber_scan_limits( Var_T * /* v */ );
+Var_T * monochromator_wavelength_scan_limits( Var_T * /* v */ );
+Var_T * monochromator_scan_setup(             Var_T * /* v */ );
+Var_T * monochromator_wavelength(             Var_T * /* v */ );
+Var_T * monochromator_wavenumber(             Var_T * /* v */ );
+Var_T * monochromator_offset(                 Var_T * /* v */ );
+Var_T * monochromator_start_scan(             Var_T * /* v */ );
+Var_T * monochromator_scan_step(              Var_T * /* v */ );
+Var_T * monochromator_laser_line(             Var_T * /* v */ );
+Var_T * monochromator_groove_density(         Var_T * /* v */ );
+Var_T * monochromator_shutter_limits(         Var_T * /* v */ );
+Var_T * monochromator_calibrate(              Var_T * /* v */ );
+Var_T * monochromator_wavelength_axis(        Var_T * /* v */ );
+Var_T * monochromator_wavenumber_axis(        Var_T * /* v */ );
 
 
 /* Functions from spex_cd2a_ll.c */

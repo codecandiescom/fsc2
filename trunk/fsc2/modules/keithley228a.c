@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  Thanks to Anton Savitsky for re-measuring the data for the corrections
  *  and including them into the code.
@@ -66,20 +66,20 @@ int keithley228a_exp_hook(        void );
 int keithley228a_end_of_exp_hook( void );
 void keithley228a_exit_hook(      void );
 
-Var_T *magnet_name(           Var_T * v );
-Var_T *magnet_setup(          Var_T * v );
-Var_T *magnet_use_correction( Var_T * v );
-Var_T *magnet_use_dac_port(   Var_T * v );
-Var_T *magnet_field(          Var_T * v );
-Var_T *set_field(             Var_T * v );
-Var_T *get_field(             Var_T * v );
-Var_T *sweep_up(              Var_T * v );
-Var_T *sweep_down(            Var_T * v );
-Var_T *magnet_sweep_up(       Var_T * v );
-Var_T *magnet_sweep_down(     Var_T * v );
-Var_T *magnet_reset_field(    Var_T * v );
-Var_T *reset_field(           Var_T * v );
-Var_T *magnet_command(        Var_T * v );
+Var_T * magnet_name(           Var_T * v );
+Var_T * magnet_setup(          Var_T * v );
+Var_T * magnet_use_correction( Var_T * v );
+Var_T * magnet_use_dac_port(   Var_T * v );
+Var_T * magnet_field(          Var_T * v );
+Var_T * set_field(             Var_T * v );
+Var_T * get_field(             Var_T * v );
+Var_T * sweep_up(              Var_T * v );
+Var_T * sweep_down(            Var_T * v );
+Var_T * magnet_sweep_up(       Var_T * v );
+Var_T * magnet_sweep_down(     Var_T * v );
+Var_T * magnet_reset_field(    Var_T * v );
+Var_T * reset_field(           Var_T * v );
+Var_T * magnet_command(        Var_T * v );
 
 
 /* internally used functions */
@@ -128,7 +128,8 @@ static struct {
  * test if this driver will be loaded before the magnet driver.
  *----------------------------------------------------------------*/
 
-int keithley228a_init_hook( void )
+int
+keithley228a_init_hook( void )
 {
     Var_T *func_ptr;
     int acc;
@@ -253,7 +254,8 @@ int keithley228a_init_hook( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-int keithley228a_exp_hook( void )
+int
+keithley228a_exp_hook( void )
 {
     keithley228a.use_correction = keithley228a.use_corr_orig;
 
@@ -271,7 +273,8 @@ int keithley228a_exp_hook( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-int keithley228a_end_of_exp_hook( void )
+int
+keithley228a_end_of_exp_hook( void )
 {
     keithley228a_to_local( );
     return 1;
@@ -283,7 +286,8 @@ int keithley228a_end_of_exp_hook( void )
  *------------------------------------------*/
 
 
-void keithley228a_exit_hook( void )
+void
+keithley228a_exit_hook( void )
 {
     T_free( keithley228a.dac_func );
 }
@@ -299,7 +303,8 @@ void keithley228a_exit_hook( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_name( Var_T * v  UNUSED_ARG )
+Var_T *
+magnet_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -309,7 +314,8 @@ Var_T *magnet_name( Var_T * v  UNUSED_ARG )
  * Function for registering the start current and the current step size.
  *-----------------------------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T * v )
+Var_T *
+magnet_setup( Var_T * v )
 {
     double cur;
     double cur_step;
@@ -349,7 +355,8 @@ Var_T *magnet_setup( Var_T * v )
  * Function for switching use of corrections to the field on and off.
  *--------------------------------------------------------------------*/
 
-Var_T *magnet_use_correction( Var_T * v )
+Var_T *
+magnet_use_correction( Var_T * v )
 {
     if ( v == NULL )
         keithley228a.use_correction = SET;
@@ -371,7 +378,8 @@ Var_T *magnet_use_correction( Var_T * v )
  * to be used for the corrections to the field.
  *--------------------------------------------------------------*/
 
-Var_T *magnet_use_dac_port( Var_T * v )
+Var_T *
+magnet_use_dac_port( Var_T * v )
 {
     int port;
     void *first_DAC_port;
@@ -407,7 +415,8 @@ Var_T *magnet_use_dac_port( Var_T * v )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-Var_T *magnet_field( Var_T * v )
+Var_T *
+magnet_field( Var_T * v )
 {
     return v == NULL ? set_field( v ) : get_field( v );
 }
@@ -416,7 +425,8 @@ Var_T *magnet_field( Var_T * v )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-Var_T *set_field( Var_T * v )
+Var_T *
+set_field( Var_T * v )
 {
     double new_current;
     double cur;
@@ -445,7 +455,8 @@ Var_T *set_field( Var_T * v )
  * Convenience function: just returns the current
  *------------------------------------------------*/
 
-Var_T *get_field( Var_T * v  UNUSED_ARG )
+Var_T *
+get_field( Var_T * v  UNUSED_ARG )
 {
     return vars_push( FLOAT_VAR, keithley228a.current );
 }
@@ -454,7 +465,8 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *magnet_sweep_up( Var_T * v )
+Var_T *
+magnet_sweep_up( Var_T * v )
 {
     return sweep_up( v );
 }
@@ -463,7 +475,8 @@ Var_T *magnet_sweep_up( Var_T * v )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *sweep_up( Var_T * v  UNUSED_ARG )
+Var_T *
+sweep_up( Var_T * v  UNUSED_ARG )
 {
     double new_current;
 
@@ -487,7 +500,8 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *magnet_sweep_down( Var_T * v )
+Var_T *
+magnet_sweep_down( Var_T * v )
 {
     return sweep_down( v );
 }
@@ -496,7 +510,8 @@ Var_T *magnet_sweep_down( Var_T * v )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *sweep_down( Var_T * v  UNUSED_ARG )
+Var_T *
+sweep_down( Var_T * v  UNUSED_ARG )
 {
     double new_current;
 
@@ -520,7 +535,8 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-Var_T *magnet_reset_field( Var_T * v )
+Var_T *
+magnet_reset_field( Var_T * v )
 {
     return reset_field( v );
 }
@@ -529,7 +545,8 @@ Var_T *magnet_reset_field( Var_T * v )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-Var_T *reset_field( Var_T * v  UNUSED_ARG )
+Var_T *
+reset_field( Var_T * v  UNUSED_ARG )
 {
     if ( ! keithley228a.is_req_current )
     {
@@ -545,7 +562,8 @@ Var_T *reset_field( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *magnet_command( Var_T * v )
+Var_T *
+magnet_command( Var_T * v )
 {
     char *cmd = NULL;
 
@@ -583,7 +601,8 @@ Var_T *magnet_command( Var_T * v )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool keithley228a_init( const char * name )
+static bool
+keithley228a_init( const char * name )
 {
     char cmd[ 100 ];
     char reply[ 100 ];
@@ -646,7 +665,8 @@ static bool keithley228a_init( const char * name )
  * current down to 0 A.
  *-----------------------------------------------------------------------*/
 
-static void keithley228a_to_local( void )
+static void
+keithley228a_to_local( void )
 {
     /* Go to STANDBY state and switch off current modulation */
 
@@ -661,7 +681,8 @@ static void keithley228a_to_local( void )
  * into STANDBY mode the current is first reset to 0 A.
  *-----------------------------------------------------------------------*/
 
-static bool keithley228a_set_state( bool new_state )
+static bool
+keithley228a_set_state( bool new_state )
 {
     char reply[ 100 ];
     long length = 100;
@@ -748,7 +769,8 @@ static bool keithley228a_set_state( bool new_state )
  * current down to 0 A before switching to STANDBY state!
  *--------------------------------------------------------------------*/
 
-static double keithley228a_goto_current( double new_current )
+static double
+keithley228a_goto_current( double new_current )
 {
     double del_amps;
     double act_amps;
@@ -836,7 +858,8 @@ static double keithley228a_goto_current( double new_current )
  * current is set via the current modulation input.
  *--------------------------------------------------------------------*/
 
-static double keithley228a_set_current( double new_current )
+static double
+keithley228a_set_current( double new_current )
 {
     double power_supply_current;
     double dac_volts;
@@ -904,7 +927,8 @@ static double keithley228a_set_current( double new_current )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool keithley228a_command( const char * cmd )
+static bool
+keithley228a_command( const char * cmd )
 {
     if ( gpib_write( keithley228a.device, cmd, strlen( cmd ) ) == FAILURE )
         keithley228a_gpib_failure( );
@@ -916,7 +940,8 @@ static bool keithley228a_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static void keithley228a_gpib_failure( void )
+static void
+keithley228a_gpib_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );
@@ -926,7 +951,8 @@ static void keithley228a_gpib_failure( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static double keithley228a_current_check( double current )
+static double
+keithley228a_current_check( double current )
 {
 
     if ( fabs( current ) > KEITHLEY228A_MAX_CURRENT )
@@ -1022,13 +1048,13 @@ static double keithley228a_current_check( double current )
  * zugleichen sind.
  *--------------------------------------------------------------------------*/
 
-static void keithley228a_get_corrected_current( double   c,
-                                                double * psc,
-                                                double * dacv )
+static void
+keithley228a_get_corrected_current( double   c,
+                                    double * psc,
+                                    double * dacv )
 {
     size_t i;
     double del = 0.0;
-
     static double
         ranges[ ] =    { -7.5, -5.5, -4.5, -1.7, -0.007, 0.004,
                           5.3,  7.2,  9.0 },

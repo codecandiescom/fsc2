@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,7 +28,8 @@
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_new_pulse( long pnum )
+bool
+hfs9000_new_pulse( long pnum )
 {
     Pulse_T *cp = hfs9000.pulses;
     Pulse_T *lp = NULL;
@@ -79,8 +80,9 @@ bool hfs9000_new_pulse( long pnum )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_pulse_function( long pnum,
-                                 int  function )
+bool
+hfs9000_set_pulse_function( long pnum,
+                            int  function )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
     Pulse_T *pl = hfs9000.pulses;
@@ -162,8 +164,9 @@ bool hfs9000_set_pulse_function( long pnum,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_pulse_position( long   pnum,
-                                 double p_time )
+bool
+hfs9000_set_pulse_position( long   pnum,
+                            double p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
 
@@ -203,8 +206,9 @@ bool hfs9000_set_pulse_position( long   pnum,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_pulse_length( long   pnum,
-                               double p_time )
+bool
+hfs9000_set_pulse_length( long   pnum,
+                          double p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
 
@@ -253,8 +257,9 @@ bool hfs9000_set_pulse_length( long   pnum,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_pulse_position_change( long   pnum,
-                                        double p_time )
+bool
+hfs9000_set_pulse_position_change( long   pnum,
+                                   double p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
 
@@ -288,8 +293,9 @@ bool hfs9000_set_pulse_position_change( long   pnum,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_pulse_length_change( long   pnum,
-                                      double p_time )
+bool
+hfs9000_set_pulse_length_change( long   pnum,
+                                 double p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
 
@@ -332,8 +338,9 @@ bool hfs9000_set_pulse_length_change( long   pnum,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_get_pulse_function( long  pnum,
-                                 int * function )
+bool
+hfs9000_get_pulse_function( long  pnum,
+                            int * function )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
 
@@ -352,8 +359,9 @@ bool hfs9000_get_pulse_function( long  pnum,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_get_pulse_position( long     pnum,
-                                 double * p_time )
+bool
+hfs9000_get_pulse_position( long     pnum,
+                            double * p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
 
@@ -373,8 +381,9 @@ bool hfs9000_get_pulse_position( long     pnum,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_get_pulse_length( long     pnum,
-                               double * p_time )
+bool
+hfs9000_get_pulse_length( long     pnum,
+                          double * p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
 
@@ -403,8 +412,9 @@ bool hfs9000_get_pulse_length( long     pnum,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_get_pulse_position_change( long     pnum,
-                                        double * p_time )
+bool
+hfs9000_get_pulse_position_change( long     pnum,
+                                   double * p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
 
@@ -424,8 +434,9 @@ bool hfs9000_get_pulse_position_change( long     pnum,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_get_pulse_length_change( long     pnum,
-                                      double * p_time )
+bool
+hfs9000_get_pulse_length_change( long     pnum,
+                                 double * p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
 
@@ -445,8 +456,9 @@ bool hfs9000_get_pulse_length_change( long     pnum,
  * Function for changing the pulse position while the experiment is run.
  *-----------------------------------------------------------------------*/
 
-bool hfs9000_change_pulse_position( long   pnum,
-                                    double p_time )
+bool
+hfs9000_change_pulse_position( long   pnum,
+                               double p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
     Ticks new_pos = 0;
@@ -509,8 +521,9 @@ bool hfs9000_change_pulse_position( long   pnum,
  * Function for changing the pulse length while the experiment is run.
  *---------------------------------------------------------------------*/
 
-bool hfs9000_change_pulse_length( long   pnum,
-                                  double p_time )
+bool
+hfs9000_change_pulse_length( long   pnum,
+                             double p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
     Ticks new_len = 0;
@@ -585,8 +598,9 @@ bool hfs9000_change_pulse_length( long   pnum,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_change_pulse_position_change( long   pnum,
-                                           double p_time )
+bool
+hfs9000_change_pulse_position_change( long   pnum,
+                                      double p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
     Ticks new_dpos = 0;
@@ -625,8 +639,9 @@ bool hfs9000_change_pulse_position_change( long   pnum,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_change_pulse_length_change( long   pnum,
-                                         double p_time )
+bool
+hfs9000_change_pulse_length_change( long   pnum,
+                                    double p_time )
 {
     Pulse_T *p = hfs9000_get_pulse( pnum );
     Ticks new_dlen = 0;

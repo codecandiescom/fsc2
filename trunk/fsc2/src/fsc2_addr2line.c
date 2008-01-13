@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -37,7 +37,8 @@
 static char *get_string( const char * /* fmt */,
 						 ... );
 
-int main( void )
+int
+main( void )
 {
 	FILE *fp;
 	char file[ MAX_FILE_LEN ];
@@ -92,8 +93,9 @@ int main( void )
 
 #define GET_STRING_TRY_LENGTH 128
 
-static char *get_string( const char * fmt,
-						 ... )
+static char *
+get_string( const char * fmt,
+            ... )
 {
     char *c = NULL;
 	char *tmp;

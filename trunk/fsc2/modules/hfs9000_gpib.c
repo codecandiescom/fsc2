@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -33,7 +33,8 @@ static void hfs9000_setup_trig_in( void );
  * Intialization of the device at the start of the experiment
  *------------------------------------------------------------*/
 
-bool hfs9000_init( const char * name )
+bool
+hfs9000_init( const char * name )
 {
     int i;
     char cmd[ 100 ];
@@ -254,7 +255,8 @@ bool hfs9000_init( const char * name )
  * delay for all used channels.
  *-------------------------------------------------------------------*/
 
-static void hfs9000_setup_trig_in( void )
+static void
+hfs9000_setup_trig_in( void )
 {
     char cmd[ 100 ];
     int i;
@@ -309,10 +311,11 @@ static void hfs9000_setup_trig_in( void )
  * Sets 'length' slots, starting at 'start', of a channel to either 1 or 0
  *-------------------------------------------------------------------------*/
 
-bool hfs9000_set_constant( int   channel,
-                           Ticks start,
-                           Ticks length,
-                           int   state )
+bool
+hfs9000_set_constant( int   channel,
+                      Ticks start,
+                      Ticks length,
+                      int   state )
 {
     char cmd[ 100 ];
 
@@ -330,7 +333,8 @@ bool hfs9000_set_constant( int   channel,
  * Sets the trigger out pulse position
  *-------------------------------------*/
 
-bool hfs9000_set_trig_out_pulse( void )
+bool
+hfs9000_set_trig_out_pulse( void )
 {
     Function_T *f = hfs9000.channel[ HFS9000_TRIG_OUT ].function;
     Pulse_T *p = f->pulses[ 0 ];
@@ -354,7 +358,8 @@ bool hfs9000_set_trig_out_pulse( void )
  *  * 1: ok, 0: error
  *-----------------------------------------------------------------*/
 
-bool hfs9000_run( bool flag )
+bool
+hfs9000_run( bool flag )
 {
     char cmd[ 100 ];
 
@@ -370,7 +375,8 @@ bool hfs9000_run( bool flag )
  * Determines if a channel is switched on or off
  *-----------------------------------------------*/
 
-bool hfs9000_get_channel_state( int channel )
+bool
+hfs9000_get_channel_state( int channel )
 {
     char cmd[ 100 ];
     char reply[ 100 ];
@@ -392,8 +398,9 @@ bool hfs9000_get_channel_state( int channel )
  * Switches a channel on or off
  *------------------------------*/
 
-bool hfs9000_set_channel_state( int  channel,
-                                bool flag )
+bool
+hfs9000_set_channel_state( int  channel,
+                           bool flag )
 {
     char cmd[ 100 ];
 
@@ -413,7 +420,8 @@ bool hfs9000_set_channel_state( int  channel,
  * Sends a command to the device
  *-------------------------------*/
 
-bool hfs9000_command( const char * cmd )
+bool
+hfs9000_command( const char * cmd )
 {
     if ( gpib_write( hfs9000.device, cmd, strlen( cmd ) ) == FAILURE )
         hfs9000_gpib_failure( );
@@ -425,7 +433,8 @@ bool hfs9000_command( const char * cmd )
  * Function to poll the device until all operations are complete
  *---------------------------------------------------------------*/
 
-bool hfs9000_operation_complete( void )
+bool
+hfs9000_operation_complete( void )
 {
     char reply[ 10 ];
     long len;
@@ -448,7 +457,8 @@ bool hfs9000_operation_complete( void )
  * Called on failures to communicate with the device
  *---------------------------------------------------*/
 
-static void hfs9000_gpib_failure( void )
+static void
+hfs9000_gpib_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );

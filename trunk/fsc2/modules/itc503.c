@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -61,12 +61,12 @@ int itc503_exp_hook(        void );
 int itc503_end_of_exp_hook( void );
 
 
-Var_T *temp_contr_name(           Var_T * v );
-Var_T *temp_contr_temperature(    Var_T * v );
-Var_T *temp_contr_sample_channel( Var_T * v );
-Var_T *temp_contr_sensor_unit(    Var_T * v );
-Var_T *temp_contr_lock_keyboard(  Var_T * v );
-Var_T *temp_contr_command(        Var_T * v );
+Var_T * temp_contr_name(           Var_T * v );
+Var_T * temp_contr_temperature(    Var_T * v );
+Var_T * temp_contr_sample_channel( Var_T * v );
+Var_T * temp_contr_sensor_unit(    Var_T * v );
+Var_T * temp_contr_lock_keyboard(  Var_T * v );
+Var_T * temp_contr_command(        Var_T * v );
 
 
 static bool itc503_init( const char * name );
@@ -102,7 +102,8 @@ static struct {
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-int itc503_init_hook( void )
+int
+itc503_init_hook( void )
 {
     Need_GPIB = SET;
     itc503.device = -1;
@@ -117,7 +118,8 @@ int itc503_init_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-int itc503_exp_hook( void )
+int
+itc503_exp_hook( void )
 {
     if ( ! itc503_init( DEVICE_NAME ) )
     {
@@ -133,7 +135,8 @@ int itc503_exp_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-int itc503_end_of_exp_hook( void )
+int
+itc503_end_of_exp_hook( void )
 {
     itc503_lock( LOCAL_AND_UNLOCKED );
     gpib_local( itc503.device );
@@ -150,7 +153,8 @@ int itc503_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *temp_contr_name( Var_T * v  UNUSED_ARG )
+Var_T *
+temp_contr_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -161,7 +165,8 @@ Var_T *temp_contr_name( Var_T * v  UNUSED_ARG )
  * (in the currently selected units)
  *---------------------------------------------*/
 
-Var_T *temp_contr_temperature( Var_T * v  UNUSED_ARG )
+Var_T *
+temp_contr_temperature( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == TEST )
         return vars_push( FLOAT_VAR,
@@ -180,7 +185,8 @@ Var_T *temp_contr_temperature( Var_T * v  UNUSED_ARG )
  * constant that can be changed in the configuration file.
  *---------------------------------------------------------------------*/
 
-Var_T *temp_contr_sample_channel( Var_T * v )
+Var_T *
+temp_contr_sample_channel( Var_T * v )
 {
     long channel;
 
@@ -230,7 +236,8 @@ Var_T *temp_contr_sample_channel( Var_T * v )
  * when reporting temperatures.
  *--------------------------------------------------------*/
 
-Var_T *temp_contr_sensor_unit( Var_T * v )
+Var_T *
+temp_contr_sensor_unit( Var_T * v )
 {
     long unit = 0;
     const char *in_units  = "KC";
@@ -279,7 +286,8 @@ Var_T *temp_contr_sensor_unit( Var_T * v )
  * unlocked during an experiment.
  *-----------------------------------------------------*/
 
-Var_T *temp_contr_lock_keyboard( Var_T * v )
+Var_T *
+temp_contr_lock_keyboard( Var_T * v )
 {
     int lock;
 
@@ -302,7 +310,8 @@ Var_T *temp_contr_lock_keyboard( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *temp_contr_command( Var_T * v )
+Var_T *
+temp_contr_command( Var_T * v )
 {
     char *cmd = NULL;
 
@@ -340,7 +349,8 @@ Var_T *temp_contr_command( Var_T * v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static bool itc503_init( const char * name )
+static bool
+itc503_init( const char * name )
 {
     char buf[ 10 ];
 
@@ -368,7 +378,8 @@ static bool itc503_init( const char * name )
  * Returns the measured temperature in Kelvin
  *--------------------------------------------*/
 
-static double itc503_sens_data( void )
+static double
+itc503_sens_data( void )
 {
     char buf[ 50 ];
     long len = 50;
@@ -402,7 +413,8 @@ static double itc503_sens_data( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static void itc503_lock( int state )
+static void
+itc503_lock( int state )
 {
     const char *cmd = NULL;
 
@@ -437,7 +449,8 @@ static void itc503_lock( int state )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool itc503_command( const char * cmd )
+static bool
+itc503_command( const char * cmd )
 {
     if ( gpib_write( itc503.device, cmd, strlen( cmd ) ) == FAILURE )
         itc503_gpib_failure( );
@@ -449,9 +462,10 @@ static bool itc503_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static long itc503_talk( const char * message,
-                         char *       reply,
-                         long         length )
+static long
+itc503_talk( const char * message,
+             char *       reply,
+             long         length )
 {
     long len = length;
     int retries = MAX_RETRIES;
@@ -500,7 +514,8 @@ static long itc503_talk( const char * message,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static void itc503_gpib_failure( void )
+static void
+itc503_gpib_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -35,7 +35,8 @@ static bool lecroy9400_talk( const char * cmd,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_init( const char * name )
+bool
+lecroy9400_init( const char * name )
 {
     char buffer[ 100 ];
     long len = 100;
@@ -124,7 +125,8 @@ bool lecroy9400_init( const char * name )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy9400_get_timebase( void )
+double
+lecroy9400_get_timebase( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -139,7 +141,8 @@ double lecroy9400_get_timebase( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_timebase( double timebase )
+bool
+lecroy9400_set_timebase( double timebase )
 {
     char cmd[ 40 ] = "TD,";
 
@@ -155,7 +158,8 @@ bool lecroy9400_set_timebase( double timebase )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-int lecroy9400_get_trigger_source( void )
+int
+lecroy9400_get_trigger_source( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -180,7 +184,8 @@ int lecroy9400_get_trigger_source( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_trigger_source( int channel )
+bool
+lecroy9400_set_trigger_source( int channel )
 {
     char cmd[ 40 ] = "TRS,";
 
@@ -208,7 +213,8 @@ bool lecroy9400_set_trigger_source( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy9400_get_trigger_level( void )
+double
+lecroy9400_get_trigger_level( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -223,7 +229,8 @@ double lecroy9400_get_trigger_level( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_trigger_level( double level )
+bool
+lecroy9400_set_trigger_level( double level )
 {
     char cmd[ 40 ] = "TRL,";
 
@@ -239,7 +246,8 @@ bool lecroy9400_set_trigger_level( double level )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy9400_get_sens( int channel )
+double
+lecroy9400_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
@@ -260,8 +268,9 @@ double lecroy9400_get_sens( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_sens( int    channel,
-                          double sens )
+bool
+lecroy9400_set_sens( int    channel,
+                     double sens )
 {
     char cmd[ 40 ];
 
@@ -282,7 +291,8 @@ bool lecroy9400_set_sens( int    channel,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy9400_get_offset( int channel )
+double
+lecroy9400_get_offset( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
@@ -303,8 +313,9 @@ double lecroy9400_get_offset( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_offset( int    channel,
-                            double offset )
+bool
+lecroy9400_set_offset( int    channel,
+                       double offset )
 {
     char cmd[ 40 ];
 
@@ -325,7 +336,8 @@ bool lecroy9400_set_offset( int    channel,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-int lecroy9400_get_coupling( int channel )
+int
+lecroy9400_get_coupling( int channel )
 {
     char cmd[ 20 ];
     int type;
@@ -353,8 +365,9 @@ int lecroy9400_get_coupling( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_coupling( int channel,
-                              int type )
+bool
+lecroy9400_set_coupling( int channel,
+                         int type )
 {
     char cmd[ 30 ];
     char const *cpl[ ] = { "A1M", "D1M", "D50" };
@@ -377,7 +390,8 @@ bool lecroy9400_set_coupling( int channel,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_is_displayed( int channel )
+bool
+lecroy9400_is_displayed( int channel )
 {
     char reply[ 30 ];
     long length = 30;
@@ -396,8 +410,9 @@ bool lecroy9400_is_displayed( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_display( int channel,
-                         int on_off )
+bool
+lecroy9400_display( int channel,
+                    int on_off )
 {
     char cmds[ ][ 9 ] = { "TRC1,", "TRC2,", "TRMC,", "TRMD,",
                           "TRFE,", "TRFF," };
@@ -436,7 +451,8 @@ bool lecroy9400_display( int channel,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-long lecroy9400_get_num_avg( int channel )
+long
+lecroy9400_get_num_avg( int channel )
 {
     int i;
     long num_avg;
@@ -464,7 +480,8 @@ long lecroy9400_get_num_avg( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_get_desc( int channel )
+bool
+lecroy9400_get_desc( int channel )
 {
     long len = MAX_DESC_LEN;
     char const *cmds[ ] = { "RD,C1.DE", "RD,C2.DE",
@@ -483,7 +500,8 @@ bool lecroy9400_get_desc( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy9400_get_trigger_delay( void )
+double
+lecroy9400_get_trigger_delay( void )
 {
     char reply[ 40 ];
     long length = 40;
@@ -508,7 +526,8 @@ double lecroy9400_get_trigger_delay( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_set_trigger_delay( double delay )
+void
+lecroy9400_set_trigger_delay( double delay )
 {
     char cmd[ 40 ] = "TRD ";
 
@@ -529,11 +548,12 @@ void lecroy9400_set_trigger_delay( double delay )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_set_up_averaging( long channel,
-                                  long source,
-                                  long num_avg,
-                                  bool reject,
-                                  long rec_len )
+void
+lecroy9400_set_up_averaging( long channel,
+                             long source,
+                             long num_avg,
+                             bool reject,
+                             long rec_len )
 {
     char cmd[ 100 ];
     size_t i;
@@ -597,7 +617,8 @@ void lecroy9400_set_up_averaging( long channel,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_finished( void )
+void
+lecroy9400_finished( void )
 {
     gpib_local( lecroy9400.device );
     is_acquiring = UNSET;
@@ -607,7 +628,8 @@ void lecroy9400_finished( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_start_acquisition( void )
+void
+lecroy9400_start_acquisition( void )
 {
     if ( lecroy9400.channels_in_use[ LECROY9400_FUNC_E ] )
         if ( gpib_write( lecroy9400.device, "SEL,FE;ARST", 11 )
@@ -626,11 +648,12 @@ void lecroy9400_start_acquisition( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_get_curve( int        ch,
-                           Window_T * w  UNUSED_ARG,
-                           double **  array,
-                           long *     length,
-                           bool       use_cursor  UNUSED_ARG )
+void
+lecroy9400_get_curve( int        ch,
+                      Window_T * w  UNUSED_ARG,
+                      double **  array,
+                      long *     length,
+                      bool       use_cursor  UNUSED_ARG )
 {
     unsigned char *data;
     unsigned char *dp;
@@ -744,7 +767,8 @@ void lecroy9400_get_curve( int        ch,
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool lecroy9400_command( const char * cmd )
+bool
+lecroy9400_command( const char * cmd )
 {
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
@@ -755,7 +779,8 @@ bool lecroy9400_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool lecroy9400_talk( const char * cmd,
+static bool
+lecroy9400_talk( const char * cmd,
                              char *       reply,
                              long *       length )
 {
@@ -769,7 +794,8 @@ static bool lecroy9400_talk( const char * cmd,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_gpib_failure( void )
+void
+lecroy9400_gpib_failure( void )
 {
     is_acquiring = UNSET;
 

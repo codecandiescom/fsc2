@@ -1,20 +1,20 @@
 /*
  *  $Id$
- * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
- * 
+ *
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -32,8 +32,9 @@
  * second pulse starts earlier.
  *-------------------------------------------------------------------*/
 
-int rb_pulser_w_start_compare( const void * A,
-                               const void * B )
+int
+rb_pulser_w_start_compare( const void * A,
+                           const void * B )
 {
     Pulse_T *a = *( Pulse_T ** ) A,
             *b = *( Pulse_T ** ) B;
@@ -58,7 +59,8 @@ int rb_pulser_w_start_compare( const void * A,
  * called Ticks, i.e. an integer multiple of the pulsers timebase
  *-----------------------------------------------------------------*/
 
-Ticks rb_pulser_w_double2ticks( double p_time )
+Ticks
+rb_pulser_w_double2ticks( double p_time )
 {
     double ticks;
 
@@ -97,7 +99,8 @@ Ticks rb_pulser_w_double2ticks( double p_time )
  * Does the exact opposite of the previous function...
  *-----------------------------------------------------*/
 
-double rb_pulser_w_ticks2double( Ticks ticks )
+double
+rb_pulser_w_ticks2double( Ticks ticks )
 {
     fsc2_assert( rb_pulser_w.is_timebase );
     return rb_pulser_w.timebase * ticks;
@@ -108,7 +111,8 @@ double rb_pulser_w_ticks2double( Ticks ticks )
  * Returns pointer to the pulses structure if given a valid pulse number.
  *------------------------------------------------------------------------*/
 
-Pulse_T *rb_pulser_w_get_pulse( long pnum )
+Pulse_T *
+rb_pulser_w_get_pulse( long pnum )
 {
     Pulse_T *cp = rb_pulser_w.pulses;
 
@@ -141,7 +145,8 @@ Pulse_T *rb_pulser_w_get_pulse( long pnum )
  * a well-formated string (i.e. with proper units for printing)
  *--------------------------------------------------------------------*/
 
-const char *rb_pulser_w_ptime( double p_time )
+const char *
+rb_pulser_w_ptime( double p_time )
 {
     static char buffer[ 2 ][ 128 ];
     static size_t i = 1;
@@ -170,7 +175,8 @@ const char *rb_pulser_w_ptime( double p_time )
  * a well-formated time string (i.e. with proper units for printing)
  *--------------------------------------------------------------------*/
 
-const char *rb_pulser_w_pticks( Ticks ticks )
+const char *
+rb_pulser_w_pticks( Ticks ticks )
 {
     return rb_pulser_w_ptime( rb_pulser_w_ticks2double( ticks ) );
 }
@@ -181,7 +187,8 @@ const char *rb_pulser_w_pticks( Ticks ticks )
  * settings of the pulses as determined during the test run
  *------------------------------------------------------------*/
 
-void rb_pulser_w_start_show_pulses( void )
+void
+rb_pulser_w_start_show_pulses( void )
 {
     int pd[ 2 ];
     pid_t pid;
@@ -244,7 +251,8 @@ void rb_pulser_w_start_show_pulses( void )
  * pulse settings as required by the function pulser_sump_pulses().
  *------------------------------------------------------------------*/
 
-void rb_pulser_w_open_dump_file( void )
+void
+rb_pulser_w_open_dump_file( void )
 {
     char *name;
     char *m;
@@ -321,7 +329,8 @@ void rb_pulser_w_open_dump_file( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void rb_pulser_w_write_pulses( FILE * fp )
+void
+rb_pulser_w_write_pulses( FILE * fp )
 {
     Function_T *f;
     int i, j;
@@ -368,7 +377,8 @@ void rb_pulser_w_write_pulses( FILE * fp )
  * pulse.
  *-------------------------------------------------------------------*/
 
-double rb_pulser_mw_min_specs( Pulse_T * p )
+double
+rb_pulser_mw_min_specs( Pulse_T * p )
 {
     Function_T *f = p->function;
     Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + MW_DELAY_0;
@@ -425,7 +435,8 @@ double rb_pulser_mw_min_specs( Pulse_T * p )
  * Function for determining the earliest possible position of the RF pulse
  *-------------------------------------------------------------------------*/
 
-double rb_pulser_rf_min_specs( Pulse_T * p )
+double
+rb_pulser_rf_min_specs( Pulse_T * p )
 {
     fsc2_assert( p->function == rb_pulser_w.function + PULSER_CHANNEL_RF );
 
@@ -441,7 +452,8 @@ double rb_pulser_rf_min_specs( Pulse_T * p )
  * of the laser pulse
  *---------------------------------------------------------*/
 
-double rb_pulser_laser_min_specs( Pulse_T * p )
+double
+rb_pulser_laser_min_specs( Pulse_T * p )
 {
     fsc2_assert( p->function == rb_pulser_w.function + PULSER_CHANNEL_LASER );
 
@@ -459,7 +471,8 @@ double rb_pulser_laser_min_specs( Pulse_T * p )
  * of the detection pulse
  *---------------------------------------------------------*/
 
-double rb_pulser_det_min_specs( Pulse_T * p )
+double
+rb_pulser_det_min_specs( Pulse_T * p )
 {
     fsc2_assert( p->function == rb_pulser_w.function + PULSER_CHANNEL_DET );
 

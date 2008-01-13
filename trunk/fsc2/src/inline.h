@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -100,10 +100,11 @@ static inline size_t s_max( size_t /* a */,
 /*-------------------------------------------------------------------------*
  * Converts an int to a short value in the range representable by 15 bits.
  * If the integer is too large or too small the maximum or minimum value
- * fron the 15 bit range gets returned and errno gets set to ERANGE.
+ * from the 15 bit range gets returned and errno gets set to ERANGE.
  *-------------------------------------------------------------------------*/
 
-static inline short int i2s15( int i )
+static inline short int
+i2s15( int i )
 {
     if ( i > 16383 )
     {
@@ -135,7 +136,8 @@ static inline short int i2s15( int i )
  * errno gets set to ERANGE.
  *--------------------------------------------------------------------------*/
 
-static inline unsigned short int i2u15( int i )
+static inline unsigned short int
+i2u15( int i )
 {
     if ( i > 32767 )
     {
@@ -158,7 +160,8 @@ static inline unsigned short int i2u15( int i )
  * fron the 16 bit range gets returned and errno gets set to ERANGE.
  *-------------------------------------------------------------------------*/
 
-static inline short int i2s16( int i )
+static inline short int
+i2s16( int i )
 {
     if ( i > 32767 )
     {
@@ -190,7 +193,8 @@ static inline short int i2s16( int i )
  * errno gets set to ERANGE.
  *--------------------------------------------------------------------------*/
 
-static inline unsigned short int i2u16( int i )
+static inline unsigned short int
+i2u16( int i )
 {
     if ( i > 65535 )
     {
@@ -214,7 +218,8 @@ static inline unsigned short int i2u16( int i )
  * to ERANGE.
  *-----------------------------------------------------------------------*/
 
-static inline short int s15rnd( double d )
+static inline short int
+s15rnd( double d )
 {
     if ( d >= 16383.5 )
     {
@@ -244,7 +249,8 @@ static inline short int s15rnd( double d )
  * is smaller than 0. In both these cases errno gets set to ERANGE.
  *-------------------------------------------------------------------------*/
 
-static inline unsigned short int u15rnd( double d )
+static inline unsigned short int
+u15rnd( double d )
 {
     if ( d >= 32767.5 )
     {
@@ -268,7 +274,8 @@ static inline unsigned short int u15rnd( double d )
  * to ERANGE.
  *-------------------------------------------------------------------------*/
 
-static inline short int s16rnd( double d )
+static inline short int
+s16rnd( double d )
 {
     if ( d >= 32767.5 )
     {
@@ -298,7 +305,8 @@ static inline short int s16rnd( double d )
  * is smaller than 0. In both these cases errno gets set to ERANGE.
  *-------------------------------------------------------------------------*/
 
-static inline unsigned short int u16rnd( double d )
+static inline unsigned short int
+u16rnd( double d )
 {
     if ( d >= 65535.5 )
     {
@@ -321,7 +329,8 @@ static inline unsigned short int u16rnd( double d )
  * short int value. In both these cases errno gets set to ERANGE.
  *---------------------------------------------------------------------*/
 
-static inline short int srnd( double d )
+static inline short int
+srnd( double d )
 {
     if ( d >= SHRT_MAX + 0.5 )
     {
@@ -345,7 +354,8 @@ static inline short int srnd( double d )
  * ERANGE.
  *----------------------------------------------------------------------*/
 
-static inline unsigned short int usrnd( double d )
+static inline unsigned short int
+usrnd( double d )
 {
     if ( d >= USHRT_MAX + 0.5 )
     {
@@ -368,7 +378,8 @@ static inline unsigned short int usrnd( double d )
  * these cases errno gets set to ERANGE.
  *------------------------------------------------------------------------*/
 
-static inline int irnd( double d )
+static inline int
+irnd( double d )
 {
     if ( d >= INT_MAX + 0.5 )
     {
@@ -391,7 +402,8 @@ static inline int irnd( double d )
  * double is less than 0. In both these cases errno gets set to ERANGE.
  *----------------------------------------------------------------------*/
 
-static inline unsigned int uirnd( double d )
+static inline unsigned int
+uirnd( double d )
 {
     if ( d >= UINT_MAX + 0.5 )
     {
@@ -414,7 +426,8 @@ static inline unsigned int uirnd( double d )
  * long int value. In both these cases errno gets set to ERANGE.
  *--------------------------------------------------------------------*/
 
-static inline long lrnd( double d )
+static inline long
+lrnd( double d )
 {
     if ( d >= LONG_MAX + 0.5 )
     {
@@ -437,7 +450,8 @@ static inline long lrnd( double d )
  * double is less than 0. In both these cases errno gets set to ERANGE.
  *-------------------------------------------------------------------------*/
 
-static inline unsigned long ulrnd( double d )
+static inline unsigned long
+ulrnd( double d )
 {
     if ( d >= ULONG_MAX + 0.5 )
     {

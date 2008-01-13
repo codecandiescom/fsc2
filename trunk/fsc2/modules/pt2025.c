@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -43,12 +43,12 @@ int pt2025_exp_hook(        void );
 int pt2025_end_of_exp_hook( void );
 
 
-Var_T *gaussmeter_name(              Var_T * v );
-Var_T *gaussmeter_field(             Var_T * v );
-Var_T *measure_field(                Var_T * v );
-Var_T *gaussmeter_resolution(        Var_T * v );
-Var_T *gaussmeter_probe_orientation( Var_T * v );
-Var_T *gaussmeter_command(           Var_T * v );
+Var_T * gaussmeter_name(              Var_T * v );
+Var_T * gaussmeter_field(             Var_T * v );
+Var_T * measure_field(                Var_T * v );
+Var_T * gaussmeter_resolution(        Var_T * v );
+Var_T * gaussmeter_probe_orientation( Var_T * v );
+Var_T * gaussmeter_command(           Var_T * v );
 
 
 static bool pt2025_init( const char * name );
@@ -87,7 +87,8 @@ static struct PT2025 pt2025, pt2025_stored;
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-int pt2025_init_hook( void )
+int
+pt2025_init_hook( void )
 {
     Need_GPIB = SET;
 
@@ -102,7 +103,8 @@ int pt2025_init_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-int pt2025_test_hook( void )
+int
+pt2025_test_hook( void )
 {
     pt2025_stored = pt2025;
     return 1;
@@ -112,7 +114,8 @@ int pt2025_test_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-int pt2025_exp_hook( void )
+int
+pt2025_exp_hook( void )
 {
     pt2025 = pt2025_stored;
 
@@ -129,7 +132,8 @@ int pt2025_exp_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-int pt2025_end_of_exp_hook( void )
+int
+pt2025_end_of_exp_hook( void )
 {
     pt2025.device = -1;
 
@@ -148,7 +152,8 @@ int pt2025_end_of_exp_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_name( Var_T * v  UNUSED_ARG )
+Var_T *
+gaussmeter_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -157,7 +162,8 @@ Var_T *gaussmeter_name( Var_T * v  UNUSED_ARG )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_field( Var_T * v )
+Var_T *
+gaussmeter_field( Var_T * v )
 {
     return measure_field( v );
 }
@@ -166,7 +172,8 @@ Var_T *gaussmeter_field( Var_T * v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *measure_field( Var_T * v  UNUSED_ARG )
+Var_T *
+measure_field( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == TEST )
         return vars_push( FLOAT_VAR, 34089.3 );
@@ -178,7 +185,8 @@ Var_T *measure_field( Var_T * v  UNUSED_ARG )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_resolution( Var_T * v )
+Var_T *
+gaussmeter_resolution( Var_T * v )
 {
     double res;
 
@@ -223,7 +231,8 @@ Var_T *gaussmeter_resolution( Var_T * v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_probe_orientation( Var_T * v )
+Var_T *
+gaussmeter_probe_orientation( Var_T * v )
 {
     long orientation;
 
@@ -274,7 +283,8 @@ Var_T *gaussmeter_probe_orientation( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *gaussmeter_command( Var_T * v )
+Var_T *
+gaussmeter_command( Var_T * v )
 {
     char *cmd = NULL;
 
@@ -312,7 +322,8 @@ Var_T *gaussmeter_command( Var_T * v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static bool pt2025_init( const char * name )
+static bool
+pt2025_init( const char * name )
 {
     unsigned char buf[ 50 ];
     long len = 50;
@@ -401,7 +412,8 @@ static bool pt2025_init( const char * name )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static double pt2025_get_field( void )
+static double
+pt2025_get_field( void )
 {
     char buf[ 50 ];
     long len;
@@ -443,7 +455,8 @@ static double pt2025_get_field( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static void pt2025_set_resolution( int res )
+static void
+pt2025_set_resolution( int res )
 {
     pt2025_command( res == LOW ? "V1\r\n" : "V0\r\n" );
 }
@@ -452,7 +465,8 @@ static void pt2025_set_resolution( int res )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool pt2025_command( const char * cmd )
+static bool
+pt2025_command( const char * cmd )
 {
     if ( gpib_write( pt2025.device, cmd, strlen( cmd ) ) == FAILURE )
     {

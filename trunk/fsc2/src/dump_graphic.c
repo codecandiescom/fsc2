@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -44,8 +44,9 @@ static void dump_as_ppm( FILE *   dp,
  * of returning an error code).
  *------------------------------------------------------------------------*/
 
-void dump_window( int type,
-                  int fd )
+void
+dump_window( int type,
+             int fd )
 {
     XImage *image;
     unsigned int w, h;
@@ -116,8 +117,9 @@ void dump_window( int type,
  * canvas for drawing 1D data and the surrounding axes canvases
  *--------------------------------------------------------------*/
 
-static Pixmap get_1d_window( unsigned int * width,
-                             unsigned int * height )
+static Pixmap
+get_1d_window( unsigned int * width,
+               unsigned int * height )
 {
     Pixmap pm;
     GC gc;
@@ -166,8 +168,9 @@ static Pixmap get_1d_window( unsigned int * width,
  * canvas for drawing 2D data and the surrounding axes canvases
  *--------------------------------------------------------------*/
 
-static Pixmap get_2d_window( unsigned int * width,
-                             unsigned int * height )
+static Pixmap
+get_2d_window( unsigned int * width,
+               unsigned int * height )
 {
     Pixmap pm;
     GC gc;
@@ -223,8 +226,9 @@ static Pixmap get_2d_window( unsigned int * width,
  * canvases
  *---------------------------------------------------------------------*/
 
-static Pixmap get_cut_window( unsigned int * width,
-                              unsigned int * height )
+static Pixmap
+get_cut_window( unsigned int * width,
+                unsigned int * height )
 {
     Pixmap pm;
     GC gc;
@@ -288,8 +292,9 @@ static Pixmap get_cut_window( unsigned int * width,
  * the pbmplus package written by Jef Poskanzer.
  *----------------------------------------------------------------*/
 
-static void dump_as_ppm( FILE *   fp,
-                         XImage * image )
+static void
+dump_as_ppm( FILE *   fp,
+             XImage * image )
 {
     int i, j;
     unsigned long pixel = 0;
@@ -392,7 +397,8 @@ static void dump_as_ppm( FILE *   fp,
  * Creates a pixel value to rgb color hash for all colors possibly used.
  *-----------------------------------------------------------------------*/
 
-void create_color_hash( void )
+void
+create_color_hash( void )
 {
     FL_COLOR i;
     FL_COLOR pixel;

@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,15 +31,20 @@ char gpib_error_msg[ 1024 ];      /* global for GPIB error messages */
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_init( const char * log_file_name  UNUSED_ARG,
-               int          log_level      UNUSED_ARG )
+int
+gpib_init( const char * log_file_name  UNUSED_ARG,
+           int          log_level      UNUSED_ARG )
 {
     strcpy( gpib_error_msg, "No GPIB support compiled into fsc2." );
     return FAILURE;
 }
 
 
-int gpib_shutdown( void )
+/*--------------------------------------*
+ *--------------------------------------*/
+
+int
+gpib_shutdown( void )
 {
     return SUCCESS;
 }
@@ -48,8 +53,9 @@ int gpib_shutdown( void )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_init_device( const char * device_name  UNUSED_ARG,
-                      int *        dev          UNUSED_ARG )
+int
+gpib_init_device( const char * device_name  UNUSED_ARG,
+                  int *        dev          UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -65,25 +71,9 @@ int gpib_init_device( const char * device_name  UNUSED_ARG,
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_timeout( int device  UNUSED_ARG,
-                  int period  UNUSED_ARG )
-{
-    /* Keep the module writers from calling the function anywhere else
-       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-       section */
-
-    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
-                 || Fsc2_Internals.state == STATE_FINISHED
-                 || Fsc2_Internals.mode  == EXPERIMENT );
-
-    return FAILURE;
-}
-
-
-/*--------------------------------------*
- *--------------------------------------*/
-
-int gpib_clear_device( int device  UNUSED_ARG )
+int
+gpib_timeout( int device  UNUSED_ARG,
+              int period  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -100,7 +90,8 @@ int gpib_clear_device( int device  UNUSED_ARG )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_local( int device  UNUSED_ARG )
+int
+gpib_clear_device( int device  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -117,7 +108,8 @@ int gpib_local( int device  UNUSED_ARG )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_local_lockout( int device  UNUSED_ARG )
+int
+gpib_local( int device  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -134,7 +126,8 @@ int gpib_local_lockout( int device  UNUSED_ARG )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_trigger( int device  UNUSED_ARG )
+int
+gpib_local_lockout( int device  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -151,9 +144,8 @@ int gpib_trigger( int device  UNUSED_ARG )
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_write( int          device  UNUSED_ARG,
-                const char * buffer  UNUSED_ARG,
-                long         length  UNUSED_ARG )
+int
+gpib_trigger( int device  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -170,9 +162,10 @@ int gpib_write( int          device  UNUSED_ARG,
 /*--------------------------------------*
  *--------------------------------------*/
 
-int gpib_read( int    device  UNUSED_ARG,
-               char * buffer  UNUSED_ARG,
-               long * length  UNUSED_ARG )
+int
+gpib_write( int          device  UNUSED_ARG,
+            const char * buffer  UNUSED_ARG,
+            long         length  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -189,8 +182,29 @@ int gpib_read( int    device  UNUSED_ARG,
 /*--------------------------------------*
  *--------------------------------------*/
 
-void gpib_log_message( const char * fmt  UNUSED_ARG,
-                       ... )
+int
+gpib_read( int    device  UNUSED_ARG,
+           char * buffer  UNUSED_ARG,
+           long * length  UNUSED_ARG )
+{
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
+
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
+
+    return FAILURE;
+}
+
+
+/*--------------------------------------*
+ *--------------------------------------*/
+
+void
+gpib_log_message( const char * fmt  UNUSED_ARG,
+                  ... )
 {
     fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
                  || Fsc2_Internals.state == STATE_FINISHED

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -83,7 +83,8 @@ static const char *ps_str[ 4 ][ 2 ] = {
  * synthesizer that takes care of the single possible RF pulse.
  *----------------------------------------------------------------*/
 
-void rb_pulser_w_init( void )
+void
+rb_pulser_w_init( void )
 {
 #if ! defined RB_PULSER_W_TEST
     int i;
@@ -293,7 +294,8 @@ void rb_pulser_w_init( void )
  * only the end pulses for the +X phase setting).
  *-------------------------------------------------------------------*/
 
-static void rb_pulser_w_phase_init( void )
+static void
+rb_pulser_w_phase_init( void )
 {
     Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + PHASE_DELAY_0;
 #if ! defined RB_PULSER_W_TEST
@@ -388,7 +390,8 @@ static void rb_pulser_w_phase_init( void )
  * in the configuration file under the name SYNTHESIZER_INTRINSIC_DELAY)
  *------------------------------------------------------------------------*/
 
-static void rb_pulser_w_synthesizer_init( void )
+static void
+rb_pulser_w_synthesizer_init( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
     Var_T *func_ptr;
@@ -444,7 +447,8 @@ static void rb_pulser_w_synthesizer_init( void )
  * cards the pulser is mode of
  *-----------------------------------------------------------*/
 
-void rb_pulser_w_exit( void )
+void
+rb_pulser_w_exit( void )
 {
     int i;
 
@@ -518,7 +522,8 @@ void rb_pulser_w_exit( void )
  * Function to "start" or "stop" the pulser
  *------------------------------------------*/
 
-void rb_pulser_w_run( bool state )
+void
+rb_pulser_w_run( bool state )
 {
 #if ! defined RB_PULSER_W_TEST
     Rulbus_Delay_Card_T *card;
@@ -592,7 +597,8 @@ void rb_pulser_w_run( bool state )
  * in external trigger mode
  *----------------------------------------------------------------*/
 
-static void rb_pulser_w_start_external_trigger( void )
+static void
+rb_pulser_w_start_external_trigger( void )
 {
     /* In external trigger mode with the external trigger going to the
        ERT_DELAY card just have to make the card output end pulses on both
@@ -623,7 +629,8 @@ static void rb_pulser_w_start_external_trigger( void )
  * external trigger mode.
  *----------------------------------------------------------*/
 
-static void rb_pulser_w_start_internal_trigger( void )
+static void
+rb_pulser_w_start_internal_trigger( void )
 {
     /* In internal trigger mode we have to set the delay required for the
        repetition time (without waiting for the card to finish a pulse already
@@ -671,8 +678,9 @@ static void rb_pulser_w_start_internal_trigger( void )
  * created.
  *-----------------------------------------------------------*/
 
-void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
-                                   bool                  state )
+void
+rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
+                              bool                  state )
 {
 #if ! defined RB_PULSER_W_TEST
     unsigned char type = state == START ?
@@ -743,8 +751,9 @@ void rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
  * Function to set the delay for a delay card
  *--------------------------------------------*/
 
-void rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * card,
-                                   unsigned long         delay )
+void
+rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * card,
+                              unsigned long         delay )
 {
 #if ! defined RB_PULSER_W_TEST
     int ret;
@@ -776,8 +785,9 @@ void rb_pulser_w_delay_card_delay( Rulbus_Delay_Card_T * card,
  * for the phase setting emits.
  *------------------------------------------------------------*/
 
-void rb_pulser_w_set_phase( Rulbus_Delay_Card_T * card,
-                            int                   phase )
+void
+rb_pulser_w_set_phase( Rulbus_Delay_Card_T * card,
+                       int                   phase )
 {
 #if ! defined RB_PULSER_W_TEST
     raise_permissions( );
@@ -805,8 +815,9 @@ void rb_pulser_w_set_phase( Rulbus_Delay_Card_T * card,
  * fails. It stops the running experiment.
  *---------------------------------------------------------*/
 
-static void rb_pulser_w_failure( bool         rb_flag,
-                                 const char * mess )
+static void
+rb_pulser_w_failure( bool         rb_flag,
+                     const char * mess )
 {
     static int calls = 0;
 

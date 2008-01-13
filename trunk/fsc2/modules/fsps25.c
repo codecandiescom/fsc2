@@ -1,7 +1,7 @@
 /*
  *  $Id
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -41,9 +41,9 @@ int fsps25_test_hook( void );
 int fsps25_exp_hook( void );
 int fsps25_end_of_exp_hook( void );
 
-Var_T *magnet_name( Var_T * v  UNUSED_ARG );
-Var_T *magnet_field( Var_T * v );
-Var_T *magnet_sweep_rate( Var_T * v );
+Var_T * magnet_name( Var_T * v  UNUSED_ARG );
+Var_T * magnet_field( Var_T * v );
+Var_T * magnet_sweep_rate( Var_T * v );
 Var_T * magnet_max_current( Var_T * v );
 Var_T * magnet_max_sweep_rate( Var_T *v );
 
@@ -142,7 +142,8 @@ FSPS25 fsps25, fsps25_stored;
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-int fsps25_init_hook( void )
+int
+fsps25_init_hook( void )
 {
 	fsps25.is_open = UNSET;
 	fsps25.state = STATE_OFF;
@@ -161,7 +162,8 @@ int fsps25_init_hook( void )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-int fsps25_test_hook( void )
+int
+fsps25_test_hook( void )
 {
 	fsps25_stored = fsps25;
 	return 1;
@@ -171,7 +173,8 @@ int fsps25_test_hook( void )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-int fsps25_exp_hook( void )
+int
+fsps25_exp_hook( void )
 {
 	fsps25 = fsps25_stored;
 	fsps25_init( );
@@ -183,7 +186,8 @@ int fsps25_exp_hook( void )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-int fsps25_end_of_exp_hook( void )
+int
+fsps25_end_of_exp_hook( void )
 {
 	return 1;
 }
@@ -192,7 +196,8 @@ int fsps25_end_of_exp_hook( void )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-Var_T *magnet_name( Var_T * v  UNUSED_ARG )
+Var_T *
+magnet_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -201,7 +206,8 @@ Var_T *magnet_name( Var_T * v  UNUSED_ARG )
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
-Var_T *magnet_field( Var_T * v )
+Var_T *
+magnet_field( Var_T * v )
 {
 	double current;
 	long raw_current;
@@ -255,7 +261,8 @@ Var_T *magnet_field( Var_T * v )
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
-Var_T *magnet_sweep_rate( Var_T * v )
+Var_T *
+magnet_sweep_rate( Var_T * v )
 {
 	long raw_speed;
 
@@ -302,7 +309,8 @@ Var_T *magnet_sweep_rate( Var_T * v )
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
-Var_T * magnet_max_current( Var_T * v )
+Var_T *
+magnet_max_current( Var_T * v )
 {
 	double max_current;
 	long raw_max_current;
@@ -367,7 +375,8 @@ Var_T * magnet_max_current( Var_T * v )
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
-Var_T * magnet_max_sweep_rate( Var_T *v )
+Var_T *
+magnet_max_sweep_rate( Var_T *v )
 {
 	double max_sweep_rate;
 	long raw_max_sweep_rate;
@@ -416,7 +425,8 @@ Var_T * magnet_max_sweep_rate( Var_T *v )
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
-static void fsps25_init( void )
+static void
+fsps25_init( void )
 {
 	FSPS25 target_state = fsps25;
 
@@ -472,7 +482,8 @@ static void fsps25_init( void )
  * Function for bringing the device into remote and back into local state
  *------------------------------------------------------------------------*/
 
-static void fsps25_on_off( bool state )
+static void
+fsps25_on_off( bool state )
 {
 	if (    ( ! state && fsps25.state == STATE_OFF )
 		 || (   state && fsps25.state != STATE_ON  ) )
@@ -489,7 +500,8 @@ static void fsps25_on_off( bool state )
  * Function for bringing the device online
  *-----------------------------------------*/
 
-static void fsps25_on( void )
+static void
+fsps25_on( void )
 {
 	if ( FSC2_MODE != EXPERIMENT )
 	{
@@ -535,7 +547,8 @@ static void fsps25_on( void )
  * Function for bringing the device offline
  *------------------------------------------*/
 
-static void fsps25_off( void )
+static void
+fsps25_off( void )
 {
 	char buf[ 5 ];
 	int retries = 30;
@@ -596,7 +609,8 @@ static void fsps25_off( void )
  * Function for asking the device for its status
  *-----------------------------------------------*/
 
-static void fsps25_get_state( void )
+static void
+fsps25_get_state( void )
 {
 	char buf[ 5 ] = "GCS?\r";
 
@@ -613,7 +627,8 @@ static void fsps25_get_state( void )
  * to fetch the reply from the device
  *-------------------------------------------------------*/
 
-static void fsps25_read_state( void )
+static void
+fsps25_read_state( void )
 {
 	char buf[ 27 ];
 	ssize_t count;
@@ -693,7 +708,8 @@ static void fsps25_read_state( void )
  * Function for asking the device for the heater state
  *-----------------------------------------------------*/
 
-static bool fsps25_get_heater_state( void )
+static bool
+fsps25_get_heater_state( void )
 {
 	char buf[ 18 ] = "GHS?\r";
 	ssize_t count = 2;
@@ -742,7 +758,8 @@ static bool fsps25_get_heater_state( void )
  * Function for setting the heater state
  *---------------------------------------*/
 
-static void fsps25_set_heater_state( bool state )
+static void
+fsps25_set_heater_state( bool state )
 {
 	char buf[ 8 ];
 	int retries = 30;
@@ -833,7 +850,8 @@ static void fsps25_set_heater_state( bool state )
  * and FAIL on failure to stop the sweep.
  *------------------------------------------------------*/
 
-static bool fsps25_abort_sweep( void )
+static bool
+fsps25_abort_sweep( void )
 {
 	char buf[ 5 ] = "DCS!\r";
 
@@ -870,7 +888,8 @@ static bool fsps25_abort_sweep( void )
  * Function for querying the actual current output by the power suply
  *--------------------------------------------------------------------*/
 
-static long fsps25_get_act_current( void )
+static long
+fsps25_get_act_current( void )
 {
 	char buf[ 11 ] = "GAC?\r";
 	long current;
@@ -922,7 +941,8 @@ static long fsps25_get_act_current( void )
  * Function for setting the current output by the power suply
  *------------------------------------------------------------*/
 
-static long fsps25_set_act_current( long current )
+static long
+fsps25_set_act_current( long current )
 {
 	char buf[ 13 ];
 	unsigned long delay;
@@ -1007,7 +1027,8 @@ static long fsps25_set_act_current( long current )
  * from the result of the "GAC?" command if the heater is off)
  *----------------------------------------------------------------------*/
 
-static long fsps25_get_super_current( void )
+static long
+fsps25_get_super_current( void )
 {
 	char buf[ 11 ] = "GSC?\r";
 	long current;
@@ -1052,7 +1073,8 @@ static long fsps25_get_super_current( void )
  * reducing the value to the maximum allowed current)
  *---------------------------------------------------------*/
 
-static long fsps25_get_max_current( void )
+static long
+fsps25_get_max_current( void )
 {
 	char buf[ 10 ] = "GMC?\r";
 	long current;
@@ -1087,7 +1109,8 @@ static long fsps25_get_max_current( void )
  * Function for setting the maximum current
  *------------------------------------------*/
 
-static long fsps25_set_max_current( long current )
+static long
+fsps25_set_max_current( long current )
 {
 	char buf[ 12 ];
 
@@ -1144,7 +1167,8 @@ static long fsps25_set_max_current( long current )
  * Function for querying the sweep speed of the power supply
  *-----------------------------------------------------------*/
 
-static long fsps25_get_sweep_speed( void )
+static long
+fsps25_get_sweep_speed( void )
 {
 	char buf[ 9 ] = "GAS?\r";
 	long raw_speed;
@@ -1175,7 +1199,8 @@ static long fsps25_get_sweep_speed( void )
  * Function for setting the sweep speed (in mA/min) of the power supply
  *----------------------------------------------------------------------*/
 
-static long fsps25_set_sweep_speed( long speed )
+static long
+fsps25_set_sweep_speed( long speed )
 {
 	char buf[ 11 ];
 
@@ -1197,7 +1222,8 @@ static long fsps25_set_sweep_speed( long speed )
  * Function for querying the maximum sweep speed that can be set
  *---------------------------------------------------------------*/
 
-static long fsps25_get_max_sweep_speed( void )
+static long
+fsps25_get_max_sweep_speed( void )
 {
 	char buf[ 9 ] = "GMS?\r";
 	long raw_speed;
@@ -1228,7 +1254,8 @@ static long fsps25_get_max_sweep_speed( void )
  * Function for setting the maximum sweep speed that can be set
  *--------------------------------------------------------------*/
 
-static long fsps25_set_max_sweep_speed( long max_speed )
+static long
+fsps25_set_max_sweep_speed( long max_speed )
 {
 	char buf[ 11 ];
 
@@ -1254,7 +1281,8 @@ static long fsps25_set_max_sweep_speed( long max_speed )
  * and setting up the communication parameters.
  *-----------------------------------------------------*/
 
-static void fsps25_open( void )
+static void
+fsps25_open( void )
 {
 #ifndef FSPS25_TEST
 
@@ -1359,7 +1387,8 @@ static void fsps25_open( void )
  * Function for receiving the response to a command
  *--------------------------------------------------*/
 
-static void fsps25_get_command_reply( void )
+static void
+fsps25_get_command_reply( void )
 {
 	char reply[ 2 ];
 
@@ -1377,7 +1406,8 @@ static void fsps25_get_command_reply( void )
  * with the device failed completely.
  *-------------------------------------------------------*/
 
-static void fsps25_comm_fail( void )
+static void
+fsps25_comm_fail( void )
 {
 	print( FATAL, "Can't access the monochromator.\n" );
     THROW( EXCEPTION );
@@ -1389,7 +1419,8 @@ static void fsps25_comm_fail( void )
  * but send a message it wasn't supposed to send.
  *--------------------------------------------------*/
 
-static void fsps25_wrong_data( void )
+static void
+fsps25_wrong_data( void )
 {
     print( FATAL, "Device send unexpected data.\n" );
     THROW( EXCEPTION );
@@ -1400,7 +1431,8 @@ static void fsps25_wrong_data( void )
  * Function for situations where the device is in PFAIL state
  *------------------------------------------------------------*/
 
-static void fsps25_pfail( void )
+static void
+fsps25_pfail( void )
 {
 	/* Unless we're in the "expert mode" a PFAIL situation leads to an
 	   immediate shutdown of the program */

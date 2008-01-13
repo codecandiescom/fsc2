@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -90,7 +90,8 @@ line:     DEF_DIR SEPARATOR TEXT    { Fsc2_Internals.def_directory =
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void fsc2_conferror( const char * s  UNUSED_ARG )
+static void
+fsc2_conferror( const char * s  UNUSED_ARG )
 {
 }
 

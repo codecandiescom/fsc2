@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -45,8 +45,9 @@ typedef unsigned int socklen_t;
  * return -1 on errors.
  *------------------------------------------------------*/
 
-pid_t spawn_conn( bool   start_state,
-                  FILE * in_file_fp )
+pid_t
+spawn_conn( bool   start_state,
+            FILE * in_file_fp )
 {
     int listen_fd;
     struct sockaddr_un serv_addr;
@@ -130,7 +131,8 @@ pid_t spawn_conn( bool   start_state,
 /*------------------------------------------------------*
  *------------------------------------------------------*/
 
-static void connect_handler( int listen_fd )
+static void
+connect_handler( int listen_fd )
 {
     int conn_fd;
     socklen_t cli_len;
@@ -296,7 +298,8 @@ static void connect_handler( int listen_fd )
  * catch).
  *---------------------------------------------------------------------*/
 
-static void set_conn_signals( void )
+static void
+set_conn_signals( void )
 {
     struct sigaction sact;
     int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,
@@ -321,7 +324,8 @@ static void set_conn_signals( void )
  * Set variable 'Is_busy' depending on type of signal.
  *-----------------------------------------------------*/
 
-static void conn_sig_handler( int signo )
+static void
+conn_sig_handler( int signo )
 {
     switch( signo )
     {

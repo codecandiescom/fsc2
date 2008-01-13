@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -205,28 +205,28 @@ int lecroy9400_end_of_exp_hook( void );
 void lecroy9400_exit_hook(      void );
 
 
-Var_T *digitizer_name(              Var_T * /* v */ );
-Var_T *digitizer_define_window(     Var_T * /* v */ );
-Var_T *digitizer_timebase(          Var_T * /* v */ );
-Var_T *digitizer_time_per_point(    Var_T * /* v */ );
-Var_T *digitizer_sensitivity(       Var_T * /* v */ );
-Var_T *digitizer_averaging(         Var_T * /* v */ );
-Var_T *digitizer_num_averages(      Var_T * /* v */ );
-Var_T *digitizer_record_length(     Var_T * /* v */ );
-Var_T *digitizer_trigger_delay(     Var_T * /* v */ );
-Var_T *digitizer_meas_channel_ok(   Var_T * /* v */ );
-Var_T *digitizer_trigger_channel(   Var_T * /* v */ );
-Var_T *digitizer_start_acquisition( Var_T * /* v */ );
-Var_T *digitizer_get_curve(         Var_T * /* v */ );
-Var_T *digitizer_get_curve_fast(    Var_T * /* v */ );
-Var_T *digitizer_command(           Var_T * /* v */ );
+Var_T * digitizer_name(              Var_T * /* v */ );
+Var_T * digitizer_define_window(     Var_T * /* v */ );
+Var_T * digitizer_timebase(          Var_T * /* v */ );
+Var_T * digitizer_time_per_point(    Var_T * /* v */ );
+Var_T * digitizer_sensitivity(       Var_T * /* v */ );
+Var_T * digitizer_averaging(         Var_T * /* v */ );
+Var_T * digitizer_num_averages(      Var_T * /* v */ );
+Var_T * digitizer_record_length(     Var_T * /* v */ );
+Var_T * digitizer_trigger_delay(     Var_T * /* v */ );
+Var_T * digitizer_meas_channel_ok(   Var_T * /* v */ );
+Var_T * digitizer_trigger_channel(   Var_T * /* v */ );
+Var_T * digitizer_start_acquisition( Var_T * /* v */ );
+Var_T * digitizer_get_curve(         Var_T * /* v */ );
+Var_T * digitizer_get_curve_fast(    Var_T * /* v */ );
+Var_T * digitizer_command(           Var_T * /* v */ );
 
 
 /* declaration of internally used functions */
 
 int lecroy9400_get_tb_index( double /* timebase */ );
 
-const char *lecroy9400_ptime( double /* p_time */ );
+const char * lecroy9400_ptime( double /* p_time */ );
 
 void lecroy9400_delete_windows( LECROY9400_T * /* s */ );
 

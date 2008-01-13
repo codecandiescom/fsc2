@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -34,7 +34,8 @@ static NI_DAQ_INPUT pci_mio_16e_1_gpct_source( const char * tname,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *daq_start_continuous_counter( Var_T * v )
+Var_T *
+daq_start_continuous_counter( Var_T * v )
 {
     long counter;
     NI_DAQ_INPUT source;
@@ -105,7 +106,8 @@ Var_T *daq_start_continuous_counter( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *daq_start_timed_counter( Var_T * v )
+Var_T *
+daq_start_timed_counter( Var_T * v )
 {
     int counter;
     NI_DAQ_INPUT source;
@@ -196,7 +198,8 @@ Var_T *daq_start_timed_counter( Var_T * v )
  * for the count interval finish and then fetches the count.
  *-----------------------------------------------------------------*/
 
-Var_T *daq_timed_count( Var_T * v )
+Var_T *
+daq_timed_count( Var_T * v )
 {
     int counter;
     NI_DAQ_INPUT source;
@@ -337,7 +340,8 @@ Var_T *daq_timed_count( Var_T * v )
  * Gets a count even while the counter is still running
  *------------------------------------------------------*/
 
-Var_T *daq_intermediate_count( Var_T * v )
+Var_T *
+daq_intermediate_count( Var_T * v )
 {
     int counter;
     unsigned long count;
@@ -380,7 +384,8 @@ Var_T *daq_intermediate_count( Var_T * v )
  * Get a count after waiting until the counter is finished counting
  *------------------------------------------------------------------*/
 
-Var_T *daq_final_count( Var_T * v )
+Var_T *
+daq_final_count( Var_T * v )
 {
     int counter;
     unsigned long count;
@@ -436,7 +441,8 @@ Var_T *daq_final_count( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *daq_stop_counter( Var_T * v )
+Var_T *
+daq_stop_counter( Var_T * v )
 {
     int counter;
     int ret;
@@ -465,7 +471,8 @@ Var_T *daq_stop_counter( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *daq_single_pulse( Var_T * v )
+Var_T *
+daq_single_pulse( Var_T * v )
 {
     int counter;
     double duration;
@@ -517,7 +524,8 @@ Var_T *daq_single_pulse( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *daq_continuous_pulses( Var_T * v )
+Var_T *
+daq_continuous_pulses( Var_T * v )
 {
     int counter;
     double len_hi, len_low;
@@ -596,8 +604,9 @@ Var_T *daq_continuous_pulses( Var_T * v )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static NI_DAQ_INPUT pci_mio_16e_1_gpct_source( const char * tname,
-                                               const char * snippet )
+static NI_DAQ_INPUT
+pci_mio_16e_1_gpct_source( const char * tname,
+                           const char * snippet )
 {
     NI_DAQ_INPUT pfi = NI_DAQ_PFI0;
     int i;
@@ -627,8 +636,9 @@ static NI_DAQ_INPUT pci_mio_16e_1_gpct_source( const char * tname,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-void ni_daq_two_channel_pulses( double delay,
-                                double scan_duration )
+void
+ni_daq_two_channel_pulses( double delay,
+                           double scan_duration )
 {
     double len_hi_0, len_hi_1,
            len_low,

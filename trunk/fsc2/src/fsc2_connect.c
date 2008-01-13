@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -103,7 +103,7 @@ extern int snprintf( char *        str,
 #define MAXLINE      4096
 
 
-void make_tmp_file( char * fname );
+void make_tmp_file( const char * fname );
 int open_fsc2_socket( const char * fname );
 void start_fsc2( char * pname,
                  char * fname,
@@ -137,7 +137,9 @@ static volatile sig_atomic_t Sig_type = 0;
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int main( int argc, char * argv[ ] )
+int
+main( int    argc,
+      char * argv[ ] )
 {
     char fname[ ] = P_tmpdir "/fsc2.edl.XXXXXX";
     int sock_fd;
@@ -161,7 +163,8 @@ int main( int argc, char * argv[ ] )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void make_tmp_file( char * fname )
+void
+make_tmp_file( const char * fname )
 {
     int tmp;
     ssize_t bytes_read;
@@ -206,7 +209,8 @@ void make_tmp_file( char * fname )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int open_fsc2_socket( const char * fname )
+int
+open_fsc2_socket( const char * fname )
 {
     int sock_fd;
     struct sockaddr_un serv_addr;
@@ -258,9 +262,10 @@ int open_fsc2_socket( const char * fname )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void start_fsc2( char * pname,
-                 char * fname,
-                 int    wait_flag )
+void
+start_fsc2( char * pname,
+            char * fname,
+            int    wait_flag )
 {
     const char *av[ 6 ] = { bindir "fsc2", NULL, NULL, NULL, NULL, NULL };
     int ac = 1;
@@ -326,7 +331,8 @@ void start_fsc2( char * pname,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void sig_handler( int signo )
+void
+sig_handler( int signo )
 {
     /* Bomb out on unexpected signals */
 
@@ -340,9 +346,10 @@ void sig_handler( int signo )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void contact_fsc2( int    sock_fd,
-                   char * pname,
-                   char * fname )
+void
+contact_fsc2( int    sock_fd,
+              char * pname,
+              char * fname )
 {
     char line[ MAXLINE ];
     char *prog_name;
@@ -435,9 +442,10 @@ void contact_fsc2( int    sock_fd,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-void clean_up( const char * fname,
-               int          sock_fd,
-               int          ret_val )
+void
+clean_up( const char * fname,
+          int          sock_fd,
+          int          ret_val )
 {
     unlink( fname );
     close( sock_fd );
@@ -448,9 +456,10 @@ void clean_up( const char * fname,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-ssize_t read_line( int    fd,
-                   void * vptr,
-                   size_t max_len )
+ssize_t
+read_line( int    fd,
+           void * vptr,
+           size_t max_len )
 {
     ssize_t n, rc;
     char c, *ptr;
@@ -484,8 +493,9 @@ ssize_t read_line( int    fd,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-ssize_t do_read( int    fd,
-                 char * ptr )
+ssize_t
+do_read( int    fd,
+         char * ptr )
 {
     static int read_cnt;
     static char *read_ptr;
@@ -516,9 +526,10 @@ ssize_t do_read( int    fd,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-ssize_t writen( int          fd,
-                const void * vptr,
-                size_t       n )
+ssize_t
+writen( int          fd,
+        const void * vptr,
+        size_t       n )
 {
     size_t nleft;
     ssize_t nwritten;

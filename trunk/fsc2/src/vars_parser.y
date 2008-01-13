@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -329,7 +329,8 @@ strs:    STR_TOKEN                 { if ( ! Dont_exec )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void varserror( const char * s  UNUSED_ARG )
+static void
+varserror( const char * s  UNUSED_ARG )
 {
     if ( *varstext == '\0' )
         print( FATAL, "Unexpected end of file in VARIABLES section.\n");
@@ -342,7 +343,8 @@ static void varserror( const char * s  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void varsparser_init( void )
+void
+varsparser_init( void )
 {
     Dont_exec = 0;
 }

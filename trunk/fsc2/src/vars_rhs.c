@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -30,10 +30,10 @@
 static int vars_check_rhs_indices( Var_T ** v,
                                    Var_T ** a,
                                    int *    range_count );
-static Var_T *vars_arr_rhs_slice( Var_T * a,
-                                  Var_T * v,
-                                  int     index_count,
-                                  int     range_count );
+static Var_T * vars_arr_rhs_slice( Var_T * a,
+                                   Var_T * v,
+                                   int     index_count,
+                                   int     range_count );
 static void vars_arr_rhs_slice_prune( Var_T * nv,
                                       Var_T * v,
                                       Var_T * a,
@@ -55,7 +55,8 @@ static void vars_fix_dims( Var_T * v,
  * onto the stack.
  *--------------------------------------------------------------------------*/
 
-Var_T *vars_arr_rhs( Var_T * v )
+Var_T *
+vars_arr_rhs( Var_T * v )
 {
     Var_T *a, *cv;
     ssize_t ind;
@@ -134,9 +135,10 @@ Var_T *vars_arr_rhs( Var_T * v )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static int vars_check_rhs_indices( Var_T ** v,
-                                   Var_T ** a,
-                                   int *    range_count )
+static int
+vars_check_rhs_indices( Var_T ** v,
+                        Var_T ** a,
+                        int *    range_count )
 {
     Var_T *cv = *v;
     int index_count = 0;
@@ -262,10 +264,11 @@ static int vars_check_rhs_indices( Var_T ** v,
  * or matrix that appears somewhere on the RHS of a statement.
  *-------------------------------------------------------------*/
 
-static Var_T *vars_arr_rhs_slice( Var_T * a,
-                                  Var_T * v,
-                                  int     index_count,
-                                  int     range_count )
+static Var_T *
+vars_arr_rhs_slice( Var_T * a,
+                    Var_T * v,
+                    int     index_count,
+                    int     range_count )
 {
     Var_T *cv = a;
 
@@ -326,10 +329,11 @@ static Var_T *vars_arr_rhs_slice( Var_T * a,
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void vars_arr_rhs_slice_prune( Var_T * nv,
-                                      Var_T * v,
-                                      Var_T * a,
-                                      Var_T * end )
+static void
+vars_arr_rhs_slice_prune( Var_T * nv,
+                          Var_T * v,
+                          Var_T * a,
+                          Var_T * end )
 {
     bool needs_stage_2 = UNSET;
 
@@ -343,11 +347,12 @@ static void vars_arr_rhs_slice_prune( Var_T * nv,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static bool prune_stage_1( Var_T * nv,
-                           Var_T * v,
-                           Var_T * a,
-                           Var_T * end,
-                           bool *  needs_stage_2 )
+static bool
+prune_stage_1( Var_T * nv,
+               Var_T * v,
+               Var_T * a,
+               Var_T * end,
+               bool *  needs_stage_2 )
 {
     ssize_t range_start, range_end, range, i;
     bool keep = UNSET;
@@ -477,7 +482,8 @@ static bool prune_stage_1( Var_T * nv,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static void prune_stage_2( Var_T * nv )
+static void
+prune_stage_2( Var_T * nv )
 {
     ssize_t i;
     Var_T **old_vptr_list;
@@ -522,8 +528,9 @@ static void prune_stage_2( Var_T * nv )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static void vars_fix_dims( Var_T * v,
-                           int     max_dim )
+static void
+vars_fix_dims( Var_T * v,
+               int     max_dim )
 {
     ssize_t i;
 
@@ -546,7 +553,8 @@ static void vars_fix_dims( Var_T * v,
  * on the RHS which this function does.
  *----------------------------------------------------------------------*/
 
-Var_T *vars_subref_to_rhs_conv( Var_T * v )
+Var_T *
+vars_subref_to_rhs_conv( Var_T * v )
 {
     Var_T *sv;
     ssize_t i;

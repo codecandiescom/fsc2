@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -32,7 +32,8 @@
  * memory used for the file name passed to the function is deallocated.
  *----------------------------------------------------------------------*/
 
-FILE *rs_sml01_find_table( char ** name )
+FILE *
+rs_sml01_find_table( char ** name )
 {
     FILE *tfp;
     char *new_name;
@@ -91,7 +92,8 @@ FILE *rs_sml01_find_table( char ** name )
  * deallocated.
  *------------------------------------------------------------------*/
 
-FILE *rs_sml01_open_table( char * name )
+FILE *
+rs_sml01_open_table( char * name )
 {
     FILE *tfp;
 
@@ -122,7 +124,8 @@ FILE *rs_sml01_open_table( char * name )
  * a given frequency by interpolation.
  *-----------------------------------------------*/
 
-double rs_sml01_get_att_from_table( double freq )
+double
+rs_sml01_get_att_from_table( double freq )
 {
     long i_low, i_high, i_cur;
     double att;
@@ -202,7 +205,8 @@ double rs_sml01_get_att_from_table( double freq )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-double rs_sml01_get_att( double freq )
+double
+rs_sml01_get_att( double freq )
 {
     double att;
 
@@ -234,13 +238,13 @@ double rs_sml01_get_att( double freq )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-unsigned int rs_sml01_get_mod_param( Var_T ** v,
-                                     double * dres,
-                                     int *    ires )
+unsigned int
+rs_sml01_get_mod_param( Var_T ** v,
+                        double * dres,
+                        int *    ires )
 {
     const char *type[ ] =   { "FM", "AM", "PHASE", "OFF" },
                *source[ ] = { "EXT AC", "AC", "EXT DC", "DC", "INT" };
-
 
 
     /* If the variable is an integer of floating value this means an
@@ -317,7 +321,8 @@ unsigned int rs_sml01_get_mod_param( Var_T ** v,
  * warning is printed out.
  *---------------------------------------------------------------------*/
 
-void rs_sml01_check_mod_ampl( double freq )
+void
+rs_sml01_check_mod_ampl( double freq )
 {
     size_t i;
 
@@ -386,7 +391,8 @@ void rs_sml01_check_mod_ampl( double freq )
 
 #if defined WITH_PULSE_MODULATION
 
-char *rs_sml01_pretty_print( double t )
+char *
+rs_sml01_pretty_print( double t )
 {
     static char ts[ 30 ];
 

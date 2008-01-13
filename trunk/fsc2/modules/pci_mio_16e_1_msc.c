@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,7 +31,8 @@
  * when calling the function daq_freq_out() withb an argument.
  *---------------------------------------------------------------------*/
 
-Var_T *daq_reserve_freq_out( Var_T * v )
+Var_T *
+daq_reserve_freq_out( Var_T * v )
 {
     bool lock_state = SET;
 
@@ -90,7 +91,8 @@ Var_T *daq_reserve_freq_out( Var_T * v )
  * frequency is 0.
  *-------------------------------------------------------------------------*/
 
-Var_T *daq_freq_out( Var_T * v )
+Var_T *
+daq_freq_out( Var_T * v )
 {
     double freq;
     double new_freq;
@@ -298,7 +300,8 @@ Var_T *daq_freq_out( Var_T * v )
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-Var_T *daq_trigger_setup( Var_T * v )
+Var_T *
+daq_trigger_setup( Var_T * v )
 {
     NI_DAQ_TRIG_TYPE trigger_type;
     const char *tt[ ] = { "TTL", "Low_Window", "High_Window", "Middle_Window",

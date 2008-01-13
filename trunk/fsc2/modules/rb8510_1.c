@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -54,16 +54,17 @@ int  rb8510_1_exp_hook(        void );
 int  rb8510_1_end_of_exp_hook( void );
 void rb8510_1_exit_hook(       void );
 
-Var_T *daq_name(        Var_T * v );
-Var_T *daq_reserve_dac( Var_T * v );
-Var_T *daq_set_voltage( Var_T * v );
+Var_T * daq_name(        Var_T * v );
+Var_T * daq_reserve_dac( Var_T * v );
+Var_T * daq_set_voltage( Var_T * v );
 
 
 /*--------------------------------------------------------------*
  * Function called immediately after the module has been loaded
  *--------------------------------------------------------------*/
 
-int rb8510_1_init_hook( void )
+int
+rb8510_1_init_hook( void )
 {
     Need_RULBUS = SET;
 
@@ -79,7 +80,8 @@ int rb8510_1_init_hook( void )
  * Function called at the start of the test run
  *----------------------------------------------*/
 
-int rb8510_1_test_hook( void )
+int
+rb8510_1_test_hook( void )
 {
     rb8510_stored = rb8510;
 
@@ -101,7 +103,8 @@ int rb8510_1_test_hook( void )
  * Function called at the start of the experiment
  *------------------------------------------------*/
 
-int rb8510_1_exp_hook( void )
+int
+rb8510_1_exp_hook( void )
 {
     int ret;
 
@@ -173,7 +176,8 @@ int rb8510_1_exp_hook( void )
  * Function called at the end of the experiment
  *----------------------------------------------*/
 
-int rb8510_1_end_of_exp_hook( void )
+int
+rb8510_1_end_of_exp_hook( void )
 {
     if ( rb8510.handle >= 0 )
     {
@@ -196,7 +200,8 @@ int rb8510_1_end_of_exp_hook( void )
  * Function called just before the module gets unloaded
  *------------------------------------------------------*/
 
-void rb8510_1_exit_hook( void )
+void
+rb8510_1_exit_hook( void )
 {
     if ( rb8510_stored.reserved_by )
         T_free( rb8510_stored.reserved_by );
@@ -207,7 +212,8 @@ void rb8510_1_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *daq_name( Var_T * v  UNUSED_ARG )
+Var_T *
+daq_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -219,7 +225,8 @@ Var_T *daq_name( Var_T * v  UNUSED_ARG )
  * argument to the function daq_set_voltage().
  *-------------------------------------------------------------------*/
 
-Var_T *daq_reserve_dac( Var_T * v )
+Var_T *
+daq_reserve_dac( Var_T * v )
 {
     bool lock_state = SET;
 
@@ -272,7 +279,8 @@ Var_T *daq_reserve_dac( Var_T * v )
  * Function sets or returns the output voltage
  *--------------------------------------------*/
 
-Var_T *daq_set_voltage( Var_T * v )
+Var_T *
+daq_set_voltage( Var_T * v )
 {
     double volts;
     char *pass = NULL;

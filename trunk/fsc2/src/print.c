@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -105,8 +105,9 @@ static void print_markers_2d( FILE * fp );
  * and -1 for the y-axis!
  *------------------------------------------------------------------------*/
 
-void print_it( FL_OBJECT * obj,
-               long        data )
+void
+print_it( FL_OBJECT * obj,
+          long        data )
 {
     FILE *fp = NULL;
     char *name = NULL;
@@ -159,9 +160,10 @@ void print_it( FL_OBJECT * obj,
  * and, for printing to file mode, select the file
  *--------------------------------------------------------------*/
 
-static bool get_print_file( FILE ** fp,
-                            char ** name,
-                            long    data )
+static bool
+get_print_file( FILE ** fp,
+                char ** name,
+                long    data )
 {
     FL_OBJECT *obj;
     struct stat stat_buf;
@@ -371,8 +373,9 @@ static bool get_print_file( FILE ** fp,
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-static int print_form_close_handler( FL_FORM * a  UNUSED_ARG,
-                                     void *    b  UNUSED_ARG )
+static int
+print_form_close_handler( FL_FORM * a  UNUSED_ARG,
+                          void *    b  UNUSED_ARG )
 {
     return FL_IGNORE;
 }
@@ -382,8 +385,9 @@ static int print_form_close_handler( FL_FORM * a  UNUSED_ARG,
  * Callback function for the objects in the print form.
  *------------------------------------------------------*/
 
-void print_callback( FL_OBJECT * obj,
-                     long        data  UNUSED_ARG )
+void
+print_callback( FL_OBJECT * obj,
+                long        data  UNUSED_ARG )
 {
     const char *fn;
 
@@ -462,7 +466,8 @@ void print_callback( FL_OBJECT * obj,
  * resulting string is stored in the global variable 'pc_string'
  *---------------------------------------------------------------*/
 
-static void get_print_comm( long data )
+static void
+get_print_comm( long data )
 {
     FL_OBJECT *obj;
     const char *res;
@@ -522,8 +527,9 @@ static void get_print_comm( long data )
  * and then pressing the "Done" button.
  *---------------------------------------------------------------------*/
 
-static int print_comment_close_handler( FL_FORM * a  UNUSED_ARG,
-                                        void *    b  UNUSED_ARG )
+static int
+print_comment_close_handler( FL_FORM * a  UNUSED_ARG,
+                             void *    b  UNUSED_ARG )
 {
     fl_set_input( GUI.print_comment->pc_input, NULL );
     fl_trigger_object( GUI.print_comment->pc_done );
@@ -536,9 +542,10 @@ static int print_comment_close_handler( FL_FORM * a  UNUSED_ARG,
  * while the main program can continue taking care of new data.
  *--------------------------------------------------------------*/
 
-static void start_printing( FILE *       fp,
-                            const char * name,
-                            long         what )
+static void
+start_printing( FILE *       fp,
+                const char * name,
+                long         what )
 {
     pid_t pid;
     char filename[ ] = P_tmpdir "/fsc2.print.XXXXXX";
@@ -632,8 +639,9 @@ static void start_printing( FILE *       fp,
  * Prints the header of the EPS-file as well as date, user and fsc2 logo.
  *------------------------------------------------------------------------*/
 
-static void print_header( FILE *       fp,
-                          const char * name )
+static void
+print_header( FILE *       fp,
+              const char * name )
 {
     time_t d;
     char *tstr = NULL;
@@ -808,8 +816,9 @@ static void print_header( FILE *       fp,
  * section in y-direction.
  *------------------------------------------------------------*/
 
-static void do_1d_printing( FILE * fp,
-                            long   what )
+static void
+do_1d_printing( FILE * fp,
+                long   what )
 {
     int i;
 
@@ -874,7 +883,8 @@ static void do_1d_printing( FILE * fp,
  * disabled (the user can't select b&w).
  *--------------------------------------------------------------*/
 
-static void do_2d_printing( FILE * fp )
+static void
+do_2d_printing( FILE * fp )
 {
     /* If the active curve has been switched off in the mean time nothing
        remains to be printed... */
@@ -931,10 +941,11 @@ static void do_2d_printing( FILE * fp )
  * Draws the scales for both 1D and 2D graphics
  *----------------------------------------------*/
 
-static void eps_make_scale( FILE * fp,
-                            void * cv,
-                            int    coord,
-                            long   dim )
+static void
+eps_make_scale( FILE * fp,
+                void * cv,
+                int    coord,
+                long   dim )
 {
     double rwc_delta,           /* distance between small ticks (in rwc) */
            order,               /* and its order of magnitude */
@@ -1257,7 +1268,8 @@ static void eps_make_scale( FILE * fp,
  * output in color mode.
  *-------------------------------------------------------*/
 
-static void eps_color_scale( FILE * fp )
+static void
+eps_color_scale( FILE * fp )
 {
     double x = x_0 + w + 5.0;
     double y = y_0;
@@ -1292,10 +1304,11 @@ static void eps_color_scale( FILE * fp )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void eps_draw_curve_1d( FILE *       fp,
-                               Curve_1d_T * cv,
-                               int          i,
-                               long         dir )
+static void
+eps_draw_curve_1d( FILE *       fp,
+                   Curve_1d_T * cv,
+                   int          i,
+                   long         dir )
 {
     double s2d[ 2 ];
     long k;
@@ -1381,8 +1394,9 @@ static void eps_draw_curve_1d( FILE *       fp,
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void eps_draw_surface( FILE * fp,
-                              int    cn )
+static void
+eps_draw_surface( FILE * fp,
+                  int    cn )
 {
     Curve_2d_T *cv = G_2d.curve_2d[ cn ];
     double s2d[ 2 ];
@@ -1438,8 +1452,9 @@ static void eps_draw_surface( FILE * fp,
  * scale, using contours...
  *-----------------------------------------------------*/
 
-static void eps_draw_contour( FILE * fp,
-                              int    cn )
+static void
+eps_draw_contour( FILE * fp,
+                  int    cn )
 {
     Curve_2d_T *cv = G_2d.curve_2d[ cn ];
     double s2d[ 2 ];
@@ -1544,7 +1559,8 @@ static void eps_draw_contour( FILE * fp,
  * of the page below the x-axis.
  *---------------------------------------------------------------*/
 
-static void print_comm( FILE * fp )
+static void
+print_comm( FILE * fp )
 {
     char **lines = NULL;
     int num_lines;
@@ -1598,7 +1614,8 @@ static void print_comm( FILE * fp )
  * the number of lines to be printed (through the pointer argument).
  *-------------------------------------------------------------------*/
 
-static char **split_into_lines( int * num_lines )
+static char **
+split_into_lines( int * num_lines )
 {
     char **lines = NULL;
     char *cp;
@@ -1712,7 +1729,8 @@ static char **split_into_lines( int * num_lines )
  * by a space character.
  *------------------------------------------------------------------*/
 
-static char *paren_replace( const char * str )
+static char *
+paren_replace( const char * str )
 {
     char *sp;
     char *cp;
@@ -1756,7 +1774,8 @@ static char *paren_replace( const char * str )
  * Function for drawing the markers in 1D graphic mode
  *-----------------------------------------------------*/
 
-static void print_markers_1d( FILE * fp )
+static void
+print_markers_1d( FILE * fp )
 {
     long i;
     Curve_1d_T *cv = NULL;
@@ -1825,7 +1844,8 @@ static void print_markers_1d( FILE * fp )
  * Function for drawing the markers in 2D graphic mode
  *-----------------------------------------------------*/
 
-static void print_markers_2d( FILE * fp )
+static void
+print_markers_2d( FILE * fp )
 {
     Curve_2d_T *cv = NULL;
     Marker_2d_T *m;

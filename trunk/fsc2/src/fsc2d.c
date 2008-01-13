@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -87,8 +87,9 @@ static void set_fs2d_signals( void );
  * may run and must start a child process for external connections.
  *---------------------------------------------------------------------*/
 
-int check_spawn_fsc2d( bool   exclusive,
-                       FILE * in_file_fp )
+int
+check_spawn_fsc2d( bool   exclusive,
+                   FILE * in_file_fp )
 {
     int sock_fd;
     char line[ MAX_LINE_LENGTH ];
@@ -199,7 +200,8 @@ int check_spawn_fsc2d( bool   exclusive,
  * and we have to create it.
  *-----------------------------------------------------------------*/
 
-static int connect_to_fsc2d( void )
+static int
+connect_to_fsc2d( void )
 {
     int sock_fd;
     struct sockaddr_un serv_addr;
@@ -236,8 +238,9 @@ static int connect_to_fsc2d( void )
  * fsc2 must get permission from before they may start.
  *----------------------------------------------------------*/
 
-static int start_fsc2d( bool   exclusive,
-                        FILE * in_file_fp )
+static int
+start_fsc2d( bool   exclusive,
+             FILE * in_file_fp )
 {
     pid_t pid;
     int listen_fd;
@@ -329,7 +332,8 @@ static int start_fsc2d( bool   exclusive,
  * Signal handler for the main program for signal by the daemon
  *--------------------------------------------------------------*/
 
-static void fsc2d_sig_handler( int signo )
+static void
+fsc2d_sig_handler( int signo )
 {
     if ( signo == SIGUSR2 )
         Fsc2d_replied = 1;
@@ -345,9 +349,10 @@ static void fsc2d_sig_handler( int signo )
  * segments and also quits.
  *-------------------------------------------------------------------------*/
 
-static void fsc2d( int             fd,
-                   bool            exclusive,
-                   struct passwd * ui )
+static void
+fsc2d( int             fd,
+       bool            exclusive,
+       struct passwd * ui )
 {
     Fsc2_Instance_T instances[ FSC2_MAX_INSTANCES + 1 ];
     fd_set fds;
@@ -404,9 +409,10 @@ static void fsc2d( int             fd,
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-static int check_instances( Fsc2_Instance_T * instances,
-                            int               num_instances,
-                            int               is_new_connect )
+static int
+check_instances( Fsc2_Instance_T * instances,
+                 int               num_instances,
+                 int               is_new_connect )
 {
     Fsc2_Instance_T *ip = instances;
     int i = 0;
@@ -468,9 +474,10 @@ static int check_instances( Fsc2_Instance_T * instances,
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-static int new_client( int               fd,
-                       Fsc2_Instance_T * instances,
-                       int               num_instances )
+static int
+new_client( int               fd,
+            Fsc2_Instance_T * instances,
+            int               num_instances )
 {
     struct sockaddr_un cli_addr;
     socklen_t cli_len = sizeof cli_addr;
@@ -609,7 +616,8 @@ static int new_client( int               fd,
  * Signal handler for the "demon" process: all signals are ignored.
  *------------------------------------------------------------------*/
 
-static void set_fs2d_signals( void )
+static void
+set_fs2d_signals( void )
 {
     struct sigaction sact;
     int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT, SIGFPE,

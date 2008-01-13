@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -127,7 +127,8 @@ sep2:   /* empty */
 %%
 
 
-static void gpiberror( const char *s )
+static void
+gpiberror( const char *s )
 {
 	printf( "%s at token '%s' on line %d.\n", s, gpibtext, gpiblineno );
 	ibsta |= IBERR;

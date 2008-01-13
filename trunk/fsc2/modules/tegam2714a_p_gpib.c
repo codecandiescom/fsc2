@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -44,7 +44,8 @@ static void tegam2714a_p_gpib_failure( void );
  * Initialization of the device
  *------------------------------*/
 
-void tegam2714a_p_init( const char * name )
+void
+tegam2714a_p_init( const char * name )
 {
     char reply[ 100 ];
     long length = 100;
@@ -149,7 +150,8 @@ void tegam2714a_p_init( const char * name )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void tegam2714a_p_run( bool state )
+void
+tegam2714a_p_run( bool state )
 {
 	char cmd[ 50 ];
 
@@ -173,7 +175,8 @@ void tegam2714a_p_run( bool state )
  * Function for setting the timebase (via sample clock frequency)
  *----------------------------------------------------------------*/
 
-static void tegam2714a_p_set_timebase( double timebase )
+static void
+tegam2714a_p_set_timebase( double timebase )
 {
     char cmd[ 100 ];
 
@@ -190,7 +193,8 @@ static void tegam2714a_p_set_timebase( double timebase )
  *-----------------------------------------------------------------*/
 
 #if 0
-static double tegam2714a_p_get_timebase( void )
+static double
+tegam2714a_p_get_timebase( void )
 {
     char reply[ 100 ];
     long length = 100;
@@ -211,7 +215,8 @@ static double tegam2714a_p_get_timebase( void )
  * Function for setting the output amplitude
  *-------------------------------------------*/
 
-void tegam2714a_p_set_amplitude( double ampl )
+void
+tegam2714a_p_set_amplitude( double ampl )
 {
     char cmd[ 100 ];
 
@@ -230,7 +235,8 @@ void tegam2714a_p_set_amplitude( double ampl )
  * Function for query of the output amplitude
  *--------------------------------------------*/
 
-static double tegam2714a_p_get_amplitude( void )
+static double
+tegam2714a_p_get_amplitude( void )
 {
     char reply[ 100 ];
     long length = 100;
@@ -250,7 +256,8 @@ static double tegam2714a_p_get_amplitude( void )
  * Function for setting the output offset
  *----------------------------------------*/
 
-static void tegam2714a_p_set_offset( double offset )
+static void
+tegam2714a_p_set_offset( double offset )
 {
     char cmd[ 100 ];
 
@@ -270,7 +277,8 @@ static void tegam2714a_p_set_offset( double offset )
  * Function for query of the output offset
  *-----------------------------------------*/
 
-static double tegam2714a_p_get_offset( void )
+static double
+tegam2714a_p_get_offset( void )
 {
     char reply[ 100 ];
     long length = 100;
@@ -289,8 +297,9 @@ static double tegam2714a_p_get_offset( void )
 /*----------------------------------------------*
  *----------------------------------------------*/
 
-static void tegam2714a_p_set_levels( double old_ampl,
-                                     double old_offset )
+static void
+tegam2714a_p_set_levels( double old_ampl,
+                         double old_offset )
 {
     double ampl   = 2.0 * (   tegam2714a_p.function.high_level
                             - tegam2714a_p.function.low_level );
@@ -343,9 +352,10 @@ static void tegam2714a_p_set_levels( double old_ampl,
  * either maximum (4095) or minimum (0) value
  *----------------------------------------------*/
 
-void  tegam2714a_p_set_constant( Ticks start,
-                                 Ticks length,
-                                 int   state )
+void
+tegam2714a_p_set_constant( Ticks start,
+                           Ticks length,
+                           int   state )
 {
     char *buf;
     unsigned char *bpt;
@@ -409,8 +419,9 @@ void  tegam2714a_p_set_constant( Ticks start,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static void tegam2714a_p_write( const char * buf,
-                                long         length )
+static void
+tegam2714a_p_write( const char * buf,
+                    long         length )
 {
     if ( gpib_write( tegam2714a_p.device, buf, length ) == FAILURE )
         tegam2714a_p_gpib_failure( );
@@ -421,7 +432,8 @@ static void tegam2714a_p_write( const char * buf,
  * Funcion to be called when the pulser does not react properly.
  *---------------------------------------------------------------*/
 
-static void tegam2714a_p_gpib_failure( void )
+static void
+tegam2714a_p_gpib_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );

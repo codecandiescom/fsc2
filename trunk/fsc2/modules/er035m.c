@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -55,15 +55,15 @@ int er035m_test_hook(       void );
 int er035m_exp_hook(        void );
 int er035m_end_of_exp_hook( void );
 
-Var_T *gaussmeter_name(               Var_T * v );
-Var_T *gaussmeter_field(              Var_T * v );
-Var_T *find_field(                    Var_T * v );
-Var_T *gaussmeter_resolution(         Var_T * v );
-Var_T *gaussmeter_probe_orientation(  Var_T * v );
-Var_T *gaussmeter_command(            Var_T * v );
-Var_T *gaussmeter_wait(               Var_T * v );
-Var_T *gaussmeter_upper_search_limit( Var_T * v );
-Var_T *gaussmeter_lower_search_limit( Var_T * v );
+Var_T * gaussmeter_name(               Var_T * v );
+Var_T * gaussmeter_field(              Var_T * v );
+Var_T * find_field(                    Var_T * v );
+Var_T * gaussmeter_resolution(         Var_T * v );
+Var_T * gaussmeter_probe_orientation(  Var_T * v );
+Var_T * gaussmeter_command(            Var_T * v );
+Var_T * gaussmeter_wait(               Var_T * v );
+Var_T * gaussmeter_upper_search_limit( Var_T * v );
+Var_T * gaussmeter_lower_search_limit( Var_T * v );
 
 
 /* internally used functions */
@@ -159,7 +159,8 @@ enum {
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-int er035m_init_hook( void )
+int
+er035m_init_hook( void )
 {
     /* Set global flag to tell magnet power supply driver that a
        gaussmeter has been loaded */
@@ -207,7 +208,8 @@ int er035m_init_hook( void )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-int er035m_test_hook( void )
+int
+er035m_test_hook( void )
 {
     nmr_stored = nmr;
     nmr.upper_search_limit = upper_search_limits[ PROBE_TYPE_F1 ];
@@ -219,7 +221,8 @@ int er035m_test_hook( void )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-int er035m_exp_hook( void )
+int
+er035m_exp_hook( void )
 {
     char buffer[ 21 ], *bp;
     long length = 20;
@@ -263,7 +266,7 @@ int er035m_exp_hook( void )
 
     nmr.state = ER035M_UNKNOWN;
 
-try_again:
+ try_again:
 
     stop_on_user_request( );
 
@@ -387,7 +390,8 @@ try_again:
 /*-----------------------------------------------------------------------*
  -----------------------------------------------------------------------*/
 
-int er035m_end_of_exp_hook( void )
+int
+er035m_end_of_exp_hook( void )
 {
     if ( ! nmr.is_needed )
         return 1;
@@ -411,7 +415,8 @@ int er035m_end_of_exp_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_name( Var_T * v  UNUSED_ARG )
+Var_T *
+gaussmeter_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -420,7 +425,8 @@ Var_T *gaussmeter_name( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-Var_T *gaussmeter_field( Var_T * v )
+Var_T *
+gaussmeter_field( Var_T * v )
 {
     return find_field( v );
 }
@@ -431,7 +437,8 @@ Var_T *gaussmeter_field( Var_T * v )
  * and returns the current field value in a variable.
  *----------------------------------------------------------------*/
 
-Var_T *find_field( Var_T * v  UNUSED_ARG )
+Var_T *
+find_field( Var_T * v  UNUSED_ARG )
 {
     char buffer[ 21 ];
     char *bp;
@@ -518,7 +525,8 @@ Var_T *find_field( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-Var_T *gaussmeter_resolution( Var_T * v )
+Var_T *
+gaussmeter_resolution( Var_T * v )
 {
     double res;
     int i;
@@ -586,7 +594,8 @@ Var_T *gaussmeter_resolution( Var_T * v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *gaussmeter_probe_orientation( Var_T * v )
+Var_T *
+gaussmeter_probe_orientation( Var_T * v )
 {
     if ( v == NULL )
     {
@@ -612,7 +621,8 @@ Var_T *gaussmeter_probe_orientation( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *gaussmeter_command( Var_T * v )
+Var_T *
+gaussmeter_command( Var_T * v )
 {
     static char *cmd;
 
@@ -643,7 +653,8 @@ Var_T *gaussmeter_command( Var_T * v )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-Var_T *gaussmeter_wait( Var_T * v  UNUSED_ARG )
+Var_T *
+gaussmeter_wait( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == EXPERIMENT && nmr.is_needed )
         fsc2_usleep( ( nmr.resolution * 10 ) * E2_US, UNSET );
@@ -654,7 +665,8 @@ Var_T *gaussmeter_wait( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-Var_T *gaussmeter_upper_search_limit( Var_T * v )
+Var_T *
+gaussmeter_upper_search_limit( Var_T * v )
 {
     double val;
     long ul;
@@ -697,7 +709,8 @@ Var_T *gaussmeter_upper_search_limit( Var_T * v )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-Var_T *gaussmeter_lower_search_limit( Var_T * v )
+Var_T *
+gaussmeter_lower_search_limit( Var_T * v )
 {
     double val;
     long ll;
@@ -754,7 +767,8 @@ Var_T *gaussmeter_lower_search_limit( Var_T * v )
  *            the function find_field() instead.
  *-----------------------------------------------------------------------*/
 
-double er035m_get_field( void )
+double
+er035m_get_field( void )
 {
     char buffer[ 21 ];
     char *state_flag;
@@ -811,7 +825,8 @@ double er035m_get_field( void )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static int er035m_get_resolution( void )
+static int
+er035m_get_resolution( void )
 {
     char buffer[ 20 ];
     long length = 20;
@@ -841,7 +856,8 @@ static int er035m_get_resolution( void )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void er035m_set_resolution( int res_index )
+static void
+er035m_set_resolution( int res_index )
 {
     char buf[ 5 ];
 
@@ -854,7 +870,8 @@ static void er035m_set_resolution( int res_index )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static long er035m_get_upper_search_limit( void )
+static long
+er035m_get_upper_search_limit( void )
 {
     char buffer[ 20 ];
     long length = 20;
@@ -869,7 +886,8 @@ static long er035m_get_upper_search_limit( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static long er035m_get_lower_search_limit( void )
+static long
+er035m_get_lower_search_limit( void )
 {
     char buffer[ 20 ];
     long length = 20;
@@ -884,7 +902,8 @@ static long er035m_get_lower_search_limit( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static void er035m_set_upper_search_limit( long ul )
+static void
+er035m_set_upper_search_limit( long ul )
 {
     char cmd[ 40 ];
 
@@ -899,7 +918,8 @@ static void er035m_set_upper_search_limit( long ul )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static void er035m_set_lower_search_limit( long ll )
+static void
+er035m_set_lower_search_limit( long ll )
 {
     char cmd[ 40 ];
 
@@ -914,7 +934,8 @@ static void er035m_set_lower_search_limit( long ll )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool er035m_command( const char * cmd )
+static bool
+er035m_command( const char * cmd )
 {
     if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
         er035m_failure( );
@@ -927,9 +948,10 @@ static bool er035m_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool er035m_talk( const char * cmd,
-                         char *       reply,
-                         long *       length )
+static bool
+er035m_talk( const char * cmd,
+             char *       reply,
+             long *       length )
 {
     if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
         er035m_failure( );
@@ -944,7 +966,8 @@ static bool er035m_talk( const char * cmd,
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void er035m_failure( void )
+static void
+er035m_failure( void )
 {
     print( FATAL, "Can't access the NMR gaussmeter.\n" );
     THROW( EXCEPTION );

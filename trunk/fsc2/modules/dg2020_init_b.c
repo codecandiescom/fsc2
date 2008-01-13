@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -41,9 +41,9 @@ static void dg2020_setup_phase_matrix( Function_T * f );
 
 static void dg2020_pulse_start_setup( void );
 
-static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T * f );
+static Phase_Setup_T * dg2020_create_dummy_phase_setup( Function_T * f );
 
-static Phs_Seq_T *dg2020_create_dummy_phase_seq( void );
+static Phs_Seq_T * dg2020_create_dummy_phase_seq( void );
 
 static void dg2020_create_shape_pulses( void );
 
@@ -56,7 +56,8 @@ static void dg2020_create_twt_pulses( void );
  * of a test run.
  *-------------------------------------------------------------------*/
 
-void dg2020_init_setup( void )
+void
+dg2020_init_setup( void )
 {
     dg2020_create_shape_pulses( );
     dg2020_create_twt_pulses( );
@@ -81,7 +82,8 @@ void dg2020_init_setup( void )
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-static void dg2020_init_print( FILE * fp )
+static void
+dg2020_init_print( FILE * fp )
 {
     Function_T *f;
     int i, j;
@@ -123,7 +125,8 @@ static void dg2020_init_print( FILE * fp )
  *    exceed the pulsers memory
  *-------------------------------------------------------------------------*/
 
-void dg2020_basic_pulse_check( void )
+void
+dg2020_basic_pulse_check( void )
 {
     Pulse_T *p;
     int i, j;
@@ -238,7 +241,8 @@ void dg2020_basic_pulse_check( void )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void dg2020_basic_functions_check( void )
+static void
+dg2020_basic_functions_check( void )
 {
     Function_T *f;
     int i;
@@ -330,7 +334,8 @@ static void dg2020_basic_functions_check( void )
  * constant voltage.
  *-------------------------------------------------------------------*/
 
-static int dg2020_calc_channels_needed( Function_T * f )
+static int
+dg2020_calc_channels_needed( Function_T * f )
 {
     int i, j;
     int num_channels;
@@ -371,7 +376,8 @@ static int dg2020_calc_channels_needed( Function_T * f )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void dg2020_phase_setup_check( Function_T * f )
+static void
+dg2020_phase_setup_check( Function_T * f )
 {
     int i, j;
     Pod_T *free_pod_list[ MAX_PODS_PER_FUNC ];
@@ -479,7 +485,8 @@ static void dg2020_phase_setup_check( Function_T * f )
  * channels as needed.
  *--------------------------------------------------------------------*/
 
-static void dg2020_distribute_channels( void )
+static void
+dg2020_distribute_channels( void )
 {
     int i;
     Function_T *f;
@@ -538,7 +545,8 @@ static void dg2020_distribute_channels( void )
  * the stages of the phase cycle this is the minimum number of channels.
  *--------------------------------------------------------------------------*/
 
-static void dg2020_setup_phase_matrix( Function_T * f )
+static void
+dg2020_setup_phase_matrix( Function_T * f )
 {
     int i, j;
     int cur_channel;
@@ -569,7 +577,8 @@ static void dg2020_setup_phase_matrix( Function_T * f )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void dg2020_pulse_start_setup( void )
+static void
+dg2020_pulse_start_setup( void )
 {
     Function_T *f;
     int i, j, k;
@@ -674,7 +683,8 @@ static void dg2020_pulse_start_setup( void )
  * assigned to it will stay low all of the time.
  *----------------------------------------------------------------------*/
 
-static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T * f )
+static Phase_Setup_T *
+dg2020_create_dummy_phase_setup( Function_T * f )
 {
     int i, j;
 
@@ -713,7 +723,8 @@ static Phase_Setup_T *dg2020_create_dummy_phase_setup( Function_T * f )
  * this already existing dummy sequence.
  *-----------------------------------------------------------------------*/
 
-static Phs_Seq_T *dg2020_create_dummy_phase_seq( void )
+static Phs_Seq_T *
+dg2020_create_dummy_phase_seq( void )
 {
     Phs_Seq_T *np, *pn;
     int i;
@@ -771,7 +782,8 @@ static Phs_Seq_T *dg2020_create_dummy_phase_seq( void )
  * other, which would beat the purpose of shape pulses.
  *--------------------------------------------------------------------------*/
 
-static void dg2020_create_shape_pulses( void )
+static void
+dg2020_create_shape_pulses( void )
 {
     Function_T *f;
     Pulse_T *np = NULL, *cp, *rp, *p1, *p2, *old_end;
@@ -939,7 +951,8 @@ static void dg2020_create_shape_pulses( void )
  * will be taken care of later.
  *------------------------------------------------------------------------*/
 
-static void dg2020_create_twt_pulses( void )
+static void
+dg2020_create_twt_pulses( void )
 {
     Function_T *f;
     Pulse_T *np, *cp, *rp, *old_end;

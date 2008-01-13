@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -28,7 +28,8 @@
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool tegam2714a_p_store_timebase( double timebase )
+bool
+tegam2714a_p_store_timebase( double timebase )
 {
     if ( timebase < MIN_TIMEBASE || timebase > MAX_TIMEBASE )
     {
@@ -49,8 +50,9 @@ bool tegam2714a_p_store_timebase( double timebase )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool tegam2714a_p_assign_channel_to_function( int  function,
-                                              long channel )
+bool
+tegam2714a_p_assign_channel_to_function( int  function,
+                                         long channel )
 {
     if ( channel < 0 || channel >= MAX_CHANNELS )
     {
@@ -91,7 +93,8 @@ bool tegam2714a_p_assign_channel_to_function( int  function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool tegam2714a_p_invert_function( int function UNUSED_ARG )
+bool
+tegam2714a_p_invert_function( int function UNUSED_ARG )
 {
     tegam2714a_p.function.is_inverted = SET;
     return OK;
@@ -101,8 +104,9 @@ bool tegam2714a_p_invert_function( int function UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool tegam2714a_p_set_function_delay( int    function,
-                                      double delay )
+bool
+tegam2714a_p_set_function_delay( int    function,
+                                 double delay )
 {
     if ( tegam2714a_p.function.self == PULSER_CHANNEL_NO_TYPE )
         tegam2714a_p.function.self = function;
@@ -141,8 +145,9 @@ bool tegam2714a_p_set_function_delay( int    function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool tegam2714a_p_set_function_high_level( int    function,
-                                           double voltage )
+bool
+tegam2714a_p_set_function_high_level( int    function,
+                                      double voltage )
 {
     if ( tegam2714a_p.function.self == PULSER_CHANNEL_NO_TYPE )
         tegam2714a_p.function.self = function;
@@ -172,8 +177,9 @@ bool tegam2714a_p_set_function_high_level( int    function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool tegam2714a_p_set_function_low_level( int    function,
-                                          double voltage )
+bool
+tegam2714a_p_set_function_low_level( int    function,
+                                     double voltage )
 {
     if ( tegam2714a_p.function.self == PULSER_CHANNEL_NO_TYPE )
         tegam2714a_p.function.self = function;
@@ -203,7 +209,8 @@ bool tegam2714a_p_set_function_low_level( int    function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool tegam2714a_p_set_trigger_mode( int mode )
+bool
+tegam2714a_p_set_trigger_mode( int mode )
 {
     fsc2_assert( mode == INTERNAL || mode == EXTERNAL );
 
@@ -222,7 +229,8 @@ bool tegam2714a_p_set_trigger_mode( int mode )
  * Function for setting the maximum sequence length
  *--------------------------------------------------*/
 
-bool tegam2714a_p_set_max_seq_len( double seq_len )
+bool
+tegam2714a_p_set_max_seq_len( double seq_len )
 {
     if (    tegam2714a_p.is_max_seq_len
          && tegam2714a_p.max_seq_len != tegam2714a_p_double2ticks( seq_len ) )

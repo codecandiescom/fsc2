@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -32,7 +32,8 @@
  * should call this function top make sure it is set correctly.
  *-----------------------------------------------------------------*/
 
-void ep385_timebase_check( void )
+void
+ep385_timebase_check( void )
 {
     double tmp;
 
@@ -63,7 +64,8 @@ void ep385_timebase_check( void )
  * i.e. an integer multiple of the time base
  *-----------------------------------------------------------------*/
 
-Ticks ep385_double2ticks( double p_time )
+Ticks
+ep385_double2ticks( double p_time )
 {
     double ticks;
 
@@ -101,7 +103,8 @@ Ticks ep385_double2ticks( double p_time )
  * i.e. an integer multiple of the time base
  *-----------------------------------------------------------------*/
 
-Ticks ep385_double2ticks_simple( double p_time )
+Ticks
+ep385_double2ticks_simple( double p_time )
 {
     double ticks;
 
@@ -129,7 +132,8 @@ Ticks ep385_double2ticks_simple( double p_time )
  * Does the exact opposite of the previous function...
  *-----------------------------------------------------*/
 
-double ep385_ticks2double( Ticks ticks )
+double
+ep385_ticks2double( Ticks ticks )
 {
     return ( double ) ( ep385.timebase * ticks );
 }
@@ -139,7 +143,8 @@ double ep385_ticks2double( Ticks ticks )
  * Returns the structure for pulse numbered pnum
  *-----------------------------------------------*/
 
-Pulse_T *ep385_get_pulse( long pnum )
+Pulse_T *
+ep385_get_pulse( long pnum )
 {
     Pulse_T *cp = ep385.pulses;
 
@@ -170,7 +175,8 @@ Pulse_T *ep385_get_pulse( long pnum )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *ep385_ptime( double p_time )
+const char *
+ep385_ptime( double p_time )
 {
     static char buffer[ 3 ][ 128 ];
     static size_t i = 2;
@@ -193,7 +199,8 @@ const char *ep385_ptime( double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *ep385_pticks( Ticks ticks )
+const char *
+ep385_pticks( Ticks ticks )
 {
     return ep385_ptime( ep385_ticks2double( ticks ) );
 }
@@ -206,8 +213,9 @@ const char *ep385_pticks( Ticks ticks )
  * second pulse starts earlier.
  *-------------------------------------------------------------------*/
 
-int ep385_pulse_compare( const void * A,
-                         const void * B )
+int
+ep385_pulse_compare( const void * A,
+                     const void * B )
 {
     Pulse_Params_T *a = ( Pulse_Params_T * ) A,
                    *b = ( Pulse_Params_T * ) B;
@@ -219,7 +227,8 @@ int ep385_pulse_compare( const void * A,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void ep385_show_pulses( void )
+void
+ep385_show_pulses( void )
 {
     int pd[ 2 ];
     pid_t pid;
@@ -280,7 +289,8 @@ void ep385_show_pulses( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void ep385_dump_pulses( void )
+void
+ep385_dump_pulses( void )
 {
     char *name;
     char *m;
@@ -357,7 +367,8 @@ void ep385_dump_pulses( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void ep385_dump_channels( FILE * fp )
+void
+ep385_dump_channels( FILE * fp )
 {
     Function_T *f;
     Channel_T *ch;
@@ -426,7 +437,8 @@ void ep385_dump_channels( FILE * fp )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void ep385_duty_check( void )
+void
+ep385_duty_check( void )
 {
     Function_T *f;
     int i;
@@ -454,7 +466,8 @@ void ep385_duty_check( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Ticks ep385_calc_max_length( Function_T * f )
+Ticks
+ep385_calc_max_length( Function_T * f )
 {
     int i, j;
     Channel_T *ch;
@@ -481,7 +494,8 @@ Ticks ep385_calc_max_length( Function_T * f )
  * because some other pulsers also have it.
  *-----------------------------------------------*/
 
-bool ep385_set_max_seq_len( double seq_len  UNUSED_ARG )
+bool
+ep385_set_max_seq_len( double seq_len  UNUSED_ARG )
 {
     print( WARN, "Pulser doesn't allow setting a maximum pattern length.\n" );
     return OK;

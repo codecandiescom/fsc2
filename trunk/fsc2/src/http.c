@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -50,8 +50,9 @@ enum {
  * in the main form for starting and stopping the HTTP server
  *------------------------------------------------------------*/
 
-void server_callback( FL_OBJECT * obj,
-                      long        a  UNUSED_ARG )
+void
+server_callback( FL_OBJECT * obj,
+                 long        a  UNUSED_ARG )
 {
     char *www_help;
 
@@ -115,7 +116,8 @@ void server_callback( FL_OBJECT * obj,
  * some data and then send them via the other pipe.
  *--------------------------------------------------------------------*/
 
-static void spawn_server( void )
+static void
+spawn_server( void )
 {
     int pr;
     const char *a[ 4 ] = { NULL, NULL, NULL, NULL };
@@ -198,7 +200,8 @@ static void spawn_server( void )
  * to check if the web server has asked for data.
  *------------------------------------------------*/
 
-void http_check( void )
+void
+http_check( void )
 {
     struct timeval tv;
     fd_set rfds;
@@ -283,7 +286,8 @@ void http_check( void )
  * look out for empty lines and send a space char for these.
  *----------------------------------------------------------------*/
 
-static void http_send_error_browser( int pd )
+static void
+http_send_error_browser( int pd )
 {
     FL_OBJECT *b = GUI.main_form->error_browser;
     const char *l;
@@ -311,8 +315,9 @@ static void http_send_error_browser( int pd )
 /*----------------------------------------------------------------*
  *----------------------------------------------------------------*/
 
-static void http_send_picture( int pd,
-                               int type )
+static void
+http_send_picture( int pd,
+                   int type )
 {
     char filename[ ] = P_tmpdir "/fsc2.http.XXXXXX";
     char reply[ 2 ];

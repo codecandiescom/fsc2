@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -33,7 +33,8 @@
  * Function for reading in the last stored state of the CCD camera.
  *------------------------------------------------------------------*/
 
-bool rs_spec10_read_state( void )
+bool
+rs_spec10_read_state( void )
 {
     char *fn;
     const char *dn;
@@ -231,7 +232,8 @@ bool rs_spec10_read_state( void )
  * Function for writing the state of the CCD camera to a file
  *------------------------------------------------------------*/
 
-bool rs_spec10_store_state( void )
+bool
+rs_spec10_store_state( void )
 {
     char *fn;
     const char *dn;
@@ -306,7 +308,8 @@ bool rs_spec10_store_state( void )
  * Function for converting a temperature from Kelvin to degree Celsius
  *---------------------------------------------------------------------*/
 
-double rs_spec10_k2c( double tk )
+double
+rs_spec10_k2c( double tk )
 {
     return tk - C2K_OFFSET;
 }
@@ -316,7 +319,8 @@ double rs_spec10_k2c( double tk )
  * Function for converting a temperature from degree Celsius to Kelvi
  *---------------------------------------------------------------------*/
 
-double rs_spec10_c2k( double tc )
+double
+rs_spec10_c2k( double tc )
 {
     return tc + C2K_OFFSET;
 }
@@ -327,7 +331,8 @@ double rs_spec10_c2k( double tc )
  * to a value that can be send to the device.
  *-------------------------------------------------*/
 
-int16 rs_spec10_k2ic( double tk )
+int16
+rs_spec10_k2ic( double tk )
 {
     return ( int16 ) lrnd( 100.0 * ( tk - C2K_OFFSET ) );
 }
@@ -338,7 +343,8 @@ int16 rs_spec10_k2ic( double tk )
  * returned from the device into a temperature in Kelvin
  *-------------------------------------------------------*/
 
-double rs_spec10_ic2k( int16 tci )
+double
+rs_spec10_ic2k( int16 tci )
 {
     return 0.01 * tci + C2K_OFFSET;
 }
@@ -352,8 +358,9 @@ double rs_spec10_ic2k( int16 tci )
  * ACC_WRITE_ONLY or ACC_READ_WRITE.
  *----------------------------------------------------------*/
 
-bool rs_spec10_param_access( uns32   param,
-                             uns16 * acc )
+bool
+rs_spec10_param_access( uns32   param,
+                        uns16 * acc )
 {
     boolean avail;
 
@@ -378,7 +385,8 @@ bool rs_spec10_param_access( uns32   param,
  * string is overwritten on each invokation of the function.
  *-------------------------------------------------------------------*/
 
-const char *rs_spec10_ptime( double p_time )
+const char *
+rs_spec10_ptime( double p_time )
 {
     static char buffer[ 128 ];
 
@@ -407,7 +415,8 @@ const char *rs_spec10_ptime( double p_time )
  * benignly) on other systems.
  *--------------------------------------------------------------------*/
 
-int *rs_spec10_get_fd_list( void )
+int *
+rs_spec10_get_fd_list( void )
 {
     DIR *dir;
     struct dirent *de;
@@ -465,7 +474,8 @@ int *rs_spec10_get_fd_list( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void rs_spec10_close_on_exec_hack( int * fd_list )
+void
+rs_spec10_close_on_exec_hack( int * fd_list )
 {
     int *new_fd_list;
     int i, j;

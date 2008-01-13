@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -270,21 +270,21 @@ int hfs9000_end_of_exp_hook(  void );
 void hfs9000_exit_hook(       void );
 
 
-Var_T *pulser_name(                   Var_T * /* v */ );
-Var_T *pulser_show_pulses(            Var_T * /* v */ );
-Var_T *pulser_dump_pulses(            Var_T * /* v */ );
-Var_T *pulser_keep_all_pulses(        Var_T * /* v */ );
-Var_T *pulser_maximum_pattern_length( Var_T * /* v */ );
-Var_T *pulser_state(                  Var_T * /* v */ );
-Var_T *pulser_channel_state(          Var_T * /* v */ );
-Var_T *pulser_update(                 Var_T * /* v */ );
-Var_T *pulser_shift(                  Var_T * /* v */ );
-Var_T *pulser_increment(              Var_T * /* v */ );
-Var_T *pulser_reset(                  Var_T * /* v */ );
-Var_T *pulser_pulse_reset(            Var_T * /* v */ );
-Var_T *pulser_lock_keyboard(          Var_T * /* v */ );
-Var_T *pulser_stop_on_update(         Var_T * /* v */ );
-Var_T *pulser_command(                Var_T * /* v */ );
+Var_T * pulser_name(                   Var_T * /* v */ );
+Var_T * pulser_show_pulses(            Var_T * /* v */ );
+Var_T * pulser_dump_pulses(            Var_T * /* v */ );
+Var_T * pulser_keep_all_pulses(        Var_T * /* v */ );
+Var_T * pulser_maximum_pattern_length( Var_T * /* v */ );
+Var_T * pulser_state(                  Var_T * /* v */ );
+Var_T * pulser_channel_state(          Var_T * /* v */ );
+Var_T * pulser_update(                 Var_T * /* v */ );
+Var_T * pulser_shift(                  Var_T * /* v */ );
+Var_T * pulser_increment(              Var_T * /* v */ );
+Var_T * pulser_reset(                  Var_T * /* v */ );
+Var_T * pulser_pulse_reset(            Var_T * /* v */ );
+Var_T * pulser_lock_keyboard(          Var_T * /* v */ );
+Var_T * pulser_stop_on_update(         Var_T * /* v */ );
+Var_T * pulser_command(                Var_T * /* v */ );
 
 
 /* Here follow the functions from hfs9000_gen.c */
@@ -377,11 +377,11 @@ double hfs9000_ticks2double( Ticks /* ticks */ );
 void hfs9000_check_pod_level_diff( double /* high */,
                                    double /* low  */  );
 
-Pulse_T *hfs9000_get_pulse( long /* pnum */ );
+Pulse_T  *hfs9000_get_pulse( long /* pnum */ );
 
-const char *hfs9000_ptime( double /* p_time */ );
+const char * hfs9000_ptime( double /* p_time */ );
 
-const char *hfs9000_pticks( Ticks /* ticks */ );
+const char * hfs9000_pticks( Ticks /* ticks */ );
 
 int hfs9000_start_compare( const void * /* A */,
                            const void * /* B */  );

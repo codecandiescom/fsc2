@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -77,7 +77,8 @@ static long lecroy_wr_calc_pos( double t );
  * tests.
  *--------------------------------------------------------------------------*/
 
-void lecroy_wr_soe_checks( void )
+void
+lecroy_wr_soe_checks( void )
 {
     LECROY_WR_PTC_DELAY_T *pd;
     LECROY_WR_PTC_WINDOW_T *pw;
@@ -100,7 +101,8 @@ void lecroy_wr_soe_checks( void )
  * function must be called in the exit handler to get rid of the memory.
  *-----------------------------------------------------------------------*/
 
-void lecroy_wr_exit_cleanup( void )
+void
+lecroy_wr_exit_cleanup( void )
 {
     LECROY_WR_PTC_DELAY_T *pd;
     LECROY_WR_PTC_WINDOW_T *pw;
@@ -126,7 +128,8 @@ void lecroy_wr_exit_cleanup( void )
  * Returns a string with a time value with a resonable unit
  *----------------------------------------------------------*/
 
-const char *lecroy_wr_ptime( double p_time )
+const char *
+lecroy_wr_ptime( double p_time )
 {
     static char buffer[ 2 ][ 128 ];
     static size_t i = 1;
@@ -152,7 +155,8 @@ const char *lecroy_wr_ptime( double p_time )
  * gets changed
  *-----------------------------------------------------------*/
 
-double lecroy_wr_trigger_delay_check( void )
+double
+lecroy_wr_trigger_delay_check( void )
 {
     double delay = lecroy_wr.trigger_delay;
     double real_delay;
@@ -239,7 +243,8 @@ double lecroy_wr_trigger_delay_check( void )
  * be checked during the test run.
  *-----------------------------------------------------------*/
 
-static void lecroy_wr_soe_trigger_delay_check( double delay )
+static void
+lecroy_wr_soe_trigger_delay_check( double delay )
 {
     double real_delay = LECROY_WR_TRIG_DELAY_RESOLUTION * lecroy_wr.timebase
                         * lrnd( delay / ( LECROY_WR_TRIG_DELAY_RESOLUTION *
@@ -283,7 +288,8 @@ static void lecroy_wr_soe_trigger_delay_check( double delay )
  * Deletes all windows
  *---------------------*/
 
-void lecroy_wr_delete_windows( LECROY_WR_T * s )
+void
+lecroy_wr_delete_windows( LECROY_WR_T * s )
 {
     Window_T *w;
 
@@ -301,7 +307,8 @@ void lecroy_wr_delete_windows( LECROY_WR_T * s )
  * Returns a pointer to the window given it's ID
  *-----------------------------------------------*/
 
-Window_T *lecroy_wr_get_window_by_number( long wid )
+Window_T *
+lecroy_wr_get_window_by_number( long wid )
 {
     Window_T *w;
     
@@ -324,7 +331,8 @@ Window_T *lecroy_wr_get_window_by_number( long wid )
  * switching interleaved mode on or off
  *-----------------------------------------------------------*/
 
-void lecroy_wr_all_windows_check( void )
+void
+lecroy_wr_all_windows_check( void )
 {
     Window_T *w = lecroy_wr.w;
 
@@ -341,8 +349,9 @@ void lecroy_wr_all_windows_check( void )
  * Checks if the window fits into the recorded data set
  *------------------------------------------------------*/
 
-void lecroy_wr_window_check( Window_T * w,
-                             bool       show_num )
+void
+lecroy_wr_window_check( Window_T * w,
+                        bool       show_num )
 {
     long start;
     long end;
@@ -448,7 +457,8 @@ void lecroy_wr_window_check( Window_T * w,
  * during the test run.
  *---------------------------------------------------------------*/
 
-static void lecroy_wr_soe_window_check( LECROY_WR_PTC_WINDOW_T * p )
+static void
+lecroy_wr_soe_window_check( LECROY_WR_PTC_WINDOW_T * p )
 {
     double real_timebase = lecroy_wr.timebase;
     int real_tb_index = lecroy_wr.tb_index;
@@ -545,7 +555,8 @@ static void lecroy_wr_soe_window_check( LECROY_WR_PTC_WINDOW_T * p )
  * position relative to the trigger position
  *-------------------------------------------------------------*/
 
-static long lecroy_wr_calc_pos( double t )
+static long
+lecroy_wr_calc_pos( double t )
 {
     return lrnd( ( t + lecroy_wr.trigger_delay ) /
                  lecroy_wr_time_per_point( ) );
@@ -561,7 +572,8 @@ static long lecroy_wr_calc_pos( double t )
  * memory size is 500 (LECROY_WR_MIN_MEMORY_SIZE) samples.
  *-------------------------------------------------------------*/
 
-void lecroy_wr_numpoints_prep( void )
+void
+lecroy_wr_numpoints_prep( void )
 {
     long cur_mem_size = LECROY_WR_MIN_MEMORY_SIZE;
     long len;
@@ -594,7 +606,8 @@ void lecroy_wr_numpoints_prep( void )
  * Function allocates and sets up the array of possible timebases.
  *-----------------------------------------------------------------*/
 
-void lecroy_wr_tbas_prep( void )
+void
+lecroy_wr_tbas_prep( void )
 {
     double cur_tbas = LECROY_WE_MAX_TIMEBASE;
     long i;
@@ -627,7 +640,8 @@ void lecroy_wr_tbas_prep( void )
  * leaved sampling mode.
  *---------------------------------------------------------------*/
 
-void lecroy_wr_hori_res_prep( void )
+void
+lecroy_wr_hori_res_prep( void )
 {
     long i;
     long j;
@@ -733,7 +747,8 @@ void lecroy_wr_hori_res_prep( void )
  * the module.
  *--------------------------------------------------------------*/
 
-void lecroy_wr_clean_up( void )
+void
+lecroy_wr_clean_up( void )
 {
     if ( lecroy_wr.hres )
     {
@@ -756,7 +771,8 @@ void lecroy_wr_clean_up( void )
  * of the timebase and interleaved mode
  *-----------------------------------------------------------------*/
 
-long lecroy_wr_curve_length( void )
+long
+lecroy_wr_curve_length( void )
 {
     return ( lecroy_wr.cur_hres->cl_ris > 0 && lecroy_wr.interleaved ) ?
            lecroy_wr.cur_hres->cl_ris : lecroy_wr.cur_hres->cl;
@@ -768,7 +784,8 @@ long lecroy_wr_curve_length( void )
  * current setting of the timebase and interleaved mode
  *-----------------------------------------------------------------*/
 
-double lecroy_wr_time_per_point( void )
+double
+lecroy_wr_time_per_point( void )
 {
     return ( lecroy_wr.cur_hres->cl_ris > 0 && lecroy_wr.interleaved ) ?
            lecroy_wr.cur_hres->tpp_ris : lecroy_wr.cur_hres->tpp;
@@ -786,9 +803,10 @@ double lecroy_wr_time_per_point( void )
  * indicate the error.
  *--------------------------------------------------------------*/
 
-long lecroy_wr_translate_channel( int  dir,
-                                  long channel,
-                                  bool flag )
+long
+lecroy_wr_translate_channel( int  dir,
+                             long channel,
+                             bool flag )
 {
     if ( dir == GENERAL_TO_LECROY_WR )
     {
@@ -918,8 +936,9 @@ long lecroy_wr_translate_channel( int  dir,
  * about the current state of the oscilloscope
  *-----------------------------------------------------------*/
 
-void lecroy_wr_store_state( LECROY_WR_T * dest,
-                            LECROY_WR_T * src )
+void
+lecroy_wr_store_state( LECROY_WR_T * dest,
+                       LECROY_WR_T * src )
 {
     Window_T *w;
     int i;

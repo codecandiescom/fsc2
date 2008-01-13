@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -54,10 +54,10 @@ int rb8509_test_hook(       void );
 int rb8509_exp_hook(        void );
 int rb8509_end_of_exp_hook( void );
 
-Var_T *daq_name(         Var_T * v );
-Var_T *daq_get_voltage(  Var_T * v );
-Var_T *daq_trigger_mode( Var_T * v );
-Var_T *daq_gain(         Var_T * v );
+Var_T * daq_name(         Var_T * v );
+Var_T * daq_get_voltage(  Var_T * v );
+Var_T * daq_trigger_mode( Var_T * v );
+Var_T * daq_gain(         Var_T * v );
 
 
 static int rb8509_translate_channel( long channel );
@@ -69,7 +69,8 @@ static void rb8509_comm_failure( void );
  * Function called immediately after the module has been loaded
  *--------------------------------------------------------------*/
 
-int rb8509_init_hook( void )
+int
+rb8509_init_hook( void )
 {
     RULBUS_CARD_INFO card_info;
 
@@ -100,7 +101,8 @@ int rb8509_init_hook( void )
  * Function called at the start of the test run
  *----------------------------------------------*/
 
-int rb8509_test_hook( void )
+int
+rb8509_test_hook( void )
 {
     rb8509_stored = rb8509;
     return 1;
@@ -175,7 +177,8 @@ int rb8509_exp_hook( void )
  * Function called at the end of the experiment
  *----------------------------------------------*/
 
-int rb8509_end_of_exp_hook( void )
+int
+rb8509_end_of_exp_hook( void )
 {
     if ( rb8509.handle >= 0 )
     {
@@ -194,7 +197,8 @@ int rb8509_end_of_exp_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *daq_name( Var_T * v  UNUSED_ARG )
+Var_T *
+daq_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -204,7 +208,8 @@ Var_T *daq_name( Var_T * v  UNUSED_ARG )
  * Function returns the converted voltage from one of the channels
  *-----------------------------------------------------------------*/
 
-Var_T *daq_get_voltage( Var_T * v )
+Var_T *
+daq_get_voltage( Var_T * v )
 {
     int channel;
     double volts;
@@ -282,7 +287,8 @@ Var_T *daq_get_voltage( Var_T * v )
  * can only be determined when the experiment is started
  *-------------------------------------------------------------------*/
 
-Var_T *daq_trigger_mode( Var_T * v )
+Var_T *
+daq_trigger_mode( Var_T * v )
 {
     int ret;
 
@@ -337,7 +343,8 @@ Var_T *daq_trigger_mode( Var_T * v )
  * argument must be either 1, 2, 4 or 8
  *---------------------------------------------------------*/
 
-Var_T *daq_gain( Var_T * v )
+Var_T *
+daq_gain( Var_T * v )
 {
     int gain;
     int ret;
@@ -384,7 +391,8 @@ Var_T *daq_gain( Var_T * v )
  * get it from the EDL script into a "real" channel number
  *----------------------------------------------------------------*/
 
-static int rb8509_translate_channel( long channel )
+static int
+rb8509_translate_channel( long channel )
 {
     switch ( channel )
     {
@@ -425,7 +433,8 @@ static int rb8509_translate_channel( long channel )
  * Called on failures of communication with the card
  *---------------------------------------------------*/
 
-static void rb8509_comm_failure( void )
+static void
+rb8509_comm_failure( void )
 {
     print( FATAL, "Communication failure: %s.\n", rulbus_strerror( ) );
     THROW( EXCEPTION );

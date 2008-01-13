@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,7 +31,8 @@
  * calling the function daq_ao_channel_setup and daq_set_voltage().
  *--------------------------------------------------------------------------*/
 
-Var_T *daq_reserve_dac( Var_T * v )
+Var_T *
+daq_reserve_dac( Var_T * v )
 {
     bool lock_state = SET;
     long channel;
@@ -105,7 +106,8 @@ Var_T *daq_reserve_dac( Var_T * v )
  * and if an external reference is to be used
  *--------------------------------------------------------------*/
 
-Var_T *daq_ao_channel_setup( Var_T * v )
+Var_T *
+daq_ao_channel_setup( Var_T * v )
 {
     int dac;
     int er;
@@ -335,7 +337,8 @@ Var_T *daq_ao_channel_setup( Var_T * v )
  * Function for outputting an voltage at an AO channel
  *-----------------------------------------------------*/
 
-Var_T *daq_set_voltage( Var_T * v )
+Var_T *
+daq_set_voltage( Var_T * v )
 {
     int dac;
     double volts;

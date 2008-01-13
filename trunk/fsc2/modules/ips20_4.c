@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -50,17 +50,17 @@ int ips20_4_test_hook(       void );
 int ips20_4_exp_hook(        void );
 int ips20_4_end_of_exp_hook( void );
 
-Var_T *magnet_name(              Var_T * v );
-Var_T *magnet_setup(             Var_T * v );
-Var_T *magnet_field(             Var_T * v );
-Var_T *get_field(                Var_T * v );
-Var_T *set_field(                Var_T * v );
-Var_T *magnet_sweep(             Var_T * v );
-Var_T *magnet_sweep_rate(        Var_T * v );
-Var_T *magnet_reset_field(       Var_T * v );
-Var_T *reset_field(              Var_T * v );
-Var_T *magnet_goto_field_on_end( Var_T * v );
-Var_T *magnet_command(           Var_T * v );
+Var_T * magnet_name(              Var_T * v );
+Var_T * magnet_setup(             Var_T * v );
+Var_T * magnet_field(             Var_T * v );
+Var_T * get_field(                Var_T * v );
+Var_T * set_field(                Var_T * v );
+Var_T * magnet_sweep(             Var_T * v );
+Var_T * magnet_sweep_rate(        Var_T * v );
+Var_T * magnet_reset_field(       Var_T * v );
+Var_T * reset_field(              Var_T * v );
+Var_T * magnet_goto_field_on_end( Var_T * v );
+Var_T * magnet_command(           Var_T * v );
 
 
 static void magnet_sweep_up( void );
@@ -178,7 +178,8 @@ static struct IPS20_4 ips20_4, ips20_4_stored;
  * Init hook function for the module
  *-----------------------------------*/
 
-int ips20_4_init_hook( void )
+int
+ips20_4_init_hook( void )
 {
     Need_GPIB = SET;
 
@@ -203,7 +204,8 @@ int ips20_4_init_hook( void )
  * Test hook function for the module
  *-----------------------------------*/
 
-int ips20_4_test_hook( void )
+int
+ips20_4_test_hook( void )
 {
     ips20_4_stored = ips20_4;
 
@@ -234,7 +236,8 @@ int ips20_4_test_hook( void )
  * Start of experiment hook function for the module
  *--------------------------------------------------*/
 
-int ips20_4_exp_hook( void )
+int
+ips20_4_exp_hook( void )
 {
     ips20_4 = ips20_4_stored;
 
@@ -253,7 +256,8 @@ int ips20_4_exp_hook( void )
  * End of experiment hook function for the module
  *------------------------------------------------*/
 
-int ips20_4_end_of_exp_hook( void )
+int
+ips20_4_end_of_exp_hook( void )
 {
     ips20_4_to_local( );
     ips20_4 = ips20_4_stored;
@@ -267,7 +271,8 @@ int ips20_4_end_of_exp_hook( void )
  * Function returns the name the device is known as.
  *---------------------------------------------------*/
 
-Var_T *magnet_name( Var_T * v  UNUSED_ARG )
+Var_T *
+magnet_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -277,7 +282,8 @@ Var_T *magnet_name( Var_T * v  UNUSED_ARG )
  * Function for registering the start current and the sweep rate.
  *----------------------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T * v )
+Var_T *
+magnet_setup( Var_T * v )
 {
     double cur;
     double sweep_rate;
@@ -317,7 +323,8 @@ Var_T *magnet_setup( Var_T * v )
  * time spent since the last call for determining the current.
  *-------------------------------------------------------------------------*/
 
-Var_T *get_field( Var_T * v  UNUSED_ARG )
+Var_T *
+get_field( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == TEST )
     {
@@ -377,7 +384,8 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-Var_T *magnet_field( Var_T * v )
+Var_T *
+magnet_field( Var_T * v )
 {
     return v == NULL ? get_field( v ) : set_field( v );
 }
@@ -388,7 +396,8 @@ Var_T *magnet_field( Var_T * v )
  * that setting a new current also stops a running sweep.
  *--------------------------------------------------------*/
 
-Var_T *set_field( Var_T * v )
+Var_T *
+set_field( Var_T * v )
 {
     double cur;
 
@@ -421,7 +430,8 @@ Var_T *set_field( Var_T * v )
  * sweeps or inquiring about the current sweep state.
  *----------------------------------------------------*/
 
-Var_T *magnet_sweep( Var_T * v )
+Var_T *
+magnet_sweep( Var_T * v )
 {
     long dir;
     Var_T *vc;
@@ -484,7 +494,8 @@ Var_T *magnet_sweep( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void magnet_sweep_up( void )
+static void
+magnet_sweep_up( void )
 {
     if ( ! ips20_4.is_sweep_rate )
     {
@@ -519,7 +530,8 @@ static void magnet_sweep_up( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void magnet_sweep_down( void )
+static void
+magnet_sweep_down( void )
 {
     if ( ! ips20_4.is_sweep_rate )
     {
@@ -554,7 +566,8 @@ static void magnet_sweep_down( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void magnet_stop_sweep( void )
+static void
+magnet_stop_sweep( void )
 {
     if ( ips20_4.sweep_state == STOPPED )
     {
@@ -578,7 +591,8 @@ static void magnet_stop_sweep( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *magnet_sweep_rate( Var_T * v )
+Var_T *
+magnet_sweep_rate( Var_T * v )
 {
     double sweep_rate;
 
@@ -617,7 +631,8 @@ Var_T *magnet_sweep_rate( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *magnet_reset_field( Var_T * v )
+Var_T *
+magnet_reset_field( Var_T * v )
 {
     return reset_field( v );
 }
@@ -626,7 +641,8 @@ Var_T *magnet_reset_field( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *reset_field( Var_T * v  UNUSED_ARG )
+Var_T *
+reset_field( Var_T * v  UNUSED_ARG )
 {
     return magnet_field( vars_push( FLOAT_VAR, ips20_4.start_current ) );
 }
@@ -638,7 +654,8 @@ Var_T *reset_field( Var_T * v  UNUSED_ARG )
  * the experiment has ended.
  *-----------------------------------------------------------*/
 
-Var_T *magnet_goto_field_on_end( Var_T * v )
+Var_T *
+magnet_goto_field_on_end( Var_T * v )
 {
     double cur;
 
@@ -654,7 +671,8 @@ Var_T *magnet_goto_field_on_end( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *magnet_command( Var_T * v )
+Var_T *
+magnet_command( Var_T * v )
 {
     char *cmd = NULL;
     char reply[ 100 ];
@@ -687,7 +705,8 @@ Var_T *magnet_command( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static bool ips20_4_init( const char * name )
+static bool
+ips20_4_init( const char * name )
 {
     char cmd[ 100 ];
     char reply[ 100 ];
@@ -828,7 +847,8 @@ static bool ips20_4_init( const char * name )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-static void ips20_4_to_local( void )
+static void
+ips20_4_to_local( void )
 {
     char cmd[ 20 ];
     char reply[ 100 ];
@@ -865,7 +885,8 @@ static void ips20_4_to_local( void )
  * Function that asks the magnet about its current state
  *-------------------------------------------------------*/
 
-static void ips20_4_get_complete_status( void )
+static void
+ips20_4_get_complete_status( void )
 {
     char cmd[ 100 ];
     char reply[ 100 ];
@@ -1106,7 +1127,8 @@ static void ips20_4_get_complete_status( void )
  * already sweeping up or very near to the maximum current)
  *---------------------------------------------------------------*/
 
-static void ips20_4_sweep_up( void )
+static void
+ips20_4_sweep_up( void )
 {
     /* Do nothing except printing a warning when we're alredy sweeping up */
 
@@ -1140,7 +1162,8 @@ static void ips20_4_sweep_up( void )
  * already sweeping down or very near to the minimum current)
  *-----------------------------------------------------------------*/
 
-static void ips20_4_sweep_down( void )
+static void
+ips20_4_sweep_down( void )
 {
     /* Do nothing except printing a warning when we're alredy sweeping down */
 
@@ -1173,7 +1196,8 @@ static void ips20_4_sweep_down( void )
  * accepted to test if it's within the limits of the magnet
  *-------------------------------------------------------------*/
 
-static double ips20_4_current_check( double current )
+static double
+ips20_4_current_check( double current )
 {
     if ( current > ips20_4.max_current )
     {
@@ -1220,7 +1244,8 @@ static double ips20_4_current_check( double current )
  * to test if it's within the magnets limits.
  *-----------------------------------------------------------*/
 
-static double ips20_4_sweep_rate_check( double sweep_rate )
+static double
+ips20_4_sweep_rate_check( double sweep_rate )
 {
     if ( sweep_rate > MAX_SWEEP_RATE )
     {
@@ -1267,7 +1292,8 @@ static double ips20_4_sweep_rate_check( double sweep_rate )
  * Function for asking the magnet about the current
  *--------------------------------------------------*/
 
-static double ips20_4_get_act_current( void )
+static double
+ips20_4_get_act_current( void )
 {
     char cmd[ 20 ];
     char reply[ 100 ];
@@ -1287,7 +1313,8 @@ static double ips20_4_get_act_current( void )
  * the magnet is supposed to sweep to.
  *-----------------------------------------------------------*/
 
-static double ips20_4_set_target_current( double current )
+static double
+ips20_4_set_target_current( double current )
 {
     char cmd[ 30 ];
     char reply[ 100 ];
@@ -1305,7 +1332,8 @@ static double ips20_4_set_target_current( double current )
  * Function for asking the setting of the target current
  *-------------------------------------------------------*/
 
-static double ips20_4_get_target_current( void )
+static double
+ips20_4_get_target_current( void )
 {
     char cmd[ 30 ];
     char reply[ 100 ];
@@ -1324,7 +1352,8 @@ static double ips20_4_get_target_current( void )
  * Function for setting a new sweep rate
  *---------------------------------------*/
 
-static double ips20_4_set_sweep_rate( double sweep_rate )
+static double
+ips20_4_set_sweep_rate( double sweep_rate )
 {
     char cmd[ 30 ];
     char reply[ 100 ];
@@ -1343,7 +1372,8 @@ static double ips20_4_set_sweep_rate( double sweep_rate )
  * Function for asking the magnet about its current sweep rate
  *-------------------------------------------------------------*/
 
-static double ips20_4_get_sweep_rate( void )
+static double
+ips20_4_get_sweep_rate( void )
 {
     char cmd[ 30 ];
     char reply[ 100 ];
@@ -1365,7 +1395,8 @@ static double ips20_4_get_sweep_rate( void )
  * handler function that's then invoked automatically.
  *-----------------------------------------------------------*/
 
-static double ips20_4_goto_current( double current )
+static double
+ips20_4_goto_current( double current )
 {
     ips20_4_set_target_current( current );
     ips20_4_set_sweep_rate( ips20_4.fast_sweep_rate );
@@ -1395,7 +1426,8 @@ static double ips20_4_goto_current( double current )
  * certain field value or make it sweep to zero.
  *-------------------------------------------------------------*/
 
-static int ips20_4_set_activity( int activity )
+static int
+ips20_4_set_activity( int activity )
 {
     char cmd[ 20 ];
     char reply[ 100 ];
@@ -1434,9 +1466,10 @@ static int ips20_4_set_activity( int activity )
  * (i.e. send a command and read the answer)
  *--------------------------------------------*/
 
-static long ips20_4_talk( const char * message,
-                          char *       reply,
-                          long         length )
+static long
+ips20_4_talk( const char * message,
+              char *       reply,
+              long         length )
 {
     long len = length;
     int retries = MAX_RETRIES;
@@ -1502,7 +1535,8 @@ static long ips20_4_talk( const char * message,
  * Function called in case of communication failures
  *---------------------------------------------------*/
 
-static void ips20_4_comm_failure( void )
+static void
+ips20_4_comm_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );

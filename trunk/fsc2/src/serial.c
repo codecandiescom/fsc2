@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -36,8 +36,9 @@
  * Just tell user about the errors of his way...
  *-----------------------------------------------*/
 
-void fsc2_request_serial_port( int          sn  UNUSED_ARG,
-                               const char * dev_name )
+void
+fsc2_request_serial_port( int          sn  UNUSED_ARG,
+                          const char * dev_name )
 {
     eprint( FATAL, UNSET, "%s: Device needs serial port but fsc2 was "
             "not compiled with support for serial port access.\n", dev_name );
@@ -49,7 +50,8 @@ void fsc2_request_serial_port( int          sn  UNUSED_ARG,
  * Nothing to be done
  *--------------------*/
 
-void fsc2_serial_init( void )
+void
+fsc2_serial_init( void )
 {
 }
 
@@ -58,8 +60,9 @@ void fsc2_serial_init( void )
  * Nothing to be done
  *--------------------*/
 
-void fsc2_serial_exp_init( const char * log_file_name  UNUSED_ARG ,
-                           int          log_level UNUSED_ARG )
+void
+fsc2_serial_exp_init( const char * log_file_name  UNUSED_ARG ,
+                      int          log_level UNUSED_ARG )
 {
 }
 
@@ -68,7 +71,8 @@ void fsc2_serial_exp_init( const char * log_file_name  UNUSED_ARG ,
  * Nothing to be done
  *--------------------*/
 
-void fsc2_serial_end_of_exp_handling( void )
+void
+fsc2_serial_end_of_exp_handling( void )
 {
 }
 
@@ -77,7 +81,8 @@ void fsc2_serial_end_of_exp_handling( void )
  * Nothing to be done
  *--------------------*/
 
-void fsc2_serial_cleanup( void )
+void
+fsc2_serial_cleanup( void )
 {
 }
 
@@ -86,7 +91,8 @@ void fsc2_serial_cleanup( void )
  * Nothing to be done
  *--------------------*/
 
-void fsc2_final_serial_cleanup( void )
+void
+fsc2_final_serial_cleanup( void )
 {
 }
 
@@ -96,9 +102,10 @@ void fsc2_final_serial_cleanup( void )
  * would never call the function anyway.
  *-------------------------------------------------------------*/
 
-struct termios *fsc2_serial_open( int          sn        UNUSED_ARG,
-                                  const char * dev_name  UNUSED_ARG,
-                                  int          flags     UNUSED_ARG )
+struct termios *
+fsc2_serial_open( int          sn        UNUSED_ARG,
+                  const char * dev_name  UNUSED_ARG,
+                  int          flags     UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -117,7 +124,8 @@ struct termios *fsc2_serial_open( int          sn        UNUSED_ARG,
  * Nothing to be done
  *--------------------*/
 
-void fsc2_serial_close( int sn  UNUSED_ARG )
+void
+fsc2_serial_close( int sn  UNUSED_ARG )
 {
 }
 
@@ -126,34 +134,12 @@ void fsc2_serial_close( int sn  UNUSED_ARG )
  * Return -1 to indicate failure
  *-------------------------------*/
 
-ssize_t fsc2_serial_write( int          sn              UNUSED_ARG,
-                           const void * buf             UNUSED_ARG ,
-                           size_t       count           UNUSED_ARG,
-                           long         us_wait         UNUSED_ARG,
-                           bool         quit_on_signal  UNUSED_ARG )
-{
-    /* Keep the module writers from calling the function anywhere else
-       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
-       section */
-
-    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
-                 || Fsc2_Internals.state == STATE_FINISHED
-                 || Fsc2_Internals.mode  == EXPERIMENT );
-
-    errno = EBADF;
-    return -1;
-}
-
-
-/*-------------------------------*
- * Return -1 to indicate failure
- *-------------------------------*/
-
-ssize_t fsc2_serial_read( int    sn              UNUSED_ARG,
-                          void * buf             UNUSED_ARG ,
-                          size_t count           UNUSED_ARG,
-                          long   us_wait         UNUSED_ARG,
-                          bool   quit_on_signal  UNUSED_ARG )
+ssize_t
+fsc2_serial_write( int          sn              UNUSED_ARG,
+                   const void * buf             UNUSED_ARG ,
+                   size_t       count           UNUSED_ARG,
+                   long         us_wait         UNUSED_ARG,
+                   bool         quit_on_signal  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -172,8 +158,12 @@ ssize_t fsc2_serial_read( int    sn              UNUSED_ARG,
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcgetattr( int              sn         UNUSED_ARG,
-                    struct termios * termios_p  UNUSED_ARG )
+ssize_t
+fsc2_serial_read( int    sn              UNUSED_ARG,
+                  void * buf             UNUSED_ARG ,
+                  size_t count           UNUSED_ARG,
+                  long   us_wait         UNUSED_ARG,
+                  bool   quit_on_signal  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -192,9 +182,9 @@ int fsc2_tcgetattr( int              sn         UNUSED_ARG,
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcsetattr( int              sn                UNUSED_ARG,
-                    int              optional_actions  UNUSED_ARG,
-                    struct termios * termios_p         UNUSED_ARG )
+int
+fsc2_tcgetattr( int              sn         UNUSED_ARG,
+                struct termios * termios_p  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -213,8 +203,10 @@ int fsc2_tcsetattr( int              sn                UNUSED_ARG,
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcsendbreak( int sn        UNUSED_ARG,
-                      int duration  UNUSED_ARG )
+int
+fsc2_tcsetattr( int              sn                UNUSED_ARG,
+                int              optional_actions  UNUSED_ARG,
+                struct termios * termios_p         UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -233,7 +225,9 @@ int fsc2_tcsendbreak( int sn        UNUSED_ARG,
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcdrain( int sn UNUSED_ARG )
+int
+fsc2_tcsendbreak( int sn        UNUSED_ARG,
+                  int duration  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -252,8 +246,8 @@ int fsc2_tcdrain( int sn UNUSED_ARG )
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcflush( int sn              UNUSED_ARG,
-                  int queue_selector  UNUSED_ARG )
+int
+fsc2_tcdrain( int sn UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -272,8 +266,30 @@ int fsc2_tcflush( int sn              UNUSED_ARG,
  * Return -1 to indicate failure
  *-------------------------------*/
 
-int fsc2_tcflow( int sn      UNUSED_ARG,
-                 int action  UNUSED_ARG )
+int
+fsc2_tcflush( int sn              UNUSED_ARG,
+              int queue_selector  UNUSED_ARG )
+{
+    /* Keep the module writers from calling the function anywhere else
+       than in the exp- and end_of_exp-hook functions and the EXPERIMENT
+       section */
+
+    fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
+                 || Fsc2_Internals.state == STATE_FINISHED
+                 || Fsc2_Internals.mode  == EXPERIMENT );
+
+    errno = EBADF;
+    return -1;
+}
+
+
+/*-------------------------------*
+ * Return -1 to indicate failure
+ *-------------------------------*/
+
+int
+fsc2_tcflow( int sn      UNUSED_ARG,
+             int action  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -355,8 +371,9 @@ static void fsc2_serial_log_function_end( const char * function,
  *    2. Name of the device the serial port is requested for
  *-------------------------------------------------------------------*/
 
-void fsc2_request_serial_port( int          sn,
-                               const char * dev_name )
+void
+fsc2_request_serial_port( int          sn,
+                          const char * dev_name )
 {
     /* Do some sanity checks on the serial port number */
 
@@ -414,8 +431,9 @@ void fsc2_request_serial_port( int          sn,
  *    (if log level is LL_NONE 'log_file_name' is not used at all)
  *-----------------------------------------------------------------------*/
 
-void fsc2_serial_exp_init( const char * log_file_name,
-                           int          log_level )
+void
+fsc2_serial_exp_init( const char * log_file_name,
+                      int          log_level )
 {
     int i;
     int requested_ports = 0;
@@ -471,7 +489,8 @@ void fsc2_serial_exp_init( const char * log_file_name,
  * the structure used in granting access to the serial ports.
  *----------------------------------------------------------------------*/
 
-void fsc2_serial_init( void )
+void
+fsc2_serial_init( void )
 {
     int i;
 
@@ -494,7 +513,8 @@ void fsc2_serial_init( void )
  * the serial ports used during the experiment.
  *-------------------------------------------------------------------*/
 
-void fsc2_serial_cleanup( void )
+void
+fsc2_serial_cleanup( void )
 {
     int i;
     int requested_ports = 0;
@@ -528,7 +548,8 @@ void fsc2_serial_cleanup( void )
  * the structures used in granting access to the serial ports.
  *----------------------------------------------------------------*/
 
-void fsc2_final_serial_cleanup( void )
+void
+fsc2_final_serial_cleanup( void )
 {
     int i;
 
@@ -561,9 +582,10 @@ void fsc2_final_serial_cleanup( void )
  * the open() function, the flags used for opening the device file.
  *--------------------------------------------------------------------*/
 
-struct termios *fsc2_serial_open( int          sn,
-                                  const char * dev_name,
-                                  int          flags )
+struct termios *
+fsc2_serial_open( int          sn,
+                  const char * dev_name,
+                  int          flags )
 {
     int fd;
     int fd_flags;
@@ -681,7 +703,8 @@ struct termios *fsc2_serial_open( int          sn,
  * Closes the device file for the serial port and removes the lock file.
  *-----------------------------------------------------------------------*/
 
-void fsc2_serial_close( int sn )
+void
+fsc2_serial_close( int sn )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -739,11 +762,12 @@ void fsc2_serial_close( int sn )
  * started.
  *-------------------------------------------------------------------*/
 
-ssize_t fsc2_serial_write( int          sn,
-                           const void * buf,
-                           size_t       count,
-                           long         us_wait,
-                           bool         quit_on_signal )
+ssize_t
+fsc2_serial_write( int          sn,
+                   const void * buf,
+                   size_t       count,
+                   long         us_wait,
+                   bool         quit_on_signal )
 {
     ssize_t write_count;
     fd_set wrds;
@@ -891,11 +915,12 @@ ssize_t fsc2_serial_write( int          sn,
  * possibly because a signal was received before reading started.
  *---------------------------------------------------------------------*/
 
-ssize_t fsc2_serial_read( int    sn,
-                          void * buf,
-                          size_t count,
-                          long   us_wait,
-                          bool   quit_on_signal )
+ssize_t
+fsc2_serial_read( int    sn,
+                  void * buf,
+                  size_t count,
+                  long   us_wait,
+                  bool   quit_on_signal )
 {
     ssize_t read_count;
     fd_set rfds;
@@ -1046,7 +1071,8 @@ ssize_t fsc2_serial_read( int    sn,
  *--------------------------------------------------------------*/
 
 #ifdef SERIAL_LOCK_DIR
-static bool get_serial_lock( int sn )
+static bool
+get_serial_lock( int sn )
 {
     int fd;
     char buf[ 128 ];
@@ -1199,7 +1225,8 @@ static bool get_serial_lock( int sn  UNUSED_ARG )
  * Deletes the previously created lock file for a serial port.
  *-------------------------------------------------------------*/
 
-static void remove_serial_lock( int sn )
+static void
+remove_serial_lock( int sn )
 {
 #ifdef SERIAL_LOCK_DIR
     fsc2_serial_log_function_end( "remove_serial_lock",
@@ -1223,8 +1250,9 @@ static void remove_serial_lock( int sn )
  * Replacement for tcgetattr(3)
  *------------------------------*/
 
-int fsc2_tcgetattr( int              sn,
-                    struct termios * termios_p )
+int
+fsc2_tcgetattr( int              sn,
+                struct termios * termios_p )
 {
     int ret_val;
 
@@ -1259,9 +1287,10 @@ int fsc2_tcgetattr( int              sn,
  * Replacement for tcsetattr(3)
  *------------------------------*/
 
-int fsc2_tcsetattr( int              sn,
-                    int              optional_actions,
-                    struct termios * termios_p )
+int
+fsc2_tcsetattr( int              sn,
+                int              optional_actions,
+                struct termios * termios_p )
 {
     int ret_val;
 
@@ -1296,8 +1325,9 @@ int fsc2_tcsetattr( int              sn,
  * Replacement for tcsendbreak(3)
  *--------------------------------*/
 
-int fsc2_tcsendbreak( int sn,
-                      int duration )
+int
+fsc2_tcsendbreak( int sn,
+                  int duration )
 {
     int ret_val;
 
@@ -1332,7 +1362,8 @@ int fsc2_tcsendbreak( int sn,
  * Replacement for tcdrain(3)
  *----------------------------*/
 
-int fsc2_tcdrain( int sn )
+int
+fsc2_tcdrain( int sn )
 {
     int ret_val;
 
@@ -1367,8 +1398,9 @@ int fsc2_tcdrain( int sn )
  * Replacement for tcflush(3)
  *----------------------------*/
 
-int fsc2_tcflush( int sn,
-                  int queue_selector )
+int
+fsc2_tcflush( int sn,
+              int queue_selector )
 {
     int ret_val;
 
@@ -1403,8 +1435,9 @@ int fsc2_tcflush( int sn,
  * Replacement for tcflow(3)
  *---------------------------*/
 
-int fsc2_tcflow( int sn,
-                 int action )
+int
+fsc2_tcflow( int sn,
+             int action )
 {
     int ret_val;
 
@@ -1440,7 +1473,8 @@ int fsc2_tcflow( int sn,
  * fsc2_serial_log_date() writes the date to the log file.
  *---------------------------------------------------------*/
 
-static void fsc2_serial_log_date( void )
+static void
+fsc2_serial_log_date( void )
 {
     char tc[ 26 ];
     struct timeb mt;
@@ -1466,8 +1500,9 @@ static void fsc2_serial_log_date( void )
  *  * name of the device involved
  *--------------------------------------------------------------*/
 
-static void fsc2_serial_log_function_start( const char * function,
-                                            const char * dev_name )
+static void
+fsc2_serial_log_function_start( const char * function,
+                                const char * dev_name )
 {
     if ( fsc2_serial_log == NULL || ll < LL_CE )
         return;
@@ -1488,8 +1523,9 @@ static void fsc2_serial_log_function_start( const char * function,
  *  * name of the device involved
  *---------------------------------------------------------*/
 
-static void fsc2_serial_log_function_end( const char * function,
-                                          const char * dev_name )
+static void
+fsc2_serial_log_function_end( const char * function,
+                              const char * dev_name )
 {
     if ( fsc2_serial_log == NULL || ll < LL_CE )
         return;
@@ -1506,8 +1542,9 @@ static void fsc2_serial_log_function_end( const char * function,
  * Function for printing out a message to the log file
  *-----------------------------------------------------*/
 
-void fsc2_serial_log_message( const char * fmt,
-                                     ... )
+void
+fsc2_serial_log_message( const char * fmt,
+                         ... )
 {
     va_list ap;
 

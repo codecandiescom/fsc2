@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -58,12 +58,12 @@ int lakeshore330_exp_hook(        void );
 int lakeshore330_end_of_exp_hook( void );
 
 
-Var_T *temp_contr_name(           Var_T *v );
-Var_T *temp_contr_temperature(    Var_T *v );
-Var_T *temp_contr_sample_channel( Var_T *v );
-Var_T *temp_contr_sensor_unit(    Var_T *v );
-Var_T *temp_contr_lock_keyboard(  Var_T *v );
-Var_T *temp_contr_command(        Var_T *v );
+Var_T * temp_contr_name(           Var_T *v );
+Var_T * temp_contr_temperature(    Var_T *v );
+Var_T * temp_contr_sample_channel( Var_T *v );
+Var_T * temp_contr_sensor_unit(    Var_T *v );
+Var_T * temp_contr_lock_keyboard(  Var_T *v );
+Var_T * temp_contr_command(        Var_T *v );
 
 
 static bool lakeshore330_init( const char * name );
@@ -105,7 +105,8 @@ static struct {
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-int lakeshore330_init_hook( void )
+int
+lakeshore330_init_hook( void )
 {
     Need_GPIB = SET;
     lakeshore330.device = -1;
@@ -120,7 +121,8 @@ int lakeshore330_init_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-int lakeshore330_exp_hook( void )
+int
+lakeshore330_exp_hook( void )
 {
     if ( ! lakeshore330_init( DEVICE_NAME ) )
     {
@@ -134,7 +136,8 @@ int lakeshore330_exp_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-int lakeshore330_end_of_exp_hook( void )
+int
+lakeshore330_end_of_exp_hook( void )
 {
     lakeshore330_lock( 0 );
     return 1;
@@ -150,7 +153,8 @@ int lakeshore330_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *temp_contr_name( Var_T * v  UNUSED_ARG )
+Var_T *
+temp_contr_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -160,7 +164,8 @@ Var_T *temp_contr_name( Var_T * v  UNUSED_ARG )
  * Returns temperature reading from controller
  *---------------------------------------------*/
 
-Var_T *temp_contr_temperature( Var_T * v  UNUSED_ARG )
+Var_T *
+temp_contr_temperature( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == TEST )
         return vars_push( FLOAT_VAR, 123.45 );
@@ -175,7 +180,8 @@ Var_T *temp_contr_temperature( Var_T * v  UNUSED_ARG )
  * as input arguments).
  *-----------------------------------------------------------------*/
 
-Var_T *temp_contr_sample_channel( Var_T * v )
+Var_T *
+temp_contr_sample_channel( Var_T * v )
 {
     long channel;
 
@@ -219,7 +225,8 @@ Var_T *temp_contr_sample_channel( Var_T * v )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-Var_T *temp_contr_sensor_unit( Var_T * v )
+Var_T *
+temp_contr_sensor_unit( Var_T * v )
 {
     long unit = 0;
     const char *in_units  = "KCS";
@@ -285,7 +292,8 @@ Var_T *temp_contr_sensor_unit( Var_T * v )
  * unlocked during an experiment.
  *---------------------------------------------------------*/
 
-Var_T *temp_contr_lock_keyboard( Var_T * v )
+Var_T *
+temp_contr_lock_keyboard( Var_T * v )
 {
     int lock;
 
@@ -308,7 +316,8 @@ Var_T *temp_contr_lock_keyboard( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *temp_contr_command( Var_T * v )
+Var_T *
+temp_contr_command( Var_T * v )
 {
     char *cmd = NULL;
 
@@ -346,7 +355,8 @@ Var_T *temp_contr_command( Var_T * v )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static bool lakeshore330_init( const char * name )
+static bool
+lakeshore330_init( const char * name )
 {
     char buf[ 20 ];
     long len = 20;
@@ -391,7 +401,8 @@ static bool lakeshore330_init( const char * name )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static double lakeshore330_sens_data( void )
+static double
+lakeshore330_sens_data( void )
 {
     char buf[ 50 ];
     long len = 50;
@@ -414,7 +425,8 @@ static double lakeshore330_sens_data( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static void lakeshore330_set_unit( long unit )
+static void
+lakeshore330_set_unit( long unit )
 {
     const char *in_units  = "KCS";
     char buf[ 30 ];
@@ -430,7 +442,8 @@ static void lakeshore330_set_unit( long unit )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static long lakeshore330_get_unit( void )
+static long
+lakeshore330_get_unit( void )
 {
     const char *out_units = "KCVRM";
     char buf[ 30 ];
@@ -454,7 +467,8 @@ static long lakeshore330_get_unit( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static long lakeshore330_sample_channel( long channel )
+static long
+lakeshore330_sample_channel( long channel )
 {
     char buf[ 20 ];
 
@@ -471,7 +485,8 @@ static long lakeshore330_sample_channel( long channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static void lakeshore330_lock( int state )
+static void
+lakeshore330_lock( int state )
 {
     char cmd[ 20 ];
 
@@ -487,7 +502,8 @@ static void lakeshore330_lock( int state )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool lakeshore330_command( const char * cmd )
+static bool
+lakeshore330_command( const char * cmd )
 {
     if ( gpib_write( lakeshore330.device, cmd, strlen( cmd ) ) == FAILURE )
         lakeshore330_gpib_failure( );
@@ -499,9 +515,10 @@ static bool lakeshore330_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool lakeshore330_talk( const char * cmd,
-                               char *       reply,
-                               long *       length )
+static bool
+lakeshore330_talk( const char * cmd,
+                   char *       reply,
+                   long *       length )
 {
     if (    gpib_write( lakeshore330.device, cmd, strlen( cmd ) ) == FAILURE
          || gpib_read( lakeshore330.device, reply, length ) == FAILURE )
@@ -514,7 +531,8 @@ static bool lakeshore330_talk( const char * cmd,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static void lakeshore330_gpib_failure( void )
+static void
+lakeshore330_gpib_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );

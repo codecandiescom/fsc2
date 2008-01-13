@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,7 +31,8 @@
  * current mode without them being able to change it.
  *-----------------------------------------------------*/
 
-int get_mode( void )
+int
+get_mode( void )
 {
     return Fsc2_Internals.mode;
 }
@@ -42,7 +43,8 @@ int get_mode( void )
  * just a check run without graphical interface or a check run
  *-------------------------------------------------------------*/
 
-int get_check_state( void )
+int
+get_check_state( void )
 {
     return Fsc2_Internals.cmdline_flags &
            ( DO_CHECK | TEST_ONLY | NO_GUI_RUN );
@@ -54,7 +56,8 @@ int get_check_state( void )
  * we're running in batch mode.
  *-------------------------------------------------------------*/
 
-int get_batch_state( void )
+int
+get_batch_state( void )
 {
     return Fsc2_Internals.cmdline_flags & BATCH_MODE;
 }
@@ -66,7 +69,8 @@ int get_batch_state( void )
  * in this case.
  *---------------------------------------------------------------*/
 
-bool check_user_request( void )
+bool
+check_user_request( void )
 {
     if ( Fsc2_Internals.I_am == PARENT )
         fl_check_only_forms( );
@@ -79,7 +83,8 @@ bool check_user_request( void )
  * and throws an USER_BREAK_EXCEPTION in this case.
  *------------------------------------------------------*/
 
-void stop_on_user_request( void )
+void
+stop_on_user_request( void )
 {
     if ( Fsc2_Internals.I_am == PARENT )
         fl_check_only_forms( );
@@ -94,7 +99,8 @@ void stop_on_user_request( void )
  * arguments to a function.
  *--------------------------------------------------------------*/
 
-void too_many_arguments( Var_T * v )
+void
+too_many_arguments( Var_T * v )
 {
     if ( v == NULL || ( v = vars_pop( v ) ) == NULL )
         return;
@@ -113,7 +119,8 @@ void too_many_arguments( Var_T * v )
  * section) and then trows an exception.
  *------------------------------------------------------------*/
 
-void no_query_possible( void )
+void
+no_query_possible( void )
 {
     print( FATAL, "Function can be used for queries in the EXPERIMENT "
            "section only.\n" );
@@ -124,8 +131,9 @@ void no_query_possible( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-long get_long( Var_T *      v,
-               const char * snippet )
+long
+get_long( Var_T *      v,
+          const char * snippet )
 {
     vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -143,8 +151,9 @@ long get_long( Var_T *      v,
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-double get_double( Var_T *      v,
-                   const char * snippet )
+double
+get_double( Var_T *      v,
+            const char * snippet )
 {
     vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -163,8 +172,9 @@ double get_double( Var_T *      v,
  * value is converted to an int and this value returned.
  *----------------------------------------------------------------------*/
 
-long get_strict_long( Var_T *      v,
-                      const char * snippet )
+long
+get_strict_long( Var_T *      v,
+                 const char * snippet )
 {
     vars_check( v, INT_VAR | FLOAT_VAR );
 
@@ -202,7 +212,8 @@ long get_strict_long( Var_T *      v,
  * match either "ON" or "OFF" and exception is thrown in every case.
  *---------------------------------------------------------------------------*/
 
-bool get_boolean( Var_T * v )
+bool
+get_boolean( Var_T * v )
 {
     const char *alt[ 2 ] = { "OFF", "ON" };
     int res;
@@ -239,9 +250,10 @@ bool get_boolean( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *get_element( Var_T * v,
-                    int     len,
-                    ... )
+Var_T *
+get_element( Var_T * v,
+             int     len,
+             ... )
 {
     va_list ap;
     long cur_idx;
@@ -297,8 +309,9 @@ Var_T *get_element( Var_T * v,
  * argument.
  *---------------------------------------------------------------------------*/
 
-double is_mult_ns( double       val,
-                   const char * text )
+double
+is_mult_ns( double       val,
+            const char * text )
 {
     double ip, fp;
 
@@ -324,7 +337,8 @@ double is_mult_ns( double       val,
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-char *translate_escape_sequences( char * str )
+char *
+translate_escape_sequences( char * str )
 {
     return handle_escape( str );
 }
@@ -346,7 +360,8 @@ char *translate_escape_sequences( char * str )
  * the start of the experiment.
  *-------------------------------------------------------------------*/
 
-double experiment_time( void )
+double
+experiment_time( void )
 {
     struct timeval t_new;
     static struct timeval t_old = { 0, 0 };
@@ -366,8 +381,9 @@ double experiment_time( void )
  * Function for opening files with the full permissions of fsc2
  *--------------------------------------------------------------*/
 
-FILE *fsc2_fopen( const char * path,
-                  const char * mode )
+FILE *
+fsc2_fopen( const char * path,
+            const char * mode )
 {
     FILE *fp;
 
@@ -390,9 +406,10 @@ extern int vfscanf( FILE *       s,
                     va_list      arg );
 #endif
 
-int fsc2_fscanf( FILE *       stream,
-                 const char * format,
-                 ... )
+int
+fsc2_fscanf( FILE *       stream,
+             const char * format,
+             ... )
 {
     va_list ap;
     int num;
@@ -412,10 +429,11 @@ int fsc2_fscanf( FILE *       stream,
  * the full permissions of fsc2
  *--------------------------------------------------*/
 
-size_t fsc2_fread( void * ptr,
-                   size_t size,
-                   size_t nmemb,
-                   FILE * stream )
+size_t
+fsc2_fread( void * ptr,
+            size_t size,
+            size_t nmemb,
+            FILE * stream )
 {
     size_t num;
 
@@ -432,9 +450,10 @@ size_t fsc2_fread( void * ptr,
  * permissions of fsc2
  *-------------------------------------------------------*/
 
-int fsc2_fprintf( FILE *       stream,
-                  const char * format,
-                  ... )
+int
+fsc2_fprintf( FILE *       stream,
+              const char * format,
+              ... )
 {
     va_list ap;
     int num;
@@ -455,10 +474,11 @@ int fsc2_fprintf( FILE *       stream,
  * the full permissions of fsc2
  *------------------------------------------------*/
 
-size_t fsc2_fwrite( void * ptr,
-                    size_t size,
-                    size_t nmemb,
-                    FILE * stream )
+size_t
+fsc2_fwrite( void * ptr,
+             size_t size,
+             size_t nmemb,
+             FILE * stream )
 {
     size_t num;
 
@@ -476,7 +496,8 @@ size_t fsc2_fwrite( void * ptr,
  * with the full permissions of fsc2
  *------------------------------------------------*/
 
-int fsc2_fgetc( FILE * stream )
+int
+fsc2_fgetc( FILE * stream )
 {
     int num;
 
@@ -493,7 +514,8 @@ int fsc2_fgetc( FILE * stream )
  * with the full permissions of fsc2
  *------------------------------------------------*/
 
-int fsc2_getc( FILE * stream )
+int
+fsc2_getc( FILE * stream )
 {
     int num;
 
@@ -509,9 +531,10 @@ int fsc2_getc( FILE * stream )
  * with the full permissions of fsc2
  *-------------------------------------------*/
 
-char *fsc2_fgets( char * s,
-                  int    size,
-                  FILE * stream )
+char *
+fsc2_fgets( char * s,
+            int    size,
+            FILE * stream )
 {
     char *p;
 
@@ -528,8 +551,9 @@ char *fsc2_fgets( char * s,
  * with the full permissions of fsc2
  *---------------------------------------------------*/
 
-int fsc2_ungetc( int    c,
-                 FILE * stream )
+int
+fsc2_ungetc( int    c,
+             FILE * stream )
 {
     int num;
 
@@ -546,9 +570,10 @@ int fsc2_ungetc( int    c,
  * full permissions of fsc2
  *---------------------------------------------*/
 
-int fsc2_fseek( FILE * stream,
-                long   offset,
-                int    whence )
+int
+fsc2_fseek( FILE * stream,
+            long   offset,
+            int    whence )
 {
     int num;
 
@@ -564,7 +589,8 @@ int fsc2_fseek( FILE * stream,
  * with the full permissions of fsc2
  *-------------------------------------------------*/
 
-long fsc2_ftell( FILE * stream )
+long
+fsc2_ftell( FILE * stream )
 {
     long num;
 
@@ -581,8 +607,9 @@ long fsc2_ftell( FILE * stream )
  * with the full permissions of fsc2
  *----------------------------------------------*/
 
-int fsc2_fputc( int    c,
-                FILE * stream )
+int
+fsc2_fputc( int    c,
+            FILE * stream )
 {
     int num;
 
@@ -600,8 +627,9 @@ int fsc2_fputc( int    c,
  * with the full permissions of fsc2
  *-----------------------------------------*/
 
-int fsc2_fputs( const char * s,
-                FILE *       stream )
+int
+fsc2_fputs( const char * s,
+            FILE *       stream )
 {
     int num;
 
@@ -619,8 +647,9 @@ int fsc2_fputs( const char * s,
  * with the full permissions of fsc2
  *----------------------------------------------*/
 
-int fsc2_putc( int    c,
-               FILE * stream )
+int
+fsc2_putc( int    c,
+           FILE * stream )
 {
     int num;
 
@@ -637,7 +666,8 @@ int fsc2_putc( int    c,
  * Function for closing a file with the full permissions of fsc2
  *---------------------------------------------------------------*/
 
-int fsc2_fclose( FILE * stream )
+int
+fsc2_fclose( FILE * stream )
 {
     int num;
 
@@ -652,7 +682,8 @@ int fsc2_fclose( FILE * stream )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-const char *fsc2_config_dir( void )
+const char *
+fsc2_config_dir( void )
 {
     return ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) ) ? 
            confdir : libdir;

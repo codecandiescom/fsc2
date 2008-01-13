@@ -1,20 +1,20 @@
 /*
  *  $Id$
- * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
- * 
+ *
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -58,7 +58,8 @@ static void rb_pulser_w_rf_pulse( void );
  * the inititialization of the pulser.
  *--------------------------------------------------------------------*/
 
-void rb_pulser_w_do_update( void )
+void
+rb_pulser_w_do_update( void )
 {
     bool restart = UNSET;
 
@@ -90,7 +91,8 @@ void rb_pulser_w_do_update( void )
  * that the new settings are reasonable and then commits all changes.
  *---------------------------------------------------------------------*/
 
-void rb_pulser_w_update_pulses( bool test_only )
+void
+rb_pulser_w_update_pulses( bool test_only )
 {
     rb_pulser_w_function_init( );
     rb_pulser_w_delay_card_setup( );
@@ -111,7 +113,8 @@ void rb_pulser_w_update_pulses( bool test_only )
  * pulse).
  *-----------------------------------------------------------------*/
 
-static void rb_pulser_w_function_init( void )
+static void
+rb_pulser_w_function_init( void )
 {
     int i, j;
     Function_T *f;
@@ -144,7 +147,8 @@ static void rb_pulser_w_function_init( void )
  * can't be set for other reasons.
  *-----------------------------------------------------------------------*/
 
-static void rb_pulser_w_delay_card_setup( void )
+static void
+rb_pulser_w_delay_card_setup( void )
 {
     rb_pulser_w_mw_channel_setup( );
     rb_pulser_w_rf_channel_setup( );
@@ -162,7 +166,8 @@ static void rb_pulser_w_delay_card_setup( void )
  * and, if necessary, the phase pulse cards.
  *--------------------------------------------------------------------*/
 
-static void rb_pulser_w_mw_channel_setup( void )
+static void
+rb_pulser_w_mw_channel_setup( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_MW;
     Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + MW_DELAY_0;
@@ -275,7 +280,8 @@ static void rb_pulser_w_mw_channel_setup( void )
  * been set up before.
  *------------------------------------------------------------------*/
 
-static void rb_pulser_w_phase_channel_setup( void )
+static void
+rb_pulser_w_phase_channel_setup( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_MW;
     Rulbus_Delay_Card_T *mw_card = rb_pulser_w.delay_card + MW_DELAY_0;
@@ -372,7 +378,8 @@ static void rb_pulser_w_phase_channel_setup( void )
  * before the RF pulse starts
  *---------------------------------------------------------*/
 
-static void rb_pulser_w_rf_channel_setup( void )
+static void
+rb_pulser_w_rf_channel_setup( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
     Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + RF_DELAY;
@@ -429,7 +436,8 @@ static void rb_pulser_w_rf_channel_setup( void )
  * Function for setting up the cards that create the laser pulse
  *---------------------------------------------------------------*/
 
-static void rb_pulser_w_laser_channel_setup( void )
+static void
+rb_pulser_w_laser_channel_setup( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_LASER;
     Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + LASER_DELAY_0;
@@ -501,7 +509,8 @@ static void rb_pulser_w_laser_channel_setup( void )
  * detection pulse).
  *---------------------------------------------------------------------*/
 
-static void rb_pulser_w_detection_channel_setup( void )
+static void
+rb_pulser_w_detection_channel_setup( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DET;
     Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DET_DELAY;
@@ -558,7 +567,8 @@ static void rb_pulser_w_detection_channel_setup( void )
  * possible.
  *------------------------------------------------------------------*/
 
-static void rb_pulser_w_defense_channel_setup( void )
+static void
+rb_pulser_w_defense_channel_setup( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DEFENSE;
     Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + DEFENSE_DELAY;
@@ -598,7 +608,8 @@ static void rb_pulser_w_defense_channel_setup( void )
  * after the microwave pulses have been set up.
  *------------------------------------------------------------------*/
 
-static void rb_pulser_w_auto_defense_channel_setup( void )
+static void
+rb_pulser_w_auto_defense_channel_setup( void )
 {
     Function_T *mw = rb_pulser_w.function + PULSER_CHANNEL_MW;
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_DEFENSE;
@@ -675,7 +686,8 @@ static void rb_pulser_w_auto_defense_channel_setup( void )
  * variables describing the state of the pulser to their initial values.
  *-------------------------------------------------------------------------*/
 
-void rb_pulser_w_full_reset( void )
+void
+rb_pulser_w_full_reset( void )
 {
     Pulse_T *p = rb_pulser_w.pulses;
     Function_T *f;
@@ -727,7 +739,8 @@ void rb_pulser_w_full_reset( void )
  * an exception if that's longer than possible.
  *------------------------------------------------------------------*/
 
-static void rb_pulser_w_seq_length_check( void )
+static void
+rb_pulser_w_seq_length_check( void )
 {
     int i;
     Function_T *f;
@@ -781,7 +794,8 @@ static void rb_pulser_w_seq_length_check( void )
  * 'test_only' is set during the test run.
  *-------------------------------------------------------------------*/
 
-static void rb_pulser_w_commit( bool test_only )
+static void
+rb_pulser_w_commit( bool test_only )
 {
     Rulbus_Delay_Card_T *card;
     Function_T *f;
@@ -839,7 +853,8 @@ static void rb_pulser_w_commit( bool test_only )
  * Function to set up the cards responsible for the phase settings
  *-----------------------------------------------------------------*/
 
-static void rb_pulser_w_set_phases( void )
+static void
+rb_pulser_w_set_phases( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_MW;
     Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + PHASE_DELAY_0;
@@ -888,7 +903,8 @@ static void rb_pulser_w_set_phases( void )
  * Function for setting the RF pulse length at the synthesizer
  *-------------------------------------------------------------*/
 
-static void rb_pulser_w_rf_pulse( void )
+static void
+rb_pulser_w_rf_pulse( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
     Pulse_T *p;

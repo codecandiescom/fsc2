@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -54,7 +54,8 @@ static double spectrapro_300i_conv( long   gn,
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-int spectrapro_300i_init_hook( void )
+int
+spectrapro_300i_init_hook( void )
 {
     int i;
 
@@ -90,7 +91,8 @@ int spectrapro_300i_init_hook( void )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-int spectrapro_300i_exp_hook( void )
+int
+spectrapro_300i_exp_hook( void )
 {
     int i;
 
@@ -134,7 +136,8 @@ int spectrapro_300i_exp_hook( void )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-int spectrapro_300i_end_of_exp_hook( void )
+int
+spectrapro_300i_end_of_exp_hook( void )
 {
     if ( ! spectrapro_300i.is_needed || ! spectrapro_300i.is_open )
         return 1;
@@ -149,7 +152,8 @@ int spectrapro_300i_end_of_exp_hook( void )
  * Returns a string with the name of the device
  *----------------------------------------------*/
 
-Var_T *monochromator_name( Var_T * v  UNUSED_ARG )
+Var_T *
+monochromator_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -159,7 +163,8 @@ Var_T *monochromator_name( Var_T * v  UNUSED_ARG )
  * Function for setting or quering the currently used grating
  *------------------------------------------------------------*/
 
-Var_T *monochromator_grating( Var_T * v )
+Var_T *
+monochromator_grating( Var_T * v )
 {
     long grating;
     long gn;
@@ -226,7 +231,8 @@ Var_T *monochromator_grating( Var_T * v )
  * the new turret the function will return an error.
  *----------------------------------------------------------------------*/
 
-Var_T *monochromator_turret( Var_T * v )
+Var_T *
+monochromator_turret( Var_T * v )
 {
     long turret;
     long tn;
@@ -304,7 +310,8 @@ Var_T *monochromator_turret( Var_T * v )
  * length as specified (in meters) by the only argument.
  *-----------------------------------------------------------------*/
 
-Var_T *monochromator_wavelength( Var_T * v )
+Var_T *
+monochromator_wavelength( Var_T * v )
 {
     double wl;
 
@@ -370,7 +377,8 @@ Var_T *monochromator_wavelength( Var_T * v )
  * number as specified (in cm^-1) by the only argument.
  *-----------------------------------------------------------------*/
 
-Var_T *monochromator_wavenumber( Var_T * v )
+Var_T *
+monochromator_wavenumber( Var_T * v )
 {
     double wl, wn;
 
@@ -427,7 +435,8 @@ Var_T *monochromator_wavenumber( Var_T * v )
  * already a grating installed at the same position.
  *--------------------------------------------------------------------*/
 
-Var_T *monochromator_install_grating( Var_T * v )
+Var_T *
+monochromator_install_grating( Var_T * v )
 {
     long grating;
     long gn;
@@ -509,7 +518,8 @@ Var_T *monochromator_install_grating( Var_T * v )
  * The only argument must be the number of an installed grating.
  *----------------------------------------------------------------*/
 
-Var_T *monochromator_groove_density( Var_T * v )
+Var_T *
+monochromator_groove_density( Var_T * v )
 {
     long gn;
 
@@ -560,7 +570,8 @@ Var_T *monochromator_groove_density( Var_T * v )
  * for the details of the syntax.
  *----------------------------------------------------------------------*/
 
-Var_T *monochromator_load_calibration( Var_T * v )
+Var_T *
+monochromator_load_calibration( Var_T * v )
 {
     char *calib_file = NULL;
     FILE *cfp = NULL;
@@ -638,7 +649,8 @@ Var_T *monochromator_load_calibration( Var_T * v )
  * the camera taken into account.
  *-----------------------------------------------------------------------*/
 
-Var_T *monochromator_wavelength_axis( Var_T * v )
+Var_T *
+monochromator_wavelength_axis( Var_T * v )
 {
     Var_T *cv;
     double pixel_width;
@@ -824,7 +836,8 @@ Var_T *monochromator_wavelength_axis( Var_T * v )
  * axis displyed using linear wavenumber values isn't really correct!
  *-----------------------------------------------------------------------*/
 
-Var_T *monochromator_wavenumber_axis( Var_T * v )
+Var_T *
+monochromator_wavenumber_axis( Var_T * v )
 {
     Var_T *cv;
     Var_T *fv;
@@ -883,7 +896,8 @@ Var_T *monochromator_wavenumber_axis( Var_T * v )
  * arguments are not specified the currently set values are used.
  *------------------------------------------------------------------------*/
 
-Var_T *monochromator_calc_wavelength( Var_T * v )
+Var_T *
+monochromator_calc_wavelength( Var_T * v )
 {
     long gn;
     double cwl;
@@ -1031,12 +1045,13 @@ Var_T *monochromator_calc_wavelength( Var_T * v )
  * into array 'dest'.
  *---------------------------------------------------------------*/
 
-static void spectrapro_300i_arr_conv( long    gn,
-                                      double  cwl,
-                                      long    num_pixels,
-                                      double  pixel_width,
-                                      Var_T * src,
-                                      Var_T * dest )
+static void
+spectrapro_300i_arr_conv( long    gn,
+                          double  cwl,
+                          long    num_pixels,
+                          double  pixel_width,
+                          Var_T * src,
+                          Var_T * dest )
 {
     ssize_t i;
     double px;
@@ -1075,11 +1090,12 @@ static void spectrapro_300i_arr_conv( long    gn,
  * at that position.
  *---------------------------------------------------------------------*/
 
-static double spectrapro_300i_conv( long   gn,
-                                    double cwl,
-                                    long   num_pixels,
-                                    double pixel_width,
-                                    double px )
+static double
+spectrapro_300i_conv( long   gn,
+                      double cwl,
+                      long   num_pixels,
+                      double pixel_width,
+                      double px )
 {
     double inclusion_angle_2;
     double focal_length;
@@ -1130,7 +1146,8 @@ static double spectrapro_300i_conv( long   gn,
  * 6. detector angle (in degree)
  *------------------------------------------------------------------*/
 
-Var_T *monochromator_set_calibration( Var_T * v )
+Var_T *
+monochromator_set_calibration( Var_T * v )
 {
     long grating;
     long gn;
@@ -1243,7 +1260,8 @@ Var_T *monochromator_set_calibration( Var_T * v )
  * monochromator.
  *------------------------------------------------------------------------*/
 
-Var_T *monochromator_zero_offset( Var_T * v )
+Var_T *
+monochromator_zero_offset( Var_T * v )
 {
     long grating;
     long gn;
@@ -1323,7 +1341,8 @@ Var_T *monochromator_zero_offset( Var_T * v )
  * monochromator.
  *-------------------------------------------------------------------*/
 
-Var_T *monochromator_grating_adjust( Var_T * v )
+Var_T *
+monochromator_grating_adjust( Var_T * v )
 {
     long grating;
     long gn;
@@ -1418,7 +1437,8 @@ Var_T *monochromator_grating_adjust( Var_T * v )
  * 12. start deviation for detector angle
  *----------------------------------------------------------------------*/
 
-Var_T *monochromator_calibrate( Var_T * v )
+Var_T *
+monochromator_calibrate( Var_T * v )
 {
     Calib_Params_T c;
     Var_T *cv;

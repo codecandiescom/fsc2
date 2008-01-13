@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -25,24 +25,24 @@
 #include "fsc2.h"
 
 
-static Var_T *vars_pow_i( Var_T * v1,
-                          Var_T * v2,
-                          bool    exc );
-static Var_T *vars_int_var_pow( Var_T * v1,
-                                Var_T * v2,
-                                bool    exc );
-static Var_T *vars_float_var_pow( Var_T * v1,
-                                  Var_T * v2,
-                                  bool    exc );
-static Var_T *vars_int_arr_pow( Var_T * v1,
-                                Var_T * v2,
-                                bool    exc );
-static Var_T *vars_float_arr_pow( Var_T * v1,
-                                  Var_T * v2,
-                                  bool    exc );
-static Var_T *vars_ref_pow( Var_T * v1,
-                            Var_T * v2,
-                            bool    exc );
+static Var_T * vars_pow_i( Var_T * v1,
+                           Var_T * v2,
+                           bool    exc );
+static Var_T * vars_int_var_pow( Var_T * v1,
+                                 Var_T * v2,
+                                 bool    exc );
+static Var_T * vars_float_var_pow( Var_T * v1,
+                                   Var_T * v2,
+                                   bool    exc );
+static Var_T * vars_int_arr_pow( Var_T * v1,
+                                 Var_T * v2,
+                                 bool    exc );
+static Var_T * vars_float_arr_pow( Var_T * v1,
+                                   Var_T * v2,
+                                   bool    exc );
+static Var_T * vars_ref_pow( Var_T * v1,
+                             Var_T * v2,
+                             bool    exc );
 static void vars_pow_check( double v1,
                             double v2 );
 
@@ -51,8 +51,9 @@ static void vars_pow_check( double v1,
  * Function for taking the power of two variables of arbitrary types
  *-------------------------------------------------------------------*/
 
-Var_T *vars_pow( Var_T * v1,
-                 Var_T * v2 )
+Var_T *
+vars_pow( Var_T * v1,
+          Var_T * v2 )
 {
     vars_check( v1, RHS_TYPES | REF_PTR | INT_PTR | FLOAT_PTR | SUB_REF_PTR );
     vars_check( v2, RHS_TYPES );
@@ -86,9 +87,10 @@ Var_T *vars_pow( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_pow_i( Var_T * v1,
-                          Var_T * v2,
-                          bool    exc )
+static Var_T *
+vars_pow_i( Var_T * v1,
+            Var_T * v2,
+            bool    exc )
 {
     Var_T *new_var = NULL;
 
@@ -126,9 +128,10 @@ static Var_T *vars_pow_i( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_int_var_pow( Var_T * v1,
-                                Var_T * v2,
-                                bool    exc )
+static Var_T *
+vars_int_var_pow( Var_T * v1,
+                  Var_T * v2,
+                  bool    exc )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -287,9 +290,10 @@ static Var_T *vars_int_var_pow( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_float_var_pow( Var_T * v1,
-                                  Var_T * v2,
-                                  bool    exc )
+static Var_T *
+vars_float_var_pow( Var_T * v1,
+                    Var_T * v2,
+                    bool    exc )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -433,9 +437,10 @@ static Var_T *vars_float_var_pow( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_int_arr_pow( Var_T * v1,
-                                Var_T * v2,
-                                bool    exc )
+static Var_T *
+vars_int_arr_pow( Var_T * v1,
+                  Var_T * v2,
+                  bool    exc )
 {
     Var_T *new_var = NULL;
     Var_T *vt;
@@ -545,9 +550,10 @@ static Var_T *vars_int_arr_pow( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_float_arr_pow( Var_T * v1,
-                                  Var_T * v2,
-                                  bool exc )
+static Var_T *
+vars_float_arr_pow( Var_T * v1,
+                    Var_T * v2,
+                    bool    exc )
 {
     Var_T *new_var = NULL;
     Var_T *vt;
@@ -635,9 +641,10 @@ static Var_T *vars_float_arr_pow( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_ref_pow( Var_T * v1,
-                            Var_T * v2,
-                            bool    exc )
+static Var_T *
+vars_ref_pow( Var_T * v1,
+              Var_T * v2,
+              bool    exc )
 {
     Var_T *new_var = NULL;
     Var_T *vt;
@@ -706,8 +713,9 @@ static Var_T *vars_ref_pow( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static void vars_pow_check( double v1,
-                            double v2 )
+static void
+vars_pow_check( double v1,
+                double v2 )
 {
     if ( v1 < 0.0 && fmod( fabs( v2 ), 1.0 ) != 0.0 )
     {

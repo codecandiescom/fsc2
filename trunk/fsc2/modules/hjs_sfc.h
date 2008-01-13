@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -64,20 +64,20 @@ int hjs_sfc_exp_hook(        void );
 int hjs_sfc_end_of_exp_hook( void );
 void hjs_sfc_exit_hook(      void );
 
-Var_T *magnet_name(             Var_T * /* v */ );
-Var_T *magnet_setup(            Var_T * /* v */ );
-Var_T *magnet_field(            Var_T * /* v */ );
-Var_T *set_field(               Var_T * /* v */ );
-Var_T *get_field(               Var_T * /* v */ );
-Var_T *sweep_up(                Var_T * /* v */ );
-Var_T *sweep_down(              Var_T * /* v */ );
-Var_T *magnet_sweep_up(         Var_T * /* v */ );
-Var_T *magnet_sweep_down(       Var_T * /* v */ );
-Var_T *reset_field(             Var_T * /* v */ );
-Var_T *magnet_reset_field(      Var_T * /* v */ );
-Var_T *magnet_B0(               Var_T * /* v */ );
-Var_T *magnet_slope(            Var_T * /* v */ );
-Var_T *magnet_calibration_file( Var_T * /* v */ );
+Var_T * magnet_name(             Var_T * /* v */ );
+Var_T * magnet_setup(            Var_T * /* v */ );
+Var_T * magnet_field(            Var_T * /* v */ );
+Var_T * set_field(               Var_T * /* v */ );
+Var_T * get_field(               Var_T * /* v */ );
+Var_T * sweep_up(                Var_T * /* v */ );
+Var_T * sweep_down(              Var_T * /* v */ );
+Var_T * magnet_sweep_up(         Var_T * /* v */ );
+Var_T * magnet_sweep_down(       Var_T * /* v */ );
+Var_T * reset_field(             Var_T * /* v */ );
+Var_T * magnet_reset_field(      Var_T * /* v */ );
+Var_T * magnet_B0(               Var_T * /* v */ );
+Var_T * magnet_slope(            Var_T * /* v */ );
+Var_T * magnet_calibration_file( Var_T * /* v */ );
 
 
 void hjs_sfc_read_calibration( void );

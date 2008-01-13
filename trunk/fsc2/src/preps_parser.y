@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -308,7 +308,8 @@ strs:    STR_TOKEN                { if ( ! Dont_exec )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void prepserror( const char * s  UNUSED_ARG )
+static void
+prepserror( const char * s  UNUSED_ARG )
 {
     if ( *prepstext == '\0' )
         print( FATAL, "Unexpected end of file in PREPARATIONS section.\n" );
@@ -321,7 +322,8 @@ static void prepserror( const char * s  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void prepsparser_init( void )
+void
+prepsparser_init( void )
 {
     Dont_exec = 0;
 }

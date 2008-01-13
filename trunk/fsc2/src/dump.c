@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -52,7 +52,8 @@ enum {
  * function. 
  *--------------------------------------------------------*/
 
-void dump_stack( FILE * fp )
+void
+dump_stack( FILE * fp )
 {
     int pipe_fd[ 4 ];
     pid_t pid;
@@ -147,10 +148,11 @@ void dump_stack( FILE * fp )
  * few modifications, into the the file we got passed.
  *-----------------------------------------------------------------------*/
 
-static int write_dump( int  * pipe_fd,
-                       FILE * fp,
-                       int    k,
-                       void * addr )
+static int
+write_dump( int  * pipe_fd,
+            FILE * fp,
+            int    k,
+            void * addr )
 {
     char buf[ 256 ] = "";
     ssize_t ret;
@@ -262,7 +264,8 @@ static int write_dump( int  * pipe_fd,
  * frame is.
  *-----------------------------------------------------*/
 
-int create_backtrace( unsigned int * bt )
+int
+create_backtrace( unsigned int * bt )
 {
     unsigned int *EBP = bt;         /* assumes size equals that of pointers */
     int size = 1;

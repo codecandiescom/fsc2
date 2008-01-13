@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -40,7 +40,8 @@ static void hfs9000_pulse_start_setup( void );
  * the start of a test run.
  *-------------------------------------------------------------*/
 
-void hfs9000_init_setup( void )
+void
+hfs9000_init_setup( void )
 {
     hfs9000_basic_pulse_check( );
     hfs9000_basic_functions_check( );
@@ -62,7 +63,8 @@ void hfs9000_init_setup( void )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void hfs9000_init_print( FILE * fp )
+static void
+hfs9000_init_print( FILE * fp )
 {
     Function_T *f;
     int i;
@@ -94,7 +96,8 @@ static void hfs9000_init_print( FILE * fp )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void hfs9000_basic_pulse_check( void )
+static void
+hfs9000_basic_pulse_check( void )
 {
     Pulse_T *p;
     Function_T *f;
@@ -168,7 +171,8 @@ static void hfs9000_basic_pulse_check( void )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void hfs9000_basic_functions_check( void )
+static void
+hfs9000_basic_functions_check( void )
 {
     Function_T *f;
     int i;
@@ -221,7 +225,8 @@ static void hfs9000_basic_functions_check( void )
 /*--------------------------------------------------------------------------*
  *--------------------------------------------------------------------------*/
 
-static void hfs9000_pulse_start_setup( void )
+static void
+hfs9000_pulse_start_setup( void )
 {
     Function_T *f;
     int i;

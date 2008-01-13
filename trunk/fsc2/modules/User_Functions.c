@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -52,7 +52,8 @@ static void pc_basic_check( const char * /* func_1 */,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *get_phase_cycled_area( Var_T * v )
+Var_T *
+get_phase_cycled_area( Var_T * v )
 {
     if ( PA_Seq.acq_seq[ 0 ].defined && PA_Seq.acq_seq[ 1 ].defined )
         return get_phase_cycled_area_2( v );
@@ -78,7 +79,8 @@ Var_T *get_phase_cycled_area( Var_T * v )
  *    phase cycled area for each window
  *-----------------------------------------------------------------*/
 
-static Var_T *get_phase_cycled_area_1( Var_T * v )
+static Var_T *
+get_phase_cycled_area_1( Var_T * v )
 {
     static Var_T *V;
     Var_T *func_ptr;
@@ -295,7 +297,8 @@ static Var_T *get_phase_cycled_area_1( Var_T * v )
  *    phase cycled area for each window
  *-----------------------------------------------------------------*/
 
-static Var_T *get_phase_cycled_area_2( Var_T * v )
+static Var_T *
+get_phase_cycled_area_2( Var_T * v )
 {
     static Var_T *V;
     Var_T *func_ptr;
@@ -568,8 +571,9 @@ static Var_T *get_phase_cycled_area_2( Var_T * v )
  * If it is the value is returned in 'channel'.
  *-----------------------------------------------------------------------*/
 
-static bool get_channel_number( Var_T * v,
-                                long *  channel )
+static bool
+ get_channel_number( Var_T * v,
+                     long *  channel )
 {
     Var_T *func_ptr;
     Var_T *vn;
@@ -599,11 +603,12 @@ static bool get_channel_number( Var_T * v,
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-static void pc_basic_check( const char * func_1,
-                            bool *       is_1,
-                            const char * func_2,
-                            bool *       is_2,
-                            const char * str )
+static void
+pc_basic_check( const char * func_1,
+                bool *       is_1,
+                const char * func_2,
+                bool *       is_2,
+                const char * str )
 {
     /* At the very start lets figure out if there are pulser functions for
        phase cycling */

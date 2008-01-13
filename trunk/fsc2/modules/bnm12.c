@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -77,9 +77,9 @@ int bnm12_test_hook(  void );
 int bnm12_exp_hook(   void );
 void bnm12_exit_hook( void );
 
-Var_T *gaussmeter_name(       Var_T * v );
-Var_T *gaussmeter_field(      Var_T * v );
-Var_T *gaussmeter_resolution( Var_T * v );
+Var_T * gaussmeter_name(       Var_T * v );
+Var_T * gaussmeter_field(      Var_T * v );
+Var_T * gaussmeter_resolution( Var_T * v );
 
 
 /* Local functions */
@@ -103,7 +103,8 @@ static void bnm12_check_field( void );
  * complain if it isn't.
  *--------------------------------------------------------------*/
 
-int bnm12_init_hook( void )
+int
+bnm12_init_hook( void )
 {
     Var_T *Func_ptr;
     int acc;
@@ -204,7 +205,8 @@ int bnm12_init_hook( void )
  * during the test run.
  *----------------------------------------------------------*/
 
-int bnm12_test_hook( void )
+int
+bnm12_test_hook( void )
 {
     bnm12_stored = bnm12;
     return 1;
@@ -216,7 +218,8 @@ int bnm12_test_hook( void )
  * the preparations section.
  *-------------------------------------------------------------*/
 
-int bnm12_exp_hook( void )
+int
+bnm12_exp_hook( void )
 {
     bnm12 = bnm12_stored;
 
@@ -230,7 +233,8 @@ int bnm12_exp_hook( void )
  * Function that gets called just before the module gets unloaded
  *----------------------------------------------------------------*/
 
-void bnm12_exit_hook( void )
+void
+bnm12_exit_hook( void )
 {
     if ( bnm12.dio_value_func )
         T_free( bnm12.dio_value_func );
@@ -247,7 +251,8 @@ void bnm12_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *gaussmeter_name( Var_T * v  UNUSED_ARG )
+Var_T *
+gaussmeter_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -257,7 +262,8 @@ Var_T *gaussmeter_name( Var_T * v  UNUSED_ARG )
  * Measure a new field value and return it to the caller
  *-------------------------------------------------------*/
 
-Var_T *gaussmeter_field( Var_T * v  UNUSED_ARG )
+Var_T *
+gaussmeter_field( Var_T * v  UNUSED_ARG )
 {
     return vars_push( FLOAT_VAR, bnm12_get_field( ) );
 }
@@ -269,7 +275,8 @@ Var_T *gaussmeter_field( Var_T * v  UNUSED_ARG )
  * trust what the user tells us...
  *----------------------------------------------------------------*/
 
-Var_T *gaussmeter_resolution( Var_T * v )
+Var_T *
+gaussmeter_resolution( Var_T * v )
 {
     double res;
     int i;
@@ -335,7 +342,8 @@ Var_T *gaussmeter_resolution( Var_T * v )
  * from BCD format.
  *---------------------------------------------------------------*/
 
-static double bnm12_get_field( void )
+static double
+bnm12_get_field( void )
 {
     Var_T *Func_ptr;
     int acc;
@@ -390,7 +398,8 @@ static double bnm12_get_field( void )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-static void bnm12_check_field( void )
+static void
+bnm12_check_field( void )
 {
     Var_T *Func_ptr;
     int acc;

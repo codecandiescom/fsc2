@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -41,17 +41,17 @@ int aeg_x_band_test_hook(       void );
 int aeg_x_band_exp_hook(        void );
 int aeg_x_band_end_of_exp_hook( void );
 
-Var_T *magnet_name(            Var_T * v );
-Var_T *magnet_setup(           Var_T * v );
-Var_T *magnet_fast_init(       Var_T * v );
-Var_T *magnet_field(           Var_T * v );
-Var_T *set_field(              Var_T * v );
-Var_T *get_field(              Var_T * v );
-Var_T *magnet_field_step_size( Var_T * v );
-Var_T *sweep_up(               Var_T * v );
-Var_T *sweep_down(             Var_T * v );
-Var_T *reset_field(            Var_T * v );
-Var_T *magnet_reset_field(     Var_T * v );
+Var_T * magnet_name(            Var_T * v );
+Var_T * magnet_setup(           Var_T * v );
+Var_T * magnet_fast_init(       Var_T * v );
+Var_T * magnet_field(           Var_T * v );
+Var_T * set_field(              Var_T * v );
+Var_T * get_field(              Var_T * v );
+Var_T * magnet_field_step_size( Var_T * v );
+Var_T * sweep_up(               Var_T * v );
+Var_T * sweep_down(             Var_T * v );
+Var_T * reset_field(            Var_T * v );
+Var_T * magnet_reset_field(     Var_T * v );
 
 
 
@@ -119,7 +119,8 @@ enum {
  * test if this driver will be loaded before the magnet driver.
  *----------------------------------------------------------------*/
 
-int aeg_x_band_init_hook( void )
+int
+aeg_x_band_init_hook( void )
 {
     void *is_gaussmeter;
     int ret;
@@ -204,7 +205,8 @@ int aeg_x_band_init_hook( void )
 /*---------------------------------------------------------------------*
  *---------------------------------------------------------------------*/
 
-int aeg_x_band_test_hook( void )
+int
+aeg_x_band_test_hook( void )
 {
     if ( magnet.is_field )
         magnet.act_field = magnet.field;
@@ -217,7 +219,8 @@ int aeg_x_band_test_hook( void )
  * Opens connection to the power supply and calibrates the field sweep
  *---------------------------------------------------------------------*/
 
-int aeg_x_band_exp_hook( void )
+int
+aeg_x_band_exp_hook( void )
 {
     Var_T *v;
     int acc;
@@ -252,7 +255,8 @@ int aeg_x_band_exp_hook( void )
  * Closes the connection to the power supply after an experiment
  *---------------------------------------------------------------*/
 
-int aeg_x_band_end_of_exp_hook( void )
+int
+aeg_x_band_end_of_exp_hook( void )
 {
     /* Reset the serial port */
 
@@ -275,7 +279,8 @@ int aeg_x_band_end_of_exp_hook( void )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_name( Var_T * v  UNUSED_ARG )
+Var_T *
+magnet_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -285,7 +290,8 @@ Var_T *magnet_name( Var_T * v  UNUSED_ARG )
  * Function for registering the start field and the field step size.
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T * v )
+Var_T *
+magnet_setup( Var_T * v )
 {
     bool err_flag = UNSET;
     double start_field;
@@ -338,7 +344,8 @@ Var_T *magnet_setup( Var_T * v )
  * magnet sweep but unfortunately also reducing the accuracy.
  *--------------------------------------------------------------------*/
 
-Var_T *magnet_fast_init( Var_T * v  UNUSED_ARG )
+Var_T *
+magnet_fast_init( Var_T * v  UNUSED_ARG )
 {
     magnet.fast_init = SET;
     return vars_push( INT_VAR, 1L );
@@ -348,7 +355,8 @@ Var_T *magnet_fast_init( Var_T * v  UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *magnet_field( Var_T * v )
+Var_T *
+magnet_field( Var_T * v )
 {
     return v == NULL ? get_field( v ) : set_field( v );
 }
@@ -357,7 +365,8 @@ Var_T *magnet_field( Var_T * v )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *set_field( Var_T * v )
+Var_T *
+set_field( Var_T * v )
 {
     double field;
     bool err_flag = UNSET;
@@ -413,7 +422,8 @@ Var_T *set_field( Var_T * v )
  * Convenience function: just asks the used gaussmeter for the current field
  *---------------------------------------------------------------------------*/
 
-Var_T *get_field( Var_T * v  UNUSED_ARG )
+Var_T *
+get_field( Var_T * v  UNUSED_ARG )
 {
     Var_T *new_var;
     int acc;
@@ -428,7 +438,8 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *sweep_up( Var_T * v  UNUSED_ARG )
+Var_T *
+sweep_up( Var_T * v  UNUSED_ARG )
 {
     bool err_flag = UNSET;
 
@@ -459,7 +470,8 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *sweep_down( Var_T * v  UNUSED_ARG )
+Var_T *
+sweep_down( Var_T * v  UNUSED_ARG )
 {
     bool err_flag = UNSET;
 
@@ -490,7 +502,8 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *magnet_reset_field( Var_T * v  UNUSED_ARG )
+Var_T *
+magnet_reset_field( Var_T * v  UNUSED_ARG )
 {
     return reset_field( v );
 }
@@ -499,7 +512,8 @@ Var_T *magnet_reset_field( Var_T * v  UNUSED_ARG )
 /*-----------------------------------------------------*
  *-----------------------------------------------------*/
 
-Var_T *reset_field( Var_T * v  UNUSED_ARG )
+Var_T *
+reset_field( Var_T * v  UNUSED_ARG )
 {
     if ( ! magnet.is_field )
     {
@@ -525,8 +539,9 @@ Var_T *reset_field( Var_T * v  UNUSED_ARG )
 /********************************************************/
 
 
-static double aeg_x_band_field_check( double field,
-                                      bool * err_flag )
+static double
+aeg_x_band_field_check( double field,
+                        bool * err_flag )
 {
     if ( exists_device( "er035m" ) )
     {
@@ -665,7 +680,8 @@ static double aeg_x_band_field_check( double field,
  * to the start field.
  *--------------------------------------------------------------------------*/
 
-static bool magnet_init( void )
+static bool
+magnet_init( void )
 {
     double start_field;
     int i;
@@ -780,8 +796,9 @@ try_again:
  * be compensated and the sweep can be done faster.
  *-------------------------------------------------------------------------*/
 
-static bool magnet_goto_field( double field,
-                               double error )
+static bool
+magnet_goto_field( double field,
+                   double error )
 {
     static double last_field_step = -1.0;
     static double last_mini_steps = 0.0;
@@ -815,10 +832,11 @@ static bool magnet_goto_field( double field,
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-static bool magnet_goto_field_rec( double   field,
-                                   double   error,
-                                   int      rec,
-                                   double * hint )
+static bool
+magnet_goto_field_rec( double   field,
+                       double   error,
+                       int      rec,
+                       double * hint )
 {
     double mini_steps;
     int steps;
@@ -931,7 +949,8 @@ static bool magnet_goto_field_rec( double   field,
  * argument.
  *----------------------------------------------------------------*/
 
-Var_T *magnet_field_step_size( Var_T * v )
+Var_T *
+magnet_field_step_size( Var_T * v )
 {
     double field_step;
     long steps;
@@ -967,7 +986,8 @@ Var_T *magnet_field_step_size( Var_T * v )
 /*-----------------------------------------------------------------------*
  *-----------------------------------------------------------------------*/
 
-static void magnet_sweep( int dir )
+static void
+magnet_sweep( int dir )
 {
     int steps, i;
     double mini_steps;
@@ -1054,7 +1074,8 @@ static void magnet_sweep( int dir )
  * face.
  *---------------------------------------------------------------------------*/
 
-bool magnet_do( int command )
+bool
+magnet_do( int command )
 {
     unsigned char data[ 2 ];
     int volt;

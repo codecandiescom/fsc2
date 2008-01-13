@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -95,26 +95,26 @@ int spectrapro_300i_init_hook(       void );
 int spectrapro_300i_exp_hook(        void );
 int spectrapro_300i_end_of_exp_hook( void );
 
-Var_T *monochromator_name(             Var_T * /* v */ );
-Var_T *monochromator_turret(           Var_T * /* v */ );
-Var_T *monochromator_grating(          Var_T * /* v */ );
-Var_T *monochromator_wavelength(       Var_T * /* v */ );
-Var_T *monochromator_wavenumber(       Var_T * /* v */ );
-Var_T *monochromator_install_grating(  Var_T * /* v */ );
-Var_T *monochromator_groove_density(   Var_T * /* v */ );
-Var_T *monochromator_calibrate(        Var_T * /* v */ );
-Var_T *monochromator_wavelength_axis(  Var_T * /* v */ );
-Var_T *monochromator_wavenumber_axis(  Var_T * /* v */ );
-Var_T *monochromator_calc_wavelength(  Var_T * /* v */ );
-Var_T *monochromator_load_calibration( Var_T * /* v */ );
-Var_T *monochromator_set_calibration(  Var_T * /* v */ );
-Var_T *monochromator_zero_offset(      Var_T * /* v */ );
-Var_T *monochromator_grating_adjust(   Var_T * /* v */ );
+Var_T * monochromator_name(             Var_T * /* v */ );
+Var_T * monochromator_turret(           Var_T * /* v */ );
+Var_T * monochromator_grating(          Var_T * /* v */ );
+Var_T * monochromator_wavelength(       Var_T * /* v */ );
+Var_T * monochromator_wavenumber(       Var_T * /* v */ );
+Var_T * monochromator_install_grating(  Var_T * /* v */ );
+Var_T * monochromator_groove_density(   Var_T * /* v */ );
+Var_T * monochromator_calibrate(        Var_T * /* v */ );
+Var_T * monochromator_wavelength_axis(  Var_T * /* v */ );
+Var_T * monochromator_wavenumber_axis(  Var_T * /* v */ );
+Var_T * monochromator_calc_wavelength(  Var_T * /* v */ );
+Var_T * monochromator_load_calibration( Var_T * /* v */ );
+Var_T * monochromator_set_calibration(  Var_T * /* v */ );
+Var_T * monochromator_zero_offset(      Var_T * /* v */ );
+Var_T * monochromator_grating_adjust(   Var_T * /* v */ );
 
 
-FILE *spectrapro_300i_find_calib( char * /* name */ );
+FILE * spectrapro_300i_find_calib( char * /* name */ );
 
-FILE *spectrapro_300i_open_calib( char * /* name */ );
+FILE * spectrapro_300i_open_calib( char * /* name */ );
 
 double spectrapro_300i_min( double * /* x   */,
                             void *   /* par */  );

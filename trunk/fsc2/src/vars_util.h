@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,11 +31,11 @@
 
 Var_T *vars_negate( Var_T * /* v */ );
 
-Var_T *vars_comp( int     /* comp_type */,
-                  Var_T * /* v1        */,
-                  Var_T * /* v2        */  );
+Var_T * vars_comp( int     /* comp_type */,
+                   Var_T * /* v1        */,
+                   Var_T * /* v2        */  );
 
-Var_T *vars_lnegate( Var_T * /* v */ );
+Var_T * vars_lnegate( Var_T * /* v */ );
 
 void vars_arith_len_check( Var_T *      /* v1 */,
                            Var_T *      /* v2 */,

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -33,7 +33,8 @@
  * driven monochromators, the position of the laser line.
  *---------------------------------------------------------------------*/
 
-bool spex_cd2a_read_state( void )
+bool
+spex_cd2a_read_state( void )
 {
     char *fn;
     const char *dn;
@@ -154,7 +155,8 @@ bool spex_cd2a_read_state( void )
  * Function for writing the state of teh monochromator to a file
  *---------------------------------------------------------------*/
 
-bool spex_cd2a_store_state( void )
+bool
+spex_cd2a_store_state( void )
 {
     char *fn;
     const char *dn;
@@ -218,7 +220,8 @@ bool spex_cd2a_store_state( void )
  * Converts a wavelength into an absolute wavenumber
  *---------------------------------------------------*/
 
-double spex_cd2a_wl2wn( double wl )
+double
+spex_cd2a_wl2wn( double wl )
 {
     if ( wl <= 0.0 )
         SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
@@ -230,7 +233,8 @@ double spex_cd2a_wl2wn( double wl )
  * Converts an absolute wavenumber into a wavelength
  *---------------------------------------------------*/
 
-double spex_cd2a_wn2wl( double wn )
+double
+spex_cd2a_wn2wl( double wn )
 {
     if ( wn <= 0.0 )
         SPEX_CD2A_THROW( INVALID_INPUT_EXCEPTION );
@@ -243,7 +247,8 @@ double spex_cd2a_wn2wl( double wn )
  * by the user (i.e. with correction included)
  *-----------------------------------------------------------*/
 
-double spex_cd2a_wl2Uwl( double wl )
+double
+spex_cd2a_wl2Uwl( double wl )
 {
     wl -= spex_cd2a.offset;
     if ( wl <= 0.0 )
@@ -257,7 +262,8 @@ double spex_cd2a_wl2Uwl( double wl )
  * correction included) to the internally used value.
  *------------------------------------------------------*/
 
-double spex_cd2a_Uwl2wl( double wl )
+double
+spex_cd2a_Uwl2wl( double wl )
 {
     wl += spex_cd2a.offset;
     if ( wl <= 0.0 )
@@ -272,7 +278,8 @@ double spex_cd2a_Uwl2wl( double wl )
  * it to relative units if a laser line is set).
  *-----------------------------------------------------------*/
 
-double spex_cd2a_wn2Uwn( double wn )
+double
+spex_cd2a_wn2Uwn( double wn )
 {
     wn = spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( spex_cd2a_wn2wl( wn ) ) );
 
@@ -289,7 +296,8 @@ double spex_cd2a_wn2Uwn( double wn )
  * line is set) to the internally used value.
  *-----------------------------------------------------------*/
 
-double spex_cd2a_Uwn2wn( double wn )
+double
+spex_cd2a_Uwn2wn( double wn )
 {
     if ( spex_cd2a.mode == WN_REL )
         wn = spex_cd2a.laser_line - wn;
@@ -304,7 +312,8 @@ double spex_cd2a_Uwn2wn( double wn )
  * and relative to the laser line if one is set).
  *-----------------------------------------------------------*/
 
-double spex_cd2a_wl2Uwn( double wl )
+double
+spex_cd2a_wl2Uwn( double wl )
 {
     double wn = spex_cd2a_wl2wn( spex_cd2a_wl2Uwl( wl ) );
 
@@ -320,7 +329,8 @@ double spex_cd2a_wl2Uwn( double wl )
  * offset correction) to internally used wavenumber.
  *----------------------------------------------------------------*/
 
-double spex_cd2a_Uwl2wn( double wl )
+double
+spex_cd2a_Uwl2wn( double wl )
 {
     return spex_cd2a_wl2wn( spex_cd2a_Uwl2wl( wl ) );
 }
@@ -331,7 +341,8 @@ double spex_cd2a_Uwl2wn( double wl )
  * seen by the user (i.e. including offset correction).
  *--------------------------------------------------------*/
 
-double spex_cd2a_wn2Uwl( double wn )
+double
+spex_cd2a_wn2Uwl( double wn )
 {
     return spex_cd2a_wl2Uwl( spex_cd2a_wn2wl( wn ) );
 }
@@ -343,7 +354,8 @@ double spex_cd2a_wn2Uwl( double wn )
  * necessary) to internally used wavelength.
  *-----------------------------------------------------------*/
 
-double spex_cd2a_Uwn2wl( double wn )
+double
+spex_cd2a_Uwn2wl( double wn )
 {
     return spex_cd2a_wn2wl( spex_cd2a_Uwn2wn( wn ) );
 }
@@ -354,7 +366,8 @@ double spex_cd2a_Uwn2wl( double wn )
  * to be send to the monochromator under its current setting.
  *-----------------------------------------------------------*/
 
-double spex_cd2a_wl2mu( double wl )
+double
+spex_cd2a_wl2mu( double wl )
 {
     switch ( spex_cd2a.mode )
     {

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -63,8 +63,8 @@ int gg_chopper_exp_hook(        void );
 int gg_chopper_end_of_exp_hook( void );
 void gg_chopper_exit_hook(      void );
 
-Var_T *chopper_name(             Var_T * v );
-Var_T *chopper_sector_frequency( Var_T * v );
+Var_T * chopper_name(             Var_T * v );
+Var_T * chopper_sector_frequency( Var_T * v );
 
 
 static void gg_chopper_set_dio( long val );
@@ -79,7 +79,8 @@ static void gg_chopper_set_freq_out( double freq );
  * initializes a few data.
  *-----------------------------------------------------------------*/
 
-int gg_chopper_init_hook( void )
+int
+gg_chopper_init_hook( void )
 {
     int dev_num;
     Var_T *func_ptr;
@@ -199,7 +200,8 @@ int gg_chopper_init_hook( void )
  * Function gets called at the start of the test run
  *---------------------------------------------------*/
 
-int gg_chopper_test_hook( void )
+int
+gg_chopper_test_hook( void )
 {
     gg_chopper_reserved = gg_chopper;
     return 1;
@@ -215,7 +217,8 @@ int gg_chopper_test_hook( void )
  * (of 45 degree each).
  *------------------------------------------------------------------*/
 
-int gg_chopper_exp_hook( void )
+int
+gg_chopper_exp_hook( void )
 {
     gg_chopper = gg_chopper_reserved;
 
@@ -246,7 +249,8 @@ int gg_chopper_exp_hook( void )
  * Function called at the end of an experiment, just stopping the chopper.
  *------------------------------------------------------------------------*/
 
-int gg_chopper_end_of_exp_hook( void )
+int
+gg_chopper_end_of_exp_hook( void )
 {
     /* Stop the chopper */
 
@@ -261,7 +265,8 @@ int gg_chopper_end_of_exp_hook( void )
  * Function that gets called just before the module is removed.
  *--------------------------------------------------------------*/
 
-void gg_chopper_exit_hook( void )
+void
+gg_chopper_exit_hook( void )
 {
     if ( gg_chopper.dio_func )
         gg_chopper.dio_func = CHAR_P T_free( gg_chopper.dio_func );
@@ -274,7 +279,8 @@ void gg_chopper_exit_hook( void )
 /* Function returns a string variable with the name of the device */
 /*----------------------------------------------------------------*/
 
-Var_T *chopper_name( Var_T * v  UNUSED_ARG )
+Var_T *
+chopper_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -285,7 +291,8 @@ Var_T *chopper_name( Var_T * v  UNUSED_ARG )
  * determine or set the sector frequency of the chopper.
  *---------------------------------------------------------------*/
 
-Var_T *chopper_sector_frequency( Var_T * v )
+Var_T *
+chopper_sector_frequency( Var_T * v )
 {
     double freq;
     long dio_value;
@@ -343,7 +350,8 @@ Var_T *chopper_sector_frequency( Var_T * v )
  * DAQ device.
  *--------------------------------------------------------------*/
 
-static void gg_chopper_set_dio( long val )
+static void
+gg_chopper_set_dio( long val )
 {
     Var_T *func_ptr;
     int acc;
@@ -366,7 +374,8 @@ static void gg_chopper_set_dio( long val )
  * FREQ_OUT pin of the DAQ device.
  *--------------------------------------------------------------*/
 
-static void gg_chopper_set_freq_out( double freq )
+static void
+gg_chopper_set_freq_out( double freq )
 {
     Var_T *func_ptr;
     int acc;

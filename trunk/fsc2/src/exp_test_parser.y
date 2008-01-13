@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -254,7 +254,8 @@ strs:    E_STR_TOKEN
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-static void exp_testerror( const char * s  UNUSED_ARG )
+static void
+exp_testerror( const char * s  UNUSED_ARG )
 {
     if ( ! Dont_print_error && ! In_cond )
     {
@@ -281,7 +282,8 @@ static void exp_testerror( const char * s  UNUSED_ARG )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-void exp_test_init( void )
+void
+exp_test_init( void )
 {
     Dont_print_error = UNSET;
     In_cond = UNSET;

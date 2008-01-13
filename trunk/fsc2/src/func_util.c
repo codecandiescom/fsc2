@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -61,7 +61,8 @@ extern volatile sig_atomic_t Can_Jmp_Alrm;    /* defined in run.c */
  * the format string.
  *-----------------------------------------------------------------------*/
 
-Var_T * f_print( Var_T * v )
+Var_T *
+f_print( Var_T * v )
 {
     char *fmt;
     char *cp;
@@ -258,7 +259,8 @@ Var_T * f_print( Var_T * v )
  * the format string.
  *-----------------------------------------------------------------------*/
 
-Var_T * f_sprint( Var_T * v )
+Var_T *
+f_sprint( Var_T * v )
 {
     char *fmt;
     char *cp;
@@ -454,7 +456,8 @@ Var_T * f_sprint( Var_T * v )
  * Called for the EDL function "show_message()".
  *-----------------------------------------------*/
 
-Var_T * f_showm( Var_T * v )
+Var_T *
+f_showm( Var_T * v )
 {
     char *mess;
     char *mp;
@@ -518,7 +521,8 @@ Var_T * f_showm( Var_T * v )
  *  * number of seconds to sleep
  *-------------------------------------------------------------------*/
 
-Var_T * f_wait( Var_T * v )
+Var_T *
+f_wait( Var_T * v )
 {
     struct itimerval sleepy;
     double how_long;
@@ -634,7 +638,8 @@ Var_T * f_wait( Var_T * v )
  * 5. y-axis label (optional)
  *-------------------------------------------------------------------*/
 
-Var_T * f_init_1d( Var_T * v )
+Var_T *
+f_init_1d( Var_T * v )
 {
     int i;
 
@@ -750,7 +755,8 @@ Var_T * f_init_1d( Var_T * v )
  * 2-dimensional experiments.
  *-------------------------------------------------------------------*/
 
-Var_T * f_init_2d( Var_T * v )
+Var_T *
+f_init_2d( Var_T * v )
 {
     int i;
 
@@ -912,7 +918,8 @@ Var_T * f_init_2d( Var_T * v )
  * Function to change 1D display mode
  *------------------------------------*/
 
-Var_T * f_dmode( Var_T * v )
+Var_T *
+f_dmode( Var_T * v )
 {
     long mode;
     long width = 0;
@@ -1062,7 +1069,8 @@ Var_T * f_dmode( Var_T * v )
  * Function to change the scale during the experiment
  *----------------------------------------------------*/
 
-Var_T * f_cscale( Var_T * v )
+Var_T *
+f_cscale( Var_T * v )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -1102,7 +1110,8 @@ Var_T * f_cscale( Var_T * v )
  * Function to change the scale of a 1D display during the experiment
  *--------------------------------------------------------------------*/
 
-Var_T * f_cscale_1d( Var_T * v )
+Var_T *
+f_cscale_1d( Var_T * v )
 {
     double x_0, dx;                  /* new scale settings */
     int is_set = 0;                  /* flags, indicating what to change */
@@ -1222,7 +1231,8 @@ Var_T * f_cscale_1d( Var_T * v )
  * Function to change the scale of a 2D display during the experiment
  *--------------------------------------------------------------------*/
 
-Var_T * f_cscale_2d( Var_T * v )
+Var_T *
+f_cscale_2d( Var_T * v )
 {
     double x_0, y_0, dx, dy;         /* new scale settings */
     int is_set = 0;                  /* flags, indicating what to change */
@@ -1359,7 +1369,8 @@ Var_T * f_cscale_2d( Var_T * v )
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-Var_T * f_vrescale( Var_T * v )
+Var_T *
+f_vrescale( Var_T * v )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -1398,7 +1409,8 @@ Var_T * f_vrescale( Var_T * v )
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-Var_T * f_vrescale_1d( Var_T * v  UNUSED_ARG )
+Var_T *
+f_vrescale_1d( Var_T * v  UNUSED_ARG )
 {
     int shm_id;
     long len = 0;                    /* total length of message to send */
@@ -1480,7 +1492,8 @@ Var_T * f_vrescale_1d( Var_T * v  UNUSED_ARG )
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-Var_T * f_vrescale_2d( Var_T * v  UNUSED_ARG )
+Var_T *
+f_vrescale_2d( Var_T * v  UNUSED_ARG )
 {
     int shm_id;
     long len = 0;                    /* total length of message to send */
@@ -1563,7 +1576,8 @@ Var_T * f_vrescale_2d( Var_T * v  UNUSED_ARG )
  * Function to change one or more axis labels during the experiment
  *------------------------------------------------------------------*/
 
-Var_T * f_clabel( Var_T * v )
+Var_T *
+f_clabel( Var_T * v )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -1604,7 +1618,8 @@ Var_T * f_clabel( Var_T * v )
 /* of a 1D display during the experiment      */
 /*--------------------------------------------*/
 
-Var_T * f_clabel_1d( Var_T * v )
+Var_T *
+f_clabel_1d( Var_T * v )
 {
     char *l[ 2 ] = { NULL, NULL };
     long lengths[ 2 ] = { 1, 1 };
@@ -1731,7 +1746,8 @@ Var_T * f_clabel_1d( Var_T * v )
  * of a 2D display during the experiment
  *--------------------------------------------*/
 
-Var_T * f_clabel_2d( Var_T * v )
+Var_T *
+f_clabel_2d( Var_T * v )
 {
     char *l[ 3 ] = { NULL, NULL, NULL };
     long lengths[ 3 ] = { 1, 1, 1 };
@@ -1866,7 +1882,8 @@ Var_T * f_clabel_2d( Var_T * v )
  * during the experiment.
  *---------------------------------------------------------*/
 
-Var_T * f_rescale( Var_T * v )
+Var_T *
+f_rescale( Var_T * v )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -1907,7 +1924,8 @@ Var_T * f_rescale( Var_T * v )
  * in a 1D display during the experiment.
  *---------------------------------------------------------*/
 
-Var_T * f_rescale_1d( Var_T * v )
+Var_T *
+f_rescale_1d( Var_T * v )
 {
     long new_nx;
     int shm_id;
@@ -2010,7 +2028,8 @@ Var_T * f_rescale_1d( Var_T * v )
  * in a 2D display during the experiment.
  *---------------------------------------------------------*/
 
-Var_T * f_rescale_2d( Var_T * v )
+Var_T *
+f_rescale_2d( Var_T * v )
 {
     long new_nx, new_ny;
     int shm_id;
@@ -2121,7 +2140,8 @@ Var_T * f_rescale_2d( Var_T * v )
  * f_display() is used to send new data to the display system.
  *-------------------------------------------------------------*/
 
-Var_T * f_display( Var_T * v )
+Var_T *
+f_display( Var_T * v )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -2160,7 +2180,8 @@ Var_T * f_display( Var_T * v )
  * f_display() is used to send new 1D data to the display system.
  *----------------------------------------------------------------*/
 
-Var_T * f_display_1d( Var_T * v )
+Var_T *
+f_display_1d( Var_T * v )
 {
     dpoint_T *dp;
     int shm_id;
@@ -2339,7 +2360,8 @@ Var_T * f_display_1d( Var_T * v )
  * f_display_2d() is used to send new 2D data to the display system.
  *-------------------------------------------------------------------*/
 
-Var_T * f_display_2d( Var_T * v )
+Var_T *
+f_display_2d( Var_T * v )
 {
     dpoint_T *dp;
     int shm_id;
@@ -2592,9 +2614,10 @@ Var_T * f_display_2d( Var_T * v )
  * be used by the funcrtions f_display_1d() and f_display_2d().
  *-------------------------------------------------------------------*/
 
-static dpoint_T *eval_display_args( Var_T * v,
-                                    int     dim,
-                                    int *   nsets )
+static dpoint_T *
+eval_display_args( Var_T * v,
+                   int     dim,
+                   int *   nsets )
 {
     dpoint_T *dp = NULL;
     long i;
@@ -2814,7 +2837,8 @@ static dpoint_T *eval_display_args( Var_T * v,
  * Function deletes all points of a curve
  *----------------------------------------*/
 
-Var_T * f_clearcv( Var_T * v )
+Var_T *
+f_clearcv( Var_T * v )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -2855,7 +2879,8 @@ Var_T * f_clearcv( Var_T * v )
  * Function deletes all points of a 1D curve
  *-------------------------------------------*/
 
-Var_T * f_clearcv_1d( Var_T * v )
+Var_T *
+f_clearcv_1d( Var_T * v )
 {
     long curve;
     long count = 0;
@@ -3003,7 +3028,8 @@ Var_T * f_clearcv_1d( Var_T * v )
  * Function deletes all points of a 2D curve
  *-------------------------------------------*/
 
-Var_T * f_clearcv_2d( Var_T * v )
+Var_T *
+f_clearcv_2d( Var_T * v )
 {
     long curve;
     long count = 0;
@@ -3151,7 +3177,8 @@ Var_T * f_clearcv_2d( Var_T * v )
  * Function draws a marker
  *-------------------------*/
 
-Var_T * f_setmark( Var_T * v )
+Var_T *
+f_setmark( Var_T * v )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -3189,7 +3216,8 @@ Var_T * f_setmark( Var_T * v )
  * Function draws a 1D marker
  *----------------------------*/
 
-Var_T * f_setmark_1d( Var_T * v )
+Var_T *
+f_setmark_1d( Var_T * v )
 {
     long position;
     long color = 0;
@@ -3325,7 +3353,8 @@ Var_T * f_setmark_1d( Var_T * v )
  * Function draws a 2D marker
  *----------------------------*/
 
-Var_T * f_setmark_2d( Var_T * v )
+Var_T *
+f_setmark_2d( Var_T * v )
 {
     long x_pos;
     long y_pos;
@@ -3496,7 +3525,8 @@ Var_T * f_setmark_2d( Var_T * v )
  * Function deletes all markers
  *------------------------------*/
 
-Var_T * f_clearmark( Var_T * v )
+Var_T *
+f_clearmark( Var_T * v )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -3534,7 +3564,8 @@ Var_T * f_clearmark( Var_T * v )
  * Function deletes all 1D markers
  *---------------------------------*/
 
-Var_T * f_clearmark_1d( Var_T * v )
+Var_T *
+f_clearmark_1d( Var_T * v )
 {
     long len = 0;                    /* total length of message to send */
     void *buf;
@@ -3624,7 +3655,8 @@ Var_T * f_clearmark_1d( Var_T * v )
  * Function deletes all 2D markers
  *---------------------------------*/
 
-Var_T * f_clearmark_2d( Var_T * v  UNUSED_ARG )
+Var_T *
+f_clearmark_2d( Var_T * v  UNUSED_ARG )
 {
     long len = 0;                    /* total length of message to send */
     void *buf;
@@ -3732,7 +3764,8 @@ Var_T * f_clearmark_2d( Var_T * v  UNUSED_ARG )
  * the state of the mouse buttons and the modifier keys.
  *-------------------------------------------------------*/
 
-Var_T * f_get_pos( Var_T * v )
+Var_T *
+f_get_pos( Var_T * v )
 {
     Var_T *nv;
     long len = 0;                    /* total length of message to send */
@@ -3823,7 +3856,8 @@ Var_T * f_get_pos( Var_T * v )
  * 1D or 2D curve buttons.
  *--------------------------------------------------------------*/
 
-Var_T * f_curve_button( Var_T * v )
+Var_T *
+f_curve_button( Var_T * v )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -3857,7 +3891,8 @@ Var_T * f_curve_button( Var_T * v )
  * 1D curve buttons.
  *--------------------------------------------------------------*/
 
-Var_T * f_curve_button_1d( Var_T * v )
+Var_T *
+f_curve_button_1d( Var_T * v )
 {
     long len = 0;                    /* total length of message to send */
     long button;
@@ -3970,7 +4005,8 @@ Var_T * f_curve_button_1d( Var_T * v )
  * 2D curve buttons.
  *--------------------------------------------------------------*/
 
-Var_T * f_curve_button_2d( Var_T * v )
+Var_T *
+f_curve_button_2d( Var_T * v )
 {
     long len = 0;                    /* total length of message to send */
     long button;
@@ -4094,7 +4130,8 @@ Var_T * f_curve_button_2d( Var_T * v )
  * Function for determining or changing the state of the FS button
  *-----------------------------------------------------------------*/
 
-Var_T * f_fs_button( Var_T * v )
+Var_T *
+f_fs_button( Var_T * v )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -4129,7 +4166,8 @@ Var_T * f_fs_button( Var_T * v )
  * for the 1D display
  *-------------------------------------------------------------*/
 
-Var_T * f_fs_button_1d( Var_T * v )
+Var_T *
+f_fs_button_1d( Var_T * v )
 {
     long len = 0;                    /* total length of message to send */
     long state = -1;
@@ -4207,7 +4245,8 @@ Var_T * f_fs_button_1d( Var_T * v )
  * for the 2D display
  *-------------------------------------------------------------*/
 
-Var_T * f_fs_button_2d( Var_T * v )
+Var_T *
+f_fs_button_2d( Var_T * v )
 {
     long len = 0;                    /* total length of message to send */
     long curve;
@@ -4310,7 +4349,8 @@ Var_T * f_fs_button_2d( Var_T * v )
  * Function for setting a zoom and shift of the displayed data.
  *--------------------------------------------------------------*/
 
-Var_T * f_zoom( Var_T * v )
+Var_T *
+f_zoom( Var_T * v )
 {
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
@@ -4342,7 +4382,8 @@ Var_T * f_zoom( Var_T * v )
  * Function for setting a zoom and shift of the displayed 1D data.
  *-----------------------------------------------------------------*/
 
-Var_T * f_zoom_1d( Var_T * v )
+Var_T *
+f_zoom_1d( Var_T * v )
 {
     double d[ 4 ];
     bool keep[ 4 ] = { SET, SET, SET, SET };
@@ -4470,7 +4511,8 @@ Var_T * f_zoom_1d( Var_T * v )
  * Function for setting a zoom and shift of the displayed 2D data.
  *-----------------------------------------------------------------*/
 
-Var_T * f_zoom_2d( Var_T * v )
+Var_T *
+f_zoom_2d( Var_T * v )
 {
     long curve;
     double d[ 6 ];
@@ -4633,7 +4675,8 @@ Var_T * f_zoom_2d( Var_T * v )
  * peaks.
  *---------------------------------------------------------------------*/
 
-Var_T * f_find_peak( Var_T * v )
+Var_T *
+f_find_peak( Var_T * v )
 {
     double *arr;
     ssize_t len;
@@ -4728,7 +4771,8 @@ Var_T * f_find_peak( Var_T * v )
  * the the first of these elements is returned.
  *-------------------------------------------------------------------*/
 
-Var_T * f_index_of_max( Var_T * v )
+Var_T *
+f_index_of_max( Var_T * v )
 {
     long ind = 0;
     long lmax = INT_MIN;
@@ -4767,7 +4811,8 @@ Var_T * f_index_of_max( Var_T * v )
  * the the first of these elements is returned.
  *--------------------------------------------------------------------*/
 
-Var_T * f_index_of_min( Var_T * v )
+Var_T *
+f_index_of_min( Var_T * v )
 {
     long ind = 0;
     ssize_t i;
@@ -4803,7 +4848,8 @@ Var_T * f_index_of_min( Var_T * v )
 /*--------------------------------------------------------------------*/
 /*--------------------------------------------------------------------*/
 
-Var_T * f_mean_part_array( Var_T * v )
+Var_T *
+f_mean_part_array( Var_T * v )
 {
     long size;
     double *m;
@@ -4891,7 +4937,8 @@ Var_T * f_mean_part_array( Var_T * v )
 
 #define OUTLIER_DEF_NUMBER 10
 
-Var_T * f_spike_rem( Var_T * v )
+Var_T *
+f_spike_rem( Var_T * v )
 {
     double *diffs;
     long *lpnt;

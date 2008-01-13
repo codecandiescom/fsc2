@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -59,7 +59,8 @@ static RS_SML01_T rs_sml01_backup;
  * Init hook function for the module.
  *------------------------------------*/
 
-int rs_sml01_init_hook( void )
+int
+rs_sml01_init_hook( void )
 {
     int i;
 
@@ -108,7 +109,8 @@ int rs_sml01_init_hook( void )
  * Test hook function for the module.
  *------------------------------------*/
 
-int rs_sml01_test_hook( void )
+int
+rs_sml01_test_hook( void )
 {
     /* If a table has been set check that at the frequency the attenuations
        refer to the table is defined and if it is get the attenuation at the
@@ -185,7 +187,8 @@ int rs_sml01_test_hook( void )
  * Start of experiment hook function for the module
  *--------------------------------------------------*/
 
-int rs_sml01_exp_hook( void )
+int
+rs_sml01_exp_hook( void )
 {
     /* Restore device structure to the state at the start of the test run */
 
@@ -206,7 +209,8 @@ int rs_sml01_exp_hook( void )
  * End of experiment hook function for the module
  *------------------------------------------------*/
 
-int rs_sml01_end_of_exp_hook( void )
+int
+rs_sml01_end_of_exp_hook( void )
 {
     rs_sml01_finished( );
 
@@ -220,8 +224,8 @@ int rs_sml01_end_of_exp_hook( void )
  * For final work before module is unloaded
  *------------------------------------------*/
 
-
-void rs_sml01_exit_hook( void )
+void
+rs_sml01_exit_hook( void )
 {
     if ( rs_sml01.table_file != NULL )
         rs_sml01.table_file = CHAR_P T_free( rs_sml01.table_file );
@@ -234,7 +238,8 @@ void rs_sml01_exit_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *synthesizer_name( Var_T * v  UNUSED_ARG )
+Var_T *
+synthesizer_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -245,7 +250,8 @@ Var_T *synthesizer_name( Var_T * v  UNUSED_ARG )
  * returns 0 or 1, indicating that RF output is off or on.
  *---------------------------------------------------------------*/
 
-Var_T *synthesizer_state( Var_T * v )
+Var_T *
+synthesizer_state( Var_T * v )
 {
     bool state;
 
@@ -288,7 +294,8 @@ Var_T *synthesizer_state( Var_T * v )
  * in a warning and the new value isn't accepted.
  *---------------------------------------------------------------------*/
 
-Var_T *synthesizer_frequency( Var_T * v )
+Var_T *
+synthesizer_frequency( Var_T * v )
 {
     double freq;
     double att;
@@ -405,7 +412,8 @@ Var_T *synthesizer_frequency( Var_T * v )
  * and the new value isn't accepted.
  *-----------------------------------------------------------------------*/
 
-Var_T *synthesizer_attenuation( Var_T * v )
+Var_T *
+synthesizer_attenuation( Var_T * v )
 {
     double att;
 
@@ -481,7 +489,8 @@ Var_T *synthesizer_attenuation( Var_T * v )
  * Sets (or returns) the minimum attentuation that can be set.
  *-------------------------------------------------------------*/
 
-Var_T *synthesizer_minimum_attenuation( Var_T * v )
+Var_T *
+synthesizer_minimum_attenuation( Var_T * v )
 {
     double min_atten;
 
@@ -518,7 +527,8 @@ Var_T *synthesizer_minimum_attenuation( Var_T * v )
  * step frequency for RF sweeps.
  *-----------------------------------------------------------*/
 
-Var_T *synthesizer_step_frequency( Var_T * v )
+Var_T *
+synthesizer_step_frequency( Var_T * v )
 {
     if ( v != NULL )
     {
@@ -551,7 +561,8 @@ Var_T *synthesizer_step_frequency( Var_T * v )
  * Function increments the frequency by a single sweep-step-sized step
  *---------------------------------------------------------------------*/
 
-Var_T *synthesizer_sweep_up( Var_T * v  UNUSED_ARG )
+Var_T *
+synthesizer_sweep_up( Var_T * v  UNUSED_ARG )
 {
     double att;
 
@@ -613,7 +624,8 @@ Var_T *synthesizer_sweep_up( Var_T * v  UNUSED_ARG )
  * Function decrements the frequency by a single sweep-step-sized step
  *---------------------------------------------------------------------*/
 
-Var_T *synthesizer_sweep_down( Var_T * v  UNUSED_ARG )
+Var_T *
+synthesizer_sweep_down( Var_T * v  UNUSED_ARG )
 {
     Var_T *nv;
 
@@ -629,7 +641,8 @@ Var_T *synthesizer_sweep_down( Var_T * v  UNUSED_ARG )
  * Function resets the frequency to the initial value
  *----------------------------------------------------*/
 
-Var_T *synthesizer_reset_frequency( Var_T * v  UNUSED_ARG )
+Var_T *
+synthesizer_reset_frequency( Var_T * v  UNUSED_ARG )
 {
     if ( ! rs_sml01.start_freq_is_set )
     {
@@ -656,7 +669,8 @@ Var_T *synthesizer_reset_frequency( Var_T * v  UNUSED_ARG )
  * Function for reading in a table file of  frequency-dependend attenuations
  *---------------------------------------------------------------------------*/
 
-Var_T *synthesizer_use_table( Var_T * v )
+Var_T *
+synthesizer_use_table( Var_T * v )
 {
     FILE *tfp = NULL;
     char *tfname;
@@ -730,7 +744,8 @@ Var_T *synthesizer_use_table( Var_T * v )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-Var_T *synthesizer_att_ref_freq( Var_T * v )
+Var_T *
+synthesizer_att_ref_freq( Var_T * v )
 {
     double freq;
 
@@ -790,7 +805,8 @@ Var_T *synthesizer_att_ref_freq( Var_T * v )
  * exception is thrown.
  *-----------------------------------------------------------------*/
 
-Var_T *synthesizer_modulation( Var_T * v )
+Var_T *
+synthesizer_modulation( Var_T * v )
 {
     unsigned int set = 0;
     int res;
@@ -877,7 +893,8 @@ Var_T *synthesizer_modulation( Var_T * v )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-Var_T *synthesizer_mod_type( Var_T * v )
+Var_T *
+synthesizer_mod_type( Var_T * v )
 {
     int res;
 
@@ -946,7 +963,8 @@ Var_T *synthesizer_mod_type( Var_T * v )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-Var_T *synthesizer_mod_source( Var_T * v )
+Var_T *
+synthesizer_mod_source( Var_T * v )
 {
     int source = 0;
     const char *sources[ ] = { "EXT AC", "AC", "EXT DC", "DC", "INT" };
@@ -1108,7 +1126,8 @@ Var_T *synthesizer_mod_source( Var_T * v )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-Var_T *synthesizer_mod_freq( Var_T * v )
+Var_T *
+synthesizer_mod_freq( Var_T * v )
 {
     double freq;
 
@@ -1190,11 +1209,11 @@ Var_T *synthesizer_mod_freq( Var_T * v )
 }
 
 
-
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-Var_T *synthesizer_mod_ampl( Var_T * v )
+Var_T *
+synthesizer_mod_ampl( Var_T * v )
 {
     double ampl;
     size_t i;
@@ -1339,7 +1358,8 @@ Var_T *synthesizer_mod_ampl( Var_T * v )
 
 #if defined WITH_PULSE_MODULATION
 
-Var_T *synthesizer_pulse_state( Var_T * v )
+Var_T *
+synthesizer_pulse_state( Var_T * v )
 {
     bool state;
 
@@ -1372,7 +1392,8 @@ Var_T *synthesizer_pulse_state( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *synthesizer_pulse_trigger_slope( Var_T * v )
+Var_T *
+synthesizer_pulse_trigger_slope( Var_T * v )
 {
     bool state;
 
@@ -1417,7 +1438,8 @@ Var_T *synthesizer_pulse_trigger_slope( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *synthesizer_pulse_width( Var_T * v )
+Var_T *
+synthesizer_pulse_width( Var_T * v )
 {
     double width;
     long ticks;
@@ -1477,7 +1499,8 @@ Var_T *synthesizer_pulse_width( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *synthesizer_pulse_delay( Var_T * v )
+Var_T *
+synthesizer_pulse_delay( Var_T * v )
 {
     double delay;
     long ticks;
@@ -1539,7 +1562,8 @@ Var_T *synthesizer_pulse_delay( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *synthesizer_command( Var_T * v )
+Var_T *
+synthesizer_command( Var_T * v )
 {
     char *cmd = NULL;
 

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -50,7 +50,8 @@ struct HJS_SFC hjs_sfc, hjs_sfc_stored;
  * and check that the function for setting the DAC can be found.
  *---------------------------------------------------------------------*/
 
-int hjs_sfc_init_hook( void )
+int
+hjs_sfc_init_hook( void )
 {
     Var_T *func_ptr;
     int acc;
@@ -161,7 +162,8 @@ int hjs_sfc_init_hook( void )
  * during the test run.
  *----------------------------------------------------------*/
 
-int hjs_sfc_test_hook( void )
+int
+hjs_sfc_test_hook( void )
 {
     /* Now is the last moment to read in the calibration file with the
        data of the field at the minimum and maximum DAC output voltage */
@@ -193,7 +195,8 @@ int hjs_sfc_test_hook( void )
  * one had been set.
  *-------------------------------------------------------------*/
 
-int hjs_sfc_exp_hook( void )
+int
+hjs_sfc_exp_hook( void )
 {
     hjs_sfc = hjs_sfc_stored;
 
@@ -211,7 +214,8 @@ int hjs_sfc_exp_hook( void )
  * Function that is called just before the module gets unloaded
  *--------------------------------------------------------------*/
 
-void hjs_sfc_exit_hook( void )
+void
+hjs_sfc_exit_hook( void )
 {
     if ( hjs_sfc.calib_file != NULL )
         hjs_sfc.calib_file = CHAR_P T_free( hjs_sfc.calib_file );
@@ -231,7 +235,8 @@ void hjs_sfc_exit_hook( void )
  * Function returns a string variable with the name of the device
  *----------------------------------------------------------------*/
 
-Var_T *magnet_name( Var_T * v  UNUSED_ARG )
+Var_T *
+magnet_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -241,7 +246,8 @@ Var_T *magnet_name( Var_T * v  UNUSED_ARG )
  * Function for registering the start field and the field step size.
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T * v )
+Var_T *
+magnet_setup( Var_T * v )
 {
     double start_field;
     double field_step;
@@ -280,7 +286,8 @@ Var_T *magnet_setup( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_field( Var_T * v )
+Var_T *
+magnet_field( Var_T * v )
 {
     return v == NULL ? get_field( v ) : set_field( v );
 }
@@ -289,7 +296,8 @@ Var_T *magnet_field( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *set_field( Var_T * v )
+Var_T *
+set_field( Var_T * v )
 {
     double field;
 
@@ -321,7 +329,8 @@ Var_T *set_field( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *get_field( Var_T * v  UNUSED_ARG )
+Var_T *
+get_field( Var_T * v  UNUSED_ARG )
 {
     if ( ! hjs_sfc.is_act_field )
     {
@@ -337,7 +346,8 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_sweep_up( Var_T * v )
+Var_T *
+magnet_sweep_up( Var_T * v )
 {
     return sweep_up( v );
 }
@@ -346,7 +356,8 @@ Var_T *magnet_sweep_up( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *sweep_up( Var_T * v  UNUSED_ARG )
+Var_T *
+sweep_up( Var_T * v  UNUSED_ARG )
 {
     double field;
 
@@ -370,7 +381,8 @@ Var_T *sweep_up( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_sweep_down( Var_T * v )
+Var_T *
+magnet_sweep_down( Var_T * v )
 {
     return sweep_down( v );
 }
@@ -379,7 +391,8 @@ Var_T *magnet_sweep_down( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *sweep_down( Var_T * v  UNUSED_ARG )
+Var_T *
+sweep_down( Var_T * v  UNUSED_ARG )
 {
     double field;
 
@@ -403,7 +416,8 @@ Var_T *sweep_down( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_reset_field( Var_T * v )
+Var_T *
+magnet_reset_field( Var_T * v )
 {
     return reset_field( v );
 }
@@ -412,7 +426,8 @@ Var_T *magnet_reset_field( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *reset_field( Var_T * v  UNUSED_ARG )
+Var_T *
+reset_field( Var_T * v  UNUSED_ARG )
 {
     if ( ! hjs_sfc.is_field )
     {
@@ -430,7 +445,8 @@ Var_T *reset_field( Var_T * v  UNUSED_ARG )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_B0( Var_T * v )
+Var_T *
+magnet_B0( Var_T * v )
 {
     double B0V;
 
@@ -471,7 +487,8 @@ Var_T *magnet_B0( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_slope( Var_T * v )
+Var_T *
+magnet_slope( Var_T * v )
 {
     double slope;
 
@@ -513,7 +530,8 @@ Var_T *magnet_slope( Var_T * v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *magnet_calibration_file( Var_T * v )
+Var_T *
+magnet_calibration_file( Var_T * v )
 {
     char *buf;
 
@@ -583,7 +601,8 @@ Var_T *magnet_calibration_file( Var_T * v )
  * Tests if a field value is with the admissible range
  *-----------------------------------------------------*/
 
-static double hjs_sfc_field_check( double field )
+static double
+hjs_sfc_field_check( double field )
 {
     /* When checking the field we must take into consideration that for some
        magnets the field the minimum DAC output voltage is the highest
@@ -661,7 +680,8 @@ static double hjs_sfc_field_check( double field )
  * Set a new field by outputting a new voltage at the DAC.
  *---------------------------------------------------------*/
 
-static double hjs_sfc_set_field( double field )
+static double
+hjs_sfc_set_field( double field )
 {
     double v_step;
     Var_T *func_ptr;

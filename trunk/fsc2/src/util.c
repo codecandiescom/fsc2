@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -48,7 +48,8 @@ static ssize_t do_read( int    fd,
 
 #define GET_STRING_TRY_LENGTH 128
 
-char *get_string( const char * fmt,
+char *
+get_string( const char * fmt,
                   ... )
 {
     char *c = NULL;
@@ -94,7 +95,8 @@ char *get_string( const char * fmt,
  * the string).
  *--------------------------------------------------------------*/
 
-char *string_to_lower( char * str )
+char *
+string_to_lower( char * str )
 {
     char *ptr;
 
@@ -114,8 +116,9 @@ char *string_to_lower( char * str )
  * On failure an OUT_OF_MEMORY exception is thrown.
  *---------------------------------------------------*/
 
-void *get_memcpy( const void * array,
-                  size_t       size )
+void *
+get_memcpy( const void * array,
+            size_t       size )
 {
     void *new_mem;
 
@@ -133,7 +136,8 @@ void *get_memcpy( const void * array,
  * never call it with a char array defined as const.
  *----------------------------------------------------------------------*/
 
-char *correct_line_breaks( char * str )
+char *
+correct_line_breaks( char * str )
 {
     char *p1 = str,
          *p2;
@@ -156,7 +160,8 @@ char *correct_line_breaks( char * str )
  * "/usr/bin/emacs" a pointer to "emacs" in the string is returned.
  *--------------------------------------------------------------------*/
 
-const char *strip_path( const char * path )
+const char *
+strip_path( const char * path )
 {
     char *cp;
 
@@ -174,7 +179,8 @@ const char *strip_path( const char * path )
  *-----------------------------------------------------------------*/
 
 
-const char *slash( const char * path )
+const char *
+slash( const char * path )
 {
     return path[ strlen( path ) - 1 ] != '/' ? "/" : "";
 }
@@ -190,8 +196,9 @@ const char *slash( const char * path )
  *   * number of lines or -1: failed to get file descriptor
  *-----------------------------------------------------------------*/
 
-long get_file_length( FILE * fp,
-                      int *  len )
+long
+get_file_length( FILE * fp,
+                 int *  len )
 {
     char *cur,
          *end,
@@ -264,10 +271,11 @@ long get_file_length( FILE * fp,
  * too long it gets truncated).
  *--------------------------------------------------------------------*/
 
-void eprint( int          severity,
-             bool         print_fl,
-             const char * fmt,
-             ... )
+void
+eprint( int          severity,
+        bool         print_fl,
+        const char * fmt,
+        ... )
 {
     char buffer[ FL_BROWSER_LINELENGTH + 1 ];
     char *cp = buffer;
@@ -359,9 +367,10 @@ void eprint( int          severity,
  * number or a function name) is dealt with automatically.
  *-----------------------------------------------------------------------*/
 
-void print( int          severity,
-            const char * fmt,
-            ... )
+void
+print( int          severity,
+       const char * fmt,
+       ... )
 {
     char buffer[ FL_BROWSER_LINELENGTH + 1 ];
     char *cp = buffer;
@@ -508,7 +517,8 @@ void print( int          severity,
  * fsc2.
  *---------------------------------------------------------------------*/
 
-void raise_permissions( void )
+void
+raise_permissions( void )
 {
     seteuid( Fsc2_Internals.EUID );
     setegid( Fsc2_Internals.EGID );
@@ -520,7 +530,8 @@ void raise_permissions( void )
  * the program.
  *---------------------------------------------------------------------*/
 
-void lower_permissions( void )
+void
+lower_permissions( void )
 {
     seteuid( getuid( ) );
     setegid( getgid( ) );
@@ -532,7 +543,8 @@ void lower_permissions( void )
  * it stands for - all C type escape sequences are supported.
  *-----------------------------------------------------------------*/
 
-char *handle_escape( char * str )
+char *
+handle_escape( char * str )
 {
     char *cp = str;
     size_t esc_len;
@@ -672,8 +684,9 @@ char *handle_escape( char * str )
  * on errors within the parent process).
  *-------------------------------------------------------------------------*/
 
-FILE *filter_edl( const char * name,
-                  FILE *       fp )
+FILE *
+filter_edl( const char * name,
+            FILE *       fp )
 {
     int pd[ 2 ];
     int pdt[ 2 ];
@@ -831,8 +844,9 @@ FILE *filter_edl( const char * name,
  * in microseconds, times longer then a second are allowed.
  *---------------------------------------------------------------------*/
 
-int fsc2_usleep( unsigned long us_dur,
-                 bool          quit_on_signal )
+int
+fsc2_usleep( unsigned long us_dur,
+             bool          quit_on_signal )
 {
     struct timespec req, rem;
     int ret;
@@ -861,9 +875,10 @@ int fsc2_usleep( unsigned long us_dur,
  * to the input string.
  *--------------------------------------------------------------------------*/
 
-int is_in( const char *  supplied_in,
-           const char ** alternatives,
-           int           max )
+int
+is_in( const char *  supplied_in,
+       const char ** alternatives,
+       int           max )
 {
     char *in, *cpy;
     const char *a;
@@ -905,8 +920,9 @@ int is_in( const char *  supplied_in,
  * endpoints of the intervals and using linear interpolation in between.
  *------------------------------------------------------------------------*/
 
-void i2rgb( double h,
-            int *  rgb )
+void
+i2rgb( double h,
+       int *  rgb )
 {
     int i, j;
     double p[ 7 ] = { 0.0, 0.125, 0.4, 0.5, 0.6, 0.875, 1.0 };
@@ -947,7 +963,8 @@ void i2rgb( double h,
  * for use in 2D graphics (NUM_COLORS is defined in global.h).
  *----------------------------------------------------------------*/
 
-void create_colors( void )
+void
+create_colors( void )
 {
     FL_COLOR i;
     int rgb[ 3 ];
@@ -978,7 +995,8 @@ void create_colors( void )
  * Converts a string with a channel name into a number
  *-----------------------------------------------------*/
 
-Var_T *convert_to_channel_number( const char * channel_name )
+Var_T *
+convert_to_channel_number( const char * channel_name )
 {
     long channel;
 
@@ -1028,13 +1046,13 @@ Var_T *convert_to_channel_number( const char * channel_name )
  * has been overwritten by the paramters that yield the mimimum value.
  *-----------------------------------------------------------------------*/
 
-double fsc2_simplex( size_t   n,
-                     double * x,
-                     double * dx,
-                     void *   par,
-                     double   ( *func )( double * x,
-                                         void *  par ),
-                     double   epsilon )
+double
+fsc2_simplex( size_t   n,
+              double * x,
+              double * dx,
+              void *   par,
+              double   ( *func )( double *, void * ),
+              double   epsilon )
 {
     double *p,              /* matrix of the (n + 1) simplex corners */
            *y,              /* array of function values at the corners */
@@ -1249,9 +1267,10 @@ double fsc2_simplex( size_t   n,
  * Function returns 1 when the minimum has been found, 0 otherwise.
  *-------------------------------------------------------------------*/
 
-static int fsc2_simplex_is_minimum( int      n,
-                                    double * y,
-                                    double   epsilon )
+static int
+fsc2_simplex_is_minimum( int      n,
+                         double * y,
+                         double   epsilon )
 {
     int i;                      /* counter */
     double yq,                  /* sum of function values */
@@ -1276,9 +1295,10 @@ static int fsc2_simplex_is_minimum( int      n,
  * a socket. This is directly copied from W. R. Stevens, UNP1.2.
  *----------------------------------------------------------------*/
 
-ssize_t read_line( int    fd,
-                   void * vptr,
-                   size_t max_len )
+ssize_t
+read_line( int    fd,
+           void * vptr,
+           size_t max_len )
 {
     ssize_t n, rc;
     char c, *ptr;
@@ -1313,8 +1333,9 @@ ssize_t read_line( int    fd,
  * This is directly copied from W. R. Stevens, UNP1.2.
  *-----------------------------------------------------*/
 
-static ssize_t do_read( int    fd,
-                        char * ptr )
+static ssize_t
+do_read( int    fd,
+         char * ptr )
 {
     static int read_cnt;
     static char *read_ptr;
@@ -1347,9 +1368,10 @@ static ssize_t do_read( int    fd,
  * This is directly copied from W. R. Stevens, UNP1.2.
  *-----------------------------------------------------*/
 
-ssize_t writen( int          fd,
-                const void * vptr,
-                size_t       n )
+ssize_t
+writen( int          fd,
+        const void * vptr,
+        size_t       n )
 {
     size_t nleft;
     ssize_t nwritten;
@@ -1382,10 +1404,11 @@ ssize_t writen( int          fd,
  * specified by the user.
  *-----------------------------------------------------------------------*/
 
-const char *fsc2_show_fselector( const char * message,
-                                 const char * dir,
-                                 const char * pattern,
-                                 const char * def_name )
+const char *
+fsc2_show_fselector( const char * message,
+                     const char * dir,
+                     const char * pattern,
+                     const char * def_name )
 {
     const char *ret;
 
@@ -1412,9 +1435,10 @@ const char *fsc2_show_fselector( const char * message,
  * Determine the exact position of the top window containing a form.
  *-------------------------------------------------------------------*/
 
-void get_form_position( FL_FORM * form,
-                        int *     x,
-                        int *     y )
+void
+get_form_position( FL_FORM * form,
+                   int *     x,
+                   int *     y )
 {
     XWindowAttributes attr;
     Window root, parent, *children;

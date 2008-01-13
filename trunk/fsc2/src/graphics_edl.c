@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -29,7 +29,8 @@
  * Function does the work for the clear_curve_1d() EDL function
  *--------------------------------------------------------------*/
 
-void clear_curve_1d( long curve )
+void
+clear_curve_1d( long curve )
 {
     long i;
     Scaled_Point_T *sp;
@@ -45,7 +46,8 @@ void clear_curve_1d( long curve )
  * Function does the work for the clear_curve_2d() EDL function
  *--------------------------------------------------------------*/
 
-void clear_curve_2d( long curve )
+void
+clear_curve_2d( long curve )
 {
     long i;
     Scaled_Point_T *sp;
@@ -62,8 +64,9 @@ void clear_curve_2d( long curve )
  * Function does the work for the change_scale_1d() EDL function
  *---------------------------------------------------------------*/
 
-void change_scale_1d( int    is_set,
-                      void * ptr )
+void
+change_scale_1d( int    is_set,
+                 void * ptr )
 {
     double vals[ 4 ];
 
@@ -81,8 +84,9 @@ void change_scale_1d( int    is_set,
  * Function does the work for the change_scale_2d() EDL function
  *---------------------------------------------------------------*/
 
-void change_scale_2d( int    is_set,
-                      void * ptr )
+void
+change_scale_2d( int    is_set,
+                 void * ptr )
 {
     long i;
     double vals[ 4 ];
@@ -124,7 +128,8 @@ void change_scale_2d( int    is_set,
  * Function does the work for the change_label_1d() EDL function
  *---------------------------------------------------------------*/
 
-void change_label_1d( char ** label )
+void
+change_label_1d( char ** label )
 {
     if ( *label[ X ] != '\0' )
     {
@@ -156,7 +161,8 @@ void change_label_1d( char ** label )
  * Function does the work for the change_label_2d() EDL function
  *---------------------------------------------------------------*/
 
-void change_label_2d( char ** label )
+void
+change_label_2d( char ** label )
 {
     int coord;
 
@@ -240,7 +246,8 @@ void change_label_2d( char ** label )
  * Function does the work for the rescale_1d() EDL function
  *----------------------------------------------------------*/
 
-void rescale_1d( long new_nx )
+void
+rescale_1d( long new_nx )
 {
     long i, k, count;
     long max_x = 0;
@@ -318,7 +325,8 @@ void rescale_1d( long new_nx )
  * Function does the work for the rescale_2d() EDL function
  *----------------------------------------------------------*/
 
-void rescale_2d( long * new_dims )
+void
+rescale_2d( long * new_dims )
 {
     long i, j, k, l, count;
     long max_x = 0,
@@ -433,8 +441,9 @@ void rescale_2d( long * new_dims )
  * Function for toggling 1D display between normal and sliding window mode
  *-------------------------------------------------------------------------*/
 
-void change_mode( long mode,
-                  long width )
+void
+change_mode( long mode,
+             long width )
 {
     long curves;
     long i;

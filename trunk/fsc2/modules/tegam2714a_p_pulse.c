@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -29,7 +29,8 @@
  * Function gets called when a new pulse is to be created
  *--------------------------------------------------------*/
 
-bool tegam2714a_p_new_pulse( long pnum )
+bool
+tegam2714a_p_new_pulse( long pnum )
 {
     Pulse_T *cp = tegam2714a_p.pulses;
     Pulse_T *lp = NULL;
@@ -84,8 +85,9 @@ bool tegam2714a_p_new_pulse( long pnum )
  * Function to set the function of a new pulse
  *---------------------------------------------*/
 
-bool tegam2714a_p_set_pulse_function( long pnum,
-                                      int  function )
+bool
+tegam2714a_p_set_pulse_function( long pnum,
+                                 int  function )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
 
@@ -127,8 +129,9 @@ bool tegam2714a_p_set_pulse_function( long pnum,
  * Function for setting the position of a new pulse 
  *--------------------------------------------------*/
 
-bool tegam2714a_p_set_pulse_position( long   pnum,
-                                      double p_time )
+bool
+tegam2714a_p_set_pulse_position( long   pnum,
+                                 double p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
 
@@ -158,8 +161,9 @@ bool tegam2714a_p_set_pulse_position( long   pnum,
  * Function for setting the length of a new pulse 
  *------------------------------------------------*/
 
-bool tegam2714a_p_set_pulse_length( long   pnum,
-                                    double p_time )
+bool
+tegam2714a_p_set_pulse_length( long   pnum,
+                               double p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
 
@@ -189,8 +193,9 @@ bool tegam2714a_p_set_pulse_length( long   pnum,
  * Function for setting the position change of a new pulse 
  *--------------------------------------------------------*/
 
-bool tegam2714a_p_set_pulse_position_change( long   pnum,
-                                             double p_time )
+bool
+tegam2714a_p_set_pulse_position_change( long   pnum,
+                                        double p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
 
@@ -220,8 +225,9 @@ bool tegam2714a_p_set_pulse_position_change( long   pnum,
  * Function for setting the length change of a new pulse 
  *-------------------------------------------------------*/
 
-bool tegam2714a_p_set_pulse_length_change( long   pnum,
-                                           double p_time )
+bool
+tegam2714a_p_set_pulse_length_change( long   pnum,
+                                      double p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
 
@@ -251,8 +257,9 @@ bool tegam2714a_p_set_pulse_length_change( long   pnum,
  * Function returns the function of a pulse
  *------------------------------------------*/
 
-bool tegam2714a_p_get_pulse_function( long  pnum,
-                                      int * function )
+bool
+tegam2714a_p_get_pulse_function( long  pnum,
+                                 int * function )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
 
@@ -272,8 +279,9 @@ bool tegam2714a_p_get_pulse_function( long  pnum,
  * Function returns the position of a pulse 
  *-----------------------------------------*/
 
-bool tegam2714a_p_get_pulse_position( long     pnum,
-                                      double * p_time )
+bool
+tegam2714a_p_get_pulse_position( long     pnum,
+                                 double * p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
 
@@ -295,8 +303,9 @@ bool tegam2714a_p_get_pulse_position( long     pnum,
  * Function returns the length of a pulse 
  *----------------------------------------*/
 
-bool tegam2714a_p_get_pulse_length( long     pnum,
-                                    double * p_time )
+bool
+tegam2714a_p_get_pulse_length( long     pnum,
+                               double * p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
 
@@ -317,8 +326,9 @@ bool tegam2714a_p_get_pulse_length( long     pnum,
  * Function returns the position change of a pulse 
  *-------------------------------------------------*/
 
-bool tegam2714a_p_get_pulse_position_change( long     pnum,
-                                             double * p_time )
+bool
+tegam2714a_p_get_pulse_position_change( long     pnum,
+                                        double * p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
 
@@ -340,8 +350,9 @@ bool tegam2714a_p_get_pulse_position_change( long     pnum,
  * Function returns the length change of a pulse 
  *-----------------------------------------------*/
 
-bool tegam2714a_p_get_pulse_length_change( long     pnum,
-                                           double * p_time )
+bool
+tegam2714a_p_get_pulse_length_change( long     pnum,
+                                      double * p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
 
@@ -362,8 +373,9 @@ bool tegam2714a_p_get_pulse_length_change( long     pnum,
  * Function to change the position of a pulse during the experiment
  *------------------------------------------------------------------*/
 
-bool tegam2714a_p_change_pulse_position( long   pnum,
-                                         double p_time )
+bool
+tegam2714a_p_change_pulse_position( long   pnum,
+                                    double p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
     Ticks new_pos;
@@ -412,8 +424,9 @@ bool tegam2714a_p_change_pulse_position( long   pnum,
  * Function to change the length of a pulse during the experiment
  *----------------------------------------------------------------*/
 
-bool tegam2714a_p_change_pulse_length( long   pnum,
-                                       double p_time )
+bool
+tegam2714a_p_change_pulse_length( long   pnum,
+                                  double p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
     Ticks new_len = 0;
@@ -466,8 +479,9 @@ bool tegam2714a_p_change_pulse_length( long   pnum,
  * Function to change the position change of a pulse during the experiment
  *-------------------------------------------------------------------------*/
 
-bool tegam2714a_p_change_pulse_position_change( long   pnum,
-                                                double p_time )
+bool
+tegam2714a_p_change_pulse_position_change( long   pnum,
+                                           double p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
     Ticks new_dpos;
@@ -512,8 +526,9 @@ bool tegam2714a_p_change_pulse_position_change( long   pnum,
  * Function to change the length change of a pulse during the experiment
  *-----------------------------------------------------------------------*/
 
-bool tegam2714a_p_change_pulse_length_change( long   pnum,
-                                              double p_time )
+bool
+tegam2714a_p_change_pulse_length_change( long   pnum,
+                                         double p_time )
 {
     Pulse_T *p = tegam2714a_p_get_pulse( pnum );
     Ticks new_dlen = 0;

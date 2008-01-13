@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -114,7 +114,8 @@ static bool Comm_is_setup = UNSET;
  * communication. It is called before the child is forked.
  *----------------------------------------------------------------*/
 
-void setup_comm( void )
+void
+setup_comm( void )
 {
     int pr;
     int i;
@@ -183,7 +184,8 @@ void setup_comm( void )
  * up the resources used in the interprocess communication.
  *--------------------------------------------------------------*/
 
-void end_comm( void )
+void
+end_comm( void )
 {
     if ( ! Comm_is_setup )
         return;
@@ -226,7 +228,8 @@ void end_comm( void )
  * change the high marker anymore.
  *-----------------------------------------------------------------*/
 
-int new_data_handler( void )
+int
+new_data_handler( void )
 {
     /* Check if the child raised a signal to tell us it's done. If it did
        send it a DO_QUIT signal (but only if it's still alive) and remove
@@ -330,8 +333,9 @@ int new_data_handler( void )
  * Called whenever the child needs to send data to the parent.
  *-------------------------------------------------------------*/
 
-void send_data( int type,
-                int shm_id )
+void
+send_data( int type,
+           int shm_id )
 {
     /* Wait until parent can accept more data */
 
@@ -359,7 +363,8 @@ void send_data( int type,
  * that contains at least information about the type of message.
  *----------------------------------------------------------------------*/
 
-bool reader( void * ret )
+bool
+reader( void * ret )
 {
     Comm_Struct_T header;
 
@@ -381,7 +386,8 @@ bool reader( void * ret )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool parent_reader( Comm_Struct_T * header )
+static bool
+parent_reader( Comm_Struct_T * header )
 {
     char *str[ 4 ] = { NULL, NULL, NULL, NULL };
     int i;
@@ -1080,8 +1086,9 @@ static bool parent_reader( Comm_Struct_T * header )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool child_reader( void *          ret,
-                          Comm_Struct_T * header )
+static bool
+child_reader( void *          ret,
+              Comm_Struct_T * header )
 {
     char *retstr = NULL;
 
@@ -1200,8 +1207,9 @@ static bool child_reader( void *          ret,
  * data into the pipe.
  *-----------------------------------------------------------------------*/
 
-bool writer( int type,
-             ... )
+bool
+writer( int type,
+        ... )
 {
     Comm_Struct_T header;
     va_list ap;
@@ -1529,7 +1537,8 @@ bool writer( int type,
  * Sends all lines of one of the browsers successively to the child
  *------------------------------------------------------------------*/
 
-static bool send_browser( FL_OBJECT * browser )
+static bool
+send_browser( FL_OBJECT * browser )
 {
     const char *line;
     int i = 0;
@@ -1551,8 +1560,9 @@ static bool send_browser( FL_OBJECT * browser )
  *       by a DO_QUIT signal
  *--------------------------------------------------------------*/
 
-static void pipe_read( char * buf,
-                       size_t bytes_to_read )
+static void
+pipe_read( char * buf,
+           size_t bytes_to_read )
 {
     long bytes_read;
     long already_read = 0;
@@ -1607,8 +1617,9 @@ static void pipe_read( char * buf,
  *    2. Number of bytes to be written
  *--------------------------------------------------------------*/
 
-static bool pipe_write( char * buf,
-                        size_t bytes_to_write )
+static bool
+pipe_write( char * buf,
+            size_t bytes_to_write )
 {
     long bytes_written;
     long already_written = 0;

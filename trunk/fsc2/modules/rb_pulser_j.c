@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -49,7 +49,8 @@ static void rb_pulser_j_card_setup( void );
  * Function that gets called immediately after the module has been loaded
  *------------------------------------------------------------------------*/
 
-int rb_pulser_j_init_hook( void )
+int
+rb_pulser_j_init_hook( void )
 {
     int i;
     Function_T *f;
@@ -186,7 +187,8 @@ int rb_pulser_j_init_hook( void )
  * Function gets called just before the test run is started
  *----------------------------------------------------------*/
 
-int rb_pulser_j_test_hook( void )
+int
+rb_pulser_j_test_hook( void )
 {
     Pulse_T *p;
 
@@ -283,7 +285,8 @@ int rb_pulser_j_test_hook( void )
  * have been set to during the experiment
  *----------------------------------------------------------------------*/
 
-int rb_pulser_j_end_of_test_hook( void )
+int
+rb_pulser_j_end_of_test_hook( void )
 {
     if ( ! rb_pulser_j.is_needed )
         return 1;
@@ -309,7 +312,8 @@ int rb_pulser_j_end_of_test_hook( void )
  * got to initialize the pulser and, if required, start it
  *---------------------------------------------------------------*/
 
-int rb_pulser_j_exp_hook( void )
+int
+rb_pulser_j_exp_hook( void )
 {
     if ( ! rb_pulser_j.is_needed )
         return 1;
@@ -343,7 +347,8 @@ int rb_pulser_j_end_of_exp_hook( void )
  * used to get rid of memory allocated for the module
  *---------------------------------------------------------------*/
 
-void rb_pulser_j_exit_hook( void )
+void
+rb_pulser_j_exit_hook( void )
 {
     Pulse_T *p, *pn;
     Function_T *f;
@@ -395,7 +400,8 @@ void rb_pulser_j_exit_hook( void )
  * EDL function that returns the device name
  *-------------------------------------------*/
 
-Var_T *pulser_name( Var_T *v UNUSED_ARG )
+Var_T *
+pulser_name( Var_T *v UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -406,7 +412,8 @@ Var_T *pulser_name( Var_T *v UNUSED_ARG )
  * of all pulses used during the experiment displayed
  *----------------------------------------------------*/
 
-Var_T *pulser_show_pulses( Var_T *v UNUSED_ARG )
+Var_T *
+pulser_show_pulses( Var_T *v UNUSED_ARG )
 {
     if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
         rb_pulser_j.do_show_pulses = SET;
@@ -420,7 +427,8 @@ Var_T *pulser_show_pulses( Var_T *v UNUSED_ARG )
  * of all pulses during the experiment gets written to a file
  *------------------------------------------------------------*/
 
-Var_T *pulser_dump_pulses( Var_T *v UNUSED_ARG )
+Var_T *
+pulser_dump_pulses( Var_T *v UNUSED_ARG )
 {
     if ( ! FSC2_IS_CHECK_RUN && ! FSC2_IS_BATCH_MODE )
         rb_pulser_j.do_dump_pulses = SET;
@@ -433,7 +441,8 @@ Var_T *pulser_dump_pulses( Var_T *v UNUSED_ARG )
  * Switches the output of the pulser on or off
  *---------------------------------------------*/
 
-Var_T *pulser_state( Var_T *v )
+Var_T *
+pulser_state( Var_T *v )
 {
     bool state;
 
@@ -459,7 +468,8 @@ Var_T *pulser_state( Var_T *v )
  * not the state of the "real" pulser
  *---------------------------------------------------------*/
 
-Var_T *pulser_update( Var_T *v UNUSED_ARG )
+Var_T *
+pulser_update( Var_T *v UNUSED_ARG )
 {
     if ( ! rb_pulser_j.is_needed )
         return vars_push( INT_VAR, 1L );
@@ -480,7 +490,8 @@ Var_T *pulser_update( Var_T *v UNUSED_ARG )
  *            the function pulser_update() !
  *----------------------------------------------------------------------*/
 
-Var_T *pulser_shift( Var_T *v )
+Var_T *
+pulser_shift( Var_T *v )
 {
     Pulse_T *p;
 
@@ -539,7 +550,8 @@ Var_T *pulser_shift( Var_T *v )
  *            function pulser_update() !
  *-------------------------------------------------------------------------*/
 
-Var_T *pulser_increment( Var_T *v )
+Var_T *
+pulser_increment( Var_T *v )
 {
     Pulse_T *p;
 
@@ -594,7 +606,8 @@ Var_T *pulser_increment( Var_T *v )
  * Function for resetting the pulser back to its initial state
  *-------------------------------------------------------------*/
 
-Var_T *pulser_reset( Var_T *v UNUSED_ARG )
+Var_T *
+pulser_reset( Var_T *v UNUSED_ARG )
 {
     if ( ! rb_pulser_j.is_needed )
         return vars_push( INT_VAR, 1L );
@@ -609,7 +622,8 @@ Var_T *pulser_reset( Var_T *v UNUSED_ARG )
  * Function for resetting one or more pulses back to the initial state
  *---------------------------------------------------------------------*/
 
-Var_T *pulser_pulse_reset( Var_T *v )
+Var_T *
+pulser_pulse_reset( Var_T *v )
 {
     Pulse_T *p;
 
@@ -665,7 +679,8 @@ Var_T *pulser_pulse_reset( Var_T *v )
  * minimum delay between the end of its predecessor and its start.
  *---------------------------------------------------------------------*/
 
-Var_T *pulser_pulse_minimum_specs( Var_T *v )
+Var_T *
+pulser_pulse_minimum_specs( Var_T *v )
 {
     Pulse_T *p = rb_pulser_j_get_pulse( get_strict_long( v, "pulse number" ) );
     double t = 0.0;
@@ -715,7 +730,8 @@ Var_T *pulser_pulse_minimum_specs( Var_T *v )
  * the Rulbus cards the pulser is made of
  *------------------------------------------------------------*/
 
-static void rb_pulser_j_card_setup( void )
+static void
+rb_pulser_j_card_setup( void )
 {
     size_t i;
     RULBUS_CARD_INFO card_info;
@@ -806,7 +822,8 @@ static void rb_pulser_j_card_setup( void )
  * configuration file and storing the names of the cards
  *---------------------------------------------------------------*/
 
-void rb_pulser_j_cleanup( void )
+void
+rb_pulser_j_cleanup( void )
 {
     size_t i;
 

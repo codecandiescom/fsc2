@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -198,16 +198,16 @@ int tegam2714a_p_end_of_exp_hook(  void );
 void tegam2714a_p_exit_hook(       void );
 
 
-Var_T *pulser_name(                   Var_T * /* v */ );
-Var_T *pulser_show_pulses(            Var_T * /* v */ );
-Var_T *pulser_dump_pulses(            Var_T * /* v */ );
-Var_T *pulser_state(                  Var_T * /* v */ );
-Var_T *pulser_maximum_pattern_length( Var_T * /* v */ );
-Var_T *pulser_update(                 Var_T * /* v */ );
-Var_T *pulser_shift(                  Var_T * /* v */ );
-Var_T *pulser_increment(              Var_T * /* v */ );
-Var_T *pulser_reset(                  Var_T * /* v */ );
-Var_T *pulser_pulse_reset(            Var_T * /* v */ );
+Var_T * pulser_name(                   Var_T * /* v */ );
+Var_T * pulser_show_pulses(            Var_T * /* v */ );
+Var_T * pulser_dump_pulses(            Var_T * /* v */ );
+Var_T * pulser_state(                  Var_T * /* v */ );
+Var_T * pulser_maximum_pattern_length( Var_T * /* v */ );
+Var_T * pulser_update(                 Var_T * /* v */ );
+Var_T * pulser_shift(                  Var_T * /* v */ );
+Var_T * pulser_increment(              Var_T * /* v */ );
+Var_T * pulser_reset(                  Var_T * /* v */ );
+Var_T * pulser_pulse_reset(            Var_T * /* v */ );
 
 
 bool tegam2714a_p_store_timebase( double /* timebase */ );
@@ -297,9 +297,9 @@ void  tegam2714a_p_set_constant( Ticks /* start  */,
 void tegam2714a_p_check_levels( double /* high */,
                                 double /* low  */  );
 
-const char *tegam2714a_p_ptime( double /* p_time */ );
+const char * tegam2714a_p_ptime( double /* p_time */ );
 
-const char *tegam2714a_p_pticks( Ticks /* ticks */ );
+const char * tegam2714a_p_pticks( Ticks /* ticks */ );
 
 Ticks tegam2714a_p_double2ticks( double /* p_time */ );
 
@@ -307,7 +307,7 @@ double tegam2714a_p_ticks2double( Ticks /* ticks */ );
 
 int tegam2714a_p_num_len( long /* num */ );
 
-Pulse_T *tegam2714a_p_get_pulse( long /* pnum */ );
+Pulse_T * tegam2714a_p_get_pulse( long /* pnum */ );
 
 int tegam2714a_p_start_compare( const void * /* A */,
                                 const void * /* B */  );

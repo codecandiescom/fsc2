@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -42,7 +42,8 @@ static void ep385_gpib_failure( void );
  *----------------------------------------------------------------*/
 
 #ifndef EP385_GPIB_DEBUG
-bool ep385_init( const char * name )
+bool
+ep385_init( const char * name )
 {
     char cmd[ 100 ];
     int i;
@@ -115,7 +116,8 @@ bool ep385_init( const char * name  UNUSED_ARG )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool ep385_run( bool state )
+bool
+ep385_run( bool state )
 {
     ep385_command( state ? "TIM;SET;TRY;SFT\r" : "TIM;SET;STP\r" );
     ep385.is_running = state;
@@ -127,7 +129,8 @@ bool ep385_run( bool state )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool ep385_set_channels( void )
+bool
+ep385_set_channels( void )
 {
     int i, j, k;
     Function_T *f;
@@ -175,7 +178,8 @@ bool ep385_set_channels( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool ep385_command( const char * cmd )
+bool
+ep385_command( const char * cmd )
 {
     if ( gpib_write( ep385.device, cmd, strlen( cmd ) ) == FAILURE )
         ep385_gpib_failure( );
@@ -186,7 +190,8 @@ bool ep385_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static void ep385_gpib_failure( void )
+static void
+ep385_gpib_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );

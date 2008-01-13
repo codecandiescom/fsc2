@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -164,8 +164,9 @@ DU       (([+-]?{INT})|{FLOAT})[\t ]?("M"|"k"|"m"|"u"|"n")?"m"
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void spectrapro_300i_read_calib( FILE *       fp,
-                                 const char * calib_file )
+void
+spectrapro_300i_read_calib( FILE *       fp,
+                            const char * calib_file )
 {
     static bool is_restart = UNSET;
     int type;
@@ -253,8 +254,9 @@ void spectrapro_300i_read_calib( FILE *       fp,
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void spectrapro_300i_new_entry( int          type,
-                                       const char * calib_file )
+static void
+spectrapro_300i_new_entry( int          type,
+                           const char * calib_file )
 {
     char *cp;
     long grating;

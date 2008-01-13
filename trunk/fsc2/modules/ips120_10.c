@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -53,18 +53,18 @@ int ips120_10_test_hook(       void );
 int ips120_10_exp_hook(        void );
 int ips120_10_end_of_exp_hook( void );
 
-Var_T *magnet_name(              Var_T * v );
-Var_T *magnet_setup(             Var_T * v );
-Var_T *magnet_field(             Var_T * v );
-Var_T *get_field(                Var_T * v );
-Var_T *set_field(                Var_T * v );
-Var_T *magnet_field_step_size(   Var_T * v );
-Var_T *magnet_sweep(             Var_T * v );
-Var_T *magnet_sweep_rate(        Var_T * v );
-Var_T *magnet_reset_field(       Var_T * v );
-Var_T *reset_field(              Var_T * v );
-Var_T *magnet_goto_field_on_end( Var_T * v );
-Var_T *magnet_command(           Var_T * v );
+Var_T * magnet_name(              Var_T * v );
+Var_T * magnet_setup(             Var_T * v );
+Var_T * magnet_field(             Var_T * v );
+Var_T * get_field(                Var_T * v );
+Var_T * set_field(                Var_T * v );
+Var_T * magnet_field_step_size(   Var_T * v );
+Var_T * magnet_sweep(             Var_T * v );
+Var_T * magnet_sweep_rate(        Var_T * v );
+Var_T * magnet_reset_field(       Var_T * v );
+Var_T * reset_field(              Var_T * v );
+Var_T * magnet_goto_field_on_end( Var_T * v );
+Var_T * magnet_command(           Var_T * v );
 
 
 static void magnet_sweep_up( void );
@@ -182,7 +182,8 @@ static struct IPS120_10 ips120_10, ips120_10_stored;
  * Init hook function for the module
  *-----------------------------------*/
 
-int ips120_10_init_hook( void )
+int
+ips120_10_init_hook( void )
 {
     Need_GPIB = SET;
 
@@ -207,7 +208,8 @@ int ips120_10_init_hook( void )
  * Test hook function for the module
  *-----------------------------------*/
 
-int ips120_10_test_hook( void )
+int
+ips120_10_test_hook( void )
 {
     ips120_10_stored = ips120_10;
 
@@ -238,7 +240,8 @@ int ips120_10_test_hook( void )
  * Start of experiment hook function for the module
  *--------------------------------------------------*/
 
-int ips120_10_exp_hook( void )
+int
+ips120_10_exp_hook( void )
 {
     ips120_10 = ips120_10_stored;
 
@@ -257,7 +260,8 @@ int ips120_10_exp_hook( void )
  * End of experiment hook function for the module
  *------------------------------------------------*/
 
-int ips120_10_end_of_exp_hook( void )
+int
+ips120_10_end_of_exp_hook( void )
 {
     ips120_10_to_local( );
     ips120_10 = ips120_10_stored;
@@ -271,7 +275,8 @@ int ips120_10_end_of_exp_hook( void )
  * Function returns the name the device is known as.
  *---------------------------------------------------*/
 
-Var_T *magnet_name( Var_T * v  UNUSED_ARG )
+Var_T *
+magnet_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -281,7 +286,8 @@ Var_T *magnet_name( Var_T * v  UNUSED_ARG )
  * Function for registering the start current and the sweep rate.
  *----------------------------------------------------------------*/
 
-Var_T *magnet_setup( Var_T * v )
+Var_T *
+magnet_setup( Var_T * v )
 {
     double cur;
     double sweep_rate;
@@ -318,7 +324,8 @@ Var_T *magnet_setup( Var_T * v )
 /*------------------------------------------------------*
  *------------------------------------------------------*/
 
-Var_T *magnet_field( Var_T * v )
+Var_T *
+magnet_field( Var_T * v )
 {
     return v == NULL ? get_field( v ) : set_field( v );
 }
@@ -330,7 +337,8 @@ Var_T *magnet_field( Var_T * v )
  * time spent since the last call for determining the field.
  *-----------------------------------------------------------------------*/
 
-Var_T *get_field( Var_T * v  UNUSED_ARG )
+Var_T *
+get_field( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == TEST )
     {
@@ -391,7 +399,8 @@ Var_T *get_field( Var_T * v  UNUSED_ARG )
  * that setting a new field also stops a running sweep.
  *------------------------------------------------------*/
 
-Var_T *set_field( Var_T * v )
+Var_T *
+set_field( Var_T * v )
 {
     double cur;
 
@@ -427,7 +436,8 @@ Var_T *set_field( Var_T * v )
  * argument.
  *----------------------------------------------------------------*/
 
-Var_T *magnet_field_step_size( Var_T * v )
+Var_T *
+magnet_field_step_size( Var_T * v )
 {
     double cur_step;
     long steps;
@@ -458,7 +468,8 @@ Var_T *magnet_field_step_size( Var_T * v )
  * inquiring about the current sweep state.
  *-------------------------------------------------------------*/
 
-Var_T *magnet_sweep( Var_T * v )
+Var_T *
+magnet_sweep( Var_T * v )
 {
     long dir;
     Var_T *vc;
@@ -522,7 +533,8 @@ Var_T *magnet_sweep( Var_T * v )
  * Function for starting an upward sweep of the field
  *----------------------------------------------------*/
 
-static void magnet_sweep_up( void )
+static void
+magnet_sweep_up( void )
 {
     if ( ! ips120_10.is_sweep_rate )
     {
@@ -559,7 +571,8 @@ static void magnet_sweep_up( void )
  * Function for starting a downward sweep of the field
  *-----------------------------------------------------*/
 
-static void magnet_sweep_down( void )
+static void
+magnet_sweep_down( void )
 {
     if ( ! ips120_10.is_sweep_rate )
     {
@@ -596,7 +609,8 @@ static void magnet_sweep_down( void )
  * Function for stopping a running sweep of the field
  *----------------------------------------------------*/
 
-static void magnet_stop_sweep( void )
+static void
+magnet_stop_sweep( void )
 {
     if ( ips120_10.sweep_state == STOPPED )
     {
@@ -621,7 +635,8 @@ static void magnet_stop_sweep( void )
  * Function to query or set a field sweep rate
  *---------------------------------------------*/
 
-Var_T *magnet_sweep_rate( Var_T * v )
+Var_T *
+magnet_sweep_rate( Var_T * v )
 {
     double sweep_rate;
 
@@ -663,7 +678,8 @@ Var_T *magnet_sweep_rate( Var_T * v )
  * i.e. at the very start of the experiment
  *--------------------------------------------------------*/
 
-Var_T *magnet_reset_field( Var_T * v )
+Var_T *
+magnet_reset_field( Var_T * v )
 {
     return reset_field( v );
 }
@@ -674,7 +690,8 @@ Var_T *magnet_reset_field( Var_T * v )
  * i.e. at the very start of the experiment
  *--------------------------------------------------------*/
 
-Var_T *reset_field( Var_T * v  UNUSED_ARG )
+Var_T *
+reset_field( Var_T * v  UNUSED_ARG )
 {
     return set_field( vars_push( FLOAT_VAR,
                                  ips120_10.start_current * F2C_RATIO) );
@@ -687,7 +704,8 @@ Var_T *reset_field( Var_T * v  UNUSED_ARG )
  * the experiment has ended.
  *-----------------------------------------------------------*/
 
-Var_T *magnet_goto_field_on_end( Var_T * v )
+Var_T *
+magnet_goto_field_on_end( Var_T * v )
 {
     double cur;
 
@@ -705,7 +723,8 @@ Var_T *magnet_goto_field_on_end( Var_T * v )
  * the magent - only use for debugging or testing purposes!
  *-------------------------------------------------------------*/
 
-Var_T *magnet_command( Var_T * v )
+Var_T *
+magnet_command( Var_T * v )
 {
     char *cmd = NULL;
     char reply[ 100 ];
@@ -738,7 +757,8 @@ Var_T *magnet_command( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static bool ips120_10_init( const char * name )
+static bool
+ips120_10_init( const char * name )
 {
     char reply[ 100 ];
     long length;
@@ -864,7 +884,8 @@ static bool ips120_10_init( const char * name )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-static void ips120_10_to_local( void )
+static void
+ips120_10_to_local( void )
 {
     char reply[ 100 ];
 
@@ -898,7 +919,8 @@ static void ips120_10_to_local( void )
  * Function that asks the magnet about its current state
  *-------------------------------------------------------*/
 
-static void ips120_10_get_complete_status( void )
+static void
+ips120_10_get_complete_status( void )
 {
     char reply[ 100 ];
     long len = 100;
@@ -1140,7 +1162,8 @@ static void ips120_10_get_complete_status( void )
  * already sweeping up or very near to the maximum current)
  *---------------------------------------------------------------*/
 
-static void ips120_10_sweep_up( void )
+static void
+ips120_10_sweep_up( void )
 {
     /* Do nothing except printing a warning when we're alredy sweeping up */
 
@@ -1175,7 +1198,8 @@ static void ips120_10_sweep_up( void )
  * already sweeping down or very near to the minimum current)
  *-----------------------------------------------------------------*/
 
-static void ips120_10_sweep_down( void )
+static void
+ips120_10_sweep_down( void )
 {
     /* Do nothing except printing a warning when we're alredy sweeping down */
 
@@ -1209,7 +1233,8 @@ static void ips120_10_sweep_down( void )
  * accepted to test if it's within the limits of the magnet
  *-------------------------------------------------------------*/
 
-static double ips120_10_current_check( double current )
+static double
+ips120_10_current_check( double current )
 {
     if ( current > ips120_10.max_current )
     {
@@ -1257,7 +1282,8 @@ static double ips120_10_current_check( double current )
  * to test if it's within the magnets limits.
  *-----------------------------------------------------------*/
 
-static double ips120_10_sweep_rate_check( double sweep_rate )
+static double
+ips120_10_sweep_rate_check( double sweep_rate )
 {
     if (    sweep_rate > MAX_SWEEP_RATE
          && ( sweep_rate - MAX_SWEEP_RATE ) / sweep_rate > 0.0001 )
@@ -1309,7 +1335,8 @@ static double ips120_10_sweep_rate_check( double sweep_rate )
  * Function for asking the magnet about the current
  *--------------------------------------------------*/
 
-static double ips120_10_get_act_current( void )
+static double
+ips120_10_get_act_current( void )
 {
     char reply[ 100 ];
     long length;
@@ -1338,7 +1365,8 @@ static double ips120_10_get_act_current( void )
  * the magnet is supposed to sweep to.
  *-----------------------------------------------------------*/
 
-static double ips120_10_set_target_current( double current )
+static double
+ips120_10_set_target_current( double current )
 {
     char cmd[ 30 ];
     char reply[ 100 ];
@@ -1355,7 +1383,8 @@ static double ips120_10_set_target_current( double current )
  * Function for asking the setting of the target current
  *-------------------------------------------------------*/
 
-static double ips120_10_get_target_current( void )
+static double
+ips120_10_get_target_current( void )
 {
     char reply[ 100 ];
     long length;
@@ -1382,7 +1411,8 @@ static double ips120_10_get_target_current( void )
  * Function for setting a new sweep rate
  *---------------------------------------*/
 
-static double ips120_10_set_sweep_rate( double sweep_rate )
+static double
+ips120_10_set_sweep_rate( double sweep_rate )
 {
     char cmd[ 30 ];
     char reply[ 100 ];
@@ -1400,7 +1430,8 @@ static double ips120_10_set_sweep_rate( double sweep_rate )
  * Function for asking the magnet about its current sweep rate
  *-------------------------------------------------------------*/
 
-static double ips120_10_get_sweep_rate( void )
+static double
+ips120_10_get_sweep_rate( void )
 {
     char reply[ 100 ];
     long length;
@@ -1430,7 +1461,8 @@ static double ips120_10_get_sweep_rate( void )
  * handler function that's then invoked automatically.
  *-----------------------------------------------------------*/
 
-static double ips120_10_goto_current( double current )
+static double
+ips120_10_goto_current( double current )
 {
     ips120_10_set_target_current( current );
     ips120_10_set_sweep_rate( ips120_10.fast_sweep_rate );
@@ -1460,7 +1492,8 @@ static double ips120_10_goto_current( double current )
  * certain field value or make it sweep to zero.
  *-------------------------------------------------------------*/
 
-static int ips120_10_set_activity( int activity )
+static int
+ips120_10_set_activity( int activity )
 {
     char cmd[ 20 ];
     char reply[ 100 ];
@@ -1498,9 +1531,10 @@ static int ips120_10_set_activity( int activity )
  * Function for talking with the magnet via the GPIB
  *---------------------------------------------------*/
 
-static long ips120_10_talk( const char * message,
-                            char *       reply,
-                            long         length )
+static long
+ips120_10_talk( const char * message,
+                char *       reply,
+                long         length )
 {
     long len = length;
     int retries = MAX_RETRIES;
@@ -1568,7 +1602,8 @@ static long ips120_10_talk( const char * message,
  * Function called in case of communication failures
  *---------------------------------------------------*/
 
-static void ips120_10_comm_failure( void )
+static void
+ips120_10_comm_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );

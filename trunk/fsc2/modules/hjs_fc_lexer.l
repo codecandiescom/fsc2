@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -157,7 +157,8 @@ UNIT     "G"
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void hjs_fc_read_calibration( void )
+void
+hjs_fc_read_calibration( void )
 {
     static bool is_restart = UNSET;
     int num_entries;

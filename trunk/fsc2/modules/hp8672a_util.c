@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -32,7 +32,8 @@
  * memory used for the file name passed to the function is deallocated.
  *----------------------------------------------------------------------*/
 
-FILE *hp8672a_find_table( char ** name )
+FILE *
+hp8672a_find_table( char ** name )
 {
     FILE *tfp;
     char *new_name;
@@ -91,7 +92,8 @@ FILE *hp8672a_find_table( char ** name )
  * deallocated.
  *------------------------------------------------------------------*/
 
-FILE *hp8672a_open_table( char * name )
+FILE *
+hp8672a_open_table( char * name )
 {
     FILE *tfp;
 
@@ -122,7 +124,8 @@ FILE *hp8672a_open_table( char * name )
  * a given frequency by interpolation
  *-----------------------------------------------*/
 
-double hp8672a_get_att_from_table( double freq )
+double
+hp8672a_get_att_from_table( double freq )
 {
     long i_low, i_high, i_cur;
     double att;
@@ -201,7 +204,8 @@ double hp8672a_get_att_from_table( double freq )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-double hp8672a_get_att( double freq )
+double
+hp8672a_get_att( double freq )
 {
     double att;
 
@@ -233,9 +237,10 @@ double hp8672a_get_att( double freq )
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-int hp8672a_set_mod_param( Var_T *  v,
-                           double * dres,
-                           int *    ires )
+int
+hp8672a_set_mod_param( Var_T *  v,
+                       double * dres,
+                       int *    ires )
 {
     const char *type[ ] =   { "FM", "AM", "OFF" };
 
@@ -278,7 +283,8 @@ int hp8672a_set_mod_param( Var_T *  v,
 /*----------------------------------------------------------------------*
  *----------------------------------------------------------------------*/
 
-int hp8672_mod_ampl_check( double ampl )
+int
+hp8672_mod_ampl_check( double ampl )
 {
     int i;
 

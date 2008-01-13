@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -40,7 +40,8 @@ static bool acquisition_is_running = UNSET;
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool tds_tmpl_init( const char * name )
+bool
+tds_tmpl_init( const char * name )
 {
     int ch;
     double cp1, cp2;
@@ -226,7 +227,8 @@ bool tds_tmpl_init( const char * name )
  * Returns the digitizers timebase
  *---------------------------------*/
 
-double tds_tmpl_get_timebase( void )
+double
+tds_tmpl_get_timebase( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -242,7 +244,8 @@ double tds_tmpl_get_timebase( void )
  * Sets the timebase of the digitizer
  *------------------------------------*/
 
-void tds_tmpl_set_timebase( double timebase )
+void
+tds_tmpl_set_timebase( double timebase )
 {
     char cmd[ 40 ];
 
@@ -258,7 +261,8 @@ void tds_tmpl_set_timebase( double timebase )
  * tds_tmpl_set_record_length() sets the record length.
  *------------------------------------------------------*/
 
-void tds_tmpl_set_record_length( long num_points )
+void
+tds_tmpl_set_record_length( long num_points )
 {
     char cmd[ 100 ];
 
@@ -274,7 +278,8 @@ void tds_tmpl_set_record_length( long num_points )
  * tds_tmpl_get_record_length() returns the current record length.
  *-----------------------------------------------------------------*/
 
-long tds_tmpl_get_record_length( void )
+long
+tds_tmpl_get_record_length( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -295,7 +300,8 @@ long tds_tmpl_get_record_length( void )
  * 0 means no pretrigger while 1 indicates maximum pretrigger
  *--------------------------------------------------------------*/
 
-void tds_tmpl_set_trigger_pos( double pos )
+void
+tds_tmpl_set_trigger_pos( double pos )
 {
     char cmd[ 50 ];
 
@@ -312,7 +318,8 @@ void tds_tmpl_set_trigger_pos( double pos )
  * 0 means no pretrigger while 1 indicates maximum pretrigger
  *-------------------------------------------------------------------*/
 
-double tds_tmpl_get_trigger_pos( void )
+double
+tds_tmpl_get_trigger_pos( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -328,7 +335,8 @@ double tds_tmpl_get_trigger_pos( void )
  * Function returns the number of averages
  *-----------------------------------------*/
 
-long tds_tmpl_get_num_avg( void )
+long
+tds_tmpl_get_num_avg( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -349,7 +357,8 @@ long tds_tmpl_get_num_avg( void )
  * Function sets the number of averages
  *--------------------------------------*/
 
-void tds_tmpl_set_num_avg( long num_avg )
+void
+tds_tmpl_set_num_avg( long num_avg )
 {
     char cmd[ 30 ];
 
@@ -382,7 +391,8 @@ void tds_tmpl_set_num_avg( long num_avg )
  * in average nor in sample mode, it is switched to sample mode.
  *-------------------------------------------------------------------------*/
 
-int tds_tmpl_get_acq_mode( void )
+int
+tds_tmpl_get_acq_mode( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -405,7 +415,8 @@ int tds_tmpl_get_acq_mode( void )
  * on the value of the argument passed to the function (1 or 2 )
  *---------------------------------------------------------------*/
 
-double tds_tmpl_get_cursor_position( int cur_no )
+double
+tds_tmpl_get_cursor_position( int cur_no )
 {
     char cmd[ 40 ] = "CURS:VBA:POSITION";
     char reply[ 30 ];
@@ -424,7 +435,8 @@ double tds_tmpl_get_cursor_position( int cur_no )
  * Returns the distance between the two cursors
  *----------------------------------------------*/
 
-double tds_tmpl_get_cursor_distance( void )
+double
+tds_tmpl_get_cursor_distance( void )
 {
     return   tds_tmpl_get_cursor_position( 1 )
            - tds_tmpl_get_cursor_position( 2 );
@@ -435,7 +447,8 @@ double tds_tmpl_get_cursor_distance( void )
  * Sets the trigger channel according to the number passed as argument
  *---------------------------------------------------------------------*/
 
-void tds_tmpl_set_trigger_channel( int ch )
+void
+tds_tmpl_set_trigger_channel( int ch )
 {
     char cmd[ 50 ];
 
@@ -458,7 +471,8 @@ void tds_tmpl_set_trigger_channel( int ch )
  * Returns number of the current trigger channel
  *-----------------------------------------------*/
 
-int tds_tmpl_get_trigger_channel( void )
+int
+tds_tmpl_get_trigger_channel( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -511,7 +525,8 @@ int tds_tmpl_get_trigger_channel( void )
  * Called on communication problems
  *----------------------------------*/
 
-void tds_tmpl_gpib_failure( void )
+void
+tds_tmpl_gpib_failure( void )
 {
     if ( ! in_init )
         print( FATAL, "Communication with device failed.\n" );
@@ -524,7 +539,8 @@ void tds_tmpl_gpib_failure( void )
  * and thereby clears it - if this isn't done no SRQs are flagged !
  *--------------------------------------------------------------------*/
 
-void tds_tmpl_clear_SESR( void )
+void
+tds_tmpl_clear_SESR( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -538,7 +554,8 @@ void tds_tmpl_clear_SESR( void )
  * Does all the necessary work after an experiment is finished.
  *--------------------------------------------------------------*/
 
-void tds_tmpl_finished( void )
+void
+tds_tmpl_finished( void )
 {
     if ( ! tds_tmpl.is_reacting )
         return;
@@ -556,8 +573,9 @@ void tds_tmpl_finished( void )
  * Positions the first or second cursor
  *--------------------------------------*/
 
-void tds_tmpl_set_cursor( int    cur_num,
-                          double pos )
+void
+tds_tmpl_set_cursor( int    cur_num,
+                     double pos )
 {
     char cmd[ 60 ];
 
@@ -575,7 +593,8 @@ void tds_tmpl_set_cursor( int    cur_num,
  * Function tests if a channel is switched on
  *--------------------------------------------*/
 
-bool tds_tmpl_display_channel_state( int channel )
+bool
+tds_tmpl_display_channel_state( int channel )
 {
     char cmd[ 30 ];
     char reply[ 10 ];
@@ -595,8 +614,9 @@ bool tds_tmpl_display_channel_state( int channel )
  * Function switches a channel of the digitizer on or off
  *--------------------------------------------------------*/
 
-void tds_tmpl_display_channel( int  channel,
-                               bool on_flag )
+void
+tds_tmpl_display_channel( int  channel,
+                          bool on_flag )
 {
     char cmd[ 30 ];
 
@@ -627,7 +647,8 @@ void tds_tmpl_display_channel( int  channel,
  * Returns the sensitivity of the channel passed as the argument
  *---------------------------------------------------------------*/
 
-double tds_tmpl_get_sens( int channel )
+double
+tds_tmpl_get_sens( int channel )
 {
     char cmd[ 30 ];
     char reply[ 30 ];
@@ -650,8 +671,9 @@ double tds_tmpl_get_sens( int channel )
  * Sets the sensitivity of one of the digitizers channels
  *--------------------------------------------------------*/
 
-void tds_tmpl_set_sens( int    channel,
-                        double sens )
+void
+tds_tmpl_set_sens( int    channel,
+                   double sens )
 {
     char cmd[ 40 ];
 #ifdef CHECK_SENS_IMPEDANCE
@@ -697,7 +719,8 @@ void tds_tmpl_set_sens( int    channel,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void tds_tmpl_start_acquisition( void )
+void
+tds_tmpl_start_acquisition( void )
 {
     /* Start an acquisition:
        1. clear the SESR register to allow SRQs
@@ -714,9 +737,10 @@ void tds_tmpl_start_acquisition( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double tds_tmpl_get_area( int        channel,
-                          Window_T * w,
-                          bool       use_cursor )
+double
+tds_tmpl_get_area( int        channel,
+                   Window_T * w,
+                   bool       use_cursor )
 {
 #ifdef NO_GATED_MEASUREMENTS
     /* Some older devices (TDS520) can't do gated measurements at all, so
@@ -802,8 +826,9 @@ double tds_tmpl_get_area( int        channel,
  * by fetching the curve in the window and integrating it 'by hand'.
  *---------------------------------------------------------------------*/
 
-static double tds_tmpl_get_area_wo_cursor( int        channel,
-                                           Window_T * w )
+static double
+tds_tmpl_get_area_wo_cursor( int        channel,
+                             Window_T * w )
 {
     double *data, area;
     long length, i;
@@ -850,11 +875,12 @@ static double tds_tmpl_get_area_wo_cursor( int        channel,
  * fetched fromt the device is to be encolsed by two vertical cursors.
  *-----------------------------------------------------------------------*/
 
-void tds_tmpl_get_curve( int        channel,
-                         Window_T * w,
-                         double **  data,
-                         long *     length,
-                         bool       use_cursor )
+void
+tds_tmpl_get_curve( int        channel,
+                    Window_T * w,
+                    double **  data,
+                    long *     length,
+                    bool       use_cursor )
 {
     char cmd[ 50 ];
     char reply[ 10 ];
@@ -998,9 +1024,10 @@ void tds_tmpl_get_curve( int        channel,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double tds_tmpl_get_amplitude( int        channel,
-                               Window_T * w,
-                               bool       use_cursor )
+double
+tds_tmpl_get_amplitude( int        channel,
+                        Window_T * w,
+                        bool       use_cursor )
 {
 #ifdef NO_GATED_MEASUREMENTS
     /* Some older devices (TDS520) can't do gated measurements at all, so
@@ -1086,8 +1113,9 @@ double tds_tmpl_get_amplitude( int        channel,
  * fetching the curve in the window and integrating it 'by hand'.
  *-------------------------------------------------------------------*/
 
-static double tds_tmpl_get_amplitude_wo_cursor( int        channel,
-                                                Window_T * w )
+static double
+tds_tmpl_get_amplitude_wo_cursor( int        channel,
+                                  Window_T * w )
 {
     double *data, min, max;
     long length, i;
@@ -1115,7 +1143,8 @@ static double tds_tmpl_get_amplitude_wo_cursor( int        channel,
  * Sets the digitizer to run continuously
  *----------------------------------------*/
 
-void tds_tmpl_free_running( void )
+void
+tds_tmpl_free_running( void )
 {
     tds_tmpl_command( "ACQ:STOPA RUNST;STATE RUN\n" );
 }
@@ -1124,7 +1153,8 @@ void tds_tmpl_free_running( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-void tds_tmpl_lock_state( bool lock )
+void
+tds_tmpl_lock_state( bool lock )
 {
     char cmd[ 100 ];
     int channel;
@@ -1155,8 +1185,9 @@ void tds_tmpl_lock_state( bool lock )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void tds_tmpl_copy_curve( int src,
-                          int dest )
+void
+tds_tmpl_copy_curve( int src,
+                     int dest )
 {
     char cmd[ 100 ] = "SAV:WAVEFORM ";
     long length;
@@ -1194,7 +1225,8 @@ void tds_tmpl_copy_curve( int src,
  * an error message gets printed and an exception is thrown.
  *-----------------------------------------------------------------*/
 
-bool tds_tmpl_command( const char * cmd )
+bool
+tds_tmpl_command( const char * cmd )
 {
     if ( gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
         tds_tmpl_gpib_failure( );
@@ -1208,9 +1240,10 @@ bool tds_tmpl_command( const char * cmd )
  * thrown, otherwise up to *length characters are returned in 'reply'.
  *-------------------------------------------------------------------------*/
 
-static bool tds_tmpl_talk( const char * cmd,
-                           char *       reply,
-                           long *       length )
+static bool
+tds_tmpl_talk( const char * cmd,
+               char *       reply,
+               long *       length )
 {
     if (    gpib_write( tds_tmpl.device, cmd, strlen( cmd ) ) == FAILURE
          || gpib_read( tds_tmpl.device, reply, length ) == FAILURE )
@@ -1226,7 +1259,8 @@ static bool tds_tmpl_talk( const char * cmd,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void tds_tmpl_set_track_cursors( bool flag )
+void
+tds_tmpl_set_track_cursors( bool flag )
 {
     char cmd[ 20 ];
 
@@ -1239,7 +1273,8 @@ void tds_tmpl_set_track_cursors( bool flag )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void tds_tmpl_set_gated_meas( bool flag )
+void
+tds_tmpl_set_gated_meas( bool flag )
 {
     char cmd[ 20 ];
 
@@ -1252,7 +1287,8 @@ void tds_tmpl_set_gated_meas( bool flag )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void tds_tmpl_set_snap( bool flag )
+void
+tds_tmpl_set_snap( bool flag )
 {
     char cmd[ 50 ];
 

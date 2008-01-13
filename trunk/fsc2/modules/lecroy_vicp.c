@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -314,10 +314,11 @@ static inline void lecroy_vicp_set_length( unsigned char * header,
  * On failures the function throws an exception.
  *-------------------------------------------------------------*/
 
-void lecroy_vicp_init( const char * dev_name,
-                       const char * address,
-                       long         us_timeout,
-                       bool         quit_on_signal )
+void
+lecroy_vicp_init( const char * dev_name,
+                  const char * address,
+                  long         us_timeout,
+                  bool         quit_on_signal )
 {
     int            fd;
     unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
@@ -401,7 +402,8 @@ void lecroy_vicp_init( const char * dev_name,
  * device and resetting some internal variables.
  *--------------------------------------------------*/
 
-static void lecroy_vicp_close_without_header( void )
+static void
+lecroy_vicp_close_without_header( void )
 {
     fsc2_lan_close( lecroy_vicp.handle );
 
@@ -420,7 +422,8 @@ static void lecroy_vicp_close_without_header( void )
  * after bringing it back to local
  *---------------------------------------------------*/
 
-void lecroy_vicp_close( void )
+void
+lecroy_vicp_close( void )
 {
     unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
     long           us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
@@ -461,7 +464,8 @@ void lecroy_vicp_close( void )
  *       otherwise unlock it
  *------------------------------------------------------*/
  
-void lecroy_vicp_lock_out( bool lock_state )
+void
+lecroy_vicp_lock_out( bool lock_state )
 {
     unsigned char op = LECROY_VICP_REMOTE;
     unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
@@ -516,8 +520,9 @@ void lecroy_vicp_lock_out( bool lock_state )
  *    2. Timeout value in micro-seconds
  *----------------------------------------------------------------*/
 
-void lecroy_vicp_set_timeout( int  dir,
-                              long us_timeout )
+void
+lecroy_vicp_set_timeout( int  dir,
+                         long us_timeout )
 {
     if ( lecroy_vicp.handle < 0 )
     {
@@ -557,10 +562,11 @@ void lecroy_vicp_set_timeout( int  dir,
  *    thrown.
  *-------------------------------------------------------------------*/
 
-int lecroy_vicp_write( const char * buffer,
-                       ssize_t    * length,
-                       bool         with_eoi,
-                       bool         quit_on_signal )
+int
+lecroy_vicp_write( const char * buffer,
+                   ssize_t    * length,
+                   bool         with_eoi,
+                   bool         quit_on_signal )
 {
     unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
     unsigned char  op = LECROY_VICP_DATA | LECROY_VICP_REMOTE;
@@ -689,10 +695,11 @@ int lecroy_vicp_write( const char * buffer,
  *    thrown.
  *---------------------------------------------------------------------*/
 
-int lecroy_vicp_read( char *    buffer,
-                      ssize_t * length,
-                      bool *    with_eoi,
-                      bool      quit_on_signal )
+int
+lecroy_vicp_read( char *    buffer,
+                  ssize_t * length,
+                  bool *    with_eoi,
+                  bool      quit_on_signal )
 {
     unsigned char   header[ LECROY_VICP_HEADER_SIZE ];
     ssize_t         total_length = 0;
@@ -854,7 +861,8 @@ int lecroy_vicp_read( char *    buffer,
  * +++ is dis- and re-connecting really necessary? +++
  *-------------------------------------------------------*/
 
-void lecroy_vicp_device_clear( void )
+void
+lecroy_vicp_device_clear( void )
 {
     int             fd;
     unsigned char   header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
@@ -922,7 +930,8 @@ void lecroy_vicp_device_clear( void )
  * Function for evaluating the operation field of a VICP header
  *--------------------------------------------------------------*/
 
-static inline unsigned char lecroy_vicp_get_operation( unsigned char * header )
+static inline unsigned char
+lecroy_vicp_get_operation( unsigned char * header )
 {
     return header[ LECROY_VICP_HEADER_OPERATION_OFFSET ];
 }
@@ -932,7 +941,8 @@ static inline unsigned char lecroy_vicp_get_operation( unsigned char * header )
  * Function for evaluating the version field of a VICP header
  *------------------------------------------------------------*/
 
-static inline unsigned char lecroy_vicp_get_version( unsigned char * header )
+static inline unsigned char
+lecroy_vicp_get_version( unsigned char * header )
 {
     return header[ LECROY_VICP_HEADER_VERSION_OFFSET ];
 }
@@ -942,7 +952,8 @@ static inline unsigned char lecroy_vicp_get_version( unsigned char * header )
  * Function for evaluation the sequence number field of a VICP header
  *--------------------------------------------------------------------*/
 
-static inline unsigned char lecroy_vicp_get_sequence( unsigned char * header )
+static inline unsigned char
+lecroy_vicp_get_sequence( unsigned char * header )
 {
     return header[ LECROY_VICP_HEADER_SEQUENCE_OFFSET ];
 }
@@ -953,7 +964,8 @@ static inline unsigned char lecroy_vicp_get_sequence( unsigned char * header )
  * Please note: the length field is a big-endian number
  *-----------------------------------------------------------*/
 
-static inline ssize_t lecroy_vicp_get_length( unsigned char * header )
+static inline ssize_t
+lecroy_vicp_get_length( unsigned char * header )
 {
     int i = LECROY_VICP_HEADER_MSB_OFFSET;
     unsigned long val = 0;
@@ -970,8 +982,9 @@ static inline ssize_t lecroy_vicp_get_length( unsigned char * header )
  * Function for setting the operation field of a VICP header
  *-----------------------------------------------------------*/
 
-static inline void lecroy_vicp_set_operation( unsigned char * header,
-                                              unsigned char   operation )
+static inline void
+lecroy_vicp_set_operation( unsigned char * header,
+                           unsigned char   operation )
 {
     header[ LECROY_VICP_HEADER_OPERATION_OFFSET ] = operation;
 }
@@ -981,7 +994,8 @@ static inline void lecroy_vicp_set_operation( unsigned char * header,
  * Function for setting the version field of a VICP header
  *---------------------------------------------------------*/
 
-static inline void lecroy_vicp_set_version( unsigned char * header )
+static inline void
+lecroy_vicp_set_version( unsigned char * header )
 {
     header[ LECROY_VICP_HEADER_VERSION_OFFSET ] =
                                               LECROY_VICP_HEADER_VERSION_VALUE;
@@ -991,7 +1005,8 @@ static inline void lecroy_vicp_set_version( unsigned char * header )
  * Function for setting the sequence number field of a VICP header
  *-----------------------------------------------------------------*/
 
-static inline void lecroy_vicp_set_sequence( unsigned char * header )
+static inline void
+lecroy_vicp_set_sequence( unsigned char * header )
 {
     if ( ++lecroy_vicp.seq_number == 0 )
         lecroy_vicp.seq_number++;
@@ -1005,8 +1020,9 @@ static inline void lecroy_vicp_set_sequence( unsigned char * header )
  * Please note: the length field is a big-endian number
  *--------------------------------------------------------*/
 
-static inline void lecroy_vicp_set_length( unsigned char * header,
-                                           unsigned long   length )
+static inline void
+lecroy_vicp_set_length( unsigned char * header,
+                        unsigned long   length )
 {
     int i = LECROY_VICP_HEADER_LSB_OFFSET;
 

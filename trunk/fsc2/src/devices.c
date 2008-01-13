@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -40,7 +40,8 @@ static long pathmax = 0;
  * the end of the linked list.
  *--------------------------------------------------------------------------*/
 
-void device_add( const char * name )
+void
+device_add( const char * name )
 {
     Device_Name_T *dl;
     char *dev_name;
@@ -225,7 +226,8 @@ void device_add( const char * name )
  * it to the list of devices.
  *-----------------------------------------------------*/
 
-void device_append_to_list( const char * dev_name )
+void
+device_append_to_list( const char * dev_name )
 {
     Device_T *cd;
 
@@ -274,7 +276,8 @@ void device_append_to_list( const char * dev_name )
  * the corresponding exit hook functions and unloading the modules.
  *---------------------------------------------------------------------*/
 
-void delete_devices( void )
+void
+delete_devices( void )
 {
     Device_T *cd, *cdp;
 
@@ -305,7 +308,8 @@ void delete_devices( void )
  * device data base file "Devices".
  *-------------------------------------------------------------*/
 
-void delete_device_name_list( void )
+void
+delete_device_name_list( void )
 {
     Device_Name_T *cd, *cdn;
 

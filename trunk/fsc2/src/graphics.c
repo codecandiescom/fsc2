@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -90,7 +90,8 @@ static struct {
  * Initializes and shows the window for displaying measurement results.
  *----------------------------------------------------------------------*/
 
-void start_graphics( void )
+void
+start_graphics( void )
 {
     long i;
     unsigned diff;
@@ -279,7 +280,8 @@ void start_graphics( void )
  * loaded tries some fonts hopefully available on all machines.
  *-----------------------------------------------------------------------*/
 
-static void fonts_init( void )
+static void
+fonts_init( void )
 {
     XCharStruct font_prop;
     int dummy;
@@ -316,7 +318,8 @@ static void fonts_init( void )
  * and positions of the display windows.
  *--------------------------------------------------------------*/
 
-static void set_default_sizes( void )
+static void
+set_default_sizes( void )
 {
     int flags;
     unsigned diff;
@@ -474,7 +477,8 @@ static void set_default_sizes( void )
  * properties of the display windows.
  *-------------------------------------------------*/
 
-static void set_defaults( void )
+static void
+set_defaults( void )
 {
     if ( GUI.G_Funcs.size == LOW )
     {
@@ -530,7 +534,8 @@ static void set_defaults( void )
  * to the current requirements.
  *---------------------------------------------------------*/
 
-static void forms_adapt( void )
+static void
+forms_adapt( void )
 {
     char *pixmap_file;
 
@@ -807,8 +812,9 @@ static void forms_adapt( void )
  * as clicking  on the "Close" button within the display window.
  *------------------------------------------------------------------*/
 
-int run_form_close_handler( FL_FORM * a  UNUSED_ARG,
-                            void    * b  UNUSED_ARG )
+int
+run_form_close_handler( FL_FORM * a  UNUSED_ARG,
+                        void    * b  UNUSED_ARG )
 {
     if ( Fsc2_Internals.child_pid == 0 )      /* if child has already exited */
     {
@@ -827,7 +833,8 @@ int run_form_close_handler( FL_FORM * a  UNUSED_ARG,
  * internal state of the graphics during an experiment.
  *---------------------------------------------------------*/
 
-static void G_struct_init( void )
+static void
+G_struct_init( void )
 {
     static bool first_time = SET;
     static int cursor_1d[ 8 ];
@@ -978,7 +985,8 @@ static void G_struct_init( void )
  * Function for initializing the 1D curves
  *-----------------------------------------*/
 
-static void G_init_curves_1d( void )
+static void
+G_init_curves_1d( void )
 {
     long i, j;
     Curve_1d_T *cv;
@@ -1079,7 +1087,8 @@ static void G_init_curves_1d( void )
  * Function for initializing the 2D curves
  *-----------------------------------------*/
 
-static void G_init_curves_2d( void )
+static void
+G_init_curves_2d( void )
 {
     long i, j;
     Curve_2d_T *cv;
@@ -1215,9 +1224,10 @@ static void G_init_curves_2d( void )
  * pixmap and then rotate this pixmap 'by hand'.
  *----------------------------------------------------------------------*/
 
-void create_label_pixmap( Canvas_T * c,
-                          int        coord,
-                          char *     label )
+void
+create_label_pixmap( Canvas_T * c,
+                     int        coord,
+                     char *     label )
 {
     Pixmap pm;
     int width, height;
@@ -1298,7 +1308,8 @@ void create_label_pixmap( Canvas_T * c,
  * Removes the window for displaying measurement results.
  *--------------------------------------------------------*/
 
-void stop_graphics( void )
+void
+stop_graphics( void )
 {
     int i;
     Marker_1d_T *m, *mn;
@@ -1446,7 +1457,8 @@ void stop_graphics( void )
  * Deallocates the memory needed for graphics
  *--------------------------------------------*/
 
-static void graphics_free( void )
+static void
+graphics_free( void )
 {
     long i;
     int coord;
@@ -1526,8 +1538,9 @@ static void graphics_free( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-static void canvas_off( Canvas_T *  c,
-                        FL_OBJECT * obj )
+static void
+canvas_off( Canvas_T *  c,
+            FL_OBJECT * obj )
 {
     FL_HANDLE_CANVAS ch;
 
@@ -1559,8 +1572,9 @@ static void canvas_off( Canvas_T *  c,
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static void setup_canvas( Canvas_T *  c,
-                          FL_OBJECT * obj )
+static void
+setup_canvas( Canvas_T *  c,
+              FL_OBJECT * obj )
 {
     XSetWindowAttributes attributes;
     FL_HANDLE_CANVAS ch;
@@ -1625,7 +1639,8 @@ static void setup_canvas( Canvas_T *  c,
  * Creates a pixmap for a canvas for buffering.
  *----------------------------------------------*/
 
-void create_pixmap( Canvas_T * c )
+void
+create_pixmap( Canvas_T * c )
 {
     char dashes[ ] = { 2, 2 };
 
@@ -1664,7 +1679,8 @@ void create_pixmap( Canvas_T * c )
  * Deletes the pixmap for a canvas for buffering.
  *------------------------------------------------*/
 
-void delete_pixmap( Canvas_T * c )
+void
+delete_pixmap( Canvas_T * c )
 {
     XFreeGC( G.d, c->gc );
     XFreePixmap( G.d, c->pm );
@@ -1678,7 +1694,8 @@ void delete_pixmap( Canvas_T * c )
  * Function for redrawing the axis areas of a the 1D display window
  *------------------------------------------------------------------*/
 
-void redraw_axis_1d( int coord )
+void
+redraw_axis_1d( int coord )
 {
     Canvas_T *c;
     Curve_1d_T *cv = NULL;
@@ -1738,7 +1755,8 @@ void redraw_axis_1d( int coord )
  * Function for redrawing the axis areas of a the 2D display window
  *------------------------------------------------------------------*/
 
-void redraw_axis_2d( int coord )
+void
+redraw_axis_2d( int coord )
 {
     Canvas_T *c;
     int width;
@@ -1794,9 +1812,10 @@ void redraw_axis_2d( int coord )
  * correct number of digits after the decimal point
  *-----------------------------------------------------*/
 
-void make_label_string( char * lstr,
-                        double num,
-                        int    res )
+void
+make_label_string( char * lstr,
+                   double num,
+                   int    res )
 {
     int n, mag;
 
@@ -1845,7 +1864,8 @@ void make_label_string( char * lstr,
  * buttons again, just to get the ButtonRelease event.
  *---------------------------------------------------------------------------*/
 
-void switch_off_special_cursors( void )
+void
+switch_off_special_cursors( void )
 {
     if ( ! G.is_init )
         return;
@@ -1910,8 +1930,9 @@ void switch_off_special_cursors( void )
  * Undoes the last action in the 1d window as far as possible.
  *-------------------------------------------------------------*/
 
-void undo_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
-                              long        b  UNUSED_ARG )
+void
+undo_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
+                         long        b  UNUSED_ARG )
 {
     long i;
     bool is_undo = UNSET;
@@ -1964,8 +1985,9 @@ void undo_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
  * Undoes the last action in the 2d window as far as possible.
  *-------------------------------------------------------------*/
 
-void undo_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
-                              long        b  UNUSED_ARG )
+void
+undo_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
+                         long        b  UNUSED_ARG )
 {
     Curve_2d_T *cv2;
     double temp_s2d,
@@ -2017,7 +2039,8 @@ void undo_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
  * vertical direction (the horizontal scaling is left unchanged)
  *------------------------------------------------------------------*/
 
-void fs_vert_rescale_1d( void )
+void
+fs_vert_rescale_1d( void )
 {
     long i;
 
@@ -2039,7 +2062,8 @@ void fs_vert_rescale_1d( void )
  * in z-direction (the other directions are left unchanged)
  *----------------------------------------------------------------*/
 
-void fs_vert_rescale_2d( void )
+void
+fs_vert_rescale_2d( void )
 {
     if ( G_2d.active_curve != -1 )
     {
@@ -2054,8 +2078,9 @@ void fs_vert_rescale_2d( void )
  * Callback for the FS button for 1D display
  *-------------------------------------------*/
 
-void fs_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
-                            long        b  UNUSED_ARG )
+void
+fs_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
+                       long        b  UNUSED_ARG )
 {
     int state;
     long i;
@@ -2102,8 +2127,9 @@ void fs_button_callback_1d( FL_OBJECT * a  UNUSED_ARG,
  * Callback for the FS button for 2D display
  *-------------------------------------------*/
 
-void fs_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
-                            long        b  UNUSED_ARG )
+void
+fs_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
+                       long        b  UNUSED_ARG )
 {
     int state;
 
@@ -2147,8 +2173,9 @@ void fs_button_callback_2d( FL_OBJECT * a  UNUSED_ARG,
  * Callback function for the curve buttons in the 1D display window
  *------------------------------------------------------------------*/
 
-void curve_button_callback_1d( FL_OBJECT * obj,
-                               long        data )
+void
+curve_button_callback_1d( FL_OBJECT * obj,
+                          long        data )
 {
     char hstr[ 128 ];
 
@@ -2177,8 +2204,9 @@ void curve_button_callback_1d( FL_OBJECT * obj,
  * Callback function for the curve buttons in the 2D display window
  *------------------------------------------------------------------*/
 
-void curve_button_callback_2d( FL_OBJECT * obj,
-                               long        data )
+void
+curve_button_callback_2d( FL_OBJECT * obj,
+                          long        data )
 {
     char hstr[ 128 ];
     int bstate;
@@ -2344,8 +2372,9 @@ void curve_button_callback_2d( FL_OBJECT * obj,
  * position).
  *--------------------------------------------------------------*/
 
-int form_event_handler( FL_FORM * form,
-                        void *    xevent )
+int
+form_event_handler( FL_FORM * form,
+                    void *    xevent )
 {
     if ( ( ( XEvent * ) xevent )->type == FocusIn )
     {

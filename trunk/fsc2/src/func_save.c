@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -64,7 +64,8 @@ static long T_fprintf( long         /* fn  */,
  * so just return a value indicating success.
  *----------------------------------------------------------------*/
 
-Var_T * f_is_file( Var_T * v  UNUSED_ARG )
+Var_T *
+f_is_file( Var_T * v  UNUSED_ARG )
 {
     return vars_push( INT_VAR, 1L );
 }
@@ -84,7 +85,8 @@ Var_T * f_is_file( Var_T * v  UNUSED_ARG )
  * 6. Default extension to add (in case it's not already there) (optional)
  *---------------------------------------------------------------------------*/
 
-Var_T * f_openf( Var_T * v )
+Var_T *
+f_openf( Var_T * v )
 {
     Var_T *cur;
     int i;
@@ -256,7 +258,8 @@ Var_T * f_openf( Var_T * v )
  * 5. Default extension to add (in case it's not already there)
  *---------------------------------------------------------------------------*/
 
-Var_T * f_getf( Var_T * v )
+Var_T *
+f_getf( Var_T * v )
 {
     Var_T *cur;
     int i;
@@ -347,7 +350,7 @@ Var_T * f_getf( Var_T * v )
     else
         s[ 4 ] = T_strdup( s[ 4 ] );
 
-getfile_retry:
+ getfile_retry:
 
     /* Try to get a filename - on 'Cancel' request confirmation (unless a
        file name was passed to the routine and this is not a repeat call) */
@@ -482,7 +485,8 @@ getfile_retry:
  * after applying some changes according to the input arguments.
  *-------------------------------------------------------------------*/
 
-Var_T * f_clonef( Var_T * v )
+Var_T *
+f_clonef( Var_T * v )
 {
     char *fn;
     char *n;
@@ -574,7 +578,8 @@ Var_T * f_clonef( Var_T * v )
  * Function for opening a file when running in batch mode
  *--------------------------------------------------------*/
 
-static Var_T *batch_mode_file_open( char * name )
+static Var_T *
+batch_mode_file_open( char * name )
 {
     unsigned long cn = 0;
     char *new_name = NULL;
@@ -704,7 +709,8 @@ static Var_T *batch_mode_file_open( char * name )
  * family of functions.
  *---------------------------------------------------------------------*/
 
-static int get_save_file( Var_T ** v )
+static int
+get_save_file( Var_T ** v )
 {
     Var_T *get_file_ptr;
     Var_T *file;
@@ -802,7 +808,8 @@ static int get_save_file( Var_T ** v )
  * Closes all opened output files
  *--------------------------------*/
 
-void close_all_files( void )
+void
+close_all_files( void )
 {
     int i;
 
@@ -837,7 +844,8 @@ void close_all_files( void )
  * slices. It returns the number of characters written.
  *----------------------------------------------------------------------*/
 
-Var_T * f_save( Var_T * v )
+Var_T *
+f_save( Var_T * v )
 {
     long file_num;
     long count = 0;
@@ -890,8 +898,9 @@ Var_T * f_save( Var_T * v )
  * the 'save()' EDL function. It writes out the array one element per line
  *-------------------------------------------------------------------------*/
 
-static long arr_save( long    file_num,
-                      Var_T * v )
+static long
+arr_save( long    file_num,
+          Var_T * v )
 {
     ssize_t i;
     long count = 0;
@@ -936,7 +945,8 @@ static long arr_save( long    file_num,
  * The function returns the number of chars it wrote to the file.
  *--------------------------------------------------------------------------*/
 
-Var_T * f_fsave( Var_T * v )
+Var_T *
+f_fsave( Var_T * v )
 {
     long file_num;
 
@@ -971,7 +981,8 @@ Var_T * f_fsave( Var_T * v )
  * a format string that can be passed to fprintf()'s format string.
  *-------------------------------------------------------------------------*/
 
-static void f_format_check( Var_T * v )
+static void
+f_format_check( Var_T * v )
 {
     char *cp;
     Var_T *cv;
@@ -1086,7 +1097,8 @@ static void f_format_check( Var_T * v )
  * The function returns the number of chars written to the file.
  *-------------------------------------------------------------------------*/
 
-Var_T * f_ffsave( Var_T * v )
+Var_T *
+f_ffsave( Var_T * v )
 {
     long file_num;
 
@@ -1123,7 +1135,8 @@ Var_T * f_ffsave( Var_T * v )
  * superfluous arguments are discarded).
  *--------------------------------------------------------------------------*/
 
-static void ff_format_check( Var_T * v )
+static void
+ff_format_check( Var_T * v )
 {
     const char *sptr = v->val.sptr;
     Var_T *vptr = v->next;
@@ -1328,7 +1341,8 @@ static void ff_format_check( Var_T * v )
  * the number of character written.
  *-----------------------------------------------------------------------*/
 
-static long do_printf( long file_num, Var_T * v )
+static long
+do_printf( long file_num, Var_T * v )
 {
     char *fmt_start,
          *fmt_end,
@@ -1638,7 +1652,8 @@ static long do_printf( long file_num, Var_T * v )
  * character).
  *-------------------------------------------------------------------------*/
 
-Var_T * f_save_p( Var_T * v )
+Var_T *
+f_save_p( Var_T * v )
 {
     long file_num;
 
@@ -1670,7 +1685,8 @@ Var_T * f_save_p( Var_T * v )
  * that gets prepended to each line of the output (i.e. a comment char).
  *--------------------------------------------------------------------------*/
 
-Var_T * f_save_o( Var_T * v )
+Var_T *
+f_save_o( Var_T * v )
 {
     long file_num;
 
@@ -1701,9 +1717,10 @@ Var_T * f_save_o( Var_T * v )
  * 3. Comment string to prepend to each line
  *---------------------------------------------------------------------*/
 
-static long print_browser( int          browser,
-                           int          fid,
-                           const char * comment )
+static long
+print_browser( int          browser,
+               int          fid,
+               const char * comment )
 {
     char *line;
     char *lp, *cp;
@@ -1765,10 +1782,11 @@ static long print_browser( int          browser,
                                         value in fsc2_clean.l */
 #define PRINT_BUF_SIZE 1025
 
-static long print_include( int          fid,
-                           char *       cp,
-                           const char * comment,
-                           const char * cur_file )
+static long
+print_include( int          fid,
+               char *       cp,
+               const char * comment,
+               const char * cur_file )
 {
     char delim;
     char *ep;
@@ -1943,7 +1961,8 @@ static long print_include( int          fid,
  * 4. The label for the editor
  *---------------------------------------------------------------------*/
 
-Var_T * f_save_c( Var_T * v )
+Var_T *
+f_save_c( Var_T * v )
 {
     long file_num;
     const char *cc = NULL;
@@ -2040,9 +2059,10 @@ Var_T * f_save_c( Var_T * v )
 #define BUFFER_SIZE_GUESS 128       /* guess for number of characters needed */
 #define COPY_BUFFER_SIZE 1024       /* size of buffer used when copying */
 
-static long T_fprintf( long         fn,
-                       const char * fmt,
-                       ... )
+static long
+T_fprintf( long         fn,
+           const char * fmt,
+           ... )
 {
     long to_write;                       /* number of bytes we need to write */
     long size = BUFFER_SIZE_GUESS;

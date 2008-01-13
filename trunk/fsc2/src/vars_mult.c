@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -25,24 +25,25 @@
 #include "fsc2.h"
 
 
-static Var_T *vars_int_var_mult( Var_T * v1,
-                                 Var_T * v2 );
-static Var_T *vars_float_var_mult( Var_T * v1,
-                                   Var_T * v2 );
-static Var_T *vars_int_arr_mult( Var_T * v1,
-                                 Var_T * v2 );
-static Var_T *vars_float_arr_mult( Var_T * v1,
-                                   Var_T * v2 );
-static Var_T *vars_ref_mult( Var_T * v1,
-                             Var_T * v2 );
+static Var_T * vars_int_var_mult( Var_T * v1,
+                                  Var_T * v2 );
+static Var_T * vars_float_var_mult( Var_T * v1,
+                                    Var_T * v2 );
+static Var_T * vars_int_arr_mult( Var_T * v1,
+                                  Var_T * v2 );
+static Var_T * vars_float_arr_mult( Var_T * v1,
+                                    Var_T * v2 );
+static Var_T * vars_ref_mult( Var_T * v1,
+                              Var_T * v2 );
 
 
 /*-------------------------------------------------------------*
  * Function for multipying of two variables of arbitrary types
  *-------------------------------------------------------------*/
 
-Var_T *vars_mult( Var_T * v1,
-                  Var_T * v2 )
+Var_T *
+vars_mult( Var_T * v1,
+           Var_T * v2 )
 {
     Var_T *new_var = NULL;
 
@@ -105,8 +106,9 @@ Var_T *vars_mult( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_int_var_mult( Var_T * v1,
-                                 Var_T * v2 )
+static Var_T *
+vars_int_var_mult( Var_T * v1,
+                   Var_T * v2 )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -204,8 +206,9 @@ static Var_T *vars_int_var_mult( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_float_var_mult( Var_T * v1,
-                                   Var_T * v2 )
+static Var_T *
+vars_float_var_mult( Var_T * v1,
+                     Var_T * v2 )
 {
     Var_T *new_var = NULL;
     ssize_t i;
@@ -292,8 +295,9 @@ static Var_T *vars_float_var_mult( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_int_arr_mult( Var_T * v1,
-                                 Var_T * v2 )
+static Var_T *
+vars_int_arr_mult( Var_T * v1,
+                   Var_T * v2 )
 {
     Var_T *new_var = NULL;
     Var_T *vt;
@@ -376,8 +380,9 @@ static Var_T *vars_int_arr_mult( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_float_arr_mult( Var_T * v1,
-                                   Var_T * v2 )
+static Var_T *
+vars_float_arr_mult( Var_T * v1,
+                     Var_T * v2 )
 {
     Var_T *new_var = NULL;
     Var_T *vt;
@@ -449,8 +454,9 @@ static Var_T *vars_float_arr_mult( Var_T * v1,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static Var_T *vars_ref_mult( Var_T * v1,
-                             Var_T * v2 )
+static Var_T *
+vars_ref_mult( Var_T * v1,
+               Var_T * v2 )
 {
     Var_T *new_var = NULL;
     Var_T *vt;

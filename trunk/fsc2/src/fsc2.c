@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -75,8 +75,9 @@ static void main_sig_handler( int signo );
 /*     Here we go...      */
 /**************************/
 
-int main( int    argc,
-          char * argv[ ] )
+int
+main( int    argc,
+      char * argv[ ] )
 {
     char *fname = NULL;
     int conn_pid;
@@ -290,7 +291,8 @@ int main( int    argc,
  * Initialization of global variables
  *-------------------------------------*/
 
-static void globals_init( const char * pname )
+static void
+globals_init( const char * pname )
 {
     /* As the very first action the effective UID and GID gets stored and
        then the program lowers the permissions to the ones of the real UID
@@ -389,7 +391,8 @@ static void globals_init( const char * pname )
  * currently getting stored is the last directory used)
  *-------------------------------------------------------*/
 
-static void fsc2_get_conf( void )
+static void
+fsc2_get_conf( void )
 {
     char *fname;
     struct passwd *ue;
@@ -465,7 +468,8 @@ static void fsc2_get_conf( void )
  * Save some configuration information
  *-------------------------------------*/
 
-static void fsc2_save_conf( void )
+static void
+fsc2_save_conf( void )
 {
     char *fname;
     struct passwd *ue;
@@ -554,7 +558,8 @@ static void fsc2_save_conf( void )
  * Function sets 'EDL.infile' to the complete name of an EDL input file
  *----------------------------------------------------------------------*/
 
-static bool get_edl_file( char * fname )
+static bool
+get_edl_file( char * fname )
 {
     TRY
     {
@@ -591,7 +596,8 @@ static bool get_edl_file( char * fname )
  * Function for running an experiment without using any GUI elements
  *-------------------------------------------------------------------*/
 
-static void no_gui_run( void )
+static void
+no_gui_run( void )
 {
     /* Read in the EDL file and analyze it */
 
@@ -631,7 +637,8 @@ static void no_gui_run( void )
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-static void check_run( void )
+static void
+check_run( void )
 {
     static bool user_break = UNSET;
     long i;
@@ -706,7 +713,8 @@ static void check_run( void )
  * be used.
  *------------------------------------------------------------------*/
 
-static void test_machine_type( void )
+static void
+test_machine_type( void )
 {
     struct utsname utsbuf;
 
@@ -728,9 +736,10 @@ static void test_machine_type( void )
  * be dealt with earlier.
  *-------------------------------------------------------*/
 
-static int scan_args( int *   argc,
-                      char *  argv[ ],
-                      char ** fname )
+static int
+scan_args( int *   argc,
+           char *  argv[ ],
+           char ** fname )
 {
     int flags = getenv( "FSC2_LOCAL_EXEC" ) != NULL ? LOCAL_EXEC : 0;
     int cur_arg = 1;
@@ -1210,7 +1219,8 @@ static int scan_args( int *   argc,
  * foing the experiment are finished!
  *----------------------------------------------------------*/
 
-static void final_exit_handler( void )
+static void
+final_exit_handler( void )
 {
     /* Stop the process that is waiting for external connections as well
        as the child process and the HTTP server */
@@ -1279,8 +1289,9 @@ static void final_exit_handler( void )
  * reload == 0: read new file, reload == 1: reload file
  *-------------------------------------------------------------------*/
 
-void load_file( FL_OBJECT * a  UNUSED_ARG,
-                long        reload )
+void
+load_file( FL_OBJECT * a  UNUSED_ARG,
+           long        reload )
 {
     const char *fn;
     static char *old_in_file;
@@ -1527,8 +1538,9 @@ void load_file( FL_OBJECT * a  UNUSED_ARG,
  * the currently loaded file.
  *-----------------------------------------------------*/
 
-void test_file( FL_OBJECT * a,
-                long        b  UNUSED_ARG )
+void
+test_file( FL_OBJECT * a,
+           long        b  UNUSED_ARG )
 {
     static bool running_test = UNSET;
     static bool user_break = UNSET;
@@ -1677,8 +1689,9 @@ void test_file( FL_OBJECT * a,
  * not already done) and on success starts the experiment.
  *---------------------------------------------------------------*/
 
-void run_file( FL_OBJECT * a  UNUSED_ARG,
-               long        b  UNUSED_ARG )
+void
+run_file( FL_OBJECT * a  UNUSED_ARG,
+          long        b  UNUSED_ARG )
 {
     struct stat file_stat;
     char str1[ 128 ],
@@ -1797,8 +1810,9 @@ void run_file( FL_OBJECT * a  UNUSED_ARG,
  * the file.
  *--------------------------------------------------------------------*/
 
-static bool display_file( char * name,
-                          FILE * fp )
+static
+bool display_file( char * name,
+                   FILE * fp )
 {
     int len, key;
     long lc, cc, i;                         /* line and char counter */
@@ -1915,7 +1929,8 @@ static bool display_file( char * name,
  * structures etc.) before a new file can be loaded.
  *--------------------------------------------------------------------*/
 
-void clean_up( void )
+void
+clean_up( void )
 {
     int i;
 
@@ -1987,7 +2002,8 @@ void clean_up( void )
  * listening for external connections (to send a new EDL program)
  *----------------------------------------------------------------*/
 
-void conn_request_handler( void )
+void
+conn_request_handler( void )
 {
     char line[ MAXLINE ];
     int count;
@@ -2013,7 +2029,8 @@ void conn_request_handler( void )
  * try to get rid of shared memory and kill the other processes etc.
  *-----------------------------------------------------------------------*/
 
-static void set_main_signals( void )
+static
+void set_main_signals( void )
 {
     struct sigaction sact;
     int sig_list[ ] = { SIGHUP, SIGINT, SIGQUIT, SIGILL, SIGABRT,
@@ -2041,7 +2058,8 @@ static void set_main_signals( void )
  * Signal handler for the main program
  *-------------------------------------*/
 
-static void main_sig_handler( int signo )
+static
+void main_sig_handler( int signo )
 {
     int errno_saved;
     pid_t pid;
@@ -2162,7 +2180,8 @@ static void main_sig_handler( int signo )
  * to reply with its own signal.
  *-------------------------------------------------------------------*/
 
-void notify_conn( int signo )
+void
+notify_conn( int signo )
 {
     /* Don't send signal to the process responsible for connections if it
        doesn't exist (in load_file() at the very start) or when the
@@ -2189,7 +2208,8 @@ void notify_conn( int signo )
  * Function prints help message and exits
  *----------------------------------------*/
 
-void usage( int return_status )
+void
+usage( int return_status )
 {
     fprintf( stderr, "Usage: fsc2 [OPTIONS]... [FILE]\n"
              "A program for remote control of spectrometers\n"
@@ -2258,7 +2278,8 @@ void usage( int return_status )
  * and which deals with periodic tasks.
  *---------------------------------------------------------*/
 
-int idle_handler( void )
+int
+idle_handler( void )
 {
     /* Check if a request from the child for external conections has
        come in */

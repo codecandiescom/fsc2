@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -43,7 +43,8 @@ static void rb_pulser_j_seq_length_check( void );
  * to update the pulser accordingly.
  *---------------------------------------------------------------------*/
 
-void rb_pulser_j_do_update( void )
+void
+rb_pulser_j_do_update( void )
 {
     bool restart = UNSET;
 
@@ -74,7 +75,8 @@ void rb_pulser_j_do_update( void )
  * that the new settings are reasonable and then commit all changes.
  *---------------------------------------------------------------------*/
 
-void rb_pulser_j_update_pulses( bool flag )
+void
+rb_pulser_j_update_pulses( bool flag )
 {
     rb_pulser_j_function_init( );
     rb_pulser_j_init_delay( );
@@ -95,7 +97,8 @@ void rb_pulser_j_update_pulses( bool flag )
  * to their positions.
  *-----------------------------------------------------------------*/
 
-static void rb_pulser_j_function_init( void )
+static void
+rb_pulser_j_function_init( void )
 {
     int i, j;
     Function_T *f;
@@ -128,7 +131,8 @@ static void rb_pulser_j_function_init( void )
  * be zero but must be at least INIT_DELAY_MINIMUM_DELAY_TICKS long!
  *----------------------------------------------------------------------*/
 
-static void rb_pulser_j_init_delay( void )
+static void
+rb_pulser_j_init_delay( void )
 {
     Function_T *f = rb_pulser_j.function + PULSER_CHANNEL_MW;
     Pulse_T *p;
@@ -188,7 +192,8 @@ static void rb_pulser_j_init_delay( void )
  * the pulses.
  *------------------------------------------------------------------------*/
 
-static void rb_pulser_j_delay_card_setup( void )
+static void
+rb_pulser_j_delay_card_setup( void )
 {
     Rulbus_Delay_Card_T *card;
     Function_T *f;
@@ -312,7 +317,8 @@ static void rb_pulser_j_delay_card_setup( void )
  * variables describing the state of the pulser to their initial values.
  *------------------------------------------------------------------------*/
 
-void rb_pulser_j_full_reset( void )
+void
+rb_pulser_j_full_reset( void )
 {
     Pulse_T *p = rb_pulser_j.pulses;
     Rulbus_Delay_Card_T *card;
@@ -368,7 +374,8 @@ void rb_pulser_j_full_reset( void )
  * an exception if that's longer than possible with the pulser.
  *------------------------------------------------------------------*/
 
-static void rb_pulser_j_seq_length_check( void )
+static void
+rb_pulser_j_seq_length_check( void )
 {
     int i;
     Function_T *f;
@@ -417,7 +424,8 @@ static void rb_pulser_j_seq_length_check( void )
  * 'flag' is set during the test run.
  *-------------------------------------------------------------------*/
 
-static void rb_pulser_j_commit( bool flag )
+static void
+rb_pulser_j_commit( bool flag )
 {
     Rulbus_Delay_Card_T *card;
     size_t i;
@@ -485,7 +493,8 @@ static void rb_pulser_j_commit( bool flag )
  * Function for telling the synthesizer about the RF pulse length
  *----------------------------------------------------------------*/
 
-static void rb_pulser_j_rf_pulse( void )
+static void
+rb_pulser_j_rf_pulse( void )
 {
     Function_T *f = rb_pulser_j.function + PULSER_CHANNEL_RF;
     Pulse_T *p;

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -36,7 +36,8 @@ static void lecroy9400_local( void );
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_init( void )
+bool
+lecroy9400_init( void )
 {
     char buffer[ 100 ];
     long len = 100;
@@ -119,7 +120,8 @@ bool lecroy9400_init( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy9400_get_timebase( void )
+double
+lecroy9400_get_timebase( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -134,7 +136,8 @@ double lecroy9400_get_timebase( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_timebase( double timebase )
+bool
+lecroy9400_set_timebase( double timebase )
 {
     char cmd[ 40 ] = "TD,";
 
@@ -151,7 +154,8 @@ bool lecroy9400_set_timebase( double timebase )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-int lecroy9400_get_trigger_source( void )
+int
+lecroy9400_get_trigger_source( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -176,7 +180,8 @@ int lecroy9400_get_trigger_source( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_trigger_source( int channel )
+bool
+lecroy9400_set_trigger_source( int channel )
 {
     char cmd[ 40 ] = "TRS,";
 
@@ -204,7 +209,8 @@ bool lecroy9400_set_trigger_source( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy9400_get_trigger_level( void )
+double
+lecroy9400_get_trigger_level( void )
 {
     char reply[ 30 ];
     long length = 30;
@@ -219,7 +225,8 @@ double lecroy9400_get_trigger_level( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_trigger_level( double level )
+bool
+lecroy9400_set_trigger_level( double level )
 {
     char cmd[ 40 ] = "TRL,";
 
@@ -236,7 +243,8 @@ bool lecroy9400_set_trigger_level( double level )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy9400_get_sens( int channel )
+double
+lecroy9400_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
@@ -257,7 +265,8 @@ double lecroy9400_get_sens( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_sens( int channel, double sens )
+bool
+lecroy9400_set_sens( int channel, double sens )
 {
     char cmd[ 40 ];
 
@@ -279,7 +288,8 @@ bool lecroy9400_set_sens( int channel, double sens )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy9400_get_offset( int channel )
+double
+lecroy9400_get_offset( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
@@ -300,7 +310,8 @@ double lecroy9400_get_offset( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_offset( int channel, double offset )
+bool
+lecroy9400_set_offset( int channel, double offset )
 {
     char cmd[ 40 ];
 
@@ -322,7 +333,8 @@ bool lecroy9400_set_offset( int channel, double offset )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-int lecroy9400_get_coupling( int channel )
+int
+lecroy9400_get_coupling( int channel )
 {
     char cmd[ 20 ];
     int type;
@@ -350,7 +362,8 @@ int lecroy9400_get_coupling( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_coupling( int channel, int type )
+bool
+lecroy9400_set_coupling( int channel, int type )
 {
     char cmd[ 30 ];
     char const *cpl[ ] = { "A1M", "D1M", "D50" };
@@ -373,7 +386,8 @@ bool lecroy9400_set_coupling( int channel, int type )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_is_displayed( int channel )
+bool
+lecroy9400_is_displayed( int channel )
 {
     char reply[ 30 ];
     long length = 30;
@@ -392,7 +406,8 @@ bool lecroy9400_is_displayed( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_display( int channel, int on_off )
+bool
+lecroy9400_display( int channel, int on_off )
 {
     char cmds[ ][ 9 ] = { "TRC1,", "TRC2,", "TRMC,", "TRMD,",
                           "TRFE,", "TRFF," };
@@ -431,7 +446,8 @@ bool lecroy9400_display( int channel, int on_off )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-long lecroy9400_get_num_avg( int channel )
+long
+lecroy9400_get_num_avg( int channel )
 {
     int i;
     long num_avg;
@@ -459,7 +475,8 @@ long lecroy9400_get_num_avg( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_get_desc( int channel )
+bool
+lecroy9400_get_desc( int channel )
 {
     long len = MAX_DESC_LEN;
     char const *cmds[ ] = { "RD,C1.DE\n", "RD,C2.DE\n",
@@ -478,7 +495,8 @@ bool lecroy9400_get_desc( int channel )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-double lecroy9400_get_trigger_pos( void )
+double
+lecroy9400_get_trigger_pos( void )
 {
     /***** Still needs to be implemented *****/
 
@@ -489,7 +507,8 @@ double lecroy9400_get_trigger_pos( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-bool lecroy9400_set_trigger_pos( double position )
+bool
+lecroy9400_set_trigger_pos( double position )
 {
     UNUSED_ARGUMENT( position );
 
@@ -502,8 +521,12 @@ bool lecroy9400_set_trigger_pos( double position )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
-                                  bool reject, long rec_len )
+void
+lecroy9400_set_up_averaging( long channel,
+                             long source,
+                             long num_avg,
+                             bool reject,
+                             long rec_len )
 {
     char cmd[ 100 ];
     size_t i;
@@ -567,7 +590,8 @@ void lecroy9400_set_up_averaging( long channel, long source, long num_avg,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_finished( void )
+void
+lecroy9400_finished( void )
 {
     lecroy9400_local( );
     fsc2_serial_close( SERIAL_PORT );
@@ -578,7 +602,8 @@ void lecroy9400_finished( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_start_acquisition( void )
+void
+lecroy9400_start_acquisition( void )
 {
     if ( lecroy9400.channels_in_use[ LECROY9400_FUNC_E ] )
         if ( lecroy9400_write( "SEL,FE;ARST\n", 12 ) == FAIL )
@@ -595,8 +620,12 @@ void lecroy9400_start_acquisition( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_get_curve( int ch, Window_T *w, double **array, long *length,
-                           bool use_cursor )
+void
+lecroy9400_get_curve( int        ch,
+                      Window_T * w,
+                      double **  array,
+                      long *     length,
+                      bool       use_cursor )
 {
     unsigned char *data;
     unsigned char *dp;
@@ -721,7 +750,8 @@ void lecroy9400_free_running( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool lecroy9400_command( const char *cmd )
+bool
+lecroy9400_command( const char * cmd )
 {
     if ( lecroy9400_write( cmd, strlen( cmd ) ) == FAIL )
         lecroy9400_comm_failure( );
@@ -732,7 +762,10 @@ bool lecroy9400_command( const char *cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool lecroy9400_talk( const char *cmd, char *reply, long *length )
+static bool
+lecroy9400_talk( const char * cmd,
+                 char *       reply,
+                 long *       length )
 {
     if (    lecroy9400_write( cmd, strlen( cmd ) ) == FAIL
          || lecroy9400_read( reply, length ) == FAIL )
@@ -744,7 +777,8 @@ static bool lecroy9400_talk( const char *cmd, char *reply, long *length )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static bool lecroy9400_serial_init( void )
+static bool
+lecroy9400_serial_init( void )
 {
     /* We need exclussive access to the serial port and we also need
        non-blocking mode to avoid hanging indefinitely if the other
@@ -783,7 +817,9 @@ static bool lecroy9400_serial_init( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static bool lecroy9400_write( const char *buffer, long length )
+static bool
+lecroy9400_write( const char * buffer,
+                  long         length )
 {
     if ( fsc2_serial_write( SERIAL_PORT, buffer, length, 0, SET ) != length )
     {
@@ -798,7 +834,9 @@ static bool lecroy9400_write( const char *buffer, long length )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static bool lecroy9400_read( char *buffer, long *length )
+static bool
+lecroy9400_read( char * buffer,
+                 long * length )
 {
     if ( ( *length = fsc2_serial_read( SERIAL_PORT, buffer, *length,
                                        0, UNSET ) ) <= 0 )
@@ -816,7 +854,8 @@ static bool lecroy9400_read( char *buffer, long *length )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static void lecroy9400_local( void )
+static void
+lecroy9400_local( void )
 {
     lecroy9400_write( "\x1BL", 2 );
 }
@@ -825,7 +864,8 @@ static void lecroy9400_local( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void lecroy9400_comm_failure( void )
+void
+lecroy9400_comm_failure( void )
 {
     is_acquiring = UNSET;
 

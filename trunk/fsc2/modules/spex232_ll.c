@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -61,7 +61,8 @@ static void spex232_comm_fail( void );
  * Function for initializing the device
  *--------------------------------------*/
 
-bool spex232_init( void )
+bool
+spex232_init( void )
 {
 	int init_retries = 0;
 
@@ -103,7 +104,8 @@ bool spex232_init( void )
  * Initialization of communication with the  device
  *--------------------------------------------------*/
 
-static bool spex232_comm_init( void )
+static bool
+spex232_comm_init( void )
 {
 	unsigned char buf[ ] = "O2000";
 
@@ -179,7 +181,8 @@ static bool spex232_comm_init( void )
  * complete failure we return '\0'.
  *-----------------------------------------------------------------------*/
 
-static unsigned char spex232_autobaud( void )
+static unsigned char
+spex232_autobaud( void )
 {
 	unsigned int autobaud_repeats = 0;
 	unsigned char buf;
@@ -273,7 +276,8 @@ static unsigned char spex232_autobaud( void )
  * communication mode")
  *------------------------------------------------------------*/
 
-static void spex232_reboot( void )
+static void
+spex232_reboot( void )
 {
 	unsigned char buf = 248;
 
@@ -298,7 +302,8 @@ static void spex232_reboot( void )
  * controller. This function tries to read them in and discards them.
  *---------------------------------------------------------------------*/
 
-static void spex232_discard_response( void )
+static void
+spex232_discard_response( void )
 {
 	unsigned char buf;
 
@@ -315,7 +320,8 @@ static void spex232_discard_response( void )
  * '\0' on failure.
  *----------------------------------------------------------*/
 
-static unsigned char spex232_switch_to_int_mode( void )
+static unsigned char
+spex232_switch_to_int_mode( void )
 {
 	unsigned char buf;
 
@@ -345,7 +351,8 @@ static unsigned char spex232_switch_to_int_mode( void )
  * and returns boolean true for success and false for failure.
  *--------------------------------------------------------------------*/
 
-static bool spex232_check_confirmation( void )
+static bool
+spex232_check_confirmation( void )
 {
 	unsigned char buf;
 
@@ -368,7 +375,8 @@ static bool spex232_check_confirmation( void )
 
 #define MOTOR_INIT_BUF_SIZE  30
 
-static void spex232_motor_init( void )
+static void
+spex232_motor_init( void )
 {
 	unsigned char buf[ MOTOR_INIT_BUF_SIZE ] = "A";
 	int len;
@@ -424,7 +432,8 @@ static void spex232_motor_init( void )
  * Converts an (uncorrected abolute) wavelength to a motor position
  *------------------------------------------------------------------*/
 
-long int spex232_wl2p( double wl )
+long int
+spex232_wl2p( double wl )
 {
     SPEX232_ASSERT(    wl - spex232.abs_lower_limit >= 0.0
                     && spex232.upper_limit - wl >= 0.0 );
@@ -441,7 +450,8 @@ long int spex232_wl2p( double wl )
  * Converts a motor position to an (uncorrected absolute) wavelength
  *-------------------------------------------------------------------*/
 
-double spex232_p2wl( long int pos )
+double
+spex232_p2wl( long int pos )
 {
 	if ( spex232.mode == WL )
 		return pos * spex232.mini_step + spex232.abs_lower_limit;
@@ -455,7 +465,8 @@ double spex232_p2wl( long int pos )
  * Function for starting  a scan 
  *-------------------------------*/
 
-void spex232_scan_start( void )
+void
+spex232_scan_start( void )
 {
     spex232.in_scan = SET;
 	spex232.wavelength = spex232_set_wavelength( spex232.scan_start );
@@ -466,7 +477,8 @@ void spex232_scan_start( void )
  * Function for doing a scan step 
  *--------------------------------*/
 
-void spex232_scan_step( void )
+void
+spex232_scan_step( void )
 {
     if ( spex232.mode == WL )
         spex232.wavelength =
@@ -483,7 +495,8 @@ void spex232_scan_step( void )
  * Function for setting a new wavelength
  *---------------------------------------*/
 
-double spex232_set_wavelength( double wl )
+double
+spex232_set_wavelength( double wl )
 {
 	long int new_pos;
 
@@ -521,7 +534,8 @@ double spex232_set_wavelength( double wl )
  * Function for telling the device the current position of the motor
  *-------------------------------------------------------------------*/
 
-static void spex232_set_motor_position( long int pos )
+static void
+spex232_set_motor_position( long int pos )
 {
     char buf[ 30 ];
 
@@ -541,7 +555,8 @@ static void spex232_set_motor_position( long int pos )
  *---------------------------------------------------------------------*/
 
 #if 0
-static long int spex232_get_motor_position( void )
+static long int
+spex232_get_motor_position( void )
 {
 	char buf[ 30 ] = "H0\r";
 	ssize_t len = 0;
@@ -564,7 +579,8 @@ static long int spex232_get_motor_position( void )
  * Function for moving the motor by a certain number of steps
  *------------------------------------------------------------*/
 
-static void spex232_move_relative( long int steps )
+static void
+spex232_move_relative( long int steps )
 {
 	char buf[ 30 ];
 
@@ -591,7 +607,8 @@ static void spex232_move_relative( long int steps )
  * if it is, otherwise false
  *------------------------------------------------------------*/
  
-static bool spex232_motor_is_busy( void )
+static bool
+spex232_motor_is_busy( void )
 {
 	char cmd = 'E';
 
@@ -610,7 +627,8 @@ static bool spex232_motor_is_busy( void )
  * and setting up the communication parameters.
  *-----------------------------------------------------*/
 
-void spex232_open( void )
+void
+spex232_open( void )
 {
 #ifndef SPEX232_TEST
 
@@ -714,7 +732,8 @@ void spex232_open( void )
  * Function that gets called to close the device file for the device
  *-------------------------------------------------------------------*/
 
-void spex232_close( void )
+void
+spex232_close( void )
 {
 #ifndef SPEX232_TEST
     if ( spex232.is_open )
@@ -729,7 +748,8 @@ void spex232_close( void )
  * with the device failed completely.
  *-------------------------------------------------------*/
 
-static void spex232_comm_fail( void )
+static void
+spex232_comm_fail( void )
 {
 	print( FATAL, "Can't access the monochromator.\n" );
     SPEX232_THROW( EXCEPTION );

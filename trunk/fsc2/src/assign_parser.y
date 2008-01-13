@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -647,7 +647,8 @@ gp:       GP_TOKEN expr            { p_set_gp( $2 ); }
  * Called in case of syntax errors
  *---------------------------------*/
 
-static void assignerror( const char * s  UNUSED_ARG )
+static void
+assignerror( const char * s  UNUSED_ARG )
 {
     if ( *assigntext == '\0' )
         print( FATAL, "Unexpected end of file in ASSIGNMENTS section.\n" );
@@ -661,7 +662,8 @@ static void assignerror( const char * s  UNUSED_ARG )
  * Called when a pulse function token has been found.
  *----------------------------------------------------*/
 
-static void ass_func( int function )
+static void
+ass_func( int function )
 {
     /* If we're at the start of a function line (i.e. when 'Func_is_set' is
        unset) test if the function is usable (if there are no phase switches
@@ -712,7 +714,8 @@ static void ass_func( int function )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void assignparser_init( void )
+void
+assignparser_init( void )
 {
     Dont_exec = 0;
 }

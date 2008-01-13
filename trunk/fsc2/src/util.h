@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -79,9 +79,8 @@ double fsc2_simplex( size_t     /* n         */,
                      double *   /* x         */,
                      double *   /* dx        */,
                      void *     /* par       */,
-                     double ( * /* func_name */ )( double * /* x   */,
-                                                   void *   /* par */  ),
-                     double     /* epsilon   */                           );
+                     double ( * /* func_name */ )( double *, void * ),
+                     double     /* epsilon   */                        );
 
 ssize_t read_line( int    /* fd      */,
                    void * /* vptr    */,

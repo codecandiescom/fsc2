@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -30,8 +30,9 @@
  * into a real channel number.
  *---------------------------------------------------------------*/
 
-int pci_mio_16e_1_channel_number( long         ch,
-                                  const char * snippet )
+int
+pci_mio_16e_1_channel_number( long         ch,
+                              const char * snippet )
 {
     switch ( ch )
     {
@@ -94,8 +95,9 @@ int pci_mio_16e_1_channel_number( long         ch,
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-double pci_mio_16e_1_check_time( double       t,
-                                 const char * snippet )
+double
+pci_mio_16e_1_check_time( double       t,
+                          const char * snippet )
 {
     int sign = t >= 0.0 ? 1 : -1;
     double at = fabs( t );

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -25,7 +25,7 @@
 #include "hfs9000.h"
 
 
-static Pulse_T *hfs9000_delete_pulse( Pulse_T * p );
+static Pulse_T * hfs9000_delete_pulse( Pulse_T * p );
 
 static bool hfs9000_update_pulses( bool flag );
 
@@ -39,7 +39,8 @@ static bool hfs9000_commit( Function_T * f,
  * test run.
  *-------------------------------------------------------------------------*/
 
-bool hfs9000_do_update( void )
+bool
+hfs9000_do_update( void )
 {
     bool restart = UNSET;
     bool state;
@@ -80,7 +81,8 @@ bool hfs9000_do_update( void )
  * This function sorts the pulses and checks that the pulses don't overlap.
  *--------------------------------------------------------------------------*/
 
-static bool hfs9000_update_pulses( bool flag )
+static bool
+hfs9000_update_pulses( bool flag )
 {
     int i;
     Function_T *f;
@@ -154,7 +156,8 @@ static bool hfs9000_update_pulses( bool flag )
  * and don't overlap.
  *-------------------------------------------------------------------------*/
 
-void hfs9000_do_checks( Function_T * f )
+void
+hfs9000_do_checks( Function_T * f )
 {
     Pulse_T *p;
     int i;
@@ -222,7 +225,8 @@ void hfs9000_do_checks( Function_T * f )
  * assigned to the function passed as argument.
  *------------------------------------------------------------------*/
 
-void hfs9000_set_pulses( Function_T * f )
+void
+hfs9000_set_pulses( Function_T * f )
 {
     Pulse_T *p;
     Ticks start, end;
@@ -271,7 +275,8 @@ void hfs9000_set_pulses( Function_T * f )
  * describing the state of the pulser to their initial values
  *-------------------------------------------------------------------*/
 
-void hfs9000_full_reset( void )
+void
+hfs9000_full_reset( void )
 {
     Pulse_T *p = hfs9000.pulses;
 
@@ -318,7 +323,8 @@ void hfs9000_full_reset( void )
  * in the pulse list.
  *------------------------------------------------------------------*/
 
-static Pulse_T *hfs9000_delete_pulse( Pulse_T * p )
+static Pulse_T *
+hfs9000_delete_pulse( Pulse_T * p )
 {
     Pulse_T *pp;
     int i;
@@ -382,8 +388,9 @@ static Pulse_T *hfs9000_delete_pulse( Pulse_T * p )
  * commands and their length.
  *---------------------------------------------------------------------*/
 
-static bool hfs9000_commit( Function_T * f,
-                            bool         flag )
+static bool
+hfs9000_commit( Function_T * f,
+                bool         flag )
 {
     Pulse_T *p;
     int i;

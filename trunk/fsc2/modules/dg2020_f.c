@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -41,7 +41,8 @@ DG2020_T dg2020;
  * module.
  *-------------------------------------------------------------------------*/
 
-int dg2020_f_init_hook( void )
+int
+dg2020_f_init_hook( void )
 {
     int i, j, k;
 
@@ -175,7 +176,8 @@ int dg2020_f_init_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-int dg2020_f_test_hook( void )
+int
+dg2020_f_test_hook( void )
 {
     if ( dg2020.pulses == NULL )
     {
@@ -232,7 +234,8 @@ int dg2020_f_test_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-int dg2020_f_end_of_test_hook( void )
+int
+dg2020_f_end_of_test_hook( void )
 {
     if ( dg2020.dump_file != NULL )
     {
@@ -270,7 +273,8 @@ int dg2020_f_end_of_test_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-int dg2020_f_exp_hook( void )
+int
+dg2020_f_exp_hook( void )
 {
     int i;
 
@@ -318,7 +322,8 @@ int dg2020_f_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-int dg2020_f_end_of_exp_hook( void )
+int
+dg2020_f_end_of_exp_hook( void )
 {
     if ( ! dg2020.is_needed )
         return 1;
@@ -333,7 +338,8 @@ int dg2020_f_end_of_exp_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void dg2020_f_exit_hook( void )
+void
+dg2020_f_exit_hook( void )
 {
     Pulse_T *p, *np;
     int i;
@@ -357,7 +363,8 @@ void dg2020_f_exit_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_name( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }
@@ -366,7 +373,8 @@ Var_T *pulser_name( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_show_pulses( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_show_pulses( Var_T * v  UNUSED_ARG )
 {
     int pd[ 2 ];
     pid_t pid;
@@ -435,7 +443,8 @@ Var_T *pulser_show_pulses( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_dump_pulses( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_dump_pulses( Var_T * v  UNUSED_ARG )
 {
     char *name;
     char *m;
@@ -516,7 +525,8 @@ Var_T *pulser_dump_pulses( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_phase_switch_delay( Var_T * v )
+Var_T *
+pulser_phase_switch_delay( Var_T * v )
 {
     long func;
     double psd;
@@ -554,7 +564,8 @@ Var_T *pulser_phase_switch_delay( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_grace_period( Var_T * v )
+Var_T *
+pulser_grace_period( Var_T * v )
 {
     double gp;
 
@@ -569,7 +580,8 @@ Var_T *pulser_grace_period( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_keep_all_pulses( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_keep_all_pulses( Var_T * v  UNUSED_ARG )
 {
     dg2020_keep_all( );
     return vars_push( INT_VAR, 1L );
@@ -593,7 +605,8 @@ Var_T *pulser_maximum_pattern_length( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_state( Var_T * v )
+Var_T *
+pulser_state( Var_T * v )
 {
     bool state;
 
@@ -614,7 +627,8 @@ Var_T *pulser_state( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_channel_state( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_channel_state( Var_T * v  UNUSED_ARG )
 {
     print( SEVERE, "Individual pod channels can't be switched on or off for "
            "this device.\n" );
@@ -625,7 +639,8 @@ Var_T *pulser_channel_state( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_update( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_update( Var_T * v  UNUSED_ARG )
 {
     bool state = OK;
 
@@ -650,7 +665,8 @@ Var_T *pulser_update( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_shift( Var_T * v )
+Var_T *
+pulser_shift( Var_T * v )
 {
     Pulse_T *p;
 
@@ -717,7 +733,8 @@ Var_T *pulser_shift( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_increment( Var_T * v )
+Var_T *
+pulser_increment( Var_T * v )
 {
     Pulse_T *p;
 
@@ -786,7 +803,8 @@ Var_T *pulser_increment( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_next_phase( Var_T * v )
+Var_T *
+pulser_next_phase( Var_T * v )
 {
     Function_T *f;
     long phase_number;
@@ -861,7 +879,8 @@ Var_T *pulser_next_phase( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_reset( Var_T * v  UNUSED_ARG )
+Var_T *
+pulser_reset( Var_T * v  UNUSED_ARG )
 {
     if ( ! dg2020.is_needed )
         return vars_push( INT_VAR, 1L );
@@ -878,7 +897,8 @@ Var_T *pulser_reset( Var_T * v  UNUSED_ARG )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_phase_reset( Var_T * v )
+Var_T *
+pulser_phase_reset( Var_T * v )
 {
     Function_T *f;
     long phase_number;
@@ -949,7 +969,8 @@ Var_T *pulser_phase_reset( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_pulse_reset( Var_T * v )
+Var_T *
+pulser_pulse_reset( Var_T * v )
 {
     Pulse_T *p;
 
@@ -1013,7 +1034,8 @@ Var_T *pulser_pulse_reset( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_lock_keyboard( Var_T * v )
+Var_T *
+pulser_lock_keyboard( Var_T * v )
 {
     bool lock;
 
@@ -1036,7 +1058,8 @@ Var_T *pulser_lock_keyboard( Var_T * v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *pulser_command( Var_T * v )
+Var_T *
+pulser_command( Var_T * v )
 {
     char *cmd = NULL;
 

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,7 +31,8 @@
  * i.e. an integer multiple of the time base
  *-----------------------------------------------------------------*/
 
-Ticks hfs9000_double2ticks( double p_time )
+Ticks
+hfs9000_double2ticks( double p_time )
 {
     double ticks;
 
@@ -69,7 +70,8 @@ Ticks hfs9000_double2ticks( double p_time )
  * Does the exact opposite of the previous function...
  *-----------------------------------------------------*/
 
-double hfs9000_ticks2double( Ticks ticks )
+double
+hfs9000_ticks2double( Ticks ticks )
 {
     fsc2_assert( hfs9000.is_timebase );
     return hfs9000.timebase * ticks;
@@ -81,8 +83,9 @@ double hfs9000_ticks2double( Ticks ticks )
  * are within the valid limits.
  *----------------------------------------------------------------------*/
 
-void hfs9000_check_pod_level_diff( double high,
-                                   double low )
+void
+hfs9000_check_pod_level_diff( double high,
+                              double low )
 {
     if ( low > high )
     {
@@ -112,7 +115,8 @@ void hfs9000_check_pod_level_diff( double high,
  * Returns the structure for pulse numbered pnum
  *-----------------------------------------------*/
 
-Pulse_T *hfs9000_get_pulse( long pnum )
+Pulse_T *
+hfs9000_get_pulse( long pnum )
 {
     Pulse_T *cp = hfs9000.pulses;
 
@@ -143,7 +147,8 @@ Pulse_T *hfs9000_get_pulse( long pnum )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *hfs9000_ptime( double p_time )
+const char *
+hfs9000_ptime( double p_time )
 {
     static char buffer[ 3 ][ 128 ];
     static size_t i = 2;
@@ -166,7 +171,8 @@ const char *hfs9000_ptime( double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *hfs9000_pticks( Ticks ticks )
+const char *
+hfs9000_pticks( Ticks ticks )
 {
     return hfs9000_ptime( hfs9000_ticks2double( ticks ) );
 }
@@ -179,8 +185,9 @@ const char *hfs9000_pticks( Ticks ticks )
  * second pulse starts earlier.
  *--------------------------------------------------------------------*/
 
-int hfs9000_start_compare( const void * A,
-                           const void * B )
+int
+hfs9000_start_compare( const void * A,
+                       const void * B )
 {
     Pulse_T *a = *( Pulse_T ** ) A,
             *b = *( Pulse_T ** ) B;
@@ -204,7 +211,8 @@ int hfs9000_start_compare( const void * A,
  * Determines the longest sequence of all pulse functions.
  *---------------------------------------------------------*/
 
-Ticks hfs9000_get_max_seq_len( void )
+Ticks
+hfs9000_get_max_seq_len( void )
 {
     int i;
     Ticks max = 0;
@@ -235,10 +243,11 @@ Ticks hfs9000_get_max_seq_len( void )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void hfs9000_set( char * arena,
-                  Ticks  start,
-                  Ticks  len,
-                  Ticks  offset )
+void
+hfs9000_set( char * arena,
+             Ticks  start,
+             Ticks  len,
+             Ticks  offset )
 {
     fsc2_assert( start + len + offset <= hfs9000.max_seq_len );
 
@@ -249,10 +258,11 @@ void hfs9000_set( char * arena,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-int hfs9000_diff( char *  old_p,
-                  char *  new_p,
-                  Ticks * start,
-                  Ticks * length )
+int
+hfs9000_diff( char *  old_p,
+              char *  new_p,
+              Ticks * start,
+              Ticks * length )
 {
     static Ticks where = 0;
     int ret;
@@ -317,7 +327,8 @@ int hfs9000_diff( char *  old_p,
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void hfs9000_dump_channels( FILE * fp )
+void
+hfs9000_dump_channels( FILE * fp )
 {
     Function_T *f;
     int i, k;
@@ -354,7 +365,8 @@ void hfs9000_dump_channels( FILE * fp )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-long hfs9000_ch_to_num( long channel )
+long
+hfs9000_ch_to_num( long channel )
 {
     switch ( channel )
     {

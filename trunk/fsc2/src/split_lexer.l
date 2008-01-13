@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -177,8 +177,9 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 /*-------------------------------------------*
  *-------------------------------------------*/
 
-bool scan_main( const char * name,
-                FILE *       fp )
+bool
+scan_main( const char * name,
+           FILE *       fp )
 {
     bool split_error;
 
@@ -259,7 +260,8 @@ bool scan_main( const char * name,
  *    * flag for success (OK) or failure (FAIL)
  *--------------------------------------------------------------------*/
 
-bool section_parser( int section )
+static bool
+section_parser( int section )
 {
     CLOBBER_PROTECT( section );
 

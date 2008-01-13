@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -120,8 +120,9 @@ static char gpib_error_buffer[ GPIB_ERROR_BUFFER_LENGTH ];
  *  * FAILURE: error, GPIB bus can't be used
  *-------------------------------------------------------------------------*/
 
-int gpib_init( const char * log_file_name,
-               int          log_level )
+int
+gpib_init( const char * log_file_name,
+           int          log_level )
 {
     int i;
 
@@ -171,7 +172,8 @@ int gpib_init( const char * log_file_name,
  * and finally checks the plausibility of the results.
  *---------------------------------------------------------*/
 
-static int gpib_parse_config( const char * file )
+static int
+gpib_parse_config( const char * file )
 {
     FILE *fp;
     int retval;
@@ -201,7 +203,8 @@ static int gpib_parse_config( const char * file )
  *    FAILURE: bus is already inactive
  *--------------------------------------------------------*/
 
-int gpib_shutdown( void )
+int
+gpib_shutdown( void )
 {
     int i;
 
@@ -244,7 +247,8 @@ int gpib_shutdown( void )
  *    point to a non-empty string stderr is used.
  *-------------------------------------------------------------------------*/
 
-static void gpib_init_log( const char * log_file_name )
+static void
+gpib_init_log( const char * log_file_name )
 {
     const char *name;
 
@@ -294,8 +298,9 @@ static void gpib_init_log( const char * log_file_name )
  *  * FAILURE: error, no valid data is returned in 'dev'
  *-----------------------------------------------------------------------*/
 
-int gpib_init_device( const char * device_name,
-                      int *        dev )
+int
+gpib_init_device( const char * device_name,
+                  int *        dev )
 {
     int i;
     static bool first_time = SET;
@@ -398,7 +403,8 @@ int gpib_init_device( const char * device_name,
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int gpib_local( int device )
+int
+gpib_local( int device )
 {
     int i;
 
@@ -430,7 +436,8 @@ int gpib_local( int device )
 /*-----------------------------------------------------------*
  *-----------------------------------------------------------*/
 
-int gpib_local_lockout( int device )
+int
+gpib_local_lockout( int device )
 {
     int i;
 
@@ -470,8 +477,9 @@ int gpib_local_lockout( int device )
  *  * SUCCESS: OK, FAILURE: error
  *-----------------------------------------------------------*/
 
-int gpib_timeout( int device,
-                  int period )
+int
+gpib_timeout( int device,
+              int period )
 {
     GPIB_Dev_T *devp;
     const char tc[ ][ 9 ] = { "infinity", "10us", "30us", "100us",
@@ -553,7 +561,8 @@ int gpib_timeout( int device,
  *  * SUCCESS: OK, FAILURE: error
  *------------------------------------------------*/
 
-int gpib_clear_device( int device )
+int
+gpib_clear_device( int device )
 {
     GPIB_Dev_T *devp;
 
@@ -612,7 +621,8 @@ int gpib_clear_device( int device )
  *  * SUCCESS: OK, FAILURE: error
  *------------------------------------------------*/
 
-int gpib_trigger( int device )
+int
+gpib_trigger( int device )
 {
     GPIB_Dev_T *devp;
 
@@ -681,9 +691,10 @@ int gpib_trigger( int device )
  *  * SUCCESS: OK, FAILURE: error
  *-----------------------------------------------------------------*/
 
-int gpib_wait( int   device,
-               int   mask,
-               int * status )
+int
+gpib_wait( int   device,
+           int   mask,
+           int * status )
 {
     GPIB_Dev_T *devp;
 
@@ -764,9 +775,10 @@ int gpib_wait( int   device,
  *  * SUCCESS: OK, FAILURE: write error
  *---------------------------------------------------*/
 
-int gpib_write( int          device,
-                const char * buffer,
-                long         length )
+int
+gpib_write( int          device,
+            const char * buffer,
+            long         length )
 {
     GPIB_Dev_T *devp;
 
@@ -840,9 +852,10 @@ int gpib_write( int          device,
  *  * number of bytes to be sent
  *----------------------------------------------------------------*/
 
-static void gpib_write_start( const char * dev_name,
-                              const char * buffer,
-                              long         length )
+static void
+gpib_write_start( const char * dev_name,
+                  const char * buffer,
+                  long         length )
 {
     gpib_log_function_start( "gpib_write", dev_name );
     raise_permissions( );
@@ -870,9 +883,10 @@ static void gpib_write_start( const char * dev_name,
  *  * FAILURE: read error
  *----------------------------------------------------------*/
 
-int gpib_read( int    device,
-               char * buffer,
-               long * length )
+int
+gpib_read( int    device,
+           char * buffer,
+           long * length )
 {
     unsigned long expected = ( unsigned long ) *length;
     GPIB_Dev_T *devp;
@@ -955,10 +969,11 @@ int gpib_read( int    device,
  *  * number of bytes actually read
  *------------------------------------------------------------------*/
 
-static void gpib_read_end( const char * dev_name,
-                           char *       buffer,
-                           long         received,
-                           long         expected )
+static void
+gpib_read_end( const char * dev_name,
+               char *       buffer,
+               long         received,
+               long         expected )
 {
     if ( ll > LL_ERR || ( ibsta & IBERR ) )
         gpib_log_function_end( "gpib_read", dev_name );
@@ -984,8 +999,9 @@ static void gpib_read_end( const char * dev_name,
 /*------------------------------------------------------------------*
  *------------------------------------------------------------------*/
 
-int gpib_serial_poll( int             device,
-                      unsigned char * stb )
+int
+gpib_serial_poll( int             device,
+                  unsigned char * stb )
 {
     GPIB_Dev_T *devp;
 
@@ -1040,7 +1056,8 @@ int gpib_serial_poll( int             device,
  * gpib_log_date() writes the date to the log file.
  *--------------------------------------------------*/
 
-static void gpib_log_date( void )
+static void
+gpib_log_date( void )
 {
     char tc[ 26 ];
     struct timeb mt;
@@ -1064,7 +1081,8 @@ static void gpib_log_date( void )
  *    the error happened in
  *--------------------------------------------------------------*/
 
-static void gpib_log_error( const char * type )
+static void
+gpib_log_error( const char * type )
 {
     int i;
     static int state[ 16 ] = { 0x8000, 0x4000, 0x2000, 0x1000,
@@ -1103,8 +1121,9 @@ static void gpib_log_error( const char * type )
  *  * name of the device involved
  *------------------------------------------------------------*/
 
-static void gpib_log_function_start( const char * function,
-                                     const char * dev_name )
+static void
+gpib_log_function_start( const char * function,
+                         const char * dev_name )
 {
     raise_permissions( );
     gpib_log_date( );
@@ -1122,8 +1141,9 @@ static void gpib_log_function_start( const char * function,
  *  * name of the device involved
  *--------------------------------------------------------*/
 
-static void gpib_log_function_end( const char * function,
-                                   const char * dev_name )
+static void
+gpib_log_function_end( const char * function,
+                       const char * dev_name )
 {
     raise_permissions( );
     if ( ibsta & IBERR )
@@ -1145,7 +1165,8 @@ static void gpib_log_function_end( const char * function,
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-static GPIB_Dev_T *gpib_get_dev( int device )
+static GPIB_Dev_T *
+gpib_get_dev( int device )
 {
     int i;
 
@@ -1166,8 +1187,9 @@ static GPIB_Dev_T *gpib_get_dev( int device )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-void gpib_log_message( const char * fmt,
-                       ... )
+void
+gpib_log_message( const char * fmt,
+                  ... )
 {
     va_list ap;
 
@@ -1197,7 +1219,8 @@ void gpib_log_message( const char * fmt,
  * and to copy them to the appropriate device structure.
  *---------------------------------------------------------------------*/
 
-int gpib_dev_setup( GPIB_Dev_T * temp_dev )
+int
+gpib_dev_setup( GPIB_Dev_T * temp_dev )
 {
     int i;
 
@@ -1283,7 +1306,8 @@ int gpib_dev_setup( GPIB_Dev_T * temp_dev )
  * work on Linux but fail (benignly) on other systems...
  *-----------------------------------------------------------------*/
 
-static int *get_fd_list( void )
+static int *
+get_fd_list( void )
 {
     DIR *dir;
     struct dirent *de;
@@ -1344,7 +1368,8 @@ static int *get_fd_list( void )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static void close_on_exec_hack( int * fd_list )
+static void
+close_on_exec_hack( int * fd_list )
 {
     int *new_fd_list;
     int i, j;

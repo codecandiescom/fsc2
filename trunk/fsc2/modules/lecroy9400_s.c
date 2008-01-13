@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2005 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -118,7 +118,8 @@ static Var_T *get_curve( Var_T *v, bool use_cursor );
  * Init hook function for the module.
  *------------------------------------*/
 
-int lecroy9400_init_hook( void )
+int
+lecroy9400_init_hook( void )
 {
     int i;
 
@@ -167,7 +168,8 @@ int lecroy9400_init_hook( void )
  * Test hook function for the module
  *-----------------------------------*/
 
-int lecroy9400_test_hook( void )
+int
+lecroy9400_test_hook( void )
 {
     lecroy9400_store_state( &lecroy9400_stored, &lecroy9400 );
     return 1;
@@ -178,7 +180,8 @@ int lecroy9400_test_hook( void )
  * Start of experiment hook function for the module
  *--------------------------------------------------*/
 
-int lecroy9400_exp_hook( void )
+int
+lecroy9400_exp_hook( void )
 {
     /* Reset structure describing the state of the digitizer to the one
        it had before the test run was started */
@@ -204,7 +207,8 @@ int lecroy9400_exp_hook( void )
  * End of experiment hook function for the module
  *------------------------------------------------*/
 
-int lecroy9400_end_of_exp_hook( void )
+int
+lecroy9400_end_of_exp_hook( void )
 {
     lecroy9400_finished( );
     return 1;
@@ -216,7 +220,8 @@ int lecroy9400_end_of_exp_hook( void )
  *---------------------------------------------*/
 
 
-void lecroy9400_exit_hook( void )
+void
+lecroy9400_exit_hook( void )
 {
 #if 0
     lecroy9400_delete_windows( &lecroy9400 );
@@ -228,7 +233,8 @@ void lecroy9400_exit_hook( void )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_name( Var_T *v )
+Var_T *
+digitizer_name( Var_T *v )
 {
     UNUSED_ARGUMENT( v );
     return vars_push( STR_VAR, DEVICE_NAME );
@@ -239,7 +245,8 @@ Var_T *digitizer_name( Var_T *v )
  *------------------------------------------*/
 
 #if 0
-Var_T *digitizer_define_window( Var_T *v )
+Var_T *
+digitizer_define_window( Var_T *v )
 {
     double win_start = 0,
            win_width = 0;
@@ -318,7 +325,8 @@ Var_T *digitizer_define_window( Var_T *v )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_timebase( Var_T *v )
+Var_T *
+digitizer_timebase( Var_T *v )
 {
     double timebase;
     int TB = -1;
@@ -417,7 +425,8 @@ Var_T *digitizer_timebase( Var_T *v )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_time_per_point( Var_T *v )
+Var_T *
+digitizer_time_per_point( Var_T *v )
 {
     UNUSED_ARGUMENT( v );
     return vars_push( FLOAT_VAR, tpp[ lecroy9400.tb_index ] );
@@ -427,7 +436,8 @@ Var_T *digitizer_time_per_point( Var_T *v )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_sensitivity( Var_T *v )
+Var_T *
+digitizer_sensitivity( Var_T *v )
 {
     long channel;
     double sens;
@@ -533,7 +543,8 @@ Var_T *digitizer_sensitivity( Var_T *v )
  * sitions).
  *------------------------------------------------------------------------*/
 
-Var_T *digitizer_averaging( Var_T *v )
+Var_T *
+digitizer_averaging( Var_T *v )
 {
     long channel;
     long source_ch;
@@ -669,7 +680,8 @@ Var_T *digitizer_averaging( Var_T *v )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-Var_T *digitizer_num_averages( Var_T *v )
+Var_T *
+digitizer_num_averages( Var_T *v )
 {
     long channel;
 
@@ -725,7 +737,8 @@ Var_T *digitizer_num_averages( Var_T *v )
  * Function returns the current record length of the digitizer.
  *--------------------------------------------------------------*/
 
-Var_T *digitizer_record_length( Var_T *v )
+Var_T *
+digitizer_record_length( Var_T *v )
 {
     long channel;
 
@@ -772,7 +785,8 @@ Var_T *digitizer_record_length( Var_T *v )
  * the number of points recorded before the trigger.
  *---------------------------------------------------------------------*/
 
-Var_T *digitizer_trigger_position( Var_T *v )
+Var_T *
+digitizer_trigger_position( Var_T *v )
 {
     double trig_pos;
 
@@ -825,7 +839,8 @@ Var_T *digitizer_trigger_position( Var_T *v )
  * argument it returns with either 0 or 1, indicating false or true.
  *----------------------------------------------------------------------*/
 
-Var_T *digitizer_meas_channel_ok( Var_T *v )
+Var_T *
+digitizer_meas_channel_ok( Var_T *v )
 {
     long channel;
     bool flag;
@@ -848,7 +863,8 @@ Var_T *digitizer_meas_channel_ok( Var_T *v )
  * triggering.
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_trigger_channel( Var_T *v )
+Var_T *
+digitizer_trigger_channel( Var_T *v )
 {
     long channel;
 
@@ -913,7 +929,8 @@ Var_T *digitizer_trigger_channel( Var_T *v )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-Var_T *digitizer_start_acquisition( Var_T *v )
+Var_T *
+digitizer_start_acquisition( Var_T *v )
 {
     UNUSED_ARGUMENT( v );
 
@@ -936,7 +953,8 @@ Var_T *digitizer_get_curve( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_get_curve_fast( Var_T *v )
+Var_T *
+digitizer_get_curve_fast( Var_T *v )
 {
     return get_curve( v, UNSET );
 }
@@ -945,7 +963,8 @@ Var_T *digitizer_get_curve_fast( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static Var_T *get_curve( Var_T *v, bool use_cursor )
+static Var_T *
+get_curve( Var_T *v, bool use_cursor )
 {
     Window_T *w;
     int ch, i;
@@ -1040,7 +1059,8 @@ static Var_T *get_curve( Var_T *v, bool use_cursor )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_run( Var_T *v )
+Var_T *
+digitizer_run( Var_T *v )
 {
     UNUSED_ARGUMENT( v );
 
@@ -1054,7 +1074,8 @@ Var_T *digitizer_run( Var_T *v )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Var_T *digitizer_command( Var_T *v )
+Var_T *
+digitizer_command( Var_T *v )
 {
     char *cmd = NULL;
 

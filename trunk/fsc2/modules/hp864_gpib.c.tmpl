@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -47,7 +47,8 @@ static bool hp864_tmpl_talk( const char * cmd,
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-bool hp864_tmpl_init( const char * name )
+bool
+hp864_tmpl_init( const char * name )
 {
     double att;
     char buffer[ 10 ];
@@ -133,7 +134,8 @@ bool hp864_tmpl_init( const char * name )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-void hp864_tmpl_finished( void )
+void
+hp864_tmpl_finished( void )
 {
     gpib_local( hp864_tmpl.device );
 }
@@ -142,7 +144,8 @@ void hp864_tmpl_finished( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-bool hp864_tmpl_set_output_state( bool state )
+bool
+hp864_tmpl_set_output_state( bool state )
 {
     char cmd[ 100 ];
 
@@ -158,7 +161,8 @@ bool hp864_tmpl_set_output_state( bool state )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-bool hp864_tmpl_get_output_state( void )
+bool
+hp864_tmpl_get_output_state( void )
 {
     char buffer[ 10 ];
     long length = 10;
@@ -172,7 +176,8 @@ bool hp864_tmpl_get_output_state( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double hp864_tmpl_set_frequency( double freq )
+double
+hp864_tmpl_set_frequency( double freq )
 {
     char cmd[ 100 ];
 
@@ -190,7 +195,8 @@ double hp864_tmpl_set_frequency( double freq )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double hp864_tmpl_get_frequency( void )
+double
+hp864_tmpl_get_frequency( void )
 {
     char buffer[ 100 ];
     long length = 100;
@@ -205,7 +211,8 @@ double hp864_tmpl_get_frequency( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double hp864_tmpl_set_attenuation( double att )
+double
+hp864_tmpl_set_attenuation( double att )
 {
     char cmd[ 100 ];
 
@@ -223,7 +230,8 @@ double hp864_tmpl_set_attenuation( double att )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double hp864_tmpl_get_attenuation( void )
+double
+hp864_tmpl_get_attenuation( void )
 {
     char buffer[ 100 ];
     long length = 100;
@@ -237,7 +245,8 @@ double hp864_tmpl_get_attenuation( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-int hp864_tmpl_set_mod_type( int type )
+int
+hp864_tmpl_set_mod_type( int type )
 {
     char cmd[ 100 ];
     const char *types[ ] = { "FM", "AM", "PM", "OFF" };
@@ -274,7 +283,8 @@ int hp864_tmpl_set_mod_type( int type )
  * or -1 if none is switched on.
  *--------------------------------------------------------------*/
 
-int hp864_tmpl_get_mod_type( void )
+int
+hp864_tmpl_get_mod_type( void )
 {
     const char *types[ ] = { "FM", "AM", "PM" };
     char cmd[ 100 ];
@@ -300,8 +310,9 @@ int hp864_tmpl_get_mod_type( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-int hp864_tmpl_set_mod_source( int type,
-                               int source )
+int
+hp864_tmpl_set_mod_source( int type,
+                           int source )
 {
     const char *types[ ] = { "FM", "AM", "PM" };
     char cmd1[ 100 ], cmd2[ 100 ];
@@ -359,7 +370,8 @@ int hp864_tmpl_set_mod_source( int type,
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-int hp864_tmpl_get_mod_source( int type )
+int
+hp864_tmpl_get_mod_source( int type )
 {
     const char *types[ ] = { "FM", "AM", "PM" };
     char cmd[ 100 ];
@@ -400,8 +412,9 @@ int hp864_tmpl_get_mod_source( int type )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double hp864_tmpl_set_mod_ampl( int    type,
-                                double ampl )
+double
+hp864_tmpl_set_mod_ampl( int    type,
+                         double ampl )
 {
     char cmd[ 100 ];
 
@@ -436,7 +449,8 @@ double hp864_tmpl_set_mod_ampl( int    type,
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-double hp864_tmpl_get_mod_ampl( int type )
+double
+hp864_tmpl_get_mod_ampl( int type )
 {
     const char *cmds[ ] = { "FM:DEV?\n", "AM:DEPT?\n", "PM:DEV?\n" };
     char buffer[ 100 ];
@@ -454,7 +468,8 @@ double hp864_tmpl_get_mod_ampl( int type )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void hp864_tmpl_comm_failure( void )
+static void
+hp864_tmpl_comm_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );
@@ -464,7 +479,8 @@ static void hp864_tmpl_comm_failure( void )
 /*-------------------------------------------------------------*
  *-------------------------------------------------------------*/
 
-static void hp864_tmpl_check_complete( void )
+static void
+hp864_tmpl_check_complete( void )
 {
     char buffer[ 10 ];
     long length = 10;
@@ -479,7 +495,8 @@ static void hp864_tmpl_check_complete( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-bool hp864_tmpl_command( const char * cmd )
+bool
+hp864_tmpl_command( const char * cmd )
 {
     if ( gpib_write( hp864_tmpl.device, cmd, strlen( cmd ) ) == FAILURE )
         hp864_tmpl_comm_failure( );
@@ -490,9 +507,10 @@ bool hp864_tmpl_command( const char * cmd )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool hp864_tmpl_talk( const char * cmd,
-                             char *       reply,
-                             long *       length )
+static bool
+hp864_tmpl_talk( const char * cmd,
+                 char *       reply,
+                 long *       length )
 {
     if (    gpib_write( hp864_tmpl.device, cmd, strlen( cmd ) ) == FAILURE
          || gpib_read( hp864_tmpl.device, reply, length ) == FAILURE )

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -31,7 +31,8 @@
  * all other functions depend on the timebase setting !
  *------------------------------------------------------------------*/
 
-bool hfs9000_store_timebase( double timebase )
+bool
+hfs9000_store_timebase( double timebase )
 {
     if ( timebase < MIN_TIMEBASE || timebase > MAX_TIMEBASE )
     {
@@ -51,8 +52,9 @@ bool hfs9000_store_timebase( double timebase )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_assign_channel_to_function( int  function,
-                                         long channel )
+bool
+hfs9000_assign_channel_to_function( int  function,
+                                    long channel )
 {
     Function_T *f = hfs9000.function + function;
     Channel_T *c = hfs9000.channel + channel;
@@ -123,7 +125,8 @@ bool hfs9000_assign_channel_to_function( int  function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_invert_function( int function )
+bool
+hfs9000_invert_function( int function )
 {
     if (    hfs9000.function[ function ].channel != NULL
          && hfs9000.function[ function ].channel->self == HFS9000_TRIG_OUT )
@@ -142,8 +145,9 @@ bool hfs9000_invert_function( int function )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_function_delay( int    function,
-                                 double delay )
+bool
+hfs9000_set_function_delay( int    function,
+                            double delay )
 {
     Ticks Delay = hfs9000_double2ticks( delay );
     int i;
@@ -195,8 +199,9 @@ bool hfs9000_set_function_delay( int    function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_function_high_level( int    function,
-                                      double voltage )
+bool
+hfs9000_set_function_high_level( int    function,
+                                 double voltage )
 {
     Function_T *f = hfs9000.function + function;
     long v;
@@ -244,8 +249,9 @@ bool hfs9000_set_function_high_level( int    function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_function_low_level( int    function,
-                                     double voltage )
+bool
+hfs9000_set_function_low_level( int    function,
+                                double voltage )
 {
     Function_T *f = hfs9000.function + function;
     long v;
@@ -293,7 +299,8 @@ bool hfs9000_set_function_low_level( int    function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_trigger_mode( int mode )
+bool
+hfs9000_set_trigger_mode( int mode )
 {
     fsc2_assert( mode == INTERNAL || mode == EXTERNAL );
 
@@ -339,7 +346,8 @@ bool hfs9000_set_trigger_mode( int mode )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_trig_in_level( double voltage )
+bool
+hfs9000_set_trig_in_level( double voltage )
 {
     long v;
 
@@ -389,7 +397,8 @@ bool hfs9000_set_trig_in_level( double voltage )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_trig_in_slope( int slope )
+bool
+hfs9000_set_trig_in_slope( int slope )
 {
     fsc2_assert( slope == POSITIVE || slope == NEGATIVE );
 
@@ -426,7 +435,8 @@ bool hfs9000_set_trig_in_slope( int slope )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool hfs9000_set_max_seq_len( double seq_len )
+bool
+hfs9000_set_max_seq_len( double seq_len )
 {
     if (    hfs9000.is_max_seq_len
          && hfs9000.max_seq_len != hfs9000_double2ticks( seq_len ) )
@@ -456,7 +466,8 @@ bool hfs9000_set_max_seq_len( double seq_len )
  * driver to keep all pulses, even unused ones.
  *----------------------------------------------*/
 
-bool hfs9000_keep_all( void )
+bool
+hfs9000_keep_all( void )
 {
     hfs9000.keep_all = SET;
     return OK;

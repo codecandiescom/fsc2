@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -34,7 +34,8 @@ static int Cur_PHS = -1;                 /* used for internal sanity checks */
  * all other functions depend on the timebase setting !
  *------------------------------------------------------------------*/
 
-bool dg2020_store_timebase( double timebase )
+bool
+dg2020_store_timebase( double timebase )
 {
     if ( timebase < MIN_TIMEBASE || timebase > MAX_TIMEBASE )
     {
@@ -57,8 +58,9 @@ bool dg2020_store_timebase( double timebase )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_assign_function( int  function,
-                             long pod )
+bool
+dg2020_assign_function( int  function,
+                        long pod )
 {
     Function_T *f = dg2020.function + function;
     Pod_T *p = dg2020.pod + pod;
@@ -111,8 +113,9 @@ bool dg2020_assign_function( int  function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_assign_channel_to_function( int  function,
-                                        long channel )
+bool
+dg2020_assign_channel_to_function( int  function,
+                                   long channel )
 {
     Function_T *f = dg2020.function + function;
     Channel_T *c = dg2020.channel + channel;
@@ -163,7 +166,8 @@ bool dg2020_assign_channel_to_function( int  function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_invert_function( int function )
+bool
+dg2020_invert_function( int function )
 {
     dg2020.function[ function ].is_inverted = SET;
     return OK;
@@ -173,8 +177,9 @@ bool dg2020_invert_function( int function )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_function_delay( int    function,
-                                double delay )
+bool
+dg2020_set_function_delay( int    function,
+                           double delay )
 {
     Ticks Delay = dg2020_double2ticks( delay );
     int i;
@@ -227,8 +232,9 @@ bool dg2020_set_function_delay( int    function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_function_high_level( int    function,
-                                     double voltage )
+bool
+dg2020_set_function_high_level( int    function,
+                                double voltage )
 {
     long v;
 
@@ -261,8 +267,9 @@ bool dg2020_set_function_high_level( int    function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_function_low_level( int    function,
-                                    double voltage )
+bool
+dg2020_set_function_low_level( int    function,
+                               double voltage )
 {
     long v;
 
@@ -295,7 +302,8 @@ bool dg2020_set_function_low_level( int    function,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_trigger_mode( int mode )
+bool
+dg2020_set_trigger_mode( int mode )
 {
     fsc2_assert( mode == INTERNAL || mode == EXTERNAL );
 
@@ -346,7 +354,8 @@ bool dg2020_set_trigger_mode( int mode )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_trig_in_level( double voltage )
+bool
+dg2020_set_trig_in_level( double voltage )
 {
     long v;
 
@@ -396,7 +405,8 @@ bool dg2020_set_trig_in_level( double voltage )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_trig_in_slope( int slope )
+bool
+dg2020_set_trig_in_slope( int slope )
 {
     fsc2_assert( slope == POSITIVE || slope == NEGATIVE );
 
@@ -433,7 +443,8 @@ bool dg2020_set_trig_in_slope( int slope )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_trig_in_impedance( int state )
+bool
+dg2020_set_trig_in_impedance( int state )
 {
     fsc2_assert( state == LOW || state == HIGH );
 
@@ -470,7 +481,8 @@ bool dg2020_set_trig_in_impedance( int state )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_repeat_time( double rep_time )
+bool
+dg2020_set_repeat_time( double rep_time )
 {
     if (    dg2020.is_repeat_time
          && dg2020.repeat_time != dg2020_double2ticks( rep_time ) )
@@ -499,7 +511,8 @@ bool dg2020_set_repeat_time( double rep_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_max_seq_len( double seq_len )
+bool
+dg2020_set_max_seq_len( double seq_len )
 {
     if (    dg2020.is_max_seq_len
          && dg2020.max_seq_len != dg2020_double2ticks( seq_len ) )
@@ -527,8 +540,9 @@ bool dg2020_set_max_seq_len( double seq_len )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-bool dg2020_set_phase_reference( int phs,
-                                 int function )
+bool
+dg2020_set_phase_reference( int phs,
+                            int function )
 {
     Function_T *f;
 
@@ -579,10 +593,11 @@ bool dg2020_set_phase_reference( int phs,
  * in a PHASE_SETUP commmand.
  *---------------------------------------------------------------------*/
 
-bool dg2020_phase_setup_prep( int  phs,
-                              int  type,
-                              int  dummy  UNUSED_ARG,
-                              long pod )
+bool
+dg2020_phase_setup_prep( int  phs,
+                         int  type,
+                         int  dummy  UNUSED_ARG,
+                         long pod )
 {
     fsc2_assert( Cur_PHS == -1 || Cur_PHS == phs );
     fsc2_assert( phs == 0 || phs == 1 );
@@ -629,7 +644,8 @@ bool dg2020_phase_setup_prep( int  phs,
  * a PHASE_SETUP command has been parsed.
  *-------------------------------------------------*/
 
-bool dg2020_phase_setup( int phs )
+bool
+dg2020_phase_setup( int phs )
 {
     bool is_set = UNSET;
     int i, j;
@@ -700,7 +716,8 @@ bool dg2020_phase_setup( int phs )
  * driver to keep all pulses, even unused ones.
  *----------------------------------------------*/
 
-bool dg2020_keep_all( void )
+bool
+dg2020_keep_all( void )
 {
     dg2020.keep_all = SET;
     return OK;

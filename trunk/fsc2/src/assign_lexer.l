@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -552,7 +552,8 @@ WS          [\n=: ]+
 /*-------------------------------------------*
  *-------------------------------------------*/
 
-int assignments_parser( FILE * in )
+int
+assignments_parser( FILE * in )
 {
     static bool needs_restart = UNSET;
 
@@ -586,7 +587,8 @@ int assignments_parser( FILE * in )
 /*-------------------------------------------*
  *-------------------------------------------*/
 
-static void set_cur_pulser( void )
+static void
+set_cur_pulser( void )
 {
     const char *t;
 

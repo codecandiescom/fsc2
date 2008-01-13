@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -30,7 +30,8 @@
  * i.e. a integer multiple of the time base
  *-----------------------------------------------------------------*/
 
-Ticks dg2020_double2ticks( double p_time )
+Ticks
+dg2020_double2ticks( double p_time )
 {
     double ticks;
 
@@ -68,7 +69,8 @@ Ticks dg2020_double2ticks( double p_time )
  * Does the exact opposite of the previous function...
  *-----------------------------------------------------*/
 
-double dg2020_ticks2double( Ticks ticks )
+double
+dg2020_ticks2double( Ticks ticks )
 {
     fsc2_assert( dg2020.is_timebase );
     return dg2020.timebase * ticks;
@@ -80,8 +82,9 @@ double dg2020_ticks2double( Ticks ticks )
  * are within the valid limits.
  *----------------------------------------------------------------------*/
 
-void dg2020_check_pod_level_diff( double high,
-                                  double low )
+void
+dg2020_check_pod_level_diff( double high,
+                             double low )
 {
     if ( low > high )
     {
@@ -110,7 +113,8 @@ void dg2020_check_pod_level_diff( double high,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-Pulse_T *dg2020_get_pulse( long pnum )
+Pulse_T *
+dg2020_get_pulse( long pnum )
 {
     Pulse_T *cp = dg2020.pulses;
 
@@ -141,7 +145,8 @@ Pulse_T *dg2020_get_pulse( long pnum )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *dg2020_ptime( double p_time )
+const char *
+dg2020_ptime( double p_time )
 {
     static char buffer[ 3 ][ 128 ];
     static size_t i = 2;
@@ -164,7 +169,8 @@ const char *dg2020_ptime( double p_time )
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-const char *dg2020_pticks( Ticks ticks )
+const char *
+dg2020_pticks( Ticks ticks )
 {
     return dg2020_ptime( dg2020_ticks2double( ticks ) );
 }
@@ -178,7 +184,8 @@ const char *dg2020_pticks( Ticks ticks )
  * to-function-assignment in their EDL program.
  *-------------------------------------------------------------------------*/
 
-Channel_T *dg2020_get_next_free_channel( void )
+Channel_T *
+dg2020_get_next_free_channel( void )
 {
     int i = 0;
 
@@ -198,8 +205,9 @@ Channel_T *dg2020_get_next_free_channel( void )
  * only the first pulse is inactive pulse or the second pulse starts earlier.
  *---------------------------------------------------------------------------*/
 
-int dg2020_start_compare( const void * A,
-                          const void * B )
+int
+dg2020_start_compare( const void * A,
+                      const void * B )
 {
     Pulse_T *a = *( Pulse_T ** ) A,
             *b = *( Pulse_T ** ) B;
@@ -226,9 +234,10 @@ int dg2020_start_compare( const void * A,
  * arguments. If at least one was found a postive result is returned.
  *--------------------------------------------------------------------------*/
 
-bool dg2020_find_phase_pulse( Pulse_T *   p,
-                              Pulse_T *** pl,
-                              int *       num )
+bool
+dg2020_find_phase_pulse( Pulse_T *   p,
+                         Pulse_T *** pl,
+                         int *       num )
 {
     Pulse_T *pp = dg2020.pulses;
 
@@ -258,9 +267,10 @@ bool dg2020_find_phase_pulse( Pulse_T *   p,
  * the same channel and returns them as a sorted list.
  *-----------------------------------------------------------------------*/
 
-int dg2020_get_phase_pulse_list( Function_T * f,
-                                 Channel_T *  channel,
-                                 Pulse_T ***  list )
+int
+dg2020_get_phase_pulse_list( Function_T * f,
+                             Channel_T *  channel,
+                             Pulse_T ***  list )
 {
     int i;
     int num_pulses = 0;
@@ -285,7 +295,8 @@ int dg2020_get_phase_pulse_list( Function_T * f,
 /*-------------------------------------------------------------------------*
  *-------------------------------------------------------------------------*/
 
-Ticks dg2020_get_max_seq_len( void )
+Ticks
+dg2020_get_max_seq_len( void )
 {
     int i;
     Ticks max = 0;
@@ -320,7 +331,8 @@ Ticks dg2020_get_max_seq_len( void )
  * a bug in the pulsers firmware, the first bit can't be used.
  *-------------------------------------------------------------------------*/
 
-void dg2020_calc_padding( void )
+void
+dg2020_calc_padding( void )
 {
     Ticks padding, block_length;
     long block_repeat;
@@ -437,10 +449,11 @@ void dg2020_calc_padding( void )
  *  * 1: ok, 0: error
  *----------------------------------------------------------*/
 
-bool dg2020_prep_cmd( char ** cmd,
-                      int     channel,
-                      Ticks   address,
-                      Ticks   length )
+bool
+dg2020_prep_cmd( char ** cmd,
+                 int     channel,
+                 Ticks   address,
+                 Ticks   length )
 {
     char dummy[ 10 ];
 
@@ -470,10 +483,11 @@ bool dg2020_prep_cmd( char ** cmd,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-void dg2020_set( char * arena,
-                 Ticks  start,
-                 Ticks  len,
-                 Ticks  offset )
+void
+dg2020_set( char * arena,
+            Ticks  start,
+            Ticks  len,
+            Ticks  offset )
 {
     fsc2_assert( start + len + offset <= dg2020.max_seq_len );
 
@@ -484,10 +498,11 @@ void dg2020_set( char * arena,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-int dg2020_diff( char *  old_p,
-                 char *  new_p,
-                 Ticks * start,
-                 Ticks * length )
+int
+dg2020_diff( char *  old_p,
+             char *  new_p,
+             Ticks * start,
+             Ticks * length )
 {
     static Ticks where = 0;
     int ret;
@@ -552,7 +567,8 @@ int dg2020_diff( char *  old_p,
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-void dg2020_dump_channels( FILE * fp )
+void
+dg2020_dump_channels( FILE * fp )
 {
     Function_T *f;
     Pulse_T *p;
@@ -645,7 +661,8 @@ void dg2020_dump_channels( FILE * fp )
 /*-------------------------------------------------------------------*
  *-------------------------------------------------------------------*/
 
-long dg2020_ch_to_num( long channel )
+long
+dg2020_ch_to_num( long channel )
 {
     switch ( channel )
     {

@@ -1,7 +1,7 @@
 /*
   $Id$
 
-  Copyright (C) 1999-2003 Anton Savitsky
+  Copyright (C) 1999-2008 Anton Savitsky
 
   This file is part of fsc2.
 

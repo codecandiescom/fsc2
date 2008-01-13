@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -346,26 +346,26 @@ int rs690_end_of_exp_hook(  void );
 void rs690_exit_hook(       void );
 
 
-Var_T *pulser_name(                              Var_T * /* v */ );
-Var_T *pulser_automatic_shape_pulses(            Var_T * /* v */ );
-Var_T *pulser_automatic_twt_pulses(              Var_T * /* v */ );
-Var_T *pulser_show_pulses(                       Var_T * /* v */ );
-Var_T *pulser_dump_pulses(                       Var_T * /* v */ );
-Var_T *pulser_shape_to_defense_minimum_distance( Var_T * /* v */ );
-Var_T *pulser_defense_to_shape_minimum_distance( Var_T * /* v */ );
-Var_T *pulser_minimum_twt_pulse_distance(        Var_T * /* v */ );
-Var_T *pulser_state(                             Var_T * /* v */ );
-Var_T *pulser_channel_state(                     Var_T * /* v */ );
-Var_T *pulser_update(                            Var_T * /* v */ );
-Var_T *pulser_shift(                             Var_T * /* v */ );
-Var_T *pulser_increment(                         Var_T * /* v */ );
-Var_T *pulser_reset(                             Var_T * /* v */ );
-Var_T *pulser_pulse_reset(                       Var_T * /* v */ );
-Var_T *pulser_next_phase(                        Var_T * /* v */ );
-Var_T *pulser_phase_reset(                       Var_T * /* v */ );
-Var_T *pulser_lock_keyboard(                     Var_T * /* v */ );
-Var_T *pulser_command(                           Var_T * /* v */ );
-Var_T *pulser_maximum_pattern_length(            Var_T * /* v */ );
+Var_T * pulser_name(                              Var_T * /* v */ );
+Var_T * pulser_automatic_shape_pulses(            Var_T * /* v */ );
+Var_T * pulser_automatic_twt_pulses(              Var_T * /* v */ );
+Var_T * pulser_show_pulses(                       Var_T * /* v */ );
+Var_T * pulser_dump_pulses(                       Var_T * /* v */ );
+Var_T * pulser_shape_to_defense_minimum_distance( Var_T * /* v */ );
+Var_T * pulser_defense_to_shape_minimum_distance( Var_T * /* v */ );
+Var_T * pulser_minimum_twt_pulse_distance(        Var_T * /* v */ );
+Var_T * pulser_state(                             Var_T * /* v */ );
+Var_T * pulser_channel_state(                     Var_T * /* v */ );
+Var_T * pulser_update(                            Var_T * /* v */ );
+Var_T * pulser_shift(                             Var_T * /* v */ );
+Var_T * pulser_increment(                         Var_T * /* v */ );
+Var_T * pulser_reset(                             Var_T * /* v */ );
+Var_T * pulser_pulse_reset(                       Var_T * /* v */ );
+Var_T * pulser_next_phase(                        Var_T * /* v */ );
+Var_T * pulser_phase_reset(                       Var_T * /* v */ );
+Var_T * pulser_lock_keyboard(                     Var_T * /* v */ );
+Var_T * pulser_command(                           Var_T * /* v */ );
+Var_T * pulser_maximum_pattern_length(            Var_T * /* v */ );
 
 
 /* Here follow the functions from rs690_gen.c */
@@ -469,9 +469,9 @@ double rs690_ticks2double( Ticks /* ticks */ );
 
 Pulse_T *rs690_get_pulse( long /* pnum */ );
 
-const char *rs690_ptime( double /* p_time */ );
+const char * rs690_ptime( double /* p_time */ );
 
-const char *rs690_pticks( Ticks /* ticks */ );
+const char * rs690_pticks( Ticks /* ticks */ );
 
 int rs690_pulse_compare( const void * /* A */,
                          const void * /* B */  );
@@ -486,7 +486,7 @@ void rs690_duty_check( void );
 
 Ticks rs690_calc_max_length( Function_T * /* f */ );
 
-char *rs690_num_2_channel( int /* num */ );
+char * rs690_num_2_channel( int /* num */ );
 
 bool rs690_set_max_seq_len( double /* seq_len */ );
 
@@ -501,8 +501,8 @@ void rs690_set_pulses( Function_T * /* f */ );
 
 void rs690_full_reset( void );
 
-Pulse_T *rs690_delete_pulse( Pulse_T * /* p    */,
-                             bool      /* warn */  );
+Pulse_T * rs690_delete_pulse( Pulse_T * /* p    */,
+                              bool      /* warn */  );
 
 void rs690_shape_padding_check_1( Channel_T * /* ch */ );
 

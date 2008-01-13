@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -66,12 +66,13 @@ static inline long d2ci( double a );
  * Handler for all kinds of X events the canvas may receive.
  *-----------------------------------------------------------*/
 
-int canvas_handler_2d( FL_OBJECT * obj,
-                       Window      window,
-                       int         w,
-                       int         h,
-                       XEvent *    ev,
-                       void *      udata )
+int
+canvas_handler_2d( FL_OBJECT * obj,
+                   Window      window,
+                   int         w,
+                   int         h,
+                   XEvent *    ev,
+                   void *      udata )
 {
     Canvas_T *c = udata;
 
@@ -109,10 +110,11 @@ int canvas_handler_2d( FL_OBJECT * obj,
  * Handler for events due to pressing one of the mouse buttons
  *-------------------------------------------------------------*/
 
-static void press_handler_2d( FL_OBJECT * obj,
-                              Window      window,
-                              XEvent *    ev,
-                              Canvas_T *  c )
+static void
+press_handler_2d( FL_OBJECT * obj,
+                  Window      window,
+                  XEvent *    ev,
+                  Canvas_T *  c )
 {
     long i;
     Curve_2d_T *cv;
@@ -312,10 +314,11 @@ static void press_handler_2d( FL_OBJECT * obj,
  * Handler for events due to releasing one of the mouse buttons.
  *---------------------------------------------------------------*/
 
-static void release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
-                                Window      window,
-                                XEvent *    ev,
-                                Canvas_T *  c )
+static void
+release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
+                    Window      window,
+                    XEvent *    ev,
+                    Canvas_T *  c )
 {
     unsigned int keymask;
     bool scale_changed = UNSET;
@@ -546,10 +549,11 @@ static void release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
  * Handler for events due to movements of the mouse.
  *---------------------------------------------------*/
 
-static void motion_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
-                               Window      window,
-                               XEvent *    ev,
-                               Canvas_T *  c )
+static void
+motion_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
+                   Window      window,
+                   XEvent *    ev,
+                   Canvas_T *  c )
 {
     XEvent new_ev;
     unsigned int keymask;
@@ -677,7 +681,8 @@ static void motion_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
  * Stores the scaling state of the currently shown curve
  *-------------------------------------------------------*/
 
-void save_scale_state_2d( Curve_2d_T * cv )
+void
+save_scale_state_2d( Curve_2d_T * cv )
 {
     int i;
 
@@ -697,7 +702,8 @@ void save_scale_state_2d( Curve_2d_T * cv )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool change_x_range_2d( Canvas_T * c )
+static bool
+change_x_range_2d( Canvas_T * c )
 {
     Curve_2d_T *cv;
     double x1, x2;
@@ -727,7 +733,8 @@ static bool change_x_range_2d( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool change_y_range_2d( Canvas_T * c )
+static bool
+change_y_range_2d( Canvas_T * c )
 {
     Curve_2d_T *cv;
     double cy1, cy2;
@@ -768,19 +775,20 @@ static bool change_y_range_2d( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-bool user_zoom_2d( long   curve,
-                   double x,
-                   bool   keep_x,
-                   double xw,
-                   bool   keep_xw,
-                   double y,
-                   bool   keep_y,
-                   double yw,
-                   bool   keep_yw,
-                   double z,
-                   bool   keep_z,
-                   double zw,
-                   bool   keep_zw )
+bool
+user_zoom_2d( long   curve,
+              double x,
+              bool   keep_x,
+              double xw,
+              bool   keep_xw,
+              double y,
+              bool   keep_y,
+              double yw,
+              bool   keep_yw,
+              double z,
+              bool   keep_z,
+              double zw,
+              bool   keep_zw )
 {
     Curve_2d_T *cv;
 
@@ -855,7 +863,8 @@ bool user_zoom_2d( long   curve,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool change_xy_range_2d( Canvas_T * c )
+static bool
+change_xy_range_2d( Canvas_T * c )
 {
     bool scale_changed = UNSET;
     Curve_2d_T *cv;
@@ -908,7 +917,8 @@ static bool change_xy_range_2d( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool change_z_range_2d( Canvas_T * c )
+static bool
+change_z_range_2d( Canvas_T * c )
 {
     Curve_2d_T *cv;
     double z1, z2;
@@ -939,7 +949,8 @@ static bool change_z_range_2d( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool zoom_x_2d( Canvas_T * c )
+static bool
+zoom_x_2d( Canvas_T * c )
 {
     Curve_2d_T *cv;
     double px;
@@ -982,7 +993,8 @@ static bool zoom_x_2d( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool zoom_y_2d( Canvas_T * c )
+static bool
+zoom_y_2d( Canvas_T * c )
 {
     Curve_2d_T *cv;
     double py;
@@ -1030,7 +1042,8 @@ static bool zoom_y_2d( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool zoom_xy_2d( Canvas_T * c )
+static bool
+zoom_xy_2d( Canvas_T * c )
 {
     bool scale_changed = UNSET;
     Curve_2d_T *cv;
@@ -1097,7 +1110,8 @@ static bool zoom_xy_2d( Canvas_T * c )
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static bool zoom_z_2d( Canvas_T * c )
+static bool
+zoom_z_2d( Canvas_T * c )
 {
     Curve_2d_T *cv;
     double pz;
@@ -1152,8 +1166,9 @@ static bool zoom_z_2d( Canvas_T * c )
  * offset to all XPoints instead of going through all the scalings...
  *-----------------------------------------------------------------------*/
 
-static bool shift_XPoints_of_curve_2d( Canvas_T *   c,
-                                       Curve_2d_T * cv )
+static bool
+shift_XPoints_of_curve_2d( Canvas_T *   c,
+                           Curve_2d_T * cv )
 {
     long i, count;
     int dx = 0,
@@ -1220,9 +1235,10 @@ static bool shift_XPoints_of_curve_2d( Canvas_T *   c,
  * Handles changes of the window size.
  *-------------------------------------*/
 
-static void reconfigure_window_2d( Canvas_T * c,
-                                   int        w,
-                                   int        h )
+static void
+reconfigure_window_2d( Canvas_T * c,
+                       int        w,
+                       int        h )
 {
     long i;
     Curve_2d_T *cv;
@@ -1356,7 +1372,8 @@ static void reconfigure_window_2d( Canvas_T * c,
 /*----------------------------------------------------------*
  *----------------------------------------------------------*/
 
-static void recalc_XPoints_2d( void )
+static void
+recalc_XPoints_2d( void )
 {
     long i;
 
@@ -1371,7 +1388,8 @@ static void recalc_XPoints_2d( void )
  * settings for the scale and the offset.
  *----------------------------------------------------------------*/
 
-void recalc_XPoints_of_curve_2d( Curve_2d_T * cv )
+void
+recalc_XPoints_of_curve_2d( Curve_2d_T * cv )
 {
     long i, j, count;
     Scaled_Point_T *sp;
@@ -1414,7 +1432,8 @@ void recalc_XPoints_of_curve_2d( Curve_2d_T * cv )
  * Does a complete redraw of all canvases.
  *-----------------------------------------*/
 
-void redraw_all_2d( void )
+void
+redraw_all_2d( void )
 {
     redraw_canvas_2d( &G_2d.canvas );
     redraw_canvas_2d( &G_2d.x_axis );
@@ -1427,7 +1446,8 @@ void redraw_all_2d( void )
  * Does a complete redraw of one of the 4 canvases.
  *--------------------------------------------------*/
 
-void redraw_canvas_2d( Canvas_T * c )
+void
+redraw_canvas_2d( Canvas_T * c )
 {
     Curve_2d_T *cv;
     Marker_2d_T *m;
@@ -1555,8 +1575,9 @@ void redraw_canvas_2d( Canvas_T * c )
  * the X clipping mechanism take care of this.
  *------------------------------------------------------------------*/
 
-static void draw_2d_points( Canvas_T *   c,
-                            Curve_2d_T * cv )
+static void
+draw_2d_points( Canvas_T *   c,
+                Curve_2d_T * cv )
 
 {
     long i, count;
@@ -1653,7 +1674,8 @@ static void draw_2d_points( Canvas_T *   c,
  * Copies the background pixmap onto the canvas.
  *-----------------------------------------------*/
 
-void repaint_canvas_2d( Canvas_T * c )
+void
+repaint_canvas_2d( Canvas_T * c )
 {
     char buf[ 256 ];
     int x, y, x2, y2;
@@ -1885,8 +1907,9 @@ void repaint_canvas_2d( Canvas_T * c )
  * user for the EDL function mouse_position()
  *----------------------------------------------------------*/
 
-int get_mouse_pos_2d( double *       pa,
-                      unsigned int * keymask )
+int
+get_mouse_pos_2d( double *       pa,
+                  unsigned int * keymask )
 {
     Curve_2d_T *cv;
     int ppos[ 2 ];
@@ -1933,8 +1956,9 @@ int get_mouse_pos_2d( double *       pa,
  * curves fit into the canvas and occupy the whole canvas.
  *---------------------------------------------------------*/
 
-void fs_rescale_2d( Curve_2d_T * cv,
-                    bool         z_only )
+void
+fs_rescale_2d( Curve_2d_T * cv,
+               bool         z_only )
 {
     long i, count;
     double min = 1.0,
@@ -2012,9 +2036,10 @@ void fs_rescale_2d( Curve_2d_T * cv,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-void make_scale_2d( Curve_2d_T * cv,
-                    Canvas_T *   c,
-                    int          coord )
+void
+make_scale_2d( Curve_2d_T * cv,
+               Canvas_T *   c,
+               int          coord )
 {
     double rwc_delta,          /* distance between small ticks (in rwc) */
            order,              /* and its order of magnitude */
@@ -2260,7 +2285,8 @@ void make_scale_2d( Curve_2d_T * cv,
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
-static void make_color_scale( Canvas_T * c )
+static void
+make_color_scale( Canvas_T * c )
 {
     int i;
     unsigned int h;
@@ -2303,7 +2329,8 @@ static void make_color_scale( Canvas_T * c )
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-static inline long d2ci( double a )
+static inline long
+d2ci( double a )
 {
     long c_index = lrnd( a * ( NUM_COLORS - 1 ) );
 
@@ -2319,10 +2346,11 @@ static inline long d2ci( double a )
  * Gets called to create a marker at 'x_pos' and 'y_pos'
  *-------------------------------------------------------*/
 
-void set_marker_2d( long x_pos,
-                    long y_pos,
-                    long color,
-                    long curve )
+void
+set_marker_2d( long x_pos,
+               long y_pos,
+               long color,
+               long curve )
 {
     Marker_2d_T *m, *cm;
     XGCValues gcv;
@@ -2390,9 +2418,10 @@ void set_marker_2d( long x_pos,
  * Function gets called to delete a 2D marker at a certain position
  *------------------------------------------------------------------*/
 
-static void delete_marker_2d( long x_pos,
-                              long y_pos,
-                              long curve )
+static void
+delete_marker_2d( long x_pos,
+                  long y_pos,
+                  long curve )
 {
     Marker_2d_T *m, *mp;
     Curve_2d_T *cv;
@@ -2438,7 +2467,8 @@ static void delete_marker_2d( long x_pos,
  * Gets called to delete all markers
  *-----------------------------------*/
 
-void remove_markers_2d( long * curves )
+void
+remove_markers_2d( long * curves )
 {
     Marker_2d_T *m, *mn;
     Curve_2d_T *cv;

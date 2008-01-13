@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -200,8 +200,9 @@ FL_resource Xresources[ ] = {
  * and creates all the forms needed by the program.
  *--------------------------------------------------*/
 
-bool xforms_init( int  * argc,
-                  char * argv[ ] )
+bool
+xforms_init( int  * argc,
+             char * argv[ ] )
 {
     Display *display;
     FL_Coord h, H;
@@ -554,7 +555,8 @@ bool xforms_init( int  * argc,
  * Setup the array used in handling the (remaining) command line options
  *-----------------------------------------------------------------------*/
 
-static void setup_app_options( FL_CMD_OPT app_opt[ ] )
+static void
+setup_app_options( FL_CMD_OPT app_opt[ ] )
 {
     app_opt[ GEOMETRY ].option            = T_strdup( "-geometry" );
     app_opt[ GEOMETRY ].specifier         = T_strdup( "*.geometry" );
@@ -643,7 +645,8 @@ static void setup_app_options( FL_CMD_OPT app_opt[ ] )
  * various forms.
  *--------------------------------------------------------------------*/
 
-bool dl_fsc2_rsc( void )
+bool
+dl_fsc2_rsc( void )
 {
     const char *lib_name;
     char *alt_lib_name;
@@ -791,8 +794,9 @@ bool dl_fsc2_rsc( void )
  * scripts to be run quit immediately.
  *-----------------------------------------------------------------*/
 
-static int main_form_close_handler( FL_FORM * a  UNUSED_ARG,
-                                    void    * b  UNUSED_ARG )
+static int
+main_form_close_handler( FL_FORM * a  UNUSED_ARG,
+                         void    * b  UNUSED_ARG )
 {
     if ( GUI.main_form->quit->active != 1 )
         return FL_IGNORE;
@@ -814,7 +818,8 @@ static int main_form_close_handler( FL_FORM * a  UNUSED_ARG,
  * forms previously needed by the program.
  *-----------------------------------------*/
 
-void xforms_close( void )
+void
+xforms_close( void )
 {
     if ( fl_form_is_visible( GUI.main_form->fsc2 ) )
     {
@@ -840,8 +845,9 @@ void xforms_close( void )
  * the sizes of the program and the error/output browser.
  *------------------------------------------------------------*/
 
-void win_slider_callback( FL_OBJECT * a,
-                          long        b  UNUSED_ARG )
+void
+win_slider_callback( FL_OBJECT * a,
+                     long        b  UNUSED_ARG )
 {
     FL_Coord h, H;
     FL_Coord new_h1 ;
@@ -877,8 +883,9 @@ void win_slider_callback( FL_OBJECT * a,
 
 #define WM_STATE_ELEMENTS 1
 
-int is_iconic( Display * d,
-               Window    w )
+int
+is_iconic( Display * d,
+           Window    w )
 {
     Atom xa_wm_state, actual_type;
     unsigned char *property = NULL;
@@ -916,8 +923,9 @@ int is_iconic( Display * d,
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-static int fsc2_x_error_handler( Display *     d,
-                                 XErrorEvent * err )
+static int
+fsc2_x_error_handler( Display *     d,
+                      XErrorEvent * err )
 {
     char err_str[ 1024 ];
 
@@ -932,7 +940,8 @@ static int fsc2_x_error_handler( Display *     d,
 /*------------------------------------------------------------*
  *------------------------------------------------------------*/
 
-static int fsc2_xio_error_handler( Display * d  UNUSED_ARG )
+static int
+fsc2_xio_error_handler( Display * d  UNUSED_ARG )
 {
     fprintf( stderr, "fsc2 (%d) killed by a fatal X error.\n", getpid( ) );
     exit( EXIT_FAILURE );

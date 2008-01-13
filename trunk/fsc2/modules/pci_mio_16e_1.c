@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -34,7 +34,8 @@ struct PCI_MIO_16E_1 pci_mio_16e_1, pci_mio_16e_1_stored;
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int pci_mio_16e_1_init_hook( void )
+int
+pci_mio_16e_1_init_hook( void )
 {
     int i;
 
@@ -74,7 +75,8 @@ int pci_mio_16e_1_init_hook( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int pci_mio_16e_1_test_hook( void )
+int
+pci_mio_16e_1_test_hook( void )
 {
     int i;
 
@@ -101,7 +103,8 @@ int pci_mio_16e_1_test_hook( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int pci_mio_16e_1_end_of_test_hook( void )
+int
+pci_mio_16e_1_end_of_test_hook( void )
 {
     if ( pci_mio_16e_1.ai_state.ranges != NULL )
         pci_mio_16e_1.ai_state.ranges =
@@ -118,7 +121,8 @@ int pci_mio_16e_1_end_of_test_hook( void )
 /*---------------------------------------------------------*
  *---------------------------------------------------------*/
 
-int pci_mio_16e_1_exp_hook( void )
+int
+pci_mio_16e_1_exp_hook( void )
 {
     int i;
 
@@ -229,7 +233,8 @@ int pci_mio_16e_1_exp_hook( void )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-int pci_mio_16e_1_end_of_exp_hook( void )
+int
+pci_mio_16e_1_end_of_exp_hook( void )
 {
     int i;
 
@@ -261,7 +266,8 @@ int pci_mio_16e_1_end_of_exp_hook( void )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-void pci_mio_16e_1_exit_hook( void )
+void
+pci_mio_16e_1_exit_hook( void )
 {
     int i;
 
@@ -298,7 +304,8 @@ void pci_mio_16e_1_exit_hook( void )
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
 
-Var_T *daq_name( Var_T * v  UNUSED_ARG )
+Var_T *
+daq_name( Var_T * v  UNUSED_ARG )
 {
     return vars_push( STR_VAR, DEVICE_NAME );
 }

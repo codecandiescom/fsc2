@@ -1,7 +1,7 @@
 /* -*-C-*-
  *  $Id$
  * 
- *  Copyright (C) 1999-2007 Jens Thoms Toerring
+ *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -455,8 +455,9 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-int main( int    argc,
-          char * argv[ ] )
+int
+main( int    argc,
+      char * argv[ ] )
 {
     struct passwd *pwe;
 
@@ -575,7 +576,8 @@ int main( int    argc,
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void include_handler( char * file )
+static void
+include_handler( char * file )
 {
     static YY_BUFFER_STATE primary_buf;
     static YY_BUFFER_STATE buf_state[ MAX_INCLUDE_DEPTH ];
@@ -744,8 +746,9 @@ static void xclose( YY_BUFFER_STATE   primary_buf,
  * Rewrites combinations like "100ns" or "100 ns" as "0.000000100000".
  *---------------------------------------------------------------------*/
 
-static void unit_spec( char * text,
-                       int    power )
+static void
+unit_spec( char * text,
+           int    power )
 {
     double dval;
 
@@ -834,7 +837,8 @@ static void *T_malloc( size_t size )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void *T_free( void * ptr )
+static void *
+T_free( void * ptr )
 {
 #if defined FSC2_MDEBUG
     fprintf( stderr, "free:    %p\n", ptr );
@@ -849,8 +853,9 @@ static void *T_free( void * ptr )
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-static void *T_realloc( void * ptr,
-                        size_t size )
+static void *
+T_realloc( void * ptr,
+           size_t size )
 {
     void *new_ptr;
 
@@ -870,8 +875,9 @@ static void *T_realloc( void * ptr,
 /*--------------------------------------------------------------------*
  *--------------------------------------------------------------------*/
 
-static void *T_realloc_or_free( void * ptr,
-                                size_t size )
+static void *
+T_realloc_or_free( void * ptr,
+                   size_t size )
 {
     void *new_ptr;
 
@@ -895,7 +901,8 @@ static void *T_realloc_or_free( void * ptr,
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static char *T_strdup( const char * string )
+static char *
+T_strdup( const char * string )
 {
     char *new_mem;
 
@@ -917,7 +924,8 @@ static char *T_strdup( const char * string )
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void lower_permissions( void )
+static void
+lower_permissions( void )
 {
     seteuid( getuid( ) );
     setegid( getgid( ) );
@@ -932,8 +940,9 @@ static void lower_permissions( void )
 
 #define OUTPUT_TRY_LENGTH 256
 
-static ssize_t output( const char * fmt,
-                       ... )
+static ssize_t
+output( const char * fmt,
+        ... )
 {
     static char *c = NULL;
     static size_t len = OUTPUT_TRY_LENGTH;
@@ -1000,7 +1009,8 @@ static ssize_t output( const char * fmt,
 /*-------------------------------------------------------*
  *-------------------------------------------------------*/
 
-static void usage( void )
+static void
+usage( void )
 {
     fprintf( stderr, "Usage: fsc2_clean [ filename ]\n"
              "This program predigests EDL files and is only meant for\n"
