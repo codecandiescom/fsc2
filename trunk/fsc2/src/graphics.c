@@ -601,7 +601,7 @@ forms_adapt( void )
         if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
             pixmap_file = T_strdup( lauxdir "printer.xpm" );
         else
-            pixmap_file = T_strdup( auxdir "undo.xpm" );
+            pixmap_file = T_strdup( auxdir "printer.xpm" );
 
         if ( access( pixmap_file, R_OK ) == 0 )
         {

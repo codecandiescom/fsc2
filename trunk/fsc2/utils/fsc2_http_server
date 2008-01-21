@@ -641,7 +641,7 @@ sub rfc_1123_date {
 # Creates (or releases) an advisory lock on STDOUT.
 
 sub stdout_lock {
-    my $fs = new File::FcntlLock 'l_type' => shift? F_WRLCK : F_UNLCK;
+    my $fs = new File::FcntlLock 'l_type' => shift( ) ? F_WRLCK : F_UNLCK;
     return defined $fs->lock( STDOUT_FILENO, F_SETLKW );
 }
 

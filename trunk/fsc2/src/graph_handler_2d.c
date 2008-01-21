@@ -563,11 +563,10 @@ motion_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
     if ( G_2d.active_curve == -1 )
         return;
 
-    /* Do event compression to avoid being flooded with motion events -
-       instead of handling them all individually only react to the latest
-       in a series of motion events for the current window */
+    /* Do avoid having to treat lots and lots of motion events only react
+       to the latest in a series of motion events for the current window */
 
-    while ( fl_XEventsQueued( QueuedAfterReading ) > 0 )
+    while ( fl_XEventsQueued( QueuedAfterReading ) )
     {
         fl_XPeekEvent( &new_ev );             /* look ahead for next event */
 

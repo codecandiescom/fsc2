@@ -224,6 +224,7 @@ xforms_init( int  * argc,
        settings in unpleasant ways... */
 
     setenv( "LANG", "C", 1 );
+    fl_set_border_width( -1 );
 
     if ( ( display = fl_initialize( argc, argv, "Fsc2", app_opt,
                                     NUM_ELEMS( Xresources ) ) ) == NULL )
