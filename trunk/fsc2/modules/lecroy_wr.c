@@ -1359,9 +1359,9 @@ digitizer_trigger_coupling( Var_T * v )
 
             case EXPERIMENT :
                 lecroy_wr.trigger_coupling[ channel ] =
-                                     lecroy_wr_get_trigger_coupling( channel );
+                                      lecroy_wr_get_trigger_coupling( channel );
                 return vars_push( INT_VAR,
-                              ( long )lecroy_wr.trigger_coupling[ channel ] );
+                               ( long ) lecroy_wr.trigger_coupling[ channel ] );
         }
 
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );

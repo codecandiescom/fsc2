@@ -431,7 +431,7 @@ xforms_init( int  * argc,
 
     fl_set_slider_size( GUI.main_form->win_slider, XI_Sizes.SLIDER_SIZE );
     fl_set_slider_value( GUI.main_form->win_slider,
-                         ( double ) ( ch1 + h / 2
+                         ( double ) ( ch1 + 0.5 * h
                                       - 0.5 * H * XI_Sizes.SLIDER_SIZE )
                          / ( ( 1.0 - XI_Sizes.SLIDER_SIZE ) * H ) );
 
@@ -853,6 +853,7 @@ win_slider_callback( FL_OBJECT * a,
     FL_Coord h, H;
     FL_Coord new_h1 ;
     FL_Coord cx1, cy1, cw1, ch1, cx2, cy2, cw2, ch2;
+    int old_nwgravity, old_segravity;
 
 
     fl_freeze_form( GUI.main_form->fsc2 );
@@ -864,13 +865,29 @@ win_slider_callback( FL_OBJECT * a,
     h = cy2 - cy1 - ch1;
     H = cy2 - cy1 + ch2;
 
-    new_h1 = ( FL_Coord ) ( ( 1.0 - XI_Sizes.SLIDER_SIZE ) * H
-                            * fl_get_slider_value( a )
-                            + 0.5 * H * XI_Sizes.SLIDER_SIZE - h / 2 );
+    new_h1 = lrnd( ( 1.0 - XI_Sizes.SLIDER_SIZE ) * H * fl_get_slider_value( a )
+                   + 0.5 * ( H * XI_Sizes.SLIDER_SIZE - h ) );
+
+    old_nwgravity = GUI.main_form->browser->nwgravity;
+    old_segravity = GUI.main_form->browser->segravity;
+    fl_set_object_gravity( GUI.main_form->browser,
+                           old_nwgravity, ForgetGravity );
 
     fl_set_object_size( GUI.main_form->browser, cw1, new_h1 );
-    fl_set_object_geometry( GUI.main_form->error_browser, cx2,
-                            cy1 + new_h1 + h, cw2, H - ( new_h1 + h ) );
+
+    fl_set_object_gravity( GUI.main_form->browser,
+                           old_nwgravity, old_segravity );
+
+    old_nwgravity = GUI.main_form->error_browser->nwgravity;
+    old_segravity = GUI.main_form->error_browser->segravity;
+    fl_set_object_gravity( GUI.main_form->error_browser,
+                           ForgetGravity, old_segravity );
+
+    fl_set_object_size( GUI.main_form->error_browser, cw2, H - ( new_h1 + h ) );
+
+    fl_set_object_gravity( GUI.main_form->error_browser,
+                           old_nwgravity, old_segravity );
+
     fl_unfreeze_form( GUI.main_form->fsc2 );
 }
 

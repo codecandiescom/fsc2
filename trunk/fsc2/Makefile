@@ -29,12 +29,13 @@
 #  Also consider using a configuration file for your machine in the     #
 #  'machines' subdirectory. You can simply copy the 'template.nowhere'  #
 #  file in this directory to a file with the fully qualified host name  #
-#  of your machine (that's what 'hostname -f' returns when you enter    #
-#  it at the command line) and then edit this file. Then, whenever you  #
-#  want to install a new version of fsc2 you only have to copy this     #
-#  file instead of editing the Makefile each time. Please also note     #
-#  that when such a configuration file for your machine exists its      #
-#  content will override everything you set here!                       #
+#  of your machine (that's what 'hostname -f' (or on some system just   #
+#  'hostname' returns when you enter it at the command line) and then   #
+#  edit this file. Then, whenever you want to install a new version of  #
+#  fsc2 you only have to copy this file instead of editing the Makefile #
+#  each time. Please also note that when such a configuration file for  #
+#  your machine exists its content will override everything you set     #
+#  here!                                                                #
 #                                                                       #
 #########################################################################
 
@@ -527,10 +528,15 @@ endif
 # Set up a variable with the machines FQDN - if necessary follow symbolic
 # links (in cases where the machine has been renamed and the files in the
 # machines subdirectory are still for the old name but a symbolic link has
-# been set from the new machine name to the old one)
+# been set from the new machine name to the old one). Note that there are
+# different versions of 'hostname', some need the -f option to output the
+# FDQN while others don't know this option.
 
 machine_name := $(shell mn=`hostname -f 2>/dev/null`;        \
-					    if [    $$? -eq 0                     \
+	                    if [ $$? -ne 0 ]; then               \
+	 						mn=`hostname 2>/dev/null`;       \
+                        fi;                                  \
+					    if [    $$? -eq 0                    \
 						     -a -L $(mchdir)/$$mn ]; then    \
 						    ls -l $(mchdir)/$$mn |           \
 						    sed 's/^.*->[ \t]\+\(.*\)/\1/';  \

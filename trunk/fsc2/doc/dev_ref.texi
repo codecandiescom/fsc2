@@ -1510,7 +1510,7 @@ In the GPIB configuration file use @code{"LAKESHORE330"} as the device name,
 @paragraphindent 0
 @strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
 Oscilloscope 9400, 2 measurement channels, 2 function channels (needed
-for averaging).
+for averaging), @w{125 MHz bandwidth}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -1527,12 +1527,18 @@ In the GPIB configuration file use @code{"LECROY9400"} as the device name,
 @item @ref{digitizer_timebase()}
 @item @ref{digitizer_time_per_point()}
 @item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_coupling()}
+@item @ref{digitizer_bandwidth_limiter()}
 @item @ref{digitizer_averaging()}
 @item @ref{digitizer_num_averages()}
 @item @ref{digitizer_record_length()}
 @item @ref{digitizer_trigger_delay()}
 @item digitizer_meas_channel_ok()
 @item @ref{digitizer_trigger_channel()}
+@item @ref{digitizer_trigger_mode()}
+@item @ref{digitizer_trigger_level()}
+@item @ref{digitizer_trigger_slope()}
+@item @ref{digitizer_trigger_coupling()}
 @item @ref{digitizer_start_acquisition()}
 @item @ref{digitizer_get_curve()}
 @item @ref{digitizer_get_curve_fast()}

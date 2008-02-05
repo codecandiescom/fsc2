@@ -1732,14 +1732,16 @@ argument) only in the @code{EXPERIMENT} section.
 The function queries (if called with just one argument) or sets (if
 called with two arguments) the input coupling of one of the channels
 of the oscilloscope. Currently this function only exists for the
-@strong{LeCroy} osccilloscopes @strong{9410}, @strong{9420}, @strong{9424},
-@strong{9424E} @strong{9450}, @strong{Waverunner} and @strong{WaveSurver}.
+@strong{LeCroy} osccilloscopes @strong{9400}, @strong{9410},
+@strong{9420}, @strong{9424}, @strong{9424E} @strong{9450},
+@strong{Waverunner} and @strong{WaveSurver}.
+
 It needs at least one argument, the channel. The channels that can be used
 as arguments depends on the model of the oscilloscope:
 @table @samp
 @itemx LeCroy 9400
-@itemx LeCroy 9420
 @itemx LeCroy 9410
+@itemx LeCroy 9420
 @itemx LeCroy 9450
 @itemx LeCroy Waverunner (LT322, LT342(L), LT262(ML), LT372(L))
 @itemx LeCroy Wavesurver (422, 432, 452)
@@ -1760,7 +1762,8 @@ given the current setting for the channel is returned as an integer number.
 
 Please note that for some of the oscilloscopes the range of input sensitivity
 settings may depend on the input impedance and requesting an invalid
-combination may result in aborting the @code{EDL} script.
+combination may result in aborting the @code{EDL} script or in an
+automatic change of the sensitivity setting.
 
 The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
@@ -1769,36 +1772,39 @@ argument) only in the @code{EXPERIMENT} section.
 @anchor{digitizer_bandwidth_limiter()}
 @findex digitizer_bandwidth_limiter()
 @item digitizer_bandwidth_limiter()
-For the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} the function queries
-(if called with no argument) or sets (if called with an arguments) if
-the bandwidth limiter (@w{80 MHz}) is switched on or off. If an argument
-is given and it is a non-zero number or the string @code{"ON"} the
-bandwidth limiter is switched on, if the argument is zero or the string
-@code{"OFF"} the bandwidth limiter is switched off. If called without an
-argument the function returns @code{1} if the bandwidth limiter is on,
-@code{0} if it's off.
+For the @strong{LeCroy 9400, 9410, 9420, 9424, 9424E, 9450} the
+function queries (if called with no argument) or sets (if called with
+an arguments) if the bandwidth limiter (@w{30 MHz} for the
+@strong{9400} and @w{80 MHz} for all others) is switched on or off. If
+an argument is given and it is a non-zero number or the string
+@code{"ON"} the bandwidth limiter is switched on, if the argument is
+zero or the string @code{"OFF"} the bandwidth limiter is switched off.
+If called without an argument the function returns @code{1} if the
+bandwidth limiter is on, @code{0} if it's off.
 
-For all but one of the models of the @strong{LeCroy Waverunner} three
-possible setings exist. It can be switched off by calling the function
-with a string argument of @code{"OFF"} (or an integer argument of @code{0})
-to achieve the highst model-dependent bandwidth (see specifications).
-It can be set to @code{200 MHz} by calling the function with the string
-@code{"200MHZ"} (or the value @code{2}). Finally by calling it with
-the string @code{"ON"} (or an integer argument of @code{1}) for bandwidth
-can be restricted to @code{25 MHz} for the Waverunner models LT322, LT342(L),
-LT262(ML) and LT372(L)) and to @code{20 MHz} for the Waverunner-2 models
-LT224, LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L) and
-LT584(M/L). The only exception is the Waverunner model LT322 were the
-maximum bandwidth is @code{200 MHz}, thus switching te bandwidth limiter
-off and setting it to @code{200 MHz} has the same effect.
+For all but one of the models of the @strong{LeCroy Waverunner} series
+three possible setings exist. It can be switched off by calling the
+function with a string argument of @code{"OFF"} (or an integer
+argument of @code{0}) to achieve the highst model-dependent bandwidth
+(see specifications). It can be set to @code{200 MHz} by calling the
+function with the string @code{"200MHZ"} (or the value @code{2}).
+Finally by calling it with the string @code{"ON"} (or an integer
+argument of @code{1}) for bandwidth can be restricted to @code{25 MHz}
+for the Waverunner models LT322, LT342(L), LT262(ML) and LT372(L)) and
+to @code{20 MHz} for the Waverunner-2 models LT224, LT344(L),
+LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L) and LT584(M/L). The
+only exception is the Waverunner model LT322 were the maximum
+bandwidth is @code{200 MHz}, thus switching te bandwidth limiter off
+and setting it to @code{200 MHz} has the same effect.
 
-For the @strong{LeCroy WaveSurfer} for the models 422 and 424 only
-@code{"OFF"} and @code{"ON"} can be set, while for the other models
-also @code{"200MHZ"} can be set (the maximum bandwidth of the 422 and 424
-models is @w{200 MHz}, so this limit is already reached when the bandwidth
-limiter is set to @code{"OFF"}.
+For the @strong{LeCroy WaveSurfer} with the models @strong{422} and
+@strong{424} only @code{"OFF"} and @code{"ON"} can be set, while with
+the other models also @code{"200MHZ"} can be set (the maximum
+bandwidth of the @strong{422} and @code{424} models is @w{200 MHz},
+so this limit is already reached when the bandwidth limiter is set to
+@code{"OFF"}.
 
-The function does not exis for the @strong{Tektronix} digitizers.
+The function does not exist for the @strong{Tektronix} digitizers.
 
 The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
@@ -1900,7 +1906,7 @@ The third required argument is the number of averages. For the
 @strong{LeCroy9400} this has to be either @code{1}, @code{2} or @code{5},
 multiplied by @code{10}, @code{100}, @code{1,000}, @code{10,000} etc.@: up
 to @code{1,000,000} (if a number not fitting this scheme is passed to the
-function the nearest allowd number is used instead).
+function the nearest allowed number is used instead).
 
 For the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} this can be an
 arbitrary  number between @code{1} and @code{1,000} (or @code{1,000,000}
@@ -1984,6 +1990,10 @@ The function can be called in query mode (i.e.@: without an argument)
 only if either it has already been called with an argument or in the
 @code{EXPERIMENT} section.
 
+Please note: In some cases the trigger level automatically gets
+adjusted when changing the trigger coupling if the trigger level
+is too large for the new coupling setting.
+
 
 
 @anchor{digitizer_trigger_level()}
@@ -1991,25 +2001,30 @@ only if either it has already been called with an argument or in the
 @item digitizer_trigger_level()
 
 Function for setting or quering the trigger level of one of the trigger
-channels of the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} and
-@strong{Waverunner} digitizers. It expects at least a single argument, the
+channels of the @strong{LeCroy 9400, 9410, 9420, 9424, 9424E, 9450} and
+@strong{Waverunner} digitizers. For all digitizers except the
+@strong{LeCroy 9400} it expects at least a single argument, the
 trigger channel, see the channels listed for the function
 @ref{digitizer_trigger_channel()}, for obvious reasons excluding the
 @code{LINE} channel. If called with no further argument the current setting
-for the trigger level of this channel is returned. If called with a second
+for the trigger level of this channel (or the general level setting in
+case of the @strong{LeCroy 9400}) is returned. If called with a second
 argument it must be the trigger level (in Volt) to be set for that channel.
-
+The accepted range for the level depends on the model and the trigger
+coupling setting.
 
 
 @anchor{digitizer_trigger_slope()}
 @findex digitizer_trigger_slope()
 @item digitizer_trigger_slope()
 Function for setting or quering the trigger slope of one of the trigger
-channels of the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} and
-@strong{Waverunner} digitizers. It expects at least a single argument, the
+channels of the @strong{LeCroy 9400, 9410, 9420, 9424, 9424E, 9450} and
+@strong{Waverunner} digitizers. For all digitizers except the
+@strong{LeCroy 9400} it expects at least a single argument, the
 trigger channel, see the channels listed for the function
 @ref{digitizer_trigger_channel()}. If called with no further argument the
-current setting for the trigger slope of this channel as a number, where
+current setting for the trigger slope of this channel (or the general
+slope in the case of the @strong{LeCroy 9400}) as a number, where
 @code{1} stands for positive slope and @code{0} for negative slope. If called
 with a second argument it must be either the string @code{"POSITIVE"} or
 @code{"POS"} (or the number @code{1}) to set a positive slope or the string
@@ -2019,7 +2034,9 @@ trigger slope for that channel.
 @table @strong
 @item Please note:
 Setting a trigger slope for a trigger channel does @strong{not}
-automatically make this channel the selected trigger channel.
+automatically make this channel the selected trigger channel if
+the device allows to maintain different slope settings for different
+trigger channels.
 @end table
 
 
@@ -2028,23 +2045,28 @@ automatically make this channel the selected trigger channel.
 @findex digitizer_trigger_coupling()
 @item digitizer_trigger_coupling()
 
-Function for setting or quering the trigger coupling of one of the trigger
-channels of the @strong{LeCroy 9410, 9420, 9424, 9424E, 9450} and
-@strong{Waverunner} digitizers. If called with a single argument, the
+Function for setting or quering the trigger coupling of one of the
+trigger channels of the @strong{LeCroy 9400, 9410, 9420, 9424, 9424E, 9450}
+and @strong{Waverunner} digitizers. For all digitizers except the
+@strong{LeCroy 9400} it expects at least a single argument, the
 trigger channel (see the description of the function
-digitizer_trigger_channel() for a list of the possible trigger channels), the
-trigger coupling gets returned as a number, where @code{0} stands for
-@code{AC} coupling, @code{1} for @code{DC} coupling, @code{2} for @code{LF
-REJ} coupling, @code{3} for @code{HF REF} coupling and @code{4} for @code{HF}
-coupling. To change the coupling for the channel pass the function a second
-argument, either an integer as it gets returnedon queries, or one of the
-strings @code{"AC"}, @code{"DC"}, @code{"LF REF"}, @code{"HF REJ"} or
-(exceptt for the @strong{LeCroy 9410}) @code{"HF"} .
+digitizer_trigger_channel() for a list of the possible trigger
+channels). If called with no further arguments the trigger coupling of
+this channnel (or the general coupling in the case if the
+@strong{LeCroy 9400}) gets returned as a number, where @code{0} stands
+for @code{AC} coupling, @code{1} for @code{DC} coupling, @code{2} for
+@code{LF REJ} coupling, @code{3} for @code{HF REF} coupling and
+@code{4} for @code{HF} coupling. To change the coupling for the
+channel pass the function a second argument, either an integer as it
+gets returnedon queries, or one of the strings @code{"AC"},
+@code{"DC"}, @code{"LF REF"}, @code{"HF REJ"} or (except for the
+@strong{LeCroy 9400} and @strong{9410}) @code{"HF"} .
 
 @table @strong
 @item Please note:
-Setting a trigger coupling for a trigger channel does @strong{not}
-automatically make this channel the selected trigger channel.
+Setting a trigger coupling for one of several possible trigger
+channels does @strong{not} automatically make this channel the
+selected trigger channel.
 @end table
 
 
@@ -2053,11 +2075,19 @@ automatically make this channel the selected trigger channel.
 @item digitizer_trigger_mode()
 
 Function for setting or quering the trigger mode of one of the @strong{LeCroy
-9410, 9420, 9424, 9424E, 9450} and @strong{Waverunner} digitizers. If called
-without an argument the function returns the currently set trigger mode as an
-integer, if called to set the mode it can either be a string or an integer.
+9400, 9410, 9420, 9424, 9424E, 9450} and @strong{Waverunner} digitizers. If
+called without an argument the function returns the currently set trigger
+mode as an integer, if called to set the mode it can either be a string or
+an integer.
 The following values are allowed:
 @table @samp
+@itemx LeCroy 9400
+@itemize @bullet
+@item @code{AUTO} or @code{0}
+@item @code{NORM} or @code{1}
+@item @code{SINGLE} or @code{2}
+@item @code{SEQUENCE} or @code{3}
+@end itemize
 @item LeCroy 9410
 @itemx LeCroy 9420
 @itemx LeCroy 9424

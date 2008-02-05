@@ -1,7 +1,7 @@
 VARIABLES:
 
 B0, B1, IX, IY, B2, B3;
-I = 1, J = 1, K, R;
+I = 1, J = 1, K, R = 1;
 M = 0;
 
 PREPARATIONS:
@@ -18,7 +18,7 @@ B2 = button_create( "NORMAL_BUTTON", "Clear curve" );
 B3 = button_create( "NORMAL_BUTTON", "Change label" );
 
 FOREVER {
-	wait( 0.25 );
+	wait( 0.1 );
 	R = button_state( B0 );
 	FOR K = 1 : R {
 		display( I, J, random( ), 1,
@@ -39,11 +39,11 @@ FOREVER {
 	}
 
 	IF button_state( B3 ) {
-		IF M == 0 {
+		IF M % 2 {
 			change_label( "Bla", "Hihi", "Vulkanier" );
-		} ELSE IF M == 1 {
+		} ELSE {
 			change_label( "Hallo", "World", "Good Bye" );
 		}
-		M = ( M + 1 ) % 2;
+		M += 1;
 	}
 }

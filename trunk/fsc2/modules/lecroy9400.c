@@ -48,7 +48,7 @@ double sset[ 10 ] = { 5.0e-3, 1.0e-2, 2.0e-2, 5.0e-2, 1.0e-1,
 double tb[ 21 ] = {                      50.0e-9,
                     100.0e-9, 200.0e-9, 500.0e-9,
                       1.0e-6,   2.0e-6,   5.0e-6,
-                     10.0e-9,  20.0e-9,  50.0e-9,
+                     10.0e-6,  20.0e-6,  50.0e-6,
                     100.0e-6, 200.0e-6, 500.0e-6,
                       1.0e-3,   2.0e-3,   5.0e-3,
                      10.0e-3,  20.0e-3,  50.0e-3,
@@ -131,28 +131,39 @@ lecroy9400_init_hook( void )
     lecroy9400.is_reacting = UNSET;
     lecroy9400.num_used_channels = 0;
 
-    lecroy9400.w                = NULL;
-    lecroy9400.is_timebase      = UNSET;
-    lecroy9400.is_trigger_delay = UNSET;
-    lecroy9400.num_windows      = 0;
-    lecroy9400.data_source      = LECROY9400_UNDEF;
-    lecroy9400.meas_source      = LECROY9400_UNDEF;
-    lecroy9400.lock_state       = SET;
+    lecroy9400.w                   = NULL;
+    lecroy9400.is_timebase         = UNSET;
+    lecroy9400.is_trigger_delay    = UNSET;
+    lecroy9400.is_trigger_mode     = UNSET;
+    lecroy9400.is_trigger_channel  = UNSET;
+    lecroy9400.is_trigger_level    = UNSET;
+    lecroy9400.is_trigger_slope    = UNSET;
+    lecroy9400.is_trigger_coupling = UNSET;
+    lecroy9400.num_windows         = 0;
+    lecroy9400.data_source         = LECROY9400_UNDEF;
+    lecroy9400.meas_source         = LECROY9400_UNDEF;
+    lecroy9400.lock_state          = SET;
 
     for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
         lecroy9400.channels_in_use[ i ] = UNSET;
+
     for ( i = LECROY9400_CH1; i <= LECROY9400_CH2; i++ )
+    {
         lecroy9400.is_sens[ i ] = UNSET;
+        lecroy9400.is_coupl[ i ] = UNSET;
+        lecroy9400.rec_len[ i ]    = UNDEFINED_REC_LEN;
+    }
+
     for ( i = LECROY9400_MEM_C; i <= LECROY9400_FUNC_F; i++ )
     {
         lecroy9400.is_sens[ i ] = SET;
         lecroy9400.sens[ i ] = 1.0;
     }
+
     for ( i = LECROY9400_FUNC_E; i <= LECROY9400_FUNC_F; i++ )
     {
         lecroy9400.source_ch[ i ]  = LECROY9400_CH1 + i - LECROY9400_FUNC_E;
         lecroy9400.is_num_avg[ i ] = UNSET;
-        lecroy9400.rec_len[ i ]    = UNDEFINED_REC_LEN;
         lecroy9400.is_reject[ i ]  = UNSET;
     }
 
@@ -181,6 +192,8 @@ lecroy9400_test_hook( void )
 int
 lecroy9400_exp_hook( void )
 {
+    size_t i;
+
     /* Reset structure describing the state of the digitizer to the one
        it had before the test run was started */
 
@@ -194,6 +207,9 @@ lecroy9400_exp_hook( void )
         THROW( EXCEPTION );
     }
     lecroy9400_IN_SETUP = UNSET;
+
+    for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
+        lecroy9400.rec_len[ i ] = ml[ lecroy9400.tb_index ];
 
     lecroy9400_do_pre_exp_checks( );
 
@@ -347,7 +363,8 @@ digitizer_timebase( Var_T * v )
                 lecroy9400.timebase = lecroy9400_get_timebase( );
                 lecroy9400.tb_index =
                                 lecroy9400_get_tb_index( lecroy9400.timebase );
-                lecroy9400.is_timebase = SET;
+                for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
+                    lecroy9400.rec_len[ i ] = ml[ lecroy9400.tb_index ];
                 return vars_push( FLOAT_VAR, lecroy9400.timebase );
         }
 
@@ -402,6 +419,9 @@ digitizer_timebase( Var_T * v )
     lecroy9400.timebase = tb[ TB ];
     lecroy9400.tb_index = TB;
     lecroy9400.is_timebase = SET;
+
+    for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
+        lecroy9400.rec_len[ i ] = ml[ TB ];
 
     /* Now check for the trigger delay (if it's set) if it fits with the new
        timebase setting, and based on this the window positions and widths */
@@ -465,7 +485,9 @@ digitizer_sensitivity( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                no_query_possible( );
+                if ( ! lecroy9400.is_sens[ channel ] )
+                    no_query_possible( );
+                /* fall through */
 
             case TEST :
                 return vars_push( FLOAT_VAR, lecroy9400.is_sens[ channel ] ?
@@ -493,7 +515,7 @@ digitizer_sensitivity( Var_T * v )
     if ( FSC2_MODE == TEST )
     {
         if ( ! lecroy9400.is_coupl[ channel ] )
-            coupl = AC_1_MOHM;
+            coupl = LECROY9400_TEST_COUPLING;
         else
             coupl = lecroy9400.coupl[ channel ];
     }
@@ -528,6 +550,148 @@ digitizer_sensitivity( Var_T * v )
         lecroy9400_set_sens( channel, sens );
 
     return vars_push( FLOAT_VAR, lecroy9400.sens[ channel ] );
+}
+
+
+/*------------------------------------------------------------------------*
+ *------------------------------------------------------------------------*/
+
+Var_T *
+digitizer_coupling( Var_T * v )
+{
+    long channel;
+    long cpl = LECROY9400_UNDEF;
+    const char *cpl_str[ ] = { "A1M", "D1M", "D50", "GND" };
+    size_t i;
+    static int old_cpl[ 2 ];
+    static bool old_is_set[ 2 ] = { UNSET, UNSET };
+
+
+    if ( v == NULL )
+    {
+        print( FATAL, "No channel specified.\n" );
+        THROW( EXCEPTION );
+    }
+
+    channel = lecroy9400_translate_channel( GENERAL_TO_LECROY9400,
+                               get_strict_long( v, "channel number" ), UNSET );
+    if ( channel > LECROY9400_CH2 )
+    {
+        print( FATAL, "Can't set or obtain coupling for channel %s.\n",
+               LECROY9400_Channel_Names[ channel ] );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( v = vars_pop( v ) ) == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! lecroy9400.is_coupl[ channel ] )
+                    no_query_possible( );
+                /* fall through */
+
+            case TEST :
+                return vars_push( INT_VAR,
+                                  lecroy9400.is_coupl[ channel ] ?
+                                  ( long ) lecroy9400.coupl[ channel ] :
+                                  ( long ) LECROY9400_TEST_COUPLING );
+
+            case EXPERIMENT :
+                lecroy9400.coupl[ channel ]
+                                          = lecroy9400_get_coupling( channel );
+                lecroy9400.is_coupl[ channel ] = SET;
+                return vars_push( INT_VAR,
+                                  ( long ) lecroy9400.coupl[ channel ] );
+        }
+
+    if ( v->type == STR_VAR )
+    {
+        for ( i = 0; i < NUM_ELEMS( cpl_str ); i++ )
+            if ( ! strcasecmp( v->val.sptr, cpl_str[ i ] ) )
+            {
+                cpl = i;
+                break;
+            }
+    }
+    else
+        cpl = get_long( v, "coupling type" );
+
+    if ( cpl < AC_1_MOHM || cpl > GND )
+    {
+        print( FATAL, "Invalid trigger coupling type.\n" );
+        THROW( EXCEPTION );
+    }
+
+    lecroy9400.coupl[ channel ] = cpl;
+    lecroy9400.is_coupl[ channel ] = SET;
+
+    if ( FSC2_MODE == EXPERIMENT )
+        lecroy9400_set_coupling( channel, cpl );
+    else
+    {
+        if (    lecroy9400.is_sens[ channel ]
+             && old_is_set[ channel ]
+             && (    old_cpl[ channel ] == AC_1_MOHM
+                  || old_cpl[ channel ] == DC_1_MOHM )
+             && cpl == DC_50_OHM )
+        {
+            if (    lecroy9400.sens[ channel ] >= 2.0
+                 && lecroy9400.sens[ channel ] < 5.0 )
+                lecroy9400.sens[ channel ] *= 0.5;
+            else if ( lecroy9400.sens[ channel ] >= 5.0 )
+                lecroy9400.sens[ channel ] *= 0.2;
+        }
+
+        if ( cpl != GND )
+        {
+            old_is_set[ channel ] = lecroy9400.is_coupl[ channel ];
+            old_cpl[ channel ] = lecroy9400.is_coupl[ channel ];
+        }
+    }
+
+    return vars_push( FLOAT_VAR, ( long ) lecroy9400.coupl[ channel ] );
+}
+
+
+/*--------------------------------------------------------------------------*
+ * Function sets or determines if the bandwidth limiter is switch on or off
+ *--------------------------------------------------------------------------*/
+
+Var_T *
+digitizer_bandwidth_limiter( Var_T * v )
+{
+    bool bwl;
+
+
+    if ( v == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! lecroy9400.is_bandwidth_limiter )
+                    no_query_possible( );
+                /* fall through */
+
+            case TEST:
+                return vars_push( INT_VAR, lecroy9400.is_bandwidth_limiter ?
+                                  ( long ) lecroy9400.bandwidth_limiter :
+                                  ( long ) LECROY9400_TEST_BWL );
+
+            case EXPERIMENT :
+                return vars_push( INT_VAR, ( long )
+                                  lecroy9400_get_bandwidth_limiter( ) );
+        }
+
+    bwl = get_boolean( v );
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        lecroy9400_set_bandwidth_limiter( bwl );
+
+    lecroy9400.is_bandwidth_limiter = SET;
+    lecroy9400.bandwidth_limiter = bwl;
+
+    return vars_push( INT_VAR, ( long ) bwl );
 }
 
 
@@ -671,6 +835,14 @@ digitizer_averaging( Var_T * v )
         too_many_arguments( v );
     }
 
+    if ( rec_len == UNDEFINED_REC_LEN )
+    {
+        if ( FSC2_MODE == EXPERIMENT || lecroy9400.is_timebase )
+            rec_len = ml[ lecroy9400.tb_index ];
+        else
+            rec_len = ml[ LECROY9400_TEST_TB_ENTRY ];
+    }
+
     lecroy9400_set_up_averaging( channel, source_ch, num_avg,
                                  reject, rec_len );
 
@@ -758,17 +930,26 @@ digitizer_record_length( Var_T * v )
         switch ( FSC2_MODE )
         {
             case PREPARATION :
-                if ( lecroy9400.rec_len[ channel ] == UNDEFINED_REC_LEN )
+                if ( ! lecroy9400.is_timebase )
                     no_query_possible( );
-                return vars_push( INT_VAR,
-                                  lecroy9400.rec_len[ channel ] );
+                /* fall through */
+
 
             case TEST :
-                return vars_push( INT_VAR,
-                    lecroy9400.rec_len[ channel ] == UNDEFINED_REC_LEN ?
-                    lecroy9400.rec_len[ channel ] : LECROY9400_TEST_REC_LEN );
+                if ( lecroy9400.rec_len[ channel ] == UNDEFINED_REC_LEN )
+                {
+                    if ( ! lecroy9400.is_timebase )
+                        lecroy9400.rec_len[ channel ] =
+                                                 ml[ LECROY9400_TEST_TB_ENTRY ];
+                    else
+                        lecroy9400.rec_len[ channel ] =
+                                                      ml[ lecroy9400.tb_index ];
+                }
+                return vars_push( INT_VAR, lecroy9400.rec_len[ channel ] );
 
             case EXPERIMENT :
+                if ( lecroy9400.rec_len[ channel ] == UNDEFINED_REC_LEN )
+                    lecroy9400.rec_len[ channel ] = ml[ lecroy9400.tb_index ];
                 return vars_push( INT_VAR, lecroy9400.rec_len[ channel ] );
         }
     }
@@ -914,6 +1095,8 @@ Var_T *
 digitizer_trigger_channel( Var_T * v )
 {
     long channel;
+    static int old_ch = LECROY9400_UNDEF;
+    static bool old_is_set = UNSET;
 
 
     if ( v == NULL )
@@ -959,6 +1142,36 @@ digitizer_trigger_channel( Var_T * v )
             lecroy9400.is_trigger_channel = SET;
             if ( FSC2_MODE == EXPERIMENT )
                 lecroy9400_set_trigger_source( channel );
+            else if ( old_is_set )
+            {
+                if ( old_ch == LECROY9400_CH1 || old_ch == LECROY9400_CH2 )
+                {
+                    if ( channel == LECROY9400_EXT )
+                        lecroy9400.trigger_level *= 0.4;
+                    else if ( channel == LECROY9400_EXT10 )
+                        lecroy9400.trigger_level *= 4.0;
+                }
+                else if ( old_ch == LECROY9400_EXT )
+                {
+                    if (    channel == LECROY9400_CH1
+                         || channel == LECROY9400_CH2 )
+                        lecroy9400.trigger_level *= 2.5;
+                    else if ( channel == LECROY9400_EXT10 )
+                        lecroy9400.trigger_level *= 10.0;
+                }
+                else if ( old_ch == LECROY9400_EXT10 )
+                {
+                    if (    channel == LECROY9400_CH1
+                         || channel == LECROY9400_CH2 )
+                        lecroy9400.trigger_level *= 0.25;
+                    else if ( channel == LECROY9400_EXT )
+                        lecroy9400.trigger_level *= 0.1;
+                }
+            }
+
+            old_ch = lecroy9400.trigger_channel;
+            old_is_set = SET;
+
             break;
 
         default :
@@ -970,6 +1183,318 @@ digitizer_trigger_channel( Var_T * v )
     too_many_arguments( v );
 
     return vars_push( INT_VAR, 1L );
+}
+
+
+/*----------------------------------------------------------------*
+ * digitizer_trigger_level() sets or determines the trigger level
+ *----------------------------------------------------------------*/
+
+Var_T *
+digitizer_trigger_level( Var_T * v )
+{
+    int channel;
+    double level;
+
+
+    if ( v == NULL )
+    {
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! lecroy9400.is_trigger_level )
+                    no_query_possible( );
+                /* Fall through */
+
+            case TEST :
+                if (    lecroy9400.is_trigger_channel
+                     && lecroy9400.trigger_channel == LECROY9400_LIN )
+                {
+                    print( FATAL, "Trigger levvel for trigger channel LINE "
+                           "is undefined\n" );
+                    THROW( EXCEPTION );
+                }
+                return vars_push( FLOAT_VAR, lecroy9400.is_trigger_level ?
+                                  lecroy9400.trigger_level :
+                                  LECROY9400_TEST_TRIG_LEVEL );
+
+            case EXPERIMENT :
+                if ( lecroy9400.trigger_channel == LECROY9400_LIN )
+                {
+                    print( FATAL, "Trigger level for trigger channel LINE "
+                           "can't be determined\n" );
+                    THROW( EXCEPTION );
+                }
+                lecroy9400.trigger_level = lecroy9400_get_trigger_level( );
+                return vars_push( FLOAT_VAR, lecroy9400.trigger_level );
+        }
+    }
+
+    /* To set a trigger level we need to know the trigger channel */
+
+    if ( FSC2_MODE == PREPARATION && ! lecroy9400.is_trigger_channel )
+    {
+        print( FATAL, "Can't set trigger level in PREPARATION section if the "
+               "trigger channel hasn't been set.\n" );
+        THROW( EXCEPTION );
+    }
+
+    level = get_double( v, "trigger level" );
+
+    too_many_arguments( v );
+
+    channel = lecroy9400.trigger_channel;
+
+    switch ( channel )
+    {
+        case LECROY9400_CH1 : case LECROY9400_CH2 :
+            if (    FSC2_MODE == PREPARATION
+                 && ! lecroy9400.is_sens[ channel ] )
+            {
+                print( FATAL, "Can't set trigger level in PREPARATION section "
+                       "while sensitivity for the trigger channel %s hasn't "
+                       "been set.\n", LECROY9400_Channel_Names[ channel ] );
+                THROW( EXCEPTION );
+            }
+
+            if ( lrnd( fabs( 100 * level ) ) > 5000 )
+            {
+                print( FATAL, "Trigger level too large, range is +/-5 V with "
+                       "CH1 or CH2 as trigger channels.\n" );
+                THROW( EXCEPTION );
+            }
+            break;
+
+        case LECROY9400_EXT :
+            if ( lrnd( fabs( 1000 * level ) ) > 2000 )
+            {
+                print( FATAL, "Trigger level too large, range is +/-2 V with "
+                       "EXT as trigger channel.\n" );
+                THROW( EXCEPTION );
+            }
+            break;
+
+        case LECROY9400_EXT10 :
+            if ( lrnd( fabs( 1000 * level ) ) > 20000 )
+            {
+                print( FATAL, "Trigger level too large, range is +/- 20 V "
+                       "with EXT10 as trigger level.\n" );
+                THROW( EXCEPTION );
+            }
+            break;
+
+        case LECROY9400_LIN :
+            print( FATAL, "Can't set trigger level with LINE as trigger "
+                   "channel.\n" );
+            THROW( EXCEPTION );
+    }
+
+    lecroy9400.is_trigger_level = SET;
+    lecroy9400.trigger_level = level;
+
+    if ( FSC2_MODE == EXPERIMENT )
+        lecroy9400_set_trigger_level( level );
+
+    return vars_push( FLOAT_VAR, level );
+}
+
+
+/*----------------------------------------------------------*
+ * digitizer_trigger_slope() sets or determines the trigger
+ * slope for the trigger channels
+ *----------------------------------------------------------*/
+
+Var_T *
+digitizer_trigger_slope( Var_T * v )
+{
+    int slope = LECROY9400_UNDEF;
+
+
+    if ( v == NULL )
+    {
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! lecroy9400.is_trigger_slope )
+                    no_query_possible( );
+                /* fall through */
+
+            case TEST :
+                if ( lecroy9400.is_trigger_slope )
+                    return vars_push( INT_VAR,
+                                      ( long ) lecroy9400.trigger_slope );
+                else
+                    return vars_push( INT_VAR,
+                                      LECROY9400_TEST_TRIG_SLOPE );
+
+            case EXPERIMENT :
+                lecroy9400.trigger_slope = lecroy9400_get_trigger_slope( );
+                return vars_push( INT_VAR, ( long ) lecroy9400.trigger_slope );
+        }
+    }
+
+    /* To set a trigger slope we need to know the trigger channel */
+
+    if ( FSC2_MODE == PREPARATION && ! lecroy9400.is_trigger_channel )
+    {
+        print( FATAL, "Can't set trigger slope in PREPARATION section if the "
+               "trigger channel hasn't been set.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( lecroy9400.trigger_channel == LECROY9400_LIN ) {
+        print( SEVERE, "Trigger slope for LINE can't be set.\n" );
+        return vars_push( INT_VAR, 0 );
+    }
+
+    if ( v->type == STR_VAR )
+    {
+        if (    ! strcasecmp( v->val.sptr, "POSITIVE" )
+             || ! strcasecmp( v->val.sptr, "POS" ) )
+            slope = TRG_SLOPE_POS;
+        else if (    ! strcasecmp( v->val.sptr, "NEGATIVE" )
+                  || ! strcasecmp( v->val.sptr, "NEG" ) ) 
+            slope = TRG_SLOPE_NEG;
+        else if ( ! strcasecmp( v->val.sptr, "POS_NEG" ) )
+            slope = TRG_SLOPE_POS_NEG;
+    }
+    else
+        slope = get_long( v, "trigger slope" );
+
+    if ( slope < TRG_SLOPE_POS || slope > TRG_SLOPE_POS_NEG )
+    {
+        print( FATAL, "Invalid slope valiue supplied.\n" );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        lecroy9400_set_trigger_slope( slope );
+
+    lecroy9400.is_trigger_slope = SET;
+    lecroy9400.trigger_slope = slope;
+    return vars_push( INT_VAR, lecroy9400.trigger_slope );
+}
+
+
+/*-------------------------------------------------------*
+ * Function to set or determine the current trigger mode
+ *-------------------------------------------------------*/
+
+Var_T *
+digitizer_trigger_mode( Var_T * v )
+{
+    long mode = -1;
+    const char *mode_str[ ] = { "AUTO", "NORM", "SINGLE", "SEQUENCE" };
+    size_t i;
+
+    if ( v == 0 )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! lecroy9400.is_trigger_mode )
+                    no_query_possible( );
+                /* Fall through */
+
+            case TEST :
+                return vars_push( INT_VAR, lecroy9400.is_trigger_mode ?
+                                  ( long ) lecroy9400.trigger_mode :
+                                  ( long ) LECROY9400_TEST_TRIG_MODE );
+
+            case EXPERIMENT :
+                lecroy9400.trigger_mode = lecroy9400_get_trigger_mode( );
+                return vars_push( INT_VAR, ( long ) lecroy9400.trigger_mode );
+        }
+
+    if ( v->type == STR_VAR )
+    {
+        for ( i = 0; i < NUM_ELEMS( mode_str ); i++ )
+            if ( ! strcasecmp( v->val.sptr, mode_str[ i ] ) )
+            {
+                mode = i;
+                break;
+            }
+    }
+    else
+        mode = get_long( v, "trigger mode" );
+
+    if ( mode < 0 || mode > ( long ) NUM_ELEMS( mode_str ) )
+    {
+        print( FATAL, "Invalid trigger mode.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        lecroy9400_set_trigger_mode( mode );
+
+    lecroy9400.trigger_mode = ( int ) mode;
+    lecroy9400.is_trigger_mode = SET;
+
+    return vars_push( INT_VAR, mode );
+}
+
+/*--------------------------------------------------*
+ * Function to query of change the trigger coupling
+ *--------------------------------------------------*/
+
+Var_T *
+digitizer_trigger_coupling( Var_T * v )
+{
+    long cpl = LECROY9400_UNDEF;
+    const char *cpl_str[ ] = { "AC", "DC", "LF REJ", "HF REJ" };
+    size_t i;
+
+
+    if ( v == NULL )
+        switch ( FSC2_MODE )
+        {
+            case PREPARATION :
+                if ( ! lecroy9400.is_trigger_coupling )
+                    no_query_possible( );
+                /* Fall through */
+
+            case TEST :
+                return vars_push( INT_VAR, lecroy9400.is_trigger_coupling ?
+                                  ( long ) lecroy9400.trigger_coupling :
+                                  ( long ) LECROY9400_TEST_TRIG_COUPLING );
+
+            case EXPERIMENT :
+                lecroy9400.trigger_coupling =
+                    lecroy9400_get_trigger_coupling( );
+                return vars_push( INT_VAR,
+                                  ( long ) lecroy9400.trigger_coupling );
+        }
+
+    vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+    if ( v->type == STR_VAR )
+    {
+        for ( i = 0; i < NUM_ELEMS( cpl_str ); i++ )
+            if ( ! strcasecmp( v->val.sptr, cpl_str[ i ] ) )
+            {
+                cpl = i;
+                break;
+            }
+    }
+    else
+        cpl = get_long( v, "trigger coupling type" );
+
+    if ( cpl < TRG_CPL_AC || cpl > TRG_CPL_HF_REJ )
+    {
+        print( FATAL, "Invalid trigger coupling type.\n" );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        lecroy9400_set_trigger_coupling( cpl );
+
+    lecroy9400.is_trigger_coupling = SET;
+    lecroy9400.trigger_coupling = cpl;
+
+    return vars_push( INT_VAR, cpl );
 }
 
 
@@ -1082,15 +1607,22 @@ get_curve( Var_T * v,
 
     if ( FSC2_MODE == EXPERIMENT )
     {
+        length = lecroy9400.rec_len[ ch ];
         lecroy9400_get_curve( ch, w, &array, &length, use_cursor );
         nv = vars_push( FLOAT_ARR, array, length );
     }
     else
     {
         if ( lecroy9400.rec_len[ ch ] == UNDEFINED_REC_LEN )
-            length = LECROY9400_TEST_REC_LEN;
-        else
-            length = lecroy9400.rec_len[ ch ];
+        {
+            if ( ! lecroy9400.is_timebase )
+                lecroy9400.rec_len[ ch ] = ml[ LECROY9400_TEST_TB_ENTRY ];
+            else
+                lecroy9400.rec_len[ ch ] = ml[ lecroy9400.tb_index ];
+        }
+
+        length = lecroy9400.rec_len[ ch ];
+
         array = DOUBLE_P T_malloc( length * sizeof *array );
         for ( i = 0; i < length; i++ )
             array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );

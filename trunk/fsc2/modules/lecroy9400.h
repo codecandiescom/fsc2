@@ -31,21 +31,11 @@
 #include "lecroy9400.conf"
 
 
-/* Here values are defined that get returned by the driver in the test run
-   when the digitizer can't be accessed - these values must really be
-   reasonable ! */
-
-#define LECROY9400_TEST_TB_ENTRY     19        /* i.e. 100 ms */
-#define LECROY9400_TEST_SENSITIVITY  0.01
-#define LECROY9400_TEST_NUM_AVG      10
-#define LECROY9400_TEST_TRIG_DELAY   0.0
-#define LECROY9400_TEST_TRIG_CHANNEL 0
-#define LECROY9400_TEST_REC_LEN      1250
-
 #define MAX_CHANNELS       9
 #define MAX_USED_CHANNELS  4
 
 #define LECROY9400_UNDEF   -1
+
 #define LECROY9400_CH1      0
 #define LECROY9400_CH2      1
 #define LECROY9400_MEM_C    2
@@ -72,19 +62,48 @@
 #define AC_1_MOHM          0
 #define DC_1_MOHM          1
 #define DC_50_OHM          2
+#define GND                3
 
 #define MAX_OFFSET         8.0       /* Offset for data channel */
 #define MIN_OFFSET        -8.0
+
+#define TRG_MODE_AUTO      0         /* Trigger modes */
+#define TRG_MODE_NORMAL    1         /* (don't change the sequence!) */
+#define TRG_MODE_SINGLE    2
+#define TRG_MODE_SEQ       3   
 
 #define TRG_CPL_AC         0         /* Trigger coupling */
 #define TRG_CPL_DC         1
 #define TRG_CPL_LF_REJ     2
 #define TRG_CPL_HF_REJ     3
 
-#define UNDEFINED_REC_LEN  -1
+#define TRG_SLOPE_POS      0
+#define TRG_SLOPE_NEG      1
+#define TRG_SLOPE_POS_NEG  2
 
-#define MAX_DESC_LEN       160       /* amount of memory that needs to be
+#define UNDEFINED_REC_LEN  1
+
+#define MAX_DESC_LEN     160         /* amount of memory that needs to be
                                         allocated for a curve descriptor */
+
+
+/* Here values are defined that get returned by the driver in the test run
+   when the digitizer can't be accessed - these values must really be
+   reasonable ! */
+
+#define LECROY9400_TEST_TB_ENTRY       19        /* i.e. 100 ms */
+#define LECROY9400_TEST_COUPLING       AC_1_MOHM
+#define LECROY9400_TEST_SENSITIVITY    0.01
+#define LECROY9400_TEST_BWL            0
+#define LECROY9400_TEST_NUM_AVG        10
+#define LECROY9400_TEST_TRIG_DELAY     0.0
+#define LECROY9400_TEST_TRIG_CHANNEL   LECROY9400_CH1
+#define LECROY9400_TEST_TRIG_LEVEL     0.0
+#define LECROY9400_TEST_TRIG_MODE      TRG_MODE_NORMAL
+#define LECROY9400_TEST_TRIG_COUPLING  TRG_CPL_AC
+#define LECROY9400_TEST_TRIG_SLOPE     TRG_SLOPE_POS
+#define LECROY9400_TEST_REC_LEN        1250
+
 
 /* Structure for description of a 'window' on the digitizer, made up from the
    area between the pair of cursors */
@@ -132,11 +151,14 @@ struct LECROY9400 {
     double offset[ MAX_CHANNELS ];
     double is_offset[ MAX_CHANNELS ];
 
-    int coupling[ MAX_CHANNELS ];
-    double is_coupling[ MAX_CHANNELS ];
+    bool bandwidth_limiter;
+    bool is_bandwidth_limiter;
 
     int trigger_channel;
     bool is_trigger_channel;
+
+    int trigger_mode;
+    bool is_trigger_mode;
 
     double trigger_level;
     bool is_trigger_level;
@@ -210,12 +232,18 @@ Var_T * digitizer_define_window(     Var_T * /* v */ );
 Var_T * digitizer_timebase(          Var_T * /* v */ );
 Var_T * digitizer_time_per_point(    Var_T * /* v */ );
 Var_T * digitizer_sensitivity(       Var_T * /* v */ );
+Var_T * digitizer_coupling(          Var_T * /* v */ );
+Var_T * digitizer_bandwidth_limiter( Var_T * /* v */ );
 Var_T * digitizer_averaging(         Var_T * /* v */ );
 Var_T * digitizer_num_averages(      Var_T * /* v */ );
 Var_T * digitizer_record_length(     Var_T * /* v */ );
 Var_T * digitizer_trigger_delay(     Var_T * /* v */ );
+Var_T * digitizer_trigger_mode(      Var_T * /* v */ );
+Var_T * digitizer_trigger_coupling(  Var_T * /* v */ );
 Var_T * digitizer_meas_channel_ok(   Var_T * /* v */ );
 Var_T * digitizer_trigger_channel(   Var_T * /* v */ );
+Var_T * digitizer_trigger_level(     Var_T * /* v */ );
+Var_T * digitizer_trigger_slope(     Var_T * /* v */ );
 Var_T * digitizer_start_acquisition( Var_T * /* v */ );
 Var_T * digitizer_get_curve(         Var_T * /* v */ );
 Var_T * digitizer_get_curve_fast(    Var_T * /* v */ );
@@ -251,9 +279,21 @@ int lecroy9400_get_trigger_source( void );
 
 bool lecroy9400_set_trigger_source( int /* channel */ );
 
+int lecroy9400_get_trigger_mode( void );
+
+bool lecroy9400_set_trigger_mode( int /* mode */ );
+
 double lecroy9400_get_trigger_level( void );
 
 bool lecroy9400_set_trigger_level( double /* level */ );
+
+int lecroy9400_get_trigger_slope( void );
+
+bool lecroy9400_set_trigger_slope( int /* slope */ );
+
+int lecroy9400_get_trigger_coupling( void );
+
+bool lecroy9400_set_trigger_coupling( int /* cpl */ );
 
 double lecroy9400_get_sens( int /* channel */ );
 
@@ -270,6 +310,10 @@ int lecroy9400_get_coupling( int /* channel */ );
 bool lecroy9400_set_coupling( int /* channel */,
                               int /* type    */  );
 
+int lecroy9400_get_bandwidth_limiter( void );
+
+void lecroy9400_set_bandwidth_limiter( bool /* state */ );
+
 bool lecroy9400_is_displayed( int /* channel */ );
 
 bool lecroy9400_display( int /* channel */,
@@ -277,7 +321,8 @@ bool lecroy9400_display( int /* channel */,
 
 long lecroy9400_get_num_avg( int /* channel */ );
 
-bool lecroy9400_get_desc( int /* channel */ );
+bool lecroy9400_get_desc( int  /* channel */,
+                          bool /* do_stop */ );
 
 double lecroy9400_get_trigger_delay( void );
 
@@ -300,8 +345,6 @@ void lecroy9400_get_curve( int        /* ch         */,
                            bool       /* use_cursor */  );
 
 bool lecroy9400_command( const char * /* cmd */ );
-
-void lecroy9400_gpib_failure( void );
 
 
 /*

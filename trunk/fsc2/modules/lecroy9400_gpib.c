@@ -30,6 +30,8 @@ static bool is_acquiring = UNSET;
 static bool lecroy9400_talk( const char * cmd,
                              char *       reply,
                              long *       length );
+static void lecroy9400_gpib_failure( void );
+static void lecroy9400_invalid_reply( void );
 
 
 /*-----------------------------------------------------------------*
@@ -55,9 +57,9 @@ lecroy9400_init( const char * name )
        reacts. */
 
     if (    gpib_write( lecroy9400.device,
-                        "CHDR,OFF;CTRL,LF;CHLP,OFF;CBLS,-1;CFMT,A,WORD",
-                        45 ) == FAILURE
-         || gpib_write( lecroy9400.device, "STB,1", 5 ) == FAILURE
+                      "CHDR,OFF;CPRM,OFF;CTRL,LF;CHLP,OFF;CBLS,-1;CFMT,A,WORD",
+                        54 ) == FAILURE
+         || gpib_write( lecroy9400.device, "STB,6,?", 7 ) == FAILURE
          || gpib_read( lecroy9400.device, buffer, &len ) == FAILURE )
     {
         gpib_local( lecroy9400.device );
@@ -74,6 +76,7 @@ lecroy9400_init( const char * name )
     else
     {
         lecroy9400.timebase = lecroy9400_get_timebase( );
+
         if ( lecroy9400.timebase < tb[ 0 ] )
         {
             lecroy9400_set_timebase( lecroy9400.timebase = tb[ 0 ] );
@@ -97,6 +100,63 @@ lecroy9400_init( const char * name )
     if ( gpib_write( lecroy9400.device, "IL,OFF", 6 ) == FAILURE )
         return FAIL;
 
+    /* Set or get the normal channels sensitivities and couplings */
+
+    for ( i = LECROY9400_CH1; i <= LECROY9400_CH2; i++ )
+    {
+        if ( lecroy9400.is_sens[ i ] )
+            lecroy9400_set_sens( i, lecroy9400.sens[ i ] );
+        else
+            lecroy9400.sens[ i ] = lecroy9400_get_sens( i );
+
+        if ( lecroy9400.is_coupl[ i ] )
+            lecroy9400_set_coupling( i, lecroy9400.coupl[ i ] );
+        else
+            lecroy9400.coupl[ i ] = lecroy9400_get_coupling( i );
+    }
+
+    /* Get or set the bandwidth limiter */
+
+    if ( lecroy9400.is_bandwidth_limiter )
+        lecroy9400_set_bandwidth_limiter( lecroy9400.bandwidth_limiter );
+    else
+        lecroy9400.bandwidth_limiter = lecroy9400_get_bandwidth_limiter( );
+
+    /* Get or set the trigger mode */
+
+    if ( lecroy9400.is_trigger_mode )
+        lecroy9400_set_trigger_mode( lecroy9400.trigger_mode );
+    else
+        lecroy9400.trigger_mode = lecroy9400_get_trigger_mode( );
+
+    /* Get or set the trigger source channel */
+
+    if ( lecroy9400.is_trigger_channel )
+        lecroy9400_set_trigger_source( lecroy9400.trigger_channel );
+    else
+        lecroy9400.trigger_channel = lecroy9400_get_trigger_source( );
+
+    /* Get or set the trigger source channel */
+
+    if ( lecroy9400.is_trigger_level )
+        lecroy9400_set_trigger_level( lecroy9400.trigger_level );
+    else
+        lecroy9400.trigger_level = lecroy9400_get_trigger_level( );
+
+    /* Get or set the trigger coupling */
+
+    if ( lecroy9400.is_trigger_coupling )
+        lecroy9400_set_trigger_coupling( lecroy9400.trigger_coupling );
+    else
+        lecroy9400.trigger_coupling = lecroy9400_get_trigger_coupling( );
+
+    /* Get or set the trigger slope */
+
+    if ( lecroy9400.is_trigger_slope )
+        lecroy9400_set_trigger_slope( lecroy9400.trigger_slope );
+    else
+        lecroy9400.trigger_slope = lecroy9400_get_trigger_slope( );
+
     /* Set (if required) the trigger delay */
 
     if ( lecroy9400.is_trigger_delay )
@@ -107,16 +167,16 @@ lecroy9400_init( const char * name )
     /* Now get the waveform descriptors for all channels */
 
     for ( i = LECROY9400_CH1; i <= LECROY9400_FUNC_F; i++ )
-        lecroy9400_get_desc( i );
+        lecroy9400_get_desc( i, SET );
 
     /* Set up averaging for function channels */
 
     for ( i = LECROY9400_FUNC_E; i <= LECROY9400_FUNC_F; i++ )
         if ( lecroy9400.is_num_avg[ i ] )
             lecroy9400_set_up_averaging( i, lecroy9400.source_ch[ i ],
-                                         lecroy9400.num_avg[ i ],
-                                         lecroy9400.is_reject[ i ],
-                                         lecroy9400.rec_len[ i ] );
+                                            lecroy9400.num_avg[ i ],
+                                            lecroy9400.is_reject[ i ],
+                                            lecroy9400.rec_len[ i ] );
 
     return OK;
 }
@@ -151,6 +211,8 @@ lecroy9400_set_timebase( double timebase )
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
+    lecroy9400.tb_index = lecroy9400_get_tb_index( timebase );
+
     return OK;
 }
 
@@ -166,7 +228,7 @@ lecroy9400_get_trigger_source( void )
     int src = LECROY9400_UNDEF;
 
 
-    lecroy9400_talk( "TRD,?", reply, &length );
+    lecroy9400_talk( "TRS,?", reply, &length );
 
     if ( reply[ 0 ] == 'C' )
         src = reply[ 1 ] == '1' ? LECROY9400_CH1 : LECROY9400_CH2;
@@ -175,7 +237,7 @@ lecroy9400_get_trigger_source( void )
     else if ( reply[ 0 ] == 'E' )
         src = reply[ 1 ] == 'X' ? LECROY9400_EXT : LECROY9400_EXT10;
     else
-        fsc2_impossible( );
+        lecroy9400_invalid_reply( );
 
     return src;
 }
@@ -204,6 +266,100 @@ lecroy9400_set_trigger_source( int channel )
         strcat( cmd, "E/10" );
 
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
+        lecroy9400_gpib_failure( );
+
+    lecroy9400.trigger_level = lecroy9400_get_trigger_level( );
+
+    return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+int
+lecroy9400_get_trigger_mode( void )
+{
+    char reply[ 30 ];
+    long length = 30;
+    int mode = LECROY9400_UNDEF;
+
+
+    lecroy9400_talk( "TRM,?", reply, &length );
+
+    if ( reply[ 0 ] == 'A' )
+        mode = TRG_MODE_AUTO;
+    else if ( reply[ 0 ] == 'N' )
+        mode = TRG_MODE_NORMAL;
+    else if ( reply[ 0 ] == 'S' )
+        mode = reply[ 1 ] == 'I' ? TRG_MODE_SINGLE : TRG_MODE_SEQ;
+    else
+        lecroy9400_invalid_reply( );;
+
+    return mode;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+bool
+lecroy9400_set_trigger_mode( int mode )
+{
+    const char *cmd[ ] = { "TRM,AU", "TRM,NO", "TRM,SI", "TRM,SE" };
+
+
+    fsc2_assert( mode >= TRG_MODE_AUTO && mode <= TRG_MODE_SEQ );
+
+    if ( gpib_write( lecroy9400.device, ( char * ) cmd[ mode ],
+                     strlen( cmd[ mode ] ) ) == FAILURE )
+        lecroy9400_gpib_failure( );
+
+    return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+int
+lecroy9400_get_trigger_coupling( void )
+{
+    char reply[ 30 ];
+    long length = 30;
+    int cpl = LECROY9400_UNDEF;
+
+
+    lecroy9400_talk( "TRC,?", reply, &length );
+
+    if ( reply[ 0 ] == 'A' )
+        cpl = TRG_CPL_AC;
+    else if ( reply[ 0 ] == 'D' )
+        cpl = TRG_CPL_DC;
+    else if ( reply[ 0 ] == 'L' )
+        cpl = TRG_CPL_LF_REJ;
+    else if ( reply[ 0 ] == 'H' )
+        cpl = TRG_CPL_HF_REJ;
+    else
+        lecroy9400_invalid_reply( );;
+
+    return cpl;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+bool
+lecroy9400_set_trigger_coupling( int cpl )
+{
+    const char *cmd[ ] = { "TRC,AC", "TRC,DC", "TRC,LF", "TRC,HF" };
+
+
+    fsc2_assert( cpl >= TRG_CPL_AC && cpl <= TRG_CPL_HF_REJ );
+
+    if ( gpib_write( lecroy9400.device, ( char * ) cmd[ cpl ],
+                     strlen( cmd[ cpl ] ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
     return OK;
@@ -237,6 +393,48 @@ lecroy9400_set_trigger_level( double level )
 
     gcvt( level, 6, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
+        lecroy9400_gpib_failure( );
+
+    return OK;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+int
+lecroy9400_get_trigger_slope( void )
+{
+    char reply[ 30 ];
+    long length = 30;
+    int slope = LECROY9400_UNDEF;
+
+
+    lecroy9400_talk( "TRP,?", reply, &length );
+    if ( reply[ 0 ] == 'N' )
+        slope = TRG_SLOPE_NEG;
+    else if ( reply[ 0 ] == 'P' )
+        slope = reply[ 3 ] != '_' ? TRG_SLOPE_POS : TRG_SLOPE_POS_NEG;
+    else
+        lecroy9400_invalid_reply( );;
+
+    return slope;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+bool
+lecroy9400_set_trigger_slope( int slope )
+{
+    const char *cmd[ ] = { "TRP,PO", "TRP,NE", "TRP,PN" };
+
+
+    fsc2_assert( slope >= TRG_SLOPE_POS && slope <= TRG_SLOPE_POS_NEG );
+
+    if ( gpib_write( lecroy9400.device, ( char * ) cmd[ slope ],
+                     strlen( cmd[ slope ] ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
     return OK;
@@ -282,7 +480,7 @@ lecroy9400_set_sens( int    channel,
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
-    lecroy9400_get_desc( channel );
+    lecroy9400_get_desc( channel, SET );
 
     return OK;
 }
@@ -327,7 +525,7 @@ lecroy9400_set_offset( int    channel,
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
-    lecroy9400_get_desc( channel );
+    lecroy9400_get_desc( channel, SET );
 
     return OK;
 }
@@ -340,7 +538,7 @@ int
 lecroy9400_get_coupling( int channel )
 {
     char cmd[ 20 ];
-    int type;
+    int type = LECROY9400_UNDEF;
     char reply[ 100 ];
     long length = 100;
 
@@ -349,14 +547,15 @@ lecroy9400_get_coupling( int channel )
 
     sprintf( cmd, "C%1dCP,?", channel + 1 );
     lecroy9400_talk( cmd, reply, &length );
-    reply[ length - 1 ] = '\0';
 
     if ( reply[ 0 ] == 'A' )
         type = AC_1_MOHM;
-    else if ( reply[ 1 ] == '1' )
-        type = DC_1_MOHM;
+    else if ( reply[ 0 ] == 'D' )
+        type = reply[ 3 ] == '1' ? DC_1_MOHM : DC_50_OHM;
+    else if ( reply[ 0 ] == 'G' )
+        type = GND;
     else
-        type = DC_50_OHM;
+        lecroy9400_invalid_reply( );
 
     return type;
 }
@@ -370,20 +569,50 @@ lecroy9400_set_coupling( int channel,
                          int type )
 {
     char cmd[ 30 ];
-    char const *cpl[ ] = { "A1M", "D1M", "D50" };
+    char const *cpl[ ] = { "A1M", "D1M", "D50", "GND" };
 
 
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
-    fsc2_assert( type >= AC_1_MOHM && type <= DC_50_OHM );
-
+    fsc2_assert( type >= AC_1_MOHM && type <= GND );
 
     sprintf( cmd, "C%1dCP,%s", channel + 1, cpl[ type ] );
     if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy9400_gpib_failure( );
 
-    lecroy9400_get_desc( channel );
+    lecroy9400_get_desc( channel, SET );
+    lecroy9400_get_sens( channel );
 
     return OK;
+}
+
+
+/*-------------------------------------------------------------*
+ * Function to determine if the bandwidth limiter is on or off
+ *-------------------------------------------------------------*/
+
+int
+lecroy9400_get_bandwidth_limiter( void )
+{
+    char buf[ 30 ] = "BW,?";
+    long length = 30;
+
+    lecroy9400_talk( ( const char * ) buf, buf, &length );
+    return buf[ 1 ] == 'N';
+}
+
+
+/*----------------------------------------------------*
+ * Function to switch the bandwidth limiter on or off
+ *----------------------------------------------------*/
+
+void
+lecroy9400_set_bandwidth_limiter( bool state )
+{
+    char cmd[ 30 ] = "BW,";
+
+    strcat( cmd, state ? "ON" : "OFF" );
+    if ( gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE )
+        lecroy9400_gpib_failure( );
 }
 
 
@@ -395,8 +624,8 @@ lecroy9400_is_displayed( int channel )
 {
     char reply[ 30 ];
     long length = 30;
-    char const *cmds[ ] = { "TRC1,?", "TRC2,?", "TRMC,?", "TRMD,?",
-                            "TRFE,?", "TRFF,?" };
+    char const *cmds[ ] = { "TRC1,?", "TRC2,?", "TRMC,?",
+                            "TRMD,?", "TRFE,?", "TRFF,?" };
 
 
     fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_FUNC_F );
@@ -414,7 +643,8 @@ bool
 lecroy9400_display( int channel,
                     int on_off )
 {
-    char cmds[ ][ 9 ] = { "TRC1,", "TRC2,", "TRMC,", "TRMD,",
+    char cmds[ ][ 9 ] = { "TRC1,", "TRC2,",
+                          "TRMC,", "TRMD,",
                           "TRFE,", "TRFF," };
 
 
@@ -462,15 +692,15 @@ lecroy9400_get_num_avg( int channel )
                  || channel == LECROY9400_FUNC_F );
 
     /* Check that the channel is in averaging mode (in which case the byte
-       at offset 34 of the waveform description is 0), if not return -1 */
+       at offset 65 of the waveform description is 0), if not return -1 */
 
-    if ( ( int ) lecroy9400.wv_desc[ channel ][ 34 ] != 99 )
+    if ( ( int ) lecroy9400.wv_desc[ channel ][ 65 ] != 0 )
         return -1;
 
-    /* 32 bit word (MSB first) at offset 70 of the waveform description is
-       the number of averages */
+    /* 32 bit word (MSB first) at offset 74 of the waveform description is
+       the number of averages to be done */
 
-    for ( num_avg = 0, i = 70; i < 74; i++ )
+    for ( num_avg = 0, i = 74; i < 78; i++ )
         num_avg = num_avg * 256 + ( long ) lecroy9400.wv_desc[ channel ][ i ];
 
     return num_avg;
@@ -481,7 +711,8 @@ lecroy9400_get_num_avg( int channel )
  *-----------------------------------------------------------------*/
 
 bool
-lecroy9400_get_desc( int channel )
+lecroy9400_get_desc( int  channel,
+                     bool do_stop )
 {
     long len = MAX_DESC_LEN;
     char const *cmds[ ] = { "RD,C1.DE", "RD,C2.DE",
@@ -491,8 +722,24 @@ lecroy9400_get_desc( int channel )
 
     fsc2_assert( channel >= LECROY9400_CH1 && channel <= LECROY9400_FUNC_F );
 
+    /* If the device is armed and waiting for a trigger it won't return
+       on a commabd that asks for a waveform descriptor. Since the device
+       may just be in this state without any triggers coming this could
+       lead to a spurious GPIB timeout. So, unless the caller tells us,
+       stop it */
+
+    if (    do_stop
+         && gpib_write( lecroy9400.device, "STOP", 4 ) == FAILURE )
+        lecroy9400_gpib_failure( );
+
     lecroy9400_talk( cmds[ channel ],
                      ( char * ) lecroy9400.wv_desc[ channel ], &len );
+
+	/* The first 4 bytes are "junk" we don't need */
+
+    memmove( lecroy9400.wv_desc[ channel ], lecroy9400.wv_desc[ channel ] + 4,
+             len - 4 );
+
     return OK;
 }
 
@@ -508,7 +755,7 @@ lecroy9400_get_trigger_delay( void )
     double delay;
 
 
-    lecroy9400_talk( "TRD?", reply, &length );
+    lecroy9400_talk( "TRD,?", reply, &length );
     reply[ length - 1 ] = '\0';
     delay = T_atod( reply );
 
@@ -529,7 +776,7 @@ lecroy9400_get_trigger_delay( void )
 void
 lecroy9400_set_trigger_delay( double delay )
 {
-    char cmd[ 40 ] = "TRD ";
+    char cmd[ 40 ] = "TRD,";
 
 
     /* For positive delay (i.e. pre-trigger) the delay must be set as a
@@ -574,27 +821,6 @@ lecroy9400_set_up_averaging( long channel,
     if ( FSC2_MODE != EXPERIMENT )
         return;
 
-    /* If the record length hasn't been set use the number of points on the
-       screen (which depends on the timebase). Otherwise check that the
-       number we got isn't larger than the number of points on the screen
-       and, if necessary reduce it. */
-
-    if ( rec_len == UNDEFINED_REC_LEN )
-        rec_len = lecroy9400.rec_len[ channel ] = ml[ lecroy9400.tb_index ];
-    else
-    {
-        if ( rec_len > ml[ lecroy9400.tb_index ] )
-        {
-            print( SEVERE, "Record length of %ld too large, using %ld "
-                   "instead\n", rec_len, ml[ lecroy9400.tb_index ] );
-            rec_len = lecroy9400.rec_len[ channel ] =
-                                                     ml[ lecroy9400.tb_index ];
-        }
-        else
-            lecroy9400.rec_len[ channel ] = rec_len;
-
-    }
-
     /* We need to send the digitizer the number of points it got to average
        over. This number isn't identical to the number of points on the
        screen, so we pick one of the list of allowed values that's at least
@@ -632,14 +858,43 @@ void
 lecroy9400_start_acquisition( void )
 {
     if ( lecroy9400.channels_in_use[ LECROY9400_FUNC_E ] )
+    {
+        if ( lecroy9400.num_used_channels >= MAX_USED_CHANNELS )
+
+
+        if ( ! lecroy9400_is_displayed(
+                                  lecroy9400.source_ch[ LECROY9400_FUNC_E ] ) )
+             lecroy9400_display( lecroy9400.source_ch[ LECROY9400_FUNC_E ],
+                                 1 );
+        if ( ! lecroy9400_is_displayed( LECROY9400_FUNC_E ) )
+            lecroy9400_display( LECROY9400_FUNC_E, 1 );
+
         if ( gpib_write( lecroy9400.device, "SEL,FE;ARST", 11 )
              == FAILURE )
             lecroy9400_gpib_failure( );
+    }
 
     if ( lecroy9400.channels_in_use[ LECROY9400_FUNC_F ] )
+    {
+        /* Switch off some math channels if necessary */
+
+        if ( lecroy9400.num_used_channels >= MAX_USED_CHANNELS - 2 )
+            lecroy9400_display( LECROY9400_MEM_C, 0 );
+
+        if ( lecroy9400.num_used_channels >= MAX_USED_CHANNELS - 1 )
+            lecroy9400_display( LECROY9400_MEM_D, 0 );
+
+        if ( ! lecroy9400_is_displayed(
+                                  lecroy9400.source_ch[ LECROY9400_FUNC_F ] ) )
+             lecroy9400_display( lecroy9400.source_ch[ LECROY9400_FUNC_F ],
+                                 1 );
+        if ( ! lecroy9400_is_displayed( LECROY9400_FUNC_F ) )
+            lecroy9400_display( LECROY9400_FUNC_F, 1 );
+
         if ( gpib_write( lecroy9400.device, "SEL,FF;ARST", 11 )
                          == FAILURE )
             lecroy9400_gpib_failure( );
+    }
 
     is_acquiring = SET;
 }
@@ -703,10 +958,10 @@ lecroy9400_get_curve( int        ch,
 
         fsc2_usleep( 20000, UNSET );
 
-        lecroy9400_get_desc( ch );
+        lecroy9400_get_desc( ch, UNSET );
         for ( cur_avg = 0, j = 0; j < 4; j++ )
             cur_avg = cur_avg * 256 +
-                ( long ) lecroy9400.wv_desc[ ch ][ 102 + j ];
+                ( long ) lecroy9400.wv_desc[ ch ][ 98 + j ];
 
         if ( cur_avg >= lecroy9400.num_avg[ ch ] )
             break;
@@ -746,11 +1001,11 @@ lecroy9400_get_curve( int        ch,
         RETHROW( );
     }
 
-    gain_fac = sset[ ( int ) lecroy9400.wv_desc[ ch ][ 4 ] - 22 ];
+    gain_fac = sset[ ( int ) lecroy9400.wv_desc[ ch ][ 0 ] - 22 ];
     vgain_fac = 200.0 / ( ( int ) lecroy9400.wv_desc[ ch ][ 5 ] + 80 );
     offset_shift = 0.04
-               * ( ( double ) lecroy9400.wv_desc[ ch ][ 8 ] * 256.0
-                   + ( double ) lecroy9400.wv_desc[ ch ][ 9 ] - 200 );
+               * ( ( double ) lecroy9400.wv_desc[ ch ][ 4 ] * 256.0
+                   + ( double ) lecroy9400.wv_desc[ ch ][ 5 ] - 200 );
 
     for ( dp = data + 4, i = 0; i < *length; dp += 2, i++ )
         *( *array + i ) = ( double ) dp[ 0 ] * 256.0 + ( double ) dp[ 1 ];
@@ -781,8 +1036,8 @@ lecroy9400_command( const char * cmd )
 
 static bool
 lecroy9400_talk( const char * cmd,
-                             char *       reply,
-                             long *       length )
+                 char *       reply,
+                 long *       length )
 {
     if (    gpib_write( lecroy9400.device, cmd, strlen( cmd ) ) == FAILURE
          || gpib_read( lecroy9400.device, reply, length ) == FAILURE )
@@ -794,12 +1049,25 @@ lecroy9400_talk( const char * cmd,
 /*-----------------------------------------------------------------*
  *-----------------------------------------------------------------*/
 
-void
+static void
 lecroy9400_gpib_failure( void )
 {
     is_acquiring = UNSET;
 
     print( FATAL, "Communication with device failed.\n" );
+    THROW( EXCEPTION );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static void
+lecroy9400_invalid_reply( void )
+{
+    is_acquiring = UNSET;
+
+    print( FATAL, "Device sent invalid data.\n" );
     THROW( EXCEPTION );
 }
 
