@@ -35,8 +35,9 @@ static int get_save_file( Var_T ** /* v */ );
 
 static Var_T * batch_mode_file_open( char * /* name */ );
 
-static long arr_save( long    /* file_num */,
-                      Var_T * /* v        */ );
+static long arr_save( const char * /* sep      */,
+                      long         /* file_num */,
+                      Var_T *      /* v        */ );
 
 static void f_format_check( Var_T * /* v */ );
 
@@ -849,7 +850,17 @@ f_save( Var_T * v )
 {
     long file_num;
     long count = 0;
+    char *sep = NULL;
 
+
+    /* Check if there's a separator character for arrays as the very
+       first argument */
+
+    if ( v->type == STR_VAR )
+    {
+        sep = T_strdup( v->val.sptr );
+        v = vars_pop( v );
+    }
 
     /* Determine the file identifier */
 
@@ -867,27 +878,37 @@ f_save( Var_T * v )
         switch( v->type )
         {
             case INT_VAR :
+                if ( sep )
+                    print( WARN, "Separator has no effect with integers "
+                           "data\n" );
                 count += T_fprintf( file_num, "%ld\n", v->val.lval );
                 break;
 
             case FLOAT_VAR :
+                if ( sep )
+                    print( WARN, "Separator has no effect with float data\n" );
                 count += T_fprintf( file_num, "%#.9g\n", v->val.dval );
                 break;
 
             case STR_VAR :
+                if ( sep )
+                    print( WARN, "Separator has no effect with string data\n" );
                 count += T_fprintf( file_num, "%s\n",
                                     handle_escape( v->val.sptr ) );
                 break;
 
 
             case INT_ARR : case FLOAT_ARR : case INT_REF : case FLOAT_REF :
-                count += arr_save( file_num, v );
+                count += arr_save( sep, file_num, v );
                 break;
 
             default :
                 fsc2_impossible( );
         }
     } while ( ( v = vars_pop( v ) ) != NULL );
+
+    if ( sep )
+        T_free( sep );
 
     return vars_push( INT_VAR, count );
 }
@@ -896,11 +917,14 @@ f_save( Var_T * v )
 /*-------------------------------------------------------------------------*
  * Function called when a one- or more-dimensional variable is passed to
  * the 'save()' EDL function. It writes out the array one element per line
+ * unless a separator is specified, then a values are separated by this on
+ * a line and the newline character only gets appended to the end.
  *-------------------------------------------------------------------------*/
 
 static long
-arr_save( long    file_num,
-          Var_T * v )
+arr_save( const char * sep,
+          long         file_num,
+          Var_T *      v )
 {
     ssize_t i;
     long count = 0;
@@ -909,21 +933,37 @@ arr_save( long    file_num,
     switch ( v->type )
     {
         case INT_ARR :
-            for ( i = 0; i < v->len; i++ )
-                count = T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
+            if ( sep )
+            {
+                for ( i = 0; i < v->len - 1; i++ )
+                    count += T_fprintf( file_num, "%ld%s",
+                                       v->val.lpnt[ i ], sep );
+                count += T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
+            }
+            else 
+                for ( i = 0; i < v->len; i++ )
+                    count += T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
             break;
 
         case FLOAT_ARR :
-            for ( i = 0; i < v->len; i++ )
-                count = T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] );
+            if ( sep )
+            {
+                for ( i = 0; i < v->len - 1; i++ )
+                    count += T_fprintf( file_num, "%#.9g%s",
+                                        v->val.dpnt[ i ], sep );
+                count += T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] );
+            }
+            else
+                for ( i = 0; i < v->len; i++ )
+                    count += T_fprintf( file_num, "%#.9g\n", v->val.dpnt[ i ] );
             break;
 
         case INT_REF : case FLOAT_REF :
             for ( i = 0; i < v->len; i++ )
             {
                 if ( v->val.vptr[ i ] != NULL )
-                    count += arr_save( file_num, v->val.vptr[ i ] );
-                if ( i != v->len - 1 )
+                    count += arr_save( sep, file_num, v->val.vptr[ i ] );
+                if ( i != v->len - 1 && ! sep )
                     count += T_fprintf( file_num, "\n" );
             }
             break;

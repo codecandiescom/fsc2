@@ -1275,7 +1275,6 @@ redraw_canvas_1d( Canvas_T * c )
     short x;
 
 
-
     XFillRectangle( G.d, c->pm, c->gc, 0, 0, c->w, c->h );
 
     if ( G.is_init )
@@ -1755,7 +1754,9 @@ make_scale_1d( Curve_1d_T * cv,
         /* Draw coloured line of scale */
 
         y = i2s15( G.x_scale_offset );
-        XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
+        XFillRectangle( G.d, c->pm, cv->gc, 0, y - 1, c->w, 2 );
+        XDrawLine( G.d, c->pm, c->font_gc, 0, y - 2, c->w, y - 2 );
+        XDrawLine( G.d, c->pm, c->font_gc, 0, y + 1, c->w, y + 1 );
 
         /* Draw all the ticks and numbers */
 
@@ -1796,7 +1797,9 @@ make_scale_1d( Curve_1d_T * cv,
         /* Draw coloured line of scale */
 
         x = i2s15( c->w - G.y_scale_offset );
-        XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
+        XFillRectangle( G.d, c->pm, cv->gc, x, 0, 2, c->h );
+        XDrawLine( G.d, c->pm, c->font_gc, x - 1, 0, x - 1, c->h );
+        XDrawLine( G.d, c->pm, c->font_gc, x + 2, 0, x + 2, c->h );
 
         /* Draw all the ticks and numbers */
 

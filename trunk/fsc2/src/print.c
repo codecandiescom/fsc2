@@ -302,27 +302,30 @@ get_print_file( FILE ** fp,
 
     /* Store state of form */
 
-    TRY
+    if ( obj == print_form->print_button )
     {
-        if ( fl_get_button( print_form->s2p_button ) )
+        TRY
         {
-            print_type = S2P;
-            cmd = T_strdup( fl_get_input( print_form->s2p_input ) );
+            if ( fl_get_button( print_form->s2p_button ) )
+            {
+                print_type = S2P;
+                cmd = T_strdup( fl_get_input( print_form->s2p_input ) );
+            }
+            else
+            {
+                print_type = P2F;
+                *name = T_strdup( fl_get_input( print_form->p2f_input ) );
+            }
+            TRY_SUCCESS;
         }
-        else
+        CATCH ( OUT_OF_MEMORY_EXCEPTION )
         {
-            print_type = P2F;
-            *name = T_strdup( fl_get_input( print_form->p2f_input ) );
+            if ( *name )
+                *name = CHAR_P T_free( *name );
+            fl_hide_form( print_form->print );
+            fl_free_form( print_form->print );
+            return FAIL;
         }
-        TRY_SUCCESS;
-    }
-    CATCH ( OUT_OF_MEMORY_EXCEPTION )
-    {
-        if ( *name )
-            *name = CHAR_P T_free( *name );
-        fl_hide_form( print_form->print );
-        fl_free_form( print_form->print );
-        return FAIL;
     }
 
     if ( 1 == fl_get_button( print_form->A6 ) )
@@ -341,10 +344,10 @@ get_print_file( FILE ** fp,
     fl_hide_form( print_form->print );
     fl_free_form( print_form->print );
 
-    /* In send-to-printer mode we're already done, we just return if the
-       user pressed the 'Print' button */
+    /* In send-to-printer mode or when the user hit the "Cancel" button we're
+       already done, we just return if the user pressed the 'Print' button */
 
-    if ( print_type == S2P )
+    if ( obj == print_form->cancel_button || print_type == S2P )
         return obj == print_form->print_button;
 
     /* In print-to-file mode ask for confirmation if the file already exists
@@ -366,7 +369,7 @@ get_print_file( FILE ** fp,
         return FAIL;
     }
 
-    return obj == print_form->print_button;
+    return SET;
 }
 
 

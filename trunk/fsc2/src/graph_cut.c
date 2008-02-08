@@ -143,6 +143,7 @@ cut_show( int  dir,
     int x, y;
     unsigned int h, w;
     Window win;
+    Curve_1d_T *cv = &G_2d.cut_curve;
 
 
     /* Don't do anything if no curve is currently displayed or if mouse didn't
@@ -217,13 +218,21 @@ cut_show( int  dir,
         cut_setup_canvas( &G_2d.cut_canvas, GUI.cut_form->cut_canvas );
 
         G_init_cut_curve( );
-
     }
     else if ( ! is_mapped )
     {
         XMapWindow( G.d, GUI.cut_form->cut->window );
         XMoveWindow( G.d, GUI.cut_form->cut->window,
                      GUI.cut_win_x, GUI.cut_win_y );
+
+        /* Make sure the colors for the curves elements are correct */
+
+        XSetForeground( G.d, cv->gc,
+                        fl_get_pixel( G.colors[ G_2d.active_curve ] ) );
+        cv->up_arrow    = G_cut.up_arrows[    G_2d.active_curve ];
+        cv->down_arrow  = G_cut.down_arrows[  G_2d.active_curve ];
+        cv->left_arrow  = G_cut.left_arrows[  G_2d.active_curve ];
+        cv->right_arrow = G_cut.right_arrows[ G_2d.active_curve ];
     }
 
     fl_raise_form( GUI.cut_form->cut );
@@ -787,7 +796,7 @@ cut_calc_curve( int  dir,
 
 
 /*-------------------------------------------------------*
- * The function calculates the points as to be displayed
+ * The function calculates the points to be displayed
  * from the scaled points. As a side effect it also sets
  * the flags that indicate if out of range arrows have
  * be shown and counts the number of displayed points.
@@ -2008,23 +2017,23 @@ redraw_cut_canvas( Canvas_T * c )
                     CoordModeOrigin );
 
         if ( cv->up )
-            XCopyArea( G.d, cv->up_arrow, c->pm, c->gc, 0, 0,
+            XCopyArea( G.d, cv->up_arrow, c->pm, cv->gc, 0, 0,
                        G.up_arrow_w, G.up_arrow_h,
                        ( G_2d.cut_canvas.w - G.up_arrow_w ) / 2, 5 );
 
         if ( cv->down )
-            XCopyArea( G.d, cv->down_arrow, c->pm, c->gc, 0, 0,
+            XCopyArea( G.d, cv->down_arrow, c->pm, cv->gc, 0, 0,
                        G.down_arrow_w, G.down_arrow_h,
                        ( G_2d.cut_canvas.w - G.down_arrow_w ) / 2,
                        G_2d.cut_canvas.h - 5 - G.down_arrow_h );
 
         if ( cv->left )
-            XCopyArea( G.d, cv->left_arrow, c->pm, c->gc, 0, 0,
+            XCopyArea( G.d, cv->left_arrow, c->pm, cv->gc, 0, 0,
                        G.left_arrow_w, G.left_arrow_h, 5,
                        ( G_2d.cut_canvas.h - G.left_arrow_h ) / 2 );
 
         if ( cv->right )
-            XCopyArea( G.d, cv->right_arrow, c->pm, c->gc, 0, 0,
+            XCopyArea( G.d, cv->right_arrow, c->pm, cv->gc, 0, 0,
                        G.right_arrow_w, G.right_arrow_h,
                        G_2d.cut_canvas.w - 5 - G.right_arrow_w,
                        ( G_2d.cut_canvas.h - G.right_arrow_h ) / 2 );
@@ -2329,7 +2338,7 @@ cut_make_scale( Canvas_T * c,
     short last = -1000;
     int r_coord;
     double r_scale;
-    XPoint triangle[ 3 ];
+    XPoint triangle[ 4 ];
 
 
     if ( coord == X )
@@ -2359,8 +2368,7 @@ cut_make_scale( Canvas_T * c,
     /* The distance between the smallest ticks should be 'G.scale_tick_dist'
        points - calculate the corresponding delta in real word units */
 
-    rwc_delta = G.scale_tick_dist * fabs( cv2->rwc_delta[ r_coord ] )
-                / r_scale;
+    rwc_delta = G.scale_tick_dist * fabs( cv2->rwc_delta[ r_coord ] ) / r_scale;
 
     /* Now scale this distance to the interval [ 1, 10 [ */
 
@@ -2458,7 +2466,9 @@ cut_make_scale( Canvas_T * c,
         /* Draw coloured line of scale */
 
         y = i2s15( G.x_scale_offset );
-        XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
+        XFillRectangle( G.d, c->pm, cv->gc, 0, y - 1, c->w, 2 );
+        XDrawLine( G.d, c->pm, c->font_gc, 0, y - 2, c->w, y - 2 );
+        XDrawLine( G.d, c->pm, c->font_gc, 0, y + 1, c->w, y + 1 );
 
         /* Draw all the ticks and numbers */
 
@@ -2498,7 +2508,9 @@ cut_make_scale( Canvas_T * c,
         /* Draw coloured line of scale */
 
         x = i2s15( c->w - G.y_scale_offset );
-        XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
+        XFillRectangle( G.d, c->pm, cv->gc, x, 0, 2, c->h );
+        XDrawLine( G.d, c->pm, c->font_gc, x - 1, 0, x - 1, c->h );
+        XDrawLine( G.d, c->pm, c->font_gc, x + 2, 0, x + 2, c->h );
 
         /* Draw all the ticks and numbers */
 
@@ -2534,7 +2546,9 @@ cut_make_scale( Canvas_T * c,
         /* Draw coloured line of scale */
 
         x = i2s15( G.z_scale_offset );
-        XFillRectangle( G.d, c->pm, cv->gc, x - 2, 0, 3, c->h );
+        XFillRectangle( G.d, c->pm, cv->gc, x - 1, 0, 2, c->h );
+        XDrawLine( G.d, c->pm, c->font_gc, x - 2, 0, x - 2, c->h );
+        XDrawLine( G.d, c->pm, c->font_gc, x + 1, 0, x + 1, c->h );
 
         /* Draw all the ticks and numbers */
 
@@ -2567,7 +2581,7 @@ cut_make_scale( Canvas_T * c,
 
         /* Finally draw the triangle indicating the position of the cut */
 
-        triangle[ 0 ].x = i2s15( x - G.long_tick_len - 1 );
+        triangle[ 0 ].x = i2s15( x - G.long_tick_len - 2 );
 
         if ( G_cut.cut_dir == X )
             triangle[ 0 ].y = s15rnd( ( G_2d.cut_z_axis.h - 1 )
@@ -2578,13 +2592,18 @@ cut_make_scale( Canvas_T * c,
                          s15rnd( ( G_2d.cut_z_axis.h - 1 )
                                  * ( 1.0 - G_cut.index / ( G_2d.ny - 1.0 ) ) );
 
-        triangle[ 1 ].x = - ( G.z_scale_offset - G.long_tick_len - 7 );
-        triangle[ 1 ].y = i2s15( - G.long_tick_len / 3 );
+        triangle[ 1 ].x = - ( G.z_scale_offset - G.long_tick_len - 6 );
+        triangle[ 1 ].y = i2s15( - G.long_tick_len / 3 ) - 2;
         triangle[ 2 ].x = 0;
-        triangle[ 2 ].y = i2s15( 2 * ( G.long_tick_len / 3 ) );
+        triangle[ 2 ].y = i2s15( 2 * ( G.long_tick_len / 3 ) ) + 4;
 
-        XFillPolygon( G.d, c->pm, G_2d.curve_2d[ 0 ]->gc, triangle, 3,
-                      Convex, CoordModePrevious );
+        XFillPolygon( G.d, c->pm, cv->gc, triangle, 3, Convex,
+                      CoordModePrevious );
+
+        triangle[ 3 ].x = -triangle[ 1 ].x;
+        triangle[ 3 ].y = triangle[ 1 ].y;
+
+        XDrawLines( G.d, c->pm, c->font_gc, triangle, 4, CoordModePrevious );
     }
 }
 

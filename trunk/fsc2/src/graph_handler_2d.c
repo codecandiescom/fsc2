@@ -2167,7 +2167,9 @@ make_scale_2d( Curve_2d_T * cv,
         y = i2s15( G.x_scale_offset );
         XSetForeground( G.d, cv->gc,
                         fl_get_pixel( G.colors[ G_2d.active_curve ] ) );
-        XFillRectangle( G.d, c->pm, cv->gc, 0, y - 2, c->w, 3 );
+        XFillRectangle( G.d, c->pm, cv->gc, 0, y - 1, c->w, 2 );
+        XDrawLine( G.d, c->pm, c->font_gc, 0, y - 2, c->w, y - 2 );
+        XDrawLine( G.d, c->pm, c->font_gc, 0, y + 1, c->w, y + 1 );
 
         /* Draw all the ticks and numbers */
 
@@ -2209,7 +2211,9 @@ make_scale_2d( Curve_2d_T * cv,
         x = i2s15( c->w - G.y_scale_offset );
         XSetForeground( G.d, cv->gc,
                         fl_get_pixel( G.colors[ G_2d.active_curve ] ) );
-        XFillRectangle( G.d, c->pm, cv->gc, x, 0, 3, c->h );
+        XFillRectangle( G.d, c->pm, cv->gc, x, 0, 2, c->h );
+        XDrawLine( G.d, c->pm, c->font_gc, x - 1, 0, x - 1, c->h );
+        XDrawLine( G.d, c->pm, c->font_gc, x + 2, 0, x + 2, c->h );
 
         /* Draw all the ticks and numbers */
 
@@ -2247,7 +2251,9 @@ make_scale_2d( Curve_2d_T * cv,
         x = i2s15( G.z_scale_offset );
         XSetForeground( G.d, cv->gc,
                         fl_get_pixel( G.colors[ G_2d.active_curve ] ) );
-        XFillRectangle( G.d, c->pm, cv->gc, x - 2, 0, 3, c->h );
+        XFillRectangle( G.d, c->pm, cv->gc, x - 1, 0, 2, c->h );
+        XDrawLine( G.d, c->pm, c->font_gc, x - 2, 0, x - 2, c->h );
+        XDrawLine( G.d, c->pm, c->font_gc, x + 1, 0, x + 1, c->h );
 
         /* Draw all the ticks and numbers */
 

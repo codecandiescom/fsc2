@@ -714,6 +714,18 @@ run_stop_button_callback( FL_OBJECT * a,
 
     fl_set_object_callback( a, NULL, 0 );
 
+    if ( G.dim & 1 || ! G.is_init )
+    {
+        fl_deactivate_object( GUI.run_form_1d->stop_1d );
+        fl_set_object_lcol( GUI.run_form_1d->stop_1d, FL_INACTIVE_COL );
+    }
+
+    if ( G.dim & 2 )
+    {
+        fl_deactivate_object( GUI.run_form_2d->stop_2d );
+        fl_set_object_lcol( GUI.run_form_2d->stop_2d, FL_INACTIVE_COL );
+    }
+
     /* If we're currently waiting for an event from the toolbox or for the
        timer to expire the child won't react to the DO_QUIT signal because
        it's still trying to read a reply from the parent. So we've got to
@@ -912,13 +924,16 @@ run_sigchld_callback( FL_OBJECT * a,
     {
         fl_freeze_form( GUI.run_form_1d->run_1d );
         fl_set_object_label( GUI.run_form_1d->stop_1d,
-                             G.dim == 1 ? "Close" : "Close all" );
+                             ( G.dim == 1 || ! G.is_init ) ?
+                             "Close" : "Close all" );
         fl_set_button_shortcut( GUI.run_form_1d->stop_1d, "C", 1 );
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
             fl_set_object_helper( GUI.run_form_1d->stop_1d,
-                                  "Removes all display windows" );
+                                  "Remove all display windows" );
         fl_set_object_callback( GUI.run_form_1d->stop_1d,
                                 run_close_button_callback, 0 );
+        fl_activate_object( GUI.run_form_1d->stop_1d );
+        fl_set_object_lcol( GUI.run_form_1d->stop_1d, FL_BLACK );
         fl_unfreeze_form( GUI.run_form_1d->run_1d );
     }
 
@@ -930,9 +945,11 @@ run_sigchld_callback( FL_OBJECT * a,
         fl_set_button_shortcut( GUI.run_form_2d->stop_2d, "C", 1 );
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_BALLOON ) )
             fl_set_object_helper( GUI.run_form_2d->stop_2d,
-                                  "Removes all display windows" );
+                                  "Remove all display windows" );
         fl_set_object_callback( GUI.run_form_2d->stop_2d,
                                 run_close_button_callback, 0 );
+        fl_activate_object( GUI.run_form_2d->stop_2d );
+        fl_set_object_lcol( GUI.run_form_2d->stop_2d, FL_BLACK );
         fl_unfreeze_form( GUI.run_form_2d->run_2d );
     }
 
