@@ -368,8 +368,14 @@ static int pci_e_series_init_board( struct pci_dev * dev,
 
 	/* Request the interrupt used by the board */
 
-	if ( request_irq( dev->irq, pci_board_irq_handler, SA_SHIRQ,
-			  BOARD_SERIES_NAME, board ) ) {
+	if ( request_irq( dev->irq, pci_board_irq_handler,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 21 )
+			  IRQF_SHARED,
+#else
+			  SA_SHIRQ,
+#endif
+			  BOARD_SERIES_NAME,
+			  board ) ) {
 		pci_e_series_release_resources( board );
 		PDEBUG( "Can't obtain IRQ %d for %d. board\n", dev->irq,
 			board - boards + 1 );

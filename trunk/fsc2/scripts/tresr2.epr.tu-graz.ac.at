@@ -501,9 +501,7 @@ change_scale_2d( - pretrigger / 1 us, time_res / 1 us );
     print $fh "
 /* Set up averaging if the number of averages is larger than 1 */
 
-digitizer_trigger_channel( EXT );
-digitizer_trigger_coupling( \"AC\" );
-digitizer_trigger_mode( "NORM" );
+digitizer_trigger_mode( \"NORM\" );
 
 IF Num_Avg > 1 {
 ";

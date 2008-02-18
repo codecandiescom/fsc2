@@ -116,7 +116,7 @@
 /* Total number of channels */
 
 #define LECROY_WR_MAX_CHANNELS       12
-#define LECROY_WR_TOTAL_CHANNELS     14
+#define LECROY_WR_TOTAL_CHANNELS     15
 
 
 /* Maximum and minimum sensitivity (in V/div) */
@@ -175,7 +175,6 @@ struct Window {
 /* Structure for the time resolution ("time per point") and number of samples
    ("points per division") for SS and RIS mode (we need one such structure
    for each memory size and timebase setting) */
-
 
 struct HORI_RES {
     double tpp;         /* time resolution (SS mode) */

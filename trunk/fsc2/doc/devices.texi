@@ -1447,14 +1447,46 @@ The function can only be used in the @code{EXPERIMENT} section.
 @section Digitizer Functions
 @cindex Digitizer Functions
 
-The digitizing oscilloscopes currently implemented are the Tektronix
-TDS520, TDS520A, TDS540, TDS744A and TDS754A and the LeCroy 9400 (with the
-WP01 Waveform Processing option), 9410, 9420, 9424, 9424E, 9450, the
-Waverunner (LT224, LT322, LT342, LT342L, LT344, LT344L, LT364, and LT364L)
-and Waverunner-2 (models LT262, LT262ML, LT264, LT264M, LT264ML, LT354,
-LT354M, LT354ML, LT372, LT372L, LT374, LT374L, LT584, LT584M and LT584L)
-and the WaveSurfer (models 422, 424, 432, 434, 452 and 454). The corresponding
-module names to be used in the @code{DEVICES} section are
+The digitizing oscilloscopes currently implemented are:
+@table @samp
+@item by Tektronix:
+@table @samp
+@item TDS520, TDS520A
+@item TDS540
+@item TDS744A
+@item TDS754A
+@end table
+@item by LeCroy
+@table @samp
+@item 94xx series
+9400 (with the WP01 Waveform Processing option), 9410, 9420, 9424,
+9424E, 9450
+@item 93xx series
+9304, 9304A, 9304AM, 9304AL, 9304C, 9304CM, 9304CL,
+9310, 9310A, 9310AM, 9310AL, 9310C, 9310CM, 9310CL,
+9314, 9314A, 9314AM, 9314AL, 9314C, 9314CM, 9314CL,
+9350, 9350A, 9350AM, 9350AL, 9350C, 9350CM, 9350CL,
+9354, 9354A, 9354AM, 9354AL, 9354C, 9354CM, 9354CL, 9354TM, 9354CTM,
+@c 9361, 9362,
+9370, 9370C, 9370CM, 9370CL,
+9374, 9374C, 9374CM, 9374CL, 9374TM, 9374CTM,
+9384, 9384A, 9384AM, 9384AL, 9384C, 9384CM, 9384CL, 9384TM, 9384CTM
+@item Waverunner and Waverunner-2 series
+LT224, LT322, LT342, LT342L, LT344, LT344L, LT364, LT364L,@*
+LT262, LT264, LT264M, LT354M, LT354ML, LT372, LT372M, LT374, LT374M,
+LT374L, LT584, LT584M and LT584L
+@item WaveSurfer series
+422, 424, 432, 434, 452 and 454
+@end table
+@end table
+
+In some cases there exists a module for each of the supported models
+(Textronix and LeCroy 94xx series) while in all others, due to the
+huge number of different models in a series) there's only a single
+module that, depending on the settings in the configuration file for
+the module, gets taylored for one of the modules in the series.
+The corresponding module names to be used in the @code{DEVICES}
+section are
 @example
 tds520
 tds520a
@@ -1467,6 +1499,7 @@ lecroy9420
 lecroy9424
 lecroy9424e
 lecroy9450
+lecroy93xx
 lecroy_wr
 lecroy_ws
 @end example
@@ -1483,10 +1516,10 @@ First digitizer channel (all models)
 Second digitizer channel (all models)
 @item CH3
 Third digitizer channel (Tektronix TDS540, TDS744A, TDS754A, LeCroy 9424, 
-LeCroy 9424E, some models of the Waverunner)
+LeCroy 9424E, some models of the 93xx, Waverunner and Wavesurfer series)
 @item CH4
 Fourth digitizer channel (Tektronix TDS540, TDS744A, TDS754A, LeCroy 9424, 
-LeCroy 9424E, some models of the Waverunner)
+LeCroy 9424E, some models of the 93xx, Waverunner and WaveSurfer series)
 @item MATH1
 First mathematic function channel (all Tektronix digitizers)
 @item MATH2
@@ -1507,39 +1540,44 @@ Auxiliary channel (Tektronix TDS540, TDS744A, TDS754A)
 First auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
 @item AUX2
 Second auxiliary channel (Tektronix TDS520, TDS520A, TDS520C)
-@item LINE
-Line In for trigger (all models)
 @item EXP_A
-First expansion channel (LeCroy 9400, 9410, 9420, 9424, 9424E, 9450)
+First expansion channel (LeCroy 94xx)
 @item EXB_B
-Second expansion channel (LeCroy 9400, 9410, 9420, 9424, 9424E, 9450)
-@item MEM_A
-Memory channel A (LeCroy Waverunner)
-@item MEM_B
-Memory channel B (LeCroy Waverunner)
+Second expansion channel (LeCroy 94xx)
 @item MEM_C
-Memory channel C (all LeCroy digitizers except WaveSurfer)
+Memory channel C (LeCroy 94xx)
 @item MEM_D
-Memory channel D (all LeCroy digitizers except WaveSurfer)
+Memory channel D (LeCroy 94xx)
+@item M1
+Memory channel 1 (LeCroy 93xx, Waverunner, WaveSurfer)
+@item M2
+Memory channel 2 (LeCroy 93xx, Waverunner, WaveSurfer)
+@item M3
+Memory channel 3 (LeCroy 93xx, Waverunner, WaveSurfer)
+@item M4
+Memory channel 4 (LeCroy 93xx, Waverunner, WaveSurfer)
 @item MATH
 Math (function) channel (LeCroy WaveSurfer)
 @item FUNC_E
-First function (averaging) channel (LeCroy 9400, 9410, 9420, 9424, 9424E, 9450)
+First function (averaging) channel (LeCroy 94xx)
 @item FUNC_F
-Second function (averaging) channel (LeCroy  9400, 9410, 9420, 9424, 9424E,
+Second function (averaging) channel (LeCroy  94xx)
 9450)
 @item TRACE_A
-First function (averaging) channel (LeCroy Waverunner)
+First function (averaging) channel (LeCroy 93xx, Waverunner, WaveSurfer)
 @item TRACE_B
-Second function (averaging) channel (LeCroy Waverunner)
+Second function (averaging) channel (LeCroy 93xx, Waverunner, WaveSurfer)
 @item TRACE_C
-Third function (averaging) channel (LeCroy Waverunner)
+Third function (averaging) channel (LeCroy 93xx, Waverunner, WaveSurfer)
 @item TRACE_D
-Fourth function (averaging) channel (LeCroy Waverunner)
+Fourth function (averaging) channel (LeCroy 93xx, Waverunner, WaveSurfer)
+@item LINE
+Line In for trigger (all models)
 @item EXT
-External trigger input (LeCroy 9400, 9410, 9420, 9424E, 9450, Waverunner)
+External trigger input (LeCroy 93xx, 94xx (except 9424), WaveSurfer, Waverunner)
 @item EXT10
-External amplified trigger input (LeCroy 9400, 9410, 9420, 9450, Waverunner)
+External amplified trigger input (LeCroy 93xx, 94xx (except 9424 and 9424E), 
+WaveSurfer, Waverunner)
 @end table
 
 
@@ -1609,8 +1647,8 @@ For the @strong{LeCroy} digitizers (except the @strong{9400} model)
 interleaved sample (RIS) mode will be automatically switched on if
 the selected timebase requires it (see the manuals at which timebase
 settings RIS or single shot mode is only possible). Changing the
-timebase for these digitizers also can lead to changes in the number
-of points of a trace.
+timebase for these digitizers may thus also lead to a change in the
+number of points of a trace.
 
 Please note that trying to change the timebase may lead to the program
 getting aborted if the new timebase setting isn't compatible with a
@@ -1685,9 +1723,11 @@ already been started!
 If no second argument is given the current sensitivity setting for the
 channel is returned.
 
-Please note that for some of the oscilloscopes the range of input sensitivity
-settings may depend on the input impedance and requesting an invalid
-combination may result in aborting the @code{EDL} script.
+Please note that for some of the oscilloscopes the range of input
+sensitivity settings may depend on the input impedance and requesting
+an invalid combination may result in aborting the @code{EDL} script
+or an automatic change of the input coupling (always accompanied by
+a warning message).
 
 The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
@@ -1699,10 +1739,9 @@ argument) only in the @code{EXPERIMENT} section.
 The function queries (if called with just one argument) or sets (if
 called with two arguments) the offset setting of one of the channels
 of the oscilloscope. Currently this function only exists for the
-@strong{LeCroy} osccilloscopes @strong{9410}, @strong{9420}, @strong{9424},
-@strong{9424E} and @strong{9450}. It needs at least one argument, the channel.
-The channels that can be used as arguments depends on the model of the
-oscilloscope:
+@strong{LeCroy} osccilloscopes (except @strong{9400}). It needs at
+least one argument, the channel. The channels that can be used as
+arguments depends on the model of the oscilloscope:
 @table @samp
 @itemx LeCroy 9400
 @itemx LeCroy 9420
@@ -1721,6 +1760,9 @@ oscilloscope:
 If a second argument is given this is taken to be the new offset
 setting (in Volts). If no second argument is given the current offset
 setting for the channel is returned.
+
+The allowed range for the offset normally depends on the sensitivity
+setting for the channel. Please refer to the device manual.
 
 The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.
@@ -1760,10 +1802,10 @@ setting, which has to b specified a string or an integer number, where
 finally, @code{"GND"} or @code{3} for Ground. If no second argument is
 given the current setting for the channel is returned as an integer number.
 
-Please note that for some of the oscilloscopes the range of input sensitivity
-settings may depend on the input impedance and requesting an invalid
-combination may result in aborting the @code{EDL} script or in an
-automatic change of the sensitivity setting.
+Please note that for some of the oscilloscopes the range of input
+sensitivity settings may depend on the input impedance and requesting
+an invalid combination may result in aborting the @code{EDL} script or
+in an automatic change of the sensitivity setting.
 
 The function can be called in query mode (i.e.@: without a second
 argument) only in the @code{EXPERIMENT} section.

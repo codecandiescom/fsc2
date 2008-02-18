@@ -609,7 +609,7 @@ lecroy_wr_numpoints_prep( void )
 void
 lecroy_wr_tbas_prep( void )
 {
-    double cur_tbas = LECROY_WE_MAX_TIMEBASE;
+    double cur_tbas = LECROY_WR_MAX_TIMEBASE;
     long i;
     long k = 0;
 
@@ -619,7 +619,7 @@ lecroy_wr_tbas_prep( void )
     lecroy_wr.tbas =
              DOUBLE_P T_malloc( lecroy_wr.num_tbas  * sizeof *lecroy_wr.tbas );
 
-    /* All timebase settings follow a 1-2-5 scheme with LECROY_WE_MAX_TIMEBASE
+    /* All timebase settings follow a 1-2-5 scheme with LECROY_WR_MAX_TIMEBASE
        (in s/div) being the largest possible setting */
 
     for ( i = lecroy_wr.num_tbas - 1; i >= 0; i--, k++ )
@@ -817,11 +817,11 @@ lecroy_wr_translate_channel( int  dir,
 
             case CHANNEL_CH2 :
                 return LECROY_WR_CH2;
-#ifdef LECROY_WR_CH3
+#if LECROY_WR_CH_MAX >= LECROY_WR_CH3
             case CHANNEL_CH3 :
                 return LECROY_WR_CH3;
 #endif
-#ifdef LECROY_WR_CH4
+#if LECROY_WR_CH_MAX >= LECROY_WR_CH4
             case CHANNEL_CH4 :
                 return LECROY_WR_CH4;
 #endif
@@ -879,11 +879,11 @@ lecroy_wr_translate_channel( int  dir,
 
             case LECROY_WR_CH2 :
                 return CHANNEL_CH2;
-#ifdef LECROY_WR_CH3
+#if LECROY_WR_CH_MAX >= LECROY_WR_CH3
             case LECROY_WR_CH3 :
                 return CHANNEL_CH3;
 #endif
-#ifdef LECROY_WR_CH4
+#if LECROY_WR_CH_MAX >= LECROY_WR_CH4
             case LECROY_WR_CH4 :
                 return CHANNEL_CH4;
 #endif

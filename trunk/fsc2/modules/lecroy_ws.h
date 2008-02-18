@@ -211,7 +211,7 @@ struct HORI_RES {
    is a POS and doesn't tell what to expect, so all the data had to be
    determined by actually looking what he device does and the 424 is currently
    the only one I have access to.
-   Just another curiosity: the record lengths are actually always to points
+   Just another curiosity: the record lengths are actually always two points
    longer and the largest record length with a memory siye of 500000 is
    only 250002 while for a memory size of 10000 it's 10002... */
 

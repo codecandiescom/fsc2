@@ -87,7 +87,7 @@ lecroy94_tmpl_init( const char * name )
 
     if (    gpib_local_lockout( lecroy94_tmpl.device ) == FAILURE
          || gpib_write( lecroy94_tmpl.device,
-                    "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO;ACAL", 49 )
+                        "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO", 44 )
                                                                     == FAILURE
          || gpib_write( lecroy94_tmpl.device, "*IDN?", 5 ) == FAILURE
          || gpib_read( lecroy94_tmpl.device, buffer, &len ) == FAILURE )
@@ -104,7 +104,7 @@ lecroy94_tmpl_init( const char * name )
     {
         /* Figure out which traces are displayed (only 4 can be displayed
            at the same time and we must be able to check for this when
-           th user asks for one more to be displayed) */
+           the user asks for one more to be displayed) */
 
         lecroy94_tmpl.num_used_channels = 0;
 

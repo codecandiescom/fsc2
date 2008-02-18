@@ -50,7 +50,7 @@ double fixed_sens[ ] = { 1.0e-1, 1.0, 10.0 };
 
 /* List of offset factors for the different sensitivity ranges */
 
-int max_offsets[ ] = { 1.0, 10.0, 100.0 };
+double max_offsets[ ] = { 1.0, 10.0, 100.0 };
 
 static LECROY_WR_T lecroy_wr_stored;
 
@@ -1087,10 +1087,10 @@ digitizer_trigger_channel( Var_T * v )
     switch ( channel )
     {
         case LECROY_WR_CH1 : case LECROY_WR_CH2 :
-#if defined LECROY_WR_CH3
+#if LECROY_WR_CH_MAX >= LECROY_WR_CH3
         case LECROY_WR_CH3 :
 #endif
-#if defined LECROY_WR_CH4
+#if LECROY_WR_CH_MAX >= LECROY_WR_CH4
         case LECROY_WR_CH4 :
 #endif
         case LECROY_WR_LIN :
@@ -1175,10 +1175,10 @@ digitizer_trigger_level( Var_T * v )
     switch ( channel )
     {
         case LECROY_WR_CH1 : case LECROY_WR_CH2 :
-#if defined LECROY_WR_CH3
+#if LECROY_WR_CH_MAX >= LECROY_WR_CH3
         case LECROY_WR_CH3 :
 #endif
-#if defined LECROY_WR_CH4
+#if LECROY_WR_CH_MAX >= LECROY_WR_CH4
         case LECROY_WR_CH4 :
 #endif
             if (    FSC2_MODE == PREPARATION

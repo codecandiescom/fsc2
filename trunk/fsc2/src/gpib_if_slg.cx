@@ -400,11 +400,38 @@ gpib_init_device( const char * device_name,
  *-----------------------------------------------------------*/
 
 int
-gpib_local( int device  UNUSED_ARG )
+gpib_local( int device )
 {
+    char *dev_name;
+
+
     fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
                  || Fsc2_Internals.state == STATE_FINISHED
                  || Fsc2_Internals.mode  == EXPERIMENT );
+
+    if ( ( dev_name = gpib_get_dev_name( device ) ) == NULL )
+    {
+        sprintf( gpib_error_msg, "CALL of gpib_local for unknown device "
+                 "(device number %d)\n", device );
+        return FAILURE;
+    }
+
+    if ( ll > LL_NONE )
+        gpib_log_function_start( "gpib_local", dev_name );
+
+    raise_permissions( );
+    ibloc( device );
+    lower_permissions( );
+
+    if ( ibsta & IBERR )
+    {
+        sprintf( gpib_error_msg, "Can't bring device %s into local mode, "
+                 "ibsta = 0x%x.", dev_name, ibsta );
+        return FAILURE;
+    }
+
+    if ( ll > LL_NONE )
+        gpib_log_function_end( "gpib_local", dev_name );
 
     return SUCCESS;
 }

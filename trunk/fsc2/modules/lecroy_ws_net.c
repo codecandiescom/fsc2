@@ -146,11 +146,11 @@ lecroy_ws_init( const char * name )
 
         /* Memory sizes are a mess. The manual is nearly silent about them,
            the errata fr the manual is claiming that it can't be set but
-           actuallz trying it reveals that there seem to be two memory
+           actually trying it reveals that there seem to be two memory
            sizes that can be set, either 10000 or 500000. But, strangly
            enough, the later setting results in curve lengths of only
            half that number, i.e. 250000 while setting it to 10000 gives
-           zou a record length of 10000. To be precise, the exact numbers
+           you a record length of 10000. To be precise, the exact numbers
            for the curve lengths are 10002 and 250002, so there are always
            two extra points... */
 
@@ -1655,7 +1655,7 @@ lecroy_ws_get_int_value( int          ch,
 {
     char cmd[ 100 ];
     ssize_t len = 100;
-    char *ptr = cmd;
+    char *ptr;
 
 
     if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
@@ -1671,8 +1671,7 @@ lecroy_ws_get_int_value( int          ch,
         lecroy_ws_lan_failure( );
     cmd[ len - 1 ] = '\0';
 
-    while ( *ptr && *ptr++ != ':' )
-        /* empty */ ;
+    ptr = strchr( cmd, ':' );
 
     if ( ! *ptr )
         lecroy_ws_lan_failure( );

@@ -159,7 +159,8 @@ vars_check_rhs_indices( Var_T ** v,
     if ( cv == NULL )
         return 0;
 
-    /* Loop over all indices */
+    /* Loop over all indices (there may also be ":" strings mixed in if
+       ranges are being used) */
 
     while ( cv )
     {
@@ -174,24 +175,24 @@ vars_check_rhs_indices( Var_T ** v,
             cv->val.lval -= ARRAY_OFFSET;
         else
         {
-            if ( cv->next == NULL || cv->next->type != STR_VAR )
-                print( WARN, "FLOAT value used as index for array '%s'.\n",
-                       ( *a )->name );
-            else
+            if ( cv->next != NULL && cv->next->type == STR_VAR )
                 print( WARN, "FLOAT value used as start of range for "
                        "array '%s'.\n", ( *a )->name );
+            else
+                print( WARN, "FLOAT value used as index for array '%s'.\n",
+                       ( *a )->name );
             cv->val.lval = lrnd( cv->val.dval ) - ARRAY_OFFSET;
             cv->type = INT_VAR;
         }
                                  
         if ( cv->val.lval < 0 )
         {
-            if ( cv->next == NULL || cv->next->type != STR_VAR )
-                print( FATAL, "Invalid index for array '%s'.\n",
-                       ( *a )->name );
+            if ( cv->next != NULL && cv->next->type == STR_VAR )
+                print( FATAL, "Invalid negative start of range %ld for array "
+                       "'%s'.\n", cv->val.lval + ARRAY_OFFSET, ( *a )->name );
             else
-                print( FATAL, "Invalid start of range for array '%s'.\n",
-                       ( *a )->name );
+                print( FATAL, "Invalid negative index %ld for array '%s'.\n",
+                       cv->val.lval + ARRAY_OFFSET, ( *a )->name );
             THROW( EXCEPTION );
         }
 
@@ -220,8 +221,8 @@ vars_check_rhs_indices( Var_T ** v,
                                  
         if ( cv->val.lval < 0 )
         {
-            print( FATAL, "Invalid end of range for array '%s'.\n",
-                   ( *a )->name );
+            print( FATAL, "Invalid end of range %ld for array '%s'.\n",
+                   cv->val.lval + ARRAY_OFFSET, ( *a )->name );
             THROW( EXCEPTION );
         }
 
@@ -229,26 +230,30 @@ vars_check_rhs_indices( Var_T ** v,
 
         if ( cv->prev->prev->val.lval > cv->val.lval )
         {
-            print( FATAL, "Start of range larger than end of range for "
-                   "array '%s'.\n", ( *a )->name );
+            print( FATAL, "Start of range %ld larger than end of range %ld for "
+                   "array '%s'.\n", cv->prev->prev->val.lval + ARRAY_OFFSET,
+                   cv->val.lval + ARRAY_OFFSET, ( *a )->name );
             THROW( EXCEPTION );
         }
 
         /* If start and end of range are identical the range represents a
-           single index, so get rid of the start of range variable and the
-           intervening STRING variable. Otherwise also pop the STRING variable
-           but mark the range start index by making it negative. */
+           single index, so get rid of the STRING and end variable, making
+           the thing going to be treated like a normal index. Otherwise also
+           pop the STRING variable but mark the range start index by making
+           it negative. */
 
         if ( cv->val.lval == cv->prev->prev->val.lval )
         {
             print( WARN, "Start and end of range are identical for "
-                   "array '%s'.\n", ( *a )->name );
-            vars_pop( vars_pop( cv->prev->prev ) );
+                   "array '%s', treating it as a \"misspelt\" normal index.\n",
+                   ( *a )->name );
+            cv = cv->prev->prev;
+            vars_pop( vars_pop( cv->next ) );
         }
         else
         {
             vars_pop( cv->prev );
-            cv->prev->val.lval = - cv->prev->val.lval -1;
+            cv->prev->val.lval = - cv->prev->val.lval - 1;
             *range_count += 1;
         }
 
@@ -367,8 +372,8 @@ prune_stage_1( Var_T * nv,
         if ( range_start >= nv->len )
         {
             if ( nv->len > 0 )
-                print( FATAL, "Invalid start of range for array '%s'.\n",
-                       a->name );
+                print( FATAL, "Start of range larger than size of array "
+                       "'%s'.\n", a->name );
             else
                 print( FATAL, "Size of array '%s' is (still) unknown.\n",
                        a->name );
@@ -380,7 +385,8 @@ prune_stage_1( Var_T * nv,
 
         if ( range_end >= nv->len )
         {
-            print( FATAL, "Invalid end of range for array '%s'.\n", a->name );
+            print( FATAL, "End of range larger than size of array '%s'.\n",
+                   a->name );
             THROW( EXCEPTION );
         }
 
@@ -394,7 +400,7 @@ prune_stage_1( Var_T * nv,
         if ( range_start >= nv->len )
         {
             if ( nv->len > 0 )
-                print( FATAL, "Invalid start index for array '%s'.\n",
+                print( FATAL, "Index larger than size of array '%s'.\n",
                        a->name );
             else
                 print( FATAL, "Size of array '%s' is (still) unknown.\n",

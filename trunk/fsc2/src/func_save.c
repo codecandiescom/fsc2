@@ -30,6 +30,8 @@
 extern bool No_File_Numbers;           /* defined in func.c */
 extern bool Dont_Save;                 /* defined in func.c */
 
+static bool STD_Is_Open = UNSET;
+
 
 static int get_save_file( Var_T ** /* v */ );
 
@@ -102,18 +104,32 @@ f_openf( Var_T * v )
     CLOBBER_PROTECT( fp );
     CLOBBER_PROTECT( old_File_List );
 
-    /* If there was a call of 'f_save()' without a previous call to 'f_getf()'
-       then 'f_save()' already called 'f_getf()' by itself and now does not
-       expects file identifiers anymore - in this case 'No_File_Numbers' is
-       set. So, if we get a call to 'f_getf()' with 'No_File_Numbers' being
+    /* If there was a call of 'f_save()' etc. without a previous call to
+       'f_getf()' or 'f_openf()' then 'f_save()' (or one of its bethren)
+       already called 'f_getf()' by itself and from now on does not expect
+       file identifiers anymore - in this case the variable 'No_File_Numbers'
+       is set. So, if we get a call to 'f_getf()' with 'No_File_Numbers' being
        set we must tell the user that he can't have it both ways, i.e. (s)he
-       either has to call 'f_getf()' before any call to 'f_save()' or never. */
+       either has to call 'f_getf()' or 'fopenf()' before any call to
+       'f_save()' etc. or never. */
 
     if ( No_File_Numbers )
     {
         print( FATAL, "Function can't be called if one of the functions for "
                "writing data to a file already has been invoked.\n" );
         THROW( EXCEPTION );
+    }
+
+    /* If there's only a single integer argument and its value is 1 or 2
+       we're asked for "opening" stdout or stderr */
+
+    if (    v->type == INT_VAR
+         && v->next == NULL
+         && (    v->val.lval == STDOUT_FILENO
+              || v->val.lval == STDERR_FILENO ) )
+    {
+        STD_Is_Open = SET;
+        return vars_push( INT_VAR, v->val.lval );
     }
 
     /* During test run just do a plausibilty check of the variables and
@@ -238,6 +254,7 @@ f_openf( Var_T * v )
 
     setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
+    STD_Is_Open = SET;
     return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 }
 
@@ -361,7 +378,7 @@ f_getf( Var_T * v )
 
     if (    ( r == NULL || *r == '\0' )
          && show_choices( "Do you really want to cancel saving data?\n"
-                          "        The data will be lost!",
+                          "        Those data will be lost!",
                           2, "Yes", "No", NULL, 2, SET ) != 1 )
     {
         r = CHAR_P T_free( r );
@@ -476,6 +493,7 @@ f_getf( Var_T * v )
 
     setbuf( EDL.File_List[ EDL.File_List_Len ].fp, NULL );
 
+    STD_Is_Open = SET;
     return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 }
 
@@ -496,11 +514,10 @@ f_clonef( Var_T * v )
     long file_num;
 
 
-    /* If the file handle passed to the function is FILE_NUMBER_NOT_OPEN
-       opening a file for this file handle did not happen, so we also don't
-       open the new file */
+    /* Neither stdout nor stderr an be "cloned" */
 
     if (    v->type == INT_VAR
+         && ! No_File_Numbers
          && (    v->val.lval == FILE_NUMBER_STDOUT
               || v->val.lval == FILE_NUMBER_STDERR ) )
     {
@@ -508,6 +525,10 @@ f_clonef( Var_T * v )
                v->val.lval == FILE_NUMBER_STDOUT ? "out" : "err" );
         return vars_push( INT_VAR, FILE_NUMBER_STDERR );
     }
+
+    /* If the file handle passed to the function is FILE_NUMBER_NOT_OPEN
+       opening a file for this file handle did not happen, so we also don't
+       open the new file */
 
     if ( v->type == INT_VAR && v->val.lval == FILE_NUMBER_NOT_OPEN )
         return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
@@ -720,15 +741,28 @@ get_save_file( Var_T ** v )
 
 
     /* If the first argument is an integer variable and has the value 1
-       or 2 return the index for stdout or stderr */
+       or 2 return the index for stdout or stderr - but only if they have
+       been "opened" either via an explicit call of f_openf() with 1 or 2
+       as the single argument or indirectly by calling f_getf() or f_openf()
+       for opening a real file. */
 
     if (    *v != NULL
          && ( *v )->type == INT_VAR
+         && ( STD_Is_Open || EDL.File_List_Len > 2 )
          && (    ( *v )->val.lval == STDOUT_FILENO
               || ( *v )->val.lval == STDERR_FILENO ) )
     {
+        if ( ! STD_Is_Open )
+        {
+            print( FATAL, "The std%s handle must have been opened, either by "
+                   "an explicit call of open_file() or by explicitely opening "
+                   "a normal file.\n",
+                   ( *v )->val.lval == STDOUT_FILENO ? "out" : "err" );
+            THROW( EXCEPTION );
+        }
+
         file_num = ( *v )->val.lval == STDOUT_FILENO ?
-                            FILE_NUMBER_STDOUT : FILE_NUMBER_STDERR;
+                   FILE_NUMBER_STDOUT : FILE_NUMBER_STDERR;
         *v = vars_pop( *v );
         return ( int ) file_num;
     }
@@ -736,8 +770,8 @@ get_save_file( Var_T ** v )
     /* If no file has been selected yet get a file and then use it exclusively
        (i.e. also expect that no file identifier is given in later calls),
        otherwise the first variable has to be the file identifier. We compare
-       the length of the list to two because the first and second entry are
-       always exist for stdout and stderr. */
+       the length of the list to two because the first and second entry always
+       already exist for stdout and stderr. */
 
     if ( EDL.File_List_Len == 2 )
     {
@@ -832,6 +866,7 @@ close_all_files( void )
     EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
                                            2 * sizeof *EDL.File_List );
     EDL.File_List_Len = 2;
+    STD_Is_Open = UNSET;
 }
 
 

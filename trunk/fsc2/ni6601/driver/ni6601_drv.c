@@ -349,8 +349,14 @@ static int ni6601_init_board( struct pci_dev *             dev,
 
 	/* Request the interrupt used by the board */
 
-	if ( request_irq( dev->irq, ni6601_irq_handler, SA_SHIRQ,
-			  NI6601_NAME, board ) ) {
+	if ( request_irq( dev->irq, ni6601_irq_handler,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 21 )
+			  IRQF_SHARED,
+#else
+			  SA_SHIRQ,
+#endif
+			  NI6601_NAME,
+			  board ) ) {
 		PDEBUG( "Can't obtain IRQ %d\n", dev->irq );
 		dev->irq = 0;
 		goto init_failure;

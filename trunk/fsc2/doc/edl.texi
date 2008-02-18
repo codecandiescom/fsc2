@@ -789,6 +789,23 @@ k[ 2 : 4, 3 : 7 ] = 1;
 would set the third to seventh element of the second to the fourth row of
 the array @code{k} to 1.
 
+Please note: If a range is used were the start index equals the end
+index a warning will be printed and the result is not an array range
+anymore but the value of the indexed element. Thus if you have e.g.@:
+@example
+A[ 3 ] = @{ 1, 2, 3 @};
+@end example
+then the pseudo-range
+@example
+A[ 2 : 2 ]
+@end example
+will be treated as if you had written
+@example
+A[ 2 ]
+@end example
+instead and not as an array with a single element.
+
+
 Array indexing with ranges can be used on both the left as well as
 the right hand side of an assignment.
 

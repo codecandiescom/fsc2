@@ -50,7 +50,7 @@ prefix             := /usr/local
 # a bit of assembler, which only works on i386 type processors but makes
 # compiling the program otherwise fail).
 
-# IS_NOT_A_I386       :+ yes
+# IS_NOT_A_I386       := yes
 
 
 # The next variable should only be set for very old Linux systems where

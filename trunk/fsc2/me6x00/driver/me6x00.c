@@ -1371,7 +1371,7 @@ static int me6x00_reset_board( int board_count,
  */
 
 static int me6x00_open( struct inode * inode_p,
-			struct file *  file_p )
+						struct file *  file_p )
 {
 	int minor = 0;
 	int i;
@@ -1413,17 +1413,21 @@ static int me6x00_open( struct inode * inode_p,
 		CALL_PDEBUG( "Got a ME6100 board\n" );
 
 		if ( request_irq( info->irq, me6x00_isr,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 21 )
+				  IRQF_DISABLED | IRQF_SHARED,
+#else
 				  SA_INTERRUPT | SA_SHIRQ,
+#endif
 				  ME6X00_NAME, info ) ) {
 			up( &info->use_lock );
 			printk( KERN_WARNING "ME6X00: me6x00_open(): "
-				"Can't get interrupt line" );
+					"Can't get interrupt line" );
 			return -ENODEV;
 		}
 
 		for ( i = 0; i < 4; i++ ) {
 			if ( ! ( info->buf[ i ].buf =
-				 kmalloc( ME6X00_BUFFER_SIZE, GFP_KERNEL ) ) )
+					 kmalloc( ME6X00_BUFFER_SIZE, GFP_KERNEL ) ) )
 				break;
 			memset( info_vec[ minor ].buf[ i ].buf, 0,
 				ME6X00_BUFFER_SIZE );
@@ -1432,7 +1436,7 @@ static int me6x00_open( struct inode * inode_p,
 		if ( i < 4 ) {
 			up( &info->use_lock );
 			printk( KERN_ERR "ME6X00: me6x00_open(): "
-				"Can't get memory\n" );
+					"Can't get memory\n" );
 			for ( --i; i >= 0; --i )
 				kfree( info->buf[ i ].buf );
 			free_irq( info->irq, info );

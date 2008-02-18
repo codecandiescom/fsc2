@@ -61,6 +61,7 @@
 * lecroy9424::      LeCroy Digitizing Oscilloscope 9424
 * lecroy9424e::     LeCroy Digitizing Oscilloscope 9424E
 * lecroy9450::      LeCroy Digitizing Oscilloscope 9450
+* lecroy93xx::      LeCroy Digitizing Oscilloscope 93xx series
 * lecroy_wr::       LeCroy Digitizing Oscilloscope Waverunner and Waverunner-2
 * lecroy_ws::       LeCroy Digitizing Oscilloscope WaveSurfer
 * mcn700_2000::     F.u.G. Elektronik GmbH Power Supply MCN 700-2000
@@ -1796,7 +1797,7 @@ In the GPIB configuration file use @code{"LECROY9424E"} as the device name,
 @c #############################################################
 
 
-@node lecroy9450, lecroy_wr, lecroy9424e, Device Reference
+@node lecroy9450, lecroy93xx, lecroy9424e, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope 9450
 @end iftex
@@ -1858,7 +1859,200 @@ In the GPIB configuration file use @code{"LECROY9450"} as the device name,
 
 @c #############################################################
 
-@node lecroy_wr, lecroy_ws, lecroy9450, Device Reference
+@node lecroy93xx, lecroy_wr, lecroy9450, Device Reference
+@iftex
+@subheading LeCroy Digitizing Oscilloscope 93xx series
+@end iftex
+@ifnottex
+@section LeCroy Digitizing Oscilloscope 93xx series
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{lecroy93xx}
+
+@paragraphindent 0
+@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
+Oscilloscope 93xx models
+@table @samp
+@item 9304
+4 channels, bandwidth 175 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 10 kpts/channel
+@item 9304A, 9304C
+4 channels, bandwidth 200 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 50 kpts/channel
+@item 9304AM, 9304CM
+4 channels, bandwidth 200 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 200 kpts/channel
+@item 9304AL, 9304CL
+4 channels, bandwidth 200 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 1 Mpts/channel
+@item 9310
+2 channels, bandwidth 300 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 10 kpts/channel
+@item 9310A, 9310C
+2 channels, bandwidth 400 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 50 kpts/channel
+@item 9310AM, 9310CM
+2 channels, bandwidth 400 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 200 kpts/channel
+@item 9310AL, 9310CL
+2 channels, bandwidth 400 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 1 Mpts/channel
+@item 9314
+4 channels, bandwidth 300 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 10 kpts/channel
+@item 9314A, 9314C
+4 channels, bandwidth 400 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 50 kpts/channel
+@item 9314AM, 9314CM
+4 channels, bandwidth 400 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 200 kpts/channel
+@item 9314AL, 9314CL
+4 channels, bandwidth 400 MHz, sample rate 100 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 1 Mpts/channel
+@item 9350
+2 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 25 kpts/channel
+@item 9350A, 9350C
+2 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 50 kpts/channel
+@item 9350AM, 9350CM
+2 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 250 kpts/channel
+@item 9350AL, 9350CL
+2 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 2 Mpts/channel
+@item 9354
+4 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 25 kpts/channel
+@item 9354A, 9354C
+4 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 50 kpts/channel
+@item 9354AM, 9354CM
+4 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 250 kpts/channel
+@item 9354AL, 9354CL
+4 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 2 Mpts/channel
+@item 9354TM, 9354CTM
+4 channels, bandwidth 500 MHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 500 Mpts/channel
+@c @item 9361
+@c 2 channels, bandwidth 300 MHz, sample rate 2.5 GS/s (SS) / ? (RIS),
+@c acquisition memory 25 kpts/channel
+@c @item 9362
+@c 2 channels, bandwidth 1.5 GHz / 50 MHz, sample rate 5 GS/s (SS) / ? (RIS),
+@c acquisition memory 25 kpts/channel
+@item 9370
+2 channels, bandwidth 1 GHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 50 kpts/channel
+@item 9370C
+2 channels, bandwidth 1 GHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 50 kpts/channel
+@item 9370CM
+2 channels, bandwidth 1 GHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 250 kpts/channel
+@item 9370CL
+2 channels, bandwidth 1 GHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 2 Mpts/channel
+@item 9374
+4 channels, bandwidth 1 GHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 50 kpts/channel
+@item 9374C
+4 channels, bandwidth 1 GHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 50 kpts/channel
+@item 9374CM
+4 channels, bandwidth 1 GHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 250 kpts/channel
+@item 9374CL
+4 channels, bandwidth 1 GHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 2 Mpts/channel
+@item 9374TM, 9374CTM
+4 channels, bandwidth 1 GHz, sample rate 500 MS/s (SS) / 10 GS/s (RIS),
+acquisition memory 500 Mpts/channel
+@item 9384
+4 channels, bandwidth 1 GHz, sample rate 1 GS/s (SS) / 10 GS/s (RIS),
+acquisition memory 100 kpts/channel
+4 channels, bandwidth 1 GHz, sample rate 1 GS/s (SS) / 10 GS/s (RIS),
+acquisition memory 2 Mpts/channel
+@item 9384A, 9384C
+4 channels, bandwidth 1 GHz, sample rate 1 GS/s (SS) / 10 GS/s (RIS),
+acquisition memory 500 kpts/channel
+@item 9384AM, 9384CM
+4 channels, bandwidth 1 GHz, sample rate 1 GS/s (SS) / 10 GS/s (RIS),
+acquisition memory 250 kpts/channel
+@item 9384AL, 9384CL
+4 channels, bandwidth 1 GHz, sample rate 1 GS/s (SS) / 10 GS/s (RIS),
+acquisition memory 2 Mpts/channel
+@item 9384TM, 9374CTM
+4 channels, bandwidth 1 GHz, sample rate 1 GS/s (SS) / 10 GS/s (RIS),
+acquisition memory 500 Mpts/channel
+@end table
+
+@paragraphindent 0
+The exact model must be set in the configuration file, together with
+information about further available options. All models have 4 function
+channels (used for averaging) and 4 memory channels.
+
+@paragraphindent 0
+@strong{Please note:} Due to the insane number of different models it
+was not possible to test the module with all of them. Moreover,
+specification data from manuals (as far as available to me) as well as
+the LeCroy web site had to be used which often contradict each other
+and not seldom are incomplete (if someone has complete data for the
+9361/9362 or the mytical 9320 series, mentioned in some manuals but
+nowhere else, I would be happy to add support for them). Thus I can
+neither guarantee that the used data are correct nor that support for
+all the modules works correctly. Please send me a bug report if you
+have such a model and you experience problems.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).
+In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
+@code{yes}.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{digitizer_name()}
+@item @ref{digitizer_define_window()}
+@item @ref{digitizer_change_window()}
+@item @ref{digitizer_window_position()}
+@item @ref{digitizer_window_width()}
+@item @ref{digitizer_timebase()}
+@item @ref{digitizer_interleave_mode()}
+@item @ref{digitizer_time_per_point()}
+@item @ref{digitizer_sensitivity()}
+@item @ref{digitizer_offset()}
+@item @ref{digitizer_coupling()}
+@item @ref{digitizer_bandwidth_limiter()}
+@item @ref{digitizer_trigger_channel()}
+@item @ref{digitizer_trigger_level()}
+@item @ref{digitizer_trigger_slope()}
+@item @ref{digitizer_trigger_coupling()}
+@item @ref{digitizer_trigger_mode()}
+@item @ref{digitizer_trigger_delay()}
+@item @ref{digitizer_averaging()}
+@item @ref{digitizer_num_averages()}
+@item @ref{digitizer_record_length()}
+@item @ref{digitizer_memory_size()}
+@item @ref{digitizer_trigger_position()}
+@item digitizer_meas_channel_ok()
+@item @ref{digitizer_start_acquisition()}
+@item @ref{digitizer_get_curve()}
+@item @ref{digitizer_get_area()}
+@item @ref{digitizer_get_amplitude()}
+@item @ref{digitizer_run()}
+@item @ref{digitizer_copy_curve()}
+@end table
+
+
+
+@c #############################################################
+
+@node lecroy_wr, lecroy_ws, lecroy93xx, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope Waverunner and Waverunner-2
 @end iftex
@@ -2020,8 +2214,8 @@ channels (depending on model), 1 function channel, 4 memory channels.
 
 @paragraphindent 0
 @strong{Controlled via}: LAN (LeCroy VICP protocol)@*
-The IP address of the device (or alernatively its hostname if it has a
-DNS entry) must be set in the configuration file for the device
+The IP address of the device (or its hostname if it has a DNS entry)
+must be set in the configuration file for the device
 @file{config/lecroy_ws.conf}.
 
 @paragraphindent 0
