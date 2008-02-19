@@ -103,7 +103,7 @@ extern int snprintf( char *        str,
 #define MAXLINE      4096
 
 
-void make_tmp_file( const char * fname );
+void make_tmp_file( char * fname );
 int open_fsc2_socket( const char * fname );
 void start_fsc2( char * pname,
                  char * fname,
@@ -164,7 +164,7 @@ main( int    argc,
  *-----------------------------------------------------------*/
 
 void
-make_tmp_file( const char * fname )
+make_tmp_file( char * fname )
 {
     int tmp;
     ssize_t bytes_read;

@@ -61,7 +61,7 @@ Var_T * freq_counter_command( Var_T * v );
 
 static bool hp5340a_init( const char * name );
 
-static double h95340a_get_freq( void );
+static double hp5340a_get_freq( void );
 
 static bool hp5340a_command( const char * cmd );
 
@@ -69,6 +69,12 @@ static bool hp5340a_command( const char * cmd );
 static struct {
     int device;
 } hp5340a;
+
+
+/* Define the frequency that the driver returns during the test run */
+
+#define HP5340A_TEST_FREQUENCY  9.2e9
+
 
 
 /**********************************************************/
@@ -147,9 +153,9 @@ Var_T *
 freq_counter_measure( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == TEST )
-        return vars_push( FLOAT_VAR, HP5340A_DEFAULT_FREQUENCY );
+        return vars_push( FLOAT_VAR, HP5340A_TEST_FREQUENCY );
 
-    return vars_push( FLOAT_VAR, h95340a_get_freq( ) );
+    return vars_push( FLOAT_VAR, hp5340a_get_freq( ) );
 }
 
 
@@ -220,7 +226,7 @@ hp5340a_init( const char * name )
  *--------------------------------------------------------*/
 
 static double
-h95340a_get_freq( void )
+hp5340a_get_freq( void )
 {
     char buf[ 16 ];
     long len = 16;

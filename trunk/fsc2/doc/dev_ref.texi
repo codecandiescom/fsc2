@@ -33,6 +33,7 @@
 * dg2020_b::        Sony/Tektronix Data Generator DG2020 (Berlin Version)
 * dg2020_f::        Sony/Tektronix Data Generator DG2020 (Frankfurt Version)
 * egg4402::         EG&G PARC Box-Car Integrator 4402
+* eip371::          EIP Microwave Counter 371
 * ep385::           Bruker Pulse Programmer EP385
 * er023m::          Bruker Signal Channel ER 023 M
 * er032m::          Bruker Field controller ER 032 M 
@@ -461,7 +462,7 @@ In the GPIB configuration file use  @code{"DG2020_F"} as the device name,
 @c #############################################################
 
 
-@node egg4402, ep385, dg2020_f, Device Reference
+@node egg4402, eip371, dg2020_f, Device Reference
 @iftex
 @subheading EG&G PARC Box-Car Integrator 4402
 @end iftex
@@ -498,7 +499,42 @@ In the GPIB configuration file use  @code{"EG4402"} as the device name,
 @c #############################################################
 
 
-@node ep385, er023m, egg4402, Device Reference
+@node eip371, ep385, egg4402,  Device Reference
+@iftex
+@subheading EIP Microwave Counter 371
+@end iftex
+@ifnottex
+@section EIP Microwave Counter 371
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{eip371}
+
+@paragraphindent 0
+@strong{Description}: EIP Microwave, Inc. (now Phase Matrix, Inc.,
+@url{http://www.eipm.com/}) frequency counter model 371.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"EIP371"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}
+@code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_band()}
+@item @ref{freq_counter_resolution()}
+@item @ref{freq_counter_measure()}
+@end table
+
+
+
+@c #############################################################
+
+
+@node ep385, er023m, eip371, Device Reference
 @iftex
 @subheading Bruker Pulse Programmer EP385
 @end iftex

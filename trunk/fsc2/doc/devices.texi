@@ -4317,12 +4317,11 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @node Frequency Counter Functions, DAQ Functions, Boxcar Integrator Functions, Device Functions
 @section Frequency Counter Functions
 @cindex Frequency Counter Functions
-Currently only one frequency counter is supported, the HP5340A. Because
-this is a very old device (even pre-dating the GPIB-standard) only two
-functions are defined for the device. All settings have to be done
-manually via the front panel. Its module is loaded by specifying
+Currently only two frequency counters are supported, the HP5340A and
+the EIP371. The modules get loaded by specifying
 @example
 hp5340a
+eip371
 @end example
 @noindent
 in the @code{DEVICES} section. 
@@ -4331,6 +4330,8 @@ in the @code{DEVICES} section.
 @strong{List of all frequency counter functions}:
 @table @samp
 @item @ref{freq_counter_name()}
+@item @ref{freq_counter_band()}
+@item @ref{freq_counter_resolution()}
 @item @ref{freq_counter_measure()}
 @end table
 
@@ -4347,6 +4348,31 @@ in the @code{DEVICES} section.
 
 @item freq_counter_name()
 Returns a string with the name of the frequency counter being used.
+
+
+@anchor{freq_counter_band()}
+@findex freq_counter_band()
+@item freq_counter_band()
+This function only exists for the @code{EIP371} and allows to set (but
+not query) the frequency band to be used. It expects a single integer
+argument between @code{0} and @code{3}, where @code{0} stands for
+the band from @w{20 Hz} to @w{135 MHz}, @code{1} for the band from
+@w{10 MHz} to @w{300 MHz}, @code{2} for the band between @w{100 MHz}
+and @w{850 MHz} and, finally, @code{3} for the band from @w{825 MHz}
+to @w{18 GHz}.
+
+
+@anchor{freq_counter_resolution()}
+@findex freq_counter_resolution()
+@item freq_counter_resolution()
+This function only exists for the @code{EIP371} and allows to set (but
+not query) the resolution frequency measurements are done with. It
+expects a single floating point argument, the resolution in @code{Hz}.
+Since the device only accepts resolutions of @w{1 Hz}, @w{10 Hz},
+@w{100 Hz}, @w{1 kHz}, @w{10 kHz}, @w{100 kHz} and @w{1 MHz}, values
+differing from these resolutions will be adjusted to the next higher
+resolution (if there's a deviation of more than @w{1%} an warning is
+printed out.
 
 
 @anchor{freq_counter_measure()}

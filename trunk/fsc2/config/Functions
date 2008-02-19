@@ -304,9 +304,11 @@ temp_contr_sample_channel, -1, EXP;
 temp_contr_command, 1, EXP;
 
 
-/* Functions exported by the frequency counter (HP5340A) */
+/* Functions exported by the frequency counter (HP5340A, EIP371) */
 
 freq_counter_name, 0, ALL;
+freq_counter_band, -1, ALL;
+freq_counter_resolution, -1, ALL;
 freq_counter_measure, 0, EXP;
 freq_counter_command, 1, EXP;
 
