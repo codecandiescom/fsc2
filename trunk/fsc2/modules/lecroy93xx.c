@@ -1,5 +1,5 @@
 /*
- *  $Id
+ *  $Id$
  *
  *  Copyright (C) 1999-2008 Jens Thoms Toerring
  *

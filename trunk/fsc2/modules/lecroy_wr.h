@@ -22,6 +22,10 @@
  */
 
 
+#if ! defined LECROY_WR_HEADER
+#define LECROY_WR_HEADER
+
+
 #include "fsc2_module.h"
 #include "gpib_if.h"
 
@@ -467,6 +471,9 @@ void lecroy_wr_tbas_prep( void );
 void lecroy_wr_hori_res_prep( void );
 
 void lecroy_wr_clean_up( void );
+
+
+#endif /* ! defined LECROY_WR_HEADER */
 
 
 /*

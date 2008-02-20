@@ -22,6 +22,10 @@
  */
 
 
+#if ! defined LECROY_WS_HEADER
+#defined LECROY_WS_HEADER
+
+
 #include "fsc2_module.h"
 
 
@@ -578,6 +582,9 @@ long lecroy_ws_translate_channel( int  /* dir     */,
 
 void lecroy_ws_store_state( LECROY_WS_T * /* dest */,
                             LECROY_WS_T * /* src  */  );
+
+
+#endif /* ! defined LECROY_WS_HEADER */
 
 
 /*

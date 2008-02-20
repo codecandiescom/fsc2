@@ -22,6 +22,10 @@
  */
 
 
+#if ! defined LECROY93XX_HEADER
+#define LECROY93XX_HEADER
+
+
 #include "fsc2_module.h"
 #include "gpib_if.h"
 
@@ -440,6 +444,9 @@ void lecroy93xx_tbas_prep( void );
 void lecroy93xx_hori_res_prep( void );
 
 void lecroy93xx_clean_up( void );
+
+
+#endif /* ! defined LECROY93XX_HEADER */
 
 
 /*
