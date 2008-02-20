@@ -295,22 +295,20 @@ eprint( int          severity,
             cp += 5;
             space_left -= 5;
         }
-
-        if ( severity == SEVERE )
+        else if ( severity == SEVERE )
         {
             strcpy( buffer, "@C4@f" );
             cp += 5;
             space_left -= 5;
         }
-
-        if ( severity == WARN )
+        else if ( severity == WARN )
         {
             strcpy( buffer, "@C2@f" );
             cp += 5;
             space_left -= 5;
         }
 
-        if ( print_fl && EDL.Fname )
+        if ( space_left > 0 && print_fl && EDL.Fname )
         {
             count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
                               EDL.Fname, EDL.Lc );
@@ -318,9 +316,14 @@ eprint( int          severity,
             cp += count;
         }
 
-        va_start( ap, fmt );
-        vsnprintf( cp, ( size_t ) space_left, fmt, ap );
-        va_end( ap );
+        if ( space_left <= 0 )
+            strcpy( buffer, "Message too long to be displayed!\n" );
+        else
+        {
+            va_start( ap, fmt );
+            vsnprintf( cp, ( size_t ) space_left, fmt, ap );
+            va_end( ap );
+        }
 
         if ( Fsc2_Internals.I_am == PARENT )
         {
@@ -359,13 +362,13 @@ eprint( int          severity,
 }
 
 
-/*-----------------------------------------------------------------------*
+/*------------------------------------------------------------------------*
  * This a somewhat simplified version of the previous function, eprint()
- * mainly for writers of moduls. The only argument beside the usual ones
+ * mainly for writers of modules. The only argument beside the usual ones
  * one would pass to printf() and friends is the severity of the error.
  * Everything else (i.e. the decision if to prepend a file name, a line
  * number or a function name) is dealt with automatically.
- *-----------------------------------------------------------------------*/
+ *------------------------------------------------------------------------*/
 
 void
 print( int          severity,
@@ -390,15 +393,13 @@ print( int          severity,
             cp += 5;
             space_left -= 5;
         }
-
-        if ( severity == SEVERE )
+        else if ( severity == SEVERE )
         {
             strcpy( buffer, "@C4@f" );
             cp += 5;
             space_left -= 5;
         }
-
-        if ( severity == WARN )
+        else if ( severity == WARN )
         {
             strcpy( buffer, "@C2@f" );
             cp += 5;
@@ -408,7 +409,7 @@ print( int          severity,
         /* Print EDL file name and line number unless we're running a hook
            function */
 
-        if ( ! Fsc2_Internals.in_hook && EDL.Fname )
+        if ( space_left > 0 && ! Fsc2_Internals.in_hook && EDL.Fname )
         {
             count = snprintf( cp, ( size_t ) space_left, "%s:%ld: ",
                               EDL.Fname, EDL.Lc );
@@ -416,7 +417,9 @@ print( int          severity,
             cp += count;
         }
 
-        if ( EDL.Call_Stack != NULL )
+        if ( space_left <= 0 )
+            strcpy( buffer, "Message too long to be displayed!\n" );
+        else if ( EDL.Call_Stack != NULL )
         {
             if ( EDL.Call_Stack->f == NULL )
             {
@@ -448,9 +451,14 @@ print( int          severity,
             }
         }
 
-        va_start( ap, fmt );
-        vsnprintf( cp, ( size_t ) space_left, fmt, ap );
-        va_end( ap );
+        if ( space_left <= 0 )
+            strcpy( buffer, "Message too long to be printed!\n" );
+        else
+        {
+            va_start( ap, fmt );
+            vsnprintf( cp, ( size_t ) space_left, fmt, ap );
+            va_end( ap );
+        }
 
         if ( Fsc2_Internals.I_am == PARENT )
         {
