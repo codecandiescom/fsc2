@@ -60,6 +60,10 @@
 #include <rulbus.h>
 #endif
 
+#if defined WITH_MEDRIVER
+#include <medriver.h>
+#endif
+
 /* inclusion of programs own header files */
 
 #include "fsc2_config.h"
@@ -396,6 +400,7 @@ extern Cut_Graphics_T G_cut;
 extern bool Need_GPIB;
 extern bool Need_RULBUS;
 extern bool Need_LAN;
+extern bool Need_MEDRIVER;
 
 extern PA_Seq_T PA_Seq;
 

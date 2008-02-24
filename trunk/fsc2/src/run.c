@@ -28,9 +28,12 @@
 #include "serial.h"
 #include "gpib_if.h"
 
-
 #if defined WITH_RULBUS
 #include <rulbus.h>
+#endif
+
+#if defined WITH_MEDRIVER
+#include <medriver.h>
 #endif
 
 
@@ -291,6 +294,52 @@ start_gpib_and_rulbus( void )
     if ( Need_LAN )
         fsc2_lan_exp_init( LAN_LOG_FILE, LAN_LOG_LEVEL );
 
+#if defined WITH_MEDRIVER
+    /* If there are devices that are controlled via the Meilhaus library */
+
+    if ( Need_MEDRIVER )
+    {
+        raise_permissions( );
+
+        if ( ( retval = meOpen( ME_OPEN_NO_FLAGS ) ) != ME_ERRNO_SUCCESS )
+        {
+            char msg[ ME_ERROR_MSG_MAX_COUNT ];
+
+            meErrorGetMessage( retval, msg, sizeof msg );
+
+            lower_permissions( );
+
+            eprint( FATAL, UNSET, "Failed to initialize Meilhaus driver: "
+                    "%s\n", msg );
+
+            if ( Need_LAN )
+                fsc2_lan_cleanup( );
+
+            fsc2_serial_cleanup( );
+
+#if defined WITH_RULBUS
+            if ( Need_RULBUS )
+                rulbus_close( );
+#endif
+
+            if ( Need_GPIB )
+                gpib_shutdown( );
+
+            if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+            {
+                set_buttons_for_run( 0 );
+                fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+                XFlush( fl_get_display( ) );
+            }
+
+            Fsc2_Internals.state = STATE_IDLE;
+            return FAIL;
+        }
+
+        lower_permissions( );
+    }
+#endif
+
     return OK;
 }
 
@@ -340,18 +389,33 @@ no_prog_to_run( void )
 
     run_end_of_exp_hooks( );
 
+#if defined WITH_MEDRIVER
+    if ( Need_MEDRIVER )
+    {
+        int retval = meClose( ME_CLOSE_NO_FLAGS );
+
+        if ( retval != ME_ERRNO_SUCCESS )
+        {
+            char msg[ ME_ERROR_MSG_MAX_COUNT ];
+
+            meErrorGetMessage( retval, msg, sizeof msg );
+            eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
+        }
+    }
+#endif
+
+    if ( Need_LAN )
+        fsc2_lan_cleanup( );
+
+    fsc2_serial_cleanup( );
+
 #if defined WITH_RULBUS
     if ( Need_RULBUS )
-         rulbus_close( );
+        rulbus_close( );
 #endif
 
     if ( Need_GPIB )
         gpib_shutdown( );
-
-    fsc2_serial_cleanup( );
-
-    if ( Need_LAN )
-        fsc2_lan_cleanup( );
 
     Fsc2_Internals.mode = PREPARATION;
 
@@ -448,18 +512,34 @@ init_devs_and_graphics( void )
         run_end_of_exp_hooks( );
         vars_del_stack( );
 
-#if defined WITH_RULBUS
-        if ( Need_RULBUS )
-             rulbus_close( );
-#endif
+#if defined WITH_MEDRIVER
+        if ( Need_MEDRIVER )
+        {
+            int retval = meClose( ME_CLOSE_NO_FLAGS );
 
-        if ( Need_GPIB )
-            gpib_shutdown( );
+            if ( retval != ME_ERRNO_SUCCESS )
+            {
+                char msg[ ME_ERROR_MSG_MAX_COUNT ];
+
+                meErrorGetMessage( retval, msg, sizeof msg );
+                eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n",
+                        msg );
+            }
+        }
+#endif
 
         fsc2_serial_cleanup( );
 
         if ( Need_LAN )
             fsc2_lan_cleanup( );
+
+#if defined WITH_RULBUS
+        if ( Need_RULBUS )
+            rulbus_close( );
+#endif
+
+        if ( Need_GPIB )
+            gpib_shutdown( );
 
         Fsc2_Internals.mode = PREPARATION;
 
@@ -576,18 +656,33 @@ fork_failure( int stored_errno )
 
     run_end_of_exp_hooks( );
 
+#if defined WITH_MEDRIVER
+    if ( Need_MEDRIVER )
+    {
+        int retval = meClose( ME_CLOSE_NO_FLAGS );
+
+        if ( retval != ME_ERRNO_SUCCESS )
+        {
+            char msg[ ME_ERROR_MSG_MAX_COUNT ];
+
+            meErrorGetMessage( retval, msg, sizeof msg );
+            eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
+        }
+    }
+#endif
+
+    if ( Need_LAN )
+        fsc2_lan_cleanup( );
+
+    fsc2_serial_cleanup( );
+
 #if defined WITH_RULBUS
     if ( Need_RULBUS )
-         rulbus_close( );
+        rulbus_close( );
 #endif
 
     if ( Need_GPIB )
         gpib_shutdown( );
-
-    fsc2_serial_cleanup( );
-
-    if ( Need_LAN )
-        fsc2_lan_cleanup( );
 
     Fsc2_Internals.mode = PREPARATION;
 
@@ -881,18 +976,33 @@ run_sigchld_callback( FL_OBJECT * a,
 
     run_end_of_exp_hooks( );
 
+#if defined WITH_MEDRIVER
+    if ( Need_MEDRIVER )
+    {
+        int retval = meClose( ME_CLOSE_NO_FLAGS );
+
+        if ( retval != ME_ERRNO_SUCCESS )
+        {
+            char msg[ ME_ERROR_MSG_MAX_COUNT ];
+
+            meErrorGetMessage( retval, msg, sizeof msg );
+            eprint( WARN, UNSET, "Failed to close Meilhaus driver: %s\n", msg );
+        }
+    }
+#endif
+
+    if ( Need_LAN )
+        fsc2_lan_cleanup( );
+
+    fsc2_serial_cleanup( );
+
 #if defined WITH_RULBUS
     if ( Need_RULBUS )
-         rulbus_close( );
+        rulbus_close( );
 #endif
 
     if ( Need_GPIB )
         gpib_shutdown( );
-
-    fsc2_serial_cleanup( );
-
-    if ( Need_LAN )
-        fsc2_lan_cleanup( );
 
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
         return;

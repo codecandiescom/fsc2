@@ -23,7 +23,7 @@
 
 
 #if ! defined LECROY_WS_HEADER
-#defined LECROY_WS_HEADER
+#define LECROY_WS_HEADER
 
 
 #include "fsc2_module.h"

@@ -145,6 +145,10 @@ simp_modules    += rb8509 rb8510_0 rb8510_1
 comp_modules    += rb_pulser_j rb_pulser_w
 endif
 
+ifdef WITH_MEDRIVER
+simp_modules    += me_dio er218
+endif
+
 src_headers     := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 
 INCLUDES        += -I$(sdir) -I$(cdir)

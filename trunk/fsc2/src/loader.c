@@ -62,6 +62,9 @@ load_all_drivers( void )
     bool saved_need_RULBUS;
 #endif
     bool saved_need_LAN;
+#if defined WITH_MEDRIVER
+    bool saved_need_MEDRIVER;
+#endif
 
 
     CLOBBER_PROTECT( cd );
@@ -114,6 +117,9 @@ load_all_drivers( void )
             saved_need_RULBUS = Need_RULBUS;
 #endif
             saved_need_LAN    = Need_LAN;
+#if defined WITH_MEDRIVER
+            saved_need_MEDRIVER = Need_MEDRIVER;
+#endif
 
             if ( cd->is_loaded && cd->driver.is_init_hook )
             {
@@ -165,6 +171,19 @@ load_all_drivers( void )
             if ( Need_LAN == UNSET && saved_need_LAN == SET )
                 Need_LAN = SET;
 
+
+#if defined WITH_MEDRIVER
+            if ( Need_MEDRIVER == UNSET && saved_need_MEDRIVER == SET )
+                Need_MEDRIVER = SET;
+#else
+            if ( Need_MEDRIVER )
+            {
+                eprint( FATAL, UNSET, "Module '%s' requires MEDRIVER but fsc2 "
+                        "hasn't been built with MEDRIVER support.\n",
+                        cd->name );
+                THROW( EXCEPTION );
+            }
+#endif
         }
 
         TRY_SUCCESS;

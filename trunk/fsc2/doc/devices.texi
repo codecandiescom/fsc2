@@ -45,6 +45,7 @@
 * Power Supply Functions::
 * Microwave Attenuator Functions::
 * Light Chopper Functions::
+* Goniometer Functions::
 * Multi-Device Functions::
 @end menu
 @end ifinfo
@@ -5313,16 +5314,21 @@ error message and the running experiment is stopped immediately.
 @node DIO Functions, Event Counter Functions, DAQ Functions, Device Functions
 @section DIO Functions
 @cindex DIO Functions
-Currently, there's only one DIO device, the @strong{Wasco WITIO-48} ISA
-DIO card by Messcomp Datentechnik GmbH. It can be used for digital input
-and output. The module for the card gets loaded by specifying
+Currently, the the @strong{Wasco WITIO-48} ISA DIO card by Messcomp
+Datentechnik GmbH and the DIO subsystem of cards by Meilhaus
+Electronic GmbH are supported. The module for the cards get loaded by
+specifying
 @example
 witio_48
+me_dio
 @end example
 in the @code{DEVICES} section. 
 
-Use of this card requires that a kernel module and an additional
-library (both coming with @code{fsc2}) have been successfully installed.
+Both cards reqyuire the use of of a kernel module and an additional
+library that have been successfully installed. The driver and library
+for the @strong{Wasco WITIO-48} card comes with @code{fsc2}, the one
+for the ones for the Meihaus cards can be downloaded from the
+@uref{http://www.meilhaus.de/index.php?id=255,Meilhaus web site}.
 
 
 @noindent
@@ -5333,6 +5339,10 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @item @ref{dio_mode()}
 @item @ref{dio_value()}
 @end table
+
+Since the cards differ quite a bit in their capabilities the arguments
+required to be passed to the functions also can be different!
+
 
 @noindent
 @strong{Descriptions of DIO functions}:
@@ -5357,27 +5367,30 @@ can only be used with a pass-phrase. This will mainly be used by modules
 for other devices that require a DIO to keep an @code{EDL} script from
 accdentally changing the output or reading the input of the DIO.
 
-The first argument is the DIO to be reserved (or released). This must be
-either a number, @code{1} or @code{2} or, better, a symbolic name,
-@code{DIO1} or @code{DIO2}.
+In the case of the @strong{Wasco WITIO-48} card the first argument is
+the DIO to be reserved (or released). This must be either a number,
+@code{1} or @code{2} or, better, a symbolic name, @code{DIO1} or
+@code{DIO2}. For the @strong{Meilhaus DIO subsystem} the whole
+subsystem gets locked or unlocked, so no DIO number can be passed
+to the function.
 
-If there is no further argument an integer is returned. If it @code{1}
-the DIO is reserved, if it is @code{0} the DIO is not reserved and can
-be used without a pass-phrase.
+If there is no further argument an integer is returned. If it is
+@code{1} the DIO or subsystem is reserved, if it's @code{0} it's not
+reserved and can be used without a pass-phrase.
 
 The next argument is a string variable to be used as the pass-phrase
 in later calls of the functions @ref{dio_mode()} and @ref{dio_value()}.
 
-The final argument is optional. If is not given the function will try to
-reserve the DIO channel. If called with either an argument of @code{0} or
-a string @code{"OFF"} the DIO is released so that it can be freely used
-again. If called with either an argument of @code{1} or a string
-@code{"ON"} the DIO is reserved (which is identical to not passing it
-this argument).
+The final argument is optional. If is not given the function will try
+to reserve the DIO or subsystem. If called with either an argument of
+@code{0} or a string @code{"OFF"} the DIO or subsystem is released so
+that it can be freely used again. If called with either an argument of
+@code{1} or a string @code{"ON"} the DIO or subsystem is reserved
+(which is identical to not passing it this argument).
 
-The function returns an integer, if it is @code{1} the operation (i.e.@:
-reserving or releasing the DIO) succeeded, if it is @code{0} the
-operation failed.
+The function returns an integer, if it is @code{1} the operation
+(i.e.@: reserving or releasing the DIO or subsystem) succeeded, if it
+is @code{0} the operation failed.
 
 
 @anchor{dio_mode()}
@@ -5387,13 +5400,17 @@ The WITIO-48 card has two DIO chips, both allowing 24 bit wide input and
 output. These DIOs can be further split up into sub-DIOs of smaller
 width. By calling this function you can set the way a DIO is split up.
 
-The function expects at least one argument, the DIO to be used with the
-function. This must be either a number, @code{1} or @code{2} or, better,
-a symbolic name, @code{DIO1} or @code{DIO2}. When called without another
-argument the current mode is returned as an integer number (as they
-could also be specified to set a mode, see below). If there is a second
-argument this is the mode to be set. You can use either a number or a
-string to specify the new mode:
+In contrast, the Meilhaus card DIO subsystem has a single 32-bit wide
+DIO which can be split up into either 32 1-bit wide DIO channels,
+4 8-bit wide channels, 2 16-bit wide channels or 1 32-wide channel.
+
+For the WITIO-48 card the function expects at least one argument, the
+DIO to be used with the function. This must be either a number,
+@code{1} or @code{2} or, better, a symbolic name, @code{DIO1} or
+@code{DIO2}. When called without another argument the current mode is
+returned as an integer number (as they could also be specified to set
+a mode, see below). If there is a second argument this is the mode to
+be set. You can use either a number or a string to specify the new mode:
 @table @samp
 @item @code{0} or @code{"3x8"}
 The DIO is split up into three independent 8-bit DIOs, which then can be
@@ -5415,33 +5432,47 @@ the function @ref{dio_value()}.
 If no mode is set for a DIO the mode for 24-bit input and output is used
 per default.
 
+For the Meilhaus card DIO subsystem the only argment is optional.
+If none is given te current mode is returned as a number, either
+@code{1} for the mode where 32 1-bit wide channels are used, @code{8}
+for the mode with 4 8-bit wide channels, @code{16} for the mode
+with 2 16-bit wide channels or @code{32} for the single channel
+32-bit wide mode. If instead one of these numbers is passed to the
+function the corresponding mode is set.
+
+
 @table @strong
 @item Please note:
-If the DIO had previously been reserved by a call of the function
-@ref{dio_reserve_dio()} the pass-phrase specified in that call has to
-be passed to the function as the very first argument if you want to be
-able to change the mode of the DIO.
+If the DIO or subsystem had previously been reserved by a call of the
+function @ref{dio_reserve_dio()} the pass-phrase specified in that
+call has to be passed to the function as the very first argument if
+you want to be able to change the mode of the DIO.
 @end table
-
 
 
 @anchor{dio_value()}
 @findex dio_value()
 @item dio_value()
-This function is used to either input or output a value. It expects at
-least two arguments, the DIO to be used (preferably use the symbolic
-names @code{DIO1} and @code{DIO2}) and a channel. Depending on the mode
-the DIO has been set to using the function @ref{dio_mode()}, either
-one, two or three channels can be used. Use the symbolic names
-@code{CH1}, @code{CH2} and @code{CH3}. If there is no further argument
-data will be read in from the DIO and pass it back to the @code{EDL}
+This function is used to either input or output a value. For the
+WITIO-48 card the first arguments must be the DIO to be used
+(preferably use the symbolic names @code{DIO1} and @code{DIO2}). and
+a channel. For both modules the channels to be used must be specified.
+Depending on the mode the DIO has been set to using the function
+@ref{dio_mode()}, for the WITIO-48 either one, two or three channels
+can be used, for the Meilhaus card DIO subsystem one, two, four or
+32 can be available.  Always use the symbolic names @code{CH1}, @code{CH2},
+@code{CH3} etc. If there is no further argument
+data will be read in from the DIO and passed back to the @code{EDL}
 script as the return value of the function.
 
 If there's a third argument it is taken as the value to output at the
-DIO (or, to be precise, the sub-DIO specified by the channel argument).
-How many channels can be used, what range of data can be output and how
-each bit the value is mapped to the output pins depends on the mode
-the DIO is been set to:
+DIO (or, to be precise, the channel of the DIO). How many channels can
+be used, what range of data can be output and how each bit the value
+is mapped to the output pins depends on the mode the DIO is been set
+to.
+
+For the WITIO-48 we have:
+
 @table @samp
 @item @code{"3x8"} mode
 Since in this mode there are three independent sub-DIOs, three channels,
@@ -5490,9 +5521,35 @@ output the value for @code{CH2}.
 
 @end table
 
+For the Meilhaus card DIO subsystem we have:
+
+@table @samp
+@item 1-bit mode
+In this mode the DIO is split up into 32 channels and for each channel
+only a value of @code{0} and @code{1} can be set.
+
+@item 8-bit mode
+In this mode the DIO is split up in 4 channels, each 8 bit wide.
+Values between @code{0} and @code{255} can be used.
+
+@item 16-bit mode
+In this mode the DIO is split up in 2 channels, each 16 bit wide.
+Values between @code{0} and @code{65535} can be used.
+
+@item 32-bit mode
+In this mode the DIO there's only a single, 32 bit wide. If the
+top-most bit is not to be set values between @code{0} and
+@code{2,147,483,647} can be used. To output a value where also the
+top-most bit is set subtract it from @code{4,294,967,296} and
+use the resulting negative number.
+
+@end table
+
+
 @table @strong
 @item Please note:
-Trying to output a negative value will make the program abort
+Except in the case of the Meilhaus card DIO subsystem in 32-bit
+mode trying to output a negative value will make the program abort
 immediately as will trying to output too large a value during the
 test run. During the experiment a too large value will be truncated
 to the allowed range by stripping off the higher order bits and a
@@ -5507,7 +5564,6 @@ want to be able to read from or write to the DIO.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
-
 
 @end table
 
@@ -7186,7 +7242,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @end table
 
 
-@node Light Chopper Functions, Multi-Device Functions, Microwave Attenuator Functions, Device Functions
+@node Light Chopper Functions, Goniometer Functions, Microwave Attenuator Functions, Device Functions
 @section Light Chopper Functions
 @cindex Light Chopper Functions
 Currently there's just a single supported light chopper. It is a chopper
@@ -7263,7 +7319,123 @@ e.g.@: to trigger an acquisition.
 @end table
 
 
-@node Multi-Device Functions, , Light Chopper Functions, Device Functions
+@node Goniometer Functions, Multi-Device Functions, Light Chopper Functions, Device Functions
+@section Goniometer Functions
+@cindex Goniometer Functions
+
+
+Currently there's only one supported goniometer, the ER218 PG1 by
+Bruker, for which additionally a Meilhaus card with DIO capabilities
+(and a bit of extra electronics) are needed. The module for the device
+is loaded by
+specifying
+@example
+er218
+@end example
+@noindent
+in the @code{DEVICES} section. Please note that the name of the module
+for the DIO device (@code{me_do}) must be listed before this module.
+
+@noindent
+@strong{List of all goniometer functions}:
+@table @samp
+@item @ref{goniometer_name()}
+@item @ref{goniometer_angle()}
+@item @ref{goniometer_increment_angle()}
+@item @ref{goniometer_backslash_correction()}
+@item @ref{goniometer_reset()}
+@item @ref{goniometer_set_zero_angle()}
+@end table
+
+@noindent
+@strong{Descriptions of goniometer functions}:
+
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML isn't valid
+
+@anchor{goniometer_name()}
+@findex goniometer_name()
+
+@table @samp
+
+@item goniometer_name()
+Returns a string with the name of the goniometer being used.
+
+@anchor{goniometer_angle()}
+@findex goniometer_angle()
+@item goniometer_angle()
+This function allows to either query the angle the goniometer is at
+or to move it to a new angle. If called without an argument the
+function returns the angle it is at the moment. If called with an
+(floating point) argument this is taken to be the new angle to move
+the goniometer to. The new angle must a multiple of @w{0.125 degree},
+otherwise the nearest angle to the specified value is used. The
+function return value is the new angle the goniometer is set to.
+
+Please note: Setting a new angle may take some time and the operation
+cannot be stopped until the goniometer has arrived at its new
+position.
+
+
+@anchor{goniometer_increment_angle()}
+@findex goniometer_increment_angle()
+@item goniometer_increment_angle()
+The function expects a single argument, which is taken as the angle
+by which the goniometer is to be rotated. Both positive (for
+clockwise) and negative (for counterclockwise rotation) values are
+allowed, but they must be multiples of @w{0.125 degrees} (or the
+argument is adapted to the nearest possible increment angle). The
+function return value is the new angle the goniometer is set to.
+
+Please note: Changing the angle may take some time and the operation
+cannot be stopped until the goniometer has arrived at its new
+position.
+
+
+@anchor{goniometer_backslash_correction()}
+@findex goniometer_backslash_correction()
+@item goniometer_backslash_correction()
+The goniometer may have some mechanical backslash which reduces the
+the absolute angular accuracy to about @w{0.5 degree}. To increase
+this acurracy backslash correction can be switched on - in this
+case when the goniometer is moved counterclockwise it will move
+to some angle a bit below the angle requested by the functions
+@ref{goniometer_angle()} or @ref{goniometer_increment_angle()}
+and only then to the requested angle.
+
+If called with an argument of @code{1} or the string @code{"ON"}
+backslash correction will be switched on, while when called with
+an argument of @code{0} or the string @code{"OFF"} it's switched
+off again. Switching backslash correction one may introduce a
+down and up rotation of the goniometer.
+
+Please note: Switching backslash correction on may lead to somewhat
+longer times required to go to a new angular position.
+
+
+@anchor{goniometer_reset()}
+@findex goniometer_reset()
+@item goniometer_reset()
+This function can be called to move the goniometer to built-in
+zero position. After a call of this function (which doesn't
+expect any arguments) angles used as arguments or returned
+by the function @ref{goniometer_angle()} are relative to this
+zero position.
+
+
+@anchor{goniometer_set_zero_angle()}
+@findex goniometer_set_zero_angle()
+@item goniometer_set_zero_amgle()
+This function, taking no arguments, allows to set a new zero position
+of the goniometer, i.e. angles used as arguments or returned
+by the function @ref{goniometer_angle()} are relative to this
+new zero position.
+
+
+@end table
+
+
+@node Multi-Device Functions, , Goniometer Functions, Device Functions
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 

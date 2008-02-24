@@ -166,8 +166,11 @@ spex232_store_state( void )
     {
         print( SEVERE, "Can't store state data in '%s', can't open file "
                "for writing.\n", fn );
+        T_free( fn );
         return FAIL;
     }
+
+    T_free( fn );
 
     fsc2_fprintf( fp, "# --- Do *not* edit this file, it gets created "
                   "automatically ---\n\n"

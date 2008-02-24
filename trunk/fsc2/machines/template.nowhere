@@ -300,6 +300,24 @@ BROWSER            := netscape
 # rulbus_lib_path    := /usr/lib/local
 
 
+# The next line must be uncommented if you want support for a Meilhaus 
+# data acquisition card, using the Meilhaus supplied driver and library.
+# If the include files for the library aren't in one of the standard places
+# (i.e. '/usr/include' or '/usr/local/include') you must also uncomment the line
+# starting with 'medriver_incl_path and specify the complete path to the place
+# where it installed (e.g. '/usr/xxx/yyy). If the library for the card isn't
+# in a place where the linker will find it automatically (e.g. '/usr/lib' and
+# '/usr/local/lib') you need also to specify the full absolute path for the
+# library by uncommenting the line starting with 'medriver_lib_path and change
+# the what it gets set to. You must make sure that the library supplied by
+# Meilhaus is already properly installed if you want to build fsc2 with
+# support for it.
+
+# WITH_MEDRIVER      := yes
+# medriver_incl_path := /usr/local/include/medriver
+# medriver_lib_path  := /usr/lib/local
+
+
 # Comment out the next two lines if you don't want the ability to run a HTTP
 # server that allows to monitor fsc2's current state via the Internet. The
 # default port number the HTTP server will listen on can be set by the second

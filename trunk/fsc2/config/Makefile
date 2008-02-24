@@ -107,6 +107,17 @@ endif
 		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$hjs_sfc_calib $(libdir);  \
 	fi
 
+ifdef WITH_MEDRIVER
+	er218_state=`grep '^[ \t]*#define[ \t]\{1,\}ER218_STATE_FILE' er218.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}ER218_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                        \
+	if [      -n "$$er218_state"                                 \
+		 -a   -e $$er218_state                                   \
+		 -a ! -e $(libdir)/$$er218_state ]; then                 \
+		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$er218_state  \
+												  $(libdir);     \
+	fi
+endif
+
+
 
 uninstall:
 ifdef WITH_RULBUS
@@ -127,6 +138,7 @@ ifdef WITH_RS_SPEC10
 		$(RM) $(RMFLAGS) $(libdir)/$$rs_spec10_state;  \
 	fi
 endif
+
 ifdef WITH_WITIO_48
 	hjs_fc_calib=`grep '^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE' hjs_fc.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}DEFAULT_CALIB_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                 \
 	if [ -n "$$hjs_fc_calib" ]; then                \
@@ -162,6 +174,14 @@ endif
 	if [ -n "$$hjs_sfc_calib" ]; then                \
 		$(RM) $(RMFLAGS) $(libdir)/$$hjs_sfc_calib;  \
 	fi
+
+ifdef WITH_MEDRIVER
+	er218_state=`grep '^[ \t]*#define[ \t]\{1,\}ER218_STATE_FILE' er218.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}ER218_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                          \
+	if [ -n "$$er218_state" ]; then                \
+		$(RM) $(RMFLAGS) $(libdir)/$$er218_state;  \
+	fi
+endif
+
 
 clean:
 	$(RM) $(RMFLAGS) *~ svn-*

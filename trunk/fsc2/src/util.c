@@ -251,7 +251,7 @@ get_file_length( FILE * fp,
 
 
 /*--------------------------------------------------------------------*
- * This function is used all over the pogram to print error messages.
+ * This function is used all over the program to print error messages.
  * Its first argument is the severity of the error, an integer in the
  * range between 0 (FATAL) and 3 (NO_ERROR), see also global.h for
  * abbreviations. If the second argument, a boolean value, is set,

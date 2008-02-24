@@ -37,9 +37,10 @@ GUI_Info_T GUI;
 Crash_Info_T Crash;
 
 
-bool Need_GPIB   = UNSET;        /* Flag, set if GPIB bus is needed */
-bool Need_RULBUS = UNSET;        /* Flag, set if RULBUS is needed */
-bool Need_LAN    = UNSET;        /* Flag, set if LAN is needed */
+bool Need_GPIB     = UNSET;        /* Flag, set if GPIB bus is needed */
+bool Need_RULBUS   = UNSET;        /* Flag, set if RULBUS is needed */
+bool Need_LAN      = UNSET;        /* Flag, set if LAN is needed */
+bool Need_MEDRIVER = UNSET;        /* Flag, set if Meilhaus driver is needed */
 
 
 /* If you change the following always remember to also adjust the

@@ -40,23 +40,21 @@ The following tools and libraries are needed to compile, install and
 run @code{fsc2}:
 @table @samp
 @item @code{gmake}
-GNU version of @code{make} (see @url{http://www.gnu.org/software/make/})
+GNU version of @code{@uref{http://www.gnu.org/software/make/,make}}
 @item @code{gcc}
-GNU C compiler (see @url{http://gcc.gnu.org/}, but other C compilers
+@code{@uref{http://gcc.gnu.org/,GNU C compiler}}, but other C compilers
 probably will also do)
 @item @code{flex}
-fast lexical analyzer (see @url{http://flex.sourceforge.net/})
+@uref{http://flex.sourceforge.net/,Fast Lexical Analyzer}
 @item @code{bison}
-GNU general purpose parser generator (see
-@url{http://www.gnu.org/software/bison/})
+@uref{http://www.gnu.org/software/bison/,GNU general purpose parser generator}
 @item @code{install}
-from the GNU coreutils package (see
-@url{http://www.gnu.org/software/coreutils/})
+from the @uref{http://www.gnu.org/software/coreutils/,GNU coreutils package}
 @item @code{sed}
-(GNU version of) stream editor (see @url{http://www.gnu.org/software/sed/})
+(GNU version of) @uref{http://www.gnu.org/software/sed/,stream editor}
 @item XForms library
-(version 0.89 or higher) with development package, i.e.@: the header files (see
-@url{http://savannah.nongnu.org/projects/xforms/})
+(version 1.0 or higher) with development package, i.e.@: the header
+files, see @url{http://savannah.nongnu.org/projects/xforms/}
 @item GPIB library
 @code{fsc2} can also be compiled and run without a GPIB library but with
 restricted functionality, see below.
@@ -68,17 +66,14 @@ Optionally, you should have:
 (or a @code{sendmail} replacement) or, if you want to use the built-in mail
 agent, the @code{libresolv.so} library
 @item @code{addr2line}
-from the GNU binutils package (see
-@url{http://www.gnu.org/software/binutils/})
+from the @uref{http://www.gnu.org/software/binutils/,GNU binutils package}
 @item @code{Perl}
-(version 5.6 or higher) with the pTk (Perl-Tk support) package (see
-@url{http://www.perl.org/})
+(version 5.6 or higher) with the @uref{http://www.perl.org/,pTk
+(Perl-Tk support) package}
 @item @code{pnmtopng}
-PNM image to PNG converter
-(see @url{http://netpbm.sourceforge.net/})
+@uref{http://netpbm.sourceforge.net/,PNM image to PNG converter}
 @item @code{pnmtojpeg}
-PNM inage to JPEG converter
-(see @url{http://netpbm.sourceforge.net/})
+@uref{http://netpbm.sourceforge.net/,PNM inage to JPEG converter}
 @end table
 @noindent
 If some of these are missing the basic functionality is still there (without
@@ -91,22 +86,22 @@ displaying pulse settings graphically won't work.
 To create the complete documentation beside Perl you also need:
 @table @samp
 @item @code{makeinfo} and @code{install-info}
-the GNU texinfo documentation format (see 
-@url{http://www.gnu.org/software/texinfo/})
+the @uref{http://www.gnu.org/software/texinfo/GNU texinfo}
+documentation format
 @item @code{TeX}
-The TeX typesetting system - if missing no PostScript and PDF documentation
-can be created (see @url{http://www.ctan.org/})
+The @uref{http://www.ctan.org/,TeX typesetting system} - if missing no
+PostScript and PDF documentation can be created
 @item @code{convert} and @code{identify}
-from the ImageMagick package - or no PostScript and PDF documentation will
-be created (see @url{http://www.imagemagick.org/})
+from the @uref{http://www.imagemagick.org/,ImageMagick package} - or
+no PostScript and PDF documentation will be created
 @item @code{dvips}
-the TeX DVI output to PostScript converter - if missing no PostScript
-documentation will be created (see @url{http://www.ctan.org/})
+the @uref{http://www.ctan.org/,TeX DVI output to PostScript converter}
+- if missing no PostScript documentation will be created
 @item @code{pdftex}
-TeX package for creating PDF output - if missing no PDF documentation will
-be created (see @url{http://www.ctan.org/})
+@uref{http://www.ctan.org/,TeX package for creating PDF output} - if
+missing no PDF documentation will be created
 @item @code{gzip}
-GNU data compression program (see @url{http://www.gnu.org/software/gzip/})
+@uref{http://www.gnu.org/software/gzip/,GNU data compression program}
 @end table
 
 @ifinfo
@@ -128,20 +123,21 @@ also compiled without GPIB support, but many of the devices will then be
 not usable). You can choose between the following ones:
 @table @samp
 @item National Instruments driver and library
-There exist two versions of the library if have been trying. The older, beta
-driver and library (version 0.86) works fine, but only with 2.4 kernels.  The
-newer driver and library (version 2.xx, supposed to work also with 2.6
-kernels) hasn't been tested, I didn't even get the driver to compile and
-linking against the library led to the program aborting immediately. I haven't
-any idea yet how to resolve that problem. If you want the older beta-driver
-but can't find it on the National Instruments web site anymore send me an
-email, I still have a copy of it around somewhere. You can download the
-newer version from @url{http://www.natinst.com}.
+There exist two versions of the library if have been trying. The
+older, beta driver and library (version 0.86) works fine, but only
+with 2.4 kernels. The newer driver and library (version 2.xx, supposed
+to work also with 2.6 kernels) hasn't been tested, I didn't even get
+the driver to compile and linking against the library led to the
+program aborting immediately. I haven't any idea yet how to resolve
+that problem. If you want the older beta-driver but can't find it on
+the National Instruments web site anymore send me an email, I still
+have a copy of it around somewhere. You can download the newer version
+from the @uref{http://www.natinst.com/,National Instruments web site}.
 
 @item Linux Lab Project driver and library
 This is a very old driver (only working with 2.0 kernels) and library,
-so you probably don't really want to use it anymore. You can download
-it from @url{http://www.llp.fu-berlin.de}.
+so you probably don't really want to use it anymore. I don't even know
+ifit can be downloaded anymore.
 
 @item SourceForge driver and library
 This is the successor to the Linux Lab Project library and drivers. It
@@ -219,9 +215,9 @@ for the board. The 'master' flag tells the driver that the board is the
 device controlling the GPIB bus and 'file' sets the name of the device
 file used for the board.
 
-Please make sure that the GPIB library you want to use is already compiled
-and installed _before_ trying to compile @code{fsc2} (unless you don't need
-GPIB support built into @code{fsc2}).
+Please make sure that the GPIB library you want to use is already
+compiled and installed @strong{before} trying to compile @code{fsc2}
+(unless you don't need GPIB support built into @code{fsc2}).
 
 
 @node Support for other devices, , GPIB support, Requirements

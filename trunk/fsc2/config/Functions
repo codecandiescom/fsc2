@@ -441,6 +441,16 @@ mw_attenuator_initial_attenuation, 1, ALL;;
 mw_attenuator_attenuation, -1, EXP;
 
 
+/* Function exported by the goniometer module (er218) */
+
+goniometer_name, 0, ALL;
+goniometer_backslash_correction, 1, ALL;
+goniometer_angle, -1, EXP;
+goniometer_increment_angle, 1, EXP;
+goniometer_reset, 0, EXP;
+goniometer_set_zero_angle, 0, ALL;
+
+
 /* Function exported by the chopper module (gg_chopper) */
 
 chopper_name, 0, ALL;

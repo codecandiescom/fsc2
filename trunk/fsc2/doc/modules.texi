@@ -2002,7 +2002,7 @@ It takes two parameters, an @code{unsigned long}, which is the duration
 value that indicates if the function is supposed to return immediately
 if a signal gets caught or if it should wait for the specified time even
 on signals.  The function is actually nothing else than a wrapper around
-@code{nanosleep()}, so you can @code{nanosleep()} yourself if you prefer.
+@code{nanosleep()}, so you can use @code{nanosleep()} yourself if you prefer.
 
 
 @node Assertions, Error handling with exceptions, Waiting for short times, Programming Utils

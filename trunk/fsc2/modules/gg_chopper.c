@@ -98,7 +98,7 @@ gg_chopper_init_hook( void )
 
     /* Get a lock on the DIO of the DAQ device used to control the chopper */
 
-    if ( dev_num )
+    if ( dev_num == 1 )
         func = T_strdup( "daq_reserve_dio" );
     else
         func = get_string( "daq_reserve_dio#%d", dev_num );

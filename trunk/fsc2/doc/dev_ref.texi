@@ -35,6 +35,7 @@
 * egg4402::         EG&G PARC Box-Car Integrator 4402
 * eip371::          EIP Microwave Counter 371
 * ep385::           Bruker Pulse Programmer EP385
+* er218::           Bruker Goniometer ER218 PG1
 * er023m::          Bruker Signal Channel ER 023 M
 * er032m::          Bruker Field controller ER 032 M 
 * er035m::          Bruker NMR Gaussmeter ER 035 M
@@ -67,6 +68,7 @@
 * lecroy_ws::       LeCroy Digitizing Oscilloscope WaveSurfer
 * mcn700_2000::     F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
+* me_dio::          Meilhaus Electronic GmbH DAQ card DIO subsystem
 * ni6601::          National Instruments 6601 GPCT card
 * pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
 * pt2025::          Metrolab NMR Teslameter PT2025
@@ -214,11 +216,11 @@ to @w{23000 G}.
 @strong{Module name}: @code{bh15}
 
 @paragraphindent 0
-@strong{Description}: Bruker (@url{http://www.bruker-biospin.com/})
-BH15 Hall effect controller for measuring magnetic fields in combination with
-power supply controllers @code{aeg_s_band} and @code{aeg_x_band}. Field range
-that can be measured is from @w{-50 G} to @w{23000 G}. (For use as a field
-controller use module @code{bh15_fc}).
+@strong{Description}: @uref{http://www.bruker-biospin.com/} BH15 Hall
+effect controller for measuring magnetic fields in combination with
+power supply controllers @code{aeg_s_band} and @code{aeg_x_band}.
+Field range that can be measured is from @w{-50 G} to @w{23000 G}.
+(For use as a field controller use module @code{bh15_fc}).
 
 
 @paragraphindent 0
@@ -253,7 +255,7 @@ In the GPIB configuration file use @code{"BH15"} as the device name,
 @strong{Module name}: @code{bh15_fc}
 
 @paragraphindent 0
-@strong{Description}: Bruker (@url{http://www.bruker-biospin.com/})
+@strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
 BH15 Hall effect controller. Field range: @w{-50 G} to @w{23000 G}.
 (For use as a gaussmeter only use module @code{bh15}).
 
@@ -299,9 +301,10 @@ In the GPIB configuration file use @code{"BH15_FC"} as the device name,
 @strong{Additionally required module}: @code{witio_48}
 
 @paragraphindent 0
-@strong{Description}: Bruker (@url{http://www.bruker-biospin.com/})
-BNM12 NMR Gaussmeter can only be used to measure fields. Using it requires
-that the module for the WITIO-48 DIO card (@code{witio_48}) is loaded.
+@strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
+BNM12 NMR Gaussmeter can only be used to measure fields. Using it
+requires that the module for the WITIO-48 DIO card (@code{witio_48})
+is loaded.
 
 @paragraphindent 0
 @strong{Controlled via}: Read only via WITIO-48 DIO card.
@@ -339,7 +342,7 @@ highest resolution setting.
 @strong{Module name}: @code{dg2020_b}
 
 @paragraphindent 0
-@strong{Description}: Sony/Tektronix (@url{http://www.tektronix.com/}) Data
+@strong{Description}: @uref{http://www.tektronix.com/,Sony/Tektronix} Data
 Generator DG2020, used as pulser for the Berlin X-band spectrometer.
 
 @paragraphindent 0
@@ -407,10 +410,10 @@ In the GPIB configuration file use @code{"DG2020_B"} as the device name,
 @strong{Module name}: @code{dg2020_f}
 
 @paragraphindent 0
-@strong{Description}: Sony/Tektronix (@url{http://www.tektronix.com/}) Data
-Generator DG2020, used as pulser for the S-band spectrometer in the group
-of T.@: Prisner at the J.-W.-Goethe University in Frankfurt/Main
-(@url{http://www.prisner.de/}).
+@strong{Description}: @uref{http://www.tektronix.com/,Sony/Tektronix}
+Data Generator DG2020, used as pulser for the S-band spectrometer in
+the @uref{http://www.prisner.de/,group of T.@: Prisner} at the
+J.-W.-Goethe University in Frankfurt/Main.
 
 @paragraphindent 0
 Timebase: between @w{5 ns} and @w{100 ms}@*
@@ -511,8 +514,9 @@ In the GPIB configuration file use  @code{"EG4402"} as the device name,
 @strong{Module name}: @code{eip371}
 
 @paragraphindent 0
-@strong{Description}: EIP Microwave, Inc. (now Phase Matrix, Inc.,
-@url{http://www.eipm.com/}) frequency counter model 371.
+@strong{Description}: @uref{http://www.eipm.com/,EIP Microwave, Inc.}
+(now @uref{http://www.phasematrix.com/,Phase Matrix, Inc.}) frequency
+counter model 371.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -534,7 +538,7 @@ In the GPIB configuration file use @code{"EIP371"} as the device name,
 @c #############################################################
 
 
-@node ep385, er023m, eip371, Device Reference
+@node ep385, er218, eip371, Device Reference
 @iftex
 @subheading Bruker Pulse Programmer EP385
 @end iftex
@@ -546,7 +550,7 @@ In the GPIB configuration file use @code{"EIP371"} as the device name,
 @strong{Module name}: @code{ep385}
 
 @paragraphindent 0
-@strong{Description}: Bruker (@url{http://www.bruker-biospin.com/}) Pulse
+@strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker} Pulse
 Programmer EP385, used as pulser for the Berlin X-band spectrometer.
 
 @paragraphindent 0
@@ -589,7 +593,41 @@ In the GPIB configuration file use @code{"EP385"} as the device name,
 @c #############################################################
 
 
-@node er023m, er032m, ep385, Device Reference
+@node er218, er023m, ep385, Device Reference
+@iftex
+@subheading Bruker Goniometer ER218 PG1
+@end iftex
+@ifnottex
+@section Bruker Goniometer ER218 PG1
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{er218}
+
+@paragraphindent 0
+@strong{Additionally required module}: @code{me_dio}
+
+@paragraphindent 0
+@strong{Description}: Goniometer is cntrolled via the output of a
+DIO subsystem on a Meilhaus card, using some additional home-built
+electronics for latching data.
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{goniometer_name()}
+@item @ref{goniometer_angle()}
+@item @ref{goniometer_increment_angle()}
+@item @ref{goniometer_backslash_correction()}
+@item @ref{goniometer_reset()}
+@item @ref{goniometer_set_zero_angle()}
+@end table
+
+
+@c #############################################################
+
+
+@node er023m, er032m, er218, Device Reference
 @iftex
 @subheading Bruker Signal Channel ER 023 M
 @end iftex
@@ -601,9 +639,9 @@ In the GPIB configuration file use @code{"EP385"} as the device name,
 @strong{Module name}: @code{er023m}
 
 @paragraphindent 0
-@strong{Description}: Bruker (@url{http://www.bruker-biospin.com/})
-Signal Channel ER 023 M used in older Bruker EPR spectrometers -- lock-in
-amplifier with built-in analog-to-digital converter.
+@strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
+Signal Channel ER 023 M used in older Bruker EPR spectrometers --
+lock-in amplifier with built-in analog-to-digital converter.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -649,10 +687,10 @@ In the GPIB configuration file use  @code{"ER023M"} as the device name,
 @strong{Module name}: @code{er032m}
 
 @paragraphindent 0
-@strong{Description}: Bruker (@url{http://www.bruker-biospin.com/})
-@w{ER 032 M} field controller, used to control the field in older Bruker
-EPR spectrometers. Maximum field range is from@w{-50 G} to @w{23000 G},
-minimum field step width is @w{1 mG}.
+@strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
+@w{ER 032 M} field controller, used to control the field in older
+Bruker EPR spectrometers. Maximum field range is from@w{-50 G} to
+@w{23000 G}, minimum field step width is @w{1 mG}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -694,12 +732,12 @@ In the GPIB configuration file use @code{"ER032M"} as the device name,
 (serial port version)
 
 @paragraphindent 0
-@strong{Description}: Bruker (@url{http://www.bruker-biospin.com/})
-NMR gaussmeter @w{ER 035 M} used n conjunction with the magnet power
+@strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker} NMR
+gaussmeter @w{ER 035 M} used n conjunction with the magnet power
 supply controllers @code{aeg_s_band} and @code{aeg_x_band}. Field
-range depends on probe used, with @code{F0} probe it is @w{460 G}
-to @w{2390 G}, with @code{F1} probe the range is @w{1460 G} to
-@w{19900 G}.
+range depends on probe used, with @code{F0} probe it is @w{460 G} to
+@w{2390 G}, with @code{F1} probe the range is @w{1460 G} to @w{19900
+G}.
 
 @paragraphindent 0
 @strong{Controlled via} (@code{er035m}): GPIB bus (IEEE 488).@*
@@ -744,7 +782,7 @@ In the GPIB configuration file use @code{"ER035M"} as the device name,
 (serial port version)
 
 @paragraphindent 0
-@strong{Description}: Bruker (@url{http://www.bruker-biospin.com/}) NMR
+@strong{Description}: @uref{http://www.bruker-biospin.com/, Bruker} NMR
 gaussmeter @w{ER 035 M} used as simple, stand-alone gaussmeter. Field 
 range depends on probe being used, with @code{F0} probe it is @w{460 G} to
 @w{2390 G}, with @code{F1} probe the range is @w{1460 G} to @w{19900 G}.
@@ -791,13 +829,14 @@ In the GPIB configuration file use @code{"ER035M"} as the device name,
 @strong{Additionally required module}: @code{pci_mio_16e_1}
 
 @paragraphindent 0
-@strong{Description}: Light chopper used in the group of G.@: Gescheidt
-at the Graz University of Technology, Austria
-(@url{http://www.ptc.tugraz.at/}). This module doesn't control the device
-directly but, via some homebuild electronics, by using a data acquisition
-card, currently the National Instruments PCI-MIO-16E-1 DAQ card. For
-details on the home-built electronics controlling the chopper please see
-Torsten Zytowski's PhD thesis, University Z@"urich, 1998.
+@strong{Description}: Light chopper used in the
+@uref{http://www.ptc.tugraz.at/,group of G.@: Gescheidt} at the Graz
+University of Technology, Austria. This module doesn't control the
+device directly but, via some homebuild electronics, by using a data
+acquisition card, currently the National Instruments PCI-MIO-16E-1 DAQ
+card. For details on the home-built electronics controlling the
+chopper please see Torsten Zytowski's PhD thesis, University Z@"urich,
+1998.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -823,7 +862,7 @@ Torsten Zytowski's PhD thesis, University Z@"urich, 1998.
 @strong{Module name}: @code{hfs9000}
 
 @paragraphindent 0
-@strong{Description}: Tektronix (@url{http://www.tektronix.com/}) Stimulus
+@strong{Description}: @uref{http://www.tektronix.com/,Tektronix} Stimulus
 System HFS9000, used as pulser in the Berlin W-band spectrometer. No support
 for phase cycled experiments.
 
@@ -879,10 +918,10 @@ In the GPIB configuration file use @code{"HFS9000"} as the device name,
 @strong{Module name}: @code{hp5340a}
 
 @paragraphindent 0
-@strong{Description}: Hewlett-Packard HP (now Agilent,
-@url{http://www.home.agilent.com/}) frequency counter HP5340A. This is a
-very old device even pre-dating the GPIB-standard. Only its capability
-to return the measured frequency can be used.
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.home.agilent.com/,Agilent}) frequency counter
+HP5340A. This is a very old device even pre-dating the GPIB-standard.
+Only its capability to return the measured frequency can be used.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -913,11 +952,12 @@ In the GPIB configuration file use @code{"HP5340A"} as the device name,
 @strong{Module name}: @code{hp8647a}
 
 @paragraphindent 0
-@strong{Description}: Hewlett-Packard RF (now Agilent,
-@url{http://www.home.agilent.com/}) synthesizer HP8647A with support for
-output level normalization via frequency/amplitude table files. For safety
-reasons only output attenuations below @w{-5 dB} are allowed -- change the
-configuration file to allow higher output levels.
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.home.agilent.com/Agilent}) RF synthesizer HP8647A with
+support for output level normalization via frequency/amplitude table
+files. For safety reasons only output attenuations below @w{-5 dB} are
+allowed -- change the configuration file to allow higher output
+levels.
 
 Frequency range is @w{250 kHz} to @w{1 GHz}, attenuation range @w{-136 dB}
 to @w{3 dB} in @w{0.1 dB} steps.
@@ -965,10 +1005,10 @@ In the GPIB configuration file use @code{"HP8647A"} as the device name,
 @strong{Module name}: @code{hp8648b}
 
 @paragraphindent 0
-@strong{Description}: Hewlett-Packard (now Agilent,
-@url{http://www.home.agilent.com/}) RF synthesizer HP8648B with
-support for output level normalization via frequency/amplitude table
-files.
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.home.agilent.com/,Agilent}) RF synthesizer HP8648B
+with support for output level normalization via frequency/amplitude
+table files.
 
 Frequency range is @w{10 kHz} to @w{2 GHz}, attenuation range @w{-136 dB}
 to @w{14.5 dB} in @w{0.1 dB} steps.
@@ -1016,10 +1056,10 @@ In the GPIB configuration file use @code{"HP8647B"} as the device name,
 @strong{Module name}: @code{hp8672a}
 
 @paragraphindent 0
-@strong{Description}: Hewlett-Packard (now Agilent,
-@url{http://www.home.agilent.com/}) RF synthesizer HP8672A with
-support for output level normalization via frequency/amplitude table
-files
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.home.agilent.com/,Agilent}) RF synthesizer HP8672A
+with support for output level normalization via frequency/amplitude
+table files
 
 Frequency range is @w{2 GHz} to @w{9 GHz}, attenuation range @w{-120 dB}
 to @w{10 dB} in @w{1 dB} steps.
@@ -1067,14 +1107,15 @@ In the GPIB configuration file use @code{"HP8672A"} as the device name,
 
 @paragraphindent 0
 @strong{Description}: Home-built computer controlled microwave
-attenuator from the group of H.-J.@: Steinhoff at the University of
-Osnabrueck (@url{http://www.macromol.uni-osnabrueck.de/index.php}). Works with
-a stepper motor to mechanically adjust a microwave attenuator. Requires
-a default calibration table file that gets read in when the module is
-loaded. The name of the file can be set in the configuration file for the
-module. During the @code{PREPARATIONS} section the function
-@code{mw_attenuator_initial_attenuation()} @strong{must} be called to tell
-the module about the initial attenuation setting.
+attenuator from the
+@uref{http://www.macromol.uni-osnabrueck.de/index.php,group of H.-J.@:
+Steinhoff} at the University of Osnabrueck. Works with a stepper
+motor to mechanically adjust a microwave attenuator. Requires a
+default calibration table file that gets read in when the module is
+loaded. The name of the file can be set in the configuration file for
+the module. During the @code{PREPARATIONS} section the function
+@code{mw_attenuator_initial_attenuation()} @strong{must} be called to
+tell the module about the initial attenuation setting.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -1104,10 +1145,10 @@ the module about the initial attenuation setting.
 @strong{Module name}: @code{hjs_daadc}
 
 @paragraphindent 0
-@strong{Description}: Home-built single channel AD and DA converter from
-the group of H.-J.@: Steinhoff at the University of Osnabrueck
-(@url{http://www.macromol.uni-osnabrueck.de/index.php}). Output voltage can be
-reduced via a potentiometer at the front panel.
+@strong{Description}: Home-built single channel AD and DA converter
+from the @uref{http://www.macromol.uni-osnabrueck.de/index.php,group
+of H.-J.@: Steinhoff} at the University of Osnabrueck. Output voltage
+can be reduced via a potentiometer at the front panel.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -1143,17 +1184,19 @@ reduced via a potentiometer at the front panel.
 @strong{Additionally required module}: @code{hjs_daadc}
 
 @paragraphindent 0
-@strong{Description}: Pseudo-device module used for controlling magnets
-in the group of H.-J.@: Steinhoff at the University of Osnabrueck
-(@url{http://www.macromol.uni-osnabrueck.de/index.php}). It's not for a device
-that gets controlled directly by this module but instead the magnetic
-field is controlled indirectly via the output voltage of a home-built DA
-and AD converter, using the module @code{hjs_daadc}. The module requires
-a previous calibration of the relation of the DAC output voltage and the
-resulting field, with these data getting set in the configuration file for
-the module.  Because there's no gaussmeter to control the real field only
-this calibration can be used. When this module is used the DAC of the DA
-and AD converter can't be used, it gets reserved automatically for this module.
+@strong{Description}: Pseudo-device module used for controlling
+magnets in the
+@uref{http://www.macromol.uni-osnabrueck.de/index.php,group of H.-J.@:
+Steinhoff} at the University of Osnabrueck. It's not for a device that
+gets controlled directly by this module but instead the magnetic field
+is controlled indirectly via the output voltage of a home-built DA and
+AD converter, using the module @code{hjs_daadc}. The module requires a
+previous calibration of the relation of the DAC output voltage and the
+resulting field, with these data getting set in the configuration file
+for the module. Because there's no gaussmeter to control the real
+field only this calibration can be used. When this module is used the
+DAC of the DA and AD converter can't be used, it gets reserved
+automatically for this module.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1193,17 +1236,18 @@ and AD converter can't be used, it gets reserved automatically for this module.
 and @code{bnm12}
 
 @paragraphindent 0
-@strong{Description}: Pseudo-device module used for controlling magnets
-in the group of H.-J.@: Steinhoff at the University of
-Osnabrueck (@url{http://www.macromol.uni-osnabrueck.de/index.php}). There's not
-just one device that gets controlled directly by this module but instead
-the magnetic field is controlled via the output voltage of a home-built
-DA and AD converter, using the module @code{hjs_daadc}, and the field is
+@strong{Description}: Pseudo-device module used for controlling
+magnets in the
+@uref{http://www.macromol.uni-osnabrueck.de/index.php,group of H.-J.@:
+Steinhoff} at the University of Osnabrueck. There's not just one
+device that gets controlled directly by this module but instead the
+magnetic field is controlled via the output voltage of a home-built DA
+and AD converter, using the module @code{hjs_daadc}, and the field is
 measured by the Bruker BNM12 gaussmeter (which in turn requires the
 @code{witio_48} module for the WITIO-48 DIO card for reading in the
-measured field). When this module is used neither the DAC of the DA and
-AD converter nor the first DIO (@code{DIO1}) of the WITIO-48 DIO card
-can be used, both get reserved automatically for this module.
+measured field). When this module is used neither the DAC of the DA
+and AD converter nor the first DIO (@code{DIO1}) of the WITIO-48 DIO
+card can be used, both get reserved automatically for this module.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1233,9 +1277,9 @@ can be used, both get reserved automatically for this module.
 @strong{Module name}: @code{ips20_4}
 
 @paragraphindent 0
-@strong{Description}: Sweep power supply for the Oxford Instruments
-(@url{http://www.oxford-instruments.com/}) superconducting
-magnet used for Berlin @w{360 GHz} spektrometer.
+@strong{Description}: Sweep power supply for the
+@uref{http://www.oxford-instruments.com/,Oxford Instruments}
+superconducting magnet used for Berlin @w{360 GHz} spektrometer.
 
 @paragraphindent 0
 Please note: With this module the functions expect arguments in terms of
@@ -1280,13 +1324,13 @@ In the GPIB configuration file use @code{"IPS120_10"} as the device name,
 @strong{Module name}: @code{ips120_10}
 
 @paragraphindent 0
-@strong{Description}: Power supply for the Oxford Instruments
-(@url{http://www.oxford-instruments.com/}) superconducting
-magnet used for the Leiden @w{275 GHz} (J-band) and @w{95 GHz}
-(W-band) spektrometers. To adapt the module for use with other
-magnets please use one of the files in @file{config/ips120_10_j.conf}
-or @file{config/ips120_10_w.conf} as template and name it
-@file{config/ips120_10.conf}.
+@strong{Description}: Power supply for the
+@uref{http://www.oxford-instruments.com/,Oxford Instruments}
+superconducting magnet used for the Leiden @w{275 GHz} (J-band) and
+@w{95 GHz} (W-band) spektrometers. To adapt the module for use with
+other magnets please use one of the files in
+@file{config/ips120_10_j.conf} or @file{config/ips120_10_w.conf} as
+template and name it @file{config/ips120_10.conf}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488)@*
@@ -1330,19 +1374,19 @@ In the GPIB configuration file use @code{"IPS120_10"} as the device name,
 be selected via the devices configuration file)
 
 @paragraphindent 0
-@strong{Description}: Power supply for the Oxford Instruments
-(@url{http://www.oxford-instruments.com/}) superconducting
-magnet previously used for the Leiden W-band spektrometer. This is
-an older version of the IPS120-10 with a current resolution of @w{10 mA}.
-Therefore it has been fitted with an external voltage input that allows
-to modulate the output current by about @w{+/- 5%} of the maximum rated
-current of @w{120 A} by a voltage in the @w{+/- 10 V} range. The external
-voltage is supplied by a RULBUS RB8510 DAC card, which has a voltage
-resolution of @w{5 mV}, resulting in a current resolution of @w{0.3 mA}
-and a field resolution of ca.@: @w{0.125 G}. Please note that this
-improved resolution applies only when a field is set, the sweep step
-resolution remains unchanged (and sweeps thus should probably be avoided
-when using this device).
+@strong{Description}: Power supply for the
+@uref{http://www.oxford-instruments.com/,Oxford Instruments}
+superconducting magnet previously used for the Leiden W-band
+spektrometer. This is an older version of the IPS120-10 with a current
+resolution of @w{10 mA}. Therefore it has been fitted with an external
+voltage input that allows to modulate the output current by about
+@w{+/- 5%} of the maximum rated current of @w{120 A} by a voltage in
+the @w{+/- 10 V} range. The external voltage is supplied by a RULBUS
+RB8510 DAC card, which has a voltage resolution of @w{5 mV}, resulting
+in a current resolution of @w{0.3 mA} and a field resolution of ca.@:
+@w{0.125 G}. Please note that this improved resolution applies only
+when a field is set, the sweep step resolution remains unchanged (and
+sweeps thus should probably be avoided when using this device).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (the device has a (non-standard)
@@ -1381,10 +1425,9 @@ between @code{RS232C} and @code{IEEE488} is employed).
 @strong{Module name}: @code{itc503}
 
 @paragraphindent 0
-@strong{Description}: Oxford Instruments
-(@url{http://www.oxford-instruments.com/}) ITC503 temperature controller.
-Currently only temperature measurements are supported, no automatic
-adjustment of temperature.
+@strong{Description}: @uref{http://www.oxford-instruments.com/,Oxford
+Instruments} ITC503 temperature controller. Currently only temperature
+measurements are supported, no automatic adjustment of temperature.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -1421,14 +1464,15 @@ In the GPIB configuration file use @code{"ITC503"} as the device name,
 @strong{Additionally required module}: @code{sr510} (can be changed)
 
 @paragraphindent 0
-@strong{Description}: Keithley (@url{http://www.keithley.com/}) power supply
-228A, used as sweep coil power supply for the Berlin W-band spectrometer. In
-order to improve the current resolution an aditional voltage source is needed.
-Currently this done via the DAC output @code{6} (can be changed by one of the
-functions) of the Stanford Research lock-in amplifier SR510 and the
-module @code{sr510} must be listed before the power supply
-module. Alternatively, after minor changes to the configuration file,
-also other lock-in amplifiers can be used.
+@strong{Description}: @uref{http://www.keithley.com/,Keithley} power
+supply 228A, used as sweep coil power supply for the Berlin W-band
+spectrometer. In order to improve the current resolution an aditional
+voltage source is needed. Currently this done via the DAC output
+@code{6} (can be changed by one of the functions) of the Stanford
+Research lock-in amplifier SR510 and the module @code{sr510} must be
+listed before the power supply module. Alternatively, after minor
+changes to the configuration file, also other lock-in amplifiers can
+be used.
 
 @paragraphindent 0
 Please note: With this module the functions expect arguments in terms of
@@ -1474,7 +1518,7 @@ In the GPIB configuration file use @code{"KEITHLEY228A"} as the device name,
 @strong{Module name}: @code{kontron4060}
 
 @paragraphindent 0
-@strong{Description}: Kontron (@url{http://www.kontron.com/}) digital
+@strong{Description}: @uref{http://www.kontron.com/,Kontron} digital
 voltmeter 4060, DC and AC measurements
 
 @paragraphindent 0
@@ -1509,9 +1553,9 @@ In the GPIB configuration file use @code{"KONTRON4060"} as the device name,
 @strong{Module name}: @code{lakeshore330}
 
 @paragraphindent 0
-@strong{Description}: Lake Shore (@url{http://www.lakeshore.com/})
-temperature controller 330. Currently only temperature measurements are
-supported, no automatic adjustment of the temperature.
+@strong{Description}: @uref{http://www.lakeshore.com/,Lake Shore}
+temperature controller 330. Currently only temperature measurements
+are supported, no automatic adjustment of the temperature.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -1545,7 +1589,7 @@ In the GPIB configuration file use @code{"LAKESHORE330"} as the device name,
 @strong{Module name}: @code{lecroy9400}
 
 @paragraphindent 0
-@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
+@strong{Description}: @uref{http://www.lecroy.com/,LeCroy} Digitizing
 Oscilloscope 9400, 2 measurement channels, 2 function channels (needed
 for averaging), @w{125 MHz bandwidth}.
 
@@ -1597,7 +1641,7 @@ In the GPIB configuration file use @code{"LECROY9400"} as the device name,
 @strong{Module name}: @code{lecroy9410}
 
 @paragraphindent 0
-@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
+@strong{Description}: @uref{http://www.lecroy.com/,LeCroy} Digitizing
 Oscilloscope 9410, 2 measurement channels, 2 function channels (needed
 for averaging), 2 memory channels, 150 MHz bandwidth.
 
@@ -1658,7 +1702,7 @@ In the GPIB configuration file use @code{"LECROY9410"} as the device name,
 @strong{Module name}: @code{lecroy9420}
 
 @paragraphindent 0
-@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
+@strong{Description}: @uref{http://www.lecroy.com/,LeCroy} Digitizing
 Oscilloscope 9420, 2 measurement channels, 2 function channels (needed
 for averaging), 2 memory channels, 350 MHz bandwidth.
 
@@ -1719,7 +1763,7 @@ In the GPIB configuration file use @code{"LECROY9420"} as the device name,
 @strong{Module name}: @code{lecroy9424}
 
 @paragraphindent 0
-@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
+@strong{Description}: @uref{http://www.lecroy.com/,LeCroy} Digitizing
 Oscilloscope 9424, 4 measurement channels, 2 function channels (needed
 for averaging), 2 memory channels, 350 MHz bandwidth
 
@@ -1781,11 +1825,12 @@ In the GPIB configuration file use @code{"LECROY9424"} as the device name,
 
 @paragraphindent 0
 
-@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
-Oscilloscope 9424E, 4 measurement channels, 2 function channels (needed for
-averaging), 2 memory channels, 350 MHz bandwidth. It is mostly identical to
-the LeCroy9424, but the fourth channel can't be used as a trigger input and
-the device has an external trigger input instead.
+@strong{Description}: @uref{http://www.lecroy.com/,LeCroy} Digitizing
+Oscilloscope 9424E, 4 measurement channels, 2 function channels
+(needed for averaging), 2 memory channels, 350 MHz bandwidth. It is
+mostly identical to the LeCroy9424, but the fourth channel can't be
+used as a trigger input and the device has an external trigger input
+instead.
 
 
 @paragraphindent 0
@@ -1845,11 +1890,11 @@ In the GPIB configuration file use @code{"LECROY9424E"} as the device name,
 @strong{Module name}: @code{lecroy9450}
 
 @paragraphindent 0
-@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
-Oscilloscope 9450, 2 measurement channels, 2 function channels (needed for
-averaging), 2 memory channels, 350 MHz bandwidth. This module should also work
-with the 9450A, which seems to be just a 300 MHz bandwidth version of the
-9450.
+@strong{Description}: @uref{http://www.lecroy.com/,LeCroy} Digitizing
+Oscilloscope 9450, 2 measurement channels, 2 function channels (needed
+for averaging), 2 memory channels, 350 MHz bandwidth. This module
+should also work with the 9450A, which seems to be just a 300 MHz
+bandwidth version of the 9450.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -1907,7 +1952,7 @@ In the GPIB configuration file use @code{"LECROY9450"} as the device name,
 @strong{Module name}: @code{lecroy93xx}
 
 @paragraphindent 0
-@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
+@strong{Description}: @uref{http://www.lecroy.com/,LeCroy} Digitizing
 Oscilloscope 93xx models
 @table @samp
 @item 9304
@@ -2100,7 +2145,7 @@ In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
 @strong{Module name}: @code{lecroy_wr}
 
 @paragraphindent 0
-@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
+@strong{Description}: @uref{http://www.lecroy.com/,LeCroy} Digitizing
 Oscilloscope Waverunner models
 @table @samp
 @item LT224
@@ -2243,7 +2288,7 @@ In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
 @strong{Module name}: @code{lecroy_ws}
 
 @paragraphindent 0
-@strong{Description}: LeCroy (@url{http://www.lecroy.com/}) Digitizing
+@strong{Description}: @uref{http://www.lecroy.com/,LeCroy} Digitizing
 Oscilloscope WaveSurfer, models 422, 424, 432, 434, 452 and 454 (the
 model must be set in the configuration file). 2 or 4 measurement
 channels (depending on model), 1 function channel, 4 memory channels.
@@ -2304,10 +2349,10 @@ must be set in the configuration file for the device
 @strong{Module name}: @code{mcn700_2000}
 
 @paragraphindent 0
-@strong{Description}: Power supply by F.u.G. Elektronik GmbH
-(@url{http://www.fug-elektronik.de/}) , voltage range @w{0 V} to @w{2000 V}
-with @w{1 V} resolution, current range @w{0 mA} to @w{300 mA} with
-@w{1 mA} resolution.
+@strong{Description}: Power supply by
+@uref{http://www.fug-elektronik.de/,F.u.G. Elektronik GmbH}, voltage
+range @w{0 V} to @w{2000 V} with @w{1 V} resolution, current range
+@w{0 mA} to @w{300 mA} with @w{1 mA} resolution.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).
@@ -2321,10 +2366,11 @@ with @w{1 V} resolution, current range @w{0 mA} to @w{300 mA} with
 @end table
 
 
+
 @c #############################################################
 
 
-@node me6000, ni6601, mcn700_2000, Device Reference
+@node me6000, me_dio, mcn700_2000, Device Reference
 @iftex
 @subheading Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 @end iftex
@@ -2336,7 +2382,7 @@ with @w{1 V} resolution, current range @w{0 mA} to @w{300 mA} with
 @strong{Module name}: @code{me6000}
 
 @paragraphindent 0
-@strong{Description}: Meilhaus Electronic GmbH (@url{http://www.meilhaus.de/})
+@strong{Description}: @uref{http://www.meilhaus.de/,Meilhaus Electronic GmbH}
 Digital-to-analog converter card with 4, 8 or 16 output ports, depending on
 model of card.
 
@@ -2356,8 +2402,48 @@ library are part of the @code{fsc2} package)
 
 @c #############################################################
 
+@node me_dio, ni6601, me6000, Device Reference
+@iftex
+@subheading Meilhaus Electronic GmbH DAQ card DIO subsystem
+@end iftex
+@ifnottex
+@section Meilhaus Electronic GmbH DAQ card DIO subsystem
+@end ifnottex
 
-@node ni6601, pci_mio_16e_1, me6000, Device Reference
+@paragraphindent 0
+@strong{Module name}: @code{me_dio}
+
+@paragraphindent 0
+@strong{Description}: Module for controlling the DIO subsystem of
+@uref{http://www.meilhaus.de/,Meilhaus} DAQ cards ME-94/95/96 (c)PCI,
+ME-94/95/96 (c)PCI, ME-94/95/96 (c)PCI, ME-94/95/96 (c)PCI,
+ME-94/95/96 (c)PCI, ME-94/95/96 (c)PCI and ME-94/95/96 (c)PCI. This
+module requires that the kernel driver and libraray, available from
+the @uref{http://www.meilhaus.de/index.php?id=255,Meilhaus web site}
+has been installed. The card and subsystem number has to be set in the
+configuration file for the device.
+
+@paragraphindent 0
+@strong{Please note}: Due to the large number of supported cards
+the module could not be tested with most of them. It is instead
+assumed that the information from the Meilhaus manuals is
+correct, in which case the module hopefully works correctly.
+
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{dio_name()}
+@item @ref{dio_reserve_dio()}
+@item @ref{dio_mode()}
+@item @ref{dio_value()}
+@end table
+
+
+@c #############################################################
+
+
+@node ni6601, pci_mio_16e_1, me_dio, Device Reference
 @iftex
 @subheading National Instruments 6601 GPCT card
 @end iftex
@@ -2370,7 +2456,7 @@ library are part of the @code{fsc2} package)
 
 @paragraphindent 0
 @strong{Description}: General purpose counter and timer card NI6601 by
-National Instruments (@url{http://www.natinst.com}) with 4 channels, used
+@uref{http://www.natinst.com,National Instruments} with 4 channels, used
 for event counting and pulse creation.
 
 @paragraphindent 0
@@ -2409,9 +2495,9 @@ library are part of the @code{fsc2} package)
 @strong{Module name}: @code{pci_mio_16e_1}
 
 @paragraphindent 0
-@strong{Description}: Data acquisition (DAQ) card PCI-MIO-16E-1 by National
-Instruments (@url{http://www.natinst.com}) for analog input and output and
-with general purpose counters, timer and digital I/O.
+@strong{Description}: Data acquisition (DAQ) card PCI-MIO-16E-1 by
+@uref{http://www.natinst.com,National Instruments} for analog input
+and output and with general purpose counters, timer and digital I/O.
 
 @paragraphindent 0
 @strong{Controlled via}: PCI card (required Linux device driver and
@@ -2460,7 +2546,7 @@ library are part of the @code{fsc2} package)
 @strong{Module name}: @code{pt2025}
 
 @paragraphindent 0
-@strong{Description}: Metrolab (@url{http://www.metrolab.ch/}) NMR
+@strong{Description}: @uref{http://www.metrolab.ch/,Metrolab} NMR
 Teslameter PT2025 - module currently only supports the @w{1.5 T} to
 @w{3.4 T} probe and fields above @w{3.15 T}. Measured fields are returned
 in Gauss, not Tesla!
@@ -2497,7 +2583,7 @@ In the GPIB configuration file use @code{"PT2025"} as the device name,
 @strong{Module name}: @code{rs_sml01}
 
 @paragraphindent 0
-@strong{Description}: Rohde & Schwarz (@url{http://www.rsd.de/}) SML01
+@strong{Description}: @uref{http://www.rsd.de/,Rohde & Schwarz} SML01
 Signal Generator with support for output level normalization via
 frequency/amplitude table files.
 
@@ -2552,8 +2638,9 @@ In the GPIB configuration file use @code{"RS_SML01"} as the device name,
 @strong{Module name}: @code{rs_spec10}
 
 @paragraphindent 0
-@strong{Description}: Roper Scientific (@url{http://www.roperscientific.com/})
-Spec-10 CCD camera, LN-cooled
+@strong{Description}: @uref{http://www.roperscientific.com/,Roper
+Scientific} Spec-10 CCD camera, LN-cooled
+
 @paragraphindent 0
 @strong{Controlled via}: PCI card, requiring a Linux device driver and
 the PVCAM library (at least version 2.6.4-2) that are both available
@@ -2607,10 +2694,10 @@ permissions and ownership of the file correctly.
 @strong{Module name}: @code{rb8509}
 
 @paragraphindent 0
-@strong{Description}: 12-bit ADC card for Rulbus (Rijksuniversiteit
-Leiden BUS, @url{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/})
-- requires Linux device driver and library that are part of the @code{fsc2}
-package)
+@strong{Description}: 12-bit ADC card for
+@uref{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/,Rulbus
+(Rijksuniversiteit Leiden BUS)} - requires Linux device driver and
+library that are part of the @code{fsc2} package)
 
 @paragraphindent 0
 @strong{Controlled via}: Rulbus
@@ -2642,10 +2729,10 @@ package)
 two DACs on a card an each one has its own module)
 
 @paragraphindent 0
-@strong{Description}: 12-bit DAC card for Rulbus (Rijksuniversiteit
-Leiden BUS, @url{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/})
-- requires Linux device driver and library that are part of the @code{fsc2}
-package)
+@strong{Description}: 12-bit DAC card for
+@uref{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/,Rulbus
+(Rijksuniversiteit Leiden BUS)} - requires Linux device driver and
+library that are part of the @code{fsc2} package)
 
 @paragraphindent 0
 @strong{Controlled via}: Rulbus
@@ -2676,14 +2763,15 @@ package)
 
 @paragraphindent 0
 @strong{Description}: Pseudo-pulser for J-band spectrometer in Leiden,
-using the Rulbus (Rijksuniversiteit Leiden BUS,
-@url{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/})
-- requires Linux device driver and library that are part of the @code{fsc2}
-package). This pulser isn't a normal stand-alone device but consists of a
-combination of (currently) 10 Rulbus RB8514 delay cards and 2 clock cards
-(one fixed frequency 100 MHz card and a RB8515 card with adjustable frequency)
-as well as requiring the @strong{Rohde & Schwarz SML01} synthesizer (with
-the SML-B3 option) in order to be able to create @code{RF} pulses.
+using the
+@uref{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/,Rulbus
+(Rijksuniversiteit Leiden BUS)} - requires Linux device driver and
+library that are part of the @code{fsc2} package). This pulser isn't a
+normal stand-alone device but consists of a combination of (currently)
+10 Rulbus RB8514 delay cards and 2 clock cards (one fixed frequency
+100 MHz card and a RB8515 card with adjustable frequency) as well as
+requiring the @strong{Rohde & Schwarz SML01} synthesizer (with the
+SML-B3 option) in order to be able to create @code{RF} pulses.
 
 The timebase of this pulser is fixed to @w{10 ns}, but this can be changed
 by using a second adjustable clock card and a modification of the
@@ -2731,15 +2819,16 @@ a function).
 @strong{Module name}: @code{rb_pulser_w}
 
 @paragraphindent 0
-@strong{Description}: Pulser used for the W-band spectrometer in Leiden,
-using the Rulbus (Rijksuniversiteit Leiden BUS,
-@url{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/})
-- requires Linux device driver and library that are part of the @code{fsc2}
-package). This pulser isn't a normal stand-alone device but consists of a
-combination of (currently) 15 Rulbus RB8514 delay cards and 2 clock cards
-(one fixed frequency 100 MHz card and a RB8515 card with adjustable frequency)
-as well as requiring the @strong{Rohde & Schwarz SML01} synthesizer (with
-the SML-B3 option) in order to be able to create @code{RF} pulses.
+@strong{Description}: Pulser used for the W-band spectrometer in
+Leiden, using the
+@uref{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/,Rulbus
+(Rijksuniversiteit Leiden BUS)} - requires Linux device driver and
+library that are part of the @code{fsc2} package). This pulser isn't a
+normal stand-alone device but consists of a combination of (currently)
+15 Rulbus RB8514 delay cards and 2 clock cards (one fixed frequency
+100 MHz card and a RB8515 card with adjustable frequency) as well as
+requiring the @strong{Rohde & Schwarz SML01} synthesizer (with the
+SML-B3 option) in order to be able to create @code{RF} pulses.
 
 The timebase of this pulser is at the moment fixed to @w{10 ns}, but this
 can be changed by using a second adjustable clock card and a modification of
@@ -2872,10 +2961,10 @@ In the GPIB configuration file use @code{"RS690"} as the device name,
 
 @paragraphindent 0
 @strong{Description}: Power supply for magnet with home-built computer
-control to be used with the S-band spectrometer in the group of T.@:
-Prisner at the J.-W.-Goethe University in Frankfurt/Main
-(@url{http://www.prisner.de/}). Field range is @w{0 G} to @w{2047.5 G}
-with a resolution of @w{0.5 G}.
+control to be used with the S-band spectrometer in the
+@uref{http://www.prisner.de/,group of T.@: Prisner} at the
+J.-W.-Goethe University in Frankfurt/Main. Field range is @w{0 G} to
+@w{2047.5 G} with a resolution of @w{0.5 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -2915,10 +3004,10 @@ with a resolution of @w{0.5 G}.
 
 @paragraphindent 0
 @strong{Description}: Power supply for magnet with home-built computer
-control to be used with the S-band spectrometer in the group of T.@:
-Prisner at the J.-W.-Goethe University in Frankfurt/Main
-(@url{http://www.prisner.de/}). Field range is @w{1070 G} to @w{1479.5 G}
-with a resolution of @w{0.1 G}.
+control to be used with the S-band spectrometer in the
+@uref{http://www.prisner.de/,group of T.@: Prisner} at the
+J.-W.-Goethe University in Frankfurt/Main. Field range is @w{1070 G}
+to @w{1479.5 G} with a resolution of @w{0.1 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -2992,9 +3081,9 @@ to @code{yes} and @code{set-xeos} and @code{set-bin} to @code{no}.
 @strong{Module name}: @code{spectrapro_300i}
 
 @paragraphindent 0
-@strong{Description}: Acton Research (@url{http://www.acton-research.com/}
-SpectraPro-300i monochromator, up to 3 gratings on up to 3 turrets,
-wavelength range @w{0 nm} to @w{1400 nm}.
+@strong{Description}: @uref{http://www.acton-research.com/,Acton
+Research} SpectraPro-300i monochromator, up to 3 gratings on up to 3
+turrets, wavelength range @w{0 nm} to @w{1400 nm}.
 
 @paragraphindent 0
 @strong{Controlled via}:  Serial port
@@ -3139,7 +3228,7 @@ permissions and ownership of the file correctly.
 @strong{Module name}: @code{sr510}
 
 @paragraphindent 0
-@strong{Description}: Stanford Research (@url{http://www.thinksrs.com/})
+@strong{Description}: @uref{http://www.thinksrs.com/,Stanford Research}
 lock-in amplifier SR510, single channel, no internal modulation, 4 ADC and
 2 DAC ports.
 
@@ -3179,9 +3268,9 @@ In the GPIB configuration file use @code{"SR510"} as the device name,
 @strong{Module name}: @code{sr530}
 
 @paragraphindent 0
-@strong{Description}: Stanford Research (@url{http://www.thinksrs.com/})
-lock-in amplifier SR530, two channels, no internal modulation, 4 ADC and
-2 DAC ports.
+@strong{Description}: @uref{http://www.thinksrs.com/,Stanford
+Research} lock-in amplifier SR530, two channels, no internal
+modulation, 4 ADC and 2 DAC ports.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -3219,9 +3308,9 @@ In the GPIB configuration file use @code{"SR530"} as the device name,
 @strong{Module name}: @code{sr810}
 
 @paragraphindent 0
-@strong{Description}: Stanford Research (@url{http://www.thinksrs.com/})
-lock-in amplifier SR810, one channel, auto acquisition, internal modulation,
-4 ADC and 4 DAC ports.
+@strong{Description}: @uref{http://www.thinksrs.com/,Stanford
+Research} lock-in amplifier SR810, one channel, auto acquisition,
+internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -3264,9 +3353,9 @@ In the GPIB configuration file use @code{"SR810"} as the device name,
 @strong{Module name}: @code{sr830}
 
 @paragraphindent 0
-@strong{Description}: Stanford Research (@url{http://www.thinksrs.com/})
-lock-in amplifier SR830, two channels, auto acquisition, internal modulation,
-4 ADC and 4 DAC ports.
+@strong{Description}: @uref{http://www.thinksrs.com/,Stanford
+Research} lock-in amplifier SR830, two channels, auto acquisition,
+internal modulation, 4 ADC and 4 DAC ports.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -3309,7 +3398,7 @@ In the GPIB configuration file use @code{"SR830"} as the device name,
 @strong{Module name}: @code{tds520}
 
 @paragraphindent 0
-@strong{Description}: Tektronix (@url{http://www.tektronix.com/}) Digitizing
+@strong{Description}: @uref{http://www.tektronix.com/,Tektronix} Digitizing
 Oscilloscope TDS520, 2 measurement channels, 2 auxiliary channels, 3 math
 channels and 4 reference channels.
 
@@ -3362,7 +3451,7 @@ In the GPIB configuration file use @code{"TDS520"} as the device name,
 @strong{Module name}: @code{tds520a}
 
 @paragraphindent 0
-@strong{Description}: Tektronix (@url{http://www.tektronix.com/}) Digitizing
+@strong{Description}: @uref{http://www.tektronix.com/,Tektronix} Digitizing
 Oscilloscope TDS520A, 2 measurement channels, 2 auxiliary channels, 3 math
 channels and 4 reference channels.
 
@@ -3415,7 +3504,7 @@ In the GPIB configuration file use @code{"TDS520A"} as the device name,
 @strong{Module name}: @code{tds520c}
 
 @paragraphindent 0
-@strong{Description}: Tektronix (@url{http://www.tektronix.com/}) Digitizing
+@strong{Description}: @uref{http://www.tektronix.com/,Tektronix} Digitizing
 Oscilloscope TDS520C, 2 measurement channels, 2 auxiliary channels, 3 math
 channels and 4 reference channels.
 
@@ -3468,7 +3557,7 @@ In the GPIB configuration file use @code{"TDS520C"} as the device name,
 @strong{Module name}: @code{tds540}
 
 @paragraphindent 0
-@strong{Description}: Tektronix (@url{http://www.tektronix.com/}) Digitizing
+@strong{Description}: @uref{http://www.tektronix.com/,Tektronix} Digitizing
 Oscilloscope TDS540, 4 measurement channels, 1 auxiliary channel (to be used
 as trigger input only), 3 math channels and 4 reference channels.
 
@@ -3521,7 +3610,7 @@ In the GPIB configuration file use @code{"TDS540"} as the device name,
 @strong{Module name}: @code{tds744a}
 
 @paragraphindent 0
-@strong{Description}: Tektronix (@url{http://www.tektronix.com/}) Digitizing
+@strong{Description}: @uref{http://www.tektronix.com/,Tektronix} Digitizing
 Oscilloscope TDS744A, 4 measurement channels, 1 auxiliary channel (to be used
 as trigger input only), 3 math channels and 4 reference channels.
 
@@ -3574,7 +3663,7 @@ In the GPIB configuration file use @code{"TDS744A"} as the device name,
 @strong{Module name}: @code{tds754a}
 
 @paragraphindent 0
-@strong{Description}: Tektronix (@url{http://www.tektronix.com/}) Digitizing
+@strong{Description}: @uref{http://www.tektronix.com/,Tektronix} Digitizing
 Oscilloscope TDS754A, 4 measurement channels, 1 auxiliary channel (to be used
 as trigger input only), 3 math channels and 4 reference channels.
 
@@ -3680,7 +3769,7 @@ In the GPIB configuration file use @code{"TEGAM2714A"} as the device name,
 @strong{Module name}: @code{thurlby330}
 
 @paragraphindent 0
-@strong{Description}: Thurlby & Thandar (@url{http://www.tti-test.com/})
+@strong{Description}: @uref{http://www.tti-test.com/,Thurlby & Thandar}
 Power Supply PL330DP, 3 output channels, voltage range: @w{0 V} to @w{32 V}
 with a resolution of @w{10 mV}, current range: @w{0 A} to @w{3 A} with a
 resolution of @w{1 mA}.
@@ -3719,9 +3808,9 @@ In the GPIB configuration file use @code{"THURLBY330"} as the device name,
 @strong{Module name}: @code{witio_48}
 
 @paragraphindent 0
-@strong{Description}: ISA DIO card by Messcomp Datentechnik GmbH
-(@url{http://www.messcomp.com/}) with two 24-bit wide DIOs, that can be
-split into independent sub-DIOs.
+@strong{Description}: ISA DIO card by
+@uref{http://www.messcomp.com/,Messcomp Datentechnik GmbH} with two
+24-bit wide DIOs, that can be split into independent sub-DIOs.
 
 @paragraphindent 0
 @strong{Controlled via}: ISA card (required Linux device driver and

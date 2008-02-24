@@ -152,7 +152,7 @@ spex_cd2a_read_state( void )
 
 
 /*---------------------------------------------------------------*
- * Function for writing the state of teh monochromator to a file
+ * Function for writing the state of the monochromator to a file
  *---------------------------------------------------------------*/
 
 bool
@@ -170,8 +170,11 @@ spex_cd2a_store_state( void )
     {
         print( SEVERE, "Can't store state data in '%s', can't open file "
                "for writing.\n", fn );
+        T_free( fn );
         return FAIL;
     }
+
+    T_free( fn );
 
     fsc2_fprintf( fp, "# --- Do *not* edit this file, it gets created "
                   "automatically ---\n\n"

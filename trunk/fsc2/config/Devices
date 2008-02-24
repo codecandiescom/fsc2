@@ -119,12 +119,13 @@ schlum7150    // Schlumberger 7150
 // Temperature controllers
 
 lakeshore330  // Lakeshore 330 temperature controller
-itc503;       // Oxford ITC503 temperature controller
+itc503        // Oxford ITC503 temperature controller
 
 
 // Frequency counter
 
 hp5340a       // HP5340A frequency counter
+eip371        // EIP 371 frequency counter
 
 
 // DAQ cards and devices (ME-6000 board, HJS_DAADC, NI PCI-MIO-16E-1,
@@ -161,15 +162,21 @@ thurlby330
 mcn700_2000
 
 
-// DIOs (WITIO-48 card)
+// DIOs (WITIO-48 card, DIO of a Meilhaus card)
 
 witio_48
+me_dio
 
 
 // Microwave attenuators 
 
 hjs_attenuator           // stepper motor controlled attenuator from the
                          // group of H.-J. Steinhoff (Osnabrueck)
+
+
+// Goniometer
+
+er218
 
 
 // Choppers
