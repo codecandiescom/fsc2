@@ -7376,6 +7376,8 @@ Please note: Setting a new angle may take some time and the operation
 cannot be stopped until the goniometer has arrived at its new
 position.
 
+This function can only be used in the @code{EXPERIMENT} section.
+
 
 @anchor{goniometer_increment_angle()}
 @findex goniometer_increment_angle()
@@ -7391,23 +7393,25 @@ Please note: Changing the angle may take some time and the operation
 cannot be stopped until the goniometer has arrived at its new
 position.
 
+This function can only be used in the @code{EXPERIMENT} section.
+
 
 @anchor{goniometer_backslash_correction()}
 @findex goniometer_backslash_correction()
 @item goniometer_backslash_correction()
-The goniometer may have some mechanical backslash which reduces the
-the absolute angular accuracy to about @w{0.5 degree}. To increase
-this acurracy backslash correction can be switched on - in this
-case when the goniometer is moved counterclockwise it will move
-to some angle a bit below the angle requested by the functions
-@ref{goniometer_angle()} or @ref{goniometer_increment_angle()}
-and only then to the requested angle.
+The goniometer has some mechanical backslash which reduces the the
+absolute angular accuracy to about @w{0.5 degree}. To increase this
+acurracy backslash correction can be switched on - in this case when
+the goniometer is moved counterclockwise it will move to some angle a
+bit below the angle requested by the functions
+@ref{goniometer_angle()} or @ref{goniometer_increment_angle()} and
+only then in a clockwise direction to the requested angle.
 
 If called with an argument of @code{1} or the string @code{"ON"}
-backslash correction will be switched on, while when called with
-an argument of @code{0} or the string @code{"OFF"} it's switched
-off again. Switching backslash correction one may introduce a
-down and up rotation of the goniometer.
+backslash correction is switched on, while when called with an
+argument of @code{0} or the string @code{"OFF"} it's switched off
+again. Switching backslash correction one may introduce a down and up
+rotation of the goniometer.
 
 Please note: Switching backslash correction on may lead to somewhat
 longer times required to go to a new angular position.
@@ -7422,6 +7426,8 @@ expect any arguments) angles used as arguments or returned
 by the function @ref{goniometer_angle()} are relative to this
 zero position.
 
+This function can only be used in the @code{EXPERIMENT} section.
+
 
 @anchor{goniometer_set_zero_angle()}
 @findex goniometer_set_zero_angle()
@@ -7430,6 +7436,8 @@ This function, taking no arguments, allows to set a new zero position
 of the goniometer, i.e. angles used as arguments or returned
 by the function @ref{goniometer_angle()} are relative to this
 new zero position.
+
+This function can only be used in the @code{EXPERIMENT} section.
 
 
 @end table
