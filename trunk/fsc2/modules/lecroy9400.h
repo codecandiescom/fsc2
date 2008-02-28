@@ -91,7 +91,7 @@
    when the digitizer can't be accessed - these values must really be
    reasonable ! */
 
-#define LECROY9400_TEST_TB_ENTRY       19        /* i.e. 100 ms */
+#define LECROY9400_TEST_TB_ENTRY       4        /* i.e. 1 us */
 #define LECROY9400_TEST_COUPLING       AC_1_MOHM
 #define LECROY9400_TEST_SENSITIVITY    0.01
 #define LECROY9400_TEST_BWL            0
@@ -102,7 +102,6 @@
 #define LECROY9400_TEST_TRIG_MODE      TRG_MODE_NORMAL
 #define LECROY9400_TEST_TRIG_COUPLING  TRG_CPL_AC
 #define LECROY9400_TEST_TRIG_SLOPE     TRG_SLOPE_POS
-#define LECROY9400_TEST_REC_LEN        1250
 
 
 /* Structure for description of a 'window' on the digitizer, made up from the

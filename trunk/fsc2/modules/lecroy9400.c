@@ -181,6 +181,7 @@ int
 lecroy9400_test_hook( void )
 {
     lecroy9400_store_state( &lecroy9400_stored, &lecroy9400 );
+    lecroy9400.timebase = tb[ LECROY9400_TEST_TB_ENTRY ];
     return 1;
 }
 

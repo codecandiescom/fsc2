@@ -50,7 +50,7 @@ static ssize_t do_read( int    fd,
 
 char *
 get_string( const char * fmt,
-                  ... )
+            ... )
 {
     char *c = NULL;
     size_t len = GET_STRING_TRY_LENGTH;
