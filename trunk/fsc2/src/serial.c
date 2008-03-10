@@ -904,10 +904,10 @@ fsc2_serial_write( int          sn,
  * Function for reading data from one of the serial ports. It expects
  * 5 arguments, first the number of the serial port, then a buffer and
  * its length for returning the read in data, a timeout in us we are
- * supposed to wait for data to readable on the serial port and
+ * supposed to wait for data to be read from the serial port and
  * finally a flag that tells if the function is to return immediately
- * if as signal is received before any data could be read.
- * if the timeout value in 'us_wait' is zero the function won't wait
+ * if a signal is received.
+ * If the timeout value in 'us_wait' is zero the function won't wait
  * for data to appear on the serial port, when it is negative the
  * function waits indefinitely long for data.
  * The function returns the number of read in data or -1 when an error
@@ -923,9 +923,13 @@ fsc2_serial_read( int    sn,
                   bool   quit_on_signal )
 {
     ssize_t read_count;
+    size_t total_count = 0;
     fd_set rfds;
     struct timeval timeout;
     struct timeval before, after;
+    long still_to_wait = us_wait;
+    int ret;
+    unsigned char *p = buf;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -951,11 +955,11 @@ fsc2_serial_read( int    sn,
 
     if ( ll == LL_ALL )
     {
-        if ( us_wait == 0 )
+        if ( still_to_wait == 0 )
             fsc2_serial_log_message( "Expected to read up to %ld bytes "
                                      "without delay from serial port "
                                      "%d\n", ( long ) count, sn );
-        else if ( us_wait < 0 )
+        else if ( still_to_wait < 0 )
             fsc2_serial_log_message( "Expected to read up to %ld bytes from "
                                      "serial port %d\n",
                                      ( long ) count, sn );
@@ -963,33 +967,37 @@ fsc2_serial_read( int    sn,
             fsc2_serial_log_message( "Expected to read up to %ld bytes "
                                      "within %ld ms from serial port "
                                      "%d\n", ( long ) count,
-                                     us_wait / 1000, sn );
+                                     still_to_wait / 1000, sn );
     }
 
-    raise_permissions( );
+    do {
 
-    /* If there is a zero timeout period wait for data for the specified
-       timeout. A negative timeout means wait forever. */
+        /* If there is a non-zero timeout wait using select() for data to
+           become readable (negative timeout means wait forever). */
 
-    if ( us_wait != 0 )
-    {
-        FD_ZERO( &rfds );
-        FD_SET( Serial_Port[ sn ].fd, &rfds );
-
-    read_retry:
-
-        if ( us_wait > 0 )
+        if ( us_wait != 0 )
         {
-            timeout.tv_sec  = us_wait / 1000000;
-            timeout.tv_usec = us_wait % 1000000;
-        }
+          read_retry:
 
-        gettimeofday( &before, NULL );
+            FD_ZERO( &rfds );
+            FD_SET( Serial_Port[ sn ].fd, &rfds );
 
-        switch ( select( Serial_Port[ sn ].fd + 1, &rfds, NULL, NULL,
-                         us_wait > 0 ? &timeout : NULL ) )
-        {
-            case -1 :
+            if ( us_wait > 0 )
+            {
+                timeout.tv_sec  = still_to_wait / 1000000;
+                timeout.tv_usec = still_to_wait % 1000000;
+                gettimeofday( &before, NULL );
+            }
+
+            raise_permissions( );
+
+            ret = select( Serial_Port[ sn ].fd + 1, &rfds, NULL, NULL,
+                          us_wait > 0 ? &timeout : NULL );
+
+            lower_permissions( );
+
+            if ( ret == -1 )
+            {
                 if ( errno != EINTR )
                 {
                     fsc2_serial_log_message( "Error: select() returned value "
@@ -997,63 +1005,126 @@ fsc2_serial_read( int    sn,
                                              "fsc2_serial_read()\n" );
                     fsc2_serial_log_function_end( "fsc2_serial_read",
                                                   Serial_Port[ sn ].dev_name );
-                    lower_permissions( );
                     return -1;
                 }
 
                 if ( ! quit_on_signal )
                 {
-                    gettimeofday( &after, NULL );
-                    us_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
-                               - ( before.tv_sec * 1000000 + before.tv_usec );
-                    if ( us_wait > 0 )
+                    if ( us_wait < 0 )
                         goto read_retry;
+
+                    gettimeofday( &after, NULL );
+                    still_to_wait -=
+                                   ( after.tv_sec  * 1000000 + after.tv_usec  )
+                                 - ( before.tv_sec * 1000000 + before.tv_usec );
+
+                    if ( still_to_wait > 0 )
+                        goto read_retry;
+                    else
+                        break;
                 }
 
                 fsc2_serial_log_message( "Error: select() aborted due to "
-                                         "receipt of a signal\n" );
+                                         "receipt of signal\n" );
                 fsc2_serial_log_function_end( "fsc2_serial_read",
                                               Serial_Port[ sn ].dev_name );
-                lower_permissions( );
                 return 0;
+            }
+            else if ( ret == 0 )
+            {
+                if ( total_count == 0 )
+                {
+                    fsc2_serial_log_message( "Error: reading aborted due to "
+                                             "timeout\n" );
+                    fsc2_serial_log_function_end( "fsc2_serial_write",
+                                                  Serial_Port[ sn ].dev_name );
+                    return 0;
+                }
+                else
+                    break;
+            }
 
-            case 0 :
-                fsc2_serial_log_message( "Error: reading aborted due to "
-                                         "timeout\n" );
-                fsc2_serial_log_function_end( "fsc2_serial_write",
-                                              Serial_Port[ sn ].dev_name );
-                lower_permissions( );
-                return 0;
+            if ( us_wait > 0 )
+            {
+                gettimeofday( &after, NULL );
+                still_to_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
+                                 - ( before.tv_sec * 1000000 + before.tv_usec );
+                gettimeofday( &before, NULL );
+            }
         }
-    }
 
-    while (    ( read_count = read( Serial_Port[ sn ].fd, buf, count ) ) < 0
-            && errno == EINTR
-            && ! quit_on_signal )
-        /* empty */ ;
+        /* Now try to read */
+ 
+        raise_permissions( );
+
+        while (    ( read_count = read( Serial_Port[ sn ].fd, p,
+                                        count - total_count ) ) < 0
+                && errno == EINTR
+                && ! quit_on_signal )
+            /* empty */ ;
         
-    if ( read_count == 0 )
-    {
-        if ( ll == LL_ALL )
-            fsc2_serial_log_message( "No bytes could be read\n" );
-    }
-    else if ( read_count < 0 && errno == EINTR )
-    {
-        fsc2_serial_log_message( "Error: reading aborted due to signal, "
-                                 "0 bytes got read\n" );
-        read_count = 0;
-    }
-    else if ( ll == LL_ALL )
-        fsc2_serial_log_message( "Read %ld bytes from serial port %d:\n%.*s\n",
-                                 ( long ) read_count, sn,
-                                 ( int ) read_count, buf );
+        lower_permissions( );
 
-    lower_permissions( );
+        /* Getting no bytes is most likely if we were asked to read without
+           waiting and then is ok, but under strange circumstances it could
+           also happen despite select() telling us there's something to read,
+           in which case this has to be considered an error */
+
+        if ( read_count == 0 )
+        {
+            if ( us_wait != 0 )
+            {
+                if ( ll == LL_ALL )
+                    fsc2_serial_log_message( "No bytes could be read, "
+                                             "aborting\n" );
+                return -1;
+            }
+
+            break;
+        }
+        else if ( read_count < 0 )
+        {
+            if ( errno == EINTR )
+                fsc2_serial_log_message( "Error: reading aborted due to "
+                                         "signal\n" );
+            else
+                fsc2_serial_log_message( "Error: read() returned value "
+                                         "indicating error in "
+                                         "fsc2_serial_read()\n" );
+
+            fsc2_serial_log_function_end( "fsc2_serial_read",
+                                          Serial_Port[ sn ].dev_name );
+
+            return errno == EINTR ? 0 : -1;
+        }
+
+        total_count += read_count;
+        p += read_count;
+
+        if ( us_wait > 0 )
+        {
+            gettimeofday( &after, NULL );
+            still_to_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
+                             - ( before.tv_sec * 1000000 + before.tv_usec );
+        }
+    } while (    total_count < count
+              && ( us_wait < 0 || still_to_wait > 0 ) );
+
+    if ( ll == LL_ALL )
+    {
+        if ( total_count > 0 )
+            fsc2_serial_log_message( "Read %ld bytes from serial port %d:\n"
+                                     "%.*s\n",
+                                     ( long ) total_count, sn,
+                                     ( int ) total_count, buf );
+        else
+            fsc2_serial_log_message( "Got 0 bytes from serial port %d:\n", sn );
+    }
 
     fsc2_serial_log_function_end( "fsc2_serial_read",
                                   Serial_Port[ sn ].dev_name );
 
-    return read_count;
+    return total_count;
 }
 
 
@@ -1096,6 +1167,8 @@ get_serial_lock( int sn )
         n = read( fd, buf, sizeof buf - 1 );
         close( fd );
 
+        lower_permissions( );
+
         if ( n == 11 )                    /* expect standard HDB UUCP format */
         {
             buf[ n ] = '\0';
@@ -1109,7 +1182,6 @@ get_serial_lock( int sn )
 
             if ( n == 0 || n == EOF )
             {
-                lower_permissions( );
                 fsc2_serial_log_message( "Error: Lock file '%s' for serial "
                                          "port %d has unknown format.\n",
                                          Serial_Port[ sn ].lock_file, sn );
@@ -1123,6 +1195,8 @@ get_serial_lock( int sn )
 
             if ( pid > 0 && kill( ( pid_t ) pid, 0 ) < 0 && errno == ESRCH )
             {
+                raise_permissions( );
+
                 if ( unlink( Serial_Port[ sn ].lock_file ) < 0 )
                 {
                     lower_permissions( );
@@ -1133,10 +1207,11 @@ get_serial_lock( int sn )
                                                   Serial_Port[ sn ].dev_name );
                     return FAIL;
                 }
+
+                lower_permissions( );
             }
             else
             {
-                lower_permissions( );
                 fsc2_serial_log_message( "Error: Serial port %d is locked by "
                                          "another program according to lock "
                                          "file '%s'.\n",
@@ -1148,7 +1223,6 @@ get_serial_lock( int sn )
         }
         else
         {
-            lower_permissions( );
             fsc2_serial_log_message( "Error: Can't read lock file '%s' for "
                                      "serial port %d or it has an unknown "
                                      "format.\n",
@@ -1160,9 +1234,10 @@ get_serial_lock( int sn )
     }
     else                               /* couldn't open lock file, check why */
     {
+        lower_permissions( );
+
         if ( errno == EACCES )                       /* no access permission */
         {
-            lower_permissions( );
             fsc2_serial_log_message( "Error: No permission to access lock "
                                      "file '%s' for serial port %d.\n",
                                      Serial_Port[ sn ].lock_file, sn );
@@ -1173,7 +1248,6 @@ get_serial_lock( int sn )
 
         if ( errno != ENOENT )    /* other errors except file does not exist */
         {
-            lower_permissions( );
             fsc2_serial_log_message( "Error: Can't access lock file '%s' for "
                                      "serial port %d .\n",
                                      Serial_Port[ sn ].lock_file, sn );
@@ -1186,6 +1260,9 @@ get_serial_lock( int sn )
     /* Create lockfile compatible with UUCP-1.2 */
 
     mask = umask( 022 );
+
+    raise_permissions( );
+
     if ( ( fd = open( Serial_Port[ sn ].lock_file,
                       O_WRONLY | O_CREAT | O_EXCL, 0666 ) ) < 0 )
     {
@@ -1206,6 +1283,7 @@ get_serial_lock( int sn )
     close( fd );
 
     lower_permissions( );
+
     Serial_Port[ sn ].have_lock = SET;
 
     fsc2_serial_log_function_end( "get_serial_lock",

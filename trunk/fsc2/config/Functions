@@ -59,6 +59,8 @@ set_field, -1, EXP;              // go to a field value (deprecated)
 get_field, 0, EXP;               // returns the current field (deprecated)
 reset_field, 0, EXP;             // go back to start field (deprecated)
 
+magnet_sweep_rate, -1, ALL;         // set or query a sweep rate
+
 
 /* Functions supported by the Steinhoff magnets (hjs_sfc, hjs_fc) only */
 
@@ -85,12 +87,20 @@ magnet_use_dac_port, 1, PREP;   // to set the lock-ins DAC port to be used
 /* Functions for the Oxford IPS20-4 sweep power supply driver only */
 
 magnet_sweep, -1, EXP;              // starts or stops a sweep
-magnet_sweep_rate, -1, ALL;         // set or query a sweep rate
 
 
 /* Functions in Oxford IPS20-4 and S-Band power supply drivers */
 
 magnet_goto_field_on_end, 1, ALL;   // keep sweeping after end of experiment
+
+
+/* Functions for the FPS25 sweep coil power supply only */
+
+magnet_max_current, -1, ALL;
+magnet_max_sweep_rate, -1, ALL;
+magnet_request_expert_mode, 0, PREP;
+magnet_coil_current, 0, EXP;
+magnet_shutdown, 0, EXP;
 
 
 /* Functions in Oxford IPS20-4 and Keithley 228A power supply drivers */

@@ -85,6 +85,7 @@ s_band_magnet_broad;    // special module for "broken" Frankfurt S-band
 s_band_magnet_narrow;   // special module for "broken" Frankfurt S-band
 hjs_sfc;      // simple field control for Steinhoff group
 hjs_fc;       // field control with field checking for Steinhoff group
+fsps25;       // supra-conducting sweep coil power supply
 
 
 // Field meter
