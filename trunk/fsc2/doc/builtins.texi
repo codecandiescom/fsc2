@@ -2580,11 +2580,17 @@ used in the @code{EXPERIMENT} section only and not after the
 @anchor{abort()}
 @findex abort()
 @item abort()
-The function will abort the currently running script immediately
+The function will abort the currently running script immediately.
+
 without even running the code following the @code{ON_STOP} label, so it
 is a kind of an emergency exit when nothing better will do. When called it
-displays a message box on the screen to inform the user. This function
-can only be used in the @code{EXPERIMENT} section.
+displays a message box on the screen to inform the user.
+
+If called after the @code{ON_STOP} label it simply ends the experiment
+without any notofication of the user, so it then can be used to get
+graciouslu out of the @code{ON_STOP} handling.
+
+The function can only be used in the @code{EXPERIMENT} section.
 
 
 @anchor{date()}

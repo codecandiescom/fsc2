@@ -1274,7 +1274,7 @@ exp_istate( char *    buffer,
 
 /*--------------------------------------------------------------*
  * Child and parent side function for passing and returning the
- * arguments and results of the input_value() function
+ * arguments and results of the input_changed() function
  *--------------------------------------------------------------*/
 
 long *
@@ -1311,7 +1311,7 @@ exp_ichanged( char *    buffer,
 
         TRY
         {
-            /* Get variable with address of function to change state */
+            /* Get variable with address of function to call */
 
             func_ptr = func_get( "input_changed", &acc );
 

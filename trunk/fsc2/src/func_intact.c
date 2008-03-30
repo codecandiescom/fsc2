@@ -170,9 +170,9 @@ toolbox_create( long layout )
         FI_sizes.OUT_HEIGHT          = h;
         FI_sizes.IN_OUT_WIDTH        = 210;
 
-        FI_sizes.MENU_WIDTH         = 210;
-        FI_sizes.MENU_ADD_X         = 40;
-        FI_sizes.MENU_ADD_Y         = 30;
+        FI_sizes.MENU_WIDTH          = 210;
+        FI_sizes.MENU_ADD_X          = 40;
+        FI_sizes.MENU_ADD_Y          = 30;
 
         FI_sizes.SYMBOL_SIZE_IN      = 40;
     }
@@ -1774,7 +1774,7 @@ tools_callback( FL_OBJECT * obj,
     const char *buf;
     int old_state;
     char obuf[ MAX_INPUT_CHARS + 1 ];
-
+    int old_errno;
 
 
     /* Find out which object got changed */
@@ -1833,18 +1833,21 @@ tools_callback( FL_OBJECT * obj,
         case INT_INPUT :
             buf = fl_get_input( obj );
 
+            /* Check the input field, use strtol() instead of T_atol()
+               since we don't want an exception in the case that the number
+               is too large for a long (it gets set to the nearest limit
+               in that case) */
+
             if ( *buf == '\0' )
                 lval = 0;
             else
-                sscanf( buf, "%ld", &lval );
+            {
+                old_errno = errno;
+                lval = strtol( buf, NULL, 10 );
+                errno = old_errno;
+            }
 
             snprintf( obuf, MAX_INPUT_CHARS + 1, "%ld", lval );
-
-            if ( strcmp( buf, obuf ) )
-            {
-                fl_set_input( io->self, buf );
-                break;
-            }
 
             fl_set_input( io->self, obuf );
             if ( lval != io->val.lval )
@@ -1859,32 +1862,29 @@ tools_callback( FL_OBJECT * obj,
         case FLOAT_INPUT :
             buf = fl_get_input( io->self );
 
+            /* Check the input field, use strtod() instead of T_atod()
+               since we don't want an exception in the case that the number
+               is too large for a double (it gets set to the nearest limit
+               in that case) */
+
             if ( *buf == '\0' )
-                dval = 0;
+                dval = 0.0;
             else
-                sscanf( buf, "%lf", &dval );
-
-/* If macro isfinite() isn't defined we try the older BSD version */
-
-#if defined( isfinite )
-            if ( ! isfinite( dval ) )
             {
-                fl_set_input( io->self, buf );
-                break;
+                old_errno = errno;
+                dval = strtod( buf, NULL );
+                errno = old_errno;
             }
-#elif defined( finite )
-            if ( ! finite( dval ) )
-            {
-                fl_set_input( io->self, buf );
-                break;
-            }
-#endif
 
             snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, dval );
             fl_set_input( io->self, obuf );
-            sscanf( obuf, "%lf", &dval );
 
+            /* Take care: the actual value may have changed a bit due to
+               the format used, so recheck it. */
+
+            dval = strtod( obuf, NULL );
             snprintf( obuf, MAX_INPUT_CHARS + 1, io->form_str, io->val.dval );
+
             if ( strcasecmp( obuf, fl_get_input( io->self ) ) )
             {
                 io->val.dval = dval;

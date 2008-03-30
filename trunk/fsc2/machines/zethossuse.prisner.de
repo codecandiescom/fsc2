@@ -39,8 +39,8 @@ prefix             := /usr/local
 # USER is set it will run with the UID of that account. Please also see the
 # discussion in the INSTALL file for more information.
 
-# OWNER              := fsc2
-# GROUP              := uucp
+OWNER              := fsc2
+GROUP              := uucp
 
 
 # Uncomment the following only if you compile the program for a non-i386 type

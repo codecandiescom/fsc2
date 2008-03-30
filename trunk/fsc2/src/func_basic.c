@@ -44,13 +44,18 @@ static void avg_data_check( Var_T * avg,
 Var_T *
 f_abort( Var_T * v  UNUSED_ARG )
 {
-    char *str;
+    /* If we're already past the ON_STOP label just stop without complaints */
 
+    if (    EDL.On_Stop_Pos >= 0
+            && EDL.cur_prg_token >= EDL.prg_token + EDL.On_Stop_Pos )
+        THROW( ABORT_EXCEPTION );
+
+    /* Otherwise inform the user abut what happend */
 
     if ( Fsc2_Internals.mode != TEST )
     {
-        str = get_string( "Exit due to call of abort() in\n"
-                          "%s at line %ld.", EDL.Fname, EDL.Lc );
+        char * str = get_string( "Exit due to call of abort() in\n"
+                                 "%s at line %ld.", EDL.Fname, EDL.Lc );
         show_message( str );
         T_free( str );
         print( NO_ERROR, "Experiment stopped due to call of abort().\n" );

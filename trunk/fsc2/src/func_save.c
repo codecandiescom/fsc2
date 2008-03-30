@@ -63,14 +63,27 @@ static long T_fprintf( long         /* fn  */,
 
 
 /*----------------------------------------------------------------*
- * Using this function is deprecated (and not necessary anymore),
- * so just return a value indicating success.
+ * Returns if a file number passed to the function stands for an 
+ * open file.
  *----------------------------------------------------------------*/
 
 Var_T *
-f_is_file( Var_T * v  UNUSED_ARG )
+f_is_file( Var_T * v )
 {
-    return vars_push( INT_VAR, 1L );
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing argument.\n" );
+        THROW( EXCEPTION );
+    }
+
+    long fn = get_long( v, "file number" );
+
+    too_many_arguments( v );
+
+    return vars_push( INT_VAR,
+                      (    fn < FILE_NUMBER_OFFSET
+                        || fn >= EDL.File_List_Len + FILE_NUMBER_OFFSET ) ?
+                      0L : 1L );
 }
 
 

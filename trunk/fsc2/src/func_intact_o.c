@@ -269,7 +269,8 @@ f_ocreate( Var_T * var )
     too_many_arguments( v );
 
     /* Now that we're done with checking the parameters we can create the new
-       button - if the Toolbox doesn't exist yet we've got to create it now */
+       input or output field - if the Toolbox doesn't exist yet we've got to
+       create it now */
 
     TRY
     {
@@ -723,6 +724,7 @@ f_ovalue( Var_T * v )
 
     io = find_object_from_ID( get_strict_long( v,
                                                "input or output object ID" ) );
+
     if ( io == NULL || ! IS_INOUTPUT( io->type ) )
     {
         print( FATAL, "Invalid input or output object identifier.\n" );
@@ -973,7 +975,7 @@ f_ochanged( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    /* Again, the child has to pass the arguments to the parent and ask it
+    /* As usual the child has to pass the arguments to the parent and ask it
        to return if the objects got changed */
 
     if ( Fsc2_Internals.I_am == CHILD )
@@ -987,10 +989,11 @@ f_ochanged( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    /* Check that ID is ID of an input or output object */
+    /* Check that the ID is one of an input or output object */
 
     io = find_object_from_ID( get_strict_long( v,
                                                "input or output object ID" ) );
+
     if ( io == NULL || ! IS_INOUTPUT( io->type ) )
     {
         print( FATAL, "Invalid input or output object identifier.\n" );
@@ -1036,7 +1039,7 @@ f_ochanged_child( Var_T * v )
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;
 
-    memcpy( pos, &ID, sizeof ID );          /* sliders ID */
+    memcpy( pos, &ID, sizeof ID );          /* input or output object ID */
     pos += sizeof ID;
 
     if ( EDL.Fname )

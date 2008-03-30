@@ -82,7 +82,7 @@ static long vars_assign_snd_range_from_nd_2( Var_T * dest,
 
 void
 vars_assign( Var_T * src,
-                  Var_T * dest )
+             Var_T * dest )
 {
     long count = 0;
 
@@ -224,6 +224,7 @@ vars_assign_to_nd( Var_T * src,
                    Var_T * dest )
 {
     long count = 0;
+
 
     switch ( src->type )
     {
@@ -410,7 +411,10 @@ vars_assign_to_snd_range_from_1d( Var_T * dest,
                                   double  d )
 {
     long count = 0;
-    ssize_t i, ind, range_start, range_end;
+    ssize_t i,
+            ind,
+            range_start,
+            range_end;
 
 
     /* Descend into the submatrices of the destination matrix while there
@@ -690,7 +694,7 @@ vars_assign_to_snd_from_nd( Var_T * src,
     while ( i < sub->len )
         if ( sub->val.index[ i++ ] < 0 )
             i++;
-        else
+        else if ( i != sub->len )
             single_indices++;
 
     /* The dimension of the destination array minus the number of single
@@ -716,7 +720,10 @@ vars_assign_snd_range_from_nd( Var_T * dest,
                                ssize_t cur,
                                Var_T * src )
 {
-    ssize_t ind, start, end, i;
+    ssize_t ind,
+            start,
+            end,
+            i;
     long count = 0;
 
 
@@ -826,6 +833,7 @@ vars_assign_snd_range_from_nd_2( Var_T * dest,
 {
     ssize_t range = end - start + 1;
     ssize_t i;
+    ssize_t idx;
     long count = 0;
 
 
@@ -858,9 +866,39 @@ vars_assign_snd_range_from_nd_2( Var_T * dest,
             break;
 
         default :
-            for ( i = start; i <= end; i++ )
-                count += vars_assign_snd_range_from_nd( dest->val.vptr[ i ],
-                                                        sub, cur, src );
+            if ( sub->val.index[ cur ] >= 0 )
+            {
+                idx = sub->val.index[ cur ];
+
+                if ( src->type == INT_ARR )
+                {
+                    for ( i = 0; i < range; i++ )
+                        if ( dest->type == INT_REF )
+                            dest->val.vptr[ i + start ]->val.lpnt[ idx ] =
+                                                             src->val.lpnt[ i ];
+                        else
+                            dest->val.vptr[ i + start ]->val.dpnt[ idx ] =
+                                                             src->val.lpnt[ i ];
+                }
+                else if ( src->type == FLOAT_ARR )
+                {
+                    for ( i = 0; i < range; i++ )
+                        if ( dest->type == INT_REF )
+                            dest->val.vptr[ i + start ]->val.lpnt[ idx ] =
+                                                     lrnd( src->val.dpnt[ i ] );
+                        else
+                            dest->val.vptr[ i + start ]->val.dpnt[ idx ] =
+                                                            src->val.dpnt[ i ];
+                }
+                else
+                    fsc2_assert( 1 == 0 );
+
+                count = range;
+            }
+            else
+                for ( i = start; i <= end; i++ )
+                    count += vars_assign_snd_range_from_nd( dest->val.vptr[ i ],
+                                                            sub, cur, src );
             break;
     }
 

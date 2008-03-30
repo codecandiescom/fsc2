@@ -101,7 +101,7 @@ magnet_max_sweep_rate, -1, ALL;
 magnet_request_expert_mode, 0, PREP;
 magnet_coil_current, 0, EXP;
 magnet_shutdown, 0, EXP;
-
+magnet_heater_state, -1, ALL;
 
 /* Functions in Oxford IPS20-4 and Keithley 228A power supply drivers */
 

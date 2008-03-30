@@ -49,17 +49,18 @@ Var_T * magnet_max_sweep_rate( Var_T *v );
 Var_T * magnet_request_expert_mode( Var_T * v );
 Var_T * magnet_coil_current( Var_T * v );
 Var_T * magnet_shutdown( Var_T * v  );
+Var_T * magnet_heater_state( Var_T * v );
 
 
 /* Local functions */
 
 static void fsps25_init( void );
-static void fsps25_on( void );
+static void fsps25_on( bool shutdown_on_fail );
 static void fsps25_off( void );
-static void fsps25_get_state( void );
+static void fsps25_get_state( bool shutdown_on_fail );
 static int  fsps25_get_heater_state( void );
 static void fsps25_set_heater_state( int state );
-static void fsps25_set_expert_mode( void );
+static void fsps25_set_expert_mode( bool state );
 static bool fsps25_abort_sweep( void );
 static long fsps25_get_act_current( void );
 static long fsps25_set_act_current( long current );
@@ -73,6 +74,7 @@ static long fsps25_set_max_sweep_speed( long max_speed );
 static void fsps25_open( void );
 static bool fsps25_get_command_reply( void );
 static void fsps25_comm_fail( void );
+static void fsps25_fail_handler( void );
 static void fsps25_wrong_data( void );
 
 
@@ -97,10 +99,12 @@ typedef struct {
 
 FSPS25 fsps25, fsps25_stored;
 
-#define RESPONSE_TIME          50000     /* 50 ms (for "normal commands) */
+#define RESPONSE_TIME          50000    /* 50 ms (for "normal commands) */
 
 #define HEATER_OFF_DELAY       10000000  /* 10 s  */
 #define HEATER_ON_DELAY        1500000   /* 1.5 s */
+
+#define MAX_CURRENT_DIFF       10         /* 10 mA */
 
 /* Defines for the parity used by the device */
 
@@ -138,6 +142,9 @@ FSPS25 fsps25, fsps25_stored;
 #define  MAX_HEATER_OFF_SPEED  6000   /* 6000 mA/min */
 
 
+#define FSPS25_TEST_CURRENT  0
+
+
 /****************************************************/
 /*                                                  */
 /*                  hook functions                  */
@@ -157,12 +164,15 @@ fsps25_init_hook( void )
 
 	fsps25.is_open = UNSET;
 	fsps25.state = STATE_OFF;
-	fsps25.sweep_state = STOPPED;
+	fsps25.sweep_state  = STOPPED;
 	fsps25.heater_state = HEATER_OFF;
 	fsps25.is_matched = SET;
 	fsps25.act_current = fsps25.super_current = 0;
+	fsps25.act_current_is_set = UNSET;
 	fsps25.max_current = MAX_ALLOWED_CURRENT;
+	fsps25.max_current_is_set = UNSET;
 	fsps25.max_speed = fsps25.act_speed = MAX_SPEED;
+    fsps25.max_speed_is_set = fsps25.act_speed_is_set = UNSET;
 	fsps25.is_expert_mode = UNSET;
 
 	return 1;
@@ -176,6 +186,13 @@ int
 fsps25_test_hook( void )
 {
 	fsps25_stored = fsps25;
+
+    fsps25.state = STATE_ON;
+    fsps25.heater_state = HEATER_ON;
+    if ( ! fsps25.act_current_is_set )
+        fsps25.act_current = fsps25.super_current = FSPS25_TEST_CURRENT;
+    fsps25.is_matched = SET;
+
 	return 1;
 }
 
@@ -198,6 +215,12 @@ fsps25_exp_hook( void )
 int
 fsps25_end_of_exp_hook( void )
 {
+    if ( fsps25.is_open )
+    {
+        fsc2_serial_close( SERIAL_PORT );
+        fsps25.is_open = UNSET;
+    }
+
 	return 1;
 }
 
@@ -228,7 +251,7 @@ magnet_request_expert_mode( Var_T * v  UNUSED_ARG )
 Var_T *
 magnet_coil_current( Var_T * v  UNUSED_ARG )
 {
-    return vars_push( FLOAT_VAR, 1.e3-3 * fsps25_get_super_current( ) );
+    return vars_push( FLOAT_VAR, 1.0e-3 * fsps25_get_super_current( ) );
 }
 
 
@@ -254,8 +277,8 @@ magnet_field( Var_T * v )
 
 
 	if ( v == NULL )
-		vars_push( FLOAT_VAR,
-				   1.0e-3 * fsps25_get_super_current( ) );
+		return vars_push( FLOAT_VAR,
+                          1.0e-3 * fsps25_get_super_current( ) );
 
 	current = get_double( v, "current" );
 	raw_current = lrnd( 1.0e3 * current );
@@ -283,15 +306,29 @@ magnet_field( Var_T * v )
 		THROW( EXCEPTION );
 	}
 
+    /* Can't set a current through the coil if heater is off */
+
+    if ( fsps25.heater_state != HEATER_ON )
+    {
+        print( FATAL, "Can't set field while heater is off.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( fsps25.heater_state == HEATER_FAIL )
+    {
+        print( FATAL, "Heater is in failure state, can't set field, "
+               "shutting device down.\n" );
+        THROW( EXCEPTION );
+    }
+
 	if (    fsps25.act_current == raw_current
 		 || FSC2_MODE != EXPERIMENT )
-	{
 		fsps25.act_current_is_set = SET;
-		return vars_push( FLOAT_VAR, 1.0e-3 * raw_current );
-	}
+    else
+        fsps25_set_act_current( raw_current );
 
 	return vars_push( FLOAT_VAR,
-					  1.0e-3 * fsps25_set_act_current( raw_current ) );
+					  1.0e-3 * fsps25_get_super_current( ) );
 }
 
 
@@ -326,7 +363,7 @@ magnet_sweep_rate( Var_T * v )
 	if ( raw_speed > fsps25.max_speed )
 	{
 		print( FATAL, "Sweep rate argument is larger than the currently set "
-			   "upper limit of %.3f mA/s.\n", fsps25.max_speed / 6.0e4 );
+			   "upper limit of %.1f mA/s.\n", fsps25.max_speed / 60.0 );
 		THROW( EXCEPTION );
 	}
 
@@ -383,19 +420,24 @@ magnet_max_current( Var_T * v )
        a sweep at this moment) and refuse to set a maximum current that's
        lower than this actual current */
 
-    fsps25_get_act_current( );
+    if ( FSC2_MODE == EXPERIMENT )
+    {
+        fsps25_get_act_current( );
 
-	if ( raw_max_current > labs( fsps25.act_current ) )
-	{
-		print( FATAL, "Can't set maximum current to a value lower than the "
-			   "actual current.\n" );
-		THROW( EXCEPTION );
-	}
+        if ( raw_max_current < labs( fsps25.act_current ) - MAX_CURRENT_DIFF )
+        {
+            print( FATAL, "Can't set maximum current to a value lower than "
+                   "the actual current.\n" );
+            print( FATAL, "%ld < %ld\n", raw_max_current,  fsps25.act_current );
+            THROW( EXCEPTION );
+        }
+    }
 
 	if (    raw_max_current == fsps25.max_current
 		 || FSC2_MODE != EXPERIMENT )
 	{
-		fsps25.max_current = SET;
+		fsps25.max_current_is_set = SET;
+		fsps25.max_current = raw_max_current;
 		return vars_push( FLOAT_VAR, 1.0e-3 * raw_max_current );
 	}
 
@@ -456,6 +498,32 @@ magnet_max_sweep_rate( Var_T *v )
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
+Var_T *
+magnet_heater_state( Var_T * v )
+{
+    bool state;
+
+    if ( v == NULL )
+        return vars_push( INT_VAR, ( long ) fsps25_get_heater_state( ) );
+
+    if ( ! fsps25.is_expert_mode )
+    {
+        print( FATAL, "This function can only be used whe expert mode "
+               "has been requested.\n" );
+        THROW( EXCEPTION );
+    }
+
+    state = get_boolean( v );
+    too_many_arguments( v );
+    fsps25_set_heater_state( state );
+
+    return vars_push( INT_VAR, ( long ) fsps25_get_heater_state( ) );
+}
+
+
+/*------------------------------------------------------------------------*
+ *------------------------------------------------------------------------*/
+
 static void
 fsps25_init( void )
 {
@@ -463,22 +531,49 @@ fsps25_init( void )
 
 
 	fsps25_open( );
-	fsps25_get_state( );
 
-	if ( fsps25.state == STATE_PFAIL &&! fsps25.is_expert_mode )
+	if ( fsps25.state == STATE_PFAIL && ! fsps25.is_expert_mode )
+    {
+        print( FATAL,
+               "Device is in PFail state. Need expert mode to contuinue.\n" );
         THROW( EXCEPTION );
+    }
+
+    /* There's no reason to keep the expert mode if the device isn't in
+       PFail state */
+
+    if ( fsps25.state == STATE_PFAIL )
+        fsps25.is_expert_mode = UNSET;
 
 	/* Switch to ON state if necessary */
 
 	if ( fsps25.state == STATE_OFF )
-		fsps25_on( );
+		fsps25_on( UNSET );
+
+    /* We can't continue if the heater is in failure state */
+
+    if ( fsps25.heater_state == HEATER_FAIL )
+        fsps25_fail_handler( );
 
 	/* Set or get the values for the maximun current, the sweep rate and
 	   the maximum sweep rate */
 
 	if ( fsps25.max_current_is_set )
+    {
+        fsps25_get_act_current( );
+        if (    labs( fsps25.act_current ) - MAX_CURRENT_DIFF >
+                                                             fsps25.max_current
+             || target_state.act_current > fsps25.max_current )
+        {
+            print( FATAL, "Can't set requested maximum current, it's lower "
+                   "than either the actual current or the requested "
+                   "current.\n" );
+            THROW( EXCEPTION );
+        }
+
 		fsps25_set_max_current( fsps25.max_current );
-	else
+    }
+    else
 		fsps25_get_max_current( );
 
 	if ( fsps25.act_speed_is_set )
@@ -505,12 +600,21 @@ fsps25_init( void )
 		if ( ! fsps25.is_matched )
 			fsps25_set_act_current( fsps25.super_current );
 
-		fsps25_set_heater_state( HEATER_ON );
+		if ( fsps25.is_matched )
+            fsps25_set_heater_state( HEATER_ON );
+        else
+        {
+            print( FATAL, "Current can't be matched to current through "
+                   "sweep coil.\n" );
+            THROW( EXCEPTION );
+        }
 	}
+    else
 
 	/* If a start current had been given set in now */
 
-	if ( target_state.act_current_is_set )
+	if (    target_state.act_current_is_set
+         && target_state.act_current != fsps25.act_current )
 		fsps25_set_act_current( target_state.act_current );
 }
 
@@ -520,15 +624,20 @@ fsps25_init( void )
  *-----------------------------------------*/
 
 static void
-fsps25_on( void )
+fsps25_on( bool shutdown_on_fail )
 {
+	fsps25_get_state( shutdown_on_fail );
+
+    if ( fsps25.state == STATE_ON || fsps25.state == STATE_PFAIL )
+        return;
+
 	if ( fsc2_serial_write( SERIAL_PORT, "On!\r", 4,
 							RESPONSE_TIME, UNSET ) != 4 )
 		fsps25_comm_fail( );
 
-	fsps25_get_state( );
+	fsps25_get_state( shutdown_on_fail );
 
-	/* Now the device should be in ON (or, in the worst case. in PFAIL) state
+	/* Now the device should be in ON (or, in the worst case, in PFail) state
 	   with the heater off and the sweep stopped */
 
 	if ( fsps25.state == STATE_OFF )
@@ -543,6 +652,12 @@ fsps25_on( void )
 		print( FATAL, "Heater is on immediately without switching it on!\n" );
 		THROW( EXCEPTION );
 	}
+
+    if ( fsps25.heater_state == HEATER_FAIL )
+    {
+        print( FATAL, "Heater is in failure state.\n" );
+        THROW( EXCEPTION );
+    }
 
 	if( fsps25.sweep_state == SWEEPING )
 	{
@@ -573,7 +688,7 @@ fsps25_off( void )
 		return;
 	}
 
-	fsps25_get_state( );
+	fsps25_get_state( UNSET );
 
 	/* Make sure the device isn't sweeping anymore */
 
@@ -591,10 +706,10 @@ fsps25_off( void )
 	if ( strncmp( buf, "DSD;\r", 5 ) )
 		fsps25_wrong_data( );
 
-	/* If the heater was on wait enough time for the heater to get
-	   switched off */
+	/* If the heater was on (or in fail state) wait enough time for the
+       heater to get switched off */
 
-	if ( fsps25.heater_state == HEATER_ON )
+	if ( fsps25.heater_state != HEATER_OFF )
 		fsc2_usleep( HEATER_OFF_DELAY, UNSET );
 
 	/* If the current wasn't zero wait long enough for the device to sweep
@@ -604,12 +719,12 @@ fsps25_off( void )
 		fsc2_usleep( lrnd( ( 6.0e7 * fabs( fsps25.act_current ) )
 						   / HEATER_OFF_SPEED ), UNSET );
 
-	/* Check the state and give it up to 3 seconds of extra time if it
-	   isn't finished yet */
+	/* Check the state and give the device up to 3 seconds of extra time if
+       it's not finished yet */
 
 	while ( retries-- > 0 )
 	{
-		fsps25_get_state( );
+		fsps25_get_state( UNSET );
 		if ( fsps25.state == STATE_OFF )
 			return;
 		fsc2_usleep( 100000, UNSET );
@@ -624,13 +739,14 @@ fsps25_off( void )
  * Function for asking the device for its status
  *-----------------------------------------------*/
 
-#define MAX_RESPONSE_LEN 28
+#define MAX_RESPONSE_LEN 30 /* 28 */
 
 static void
-fsps25_get_state( void )
+fsps25_get_state( bool shutdown_on_fail )
 {
 	char buf[ MAX_RESPONSE_LEN ] = "GCS?\r";
-	size_t i;
+	ssize_t i;
+    ssize_t count = 0;
     struct {
         const char *response;
         int state;
@@ -640,43 +756,45 @@ fsps25_get_state( void )
     } states[ ] = {
         { "OFF;",
           STATE_OFF, STOPPED, HEATER_OFF, UNMATCHED },
-        { "CS PFail;",
-          STATE_PFAIL, STOPPED, HEATER_OFF, UNMATCHED },
         { "Stopped HOff UnMatched;",
           STATE_ON, STOPPED, HEATER_OFF, UNMATCHED },
         { "Stopped HOff Matched;",
           STATE_ON, STOPPED, HEATER_OFF, MATCHED },
-        { "Stopped HFail UnMatched;",
-          STATE_ON, STOPPED, HEATER_FAIL, UNMATCHED },
-        { "Stopped HFail Matched;",
-          STATE_ON, STOPPED, HEATER_FAIL, MATCHED },
         { "Sweeping HOff;",
           STATE_ON, SWEEPING, HEATER_ON, UNMATCHED },
         { "Stopped HOn;",
           STATE_ON, STOPPED, HEATER_ON, MATCHED },
         { "Sweeping HOn;",
           STATE_ON, SWEEPING, HEATER_ON, MATCHED },
+        { "Stopped HFail UnMatched;",
+          STATE_ON, STOPPED, HEATER_FAIL, UNMATCHED },
+        { "Stopped HFail Matched;",
+          STATE_ON, STOPPED, HEATER_FAIL, MATCHED },
+        { "PFail Stopped;",
+          STATE_PFAIL, STOPPED, HEATER_OFF, UNMATCHED },
+        { "PFail Sweeping;",
+          STATE_PFAIL, SWEEPING, HEATER_OFF, UNMATCHED },
     };
 
 
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-         || fsc2_serial_read( SERIAL_PORT, buf, MAX_RESPONSE_LEN, 
-                              RESPONSE_TIME, UNSET ) <= 0 )
+         || ( count = fsc2_serial_read( SERIAL_PORT, buf, MAX_RESPONSE_LEN, 
+                                        RESPONSE_TIME, UNSET ) ) <= 0 )
         fsps25_comm_fail( );
 
-    /* Find the '\r' in the response and replace by '\0' */
+    /* Find '\r' in the response and replace it by '\0' */
 
-    for ( i = 0; i < MAX_RESPONSE_LEN; i++ )
+    for ( i = 0; i < count; i++ )
         if ( buf[ i ] == '\r' )
         {
             buf[ i ] = '\0';
             break;
         }
 
-    if ( i >= MAX_RESPONSE_LEN || strncmp( buf, "CS ", 3 ) )
+    if ( i >= count || strncmp( buf, "CS ", 3 ) )
         fsps25_wrong_data( );
 
-    for ( i = 0; i < NUM_ELEMS( states ); i++ )
+    for ( i = 0; i < ( ssize_t ) NUM_ELEMS( states ); i++ )
         if ( ! strcmp( buf + 3, states[ i ].response ) )
         {
             fsps25.state = states[ i ].state;
@@ -684,13 +802,12 @@ fsps25_get_state( void )
             fsps25.heater_state = states[ i ].heater_state;
             fsps25.is_matched = states[ i ].is_matched;
 
-            if ( fsps25.state == STATE_PFAIL )
-                print( FATAL, "Device is in PFAIL state!\n" );
+            if ( ! shutdown_on_fail )
+                return;
 
-            if ( fsps25.heater_state == HEATER_FAIL )
-                print( FATAL, "Heater failure!\n" );
-
-            return;
+            if (    fsps25.state == STATE_PFAIL
+                 || fsps25.heater_state == HEATER_FAIL )
+                fsps25_fail_handler( );
         }
 
     fsps25_wrong_data( );
@@ -717,10 +834,10 @@ fsps25_get_heater_state( void )
                               RESPONSE_TIME, UNSET ) <= 0 )
 		fsps25_comm_fail( );
 
-    if ( strncasecmp( buf, "HS 1;\r", 6 ) )
-         fsps25.heater_state = HEATER_ON;
-    if ( strncasecmp( buf, "HS 0;\r", 6 ) )
-         fsps25.heater_state = HEATER_OFF;
+    if ( ! strncasecmp( buf, "HS 1;\r", 6 ) )
+        fsps25.heater_state = HEATER_ON;
+    else if ( ! strncasecmp( buf, "HS 0;\r", 6 ) )
+        fsps25.heater_state = HEATER_OFF;
     else
 		fsps25_wrong_data( );
          
@@ -735,13 +852,13 @@ fsps25_get_heater_state( void )
 static void
 fsps25_set_heater_state( int state )
 {
-	char buf[ 8 ];
 	int retries = 30;
 
 
 	fsc2_assert( fsps25.state != STATE_OFF );
 	fsc2_assert( fsps25.sweep_state != SWEEPING );
 	fsc2_assert( fsps25.heater_state != HEATER_FAIL );
+    fsc2_assert( state == HEATER_ON || state == HEATER_OFF );
 
 	if ( state == fsps25.heater_state )
         return;
@@ -770,8 +887,8 @@ fsps25_set_heater_state( int state )
         else
 		{
 			char *warn;
-			long coil_current = lrnd( 1.0e3 * fsps25_get_super_current( ) );
-			long ps_current   = lrnd( 1.0e3 * fsps25_get_act_current( ) );
+			long coil_current = fsps25_get_super_current( );
+			long ps_current   = fsps25_get_act_current( );
 
 			if ( coil_current == ps_current )
 				warn = get_string( "Power supply status is in PFail mode.\n"
@@ -787,17 +904,17 @@ fsps25_set_heater_state( int state )
 			if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
 			{
 				T_free( warn );
-				THROW( EXCEPTION );
+                return;
 			}
 
 			T_free( warn );
 
-            fsps25_set_expert_mode( );
+            fsps25_set_expert_mode( SET );
 		}
 	}
 
-	sprintf( buf, "AHS %c;\r", state ?  '1' : '0' );
-	if ( fsc2_serial_write( SERIAL_PORT, buf, 7, RESPONSE_TIME, UNSET ) != 7 )
+	if ( fsc2_serial_write( SERIAL_PORT, state ? "AHS 1;\r" : "AHS 0;\r", 7,
+                            RESPONSE_TIME, UNSET ) != 7 )
 		fsps25_comm_fail( );
 
 	if ( ! fsps25_get_command_reply( ) )
@@ -808,7 +925,7 @@ fsps25_set_heater_state( int state )
 
 	/* Switching the heater on or off takes some time to take effect */
 
-	fsc2_usleep( state ? HEATER_OFF_DELAY : HEATER_OFF_DELAY, UNSET );
+	fsc2_usleep( state ? HEATER_ON_DELAY : HEATER_OFF_DELAY, UNSET );
 
 	/* Give the heater some more time to get set */
 
@@ -831,11 +948,10 @@ fsps25_set_heater_state( int state )
  *------------------------------------------------------*/
 
 static void
-fsps25_set_expert_mode( void )
+fsps25_set_expert_mode( bool state )
 {
-	char buf[ 7 ] = "SEM 1;\r";
-    
-	if ( fsc2_serial_write( SERIAL_PORT, buf, 7, RESPONSE_TIME, UNSET ) != 7 )
+	if ( fsc2_serial_write( SERIAL_PORT, state ? "SEM 1;\r" : "SEM 0\r", 7,
+                            RESPONSE_TIME, UNSET ) != 7 )
 		fsps25_comm_fail( );
 
 	if ( ! fsps25_get_command_reply( ) )
@@ -877,11 +993,11 @@ fsps25_abort_sweep( void )
 
 	if ( ! strncmp( buf, "CCS;\r", 5 ) )
     {
-        print( FATAL, "Failed to stop running sweep.\n" );
-        THROW( EXCEPTION );
+        print( SEVERE, "Failed to stop running sweep.\n" );
+        return FAIL;
     }
 
-	fsps25_get_state( );
+	fsps25_get_state( SET );
 
     if ( fsps25.sweep_state == SWEEPING )
     {
@@ -923,17 +1039,17 @@ fsps25_get_act_current( void )
 	buf[ 9 ] = '\0';
 	current = T_atol( buf + 3 );
 
-	if ( labs( current ) > MAX_CURRENT )
+	if ( labs( current ) - MAX_CURRENT_DIFF > MAX_CURRENT )
 		fsps25_wrong_data( );
 
-	if ( labs( current ) > MAX_ALLOWED_CURRENT )
+	if ( labs( current ) - MAX_CURRENT_DIFF > MAX_ALLOWED_CURRENT )
 	{
 		print( FATAL, "Reported current of %.3f A is not within the allowed "
 			   "range.\n", 1.0e-3 * current );
 		THROW( EXCEPTION );
 	}
 
-	if ( labs( current ) > fsps25.max_current )
+	if ( labs( current ) - MAX_CURRENT_DIFF > fsps25.max_current )
 	{
 		print( FATAL, "Reported current of %.3f A is not within the currently "
 			   "set limits.\n", 1.0e-3 * current );
@@ -962,15 +1078,13 @@ fsps25_set_act_current( long current )
 
 
 	fsc2_assert( fsps25.state != STATE_OFF );
+	fsc2_assert( fsps25.heater_state != HEATER_FAIL );
 
 	if ( FSC2_MODE != EXPERIMENT )
-		return fsps25.act_current = current;
-
-    if (    fsps25.heater_state != HEATER_ON
-         && ! fsps25.is_expert_mode )
     {
-        print( FATAL, "Can't set current, heater is off.\n" );
-        THROW( EXCEPTION );
+        if ( fsps25.heater_state == HEATER_ON )
+            fsps25.super_current = current;
+		return fsps25.act_current = current;
     }
 
 	sprintf( buf, "GTC %+06ld;\r", current );
@@ -1014,7 +1128,11 @@ fsps25_set_act_current( long current )
 
 	while ( retries-- > 0 )
 	{
-		fsps25_get_state( );
+		fsps25_get_state( UNSET );
+        if (    ( fsps25.state == STATE_PFAIL && ! fsps25.is_expert_mode )
+             || fsps25.heater_state == HEATER_FAIL )
+            fsps25_fail_handler( );
+
 		if ( fsps25.sweep_state == STOPPED )
 			break;
 		
@@ -1027,28 +1145,24 @@ fsps25_set_act_current( long current )
 		}
 	}
 
-	/* Now make sure the sweep has stopped and the target current has been
-	   reached */
+	/* Now make sure the sweep has really stopped and the target current has
+       been reached */
 
 	if ( fsps25.sweep_state == SWEEPING )
 	{
 		fsps25_abort_sweep( );
-		print( FATAL, "Failed to reach target current in time.\n" );
+		print( FATAL, "Failed to reach requested current in time.\n" );
 		THROW( EXCEPTION );
 	}
 
 	fsps25_get_act_current( );
-	if ( current != fsps25.act_current )
+	if ( labs( current - fsps25.act_current ) > MAX_CURRENT_DIFF )
 	{
-		print( FATAL, "Failed to reach target current.\n" );
+		print( FATAL, "Failed to reach requested current.\n" );
 		THROW( EXCEPTION );
 	}
 
-    if (    fsps25.heater_state != HEATER_ON
-         && fsps25.is_expert_mode )
-        fsps25_set_heater_state( HEATER_ON );
-
-	return current;
+	return fsps25.act_current;
 }
 
 
@@ -1090,7 +1204,7 @@ fsps25_get_super_current( void )
 		THROW( EXCEPTION );
 	}
 
-	if ( labs( current ) > fsps25.max_current )
+	if ( labs( current ) - MAX_CURRENT_DIFF > fsps25.max_current )
 	{
 		print( FATAL, "Reported coil current of %.3f A is not within the "
 			   "currently set limits.\n", 1.0e-3 * current );
@@ -1130,10 +1244,10 @@ fsps25_get_max_current( void )
 	if ( current < 0 || current > MAX_CURRENT )
 		fsps25_wrong_data( );
 
-	if ( current > MAX_ALLOWED_CURRENT )
+	if ( current - MAX_CURRENT_DIFF > MAX_ALLOWED_CURRENT )
 	{
 		print( SEVERE, "Reported maximum current value is not within the "
-			   "allowed range, reducing setting this limit.\n" );
+			   "allowed range, reducing maximum current this limit.\n" );
 		return fsps25_set_max_current( MAX_ALLOWED_CURRENT );
 	}
 
@@ -1181,7 +1295,7 @@ fsps25_set_max_current( long current )
 	   lower than this actual current */
 
 	fsps25_get_act_current( );
-	if ( current < labs( fsps25.act_current ) )
+	if ( current < labs( fsps25.act_current ) - MAX_CURRENT_DIFF )
 	{
 		print( FATAL, "Can't set maximum current to a value lower than the "
 			   "actual current.\n" );
@@ -1297,7 +1411,7 @@ fsps25_get_max_sweep_speed( void )
 
 	if ( raw_speed > MAX_SPEED )
 		print( SEVERE, "Maximum sweep rate is larger than upper limit of "
-			   "%.3f mA/s.\n", MAX_SPEED / 6.0e4 );
+			   "%.1f mA/s.\n", MAX_SPEED / 60.0 );
 
 	return fsps25.max_speed = raw_speed;
 }
@@ -1439,6 +1553,7 @@ fsps25_open( void )
 
 #endif
 
+    fsps25_get_state( UNSET );
     fsps25.is_open = SET;
 }
 
@@ -1471,6 +1586,30 @@ static void
 fsps25_comm_fail( void )
 {
 	print( FATAL, "Can't access the power supply.\n" );
+    THROW( EXCEPTION );
+}
+
+
+/*-------------------------------------------------------*
+ *-------------------------------------------------------*/
+
+static void
+fsps25_fail_handler( void )
+{
+    if ( fsps25.state == STATE_PFAIL && fsps25.heater_state == HEATER_FAIL )
+        print( FATAL, "Device is in power failure state and heater is "
+               "also in failure mode, shutting device down.\n" );
+    else if ( fsps25.state == STATE_PFAIL )
+        print( FATAL, "Device is in power failure state, shutting it down.\n" );
+    else if ( fsps25.heater_state == HEATER_FAIL )
+        print( FATAL, "Heater failure, shutting device down.\n" );
+
+    fsps25_off( );
+
+    if ( fsps25.state == STATE_PFAIL )
+        print( WARN, "Last reported super current: %f A.\n",
+               1.0e-3 * fsps25_get_super_current( ) );
+
     THROW( EXCEPTION );
 }
 

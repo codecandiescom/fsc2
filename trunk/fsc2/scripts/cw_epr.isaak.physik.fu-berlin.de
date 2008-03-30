@@ -71,7 +71,7 @@ my $balloon = $mw->Balloon( );
 my $f0 = $mw->Frame( );
 my $f0_l1 = $f0->Label( '-text'           => 'Start field:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f0_v = $f0->Entry( '-textvariable'    => \$start_field,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -91,7 +91,7 @@ $f0_l2->pack( %wp );
 my $f1 = $mw->Frame( );
 my $f1_l1 = $f1->Label( '-text'          => 'End field:',
 						'-width'         => '20',
-						'anchor'         => 'w' );
+						'-anchor'        => 'w' );
 my $f1_v = $f1->Entry( '-textvariable'   => \$end_field,
 					   '-width'          => '8',
 					   '-validate'       => 'key',
@@ -110,7 +110,7 @@ $f1_l2->pack( %wp );
 my $f2 = $mw->Frame( );
 my $f2_l1 = $f2->Label( '-text'           => 'Field step size:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f2_v = $f2->Entry( '-textvariable'    => \$field_step,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -130,13 +130,13 @@ $f2_l2->pack( %wp );
 my $f3 = $mw->Frame( );
 my $f3_l1 = $f3->Label( '-text'          => 'Maximum field error:',
 						'-width'         => '20',
-						'anchor'         => 'w' );
+						'-anchor'        => 'w' );
 my $f3_v = $f3->Entry( '-textvariable'   => \$field_error,
 					   '-width'          => '8',
 					   '-validate'       => 'key',
 					   '-validatecommand'=> \&is_numeric,
 					   '-relief'         => 'sunken',
-					   'state'           => $sweep_method eq 'simple' ?
+					   '-state'          => $sweep_method eq 'simple' ?
 					                            'disabled' : 'normal' );
 $balloon->attach( $f3_v, '-balloonmsg'   => "Sets maximum acceptable field\n" .
 				                            "deviation in tested sweep\n" .
@@ -149,7 +149,7 @@ my $f3_l2 = $f3->Label( '-text'          => 'G',
 my $f4 = $mw->Frame( );
 my $f4_l = $f4->Label( '-text'           => 'Sweep method:',
 						'-width'         => '20',
-						'anchor'         => 'w' );
+						'-anchor'        => 'w' );
 my $f4_m = $f4->Optionmenu( '-options'   => [ ( 'simple', 'tested' ) ],
 							'-width'     => 9,
 							'-textvariable'  => \$sweep_method,
@@ -173,7 +173,7 @@ $f3_l2->pack( %wp );
 my $f5 = $mw->Frame( );
 my $f5_l1 = $f5->Label( '-text'           => 'Number of runs:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f5_v = $f5->Entry( '-textvariable'    => \$num_runs,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -192,7 +192,7 @@ $f5_l2->pack( %wp );
 my $f6 = $mw->Frame( '-width'             => '29' );
 my $f6_l1 = $f6->Label( '-text'           => 'Waiting time:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f6_v = $f6->Entry( '-textvariable'    => \$tc_fact,
 					   '-width'           => '7',
 					   '-validate'        => 'key',
@@ -213,7 +213,7 @@ $f6_l2->pack( %wp );
 my $f7 = $mw->Frame( );
 my $f7_l = $f7->Label( '-text'          => 'Lock-in amplifier:',
 						'-width'        => '20',
-						'anchor'        => 'w' );
+						'-anchor'       => 'w' );
 my $f7_m = $f7->Optionmenu( '-options'  =>
 							[ ( 'SR510', 'SR530', 'SR810', 'SR830' ) ],
 							'-width'    => 9,
@@ -227,7 +227,7 @@ $f7_m->pack( %wp );
 my $f8 = $mw->Frame( );
 my $f8_l = $f8->Label( '-text'          => 'Phases:',
 					   '-width'        => '20',
-					   'anchor'        => 'w' );
+					   '-anchor'       => 'w' );
 my $f8_m = $f8->Optionmenu( '-options'  => [ 'X only', 'X and Y' ],
 							'-width'    => 9,
 							'-textvariable' => \$two_phases );
@@ -236,7 +236,7 @@ $balloon->attach( $f8_m, '-balloonmsg'   => "Select measurement of  X phase\n"
 
 if ( $lockin =~ /^SR[85]10$/ ) {
 	$two_phases = 'X only' if $two_phases =~ /^Y and Y$/;
-	$f8_m->configure( 'state' => 'disabled' );
+	$f8_m->configure( '-state' => 'disabled' );
 }
 
 $f8->pack( %fp );
@@ -247,7 +247,7 @@ $f8_m->pack( %wp );
 my $f9 = $mw->Frame( );
 my $f9_l = $f9->Label( '-text'          => 'Time constant (tc):',
 					   '-width'         => '20',
-					   'anchor'         => 'w' );
+					   '-anchor'        => 'w' );
 my $f9_m = $f9->Optionmenu( '-options'  =>
                             [ ( "Don't set", '100 s', ' 30 s', ' 10 s',
                                 '  3 s', '  1 s', '300 ms', '100 ms', ' 30 ms',
@@ -262,7 +262,7 @@ $f9_m->pack( %wp );
 my $f10 = $mw->Frame( );
 my $f10_l = $f10->Label( '-text'          => 'Sensitivity:',
 						 '-width'         => '20',
-						 'anchor'         => 'w' );
+						 '-anchor'        => 'w' );
 my $f10_m = $f10->Optionmenu( '-options'  =>
 							  [ ( "Don't set", '500 mV', '200 mV', '100 mV',
 								  ' 50 mV', ' 20 mV', ' 10 mV', '  5 mv',
@@ -292,8 +292,8 @@ my $f11_q = $mw->Button( '-text' => 'Quit',
 $f11->pack( '-side' => 'top',
 			'-fill' => 'x',
 			'-padx' => '4m' );
-$f11_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
-$f11_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f11_a->pack( %wp, '-padx' => '5m', '-pady' => '3m' );
+$f11_q->pack( %wp, '-padx' => '5m', '-pady' => '3m' );
 
 MainLoop;
 
@@ -302,11 +302,11 @@ MainLoop;
 
 sub set_sweep_method {
 	if ( $sweep_method eq 'simple' ) {
-		$f3_v->configure( 'state' => 'disabled' );
+		$f3_v->configure( '-state' => 'disabled' );
 		$hidden_field_error = $field_error;
 		$field_error = "";
 	} else {
-		$f3_v->configure( 'state' => 'normal' );
+		$f3_v->configure( '-state' => 'normal' );
 		$field_error = $hidden_field_error;
 	}
 }
@@ -317,9 +317,9 @@ sub set_sweep_method {
 sub lockin_check {
 	if ( $lockin =~ /^SR[85]10$/ ) {
 		$two_phases = 'X only';
-		$f8_m->configure( 'state' => 'disabled' );
+		$f8_m->configure( '-state' => 'disabled' );
 	} else {
-		$f8_m->configure( 'state' => 'normal' );
+		$f8_m->configure( '-state' => 'normal' );
 	}
 }
 
