@@ -72,7 +72,8 @@ get_batch_state( void )
 bool
 check_user_request( void )
 {
-    if ( Fsc2_Internals.I_am == PARENT )
+    if (    Fsc2_Internals.I_am == PARENT
+         && ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
         fl_check_only_forms( );
     return EDL.do_quit && EDL.react_to_do_quit;
 }
@@ -86,7 +87,8 @@ check_user_request( void )
 void
 stop_on_user_request( void )
 {
-    if ( Fsc2_Internals.I_am == PARENT )
+    if (    Fsc2_Internals.I_am == PARENT
+         && ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
         fl_check_only_forms( );
     if ( EDL.do_quit && EDL.react_to_do_quit )
         THROW( USER_BREAK_EXCEPTION );

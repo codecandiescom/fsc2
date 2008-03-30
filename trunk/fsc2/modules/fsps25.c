@@ -428,7 +428,7 @@ magnet_max_current( Var_T * v )
         {
             print( FATAL, "Can't set maximum current to a value lower than "
                    "the actual current.\n" );
-            print( FATAL, "%ld < %ld\n", raw_max_current,  fsps25.act_current );
+            print( FATAL, "%ld < %ld\n", raw_max_current, fsps25.act_current );
             THROW( EXCEPTION );
         }
     }
@@ -536,6 +536,8 @@ fsps25_init( void )
     {
         print( FATAL,
                "Device is in PFail state. Need expert mode to contuinue.\n" );
+        print( WARN, "Last reported super current: %f A.\n",
+               1.0e-3 * fsps25_get_super_current( ) );
         THROW( EXCEPTION );
     }
 
@@ -555,12 +557,15 @@ fsps25_init( void )
     if ( fsps25.heater_state == HEATER_FAIL )
         fsps25_fail_handler( );
 
+    /* Determine the actual current output by the powetr supply */
+
+    fsps25_get_act_current( );
+
 	/* Set or get the values for the maximun current, the sweep rate and
 	   the maximum sweep rate */
 
 	if ( fsps25.max_current_is_set )
     {
-        fsps25_get_act_current( );
         if (    labs( fsps25.act_current ) - MAX_CURRENT_DIFF >
                                                              fsps25.max_current
              || target_state.act_current > fsps25.max_current )
@@ -596,9 +601,11 @@ fsps25_init( void )
 
 	if ( ! fsps25.heater_state )
 	{
-		fsps25_get_super_current( );
 		if ( ! fsps25.is_matched )
+        {
+            fsps25_get_super_current( );
 			fsps25_set_act_current( fsps25.super_current );
+        }
 
 		if ( fsps25.is_matched )
             fsps25_set_heater_state( HEATER_ON );
@@ -631,7 +638,7 @@ fsps25_on( bool shutdown_on_fail )
     if ( fsps25.state == STATE_ON || fsps25.state == STATE_PFAIL )
         return;
 
-	if ( fsc2_serial_write( SERIAL_PORT, "On!\r", 4,
+	if ( fsc2_serial_write( SERIAL_PORT, "ON!\r", 4,
 							RESPONSE_TIME, UNSET ) != 4 )
 		fsps25_comm_fail( );
 
@@ -715,7 +722,7 @@ fsps25_off( void )
 	/* If the current wasn't zero wait long enough for the device to sweep
 	   it down to zero */
 
-	if ( fsps25.act_current != 0 )
+	if ( fabs( fsps25.act_current ) > MAX_CURRENT_DIFF )
 		fsc2_usleep( lrnd( ( 6.0e7 * fabs( fsps25.act_current ) )
 						   / HEATER_OFF_SPEED ), UNSET );
 
@@ -774,6 +781,8 @@ fsps25_get_state( bool shutdown_on_fail )
           STATE_PFAIL, STOPPED, HEATER_OFF, UNMATCHED },
         { "PFail Sweeping;",
           STATE_PFAIL, SWEEPING, HEATER_OFF, UNMATCHED },
+        { "PFail HFail;",
+          STATE_PFAIL, STOPPED, HEATER_FAIL, UNMATCHED },
     };
 
 
