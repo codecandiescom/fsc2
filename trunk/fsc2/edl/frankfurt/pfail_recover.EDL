@@ -1,0 +1,21 @@
+=== CURRENT float [ -20.0 : 20.0 ] [ 0.0 ] "Current" "A"
+
+DEVICES:
+
+fsps25;
+
+
+VARIABLES:
+
+current = CURRENT A;
+
+
+PREPARATIONS:
+
+magnet_request_expert_mode( );
+
+
+EXPERIMENT:
+
+magnet_field( current );
+magnet_heater_state( "ON" );

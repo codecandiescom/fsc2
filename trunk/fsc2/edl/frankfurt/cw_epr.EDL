@@ -1,0 +1,349 @@
+=== START_CURRENT float  [ -20.0 : 20.0 ] [ 0.0  ] "Start current" "A"
+=== END_CURRENT   float  [ -20.0 : 20.0 ] [ 1.0  ] "End current"   "A"
+=== CURRENT_STEP  float  [ 5.0 : 1000.0 ] [ 50.0 ] "Current step"  "mA"
+=== FACTOR        float  [ 1.0e-3 : 100 ] [ 1.0  ] "Waiting time"  "* tc"
+=== TEST          button [ OFF ]  "Test only"
+=== if ( ! TEST )
+DEVICES:
+
+fsps25;              /* sweep power supply */
+sr530;               /* lock-in amplifier  */
+
+
+=== endif
+VARIABLES:
+
+start_current = START_CURRENT A;
+end_current   = END_CURRENT A;
+current_step  = CURRENT_STEP mA;
+
+N_points = int( abs( start_current - end_current ) / current_step ) + 1;
+
+data[ *, *, * ];     /* acquired data (field, x- and y-lock-in data) */
+avg[ N_points, 2 ];  /* averaged lock-in data */
+
+=== if ( START_CURRENT <= END_CURRENT )
+SP = 1;
+EP = N_points;
+D = 1;               /* scan direction, 1: up, -1 down */
+sc = start_current;
+=== else
+SP = N_points;
+EP = 1;
+D = -1;              /* scan direction, 1: up, -1 down */
+sc = end_current;
+=== endif
+
+I = 0,               /* scan and point counters */
+J = 0;
+Scans_done = 0;      /* final value of number of scans */
+Points_done = 0;     /* final value of number of points per scan */
+delay;               /* delay for lock-in */
+ec;                  /* current at end of scan */
+p = 0.0;             /* phase correction variables */
+np;
+s = 0.0;
+c = 1.0;
+tmp[ * ];
+
+Current_scan;        /* toolbox variables */
+Act_current;
+Stop_after_scan;
+Phase_slider;
+Phase_input;
+Done;
+
+File_d;              /* variables for output files */
+File_i;
+File_pc;
+
+
+PREPARATIONS:
+
+init_1d( 4, N_points, sc, current_step, "Current [A]", "Signal [mV]" );
+
+
+EXPERIMENT:
+
+/* Calculate how long t wait for lock-in to measure new data and go to the
+   the start field */
+
+=== if ( ! TEST )
+delay = FACTOR * lockin_time_constant( );
+
+data[ 1, SP, 1 ] = magnet_field( start_current );
+=== else
+delay = FACTOR * 0.02;
+
+data[ 1, SP, 1 ] = start_current;
+=== endif
+sc = data[ 1, SP, 1 ];
+
+/* Create the toolbos that shows the current scan number and allows to
+   request to end the experiment with the end of the scan */
+
+hide_toolbox( "ON" );
+Current_scan = output_create( "INT_OUTPUT",  "Current scan no." );
+Act_current =  output_create( "FLOAT_OUTPUT", sc, "Coil current[ A]" );
+Stop_after_scan = button_create( "PUSH_BUTTON", "Stop after end of scan" );
+hide_toolbox( "OFF" );
+
+/* Keep repeating scans until the user stops it */
+
+FOREVER {
+
+	/* Set new number of scan and display it */
+
+	I += 1;
+	output_value( Current_scan, I );
+
+	/* Record the requested number of points for the scan */
+
+	FOR J = SP : EP : D {
+
+		/* Update the output field with the actual current */
+
+		output_value( Act_current, data[ I, J, 1 ] );
+
+		/* Sleep a bit until the lock-in had had enough time to measure
+		   new data points, then fetch them */
+
+		wait( delay );
+=== if ( ! TEST )
+		data[ I, J, 2 : 3 ] = lockin_get_data( 1, 2 ) / 1 mV;
+=== else
+		data[ I, J, 2 ] = grandom( ) + - 0.5 * ( J - N_points / 2 ) *
+ 			              exp( - ( J - N_points / 2 )^2 / 55.0^2 );
+		data[ I, J, 3 ] = grandom( ) + 0.134 * ( J - N_points / 2 ) *
+		                  exp( - ( J - N_points / 2 )^2 / 55.0^2 );
+=== endif
+
+		/* Calculate the new averaged data, tne display the new points and
+		   the updayed average */
+
+		avg[ J ] = add_to_average( avg[ J ], data[ I, J, 2 : 3 ], I );
+		display( J, data[ I, J, 2 ], 1,
+		         J, data[ I, J, 3 ], 2,
+				 J, avg[ J, 1 ], 3,
+				 J, avg[ J, 2 ], 4 );
+
+		/* If we're not at the end of the scan change the field */
+
+=== if ( ! TEST )
+        IF    ( D ==  1 AND J < N_points )
+	    	data[ I, J + 1, 1 ] =
+			            magnet_field( start_current + J * current_step );
+		} ELSE  IF D == -1 AND J > 1 {
+	    	data[ I, J - 1, 1 ] =
+			            magnet_field( end_current + ( J - 2 ) * current_step );
+		}
+=== else
+        IF D ==  1 AND J < N_points {
+	    	data[ I, J + 1, 1 ] = start_current + J * current_step;
+		} ELSE IF D == -1 AND J > 1 {
+	    	data[ I, J - 1, 1 ] = end_current + ( J - 2 ) * current_step;
+		}
+=== endif
+    }
+
+	/* Scan is done, if the user told us to stop (by clicking on the "Stop
+	   after end of scan"-button do so */
+
+    Scans_done = I;
+
+	IF button_state( Stop_after_scan ) {
+		BREAK;
+	}
+
+	/* Otherwise go back to the start field */
+
+=== if ( ! TEST )
+	data[ I + 1, SP, 1 ] = magnet_field( start_current );
+=== else
+	data[ I + 1, SP, 1 ] = start_current;
+=== endif
+}
+
+
+ON_STOP:
+
+/* If the experiment got aborted immediately at the start (less than three
+   points got measured) don't do anything anymore*/
+
+IF     Scans_done == 0
+   AND ( ( D == 1 AND J <= 3 ) OR ( D == -1 AND J >= N_points - 2 ) ) { 
+	abort( );
+}
+
+/* Remove contents of the toolbox */
+
+hide_toolbox( "ON" );
+object_delete( Current_scan );
+object_delete( Stop_after_scan );
+
+/* Ask for the data file, if none gets selected skip all the rest */
+
+File_d = get_file( "", "*.dat", "", "", "dat" );
+
+IF ! is_file( File_d ) {
+	abort( );
+}
+
+/* Get the file for the experiments parameters */
+
+File_i = clone_file( File_d, "dat", "inf" );
+
+/* If the experiment got stopped already during the very first scan throw
+   away the last point, we can't be sure it really got measured. If we got
+   stopped within another scan the data of the last scan are thrown away
+   since they are incomplete. */
+
+IF Scans_done == 0 {
+	Scans_done = 1;
+	IF D == 1 {
+    	IF J <= N_points {
+			J -= 1;
+		}
+		Points_done = J;
+		EP = J;
+	} ELSE {
+    	IF J > 0 {
+			J += 1;
+		}
+		Points_done = N_points - J + 1;
+		SP = J;
+		EP = N_points;
+	}
+	ec = data[ 1, J, 1 ];
+} ELSE {
+	Points_done = N_points;
+	IF D == 1 {
+		ec = data[ 1, N_points, 1 ];
+	} ELSE {
+		SP = 1;
+		EP = N_points;
+		ec = data[ 1, 1, 1 ];
+	}
+
+	/* If necessary recalculate the average to get rid of the thrown away
+	   points of the last (unfinished) scan */
+
+	IF ( D == 1 AND J <= N_points ) OR ( D == -1 AND J > 0 ) {
+		avg = data[ 1, 1 : N_points, 2 : 3 ];
+		FOR I = 2 : Scans_done {
+			avg = add_to_average( avg, data[ I, 1 : N_points, 2 : 3 ], I );
+		}
+	}
+}
+
+/* Save the "raw" data */
+
+FOR I = 1 : Scans_done {
+	save( " ", File_d, data[ I, SP : EP ] );
+	IF I < Scans_done {
+		fsave( File_d, "\n" );
+	}
+}
+
+/* Prepare things for phase correction - it doesn't make much sense to
+   display anything but the averaged curve, so remove anything else. */
+
+clear_curve( 1, 2, 3, 4 );
+display_1d( SP, avg[ SP : EP, 1 ], 3,
+			SP, avg[ SP : EP, 2 ], 4 );
+
+Phase_slider = slider_create( "NORMAL_SLIDER", -180.0, 180.0,
+			   				  "Phase (coarse)" );
+Phase_input = input_create( "FLOAT_INPUT", 0, "Phase (venier)" );
+Done = button_create( "NORMAL_BUTTON", "Done" );
+hide_toolbox( "OFF" );
+
+/* Give the user a chance play around with the phase. Stops only when the
+   "Done" button gets clicked on. Slider is for coarse setting and input
+   field for fine adjustments. Keep the user form entering insane values. */
+
+FOREVER {
+	toolbox_wait( 1.0e12 s );
+
+	IF button_state( Done ) {
+		BREAK;
+	}
+
+	IF slider_changed( Phase_slider ) {
+		np = slider_value( Phase_slider );
+	} ELSE {
+		np = input_value( Phase_input );
+		IF abs( np ) > 10000.0 {
+			input_value( Phase_input, p );
+			NEXT;
+		}
+
+		WHILE np > 180.0 {
+			np -= 360.0;
+		}
+		WHILE np < -180.0 {
+			np += 360.0;
+		}
+	}
+
+	input_value( Phase_input, np );
+	slider_value( Phase_slider, np );
+
+	IF np == p {
+		NEXT;
+	}
+
+	p = np;
+	s = sin( D_to_R( p ) );
+	c = cos( D_to_R( p ) );
+	display( SP,  c * avg[ SP : EP, 1 ] + s * avg[ SP : EP, 2 ], 3,
+			 SP, -s * avg[ SP : EP, 1 ] + c * avg[ SP : EP, 2 ], 4 );
+}
+
+/* If the phase got changed write out the phase corrected data - got to
+   phase-correct the data for each scan */
+
+IF p != 0.0 {
+   	File_pc = clone_file( File_d, "dat", "pc" );
+
+	FOR I = 1 : Scans_done {
+		tmp =   c * data[ I, SP : EP, 2 ] + s * data[ I, SP : EP, 3 ];
+		data[ I, SP : EP, 3 ] =
+	    	  - s * data[ I, SP : EP, 2 ] + c * data[ I, SP : EP, 3 ];
+		data[ I, SP : EP, 2 ] = tmp;
+		save( " ", File_pc, data[ I, SP : EP ] );
+			IF I < Scans_done {
+			fsave( File_pc, "\n" );
+		}
+	}
+}
+
+/* Finally write out the file with the experiments parameters (and a user
+    comment) */
+
+fsave( File_i, "Date                   = # #\n"
+               "No. of points per scan = #\n"
+               "No. of scans           = #\n"
+               "Magnet:\n"
+               "  Start current        = # A\n"
+               "  End current          = # A\n"
+               "  Current step         = # mA\n"
+               "Lock-In:\n"
+               "  Sensitivity          = # mV\n"
+               "  Time constant        = # s\n"
+			   "  Phase                = #\n"
+			   "  Modulation frequency = # kHz\n\n"
+			   "*** Lock-In data are in mV ***\n\n",
+       date( ), time( ), Points_done, Scans_done, sc, ec, current_step, 
+=== if ( ! TEST )
+	   lockin_sensitivity( ) / 1 mV, lockin_time_constant( ),
+	   lockin_phase( ), lockin_ref_freq( ) / 1 kHz );
+=== else
+	   1 mV, 300 ms, 123, 100 );
+=== endif
+
+IF p != 0.0 {
+   	ffsave( File_i, "Phase:\n  Additional phase:    = %.1f\n", p );
+}
+
+save_comment( File_i );

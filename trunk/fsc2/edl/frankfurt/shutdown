@@ -1,0 +1,8 @@
+#!/usr/local/bin/fsc2 -nw
+DEVICES:
+
+fsps25;
+
+EXPERIMENT:
+
+magnet_shutdown( );
