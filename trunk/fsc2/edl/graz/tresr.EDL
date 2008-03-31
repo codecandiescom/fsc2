@@ -25,7 +25,7 @@ field_step  = FIELD_STEP G;              // Field step size
 === else
 field_step  = - FIELD_STEP G;            // Field step size
 === endif
-Num_Traces  = ceil( abs( start_field - end_field ) / abs( field_step ) ) + 1;
+Num_Traces  = round( abs( start_field - end_field ) / abs( field_step ) ) + 1;
                                          // Number of field points
 field[ Num_Traces ];                     // Current field values
 
@@ -284,7 +284,7 @@ fsave( File_p, "Date              : # #\n"
 			   "No. of traces     = #\n"
                "Trace length      = #\n"
 			   "No signal traces  = #\n",
-       date( ), time( ), field[ I - 1 ],
+       date( ), time( ), field[ 1 ],
 	   Scans_Done == 0 ? field[ I - 1 ] : field[ Num_Traces ], field_step,
        Scans_Done == 0 ? 1 : Scans_Done, Num_Avg,
        digitizer_sensitivity( ACQ_CH ) / 1 mV,
