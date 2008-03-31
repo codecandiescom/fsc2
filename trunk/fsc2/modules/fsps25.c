@@ -55,9 +55,10 @@ Var_T * magnet_heater_state( Var_T * v );
 /* Local functions */
 
 static void fsps25_init( void );
-static void fsps25_on( bool shutdown_on_fail );
+static void fsps25_on( void );
 static void fsps25_off( void );
-static void fsps25_get_state( bool shutdown_on_fail );
+static void fsps25_get_state( void );
+static void fsps25_read_state( void );
 static int  fsps25_get_heater_state( void );
 static void fsps25_set_heater_state( int state );
 static void fsps25_set_expert_mode( bool state );
@@ -535,8 +536,9 @@ fsps25_init( void )
 	if ( fsps25.state == STATE_PFAIL && ! fsps25.is_expert_mode )
     {
         print( FATAL,
-               "Device is in PFail state. Need expert mode to contuinue.\n" );
-        print( WARN, "Last reported super current: %f A.\n",
+               "Device is in power failure state. Need expert mode to "
+               "contuinue.\n" );
+        print( WARN, "Last reported current through coil: %f A.\n",
                1.0e-3 * fsps25_get_super_current( ) );
         THROW( EXCEPTION );
     }
@@ -550,7 +552,7 @@ fsps25_init( void )
 	/* Switch to ON state if necessary */
 
 	if ( fsps25.state == STATE_OFF )
-		fsps25_on( UNSET );
+		fsps25_on( );
 
     /* We can't continue if the heater is in failure state */
 
@@ -631,9 +633,9 @@ fsps25_init( void )
  *-----------------------------------------*/
 
 static void
-fsps25_on( bool shutdown_on_fail )
+fsps25_on( void )
 {
-	fsps25_get_state( shutdown_on_fail );
+	fsps25_get_state( );
 
     if ( fsps25.state == STATE_ON || fsps25.state == STATE_PFAIL )
         return;
@@ -642,7 +644,11 @@ fsps25_on( bool shutdown_on_fail )
 							RESPONSE_TIME, UNSET ) != 4 )
 		fsps25_comm_fail( );
 
-	fsps25_get_state( shutdown_on_fail );
+	fsps25_read_state( );
+
+    if (    ( fsps25.state == STATE_PFAIL && ! fsps25.is_expert_mode )
+         || fsps25.heater_state == HEATER_FAIL )
+        fsps25_fail_handler( );
 
 	/* Now the device should be in ON (or, in the worst case, in PFail) state
 	   with the heater off and the sweep stopped */
@@ -650,7 +656,7 @@ fsps25_on( bool shutdown_on_fail )
 	if ( fsps25.state == STATE_OFF )
 	{
 		print( FATAL, "Device doesn't react properly to being brought "
-			   "online.\n" );
+			   "online, remains in OFF state).\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -660,15 +666,9 @@ fsps25_on( bool shutdown_on_fail )
 		THROW( EXCEPTION );
 	}
 
-    if ( fsps25.heater_state == HEATER_FAIL )
-    {
-        print( FATAL, "Heater is in failure state.\n" );
-        THROW( EXCEPTION );
-    }
-
 	if( fsps25.sweep_state == SWEEPING )
 	{
-		print( FATAL, "Current is sweeping without a command having been "
+		print( FATAL, "Device is sweeping without a command having been "
 			   "issued.\n" );
 		THROW( EXCEPTION );
 	}
@@ -695,7 +695,7 @@ fsps25_off( void )
 		return;
 	}
 
-	fsps25_get_state( UNSET );
+	fsps25_get_state( );
 
 	/* Make sure the device isn't sweeping anymore */
 
@@ -731,13 +731,13 @@ fsps25_off( void )
 
 	while ( retries-- > 0 )
 	{
-		fsps25_get_state( UNSET );
-		if ( fsps25.state == STATE_OFF )
+		fsps25_get_state( );
+		if ( fsps25.state != STATE_ON )
 			return;
 		fsc2_usleep( 100000, UNSET );
 	}
 
-    print( FATAL, "Device doesn't react properly to being shutdown.\n" );
+    print( FATAL, "Device doesn't react in time to shutdown command.\n" );
     THROW( EXCEPTION );
 }
 
@@ -746,12 +746,30 @@ fsps25_off( void )
  * Function for asking the device for its status
  *-----------------------------------------------*/
 
+static void
+fsps25_get_state( void )
+{
+	if ( fsc2_serial_write( SERIAL_PORT, "GCS?\r", 5, RESPONSE_TIME,
+                            UNSET ) != 5 )
+        fsps25_comm_fail( );
+
+    fsps25_read_state( );
+}
+
+
+/*-----------------------------------------------*
+ * Function reads and interprets the reply to a "GCS?" and "ON!"
+ * command. If 'shutdown_on_fail' is set power failure (PFail)
+ * or heater failure leads to the device being brought into
+ * the OFF state.
+ *-----------------------------------------------*/
+
 #define MAX_RESPONSE_LEN 30 /* 28 */
 
 static void
-fsps25_get_state( bool shutdown_on_fail )
+fsps25_read_state( void )
 {
-	char buf[ MAX_RESPONSE_LEN ] = "GCS?\r";
+	char buf[ MAX_RESPONSE_LEN ];
 	ssize_t i;
     ssize_t count = 0;
     struct {
@@ -785,10 +803,8 @@ fsps25_get_state( bool shutdown_on_fail )
           STATE_PFAIL, STOPPED, HEATER_FAIL, UNMATCHED },
     };
 
-
-	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-         || ( count = fsc2_serial_read( SERIAL_PORT, buf, MAX_RESPONSE_LEN, 
-                                        RESPONSE_TIME, UNSET ) ) <= 0 )
+    if ( ( count = fsc2_serial_read( SERIAL_PORT, buf, MAX_RESPONSE_LEN, 
+                                     RESPONSE_TIME, UNSET ) ) <= 0 )
         fsps25_comm_fail( );
 
     /* Find '\r' in the response and replace it by '\0' */
@@ -804,19 +820,14 @@ fsps25_get_state( bool shutdown_on_fail )
         fsps25_wrong_data( );
 
     for ( i = 0; i < ( ssize_t ) NUM_ELEMS( states ); i++ )
-        if ( ! strcmp( buf + 3, states[ i ].response ) )
+        if ( ! strcasecmp( buf + 3, states[ i ].response ) )
         {
             fsps25.state = states[ i ].state;
             fsps25.sweep_state = states[ i ].sweep_state;
             fsps25.heater_state = states[ i ].heater_state;
             fsps25.is_matched = states[ i ].is_matched;
 
-            if ( ! shutdown_on_fail )
-                return;
-
-            if (    fsps25.state == STATE_PFAIL
-                 || fsps25.heater_state == HEATER_FAIL )
-                fsps25_fail_handler( );
+            return;
         }
 
     fsps25_wrong_data( );
@@ -830,13 +841,20 @@ fsps25_get_state( bool shutdown_on_fail )
 static int
 fsps25_get_heater_state( void )
 {
-	char buf[ 6 ] = "GHS?\r";
+    char buf[ 6 ] = "GHS?\r";
 
 
 	if ( FSC2_MODE != EXPERIMENT )
 		return fsps25.heater_state;
 
-	fsc2_assert( fsps25.state != STATE_OFF );
+    fsps25_get_state( );
+
+    if ( fsps25.heater_state == HEATER_FAIL )
+        fsps25_fail_handler( );
+
+    if ( fsps25.state == STATE_ON )
+        return fsps25.heater_state;
+
 
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
 		 || fsc2_serial_read( SERIAL_PORT, buf, 6,
@@ -940,11 +958,16 @@ fsps25_set_heater_state( int state )
 
 	while ( retries-- > 0 )
 	{
-		if ( fsps25_get_heater_state( ) == state )
+        fsps25_get_state( );
+
+        if ( fsps25.heater_state == state )
 		{
 			fsps25_get_super_current( );
 			return;
 		}
+
+		if ( fsps25.heater_state ==  HEATER_FAIL )
+            fsps25_fail_handler( );
 		fsc2_usleep( 100000, UNSET );
 	}
 
@@ -1006,7 +1029,7 @@ fsps25_abort_sweep( void )
         return FAIL;
     }
 
-	fsps25_get_state( SET );
+	fsps25_get_state( );
 
     if ( fsps25.sweep_state == SWEEPING )
     {
@@ -1122,6 +1145,9 @@ fsps25_set_act_current( long current )
 		if ( check_user_request( ) )
 		{
 			fsps25_abort_sweep( );
+            if (    ( fsps25.state == STATE_PFAIL && ! fsps25.is_expert_mode )
+                 || fsps25.heater_state == HEATER_FAIL )
+                fsps25_fail_handler( );
             THROW( USER_BREAK_EXCEPTION );
 		}
 
@@ -1137,7 +1163,7 @@ fsps25_set_act_current( long current )
 
 	while ( retries-- > 0 )
 	{
-		fsps25_get_state( UNSET );
+		fsps25_get_state( );
         if (    ( fsps25.state == STATE_PFAIL && ! fsps25.is_expert_mode )
              || fsps25.heater_state == HEATER_FAIL )
             fsps25_fail_handler( );
@@ -1150,7 +1176,9 @@ fsps25_set_act_current( long current )
 		if ( check_user_request( ) )
 		{
 			fsps25_abort_sweep( );
-            THROW( USER_BREAK_EXCEPTION );
+            if (    ( fsps25.state == STATE_PFAIL && ! fsps25.is_expert_mode )
+                 || fsps25.heater_state == HEATER_FAIL )
+                fsps25_fail_handler( );
 		}
 	}
 
@@ -1160,6 +1188,9 @@ fsps25_set_act_current( long current )
 	if ( fsps25.sweep_state == SWEEPING )
 	{
 		fsps25_abort_sweep( );
+        if (    ( fsps25.state == STATE_PFAIL && ! fsps25.is_expert_mode )
+             || fsps25.heater_state == HEATER_FAIL )
+                fsps25_fail_handler( );
 		print( FATAL, "Failed to reach requested current in time.\n" );
 		THROW( EXCEPTION );
 	}
@@ -1562,7 +1593,7 @@ fsps25_open( void )
 
 #endif
 
-    fsps25_get_state( UNSET );
+    fsps25_get_state( );
     fsps25.is_open = SET;
 }
 
@@ -1616,7 +1647,7 @@ fsps25_fail_handler( void )
     fsps25_off( );
 
     if ( fsps25.state == STATE_PFAIL )
-        print( WARN, "Last reported super current: %f A.\n",
+        print( WARN, "Last reported current through coil: %f A.\n",
                1.0e-3 * fsps25_get_super_current( ) );
 
     THROW( EXCEPTION );

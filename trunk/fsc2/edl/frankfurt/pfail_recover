@@ -34,14 +34,14 @@ FOREVER {
 	toolbox_wait( 1.0e12 );
 
 	IF button_state( AB ) {
-		end( );
+		BREAK;
 	}
 
 	IF button_state( DO ) {
 		current = input_value( NC );
 		IF abs( current ) > max_current {
 			show_message( "Current is too large.\n" );
-			NEXT;
+			BREAK;
 		}
 
 		IF Count == 0 {
@@ -53,6 +53,6 @@ FOREVER {
 
 		magnet_field( current );
 		magnet_heater_state( "ON" );
-		end( );
+		BREAK;
 	}
 }
