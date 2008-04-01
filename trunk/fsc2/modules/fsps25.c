@@ -218,6 +218,10 @@ fsps25_end_of_exp_hook( void )
 {
     if ( fsps25.is_open )
     {
+        fsps25_get_state( );
+        if ( fsps25.heater_state == HEATER_FAIL )
+            fsps25_off( );
+
         fsc2_serial_close( SERIAL_PORT );
         fsps25.is_open = UNSET;
     }
@@ -1141,6 +1145,11 @@ fsps25_set_act_current( long current )
 	while ( 1 )
 	{
 		fsc2_usleep( short_delay, UNSET );
+
+        fsps25_get_state( );
+
+        if ( fsps25.heater_state == HEATER_FAIL )
+            fsps25_fail_handler( );
 
 		if ( check_user_request( ) )
 		{
