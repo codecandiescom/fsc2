@@ -125,7 +125,7 @@ sub shutdown_normal {
 
 	$top->withdraw;
 
-	unless ( open $fh, "/usr/local/bin/shutdown 2>&1 |" ) {
+	unless ( open $fh, "/usr/local/bin/fsps25_shutdown 2>&1 |" ) {
 		show_message( $top, "Program for shutdown\nnot found" );
 		$top->deiconify;
 		return;
@@ -157,7 +157,7 @@ sub shutdown_zero {
 
 	$top->withdraw;
 
-	unless ( open $fh, "/usr/local/bin/shutdown_zero 2>&1 |" ) {
+	unless ( open $fh, "/usr/local/bin/fsps25_shutdown_zero 2>&1 |" ) {
 		show_message( $top, "Program for shutdown\nwith 0 A not found" );
 		$top->deiconify;
 		return;

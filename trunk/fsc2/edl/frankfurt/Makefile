@@ -1,6 +1,6 @@
 EDL           := $(wildcard *.EDL)
 MACHINE       := zethossuse.prisner.de
-ALL           := $(patsubst %.EDL,%,$(EDL)) epr shutdown shutdown_zero pfail_recover
+ALL           := $(patsubst %.EDL,%,$(EDL)) epr fsps25_shutdown fsps25_shutdown_zero pfail_recover
 
 all: $(patsubst %.EDL,%,$(EDL))
 
