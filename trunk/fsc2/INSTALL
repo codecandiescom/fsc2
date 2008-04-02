@@ -14,8 +14,13 @@ run fsc2:
  5) install
  6) sed
  7) XFORMS library (version 0.89 or higher) and development package
-    (a properly installed header file for XForms is required). You can
-	download it from http://savannah.nongnu.org/projects/xforms/.
+    (a properly installed header file for XForms as well the shared
+	library are required). You can download it from
+
+       http://savannah.nongnu.org/projects/xforms/.
+
+	I strongly recommend the newest available version (even if
+	it's only a pre-release).
  8) GPIB library (fsc2 can also be compiled and run without it but
     with restricted functionality, see below)
 

@@ -88,7 +88,9 @@ typedef struct {
 	bool is_matched;
 	long act_current;
 	bool act_current_is_set;
+    bool act_current_need_request;
 	long super_current;
+    bool super_current_need_request;
 	long max_current;       /* maximum current (in mA) */
 	bool max_current_is_set;
 	long max_speed;         /* maximum sweep speed (in mA/min) */
@@ -170,6 +172,8 @@ fsps25_init_hook( void )
 	fsps25.is_matched = SET;
 	fsps25.act_current = fsps25.super_current = 0;
 	fsps25.act_current_is_set = UNSET;
+	fsps25.act_current_need_request = SET;
+	fsps25.super_current_need_request = SET;
 	fsps25.max_current = MAX_ALLOWED_CURRENT;
 	fsps25.max_current_is_set = UNSET;
 	fsps25.max_speed = fsps25.act_speed = MAX_SPEED;
@@ -537,6 +541,14 @@ fsps25_init( void )
 
 	fsps25_open( );
 
+    /* Make sure the actual and super current really get measured - if the
+       '...need_request' variables aren't set it is assumed the currents
+       have been set and, since the set values are exact while measured
+       values are only approximations, then formerly set values are returned */
+
+    fsps25.act_current_need_request = SET;
+    fsps25.super_current_need_request = SET;
+
 	if ( fsps25.state == STATE_PFAIL && ! fsps25.is_expert_mode )
     {
         print( FATAL,
@@ -785,24 +797,24 @@ fsps25_read_state( void )
     } states[ ] = {
         { "OFF;",
           STATE_OFF, STOPPED, HEATER_OFF, UNMATCHED },
-        { "Stopped HOff UnMatched;",
-          STATE_ON, STOPPED, HEATER_OFF, UNMATCHED },
-        { "Stopped HOff Matched;",
-          STATE_ON, STOPPED, HEATER_OFF, MATCHED },
-        { "Sweeping HOff;",
-          STATE_ON, SWEEPING, HEATER_ON, UNMATCHED },
         { "Stopped HOn;",
           STATE_ON, STOPPED, HEATER_ON, MATCHED },
+        { "Stopped HOff Matched;",
+          STATE_ON, STOPPED, HEATER_OFF, MATCHED },
+        { "Stopped HOff UnMatched;",
+          STATE_ON, STOPPED, HEATER_OFF, UNMATCHED },
         { "Sweeping HOn;",
           STATE_ON, SWEEPING, HEATER_ON, MATCHED },
-        { "Stopped HFail UnMatched;",
-          STATE_ON, STOPPED, HEATER_FAIL, UNMATCHED },
-        { "Stopped HFail Matched;",
-          STATE_ON, STOPPED, HEATER_FAIL, MATCHED },
-        { "PFail Stopped;",
-          STATE_PFAIL, STOPPED, HEATER_OFF, UNMATCHED },
+        { "Sweeping HOff;",
+          STATE_ON, SWEEPING, HEATER_ON, UNMATCHED },
         { "PFail Sweeping;",
           STATE_PFAIL, SWEEPING, HEATER_OFF, UNMATCHED },
+        { "PFail Stopped;",
+          STATE_PFAIL, STOPPED, HEATER_OFF, UNMATCHED },
+        { "HFail Stopped UnMatched;",
+          STATE_ON, STOPPED, HEATER_FAIL, UNMATCHED },
+        { "HFail Stopped Matched;",
+          STATE_ON, STOPPED, HEATER_FAIL, MATCHED },
         { "PFail HFail;",
           STATE_PFAIL, STOPPED, HEATER_FAIL, UNMATCHED },
     };
@@ -966,12 +978,23 @@ fsps25_set_heater_state( int state )
 
         if ( fsps25.heater_state == state )
 		{
-			fsps25_get_super_current( );
+            if ( state == HEATER_ON )
+            {
+                fsps25.super_current_need_request = SET;
+                fsps25_get_super_current( );
+            }
+            else
+            {
+                fsps25.super_current_need_request = UNSET;
+                fsps25.super_current = fsps25.act_current;
+            }
+
 			return;
 		}
 
 		if ( fsps25.heater_state ==  HEATER_FAIL )
             fsps25_fail_handler( );
+
 		fsc2_usleep( 100000, UNSET );
 	}
 
@@ -992,7 +1015,8 @@ fsps25_set_expert_mode( bool state )
 
 	if ( ! fsps25_get_command_reply( ) )
     {
-        print( FATAL, "Device did not accept SEM command.\n" );
+        print( FATAL, "Device did not accept \"SEM %c;\"command.\n",
+               state ? '1' : '0' );
         THROW( EXCEPTION );
     }
 }
@@ -1041,7 +1065,14 @@ fsps25_abort_sweep( void )
         THROW( EXCEPTION );
     }
 
+    /* Make sure that the value really get measured by aetting the
+       act_current_need_request member, otherwise only a formerly set
+       value gets returned */
+
+    fsps25.act_current_need_request = SET;
+    fsps25.super_current_need_request = SET;
 	fsps25_get_act_current( );
+	fsps25_get_super_current( );
 
 	return OK;
 }
@@ -1058,7 +1089,13 @@ fsps25_get_act_current( void )
 	long current;
 
 
-	if ( FSC2_MODE != EXPERIMENT )
+    /* Values for the current returned by the device aren't exact, so if the
+       act_current_need_request isn't set return the already stored value
+       (which then is a value that has been send to the device and which
+       is exact) */
+
+	if (    FSC2_MODE != EXPERIMENT
+         || ! fsps25.act_current_need_request )
 		return fsps25.act_current;
 
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
@@ -1092,9 +1129,17 @@ fsps25_get_act_current( void )
 		THROW( EXCEPTION );
 	}
 
+    /* Indicate that this is a value fetched from the device by setting the 
+       act_current_need_request member */
+
 	fsps25.act_current = current;
+    fsps25.act_current_need_request = SET;
+
 	if ( fsps25.heater_state == HEATER_ON )
+    {
+        fsps25.super_current_need_request = SET; 
 		fsps25.super_current = current;
+    }
 
 	return current;
 }
@@ -1204,12 +1249,27 @@ fsps25_set_act_current( long current )
 		THROW( EXCEPTION );
 	}
 
+    /* Get a really measured value for comparing to what we requested */
+
+    fsps25.act_current_need_request = SET;
 	fsps25_get_act_current( );
+
 	if ( labs( current - fsps25.act_current ) > MAX_CURRENT_DIFF )
 	{
 		print( FATAL, "Failed to reach requested current.\n" );
 		THROW( EXCEPTION );
 	}
+
+    /* The real current is the one we set, not the one we measured... */
+
+    fsps25.act_current = current;
+    fsps25.act_current_need_request = UNSET;
+
+    if ( fsps25.heater_state == HEATER_ON )
+    {
+        fsps25.super_current_need_request = UNSET;
+        fsps25.super_current = current;
+    }
 
 	return fsps25.act_current;
 }
@@ -1227,7 +1287,13 @@ fsps25_get_super_current( void )
 	long current;
 
 
-	if ( FSC2_MODE != EXPERIMENT )
+    /* Values for the super current returned by the device aren't exact, so
+       if the super_current_need_request isn't set return the already stored
+       value (which then is a value that has been send to the device and
+       which is exact) */
+
+	if (    FSC2_MODE != EXPERIMENT
+         || ! fsps25.super_current_need_request )
 		return fsps25.super_current;
 
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
@@ -1260,6 +1326,7 @@ fsps25_get_super_current( void )
 		THROW( EXCEPTION );
 	}
 
+    fsps25.super_current_need_request = UNSET;
 	return fsps25.super_current = current;
 }
 

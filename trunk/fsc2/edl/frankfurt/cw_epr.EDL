@@ -1,6 +1,6 @@
 === START_CURRENT float  [ -20.0 : 20.0 ] [ 0.0  ] "Start current" "A"
 === END_CURRENT   float  [ -20.0 : 20.0 ] [ 1.0  ] "End current"   "A"
-=== CURRENT_STEP  float  [ 5.0 : 1000.0 ] [ 50.0 ] "Current step"  "mA"
+=== CURRENT_STEP  float  [ 1.0 : 1000.0 ] [ 50.0 ] "Current step"  "mA"
 === FACTOR        float  [ 1.0e-3 : 100 ] [ 1.0  ] "Waiting time"  "* tc"
 === TEST          button [ OFF ]  "Test only"
 === if ( ! TEST )

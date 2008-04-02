@@ -21,7 +21,7 @@ magnet_request_expert_mode( );
 
 EXPERIMENT:
 
-sc = magnet_coil_current( )
+sc = magnet_coil_current( );
 
 hide_toolbox( "ON" );
 SC = output_create( "FLOAT_OUTPUT", sc, "Current through coil [A]" );
