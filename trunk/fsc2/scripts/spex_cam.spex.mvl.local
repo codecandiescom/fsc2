@@ -1787,7 +1787,7 @@ FOR I = 1 : N_scans {
 	}
 
 	IF button_state( B_eas ) {
-		end( );
+		BREAK;
 	}
 
 	IF button_state( B_wl ) {
@@ -1942,7 +1942,7 @@ sub get_wavelength {
 DEVICES:
 spex232;
 EXPERIMENT:
-ffsave( 1, "%.5f", monochromator_wavelength( ) / 1 nm );
+print( "#", monochromator_wavelength( ) / 1 nm );
 EOF
 
 	close $f;
@@ -1988,7 +1988,7 @@ sub get_wavenumber {
 DEVICES:
 spex232;
 EXPERIMENT:
-ffsave( 1, "%.3f", monochromator_wavenumber( ) );
+print( "#", monochromator_wavenumber( ) );
 EOF
 
 	close $f;
@@ -2034,7 +2034,7 @@ sub get_laser_line {
 DEVICES:
 spex232;
 EXPERIMENT:
-ffsave( 1, "%.4f", monochromator_laser_line( ) );
+print( "#", monochromator_laser_line( ) );
 EOF
 
 	close $f;
@@ -2084,7 +2084,7 @@ VARIABLES:
 limits[ 2 ];
 EXPERIMENT:
 limits = monochromator_wavenumber_scan_limits( );
-ffsave( 1, "%.3f %.3f", limits[ 1 ], limits[ 2 ] );
+print( "# #", limits[ 1 ], limits[ 2 ] );
 EOF
 
 	close $f;
@@ -2134,7 +2134,7 @@ VARIABLES:
 wla[ 4 ];
 EXPERIMENT:
 wla = monochromator_wavelength_axis( );
-ffsave( 1, "%.7f", wla[ 2 ] / 1 nm );
+print( "#", wla[ 2 ] / 1 nm );
 EOF
 
 	close $f;
@@ -2249,7 +2249,7 @@ sub is_laser_line_safe {
 
 	my ( undef, undef, undef, $num_pixel ) = get_camera_settings( $mw );
 	my $pixel_width = get_pixel_width( $mw );
-	
+
 	my $swn = wl2wn( wn2wl( $cwn ) - 0.5 * $pixel_width * ( $num_pixel - 1 ) );
 	my $ewn = wl2wn( wn2wl( $cwn ) + 0.5 * $pixel_width * ( $num_pixel - 1 ) );
 

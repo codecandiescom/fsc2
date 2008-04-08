@@ -127,6 +127,8 @@ struct RS_SML01 {
     double mod_ampl[ NUM_MOD_TYPES ];
     bool mod_ampl_is_set[ NUM_MOD_TYPES ];
 
+    double freq_change_delay;
+
 #if defined WITH_PULSE_MODULATION
     bool pulse_mode_state;            /* pulse mode on/off */
     bool pulse_mode_state_is_set;
@@ -168,6 +170,7 @@ Var_T * synthesizer_mod_freq(            Var_T * /* v */ );
 Var_T * synthesizer_mod_ampl(            Var_T * /* v */ );
 Var_T * synthesizer_mod_type(            Var_T * /* v */ );
 Var_T * synthesizer_mod_source(          Var_T * /* v */ );
+Var_T * synthesizer_freq_change_delay(   Var_T * /* v */ );
 Var_T * synthesizer_command(             Var_T * /* v */ );
 
 #if defined WITH_PULSE_MODULATION

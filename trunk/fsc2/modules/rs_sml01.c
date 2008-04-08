@@ -94,6 +94,8 @@ rs_sml01_init_hook( void )
         rs_sml01.mod_ampl_is_set[ i ] = UNSET;
     }
 
+    rs_sml01.freq_change_delay = 0.0;
+
 #if defined WITH_PULSE_MODULATION
     rs_sml01.pulse_mode_state_is_set = UNSET;
     rs_sml01.pulse_trig_slope_is_set = UNSET;
@@ -1557,6 +1559,30 @@ synthesizer_pulse_delay( Var_T * v )
 }
 
 #endif /* WITH_PULSE_MODULATION */
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_freq_change_delay( Var_T * v )
+{
+    double delay;
+
+    if ( v )
+    {
+        delay = get_double( v, "frequency change delay" );
+
+        too_many_arguments( v );
+
+        if ( delay < 1.0e-3 )
+            rs_sml01.freq_change_delay = 0.0;
+        else
+            rs_sml01.freq_change_delay = delay;
+    }
+
+    return vars_push( FLOAT_VAR, rs_sml01.freq_change_delay );
+}  
 
 
 /*----------------------------------------------------*

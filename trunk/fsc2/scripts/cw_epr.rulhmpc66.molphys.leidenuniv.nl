@@ -3,7 +3,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003-2007 Jens Thoms Toerring
+# Copyright (C) 2003-2008 Jens Thoms Toerring
 #
 # This file is part of fsc2.
 #
@@ -74,7 +74,7 @@ my $mf = $mw->Frame( '-relief' => 'ridge', '-borderwidth' => '1m' );
 my $f1 = $mf->Frame( );
 my $f1_l1 = $f1->Label( '-text'           => 'Start field:',
 						'-width'          => '20',
-						'-anchor'         => 'w' );
+						'anchor'          => 'w' );
 my $f1_v = $f1->Entry( '-textvariable'    => \$start_field,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -92,7 +92,7 @@ $f1_l2->pack( %wp );
 my $f2 = $mf->Frame( );
 my $f2_l1 = $f2->Label( '-text'          => 'End field:',
 						'-width'         => '20',
-						'-anchor'        => 'w' );
+						'anchor'         => 'w' );
 my $f2_v = $f2->Entry( '-textvariable'   => \$end_field,
 					   '-width'          => '8',
 					   '-validate'       => 'key',
@@ -110,7 +110,7 @@ $f2_l2->pack( %wp );
 my $f4 = $mf->Frame( );
 my $f4_l1 = $f4->Label( '-text'           => 'Number of points:',
 						'-width'          => '20',
-						'-anchor'         => 'w' );
+						'anchor'          => 'w' );
 my $f4_v = $f4->Entry( '-textvariable'    => \$num_points,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -128,7 +128,7 @@ $f4_l2->pack( %wp );
 my $f6 = $mf->Frame( );
 my $f6_l = $f6->Label( '-text'          => 'Time constant (tc):',
 					   '-width'         => '20',
-					   '-anchor'        => 'w' );
+					   'anchor'         => 'w' );
 my $f6_m = $f6->Optionmenu( '-options'      => \@tcs,
 							'-width'        => 9,
 							'-command'      => \&tc_check,
@@ -141,7 +141,7 @@ $f6_m->pack( %wp );
 my $f7 = $mf->Frame( );
 my $f7_l = $f7->Label( '-text'          => 'Acquisition rate (kd):',
 					   '-width'         => '20',
-					   '-anchor'        => 'w' );
+					   'anchor'         => 'w' );
 my $f7_m = $f7->Optionmenu( '-options'      => \@kds,
 							'-command'      => \&tpp_set,
 							'-width'        => 9,
@@ -156,7 +156,7 @@ $mf->pack( %fp, '-pady' => '1m' );
 my $f13 = $mf->Frame( );
 my $f13_l = $f13->Label( '-text'          => 'Sweep method:',
 						 '-width'         => '20',
-						 '-anchor'        => 'w' );
+						 'anchor'         => 'w' );
 my $f13_m = $f13->Optionmenu( '-options'  => [ "Unidirectional",
 							                   "Bidirectional" ],
 							'-width'        => 9,
@@ -173,7 +173,7 @@ my $mf2 = $mw->Frame( '-relief' => 'ridge', '-borderwidth' => '1m' );
 my $f3 = $mf2->Frame( );
 my $f3_l1 = $f3->Label( '-text'           => 'Sweep rate:',
 						'-width'          => '20',
-						'-anchor'         => 'w' );
+						'anchor'          => 'w' );
 my $f3_v = $f3->Entry( '-textvariable'    => \$sweep_rate,
 					   '-width'           => '8',
 					   '-state'           => 'disabled',
@@ -190,7 +190,7 @@ $f3_l2->pack( %wp );
 my $f8 = $mf2->Frame( );
 my $f8_l1 = $f8->Label( '-text'           => 'tc\'s per point:',
 						'-width'          => '20',
-						'-anchor'         => 'w' );
+						'anchor'          => 'w' );
 my $f8_v = $f8->Entry( '-textvariable'    => \$tau_per_point,
 					   '-width'           => '8',
 					   '-state'           => 'disabled',
@@ -203,7 +203,7 @@ $f8_v->pack( %wp );
 my $f12 = $mf2->Frame( );
 my $f12_l1 = $f12->Label( '-text'           => 'Time for single sweep:',
 						'-width'          => '20',
-						'-anchor'         => 'w' );
+						'anchor'          => 'w' );
 my $f12_v = $f12->Entry( '-textvariable'    => \$sweep_time,
 					   '-width'           => '8',
 					   '-state'           => 'disabled',
@@ -230,7 +230,7 @@ $mf2->pack( %fp, '-pady' => '1m' );
 my $f9 = $mf2->Frame( );
 my $f9_l1 = $f9->Label( '-text'           => 'Magnet wait time:',
 						'-width'          => '20',
-						'-anchor'         => 'w' );
+						'anchor'          => 'w' );
 my $f9_v = $f9->Entry( '-textvariable'    => \$sleep_time,
 					   '-width'           => '8',
 					   '-validate'        => 'key',
@@ -264,8 +264,8 @@ $f11_q->bind( 'all', '<Control-q>' => sub { &store_defs; $mw->destroy } );
 $f11->pack( '-side' => 'top',
 			'-fill' => 'x',
 			'-padx' => '4m' );
-$f11_a->pack( %wp, '-padx' => '5m', '-pady' => '3m' );
-$f11_q->pack( %wp, '-padx' => '5m', '-pady' => '3m' );
+$f11_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f11_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
 
 
 # Setup defaults

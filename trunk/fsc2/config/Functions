@@ -280,6 +280,7 @@ synthesizer_pulse_trigger_slope, -1, ALL;  // R&S SML01 with SML-B3 only
 synthesizer_pulse_width, -1, ALL;          // R&S SML01 with SML-B3 only
 synthesizer_pulse_delay, -1, ALL;          // R&S SML01 with SML-B3 only
 
+synthesizer_freq_change_delay, -1, ALL;
 
 /* Functions exported by the boxcar (EGG4402) */
 

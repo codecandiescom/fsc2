@@ -41,7 +41,8 @@ all: $(SIMPLE_SCRIPTS) $(EDL_SCRIPTS)
 
 install:
 	@for f in *.molphys.leidenuniv.nl; do       \
-		if [ $$f -nt ../../scripts/$$f ]; then  \
+		if [    $$f -nt ../../scripts/$$f       \
+			 -o ! -e ../../scripts/$$f ]; then  \
 			echo "cp $$f ../../scripts";        \
 	    	cp $$f ../../scripts;               \
 		fi;                                     \

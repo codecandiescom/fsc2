@@ -70,13 +70,16 @@ static long T_fprintf( long         /* fn  */,
 Var_T *
 f_is_file( Var_T * v )
 {
+    long fn;
+
+
     if ( v == NULL )
     {
         print( FATAL, "Missing argument.\n" );
         THROW( EXCEPTION );
     }
 
-    long fn = get_long( v, "file number" );
+    fn = get_long( v, "file number" );
 
     too_many_arguments( v );
 

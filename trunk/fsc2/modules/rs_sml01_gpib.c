@@ -307,8 +307,17 @@ rs_sml01_set_frequency( double freq )
        to be finished since otherwise sometimes pulses created afterwards
        were missing */
 
-    sprintf( cmd, "FREQ:CW %.0f;*WAI;*OPC?\n", freq );
-    rs_sml01_talk( ( const char * ) cmd, cmd, &length );
+    if ( rs_sml01.freq_change_delay < 1.0e-3 )
+    {
+        sprintf( cmd, "FREQ:CW %.0f;*WAI;*OPC?\n", freq );
+        rs_sml01_talk( ( const char * ) cmd, cmd, &length );
+    }
+    else
+    {
+        sprintf( cmd, "FREQ:CW %.0f\n", freq );
+        rs_sml01_command( cmd );
+        fsc2_usleep( lrnd( 1.0e6 * rs_sml01.freq_change_delay ), UNSET );
+    }
 
     return freq;
 }
