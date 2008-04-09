@@ -101,7 +101,7 @@ Exception_Types_T get_exception_type( const char * /* file */,
 #define OTHERWISE  else
 
 /* Automatic variables are not necessarily restored after a longjmp() when
-   they were stored in a register, so we have to keep the compiler from
+   they were stored in registers, so we have to keep the compiler from
    putting automatic variable that could be clobbered into a register.
    The following hack seems to do the trick for all gcc versions. */
 
