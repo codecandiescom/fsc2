@@ -138,7 +138,7 @@ FOREVER {
 		   ( p2_to_p3_dist + p2_to_p3_incr * ( I - 1 ) ) / 1 ns, data );
 === endif
 	pulser_shift( );
-	pulser_update( );	
+	pulser_update( );
     output_value( B1, int( ( p2_to_p3_dist + I * p2_to_p3_incr ) / 1 ns ) );
 	I += 1;
 }

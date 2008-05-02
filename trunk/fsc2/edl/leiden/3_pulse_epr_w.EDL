@@ -168,7 +168,7 @@ FOREVER {
 === if ( START_FIELD <= END_FIELD )
         display_1d( I, data[ 1, J, I ], 1,
                     I, data[ 2, J, I ], 2,
-                    I, avg[ 1, I ],     3
+                    I, avg[ 1, I ],     3,
                     I, avg[ 2, I ],     4 );
 === else
         display_1d( N_Points - I + 1, data[ 1, J, I ], 1,

@@ -600,7 +600,7 @@ lockin_dac_voltage( Var_T * v )
 
     voltage = get_double( v, "DAC voltage" );
 
-    if ( voltage < DAC_MIN_VOLTAGE || voltage > DAC_MIN_VOLTAGE )
+    if ( voltage < DAC_MIN_VOLTAGE || voltage > DAC_MAX_VOLTAGE )
     {
         print( FATAL, "Invalid DAC voltage (%f V), valid range is between "
                "%f V and %f V.\n", voltage, DAC_MIN_VOLTAGE, DAC_MAX_VOLTAGE );

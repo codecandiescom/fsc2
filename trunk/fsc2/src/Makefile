@@ -20,33 +20,35 @@
 #  Boston, MA 02111-1307, USA.
 
 
-c_sources     = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c     \
-				vars_rhs.c vars_lhs.c vars_ass.c vars_add.c vars_sub.c      \
-				vars_mult.c vars_div.c vars_mod.c vars_pow.c vars_util.c    \
-				func.c func_basic.c func_util.c func_save.c chld_func.c     \
-				func_intact.c func_intact_b.c func_intact_s.c               \
-				func_intact_o.c func_intact_m.c T.c phases.c devices.c      \
-				exp.c run.c comm.c accept.c gpib_if.c loader.c conn.c       \
-				mail.c ipc.c print.c serial.c lan.c graphics.c              \
-				graphics_edl.c graph_handler_1d.c graph_handler_2d.c        \
-				graph_cut.c bugs.c fsc2_assert.c dump.c module_util.c       \
-				fsc2d.c global.c help.c edit.c
+c_sources      = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c     \
+				 vars_rhs.c vars_lhs.c vars_ass.c vars_add.c vars_sub.c      \
+				 vars_mult.c vars_div.c vars_mod.c vars_pow.c vars_util.c    \
+				 func.c func_basic.c func_util.c func_save.c chld_func.c     \
+				 func_intact.c func_intact_b.c func_intact_s.c               \
+				 func_intact_o.c func_intact_m.c T.c phases.c devices.c      \
+				 exp.c run.c comm.c accept.c gpib_if.c loader.c conn.c       \
+				 mail.c ipc.c print.c serial.c lan.c graphics.c              \
+				 graphics_edl.c graph_handler_1d.c graph_handler_2d.c        \
+				 graph_cut.c bugs.c fsc2_assert.c dump.c module_util.c       \
+				 fsc2d.c global.c help.c edit.c
 ifdef WITH_HTTP_SERVER
-c_sources    += http.c dump_graphic.c
+c_sources     += http.c dump_graphic.c
 endif
-bison_sources = $(wildcard *_parser.y)
-flex_sources  = $(wildcard *_lexer.l)
-sources       = $(bison_sources:.y=.c) $(flex_sources:.l=.c) $(c_sources)
-objects       = $(sources:.c=.o)
-resources     = $(wildcard fsc2_rsc_*r.fd)
-headers       = ${c_sources:.c=.h} fsc2_types.h ../fsc2_config.h
-all_headers   = $(headers) $(bison_sources:.y=.h) $(resources:.fd=.h)
+bison_sources  = $(wildcard *_parser.y)
+flex_sources   = $(wildcard *_lexer.l)
+sources        = $(bison_sources:.y=.c) $(flex_sources:.l=.c) $(c_sources)
+objects        = $(sources:.c=.o)
+resources      = $(wildcard fsc2_rsc_*r.fd)
+headers        = ${c_sources:.c=.h} fsc2_types.h ../fsc2_config.h
+all_headers    = $(headers) $(bison_sources:.y=.h) $(resources:.fd=.h)
+
+xforms_version = $(shell fdesign -xforms_version 2>&1 | grep '^FORMS Library Version [0-9]*\.[0-9]*\.[0-9]*.*$$' - | wc -c )
 
 export headers        # export list of header files to the modules Makefile
 
 
 .SUFFIXES:
-.PHONY:    all src res gpib_setup cleanup clean
+.PHONY:    all src res gpib_setup xforms_setup cleanup clean
 
 
 # Default target which is used when make is called from within this directory
@@ -182,6 +184,22 @@ gpib_setup:
 	fi
 
 
+fsc2_rsc_lr.fd: fsc2_rsc_lr_old.fd fsc2_rsc_hr_new.fd
+	@if [ -z "$(xforms_version)" ]; then              \
+		ln -f -s fsc2_rsc_lr_old.fd fsc2_rsc_lr.fd;   \
+	else                                              \
+		ln -f -s fsc2_rsc_lr_new.fd fsc2_rsc_lr.fd;   \
+    fi                                                \
+
+
+fsc2_rsc_hr.fd: fsc2_rsc_hr_new.fd fsc2_rsc_hr_new.fd
+	@if [ -z "$(xforms_version)" ]; then              \
+		ln -f -s fsc2_rsc_hr_old.fd fsc2_rsc_hr.fd;   \
+	else                                              \
+		ln -f -s fsc2_rsc_hr_new.fd fsc2_rsc_hr.fd;   \
+    fi                                                \
+
+
 # How to install the binaries
 
 install:
@@ -231,7 +249,7 @@ cleanup:
 clean:
 	$(MAKE) cleanup
 	$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch] \
-		  fsc2_addr2line *.fsc2_so *.bak
+		  fsc2_rsc_[hl]r.fd fsc2_addr2line *.fsc2_so *.bak
 
 
 # don't automatically delete intermediate files created by bison and flex

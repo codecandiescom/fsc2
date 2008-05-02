@@ -99,6 +99,7 @@ magnet_goto_field_on_end, 1, ALL;   // keep sweeping after end of experiment
 magnet_max_current, -1, ALL;
 magnet_max_sweep_rate, -1, ALL;
 magnet_request_expert_mode, 0, PREP;
+magnet_act_current, -1, EXP;
 magnet_coil_current, 0, EXP;
 magnet_shutdown, 0, EXP;
 magnet_heater_state, -1, ALL;

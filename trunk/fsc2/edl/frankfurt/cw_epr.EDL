@@ -1,16 +1,27 @@
-=== START_CURRENT float  [ -20.0 : 20.0 ] [ 0.0  ] "Start current" "A"
-=== END_CURRENT   float  [ -20.0 : 20.0 ] [ 1.0  ] "End current"   "A"
-=== CURRENT_STEP  float  [ 1.0 : 1000.0 ] [ 50.0 ] "Current step"  "mA"
-=== FACTOR        float  [ 1.0e-3 : 100 ] [ 1.0  ] "Waiting time"  "* tc"
-=== TEST          button [ OFF ]  "Test only"
-=== if ( ! TEST )
+=== START_CURRENT float  [ -20.0  : 20.0   ] [ 0.0    ] "Start current" "A"
+=== END_CURRENT   float  [ -20.0  : 20.0   ] [ 1.0    ] "End current"   "A"
+=== CURRENT_STEP  float  [ 1.0    : 1000.0 ] [ 50.0   ] "Current step"  "mA"
+=== SPEED         float  [ 1.0    : 2000.0 ] [ 2000.0 ] "Sweep speed"   "mA/min"
+=== FACTOR        float  [ 1.0e-3 : 100    ] [ 1.0    ] "Waiting time"  "* tc"
+=== NUM_AVG       int    [ 1      :        ] [ 1      ] "Number of averages"
+=== LOCKIN menu [ "SR530", "SR830" ] [ 1 ] "Lock-in amplifier"
+=== SENS   menu [ "Don't set", "500 mV", "200 mV", "100 mV", " 50 mV", \
+===               " 20 mV", " 10 mV", "  5 mv", "  2 mV", "  1 mV", "500 uV", \
+===               "200 uV", "100 uV", " 50 uV", " 20 uV", " 10 uV", "  5 uV", \
+===               "  2 uV", "  1 uV", "500 nV", "200 nV", "100 nV", " 50 nV", \
+===               " 10 nV", "  5 nV", "  2 nV" ] [ 1 ] \
+===               "Sensitivity:"
+=== TC     menu [ "Don't set", "100 s", " 30 s", " 10 s", "  3 s", "  1 s",    \
+===               "300 ms", "100 ms", " 30 ms", " 10 ms", "  3 ms", "  1 ms" ] \
+===             [ 1 ] "Time constant:"
+=== BOFFSET float  [ : ] [ 0.0 ] "Center field" "mT"
+=== BSLOPE  float  [ : ] [ 4.0 ] "Field/current ratio" "mT/A"
 DEVICES:
 
 fsps25;              /* sweep power supply */
-sr530;               /* lock-in amplifier  */
+LOCKIN;               /* lock-in amplifier  */
 
 
-=== endif
 VARIABLES:
 
 start_current = START_CURRENT A;
@@ -27,15 +38,18 @@ SP = 1;
 EP = N_points;
 D = 1;               /* scan direction, 1: up, -1 down */
 sc = start_current;
+ssc = start_current;
 === else
 SP = N_points;
 EP = 1;
 D = -1;              /* scan direction, 1: up, -1 down */
 sc = end_current;
+ssc = end_current;
 === endif
 
 I = 0,               /* scan and point counters */
 J = 0;
+K;
 Scans_done = 0;      /* final value of number of scans */
 Points_done = 0;     /* final value of number of points per scan */
 delay;               /* delay for lock-in */
@@ -45,13 +59,22 @@ np;
 s = 0.0;
 c = 1.0;
 tmp[ * ];
+new;
 
 Current_scan;        /* toolbox variables */
 Act_current;
 Stop_after_scan;
 Phase_slider;
 Phase_input;
+B_field;
+B_offset;
+B_slope;
 Done;
+
+B_axis = 0;
+
+b_offset = BOFFSET;
+b_slope  = BSLOPE;
 
 File_d;              /* variables for output files */
 File_i;
@@ -60,23 +83,28 @@ File_pc;
 
 PREPARATIONS:
 
-init_1d( 4, N_points, sc, current_step, "Current [A]", "Signal [mV]" );
+init_1d( 4, N_points, ssc, current_step, "Current [A]", "Signal [mV]" );
 
 
 EXPERIMENT:
 
-/* Calculate how long t wait for lock-in to measure new data and go to the
+/* Calculate how long to wait for lock-in to measure new data and go to the
    the start field */
 
-=== if ( ! TEST )
-delay = FACTOR * lockin_time_constant( );
-
-data[ 1, SP, 1 ] = magnet_field( start_current );
+=== if TC ne "Don't set"
+lockin_time_constant( TC );
+delay = FACTOR * TC;
 === else
-delay = FACTOR * 0.02;
-
-data[ 1, SP, 1 ] = start_current;
+delay = FACTOR * lockin_time_constant( );
 === endif
+
+=== if SENS ne "Don't set"
+lockin_sensitivity( SENS );
+=== endif
+
+magnet_max_sweep_rate( SPEED / 6.0e4 );
+data[ 1, SP, 1 ] = magnet_field( start_current );
+magnet_max_sweep_rate( 2000.0 / 6.0e4 );
 sc = data[ 1, SP, 1 ];
 
 /* Create the toolbos that shows the current scan number and allows to
@@ -86,6 +114,9 @@ hide_toolbox( "ON" );
 Current_scan = output_create( "INT_OUTPUT",  "Current scan no." );
 Act_current =  output_create( "FLOAT_OUTPUT", sc, "Coil current[ A]" );
 Stop_after_scan = button_create( "PUSH_BUTTON", "Stop after end of scan" );
+B_offset = input_create( "FLOAT_INPUT", b_offset, "Center field [mT]" );
+B_slope = input_create( "FLOAT_INPUT", b_slope, "Field/current ratio [mT/A]" );
+B_field = button_create( "PUSH_BUTTON", "Show field axis" );
 hide_toolbox( "OFF" );
 
 /* Keep repeating scans until the user stops it */
@@ -108,17 +139,20 @@ FOREVER {
 		/* Sleep a bit until the lock-in had had enough time to measure
 		   new data points, then fetch them */
 
+=== if NUM_AVG == 1
 		wait( delay );
-=== if ( ! TEST )
 		data[ I, J, 2 : 3 ] = lockin_get_data( 1, 2 ) / 1 mV;
 === else
-		data[ I, J, 2 ] = grandom( ) + - 0.5 * ( J - N_points / 2 ) *
- 			              exp( - ( J - N_points / 2 )^2 / 55.0^2 );
-		data[ I, J, 3 ] = grandom( ) + 0.134 * ( J - N_points / 2 ) *
-		                  exp( - ( J - N_points / 2 )^2 / 55.0^2 );
+	    data[ I, J, 2 ] = 0.0;
+	    data[ I, J, 3 ] = 0.0;
+		FOR K = 1 : NUM_AVG {
+			wait( delay );
+			add_to_average( data[ I, J, 2 : 3 ],
+			                lockin_get_data( 1, 2 ) / 1 mV, K );
+        }
 === endif
 
-		/* Calculate the new averaged data, tne display the new points and
+		/* Calculate the new averaged data, then display the new points and
 		   the updayed average */
 
 		avg[ J ] = add_to_average( avg[ J ], data[ I, J, 2 : 3 ], I );
@@ -129,21 +163,55 @@ FOREVER {
 
 		/* If we're not at the end of the scan change the field */
 
-=== if ( ! TEST )
-        IF    ( D ==  1 AND J < N_points )
-	    	data[ I, J + 1, 1 ] =
-			            magnet_field( start_current + J * current_step );
-		} ELSE  IF D == -1 AND J > 1 {
+        IF D ==  1 AND J < N_points {
+            data[ I, J + 1, 1 ] =
+			       magnet_field( start_current + J * current_step );
+        } ELSE  IF D == -1 AND J > 1 {
 	    	data[ I, J - 1, 1 ] =
 			            magnet_field( end_current + ( J - 2 ) * current_step );
 		}
-=== else
-        IF D ==  1 AND J < N_points {
-	    	data[ I, J + 1, 1 ] = start_current + J * current_step;
-		} ELSE IF D == -1 AND J > 1 {
-	    	data[ I, J - 1, 1 ] = end_current + ( J - 2 ) * current_step;
+
+		IF input_changed( B_offset ) {
+			new = input_value( B_offset );
+			IF new != b_offset {
+				b_offset = new;
+				IF B_axis == 1 AND b_slope != 0.0 {
+					change_scale_1d( b_offset + ssc * b_slope,
+									 current_step * b_slope );
+				}
+			}
 		}
-=== endif
+
+		IF input_changed( B_slope ) {
+			new = input_value( B_slope );
+			IF new != b_slope AND new != 0.0 {
+				b_slope = new;
+				IF B_axis == 1 {
+					change_scale_1d( b_offset + ssc * b_slope,
+									 current_step * b_slope );
+				}
+			}
+			IF new == 0.0 {
+				input_value( B_slope, b_slope );
+			}			
+		}
+
+		IF button_changed( B_field ) {
+			IF button_state( B_field ) {
+			    IF b_slope == 0.0 {	 
+				    button_state( B_field, 0 );
+				} ELSE {
+			    	B_axis = 1;
+					change_scale_1d( b_offset + ssc * b_slope,
+									 current_step * b_slope );
+					change_label_1d( "Field [mT]" );
+				}
+			} ELSE {
+			    B_axis = 0;
+				change_scale_1d( ssc, current_step );
+				change_label_1d( "Current [A]" );
+			}
+		}
     }
 
 	/* Scan is done, if the user told us to stop (by clicking on the "Stop
@@ -157,11 +225,9 @@ FOREVER {
 
 	/* Otherwise go back to the start field */
 
-=== if ( ! TEST )
+	magnet_max_sweep_rate( SPEED / 6.0e4 );
 	data[ I + 1, SP, 1 ] = magnet_field( start_current );
-=== else
-	data[ I + 1, SP, 1 ] = start_current;
-=== endif
+	magnet_max_sweep_rate( 2000.0 / 6.0e4 );
 }
 
 
@@ -172,21 +238,21 @@ ON_STOP:
 
 IF     Scans_done == 0
    AND ( ( D == 1 AND J <= 3 ) OR ( D == -1 AND J >= N_points - 2 ) ) { 
-	abort( );
+    abort( );
 }
 
 /* Remove contents of the toolbox */
 
 hide_toolbox( "ON" );
-object_delete( Current_scan );
 object_delete( Stop_after_scan );
+object_delete( Current_scan );
 
 /* Ask for the data file, if none gets selected skip all the rest */
 
 File_d = get_file( "", "*.dat", "", "", "dat" );
 
 IF ! is_file( File_d ) {
-	abort( );
+    abort( );
 }
 
 /* Get the file for the experiments parameters */
@@ -234,6 +300,7 @@ IF Scans_done == 0 {
 			avg = add_to_average( avg, data[ I, 1 : N_points, 2 : 3 ], I );
 		}
 	}
+
 }
 
 /* Save the "raw" data */
@@ -267,6 +334,48 @@ FOREVER {
 
 	IF button_state( Done ) {
 		BREAK;
+	}
+
+	IF input_changed( B_offset ) {
+		new = input_value( B_offset );
+		IF new != b_offset {
+			b_offset = new;
+			IF B_axis == 1 AND b_slope != 0.0 {
+				change_scale_1d( b_offset + ssc * b_slope,
+								 current_step * b_slope );
+			}
+		}
+	}
+
+	IF input_changed( B_slope ) {
+		new = input_value( B_slope );
+		IF new != b_slope AND new != 0.0 {
+			b_slope = new;
+			IF B_axis == 1 {
+				change_scale_1d( b_offset + ssc * b_slope,
+								 current_step * b_slope );
+			}
+		}
+		IF new == 0.0 {
+			input_value( B_slope, b_slope );
+		}			
+	}
+
+	IF button_changed( B_field ) {
+		IF button_state( B_field ) {
+		    IF b_slope == 0.0 {	 
+			    button_state( B_field, 0 );
+			} ELSE {
+		    	B_axis = 1;
+				change_scale_1d( b_offset + ssc * b_slope,
+								 current_step * b_slope );
+				change_label_1d( "Field [mT]" );
+			}
+		} ELSE {
+		    B_axis = 0;
+			change_scale_1d( ssc, current_step );
+			change_label_1d( "Current [A]" );
+		}
 	}
 
 	IF slider_changed( Phase_slider ) {
@@ -335,12 +444,8 @@ fsave( File_i, "Date                   = # #\n"
 			   "  Modulation frequency = # kHz\n\n"
 			   "*** Lock-In data are in mV ***\n\n",
        date( ), time( ), Points_done, Scans_done, sc, ec, current_step, 
-=== if ( ! TEST )
 	   lockin_sensitivity( ) / 1 mV, lockin_time_constant( ),
 	   lockin_phase( ), lockin_ref_freq( ) / 1 kHz );
-=== else
-	   1 mV, 300 ms, 123, 100 );
-=== endif
 
 IF p != 0.0 {
    	ffsave( File_i, "Phase:\n  Additional phase:    = %.1f\n", p );

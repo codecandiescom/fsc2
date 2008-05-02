@@ -178,7 +178,7 @@ FOREVER {
         display_1d( N_Points - I + 1, data[ 1, J, N_Points - I + 1 ], 1,
 					N_Points - I + 1, data[ 2, J, N_Points - I + 1 ], 2,
                     N_Points - I + 1, ( ( J - 1 ) * avg[ 1, N_Points - I + 1 ]
-                    + data[ 1, J, N_Points - I + 1 ] ) / J, 3
+                    + data[ 1, J, N_Points - I + 1 ] ) / J, 3,
                     N_Points - I + 1, ( ( J - 1 ) * avg[ 2, N_Points - I + 1 ]
                     + data[ 2, J, N_Points - I + 1 ] ) / J, 4 );
 === endif

@@ -47,6 +47,7 @@ Var_T * magnet_sweep_rate( Var_T * v );
 Var_T * magnet_max_current( Var_T * v );
 Var_T * magnet_max_sweep_rate( Var_T *v );
 Var_T * magnet_request_expert_mode( Var_T * v );
+Var_T * magnet_act_current( Var_T * v );
 Var_T * magnet_coil_current( Var_T * v );
 Var_T * magnet_shutdown( Var_T * v  );
 Var_T * magnet_heater_state( Var_T * v );
@@ -107,7 +108,7 @@ FSPS25 fsps25, fsps25_stored;
 #define HEATER_OFF_DELAY       10000000  /* 10 s  */
 #define HEATER_ON_DELAY        1500000   /* 1.5 s */
 
-#define MAX_CURRENT_DIFF       10         /* 10 mA */
+#define MAX_CURRENT_DIFF       12         /* 12 mA */
 
 /* Defines for the parity used by the device */
 
@@ -250,7 +251,8 @@ magnet_name( Var_T * v  UNUSED_ARG )
 Var_T *
 magnet_request_expert_mode( Var_T * v  UNUSED_ARG )
 {
-    return vars_push( INT_VAR, ( long ) ( fsps25.is_expert_mode = SET ) );
+    fsps25.is_expert_mode = SET;
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -533,6 +535,57 @@ magnet_heater_state( Var_T * v )
 /*------------------------------------------------------------------------*
  *------------------------------------------------------------------------*/
 
+Var_T *
+magnet_act_current( Var_T * v )
+{
+	double current;
+	long raw_current;
+
+
+	if ( v == NULL )
+		return vars_push( FLOAT_VAR,
+                          1.0e-3 * fsps25_get_act_current( ) );
+
+	current = get_double( v, "current" );
+	raw_current = lrnd( 1.0e3 * current );
+
+	too_many_arguments( v );
+
+	if ( labs( raw_current ) > MAX_CURRENT )
+	{
+		print( FATAL, "Requested current of %.3f A is not within the possible "
+			   "range.\n", current );
+		THROW( EXCEPTION );
+	}
+
+	if ( labs( raw_current ) > MAX_ALLOWED_CURRENT )
+	{
+		print( FATAL, "Requested current of %.3f A is not within the allowed "
+			   "range.\n", current );
+		THROW( EXCEPTION );
+	}
+
+	if ( labs( raw_current ) > fsps25.max_current )
+	{
+		print( FATAL, "Requested current of %.3f A is not within the currently "
+			   "set limits.\n", current );
+		THROW( EXCEPTION );
+	}
+
+	if (    fsps25.act_current == raw_current
+		 || FSC2_MODE != EXPERIMENT )
+		fsps25.act_current_is_set = SET;
+    else
+        fsps25_set_act_current( raw_current );
+
+	return vars_push( FLOAT_VAR,
+					  1.0e-3 * fsps25_get_act_current( ) );
+}
+
+
+/*------------------------------------------------------------------------*
+ *------------------------------------------------------------------------*/
+
 static void
 fsps25_init( void )
 {
@@ -562,20 +615,20 @@ fsps25_init( void )
     /* There's no reason to keep the expert mode if the device isn't in
        PFail state */
 
-    if ( fsps25.state == STATE_PFAIL )
-        fsps25.is_expert_mode = UNSET;
-
 	/* Switch to ON state if necessary */
 
-	if ( fsps25.state == STATE_OFF )
+	if ( fsps25.state != STATE_ON )
 		fsps25_on( );
+
+    if ( fsps25.state != STATE_PFAIL )
+        fsps25.is_expert_mode = UNSET;
 
     /* We can't continue if the heater is in failure state */
 
     if ( fsps25.heater_state == HEATER_FAIL )
         fsps25_fail_handler( );
 
-    /* Determine the actual current output by the powetr supply */
+    /* Determine the actual current output by the power supply */
 
     fsps25_get_act_current( );
 
@@ -612,7 +665,7 @@ fsps25_init( void )
     /* If we're in PFail state and expert mode is on we have to stop right
        here - switching on the heater must be done only on user request */
 
-	if ( fsps25.state == STATE_PFAIL )
+	if ( fsps25.state == STATE_PFAIL && fsps25.is_expert_mode )
         return;
 
 	/* We now need to switch on the heater */
@@ -1196,6 +1249,9 @@ fsps25_set_act_current( long current )
         if ( fsps25.heater_state == HEATER_FAIL )
             fsps25_fail_handler( );
 
+        if ( fsps25.sweep_state == STOPPED )
+            break;
+
 		if ( check_user_request( ) )
 		{
 			fsps25_abort_sweep( );
@@ -1215,7 +1271,7 @@ fsps25_set_act_current( long current )
 
 	/* Check if the sweep has stopped, if not give it a bit more time (3s) */
 
-	while ( retries-- > 0 )
+	while ( fsps25.sweep_state != STOPPED && retries-- > 0 )
 	{
 		fsps25_get_state( );
         if (    ( fsps25.state == STATE_PFAIL && ! fsps25.is_expert_mode )
@@ -1239,7 +1295,7 @@ fsps25_set_act_current( long current )
 	/* Now make sure the sweep has really stopped and the target current has
        been reached */
 
-	if ( fsps25.sweep_state == SWEEPING )
+	if ( fsps25.sweep_state != STOPPED )
 	{
 		fsps25_abort_sweep( );
         if (    ( fsps25.state == STATE_PFAIL && ! fsps25.is_expert_mode )
@@ -1249,7 +1305,7 @@ fsps25_set_act_current( long current )
 		THROW( EXCEPTION );
 	}
 
-    /* Get a really measured value for comparing to what we requested */
+    /* Get a measured value for comparing it to what we requested */
 
     fsps25.act_current_need_request = SET;
 	fsps25_get_act_current( );

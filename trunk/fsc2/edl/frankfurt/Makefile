@@ -1,6 +1,6 @@
 EDL           := $(wildcard *.EDL)
 MACHINE       := zethossuse.prisner.de
-ALL           := $(patsubst %.EDL,%,$(EDL)) epr fsps25_shutdown fsps25_shutdown_zero pfail_recover
+ALL           := $(patsubst %.EDL,%,$(EDL)) epr monitor_mode fsps25_shutdown fsps25_shutdown_zero pfail_recover
 
 all: $(patsubst %.EDL,%,$(EDL))
 
@@ -9,11 +9,6 @@ all: $(patsubst %.EDL,%,$(EDL))
 		echo "fsc2_guify $< $@";        \
 		fsc2_guify $< $@;               \
 	fi
-
-bla:
-	@for f in $(ALL); do       \
-		echo "cp $$f ../../scripts/$$f.$(MACHINE)";    \
-		done
 
 install:
 	@for f in $(ALL); do                                      \

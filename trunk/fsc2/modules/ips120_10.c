@@ -1341,6 +1341,7 @@ ips120_10_get_act_current( void )
     char reply[ 100 ];
     long length;
     int retries = 3;
+    double current;
 
 
     CLOBBER_PROTECT( retries );
@@ -1350,8 +1351,16 @@ ips120_10_get_act_current( void )
         length = ips120_10_talk( "R0\r", reply, 100 );
 
         reply[ length - 1 ] = '\0';
+
         TRY
-            return T_atod( reply + 1 );
+        {
+            current = T_atod( reply + 1 );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+            continue;
+
+        return current;
     }
 
     ips120_10_comm_failure( );
@@ -1389,6 +1398,7 @@ ips120_10_get_target_current( void )
     char reply[ 100 ];
     long length;
     int retries = 3;
+    double current;
 
 
     CLOBBER_PROTECT( retries );
@@ -1398,7 +1408,14 @@ ips120_10_get_target_current( void )
         length = ips120_10_talk( "R5\r", reply, 100 );
         reply[ length - 1 ] = '\0';
         TRY
-            return T_atod( reply + 1 );
+        {
+            current = T_atod( reply + 1 );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+            continue;
+
+        return current;
     }
 
     ips120_10_comm_failure( );
@@ -1436,6 +1453,7 @@ ips120_10_get_sweep_rate( void )
     char reply[ 100 ];
     long length;
     int retries = 3;
+    double rate;
 
 
     CLOBBER_PROTECT( retries );
@@ -1444,8 +1462,16 @@ ips120_10_get_sweep_rate( void )
     {
         length = ips120_10_talk( "R6\r", reply, 100 );
         reply[ length - 1 ] = '\0';
+
         TRY
-            return T_atod( reply + 1 ) / 60.0;
+        {
+            rate = T_atod( reply + 1 ) / 60.0;
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+            continue;
+
+        return rate;
     }
 
     ips120_10_comm_failure( );

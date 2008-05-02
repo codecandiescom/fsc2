@@ -2588,7 +2588,7 @@ displays a message box on the screen to inform the user.
 
 If called after the @code{ON_STOP} label it simply ends the experiment
 without any notofication of the user, so it then can be used to get
-graciouslu out of the @code{ON_STOP} handling.
+out of the @code{ON_STOP} handling.
 
 The function can only be used in the @code{EXPERIMENT} section.
 
