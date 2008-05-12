@@ -330,13 +330,15 @@ f_ocreate( Var_T * var )
         new_io->val.dval = dval;
     else
         new_io->val.sptr = sptr;
-    new_io->self = NULL;
-    new_io->group = NULL;
-    new_io->label = label;
-    new_io->help_text = help_text;
-    new_io->is_changed = UNSET;
+
+    new_io->self          = NULL;
+    new_io->group         = NULL;
+    new_io->label         = label;
+    new_io->help_text     = help_text;
+    new_io->is_changed    = UNSET;
     new_io->report_change = UNSET;
-    new_io->enabled = SET;
+    new_io->enabled       = SET;
+    new_io->partner       = -1;
 
     /* Draw the new object */
 

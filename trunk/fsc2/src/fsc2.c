@@ -336,6 +336,12 @@ globals_init( const char * pname )
     GUI.cut_win_has_pos = UNSET;
     GUI.cut_win_has_size = UNSET;
     GUI.toolbox_has_pos = UNSET;
+    GUI.main_form     = NULL;
+    GUI.run_form_1d   = NULL;
+    GUI.run_form_2d   = NULL;
+    GUI.input_form    = NULL;
+    GUI.cut_form      = NULL;
+    GUI.print_comment = NULL;
 
     fsc2_get_conf( );
 

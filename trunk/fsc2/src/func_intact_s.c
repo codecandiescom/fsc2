@@ -243,11 +243,12 @@ f_screate( Var_T * var )
     if ( step != 0.0 )
         new_io->value = lrnd( ( new_io->value - start_val ) / step ) * step
                         + start_val;
-    new_io->label = label;
-    new_io->help_text = help_text;
-    new_io->is_changed = UNSET;
+    new_io->label         = label;
+    new_io->help_text     = help_text;
+    new_io->is_changed    = UNSET;
     new_io->report_change = UNSET;
-    new_io->enabled = SET;
+    new_io->enabled       = SET;
+    new_io->partner       = -1;
 
     /* Draw the new slider */
 

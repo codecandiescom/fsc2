@@ -1398,6 +1398,7 @@ stop_graphics( void )
 
         fl_hide_form( GUI.run_form_1d->run_1d );
         fl_free_form( GUI.run_form_1d->run_1d );
+        fl_free( GUI.run_form_1d );
         GUI.run_form_1d = NULL;
     }
 
@@ -1417,6 +1418,7 @@ stop_graphics( void )
 
         fl_hide_form( GUI.run_form_2d->run_2d );
         fl_free_form( GUI.run_form_2d->run_2d );
+        fl_free( GUI.run_form_2d );
         GUI.run_form_2d = NULL;
     }
 

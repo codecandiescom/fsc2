@@ -700,7 +700,7 @@ filter_edl( const char * name,
     int pdt[ 2 ];
     fd_set rfds;
     int rs;
-    char c;
+    char c = '\0';
 
 
     /* The first set of pipes is needed to read the output of 'fsc2_clean' */
@@ -1445,11 +1445,13 @@ fsc2_show_fselector( const char * message,
 
 void
 get_form_position( FL_FORM * form,
-                   int *     x,
-                   int *     y )
+                   int     * x,
+                   int     * y )
 {
     XWindowAttributes attr;
-    Window root, parent, *children;
+    Window root,
+           parent,
+           *children;
     unsigned int nchilds;
 
 

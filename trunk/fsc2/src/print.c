@@ -290,6 +290,7 @@ get_print_file( FILE ** fp,
 
         default :
             fl_free_form( print_form->print );
+            fl_free( print_form );
             return FAIL;
     }
 
@@ -324,6 +325,7 @@ get_print_file( FILE ** fp,
                 *name = CHAR_P T_free( *name );
             fl_hide_form( print_form->print );
             fl_free_form( print_form->print );
+            fl_free( print_form );
             return FAIL;
         }
     }
@@ -343,6 +345,7 @@ get_print_file( FILE ** fp,
 
     fl_hide_form( print_form->print );
     fl_free_form( print_form->print );
+    fl_free( print_form );
 
     /* In send-to-printer mode or when the user hit the "Cancel" button we're
        already done, we just return if the user pressed the 'Print' button */

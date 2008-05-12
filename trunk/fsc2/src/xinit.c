@@ -805,9 +805,9 @@ main_form_close_handler( FL_FORM * a  UNUSED_ARG,
     /* Do the same as if the "Quit" button has been hit (but quit immediately
        in batch mode and don't load the next EDL script) */
 
-    T_free( Fsc2_Internals.title );
     clean_up( );
     xforms_close( );
+    T_free( Fsc2_Internals.title );
 
     exit( EXIT_SUCCESS );
     return FL_OK;                    /* keeps the compiler happy... */
@@ -832,7 +832,14 @@ xforms_close( void )
     }
 
     fl_free_form( GUI.main_form->fsc2 );
+    fl_free_form( GUI.input_form->input_form );
+    fl_free_form( GUI.print_comment->print_comment );
+
     fl_finish( );
+
+    fl_free( GUI.main_form );
+    fl_free( GUI.input_form );
+    fl_free( GUI.print_comment );
 
     /* Close the library for the graphics resources */
 

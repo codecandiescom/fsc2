@@ -1211,7 +1211,7 @@ bool
 writer( int type,
         ... )
 {
-    Comm_Struct_T header;
+    Comm_Struct_T header = { 0, { 0 } };    /* Initialization for valgrind */
     va_list ap;
     char *str[ 4 ];
     int n1, n2;

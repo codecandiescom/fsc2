@@ -607,6 +607,8 @@ cut_form_close( void )
 
     fl_hide_form( GUI.cut_form->cut );
     fl_free_form( GUI.cut_form->cut );
+    fl_free( GUI.cut_form );
+    GUI.cut_form = NULL;
 
     G_cut.is_shown = is_mapped = UNSET;
 }

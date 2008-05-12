@@ -222,25 +222,26 @@ f_bcreate( Var_T * var )
     {
         for ( ioi = Toolbox->objs; ioi->next != NULL; ioi = ioi->next )
             /* empty */ ;
-        ioi->next = new_io;
+        ioi->next    = new_io;
         new_io->prev = ioi;
         new_io->next = NULL;
     }
 
-    new_io->ID = Toolbox->next_ID++;
-    new_io->type = type;
+    new_io->ID            = Toolbox->next_ID++;
+    new_io->type          = type;
+    new_io->self          = NULL;
+    new_io->group         = NULL;
+    new_io->label         = label;
+    new_io->help_text     = help_text;
+    new_io->partner       = coll;
+    new_io->is_changed    = UNSET;
+    new_io->report_change = UNSET;
+    new_io->enabled       = SET;
+
     if ( type == RADIO_BUTTON && coll == -1 )
         new_io->state = 1;
     else
         new_io->state = 0;
-    new_io->self = NULL;
-    new_io->group = NULL;
-    new_io->label = label;
-    new_io->help_text = help_text;
-    new_io->partner = coll;
-    new_io->is_changed = UNSET;
-    new_io->report_change = UNSET;
-    new_io->enabled = SET;
 
     /* Draw the new button */
 

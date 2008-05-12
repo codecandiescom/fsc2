@@ -4,11 +4,12 @@ I. Introduction
 This package is a driver (module) for the Rulbus (Rijksuniversiteit
 Leiden BUS) parallel port (EPP) interface and a library to be
 linked against programs using the Rulbus.
+
 Currently the Rulbus-cards RB8509 (12-bit ADC), RB8510 (12-bit DAC),
 RB8514 (delay card) and RB8515 (clock card) are supported. It was
 mainly written to allow support for Rulbus cards for a program for
-spectrometer control, fsc2, I have written. While the driver compiles
-with both .4 and 2.6 kernels it was tested with 2.4 kernels only.
+spectrometer control, fsc2, I have written. The driver has been
+tested with both 2.4 and 2.6 kernels.
 
 
 II. Preparation for installation
@@ -161,7 +162,7 @@ functionality supplied by the library.
 
 For questions concerning the Rulbus system as well as the parallel
 port interface itself please contact either Martin J. Moene
-(m.j.moene@eld.physics.leidenuniv.nl) or or Arno van Amersfoort
+(m.j.moene@eld.physics.leidenuniv.nl) or Arno van Amersfoort
 (arnova@molphys.leidenuniv.nl).
 
 
@@ -171,7 +172,7 @@ V. Acknowledgments
 Martin J. Moene (m.j.moene@eld.physics.leidenuniv.nl) and Arno van
 Amersfoort (arnova@molphys.leidenuniv.nl) from the Physics department
 of the Rijksuniversiteit Leiden, who developed the interface, were
-extremely helpful by supplying all kinds of informations, sending me
+extremely helpful by supplying all kinds of information, sending me
 very well-documented Windows code, answering all my stupid questions
 and even reading and pointing out errors in my code. Martin also took
 it onto himself to get parts of his Windows version of the library in

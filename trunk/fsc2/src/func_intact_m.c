@@ -103,18 +103,18 @@ f_mcreate( Var_T * var )
             new_io->next = NULL;
         }
 
-        new_io->ID = Toolbox->next_ID++;
-        new_io->type = MENU;
-        new_io->self = NULL;
-        new_io->state = 1;
-        new_io->is_changed = UNSET;
+        new_io->ID            = Toolbox->next_ID++;
+        new_io->type          = MENU;
+        new_io->self          = NULL;
+        new_io->state         = 1;
+        new_io->is_changed    = UNSET;
         new_io->report_change = UNSET;
-        new_io->enabled = SET;
+        new_io->enabled       = SET;
+        new_io->partner       = -1;
+        new_io->label         = NULL;
+        new_io->menu_items    = NULL;
+        new_io->label         = T_strdup( v->val.sptr );
 
-        new_io->label = NULL;
-        new_io->menu_items = NULL;
-
-        new_io->label = T_strdup( v->val.sptr );
         v = vars_pop( v );
 
         check_label( new_io->label );

@@ -195,6 +195,7 @@ toolbox_delete( void )
         }
 
         fl_free_form( Toolbox->Tools );
+        Toolbox->Tools = NULL;
     }
 
     Toolbox = TOOLBOX_P T_free( Toolbox );
@@ -874,7 +875,8 @@ find_object_from_ID( long ID )
 void
 tools_clear( void )
 {
-    Iobject_T *io, *next;
+    Iobject_T *io,
+              *next;
     long i;
 
 
@@ -916,7 +918,10 @@ tools_clear( void )
     }
 
     if ( Toolbox->Tools )
+    {
         fl_free_form( Toolbox->Tools );
+        Toolbox->Tools = NULL;
+    }
 
     Toolbox = TOOLBOX_P T_free( Toolbox );
 }
@@ -929,10 +934,12 @@ tools_clear( void )
 void
 recreate_Toolbox( void )
 {
-    Iobject_T *io, *last_io = NULL;
+    Iobject_T *io,
+              *last_io = NULL;
     int flags;
     int unsigned dummy;
-    int tool_x, tool_y;
+    int tool_x,
+        tool_y;
 
 
     if ( Fsc2_Internals.mode == TEST )        /* no drawing in test mode */
@@ -1988,11 +1995,11 @@ convert_escapes( char * str )
         switch ( * ( ptr + 1 ) )
         {
             case '\\' :
-                memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
+                memmove( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
                 break;
 
             case 'n' :
-                memcpy( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
+                memmove( ptr + 1, ptr + 2, strlen( ptr + 2 ) + 1 );
                 *ptr = '\n';
                 break;
         }
