@@ -466,7 +466,6 @@ spectrapro_300i_set_turret( long tn )
         T_free( buf );
         RETHROW( );
     }
-
 }
 
 

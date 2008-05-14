@@ -351,7 +351,7 @@ rb_pulser_w_write_pulses( FILE * fp )
 
         fprintf( fp, "%s: ", f->name );
         for ( j = 0; j < f->num_active_pulses; j++ )
-        {
+        {            
             fprintf( fp, " %ld %ld %ld", f->pulses[ j ]->num,
                      Ticks_rnd( f->pulses[ j ]->pos / rb_pulser_w.timebase ),
                      f->delay_card->next != NULL ? f->pulses[ j ]->len  :
@@ -409,6 +409,8 @@ rb_pulser_mw_min_specs( Pulse_T * p )
         {
             if ( i == 0 )
                 t += rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay + f->delay;
+            else
+                t -= cur_card->intr_delay;
             break;
         }
     }

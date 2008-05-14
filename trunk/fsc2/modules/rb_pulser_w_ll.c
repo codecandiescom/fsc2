@@ -683,9 +683,25 @@ rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
                               bool                  state )
 {
 #if ! defined RB_PULSER_W_TEST
-    unsigned char type = state == START ?
-                RULBUS_RB8514_DELAY_END_PULSE : RULBUS_RB8514_DELAY_PULSE_NONE;
+    unsigned char type;
 
+
+    /* Most cards are supposed to output an end pulse when activated, only
+       the predecessors of the delay cards for creating the delays in
+       between microwave pulses (i.e. the cards that create the first and
+       second microwave pulse) should emit start pulses. Deactivating is
+       done by making cards not output start or end pulses anymore. */
+
+    if ( state == START )
+    {
+        if (    card == rb_pulser_w.delay_card + MW_DELAY_2
+             || card == rb_pulser_w.delay_card + MW_DELAY_4 )
+            type = RULBUS_RB8514_DELAY_START_PULSE;
+        else
+            type = RULBUS_RB8514_DELAY_END_PULSE;
+    }
+    else
+        type = RULBUS_RB8514_DELAY_PULSE_NONE;
 
     raise_permissions( );
 
@@ -726,9 +742,18 @@ rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
     lower_permissions( );
 
 #else
-    const char *type = state == START ?
-           "RULBUS_RB8514_DELAY_END_PULSE" : "RULBUS_RB8514_DELAY_PULSE_NONE";
+    const char *type;
 
+    if ( state == START )
+    {
+        if (    card == rb_pulser_w.delay_card + MW_DELAY_2
+             || card == rb_pulser_w.delay_card + MW_DELAY_4 )
+            type = "RULBUS_RB8514_DELAY_START_PULSE";
+        else
+            type = "RULBUS_RB8514_DELAY_END_PULSE";
+    }
+    else
+        type = "RULBUS_RB8514_DELAY_PULSE_NONE";
 
     if ( card->prev != NULL )
         fprintf( stderr, "rulbus_rb8514_delay_set_output_pulse( %s, "

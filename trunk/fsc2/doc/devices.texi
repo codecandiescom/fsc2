@@ -3460,7 +3460,7 @@ This function exists only for the W-band configuration of the @strong{Rulbus
 pulser}, @code{rb_pulser_w}. Unless explicitely forbidden by a call of
 @ref{pulser_defense_pulse_mode()} with the appropriate argument, for this
 module a defense pulse is created automatically, lasting from the start of
-the pulse pattern to some time after end of the last microwave pulse, in
+the pulse pattern to some time after the end of the last microwave pulse, in
 order to protect amplifiers and receivers from excessive levels of microwave
 power. Using this function the minimum distance between the end of the last
 microwave pulse and the end of the defense pulse can be set (or queried),
@@ -3482,7 +3482,7 @@ intended to change the minimum defense delay.
 @item pulser_defense_pulse_mode()
 This function exists only for the W-band configuration of the @strong{Rulbus
 pulser}, @code{rb_pulser_w}. For this module a defense pulse, starting at the
-very start of the pulse pattern and lasting to some time after end of the
+very start of the pulse pattern and lasting to some time after the end of the
 last microwave pulse, is created in order to protect amplifiers and receivers
 from excessive levels of microwave power. But in some situations such an
 aautomatic creation of a defense pulse is not desirable, in which case this

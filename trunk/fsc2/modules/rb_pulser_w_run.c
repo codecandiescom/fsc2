@@ -216,7 +216,12 @@ rb_pulser_w_mw_channel_setup( void )
             THROW( EXCEPTION );
         }
 
-        if ( i != 0 && pulses[ i ]->pos <= start )
+        if (    i != 0
+             && (    pulses[ i ]->pos <=
+                           start - cur_card->prev->delay * rb_pulser_w.timebase
+                  || pulses[ i ]->pos <=
+                                pulses[ i - 1 ]->pos
+                              + cur_card->prev->delay * rb_pulser_w.timebase ) )
         {
             print( FATAL, "Microwave pulse #%ld not far enough away from its "
                    "predecessor, pulse #%ld.\n", pulses[ i ]->num,
@@ -227,6 +232,8 @@ rb_pulser_w_mw_channel_setup( void )
         delta = pulses[ i ]->pos - start;
         dT = Ticks_rnd( delta / rb_pulser_w.timebase );
         shift = dT * rb_pulser_w.timebase - delta;
+        if ( i > 0 )
+            dT += cur_card->prev->delay;
 
         /* Make sure the delay settings for both cards aren't too long */
 
@@ -254,6 +261,9 @@ rb_pulser_w_mw_channel_setup( void )
                    rb_pulser_w_ptime( shift ) );
 
         cur_card->delay = dT;
+        if ( i > 0 )
+            dT -= cur_card->prev->delay;
+
         cur_card->is_active = SET;
         cur_card = cur_card->next;
 
@@ -623,8 +633,7 @@ rb_pulser_w_auto_defense_channel_setup( void )
     card->was_active = card->is_active;
     card->is_active = UNSET;
 
-    /* No defense pulse needs to be set if either there are no microwave
-       pulses */
+    /* No defense pulse needs to be set if there are no microwave pulses */
 
     if ( ! mw->is_used || mw->num_active_pulses == 0 )
         return;
@@ -632,13 +641,13 @@ rb_pulser_w_auto_defense_channel_setup( void )
     /* Determine the position of the first microwave pulse and check if the
        defense pulse can at least start at the same time or earlier */
 
+    start    =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
+               + card->intr_delay;
+
     mw_start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
                + mw_card->intr_delay
                + mw_card->delay * rb_pulser_w.timebase
                + mw_card->next->intr_delay;
-
-    start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
-            + card->intr_delay;
 
     if ( start > mw_start )
     {
@@ -648,6 +657,12 @@ rb_pulser_w_auto_defense_channel_setup( void )
         THROW( EXCEPTION );
     }
 
+    /* The position of the defense pulse is actually never used fo setting
+       the pulse, it's only used for visualisation of the pulses via a
+       dump (to file or the fsc2_pulse utility) */
+
+    f->pulses[ 0 ]->pos = start;
+
     /* Now figure out where the end of the last microwave pulse is and from
        that at what time the defense pulse can end */
 
@@ -655,17 +670,23 @@ rb_pulser_w_auto_defense_channel_setup( void )
 
     for ( i = 0; i < mw->num_active_pulses; i++ )
     {
+        /* Please note: the length of the inter-pulse delay already
+           contains the length of the previous microwave pulse. */
+
         mw_end +=   mw_card->intr_delay
                   + mw_card->delay * rb_pulser_w.timebase;
         mw_card = mw_card->next;
-        mw_end +=   mw_card->intr_delay
-                  + mw_card->delay * rb_pulser_w.timebase;
+
+        mw_end += mw_card->intr_delay;
+        if ( i == mw->num_active_pulses - 1 )
+            mw_end += mw_card->delay * rb_pulser_w.timebase;
         mw_card = mw_card->next;
     }
 
     end = mw_end + rb_pulser_w.pulse_2_defense;
 
-    dT = Ticks_ceil( ( end - start ) / rb_pulser_w.timebase );
+    dT = Ticks_ceil( 0.1 *
+                     Ticks_rnd( 10 * ( end - start ) / rb_pulser_w.timebase ) );
 
     if ( dT > MAX_TICKS )
     {

@@ -356,8 +356,8 @@ sub init {
                      '-width'   => '1',
                      '-command' => sub { $self->pshift( 1, 1 ) } );
     $self->{ 'close_button' } =
-        $f2->Button( '-text'   => 'Close',
-                     'command' => [ destroy => $self->top ] );
+        $f2->Button( '-text'    => 'Close',
+                     '-command' => [ destroy => $self->top ] );
 
     $f2->pack( '-side'  => 'bottom',
                '-fill'  => 'x' );
@@ -732,8 +732,8 @@ sub init {
     $self->{ 'w' }->title( "Pulse parameters" .
                            ( $ARGV[ 0 ] ? ":  $ARGV[ 0 ]" : "" ) );
 
-    my $F = $self->{ 'w' }->Frame( '-relief'     => 'ridge',
-                                   'borderwidth' => '1m' );
+    my $F = $self->{ 'w' }->Frame( '-relief'      => 'ridge',
+                                   '-borderwidth' => '1m' );
     my $f = $F->Frame;
     my $l = $f->Label( '-text'   => 'Pulse number: ',
                        '-width'  => 20,
@@ -749,7 +749,7 @@ sub init {
 
     $f = $F->Frame;
     $l = $f->Label( '-text'   => 'Pulse position: ',
-                    'width'   => 20,
+                    '-width'  => 20,
                     '-anchor' => 'w' );
     $e = $f->Entry( '-textvariable' => \$self->{ 'pos' },
                      '-width'       => 20,

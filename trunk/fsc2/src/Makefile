@@ -42,8 +42,6 @@ resources      = $(wildcard fsc2_rsc_*r.fd)
 headers        = ${c_sources:.c=.h} fsc2_types.h ../fsc2_config.h
 all_headers    = $(headers) $(bison_sources:.y=.h) $(resources:.fd=.h)
 
-xforms_version = $(shell fdesign -xforms_version 2>&1 | grep '^FORMS Library Version [0-9]*\.[0-9]*\.[0-9]*.*$$' - | wc -c )
-
 export headers        # export list of header files to the modules Makefile
 
 
@@ -184,22 +182,6 @@ gpib_setup:
 	fi
 
 
-fsc2_rsc_lr.fd: fsc2_rsc_lr_old.fd fsc2_rsc_hr_new.fd
-	@if [ -z "$(xforms_version)" ]; then              \
-		ln -f -s fsc2_rsc_lr_old.fd fsc2_rsc_lr.fd;   \
-	else                                              \
-		ln -f -s fsc2_rsc_lr_new.fd fsc2_rsc_lr.fd;   \
-    fi                                                \
-
-
-fsc2_rsc_hr.fd: fsc2_rsc_hr_new.fd fsc2_rsc_hr_new.fd
-	@if [ -z "$(xforms_version)" ]; then              \
-		ln -f -s fsc2_rsc_hr_old.fd fsc2_rsc_hr.fd;   \
-	else                                              \
-		ln -f -s fsc2_rsc_hr_new.fd fsc2_rsc_hr.fd;   \
-    fi                                                \
-
-
 # How to install the binaries
 
 install:
@@ -249,7 +231,7 @@ cleanup:
 clean:
 	$(MAKE) cleanup
 	$(RM) $(RMFLAGS) fsc2 fsc2_clean fsc2_connect fsc2_rsc_[hl]r.[ch] \
-		  fsc2_rsc_[hl]r.fd fsc2_addr2line *.fsc2_so *.bak
+		  fsc2_addr2line *.fsc2_so *.bak
 
 
 # don't automatically delete intermediate files created by bison and flex

@@ -60,7 +60,7 @@ my $of;
 
 if ( $ARGV[ 0 ] ) {
     usage( ) if $ARGV[ 0 ] =~ /^-h$/ or $ARGV[ 0 ] =~ /^--help$/;
-    open $if, "<$ARGV[ 0 ]"
+    open $if, '<', $ARGV[ 0 ]
         or die "Can't open input file $ARGV[ 0 ]: $!\n";
 } else {
     $if = *STDIN;
@@ -200,7 +200,7 @@ cond_check( );
 # out the script
 
 if ( $ARGV[ 1 ] ) {
-    open $of, ">$ARGV[ 1 ]"
+    open $of, '>', $ARGV[ 1 ]
         or die "Can't open output file $ARGV[ 1 ]: $!\n";
 } else {
     $of = *STDOUT;
@@ -831,7 +831,7 @@ sub store_defs {
 
     $name =~ s|^.*?([^/]+)$|$1|;
     mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
-    open( $fh, ">$ENV{ HOME }/.fsc2/$name" ) or return;
+    open( $fh, '>', $ENV{ HOME } . "/.fsc2/$name" ) or return;
     print $fh "# Do not edit - created automatically!\n";
 EOT
 
@@ -888,9 +888,9 @@ sub load_defs {
 
     $name =~ s|^.*?([^/]+)$|$1|;
     if ( $ARGV[ 0 ] ) {
-        open( $fh, "<$ARGV[ 0 ]" ) or return;
+        open( $fh, '<', $ARGV[ 0 ] ) or return;
     } else {
-        open( $fh, "<$ENV{ HOME }/.fsc2/$name" ) or return;
+        open( $fh, '<'. $ENV{ HOME } . "/.fsc2/$name" ) or return;
     }
 
     goto done_reading unless defined( $ne = <$fh> ) and $ne =~ /^#/;
