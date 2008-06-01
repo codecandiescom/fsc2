@@ -12,13 +12,13 @@ use Config;
 
 # Check if there's a C compiler we can use.
 
-open $fh, '>cc_test.c' or die "Failed to open a file for writing: $!\n";
+open my $fh, '>cc_test.c' or die "Failed to open a file for writing: $!\n";
 print $fh "int main(void)\n{\nreturn 0;\n}\n";
 close $fh;
 
-if ( system $Config{cc}, qw( -o cc_test cc_test.c ) ) {
+if ( system "$Config{cc} -o cc_test cc_test.c" ) {
     unlink 'cc_test.c';
-    die "Can't run C compiler $Config{cc}\n";
+    die "Can't run C compiler '$Config{cc}'\n";
 }
 unlink 'cc_test';
 unlink 'cc_test.c';
@@ -44,7 +44,7 @@ int main( void ) {
 EOF
 close $fh;
 
-if ( system $Config{cc}, qw( -o fcntl_test fcntl_test.c ) ) {
+if ( system "$Config{cc} -o fcntl_test fcntl_test.c" ) {
     unlink 'fcntl_test.c';
     die "Failed to compile a program that uses fcntl(). Does your system " .
         "have a fcntl(2) system call?\n";
@@ -57,9 +57,9 @@ unlink 'fcntl_test.c';
 # a version that also tries 'long long', then one that only uses 'long'
 # since 'long long' may not exist on all systems).
 
-if (     (    system $Config{cc}, qw( -o sizes1 sizes1.c )
+if (     (    system "$Config{cc} -o sizes1 sizes1.c"
 		   or system './sizes1' ) 
-     and (    system $Config{cc}, qw( -o sizes2 sizes2.c )
+     and (    system "$Config{cc} -o sizes2 sizes2.c"
 		   or system './sizes2' ) ) {
     unlink 'sizes1' if -e 'sizes1';
     unlink 'sizes2' if -e 'sizes2';

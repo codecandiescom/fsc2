@@ -278,21 +278,26 @@ BROWSER            := netscape
 # witio_48_libs      := libwitio_48.so
 
 
-# All of the following three lines must be uncommented when you want support
-# for the Roper Scientific Spec-10 CCD camera. Depending on where the header
-# files required by the PVCAM library are installed (which is to compile the
-# module for the the camera) you may have to change the 'rs_spec10_incl'
-# variable to the name of the installation directory. The third variable,
-# 'rs_spec10_libs', must be changed if the library isn't in a place where the
-# linker will find it automatically (e.g. '/usr/lib' and '/usr/local/lib'). In
-# this case it must be the full absolute path of the library (for example
-# '/usr/lib/pvcam/libpvcam.so'). You must make sure that the header files and
-# the library for the camera are already properly installed before you build
-# fsc2 with support for the camera.
+# All of the top three of the the four following lines must be uncommented
+# when you want support for the Roper Scientific Spec-10 CCD camera. Depending
+# on where the header files required by the PVCAM library are installed (which
+# is to compile the module for the the camera) you may have to change the
+# 'rs_spec10_incl' variable to the name of the installation directory. The
+# third variable, 'rs_spec10_libs', must be changed if the library isn't in
+# a place where the linker will find it automatically (e.g. '/usr/lib' and
+# '/usr/local/lib'). In this case it must be the full absolute path of the
+# library (for example '/usr/lib/pvcam/libpvcam.so'). You must make sure that
+# the header files and the library for the camera are already properly
+# installed before you build fsc2 with support for the camera.
+# The fourth line must be uncommented if you use a newer version of the
+# PVCAM library (sorry, I don't which is the exact version where the
+# requiremenst changed, I just know it's needed at least since version 2.7.0.0)
 
-# WITH_RS_SPEC10     := yes
-# rs_spec10_incl     := /usr/local/include/pvcam
-# rs_spec10_libs     := libpvcam.so
+
+# WITH_RS_SPEC10       := yes
+# rs_spec10_incl       := /usr/local/include/pvcam
+# rs_spec10_libs       := libpvcam.so
+# rs_spec10_extra_libs := '-lrt -lraw1394'
 
 
 # Both the next two lines must be uncommented if you want support for the

@@ -344,14 +344,21 @@ get_print_file( FILE ** fp,
          paper_type = Legal_PAPER;
 
     fl_hide_form( print_form->print );
-    fl_free_form( print_form->print );
-    fl_free( print_form );
 
     /* In send-to-printer mode or when the user hit the "Cancel" button we're
        already done, we just return if the user pressed the 'Print' button */
 
     if ( obj == print_form->cancel_button || print_type == S2P )
-        return obj == print_form->print_button;
+    {
+        int ret = obj == print_form->print_button;
+
+        fl_free_form( print_form->print );
+        fl_free( print_form );
+        return ret;
+    }
+
+    fl_free_form( print_form->print );
+    fl_free( print_form );
 
     /* In print-to-file mode ask for confirmation if the file already exists
        and try to open it for writing */

@@ -1,4 +1,4 @@
-File::FcntlLock version 0.09
+File::FcntlLock version 0.10
 =============================
 
 FcntlLock is a module to do file locking in an object oriented

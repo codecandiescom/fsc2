@@ -1,5 +1,9 @@
 Revision history for Perl extension File::FcntlLock
 
+0.10  Wed May 14 2008
+    - Removed an issue in Makefile.PL that kept the module
+      from being built on some systems
+
 0.09  Sun Aug 26 2007
     - Renamed module from Fcntl_Lock to FcntlLock to make it
       fit into the namespace newly allocated on CPAN
