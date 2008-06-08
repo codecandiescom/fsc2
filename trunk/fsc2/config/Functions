@@ -400,6 +400,8 @@ ccd_camera_pixel_area, 0, ALL;
 monochromator_name, 0, ALL;               // returns the device name
 monochromator_turret, -1, EXP;            // set/query current turret
 monochromator_grating, -1, EXP;           // set/query current grating
+monochromator_entry_mirror, -1, EXP;      // set/query entry mirror position
+monochromator_exit_mirror, -1, EXP;       // set/query exit mirror position
 monochromator_wavelength, -1, ALL;        // set/query wavelength
 monochromator_wavenumber, -1, ALL;        // set/query wavenumber
 monochromator_install_grating, 2, EXP;    // install new grating

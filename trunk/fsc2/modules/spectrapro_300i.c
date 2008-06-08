@@ -80,6 +80,10 @@ spectrapro_300i_init_hook( void )
 
     spectrapro_300i.tn = 0;
     spectrapro_300i.current_gn = 0;
+    spectrapro_300i.entry_mirror = 0;
+    spectrapro_300i.is_entry_mirror = UNSET;
+    spectrapro_300i.exit_mirror = 0;
+    spectrapro_300i.is_exit_mirror = UNSET;
     spectrapro_300i.wavelength = 5.0e-7;
     spectrapro_300i.is_wavelength = UNSET;
     spectrapro_300i.use_calib = 0;
@@ -301,6 +305,96 @@ monochromator_turret( Var_T * v )
     spectrapro_300i.current_gn = new_gn;    
 
     return vars_push( INT_VAR, turret );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+Var_T *
+monochromator_entry_mirror( Var_T * v )
+{
+    long entry_mirror;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+            spectrapro_300i.entry_mirror = spectrapro_300i_get_entry_mirror( );
+        return vars_push( INT_VAR, spectrapro_300i.entry_mirror );
+    }
+
+
+    if ( v->type == STR_VAR )
+    {
+        if ( strcasecmp( v->val.sptr, "FRONT" ) )
+            entry_mirror = 0;
+        else if ( strcasecmp( v->val.sptr, "SIDE" ) )
+            entry_mirror = 1;
+        else
+        {
+            print( FATAL, "Invalid argument '%s', must be 'FRONT' or 'SIDE'.\n",
+                   v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        entry_mirror = get_long( v, "entry mirror position" ) ? 1 : 0;
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        spectrapro_300i_set_entry_mirror( entry_mirror );
+
+    spectrapro_300i.entry_mirror = entry_mirror;
+    spectrapro_300i.is_entry_mirror = SET;
+
+    return vars_push( INT_VAR, entry_mirror );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+Var_T *
+monochromator_exit_mirror( Var_T * v )
+{
+    long exit_mirror;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == EXPERIMENT )
+            spectrapro_300i.exit_mirror = spectrapro_300i_get_exit_mirror( );
+        return vars_push( INT_VAR, spectrapro_300i.exit_mirror );
+    }
+
+
+    if ( v->type == STR_VAR )
+    {
+        if ( strcasecmp( v->val.sptr, "FRONT" ) )
+            exit_mirror = 0;
+        else if ( strcasecmp( v->val.sptr, "SIDE" ) )
+            exit_mirror = 1;
+        else
+        {
+            print( FATAL, "Invalid argument '%s', must be 'FRONT' or 'SIDE'.\n",
+                   v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+        exit_mirror = get_long( v, "exit mirror position" ) ? 1 : 0;
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        spectrapro_300i_set_exit_mirror( exit_mirror );
+
+    spectrapro_300i.exit_mirror = exit_mirror;
+    spectrapro_300i.is_exit_mirror = SET;
+
+    return vars_push( INT_VAR, exit_mirror );
 }
 
 

@@ -356,6 +356,12 @@ spectrapro_300i_open( void )
     spectrapro_300i_get_gratings( );
     spectrapro_300i.current_gn = spectrapro_300i_get_grating( );
     spectrapro_300i.tn = spectrapro_300i_get_turret( );
+
+    if ( spectrapro_300i.is_entry_mirror )
+        spectrapro_300i_set_entry_mirror( spectrapro_300i.entry_mirror );
+
+    if ( spectrapro_300i.is_exit_mirror )
+        spectrapro_300i_set_exit_mirror( spectrapro_300i.exit_mirror );
 }
 
 
@@ -517,6 +523,82 @@ spectrapro_300i_set_grating( long gn )
     {
         T_free( buf );
         RETHROW( );
+    }
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+int
+spectrapro_300i_get_entry_mirror( void )
+{
+    const char *reply;
+    long entry_mirror;
+
+
+    TRY
+    {
+        spectrapro_300i_send( "ENT-MIRROR" );
+        TRY_SUCCESS;
+    }
+
+    reply = spectrapro_300i_talk( "?MIR", 20 );
+    entry_mirror = T_atol( reply ) - 1;
+    T_free( ( void * ) reply );
+    return entry_mirror;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+void
+spectrapro_300i_set_entry_mirror( long entry_mirror )
+{
+    TRY
+    {
+        spectrapro_300i_send( "ENT-MIRROR" );
+        spectrapro_300i_send( entry_mirror ? "SIDE" : "FRONT" );
+        TRY_SUCCESS;
+    }
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+int
+spectrapro_300i_get_exit_mirror( void )
+{
+    const char *reply;
+    long exit_mirror;
+
+
+    TRY
+    {
+        spectrapro_300i_send( "EXIT-MIRROR" );
+        TRY_SUCCESS;
+    }
+
+    reply = spectrapro_300i_talk( "?MIR", 20 );
+    exit_mirror = T_atol( reply ) - 1;
+    T_free( ( void * ) reply );
+    return exit_mirror;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+void
+spectrapro_300i_set_exit_mirror( long exit_mirror )
+{
+    TRY
+    {
+        spectrapro_300i_send( "EXIT-MIRROR" );
+        spectrapro_300i_send( exit_mirror ? "SIDE" : "FRONT" );
+        TRY_SUCCESS;
     }
 }
 

@@ -43,6 +43,7 @@
 * gg_chopper::      Light chopper (Gescheidt group, Graz)
 * hfs9000::         Tektronix Stimulus System HFS9000 (Berlin W-Band)
 * hp5340a::         HP Frequency Counter HP5340A
+* hp5342a::         HP Frequency Counter HP5342A
 * hp8647a::         HP RF Synthesizer HP8647A
 * hp8648b::         HP RF Synthesizer HP8648B
 * hp8672a::         HP RF Synthesizer HP8672A
@@ -104,7 +105,6 @@
 
 @c #############################################################
 
-
 @node aeg_s_band, aeg_x_band, Device Reference, Device Reference
 @iftex
 @subheading S-band AEG Magnet Power Supply
@@ -133,6 +133,9 @@ gaussmeter used, with @code{er035m} or @code{er035m_s} the range is
 @strong{Controlled via}: Serial port
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -152,7 +155,6 @@ gaussmeter used, with @code{er035m} or @code{er035m_s} the range is
 
 
 @c #############################################################
-
 
 @node aeg_x_band, bh15, aeg_s_band, Device Reference
 @iftex
@@ -183,6 +185,9 @@ to @w{23000 G}.
 @strong{Controlled via}: Serial port
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -202,7 +207,6 @@ to @w{23000 G}.
 
 
 @c #############################################################
-
 
 @node bh15, bh15_fc, aeg_x_band, Device Reference
 @iftex
@@ -230,6 +234,9 @@ In the GPIB configuration file use @code{"BH15"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{gaussmeter_name()}
@@ -241,7 +248,6 @@ In the GPIB configuration file use @code{"BH15"} as the device name,
 
 
 @c #############################################################
-
 
 @node bh15_fc, bnm12, bh15, Device Reference
 @iftex
@@ -266,6 +272,9 @@ In the GPIB configuration file use @code{"BH15_FC"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -284,7 +293,6 @@ In the GPIB configuration file use @code{"BH15_FC"} as the device name,
 
 
 @c #############################################################
-
 
 @node bnm12, dg2020_b, bh15_fc, Device Reference
 @iftex
@@ -310,6 +318,9 @@ is loaded.
 @strong{Controlled via}: Read only via WITIO-48 DIO card.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Please note}: If a field resolution other than @w{0.1 G} is set
 at the front panel of the device, the function
 @code{gaussmeter_resolution()} must be called, otherwise the field values
@@ -328,7 +339,6 @@ highest resolution setting.
 
 
 @c #############################################################
-
 
 @node dg2020_b, dg2020_f, bnm12, Device Reference
 @iftex
@@ -371,6 +381,9 @@ In the GPIB configuration file use @code{"DG2020_B"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{pulser_name()}
@@ -396,7 +409,6 @@ In the GPIB configuration file use @code{"DG2020_B"} as the device name,
 
 
 @c #############################################################
-
 
 @node dg2020_f, egg4402, dg2020_b, Device Reference
 @iftex
@@ -441,6 +453,9 @@ In the GPIB configuration file use  @code{"DG2020_F"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{pulser_name()}
@@ -463,7 +478,6 @@ In the GPIB configuration file use  @code{"DG2020_F"} as the device name,
 
 
 @c #############################################################
-
 
 @node egg4402, eip371, dg2020_f, Device Reference
 @iftex
@@ -488,6 +502,9 @@ In the GPIB configuration file use  @code{"EG4402"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{boxcar_name()}
@@ -500,7 +517,6 @@ In the GPIB configuration file use  @code{"EG4402"} as the device name,
 
 
 @c #############################################################
-
 
 @node eip371, ep385, egg4402,  Device Reference
 @iftex
@@ -525,6 +541,9 @@ In the GPIB configuration file use @code{"EIP371"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{freq_counter_name()}
@@ -536,7 +555,6 @@ In the GPIB configuration file use @code{"EIP371"} as the device name,
 
 
 @c #############################################################
-
 
 @node ep385, er218, eip371, Device Reference
 @iftex
@@ -569,6 +587,9 @@ In the GPIB configuration file use @code{"EP385"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{pulser_name()}
@@ -592,7 +613,6 @@ In the GPIB configuration file use @code{"EP385"} as the device name,
 
 @c #############################################################
 
-
 @node er218, er023m, ep385, Device Reference
 @iftex
 @subheading Bruker Goniometer ER218 PG1
@@ -613,6 +633,9 @@ DIO subsystem on a Meilhaus card, using some additional home-built
 electronics for latching data.
 
 @paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{goniometer_name()}
@@ -625,7 +648,6 @@ electronics for latching data.
 
 
 @c #############################################################
-
 
 @node er023m, er032m, er218, Device Reference
 @iftex
@@ -648,6 +670,9 @@ lock-in amplifier with built-in analog-to-digital converter.
 In the GPIB configuration file use  @code{"ER023M"} as the device name,
 @code{'\r'} or @code{0xd} as the EOS character, set @code{set-reos},
 @code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -674,7 +699,6 @@ In the GPIB configuration file use  @code{"ER023M"} as the device name,
 
 @c #############################################################
 
-
 @node er032m, er035m, er023m, Device Reference
 @iftex
 @subheading Bruker Field controller ER 032 M
@@ -699,6 +723,9 @@ In the GPIB configuration file use @code{"ER032M"} as the device name,
 @code{yes} and @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -717,7 +744,6 @@ In the GPIB configuration file use @code{"ER032M"} as the device name,
 
 
 @c #############################################################
-
 
 @node er035m, er035m_sa, er032m, Device Reference
 @iftex
@@ -751,6 +777,8 @@ In the GPIB configuration file use @code{"ER035M"} as the device name,
 @paragraphindent 0
 @strong{Controlled via} (@code{er035m_s}): Serial port
 
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -767,7 +795,6 @@ In the GPIB configuration file use @code{"ER035M"} as the device name,
 
 
 @c #############################################################
-
 
 @node er035m_sa, gg_chopper, er035m, Device Reference
 @iftex
@@ -798,6 +825,9 @@ In the GPIB configuration file use @code{"ER035M"} as the device name,
 
 @paragraphindent 0
 @strong{Controlled via} (@code{er035m_sas}): Serial port
+
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -839,6 +869,9 @@ chopper please see Torsten Zytowski's PhD thesis, University Z@"urich,
 1998.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{chopper_name()}
@@ -848,7 +881,6 @@ chopper please see Torsten Zytowski's PhD thesis, University Z@"urich,
 
 
 @c #############################################################
-
 
 @node hfs9000, hp5340a, gg_chopper, Device Reference
 @iftex
@@ -884,6 +916,9 @@ In the GPIB configuration file use @code{"HFS9000"} as the device name,
 @code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{pulser_name()}
@@ -905,8 +940,7 @@ In the GPIB configuration file use @code{"HFS9000"} as the device name,
 
 @c #############################################################
 
-
-@node hp5340a, hp8647a, hfs9000, Device Reference
+@node hp5340a, hp5342a, hfs9000, Device Reference
 @iftex
 @subheading HP Frequency Counter HP5340A
 @end iftex
@@ -930,6 +964,9 @@ In the GPIB configuration file use @code{"HP5340A"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{freq_counter_name()}
@@ -939,8 +976,43 @@ In the GPIB configuration file use @code{"HP5340A"} as the device name,
 
 @c #############################################################
 
+@node hp5342a, hp8647a, hp5340a, Device Reference
+@iftex
+@subheading HP Frequency Counter HP5342A
+@end iftex
+@ifnottex
+@section HP Frequency Counter HP5342A
+@end ifnottex
 
-@node hp8647a, hp8648b, hp5340a, Device Reference
+@paragraphindent 0
+@strong{Module name}: @code{hp5342a}
+
+@paragraphindent 0
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.home.agilent.com/,Agilent}) frequency counter
+HP5342A. This is a very old device even pre-dating the GPIB-standard.
+Only its capability to return the measured frequency can be used.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"HP5342A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}
+@code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_measure()}
+@end table
+
+
+@c #############################################################
+
+@node hp8647a, hp8648b, hp5342a, Device Reference
 @iftex
 @subheading HP RF Synthesizer HP8647A
 @end iftex
@@ -969,6 +1041,9 @@ In the GPIB configuration file use @code{"HP8647A"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{synthesizer_name()}
@@ -991,7 +1066,6 @@ In the GPIB configuration file use @code{"HP8647A"} as the device name,
 
 
 @c #############################################################
-
 
 @node hp8648b, hp8672a, hp8647a, Device Reference
 @iftex
@@ -1020,6 +1094,9 @@ In the GPIB configuration file use @code{"HP8647B"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{synthesizer_name()}
@@ -1042,7 +1119,6 @@ In the GPIB configuration file use @code{"HP8647B"} as the device name,
 
 
 @c #############################################################
-
 
 @node hp8672a, hjs_attenuator, hp8648b, Device Reference
 @iftex
@@ -1071,6 +1147,9 @@ In the GPIB configuration file use @code{"HP8672A"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{synthesizer_name()}
@@ -1092,7 +1171,6 @@ In the GPIB configuration file use @code{"HP8672A"} as the device name,
 
 
 @c #############################################################
-
 
 @node hjs_attenuator, hjs_daadc, hp8672a, Device Reference
 @iftex
@@ -1121,6 +1199,9 @@ tell the module about the initial attenuation setting.
 @strong{Controlled via}: Serial port
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{mw_attenuator_name()}
@@ -1131,7 +1212,6 @@ tell the module about the initial attenuation setting.
 
 
 @c #############################################################
-
 
 @node hjs_daadc, hjs_sfc, hjs_attenuator, Device Reference
 @iftex
@@ -1154,6 +1234,9 @@ can be reduced via a potentiometer at the front panel.
 @strong{Controlled via}: Serial port
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{daq_name()}
@@ -1167,7 +1250,6 @@ can be reduced via a potentiometer at the front panel.
 
 
 @c #############################################################
-
 
 @node hjs_sfc, hjs_fc, hjs_daadc, Device Reference
 @iftex
@@ -1199,6 +1281,9 @@ DAC of the DA and AD converter can't be used, it gets reserved
 automatically for this module.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -1218,7 +1303,6 @@ automatically for this module.
 
 
 @c #############################################################
-
 
 @node hjs_fc, ips20_4, hjs_sfc, Device Reference
 @iftex
@@ -1250,6 +1334,9 @@ and AD converter nor the first DIO (@code{DIO1}) of the WITIO-48 DIO
 card can be used, both get reserved automatically for this module.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -1263,7 +1350,6 @@ card can be used, both get reserved automatically for this module.
 
 
 @c #############################################################
-
 
 @node ips20_4, ips120_10, hjs_fc, Device Reference
 @iftex
@@ -1294,6 +1380,9 @@ In the GPIB configuration file use @code{"IPS120_10"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -1310,7 +1399,6 @@ In the GPIB configuration file use @code{"IPS120_10"} as the device name,
 
 
 @c #############################################################
-
 
 @node ips120_10, ips120_10_mod, ips20_4, Device Reference
 @iftex
@@ -1339,6 +1427,9 @@ In the GPIB configuration file use @code{"IPS120_10"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -1356,7 +1447,6 @@ In the GPIB configuration file use @code{"IPS120_10"} as the device name,
 
 
 @c #############################################################
-
 
 @node ips120_10_mod, itc503, ips120_10, Device Reference
 @iftex
@@ -1394,6 +1484,9 @@ serial port a @code{GPV24} interface for conversion
 between @code{RS232C} and @code{IEEE488} is employed).
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -1411,7 +1504,6 @@ between @code{RS232C} and @code{IEEE488} is employed).
 
 
 @c #############################################################
-
 
 @node itc503, keithley228a, ips120_10_mod, Device Reference
 @iftex
@@ -1436,6 +1528,9 @@ In the GPIB configuration file use @code{"ITC503"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{temp_contr_name()}
@@ -1447,7 +1542,6 @@ In the GPIB configuration file use @code{"ITC503"} as the device name,
 
 
 @c #############################################################
-
 
 @node keithley228a, kontron4060, itc503, Device Reference
 @iftex
@@ -1485,6 +1579,9 @@ In the GPIB configuration file use @code{"KEITHLEY228A"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -1504,7 +1601,6 @@ In the GPIB configuration file use @code{"KEITHLEY228A"} as the device name,
 
 
 @c #############################################################
-
 
 @node kontron4060, lakeshore330, keithley228a, Device Reference
 @iftex
@@ -1528,6 +1624,9 @@ In the GPIB configuration file use @code{"KONTRON4060"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{multimeter_name()}
@@ -1539,7 +1638,6 @@ In the GPIB configuration file use @code{"KONTRON4060"} as the device name,
 
 
 @c #############################################################
-
 
 @node lakeshore330, lecroy9400, kontron4060, Device Reference
 @iftex
@@ -1564,6 +1662,9 @@ In the GPIB configuration file use @code{"LAKESHORE330"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{temp_contr_name()}
@@ -1575,7 +1676,6 @@ In the GPIB configuration file use @code{"LAKESHORE330"} as the device name,
 
 
 @c #############################################################
-
 
 @node lecroy9400, lecroy9410, lakeshore330, Device Reference
 @iftex
@@ -1599,6 +1699,9 @@ In the GPIB configuration file use @code{"LECROY9400"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
 @code{yes}.
+
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1628,7 +1731,6 @@ In the GPIB configuration file use @code{"LECROY9400"} as the device name,
 
 @c #############################################################
 
-
 @node lecroy9410, lecroy9420, lecroy9400, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope 9410
@@ -1651,6 +1753,9 @@ In the GPIB configuration file use @code{"LECROY9410"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
 @code{yes}.
+
+@paragraphindent 0
+@strong{Status}: Similar module for LeCroy 9450 works
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1688,7 +1793,6 @@ In the GPIB configuration file use @code{"LECROY9410"} as the device name,
 
 
 @c #############################################################
-
 
 @node lecroy9420, lecroy9424, lecroy9410, Device Reference
 @iftex
@@ -1714,6 +1818,9 @@ In the GPIB configuration file use @code{"LECROY9420"} as the device name,
 @code{yes}.
 
 @paragraphindent 0
+@strong{Status}: Similar module for LeCroy 9450 works
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}
@@ -1749,7 +1856,6 @@ In the GPIB configuration file use @code{"LECROY9420"} as the device name,
 
 
 @c #############################################################
-
 
 @node lecroy9424, lecroy9424e, lecroy9420, Device Reference
 @iftex
@@ -1775,6 +1881,9 @@ In the GPIB configuration file use @code{"LECROY9424"} as the device name,
 @code{yes}.
 
 @paragraphindent 0
+@strong{Status}: Similar module for LeCroy 9450 works
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}
@@ -1810,7 +1919,6 @@ In the GPIB configuration file use @code{"LECROY9424"} as the device name,
 
 
 @c #############################################################
-
 
 @node lecroy9424e, lecroy9450, lecroy9424, Device Reference
 @iftex
@@ -1841,6 +1949,9 @@ In the GPIB configuration file use @code{"LECROY9424E"} as the device name,
 @code{yes}.
 
 @paragraphindent 0
+@strong{Status}: Similar module for LeCroy 9450 works
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}
@@ -1877,7 +1988,6 @@ In the GPIB configuration file use @code{"LECROY9424E"} as the device name,
 
 @c #############################################################
 
-
 @node lecroy9450, lecroy93xx, lecroy9424e, Device Reference
 @iftex
 @subheading LeCroy Digitizing Oscilloscope 9450
@@ -1902,6 +2012,9 @@ In the GPIB configuration file use @code{"LECROY9450"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
 @code{yes}.
+
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2076,7 +2189,14 @@ information about further available options. All models have 4 function
 channels (used for averaging) and 4 memory channels.
 
 @paragraphindent 0
-@strong{Please note:} Due to the insane number of different models it
+@strong{Controlled via}: GPIB bus (IEEE 488).
+In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
+@code{yes}.
+
+@paragraphindent 0
+@strong{Status}: Due to the insane number of different models it
 was not possible to test the module with all of them. Moreover,
 specification data from manuals (as far as available to me) as well as
 the LeCroy web site had to be used which often contradict each other
@@ -2086,13 +2206,6 @@ nowhere else, I would be happy to add support for them). Thus I can
 neither guarantee that the used data are correct nor that support for
 all the modules works correctly. Please send me a bug report if you
 have such a model and you experience problems.
-
-@paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
-In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
-@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
-@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
-@code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2223,20 +2336,20 @@ information about further available options. All models have 4 function
 channels (used for averaging) and 4 memory channels.
 
 @paragraphindent 0
-@strong{Please note:} Due to the huge number of different models it
+@strong{Controlled via}: GPIB bus (IEEE 488).
+In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
+@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
+@code{yes}.
+
+@paragraphindent 0
+@strong{Status}: Due to the huge number of different models it
 was not possible to test the module with all those models. Moreover,
 specification data from the manuals as well as the LeCroy web site
 had to be used which sometimes contradict each other. Thus I can
 neither guarantee that the used data are correct nor that support
 for all the modules works flawlessly. Please send me a bug report
 if you have such a model and you experience problems.
-
-@paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
-In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
-@code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
-@code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
-@code{yes}.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2300,6 +2413,9 @@ must be set in the configuration file for the device
 @file{config/lecroy_ws.conf}.
 
 @paragraphindent 0
+@strong{Status}: Tested with at least one of the models
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}
@@ -2358,6 +2474,9 @@ range @w{0 V} to @w{2000 V} with @w{1 V} resolution, current range
 @strong{Controlled via}: GPIB bus (IEEE 488).
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{powersupply_name()}
@@ -2368,7 +2487,6 @@ range @w{0 V} to @w{2000 V} with @w{1 V} resolution, current range
 
 
 @c #############################################################
-
 
 @node me6000, me_dio, mcn700_2000, Device Reference
 @iftex
@@ -2389,6 +2507,9 @@ model of card.
 @paragraphindent 0
 @strong{Controlled via}: PCI card (required Linux device driver and
 library are part of the @code{fsc2} package)
+
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2429,6 +2550,8 @@ the module could not be tested with most of them. It is instead
 assumed that the information from the Meilhaus manuals is
 correct, in which case the module hopefully works correctly.
 
+@paragraphindent 0
+@strong{Status}: Untested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2441,7 +2564,6 @@ correct, in which case the module hopefully works correctly.
 
 
 @c #############################################################
-
 
 @node ni6601, pci_mio_16e_1, me_dio, Device Reference
 @iftex
@@ -2464,6 +2586,9 @@ for event counting and pulse creation.
 library are part of the @code{fsc2} package)
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{counter_name()}
@@ -2481,7 +2606,6 @@ library are part of the @code{fsc2} package)
 
 
 @c #############################################################
-
 
 @node pci_mio_16e_1, pt2025, ni6601, Device Reference
 @iftex
@@ -2502,6 +2626,9 @@ and output and with general purpose counters, timer and digital I/O.
 @paragraphindent 0
 @strong{Controlled via}: PCI card (required Linux device driver and
 library are part of the @code{fsc2} package)
+
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2558,6 +2685,9 @@ In the GPIB configuration file use @code{"PT2025"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{gaussmeter_name()}
@@ -2569,7 +2699,6 @@ In the GPIB configuration file use @code{"PT2025"} as the device name,
 
 
 @c #############################################################
-
 
 @node rs_sml01, rs_spec10, pt2025, Device Reference
 @iftex
@@ -2595,6 +2724,9 @@ to @w{13 dB} in @w{0.1 dB} steps.
 In the GPIB configuration file use @code{"RS_SML01"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2625,7 +2757,6 @@ In the GPIB configuration file use @code{"RS_SML01"} as the device name,
 
 @c #############################################################
 
-
 @node rs_spec10, rb8509, rs_sml01, Device Reference
 @iftex
 @subheading Roper Scientific Spec-10 CCD Camera
@@ -2644,7 +2775,9 @@ Scientific} Spec-10 CCD camera, LN-cooled
 @paragraphindent 0
 @strong{Controlled via}: PCI card, requiring a Linux device driver and
 the PVCAM library (at least version 2.6.4-2) that are both available
-from Roper Scientific.
+from Roper Scientific. Please note that @code{fsc2} needs to be linked
+against librt and libraw1394 when newer versions (2.7 and above) of the
+PVCAM library are used.
 
 @paragraphindent 0
 Note: Several important parameters of the camera need to be set in the
@@ -2661,6 +2794,9 @@ installation this is @file{/usr/local/lib/fsc2/rs_spec10.state}. In
 case this file has been deleted or has become garbled use the file
 @file{config/rs_spec10.state} to replace it. Take care to set the
 permissions and ownership of the file correctly.
+
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2680,7 +2816,6 @@ permissions and ownership of the file correctly.
 
 
 @c #############################################################
-
 
 @node rb8509, rb8510, rs_spec10, Device Reference
 @iftex
@@ -2702,6 +2837,8 @@ library that are part of the @code{fsc2} package)
 @paragraphindent 0
 @strong{Controlled via}: Rulbus
 
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2714,7 +2851,6 @@ library that are part of the @code{fsc2} package)
 
 
 @c #############################################################
-
 
 @node rb8510, rb_pulser_j, rb8509, Device Reference
 @iftex
@@ -2737,6 +2873,8 @@ library that are part of the @code{fsc2} package)
 @paragraphindent 0
 @strong{Controlled via}: Rulbus
 
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2748,7 +2886,6 @@ library that are part of the @code{fsc2} package)
 
 
 @c #############################################################
-
 
 @node rb_pulser_j, rb_pulser_w, rb8510, Device Reference
 @iftex
@@ -2787,6 +2924,9 @@ between the start of the pulse sequence and the start of the first pulse of
 a function).
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Controlled via}: Rulbus
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2805,7 +2945,6 @@ a function).
 
 
 @c #############################################################
-
 
 @node rb_pulser_w, rs690, rb_pulser_j, Device Reference
 @iftex
@@ -2860,6 +2999,8 @@ The length of pulses and the distance between them is limited to about
 @w{167 ms} (and that's also the maximum delay between the start of the
 pulse sequence and the start of the first pulse of a function).
 
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Controlled via}: Rulbus
@@ -2882,7 +3023,6 @@ pulse sequence and the start of the first pulse of a function).
 
 
 @c #############################################################
-
 
 @node rs690, s_band_magnet_broad, rb_pulser_w, Device Reference
 @iftex
@@ -2924,6 +3064,9 @@ In the GPIB configuration file use @code{"RS690"} as the device name,
 @code{yes} and @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{pulser_name()}
@@ -2947,7 +3090,6 @@ In the GPIB configuration file use @code{"RS690"} as the device name,
 
 @c #############################################################
 
-
 @node s_band_magnet_broad, s_band_magnet_narrow, rs690, Device Reference
 @iftex
 @subheading S-band Magnet Power Supply (broad range)
@@ -2970,6 +3112,9 @@ J.-W.-Goethe University in Frankfurt/Main. Field range is @w{0 G} to
 @strong{Controlled via}: Serial port
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -2989,7 +3134,6 @@ J.-W.-Goethe University in Frankfurt/Main. Field range is @w{0 G} to
 
 
 @c #############################################################
-
 
 @node s_band_magnet_narrow, schlum7150, s_band_magnet_broad, Device Reference
 @iftex
@@ -3013,6 +3157,9 @@ to @w{1479.5 G} with a resolution of @w{0.1 G}.
 @strong{Controlled via}: Serial port
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{magnet_name()}
@@ -3032,7 +3179,6 @@ to @w{1479.5 G} with a resolution of @w{0.1 G}.
 
 
 @c #############################################################
-
 
 @node schlum7150, spectrapro_300i, s_band_magnet_narrow, Device Reference
 @iftex
@@ -3056,6 +3202,9 @@ name, @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos}
 to @code{yes} and @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{multimeter_name()}
@@ -3067,7 +3216,6 @@ to @code{yes} and @code{set-xeos} and @code{set-bin} to @code{no}.
 
 
 @c #############################################################
-
 
 @node spectrapro_300i, spex_cd2a, schlum7150, Device Reference
 @iftex
@@ -3089,6 +3237,9 @@ turrets, wavelength range @w{0 nm} to @w{1400 nm}.
 @strong{Controlled via}:  Serial port
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{monochromator_name()}
@@ -3104,13 +3255,14 @@ turrets, wavelength range @w{0 nm} to @w{1400 nm}.
 @item @ref{monochromator_zero_offset()}
 @item @ref{monochromator_grating_adjust()}
 @item @ref{monochromator_turret()}
+@item @ref{monochromator_entry_mirror()}
+@item @ref{monochromator_exit_mirror()}
 @item @ref{monochromator_install_grating()}
 @item @ref{monochromator_calibrate()}
 @end table
 
 
 @c #############################################################
-
 
 @node spex_cd2a, spex232, spectrapro_300i, Device Reference
 @iftex
@@ -3141,6 +3293,9 @@ has been deleted or has become garbled use the file
 permissions and ownership of the file correctly.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{monochromator_name()}
@@ -3162,7 +3317,6 @@ permissions and ownership of the file correctly.
 
 @c #############################################################
 
-
 @node spex232, sr510, spex_cd2a, Device Reference
 @iftex
 @subheading SPEX Monochromators with SPEX232 interface
@@ -3181,6 +3335,9 @@ via the SPEX232 interface (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 
 @paragraphindent 0
 @strong{Controlled via}:  Serial port
+
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 The state of the device (i.e. current wavelength setting, offset
@@ -3215,7 +3372,6 @@ permissions and ownership of the file correctly.
 
 @c #############################################################
 
-
 @node sr510, sr530, spex232, Device Reference
 @iftex
 @subheading Stanford Research Lock-In Amplifier SR510
@@ -3239,6 +3395,9 @@ In the GPIB configuration file use @code{"SR510"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{lockin_name()}
@@ -3254,7 +3413,6 @@ In the GPIB configuration file use @code{"SR510"} as the device name,
 
 
 @c #############################################################
-
 
 @node sr530, sr810, sr510, Device Reference
 @iftex
@@ -3279,6 +3437,9 @@ In the GPIB configuration file use @code{"SR530"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{lockin_name()}
@@ -3294,7 +3455,6 @@ In the GPIB configuration file use @code{"SR530"} as the device name,
 
 
 @c #############################################################
-
 
 @node sr810, sr830, sr530, Device Reference
 @iftex
@@ -3319,6 +3479,9 @@ In the GPIB configuration file use @code{"SR810"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{lockin_name()}
@@ -3339,7 +3502,6 @@ In the GPIB configuration file use @code{"SR810"} as the device name,
 
 
 @c #############################################################
-
 
 @node sr830, tds520, sr810, Device Reference
 @iftex
@@ -3364,6 +3526,9 @@ In the GPIB configuration file use @code{"SR830"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{lockin_name()}
@@ -3384,7 +3549,6 @@ In the GPIB configuration file use @code{"SR830"} as the device name,
 
 
 @c #############################################################
-
 
 @node tds520, tds520a, sr830, Device Reference
 @iftex
@@ -3409,6 +3573,9 @@ In the GPIB configuration file use @code{"TDS520"} as the device name,
 @code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}
@@ -3437,7 +3604,6 @@ In the GPIB configuration file use @code{"TDS520"} as the device name,
 
 
 @c #############################################################
-
 
 @node tds520a, tds520c, tds520, Device Reference
 @iftex
@@ -3462,6 +3628,9 @@ In the GPIB configuration file use @code{"TDS520A"} as the device name,
 @code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}
@@ -3490,7 +3659,6 @@ In the GPIB configuration file use @code{"TDS520A"} as the device name,
 
 
 @c #############################################################
-
 
 @node tds520c, tds540, tds520a, Device Reference
 @iftex
@@ -3515,6 +3683,9 @@ In the GPIB configuration file use @code{"TDS520C"} as the device name,
 @code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}
@@ -3543,7 +3714,6 @@ In the GPIB configuration file use @code{"TDS520C"} as the device name,
 
 
 @c #############################################################
-
 
 @node tds540, tds744a, tds520c, Device Reference
 @iftex
@@ -3568,6 +3738,9 @@ In the GPIB configuration file use @code{"TDS540"} as the device name,
 @code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}
@@ -3596,7 +3769,6 @@ In the GPIB configuration file use @code{"TDS540"} as the device name,
 
 
 @c #############################################################
-
 
 @node tds744a, tds754a, tds540, Device Reference
 @iftex
@@ -3621,6 +3793,9 @@ In the GPIB configuration file use @code{"TDS744A"} as the device name,
 @code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}
@@ -3649,7 +3824,6 @@ In the GPIB configuration file use @code{"TDS744A"} as the device name,
 
 
 @c #############################################################
-
 
 @node tds754a, tegam2714a_p, tds744a, Device Reference
 @iftex
@@ -3674,6 +3848,9 @@ use @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos}
 and @code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}
@@ -3702,7 +3879,6 @@ and @code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 
 
 @c #############################################################
-
 
 @node tegam2714a_p, thurlby330, tds754a, Device Reference
 @iftex
@@ -3737,6 +3913,9 @@ via the configuration file for the device)
 In the GPIB configuration file use @code{"TEGAM2714A"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos},
 @code{set-xeos} and @code{set-bin} to @code{yes}.
+
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -3781,6 +3960,9 @@ In the GPIB configuration file use @code{"THURLBY330"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{powersupply_name()}
@@ -3794,7 +3976,6 @@ In the GPIB configuration file use @code{"THURLBY330"} as the device name,
 
 
 @c #############################################################
-
 
 @node witio_48, ,thurlby330, Device Reference
 @iftex
@@ -3815,6 +3996,9 @@ In the GPIB configuration file use @code{"THURLBY330"} as the device name,
 @paragraphindent 0
 @strong{Controlled via}: ISA card (required Linux device driver and
 library are part of the @code{fsc2} package)
+
+@paragraphindent 0
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:

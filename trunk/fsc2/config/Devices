@@ -126,6 +126,7 @@ itc503        // Oxford ITC503 temperature controller
 // Frequency counter
 
 hp5340a       // HP5340A frequency counter
+hp5342a       // HP5342A frequency counter
 eip371        // EIP 371 frequency counter
 
 

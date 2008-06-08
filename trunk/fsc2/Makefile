@@ -290,14 +290,15 @@ BROWSER            := netscape
 # the header files and the library for the camera are already properly
 # installed before you build fsc2 with support for the camera.
 # The fourth line must be uncommented if you use a newer version of the
-# PVCAM library (sorry, I don't which is the exact version where the
-# requiremenst changed, I just know it's needed at least since version 2.7.0.0)
-
+# PVCAM library (I don't know which is the exact version where the requirements
+# changed, but it's definitely needed since version 2.7.0.0). For these
+# versions of the PVCAM library fsc2 needs to be linked against the real-
+# time and a firewire library.
 
 # WITH_RS_SPEC10       := yes
 # rs_spec10_incl       := /usr/local/include/pvcam
 # rs_spec10_libs       := libpvcam.so
-# rs_spec10_extra_libs := '-lrt -lraw1394'
+# rs_spec10_extra_libs := yes
 
 
 # Both the next two lines must be uncommented if you want support for the
@@ -402,7 +403,7 @@ MAIL_ADDRESS       := fsc2@toerring.de
 
 # Set the optimization level
 
-OPTIMIZATION     := -O0
+OPTIMIZATION     := -O2
 
 
 # Define this in order to use mpatrol
@@ -776,6 +777,10 @@ ifdef WITH_MEDRIVER
 	CONFFLAGS += -DWITH_MEDRIVER
 endif
 
+
+ifdef rs_spec10_extra_libs
+	LIBS += -lrt -lraw1394
+endif
 
 
 ifdef WITH_HTTP_SERVER

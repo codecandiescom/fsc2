@@ -1,0 +1,192 @@
+#!/usr/bin/perl
+# -*- cperl -*-
+#
+# $Id$
+#
+# Copyright (C) 1999-2007 Jens Thoms Toerring
+#
+# This file is part of fsc2.
+#
+# Fsc2 is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# Fsc2 is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with fsc2; see the file COPYING.  If not, write to
+# the Free Software Foundation, 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+use strict;
+use warnings;
+use Tk;
+use Tk::Balloon;
+use Tk::Dialog;
+
+
+my @version = split /\./, $Tk::VERSION;
+die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
+    if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
+
+
+$SIG{ CHLD } = sub { };
+
+create_gui( );
+MainLoop;
+
+
+#############################################
+
+sub create_gui {
+
+	my $f;
+	my @b;
+	my %fp = ( '-side' => 'top',
+			   '-fill' => 'x',
+			   '-padx' => '2m',
+			   '-pady' => '2m' );
+
+	my $mw = MainWindow->new( );
+	$mw->title( "EPR" );
+
+	$f = $mw->Frame( );
+	$b[ 0 ] = $f->Button( '-text' => "cw-EPR Experiment" );
+	$b[ 1 ] = $f->Button( '-text' => "Monitor Mode" );
+	$b[ 2 ] = $f->Button( '-text' => "Shutdown" );
+	$b[ 3 ] = $f->Button( '-text' => "Shutdown with 0 A" );
+
+	$b[ 0 ]->configure( '-command' => sub { cw_epr( $mw )  } );
+	$b[ 1 ]->configure( '-command' => sub { monitor( $mw ) } );
+	$b[ 2 ]->configure( '-command' => sub { shutdown_normal( $mw ); } );
+	$b[ 3 ]->configure( '-command' => sub { shutdown_zero( $mw ); } );
+
+	$f->pack( %fp );
+	$_->pack( %fp ) foreach @b;
+}
+
+
+#############################################
+
+sub cw_epr {
+	my $top = shift;
+	my $fh;
+
+	$top->withdraw;
+
+	unless ( open $fh, "/usr/local/bin/cw_epr 2>&1 |" ) {
+		show_message( $top, "Program for cw EPR\nexperiment not found" );
+		$top->deiconify;
+		return;
+	}
+
+	while ( <$fh>) {
+	}
+
+	close $fh;
+
+	$top->deiconify;
+}
+
+
+#############################################
+
+sub monitor {
+	my $top = shift;
+	my $fh;
+
+	$top->withdraw;
+
+	unless ( open $fh, "/usr/local/bin/monitor_mode 2>&1 |" ) {
+		show_message( $top, "Program for monitor\nmode not found" );
+		$top->deiconify;
+		return;
+	}
+
+	while ( <$fh>) {
+	}
+
+	close $fh;
+
+	$top->deiconify;
+}
+
+
+#############################################
+
+sub shutdown_normal {
+	my $top = shift;
+	my $fh;
+	my $txt;
+
+	$top->withdraw;
+
+	unless ( open $fh, "/usr/local/bin/fsps25_shutdown 2>&1 |" ) {
+		show_message( $top, "Program for shutdown\nnot found" );
+		$top->deiconify;
+		return;
+	}
+
+	while ( <$fh> ) {
+		$txt .= $_;
+	}
+
+	close $fh;
+
+	if ( ! defined $txt) {
+		$top->destroy;
+		exit( 0 );
+	}
+
+	show_message( $top, "Failure:\n$txt" );
+
+	$top->deiconify;
+}
+
+
+#############################################
+
+sub shutdown_zero {
+	my $top = shift;
+	my $fh;
+	my $txt;
+
+	$top->withdraw;
+
+	unless ( open $fh, "/usr/local/bin/fsps25_shutdown_zero 2>&1 |" ) {
+		show_message( $top, "Program for shutdown\nwith 0 A not found" );
+		$top->deiconify;
+		return;
+	}
+
+	while ( <$fh> ) {
+		$txt .= $_;
+	}
+
+	close $fh;
+
+	if ( ! defined $txt) {
+		$top->destroy;
+		exit( 0 );
+	}
+
+	show_message( $top, "Failure:\n$txt" );
+
+	$top->deiconify;
+}
+
+
+#############################################
+
+sub show_message {
+	my ( $mw, $text ) = @_;
+
+    $mw->messageBox( '-icon' => 'error',
+                     '-type' => 'Ok',
+	                 '-title' => 'Error',
+                     '-message' => $text );
+}

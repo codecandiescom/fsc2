@@ -42,6 +42,10 @@ struct SPECTRAPRO_300I {
     bool is_wavelength;     /* if wavelength got set in PREPARATIONS section */
     long tn;                /* current turret number, range 0-2 */
     long current_gn;        /* current grating number, range 0-8 */
+    long entry_mirror;
+    bool is_entry_mirror;
+    long exit_mirror;
+    bool is_exit_mirror;
     bool use_calib;         /* can calibration info be used ? */
     struct {
         bool is_installed;  /* is grating installed at all ? */
@@ -98,6 +102,8 @@ int spectrapro_300i_end_of_exp_hook( void );
 Var_T * monochromator_name(             Var_T * /* v */ );
 Var_T * monochromator_turret(           Var_T * /* v */ );
 Var_T * monochromator_grating(          Var_T * /* v */ );
+Var_T * monochromator_entry_mirror(     Var_T * /* v */ );
+Var_T * monochromator_exit_mirror(      Var_T * /* v */ );
 Var_T * monochromator_wavelength(       Var_T * /* v */ );
 Var_T * monochromator_wavenumber(       Var_T * /* v */ );
 Var_T * monochromator_install_grating(  Var_T * /* v */ );
@@ -136,6 +142,14 @@ long spectrapro_300i_get_grating( void );
 void spectrapro_300i_set_grating( long /* gn */ );
 
 void spectrapro_300i_get_gratings( void );
+
+int spectrapro_300i_get_entry_mirror( void );
+
+void spectrapro_300i_set_entry_mirror( long /* entry_mirror */ );
+
+int spectrapro_300i_get_exit_mirror( void );
+
+void spectrapro_300i_set_exit_mirror( long /* exit_mirror */ );
 
 long spectrapro_300i_get_offset( long /* gn */ );
 
