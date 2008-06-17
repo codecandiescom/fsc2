@@ -24,7 +24,7 @@
 static char * printer[ ] = {
 	"32 34 9 1",
 	" 	c #FFFFFFFFFFFF",
-	".	c #A1A1A1A1A1A1",
+	".	c None",
 	"@	c #C71BBAEAC71B",
 	"#	c #000000000000",
 	"$	c #28A25D754924",
