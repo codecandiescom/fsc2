@@ -58,6 +58,8 @@ rs_spec10_init_camera( void )
     int *fd_list;
 
 
+    raise_permissions( );
+
     /* Try to figure out how many cameras are attached to the system */
 
     if ( ! pl_cam_get_total( &total_cams ) )
@@ -76,6 +78,7 @@ rs_spec10_init_camera( void )
 
     if ( i == total_cams )
     {
+        lower_permissions( );
         print( FATAL, "No camera device file '/dev/%s' found.\n",
                rs_spec10->dev_file );
         THROW( EXCEPTION );
@@ -98,6 +101,8 @@ rs_spec10_init_camera( void )
 
     if ( ! pl_cam_check( rs_spec10->handle ) )
         rs_spec10_error_handling( );
+
+    lower_permssions( );
 
     rs_spec10_ccd_init( );
     rs_spec10_temperature_init( );
@@ -132,11 +137,14 @@ rs_spec10_ccd_init( void )
     uns32 i;
 
 
+    raise_permissions( );
+
     if (    ! rs_spec10_param_access( PARAM_SER_SIZE, &acc )
          || ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE )
          || ! rs_spec10_param_access( PARAM_PAR_SIZE, &acc )
          || ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
     {
+        lower_permissons( );
         print( FATAL, "Can't determine number of pixels of CCD\n" );
         THROW( EXCEPTION );
     }
@@ -146,11 +154,13 @@ rs_spec10_ccd_init( void )
     if ( ! pl_get_param( rs_spec10->handle, PARAM_SER_SIZE, ATTR_DEFAULT,
                          ( void_ptr ) &num_pix ) )
         rs_spec10_error_handling( );
+
     rs_spec10->ccd.max_size[ X ] = num_pix;
 
     if ( ! pl_get_param( rs_spec10->handle, PARAM_PAR_SIZE, ATTR_DEFAULT,
                          ( void_ptr ) &num_pix ) )
         rs_spec10_error_handling( );
+
     rs_spec10->ccd.max_size[ Y ] = num_pix;
 
     /* Make sure the sizes are identical to what the configuration file
@@ -159,6 +169,7 @@ rs_spec10_ccd_init( void )
     if (    rs_spec10->ccd.max_size[ X ] != CCD_PIXEL_WIDTH
          || rs_spec10->ccd.max_size[ Y ] != CCD_PIXEL_HEIGHT )
     {
+        lower_permissions( );
         print( FATAL, "Configuration file for camera has invalid CCD "
                "size, real size is %ldx%ld.\n",
                ( long ) rs_spec10->ccd.max_size[ X ],
@@ -197,6 +208,7 @@ rs_spec10_ccd_init( void )
     if (    ! rs_spec10_param_access( PARAM_EXP_RES_INDEX, &acc )
          || ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
     {
+        lower_permissions( );
         print( FATAL, "Can't determine exposure time resolution.\n" );
         THROW( EXCEPTION );
     }
@@ -233,6 +245,7 @@ rs_spec10_ccd_init( void )
         }
         OTHERWISE
         {
+            lower_permissions( );
             T_free( exp_res_array );
             RETHROW( );
         }
@@ -258,6 +271,7 @@ rs_spec10_ccd_init( void )
 
         if ( i == exp_res_count )
         {
+            lower_permissions( );
             print( FATAL, "Can't determine an usable value for the exposure "
                    "time resolution.\n" );
             THROW( EXCEPTION );
@@ -278,6 +292,7 @@ rs_spec10_ccd_init( void )
             rs_spec10->ccd.exp_res = 1.0e-3;
         else
         {
+            lower_permissions( );
             print( FATAL, "Camera returns undefined exposure time "
                    "resolution.\n" );
             THROW( EXCEPTION );
@@ -301,6 +316,7 @@ rs_spec10_ccd_init( void )
 
     if ( rs_spec10_test.ccd.test_min_exp_time < rs_spec10->ccd.exp_min_time )
     {
+        lower_permissions( );
         print( FATAL, "Shortest exposure time set in test run was smaller "
                "than the minimum exposure time of %s.\n",
                rs_spec10->ccd.exp_min_time );
@@ -312,6 +328,7 @@ rs_spec10_ccd_init( void )
     if (    ! rs_spec10_param_access( PARAM_CLEAR_CYCLES, &acc )
          || acc != ACC_READ_WRITE )
     {
+        lower_permissions( );
         print( FATAL, "Can't determine or set number of clear cycles.\n" );
         THROW( EXCEPTION );
     }
@@ -325,6 +342,7 @@ rs_spec10_ccd_init( void )
 
     if ( clear_cycles != CCD_MAX_CLEAR_CYCLES )
     {
+        lower_permissions( );
         print( FATAL, "Configuration file for camera has invalid maximum "
                "number of CCD clear cyces, real number is %ld.\n",
                ( long ) clear_cycles );
@@ -337,11 +355,14 @@ rs_spec10_ccd_init( void )
 
     if ( clear_cycles != CCD_MIN_CLEAR_CYCLES )
     {
+        lower_permissions( );
         print( FATAL, "Configuration file for camera has invalid minimum "
                "number of CCD clear cyces, real number is %ld.\n",
                ( long ) clear_cycles );
         THROW( EXCEPTION );
     }
+
+    lower_permissions( );
 
     rs_spec10_clear_cycles( rs_spec10->ccd.clear_cycles );
 }
@@ -358,6 +379,8 @@ rs_spec10_temperature_init( void )
     int16 temp;
     long min_temp, max_temp;
 
+
+    raise_permissions( );
 
     /* Determine if reading and setting a setpoint is possible */
 
@@ -389,6 +412,7 @@ rs_spec10_temperature_init( void )
         if (    max_temp != lrnd( CCD_MAX_TEMPERATURE * 100.0 )
              || min_temp != lrnd( CCD_MIN_TEMPERATURE * 100.0 ) )
         {
+            lower_permissions( );
             print( FATAL, "Configuration file for camera has invalid CCD "
                    "temperature range, valid range is %.2f K (%.2fC) to "
                    "%.2f K (%.2f C).\n", rs_spec10_c2k( CCD_MIN_TEMPERATURE ),
@@ -402,6 +426,7 @@ rs_spec10_temperature_init( void )
          && rs_spec10->temp.acc_setpoint != ACC_READ_WRITE
          && rs_spec10->temp.acc_setpoint != ACC_WRITE_ONLY )
     {
+        lower_permissions( );
         print( FATAL, "During the PREPARATIONS section or the test run a "
                "temperature setpoint was set, but camera doesn't allow to "
                "do so.\n" );
@@ -421,9 +446,12 @@ rs_spec10_temperature_init( void )
     if (    ! rs_spec10_param_access( PARAM_TEMP, &acc )
          || ! ( acc == ACC_READ_ONLY || acc == ACC_READ_WRITE ) )
     {
+        lower_permissions( );
         print( FATAL, "Can't determine the current temperature.\n" );
         THROW( EXCEPTION );
     }
+
+    lower_permissions( );
 
     rs_spec10_get_temperature( );
 }
@@ -445,11 +473,14 @@ rs_spec10_clear_cycles( uns16 cycles )
     fsc2_assert(    count >= CCD_MIN_CLEAR_CYCLES
                  && count <= CCD_MAX_CLEAR_CYCLES );
 
+    raise_permissions( );
+
     if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_CYCLES, &cycles ) )
         rs_spec10_error_handling( );
 
     rs_spec10->ccd.clear_cycles = cycles;
 
+    lower_permissions( );
 #endif /* ! defined RS_SPEC10_TEST */
 }
 
@@ -473,6 +504,8 @@ rs_spec10_get_pic( uns32 * size )
     char cur_dir[ PATH_MAX ];
     uns16 temp;
 
+
+    raise_permissions( );
 
     region.s1   = rs_spec10->ccd.roi[ X ];
     region.s2   = rs_spec10->ccd.roi[ X + 2 ];
@@ -565,6 +598,8 @@ rs_spec10_get_pic( uns32 * size )
 
 #endif /* ! defined RS_SPEC10_TEST */
 
+        lower_permissions( );
+
         chdir( cur_dir );
         THROW( EXCEPTION );
     }
@@ -601,6 +636,8 @@ rs_spec10_get_pic( uns32 * size )
         pl_exp_uninit_seq( );
 
 #endif /* ! defined RS_SPEC10_TEST */
+
+        lower_permissions( );
 
         RETHROW( );
     }
@@ -645,6 +682,7 @@ rs_spec10_get_pic( uns32 * size )
         munlock( frame, *size );
 #endif
 
+        lower_permissions( );
         T_free( frame );
         chdir( cur_dir );
         RETHROW( );
@@ -686,6 +724,7 @@ rs_spec10_get_pic( uns32 * size )
     munlock( frame, *size );
 #endif
 
+    lower_permissions( );
     chdir( cur_dir );
     return frame;
 }
@@ -700,6 +739,8 @@ rs_spec10_get_temperature( void )
 {
     int16 itemp;
 
+
+    raise_permissions( );
 
     /* Get the current temperature */
 
@@ -717,6 +758,8 @@ rs_spec10_get_temperature( void )
 
 #endif /* ! defined RS_SPEC10_TEST */
 
+    lower_permissions( );
+
     return rs_spec10_ic2k( itemp );
 }
 
@@ -730,6 +773,8 @@ rs_spec10_set_temperature( double temp )
 {
     int16 itemp;
 
+
+    raise_permissions( );
 
     itemp = rs_spec10_k2ic( temp );
 
@@ -747,6 +792,8 @@ rs_spec10_set_temperature( double temp )
 #endif /* ! defined RS_SPEC10_TEST */
 
     /* Return the new setpoint */
+
+    lower_permissions( );
 
     return rs_spec10_ic2k( itemp );
 }
@@ -770,6 +817,7 @@ rs_spec10_error_handling( void )
         rs_spec10->is_open = UNSET;
     }
 
+    lower_permissions( );
     THROW( EXCEPTION );
 }
 
