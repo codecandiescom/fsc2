@@ -4367,14 +4367,14 @@ to @w{18 GHz}.
 @anchor{freq_counter_resolution()}
 @findex freq_counter_resolution()
 @item freq_counter_resolution()
-This function only exists for the @code{EIP371} and allows to set (but
-not query) the resolution frequency measurements are done with. It
-expects a single floating point argument, the resolution in @code{Hz}.
-Since the device only accepts resolutions of @w{1 Hz}, @w{10 Hz},
-@w{100 Hz}, @w{1 kHz}, @w{10 kHz}, @w{100 kHz} and @w{1 MHz}, values
-differing from these resolutions will be adjusted to the next higher
-resolution (if there's a deviation of more than @w{1%} an warning is
-printed out.
+This function only exists for the @code{EIP371} and the
+@code{HP5342A}. It allows to set (but not query) the resolution
+frequency measurements are done with. It expects a single floating
+point argument, the resolution in @code{Hz}. Since the device only
+accepts resolutions of @w{1 Hz}, @w{10 Hz}, @w{100 Hz}, @w{1 kHz},
+@w{10 kHz}, @w{100 kHz} and @w{1 MHz}, values differing from these
+resolutions will be adjusted to the next higher resolution (if there's
+a deviation of more than @w{1%} an warning is printed out.
 
 
 @anchor{freq_counter_measure()}

@@ -203,9 +203,13 @@ freq_counter_resolution( Var_T * v )
 	}
 	else
 	{
-		for ( i = 1; i < 7; i++ )
-			if ( resolution <= 0.99 * res[ i ] )
-				break;
+        for ( i = 0; i < 6; i++ )
+            if ( resolution >= res[ i ] && resolution <= res[ i + 1 ] )
+            {
+                if ( res[ i ] / resolution < resolution / res[ i + 1 ] )
+                    i++;
+                break;
+            }
 
 		if ( resolution > 1.01e6 )
 		{

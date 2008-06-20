@@ -54,26 +54,30 @@ int hp5342a_exp_hook(        void );
 int hp5342a_end_of_exp_hook( void );
 
 
-Var_T * freq_counter_name(    Var_T * v );
-Var_T * freq_counter_measure( Var_T * v );
-Var_T * freq_counter_command( Var_T * v );
+Var_T * freq_counter_name(       Var_T * v );
+Var_T * freq_counter_measure(    Var_T * v );
+Var_T * freq_counter_resolution( Var_T * v );
+Var_T * freq_counter_command(    Var_T * v );
 
 
 static bool hp5342a_init( const char * name );
 
 static double hp5342a_get_freq( void );
 
-static bool hp5342a_command( const char * cmd );
+static double hp5342a_set_resolution( int );
+static bool hp5342a_command( const char * );
 
 
 static struct {
     int device;
+	int res;
+	bool is_res;
 } hp5342a;
 
 
 /* Define the frequency that the driver returns during the test run */
 
-#define HP5342A_TEST_FREQUENCY  9.2e9
+#define HP5342A_TEST_FREQUENCY  2.6e9
 
 
 
@@ -94,6 +98,7 @@ hp5342a_init_hook( void )
     Need_GPIB = SET;
 
     hp5342a.device = -1;
+	hp5342a.is_res = UNSET;
     return 1;
 }
 
@@ -121,10 +126,6 @@ hp5342a_exp_hook( void )
 int
 hp5342a_end_of_exp_hook( void )
 {
-    /* Do a reset and switch device to local mode */
-
-    gpib_write( hp5342a.device, "NH", 2 );
-
     hp5342a.device = -1;
     return 1;
 }
@@ -156,6 +157,64 @@ freq_counter_measure( Var_T * v  UNUSED_ARG )
         return vars_push( FLOAT_VAR, HP5342A_TEST_FREQUENCY );
 
     return vars_push( FLOAT_VAR, hp5342a_get_freq( ) );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+freq_counter_resolution( Var_T * v )
+{
+	size_t i;
+	double res[ ] = { 1.0e0, 1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6 };
+	double resolution;
+
+
+	if ( v == NULL )
+	{
+		print( FATAL, "Frequency resolution can only be set, not queried.\n" );
+		THROW( EXCEPTION );
+	}
+
+	resolution = get_double( v, "frequency resolution" );
+
+	too_many_arguments( v );
+
+	if ( resolution < 0.99 * res[ 0 ] )
+	{
+		print( SEVERE, "Resolution too high, switching to 1 Hz\n" );
+		i = 0;
+	}
+	else
+	{
+        for ( i = 0; i < 6; i++ )
+            if ( resolution >= res[ i ] && resolution <= res[ i + 1 ] )
+            {
+                if ( res[ i ] / resolution < resolution / res[ i + 1 ] )
+                    i++;
+                break;
+            }
+
+		if ( resolution > 1.01 * res[ 6 ] )
+		{
+			print( SEVERE, "Resolution too low, switching to 1 MHz\n" );
+			resolution = res[ 6 ];
+			i = 6;
+		}
+
+		if ( fabs( resolution - res[ i ] ) > 0.01 * resolution )
+			print( SEVERE, "Requested resolution of %f can't be set exactly, "
+				   "using %.3f Hz  instead.\n", resolution, res[ i ] );
+	}
+
+	hp5342a.res = i;
+	hp5342a.is_res = SET;
+
+	if ( FSC2_MODE == EXPERIMENT )
+		hp5342a_set_resolution( i );
+
+	return vars_push( FLOAT_VAR, res[ i ] );
 }
 
 
@@ -218,6 +277,9 @@ hp5342a_init( const char * name )
     if ( gpib_write( hp5342a.device, "ST1", 3 ) == FAILURE )
         return FAIL;
 
+    if ( hp5342a.is_res )
+        hp5342a_set_resolution( hp5342a.res );
+
     return OK;
 }
 
@@ -228,24 +290,40 @@ hp5342a_init( const char * name )
 static double
 hp5342a_get_freq( void )
 {
-    char buf[ 16 ];
-    long len = 16;
+    char buf[ 22 ];
+    long len = 22;
 
     if (    gpib_read( hp5342a.device, buf, &len ) == FAILURE
-         || len != 16 )
+         || len != 22
+         || strncmp( buf, " F  ", 4 ) )
     {
         print( FATAL, "Communication with device failed.\n" );
         THROW( EXCEPTION );
     }
 
-    if ( buf[ 1 ] != ' ' )
+    buf[ 20 ] = '\0';
+    return T_atod( buf + 4 );
+}
+
+
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+static double
+hp5342a_set_resolution( int res )
+{
+	char cmd[ 3 ] = "SR";
+
+
+	fsc2_assert( res >= 0 && res <= 6 );
+
+	cmd[ 2 ] = '3' + res;
+    if ( gpib_write( hp5342a.device, cmd, 3 ) == FAILURE )
     {
-        print( FATAL, "Device detected display overflow.\n" );
+        print( FATAL, "Communication with device failed.\n" );
         THROW( EXCEPTION );
     }
-
-    buf[ 14 ] = '\0';
-    return T_atod( buf + 3 );
+    return OK;
 }
 
 
