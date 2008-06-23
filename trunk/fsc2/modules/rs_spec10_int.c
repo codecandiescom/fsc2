@@ -102,7 +102,7 @@ rs_spec10_init_camera( void )
     if ( ! pl_cam_check( rs_spec10->handle ) )
         rs_spec10_error_handling( );
 
-    lower_permssions( );
+    lower_permissions( );
 
     rs_spec10_ccd_init( );
     rs_spec10_temperature_init( );
@@ -144,7 +144,7 @@ rs_spec10_ccd_init( void )
          || ! rs_spec10_param_access( PARAM_PAR_SIZE, &acc )
          || ( acc != ACC_READ_ONLY && acc != ACC_READ_WRITE ) )
     {
-        lower_permissons( );
+        lower_permissions( );
         print( FATAL, "Can't determine number of pixels of CCD\n" );
         THROW( EXCEPTION );
     }
