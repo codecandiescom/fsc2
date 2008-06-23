@@ -1,0 +1,66 @@
+=== DT float [ 0.2 : ][ 1 ] "Time step" "s"
+
+DEVICES:
+
+hp5342a;
+
+
+VARIABLES:
+
+dt = DT s;
+File;
+t1, t2;
+res = 1.0 Hz;
+I = 1;
+freq;
+S;
+
+
+PREPARATIONS:
+
+init_1d( 1, 0, 0, dt, "Time [s]", "Frequency [GHz]" );
+
+
+EXPERIMENT:
+
+// Set resolution at which the counter is fast enough
+
+IF dt <= 0.2 s {
+    res = 1 kHz;
+} ELSE IF dt < 0.5 s {
+    res = 100 Hz;
+} ELSE IF dt < 1.1 s {
+    res = 10 Hz;
+}
+
+freq_counter_resolution( res );
+
+File = get_file( );
+
+// Get two dat points to get the frequency counter up to speed
+
+freq_counter_measure( );
+freq_counter_measure( );
+
+delta_time( );
+
+S = button_create( "PUSH_BUTTON", "Start/Stop data acquistion" );
+button_state( S, 1 );
+
+t1 = 0.0;
+
+FOREVER {
+    IF button_state( S ) {
+        freq = freq_counter_measure( ) / 1 GHz;
+        display_1d( I, freq );
+        I += 1;
+        t2 = delta_time( );
+        fsave( File, "# # #\n", t1, t2, freq );
+        IF dt > t2 {
+            wait( dt - t2 );
+        }
+        t1 = delta_time( );
+    } ELSE {
+        wait( 0.25 s );
+    }
+}

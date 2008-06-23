@@ -6328,7 +6328,7 @@ the supported monochromatore).
 @item @ref{monochromator_groove_density()}
 @item @ref{monochromator_grating()}
 @item @ref{monochromator_turret()}
-@item @ref{monochromator_entry_mirror()}
+@c @item @ref{monochromator_entry_mirror()}
 @item @ref{monochromator_exit_mirror()}
 @item @ref{monochromator_wavelength_axis()}
 @item @ref{monochromator_wavenumber_axis()}
@@ -6559,20 +6559,20 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@anchor{monochromator_entry_mirror()}
-@findex monochromator_entry_mirror()
-@item monochromator_entry_mirror()
-The function is only supported for @strong{SpectraPro-300i}
-monochromators. If called with no argument the function returns the
-position of the entry divertor mirror, where @code{1} stands for front and
-@code{1} for side. If called with an string argument of @code{"FRONT"}
-or an integer argument of @code{0} it moves entry diverter mirror to
-position the beam to the front port position, of called with a string
-argument of @code{"SIDE"} or an integer argument of @code{1} it
-moves the mirror to position the beam to the side port.
-
-The function can only be used in the @code{EXPERIMENT} section of an
-@code{EDL} script.
+@c @anchor{monochromator_entry_mirror()}
+@c @findex monochromator_entry_mirror()
+@c @item monochromator_entry_mirror()
+@c The function is only supported for @strong{SpectraPro-300i}
+@c monochromators. If called with no argument the function returns the
+@c position of the entry divertor mirror, where @code{0} stands for front and
+@c @code{1} for side. If called with an string argument of @code{"FRONT"}
+@c or an integer argument of @code{0} it moves entry diverter mirror to
+@c position the beam to the front port position, of called with a string
+@c argument of @code{"SIDE"} or an integer argument of @code{1} it
+@c moves the mirror to position the beam to the side port.
+@c 
+@c The function can only be used in the @code{EXPERIMENT} section of an
+@c @code{EDL} script.
 
 
 @anchor{monochromator_exit_mirror()}
@@ -6580,7 +6580,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item monochromator_exit_mirror()
 The function is only supported for @strong{SpectraPro-300i}
 monochromators. If called with no argument the function returns the
-position of the exit divertor mirror, where @code{1} stands for front and
+position of the exit divertor mirror, where @code{0} stands for front and
 @code{1} for side. If called with an string argument of @code{"FRONT"}
 or an integer argument of @code{0} it moves exit diverter mirror to
 position the beam to the front port position, of called with a string

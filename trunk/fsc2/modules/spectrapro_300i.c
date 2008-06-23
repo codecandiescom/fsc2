@@ -33,7 +33,7 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-struct SPECTRAPRO_300I spectrapro_300i;
+struct SPECTRAPRO_300I spectrapro_300i, spectrapro_300i_stored;
 
 
 
@@ -80,8 +80,6 @@ spectrapro_300i_init_hook( void )
 
     spectrapro_300i.tn = 0;
     spectrapro_300i.current_gn = 0;
-    spectrapro_300i.entry_mirror = 0;
-    spectrapro_300i.is_entry_mirror = UNSET;
     spectrapro_300i.exit_mirror = 0;
     spectrapro_300i.is_exit_mirror = UNSET;
     spectrapro_300i.wavelength = 5.0e-7;
@@ -96,10 +94,23 @@ spectrapro_300i_init_hook( void )
  *-----------------------------------------------------------------------*/
 
 int
+spectrapro_300i_test_hook( void )
+{
+    spectrapro_300i_stored = spectrapro_300i;
+    return 1;
+}
+
+
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
+
+int
 spectrapro_300i_exp_hook( void )
 {
     int i;
 
+
+    spectrapro_300i = spectrapro_300i_stored;
 
     if ( ! spectrapro_300i.is_needed )
         return 1;
@@ -312,51 +323,6 @@ monochromator_turret( Var_T * v )
  *-----------------------------------------------------------------*/
 
 Var_T *
-monochromator_entry_mirror( Var_T * v )
-{
-    long entry_mirror;
-
-
-    if ( v == NULL )
-    {
-        if ( FSC2_MODE == EXPERIMENT )
-            spectrapro_300i.entry_mirror = spectrapro_300i_get_entry_mirror( );
-        return vars_push( INT_VAR, spectrapro_300i.entry_mirror );
-    }
-
-
-    if ( v->type == STR_VAR )
-    {
-        if ( strcasecmp( v->val.sptr, "FRONT" ) )
-            entry_mirror = 0;
-        else if ( strcasecmp( v->val.sptr, "SIDE" ) )
-            entry_mirror = 1;
-        else
-        {
-            print( FATAL, "Invalid argument '%s', must be 'FRONT' or 'SIDE'.\n",
-                   v->val.sptr );
-            THROW( EXCEPTION );
-        }
-    }
-    else
-        entry_mirror = get_long( v, "entry mirror position" ) ? 1 : 0;
-
-    too_many_arguments( v );
-
-    if ( FSC2_MODE == EXPERIMENT )
-        spectrapro_300i_set_entry_mirror( entry_mirror );
-
-    spectrapro_300i.entry_mirror = entry_mirror;
-    spectrapro_300i.is_entry_mirror = SET;
-
-    return vars_push( INT_VAR, entry_mirror );
-}
-
-
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
-
-Var_T *
 monochromator_exit_mirror( Var_T * v )
 {
     long exit_mirror;
@@ -369,12 +335,11 @@ monochromator_exit_mirror( Var_T * v )
         return vars_push( INT_VAR, spectrapro_300i.exit_mirror );
     }
 
-
     if ( v->type == STR_VAR )
     {
-        if ( strcasecmp( v->val.sptr, "FRONT" ) )
+        if ( ! strcasecmp( v->val.sptr, "FRONT" ) )
             exit_mirror = 0;
-        else if ( strcasecmp( v->val.sptr, "SIDE" ) )
+        else if ( ! strcasecmp( v->val.sptr, "SIDE" ) )
             exit_mirror = 1;
         else
         {

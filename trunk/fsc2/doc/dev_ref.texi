@@ -3255,7 +3255,6 @@ turrets, wavelength range @w{0 nm} to @w{1400 nm}.
 @item @ref{monochromator_zero_offset()}
 @item @ref{monochromator_grating_adjust()}
 @item @ref{monochromator_turret()}
-@item @ref{monochromator_entry_mirror()}
 @item @ref{monochromator_exit_mirror()}
 @item @ref{monochromator_install_grating()}
 @item @ref{monochromator_calibrate()}

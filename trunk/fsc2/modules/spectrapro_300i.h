@@ -96,13 +96,13 @@ extern struct SPECTRAPRO_300I spectrapro_300i;
 
 
 int spectrapro_300i_init_hook(       void );
+int spectrapro_300i_test_hook(       void );
 int spectrapro_300i_exp_hook(        void );
 int spectrapro_300i_end_of_exp_hook( void );
 
 Var_T * monochromator_name(             Var_T * /* v */ );
 Var_T * monochromator_turret(           Var_T * /* v */ );
 Var_T * monochromator_grating(          Var_T * /* v */ );
-Var_T * monochromator_entry_mirror(     Var_T * /* v */ );
 Var_T * monochromator_exit_mirror(      Var_T * /* v */ );
 Var_T * monochromator_wavelength(       Var_T * /* v */ );
 Var_T * monochromator_wavenumber(       Var_T * /* v */ );

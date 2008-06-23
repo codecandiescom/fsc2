@@ -2,6 +2,14 @@
 #
 # $Id: gpt.toerring.de-config 7130 2004-07-29 15:36:35Z jens $
 
+grep -E '^[ \t]*#define[ \t]+CCD_MIN_TEMPERATURE[ \t]+-152\.00[[:space:]]*$' \
+	 $cdir/rs_spec10.conf > /dev/null
+if [ $? -ne 0 ]; then
+	sed 's/^[ \t]*\(#define[ \t]\{1,\}CCD_MIN_TEMPERATURE\).*$/\1 -150.00/' \
+		$cdir/rs_spec10.conf > $cdir/rs_spec10.conf.new
+	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf
+fi
+
 grep -E '^[ \t]*#define[ \t]+CCD_PIXEL_WIDTH[ \t]+1340[[:space:]]*$' $cdir/rs_spec10.conf > /dev/null
 if [ $? -ne 0 ]; then
 	sed 's/^\s*\(#define[ \t]\{1,\}CCD_PIXEL_WIDTH\).*$/\1  1340/' $cdir/rs_spec10.conf > $cdir/rs_spec10.conf.new

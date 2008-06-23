@@ -26,6 +26,14 @@ if [ $? -ne 0 ]; then
 	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf
 fi
 
+grep -E '^[ \t]*#define[ \t]+CCD_MIN_TEMPERATURE[ \t]+-152\.50[[:space:]]*$' \
+	 $cdir/rs_spec10.conf > /dev/null
+if [ $? -ne 0 ]; then
+	sed 's/^[ \t]*\(#define[ \t]\{1,\}CCD_MIN_TEMPERATURE\).*$/\1 -150.50/' \
+		$cdir/rs_spec10.conf > $cdir/rs_spec10.conf.new
+	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf
+fi
+
 grep -E '^[ \t]*#define[ \t]+RS_SPEC10_MIRROR[ \t]+0[[:space:]]*$' \
 	 $cdir/rs_spec10.conf > /dev/null
 if [ $? -ne 0 ]; then
