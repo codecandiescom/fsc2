@@ -18,6 +18,14 @@ if [ $? -ne 0 ]; then
 	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf
 fi
 
+grep -E '^[ \t]*#define[ \t]+PVCAM_DATA_DIR[ \t]+\/usr\/local\/lib[[:space:]]*$' \
+	 $cdir/rs_spec10.conf > /dev/null
+if [ $? -ne 0 ]; then
+	sed 's/^[ \t]*\(#define[ \t]\{1,\}PVCAM_DATA_DIR\).*$/\1 \/usr\/lib/' \
+		$cdir/rs_spec10.conf > $cdir/rs_spec10.conf.new
+	mv $cdir/rs_spec10.conf.new $cdir/rs_spec10.conf
+fi
+
 grep -E '^[ \t]*#define[ \t]+RS_SPEC10_UPSIDE_DOWN[ \t]+0[[:space:]]*$' \
 	 $cdir/rs_spec10.conf > /dev/null
 if [ $? -ne 0 ]; then

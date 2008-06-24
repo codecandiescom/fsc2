@@ -271,10 +271,10 @@ hp5342a_init( const char * name )
        addressed as talker(don't lock the keyboard, the user is supposed
        to do settings at the front panel) */
 
-    if ( gpib_write( hp5342a.device, "T2", 2 ) == FAILURE )
+    if ( gpib_write( hp5342a.device, "ST1", 3 ) == FAILURE )
         return FAIL;
 
-    if ( gpib_write( hp5342a.device, "ST1", 3 ) == FAILURE )
+    if ( gpib_write( hp5342a.device, "T2", 2 ) == FAILURE )
         return FAIL;
 
     if ( hp5342a.is_res )
