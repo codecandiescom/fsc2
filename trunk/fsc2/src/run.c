@@ -230,7 +230,7 @@ error_while_iconified( void )
 static bool
 start_gpib_and_rulbus( void )
 {
-#if defined WITH_RULBUS
+#if defined WITH_RULBUS || defined WITH_MEDRIVER
     int retval;
 #endif
 
