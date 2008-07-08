@@ -525,6 +525,8 @@ spectrapro_300i_set_grating( long gn )
 
 
 /*-----------------------------------------------------------------*
+ * Please note: the manual claims that sending "EXIT-MIRROR" would
+ * not be required but without it it doesn't work reliable!
  *-----------------------------------------------------------------*/
 
 int
@@ -534,6 +536,7 @@ spectrapro_300i_get_exit_mirror( void )
     long exit_mirror;
 
 
+    spectrapro_300i_send( "EXIT-MIRROR" );
     reply = spectrapro_300i_talk( "?MIR", 20 );
     exit_mirror = T_atol( reply );
     T_free( ( void * ) reply );
@@ -542,16 +545,15 @@ spectrapro_300i_get_exit_mirror( void )
 
 
 /*-----------------------------------------------------------------*
+ * Please note: the manual claims that sending "EXIT-MIRROR" would
+ * not be required but without it it doesn't work reliable!
  *-----------------------------------------------------------------*/
 
 void
 spectrapro_300i_set_exit_mirror( long exit_mirror )
 {
-    TRY
-    {
-        spectrapro_300i_send( exit_mirror ? "SIDE" : "FRONT" );
-        TRY_SUCCESS;
-    }
+    spectrapro_300i_send( "EXIT-MIRROR" );
+    spectrapro_300i_send( exit_mirror ? "SIDE" : "FRONT" );
 }
 
 
