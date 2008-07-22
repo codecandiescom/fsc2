@@ -27,26 +27,30 @@
 #include <medriver.h>
 
 
-#define DIO_MAX_CHANNEL  32
+#define DIO_MAX_CHANNEL  8
+
+int config_flags[ ] = { ME_IO_SINGLE_CONFIG_DIO_BIT,
+                        ME_IO_SINGLE_CONFIG_DIO_BYTE };
+int query_flags[ ]  = { ME_CAPS_DIO_DIR_BIT,
+                        ME_CAPS_DIO_DIR_BYTE };
+const char *mode_name[ ] = { "8 1-bit DIO channels",
+                             "1 8-bit DIO channel", };
 
 enum DIO_MODE {
-    DIO_BIT,
-    DIO_BYTE,
-    DIO_WORD,
-    DIO_DWORD
+    DIO_BIT   = 8,
+    DIO_BYTE  = 1,
 };
 
-int num_channels[ ] = { 32, 4, 2, 1 };
-int num_bits[ ]     = { 1, 8, 16, 32 };
-int config_flags[ ] = { ME_IO_SINGLE_CONFIG_DIO_BIT,
-                        ME_IO_SINGLE_CONFIG_DIO_BYTE,
-                        ME_IO_SINGLE_CONFIG_DIO_WORD,
-                        ME_IO_SINGLE_CONFIG_DIO_DWORD };
-
 enum DIO_DIR {
-    DIO_UNKNOWN,
-    DIO_IN,
-    DIO_OUT
+    DIO_IN      = 1,
+    DIO_OUT     = 2
+};
+
+
+enum DIO_TYPE {
+    DI          = 0,
+    DO          = 1,
+    DIO         = 2
 };
 
 
@@ -63,19 +67,25 @@ Var_T * dio_value(       Var_T * v );
 
 
 static void me_dio_init( void );
+static void me_dio_exit( void );
 static unsigned long me_dio_in( int ch );
 static void me_dio_out( int           ch,
                         unsigned long val );
 static long me_dio_translate_channel( long channel );
 
+
 struct ME_DIO {
-    bool is_open;
-    int mode;
-    bool is_mode;
+    bool is_locked;
     char *reserved_by;
-    unsigned int dir[ DIO_MAX_CHANNEL ];
+    int dev_no;
+    int subdev_no;
+    int type;
+    bool dir_cap[ 2 ];
+    int mode;
     int config_flags;
     int single_flags;
+    int max_channels;
+    unsigned int dir[ MAX_CHANNELS ];
 };
 
 
@@ -88,20 +98,39 @@ static struct ME_DIO me_dio, me_dio_saved;
 int
 me_dio_init_hook( void )
 {
-    int i;
+    size_t i;
 
 
 	Need_MEDRIVER = SET;
 
-	me_dio.mode = DIO_BYTE;                  /* default to 8 bits DIO */
-    me_dio.is_mode = UNSET;
-    me_dio.config_flags = ME_IO_SINGLE_CONFIG_DIO_BYTE;
-    me_dio.single_flags = ME_IO_SINGLE_TYPE_DIO_BYTE;
+    me_dio.dev_no = DEVICE_NUMBER;
+    me_dio.subdev_no = SUBDEVICE_NUMBER;
+    switch ( DEVICE_TYPE )
+    {
+        case DI :
+            me_dio.type = ME_TYPE_DI;
+            break;
+
+        case DO :
+            me_dio.type = ME_TYPE_DO;
+            break;
+
+        case DIO :
+            me_dio.type = ME_TYPE_DIO;
+            break;
+
+        default:
+            print( FATAL, "Invalid device type in configiration file.\n" );
+            return 0;
+    }
+
+    me_dio.max_channels = MAX_CHANNELS;
+    me_dio.is_locked = UNSET;
+
+    for ( i = 0; i < sizeof query_flags / sizeof *query_flags; i++ )
+        me_dio.caps[ i ] = CAPABILITIES & query_flags[ i ] ? SET : UNSET;
 
     me_dio.reserved_by = NULL;
-
-    for ( i = 0; i < num_channels[ me_dio.mode ]; i++ )
-        me_dio.dir[ i ] = DIO_UNKNOWN;
 
 	return 1;
 }
@@ -139,6 +168,7 @@ me_dio_exp_hook( void )
 int
 me_dio_end_of_exp_hook( void )
 {
+    me_dio_exit( );
     if ( me_dio.reserved_by != NULL )
         me_dio.reserved_by = CHAR_P T_free( me_dio.reserved_by );
 
@@ -234,7 +264,7 @@ dio_reserve_dio( Var_T * v )
 
 /*--------------------------------------------------------------*
  * Function for querying or setting the mode the DIO. Modes are
- * either 1, 8, 16, or 32 (for the number of bits to be used).
+ * either 1 or 8 (for the number of bits to be used).
  * If the DIO has been reserved, the first argument must be the
  * correct pass-phrase agreed upon in the lock operation.
  *--------------------------------------------------------------*/
@@ -246,6 +276,12 @@ dio_mode( Var_T * v )
     char *pass = NULL;
     int i;
 
+
+    if ( FSC2_MODE == PREPARATIONS )
+    {
+        print( FATAL, "Function can only be used in EXPERIMENT section.\n" );
+        THROW( EXCEPTION );
+    }
 
     /* If the first argument is a string we assume it's a pass-phrase */
 
@@ -269,16 +305,9 @@ dio_mode( Var_T * v )
 
 	mode = get_long( v, "DIO mode" );
 
-    for ( i = DIO_BIT; i <= DIO_DWORD; i++ )
-        if ( num_bits[ i ] == mode )
-        {
-            mode = i;
-            break;
-        }
-
-    if ( i > DIO_DWORD )
-	{
-		print( FATAL, "Invalid mode, must be 1, 8, 16 or 32.\n" );
+    if ( mode != DIO_BIT && mode != DIO_BYTE )
+    {
+		print( FATAL, "Invalid mode, must be 1 or 8.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -302,13 +331,22 @@ dio_mode( Var_T * v )
 
     /* Set the new mode */
 
+    if ( mode > ne_dio.max_channels )
+    {
+        print( FATAL, "Device does not support %s.\n",
+               mode_name[ mode == DIO_BIT ? 0 : 1 ] );
+        THROW( EXCEPTION );
+    }
+
     me_dio.mode = mode;
-    me_dio.is_mode = SET;
 
     switch ( mode )
     {
         case DIO_BIT :
-            me_dio.config_flags = ME_IO_SINGLE_CONFIG_DIO_BIT;
+            if ( me_dio.caps[ 0 ] == 0 )
+                me_dio.config_flags = ME_IO_SINGLE_CONFIG_DIO_BIT;
+            else
+                me_dio.config_flags = ME_IO_SINGLE_CONFIG_DIO_BYTE;
             me_dio.single_flags = ME_IO_SINGLE_TYPE_DIO_BIT;
             break;
 
@@ -316,19 +354,9 @@ dio_mode( Var_T * v )
             me_dio.config_flags = ME_IO_SINGLE_CONFIG_DIO_BYTE;
             me_dio.single_flags = ME_IO_SINGLE_TYPE_DIO_BYTE;
             break;
-
-        case DIO_WORD :
-            me_dio.config_flags = ME_IO_SINGLE_CONFIG_DIO_WORD;
-            me_dio.single_flags = ME_IO_SINGLE_TYPE_DIO_WORD;
-            break;
-
-        case DIO_DWORD :
-            me_dio.config_flags = ME_IO_SINGLE_CONFIG_DIO_DWORD;
-            me_dio.single_flags = ME_IO_SINGLE_TYPE_DIO_DWORD;
-            break;
     }
 
-    for ( i = 0; i < num_channels[ me_dio.mode ]; i++ )
+    for ( i = 0; i < me_dio.max_channels; i++ )
         me_dio.dir[ i ] = DIO_UNKNOWN;
 
     return vars_push( INT_VAR, num_bits[ mode ] );
@@ -370,14 +398,6 @@ dio_value( Var_T * v )
 
     ch = me_dio_translate_channel( get_strict_long( v, "channel number" ) );
 
-    if ( ch < 0 || ch >= num_channels[ me_dio.mode ] )
-    {
-        print( FATAL, "Invalid channel number CH%d in %d bit mode, upper limit "
-               "is CH%d.\n", ch + 1, num_bits[ me_dio.mode ],
-               num_channels[ me_dio.mode ] );
-        THROW( EXCEPTION );
-    }
-
     /* If the DIO is locked check the pass-phrase */
 
     if ( me_dio.reserved_by )
@@ -394,17 +414,22 @@ dio_value( Var_T * v )
         }
     }
 
-    /* Check if a mode has been set otherwise warn */
+    if ( ch < 0 || ch >= me_dio.mode )
+    {
+        print( FATAL, "Invalid channel %ld\n", ch );
+        THROW( EXCEPTION );
+    }
 
-    if ( ! me_dio.is_mode )
-        print( WARN, "No mode has been set, using default %d bit mode.\n",
-               num_bits[ me_dio.mode ] );
-
-    /* If there's no value to output read the input from the DIO and return
-       it to the user */
+    /* If there's no value to output read the input and return it to the user */
 
     if ( ( v = vars_pop( v ) ) == NULL )
     {
+        if ( me_dio.type == DO )
+        {
+            print( FATAL, "Device only allows output.\n" );
+            THROW( EXCEPTION );
+        }
+
         if ( FSC2_MODE == EXPERIMENT )
             uval = me_dio_in( ch );
 
@@ -417,12 +442,16 @@ dio_value( Var_T * v )
 
     too_many_arguments( v );
 
+    if ( me_dio.type == DI )
+    {
+        print( FATAL, "Device only allows input.\n" );
+        THROW( EXCEPTION );
+    }
+
     uval = ( unsigned long ) val;
 
     if (    ( me_dio.mode == DIO_BIT   && uval > 1 )
-         || ( me_dio.mode == DIO_BYTE  && uval > 0xFF )
-         || ( me_dio.mode == DIO_WORD  && uval > 0xFFFF )
-         || ( me_dio.mode == DIO_DWORD && uval > 0xFFFFFFFF ) )
+         || ( me_dio.mode == DIO_BYTE  && uval > 0xFF ) )
     {
         if ( FSC2_MODE != EXPERIMENT )
         {
@@ -434,12 +463,8 @@ dio_value( Var_T * v )
         {
             if ( me_dio.mode == DIO_BIT )
                 uval &= 1;
-            else if ( me_dio.mode == DIO_BYTE )
+            else ( me_dio.mode == DIO_BYTE )
                 uval &= 0xFF;
-            else if ( me_dio.mode == DIO_WORD )
-                uval &= 0xFFFF;
-            else if ( me_dio.mode == DIO_DWORD )
-                uval &= 0xFFFFFFFF;
 
             print( FATAL, "Value of 0x%lx to be output is too large for "
                    "%d mode, truncating it to %lu.\n", ( unsigned long ) val,
@@ -465,24 +490,109 @@ me_dio_init( void )
     int retval;
     int type;
     int subtype;
+    size_t i;
+    int caps;
 
 
-    if ( ( retval = meQuerySubdeviceType( DEVICE_NUMBER, SUBDEVICE_NUMBER,
-                                          &type, &subtype ) )
+    /* Try to find the device */
+
+    if ( ( retval =
+           	   meQuerySubdeviceType( DEVICE_NUMBER, SUBDEVICE_NUMBER,
+                                     &type, &subtype ) ) != ME_ERRNO_SUCCESS )
+    {
+        char msg[ ME_ERROR_MSG_MAX_COUNT ];
+
+        meErrorGetMessage( retval, msg, sizeof msg );
+        print( FATAL, "Failed to locate DIO: %s\n", msg );
+        THROW( EXCEPTION );
+    }
+
+    if ( type != me_dio.type || subtype != ME_SUBTYPE_SINGLE )
+    {
+        print( FATAL, "Invalid device type in configuration file.\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* Query capabilities */
+
+    if ( ( retval =
+              meQuerySubdeviceCaps( me_dio.dev_no, me_dio.subdev_no,
+                                    &caps ) ) != ME_ERRNO_SUCCESS )
+    {
+        char msg[ ME_ERROR_MSG_MAX_COUNT ];
+
+        meErrorGetMessage( retval, msg, sizeof msg );
+        print( FATAL, "Failed to query DIO capabilities: %s\n", msg );
+        THROW( EXCEPTION );
+    }
+
+    if ( caps != CAPABILITIES )
+    {
+        print( FATAL, "Invalid setting fir capabilities in configuration "
+               "file.\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* Query the number of channels */
+
+    if ( ( retval =
+              meQueryNumberChannels( me_dio.dev_no, me_dio.subdev_no,
+                                     &ch ) ) != ME_ERRNO_SUCCESS )
+    {
+        char msg[ ME_ERROR_MSG_MAX_COUNT ];
+
+        meErrorGetMessage( retval, msg, sizeof msg );
+        print( FATAL, "Failed to query number of DIO channels: %s\n", msg );
+        THROW( EXCEPTION );
+    }
+
+    if ( ch != me_dio.max_channels )
+    {
+        print( FATAL, "Wrong maximum number of channels in configuration "
+               "file.\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* Try to get a lock on the subdevice */
+
+    if ( ( retval =
+           	   meLockSubdevice( me_dio.dev_no, me_dio.subdev_no,
+                                ME_LOCK_SET, ME_LOCK_SUBDEVICE_NO_FLAGS ) )
                                                           != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
         meErrorGetMessage( retval, msg, sizeof msg );
-        print( FATAL, "Failed to query device type: %s\n", msg );
+        print( FATAL, "Failed to lock DIO: %s\n", msg );
         THROW( EXCEPTION );
     }
 
-    if ( type != ME_TYPE_DIO || subtype == ME_IO_SINGLE_CONFIG_DIO_BIT )
+    me_dio.is_locked = SET;
+}
+
+
+/*-------------------------------------------------------------
+ *-------------------------------------------------------------*/
+
+static void
+me_dio_exit( void )
+{
+    int retval;
+
+
+    if ( me_dio.is_locked
+         && ( retval =
+           	    meLockSubdevice( me_dio.dev_no, me_dio.subdev_no,
+                                 ME_LOCK_RELEASE, ME_LOCK_SUBDEVICE_NO_FLAGS ) )
+                                                          != ME_ERRNO_SUCCESS )
     {
-        print( FATAL, "Device isn't a DIO.\n" );
-        THROW( EXCEPTION );
+        char msg[ ME_ERROR_MSG_MAX_COUNT ];
+
+        meErrorGetMessage( retval, msg, sizeof msg );
+        print( FATAL, "Failed to unlock DIO: %s\n", msg );
     }
+
+    me_dio.is_locked = UNSET;
 }
 
 
@@ -493,19 +603,23 @@ static unsigned long
 me_dio_in( int ch )
 {
     int retval;
-    static meIOSingle_t list = { ME_IO_SINGLE_CONFIG_DIO_BIT,
-                                 SUBDEVICE_NUMBER,
-                                 0,
-                                 ME_DIR_INPUT,
-                                 0, 0, 0, 0 };
+    meIOSingle_t list = { me_dio.dev_no, me_dio.subdev_no, ch,
+                          ME_DIR_INPUT, 0, 0, me_dio.single_flags, 0 };
 
 
     /* Configure the channel if necessary */
 
     if (    me_dio.dir[ ch ] != DIO_IN
-         && ( retval = meIOSingleConfig( DEVICE_NUMBER, SUBDEVICE_NUMBER,
-                                         ch, ME_SINGLE_CONFIG_DIO_INPUT,
-                                         0, 0, 0, 0, me_dio.config_flags ) )
+         && ( retval = meIOSingleConfig( me_dio.dev_no,
+                                         me_dio.subdev_no,
+                                         ch,
+                                         ME_SINGLE_CONFIG_DIO_INPUT,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         me_dio.config_flags
+                  ) )
                                                            != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
@@ -519,15 +633,12 @@ me_dio_in( int ch )
 
     /* Prepare input and send to DIO */
 
-    list.iChannel = ch;
-    list.iFlags = me_dio.single_flags;
-
-    if ( ( retval = meIOSingle( &list, 1, ME_IO_SINGLE_CONFIG_DIO_BIT ) )
-                                                           != ME_ERRNO_SUCCESS )
+    if ( ( retval = meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) )
+                                                          != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
-        meErrorGetMessage( retval, msg, sizeof msg );
+        meErrorGetMessage( list.iErrno, msg, sizeof msg );
         print( FATAL, "Error while reading from DIO: %s\n", msg );
         THROW( EXCEPTION );
     }
@@ -544,20 +655,23 @@ me_dio_out( int           ch,
             unsigned long val )
 {
     int retval;
-    static meIOSingle_t list = { ME_IO_SINGLE_CONFIG_DIO_BIT,
-                                 SUBDEVICE_NUMBER,
-                                 0,
-                                 ME_DIR_OUTPUT,
-                                 0, 0, 0, 0 };
-
+    meIOSingle_t list = { me_dio.dev_no, me_dio.subdev_no, ch,
+                          ME_DIR_OUTPUT, val, 0, me_dio.single_flags, 0 };
 
     /* Configure the channel if necessary */
 
     if (    me_dio.dir[ ch ] != DIO_OUT
-         && ( retval = meIOSingleConfig( DEVICE_NUMBER, SUBDEVICE_NUMBER,
-                                         ch, ME_SINGLE_CONFIG_DIO_OUTPUT,
-                                         0, 0, 0, 0, me_dio.config_flags ) )
-                                                           != ME_ERRNO_SUCCESS )
+         && ( retval = meIOSingleConfig( me_dio.dev_no,
+                                         me_dio.subdev_no,
+                                         ch,
+                                         ME_SINGLE_CONFIG_DIO_OUTPUT,
+                                         0,
+                                         0,
+                                         0,
+                                         0,
+                                         me_dio.config_flags
+                  ) )
+                                                          != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
@@ -570,16 +684,12 @@ me_dio_out( int           ch,
 
     /* Prepare output and send to DIO */
 
-    list.iChannel = ch;
-    list.iValue = val;
-    list.iFlags = me_dio.single_flags;
-
-    if ( ( retval = meIOSingle( &list, 1, ME_IO_SINGLE_CONFIG_DIO_BIT ) )
+    if ( ( retval = meIOSingle( &list, 1, ME_IO_SINGLE_NO_FLAGS ) )
                                                            != ME_ERRNO_SUCCESS )
     {
         char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
-        meErrorGetMessage( retval, msg, sizeof msg );
+        meErrorGetMessage( list.iErrno, msg, sizeof msg );
         print( FATAL, "Error while writing to DIO: %s\n", msg );
         THROW( EXCEPTION );
     }
@@ -696,8 +806,8 @@ me_dio_translate_channel( long channel )
 
         default :
             print( FATAL, "Invalid channel channel, DIO has no channel "
-                   "named %s, use either 'CH1', 'CH2', 'CH3' or 'CH4'.\n",
-                   Channel_Names[ channel ] );
+                   "named %s, use either 'CH1' to 'CH32' (depending on"
+                   "model of card.\n", Channel_Names[ channel ] );
             THROW( EXCEPTION );
     }
 
