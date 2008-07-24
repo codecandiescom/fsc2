@@ -247,7 +247,7 @@ my $f8_v = $f8->Entry( '-textvariable'    => \$mod_amp,
 my $f8_l2 = $f8->Label( '-text'           => '%',
                         '-width'          => 1 );
 $balloon->attach( $f8_v, '-balloonmsg'    =>
-                  "Set the lock-in amplifiers modulation amplitude\n" );
+                  "Set the lock-in amplifiers modulation amplitude" );
 $f8->pack( %fp );
 $f8_l1->pack( %wp );
 $f8_v->pack( %wp );

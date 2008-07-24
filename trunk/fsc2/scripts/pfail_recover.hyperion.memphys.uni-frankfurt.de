@@ -1,0 +1,58 @@
+#!/usr/local/bin/fsc2 -S
+
+DEVICES:
+
+fsps25;
+
+
+VARIABLES:
+
+current;
+sc;
+max_current = 20 A;
+Count = 0;
+
+SC, NC, DO, AB;
+
+PREPARATIONS:
+
+magnet_request_expert_mode( );
+
+
+EXPERIMENT:
+
+sc = magnet_coil_current( );
+
+hide_toolbox( "ON" );
+SC = output_create( "FLOAT_OUTPUT", sc, "Current through coil [A]" );
+NC = input_create( "FLOAT_INPUT", sc, "Current to be set [A]" );
+DO = button_create( "NORMAL_BUTTON", "Set current" );
+AB = button_create( "NORMAL_BUTTON", "Abort" );
+hide_toolbox( "OFF" );
+
+FOREVER {
+	toolbox_wait( 1.0e12 );
+
+	IF button_state( AB ) {
+		BREAK;
+	}
+
+	IF button_state( DO ) {
+		current = input_value( NC );
+		IF abs( current ) > max_current {
+			show_message( "Current is too large.\n" );
+			BREAK;
+		}
+
+		IF Count == 0 {
+		    show_message( "Are you absolutely sure?\n"
+		                  "Click on \"Set current\" again if you are." );
+			Count += 1;
+			NEXT;
+		}
+
+		magnet_field( current );
+		magnet_heater_state( "ON" );
+		BREAK;
+	}
+}
