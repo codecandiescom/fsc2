@@ -295,10 +295,10 @@ eip371_init( const char * name )
     if ( gpib_init_device( name, &eip371.device ) == FAILURE )
         return FAIL;
 
-    /* Tell device to output data in scientific fotmat and go into fast
-	   cycle mode. */
+    /* Tell device to use band 3 per default, output data in scientific
+       format and go into fast cycle mode. */
 
-    if ( gpib_write( eip371.device, "ESFA", 4 ) == FAILURE )
+    if ( gpib_write( eip371.device, "B3ESFA", 6 ) == FAILURE )
         return FAIL;
 
 	if ( eip371.is_band )
