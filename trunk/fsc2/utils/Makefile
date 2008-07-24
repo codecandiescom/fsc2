@@ -37,7 +37,11 @@ all:
 	$(MAKE) utils
 
 
+ifdef WITH_MEDRIVER
+utils: edl-mod.elc edl.vim me_dio_get_subdevices
+else
 utils: edl-mod.elc edl.vim
+endif
 
 
 edl-mod.el: edl-mod.el.template $(sdir)/func.c $(cdir)/Functions
@@ -47,8 +51,15 @@ edl-mod.el: edl-mod.el.template $(sdir)/func.c $(cdir)/Functions
 edl-mod.elc: edl-mod.el
 	emacs -batch -f batch-byte-compile edl-mod.el;
 
+
 edl.vim: edl.vim.template $(sdir)/func.c $(cdir)/Functions
 	@sed -e 's/BUILTIN_FUNCTION_LIST/$(shell SRC_DIR=$(sdir) ./get_built_in_functions vim)/;s/DEVICE_FUNCTION_LIST/$(shell CONF_DIR=$(cdir) ./get_device_functions vim)/' $< > $@;
+
+
+ifdef WITH_MEDRIVER
+me_dio_get_subdevices: me_dio_get_subdevices.c
+	gcc -o $@ $< -I$(medriver_incl_path) -L$(medriver_lib_path) -lmedriver
+endif
 
 
 install: edl-mod.elc
