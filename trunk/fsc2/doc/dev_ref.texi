@@ -69,7 +69,7 @@
 * lecroy_ws::       LeCroy Digitizing Oscilloscope WaveSurfer
 * mcn700_2000::     F.u.G. Elektronik GmbH Power Supply MCN 700-2000
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
-* me_dio::          Meilhaus Electronic GmbH DAQ card DIO subsystem
+* me_dio_X::        Meilhaus Electronic GmbH DAQ card DIO subsystem
 * ni6601::          National Instruments 6601 GPCT card
 * pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
 * pt2025::          Metrolab NMR Teslameter PT2025
@@ -625,7 +625,9 @@ In the GPIB configuration file use @code{"EP385"} as the device name,
 @strong{Module name}: @code{er218}
 
 @paragraphindent 0
-@strong{Additionally required module}: @code{me_dio}
+@strong{Additionally required module}: @code{me_dio_X} (where @code{X}
+stands for the number of two modules for DIOs or DOs of a Meilhaus
+card).
 
 @paragraphindent 0
 @strong{Description}: Goniometer is cntrolled via the output of a
@@ -2488,7 +2490,7 @@ range @w{0 V} to @w{2000 V} with @w{1 V} resolution, current range
 
 @c #############################################################
 
-@node me6000, me_dio, mcn700_2000, Device Reference
+@node me6000, me_dio_X, mcn700_2000, Device Reference
 @iftex
 @subheading Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 @end iftex
@@ -2523,7 +2525,7 @@ library are part of the @code{fsc2} package)
 
 @c #############################################################
 
-@node me_dio, ni6601, me6000, Device Reference
+@node me_dio_X, ni6601, me6000, Device Reference
 @iftex
 @subheading Meilhaus Electronic GmbH DAQ card DIO subsystem
 @end iftex
@@ -2532,26 +2534,48 @@ library are part of the @code{fsc2} package)
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{me_dio}
+@strong{Module name}: @code{me_dio_X}
 
 @paragraphindent 0
-@strong{Description}: Module for controlling the DIO subsystem of
-@uref{http://www.meilhaus.de/,Meilhaus} DAQ cards ME-94/95/96 (c)PCI,
-ME-94/95/96 (c)PCI, ME-94/95/96 (c)PCI, ME-94/95/96 (c)PCI,
-ME-94/95/96 (c)PCI, ME-94/95/96 (c)PCI and ME-94/95/96 (c)PCI. This
-module requires that the kernel driver and libraray, available from
+Most cards have more than a single DI/DO/DIO subsystem and for each
+of them a module is needed, where the @code{X} in the module name
+stands for a number for the subsystem. As many modules are generated
+automatically as there are configuration files of the name
+@file{config/me_dio_X.config} (replace @code{X} by a number).
+
+@paragraphindent 0
+In the configuration file the board number, the subdevice number,
+the type of the device, the maximum number of channels and the
+``capabilities'' have to be set. To find about those values use
+the program @file{utils/me_di_get_subdevices} with a board number
+as the command line argument (starting from 0), which outputs a
+descriptive string for the board and a list of all available
+DIs, DOs and DIOs.
+
+@paragraphindent 0
+@strong{Description}: Module for controlling a DI/DO/DIO subsystem
+of @uref{http://www.meilhaus.de/,Meilhaus} DAQ cards ME-94/95/96.
+ME-630, 1000, ME-1400, ME-1600, ME-4610/4650/4660/4670/4680 and
+ME-6000/6100/6200/6300 (controlled via cPCI/PCI). This module
+requires that the kernel driver and library, available from
 the @uref{http://www.meilhaus.de/index.php?id=255,Meilhaus web site}
-has been installed. The card and subsystem number has to be set in the
-configuration file for the device.
+has been installed.
 
 @paragraphindent 0
 @strong{Please note}: Due to the large number of supported cards
 the module could not be tested with most of them. It is instead
 assumed that the information from the Meilhaus manuals is
 correct, in which case the module hopefully works correctly.
+Some functionalities like selecting the mode may not be available,
+depending on the board type.
 
 @paragraphindent 0
-@strong{Status}: Untested
+@strong{Controlled via}: (c)PCI card (required Linux device driver and
+library can be downloaded from
+@uref{http://www.meilhaus.de/index.php?id=255,Meilhaus web site}).
+
+@paragraphindent 0
+@strong{Status}: Tested with ME-4680IS.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2565,7 +2589,7 @@ correct, in which case the module hopefully works correctly.
 
 @c #############################################################
 
-@node ni6601, pci_mio_16e_1, me_dio, Device Reference
+@node ni6601, pci_mio_16e_1, me_dio_X, Device Reference
 @iftex
 @subheading National Instruments 6601 GPCT card
 @end iftex

@@ -146,7 +146,8 @@ comp_modules    += rb_pulser_j rb_pulser_w
 endif
 
 ifdef WITH_MEDRIVER
-simp_modules    += me_dio er218
+me_dio          :=  $(patsubst $(cdir)/%.conf,%,$(wildcard $(cdir)/me_dio_*.conf))
+simp_modules    += $(me_dio) er218
 endif
 
 src_headers     := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
@@ -289,6 +290,11 @@ $(addsuffix .c,$(s_band_list)): %.c: s_band_magnet.c.tmpl
 	    -e "s/S_BAND_MAGNET_TMPL/S_BAND_MAGNET_$$o/g" $^ > $@
 
 
+ifdef WITH_MEDRIVER
+$(addsuffix .c,$(me_dio)): me_dio.c.tmpl
+	sed -e 's/me_dio_#/$(patsubst %.c,%,$@)/g' me_dio.c.tmpl > $@
+endif
+
 # How to install the modules
 
 install:
@@ -314,7 +320,7 @@ uninstall:
 # How to clean up the mess we created
 
 cleanup:
-	$(RM) $(RMFLAGS) *.o *_lexer.c cscope.out *.make svn-* *~
+	$(RM) $(RMFLAGS) *.o *_lexer.c me_dio_*.c cscope.out *.make svn-* *~
 
 clean:
 	$(MAKE) cleanup

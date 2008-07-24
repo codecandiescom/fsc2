@@ -29,9 +29,9 @@
 #define ANGLE_TO_STEPS( x )    irnd( 8 * ( x ) )
 #define STEPS_TO_ANGLE( x )    ( 0.125 * ( x ) ) 
 
-#define USEC_PER_STEP  25000L    /* time (in us) for a step of the motor */
+#define USEC_PER_STEP  25000L   /* time (in us) for a step of the motor */
 
-#define STROBE_WAIT    1000L     /* time to wait in strobe or latch operation */
+#define STROBE_WAIT    1000L    /* time to wait in strobe or latch operation */
 
 
 #define INIT_CMD       0x19
@@ -55,7 +55,6 @@
 int  er218_init_hook(       void );
 int  er218_test_hook(       void );
 int  er218_exp_hook(        void );
-int  er218_end_of_exp_hook( void );
 void er218_exit_hook(       void );
 
 
@@ -84,10 +83,8 @@ struct ER218 {
 	bool is_angle;
     unsigned char dio1_data;
     unsigned char dio2_data;
-    int dio1_channel;
-    int dio2_channel;
-    char *dio_out_func;
-    char *dio_mode_func;
+    char *dio_out_func[ 2 ];
+    char *dio_mode_func[ 2];
     bool backslash_correction;
     int last_dir;
 };
@@ -103,91 +100,99 @@ static struct ER218 er218,
 int
 er218_init_hook( void )
 {
-    int dev_num;
+    const char *dio_names[ ] = { DIO_MODULE_1, DIO_MODULE_2 };
+    int dio_num[ 2 ];
     Var_T *func_ptr;
     Var_T *v;
     char *func;
     int acc;
+    int i,
+        j;
 
 
 	er218.angle = er218_read_config( );
 
-    er218.dio1_channel = CHANNEL_CH3;
-    er218.dio2_channel = CHANNEL_CH4;
-
     er218.backslash_correction = UNSET;
     er218.last_dir = -1;
 
-    if ( ( dev_num = exists_device( DIO_MODULE ) ) == 0 )
+    for ( i = 0; i < 2; i++ )
     {
-        print( FATAL, "Can't find the module '%s' - it must be listed before "
-               "this module.\n", DIO_MODULE );
-        THROW( EXCEPTION );
-    }
+        if ( ( dio_num[ i ] = exists_device( dio_names[ i ] ) ) == 0 )
+        {
+            print( FATAL, "Can't find the module '%s' - must be listed "
+                   "before this module.\n", dio_names[ i ] );
+            THROW( EXCEPTION );
+        }
 
-    /* Get a lock on the DIO used to control the goniometer */
+        /* Get a lock on the DIO */
 
-    if ( dev_num == 1 )
-        func = T_strdup( "dio_reserve_dio" );
-    else
-        func = get_string( "dio_reserve_dio#%d", dev_num );
+        func = get_string( "dio_reserve_dio#%d", dio_num[ i ] );
 
-    if (    ! func_exists( func )
-         || ( func_ptr = func_get( func, &acc ) ) == NULL )
-    {
+        if (    ! func_exists( func )
+             || ( func_ptr = func_get( func, &acc ) ) == NULL )
+        {
+            T_free( func );
+            print( FATAL, "Function for reserving the DIO is missing from "
+                   "module '%s'.\n", dio_names[ i ] );
+            THROW( EXCEPTION );
+        }
+
         T_free( func );
-        print( FATAL, "Function for reserving the DIO is missing from "
-               "module '%s'.\n", DIO_MODULE );
-        THROW( EXCEPTION );
+        vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
+
+        v = func_call( func_ptr );
+
+        if ( v->val.lval != 1 )
+        {
+            print( FATAL, "Can't reserve the DIO using module '%s'.\n",
+                   dio_names[ i ] );
+            THROW( EXCEPTION );
+        }
+
+        vars_pop( v );
+
+        /* Get the name for the function for setting a value at the DIO and
+           check if it exists */
+
+        er218.dio_out_func[ i ] = get_string( "dio_value#%d", dio_num[ i ] );
+
+        if ( ! func_exists( er218.dio_out_func[ i ] ) )
+        {
+            er218.dio_out_func[ i ] = CHAR_P T_free( er218.dio_out_func[ i ] );
+
+            if ( i == 1 )
+            {
+                er218.dio_out_func[ 0 ] =
+                                     CHAR_P T_free( er218.dio_out_func[ 0 ] );
+                er218.dio_mode_func[ 0 ] =
+                                     CHAR_P T_free( er218.dio_mode_func[ 0 ] );
+            }
+            print( FATAL, "Function for setting a DIO value is missing from "
+                   "module '%s'.\n", dio_names[ i ] ); 
+            THROW( EXCEPTION );
+        }
+
+        /* Get the name for the function for setting the mode of the DIO and
+           check if it exists */
+
+        er218.dio_mode_func[ i ] = get_string( "dio_mode#%d", dio_num[ i ] );
+
+        if ( ! func_exists( er218.dio_mode_func[ i ] ) )
+        {
+            for ( j = 0; j <= i; j++ )
+            {
+                er218.dio_out_func[ j ] =
+                                     CHAR_P T_free( er218.dio_out_func[ j ] );
+                er218.dio_mode_func[ j ] =
+                                     CHAR_P T_free( er218.dio_mode_func[ j ] );
+            }
+            print( FATAL, "Function for setting the DIOs mode is missing from "
+                   "module '%s'.\n", dio_names[ i ] ); 
+            THROW( EXCEPTION );
+        }
     }
 
-    T_free( func );
-    vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
-
-    v = func_call( func_ptr );
-
-    if ( v->val.lval != 1 )
-    {
-        print( FATAL, "Can't reserve the DIO using module '%s'.\n",
-               DIO_MODULE );
-        THROW( EXCEPTION );
-    }
-
-    vars_pop( v );
-
-    /* Get the name for the function for setting a value at the DIO and
-       check if it exists */
-
-    if ( dev_num == 1 )
-        er218.dio_out_func = T_strdup( "dio_value" );
-    else
-        er218.dio_out_func = get_string( "dio_value#%d", dev_num );
-
-    if ( ! func_exists( er218.dio_out_func ) )
-    {
-        er218.dio_out_func = CHAR_P T_free( er218.dio_out_func );
-        print( FATAL, "Function for setting a DIO value is missing from module "
-               "'%s'.\n", DIO_MODULE ); 
-        THROW( EXCEPTION );
-    }
-
-    /* Get the name for the function for setting the mode of the DIO and
-       check if it exists */
-
-    if ( dev_num == 1 )
-        er218.dio_mode_func = T_strdup( "dio_mode" );
-    else
-        er218.dio_mode_func = get_string( "dio_mode#%d", dev_num );
-
-    if ( ! func_exists( er218.dio_mode_func ) )
-    {
-        er218.dio_mode_func = CHAR_P T_free( er218.dio_mode_func );
-        print( FATAL, "Function for setting the DIOs mode is missing from "
-               "module '%s'.\n", DIO_MODULE ); 
-        THROW( EXCEPTION );
-    }
-
-	return 1;
+    return 1;
 }
 
 
@@ -199,6 +204,7 @@ er218_test_hook( void )
 {
     Var_T *func_ptr;
     int acc;
+    int i;
 
 
     er218_saved = er218;
@@ -207,16 +213,19 @@ er218_test_hook( void )
 
     /* Call function that brings the DIO into 8 bit mode */
 
-    if ( ( func_ptr = func_get( er218.dio_mode_func, &acc ) ) == NULL )
+    for ( i = 0; i < 2; i++ )
     {
-        print( FATAL, "Internal error detected at %s:%d.\n",
-               __FILE__, __LINE__ );
-        THROW( EXCEPTION );
-    }
+        if ( ( func_ptr = func_get( er218.dio_mode_func[ i ], &acc ) ) == NULL )
+        {
+            print( FATAL, "Internal error detected at %s:%d.\n",
+                   __FILE__, __LINE__ );
+            THROW( EXCEPTION );
+        }
 
-    vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
-    vars_push( INT_VAR, ( long ) 8 );
-    vars_pop( func_call( func_ptr ) );
+        vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
+        vars_push( INT_VAR, 8L );
+        vars_pop( func_call( func_ptr ) );
+    }
 
 	return 1;
 }
@@ -230,6 +239,7 @@ er218_exp_hook( void )
 {
     Var_T *func_ptr;
     int acc;
+    int i;
 
 
     er218 = er218_saved;
@@ -237,18 +247,21 @@ er218_exp_hook( void )
     er218.angle = er218_read_config( );
     er218.is_angle = SET;
 
-    /* Bring the DIO into 8 bit mode */
+    /* Bring the DIOs into 8 bit mode */
 
-    if ( ( func_ptr = func_get( er218.dio_mode_func, &acc ) ) == NULL )
+    for ( i = 0; i < 2; i++ )
     {
-        print( FATAL, "Internal error detected at %s:%d.\n",
-               __FILE__, __LINE__ );
-        THROW( EXCEPTION );
-    }
+        if ( ( func_ptr = func_get( er218.dio_mode_func[ i ], &acc ) ) == NULL )
+        {
+            print( FATAL, "Internal error detected at %s:%d.\n",
+                   __FILE__, __LINE__ );
+            THROW( EXCEPTION );
+        }
 
-    vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
-    vars_push( INT_VAR, ( long ) 8 );
-    vars_pop( func_call( func_ptr ) );
+        vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
+        vars_push( INT_VAR, 8L );
+        vars_pop( func_call( func_ptr ) );
+    }
 
     if ( er218.backslash_correction )
     {
@@ -263,27 +276,20 @@ er218_exp_hook( void )
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
-int
-er218_end_of_exp_hook( void )
-{
-    if ( er218.is_angle )
-        er218_write_config( er218.angle );
-
-	return 1;
-}
-
-
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
-
 void
 er218_exit_hook( void )
 {
-    if ( er218.dio_out_func )
-        er218.dio_out_func = CHAR_P T_free( er218.dio_out_func );
+    int i;
 
-    if ( er218.dio_mode_func )
-        er218.dio_mode_func = CHAR_P T_free( er218.dio_mode_func );
+    for ( i = 0; i < 2; i++ )
+    {
+        if ( er218.dio_out_func[ i ] )
+            er218.dio_out_func[ i ] = CHAR_P T_free( er218.dio_out_func[ i ] );
+
+        if ( er218.dio_mode_func[ i ] )
+            er218.dio_mode_func[ i ] =
+                                     CHAR_P T_free( er218.dio_mode_func[ i ] );
+    }
 }
 
 
@@ -293,6 +299,7 @@ er218_exit_hook( void )
 Var_T *
 goniometer_name( Var_T * v  UNUSED_ARG )
 {
+    fprintf( stderr, "X = %.3f\n", er218.angle );
     return vars_push( STR_VAR, DEVICE_NAME );
 }
 
@@ -387,7 +394,10 @@ goniometer_angle( Var_T * v )
         }
     }
 
-    return vars_push( FLOAT_VAR, er218.angle = STEPS_TO_ANGLE( new_angle ) );
+	er218.angle = STEPS_TO_ANGLE( new_angle );
+	if ( FSC2_MODE == EXPERIMENT )
+    	er218_write_config( er218.angle );
+    return vars_push( FLOAT_VAR, er218.angle );
 }
 
 
@@ -576,14 +586,14 @@ static void
 er218_init_cmd( void )
 {
     er218.dio1_data = INIT_CMD;
-    er218_set_dio( er218.dio1_channel, er218.dio1_data );
+    er218_set_dio( 0, er218.dio1_data );
     er218_toggle( ADDRESS_LATCH );
 
     er218.dio1_data = INIT_DATA & 0xFF;
-    er218_set_dio( er218.dio1_channel, er218.dio1_data );
+    er218_set_dio( 0, er218.dio1_data );
 
     er218.dio2_data = INIT_DATA >> 8;
-    er218_set_dio( er218.dio2_channel, er218.dio2_data );
+    er218_set_dio( 1, er218.dio2_data );
 
     er218_toggle( DATA_LATCH );
 
@@ -602,37 +612,37 @@ er218_go_cmd( int          dir,
               unsigned int data )
 {
     er218.dio1_data = DATA_CMD;
-    er218_set_dio( er218.dio1_channel, er218.dio1_data );
+    er218_set_dio( 0, er218.dio1_data );
     er218_toggle( ADDRESS_LATCH );
 
     er218.dio1_data = ~ data & 0xFF;
-    er218_set_dio( er218.dio1_channel, er218.dio1_data );
+    er218_set_dio( 0, er218.dio1_data );
 
     er218.dio2_data = ( ~ data >> 8 ) & 0x0F;
-    er218_set_dio( er218.dio2_channel, er218.dio2_data );
+    er218_set_dio( 1, er218.dio2_data );
 
     er218_toggle( DATA_LATCH );
 
     er218.dio1_data = DATA_CMD;
-    er218_set_dio( er218.dio1_channel, er218.dio1_data );
+    er218_set_dio( 0, er218.dio1_data );
     er218_toggle( ADDRESS_LATCH );
 
     er218.dio1_data = STORE_DATA & 0xFF;
-    er218_set_dio( er218.dio1_channel, er218.dio1_data );
+    er218_set_dio( 0, er218.dio1_data );
 
     er218.dio2_data = ( STORE_DATA >> 8 ) & 0x0F;
-    er218_set_dio( er218.dio2_channel, er218.dio2_data );
+    er218_set_dio( 1, er218.dio2_data );
 
     er218_toggle( DATA_LATCH );
 
     er218.dio1_data = dir == GO_UP ? UP_CMD : DOWN_CMD;
-    er218_set_dio( er218.dio1_channel, er218.dio1_data );
+    er218_set_dio( 0, er218.dio1_data );
     er218_toggle( ADDRESS_LATCH );
 
     er218.dio1_data = STORE_DATA & 0xFF;
-    er218_set_dio( er218.dio1_channel, er218.dio1_data );
+    er218_set_dio( 0, er218.dio1_data );
 
-    er218_set_dio( er218.dio2_channel, er218.dio2_data );
+    er218_set_dio( 1, er218.dio2_data );
 
     er218_toggle( DATA_LATCH );
 
@@ -650,9 +660,9 @@ er218_go_cmd( int          dir,
 static void
 er218_toggle( unsigned char bit )
 {
-    er218_set_dio( er218.dio2_channel, er218.dio2_data | bit );
+    er218_set_dio( 1, er218.dio2_data | bit );
     er218_strobe_wait( STROBE_WAIT );
-    er218_set_dio( er218.dio2_channel, er218.dio2_data );
+    er218_set_dio( 1, er218.dio2_data );
     er218_strobe_wait( STROBE_WAIT );
 }
 
@@ -673,7 +683,7 @@ er218_strobe_wait( unsigned int duration )
 
 /*-------------------------------------------------------*
  * Function to wait until the goniometer has reached its
- * requested positions - exects the number of steps of
+ * requested positions - expects the number of steps of
  * the motor to be done
  *-------------------------------------------------------*/
 
@@ -690,14 +700,14 @@ er218_position_wait( unsigned int steps )
  *--------------------------------------*/
 
 static void
-er218_set_dio( int           ch,
+er218_set_dio( int           dio,
                unsigned char data )
 {
     Var_T *func_ptr;
     int acc;
 
 
-    if ( ( func_ptr = func_get( er218.dio_out_func, &acc ) ) == NULL )
+    if ( ( func_ptr = func_get( er218.dio_out_func[ dio ], &acc ) ) == NULL )
     {
         print( FATAL, "Internal error detected at %s:%d.\n",
                __FILE__, __LINE__ );
@@ -705,8 +715,8 @@ er218_set_dio( int           ch,
     }
 
     vars_push( STR_VAR, DEVICE_NAME );         /* push the pass-phrase */
-    vars_push( INT_VAR, ( long ) ch );
-    vars_push( INT_VAR, ( long ) data );
+    vars_push( INT_VAR, 0L );                  /* Push channel number */
+    vars_push( INT_VAR, ( long ) data );       /* Push dat to be output */
     vars_pop( func_call( func_ptr ) );
 }
 

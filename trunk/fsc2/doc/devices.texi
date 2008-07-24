@@ -5433,13 +5433,12 @@ the function @ref{dio_value()}.
 If no mode is set for a DIO the mode for 24-bit input and output is used
 per default.
 
-For the Meilhaus card DIO subsystem the only argment is optional.
-If none is given te current mode is returned as a number, either
-@code{1} for the mode where 32 1-bit wide channels are used, @code{8}
-for the mode with 4 8-bit wide channels, @code{16} for the mode
-with 2 16-bit wide channels or @code{32} for the single channel
-32-bit wide mode. If instead one of these numbers is passed to the
-function the corresponding mode is set.
+For a Meilhaus card DI,DO or DIO subsystem the only argment is
+optional. If none is given the current mode is returned as a number,
+either @code{1} for the mode where 8 1-bit wide channels are used
+and @code{8} for the mode with 1 8-bit wide channel. If instead one
+of these numbers is passed to the function the corresponding mode is
+set (if available).
 
 
 @table @strong
@@ -5526,23 +5525,17 @@ For the Meilhaus card DIO subsystem we have:
 
 @table @samp
 @item 1-bit mode
-In this mode the DIO is split up into 32 channels and for each channel
-only a value of @code{0} and @code{1} can be set.
+In this mode the DI, DO or DIO is split up into 8 channels and
+for each channel only a value of @code{0} and @code{1} can be set.
 
 @item 8-bit mode
-In this mode the DIO is split up in 4 channels, each 8 bit wide.
+In this mode the DI, DO or DIOO has a single channel, 8 bit wide.
 Values between @code{0} and @code{255} can be used.
 
-@item 16-bit mode
-In this mode the DIO is split up in 2 channels, each 16 bit wide.
-Values between @code{0} and @code{65535} can be used.
-
-@item 32-bit mode
-In this mode the DIO there's only a single, 32 bit wide. If the
-top-most bit is not to be set values between @code{0} and
-@code{2,147,483,647} can be used. To output a value where also the
-top-most bit is set subtract it from @code{4,294,967,296} and
-use the resulting negative number.
+Please note that a DI subsystem can only be used for input and a
+DO subsystem only for output. Also note that for a number of
+these cards only all 8 bits of a DIO subsystem can be switched
+between input and output together and not individually.
 
 @end table
 
