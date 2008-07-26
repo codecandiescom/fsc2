@@ -1,5 +1,5 @@
 /*
- *  $Id
+ *  $Id$
  * 
  *  Copyright (C) 1999-2008 Jens Thoms Toerring
  * 
@@ -57,7 +57,6 @@ static void eip371_comm_fail( void );
 static struct {
     int device;
 	int band;
-	bool is_band;
 	int res;
 	bool is_res;
 } eip371;
@@ -85,7 +84,7 @@ eip371_init_hook( void )
     Need_GPIB = SET;
 
     eip371.device = -1;
-	eip371.is_band = UNSET;
+	eip371.band = 3;
 	eip371.is_res = UNSET;
 
     return 1;
@@ -124,12 +123,6 @@ eip371_end_of_exp_hook( void )
 }
 
 
-/**************************************/
-/*                                    */
-/*          EDL functions             */
-/*                                    */
-/**************************************/
-
 /*----------------------------------------------------*
  *----------------------------------------------------*/
 
@@ -150,10 +143,7 @@ freq_counter_band( Var_T * v )
 
 
 	if ( v == NULL )
-	{
-		print( FATAL, "Frequency band can only be set, not queried.\n" );
-		THROW( EXCEPTION );
-	}
+        return vars_push( INT_VAR, ( long ) eip317.band );
 
 	band = get_long( v, "frequency band" );
 
@@ -166,7 +156,6 @@ freq_counter_band( Var_T * v )
 	too_many_arguments( v );
 
 	eip371.band = band;
-	eip371.is_band = SET;
 
 	if ( FSC2_MODE == EXPERIMENT )
 		eip371_set_band( band );
@@ -187,10 +176,16 @@ freq_counter_resolution( Var_T * v )
 
 
 	if ( v == NULL )
-	{
-		print( FATAL, "Frequency resolution can only be set, not queried.\n" );
-		THROW( EXCEPTION );
-	}
+    {
+        if ( ! eip317.is_res )
+        {
+            print( FATAL, "Frequency resolution can only be queried after "
+                   "having been set.\n" );
+            THROW( EXCEPTION );
+        }
+        else
+            return vars_push( FLOAT_VAR, res[ eip317.res ] );
+    }
 
 	resolution = get_double( v, "frequency resolution" );
 
@@ -279,13 +274,6 @@ freq_counter_command( Var_T * v )
 }
 
 
-
-/**************************************************/
-/*                                                */
-/*       Internal (non-exported) functions        */
-/*                                                */
-/**************************************************/
-
 /*--------------------------------------------------------*
  *--------------------------------------------------------*/
 
@@ -295,14 +283,17 @@ eip371_init( const char * name )
     if ( gpib_init_device( name, &eip371.device ) == FAILURE )
         return FAIL;
 
-    /* Tell device to use band 3 per default, output data in scientific
-       format and go into fast cycle mode. */
+    /* Tell device to output data in scientific format and to go into fast
+       cycle mode. */
 
-    if ( gpib_write( eip371.device, "B3ESFA", 6 ) == FAILURE )
+    if ( gpib_write( eip371.device, "ESFA", 4 ) == FAILURE )
         return FAIL;
 
-	if ( eip371.is_band )
-		eip371_set_band( eip371.band );
+    /* Set a band (unless specified in the PREPARATIONS section use band 3
+       per default) since without a band being set the device doesn't do
+       measurements */
+
+    eip371_set_band( eip371.band );
 
 	if ( eip371.is_res )
 		eip371_set_resolution( eip371.res );

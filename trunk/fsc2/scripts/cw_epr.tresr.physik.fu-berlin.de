@@ -137,7 +137,7 @@ $f3_l2->pack( %wp );
 
 
 my $f6 = $mw->Frame( );
-my $f6_l1 = $f6->Label( '-text'           => 'Number of runs:',
+my $f6_l1 = $f6->Label( '-text'           => 'Number of scans:',
                         '-width'          => '20',
                         '-anchor'         => 'w' );
 my $f6_v = $f6->Entry( '-textvariable'    => \$num_runs,
