@@ -258,11 +258,12 @@ f_bcreate( Var_T * var )
  *-----------------------------------------------------------------*/
 
 static Var_T *
-f_bcreate_child( Var_T *        v,
-                 Iobject_Type_T type, 
-                 long           coll )
+f_bcreate_child( Var_T          * v,
+                 Iobject_Type_T   type, 
+                 long             coll )
 {
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     long new_ID;
     long *result;
     size_t len;
@@ -270,7 +271,7 @@ f_bcreate_child( Var_T *        v,
     char *help_text = NULL;
 
 
-    /* We already got the type and the 'collge' buttons number, the next
+    /* We already got the type and the 'colleague' buttons number, the next
        argument is the label string */
 
     if ( v != NULL )

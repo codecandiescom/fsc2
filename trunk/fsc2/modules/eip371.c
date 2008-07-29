@@ -143,7 +143,7 @@ freq_counter_band( Var_T * v )
 
 
 	if ( v == NULL )
-        return vars_push( INT_VAR, ( long ) eip317.band );
+        return vars_push( INT_VAR, ( long ) eip371.band );
 
 	band = get_long( v, "frequency band" );
 
@@ -177,14 +177,14 @@ freq_counter_resolution( Var_T * v )
 
 	if ( v == NULL )
     {
-        if ( ! eip317.is_res )
+        if ( ! eip371.is_res )
         {
             print( FATAL, "Frequency resolution can only be queried after "
                    "having been set.\n" );
             THROW( EXCEPTION );
         }
         else
-            return vars_push( FLOAT_VAR, res[ eip317.res ] );
+            return vars_push( FLOAT_VAR, res[ eip371.res ] );
     }
 
 	resolution = get_double( v, "frequency resolution" );

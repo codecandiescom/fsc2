@@ -353,7 +353,7 @@ exp_bcreate( char *    buffer,
         int acc;
         long result[ 2 ];
         char *pos;
-        long type;
+        Iobject_Type_T type;
 
 
         TRY
@@ -369,7 +369,7 @@ exp_bcreate( char *    buffer,
             pos += sizeof EDL.Lc;
 
             memcpy( &type, pos, sizeof type );
-            vars_push( INT_VAR, type - FIRST_BUTTON_TYPE );
+            vars_push( INT_VAR, ( long ) type - FIRST_BUTTON_TYPE );
             pos += sizeof type;
 
             memcpy( &val, pos, sizeof val );         /* get colleague ID */
@@ -661,7 +661,7 @@ exp_screate( char *    buffer,
         int acc;
         long result[ 2 ];
         char *pos;
-        long type;
+        Iobject_Type_T type;
         double val;
         int i;
 
@@ -679,7 +679,7 @@ exp_screate( char *    buffer,
             pos += sizeof EDL.Lc;
 
             memcpy( &type, pos, sizeof type );
-            vars_push( INT_VAR, type - FIRST_SLIDER_TYPE );
+            vars_push( INT_VAR, ( long ) type - FIRST_SLIDER_TYPE );
             pos += sizeof type;
 
             for ( i = 0; i < 3; i++ )
@@ -980,7 +980,7 @@ exp_icreate( char *    buffer,
         int acc;
         long result[ 2 ];
         char *pos;
-        long type;
+        Iobject_Type_T type;
 
 
         TRY
@@ -996,7 +996,7 @@ exp_icreate( char *    buffer,
             pos += sizeof EDL.Lc;
 
             memcpy( &type, pos, sizeof type );       /* type of input object */
-            vars_push( INT_VAR, type - FIRST_INOUTPUT_TYPE );
+            vars_push( INT_VAR, ( long ) type - FIRST_INOUTPUT_TYPE );
             pos += sizeof type;
 
             if ( type == INT_INPUT || type == INT_OUTPUT )
