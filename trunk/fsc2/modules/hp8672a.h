@@ -60,6 +60,9 @@
 #define HP8672A_10dbm_OVERRANGE       0x01
 
 
+#define HP8672A_SET_FREQ_DELAY        10000    /* default delay (10 ms)
+                                                  after setting a frequency */
+
 typedef struct Att_Table_Entry Att_Table_Entry_T;
 typedef struct HP8672A HP8672A_T;
 
@@ -96,6 +99,9 @@ struct HP8672A {
     double att_at_ref_freq;
     double real_attenuation;        /* might differ from attenuation due to
                                        use of table */
+
+    unsigned long set_freq_delay;   /* time to wait after setting a freq. */
+
     int mod_type;
     bool mod_type_is_set;
     int mod_ampl[ NUM_MOD_TYPES ];
@@ -119,6 +125,7 @@ void hp8672a_exit_hook(      void );
 Var_T * synthesizer_name(                Var_T * /* v */ );
 Var_T * synthesizer_state(               Var_T * /* v */ );
 Var_T * synthesizer_frequency(           Var_T * /* v */ );
+Var_T * synthesizer_set_freq_delay(      Var_T * /* v */ );
 Var_T * synthesizer_step_frequency(      Var_T * /* v */ );
 Var_T * synthesizer_attenuation(         Var_T * /* v */ );
 Var_T * synthesizer_minimum_attenuation( Var_T * /* v */ );

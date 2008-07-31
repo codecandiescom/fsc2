@@ -208,9 +208,11 @@ hp8672a_set_frequency( double freq )
     sprintf( cmd + 1, "%ldZ8\n", ifreq );
     hp8672a_command( cmd );
 
-    /* Frequency needs about 10 ms to settle */
+    /* Frequency needs about 10 ms to settle (value can be overridden by user
+       via calling synthesizer_set_freq_delay()) */
 
-    fsc2_usleep( 10000, UNSET );
+    if ( hp8672a.set_freq_delay > 0 )
+        fsc2_usleep( hp8672a.set_freq_delay, UNSET );
 
     return ifreq * 1.0e3;
 }

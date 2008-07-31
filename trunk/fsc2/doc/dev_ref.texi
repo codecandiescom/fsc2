@@ -1157,6 +1157,7 @@ In the GPIB configuration file use @code{"HP8672A"} as the device name,
 @item @ref{synthesizer_name()}
 @item @ref{synthesizer_state()}
 @item @ref{synthesizer_frequency()}
+@item @ref{synthesizer_set_freq_delay()}
 @item @ref{synthesizer_step_frequency()}
 @item @ref{synthesizer_attenuation()}
 @item @ref{synthesizer_minimum_attenuation()}

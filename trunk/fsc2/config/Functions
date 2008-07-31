@@ -260,6 +260,7 @@ digitizer_get_yincrement, -1, ALL;      //Agilent 54830B only
 synthesizer_name, 0, ALL;             // returns the device name
 synthesizer_state, -1, ALL;           // set/get state (ON/OFF)
 synthesizer_frequency, -1, ALL;       // set/get frequency
+synthesizer_set_freq_delay, -1, ALL;  // set delay after freq. change
 synthesizer_attenuation, -1, ALL;     // set/get attenuation
 synthesizer_minimum_attenuation, -1, ALL;     // set/get minimum attenuation
 synthesizer_step_frequency, -1, ALL;  // set/get sweep step frequency

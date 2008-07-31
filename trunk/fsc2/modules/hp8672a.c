@@ -72,6 +72,8 @@ hp8672a_init_hook( void )
 
     hp8672a.att_ref_freq = DEF_ATT_REF_FREQ;
 
+    hp8672a.set_freq_delay = HP8672A_SET_FREQ_DELAY;
+
     hp8672a.mod_type = UNDEFINED;
     hp8672a.mod_type_is_set = UNSET;
     for ( i = 0; i < NUM_MOD_TYPES; i++ )
@@ -322,6 +324,40 @@ synthesizer_frequency( Var_T * v )
     }
 
     return vars_push( FLOAT_VAR, freq );
+}
+
+
+/*------------------------------------------------------------------*
+ * Function sets or queries the time that the program waits after
+ * setting a new RF frequency. Normally the program should wait for
+ * about 10 ms (which is the default) but some users may want to
+ * change that.
+ *------------------------------------------------------------------*/
+
+Var_T *
+synthesizer_set_freq_delay( Var_T * v )
+{
+    double delay;
+
+
+    if ( v == NULL )
+        return vars_push( FLOAT_VAR, hp8672a.set_freq_delay * 1.0e-6 );
+
+
+    delay = get_double( v, "frequency setting delay" );
+
+    too_many_arguments( v );
+
+    if ( delay < 0.0 )
+    {
+        print( FATAL, "Invalid negative delay for setting a new RF "
+               "frequency.\n" );
+        THROW( EXCEPTION );
+    }
+
+    hp8672a.set_freq_delay = lrnd( 1.0e6 * delay );
+
+    return vars_push( FLOAT_VAR, hp8672a.set_freq_delay * 1.0e-6 );
 }
 
 

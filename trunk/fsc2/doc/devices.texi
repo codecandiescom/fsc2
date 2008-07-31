@@ -3535,6 +3535,7 @@ in the @code{DEVICES} section.
 @item @ref{synthesizer_name()}
 @item @ref{synthesizer_state()}
 @item @ref{synthesizer_frequency()}
+@item @ref{synthesizer_set_freq_delay()}
 @item @ref{synthesizer_attenuation()}
 @item @ref{synthesizer_minimum_attenuation()}
 @item @ref{synthesizer_step_frequency()}
@@ -3610,6 +3611,19 @@ query mode, i.e.@: without an argument (unless the frequency has already
 been set by calling the function with an argument). For the
 @strong{HP8672A} the function can be called in query mode only when the
 frequency has been set previously.
+
+
+@anchor{synthesizer_set_freq_delay()}
+@findex synthesizer_set_freq_delay()
+@item synthesizer_set_freq_delay()
+This function is currently only implemented for the @strong{HP8672A}.
+It allows to set or query the time the program waits after setting a
+new frequency (the default is @w{10 ms}). If called without an
+argument it returns the delay (in seconds), if called with a
+non-negative number the delay is changed to that value (taken to be
+the number of seconds to wait).
+
+The function can be called from all sections of an @code{EDL} script.
 
 
 @anchor{synthesizer_attenuation()}

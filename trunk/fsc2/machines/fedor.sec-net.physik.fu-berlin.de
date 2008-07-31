@@ -1,0 +1,34 @@
+# -*-Makefile-*-
+
+prefix		   := /usr/local
+# OWNER              := fsc2
+# GROUP              := fsc2
+
+# define default include directory for edl files
+DEF_INCL_DIR       := /home/lab/edl/include
+
+# use sourceforge linux gpib library
+GPIB_LIBRARY       := SLG
+GPIB_CONF_FILE     := /etc/gpib.conf
+GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
+GPIB_LOG_LEVEL     := HIGH
+GPIB_HEADER_DIR    := /usr/local/include/gpib
+GPIB_CARD_NAME     := "gpib0"
+
+NUM_SERIAL_PORTS   := 0
+SERIAL_LOCK_DIR    := /var/lock
+EDITOR		   := vi
+BROWSER            := firefox
+
+WITH_NI6601        := yes
+ni6601_libs        := libni6601.so
+
+WITH_ME6000        := yes
+me6000_libs        := libme6x00.so
+
+WITH_ME4000	   := yes
+me4000_libs        := libmedriver.so
+
+# we're in sec-net, mails won't be send anyway...
+# NO_MAIL            := yes
+
