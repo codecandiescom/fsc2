@@ -366,6 +366,7 @@ no_prog_to_run( void )
             fl_set_object_callback( GUI.main_form->run,
                                     stop_while_exp_hook, 0 );
             fl_set_object_label( GUI.main_form->run, "Stop" );
+            fl_set_object_shortcut( GUI.main_form->run, "S", 1 );
             XFlush( fl_get_display( ) );
         }
 
@@ -422,6 +423,7 @@ no_prog_to_run( void )
     if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
     {
         fl_set_object_label( GUI.main_form->run, "Start" );
+        fl_set_object_shortcut( GUI.main_form->run, "S", 1 );
         fl_set_object_callback( GUI.main_form->run, run_file, 0 );
         set_buttons_for_run( 0 );
         fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
@@ -462,6 +464,7 @@ init_devs_and_graphics( void )
             fl_set_object_callback( GUI.main_form->run,
                                     stop_while_exp_hook, 0 );
             fl_set_object_label( GUI.main_form->run, "Stop" );
+            fl_set_object_shortcut( GUI.main_form->run, "S", 1 );
             XFlush( fl_get_display( ) );
         }
 
@@ -479,6 +482,7 @@ init_devs_and_graphics( void )
         {
             fl_deactivate_object( GUI.main_form->run );
             fl_set_object_label( GUI.main_form->run, "Start" );
+            fl_set_object_shortcut( GUI.main_form->run, "S", 1 );
             fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
             fl_set_object_callback( GUI.main_form->run, run_file, 0 );
             XFlush( fl_get_display( ) );
@@ -549,6 +553,7 @@ init_devs_and_graphics( void )
 
             fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
             fl_set_object_label( GUI.main_form->run, "Start" );
+            fl_set_object_shortcut( GUI.main_form->run, "S", 1 );
             fl_set_object_callback( GUI.main_form->run, run_file, 0 );
             fl_set_object_lcol( GUI.main_form->run, FL_BLACK );
             fl_activate_object( GUI.main_form->run );

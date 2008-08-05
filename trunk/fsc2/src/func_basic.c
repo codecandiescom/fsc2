@@ -3811,6 +3811,12 @@ avg_data_check( Var_T * avg,
     }
     else if ( avg->len < data->len )
     {
+        if ( ! ( ( avg->from ? avg->from->flags : avg->flags ) & IS_DYNAMIC ) )
+        {
+            print( FATAL, "Average matrix is shorter than data matrix.\n" );
+            THROW( EXCEPTION );
+        }
+
         print( SEVERE, "Average matrix is shorter than data matrix, "
                        "extending average matrix.\n" );
 
