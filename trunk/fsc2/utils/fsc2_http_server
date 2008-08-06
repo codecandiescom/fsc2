@@ -24,14 +24,17 @@
 
 
 use strict;
+use Sys::Hostname;
 use warnings;
 use IO::Socket::INET;
 use POSIX;
 use File::FcntlLock;
 
-# Reduce PATH to the minmum necessary (we're running in tainted mode)
+# Reduce PATH to the necessary minmum and delete the ENV environment
+# variable (set on some systems) - we're running in taint mode
 
 $ENV{ PATH } = '/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin';
+delete $ENV{ ENV };
 
 
 my $client;            # The Most Important Entity ;-)
@@ -40,8 +43,7 @@ my $crlf = "\r\n";     # RFC 2616 requires this as the newline character
 my $has_pnmtopng;      # does the pnmtopng utility exist?
 my $has_pnmtojpeg;     # does the pnmtojpeg utility exist?
 my $version = 0.5;
-my $hostname = `hostname -f`;
-chomp $hostname;
+my $hostname = hostname;
 
 
 # Check if we got a port number as the first command line argument...
