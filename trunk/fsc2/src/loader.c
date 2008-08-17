@@ -65,6 +65,9 @@ load_all_drivers( void )
 #if defined WITH_MEDRIVER
     bool saved_need_MEDRIVER;
 #endif
+#if defined WITH_LIBUSB
+    bool saved_need_USB;
+#endif
 
 
     CLOBBER_PROTECT( cd );
@@ -119,6 +122,9 @@ load_all_drivers( void )
             saved_need_LAN    = Need_LAN;
 #if defined WITH_MEDRIVER
             saved_need_MEDRIVER = Need_MEDRIVER;
+#endif
+#if defined WITH_LIB_USB
+            saved_need_USB = Need_USB;
 #endif
 
             if ( cd->is_loaded && cd->driver.is_init_hook )
@@ -180,6 +186,18 @@ load_all_drivers( void )
             {
                 eprint( FATAL, UNSET, "Module '%s' requires MEDRIVER but fsc2 "
                         "hasn't been built with MEDRIVER support.\n",
+                        cd->name );
+                THROW( EXCEPTION );
+            }
+#endif
+#if defined WITH_LIBUSB
+            if ( Need_USB == UNSET && saved_need_USB == SET )
+                Need_USB = SET;
+#else
+            if ( Need_USB )
+            {
+                eprint( FATAL, UNSET, "Module '%s' requires LIBUSB but fsc2 "
+                        "hasn't been built with LIBUSB support.\n",
                         cd->name );
                 THROW( EXCEPTION );
             }

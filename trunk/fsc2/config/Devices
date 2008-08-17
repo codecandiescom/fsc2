@@ -146,9 +146,10 @@ rb8510_1      // Rulbus 12-bit DAC card
 ni6601
 
 
-// CCD cameras (Roper Scientific Spec-10)
+// CCD cameras (Roper Scientific Spec-10 and Newport Oriel MMS)
 
 rs_spec10
+oriel_matrix
 
 
 // Monochromators
@@ -167,7 +168,10 @@ mcn700_2000
 // DIOs (WITIO-48 card, DIO of a Meilhaus card)
 
 witio_48
-me_dio
+me_dio_0
+me_dio_1
+me_dio_2
+me_dio_3
 
 
 // Microwave attenuators 

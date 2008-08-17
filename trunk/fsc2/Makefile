@@ -227,6 +227,23 @@ LAN_LOG_FILE    := /tmp/fsc2_lan.log
 LAN_LOG_LEVEL   := HIGH
 
 
+# The next line must be uncommented if you want support for devices controlled
+# via USB and the libusb library. If the include file for the library isn't in
+# one of the standard places (i.e. # '/usr/include' or '/usr/local/include')
+# you must also uncomment the line starting with 'libusb_incl_path and specify
+# the complete path to the place where it installed (e.g. '/usr/xxx/yyy). If
+# the library for the card isn't in a place where the linker will find it
+# automatically (e.g. '/usr/lib' and '/usr/local/lib') you need also to specify
+# the full absolute path for the library by uncommenting the line starting with
+# 'libusb_lib_path and change the what it gets set to. You must make sure that
+# the libusb library is already properly installed if you want to build fsc2
+# with support for it.
+
+# WITH_LIBUSB        := yes
+# libusb_incl_path   := /usr/local/include
+# libusb_lib_path    := /usr/lib/local
+
+
 # Define the default editor to use for editing when the "Edit" button gets
 # pressed or for writing a bug report  (but a user can still override this
 # by setting the 'EDITOR' environment variable).
@@ -239,7 +256,7 @@ EDITOR             := vi
 # firefox, opera, konqueror, galeon, lnyx and w3m (but a user can still
 # override this by setting the 'BROWSER' environment variable named).
 
-BROWSER            := netscape
+BROWSER            := firefox
 
 
 # Both the next two lines must be uncommented if you want support for the
@@ -251,7 +268,7 @@ BROWSER            := netscape
 # support for the card.
 
 # WITH_NI6601        := yes
-# ni6601_libs        := libni6601.so
+# ni6601_libs        := /usr/local/lib/libni6601.so
 
 
 # Uncommented both the next two lines if you want support for the Meilhaus
@@ -263,7 +280,7 @@ BROWSER            := netscape
 # fsc2 with support for the card.
 
 # WITH_ME6000        := yes
-# me6000_libs        := libme6x00.so
+# me6000_libs        := /usr/local/lib/libme6x00.so
 
 
 # Both the next two lines must be uncommented if you want support for the
@@ -275,7 +292,7 @@ BROWSER            := netscape
 # for the Wasco WITIO-48 DIO card.
 
 # WITH_WITIO_48      := yes
-# witio_48_libs      := libwitio_48.so
+# witio_48_libs      := /usr/local/lib/libwitio_48.so
 
 
 # All of the top three of the the four following lines must be uncommented
@@ -747,6 +764,18 @@ else
 			CONFFLAGS += -DLAN_LOG_LEVEL=LL_ERR
 		endif
 	endif
+endif
+
+
+ifdef WITH_LIBUSB
+	ifdef libusb_incl_path
+		INCLUDES += -I$(libusb_incl_path)
+	endif
+	ifdef libusb_lib_path
+		LIBS += -L$(libusb_lib_path)
+	endif
+	LIBS      += -lusb
+	CONFFLAGS += -DWITH_LIBUSB
 endif
 
 

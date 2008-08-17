@@ -401,6 +401,7 @@ extern bool Need_GPIB;
 extern bool Need_RULBUS;
 extern bool Need_LAN;
 extern bool Need_MEDRIVER;
+extern bool Need_USB;
 
 extern PA_Seq_T PA_Seq;
 

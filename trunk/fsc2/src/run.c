@@ -289,6 +289,22 @@ start_gpib_and_rulbus( void )
     }
 #endif
 
+
+#if defined WITH_LIBUSB
+    /* If there are devices that are controlled via USB initialize library */
+
+    if ( Need_USB )
+    {
+        raise_permissions( );
+
+        usb_init( );
+        usb_find_busses( );
+        usb_find_devices( );
+
+        lower_permissions( );
+    }
+#endif
+
     fsc2_serial_exp_init( SERIAL_LOG_FILE, SERIAL_LOG_LEVEL );
 
     if ( Need_LAN )

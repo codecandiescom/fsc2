@@ -1,6 +1,7 @@
 === START_FIELD float [ -50 : 23000 ] [ 3000 ] "Start field" "G"
 === END_FIELD float [ -50 : 23000 ] [ 3500 ] "End field" "G"
 === FIELD_STEP float [ 0.001 : 1600 ] [ 1 ] "Field step size" "G"
+=== NUM_SCANS int [ 0 : ][ 0 ] "Number of scans"
 === FACTOR float [ 1.0e-3 : 100 ] [ 1.0  ] "Waiting time"  "* tc"
 === CHANNELS menu [ "X only", "X and Y" ] [ 2 ] "Lock-In channel(s)"
 DEVICES:
@@ -35,6 +36,7 @@ freq[ 2 ];
 avg_freq = 0.0;
 Stop_Button;
 Scan_No;
+TT;
 
 
 PREPARATIONS:
@@ -59,7 +61,7 @@ EXPERIMENT:
 
 start_field = magnet_field( );
 field[ 1 ] = start_field;
-field_step = magnet_field_step_size( );
+field_step = magnet_field_step_size( field_step );
 === if START_FIELD <= END_FIELD
 end_field = start_field + ( Num_Points - 1 ) * field_step;
 change_scale_1d( start_field, field_step );
@@ -77,6 +79,10 @@ Scan_No = output_create( "INT_OUTPUT", 0, "Scan Number" );
 Stop_Button = button_create( "PUSH_BUTTON", "Stop after end of scan" );
 hide_toolbox( "OFF" );
 
+IF NUM_SCANS > 0 {
+   TT = ceil( NUM_SCANS * Num_Points * factor * tc );
+   print( "Minimum experiment duration: #:# min\n", TT / 60, TT % 60 );
+}
 
 I = 0;
 FOREVER {
@@ -178,7 +184,7 @@ FOREVER {
 	            1, avg_data[ 2 ] / 1 uV, 4 );
 ===endif
 
-    IF button_state( Stop_Button ) {
+    IF button_state( Stop_Button ) OR Scans_Done == NUM_SCANS {
         BREAK;
     }
 	magnet_reset_field( );
@@ -237,8 +243,8 @@ FOR K = 1 : 2 {
                        "\# No. of scans     = #\n"
 					   "\# MW frequency     = # GHz\n"
 					   "\# Lockin-In        = Stanford Research SR830\n"
-                       "\# Sensitivity      = # uV\n"
-                       "\# Time constant    = # s\n"
+                       "\# Sensitivity      = # mV\n"
+                       "\# Time constant    = # ms\n"
 					   "\# Waiting factor   = #\n"
 					   "\# Modulation ampl. = # V\n"
 					   "\# Modulation freq. = # kHz\n"
@@ -249,12 +255,12 @@ FOR K = 1 : 2 {
 === else
 	   	   start_field - ( Num_Points - 1 ) * field_step, - field_step,
 === endif
-	       Num_Points , Scans_Done, avg_freq / 1 GHz,
-		   lockin_sensitivity( ) / 1 uV, tc, factor,
-	       lockin_ref_level( ) / 1 kHz, lockin_ref_level( ), lockin_phase( ) );
+	       Num_Points, Scans_Done, avg_freq / 1 GHz,
+		   lockin_sensitivity( ) / 1 mV, tc / 1 ms, factor,
+	       lockin_ref_level( ), lockin_ref_freq( ) / 1kHz, lockin_phase( ) );
 }
 
-save_comment( Files[ 1 ], "Sample: \nTemperature: \nCavity: " );
+save_comment( Files[ 1 ], "# ", "Sample: \nTemperature: \nCavity: " );
 
 FOR K = 1 : Num_Points {
 === if CHANNELS eq 'X only'

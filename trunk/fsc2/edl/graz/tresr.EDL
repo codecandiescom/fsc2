@@ -180,9 +180,9 @@ FOREVER {
 		IF Pretrigger_Points == 0 {
 			ground[ I ] = 0.0;
 	    } ELSE IF Pretrigger_Points == 1 {
-		    ground[ I ] = data[ 1 ];
+		    ground[ I ] = data[ I, 1 ];
 		} ELSE {
-		    ground[ I ] = mean( data[ 1 : Pretrigger_Points ] );
+		    ground[ I ] = mean( data[ I, 1 : Pretrigger_Points ] );
 		}
 
 === if ( START_FIELD < SIGNAL_START and SIGNAL_START < END_FIELD ) or  ( START_FIELD > SIGNAL_START and SIGNAL_START > END_FIELD )

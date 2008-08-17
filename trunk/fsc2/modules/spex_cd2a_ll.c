@@ -544,9 +544,7 @@ spex_cd2a_write( int          type,
 
 
 #ifdef SPEX_CD2A_TEST
-
-//  fprintf( stderr, "%s\n", mess );
-
+    fprintf( stderr, "%s\n", mess );
     return 0;
 #endif
 

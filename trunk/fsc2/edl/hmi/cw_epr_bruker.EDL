@@ -1,11 +1,12 @@
 === START_FIELD float [ -50 : 23000 ] [ 3000 ] "Start field" "G"
 === END_FIELD float [ -50 : 23000 ] [ 3500 ] "End field" "G"
 === FIELD_STEP float [ 0.001 : 1600 ] [ 1 ] "Field step size" "G"
+=== NUM_SCANS int [ 0 : ][ 0 ] "Number of scans"
 === SENS1 menu [ "Don't set", "1.0", "1.25", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "6.0", "8.0" ][ 1 ] "Lock-in sensitivity\n(factor)"
-=== SENS2 menu [ "1.0e1", "1.0e2", "1.0e3", "1.0e4", "1.0e5", "1.0e6", "1.0e7" ] [ 3 ] "Lock-in sensitivity\n(magnitude)"
+=== SENS2 menu [ "1.0e2", "1.0e3", "1.0e4", "1.0e5", "1.0e6" ] [ 3 ] "Lock-in sensitivity\n(magnitude)"
 === TC menu [ "Don't set", "2.5 ms", "5 ms", "10 ms", "20 ms", "40 ms", "80 ms", "160 ms", "320 ms", "640 ms", "1.25 s", "2.5 s", "5 s" ] [ 1 ] "Lock-in Time constant"
 === FACTOR float [ 1.0e-3 : 100 ] [ 1.0  ] "Waiting time"  "* tc"
-=== MODFREQ menu [ "Don't set", "100 kHz", "50 kHz", "25 kHz", "12.5 kHz", "6.25 kHz", "3.125 kHz" ] [ 1 ] "Modulation frequency"
+=== MODFREQ menu [ "Don't set", "100 kHz", "50 kHz", "25 kHz", "12.5 kHz", "6.25 kHz", "3.125 kHz", "1.5625 kHz" ] [ 1 ] "Modulation frequency"
 === MODAMP float [ 0.01 : 100 ] [ 1 ] "Modulation amplitude" "%"
 === PHASE float [ -360.0 : 360.0 ] [ 0.0 ] "Modulation phase"
 DEVICES:
@@ -34,10 +35,11 @@ freq[ 2 ];
 avg_freq = 0.0;
 Stop_Button;
 Scan_No;
+CT;
+TT;
 
 
 PREPARATIONS:
-
 
 magnet_setup( start_field, field_step );
 === if START_FIELD <= END_FIELD
@@ -50,7 +52,7 @@ EXPERIMENT:
 
 start_field = magnet_field( );
 field[ 1 ] = start_field;
-field_step = magnet_field_step_size( );
+field_step = magnet_field_step_size( field_step );
 === if START_FIELD <= END_FIELD
 end_field = start_field + ( Num_Points - 1 ) * field_step;
 change_scale_1d( start_field, field_step );
@@ -71,8 +73,8 @@ tc = lockin_time_constant( TC );
 CT = round( tc / 0.32 ms );
 IF CT < 10 {
     CT = 10;
-ELSE IF CT > 9999 {
-    T = 9999;
+} ELSE IF CT > 9999 {
+    CT = 9999;
 }
 lockin_conversion_time( CT * 0.32 ms );
 === else
@@ -86,6 +88,11 @@ hide_toolbox( "ON" );
 Scan_No = output_create( "INT_OUTPUT", 0, "Scan Number" );
 Stop_Button = button_create( "PUSH_BUTTON", "Stop after end of scan" );
 hide_toolbox( "OFF" );
+
+IF NUM_SCANS > 0 {
+   TT = ceil( NUM_SCANS * Num_Points * factor * tc );
+   print( "Minimum experiment duration: #:# min\n", TT / 60, TT % 60 );
+}
 
 I = 0;
 FOREVER {
@@ -139,7 +146,7 @@ FOREVER {
 	Scans_Done += 1;
 	display_1d( 1, avg_data / 1 uV, 2 );
 
-    IF button_state( Stop_Button ) {
+    IF button_state( Stop_Button ) OR Scans_Done == NUM_SCANS {
         BREAK;
     }
 	magnet_reset_field( );
@@ -188,12 +195,12 @@ FOR K = 1 : 2 {
                        "\# No. of scans     = #\n"
 					   "\# MW frequency     = # GHz\n"
 					   "\# Lockin-In        = Stanford Research SR830\n"
-                       "\# Sensitivity      = # uV\n"
-                       "\# Time constant    = # s\n"
+                       "\# Sensitivity      = # mV\n"
+                       "\# Time constant    = # ms\n"
 					   "\# Waiting factor   = #\n"
 					   "\# Modulation ampl. = # %\n"
 					   "\# Modulation freq. = # kHz\n"
-					   "\# Phase            = PHASE\n",
+					   "\# Phase            = #\n",
            date( ), time( ), start_field,
 === if START_FIELD <= END_FIELD
 	   	   start_field + ( Num_Points - 1 ) * field_step, field_step,
@@ -201,11 +208,11 @@ FOR K = 1 : 2 {
 	   	   start_field - ( Num_Points - 1 ) * field_step, - field_step,
 === endif
 	       Num_Points , Scans_Done, avg_freq / 1 GHz,
-		   lockin_sensitivity( ) / 1 uV, tc, factor,
-	       lockin_ref_level( ) / 1 kHz, lockin_ref_level( ) );
+		   lockin_sensitivity( ) / 1 mV, tc / 1 ms, factor,
+	       lockin_ref_level( ), lockin_ref_freq( ) / 1kHz, lockin_phase( ) );
 }
 
-save_comment( Files[ 1 ], "Sample: \nTemperature: \nCavity: " );
+save_comment( Files[ 1 ], "# ", "Sample: \nTemperature: \nCavity: " );
 
 FOR K = 1 : Num_Points {
 === if START_FIELD <= END_FIELD

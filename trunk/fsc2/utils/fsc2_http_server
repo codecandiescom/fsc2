@@ -30,12 +30,14 @@ use IO::Socket::INET;
 use POSIX;
 use File::FcntlLock;
 
-# Reduce PATH to the necessary minmum and delete the ENV environment
-# variable (set on some systems) - we're running in taint mode
+# Reduce PATH to the necessary minmum and delete some other environment
+# variable that might lead to trouble - we're running in taint mode
 
 $ENV{ PATH } = '/bin:/usr/bin:/usr/local/bin:/usr/X11R6/bin';
 delete $ENV{ ENV };
-
+delete $ENV{ IFS };
+delete $ENV{ CDPATH };
+delete $ENV{ BASH_ENV };
 
 my $client;            # The Most Important Entity ;-)
 my $max_reqs = 16;     # how many simultaneous requests get accepted

@@ -17,4 +17,4 @@ install:
 	done
 
 clean:
-	rm -f $(scripts)
+	rm -f $(patsubst %.EDL,%,$(EDL)) *~

@@ -1,4 +1,4 @@
-#!/usr/local/bin/fsc2 -T
+#!/usr/local/bin/fsc2 -S
 
 /*
   $Id$
@@ -95,7 +95,7 @@ FOREVER {
 
 	IF Acq_State {
 		wait( lockin_time_constant( ) );
-		data = lockin_get_data( 1, 2 );
+		data = lockin_get_data( 1, 2 ) / 1uV;
 		display_1d( I, data[ 1 ], 1,
 		            I, data[ 2 ], 2 );
 		I += 1;
@@ -104,7 +104,7 @@ FOREVER {
     IF Sweep_State != STOPPED {
 		IF Sweep_State == UP {
 			IF current_field + field_step <= max_field {
-				current_field = magnet_sweep_up( );
+				current_field = magnet_field( current_field + field_step );
 				output_value( Current_Field, current_field );
 			} ELSE {
                 Sweep_State = STOPPED;
@@ -115,7 +115,7 @@ FOREVER {
 			}
 		} ELSE {
 			IF current_field - field_step >= min_field {
-				current_field = magnet_sweep_down( );
+				current_field = magnet_field( current_field - field_step );
 				output_value( Current_Field, current_field );
 			} ELSE {
                 Sweep_State = STOPPED;

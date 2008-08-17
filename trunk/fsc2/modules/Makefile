@@ -89,6 +89,8 @@ rb_pulser_j     := rb_pulser_j.c rb_pulser_j_gen.c rb_pulser_j_pulse.c \
 rb_pulser_w     := rb_pulser_w.c rb_pulser_w_gen.c rb_pulser_w_pulse.c \
 				   rb_pulser_w_util.c rb_pulser_w_init.c rb_pulser_w_run.c \
 				   rb_pulser_w_ll.c rb_pulser_w_lexer.c
+oriel_matrix    := oriel_matrix.c oriel_matrix_ll.c
+
 
 # List of all "complicated" modules that are to be made from more than a
 # single source file (plus a header file) and that don't need any further
@@ -148,6 +150,10 @@ endif
 ifdef WITH_MEDRIVER
 me_dio          :=  $(patsubst $(cdir)/%.conf,%,$(wildcard $(cdir)/me_dio_*.conf))
 simp_modules    += $(me_dio) er218
+endif
+
+ifdef WITH_LIBUSB
+comp_modules    += oriel_matrix
 endif
 
 src_headers     := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h

@@ -1,4 +1,4 @@
-#!/usr/local/bin/fsc2 -T
+#!/usr/local/bin/fsc2 -S
 
 /*
   $Id$
@@ -51,13 +51,15 @@ mod_amp;
 phase;
 CT;
 
-tcs[ * ] = { 2.5 ms, 5 ms, 10 ms, 20 ms, 40 ms, 80 ms, 160 ms, 320 ms, 640 ms,
-	         1.25 s, 2.5 s, 5 s };
+tcs[ * ] = { 2.56 ms, 5.12 ms, 10.24 ms, 20.48 ms, 40.96 ms, 81.92 ms,
+	         163.84 ms, 327.68 ms, 655.360 ms, 1.31072 s, 2.62144,
+             5.24288 s };
 
 senses1[ * ] = { 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0 };
-senses2[ * ] = { 1.0e1, 1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6, 1.0e7 };
+senses2[ * ] = { 1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6 };
 
-freqs[ * ] = { 100 kHz, 50 kHz, 25 kHz, 12.5 kHz, 6.25 kHz, 3.125 kHz };
+freqs[ * ] = { 100 kHz, 50 kHz, 25 kHz, 12.5 kHz, 6.25 kHz, 3.125 kHz,
+               1.5625 kHz };
 
 I, J;
 data;
@@ -95,7 +97,6 @@ sens = lockin_sensitivity( );
 mod_freq = lockin_ref_freq( );
 mod_amp = lockin_ref_level( );
 phase = lockin_phase( );
-phase = 90;
 
 /* Finally, create the form with the buttons for sweeping etc. */
 
@@ -123,25 +124,21 @@ FOR I = 1 : size( tcs ) {
 
 Sens1 = menu_create( "Sensitivity (factor)", "1.0", "1.25", "1.5",
 	                 "2.0", "2.5", "3.0", "4.0", "5.0", "6.0", "8.0" );
-Sens2 = menu_create( "Sensitivity (magnitude)", "1.0e1", "1.0e2",
-	                 "1.0e3", "1.0e4", "1.0e5", "1.0e6", "1.0e7" );
+Sens2 = menu_create( "Sensitivity (magnitude)", "1.0e2", "1.0e3", "1.0e4",
+	                 "1.0e5", "1.0e6" );
 
-FOR I = 1 : size( senses2 ) {
-	FOR J = 1 : size( senses1 ) {
-	    IF sens == senses1[ J ] * senses2[ I ] {
-			menu_choice( Sens1, J );
-			menu_choice( Sens2, I );
-			J = -1;
-			BREAK;
-		}
-	}
-	IF J < 0 {
-		BREAK;
-	}
-}		
+IF lockin_rg( ) < 7 {
+    lockin_sensitivity( 1.0e2 );
+}
+IF lockin_rg( ) > 56 {
+    lockin_sensitivity( 8.0e6 );
+}
+
+menu_choice( Sens1, ( lockin_rg( ) - 7 ) % 10 + 1 );
+menu_choice( Sens2, ( lockin_rg( ) - 7 ) / 10 + 1 );
 
 MF = menu_create( "Modulation frequency", "100 kHz", "50 kHz", "25 kHz",
-                  "12.5 kHz", "6.25 kHz", "3.125 kHz" );
+                  "12.5 kHz", "6.25 kHz", "3.125 kHz", "1.5635 kHz" );
 
 FOR I = 1 : size( freqs ) {
 	IF mod_freq == freqs[ I ] {
@@ -168,14 +165,14 @@ FOREVER {
 	IF Acq_State {
 		wait( lockin_time_constant( ) );
 		data = lockin_get_data( );
-		display_1d( I, data );
+		display_1d( I, data / 1 uV );
 		I += 1;
 	}
 
     IF Sweep_State != STOPPED {
 		IF Sweep_State == UP {
 			IF current_field + field_step <= max_field {
-				current_field = magnet_sweep_up( );
+				current_field = magnet_field( current_field + field_step );
 				output_value( Current_Field, current_field );
 			} ELSE {
                 Sweep_State = STOPPED;
@@ -186,7 +183,7 @@ FOREVER {
 			}
 		} ELSE {
 			IF current_field - field_step >= min_field {
-				current_field = magnet_sweep_down( );
+				current_field = magnet_field( current_field - field_step );
 				output_value( Current_Field, current_field );
 			} ELSE {
                 Sweep_State = STOPPED;
