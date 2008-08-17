@@ -36,6 +36,10 @@
 #include <medriver.h>
 #endif
 
+#if defined WITH_LIBUSB
+#include <usb.h>
+#endif
+
 
 extern int exp_runparse( void );              /* from exp_run_parser.y */
 extern int exp_runparser_init( void );        /* from exp_run_parser.y */

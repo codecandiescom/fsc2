@@ -58,15 +58,13 @@ load_all_drivers( void )
 {
     Device_T *cd;
     bool saved_need_GPIB;
+    bool saved_need_USB;
 #if defined WITH_RULBUS
     bool saved_need_RULBUS;
 #endif
     bool saved_need_LAN;
 #if defined WITH_MEDRIVER
     bool saved_need_MEDRIVER;
-#endif
-#if defined WITH_LIBUSB
-    bool saved_need_USB;
 #endif
 
 
@@ -123,9 +121,7 @@ load_all_drivers( void )
 #if defined WITH_MEDRIVER
             saved_need_MEDRIVER = Need_MEDRIVER;
 #endif
-#if defined WITH_LIB_USB
             saved_need_USB = Need_USB;
-#endif
 
             if ( cd->is_loaded && cd->driver.is_init_hook )
             {
@@ -190,10 +186,10 @@ load_all_drivers( void )
                 THROW( EXCEPTION );
             }
 #endif
-#if defined WITH_LIBUSB
             if ( Need_USB == UNSET && saved_need_USB == SET )
                 Need_USB = SET;
-#else
+
+#if ! defined WITH_LIBUSB
             if ( Need_USB )
             {
                 eprint( FATAL, UNSET, "Module '%s' requires LIBUSB but fsc2 "
