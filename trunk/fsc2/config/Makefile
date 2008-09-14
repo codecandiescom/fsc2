@@ -117,6 +117,13 @@ ifdef WITH_MEDRIVER
 	fi
 endif
 
+	epr_mod_state=`grep '^[ \t]*#define[ \t]\{1,\}EPR_MOD_STATE_FILE' epr_mod.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}EPR_MOD_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                              \
+	if [      -n "$$epr_mod_state"                                 \
+	     -a   -e $$epr_mod_state                                    \
+         -a ! -e $(libdir)/$$epr_mod_state ]; then                 \
+		$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) $$epr_mod_state  \
+												  $(libdir);       \
+	fi
 
 
 uninstall:
@@ -181,6 +188,11 @@ ifdef WITH_MEDRIVER
 		$(RM) $(RMFLAGS) $(libdir)/$$er218_state;  \
 	fi
 endif
+
+	epr_mod_state=`grep '^[ \t]*#define[ \t]\{1,\}EPR_MOD_STATE_FILE' epr_mod.conf 2>/dev/null | sed 's/^[ \t]*#define[ \t]\{1,\}EPR_MOD_STATE_FILE[ \t]\{1,\}"\([^"]\{1,\}\)"/\1/'`;                                \
+	if [ -n "$$epr_mpd_state" ]; then                \
+		$(RM) $(RMFLAGS) $(libdir)/$$epr_mod_state;  \
+	fi
 
 
 clean:

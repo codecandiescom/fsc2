@@ -472,6 +472,14 @@ chopper_name, 0, ALL;
 chopper_sector_frequency, -1, ALL;
 
 
+/* Functions exported by the pseudo-devices for EPR resonator modulation */
+
+epr_modulation_create, -1, EXP;
+epr_modulation_delete, -1, EXP;
+epr_modulation_ratio, -1, EXP;
+epr_modulation_phase, -1, EXP;
+
+
 /*
  * Local variables:
  * tab-width: 4

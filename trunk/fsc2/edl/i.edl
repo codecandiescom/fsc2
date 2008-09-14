@@ -67,7 +67,7 @@ FOR I = 1 : 8 {
 
 
 //hide_toolbox( "OFF" );
-//FILE1 = get_file( "", "*.dat", "", "", "dat" );
+FILE1 = get_file( "", "*.dat", "", "", "dat" );
 //FILE2 = clone_file( FILE1, "dat", "dxx" );
 
 FOREVER {

@@ -785,18 +785,18 @@ print_header( FILE *       fp,
         tstr[ strlen( tstr ) - 1 ] = '\0';
         if ( uname( &un ) != -1 && pwd != NULL )
 #if defined DESCRIPTION
-            fprintf( fp, "5 5 m (%s %s@%s [%s]) show\n",
+            fprintf( fp, "5 8 m (%s %s@%s [%s]) show\n",
                      tstr, pwd->pw_name, un.nodename, DESCRIPTION );
 #else
-            fprintf( fp, "5 5 m (%s %s@%s) show\n",
+            fprintf( fp, "5 8 m (%s %s@%s) show\n",
                      tstr, pwd->pw_name, un.nodename );
 #endif
         else if ( pwd != NULL )
 #if defined DESCRIPTION
-            fprintf( fp, "5 5 m (%s %s [%s]) show\n",
+            fprintf( fp, "5 8 m (%s %s [%s]) show\n",
                      tstr, pwd->pw_name, DESCRIPTION );
 #else
-            fprintf( fp, "5 5 m (%s %s) show\n", tstr, pwd->pw_name );
+            fprintf( fp, "5 8 m (%s %s) show\n", tstr, pwd->pw_name );
 #endif
         T_free( tstr );
         TRY_SUCCESS;
@@ -805,16 +805,16 @@ print_header( FILE *       fp,
     {
         if ( uname( &un ) != -1 && pwd != NULL )
 #if defined DESCRIPTION
-            fprintf( fp, "5 5 m (%s@%s [%s]) show\n",
+            fprintf( fp, "5 8 m (%s@%s [%s]) show\n",
                      pwd->pw_name, un.nodename, DESCRIPTION );
 #else
-            fprintf( fp, "5 5 m (%s@%s) show\n", pwd->pw_name, un.nodename );
+            fprintf( fp, "5 7 m (%s@%s) show\n", pwd->pw_name, un.nodename );
 #endif
         else if ( pwd != NULL )
 #if defined DESCRIPTION
-            fprintf( fp, "5 5 m (%s [%s]) show\n", pwd->pw_name, DESCRIPTION );
+            fprintf( fp, "5 8 m (%s [%s]) show\n", pwd->pw_name, DESCRIPTION );
 #else
-            fprintf( fp, "5 5 m (%s) show\n", pwd->pw_name );
+            fprintf( fp, "5 8 m (%s) show\n", pwd->pw_name );
 #endif
     }
 }

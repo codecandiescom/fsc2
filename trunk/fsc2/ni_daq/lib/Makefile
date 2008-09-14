@@ -27,7 +27,7 @@
 lib_dir   = $(prefix)/lib
 
 CFLAGS    = -ggdb -O0 -Wall -Wwrite-strings -Wstrict-prototypes \
-			-Wmissing-prototypes -Wmissing-declarations -W
+			-Wmissing-prototypes -Wmissing-declarations -W -fpic
 #LDFLAGS   = -Wl,--version-script=ni_daq_lib.map
 INCLUDES  = -I../include -I.
 

@@ -71,6 +71,7 @@
 * me6000::          Meilhaus Electronic GmbH ME-6000 and ME-6100 DAC card
 * me_dio_X::        Meilhaus Electronic GmbH DAQ card DIO subsystem
 * ni6601::          National Instruments 6601 GPCT card
+* oriel_matrix::    Newport Oriel MMS Spectrometer
 * pci_mio_16e_1::   National Instruments PCI-MIO-16E-1 DAQ card
 * pt2025::          Metrolab NMR Teslameter PT2025
 * rs_sml01::        Rohde & Schwarz SML01 Signal Generator
@@ -2401,6 +2402,9 @@ if you have such a model and you experience problems.
 @end ifnottex
 
 @paragraphindent 0
+@strong{Author}: Anton Savitsky (Freie Universit@''at Berlin)
+
+@paragraphindent 0
 @strong{Module name}: @code{lecroy_ws}
 
 @paragraphindent 0
@@ -2590,7 +2594,7 @@ library can be downloaded from
 
 @c #############################################################
 
-@node ni6601, pci_mio_16e_1, me_dio_X, Device Reference
+@node ni6601, oriel_matrix, me_dio_X, Device Reference
 @iftex
 @subheading National Instruments 6601 GPCT card
 @end iftex
@@ -2632,7 +2636,49 @@ library are part of the @code{fsc2} package)
 
 @c #############################################################
 
-@node pci_mio_16e_1, pt2025, ni6601, Device Reference
+@node oriel_matrix, pci_mio_16e_1, ni6601, Device Reference
+@iftex
+@subheading Newport Oriel MMS Spectrometer
+@end iftex
+@ifnottex
+@section Newport Oriel MMS Spectrometer
+@end ifnottex
+
+@paragraphindent 0
+@strong{Author}: Clinton Jermaine Mccrowey (California State
+University Northridge)
+
+@paragraphindent 0
+@strong{License}: BSD
+
+@paragraphindent 0
+@strong{Module name}: @code{oriel_matrix}
+
+@paragraphindent 0
+@strong{Description}: CCD camera
+@uref{http://www.newport.com/file_store/PDFs/tempPDFs/e6063_Oriel-Matrix-Spectrometers.pdf}
+
+@paragraphindent 0
+@strong{Controlled via}: USB (requires
+@uref{http://libusb.wiki.sourceforge.net/,libusb v0.1} library)
+
+@paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{ccd_camera_name()}
+@item @ref{ccd_camera_exposure_time()}
+@item @ref{ccd_camera_get_spectrum()}
+@item @ref{ccd_camera_temperature()}
+@item @ref{ccd_camera_pixel_area()}
+@end table
+
+
+@c #############################################################
+
+@node pci_mio_16e_1, pt2025, oriel_matrix, Device Reference
 @iftex
 @subheading National Instruments PCI-MIO-16E-1 DAQ card
 @end iftex
@@ -3167,6 +3213,9 @@ J.-W.-Goethe University in Frankfurt/Main. Field range is @w{0 G} to
 @ifnottex
 @section S-band Magnet Power Supply (narrow range)
 @end ifnottex
+
+@paragraphindent 0
+@strong{Author}: Sergey Veber (International Tomography Center, Novosibirsk)
 
 @paragraphindent 0
 @strong{Module name}: @code{s_band_magnet_narrow}
@@ -3911,6 +3960,9 @@ and @code{set-xeos} to @code{no} and @code{set-bin} to @code{yes}.
 @ifnottex
 @section TEGAM 2714A Arbitrary Waveform Generator (as pulser)
 @end ifnottex
+
+@paragraphindent 0
+@strong{Author}: Anton Savitsky (Freie Universit@''at Berlin)
 
 @paragraphindent 0
 @strong{Module name}: @code{tegam2714a_p}

@@ -180,14 +180,55 @@ rb_pulser_w_basic_functions_init( void )
             f->is_used = UNSET;
         }
 
+        /* If it's a microwave pulse check that there not more than the
+           maximum possible number of such pulses */
+
         if ( i == PULSER_CHANNEL_MW && f->num_pulses > MAX_MW_PULSES )
         {
-            print( FATAL, "Pulser function 'MICROWAVE' allows only %d pulses "
-                   "but %d are defined.\n", MAX_MW_PULSES, f->num_pulses );
+            print( FATAL, "Pulser function '%s' allows only %d pulses but %d "
+                   "are defined.\n", Function_Names[ i ], MAX_MW_PULSES,
+                   f->num_pulses );
             THROW( EXCEPTION );
         }
 
-        if ( i != PULSER_CHANNEL_MW && f->num_pulses > 1 )
+        /* There can be only 2 microwave pulses and they need to have the
+           same length */
+
+        if ( i == PULSER_CHANNEL_MW )
+        {
+            if ( f->num_pulses > SYNTHESIZER_MAX_PULSES )
+            {
+                print( FATAL, "Pulser function '%s' allows only %d pulse%s but "
+                       "%d are defined.\n", SYNTHESIZER_MAX_PULSES,
+                       SYNTHESIZER_MAX_PULSES > 1 ? "s" : "",
+                       Function_Names[ i ], f->num_pulses );
+                THROW( EXCEPTION );
+            }
+
+#if defined SYNTHESIZER_PULSES_HAVE_SAME_LENGTHS
+            if ( f->num_pulses == SYNTHESIZER_MAX_PULSES )
+            {
+                int j, k;
+
+                for ( j = 1; j < f->num_pulses; j++ )
+                    for ( k = 0; k < j; k++ )
+                        if ( f->pulses[ k ]->len != f->pulses[ j ]->len )
+                        {
+                            print( FATAL, "Pulser function '%s' allows only "
+                                   "pulses of equal length but pulses #%d and "
+                                   "#%d are different.\n", Function_Names[ i ],
+                                   k + 1, j + 1 );
+                            THROW( EXCEPTION );
+                        }
+            }
+        }
+#endif
+
+        /* For all other channels only a single pulse can be set */
+
+        if (    i != PULSER_CHANNEL_MW
+             && i != PULSER_CHANNEL_RF
+             && f->num_pulses > 1 )
         {
             print( FATAL, "Pulser function '%s' allows only 1 pulse but %d "
                    "are defined.\n", Function_Names[ i ], f->num_pulses );
@@ -340,7 +381,7 @@ rb_pulser_w_rf_synth_init( void )
         rb_pulser_w.synth_pulse_state =
                                 CHAR_P T_free( rb_pulser_w.synth_pulse_state );
         T_free( func );
-        print( FATAL, "Function for setting pulse widths is missing from "
+        print( FATAL, "Function for setting pulse width is missing from "
                "the synthesizer module '%s'.\n", SYNTHESIZER_MODULE );
         THROW( EXCEPTION );
     }

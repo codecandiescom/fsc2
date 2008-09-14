@@ -40,7 +40,7 @@
 		chmod 644 $@;                                                 \
 	else                                                              \
 		for l in "$($(patsubst %.fsc2_so,%_libs,$@))"; do             \
-			if [ "$(notdir $$l)" = "$$l" ]; then                     \
+			if [ "$(notdir $$l)" = "$$l" ]; then                      \
 				l=$${l%.so};                                          \
 				libs="$$libs -l$${l#lib}";                            \
 			else                                                      \
@@ -70,8 +70,8 @@ $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
 # replacement avoids a warning (at least for newer versions of flex) about
 # a comparison betwen a signed and an unsigned int.
 
-%_lexer.c: %_lexer.l $(src_header)
-	$(FLEX) $(FLEXFLAGS)$(patsubst %lexer.l,%,$<) -o$@ $<
+%_lexer.c: %_lexer.l %.h $(src_header)
+	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.l,%_,$<) -o$@ $<
 	sed -e 's/\bECHO\b/FLEX_ECHO/g' \
 		-e 's/for ( n = 0; n < max_size && \\$$/for ( n = 0; n < ( size_t ) max_size \&\& \\/' $@ > $@.x
 	mv $@.x $@

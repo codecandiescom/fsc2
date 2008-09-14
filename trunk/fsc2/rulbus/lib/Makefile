@@ -22,7 +22,7 @@
 
 
 CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
-			-Wmissing-prototypes -Wmissing-declarations -W
+			-Wmissing-prototypes -Wmissing-declarations -W -fpic
 # LDFLAGS   = -Wl,--version-script=rulbus_lib.map
 LEX       = flex
 LFLAGS    = -B -P

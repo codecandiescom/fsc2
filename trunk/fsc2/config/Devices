@@ -190,6 +190,11 @@ er218
 gg_chopper
 
 
+// Pseudo-device for EPR resonator modulation setup
+
+epr_mod
+
+
 /*
  * Local variables:
  * tab-width: 4

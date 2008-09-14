@@ -26,6 +26,10 @@
 #include "er218.conf"
 
 
+const char device_name[ ]  = DEVICE_NAME;
+const char generic_type[ ] = DEVICE_TYPE;
+
+
 #define ANGLE_TO_STEPS( x )    irnd( 8 * ( x ) )
 #define STEPS_TO_ANGLE( x )    ( 0.125 * ( x ) ) 
 
@@ -299,7 +303,6 @@ er218_exit_hook( void )
 Var_T *
 goniometer_name( Var_T * v  UNUSED_ARG )
 {
-    fprintf( stderr, "X = %.3f\n", er218.angle );
     return vars_push( STR_VAR, DEVICE_NAME );
 }
 

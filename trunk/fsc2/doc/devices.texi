@@ -5609,7 +5609,6 @@ library (both coming with @code{fsc2}) have been successfully installed.
 @item @ref{counter_continuous_pulses()}
 @item @ref{counter_dio_read()}
 @item @ref{counter_dio_write()}
-@item @ref{ccd_camera_name()}
 @end table
 
 @noindent
@@ -6002,40 +6001,48 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @section CCD Camera Functions
 @cindex CCD Camera Functions
 
-The only currently supplied CCD camera is the @strong{Roper Scientific
-Spec-10} camera (without a shutter and with LN cooling). Its module is loaded
+Currently supplied CCD camera are the @strong{Roper Scientific
+Spec-10} (without a shutter and with LN cooling) and the
+@strong{Newport Oriel Matrix Sprectrometer}. Their modules are loaded
 by specifying
 @example
 rs_spec10
+oriel_matrix
 @end example
 in the @code{DEVICES} section. 
 
-The module requires the PVCAM library supplied by @strong{Roper Scientific} to
-be installed. To to be able to work with the camera also the Linux device
-driver for the PCI board used for the communication with camera, also supplied
-by Roper Scientific, must be installed.
+The module for the @strong{Roper Scientific Spec-10} requires the
+PVCAM library supplied by @strong{Roper Scientific} to be installed.
+To to be able to work with the camera also the Linux device driver for
+the PCI board used for the communication with camera, also supplied by
+Roper Scientific, must be installed.
+
+The @strong{Newport Oriel Matrix Sprectrometer} is controlled via the
+USB bus and requires cthe @code{libusb} library (currently version
+0.1).
 
 @table @strong
 @item Please note:
-By setting two variables the configuration file the orientation of the
-spectra or images taken by the camera can be influenced. They allow to
-mirror the spectra or images (i.e. exchanging right and left side)
-and/or turn images upside-down. Since some functions assume spectra to
-have an increasing wavelength or relative wavenumber axis (or
-decreasing absolute wavenumber axis) this option can be used to
-satisfy the requirement.
+By setting two variables the configuration file for the @strong{Roper
+Scientific Spec-10} the orientation of the spectra or images taken by
+the camera can be influenced. They allow to mirror the spectra or
+images (i.e. exchanging right and left side) and/or turn images
+upside-down. Since some functions assume spectra to have an increasing
+wavelength or relative wavenumber axis (or decreasing absolute
+wavenumber axis) this option can be used to satisfy the requirement.
 
 @item Please note also:
-At the start of the experiment the target temperature for the camera
-is set to the lowest possible value unless a target temperature is
-explicitely set using the function @ref{ccd_camera_temperature()}
-(see below).
+For the @strong{Roper Scientific Spec-10} at the start of the
+experiment the target temperature for the camera is set to the lowest
+possible value unless a target temperature is explicitely set using
+the function @ref{ccd_camera_temperature()} (see below).
 @end table
 
-The values for the region of interest, the binning values, the binning
-mode and the number of clear cycles are stored internally between
-experiments, so at the start of an experiment these values are set
-automatically to the ones they had in the previously run experiment.
+For the @strong{Roper Scientific Spec-10} the values for the region of
+interest, the binning values, the binning mode and the number of clear
+cycles are stored internally between experiments, so at the start of
+an experiment these values are set automatically to the ones they had
+in the previously run experiment.
 
 
 @noindent
@@ -6072,16 +6079,17 @@ Returns a string with the name of the CCD camera being used.
 @anchor{ccd_camera_roi()}
 @findex ccd_camera_roi()
 @item ccd_camera_roi()
-The function is used to query or set the region of interest (ROI) of the
-CCD chip to be used when fetching spectra or images from the
+The function is only supported for the @strong{Roper Scientific
+Spec-10} and is used to query or set the region of interest (ROI) of
+the CCD chip to be used when fetching spectra or images from the
 camera. When no arguments are specified the function returns an array
-with 4 elements. Its first element is the @i{x}-coordinate of the lower
-left hand of the ROI, the second element the @i{y}-coordinate of the
-same point and the third and fourth element are the @i{x}- and
+with 4 elements. Its first element is the @i{x}-coordinate of the
+lower left hand of the ROI, the second element the @i{y}-coordinate of
+the same point and the third and fourth element are the @i{x}- and
 @i{y}-coordonate of the right hand upper corner of the ROI. The
 coordinate of the lower left hand pixel of the CCD chip is @code{1,1},
-the coordinates of the upper right hand corner are the width and height
-of the chip.
+the coordinates of the upper right hand corner are the width and
+height of the chip.
 
 If there is an argument this must be either an array with 4 elements that
 specify the ROI as explained above or the string @code{"ALL"} to set the
@@ -6107,11 +6115,13 @@ previously run experiment.
 @anchor{ccd_camera_binning()}
 @findex ccd_camera_binning()
 @item ccd_camera_binning()
-The function allows to set or query the binning (i.e.@: the combining of
-several pixels) done by the camera. If called with no arguments the
+The function is only supported for the @strong{Roper Scientific
+Spec-10} and allows to set or query the binning (i.e.@: the combining
+of several pixels) done by the camera. If called with no arguments the
 function returns an array with 2 elements. The first element is the
 number of pixels that get binned in the (horizontal) @i{x}-direction,
-the second element is the binning factor in (vertical) @i{y}-direction.
+the second element is the binning factor in (vertical)
+@i{y}-direction.
 
 If the function is called with arguments the first argument must be an
 either an array with 2 elements or a string. If the argument is an array
@@ -6152,16 +6162,17 @@ the one they had in a previously run experiment.
 @anchor{ccd_camera_binning_method()}
 @findex ccd_camera_binning_method()
 @item ccd_camera_binning_method()
-This function lets you query or set the binning method to be used.  You
+This function is only supported for the @strong{Roper Scientific
+Spec-10} and lets you query or set the binning method to be used. You
 can use either hardware binning, i.e.@: binning is done by the camera
-itself, or binning can be done by the software, in which case the whole
-image or spectrum is fetched from the camera and the binning is done
-numerically on the received data). Wile hardware binning is faster
-(mainly due to the reduced time required for the transfer) in some cases
-it might lead to artifacts when the sum of the values of all pixels
-combined in binning would be larger than 65535. In this case the value
-after binning is always 65536, leading to an effect that looks like
-saturation of the region of the chip.
+itself, or binning can be done by the software, in which case the
+whole image or spectrum is fetched from the camera and the binning is
+done numerically on the received data). Wile hardware binning is
+faster (mainly due to the reduced time required for the transfer) in
+some cases it might lead to artifacts when the sum of the values of
+all pixels combined in binning would be larger than 65535. In this
+case the value after binning is always 65536, leading to an effect
+that looks like saturation of the region of the chip.
 
 If called with no argument the function returns the number @code{0}
 when hardware binning is used and @code{1} for software binning.
@@ -6194,12 +6205,13 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{ccd_camera_clear_cycles()}
 @findex ccd_camera_clear_cycles()
 @item ccd_camera_clear_cycles()
-The function allows to determine or set the number of clear cycles of
-the CCD chip to be done before an exposure is started. If called without
-an argument the function returns the number of clear cycles. If an
-argument is passd to the function it must be a number between 0 and the
-maximum number of clear cycles (which is 7 for the Spec-10 camera). The
-default value of clear cycles is 1.
+The function is only supported for the @strong{Roper Scientific
+Spec-10a} and allows to determine or set the number of clear cycles of
+the CCD chip to be done before an exposure is started. If called
+without an argument the function returns the number of clear cycles.
+If an argument is passd to the function it must be a number between 0
+and the maximum number of clear cycles (which is 7 for the Spec-10
+camera). The default value of clear cycles is 1.
 
 The number of clear cycles is stored between experiments, so when a new
 experiment is started its setting is identical to the it had in a
@@ -6213,11 +6225,12 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{ccd_camera_get_image()}
 @findex ccd_camera_get_image()
 @item ccd_camera_get_image()
-The function starts an exposure, fetches the resulting image from the
+The function is only supported for the @strong{Roper Scientific
+Spec-10} and starts an exposure, fetches the resulting image from the
 camera and returns it to the @code{EDL} script as a 2-dimensional
 array. The size of the image depends on the setting of the region of
-interest (ROI) and the settings for binning. When no ROI or binning has
-been set the image returned is the whole area of the CCD chip.
+interest (ROI) and the settings for binning. When no ROI or binning
+has been set the image returned is the whole area of the CCD chip.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -6239,13 +6252,12 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{ccd_camera_temperature()}
 @findex ccd_camera_temperature()
 @item ccd_camera_temperature()
-The function can be used to determine the current temperature of the CCD
-chip or to set a target temperature for the chip. If called without an
-argument the current temperature (in Kelvin) of the chip is returned.
-If called with an argument this must be a number between @w{120.66 K}
-(-152.5 degree Celsius) and @w{248.26 K} (-25 degree Celsius). Please
-note that it may take quite some time until a target temperature is
-reached.
+The function can be used to determine the current temperature of the
+CCD chip or to set a target temperature for the chip. If called
+without an argument the current temperature (in Kelvin) of the chip is
+returned. If called with an argument this must be the requested
+temperature in Kelvin. Please note that it may take quite some time
+until a target temperature is reached.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -6254,8 +6266,9 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{ccd_camera_pixel_size()}
 @findex ccd_camera_pixel_size()
 @item ccd_camera_pixel_size()
-The function takes no arguments and returns the width of a pixel of the
-CCD chip.
+The function is only supported for the @strong{Roper Scientific
+Spec-10}, taking no arguments and returning the width of a pixel of
+the CCD chip.
 
 
 @anchor{ccd_camera_pixel_area()}
@@ -6263,7 +6276,7 @@ CCD chip.
 @item ccd_camera_pixel_area()
 The function accepts no arguments and returns an 1-dimensional array with
 two elements, where the first argument is the number of pixels of the
-CCD chip in the (horizintal) @i{x}-direction and the second element is
+CCD chip in the (horizontal) @i{x}-direction and the second element is
 the number of pixels in the (vertical) @i{y}-direction.
 
 

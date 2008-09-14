@@ -1602,7 +1602,7 @@ fsps25_set_max_sweep_speed( long max_speed )
 	if ( FSC2_MODE != EXPERIMENT )
 		return fsps25.max_speed = max_speed;
 
-	sprintf( buf, "SMS %4ld;\r", max_speed );
+	sprintf( buf, "SMS %04ld;\r", max_speed );
 	if ( fsc2_serial_write( SERIAL_PORT, buf, 10, RESPONSE_TIME, UNSET ) != 10 )
 		fsps25_comm_fail( );
 

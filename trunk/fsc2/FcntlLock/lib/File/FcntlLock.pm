@@ -41,15 +41,14 @@ File::FcntlLock - File locking with L<fcntl(2)>
 
   use File::FcntlLock;
 
-  my $fs = new Fcntl::FcntlLock;
+  my $fs = new File::FcntlLock;
   $fs->l_type( F_RDLCK );
   $fs->l_whence( SEEK_CUR );
   $fs->l_start( 100 );
   $fs->l_len( 123 );
 
-  my $fh;
-  open $fh, "<file_name" or die "Can't open file: $!\n";
-  $fs->lock( $fh, F_SETLK ) )
+  open my $fh, '<', 'file_name' or die "Can't open file: $!\n";
+  $fs->lock( $fh, F_SETLK )
       or print "Locking failed: " . $fs->error . "\n";
   $fs->l_type( F_UNLCK );
   $fs->lock( $fh, F_SETLK )

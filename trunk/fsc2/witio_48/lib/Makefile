@@ -29,7 +29,7 @@ incl_dir  = $(prefix)/include
 
 
 CFLAGS    = -ggdb -O2 -Wall -Wwrite-strings -Wstrict-prototypes \
-			-Wmissing-prototypes -Wmissing-declarations -W
+			-Wmissing-prototypes -Wmissing-declarations -W -fpic
 # LDFLAGS   = -Wl,--version-script=witio_48_lib.map
 INCLUDES  = -I../driver -I.
 
