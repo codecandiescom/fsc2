@@ -1439,30 +1439,46 @@ fsc2_show_fselector( const char * message,
 }
 
 
-/*-------------------------------------------------------------------*
- * Determine the exact position of the top window containing a form.
- *-------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ *-----------------------------------------------------------------------*/
 
 void
 get_form_position( FL_FORM * form,
                    int     * x,
                    int     * y )
 {
-    XWindowAttributes attr;
-    Window root,
-           parent,
-           *children;
-    unsigned int nchilds;
+    int dummy,
+        top,
+        left;
+	Atom a;
+    Atom actual_type;
+    int actual_format;
+    unsigned long nitems;
+    unsigned long bytes_after;
+    static unsigned char *prop;
 
+    fl_get_wingeometry( form->window, x, y, &dummy, &dummy );
 
-    XQueryTree( fl_get_display( ), form->window, &root, &parent, &children,
-                &nchilds );
-    XQueryTree( fl_get_display( ), parent, &root, &parent, &children,
-                &nchilds );
-    XGetWindowAttributes( fl_get_display( ), parent, &attr );
+	if (    ! form
+		 || ! form->window
+		 || form->visible != FL_VISIBLE
+		 || form->parent )
+		return;
 
-    *x = attr.x;
-    *y = attr.y;
+    if ( ( a = XInternAtom( fl_get_display( ), "_NET_FRAME_EXTENTS", True ) )
+                                                                       != None )
+        XGetWindowProperty( fl_get_display( ), form->window, a, 0,
+                            4, False, XA_CARDINAL,
+                            &actual_type, &actual_format, &nitems,
+                            &bytes_after, &prop );
+    if ( a != None
+         && actual_type == XA_CARDINAL
+         && actual_format == 32
+         && nitems == 4 )
+    {
+        *x -= ( ( long * ) prop )[ 0 ];
+        *y -= ( ( long * ) prop )[ 2 ];
+    }
 }
 
 

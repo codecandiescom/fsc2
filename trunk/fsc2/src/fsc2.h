@@ -334,9 +334,6 @@ struct GUI_Info {
     FD_cut *cut_form;
     FD_print_comment *print_comment;
 
-    int border_offset_x;         /* width and height of window left and */
-    int border_offset_y;         /* top border */
-
     int stop_button_mask;        /* which mouse buttons to use for STOP
                                     button */
 

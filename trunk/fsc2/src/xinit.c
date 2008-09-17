@@ -208,11 +208,9 @@ xforms_init( int  * argc,
     FL_Coord h, H;
     FL_Coord cx1, cy1, cw1, ch1, cx2, cy2, cw2, ch2;
     size_t i;
-    int flags, wx, wy;
-    unsigned int ww, wh;
+    int flags;
     XFontStruct *font;
     FL_CMD_OPT app_opt[ NUM_ELEMS( Xresources ) ];
-    int x, y;
 #if defined WITH_HTTP_SERVER
     char *www_help;
 #endif
@@ -456,20 +454,11 @@ xforms_init( int  * argc,
     if ( * ( ( char * ) Xresources[ GEOMETRY ].var ) != '\0' )
     {
         flags = XParseGeometry( ( char * ) Xresources[ GEOMETRY ].var,
-                                &wx, &wy, &ww, &wh );
-        if ( WidthValue & flags && HeightValue & flags )
-        {
-            GUI.win_has_size = SET;
-            GUI.win_width= ww;
-            GUI.win_height = wh;
-        }
+                                &GUI.win_x, &GUI.win_y,
+                                &GUI.win_width, &GUI.win_height );
 
-        if ( XValue & flags && YValue & flags )
-        {
-            GUI.win_has_pos = SET;
-            GUI.win_x = wx;
-            GUI.win_y = wy;
-        }
+        GUI.win_has_pos  = XValue & flags     && YValue & flags;
+        GUI.win_has_size = WidthValue & flags && HeightValue & flags;
     }
 
     if ( GUI.win_has_size )
@@ -491,7 +480,7 @@ xforms_init( int  * argc,
             fl_show_form( GUI.main_form->fsc2, FL_PLACE_POSITION,
                           FL_FULLBORDER, "fsc2" );
         else
-            fl_show_form( GUI.main_form->fsc2, FL_PLACE_MOUSE | FL_FREE_SIZE,
+            fl_show_form( GUI.main_form->fsc2, FL_PLACE_CENTER | FL_FREE_SIZE,
                           FL_FULLBORDER, "fsc2" );
     }
     else
@@ -506,10 +495,6 @@ xforms_init( int  * argc,
     fl_set_object_lcol( GUI.main_form->test_file, FL_INACTIVE_COL );
     fl_deactivate_object( GUI.main_form->run );
     fl_set_object_lcol( GUI.main_form->run, FL_INACTIVE_COL );
-
-    get_form_position( GUI.main_form->fsc2, &x, &y );
-    GUI.border_offset_x = GUI.main_form->fsc2->x - x;
-    GUI.border_offset_y = GUI.main_form->fsc2->y - y;
 
     fl_winminsize( GUI.main_form->fsc2->window,
                    XI_Sizes.WIN_MIN_WIDTH, XI_Sizes.WIN_MIN_HEIGHT );
@@ -825,9 +810,8 @@ xforms_close( void )
     if ( fl_form_is_visible( GUI.main_form->fsc2 ) )
     {
         get_form_position( GUI.main_form->fsc2, &GUI.win_x, &GUI.win_y );
-        GUI.win_width = GUI.main_form->fsc2->w;
+        GUI.win_width  = GUI.main_form->fsc2->w;
         GUI.win_height = GUI.main_form->fsc2->h;
-
         fl_hide_form( GUI.main_form->fsc2 );
     }
 

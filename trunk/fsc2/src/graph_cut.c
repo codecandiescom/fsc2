@@ -176,8 +176,8 @@ cut_show( int  dir,
 
             if ( XValue & flags && YValue & flags )
             {
-                GUI.cut_win_x = x + GUI.border_offset_x;
-                GUI.cut_win_y = y + GUI.border_offset_y;
+                GUI.cut_win_x = x;
+                GUI.cut_win_y = y;
                 GUI.cut_win_has_pos = SET;
             }
         }
@@ -592,17 +592,23 @@ cut_form_close( void )
     cv->points  = SCALED_POINT_P T_free( cv->points );
     cv->xpoints = XPOINT_P T_free( cv->xpoints );
 
-    if ( GUI.cut_form && fl_form_is_visible( GUI.cut_form->cut ) && is_mapped )
+    if ( GUI.cut_form )
     {
-        get_form_position( GUI.cut_form->cut, &GUI.cut_win_x, &GUI.cut_win_y );
+        if ( fl_form_is_visible( GUI.cut_form->cut ) && is_mapped )
+        {
+            get_form_position( GUI.cut_form->cut, &GUI.cut_win_x,
+                               &GUI.cut_win_y );
+            GUI.cut_win_has_pos = SET;
 
-        GUI.cut_win_x += GUI.border_offset_x;
-        GUI.cut_win_y += GUI.border_offset_y;
-        GUI.cut_win_has_pos = SET;
-
-        GUI.cut_win_width = GUI.cut_form->cut->w;
-        GUI.cut_win_height = GUI.cut_form->cut->h;
-        GUI.cut_win_has_size = SET;
+            GUI.cut_win_width  = GUI.cut_form->cut->w;
+            GUI.cut_win_height = GUI.cut_form->cut->h;
+            GUI.cut_win_has_size = SET;
+        }
+        else
+        {
+            GUI.cut_win_x = G_cut.win_x;
+            GUI.cut_win_y = G_cut.win_y;
+        }
     }
 
     fl_hide_form( GUI.cut_form->cut );
@@ -633,13 +639,12 @@ cut_close_callback( FL_OBJECT * a  UNUSED_ARG,
 
     if ( GUI.cut_form && fl_form_is_visible( GUI.cut_form->cut ) && is_mapped )
     {
-        get_form_position( GUI.cut_form->cut, &GUI.cut_win_x, &GUI.cut_win_y );
-
-        GUI.cut_win_x += GUI.border_offset_x;
-        GUI.cut_win_y += GUI.border_offset_y;
+        get_form_position( GUI.cut_form->cut, &G_cut.win_x, &G_cut.win_y );
+        GUI.cut_win_x = GUI.cut_form->cut->x;
+        GUI.cut_win_y = GUI.cut_form->cut->y;;
         GUI.cut_win_has_pos = SET;
 
-        GUI.cut_win_width = GUI.cut_form->cut->w;
+        GUI.cut_win_width  = GUI.cut_form->cut->w;
         GUI.cut_win_height = GUI.cut_form->cut->h;
         GUI.cut_win_has_size = SET;
     }

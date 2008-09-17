@@ -524,9 +524,8 @@ fsc2_save_conf( void )
              Fsc2_Internals.def_directory =
                                  CHAR_P T_free( Fsc2_Internals.def_directory );
 
-    fprintf( fp, "MAIN_WINDOW_POSITION: %d%+d\n", GUI.win_x, GUI.win_y );
-
-    fprintf( fp, "MAIN_WINDOW_SIZE: %ux%u\n", GUI.win_width, GUI.win_height );
+    fprintf( fp, "MAIN_WINDOW_POSITION: +%d%+d\nMAIN_WINDOW_SIZE: %ux%u\n",
+             GUI.win_x, GUI.win_y, GUI.win_width, GUI.win_height );
 
     if ( GUI.display_1d_has_pos )
         fprintf( fp, "DISPLAY_1D_WINDOW_POSITION: %d%+d\n", GUI.display_1d_x,
@@ -1219,7 +1218,7 @@ scan_args( int *   argc,
 
 /*----------------------------------------------------------*
  * This function is called after either exit() is called or
- * it returns from main(). Here some cleanup is done that
+ * fsc2 returns from main(). Here some cleanup is done that
  * is necessary even if the program crashed. Please take
  * care: this function also gets called when the processes
  * foing the experiment are finished!

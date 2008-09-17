@@ -173,9 +173,11 @@ start_graphics( void )
 
     if ( ! G.is_init || G.dim & 1 )
     {
-        w = fl_show_form( GUI.run_form_1d->run_1d, GUI.display_1d_has_pos ?
-                          FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
-                          FL_FULLBORDER, G.mode == NORMAL_DISPLAY ?
+        w = fl_show_form( GUI.run_form_1d->run_1d,
+                          GUI.display_1d_has_pos ?
+                              FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
+                          FL_FULLBORDER,
+                          G.mode == NORMAL_DISPLAY ?
                           "fsc2: 1D-Display" :
                           "fsc2: 1D-Display (sliding window)" );
         G.d = FL_FormDisplay( GUI.run_form_1d->run_1d );
@@ -186,8 +188,9 @@ start_graphics( void )
 
     if ( G.dim & 2 )
     {
-        w = fl_show_form( GUI.run_form_2d->run_2d, GUI.display_2d_has_pos ?
-                          FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
+        w = fl_show_form( GUI.run_form_2d->run_2d,
+                          GUI.display_2d_has_pos ?
+                              FL_PLACE_POSITION : FL_PLACE_MOUSE | FL_FREE_SIZE,
                           FL_FULLBORDER, "fsc2: 2D-Display" );
         G.d = FL_FormDisplay( GUI.run_form_1d->run_1d );
         fl_addto_selected_xevent( w, FocusIn | FocusOut );
@@ -345,11 +348,7 @@ set_default_sizes( void )
                 has_size = SET;
 
             if ( XValue & flags && YValue & flags )
-            {
-                GI.display_x += GUI.border_offset_x;
-                GI.display_y += GUI.border_offset_y;
                 has_pos = SET;
-            }
         }
 
         if ( * ( ( char * ) Xresources[ DISPLAY1DGEOMETRY ].var ) != '\0' )
@@ -360,15 +359,15 @@ set_default_sizes( void )
 
             if ( WidthValue & flags && HeightValue & flags )
             {
-                GUI.display_1d_width = w;
+                GUI.display_1d_width  = w;
                 GUI.display_1d_height = h;
                 GUI.display_1d_has_size = SET;
             }
 
             if ( XValue & flags && YValue & flags )
             {
-                GUI.display_1d_x = x + GUI.border_offset_x;
-                GUI.display_1d_y = y + GUI.border_offset_y;
+                GUI.display_1d_x = x;
+                GUI.display_1d_y = y;
                 GUI.display_1d_has_pos = SET;
             }
         }
@@ -388,8 +387,8 @@ set_default_sizes( void )
 
             if ( XValue & flags && YValue & flags )
             {
-                GUI.display_2d_x = x + GUI.border_offset_x;
-                GUI.display_2d_y = y + GUI.border_offset_y;
+                GUI.display_2d_x = x;
+                GUI.display_2d_y = y;
                 GUI.display_2d_has_pos = SET;
             }
         }
@@ -1386,9 +1385,6 @@ stop_graphics( void )
     {
         get_form_position( GUI.run_form_1d->run_1d, &GUI.display_1d_x,
                            &GUI.display_1d_y );
-
-        GUI.display_1d_x += GUI.border_offset_x;
-        GUI.display_1d_y += GUI.border_offset_y;
         GUI.display_1d_has_pos = SET;
 
         GUI.display_1d_width = GUI.run_form_1d->run_1d->w;
@@ -1406,9 +1402,6 @@ stop_graphics( void )
     {
         get_form_position( GUI.run_form_2d->run_2d, &GUI.display_2d_x,
                            &GUI.display_2d_y );
-
-        GUI.display_2d_x += GUI.border_offset_x;
-        GUI.display_2d_y += GUI.border_offset_y;
         GUI.display_2d_has_pos = SET;
 
         GUI.display_2d_width = GUI.run_form_2d->run_2d->w;

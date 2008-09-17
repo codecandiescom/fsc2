@@ -96,9 +96,8 @@ const char *fsc2_show_fselector( const char * /* message  */,
                                  const char * /* def_name */  );
 
 void get_form_position( FL_FORM * /* form */,
-                        int *     /* x    */,
-                        int *     /* y    */  );
-
+                        int     * /* x */,
+                        int     * /* y */ );
 
 #endif  /* ! UTIL_HEADER */
 

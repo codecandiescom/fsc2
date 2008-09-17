@@ -57,6 +57,9 @@ struct Cut_Graphics {
            left_arrows[ 4 ],
            right_arrows[ 4 ];
 
+    int win_x,
+        win_y;
+
     unsigned int up_arrow_w,    /* sizes of out of range markers */
                  up_arrow_h,
                  down_arrow_w,
