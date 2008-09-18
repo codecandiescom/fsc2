@@ -3,7 +3,7 @@
 # $Id$
 
 OWNER              := fsc2
-GROUP              := uucp
+GROUP              := dialout
 
 # If we're running a 2.4 kernel we use the old NI driver, otherwise the
 # SourceForge driver
