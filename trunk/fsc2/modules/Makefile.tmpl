@@ -73,5 +73,5 @@ $(##:.c=.o): %.o: %.c ##.h $(cdir)/##.conf $(src_headers)
 %_lexer.c: %_lexer.l %.h $(src_header)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.l,%_,$<) -o$@ $<
 	sed -e 's/\bECHO\b/FLEX_ECHO/g' \
-		-e 's/for ( n = 0; n < max_size && \\$$/for ( n = 0; n < ( size_t ) max_size \&\& \\/' $@ > $@.x
+		-e 's/for ( n = 0; n < max_size && \\$$/for ( n = 0; ( size_t ) n < max_size \&\& \\/' $@ > $@.x
 	mv $@.x $@

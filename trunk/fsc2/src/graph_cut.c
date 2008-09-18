@@ -100,8 +100,7 @@ static struct {
 } GC_sizes;
 
 
-static bool is_mapped = UNSET;  /* set while form is mapped */
-static bool cut_has_been_shown = UNSET;
+static bool is_mapped = UNSET;           /* set while form is mapped */
 
 
 /*--------------------------------------------------------------------*
@@ -162,7 +161,8 @@ cut_show( int  dir,
     {
         fl_set_object_shortcutkey( GUI.cut_form->change_button, XK_space );
 
-        if (    ! cut_has_been_shown
+        if (    ! GUI.cut_win_has_size
+             && ! GUI.cut_win_has_pos
              && ( ( char * ) Xresources[ CUTGEOMETRY ].var ) != '\0' )
         {
             flags = XParseGeometry( ( char * ) Xresources[ CUTGEOMETRY ].var,
@@ -182,7 +182,7 @@ cut_show( int  dir,
             }
         }
 
-        if ( /*! cut_has_been_shown && */GUI.cut_win_has_size )
+        if ( GUI.cut_win_has_size )
         {
             if ( GUI.cut_win_width < GC_sizes.WIN_MIN_WIDTH )
                 GUI.cut_win_width = GC_sizes.WIN_MIN_WIDTH;
@@ -190,12 +190,12 @@ cut_show( int  dir,
             if ( GUI.cut_win_height < GC_sizes.WIN_MIN_HEIGHT )
                     GUI.cut_win_height = GC_sizes.WIN_MIN_HEIGHT;
 
-            fl_set_form_size( GUI.cut_form->cut,
-                              GUI.cut_win_width, GUI.cut_win_height );
+            if ( ! GUI.cut_win_has_pos )
+                fl_set_form_size( GUI.cut_form->cut,
+                                  GUI.cut_win_width, GUI.cut_win_height );
         }
 
-
-        if ( /* ! cut_has_been_shown && */GUI.cut_win_has_pos )
+        if ( GUI.cut_win_has_pos )
             fl_set_form_geometry( GUI.cut_form->cut, GUI.cut_win_x,
                                   GUI.cut_win_y, GUI.cut_win_width,
                                   GUI.cut_win_height );
@@ -221,9 +221,11 @@ cut_show( int  dir,
     }
     else if ( ! is_mapped )
     {
-        XMapWindow( G.d, GUI.cut_form->cut->window );
-        XMoveWindow( G.d, GUI.cut_form->cut->window,
-                     GUI.cut_win_x, GUI.cut_win_y );
+        fl_set_form_geometry( GUI.cut_form->cut, GUI.cut_win_x,
+                              GUI.cut_win_y, GUI.cut_win_width,
+                              GUI.cut_win_height );
+        fl_show_form( GUI.cut_form->cut, FL_PLACE_POSITION,
+                      FL_FULLBORDER, "fsc2: Cross section" );
 
         /* Make sure the colors for the curves elements are correct */
 
@@ -376,6 +378,8 @@ cut_canvas_off( Canvas_T *  c,
     FL_HANDLE_CANVAS ch = cut_canvas_handler;
 
 
+    G_2d.is_cut = UNSET;
+
     fl_remove_canvas_handler( obj, Expose, ch );
 
     fl_remove_canvas_handler( obj, ConfigureNotify, ch );
@@ -386,8 +390,6 @@ cut_canvas_off( Canvas_T *  c,
     XFreeGC( G.d, c->font_gc );
 
     delete_pixmap( c );
-
-    G_2d.is_cut = UNSET;
 }
 
 
@@ -563,8 +565,7 @@ cut_form_close( void )
     if ( ! G_cut.is_shown )
         return;
 
-    /* Get rid of canvas related stuff (needs to be done *before*
-       hiding the form) */
+    /* Get rid of canvas related stuff */
 
     cut_canvas_off( &G_2d.cut_x_axis, GUI.cut_form->cut_x_axis );
     cut_canvas_off( &G_2d.cut_y_axis, GUI.cut_form->cut_y_axis );
@@ -592,26 +593,21 @@ cut_form_close( void )
     cv->points  = SCALED_POINT_P T_free( cv->points );
     cv->xpoints = XPOINT_P T_free( cv->xpoints );
 
-    if ( GUI.cut_form )
-    {
-        if ( fl_form_is_visible( GUI.cut_form->cut ) && is_mapped )
-        {
-            get_form_position( GUI.cut_form->cut, &GUI.cut_win_x,
-                               &GUI.cut_win_y );
-            GUI.cut_win_has_pos = SET;
+    /* Hide the form (also storing its last position) if it's still shown */
 
-            GUI.cut_win_width  = GUI.cut_form->cut->w;
-            GUI.cut_win_height = GUI.cut_form->cut->h;
-            GUI.cut_win_has_size = SET;
-        }
-        else
-        {
-            GUI.cut_win_x = G_cut.win_x;
-            GUI.cut_win_y = G_cut.win_y;
-        }
+    if ( GUI.cut_form && fl_form_is_visible( GUI.cut_form->cut ) && is_mapped )
+    {
+        get_form_position( GUI.cut_form->cut, &GUI.cut_win_x,
+                           &GUI.cut_win_y );
+        GUI.cut_win_has_pos = SET;
+
+        GUI.cut_win_width  = GUI.cut_form->cut->w;
+        GUI.cut_win_height = GUI.cut_form->cut->h;
+        GUI.cut_win_has_size = SET;
+
+        fl_hide_form( GUI.cut_form->cut );
     }
 
-    fl_hide_form( GUI.cut_form->cut );
     fl_free_form( GUI.cut_form->cut );
     fl_free( GUI.cut_form );
     GUI.cut_form = NULL;
@@ -621,9 +617,6 @@ cut_form_close( void )
 
 
 /*-------------------------------------------------------------*
- * Instead of calling fl_hide_form() directly unmap the window
- * to make it easier to show it again (otherwise we'd have to
- * first delete and later to recreate lots of stuff).
  *-------------------------------------------------------------*/
 
 void
@@ -637,19 +630,15 @@ cut_close_callback( FL_OBJECT * a  UNUSED_ARG,
     G.dist_display  &= ~ 4;
     delete_all_cut_markers( UNSET );
 
-    if ( GUI.cut_form && fl_form_is_visible( GUI.cut_form->cut ) && is_mapped )
-    {
-        get_form_position( GUI.cut_form->cut, &G_cut.win_x, &G_cut.win_y );
-        GUI.cut_win_x = GUI.cut_form->cut->x;
-        GUI.cut_win_y = GUI.cut_form->cut->y;;
-        GUI.cut_win_has_pos = SET;
+    get_form_position( GUI.cut_form->cut, &GUI.cut_win_x, &GUI.cut_win_y );
+    GUI.cut_win_has_pos = SET;
 
-        GUI.cut_win_width  = GUI.cut_form->cut->w;
-        GUI.cut_win_height = GUI.cut_form->cut->h;
-        GUI.cut_win_has_size = SET;
-    }
+    GUI.cut_win_width  = GUI.cut_form->cut->w;
+    GUI.cut_win_height = GUI.cut_form->cut->h;
+    GUI.cut_win_has_size = SET;
 
-    XUnmapWindow( G.d, GUI.cut_form->cut->window );
+    fl_hide_form( GUI.cut_form->cut );
+
     G_2d.is_cut = is_mapped = UNSET;
 
     for ( i = 0; i < MAX_CURVES; i++ )

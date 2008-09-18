@@ -156,6 +156,67 @@ print_it( FL_OBJECT * obj,
 
 
 /*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+static char *
+get_print_command( void )
+{
+    char *fname;
+    FILE *fp;
+    struct passwd *ue;
+    char *line;
+    char *p;
+    size_t len;
+
+
+    if (    ( ue = getpwuid( getuid( ) ) ) == NULL
+         || ue->pw_dir == NULL
+         || *ue->pw_dir == '\0' )
+         return NULL;
+
+    TRY
+    {
+        fname = get_string( "%s/.fsc2/print_command", ue->pw_dir );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+        return NULL;
+
+    if ( ( fp = fopen( fname, "r" ) ) == NULL )
+    {
+        T_free( fname );
+        return NULL;
+    }
+
+    T_free( fname );
+
+    while ( 1 )
+    {
+        if ( ! ( line = fsc2_fline( fp ) ) )
+        {
+            fclose( fp );
+            return NULL;
+        }
+
+        for ( p = line; *p && isspace( ( int) *p ); p++ )
+            /* empty */ ;
+
+        if ( *p && *p != '#' )
+            break;
+
+        T_free( line );
+    }
+
+    fclose( fp );
+    len = strlen( line );
+    if ( line[ len - 1 ] == '\n' )
+        line[ len - 1 ] = '\0';
+
+    return line;
+}
+
+
+/*--------------------------------------------------------------*
  * Shows a form that allows the user to select the way to print
  * and, for printing to file mode, select the file
  *--------------------------------------------------------------*/
@@ -167,7 +228,8 @@ get_print_file( FILE ** fp,
 {
     FL_OBJECT *obj;
     struct stat stat_buf;
-    char *pc;
+    char *pc_f = NULL,
+         *pc_e = NULL;
 
 
     print_form = GUI.G_Funcs.create_form_print( );
@@ -194,8 +256,13 @@ get_print_file( FILE ** fp,
         fl_set_input( print_form->s2p_input, cmd );
         cmd = CHAR_P T_free( cmd );
     }
-    else if ( ( pc = getenv( "FSC2_PRINT_COMMAND" ) ) )
-        fl_set_input( print_form->s2p_input, pc );
+    else if (    ( pc_f = get_print_command( ) )
+              || ( pc_e = getenv( "FSC2_PRINT_COMMAND" ) ) )
+    {
+        fl_set_input( print_form->s2p_input, pc_e ? pc_e : pc_f );
+        if ( pc_f )
+            pc_f = T_free( pc_f );
+    }
     else
         fl_set_input( print_form->s2p_input, "lpr -h" );
 

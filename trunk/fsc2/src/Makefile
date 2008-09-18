@@ -95,7 +95,7 @@ fsc2: $(objects)
 %.c: %.l $(headers)
 	$(FLEX) $(FLEXFLAGS)$(patsubst %_lexer.l,%,$<) -o$@ $<
 	sed -e 's/\bECHO\b/FLEX_ECHO/g' \
-		-e 's/for ( n = 0; n < max_size && \\$$/for ( n = 0; n < ( size_t ) max_size \&\& \\/' $@ > $@.x
+		-e 's/for ( n = 0; n < max_size && \\$$/for ( n = 0; ( size_t ) n < max_size \&\& \\/' $@ > $@.x
 	mv $@.x $@
 
 
@@ -107,7 +107,7 @@ fsc2_clean: fsc2_clean.o exceptions.o
 
 fsc2_clean.c: fsc2_clean.l
 	$(FLEX) -B -o$@ $<
-	sed 's/for ( n = 0; n < max_size && \\$$/for ( n = 0; n < ( size_t ) max_size \&\& \\/' $@ > $@.x
+	sed 's/for ( n = 0; n < max_size && \\$$/for ( n = 0; ( size_t ) n < max_size \&\& \\/' $@ > $@.x
 	mv $@.x $@
 
 

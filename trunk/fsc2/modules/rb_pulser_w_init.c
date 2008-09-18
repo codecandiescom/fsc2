@@ -191,17 +191,16 @@ rb_pulser_w_basic_functions_init( void )
             THROW( EXCEPTION );
         }
 
-        /* There can be only 2 microwave pulses and they need to have the
-           same length */
+        /* Check that there are npt too many RF pulses */
 
-        if ( i == PULSER_CHANNEL_MW )
+        if ( i == PULSER_CHANNEL_RF )
         {
             if ( f->num_pulses > SYNTHESIZER_MAX_PULSES )
             {
                 print( FATAL, "Pulser function '%s' allows only %d pulse%s but "
-                       "%d are defined.\n", SYNTHESIZER_MAX_PULSES,
-                       SYNTHESIZER_MAX_PULSES > 1 ? "s" : "",
-                       Function_Names[ i ], f->num_pulses );
+                       "%d are defined.\n", Function_Names[ i ], 
+                       SYNTHESIZER_MAX_PULSES,
+                       SYNTHESIZER_MAX_PULSES > 1 ? "s" : "", f->num_pulses );
                 THROW( EXCEPTION );
             }
 

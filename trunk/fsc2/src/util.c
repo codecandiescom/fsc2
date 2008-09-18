@@ -1439,8 +1439,96 @@ fsc2_show_fselector( const char * message,
 }
 
 
-/*-----------------------------------------------------------------------*
- *-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
+
+#define FGETS_START_LEN 128
+
+char *
+fsc2_fline( FILE * fp )
+{
+    char *line;
+    char *p;
+    size_t buf_len;
+    size_t rem_len;
+    size_t len = 0;
+    size_t offset;
+
+
+    CLOBBER_PROTECT( buf_len );
+    CLOBBER_PROTECT( rem_len );
+    CLOBBER_PROTECT( line );
+    CLOBBER_PROTECT( p );
+
+    if ( fp == NULL )
+        THROW( EXCEPTION );
+
+    line = p = T_malloc( FGETS_START_LEN );
+    *line = '\0';
+    buf_len = rem_len = FGETS_START_LEN;
+
+    while ( 1 )
+    {
+        fgets( p, rem_len, fp );
+
+        if ( ! *p )
+            break;
+
+        len = strlen( p );
+
+        if ( p[ len - 1 ] == '\n' && p[ len - 2 ] != '\\' )
+            break;
+
+        if ( p[ len - 2 ] == '\\' )
+            len -= 2;
+
+        rem_len -= len;
+        p += len;
+
+        offset = p - line;
+
+        TRY
+        {
+            line = T_realloc( line, 2 * buf_len );
+            p = line + offset;
+            rem_len += buf_len;
+            buf_len *= 2;
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+        {
+            T_free( line );
+            RETHROW( );
+        }
+    }
+
+    if ( ! *line )
+    {
+        T_free( line );
+        return NULL;
+    }
+
+    TRY
+    {
+        line = realloc( line, strlen( line ) + 1 );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        T_free( line );
+        RETHROW( );
+    }
+    
+    return line;
+}
+
+
+/*--------------------------------------------------------------------*
+ * Given a form the function tries to determine the exact position of
+ * its window, including window manager decorations. The resulting
+ * values should be usable directly for a geometry string to be
+ * passed as position of the window to the XForms library.
+ *--------------------------------------------------------------------*/
 
 void
 get_form_position( FL_FORM * form,

@@ -90,7 +90,7 @@ rb_pulser_w     := rb_pulser_w.c rb_pulser_w_gen.c rb_pulser_w_pulse.c \
 				   rb_pulser_w_util.c rb_pulser_w_init.c rb_pulser_w_run.c \
 				   rb_pulser_w_ll.c rb_pulser_w_lexer.c
 oriel_matrix    := oriel_matrix.c oriel_matrix_ll.c
-epr_mod         := epr_mod.c epr_mod_lexer.c
+#epr_mod         := epr_mod.c epr_mod_lexer.c
 
 
 # List of all "complicated" modules that are to be made from more than a
@@ -113,7 +113,7 @@ simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a hp5342a      \
 comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a        \
 				   $(hp864_list) lecroy9400 rs690 tegam2714a_p rs_sml01  \
 	               $(tds_list) $(lecroy94_list) lecroy93xx lecroy_wr     \
-				   lecroy_ws epr_mod
+				   lecroy_ws #epr_mod
 endif
 
 ifneq ($(NUM_SERIAL_PORTS),0)

@@ -5280,7 +5280,7 @@ DA converter will switch to @w{0 V} automatically. So you should call
 @ref{daq_set_voltage()} always before @ref{daq_get_voltage()} if
 something is connected to the DA output!
 
-@item Note also
+@item Also note:
 if the ADC had previously been reserved by a call of
 the function @ref{daq_reserve_adc()} the pass-phrase specified in that
 call has to be passed to the function as the very first argument if you
@@ -5563,7 +5563,7 @@ test run. During the experiment a too large value will be truncated
 to the allowed range by stripping off the higher order bits and a
 warning message is printed out.
 
-@item Note also
+@item Also note:
 if the DIO had previously been reserved by a call of the function
 @ref{dio_reserve_dio()} the pass-phrase specified in that call has
 to be passed to the function as the very first argument if you

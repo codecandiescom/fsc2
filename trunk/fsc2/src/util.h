@@ -95,6 +95,8 @@ const char *fsc2_show_fselector( const char * /* message  */,
                                  const char * /* pattern  */,
                                  const char * /* def_name */  );
 
+char * fsc2_fline( FILE * /* fp */ );
+
 void get_form_position( FL_FORM * /* form */,
                         int     * /* x */,
                         int     * /* y */ );
