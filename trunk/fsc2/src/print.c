@@ -167,6 +167,7 @@ get_print_file( FILE ** fp,
 {
     FL_OBJECT *obj;
     struct stat stat_buf;
+    char *pc;
 
 
     print_form = GUI.G_Funcs.create_form_print( );
@@ -185,13 +186,16 @@ get_print_file( FILE ** fp,
     }
 
     /* If a printer command has already been set put it into the input object,
-       otherwise set default command */
+       otherwise use what's set via the 'FSC2_PRINT_COMMAND; or the default
+       'lpr' command */
 
     if ( cmd != NULL )
     {
         fl_set_input( print_form->s2p_input, cmd );
         cmd = CHAR_P T_free( cmd );
     }
+    else if ( ( pc = getenv( "FSC2_PRINT_COMMAND" ) ) )
+        fl_set_input( print_form->s2p_input, pc );
     else
         fl_set_input( print_form->s2p_input, "lpr -h" );
 

@@ -524,11 +524,11 @@ fsc2_save_conf( void )
              Fsc2_Internals.def_directory =
                                  CHAR_P T_free( Fsc2_Internals.def_directory );
 
-    fprintf( fp, "MAIN_WINDOW_POSITION: +%d%+d\nMAIN_WINDOW_SIZE: %ux%u\n",
+    fprintf( fp, "MAIN_WINDOW_POSITION: %+d%+d\nMAIN_WINDOW_SIZE: %ux%u\n",
              GUI.win_x, GUI.win_y, GUI.win_width, GUI.win_height );
 
     if ( GUI.display_1d_has_pos )
-        fprintf( fp, "DISPLAY_1D_WINDOW_POSITION: %d%+d\n", GUI.display_1d_x,
+        fprintf( fp, "DISPLAY_1D_WINDOW_POSITION: %+d%+d\n", GUI.display_1d_x,
                  GUI.display_1d_y );
 
     if ( GUI.display_1d_has_size )
@@ -536,7 +536,7 @@ fsc2_save_conf( void )
                  GUI.display_1d_height );
 
     if ( GUI.display_2d_has_pos )
-        fprintf( fp, "DISPLAY_2D_WINDOW_POSITION: %d%+d\n", GUI.display_2d_x,
+        fprintf( fp, "DISPLAY_2D_WINDOW_POSITION: %+d%+d\n", GUI.display_2d_x,
                  GUI.display_2d_y );
 
     if ( GUI.display_2d_has_size )
@@ -544,7 +544,7 @@ fsc2_save_conf( void )
                  GUI.display_2d_height );
 
     if ( GUI.cut_win_has_pos )
-        fprintf( fp, "CUT_WINDOW_POSITION: %d%+d\n", GUI.cut_win_x,
+        fprintf( fp, "CUT_WINDOW_POSITION: %+d%+d\n", GUI.cut_win_x,
                  GUI.cut_win_y );
 
     if ( GUI.cut_win_has_size )
@@ -552,7 +552,7 @@ fsc2_save_conf( void )
                  GUI.cut_win_height );
 
     if ( GUI.toolbox_has_pos )
-        fprintf( fp, "TOOLBOX_POSITION: %d%+d\n", GUI.toolbox_x,
+        fprintf( fp, "TOOLBOX_POSITION: %+d%+d\n", GUI.toolbox_x,
                  GUI.toolbox_y );
 
     fclose( fp );

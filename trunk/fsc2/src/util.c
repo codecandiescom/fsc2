@@ -1447,9 +1447,8 @@ get_form_position( FL_FORM * form,
                    int     * x,
                    int     * y )
 {
-    int dummy,
-        top,
-        left;
+    int w,
+        h;
 	Atom a;
     Atom actual_type;
     int actual_format;
@@ -1457,13 +1456,19 @@ get_form_position( FL_FORM * form,
     unsigned long bytes_after;
     static unsigned char *prop;
 
-    fl_get_wingeometry( form->window, x, y, &dummy, &dummy );
+    fl_get_wingeometry( form->window, x, y, &w, &h );
 
 	if (    ! form
 		 || ! form->window
 		 || form->visible != FL_VISIBLE
 		 || form->parent )
+    {
+        if ( *x < 0 )
+            *x += w - fl_scrw;
+        if ( *y < 0 )
+            *y += h - fl_scrh;
 		return;
+    }
 
     if ( ( a = XInternAtom( fl_get_display( ), "_NET_FRAME_EXTENTS", True ) )
                                                                        != None )
@@ -1477,7 +1482,20 @@ get_form_position( FL_FORM * form,
          && nitems == 4 )
     {
         *x -= ( ( long * ) prop )[ 0 ];
+        if ( *x < 0 )
+            *x +=   ( ( long * ) prop )[ 0 ] + w + ( ( long * ) prop )[ 1 ]
+                  - fl_scrw;
         *y -= ( ( long * ) prop )[ 2 ];
+        if ( *y < 0 )
+            *y +=   ( ( long * ) prop )[ 2 ] + h + ( ( long * ) prop )[ 3 ]
+                  - fl_scrh;
+    }
+    else
+    {
+        if ( *x < 0 )
+            *x += w - fl_scrw;
+        if ( *y < 0 )
+            *y += h - fl_scrh;
     }
 }
 

@@ -526,7 +526,7 @@ xforms_init( int  * argc,
        with the data and for printing) */
 
     GUI.input_form = GUI.G_Funcs.create_form_input_form( );
-    GUI.print_comment = GUI.G_Funcs.create_pc_form( );
+    GUI.print_comment = GUI.G_Funcs.create_pc_form( );    
 
     /* Unset a flag that should only be set when the display window has been
        drawn completely */
