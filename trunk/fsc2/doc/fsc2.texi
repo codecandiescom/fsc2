@@ -43,13 +43,13 @@
 @sp 4
 @center A Program for the Remote Control of Spectrometers
 @sp 2
-@center January 2007
+@center September 2008
 @sp 10
 @center Jens Thoms T@"orring
 @sp 1
 @center @email{jt@@toerring.de}
 @sp 16
-@center Copyright @copyright{} 1999--2007 Jens Thoms T@"orring
+@center Copyright @copyright{} 1999--2008 Jens Thoms T@"orring
 Permission is granted to make and distribute verbatim
 copies of this manual provided the copyright notice and
 this permission notice are preserved on all copies.
