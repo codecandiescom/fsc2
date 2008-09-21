@@ -43,7 +43,7 @@ Num_Avg     = NUM_AVG;                   // Number of averages per trace
 Trace_Len;                               // Digitizer trace length
 timebase;                                // Digitizer timebase
 time_res;                                // Digitizer time resolution
-pretrigger  = 0.01 * PRETRIGGER;         // Amount of pre-trigger (rel. to
+pretrigger = 0.01 * PRETRIGGER;          // Amount of pre-trigger (rel. to
 			                             // digitizer trace length)
 data[ Num_Traces, * ];                   // Data of single scan
 mdata[ Num_Traces, * ];                  // Averaged data of all scans

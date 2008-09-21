@@ -1524,6 +1524,122 @@ fsc2_fline( FILE * fp )
 
 
 /*--------------------------------------------------------------------*
+ *--------------------------------------------------------------------*/
+
+static int
+get_decoration_sizes( FL_FORM * form,
+                      int     * top,
+                      int     * right,
+                      int     * bottom,
+                      int     * left )
+{
+	Atom a;
+
+	if (    ! form
+		 || ! form->window
+		 || form->visible != FL_VISIBLE
+		 || form->parent )
+		return 1;
+
+	*top = *right = *bottom = *left = 0;
+
+    if ( ( a = XInternAtom( fl_get_display( ), "_NET_FRAME_EXTENTS", True ) )
+                                                                       != None )
+	{
+		Atom actual_type;
+		int actual_format;
+		unsigned long nitems;
+		unsigned long bytes_after;
+		static unsigned char *prop;
+
+        XGetWindowProperty( fl_get_display( ), form->window, a, 0,
+                            4, False, XA_CARDINAL,
+                            &actual_type, &actual_format, &nitems,
+                            &bytes_after, &prop );
+
+		if (    actual_type == XA_CARDINAL
+			 && actual_format == 32
+			 && nitems == 4 )
+		{
+			*top    = ( ( long * ) prop )[ 2 ];
+			*right  = ( ( long * ) prop )[ 1 ];
+			*bottom = ( ( long * ) prop )[ 3 ];
+			*left   = ( ( long * ) prop )[ 0 ];
+		}
+	}
+	else
+	{
+		/* The window manager doesn't have the _NET_FRAME_EXTENDS atom so we
+		   have to try with the traditional method (which assumes that the
+           window manager reparents the windows it manages) */
+
+		Window cur_win = form->window;
+		Window root;
+		Window parent;
+		Window *childs = NULL;
+		Window wjunk;
+		XWindowAttributes win_attr;
+		XWindowAttributes frame_attr;
+		unsigned int ujunk;
+
+
+        /* Get the coordinates and size of the form's window */
+
+		XGetWindowAttributes( fl_get_display( ), cur_win, &win_attr );
+
+        /* Check try to get its parent window */
+
+		XQueryTree( fl_get_display( ), cur_win, &root, &parent, &childs,
+                    &ujunk );
+		if ( childs )
+		{
+			XFree( childs );
+			childs = NULL;
+		}
+
+		/* If there's no parent or the parent window is the root window
+		   we've got to assume that there are no decorations */
+
+		if ( ! parent || parent == root )
+			return 0;
+
+        /* Now convert the form window's coordiates to that relative to the
+		   root window and the find the top-most parent (that isn't the root
+		   window itself) */
+
+		XTranslateCoordinates( fl_get_display( ), parent, root,
+							   win_attr.x, win_attr.y,
+							   &win_attr.x, &win_attr.y, &wjunk );
+
+		while ( parent && parent != root )
+		{
+			cur_win = parent;
+			XQueryTree( fl_get_display( ), cur_win, &root, &parent, &childs,
+						&ujunk );
+			if ( childs )
+			{
+				XFree( childs );
+				childs = NULL;
+			}
+		}
+
+        /* Get the cordinates and sizes of that top-most window... */
+
+		XGetWindowAttributes( fl_get_display( ), cur_win, &frame_attr );
+
+        /* ...and finally calculate the decoration sizes */
+
+		*top    = win_attr.y - frame_attr.y;
+		*left   = win_attr.x - frame_attr.x;
+		*bottom = frame_attr.height - win_attr.height - *top;
+		*right  = frame_attr.width - win_attr.width - *left;
+	}
+
+	return 0;
+}
+
+
+/*--------------------------------------------------------------------*
  * Given a form the function tries to determine the exact position of
  * its window, including window manager decorations. The resulting
  * values should be usable directly for a geometry string to be
@@ -1537,54 +1653,29 @@ get_form_position( FL_FORM * form,
 {
     int w,
         h;
-	Atom a;
-    Atom actual_type;
-    int actual_format;
-    unsigned long nitems;
-    unsigned long bytes_after;
-    static unsigned char *prop;
+    int top = 0,
+        right = 0,
+        bottom = 0,
+        left = 0;
+
 
     fl_get_wingeometry( form->window, x, y, &w, &h );
+    get_decoration_sizes( form, &top, &right, &bottom, &left );
 
-	if (    ! form
-		 || ! form->window
-		 || form->visible != FL_VISIBLE
-		 || form->parent )
-    {
-        if ( *x < 0 )
-            *x += w - fl_scrw;
-        if ( *y < 0 )
-            *y += h - fl_scrh;
-		return;
-    }
+    /* If the windows left upper corner is not on the scrreen but left to
+       to left screen border or above the tob border the corresponding
+       value is negative. But such a value would, when used for setting
+       a window position, be interpreted as relative to the right or botton
+       screen border, os correct them so that they can be interpreted that
+       way */
 
-    if ( ( a = XInternAtom( fl_get_display( ), "_NET_FRAME_EXTENTS", True ) )
-                                                                       != None )
-        XGetWindowProperty( fl_get_display( ), form->window, a, 0,
-                            4, False, XA_CARDINAL,
-                            &actual_type, &actual_format, &nitems,
-                            &bytes_after, &prop );
-    if ( a != None
-         && actual_type == XA_CARDINAL
-         && actual_format == 32
-         && nitems == 4 )
-    {
-        *x -= ( ( long * ) prop )[ 0 ];
-        if ( *x < 0 )
-            *x +=   ( ( long * ) prop )[ 0 ] + w + ( ( long * ) prop )[ 1 ]
-                  - fl_scrw;
-        *y -= ( ( long * ) prop )[ 2 ];
-        if ( *y < 0 )
-            *y +=   ( ( long * ) prop )[ 2 ] + h + ( ( long * ) prop )[ 3 ]
-                  - fl_scrh;
-    }
-    else
-    {
-        if ( *x < 0 )
-            *x += w - fl_scrw;
-        if ( *y < 0 )
-            *y += h - fl_scrh;
-    }
+    *x -= left;
+    if ( *x < 0 )
+        *x += left + w + right - fl_scrw;
+
+    *y -= top;
+    if ( *y < 0 )
+        *y += top + h + bottom - fl_scrh;
 }
 
 
