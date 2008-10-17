@@ -148,9 +148,7 @@ epr_modulation_ratio( Var_T * v )
 
     if ( v == NULL )
     {
-        if (    res->count > 2
-             && (    freq < res->fe[ 0 ].freq
-                  || freq > res->fe[ res->count - 1 ].freq ) )
+        if ( freq < res->fe[ 0 ].freq || freq > res->fe[ res->count - 1 ].freq )
         {
             if ( ! res->extrapolate )
             {
@@ -185,20 +183,6 @@ epr_modulation_ratio( Var_T * v )
     ratio = get_double( v, "field/voltage ratio" );
 
     too_many_arguments( v );
-
-    for ( i = 0; i < res->count; i++ )
-    {
-        if (    fabs( res->fe[ i ].freq - freq ) / res->fe[ i ].freq
-                                             < 1.0e-2 * EPR_MOD_MIN_DEVIATION
-             || fabs( res->fe[ i ].freq - freq ) / freq
-                                             < 1.0e-2 * EPR_MOD_MIN_DEVIATION )
-        {
-            print( FATAL, "Deviation between new and already set frequency "
-                   "is smaller than minimum deviation of %d%%.\n",
-                   ( int ) EPR_MOD_MIN_DEVIATION );
-            THROW( EXCEPTION );
-        }
-    }
 
     res->fe = T_realloc( res->fe, ( res->count + 1 ) * sizeof *res->fe );
     res->fe[ res->count ].freq = freq;
@@ -240,7 +224,7 @@ epr_modulation_phase( Var_T * v )
 
     if ( ! ( fe = epr_mod_find_fe( res, freq ) ) )
     {
-        print( FATAL, "Frequency doesn't match an entry.\n" );
+        print( FATAL, "Frequency doesn't match any entry.\n" );
         THROW( EXCEPTION );
     }
 
@@ -287,10 +271,9 @@ epr_modulation_has_phase( Var_T * v )
 
 	freq = get_double( v, "modulation frequency" );
 
-    if ( ! ( fe = epr_mod_find_fe( res, freq ) ) )
-        return vars_push( INT_VAR, 0L );
-
-    return vars_push( INT_VAR, ( long ) fe->is_phase );
+    return vars_push( INT_VAR,
+                      ( long ) (    fe = epr_mod_find_fe( res, freq )
+                                 && fe->is_phase ) );
 }
 
        

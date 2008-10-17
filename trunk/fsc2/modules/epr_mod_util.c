@@ -84,6 +84,12 @@ epr_mod_find_fe( Resonator_T * res,
     size_t i;
 
 
+    if ( freq <= 0.0 )
+    {
+        print( FATAL, "Invalid zero or negative frequency.\n" );
+        THROW( EXCEPTION );
+    }
+
     for ( i = 0; i < res->count; i++ )
         if (    fabs( freq - res->fe[ i ].freq ) / freq
                                             < 1.0e-2 * EPR_MOD_MIN_DEVIATION
