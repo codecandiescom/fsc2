@@ -970,7 +970,7 @@ lecroy9400_get_curve( int        ch,
     *length = lecroy9400.rec_len[ ch ];
 
     len = 2 * *length + 10;
-    data = UCHAR_P T_malloc( len );
+    data = T_malloc( len );
 
     snprintf( cmd, 100, "RD,%s.DA,1,%ld,0,0",
               ch == LECROY9400_FUNC_E ? "FE" : "FF", *length );
@@ -991,7 +991,7 @@ lecroy9400_get_curve( int        ch,
 
     TRY
     {
-        *array = DOUBLE_P T_malloc( *length * sizeof **array );
+        *array = T_malloc( *length * sizeof **array );
         TRY_SUCCESS;
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )

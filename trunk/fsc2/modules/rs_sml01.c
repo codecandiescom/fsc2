@@ -230,10 +230,10 @@ void
 rs_sml01_exit_hook( void )
 {
     if ( rs_sml01.table_file != NULL )
-        rs_sml01.table_file = CHAR_P T_free( rs_sml01.table_file );
+        rs_sml01.table_file = T_free( rs_sml01.table_file );
 
     if ( rs_sml01.use_table && rs_sml01.att_table != NULL )
-        rs_sml01.att_table = ATT_TABLE_ENTRY_P T_free( rs_sml01.att_table );
+        rs_sml01.att_table = T_free( rs_sml01.att_table );
 }
 
 
@@ -696,7 +696,7 @@ synthesizer_use_table( Var_T * v )
         {
             print( FATAL, "Default table file '%s' not found.\n",
                    rs_sml01.table_file );
-            rs_sml01.table_file = CHAR_P T_free( rs_sml01.table_file );
+            rs_sml01.table_file = T_free( rs_sml01.table_file );
             THROW( EXCEPTION );
         }
     }
@@ -731,12 +731,12 @@ synthesizer_use_table( Var_T * v )
     OTHERWISE
     {
         fclose( tfp );
-        rs_sml01.table_file = CHAR_P T_free( rs_sml01.table_file );
+        rs_sml01.table_file = T_free( rs_sml01.table_file );
         RETHROW( );
     }
 
     fclose( tfp );
-    rs_sml01.table_file = CHAR_P T_free( rs_sml01.table_file );
+    rs_sml01.table_file = T_free( rs_sml01.table_file );
     rs_sml01.use_table = SET;
 
     return vars_push( INT_VAR, 1L );

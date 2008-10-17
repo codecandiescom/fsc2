@@ -135,8 +135,7 @@ witio_48_exp_hook( void )
                 witio_48.is_open = SET;
 
             if ( witio_48.reserved_by[ i ] )
-                witio_48.reserved_by[ i ] =
-                                    CHAR_P T_free( witio_48.reserved_by[ i ] );
+                witio_48.reserved_by[ i ] = T_free( witio_48.reserved_by[ i ] );
             if ( witio_48_saved.reserved_by[ i ] )
                 witio_48.reserved_by[ i ] =
                                    T_strdup( witio_48_saved.reserved_by[ i ] );
@@ -286,7 +285,7 @@ dio_reserve_dio( Var_T * v )
             if ( ! strcmp( witio_48.reserved_by[ dio ], v->val.sptr ) )
             {
                 witio_48.reserved_by[ dio ] =
-                                  CHAR_P T_free( witio_48.reserved_by[ dio ] );
+                                         T_free( witio_48.reserved_by[ dio ] );
                 return vars_push( INT_VAR, 1L );
             }
             else

@@ -1818,7 +1818,7 @@ f_random( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    arr = DOUBLE_P T_malloc( len * sizeof *arr );
+    arr = T_malloc( len * sizeof *arr );
     for ( i = 0; i < len; i++ )
         *( arr + i ) = random( ) / ( double ) RAND_MAX;
 
@@ -1855,7 +1855,7 @@ f_grand( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    arr = DOUBLE_P T_malloc( len * sizeof *arr );
+    arr = T_malloc( len * sizeof *arr );
     for ( i = 0; i < len; i++ )
         *( arr + i ) = gauss_random( );
 
@@ -3723,8 +3723,7 @@ avg_data_check( Var_T * avg,
                     count = 1;
                 }
 
-                avg->val.dpnt = DOUBLE_P T_malloc( data->len
-                                               * sizeof *avg->val.dpnt );
+                avg->val.dpnt = T_malloc( data->len * sizeof *avg->val.dpnt );
                 for ( i = 0; i < data->len; i++ )
                     avg->val.dpnt[ i ] = 0.0;
 
@@ -3735,9 +3734,8 @@ avg_data_check( Var_T * avg,
                 print( SEVERE, "Average array is shorter than data array, "
                        "padding it with zeros.\n" );
 
-                avg->val.dpnt = DOUBLE_P T_realloc( avg->val.dpnt,
-                                                    data->len
-                                                    * sizeof *avg->val.dpnt );
+                avg->val.dpnt = T_realloc( avg->val.dpnt,
+                                           data->len * sizeof *avg->val.dpnt );
                 for ( i = avg->len; i < data->len; i++ )
                     avg->val.dpnt[ i ] = 0.0;
             }
@@ -3806,8 +3804,8 @@ avg_data_check( Var_T * avg,
             count = 1;
         }
 
-        avg->val.vptr = VAR_PP T_realloc( avg->val.vptr,
-                                          data->len * sizeof *avg->val.vptr );
+        avg->val.vptr = T_realloc( avg->val.vptr,
+                                   data->len * sizeof *avg->val.vptr );
     }
     else if ( avg->len < data->len )
     {
@@ -3820,7 +3818,7 @@ avg_data_check( Var_T * avg,
         print( SEVERE, "Average matrix is shorter than data matrix, "
                        "extending average matrix.\n" );
 
-        avg->val.vptr = VAR_PP T_malloc( data->len * sizeof *avg->val.vptr );
+        avg->val.vptr = T_malloc( data->len * sizeof *avg->val.vptr );
     }
 
     if ( avg->len != data->len )

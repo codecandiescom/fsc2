@@ -172,7 +172,7 @@ tegam2714a_p_pulse_setup( void )
        pulsers memory in later updates (used in order to minimze the number
        of commands to be send to the pulser) */
 
-    tegam2714a_p.old_arena = CHAR_P T_malloc( 2 * tegam2714a_p.max_seq_len );
+    tegam2714a_p.old_arena = T_malloc( 2 * tegam2714a_p.max_seq_len );
     tegam2714a_p.new_arena = tegam2714a_p.old_arena + tegam2714a_p.max_seq_len;
     memset( tegam2714a_p.new_arena, 0, tegam2714a_p.max_seq_len );
 

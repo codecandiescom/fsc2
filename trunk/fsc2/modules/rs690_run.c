@@ -973,11 +973,11 @@ rs690_delete_pulse( Pulse_T * p,
            its function send a warning and mark the function as useless */
 
         if ( f->num_pulses-- > 1 )
-            f->pulses = PULSE_PP T_realloc( f->pulses,
-                                           f->num_pulses * sizeof *f->pulses );
+            f->pulses = T_realloc( f->pulses,
+                                   f->num_pulses * sizeof *f->pulses );
         else
         {
-            f->pulses = PULSE_PP T_free( f->pulses );
+            f->pulses = T_free( f->pulses );
 
             if ( warn )
                 print( SEVERE, "Function '%s' isn't used at all because all "
@@ -1528,7 +1528,7 @@ rs690_insert_fs( FS_T * at,
     if ( rs690.new_fs == NULL )
         return rs690_append_fs( pos );
 
-    n = FS_P T_malloc( sizeof *n );
+    n = T_malloc( sizeof *n );
     rs690.new_fs_count++;
 
     n->next = at->next;
@@ -1556,7 +1556,7 @@ rs690_append_fs( Ticks pos )
 
     if ( rs690.new_fs == NULL )
     {
-        n = rs690.new_fs = FS_P T_malloc( sizeof *n );
+        n = rs690.new_fs = T_malloc( sizeof *n );
         rs690.new_fs_count = 1;
     }
     else
@@ -1564,7 +1564,7 @@ rs690_append_fs( Ticks pos )
         for ( p = rs690.new_fs; p->next != NULL; p = p->next )
             /* empty */ ;
 
-        n = p->next = FS_P T_malloc( sizeof *n );
+        n = p->next = T_malloc( sizeof *n );
         rs690.new_fs_count++;
     }
 
@@ -1610,7 +1610,7 @@ rs690_cleanup_fs( void )
     {
         while ( rs690.new_fs->next != NULL )
             rs690_delete_fs_successor( rs690.new_fs );
-        rs690.new_fs = FS_P T_free( rs690.new_fs );
+        rs690.new_fs = T_free( rs690.new_fs );
     }
     rs690.new_fs_count = 0;
 
@@ -1619,7 +1619,7 @@ rs690_cleanup_fs( void )
     {
         while ( rs690.old_fs->next != NULL )
             rs690_delete_fs_successor( rs690.old_fs );
-        rs690.old_fs = FS_P T_free( rs690.old_fs );
+        rs690.old_fs = T_free( rs690.old_fs );
     }
     rs690.old_fs_count = 0;
 }

@@ -228,8 +228,7 @@ hjs_attenuator_new_table_entry( int    type,
     if ( type == TABLE_INIT )
     {
         last_type = TABLE_INIT;
-        hjs_attenuator.att_table =
-              ATT_TABLE_ENTRY_P T_malloc( TABLE_CHUNK_SIZE
+        hjs_attenuator.att_table = T_malloc( TABLE_CHUNK_SIZE
                                           * sizeof *hjs_attenuator.att_table );
         cur_table_len = TABLE_CHUNK_SIZE;
         return;
@@ -263,9 +262,8 @@ hjs_attenuator_new_table_entry( int    type,
            the table in ascending order with respect to the frequencies, then
            set lowest and highest frequency in structure for synthesizer */
 
-        hjs_attenuator.att_table =
-             ATT_TABLE_ENTRY_P T_realloc( hjs_attenuator.att_table,
-                                          hjs_attenuator.att_table_len
+        hjs_attenuator.att_table = realloc( hjs_attenuator.att_table,
+                                            hjs_attenuator.att_table_len
                                           * sizeof *hjs_attenuator.att_table );
         cur_table_len = hjs_attenuator.att_table_len;
         qsort( hjs_attenuator.att_table, hjs_attenuator.att_table_len,
@@ -298,9 +296,8 @@ hjs_attenuator_new_table_entry( int    type,
         if ( cur_table_len <= hjs_attenuator.att_table_len )
         {
             cur_table_len += TABLE_CHUNK_SIZE;
-            hjs_attenuator.att_table =
-                ATT_TABLE_ENTRY_P T_realloc( hjs_attenuator.att_table,
-                                          cur_table_len
+            hjs_attenuator.att_table = T_realloc( hjs_attenuator.att_table,
+                                                  cur_table_len
                                           * sizeof *hjs_attenuator.att_table );
         }
 

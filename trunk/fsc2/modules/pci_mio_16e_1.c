@@ -86,15 +86,15 @@ pci_mio_16e_1_test_hook( void )
     for ( i = 0; i < 2; i++ )
         if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
             pci_mio_16e_1_stored.ao_state.reserved_by[ i ] =
-                    CHAR_P T_strdup( pci_mio_16e_1.ao_state.reserved_by[ i ] );
+                           T_strdup( pci_mio_16e_1.ao_state.reserved_by[ i ] );
 
     if ( pci_mio_16e_1.dio_state.reserved_by )
         pci_mio_16e_1_stored.dio_state.reserved_by =
-                        CHAR_P T_strdup( pci_mio_16e_1.dio_state.reserved_by );
+                           T_strdup( pci_mio_16e_1.dio_state.reserved_by );
 
     if ( pci_mio_16e_1.msc_state.reserved_by )
             pci_mio_16e_1_stored.msc_state.reserved_by =
-                        CHAR_P T_strdup( pci_mio_16e_1.msc_state.reserved_by );
+                           T_strdup( pci_mio_16e_1.msc_state.reserved_by );
 
     return 1;
 }
@@ -107,12 +107,11 @@ int
 pci_mio_16e_1_end_of_test_hook( void )
 {
     if ( pci_mio_16e_1.ai_state.ranges != NULL )
-        pci_mio_16e_1.ai_state.ranges =
-                              DOUBLE_P T_free( pci_mio_16e_1.ai_state.ranges );
+        pci_mio_16e_1.ai_state.ranges = T_free( pci_mio_16e_1.ai_state.ranges );
 
     if ( pci_mio_16e_1.ai_state.polarities != NULL )
         pci_mio_16e_1.ai_state.polarities =
-              NI_DAQ_BU_POLARITY_P T_free( pci_mio_16e_1.ai_state.polarities );
+                                   T_free( pci_mio_16e_1.ai_state.polarities );
 
     return 1;
 }
@@ -132,30 +131,30 @@ pci_mio_16e_1_exp_hook( void )
     for ( i = 0; i < 2; i++ )
         if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
             pci_mio_16e_1.ao_state.reserved_by[ i ] =
-                      CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
+                              T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
 
     if ( pci_mio_16e_1.dio_state.reserved_by )
         pci_mio_16e_1.dio_state.reserved_by =
-                          CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
+                                 T_free( pci_mio_16e_1.dio_state.reserved_by );
 
     if ( pci_mio_16e_1.msc_state.reserved_by )
         pci_mio_16e_1.msc_state.reserved_by =
-                          CHAR_P T_free( pci_mio_16e_1.msc_state.reserved_by );
+                                 T_free( pci_mio_16e_1.msc_state.reserved_by );
 
     pci_mio_16e_1 = pci_mio_16e_1_stored;
 
     for ( i = 0; i < 2; i++ )
         if ( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] )
             pci_mio_16e_1.ao_state.reserved_by[ i ] =
-             CHAR_P T_strdup( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] );
+                    T_strdup( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] );
 
     if ( pci_mio_16e_1_stored.dio_state.reserved_by )
         pci_mio_16e_1.dio_state.reserved_by =
-                 CHAR_P T_strdup( pci_mio_16e_1_stored.dio_state.reserved_by );
+                    T_strdup( pci_mio_16e_1_stored.dio_state.reserved_by );
 
     if ( pci_mio_16e_1_stored.msc_state.reserved_by )
         pci_mio_16e_1.msc_state.reserved_by =
-                 CHAR_P T_strdup( pci_mio_16e_1_stored.msc_state.reserved_by );
+                    T_strdup( pci_mio_16e_1_stored.msc_state.reserved_by );
 
     raise_permissions( );
     pci_mio_16e_1.board = ni_daq_open( BOARD_DEVICE_FILE, 0 );
@@ -249,15 +248,15 @@ pci_mio_16e_1_end_of_exp_hook( void )
     for ( i = 0; i < 2; i++ )
         if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
             pci_mio_16e_1.ao_state.reserved_by[ i ] =
-                      CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
+                            T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
 
     if ( pci_mio_16e_1.dio_state.reserved_by )
         pci_mio_16e_1.dio_state.reserved_by =
-                          CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
+                            T_free( pci_mio_16e_1.dio_state.reserved_by );
 
     if ( pci_mio_16e_1.msc_state.reserved_by )
         pci_mio_16e_1.msc_state.reserved_by =
-                          CHAR_P T_free( pci_mio_16e_1.msc_state.reserved_by );
+                            T_free( pci_mio_16e_1.msc_state.reserved_by );
 
     return 1;
 }
@@ -276,28 +275,28 @@ pci_mio_16e_1_exit_hook( void )
     {
         if ( pci_mio_16e_1.ao_state.reserved_by[ i ] )
             pci_mio_16e_1.ao_state.reserved_by[ i ] =
-                      CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
+                     T_free( pci_mio_16e_1.ao_state.reserved_by[ i ] );
 
         if ( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] )
             pci_mio_16e_1_stored.ao_state.reserved_by[ i ] =
-               CHAR_P T_free( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] );
+                     T_free( pci_mio_16e_1_stored.ao_state.reserved_by[ i ] );
     }
 
     if ( pci_mio_16e_1.dio_state.reserved_by )
         pci_mio_16e_1.dio_state.reserved_by =
-                          CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
+                     T_free( pci_mio_16e_1.dio_state.reserved_by );
 
     if ( pci_mio_16e_1_stored.dio_state.reserved_by )
         pci_mio_16e_1_stored.dio_state.reserved_by =
-                   CHAR_P T_free( pci_mio_16e_1_stored.dio_state.reserved_by );
+                     T_free( pci_mio_16e_1_stored.dio_state.reserved_by );
 
     if ( pci_mio_16e_1.msc_state.reserved_by )
         pci_mio_16e_1.msc_state.reserved_by =
-                          CHAR_P T_free( pci_mio_16e_1.msc_state.reserved_by );
+                     T_free( pci_mio_16e_1.msc_state.reserved_by );
 
     if ( pci_mio_16e_1_stored.msc_state.reserved_by )
         pci_mio_16e_1_stored.msc_state.reserved_by =
-                   CHAR_P T_free( pci_mio_16e_1_stored.msc_state.reserved_by );
+                     T_free( pci_mio_16e_1_stored.msc_state.reserved_by );
 }
 
 

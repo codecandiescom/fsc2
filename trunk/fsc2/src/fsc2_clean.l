@@ -42,7 +42,6 @@
 #include <sys/types.h>
 
 #include "fsc2_config.h"
-#include "fsc2_types.h"
 
 
 #ifndef __cplusplus
@@ -505,8 +504,7 @@ main( int    argc,
         if ( argv[ 1 ][ 0 ] == '~' && argv[ 1 ][ 1 ] == '/' )
         {
             pwe = getpwuid( getuid( ) );
-            Fname = CHAR_P T_malloc(   strlen( pwe->pw_dir )
-                                     + strlen( argv[ 1 ] ) );
+            Fname = T_malloc( strlen( pwe->pw_dir ) + strlen( argv[ 1 ] ) );
             strcpy( Fname, pwe->pw_dir );
             strcat( Fname, &argv[ 1 ][ 1 ] );
         }
@@ -620,8 +618,8 @@ include_handler( char * file )
             else if ( file[ 1 ] == '~' && file[ 2 ] == '/' )
             {
                 pwe = getpwuid( getuid( ) );
-                incl_file = CHAR_P T_malloc(   strlen( pwe->pw_dir ) 
-                                             + strlen( file ) - 1 );
+                incl_file = T_malloc(   strlen( pwe->pw_dir ) 
+                                      + strlen( file ) - 1 );
                 strcpy( incl_file, pwe->pw_dir );
                 strcat( incl_file, file + 2 );
             }
@@ -629,8 +627,8 @@ include_handler( char * file )
             {
                 incl_file = T_strdup( Fname );
                 *strrchr( incl_file, '/' ) = '\0';
-                incl_file = CHAR_P T_realloc( incl_file, strlen( incl_file )
-                                              + strlen( file ) + 1 );
+                incl_file = T_realloc(   incl_file, strlen( incl_file )
+                                       + strlen( file ) + 1 );
                 strcat( incl_file, "/" );
                 strcat( incl_file, file + 1 );
             }
@@ -639,8 +637,7 @@ include_handler( char * file )
         {
 #if defined DEF_INCL_DIR
             *( file + strlen( file ) - 1 ) = '\0';
-            incl_file = CHAR_P T_malloc(   strlen( file )
-                                         + strlen( DEF_INCL_DIR ) + 2 );
+            incl_file = T_malloc( strlen( file ) + strlen( DEF_INCL_DIR ) + 2 );
             strcpy( incl_file, DEF_INCL_DIR );
             if ( incl_file[ strlen( incl_file ) - 1 ] != '/' )
                 strcat( incl_file, "/" );
@@ -952,7 +949,7 @@ output( const char * fmt,
 
 
     if ( c == NULL )
-        c = CHAR_P T_malloc( len );
+        c = T_malloc( len );
 
     while ( 1 )
     {
@@ -982,7 +979,7 @@ output( const char * fmt,
         if ( wr >= 0 && ( size_t ) wr + 1 > new_len )
             new_len = ( size_t ) wr + 1;
 
-        c = CHAR_P T_realloc_or_free( c, new_len );
+        c = T_realloc_or_free( c, new_len );
         len = new_len;
     }
 

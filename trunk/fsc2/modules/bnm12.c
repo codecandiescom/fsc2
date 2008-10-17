@@ -187,7 +187,7 @@ bnm12_init_hook( void )
 
     if ( ! func_exists( bnm12.dio_value_func ) )
     {
-        bnm12.dio_value_func = CHAR_P T_free( bnm12.dio_value_func );
+        bnm12.dio_value_func = T_free( bnm12.dio_value_func );
         print( FATAL, "Function for reading from the DIO mode is missing.\n" );
         THROW( EXCEPTION );
     }

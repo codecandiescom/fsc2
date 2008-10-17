@@ -122,7 +122,7 @@ dg2020_reorganize_pulses( bool flag )
             for ( j = 0; j <= i; j++ )
             {
                 f = dg2020.function + j;
-                f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
+                f->pulse_params = T_free( f->pulse_params );
             }
 
             if ( flag )
@@ -885,7 +885,7 @@ dg2020_set_pulses( Function_T * f )
     {
         dg2020_set_constant( f->channel[ i ]->self, -1, 1, LOW );
 
-        f->channel[ i ]->old_d = CHAR_P T_calloc( 2 * dg2020.max_seq_len, 1 );
+        f->channel[ i ]->old_d = T_calloc( 2 * dg2020.max_seq_len, 1 );
         f->channel[ i ]->new_d = f->channel[ i ]->old_d + dg2020.max_seq_len;
         dg2020_set( f->channel[ i ]->old_d, 0, dg2020.max_seq_len - 1 );
     }
@@ -1058,11 +1058,11 @@ dg2020_delete_pulse( Pulse_T * p,
            its function send a warning and mark the function as useless */
 
         if ( f->num_pulses-- > 1 )
-            f->pulses = PULSE_PP T_realloc( f->pulses,
-                                           f->num_pulses * sizeof *f->pulses );
+            f->pulses = T_realloc( f->pulses,
+                                   f->num_pulses * sizeof *f->pulses );
         else
         {
-            f->pulses = PULSE_PP T_free( f->pulses );
+            f->pulses = T_free( f->pulses );
 
             if ( warn )
                 print( SEVERE, "Function '%s' isn't used at all because all "
@@ -1083,7 +1083,7 @@ dg2020_delete_pulse( Pulse_T * p,
     /* Special care has to be taken if this is the very last pulse... */
 
     if ( p == dg2020.pulses && p->next == NULL )
-        dg2020.pulses = PULSE_P T_free( dg2020.pulses );
+        dg2020.pulses = T_free( dg2020.pulses );
     else
         T_free( p );
 
@@ -1138,7 +1138,7 @@ dg2020_commit( Function_T * f,
 
     for ( i = 0; i < f->num_needed_channels; i++ )
     {
-        f->channel[ i ]->old_d = CHAR_P T_calloc( 2 * dg2020.max_seq_len, 1 );
+        f->channel[ i ]->old_d = T_calloc( 2 * dg2020.max_seq_len, 1 );
         f->channel[ i ]->new_d = f->channel[ i ]->old_d + dg2020.max_seq_len;
     }
 

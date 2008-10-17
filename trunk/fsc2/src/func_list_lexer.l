@@ -191,7 +191,7 @@ func_list_parse( Func_T ** fncts,
 
     CLOBBER_PROTECT( nf );
 
-    EDL.Fname = CHAR_P T_free( EDL.Fname );
+    EDL.Fname = T_free( EDL.Fname );
 
     /* If we're supposed only to use the files from the source directories
        only try to use those */
@@ -200,7 +200,7 @@ func_list_parse( Func_T ** fncts,
     {
         EDL.Fname = T_strdup( confdir "Functions" );
         if ( lstat( EDL.Fname, &buf ) < 0 )
-            EDL.Fname = CHAR_P T_free( EDL.Fname );
+            EDL.Fname = T_free( EDL.Fname );
     }
     else
     {
@@ -218,7 +218,7 @@ func_list_parse( Func_T ** fncts,
                 EDL.Fname = get_string( "%s%sFunctions", ldc, slash( ldc ) );
                 if ( lstat( EDL.Fname, &buf ) == 0 )
                     break;
-                EDL.Fname = CHAR_P T_free( EDL.Fname );
+                EDL.Fname = T_free( EDL.Fname );
             }
 
             T_free( ld );
@@ -229,7 +229,7 @@ func_list_parse( Func_T ** fncts,
         {
             EDL.Fname = T_strdup( libdir "Functions" );
             if ( lstat( EDL.Fname, &buf ) < 0 )
-                EDL.Fname = CHAR_P T_free( EDL.Fname );
+                EDL.Fname = T_free( EDL.Fname );
         }
     }
 
@@ -243,7 +243,7 @@ func_list_parse( Func_T ** fncts,
     {
         eprint( FATAL, UNSET, "Can't open function data base '%s'.\n",
                 EDL.Fname );
-        EDL.Fname = CHAR_P T_free( EDL.Fname );
+        EDL.Fname = T_free( EDL.Fname );
         THROW( EXCEPTION );
     }
 
@@ -282,7 +282,7 @@ func_list_parse( Func_T ** fncts,
     nf = num + num_predef_func;
 
     if ( num != 0 )
-        *fncts = FUNC_P T_realloc( *fncts, nf * sizeof **fncts );
+        *fncts = T_realloc( *fncts, nf * sizeof **fncts );
 
     for ( cur = num_predef_func; cur < nf; cur++ )
     {
@@ -337,8 +337,8 @@ fll_count_functions( Func_T * fncts,
 
         if ( ret_token == IDENT_TOKEN )
         {
-            if ( ( f = FUNC_P bsearch( func_listtext, fncts, num_predef_func,
-                                       sizeof *fncts, ffl_func_cmp2 ) )
+            if ( ( f = bsearch( func_listtext, fncts, num_predef_func,
+                                sizeof *fncts, ffl_func_cmp2 ) )
                  != NULL )
             {
                 eprint( WARN, UNSET, "Loadable function '%s()' hides "

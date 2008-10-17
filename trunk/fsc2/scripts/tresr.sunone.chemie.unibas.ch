@@ -62,7 +62,7 @@ my $balloon = $mw->Balloon( );
 my $f0 = $mw->Frame( );
 my $f0_l1 = $f0->Label( '-text'           => 'Number of field ranges:',
 						'-width'          => '20',
-						'anchor'          => 'w' );
+						'-anchor'         => 'w' );
 my $f0_v = $f0->Scale( '-variable'        => \$no_ranges,
                        '-orient'          => 'horizontal',
                        '-from'            => 1,
@@ -438,7 +438,7 @@ sub make_rest {
         my $fs_l1 = $fs[ $i ]->Label( '-text'           =>
                                       "Start field " . ($i + 1) . " :",
                                       '-width'          => '20',
-                                      'anchor'          => 'w' );
+                                      '-anchor'         => 'w' );
         my $fs_v = $fs[ $i ]->Entry( '-textvariable'    => \$start_field[ $i ],
                                      '-width'           => '8',
                                      '-validate'        => 'key',
@@ -459,7 +459,7 @@ sub make_rest {
         my $fe_l1 = $fe[ $i ]->Label( '-text'           => 
                                       "End field " . ($i + 1) . ":",
                                       '-width'          => '20',
-                                      'anchor'          => 'w' );
+                                      '-anchor'         => 'w' );
         my $fe_v = $fe[ $i ]->Entry( '-textvariable'    => \$end_field[ $i ],
                                      '-width'           => '8',
                                      '-validate'        => 'key',
@@ -481,8 +481,8 @@ sub make_rest {
 
     $fr[ 0 ] = $mw->Frame( );
     $fr[ 1 ] = $fr[ 0 ]->Label( '-text'           => 'Field step size:',
-                            '-width'          => '20',
-                            'anchor'          => 'w' );
+								'-width'          => '20',
+								'-anchor'         => 'w' );
     $fr[ 2 ] = $fr[ 0 ]->Entry( '-textvariable'    => \$field_step,
                                 '-width'           => '8',
                                 '-validate'        => 'key',
@@ -501,7 +501,7 @@ sub make_rest {
     $fr[ 4 ] = $mw->Frame( );
     my $fr4_l = $fr[ 4 ]->Label( '-text'      => 'Number of averages:',
                                  '-width'     => '20',
-                                 'anchor'     => 'w' );
+                                 '-anchor'    => 'w' );
     my $fr4_m = $fr[ 4 ]->Optionmenu( '-options' => 
                                       [ ( 10, 20, 50, 100, 200, 500,
                                           1000, 2000, 5000,
@@ -531,6 +531,6 @@ sub make_rest {
     $fr[ 6 ]->pack( '-side' => 'top',
                     '-fill' => 'x',
                     '-padx' => '4m' );
-    $fr[ 7 ]->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
-    $fr[ 8 ]->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+    $fr[ 7 ]->pack( %wp, '-padx' => '5m', '-pady' => '3m' );
+    $fr[ 8 ]->pack( %wp, '-padx' => '5m', '-pady' => '3m' );
 }

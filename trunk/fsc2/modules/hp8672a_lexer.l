@@ -287,8 +287,8 @@ hp8672a_new_table_entry( int    type,
     if ( type == TABLE_INIT )
     {
         is_freq = is_att = UNSET;
-        hp8672a.att_table = ATT_TABLE_ENTRY_P T_malloc( TABLE_CHUNK_SIZE
-                                                 * sizeof *hp8672a.att_table );
+        hp8672a.att_table = T_malloc(   TABLE_CHUNK_SIZE
+                                      * sizeof *hp8672a.att_table );
         cur_table_len = TABLE_CHUNK_SIZE;
         return;
     }
@@ -320,8 +320,9 @@ hp8672a_new_table_entry( int    type,
            the table in ascending order with respect to the frequencies, then
            set lowest and highest frequency in structure for synthesizer */
 
-        hp8672a.att_table = ATT_TABLE_ENTRY_P T_realloc( hp8672a.att_table,
-                           hp8672a.att_table_len * sizeof *hp8672a.att_table );
+        hp8672a.att_table = T_realloc( hp8672a.att_table,
+                                         hp8672a.att_table_len
+                                       * sizeof *hp8672a.att_table );
         cur_table_len = hp8672a.att_table_len;
         qsort( hp8672a.att_table, hp8672a.att_table_len,
                sizeof *hp8672a.att_table, hp8672a_comp );
@@ -367,8 +368,9 @@ hp8672a_new_table_entry( int    type,
     if ( cur_table_len <= hp8672a.att_table_len )
     {
         cur_table_len += TABLE_CHUNK_SIZE;
-        hp8672a.att_table = ATT_TABLE_ENTRY_P T_realloc( hp8672a.att_table,
-                                   cur_table_len * sizeof *hp8672a.att_table );
+        hp8672a.att_table = T_realloc( hp8672a.att_table,
+                                         cur_table_len
+                                       * sizeof *hp8672a.att_table );
     }
 
     if ( type == IS_FREQ )

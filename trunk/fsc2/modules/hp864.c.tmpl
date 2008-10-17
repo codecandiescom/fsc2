@@ -166,11 +166,10 @@ void
 hp864_tmpl_exit_hook( void )
 {
     if ( hp864_tmpl.table_file != NULL )
-        hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
+        hp864_tmpl.table_file = T_free( hp864_tmpl.table_file );
 
     if ( hp864_tmpl.use_table && hp864_tmpl.att_table != NULL )
-        hp864_tmpl.att_table =
-                              ATT_TABLE_ENTRY_P T_free( hp864_tmpl.att_table );
+        hp864_tmpl.att_table = T_free( hp864_tmpl.att_table );
 }
 
 
@@ -643,7 +642,7 @@ synthesizer_use_table( Var_T * v )
         {
             print( FATAL, "Default table file '%s' not found.\n",
                    hp864_tmpl.table_file );
-            hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
+            hp864_tmpl.table_file = T_free( hp864_tmpl.table_file );
             THROW( EXCEPTION );
         }
     }
@@ -678,12 +677,12 @@ synthesizer_use_table( Var_T * v )
     OTHERWISE
     {
         fclose( tfp );
-        hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
+        hp864_tmpl.table_file = T_free( hp864_tmpl.table_file );
         RETHROW( );
     }
 
     fclose( tfp );
-    hp864_tmpl.table_file = CHAR_P T_free( hp864_tmpl.table_file );
+    hp864_tmpl.table_file = T_free( hp864_tmpl.table_file );
     hp864_tmpl.use_table = SET;
 
     return vars_push( INT_VAR, 1L );

@@ -987,11 +987,11 @@ ep385_delete_pulse( Pulse_T * p,
            its function send a warning and mark the function as useless */
 
         if ( f->num_pulses-- > 1 )
-            f->pulses = PULSE_PP T_realloc( f->pulses,
-                                           f->num_pulses * sizeof *f->pulses );
+            f->pulses = T_realloc( f->pulses,
+                                   f->num_pulses * sizeof *f->pulses );
         else
         {
-            f->pulses = PULSE_PP T_free( f->pulses );
+            f->pulses = T_free( f->pulses );
 
             if ( warn )
                 print( SEVERE, "Function '%s' isn't used at all because all "

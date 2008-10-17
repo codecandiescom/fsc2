@@ -153,7 +153,7 @@ hjs_fc_init_hook( void )
             THROW( EXCEPTION );
         }
 
-        func = CHAR_P T_free( func );
+        func = T_free( func );
         vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
 
         v = func_call( func_ptr );
@@ -193,7 +193,7 @@ hjs_fc_init_hook( void )
             THROW( EXCEPTION );
         }
 
-        func = CHAR_P T_free( func );
+        func = T_free( func );
         vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
 
         v = func_call( func_ptr );
@@ -217,11 +217,11 @@ hjs_fc_init_hook( void )
         if ( func )
             T_free( func );
         if ( hjs_fc.gm_gf_func )
-            hjs_fc.gm_gf_func = CHAR_P T_free( hjs_fc.gm_gf_func );
+            hjs_fc.gm_gf_func = T_free( hjs_fc.gm_gf_func );
         if ( hjs_fc.gm_res_func )
-            hjs_fc.gm_res_func = CHAR_P T_free( hjs_fc.gm_res_func );
+            hjs_fc.gm_res_func = T_free( hjs_fc.gm_res_func );
         if ( hjs_fc.dac_func )
-            hjs_fc.dac_func = CHAR_P T_free( hjs_fc.dac_func );
+            hjs_fc.dac_func = T_free( hjs_fc.dac_func );
         RETHROW( );
     }
 
@@ -337,7 +337,7 @@ void
 hjs_fc_exit_hook( void )
 {
     if ( hjs_fc.calib_file != NULL )
-        hjs_fc.calib_file = CHAR_P T_free( hjs_fc.calib_file );
+        hjs_fc.calib_file = T_free( hjs_fc.calib_file );
     if ( hjs_fc.dac_func )
         T_free( hjs_fc.dac_func );
     if ( hjs_fc.gm_gf_func )
@@ -457,7 +457,7 @@ magnet_calibration_file( Var_T * v )
                                         v->val.sptr + 1 );
     else
     {
-        buf = CHAR_P T_malloc( PATH_MAX );
+        buf = T_malloc( PATH_MAX );
 
         if ( getcwd( buf, PATH_MAX ) == NULL )
         {

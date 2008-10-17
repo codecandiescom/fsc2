@@ -46,6 +46,7 @@
 * Microwave Attenuator Functions::
 * Light Chopper Functions::
 * Goniometer Functions::
+* EPR Modulation Functions::
 * Multi-Device Functions::
 @end menu
 @end ifinfo
@@ -7374,7 +7375,7 @@ e.g.@: to trigger an acquisition.
 @end table
 
 
-@node Goniometer Functions, Multi-Device Functions, Light Chopper Functions, Device Functions
+@node Goniometer Functions, EPR Modulation Functions, Light Chopper Functions, Device Functions
 @section Goniometer Functions
 @cindex Goniometer Functions
 
@@ -7498,7 +7499,278 @@ This function can only be used in the @code{EXPERIMENT} section.
 @end table
 
 
-@node Multi-Device Functions, , Goniometer Functions, Device Functions
+@node EPR Modulation Functions, Multi-Device Functions , Goniometer Functions, Device Functions
+@section EPR Modulation Functions
+@cindex EPR Modulation Functions
+
+The following functions are for a pseudo-device that can be used to
+store informations about EPR resonators, the modulation field to
+modulation voltage ratios and modulation phase settings for
+different moduation frequencies. The module for this pseudo-device
+can be loaded by specifying
+@example
+epr_mod
+@end example
+@noindent
+in the @code{DEVICES} section. The informations about the properties of
+resonators get stored in a file, unless set differently in
+@file{/usr/local/lib/fsc2/epr_mod.state}. Each resonator in this file is
+characterised by its name, a (non-empty) string. All functions can be
+called from all sections of an @code{EDL} script.
+
+For the modulation field to voltage ration inter- or even extrapolation
+can be done if the requested frequency doesn't match one of the ones
+known for a resonator (interpolation for frequencies within the range of
+known frequencies, extrapolation for frequencies that don't lay within
+this range). This requires that inter- or extrapolation is allowed for a
+resonator, that there are at least three known values for the
+field/voltage ratio and that a linear square fit (assuming that the
+modulation field is inverse to the frequency, with an voltage offset
+being taken into consideration) has a correlation coefficient
+(@math{r^2}) at least as large as set in the configuration file for the
+module.
+
+
+@noindent
+@strong{List of all EPR modulation functions}:
+@table @samp
+@item @ref{epr_modulation_name()}
+@item @ref{epr_modulation_name()}
+@item @ref{epr_modulation_ratio()}
+@item @ref{epr_modulation_phase()}
+@item @ref{epr_modulation_has_phase()}
+@item @ref{epr_modulation_resonator_interpolate()}
+@item @ref{epr_modulation_resonator_can_interpolate()}
+@item @ref{epr_modulation_resonator_extrapolate()}
+@item @ref{epr_modulation_resonator_can_extrapolate()}
+@item @ref{epr_modulation_add_resonator()}
+@item @ref{epr_modulation_delete_resonator()}
+@item @ref{epr_modulation_resonator_count()}
+@item @ref{epr_modulation_resonator_name()}
+@item @ref{epr_modulation_frequencies()}
+@item @ref{epr_modulation_store()}
+
+
+@end table
+
+@noindent
+@strong{Descriptions of EPR modulation functions}:
+
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML isn't valid
+
+@anchor{epr_modulation_name()}
+@findex epr_modulation_name()
+
+@table @samp
+
+@item epr_modulation_name()
+Returns a string with the name of the pseudo-device.
+
+
+@anchor{epr_modulation_ratio()}
+@findex epr_modulation_ratio()
+@item epr_modulation_ratio()
+This function is for quering or setting the modulation field to voltage
+ratio for a certain frequency and resonator. Expects at least two
+arguments, first the resonator name (a string) and a positive, non-zero
+frequency. If the there is no further argument the function returns the
+ratio of the modulation field to the modulation frequency (in G/V) if
+possible.
+
+The following algorithm is used to determine the field/voltage ration:
+If the frequency is identical to one known for the resonator the
+corresponding ratio is returned. If the frequency does not match a
+known frequency exactly but is within a confidence interval around a
+known frequency (the interval is set via the configuration file) and
+interpolation is not allowed or possible the ratio for the known
+frequency is returned, otherwise an interpolated value. If the
+requested frequency isn't within the confidence interval but is
+within the range of known values the interpolated value is also
+returned if interpolation is possible, otherwise an exception is
+thrown. If the frequency is outside the range of known frequencies
+and extrapolation is allowed and possible the extrapolated for the
+ration is returned, otherwise an exception gets thrown.
+
+If there's another argument this is taken to be a new ration to
+be set. This requires that the frequency is not within the confidence
+interval of an already known frequency or setting the new value is
+rejected and an excption is thrown. Please note that setting the
+ratio for a new frequency only is in effect until the @code{EDL}
+script ends unless the function @ref{epr_modulation_store()} is
+called afterwards to make this setting permanent.
+
+
+@anchor{epr_modulation_phase()}
+@findex epr_modulation_phase()
+@item epr_modulation_phase()
+This function is for quering or setting the modulation phase for a
+certain resonator and frequency. The function must be called with
+at least two arguments, the name of the resonator (as a string) and
+a frequency that has already been assigned a field/voltage ratio.
+
+If no further argument is given the function returns the modulation
+phase for the resonator and frequency if possible. This requires that
+the frequency matches one of the known frequencies within the confidence
+interval (as set in the configuration file for the module) and that
+a modulattion phase is known for this resonator and frequency. Otherwise
+an exception is thrown.
+
+If there's nother argument this is taken to be a modulation phase. This
+requires that the frequency is not within the confidence interval of an
+already known frequency or setting the new value is rejected and an
+excption is thrown. Please note that setting the phase for a new
+frequency only is in effect until the @code{EDL} script ends unless the
+function @ref{epr_modulation_store()} is called afterwards to make this
+setting permanent.
+
+
+@anchor{epr_modulation_has_phase()}
+@findex epr_modulation_has_phase()
+@item epr_modulation_has_phase()
+The function allows to query if a modulation phase for a certain
+resonator and (known) frequency is known. It takes two arguments, the
+name of the resonator (as a string) and a frequency. If the frequency is
+within the confidence interval of one of the known modulation
+frequencies and a phase is known for this frequency the function returns
+@code{1}, otherwise @code{0}.
+
+
+@anchor{epr_modulation_resonator_interpolate()}
+@findex epr_modulation_resonator_interpolate()
+@item epr_modulation_resonator_interpolate()
+The function allows tp either query or set if interpolation (for
+modulation field to voltage ratios) is allowed for a certain
+resonator. The function expects at least one argument, the name
+of the resonator (as a string). If there's no further argument
+the function returns @code{1} if interpolation is allowed for
+the resonator, otherwise @code{1}.
+
+If there's another argument it must be of boolean type, i.e.@: either
+@code{"ON"} or @code{1} to permit interpolation or @code{"OFF"} or
+@code{0} to disable interpolation. Please note that allowing
+interpolation does not gurantee that interpolation can be done since
+this also requires that there are at least 3 known frequencies and that
+the correlation coefficient of a least square fit is at least as large
+as set in the configuration file. Whether interpolation is possible for a
+certain resonator can be determined by calling the function
+@code{epr_modulation_can_interpolate()}. Please note also that allowing
+or disabling intrepolation for a frequency only is in effect until the
+@code{EDL} script ends unless the function @ref{epr_modulation_store()}
+is called afterwards to make this setting permanent.
+
+
+@anchor{epr_modulation_resonator_can_interpolate()}
+@findex epr_modulation_resonator_can_interpolate()
+@item epr_modulation_resonator_can_interpolate()
+This function allows to determine if interpolation is possible for
+a resonator. The function requires a single rgument, the name of
+the resonator (as a string). Itt returns @code{1} if interpolation
+can be done, otherwise @code{0}. Interpolation is possible if it's
+allowed for the resonator, ratios for at least 3 frequencies are
+known and the correlation coeficient for a least square fit is
+at least as large as set in the configuration file for the device.
+
+
+@anchor{epr_modulation_resonator_extrapolate()}
+@findex epr_modulation_resonator_extrapolate()
+@item epr_modulation_resonator_extrapolate()
+The function allows tp either query or set if extrapolation (for
+modulation field to voltage ratios) is allowed for a certain
+resonator. The function expects at least one argument, the name
+of the resonator (as a string). If there's no further argument
+the function returns @code{1} if extrapolation is allowed for
+the resonator, otherwise @code{1}.
+
+If there's another argument it must be of boolean type, i.e.@: either
+@code{"ON"} or @code{1} to permit extrapolation or @code{"OFF"} or
+@code{0} to disable extrapolation. Please note that allowing
+extrapolation does not gurantee that extrapolation can be done since
+this also requires that there are at least 3 known frequencies and that
+the correlation coefficient of a least square fit is at least as large
+as set in the configuration file. Whether extrapolation is possible for a
+certain resonator can be determined by calling the function
+@code{epr_modulation_can_extrapolate()}. Please note also that allowing
+or disabling intrepolation for a frequency only is in effect until the
+@code{EDL} script ends unless the function @ref{epr_modulation_store()}
+is called afterwards to make this setting permanent.
+
+
+@anchor{epr_modulation_resonator_can_extrapolate()}
+@findex epr_modulation_resonator_can_extrapolate()
+@item epr_modulation_resonator_can_extrapolate()
+This function allows to determine if extrapolation is possible for
+a resonator. The function requires a single rgument, the name of
+the resonator (as a string). Itt returns @code{1} if extrapolation
+can be done, otherwise @code{0}. Extrapolation is possible if it's
+allowed for the resonator, ratios for at least 3 frequencies are
+known and the correlation coeficient for a least square fit is
+at least as large as set in the configuration file for the device.
+
+
+@anchor{epr_modulation_add_resonator()}
+@findex epr_modulation_add_resonator()
+@item epr_modulation_add_resonator()
+This function allows to create an new resonator (i.e. a data structure
+that represents informations about a resonator). IIt expects a single
+arguemnt, the name of the new resonator (as a string). Informations for
+this resonator can be set by the functions listed above. Please note
+that creating a new resonator and setting properties only is in effect
+until the @code{EDL} script ends unless the function
+@ref{epr_modulation_store()} is called afterwards to make this setting
+permanent.
+
+
+@anchor{epr_modulation_delete_resonator()}
+@findex epr_modulation_delete_resonator()
+@item epr_modulation_delete_resonator()
+This function allows to delete a resonator and all its properties. The
+function tales a single argument, the name of the resonator to delete
+(as a string). Please note that deleting a resonator only is in effect
+until the @code{EDL} script ends unless the function
+@ref{epr_modulation_store()} is called afterwards to make this setting
+permanent.
+
+
+@anchor{epr_modulation_resonator_count()}
+@findex epr_modulation_resonator_count()
+@item epr_modulation_resonator_count()
+This function takes no arguments and returns the number of known
+resonators.
+
+
+@anchor{epr_modulation_resonator_name()}
+@findex epr_modulation_resonator_name()
+@item epr_modulation_resonator_name()
+This function allows to find the name of a resonator by its index in the
+list of resonators (a number between @code{1} and the number of known
+resonators). The function takes a single argument, the resonator's index
+(and invalid index will result in an exception getting thrown). The
+function can be used to in conjunction with the
+@ref{epr_modulation_resonator_count()} to obtain the names of all known
+resonators.
+
+@anchor{epr_modulation_frequencies()}
+@findex epr_modulation_frequencies()
+@item epr_modulation_frequencies()
+This function returns an array of all frequencies known for a certain
+resonator. It takes a single argument, the name of a resonator (as a
+string).
+
+
+@anchor{epr_modulation_store()}
+@findex epr_modulation_store()
+@item epr_modulation_store()
+This function takes no arguments and must be called to make any changes
+to the settings for the resoators permanent - without calling this
+function all changes are discarded once the running @code{EDL} script
+ends.
+
+
+@end table
+
+
+@node Multi-Device Functions, , EPR Modulation Functions, Device Functions
 @section Multi-Device Functions
 @cindex Multi-Device Functions
 

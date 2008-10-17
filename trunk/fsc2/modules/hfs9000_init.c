@@ -161,8 +161,8 @@ hfs9000_basic_pulse_check( void )
         if ( p->is_active )
             p->was_active = p->has_been_active = SET;
 
-        f->pulses = PULSE_PP T_realloc( f->pulses,
-                                   ( f->num_pulses + 1 ) * sizeof *f->pulses );
+        f->pulses = T_realloc( f->pulses,
+                               ( f->num_pulses + 1 ) * sizeof *f->pulses );
         f->pulses[ f->num_pulses++ ] = p;
     }
 }

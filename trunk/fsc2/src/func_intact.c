@@ -108,7 +108,7 @@ toolbox_create( long layout )
     if ( Toolbox != NULL )
         return;
 
-    Toolbox                 = TOOLBOX_P T_malloc( sizeof *Toolbox );
+    Toolbox                 = T_malloc( sizeof *Toolbox );
     Toolbox->layout         = layout;
     Toolbox->Tools          = NULL;                 /* no form created yet */
     Toolbox->objs           = NULL;                 /* and also no objects */
@@ -198,7 +198,7 @@ toolbox_delete( void )
         Toolbox->Tools = NULL;
     }
 
-    Toolbox = TOOLBOX_P T_free( Toolbox );
+    Toolbox = T_free( Toolbox );
 }
 
 
@@ -391,7 +391,7 @@ f_layout_child( long layout )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
     pos += sizeof EDL.Lc;
@@ -487,7 +487,7 @@ f_objdel_child( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );      /* current line number */
     pos += sizeof EDL.Lc;
@@ -683,7 +683,7 @@ f_obj_clabel_child( long   ID,
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
     pos += sizeof EDL.Lc;
@@ -812,7 +812,7 @@ f_obj_xable_child( long ID,
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );   /* current line number */
     pos += sizeof EDL.Lc;
@@ -923,7 +923,7 @@ tools_clear( void )
         Toolbox->Tools = NULL;
     }
 
-    Toolbox = TOOLBOX_P T_free( Toolbox );
+    Toolbox = T_free( Toolbox );
 }
 
 
@@ -2218,7 +2218,7 @@ f_tb_changed_child( Var_T * v )
         var_count++;
     }
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );         /* current line number */
     pos += sizeof EDL.Lc;
@@ -2440,7 +2440,7 @@ f_tb_wait_child( Var_T * v )
         var_count++;
     }
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );         /* current line number */
     pos += sizeof EDL.Lc;

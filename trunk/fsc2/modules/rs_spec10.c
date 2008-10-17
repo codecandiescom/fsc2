@@ -618,7 +618,7 @@ ccd_camera_get_image( Var_T * v  UNUSED_ARG )
             max_val = ~ ( uns16 ) 0;
 
             size = ( uns32 ) ( width * height *sizeof *frame );
-            cf = frame = UNS16_P T_malloc( size );
+            cf = frame = T_malloc( size );
 
             for ( i = 0; i < width * height; i++ )
                 frame[ i ] = random( ) % max_val;
@@ -804,7 +804,7 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
             max_val = ~ ( uns16 ) 0;
 
             size = ( uns32 ) ( width * sizeof *frame );
-            cf = frame = UNS16_P T_malloc( size );
+            cf = frame = T_malloc( size );
 
             for ( i = 0; i < width; i++ )
                 frame[ i ] = random( ) * max_val;

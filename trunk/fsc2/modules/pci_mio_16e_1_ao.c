@@ -85,7 +85,7 @@ daq_reserve_dac( Var_T * v )
                            v->val.sptr ) )
             {
                 pci_mio_16e_1.ao_state.reserved_by[ dac ] =
-                    CHAR_P T_free( pci_mio_16e_1.ao_state.reserved_by[ dac ] );
+                            T_free( pci_mio_16e_1.ao_state.reserved_by[ dac ] );
                 return vars_push( INT_VAR, 1L );
             }
             else

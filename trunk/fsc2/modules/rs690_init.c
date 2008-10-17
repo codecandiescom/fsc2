@@ -85,19 +85,19 @@ rs690_init_setup( void )
             f = rs690.function + i;
 
             if ( f->pulses != NULL )
-                f->pulses = PULSE_PP T_free( f->pulses );
+                f->pulses = T_free( f->pulses );
 
             if ( f->pm != NULL )
             {
                 for ( j = 0; j < f->pc_len * f->num_channels; j++ )
                     T_free( f->pm[ j ] );
-                f->pm = PULSE_PPP T_free( f->pm );
+                f->pm = T_free( f->pm );
             }
         }
 
         for ( i = 0; i < MAX_CHANNELS; i++ )
             rs690.channel[ i ].pulse_params =
-                    PULSE_PARAMS_P T_free( rs690.channel[ i ].pulse_params );
+                                     T_free( rs690.channel[ i ].pulse_params );
 
         RETHROW( );
     }
@@ -242,7 +242,7 @@ rs690_create_shape_pulses( void )
              || ! f->uses_auto_shape_pulses )
             continue;
 
-        np = PULSE_P T_malloc( sizeof *np );
+        np = T_malloc( sizeof *np );
 
         np->prev = cp;
         cp = cp->next = np;
@@ -409,7 +409,7 @@ rs690_create_twt_pulses( void )
              || ! f->uses_auto_twt_pulses )
             continue;
 
-        np = PULSE_P T_malloc( sizeof *np );
+        np = T_malloc( sizeof *np );
 
         np->prev = cp;
         cp = cp->next = np;
@@ -521,8 +521,8 @@ rs690_basic_functions_check( void )
                 continue;
 
             f->num_pulses++;
-            f->pulses = PULSE_PP T_realloc( f->pulses,
-                                           f->num_pulses * sizeof *f->pulses );
+            f->pulses = T_realloc( f->pulses,
+                                   f->num_pulses * sizeof *f->pulses );
             f->pulses[ f->num_pulses - 1 ] = p;
 
             if ( p->pc != NULL )
@@ -583,16 +583,14 @@ rs690_create_phase_matrix( Function_T * f )
     int i, j, k, l, m;
 
 
-    f->pm = PULSE_PPP T_malloc( f->pc_len * f->num_channels * sizeof *f->pm );
+    f->pm = T_malloc( f->pc_len * f->num_channels * sizeof *f->pm );
 
     for ( j = 0; j < f->pc_len * f->num_channels; j++ )
         f->pm[ j ] = NULL;
 
     for ( j = 0; j < f->pc_len * f->num_channels; j++ )
     {
-        f->pm[ j ] = PULSE_PP T_malloc( ( f->num_pulses + 1 )
-                                        * sizeof **f->pm );
-
+        f->pm[ j ] = T_malloc( ( f->num_pulses + 1 ) * sizeof **f->pm );
         *f->pm[ j ] = NULL;         /* list is still empty */
     }
 
@@ -756,9 +754,8 @@ rs690_setup_channels( void )
 
         if ( ch->num_pulses > 0 )
         {
-            ch->pulse_params =
-                PULSE_PARAMS_P T_malloc( 2 * ch->num_pulses *
-                                         sizeof *ch->pulse_params );
+            ch->pulse_params = T_malloc(   2 * ch->num_pulses
+                                         * sizeof *ch->pulse_params );
             ch->old_pulse_params = ch->pulse_params + ch->num_pulses;
 
             for ( j = 0; j < ch->num_pulses; j++ )

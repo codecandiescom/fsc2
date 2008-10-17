@@ -121,7 +121,7 @@ hjs_sfc_init_hook( void )
 
     if ( ! func_exists( hjs_sfc.dac_func ) )
     {
-        hjs_sfc.dac_func = CHAR_P T_free( hjs_sfc.dac_func );
+        hjs_sfc.dac_func = T_free( hjs_sfc.dac_func );
         print( FATAL, "Function for setting the DAC is missing.\n" );
         THROW( EXCEPTION );
     }
@@ -139,7 +139,7 @@ hjs_sfc_init_hook( void )
         THROW( EXCEPTION );
     }
 
-    func = CHAR_P T_free( func );
+    func = T_free( func );
     vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
     
     v = func_call( func_ptr );
@@ -218,7 +218,7 @@ void
 hjs_sfc_exit_hook( void )
 {
     if ( hjs_sfc.calib_file != NULL )
-        hjs_sfc.calib_file = CHAR_P T_free( hjs_sfc.calib_file );
+        hjs_sfc.calib_file = T_free( hjs_sfc.calib_file );
 
     if ( hjs_sfc.dac_func )
         T_free( hjs_sfc.dac_func );
@@ -561,7 +561,7 @@ magnet_calibration_file( Var_T * v )
                                          v->val.sptr + 1 );
     else
     {
-        buf = CHAR_P T_malloc( PATH_MAX );
+        buf = T_malloc( PATH_MAX );
 
         if ( getcwd( buf, PATH_MAX ) == NULL )
         {

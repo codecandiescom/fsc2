@@ -149,10 +149,10 @@ hjs_daadc_exp_hook( void )
        last experiment) */
 
     if ( hjs_daadc.dac_reserved_by )
-        hjs_daadc.dac_reserved_by = CHAR_P T_free( hjs_daadc.dac_reserved_by );
+        hjs_daadc.dac_reserved_by = T_free( hjs_daadc.dac_reserved_by );
 
     if ( hjs_daadc.adc_reserved_by )
-        hjs_daadc.adc_reserved_by = CHAR_P T_free( hjs_daadc.adc_reserved_by );
+        hjs_daadc.adc_reserved_by = T_free( hjs_daadc.adc_reserved_by );
 
     hjs_daadc = hjs_daadc_stored;
 
@@ -272,8 +272,7 @@ daq_reserve_dac( Var_T * v )
         {
             if ( ! strcmp( hjs_daadc.dac_reserved_by, v->val.sptr ) )
             {
-                hjs_daadc.dac_reserved_by =
-                                    CHAR_P T_free( hjs_daadc.dac_reserved_by );
+                hjs_daadc.dac_reserved_by = T_free( hjs_daadc.dac_reserved_by );
                 return vars_push( INT_VAR, 1L );
             }
             else
@@ -336,8 +335,7 @@ daq_reserve_adc( Var_T * v )
         {
             if ( ! strcmp( hjs_daadc.adc_reserved_by, v->val.sptr ) )
             {
-                hjs_daadc.adc_reserved_by =
-                                    CHAR_P T_free( hjs_daadc.adc_reserved_by );
+                hjs_daadc.adc_reserved_by = T_free( hjs_daadc.adc_reserved_by );
                 return vars_push( INT_VAR, 1L );
             }
             else

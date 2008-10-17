@@ -167,7 +167,7 @@ gg_chopper_init_hook( void )
 
     if ( ! func_exists( gg_chopper.dio_func ) )
     {
-        gg_chopper.dio_func = CHAR_P T_free( gg_chopper.dio_func );
+        gg_chopper.dio_func = T_free( gg_chopper.dio_func );
         print( FATAL, "Function for setting the DIO is missing from module "
                "'%s'.\n", DAQ_MODULE ); 
         THROW( EXCEPTION );
@@ -183,8 +183,8 @@ gg_chopper_init_hook( void )
 
     if ( ! func_exists( gg_chopper.freq_out_func ) )
     {
-        gg_chopper.dio_func = CHAR_P T_free( gg_chopper.dio_func );
-        gg_chopper.freq_out_func = CHAR_P T_free( gg_chopper.freq_out_func );
+        gg_chopper.dio_func = T_free( gg_chopper.dio_func );
+        gg_chopper.freq_out_func = T_free( gg_chopper.freq_out_func );
         print( FATAL, "Function for setting the frequency of the FREQ_OUT "
                "pin is missing from module '%s'.\n", DAQ_MODULE );
         THROW( EXCEPTION );
@@ -269,9 +269,9 @@ void
 gg_chopper_exit_hook( void )
 {
     if ( gg_chopper.dio_func )
-        gg_chopper.dio_func = CHAR_P T_free( gg_chopper.dio_func );
+        gg_chopper.dio_func = T_free( gg_chopper.dio_func );
     if ( gg_chopper.freq_out_func )
-        gg_chopper.freq_out_func = CHAR_P T_free( gg_chopper.freq_out_func );
+        gg_chopper.freq_out_func = T_free( gg_chopper.freq_out_func );
 }
 
 

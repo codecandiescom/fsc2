@@ -49,7 +49,7 @@ ep385_new_pulse( long pnum )
 
     /* Append the pulse to the linked list of all pulses */
 
-    cp = PULSE_P T_malloc( sizeof *cp );
+    cp = T_malloc( sizeof *cp );
 
     if ( ep385.pulses == NULL )
     {

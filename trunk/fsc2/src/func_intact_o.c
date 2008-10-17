@@ -277,7 +277,7 @@ f_ocreate( Var_T * var )
         if ( Toolbox == NULL )
             toolbox_create( VERT );
 
-        new_io = IOBJECT_P T_malloc( sizeof *new_io );
+        new_io = T_malloc( sizeof *new_io );
 
         /* We already do the following here while we're in the TRY block... */
 
@@ -290,7 +290,7 @@ f_ocreate( Var_T * var )
                 new_io->form_str = T_strdup( "%g" );
         }
 
-        form_str = CHAR_P T_free( form_str );
+        form_str = T_free( form_str );
 
         TRY_SUCCESS;
     }
@@ -436,7 +436,7 @@ f_ocreate_child( Var_T *        v,
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
     pos += sizeof EDL.Lc;
@@ -596,7 +596,7 @@ f_odelete_child( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );    /* current line number */
     pos += sizeof EDL.Lc;
@@ -886,7 +886,7 @@ f_ovalue_child( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;
@@ -1036,7 +1036,7 @@ f_ochanged_child( Var_T * v )
     if ( EDL.Fname )
         len += strlen( EDL.Fname );
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;

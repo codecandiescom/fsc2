@@ -225,8 +225,7 @@ rs_spec10_ccd_init( void )
 
     if ( acc == ACC_READ_WRITE )
     {
-        exp_res_array = UNS32_P T_malloc( exp_res_count
-                                          * sizeof *exp_res_array );
+        exp_res_array = T_malloc( exp_res_count * sizeof *exp_res_array );
 
         TRY
         {
@@ -613,7 +612,7 @@ rs_spec10_get_pic( uns32 * size )
 
     TRY
     {
-        frame = UNS16_P T_malloc( ( size_t ) *size );
+        frame = T_malloc( ( size_t ) *size );
 
 #if defined RUNNING_WITH_ROOT_PRIVILEGES
         if ( mlock( frame, *size ) != 0 )

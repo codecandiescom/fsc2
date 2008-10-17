@@ -46,7 +46,7 @@ hfs9000_new_pulse( long pnum )
         cp = cp->next;
     }
 
-    cp = PULSE_P T_malloc( sizeof *cp );
+    cp = T_malloc( sizeof *cp );
 
     if ( hfs9000.pulses == NULL )
     {

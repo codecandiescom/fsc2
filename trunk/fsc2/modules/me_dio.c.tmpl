@@ -168,8 +168,7 @@ int
 me_dio_#_exp_hook( void )
 {
     if ( me_dio_#_saved.reserved_by != NULL )
-        me_dio_#_saved.reserved_by =
-                                  CHAR_P T_free( me_dio_#_saved.reserved_by );
+        me_dio_#_saved.reserved_by = T_free( me_dio_#_saved.reserved_by );
 
     me_dio_# = me_dio_#_saved;
     me_dio_#_init( );
@@ -185,7 +184,7 @@ me_dio_#_end_of_exp_hook( void )
 {
     me_dio_#_exit( );
     if ( me_dio_#.reserved_by != NULL )
-        me_dio_#.reserved_by = CHAR_P T_free( me_dio_#.reserved_by );
+        me_dio_#.reserved_by = T_free( me_dio_#.reserved_by );
 
 	return 1;
 }
@@ -261,7 +260,7 @@ dio_reserve_dio( Var_T * v )
         {
             if ( ! strcmp( me_dio_#.reserved_by, v->val.sptr ) )
             {
-                me_dio_#.reserved_by = CHAR_P T_free( me_dio_#.reserved_by );
+                me_dio_#.reserved_by = T_free( me_dio_#.reserved_by );
                 return vars_push( INT_VAR, 1L );
             }
             else

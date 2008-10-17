@@ -226,8 +226,7 @@ me6000_end_of_exp_hook( void )
         if (    me6000.dac[ i ].reserved_by
              && me6000.dac[ i ].reserved_by !=
                                            me6000_stored.dac[ i ].reserved_by )
-            me6000.dac[ i ].reserved_by =
-                                  CHAR_P T_free( me6000.dac[ i ].reserved_by );
+            me6000.dac[ i ].reserved_by = T_free( me6000.dac[ i ].reserved_by );
 
     return 1;
 }
@@ -318,7 +317,7 @@ daq_reserve_dac( Var_T * v )
             if ( ! strcmp( me6000.dac[ dac ].reserved_by, v->val.sptr ) )
             {
                 me6000.dac[ dac ].reserved_by =
-                                CHAR_P T_free( me6000.dac[ dac ].reserved_by );
+                                       T_free( me6000.dac[ dac ].reserved_by );
                 return vars_push( INT_VAR, 1L );
             }
             else

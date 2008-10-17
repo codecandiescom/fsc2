@@ -218,9 +218,9 @@ dg2020_basic_pulse_check( void )
         {
             if ( p->function->pm == NULL )      /* if it doesn't exist yet */
             {
-                p->function->pm = BOOL_P T_malloc( p->pc->len 
-                                                   * sizeof *p->function->pm
-                                                   * NUM_PHASE_TYPES );
+                p->function->pm = T_malloc(   p->pc->len 
+                                            * sizeof *p->function->pm
+                                            * NUM_PHASE_TYPES );
 
                 for ( i = 0; i < NUM_PHASE_TYPES; i++ )
                     for ( j = 0; j < p->pc->len; j++ )
@@ -285,8 +285,8 @@ dg2020_basic_functions_check( void )
                 continue;
 
             f->num_pulses++;
-            f->pulses = PULSE_PP T_realloc( f->pulses, f->num_pulses
-                                                       * sizeof *f->pulses );
+            f->pulses = T_realloc( f->pulses,
+                                   f->num_pulses * sizeof *f->pulses );
             f->pulses[ f->num_pulses - 1 ] = cp;
 
             if ( cp->is_active )
@@ -302,8 +302,8 @@ dg2020_basic_functions_check( void )
                    f->name );
         else
         {
-            f->pulse_params = PULSE_PARAMS_P T_malloc( 2 * f->num_pulses
-                                                   * sizeof *f->pulse_params );
+            f->pulse_params = T_malloc(   2 * f->num_pulses
+                                        * sizeof *f->pulse_params );
             f->old_pulse_params = f->pulse_params + f->num_pulses;
         }
 
@@ -559,8 +559,7 @@ dg2020_setup_phase_matrix( Function_T * f )
 
     cur_channel = f->need_constant ? 1 : 0;
 
-    f->pcm = CHANNEL_PP T_malloc( f->pc_len * NUM_PHASE_TYPES
-                                  * sizeof *f->pcm );
+    f->pcm = T_malloc( f->pc_len * NUM_PHASE_TYPES * sizeof *f->pcm );
 
     for ( i = 0; i < NUM_PHASE_TYPES; i++ )
         for ( j = 0; j < f->pc_len; j++ )
@@ -570,7 +569,7 @@ dg2020_setup_phase_matrix( Function_T * f )
                 f->pcm[ i * f->pc_len + j ] = f->channel[ 0 ];
 
     if ( f->pm != NULL )
-        f->pm = BOOL_P T_free( f->pm );
+        f->pm = T_free( f->pm );
 }
 
 
@@ -610,7 +609,7 @@ dg2020_pulse_start_setup( void )
 
         for ( j = 0; j < f->num_pulses; j++ )
         {
-            f->pulses[ j ]->channel = CHANNEL_PP T_malloc( f->pc_len
+            f->pulses[ j ]->channel = T_malloc( f->pc_len
                                            * sizeof *f->pulses[ j ]->channel );
             for ( k = 0; k < f->pc_len; k++ )
                 f->pulses[ j ]->channel[ k ] = NULL;
@@ -690,10 +689,9 @@ dg2020_create_dummy_phase_setup( Function_T * f )
 
 
     i = dg2020.num_dummy_phase_setups;
-    dg2020.dummy_phase_setup = PHASE_SETUP_P
-                                T_realloc( dg2020.dummy_phase_setup,
-                                           ++dg2020.num_dummy_phase_setups *
-                                           sizeof *dg2020.dummy_phase_setup );
+    dg2020.dummy_phase_setup = T_realloc( dg2020.dummy_phase_setup,
+                                            ++dg2020.num_dummy_phase_setups
+                                          * sizeof *dg2020.dummy_phase_setup );
 
 
     dg2020.dummy_phase_setup[ i ].is_defined = SET;
@@ -745,13 +743,13 @@ dg2020_create_dummy_phase_seq( void )
 
     /* Create a new phase sequence */
 
-    np = PHS_SEQ_P T_malloc( sizeof *np );
+    np = T_malloc( sizeof *np );
 
     if ( PA_Seq.phs_seq == NULL )
     {
         PA_Seq.phs_seq = np;
         np->len = 1;
-        np->sequence = INT_P T_malloc( sizeof *np->sequence );
+        np->sequence = T_malloc( sizeof *np->sequence );
         np->sequence[ 0 ] = PHASE_PLUS_X;
     }
     else
@@ -761,7 +759,7 @@ dg2020_create_dummy_phase_seq( void )
             pn = pn->next;
         pn->next = np;
         np->len = PA_Seq.phs_seq->len;
-        np->sequence = INT_P T_malloc( np->len * sizeof *np->sequence );
+        np->sequence = T_malloc( np->len * sizeof *np->sequence );
         for ( i = 0; i < np->len; i++ )
             np->sequence[ i ] = PHASE_PLUS_X;
     }
@@ -817,7 +815,7 @@ dg2020_create_shape_pulses( void )
 
         /* Append a new pulse to the list of pulses */
 
-        np = PULSE_P T_malloc( sizeof *np );
+        np = T_malloc( sizeof *np );
 
         np->prev = cp;
         cp = cp->next = np;
@@ -987,7 +985,7 @@ dg2020_create_twt_pulses( void )
 
         /* Append a new pulse to the list of pulses */
 
-        np = PULSE_P T_malloc( sizeof *np );
+        np = T_malloc( sizeof *np );
 
         np->prev = cp;
         cp = cp->next = np;

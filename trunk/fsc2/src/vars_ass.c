@@ -568,19 +568,17 @@ vars_arr_assign_1d( Var_T * src,
         if ( dest->len != 0 )
         {
             if ( INT_TYPE( dest ) )
-                dest->val.lpnt = LONG_P T_free( dest->val.lpnt );
+                dest->val.lpnt = T_free( dest->val.lpnt );
             else
-                dest->val.dpnt = DOUBLE_P T_free( dest->val.dpnt );
+                dest->val.dpnt = T_free( dest->val.dpnt );
         }
 
         dest->len = src->len;
 
         if ( INT_TYPE( dest ) )
-            dest->val.lpnt = LONG_P T_malloc( dest->len
-                                              * sizeof *dest->val.lpnt );
+            dest->val.lpnt = T_malloc( dest->len * sizeof *dest->val.lpnt );
         else
-            dest->val.dpnt = DOUBLE_P T_malloc( dest->len
-                                                * sizeof *dest->val.dpnt );
+            dest->val.dpnt = T_malloc( dest->len * sizeof *dest->val.dpnt );
     }
 
     /* Now copy all elements, taking care of possibly different types
@@ -633,20 +631,18 @@ vars_arr_assign_nd( Var_T * src,
             }
 
             if ( src->len > 0 )
-                dest->val.vptr = VAR_PP T_realloc( dest->val.vptr,
-                                                   src->len
-                                                   * sizeof *dest->val.vptr );
+                dest->val.vptr = T_realloc( dest->val.vptr,
+                                            src->len * sizeof *dest->val.vptr );
             else
             {
-                dest->val.vptr = VAR_PP T_free( dest->val.vptr );
+                dest->val.vptr = T_free( dest->val.vptr );
                 dest->len = 0;
             }
         }
         else if ( dest->len < src->len )
         {
-            dest->val.vptr = VAR_PP T_realloc( dest->val.vptr,
-                                               src->len
-                                               * sizeof *dest->val.vptr );
+            dest->val.vptr = T_realloc( dest->val.vptr,
+                                        src->len * sizeof *dest->val.vptr );
             for ( ; dest->len < src->len; dest->len++ )
             {
                 dest->val.vptr[ dest->len ] = vars_new( NULL );

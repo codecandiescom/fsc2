@@ -387,7 +387,7 @@ resolve_hook_functions( Device_T * dev )
        path before the device name - it may be set via a symbolic link to
        some other directory than the normal module directory. */
 
-    hook_func_name = CHAR_P T_malloc( strlen( strip_path( dev->name ) ) + 18 );
+    hook_func_name = T_malloc( strlen( strip_path( dev->name ) ) + 18 );
     strcpy( hook_func_name, strip_path( dev->name ) );
     app = hook_func_name + strlen( strip_path( dev->name ) );
     strcpy( app, "_init_hook" );
@@ -539,7 +539,7 @@ add_function( size_t     num,
 
     /* Add an entry for the new function to the list of functions */
 
-    Fncts = FUNC_P T_realloc( Fncts, ( Num_Func + 1 ) * sizeof *Fncts );
+    Fncts = T_realloc( Fncts, ( Num_Func + 1 ) * sizeof *Fncts );
     f = Fncts + Num_Func++;
     memcpy( f, Fncts + num, sizeof *f );
 
@@ -1048,7 +1048,7 @@ unload_device( Device_T * dev )
 
     dlclose( dev->driver.handle );
     dev->driver.handle = NULL;
-    dev->driver.lib_name = CHAR_P T_free( dev->driver.lib_name );
+    dev->driver.lib_name = T_free( dev->driver.lib_name );
 }
 
 

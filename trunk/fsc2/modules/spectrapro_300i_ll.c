@@ -1183,7 +1183,7 @@ bool spectrapro_300i_read( char *   buf,
     CLOBBER_PROTECT( already_read );
     CLOBBER_PROTECT( done );
 
-    lbuf = CHAR_P T_malloc( llen );
+    lbuf = T_malloc( llen );
 
     do
     {
@@ -1314,11 +1314,11 @@ spectrapro_300i_talk( const char * buf,
     {
         already_read = 0;
         len += 5;
-        lbuf = CHAR_P T_realloc( lbuf, len );
+        lbuf = T_realloc( lbuf, len );
 
         while ( ! spectrapro_300i_read( lbuf + already_read, &len ) )
         {
-            lbuf = CHAR_P realloc( lbuf, 2 * len + 5 );
+            lbuf = realloc( lbuf, 2 * len + 5 );
             already_read += len;
         }
         already_read += len;

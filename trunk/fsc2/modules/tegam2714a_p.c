@@ -284,7 +284,7 @@ tegam2714a_p_exit_hook( void )
 
     /* Free all memory allocated within the module */
 
-    f->pulses = PULSE_PP T_free( f->pulses );
+    f->pulses = T_free( f->pulses );
 
     for ( p = tegam2714a_p.pulses; p != NULL; p = pn )
     {

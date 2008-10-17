@@ -161,9 +161,9 @@ start_graphics( void )
     /* Store the current state of the Graphics structure - to be restored
        after the experiment */
 
-    G_stored = GRAPHICS_P get_memcpy( &G, sizeof G );
-    G_1d_stored = GRAPHICS_1D_P get_memcpy( &G_1d, sizeof G_1d );
-    G_2d_stored = GRAPHICS_2D_P get_memcpy( &G_2d, sizeof G_2d );
+    G_stored = get_memcpy( &G, sizeof G );
+    G_1d_stored = get_memcpy( &G_1d, sizeof G_1d );
+    G_2d_stored = get_memcpy( &G_2d, sizeof G_2d );
 
     G_2d.active_curve = 0;
 
@@ -1004,7 +1004,7 @@ G_init_curves_1d( void )
     {
         /* Allocate memory for the curve and its data */
 
-        cv = G_1d.curve[ i ] = CURVE_1D_P T_malloc( sizeof *cv );
+        cv = G_1d.curve[ i ] = T_malloc( sizeof *cv );
 
         cv->points = NULL;
         cv->xpoints = NULL;
@@ -1072,12 +1072,12 @@ G_init_curves_1d( void )
 
         /* Finally get memory for the data */
 
-        cv->points = SCALED_POINT_P T_malloc( G_1d.nx * sizeof *cv->points );
+        cv->points = T_malloc( G_1d.nx * sizeof *cv->points );
 
         for ( j = 0; j < G_1d.nx; j++ )          /* no points are known yet */
             cv->points[ j ].exist = UNSET;
 
-        cv->xpoints = XPOINT_P T_malloc( G_1d.nx * sizeof *cv->xpoints );
+        cv->xpoints = T_malloc( G_1d.nx * sizeof *cv->xpoints );
     }
 }
 
@@ -1115,7 +1115,7 @@ G_init_curves_2d( void )
     {
         /* Allocate memory for the curve */
 
-        cv = G_2d.curve_2d[ i ] = CURVE_2D_P T_malloc( sizeof *cv );
+        cv = G_2d.curve_2d[ i ] = T_malloc( sizeof *cv );
 
         cv->points = NULL;
         cv->xpoints = NULL;
@@ -1202,14 +1202,12 @@ G_init_curves_2d( void )
 
         /* Now get also memory for the data */
 
-        cv->points = SCALED_POINT_P T_malloc( G_2d.nx * G_2d.ny
-                                              * sizeof *cv->points );
+        cv->points = T_malloc( G_2d.nx * G_2d.ny * sizeof *cv->points );
 
         for ( sp = cv->points, j = 0; j < G_2d.nx * G_2d.ny; sp++, j++ )
             sp->exist = UNSET;
 
-        cv->xpoints = XPOINT_P T_malloc( G_2d.nx * G_2d.ny
-                                         * sizeof *cv->xpoints );
+        cv->xpoints = T_malloc( G_2d.nx * G_2d.ny * sizeof *cv->xpoints );
     }
 
     G_2d.curve_2d[ 0 ]->active = SET;       /* first curve is the active one */
@@ -1323,11 +1321,11 @@ stop_graphics( void )
         if ( G.dim & 1 )
             for ( i = X; i <= Y; i++ )
                 if ( G_1d.label[ i ] )
-                    G_1d.label[ i ] = CHAR_P T_free( G_1d.label[ i ] );
+                    G_1d.label[ i ] = T_free( G_1d.label[ i ] );
         if ( G.dim & 2 )
             for ( i = X; i <= Z; i++ )
                 if ( G_2d.label[ i ] )
-                    G_2d.label[ i ] = CHAR_P T_free( G_2d.label[ i ] );
+                    G_2d.label[ i ] = T_free( G_2d.label[ i ] );
 
         if ( G.font )
             XFreeFont( G.d, G.font );
@@ -1419,19 +1417,19 @@ stop_graphics( void )
     {
         XFreeGC( G.d, m->gc );
         mn = m->next;
-        m = MARKER_1D_P T_free( m );
+        m = T_free( m );
     }
 
     if ( G_stored )
     {
         memcpy( &G, G_stored, sizeof G );
-        G_stored = GRAPHICS_P T_free( G_stored );
+        G_stored = T_free( G_stored );
     }
 
     if ( G_1d_stored )
     {
         memcpy( &G_1d, G_1d_stored, sizeof G_1d );
-        G_1d_stored = GRAPHICS_1D_P T_free( G_1d_stored );
+        G_1d_stored = T_free( G_1d_stored );
 
         for ( i = X; i <= Y; i++ )
             G_1d.label[ i ] = NULL;
@@ -1440,7 +1438,7 @@ stop_graphics( void )
     if ( G_2d_stored )
     {
         memcpy( &G_2d, G_2d_stored, sizeof G_2d );
-        G_2d_stored = GRAPHICS_2D_P T_free( G_2d_stored );
+        G_2d_stored = T_free( G_2d_stored );
 
         for ( i = X; i <= Z; i++ )
             G_2d.label[ i ] = NULL;
@@ -1483,7 +1481,7 @@ graphics_free( void )
 
             T_free( cv->points );
             T_free( cv->xpoints );
-            cv = CURVE_1D_P T_free( cv );
+            cv = T_free( cv );
         }
 
     if ( G.dim & 2 )
@@ -1507,12 +1505,12 @@ graphics_free( void )
             {
                 XFreeGC( G.d, m2->gc );
                 mn2 = m2->next;
-                m2 = MARKER_2D_P T_free( m2 );
+                m2 = T_free( m2 );
             }
 
             T_free( cv2->points );
             T_free( cv2->xpoints );
-            cv2 = CURVE_2D_P T_free( cv2 );
+            cv2 = T_free( cv2 );
         }
     }
 

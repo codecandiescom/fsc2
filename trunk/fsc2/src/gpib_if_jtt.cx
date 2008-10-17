@@ -353,7 +353,7 @@ gpib_init_device( const char * device_name,
 
     if ( gpib_dev_list == NULL )
     {
-        gpib_dev_list = cur_dev = GPIB_DEV_P T_malloc( sizeof *cur_dev );
+        gpib_dev_list = cur_dev = T_malloc( sizeof *cur_dev );
         cur_dev->prev = NULL;
     }
     else
@@ -362,7 +362,7 @@ gpib_init_device( const char * device_name,
               cur_dev = cur_dev->next )
             /* empty */ ;
 
-        cur_dev->next = GPIB_DEV_P T_malloc( sizeof *cur_dev->next );
+        cur_dev->next = T_malloc( sizeof *cur_dev->next );
         cur_dev->next->prev = cur_dev;
         cur_dev = cur_dev->next;
     }

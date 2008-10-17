@@ -67,7 +67,7 @@ daq_reserve_dio( Var_T * v )
             if ( ! strcmp( pci_mio_16e_1.dio_state.reserved_by, v->val.sptr ) )
             {
                 pci_mio_16e_1.dio_state.reserved_by =
-                          CHAR_P T_free( pci_mio_16e_1.dio_state.reserved_by );
+                                 T_free( pci_mio_16e_1.dio_state.reserved_by );
                 return vars_push( INT_VAR, 1L );
             }
             else

@@ -338,7 +338,7 @@ exp_bcreate( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        result = LONG_P T_malloc( 2 * sizeof *result );
+        result = T_malloc( 2 * sizeof *result );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = 0;
         return result;
@@ -490,7 +490,7 @@ exp_bstate( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        result = LONG_P T_malloc( 2 * sizeof *result );
+        result = T_malloc( 2 * sizeof *result );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = 0;
         return result;
@@ -571,7 +571,7 @@ exp_bchanged( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        result = LONG_P T_malloc( 2 * sizeof *result );
+        result = T_malloc( 2 * sizeof *result );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = 0;
         return result;
@@ -647,7 +647,7 @@ exp_screate( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        result = LONG_P T_malloc( 2 * sizeof *result );
+        result = T_malloc( 2 * sizeof *result );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = 0;
         return result;
@@ -801,7 +801,7 @@ exp_sstate( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        result = DOUBLE_P T_malloc( 2 * sizeof *result );
+        result = T_malloc( 2 * sizeof *result );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = -1.0;
         return result;
@@ -889,7 +889,7 @@ exp_schanged( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        result = LONG_P T_malloc( 2 * sizeof *result );
+        result = T_malloc( 2 * sizeof *result );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = -1;
         return result;
@@ -966,7 +966,7 @@ exp_icreate( char *    buffer,
         }
         T_free( buffer );
 
-        result = LONG_P T_malloc( 2 * sizeof( long ) );
+        result = T_malloc( 2 * sizeof( long ) );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = 0;
         return result;
@@ -1154,7 +1154,7 @@ exp_istate( char *    buffer,
 
         /* Now get the parents reply */
 
-        input_res = INPUT_RES_P T_malloc( sizeof *input_res );
+        input_res = T_malloc( sizeof *input_res );
         if ( ! reader( ( void * ) input_res ) )
             input_res->res = -1;
         return input_res;
@@ -1292,7 +1292,7 @@ exp_ichanged( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        res = LONG_P T_malloc( 2 * sizeof *res );
+        res = T_malloc( 2 * sizeof *res );
         if ( ! reader( ( void * ) res ) )
             res[ 0 ] = -1;
         return res;
@@ -1367,7 +1367,7 @@ exp_mcreate( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        result = LONG_P T_malloc( 2 * sizeof *result );
+        result = T_malloc( 2 * sizeof *result );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = 0;
         return result;
@@ -1511,7 +1511,7 @@ exp_mchoice( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        result = LONG_P T_malloc( 2 * sizeof *result );
+        result = T_malloc( 2 * sizeof *result );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = 0;
         return result;
@@ -1592,7 +1592,7 @@ exp_mchanged( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        result = LONG_P T_malloc( 2 *     sizeof *result );
+        result = T_malloc( 2 *     sizeof *result );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = 0;
         return result;
@@ -1668,7 +1668,7 @@ exp_tbchanged( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        result = LONG_P T_malloc( 2 * sizeof *result );
+        result = T_malloc( 2 * sizeof *result );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = 0;
         return result;
@@ -1750,7 +1750,7 @@ exp_tbwait( char *    buffer,
             THROW( EXCEPTION );
         }
         T_free( buffer );
-        result = LONG_P T_malloc( 2 * sizeof *result );
+        result = T_malloc( 2 * sizeof *result );
         if ( ! reader( ( void * ) result ) )
             result[ 0 ] = 0;
         return result;
@@ -2038,7 +2038,7 @@ exp_getpos( char *    buffer,
         }
 
         T_free( buffer );
-        result = DOUBLE_P T_malloc( ( 2 * MAX_CURVES + 2 ) * sizeof *result );
+        result = T_malloc( ( 2 * MAX_CURVES + 2 ) * sizeof *result );
 
         if ( ! reader( ( void * ) result ) )
         {

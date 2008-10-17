@@ -606,8 +606,7 @@ lecroy93xx_numpoints_prep( void )
     } while ( cur_mem_size < LECROY93XX_MAX_MEMORY_SIZE );
 
     lecroy93xx.num_mem_sizes = len;
-    lecroy93xx.mem_sizes =
-        				  LONG_P T_malloc( len * sizeof *lecroy93xx.mem_sizes );
+    lecroy93xx.mem_sizes = T_malloc( len * sizeof *lecroy93xx.mem_sizes );
 
     cur_mem_size = LECROY93XX_MIN_MEMORY_SIZE;
 
@@ -640,8 +639,7 @@ lecroy93xx_tbas_prep( void )
 
     lecroy93xx.num_tbas = LECROY93XX_NUM_TBAS;
 
-    lecroy93xx.tbas =
-            DOUBLE_P T_malloc( lecroy93xx.num_tbas  * sizeof *lecroy93xx.tbas );
+    lecroy93xx.tbas = T_malloc( lecroy93xx.num_tbas * sizeof *lecroy93xx.tbas );
 
     /* All timebase settings follow a 1-2-5 scheme with LECROY93XX_MAX_TIMEBASE
        (in s/div) being the largest possible setting */
@@ -674,14 +672,14 @@ lecroy93xx_hori_res_prep( void )
     double ss_res;
 
 
-    lecroy93xx.hres = HORI_RES_PP T_malloc( lecroy93xx.num_mem_sizes *
-                                           sizeof *lecroy93xx.hres );
+    lecroy93xx.hres = T_malloc(   lecroy93xx.num_mem_sizes
+                                * sizeof *lecroy93xx.hres );
 
     TRY
     {
-        *lecroy93xx.hres = HORI_RES_P T_malloc(   lecroy93xx.num_mem_sizes
-                                                * LECROY93XX_NUM_TBAS
-                                                * sizeof **lecroy93xx.hres );
+        *lecroy93xx.hres = T_malloc(   lecroy93xx.num_mem_sizes
+                                     * LECROY93XX_NUM_TBAS
+                                     * sizeof **lecroy93xx.hres );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -985,7 +983,7 @@ lecroy93xx_store_state( LECROY93XX_T * dest,
     }
 
     dest->w = NULL;
-    dest->w = WINDOW_P T_malloc( src->num_windows * sizeof *dest->w );
+    dest->w = T_malloc( src->num_windows * sizeof *dest->w );
 
     for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
     {

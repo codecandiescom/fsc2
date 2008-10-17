@@ -81,7 +81,7 @@ start_editor( void )
 
     if ( ed == NULL || *ed == '\0' )
     {
-        argv = CHAR_PP T_malloc( 5 * sizeof *argv );
+        argv = T_malloc( 5 * sizeof *argv );
 
         argv[ 0 ] = ( char * ) "xterm";
         argv[ 1 ] = ( char * ) "-e";
@@ -100,7 +100,7 @@ start_editor( void )
 
         if ( ! *ep )   /* no command line arguments */
         {
-            argv = CHAR_PP T_malloc( 5 * sizeof *argv );
+            argv = T_malloc( 5 * sizeof *argv );
 
             argv[ 0 ] = ( char * ) "xterm";
             argv[ 1 ] = ( char * ) "-e";
@@ -120,7 +120,7 @@ start_editor( void )
                 ++argc;
             }
 
-            argv = CHAR_PP T_malloc( ( argc + 5 ) * sizeof *argv );
+            argv = T_malloc( ( argc + 5 ) * sizeof *argv );
 
             argv[ 0 ] = ( char * ) "xterm";
             argv[ 1 ] = ( char * ) "-e";

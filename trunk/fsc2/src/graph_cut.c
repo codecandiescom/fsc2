@@ -590,8 +590,8 @@ cut_form_close( void )
     /* Get rid of GCs and memory allocated for the curve */
 
     XFreeGC( G.d, cv->font_gc );
-    cv->points  = SCALED_POINT_P T_free( cv->points );
-    cv->xpoints = XPOINT_P T_free( cv->xpoints );
+    cv->points  = T_free( cv->points );
+    cv->xpoints = T_free( cv->xpoints );
 
     /* Hide the form (also storing its last position) if it's still shown */
 
@@ -750,10 +750,8 @@ cut_calc_curve( int  dir,
 
     /* Allocate memory for storing of scaled data and points for display */
 
-    cv->points = SCALED_POINT_P T_realloc( cv->points,
-                                           G_cut.nx * sizeof *cv->points );
-    cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
-                                      G_cut.nx * sizeof *cv->xpoints );
+    cv->points = T_realloc( cv->points, G_cut.nx * sizeof *cv->points );
+    cv->xpoints = T_realloc( cv->xpoints, G_cut.nx * sizeof *cv->xpoints );
 
     /* Extract the existing scaled data of the cut from the 2d curve */
 
@@ -869,8 +867,8 @@ cut_new_curve_handler( void )
         /* Remove the current curve */
 
         G_cut.curve = -1;
-        cv->points = SCALED_POINT_P T_free( cv->points );
-        cv->xpoints = XPOINT_P T_free( cv->xpoints );
+        cv->points = T_free( cv->points );
+        cv->xpoints = T_free( cv->xpoints );
         cv->count = 0;
     }
     else
@@ -1050,10 +1048,8 @@ cut_num_points_changed( int  dir,
 
     /* Extend the arrays for the (scaled) data and the array of XPoints */
 
-    cv->points = SCALED_POINT_P T_realloc( cv->points,
-                                           num_points * sizeof *cv->points );
-    cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
-                                      num_points * sizeof *cv->xpoints );
+    cv->points = T_realloc( cv->points, num_points * sizeof *cv->points );
+    cv->xpoints = T_realloc( cv->xpoints, num_points * sizeof *cv->xpoints );
 
     /* The new entries are not set yet */
 
@@ -3065,7 +3061,7 @@ set_cut_marker( long x_pos,
     Curve_2d_T *cv = G_2d.curve_2d[ G_2d.active_curve ];
 
 
-    m = MARKER_1D_P T_malloc( sizeof *m );
+    m = T_malloc( sizeof *m );
     m->next = NULL;
 
     if ( cv->cut_marker == NULL )

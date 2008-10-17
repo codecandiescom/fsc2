@@ -165,8 +165,8 @@ rb_pulser_w_basic_functions_init( void )
                 continue;
 
             f->num_pulses++;
-            f->pulses = PULSE_PP T_realloc( f->pulses, f->num_pulses
-                                                       * sizeof *f->pulses );
+            f->pulses = T_realloc( f->pulses,
+                                   f->num_pulses * sizeof *f->pulses );
             f->pulses[ f->num_pulses - 1 ] = cp;
         }
 
@@ -290,7 +290,7 @@ rb_pulser_w_defense_pulse_create( void )
     def->is_used = SET;
 
     def->num_pulses = def->num_active_pulses = 1;
-    def->pulses = PULSE_PP T_malloc( sizeof *def->pulses );
+    def->pulses = T_malloc( sizeof *def->pulses );
 
     /* Create the defense pulse and append it to the list of all pulses */
 
@@ -300,7 +300,7 @@ rb_pulser_w_defense_pulse_create( void )
         cp = cp->next;
     }
 
-    cp = PULSE_P T_malloc( sizeof *cp );
+    cp = T_malloc( sizeof *cp );
 
     lp->next = cp;
     cp->prev = lp;
@@ -311,7 +311,7 @@ rb_pulser_w_defense_pulse_create( void )
 
     cp->has_been_active = cp->was_active = UNSET;
         
-    def->pulses = PULSE_PP T_malloc( sizeof *def->pulses );
+    def->pulses = T_malloc( sizeof *def->pulses );
     *def->pulses = cp;
 
     cp->is_pos = cp->initial_is_pos = SET;
@@ -377,8 +377,7 @@ rb_pulser_w_rf_synth_init( void )
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
-        rb_pulser_w.synth_pulse_state =
-                                CHAR_P T_free( rb_pulser_w.synth_pulse_state );
+        rb_pulser_w.synth_pulse_state = T_free( rb_pulser_w.synth_pulse_state );
         T_free( func );
         print( FATAL, "Function for setting pulse width is missing from "
                "the synthesizer module '%s'.\n", SYNTHESIZER_MODULE );
@@ -396,10 +395,8 @@ rb_pulser_w_rf_synth_init( void )
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
-        rb_pulser_w.synth_pulse_state =
-                                CHAR_P T_free( rb_pulser_w.synth_pulse_state );
-        rb_pulser_w.synth_pulse_width =
-                                CHAR_P T_free( rb_pulser_w.synth_pulse_width );
+        rb_pulser_w.synth_pulse_state = T_free( rb_pulser_w.synth_pulse_state );
+        rb_pulser_w.synth_pulse_width = T_free( rb_pulser_w.synth_pulse_width );
         T_free( func );
         print( FATAL, "Function for setting pulse delays is missing from "
                "the synthesizer module '%s'.\n", SYNTHESIZER_MODULE );
@@ -417,12 +414,9 @@ rb_pulser_w_rf_synth_init( void )
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
-        rb_pulser_w.synth_pulse_state =
-                                CHAR_P T_free( rb_pulser_w.synth_pulse_state );
-        rb_pulser_w.synth_pulse_delay =
-                                CHAR_P T_free( rb_pulser_w.synth_pulse_delay );
-        rb_pulser_w.synth_pulse_width =
-                                CHAR_P T_free( rb_pulser_w.synth_pulse_width );
+        rb_pulser_w.synth_pulse_state = T_free( rb_pulser_w.synth_pulse_state );
+        rb_pulser_w.synth_pulse_delay = T_free( rb_pulser_w.synth_pulse_delay );
+        rb_pulser_w.synth_pulse_width = T_free( rb_pulser_w.synth_pulse_width );
         T_free( func );
         print( FATAL, "Function for setting the trigger slope is missing from "
                "the synthesizer module '%s'.\n", SYNTHESIZER_MODULE );
@@ -440,14 +434,10 @@ rb_pulser_w_rf_synth_init( void )
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
-        rb_pulser_w.synth_pulse_state =
-                                CHAR_P T_free( rb_pulser_w.synth_pulse_state );
-        rb_pulser_w.synth_pulse_delay =
-                                CHAR_P T_free( rb_pulser_w.synth_pulse_delay );
-        rb_pulser_w.synth_pulse_width =
-                                CHAR_P T_free( rb_pulser_w.synth_pulse_width );
-        rb_pulser_w.synth_trig_slope =
-                                CHAR_P T_free( rb_pulser_w.synth_trig_slope );
+        rb_pulser_w.synth_pulse_state = T_free( rb_pulser_w.synth_pulse_state );
+        rb_pulser_w.synth_pulse_delay = T_free( rb_pulser_w.synth_pulse_delay );
+        rb_pulser_w.synth_pulse_width = T_free( rb_pulser_w.synth_pulse_width );
+        rb_pulser_w.synth_trig_slope  = T_free( rb_pulser_w.synth_trig_slope );
         T_free( func );
         print( FATAL, "Function for setting the trigger slope is missing from "
                "the synthesizer module '%s'.\n", SYNTHESIZER_MODULE );

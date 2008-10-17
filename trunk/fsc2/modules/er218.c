@@ -162,14 +162,12 @@ er218_init_hook( void )
 
         if ( ! func_exists( er218.dio_out_func[ i ] ) )
         {
-            er218.dio_out_func[ i ] = CHAR_P T_free( er218.dio_out_func[ i ] );
+            er218.dio_out_func[ i ] = T_free( er218.dio_out_func[ i ] );
 
             if ( i == 1 )
             {
-                er218.dio_out_func[ 0 ] =
-                                     CHAR_P T_free( er218.dio_out_func[ 0 ] );
-                er218.dio_mode_func[ 0 ] =
-                                     CHAR_P T_free( er218.dio_mode_func[ 0 ] );
+                er218.dio_out_func[ 0 ] = T_free( er218.dio_out_func[ 0 ] );
+                er218.dio_mode_func[ 0 ] = T_free( er218.dio_mode_func[ 0 ] );
             }
             print( FATAL, "Function for setting a DIO value is missing from "
                    "module '%s'.\n", dio_names[ i ] ); 
@@ -185,10 +183,8 @@ er218_init_hook( void )
         {
             for ( j = 0; j <= i; j++ )
             {
-                er218.dio_out_func[ j ] =
-                                     CHAR_P T_free( er218.dio_out_func[ j ] );
-                er218.dio_mode_func[ j ] =
-                                     CHAR_P T_free( er218.dio_mode_func[ j ] );
+                er218.dio_out_func[ j ] = T_free( er218.dio_out_func[ j ] );
+                er218.dio_mode_func[ j ] = T_free( er218.dio_mode_func[ j ] );
             }
             print( FATAL, "Function for setting the DIOs mode is missing from "
                    "module '%s'.\n", dio_names[ i ] ); 
@@ -288,11 +284,10 @@ er218_exit_hook( void )
     for ( i = 0; i < 2; i++ )
     {
         if ( er218.dio_out_func[ i ] )
-            er218.dio_out_func[ i ] = CHAR_P T_free( er218.dio_out_func[ i ] );
+            er218.dio_out_func[ i ] = T_free( er218.dio_out_func[ i ] );
 
         if ( er218.dio_mode_func[ i ] )
-            er218.dio_mode_func[ i ] =
-                                     CHAR_P T_free( er218.dio_mode_func[ i ] );
+            er218.dio_mode_func[ i ] = T_free( er218.dio_mode_func[ i ] );
     }
 }
 

@@ -478,7 +478,7 @@ pulser_dump_pulses( Var_T * v  UNUSED_ARG )
             if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2 ) )
             {
                 T_free( m );
-                name = CHAR_P T_free( name );
+                name = T_free( name );
                 continue;
             }
             T_free( m );
@@ -511,7 +511,7 @@ pulser_dump_pulses( Var_T * v  UNUSED_ARG )
                                   "different file." );
             }
 
-            name = CHAR_P T_free( name );
+            name = T_free( name );
             continue;
         }
     } while ( dg2020.dump_file == NULL );

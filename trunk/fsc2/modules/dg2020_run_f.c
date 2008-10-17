@@ -635,13 +635,12 @@ dg2020_delete_pulse( Pulse_T * p )
        its function send a warning and mark the function as useless */
 
     if ( p->function->num_pulses-- > 1 )
-        p->function->pulses = PULSE_PP
-                      T_realloc( p->function->pulses,
-                                 p->function->num_pulses *
-                                 sizeof *p->function->pulses );
+        p->function->pulses = T_realloc( p->function->pulses,
+                                           p->function->num_pulses
+                                         * sizeof *p->function->pulses );
     else
     {
-        p->function->pulses = PULSE_PP T_free( p->function->pulses );
+        p->function->pulses = T_free( p->function->pulses );
 
         print( SEVERE, "Function '%s' isn't used at all because all its "
                "pulses are never used.\n", p->function->name );
@@ -659,7 +658,7 @@ dg2020_delete_pulse( Pulse_T * p )
     /* Special care has to be taken if this is the very last pulse... */
 
     if ( p == dg2020.pulses && p->next == NULL )
-        dg2020.pulses = PULSE_P T_free( dg2020.pulses );
+        dg2020.pulses = T_free( dg2020.pulses );
     else
         T_free( p );
 
@@ -884,7 +883,7 @@ dg2020_commit( Function_T * f,
        easier to understand and to debug, than any alternative I came up
        with... */
 
-    old_p = CHAR_P T_calloc( 2 * ( size_t ) dg2020.max_seq_len, 1 );
+    old_p = T_calloc( 2 * ( size_t ) dg2020.max_seq_len, 1 );
     new_p = old_p + dg2020.max_seq_len;
 
     for ( i = 0; i < f->num_pulses; i++ )

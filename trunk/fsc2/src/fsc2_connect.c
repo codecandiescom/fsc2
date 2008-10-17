@@ -72,7 +72,6 @@
 #include <sys/wait.h>
 
 #include "fsc2_config.h"
-#include "fsc2_types.h"
 
 
 /* Stuff needed if we're still running an old libc */
@@ -461,11 +460,12 @@ read_line( int    fd,
            void * vptr,
            size_t max_len )
 {
-    ssize_t n, rc;
-    char c, *ptr;
+    ssize_t n,
+            rc;
+    char c,
+         *ptr = vptr;
 
 
-    ptr = CHAR_P vptr;
     for ( n = 1; n < ( ssize_t ) max_len; n++ )
     {
         if ( ( rc = do_read( fd, &c ) ) == 1 )
@@ -533,10 +533,9 @@ writen( int          fd,
 {
     size_t nleft;
     ssize_t nwritten;
-    const char *ptr;
+    const char *ptr = vptr;
 
 
-    ptr = CHAR_P vptr;
     nleft = n;
     while ( nleft > 0 )
     {

@@ -314,7 +314,7 @@ T_strdup( const char * str )
 
     len = strlen( str );
 
-    if ( ( new_str = CHAR_P malloc( len + 1 ) ) == NULL )
+    if ( ( new_str = malloc( len + 1 ) ) == NULL )
     {
         print( FATAL, "Running out of memory.\n" );
         THROW( OUT_OF_MEMORY_EXCEPTION );

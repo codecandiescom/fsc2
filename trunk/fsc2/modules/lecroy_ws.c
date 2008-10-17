@@ -256,7 +256,7 @@ digitizer_define_window( Var_T * v )
 
     if ( lecroy_ws.w == NULL )
     {
-        lecroy_ws.w = w = WINDOW_P T_malloc( sizeof *w );
+        lecroy_ws.w = w = T_malloc( sizeof *w );
         w->prev = NULL;
     }
     else
@@ -264,7 +264,7 @@ digitizer_define_window( Var_T * v )
         w = lecroy_ws.w;
         while ( w->next != NULL )
             w = w->next;
-        w->next = WINDOW_P T_malloc( sizeof *w->next );
+        w->next = T_malloc( sizeof *w->next );
         w->next->prev = w;
         w = w->next;
     }
@@ -1854,7 +1854,7 @@ digitizer_get_curve( Var_T * v )
     else
     {
         length = lecroy_ws_curve_length( );
-        array = DOUBLE_P T_malloc( length * sizeof *array );
+        array = T_malloc( length * sizeof *array );
         for ( i = 0; i < length; i++ )
             array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
         nv = vars_push( FLOAT_ARR, array, length );

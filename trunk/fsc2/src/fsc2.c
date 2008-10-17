@@ -172,7 +172,7 @@ main( int    argc,
             return EXIT_FAILURE;
         }
 
-        EDL.in_file = CHAR_P T_free( EDL.in_file );
+        EDL.in_file = T_free( EDL.in_file );
         fname = argv[ 1 ];
 
         if ( ! get_edl_file( fname ) )
@@ -253,7 +253,7 @@ main( int    argc,
             {
                 int i;
 
-                EDL.in_file = CHAR_P T_free( EDL.in_file );
+                EDL.in_file = T_free( EDL.in_file );
                 fname = argv[ 1 ];
 
                 if ( ! get_edl_file( fname ) )
@@ -366,7 +366,7 @@ globals_init( const char * pname )
     EDL.do_quit = UNSET;
     EDL.react_to_do_quit = SET;
 
-    EDL.File_List = FILE_LIST_P T_malloc( 2 * sizeof *EDL.File_List );
+    EDL.File_List = T_malloc( 2 * sizeof *EDL.File_List );
     EDL.File_List_Len = 2;
     EDL.File_List[ 0 ].fp = stdout;
     setbuf( stdout, NULL );
@@ -438,7 +438,7 @@ fsc2_get_conf( void )
     {
         if ( Fsc2_Internals.def_directory != NULL )
             Fsc2_Internals.def_directory =
-                                 CHAR_P T_free( Fsc2_Internals.def_directory );
+                                        T_free( Fsc2_Internals.def_directory );
         return;
     }
 
@@ -460,7 +460,7 @@ fsc2_get_conf( void )
          || ! ( buf.st_mode & ( S_IRUSR | S_IRGRP | S_IROTH ) ) )
     {
         Fsc2_Internals.def_directory =
-                                 CHAR_P T_free( Fsc2_Internals.def_directory );
+                                        T_free( Fsc2_Internals.def_directory );
         return;
     }
 
@@ -488,7 +488,7 @@ fsc2_save_conf( void )
     {
          if ( Fsc2_Internals.def_directory != NULL )
              Fsc2_Internals.def_directory =
-                                 CHAR_P T_free( Fsc2_Internals.def_directory );
+                                        T_free( Fsc2_Internals.def_directory );
          return;
     }
 
@@ -505,7 +505,7 @@ fsc2_save_conf( void )
         T_free( fname );
          if ( Fsc2_Internals.def_directory != NULL )
              Fsc2_Internals.def_directory =
-                                 CHAR_P T_free( Fsc2_Internals.def_directory );
+                                        T_free( Fsc2_Internals.def_directory );
         return;
     }
 
@@ -522,7 +522,7 @@ fsc2_save_conf( void )
 
     if ( Fsc2_Internals.def_directory != NULL )
              Fsc2_Internals.def_directory =
-                                 CHAR_P T_free( Fsc2_Internals.def_directory );
+                                        T_free( Fsc2_Internals.def_directory );
 
     fprintf( fp, "MAIN_WINDOW_POSITION: %+d%+d\nMAIN_WINDOW_SIZE: %ux%u\n",
              GUI.win_x, GUI.win_y, GUI.win_width, GUI.win_height );
@@ -582,7 +582,7 @@ get_edl_file( char * fname )
             char *buf;
 
             size = ( size_t ) pathconf( ".", _PC_PATH_MAX );
-            buf = CHAR_P T_malloc( size );
+            buf = T_malloc( size );
             EDL.in_file = get_string( "%s/%s",
                                       getcwd( buf, size ), fname );
             T_free( buf );
@@ -1356,7 +1356,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         if ( EDL.in_file == '\0' )
         {
             fl_show_alert( "Error", "Sorry, no file is loaded yet.", NULL, 1 );
-            old_in_file = CHAR_P T_free( old_in_file );
+            old_in_file = T_free( old_in_file );
             notify_conn( UNBUSY_SIGNAL );
             return;
         }
@@ -1387,7 +1387,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         else
             fl_show_alert( "Error", "Sorry, no permission to read file:",
                            EDL.in_file, 1 );
-        old_in_file = CHAR_P T_free( old_in_file );
+        old_in_file = T_free( old_in_file );
         notify_conn( UNBUSY_SIGNAL );
         return;
     }
@@ -1413,7 +1413,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
 
         fl_show_alert( "Error", "Sorry, can't open a temporary file.",
                        NULL, 1 );
-        old_in_file = CHAR_P T_free( old_in_file );
+        old_in_file = T_free( old_in_file );
         notify_conn( UNBUSY_SIGNAL );
         return;
     }
@@ -1436,7 +1436,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
 
         fl_show_alert( "Error", "Sorry, can't open a temporary file.",
                        NULL, 1 );
-        old_in_file = CHAR_P T_free( old_in_file );
+        old_in_file = T_free( old_in_file );
         notify_conn( UNBUSY_SIGNAL );
         return;
     }
@@ -1455,7 +1455,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         }
 
         fl_show_alert( "Error", "Sorry, can't open file:", EDL.in_file, 1 );
-        old_in_file = CHAR_P T_free( old_in_file );
+        old_in_file = T_free( old_in_file );
         notify_conn( UNBUSY_SIGNAL );
         return;
     }
@@ -1497,12 +1497,12 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
     In_file_fp = fp;
 
     Delete_file = UNSET;
-    old_in_file = CHAR_P T_free( old_in_file );
+    old_in_file = T_free( old_in_file );
 
     /* Set a new window title */
 
     if ( Fsc2_Internals.title )
-        Fsc2_Internals.title = CHAR_P T_free( Fsc2_Internals.title );
+        Fsc2_Internals.title = T_free( Fsc2_Internals.title );
     Fsc2_Internals.title = get_string( "fsc2: %s", EDL.in_file );
     fl_set_form_title( GUI.main_form->fsc2, Fsc2_Internals.title );
 
@@ -1944,11 +1944,11 @@ clean_up( void )
 
     for ( i = X; i <= Y; i++ )
         if ( G_1d.label_orig[ i ] )
-            G_1d.label_orig[ i ] = CHAR_P T_free( G_1d.label_orig[ i ] );
+            G_1d.label_orig[ i ] = T_free( G_1d.label_orig[ i ] );
 
     for ( i = X; i <= Z; i++ )
         if ( G_2d.label_orig[ i ] )
-            G_2d.label_orig[ i ] = CHAR_P T_free( G_2d.label_orig[ i ] );
+            G_2d.label_orig[ i ] = T_free( G_2d.label_orig[ i ] );
 
     G.is_init = UNSET;
     G.dim = 0;
@@ -1962,7 +1962,7 @@ clean_up( void )
 
     /* Deallocate memory used for file names */
 
-    EDL.Fname = CHAR_P T_free( EDL.Fname );
+    EDL.Fname = T_free( EDL.Fname );
 
     /* Run exit hook functions and unlink modules */
 

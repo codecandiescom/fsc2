@@ -251,7 +251,7 @@ dg2020_find_phase_pulse( Pulse_T *   p,
     {
         if ( pp->num < 0 && pp->for_pulse == p )
         {
-            *pl = PULSE_PP T_realloc( *pl, ++( *num ) * sizeof **pl );
+            *pl = T_realloc( *pl, ++( *num ) * sizeof **pl );
             ( *pl )[ *num - 1 ] = pp;
         }
 
@@ -281,8 +281,7 @@ dg2020_get_phase_pulse_list( Function_T * f,
     {
         if ( f->pulses[ i ]->channel != channel )
             continue;
-        *list = PULSE_PP T_realloc( *list,
-                                    ( num_pulses + 1 ) * sizeof **list );
+        *list = T_realloc( *list, ( num_pulses + 1 ) * sizeof **list );
         *( *list + num_pulses++ ) = f->pulses[ i ];
     }
 
@@ -467,7 +466,7 @@ dg2020_prep_cmd( char ** cmd,
 
     /* Get enough memory for the command string */
 
-    *cmd = CHAR_P T_malloc( length + 50L );
+    *cmd = T_malloc( length + 50L );
 
     /* Set up the command string */
 

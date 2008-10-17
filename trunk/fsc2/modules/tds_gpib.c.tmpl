@@ -885,7 +885,7 @@ tds_tmpl_get_curve( int        channel,
     char cmd[ 50 ];
     char reply[ 10 ];
     long len = 10;
-    char *buffer;
+    char *buffer = NULL;
     char *b;
     long i;
     double sens;
@@ -987,20 +987,23 @@ tds_tmpl_get_curve( int        channel,
     len1 = 1 + lrnd( floor( log10( len2 ) ) );
     len += len1 + len2 + 2;
 
-    *data = DOUBLE_P T_malloc( *length * sizeof **data );
-    buffer = CHAR_P T_malloc( len );
 
     /* Now get all the data bytes... */
 
     TRY
     {
+        *data = NULL;
+        *data = T_malloc( *length * sizeof **data );
+        buffer = T_malloc( len );
         tds_tmpl_talk( "CURV?\n", buffer, &len );
         TRY_SUCCESS;
     }
     OTHERWISE
     {
-        T_free( buffer );
-        T_free( *data );
+        if ( buffer )
+            T_free( buffer );
+        if ( *data )
+            T_free( *data );
         RETHROW( );
     }
 

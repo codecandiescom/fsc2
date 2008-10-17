@@ -189,7 +189,7 @@ rb8510_1_end_of_exp_hook( void )
 
         if (    rb8510.reserved_by
              && rb8510.reserved_by != rb8510_stored.reserved_by )
-            rb8510.reserved_by = CHAR_P T_free( rb8510.reserved_by );
+            rb8510.reserved_by = T_free( rb8510.reserved_by );
     }
 
     return 1;
@@ -259,7 +259,7 @@ daq_reserve_dac( Var_T * v )
         {
             if ( ! strcmp( rb8510.reserved_by, v->val.sptr ) )
             {
-                rb8510.reserved_by = CHAR_P T_free( rb8510.reserved_by );
+                rb8510.reserved_by = T_free( rb8510.reserved_by );
                 return vars_push( INT_VAR, 1L );
             }
             else

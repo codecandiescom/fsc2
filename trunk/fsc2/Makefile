@@ -420,7 +420,7 @@ MAIL_ADDRESS       := fsc2@toerring.de
 
 # Set the optimization level
 
-OPTIMIZATION     := -O2
+OPTIMIZATION     := -O0
 
 
 # Define this in order to use mpatrol

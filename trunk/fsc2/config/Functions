@@ -474,11 +474,19 @@ chopper_sector_frequency, -1, ALL;
 
 /* Functions exported by the pseudo-devices for EPR resonator modulation */
 
-epr_modulation_create, -1, EXP;
-epr_modulation_delete, -1, EXP;
-epr_modulation_ratio, -1, EXP;
-epr_modulation_phase, -1, EXP;
-
+epr_modulation_ratio, -1, ALL;
+epr_modulation_phase, -1, ALL;
+epr_modulation_has_phase, 2, ALL;
+epr_modulation_add_resonator, 1, ALL;
+epr_modulation_delete_resonator, 1, ALL;
+epr_modulation_resonator_count, 0, ALL;
+epr_modulation_resonator_name, 1, ALL;
+epr_modulation_resonator_interpolate, -1, ALL;
+epr_modulation_resonator_can_interpolate, 1, ALL;
+epr_modulation_resonator_extrapolate, -1, ALL;
+epr_modulation_resonator_can_extrapolate, 11, ALL;
+epr_modulation_frequencies, 1, ALL;
+epr_modulation_store, 0, ALL;
 
 /*
  * Local variables:

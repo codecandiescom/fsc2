@@ -39,7 +39,7 @@ flex_sources   = $(wildcard *_lexer.l)
 sources        = $(bison_sources:.y=.c) $(flex_sources:.l=.c) $(c_sources)
 objects        = $(sources:.c=.o)
 resources      = $(wildcard fsc2_rsc_*r.fd)
-headers        = ${c_sources:.c=.h} fsc2_types.h ../fsc2_config.h
+headers        = ${c_sources:.c=.h} ../fsc2_config.h
 all_headers    = $(headers) $(bison_sources:.y=.h) $(resources:.fd=.h)
 
 export headers        # export list of header files to the modules Makefile
@@ -71,7 +71,7 @@ modules:
 	$(MAKE) -C ../modules modules
 
 
-# Make the main program from the c, flex and bison source files
+# Make the main program from the C, flex and bison source files
 # When linking all symbols must be added to the dynamic symbol table,
 # the dynamically loaded libraries need to see at least some of them.
 
@@ -83,7 +83,7 @@ fsc2: $(objects)
 
 %.c %.h: %.y $(headers)
 	$(BISON) $(BISONFLAGS) $(patsubst %_parser.y,%,$<) \
-		-o $(addsuffix .c,$(basename $@)) $<
+			 -o $(addsuffix .c,$(basename $@)) $<
 
 
 # The replacement of 'ECHO' by 'FLEX_ECHO' in the files created by flex is

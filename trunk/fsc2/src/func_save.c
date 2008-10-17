@@ -228,8 +228,8 @@ f_openf( Var_T * v )
     {
         if ( EDL.File_List )
         {
-            old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
-                                                  * sizeof *old_File_List );
+            old_File_List = T_malloc(   EDL.File_List_Len
+                                      * sizeof *old_File_List );
             memcpy( old_File_List, EDL.File_List,
                     EDL.File_List_Len * sizeof *old_File_List );
         }
@@ -243,9 +243,9 @@ f_openf( Var_T * v )
 
     TRY
     {
-        EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
-                                               ( EDL.File_List_Len + 1 )
-                                               * sizeof *EDL.File_List );
+        EDL.File_List = T_realloc( EDL.File_List,
+                                     ( EDL.File_List_Len + 1 )
+                                   * sizeof *EDL.File_List );
         if ( old_File_List != NULL )
             T_free( old_File_List );
         TRY_SUCCESS;
@@ -397,7 +397,7 @@ f_getf( Var_T * v )
                           "        Those data will be lost!",
                           2, "Yes", "No", NULL, 2, SET ) != 1 )
     {
-        r = CHAR_P T_free( r );
+        r = T_free( r );
         goto getfile_retry;
     }
 
@@ -432,7 +432,7 @@ f_getf( Var_T * v )
         if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2, SET ) )
         {
             T_free( m );
-            r = CHAR_P T_free( r );
+            r = T_free( r );
             goto getfile_retry;
         }
         T_free( m );
@@ -462,7 +462,7 @@ f_getf( Var_T * v )
                               "       Please select a different file." );
         }
 
-        r = CHAR_P T_free( r );
+        r = T_free( r );
         goto getfile_retry;
     }
 
@@ -477,17 +477,16 @@ f_getf( Var_T * v )
 
     if ( EDL.File_List )
     {
-        old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len *
-                                              sizeof *old_File_List );
+        old_File_List = T_malloc( EDL.File_List_Len * sizeof *old_File_List );
         memcpy( old_File_List, EDL.File_List,
                 EDL.File_List_Len * sizeof *old_File_List );
     }
 
     TRY
     {
-        EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
-                                               ( EDL.File_List_Len + 1 )
-                                               * sizeof *EDL.File_List );
+        EDL.File_List = T_realloc( EDL.File_List,
+                                     ( EDL.File_List_Len + 1 )
+                                   * sizeof *EDL.File_List );
         if ( old_File_List != NULL )
             T_free( old_File_List );
         TRY_SUCCESS;
@@ -577,8 +576,8 @@ f_clonef( Var_T * v )
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, EDL.File_List_Len++ + FILE_NUMBER_OFFSET );
 
-    fn = CHAR_P T_malloc(   strlen( EDL.File_List[ file_num ].name )
-                          + strlen( v->next->next->val.sptr ) + 2 );
+    fn = T_malloc(   strlen( EDL.File_List[ file_num ].name )
+                   + strlen( v->next->next->val.sptr ) + 2 );
     strcpy( fn, EDL.File_List[ file_num ].name );
 
     n = fn + strlen( fn ) - strlen( v->next->val.sptr );
@@ -644,7 +643,7 @@ batch_mode_file_open( char * name )
             if ( cn % 10 == 0 )
             {
                 if ( new_name != NULL )
-                    new_name = CHAR_P T_free( new_name );
+                    new_name = T_free( new_name );
                 new_name = get_string( "%s.batch_output.%lu",
                                        strrchr( EDL.in_file, '/' ) + 1, cn++ );
             }
@@ -661,7 +660,7 @@ batch_mode_file_open( char * name )
                 if ( cn % 10 == 0 )
                 {
                     if ( new_name != NULL )
-                        new_name = CHAR_P T_free( new_name );
+                        new_name = T_free( new_name );
                     new_name = get_string( "%s.batch_output.%lu", name, cn++ );
                 }
                 else
@@ -706,17 +705,16 @@ batch_mode_file_open( char * name )
 
     if ( EDL.File_List )
     {
-        old_File_List = FILE_LIST_P T_malloc( EDL.File_List_Len
-                                              * sizeof *old_File_List );
+        old_File_List = T_malloc( EDL.File_List_Len * sizeof *old_File_List );
         memcpy( old_File_List, EDL.File_List,
                 EDL.File_List_Len * sizeof *old_File_List );
     }
 
     TRY
     {
-        EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
-                                               ( EDL.File_List_Len + 1 )
-                                               * sizeof *EDL.File_List );
+        EDL.File_List = T_realloc( EDL.File_List,
+                                     ( EDL.File_List_Len + 1 )
+                                   * sizeof *EDL.File_List );
         if ( old_File_List != NULL )
             T_free( old_File_List );
         TRY_SUCCESS;
@@ -879,8 +877,7 @@ close_all_files( void )
             T_free( EDL.File_List[ i ].name );
     }
 
-    EDL.File_List = FILE_LIST_P T_realloc( EDL.File_List,
-                                           2 * sizeof *EDL.File_List );
+    EDL.File_List = T_realloc( EDL.File_List, 2 * sizeof *EDL.File_List );
     EDL.File_List_Len = 2;
     STD_Is_Open = UNSET;
 }
@@ -1088,8 +1085,7 @@ f_format_check( Var_T * v )
         if ( *cp == '%' )                 /* '%' must be replaced by "%%" */
         {
             s2c = cp - v->val.sptr;
-            v->val.sptr = CHAR_P T_realloc( v->val.sptr,
-                                            strlen( v->val.sptr ) + 2 );
+            v->val.sptr = T_realloc( v->val.sptr, strlen( v->val.sptr ) + 2 );
             cp = v->val.sptr + s2c;
             memmove( cp + 1, cp, strlen( cp ) + 1 );
             cp++;
@@ -1124,8 +1120,8 @@ f_format_check( Var_T * v )
         {
             case INT_VAR :
                 s2c = cp - v->val.sptr;
-                v->val.sptr = CHAR_P T_realloc( v->val.sptr,
-                                                strlen( v->val.sptr ) + 2 );
+                v->val.sptr = T_realloc( v->val.sptr,
+                                         strlen( v->val.sptr ) + 2 );
                 cp = v->val.sptr + s2c;
                 memmove( cp + 2, cp + 1, strlen( cp ) );
                 memcpy( cp, "%d", 2 );
@@ -1134,8 +1130,8 @@ f_format_check( Var_T * v )
 
             case FLOAT_VAR :
                 s2c = cp - v->val.sptr;
-                v->val.sptr = CHAR_P T_realloc( v->val.sptr,
-                                                strlen( v->val.sptr ) + 5 );
+                v->val.sptr = T_realloc( v->val.sptr,
+                                         strlen( v->val.sptr ) + 5 );
                 cp = v->val.sptr + s2c;
                 memmove( cp + 5, cp + 1, strlen( cp ) );
                 memcpy( cp, "%#.9g", 5 );
@@ -1144,8 +1140,8 @@ f_format_check( Var_T * v )
 
             case STR_VAR :
                 s2c = cp - v->val.sptr;
-                v->val.sptr = CHAR_P T_realloc( v->val.sptr,
-                                                strlen( v->val.sptr ) + 2 );
+                v->val.sptr = T_realloc( v->val.sptr,
+                                         strlen( v->val.sptr ) + 2 );
                 cp = v->val.sptr + s2c;
                 memmove( cp + 2, cp + 1, strlen( cp ) );
                 memcpy( cp, "%s", 2 );
@@ -1451,7 +1447,7 @@ do_printf( long file_num, Var_T * v )
     CLOBBER_PROTECT( count );
 
     sptr = v->val.sptr;
-    fmt_start = fmt_end = CHAR_P T_malloc( strlen( sptr ) + 2 );
+    fmt_start = fmt_end = T_malloc( strlen( sptr ) + 2 );
     strcpy( fmt_start, sptr );
     cv = v->next;
 
@@ -1955,8 +1951,7 @@ print_include( int          fid,
             else if ( *cp == '~' && cp[ 1 ] == '/' )
             {
                 pwe = getpwuid( getuid( ) );
-                file_name = CHAR_P T_malloc(   strlen( pwe->pw_dir ) 
-                                             + strlen( cp ) );
+                file_name = T_malloc( strlen( pwe->pw_dir ) + strlen( cp ) );
                 strcpy( file_name, pwe->pw_dir );
                 strcat( file_name, cp + 1 );
             }
@@ -1964,8 +1959,8 @@ print_include( int          fid,
             {
                 file_name = T_strdup( cur_file );
                 *strrchr( file_name, '/' ) = '\0';
-                file_name = CHAR_P T_realloc( file_name, strlen( file_name )
-                                              + strlen( cp ) + 2 );
+                file_name = T_realloc(   file_name, strlen( file_name )
+                                       + strlen( cp ) + 2 );
                 strcat( file_name, "/" );
                 strcat( file_name, cp );
             }
@@ -1974,8 +1969,7 @@ print_include( int          fid,
         else
         {
 #if defined DEF_INCL_DIR
-            file_name = CHAR_P T_malloc(   strlen( cp )
-                                         + strlen( DEF_INCL_DIR ) + 3 );
+            file_name = T_malloc( strlen( cp ) + strlen( DEF_INCL_DIR ) + 3 );
             strcpy( file_name, DEF_INCL_DIR );
             if ( file_name[ strlen( file_name ) - 1 ] != '/' )
                 strcat( file_name, "/" );
@@ -2231,7 +2225,7 @@ T_fprintf( long         fn,
 
         if ( p == initial_buffer )
             p = NULL;
-        p = CHAR_P T_realloc_or_free( p, size );
+        p = T_realloc_or_free( p, size );
     }
 
     if ( Fsc2_Internals.mode == TEST )
@@ -2299,7 +2293,7 @@ get_repl_retry:
                                2, "Yes", "No", NULL, 2, SET ) )
     {
         if ( new_name != NULL )
-            new_name = CHAR_P T_free( new_name );
+            new_name = T_free( new_name );
         goto get_repl_retry;
     }
 
@@ -2324,7 +2318,7 @@ get_repl_retry:
                                " Do you really want to overwrite it?",
                                2, "Yes", "No", NULL, 2, SET ) )
     {
-        new_name = CHAR_P T_free( new_name );
+        new_name = T_free( new_name );
         goto get_repl_retry;
     }
 
@@ -2357,7 +2351,7 @@ get_repl_retry:
                               "       Please select a different file." );
         }
 
-        new_name = CHAR_P T_free( new_name );
+        new_name = T_free( new_name );
         goto get_repl_retry;
     }
 
@@ -2393,7 +2387,7 @@ get_repl_retry:
                 T_free( mess );
                 fclose( new_fp );
                 unlink( new_name );
-                new_name = CHAR_P T_free( new_name );
+                new_name = T_free( new_name );
                 goto get_repl_retry;
             }
 

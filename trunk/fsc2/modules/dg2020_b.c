@@ -543,11 +543,11 @@ dg2020_b_exit_hook( void )
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
         f = dg2020.function + i;
-        f->pcm = CHANNEL_PP T_free( f->pcm );
-        f->pm = BOOL_P T_free( f->pm );
-        f->pulses = PULSE_PP T_free( f->pulses );
+        f->pcm = T_free( f->pcm );
+        f->pm = T_free( f->pm );
+        f->pulses = T_free( f->pulses );
         if ( f->pulse_params )
-            f->pulse_params = PULSE_PARAMS_P T_free( f->pulse_params );
+            f->pulse_params = T_free( f->pulse_params );
         f->old_pulse_params = NULL;
     }
 

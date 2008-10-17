@@ -117,8 +117,8 @@ tegam2714a_p_basic_check( void )
             THROW( EXCEPTION );
         }
 
-        f->pulses = PULSE_PP T_realloc( f->pulses,
-                                        ++f->num_pulses * sizeof * f->pulses );
+        f->pulses = T_realloc( f->pulses,
+                               ++f->num_pulses * sizeof * f->pulses );
         f->pulses[ f->num_pulses - 1 ] = p;
     }
 

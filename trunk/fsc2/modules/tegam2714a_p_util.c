@@ -374,7 +374,7 @@ tegam2714a_p_dump_pulses( void )
             if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2 ) )
             {
                 T_free( m );
-                name = CHAR_P T_free( name );
+                name = T_free( name );
                 continue;
             }
             T_free( m );
@@ -407,7 +407,7 @@ tegam2714a_p_dump_pulses( void )
                                   "different file." );
             }
 
-            name = CHAR_P T_free( name );
+            name = T_free( name );
             continue;
         }
     } while ( tegam2714a_p.dump_file == NULL );

@@ -268,8 +268,8 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
 
     if ( FSC2_MODE == TEST )
     {
-        array = DOUBLE_P T_malloc( TEST_PIXEL_WIDTH * TEST_PIXEL_HEIGHT
-                                   * sizeof *array );
+        array = T_malloc(   TEST_PIXEL_WIDTH * TEST_PIXEL_HEIGHT
+                          * sizeof *array );
         for ( i = 0; i < TEST_PIXEL_WIDTH * TEST_PIXEL_HEIGHT; i++ )
             array[ i ] = 0.0;
         nv = vars_push( FLOAT_ARR, array,
@@ -298,7 +298,7 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
     recon = oriel_matrix_get_reconstruction( RECON_TYPE_LIGHT );
 
     len = recon->response_size  / sizeof( float );
-    array = DOUBLE_P T_malloc( len * sizeof *array );
+    array = T_malloc( len * sizeof *array );
 
     for ( i = 0; i < len; i++ )
         array[ i ] = recon->intensity[ i ];

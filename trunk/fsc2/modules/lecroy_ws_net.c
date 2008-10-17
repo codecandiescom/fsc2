@@ -1441,7 +1441,7 @@ lecroy_ws_get_curve( int        ch,
        two's complement integers, which then need to be scaled by gain and
        offset. */
 
-    *array = DOUBLE_P T_malloc( *length * sizeof **array + 1 );
+    *array = T_malloc( *length * sizeof **array + 1 );
 
     for ( i = 0, dp = data; i < *length; dp += 2, i++ )
     {
@@ -1624,7 +1624,7 @@ lecroy_ws_get_data( long * length )
     /* Obtain enough memory (one more byte than we need for the data because
        a '\n' gets attached at the end) */
 
-    data = UCHAR_P T_malloc( ++len );
+    data = T_malloc( ++len );
 
     /* Get the data, we need to loop since the device may send them in
        several chunks */

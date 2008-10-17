@@ -1567,8 +1567,7 @@ monochromator_calibrate( Var_T * v )
     TRY
     {
         c.num_values = v->len;
-        c.wavelengths = DOUBLE_P T_malloc( c.num_values
-                                           * sizeof *c.wavelengths );
+        c.wavelengths = T_malloc( c.num_values * sizeof *c.wavelengths );
         if ( v->type == INT_ARR )
             for ( i = 0; i < v->len; i++ )
                 c.wavelengths[ i ] = ( double ) v->val.lpnt[ i ];
@@ -1598,8 +1597,8 @@ monochromator_calibrate( Var_T * v )
             THROW( EXCEPTION );
         }
 
-        c.center_wavelengths = DOUBLE_P T_malloc( c.num_values
-                                              * sizeof *c.center_wavelengths );
+        c.center_wavelengths = T_malloc(   c.num_values
+                                         * sizeof *c.center_wavelengths );
 
         if ( v->type == INT_ARR )
             for ( i = 0; i < v->len; i++ )
@@ -1630,7 +1629,7 @@ monochromator_calibrate( Var_T * v )
             THROW( EXCEPTION );
         }
 
-        c.m = LONG_P T_malloc( c.num_values * sizeof *c.m );
+        c.m = T_malloc( c.num_values * sizeof *c.m );
 
         if ( v->type == INT_ARR )
             memcpy( c.m, v->val.lpnt, c.num_values * sizeof *c.m );
@@ -1660,7 +1659,7 @@ monochromator_calibrate( Var_T * v )
             THROW( EXCEPTION );
         }
 
-        c.n_exp = DOUBLE_P T_malloc( c.num_values * sizeof *c.n_exp );
+        c.n_exp = T_malloc( c.num_values * sizeof *c.n_exp );
 
         if ( v->type == INT_ARR )
             for ( i = 0; i < v->len; i++ )
@@ -1699,7 +1698,7 @@ monochromator_calibrate( Var_T * v )
            values or with input arguments. Make sure that the values are
            reasonable and none of the deviations are exactly 0. */
 
-        x = DOUBLE_P T_malloc( 6 * sizeof *x );
+        x = T_malloc( 6 * sizeof *x );
         dx = x + 3;
 
         x[ 0 ] = DEFAULT_INCLUSION_ANGLE;

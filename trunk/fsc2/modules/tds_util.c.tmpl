@@ -654,13 +654,13 @@ tds_tmpl_store_state( TDS_TMPL_T * dest,
         return;
     }
 
-    dw = dest->w = WINDOW_P T_malloc( sizeof *dw );
+    dw = dest->w = T_malloc( sizeof *dw );
     *dest->w = *src->w;
     dest->w->next = dest->w->prev = NULL;
 
     for ( w = src->w->next; w != NULL; w = w->next )
     {
-        dw->next = WINDOW_P T_malloc( sizeof *dw->next );
+        dw->next = T_malloc( sizeof *dw->next );
         *dw->next = *w;
         dw->next->prev = dw;
         dw = dw->next;

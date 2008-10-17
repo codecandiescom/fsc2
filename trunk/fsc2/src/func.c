@@ -247,7 +247,7 @@ functions_init( void )
 
     TRY
     {
-        Fncts = FUNC_P T_malloc( sizeof Def_fncts );
+        Fncts = T_malloc( sizeof Def_fncts );
         memcpy( Fncts, Def_fncts, sizeof Def_fncts );
         qsort( Fncts, Num_Func, sizeof *Fncts, func_cmp1 );
         Num_Func = func_list_parse( &Fncts, Num_Func );
@@ -297,7 +297,7 @@ functions_exit( void )
         if ( Fncts[ i ].to_be_loaded && Fncts[ i ].name != NULL )
             T_free( ( char * ) Fncts[ i ].name );
 
-    Fncts = FUNC_P T_free( Fncts );
+    Fncts = T_free( Fncts );
 
     /* Clean up the call stack */
 
@@ -453,7 +453,7 @@ func_get_long( const char * name,
        the variable stack with a pointer to the function and the number of
        arguments. Also copy the functions name and access flag. */
 
-    f = FUNC_P bsearch( fn, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
+    f = bsearch( fn, Fncts, Num_Func, sizeof *Fncts, func_cmp2 );
 
     T_free( fn );
 
@@ -702,7 +702,7 @@ call_push( Func_T *     f,
     Call_Stack_T *cs;
 
 
-    cs = CALL_STACK_P T_malloc( sizeof *cs );
+    cs = T_malloc( sizeof *cs );
     cs->next = EDL.Call_Stack;
     cs->f = f;
     if ( f != NULL )

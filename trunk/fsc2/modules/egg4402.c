@@ -333,7 +333,7 @@ boxcar_get_curve( Var_T * v )
 
     if ( FSC2_MODE == TEST )
     {
-        ret_buffer = DOUBLE_P T_calloc( num_points, sizeof *ret_buffer );
+        ret_buffer = T_calloc( num_points, sizeof *ret_buffer );
         cl = vars_push( FLOAT_ARR, ret_buffer, last - first + 1 );
         if ( size_dynamic )
             cl->flags |= IS_DYNAMIC;
@@ -344,7 +344,7 @@ boxcar_get_curve( Var_T * v )
     /* Get a buffer large enough to hold all data */
 
     length = num_points * 15 + 1;
-    buffer = UCHAR_P T_malloc( length );
+    buffer = T_malloc( length );
 
     /* Set the curve to use for the transfer */
 
@@ -399,7 +399,7 @@ boxcar_get_curve( Var_T * v )
     /* Get a buffer for the data in binary form and convert the ASCII data */
 
     buffer[ length - 1 ] = '\0';
-    ret_buffer = DOUBLE_P T_malloc( num_points * sizeof *ret_buffer );
+    ret_buffer = T_malloc( num_points * sizeof *ret_buffer );
 
     for ( i = 0, cc = buffer; i < num_points; cc = cn, i++ )
     {

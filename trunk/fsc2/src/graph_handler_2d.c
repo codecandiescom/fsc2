@@ -2380,7 +2380,7 @@ set_marker_2d( long x_pos,
     else
         cv = G_2d.curve_2d[ curve ];
 
-    m = MARKER_2D_P T_malloc( sizeof *m );
+    m = T_malloc( sizeof *m );
     m->next = 0;
 
     if ( cv->marker_2d == NULL )
@@ -2497,7 +2497,7 @@ remove_markers_2d( long * curves )
         {
             XFreeGC( G.d, m->gc );
             mn = m->next;
-            m = MARKER_2D_P T_free( m );
+            m = T_free( m );
         }
         cv->marker_2d = NULL;
 

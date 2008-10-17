@@ -147,10 +147,10 @@ daq_ai_channel_setup( Var_T * v )
     {
         if ( pci_mio_16e_1.ai_state.ranges != NULL )
             pci_mio_16e_1.ai_state.ranges =
-                              DOUBLE_P T_free( pci_mio_16e_1.ai_state.ranges );
+                                      T_free( pci_mio_16e_1.ai_state.ranges );
         if ( pci_mio_16e_1.ai_state.polarities != NULL )
             pci_mio_16e_1.ai_state.polarities =
-              NI_DAQ_BU_POLARITY_P T_free( pci_mio_16e_1.ai_state.polarities );
+                                  T_free( pci_mio_16e_1.ai_state.polarities );
     }
 
     pci_mio_16e_1.ai_state.ampl_switch_needed = UNSET;
@@ -179,16 +179,14 @@ daq_ai_channel_setup( Var_T * v )
             range = get_double( v, "voltage range" );
 
             num_channels++;
-            channels = INT_P T_realloc( channels,
-                                        num_channels * sizeof *channels );
-            ranges = DOUBLE_P T_realloc( ranges,
-                                         num_channels * sizeof *ranges );
-            types = NI_DAQ_AI_TYPE_P T_realloc( types,
-                                                num_channels * sizeof *types );
-            polarities = NI_DAQ_BU_POLARITY_P T_realloc( polarities,
-                                           num_channels * sizeof *polarities );
-            dither_enables = NI_DAQ_STATE_P T_realloc( dither_enables,
-                                       num_channels * sizeof *dither_enables );
+            channels = T_realloc( channels,
+                                  num_channels * sizeof *channels );
+            ranges = T_realloc( ranges, num_channels * sizeof *ranges );
+            types = T_realloc( types, num_channels * sizeof *types );
+            polarities = T_realloc( polarities,
+                                    num_channels * sizeof *polarities );
+            dither_enables = T_realloc( dither_enables,
+                                        num_channels * sizeof *dither_enables );
 
             TRY_SUCCESS;
         }
@@ -666,8 +664,8 @@ daq_ai_get_curve( Var_T * v  UNUSED_ARG )
 
     TRY
     {
-        volts = DOUBLE_PP T_malloc( pci_mio_16e_1.ai_state.num_channels
-                                    * sizeof *volts );
+        volts = T_malloc(   pci_mio_16e_1.ai_state.num_channels
+                          * sizeof *volts );
 
         if ( pci_mio_16e_1.ai_state.num_channels == 1 )
         {

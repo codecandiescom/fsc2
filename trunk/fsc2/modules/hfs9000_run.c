@@ -349,13 +349,12 @@ hfs9000_delete_pulse( Pulse_T * p )
        its function send a warning and mark the function as useless */
 
     if ( p->function->num_pulses-- > 1 )
-        p->function->pulses = PULSE_PP
-                      T_realloc( p->function->pulses,
-                                 p->function->num_pulses *
-                                 sizeof *p->function->pulses );
+        p->function->pulses = T_realloc( p->function->pulses,
+                                           p->function->num_pulses
+                                         * sizeof *p->function->pulses );
     else
     {
-        p->function->pulses = PULSE_PP T_free( p->function->pulses );
+        p->function->pulses = T_free( p->function->pulses );
 
         print( SEVERE, "Function '%s' isn't used at all because all its "
                "pulses are never used.\n", p->function->name );
@@ -373,7 +372,7 @@ hfs9000_delete_pulse( Pulse_T * p )
     /* Special care has to be taken if this is the very last pulse... */
 
     if ( p == hfs9000.pulses && p->next == NULL )
-        hfs9000.pulses = PULSE_P T_free( hfs9000.pulses );
+        hfs9000.pulses = T_free( hfs9000.pulses );
     else
         T_free( p );
 
@@ -426,7 +425,7 @@ hfs9000_commit( Function_T * f,
        First allocate memory for the old and the new states of the channels
        used by the function */
 
-    f->channel->old_d = CHAR_P T_calloc( 2 * hfs9000.max_seq_len, 1 );
+    f->channel->old_d = T_calloc( 2 * hfs9000.max_seq_len, 1 );
     f->channel->new_d = f->channel->old_d + hfs9000.max_seq_len;
 
     /* Now loop over all pulses and pick the ones that need changes */

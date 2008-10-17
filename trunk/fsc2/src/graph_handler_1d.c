@@ -1851,7 +1851,7 @@ set_marker_1d( long x_pos,
         return;
     }
 
-    m = MARKER_1D_P T_malloc( sizeof *m );
+    m = T_malloc( sizeof *m );
     m->next = NULL;
 
     if ( G_1d.marker_1d == NULL )

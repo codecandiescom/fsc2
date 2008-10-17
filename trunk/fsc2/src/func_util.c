@@ -130,7 +130,7 @@ f_print( Var_T * v )
     /* Get string long enough to replace each '#' by a 3 char sequence
        plus a '\0' character */
 
-    fmt = CHAR_P T_malloc( strlen( sptr ) + 3 * in_format + percs + 3 );
+    fmt = T_malloc( strlen( sptr ) + 3 * in_format + percs + 3 );
     strcpy( fmt, sptr );
 
     for ( cp = fmt; *cp != '\0'; cp++ )
@@ -324,7 +324,7 @@ f_sprint( Var_T * v )
     /* Get string long enough to replace each '#' by a 3 char sequence
        plus a '\0' character */
 
-    fmt = CHAR_P T_malloc( strlen( sptr ) + 3 * in_format + percs + 5 );
+    fmt = T_malloc( strlen( sptr ) + 3 * in_format + percs + 5 );
     strcpy( fmt, "%s" );
     strcat( fmt, sptr );
 
@@ -1038,7 +1038,7 @@ f_dmode( Var_T * v )
 
     /* Copy the data to the segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );                   /* total length */
     ptr += sizeof len;
@@ -1197,7 +1197,7 @@ f_cscale_1d( Var_T * v )
 
     /* Copy the data to the segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );                   /* total length */
     ptr += sizeof len;
@@ -1331,7 +1331,7 @@ f_cscale_2d( Var_T * v )
 
     /* Copy the data to the segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );                   /* total length */
     ptr += sizeof len;
@@ -1468,7 +1468,7 @@ f_vrescale_1d( Var_T * v  UNUSED_ARG )
 
     /* Copy the data to the segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );                   /* total length */
     ptr += sizeof len;
@@ -1551,7 +1551,7 @@ f_vrescale_2d( Var_T * v  UNUSED_ARG )
 
     /* Copy the data to the segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );                   /* total length */
     ptr += sizeof len;
@@ -1706,7 +1706,7 @@ f_clabel_1d( Var_T * v )
 
     /* Copy the data to the segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );                   /* total length */
     ptr += sizeof len;
@@ -1842,7 +1842,7 @@ f_clabel_2d( Var_T * v )
 
     /* Copy the data to the segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );                   /* total length */
     ptr += sizeof len;
@@ -1999,7 +1999,7 @@ f_rescale_1d( Var_T * v )
 
     /* Copy the data to the segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );                   /* total length */
     ptr += sizeof len;
@@ -2110,7 +2110,7 @@ f_rescale_2d( Var_T * v )
 
     /* Copy the data to the segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );                   /* total length */
     ptr += sizeof len;
@@ -2286,7 +2286,7 @@ f_display_1d( Var_T * v )
 
     /* Copy the data to the segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );                   /* total length */
     ptr += sizeof len;
@@ -2484,7 +2484,7 @@ f_display_2d( Var_T * v )
        the number of 1D-arrays the 2D-array is made of and then for each of
        the 1D-arrays its length and data. */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );                   /* total length */
     ptr += sizeof len;
@@ -2637,7 +2637,7 @@ eval_display_args( Var_T * v,
     {
         /* Get (more) memory for the sets */
 
-        dp = DPOINT_P T_realloc_or_free( dp, ( *nsets + 1 ) * sizeof *dp );
+        dp = T_realloc_or_free( dp, ( *nsets + 1 ) * sizeof *dp );
 
         /* Check and store the x-index */
 
@@ -2927,7 +2927,7 @@ f_clearcv_1d( Var_T * v )
         if ( Fsc2_Internals.mode == TEST )
             return vars_push( INT_VAR, 1L );
 
-        ca = LONG_P T_malloc( sizeof *ca );
+        ca = T_malloc( sizeof *ca );
         *ca = 0;
         count = 1;
     }
@@ -2952,7 +2952,7 @@ f_clearcv_1d( Var_T * v )
 
             /* Store curve number */
 
-            ca = LONG_P T_realloc_or_free( ca, ( count + 1 ) * sizeof *ca );
+            ca = T_realloc_or_free( ca, ( count + 1 ) * sizeof *ca );
             ca[ count++ ] = curve - 1;
 
         } while ( ( v = v->next ) != NULL );
@@ -2992,7 +2992,7 @@ f_clearcv_1d( Var_T * v )
 
     /* Copy all data into the shared memory segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );               /* total length */
     ptr += sizeof len;
@@ -3076,7 +3076,7 @@ f_clearcv_2d( Var_T * v )
         if ( Fsc2_Internals.mode == TEST )
             return vars_push( INT_VAR, 1L );
 
-        ca = LONG_P T_malloc( sizeof *ca );
+        ca = T_malloc( sizeof *ca );
         *ca = 0;
         count = 1;
     }
@@ -3101,7 +3101,7 @@ f_clearcv_2d( Var_T * v )
 
             /* Store curve number */
 
-            ca = LONG_P T_realloc_or_free( ca, ( count + 1 ) * sizeof *ca );
+            ca = T_realloc_or_free( ca, ( count + 1 ) * sizeof *ca );
             ca[ count++ ] = curve - 1;
 
         } while ( ( v = v->next ) != NULL );
@@ -3141,7 +3141,7 @@ f_clearcv_2d( Var_T * v )
 
     /* Copy all data into the shared memory segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );               /* total length */
     ptr += sizeof len;
@@ -3321,7 +3321,7 @@ f_setmark_1d( Var_T * v )
 
     /* Copy all data into the shared memory segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );               /* total length */
     ptr += sizeof len;
@@ -3487,7 +3487,7 @@ f_setmark_2d( Var_T * v )
 
     /* Copy all data into the shared memory segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );               /* total length */
     ptr += sizeof len;
@@ -3629,7 +3629,7 @@ f_clearmark_1d( Var_T * v )
 
     /* Copy all data into the shared memory segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );               /* total length */
     ptr += sizeof len;
@@ -3734,7 +3734,7 @@ f_clearmark_2d( Var_T * v  UNUSED_ARG )
 
     /* Copy all data into the shared memory segment */
 
-    ptr = CHAR_P buf;
+    ptr = buf;
 
     memcpy( ptr, &len, sizeof len );               /* total length */
     ptr += sizeof len;
@@ -3826,7 +3826,7 @@ f_get_pos( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &buttons, sizeof buttons ); /* buttons to handle */
     pos += sizeof buttons;
@@ -3977,7 +3977,7 @@ f_curve_button_1d( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &button, sizeof button );   /* button to handle */
     pos += sizeof button;
@@ -4103,7 +4103,7 @@ f_curve_button_2d( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &button, sizeof button );   /* button to handle */
     pos += sizeof button;
@@ -4220,7 +4220,7 @@ f_fs_button_1d( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &state, sizeof state );     /* new state */
     pos += sizeof state;
@@ -4322,7 +4322,7 @@ f_fs_button_2d( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &curve, sizeof curve );     /* curve to handle */
     pos += sizeof curve;
@@ -4484,7 +4484,7 @@ f_zoom_1d( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, d, sizeof d );              /* dimensions to set */
     pos += sizeof d;
@@ -4636,7 +4636,7 @@ f_zoom_2d( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &curve, sizeof curve );     /* curve to zoom */
     pos += sizeof curve;
@@ -4691,7 +4691,7 @@ f_find_peak( Var_T * v )
     vars_check( v, INT_ARR | FLOAT_ARR );
 
     len = v->len;
-    arr = DOUBLE_P T_malloc( len * sizeof *arr );
+    arr = T_malloc( len * sizeof *arr );
 
     /* We start by calculating numerically the derivative of the curve.
        While doing so we add up the values of all points of the derivative
@@ -4890,7 +4890,7 @@ f_mean_part_array( Var_T * v )
     if ( size == v->len )
         return f_float( v );
 
-    m = DOUBLE_P T_malloc( size * sizeof *m );
+    m = T_malloc( size * sizeof *m );
     for ( i = 0; i < size; i++ )
         m[ i ] = 0.0;
     par = v->len / size;

@@ -183,7 +183,7 @@ get_phase_cycled_area_1( Var_T * v )
             num_windows++;
     }
 
-    win_list = LONG_P T_malloc( num_windows * sizeof *win_list );
+    win_list = T_malloc( num_windows * sizeof *win_list );
 
     if ( V != NULL )
         for ( i = 0; i < num_windows; V = vars_pop( V ), i++ )
@@ -195,7 +195,7 @@ get_phase_cycled_area_1( Var_T * v )
 
     TRY
     {
-        data = DOUBLE_P T_malloc( num_windows * sizeof *data );
+        data = T_malloc( num_windows * sizeof *data );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -407,7 +407,7 @@ get_phase_cycled_area_2( Var_T * v )
             num_windows++;
     }
 
-    win_list = LONG_P T_malloc( num_windows * sizeof *win_list );
+    win_list = T_malloc( num_windows * sizeof *win_list );
 
     TRY
     {
@@ -419,7 +419,7 @@ get_phase_cycled_area_2( Var_T * v )
 
         /* Also get memory for the data */
 
-        data = DOUBLE_P T_malloc( 2 * num_windows * sizeof *data );
+        data = T_malloc( 2 * num_windows * sizeof *data );
         TRY_SUCCESS;
     }
     OTHERWISE

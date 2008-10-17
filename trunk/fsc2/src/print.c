@@ -143,7 +143,7 @@ print_it( FL_OBJECT * obj,
         if ( fp != NULL )
             fclose( fp );
         if ( name )
-            name = CHAR_P T_free( name );
+            name = T_free( name );
     }
 
     if ( GUI.run_form_1d )
@@ -254,7 +254,7 @@ get_print_file( FILE ** fp,
     if ( cmd != NULL )
     {
         fl_set_input( print_form->s2p_input, cmd );
-        cmd = CHAR_P T_free( cmd );
+        cmd = T_free( cmd );
     }
     else if (    ( pc_f = get_print_command( ) )
               || ( pc_e = getenv( "FSC2_PRINT_COMMAND" ) ) )
@@ -393,7 +393,7 @@ get_print_file( FILE ** fp,
         CATCH ( OUT_OF_MEMORY_EXCEPTION )
         {
             if ( *name )
-                *name = CHAR_P T_free( *name );
+                *name = T_free( *name );
             fl_hide_form( print_form->print );
             fl_free_form( print_form->print );
             fl_free( print_form );
@@ -439,14 +439,14 @@ get_print_file( FILE ** fp,
                                 "Are you sure you want to overwrite it?",
                                 2, "Yes", "No", NULL, 2, UNSET ) )
     {
-        *name = CHAR_P T_free( *name );
+        *name = T_free( *name );
         return FAIL;
     }
 
     if ( ( *fp = fopen( *name, "w" ) ) == NULL )
     {
         fl_show_alert( "Error", "Sorry, can't open file:", *name, 1 );
-        *name = CHAR_P T_free( *name );
+        *name = T_free( *name );
         return FAIL;
     }
 
@@ -564,7 +564,7 @@ get_print_comm( long data )
     if ( pc_string != NULL )
         fl_set_input( GUI.print_comment->pc_input, pc_string );
 
-    pc_string = CHAR_P T_free( pc_string );
+    pc_string = T_free( pc_string );
 
     fl_set_form_atclose( GUI.print_comment->print_comment,
                          print_comment_close_handler, NULL );
@@ -1718,7 +1718,7 @@ split_into_lines( int * num_lines )
 
     TRY
     {
-        lines = CHAR_PP T_malloc( cur_size * sizeof *lines );
+        lines = T_malloc( cur_size * sizeof *lines );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -1733,7 +1733,7 @@ split_into_lines( int * num_lines )
             if ( nl++ == cur_size )
             {
                 cur_size += GUESS_NUM_LINES;
-                lines = CHAR_PP T_realloc_or_free( lines,
+                lines = T_realloc_or_free( lines,
                                                    cur_size * sizeof *lines );
             }
 
@@ -1751,13 +1751,12 @@ split_into_lines( int * num_lines )
             THROW( EXCEPTION );
         }
 
-        lines = CHAR_PP T_realloc_or_free( lines, ( nl + 1 ) * sizeof *lines );
+        lines = T_realloc_or_free( lines, ( nl + 1 ) * sizeof *lines );
     }
     else
     {
         if ( nl++ >= cur_size )
-            lines = CHAR_PP T_realloc_or_free( lines,
-                                               ( nl + 1 ) * sizeof *lines );
+            lines = T_realloc_or_free( lines, ( nl + 1 ) * sizeof *lines );
         lines[ nl ] = cp + 2;
     }
 
@@ -1770,7 +1769,7 @@ split_into_lines( int * num_lines )
         {
             cp = lines[ i ];
             count = lines[ i + 1 ] - cp;
-            lines[ i ] = CHAR_P T_malloc( count );
+            lines[ i ] = T_malloc( count );
             memcpy( lines[ i ], cp, count );
             lines[ i ][ count - 1 ] = '\0';
 
@@ -1840,7 +1839,7 @@ paren_replace( const char * str )
     if ( p_count == 0 )
         return T_strdup( str );
 
-    cp = sp = CHAR_P T_malloc( len + p_count );
+    cp = sp = T_malloc( len + p_count );
     strcpy( sp, str );
 
     for ( i = len; *cp != '\0'; i--, cp++ )

@@ -369,29 +369,24 @@ rb_pulser_j_exit_hook( void )
     }
 
     if ( rb_pulser_j.synth_state )
-        rb_pulser_j.synth_pulse_state =
-                                      CHAR_P T_free( rb_pulser_j.synth_state );
+        rb_pulser_j.synth_pulse_state = T_free( rb_pulser_j.synth_state );
 
     if ( rb_pulser_j.synth_pulse_state )
-        rb_pulser_j.synth_pulse_state =
-                                CHAR_P T_free( rb_pulser_j.synth_pulse_state );
+        rb_pulser_j.synth_pulse_state = T_free( rb_pulser_j.synth_pulse_state );
 
     if ( rb_pulser_j.synth_pulse_width )
-        rb_pulser_j.synth_pulse_width =
-                                CHAR_P T_free( rb_pulser_j.synth_pulse_width );
+        rb_pulser_j.synth_pulse_width = T_free( rb_pulser_j.synth_pulse_width );
 
     if ( rb_pulser_j.synth_pulse_delay )
-        rb_pulser_j.synth_pulse_delay =
-                                CHAR_P T_free( rb_pulser_j.synth_pulse_delay );
+        rb_pulser_j.synth_pulse_delay = T_free( rb_pulser_j.synth_pulse_delay );
 
     if ( rb_pulser_j.synth_trig_slope )
-        rb_pulser_j.synth_trig_slope =
-                                 CHAR_P T_free( rb_pulser_j.synth_trig_slope );
+        rb_pulser_j.synth_trig_slope = T_free( rb_pulser_j.synth_trig_slope );
 
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
         f = rb_pulser_j.function + i;
-        f->pulses = PULSE_PP T_free( f->pulses );
+        f->pulses = T_free( f->pulses );
     }
 }
 
@@ -829,17 +824,17 @@ rb_pulser_j_cleanup( void )
 
 
     if ( rb_pulser_j.config_file != NULL )
-        rb_pulser_j.config_file = CHAR_P T_free( rb_pulser_j.config_file );
+        rb_pulser_j.config_file = T_free( rb_pulser_j.config_file );
 
     for ( i = 0; i < NUM_DELAY_CARDS; i++ )
         if ( rb_pulser_j.delay_card[ i ].name != NULL )
             rb_pulser_j.delay_card[ i ].name =
-                             CHAR_P T_free( rb_pulser_j.delay_card[ i ].name );
+                                  T_free( rb_pulser_j.delay_card[ i ].name );
 
     for ( i = 0; i < NUM_CLOCK_CARDS; i++ )
         if ( rb_pulser_j.clock_card[ i ].name != NULL )
             rb_pulser_j.clock_card[ i ].name =
-                            CHAR_P T_free( rb_pulser_j.clock_card[ i ].name );
+                                  T_free( rb_pulser_j.clock_card[ i ].name );
 }
 
 

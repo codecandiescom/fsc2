@@ -208,7 +208,7 @@ f_screate( Var_T * var )
         if ( Toolbox == NULL )
             toolbox_create( VERT );
 
-        new_io = IOBJECT_P T_malloc( sizeof *new_io );
+        new_io = T_malloc( sizeof *new_io );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -311,7 +311,7 @@ f_screate_child( Var_T *        v,
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc ); /* store current line number */
     pos += sizeof EDL.Lc;
@@ -442,7 +442,7 @@ f_sdelete_child( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;
@@ -659,7 +659,7 @@ f_svalue_child( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
     pos += sizeof EDL.Lc;
@@ -780,7 +780,7 @@ f_schanged_child( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
     pos += sizeof EDL.Lc;

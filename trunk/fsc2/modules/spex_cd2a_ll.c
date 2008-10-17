@@ -549,7 +549,7 @@ spex_cd2a_write( int          type,
 #endif
 
     len = strlen( mess );
-    tmx = UCHAR_P T_malloc( len + 6 );
+    tmx = T_malloc( len + 6 );
 
     tmx[ 0 ] = type == PARAMETER ? STX : CAN;
     len++;

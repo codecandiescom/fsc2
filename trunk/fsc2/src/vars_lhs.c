@@ -356,10 +356,10 @@ vars_arr_create( Var_T * a,
     {
         a->type = a->type == INT_REF ? INT_ARR : FLOAT_ARR;
         if ( a->type == INT_ARR )
-            a->val.lpnt = LONG_P T_calloc( len, sizeof *a->val.lpnt );
+            a->val.lpnt = T_calloc( len, sizeof *a->val.lpnt );
         else
         {
-            a->val.dpnt = DOUBLE_P T_malloc( len * sizeof *a->val.dpnt );
+            a->val.dpnt = T_malloc( len * sizeof *a->val.dpnt );
             for ( i = 0; i < len; i++ )
                 a->val.dpnt[ i ] = 0.0;
         }
@@ -371,7 +371,7 @@ vars_arr_create( Var_T * a,
     /* Otherwise we need an array of references to arrays of lower dimensions
        which then in turn must be created */
 
-    a->val.vptr = VAR_PP T_malloc( len * sizeof *a->val.vptr );
+    a->val.vptr = T_malloc( len * sizeof *a->val.vptr );
 
     for ( i = 0; i < len; i++ )
         a->val.vptr[ i ] = NULL;
@@ -482,7 +482,7 @@ vars_init_list( Var_T * v,
         {
             nv = vars_push( INT_ARR, NULL, count );
             nv->flags |= INIT_ONLY;
-            nv->val.lpnt = LONG_P T_malloc( nv->len * sizeof *nv->val.lpnt );
+            nv->val.lpnt = T_malloc( nv->len * sizeof *nv->val.lpnt );
             for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )
                 nv->val.lpnt[ i ] = v->val.lval;
         }
@@ -490,7 +490,7 @@ vars_init_list( Var_T * v,
         {
             nv = vars_push( FLOAT_ARR, NULL, count );
             nv->flags |= INIT_ONLY;
-            nv->val.dpnt = DOUBLE_P T_malloc( nv->len * sizeof *nv->val.dpnt );
+            nv->val.dpnt = T_malloc( nv->len * sizeof *nv->val.dpnt );
             for ( i = 0; i < nv->len; i++, v = vars_pop( v ) )
                 if ( v->type == INT_VAR )
                     nv->val.dpnt[ i ] = ( double ) v->val.lval;
@@ -512,7 +512,7 @@ vars_init_list( Var_T * v,
 
     TRY
     {
-        nv->val.vptr = VAR_PP T_malloc( nv->len * sizeof *nv->val.vptr );
+        nv->val.vptr = T_malloc( nv->len * sizeof *nv->val.vptr );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -623,8 +623,7 @@ vars_do_init( Var_T * src,
             if ( dest->flags & IS_DYNAMIC )
             {
                 dest->len = src->len;
-                dest->val.lpnt = LONG_P T_malloc( dest->len
-                                                  * sizeof *dest->val.lpnt );
+                dest->val.lpnt = T_malloc( dest->len * sizeof *dest->val.lpnt );
             }
             else if ( src->len > dest->len )
                 print( WARN, "Superfluous initialization data.\n" );
@@ -651,8 +650,7 @@ vars_do_init( Var_T * src,
             if ( dest->flags & IS_DYNAMIC )
             {
                 dest->len = src->len;
-                dest->val.dpnt = DOUBLE_P T_malloc( dest->len
-                                                    * sizeof *dest->val.dpnt );
+                dest->val.dpnt = T_malloc( dest->len * sizeof *dest->val.dpnt );
             }
             else if ( src->len > dest->len )
                 print( WARN, "Superfluous initialization data.\n" );
@@ -674,8 +672,7 @@ vars_do_init( Var_T * src,
         case INT_REF :
             if ( dest->flags & IS_DYNAMIC )
             {
-                dest->val.vptr = VAR_PP T_malloc( src->len
-                                                  * sizeof *dest->val.vptr );
+                dest->val.vptr = T_malloc( src->len * sizeof *dest->val.vptr );
                 for ( ; dest->len < src->len; dest->len++ )
                     dest->val.vptr[ dest->len ] = NULL;
             }
@@ -706,8 +703,7 @@ vars_do_init( Var_T * src,
         case FLOAT_REF :
             if ( dest->flags & IS_DYNAMIC )
             {
-                dest->val.vptr = VAR_PP T_malloc( src->len
-                                                  * sizeof *dest->val.vptr );
+                dest->val.vptr = T_malloc( src->len * sizeof *dest->val.vptr );
                 for ( ; dest->len < src->len; dest->len++ )
                     dest->val.vptr[ dest->len ] = NULL;
             }
@@ -928,8 +924,8 @@ vars_lhs_simple_pointer( Var_T * a,
 
         if ( dim > 1 )
         {
-            cv->val.vptr = VAR_PP T_realloc( cv->val.vptr,
-                                          ( ind + 1 ) * sizeof *cv->val.vptr );
+            cv->val.vptr = T_realloc( cv->val.vptr,
+                                      ( ind + 1 ) * sizeof *cv->val.vptr );
 
             for ( i = cv->len; i <= ind; i++ )
             {
@@ -951,15 +947,17 @@ vars_lhs_simple_pointer( Var_T * a,
             switch ( cv->type )
             {
                 case INT_ARR :
-                    cv->val.lpnt = LONG_P T_realloc( cv->val.lpnt,
-                                          ( ind + 1 ) * sizeof *cv->val.lpnt );
+                    cv->val.lpnt = T_realloc( cv->val.lpnt,
+                                                ( ind + 1 )
+                                              * sizeof *cv->val.lpnt );
                     memset( cv->val.lpnt + cv->len, 0,
                             ( ind - cv->len + 1 ) * sizeof *cv->val.lpnt );
                     break;
 
                 case FLOAT_ARR :
-                    cv->val.dpnt = DOUBLE_P T_realloc( cv->val.dpnt,
-                                          ( ind + 1 ) * sizeof *cv->val.dpnt );
+                    cv->val.dpnt = T_realloc( cv->val.dpnt,
+                                                ( ind + 1 )
+                                              * sizeof *cv->val.dpnt );
                     for ( i = cv->len; i <= ind; i++ )
                         cv->val.dpnt[ i ] = 0.0;
                     break;
@@ -1034,8 +1032,9 @@ vars_lhs_range_pointer( Var_T * a,
     {
         if ( dim > 1 )
         {
-            cv->val.vptr = VAR_PP T_realloc( cv->val.vptr,
-                                    ( range_end + 1 ) * sizeof *cv->val.vptr );
+            cv->val.vptr = T_realloc( cv->val.vptr,
+                                        ( range_end + 1 )
+                                      * sizeof *cv->val.vptr );
 
             for ( i = cv->len; i <= range_end; i++ )
             {
@@ -1057,16 +1056,18 @@ vars_lhs_range_pointer( Var_T * a,
             switch ( cv->type )
             {
                 case INT_ARR :
-                    cv->val.lpnt = LONG_P T_realloc( cv->val.lpnt,
-                                    ( range_end + 1 ) * sizeof *cv->val.lpnt );
+                    cv->val.lpnt = T_realloc( cv->val.lpnt,
+                                                ( range_end + 1 )
+                                              * sizeof *cv->val.lpnt );
                     memset( cv->val.lpnt + cv->len, 0,
                             ( range_end - cv->len + 1 )
                             * sizeof *cv->val.lpnt );
                     break;
 
                 case FLOAT_ARR :
-                    cv->val.dpnt = DOUBLE_P T_realloc( cv->val.dpnt,
-                                    ( range_end + 1 ) * sizeof *cv->val.dpnt );
+                    cv->val.dpnt = T_realloc( cv->val.dpnt,
+                                                ( range_end + 1 )
+                                              * sizeof *cv->val.dpnt );
                     for ( i = cv->len; i <= range_end; i++ )
                         cv->val.dpnt[ i ] = 0.0;
                     break;

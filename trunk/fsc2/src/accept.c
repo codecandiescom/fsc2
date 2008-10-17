@@ -512,12 +512,10 @@ accept_1d_data( long       x_index,
         for ( i = 0, cv = G_1d.curve[ i ]; i < G_1d.nc;
               cv = G_1d.curve[ ++i ] )
         {
-            cv->points = SCALED_POINT_P T_realloc( cv->points,
-                                                   end_index
-                                                   * sizeof *cv->points );
-            cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
-                                              end_index
-                                              * sizeof *cv->xpoints );
+            cv->points = T_realloc( cv->points,
+                                    end_index * sizeof *cv->points );
+            cv->xpoints = T_realloc( cv->xpoints,
+                                     end_index * sizeof *cv->xpoints );
 
             for ( j = G_1d.nx, sp = cv->points + j; j < end_index; sp++, j++ )
                 sp->exist = UNSET;
@@ -1273,7 +1271,7 @@ incr_x( long x_index,
         cv = G_2d.curve_2d[ i ];
 
         old_points = cv->points;
-        sp = cv->points = SCALED_POINT_P T_malloc( new_num * sizeof *sp );
+        sp = cv->points = T_malloc( new_num * sizeof *sp );
 
         for ( j = 0; j < G_2d.ny; j++ )
         {
@@ -1284,8 +1282,7 @@ incr_x( long x_index,
 
         T_free( old_points );
 
-        cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
-                                          new_num * sizeof *cv->xpoints );
+        cv->xpoints = T_realloc( cv->xpoints, new_num * sizeof *cv->xpoints );
 
         if ( cv->is_fs )
             cv->s2d[ X ] = ( double ) ( G_2d.canvas.w - 1 ) /
@@ -1321,10 +1318,8 @@ incr_y( long y_index )
     {
         cv = G_2d.curve_2d[ i ];
 
-        cv->points = SCALED_POINT_P T_realloc( cv->points,
-                                               new_num * sizeof *cv->points );
-        cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
-                                          new_num * sizeof *cv->xpoints );
+        cv->points = T_realloc( cv->points, new_num * sizeof *cv->points );
+        cv->xpoints = T_realloc( cv->xpoints, new_num * sizeof *cv->xpoints );
 
         for ( k = G_2d.ny * G_2d.nx, sp = cv->points + k; k < new_num;
               sp++, k++ )
@@ -1371,7 +1366,7 @@ incr_x_and_y( long x_index,
         cv = G_2d.curve_2d[ i ];
 
         old_points = cv->points;
-        sp = cv->points = SCALED_POINT_P T_malloc( new_num * sizeof *sp );
+        sp = cv->points = T_malloc( new_num * sizeof *sp );
 
         /* Reorganise the old elements to fit into the new array and clear
            the new elements in the already existing rows */
@@ -1390,8 +1385,7 @@ incr_x_and_y( long x_index,
 
         T_free( old_points );
 
-        cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
-                                          new_num * sizeof *cv->xpoints );
+        cv->xpoints = T_realloc( cv->xpoints, new_num * sizeof *cv->xpoints );
 
         if ( cv->is_fs )
         {

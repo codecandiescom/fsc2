@@ -405,7 +405,7 @@ dg2020_prep_cmd( char ** cmd,
 
     /* Get enough memory for the command string */
 
-    *cmd = CHAR_P T_malloc( length + 50L );
+    *cmd = T_malloc( length + 50L );
 
     /* Set up the command string */
 
@@ -662,7 +662,7 @@ dg2020_dump_pulses( void )
             if ( 1 != show_choices( m, 2, "Yes", "No", NULL, 2 ) )
             {
                 T_free( m );
-                name = CHAR_P T_free( name );
+                name = T_free( name );
                 continue;
             }
             T_free( m );
@@ -695,7 +695,7 @@ dg2020_dump_pulses( void )
                                   "different file." );
             }
 
-            name = CHAR_P T_free( name );
+            name = T_free( name );
             continue;
         }
     } while ( dg2020.dump_file == NULL );

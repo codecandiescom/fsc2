@@ -49,7 +49,7 @@ rb_pulser_j_new_pulse( long pnum )
         cp = cp->next;
     }
 
-    cp = PULSE_P T_malloc( sizeof *cp );
+    cp = T_malloc( sizeof *cp );
 
     if ( lp == NULL )
         rb_pulser_j.pulses = cp;
@@ -381,7 +381,6 @@ rb_pulser_j_change_pulse_position( long   pnum,
 
 
     CLOBBER_PROTECT( new_pos );
-
 
     if ( p_time < 0.0 )
     {

@@ -49,7 +49,7 @@ tegam2714a_p_new_pulse( long pnum )
         cp = cp->next;
     }
 
-    cp = PULSE_P T_malloc( sizeof *cp );
+    cp = T_malloc( sizeof *cp );
 
     if ( lp == NULL )
         tegam2714a_p.pulses = cp;

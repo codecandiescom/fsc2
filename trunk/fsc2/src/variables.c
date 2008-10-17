@@ -218,7 +218,7 @@ vars_new( const char * name )
        template variable, that might be a bit faster than setting all
        elements individually), and get memory for storing the name */
 
-    vp = VAR_P T_malloc( sizeof *vp );
+    vp = T_malloc( sizeof *vp );
 
     *vp = template;
 
@@ -280,17 +280,17 @@ vars_free( Var_T * v,
     {
         case INT_ARR :
             if ( v->len != 0 )
-                v->val.lpnt = LONG_P T_free( v->val.lpnt );
+                v->val.lpnt = T_free( v->val.lpnt );
             break;
 
         case FLOAT_ARR :
             if ( v->len != 0 )
-                v->val.dpnt = DOUBLE_P T_free( v->val.dpnt );
+                v->val.dpnt = T_free( v->val.dpnt );
             break;
 
         case STR_VAR :
             if ( v->val.sptr != NULL )
-                v->val.sptr = CHAR_P T_free( v->val.sptr );
+                v->val.sptr = T_free( v->val.sptr );
                 break;
 
         case INT_REF : case FLOAT_REF :
@@ -300,7 +300,7 @@ vars_free( Var_T * v,
                 for ( i = 0; i < v->len; i++ )
                     if ( v->val.vptr[ i ] != NULL )
                         vars_free( v->val.vptr[ i ], SET );
-            v->val.vptr = VAR_PP T_free( v->val.vptr );
+            v->val.vptr = T_free( v->val.vptr );
             break;
 
         default :
@@ -308,7 +308,7 @@ vars_free( Var_T * v,
     }
 
     if ( v->name != NULL )
-        v->name = CHAR_P T_free( v->name );
+        v->name = T_free( v->name );
 
     if ( v->prev == NULL )
         EDL.Var_List = v->next;
@@ -432,7 +432,7 @@ vars_push_matrix( Var_Type_T type,
     nv = vars_push( type, NULL );
     nv->from = NULL;
 
-    sizes = SSIZE_T_P T_malloc( dim * sizeof *sizes );
+    sizes = T_malloc( dim * sizeof *sizes );
 
     va_start( ap, dim );
     
@@ -448,7 +448,7 @@ vars_push_matrix( Var_Type_T type,
 
     TRY
     {
-        nv->val.vptr = VAR_PP T_malloc( sizes[ 0 ] * sizeof *nv->val.vptr );
+        nv->val.vptr = T_malloc( sizes[ 0 ] * sizeof *nv->val.vptr );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -507,12 +507,12 @@ vars_push_submatrix( Var_T *    from,
         if ( type == INT_REF )
         {
             nv->type = type = INT_ARR;
-            nv->val.lpnt = LONG_P T_calloc( nv->len, sizeof *nv->val.lpnt );
+            nv->val.lpnt = T_calloc( nv->len, sizeof *nv->val.lpnt );
         }
         else
         {
             nv->type = FLOAT_ARR;
-            nv->val.dpnt = DOUBLE_P T_malloc( nv->len * sizeof *nv->val.dpnt );
+            nv->val.dpnt = T_malloc( nv->len * sizeof *nv->val.dpnt );
             for ( i = 0; i < nv->len; i++ )
                 nv->val.dpnt[ i ] = 0.0;
         }
@@ -521,7 +521,7 @@ vars_push_submatrix( Var_T *    from,
     }
 
     nv->type = type;
-    nv->val.vptr = VAR_PP T_malloc( nv->len * sizeof *nv->val.vptr );
+    nv->val.vptr = T_malloc( nv->len * sizeof *nv->val.vptr );
 
     for ( i = 0; i < nv->len; i++ )
         nv->val.vptr[ i ] = NULL;
@@ -569,7 +569,7 @@ vars_push( Var_Type_T type,
     /* Get memory for the new variable to be appended to the stack, set its
        type and initialize some fields */
 
-    nsv         = VAR_P T_malloc( sizeof *nsv );
+    nsv         = T_malloc( sizeof *nsv );
     nsv->name   = NULL;
     nsv->type   = type;
     nsv->next   = NULL;
@@ -614,11 +614,11 @@ vars_push( Var_Type_T type,
             else
             {
                 if ( nsv->val.lpnt != NULL )
-                    nsv->val.lpnt = LONG_P get_memcpy( nsv->val.lpnt,
-                                            nsv->len * sizeof *nsv->val.lpnt );
+                    nsv->val.lpnt = get_memcpy( nsv->val.lpnt,
+                                                  nsv->len
+                                                * sizeof *nsv->val.lpnt );
                 else
-                    nsv->val.lpnt = LONG_P T_calloc( nsv->len,
-                                                     sizeof *nsv->val.lpnt );
+                    nsv->val.lpnt = T_calloc( nsv->len, sizeof *nsv->val.lpnt );
             }
             break;
 
@@ -634,12 +634,13 @@ vars_push( Var_Type_T type,
             else
             {
                 if ( nsv->val.dpnt != NULL )
-                    nsv->val.dpnt = DOUBLE_P get_memcpy( nsv->val.dpnt,
-                                            nsv->len * sizeof *nsv->val.dpnt );
+                    nsv->val.dpnt = get_memcpy( nsv->val.dpnt,
+                                                  nsv->len
+                                                * sizeof *nsv->val.dpnt );
                 else
                 {
-                    nsv->val.dpnt = DOUBLE_P T_malloc( nsv->len *
-                                                       sizeof *nsv->val.dpnt );
+                    nsv->val.dpnt = T_malloc(   nsv->len
+                                              * sizeof *nsv->val.dpnt );
                     for ( i = 0; i < nsv->len; i++ )
                         nsv->val.dpnt[ i ] = 0.0;
                 }
@@ -662,8 +663,7 @@ vars_push( Var_Type_T type,
 
         case SUB_REF_PTR :
             nsv->len = va_arg( ap, ssize_t );
-            nsv->val.index = SSIZE_T_P T_malloc( nsv->len *
-                                                 sizeof *nsv->val.index );
+            nsv->val.index = T_malloc( nsv->len * sizeof *nsv->val.index );
             break;
 
         case REF_PTR :
@@ -715,7 +715,7 @@ vars_make( Var_Type_T type,
 
     if ( src->flags & ON_STACK )
     {
-        nv        = VAR_P T_malloc( sizeof *nv );
+        nv        = T_malloc( sizeof *nv );
         nv->name  = NULL;
         nv->next  = NULL;
         nv->flags = ON_STACK;
@@ -747,8 +747,7 @@ vars_make( Var_Type_T type,
             nv->len = src->len;
             nv->dim = 1;
             if ( nv->len != 0 )
-                nv->val.lpnt = LONG_P T_calloc( nv->len,
-                                                sizeof *nv->val.lpnt );
+                nv->val.lpnt = T_calloc( nv->len, sizeof *nv->val.lpnt );
             else
                 nv->val.lpnt = NULL;
             break;
@@ -758,8 +757,7 @@ vars_make( Var_Type_T type,
             nv->dim = 1;
             if ( nv->len != 0 )
             {
-                nv->val.dpnt = DOUBLE_P T_malloc(   nv->len
-                                                  * sizeof *nv->val.dpnt );
+                nv->val.dpnt = T_malloc(   nv->len * sizeof *nv->val.dpnt );
                 for ( i = 0; i < nv->len; i++ )
                     nv->val.dpnt[ i ] = 0.0;
             }
@@ -771,8 +769,7 @@ vars_make( Var_Type_T type,
             nv->dim = src->dim;
             if ( src->len != 0 )
             {
-                nv->val.vptr = VAR_PP T_malloc(   src->len
-                                                * sizeof *nv->val.vptr );
+                nv->val.vptr = T_malloc( src->len * sizeof *nv->val.vptr );
                 for ( nv->len = 0; nv->len < src->len; nv->len++ )
                     nv->val.vptr[ nv->len ] = NULL;
             }
@@ -848,8 +845,8 @@ vars_ref_copy_create( Var_T * nsv,
                 nsv->type = INT_ARR;
                 if ( nsv->len != 0 )
                 {
-                    nsv->val.lpnt = LONG_P T_malloc(   nsv->len 
-                                                     * sizeof *nsv->val.lpnt );
+                    nsv->val.lpnt = T_malloc(   nsv->len 
+                                              * sizeof *nsv->val.lpnt );
                     memcpy( nsv->val.lpnt, src->val.lpnt,
                             nsv->len * sizeof *nsv->val.lpnt );
                 }
@@ -861,8 +858,8 @@ vars_ref_copy_create( Var_T * nsv,
                 nsv->type = FLOAT_ARR;
                 if ( nsv->len != 0 )
                 {
-                    nsv->val.dpnt = DOUBLE_P T_malloc( nsv->len 
-                                                     * sizeof *nsv->val.dpnt );
+                    nsv->val.dpnt = T_malloc(   nsv->len
+                                              * sizeof *nsv->val.dpnt );
                     for ( i = 0; i < nsv->len; i++ )
                         nsv->val.dpnt[ i ] = ( double ) src->val.lpnt[ i ];
                 }
@@ -875,8 +872,7 @@ vars_ref_copy_create( Var_T * nsv,
             nsv->type = FLOAT_ARR;
             if ( nsv->len != 0 )
             {
-                nsv->val.dpnt = DOUBLE_P T_malloc(   nsv->len 
-                                                   * sizeof *nsv->val.dpnt );
+                nsv->val.dpnt = T_malloc(   nsv->len * sizeof *nsv->val.dpnt );
                 memcpy( nsv->val.dpnt, src->val.dpnt,
                         nsv->len * sizeof *nsv->val.dpnt );
             }
@@ -898,7 +894,7 @@ vars_ref_copy_create( Var_T * nsv,
 
     TRY
     {
-        nsv->val.vptr = VAR_PP T_malloc( nsv->len * sizeof *nsv->val.vptr );
+        nsv->val.vptr = T_malloc( nsv->len * sizeof *nsv->val.vptr );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -1142,7 +1138,7 @@ vars_iter( Var_T * v )
     if ( v == NULL )
     {
         if ( iter != NULL )
-            iter = SSIZE_T_P T_free( iter );
+            iter = T_free( iter );
         return NULL;
     }
 
@@ -1150,7 +1146,7 @@ vars_iter( Var_T * v )
 
     if ( iter == NULL )
     {
-        iter = SSIZE_T_P T_malloc( v->dim * sizeof *iter );
+        iter = T_malloc( v->dim * sizeof *iter );
         for ( i = 0; i < v->dim - 1; i++ )
             iter[ i ] = 0;
         iter[ v->dim - 1 ] = -1;
@@ -1165,7 +1161,7 @@ vars_iter( Var_T * v )
 
     if ( ( ret = vars_get_pointer( iter, 0, v ) ) == NULL )
     {
-        iter = SSIZE_T_P T_free( iter );
+        iter = T_free( iter );
         return NULL;
     }
 
@@ -1253,7 +1249,7 @@ vars_save_restore( bool flag )
         for ( var_count = 0, src = EDL.Var_List; src != NULL; src = src->next )
             var_count++;
 
-        cpy_area = VAR_P T_malloc( var_count * sizeof *cpy_area );
+        cpy_area = T_malloc( var_count * sizeof *cpy_area );
 
         for ( cpy = cpy_area, src = EDL.Var_List; src != NULL;
               src = src->next, cpy++ )
@@ -1269,24 +1265,27 @@ vars_save_restore( bool flag )
                     if ( src->len == 0 )
                         break;
                     cpy->val.lpnt = NULL;
-                    cpy->val.lpnt = LONG_P get_memcpy( src->val.lpnt,
-                                            src->len * sizeof *src->val.lpnt );
+                    cpy->val.lpnt = get_memcpy( src->val.lpnt,
+                                                  src->len
+                                                * sizeof *src->val.lpnt );
                     break;
 
                 case FLOAT_ARR :
                     if ( src->len == 0 )
                         break;
                     cpy->val.dpnt = NULL;
-                    cpy->val.dpnt = DOUBLE_P get_memcpy( src->val.dpnt,
-                                            src->len * sizeof *src->val.dpnt );
+                    cpy->val.dpnt = get_memcpy( src->val.dpnt,
+                                                  src->len
+                                                * sizeof *src->val.dpnt );
                     break;
 
                 case INT_REF : case FLOAT_REF :
                     if ( src->len == 0 )
                         break;
                     cpy->val.vptr = NULL;
-                    cpy->val.vptr = VAR_PP get_memcpy( src->val.vptr,
-                                            src->len * sizeof *src->val.vptr );
+                    cpy->val.vptr = get_memcpy( src->val.vptr,
+                                                  src->len
+                                                * sizeof *src->val.vptr );
                     break;
 
                 default :
@@ -1328,17 +1327,17 @@ vars_save_restore( bool flag )
 
                 case INT_ARR :
                     if ( cpy->len != 0 )
-                        cpy->val.lpnt = LONG_P T_free( cpy->val.lpnt );
+                        cpy->val.lpnt = T_free( cpy->val.lpnt );
                     break;
 
                 case FLOAT_ARR :
                     if ( cpy->len != 0 )
-                        cpy->val.dpnt = DOUBLE_P T_free( cpy->val.dpnt );
+                        cpy->val.dpnt = T_free( cpy->val.dpnt );
                     break;
 
                 case INT_REF : case FLOAT_REF :
                     if ( cpy->len != 0 )
-                        cpy->val.vptr = VAR_PP T_free( cpy->val.vptr );
+                        cpy->val.vptr = T_free( cpy->val.vptr );
                     break;
 
                 default :
@@ -1348,7 +1347,7 @@ vars_save_restore( bool flag )
             memcpy( cpy, src, sizeof *src );
         }
 
-        cpy_area = VAR_P T_free( cpy_area );
+        cpy_area = T_free( cpy_area );
         exists_copy = UNSET;
     }
 }

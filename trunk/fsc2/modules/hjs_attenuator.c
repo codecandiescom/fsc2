@@ -139,8 +139,7 @@ hjs_attenuator_exit_hook( void )
     /* Get rid of the data from the calibration file */
 
     if ( hjs_attenuator.att_table )
-        hjs_attenuator.att_table =
-                          ATT_TABLE_ENTRY_P T_free( hjs_attenuator.att_table );
+        hjs_attenuator.att_table = T_free( hjs_attenuator.att_table );
 }
 
 
@@ -206,8 +205,7 @@ mw_attenuator_load_calibration( Var_T * v )
 
     if ( hjs_attenuator.att_table != NULL )
     {
-        hjs_attenuator.att_table =
-                          ATT_TABLE_ENTRY_P T_free( hjs_attenuator.att_table );
+        hjs_attenuator.att_table = T_free( hjs_attenuator.att_table );
         hjs_attenuator.att_table_len = 0;
     }
 
@@ -230,8 +228,7 @@ mw_attenuator_load_calibration( Var_T * v )
         {
             print( FATAL, "Calibration file '%s' not found.\n",
                    hjs_attenuator.calib_file );
-            hjs_attenuator.calib_file =
-                                    CHAR_P T_free( hjs_attenuator.calib_file );
+            hjs_attenuator.calib_file = T_free( hjs_attenuator.calib_file );
             THROW( EXCEPTION );
         }
     }
@@ -268,12 +265,12 @@ mw_attenuator_load_calibration( Var_T * v )
     OTHERWISE
     {
         fclose( tfp );
-        hjs_attenuator.calib_file = CHAR_P T_free( hjs_attenuator.calib_file );
+        hjs_attenuator.calib_file = T_free( hjs_attenuator.calib_file );
         RETHROW( );
     }
 
     fclose( tfp );
-    hjs_attenuator.calib_file = CHAR_P T_free( hjs_attenuator.calib_file );
+    hjs_attenuator.calib_file = T_free( hjs_attenuator.calib_file );
 
     return vars_push( INT_VAR, 1L );
 }

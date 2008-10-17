@@ -406,7 +406,7 @@ parent_reader( Comm_Struct_T * header )
             {
                 if ( header->data.str_len[ 0 ] > 0 )
                 {
-                    str[ 0 ] = CHAR_P T_malloc(
+                    str[ 0 ] = T_malloc(
                                     ( size_t ) header->data.str_len[ 0 ] + 1 );
                     pipe_read( str[ 0 ],
                                ( size_t ) header->data.str_len[ 0 ] );
@@ -436,7 +436,7 @@ parent_reader( Comm_Struct_T * header )
             {
                 if ( header->data.str_len[ 0 ] > 0 )
                 {
-                    str[ 0 ] = CHAR_P T_malloc(
+                    str[ 0 ] = T_malloc(
                                     ( size_t ) header->data.str_len[ 0 ] + 1 );
                     pipe_read( str[ 0 ],
                                ( size_t ) header->data.str_len[ 0 ] );
@@ -466,7 +466,7 @@ parent_reader( Comm_Struct_T * header )
             {
                 if ( header->data.str_len[ 0 ] > 0 )
                 {
-                    str[ 0 ] = CHAR_P T_malloc(
+                    str[ 0 ] = T_malloc(
                                     ( size_t ) header->data.str_len[ 0 ] + 1 );
                     pipe_read( str[ 0 ],
                                ( size_t ) header->data.str_len[ 0 ] );
@@ -503,7 +503,7 @@ parent_reader( Comm_Struct_T * header )
                 {
                     if ( header->data.str_len[ i ] > 0 )
                     {
-                        str[ i ] = CHAR_P
+                        str[ i ] =
                           T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
                         pipe_read( str[ i ],
                                    ( size_t ) header->data.str_len[ i ] );
@@ -542,7 +542,7 @@ parent_reader( Comm_Struct_T * header )
                 {
                     if ( header->data.str_len[ i ] > 0 )
                     {
-                        str[ i ] = CHAR_P
+                        str[ i ] =
                           T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
                         pipe_read( str[ i ],
                                    ( size_t ) header->data.str_len[ i ] );
@@ -586,7 +586,7 @@ parent_reader( Comm_Struct_T * header )
                 for ( i = 0; i < 2 ; i++ )
                     if ( header->data.str_len[ i ] > 0 )
                     {
-                        str[ i ] = CHAR_P
+                        str[ i ] =
                           T_malloc( ( size_t ) header->data.str_len[ i ] + 1 );
                         pipe_read( str[ i ],
                                    ( size_t ) header->data.str_len[ i ] );
@@ -610,7 +610,7 @@ parent_reader( Comm_Struct_T * header )
         case C_LAYOUT :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_layout( data, header->data.len );
                 TRY_SUCCESS;
@@ -626,7 +626,7 @@ parent_reader( Comm_Struct_T * header )
         case C_BCREATE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_bcreate( data, header->data.len );
                 TRY_SUCCESS;
@@ -642,7 +642,7 @@ parent_reader( Comm_Struct_T * header )
         case C_BDELETE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_bdelete( data, header->data.len );
                 TRY_SUCCESS;
@@ -658,7 +658,7 @@ parent_reader( Comm_Struct_T * header )
         case C_BSTATE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_bstate( data, header->data.len );
                 TRY_SUCCESS;
@@ -674,7 +674,7 @@ parent_reader( Comm_Struct_T * header )
         case C_BCHANGED :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_bchanged( data, header->data.len );
                 TRY_SUCCESS;
@@ -690,7 +690,7 @@ parent_reader( Comm_Struct_T * header )
         case C_SCREATE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_screate( data, header->data.len );
                 TRY_SUCCESS;
@@ -706,7 +706,7 @@ parent_reader( Comm_Struct_T * header )
         case C_SDELETE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_sdelete( data, header->data.len );
                 TRY_SUCCESS;
@@ -722,7 +722,7 @@ parent_reader( Comm_Struct_T * header )
         case C_SSTATE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_sstate( data, header->data.len );
                 TRY_SUCCESS;
@@ -738,7 +738,7 @@ parent_reader( Comm_Struct_T * header )
         case C_SCHANGED :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_schanged( data, header->data.len );
                 TRY_SUCCESS;
@@ -754,7 +754,7 @@ parent_reader( Comm_Struct_T * header )
         case C_ICREATE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_icreate( data, header->data.len );
                 TRY_SUCCESS;
@@ -770,7 +770,7 @@ parent_reader( Comm_Struct_T * header )
         case C_IDELETE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_idelete( data, header->data.len );
                 TRY_SUCCESS;
@@ -786,7 +786,7 @@ parent_reader( Comm_Struct_T * header )
         case C_ISTATE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_istate( data, header->data.len );
                 TRY_SUCCESS;
@@ -802,7 +802,7 @@ parent_reader( Comm_Struct_T * header )
         case C_ICHANGED :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_ichanged( data, header->data.len );
                 TRY_SUCCESS;
@@ -818,7 +818,7 @@ parent_reader( Comm_Struct_T * header )
         case C_MCREATE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_mcreate( data, header->data.len );
                 TRY_SUCCESS;
@@ -834,7 +834,7 @@ parent_reader( Comm_Struct_T * header )
         case C_MDELETE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_mdelete( data, header->data.len );
                 TRY_SUCCESS;
@@ -850,7 +850,7 @@ parent_reader( Comm_Struct_T * header )
         case C_MCHOICE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_mchoice( data, header->data.len );
                 TRY_SUCCESS;
@@ -866,7 +866,7 @@ parent_reader( Comm_Struct_T * header )
         case C_MCHANGED :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_mchanged( data, header->data.len );
                 TRY_SUCCESS;
@@ -882,7 +882,7 @@ parent_reader( Comm_Struct_T * header )
         case C_TBCHANGED :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_tbchanged( data, header->data.len );
                 TRY_SUCCESS;
@@ -898,7 +898,7 @@ parent_reader( Comm_Struct_T * header )
         case C_TBWAIT :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_tbwait( data, header->data.len );
                 TRY_SUCCESS;
@@ -914,7 +914,7 @@ parent_reader( Comm_Struct_T * header )
         case C_ODELETE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_objdel( data, header->data.len );
                 TRY_SUCCESS;
@@ -934,7 +934,7 @@ parent_reader( Comm_Struct_T * header )
         case C_GETPOS :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_getpos( data, header->data.len );
                 TRY_SUCCESS;
@@ -950,7 +950,7 @@ parent_reader( Comm_Struct_T * header )
         case C_CLABEL :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_clabel( data, header->data.len );
                 TRY_SUCCESS;
@@ -966,7 +966,7 @@ parent_reader( Comm_Struct_T * header )
         case C_XABLE :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_xable( data, header->data.len );
                 TRY_SUCCESS;
@@ -982,7 +982,7 @@ parent_reader( Comm_Struct_T * header )
         case C_CB_1D :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_cb_1d( data, header->data.len );
                 TRY_SUCCESS;
@@ -998,7 +998,7 @@ parent_reader( Comm_Struct_T * header )
         case C_CB_2D :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_cb_2d( data, header->data.len );
                 TRY_SUCCESS;
@@ -1014,7 +1014,7 @@ parent_reader( Comm_Struct_T * header )
         case C_ZOOM_1D :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_zoom_1d( data, header->data.len );
                 TRY_SUCCESS;
@@ -1030,7 +1030,7 @@ parent_reader( Comm_Struct_T * header )
         case C_ZOOM_2D :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_zoom_2d( data, header->data.len );
                 TRY_SUCCESS;
@@ -1046,7 +1046,7 @@ parent_reader( Comm_Struct_T * header )
         case C_FSB_1D :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_fsb_1d( data, header->data.len );
                 TRY_SUCCESS;
@@ -1062,7 +1062,7 @@ parent_reader( Comm_Struct_T * header )
         case C_FSB_2D :
             TRY
             {
-                data = CHAR_P T_malloc( ( size_t ) header->data.len );
+                data = T_malloc( ( size_t ) header->data.len );
                 pipe_read( data, ( size_t ) header->data.len );
                 exp_fsb_2d( data, header->data.len );
                 TRY_SUCCESS;
@@ -1110,7 +1110,7 @@ child_reader( void *          ret,
 
             TRY
             {
-                retstr = CHAR_P T_malloc( ( size_t ) header->data.len + 1 );
+                retstr = T_malloc( ( size_t ) header->data.len + 1 );
                 if ( header->data.len > 0 )
                     pipe_read( retstr, ( size_t ) header->data.len );
                 retstr[ header->data.len ] = '\0';
@@ -1167,7 +1167,7 @@ child_reader( void *          ret,
         case C_ISTATE_STR_REPLY :
             TRY
             {
-                retstr = CHAR_P T_malloc( ( size_t ) header->data.len + 1 );
+                retstr = T_malloc( ( size_t ) header->data.len + 1 );
                 if ( header->data.len > 0 )
                     pipe_read( retstr, ( size_t ) header->data.len );
                 retstr[ header->data.len ] = '\0';

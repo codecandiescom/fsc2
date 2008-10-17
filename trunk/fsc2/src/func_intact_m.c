@@ -88,7 +88,7 @@ f_mcreate( Var_T * var )
 
     TRY
     {
-        new_io = IOBJECT_P T_malloc( sizeof *new_io );
+        new_io = T_malloc( sizeof *new_io );
         if ( Toolbox->objs == NULL )
         {
             Toolbox->objs = new_io;
@@ -123,8 +123,8 @@ f_mcreate( Var_T * var )
         new_io->help_text = NULL;
 
         new_io->num_items = num_strs - 1;
-        new_io->menu_items = CHAR_PP T_malloc( new_io->num_items
-                                               * sizeof *new_io->menu_items );
+        new_io->menu_items = T_malloc(   new_io->num_items
+                                       * sizeof *new_io->menu_items );
 
         for  ( i = 0; i < new_io->num_items; i++ )
             new_io->menu_items[ i ] = NULL;
@@ -189,7 +189,7 @@ f_mcreate_child( Var_T * v,
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );     /* current line number */
     pos += sizeof EDL.Lc;
@@ -302,7 +302,7 @@ f_mdelete_child( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );      /* current line number */
     pos += sizeof EDL.Lc;
@@ -543,7 +543,7 @@ f_mchoice_child( Var_T * v )
     else
         len++;
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;
@@ -660,7 +660,7 @@ f_mchanged_child( Var_T * v )
     if ( EDL.Fname )
         len += strlen( EDL.Fname );
 
-    pos = buffer = CHAR_P T_malloc( len );
+    pos = buffer = T_malloc( len );
 
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;

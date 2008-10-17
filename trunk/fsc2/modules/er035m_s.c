@@ -1113,7 +1113,7 @@ er035m_s_write( const char * buf )
 
         TRY
         {
-            wrbuf = CHAR_P T_malloc( wrlen + 1 );
+            wrbuf = T_malloc( wrlen + 1 );
             TRY_SUCCESS;
         }
 

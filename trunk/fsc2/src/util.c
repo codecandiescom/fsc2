@@ -60,7 +60,7 @@ get_string( const char * fmt,
 
     while ( 1 )
     {
-        c = CHAR_P T_realloc_or_free( c, len );
+        c = T_realloc_or_free( c, len );
         va_start( ap, fmt );
         wr = vsnprintf( c, len, fmt, ap );
         va_end( ap );
@@ -1085,7 +1085,7 @@ fsc2_simplex( size_t   n,
     /* Get enough memory for the corners of the simplex, center points and
        function values at the (n + 1) corners */
 
-    p = DOUBLE_P T_malloc( ( n * ( n + 5 ) + 1 ) * sizeof *p );
+    p = T_malloc( ( n * ( n + 5 ) + 1 ) * sizeof *p );
     p_centroid = p + n * ( n + 1 );
     p_1st_try = p_centroid + n;
     p_2nd_try = p_1st_try + n;
@@ -1308,11 +1308,12 @@ read_line( int    fd,
            void * vptr,
            size_t max_len )
 {
-    ssize_t n, rc;
-    char c, *ptr;
+    ssize_t n,
+            rc;
+    char c,
+         *ptr = vptr;
 
 
-    ptr = CHAR_P vptr;
     for ( n = 1; n < ( ssize_t ) max_len; n++ )
     {
         if ( ( rc = do_read( fd, &c ) ) == 1 )
@@ -1381,13 +1382,11 @@ writen( int          fd,
         const void * vptr,
         size_t       n )
 {
-    size_t nleft;
+    size_t nleft = n;
     ssize_t nwritten;
-    const char *ptr;
+    const char *ptr = vptr;
 
 
-    ptr = CHAR_P vptr;
-    nleft = n;
     while ( nleft > 0 )
     {
         if ( ( nwritten = write( fd, ptr, nleft ) ) <= 0 )
@@ -1432,8 +1431,7 @@ fsc2_show_fselector( const char * message,
     ret = fl_show_fselector( message, dir, pattern, def_name );
 
     if ( Fsc2_Internals.def_directory != NULL )
-        Fsc2_Internals.def_directory =
-                                 CHAR_P T_free( Fsc2_Internals.def_directory );
+        Fsc2_Internals.def_directory = T_free( Fsc2_Internals.def_directory );
 
     return ret;
 }

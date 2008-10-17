@@ -367,7 +367,7 @@ tegam2714a_p_set_constant( Ticks start,
 
     fsc2_assert( start >= 0 && start + length < MAX_PULSER_BITS );
 
-    buf = CHAR_P T_malloc( len );
+    buf = T_malloc( len );
     bpt =   ( unsigned char * ) buf
           + sprintf( buf, ":WVFM:WAVE %d;MEM %ld,#%1d%ld",
                      tegam2714a_p.function.channel,

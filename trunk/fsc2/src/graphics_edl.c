@@ -142,7 +142,7 @@ change_label_1d( char ** label )
     {
         if ( G_1d.label[ Y ] != NULL )
         {
-            G_1d.label[ Y ] = CHAR_P T_free( G_1d.label[ Y ] );
+            G_1d.label[ Y ] = T_free( G_1d.label[ Y ] );
             if ( G.font != NULL )
                 XFreePixmap( G.d, G_1d.label_pm );
         }
@@ -171,7 +171,7 @@ change_label_2d( char ** label )
     {
         if ( G_2d.label[ X ] != NULL )
         {
-            G_2d.label[ X ] = CHAR_P T_free( G_2d.label[ X ] );
+            G_2d.label[ X ] = T_free( G_2d.label[ X ] );
             if ( G_cut.is_shown && G_cut.cut_dir == X )
                 XFreePixmap( G.d, G_2d.label_pm[ Z + 3 ] );
         }
@@ -294,11 +294,9 @@ rescale_1d( long new_nx )
 
     for ( k = 0; k < G_1d.nc; k++ )
     {
-        G_1d.curve[ k ]->points =
-            SCALED_POINT_P T_realloc( G_1d.curve[ k ]->points,
+        G_1d.curve[ k ]->points = T_realloc( G_1d.curve[ k ]->points,
                                      max_x * sizeof *G_1d.curve[ k ]->points );
-        G_1d.curve[ k ]->xpoints =
-                XPOINT_P T_realloc( G_1d.curve[ k ]->xpoints,
+        G_1d.curve[ k ]->xpoints = T_realloc( G_1d.curve[ k ]->xpoints,
                                     max_x * sizeof *G_1d.curve[ k ]->xpoints );
 
         for ( i = G_1d.nx, sp = G_1d.curve[ k ]->points + i; i < max_x;
@@ -387,8 +385,8 @@ rescale_2d( long * new_dims )
            the the new elements in the already existing rows */
 
         old_sp = osp = G_2d.curve_2d[ k ]->points;
-        sp = G_2d.curve_2d[ k ]->points = SCALED_POINT_P
-                                      T_malloc( new_nx * new_ny * sizeof *sp );
+        sp = G_2d.curve_2d[ k ]->points = T_malloc(   new_nx * new_ny
+                                                    * sizeof *sp );
 
         for ( j = 0; j < l_min( G_2d.ny, new_ny ); j++, osp += G_2d.nx )
         {
@@ -406,10 +404,9 @@ rescale_2d( long * new_dims )
 
         T_free( old_sp );
 
-        G_2d.curve_2d[ k ]->xpoints =
-             	   XPOINT_P T_realloc( G_2d.curve_2d[ k ]->xpoints,
-                        			   new_nx * new_ny
-                        			   * sizeof *G_2d.curve_2d[ k ]->xpoints );
+        G_2d.curve_2d[ k ]->xpoints = T_realloc( G_2d.curve_2d[ k ]->xpoints,
+                                         new_nx * new_ny
+                                       * sizeof *G_2d.curve_2d[ k ]->xpoints );
 
         if ( G_2d.curve_2d[ k ]->is_fs )
         {
@@ -467,10 +464,8 @@ change_mode( long mode,
 
         if ( width != G_1d.nx )
         {
-            cv->points = SCALED_POINT_P T_realloc( cv->points,
-                                                  width * sizeof *cv->points );
-            cv->xpoints = XPOINT_P T_realloc( cv->xpoints,
-                                              width * sizeof *cv->xpoints );
+            cv->points = T_realloc( cv->points, width * sizeof *cv->points );
+            cv->xpoints = T_realloc( cv->xpoints, width * sizeof *cv->xpoints );
         }
 
         for ( sp = cv->points, i = 0; i < width; sp++, i++ )
@@ -487,7 +482,7 @@ change_mode( long mode,
     {
         XFreeGC( G.d, m->gc );
         mn = m->next;
-        m = MARKER_1D_P T_free( m );
+        m = T_free( m );
     }
 
     G_1d.marker_1d = NULL;

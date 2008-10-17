@@ -477,21 +477,21 @@ rs690_exit_hook( void )
 
     for ( i = 0; i < MAX_CHANNELS; i++ )
         rs690.channel[ i ].pulse_params =
-                    PULSE_PARAMS_P T_free( rs690.channel[ i ].pulse_params );
+                                     T_free( rs690.channel[ i ].pulse_params );
 
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {
         f = rs690.function + i;
 
         if ( f->pulses != NULL )
-            f->pulses = PULSE_PP T_free( f->pulses );
+            f->pulses = T_free( f->pulses );
 
         if ( f->pm != NULL )
         {
             for ( j = 0; j < f->pc_len * f->num_channels; j++ )
                 if ( f->pm[ j ] != NULL )
                     T_free( f->pm[ j ] );
-            f->pm = PULSE_PPP T_free( f->pm );
+            f->pm = T_free( f->pm );
         }
     }
 }

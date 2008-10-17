@@ -253,10 +253,9 @@ get_and_store_tokens( long * parenthesis_count,
            store the token */
 
         if ( EDL.prg_length % PRG_CHUNK_SIZE == 0 )
-            EDL.prg_token = 
-                     PRG_TOKEN_P T_realloc( EDL.prg_token,
-                                            ( EDL.prg_length + PRG_CHUNK_SIZE )
-                                            * sizeof *EDL.prg_token );
+            EDL.prg_token = T_realloc( EDL.prg_token,
+                                         ( EDL.prg_length + PRG_CHUNK_SIZE )
+                                       * sizeof *EDL.prg_token );
 
         cur = EDL.prg_token + EDL.prg_length;
         cur->token = token;
@@ -372,7 +371,7 @@ get_and_store_tokens( long * parenthesis_count,
 
             case E_FUNC_TOKEN :
                 cur->tv.vptr = NULL;
-                cur->tv.vptr = VAR_P T_malloc( sizeof *cur->tv.vptr );
+                cur->tv.vptr = T_malloc( sizeof *cur->tv.vptr );
                 memcpy( cur->tv.vptr, EDL.Var_Stack, sizeof *EDL.Var_Stack );
                 cur->tv.vptr->name = NULL;
                 cur->tv.vptr->name = T_strdup( EDL.Var_Stack->name );
@@ -381,7 +380,7 @@ get_and_store_tokens( long * parenthesis_count,
 
             case E_VAR_REF :
                 cur->tv.vptr = NULL;
-                cur->tv.vptr = VAR_P T_malloc( sizeof *cur->tv.vptr );
+                cur->tv.vptr = T_malloc( sizeof *cur->tv.vptr );
                 memcpy( cur->tv.vptr, EDL.Var_Stack, sizeof *EDL.Var_Stack );
                 vars_pop( EDL.Var_Stack );
                 break;
@@ -430,11 +429,10 @@ get_and_store_tokens( long * parenthesis_count,
        array for tokens to the required length */
 
     if ( EDL.prg_length > 0 )
-        EDL.prg_token = PRG_TOKEN_P T_realloc( EDL.prg_token,
-                                               EDL.prg_length
-                                               * sizeof *EDL.prg_token );
+        EDL.prg_token = T_realloc( EDL.prg_token,
+                                   EDL.prg_length * sizeof *EDL.prg_token );
     else
-        EDL.prg_token = PRG_TOKEN_P T_free( EDL.prg_token );
+        EDL.prg_token = T_free( EDL.prg_token );
 }
 
 
@@ -450,7 +448,7 @@ push_curly_brace( Prg_Token_T * where )
     struct CB_Stack *new_cb;
 
 
-    new_cb = CB_STACK_P T_malloc( sizeof *new_cb );
+    new_cb = T_malloc( sizeof *new_cb );
     new_cb->next = Cb_stack;
     new_cb->where = where;
     Cb_stack = new_cb;
@@ -538,7 +536,7 @@ forget_prg( void )
 
     /* Get rid of the memory used for storing the tokens */
 
-    EDL.prg_token = PRG_TOKEN_P T_free( EDL.prg_token );
+    EDL.prg_token = T_free( EDL.prg_token );
     EDL.prg_length = 0;
 
     /* Get rid of structures for curly braces that may have survived when an
@@ -890,7 +888,7 @@ exp_syntax_check( void )
     if ( EDL.prg_token == NULL )
         return;
 
-    EDL.Fname = CHAR_P T_free( EDL.Fname );
+    EDL.Fname = T_free( EDL.Fname );
 
     TRY
     {
@@ -948,7 +946,7 @@ exp_test_run( void )
     int old_FLL = EDL.File_List_Len;
 
 
-    EDL.Fname = CHAR_P T_free( EDL.Fname );
+    EDL.Fname = T_free( EDL.Fname );
     In_for_lex = UNSET;
     In_cond = 0;
 

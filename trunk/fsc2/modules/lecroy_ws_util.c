@@ -778,7 +778,7 @@ lecroy_ws_store_state( LECROY_WS_T * dest,
     }
 
     dest->w = NULL;
-    dest->w = WINDOW_P T_malloc( src->num_windows * sizeof *dest->w );
+    dest->w = T_malloc( src->num_windows * sizeof *dest->w );
 
     for ( i = 0, w = src->w; w != NULL; i++, w = w->next )
     {

@@ -303,7 +303,7 @@ fsc2_lan_open( const char * dev_name,
     {
         if ( ( ll = lan_list ) == NULL )
         {
-            ll = lan_list = LAN_LIST_P T_malloc( sizeof *lan_list );
+            ll = lan_list = T_malloc( sizeof *lan_list );
             ll->prev = NULL;
         }
         else
@@ -311,7 +311,7 @@ fsc2_lan_open( const char * dev_name,
             while ( ll->next != NULL )
                 ll = ll->next;
 
-            ll->next = LAN_LIST_P T_malloc( sizeof *lan_list );
+            ll->next = T_malloc( sizeof *lan_list );
             ll->next->prev = ll;
             ll = ll->next;
         }

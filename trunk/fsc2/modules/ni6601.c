@@ -795,7 +795,7 @@ counter_get_buffered_counts( Var_T * v )
         if ( num_points == 0 )
             num_points = buffered_remaining;
 
-        buf = LONG_P T_malloc( num_points * sizeof *buf );
+        buf = T_malloc( num_points * sizeof *buf );
         for ( i = 0; i < num_points; i++ )
             buf[ i ] = lrnd( INT_MAX * ( rand( ) / ( RAND_MAX + 1.0 ) ) );
 
@@ -866,7 +866,7 @@ ni6601_get_data( long   to_fetch,
             return vars_push( INT_ARR, NULL, 0 );
     }
 
-    buf = ULONG_P T_malloc( to_fetch * sizeof *buf );
+    buf = T_malloc( to_fetch * sizeof *buf );
 
     while ( 1 )
     {
@@ -957,7 +957,7 @@ ni6601_get_data( long   to_fetch,
 
     TRY
     {
-        final_buf = LONG_P T_malloc( received * sizeof *final_buf );
+        final_buf = T_malloc( received * sizeof *final_buf );
         TRY_SUCCESS;
     }
     OTHERWISE
@@ -1386,17 +1386,17 @@ ni6601_time_check( double       duration,
         OTHERWISE
         {
             if ( mint )
-                mint = CHAR_P T_free( mint );
+                mint = T_free( mint );
             if ( maxt )
-                maxt = CHAR_P T_free( maxt );
+                maxt = T_free( maxt );
             RETHROW( );
         }
 
         print( FATAL, "Invalid %s of %s, valid values are in the range "
                "between %s and %s.\n", text, ni6601_ptime( duration ),
                mint, maxt );
-        mint = CHAR_P T_free( mint );
-        maxt = CHAR_P T_free( maxt );
+        mint = T_free( mint );
+        maxt = T_free( maxt );
         THROW( EXCEPTION );
     }
 
@@ -1414,13 +1414,13 @@ ni6601_time_check( double       duration,
         OTHERWISE
         {
             if ( oldv )
-                oldv = CHAR_P T_free( oldv );
+                oldv = T_free( oldv );
             RETHROW( );
         }
 
         print( WARN, "Adjusting %s from %s to %s.\n", text, oldv,
                ni6601_ptime( ticks * NI6601_TIME_RESOLUTION ) );
-        oldv = CHAR_P T_free( oldv );
+        oldv = T_free( oldv );
     }
 
     return ticks * NI6601_TIME_RESOLUTION;

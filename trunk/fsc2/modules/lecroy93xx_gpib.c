@@ -1340,7 +1340,7 @@ lecroy93xx_get_curve( int        ch,
        two's complement integers, which then need to be scaled by gain and
        offset. */
 
-    *array = DOUBLE_P T_malloc( *length * sizeof **array );
+    *array = T_malloc( *length * sizeof **array );
 
     for ( i = 0, dp = data; i < *length; dp += 2, i++ )
     {
@@ -1503,7 +1503,7 @@ lecroy93xx_get_data( long * len )
 
     /* Obtain enough memory and then read the real data */
 
-    data = UCHAR_P T_malloc( *len );
+    data = T_malloc( *len );
 
     if ( gpib_read( lecroy93xx.device, ( char * ) data, len ) == FAILURE )
         lecroy93xx_gpib_failure( );

@@ -166,7 +166,7 @@ device_list_parse( void )
     char *ldc;
 
 
-    EDL.Fname = CHAR_P T_free( EDL.Fname );
+    EDL.Fname = T_free( EDL.Fname );
 
     /* If we're supposed only to use the files from the source directories
        only try to use those */
@@ -175,7 +175,7 @@ device_list_parse( void )
     {
         EDL.Fname = get_string( confdir "Devices" );
         if ( lstat( EDL.Fname, &buf ) < 0 )
-            EDL.Fname = CHAR_P T_free( EDL.Fname );
+            EDL.Fname = T_free( EDL.Fname );
     }
     else
     {
@@ -193,7 +193,7 @@ device_list_parse( void )
                 EDL.Fname = get_string( "%s%sDevices", ldc, slash( ldc ) );
                 if ( lstat( EDL.Fname, &buf ) == 0 )
                     break;
-                EDL.Fname = CHAR_P T_free( EDL.Fname );
+                EDL.Fname = T_free( EDL.Fname );
             }
 
             T_free( ld );
@@ -204,7 +204,7 @@ device_list_parse( void )
         {
             EDL.Fname = T_strdup( libdir "Devices" );
             if ( lstat( EDL.Fname, &buf ) < 0 )
-                EDL.Fname = CHAR_P T_free( EDL.Fname );
+                EDL.Fname = T_free( EDL.Fname );
         }
     }
 
@@ -218,7 +218,7 @@ device_list_parse( void )
     {
         eprint( FATAL, UNSET, "Can't open device data base '%s'.\n",
                        EDL.Fname );
-        EDL.Fname = CHAR_P T_free( EDL.Fname );
+        EDL.Fname = T_free( EDL.Fname );
         return FAIL;
     }
 
@@ -235,8 +235,7 @@ device_list_parse( void )
     {
         while ( devices_listlex( ) )
         {
-            new_device_name =
-                             DEVICE_NAME_P T_malloc( sizeof *new_device_name );
+            new_device_name = T_malloc( sizeof *new_device_name );
             new_device_name->name = T_strdup( devices_listtext );
             string_to_lower( new_device_name->name );
             new_device_name->next = EDL.Device_Name_List;

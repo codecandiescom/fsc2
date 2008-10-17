@@ -723,7 +723,7 @@ Var_T *digitizer_get_curve( Var_T *v )
 			length = ag54830b.rec_len;
 		else
 			length = AG54830B_TEST_REC_LEN;
-		array = DOUBLE_P T_malloc( length * sizeof *array );
+		array = T_malloc( length * sizeof *array );
 		for ( i = 0; i < length; i++ )
 			array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
 		nv = vars_push( FLOAT_ARR, array, length );
@@ -781,7 +781,7 @@ Var_T *digitizer_get_curve_fast( Var_T *v )
 			length = ag54830b.rec_len;
 		else
 			length = AG54830B_TEST_REC_LEN;
-		array = DOUBLE_P T_malloc( length * sizeof *array );
+		array = T_malloc( length * sizeof *array );
 		for ( i = 0; i < length; i++ )
 			array[ i ] = 1.0e-7 * sin( M_PI * i / 122.0 );
 		nv = vars_push( FLOAT_ARR, array, length );
@@ -1273,7 +1273,7 @@ void ag54830b_get_curve( int channel, double **data, long *length,
 		}
         /*print( SEVERE, "BytesToRead are %ld   .\n", BytesToRead);*/
 				
-		buffer = CHAR_P T_malloc( BytesToRead );
+		buffer = T_malloc( BytesToRead );
 		
 		/* read all data into buffer */
 
@@ -1281,7 +1281,7 @@ void ag54830b_get_curve( int channel, double **data, long *length,
 			ag54830b_failure( );
 				
 		*length = BytesToRead / 2;
-		*data = DOUBLE_P T_malloc( *length * sizeof **data );
+		*data = T_malloc( *length * sizeof **data );
 
         /* read termination */
 
