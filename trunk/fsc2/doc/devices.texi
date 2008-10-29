@@ -7512,13 +7512,13 @@ can be loaded by specifying
 epr_mod
 @end example
 @noindent
-in the @code{DEVICES} section. The informations about the properties of
-resonators get stored in a file, unless set differently in
-@file{/usr/local/lib/fsc2/epr_mod.state}. Each resonator in this file is
-characterised by its name, a (non-empty) string. All functions can be
-called from all sections of an @code{EDL} script.
+in the @code{DEVICES} section. The information about properties of
+resonators get stored in a file (unless set differently in
+@file{/usr/local/lib/fsc2/epr_mod.state}). Each resonator in this file
+is characterised by its name, a (non-empty) string. All functions can
+be called from all sections of an @code{EDL} script.
 
-For the modulation field to voltage ration inter- or even extrapolation
+For the modulation field to voltage ratio inter- or even extrapolation
 can be done if the requested frequency doesn't match one of the ones
 known for a resonator (interpolation for frequencies within the range of
 known frequencies, extrapolation for frequencies that don't lay within
@@ -7527,7 +7527,7 @@ resonator, that there are at least three known values for the
 field/voltage ratio and that a linear square fit (assuming that the
 modulation field is inverse to the frequency, with an voltage offset
 being taken into consideration) has a correlation coefficient
-(@math{r^2}) at least as large as set in the configuration file for the
+(@code{r^2}) at least as large as set in the configuration file for the
 module.
 
 
@@ -7547,7 +7547,7 @@ module.
 @item @ref{epr_modulation_delete_resonator()}
 @item @ref{epr_modulation_resonator_count()}
 @item @ref{epr_modulation_resonator_name()}
-@item @ref{epr_modulation_frequencies()}
+@item @ref{epr_modulation_resonator_frequencies()}
 @item @ref{epr_modulation_store()}
 
 
@@ -7578,7 +7578,7 @@ frequency. If the there is no further argument the function returns the
 ratio of the modulation field to the modulation frequency (in G/V) if
 possible.
 
-The following algorithm is used to determine the field/voltage ration:
+The following algorithm is used to determine the field/voltage ratio:
 If the frequency is identical to one known for the resonator the
 corresponding ratio is returned. If the frequency does not match a
 known frequency exactly but is within a confidence interval around a
@@ -7590,15 +7590,16 @@ within the range of known values the interpolated value is also
 returned if interpolation is possible, otherwise an exception is
 thrown. If the frequency is outside the range of known frequencies
 and extrapolation is allowed and possible the extrapolated for the
-ration is returned, otherwise an exception gets thrown.
+ratio is returned, otherwise an exception gets thrown.
 
-If there's another argument this is taken to be a new ration to
-be set. This requires that the frequency is not within the confidence
-interval of an already known frequency or setting the new value is
-rejected and an excption is thrown. Please note that setting the
-ratio for a new frequency only is in effect until the @code{EDL}
-script ends unless the function @ref{epr_modulation_store()} is
-called afterwards to make this setting permanent.
+If there's another argument this is taken to be a new ratio to be set.
+If the frequency given as the second argument is within the confidence
+interval of an already known frequency the argument replaces the ratio
+value for this frequency, otherwise a new entry for the frequency is
+created. Please note that setting the ratio for a new frequency only
+is in effect until the @code{EDL} script ends unless the function
+@ref{epr_modulation_store()} is called afterwards to make this setting
+permanent.
 
 
 @anchor{epr_modulation_phase()}
@@ -7616,13 +7617,13 @@ interval (as set in the configuration file for the module) and that
 a modulattion phase is known for this resonator and frequency. Otherwise
 an exception is thrown.
 
-If there's nother argument this is taken to be a modulation phase. This
-requires that the frequency is not within the confidence interval of an
-already known frequency or setting the new value is rejected and an
-excption is thrown. Please note that setting the phase for a new
-frequency only is in effect until the @code{EDL} script ends unless the
-function @ref{epr_modulation_store()} is called afterwards to make this
-setting permanent.
+If there's nother argument this is taken to be a modulation phase.
+This requires that a ration already has been set for the frequency
+given as the second argument (or for a frequency within the confidence
+interval). Please note that setting the phase for a new frequency only
+is in effect until the @code{EDL} script ends unless the function
+@ref{epr_modulation_store()} is called afterwards to make this setting
+permanent.
 
 
 @anchor{epr_modulation_has_phase()}
@@ -7750,12 +7751,12 @@ function can be used to in conjunction with the
 @ref{epr_modulation_resonator_count()} to obtain the names of all known
 resonators.
 
-@anchor{epr_modulation_frequencies()}
-@findex epr_modulation_frequencies()
-@item epr_modulation_frequencies()
+@anchor{epr_modulation_resonator_frequencies()}
+@findex epr_modulation_resonator_frequencies()
+@item epr_modulation_resonator_frequencies()
 This function returns an array of all frequencies known for a certain
-resonator. It takes a single argument, the name of a resonator (as a
-string).
+resonator (in ascending order). It takes a single argument, the name
+of a resonator (as a string).
 
 
 @anchor{epr_modulation_store()}

@@ -369,7 +369,7 @@ rb_pulser_w_exp_hook( void )
                            "the defense pulse. This can destroy the\n"
                            "signal amplifier unless you are very careful.\n"
                            "***** Is this really what you want to do? *****";
-        if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
+        if ( show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) != 2 )
             THROW( EXCEPTION );
     }
 
@@ -387,7 +387,7 @@ rb_pulser_w_exp_hook( void )
                            "defense pulse. This can destroy the signal\n"
                            "amplifier if you are not very careful.\n"
                            "***** Is this really what you want to do? *****";
-        if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
+        if ( show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) != 2 )
             THROW( EXCEPTION );
     }
 
@@ -409,7 +409,7 @@ rb_pulser_w_exp_hook( void )
                        "***** Is this really what you want to do? *****",
                  rb_pulser_w_ptime( PULSE_2_DEFENSE_DEFAULT_MIN_DISTANCE ),
                  rb_pulser_w_ptime( rb_pulser_w.pulse_2_defense ) );
-        if ( 2 != show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) )
+        if ( show_choices( warn, 2, "Abort", "Yes", NULL, 1 ) != 2 )
             THROW( EXCEPTION );
     }
 #endif

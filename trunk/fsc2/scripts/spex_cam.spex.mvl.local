@@ -116,9 +116,9 @@ sub get_defs {
 
 
 	if ( $ARGV[ 0 ] ) {
-		open( $f, "<$ARGV[ 0 ]" ) or return;
+		open $f, '<', $ARGV[ 0 ] or return;
 	} else {
-		open( $f, "<$ENV{ HOME }/.fsc2/spex_cam" ) or return;
+		open $f, '<', "$ENV{ HOME }/.fsc2/spex_cam" or return;
 	}
 
 	goto done_reading unless defined( $ne = <$f> ) and $ne =~ /^#/;
@@ -148,10 +148,9 @@ sub get_defs {
 
 sub store_defs {
 	my $geom = shift;
-	my $f;
 
 	mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
-	open( $f, ">$ENV{ HOME }/.fsc2/spex_cam" ) or return;
+	open my $f, '>', "$ENV{ HOME }/.fsc2/spex_cam or return;
 	$geom = "+0+0" unless defined $geom and $geom =~ /^[-+]\d+[-+]\d+$/;
 	print $f <<EOF;
 # Do not edit - created automatically!
@@ -177,7 +176,7 @@ sub run {
 
 	$top->withdraw;
 
-    unless ( open $fh, "|fsc2_start -w" ) {
+    unless ( open $fh, '|-', 'fsc2_start -w' ) {
 		Tools::show_message( $top, "Can't start fsc2" );
 		$top->deiconify;
 		return;
@@ -362,7 +361,7 @@ EOF
 
 	close $f;
 
-	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+	unless ( open $f, '-|', "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
 		Tools::show_message( $top, "Can't start fsc2" );
@@ -500,7 +499,7 @@ EOF
 
 	close $f;
 
-	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+	unless ( open $f, '-|', "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
 		Tools::show_message( "Can't start fsc2" );
@@ -570,7 +569,7 @@ sub run {
 
 	$top->withdraw;
 
-    unless ( open $fh, "|fsc2_start -w" ) {
+    unless ( open $fh, '|-', 'fsc2_start -w' ) {
 		Tools::show_message( $top, "Can't start fsc2" );
 		return;
 	}
@@ -911,7 +910,7 @@ sub run {
 
 	$top->withdraw;
 
-    unless ( open $fh, "|fsc2_start -w" ) {
+    unless ( open $fh, '|-', 'fsc2_start -w' ) {
 		Tools::show_message( $top, "Can't start fsc2" );
 		$top->deiconify;
 		return;
@@ -1376,7 +1375,7 @@ sub realtime_run {
 
 	my $fh;
 
-    unless ( open $fh, "|fsc2_start -w" ) {
+    unless ( open $fh, '|-', 'fsc2_start -w' ) {
 		Tools::show_message( $top, "Can't start fsc2" );
 		return;
 	}
@@ -1706,7 +1705,7 @@ sub single_run {
 	my ( $top, $N_scans, $exp_time, %p ) = @_;
 
 	my $fh;
-    unless ( open $fh, "|fsc2_start -w" ) {
+    unless ( open $fh, '|-', 'fsc2_start -w' ) {
 		Tools::show_message( $top, "Can't start fsc2" );
 		return;
 	}
@@ -1949,7 +1948,7 @@ EOF
 
 	# Run the script and read in the result
 
-	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+	unless ( open $f, '-|', "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
 		show_message( $top, "Can't start fsc2" );
@@ -1995,7 +1994,7 @@ EOF
 
 	# Run the script and read in the result
 
-	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+	unless ( open $f, '-|', "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
 		show_message( $top, "Can't start fsc2" );
@@ -2041,7 +2040,7 @@ EOF
 
 	# Run the script and read in the result
 
-	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+	unless ( open $f, '-|', "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
 		show_message( $top, "Can't start fsc2" );
@@ -2091,7 +2090,7 @@ EOF
 
 	# Run the script and read in the result
 
-	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+	unless ( open $f, '-|', "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
 		show_message( $top, "Can't start fsc2" );
@@ -2141,7 +2140,7 @@ EOF
 
 	# Run the script and read in the result
 
-	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+	unless ( open $f, '-|', "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
 		show_message( $top, "Can't start fsc2" );
@@ -2186,7 +2185,7 @@ EOF
 
 	# Run the script and read in the result
 
-	unless ( open $f, "-|", "fsc2 -ng $fn 2>&1" ) {
+	unless ( open $f, '-|', "fsc2 -ng $fn 2>&1" ) {
 		close $f;
 		unlink $fn;
 		show_message( $top, "Can't start fsc2" );

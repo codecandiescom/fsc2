@@ -178,8 +178,9 @@ name of a variable, which may consist of all normal characters, digits
 and the underscore character. But you must make sure that its name does
 not coincide with the name of a variable already used in the
 @code{EDL} script. The next required item is the type of the
-variable, which can be either @code{int}, @code{float}, @code{menu},
-@code{button} or @code{file} (all five in lower case characters).
+variable, which can be either @code{int}, @code{int_empty},
+@code{float}, @code{float_empty}, @code{menu}, @code{button} or
+@code{file} (all in lower case characters).
 
 For variables of type @code{int} and @code{float} all the following
 items are optional. The first thing you can tell the conversion program
@@ -219,7 +220,16 @@ is that, obviously, for @code{int} variables you may only use integer
 numbers for the range values and the initial value and the user can also
 only enter integer numbers.
 
-But there's also a third type of variables, @code{menu}. These are for
+The difference between @code{int} and @code{int_empty} on the one hand
+and @code{float} and @code{float_empty} on the other is just that you
+won't be able to start the experiment if no number is given for
+entries of type @code{int} and @code{float} while for @code{int_empty}
+and @code{float_empty} you can leave the input field empty. You can
+check for that in the template for the @code{EDL} script by checking
+if the corresponding variable is @code{defined} (if it is it will
+contain a valid value) and branch accordingly.
+
+But there's also another type of variables, @code{menu}. These are for
 cases where you want to have one value selected from a list of
 values. To demonstrate this let's improve the @code{EDL} script a
 bit. For examples sake we assume that you have to switch between

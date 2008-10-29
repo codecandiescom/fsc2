@@ -78,7 +78,7 @@ Var_T * epr_modulation_resonator_interpolate(     Var_T * /* v */ );
 Var_T * epr_modulation_resonator_can_interpolate( Var_T * /* v */ );
 Var_T * epr_modulation_resonator_extrapolate(     Var_T * /* v */ );
 Var_T * epr_modulation_resonator_can_extrapolate( Var_T * /* v */ );
-Var_T * epr_modulation_frequencies(               Var_T * /* v */ );
+Var_T * epr_modulation_resonator_frequencies(     Var_T * /* v */ );
 Var_T * epr_modulation_store(                     Var_T * /* v */ );
 
 
@@ -92,6 +92,8 @@ void epr_mod_clear( EPR_MOD * /* em */ );
 void epr_mod_copy_state( EPR_MOD * /* to */,
                          EPR_MOD * /* from */ );
 void epr_mod_recalc( Resonator_T * /* res */ );
+int epr_mod_comp( const void * /* a */,
+                  const void * /* b */ );
 
 
 #endif /* ! EPR_MOD_HEADER */

@@ -27,12 +27,13 @@
 #  run, allows the user to set parameters via a GUI, then creates an EDL
 #  script from these parameters and sends it to fsc2 for execution.
 #
-#  Thanks to Burkhard Endeward (J.-W.-Gothe-University Frankfurt/Main) for
+#  Thanks to Burkhard Endeward (J.-W.-Goethe-University, Frankfurt/Main) for
 #  pointing out several problems with the handling of button objects.
 
 
 use strict;
 use warnings;
+use utf8;
 
 # By changing the next three variables the layout of the form can be changed!
 
@@ -44,7 +45,7 @@ my @lines;
 my @vars;
 my $guify_marker = '^\s*===\s*';
 my $var_entry = $guify_marker .
-    '([A-Za-z0-9_]+)\s+(int|float|menu|file|button)(\s*(.*))?';
+    '([A-Za-z0-9_]+)\s+(int(_empty)?|float(_empty)?|menu|file|button)(\s*(.*))?';
 my $if_entry = $guify_marker . 'if\s*';
 my $elsif_entry = $guify_marker . 'elsif\s*';
 my $else_entry = $guify_marker . 'else\s*$';
@@ -60,7 +61,7 @@ my $of;
 
 if ( $ARGV[ 0 ] ) {
     usage( ) if $ARGV[ 0 ] =~ /^-h$/ or $ARGV[ 0 ] =~ /^--help$/;
-    open $if, '<', $ARGV[ 0 ]
+    open $if, '<:utf8', $ARGV[ 0 ]
         or die "Can't open input file $ARGV[ 0 ]: $!\n";
 } else {
     $if = *STDIN;
@@ -133,12 +134,14 @@ while ( <$if> ) {
 
     if ( $cur_line =~ /$var_entry/o ) {
         chomp $cur_line;
-        my $var_options = { name => $1, type => $2, value => undef,
-                            line => $cur_line };
-        if ( defined $4 ) {
-            my $option = $4;
-            $option = "\"\"" if     $var_options->{ type } =~ /^file$/o
-                                and $option =~ /^\s*$/;
+        my $var_options = { name     => $1,
+                            type     => $2,
+                            value    => undef,
+                            line     => $cur_line };
+        if ( defined $6 ) {
+            my $option = $6;
+            $option = "''" if     $var_options->{ type } =~ /^file$/o
+                              and $option =~ /^\s*$/;
             die "Syntax error at line $lino, garbage after variable type\n"
                 unless $option =~ /^\s*[\"\[]/o;
             analyze_var_options( $var_options, $option );
@@ -151,7 +154,7 @@ while ( <$if> ) {
     chomp $cur_line;
     $cur_line =~ s/^\s*===\s+//o;
     $cur_line = $1 if $cur_line =~ /^[A-Za-z0-9_]+\s+(.*)$/o;
-    die "Invalid syntax at line $lino near \"$cur_line\"\n";
+    die "Invalid syntax at line $lino near '$cur_line'\n";
 }
 
 close $if if $ARGV[ 0 ];
@@ -182,12 +185,14 @@ for ( @vars ) {
             $$_{ value } = 0;
         }
         $$_{ def_value } = $$_{ value };
+    } elsif ( $$_{ type } =~ /^int_empty|float_empty$/ ) {
+        $$_{ value } = $$_{ def_value } = '';
     } elsif ( $$_{ type } =~ /^menu$/ ) {
         $$_{ value } = $$_{ def_value } = $$_{ menu_entries }->[ 0 ];
     } elsif ( $$_{ type } =~ /^button$/ ) {
         $$_{ value } = $$_{ def_value } = 0;
     } else {
-        $$_{ value } = $$_{ def_value } = "";
+        $$_{ value } = $$_{ def_value } = '';
         $entry_width = 15;
     }
 }
@@ -200,7 +205,7 @@ cond_check( );
 # out the script
 
 if ( $ARGV[ 1 ] ) {
-    open $of, '>', $ARGV[ 1 ]
+    open $of, '>:utf8', $ARGV[ 1 ]
         or die "Can't open output file $ARGV[ 1 ]: $!\n";
 } else {
     $of = *STDOUT;
@@ -235,9 +240,9 @@ sub analyze_var_options {
     my ( $hr, $str ) = @_;
     my $res;
 
-    if ( $hr->{ type } =~ /^float$/o ) {
+    if ( $hr->{ type } =~ /^float(_empty)?$/o ) {
         $str = get_float_limits( $hr, $str );
-    } elsif ( $hr->{ type } =~ /^int$/o ) {
+    } elsif ( $hr->{ type } =~ /^int(_empty)?$/o ) {
         $str = get_int_limits( $hr, $str );
     } elsif ( $hr->{ type } =~ /^menu$/o ) {
         $str = get_menu_entries( $hr, $str );
@@ -249,14 +254,14 @@ sub analyze_var_options {
     }
 
     ( $res, $str ) = get_string( $str, $hr );
-    $hr->{ label } = defined $res ? $res : '""';
+    $hr->{ label } = defined $res ? $res : "''";
 
     unless ( $hr->{ type } =~ /^file$/o ) {
         ( $res, $str ) = get_string( $str );
-        $hr->{ unit } = defined $res ? $res : '""';
+        $hr->{ unit } = defined $res ? $res : "''";
     }
 
-    die "Syntax error at line $lino near \"$str\"\n"
+    die "Syntax error at line $lino near '$str'\n"
         if defined $str and $str !~ /^\s*$/;
 }
 
@@ -303,7 +308,7 @@ sub get_float_limits {
 
 
 ################################################################
-# Function for determining the limits for initeger variables
+# Function for determining the limits for integer variables
 
 sub get_int_limits {
     my ( $hr, $str ) = @_;
@@ -386,7 +391,7 @@ sub get_default_value {
     $val = $1;
     $str = $3;
 
-    if ( $hr->{ type } =~ /^int$/ ) {
+    if ( $hr->{ type } =~ /^int(_empty)?$/ ) {
         if ( $val =~ /^[+-]?\d+$/ ) {
             die "Default value for $hr->{ name } does not fit into range at " .
                 "line $lino\n"
@@ -396,7 +401,7 @@ sub get_default_value {
         } else {
             die "Default value ($val) isn't an integer number at line $lino\n";
         }
-    } elsif ( $hr->{ type } =~ /^float$/ ) {
+    } elsif ( $hr->{ type } =~ /^float(_empty)?$/ ) {
         if ( $val =~ /^[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?/o ) {
             die "Default value for $hr->{ name } does not fit into range at " .
                 "line $lino\n"
@@ -436,7 +441,7 @@ sub get_string {
 
     return ( undef, undef ) if ! defined $str or $str =~ /^\s*$/;
 
-    die "Syntax error at line $lino near \"$str\"\n" unless $str =~ /^\s*\"/o;
+    die "Syntax error at line $lino near '$str'\n" unless $str =~ /^\s*\"/o;
 
     $str =~ /^\s*(\"([^\"]|\\\")*\")(\s*(.*)?)?$/o;
     return ( $1, $4 ) if defined $1;
@@ -451,13 +456,13 @@ sub get_string {
 # If the eval() fails we know that there must be some Perl syntax error.
 
 sub cond_check {
-    my $defs = "";
+    my $defs = '';
 
     for ( @vars ) {
         if ( $$_{ type } =~ /^int|float$/o ) {
             $defs .= "my \$$$_{ name } = $$_{ value };\n" ;
         } else {
-            $defs .= "my \$$$_{ name } = \"$$_{ value }\";\n" ;
+            $defs .= "my \$$$_{ name } = '$$_{ value }';\n" ;
         }
     }
 
@@ -473,7 +478,7 @@ sub cond_check {
 
         local $SIG{ __WARN__ } = sub{ };
         eval $defs . $cmd;
-        die "Syntax error in $type condition at line $$_{ lino }: \"$rcmd\"\n"
+        die "Syntax error in $type condition at line $$_{ lino }: '$rcmd'\n"
             if $@;
     }
 }
@@ -490,12 +495,13 @@ sub write_script {
 # -*- cperl -*-
 # Generated by fsc2_guify';
 print " from $ARGV[ 0 ]" if $ARGV[ 0 ];
-print " on " . `date`;
+print ' on ' . `date`;
 
     print <<'EOT';
 
 use strict;
 use warnings;
+use utf8;
 use Tk;
 use Tk::Balloon;
 
@@ -505,43 +511,44 @@ die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
 
 my %fp = ( -side => 'top',
            -fill => 'x',
-           -padx => '2m',
-           -pady => '2m' );
-my %wp = ( -side => 'left',
-           -fill => 'x',
+           -padx => 10,
+           -pady => 5 );
+my %wp = ( -side   => 'left',
+           -fill   => 'x',
            -expand => 1 );
 my %up = ( -side => 'left' );
 my $geom;
 
-my $fsc2_how_to_run = "Test program";
-my @fsc2_how_to_run = ( "Start experiment",
-                        "Test program",
-                        "Load into fsc2" );
+my @VARS;
+my $fsc2_how_to_run = 'Test program';
+my @fsc2_how_to_run = ( 'Start experiment',
+                        'Test program',
+                        'Load into fsc2' );
 my $fsc2_main_window = MainWindow->new( -title =>
                                ( split /\./, ( split /\//, $0 )[ -1 ] )[ 0 ] );
-my $fsc2_main_frame = $fsc2_main_window->Frame( -relief => "ridge",
-                                                -borderwidth => "1m" );
+my $fsc2_main_frame = $fsc2_main_window->Frame( -relief      => 'ridge',
+                                                -borderwidth => 5 );
 my $fsc2_balloon = $fsc2_main_frame->Balloon( );
 my $fsc2_apply_frame = $fsc2_main_window->Frame( );
-my $fsc2_apply_button = $fsc2_apply_frame->Button( -text => "Apply",
+my $fsc2_apply_button = $fsc2_apply_frame->Button( -text    => 'Apply',
                                                    -command => \&write_out );
-$fsc2_apply_button->bind( "all", "<Alt-a>" => \&write_out );
-my $fsc2_quit_button = $fsc2_apply_frame->Button( -text => "Quit",
+$fsc2_apply_button->bind( 'all', '<Alt-a>' => \&write_out );
+my $fsc2_quit_button = $fsc2_apply_frame->Button( -text => 'Quit',
                  -command => sub { $fsc2_main_window->geometry =~
                                                    /^\d+x\d+([+-]\d+[+-]\d+)$/;
                                    $geom = $1;
                                    &store_defs;
                                    $fsc2_main_window->destroy } );
-$fsc2_quit_button->bind( "all",
-                         "<Alt-q>" =>
+$fsc2_quit_button->bind( 'all',
+                         '<Alt-q>' =>
                                 sub { $fsc2_main_window->geometry =~
                                                    /^\d+x\d+([+-]\d+[+-]\d+)$/;
                                       $geom = $1;
                                       &store_defs;
                                       $fsc2_main_window->destroy } );
-$fsc2_apply_frame->pack( -side => "bottom",
-                         -fill => "x",
-                         -padx => "4m" );
+$fsc2_apply_frame->pack( -side => 'bottom',
+                         -fill => 'x',
+                         -padx => 20 );
 
 EOT
 
@@ -552,41 +559,43 @@ EOT
 # $$_{ line }
 
 my \%$$_{ name };
+push \@VARS, \\\%$$_{ name };
+\$$$_{ name }\{ is_valid \} = 1;
+\$$$_{ name }\{ type \} = '$$_{ type }';
 \$$$_{ name }\{ tk_frame \} = \$fsc2_main_frame->Frame( );
 \$$$_{ name }\{ tk_label \} = \$$$_{ name }\{ tk_frame \}->Label( -text => $$_{ label },
 -width => $label_width,
 -anchor => 'w' );
 EOT
 
-        if ( $$_{ type } =~ /^int|float$/o ) {
-            print "\$$$_{ name }\{ value \} = $$_{ value };
-\$$$_{ name }\{ min \} = " . ( defined $$_{ min } ? $$_{ min } : "undef" ) . ";
-\$$$_{ name }\{ max \} = " . ( defined $$_{ max } ? $$_{ max } : "undef" ) . ";
+        if ( $$_{ type } =~ /^(int|float)(_empty)?$/o ) {
+            print "\$$$_{ name }\{ value \} = " . ( $$_{ value } ne '' ? $$_{ value } : "''" ) . ";\n
+\$$$_{ name }\{ min \} = " . ( defined $$_{ min } ? $$_{ min } : 'undef' ) . ";
+\$$$_{ name }\{ max \} = " . ( defined $$_{ max } ? $$_{ max } : 'undef' ) . ";
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Entry( -textvariable => \\\$$$_{ name }\{ value \},
 -width => $entry_width,
 -validate => 'key',
--validatecommand => sub{ $$_{ type }_check( shift,
+-validatecommand => sub{ $$_{ type }_check( shift, \\\$$$_{ name }\{ is_valid \},
 ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} : undef ),
 ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} : undef ) ); },
 -relief => 'sunken' );
 \$fsc2_balloon->attach( \$$$_{ name }\{ tk_entry \},
--balloonmsg  => \"Range: [ \" . ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} : '-inf' ) .
-\" : \" . ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} : '+inf' ) . \" ]\" );
+-balloonmsg  => 'Range: [ ' . ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} : '-inf' ) . ' : ' . ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} : '+inf' ) . ' ]' . ( \$$$_{ name }\{ type \} =~ /_empty\$/ ? ' or leave empty' : '' ) );
 ";
         } elsif ( $$_{ type } =~ /^button$/o ) {
             print "\$$$_{ name }\{ value \} = $$_{ value };
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Checkbutton( -variable => \\\$$$_{ name }\{ value \},
 -width => $entry_width );\n";
         } elsif ( $$_{ type } =~ /^menu$/o ) {
-            print "\$$$_{ name }\{ value \} = \"$$_{ value }\";
-my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
+            print "\$$$_{ name }\{ value \} = '$$_{ value }';
+my \@$$_{ name } = ( '$$_{ menu_entries }[ 0 ]'";
             for ( my $i = 1; $i < @{ $$_{ menu_entries } }; $i++ ) {
-                print ", \"" . ${ $$_{ menu_entries } }[ $i ] . "\"";
+                print ", '" . ${ $$_{ menu_entries } }[ $i ] . "'";
             }
             print " );
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Optionmenu( " .
-"-options => \\\@$$_{ name },
--width => $entry_width,
+"-options     => \\\@$$_{ name },
+-width        => $entry_width,
 -textvariable => \\\$$$_{ name }\{ value \} );
 ";
         } elsif( $$_{ type } =~ /^file$/o ) {
@@ -604,7 +613,7 @@ my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
 EOT
         } elsif ( $$_{ type } =~ /^file$/o ) {
             print <<"EOT";
-\$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Button( -text => \"...\",
+\$$$_{ name }\{ tk_unit \} = \$$$_{ name }\{ tk_frame \}->Button( -text => '...',
 -command => sub { my \$fn = \$fsc2_main_window->fsc2_filesel::show( \$$$_{ name }\{ value \} );
                   \$$$_{ name }\{ value \} = \$fn if defined \$fn;
                   \$$$_{ name }\{ tk_entry \}->xview( length( \$$$_{ name }\{ value \} ) - $entry_width ) }
@@ -625,14 +634,14 @@ EOT
     # script and the Apply- and Quit-button
 
     print <<"EOT";
-\$fsc2_main_frame->pack( \%fp, -pady => '1m' );
-\$fsc2_main_window->Optionmenu( -options => \\\@fsc2_how_to_run,
+\$fsc2_main_frame->pack( \%fp, -pady => '5' );
+\$fsc2_main_window->Optionmenu( -options      => \\\@fsc2_how_to_run,
                                 -textvariable => \\\$fsc2_how_to_run,
-                              )->pack( -padx => '3m',
-                                       -pady => '3m' );
+                              )->pack( -padx => 15,
+                                       -pady => 5 );
 
-\$fsc2_apply_button->pack( \%wp, -padx => '5m', -pady => '3m' );
-\$fsc2_quit_button->pack(  \%wp, -padx => '5m', -pady => '3m' );
+\$fsc2_apply_button->pack( \%wp, -padx => 25, -pady => 5 );
+\$fsc2_quit_button->pack(  \%wp, -padx => 25, -pady => 5 );
 
 load_defs( );
 \$fsc2_main_window->geometry( \$geom ) if defined \$geom;
@@ -653,7 +662,9 @@ MainLoop;
 ################################################################
 
 sub int_check {
-    my ( \$new, \$min, \$max ) = \@_;
+    my ( \$new, \$is_valid, \$min, \$max ) = \@_;
+
+    \$\$is_valid = 0;
 
     return 0 if \$new =~ /^\\+?(\\d+)?\$/ and defined \$max and \$max < 0;
     return 0 if \$new =~ /^-/ and defined \$min and \$min >= 0;
@@ -668,7 +679,8 @@ sub int_check {
          or ( defined \$max and \$new > \$max ) ) {
          \$fsc2_apply_button->configure( -state => 'disabled' );
      } else {
-         \$fsc2_apply_button->configure( -state => 'normal' );
+         \$\$is_valid = 1;
+         check_all_vars( );
      }
      return 1;
 }
@@ -676,9 +688,45 @@ sub int_check {
 
 ################################################################
 
+sub int_empty_check {
+    my ( \$new, \$is_valid, \$min, \$max ) = \@_;
+
+    \$\$is_valid = 0;
+
+    if ( \$new =~ /^\$/ ) {
+        \$\$is_valid = 1;
+        check_all_vars( );
+        return 1;
+    }
+
+    return 0 if \$new =~ /^\\+?(\\d+)?\$/ and defined \$max and \$max < 0;
+    return 0 if \$new =~ /^-/ and defined \$min and \$min >= 0;
+    if ( \$new =~ /^[+-]?\$/ ) {
+         \$fsc2_apply_button->configure( -state => 'disabled' );
+         return 1;
+     }
+
+    return 0 unless \$new =~ /^[+-]?\\d+?\$/;
+
+    if ( ( defined \$min and \$new < \$min )
+         or ( defined \$max and \$new > \$max ) ) {
+         \$fsc2_apply_button->configure( -state => 'disabled' );
+     } else {
+         \$\$is_valid = 1;
+         check_all_vars( );
+     }
+
+     return 1;
+}
+
+
+################################################################
+
 sub float_check {
-    my ( \$new, \$min, \$max ) = \@_;
+    my ( \$new, \$is_valid, \$min, \$max ) = \@_;
     my \$float_rep = '[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?';
+
+    \$\$is_valid = 0;
 
     return 0 if \$new =~ /^\\+/ and defined \$max and \$max < 0;
     return 0 if \$new =~ /^-/ and defined \$min and \$min > 0;
@@ -688,14 +736,16 @@ sub float_check {
              ( defined \$min and \$min > \$new ) ) {
             \$fsc2_apply_button->configure( -state => 'disabled' );
         } else {
-            \$fsc2_apply_button->configure( -state => 'normal' );
+            \$\$is_valid = 1;
+            check_all_vars( );
         }
         return 1;
     }
 
     if ( \$new =~ /^[+-]?(\\d+)?\\.?(\\d+)?([Ee][+-]?(\\d+)?)?\$/ ) {
-         \$fsc2_apply_button->configure( -state => 'disabled' );
-         return 1;
+        \$\$is_valid = 0;
+        check_all_vars( );
+        return 1;
      }
 
      return 0;
@@ -704,10 +754,65 @@ sub float_check {
 
 ################################################################
 
-sub write_out {
-    my \$fh;
+sub float_empty_check {
+    my ( \$new, \$is_valid, \$min, \$max ) = \@_;
+    my \$float_rep = '[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?';
 
-    open( \$fh, \"|fsc2_\" . lc \$fsc2_how_to_run )
+    \$\$is_valid = 0;
+
+    if ( \$new =~ /^\$/ ) {
+        \$\$is_valid = 1;
+        check_all_vars( );
+        return 1;
+    }
+
+    return 0 if \$new =~ /^\\+/ and defined \$max and \$max < 0;
+    return 0 if \$new =~ /^-/ and defined \$min and \$min > 0;
+
+    if ( \$new =~ /^\$float_rep\$/ ) {
+        if ( ( defined \$max and \$max < \$new ) or
+             ( defined \$min and \$min > \$new ) ) {
+            \$fsc2_apply_button->configure( -state => 'disabled' );
+        } else {
+            \$\$is_valid = 1;
+            check_all_vars( );
+        }
+        return 1;
+    }
+
+    if ( \$new =~ /^[+-]?(\\d+)?\\.?(\\d+)?([Ee][+-]?(\\d+)?)?\$/ ) {
+        \$\$is_valid = 0;
+        check_all_vars( );
+        return 1;
+    }
+
+    return 0;
+}
+
+
+################################################################
+
+sub check_all_vars {
+    for ( \@VARS ) {
+        if ( ! \$_->{ is_valid } ) {
+            \$fsc2_apply_button->configure( -state => 'disabled' );
+            return;
+        }
+    }
+
+    \$fsc2_apply_button->configure( -state => 'normal' );
+}
+
+
+################################################################
+
+sub write_out {
+    for ( \@VARS ) {
+        \$_->{ value } = undef
+            if \$_->{ type } =~ /^(int|float)_empty/ and \$_->{ value } eq '';
+    }
+
+    open my \$fh, '|-', 'fsc2_' . lc \$fsc2_how_to_run
         or die \"Can't find utility fsc2_\" . lc \$fsc2_how_to_run . \".\\n";
 
 EOT
@@ -831,14 +936,15 @@ sub store_defs {
 
     $name =~ s|^.*?([^/]+)$|$1|;
     mkdir "$ENV{ HOME }/.fsc2", 0777 unless -e "$ENV{ HOME }/.fsc2";
-    open( $fh, '>', $ENV{ HOME } . "/.fsc2/$name" ) or return;
+    open $fh, '>:utf8', $ENV{ HOME } . "/.fsc2/$name" or return;
     print $fh "# Do not edit - created automatically!\n";
 EOT
 
     for ( @vars ) {
-        if ( $$_{ type } =~ /^int$/o ) {
+        if ( $$_{ type } =~ /^int(_empty)?$/o ) {
             print "
-    if (     \$$$_{ name }\{ value \} =~ /^[+-]?\\d+\$/o
+    if (     defined \$$$_{ name }\{ value \}
+         and \$$$_{ name }\{ value \} =~ /^[+-]?\\d+\$/o
          and ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 )
          and ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) {
         print \$fh \"\$$$_{ name }\{ value \}\\n\";
@@ -846,10 +952,11 @@ EOT
         print \$fh \"$$_{ def_value }\\n\";
     }
 ";
-        } elsif ( $$_{ type } =~ /^float$/o ) {
+        } elsif ( $$_{ type } =~ /^float(_empty)?$/o ) {
             print "
-    if (     \$$$_{ name }\{ value \} =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o
-         and (     defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 )
+    if (     defined \$$$_{ name }\{ value \}
+         and \$$$_{ name }\{ value \} =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o
+         and ( defined \$$$_{ name }\{ max \} ? \$$$_{ name }\{ max \} >= \$$$_{ name }\{ value \} : 1 )
          and ( defined \$$$_{ name }\{ min \} ? \$$$_{ name }\{ min \} <= \$$$_{ name }\{ value \} : 1 ) ) {
         print \$fh \"\$$$_{ name }\{ value \}\\n\";
     } else {
@@ -888,9 +995,9 @@ sub load_defs {
 
     $name =~ s|^.*?([^/]+)$|$1|;
     if ( $ARGV[ 0 ] ) {
-        open( $fh, '<', $ARGV[ 0 ] ) or return;
+        open $fh, '<:utf8', $ARGV[ 0 ] or return;
     } else {
-        open( $fh, '<'. $ENV{ HOME } . "/.fsc2/$name" ) or return;
+        open $fh, '<:utf8', $ENV{ HOME } . "/.fsc2/$name" or return;
     }
 
     goto done_reading unless defined( $ne = <$fh> ) and $ne =~ /^#/;
@@ -906,6 +1013,16 @@ EOT
                          or ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
     \$$$_{ name }\{ value \} = \$ne;
 ";
+        } elsif ( $$_{ type } =~ /^int_empty$/o ) {
+            print "
+    goto done_reading unless     defined( \$ne = <\$fh> );
+                             and ( \$ne =~ /^\$/o  or \$ne =~ /^[+-]?\\d+\$/o );
+    chomp \$ne;
+    goto done_reading if     \$ne ne ''
+                         and (    ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} )
+                               or ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} ) );
+    \$$$_{ name }\{ value \} = \$ne;
+";
         } elsif ( $$_{ type } =~ /^float$/o ) {
             print "
     goto done_reading unless     defined( \$ne = <\$fh> )
@@ -913,6 +1030,17 @@ EOT
     chomp \$ne;
     goto done_reading if    ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} )
                          or ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} );
+    \$$$_{ name }\{ value \} = \$ne;
+";
+        } elsif ( $$_{ type } =~ /^float_empty$/o ) {
+            print "
+    goto done_reading unless     defined( \$ne = <\$fh> )
+                             and (    \$ne =~ /^\$/o
+                                   or \$ne =~ /^[+-]?((\\d+(\\.(\\d+)?)?)|(\\.\\d+))([eE][+-]?\\d+)?\$/o );
+    chomp \$ne;
+    goto done_reading if     \$ne ne ''
+                         and (    ( defined \$$$_{ name }\{ max \} and \$ne > \$$$_{ name }\{ max \} )
+                               or ( defined \$$$_{ name }\{ min \} and \$ne < \$$$_{ name }\{ min \} ) );
     \$$$_{ name }\{ value \} = \$ne;
 ";
         } elsif ( $$_{ type } =~ /^menu$/o ) {
@@ -1010,44 +1138,44 @@ sub show {
                                     -width => 35
                                   )->pack( -side => 'top',
                                            -fill => 'x',
-                                           -padx => '2m',
-                                           -pady => '1m',
+                                           -padx => 10,
+                                           -pady => 5,
                                          );
     $fs{ list } = $fs{ top }->Scrolled( 'Listbox',
                                         -selectmode => 'single',
                                         -scrollbars => 'osoe',
-                                      )->pack( -side => 'top',
-                                               -fill => 'both',
+                                      )->pack( -side   => 'top',
+                                               -fill   => 'both',
                                                -anchor => 's',
-                                               -padx => '2m',
-                                               -pady => '1m',
+                                               -padx   => 10,
+                                               -pady   => 5,
                                                -expand => 1 );
     populate_fs( $fs{ list }, $cur_dir );
     $fs{ file } = $fs{ top }->Entry( -textvariable => \$cur_file
                                    )->pack( -side => 'top',
                                             -fill => 'x',
-                                            -padx => '2m',
-                                            -pady => '1m'
+                                            -padx => 10,
+                                            -pady => 5
                                           );
     $fs{ frame } = $fs{ top }->Frame( )->pack( -side => 'bottom' );
     $fs{ frame }->Button( -text => 'Cancel',
-                          -command => sub { $selected = "" }
+                          -command => sub { $selected = '' }
                         )->pack( -side => 'left',
-                                 -padx => '2m',
-                                 -pady => '1m'
+                                 -padx => 10,
+                                 -pady => 5
                                );
     $fs{ frame }->Button( -text => 'Rescan',
                           -command => [ \&populate_fs, $fs{ list },
                                         $cur_dir ]
                         )->pack( -side => 'left',
-                                 -padx => '2m',
-                                 -pady => '1m'
+                                 -padx => 10,
+                                 -pady => 5
                                              );
     $fs{ frame }-> Button( -text => '  Ok  ',
                            -command => sub { $selected = $cur_file }
                          )->pack( -side => 'right',
-                                  -padx => '2m',
-                                  -pady => '1m'
+                                  -padx => 10,
+                                  -pady => 5
                                 );
     $fs{ list }->bind( '<ButtonPress-1>' =>
                        [ \&new_selection, $fs{ list }, Ev( 'y' ) ] );
@@ -1066,7 +1194,7 @@ sub show {
     $fs{ top }->bind( '<Home>' => sub { $fs{ list }->yview( 0 ) } );
     $fs{ top }->bind( '<End>' =>
                       sub { $fs{ list }->yview( $fs{ list }->size - 1 ) } );
-    $fs{ top }->bind( '<Escape>' => sub { $selected = "" } );
+    $fs{ top }->bind( '<Escape>' => sub { $selected = '' } );
     $fs{ top }->bind( '<Return>' => sub { $selected = $cur_file } );
 
     $fs{ top }->waitVariable( \$selected );
@@ -1088,11 +1216,11 @@ sub new_selection {
 
     if ( $sel =~ /^d (.*)$/o ) {
         my $dir = $1;
-        $cur_file = "";
+        $cur_file = '';
         return if $dir =~ /^\.$/o;
         if ( $dir =~ /^\.\.$/o ) {
             $cur_dir =~ s|^(.*?)/[^/]+$|$1|;
-            $cur_dir = "/" if $cur_dir =~ /^$/o;
+            $cur_dir = '/' if $cur_dir =~ /^$/o;
             populate_fs( $l, $cur_dir );
         }
         else {

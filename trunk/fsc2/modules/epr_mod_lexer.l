@@ -413,7 +413,11 @@ epr_mod_get_new_res( int tok )
         }
 
         if ( epr_mod.resonators[ last ].count > 2 )
-            epr_mod_recalc( epr_mod.resonators  +last );
+            epr_mod_recalc( epr_mod.resonators  + last );
+        else
+            qsort( epr_mod.resonators[ last ].fe,
+                   epr_mod.resonators[ last ].count,
+                   sizeof *epr_mod.resonators[ last ].fe, epr_mod_comp );
 
         TRY_SUCCESS;
     }

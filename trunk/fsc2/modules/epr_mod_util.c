@@ -25,10 +25,6 @@
 #include "epr_mod.h"
 
 
-static int epr_mod_comp( const void * a,
-                         const void * b );
-
-
 /*-----------------------------------*
  * Tries to find a resonator by name
  *-----------------------------------*/
@@ -286,7 +282,7 @@ epr_mod_recalc( Resonator_T * res )
  * Comparison function for frequency entries of a resonator
  *----------------------------------------------------------*/
 
-static int
+int
 epr_mod_comp( const void * a,
               const void * b )
 {

@@ -27,7 +27,7 @@
  *
  * Syntax:
  *
- *               name, num_args [ , access ] ;
+ *           function_name, num_args [ , access ] ;
  *
  * where `name' is the name of the function and `num_args' is the
  * number of arguments - use a negative number for functions with
@@ -474,6 +474,7 @@ chopper_sector_frequency, -1, ALL;
 
 /* Functions exported by the pseudo-devices for EPR resonator modulation */
 
+epr_modulation_name, 0, ALL;
 epr_modulation_ratio, -1, ALL;
 epr_modulation_phase, -1, ALL;
 epr_modulation_has_phase, 2, ALL;
@@ -485,7 +486,7 @@ epr_modulation_resonator_interpolate, -1, ALL;
 epr_modulation_resonator_can_interpolate, 1, ALL;
 epr_modulation_resonator_extrapolate, -1, ALL;
 epr_modulation_resonator_can_extrapolate, 11, ALL;
-epr_modulation_frequencies, 1, ALL;
+epr_modulation_resonator_frequencies, 1, ALL;
 epr_modulation_store, 0, ALL;
 
 /*

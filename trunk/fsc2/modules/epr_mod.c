@@ -101,7 +101,6 @@ epr_modulation_ratio( Var_T * v )
 	double freq;
     double ratio;
     FREQ_ENTRY_T *fe;
-    size_t i;
 
 
 	res = epr_mod_find( v );
@@ -142,6 +141,8 @@ epr_modulation_ratio( Var_T * v )
 
         if ( res->count > 2 && ( res->interpolate || res->extrapolate ) )
             epr_mod_recalc( res );
+        else
+            qsort( res->fe, res->count, sizeof *res->fe, epr_mod_comp );
 
         return vars_push( FLOAT_VAR, fe->ratio );
     }
@@ -191,6 +192,8 @@ epr_modulation_ratio( Var_T * v )
 
     if ( res->count > 2 )
         epr_mod_recalc( res );
+    else
+        qsort( res->fe, res->count, sizeof *res->fe, epr_mod_comp );
 
     return vars_push( FLOAT_VAR, ratio );
 }
@@ -229,7 +232,15 @@ epr_modulation_phase( Var_T * v )
     }
 
     if ( v == NULL )
+    {
+        if ( ! fe->is_phase )
+        {
+            print( FATAL, "No phase known for this frequency.\n" );
+            THROW( EXCEPTION );
+        }
+
         return vars_push( FLOAT_VAR, fe->phase );
+    }
 
     phase = get_double( v, "modulation phase" );
 
@@ -272,7 +283,7 @@ epr_modulation_has_phase( Var_T * v )
 	freq = get_double( v, "modulation frequency" );
 
     return vars_push( INT_VAR,
-                      ( long ) (    fe = epr_mod_find_fe( res, freq )
+                      ( long ) (    ( fe = epr_mod_find_fe( res, freq ) )
                                  && fe->is_phase ) );
 }
 
@@ -374,9 +385,12 @@ epr_modulation_delete_resonator( Var_T * v )
 		memmove( epr_mod.resonators + i, epr_mod.resonators + i + 1,
 				 ( epr_mod.count - i - 1 ) * sizeof *epr_mod.resonators );
 
-	epr_mod.resonators = 
-		T_realloc( epr_mod.resonators,
-                   --epr_mod.count * sizeof *epr_mod.resonators );
+    if ( --epr_mod.count > 0 )
+        epr_mod.resonators = 
+            T_realloc( epr_mod.resonators,
+                       epr_mod.count * sizeof *epr_mod.resonators );
+    else
+        epr_mod.resonators = T_free( epr_mod.resonators );
 
 	return vars_push( INT_VAR, 1L );
 }
@@ -410,9 +424,9 @@ epr_modulation_resonator_name( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    idx = get_long( v, "resonator index" );
+    idx = get_long( v, "resonator index" ) - 1;
 
-    if ( idx <= 0 || idx > ( long ) epr_mod.count )
+    if ( idx < 0 || idx >= ( long ) epr_mod.count )
     {
         print( FATAL, "Invalid resonator index." );
         THROW( EXCEPTION );
@@ -435,8 +449,6 @@ epr_modulation_resonator_name( Var_T * v )
     }
 
     name = T_strdup( v->val.sptr );
-
-    too_many_arguments( v );
 
     return vars_push ( STR_VAR,
                        epr_mod.resonators[ idx ].name = name );
@@ -522,7 +534,7 @@ epr_modulation_resonator_can_extrapolate( Var_T * v  UNUSED_ARG )
  *---------------------------------------------------------*/
 
 Var_T *
-epr_modulation_frequencies( Var_T * v )
+epr_modulation_resonator_frequencies( Var_T * v )
 {
 	Resonator_T *res = epr_mod_find( v );
     double *freq = NULL;

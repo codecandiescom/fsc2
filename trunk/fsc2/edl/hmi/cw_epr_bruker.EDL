@@ -2,19 +2,24 @@
 === END_FIELD float [ -50 : 23000 ] [ 3500 ] "End field" "G"
 === FIELD_STEP float [ 0.001 : 1600 ] [ 1 ] "Field step size" "G"
 === NUM_SCANS int [ 0 : ][ 0 ] "Number of scans"
+=== RESONATOR menu [ "Unspecified", "Doppelmode", "Hochtemperatur",   \
+=== "Tieftemperatur", "Zylinder", "Raumtemperatur 1", "Raumtemperatur 2a",  \
+=== "Raumtemperatur 2b" ] [ 1 ] "Resonator"
 === SENS1 menu [ "Don't set", "1.0", "1.25", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "6.0", "8.0" ][ 1 ] "Lock-in sensitivity\n(factor)"
 === SENS2 menu [ "1.0e2", "1.0e3", "1.0e4", "1.0e5", "1.0e6" ] [ 3 ] "Lock-in sensitivity\n(magnitude)"
 === TC menu [ "Don't set", "2.5 ms", "5 ms", "10 ms", "20 ms", "40 ms", "80 ms", "160 ms", "320 ms", "640 ms", "1.25 s", "2.5 s", "5 s" ] [ 1 ] "Lock-in Time constant"
 === FACTOR float [ 1.0e-3 : 100 ] [ 1.0  ] "Waiting time"  "* tc"
-=== MODFREQ menu [ "Don't set", "100 kHz", "50 kHz", "25 kHz", "12.5 kHz", "6.25 kHz", "3.125 kHz", "1.5625 kHz" ] [ 1 ] "Modulation frequency"
-=== MODAMP float [ 0.01 : 100 ] [ 1 ] "Modulation amplitude" "%"
+=== MODFREQ menu [ "100 kHz", "50 kHz", "25 kHz", "12.5 kHz", "6.25 kHz", "3.125 kHz", "1.5625 kHz" ] [ 1 ] "Modulation frequency"
+=== MODAMP float [ 0.01 : 100 ] [ 1 ] "Modulation amplitude" "G"
 === PHASE float [ -360.0 : 360.0 ] [ 0.0 ] "Modulation phase"
 DEVICES:
 
 er032m;
 er023m;
 eip371;
-
+=== if RESONATOR ne "Unspecified"
+epr_mod;
+=== endif
 
 VARIABLES:
 
@@ -64,10 +69,12 @@ change_scale_1d( end_field, field_step );
 lockin_sensitivity( SENS1 * SENS2 );
 === endif
 lockin_phase( float( PHASE ) );
-=== if MODFREQ ne "Don't set"
 lockin_ref_freq( MODFREQ );
-=== endif
+=== if RESONATOR ne "Unspecified"
+lockin_ref_level( MODAMP / epr_modulation_ratio( "RESONATOR", MODFREQ ) );
+=== else
 lockin_ref_level( MODAMP G );
+=== endif
 === if TC ne "Don't set"
 tc = lockin_time_constant( TC );
 CT = round( tc / 0.32 ms );
@@ -198,6 +205,12 @@ FOR K = 1 : 2 {
                        "\# Sensitivity      = # mV\n"
                        "\# Time constant    = # ms\n"
 					   "\# Waiting factor   = #\n"
+=== if RESONATOR ne "Unspecified"
+	                   "\# Resonator        = Resonator\n"
+					   "\# Modulation ampl. = # G (raw: \# G)\n"
+=== else
+					   "\# Modulation ampl. = # G\n"
+=== endif
 					   "\# Modulation ampl. = # %\n"
 					   "\# Modulation freq. = # kHz\n"
 					   "\# Phase            = #\n",
@@ -209,7 +222,11 @@ FOR K = 1 : 2 {
 === endif
 	       Num_Points , Scans_Done, avg_freq / 1 GHz,
 		   lockin_sensitivity( ) / 1 mV, tc / 1 ms, factor,
-	       lockin_ref_level( ), lockin_ref_freq( ) / 1kHz, lockin_phase( ) );
+=== if RESONATOR ne "Unspecified"
+           lockin_ref_level( ) * epr_modulation_ratio( "RESONATOR", lockin_ref_freq( ) ),
+=== endif
+	       lockin_ref_level( ),
+		   lockin_ref_freq( ) / 1kHz, lockin_phase( ) );
 }
 
 save_comment( Files[ 1 ], "# ", "Sample: \nTemperature: \nCavity: " );

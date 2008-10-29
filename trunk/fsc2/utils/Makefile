@@ -65,6 +65,7 @@ endif
 install: edl-mod.elc
 	$(INSTALL) -m 755 fsc2_guify $(bindir)
 	$(INSTALL) -m 755 fsc2_pulses $(bindir)
+	$(INSTALL) -m 755 epr_modulation $(bindir)
 	$(INSTALL) -d $(emacs_dir)
 	if [ -n "$(emacs_dir)" ]; then                   \
 		$(INSTALL) -m 644 edl-mod.el $(emacs_dir);   \
@@ -81,6 +82,7 @@ endif
 uninstall:
 	-$(RM) $(RMFLAGS) $(bindir)/fsc2_guify
 	-$(RM) $(RMFLAGS) $(bindir)/fsc2_pulses
+	-$(RM) $(RMFLAGS) $(bindir)/epr_modulation
 	-if [ -n "$(emacs_dir)" ]; then                  \
 		-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.el;   \
 		-$(RM) $(RMFLAGS) $(emacs_dir)/edl-mod.elc;  \
