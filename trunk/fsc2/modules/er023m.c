@@ -727,13 +727,14 @@ lockin_ref_level( Var_T * v )
         else
             ma_index = MAX_MA_INDEX;
 
-        print( WARN, "Modulation amplitude of %.2f %% is too %s, using "
-               "%.2f %% instead.\n",
-               ma, ma_index == 0 ? "high" : "low", ma_list[ ma_index ] );
+        if ( fabs( ma - ma_list[ ma_index ] ) > ma * 5.0e-2 )
+            print( WARN, "Modulation amplitude of %.2f%% is too %s, using "
+                   "%.2f%% instead.\n",
+                   ma, ma_index == 0 ? "high" : "low", ma_list[ ma_index ] );
     }
     else if ( fabs( ma - ma_list[ ma_index ] ) > ma * 5.0e-2 )
-        print( WARN, "Can't set modulation amplitude to %.2f %%, using "
-               "%.2f %% instead.\n", ma, ma_list[ ma_index ] );
+        print( WARN, "Can't set modulation amplitude to %.2f%%, using "
+               "%.2f%% instead.\n", ma, ma_list[ ma_index ] );
 
     er023m.ma_index = ma_index;
     if ( FSC2_MODE == EXPERIMENT )
