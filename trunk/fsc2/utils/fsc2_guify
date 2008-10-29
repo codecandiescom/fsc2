@@ -254,11 +254,11 @@ sub analyze_var_options {
     }
 
     ( $res, $str ) = get_string( $str, $hr );
-    $hr->{ label } = defined $res ? $res : "''";
+    $hr->{ label } = defined $res ? $res : '""';
 
     unless ( $hr->{ type } =~ /^file$/o ) {
         ( $res, $str ) = get_string( $str );
-        $hr->{ unit } = defined $res ? $res : "''";
+        $hr->{ unit } = defined $res ? $res : '""';
     }
 
     die "Syntax error at line $lino near '$str'\n"
@@ -462,7 +462,7 @@ sub cond_check {
         if ( $$_{ type } =~ /^int|float$/o ) {
             $defs .= "my \$$$_{ name } = $$_{ value };\n" ;
         } else {
-            $defs .= "my \$$$_{ name } = '$$_{ value }';\n" ;
+            $defs .= "my \$$$_{ name } = \"$$_{ value }\";\n" ;
         }
     }
 
@@ -587,10 +587,10 @@ EOT
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Checkbutton( -variable => \\\$$$_{ name }\{ value \},
 -width => $entry_width );\n";
         } elsif ( $$_{ type } =~ /^menu$/o ) {
-            print "\$$$_{ name }\{ value \} = '$$_{ value }';
-my \@$$_{ name } = ( '$$_{ menu_entries }[ 0 ]'";
+            print "\$$$_{ name }\{ value \} = \"$$_{ value }\";
+my \@$$_{ name } = ( \"$$_{ menu_entries }[ 0 ]\"";
             for ( my $i = 1; $i < @{ $$_{ menu_entries } }; $i++ ) {
-                print ", '" . ${ $$_{ menu_entries } }[ $i ] . "'";
+                print ', "' . ${ $$_{ menu_entries } }[ $i ] . '"';
             }
             print " );
 \$$$_{ name }\{ tk_entry \} = \$$$_{ name }\{ tk_frame \}->Optionmenu( " .
@@ -812,7 +812,7 @@ sub write_out {
             if \$_->{ type } =~ /^(int|float)_empty/ and \$_->{ value } eq '';
     }
 
-    open my \$fh, '|-', 'fsc2_' . lc \$fsc2_how_to_run
+    open my \$fh, '|-:utf8', 'fsc2_' . lc \$fsc2_how_to_run
         or die \"Can't find utility fsc2_\" . lc \$fsc2_how_to_run . \".\\n";
 
 EOT
