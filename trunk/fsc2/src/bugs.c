@@ -52,6 +52,7 @@ bug_report_callback( FL_OBJECT * a,
     char *ed;
     int res;
     struct sigaction sact, oact;
+    int ret;
 
 
     notify_conn( BUSY_SIGNAL );
@@ -119,8 +120,8 @@ bug_report_callback( FL_OBJECT * a,
        as well as the location of the library */
 
     fprintf( tmp, "Current user: %s\n", ( getpwuid( getuid( ) ) )->pw_name );
-    getcwd( cur_dir, PATH_MAX );
-    fprintf( tmp, "Current dir:  %s\n", cur_dir );
+    if ( getcwd( cur_dir, PATH_MAX ) )
+        fprintf( tmp, "Current dir:  %s\n", cur_dir );
     fprintf( tmp, "libdir:       " libdir "\n\n" );
 
     /* Append output of ulimit */
@@ -128,12 +129,12 @@ bug_report_callback( FL_OBJECT * a,
     fprintf( tmp, "\"ulimit -a -S\" returns:\n\n" );
     cmd = get_string( "ulimit -a -S >> %s", filename );
     fflush( tmp );
-    system( cmd );
+    ret = system( cmd );
     T_free( cmd );
 
     cmd = get_string( "echo >> %s", filename );
     fflush( tmp );
-    system( cmd );
+    ret = system( cmd );
     T_free( cmd );
 
     /* Append current disk usage to the file to detect problems due to a
@@ -141,7 +142,7 @@ bug_report_callback( FL_OBJECT * a,
 
     cmd = get_string( "df >> %f", filename );
     fflush( tmp );
-    system( cmd );
+    ret = system( cmd );
     T_free( cmd );
 
     /* Finally append the file with the version informations so that I'll know
@@ -150,12 +151,12 @@ bug_report_callback( FL_OBJECT * a,
     cmd = get_string( "echo \"\nVersion (use uudecode file "
                       "| gunzip -c to unpack):\n\" >> %s", filename );
     fflush( tmp );
-    system( cmd );
+    ret = system( cmd );
     T_free( cmd );
 
     cmd = get_string( "cat " libdir "version.ugz >> %s", filename );
     fflush( tmp );
-    system( cmd );
+    ret = system( cmd );
     T_free( cmd );
     fflush( tmp );
 
@@ -184,7 +185,7 @@ bug_report_callback( FL_OBJECT * a,
 
     do
     {
-        system( cmd );
+        ret = system( cmd );
         res = fl_show_choices( "Please choose one of the following options:",
                                3, "Send", "Forget", "Edit", 1 );
     } while ( res == 3 );
@@ -313,8 +314,9 @@ death_mail( void )
     if ( ( vfp = fopen( vfn, "r" ) ) != NULL )
     {
         fputs( "\n\nVersion:\n\n", mail );
-        while ( ( count = fread( buffer, 1, DM_BUF_SIZE, vfp ) ) != 0 )
-            fwrite( buffer, 1, count, mail );
+        while (    ( count = fread( buffer, 1, DM_BUF_SIZE, vfp ) ) != 0
+                && fwrite( buffer, 1, count, mail ) == count )
+            /* empty */;
         fclose( vfp );
     }
 

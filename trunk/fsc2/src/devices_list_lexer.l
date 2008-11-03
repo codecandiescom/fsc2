@@ -26,7 +26,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack nounput noyy_top_state never-interactive
+%option noyywrap stack noinput nounput noyy_top_state never-interactive
 
 %{
 
@@ -34,9 +34,10 @@
 
 static long Comm_lc;
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int devices_listget_lineno( void );
 FILE * devices_listget_in( void );
 FILE * devices_listget_out( void );
@@ -48,6 +49,7 @@ void devices_listset_out( FILE * );
 int devices_listget_debug( void );
 void devices_listset_debug( int );
 int devices_listlex_destroy( void );
+#endif
 
 
 %}

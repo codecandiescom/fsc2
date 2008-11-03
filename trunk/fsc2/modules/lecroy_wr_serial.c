@@ -339,8 +339,7 @@ lecroy_wr_set_timebase( double timebase )
     ssize_t to_send;
 
 
-    gcvt( timebase, 8, cmd + strlen( cmd ) );
-    strcat( cmd, "\r" );
+    strcat( gcvt( timebase, 8, cmd + strlen( cmd ) ), "\r" );
     to_send = strlen( cmd );
     if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
@@ -499,8 +498,7 @@ lecroy_wr_set_sens( int    channel,
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
     sprintf( cmd, "C%1d:VDIV ", channel + 1 );
-    gcvt( sens, 8, cmd + strlen( cmd ) );
-    strcat( cmd, "\r" );
+    strcat( gcvt( sens, 8, cmd + strlen( cmd ) ), "\r" );
     to_send = strlen( cmd );
     if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
@@ -545,8 +543,7 @@ lecroy_wr_set_offset( int    channel,
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
     sprintf( cmd, "C%1d:OFST ", channel + 1 );
-    gcvt( offset, 8, cmd + strlen( cmd ) );
-    strcat( cmd, "\r" );
+    strcat( gcvt( offset, 8, cmd + strlen( cmd ) ), "\r" );
     to_send = strlen( cmd );
     if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
@@ -926,8 +923,7 @@ lecroy_wr_set_trigger_level( int    channel,
     else
         strcpy( cmd, "EX10:TRLV " );
 
-    gcvt( level, 6, cmd + strlen( cmd ) );
-    strcat( cmd, "\r" );
+    strcat( gcvt( level, 6, cmd + strlen( cmd ) ), "\r" );
 
     to_send = strlen( cmd );
     if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
@@ -1200,8 +1196,7 @@ lecroy_wr_set_trigger_delay( double delay )
     if ( delay > 0.0 )
         delay = 10.0 * delay / lecroy_wr.timebase;
 
-    gcvt( delay, 8, cmd + strlen( cmd ) );
-    strcat( cmd, "\r" );
+    strcat( gcvt( delay, 8, cmd + strlen( cmd ) ), "\r" );
 
     to_send = strlen( cmd );
     if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,

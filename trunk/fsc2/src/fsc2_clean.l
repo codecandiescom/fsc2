@@ -26,7 +26,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack never-interactive
+%option noyywrap noinput stack never-interactive
 
 %{
 
@@ -113,9 +113,10 @@ char *Fname;
 bool Eol;
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int yyget_lineno( void );
 FILE * yyget_in( void );
 FILE * yyget_out( void );
@@ -127,6 +128,7 @@ void yyset_out( FILE * );
 int yyget_debug( void );
 void yyset_debug( int );
 int yylex_destroy( void );
+#endif
 
 
 %}

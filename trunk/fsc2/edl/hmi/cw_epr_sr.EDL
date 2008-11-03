@@ -6,8 +6,8 @@
 === RESONATOR menu [ "Unspecified", "Doppelmode", "Hochtemperatur",         \
 === "Tieftemperatur", "Zylinder", "Raumtemperatur 1", "Raumtemperatur 2a",  \
 === "Raumtemperatur 2b" ] [ 1 ] "Resonator"
-=== MODFREQ float [ 0.000001 : 102 ] [ 100 ] "Modulation frequncy" "kHz"
-=== MODAMP float [ 0 : ] [ 1 ] "Modulation amplitude" "G"
+=== MODFREQ float_empty [ 0.000001 : 102 ] [ 100 ] "Modulation frequncy" "kHz"
+=== MODAMP float_empty [ 0 : ] [ 1 ] "Modulation amplitude" "G"
 === MODPHASE float_empty [ -360 : 360 ] "Modulation phase" "°"
 === CHANNELS menu [ "X only", "X and Y" ] [ 2 ] "Lock-In channel(s)"
 DEVICES:
@@ -15,13 +15,12 @@ DEVICES:
 er032m;
 sr830;
 eip371;
+=== if RESONATOR ne "Unspecified"
+epr_mod;
+=== endif
 
 
 VARIABLES:
-
-=== if ! defined MODPHASE
-XXXXX
-=== endif
 
 start_field = START_FIELD G;
 end_field   = END_FIELD G;
@@ -80,6 +79,19 @@ end_field = start_field - ( Num_Points - 1 ) * field_step;
 change_scale_1d( end_field, field_step );
 === endif
 tc = lockin_time_constant( );
+=== if defined MODPHASE
+lockin_phase( float( MODPHASE ) );
+=== endif
+=== if defined MODFREQ
+lockin_ref_freq( MODFREQ kHz );
+=== endif
+=== if defined MODAMP
+===   if RESONATOR ne "Unspecified"
+lockin_ref_level( MODAMP G / epr_modulation_ratio( "RESONATOR", lockin_ref_freq( ) ) );
+===   else
+lockin_ref_level( MODAMP V );
+===   endif
+=== endif
 
 Files[ 1 ] = get_file( "", "*.avg", "", "", "avg" );
 Files[ 2 ] = clone_file( Files[ 1 ], "avg", "scans" );
@@ -245,20 +257,25 @@ IF ! Scans_Written {
 }
 
 FOR K = 1 : 2 {
-    fsave( Files[ K ], "\# Date             : # #\n"
-                       "\# Start field      = # G\n"
-                       "\# End field        = # G\n"
-                       "\# Field step size  = # G\n"
-					   "\# Number of points = #\n"
-                       "\# No. of scans     = #\n"
-					   "\# MW frequency     = # GHz\n"
-					   "\# Lockin-In        = Stanford Research SR830\n"
-                       "\# Sensitivity      = # mV\n"
-                       "\# Time constant    = # ms\n"
-					   "\# Waiting factor   = #\n"
-					   "\# Modulation ampl. = # V\n"
-					   "\# Modulation freq. = # kHz\n"
-					   "\# Phase            = #\n",
+    fsave( Files[ K ], "\# Date                : # #\n"
+                       "\# Start field         = # G\n"
+                       "\# End field           = # G\n"
+                       "\# Field step size     = # G\n"
+					   "\# Number of points    = #\n"
+                       "\# No. of scans        = #\n"
+					   "\# MW frequency        = # GHz\n"
+					   "\# Lockin-In           = Stanford Research SR830\n"
+                       "\# Sensitivity         = # mV\n"
+                       "\# Time constant       = # ms\n"
+					   "\# Waiting time factor = #\n"
+=== if RESONATOR ne "Unspecified"
+	                   "\# Resonator           = RESONATOR\n"
+					   "\# Modulation ampl.    = # G (raw: # V)\n"
+=== else
+					   "\# Modulation ampl.    = # V (raw)\n"
+=== endif
+					   "\# Modulation freq.     = # kHz\n"
+					   "\# Phase                = #\n",
            date( ), time( ), start_field,
 === if START_FIELD <= END_FIELD
 	   	   start_field + ( Num_Points - 1 ) * field_step, field_step,
@@ -267,6 +284,9 @@ FOR K = 1 : 2 {
 === endif
 	       Num_Points, Scans_Done, avg_freq / 1 GHz,
 		   lockin_sensitivity( ) / 1 mV, tc / 1 ms, factor,
+=== if RESONATOR ne "Unspecified"
+           lockin_ref_level( ) * epr_modulation_ratio( "RESONATOR", lockin_ref_freq( ) ),
+=== endif
 	       lockin_ref_level( ), lockin_ref_freq( ) / 1kHz, lockin_phase( ) );
 }
 

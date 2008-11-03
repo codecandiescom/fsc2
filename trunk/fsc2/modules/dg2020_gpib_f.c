@@ -337,8 +337,7 @@ dg2020_set_timebase( double timebase )
          || timebase > MAX_TIMEBASE * 1.00001 )
         return FAIL;
 
-    gcvt( 1.0 / timebase, 4, cmd + strlen( cmd ) );
-    strcat( cmd, "\n" );
+    strcat( gcvt( 1.0 / timebase, 4, cmd + strlen( cmd ) ), "\n" );
     dg2020_command( cmd );
 
     return OK;

@@ -207,20 +207,22 @@ http_check( void )
     fd_set rfds;
     char reply[ 2 ];
     char query;
+    ssize_t c;
 
 
     tv.tv_sec = tv.tv_usec = 0;
     FD_ZERO( &rfds );
     FD_SET( Comm.http_pd[ HTTP_PARENT_READ ], &rfds );
 
-    /* Answer only one reqest at a time, we don't want the experiment getting
-       bogged down just because somone has been fallen asleep on the reload
-       button of his browser... */
+    /* Answer only one request at a time, we don't want the experiment getting
+       bogged down just because somebody has fallen asleep on the reload button
+       of his browser... */
 
     if ( select( Comm.http_pd[ HTTP_PARENT_READ ] + 1, &rfds,
                  NULL, NULL, &tv ) > 0 )
     {
-        read( Comm.http_pd[ HTTP_PARENT_READ ], &query, 1 );
+        if ( read( Comm.http_pd[ HTTP_PARENT_READ ], &query, 1 ) == 0 )
+            return;
 
         reply[ 1 ] = '\n';
 
@@ -228,7 +230,7 @@ http_check( void )
         {
             case 'S' :                             /* state of the program ? */
                 reply[ 0 ]  = ( char ) Fsc2_Internals.state + '0';
-                write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+                c = write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
                 break;
 
             case 'W' :                       /* wich windows are displayed ? */
@@ -244,12 +246,12 @@ http_check( void )
                         reply[ 0 ] = ( G_2d.is_cut ? '7' : '3' );
                 }
 
-                write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+                c = write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
                 break;
 
             case 'C' :            /* which 2D curve is currently displayed ? */
                 reply[ 0 ] = ( char ) ( G_2d.active_curve + 1 ) + '0';
-                write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
+                c = write( Comm.http_pd[ HTTP_PARENT_WRITE ], reply, 2 );
                 break;
 
             case 'E' :             /* send the contents of the error browser */
@@ -283,7 +285,8 @@ http_check( void )
  * MAX_LINES_TO_SEND) to the server. The server expects each line
  * to end with a newline character and treats a line consisting
  * of a newline only as the end of the message. Thus we have to
- * look out for empty lines and send a space char for these.
+ * look out for empty lines and send an extra  space char for
+ * those.
  *----------------------------------------------------------------*/
 
 static void
@@ -294,6 +297,7 @@ http_send_error_browser( int pd )
     int i = 0;
     char newline = '\n';
     char space = ' ';
+    ssize_t c;
 
 
     if ( ( i = fl_get_browser_maxline( b ) - MAX_LINES_TO_SEND  ) < 0 )
@@ -302,13 +306,13 @@ http_send_error_browser( int pd )
     while ( ( l = fl_get_browser_line( b, ++i ) ) != NULL )
     {
         if ( *l != '\0' )
-            write( pd, l, strlen( l ) );
+            c = write( pd, l, strlen( l ) );
         else
-            write( pd, &space, 1 );
-        write( pd, &newline, 1 );
+            c = write( pd, &space, 1 );
+        c = write( pd, &newline, 1 );
     }
 
-    write( pd, &newline, 1 );
+    c = write( pd, &newline, 1 );
 }
 
 
@@ -322,6 +326,7 @@ http_send_picture( int pd,
     char filename[ ] = P_tmpdir "/fsc2.http.XXXXXX";
     char reply[ 2 ];
     int tmp_fd = -1;
+    ssize_t c;
 
 
     CLOBBER_PROTECT( tmp_fd );
@@ -338,7 +343,7 @@ http_send_picture( int pd,
          || ( type == 3 && ! G_2d.is_cut ) )
     {
         reply[ 0 ] = '0';
-        write( pd, reply, 2 );
+        c = write( pd, reply, 2 );
         return;
     }
 
@@ -358,10 +363,9 @@ http_send_picture( int pd,
         dump_window( type, tmp_fd );
 
         reply[ 0 ] = '1';
-        write( pd, reply, 2 );
-
-        write( pd, filename, strlen( filename ) );
-        write( pd, reply + 1, 1 );
+        c =   write( pd, reply, 2 )
+            + write( pd, filename, strlen( filename ) )
+            + write( pd, reply + 1, 1 );
 
         TRY_SUCCESS;
     }
@@ -374,7 +378,7 @@ http_send_picture( int pd,
         }
 
         reply[ 0 ] = '0';
-        write( pd, reply, 2 );
+        c = write( pd, reply, 2 );
     }
 
     close( tmp_fd );

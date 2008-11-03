@@ -136,7 +136,7 @@ epr_mod_save( void )
 		for ( j = 0; j < res->count; j++ )
 		{
 			fprintf( fp, "  freq: %f kHz\n"
-					 "    ratio: %f G/V\n",
+					 "    ratio: %f\n",
 					 0.001 * res->fe[ j ].freq, res->fe[ j ].ratio );
 			if ( res->fe[ j ].is_phase )
 				fprintf( fp, "    phase: %f\n", res->fe[ j ].phase );

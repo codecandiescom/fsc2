@@ -26,7 +26,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack noyy_top_state nounput never-interactive case-insensitive
+%option noyywrap stack noyy_top_state nounput noinput never-interactive case-insensitive
 
 %{
 
@@ -40,9 +40,10 @@ static int ival;
 static double dval;
 static char *sval;
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int epr_mod_get_lineno( void );
 FILE * epr_mod_get_in( void );
 FILE * epr_mod_get_out( void );
@@ -54,6 +55,7 @@ void epr_mod_set_out( FILE * );
 int epr_mod_get_debug( void );
 void epr_mod_set_debug( int );
 int epr_mod_lex_destroy( void );
+#endif
 
 
 typedef struct FE_T  {
@@ -714,12 +716,10 @@ epr_mod_get_ratio( int tok )
     res.fe[ last ].ratio = dval;
     res.fe[ last ].is_ratio = SET;
 
+    /* Allow an optional "G/V" after the number */
+
     if ( ( tok = epr_mod_lex( ) ) != RUNIT_TOK )
-    {
-        print( FATAL, "Missing ratio unit in state file '%s' at line %d.\n",
-               epr_mod.state_file, epr_mod_Lc );
-        epr_mod_state_file_err( 0 );
-    }
+        return tok;
 
     return epr_mod_lex( );
 }

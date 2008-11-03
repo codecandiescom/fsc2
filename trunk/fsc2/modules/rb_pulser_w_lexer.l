@@ -26,7 +26,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack noyy_top_state nounput never-interactive
+%option noyywrap stack noyy_top_state noinput nounput never-interactive
 
 %{
 
@@ -44,9 +44,10 @@ static int cur_delay = INVALID_DELAY_NUMBER;
 static int cur_clock = INVALID_CLOCK_NUMBER;
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int rb_pulser_w_get_lineno( void );
 FILE * rb_pulser_w_get_in( void );
 FILE * rb_pulser_w_get_out( void );
@@ -58,6 +59,7 @@ void rb_pulser_w_set_out( FILE * );
 int rb_pulser_w_get_debug( void );
 void rb_pulser_w_set_debug( int );
 int rb_pulser_w_lex_destroy( void );
+#endif
 
 %}
 

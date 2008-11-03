@@ -585,6 +585,7 @@ f_obj_clabel( Var_T * v )
 
     CLOBBER_PROTECT( v );
     CLOBBER_PROTECT( label );
+    CLOBBER_PROTECT( io );
 
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {

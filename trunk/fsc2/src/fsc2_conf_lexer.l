@@ -27,7 +27,7 @@
         /*---------------------*/
 
 
-%option noyywrap nounput never-interactive
+%option noyywrap noinput nounput never-interactive
 
 
 %{
@@ -35,9 +35,10 @@
 #include "fsc2_conf_parser.h"
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int fsc2_confget_lineno( void );
 FILE * fsc2_confget_in( void );
 FILE * fsc2_confget_out( void );
@@ -49,6 +50,7 @@ void fsc2_confset_out( FILE * );
 int fsc2_confget_debug( void );
 void fsc2_confset_debug( int );
 int fsc2_conflex_destroy( void );
+#endif
 
 
 %}

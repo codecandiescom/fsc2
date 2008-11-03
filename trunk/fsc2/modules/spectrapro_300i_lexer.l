@@ -26,7 +26,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack noyy_top_state nounput never-interactive
+%option noyywrap stack noyy_top_state noinput nounput never-interactive
 
 %{
 
@@ -52,9 +52,10 @@ static struct {
 #define DATA_U_TYPE 5
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int spectrapro_300i_get_lineno( void );
 FILE * spectrapro_300i_get_in( void );
 FILE * spectrapro_300i_get_out( void );
@@ -66,6 +67,7 @@ void spectrapro_300i_set_out( FILE * );
 int spectrapro_300i_get_debug( void );
 void spectrapro_300i_set_debug( int );
 int spectrapro_300i_lex_destroy( void );
+#endif
 
 %}
 

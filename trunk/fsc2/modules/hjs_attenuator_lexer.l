@@ -26,7 +26,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack noyy_top_state nounput never-interactive
+%option noyywrap stack noyy_top_state noinput nounput never-interactive
 
 %{
 
@@ -52,9 +52,10 @@ static long hjs_attenuator_Lc,
 
 static size_t cur_table_len;
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int hjs_attenuator_get_lineno( void );
 FILE * hjs_attenuator_get_in( void );
 FILE * hjs_attenuator_get_out( void );
@@ -66,6 +67,7 @@ void hjs_attenuator_set_out( FILE * );
 int hjs_attenuator_get_debug( void );
 void hjs_attenuator_set_debug( int );
 int hjs_attenuator_lex_destroy( void );
+#endif
 
 %}
 

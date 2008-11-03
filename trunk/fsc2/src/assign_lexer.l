@@ -31,7 +31,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap nounput never-interactive
+%option noyywrap noinput nounput never-interactive
 
 
 %{
@@ -60,9 +60,10 @@ extern void assignparser_init( void );
 extern void assignparse( void );
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int assignget_lineno( void );
 FILE * assignget_in( void );
 FILE * assignget_out( void );
@@ -74,6 +75,7 @@ void assignset_out( FILE * );
 int assignget_debug( void );
 void assignset_debug( int );
 int assignlex_destroy( void );
+#endif
 
 
 /* locally used global variables */

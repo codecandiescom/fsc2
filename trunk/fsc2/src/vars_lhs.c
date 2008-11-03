@@ -32,8 +32,10 @@ static int vars_check_lhs_indices( Var_T ** v,
                                    int *    range_count );
 static Var_T * vars_setup_new_array( Var_T * v,
                                      int     dim );
+#if 0
 static Var_T * vars_init_elements( Var_T * a,
                                    Var_T * v );
+#endif
 static void vars_do_init( Var_T * src,
                           Var_T * dest );
 static Var_T * vars_lhs_pointer( Var_T * v,
@@ -744,6 +746,7 @@ vars_do_init( Var_T * src,
  * the variables on the stack (first of which is 'v').
  *--------------------------------------------------------------------*/
 
+#if 0
 static Var_T *
 vars_init_elements( Var_T * a,
                     Var_T * v )
@@ -787,6 +790,7 @@ vars_init_elements( Var_T * a,
 
     return v;
 }
+#endif
 
 
 /*----------------------------------------------------------------------*

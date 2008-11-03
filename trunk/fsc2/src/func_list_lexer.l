@@ -26,7 +26,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack nounput noyy_top_state never-interactive
+%option noyywrap stack noinput nounput noyy_top_state never-interactive
 
 %{
 
@@ -48,9 +48,10 @@ static long Comm_lc;
 #define IDENT_TOKEN  260
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int func_listget_lineno( void );
 FILE * func_listget_in( void );
 FILE * func_listget_out( void );
@@ -62,6 +63,7 @@ void func_listset_out( FILE * );
 int func_listget_debug( void );
 void func_listset_debug( int );
 int func_listlex_destroy( void );
+#endif
 
 
 %}

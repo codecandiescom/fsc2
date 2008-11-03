@@ -2370,17 +2370,28 @@ get_repl_retry:
         while( 1 )
         {
             clearerr( EDL.File_List[ file_num ].fp );
-            clearerr( new_fp );
 
-            rw = fread( buffer, 1, COPY_BUFFER_SIZE,
-                        EDL.File_List[ file_num ].fp );
-
-            if ( rw != 0 )
-                fwrite( buffer, 1, rw, new_fp );
-
-            if ( ferror( new_fp ) )
+            if ( ( rw = fread( buffer, 1, COPY_BUFFER_SIZE,
+                               EDL.File_List[ file_num ].fp ) ) == 0 )
             {
-                mess = get_string( "Can't write to replacement file\n%s\n"
+                if ( ferror( EDL.File_List[ file_num ].fp ) )
+                {
+                    mess = get_string( "Failed to read from file\n%s",
+                                       EDL.File_List[ file_num ].name );
+                    show_message( mess );
+                    T_free( mess );
+                    fclose( new_fp );
+                    unlink( new_name );
+                    new_name = T_free( new_name );
+                    THROW( EXCEPTION );
+                }
+
+                break;
+            }
+            
+            if( fwrite( buffer, 1, rw, new_fp ) != rw )
+            {
+                mess = get_string( "Failed to write to replacement file\n%s\n"
                                    "Please choose another replacement file.",
                                    new_name );
                 show_message( mess );
@@ -2390,9 +2401,6 @@ get_repl_retry:
                 new_name = T_free( new_name );
                 goto get_repl_retry;
             }
-
-            if ( feof( EDL.File_List[ file_num ].fp ) )
-                break;
         }
 
         fclose( EDL.File_List[ file_num ].fp );

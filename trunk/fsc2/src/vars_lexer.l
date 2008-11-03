@@ -31,7 +31,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap nounput never-interactive
+%option noyywrap noinput nounput never-interactive
 
 %{
 
@@ -60,9 +60,10 @@ extern void varsparser_init( void );
 extern void varsparse( void );
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int varsget_lineno( void );
 FILE * varsget_in( void );
 FILE * varsget_out( void );
@@ -74,6 +75,7 @@ void varsset_out( FILE * );
 int varsget_debug( void );
 void varsset_debug( int );
 int varslex_destroy( void );
+#endif
 
 
 /* Locally used global variables */

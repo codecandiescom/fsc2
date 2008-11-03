@@ -26,7 +26,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack noyy_top_state nounput never-interactive
+%option noyywrap stack noyy_top_state noinput nounput never-interactive
 
 %{
 
@@ -53,9 +53,10 @@ static double unit_fac = 1.0;
 
 static long cur_table_len;
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int hp8672a_get_lineno( void );
 FILE * hp8672a_get_in( void );
 FILE * hp8672a_get_out( void );
@@ -67,7 +68,7 @@ void hp8672a_set_out( FILE * );
 int hp8672a_get_debug( void );
 void hp8672a_set_debug( int );
 int hp8672a_lex_destroy( void );
-
+#endif
 
 %}
 

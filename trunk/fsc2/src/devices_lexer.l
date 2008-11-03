@@ -31,7 +31,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap nounput never-interactive
+%option noyywrap noinput nounput never-interactive
 
 %{
 
@@ -57,9 +57,10 @@
 extern void devicesparse( void );
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int devicesget_lineno( void );
 FILE * devicesget_in( void );
 FILE * devicesget_out( void );
@@ -71,6 +72,7 @@ void devicesset_out( FILE * );
 int devicesget_debug( void );
 void devicesset_debug( int );
 int deviceslex_destroy( void );
+#endif
 
 
 /* locally used global variables */

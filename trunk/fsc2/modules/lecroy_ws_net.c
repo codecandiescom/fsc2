@@ -329,8 +329,7 @@ lecroy_ws_set_timebase( double timebase )
     ssize_t len;
 
 
-    gcvt( timebase, 8, cmd + strlen( cmd ) );
-    strcat( cmd, "\n" );
+    strcat( gcvt( timebase, 8, cmd + strlen( cmd ) ), "\n" );
     len = strlen( cmd );
     lecroy_vicp_write( cmd, &len, SET, UNSET );
 
@@ -465,8 +464,7 @@ lecroy_ws_set_sens( int    channel,
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 
     sprintf( cmd, "C%1d:VDIV ", channel - LECROY_WS_CH1 + 1 );
-    gcvt( sens, 8, cmd + strlen( cmd ) );
-    strcat( cmd, "\n" );
+    strcat( gcvt( sens, 8, cmd + strlen( cmd ) ), "\n" );
     len = strlen( cmd );
     lecroy_vicp_write( cmd, &len, SET, UNSET );
 
@@ -510,8 +508,7 @@ lecroy_ws_set_offset( int    channel,
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
 
     sprintf( cmd, "C%1d:OFST ", channel - LECROY_WS_CH1 + 1 );
-    gcvt( offset, 8, cmd + strlen( cmd ) );
-    strcat( cmd, "\n" );
+    strcat( gcvt( offset, 8, cmd + strlen( cmd ) ), "\n" );
     len = strlen( cmd ),
     lecroy_vicp_write( cmd, &len, SET, UNSET );
 
@@ -801,8 +798,7 @@ lecroy_ws_set_trigger_level( int    channel,
     else
         strcpy( cmd, "EX10:TRLV " );
 
-    gcvt( level, 6, cmd + strlen( cmd ) );
-    strcat( cmd, "\n" );
+    strcat( gcvt( level, 6, cmd + strlen( cmd ) ), "\n" );
     len = strlen( cmd );
     lecroy_vicp_write( cmd, &len, SET, UNSET );
 
@@ -1067,8 +1063,7 @@ lecroy_ws_set_trigger_delay( double delay )
     if ( delay > 0.0 )
         delay = 10.0 * delay / lecroy_ws.timebase;
 
-    gcvt( delay, 8, cmd + strlen( cmd ) );
-    strcat( cmd, "\n" );
+    strcat( gcvt( delay, 8, cmd + strlen( cmd ) ), "\n" );
     len = strlen( cmd ),
     lecroy_vicp_write( cmd, &len, SET, UNSET );
 

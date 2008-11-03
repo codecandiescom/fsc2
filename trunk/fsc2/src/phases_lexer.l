@@ -31,7 +31,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap nounput never-interactive
+%option noyywrap noinput nounput never-interactive
 
 %{
 
@@ -57,9 +57,10 @@
 extern void phasesparse( void );
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int phasesget_lineno( void );
 FILE * phasesget_in( void );
 FILE * phasesget_out( void );
@@ -71,6 +72,7 @@ void phasesset_out( FILE * );
 int phasesget_debug( void );
 void phasesset_debug( int );
 int phaseslex_destroy( void );
+#endif
 
 
 /* locally used global variables */

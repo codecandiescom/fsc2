@@ -1274,10 +1274,17 @@ get_serial_lock( int sn )
     }
 
     umask( mask );
-    chown( Serial_Port[ sn ].lock_file, Fsc2_Internals.EUID,
-           Fsc2_Internals.EGID );
+    if ( chown( Serial_Port[ sn ].lock_file, Fsc2_Internals.EUID,
+                Fsc2_Internals.EGID ) != 0 )
+        print( WARN, "Failed to set ownership on serial port lockfile '%s' "
+               "for serial port %d, might cause trouble later on.\n",
+               Serial_Port[ sn ].lock_file, sn );
+               
     snprintf( buf, sizeof buf, "%10ld\n", ( long ) getpid( ) );
-    write( fd, buf, strlen( buf ) );
+    if ( write( fd, buf, strlen( buf ) ) != ( ssize_t ) strlen( buf ) )
+        print( WARN, "Failed to write to serial port lockfile '%s' "
+               "for serial port %d, might cause trouble later on.\n",
+               Serial_Port[ sn ].lock_file, sn );
     close( fd );
 
     lower_permissions( );

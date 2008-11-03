@@ -31,7 +31,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap nounput never-interactive
+%option noyywrap noinput nounput never-interactive
 
 %{
 
@@ -59,9 +59,10 @@ extern void prepsparser_init( void );
 extern void prepsparse( void );
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int prepsget_lineno( void );
 FILE * prepsget_in( void );
 FILE * prepsget_out( void );
@@ -73,6 +74,7 @@ void prepsset_out( FILE * );
 int prepsget_debug( void );
 void prepsset_debug( int );
 int prepslex_destroy( void );
+#endif
 
 
 /* Locally used global variables */

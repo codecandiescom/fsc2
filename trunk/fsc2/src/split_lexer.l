@@ -27,7 +27,7 @@
 /**********************************************/
 
 
-%option noyywrap nounput never-interactive
+%option noyywrap noinput nounput never-interactive
 
 %{
 
@@ -50,9 +50,10 @@
 #include "fsc2.h"
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int splitget_lineno( void );
 FILE * splitget_in( void );
 FILE * splitget_out( void );
@@ -64,6 +65,7 @@ void splitset_out( FILE * );
 int splitget_debug( void );
 void splitset_debug( int );
 int splitlex_destroy( void );
+#endif
 
 
 /* local functions */

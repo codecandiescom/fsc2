@@ -888,7 +888,9 @@ gpib_write_start( const char * dev_name,
 
     if ( ll == LL_ALL )
     {
-        fwrite( buffer, length, 1, gpib_log );
+        size_t c;
+
+        c = fwrite( buffer, length, 1, gpib_log );
         fputc( ( int ) '\n', gpib_log );
     }
 
@@ -1006,7 +1008,9 @@ gpib_read_end( const char * dev_name,
 
     if ( ll == LL_ALL )
     {
-        fwrite( buffer, received, 1, gpib_log );
+        size_t c;
+
+        c = fwrite( buffer, received, 1, gpib_log );
         fputc( ( int ) '\n', gpib_log );
     }
 

@@ -26,7 +26,7 @@
         /*     DEFINITIONS     */
         /*---------------------*/
 
-%option noyywrap stack noyy_top_state nounput never-interactive
+%option noyywrap stack noyy_top_state noinput nounput never-interactive
 
 %{
 
@@ -37,9 +37,10 @@ static long hjs_sfc_Lc,
             hjs_sfc_Comm_Lc;
 
 
-/* We need these to avoid unnecessary warnings from the flex-generated
-   C code when newer versions of flex are used */
+/* The following declarations are to avoid unnecessary warnings from
+   the flex-generated C code for some versions of flex */
 
+#if defined FLEX_NEEDS_DECLARATIONS
 int hjs_sfc_get_lineno( void );
 FILE * hjs_sfc_get_in( void );
 FILE * hjs_sfc_get_out( void );
@@ -51,6 +52,7 @@ void hjs_sfc_set_out( FILE * );
 int hjs_sfc_get_debug( void );
 void hjs_sfc_set_debug( int );
 int hjs_sfc_lex_destroy( void );
+#endif
 
 %}
 
