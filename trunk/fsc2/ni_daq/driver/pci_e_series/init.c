@@ -115,7 +115,7 @@ static struct pci_driver pci_e_series_pci_driver = {
 static dev_t dev_no;
 static struct cdev ch_dev;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
 static struct class *pci_e_series_class;
 #endif
 
@@ -244,7 +244,7 @@ static int __init pci_e_series_init( void )
 		return result;
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
 	pci_e_series_class = class_create( THIS_MODULE, BOARD_SERIES_NAME );
 
 	if ( IS_ERR( pci_e_series_class ) ) {
@@ -257,8 +257,24 @@ static int __init pci_e_series_init( void )
 	}
 
 	for ( i = 0; i < board_count; i++ )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 27 )
+		device_create( pci_e_series_class, NULL, major, NULL,
+			       BOARD_SERIES_NAME "_%i", i );
+#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 26 )
+		device_create( pci_e_series_class, NULL, major,
+			       BOARD_SERIES_NAME "_%i", i );
+#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 15 )
 		class_device_create( pci_e_series_class, NULL, major, NULL,
 				     BOARD_SERIES_NAME "_%i", i );
+#else
+		class_device_create( pci_e_series_class, NULL, major,
+				     BOARD_SERIES_NAME "_%i", i );
+#endif
+#endif
+#endif
+
 #endif
 
 	printk( KERN_INFO BOARD_SERIES_NAME ": Module successfully installed\n"
@@ -504,11 +520,16 @@ static void __exit pci_e_series_cleanup( void )
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
 	int i;
 
 	for ( i = 0; i <board_count; i++ )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
+		device_destroy( pci_e_series_class, major );
+#else
 		class_device_destroy( pci_e_series_class, major );
+#endif
+
         class_destroy( pci_e_series_class );
 #endif
 

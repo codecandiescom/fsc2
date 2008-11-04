@@ -63,7 +63,11 @@
 
 #include <linux/pci.h>
 #include <linux/stddef.h>             /* for definition of NULL              */
-#include <asm/semaphore.h>            /* for definition of struct semaphore  */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 26 )
+#include <linux/semaphore.h>
+#else
+#include <asm/semaphore.h>
+#endif
 #include <linux/init.h>
 #include <linux/wait.h>
 #include <linux/delay.h>

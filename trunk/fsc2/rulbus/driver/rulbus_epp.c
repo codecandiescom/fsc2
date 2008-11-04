@@ -61,7 +61,11 @@
 #include <linux/init.h>
 #include <linux/wait.h>
 #include <linux/delay.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 26 )
+#include <linux/semaphore.h>
+#else
 #include <asm/semaphore.h>
+#endif
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 #include <asm/io.h>
@@ -202,7 +206,7 @@ static struct rulbus_device {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 			 { },
 			 ( dev_t ) 0,
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
 			 NULL,
 #endif
 #endif
@@ -429,7 +433,7 @@ static int __init rulbus_init( void )
 				return -EIO;
 		}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
 		rulbus.rb_class = class_create( THIS_MODULE, RULBUS_EPP_NAME );
 		if ( IS_ERR( rulbus.rb_class ) ) {
 				printk( KERN_ERR RULBUS_EPP_NAME ": Can't create a class for "
@@ -440,8 +444,23 @@ static int __init rulbus_init( void )
 				return -EIO;
 		}
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 27 )
+		device_create( rulbus.rb_class, NULL, rulbus.dev_no,
+					   NULL, RULBUS_EPP_NAME );
+#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 26 )
+		device_create( rulbus.rb_class, NULL, rulbus.dev_no, RULBUS_EPP_NAME );
+#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 15 )
 		class_device_create( rulbus.rb_class, NULL, rulbus.dev_no,
 							 NULL, RULBUS_EPP_NAME );
+#else
+		class_device_create( rulbus.rb_class, rulbus.dev_no,
+							 NULL, RULBUS_EPP_NAME );
+#endif
+#endif
+#endif
+
 #endif
 
 #else
@@ -480,8 +499,12 @@ static void __exit rulbus_cleanup( void )
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 26 )
+		device_destroy( rulbus.rb_class, rulbus.dev_no );
+#else
 		class_device_destroy( rulbus.rb_class, rulbus.dev_no );
+#endif
 		class_destroy( rulbus.rb_class );
 #endif
 

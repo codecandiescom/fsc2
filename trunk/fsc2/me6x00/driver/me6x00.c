@@ -128,7 +128,7 @@ static struct pci_driver me6x00_pci_driver = {
 static dev_t dev_no;
 static struct cdev ch_dev;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
 static struct class *me6x00_class;
 #endif
 
@@ -482,7 +482,7 @@ int init_module( void )
 		return -EIO;
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
 	me6x00_class = class_create( THIS_MODULE, "me6x00" );
 	if ( IS_ERR( me6x00_class ) ) {
 		printk( KERN_ERR "ME6X00: Can't create a class for "
@@ -494,8 +494,23 @@ int init_module( void )
 	}
 
 	for ( i = 0; i < me6x00_board_count; i++ )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 27 )
+		device_create( me6x00_class, NULL, major, NULL,
+			       "me6x00_%i", i );
+#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 26 )
+		device_create( me6x00_class, NULL, major, "me6x00_%i", i );
+#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 15 )
 		class_device_create( me6x00_class, NULL, major, NULL,
 				     "me6x00_%i", i );
+#else
+		class_device_create( me6x00_class, major, NULL,
+				     "me6x00_%i", i );
+#endif
+#endif
+#endif
+
 #endif
 
 #else
@@ -553,11 +568,16 @@ void cleanup_module( void )
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
 	int i;
 
 	for ( i = 0; i < me6x00_board_count; i++ )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 26 )
+                device_destroy( me6x00_class, major );
+#else
 		class_device_destroy( me6x00_class, major );
+#endif
+
         class_destroy( me6x00_class );
 #endif
 

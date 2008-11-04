@@ -71,7 +71,7 @@
 #endif
 
 
-#define PORT unsigned int
+#define PORT unsigned long
 
 
 #define A 0
@@ -90,9 +90,9 @@ typedef struct Registers Registers;
 typedef struct State State;
 
 struct Registers {
-	unsigned char *port[ 2 ][ 3 ];
-	unsigned char *control[ 2 ];
-	unsigned char *counter[ 3 ];
+	unsigned long port[ 2 ][ 3 ];
+	unsigned long control[ 2 ];
+	unsigned long counter[ 3 ];
 };
 
 
@@ -105,7 +105,7 @@ struct State {
 
 struct Board {
 	int major;
-	unsigned char *base;
+	unsigned long base;
 	int in_use;
 	uid_t owner;
 	struct semaphore open_mutex;
@@ -173,10 +173,10 @@ static void witio_48_16_8_dio_in( WITIO_48_DATA * data );
 
 static void witio_48_set_crtl( int dio );
 
-static void witio_48_board_out( unsigned char * addr,
-				unsigned char   byte );
+static void witio_48_board_out( unsigned long addr,
+				unsigned char byte );
 
-static unsigned char witio_48_board_in( unsigned char * addr );
+static unsigned char witio_48_board_in( unsigned long addr );
 
 
 /* Global variables of the module */
@@ -201,7 +201,7 @@ static struct file_operations witio_48_file_ops = {
 static dev_t dev_no;
 struct cdev ch_dev;
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
 static struct class *witio_48_class;
 #endif
 
@@ -255,7 +255,7 @@ static int __init witio_48_init( void )
 		goto device_registration_failure;
 	}
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
 	witio_48_class = class_create( THIS_MODULE, "witio_48" );
 
 	if ( IS_ERR( witio_48_class ) ) {
@@ -266,7 +266,20 @@ static int __init witio_48_init( void )
 		return -EIO;
 	}
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 27 )
+	device_create( witio_48_class, NULL, major, NULL, "witio_48" );
+#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 26 )
+	device_create( witio_48_class, NULL, major, "witio_48" );
+#else
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 15 )
 	class_device_create( witio_48_class, NULL, major, NULL, "witio_48" );
+#else
+	class_device_create( witio_48_class, major, NULL, "witio_48" );
+#endif
+#endif
+#endif
+
 #endif
 
 #else
@@ -283,7 +296,7 @@ static int __init witio_48_init( void )
 
 	/* Now try to get the IO-port region required for the board */
 
-	board.base = ( unsigned char * ) base;
+	board.base = base;
 
 	if ( witio_48_get_ioport( ) )
 		goto ioport_failure;
@@ -320,7 +333,7 @@ static int __init witio_48_init( void )
 	printk( KERN_INFO "witio_48: Module succesfully installed.\n" );
 	printk( KERN_INFO "witio_48: Major = %d\n", board.major );
 	printk( KERN_INFO "witio_48: Base = 0x%lx\n",
-		( unsigned long ) board.base );
+		board.base );
 
 	return 0;
 
@@ -345,12 +358,16 @@ static void __exit witio_48_cleanup( void )
 {
 	/* Release IO-port region reserved for the board */
 
-	release_region( ( unsigned long ) board.base, 0x0BUL );
+	release_region( board.base, 0x0BUL );
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 14 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 13 )
+#if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 26 )
+	device_destroy( witio_48_class, dev_no );
+#else
 	class_device_destroy( witio_48_class, dev_no );
+#endif
         class_destroy( witio_48_class );
 #endif
 
@@ -375,7 +392,7 @@ static void __exit witio_48_cleanup( void )
 
 static int witio_48_get_ioport( void )
 {
-	unsigned char *base;
+	unsigned long base;
 	int i, j;
 
 
@@ -383,14 +400,14 @@ static int witio_48_get_ioport( void )
 	   between (and including) 0x200 and 0x300. Check if the requested
 	   board IO-port addrress satisfies this condition. */
 
-	for ( base = ( unsigned char * ) 0x200;
-	      base <= ( unsigned char * ) 0x300; base += 0x10 )
+	for ( base = 0x200;
+	      base <= 0x300; base += 0x10 )
 		if ( base == board.base )
 			break;
 
-	if ( base > ( unsigned char * ) 0x300 ) {
-		printk( KERN_ERR "witio_48: Invalid board base address: %p\n",
-			board.base );
+	if ( base > 0x300 ) {
+		printk( KERN_ERR "witio_48: Invalid board base address: "
+			"0x%lx\n", board.base );
 		return 1;
 	}
 
@@ -398,23 +415,22 @@ static int witio_48_get_ioport( void )
 	   11 bytes */
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION( 2, 6, 0 )
-	if ( request_region( ( unsigned long ) base, 0x0BUL,
-			     "witio_48" ) == NULL ) {
+	if ( request_region( base, 0x0BUL, "witio_48" ) == NULL ) {
 		printk( KERN_ERR "witio_48: Can't obtain region at boards "
-			"base address: %p\n", board.base );
+			"base address: 0x%lx\n", board.base );
 		return 1;
 	}
 #else
-	if ( check_region( ( unsigned long ) base, 0x0BUL ) < 0 ) {
+	if ( check_region( base, 0x0BUL ) < 0 ) {
 		printk( KERN_ERR "witio_48: Can't obtain region at boards "
-			"base address: %p\n", board.base );
+			"base address: 0x%lx\n", board.base );
 		return 1;
 	}
 
 	/* Now lock this region - this always succeeds when the check
            succeeded */
 
-	request_region( ( unsigned long ) base, 0x0BUL, "witio_48" );
+	request_region( base, 0x0BUL, "witio_48" );
 #endif
 
 	/* Finally set up the pointers to the registers on the board */
@@ -1077,10 +1093,10 @@ static void witio_48_set_crtl( int dio )
  * Outputs one byte to the register addressed by the first argument
  *------------------------------------------------------------------*/
 
-static void witio_48_board_out( unsigned char * addr,
-				unsigned char   byte )
+static void witio_48_board_out( unsigned long addr,
+				unsigned char byte )
 {
-	outb_p( byte, ( PORT ) addr );
+	outb_p( byte, addr );
 }
 
 
@@ -1088,9 +1104,9 @@ static void witio_48_board_out( unsigned char * addr,
  * Inputs one byte from the register addressed by the argument
  *-------------------------------------------------------------*/
 
-static unsigned char witio_48_board_in( unsigned char * addr )
+static unsigned char witio_48_board_in( unsigned long addr )
 {
-	return inb_p( ( PORT ) addr );
+	return inb_p( addr );
 }
 
 
