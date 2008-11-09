@@ -91,13 +91,13 @@ epr_modulation_name( Var_T * v  UNUSED_ARG )
 
 /*-------------------------------------------------------*
  * Function for calculating or setting the field/voltage
- * ratio for a certain frequency for a resonator
+ * ratio for a certain frequency for a calibration
  *-------------------------------------------------------*/
 
 Var_T *
 epr_modulation_ratio( Var_T * v )
 {
-	Resonator_T *res;
+	Calibration_T *res;
 	double freq;
     double ratio;
     FREQ_ENTRY_T *fe;
@@ -199,15 +199,15 @@ epr_modulation_ratio( Var_T * v )
 }
 
 
-/*-----------------------------------------------*
+/*-------------------------------------------------*
  * Function for calculating or setting the phase
- * ratio for a certain frequency for a resonator
- *-----------------------------------------------*/
+ * ratio for a certain frequency for a calibration
+ *-------------------------------------------------*/
 
 Var_T *
 epr_modulation_phase( Var_T * v )
 {
-	Resonator_T *res;
+	Calibration_T *res;
 	double freq;
     double phase;
     FREQ_ENTRY_T *fe;
@@ -266,7 +266,7 @@ epr_modulation_phase( Var_T * v )
 Var_T *
 epr_modulation_has_phase( Var_T * v )
 {
-	Resonator_T *res;
+	Calibration_T *res;
 	double freq;
     FREQ_ENTRY_T *fe;
 
@@ -288,20 +288,20 @@ epr_modulation_has_phase( Var_T * v )
 }
 
        
-/*---------------------------------------------*
- * Function for creating a new resonator entry
- *---------------------------------------------*/
+/*-----------------------------------------------*
+ * Function for creating a new calibration entry
+ *-----------------------------------------------*/
 
 Var_T *
-epr_modulation_add_resonator( Var_T * v )
+epr_modulation_add_calibration( Var_T * v )
 {
 	size_t i;
-	Resonator_T *res = NULL;
+	Calibration_T *res = NULL;
 
 
 	if ( v == NULL )
 	{
-		print( FATAL, "Missing resonator name.\n" );
+		print( FATAL, "Missing calibration name.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -313,20 +313,20 @@ epr_modulation_add_resonator( Var_T * v )
 
     if ( *v->val.sptr == '\0' )
     {
-        print( FATAL, "Invalid resonator name.\n" );
+        print( FATAL, "Invalid calibration name.\n" );
         THROW( EXCEPTION );
     }
 
 	for ( i = 0; i < epr_mod.count; i++ )
-		if ( ! strcmp( epr_mod.resonators[ i ].name, v->val.sptr ) )
+		if ( ! strcmp( epr_mod.calibrations[ i ].name, v->val.sptr ) )
 		{
-			res = epr_mod.resonators + i;
+			res = epr_mod.calibrations + i;
 			break;
 		}
 
 	if ( res != NULL )
 	{
-		print( FATAL, "Resonator entry with name '%s' already exists.\n",
+		print( FATAL, "Calibration entry with name '%s' already exists.\n",
                v->val.sptr );
 		THROW( EXCEPTION );
 	}
@@ -340,10 +340,10 @@ epr_modulation_add_resonator( Var_T * v )
         res->fe = NULL;
 		res->count = 0;
 
-		epr_mod.resonators =
-			realloc( epr_mod.resonators,
-					 ( epr_mod.count + 1 ) * sizeof *epr_mod.resonators );
-		epr_mod.resonators[ epr_mod.count++ ] = *res;
+		epr_mod.calibrations =
+			realloc( epr_mod.calibrations,
+					 ( epr_mod.count + 1 ) * sizeof *epr_mod.calibrations );
+		epr_mod.calibrations[ epr_mod.count++ ] = *res;
 		TRY_SUCCESS;
 	}
 	CATCH ( OUT_OF_MEMORY_EXCEPTION )
@@ -361,19 +361,19 @@ epr_modulation_add_resonator( Var_T * v )
 }
 
 
-/*--------------------------------------------------*
- * Function for deleting a complete resonator entry
- *--------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function for deleting a complete calibration entry
+ *----------------------------------------------------*/
 
 Var_T *
-epr_modulation_delete_resonator( Var_T * v )
+epr_modulation_delete_calibration( Var_T * v )
 {
-	Resonator_T *res = epr_mod_find( v );
+	Calibration_T *res = epr_mod_find( v );
 	size_t i;
 
 
 	for ( i = 0; i < epr_mod.count; i++ )
-		if ( epr_mod.resonators + i == res )
+		if ( epr_mod.calibrations + i == res )
 			break;
 
 	fsc2_assert( i < epr_mod.count );
@@ -382,37 +382,37 @@ epr_modulation_delete_resonator( Var_T * v )
 	T_free( res->name );
 
 	if ( i < epr_mod.count - 1 )
-		memmove( epr_mod.resonators + i, epr_mod.resonators + i + 1,
-				 ( epr_mod.count - i - 1 ) * sizeof *epr_mod.resonators );
+		memmove( epr_mod.calibrations + i, epr_mod.calibrations + i + 1,
+				 ( epr_mod.count - i - 1 ) * sizeof *epr_mod.calibrations );
 
     if ( --epr_mod.count > 0 )
-        epr_mod.resonators = 
-            T_realloc( epr_mod.resonators,
-                       epr_mod.count * sizeof *epr_mod.resonators );
+        epr_mod.calibrations = 
+            T_realloc( epr_mod.calibrations,
+                       epr_mod.count * sizeof *epr_mod.calibrations );
     else
-        epr_mod.resonators = T_free( epr_mod.resonators );
+        epr_mod.calibrations = T_free( epr_mod.calibrations );
 
 	return vars_push( INT_VAR, 1L );
 }
 
 
-/*--------------------------------------------------*
- * Function returns the number of resonator entries
- *--------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function returns the number of calibration entries
+ *----------------------------------------------------*/
 
 Var_T *
-epr_modulation_resonator_count( Var_T * v  UNUSED_ARG )
+epr_modulation_calibration_count( Var_T * v  UNUSED_ARG )
 {
     return vars_push( INT_VAR, ( long ) epr_mod.count );
 }
 
 
-/*--------------------------------------------*
- * Function to set or query a resonators name
- *--------------------------------------------*/
+/*----------------------------------------------*
+ * Function to set or query a calibrations name
+ *----------------------------------------------*/
 
 Var_T *
-epr_modulation_resonator_name( Var_T * v )
+epr_modulation_calibration_name( Var_T * v )
 {
     long idx;
     char *name;
@@ -420,49 +420,49 @@ epr_modulation_resonator_name( Var_T * v )
 
     if ( v == NULL )
     {
-        print( FATAL, "Missing resonator index.\n" );
+        print( FATAL, "Missing calibration index.\n" );
         THROW( EXCEPTION );
     }
 
-    idx = get_long( v, "resonator index" ) - 1;
+    idx = get_long( v, "calibration index" ) - 1;
 
     if ( idx < 0 || idx >= ( long ) epr_mod.count )
     {
-        print( FATAL, "Invalid resonator index." );
+        print( FATAL, "Invalid calibration index." );
         THROW( EXCEPTION );
     }
 
     if ( ( v = vars_pop( v ) ) == NULL )
-        return vars_push( STR_VAR, epr_mod.resonators[ idx ].name );
+        return vars_push( STR_VAR, epr_mod.calibrations[ idx ].name );
 
     if ( v->type != STR_VAR )
     {
-        print( FATAL, "Invalid argument, resonator name must be a string "
+        print( FATAL, "Invalid argument, calibration name must be a string "
                "variable.\n" );
         THROW( EXCEPTION );
     }
 
     if ( *v->val.sptr == '\0' )
     {
-        print( FATAL, "Invalid resonator name.\n" );
+        print( FATAL, "Invalid calibration name.\n" );
         THROW( EXCEPTION );
     }
 
     name = T_strdup( v->val.sptr );
 
     return vars_push ( STR_VAR,
-                       epr_mod.resonators[ idx ].name = name );
+                       epr_mod.calibrations[ idx ].name = name );
 }
 
 
-/*------------------------------------------------------------------*
- * Function to set or query if interpolation is set for a resonator
- *------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function to set or query if interpolation is set for a calibration
+ *--------------------------------------------------------------------*/
 
 Var_T *
-epr_modulation_resonator_interpolate( Var_T * v )
+epr_modulation_calibration_interpolate( Var_T * v )
 {
-	Resonator_T *res = epr_mod_find( v );
+	Calibration_T *res = epr_mod_find( v );
 
 
     if ( ( v = vars_pop( v ) ) != NULL )
@@ -475,14 +475,14 @@ epr_modulation_resonator_interpolate( Var_T * v )
 }
 
 
-/*----------------------------------------------------------------*
- * Function to query if interpolation can be done for a resonator
- *----------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function to query if interpolation can be done for a calibration
+ *------------------------------------------------------------------*/
 
 Var_T *
-epr_modulation_resonator_can_interpolate( Var_T * v  UNUSED_ARG )
+epr_modulation_calibration_can_interpolate( Var_T * v  UNUSED_ARG )
 {
-	Resonator_T *res = epr_mod_find( v );
+	Calibration_T *res = epr_mod_find( v );
 
 
     return vars_push( INT_VAR,
@@ -492,14 +492,14 @@ epr_modulation_resonator_can_interpolate( Var_T * v  UNUSED_ARG )
 }    
 
 
-/*------------------------------------------------------------------*
- * Function to set or query if extrapolation is set for a resonator
- *------------------------------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Function to set or query if extrapolation is set for a calibration
+ *--------------------------------------------------------------------*/
 
 Var_T *
-epr_modulation_resonator_extrapolate( Var_T * v )
+epr_modulation_calibration_extrapolate( Var_T * v )
 {
-	Resonator_T *res = epr_mod_find( v );
+	Calibration_T *res = epr_mod_find( v );
 
 
     if ( ( v = vars_pop( v ) ) != NULL )
@@ -512,14 +512,14 @@ epr_modulation_resonator_extrapolate( Var_T * v )
 }
 
 
-/*----------------------------------------------------------------*
- * Function to query if extrapolation can be done for a resonator
- *----------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function to query if extrapolation can be done for a calibration
+ *------------------------------------------------------------------*/
 
 Var_T *
-epr_modulation_resonator_can_extrapolate( Var_T * v  UNUSED_ARG )
+epr_modulation_calibration_can_extrapolate( Var_T * v  UNUSED_ARG )
 {
-	Resonator_T *res = epr_mod_find( v );
+	Calibration_T *res = epr_mod_find( v );
 
 
     return vars_push( INT_VAR,
@@ -529,14 +529,14 @@ epr_modulation_resonator_can_extrapolate( Var_T * v  UNUSED_ARG )
 }    
 
 
-/*---------------------------------------------------------*
- * Function for query of number of entries for a resonator
- *---------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function for query of number of entries for a calibration
+ *-----------------------------------------------------------*/
 
 Var_T *
-epr_modulation_resonator_frequencies( Var_T * v )
+epr_modulation_calibration_frequencies( Var_T * v )
 {
-	Resonator_T *res = epr_mod_find( v );
+	Calibration_T *res = epr_mod_find( v );
     double *freq = NULL;
     size_t i;
 

@@ -149,7 +149,8 @@
 
 
 /* Include a file with model dependend settings (it needs to be included
- * here since it relies on some of the above definitions */
+ * here since it relies on some of the above definitions. This only is to
+ * be included after the configuration file for the device! */
 
 #include "lecroy_wr_models.h"
 

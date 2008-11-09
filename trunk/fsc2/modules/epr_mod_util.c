@@ -25,11 +25,11 @@
 #include "epr_mod.h"
 
 
-/*-----------------------------------*
- * Tries to find a resonator by name
- *-----------------------------------*/
+/*-------------------------------------*
+ * Tries to find a calibration by name
+ *-------------------------------------*/
 
-Resonator_T *
+Calibration_T *
 epr_mod_find( Var_T * v )
 {
 	size_t i;
@@ -37,7 +37,7 @@ epr_mod_find( Var_T * v )
 
 	if ( v == NULL )
 	{
-		print( FATAL, "Missing resonator name.\n" );
+		print( FATAL, "Missing calibration name.\n" );
 		THROW( EXCEPTION );
 	}
 
@@ -49,33 +49,33 @@ epr_mod_find( Var_T * v )
 
     if ( *v->val.sptr == '\0' )
     {
-        print( FATAL, "Invalid resonator name.\n" );
+        print( FATAL, "Invalid calibration name.\n" );
         THROW( EXCEPTION );
     }
 
 	for ( i = 0; i < epr_mod.count; i++ )
-		if ( ! strcmp( epr_mod.resonators[ i ].name, v->val.sptr ) )
+		if ( ! strcmp( epr_mod.calibrations[ i ].name, v->val.sptr ) )
 			break;
 
 	if ( i == epr_mod.count )
 	{
-		print( FATAL, "Resonator entry with name '%s' doesn't exist.\n",
+		print( FATAL, "Calibration entry with name '%s' doesn't exist.\n",
                v->val.sptr );
 		THROW( EXCEPTION );
 	}
 
-	return epr_mod.resonators + i;
+	return epr_mod.calibrations + i;
 }
 
 
-/*-------------------------------------------------*
- * Tries to find a frequency entry for a resonator
- *-------------------------------------------------*/
+/*---------------------------------------------------*
+ * Tries to find a frequency entry for a calibration
+ *---------------------------------------------------*/
 
 
 FREQ_ENTRY_T *
-epr_mod_find_fe( Resonator_T * res,
-                 double        freq )
+epr_mod_find_fe( Calibration_T * res,
+                 double          freq )
 {
     size_t i;
 
@@ -97,9 +97,9 @@ epr_mod_find_fe( Resonator_T * res,
 }
 
 
-/*-------------------------------*
- * Save resonator data to a file
- *-------------------------------*/
+/*---------------------------------*
+ * Save calibration data to a file
+ *---------------------------------*/
 
 void
 epr_mod_save( void )
@@ -126,9 +126,9 @@ epr_mod_save( void )
 
     for ( i = 0; i < epr_mod.count; i++ )
     {
-		Resonator_T *res = epr_mod.resonators + i;
+		Calibration_T *res = epr_mod.calibrations + i;
 
-        fprintf( fp, "\nresonator: \"%s\"\n"
+        fprintf( fp, "\ncalibration: \"%s\"\n"
 				 "  interpolate: %s\n"
 				 "  extrapolate: %s\n",
 				 res->name, res->interpolate ? "yes" : "no",
@@ -161,18 +161,18 @@ epr_mod_clear( EPR_MOD * em )
     if ( em->state_file )
         em->state_file = T_free( em->state_file );
 
-    if ( em->resonators == NULL )
+    if ( em->calibrations == NULL )
         return;
 
     for ( i = 0; i < em->count; i++ )
     {
-        if ( em->resonators[ i ].name )
-            T_free( em->resonators[ i ].name );
-        if ( em->resonators[ i ].fe )
-            T_free( em->resonators[ i ].fe );
+        if ( em->calibrations[ i ].name )
+            T_free( em->calibrations[ i ].name );
+        if ( em->calibrations[ i ].fe )
+            T_free( em->calibrations[ i ].fe );
     }
 
-    em->resonators = T_free( em->resonators );
+    em->calibrations = T_free( em->calibrations );
     em->count = 0;
 }
 
@@ -196,9 +196,9 @@ epr_mod_copy_state( EPR_MOD * to,
     if ( from->count == 0 )
         return;
 
-    to->resonators = T_malloc( from->count * sizeof *to->resonators );
-    memcpy( to->resonators, from->resonators,
-            from->count * sizeof *to->resonators );
+    to->calibrations = T_malloc( from->count * sizeof *to->calibrations );
+    memcpy( to->calibrations, from->calibrations,
+            from->count * sizeof *to->calibrations );
 
     /* This may look redundant since the values get reset in the next
        step but it's necessary to allow deallocation of memory if in
@@ -206,23 +206,25 @@ epr_mod_copy_state( EPR_MOD * to,
 
     for ( i = 0; i < from->count; i++ )
     {
-        to->resonators[ i ].name = NULL;
-        to->resonators[ i ].fe = NULL;
-        to->resonators[ i ].count = 0;
+        to->calibrations[ i ].name = NULL;
+        to->calibrations[ i ].fe = NULL;
+        to->calibrations[ i ].count = 0;
     }
 
     to->count = from->count;
 
     for ( i = 0; i < from->count; i++ )
     {
-        to->resonators[ i ].name = T_strdup( from->resonators[ i ].name );
-        if ( from->resonators[ i ].count == 0 )
+        to->calibrations[ i ].name = T_strdup( from->calibrations[ i ].name );
+        if ( from->calibrations[ i ].count == 0 )
             continue;
-        to->resonators[ i ].fe = T_malloc(    from->resonators[ i ].count
-                                            * sizeof *to->resonators[ i ].fe );
-        memcpy( to->resonators[ i ].fe, from->resonators[ i ].fe,
-                from->resonators[ i ].count * sizeof * to->resonators[ i ].fe );
-        to->resonators[ i ].count = from->resonators[ i ].count;
+        to->calibrations[ i ].fe =
+            T_malloc(    from->calibrations[ i ].count
+                      * sizeof *to->calibrations[ i ].fe );
+        memcpy( to->calibrations[ i ].fe, from->calibrations[ i ].fe,
+                  from->calibrations[ i ].count
+                * sizeof * to->calibrations[ i ].fe );
+        to->calibrations[ i ].count = from->calibrations[ i ].count;
     }
 }
 
@@ -236,7 +238,7 @@ epr_mod_copy_state( EPR_MOD * to,
  *------------------------------------------------------------*/
 
 void
-epr_mod_recalc( Resonator_T * res )
+epr_mod_recalc( Calibration_T * res )
 {
     double ifsum = 0.0,
            if2sum = 0.0,
@@ -278,9 +280,9 @@ epr_mod_recalc( Resonator_T * res )
 }
 
 
-/*----------------------------------------------------------*
- * Comparison function for frequency entries of a resonator
- *----------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Comparison function for frequency entries of a calibration
+ *------------------------------------------------------------*/
 
 int
 epr_mod_comp( const void * a,

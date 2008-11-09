@@ -87,7 +87,7 @@ lockin_ref_freq( MODFREQ kHz );
 === endif
 === if defined MODAMP
 ===   if RESONATOR ne "Unspecified"
-lockin_ref_level( MODAMP G / epr_modulation_ratio( "RESONATOR", lockin_ref_freq( ) ) );
+lockin_ref_level( MODAMP G / epr_modulation_ratio( "RESONATOR" " (SR830)", lockin_ref_freq( ) ) );
 ===   else
 lockin_ref_level( MODAMP V );
 ===   endif
@@ -285,7 +285,7 @@ FOR K = 1 : 2 {
 	       Num_Points, Scans_Done, avg_freq / 1 GHz,
 		   lockin_sensitivity( ) / 1 mV, tc / 1 ms, factor,
 === if RESONATOR ne "Unspecified"
-           lockin_ref_level( ) * epr_modulation_ratio( "RESONATOR", lockin_ref_freq( ) ),
+           lockin_ref_level( ) * epr_modulation_ratio( "RESONATOR" " (SR830)", lockin_ref_freq( ) ),
 === endif
 	       lockin_ref_level( ), lockin_ref_freq( ) / 1kHz, lockin_phase( ) );
 }

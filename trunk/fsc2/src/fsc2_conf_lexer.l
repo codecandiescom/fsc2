@@ -32,6 +32,7 @@
 
 %{
 
+#include "fsc2.h"
 #include "fsc2_conf_parser.h"
 
 

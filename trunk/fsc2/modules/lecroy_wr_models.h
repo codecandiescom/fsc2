@@ -72,7 +72,10 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE         100000L     /* 100 kpts/channel */
-#endif 
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
+#endif
 
 
 #if defined LT322
@@ -85,6 +88,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             6
 #define LECROY_WR_MAX_MEMORY_SIZE         100000L     /* 100 kpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif 
 
 
@@ -98,6 +104,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             6
 #define LECROY_WR_MAX_MEMORY_SIZE         250000L     /* 250 kpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif 
 
 
@@ -111,6 +120,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             6
 #define LECROY_WR_MAX_MEMORY_SIZE        1000000L     /* 1 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif 
 
 
@@ -124,6 +136,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE         250000L     /* 250 kpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif 
 
 
@@ -137,6 +152,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE        1000000L     /* 1 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif 
 
 
@@ -150,6 +168,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE         500000L     /* 500 kpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif 
 
 
@@ -163,6 +184,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE        2000000L     /* 2 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif 
 
 
@@ -178,6 +202,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE         100000L     /* 100 kpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -191,6 +218,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE         100000L     /* 100 kpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -204,6 +234,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE        1000000L     /* 1 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -217,6 +250,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE         250000L     /* 250 kpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -230,6 +266,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE        1000000L     /* 1 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -243,6 +282,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE        2000000L     /* 2 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -256,6 +298,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE         250000L     /* 250 kpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -269,6 +314,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE        1000000L     /* 1 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -282,6 +330,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE         250000L     /* 250 kpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -295,6 +346,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE        1000000L     /* 1 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -308,6 +362,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE        4000000L     /* 4 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -321,6 +378,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE         250000L     /* 250 kpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -334,6 +394,9 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/div */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE        1000000L     /* 1 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
 #endif
 
 
@@ -347,6 +410,89 @@
 #define LECROY_WR_MAX_TIMEBASE               1000     /* 1 ks/dev */
 #define LECROY_WR_MAX_USED_CHANNELS             8
 #define LECROY_WR_MAX_MEMORY_SIZE        4000000L     /* 4 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES              4000
+#endif
+#endif
+
+
+#if defined _44Xi
+#define LECROY_WR_CH_MAX            LECROY_WR_CH4     /* 4 channels */
+#define LECROY_WR_NUM_TBAS                     31     /* # of timebases */    
+#define LECROY_WR_NUM_SS_TBAS                  31     /* # of SS timebases */ 
+#define LECROY_WR_NUM_RIS_TBAS                  4     /* # of RIS timebases */
+#define LECROY_WR_SS_SAMPLE_RATE             5000     /* 5000 MS/s */
+#define LECROY_WR_RIS_SAMPLE_RATE             200     /* 200 Gs/s */
+#define LECROY_WR_MAX_TIMEBASE                 10     /* 10 s/dev */
+#define LECROY_WR_MAX_USED_CHANNELS             8
+#define LECROY_WR_MAX_MEMORY_SIZE       12500000L     /* 12.5 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES           1000000
+#endif
+#endif
+
+
+#if defined _62Xi
+#define LECROY_WR_CH_MAX            LECROY_WR_CH2     /* 4 channels */
+#define LECROY_WR_NUM_TBAS                     31     /* # of timebases */    
+#define LECROY_WR_NUM_SS_TBAS                  31     /* # of SS timebases */ 
+#define LECROY_WR_NUM_RIS_TBAS                  4     /* # of RIS timebases */
+#define LECROY_WR_SS_SAMPLE_RATE             5000     /* 5000 MS/s */
+#define LECROY_WR_RIS_SAMPLE_RATE             200     /* 200 Gs/s */
+#define LECROY_WR_MAX_TIMEBASE                 10     /* 10 s/dev */
+#define LECROY_WR_MAX_USED_CHANNELS             8
+#define LECROY_WR_MAX_MEMORY_SIZE       12500000L     /* 12.5 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES           1000000
+#endif
+#endif
+
+
+#if defined _64Xi
+#define LECROY_WR_CH_MAX            LECROY_WR_CH4     /* 4 channels */
+#define LECROY_WR_NUM_TBAS                     31     /* # of timebases */    
+#define LECROY_WR_NUM_SS_TBAS                  31     /* # of SS timebases */ 
+#define LECROY_WR_NUM_RIS_TBAS                  4     /* # of RIS timebases */
+#define LECROY_WR_SS_SAMPLE_RATE             5000     /* 5000 MS/s */
+#define LECROY_WR_RIS_SAMPLE_RATE             200     /* 200 Gs/s */
+#define LECROY_WR_MAX_TIMEBASE                 10     /* 10 s/dev */
+#define LECROY_WR_MAX_USED_CHANNELS             8
+#define LECROY_WR_MAX_MEMORY_SIZE       12500000L     /* 12.5 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES           1000000
+#endif
+#endif
+
+
+#if defined _104Xi
+#define LECROY_WR_CH_MAX            LECROY_WR_CH4     /* 4 channels */
+#define LECROY_WR_NUM_TBAS                     31     /* # of timebases */    
+#define LECROY_WR_NUM_SS_TBAS                  31     /* # of SS timebases */ 
+#define LECROY_WR_NUM_RIS_TBAS                  4     /* # of RIS timebases */
+#define LECROY_WR_SS_SAMPLE_RATE             5000     /* 5000 MS/s */
+#define LECROY_WR_RIS_SAMPLE_RATE             200     /* 200 Gs/s */
+#define LECROY_WR_MAX_TIMEBASE                 10     /* 10 s/dev */
+#define LECROY_WR_MAX_USED_CHANNELS             8
+#define LECROY_WR_MAX_MEMORY_SIZE       12500000L     /* 12.5 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES           1000000
+#endif
+#endif
+
+
+#if defined _204Xi
+#define LECROY_WR_CH_MAX            LECROY_WR_CH4     /* 4 channels */
+#define LECROY_WR_NUM_TBAS                     31     /* # of timebases */    
+#define LECROY_WR_NUM_SS_TBAS                  31     /* # of SS timebases */ 
+#define LECROY_WR_NUM_RIS_TBAS                  4     /* # of RIS timebases */
+#define LECROY_WR_SS_SAMPLE_RATE             5000     /* 5000 MS/s */
+#define LECROY_WR_RIS_SAMPLE_RATE             200     /* 200 Gs/s */
+#define LECROY_WR_MAX_TIMEBASE                 10     /* 10 s/dev */
+#define LECROY_WR_MAX_USED_CHANNELS             8
+#define LECROY_WR_MAX_MEMORY_SIZE       12500000L     /* 12.5 Mpts/channel */
+#if ! defined LECROY_WR_MAX_AVERAGES
+#defined LECROY_WR_MAX_AVERAGES           1000000
+#endif
 #endif
 
 

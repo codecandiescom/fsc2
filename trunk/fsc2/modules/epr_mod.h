@@ -38,7 +38,7 @@ typedef struct {
 } FREQ_ENTRY_T;
 
 
-typedef struct Resonator {
+typedef struct Calibration {
 	char         * name;
 	size_t         count;               /* number of frequency entries */
 	FREQ_ENTRY_T * fe;
@@ -47,13 +47,13 @@ typedef struct Resonator {
 	double         r2;
 	double         slope;
 	double         offset;
-} Resonator_T;
+} Calibration_T;
 
 
 typedef struct EPR_MOD {
-	char        * state_file;
-	Resonator_T * resonators;
-	size_t        count;
+	char          * state_file;
+	Calibration_T * calibrations;
+	size_t          count;
 } EPR_MOD;
 
 
@@ -66,32 +66,32 @@ int epr_mod_test_hook( void );
 int epr_mod_exp_hook( void );
 int epr_mod_exit_hook( void );
 
-Var_T * epr_modulation_name(                      Var_T * /* v */ );
-Var_T * epr_modulation_ratio(                     Var_T * /* v */ );
-Var_T * epr_modulation_phase(                     Var_T * /* v */ );
-Var_T * epr_modulation_has_phase(                 Var_T * /* v */ );
-Var_T * epr_modulation_add_resonator(             Var_T * /* v */ );
-Var_T * epr_modulation_delete_resonator(          Var_T * /* v */ );
-Var_T * epr_modulation_resonator_count(           Var_T * /* v */ );
-Var_T * epr_modulation_resonator_name(            Var_T * /* v */ );
-Var_T * epr_modulation_resonator_interpolate(     Var_T * /* v */ );
-Var_T * epr_modulation_resonator_can_interpolate( Var_T * /* v */ );
-Var_T * epr_modulation_resonator_extrapolate(     Var_T * /* v */ );
-Var_T * epr_modulation_resonator_can_extrapolate( Var_T * /* v */ );
-Var_T * epr_modulation_resonator_frequencies(     Var_T * /* v */ );
-Var_T * epr_modulation_store(                     Var_T * /* v */ );
+Var_T * epr_modulation_name(                        Var_T * /* v */ );
+Var_T * epr_modulation_ratio(                       Var_T * /* v */ );
+Var_T * epr_modulation_phase(                       Var_T * /* v */ );
+Var_T * epr_modulation_has_phase(                   Var_T * /* v */ );
+Var_T * epr_modulation_add_calibration(             Var_T * /* v */ );
+Var_T * epr_modulation_delete_calibration(          Var_T * /* v */ );
+Var_T * epr_modulation_calibration_count(           Var_T * /* v */ );
+Var_T * epr_modulation_calibration_name(            Var_T * /* v */ );
+Var_T * epr_modulation_calibration_interpolate(     Var_T * /* v */ );
+Var_T * epr_modulation_calibration_can_interpolate( Var_T * /* v */ );
+Var_T * epr_modulation_calibration_extrapolate(     Var_T * /* v */ );
+Var_T * epr_modulation_calibration_can_extrapolate( Var_T * /* v */ );
+Var_T * epr_modulation_calibration_frequencies(     Var_T * /* v */ );
+Var_T * epr_modulation_store(                       Var_T * /* v */ );
 
 
 void epr_mod_read_state( void );
 
-Resonator_T * epr_mod_find( Var_T * /* v */ );
-FREQ_ENTRY_T * epr_mod_find_fe( Resonator_T * /* res */,
+Calibration_T * epr_mod_find( Var_T * /* v */ );
+FREQ_ENTRY_T * epr_mod_find_fe( Calibration_T * /* res */,
                                 double        /* freq */ );
 void epr_mod_save( void );
 void epr_mod_clear( EPR_MOD * /* em */ );
 void epr_mod_copy_state( EPR_MOD * /* to */,
                          EPR_MOD * /* from */ );
-void epr_mod_recalc( Resonator_T * /* res */ );
+void epr_mod_recalc( Calibration_T * /* res */ );
 int epr_mod_comp( const void * /* a */,
                   const void * /* b */ );
 

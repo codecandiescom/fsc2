@@ -25,6 +25,7 @@
 
 use strict;
 use Tk;
+use Tk::Balloon;
 
 my @version = split /\./, $Tk::VERSION;
 die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
@@ -70,6 +71,7 @@ my $mw = MainWindow->new( );
 $mw->title( "cw_epr" );
 
 my $mf = $mw->Frame( '-relief' => 'ridge', '-borderwidth' => '1m' );
+my $balloon = $mf->Balloon( );
 
 my $f1 = $mf->Frame( );
 my $f1_l1 = $f1->Label( '-text'           => 'Start current:',
@@ -80,6 +82,8 @@ my $f1_v = $f1->Entry( '-textvariable'    => \$start_current,
 					   '-validate'        => 'key',
 					   '-validatecommand' => \&current_check,
 					   '-relief'          => 'sunken' );
+$balloon->attach( $f1_v,
+				  -balloonmsg => 'Range: [ -7.5 : 7.5 ]' );
 my $f1_l2 = $f1->Label( '-text'           => 'A',
 						'-width'          => 5 );
 
@@ -98,6 +102,8 @@ my $f2_v = $f2->Entry( '-textvariable'   => \$end_current,
 					   '-validate'       => 'key',
 					   '-validatecommand'=> \&end_current_check,
 					   '-relief'         => 'sunken' );
+$balloon->attach( $f2_v,
+				  -balloonmsg => 'Range: [ -7.5 : 7.5 ]' );
 my $f2_l2 = $f2->Label( '-text'          => 'A',
 						'-width'         => 5 );
 
@@ -116,6 +122,8 @@ my $f4_v = $f4->Entry( '-textvariable'    => \$num_points,
 					   '-validate'        => 'key',
 					   '-validatecommand' => \&num_points_check,
 					   '-relief'          => 'sunken' );
+$balloon->attach( $f4_v,
+				  -balloonmsg => 'Range: [ 1 :  8191/16381 (SR810/SR830) ]' );
 my $f4_l2 = $f4->Label( '-text'           => '',
 						'-width'          => 5 );
 
@@ -252,6 +260,8 @@ my $f9_v = $f9->Entry( '-textvariable'    => \$sleep_time,
 					   '-validate'        => 'key',
 					   '-validatecommand' => \&sleep_time_check,
 					   '-relief'          => 'sunken' );
+$balloon->attach( $f9_v,
+				  -balloonmsg => 'Range: [ 0 : +inf ] or leave empty' );
 my $f9_l2 = $f9->Label( '-text'           => 's',
 						'-width'          => 5 );
 

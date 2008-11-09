@@ -68,7 +68,7 @@ typedef struct FE_T  {
 } FE_T;
 
 
-typedef struct RES_T {
+typedef struct CAL_T {
     char   * name;
     size_t   count;
     FE_T   * fe;
@@ -76,14 +76,14 @@ typedef struct RES_T {
     bool     is_interpolate;
     bool     extrapolate;
     bool     is_extrapolate;
-} RES_T;
+} CAL_T;
 
 
-static RES_T res;
+static CAL_T cal;
 
 
-static int epr_mod_get_new_res( int tok );
-static int epr_mod_res_data( int tok );
+static int epr_mod_get_new_cal( int tok );
+static int epr_mod_cal_data( int tok );
 static int epr_mod_get_name( int tok );
 static int epr_mod_get_ip( int tok );
 static int epr_mod_get_ep( int tok );
@@ -96,7 +96,7 @@ static void epr_mod_state_file_err( int print_what );
 
 #define END_TOK    0
 #define YN_TOK     1
-#define RES_TOK    2
+#define CAL_TOK    2
 #define FREQ_TOK   3
 #define RATIO_TOK  4
 #define PHASE_TOK  5
@@ -125,7 +125,7 @@ EXPO     [EDed][+-]?{INT}
 FLOAT    [+-]?((([0-9]+"."[0-9]*)|([0-9]*"."[0-9]+)){EXPO}?)|({INT}{EXPO})
 D        ([+-]?{INT})|{FLOAT}
 
-RES      "resonator"[\t ]*":"
+CAL      "calibration"[\t ]*":"
 FREQ     "freq"[\t ]*":"
 RATIO    "ratio"[\t ]*":"
 PHASE    "phase"[\t ]*":"
@@ -211,7 +211,7 @@ NAME_VAL "\""[^\"]*"\""
                 return YN_TOK;
             }
 
-{RES}       return RES_TOK;
+{CAL}       return CAL_TOK;
 
 {RATIO}     return RATIO_TOK;
 
@@ -343,18 +343,18 @@ epr_mod_read_state( void )
 
     epr_mod_Lc = 1;
 
-    res. name = NULL;
-    res.count = 0;
-    res.fe = NULL;
-    res.interpolate = SET;
-    res.is_interpolate = UNSET;
-    res.extrapolate = UNSET;
-    res.is_extrapolate = UNSET;
+    cal. name = NULL;
+    cal.count = 0;
+    cal.fe = NULL;
+    cal.interpolate = SET;
+    cal.is_interpolate = UNSET;
+    cal.extrapolate = UNSET;
+    cal.is_extrapolate = UNSET;
     
     tok = epr_mod_lex( );
 
     while ( tok != END_TOK )
-        tok = epr_mod_get_new_res( tok );
+        tok = epr_mod_get_new_cal( tok );
 
     fclose( epr_mod_in );
 
@@ -366,68 +366,69 @@ epr_mod_read_state( void )
  *--------------------------------------------------------*/
 
 static int
-epr_mod_get_new_res( int tok )
+epr_mod_get_new_cal( int tok )
 {
     size_t i;
     size_t last;
 
 
-    if ( tok != RES_TOK )
+    if ( tok != CAL_TOK )
         epr_mod_state_file_err( 1 );
         
     tok = epr_mod_lex( );
 
-    if ( tok == RES_TOK || tok == END_TOK )
+    if ( tok == CAL_TOK || tok == END_TOK )
         epr_mod_state_file_err( 0 );
 
-    while ( tok != RES_TOK && tok != END_TOK )
-        tok = epr_mod_res_data( tok );
+    while ( tok != CAL_TOK && tok != END_TOK )
+        tok = epr_mod_cal_data( tok );
 
     TRY
     {
         last = epr_mod.count;
-        epr_mod.resonators =
-            T_realloc( epr_mod.resonators,
-                       ++epr_mod.count * sizeof *epr_mod.resonators );
-        epr_mod.resonators[ last ].name = res.name;
-        res.name = NULL;
-        epr_mod.resonators[ last ].interpolate = res.interpolate;
-        epr_mod.resonators[ last ].extrapolate = res.extrapolate;
-        epr_mod.resonators[ last ].fe = NULL;
-        epr_mod.resonators[ last ].count = res.count;
+        epr_mod.calibrations =
+            T_realloc( epr_mod.calibrations,
+                       ++epr_mod.count * sizeof *epr_mod.calibrations );
+        epr_mod.calibrations[ last ].name = cal.name;
+        cal.name = NULL;
+        epr_mod.calibrations[ last ].interpolate = cal.interpolate;
+        epr_mod.calibrations[ last ].extrapolate = cal.extrapolate;
+        epr_mod.calibrations[ last ].fe = NULL;
+        epr_mod.calibrations[ last ].count = cal.count;
 
-        if ( res.count > 0 )
+        if ( cal.count > 0 )
         {
-            epr_mod.resonators[ last ].fe = 
-                    T_malloc( res.count * sizeof *epr_mod.resonators[ 0 ].fe );
+            epr_mod.calibrations[ last ].fe = 
+                T_malloc(   cal.count
+                          * sizeof *epr_mod.calibrations[ 0 ].fe );
 
-            for ( i = 0; i < res.count; i++ )
+            for ( i = 0; i < cal.count; i++ )
             {
-                epr_mod.resonators[ last ].fe[ i ].freq  = res.fe[ i ].freq;
-                epr_mod.resonators[ last ].fe[ i ].ratio = res.fe[ i ].ratio;
-                epr_mod.resonators[ last ].fe[ i ].phase = res.fe[ i ].phase;
-                epr_mod.resonators[ last ].fe[ i ].is_phase =
-                                                           res.fe[ i ].is_phase;
+                epr_mod.calibrations[ last ].fe[ i ].freq  = cal.fe[ i ].freq;
+                epr_mod.calibrations[ last ].fe[ i ].ratio = cal.fe[ i ].ratio;
+                epr_mod.calibrations[ last ].fe[ i ].phase = cal.fe[ i ].phase;
+                epr_mod.calibrations[ last ].fe[ i ].is_phase =
+                                                          cal.fe[ i ].is_phase;
             }
 
-            res.fe = T_free( res.fe );
-            res.count = 0;
+            cal.fe = T_free( cal.fe );
+            cal.count = 0;
         }
 
-        if ( epr_mod.resonators[ last ].count > 2 )
-            epr_mod_recalc( epr_mod.resonators  + last );
+        if ( epr_mod.calibrations[ last ].count > 2 )
+            epr_mod_recalc( epr_mod.calibrations  + last );
         else
-            qsort( epr_mod.resonators[ last ].fe,
-                   epr_mod.resonators[ last ].count,
-                   sizeof *epr_mod.resonators[ last ].fe, epr_mod_comp );
+            qsort( epr_mod.calibrations[ last ].fe,
+                   epr_mod.calibrations[ last ].count,
+                   sizeof *epr_mod.calibrations[ last ].fe, epr_mod_comp );
 
         TRY_SUCCESS;
     }
     CATCH ( OUT_OF_MEMORY_EXCEPTION )
         epr_mod_state_file_err( 0 );
 
-    res.is_interpolate = 0;
-    res.is_extrapolate = 0;
+    cal.is_interpolate = 0;
+    cal.is_extrapolate = 0;
 
     return tok;
 }
@@ -437,9 +438,9 @@ epr_mod_get_new_res( int tok )
  *--------------------------------------------------------*/
 
 static int
-epr_mod_res_data( int tok )
+epr_mod_cal_data( int tok )
 {
-    while ( tok != RES_TOK && tok != END_TOK )
+    while ( tok != CAL_TOK && tok != END_TOK )
         switch ( tok )
         {
             case NAME_TOK :
@@ -462,7 +463,7 @@ epr_mod_res_data( int tok )
                 epr_mod_state_file_err( 1 );
         }
 
-    if ( res.name == NULL )
+    if ( cal.name == NULL )
     {
         print( FATAL, "Missing name for entry detected in state file '%s' at "
                "line %d.\n", epr_mod.state_file, epr_mod_Lc );
@@ -501,11 +502,11 @@ epr_mod_get_name( int tok )
         epr_mod_state_file_err( 0 );
     }
 
-    if ( res.name == NULL )
-        res.name = name;
+    if ( cal.name == NULL )
+        cal.name = name;
     else
     {
-        print( SEVERE, "Resonator name defined more than once in state file "
+        print( SEVERE, "Calibration name defined more than once in state file "
                "'%s' at line %d, keeping first definition.\n",
                epr_mod.state_file, epr_mod_Lc );
         T_free( name );
@@ -524,7 +525,7 @@ epr_mod_get_ip( int tok )
     if ( tok != IP_TOK )
         epr_mod_state_file_err( 3 );
 
-    if ( res.is_interpolate )
+    if ( cal.is_interpolate )
         print( SEVERE, "Interpolation setting found more than once in state "
                "file '%s' at line %d, keeping first definition.\n",
                epr_mod.state_file, epr_mod_Lc );
@@ -532,10 +533,10 @@ epr_mod_get_ip( int tok )
     if ( ( tok = epr_mod_lex( ) ) != YN_TOK )
         epr_mod_state_file_err( 1 );
 
-    if ( ! res.is_interpolate )
+    if ( ! cal.is_interpolate )
     {
-        res.is_interpolate = SET;
-        res.interpolate = ival;
+        cal.is_interpolate = SET;
+        cal.interpolate    = ival;
     }
 
     return epr_mod_lex( );
@@ -551,7 +552,7 @@ epr_mod_get_ep( int tok )
     if ( tok != EP_TOK )
         epr_mod_state_file_err( 3 );
 
-    if ( res.is_extrapolate )
+    if ( cal.is_extrapolate )
         print( SEVERE, "Extrapolation setting found more than once in state "
                "file '%s' at line %d, keeping first definition.\n",
                epr_mod.state_file, epr_mod_Lc );
@@ -559,10 +560,10 @@ epr_mod_get_ep( int tok )
     if ( ( tok = epr_mod_lex( ) ) != YN_TOK )
         epr_mod_state_file_err( 1 );
 
-    if ( ! res.is_extrapolate )
+    if ( ! cal.is_extrapolate )
     {
-        res.is_extrapolate = SET;
-        res.extrapolate = ival;
+        cal.is_extrapolate = SET;
+        cal.extrapolate    = ival;
     }
 
     return epr_mod_lex( );
@@ -575,17 +576,17 @@ epr_mod_get_ep( int tok )
 static int
 epr_mod_get_freq( int tok )
 {
-    size_t last = res.count;
+    size_t last = cal.count;
 
     if ( tok != FREQ_TOK )
         epr_mod_state_file_err( 3 );
 
     TRY
     {
-        res.fe = T_realloc( res.fe, ++res.count * sizeof *res.fe );
-        res.fe[ last ].is_freq = UNSET;
-        res.fe[ last ].is_ratio = UNSET;
-        res.fe[ last ].is_phase = UNSET;
+        cal.fe = T_realloc( cal.fe, ++cal.count * sizeof *cal.fe );
+        cal.fe[ last ].is_freq = UNSET;
+        cal.fe[ last ].is_ratio = UNSET;
+        cal.fe[ last ].is_phase = UNSET;
         TRY_SUCCESS;
     }
     CATCH ( OUT_OF_MEMORY_EXCEPTION )
@@ -609,8 +610,8 @@ epr_mod_get_freq( int tok )
                 break;
 
             default :
-                if (    ! res.fe[ last ].is_freq
-                     || ! res.fe[ last ].is_ratio )
+                if (    ! cal.fe[ last ].is_freq
+                     || ! cal.fe[ last ].is_ratio )
                 {
                     print( FATAL, "Incomplete data for entry in state file "
                            "'%s' at line %d detected.\n",
@@ -631,14 +632,14 @@ epr_mod_get_freq( int tok )
 static int
 epr_mod_get_val( int tok )
 {
-    size_t last = res.count - 1;
+    size_t last = cal.count - 1;
     size_t i;
 
 
     if ( tok != NUM_TOK )
         epr_mod_state_file_err( 3 );
 
-    if ( res.fe[ last ].is_freq )
+    if ( cal.fe[ last ].is_freq )
     {
         print( FATAL, "Frequency value defined more than once in state file "
                "'%s' at line %d.\n", epr_mod.state_file, epr_mod_Lc );
@@ -652,12 +653,12 @@ epr_mod_get_val( int tok )
         epr_mod_state_file_err( 0 );
     }
 
-    res.fe[ last ].freq = dval;
-    res.fe[ last ].is_freq = SET;
+    cal.fe[ last ].freq    = dval;
+    cal.fe[ last ].is_freq = SET;
 
     if ( ( tok = epr_mod_lex( ) ) == FUNIT_TOK )
     {
-        res.fe[ last ].freq *= dval;
+        cal.fe[ last ].freq *= dval;
         tok = epr_mod_lex( );
     }
     else
@@ -669,21 +670,21 @@ epr_mod_get_val( int tok )
 
     for ( i = 0; i < last; i++ )
     {
-        if  ( res.fe[ i ].freq == res.fe[ last ].freq )
+        if  ( cal.fe[ i ].freq == cal.fe[ last ].freq )
         {
-            print( FATAL, "Frequencies of %d. and %d. entry for resonator '%s' "
-                   "are identical.\n", ( int ) i + 1, ( int ) last + 1,
-                   res.name );
+            print( FATAL, "Frequencies of %d. and %d. entry for calibration "
+                   "'%s' are identical.\n", ( int ) i + 1, ( int ) last + 1,
+                   cal.name );
             epr_mod_state_file_err( 0 );
         }
             
-        if (    fabs( res.fe[ i ].freq - res.fe[ last ].freq )
-                    / res.fe[ i ].freq < 1.0e-2 * EPR_MOD_MIN_DEVIATION
-             || fabs( res.fe[ i ].freq - res.fe[ last ].freq )
-                    / res.fe[ last ].freq < 1.0e-2 * EPR_MOD_MIN_DEVIATION )
+        if (    fabs( cal.fe[ i ].freq - cal.fe[ last ].freq )
+                    / cal.fe[ i ].freq < 1.0e-2 * EPR_MOD_MIN_DEVIATION
+             || fabs( cal.fe[ i ].freq - cal.fe[ last ].freq )
+                    / cal.fe[ last ].freq < 1.0e-2 * EPR_MOD_MIN_DEVIATION )
         {
             print( FATAL, "Deviation between frequencies for %d. and %d. "
-                   "entry for resonator '%s' smaller than minimum deviation "
+                   "entry for calibration '%s' smaller than minimum deviation "
                    "of %d%%.\n", ( int ) i + 1, ( int ) last + 1,
                    ( int ) EPR_MOD_MIN_DEVIATION );
             epr_mod_state_file_err( 0 );
@@ -700,10 +701,10 @@ epr_mod_get_val( int tok )
 static int
 epr_mod_get_ratio( int tok )
 {
-    int last = res.count - 1;
+    int last = cal.count - 1;
 
 
-    if ( res.fe[ last ].is_ratio )
+    if ( cal.fe[ last ].is_ratio )
     {
         print( FATAL, "Ratio defined more than once in state file "
                "'%s' at line %d.\n", epr_mod.state_file, epr_mod_Lc );
@@ -713,8 +714,8 @@ epr_mod_get_ratio( int tok )
     if ( ( tok = epr_mod_lex( ) ) != NUM_TOK )
         epr_mod_state_file_err( 1 );
 
-    res.fe[ last ].ratio = dval;
-    res.fe[ last ].is_ratio = SET;
+    cal.fe[ last ].ratio = dval;
+    cal.fe[ last ].is_ratio = SET;
 
     /* Allow an optional "G/V" after the number */
 
@@ -731,10 +732,10 @@ epr_mod_get_ratio( int tok )
 static int
 epr_mod_get_phase( int tok )
 {
-    int last = res.count - 1;
+    int last = cal.count - 1;
 
 
-    if ( res.fe[ last ].is_phase )
+    if ( cal.fe[ last ].is_phase )
     {
         print( FATAL, "Phase defined more than once in state file "
                "'%s' at line %d.\n", epr_mod.state_file, epr_mod_Lc );
@@ -744,14 +745,14 @@ epr_mod_get_phase( int tok )
     if ( ( tok = epr_mod_lex( ) ) != NUM_TOK )
         epr_mod_state_file_err( 1 );
 
-    res.fe[ last ].phase = dval;
-    res.fe[ last ].is_phase = SET;
+    cal.fe[ last ].phase = dval;
+    cal.fe[ last ].is_phase = SET;
 
-    while ( res.fe[ last ].phase > 360.0 )
-        res.fe[ last ].phase -= 360.0;
+    while ( cal.fe[ last ].phase > 360.0 )
+        cal.fe[ last ].phase -= 360.0;
 
-    while ( res.fe[ last ].phase < -360.0 )
-        res.fe[ last ].phase += 360.0;
+    while ( cal.fe[ last ].phase < -360.0 )
+        cal.fe[ last ].phase += 360.0;
 
     return epr_mod_lex( );
 }
@@ -784,10 +785,10 @@ epr_mod_state_file_err( int print_what )
             break;
     }
 
-    if ( res.name )
-        T_free( res.name );
-    if ( res.fe )
-        T_free( res.fe );
+    if ( cal.name )
+        T_free( cal.name );
+    if ( cal.fe )
+        T_free( cal.fe );
 
     epr_mod_clear( &epr_mod );
 

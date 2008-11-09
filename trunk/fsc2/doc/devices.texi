@@ -1826,20 +1826,21 @@ zero or the string @code{"OFF"} the bandwidth limiter is switched off.
 If called without an argument the function returns @code{1} if the
 bandwidth limiter is on, @code{0} if it's off.
 
-For all but one of the models of the @strong{LeCroy Waverunner} series
-three possible setings exist. It can be switched off by calling the
-function with a string argument of @code{"OFF"} (or an integer
-argument of @code{0}) to achieve the highst model-dependent bandwidth
-(see specifications). It can be set to @code{200 MHz} by calling the
-function with the string @code{"200MHZ"} (or the value @code{2}).
-Finally by calling it with the string @code{"ON"} (or an integer
-argument of @code{1}) for bandwidth can be restricted to @code{25 MHz}
-for the Waverunner models LT322, LT342(L), LT262(ML) and LT372(L)) and
-to @code{20 MHz} for the Waverunner-2 models LT224, LT344(L),
-LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L) and LT584(M/L). The
-only exception is the Waverunner model LT322 were the maximum
-bandwidth is @code{200 MHz}, thus switching te bandwidth limiter off
-and setting it to @code{200 MHz} has the same effect.
+For all but one of the supported models of the @strong{LeCroy
+Waverunner} series three possible setings exist. It can be switched
+off by calling the function with a string argument of @code{"OFF"} (or
+an integer argument of @code{0}) to achieve the highst model-dependent
+bandwidth (see specifications). It can be set to @code{200 MHz} by
+calling the function with the string @code{"200MHZ"} (or the value
+@code{2}). Finally by calling it with the string @code{"ON"} (or an
+integer argument of @code{1}) for bandwidth can be restricted to
+@code{25 MHz} for the Waverunner models LT322, LT342(L), LT262(ML) and
+LT372(L)) and to @code{20 MHz} for the Waverunner-2 models LT224,
+LT344(L), LT364(L), LT264(M/ML), LT354(M/ML), LT374(M/L) and
+LT584(M/L) and all @code{Xi} models. The only exception is the
+Waverunner model LT322 were the maximum bandwidth is @code{200 MHz},
+thus switching te bandwidth limiter off and setting it to @code{200
+MHz} has the same effect.
 
 For the @strong{LeCroy WaveSurfer} with the models @strong{422} and
 @strong{424} only @code{"OFF"} and @code{"ON"} can be set, while with
@@ -7504,8 +7505,8 @@ This function can only be used in the @code{EXPERIMENT} section.
 @cindex EPR Modulation Functions
 
 The following functions are for a pseudo-device that can be used to
-store informations about EPR resonators, the modulation field to
-modulation voltage ratios and modulation phase settings for
+store informations about EPR modulation calibrations, the modulation
+field to modulation voltage ratios and modulation phase settings for
 different moduation frequencies. The module for this pseudo-device
 can be loaded by specifying
 @example
@@ -7513,22 +7514,22 @@ epr_mod
 @end example
 @noindent
 in the @code{DEVICES} section. The information about properties of
-resonators get stored in a file (unless set differently in
-@file{/usr/local/lib/fsc2/epr_mod.state}). Each resonator in this file
+calibrations get stored in a file (unless set differently in
+@file{/usr/local/lib/fsc2/epr_mod.state}). Each calibration in this file
 is characterised by its name, a (non-empty) string. All functions can
 be called from all sections of an @code{EDL} script.
 
 For the modulation field to voltage ratio inter- or even extrapolation
 can be done if the requested frequency doesn't match one of the ones
-known for a resonator (interpolation for frequencies within the range of
+known for a calibration (interpolation for frequencies within the range of
 known frequencies, extrapolation for frequencies that don't lay within
 this range). This requires that inter- or extrapolation is allowed for a
-resonator, that there are at least three known values for the
-field/voltage ratio and that a linear square fit (assuming that the
-modulation field is inverse to the frequency, with an voltage offset
-being taken into consideration) has a correlation coefficient
-(@code{r^2}) at least as large as set in the configuration file for the
-module.
+calibration, that there are at least three known values for the
+field/voltage ratio and that a linear-square fit (assuming that the
+modulation field is proportional to the inverse of the frequency, with
+an voltage offset being taken into consideration) has a correlation
+coefficient (@code{r^2}) at least as large as set in the configuration
+file for the module.
 
 
 @noindent
@@ -7539,15 +7540,15 @@ module.
 @item @ref{epr_modulation_ratio()}
 @item @ref{epr_modulation_phase()}
 @item @ref{epr_modulation_has_phase()}
-@item @ref{epr_modulation_resonator_interpolate()}
-@item @ref{epr_modulation_resonator_can_interpolate()}
-@item @ref{epr_modulation_resonator_extrapolate()}
-@item @ref{epr_modulation_resonator_can_extrapolate()}
-@item @ref{epr_modulation_add_resonator()}
-@item @ref{epr_modulation_delete_resonator()}
-@item @ref{epr_modulation_resonator_count()}
-@item @ref{epr_modulation_resonator_name()}
-@item @ref{epr_modulation_resonator_frequencies()}
+@item @ref{epr_modulation_calibration_interpolate()}
+@item @ref{epr_modulation_calibration_can_interpolate()}
+@item @ref{epr_modulation_calibration_extrapolate()}
+@item @ref{epr_modulation_calibration_can_extrapolate()}
+@item @ref{epr_modulation_add_calibration()}
+@item @ref{epr_modulation_delete_calibration()}
+@item @ref{epr_modulation_calibration_count()}
+@item @ref{epr_modulation_calibration_name()}
+@item @ref{epr_modulation_calibration_frequencies()}
 @item @ref{epr_modulation_store()}
 
 
@@ -7572,14 +7573,14 @@ Returns a string with the name of the pseudo-device.
 @findex epr_modulation_ratio()
 @item epr_modulation_ratio()
 This function is for quering or setting the modulation field to voltage
-ratio for a certain frequency and resonator. Expects at least two
-arguments, first the resonator name (a string) and a positive, non-zero
+ratio for a certain frequency and calibration. Expects at least two
+arguments, first the calibration name (a string) and a positive, non-zero
 frequency. If the there is no further argument the function returns the
 ratio of the modulation field to the modulation frequency (in G/V) if
 possible.
 
 The following algorithm is used to determine the field/voltage ratio:
-If the frequency is identical to one known for the resonator the
+If the frequency is identical to one known for the calibration the
 corresponding ratio is returned. If the frequency does not match a
 known frequency exactly but is within a confidence interval around a
 known frequency (the interval is set via the configuration file) and
@@ -7606,15 +7607,15 @@ permanent.
 @findex epr_modulation_phase()
 @item epr_modulation_phase()
 This function is for quering or setting the modulation phase for a
-certain resonator and frequency. The function must be called with
-at least two arguments, the name of the resonator (as a string) and
+certain calibration and frequency. The function must be called with
+at least two arguments, the name of the calibration (as a string) and
 a frequency that has already been assigned a field/voltage ratio.
 
 If no further argument is given the function returns the modulation
-phase for the resonator and frequency if possible. This requires that
+phase for the calibration and frequency if possible. This requires that
 the frequency matches one of the known frequencies within the confidence
 interval (as set in the configuration file for the module) and that
-a modulattion phase is known for this resonator and frequency. Otherwise
+a modulattion phase is known for this calibration and frequency. Otherwise
 an exception is thrown.
 
 If there's nother argument this is taken to be a modulation phase.
@@ -7630,22 +7631,22 @@ permanent.
 @findex epr_modulation_has_phase()
 @item epr_modulation_has_phase()
 The function allows to query if a modulation phase for a certain
-resonator and (known) frequency is known. It takes two arguments, the
-name of the resonator (as a string) and a frequency. If the frequency is
+calibration and (known) frequency is known. It takes two arguments, the
+name of the calibration (as a string) and a frequency. If the frequency is
 within the confidence interval of one of the known modulation
 frequencies and a phase is known for this frequency the function returns
 @code{1}, otherwise @code{0}.
 
 
-@anchor{epr_modulation_resonator_interpolate()}
-@findex epr_modulation_resonator_interpolate()
-@item epr_modulation_resonator_interpolate()
+@anchor{epr_modulation_calibration_interpolate()}
+@findex epr_modulation_calibration_interpolate()
+@item epr_modulation_calibration_interpolate()
 The function allows tp either query or set if interpolation (for
 modulation field to voltage ratios) is allowed for a certain
-resonator. The function expects at least one argument, the name
-of the resonator (as a string). If there's no further argument
+calibration. The function expects at least one argument, the name
+of the calibration (as a string). If there's no further argument
 the function returns @code{1} if interpolation is allowed for
-the resonator, otherwise @code{1}.
+the calibration, otherwise @code{1}.
 
 If there's another argument it must be of boolean type, i.e.@: either
 @code{"ON"} or @code{1} to permit interpolation or @code{"OFF"} or
@@ -7654,34 +7655,34 @@ interpolation does not gurantee that interpolation can be done since
 this also requires that there are at least 3 known frequencies and that
 the correlation coefficient of a least square fit is at least as large
 as set in the configuration file. Whether interpolation is possible for a
-certain resonator can be determined by calling the function
+certain calibration can be determined by calling the function
 @code{epr_modulation_can_interpolate()}. Please note also that allowing
 or disabling intrepolation for a frequency only is in effect until the
 @code{EDL} script ends unless the function @ref{epr_modulation_store()}
 is called afterwards to make this setting permanent.
 
 
-@anchor{epr_modulation_resonator_can_interpolate()}
-@findex epr_modulation_resonator_can_interpolate()
-@item epr_modulation_resonator_can_interpolate()
+@anchor{epr_modulation_calibration_can_interpolate()}
+@findex epr_modulation_calibration_can_interpolate()
+@item epr_modulation_calibration_can_interpolate()
 This function allows to determine if interpolation is possible for
-a resonator. The function requires a single rgument, the name of
-the resonator (as a string). Itt returns @code{1} if interpolation
+a calibration. The function requires a single rgument, the name of
+the calibration (as a string). Itt returns @code{1} if interpolation
 can be done, otherwise @code{0}. Interpolation is possible if it's
-allowed for the resonator, ratios for at least 3 frequencies are
+allowed for the calibration, ratios for at least 3 frequencies are
 known and the correlation coeficient for a least square fit is
 at least as large as set in the configuration file for the device.
 
 
-@anchor{epr_modulation_resonator_extrapolate()}
-@findex epr_modulation_resonator_extrapolate()
-@item epr_modulation_resonator_extrapolate()
+@anchor{epr_modulation_calibration_extrapolate()}
+@findex epr_modulation_calibration_extrapolate()
+@item epr_modulation_calibration_extrapolate()
 The function allows tp either query or set if extrapolation (for
 modulation field to voltage ratios) is allowed for a certain
-resonator. The function expects at least one argument, the name
-of the resonator (as a string). If there's no further argument
+calibration. The function expects at least one argument, the name
+of the calibration (as a string). If there's no further argument
 the function returns @code{1} if extrapolation is allowed for
-the resonator, otherwise @code{1}.
+the calibration, otherwise @code{1}.
 
 If there's another argument it must be of boolean type, i.e.@: either
 @code{"ON"} or @code{1} to permit extrapolation or @code{"OFF"} or
@@ -7690,73 +7691,73 @@ extrapolation does not gurantee that extrapolation can be done since
 this also requires that there are at least 3 known frequencies and that
 the correlation coefficient of a least square fit is at least as large
 as set in the configuration file. Whether extrapolation is possible for a
-certain resonator can be determined by calling the function
+certain calibration can be determined by calling the function
 @code{epr_modulation_can_extrapolate()}. Please note also that allowing
 or disabling intrepolation for a frequency only is in effect until the
 @code{EDL} script ends unless the function @ref{epr_modulation_store()}
 is called afterwards to make this setting permanent.
 
 
-@anchor{epr_modulation_resonator_can_extrapolate()}
-@findex epr_modulation_resonator_can_extrapolate()
-@item epr_modulation_resonator_can_extrapolate()
+@anchor{epr_modulation_calibration_can_extrapolate()}
+@findex epr_modulation_calibration_can_extrapolate()
+@item epr_modulation_calibration_can_extrapolate()
 This function allows to determine if extrapolation is possible for
-a resonator. The function requires a single rgument, the name of
-the resonator (as a string). Itt returns @code{1} if extrapolation
+a calibration. The function requires a single rgument, the name of
+the calibration (as a string). Itt returns @code{1} if extrapolation
 can be done, otherwise @code{0}. Extrapolation is possible if it's
-allowed for the resonator, ratios for at least 3 frequencies are
+allowed for the calibration, ratios for at least 3 frequencies are
 known and the correlation coeficient for a least square fit is
 at least as large as set in the configuration file for the device.
 
 
-@anchor{epr_modulation_add_resonator()}
-@findex epr_modulation_add_resonator()
-@item epr_modulation_add_resonator()
-This function allows to create an new resonator (i.e. a data structure
-that represents informations about a resonator). IIt expects a single
-arguemnt, the name of the new resonator (as a string). Informations for
-this resonator can be set by the functions listed above. Please note
-that creating a new resonator and setting properties only is in effect
+@anchor{epr_modulation_add_calibration()}
+@findex epr_modulation_add_calibration()
+@item epr_modulation_add_calibration()
+This function allows to create an new calibration (i.e. a data structure
+that represents informations about a calibration). IIt expects a single
+arguemnt, the name of the new calibration (as a string). Informations for
+this calibration can be set by the functions listed above. Please note
+that creating a new calibration and setting properties only is in effect
 until the @code{EDL} script ends unless the function
 @ref{epr_modulation_store()} is called afterwards to make this setting
 permanent.
 
 
-@anchor{epr_modulation_delete_resonator()}
-@findex epr_modulation_delete_resonator()
-@item epr_modulation_delete_resonator()
-This function allows to delete a resonator and all its properties. The
-function tales a single argument, the name of the resonator to delete
-(as a string). Please note that deleting a resonator only is in effect
+@anchor{epr_modulation_delete_calibration()}
+@findex epr_modulation_delete_calibration()
+@item epr_modulation_delete_calibration()
+This function allows to delete a calibration and all its properties. The
+function tales a single argument, the name of the calibration to delete
+(as a string). Please note that deleting a calibration only is in effect
 until the @code{EDL} script ends unless the function
 @ref{epr_modulation_store()} is called afterwards to make this setting
 permanent.
 
 
-@anchor{epr_modulation_resonator_count()}
-@findex epr_modulation_resonator_count()
-@item epr_modulation_resonator_count()
+@anchor{epr_modulation_calibration_count()}
+@findex epr_modulation_calibration_count()
+@item epr_modulation_calibration_count()
 This function takes no arguments and returns the number of known
-resonators.
+calibrations.
 
 
-@anchor{epr_modulation_resonator_name()}
-@findex epr_modulation_resonator_name()
-@item epr_modulation_resonator_name()
-This function allows to find the name of a resonator by its index in the
-list of resonators (a number between @code{1} and the number of known
-resonators). The function takes a single argument, the resonator's index
+@anchor{epr_modulation_calibration_name()}
+@findex epr_modulation_calibration_name()
+@item epr_modulation_calibration_name()
+This function allows to find the name of a calibration by its index in the
+list of calibrations (a number between @code{1} and the number of known
+calibrations). The function takes a single argument, the calibration's index
 (and invalid index will result in an exception getting thrown). The
 function can be used to in conjunction with the
-@ref{epr_modulation_resonator_count()} to obtain the names of all known
-resonators.
+@ref{epr_modulation_calibration_count()} to obtain the names of all known
+calibrations.
 
-@anchor{epr_modulation_resonator_frequencies()}
-@findex epr_modulation_resonator_frequencies()
-@item epr_modulation_resonator_frequencies()
+@anchor{epr_modulation_calibration_frequencies()}
+@findex epr_modulation_calibration_frequencies()
+@item epr_modulation_calibration_frequencies()
 This function returns an array of all frequencies known for a certain
-resonator (in ascending order). It takes a single argument, the name
-of a resonator (as a string).
+calibration (in ascending order). It takes a single argument, the name
+of a calibration (as a string).
 
 
 @anchor{epr_modulation_store()}
