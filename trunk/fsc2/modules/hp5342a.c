@@ -151,8 +151,10 @@ freq_counter_name( Var_T * v  UNUSED_ARG )
  *----------------------------------------------------*/
 
 Var_T *
-freq_counter_measure( Var_T * v  UNUSED_ARG )
+freq_counter_measure( Var_T * v )
 {
+    too_many_arguments( v );
+
     if ( FSC2_MODE == TEST )
         return vars_push( FLOAT_VAR, HP5342A_TEST_FREQUENCY );
 

@@ -116,7 +116,8 @@ eip371_end_of_exp_hook( void )
 {
     /* Switch device to local mode */
 
-    gpib_local( eip371.device );
+    if ( eip371.device != -1 )
+        gpib_local( eip371.device );
 
     eip371.device = -1;
     return 1;
@@ -232,8 +233,10 @@ freq_counter_resolution( Var_T * v )
  *----------------------------------------------------*/
 
 Var_T *
-freq_counter_measure( Var_T * v  UNUSED_ARG )
+freq_counter_measure( Var_T * v )
 {
+    too_many_arguments( v );
+
     if ( FSC2_MODE == TEST )
         return vars_push( FLOAT_VAR, EIP371_TEST_FREQUENCY );
 
