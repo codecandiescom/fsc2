@@ -1004,7 +1004,7 @@ In the GPIB configuration file use @code{"HP5342A"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
-@strong{Status}: Untested
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1033,9 +1033,9 @@ frequency counter 53181A.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
-@c In the GPIB configuration file use @code{"HP5342A"} as the device name,
-@c @code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}
-@c @code{set-xeos} and @code{set-bin} to @code{no}.
+@c In the GPIB configuration file use @code{"AGILENT_53181A"} as the
+@c device name, @code{'\n'} or @code{0xa} as the EOS character and set
+@c @code{set-reos} @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
 @strong{Status}: Untested

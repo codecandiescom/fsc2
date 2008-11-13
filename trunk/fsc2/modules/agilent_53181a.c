@@ -60,7 +60,7 @@ static void agilent_53181a_set_digits( void );
 static int agilent_53181a_get_digits( void );
 static void agilent_53181a_set_gate_time( void );
 static double agilent_53181a_get_gate_time( void );
-static double agilent_53181a_get_freq( int channel );
+static double agilent_53181a_get_freq( int );
 static bool agilent_53181a_talk( const char * cmd,
                                  char *       reply,
                                  long *       length );
@@ -200,7 +200,7 @@ freq_counter_name( Var_T * v  UNUSED_ARG )
 Var_T *
 freq_counter_coupling( Var_T * v )
 {
-    long cpl;
+    long cpl = -1;
     const char *cpl_str[ ] = { "A50", "D50", "A1M", "D1M" };
 
 
@@ -507,9 +507,9 @@ freq_counter_measure( Var_T * v )
                           channel == CHANNEL_CH1 ?
                           TEST_CH1_FREQUENCY : TEST_CH2_FREQUENCY );
 
-	retur vars_push( FLOAT_VAR,
-                     agilent_53181a_get_freq( channel == CHANNEL_CH1 ?
-                                              1 : 2 ) );
+	return vars_push( FLOAT_VAR,
+                      agilent_53181a_get_freq( channel == CHANNEL_CH1 ?
+                                               1 : 2 ) );
 }
 
 
@@ -519,8 +519,47 @@ freq_counter_measure( Var_T * v )
 static int
 agilent_53181a_init( void )
 {
+    /* Initialize connection to device */
+
     if ( gpib_init_device( DEVICE_NAME, &agilent_53181a.device ) == FAILURE )
         return FAIL;
+
+    /* Clear event register and event queue, clear service request enable
+       register and event status enable register */
+
+    if ( gpib_write( agilent_53181a.device, "*CLS;*SRE 0;*ESE 0", 18 )
+                                                                 == FAILURE )
+        return FAIL;
+
+    /* Configure the counter to perform, as necessary, a pre-measurement step
+       to automatically determine the approximate frequency of the signal to
+       measure for both channels. This assumes that a representative cw signal
+       is present at the inputs. */
+
+    if ( gpib_write( agilent_53181a.device, ":FREQ:EXP1:AUTO ON", 18 )
+                                                                 == FAILURE )
+        return FAIL;
+
+#if defined HAS_SECOND_CHANNEL
+    if ( gpib_write( agilent_53181a.device, ":FREQ:EXP2:AUTO ON", 18 )
+                                                                 == FAILURE )
+        return FAIL;
+#endif
+
+    if ( agilent_53181a.is_coupling )
+        agilent_53181a_set_coupling( );
+
+    if ( agilent_53181a.is_timebase )
+        agilent_53181a_set_timebase( );
+
+    if ( agilent_53181a.is_digits )
+        agilent_53181a_set_digits( );
+
+    if ( agilent_53181a.is_gate_time )
+        agilent_53181a_set_gate_time( );
+
+    if ( agilent_53181a.is_mode )
+        agilent_53181a_set_mode( );
 
     return OK;
 }
@@ -532,25 +571,25 @@ agilent_53181a_init( void )
 static void
 agilent_53181a_set_coupling( void )
 {
-    char cmd[ 100 ];
+    char cmd[ 30 ];
 
 
     switch ( agilent_53181a.coupling )
     {
         case COUPLING_A50 :
-            strcpy( cmd, "INP1:COUP AC;IMP 50" );
+            strcpy( cmd, ":INP1:COUP AC;IMP 50" );
             break;
 
         case COUPLING_D50 :
-            strcpy( cmd, "INP1:COUP DC;IMP 50" );
+            strcpy( cmd, ":INP1:COUP DC;IMP 50" );
             break;
 
         case COUPLING_A1M :
-            strcpy( cmd, "INP1:COUP AC;IMP 1E6" );
+            strcpy( cmd, ":INP1:COUP AC;IMP 1E+6" );
             break;
 
         case COUPLING_D1M :
-            strcpy( cmd, "INP1:COUP DC;IMP 1E6" );
+            strcpy( cmd, ":INP1:COUP DC;IMP 1E+6" );
             break;
     }
 
@@ -565,23 +604,25 @@ agilent_53181a_set_coupling( void )
 static int
 agilent_53181a_get_coupling( void )
 {
-    char reply[ 50 ];
+    char reply[ 25 ];
     long length = sizeof reply;
-    int coup = 0;
+    int coup = -1;
     double val = 0.0;
 
 
-    agilent_53181a_talk( "INP1:COUP?", reply, &length );
+    CLOBBER_PROTECT( coup );
 
-    if ( ! strcmp( reply, "AC" ) )
+    agilent_53181a_talk( ":INP1:COUP?", reply, &length );
+
+    if ( ! strcmp( reply, "AC\n" ) )
         coup = 0;
-    else if ( ! strcmp( reply, "DC" ) )
+    else if ( ! strcmp( reply, "DC\n" ) )
         coup = 2;
     else
         agilent_53181a_comm_fail( );
     
     length = sizeof reply;
-    agilent_53181a_talk( "INP1:COUP?", reply, &length );
+    agilent_53181a_talk( ":INP1:COUP?", reply, &length );
 
     TRY
     {
@@ -597,7 +638,6 @@ agilent_53181a_get_coupling( void )
         coup += 1;
     else
         agilent_53181a_comm_fail( );
-
 
     agilent_53181a.coupling = coup;
     agilent_53181a.is_coupling = SET;
@@ -615,11 +655,11 @@ agilent_53181a_set_timebase( void )
     char cmd[ 100 ];
 
     if ( agilent_53181a.timebase == TIMEBASE_AUTO )
-        strcpy( cmd, ":ROSC:SOUR:AUTO 1" );
+        strcpy( cmd, ":ROSC:SOUR:AUTO ON" );
     else if ( agilent_53181a.timebase == TIMEBASE_INT )
-        strcpy( cmd, ":ROSC:SOUR:AUTO 0;SOUR INT" );
+        strcpy( cmd, ":ROSC:SOUR:AUTO OFF;SOUR INT" );
     else
-        strcpy( cmd, ":ROSC:SOUR:AUTO 0;SOUR EXT" );
+        strcpy( cmd, ":ROSC:SOUR:AUTO OFF;SOUR EXT" );
 
     if ( gpib_write( agilent_53181a.device, cmd, strlen( cmd ) ) == FAILURE )
         agilent_53181a_comm_fail( );
@@ -632,15 +672,15 @@ agilent_53181a_set_timebase( void )
 static int
 agilent_53181a_get_timebase( void )
 {
-    char reply[ 50 ];
+    char reply[ 5 ];
     long length = sizeof reply;
 
 
     agilent_53181a_talk( ":ROSC:SOUR?", reply, &length );
 
-    if ( ! strcmp( reply, "INT" ) )
+    if ( ! strcmp( reply, "INT\n" ) )
         return TIMEBASE_INT;
-    else if ( ! strcmp( reply, "EXT" ) )
+    else if ( ! strcmp( reply, "EXT\n" ) )
         return TIMEBASE_EXT;
 
     agilent_53181a_comm_fail( );
@@ -655,7 +695,7 @@ agilent_53181a_get_timebase( void )
 static void
 agilent_53181a_set_mode( void )
 {
-    char cmd[ 100 ] = ":FREQ:ARM:STAR:SOUR IMM;:FREQ:ARM:STOP:SOUR ";
+    char cmd[ 50 ] = ":FREQ:ARM:STAR:SOUR IMM;STOP:SOUR ";
     const char *modes[ ] = { "IMM", "TIM", "DIG" };
 
 
@@ -672,17 +712,17 @@ agilent_53181a_set_mode( void )
 static int
 agilent_53181a_get_mode( void )
 {
-    char reply[ 50 ];
+    char reply[ 5 ];
     long length = sizeof reply;
-    const char *modes[ ] = { "IMM", "TIM", "DIG" };
+    const char *modes[ ] = { "IMM\n", "TIM\n", "DIG\n" };
     size_t i;
 
 
     agilent_53181a_talk( ":FREQ:ARM:STAR?", reply, &length );
 
-    if ( ! strcmp( reply, "EXT" ) )
+    if ( ! strcmp( reply, "EXT\n" ) )
         return MODE_EXT;
-    else if ( strcmp( reply, "IMM" ) )
+    else if ( strcmp( reply, "IMM\n" ) )
         agilent_53181a_comm_fail( );
 
     agilent_53181a_talk( ":FREQ:ARM:STOP?", reply, &length );
@@ -722,9 +762,9 @@ agilent_53181a_set_digits( void )
 static int
 agilent_53181a_get_digits( void )
 {
-    char reply[ 50 ];
+    char reply[ 20 ];
     long length = sizeof reply;
-    long digits;
+    long digits = 0;
 
 
     agilent_53181a_talk( ":FREQ:ARM:STOP:DIG?", reply, &length );
@@ -752,7 +792,7 @@ agilent_53181a_set_gate_time( void )
 {
     char cmd[ 100 ];
 
-    sprintf( cmd, ":FREQ:ARM:STOP:TIM %g", agilent_53181a.gate_time );
+    sprintf( cmd, ":FREQ:ARM:STOP:TIM %G", agilent_53181a.gate_time );
     if ( gpib_write( agilent_53181a.device, cmd, strlen( cmd ) ) == FAILURE )
         agilent_53181a_comm_fail( );
 }
@@ -764,9 +804,9 @@ agilent_53181a_set_gate_time( void )
 static double
 agilent_53181a_get_gate_time( void )
 {
-    char reply[ 50 ];
+    char reply[ 25 ];
     long length = sizeof reply;
-    double gate_time;
+    double gate_time = 0.0;
 
 
     agilent_53181a_talk( ":FREQ:ARM:STOP:TIM?", reply, &length );
@@ -793,11 +833,11 @@ static double
 agilent_53181a_get_freq( int channel )
 {
     char str[ 50 ];
-    long length = sizeof reply;
+    long length = sizeof str;
     double val = 0.0;
 
 
-    sprintf( str, ":CONF:FREQ (@%d);READ?", channel );
+    sprintf( str, ":CONF:FREQ (@%d);:READ?", channel );
     agilent_53181a_talk( str, str, &length );
 
     TRY
