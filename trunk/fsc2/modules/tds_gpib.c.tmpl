@@ -893,6 +893,8 @@ tds_tmpl_get_curve( int        channel,
     long len1, len2;
 
 
+    CLOBBER_PROTECT( buffer );
+
     fsc2_assert(    channel >= TDS_TMPL_CH1
                  && channel < NUM_DISPLAYABLE_CHANNELS );
 

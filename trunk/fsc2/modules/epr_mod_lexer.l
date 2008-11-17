@@ -372,6 +372,8 @@ epr_mod_get_new_cal( int tok )
     size_t last;
 
 
+    CLOBBER_PROTECT( tok );
+
     if ( tok != CAL_TOK )
         epr_mod_state_file_err( 1 );
         
@@ -482,6 +484,8 @@ epr_mod_get_name( int tok )
 {
     char *name = NULL;
 
+
+    CLOBBER_PROTECT( name );
 
     if ( tok != NAME_TOK )
         epr_mod_state_file_err( 1 );

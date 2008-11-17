@@ -330,6 +330,7 @@ freq_counter_digits, -1, ALL;
 freq_counter_gate_time, -1, ALL;
 freq_counter_measure, -1, EXP;
 freq_counter_command, 1, EXP;
+freq_counter_talk, 1, EXP;
 
 
 /* Functions exported by DAQ cards and devices (PCI-MIO-16E-1, ME-6000,

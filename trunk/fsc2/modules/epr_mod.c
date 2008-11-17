@@ -299,6 +299,8 @@ epr_modulation_add_calibration( Var_T * v )
 	Calibration_T *res = NULL;
 
 
+    CLOBBER_PROTECT( res);
+
 	if ( v == NULL )
 	{
 		print( FATAL, "Missing calibration name.\n" );
