@@ -35,6 +35,8 @@ static bool rs_sml01_get_pulse_trig_slope( void );
 static double rs_sml01_get_pulse_width( void );
 
 static double rs_sml01_get_pulse_delay( void );
+
+static double rs_sml01_get_double_pulse_delay( void );
 #endif
 
 static void rs_sml01_comm_failure( void );
@@ -72,7 +74,6 @@ rs_sml01_init( const char * name )
 #if defined WITH_PULSE_MODULATION
     rs_sml01_command( "PULM:SOUR INT\n" );
     rs_sml01_command( "PULM:POL NORM\n" );
-    rs_sml01_command( "PULS:DOUB:STAT OFF\n" );
 #endif
 
     /* Figure out the current frequency if it's not going to be set */
@@ -148,15 +149,64 @@ rs_sml01_init( const char * name )
     }
 
 #if defined WITH_PULSE_MODULATION
+
     if ( rs_sml01.pulse_trig_slope_is_set )
         rs_sml01_set_pulse_trig_slope( rs_sml01.pulse_trig_slope );
     else
         rs_sml01.pulse_trig_slope = rs_sml01_get_pulse_trig_slope( );
 
+    /* If double pulse mode is going to be switched on make sure the distance
+       between both the pulses is going to be larger than the pulse width */
+
+    if (    rs_sml01.double_pulse_mode_is_set
+         && rs_sml01.double_pulse_mode == SET )
+    {
+        if ( ! rs_sml01.pulse_width_is_set )
+            rs_sml01.pulse_width = rs_sml01_get_pulse_width( );
+
+        if ( ! rs_sml01.double_pulse_delay_is_set )
+            rs_sml01.double_pulse_delay = rs_sml01_get_double_pulse_delay( );
+
+        if ( lrnd( ( rs_sml01.double_pulse_delay - rs_sml01.pulse_width )
+                   / MIN_PULSE_WIDTH ) <= 0 )
+        {
+            print( FATAL, "Setting for pulse width is too short for double "
+                   "pulse delay.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+
+    /* Switch off double pulse mode per default and only switch it on again
+       later on if it has been explicitely requested */
+
+    rs_sml01_set_double_pulse_mode( UNSET );
+
     if ( rs_sml01.pulse_width_is_set )
         rs_sml01_set_pulse_width( rs_sml01.pulse_width );
     else
+    {
         rs_sml01.pulse_width = rs_sml01_get_pulse_width( );
+        rs_sml01.pulse_width_is_set = SET;
+    }
+
+    if ( rs_sml01.double_pulse_delay_is_set )
+        rs_sml01_set_double_pulse_delay( rs_sml01.double_pulse_delay );
+    else
+    {
+        rs_sml01.double_pulse_delay = rs_sml01_get_double_pulse_delay( );
+        rs_sml01.double_pulse_mode_is_set = SET;
+    }
+
+    /* Switch off double pulse mode per default unless it has been explicitely
+       requested */
+
+    if ( rs_sml01.double_pulse_mode_is_set )
+        rs_sml01_set_double_pulse_mode( rs_sml01.double_pulse_mode );
+    else
+    {
+        rs_sml01.double_pulse_mode = UNSET;
+        rs_sml01.double_pulse_mode_is_set = UNSET;
+    }
 
     if ( rs_sml01.pulse_delay_is_set )
         rs_sml01_set_pulse_delay( rs_sml01.pulse_delay );
@@ -196,7 +246,7 @@ rs_sml01_initial_mod_setup( void )
 
     for ( i = 0; i < NUM_MOD_TYPES - 1; i++ )
     {
-        length = 100;
+        length = sizeof buffer;
         sprintf( cmd, "%s:STAT?\n", types[ i ] );
         rs_sml01_talk( cmd, buffer, &length );
 
@@ -283,7 +333,7 @@ bool
 rs_sml01_get_output_state( void )
 {
     char buffer[ 10 ];
-    long length = 10;
+    long length = sizeof buffer;
 
 
     rs_sml01_talk( "OUTP?\n", buffer, &length );
@@ -298,7 +348,7 @@ double
 rs_sml01_set_frequency( double freq )
 {
     char cmd[ 100 ];
-    long length = 100;
+    long length = sizeof cmd;
 
 
     fsc2_assert( freq >= MIN_FREQ && freq <= MAX_FREQ );
@@ -310,7 +360,7 @@ rs_sml01_set_frequency( double freq )
     if ( rs_sml01.freq_change_delay < 1.0e-3 )
     {
         sprintf( cmd, "FREQ:CW %.0f;*WAI;*OPC?\n", freq );
-        rs_sml01_talk( ( const char * ) cmd, cmd, &length );
+        rs_sml01_talk( cmd, cmd, &length );
     }
     else
     {
@@ -330,7 +380,7 @@ double
 rs_sml01_get_frequency( void )
 {
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
 
 
     rs_sml01_talk( "FREQ:CW?\n", buffer, &length );
@@ -364,7 +414,7 @@ double
 rs_sml01_get_attenuation( void )
 {
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
 
     rs_sml01_talk( "POW?\n", buffer, &length );
     buffer[ length - 1 ] = '\0';
@@ -422,7 +472,7 @@ rs_sml01_get_mod_type( void )
 
     for ( i = 0; i < NUM_MOD_TYPES - 1; i++ )
     {
-        length = 100;
+        length = sizeof buffer;
         sprintf( cmd, "%s:STAT?\n", types[ i ] );
         rs_sml01_talk( cmd, buffer, &length );
 
@@ -490,10 +540,10 @@ rs_sml01_get_mod_source( int      type,
     fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
     sprintf( cmd, "%s:SOUR?\n", types[ type ] );
-    length = 100;
+    length = sizeof buffer;
     rs_sml01_talk( cmd, buffer, &length );
 
-    length = 100;
+    length = sizeof buffer;
     if ( ! strncmp( buffer, "INT", 3 ) )
     {
         source = MOD_SOURCE_INT;
@@ -562,7 +612,7 @@ rs_sml01_get_mod_ampl( int type )
 {
     const char *cmds[ ] = { "FM?\n", "AM?\n", "PM?\n" };
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
 
 
     fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
@@ -583,11 +633,8 @@ rs_sml01_set_pulse_state( bool state )
 {
     char cmd[ 100 ] = "PULM:STAT ";
 
-    if ( state )
-        strcat( cmd, "ON\n" );
-    else
-        strcat( cmd, "OFF\n" );
 
+    strcat( cmd, state ? "ON\n" : "OFF\n" );
     rs_sml01_command( cmd );
 }
 
@@ -599,11 +646,25 @@ static bool
 rs_sml01_get_pulse_state( void )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
 
 
     rs_sml01_talk( "PULM:STAT?\n", buffer, &length );
     return buffer[ 0 ] == '1';
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+void
+rs_sml01_set_double_pulse_mode( bool state )
+{
+    char cmd[ 100 ] = "PULS:DOUBLE ";
+
+
+    strcat( cmd, state ? "ON\n" : "OFF\n" );
+    rs_sml01_command( cmd );
 }
 
 
@@ -632,7 +693,7 @@ static bool
 rs_sml01_get_pulse_trig_slope( void )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
 
 
     rs_sml01_talk( ":TRIG:PULS:SLOP?\n", buffer, &length );
@@ -661,7 +722,7 @@ static double
 rs_sml01_get_pulse_width( void )
 {
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
 
 
     rs_sml01_talk( "PULS:WIDT?\n", buffer, &length );
@@ -691,13 +752,44 @@ static double
 rs_sml01_get_pulse_delay( void )
 {
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
 
 
     rs_sml01_talk( "PULS:DEL?\n", buffer, &length );
     buffer[ length - 1 ] = '\0';
     return T_atod( buffer );
 }
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+void
+rs_sml01_set_double_pulse_delay( double delay )
+{
+    char cmd[ 100 ];
+
+
+    sprintf( cmd, "PULS:DOUBL:DEL %s\n", rs_sml01_pretty_print( delay ) );
+    rs_sml01_command( cmd );
+}
+
+
+/*-------------------------------------------------------------*
+ *-------------------------------------------------------------*/
+
+static double
+rs_sml01_get_double_pulse_delay( void )
+{
+    char buffer[ 100 ];
+    long length = sizeof buffer;
+
+
+    rs_sml01_talk( "PULS:DOUBL:DEL?\n", buffer, &length );
+    buffer[ length - 1 ] = '\0';
+    return T_atod( buffer );
+}
+
 
 #endif /* WITH_PULSE_MODULATION */
 

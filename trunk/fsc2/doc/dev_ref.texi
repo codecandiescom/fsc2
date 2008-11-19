@@ -2863,6 +2863,8 @@ In the GPIB configuration file use @code{"RS_SML01"} as the device name,
 @item @ref{synthesizer_pulse_trigger_slope()}
 @item @ref{synthesizer_pulse_width()}
 @item @ref{synthesizer_pulse_delay()}
+@item @ref{synthesizer_double_pulse_mode()}
+@item @ref{synthesizer_double_pulse_delay()}
 @end table
 
 

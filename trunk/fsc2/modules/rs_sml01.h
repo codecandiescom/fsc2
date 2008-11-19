@@ -50,26 +50,32 @@
 
 #define MAX_AM_AMPL     1.0e2
 
-#define RS_SML01_TEST_RF_FREQ           1.4e7            /* 14 MHz */
-#define RS_SML01_TEST_MOD_TYPE          MOD_TYPE_FM
-#define RS_SML01_TEST_MOD_SOURCE        MOD_SOURCE_INT
-#define RS_SML01_TEST_MOD_FREQ          1.0e5            /* 100 kHz */
-#define RS_SML01_TEST_MOD_AMPL          2.5e4            /* 25 kHz */
+#define RS_SML01_TEST_RF_FREQ             1.4e7            /* 14 MHz */
+#define RS_SML01_TEST_MOD_TYPE            MOD_TYPE_FM
+#define RS_SML01_TEST_MOD_SOURCE          MOD_SOURCE_INT
+#define RS_SML01_TEST_MOD_FREQ            1.0e5            /* 100 kHz */
+#define RS_SML01_TEST_MOD_AMPL            2.5e4            /* 25 kHz */
 
 #if defined WITH_PULSE_MODULATION
 
 #define SLOPE_FALL      UNSET
 #define SLOPE_RAISE     SET
 
-#define MIN_PULSE_WIDTH 2.0e-8     /* 20 ns */
-#define MAX_PULSE_WIDTH 1.3        /* 1.3 s */
-#define MIN_PULSE_DELAY 2.0e-8     /* 20 ns */
-#define MAX_PULSE_DELAY 1.3        /* 1.3 s */
+#define MIN_PULSE_WIDTH                   2.0e-8           /* 20 ns */
+#define MAX_PULSE_WIDTH                   1.3              /* 1.3 s */
+#define MIN_PULSE_DELAY                   2.0e-8           /* 20 ns */
+#define MAX_PULSE_DELAY                   1.3              /* 1.3 s */
 
-#define RS_SML01_TEST_PULSE_MODE_STATE  UNSET
-#define RS_SML01_TEST_PULSE_TRIG_SLOPE  SLOPE_RAISE
-#define RS_SML01_TEST_PULSE_WIDTH       1.0e-6           /* 1 us */
-#define RS_SML_TEST_PULSE_DELAY         2.0e-8           /* 20 ns */
+#define MIN_DOUBLE_PULSE_DELAY            6.0e-8           /* 60 ns */
+#define MAX_DOUBLE_PULSE_DELAY            1.3              /* 1.3 s */
+
+#define RS_SML01_TEST_PULSE_MODE_STATE    UNSET
+#define RS_SML01_TEST_PULSE_TRIG_SLOPE    SLOPE_RAISE
+#define RS_SML01_TEST_PULSE_WIDTH         1.0e-6           /* 1 us */
+#define RS_SML01_TEST_PULSE_DELAY         2.0e-8           /* 20 ns */
+
+#define RS_SML01_TEST_DOUBLE_PULSE_MODE   UNSET
+#define RS_SML01_TEST_DOUBLE_PULSE_DELAY  1.0e-5           /* 10 us */
 
 #endif /* WITH_PULSE_MODULATION */
 
@@ -132,12 +138,16 @@ struct RS_SML01 {
 #if defined WITH_PULSE_MODULATION
     bool pulse_mode_state;            /* pulse mode on/off */
     bool pulse_mode_state_is_set;
+    bool double_pulse_mode;
+    bool double_pulse_mode_is_set;
     bool pulse_trig_slope;
     bool pulse_trig_slope_is_set;
     double pulse_width;
     bool pulse_width_is_set;
     double pulse_delay;
     bool pulse_delay_is_set;
+    double double_pulse_delay;
+    bool double_pulse_delay_is_set;
 #endif /* WITH_PULSE_MODULATION */
 };
 
@@ -171,6 +181,8 @@ Var_T * synthesizer_mod_ampl(            Var_T * /* v */ );
 Var_T * synthesizer_mod_type(            Var_T * /* v */ );
 Var_T * synthesizer_mod_source(          Var_T * /* v */ );
 Var_T * synthesizer_freq_change_delay(   Var_T * /* v */ );
+Var_T * synthesizer_double_pulse_mode(   Var_T * /* v */ );
+Var_T * synthesizer_double_pulse_delay(  Var_T * /* v */ );
 Var_T * synthesizer_command(             Var_T * /* v */ );
 
 #if defined WITH_PULSE_MODULATION
@@ -250,6 +262,10 @@ void rs_sml01_set_pulse_trig_slope( bool /* state */ );
 void rs_sml01_set_pulse_width( double /* width */ );
 
 void rs_sml01_set_pulse_delay( double /* delay */ );
+
+void rs_sml01_set_double_pulse_mode( bool /* state */ );
+
+void rs_sml01_set_double_pulse_delay( double /* delay */ );
 #endif /* WITH_PULSE_MODULATION */
 
 

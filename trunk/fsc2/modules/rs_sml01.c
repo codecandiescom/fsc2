@@ -98,9 +98,12 @@ rs_sml01_init_hook( void )
 
 #if defined WITH_PULSE_MODULATION
     rs_sml01.pulse_mode_state_is_set = UNSET;
+    rs_sml01.pulse_mode_state = UNSET;
+    rs_sml01.double_pulse_mode_is_set = UNSET;
     rs_sml01.pulse_trig_slope_is_set = UNSET;
     rs_sml01.pulse_width_is_set = UNSET;
     rs_sml01.pulse_delay_is_set = UNSET;
+    rs_sml01.double_pulse_delay_is_set = UNSET;
 #endif /* WITH_PULSE_MODULATION */
 
     return 1;
@@ -171,14 +174,43 @@ rs_sml01_test_hook( void )
     }
 
 #if defined WITH_PULSE_MODULATION
-    rs_sml01.pulse_mode_state = RS_SML01_TEST_PULSE_MODE_STATE;
-    rs_sml01.pulse_mode_state_is_set = SET;
-    rs_sml01.pulse_trig_slope_is_set = RS_SML01_TEST_PULSE_TRIG_SLOPE;
-    rs_sml01.pulse_trig_slope_is_set = SET;
-    rs_sml01.pulse_width = RS_SML01_TEST_PULSE_WIDTH;
-    rs_sml01.pulse_width_is_set = SET;
-    rs_sml01.pulse_delay = RS_SML_TEST_PULSE_DELAY;
-    rs_sml01.pulse_delay_is_set = SET;
+    if ( ! rs_sml01.pulse_mode_state_is_set )
+    {
+        rs_sml01.pulse_mode_state = RS_SML01_TEST_PULSE_MODE_STATE;
+        rs_sml01.pulse_mode_state_is_set = SET;
+    }
+
+    if ( ! rs_sml01.pulse_trig_slope_is_set )
+    {
+        rs_sml01.pulse_trig_slope_is_set = RS_SML01_TEST_PULSE_TRIG_SLOPE;
+        rs_sml01.pulse_trig_slope_is_set = SET;
+    }
+
+    if ( ! rs_sml01.double_pulse_mode_is_set )
+    {
+        rs_sml01.double_pulse_mode = RS_SML01_TEST_DOUBLE_PULSE_MODE;
+        rs_sml01.double_pulse_mode_is_set = SET;
+    }
+
+    if ( ! rs_sml01.double_pulse_delay_is_set )
+    {
+        rs_sml01.double_pulse_delay = RS_SML01_TEST_DOUBLE_PULSE_DELAY;
+        if ( rs_sml01.pulse_width_is_set )
+            rs_sml01.double_pulse_delay += rs_sml01.pulse_width;
+        rs_sml01.double_pulse_delay_is_set = SET;
+    }
+    if ( ! rs_sml01.pulse_width_is_set )
+    {
+        rs_sml01.pulse_width = RS_SML01_TEST_PULSE_WIDTH;
+        rs_sml01.pulse_width_is_set = SET;
+    }
+
+    if ( ! rs_sml01.pulse_delay_is_set )
+    {
+        rs_sml01.pulse_delay = RS_SML01_TEST_PULSE_DELAY;
+        rs_sml01.pulse_delay_is_set = SET;
+    }
+
 #endif /* WITH_PULSE_MODULATION */
 
     return 1;
@@ -1486,6 +1518,17 @@ synthesizer_pulse_width( Var_T * v )
         width = ticks * MIN_PULSE_WIDTH;
     }
 
+    if (    rs_sml01.double_pulse_mode_is_set
+         && rs_sml01.double_pulse_mode
+         && rs_sml01.double_pulse_delay_is_set
+         && lrnd( ( rs_sml01.double_pulse_delay - width ) / MIN_PULSE_WIDTH )
+                                                                         <= 0 )
+    {
+        print( FATAL, "Can't set pulse width since it's not shorter than the "
+               "the distance between the existing two pulses.\n" );
+        THROW( EXCEPTION );
+    }
+
     too_many_arguments( v );
     
     if ( FSC2_MODE == EXPERIMENT )
@@ -1516,7 +1559,7 @@ synthesizer_pulse_delay( Var_T * v )
             THROW( EXCEPTION );
         }
 
-        return vars_push( INT_VAR, ( int ) rs_sml01.pulse_delay );
+        return vars_push( FLOAT_VAR, rs_sml01.pulse_delay );
     }
 
     delay = get_double( v, "pulse delay" );
@@ -1558,6 +1601,116 @@ synthesizer_pulse_delay( Var_T * v )
     return vars_push( FLOAT_VAR, delay );
 }
 
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_double_pulse_mode( Var_T * v )
+{
+    bool state;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == PREPARATION && ! rs_sml01.double_pulse_mode_is_set )
+        {
+            print( FATAL, "Double pulse mode hasn't been set.\n" );
+            THROW( EXCEPTION );
+        }
+
+        return vars_push( INT_VAR, ( long ) rs_sml01.double_pulse_mode );
+    }
+
+    state = get_boolean( v );
+
+    if (    state
+         && rs_sml01.pulse_width_is_set
+         && rs_sml01.double_pulse_delay_is_set
+            && lrnd( ( rs_sml01.double_pulse_delay - rs_sml01.pulse_width )
+                     / MIN_PULSE_WIDTH ) <= 0 )
+    {
+        print( FATAL, "Can't switch on double pulse mdde since pulse width "
+               "isn't smaller than distance between the pulses.\n" );
+        THROW( EXCEPTION );
+    }
+
+    too_many_arguments( v );
+
+    if ( ! rs_sml01.double_pulse_delay_is_set )
+        print( WARN, "Switching on double pulse mode without delay beween "
+               "pulses having been set.\n" );
+
+    if ( FSC2_MODE == EXPERIMENT )
+        rs_sml01_set_double_pulse_mode( state );
+
+    rs_sml01.double_pulse_mode = state;
+    rs_sml01.double_pulse_mode_is_set = SET;
+
+    return vars_push( INT_VAR, ( long ) state );
+}
+
+
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
+
+Var_T *
+synthesizer_double_pulse_delay( Var_T * v )
+{
+    double delay;
+    long ticks;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == PREPARATION && ! rs_sml01.double_pulse_delay_is_set )
+        {
+            print( FATAL, "Double pulse delay hasn't been set.\n" );
+            THROW( EXCEPTION );
+        }
+
+        return vars_push( FLOAT_VAR, rs_sml01.double_pulse_delay );
+    }
+
+    delay = get_double( v, "doubl pulse delay" );
+
+    ticks = lrnd( delay / MIN_PULSE_WIDTH );
+
+    if (    ticks < lrnd( MIN_DOUBLE_PULSE_DELAY / MIN_PULSE_WIDTH )
+         || ticks > lrnd( MAX_DOUBLE_PULSE_DELAY / MIN_PULSE_WIDTH ) )
+    {
+        print( FATAL, "Invalid double pulse delay of %s, allowed range is "
+               "%ld ns to %.1f s\n", rs_sml01_pretty_print( delay ),
+               lrnd( MIN_DOUBLE_PULSE_DELAY * 1.0e9 ), MAX_DOUBLE_PULSE_DELAY );
+        THROW( EXCEPTION );
+    }
+
+    if ( fabs( ticks * MIN_PULSE_WIDTH - delay ) > 0.01 * MIN_PULSE_WIDTH )
+    {
+        char *t = T_strdup( rs_sml01_pretty_print( delay ) );
+        print( SEVERE, "Pulse width of %s isn't an integer multiple of %d ns, "
+               "changing it to %s\n", t, irnd( MIN_PULSE_WIDTH * 1.0e9 ),
+               rs_sml01_pretty_print( ticks * MIN_PULSE_WIDTH ) );
+        T_free( t );
+        delay = ticks * MIN_PULSE_WIDTH;
+    }
+
+    if (    rs_sml01.double_pulse_mode_is_set
+         && rs_sml01.double_pulse_mode
+         && rs_sml01.pulse_width_is_set
+         && lrnd( ( delay - rs_sml01.pulse_width ) / MIN_PULSE_WIDTH ) <= 0 )
+    {
+        print( FATAL, "Can't set double pulse delay since it's not longer than "
+               "the the pulse's widths.\n" );
+        THROW( EXCEPTION );
+    }
+
+    rs_sml01.double_pulse_delay = delay;
+    rs_sml01.double_pulse_delay_is_set = SET;
+
+    return vars_push( FLOAT_VAR, delay );
+}
+
 #endif /* WITH_PULSE_MODULATION */
 
 
@@ -1568,6 +1721,7 @@ Var_T *
 synthesizer_freq_change_delay( Var_T * v )
 {
     double delay;
+
 
     if ( v )
     {

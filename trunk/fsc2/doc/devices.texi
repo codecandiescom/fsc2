@@ -3555,6 +3555,8 @@ in the @code{DEVICES} section.
 @item @ref{synthesizer_pulse_trigger_slope()}
 @item @ref{synthesizer_pulse_width()}
 @item @ref{synthesizer_pulse_delay()}
+@item @ref{synthesizer_double_pulse_mode()}
+@item @ref{synthesizer_double_pulse_delay()}
 @end table
 
 @noindent
@@ -4014,8 +4016,36 @@ device will always add another intrinsic delay of about @w{50 ns} to
 this value.
 
 
-@end table
+@anchor{synthesizer_double_pulse_mode()}
+@findex synthesizer_double_pulse_mode()
+@item synthesizer_double_pulse_mode()
+This function is only available for the @strong{Rohde&Schwarz SML01}
+synthesizer with @strong{SML-B3} option. The synthesizer can generate
+either one or two pulses (of the same length. This function allows
+to query or set in which mode the synthesizer is working. If called
+with no argument the function returns @code{0} ifonly a single pulse
+gets generated and @code{1} if two are created. If called with a
+boolean argument, either the string @code{"OFF"} or the integer
+@code{0} generation of two pulses is switched off, if called with
+@code{"ON"} or @code{1} two pulses will be created.
 
+Please note that creation of two pulses will per default be switched
+off unless it's explicitely requested.
+
+
+@anchor{synthesizer_double_pulse_delay()}
+@findex synthesizer_double_pulse_delay()
+@item synthesizer_double_pulse_delay()
+This function is only available for the @strong{Rohde&Schwarz SML01}
+synthesizer with @strong{SML-B3} option. If the synthesizer is
+requested to henerate two pulses this function can be used to query or
+set the delay between the starts of both pulses. If called without an
+argument the function returns this time (in seconds). If called with
+an argument the delay between the starts of the two pulses will be
+set. The delay must be at least @w{60 ns} and must be at least @w{20
+ns} larger then the widths of the pulses.
+
+@end table
 
 
 @node Temperature Controller Functions, Multimeter Functions, Synthesizer Functions, Device Functions

@@ -281,6 +281,9 @@ synthesizer_pulse_state, -1, ALL;          // R&S SML01 with SML-B3 only
 synthesizer_pulse_trigger_slope, -1, ALL;  // R&S SML01 with SML-B3 only
 synthesizer_pulse_width, -1, ALL;          // R&S SML01 with SML-B3 only
 synthesizer_pulse_delay, -1, ALL;          // R&S SML01 with SML-B3 only
+synthesizer_double_pulse_mode, -1, ALL;    // R&S SML01 with SML-B3 only
+synthesizer_double_pulse_delay, -1, ALL;   // R&S SML01 with SML-B3 only
+
 
 synthesizer_freq_change_delay, -1, ALL;
 
