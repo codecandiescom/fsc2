@@ -82,7 +82,7 @@ translation approved by the Free Software Foundation.
 
 This manual describes @code{fsc2}, a program to control spectrometers.
 Basically, @code{fsc2} is an interpreter for running scripts that
-describe how experiments are to be done. The manual describes how to use
+describe how experiments are to be done. The manual explains how to use
 the program, how to write scripts for experiments, how to extend the
 range of devices that can be controlled by writing new device modules
 and lots of further topics.
