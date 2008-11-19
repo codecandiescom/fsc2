@@ -80,12 +80,12 @@ translation approved by the Free Software Foundation.
 @node Top, , (dir), (dir)
 @top Top
 
-This manual describes @code{fsc2}, a program to control
-spectrometers. Basically, @code{fsc2} is an interpreter to run a script
-that describes how the experiment is to be done. The manual describes
-how to use the program, how to write scripts for experiments, how to
-extend the range of devices that can be controlled by writing new device
-modules and lots of further topics.
+This manual describes @code{fsc2}, a program to control spectrometers.
+Basically, @code{fsc2} is an interpreter for running scripts that
+describe how experiments are to be done. The manual describes how to use
+the program, how to write scripts for experiments, how to extend the
+range of devices that can be controlled by writing new device modules
+and lots of further topics.
 
 @menu
 * Introduction::                Basic concepts of @code{fsc2}
