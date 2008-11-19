@@ -4043,7 +4043,8 @@ set the delay between the starts of both pulses. If called without an
 argument the function returns this time (in seconds). If called with
 an argument the delay between the starts of the two pulses will be
 set. The delay must be at least @w{60 ns} and must be at least @w{20
-ns} larger then the widths of the pulses.
+ns} larger then the widths of the pulses (i.e.@: the pulses must be
+at least @w{20 ns} apart).
 
 @end table
 
