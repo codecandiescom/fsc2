@@ -4517,7 +4517,7 @@ number of digits hasn't been set before).
 
 @anchor{freq_counter_gate_time()}
 @findex freq_counter_gate_time()
-@item freq_counter_digits()
+@item freq_counter_gate_time()
 This function only exists for the @code{Agilen 53181A}. It allows to
 set or query the gate time when te device is used in gate time arming
 mode (use function @ref{freq_counter_mode()} to set this mode).
@@ -4532,9 +4532,11 @@ before).
 @anchor{freq_counter_measure()}
 @findex freq_counter_measure()
 @item freq_counter_measure()
-Returns a floating point value with the measured frequency. The function
-does not accept any parameters and can only by used in the
-@code{EXPERIMENT} section.
+Returns a floating point value with the measured frequency. Except
+for the @code{Agilen 53181A} the function does not accept any
+parameters. For the @code{Agilen 53181A} a single argument is
+required, the channel to be used, either @code{CH1} or @{CH2}.
+The function can only by used in the @code{EXPERIMENT} section.
 
 @end table
 
