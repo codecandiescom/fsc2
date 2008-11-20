@@ -4434,7 +4434,7 @@ a deviation of more than @w{1%} an warning is printed out.
 @anchor{freq_counter_coupling()}
 @findex freq_counter_coupling()
 @item freq_counter_coupling()
-This function only exists for the @code{Agilen 53181A}. It allows to
+This function only exists for the @code{Agilent 53181A}. It allows to
 set or query the input coupling and impedance of channel 1 of the
 counter (the second channel's input coupling is always AC and the
 impedance is 50 Ohms).
@@ -4454,7 +4454,7 @@ coupling haven't been set before).
 @anchor{freq_counter_timebase()}
 @findex freq_counter_timebase()
 @item freq_counter_timebase()
-This function only exists for the @code{Agilen 53181A}. It allows to
+This function only exists for the @code{Agilent 53181A}. It allows to
 set or query the timebase used by the counter, either internal,
 external or automatic.
 
@@ -4475,7 +4475,7 @@ been set before.
 @anchor{freq_counter_mode()}
 @findex freq_counter_mode()
 @item freq_counter_mode()
-This function only exists for the @code{Agilen 53181A}. It allows to
+This function only exists for the @code{Agilent 53181A}. It allows to
 set or query the arming mode, either automatic, based on the gate time
 or requiring a certain number of digits (in automatic mode the device
 does the fastest possible acquisistion, in gate time mode it measures
@@ -4503,7 +4503,7 @@ sections and the mode hasn't been set before).
 @anchor{freq_counter_digits()}
 @findex freq_counter_digits()
 @item freq_counter_digits()
-This function only exists for the @code{Agilen 53181A}. It allows to
+This function only exists for the @code{Agilent 53181A}. It allows to
 set or query the number of measured digits when te device is used
 in digits arming mode (use function @ref{freq_counter_mode()} to
 set this mode).
@@ -4518,7 +4518,7 @@ number of digits hasn't been set before).
 @anchor{freq_counter_gate_time()}
 @findex freq_counter_gate_time()
 @item freq_counter_gate_time()
-This function only exists for the @code{Agilen 53181A}. It allows to
+This function only exists for the @code{Agilent 53181A}. It allows to
 set or query the gate time when te device is used in gate time arming
 mode (use function @ref{freq_counter_mode()} to set this mode).
 
@@ -4533,8 +4533,8 @@ before).
 @findex freq_counter_measure()
 @item freq_counter_measure()
 Returns a floating point value with the measured frequency. Except for
-the @code{Agilen 53181A} the function does not accept any parameters.
-For the @code{Agilen 53181A} a single argument is required, the
+the @code{Agilent 53181A} the function does not accept any parameters.
+For the @code{Agilent 53181A} a single argument is required, the
 channel to be used, either @code{CH1} or @code{CH2}. The function can
 only by used in the @code{EXPERIMENT} section.
 
