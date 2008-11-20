@@ -4532,11 +4532,12 @@ before).
 @anchor{freq_counter_measure()}
 @findex freq_counter_measure()
 @item freq_counter_measure()
-Returns a floating point value with the measured frequency. Except
-for the @code{Agilen 53181A} the function does not accept any
-parameters. For the @code{Agilen 53181A} a single argument is
-required, the channel to be used, either @code{CH1} or @{CH2}.
-The function can only by used in the @code{EXPERIMENT} section.
+Returns a floating point value with the measured frequency. Except for
+the @code{Agilen 53181A} the function does not accept any parameters.
+For the @code{Agilen 53181A} a single argument is required, the
+channel to be used, either @code{CH1} or @code{CH2}. The function can
+only by used in the @code{EXPERIMENT} section.
+
 
 @end table
 
