@@ -367,7 +367,7 @@ itc503_init( const char * name )
 
     /* Switch device per default to remote state with local lockout */
 
-    if ( itc503_talk( "C1\r", buf, 10 ) != 2 )
+    if ( itc503_talk( "C1\r", buf, sizeof buf ) != 2 )
         return FAIL;
 
     return OK;

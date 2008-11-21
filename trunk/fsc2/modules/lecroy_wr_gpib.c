@@ -48,7 +48,7 @@ static bool lecroy_wr_talk( const char * cmd,
                             char *       reply,
                             long *       length );
 
-static void lecroy_wr_gpib_failure( void );
+static void lecroy_wr_comm_failure( void );
 
 
 static unsigned int can_fetch = 0;
@@ -63,8 +63,8 @@ static unsigned int can_fetch = 0;
 bool
 lecroy_wr_init( const char * name )
 {
-    char buffer[ 100 ];
-    long len = 100;
+    char buf[ 100 ];
+    long len = sizeof buf;
     int i;
 
 
@@ -79,7 +79,7 @@ lecroy_wr_init( const char * name )
                         "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO", 44 )
                                                                      == FAILURE
          || gpib_write( lecroy_wr.device, "*STB?", 5 ) == FAILURE
-         || gpib_read( lecroy_wr.device, buffer, &len ) == FAILURE )
+         || gpib_read( lecroy_wr.device, buf, &len ) == FAILURE )
     {
         gpib_local( lecroy_wr.device );
         return FAIL;
@@ -119,7 +119,7 @@ lecroy_wr_init( const char * name )
         /* Make sure the internal timebase is used */
 
         if ( gpib_write( lecroy_wr.device, "SCLK INT", 8 ) == FAILURE )
-            lecroy_wr_gpib_failure( );
+            lecroy_wr_comm_failure( );
 
         /* Set or get the timebase (including the index in the table of
            possible timebases) while also taking care of the mode, i.e.
@@ -274,7 +274,7 @@ double
 lecroy_wr_get_timebase( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     double timebase;
     int i;
 
@@ -313,7 +313,7 @@ lecroy_wr_set_timebase( double timebase )
 
     dummy = gcvt( timebase, 8, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -327,7 +327,7 @@ bool
 lecroy_wr_get_interleaved( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     lecroy_wr_talk( "ILVD?", reply, &length );
@@ -348,7 +348,7 @@ lecroy_wr_set_interleaved( bool state )
 
     strcat( cmd, state ? "ON" : "OFF" );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -362,7 +362,7 @@ long
 lecroy_wr_get_memory_size( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     long mem_size;
     long i;
     char *end_p;
@@ -416,9 +416,10 @@ lecroy_wr_set_memory_size( long mem_size )
 {
     char cmd[ 30 ];
 
+
     sprintf( cmd, "MSIZ %ld", mem_size );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -433,7 +434,7 @@ lecroy_wr_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -462,7 +463,7 @@ lecroy_wr_set_sens( int    channel,
     sprintf( cmd, "C%1d:VDIV ", channel + 1 );
     dummy = gcvt( sens, 8, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -476,7 +477,7 @@ double
 lecroy_wr_get_offset( int channel )
 {
     char buf[ 30 ];
-    long length = 30;
+    long length = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -505,7 +506,7 @@ lecroy_wr_set_offset( int    channel,
     sprintf( cmd, "C%1d:OFST ", channel + 1 );
     dummy = gcvt( offset, 8, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -520,7 +521,7 @@ lecroy_wr_get_coupling( int channel )
 {
     int type = LECROY_WR_CPL_INVALID;
     char buf[ 100 ];
-    long length = 100;
+    long length = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -569,7 +570,7 @@ lecroy_wr_set_coupling( int channel,
 
     sprintf( cmd, "C%1d:CPL %s", channel + 1, cpl[ type ] );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -583,7 +584,7 @@ int
 lecroy_wr_get_bandwidth_limiter( int channel )
 {
     char buf[ 30 ] = "BWL?";
-    long length = 30;
+    long length = sizeof buf;
     int mode = -1;
     char *ptr;
     const char *delim = " ";
@@ -664,7 +665,7 @@ lecroy_wr_set_bandwidth_limiter( int channel,
                                  int bwl )
 {
     char buf[ 50 ] = "GBWL?";
-    long length;
+    long length = sizeof buf;
     int i;
 
 
@@ -703,7 +704,7 @@ lecroy_wr_set_bandwidth_limiter( int channel,
             strcat( buf, "200MHZ" );
         
         if ( gpib_write( lecroy_wr.device, buf, strlen( buf ) ) == FAILURE )
-            lecroy_wr_gpib_failure( );
+            lecroy_wr_comm_failure( );
 
         return OK;
     }
@@ -715,7 +716,7 @@ lecroy_wr_set_bandwidth_limiter( int channel,
 
     strcpy( buf, "GBWL OFF" );
     if ( gpib_write( lecroy_wr.device, buf, strlen( buf ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     strcpy( buf, "BWL " );
 
@@ -733,7 +734,7 @@ lecroy_wr_set_bandwidth_limiter( int channel,
     buf[ strlen( buf ) - 2 ] = '\0';
 
     if ( gpib_write( lecroy_wr.device, buf, strlen( buf ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -747,7 +748,7 @@ int
 lecroy_wr_get_trigger_source( void )
 {
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
     int src = LECROY_WR_UNDEF;
     char *ptr = reply + 7;
 
@@ -807,7 +808,7 @@ lecroy_wr_set_trigger_source( int channel )
         strcat( cmd, "EX10" );
 
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -821,7 +822,7 @@ double
 lecroy_wr_get_trigger_level( int channel )
 {
     char buf[ 30 ];
-    long length = 30;
+    long length = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -868,7 +869,7 @@ lecroy_wr_set_trigger_level( int    channel,
 
     dummy = gcvt( level, 6, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -882,7 +883,7 @@ bool
 lecroy_wr_get_trigger_slope( int channel )
 {
     char buf[ 30 ];
-    long length = 30;
+    long length = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -937,7 +938,7 @@ lecroy_wr_set_trigger_slope( int channel,
 
     strcat( cmd, slope ? "POS" : "NEG" );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -951,7 +952,7 @@ int
 lecroy_wr_get_trigger_coupling( int channel )
 {
     char buf[ 40 ];
-    long length = 40;
+    long length = sizeof buf;
     int cpl = -1;
 
 
@@ -1025,7 +1026,7 @@ lecroy_wr_set_trigger_coupling( int channel,
     strcat( cmd, cpl_str[ cpl ] );
 
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -1039,7 +1040,7 @@ int
 lecroy_wr_get_trigger_mode( void )
 {
     char buf[ 40 ];
-    long length = 40;
+    long length = sizeof buf;
     int mode = -1;
 
 
@@ -1076,7 +1077,7 @@ lecroy_wr_set_trigger_mode( int mode )
 
     strcat( cmd, mode_str[ mode ] );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -1090,7 +1091,7 @@ double
 lecroy_wr_get_trigger_delay( void )
 {
     char reply[ 40 ];
-    long length = 40;
+    long length = sizeof reply;
 
 
     lecroy_wr_talk( "TRDL?", reply, &length );
@@ -1127,7 +1128,7 @@ lecroy_wr_set_trigger_delay( double delay )
 
     dummy = gcvt( delay, 8, cmd + strlen( cmd ) );
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return OK;
 }
@@ -1141,7 +1142,7 @@ bool
 lecroy_wr_is_displayed( int ch )
 {
     char cmd[ 30 ];
-    long length = 30;
+    long length = sizeof cmd;
 
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
@@ -1202,7 +1203,7 @@ lecroy_wr_display( int ch,
     }
 
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     if ( on_off )
     {
@@ -1244,7 +1245,7 @@ lecroy_wr_start_acquisition( void )
     /* Stop the digitizer (also switches to "STOPPED" trigger mode) */
 
     if ( gpib_write( lecroy_wr.device, "STOP", 4 ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     /* Set up the parameter to be used for averaging for the function channels
        (as far as they have been set by the user) */
@@ -1264,7 +1265,7 @@ lecroy_wr_start_acquisition( void )
 
         if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) )
              == FAILURE )
-            lecroy_wr_gpib_failure( );
+            lecroy_wr_comm_failure( );
 
         /* If we want to use a trace it must be switched on (but not the
            channel that gets averaged) */
@@ -1279,7 +1280,7 @@ lecroy_wr_start_acquisition( void )
                  'A' + LECROY_WR_TA - ch ) ;
 
         if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-            lecroy_wr_gpib_failure( );
+            lecroy_wr_comm_failure( );
 
         /* Finally reset what's currently stored in the trace (otherwise a
            new acquisition may not get started) */
@@ -1287,7 +1288,7 @@ lecroy_wr_start_acquisition( void )
         sprintf( cmd, "T%c:FRST", 'A' + LECROY_WR_TA - ch );
 
         if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-            lecroy_wr_gpib_failure( );
+            lecroy_wr_comm_failure( );
     }
 
     /* Reset the bits in the word that tells us later that the data in the
@@ -1314,7 +1315,7 @@ lecroy_wr_start_acquisition( void )
         lecroy_wr.trigger_mode = LECROY_WR_TRG_MODE_NORMAL;
 
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
 }
 
@@ -1388,7 +1389,7 @@ lecroy_wr_get_prep( int              ch,
                  lecroy_wr_curve_length( ) );
 
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     /* When a non-memory curve is to be fetched and the acquisition isn't
        finished yet poll until the bit that tells that the acquisition for
@@ -1410,7 +1411,7 @@ lecroy_wr_get_prep( int              ch,
         strcat( cmd, ":WF? DAT1" );
         if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) )
              == FAILURE )
-            lecroy_wr_gpib_failure( );
+            lecroy_wr_comm_failure( );
 
         /* ...and fetch 'em */
 
@@ -1583,7 +1584,7 @@ lecroy_wr_copy_curve( long src,
     sprintf( cmd + strlen( cmd ), "M%ld", dest - LECROY_WR_M1 + 1 );
 
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 }
 
 
@@ -1602,7 +1603,7 @@ lecroy_wr_get_data( long * len )
 
     *len = 7;
     if ( gpib_read( lecroy_wr.device, len_str, len ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     len_str [ *len ] = '\0';
     *len = T_atol( len_str + 6 );
@@ -1612,7 +1613,7 @@ lecroy_wr_get_data( long * len )
     /* Now get the number of bytes to read */
 
     if ( gpib_read( lecroy_wr.device, len_str, len ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
     
     len_str[ *len ] = '\0';
     *len = T_atol( len_str );
@@ -1624,7 +1625,7 @@ lecroy_wr_get_data( long * len )
     data = T_malloc( *len );
 
     if ( gpib_read( lecroy_wr.device, ( char * ) data, len ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return data;
 }
@@ -1640,7 +1641,7 @@ lecroy_wr_get_int_value( int          ch,
                          const char * name )
 {
     char cmd[ 100 ];
-    long length = 100;
+    long length = sizeof cmd;
     char *ptr = cmd;
     long val = 0;
 
@@ -1664,7 +1665,7 @@ lecroy_wr_get_int_value( int          ch,
         /* empty */ ;
 
     if ( ! *ptr )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     TRY
     {
@@ -1672,7 +1673,7 @@ lecroy_wr_get_int_value( int          ch,
         TRY_SUCCESS;
     }
     OTHERWISE
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return val;
 }
@@ -1688,7 +1689,7 @@ lecroy_wr_get_float_value( int          ch,
                            const char * name )
 {
     char cmd[ 100 ];
-    long length = 100;
+    long length = sizeof cmd;
     char *ptr = cmd;
     double val = 0.0;
 
@@ -1712,7 +1713,7 @@ lecroy_wr_get_float_value( int          ch,
         /* empty */ ;
 
     if ( ! *ptr )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     TRY
     {
@@ -1720,7 +1721,7 @@ lecroy_wr_get_float_value( int          ch,
         TRY_SUCCESS;
     }
     OTHERWISE
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
 
     return val;
 }
@@ -1733,7 +1734,7 @@ bool
 lecroy_wr_command( const char * cmd )
 {
     if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
     return OK;
 }
 
@@ -1750,7 +1751,7 @@ static unsigned int
 lecroy_wr_get_inr( void )
 {
     char reply[ 10 ] = "INR?";
-    long length = 10;
+    long length = sizeof reply;
 
 
     lecroy_wr_talk( "INR?", reply, &length );
@@ -1768,7 +1769,7 @@ static bool lecroy_wr_talk( const char * cmd,
 {
     if (    gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE
          || gpib_read( lecroy_wr.device, reply, length ) == FAILURE )
-        lecroy_wr_gpib_failure( );
+        lecroy_wr_comm_failure( );
     return OK;
 }
 
@@ -1777,7 +1778,7 @@ static bool lecroy_wr_talk( const char * cmd,
  *-----------------------------------------------------------------*/
 
 static void
-lecroy_wr_gpib_failure( void )
+lecroy_wr_comm_failure( void )
 {
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );

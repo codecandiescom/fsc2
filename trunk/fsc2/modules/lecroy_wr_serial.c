@@ -302,7 +302,7 @@ double
 lecroy_wr_get_timebase( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     double timebase;
     int i;
 
@@ -357,7 +357,7 @@ bool
 lecroy_wr_get_interleaved( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     lecroy_wr_talk( "ILVD?\r", reply, &length );
@@ -396,7 +396,7 @@ long
 lecroy_wr_get_memory_size( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     long mem_size;
     long i;
     char *end_p;
@@ -471,7 +471,7 @@ lecroy_wr_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -516,7 +516,7 @@ double
 lecroy_wr_get_offset( int channel )
 {
     char buf[ 30 ];
-    long length = 30;
+    long length = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -562,7 +562,7 @@ lecroy_wr_get_coupling( int channel )
 {
     int type = LECROY_WR_CPL_INVALID;
     char buf[ 100 ];
-    long length = 100;
+    long length = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -628,7 +628,7 @@ int
 lecroy_wr_get_bandwidth_limiter( int channel )
 {
     char buf[ 30 ] = "BWL?";
-    long length = 30;
+    long length = sizeof buf;
     int mode = -1;
     char *ptr;
     const char *delim = " ";
@@ -709,14 +709,13 @@ lecroy_wr_set_bandwidth_limiter( int channel,
                                  int bwl )
 {
     char buf[ 50 ] = "GBWL?";
-    long length;
+    long length = sizeof buf;
     int i;
     ssize_t to_send;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
     fsc2_assert( bwl >= LECROY_WR_BWL_OFF && bwl <= LECROY_WR_BWL_200MHZ );
-
 
     /* We first need to check if the global bandwidth limiter is on or off. */
 
@@ -801,7 +800,7 @@ int
 lecroy_wr_get_trigger_source( void )
 {
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
     int src = LECROY_WR_UNDEF;
     char *ptr = reply + 7;
 
@@ -878,7 +877,7 @@ double
 lecroy_wr_get_trigger_level( int channel )
 {
     char buf[ 30 ];
-    long length = 30;
+    long length = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -942,7 +941,7 @@ bool
 lecroy_wr_get_trigger_slope( int channel )
 {
     char buf[ 30 ];
-    long length = 30;
+    long length = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -1015,7 +1014,7 @@ int
 lecroy_wr_get_trigger_coupling( int channel )
 {
     char buf[ 40 ];
-    long length = 40;
+    long length = sizeof buf;
     int cpl = -1;
 
 
@@ -1106,7 +1105,7 @@ int
 lecroy_wr_get_trigger_mode( void )
 {
     char buf[ 40 ];
-    long length = 40;
+    long length = sizeof buf;
     int mode = -1;
 
 
@@ -1161,7 +1160,7 @@ double
 lecroy_wr_get_trigger_delay( void )
 {
     char reply[ 40 ];
-    long length = 40;
+    long length = sizeof reply;
 
 
     lecroy_wr_talk( "TRDL?\r", reply, &length );
@@ -1215,7 +1214,7 @@ bool
 lecroy_wr_is_displayed( int ch )
 {
     char cmd[ 30 ];
-    long length = 30;
+    long length = sizeof cmd;
 
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
@@ -1224,7 +1223,7 @@ lecroy_wr_is_displayed( int ch )
         sprintf( cmd, "T%c:TRA?\r", ch - LECROY_WR_TA + 'A' );
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
     {
-        print( FATAL, "A memory channel can't be displayed.\n");
+        print( FATAL, "Memory channels can't be displayed.\n");
         THROW( EXCEPTION );
     }
     else
@@ -1796,7 +1795,7 @@ lecroy_wr_get_int_value( int          ch,
                          const char * name )
 {
     char cmd[ 100 ];
-    long length = 100;
+    long length = sizeof cmd;
     char *ptr = cmd;
     long val = 0;
 
@@ -1846,7 +1845,7 @@ lecroy_wr_get_float_value( int          ch,
                            const char * name )
 {
     char cmd[ 100 ];
-    long length = 100;
+    long length = sizeof cmd;
     char *ptr = cmd;
     double val = 0.0;
 
@@ -1913,8 +1912,8 @@ lecroy_wr_command( const char * cmd )
 static unsigned int
 lecroy_wr_get_inr( void )
 {
-    char reply[ 10 ] = "INR?";
-    long length = 10;
+    char reply[ 10 ];
+    long length = sizeof reply;
 
 
     lecroy_wr_talk( "INR?\r", reply, &length );

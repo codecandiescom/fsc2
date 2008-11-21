@@ -64,7 +64,7 @@ bool
 lecroy93xx_init( const char * name )
 {
     char buffer[ 100 ];
-    long len = 100;
+    long len = sizeof buffer;
     int i;
 
 
@@ -273,7 +273,7 @@ double
 lecroy93xx_get_timebase( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     double timebase;
     int i;
 
@@ -326,7 +326,7 @@ bool
 lecroy93xx_get_interleaved( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     lecroy93xx_talk( "ILVD?", reply, &length );
@@ -361,7 +361,7 @@ long
 lecroy93xx_get_memory_size( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     long mem_size;
     long i;
     char *end_p;
@@ -415,6 +415,7 @@ lecroy93xx_set_memory_size( long mem_size )
 {
     char cmd[ 30 ];
 
+
     sprintf( cmd, "MSIZ %ld", mem_size );
     if ( gpib_write( lecroy93xx.device, cmd, strlen( cmd ) ) == FAILURE )
         lecroy93xx_gpib_failure( );
@@ -432,7 +433,7 @@ lecroy93xx_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel >= LECROY93XX_CH1 && channel <= LECROY93XX_CH_MAX );
@@ -475,7 +476,7 @@ double
 lecroy93xx_get_offset( int channel )
 {
     char buf[ 30 ];
-    long length = 30;
+    long length = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY93XX_CH1 && channel <= LECROY93XX_CH_MAX );
@@ -519,7 +520,7 @@ lecroy93xx_get_coupling( int channel )
 {
     int type = LECROY93XX_CPL_INVALID;
     char buf[ 100 ];
-    long length = 100;
+    long length = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY93XX_CH1 && channel <= LECROY93XX_CH_MAX );
@@ -581,11 +582,11 @@ lecroy93xx_set_coupling( int channel,
 int
 lecroy93xx_get_bandwidth_limiter( void )
 {
-    char buf[ 30 ] = "BWL?";
-    long length = 30;
+    char buf[ 30 ];
+    long length = sizeof buf;
 
 
-    lecroy93xx_talk( buf, buf, &length );
+    lecroy93xx_talk( "BWL?", buf, &length );
     if ( buf[ 1 ] == 'F' )           /* OFF */
         lecroy93xx.bandwidth_limiter = LECROY93XX_BWL_OFF;
     else if ( buf[ 1 ] == 'N' )      /* ON */
@@ -611,7 +612,6 @@ lecroy93xx_set_bandwidth_limiter( int bwl )
 
     fsc2_assert( bwl >= LECROY93XX_BWL_OFF && bwl <= LECROY93XX_BWL_200MHZ );
 
-
     if ( bwl == LECROY93XX_BWL_OFF )
         strcat( buf, "OFF" );
     else if ( bwl == LECROY93XX_BWL_ON )
@@ -634,7 +634,7 @@ int
 lecroy93xx_get_trigger_source( void )
 {
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
     int src = LECROY93XX_UNDEF;
     char *ptr = reply + 7;
 
@@ -708,7 +708,7 @@ double
 lecroy93xx_get_trigger_level( int channel )
 {
     char buf[ 30 ];
-    long length = 30;
+    long length = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY93XX_CH1
@@ -769,7 +769,7 @@ bool
 lecroy93xx_get_trigger_slope( int channel )
 {
     char buf[ 30 ];
-    long length = 30;
+    long length = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY93XX_CH1
@@ -838,7 +838,7 @@ int
 lecroy93xx_get_trigger_coupling( int channel )
 {
     char buf[ 40 ];
-    long length = 40;
+    long length = sizeof buf;
     int cpl = -1;
 
 
@@ -926,7 +926,7 @@ int
 lecroy93xx_get_trigger_mode( void )
 {
     char buf[ 40 ];
-    long length = 40;
+    long length = sizeof buf;
     int mode = -1;
 
 
@@ -977,7 +977,7 @@ double
 lecroy93xx_get_trigger_delay( void )
 {
     char reply[ 40 ];
-    long length = 40;
+    long length = sizeof reply;
 
 
     lecroy93xx_talk( "TRDL?", reply, &length );
@@ -1028,7 +1028,7 @@ bool
 lecroy93xx_is_displayed( int ch )
 {
     char cmd[ 30 ];
-    long length = 30;
+    long length = sizeof cmd;
 
 
     if ( ch >= LECROY93XX_CH1 && ch <= LECROY93XX_CH_MAX )
@@ -1527,7 +1527,7 @@ lecroy93xx_get_int_value( int          ch,
                          const char * name )
 {
     char cmd[ 100 ];
-    long length = 100;
+    long length = sizeof cmd;
     char *ptr = cmd;
     long val = 0;
 
@@ -1575,7 +1575,7 @@ lecroy93xx_get_float_value( int          ch,
                            const char * name )
 {
     char cmd[ 100 ];
-    long length = 100;
+    long length = sizeof cmd;
     char *ptr = cmd;
     double val = 0.0;
 
@@ -1636,8 +1636,8 @@ lecroy93xx_command( const char * cmd )
 static unsigned int
 lecroy93xx_get_inr( void )
 {
-    char reply[ 10 ] = "INR?";
-    long length = 10;
+    char reply[ 10 ];
+    long length = sizeof reply;
 
 
     lecroy93xx_talk( "INR?", reply, &length );

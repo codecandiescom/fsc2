@@ -817,7 +817,7 @@ magnet_command( Var_T * v )
 		TRY
 		{
 			cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-			ips120_10_mod_talk( cmd, reply, 100 );
+			ips120_10_mod_talk( cmd, reply, sizeof reply );
 			T_free( cmd );
 			TRY_SUCCESS;
 		}
@@ -859,7 +859,7 @@ ips120_10_mod_init( const char * name )
 
 	/* Bring power supply in remote state */
 
-	ips120_10_mod_talk( "C3\r", reply, 100 );
+	ips120_10_mod_talk( "C3\r", reply, sizeof reply );
 
 	/* Set the sweep power supply to send and accept data with extended
 	   resolution (this is one of the few commands that don't produce a
@@ -882,14 +882,14 @@ ips120_10_mod_init( const char * name )
 	   allowed current range (unless they are larger than the ones set in the
 	   configuration file). */
 
-	length = ips120_10_mod_talk( "R21\r", reply, 100 );
+	length = ips120_10_mod_talk( "R21\r", reply, sizeof reply );
 	reply[ length - 1 ] = '\0';
 	cur_limit = T_atod( reply + 1 );
 
 	if ( cur_limit > MIN_CURRENT )
 		ips120_10_mod.min_current = cur_limit;
 
-	length = ips120_10_mod_talk( "R22\r", reply, 100 );
+	length = ips120_10_mod_talk( "R22\r", reply, sizeof reply );
 
 	reply[ length - 1 ] = '\0';
 	cur_limit = T_atod( reply + 1 );
@@ -995,7 +995,7 @@ ips120_10_mod_to_local( void )
 		ips120_10_mod.sweep_state = STOPPED;
 	}
 
-	ips120_10_mod_talk( "C2\r", reply, 100 );
+	ips120_10_mod_talk( "C2\r", reply, sizeof reply );
 
 	gpib_local( ips120_10_mod.device );
 }
@@ -1447,7 +1447,7 @@ ips120_10_mod_get_act_current( void )
 	/* Get the current the power supply is set to (which gets returned in
 	   units of the current resolution) */
 
-	length = ips120_10_mod_talk( "R0\r", reply, 100 );
+	length = ips120_10_mod_talk( "R0\r", reply, sizeof reply );
 	reply[ length - 1 ] = '\0';
 	norm_current = T_atod( reply + 1 ) * CURRENT_RESOLUTION;
 
@@ -1491,7 +1491,7 @@ ips120_10_mod_set_target_current( double current )
 	   the current resolution). */
 
 	sprintf( cmd, "I%5ld\r", lrnd( norm_current / CURRENT_RESOLUTION ) );
-	ips120_10_mod_talk( cmd, reply, 100 );
+	ips120_10_mod_talk( cmd, reply, sizeof reply );
 
 	/* And set the DAC voltage */
 
@@ -1519,7 +1519,7 @@ ips120_10_mod_get_target_current( void )
 	int acc;
 
 
-	length = ips120_10_mod_talk( "R5\r", reply, 100 );
+	length = ips120_10_mod_talk( "R5\r", reply, sizeof reply );
 	reply[ length - 1 ] = '\0';
 	norm_current = T_atod( reply + 1 );
 
@@ -1551,7 +1551,7 @@ ips120_10_mod_set_sweep_rate( double sweep_rate )
 	   sweep rate in A/s. */
 
 	sprintf( cmd, "S%.5ld\r", lrnd( sweep_rate / MIN_SWEEP_RATE ) );
-	ips120_10_mod_talk( cmd, reply, 100 );
+	ips120_10_mod_talk( cmd, reply, sizeof reply );
 
 	return sweep_rate;
 }
@@ -1568,7 +1568,7 @@ ips120_10_mod_get_sweep_rate( void )
 	long length;
 
 
-	length = ips120_10_mod_talk( "R6\r", reply, 100 );
+	length = ips120_10_mod_talk( "R6\r", reply, sizeof reply );
 	reply[ length - 1 ] = '\0';
 
 	/* Please note: it looks as if the the sweep rate gets returned in units
@@ -1646,7 +1646,7 @@ ips120_10_mod_set_activity( int activity )
 	}
 
 	sprintf( cmd, "A%1d\r", act );
-	ips120_10_mod_talk( cmd, reply, 100 );
+	ips120_10_mod_talk( cmd, reply, sizeof reply );
 
 	return activity;
 }

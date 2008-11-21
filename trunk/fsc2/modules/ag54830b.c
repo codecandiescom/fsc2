@@ -666,7 +666,7 @@ Var_T *digitizer_start_acquisition( Var_T *v )
 	    /*ag54830b_command( ":CDISPLAY;*CLS\n");*/
 	    /*ag54830b_command( "*CLS; *SRE 32; *ESE 1\n");*/
 	    /*gpib_clear_device( ag54830b.device );*/
-		  /*fsc2_usleep( 4000, UNSET );*/
+		/*fsc2_usleep( 4000, UNSET );*/
 		ag54830b_command_retry( "*CLS;:DIGITIZE;*OPC\n");
 	    /*ag54830b_command( ":CHANNEL1:DISPLAY ON\n" );*/
 		acquisition_is_running = SET;
@@ -988,7 +988,7 @@ static bool ag54830b_init( const char *name )
         return FAIL;
 
 	gpib_clear_device( ag54830b.device );
-	//ag54830b_command(":ACQ:COMP 100\n");
+	/* ag54830b_command(":ACQ:COMP 100\n"); */
 	ag54830b_command(":WAV:BYT LSBF\n"); /*set byte order*/
 	ag54830b_command(":WAV:FORM WORD\n"); /*set transfer format*/
 	ag54830b_command(":WAV:VIEW ALL\n"); /*set all acquared data*/
@@ -1023,7 +1023,7 @@ static bool ag54830b_command_retry( const char *cmd )
 		{ 
 			print( SEVERE, "One more try.\n");
 			fsc2_usleep( 4000, UNSET );
-			if ( gpib_write( ag54830b.device, cmd, strlen( cmd ) ) == FAILURE ) /*retry*/
+			if ( gpib_write( ag54830b.device, cmd, strlen( cmd ) ) == FAILURE )
 			ag54830b_failure( );
 		}
 
@@ -1072,7 +1072,7 @@ static void ag54830b_failure( void )
 double ag54830b_get_timebase( void )
 {
 	char reply[ 30 ];
-	long length = 30;
+	long length = sizeof reply;
 
 
 	ag54830b_talk( "TIMEBASE:SCALE?\n", reply, &length );
@@ -1102,7 +1102,7 @@ void ag54830b_set_timebase( double timebase )
 long ag54830b_get_num_avg( void )
 {
 	char reply[ 30 ];
-	long length = 30;
+	long length = sizeof reply;
 
 
 	if ( ag54830b_get_acq_mode( ) == 1 )
@@ -1150,7 +1150,7 @@ void ag54830b_set_num_avg( long num_avg )
 int ag54830b_get_acq_mode( void )
 {
 	char reply[ 30 ];
-	long length = 30;
+	long length = sizeof reply;
 
 
 	ag54830b_talk( ":ACQ:AVER?\n", reply, &length );
@@ -1310,13 +1310,13 @@ void ag54830b_get_curve( int channel, double **data, long *length,
 		 && channel >= AG54830B_CH1
 		 && channel < NUM_DISPLAYABLE_CHANNELS )
 	{
-		blength = 32;
+		blength = sizeof reply;
 		ag54830b_talk(":WAV:YINC?\n", reply, &blength ); /* get y-increment */
 		reply[ blength - 1 ] = '\0';
 		yinc = T_atod( reply );
 		fsc2_usleep( 1000, UNSET );
 
-		blength = 32;
+		blength = sizeof reply;
 		ag54830b_talk(":WAV:YOR?\n", reply, &blength );  /* get y-origin*/
 		reply[ blength - 1 ] = '\0';
 		yorg = T_atod( reply );
@@ -1346,7 +1346,7 @@ void ag54830b_get_curve( int channel, double **data, long *length,
 long ag54830b_get_record_length( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
 	ag54830b_talk( ":ACQ:POIN?\n", reply, &length );
@@ -1378,7 +1378,7 @@ double ag54830b_get_sens( int channel )
 {
     char cmd[ 30 ];
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
 	fsc2_assert( channel >= AG54830B_CH1 && channel < NUM_NORMAL_CHANNELS );
@@ -1401,7 +1401,7 @@ void ag54830b_set_sens( int channel, double sens )
 {
     char cmd[ 40 ];
 	char reply[ 40 ];
-	long length = 40;
+	long length = sizeof reply;
 
 
 	fsc2_assert( channel >= AG54830B_CH1 && channel < NUM_NORMAL_CHANNELS );
@@ -1444,7 +1444,7 @@ double ag54830b_get_xorigin( int channel )
 {
 	char cmd[ 30 ];
 	char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
 	fsc2_assert(    channel >= AG54830B_CH1
@@ -1475,7 +1475,7 @@ double ag54830b_get_xincrement( int channel )
 {
 	char cmd[ 30 ];
 	char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
 	fsc2_assert(    channel >= AG54830B_CH1
@@ -1506,7 +1506,7 @@ double ag54830b_get_yorigin( int channel )
 {
 	char cmd[ 30 ];
 	char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
 	fsc2_assert(    channel >= AG54830B_CH1
@@ -1537,7 +1537,7 @@ double ag54830b_get_yincrement( int channel )
 {
 	char cmd[ 30 ];
 	char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
 	fsc2_assert(    channel >= AG54830B_CH1
@@ -1568,7 +1568,7 @@ bool ag54830b_display_channel_state( int channel )
 {
 	char cmd[ 30 ];
     char reply[ 10 ];
-    long length = 10;
+    long length = sizeof reply;
 
 
 	fsc2_assert(    channel >= AG54830B_CH1
@@ -1591,7 +1591,7 @@ bool ag54830b_display_channel_state( int channel )
 void ag54830b_set_trigger_pos( double pos )
 {
     char   reply[ 30 ];
-    long   length = 30;
+    long   length = sizeof reply;
 	double time_pos;
 	double time_range;
 	char   cmd[ 30 ];
@@ -1615,7 +1615,7 @@ void ag54830b_set_trigger_pos( double pos )
 double ag54830b_get_trigger_pos( void )
 {
     char   reply[ 30 ];
-    long   length = 30;
+    long   length = sizeof reply;
 	double time_pos;
 	double time_range;
 
@@ -1623,7 +1623,7 @@ double ag54830b_get_trigger_pos( void )
 	ag54830b_talk( ":TIM:POS?\n", reply, &length );
     reply[ length - 1 ] = '\0';
 	time_pos = - T_atod( reply );
-	length=30;
+	length = sizeof reply;
 	ag54830b_talk( ":TIM:RANG?\n", reply, &length );
     reply[ length - 1 ] = '\0';
 	time_range = T_atod( reply );

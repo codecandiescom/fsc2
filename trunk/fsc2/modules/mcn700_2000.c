@@ -342,7 +342,7 @@ mcn700_2000_get_voltage( void )
 {
     char buffer[ 100 ];
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     sprintf( buffer, "N0\n" );
@@ -379,7 +379,7 @@ mcn700_2000_get_current( void )
 {
     char buffer[ 100 ];
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     sprintf( buffer, "N1\n" );

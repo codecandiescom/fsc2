@@ -359,7 +359,7 @@ static bool
 lakeshore330_init( const char * name )
 {
     char buf[ 20 ];
-    long len = 20;
+    long len = sizeof buf;
     const char *in_units  = "KCS";
 
 
@@ -405,7 +405,7 @@ static double
 lakeshore330_sens_data( void )
 {
     char buf[ 50 ];
-    long len = 50;
+    long len = sizeof buf;
     double temp;
 
 
@@ -447,7 +447,7 @@ lakeshore330_get_unit( void )
 {
     const char *out_units = "KCVRM";
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
     long i;
 
 

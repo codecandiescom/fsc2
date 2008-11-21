@@ -67,7 +67,7 @@ bool
 rs690_init( const char * name )
 {
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
     char cmd[ 100 ];
 
 

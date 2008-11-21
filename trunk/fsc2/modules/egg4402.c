@@ -147,7 +147,7 @@ Var_T *
 boxcar_curve_length( Var_T * v )
 {
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
     long num_points;
     long inter;
 
@@ -466,8 +466,8 @@ boxcar_single_shot( Var_T * v )
     unsigned char stb = 0;
     char cmd[ 100 ];
     char reply[ 16 ];
+    long length = sizeof reply;
     char *cn;
-    long length = 16;
 
 
     if ( v == NULL )
@@ -553,7 +553,7 @@ boxcar_single_shot( Var_T * v )
     egg4402_command( cmd );
     egg4402_command( "DC 0 1\n" );
 
-    length = 16;
+    length = sizeof reply;
     if ( gpib_read( egg4402.device, reply, &length ) == FAILURE )
         egg4402_failure( );
 

@@ -1406,7 +1406,7 @@ static bool
 sr830_init( const char * name )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
     int i;
     bool is_auto_setup;
 
@@ -1427,7 +1427,7 @@ sr830_init( const char * name )
 
     /* Ask lock-in to send the error status byte and test if it does */
 
-    length = 20;
+    length = sizeof buffer;
     if (    gpib_write( sr830.device, "ERRS?\n", 6 ) == FAILURE
          || gpib_read( sr830.device, buffer, &length ) == FAILURE )
         return FAIL;
@@ -1440,9 +1440,9 @@ sr830_init( const char * name )
         do
         {
             stop_on_user_request( );
-            length = 20;
+            length = sizeof buffer;
         } while (    gpib_read( sr830.device, buffer, &length ) != FAILURE
-                  && length == 20 );
+                  && length == sizeof buffer );
     }
 
     /* If sensitivity, time constant or phase were set in one of the
@@ -1503,7 +1503,7 @@ static double
 sr830_get_data( void )
 {
     char buffer[ 50 ];
-    long length = 50;
+    long length = sizeof buffer;
 
 
     /* If in auto mode and the X channel is displayed in CH1 return the
@@ -1532,7 +1532,7 @@ sr830_get_xy_data( double * data,
 {
     char cmd[ 100 ] = "SNAP?";
     char buffer[ 200 ];
-    long length = 200;
+    long length = sizeof buffer;
     char *bp_cur, *bp_next = NULL;
     int i, j;
 
@@ -1692,7 +1692,7 @@ static double
 sr830_get_adc_data( long channel )
 {
     char buffer[ 16 ] = "OAUX?*\n";
-    long length = 16;
+    long length = sizeof buffer;
 
 
     fsc2_assert( channel >= 1 && channel <= 4 );
@@ -1737,7 +1737,7 @@ static double
 sr830_get_dac_data( long port )
 {
     char buffer [ 40 ];
-    long len = 40;
+    long len = sizeof buffer;
 
 
     fsc2_assert( port >= 1 && port <= 4 );
@@ -1757,7 +1757,7 @@ static double
 sr830_get_sens( void )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
     double sens;
 
 
@@ -1799,7 +1799,7 @@ static double
 sr830_get_tc( void )
 {
     char buffer[ 10 ];
-    long length = 10;
+    long length = sizeof buffer;
 
 
     sr830_talk( "OFLT?\n", buffer, &length );
@@ -1835,7 +1835,7 @@ static double
 sr830_get_phase( void )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
     double phase;
 
 
@@ -1881,7 +1881,7 @@ static double
 sr830_get_mod_freq( void )
 {
     char buffer[ 40 ];
-    long length = 40;
+    long length = sizeof buffer;
 
 
     sr830_talk( "FREQ?\n", buffer, &length );
@@ -1926,7 +1926,7 @@ static long
 sr830_get_mod_mode( void )
 {
     char buffer[ 10 ];
-    long length = 10;
+    long length = sizeof buffer;
 
 
     sr830_talk( "FMOD?\n", buffer, &length );
@@ -1942,7 +1942,7 @@ static long
 sr830_get_harmonic( void )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
 
 
     sr830_talk( "HARM?\n", buffer, &length );
@@ -1987,7 +1987,7 @@ static double
 sr830_get_mod_level( void )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
 
 
     sr830_talk( "SLVL?\n", buffer, &length );
@@ -2042,7 +2042,7 @@ static long
 sr830_get_sample_time( void )
 {
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
     long st_index;
 
 
@@ -2105,7 +2105,7 @@ sr830_get_display_channel( int channel )
 {
     char cmd[ 100 ];
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
     long type;
     char *sptr;
 
@@ -2191,7 +2191,7 @@ sr830_get_auto_data( int type )
 {
     char cmd[ 100 ];
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
     int channel;
     int i;
     char *ptr;
@@ -2260,7 +2260,7 @@ sr830_get_auto_data( int type )
 
         stop_on_user_request( );
 
-        length = 100;
+        length = sizeof buffer;
         sr830_talk( "SPTS?\n", buffer, &length );
 
         /* Store the time where we received the last data item */
@@ -2278,7 +2278,7 @@ sr830_get_auto_data( int type )
 
     sprintf( cmd, "TRCA? %d,%ld,1\n",
              channel + 1, sr830.data_fetched[ channel ]++ );
-    length = 100;
+    length = sizeof buffer;
     sr830_talk( cmd, buffer, &length );
     buffer[ length - 1 ] = '\0';
     return T_atod( buffer );

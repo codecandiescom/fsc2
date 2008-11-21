@@ -1314,7 +1314,7 @@ er032m_test_leds( void )
 
         is_overload = is_remote = UNSET;
 
-        length = 20;
+        length = sizeof buf;
         er032m_talk( "LE\r", buf, &length );
 
         bp = buf;
@@ -1375,7 +1375,7 @@ static double
 er032m_get_field( void )
 {
     char buf[ 30 ];
-    long length = 30;
+    long length = sizeof buf;
 
 
     if ( FSC2_MODE != EXPERIMENT )
@@ -1432,7 +1432,7 @@ static double
 er032m_get_cf( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     if ( FSC2_MODE != EXPERIMENT )
@@ -1499,7 +1499,7 @@ static double
 er032m_get_sw( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     if ( FSC2_MODE != EXPERIMENT )
@@ -1538,7 +1538,7 @@ static int
 er032m_get_swa( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     if ( FSC2_MODE != EXPERIMENT )

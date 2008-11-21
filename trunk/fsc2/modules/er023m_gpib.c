@@ -192,7 +192,7 @@ unsigned int
 er023m_get_data( void )
 {
     unsigned char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
     int i;
     int fac;
     int val = 0;
@@ -232,7 +232,7 @@ int
 er023m_get_rg( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     er023m_talk( "RG\r", buf, &len );
@@ -268,7 +268,7 @@ int
 er023m_get_tc( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     er023m_talk( "TC\r", buf, &len );
@@ -305,7 +305,7 @@ int
 er023m_get_ct( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     er023m_talk( "CT\r", buf, &len );
@@ -357,7 +357,7 @@ int
 er023m_get_ph( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     er023m_talk( "PH\r", buf, &len );
@@ -392,7 +392,7 @@ int
 er023m_get_ma( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     er023m_talk( "MA\r", buf, &len );
@@ -429,7 +429,7 @@ int
 er023m_get_of( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     er023m_talk( "OF\r", buf, &len );
@@ -465,7 +465,7 @@ int
 er023m_get_mf( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     er023m_talk( "MF\r", buf, &len );
@@ -499,7 +499,7 @@ int
 er023m_get_ha( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     er023m_talk( "HA\r", buf, &len );
@@ -533,7 +533,7 @@ int
 er023m_get_re( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
 
 
     er023m_talk( "RE\r", buf, &len );
@@ -570,7 +570,7 @@ int
 er023m_nb( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
     int nb;
 
 
@@ -609,7 +609,7 @@ unsigned char
 er023m_st( void )
 {
     char buf[ 30 ];
-    long len = 30;
+    long len = sizeof buf;
     int st;
 
 

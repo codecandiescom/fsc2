@@ -180,7 +180,7 @@ dg2020_init( const char * name )
     int i;
     Function_T *f;
     char reply[ 100 ];
-    long len = 100;
+    long len = sizeof reply;
 
 
     if ( gpib_init_device( name, &dg2020.device ) == FAILURE )
@@ -457,10 +457,11 @@ dg2020_make_blocks( int       num_blocks,
     l = 100;
     if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
         dg2020_gpib_failure( );
+
     if ( dummy[ 0 ] != '0' || l != 2 )
     {
         dg2020_command( "ALLE?\n" );
-        l = 1000;
+        l = sizeof dummy;
         if ( gpib_read( dg2020.device, dummy, &l ) == FAILURE )
             dg2020_gpib_failure( );
     }

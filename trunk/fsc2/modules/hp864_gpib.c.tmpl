@@ -52,7 +52,7 @@ hp864_tmpl_init( const char * name )
 {
     double att;
     char buffer[ 10 ];
-    long length = 10;
+    long length = sizeof buffer;
     int i;
 
 
@@ -165,7 +165,7 @@ bool
 hp864_tmpl_get_output_state( void )
 {
     char buffer[ 10 ];
-    long length = 10;
+    long length = sizeof buffer;
 
 
     hp864_tmpl_talk( "OUTP:STAT?\n", buffer, &length );
@@ -199,7 +199,7 @@ double
 hp864_tmpl_get_frequency( void )
 {
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
 
 
     hp864_tmpl_talk( "FREQ:CW?\n", buffer, &length );
@@ -234,7 +234,7 @@ double
 hp864_tmpl_get_attenuation( void )
 {
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
 
     hp864_tmpl_talk( "POW:AMPL?\n", buffer, &length );
     buffer[ length - 1 ] = '\0';
@@ -295,7 +295,7 @@ hp864_tmpl_get_mod_type( void )
 
     for ( i = 0; i < NUM_MOD_TYPES - 1; i++ )
     {
-        length = 100;
+        length = sizeof buffer;
         sprintf( cmd, "%s:STAT?\n", types[ i ] );
         hp864_tmpl_talk( cmd, buffer, &length );
 
@@ -384,12 +384,12 @@ hp864_tmpl_get_mod_source( int type )
     fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
 
     sprintf( cmd, "%s:SOUR?\n", types[ type ] );
-    length = 100;
+    length = sizeof buffer;
     hp864_tmpl_talk( cmd, buffer, &length );
 
     source = buffer[ 0 ] == 'I' ? 0 : 1;
 
-    length = 100;
+    length = sizeof buffer;
     if ( source == 0 )
     {
         sprintf( cmd, "%s:INT:FREQ?\n", types[ type ] );
@@ -454,7 +454,7 @@ hp864_tmpl_get_mod_ampl( int type )
 {
     const char *cmds[ ] = { "FM:DEV?\n", "AM:DEPT?\n", "PM:DEV?\n" };
     char buffer[ 100 ];
-    long length = 100;
+    long length = sizeof buffer;
 
 
     fsc2_assert( type >= 0 && type < NUM_MOD_TYPES );
@@ -483,10 +483,11 @@ static void
 hp864_tmpl_check_complete( void )
 {
     char buffer[ 10 ];
-    long length = 10;
+    long length;
 
 
     do {
+        length = sizeof buffer;
         hp864_tmpl_talk( "*OPC?\n", buffer, &length );
     } while ( buffer[ 1 ] != '1' );
 }

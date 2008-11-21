@@ -341,7 +341,7 @@ multimeter_get_data( Var_T * v )
 {
     char cmd[ ] = "Rx\n";
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
     double start_time;
     unsigned char stb = 0;
     int old_range = schlum7150.range;
@@ -424,6 +424,7 @@ multimeter_get_data( Var_T * v )
 
         if ( stb & 0x10 )
         {
+            length = sizeof reply;
             if ( gpib_read( schlum7150.device, reply, &length ) == FAILURE )
                 schlum7150_failure( );
 

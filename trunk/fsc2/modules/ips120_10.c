@@ -779,7 +779,7 @@ ips120_10_init( const char * name )
 
     /* Bring power supply in remote state */
 
-    ips120_10_talk( "C3\r", reply, 100 );
+    ips120_10_talk( "C3\r", reply, sizeof reply );
 
     /* Set the sweep power supply to send and accept data with extended
        resolution (this is one of the few commands that don't produce a
@@ -802,14 +802,14 @@ ips120_10_init( const char * name )
        allowed current range (unless they are larger than the ones set in the
        configuration file). */
 
-    length = ips120_10_talk( "R21\r", reply, 100 );
+    length = ips120_10_talk( "R21\r", reply, sizeof reply );
     reply[ length - 1 ] = '\0';
     cur_limit = T_atod( reply + 1 );
 
     if ( cur_limit > MIN_CURRENT )
         ips120_10.min_current = cur_limit;
 
-    length = ips120_10_talk( "R22\r", reply, 100 );
+    length = ips120_10_talk( "R22\r", reply, sizeof reply );
 
     reply[ length - 1 ] = '\0';
     cur_limit = T_atod( reply + 1 );
@@ -909,7 +909,7 @@ ips120_10_to_local( void )
         ips120_10.sweep_state = STOPPED;
     }
 
-    ips120_10_talk( "C2\r", reply, 100 );
+    ips120_10_talk( "C2\r", reply, sizeof reply );
 
     gpib_local( ips120_10.device );
 }
@@ -1348,7 +1348,7 @@ ips120_10_get_act_current( void )
 
     while ( retries-- )
     {
-        length = ips120_10_talk( "R0\r", reply, 100 );
+        length = ips120_10_talk( "R0\r", reply, sizeof reply );
 
         reply[ length - 1 ] = '\0';
 
@@ -1383,7 +1383,7 @@ ips120_10_set_target_current( double current )
 
     current = ips120_10_current_check( current );
     sprintf( cmd, "I%.4f\r", current );
-    ips120_10_talk( cmd, reply, 100 );
+    ips120_10_talk( cmd, reply, sizeof reply );
 
     return current;
 }
@@ -1405,7 +1405,7 @@ ips120_10_get_target_current( void )
 
     while ( retries-- )
     {
-        length = ips120_10_talk( "R5\r", reply, 100 );
+        length = ips120_10_talk( "R5\r", reply, sizeof reply );
         reply[ length - 1 ] = '\0';
         TRY
         {
@@ -1437,7 +1437,7 @@ ips120_10_set_sweep_rate( double sweep_rate )
 
     sweep_rate = ips120_10_sweep_rate_check( sweep_rate );
     sprintf( cmd, "S%.3f\r", sweep_rate * 60.0 );
-    ips120_10_talk( cmd, reply, 100 );
+    ips120_10_talk( cmd, reply, sizeof reply );
 
     return sweep_rate;
 }
@@ -1460,7 +1460,7 @@ ips120_10_get_sweep_rate( void )
 
     while ( retries-- )
     {
-        length = ips120_10_talk( "R6\r", reply, 100 );
+        length = ips120_10_talk( "R6\r", reply, sizeof reply );
         reply[ length - 1 ] = '\0';
 
         TRY
@@ -1547,7 +1547,7 @@ ips120_10_set_activity( int activity )
     }
 
     sprintf( cmd, "A%1d\r", act );
-    ips120_10_talk( cmd, reply, 100 );
+    ips120_10_talk( cmd, reply, sizeof reply );
 
     return activity;
 }

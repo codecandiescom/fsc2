@@ -1283,7 +1283,7 @@ bh15_fc_test_leds( void )
 
         is_overload = is_remote = UNSET;
 
-        length = 20;
+        length = sizeof buf;
         bh15_fc_talk( "LE\r", buf, &length );
 
         bp = buf;

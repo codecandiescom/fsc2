@@ -537,7 +537,7 @@ thurlby330_get_voltage( long channel )
 {
     char buffer[ 100 ];
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel == 1 || channel == 2 );
@@ -557,7 +557,7 @@ thurlby330_get_voltage_limit( long channel )
 {
     char buffer[ 100 ];
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel == 1 || channel == 2 );
@@ -598,7 +598,7 @@ thurlby330_get_current( long channel )
 {
     char buffer[ 100 ];
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel == 1 || channel == 2 );
@@ -618,7 +618,7 @@ thurlby330_get_current_limit( long channel )
 {
     char buffer[ 100 ];
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel == 1 || channel == 2 );

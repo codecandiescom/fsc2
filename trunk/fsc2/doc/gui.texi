@@ -243,11 +243,11 @@ curves, indicating for which of the curves the scale is valid.
 
 The topmost buttons on the left side
 @ifnotinfo
-(which both are switched on)
+(which both are switched on here)
 @end ifnotinfo
 let you decide which of the curves will be included in rescaling operations
 - this way you can rescale curves individually to account for e.g.@:
-different sensitivity settings.
+different sensitivity settings or to simply move them apart.
 
 The two buttons below, labeled @code{Undo} and @code{Print} allow you to
 undo the last rescaling operation or to send a snapshot of the current

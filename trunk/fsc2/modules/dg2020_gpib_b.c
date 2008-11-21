@@ -191,7 +191,7 @@ dg2020_init( const char * name )
     Function_T *f;
 #ifndef DG2020_B_GPIB_DEBUG
     char reply[ 100 ];
-    long len = 100;
+    long len = sizeof reply;
 #else
     UNUSED_ARGUMENT( name );
 #endif
@@ -431,10 +431,9 @@ dg2020_update_data( void )
     while( 1 )
     {
         char reply[ 10 ];
-        long len;
+        long len = sizeof reply;
 
         dg2020_command( "*ESE\n" );
-        len = 10;
         if ( gpib_read( dg2020.device, reply, &len ) == FAILURE )
             dg2020_gpib_failure( );
 #ifdef DG2020_B_GPIB_DEBUG

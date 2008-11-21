@@ -326,7 +326,7 @@ static bool
 pt2025_init( const char * name )
 {
     unsigned char buf[ 50 ];
-    long len = 50;
+    long len = sizeof buf;
     long status;
 
 
@@ -341,7 +341,7 @@ pt2025_init( const char * name )
 
     do
     {
-        len = 50;
+        len = sizeof buf;
         if (    gpib_write( pt2025.device, "S3\r\n", 4 ) == FAILURE
              || gpib_read( pt2025.device, ( char * ) buf, &len ) == FAILURE )
             return FAIL;
@@ -401,7 +401,7 @@ pt2025_init( const char * name )
 
     /* Get first field value */
 
-    len = 50;
+    len = sizeof buf;
     if ( gpib_read( pt2025.device, ( char * ) buf, &len ) == FAILURE )
         return FAIL;
 
@@ -425,7 +425,7 @@ pt2025_get_field( void )
     {
         stop_on_user_request( );
 
-        len = 50;
+        len = sizeof buf;
         if ( gpib_read( pt2025.device, buf, &len ) == FAILURE )
         {
             print( FATAL, "Can't access the NMR gaussmeter.\n" );

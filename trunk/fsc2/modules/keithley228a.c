@@ -606,7 +606,7 @@ keithley228a_init( const char * name )
 {
     char cmd[ 100 ];
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     /* Initialize GPIB communication with the power supply */
@@ -641,8 +641,8 @@ keithley228a_init( const char * name )
 
     /* Get state of power supply and switch state to OPERATE */
 
-    length = 100;
     keithley228a_command( "U0X\r\n" );
+    length = sizeof reply;
     if ( gpib_read( keithley228a.device, reply, &length ) == FAILURE )
         keithley228a_gpib_failure( );
 
@@ -685,7 +685,7 @@ static bool
 keithley228a_set_state( bool new_state )
 {
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
     double dummy;
 
 
@@ -699,7 +699,7 @@ keithley228a_set_state( bool new_state )
     {
         if ( keithley228a.state == OPERATE )
         {
-            length = 100;
+            length = sizeof reply;
             if ( gpib_read( keithley228a.device, reply, &length ) == FAILURE )
                 keithley228a_gpib_failure( );
             sscanf( reply, "%lf,%lf", &dummy, &keithley228a.current);
@@ -714,7 +714,7 @@ keithley228a_set_state( bool new_state )
            voltages across the terminals induced by the decaying field in
            the sweep coil ! */
 
-        length = 100;
+        length = sizeof reply;
         if ( gpib_read( keithley228a.device, reply, &length ) == FAILURE )
             keithley228a_gpib_failure( );
         sscanf( reply, "%lf,%lf", &dummy, &keithley228a.current);
@@ -775,7 +775,7 @@ keithley228a_goto_current( double new_current )
     double del_amps;
     double act_amps;
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
     double dummy;
     int max_tries = 100;
     bool do_test;
@@ -823,7 +823,7 @@ keithley228a_goto_current( double new_current )
         do
         {
             fsc2_usleep( 100000, UNSET );
-            length = 100;
+            length = sizeof reply;
             if ( gpib_read( keithley228a.device, reply, &length ) == FAILURE )
                 keithley228a_gpib_failure( );
             sscanf( reply, "%lf,%lf", &dummy, &act_amps );

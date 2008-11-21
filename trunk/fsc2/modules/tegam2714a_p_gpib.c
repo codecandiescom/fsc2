@@ -48,7 +48,7 @@ void
 tegam2714a_p_init( const char * name )
 {
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
     char cmd[ 100 ];
     char *ptr;
     size_t i;
@@ -197,7 +197,7 @@ static double
 tegam2714a_p_get_timebase( void )
 {
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     tegam2714a_p_write( "SCLK?\n", 6 );
@@ -239,7 +239,7 @@ static double
 tegam2714a_p_get_amplitude( void )
 {
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     tegam2714a_p_write( "AMPL?\n", 6 );
@@ -281,7 +281,7 @@ static double
 tegam2714a_p_get_offset( void )
 {
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     tegam2714a_p_write( "OFST?\n", 6 );

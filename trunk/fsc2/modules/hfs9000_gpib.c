@@ -39,7 +39,7 @@ hfs9000_init( const char * name )
     int i;
     char cmd[ 100 ];
     char reply[ 100 ];
-    long len = 100;
+    long len = sizeof reply;
 
 
     if ( gpib_init_device( name, &hfs9000.device ) == FAILURE )
@@ -377,7 +377,7 @@ hfs9000_get_channel_state( int channel )
 {
     char cmd[ 100 ];
     char reply[ 100 ];
-    long len = 100;
+    long len = sizeof reply;
 
 
     fsc2_assert ( IS_NORMAL_CHANNEL( channel ) );
@@ -440,7 +440,7 @@ hfs9000_operation_complete( void )
     do
     {
         stop_on_user_request( );
-        len = 10;
+        len = sizeof reply;
         if (    gpib_write( hfs9000.device, "*OPC?\n", 6 ) == FAILURE
              || gpib_read( hfs9000.device, reply, &len ) == FAILURE )
             hfs9000_gpib_failure( );

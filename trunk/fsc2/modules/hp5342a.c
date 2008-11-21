@@ -293,10 +293,11 @@ static double
 hp5342a_get_freq( void )
 {
     char buf[ 22 ];
-    long len = 22;
+    long len = sizeof buf;
+
 
     if (    gpib_read( hp5342a.device, buf, &len ) == FAILURE
-         || len != 22
+         || len != sizeof buf
          || strncmp( buf, " F  ", 4 ) )
     {
         print( FATAL, "Communication with device failed.\n" );

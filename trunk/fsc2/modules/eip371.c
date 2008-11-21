@@ -348,8 +348,8 @@ static double
 eip371_get_freq( void )
 {
     char buf[ 16 ];
+    long len = sizeof buf;
 	size_t i = 0;
-    long len = 16;
 
 
     if ( gpib_read( eip371.device, buf, &len ) == FAILURE || len != 16 )

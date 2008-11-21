@@ -46,7 +46,7 @@ tds_tmpl_init( const char * name )
     int ch;
     double cp1, cp2;
     char buffer[ 100 ];
-    long len = 100;
+    long len = sizeof buffer;
     bool lock_state;
     int on_count, needed_count, needed_on_count;
 
@@ -231,7 +231,7 @@ double
 tds_tmpl_get_timebase( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     tds_tmpl_talk( "HOR:MAI:SCA?\n", reply, &length );
@@ -282,7 +282,7 @@ long
 tds_tmpl_get_record_length( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     char *r = reply;
 
 
@@ -322,7 +322,7 @@ double
 tds_tmpl_get_trigger_pos( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     tds_tmpl_talk( "HOR:TRIG:POS?\n", reply, &length );
@@ -339,7 +339,7 @@ long
 tds_tmpl_get_num_avg( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     if ( tds_tmpl_get_acq_mode( ) == AVERAGE )
@@ -395,7 +395,7 @@ int
 tds_tmpl_get_acq_mode( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     tds_tmpl_talk( "ACQ:MOD?\n", reply, &length );
@@ -420,7 +420,7 @@ tds_tmpl_get_cursor_position( int cur_no )
 {
     char cmd[ 40 ] = "CURS:VBA:POSITION";
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
     fsc2_assert( cur_no == 1 || cur_no == 2 );
 
@@ -475,7 +475,7 @@ int
 tds_tmpl_get_trigger_channel( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     tds_tmpl_talk( "TRIG:MAI:EDGE:SOU?\n", reply, &length );
@@ -543,7 +543,7 @@ void
 tds_tmpl_clear_SESR( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     tds_tmpl_talk( "*ESR?\n", reply, &length );
@@ -598,7 +598,7 @@ tds_tmpl_display_channel_state( int channel )
 {
     char cmd[ 30 ];
     char reply[ 10 ];
-    long length = 10;
+    long length = sizeof reply;
 
 
     fsc2_assert(    channel >= TDS_TMPL_CH1
@@ -652,7 +652,7 @@ tds_tmpl_get_sens( int channel )
 {
     char cmd[ 30 ];
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel >= TDS_TMPL_CH1 && channel < NUM_NORMAL_CHANNELS );
@@ -678,7 +678,7 @@ tds_tmpl_set_sens( int    channel,
     char cmd[ 40 ];
 #ifdef CHECK_SENS_IMPEDANCE
     char reply[ 40 ];
-    long length = 40;
+    long length = sizeof reply;
 #endif
 
 
@@ -764,11 +764,9 @@ tds_tmpl_get_area( int        channel,
     return tds_tmpl_get_area_wo_cursor( channel, w );
 
 #else
-
     char cmd[ 50 ];
     char reply[ 40 ];
-    long length = 40;
-
+    long length = sizeof reply;
 
 
     if ( ! use_cursor )
@@ -802,7 +800,7 @@ tds_tmpl_get_area( int        channel,
         {
             stop_on_user_request( );
 
-            length = 40;
+            length = sizeof reply;
             usleep( 100000 );
             tds_tmpl_talk( "BUSY?\n", reply, &length );
         } while ( reply[ 0 ] == '1' );
@@ -811,12 +809,11 @@ tds_tmpl_get_area( int        channel,
 
     /* Get the the area */
 
-    length = 40;
+    length = sizeof reply;
     tds_tmpl_talk( "*WAI;:MEASU:IMM:VAL?\n", reply, &length );
 
     reply[ length - 1 ] = '\0';
     return T_atod( reply );
-
 #endif
 }
 
@@ -835,7 +832,7 @@ tds_tmpl_get_area_wo_cursor( int        channel,
     double pos = 0.0;
     char cmd[ 100 ];
     char buf[ 100 ];
-    long len = 100;
+    long len = sizeof buf;
 
 
     tds_tmpl_get_curve( channel, w, &data, &length, UNSET );
@@ -884,13 +881,14 @@ tds_tmpl_get_curve( int        channel,
 {
     char cmd[ 50 ];
     char reply[ 10 ];
-    long len = 10;
+    long len = sizeof reply;
     char *buffer = NULL;
     char *b;
     long i;
     double sens;
     double scale;
-    long len1, len2;
+    long len1,
+         len2;
 
 
     CLOBBER_PROTECT( buffer );
@@ -972,7 +970,7 @@ tds_tmpl_get_curve( int        channel,
         {
             stop_on_user_request( );
 
-            len = 10;
+            len = sizeof reply;
             usleep( 100000 );
             tds_tmpl_talk( "BUSY?\n", reply, &len );
         } while ( reply[ 0 ] == '1' );
@@ -1059,7 +1057,7 @@ tds_tmpl_get_amplitude( int        channel,
 
     char cmd[ 50 ];
     char reply[ 40 ];
-    long length = 40;
+    long length = sizeof reply;
 
 
     if ( ! use_cursor )
@@ -1093,7 +1091,7 @@ tds_tmpl_get_amplitude( int        channel,
         {
             stop_on_user_request( );
 
-            length = 40;
+            length = sizeof reply;
             usleep( 100000 );
             tds_tmpl_talk( "BUSY?\n", reply, &length );
         } while ( reply[ 0 ] == '1' );
@@ -1102,7 +1100,7 @@ tds_tmpl_get_amplitude( int        channel,
 
     /* Get the the amplitude */
 
-    length = 40;
+    length = sizeof reply;
     tds_tmpl_command( "*WAI\n" );
     tds_tmpl_talk( "MEASU:IMM:VAL?\n", reply, &length );
 
@@ -1122,8 +1120,11 @@ static double
 tds_tmpl_get_amplitude_wo_cursor( int        channel,
                                   Window_T * w )
 {
-    double *data, min, max;
-    long length, i;
+    double *data,
+           min,
+           max;
+    long length,
+         i;
 
 
     tds_tmpl_get_curve( channel, w, &data, &length, UNSET );
@@ -1195,8 +1196,8 @@ tds_tmpl_copy_curve( int src,
                      int dest )
 {
     char cmd[ 100 ] = "SAV:WAVEFORM ";
+    char reply[ 40 ];
     long length;
-    char reply[ 20 ];
 
 
     fsc2_assert( src >= TDS_TMPL_CH1 && src < TDS_TMPL_REF4 );
@@ -1212,7 +1213,7 @@ tds_tmpl_copy_curve( int src,
         {
             stop_on_user_request( );
 
-            length = 40;
+            length = sizeof reply;
             usleep( 100000 );
             tds_tmpl_talk( "BUSY?\n", reply, &length );
         } while ( reply[ 0 ] == '1' );

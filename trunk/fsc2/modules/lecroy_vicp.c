@@ -24,16 +24,16 @@
 
 /* The following is a set of routines that can be used by progams that need
    to communicate with devices using the LeCroy VICP (Versatile Instrument
-   Controll Protocol) protocol, running on top of TCP/IP. It uses a TCP
-   connection and runs over port 1861.
+   Control Protocol), running on top of TCP/IP. It uses a TCP connection on
+   port 1861.
 
-   Basically, the Lecroy VICP protocol just tells that before data are
+   Basically the Lecroy VICP protocol just tells that before data are
    exchanged a header must be sent. The header has the form
 
    struct LeCroy_VICP_Header {
        unsigned char  operation;
        unsigned char  header version;
-       unsigned char  sequence_number;    // only for version 1A and later
+       unsigned char  sequence_number;    // only set in version 1A and later
        unsigned char  reserved;
        uint_32        block_length;       // in big-endian format
    }
@@ -118,7 +118,7 @@
    down the existing connection. It throws an exception when you try to
    close an already closed connection.
 
-   lecroy_vicp_lock_out() allows you to control if the DSO is in
+   lecroy_vicp_lock_out() allows you to control if the device is in
    local_lockout state (the default when a connection is made) or not.
    By calling the funtion with a true boolean value local lockout gets
    switched on, switch it off by calling it with a false value.
@@ -163,7 +163,7 @@
    and the third one shows if the data sent have a trailing EOI, even if the
    function did return with FAILURE or threw an exception.
 
-   if  the function returns less data than the device was willing to send
+   If  the function returns less data than the device was willing to send
    (in which case SUCCESS_BUT_MORE gets returned) the next invocation of
    lecroy_vicp_read() will return these yet unread data, even if another
    reply by the device was initiated by sending another command in between.
@@ -177,12 +177,12 @@
    after receipt of a signal you must make sure that the remaining data
    are fetched from or get send to the device.
 
-   lecroy_vicp_device_clear() allows to clear the device and reset the
-   connection. Clearing the device includes clearing its input and output
-   buffers and aborting the interpretation of the current connand (if any)
-   as well as clearing all pending commands. Status and status enable
-   registers remain unchanged. All of this may take several seconds to
-   finish. The function also closes and reopens the connection to the
+   The function lecroy_vicp_device_clear() allows to clear the device and
+   reset the connection. Clearing the device includes clearing its input
+   and output buffers and aborting the interpretation of the current command
+   (if any) as well as clearing all pending commands. Status and status
+   enable registers remain unchanged. All of this may take several seconds
+   to finish. The function also closes and reopens the connection to the
    device.
 
 
@@ -200,7 +200,7 @@
 
    were of great help in writing my own implementation, especially given
    the rather meager amount of information in the Remote Control Manuals
-   by LeCroy, and are gratefully acknowledged.
+   by LeCroy.
 */
 
 
@@ -710,7 +710,7 @@ lecroy_vicp_read( char *    buffer,
     long            us_timeout = lecroy_vicp.us_read_timeout;
 
 
-    /* Do nothing if there are no data to be read */
+    /* Do nothing if no data are to be read */
 
     if ( *length == 0 )
         return SUCCESS;

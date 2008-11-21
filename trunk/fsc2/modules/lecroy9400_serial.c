@@ -40,7 +40,7 @@ bool
 lecroy9400_init( void )
 {
     char buffer[ 100 ];
-    long len = 100;
+    long len = sizeof buffer;
     int i;
 
 
@@ -124,7 +124,7 @@ double
 lecroy9400_get_timebase( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     lecroy9400_talk( "TD,?\n", reply, &length );
@@ -158,7 +158,7 @@ int
 lecroy9400_get_trigger_source( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     int src;
 
 
@@ -213,7 +213,7 @@ double
 lecroy9400_get_trigger_level( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     lecroy9400_talk( "TRL,?\n", reply, &length );
@@ -248,7 +248,7 @@ lecroy9400_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
@@ -293,7 +293,7 @@ lecroy9400_get_offset( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
@@ -339,7 +339,7 @@ lecroy9400_get_coupling( int channel )
     char cmd[ 20 ];
     int type;
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
@@ -390,7 +390,7 @@ bool
 lecroy9400_is_displayed( int channel )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     char const *cmds[ ] = { "TRC1,?\n", "TRC2,?\n", "TRMC,?\n", "TRMD,?\n",
                             "TRFE,?\n", "TRFF,?\n" };
 

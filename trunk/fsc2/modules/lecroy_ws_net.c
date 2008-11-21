@@ -86,7 +86,7 @@ lecroy_ws_init( const char * name )
              != SUCCESS )
             lecroy_ws_lan_failure( );
 
-        len = 100;
+        len = sizeof buffer;
         if ( lecroy_vicp_read( buffer, &len, &with_eoi, UNSET ) == FAILURE )
             lecroy_ws_lan_failure( );
 
@@ -291,7 +291,7 @@ double
 lecroy_ws_get_timebase( void )
 {
     char reply[ 30 ];
-    ssize_t len = 30;
+    ssize_t len = sizeof reply;
     double timebase;
     size_t i;
 
@@ -345,7 +345,7 @@ bool
 lecroy_ws_get_interleaved( void )
 {
     char reply[ 30 ];
-    ssize_t len = 30;
+    ssize_t len = sizeof reply;
 
 
     if ( lecroy_ws_talk( "ILVD?\n", reply, &len ) != SUCCESS )
@@ -383,7 +383,7 @@ long
 lecroy_ws_get_memory_size( void )
 {
     char reply[ 30 ];
-    ssize_t len = 30;
+    ssize_t len = sizeof reply;
     long mem_size;
 
 
@@ -436,7 +436,7 @@ lecroy_ws_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
-    ssize_t len = 30;
+    ssize_t len = sizeof reply;
 
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
@@ -480,7 +480,7 @@ double
 lecroy_ws_get_offset( int channel )
 {
     char buf[ 30 ];
-    ssize_t len = 30;
+    ssize_t len = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
@@ -525,7 +525,7 @@ lecroy_ws_get_coupling( int channel )
 {
     int type = LECROY_WS_CPL_INVALID;
     char buf[ 100 ];
-    ssize_t len = 100;
+    ssize_t len = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
@@ -590,7 +590,7 @@ int
 lecroy_ws_get_bandwidth_limiter( int channel )
 {
     char buf[ 30 ] = "BWL?\n";
-    ssize_t len = 30;
+    ssize_t len = sizeof buf;
     int mode = -1;
     char *ptr;
     char look_for[ 4 ];
@@ -676,7 +676,7 @@ int
 lecroy_ws_get_trigger_source( void )
 {
     char reply[ 100 ];
-    ssize_t len = 100;
+    ssize_t len = sizeof reply;
     int src;
     char *ptr = reply + 7;
 
@@ -752,7 +752,7 @@ double
 lecroy_ws_get_trigger_level( int channel )
 {
     char buf[ 30 ];
-    ssize_t len = 30;
+    ssize_t len = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY_WS_CH1
@@ -814,7 +814,7 @@ bool
 lecroy_ws_get_trigger_slope( int channel )
 {
     char buf[ 30 ];
-    ssize_t len = 30;
+    ssize_t len = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY_WS_CH1
@@ -884,7 +884,7 @@ int
 lecroy_ws_get_trigger_coupling( int channel )
 {
     char buf[ 40 ];
-    ssize_t len = 40;
+    ssize_t len = sizeof buf;
     int cpl = -1;
 
 
@@ -974,7 +974,7 @@ int
 lecroy_ws_get_trigger_mode( void )
 {
     char buf[ 40 ];
-    ssize_t len = 40;
+    ssize_t len = sizeof buf;
     int mode = -1;
 
 
@@ -1027,7 +1027,7 @@ double
 lecroy_ws_get_trigger_delay( void )
 {
     char reply[ 40 ];
-    ssize_t len = 40;
+    ssize_t len = sizeof reply;
 
 
     if ( lecroy_ws_talk( "TRDL?\n", reply, &len ) != SUCCESS )
@@ -1079,7 +1079,7 @@ bool
 lecroy_ws_is_displayed( int ch )
 {
     char cmd[ 130 ];
-    ssize_t len = 130;
+    ssize_t len = sizeof cmd;
 
 
     if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
@@ -1180,7 +1180,6 @@ lecroy_normal_channel_averaging( int  channel,
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
     fsc2_assert( num_avg > 0 && num_avg < LECROY_WS_MAX_AVERAGES );
-
 
     sprintf( cmd, "VBS 'app.Acquisition.C%d.AverageSweeps=%ld'\n",
              channel - LECROY_WS_CH1 + 1, num_avg );
@@ -1649,7 +1648,7 @@ lecroy_ws_get_int_value( int          ch,
                          const char * name )
 {
     char cmd[ 100 ];
-    ssize_t len = 100;
+    ssize_t len = sizeof cmd;
     char *ptr;
 
 
@@ -1684,7 +1683,7 @@ lecroy_ws_get_float_value( int          ch,
                            const char * name )
 {
     char cmd[ 100 ];
-    ssize_t len = 100;
+    ssize_t len = sizeof cmd;
     char *ptr = cmd;
 
 
@@ -1746,8 +1745,8 @@ lecroy_ws_command( const char * cmd )
 static unsigned int
 lecroy_ws_get_inr( void )
 {
-    char reply[ 10 ] = "INR?";
-    ssize_t len = 10;
+    char reply[ 10 ];
+    ssize_t len = sizeof reply;
 
 
     if ( lecroy_ws_talk( "INR?\n", reply, &len ) != SUCCESS )

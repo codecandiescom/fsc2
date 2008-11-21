@@ -53,7 +53,7 @@ hp8672a_init( const char * name )
 {
     double att;
     char buffer[ 10 ];
-    long length = 10;
+    long length = sizeof buffer;
 
 
     if ( gpib_init_device( name, &hp8672a.device ) == FAILURE )
@@ -159,7 +159,7 @@ bool
 hp8672a_get_output_state( void )
 {
     char buffer[ 10 ];
-    long length = 10;
+    long length = sizeof buffer;
 
 
     if ( gpib_read( hp8672a.device, buffer, &length ) == FAILURE )

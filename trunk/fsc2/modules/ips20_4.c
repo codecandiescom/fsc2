@@ -687,7 +687,7 @@ magnet_command( Var_T * v )
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-            ips20_4_talk( cmd, reply, 100 );
+            ips20_4_talk( cmd, reply, sizeof reply );
             T_free( cmd );
             TRY_SUCCESS;
         }
@@ -734,14 +734,14 @@ ips20_4_init( const char * name )
        supply in remote state */
 
     sprintf( cmd, "@%1dC3\r", MASTER_ISOBUS_ADDRESS );
-    ips20_4_talk( cmd, reply, 100 );
+    ips20_4_talk( cmd, reply, sizeof reply );
 
     sprintf( cmd, "@%1dQ0\r", MASTER_ISOBUS_ADDRESS );
     if ( gpib_write( ips20_4.device, cmd, 5 ) == FAILURE )
         ips20_4_comm_failure( );
 
     sprintf( cmd, "@%1dC3\r", IPS20_4_ISOBUS_ADDRESS );
-    ips20_4_talk( cmd, reply, 100 );
+    ips20_4_talk( cmd, reply, sizeof reply );
 
     /* Set the sweep power supply to send and accept data with extended
        resolution (this is one of the few commands that don't produce a
@@ -766,7 +766,7 @@ ips20_4_init( const char * name )
        configuration file). */
 
     sprintf( cmd, "@%1dR21\r", IPS20_4_ISOBUS_ADDRESS );
-    length = ips20_4_talk( cmd, reply, 100 );
+    length = ips20_4_talk( cmd, reply, sizeof reply );
     reply[ length - 1 ] = '\0';
     cur_limit = T_atod( reply + 1 );
 
@@ -774,7 +774,7 @@ ips20_4_init( const char * name )
         ips20_4.min_current = cur_limit;
 
     sprintf( cmd, "@%1dR22\r", IPS20_4_ISOBUS_ADDRESS );
-    length = ips20_4_talk( cmd, reply, 100 );
+    length = ips20_4_talk( cmd, reply, sizeof reply );
 
     reply[ length - 1 ] = '\0';
     cur_limit = T_atod( reply + 1 );
@@ -872,10 +872,10 @@ ips20_4_to_local( void )
     }
 
     sprintf( cmd, "@%1dC0\r", IPS20_4_ISOBUS_ADDRESS );
-    ips20_4_talk( cmd, reply, 100 );
+    ips20_4_talk( cmd, reply, sizeof reply );
 
     sprintf( cmd, "@%1dC0\r", MASTER_ISOBUS_ADDRESS );
-    ips20_4_talk( cmd, reply, 100 );
+    ips20_4_talk( cmd, reply, sizeof reply );
 
     gpib_local( ips20_4.device );
 }
@@ -1301,7 +1301,7 @@ ips20_4_get_act_current( void )
 
 
     sprintf( cmd, "@%1dR0\r", IPS20_4_ISOBUS_ADDRESS );
-    length = ips20_4_talk( cmd, reply, 100 );
+    length = ips20_4_talk( cmd, reply, sizeof reply );
 
     reply[ length - 1 ] = '\0';
     return T_atod( reply + 1 );
@@ -1322,7 +1322,7 @@ ips20_4_set_target_current( double current )
 
     current = ips20_4_current_check( current );
     sprintf( cmd, "@%1dI%.4f\r", IPS20_4_ISOBUS_ADDRESS, current );
-    ips20_4_talk( cmd, reply, 100 );
+    ips20_4_talk( cmd, reply, sizeof reply );
 
     return current;
 }
@@ -1341,7 +1341,7 @@ ips20_4_get_target_current( void )
 
 
     sprintf( cmd, "@%1dR5\r", IPS20_4_ISOBUS_ADDRESS );
-    length = ips20_4_talk( cmd, reply, 100 );
+    length = ips20_4_talk( cmd, reply, sizeof reply );
 
     reply[ length - 1 ] = '\0';
     return T_atod( reply + 1 );
@@ -1362,7 +1362,7 @@ ips20_4_set_sweep_rate( double sweep_rate )
     sweep_rate = ips20_4_sweep_rate_check( sweep_rate );
 
     sprintf( cmd, "@%1dS%.3f\r", IPS20_4_ISOBUS_ADDRESS, sweep_rate * 60.0 );
-    ips20_4_talk( cmd, reply, 100 );
+    ips20_4_talk( cmd, reply, sizeof reply );
 
     return sweep_rate;
 }
@@ -1381,7 +1381,7 @@ ips20_4_get_sweep_rate( void )
 
 
     sprintf( cmd, "@%1dR6\r", IPS20_4_ISOBUS_ADDRESS );
-    length = ips20_4_talk( cmd, reply, 100 );
+    length = ips20_4_talk( cmd, reply, sizeof reply );
 
     reply[ length - 1 ] = '\0';
     return T_atod( reply + 1 ) / 60.0;
@@ -1455,7 +1455,7 @@ ips20_4_set_activity( int activity )
     }
 
     sprintf( cmd, "@%1dA%1d\r", IPS20_4_ISOBUS_ADDRESS, act );
-    ips20_4_talk( cmd, reply, 100 );
+    ips20_4_talk( cmd, reply, sizeof reply );
 
     return activity;
 }

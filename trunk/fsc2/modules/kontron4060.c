@@ -256,7 +256,7 @@ Var_T *
 multimeter_get_data( Var_T * v  UNUSED_ARG )
 {
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
     char buffer[ 100 ];
     double val;
 

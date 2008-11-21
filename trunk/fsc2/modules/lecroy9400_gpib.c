@@ -41,7 +41,7 @@ bool
 lecroy9400_init( const char * name )
 {
     char buffer[ 100 ];
-    long len = 100;
+    long len = sizeof buffer;
     int i;
 
 
@@ -189,7 +189,7 @@ double
 lecroy9400_get_timebase( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     lecroy9400_talk( "TD,?", reply, &length );
@@ -225,7 +225,7 @@ int
 lecroy9400_get_trigger_source( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     int src = LECROY9400_UNDEF;
 
 
@@ -282,7 +282,7 @@ int
 lecroy9400_get_trigger_mode( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     int mode = LECROY9400_UNDEF;
 
 
@@ -327,7 +327,7 @@ int
 lecroy9400_get_trigger_coupling( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     int cpl = LECROY9400_UNDEF;
 
 
@@ -374,7 +374,7 @@ double
 lecroy9400_get_trigger_level( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     lecroy9400_talk( "TRL,?", reply, &length );
@@ -408,7 +408,7 @@ int
 lecroy9400_get_trigger_slope( void )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     int slope = LECROY9400_UNDEF;
 
 
@@ -451,7 +451,7 @@ lecroy9400_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
@@ -497,7 +497,7 @@ lecroy9400_get_offset( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
@@ -544,7 +544,7 @@ lecroy9400_get_coupling( int channel )
     char cmd[ 20 ];
     int type = LECROY9400_UNDEF;
     char reply[ 100 ];
-    long length = 100;
+    long length = sizeof reply;
 
 
     fsc2_assert( channel == LECROY9400_CH1 || channel == LECROY9400_CH2 );
@@ -598,7 +598,8 @@ int
 lecroy9400_get_bandwidth_limiter( void )
 {
     char buf[ 30 ] = "BW,?";
-    long length = 30;
+    long length = sizeof buf;
+
 
     lecroy9400_talk( ( const char * ) buf, buf, &length );
     return buf[ 1 ] == 'N';
@@ -627,7 +628,7 @@ bool
 lecroy9400_is_displayed( int channel )
 {
     char reply[ 30 ];
-    long length = 30;
+    long length = sizeof reply;
     char const *cmds[ ] = { "TRC1,?", "TRC2,?", "TRMC,?",
                             "TRMD,?", "TRFE,?", "TRFF,?" };
 
@@ -755,7 +756,7 @@ double
 lecroy9400_get_trigger_delay( void )
 {
     char reply[ 40 ];
-    long length = 40;
+    long length = sizeof reply;
     double delay;
 
 

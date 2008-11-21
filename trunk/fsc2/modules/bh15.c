@@ -144,7 +144,7 @@ bh15_exp_hook( void )
 
         bh15_command( "LE\r" );
 
-        len = 20;
+        len = sizeof buffer;
         if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
         {
             print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
@@ -301,7 +301,7 @@ bh15_get_field( void )
 
         bh15_command( "LE\r" );
 
-        len = 20;
+        len = sizeof buffer;
         if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
         {
             print( FATAL, "Can't access the Bruker BH15 field controller.\n" );
@@ -321,7 +321,7 @@ bh15_get_field( void )
 
         bh15_command( "FV\r" );
 
-        len = 20;
+        len = sizeof buffer;
         if ( gpib_read( bh15.device, buffer, &len ) == FAILURE )
         {
             print( FATAL, "Can't access the Bruker BH15 field controller.\n" );

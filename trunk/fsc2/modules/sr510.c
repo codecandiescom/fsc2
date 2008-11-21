@@ -723,7 +723,7 @@ static bool
 sr510_init( const char * name )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
     int i;
 
 
@@ -779,7 +779,7 @@ static double
 sr510_get_data( void )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
 
 
     sr510_talk( "Q\n",buffer, &length );
@@ -798,7 +798,7 @@ static double
 sr510_get_adc_data( long channel )
 {
     char buffer[ 5 ] = "X*\n";
-    long length = 16;
+    long length = sizeof buffer;
 
 
     fsc2_assert( channel >= 1 && channel <= 4 );
@@ -818,7 +818,7 @@ static double
 sr510_get_sens( void )
 {
     char buffer[ 10 ];
-    long length = 10;
+    long length = sizeof buffer;
     double sens;
 
     /* Ask lock-in for the sensitivity setting */
@@ -830,7 +830,7 @@ sr510_get_sens( void )
     /* Check if EXPAND is switched on - this increases the sensitivity
        by a factor of 10 */
 
-    length = 10;
+    length = sizeof buffer;
     sr510_talk( "E\n", buffer, &length );
 
     if ( buffer[ 0 ] == '1' )
@@ -896,7 +896,7 @@ static double
 sr510_get_tc( void )
 {
     char buffer[ 10 ];
-    long length = 10;
+    long length = sizeof buffer;
 
 
     sr510_talk( "T1\n", buffer, &length );
@@ -946,7 +946,7 @@ static double
 sr510_get_phase( void )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
     double phase;
 
 
@@ -990,7 +990,7 @@ static double
 sr510_get_ref_freq( void )
 {
     char buffer[ 50 ];
-    long length = 50;
+    long length = sizeof buffer;
 
 
     sr510_talk( "F\n", buffer, &length );

@@ -231,10 +231,11 @@ static double
 hp5340a_get_freq( void )
 {
     char buf[ 16 ];
-    long len = 16;
+    long len = sizeof buf;
+
 
     if (    gpib_read( hp5340a.device, buf, &len ) == FAILURE
-         || len != 16 )
+         || len != sizeof buf )
     {
         print( FATAL, "Communication with device failed.\n" );
         THROW( EXCEPTION );
