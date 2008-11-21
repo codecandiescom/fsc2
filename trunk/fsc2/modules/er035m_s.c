@@ -243,7 +243,7 @@ int
 er035m_s_exp_hook( void )
 {
     char buffer[ 21 ], *bp;
-    size_t length = 20;
+    size_t length = sizeof buffer - 1;
     Var_T *v;
     long retries;
     int cur_res;
@@ -292,7 +292,7 @@ er035m_s_exp_hook( void )
         if ( er035m_s_write( "PS" ) == FAIL )
             er035m_s_comm_fail( );
 
-        length = 20;
+        length = sizeof buffer - 1;
         if ( er035m_s_read( buffer, &length ) == OK )
             break;
 
@@ -499,7 +499,7 @@ find_field( Var_T * v  UNUSED_ARG )
             if ( er035m_s_write( "PS" ) == FAIL )
                 er035m_s_comm_fail( );
 
-            length = 20;
+            length = sizeof buffer - 1;
             if ( er035m_s_read( buffer, &length ) == OK )
                 break;
 
@@ -851,7 +851,7 @@ er035m_s_get_field( void )
             if ( er035m_s_write( "PF" ) == FAIL )
                 er035m_s_comm_fail( );
 
-            length = 20;
+            length = sizeof buffer - 1;
             if ( er035m_s_read( buffer, &length ) == OK )
                 break;
 
@@ -906,7 +906,7 @@ er035m_s_get_resolution( void )
 {
     int retries;
     char buffer[ 20 ];
-    size_t length = 20;
+    size_t length = sizeof buffer;
 
 
     for ( retries = FAIL_RETRIES; ; retries-- )
@@ -916,7 +916,7 @@ er035m_s_get_resolution( void )
         if ( er035m_s_write( "RS" ) == FAIL )
             er035m_s_comm_fail( );
 
-        length = 20;
+        length = sizeof buffer;
         if ( er035m_s_read( buffer, &length ) == OK )
             break;
 
@@ -966,7 +966,7 @@ er035m_s_get_upper_search_limit( void )
 {
     int retries;
     char buffer[ 20 ];
-    size_t length = 20;
+    size_t length = sizeof buffer;
     char *ptr;
 
 
@@ -977,7 +977,7 @@ er035m_s_get_upper_search_limit( void )
         if ( er035m_s_write( "UL" ) == FAIL )
             er035m_s_comm_fail( );
 
-        length = 20;
+        length = sizeof buffer;
         if ( er035m_s_read( buffer, &length ) == OK )
             break;
 
@@ -1008,7 +1008,7 @@ er035m_s_get_lower_search_limit( void )
 {
     int retries;
     char buffer[ 20 ];
-    size_t length = 20;
+    size_t length = sizeof buffer;
     char *ptr;
 
 
@@ -1019,7 +1019,7 @@ er035m_s_get_lower_search_limit( void )
         if ( er035m_s_write( "LL" ) == FAIL )
             er035m_s_comm_fail( );
 
-        length = 20;
+        length = sizeof buffer;
         if ( er035m_s_read( buffer, &length ) == OK )
             break;
 

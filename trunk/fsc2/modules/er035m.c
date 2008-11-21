@@ -225,7 +225,7 @@ int
 er035m_exp_hook( void )
 {
     char buffer[ 21 ], *bp;
-    long length = 20;
+    long length = sizeof buffer - 1;
     int cur_res;
     Var_T *v;
 
@@ -270,7 +270,7 @@ er035m_exp_hook( void )
 
     stop_on_user_request( );
 
-    length = 20;
+    length = sizeof buffer - 1;
     er035m_talk( "PS\r", buffer, &length );
 
     /* Now look if the status byte says that device is OK where OK means that
@@ -466,7 +466,7 @@ find_field( Var_T * v  UNUSED_ARG )
 
         /* Get status byte and check if lock was achieved */
 
-        length = 20;
+        length = sizeof buffer - 1;
         er035m_talk( "PS\r", buffer, &length );
 
         bp = buffer + 2;   /* skip first two chars of status byte */
@@ -786,7 +786,7 @@ er035m_get_field( void )
 
         /* Ask gaussmeter to send the current field and read result */
 
-        length = 20;
+        length = sizeof buffer - 1;
         er035m_talk( "PF\r", buffer, &length );
 
         /* Disassemble field value and flag showing the state */
@@ -829,7 +829,7 @@ static int
 er035m_get_resolution( void )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
 
 
     er035m_talk( "RS\r", buffer, &length );
@@ -874,7 +874,7 @@ static long
 er035m_get_upper_search_limit( void )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
 
 
     er035m_talk( "UL\r", buffer, &length );
@@ -890,7 +890,7 @@ static long
 er035m_get_lower_search_limit( void )
 {
     char buffer[ 20 ];
-    long length = 20;
+    long length = sizeof buffer;
 
 
     er035m_talk( "LL\r", buffer, &length );
@@ -908,7 +908,7 @@ er035m_set_upper_search_limit( long ul )
     char cmd[ 40 ];
 
 
-    snprintf( cmd, 40, "UL%ld\r", ul );
+    snprintf( cmd, sizeof cmd, "UL%ld\r", ul );
     if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
         er035m_failure( );
     fsc2_usleep( ER035M_WAIT, UNSET );
@@ -924,7 +924,7 @@ er035m_set_lower_search_limit( long ll )
     char cmd[ 40 ];
 
 
-    snprintf( cmd, 40, "LL%ld\r", ll );
+    snprintf( cmd, sizeof cmd, "LL%ld\r", ll );
     if ( gpib_write( nmr.device, cmd, strlen( cmd ) ) == FAILURE )
         er035m_failure( );
     fsc2_usleep( ER035M_WAIT, UNSET );
