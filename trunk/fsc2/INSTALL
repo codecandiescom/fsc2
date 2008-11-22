@@ -19,8 +19,9 @@ run fsc2:
 
        http://savannah.nongnu.org/projects/xforms/.
 
-	I strongly recommend the newest available version (even if
-	it's only a pre-release).
+	I strongly recommend to use the newest available version, which
+    currently is xforms-1.0.91
+
  8) GPIB library (fsc2 can also be compiled and run without it but
     with restricted functionality, see below)
 
@@ -535,7 +536,7 @@ devices, writing a test suite for the supported devices is still on my
 to-do list.
 
 
-    December 24, 2006                        Much luck, Jens
+    November 22, 2008                      Much luck, Jens
 
 --
   \   Jens Thoms Toerring  ___    jt@toerring.de
