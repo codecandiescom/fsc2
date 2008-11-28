@@ -20,10 +20,11 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Device Reference, Reserved Words, Installation, Top
+@node Device Reference, Reserved Words, Installation, fsc2
 @appendix Device Reference
 
-@ifinfo
+@ifnottex
+
 @menu
 * aeg_s_band::      S-band AEG Magnet Power Supply
 * aeg_x_band::      X-band AEG Magnet Power Supply
@@ -102,7 +103,8 @@
 * thurlby330::      Thurlby & Thandar Power Supply PL330DP
 * witio_48::        Wasco WITIO-48 DIO card
 @end menu
-@end ifinfo
+
+@end ifnottex
 
 
 @c #############################################################

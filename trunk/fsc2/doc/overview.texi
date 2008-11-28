@@ -20,7 +20,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Introduction, GUI, Top, Top
+@node Introduction, GUI, fsc2, fsc2
 @chapter Introduction
 @cindex Introduction
 

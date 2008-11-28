@@ -20,7 +20,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Reserved Words, EDL Mode for Emacs and VIM, Device Reference, Top
+@node Reserved Words, EDL Mode for Emacs and VIM, Device Reference, fsc2
 @appendix Reserved Words
 
 

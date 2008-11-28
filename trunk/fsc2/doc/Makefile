@@ -56,47 +56,11 @@ fsc2.info: $(docs)
 html: fsc2.html
 
 fsc2.html: $(docs) $(figures)
-	./texi2html -split section -menu -number -sec_nav -iso fsc2.texi
-
-	@printf '%b\n' "  <div id=\"links\">\n  <img src=\"fsc2.gif\" alt=\"fsc2 logo\">\n  <br><br>" >> TOC
-	@for i in fsc2.html fsc2_[1-9].html; do \
-		if [    -z "`grep -h '^<title>fsc2: Index:' $$i`" \
-			 -a -n "`grep -h '^<h1>' $$i`" ]; then \
-			echo -n '  <a href="'$$i'">' >> TOC; \
-			grep -h '^<title>fsc2: [^<]*</title>$$' $$i | \
-			sed 's/^<title>fsc2: \([^<]*\)<\/title>$$/\1<\/a><br>/' >> TOC; \
-		fi; \
-	done
-	@for i in fsc2_[1-9][0-9].html; do \
-		if [    -z "`grep -h '^<title>fsc2: Index:' $$i`" \
-			 -a -n "`grep -h '^<h1>' $$i`" ]; then \
-			echo -n '  <a href="'$$i'">' >> TOC; \
-			grep -h '^<title>fsc2: [^<]*</title>$$' $$i | \
-			sed 's/^<title>fsc2: \([^<]*\)<\/title>$$/\1<\/a><br>/' >> TOC; \
-		fi; \
-	done
-	@for i in fsc2_[1-9][0-9][0-9].html; do \
-		if [    -z "`grep -h '^<title>fsc2: Index:' $$i`" \
-			 -a -n "`grep -h '^<h1>' $$i`" ]; then \
-			echo -n '  <a href="'$$i'">' >> TOC; \
-			grep -h '^<title>fsc2: [^<]*</title>$$' $$i | \
-			sed 's/^<title>fsc2: \([^<]*\)<\/title>$$/\1<\/a><br>/' >> TOC; \
-		fi; \
-	done
-	@echo -n '  <a href="fsc2_toc.html">' >> TOC;
-	@grep -h '^<title>fsc2: [^<]*</title>$$' fsc2_toc.html | \
-	sed 's/^<title>fsc2: \([^<]*\)<\/title>$$/\1<\/a><br><br>/' >> TOC;
-	@echo '  <a href="http://www.physik.fu-berlin.de/~toerring/fsc2.phtml">Download</a><br>' >> TOC
-	@echo '  <a href="mailto:jt@toerring.de">Contact</a>' >> TOC
-	@printf '%b\n' "  </div>\n  <div id=\"main\">" >> TOC
-	@for i in *.html; do \
-		sed '1,/body/!d' $$i > $$i.x; \
-		cat TOC >> $$i.x; \
-		sed '1,/<body>/d;/<\/body/,$$d' $$i >> $$i.x; \
-		printf '%b\n' "  </div>\n</body>\n</html>" >> $$i.x; \
-		mv $$i.x $$i; \
-	done
-	-@$(RM) TOC
+	@if [ "`eval texi2html --help 2>/dev/null`" ]; then  \
+		texi2html --init-file=fsc2.init fsc2.texi;      \
+	else                                                \
+		echo "Can't make HTML documentation, program 'texi2html' not found";  \
+	fi
 
 %.png: $(adir)/%.xbm
 	convert -page `identify $< 2>/dev/null | sed 's/^.*[ 	]\([0-9]\{1,\}x[0-9]\{1,\}\)[ 	+-].*$$/\1/'` $< $@ 2>/dev/null
@@ -104,13 +68,13 @@ fsc2.html: $(docs) $(figures)
 ps: fsc2.ps.gz
 
 fsc2.ps.gz: $(docs) $(eps_pics)
-	@if [    "`eval tex -help 2>/dev/null`"             \
-		  -a "`eval dvips --help 2>/dev/null`" ]; then  \
-		./texi2dvi -c fsc2.texi &&                      \
-		dvips fsc2.dvi -o fsc2.ps;                      \
-		gzip -f -9 fsc2.ps;                             \
-	else                                                \
-		echo "Can't make PostScript documentation, programs tex and/or dvips not found";  \
+	@if [    "`eval texi2dvi --help 2>/dev/null`"          \
+		  -a "`eval dvips --help 2>/dev/null`"    ]; then  \
+		texi2dvi -c fsc2.texi &&                           \
+		dvips fsc2.dvi -o fsc2.ps;                         \
+		gzip -f -9 fsc2.ps;                                \
+	else                                                   \
+		echo "Can't make PostScript documentation, program 'texi2dvi' or 'dvips' not found";  \
 	fi
 
 
@@ -129,10 +93,11 @@ endif
 pdf: fsc2.pdf
 
 fsc2.pdf: $(docs) $(pdf_pics)
-	-@if [ "`eval pdftex --help 2>/dev/null`" ]; then                     \
-		./texi2dvi --pdf -c fsc2.texi;                                    \
-	else                                                                  \
-		echo "Can't make PDF documentation, program 'pdftex' not found";  \
+	@if [    "`eval texi2dvi --help 2>/dev/null`"          \
+	       -a "`eval pdftex --help 2>/dev/null`"   ]; then  \
+		texi2dvi --pdf -c fsc2.texi;                        \
+	else                                                    \
+		echo "Can't make PDF documentation, program 'texi2dvi' or 'pdftex' not found";  \
 	fi
 
 
@@ -231,5 +196,5 @@ cleanup:
 
 clean:
 	$(MAKE) cleanup
-	-$(RM) $(RMFLAGS) fsc2*.html fsc2_*.html *.ps *.eps *.pdf *.info*  \
+	-$(RM) $(RMFLAGS) *.html *.ps *.eps *.pdf *.info*  \
 					  *.gz cursor*.png *_arrow.png

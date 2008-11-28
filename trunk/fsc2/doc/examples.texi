@@ -20,7 +20,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Example EDL Scripts, Command Line Options, Using Pulsers, Top
+@node Example EDL Scripts, Command Line Options, Using Pulsers, fsc2
 @chapter Example EDL Scripts
 
 
@@ -35,7 +35,8 @@ accept more parameters than mentioned here etc.@:, please always look up
 the full documentation in the previous chapters when in doubt.
 
 
-@ifinfo
+@ifnottex
+
 @menu
 * An enhanced cw-EPR experiment::
 * GUI-fying the script::
@@ -44,7 +45,8 @@ the full documentation in the previous chapters when in doubt.
 * ESEEM script::
 * Time-resolved EPR script::
 @end menu
-@end ifinfo
+
+@end ifnottex
 
 
 @node An enhanced cw-EPR experiment, GUI-fying the script, Example EDL Scripts, Example EDL Scripts

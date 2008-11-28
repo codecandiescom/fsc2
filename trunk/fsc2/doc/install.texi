@@ -20,17 +20,19 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Installation, Device Reference, Modules, Top
+@node Installation, Device Reference, Modules, fsc2
 @appendix Installation
 
-@ifinfo
+@ifnottex
+
 @menu
 * Requirements::                Tools required for installation
 * Security issues::             How to avoid security problems
 * Preparing for installation::  Before you type @code{make}
 * Compiling and Installation::  Options when running @code{make}
 @end menu
-@end ifinfo
+
+@end ifnottex
 
 
 @node Requirements, Security issues, Installation, Installation
@@ -104,14 +106,14 @@ missing no PDF documentation will be created
 @uref{http://www.gnu.org/software/gzip/,GNU data compression program}
 @end table
 
-@ifinfo
+@ifnottex
 
 @menu
 * GPIB support::
 * Support for other devices::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node GPIB support, Support for other devices, , Requirements
@@ -555,13 +557,13 @@ changes to the program on your own. In this case sending these kind of mails
 to me obviously doesn't make too much sense... Another obvious reason for
 changing it would be that the machine isn't connected to the internet.
 
-@ifinfo
+@ifnottex
 
 @menu
 * Device setup::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node Device setup, , , Preparing for installation

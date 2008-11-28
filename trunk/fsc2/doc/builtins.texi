@@ -20,10 +20,11 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Built-in Functions, Device Functions, EDL, Top
+@node Built-in Functions, Device Functions, EDL, fsc2
 @chapter Built-in Functions
 
-@ifinfo
+@ifnottex
+
 @menu
 * Output functions::        Functions for drawing and printing.
 * File handling functions:: Functions for storing data
@@ -31,7 +32,8 @@
 * Mathematical functions::  Function for doing mathematics.
 * Auxiliary functions::     All other functions.
 @end menu
-@end ifinfo
+
+@end ifnottex
 
 In this chapter all functions built into @code{fsc2} are discussed in
 detail. These functions are available even when no device modules have

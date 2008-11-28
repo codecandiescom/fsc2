@@ -20,11 +20,11 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node EDL, Built-in Functions, Web Server, Top
+@node EDL, Built-in Functions, Web Server, fsc2
 @chapter @code{EDL}
 @cindex @code{EDL}
 
-@ifinfo
+@ifnottex
 
 @menu
 * Basics::                  Basic principles.
@@ -39,7 +39,7 @@
 * Miscellaneous::           Additional syntactic elements
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 To do an experiment using @code{fsc2} you may have to write a script
@@ -349,7 +349,7 @@ stating
 VARIABLES:
 @end example
 
-@ifinfo
+@ifnottex
 
 @menu
 * Variable names::
@@ -358,7 +358,7 @@ VARIABLES:
 * Variable sized arrays and matrices::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node Variable names, Variable types, , Variables
@@ -903,7 +903,7 @@ For the exponentiation the caret character @code{^} is to be used, e.g.@:
 As mathematics dictate non-integer exponents can only be used with
 non-negative bases!
 
-@ifinfo
+@ifnottex
 
 @menu
 * Arithmetic-assignment operators::
@@ -911,7 +911,7 @@ non-negative bases!
 * Arithmetic with arrays and matrices::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node Arithmetic-assignment operators, Operator precedence, , Arithmetic
@@ -1392,7 +1392,7 @@ has to be enclosed in curly braces (@code{@{} and @code{@}}) and may
 contain as many statements as needed (and still fit into the computers
 memory).
 
-@ifinfo
+@ifnottex
 
 @menu
 * REPEAT loops::
@@ -1406,7 +1406,7 @@ memory).
 * UNLESS-ELSE constructs::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node REPEAT loops, WHILE loops, , Control structures
@@ -1823,7 +1823,7 @@ actual experiment stops with an error that could not be anticipated.
 The remainder of this chapter covers a few additional syntactic elements
 that didn't fit into any of the previous sections.
 
-@ifinfo
+@ifnottex
 
 @menu
 * #INCLUDE statement::
@@ -1831,7 +1831,7 @@ that didn't fit into any of the previous sections.
 * #QUIT statement::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node #INCLUDE statement, #EXIT statement, , Miscellaneous

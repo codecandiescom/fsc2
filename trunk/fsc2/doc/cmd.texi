@@ -20,17 +20,19 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Command Line Options, GUI-fying, Example EDL Scripts, Top
+@node Command Line Options, GUI-fying, Example EDL Scripts, fsc2
 @chapter Command Line Options
 @cindex command line options
 
-@ifinfo
+@ifnottex
+
 @menu
 * Batch mode::              Non-supervised operation
 * Non-exclusive mode::      Running more than one instance of @code{fsc2} at once
 * Options summary::         List of all command line options
 @end menu
-@end ifinfo
+
+@end ifnottex
 
 
 @node Batch mode, Non-exclusive mode, Command Line Options, Command Line Options

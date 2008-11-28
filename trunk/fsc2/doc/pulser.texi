@@ -20,7 +20,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Using Pulsers, Example EDL Scripts, Device Functions, Top
+@node Using Pulsers, Example EDL Scripts, Device Functions, fsc2
 @chapter Using Pulsers
 
 
@@ -74,7 +74,7 @@ the creation of pulses and their subsequent manipulation. These are
 identical for all pulsers and are explained in in subsequent sections of
 this chapter.
 
-@ifinfo
+@ifnottex
 
 @menu
 * Setting up the Pulser::  @code{ASSIGNMENTS} and @code{PHASES} section
@@ -82,7 +82,7 @@ this chapter.
 * Using Pulses::           How to use pulses in the experiment
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 
@@ -97,14 +97,14 @@ The basic setup of a pulser happens in the @code{ASSIGNMENTS} and the
 @code{PHASES} section. The latter section will be missing if no phase
 cycling is to be done during the experiment.
 
-@ifinfo
+@ifnottex
 
 @menu
 * ASSIGNMENTS section::
 * PHASES section::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @c ########################################################
@@ -120,7 +120,7 @@ i.e.@: associating some or more output connectors with pulse functions
 and setting the physical characteristics of the output (e.g.@: voltage
 levels, inverting the output etc.).
 
-@ifinfo
+@ifnottex
 
 @menu
 * Setting the TIMEBASE::
@@ -129,7 +129,7 @@ levels, inverting the output etc.).
 * Phase channel setup::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @c ########################################################
@@ -1331,13 +1331,13 @@ FOR I = 1: Curve_length @{
 @end example
 
 
-@ifinfo
+@ifnottex
 
 @menu
 * Simplified pulse cycling::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node Simplified pulse cycling, , , Using Pulses

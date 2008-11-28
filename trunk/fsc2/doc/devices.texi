@@ -20,10 +20,11 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Device Functions, Using Pulsers, Built-in Functions, Top
+@node Device Functions, Using Pulsers, Built-in Functions, fsc2
 @chapter Device Functions
 
-@ifinfo
+@ifnottex
+
 @menu
 * Overview::            
 * Using two (or more) devices of the same type::
@@ -49,7 +50,8 @@
 * EPR Modulation Functions::
 * Multi-Device Functions::
 @end menu
-@end ifinfo
+
+@end ifnottex
 
 
 @node Overview, Using two (or more) devices of the same type, Device Functions, Device Functions

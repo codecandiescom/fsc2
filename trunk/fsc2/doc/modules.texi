@@ -20,14 +20,15 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Modules, Installation, Internals, Top
+@node Modules, Installation, Internals, fsc2
 @chapter Modules
 @cindex modules
 
 This chapter tries to describe how to write new modules for use with
 @code{fsc2}.
 
-@ifinfo
+@ifnottex
+
 @menu
 * Module Overview::       What modules are good for.
 * fsc2's Variables::      How to use fsc2's variables.
@@ -35,7 +36,8 @@ This chapter tries to describe how to write new modules for use with
 * Programming Utils::     Functions that help in programming modules
 * Pulser Modules::        Writing modules for pulsers
 @end menu
-@end ifinfo
+
+@end ifnottex
 
 @node Module Overview, fsc2's Variables, Modules, Modules
 @section What modules are good for
@@ -292,7 +294,7 @@ in which case you get a value of type @code{double}. Finally you may use
 @end quotation
 to get the address of the start of a string variable.
 
-@ifinfo
+@ifnottex
 
 @menu
 * Utility functions to determine variables values::
@@ -301,7 +303,7 @@ to get the address of the start of a string variable.
 * Returning data from EDL functions::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node Utility functions to determine variables values, Getting at the data of one-dimensional arrays, , fsc2's Variables
@@ -725,7 +727,7 @@ correct sequence, so it's not completely foolproof.
 @node Writing New Modules, Programming Utils, fsc2's Variables, Modules
 @section How to write a new module
 
-@ifinfo
+@ifnottex
 
 @menu
 * EDL Functions::
@@ -743,7 +745,7 @@ correct sequence, so it's not completely foolproof.
 * Calling EDL functions from a modules::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node EDL Functions, Files to be included, , Writing New Modules
@@ -1896,7 +1898,7 @@ Finally, there exist some utility function for rounding of double values
 to the different integer types as well as converting integers to types
 of smaller width.
 
-@ifinfo
+@ifnottex
 
 @menu
 * Printing out messages::
@@ -1909,7 +1911,7 @@ of smaller width.
 * Numerical conversions and comparisons::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node Printing out messages, Determining the time, , Programming Utils
@@ -2099,14 +2101,14 @@ and @code{fsc2} will take care of all error handling and the stop the
 running experiment (or the test run). That's all you need to know about
 exceptions for nearly all cases that have to be dealt within modules.
 
-@ifinfo
+@ifnottex
 
 @menu
 * More on programming with exceptions::
 * Problems with exceptions::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node More on programming with exceptions, Problems with exceptions, , Error handling with exceptions
@@ -2591,13 +2593,13 @@ internal channels for storing pulse sequences which get mapped to
 certain output connectors (pods), like the @code{Sony/Tektronix DG2020}.
 Per default the variable is set to false.
 
-@ifinfo
+@ifnottex
 
 @menu
 * Pulse Functions::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node Pulse Functions, , , Pulser Modules

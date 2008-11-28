@@ -20,7 +20,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Internals, Modules, Cloning Devices, Top
+@node Internals, Modules, Cloning Devices, fsc2
 @chapter Internals
 
 
@@ -59,7 +59,7 @@ follows a real long section with a @i{tour de force} through the sources
 of the program. This is hopefully going to be helpful for people that try
 eliminate bugs or even extend @code{fsc2}.
 
-@ifinfo
+@ifnottex
 
 @menu
 * First stage of interpretation::
@@ -69,7 +69,7 @@ eliminate bugs or even extend @code{fsc2}.
 * Coding conventions::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node First stage of interpretation, Second stage of interpretation, Internals, Internals

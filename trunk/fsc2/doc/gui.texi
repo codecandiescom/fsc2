@@ -20,10 +20,10 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node GUI, Web Server, Introduction, Top
+@node GUI, Web Server, Introduction, fsc2
 @chapter GUI
 
-@ifinfo
+@ifnottex
 
 @menu
 * Main Window::         The program's main window
@@ -32,7 +32,7 @@
 * Customization::       Customizing the way the GUI looks like
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node Main Window, Experiment Window, GUI, GUI
@@ -43,7 +43,7 @@
 Whenever you start @code{fsc2} the first thing you will see is the
 following window:
 
-@image{fsc2fig1,11cm,}
+@center @image{fsc2fig1,11cm,}
 
 The large white area at the top is a browser for displaying the text of
 the current @code{EDL} script. Below this main browser is another
@@ -99,7 +99,6 @@ you really want to send the bug report.
 @end ifnotinfo
 
 @ifinfo
-@ifnothtml
 
 The first window you see when you start @code{fsc2} contains the
 following elements:
@@ -146,7 +145,6 @@ the environment variable @code{EDITOR}, if it isn't set @code{vi} is
 used as the default.
 @end itemize
 
-@end ifnothtml
 @end ifinfo
 
 In each button one of the characters of the label is underlined. By
@@ -172,14 +170,14 @@ When the device initialization is finished a new window, to be described
 in the next section, opens up for displaying the measured data.
 
 
-@ifnotinfo
+@ifnottex
 The next figure shows you the main window of @code{fsc2} with an
 @code{EDL} script loaded and the name of the loaded script being
 shown in the widow title.
 
-@image{fsc2fig2,11cm,}
+@center @image{fsc2fig2,11cm,}
 
-@end ifnotinfo
+@end ifnottex
 
 
 @node Experiment Window, Tool Box Window, Main Window, GUI
@@ -197,7 +195,7 @@ parameter is changed during the experiment. Sometimes it also might be
 useful to display curves as well as surfaces, in which case a window for
 both display modes can be created.
 
-@ifinfo
+@ifnottex
 
 @menu
 * 1D-Display::      Displaying data for one-dimensional experiments
@@ -205,7 +203,7 @@ both display modes can be created.
 * Cross Sections::  Displaying cross sections through two-dimensional data
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node 1D-Display, 2D-Display, , Experiment Window
@@ -216,7 +214,7 @@ both display modes can be created.
 Here's a typical example of the kind of display you may get while doing
 an experiment:
 
-@image{fsc2fig3,11cm,}
+@center @image{fsc2fig3,11cm,}
 
 The most prominent feature is the area for displaying the measured
 data. In this case two different curves are displayed simultaneously
@@ -230,16 +228,15 @@ drawn in red indicates that the scales are valid (at least) for the first
 (red) curve.
 
 @end ifnotinfo
-@ifnothtml
-@ifnottex
+
+@ifinfo
 The most prominent feature of the new window that gets opened when the
 experiment is started is an area for displaying the measured data. In
 this area you may display up to four different curves simultaneously.
 The display area is surrounded by two areas with the x- and the
 y-scale. The color of the scale is identical to the color of one the
 curves, indicating for which of the curves the scale is valid.
-@end ifnottex
-@end ifnothtml
+@end ifinfo
 
 The topmost buttons on the left side
 @ifnotinfo
@@ -275,14 +272,14 @@ more data than would fit into the window the oldest data get shifted out
 of the window to the left -- similar to a news-ticker.
 
 
-@ifinfo
+@ifnottex
 
 @menu
 * Examining data::         Finding out more about your data
 * Rescaling and moving::   Zooming in and out
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node Examining data, Rescaling and moving, , 1D-Display
@@ -297,11 +294,9 @@ changes to a cross-hair
 @ifnotinfo
 cursor, @image{cursor4,5mm,},
 @end ifnotinfo
-@ifnothtml
-@ifnottex
+@ifinfo
 cursor
-@end ifnottex
-@end ifnothtml
+@end ifinfo
 and in the upper left hand corner pairs of values with the exact
 coordinates (in the units of the axis scales) of the current mouse
 position are shown. Because different curves can have a different
@@ -318,11 +313,9 @@ encircled cross-hair
 @ifnotinfo
 cursor, @image{cursor5,5mm,},
 @end ifnotinfo
-@ifnothtml
-@ifnottex
+@ifinfo
 cursor
-@end ifnottex
-@end ifnothtml
+@end ifinfo
 and a circle is drawn at the position where you pressed the mouse
 buttons.  When you move the mouse (while keeping both middle and right
 mouse buttons pressed down) a vertical and a horizontal dashed line
@@ -343,11 +336,9 @@ mouse pointer changes to a
 @ifnotinfo
 symbol, @image{cursor1,5mm,},
 @end ifnotinfo
-@ifnothtml
-@ifnottex
+@ifinfo
 symbol
-@end ifnottex
-@end ifnothtml
+@end ifinfo
 indicating that you're in zoom mode. If you now move the mouse while
 keeping the left mouse button pressed down a dashed rectangular box is
 drawn from the position where the mouse button was first pressed to the
@@ -365,11 +356,9 @@ middle mouse button somewhere in the display area the cursor changes to a
 @ifnotinfo
 hand, @image{cursor2,5mm,}.
 @end ifnotinfo
-@ifnothtml
-@ifnottex
+@ifinfo
 hand.
-@end ifnottex
-@end ifnothtml
+@end ifinfo
 As long as you keep the middle mouse button pressed down the displayed
 curves will move around following the mouse. As in the case of zooming
 you can restrict movements to either the x- or y-direction by pressing
@@ -387,11 +376,9 @@ fields the cursor changes to a magnifying
 @ifnotinfo
 glass, @image{cursor3,5mm,}.
 @end ifnotinfo
-@ifnothtml
-@ifnottex
+@ifinfo
 glass.
-@end ifnottex
-@end ifnothtml
+@end ifinfo
 When you move the mouse nothing happens at first and only when you
 release the mouse button the display scaling gets either magnified or
 de-magnified. This follows some simple rules: The point where you first
@@ -456,7 +443,7 @@ When doing an 2D-experiment, e.g.@: when recording time traces after a
 laser flash at different magnetic field positions, the display probably
 will look similar to this:
 
-@image{fsc2fig4,11cm,}
+@center @image{fsc2fig4,11cm,}
 
 @end ifnotinfo
 
@@ -486,13 +473,13 @@ When the surface with the data set is moved out of the area of the
 display arrows will be shown at the sides of the display area where you
 have to look for the data set.
 
-@ifinfo
+@ifnottex
 
 @menu
 * Rescaling and moving in 2D-Display::
 @end menu
 
-@end ifinfo
+@end ifnottex
 
 
 @node Rescaling and moving in 2D-Display, , , 2D-Display
@@ -512,7 +499,7 @@ lot of the values are now too small to be drawn using the values shown on
 the z-scale and are thus drawn in dark blue, while the maximum values at
 the top of the high-field signal are too large and thus drawn in white.
 
-@image{fsc2fig5,11cm,}
+@center @image{fsc2fig5,11cm,}
 
 @end ifnotinfo
 
@@ -533,11 +520,9 @@ changed to a vertical or horizontal
 arrow, i.e.@: either @image{cursor6,5mm,} or @image{cursor7,5mm,}
 .
 @end ifnotinfo
-@ifnothtml
-@ifnottex
+@ifinfo
 arrow.
-@end ifnottex
-@end ifnothtml
+@end ifinfo
 
 Even though the new window with the cross section through the data set
 only shows an 1D-curve it also has a z-axis. On this axis a red
@@ -545,7 +530,7 @@ indicator shows the value for which the cross section in either x- or
 y-direction was taken.
 @ifnotinfo
 
-@image{fsc2fig6,11cm,}
+@center @image{fsc2fig6,11cm,}
 
 @end ifnotinfo
 The z-axis area at the right side in the cross section window can also be used
@@ -602,13 +587,11 @@ data.
 @ifnotinfo
 The next figure shows all types of objects that can be created.
 
-@image{fsc2fig7,4cm,}
+@center @image{fsc2fig7,4cm,}
 
 @end ifnotinfo
 @ifinfo
-@ifnothtml
 A tool box may contain the following types of objects:
-@end ifnothtml
 @end ifinfo
 
 First there are the normal buttons. A normal button can be clicked on to

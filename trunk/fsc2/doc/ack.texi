@@ -20,7 +20,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Acknowledgments, Copying, EDL Mode for Emacs and VIM, Top
+@node Acknowledgments, Copying, EDL Mode for Emacs and VIM, fsc2
 @appendix Acknowledgments
 
 

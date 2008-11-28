@@ -1,7 +1,7 @@
 @c $Id$
 
 
-@node Copying, , Acknowledgments, Top
+@node Copying, , Acknowledgments, fsc2
 @appendix Copying
 @center @strong{GNU GENERAL PUBLIC LICENSE}
 @center Version 2, June 1991

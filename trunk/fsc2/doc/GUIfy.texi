@@ -20,15 +20,17 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node GUI-fying, Cloning Devices, Command Line Options, Top
+@node GUI-fying, Cloning Devices, Command Line Options, fsc2
 @chapter GUI-fying EDL scripts
 
-@ifinfo
+@ifnottex
+
 @menu
 * fsc2_guify::            Creating a GUI for an @code{EDL} script
 * Interfacing::           Sending EDL scripts to fsc2
 @end menu
-@end ifinfo
+
+@end ifnottex
 
 @node fsc2_guify, Interfacing, , GUI-fying
 @section @code{fsc2_guify}
@@ -138,10 +140,11 @@ named @file{simple_cw.EDL}) just type
 This should create an executable script called @file{simple_cw}.
 
 @ifnotinfo
+
 If you now execute this script the following graphical user interface
 will show up:
 
-@image{simplecw1,7cm,}
+@center @image{simplecw1,7cm,}
 
 
 As you see there are three fields for editing the parameters according
@@ -266,13 +269,12 @@ If we now again convert our improved and enhanced @code{EDL} script
 and start the resulting script, we will get the following graphical
 interface:
 
-@image{simplecw2,7cm,}
+@center @image{simplecw2,7cm,}
 
 The new popup-menu will allow you to pick the model of the lock-in
 amplifier to be used in the experiment.
 
 @end ifnotinfo
-
 
 Another graphical element that can be used are simple check-buttons,
 i.e.@: buttons that can have two states, either activated or inactive.
