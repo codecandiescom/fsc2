@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -45,11 +45,12 @@ ssize_t fsc2_serial_write( int          /* sn             */,
                            long         /* us_wait        */,
                            bool         /* quit_on_signal */  );
 
-ssize_t fsc2_serial_read( int    /* sn             */,
-                          void * /* buf            */,
-                          size_t /* count          */,
-                          long   /* us_wait        */,
-                          bool   /* quit_on_signal */  );
+ssize_t fsc2_serial_read( int          /* sn             */,
+                          void *       /* buf            */,
+                          size_t       /* count          */,
+                          const char * /* term           */,
+                          long         /* us_wait        */,
+                          bool         /* quit_on_signal */  );
 
 int fsc2_tcgetattr( int              /* sn        */,
                     struct termios * /* termios_p */  );

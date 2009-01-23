@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -26,8 +26,8 @@
  * The original ideas for the following code came from an article  *
  * by Peter Simons in the iX magazine No. 5, 1998, pp. 160-162. It *
  * has been changed a lot thanks to very constructive criticism by *
- * Chris Torek <nospam@elf.eng.bsdi.com> on comp.lang.c (which is  *
- * meant to mean that he would be responsible for its flaws!)      *
+ * Chris Torek <nospam@elf.eng.bsdi.com> on comp.lang.c (which     *
+ * doesn't meant that he would be responsible for the flaws!)      *
  *                                                                 *
  * In order to avoid overflows of the fixed size exception frame   *
  * stack (i.e. after MAX_NESTED_EXCEPTIONS successful TRY's) it is *

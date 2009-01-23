@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -208,8 +208,8 @@ T_realloc( void * ptr,
  *-----------------------------------------------------------------*/
 
 void *
-T_realloc_or_free( void * ptr,
-                   size_t size )
+T_realloc_or_free( void   * ptr,
+                   size_t   size )
 {
     void *new_ptr;
 #if defined FSC2_MDEBUG

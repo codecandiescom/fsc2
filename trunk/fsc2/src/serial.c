@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -159,11 +159,12 @@ fsc2_serial_write( int          sn              UNUSED_ARG,
  *-------------------------------*/
 
 ssize_t
-fsc2_serial_read( int    sn              UNUSED_ARG,
-                  void * buf             UNUSED_ARG ,
-                  size_t count           UNUSED_ARG,
-                  long   us_wait         UNUSED_ARG,
-                  bool   quit_on_signal  UNUSED_ARG )
+fsc2_serial_read( int          sn              UNUSED_ARG,
+                  void       * buf             UNUSED_ARG,
+                  size_t       count           UNUSED_ARG,
+                  const char * term            UNUSED_ARG,
+                  long         us_wait         UNUSED_ARG,
+                  bool         quit_on_signal  UNUSED_ARG )
 {
     /* Keep the module writers from calling the function anywhere else
        than in the exp- and end_of_exp-hook functions and the EXPERIMENT
@@ -900,11 +901,13 @@ fsc2_serial_write( int          sn,
 
 /*---------------------------------------------------------------------*
  * Function for reading data from one of the serial ports. It expects
- * 5 arguments, first the number of the serial port, then a buffer and
- * its length for returning the read in data, a timeout in us we are
- * supposed to wait for data to be read from the serial port and
- * finally a flag that tells if the function is to return immediately
- * if a signal is received.
+ * 6 arguments, first the number of the serial port, then a buffer and
+ * its maximum length for returning the read in data, an (optional
+ * string with the character(s) that act as terminator for the data
+ * send by the device, a timeout in micro-seconds we are supposed to
+ * wait for data to be read from the serial port and finally a flag
+ * that tells if the function is to return immediately if a signal
+ * is received.
  * If the timeout value in 'us_wait' is zero the function won't wait
  * for data to appear on the serial port, when it is negative the
  * function waits indefinitely long for data.
@@ -914,11 +917,12 @@ fsc2_serial_write( int          sn,
  *---------------------------------------------------------------------*/
 
 ssize_t
-fsc2_serial_read( int    sn,
-                  void * buf,
-                  size_t count,
-                  long   us_wait,
-                  bool   quit_on_signal )
+fsc2_serial_read( int          sn,
+                  void       * buf,
+                  size_t       count,
+                  const char * term,
+                  long         us_wait,
+                  bool         quit_on_signal )
 {
     ssize_t read_count;
     size_t total_count = 0;
@@ -928,6 +932,8 @@ fsc2_serial_read( int    sn,
     long still_to_wait = us_wait;
     int ret;
     unsigned char *p = buf;
+    size_t term_len = term ? strlen( term ) : 0;
+    bool is_term = UNSET;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -1099,13 +1105,22 @@ fsc2_serial_read( int    sn,
         total_count += read_count;
         p += read_count;
 
+        /* Check if we read in the terminator sequence */
+
+        if (    term
+             && term_len
+             && total_count >= term_len
+                && ! strncmp( ( char * ) p - term_len, term, term_len ) )
+            is_term = SET;
+
         if ( us_wait > 0 )
         {
             gettimeofday( &after, NULL );
             still_to_wait -=   ( after.tv_sec  * 1000000 + after.tv_usec  )
                              - ( before.tv_sec * 1000000 + before.tv_usec );
         }
-    } while (    total_count < count
+    } while (    ! is_term
+              && total_count < count
               && ( us_wait < 0 || still_to_wait > 0 ) );
 
     if ( ll == LL_ALL )
