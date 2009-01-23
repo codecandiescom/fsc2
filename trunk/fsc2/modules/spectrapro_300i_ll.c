@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -1399,7 +1399,7 @@ spectrapro_300i_comm( int type,
             lptr = va_arg( ap, size_t * );
             va_end( ap );
 
-            len = fsc2_serial_read( SERIAL_PORT, buf, *lptr,
+            len = fsc2_serial_read( SERIAL_PORT, buf, *lptr, NULL,
                                     SPECTRAPRO_300I_WAIT, UNSET );
             if ( len < 0 )
                 return FAIL;

@@ -1,7 +1,7 @@
 /*
- *  $Id
+ *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -147,13 +147,6 @@ FSPS25 fsps25, fsps25_stored;
 
 
 #define FSPS25_TEST_CURRENT  0
-
-
-/****************************************************/
-/*                                                  */
-/*                  hook functions                  */
-/*                                                  */
-/****************************************************/
 
 
 /*----------------------------------------------------------------*
@@ -775,11 +768,13 @@ fsps25_off( void )
 
 	if (    fsc2_serial_write( SERIAL_PORT, "DSD!\r", 5,
 							   RESPONSE_TIME, UNSET ) != 5
-		 || fsc2_serial_read( SERIAL_PORT, buf, 5,
-							  RESPONSE_TIME, UNSET ) != 5 )
+         || fsc2_serial_read( SERIAL_PORT, buf, 5, "\r",
+							  RESPONSE_TIME, UNSET ) != 5
+         || buf[ 4 ] != '\r' )
 		fsps25_comm_fail( );
 
-	if ( strncmp( buf, "DSD;\r", 5 ) )
+    buf[ 4 ] = '\0';
+	if ( strcasecmp( buf, "DSD;" ) )
 		fsps25_wrong_data( );
 
 	/* If the heater was on (or in fail state) wait enough time for the
@@ -872,21 +867,19 @@ fsps25_read_state( void )
           STATE_PFAIL, STOPPED, HEATER_FAIL, UNMATCHED },
     };
 
-    if ( ( count = fsc2_serial_read( SERIAL_PORT, buf, MAX_RESPONSE_LEN, 
+    if ( ( count = fsc2_serial_read( SERIAL_PORT, buf, sizeof buf, "\r",
                                      RESPONSE_TIME, UNSET ) ) <= 0 )
         fsps25_comm_fail( );
 
-    /* Find '\r' in the response and replace it by '\0' */
+    /* Check that there's a carriage return at the end of the response and
+       replace it by '\0' */
 
-    for ( i = 0; i < count; i++ )
-        if ( buf[ i ] == '\r' )
-        {
-            buf[ i ] = '\0';
-            break;
-        }
-
-    if ( i >= count || strncmp( buf, "CS ", 3 ) )
+    if ( buf[ count - 1 ] == '\r' )
+        buf[ count - 1 ] = '\0';
+    else
         fsps25_wrong_data( );
+
+    if ( strncmp( buf, "CS ", 3 ) )
 
     for ( i = 0; i < ( ssize_t ) NUM_ELEMS( states ); i++ )
         if ( ! strcasecmp( buf + 3, states[ i ].response ) )
@@ -926,13 +919,18 @@ fsps25_get_heater_state( void )
 
 
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-		 || fsc2_serial_read( SERIAL_PORT, buf, 6,
+         || fsc2_serial_read( SERIAL_PORT, buf, 6, "\r",
                               RESPONSE_TIME, UNSET ) <= 0 )
 		fsps25_comm_fail( );
 
-    if ( ! strncasecmp( buf, "HS 1;\r", 6 ) )
+    if ( buf[ 5 ] == '\r' )
+        buf[ 5 ] = '\0';
+    else
+        fsps25_wrong_data( );
+
+    if ( ! strcasecmp( buf, "HS 1;" ) )
         fsps25.heater_state = HEATER_ON;
-    else if ( ! strncasecmp( buf, "HS 0;\r", 6 ) )
+    else if ( ! strcasecmp( buf, "HS 0;" ) )
         fsps25.heater_state = HEATER_OFF;
     else
 		fsps25_wrong_data( );
@@ -1098,7 +1096,8 @@ fsps25_abort_sweep( void )
 	}
 
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-		  || fsc2_serial_read( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) < 4 )
+         || fsc2_serial_read( SERIAL_PORT, buf, 5, "\r",
+                              RESPONSE_TIME, UNSET ) < 4 )
 		fsps25_comm_fail( );
 
 	if ( strncmp( buf, "SC;\r", 4 ) && strncmp( buf, "CCS;\r", 5 ) )
@@ -1152,8 +1151,8 @@ fsps25_get_act_current( void )
 		return fsps25.act_current;
 
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-	     || fsc2_serial_read( SERIAL_PORT, buf, 11, RESPONSE_TIME, UNSET )
-			                                                            != 11 )
+         || fsc2_serial_read( SERIAL_PORT, buf, 11, "\r",
+                              RESPONSE_TIME, UNSET ) != 11 )
 		fsps25_comm_fail( );
 
 	if (    strncmp( buf, "AC ", 3 )
@@ -1353,8 +1352,8 @@ fsps25_get_super_current( void )
 		return fsps25.super_current;
 
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-	     || fsc2_serial_read( SERIAL_PORT, buf, 11, RESPONSE_TIME, UNSET )
-			                                                            != 11 )
+         || fsc2_serial_read( SERIAL_PORT, buf, 11, "\r",
+                              RESPONSE_TIME, UNSET ) != 11 )
 		fsps25_comm_fail( );
 
 	if (    strncmp( buf, "SC ", 3 )
@@ -1403,8 +1402,8 @@ fsps25_get_max_current( void )
 		return fsps25.max_current;
 
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-	     || fsc2_serial_read( SERIAL_PORT, buf, 10, RESPONSE_TIME, UNSET )
-			                                                            != 10 )
+         || fsc2_serial_read( SERIAL_PORT, buf, 10, "\r",
+                              RESPONSE_TIME, UNSET ) != 10 )
 		fsps25_comm_fail( );
 
 	if ( strncmp( buf, "MC ", 3 ) || buf[ 8 ] != ';' || buf[ 9 ] != '\r' )
@@ -1505,8 +1504,8 @@ fsps25_get_sweep_speed( void )
 		return fsps25.act_speed;
 
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-	     || fsc2_serial_read( SERIAL_PORT, buf, 9, RESPONSE_TIME, UNSET )
-                                                                         != 9 )
+         || fsc2_serial_read( SERIAL_PORT, buf, 9, "\r",
+                              RESPONSE_TIME, UNSET ) != 9 )
 		fsps25_comm_fail( );
 
 	if ( strncmp( buf, "AS ", 3 ) || buf[ 7 ] != ';' || buf[ 8 ] != '\r' )
@@ -1569,7 +1568,8 @@ fsps25_get_max_sweep_speed( void )
 		return fsps25.max_speed;
 
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-	     || fsc2_serial_read( SERIAL_PORT, buf, 9, RESPONSE_TIME, UNSET ) != 9 )
+	     || fsc2_serial_read( SERIAL_PORT, buf, 9, "\r",
+                              RESPONSE_TIME, UNSET ) != 9 )
 		fsps25_comm_fail( );
 
 	if ( strncmp( buf, "MS ", 3 ) || buf[ 7 ] != ';' || buf[ 8 ] != '\r' )
@@ -1739,7 +1739,8 @@ fsps25_get_command_reply( void )
 {
 	char reply[ 2 ];
 
-	if ( fsc2_serial_read( SERIAL_PORT, reply, 2, RESPONSE_TIME, UNSET ) != 2 )
+	if ( fsc2_serial_read( SERIAL_PORT, reply, 2, "\r",
+                           RESPONSE_TIME, UNSET ) != 2 )
 		fsps25_comm_fail( );
 
 	if ( ( reply[ 0 ] != '#' && reply[ 0 ] != '?' ) || reply[ 1 ] != '\r' )

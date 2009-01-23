@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -48,7 +48,9 @@ rb_pulser_w_init_setup( void )
     rb_pulser_w_basic_pulse_check( );
     rb_pulser_w_basic_functions_init( );
     rb_pulser_w_defense_pulse_create( );
+#if ! defined RB_PULSER_W_TEST
     rb_pulser_w_rf_synth_init( );
+#endif
 
     if ( rb_pulser_w.dump_file != NULL )
         rb_pulser_w_init_print( rb_pulser_w.dump_file );
@@ -211,7 +213,9 @@ rb_pulser_w_basic_functions_init( void )
 
                 for ( j = 1; j < f->num_pulses; j++ )
                     for ( k = 0; k < j; k++ )
-                        if ( f->pulses[ k ]->len != f->pulses[ j ]->len )
+                        if (    f->pulses[ k ]->len != f->pulses[ j ]->len
+                             && f->pulses[ k ]->len != 0
+                             && f->pulses[ j ]->len != 0 )
                         {
                             print( FATAL, "Pulser function '%s' allows only "
                                    "pulses of equal length but pulses #%d and "
@@ -446,6 +450,56 @@ rb_pulser_w_rf_synth_init( void )
 
     vars_pop( func_ptr );
     rb_pulser_w.synth_state = func;
+
+#if defined SYNTHESIZER_MAX_PULSES && SYNTHESIZER_MAX_PULSES > 1
+    if ( dev_num == 1 )
+        func = T_strdup( SYNTHESIZER_DOUBLE_PULSE_MODE );
+    else
+        func = get_string( SYNTHESIZER_DOUBLE_PULSE_MODE "#%d", dev_num );
+    
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
+    {
+        rb_pulser_w.synth_pulse_state = T_free( rb_pulser_w.synth_pulse_state );
+        rb_pulser_w.synth_pulse_delay = T_free( rb_pulser_w.synth_pulse_delay );
+        rb_pulser_w.synth_pulse_width = T_free( rb_pulser_w.synth_pulse_width );
+        rb_pulser_w.synth_trig_slope  = T_free( rb_pulser_w.synth_trig_slope );
+        rb_pulser_w.synth_state = T_free( rb_pulser_w.synth_state );
+        T_free( func );
+        print( FATAL, "Function for setting the synthesizer to double pulse "
+               "mode is missing from the synthesizer module '%s'.\n",
+               SYNTHESIZER_MODULE );
+        THROW( EXCEPTION );
+    }
+
+    vars_pop( func_ptr );
+    rb_pulser_w.synth_double_mode = func;
+
+    if ( dev_num == 1 )
+        func = T_strdup( SYNTHESIZER_DOUBLE_PULSE_DELAY );
+    else
+        func = get_string( SYNTHESIZER_DOUBLE_PULSE_DELAY "#%d", dev_num );
+    
+    if (    ! func_exists( func )
+         || ( func_ptr = func_get( func, &acc ) ) == NULL )
+    {
+        rb_pulser_w.synth_pulse_state = T_free( rb_pulser_w.synth_pulse_state );
+        rb_pulser_w.synth_pulse_delay = T_free( rb_pulser_w.synth_pulse_delay );
+        rb_pulser_w.synth_pulse_width = T_free( rb_pulser_w.synth_pulse_width );
+        rb_pulser_w.synth_trig_slope  = T_free( rb_pulser_w.synth_trig_slope );
+        rb_pulser_w.synth_state       = T_free( rb_pulser_w.synth_state );
+        rb_pulser_w.synth_double_delay =
+                                      T_free( rb_pulser_w.synth_double_delay );
+        T_free( func );
+        print( FATAL, "Function for setting the synthesizer double pulse "
+               "delay delay is missing from the synthesizer module '%s'.\n",
+               SYNTHESIZER_MODULE );
+        THROW( EXCEPTION );
+    }
+
+    vars_pop( func_ptr );
+    rb_pulser_w.synth_double_delay = func;
+#endif
 }
 
 

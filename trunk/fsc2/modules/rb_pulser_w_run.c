@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -404,41 +404,55 @@ rb_pulser_w_rf_channel_setup( void )
     card->was_active = card->is_active;
     card->is_active = UNSET;
 
-    p = *f->pulses;
-
-    if ( ! IS_ACTIVE( p ) )
+    if ( f->num_active_pulses == 0 )
         return;
 
-    start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
-            + SYNTHESIZER_INTRINSIC_DELAY + f->delay;
-
-    if ( p->pos <= start )
+    if ( f->num_active_pulses == 1 )
     {
-        print( FATAL, "RF pulse #%ld starts too early.\n", p->num );
-        THROW( EXCEPTION );
-    }
+        int i;
 
-    delta = p->pos - start;
-    dT = Ticks_rnd( delta / rb_pulser_w.timebase );
-    shift = dT * rb_pulser_w.timebase - delta;
+        for ( i = 0; i < f->num_active_pulses; i ++ )
+            if ( IS_ACTIVE( f->pulses[ i ] ) )
+            {
+                p = f->pulses[ i ];
+                break;
+            }
+
+        start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
+                + SYNTHESIZER_INTRINSIC_DELAY + f->delay;
+
+        if ( p->pos <= start )
+        {
+            print( FATAL, "RF pulse #%ld starts too early.\n", p->num );
+            THROW( EXCEPTION );
+        }
+
+        delta = p->pos - start;
+        dT = Ticks_rnd( delta / rb_pulser_w.timebase );
+        shift = dT * rb_pulser_w.timebase - delta;
             
-    if ( dT > MAX_TICKS )
-    {
-        print( FATAL, "RF pulse #%ld starts too late.\n", p->num );
-        THROW( EXCEPTION );
+        if ( dT > MAX_TICKS )
+        {
+            print( FATAL, "RF pulse #%ld starts too late.\n", p->num );
+            THROW( EXCEPTION );
+        }
+
+        if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
+            print( SEVERE, "Position of RF pulse #%ld not possible, must "
+                   "shift it by %s.\n", p->num, rb_pulser_w_ptime( shift ) );
+
+        card->delay = dT;
+        card->is_active = SET;
+
+        /* Store the length of the pulse itself separately. there's no card for
+           this pulse, it gets set by the synthesizer directly */ 
+
+        f->last_pulse_len = p->len * rb_pulser_w.timebase;
     }
-
-    if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
-        print( SEVERE, "Position of RF pulse #%ld not possible, must shift it "
-               "by %s.\n", p->num, rb_pulser_w_ptime( shift ) );
-
-    card->delay = dT;
-    card->is_active = SET;
-
-    /* Store the length of the pulse itself separately. there's no card for
-       this pulse, it gets set by the synthesizer directly */ 
-
-    f->last_pulse_len = p->len * rb_pulser_w.timebase;
+    else
+    {
+        /* Here goes the code for more than a single pulse... */
+    }
 }
 
 

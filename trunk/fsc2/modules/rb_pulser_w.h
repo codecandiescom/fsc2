@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -43,9 +43,9 @@
    instead of outputting pulses have a line printed to stderr for each
    call for setting a deleay or clock card. */
 
-#if 0
+//#if 0
 #define RB_PULSER_W_TEST
-#endif
+//#endif
 
 
 /* Defines for the number of delay and clock cards */
@@ -251,6 +251,8 @@ struct RB_Pulser_W {
     char *synth_pulse_width;
     char *synth_pulse_delay;
     char *synth_trig_slope;
+    char *synth_double_mode;
+    char *synth_double_delay;
 
     bool needs_phases;       /* set if phase cycling (of microwave pulses)
                                 is needed */

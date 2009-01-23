@@ -1,7 +1,7 @@
 /*
  *  $Id$
  *
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  *
  *  This file is part of fsc2.
  *
@@ -479,6 +479,16 @@ rb_pulser_w_exit_hook( void )
 
     if ( rb_pulser_w.synth_trig_slope )
         rb_pulser_w.synth_trig_slope = T_free( rb_pulser_w.synth_trig_slope );
+
+#if defined SYNTHESIZER_MAX_PULSES && SYNTHESIZER_MAX_PULSES > 1
+    if ( rb_pulser_w.synth_double_delay )
+        rb_pulser_w.synth_double_delay =
+                                      T_free( rb_pulser_w.synth_double_delay );
+
+    if ( rb_pulser_w.synth_double_delay )
+        rb_pulser_w.synth_double_delay =
+                                      T_free( rb_pulser_w.synth_double_delay );
+#endif
 
     for ( i = 0; i < PULSER_CHANNEL_NUM_FUNC; i++ )
     {

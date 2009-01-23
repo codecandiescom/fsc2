@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -144,7 +144,8 @@ spex232_comm_init( void )
 
 	/* The device now should react by sending '*' */
 
-	if (    fsc2_serial_read( SERIAL_PORT, buf, 1, SERIAL_WAIT, SET )  != 1
+	if (    fsc2_serial_read( SERIAL_PORT, buf, 1, NULL,
+                              SERIAL_WAIT, SET )  != 1
          || buf[ 0 ] != '*' )
 		spex232_comm_fail( );
 
@@ -153,7 +154,8 @@ spex232_comm_init( void )
 
 	buf[ 0 ] = ' ';
 	if (    fsc2_serial_write( SERIAL_PORT, buf, 1, SERIAL_WAIT, SET ) != 1
-         || fsc2_serial_read( SERIAL_PORT, buf, 1, SERIAL_WAIT, SET )  != 1 )
+         || fsc2_serial_read( SERIAL_PORT, buf, 1, NULL,
+                              SERIAL_WAIT, SET ) != 1 )
 		spex232_comm_fail( );
 
 	switch ( buf[ 0 ] )
@@ -205,7 +207,8 @@ spex232_autobaud( void )
 
 		fsc2_usleep( 500000, UNSET );
 
-		if ( fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) == 1 )
+		if ( fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+                               SERIAL_WAIT, SET ) == 1 )
 		{
 			/* If the device is already in "intelligent communication mode" it
 			   either returns 'B' or 'F', telling if it's running the BOOT or
@@ -253,13 +256,15 @@ spex232_autobaud( void )
 
 	buf = 247;
 	if (    fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1
-         || fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1
+         || fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+                              SERIAL_WAIT, SET )  != 1
          || buf != '=' )
 		spex232_comm_fail( );
 
 	buf = ' ';
 	if (    fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1
-         || fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1 )
+         || fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+                              SERIAL_WAIT, SET )  != 1 )
 		spex232_comm_fail( );
 
 	if ( buf == 'B' )
@@ -308,7 +313,8 @@ spex232_discard_response( void )
 	unsigned char buf;
 
 
-	while ( fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) == 1 )
+	while ( fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+                              SERIAL_WAIT, SET ) == 1 )
 		/* empty */ ;
 }
 
@@ -338,7 +344,8 @@ spex232_switch_to_int_mode( void )
 
 	buf = ' ';
 	if (    fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1
-         || fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1 )
+         || fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+                              SERIAL_WAIT, SET )  != 1 )
 		spex232_comm_fail( );
 
 	return ( buf == 'F' || buf == 'B' ) ? buf : '\0';
@@ -356,7 +363,8 @@ spex232_check_confirmation( void )
 {
 	unsigned char buf;
 
-	if (    fsc2_serial_read( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET )  != 1
+	if (    fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+                              SERIAL_WAIT, SET )  != 1
          || ( buf != 'o' && buf != 'b' ) )
 		spex232_comm_fail( );
 
@@ -565,7 +573,7 @@ spex232_get_motor_position( void )
 	if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
                                SERIAL_WAIT, UNSET ) != ( ssize_t )strlen( buf )
          || ! spex232_check_confirmation( )
-         || ( len = fsc2_serial_read( SERIAL_PORT, buf, sizeof buf,
+         || ( len = fsc2_serial_read( SERIAL_PORT, buf, sizeof buf, NULL,
                                       SERIAL_WAIT, UNSET ) ) < 2 )
 		spex232_comm_fail( );
 
@@ -614,7 +622,8 @@ spex232_motor_is_busy( void )
 
 	if (    fsc2_serial_write( SERIAL_PORT, &cmd, 1, SERIAL_WAIT, UNSET ) != 1
          || ! spex232_check_confirmation( )
-         || fsc2_serial_read( SERIAL_PORT, &cmd, 1, SERIAL_WAIT, UNSET ) != 1
+         || fsc2_serial_read( SERIAL_PORT, &cmd, 1, NULL,
+                              SERIAL_WAIT, UNSET ) != 1
          || ( cmd != 'q' && cmd != 'z' ) )
 		spex232_comm_fail( );
 

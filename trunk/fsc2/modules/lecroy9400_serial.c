@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -838,7 +838,7 @@ static bool
 lecroy9400_read( char * buffer,
                  long * length )
 {
-    if ( ( *length = fsc2_serial_read( SERIAL_PORT, buffer, *length,
+    if ( ( *length = fsc2_serial_read( SERIAL_PORT, buffer, *length, NULL,
                                        0, UNSET ) ) <= 0 )
     {
         if ( *length == 0 )

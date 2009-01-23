@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -837,11 +837,11 @@ bh15_fc_start_field( void )
     }
 
     /* Now readjust the SWA count a bit to make sure that the center field is
-       a multiple of the maximum CF resolution (at least with in accuracy of
+       a multiple of the maximum CF resolution (at least within accuracy of
        2 mG). This should always work out correctly because we made sure that
-       either CF is alrady a multiple of the required resolution or the step
+       either CF is already a multiple of the required resolution or the step
        size is below this resolution. So we can set the correct start field
-       with a combination of a slightly shifted CF plus not too large number
+       with a combination of a slightly shifted CF plus not too large a number
        of SWA steps (typically not more than 100). */
 
     bh15_fc_best_fit_search( &magnet.cf, &magnet.swa, magnet.cf >=

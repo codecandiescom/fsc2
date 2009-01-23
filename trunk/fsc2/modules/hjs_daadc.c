@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -719,13 +719,14 @@ hjs_daadc_in_out( int out )
     out_bytes[ 1 ] |= ( out >>= 4 ) & 0x0F;
     out_bytes[ 2 ] |= out >> 4;
 
-    /* We can always write, even if the device is switched off, because
+    /* We can always write, even if the device is switched off because
        there exist no control lines, checking the return value is just
        cosmetics ;-). The data from the ADC should have arrived within
        20 ms. */
 
     if (    fsc2_serial_write( SERIAL_PORT, out_bytes, 4, 0, UNSET ) != 4
-         || fsc2_serial_read( SERIAL_PORT, in_bytes, 4, 20000, UNSET ) != 4 )
+         || fsc2_serial_read( SERIAL_PORT, in_bytes, 4, NULL,
+                              20000, UNSET ) != 4 )
         hjs_daadc_comm_failure( );
 
     /* The results of the conversion by the ADC is stored in the second and

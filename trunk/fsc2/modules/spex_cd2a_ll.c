@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -607,13 +607,13 @@ spex_cd2a_read_ack( void )
        good reasons (at least in contrast to what's written in the manual) */
 
     do {
-        if ( ( received = fsc2_serial_read( SERIAL_PORT, buf, 1,
+        if ( ( received = fsc2_serial_read( SERIAL_PORT, buf, 1, NULL,
                                             1000000, UNSET ) ) <= 0 )
             spex_cd2a_comm_fail( );
     } while ( *buf == CAN );
 
     if (    *buf != NAK
-         && ( received = fsc2_serial_read( SERIAL_PORT, buf + 1,
+         && ( received = fsc2_serial_read( SERIAL_PORT, buf + 1, NULL,
                                            1, 1000000, UNSET ) ) <= 0 )
         spex_cd2a_comm_fail( );
 
@@ -648,7 +648,8 @@ spex_cd2a_read_ack( void )
         while ( len > 0 )
         {
             if ( ( received = fsc2_serial_read( SERIAL_PORT, buf + count + 2,
-                                                len - count, 1000000, UNSET ) )
+                                                len - count, NULL,
+                                                1000000, UNSET ) )
                  <= 0 )
                 spex_cd2a_comm_fail( );
 
@@ -690,8 +691,9 @@ spex_cd2a_read_mess( ssize_t to_be_read )
         old_already_read = already_read;
 
         if ( ( already_read +=
-               fsc2_serial_read( SERIAL_PORT, buf + already_read,
-                            to_be_read - already_read, 1000000, UNSET ) ) < 0 )
+               				fsc2_serial_read( SERIAL_PORT, buf + already_read,
+                                              to_be_read - already_read, NULL,
+                                              1000000, UNSET ) ) < 0 )
             spex_cd2a_comm_fail( );
 
         /* Throw away <CAN> characters, the device sends them sometimes in the

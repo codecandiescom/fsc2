@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -1753,7 +1753,7 @@ lecroy_wr_get_data( long * len )
     /* First thing we read is something like "DAT1,#[0-9]" where the number
        following the '#' is the number of bytes to be read next */
 
-    if ( fsc2_serial_read( SERIAL_PORT, len_str, 7,
+    if ( fsc2_serial_read( SERIAL_PORT, len_str, 7, NULL,
                            TIMEOUT_FROM_LENGTH( 7 ), SET ) != 7 )
         lecroy_wr_comm_failure( );
 
@@ -1764,7 +1764,7 @@ lecroy_wr_get_data( long * len )
 
     /* Now get the number of bytes to read */
 
-    if ( fsc2_serial_read( SERIAL_PORT, len_str, *len,
+    if ( fsc2_serial_read( SERIAL_PORT, len_str, *len, NULL,
                            TIMEOUT_FROM_LENGTH( *len ), SET ) != *len )
         lecroy_wr_comm_failure( );
     
@@ -1777,7 +1777,7 @@ lecroy_wr_get_data( long * len )
 
     data = T_malloc( *len );
 
-    if ( fsc2_serial_read( SERIAL_PORT, data, *len,
+    if ( fsc2_serial_read( SERIAL_PORT, data, *len, NULL,
                            TIMEOUT_FROM_LENGTH( *len ), SET ) != *len )
         lecroy_wr_comm_failure( );
 
@@ -1935,7 +1935,7 @@ lecroy_wr_talk( const char * cmd,
 
     if (    fsc2_serial_write( SERIAL_PORT, cmd, to_send,
                                TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send
-         || ( *length = fsc2_serial_read( SERIAL_PORT, reply, *length,
+         || ( *length = fsc2_serial_read( SERIAL_PORT, reply, *length, NULL,
                                         TIMEOUT_FROM_LENGTH( *length ), SET ) )
                                                                          <= 0 )
         lecroy_wr_comm_failure( );
@@ -2129,7 +2129,7 @@ lecroy_wr_serial_open( void )
          || fsc2_serial_write( SERIAL_PORT,
                           "CORS EO,\"\n\r\",EI,\"\r\",SRQ,\"\",LS,OFF;*STB?\r",
                           40, TIMEOUT_FROM_LENGTH( 40 ), SET ) != 40
-         || fsc2_serial_read( SERIAL_PORT, buf, 10,
+         || fsc2_serial_read( SERIAL_PORT, buf, 10, NULL,
                               TIMEOUT_FROM_LENGTH( 10 ), SET ) <= 0 )
     {
         lecroy_wr_finished( );

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 1999-2008 Jens Thoms Toerring
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  * 
  *  This file is part of fsc2.
  * 
@@ -1268,7 +1268,7 @@ er035m_s_comm( int type,
             /* Try to read from the gaussmeter, give it up to 2 seconds time
                to respond */
 
-            if ( ( len = fsc2_serial_read( SERIAL_PORT, buf, *lptr,
+            if ( ( len = fsc2_serial_read( SERIAL_PORT, buf, *lptr, NULL,
                                            10 * ER035M_S_WAIT, UNSET ) ) <= 0 )
             {
                 if ( len == 0 )
