@@ -3,9 +3,9 @@
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
-# Copyright (C) 2002-2008 Jens Thoms Toerring <jt@toerring.de>
-#
 # $Id$
+#
+# Copyright (C) 2002-2009 Jens Thoms Toerring <jt@toerring.de>
 
 
 package File::FcntlLock;
@@ -478,7 +478,7 @@ SEEK_SET SEEK_CUR SEEK_END
 
 =head1 CREDITS
 
-Thanks to Mark-Jason Dominus (MJD) and Benjamin Goldberg (GOLDBB) for
+Thanks to Mark Jason Dominus (MJD) and Benjamin Goldberg (GOLDBB) for
 helpful discussions, code examples and encouragement.
 
 =head1 AUTHOR

@@ -43,7 +43,7 @@ Revision history for Perl extension File::FcntlLock
 
 0.02  Sat Apr 20 2002
     - Added tests in test.pl
-    - Some changes in Makefile.PL thanks to Mark-Jason Dominus
+    - Some changes in Makefile.PL thanks to Mark Jason Dominus
     - Module now recognizes file handles and descriptors correctly
     - Update of documentation
 

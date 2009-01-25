@@ -3,7 +3,7 @@
 #
 #  Makefile for ME-6000 and ME-6100 driver and library
 #
-#  Copyright (C) 2002-2008 Jens Thoms Toerring
+#  Copyright (C) 2002-2009 Jens Thoms Toerring
 #
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by

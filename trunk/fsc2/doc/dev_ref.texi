@@ -1,6 +1,6 @@
 @c  $Id$
 @c
-@c  Copyright (C) 1999-2008 Jens Thoms Toerring
+@c  Copyright (C) 1999-2009 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.
 @c
@@ -224,11 +224,12 @@ to @w{23000 G}.
 @strong{Module name}: @code{bh15}
 
 @paragraphindent 0
-@strong{Description}: @uref{http://www.bruker-biospin.com/} BH15 Hall
-effect controller for measuring magnetic fields in combination with
-power supply controllers @code{aeg_s_band} and @code{aeg_x_band}.
-Field range that can be measured is from @w{-50 G} to @w{23000 G}.
-(For use as a field controller use module @code{bh15_fc}).
+@strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
+BH15 Hall effect controller for measuring magnetic fields in
+combination with power supply controllers @code{aeg_s_band} and
+@code{aeg_x_band}. Field range that can be measured is from @w{-50 G}
+to @w{23000 G}. (For use as a field controller use module
+@code{bh15_fc}).
 
 
 @paragraphindent 0

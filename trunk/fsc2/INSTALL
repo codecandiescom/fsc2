@@ -45,12 +45,14 @@ To create the complete documentation beside Perl you also need
 
 14) makeinfo
 15) install-info (see GNU texinfo)
-16) TeX (if missing no PostScript and PDF documentation is created)
-17) convert and identify from the ImageMagick package (or no PostScript
+16) texi2html (at least version 1.78)
+17)
+18) TeX (if missing no PostScript and PDF documentation is created)
+19) convert and identify from the ImageMagick package (or no PostScript
 	and PDF documentation will be created)
-18) dvips (if missing no PostScript documentation is created)
-19) pdftex (if missing no PDF documentation will be created)
-20) gzip
+20) dvips (if missing no PostScript documentation is created)
+21) pdftex (if missing no PDF documentation will be created)
+22) gzip
 
 
 
@@ -536,7 +538,7 @@ devices, writing a test suite for the supported devices is still on my
 to-do list.
 
 
-    November 22, 2008                      Much luck, Jens
+    November 28, 2008                      Much luck, Jens
 
 --
   \   Jens Thoms Toerring  ___    jt@toerring.de

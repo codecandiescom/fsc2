@@ -499,6 +499,15 @@ epr_modulation_calibration_can_extrapolate, 11, ALL;
 epr_modulation_calibration_frequencies, 1, ALL;
 epr_modulation_store, 0, ALL;
 
+
+/* Functions exported bz Pollux steper motor module used with Berlin single
+    molecule spectrometer */
+
+smsmover_name, 0, ALL;
+smsmover_position, -1, EXP;
+smsmover_move_relative, 2, EXP;
+
+
 /*
  * Local variables:
  * tab-width: 4

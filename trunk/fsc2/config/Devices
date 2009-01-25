@@ -196,6 +196,11 @@ gg_chopper
 epr_mod
 
 
+// Pollux steper motors used with Berlin single molecule spectrometer
+
+smsmover
+
+
 /*
  * Local variables:
  * tab-width: 4

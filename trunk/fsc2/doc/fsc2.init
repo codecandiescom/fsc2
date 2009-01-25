@@ -255,7 +255,7 @@ for ( @chapters ) {
 
 $AFTER_BODY_OPEN .= "<a href=\"fsc2_toc.html\">Table of Contents</a>\n" .
 	                "<br><br>\n" .
-	                "<a href=\"$download_url\">Download</a><br />\n" .
+	                "<a href=\"$download_url\">Download</a><br>\n" .
                     "<a href=\"mailto:$email_address\">Contact</a>\n" .
                     "</div>\n" .
                     "<div id=\"main\">\n";

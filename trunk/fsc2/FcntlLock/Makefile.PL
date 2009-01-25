@@ -1,9 +1,9 @@
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
-# Copyright (C) 2002-2008 Jens Thoms Toerring <jt@toerring.de>
-#
 # $Id$
+#
+# Copyright (C) 2002-2009 Jens Thoms Toerring <jt@toerring.de>
 
 
 use ExtUtils::MakeMaker;

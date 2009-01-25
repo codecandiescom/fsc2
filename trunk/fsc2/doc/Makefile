@@ -1,6 +1,6 @@
 #  $Id$
 #
-#  Copyright (C) 1999-2008 Jens Thoms Toerring
+#  Copyright (C) 1999-2009 Jens Thoms Toerring
 #
 #  This file is part of fsc2.
 #
@@ -70,8 +70,7 @@ ps: fsc2.ps.gz
 fsc2.ps.gz: $(docs) $(eps_pics)
 	@if [    "`eval texi2dvi --help 2>/dev/null`"          \
 		  -a "`eval dvips --help 2>/dev/null`"    ]; then  \
-		texi2dvi -c fsc2.texi &&                           \
-		dvips fsc2.dvi -o fsc2.ps;                         \
+		texi2dvi --ps -c fsc2.texi &&                      \
 		gzip -f -9 fsc2.ps;                                \
 	else                                                   \
 		echo "Can't make PostScript documentation, program 'texi2dvi' or 'dvips' not found";  \
