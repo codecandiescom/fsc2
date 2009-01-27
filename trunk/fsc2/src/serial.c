@@ -690,7 +690,7 @@ fsc2_serial_open( int          sn,
     Serial_Port[ sn ].fd = fd;
     Serial_Port[ sn ].is_open = SET;
 
-    fsc2_serial_log_message( "Successfully opened serial port %d for device ",
+    fsc2_serial_log_message( "Successfully opened serial port %d for device "
                              "%s\n", sn, dev_name );
     fsc2_serial_log_function_end( "fsc2_serial_open", dev_name );
 

@@ -721,10 +721,13 @@ Var_T *
 ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
 {
     uns16 *frame = NULL;
-    long width, height;
+    long width,
+         height;
     unsigned long max_val;
     Var_T *nv = NULL;
-    long i, j, k;
+    long i,
+         j,
+         k;
     uns16 *cf;
     long *dest;
     uns16 bin[ 2 ];

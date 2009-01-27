@@ -51,7 +51,6 @@ void
 rs_spec10_init_camera( void )
 {
 #if ! defined RS_SPEC10_TEST
-
     int16 total_cams;
     char cam_name[ CAM_NAME_LEN ];
     int16 i;
@@ -119,7 +118,7 @@ rs_spec10_init_camera( void )
 /*-----------------------------------------------------------------------*
  * Function for initializing the camera. Several properties are compared
  * to the values from the configuration file for the module (deviations
- * resulting in an exception) and then several default settings are made
+ * result in an exception) and then several default settings are made
  * and capabilities of the camera determined.
  *-----------------------------------------------------------------------*/
 
@@ -376,7 +375,8 @@ rs_spec10_temperature_init( void )
 {
     uns16 acc;
     int16 temp;
-    long min_temp, max_temp;
+    long min_temp,
+         max_temp;
 
 
     raise_permissions( );
@@ -406,17 +406,17 @@ rs_spec10_temperature_init( void )
         if ( ! pl_get_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, ATTR_MIN,
                              ( void_ptr ) &temp ) )
             rs_spec10_error_handling( );
-        min_temp = ( long )temp;
+        min_temp = temp;
 
         if (    max_temp != lrnd( CCD_MAX_TEMPERATURE * 100.0 )
              || min_temp != lrnd( CCD_MIN_TEMPERATURE * 100.0 ) )
         {
             lower_permissions( );
             print( FATAL, "Configuration file for camera has invalid CCD "
-                   "temperature range, valid range is %.2f K (%.2fC) to "
-                   "%.2f K (%.2f C).\n", rs_spec10_c2k( CCD_MIN_TEMPERATURE ),
-                   CCD_MIN_TEMPERATURE, rs_spec10_c2k( CCD_MAX_TEMPERATURE ),
-                   CCD_MAX_TEMPERATURE );
+                   "temperature range, valid range is %.2f K (%.2f C) to "
+                   "%.2f K (%.2f C).\n", rs_spec10_c2k( 0.01 * min_temp ),
+                   0.01 * min_temp, rs_spec10_c2k( 0.01 * max_temp ),
+                   0.01 * max_temp );
             THROW( EXCEPTION );
         }
     }

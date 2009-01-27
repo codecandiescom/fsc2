@@ -448,11 +448,15 @@ rs_spec10_get_fd_list( void )
                 THROW( EXCEPTION );
 
             if ( S_ISDIR( buf.st_mode ) )
+            {
+                TRY_SUCCESS;
                 continue;
+            }
 
             fd_list = T_realloc( fd_list,
                                        ( num_fds + 2 ) * sizeof *fd_list );
             fd_list[ num_fds++ ] = fd;
+
             TRY_SUCCESS;
         }
         OTHERWISE
@@ -478,7 +482,8 @@ void
 rs_spec10_close_on_exec_hack( int * fd_list )
 {
     int *new_fd_list;
-    int i, j;
+    int i,
+        j;
     int flags;
     bool found;
 

@@ -298,22 +298,22 @@ smsmover_init( void )
 		if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
 								   WAIT_TIME, UNSET ) <= 0
 			 || ( len = fsc2_serial_read( SERIAL_PORT, reply, sizeof reply,
-										  "\r\n", WAIT_TIME, UNSET ) ) < 2
-			 || strncmp( buf + len - 2, "\r\n", 2 ) )
+										  " \r\n", WAIT_TIME, UNSET ) ) <= 3
+             || strncmp( reply + len - 3, " \r\n", 3 ) )
 			smsmover_fail( );
 
-		reply[ len - 2 ] = '\0';
+		reply[ len - 3 ] = '\0';
 		smsmover.position[ i ] = T_atod( reply );
 
 		sprintf( buf, "%ld getnlimit ", i + 1 );
 		if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
 								   WAIT_TIME, UNSET ) <= 0
 			 || ( len = fsc2_serial_read( SERIAL_PORT, reply, sizeof reply,
-										  "\r\n", WAIT_TIME, UNSET ) ) < 2
-			 || strncmp( buf + len - 2, "\r\n", 2 ) )
+										  " \r\n", WAIT_TIME, UNSET ) ) <= 3
+			 || strncmp( reply + len - 3, " \r\n", 3 ) )
 			smsmover_fail( );
 
-		reply[ len - 2 ] = '\0';
+		reply[ len - 3 ] = '\0';
 		if ( ! ( p = strchr( reply, ' ' ) ) )
 			smsmover_fail( );
 
@@ -323,23 +323,23 @@ smsmover_init( void )
 		smsmover.upper_limit[ i ] = T_atod( p );
 
 		if ( smsmover.min_position[ i ] <
-			              smsmover.lower_limit[ i ] - smsmover.posistion[ i ] )
+			              smsmover.lower_limit[ i ] - smsmover.position[ i ] )
 		{
 			print( FATAL, "During the test run a position of %f was requested "
 				   "for device #%ld which is lower that the lower limit of "
 				   "%f.\n",
-				   smsmover.min_position[ i ] + smsmover.posistion[ i ], i + 1,
+				   smsmover.min_position[ i ] + smsmover.position[ i ], i + 1,
 				   smsmover.lower_limit[ i ] );
 			THROW( EXCEPTION );
 		}
 
 		if ( smsmover.max_position[ i ] >
-			              smsmover.upper_limit[ i ] - smsmover.posistion[ i ] )
+			              smsmover.upper_limit[ i ] - smsmover.position[ i ] )
 		{
 			print( FATAL, "During the test run a position of %f was requested "
 				   "for device #%ld which is larger that the upper limit of "
 				   "%f.\n",
-				   smsmover.max_position[ i ] + smsmover.posistion[ i ], i + 1,
+				   smsmover.max_position[ i ] + smsmover.position[ i ], i + 1,
 				   smsmover.upper_limit[ i ] );
 			THROW( EXCEPTION );
 		}
@@ -488,11 +488,11 @@ smsmover_goto( long   dev,
 	{
 		if (    fsc2_serial_write( SERIAL_PORT, buf, len,
 								   WAIT_TIME, UNSET ) != len
-			 || fsc2_serial_read( SERIAL_PORT, reply, 3, "\r\n",
-								  WAIT_TIME, UNSET ) != 3 )
+			 || fsc2_serial_read( SERIAL_PORT, reply, 4, " \r\n",
+								  WAIT_TIME, UNSET ) != 4 )
 			smsmover_fail( );
 
-		if ( buf[ 0 ] == '0' )
+		if ( reply[ 0 ] == '0' )
 			break;
 
 		if ( check_user_request ( ) )
@@ -509,12 +509,12 @@ smsmover_goto( long   dev,
 	sprintf( buf, "%ld npos ", dev + 1 );
 	if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
 							   WAIT_TIME, UNSET ) <= 0
-		 || ( len = fsc2_serial_read( SERIAL_PORT, reply, sizeof reply, "\r\n",
-									  WAIT_TIME, UNSET ) ) < 2
-		 || strncmp( buf + len - 2, "\r\n", 2 ) )
+		 || ( len = fsc2_serial_read( SERIAL_PORT, reply, sizeof reply,
+                                      " \r\n", WAIT_TIME, UNSET ) ) < 2
+		 || strncmp( reply + len - 3, " \r\n", 3 ) )
 			smsmover_fail( );
 
-	reply[ len - 2 ] = '\0';
+	reply[ len - 3 ] = '\0';
 	return T_atod( reply );
 #else
 	return pos;
