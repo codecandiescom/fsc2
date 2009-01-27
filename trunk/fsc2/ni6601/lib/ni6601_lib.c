@@ -1,7 +1,7 @@
 /*
  *  $Id$
  * 
- *  Copyright (C) 2002-2008 Jens Thoms Toerring
+ *  Copyright (C) 2002-2009 Jens Thoms Toerring
  * 
  *  This library should simplify accessing NI6601 GBCT boards by National
  *  Instruments by avoiding to be forced to make ioctl() calls and use
