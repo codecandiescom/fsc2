@@ -165,7 +165,7 @@ mover_position( Var_T * v )
 	v = vars_pop( v );
 
 	if ( v == NULL )
-		return vars_push( FLOAT_VAR, smsmover.position );
+		return vars_push( FLOAT_VAR, smsmover.position[ dev ] );
 
 	position = get_double( v, "position" );
 
