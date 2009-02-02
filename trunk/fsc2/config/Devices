@@ -198,7 +198,7 @@ epr_mod
 
 // Pollux steper motors used with Berlin single molecule spectrometer
 
-smsmover
+smsmotor
 
 
 /*
