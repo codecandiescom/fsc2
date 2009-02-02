@@ -72,8 +72,11 @@ static struct {
 	double position[ DEVICE_COUNT ];
 	double lower_limit[ DEVICE_COUNT ];
 	double upper_limit[ DEVICE_COUNT ];
-	double min_position[ DEVICE_COUNT ];
-	double max_position[ DEVICE_COUNT ];
+	double abs_min_position[ DEVICE_COUNT ];
+	double abs_max_position[ DEVICE_COUNT ];
+	double rel_min_position[ DEVICE_COUNT ];
+	double rel_max_position[ DEVICE_COUNT ];
+    bool is_rel_mode[ DEVICE_COUNT ];
     double init_speed[ DEVICE_COUNT ];
     double speed[ DEVICE_COUNT ];
     bool speed_is_set[ DEVICE_COUNT ];
@@ -124,14 +127,17 @@ smsmotor_init_hook( void )
 	for ( i = 0; i < DEVICE_COUNT; i++ )
 	{
 		smsmotor.position[ i ]= 0.0;
-		smsmotor.min_position[ i ] = HUGE_VAL;
-		smsmotor.max_position[ i ] = - HUGE_VAL;
-        smsmotor.lower_limit[ i ] = default_limits[ i ][ 0 ];
-        smsmotor.upper_limit[ i ] = default_limits[ i ][ 1 ];
-        smsmotor.speed[ i ] = TEST_SPEED;
-        smsmotor.speed_is_set[ i ] = UNSET;
+		smsmotor.abs_min_position[ i ]    =   0.5 * HUGE_VAL;
+		smsmotor.abs_max_position[ i ]    = - 0.5 * HUGE_VAL;
+		smsmotor.rel_min_position[ i ]    =   0.5 * HUGE_VAL;
+		smsmotor.rel_max_position[ i ]    = - 0.5 * HUGE_VAL;
+        smsmotor.is_rel_mode[ i ]         = SET;
+        smsmotor.lower_limit[ i ]         = default_limits[ i ][ 0 ];
+        smsmotor.upper_limit[ i ]         = default_limits[ i ][ 1 ];
+        smsmotor.speed[ i ]               = TEST_SPEED;
+        smsmotor.speed_is_set[ i ]        = UNSET;
         smsmotor.acceleration_is_set[ i ] = UNSET;
-        smsmotor.acceleration[ i ] = TEST_ACCELERATION;
+        smsmotor.acceleration[ i ]        = TEST_ACCELERATION;
 	}
 
 	return 1;
@@ -220,10 +226,12 @@ motor_position( Var_T * v )
 
 	if ( FSC2_MODE != EXPERIMENT )
 	{
-		smsmotor.min_position[ dev ] = d_min( smsmotor.min_position[ dev ],
-											  position );
-		smsmotor.max_position[ dev ] = d_max( smsmotor.max_position[ dev ],
-											  position );
+        smsmotor.is_rel_mode[ dev ] = UNSET;
+		smsmotor.abs_min_position[ dev ] =
+                            d_min( smsmotor.abs_min_position[ dev ], position );
+		smsmotor.abs_max_position[ dev ] =
+                            d_max( smsmotor.abs_max_position[ dev ], position );
+
 		return vars_push( FLOAT_VAR, smsmotor.position[ dev ] = position );
 	}
 
@@ -289,10 +297,23 @@ motor_move_relative( Var_T * v )
 
 	if ( FSC2_MODE != EXPERIMENT )
 	{
-		smsmotor.min_position[ dev ] = d_min( smsmotor.min_position[ dev ],
-											  smsmotor.position[ dev ] + step );
-		smsmotor.max_position[ dev ] = d_max( smsmotor.max_position[ dev ],
-											  smsmotor.position[ dev ] + step );
+        if ( smsmotor.is_rel_mode[ dev ] ) {
+            smsmotor.rel_min_position[ dev ] =
+                                      d_min( smsmotor.rel_min_position[ dev ], 
+                                             smsmotor.position[ dev ] + step );
+            smsmotor.rel_max_position[ dev ] =
+                                      d_max( smsmotor.rel_max_position[ dev ],
+                                             smsmotor.position[ dev ] + step );
+        }
+        else
+        {
+            smsmotor.abs_min_position[ dev ] =
+                                      d_min( smsmotor.abs_min_position[ dev ],
+                                             smsmotor.position[ dev ] + step );
+            smsmotor.abs_max_position[ dev ] =
+                                      d_max( smsmotor.abs_max_position[ dev ],
+                                             smsmotor.position[ dev ] + step );
+        }
 		return vars_push( FLOAT_VAR, smsmotor.position[ dev ] += step );
 	}
 
@@ -590,23 +611,23 @@ smsmotor_init( void )
         /* Check that all positions set during the test run we're within
            the limits we're going to set */
 
-		if ( smsmotor.min_position[ i ] < smsmotor.lower_limit[ i ] )
+		if (    smsmotor.abs_min_position[ i ] < smsmotor.lower_limit[ i ]
+             || smsmotor.rel_min_position[ i ] + smsmotor.position[ i ]
+                                                  < smsmotor.lower_limit[ i ] )
 		{
-			print( FATAL, "During the test run a position of %f was requested "
-				   "for device #%ld which is lower that the lower limit of "
-				   "%f.\n",
-				   smsmotor.min_position[ i ], i + 1,
-				   smsmotor.lower_limit[ i ] );
+			print( FATAL, "During the test run a position was requested for "
+                   "device #%ld which is lower that the lower limit of %f.\n",
+				   i + 1, smsmotor.lower_limit[ i ] );
 			THROW( EXCEPTION );
 		}
 
-		if ( smsmotor.max_position[ i ] > smsmotor.upper_limit[ i ] )
+		if (    smsmotor.abs_max_position[ i ] > smsmotor.upper_limit[ i ]
+             || smsmotor.rel_max_position[ i ] + smsmotor.position[ i ]
+                                                  > smsmotor.upper_limit[ i ] )
 		{
-			print( FATAL, "During the test run a position of %f was requested "
-				   "for device #%ld which is larger that the upper limit of "
-				   "%f.\n",
-				   smsmotor.max_position[ i ], i + 1,
-                   smsmotor.upper_limit[ i ] );
+			print( FATAL, "During the test run a position was requested for "
+                   "device #%ld which is larger that the upper limit of %f.\n",
+				   i + 1, smsmotor.upper_limit[ i ] );
 			THROW( EXCEPTION );
 		}
 
