@@ -1,0 +1,942 @@
+#!/usr/bin/perl
+# -*- cperl -*-
+#
+#  $Id$
+#
+#  Copyright (C) 1999-2009 Jens Thoms Toerring
+#
+#  This file is part of fsc2.
+#
+#  Fsc2 is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#
+#  Fsc2 is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with fsc2; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 59 Temple Place - Suite 330,
+#  Boston, MA 02111-1307, USA.
+#
+#  This script tries to GUI-fy a suitably adapted EDL script, i.e. it takes
+#  an "enhanced" EDL script and creates from it a Perl script which, when
+#  run, allows the user to set parameters via a GUI, then creates an EDL
+#  script from these parameters and sends it to fsc2 for execution.
+
+
+use strict;
+use warnings;
+use utf8;
+use Tk;
+use Tk::Pane;
+
+
+my $mw = MainWindow->new;
+$mw->title( 'Calibrations' );
+my $all = EPR_Mod->new( );
+my $selected_cal_index = undef;
+
+create_main_win( );
+MainLoop;
+
+
+################################################
+
+sub create_main_win {
+    my $lf = $mw->Frame->pack( -anchor => 'nw',
+                               -expand => 1,
+                               -fill   => 'both',
+                               -padx   => 3,
+                               -pady   => 3 );
+
+    my $ll = $lf->Scrolled( 'Listbox',
+                            -selectmode => 'single',
+                            -scrollbars => 'osoe',
+                            -background => 'white'
+						  )->pack( -expand => 1,
+								   -fill   => 'both' );
+
+	$ll->insert( 'end', $_->name ) for @$all;
+
+    $ll->bind( '<Button-1>' => [ \&new_selection, Ev( 'y' ) ] );
+    $ll->bind( '<Double-Button-1>' =>  [ \&edit_calibration, Ev( 'y' ) ] );
+
+    my $lbf = $lf->Frame->pack( -fill => 'x' );
+
+    $lbf->Frame->pack( -side   => 'left',
+                       -expand => 1,
+                       -fill   => 'x' );
+
+    $lbf->Button( -text    => 'Add / Edit',
+                  -command => [ \&edit_calibration, $ll ]
+                )->pack( -side => 'left',
+                         -padx => 10 );
+
+    $lbf->Button( -text    => 'Delete',
+                  -command => [ \&delete_calibration, $ll ]
+                )->pack( -side => 'left',
+                         -padx => 10 );
+
+    $lbf->Frame->pack( -side   => 'left',
+                       -expand => 1,
+                       -fill   => 'x' );
+
+    my $lcsf = $lf->Frame( -relief => 'ridge',
+                           -borderwidth => 3
+                         )->pack( -fill  => 'x',
+                                  -pady  => 5,
+                                  -ipady => 2 );
+
+    $lcsf->Frame->pack( -side   => 'left', 
+                        -expand => 1,
+                        -fill   => 'x' );
+
+    $lcsf->Button( -text    => 'Cancel',
+                   -command => sub { $mw->destroy }
+                 )->pack( -side => 'left',
+                          -padx => 10 );
+
+    my $lsb = $lcsf->Button( -text    => 'Done',
+                             -command => sub { $all->store;
+                                               $mw->destroy }
+                           )->pack( -side => 'left',
+                                    -padx => 10 );
+
+    $lcsf->Frame->pack( -side   => 'left',
+                        -expand => 1,
+                        -fill   => 'x' );
+}
+
+
+################################################
+
+sub new_selection {
+    $selected_cal_index = shift->nearest( shift );
+}
+
+
+################################################
+
+sub delete_calibration {
+    my $ll = shift;
+
+    return unless defined $selected_cal_index;
+
+	$all->delete_calibration( $ll->get( $selected_cal_index ) );
+    $ll->delete( $selected_cal_index );
+}
+
+
+################################################
+
+sub edit_calibration {
+    my $ll = shift;
+	my ( $cal, $orig_cal );
+
+    if ( defined $selected_cal_index or @_ ) {
+        $orig_cal = $all->[ defined $selected_cal_index ?
+							$selected_cal_index : $ll->nearest( shift ) ];
+        $cal = $orig_cal->copy;
+        $ll->selectionClear( 0, @$all - 1 );
+		$selected_cal_index = undef;
+    }
+    else {
+		$cal = Calibration->new;
+    }
+
+    $mw->withdraw;
+
+    create_edit_win( $cal, $orig_cal, $ll );
+}
+
+
+################################################
+
+sub create_edit_win {
+    my ( $cal, $orig_cal, $ll ) = @_;
+
+    my $ew = $mw->Toplevel;
+
+    my $rf = $ew->Frame->pack( -anchor => 'nw',
+                               -expand => 1,
+                               -fill   => 'both',
+                               -padx   => 3,
+                               -pady => 3 );
+
+    my $rd = $rf->Scrolled( 'Pane',
+							-sticky     => 'nw',
+                            -width      => 320,
+                            -height     => 500,
+                            -scrollbars => 'osoe',
+                            -background => 'white'
+						  )->pack( -expand => 1,
+								   -fill   => 'both',
+								   -anchor =>  'nw' );
+
+    my $rnf = $rd->Frame( -background => 'white'
+                        )->pack( -anchor => 'nw' );
+
+    my $rnl = $rnf->Label( -text       => 'Name:',
+                           -width      => 15,
+                           -anchor     => 'w',
+                           -background => 'white'
+                         )->pack( -side   => 'left',
+                                  -anchor => 'w',
+                                  -padx   => 3,
+                                  -pady   => 3 );
+
+    my $rne = $rnf->Entry( -textvariable    => \$cal->{ name },
+                           -width           => 20,
+                           -relief          => 'sunken',
+                           -background      => 'white'
+                         )->pack( -side => 'left' );
+
+    my $rif = $rd->Frame( -background => 'white'
+                        )->pack( -anchor => 'nw' );
+
+    my $ril = $rif->Label( -text       => 'Interpolate:',
+                           -width      => 15,
+                           -anchor     => 'w',
+                           -background => 'white'
+                         )->pack( -side   => 'left',
+                                  -anchor => 'w',
+                                  -padx   => 3,
+                                  -pady   => 3 );
+
+    my $rim = $rif->Optionmenu( -options       => [ 'no', 'yes' ],
+                                -textvariable  => \$cal->{ interpolate },
+                                -width         => 5,
+                                -background    => 'white'
+                              )->pack( -side => 'left' );
+
+    my $ref = $rd->Frame( -background => 'white'
+                        )->pack( -anchor => 'nw' );
+
+    my $rel = $ref->Label( -text       => 'Extrapolate:',
+                           -width      => 15,
+                           -anchor     => 'w',
+                           -background => 'white'
+                         )->pack( -side   => 'left',
+                                  -anchor => 'w',
+                                  -padx   => 3,
+                                  -pady   => 3 );
+
+    my $rem = $ref->Optionmenu( -options      => [ 'no', 'yes' ],
+                                -textvariable => \$cal->{ extrapolate },
+                                -width        => 5,
+                                -background   => 'white'
+                              )->pack( -side => 'left' );
+
+    add_entry( $cal, $_, $rd ) for @{ $cal->{ freqs } };
+
+    my $rbf = $ew->Frame->pack( -fill => 'x' );
+
+    my $rab = $rbf->Button( -text    => 'Add entry',
+                            -command => [ \&add_entry, $cal, undef, $rd ]
+                          )->pack( -pady => 3 );
+
+    my $rcsf = $ew->Frame( -relief      => 'ridge',
+                           -borderwidth => 3
+                         )->pack( -fill  => 'x',
+                                  -pady  => 5,
+                                  -ipady => 2 );
+
+    $rcsf->Frame->pack( -side   => 'left', 
+                        -expand => 1,
+                        -fill   => 'x' );
+
+    my $rcb = $rcsf->Button( -text    => 'Cancel',
+                             -command => sub { $ew->destroy;
+                                               $mw->deiconify }
+                           )->pack( -side => 'left',
+                                    -padx => 10 );
+
+    my $rsb = $rcsf->Button( -text    => 'Done',
+                             -command => [ \&done, $ew, $cal, $orig_cal, $ll ]
+                           )->pack( -side => 'left',
+                                    -padx => 10 );
+
+    $rcsf->Frame->pack( -side   => 'left',
+                        -expand => 1,
+                        -fill   => 'x' );
+}
+
+
+################################################
+
+sub add_entry {
+    my ( $cal, $cf, $rd ) = @_;
+
+    unless ( defined $cf ) {
+        $cf = Freq->new;
+        push @{ $cal->{ freqs } }, $cf;
+    } else {
+        $cf->{ freq } *= 0.001;
+    }
+
+    my $of = $rd->Frame( -background  => 'white',
+						 -borderwidth => 1,
+						 -relief      => 'ridge'
+					   )->pack( -pady => 3 );
+
+    my $ff = $of->Frame( -background => 'white' )->pack;
+
+    $ff->Label( -text       => 'Frequency:',
+                -background => 'white',
+                -width      => 15
+              )->pack( -side   => 'left',
+                       -pady   => 3,
+                       -anchor => 'w' );
+
+    my $fv = $ff->Entry( -textvariable    => \$cf->{ freq },
+						 -validate        => 'key',
+						 -validatecommand => [ \&freq_check ],
+						 -width           => 20,
+						 -relief          => 'sunken',
+						 -background      => 'white'
+					   )->pack( -side => 'left',
+								-pady => 3 );
+
+    $ff->Label( -text       => 'kHz',
+                -background => 'white',
+                -width      => 3
+              )->pack( -side => 'left',
+                       -pady => 3,
+                       -padx => 3 );
+
+    my $fr = $of->Frame( -background => 'white' )->pack;
+
+    $fr->Label( -text       => 'Ratio:',
+                -background => 'white',
+                -width      => 15
+              )->pack( -side   => 'left',
+                       -pady   => 3,
+                       -anchor => 'w' );
+
+    my $rv = $fr->Entry( -textvariable    => \$cf->{ ratio },
+						 -validate        => 'key',
+						 -validatecommand => [ \&ratio_phase_check ],
+						 -width           => 20,
+						 -relief          => 'sunken',
+						 -background      => 'white'
+					   )->pack( -side => 'left',
+								-pady => 3 );
+
+    $fr->Label( -text       => 'G/V',
+                -background => 'white',
+                -width      => 3
+              )->pack( -side => 'left',
+                       -pady => 3,
+                       -padx => 3 );
+
+    my $fl = $of->Frame( -background => 'white' )->pack;
+
+    $fl->Label( -text       => 'Phase:',
+                -background => 'white',
+                -width      => 15
+              )->pack( -side   => 'left',
+                       -pady   => 3,
+                       -anchor => 'w' );
+
+    my $pv = $fl->Entry( -textvariable    => \$cf->{ phase },
+						 -validate        => 'key',
+						 -validatecommand => [ \&ratio_phase_check ],
+						 -width           => 20,
+						 -relief          => 'sunken',
+						 -background      => 'white'
+					   )->pack( -side => 'left',
+								-pady => 3 );
+
+    $fl->Label( -text       => '°',
+                -background => 'white',
+                -width      => 3
+              )->pack( -side => 'left',
+                       -pady => 3,
+                       -padx => 3 );
+
+    my $fdf = $of->Frame->pack( -pady => 3 );
+
+   $fdf->Button( -text     => 'Delete entry',
+                  -command => sub { $of->destroy;
+									$cal->freqs( [ grep { $_ == $cf }
+												   @{ $cal->{ freqs } } ] ); }
+                )->pack;
+}
+
+
+################################################
+
+sub done {
+	my ( $ew, $cal, $orig_cal, $ll ) = @_;
+	my $txt;
+
+	if ( defined ( $txt = $all->check( $cal, $orig_cal ) ) ) {
+		show_message( $txt );
+		return;
+	}
+
+	$_->freq( 1000 * $_->freq ) for @{ $cal->freqs };
+
+	if ( $orig_cal ) {
+		$all->replace( $orig_cal, $cal );
+	} else {
+		$all->add_calibration( $cal );
+	}
+
+	$ew->destroy;
+
+	$ll->delete( 0, @$all - 1 );
+	$ll->insert( 'end', $_->name ) for @$all;
+
+	my $r2 = $cal->r2;
+	show_message( "Correlation coefficient:\nr^2 = $r2", 1 ) if defined $r2;
+
+	$mw->deiconify;
+}
+
+
+################################################
+
+sub freq_check {
+    return shift( ) =~ /^(\d+(\.(\d+)?)?)?$/;
+}
+
+
+################################################
+
+sub ratio_phase_check {
+    return shift( ) =~ /^[+-]?(\d+(\.(\d+)?)?)?$/;
+}
+
+
+################################################
+
+sub edit_end {
+    my ( $cal ) = @_;
+
+    return 0 if $cal->{ name } =~ /^\s$/;
+}
+
+
+################################################
+
+sub show_message {
+    my $text = shift;
+
+    $mw->messageBox( -icon => @_ ? 'info' : 'error',
+                     -type => 'Ok',
+                     -title => @_ ? '' : 'Error',
+                     -message => $text );
+}
+
+
+1;
+
+
+###################################
+###################################
+
+package EPR_Mod;
+
+use strict;
+use warnings;
+
+
+sub new {
+    my $inv = shift;
+    my $class = ref( $inv ) || $inv;
+	my $self = [ ];
+	bless $self, $class;
+
+	my $f;
+
+	if ( ! open $f, '>', '/tmp/epr_modulation_dump.edl' ) {
+		main::show_message( "Failed to open temporary file." );
+		exit 1;
+	}
+
+	print $f <<EOT;
+DEVICES:
+epr_mod;
+VARIABLES:
+I, J;
+f[ * ];
+EXPERIMENT:
+FOR I = 1 : epr_modulation_calibration_count( ) {
+print( "calibration: \\"#\\"\\n", epr_modulation_calibration_name( I ) );
+print( "interpolate: #\\n", epr_modulation_calibration_interpolate( epr_modulation_calibration_name( I ) ) ? "yes" : "no");
+print( "extrapolate: #\\n", epr_modulation_calibration_extrapolate( epr_modulation_calibration_name( I ) ) ? "yes" : "no" );
+epr_modulation_calibration_interpolate( epr_modulation_calibration_name( I ), "OFF" );
+f = epr_modulation_calibration_frequencies( epr_modulation_calibration_name( I ) );
+FOR J = 1 : size( f ) {
+print( "freq: # kHz\\n", f[ J ] / 1 kHz );
+print( "ratio: # G/V\\n", epr_modulation_ratio( epr_modulation_calibration_name( I ), f[ J ] ) );
+IF ( epr_modulation_has_phase( epr_modulation_calibration_name( I ), f[ J ] ) ) {
+print( "phase: #\\n", epr_modulation_phase( epr_modulation_calibration_name( I ), f[ J ] ) );
+}
+}
+print( "\n" );
+}
+EOT
+
+	close $f;
+
+	if ( ! open $f, '-|', 'fsc2 -nw /tmp/epr_modulation_dump.edl 2>&1' ) {
+		unlink '/tmp/epr_modulation_dump.edl';
+		main::show_message( 'Failed to start fsc2.' );
+		exit 1;
+	}
+
+	my ( $cal, $freq );
+	my %u = ( 'G' => 1e9,  'M' => 1e6,  'k' => 1e3,
+			  'm' => 1e-3, 'u' => 1e-6, 'n' => 1e-9 );
+
+	while ( <$f> ) {
+		if ( /^calibration: \"([^\"]+)\"$/ ) {
+			$cal = $self->add_calibration( $1 );
+		} elsif ( /^interpolate: *(yes|no|1|0)$/ ) {
+			$cal->interpolate( $1 );
+		} elsif  ( /^extrapolate:\s*(yes|no|1|0)$/ ) {
+			$cal->extrapolate( $1 );
+		} elsif ( /^freq: ([^ ]+) *((G|M|k|m|u|n)?)Hz$/ ) {
+			$freq = $cal->add_freq( Freq->new( $1 * ( $2 ? $u{ $2 } : 1 ) ) );
+		} elsif ( /^ratio: ([^ ]+) G\/V$/ ) {
+			$freq->ratio( $1 );
+		} elsif ( /^phase: (.*)$/ ) {
+			$freq->phase( $1 );
+		} else {
+            my $txt = $_;
+            while ( <$f> ) {
+                $txt .= $_;
+            }
+            $txt =~ s/^(.*?):\d+://;
+            main::show_message( $txt );
+            unlink '/tmp/epr_modulation_dump.edl';
+            exit 1;
+        }
+	}
+
+	close $f;
+	unlink '/tmp/epr_modulation_dump.edl';
+
+	return $self;
+}
+
+
+################################################
+
+sub store {
+	my $self = shift;
+	my $f;
+
+	unless ( open $f, '>', '/tmp/epr_modulation_save.edl' ) {
+		main::show_message( "Failed to open temporary file." );
+		exit 1;
+	}
+
+	print $f <<EOT;
+DEVICES:
+epr_mod;
+VARIABLES:
+EXPERIMENT:
+WHILE ( epr_modulation_calibration_count( ) > 0 ) {
+epr_modulation_delete_calibration( epr_modulation_calibration_name( 1 ) );
+}
+EOT
+
+	for my $cal ( @$self ) {
+		print $f 'epr_modulation_add_calibration( "' . $cal->name . "\" );\n";
+		print $f 'epr_modulation_calibration_interpolate( "' . $cal->name .
+			     '", ' .
+			     ( $cal->interpolate eq 'yes' ? '"ON"' : '"OFF"' ) . " );\n";
+		print $f 'epr_modulation_calibration_extrapolate( "' . $cal->name .
+			     '", ' .
+			     ( $cal->extrapolate eq 'yes' ? '"ON"' : '"OFF"' ) . " );\n";
+		for my $freq ( @{ $cal->freqs } ) {
+			printf $f "epr_modulation_ratio( \"%s\", %f Hz, %f );\n",
+				      $cal->name, $freq->freq, $freq->ratio;
+			printf $f "epr_modulation_phase( \"%s\", %f Hz, %f );\n",
+				      $cal->name, $freq->freq, $freq->phase
+				if defined $freq->phase;
+		}
+	}
+
+	print $f "epr_modulation_store( );\n";
+
+	close $f;
+
+	if ( ! open $f, '-|', 'fsc2 -nw /tmp/epr_modulation_save.edl' ) {
+		unlink '/tmp/epr_modulation_save.edl';
+		main::show_message( 'Failed to start fsc2.' );
+		exit 1;
+	}
+
+	close $f;
+
+	unlink '/tmp/epr_modulation_save.edl';
+}
+
+
+###################################
+
+sub get_calibration {
+	my ( $self, $name ) = @_;
+
+	for ( @$self ) {
+		return $_ if $_->name eq $name;
+	}
+
+	die "Unknown name.\n";
+}
+
+
+###################################
+
+sub add_calibration {
+	my ( $self, $arg ) = ( shift, shift );
+
+	if ( $arg->isa( 'Calibration' ) ) {
+		for ( @$self ) {
+			die "Calibration name not unique.\n" if $_->name eq $arg->name;
+		}
+		push @$self, $arg;
+	} else {
+		for ( @$self ) {
+			die "Calibration name not unique.\n" if $_->name eq $arg;
+		}
+		push @$self, Calibration->new( $arg, @_ );
+	}
+
+	return $self->[ -1 ];
+}
+
+
+###################################
+
+sub delete_calibration {
+	my ( $self, $name ) = @_;
+	my $i = 0;
+
+	for ( @$self) {
+		if ( $_->name eq $name ) {
+			delete $self->[ $i ];
+			return;
+		}
+		$i++;
+	}
+
+	die "Unknown calibration.\n";
+}
+
+
+###################################
+
+sub replace {
+	my ( $self, $old, $new ) = @_;
+
+	return unless defined $old;
+
+	for ( @$self ) {
+		if ( $_ == $old ) {
+			$_ = $new;
+			return;
+		}
+	}
+
+	die "Calibration to replace not found.\n";
+}
+
+
+###################################
+
+sub check {
+	my ( $self, $cal, $orig_cal ) = @_;;
+
+	for ( @$self ) {
+		next if defined $orig_cal and $_ == $orig_cal;
+		return "Missing calibration name." unless defined $cal->name;
+		return "Calibration name is not unique." if $cal->name eq $_->name;
+	}
+
+	return $cal->check;
+}
+
+
+1;
+
+
+###################################
+###################################
+
+package Calibration;
+
+use strict;
+use warnings;
+
+
+###################################
+
+sub new {
+    my $inv = shift;
+    my $class = ref( $inv ) || $inv;
+	die "Invalid calibration name.\n" if defined $_[ 0 ] and $_[ 0 ] =~ /^\s*$/;
+	my $self = { name => shift };
+	bless $self, $class;
+
+	if ( @_ and defined $_[ 0 ] ) {
+		$self->interpolate( shift );
+	} else {
+		$self->{ interpolate } = undef;
+		shift;
+	}
+
+	if ( @_ and defined $_[ 0 ] ) {
+		$self->extrapolate( shift );
+	} else {
+		$self->{ extrapolate } = undef;
+		shift;
+	}
+
+	if ( @_ and defined $_[ 0 ] ) {
+		$self->freqs( shift );
+	} else {
+		$self->{ freqs } = [ ];
+	}
+
+	return $self;
+}
+
+
+###################################
+
+sub check {
+	my $self = shift;
+	my $i = 1;
+
+	return "Invalid calibration name." if $self->name =~ /^\s*$/;
+
+	for my $f ( @{ $self->freqs } ) {
+		return "Invalid frequency in $i. entry."
+			unless defined $f->freq and $f->freq > 0;
+		return "Missing ratio for $i. entry."
+			unless defined $f->ratio and $f->ratio != 0.0;
+		my $j = 0;
+		for ( @{ $self->freqs } ) {
+			$j++;
+			next if $f == $_;
+			return "Frequencies of $i. and $j. entry are identical."
+				if $f->freq == $_->freq;
+		}
+		$i++;
+	}
+
+	$self->{ freqs } = [ sort { $a->freq <=> $b->freq } @{ $self->freqs } ];
+
+	return undef;
+}
+
+
+###################################
+
+sub copy {
+	my $self = shift;
+	my $nr = Calibration->new( $self->name, $self->interpolate,
+                               $self->extrapolate );
+
+	$nr->add_freq( $_->copy ) for @{ $self->freqs };
+	return $nr;
+}
+
+
+###################################
+
+sub name {
+	my ( $self, $name ) = @_;
+	return $self->{ name } unless defined $name;
+	die "Invalid name.\n" if $name =~ /^\s*$/;
+	return $self->{ name } = shift;
+}
+
+
+###################################
+
+sub interpolate {
+	my ( $self, $interpolate ) = @_;
+	return $self->{ interpolate } unless defined $interpolate;
+	die "Invalid interpolation type $interpolate.\n"
+		unless $interpolate =~ /^(yes|no|1|0)$/i;
+	$interpolate =~ s/1/yes/i;
+	$interpolate =~ s/0/no/i;
+	return $self->{ interpolate } = $interpolate;
+}
+
+
+###################################
+
+sub extrapolate {
+	my ( $self, $extrapolate ) = @_;
+	return $self->{ extrapolate } unless defined $extrapolate;
+	die "Invalid extrapolation type.\n"
+		unless $extrapolate =~ /^(yes|no|1|0)$/i;
+	$extrapolate =~ s/1/yes/i;
+	$extrapolate =~ s/0/no/i;
+	return $self->{ extrapolate } = $extrapolate;
+}
+
+
+###################################
+
+sub freqs {
+	my ( $self, $freqs ) = @_;;
+	return $self->{ freqs } unless defined $freqs;
+
+	die "Argument not a reference to an array of Freq objects.\n"
+		unless ref( $freqs ) eq 'ARRAY';
+
+	for ( @$freqs ) {
+		die "Argument not a reference to an array of Freq objects.\n"
+			unless $_->isa( 'Freq' );
+	}
+
+	push @{ $self->{ freqs } }, Freq->new( $_->freq, $_->ratio, $_->phase )
+		for @$freqs;
+
+	return $self->{ freqs };
+}
+
+
+###################################
+
+sub add_freq {
+	my ( $self, $f ) = @_;
+
+	die "Argument not a Freq object.\n" unless $f->isa( 'Freq' );
+	die "Undefined frequency.\n" unless defined defined $f->freq;
+
+	for ( @{ $self->freqs } ) {
+		die "Frequency is not unique.\n" unless $_->freq != $f->freq;
+	}
+
+	push @{ $self->freqs }, $f;
+	$self->{ freqs } = [ sort { $a->freq <=> $b->freq } @{ $self->freqs } ];
+	return $f;
+}
+
+
+###################################
+
+sub del_freq {
+	my ( $self, $f ) = @_;
+	my $i = 0;
+
+	die "Argument not a Freq object.\n" unless $f->isa( 'Freq' );
+
+	for ( @{ $self->freqs } ) {
+		if ( $_ == $f ) {
+			delete $self->freqs->[ $i ];
+			return;
+		}
+		$i++;
+	}
+
+	die "Invalid Freq object.\n";
+}
+
+
+###################################
+
+sub r2 {
+	my $self = shift;
+
+	return if @{ $self->freqs } < 3;
+
+	my ( $ifsum, $if2sum, $rsum, $r2sum, $rifsum ) = ( 0, 0, 0, 0, 0 );
+
+	for ( @{ $self->freqs } ) {
+        $ifsum  += 1.0 / $_->freq;
+        $if2sum += 1.0 / ( $_->freq * $_->freq );
+        $rsum   += $_->ratio;
+        $r2sum  += $_->ratio * $_->ratio;
+        $rifsum += $_->ratio / $_->freq;
+	}
+
+    my $r2 =  ( $rifsum - $ifsum * $rsum / @{ $self->freqs } );
+    return $r2 * $r2
+           / (   ( $if2sum - $ifsum * $ifsum / @{ $self->freqs } )
+               * ( $r2sum  - $rsum  * $rsum  / @{ $self->freqs } ) );
+}
+
+
+1;
+
+
+###################################
+###################################
+
+package Freq;
+
+use strict;
+use warnings;
+
+
+sub new {
+    my $inv = shift;
+    my $class = ref( $inv ) || $inv;
+	my $self = { freq  => shift,
+				 ratio => shift,
+			     phase => shift };
+	return bless $self, $class;
+}
+
+
+###################################
+
+sub copy {
+	my $self = shift;
+	return Freq->new( $self->freq, $self->ratio, $self->phase );
+}
+
+
+###################################
+
+sub freq {
+	my ( $self, $freq ) = @_;
+
+	return $self->{ freq } unless defined $freq;
+
+	die "Invalid frequency.\n" if $freq <= 0.0;
+	return $self->{ freq } = $freq;
+}
+
+
+###################################
+
+sub ratio {
+	my ( $self, $ratio ) = @_;
+
+	return $self->{ ratio } unless defined $ratio;
+	return $self->{ ratio } = $ratio;
+}
+
+
+###################################
+
+sub phase {
+	my ( $self, $phase ) = @_;
+
+	return $self->{ phase } unless defined $phase;
+	return $self->{ phase } = $phase;
+}
+
+
+1;
+
+
+# Local variables:
+# tab-width: 4
+# indent-tabs-mode: nil
+# End:
