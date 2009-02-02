@@ -206,26 +206,43 @@ rb_pulser_w_basic_functions_init( void )
                 THROW( EXCEPTION );
             }
 
-#if defined SYNTHESIZER_PULSES_HAVE_SAME_LENGTHS
             if ( f->num_pulses == SYNTHESIZER_MAX_PULSES )
             {
                 int j, k;
 
                 for ( j = 1; j < f->num_pulses; j++ )
+                {
+                    if (    IS_ACTIVE( f->pulses[ j ] )
+                         && IS_ACTIVE( f->pulses[ j -1 ] )
+                         && f->pulses[ j ]->pos < 
+                                 f->pulses[ j - 1 ]->pos
+                               + f->pulses[ j - 1 ]->len * rb_pulser_w.timebase 
+                               + SYNTHESIZER_MIN_PULSE_SEPARATION )
+                    {
+                        print( FATAL, "Pulser function '%s' requires minimum "
+                               "pulse separation of %s but pulses #%ld and "
+                               "#%ld are nearer to each other.\n",
+                               Function_Names[ i ],
+                               rb_pulser_w_ptime(
+                                             SYNTHESIZER_MIN_PULSE_SEPARATION ),
+                               f->pulses[ j - 1 ]->num, f->pulses[ j ]->num );
+                        THROW( EXCEPTION );
+                    }
+
                     for ( k = 0; k < j; k++ )
                         if (    f->pulses[ k ]->len != f->pulses[ j ]->len
                              && f->pulses[ k ]->len != 0
                              && f->pulses[ j ]->len != 0 )
                         {
                             print( FATAL, "Pulser function '%s' allows only "
-                                   "pulses of equal length but pulses #%d and "
-                                   "#%d are different.\n", Function_Names[ i ],
-                                   k + 1, j + 1 );
+                                   "pulses of equal length but pulses #%pd and "
+                                   "#%ld are different.\n", Function_Names[ i ],
+                                   f->pulses[ k ]->num, f->pulses[ j ]->num );
                             THROW( EXCEPTION );
                         }
+                }
             }
         }
-#endif
 
         /* For all other channels only a single pulse can be set */
 
@@ -492,7 +509,7 @@ rb_pulser_w_rf_synth_init( void )
                                       T_free( rb_pulser_w.synth_double_delay );
         T_free( func );
         print( FATAL, "Function for setting the synthesizer double pulse "
-               "delay delay is missing from the synthesizer module '%s'.\n",
+               "delay is missing from the synthesizer module '%s'.\n",
                SYNTHESIZER_MODULE );
         THROW( EXCEPTION );
     }

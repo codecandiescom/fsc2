@@ -299,7 +299,8 @@ rb_pulser_w_test_hook( void )
     /* If a repetition time has been set set up the corresponding value in
        the structure for the card creating the repetition time */
 
-    if ( rb_pulser_w.trig_in_mode == INTERNAL ) {
+    if ( rb_pulser_w.trig_in_mode == INTERNAL )
+    {
         rb_pulser_w.clock_card[ ERT_CLOCK ].freq = rb_pulser_w.rep_time_index;
         rb_pulser_w.delay_card[ ERT_DELAY ].delay = rb_pulser_w.rep_time_ticks;
     }
@@ -349,10 +350,10 @@ rb_pulser_w_end_of_test_hook( void )
 }
 
 
-/*---------------------------------------------------------------*
- * Function gets called at the very start of the experiment - it
- * got to initialize the pulser and, if required, start it
- *---------------------------------------------------------------*/
+/*------------------------------------------------------------*
+ * Function gets called at the very start of the experiment -
+ * it got to initialize the pulser and, if required, start it
+ *------------------------------------------------------------*/
 
 int
 rb_pulser_w_exp_hook( void )

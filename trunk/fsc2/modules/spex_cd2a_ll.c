@@ -613,8 +613,8 @@ spex_cd2a_read_ack( void )
     } while ( *buf == CAN );
 
     if (    *buf != NAK
-         && ( received = fsc2_serial_read( SERIAL_PORT, buf + 1, NULL,
-                                           1, 1000000, UNSET ) ) <= 0 )
+         && ( received = fsc2_serial_read( SERIAL_PORT, buf + 1, 1, NULL,
+                                           1000000, UNSET ) ) <= 0 )
         spex_cd2a_comm_fail( );
 
     /* A <NAK> character means that there are communication problems */

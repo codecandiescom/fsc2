@@ -395,11 +395,14 @@ rb_pulser_w_synthesizer_init( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
     Var_T *func_ptr;
+    Var_T *res;
     int acc;
 
 
     if ( ! f->is_used )
         return;
+
+    /* Set the trigger slope to positive */
 
     if ( ! rb_pulser_w.synth_trig_slope )
         rb_pulser_w_failure( UNSET, "Function for setting synthesizer pulse "
@@ -413,6 +416,8 @@ rb_pulser_w_synthesizer_init( void )
     vars_push( STR_VAR, "POSITIVE" );
     vars_pop( func_call( func_ptr ) );
 
+    /* Set the minimum pulse delay (only has an effect in single pulse mode) */
+
     if ( ! rb_pulser_w.synth_pulse_delay )
         rb_pulser_w_failure( UNSET, "Function for setting synthesizer pulse "
                              "delay is unknown" );
@@ -425,6 +430,48 @@ rb_pulser_w_synthesizer_init( void )
     vars_push( FLOAT_VAR, SYNTHESIZER_MIN_PULSE_DELAY );
     vars_pop( func_call( func_ptr ) );
 
+#if defined SYNTHESIZER_MAX_PULSES
+    /* If there can be more than a single pulse switch to double pulse
+       mode if necessary, else make sure pulser is in singe pulse mode */
+
+    if ( ! rb_pulser_w.synth_double_mode )
+        rb_pulser_w_failure( UNSET, "Function for switching synthesizer "
+                             "between single and double pulse mode is "
+                             "unknown" );
+
+    if ( ( func_ptr = func_get( rb_pulser_w.synth_double_mode, &acc ) )
+                                                                      == NULL )
+        rb_pulser_w_failure( UNSET, "Function for switching synthesizer "
+                             "between single and double pulse mode is not "
+                             "available" );
+
+    if (    f->num_pulses > 1
+         && f->pulses[ 0 ]->is_active
+         && f->pulses[ 1 ]->is_active )
+        vars_push( STR_VAR, "ON" );
+    else
+        vars_push( STR_VAR, "OFF" );
+
+    vars_pop( func_call( func_ptr ) );
+
+    /* Also determine the current setting for the pulse separation */
+
+    if ( ! rb_pulser_w.synth_double_delay )
+        rb_pulser_w_failure( UNSET, "Function for setting delay between two "
+                             "RF pulses is unknown" );
+
+    if ( ( func_ptr = func_get( rb_pulser_w.synth_double_delay, &acc ) )
+                                                                      == NULL )
+        rb_pulser_w_failure( UNSET, "Function for setting delay between two "
+                             "RF pulses is not available" );
+
+    res = func_call( func_ptr );
+    f->old_delay = res->val.dval;
+    vars_pop( res );
+#endif
+
+    /* Switch pulser on if there are any active pulses */
+
     if ( ! rb_pulser_w.synth_pulse_state )
         rb_pulser_w_failure( UNSET, "Function for switching synthesizer pulse "
                              "modulation on or off is unknown" );
@@ -434,10 +481,22 @@ rb_pulser_w_synthesizer_init( void )
         rb_pulser_w_failure( UNSET, "Function for switching synthesizer pulse "
                              "modulation on or off is not available" );
 
-    vars_push( STR_VAR, f->pulses[ 0 ]->is_active ? "ON" : "OFF" );
+    if (    ( f->num_pulses > 1
+              && ( f->pulses[ 0 ]->is_active || f->pulses[ 1 ]->is_active ) )
+         || ( f->num_pulses == 1 && f->pulses[ 0 ]->is_active ) )
+        vars_push( STR_VAR, "ON" );
+    else
+        vars_push( STR_VAR, "OFF" );
+
     vars_pop( func_call( func_ptr ) );
 
     f->pulses[ 0 ]->was_active = f->pulses[ 0 ]->is_active;
+    f->old_num_active_pulses = f->pulses[ 0 ]->is_active ? 1 : 0;
+    if ( f->num_pulses > 1 )
+    {
+        f->pulses[ 1 ]->was_active = f->pulses[ 1 ]->is_active; 
+        f->old_num_active_pulses += f->pulses[ 1 ]->is_active ? 1 : 0;
+    }
 }
 
 

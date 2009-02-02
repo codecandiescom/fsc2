@@ -129,6 +129,8 @@ rb_pulser_w_function_init( void )
                   && rb_pulser_w.defense_pulse_mode ) )
             continue;
 
+        f->old_num_active_pulses = f->num_active_pulses; 
+
         for ( f->num_active_pulses = 0, j = 0; j < f->num_pulses; j++ )
             if ( f->pulses[ j ]->is_active )
                 f->num_active_pulses++;
@@ -298,7 +300,8 @@ rb_pulser_w_phase_channel_setup( void )
     Rulbus_Delay_Card_T *p_card = rb_pulser_w.delay_card + PHASE_DELAY_0;
     Rulbus_Delay_Card_T *cur_card;
     Pulse_T **pulses = f->pulses;
-    double mw_start, mw_end;
+    double mw_start,
+           mw_end;
     Ticks dT;
     int i;
 
@@ -393,9 +396,12 @@ rb_pulser_w_rf_channel_setup( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
     Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + RF_DELAY;
-    Pulse_T *p;
+    Pulse_T *p,
+            *p2;
     Ticks dT;
-    double start, delta, shift;
+    double start = 0.0,
+           delta,
+           shift;
 
 
     if ( ! f->is_used )
@@ -418,40 +424,64 @@ rb_pulser_w_rf_channel_setup( void )
                 break;
             }
 
-        start =   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
-                + SYNTHESIZER_INTRINSIC_DELAY + f->delay;
-
-        if ( p->pos <= start )
-        {
-            print( FATAL, "RF pulse #%ld starts too early.\n", p->num );
-            THROW( EXCEPTION );
-        }
-
-        delta = p->pos - start;
-        dT = Ticks_rnd( delta / rb_pulser_w.timebase );
-        shift = dT * rb_pulser_w.timebase - delta;
-            
-        if ( dT > MAX_TICKS )
-        {
-            print( FATAL, "RF pulse #%ld starts too late.\n", p->num );
-            THROW( EXCEPTION );
-        }
-
-        if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
-            print( SEVERE, "Position of RF pulse #%ld not possible, must "
-                   "shift it by %s.\n", p->num, rb_pulser_w_ptime( shift ) );
-
-        card->delay = dT;
-        card->is_active = SET;
-
-        /* Store the length of the pulse itself separately. there's no card for
-           this pulse, it gets set by the synthesizer directly */ 
-
-        f->last_pulse_len = p->len * rb_pulser_w.timebase;
+        start = SYNTHESIZER_MIN_PULSE_DELAY;
     }
     else
     {
-        /* Here goes the code for more than a single pulse... */
+        p  = f->pulses[ 0 ];
+        p2 = f->pulses[ 1 ];
+
+        if ( p->len != p2->len )
+        {
+            print( SEVERE, "Lengths of RF pulses #%ld and #%ld differ which "
+                   "isn't possible, adjusting length of pulse #%ld to %s.\n",
+                   p->num, p2->num, p2->num,
+                   rb_pulser_w_ptime( p2->len * rb_pulser_w.timebase ) );
+            p2->len = p->len;
+        }
+    }
+
+    start +=   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
+             + SYNTHESIZER_INTRINSIC_DELAY + f->delay;
+
+    if ( p->pos <= start + 0.5 * rb_pulser_w.timebase )
+    {
+        print( FATAL, "RF pulse #%ld starts too early.\n", p->num );
+        THROW( EXCEPTION );
+    }
+
+    delta = p->pos - start;
+    dT = Ticks_rnd( delta / rb_pulser_w.timebase );
+    shift = dT * rb_pulser_w.timebase - delta;
+            
+    if ( dT > MAX_TICKS )
+    {
+        print( FATAL, "RF pulse #%ld starts too late.\n", p->num );
+        THROW( EXCEPTION );
+    }
+
+    if ( fabs( shift ) > PRECISION * rb_pulser_w.timebase )
+        print( SEVERE, "Position of RF pulse #%ld not possible, must "
+               "shift it by %s.\n", p->num, rb_pulser_w_ptime( shift ) );
+
+    card->delay = dT;
+    card->is_active = SET;
+
+    /* Store the length of the pulse itself separately. there's no card for
+       this pulse, it gets set by the synthesizer directly */ 
+
+    f->last_pulse_len = p->len * rb_pulser_w.timebase;
+
+    /* If there are two RF pulses check that their separation is large enough */
+
+    if (    f->num_active_pulses > 1
+         && p2->pos <   p->pos + p->len * rb_pulser_w.timebase
+                      + SYNTHESIZER_MIN_PULSE_SEPARATION )
+    {
+        print( FATAL, "Position of RF pulse #%ld too near to pulse #%ld, "
+               "minimum separation between RF pulses is %s.\n", p2->num, p->num,
+               rb_pulser_w_ptime( SYNTHESIZER_MIN_PULSE_SEPARATION ) );
+        THROW( EXCEPTION );
     }
 }
 
@@ -825,7 +855,7 @@ rb_pulser_w_seq_length_check( void )
 
 /*-------------------------------------------------------------------*
  * Changes the pulse pattern in all channels so that the data in the
- * pulser get in sync with the its internal representation.
+ * pulser get in sync with the the internal representation.
  * 'test_only' is set during the test run.
  *-------------------------------------------------------------------*/
 
@@ -942,7 +972,8 @@ static void
 rb_pulser_w_rf_pulse( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
-    Pulse_T *p;
+    Pulse_T *p,
+            *p2;
     Var_T *func_ptr;
     int acc;
 
@@ -950,7 +981,24 @@ rb_pulser_w_rf_pulse( void )
     if ( ! f->is_used )
         return;
 
-    p = *f->pulses;
+    if ( f->num_active_pulses == 1 )
+    {
+        int i;
+
+        for ( i = 0; i < f->num_active_pulses; i ++ )
+            if ( IS_ACTIVE( f->pulses[ i ] ) )
+            {
+                p = f->pulses[ i ];
+                break;
+            }
+    }
+    else
+    {
+        p  = f->pulses[ 0 ];
+        p2 = f->pulses[ 1 ];
+    }
+
+    /* Set the length of the first RF pulse (all others have the same length) */
 
     if ( p->is_active )
     {
@@ -973,11 +1021,11 @@ rb_pulser_w_rf_pulse( void )
 #endif
     }
 
-    /* Switch synthesizer output on or off if the pulse just became active or
-       inactive */
+    /* Switch synthesizer output on if there were no active pulses before but
+       now are and off if there were active pulse but now there are none */
 
-    if (    ( p->was_active && ! p->is_active )
-         || ( ! p->was_active && p->is_active ) )
+    if (    ( f->old_num_active_pulses <= 0 && f->num_active_pulses > 0 )
+         || ( f->old_num_active_pulses > 0 && f->num_active_pulses == 0 ) )
     {
 #if ! defined RB_PULSER_W_TEST
         if ( ( func_ptr = func_get( rb_pulser_w.synth_state, &acc ) ) == NULL )
@@ -987,19 +1035,71 @@ rb_pulser_w_rf_pulse( void )
             THROW( EXCEPTION );
         }
 
-        if ( p->was_active && ! p->is_active )
-            vars_push( STR_VAR, "OFF" );
-        else
+        if ( f->num_active_pulses > 1 )
             vars_push( STR_VAR, "ON" );
+        else
+            vars_push( STR_VAR, "OFF" );
 
         vars_pop( func_call( func_ptr ) );
 
 #else   /* in test mode */
         fprintf( stderr, "synthesizer_pulse_state( \"%s\" )\n",
-                 ( p->was_active && ! p->is_active ) ? "OFF" : "ON" );
+                 f->num_active_pulses > 1 ? "ON" : "OFF" );
 #endif
 
         p->was_active = p->is_active;
+    }
+
+    /* Switch between double and single mode if the number o active pulses
+       changed */
+
+    if ( f->old_num_active_pulses != f->num_active_pulses )
+    {
+#if ! defined RB_PULSER_W_TEST
+        if ( ( func_ptr = func_get( rb_pulser_w.synth_double_mode, &acc ) )
+                                                                       == NULL )
+        {
+            print( FATAL, "Synthesizer function for switching between single "
+                   "and double pulse mode is not available.\n" );
+            THROW( EXCEPTION );
+        }
+
+        if ( f->num_active_pulses > 1 )
+            vars_push( STR_VAR, "ON" );
+        else
+            vars_push( STR_VAR, "OFF" );
+
+        vars_pop( func_call( func_ptr ) );
+#else
+        fprintf( stderr, "synthesizer_double_pulse_mode( \"%s\" )\n",
+                 f->num_active_pulses > 1 ? "ON" : "OFF" );
+#endif
+    }
+
+    /* If there are two RF pulses set the delay between them */
+
+    if (    f->num_active_pulses > 1
+         && lrnd( 1.0e9 * f->old_delay ) !=
+                lrnd(   1.0e9
+                      * ( p2->pos - p->pos - p->len * rb_pulser_w.timebase ) ) )
+    {
+#if ! defined RB_PULSER_W_TEST
+        if ( ( func_ptr = func_get( rb_pulser_w.synth_double_delay, &acc ) )
+                                                                       == NULL )
+        {
+            print( FATAL, "Synthesizer function for setting delay between two "
+                   "pulses is not available.\n" );
+            THROW( EXCEPTION );
+        }
+
+        f->old_delay = p2->pos - p->pos - p->len * rb_pulser_w.timebase;
+        vars_push( FLOAT_VAR, f->old_delay );
+        vars_pop( func_call( func_ptr ) );
+#else
+        fprintf( stderr, "synthesizer_double_pulse_delay( \"%s\" )\n",
+                 rb_pulser_w_ptime(   p2->pos - p->pos
+                                    - p->len * rb_pulser_w.timebase ) );
+#endif
     }
 }
 

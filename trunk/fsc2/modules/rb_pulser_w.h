@@ -43,9 +43,9 @@
    instead of outputting pulses have a line printed to stderr for each
    call for setting a deleay or clock card. */
 
-//#if 0
+#if 0
 #define RB_PULSER_W_TEST
-//#endif
+#endif
 
 
 /* Defines for the number of delay and clock cards */
@@ -163,6 +163,10 @@ struct Function {
 
     int num_pulses;             /* number of pulses assigned to the function */
     int num_active_pulses;
+
+    int old_num_active_pulses;  /* only used for RF pulses */
+    double old_delay;           /* only used for RF pulses */
+
     Pulse_T **pulses;           /* list of pulse pointers */
 
     double last_pulse_len;

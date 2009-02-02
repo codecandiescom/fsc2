@@ -433,19 +433,23 @@ rb_pulser_mw_min_specs( Pulse_T * p )
 }
 
 
-/*-------------------------------------------------------------------------*
- * Function for determining the earliest possible position of the RF pulse
- *-------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for determining the earliest possible position for the first
+ * RF pulse or the minimum separation to the previous one for the second
+ *-----------------------------------------------------------------------*/
 
 double
 rb_pulser_rf_min_specs( Pulse_T * p )
 {
     fsc2_assert( p->function == rb_pulser_w.function + PULSER_CHANNEL_RF );
 
-    return Ticks_ceil( (   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
-                         + SYNTHESIZER_INTRINSIC_DELAY
-                         + p->function->delay ) / rb_pulser_w.timebase )
-           * rb_pulser_w.timebase;
+    if ( p == p->function->pulses[ 0 ] )
+        return   Ticks_ceil( (   rb_pulser_w.delay_card[ ERT_DELAY ].intr_delay
+                               + SYNTHESIZER_INTRINSIC_DELAY
+                               + p->function->delay ) / rb_pulser_w.timebase )
+               * rb_pulser_w.timebase;
+    else
+        return SYNTHESIZER_MIN_PULSE_SEPARATION;
 }
 
 

@@ -1518,17 +1518,6 @@ synthesizer_pulse_width( Var_T * v )
         width = ticks * MIN_PULSE_WIDTH;
     }
 
-    if (    rs_sml01.double_pulse_mode_is_set
-         && rs_sml01.double_pulse_mode
-         && rs_sml01.double_pulse_delay_is_set
-         && lrnd( ( rs_sml01.double_pulse_delay - width ) / MIN_PULSE_WIDTH )
-                                                                         <= 0 )
-    {
-        print( FATAL, "Can't set pulse width since it's not shorter than the "
-               "the distance between the existing two pulses.\n" );
-        THROW( EXCEPTION );
-    }
-
     too_many_arguments( v );
     
     if ( FSC2_MODE == EXPERIMENT )
@@ -1624,22 +1613,7 @@ synthesizer_double_pulse_mode( Var_T * v )
 
     state = get_boolean( v );
 
-    if (    state
-         && rs_sml01.pulse_width_is_set
-         && rs_sml01.double_pulse_delay_is_set
-            && lrnd( ( rs_sml01.double_pulse_delay - rs_sml01.pulse_width )
-                     / MIN_PULSE_WIDTH ) <= 0 )
-    {
-        print( FATAL, "Can't switch on double pulse mdde since pulse width "
-               "isn't smaller than distance between the pulses.\n" );
-        THROW( EXCEPTION );
-    }
-
     too_many_arguments( v );
-
-    if ( ! rs_sml01.double_pulse_delay_is_set )
-        print( WARN, "Switching on double pulse mode without delay beween "
-               "pulses having been set.\n" );
 
     if ( FSC2_MODE == EXPERIMENT )
         rs_sml01_set_double_pulse_mode( state );
@@ -1672,7 +1646,7 @@ synthesizer_double_pulse_delay( Var_T * v )
         return vars_push( FLOAT_VAR, rs_sml01.double_pulse_delay );
     }
 
-    delay = get_double( v, "doubl pulse delay" );
+    delay = get_double( v, "double pulse delay" );
 
     ticks = lrnd( delay / MIN_PULSE_WIDTH );
 
@@ -1693,16 +1667,6 @@ synthesizer_double_pulse_delay( Var_T * v )
                rs_sml01_pretty_print( ticks * MIN_PULSE_WIDTH ) );
         T_free( t );
         delay = ticks * MIN_PULSE_WIDTH;
-    }
-
-    if (    rs_sml01.double_pulse_mode_is_set
-         && rs_sml01.double_pulse_mode
-         && rs_sml01.pulse_width_is_set
-         && lrnd( ( delay - rs_sml01.pulse_width ) / MIN_PULSE_WIDTH ) <= 0 )
-    {
-        print( FATAL, "Can't set double pulse delay since it's not longer than "
-               "the the pulse's widths.\n" );
-        THROW( EXCEPTION );
     }
 
     rs_sml01.double_pulse_delay = delay;
