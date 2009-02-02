@@ -127,7 +127,7 @@ smsmotor_init_hook( void )
 		smsmotor.min_position[ i ] = HUGE_VAL;
 		smsmotor.max_position[ i ] = - HUGE_VAL;
         smsmotor.lower_limit[ i ] = default_limits[ i ][ 0 ];
-        smsmotor.lower_limit[ i ] = default_limits[ i ][ 1 ];
+        smsmotor.upper_limit[ i ] = default_limits[ i ][ 1 ];
         smsmotor.speed[ i ] = TEST_SPEED;
         smsmotor.speed_is_set[ i ] = UNSET;
         smsmotor.acceleration_is_set[ i ] = UNSET;
@@ -590,25 +590,23 @@ smsmotor_init( void )
         /* Check that all positions set during the test run we're within
            the limits we're going to set */
 
-		if ( smsmotor.min_position[ i ] <
-			              smsmotor.lower_limit[ i ] - smsmotor.position[ i ] )
+		if ( smsmotor.min_position[ i ] < smsmotor.lower_limit[ i ] )
 		{
 			print( FATAL, "During the test run a position of %f was requested "
 				   "for device #%ld which is lower that the lower limit of "
 				   "%f.\n",
-				   smsmotor.min_position[ i ] + smsmotor.position[ i ], i + 1,
+				   smsmotor.min_position[ i ], i + 1,
 				   smsmotor.lower_limit[ i ] );
 			THROW( EXCEPTION );
 		}
 
-		if ( smsmotor.max_position[ i ] >
-			              smsmotor.upper_limit[ i ] - smsmotor.position[ i ] )
+		if ( smsmotor.max_position[ i ] > smsmotor.upper_limit[ i ] )
 		{
 			print( FATAL, "During the test run a position of %f was requested "
 				   "for device #%ld which is larger that the upper limit of "
 				   "%f.\n",
-				   smsmotor.max_position[ i ] + smsmotor.position[ i ], i + 1,
-				   smsmotor.upper_limit[ i ] );
+				   smsmotor.max_position[ i ], i + 1,
+                   smsmotor.upper_limit[ i ] );
 			THROW( EXCEPTION );
 		}
 
@@ -823,7 +821,7 @@ smsmotor_set_speed( long   dev,
     char buf[ 30 ];
 
 
-    sprintf( buf, "%f %ld snv ", speed, dev );
+    sprintf( buf, "%f %ld snv ", speed, dev + 1 );
     if ( fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
                                     WAIT_TIME, UNSET ) <= 0 )
         smsmotor_fail( );
@@ -844,7 +842,7 @@ smsmotor_get_speed( long  dev )
     long len = 0;
 
 
-    sprintf( buf, "%ld gnv ", dev );
+    sprintf( buf, "%ld gnv ", dev + 1 );
     if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
                                WAIT_TIME, UNSET ) <= 0
          || ( len = fsc2_serial_read( SERIAL_PORT, reply, sizeof reply,
@@ -872,7 +870,7 @@ smsmotor_set_acceleration( long   dev,
     char buf[ 30 ];
 
 
-    sprintf( buf, "%f %ld sna ", acceleration, dev );
+    sprintf( buf, "%f %ld sna ", acceleration, dev + 1 );
     if ( fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
                                     WAIT_TIME, UNSET ) <= 0 )
         smsmotor_fail( );
@@ -893,7 +891,7 @@ smsmotor_get_acceleration( long  dev )
     long len = 0;
 
 
-    sprintf( buf, "%ld gna ", dev );
+    sprintf( buf, "%ld gna ", dev + 1 );
     if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
                                WAIT_TIME, UNSET ) <= 0
          || ( len = fsc2_serial_read( SERIAL_PORT, reply, sizeof reply,
