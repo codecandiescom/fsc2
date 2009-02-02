@@ -660,7 +660,7 @@ rs_sml01_get_pulse_state( void )
 void
 rs_sml01_set_double_pulse_mode( bool state )
 {
-    char cmd[ 100 ] = "PULS:DOUBLE ";
+    char cmd[ 100 ] = "PULS:DOUB:STAT ";
 
 
     strcat( cmd, state ? "ON\n" : "OFF\n" );
@@ -770,7 +770,7 @@ rs_sml01_set_double_pulse_delay( double delay )
     char cmd[ 100 ];
 
 
-    sprintf( cmd, "PULS:DOUBL:DEL %s\n", rs_sml01_pretty_print( delay ) );
+    sprintf( cmd, "PULS:DOUB:DEL %s\n", rs_sml01_pretty_print( delay ) );
     rs_sml01_command( cmd );
 }
 
@@ -785,7 +785,7 @@ rs_sml01_get_double_pulse_delay( void )
     long length = sizeof buffer;
 
 
-    rs_sml01_talk( "PULS:DOUBL:DEL?\n", buffer, &length );
+    rs_sml01_talk( "PULS:DOUB:DEL?\n", buffer, &length );
     buffer[ length - 1 ] = '\0';
     return T_atod( buffer );
 }

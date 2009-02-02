@@ -396,8 +396,8 @@ rb_pulser_w_rf_channel_setup( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
     Rulbus_Delay_Card_T *card = rb_pulser_w.delay_card + RF_DELAY;
-    Pulse_T *p,
-            *p2;
+    Pulse_T *p = NULL,
+            *p2 = NULL;
     Ticks dT;
     double start = 0.0,
            delta,
@@ -470,9 +470,10 @@ rb_pulser_w_rf_channel_setup( void )
     /* Store the length of the pulse itself separately. there's no card for
        this pulse, it gets set by the synthesizer directly */ 
 
+
     f->last_pulse_len = p->len * rb_pulser_w.timebase;
 
-    /* If there are two RF pulses check that their separation is large enough */
+    /* If there are two RF pulses check that the separation is large enough */
 
     if (    f->num_active_pulses > 1
          && p2->pos <   p->pos + p->len * rb_pulser_w.timebase
@@ -972,8 +973,8 @@ static void
 rb_pulser_w_rf_pulse( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
-    Pulse_T *p,
-            *p2;
+    Pulse_T *p  = NULL,
+            *p2 = NULL;
     Var_T *func_ptr;
     int acc;
 
@@ -998,7 +999,8 @@ rb_pulser_w_rf_pulse( void )
         p2 = f->pulses[ 1 ];
     }
 
-    /* Set the length of the first RF pulse (all others have the same length) */
+    /* Set the length of the first RF pulse (all others have the same
+       length) */
 
     if ( p->is_active )
     {
@@ -1016,8 +1018,8 @@ rb_pulser_w_rf_pulse( void )
 
 #else   /* in test mode */
         if ( FSC2_MODE == EXPERIMENT )
-            fprintf( stderr, "synthesizer_pulse_width( %lf )\n",
-                     f->last_pulse_len );
+            fprintf( stderr, "synthesizer_pulse_width( %lf ns )\n",
+                     1.0e9 * f->last_pulse_len );
 #endif
     }
 
