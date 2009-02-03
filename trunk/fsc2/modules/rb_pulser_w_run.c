@@ -1081,13 +1081,14 @@ rb_pulser_w_rf_pulse( void )
     /* If there are two RF pulses set the delay between them */
 
     if (    f->num_active_pulses > 1
-         && lrnd( 1.0e9 * f->old_delay ) !=
-                lrnd(   1.0e9
-                      * ( p2->pos - p->pos - p->len * rb_pulser_w.timebase ) ) )
+		 && ( f->old_delay < 0.0
+			  || lrnd( 1.0e9 * f->old_delay ) !=
+                        lrnd( 1.0e9 * (   p2->pos - p->pos
+										- p->len * rb_pulser_w.timebase ) ) ) )
     {
 #if ! defined RB_PULSER_W_TEST
         if ( ( func_ptr = func_get( rb_pulser_w.synth_double_delay, &acc ) )
-                                                                       == NULL )
+                                                                      == NULL )
         {
             print( FATAL, "Synthesizer function for setting delay between two "
                    "pulses is not available.\n" );

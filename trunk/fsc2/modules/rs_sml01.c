@@ -1672,6 +1672,9 @@ synthesizer_double_pulse_delay( Var_T * v )
     rs_sml01.double_pulse_delay = delay;
     rs_sml01.double_pulse_delay_is_set = SET;
 
+    if ( FSC2_MODE == EXPERIMENT )
+      rs_sml01_set_double_pulse_delay( delay );
+
     return vars_push( FLOAT_VAR, delay );
 }
 

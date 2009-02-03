@@ -415,6 +415,8 @@ rb_pulser_w_exp_hook( void )
     }
 #endif
 
+    rb_pulser_w.function[ PULSER_CHANNEL_RF ].old_delay = -1.0;
+
     /* Initialize the device */
 
     rb_pulser_w.is_running = UNSET;

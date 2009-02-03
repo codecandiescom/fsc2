@@ -453,21 +453,6 @@ rb_pulser_w_synthesizer_init( void )
         vars_push( STR_VAR, "OFF" );
 
     vars_pop( func_call( func_ptr ) );
-
-    /* Also determine the current setting for the pulse separation */
-
-    if ( ! rb_pulser_w.synth_double_delay )
-        rb_pulser_w_failure( UNSET, "Function for setting delay between two "
-                             "RF pulses is unknown" );
-
-    if ( ( func_ptr = func_get( rb_pulser_w.synth_double_delay, &acc ) )
-                                                                      == NULL )
-        rb_pulser_w_failure( UNSET, "Function for setting delay between two "
-                             "RF pulses is not available" );
-
-    res = func_call( func_ptr );
-    f->old_delay = res->val.dval;
-    vars_pop( res );
 #endif
 
     /* Switch pulser on if there are any active pulses */
