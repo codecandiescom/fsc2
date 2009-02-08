@@ -29,8 +29,7 @@ lecroy94_list   := lecroy9410 lecroy9420 lecroy9424 lecroy9424e lecroy9450
 
 
 # List of modules that are to be made from a single source file only (as
-# far as they don't require some additional hardware that gets tested for
-# below)
+# far as they don't require some additional software
 
 simp_modules    := User_Functions gg_chopper
 
@@ -95,14 +94,16 @@ epr_mod         := epr_mod.c epr_mod_util.c epr_mod_lexer.c
 
 # List of all "complicated" modules that are to be made from more than a
 # single source file (plus a header file) and that don't need any further
-# hardware (that gets tested for below)
+# pre-installed software
 
 comp_modules    := hjs_sfc
 
 
 # Add modules that only get created on demand (they require either some
-# additional libraries that are not installed on all systems or a serial
+# additional libraries that may not be installed on all systems or a serial
 # port that may not be available everywhere)
+
+# Support for devices contolled via GPIB
 
 ifneq ($(GPIB_LIBRARY),none)
 simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a hp5342a       \
@@ -117,51 +118,70 @@ comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a        \
 				   lecroy_ws epr_mod
 endif
 
+# Support for devices controlled via the serial port
+
 ifneq ($(NUM_SERIAL_PORTS),0)
 simp_modules    += aeg_s_band aeg_x_band er035m_s er035m_sas hjs_daadc  \
 				   $(s_band_list) fsps25 smsmotor
 comp_modules    += hjs_attenuator spectrapro_300i spex_cd2a spex232 lecroy_wr_s
 endif
 
-ifdef WITH_ME6000
-simp_modules    += me6000
-endif
+# Support for the National Instruments 6601 General Purpose Counter
+# and Timer board
 
 ifdef WITH_NI6601
 simp_modules    += ni6601
 endif
+
+# Support for the Wasco WITIO-48 DIO card
 
 ifdef WITH_WITIO_48
 simp_modules    += witio_48 bnm12
 comp_modules    += hjs_fc
 endif
 
+# Support for the Roper Scientific Spec-10 CCD camera
+
 ifdef WITH_RS_SPEC10
 comp_modules    += rs_spec10
 endif
 
+# Support for the National Instruments PCI MIO 16E-1 DAQ card
+
 ifdef WITH_PCI_MIO_16E_1
 comp_modules    += pci_mio_16e_1
 endif
+
+# Support for devices controlled via the RULBUS
 
 ifdef WITH_RULBUS
 simp_modules    += rb8509 rb8510_0 rb8510_1
 comp_modules    += rb_pulser_j rb_pulser_w
 endif
 
+# Support for Meihaus data acquisition card (via Meilhaus supplied library)
+
 ifdef WITH_MEDRIVER
 me_dio          :=  $(patsubst $(cdir)/%.conf,%,$(wildcard $(cdir)/me_dio_*.conf))
 simp_modules    += $(me_dio) er218
 endif
 
+# Support for the Meilhaus ME-6000 DAC card (using library coming with fsc2)
+
+ifdef WITH_ME6000
+simp_modules    += me6000
+endif
+
+# Support Newport Oriel MMSS spectrometer
+
 ifdef WITH_LIBUSB
 comp_modules    += oriel_matrix
 endif
 
+
 src_headers     := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 
 INCLUDES        += -I$(sdir) -I$(cdir)
-
 
 export        # export all symbols to the sub-makefiles
 

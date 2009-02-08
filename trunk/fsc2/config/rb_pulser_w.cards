@@ -109,7 +109,7 @@ ERT_CLOCK_CARD    "CLOCK_0"
 
 
 # 17. Name of the first clock card that's the clock for all the pulse delay
-#     cards and the defense delay card, i.e. the frst time base clock card
+#     cards and the defense delay card, i.e. the first time base clock card
 #     - but note that there's a compile time option in the configuration
 #     file for the module, FIXED_TIMEBASE, that makes the program assume
 #     that a fixed frequency clock card is used instead, if it's defined

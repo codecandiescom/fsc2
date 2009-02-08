@@ -732,9 +732,10 @@ rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
 
     /* Most cards are supposed to output an end pulse when activated, only
        the predecessors of the delay cards for creating the delays in
-       between microwave pulses (i.e. the cards that create the first and
-       second microwave pulse) should emit start pulses. Deactivating is
-       done by making cards not output start or end pulses anymore. */
+       between microwave pulses (i.e. the ones between the cards that create
+       the first and second microwave pulse) should emit start pulses to
+       allow shorter pulse spacings. Deactivating is done by making cards
+       not output start or end pulses anymore. */
 
     if ( state == START )
     {
