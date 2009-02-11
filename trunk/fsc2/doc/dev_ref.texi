@@ -2243,15 +2243,15 @@ In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
 @code{yes}.
 
 @paragraphindent 0
-@strong{Status}: Due to the insane number of different models it
-was not possible to test the module with all of them. Moreover,
-specification data from manuals (as far as available to me) as well as
-the LeCroy web site had to be used which often contradict each other
-and not seldom are incomplete (if someone has complete data for the
-9361/9362 or the mytical 9320 series, mentioned in some manuals but
-nowhere else, I would be happy to add support for them). Thus I can
-neither guarantee that the used data are correct nor that support for
-all the modules works correctly. Please send me a bug report if you
+@strong{Status}: Due to the huge number of different models it was not
+possible to test the module with all of them. Moreover, specification
+data from manuals (as far as available to me) as well as the LeCroy
+web site had to be used which sometimes contradict each other and not
+seldom are incomplete (if someone has complete data for the 9361/9362
+or the mythical 9320 series, mentioned in some manuals but nowhere
+else I would be happy to add support for them). Thus I can neither
+guarantee that the used data are correct nor that support for all the
+modules works correctly. Please send me a bug report if you happen to
 have such a model and you experience problems.
 
 @paragraphindent 0

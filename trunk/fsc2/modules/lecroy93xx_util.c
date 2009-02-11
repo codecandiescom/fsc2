@@ -647,7 +647,7 @@ lecroy93xx_tbas_prep( void )
     for ( i = lecroy93xx.num_tbas - 1; i >= 0; i--, k++ )
     {
         lecroy93xx.tbas[ i ] = cur_tbas;
-        if ( k % 3 == 1 )
+        if ( k % 3 == 2 )
             cur_tbas *= 0.4;
         else
             cur_tbas *= 0.5;

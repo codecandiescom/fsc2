@@ -650,6 +650,12 @@ f_init_1d( Var_T * v )
         THROW( EXCEPTION );
     }
 
+    if ( G.dim & 1 )
+    {
+        print( FATAL, "Function has already been called before.\n" );
+        THROW( EXCEPTION );
+    }
+
     /* Set some default values */
 
     G.dim |= 1;
@@ -764,6 +770,12 @@ f_init_2d( Var_T * v )
     if ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN )
     {
         print( FATAL, "Function can't be used without a GUI.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( G.dim & 2 )
+    {
+        print( FATAL, "Function has already been called before.\n" );
         THROW( EXCEPTION );
     }
 

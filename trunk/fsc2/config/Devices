@@ -51,11 +51,12 @@ tds520c       // Tektronix 520C
 tds540        // Tektronix 540
 tds744a       // Tektronix 744A
 tds754a       // Tektronix 754A
+lecroy93xx    // LeCroy 9300 series
 lecroy9400    // LeCroy 9400
-lecroy9450    // LeCroy 9450
+lecroy9410    // LeCroy 9410
 lecroy9424    // LeCroy 9424
 lecroy9424e   // LeCroy 9424e
-lecroy9410    // LeCroy 9410
+lecroy9450    // LeCroy 9450
 lecroy_wr     // LeCroy Waverunner and Waverunner 2 (GPIB)
 lecroy_wr_s   // LeCroy Waverunner and Waverunner 2 (serial)
 lecroy_ws     // LeCroy WaveSurfer (LAN)

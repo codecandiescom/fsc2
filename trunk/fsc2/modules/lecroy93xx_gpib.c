@@ -1482,6 +1482,7 @@ lecroy93xx_get_data( long * len )
 {
     unsigned char *data;
     char len_str[ 10 ];
+    long one = 1;
 
 
     /* First thing we read is something like "DAT1,#[0-9]" where the number
@@ -1506,11 +1507,13 @@ lecroy93xx_get_data( long * len )
 
     fsc2_assert( *len > 0 );
 
-    /* Obtain enough memory and then read the real data */
+    /* Obtain enough memory and then read the real data. Afterwards we
+       need to read in one more extra byte the device sends. */
 
     data = T_malloc( *len );
 
-    if ( gpib_read( lecroy93xx.device, ( char * ) data, len ) == FAILURE )
+    if (    gpib_read( lecroy93xx.device, ( char * ) data, len ) == FAILURE
+         || gpib_read( lecroy93xx.device, len_str, &one ) == FAILURE )
         lecroy93xx_gpib_failure( );
 
     return data;

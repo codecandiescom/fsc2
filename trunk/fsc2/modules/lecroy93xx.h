@@ -246,7 +246,7 @@ enum {
 
 
 #if defined LECROY93XX_MAIN_
-#if defined LECROY93XX_CH3 && defined LECROY93XX_CH4
+#if LECROY93XX_CH_MAX >= LECROY93XX_CH4
 int trg_channels[ 7 ] = { LECROY93XX_CH1,
                           LECROY93XX_CH2,
                           LECROY93XX_CH3,
@@ -264,7 +264,7 @@ int trg_channels[ 5 ] = { LECROY93XX_CH1,
                         };
 #endif
 #else
-#if defined LECROY93XX_CH3 && defined LECROY93XX_CH4
+#if LECROY93XX_CH_MAX >= LECROY93XX_CH4
 extern int trg_channels[ 7 ];
 #else
 extern int trg_channels[ 5 ];
