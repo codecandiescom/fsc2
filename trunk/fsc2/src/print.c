@@ -230,6 +230,7 @@ get_print_file( FILE ** fp,
     struct stat stat_buf;
     char *pc_f = NULL,
          *pc_e = NULL;
+    int fd_flags;
 
 
     print_form = GUI.G_Funcs.create_form_print( );
@@ -449,6 +450,10 @@ get_print_file( FILE ** fp,
         *name = T_free( *name );
         return FAIL;
     }
+
+    if ( ( fd_flags  = fcntl( fileno( *fp ), F_GETFD ) ) < 0 )
+        fd_flags = 0;
+    fcntl( fileno( *fp ), F_SETFD, fd_flags | FD_CLOEXEC );
 
     return SET;
 }

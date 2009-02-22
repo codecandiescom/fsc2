@@ -40,6 +40,7 @@ struct File_List {
 Var_T * f_openf(   Var_T * /* v */ );
 Var_T * f_getf(    Var_T * /* v */ );
 Var_T * f_clonef(  Var_T * /* v */ );
+Var_T * f_resetf(  Var_T * /* v */ );
 Var_T * f_save(    Var_T * /* v */ );
 Var_T * f_fsave(   Var_T * /* v */ );
 Var_T * f_ffsave(  Var_T * /* v */ );

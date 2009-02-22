@@ -5,11 +5,16 @@
 === RESONATOR menu [ "Unspecified", "Doppelmode", "Hochtemperatur",   \
 === "Tieftemperatur", "Zylinder", "Raumtemperatur 1", "Raumtemperatur 2a",  \
 === "Raumtemperatur 2b" ] [ 1 ] "Resonator"
-=== SENS1 menu [ "Don't set", "1.0", "1.25", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "6.0", "8.0" ][ 1 ] "Lock-in sensitivity\n(factor)"
-=== SENS2 menu [ "1.0e2", "1.0e3", "1.0e4", "1.0e5", "1.0e6" ] [ 3 ] "Lock-in sensitivity\n(magnitude)"
-=== TC menu [ "Don't set", "2.5 ms", "5 ms", "10 ms", "20 ms", "40 ms", "80 ms", "160 ms", "320 ms", "640 ms", "1.25 s", "2.5 s", "5 s" ] [ 1 ] "Lock-in Time constant"
+=== SENS1 menu [ "1.0", "1.25", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0",  \
+=== "6.0", "8.0" ][ 1 ] "Receiver gain\n(factor)"
+=== SENS2 menu [ "1.0e2", "1.0e3", "1.0e4", "1.0e5", "1.0e6" ] [ 3 ]  \
+=== "Receiver gain\n(magnitude)"
+=== TC menu [ "Don't set", "2.5 ms", "5 ms", "10 ms", "20 ms", "40 ms",  \
+=== "80 ms", "160 ms", "320 ms", "640 ms", "1.25 s", "2.5 s", "5 s" ] [ 1 ]  \
+=== "Lock-in Time constant"
 === FACTOR float [ 1.0e-3 : 100 ] [ 1.0  ] "Waiting time"  "* tc"
-=== MODFREQ menu [ "Don't set", "100 kHz", "50 kHz", "25 kHz", "12.5 kHz", "6.25 kHz", "3.125 kHz", "1.5625 kHz" ] [ 1 ] "Modulation frequency"
+=== MODFREQ menu [ "Don't set", "100 kHz", "50 kHz", "25 kHz", "12.5 kHz",  \
+=== "6.25 kHz", "3.125 kHz", "1.5625 kHz" ] [ 1 ] "Modulation frequency"
 === MODAMP float_empty [ 0 : ] [ 1 ] "Modulation amplitude" "G"
 === PHASE float_empty [ -360.0 : 360.0 ] [ 0.0 ] "Modulation phase"
 DEVICES:

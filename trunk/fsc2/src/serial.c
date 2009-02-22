@@ -475,8 +475,15 @@ fsc2_serial_exp_init( const char * log_file_name,
                      "stderr instead.\n", log_file_name );
         }
         else
+        {
+            int fd_flags = fcntl( fileno( fsc2_serial_log ), F_GETFD );
+
+            if ( fd_flags < 0 )
+                fd_flags = 0;
+            fcntl( fileno( fsc2_serial_log ), F_SETFD, fd_flags | FD_CLOEXEC );
             chmod( log_file_name,
                    S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH );
+        }
     }
 
     lower_permissions( );
@@ -674,9 +681,8 @@ fsc2_serial_open( int          sn,
 
     /* Set the close-on-exec flag for the file descriptor */
 
-    if ( ( fd_flags = fcntl( fd, F_GETFD, 0 ) ) < 0 )
+    if ( ( fd_flags = fcntl( fd, F_GETFD ) ) < 0 )
         fd_flags = 0;
-
     fcntl( fd, F_SETFD, fd_flags | FD_CLOEXEC );
 
     /* Get the the current terminal settings and copy them to a structure

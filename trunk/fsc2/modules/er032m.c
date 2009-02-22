@@ -379,7 +379,7 @@ magnet_setup( Var_T * v )
 
     if ( field_step < ER032M_MIN_FIELD_STEP )
     {
-        print( FATAL, "Field sweep step size (%lf G) too small, minimum is "
+        print( FATAL, "Field sweep step size (%f G) too small, minimum is "
                "%f G.\n", VALUE( v ), ER032M_MIN_FIELD_STEP );
         THROW( EXCEPTION );
     }
@@ -484,8 +484,8 @@ sweep_up( Var_T * v  UNUSED_ARG )
         if (    new_swa > MAX_SWA
              || new_cf + 0.5 * magnet.sw > ER032M_MAX_FIELD )
         {
-            print( FATAL, "Can't set field of %.3f G.\n", 
-                   magnet.act_field + magnet.field_step );
+            print( FATAL, "Can't set field of %.3f G, too near to maximum "
+                   "field.\n", magnet.act_field + magnet.field_step );
             THROW( EXCEPTION );
         }
 
@@ -570,8 +570,8 @@ sweep_down( Var_T * v  UNUSED_ARG )
         if (    new_swa < MIN_SWA
              || new_cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
         {
-            print( FATAL, "Can't set field of %.3f G.\n", 
-                   magnet.act_field + magnet.field_step );
+            print( FATAL, "Can't set field of %.3f G, too near to minimum "
+                   "field.\n", magnet.act_field + magnet.field_step );
             THROW( EXCEPTION );
         }
 
@@ -692,7 +692,7 @@ magnet_field_step_size( Var_T * v )
 
     if ( field_step < 0.0 )
     {
-        print( FATAL, "Invalid negative field step size\n" );
+        print( FATAL, "Invalid negative field step size.\n" );
         THROW( EXCEPTION );
     }
 
@@ -884,7 +884,8 @@ er032m_start_field( void )
          || magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD
          || magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
     {
-        print( FATAL, "Can't set field of %.3f G\n", magnet.start_field );
+        print( FATAL, "Can't set field of %.3f G, too neat to maximum or "
+               "minimum field.\n", magnet.start_field );
         THROW( EXCEPTION );
     }
 
@@ -1150,7 +1151,8 @@ er032m_change_field_and_keep_sw( double field )
          || magnet.cf + 0.5 * magnet.sw > ER032M_MAX_FIELD
          || magnet.cf - 0.5 * magnet.sw < ER032M_MIN_FIELD )
     {
-        print( FATAL, "Can't set field of %.3f G\n", field );
+        print( FATAL, "Can't set field of %.3f G, to near to minimum or "
+               "maximum field.\n", field );
         THROW( EXCEPTION );
     }
 

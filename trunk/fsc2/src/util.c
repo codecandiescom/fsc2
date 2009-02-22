@@ -694,7 +694,7 @@ handle_escape( char * str )
 
 FILE *
 filter_edl( const char * name,
-            FILE *       fp )
+            FILE       * fp )
 {
     int pd[ 2 ];
     int pdt[ 2 ];

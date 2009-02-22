@@ -133,7 +133,7 @@ aeg_s_band_init_hook( void )
          && ! exists_device( "er035m_s" )
          && ! exists_device( "bh15" ) )
     {
-        print( FATAL, "Can't find a field meter.\n" );
+        print( FATAL, "Can't find a field meter module.\n" );
         THROW( EXCEPTION );
     }
 
@@ -324,7 +324,7 @@ magnet_setup( Var_T * v )
 
     if ( fabs( field_step ) < AEG_S_BAND_MIN_FIELD_STEP )
     {
-        print( FATAL, "Field sweep step size (%lf G) too small, minimum is "
+        print( FATAL, "Field sweep step size (%f G) too small, minimum is "
                "%f G.\n", field_step, ( double ) AEG_S_BAND_MIN_FIELD_STEP );
         THROW( EXCEPTION );
     }
@@ -398,7 +398,7 @@ Var_T *set_field( Var_T * v )
 
     if ( ! magnet_goto_field( field, error ) )
     {
-        print( FATAL, "Can't reach requested field of %lf G.\n", field );
+        print( FATAL, "Can't reach requested field of %f G.\n", field );
         THROW( EXCEPTION );
     }
 
@@ -586,7 +586,7 @@ aeg_s_band_field_check( double field,
     {
         if ( field < AEG_S_BAND_WITH_ER035M_MIN_FIELD )
         {
-            print( FATAL, "Field (%lf G) too low for Bruker ER035M "
+            print( FATAL, "Field (%f G) too low for Bruker ER035M "
                    "gaussmeter, minimum is %d G.\n",
                     field, ( int ) AEG_S_BAND_WITH_ER035M_MIN_FIELD );
             if ( FSC2_MODE == EXPERIMENT )
@@ -600,7 +600,7 @@ aeg_s_band_field_check( double field,
 
         if ( field > AEG_S_BAND_WITH_ER035M_MAX_FIELD )
         {
-            print( FATAL, "Field (%lf G) too high for Bruker ER035M "
+            print( FATAL, "Field (%f G) too high for Bruker ER035M "
                    "gaussmeter, maximum is %d G.\n", field,
                    ( int ) AEG_S_BAND_WITH_ER035M_MAX_FIELD );
             if ( FSC2_MODE == EXPERIMENT )
@@ -617,7 +617,7 @@ aeg_s_band_field_check( double field,
     {
         if ( field < AEG_S_BAND_WITH_BH15_MIN_FIELD )
         {
-            print( FATAL, "Field (%lf G) too low for Bruker BH15 field "
+            print( FATAL, "Field (%f G) too low for Bruker BH15 field "
                    "controller, minimum is %d G.\n",
                     field, ( int ) AEG_S_BAND_WITH_BH15_MIN_FIELD );
             if ( FSC2_MODE == EXPERIMENT )
@@ -631,7 +631,7 @@ aeg_s_band_field_check( double field,
 
         if ( field > AEG_S_BAND_WITH_BH15_MAX_FIELD )
         {
-            print( FATAL, "Field (%lf G) too high for Bruker BH15 field "
+            print( FATAL, "Field (%f G) too high for Bruker BH15 field "
                    "controller, maximum is %d G.\n",
                     field, ( int ) AEG_S_BAND_WITH_BH15_MAX_FIELD );
             if ( FSC2_MODE == EXPERIMENT )

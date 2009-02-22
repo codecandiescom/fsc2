@@ -35,18 +35,18 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 #define USEC_PER_STEP  25000L   /* time (in us) for a step of the motor */
 
-#define STROBE_WAIT    1000L    /* time to wait in strobe or latch operation */
+#define STROBE_WAIT     1000L   /* time to wait in strobe or latch operation */
 
 
 #define INIT_CMD       0x19
 #define INIT_DATA      0xFFF
 #define DATA_CMD       0x1A
-#define STORE_CMD      0x1D
+#define STORE_CMD      0x1B
 #define STORE_DATA     0x007
 #define UP_CMD         0x1D
 #define DOWN_CMD       0x1C
 
-#define SSTROBE        0x80;
+#define SSTROBE        0x80
 #define ADDRESS_LATCH  0x10
 #define DATA_LATCH     0x20
 
@@ -585,6 +585,7 @@ er218_init_cmd( void )
 {
     er218.dio1_data = INIT_CMD;
     er218_set_dio( 0, er218.dio1_data );
+
     er218_toggle( ADDRESS_LATCH );
 
     er218.dio1_data = INIT_DATA & 0xFF;
@@ -594,6 +595,8 @@ er218_init_cmd( void )
     er218_set_dio( 1, er218.dio2_data );
 
     er218_toggle( DATA_LATCH );
+
+    er218_toggle( SSTROBE );
 
     er218_position_wait( ANGLE_TO_STEPS( 360.0 ) );
 }
@@ -609,32 +612,45 @@ static void
 er218_go_cmd( int          dir,
               unsigned int data )
 {
+    /* Step 1: send the number of steps (vaku emust be sent inverted) */
+
     er218.dio1_data = DATA_CMD;
     er218_set_dio( 0, er218.dio1_data );
+
     er218_toggle( ADDRESS_LATCH );
 
     er218.dio1_data = ~ data & 0xFF;
     er218_set_dio( 0, er218.dio1_data );
 
-    er218.dio2_data = ( ~ data >> 8 ) & 0x0F;
+    er218.dio2_data = ~ data >> 8 & 0x0F;
     er218_set_dio( 1, er218.dio2_data );
 
     er218_toggle( DATA_LATCH );
 
-    er218.dio1_data = DATA_CMD;
+    er218_toggle( SSTROBE );
+
+    /* Step 2: make the device accept the data */
+
+    er218.dio1_data = STORE_CMD;
     er218_set_dio( 0, er218.dio1_data );
+
     er218_toggle( ADDRESS_LATCH );
 
     er218.dio1_data = STORE_DATA & 0xFF;
     er218_set_dio( 0, er218.dio1_data );
 
-    er218.dio2_data = ( STORE_DATA >> 8 ) & 0x0F;
+    er218.dio2_data = STORE_DATA >> 8 & 0x0F;
     er218_set_dio( 1, er218.dio2_data );
 
     er218_toggle( DATA_LATCH );
+
+    er218_toggle( SSTROBE );
+
+    /* Step 3: tell the device to go up or down */
 
     er218.dio1_data = dir == GO_UP ? UP_CMD : DOWN_CMD;
     er218_set_dio( 0, er218.dio1_data );
+
     er218_toggle( ADDRESS_LATCH );
 
     er218.dio1_data = STORE_DATA & 0xFF;
@@ -643,6 +659,8 @@ er218_go_cmd( int          dir,
     er218_set_dio( 1, er218.dio2_data );
 
     er218_toggle( DATA_LATCH );
+
+    er218_toggle( SSTROBE );
 
     er218.last_dir = dir;
 

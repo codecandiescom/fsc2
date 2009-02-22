@@ -122,9 +122,9 @@ FOR I = 1 : size( tcs ) {
 	}
 }
 
-Sens1 = menu_create( "Sensitivity (factor)", "1.0", "1.25", "1.5",
+Sens1 = menu_create( "Receiver gain (factor)", "1.0", "1.25", "1.5",
 	                 "2.0", "2.5", "3.0", "4.0", "5.0", "6.0", "8.0" );
-Sens2 = menu_create( "Sensitivity (magnitude)", "1.0e2", "1.0e3", "1.0e4",
+Sens2 = menu_create( "Receiver gain (magnitude)", "1.0e2", "1.0e3", "1.0e4",
 	                 "1.0e5", "1.0e6" );
 
 IF lockin_rg( ) < 7 {
@@ -163,7 +163,7 @@ FOREVER {
 	}
 
 	IF Acq_State {
-		wait( lockin_time_constant( ) );
+		wait( tc );
 		data = lockin_get_data( );
 		display_1d( I, data / 1 uV );
 		I += 1;

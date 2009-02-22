@@ -4,7 +4,7 @@
 /*                                                                        */
 /*  EDL monitor script pulses experiments for the 275 GHz spectrometer.   */
 /*                                                                        */
-/* $Id$
+/* $Id$              */
 /*                                                                        */
 /**************************************************************************/
 

@@ -379,9 +379,10 @@ experiment_time( void )
 }
 
 
-/*--------------------------------------------------------------*
- * Function for opening files with the full permissions of fsc2
- *--------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function for opening files with the maximum permissions of fsc2.
+ * Close-on-exec flag gets set for the newly opened file.
+ *------------------------------------------------------------------*/
 
 FILE *
 fsc2_fopen( const char * path,
@@ -392,6 +393,19 @@ fsc2_fopen( const char * path,
 
     raise_permissions( );
     fp = fopen( path, mode );
+
+    /* Probably rarely necessary, but make sure the close-on-exec flag is
+       se for the file */
+
+    if ( fp )
+    {
+        int fd_flags = fcntl( fileno( fp ), F_GETFD );
+
+        if ( fd_flags < 0 )
+            fd_flags = 0;
+        fcntl( fileno( fp ), F_SETFD, fd_flags | FD_CLOEXEC );
+    }
+
     lower_permissions( );
     return fp;
 }

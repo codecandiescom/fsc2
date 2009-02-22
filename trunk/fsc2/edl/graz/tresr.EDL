@@ -27,7 +27,7 @@ field_step  = - FIELD_STEP G;            // Field step size
 === endif
 Num_Traces  = round( abs( start_field - end_field ) / abs( field_step ) ) + 1;
                                          // Number of field points
-field[ Num_Traces ];                     // Current field values
+field[ * ];                              // Current field values
 
 === if ( START_FIELD < SIGNAL_START and SIGNAL_START < END_FIELD ) or  ( START_FIELD > SIGNAL_START and SIGNAL_START > END_FIELD )
 no_signal_max_field = SIGNAL_START G;    // Start of field region with signals
@@ -45,26 +45,28 @@ timebase;                                // Digitizer timebase
 time_res;                                // Digitizer time resolution
 pretrigger = 0.01 * PRETRIGGER;          // Amount of pre-trigger (rel. to
                                          // digitizer trace length)
-data[ Num_Traces, * ];                   // Data of single scan
-mdata[ Num_Traces, * ];                  // Averaged data of all scans
-mdata_g[ Num_Traces, * ];                // Averaged and corrected data
+data[ *, * ];                            // Data of single scan
+mdata[ *, * ];                           // Averaged data of all scans
+mdata_g[ *, * ];                         // Averaged and corrected data
 new_mdata[ * ];                          // New (scan averaged) trace
 new_mdata_g[ * ];                        // New (scan averaged and baseline
                                          // corrected) trace
-integ[ Num_Traces ];                     // integrated signal
 Int_Start, Int_Len;                      // Start point and widthof integrated
                                          // signal
 background[ * ];                         // averaged laser background signal
 Pretrigger_Points;                       // No. of points before trigger
-ground[ Num_Traces ];                    // baseline offsets for each trace
+ground[ * ];                             // baseline offsets for each trace
 
 Scan_No = 0;                                   // Counter for scans
 I;                                       // Counter for traces
 J;                                       // Misc counter
 BG_Count = 0;                            // No. of averaged backgrounds
-B1, B2, B3, B4;                          // Toolbox variables
+B1, B2, B3, B4, B5;                      // Toolbox variables
 File_p, File_f, File_r, File_d;          // File handle
 Scans_Done = 0;                          // Number of finished scans
+New_Num_Traces;
+new_end_field;
+K;
 
 
 PREPARATIONS:
@@ -89,12 +91,6 @@ EXPERIMENT:
 Trace_Len = digitizer_record_length( ACQ_CH );
 
 background= float_slice( Trace_Len );
-mdata[ 1 ] = float_slice( Trace_Len );
-mdata_g[ 1 ] = mdata[ 1 ];
-FOR I = 2 : Num_Traces {
-    mdata[ I ] = mdata[ 1 ];
-    mdata_g[ I ] = mdata_g[ 1 ];
-}
 
 /* Now get the timebase and the corresponding time resolution */
 
@@ -149,7 +145,15 @@ B1 = output_create( "INT_OUTPUT", "Current scan" );
 B2 = output_create( "FLOAT_OUTPUT", "Current field [G]", "%.3f" );
 B3 = button_create( "PUSH_BUTTON", "Pause/Continue" );
 B4 = button_create( "PUSH_BUTTON", "Stop after end of scan" );
+B5 = input_create( "FLOAT_INPUT", end_field, "New end field [G]" );
 hide_toolbox( "OFF" );
+
+/* Open files we're going to need */
+
+File_d = get_file( "", "*.dat", "", "", "dat" );
+File_p = clone_file( File_d, "dat", "par" );
+File_f = clone_file( File_d, "dat", "fld" );
+File_r = clone_file( File_d, "dat", "raw" );
 
 /* Now we need two nested loops, the outer loop over the scans and the inner
    loop over the field positions */
@@ -161,9 +165,38 @@ FOREVER {
     field[ 1 ] = magnet_field( start_field );
     output_value( B1, Scan_No );          // Update the scan count display
 
-    FOR I = 1 : Num_Traces {
+	IF Scan_No == 2 {
+		input_delete( B5 );
+    }
+
+	I = 0;
+
+    WHILE I < Num_Traces {
+
+		I += 1;
 
         output_value( B2, field[ I ] );   // Update the field value display
+
+		/* During first scan allow the end field to be changed (but only if
+		   that makes the difference between start end end field larger) */
+
+        IF Scan_No == 1 {
+
+			mdata[ I ] = float_slice( Trace_Len );
+			mdata_g[ I ] = float_slice( Trace_Len );
+
+			IF input_changed( B5 ) {
+				new_end_field = input_value( B5 );
+				New_Num_Traces = round(   abs( start_field - new_end_field )
+                                        / abs( field_step ) ) + 1;
+	            IF New_Num_Traces >= I {
+					Num_Traces = New_Num_Traces;
+					rescale_2d( Trace_Len, Num_Traces );
+					end_field = start_field + ( Num_Traces - 1 ) * field_step;
+                }
+				input_value( B5, end_field );
+			}
+        }
 
         /* Start an acquisition and fetch the resulting curve, then
            immediately sweep up */
@@ -253,11 +286,50 @@ FOREVER {
 
     mdata = add_to_average( mdata, data, Scan_No );
 
+	/* Write out all data we got so far (there are sometimes hardware
+	   problems and we need to make sure data are saved for that case) */
+
+	reset_file( File_p );
+	fsave( File_p, "Date              : # #\n"
+    	           "Start field       = # G\n"
+                   "End field         = # G\n"
+                   "Field step size   = # G\n"
+                   "No. of scans      = #\n"
+                   "No. of averages   = #\n"
+                   "Signal channel    = ACQ_CH\n"
+                   "Averaging channel = AVG_CH\n"
+                   "Sensitivity       = # mV\n"
+                   "Timebase          = # us\n"
+                   "Time resolution   = # ns\n"
+                   "Trigger channel   = TRG_CH\n"
+                   "Trigger position  = # us\n"
+                   "Trigger mode      = NORM\n"
+                   "Trigger level     = # V\n"
+                   "No. of traces     = #\n"
+                   "Trace length      = #\n"
+                   "No signal traces  = #\n",
+           date( ), time( ), field[ 1 ], field[ Num_Traces ], field_step,
+           Scan_No, Num_Avg, digitizer_sensitivity( ACQ_CH ) / 1 mV,
+           timebase / 1 us, time_res / 1 ns, pretrigger / 1 us,
+           digitizer_trigger_level( ), Num_Traces, Trace_Len,
+		   Num_No_Signal_Traces );
+
+    reset_file( File_f );
+    save( File_f, field );
+    reset_file( File_r );
+    save( " ", File_r, mdata );
+    reset_file( File_d );
+    save( " ", File_d, mdata_g );
+
     Scans_Done += 1;                      // Update the number of scans done
+
+	/* Wait while the if "Pause" button is active */
 
     WHILE button_state( B3 ) {
         wait( 0.25 s );
     }
+
+	/* End the exeriment of the "Stop after end of scan button: is active */
 
     IF button_state( B4 ) {               // Stop on user request
         BREAK;
@@ -267,13 +339,12 @@ FOREVER {
 
 ON_STOP:
 
-/* Get a file and write out the experimental parameters - make sure to get it
-   right also in the case that a scan was aborted while under way */
+/* Clear the contents of all files, we're going to rewrite them */
 
-File_d = get_file( "", "*.dat", "", "", "dat" );
-File_p = clone_file( File_d, "dat", "par" );
-File_f = clone_file( File_d, "dat", "fld" );
-File_r = clone_file( File_d, "dat", "raw" );
+reset_file( File_d );
+reset_file( File_p );
+reset_file( File_f );
+reset_file( File_r );
 
 fsave( File_p, "Date              : # #\n"
                "Start field       = # G\n"

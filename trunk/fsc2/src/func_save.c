@@ -611,6 +611,81 @@ f_clonef( Var_T * v )
 }
 
 
+/*-------------------------------------------------------------------*
+ * Function called for the 'reset_file()' EDL function to truncate
+ * a file.
+ *-------------------------------------------------------------------*/
+
+Var_T *
+f_resetf( Var_T * v )
+{
+    long file_num;
+
+
+    /* Neither stdout nor stderr an be "cloned" */
+
+    if (    v != NULL
+         && v->type == INT_VAR
+         && ! No_File_Numbers
+         && (    v->val.lval == FILE_NUMBER_STDOUT
+              || v->val.lval == FILE_NUMBER_STDERR ) )
+    {
+        print( WARN, "std%s can't be reset.\n",
+               v->val.lval == FILE_NUMBER_STDOUT ? "out" : "err" );
+        return vars_push( INT_VAR, FILE_NUMBER_STDERR );
+    }
+
+    /* Check that a possibly available paranter is ok */
+
+    if (    v != NULL
+         && (    v->type != INT_VAR
+              || v->val.lval < FILE_NUMBER_OFFSET
+              || v->val.lval >= EDL.File_List_Len + FILE_NUMBER_OFFSET ) )
+    {
+         print( FATAL, "Argument isn't a vaild file handle.\n" );
+         THROW( EXCEPTION );
+    }
+
+    if ( v != NULL )
+        file_num = v->val.lval - FILE_NUMBER_OFFSET;
+    else if ( ! No_File_Numbers && EDL.File_List_Len > 2 )
+    {
+        print( FATAL, "Missing argument.\n" );
+        THROW( EXCEPTION );
+    }
+    else if ( EDL.File_List_Len == 2 )
+        return vars_push( INT_VAR, 0L );
+    else
+        file_num = 2;
+
+    /* Nothing further to be done in test mode */
+
+    if ( Fsc2_Internals.mode == TEST )
+        return vars_push( INT_VAR, file_num + FILE_NUMBER_OFFSET );
+
+    /* Truncate the file - do it both for the standard C API (which allows
+       just setting the position) and the UNIX API */
+
+    fflush( EDL.File_List[ file_num ].fp );
+    if (    fseek( EDL.File_List[ file_num ].fp, 0, SEEK_SET ) != 0
+         || lseek( fileno( EDL.File_List[ file_num ].fp ), 0, SEEK_SET ) != 0 )
+    {
+        print( FATAL, "Failed to reset file.\n" );
+        THROW( EXCEPTION );
+    }
+
+    while ( ftruncate( fileno( EDL.File_List[ file_num ].fp ), 0 ) != 0 )
+    {
+        if ( errno == EINTR )
+            continue;
+        print( FATAL, "Failed to reset file.\n" );
+        THROW( EXCEPTION );
+    }
+
+    return vars_push( INT_VAR, file_num + FILE_NUMBER_OFFSET );
+}
+
+
 /*--------------------------------------------------------*
  * Function for opening a file when running in batch mode
  *--------------------------------------------------------*/
@@ -671,7 +746,6 @@ batch_mode_file_open( char * name )
             new_name = T_strdup( name );
     }
         
-
     /* Now try to open the new file, if this fails we must give up */
 
     if ( ( fp = fopen( new_name, "w+" ) ) == NULL )

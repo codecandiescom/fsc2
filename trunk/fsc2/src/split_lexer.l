@@ -181,7 +181,7 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 
 bool
 scan_main( const char * name,
-           FILE *       fp )
+           FILE       * fp )
 {
     bool split_error;
 

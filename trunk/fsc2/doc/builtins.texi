@@ -1070,6 +1070,7 @@ numbers @code{1} and @code{2} as file handles for @i{stdout} and @i{stderr}.
 @item @ref{get_file()}
 @item @ref{open_file()}
 @item @ref{clone_file()}
+@item @ref{reset_file()}
 @item @ref{save()}
 @item @ref{fsave()}
 @item @ref{ffsave()}
@@ -1223,6 +1224,19 @@ is used as the output file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
+
+
+@anchor{reset_file()}
+@findex reset_file()
+@item reset_file()
+Under some circumstances it may be required to throw away everything
+already written to file until that moment. That can be achieved by
+calling this function. If there's only a single file that got opened
+automatically (by callling a function that writes to a file withoyut
+calling @code{@ref{open_file()}} before) then the function takes no
+argument. If a file got opened by a call of @code{@ref{open_file()}}
+or similar then the function must be called with a single argument,
+the file handle for the file to be reset.
 
 
 @anchor{save()}

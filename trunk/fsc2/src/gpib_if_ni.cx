@@ -275,7 +275,14 @@ gpib_init_log( const char * log_file_name )
                      name );
         }
         else
+        {
+            int fd_flags = fcntl( fileno( gpib_log ), F_GETFD );
+
+            if ( fd_flags < 0 )
+                fd_flags = 0;
+            fcntl( fileno( gpib_log ), F_SETFD, fd_flags | FD_CLOEXEC );
             chmod( name, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH );
+        }
     }
 
     gpib_log_date( );

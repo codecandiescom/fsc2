@@ -392,10 +392,9 @@ globals_init( const char * pname )
 }
 
 
-/*-------------------------------------------------------*
- * Read in some configuration information (the only item
- * currently getting stored is the last directory used)
- *-------------------------------------------------------*/
+/*----------------------------------------*
+ * Read in some configuration information
+ *----------------------------------------*/
 
 static void
 fsc2_get_conf( void )
@@ -432,10 +431,12 @@ fsc2_get_conf( void )
     TRY
     {
         fsc2_confparse( );
+        fclose( fsc2_confin );
         TRY_SUCCESS;
     }
     OTHERWISE
     {
+        fclose( fsc2_confin );
         if ( Fsc2_Internals.def_directory != NULL )
             Fsc2_Internals.def_directory =
                                         T_free( Fsc2_Internals.def_directory );
@@ -647,6 +648,7 @@ check_run( void )
 {
     static bool user_break = UNSET;
     long i;
+    int fd_flags;
 
 
     fl_set_object_callback( GUI.main_form->test_file, NULL, 0 );
@@ -665,6 +667,10 @@ check_run( void )
 
     if ( ( In_file_fp = fopen( EDL.in_file, "r" ) ) == NULL )
         exit( EXIT_FAILURE );
+
+    if ( ( fd_flags = fcntl( fileno( In_file_fp ), F_GETFD ) ) < 0 )
+        fd_flags = 0;
+    fcntl( fileno( In_file_fp ), F_SETFD, fd_flags | FD_CLOEXEC );
 
     user_break = UNSET;
 
@@ -837,7 +843,7 @@ scan_args( int *   argc,
                 usage( EXIT_FAILURE );
             }
 
-            /* no file name with "-ng" or "-nw" option ? */
+            /* No file name with "-ng" or "-nw" option ? */
 
             if ( argv[ ++cur_arg ] == NULL )
             {
@@ -1301,6 +1307,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
     const char *fn;
     static char *old_in_file;
     FILE *fp;
+    int fd_flags;
     struct stat file_stat;
     char tmp_file[ ] = P_tmpdir "/fsc2.stash.XXXXXX";
     int c;
@@ -1392,7 +1399,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         return;
     }
 
-    /* Now we create a copy of the file, so that we can still operate on the
+    /* Now we create a copy of the file so that we can still operate on the
        file in the currently loaded form at later times even when the user
        changes the file in between. In all the following we work on the
        file pointer 'fp' of this temporary file even though the file name
@@ -1417,6 +1424,10 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         notify_conn( UNBUSY_SIGNAL );
         return;
     }
+
+    if ( ( fd_flags = fcntl( tmp_fd, F_GETFD ) ) < 0 )
+        fd_flags = 0;
+    fcntl( tmp_fd, F_SETFD, fd_flags | FD_CLOEXEC );
 
     unlink( tmp_file );
 

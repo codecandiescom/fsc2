@@ -740,12 +740,12 @@ if the matrix on the left hand side isn't variable sized, its sizes must
 fit the sizes of the quantity on the right hand side.
 
 With dynamically sized arrays some care has to be taken when doing
-assignments. That's because the size of the array on the left hand side
-automatically gets adjusted to the one on the right hand side. This
-includes even cases where the size of array on the right hand side is
-still unknown. In this case all information about the size of the left
-hand side array and its elements are discarded and it will now be
-treated as if its size never had been set.
+assignments. That's because the size of the array on the left hand
+side automatically gets adjusted to the one on the right hand side.
+This includes even cases where the size of the array on the right hand
+side is still unknown. In this case all information about the size of
+the left hand side array and its elements are discarded and it will
+now be treated as if its size never had been set.
 
 
 @node Array ranges, Arithmetic, Assignment operations, EDL
@@ -1640,13 +1640,13 @@ the first of the two examples for @code{WHILE} loops:
   @}
 @end example
 
-At the very start of the @code{FOR} loop the loop variable `@code{I}' is
-set to 1 and the loop block is run using this value. When it is done,
-`@code{I}' is automatically incremented by 1 and tested if it is still
-less or equal to 6. If this is @code{TRUE} the loop is repeated with the
-new value of `@code{I}'. Take care: You can change `@code{I}' also
-within the loop, but you only should do this if you really mean it and
-know what you're doing!
+At the very start of the @code{FOR} loop the loop variable `@code{I}'
+is set to 1 and the loop body is run using this value. When the of the
+loops body is reached`@code{I}' is automatically incremented by 1 and
+then it's tested if it is still less or equal to 6. If this is
+@code{TRUE} the loop is repeated with the new value of `@code{I}'.
+Take care: You can change `@code{I}' also within the loop, but you
+only should do this if you really mean it and know what you're doing!
 
 But you can also reproduce the second version of the factorial
 calculation using a @code{FOR} loop. Here it is:
@@ -1676,6 +1676,24 @@ end of the loop
 @end example
 @noindent
 the loop variable @code{I} has the value @code{11} and not @code{9}.
+
+Please also note that the end and increment value os evaluated only
+at the start of the loop. Thus if you would have
+@example
+End = 10;
+Incr = 1;
+FOR I = 1 : End : Incr @{
+   End = 20;
+   Incr = 2;
+@}
+@end example
+@noindent
+the changes done to the variables @code{End} and @code{Incr} don't
+have any effect on when the loop ends or on how the loop variable
+is incremented, it will still stop when the loop variable @code{I}
+reaches 10 and @code{I} will continue to be incremented by 1. You
+will have to use a @code{WHILE} loop if you want to change the
+end of a loop or the increment from within a loop.
 
 
 @node FOREVER loops, NEXT statement, FOR loops, Control structures

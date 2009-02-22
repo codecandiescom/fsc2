@@ -27,7 +27,7 @@
 #include "fsc2.h"
 
 extern int fsc2_conflex( void );
-static void fsc2_conferror ( const char * s );
+static void fsc2_conferror( const char * s );
 
 %}
 

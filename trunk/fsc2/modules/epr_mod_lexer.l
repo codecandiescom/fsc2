@@ -133,8 +133,8 @@ IS_IP    "interpolate"[\t ]*":"
 IS_EP    "extrapolate"[\t ]*":"
 YES      "yes"
 NO       "no"
-FUNIT    (G|M|k|m|u|n)?"Hz"
 RUNIT    "G"[\t ]*"/"[\t ]*"V"
+FUNIT    (G|M|k|m|u|n)?"Hz"
 NAME_VAL "\""[^\"]*"\""
 
 %x      comm
@@ -223,6 +223,8 @@ NAME_VAL "\""[^\"]*"\""
 
 {IS_EP}     return EP_TOK;
 
+{RUNIT}     return RUNIT_TOK;
+
 {FUNIT}     {
                 char *u = epr_mod_text;
 
@@ -274,8 +276,6 @@ NAME_VAL "\""[^\"]*"\""
                 return NUM_TOK;
             }
 
-{RUNIT}     return RUNIT_TOK;
-
 {NAME_VAL}  {
                 epr_mod_text[ epr_mod_leng - 1 ] = '\0';
                 sval = epr_mod_text + 1;
@@ -315,7 +315,7 @@ epr_mod_read_state( void )
 
     if ( ( epr_mod_in = fopen( epr_mod.state_file, "r" ) ) == NULL )
     {
-        /* It's ok if th file does not yet exist */
+        /* It's ok if the file does not yet exist */
 
         if ( errno == ENOENT )
         {
