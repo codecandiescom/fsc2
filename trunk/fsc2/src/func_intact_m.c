@@ -28,13 +28,15 @@
 extern Toolbox_T *Toolbox;        /* defined in func_intact.c */
 
 
-static Var_T *f_mcreate_child( Var_T * v,
-                               size_t  len,
-                               long    num_strs );
+static Var_T * f_mcreate_child( Var_T  * v,
+                                size_t   len,
+                                long     num_strs );
+static void f_madd_child( Var_T * v );
+static void f_madd_parent( Var_T * v );
 static void f_mdelete_child( Var_T * v );
 static void f_mdelete_parent( Var_T * v );
-static Var_T *f_mchoice_child( Var_T * v );
-static Var_T *f_mchanged_child( Var_T * v );
+static Var_T * f_mchoice_child( Var_T * v );
+static Var_T * f_mchanged_child( Var_T * v );
 
 
 /*---------------------------------------------------------*
@@ -81,7 +83,7 @@ f_mcreate( Var_T * var )
         return f_mcreate_child( v, len, num_strs );
 
     /* Now that we're done with checking the parameters we can create the new
-       button - if the Toolbox doesn't exist yet we've got to create it now */
+       menu - if the Toolbox doesn't exist yet we've got to create it now */
 
     if ( Toolbox == NULL )
         toolbox_create( VERT );
@@ -172,9 +174,9 @@ f_mcreate( Var_T * var )
  *-----------------------------------------------------------------*/
 
 static Var_T *
-f_mcreate_child( Var_T * v,
-                 size_t  len,
-                 long    num_strs )
+f_mcreate_child( Var_T  * v,
+                 size_t   len,
+                 long     num_strs )
 {
     char *buffer, *pos;
     long new_ID;
@@ -232,6 +234,165 @@ f_mcreate_child( Var_T * v,
 }
 
 
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
+
+Var_T *
+f_madd( Var_T * v )
+{
+    /* At least a menu ID and a string to be added is needed... */
+
+    if ( v == NULL || v->next == NULL)
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( Fsc2_Internals.I_am == CHILD )
+        f_madd_child( v );
+    else
+        f_madd_parent( v );
+
+    return vars_push( INT_VAR, 1L );
+}
+
+
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
+
+static void
+f_madd_child( Var_T * v )
+{
+    char *buffer, *pos;
+    size_t len;
+    size_t l;
+    long ID;
+    long add_count;
+    Var_T *ev;
+
+
+    /* Very basic sanity check */
+
+    ID = get_strict_long( v, "menu ID" );
+
+    if ( ID < ID_OFFSET )
+    {
+        print( FATAL, "Invalid menu identifier.\n" );
+        THROW( EXCEPTION );
+    }
+
+    len = sizeof EDL.Lc + sizeof v->val.lval + sizeof add_count;
+
+    if ( EDL.Fname )
+        len += strlen( EDL.Fname ) + 1;
+    else
+        len++;
+
+    for ( add_count = 0, ev = v = vars_pop( v ); ev != NULL;
+          ev = ev->next, add_count++ )
+    {
+        if ( ev->type != STR_VAR )
+        {
+            print( FATAL, "Invalid argument, new entries to be added must "
+                   "be strings.\n" );
+            THROW( EXCEPTION );
+        }
+
+        len += strlen( ev->val.sptr ) + 1;
+    }
+
+    pos = buffer = T_malloc( len );
+
+    memcpy( pos, &EDL.Lc, sizeof EDL.Lc );      /* current line number */
+    pos += sizeof EDL.Lc;
+
+    memcpy( pos, &ID, sizeof ID );              /* menu ID */
+    pos += sizeof ID;
+
+    memcpy( pos, &add_count, sizeof add_count );   /* number of strings */
+    pos += sizeof add_count;
+
+    if ( EDL.Fname )
+    {
+        strcpy( pos, EDL.Fname );               /* current file name */
+        pos += strlen( EDL.Fname ) + 1;
+    }
+    else
+        *pos++ = '\0';
+
+    for ( ; v != NULL; v = v->next )
+    {
+        l = strlen( v->val.sptr ) + 1;
+        memcpy( pos, v->val.sptr, l );
+        pos += l;
+    }
+
+    /* Bomb out on failure */
+
+    if ( ! exp_madd( buffer, pos - buffer ) )
+        THROW( EXCEPTION );
+}
+
+
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
+
+static void
+f_madd_parent( Var_T * v )
+{
+    Iobject_T *io;
+    long i;
+    long add_count = 0;
+    Var_T *ev;
+
+
+    /* No tool box -> no menu we could add entries to */
+
+    if ( Toolbox == NULL || Toolbox->objs == NULL )
+    {
+        print( FATAL, "No menus have been defined yet.\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* Check that menu with the ID exists */
+
+    io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
+
+    if ( io == NULL || io->type != MENU )
+    {
+        print( FATAL, "Invalid menu identifier.\n" );
+        THROW( EXCEPTION );
+    }
+
+    for ( add_count = 0, ev = v = vars_pop( v ); ev != NULL;
+          add_count++, ev = ev->next )
+        if ( ev->type != STR_VAR )
+        {
+            print( FATAL, "Invalid argument, new entries to be added must "
+                   "be strings.\n" );
+            THROW( EXCEPTION );
+        }
+
+    io->num_items += add_count;
+    io->menu_items = T_realloc( io->menu_items,
+                                io->num_items * sizeof *io->menu_items );
+
+    for  ( i = add_count; i < io->num_items; i++ )
+        io->menu_items[ i ] = NULL;
+    for ( i = add_count; v != NULL && i < io->num_items;
+          i++, v = vars_pop( v ) )
+    {
+        io->menu_items[ i ] = T_strdup( v->val.sptr );
+        if (    Fsc2_Internals.mode != TEST
+             && fl_addto_choice( io->self, io->menu_items[ i ] ) == 0 )
+        {
+            print( FATAL, "Adding entry to menu failed.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+}
+
+
 /*--------------------------------------------------------------------------*
  * Deletes one or more menu objects, parameter(s) are one or more menu IDs.
  *--------------------------------------------------------------------------*/
@@ -247,8 +408,8 @@ f_mdelete( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    /* Loop over all slider IDs - since the child has no control over the
-       sliders, it has to ask the parent process to delete the button */
+    /* Loop over all menu IDs - since the child has no control over the menu
+       it has to ask the parent process to delete the menu */
 
     do
     {
@@ -291,7 +452,7 @@ f_mdelete_child( Var_T * v )
 
     if ( ID < ID_OFFSET )
     {
-        print( FATAL, "Invalid slider identifier.\n" );
+        print( FATAL, "Invalid menu identifier.\n" );
         THROW( EXCEPTION );
     }
 
@@ -426,7 +587,7 @@ f_mchoice( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    /* Check the button ID parameter */
+    /* Check the menu ID parameter */
 
     io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
 
@@ -548,7 +709,7 @@ f_mchoice_child( Var_T * v )
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;
 
-    memcpy( pos, &ID, sizeof ID );          /* buttons ID */
+    memcpy( pos, &ID, sizeof ID );          /* menu ID */
     pos += sizeof ID;
 
     memcpy( pos, &select_item, sizeof select_item );
@@ -613,7 +774,7 @@ f_mchanged( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    /* Check the button ID parameter */
+    /* Check the menu ID parameter */
 
     io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
 
@@ -665,7 +826,7 @@ f_mchanged_child( Var_T * v )
     memcpy( pos, &EDL.Lc, sizeof EDL.Lc );  /* current line number */
     pos += sizeof EDL.Lc;
 
-    memcpy( pos, &ID, sizeof ID );          /* buttons ID */
+    memcpy( pos, &ID, sizeof ID );          /* menu ID */
     pos += sizeof ID;
 
     if ( EDL.Fname )

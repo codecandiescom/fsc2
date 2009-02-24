@@ -57,8 +57,8 @@ html: fsc2.html
 
 fsc2.html: $(docs) $(figures)
 	@if [ "`eval texi2html --help 2>/dev/null`" ]; then  \
-		texi2html --init-file=fsc2.init fsc2.texi;      \
-	else                                                \
+		texi2html --init-file=fsc2.init fsc2.texi;       \
+	else                                                 \
 		echo "Can't make HTML documentation, program 'texi2html' not found";  \
 	fi
 
@@ -123,7 +123,7 @@ install:
 	$(INSTALL) -d $(infodir)
 	$(INSTALL) -d $(mandir)/man1
 	$(INSTALL) -m 444 fsc2.1.gz $(mandir)/man1
-	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2*.html $(docdir)/html
+	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) *.html $(docdir)/html
 	-$(RM) $(RMFLAGS) $(docdir)/html/index.html
 	ln -s $(docdir)/html/fsc2.html $(docdir)/html/index.html
 	$(INSTALL) -m 444 -o $(OWNER) -g $(GROUP) fsc2.css $(docdir)/html

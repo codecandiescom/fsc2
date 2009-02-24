@@ -183,17 +183,18 @@ shown in the widow title.
 @node Experiment Window, Tool Box Window, Main Window, GUI
 @section Experiment Window
 
-When an experiment is started at least one another window will pop
-up. It is up to the writer of the @code{EDL} script to choose if the
+When an experiment is started at least one another window will pop up.
+It is up to the writer of the @code{EDL} script to choose if the
 window will be used for displaying curves or color-coded surfaces or
-both at once, see the functions @code{init_1d()} and @code{init_2d()} in
-one of the later chapters. The first type of display is well suited for
-showing the results of typical cw-measured EPR data or traces fetched
-from digitizers, while the second type is for useful for visualizing
-2-dimensional experiments, i.e.@: all experiments where more than one
-parameter is changed during the experiment. Sometimes it also might be
-useful to display curves as well as surfaces, in which case a window for
-both display modes can be created.
+both at once, see the functions @code{@ref{init_1d()}} and
+@code{@ref{init_2d()}} in one of the later chapters. The first type of
+display is well suited for showing the results of typical cw-measured
+EPR data or traces fetched from digitizers, while the second type is
+for useful for visualizing 2-dimensional experiments, i.e.@: all
+experiments where more than one parameter is changed during the
+experiment. Sometimes it also might be useful to display curves as
+well as surfaces, in which case a window for both display modes can be
+created.
 
 @ifnottex
 

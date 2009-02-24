@@ -831,6 +831,22 @@ parent_reader( Comm_Struct_T * header )
             T_free( data );
             break;
 
+        case C_MADD :
+            TRY
+            {
+                data = T_malloc( ( size_t ) header->data.len );
+                pipe_read( data, ( size_t ) header->data.len );
+                exp_madd( data, header->data.len );
+                TRY_SUCCESS;
+            }
+            OTHERWISE
+            {
+                T_free( data );
+                return FAIL;
+            }
+            T_free( data );
+            break;
+
         case C_MDELETE :
             TRY
             {
@@ -1187,13 +1203,11 @@ child_reader( void *          ret,
             }
             return OK;
 
-        case C_LAYOUT_REPLY  : case C_BDELETE_REPLY :
-        case C_SDELETE_REPLY : case C_IDELETE_REPLY :
-        case C_MDELETE_REPLY : case C_ODELETE_REPLY :
-        case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
-        case C_CB_1D_REPLY   : case C_CB_2D_REPLY   :
-        case C_ZOOM_1D_REPLY : case C_ZOOM_2D_REPLY :
-        case C_FSB_1D_REPLY  : case C_FSB_2D_REPLY  :
+        case C_LAYOUT_REPLY  : case C_BDELETE_REPLY : case C_SDELETE_REPLY :
+        case C_IDELETE_REPLY : case C_MADD_REPLY    : case C_MDELETE_REPLY :
+        case C_ODELETE_REPLY : case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
+        case C_CB_1D_REPLY   : case C_CB_2D_REPLY   : case C_ZOOM_1D_REPLY :
+        case C_ZOOM_2D_REPLY : case C_FSB_1D_REPLY  : case C_FSB_2D_REPLY  :
             return ( header->data.long_data != 0 ? OK : FAIL );
     }
 
@@ -1385,16 +1399,16 @@ writer( int type,
                         return FAIL;
                 break;
 
-            case C_LAYOUT   : case C_BCREATE  : case C_BDELETE   :
-            case C_BSTATE   : case C_BCHANGED : case C_SCREATE   :
-            case C_SDELETE  : case C_SSTATE   : case C_SCHANGED  :
-            case C_ICREATE  : case C_IDELETE  : case C_ISTATE    :
-            case C_ICHANGED : case C_MCREATE  : case C_MDELETE   :
-            case C_MCHOICE  : case C_MCHANGED : case C_TBCHANGED :
-            case C_TBWAIT   : case C_ODELETE  : case C_CLABEL    :
-            case C_XABLE    : case C_GETPOS   : case C_CB_1D     :
-            case C_CB_2D    : case C_ZOOM_1D  : case C_ZOOM_2D   :
-            case C_FSB_1D   : case C_FSB_2D   :
+            case C_LAYOUT    : case C_BCREATE  : case C_BDELETE  :
+            case C_BSTATE    : case C_BCHANGED : case C_SCREATE  :
+            case C_SDELETE   : case C_SSTATE   : case C_SCHANGED :
+            case C_ICREATE   : case C_IDELETE  : case C_ISTATE   :
+            case C_ICHANGED  : case C_MCREATE  : case C_MADD     :
+            case C_MDELETE   : case C_MCHOICE  : case C_MCHANGED :
+            case C_TBCHANGED : case C_TBWAIT   : case C_ODELETE  :
+            case C_CLABEL    : case C_XABLE    : case C_GETPOS   :
+            case C_CB_1D     : case C_CB_2D    : case C_ZOOM_1D  :
+            case C_ZOOM_2D   : case C_FSB_1D   : case C_FSB_2D   :
 
                 header.data.len = va_arg( ap, ptrdiff_t );
                 if ( ! pipe_write( ( char * ) &header, sizeof header ) )
@@ -1471,11 +1485,12 @@ writer( int type,
 
             case C_LAYOUT_REPLY  : case C_BDELETE_REPLY :
             case C_SDELETE_REPLY : case C_IDELETE_REPLY :
-            case C_MDELETE_REPLY : case C_ODELETE_REPLY :
-            case C_CLABEL_REPLY  : case C_XABLE_REPLY   :
-            case C_CB_1D_REPLY   : case C_CB_2D_REPLY   :
-            case C_ZOOM_1D_REPLY : case C_ZOOM_2D_REPLY :
-            case C_FSB_1D_REPLY  : case C_FSB_2D_REPLY  :
+            case C_MADD_REPLY    : case C_MDELETE_REPLY :
+            case C_ODELETE_REPLY : case C_CLABEL_REPLY  :
+            case C_XABLE_REPLY   : case C_CB_1D_REPLY   :
+            case C_CB_2D_REPLY   : case C_ZOOM_1D_REPLY :
+            case C_ZOOM_2D_REPLY : case C_FSB_1D_REPLY  :
+            case C_FSB_2D_REPLY  :
                 header.data.long_data = va_arg( ap, long );
                 va_end( ap );
                 return pipe_write( ( char * ) &header, sizeof header );

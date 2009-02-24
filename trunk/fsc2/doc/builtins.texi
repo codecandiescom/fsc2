@@ -78,20 +78,20 @@ if the return value sometimes doesn't make too much sense.
 @cindex output functions
 
 Before delving into the details of the functions for drawing measured
-data into the main display window a short explanation of the basic ideas
-probably is in order. There are two ways of displaying data. If only one
-parameter gets changed during the experiment (e.g.@: just the magnetic
-field gets sweeped) a 1D-display will be all you need. But if you do
-measurements where two parameters get changed (e..g.@: if you measure
-time traces of your signal after laser excitation at different field
-positions) you will need a 2D-display to view all measured data. Finally,
-there can be situations where you need both ways to display your data.
-Thus, @code{fsc2} allows you to select either 1D-display, 2D-display or
-even both at once at the same time. You just have to tell the program in
-the @code{PREPARATIONS} section by calling the functions @code{init_1d()}
-and @code{init_2d()}. If both function are invoked in the @code{PREPARATIONS}
-section two windows will be displayed, one for the 1D-data and one for the
-2D-data.
+data into the main display window a short explanation of the basic
+ideas probably is in order. There are two ways of displaying data. If
+only one parameter gets changed during the experiment (e.g.@: just the
+magnetic field gets sweeped) a 1D-display will be all you need. But if
+you do measurements where two parameters get changed (e..g.@: if you
+measure time traces of your signal after laser excitation at different
+field positions) you will need a 2D-display to view all measured data.
+Finally, there can be situations where you need both ways to display
+your data. Thus, @code{fsc2} allows you to select either 1D-display,
+2D-display or even both at once at the same time. You just have to
+tell the program in the @code{PREPARATIONS} section by calling the
+functions @code{@ref{init_1d()}} and @code{@ref{init_2d()}}. If both
+function are invoked in the @code{PREPARATIONS} section two windows
+will be displayed, one for the 1D-data and one for the 2D-data.
 
 In 1D-display to display a new data point you have to specify the @i{x}-
 and the @i{y}-coordinate of the point. The @i{x}-coordinate is always an
@@ -198,10 +198,10 @@ discarded when they don't fit into the display window anymore.
 
 @item init_1d()
 This function initializes the display for one-dimensional data
-representation - without a call to this function (or @code{init_2d()},
-see below) no data can be displayed. The function may only be called
-once and accepts up to six arguments, all of them being optional.
-These are:
+representation - without a call to this function (or
+@code{@ref{init_2d()}}, see below) no data can be displayed. The
+function may only be called once and accepts up to six arguments, all
+of them being optional. These are:
 @enumerate
 @item
 The number of curves to be displayed, the maximum is currently 4
@@ -329,9 +329,9 @@ The data point or a (one-dimensional) array of data (to be displayed
 left to right).
 @item
 Number of the curve or data set the data are to be displayed belong
-to. If missing it defaults to the first curve, 1. If there is more than
-one data set given in the @code{display()} command the curve number
-must be specified.
+to. If missing it defaults to the first curve, 1. If there is more
+than one data set given in the @code{@ref{display()}} command the
+curve number must be specified.
 @end enumerate
 These arguments can be repeated as many times as there are data to be
 displayed simultaneously (but in this case all of the arguments must be
@@ -376,9 +376,9 @@ at the row where this (undefined) sub-array would have appeared nothing
 is drawn.
 @item
 Number of the curve or data set the data are to be displayed belong
-to. If missing it defaults to the first curve, 1. If there is more than
-one data set given in the @code{display()} command the curve number
-must be specified.
+to. If missing it defaults to the first curve, 1. If there is more
+than one data set given in the @code{@ref{display()}} command the
+curve number must be specified.
 @end enumerate
 These arguments can be repeated as many times as there are data to be
 displayed simultaneously (but in this case all of the arguments must be
@@ -396,10 +396,10 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{display()}
 @findex display()
 @item display()
-This function can be used instead of either @code{display_1d()} or
-@code{display_2d()} if either @code{init_1d()} or @code{init_2d()} (but
-not both) were called in the @code{PREPARATIONS} section.  It takes the
-following arguments:
+This function can be used instead of either @code{@ref{display_1d()}}
+or @code{@ref{display_2d()}} if either @code{@ref{init_1d()}} or
+@code{@ref{init_2d()}} (but not both) were called in the
+@code{PREPARATIONS} section. It takes the following arguments:
 @enumerate
 @item
 The (@i{x}) point number (coordinate) where the data point (if only a
@@ -415,9 +415,9 @@ i.e.@: in @i{x}-direction).
 The data point or a (one-dimensional) array of data.
 @item
 Number of the curve or data set the data are to be displayed belong
-to. If missing it defaults to the first curve, 1. If there is more than
-one data set given in the @code{display()} command the curve number
-must be specified.
+to. If missing it defaults to the first curve, 1. If there is more
+than one data set given in the @code{@ref{display()}} command the
+curve number must be specified.
 @end enumerate
 These arguments can be repeated as many times as there are data to be
 displayed simultaneously (but in this case all of the arguments must be
@@ -439,13 +439,13 @@ is shifted to the left to make room for the new data, and some of the old
 data vanish.
 
 To switch between the normal display mode and the "sliding window"
-display mode the function @code{display_mode()} has to be used. The
-function expects at least one argument, the mode to be used. You have to
-specify the string @code{"NORMAL_DISPLAY"} (or @code{"NORMAL"} or simply
-the number @code{0}) to switch to the normal display mode (which is the
-default mode to be used) and the string @code{"SLIDING_DISPLAY"} (or
-@code{"SLIDING"} or the number @code{1}) to switch to "sliding window"
-mode.
+display mode the function @code{@ref{display_mode()}} has to be used.
+The function expects at least one argument, the mode to be used. You
+have to specify the string @code{"NORMAL_DISPLAY"} (or @code{"NORMAL"}
+or simply the number @code{0}) to switch to the normal display mode
+(which is the default mode to be used) and the string
+@code{"SLIDING_DISPLAY"} (or @code{"SLIDING"} or the number @code{1})
+to switch to "sliding window" mode.
 
 The second, optional argument is the number of points to display in
 @i{x}-direction. If this argument isn't specified the previous number of
@@ -462,12 +462,13 @@ This function can be used in both the @code{PREPARATIONS} as well as the
 @anchor{change_scale_1d()}
 @findex change_scale_1d()
 @item change_scale_1d()
-This function allows to change the scale settings of the 1D-data window
-(originally set in the call of @w{@code{init_1d()}}) after an experiment
-has been started. The function can be passed a maximum of two arguments,
-the new start value of the @i{x}-axis and the new @i{x}-increment.If one
-of these values should remain unchanged a string (e.g.@ @code{"keep"})
-instead of a value can be passed as the argument.
+This function allows to change the scale settings of the 1D-data
+window (originally set in the call of @code{@ref{init_1d()}}) after an
+experiment has been started. The function can be passed a maximum of
+two arguments, the new start value of the @i{x}-axis and the new
+@i{x}-increment.If one of these values should remain unchanged a
+string (e.g.@ @code{"keep"}) instead of a value can be passed as the
+argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -476,13 +477,14 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{change_scale_2d()}
 @findex change_scale_2d()
 @item change_scale_2d()
-This function allows to change the scale settings of the 2D-data window
-(originally set in the call of @w{@code{init_2d()}}) after an experiment
-has been started. The function accepts up to four arguments, the new
-start value of the @i{x}-axis, the new @i{x}-increment, a new start
-value for the @i{y}-axis as well as the @i{y}-increment. If one of these
-values should remain unchanged a string (e.g.@ @code{"keep"}) instead of
-a value can be passed as the argument.
+This function allows to change the scale settings of the 2D-data
+window (originally set in the call of @code{@ref{init_2d()}}) after an
+experiment has been started. The function accepts up to four
+arguments, the new start value of the @i{x}-axis, the new
+@i{x}-increment, a new start value for the @i{y}-axis as well as the
+@i{y}-increment. If one of these values should remain unchanged a
+string (e.g.@ @code{"keep"}) instead of a value can be passed as the
+argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -491,15 +493,16 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{change_scale()}
 @findex change_scale()
 @item change_scale()
-This function allows to change the scale settings (originally set in the
-call of @w{@code{init_1d()}} or @w{@code{init_2d()}}) when your using
-either a 1D-display or a 2D-display (but not both) after the experiment
-has been started. With a one-dimensional display the function can be
-passed a maximum of two arguments, the new start value of the @i{x}-axis
-and the new @i{x}-increment. For two-dimensional display the function
-also accepts a new start value for the @i{y}-axis as well as the
-@i{y}-increment. If one of these values should remain unchanged a string
-(e.g.@ @code{"keep"}) instead of a value can be passed as the argument.
+This function allows to change the scale settings (originally set in
+the call of @code{@ref{init_1d()}} or @code{@ref{init_2d()}}) when
+your using either a 1D-display or a 2D-display (but not both) after
+the experiment has been started. With a one-dimensional display the
+function can be passed a maximum of two arguments, the new start value
+of the @i{x}-axis and the new @i{x}-increment. For two-dimensional
+display the function also accepts a new start value for the @i{y}-axis
+as well as the @i{y}-increment. If one of these values should remain
+unchanged a string (e.g.@ @code{"keep"}) instead of a value can be
+passed as the argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -530,11 +533,12 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{vert_rescale()}
 @findex vert_rescale()
 @item vert_rescale()
-The function allows to change the vertical scaling for 1D-display or the
-@i{z}-scaling for 2D-display when only either 1D or 2D display is activated.
-If both are active use the function @code{vert_rescale_1d()} to change
-the vertical scaling of the 1D display and @code{vert_rescale_2d()} to
-change the @i{z}-scaling of the 2D display.
+The function allows to change the vertical scaling for 1D-display or
+the @i{z}-scaling for 2D-display when only either 1D or 2D display is
+activated. If both are active use the function
+@code{@ref{vert_rescale_1d()}} to change the vertical scaling of the
+1D display and @code{@ref{vert_rescale_2d()}} to change the
+@i{z}-scaling of the 2D display.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -580,8 +584,8 @@ used (but not both). For 1D-display it accepts up to two strings for the
 @i{x}- and @i{y}-axis labels, for 2D-display up to three, the third for
 the @i{z}-axis label. To leave a label unchanged pass the function an
 empty string, i.e.@ @code{""}. If no label should be drawn pass it a
-string that just contains one (or more) space characters, i.e.@: @code{"
-"}.
+string that just contains one (or more) space characters, i.e.@:
+@w{@code{" "}}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -590,17 +594,18 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{rescale_1d()}
 @findex rescale_1d()
 @item rescale_1d()
-In the function @code{init_1d()} the number of points in @i{x}-direction
-can be set. If, during the experiment more points are displayed then set
-in the initialization, the scaling of the axis will be changed
-automatically. Using the function @code{rescale()} one can change the
-number of points from within the @code{EDL} script. The function accepts
-one argument, the new number of points in @i{x}-direction. A negative
-number is silently ignored. For a value of @code{0} the number of points
-is adjusted to the number of currently displayed points. A value of
-@code{1} will be increased to the lowest number of points that can be
-displayed, which is @code{2}. If the number is smaller than the number
-of currently displayed points it is automatically increased to this number.
+In the function @code{@ref{init_1d()}} the number of points in
+@i{x}-direction can be set. If, during the experiment more points are
+displayed then set in the initialization, the scaling of the axis will
+be changed automatically. Using the function @code{@ref{rescale()}}
+one can change the number of points from within the @code{EDL} script.
+The function accepts one argument, the new number of points in
+@i{x}-direction. A negative number is silently ignored. For a value of
+@code{0} the number of points is adjusted to the number of currently
+displayed points. A value of @code{1} will be increased to the lowest
+number of points that can be displayed, which is @code{2}. If the
+number is smaller than the number of currently displayed points it is
+automatically increased to this number.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -609,14 +614,14 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{rescale_2d()}
 @findex rescale_2d()
 @item rescale_2d()
-In the function @code{init_2d()} the number of points in @i{x}- and
-@i{y}- direction can be set. If, during the experiment more points are
-displayed than had been set in the initialization, the scaling of the
-axes will be changed automatically. Using the function @code{rescale()}
-one can change the number of points from within the @code{EDL} script.
-The function accepts two arguments, the first being the number of points
-to be displayed in @i{x}-direction and the second the number of points
-in @i{y}-direction.
+In the function @code{@ref{init_2d()}} the number of points in @i{x}-
+and @i{y}- direction can be set. If, during the experiment more points
+are displayed than had been set in the initialization, the scaling of
+the axes will be changed automatically. Using the function
+@code{@ref{rescale()}} one can change the number of points from within
+the @code{EDL} script. The function accepts two arguments, the first
+being the number of points to be displayed in @i{x}-direction and the
+second the number of points in @i{y}-direction.
 
 A negative number is silently ignored. For a value of @code{0} the
 number of points is adjusted to the number of currently displayed points
@@ -632,13 +637,13 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{rescale()}
 @findex rescale()
 @item rescale()
-This function can be called instead of @code{rescale_1d()} or
-@code{rescale_2d()} when only either a 1D- or a 2D-display is used (but
-not both at once). In the 1D-case the function accepts one argument, the
-new number of points in @i{x}-direction. In the 2D-case the function
-accepts two arguments, one for the number of points to be displayed in
-@i{x}-direction and the second for the number of points in
-@i{y}-direction.
+This function can be called instead of @code{@ref{rescale_1d()}} or
+@code{@ref{rescale_2d()}} when only either a 1D- or a 2D-display is
+used (but not both at once). In the 1D-case the function accepts one
+argument, the new number of points in @i{x}-direction. In the 2D-case
+the function accepts two arguments, one for the number of points to be
+displayed in @i{x}-direction and the second for the number of points
+in @i{y}-direction.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -671,22 +676,23 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{zoom_2d()}
 @findex zoom_2d()
 @item zoom_2d()
-This function can be used to zoom into (or out of) the 2D display window
-as well as shifting the contents of the window, just like you can do
-using the mouse. It expects at least two and up to seven arguments. The
-first one is the number of the curve to be zoomed. This must be a number
-between @code{1} and the maximum curve number (as set by the call of
-@code{init_2d()}). The second and third argument are the @i{x}-coordinate
-of the leftmost point to be displayed within the 2D window and the number
-of points to be displayed in @i{x}-direction. The fourth and fifth argument
-are the @i{y}-coordinate of the point with the smallest @i{y}-value and the
-number of points to be displayed. The sixth and seventh argument determine the
-@i{z}-range to be displayed, the sixth argument being the lowest-valued
-@i{z}-value and the last argument the @i{z}-span. Both the number of points
-in @i{x}- and @i{y}-direction must be numbers larger than @code{1} and the
-@i{z}-span larger than @code{0}. If an argument is not given or is given as
-an arbitrary string (e.g. @code{"KEEP"}) the corresponding value remains
-unchanged.
+This function can be used to zoom into (or out of) the 2D display
+window as well as shifting the contents of the window, just like you
+can do using the mouse. It expects at least two and up to seven
+arguments. The first one is the number of the curve to be zoomed. This
+must be a number between @code{1} and the maximum curve number (as set
+by the call of @code{@ref{init_2d()}}). The second and third argument
+are the @i{x}-coordinate of the leftmost point to be displayed within
+the 2D window and the number of points to be displayed in
+@i{x}-direction. The fourth and fifth argument are the
+@i{y}-coordinate of the point with the smallest @i{y}-value and the
+number of points to be displayed. The sixth and seventh argument
+determine the @i{z}-range to be displayed, the sixth argument being
+the lowest-valued @i{z}-value and the last argument the @i{z}-span.
+Both the number of points in @i{x}- and @i{y}-direction must be
+numbers larger than @code{1} and the @i{z}-span larger than @code{0}.
+If an argument is not given or is given as an arbitrary string (e.g.
+@code{"KEEP"}) the corresponding value remains unchanged.
 
 The function returns the value @code{1} to indicate success or @code{0}
 if it is impossible to set the zoom (since no scaling has been set for
@@ -699,10 +705,11 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{zoom()}
 @findex zoom()
 @item zoom()
-This function can be called instead of @code{zoom_1d()} or @code{zoom_2d()}
-when only either a 1D- or a 2D-display is used (but not both at once). In
-the 1D-case the function must be called with at least two and up to four
-arguments, in the 2D case with at least two and a maximum of seven arguments.
+This function can be called instead of @code{@ref{zoom_1d()}} or
+@code{@ref{zoom_2d()}} when only either a 1D- or a 2D-display is used
+(but not both at once). In the 1D-case the function must be called
+with at least two and up to four arguments, in the 2D case with at
+least two and a maximum of seven arguments.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -735,8 +742,9 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{clear_curve()}
 @findex clear_curve()
 @item clear_curve()
-If there is only either a 1D- or 2D-display window this function can be
-used instead of @code{clear_curve_1d()} or @code{clear_curve_2d()}.
+If there is only either a 1D- or 2D-display window this function can
+be used instead of @code{@ref{clear_curve_1d()}} or
+@code{@ref{clear_curve_2d()}}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -769,9 +777,9 @@ deleted).
 Please note: in "sliding window" display mode, the coordinate for the
 marker is not used at all (but must be given and must be larger than
 @code{0}), the marker will always be drawn at the newest point for the
-first displayed curve (the curve numbered 1). Thus also can't delete
-a single marker in this mode but only all of them using the function
-@code{clear_marker_1d()}.
+first displayed curve (the curve numbered 1). Thus also can't delete a
+single marker in this mode but only all of them using the function
+@code{@ref{clear_marker_1d()}}.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -810,9 +818,9 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{draw_marker()}
 @findex draw_marker()
 @item draw_marker()
-This function can be called instead of @code{draw_marker_1d()} or
-@code{draw_marker_2d()} when only either a 1D- or a 2D-display is used
-(but not both at once).
+This function can be called instead of @code{@ref{draw_marker_1d()}}
+or @code{@ref{draw_marker_2d()}} when only either a 1D- or a
+2D-display is used (but not both at once).
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -841,9 +849,9 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{clear_marker()}
 @findex clear_marker()
 @item clear_marker()
-This function can be called instead of @code{clear_marker_1d()} or
-@code{clear_marker_2d()} when only either a 1D- or a 2D-display is used
-(but not both at once).
+This function can be called instead of @code{@ref{clear_marker_1d()}}
+or @code{@ref{clear_marker_2d()}} when only either a 1D- or a
+2D-display is used (but not both at once).
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -890,9 +898,9 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{curve_button()}
 @findex curve_button()
 @item curve_button()
-This function can be called instead of @code{curve_button_1d()} or
-@code{curve_button_2d()} when only either a 1D- or a 2D-display is used
-(but not both at once).
+This function can be called instead of @code{@ref{curve_button_1d()}}
+or @code{@ref{curve_button_2d()}} when only either a 1D- or a
+2D-display is used (but not both at once).
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -935,9 +943,9 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{fs_button()}
 @findex fs_button()
 @item fs_button()
-This function can be called instead of @code{fs_button_1d()} or
-@code{fs_button_2d()} when only either a 1D- or a 2D-display is used
-(but not both at once).
+This function can be called instead of @code{@ref{fs_button_1d()}} or
+@code{@ref{fs_button_2d()}} when only either a 1D- or a 2D-display is
+used (but not both at once).
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -951,10 +959,10 @@ This function prints text into the output browser in the main form of
 @cindex format string
 as its very first argument. The @i{format string} can contain any text
 as well as a special character, @code{#},
-@findex # @r{(in @code{print()} function)}
-that works as a placeholder for data to be printed in its place.  Here's
-a first simple example: You want to print the value of a variable called
-@code{I}, that has been assigned a value of 3. Now,
+@findex # @r{(in @code{@ref{print()}} function)}
+that works as a placeholder for data to be printed in its place.
+Here's a first simple example: You want to print the value of a
+variable called @code{I}, that has been assigned a value of 3. Now,
 @example
 print( "The value of I is #.\n", I );
 @end example
@@ -973,10 +981,10 @@ too many @code{#}'s the superfluous ones are simply printed out, but if
 there are not enough only as many variables as there are @code{#}'s are
 printed, the remaining data are discarded.
 
-You may use @code{print()} to print integer or floating point values
-(that includes the return values of functions) and variables and strings
-(i.e.@: text enclosed in double quotes, @code{"}).  Here's a longer,
-somewhat contrived example:
+You may use @code{@ref{print()}} to print integer or floating point
+values (that includes the return values of functions) and variables
+and strings (i.e.@: text enclosed in double quotes, @code{"}). Here's
+a longer, somewhat contrived example:
 @example
 print( "The # of # is #\n", "sine", x, sin( x ) );
 @end example
@@ -993,14 +1001,14 @@ list of all recognized special sequences:
 @c The cindex must come before the start of the table,
 @c otherwise the created HTML isn't valid
 
-@cindex escape characters (in @code{print()} function)
+@cindex escape characters (in @code{@ref{print()}} function)
 
 @table @samp
 @item \n
-Linefeed character: Ends a line, everything following it starts on a new
-line. Thus several lines can be printed at once by one call of
-@code{print()}. @code{print()} does not automatically add a linefeed by
-itself.
+Linefeed character: Ends a line, everything following it starts on a
+new line. Thus several lines can be printed at once by one call of
+@code{@ref{print()}}. @code{@ref{print()}} does not automatically add
+a linefeed by itself.
 @item \t
 Embeds a tabulator character in the text, tab stops are set at every
 eighth character position.
@@ -1016,9 +1024,9 @@ Prints a @code{#}, thus switching off the special meaning of the
 @item \T
 While normally nothing is printed during the test run of the
 @code{EXPERIMENT} section of an @code{EDL} script, if the @i{format
-string} starts with this escape sequence the @code{print()} function
-will produce output already in the test run (the @code{T} is never
-printed).
+string} starts with this escape sequence the @code{@ref{print()}}
+function will produce output already in the test run (the @code{T} is
+never printed).
 @end table
 
 
@@ -1056,12 +1064,13 @@ time you try to write out data in this case.
 
 Please note: under certain circumstances it is also possible to write
 data to @i{stdout} and @i{stderr}. To do so you must first either open
-a regular file via a call of e.g.@: the function @code{get_file()} or
-by explicitely opening @i{stdout} or @i{stderr} by a call of
-@code{open_file()} with the number @code{1} or @code{2} as the only
-argument (opening one of them this way will also automatically allow
-you to writ eto the other). If this has happened you then can use the
-numbers @code{1} and @code{2} as file handles for @i{stdout} and @i{stderr}.
+a regular file via a call of e.g.@: the function
+@code{@ref{get_file()}} or by explicitely opening @i{stdout} or
+@i{stderr} by a call of @code{@ref{open_file()}} with the number
+@code{1} or @code{2} as the only argument (opening one of them this
+way will also automatically allow you to writ eto the other). If this
+has happened you then can use the numbers @code{1} and @code{2} as
+file handles for @i{stdout} and @i{stderr}.
 
 
 @noindent
@@ -1116,12 +1125,13 @@ automatically to the name of the file the user selects unless the file
 name already has this extension. This way one can enforce an extension
 for the file name.
 
-If @code{get_file()} has never been called on the first call to a
-function from the @code{save_xxx()}-family the user is asked to select a
-file and this file is used exclusively in further @code{save_xxx()}-calls.
-That means that calling @code{get_file()} after the default file has
-already been opened is not allowed, call it either before the first
-save-operation or never at all!
+If @code{@ref{get_file()}} has never been called on the first call to
+a function from the @code{save_xxx()}-family the user is asked to
+select a file and this file is used exclusively in further
+@code{save_xxx()}-calls. That means that calling
+@code{@ref{get_file()}} after the default file has already been opened
+is not allowed, call it either before the first save-operation or
+never at all!
 
 In batch mode (i.e.@: if @code{fsc2} got started with the '@code{-B}'
 option) no file select box gets shown because the script is supposed to
@@ -1142,14 +1152,14 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex open_file()
 @item open_file()
 This function is similar to the previous one with the main difference
-that one may specify an hard-coded file name in the script. The function
-will use its first argument as a file name and try to open this file. If
-the file already exists (or can't be opened)  a warning will be shown and,
-on user request will show up a file selector to allow selecting a different
-file, just as the @code{get_file()}. Thus the arguments that the function
-accepts are identical to the ones of @code{get_file()} with the only
-exception that the first argument is an additional argument with a string
-for the file name.
+that one may specify an hard-coded file name in the script. The
+function will use its first argument as a file name and try to open
+this file. If the file already exists (or can't be opened) a warning
+will be shown and, on user request will show up a file selector to
+allow selecting a different file, just as the @code{@ref{get_file()}}.
+Thus the arguments that the function accepts are identical to the ones
+of @code{@ref{get_file()}} with the only exception that the first
+argument is an additional argument with a string for the file name.
 
 This function can also be used to explicitely open @i{stdout} and
 @i{stderr}. To do so call the function with a single integer argument
@@ -1174,28 +1184,28 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @item clone_file()
 Sometimes two output files are needed that should only differ in their
 extension but not in the filename. In this case the function
-@code{clone_file()} can be useful. It expects exactly three
-arguments. The first one is an identifier for an already existing file as
-returned by the function @code{get_file()}. If in the call of
-@code{get_file()} the user did @b{not} to choose a file, i.e.@: pressed
-the @code{Cancel}-button, it is silently assumed that also the new
-file to be created by @code{clone_file()} is @b{not} to be used.
-If either the numer @code{1} (for writing to @i{stdout}) or @code{2} (for
-writing to @i{stderr}) was given as the argument a warning is printed out
-and the output gets written to either @i{stdout} or @i{stderr} as if
-the function wouldn't have been called.
+@code{@ref{clone_file()}} can be useful. It expects exactly three
+arguments. The first one is an identifier for an already existing file
+as returned by the function @code{@ref{get_file()}}. If in the call of
+@code{@ref{get_file()}} the user did @b{not} to choose a file, i.e.@:
+pressed the @code{Cancel}-button, it is silently assumed that also the
+new file to be created by @code{@ref{clone_file()}} is @b{not} to be
+used. If either the numer @code{1} (for writing to @i{stdout}) or
+@code{2} (for writing to @i{stderr}) was given as the argument a
+warning is printed out and the output gets written to either
+@i{stdout} or @i{stderr} as if the function wouldn't have been called.
 
 The second and third arguments both have to be strings. The second
-argument is the expected extension of the file that was selected via the
-previous call of @code{get_file()}. And the third argument is the
-replacement for the extension of the previously selected file. Both are
-to be specified without the starting dot. If the second argument does not
-fit with the extension of the file the user had chosen, the new extension
-from the third argument is simply appended to the file name (instead of
-replacing the extension). If the replacement extension (i.e.@: the third
-argument) is identical to the extension of the already open file (i.e.@:
-the second argument) it is also appended instead of being used for
-replacement.
+argument is the expected extension of the file that was selected via
+the previous call of @code{@ref{get_file()}}. And the third argument
+is the replacement for the extension of the previously selected file.
+Both are to be specified without the starting dot. If the second
+argument does not fit with the extension of the file the user had
+chosen, the new extension from the third argument is simply appended
+to the file name (instead of replacing the extension). If the
+replacement extension (i.e.@: the third argument) is identical to the
+extension of the already open file (i.e.@: the second argument) it is
+also appended instead of being used for replacement.
 
 A typical piece of code to open two files, the first with the extension
 @code{dat} and the second with the same name but the extension
@@ -1254,11 +1264,11 @@ space.
 
 The second, also optional argument, is a file handle. This argument
 must be given if somewhere before in the script the @code{fsc2}
-function had been called and then must be its return value. If,
-on the other hand, @code{get_file()} had not been called before,
-the argument should be left out and the user is asked to select
-a file now and all further call of functions of the functions
-for saving data wwill use this one file automatically.
+function had been called and then must be its return value. If, on the
+other hand, @code{@ref{get_file()}} had not been called before, the
+argument should be left out and the user is asked to select a file now
+and all further call of functions of the functions for saving data
+wwill use this one file automatically.
 
 All arguments (following the file identifier if there's one) are
 data. The types of these data may be
@@ -1269,7 +1279,8 @@ Integer data
 @item
 Floating point data
 @item
-Strings (with interpretation of escape sequences, see @code{fsave()})
+Strings (with interpretation of escape sequences, see
+@code{@ref{fsave()}})
 @item
 One-dimensional arrays (or slices of more-dimensional arrays) of integer
 or floating point type
@@ -1324,18 +1335,18 @@ section of an @code{EDL} script.
 @anchor{fsave()}
 @findex fsave()
 @item fsave()
-This function (the name stands for 'formated save') can be used to write
-data to a file in a user formated way. The first argument must be a
-file identifier if @code{get_file()} had been called before (or can be
-the numbers @code{1} and @code{2} to write to @i{stdout} or @i{stder}).
-The next argument must be a @i{format string} with a syntax remotely
-similar to the one for the @code{C} @code{print()} function. The format
-string can contain arbitrary text and conversion specifiers, a @code{#}
-character for each data item from the remaining argument list. In contrast
-to the @code{save()} function this function can not be used to print array
-slices or complete arrays, but only simple data types. On the other
-hand, printing of complete arrays can be done using loops, i.e.@: as in
-the following example:
+This function (the name stands for 'formated save') can be used to
+write data to a file in a user formated way. The first argument must
+be a file identifier if @code{@ref{get_file()}} had been called before
+(or can be the numbers @code{1} and @code{2} to write to @i{stdout} or
+@i{stder}). The next argument must be a @i{format string} with a
+syntax remotely similar to the one for the @code{C} @code{printf(3)}
+function. The format string can contain arbitrary text and conversion
+specifiers, a @code{#} character for each data item from the remaining
+argument list. In contrast to the @code{@ref{save()}} function this
+function can not be used to print array slices or complete arrays, but
+only simple data types. On the other hand, printing of complete arrays
+can be done using loops, i.e.@: as in the following example:
 
 @example
 VARIABLES:
@@ -1402,7 +1413,7 @@ replaces the hexadecimal number @i{hh} by the corresponding character
 
 @item \#
 prints a @code{#} (this is a special escape sequence to be used with
-@code{fsave()} only)
+@code{@ref{fsave()}} only)
 @end table
 
 The function returns the total number of characters that have been written to
@@ -1415,13 +1426,14 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{ffsave()}
 @findex ffsave()
 @item ffsave()
-This function can also be used to write data into a file using a format
-string. In comparison to the @code{fsave()} function it gives you even
-more control over the format that is used by accepting a format string
-that is nearly identical to the one of the @code{C} @code{printf()} family
-of functions, missing only some elements that wouldn't make sense here.
-As in the case of the @code{save()} and @code{fsave()} function the
-first argument can be a file identifier.
+This function can also be used to write data into a file using a
+format string. In comparison to the @code{@ref{fsave()}} function it
+gives you even more control over the format that is used by accepting
+a format string that is nearly identical to the one of the @code{C}
+@code{printf(3)} family of functions, missing only some elements that
+wouldn't make sense here. As in the case of the @code{@ref{save()}}
+and @code{@ref{fsave()}} function the first argument can be a file
+identifier.
 
 The format string may contain two types of objects: ordinary characters,
 which are copied to the file, and conversion specifications, each of
@@ -1466,9 +1478,9 @@ Width or precision or both may be specified as @code{*}, in which case
 the value is computed by converting the next arguments(s), which must be
 an integer values.
 
-In contrast to the @code{printf()} format string no length modifier can
-be used -- @code{fsc2} has no different short, long or long long
-variable types.
+In contrast to the @code{C} @code{printf(3)} format string no length
+modifier can be used -- @code{fsc2} has no different short, long or
+long long variable types.
 
 The following table lists all conversion characters. If the character
 found in the format string is not a valid conversion specifier the
@@ -1500,8 +1512,8 @@ no argument is converted, prints a @code{%}
 @end table
 
 The format string as well as argument strings may contain escape
-sequences, starting with a backslash @code{\}, see @code{fsave()} for
-the complete list.
+sequences, starting with a backslash @code{\}, see
+@code{@ref{fsave()}} for the complete list.
 
 
 The function returns the total number of characters that have been written to
@@ -1514,12 +1526,12 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{save_program()}
 @findex save_program()
 @item save_program()
-This functions writes the currently run @code{EDL} script into a
-file. As usual, the first argument may be a file identifier -- the same
-rules apply as for @code{save()} and @code{fsave()}. The second argument
-can be a string that is prepended to each line of the script, i.e.@: a
-comment character to make other programs like @acronym{MATHLAB} or
-@acronym{octave} skip these lines.
+This functions writes the currently run @code{EDL} script into a file.
+As usual, the first argument may be a file identifier -- the same
+rules apply as for @code{@ref{save()}} and @code{@ref{fsave()}}. The
+second argument can be a string that is prepended to each line of the
+script, i.e.@: a comment character to make other programs like
+@acronym{MATHLAB} or @acronym{octave} skip these lines.
 
 If @code{#INCLUDE} statements are found in the @code{EDL} script also
 the included files get saved into the output file, embedded into the
@@ -1532,9 +1544,9 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{save_output()}
 @findex save_output()
 @item save_output()
-This function has the same arguments as @code{save_program()} but prints
-the content of the output window (i.e.@: the bottom browser window in
-the main form) into the file.
+This function has the same arguments as @code{@ref{save_program()}}
+but prints the content of the output window (i.e.@: the bottom browser
+window in the main form) into the file.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -1547,13 +1559,14 @@ This function is used to print comments into the file. When it is called a
 small editor is shown and the user may enter comments. These will be then
 written into the file.
 
-The first argument may as usual be a file identifier (or may be missing
-if @w{@code{get_file()}} hasn't been called). The second argument is
-again a string to be prepended to each line of the comment. The third
-argument is a preset string that appears in the comment editor when it is
-opened -- use "@code{\n}" to separate the lines of a multi-line text. The
-last argument is the label string to be shown on top of the editor -- it
-defaults to "Please enter a comment:".
+The first argument may as usual be a file identifier (or may be
+missing if @w{@code{@ref{get_file()}}} hasn't been called). The second
+argument is again a string to be prepended to each line of the
+comment. The third argument is a preset string that appears in the
+comment editor when it is opened -- use "@code{\n}" to separate the
+lines of a multi-line text. The last argument is the label string to
+be shown on top of the editor -- it defaults to "Please enter a
+comment:".
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -1594,13 +1607,13 @@ find the optimum parameters for an experiment but not in the final
 experiment.
 
 When the script is tested before the experiment is started it is
-assumed that all buttons are not pressed and switched off (unless their
-state has been set explicitly by the function @code{button_state()}, all
-sliders are assumed to be in the middle position unless a different
-value has been set via the function @code{slider_value()} and all input
-and output fields are initialized to @code{0} unless an initial value
-has been passed to the functions @code{input_create()} or
-@code{output_create()}.
+assumed that all buttons are not pressed and switched off (unless
+their state has been set explicitly by the function
+@code{@ref{button_state()}}, all sliders are assumed to be in the
+middle position unless a different value has been set via the function
+@code{@ref{slider_value()}} and all input and output fields are
+initialized to @code{0} unless an initial value has been passed to the
+functions @code{@ref{input_create()}} or @code{@ref{output_create()}}.
 
 For all the objects to be created a label string to be drawn with the
 object can be defined. Normally this will be a simple text, indicating
@@ -1707,6 +1720,7 @@ pixels smaller than the default size use the label string
 @item @ref{output_delete()}
 @item @ref{output_value()}
 @item @ref{menu_create()}
+@item @ref{menu_add()}
 @item @ref{menu_delete()}
 @item @ref{menu_choice()}
 @item @ref{menu_changed()}
@@ -1758,26 +1772,26 @@ of all objects in the toolbox) that has been changed. If none have been
 changed @code{0} is returned.
 
 Please note: the function will @strong{not} report changes due to
-function calls that change the state of an object, e.g.@: when setting a
-new slider position from within the @code{EDL} script. The function also
-will report a change until the new state of the object has been
+function calls that change the state of an object, e.g.@: when setting
+a new slider position from within the @code{EDL} script. The function
+also will report a change until the new state of the object has been
 determined by an appropriate function call. I.e.@: it will keep
 reporting e.g.@: a new slider value until you have called
-@code{slider_value()} for the object.
+@code{@ref{slider_value()}} for the object.
 
 
 @anchor{toolbox_wait()}
 @findex toolbox_wait()
 @item toolbox_wait()
 This function is very similar to the previous function,
-@code{toolbox_change()}. The main difference is that it will wait for a
-certain time and only returns when either this time has expired or an
-objects state has changed. Thus it needs one additional argument: the
-first argument must be the maximum time the function will block if none
-of the objects were changed. This first argument may be followed of a
-list of objects to check. The function also returns the ID of the first
-changed object or @code{0} if the time expired and no objects were
-changed during the time interval.
+@code{@ref{toolbox_changed()}}. The main difference is that it will
+wait for a certain time and only returns when either this time has
+expired or an objects state has changed. Thus it needs one additional
+argument: the first argument must be the maximum time the function
+will block if none of the objects were changed. This first argument
+may be followed of a list of objects to check. The function also
+returns the ID of the first changed object or @code{0} if the time
+expired and no objects were changed during the time interval.
 
 If you want to wait indefinitely you may pass the function a value of
 @code{0} or a negative value. If you pass no arguments at all to the
@@ -1836,7 +1850,7 @@ group of radio buttons.
 @item button_delete()
 Using this function one or more buttons can be deleted. It expects one
 or a list of button identifiers (separated by commas) as returned by
-the function @code{button_create()}.
+the function @code{@ref{button_create()}}.
 
 If the group leader (i.e.@: the first button) of a group of radio
 buttons is deleted, the next button of the group becomes the new group
@@ -1853,8 +1867,8 @@ deleted immediately afterwards).
 This function returns or sets the state of a button, depending on the
 number of arguments passed to the function. The non-optional first
 argument is the identifier of the button as it was returned by the
-function @code{button_create()}. If there are no more arguments the
-state of the button is returned. There is a difference between the
+function @code{@ref{button_create()}}. If there are no more arguments
+the state of the button is returned. There is a difference between the
 values returned for normal buttons on the one side and push and radio
 buttons on the other. For normal buttons a counter is maintained that
 counts the number of times the button was pressed and its value is
@@ -1878,9 +1892,9 @@ buttons cannot be set.
 The function takes one argument, the ID of a button. It will return
 @code{1} if the button has been activated and @code{0} if the state of
 the button hasn't been changed. Please note that the function will
-repeatedly report a change of the button state until you have determined
-the new state of the button by calling @code{button_state()} for the
-button.
+repeatedly report a change of the button state until you have
+determined the new state of the button by calling
+@code{@ref{button_state()}} for the button.
 
 For radio buttons, the function will only report a change for a newly
 activated button, but none for a button that automatically got switched
@@ -1896,8 +1910,8 @@ are two types of sliders, normal sliders and value sliders. The
 difference between these types is that for value sliders there is an
 additional field showing the currently set value while for normal
 sliders there isn't such a visual feedback. As already the function
-@code{button_create()} also this function returns a unique integer
-number to be used to identify the slider.
+@code{@ref{button_create()}} also this function returns a unique
+integer number to be used to identify the slider.
 
 The first argument the function expects is a string, either
 @code{"NORMAL_SLIDER"}, @code{"VALUE_SLIDER"},
@@ -1931,22 +1945,23 @@ used as the sliders initial value.
 @findex slider_delete()
 @item slider_delete()
 The function deletes one or more sliders. It expects one or a list of
-slider identifiers as returned by the function @code{slider_create()}.
+slider identifiers as returned by the function
+@code{@ref{slider_create()}}.
 
 
 @anchor{slider_value()}
 @findex slider_value()
 @item slider_value()
-This function returns or sets the value of a slider. The first argument
-must be a slider identifier as returned by the function
-@code{slider_create()}. If this is the only argument the value the
-slider is currently set to is returned. If there's a second value the
-slider is set to this value. Obviously, the value must be within the
-range of the slider as defined by the minimum and maximum value set in
-@code{slider_create()}, otherwise an error message is printed and the
-slider value is set to the next value still within the allowed range.
-If a step size is set for the slider and the new value does not fit with
-the step size the nearest allowed value is set.
+This function returns or sets the value of a slider. The first
+argument must be a slider identifier as returned by the function
+@code{@ref{slider_create()}}. If this is the only argument the value
+the slider is currently set to is returned. If there's a second value
+the slider is set to this value. Obviously, the value must be within
+the range of the slider as defined by the minimum and maximum value
+set in @code{@ref{slider_create()}}, otherwise an error message is
+printed and the slider value is set to the next value still within the
+allowed range. If a step size is set for the slider and the new value
+does not fit with the step size the nearest allowed value is set.
 
 
 @anchor{slider_changed()}
@@ -1954,9 +1969,9 @@ the step size the nearest allowed value is set.
 @item slider_changed()
 The function takes one argument, the ID of a slider. It will return
 @code{1} if the value of the slider has been changed by the user and
-@code{0} if not. Please note that the function will repeatedly report a
-change of the sliders value until you have determined the new value by
-calling @code{slider_value()} for the slider.
+@code{0} if not. Please note that the function will repeatedly report
+a change of the sliders value until you have determined the new value
+by calling @code{@ref{slider_value()}} for the slider.
 
 
 @anchor{input_create()}
@@ -1964,12 +1979,12 @@ calling @code{slider_value()} for the slider.
 @item input_create()
 Using input fields numerical values can be entered. There are two
 different types of input fields, one, that will only accept integer
-values, while the other also allows input of floating point numbers. The
-first argument of the function for creating an input field,
-@code{input_create()}, is the type of the input field. If the first
-argument is @code{"INT_INPUT"} the input field will only accept integer
-numbers, while with an argument of @code{"FLOAT_INPUT"} also floating
-point numbers can be entered.
+values, while the other also allows input of floating point numbers.
+The first argument of the function for creating an input field,
+@code{@ref{input_create()}}, is the type of the input field. If the
+first argument is @code{"INT_INPUT"} the input field will only accept
+integer numbers, while with an argument of @code{"FLOAT_INPUT"} also
+floating point numbers can be entered.
 
 If the second argument is a number it is taken to be the initial value
 in the input field. If there is either no second argument or the second
@@ -1997,8 +2012,9 @@ it gets truncated and longer texts can't be entered.
 @anchor{input_delete()}
 @findex input_delete()
 @item input_delete()
-The function deletes one or more input field. It expects one or a list of
-input field identifiers as returned by the function @code{input_create()}.
+The function deletes one or more input field. It expects one or a list
+of input field identifiers as returned by the function
+@code{@ref{input_create()}}.
 
 
 @anchor{input_value()}
@@ -2006,11 +2022,11 @@ input field identifiers as returned by the function @code{input_create()}.
 @item input_value()
 This function returns or sets the value of an input field. The first
 argument must be an input field identifier as returned by the function
-@code{input_create()}. If this is the only argument the value the input
-field is set to is returned. If there's a second value the input field
-is set to this value. Obviously, the value must be number, an integer
-for @code{INT_INPUT} fields and a floating point number (but integers
-will also be accepted) for @code{FLOAT_INPUT} objects.
+@code{@ref{input_create()}}. If this is the only argument the value
+the input field is set to is returned. If there's a second value the
+input field is set to this value. Obviously, the value must be number,
+an integer for @code{INT_INPUT} fields and a floating point number
+(but integers will also be accepted) for @code{FLOAT_INPUT} objects.
 
 
 @anchor{input_changed()}
@@ -2019,8 +2035,8 @@ will also be accepted) for @code{FLOAT_INPUT} objects.
 The function takes one argument, the ID of an input field. It returns
 @code{1} if the value of the input field has been changed by the user
 and @code{0} if not. Please note that the function will repeatedly
-report a change of the input fields value until you have determined the
-new value by calling @code{input_value()}.
+report a change of the input fields value until you have determined
+the new value by calling @code{@ref{input_value()}}.
 
 
 @anchor{output_create()}
@@ -2030,13 +2046,13 @@ In contrast to input objects output objects can be used to display a
 value but the user can't change the value. As in the case of input
 objects there are two types of output fields, one, that will only
 accept integer values while the other also allows output of floating
-point numbers. The first argument of the function for creating
-an output field, @code{output_create()}, is the type of the output
+point numbers. The first argument of the function for creating an
+output field, @code{@ref{output_create()}}, is the type of the output
 field. If the first argument is @code{"INT_OUTPUT"} the output field
 will only show integer numbers, while with an argument of
-@code{"FLOAT_OUTPUT"} also floating point numbers can be
-displayed. Beside the two output fields for numerical values there
-also exists a field for string output. You create it by specifying
+@code{"FLOAT_OUTPUT"} also floating point numbers can be displayed.
+Beside the two output fields for numerical values there also exists a
+field for string output. You create it by specifying
 @code{"STRING_OUTPUT"} as the first argument.
 
 If the second argument is a number it is taken to be the initial value
@@ -2068,21 +2084,23 @@ is longer it gets truncated.
 @anchor{output_delete()}
 @findex output_delete()
 @item output_delete()
-The function deletes one or more output field. It expects one or a list of
-output field identifiers as returned by the function @code{input_create()}.
+The function deletes one or more output field. It expects one or a
+list of output field identifiers as returned by the function
+@code{@ref{input_create()}}.
 
 
 @anchor{output_value()}
 @findex output_value()
 @item output_value()
 This function sets a new value for an output field or returns the
-current value. The first argument must be an output field identifier as
-returned by the function @code{output_create()}. If this is the only
-argument the value the output field is set to is returned. If there's a
-second value the output field is set to this value. Obviously, the value
-must be number for integer and floating point output fields. If for a
-string output field a number is passed to the function the number is
-automatically converted to a string representing that number.
+current value. The first argument must be an output field identifier
+as returned by the function @code{@ref{output_create()}}. If this is
+the only argument the value the output field is set to is returned. If
+there's a second value the output field is set to this value.
+Obviously, the value must be number for integer and floating point
+output fields. If for a string output field a number is passed to the
+function the number is automatically converted to a string
+representing that number.
 
 
 @anchor{menu_create()}
@@ -2098,24 +2116,34 @@ As usual, the value returned is an integer ID for the popup-menu button
 that has to be used in further commands dealing with the widget.
 
 
+@anchor{menu_add()}
+@findex menu_add()
+@item menu_add()
+This function allows to add one or more entries to an already existing
+popup-menu, created by @code{@ref{menu_create()}}. The first argument
+must be the ID of the menu and the following arguments must be
+strings, one for each new entry to add.
+
+
 @anchor{menu_delete()}
 @findex menu_delete()
 @item menu_delete()
-This function deletes one or more popup-menu buttons. It expects one or
-a list of popup-menu button identifiers as returned by the function
-@code{menu_create()}.
+This function deletes one or more popup-menu buttons. It expects one
+or more popup-menu button identifiers as returned by the function
+@code{@ref{menu_create()}}.
 
 
 @anchor{menu_choice()}
 @findex menu_choice()
 @item menu_choice()
 This function either selects a new item from the list of items of the
-popup-menu button or returns the number of the currently selected item.
-The first argument must be a valid popup-menu button identifiers as
-returned by the function @code{menu_create()}. If there is no second
-argument the currently selected item is returned, an integer number
-between @code{1}, indicating that the first item is selected, and the
-total number of items, indicating that the last item is selected.
+popup-menu button or returns the number of the currently selected
+item. The first argument must be a valid popup-menu button identifiers
+as returned by the function @code{@ref{menu_create()}}. If there is no
+second argument the currently selected item is returned, an integer
+number between @code{1}, indicating that the first item is selected,
+and the total number of items, indicating that the last item is
+selected.
 
 If called with a second argument this must be an integer number between
 @code{1} and the total number of items of the popup-menu button. The
@@ -2130,8 +2158,8 @@ second etc.).
 The function takes one argument, the ID of a menu. It will return
 @code{1} if the the user has selected a new menu item and @code{0} if
 not. Please note that the function will repeatedly report a change of
-the selected menu item until you have determined the new item by calling
-@code{menu_choice()} for the menu object.
+the selected menu item until you have determined the new item by
+calling @code{@ref{menu_choice()}} for the menu object.
 
 
 @anchor{object_delete()}
@@ -2139,8 +2167,9 @@ the selected menu item until you have determined the new item by calling
 @item object_delete()
 The function deletes one or more objects from the toolbox. It expects
 one or a comma separated list of object identifiers as returned by the
-functions @code{button_create()}, @code{slider_create()},
-@code{input_create()}, @code{output_create()} or @code{menu_create()}.
+functions @code{@ref{button_create()}}, @code{@ref{slider_create()}},
+@code{@ref{input_create()}}, @code{@ref{output_create()}} or
+@code{@ref{menu_create()}}.
 
 
 @anchor{object_change_label()}
@@ -2340,7 +2369,7 @@ variance of 1. If called with a non-zero, positive argument it returns
 an array of Gaussian distributed random numbers where the argument
 specifies the size of the array. These random numbers are probably
 better suited for simulating noise than the ones returned by
-@code{random()}.
+@code{@ref{random()}}.
 
 
 @anchor{index_of_max()}
@@ -2414,9 +2443,9 @@ cases where a repeated signal, that has been sampled several times and
 is stored in a flat array, is to be averaged.
 
 Calling the function with a chunk size of @code{1} is equivalent to
-invoking the @code{mean()} function while calling it with a sub-partition
-size equal to the length of the array itself is equivalent to calling
-the @code{float()} function on the array.
+invoking the @code{@ref{mean()}} function while calling it with a
+sub-partition size equal to the length of the array itself is
+equivalent to calling the @code{@ref{float()}} function on the array.
 
 
 @anchor{min_of()}
@@ -2454,9 +2483,10 @@ sub-matrices as specified by the third argument are used..
 @findex set_seed()
 @item set_seed()
 Sets a seed for the random number generator used in the functions
-@code{random()} and @code{grandom()}. The argument has to be a positive
-integer. Alternatively, when no argument is given, the time in seconds
-since 00:00:00 UTC, January 1, 1970 is used as the seed.
+@code{@ref{random()}} and @code{@ref{grandom()}}. The argument has to
+be a positive integer. Alternatively, when no argument is given, the
+time in seconds since 00:00:00 UTC, January 1, 1970 is used as the
+seed.
 
 
 @anchor{sin()}
@@ -2565,6 +2595,7 @@ which is not only simpler to read but also a lot faster.
 @item @ref{float_slice()}
 @item @ref{dim()}
 @item @ref{size()}
+@item @ref{sort()}
 @item @ref{reverse()}
 @item @ref{sprint()}
 @item @ref{mouse_position()}
@@ -2651,12 +2682,13 @@ the time that will be required in the real run of the experiment.
 @anchor{wait()}
 @findex wait()
 @item wait()
-Waits for the specified time. Times are always to be given in seconds or
-alternatively with a unit, e.g.@: @w{100 ms}. Unfortunately, the time
-resolution of @code{wait()} is in the @w{10 ms} range and may even be
-less precise. If the argument is negative the function will print an
-error message and return immediately. The maximum time the function
-accepts is more than 2.1 billion seconds (or about 68 years).
+Waits for the specified time. Times are always to be given in seconds
+or alternatively with a unit, e.g.@: @w{100 ms}. Unfortunately, the
+time resolution of @code{@ref{wait()}} is in the @w{10 ms} range and
+may even be less precise. If the argument is negative the function
+will print an error message and return immediately. The maximum time
+the function accepts is more than 2.1 billion seconds (or about 68
+years).
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -2751,7 +2783,7 @@ For an array defined as
 X[ 8 ] = @{ 1, 2, 3, 4, 5, 6, 7, 8 @}
 @end example
 @noindent
-the call of @code{slice()}
+the call of @code{@ref{slice()}}
 @example
 slice( X, 3, 4 );
 @end example
@@ -2814,6 +2846,18 @@ and a warning is printed. If the argument is a string the length of the
 string is returned.
 
 
+@anchor{sort()}
+@findex sort()
+@item sort()
+The function takes at least one argument, a one-dimensional array. If
+no further argument is given it returns an array with the sorted (in
+ascending order) values of the argument array. If there's a second
+argument and this is @code{1} or @code{"DOWN"} or @code{"DOWNWARDS"}
+then the array is sorted in descending order. (You may also specify
+@code{0} or @code{"UP"} or @code{"UPWARDS"} as the second argument to
+explicitely request sorting in ascending order.)
+
+
 @anchor{reverse()}
 @findex reverse()
 @item reverse()
@@ -2835,16 +2879,17 @@ is returned.
 The function can be used to create strings with a text that only gets
 determined while the experiment is running, e.g.@: to create label
 strings on demand etc. The function expects at least one argument, a
-format string, having exactly the same form as the format string passed
-to the @code{print()} function, i.e.@: with embedded @code{#} characters
-as placeholders for the values of other variables to be inserted into
-the string. For each unescaped @code{#} in the string there must be
-an additional argument, a number, a variable or a string. The function
-returns a variable that can be used in all places where otherwise a
-string would be required. Here's a simple-minded example on how to create
-a set of 10 buttons, where the label contains the button number (note
-that the first @code{#} character is escaped by a backslash, so it goes
-directly into the string to be created without any conversions):
+format string, having exactly the same form as the format string
+passed to the @code{@ref{print()}} function, i.e.@: with embedded
+@code{#} characters as placeholders for the values of other variables
+to be inserted into the string. For each unescaped @code{#} in the
+string there must be an additional argument, a number, a variable or a
+string. The function returns a variable that can be used in all places
+where otherwise a string would be required. Here's a simple-minded
+example on how to create a set of 10 buttons, where the label contains
+the button number (note that the first @code{#} character is escaped
+by a backslash, so it goes directly into the string to be created
+without any conversions):
 @example
 FOR I = 1 : 10 @{
     B[ I ] = button_create( "NORMAL_BUTTON",

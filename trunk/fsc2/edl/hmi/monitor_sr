@@ -153,8 +153,7 @@ FOREVER {
 			object_enable( Sweep_Down, "ON" );
 		}
 
-		current_field = dval;
-//		current_field = magnet_field( dval );
+		current_field = magnet_field( dval );
 		output_value( Current_Field, current_field );
 		draw_marker( I, "BLUE" );
 	}

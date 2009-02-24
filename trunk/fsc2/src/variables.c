@@ -426,6 +426,9 @@ vars_push_matrix( Var_Type_T type,
     ssize_t i;
 
 
+    CLOBBER_PROTECT( nv );
+    CLOBBER_PROTECT( sizes );
+
     if ( ! ( type & ( INT_REF | FLOAT_REF ) ) || dim < 2 )
         fsc2_impossible( );
 

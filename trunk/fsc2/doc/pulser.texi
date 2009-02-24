@@ -903,9 +903,9 @@ ACQUISITION_SEQUENCE_2 = +B, -B, -A, +A, +B, -B, -A, +A;
 
 
 The definition of acquisition sequences is optional and only needed if
-the function @code{get_phase_cycled_area()} (see below) is going to be
-used. If defined their lengths have to be identical to the lengths of
-the phase sequences.
+the function @code{@ref{get_phase_cycled_area()}} (see below) is going
+to be used. If defined their lengths have to be identical to the
+lengths of the phase sequences.
 
 
 @c ########################################################
@@ -1347,9 +1347,9 @@ FOR I = 1: Curve_length @{
 
 The inner loop in the previous example runs through the 4 different
 phase settings, adding up the areas with the correct sign. Instead of
-writing out this loop one could also define an acquisition sequence and
-use the @code{EDL} function @code{get_phase_cycled_area()}. This
-function does everything automatically that had to be spelled out
+writing out this loop one could also define an acquisition sequence
+and use the @code{EDL} function @code{@ref{get_phase_cycled_area()}}.
+This function does everything automatically that had to be spelled out
 explicitely in the loop in the previous example and thus makes the
 script much simpler. The only changes needed are in the @code{PHASES}
 and @code{EXPERIMENT} section: first, an acquisition sequence must be
@@ -1376,26 +1376,27 @@ FOR I = 1: 128 @{
 @}
 @end example
 @noindent
-As can be seen from this example @code{get_phase_cycled_area()} not only
-sets the pulse phases but also starts the digitizer acquisition, fetches
-the measured areas from the digitizer and adds up the areas according to
-the acquisition sequence.
+As can be seen from this example @code{@ref{get_phase_cycled_area()}}
+not only sets the pulse phases but also starts the digitizer
+acquisition, fetches the measured areas from the digitizer and adds up
+the areas according to the acquisition sequence.
 
 
-@code{get_phase_cycled_area()} can handle one as well as two acquisition
-sequences, see below. But also a single acquisition sequence may need
-data from two different digitizer channels, for example an acquisition
-sequence like this:
+@code{@ref{get_phase_cycled_area()}} can handle one as well as two
+acquisition sequences, see below. But also a single acquisition
+sequence may need data from two different digitizer channels, for
+example an acquisition sequence like this:
 @example
 ACQUISITION_SEQUENCE =  +A, -B, -A, +B;
 @end example
 @noindent
-which means that the value for the first phase setting has to be fetched
-from the first digitizer channel (associated with @code{A}) and that for
-the second phase setting the value from the second digitizer channel
-(associated with @code{B}) has to be subtracted, etc. In this case
-@code{get_phase_cycled_area()} expects its second argument to be the
-second digitizer channel, i.e.@: it must be called like this:
+which means that the value for the first phase setting has to be
+fetched from the first digitizer channel (associated with @code{A})
+and that for the second phase setting the value from the second
+digitizer channel (associated with @code{B}) has to be subtracted,
+etc. In this case @code{@ref{get_phase_cycled_area()}} expects its
+second argument to be the second digitizer channel, i.e.@: it must be
+called like this:
 @example
 data = get_phase_cycled_area( CH1, CH2, Window );
 @end example
@@ -1441,7 +1442,7 @@ FOR I = 1: 128 @{
 
 
 Finally, if there are two acquisition sequences
-@code{get_phase_cycled_area()} will return 2 values for each
+@code{@ref{get_phase_cycled_area()}} will return 2 values for each
 digitizer window. Thus it will returns an array of values, where the
-first two values are the data from both the acquisition sequences of the
-first window, the next two from the second window etc.
+first two values are the data from both the acquisition sequences of
+the first window, the next two from the second window etc.

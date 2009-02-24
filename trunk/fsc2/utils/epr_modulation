@@ -357,8 +357,7 @@ sub add_entry {
 
    $fdf->Button( -text     => 'Delete entry',
                   -command => sub { $of->destroy;
-									$cal->freqs( [ grep { $_ == $cf }
-												   @{ $cal->{ freqs } } ] ); }
+                                    $cal->del_freq( $cf ); }
                 )->pack;
 }
 
@@ -786,7 +785,7 @@ sub extrapolate {
 ###################################
 
 sub freqs {
-	my ( $self, $freqs ) = @_;;
+	my ( $self, $freqs ) = @_;
 	return $self->{ freqs } unless defined $freqs;
 
 	die "Argument not a reference to an array of Freq objects.\n"
@@ -833,6 +832,7 @@ sub del_freq {
 	for ( @{ $self->freqs } ) {
 		if ( $_ == $f ) {
 			delete $self->freqs->[ $i ];
+            splice @{ $self->freqs }, $i, 1;
 			return;
 		}
 		$i++;

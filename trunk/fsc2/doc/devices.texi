@@ -414,8 +414,9 @@ field deviation was larger than @w{5 mG} at the end of the test run as
 well as the experiment the maximum field deviation is printed out.
 
 For the module @code{bh15_fc} requesting the current value of the
-field is only possible when either the function @code{magnet_init()}
-has been called or a field already as been set.
+field is only possible when either the function
+@code{@ref{magnet_setup()}} has been called or a field already as been
+set.
 
 The function can only be used in the @code{EXPERIMENT} section.
 .
@@ -7793,14 +7794,15 @@ If there's another argument it must be of boolean type, i.e.@: either
 @code{"ON"} or @code{1} to permit interpolation or @code{"OFF"} or
 @code{0} to disable interpolation. Please note that allowing
 interpolation does not gurantee that interpolation can be done since
-this also requires that there are at least 3 known frequencies and that
-the correlation coefficient of a least square fit is at least as large
-as set in the configuration file. Whether interpolation is possible for a
-certain calibration can be determined by calling the function
-@code{epr_modulation_can_interpolate()}. Please note also that allowing
-or disabling intrepolation for a frequency only is in effect until the
-@code{EDL} script ends unless the function @ref{epr_modulation_store()}
-is called afterwards to make this setting permanent.
+this also requires that there are at least 3 known frequencies and
+that the correlation coefficient of a least square fit is at least as
+large as set in the configuration file. Whether interpolation is
+possible for a certain calibration can be determined by calling the
+function @code{@ref{epr_modulation_calibration_can_interpolate()}}.
+Please note also that allowing or disabling intrepolation for a
+frequency only is in effect until the @code{EDL} script ends unless
+the function @ref{epr_modulation_store()} is called afterwards to make
+this setting permanent.
 
 
 @anchor{epr_modulation_calibration_can_interpolate()}
@@ -7829,14 +7831,15 @@ If there's another argument it must be of boolean type, i.e.@: either
 @code{"ON"} or @code{1} to permit extrapolation or @code{"OFF"} or
 @code{0} to disable extrapolation. Please note that allowing
 extrapolation does not gurantee that extrapolation can be done since
-this also requires that there are at least 3 known frequencies and that
-the correlation coefficient of a least square fit is at least as large
-as set in the configuration file. Whether extrapolation is possible for a
-certain calibration can be determined by calling the function
-@code{epr_modulation_can_extrapolate()}. Please note also that allowing
-or disabling intrepolation for a frequency only is in effect until the
-@code{EDL} script ends unless the function @ref{epr_modulation_store()}
-is called afterwards to make this setting permanent.
+this also requires that there are at least 3 known frequencies and
+that the correlation coefficient of a least square fit is at least as
+large as set in the configuration file. Whether extrapolation is
+possible for a certain calibration can be determined by calling the
+function @code{@ref{epr_modulation_calibration_can_extrapolate()}}.
+Please note also that allowing or disabling intrepolation for a
+frequency only is in effect until the @code{EDL} script ends unless
+the function @code{@ref{epr_modulation_store()}} is called afterwards
+to make this setting permanent.
 
 
 @anchor{epr_modulation_calibration_can_extrapolate()}
@@ -7854,23 +7857,23 @@ at least as large as set in the configuration file for the device.
 @anchor{epr_modulation_add_calibration()}
 @findex epr_modulation_add_calibration()
 @item epr_modulation_add_calibration()
-This function allows to create an new calibration (i.e. a data structure
-that represents informations about a calibration). IIt expects a single
-arguemnt, the name of the new calibration (as a string). Informations for
-this calibration can be set by the functions listed above. Please note
-that creating a new calibration and setting properties only is in effect
-until the @code{EDL} script ends unless the function
-@ref{epr_modulation_store()} is called afterwards to make this setting
-permanent.
+This function allows to create an new calibration (i.e. a data
+structure that represents informations about a calibration). IIt
+expects a single arguemnt, the name of the new calibration (as a
+string). Informations for this calibration can be set by the functions
+listed above. Please note that creating a new calibration and setting
+properties only is in effect until the @code{EDL} script ends unless
+the function @ref{epr_modulation_store()} is called afterwards to make
+this setting permanent.
 
 
 @anchor{epr_modulation_delete_calibration()}
 @findex epr_modulation_delete_calibration()
 @item epr_modulation_delete_calibration()
-This function allows to delete a calibration and all its properties. The
-function tales a single argument, the name of the calibration to delete
-(as a string). Please note that deleting a calibration only is in effect
-until the @code{EDL} script ends unless the function
+This function allows to delete a calibration and all its properties.
+The function tales a single argument, the name of the calibration to
+delete (as a string). Please note that deleting a calibration only is
+in effect until the @code{EDL} script ends unless the function
 @ref{epr_modulation_store()} is called afterwards to make this setting
 permanent.
 
@@ -7885,13 +7888,13 @@ calibrations.
 @anchor{epr_modulation_calibration_name()}
 @findex epr_modulation_calibration_name()
 @item epr_modulation_calibration_name()
-This function allows to find the name of a calibration by its index in the
-list of calibrations (a number between @code{1} and the number of known
-calibrations). The function takes a single argument, the calibration's index
-(and invalid index will result in an exception getting thrown). The
-function can be used to in conjunction with the
-@ref{epr_modulation_calibration_count()} to obtain the names of all known
-calibrations.
+This function allows to find the name of a calibration by its index in
+the list of calibrations (a number between @code{1} and the number of
+known calibrations). The function takes a single argument, the
+calibration's index (and invalid index will result in an exception
+getting thrown). The function can be used to in conjunction with the
+@ref{epr_modulation_calibration_count()} to obtain the names of all
+known calibrations.
 
 @anchor{epr_modulation_calibration_frequencies()}
 @findex epr_modulation_calibration_frequencies()
@@ -7904,10 +7907,10 @@ of a calibration (as a string).
 @anchor{epr_modulation_store()}
 @findex epr_modulation_store()
 @item epr_modulation_store()
-This function takes no arguments and must be called to make any changes
-to the settings for the resoators permanent - without calling this
-function all changes are discarded once the running @code{EDL} script
-ends.
+This function takes no arguments and must be called to make any
+changes to the settings for the resoators permanent - without calling
+this function all changes are discarded once the running @code{EDL}
+script ends.
 
 
 @end table
@@ -7918,11 +7921,11 @@ ends.
 @cindex Multi-Device Functions
 
 Currently there is just one function that uses two devices at once. It
-uses the single-device functions (and thus will print error messages if
-the modules for the required devices aren't loaded or if the modules
-don't support the needed functions). The module they are defined in is
-automatically loaded, so it needs no special entry in the @code{DEVICES}
-section.
+uses the single-device functions (and thus will print error messages
+if the modules for the required devices aren't loaded or if the
+modules don't support the needed functions). The module they are
+defined in is automatically loaded, so it needs no special entry in
+the @code{DEVICES} section.
 
 @c The anchor and the findex must come before the start of the table,
 @c otherwise the created HTML isn't valid
@@ -7939,53 +7942,54 @@ pulser, fetching the data from the digitizer and finally returning the
 measured data, i.e.@: the areas returned by the digitizer and added up
 according to the setting of the @code{ACQUISITION_SEQUENCE}.
 
-The function needs both a pulser and a digitizer. It is not possible to
-use the function with more than one pulser or digitizer -- if more than
-one pulser or digitizer is listed in the @code{DEVICES} section it will
-always use the first pulser and digitizer listed only.
+The function needs both a pulser and a digitizer. It is not possible
+to use the function with more than one pulser or digitizer -- if more
+than one pulser or digitizer is listed in the @code{DEVICES} section
+it will always use the first pulser and digitizer listed only.
 
 The function can be used both for 1-dimensional and 2-dimensional
-measurements. In the first case there is just one signal channel, in the
-second two, e.g.@: a real and an imaginary part of a signal. Which kind
-of measurement has to be done is determined by the number of acquisition
-sequences. If there's only one it's a 1-dimensional measurement,
-otherwise a 2-dimensional one.
+measurements. In the first case there is just one signal channel, in
+the second two, e.g.@: a real and an imaginary part of a signal. Which
+kind of measurement has to be done is determined by the number of
+acquisition sequences. If there's only one it's a 1-dimensional
+measurement, otherwise a 2-dimensional one.
 
 The first argument the function expects is a digitizer channel to be
-used for measuring the area of the signal, see above which channels can
-be used for the different digitizers. If the @code{ACQUISITION_SEQUENCE}
-is written in way that it is clear that two digitizer channels are
-needed, i.e.@: you have a line in the @code{PHASES} section like
+used for measuring the area of the signal, see above which channels
+can be used for the different digitizers. If the
+@code{ACQUISITION_SEQUENCE} is written in way that it is clear that
+two digitizer channels are needed, i.e.@: you have a line in the
+@code{PHASES} section like
 @example
 ACQUISITION_SEQUENCE = +A, -B, -A, +B;
 @end example
 @noindent
-also the second argument to the function must be a digitizer
-channel. The first channel is used for fetching the @code{A} data, the
-second for the @code{B} data. This is, of course, only relevant when you
-have two different signals, e.g.@: the two outputs of a quadrature mixer
+also the second argument to the function must be a digitizer channel.
+The first channel is used for fetching the @code{A} data, the second
+for the @code{B} data. This is, of course, only relevant when you have
+two different signals, e.g.@: the two outputs of a quadrature mixer
 and the measured data consist of adding up signals from both channels.
 
 The following arguments are as many window identifiers (as returned by
 @ref{digitizer_define_window()} as there are needed. If no window
 argument is given always the area of the complete curve is returned!
 
-The type of the return value depends on the number of window identifiers
-passed to the function and the number of acquisition sequences. If there
-is only one window identifier (or none) and only one acquisition
-sequence a floating point value with the result of the measurement is
-returned. If, on the other hand, there is more than one window
-identifier and a single acquisition sequence an array will be returned
-with as many elements as there are window identifiers, the first element
-of the returned array containing the result for the first window, the
-second element the value for the second window etc.
+The type of the return value depends on the number of window
+identifiers passed to the function and the number of acquisition
+sequences. If there is only one window identifier (or none) and only
+one acquisition sequence a floating point value with the result of the
+measurement is returned. If, on the other hand, there is more than one
+window identifier and a single acquisition sequence an array will be
+returned with as many elements as there are window identifiers, the
+first element of the returned array containing the result for the
+first window, the second element the value for the second window etc.
 
 If, in contrast, there are two acquisition sequences an array of twice
 the number of windows is returned. The first value in the array is the
 result for the first acquistion sequence for the first window, the
 second the result for the second acquistion sequence and the first
-window, then follow the results of both acquisition sequences fort
-he second window, etc.
+window, then follow the results of both acquisition sequences fort he
+second window, etc.
 
 As an example here parts of an @code{EDL} script for a 1-dimensional
 stimulated echo experiment with phase cycling. The parts with the
@@ -8041,20 +8045,21 @@ FOR I = 1 : : Num_points @{
 @end example
 
 The first thing the function does is to do a phase reset to be certain
-the pulser starts with a pulse pattern for the first phase as defined in
-the @code{PHASE_SEQUENCE} declarations. Then it will measure the signals
-areas for both digitizer window areas. In the next step it switched the
-pulser to the pulse pattern for the next phase and repeat the
-measurement of both the signal areas and subtract them from the values
-measured in the first step (because in the @code{ACQUISITION_SEQUNCE}
-command requires subtraction of the data). Then, again the pulse pattern
-is switched to the third phase and a third set of data for both windows
-is measured. Also these data are subtracted according to the settings of
-acquisition sequence. Finally, the fourth and last phase settings are
-send to the pulser and a fourth set of signal areas is measured. These
-data now must, according to the acquisition sequence, be added to the
-previous accumulated data. The result, an array with two elements for
-the first and second window is returned by the function.
+the pulser starts with a pulse pattern for the first phase as defined
+in the @code{PHASE_SEQUENCE} declarations. Then it will measure the
+signals areas for both digitizer window areas. In the next step it
+switched the pulser to the pulse pattern for the next phase and repeat
+the measurement of both the signal areas and subtract them from the
+values measured in the first step (because in the
+@code{ACQUISITION_SEQUNCE} command requires subtraction of the data).
+Then, again the pulse pattern is switched to the third phase and a
+third set of data for both windows is measured. Also these data are
+subtracted according to the settings of acquisition sequence. Finally,
+the fourth and last phase settings are send to the pulser and a fourth
+set of signal areas is measured. These data now must, according to the
+acquisition sequence, be added to the previous accumulated data. The
+result, an array with two elements for the first and second window is
+returned by the function.
 
 You may note that in this script @ref{pulser_update()} isn't called
 after @ref{pulser_shift()}. This is possible because
@@ -8118,12 +8123,12 @@ We have two acquisition sequences and two digitizer windows, so the
 function returns an array with 4 elements. The first and third element
 of the array are the results for the first acquisition sequence for
 window 1 and 2, the second and fourth are the ones for the second
-acquisition for both windows. Since the data are measured with baseline
-correction, i.e.@: the result for the second, off-resonance window must
-be subtracted from the first windows result, to obtain the value for the
-first acquisition sequence from the first array element the third must
-be subtracted, and for the second acquisition sequence the value if the
-fourth array element from the second.
+acquisition for both windows. Since the data are measured with
+baseline correction, i.e.@: the result for the second, off-resonance
+window must be subtracted from the first windows result, to obtain the
+value for the first acquisition sequence from the first array element
+the third must be subtracted, and for the second acquisition sequence
+the value if the fourth array element from the second.
 
 
 @end table

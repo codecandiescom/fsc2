@@ -116,15 +116,15 @@ another variable, @code{data}, for the data point obtained from the lock-in
 amplifier, are declared.
 
 In the next section, following the @code{PREPARATIONS} section keyword,
-the devices are set up. The function @w{@code{magnet_setup()}} tells the
+the devices are set up. The function @code{@ref{magnet_setup()}} tells the
 magnet to start with the field stored in the variable
 @w{@code{start_field}} and to use a field step size of @w{@code{field_step}}.
 This will also make the magnet automatically go to the start field (with
 the selected devices after some calibration) when the experiment starts.
 
-The next function call, @w{@code{init_1d()}}, tells the program that this is
-an 1-dimensional experiment and to use the appropriate kind of display
-for the data.
+The next function call, @code{@ref{init_1d()}}, tells the program that
+this is an 1-dimensional experiment and to use the appropriate kind of
+display for the data.
 
 Now we're already done with the preparations and can start the
 experiment, as indicated by the section keyword @code{EXPERIMENT}. The
@@ -135,32 +135,34 @@ all the statements belonging to the loop are enclosed in curly braces,
 `@code{@{}' and `@code{@}}'.
 
 The first thing to do in the experiment loop is to fetch a new data
-point from the lock-in amplifier, storing it in the variable @code{data}.
-Next, we have to display the data point, which is done via the call of
-the function @w{@code{display_1d()}} (as you may have guessed there also
-exists a function called @w{@code{display_2d()}} that gets used when one
-wants to display results from an experimnt where 2 parameters are varied,
-but since here only the field is swept @w{@code{display_1d()}} will do).
-Here two arguments are required, the number of the point, stored in the
+point from the lock-in amplifier, storing it in the variable
+@code{data}. Next, we have to display the data point, which is done
+via the call of the function @code{@ref{display_1d()}} (as you may
+have guessed there also exists a function called
+@code{@ref{display_2d()}} that gets used when one wants to display
+results from an experimnt where 2 parameters are varied, but since
+here only the field is swept @code{@ref{display_1d()}} will do). Here
+two arguments are required, the number of the point, stored in the
 variable @code{I}, and the value of the new data point.
 
-Of course, we also need to write the new data point to a data file. This
-is done by the call of the function @code{save()} that automatically
-writes its argument to a file. When the function is called for the first
-time it prompts you for the name of the file to be used.
+Of course, we also need to write the new data point to a data file.
+This is done by the call of the function @code{@ref{save()}} that
+automatically writes its argument to a file. When the function is
+called for the first time it prompts you for the name of the file to
+be used.
 
 What remains to be done is to increment the counter variable @code{I}
-and to sweep up the field. The function @w{@code{sweep_up()}} increments the
-field by the amount you specified previously in the call of
-@w{@code{magnet_init()}} (in the @code{PREPARATIONS} section) and returns
-the new value of the field, which is later used in the test of the loop
-condition to decide if the experiment is finished, i.e.@: the end field
-is reached.
+and to sweep up the field. The function @code{@ref{sweep_up()}}
+increments the field by the amount you specified previously in the
+call of @code{@ref{magnet_setup()}} (in the @code{PREPARATIONS}
+section) and returns the new value of the field, which is later used
+in the test of the loop condition to decide if the experiment is
+finished, i.e.@: the end field is reached.
 
-The last function call of @code{wait()} with the result of a call of the
-function @w{@code{lockin_time_constant()}} as the argument makes the program
-wait for the time constant of the lock-in amplifier to give it enough
-time to measure a new data point.
+The last function call of @code{@ref{wait()}} with the result of a
+call of the function @code{@ref{lockin_time_constant()}} as the
+argument makes the program wait for the time constant of the lock-in
+amplifier to give it enough time to measure a new data point.
 
 When you have written such a script (using, for example, a simple ASCII
 editor) you load it into @code{fsc2} and press the @code{Test} or the
@@ -178,21 +180,21 @@ already run for 2 hours and you have to start all over again.
 
 As you can already see from the example most of an @code{EDL} script
 consists of function calls. Functions can be divided into two
-categories, built-in functions and device functions. Built-in functions
-(like @w{@code{init_1d()}}, @w{@code{display_1d()}}, @code{save()} and
-@code{wait()}) are always available, even when there is no
-@code{DEVICES} section (or no devices are listed in that section). In
-contrast, device functions are bound to certain devices and can only
-be called when the device they are defined for is listed in the
-@code{DEVICES} section. For example, the functions
-@w{@code{lockin_sensitivity()}}, @w{@code{lockin_time_constant()}} and
-@w{@code{lockin_get_data()}} are obviously targeted at lock-in
+categories, built-in functions and device functions. Built-in
+functions (like @code{@ref{init_1d()}}, @code{@ref{display_1d()}},
+@code{@ref{save()}} and @code{@ref{wait()}}) are always available,
+even when there is no @code{DEVICES} section (or no devices are listed
+in that section). In contrast, device functions are bound to certain
+devices and can only be called when the device they are defined for is
+listed in the @code{DEVICES} section. For example, the functions
+@code{@ref{lockin_sensitivity()}}, @code{@ref{lockin_time_constant()}}
+and @code{@ref{lockin_get_data()}} are obviously targeted at lock-in
 amplifiers and are only available when a lock-in amplifier module is
 specified in the @code{DEVICES} section. Most of these functions are
 available for all types of lock-in amplifiers (possibly with minor
-variations) so that using a different lock-in amplifier usually doesn't
-require a major rewrite of the @code{EDL} script but just changing the
-lock-in's name in the @code{DEVICES} section.
+variations) so that using a different lock-in amplifier usually
+doesn't require a major rewrite of the @code{EDL} script but just
+changing the lock-in's name in the @code{DEVICES} section.
 
 To find out about all built-in and device functions, their arguments and
 where they may be used have a look at the next two chapters of this
@@ -848,9 +850,9 @@ be completely bogus, e.g.@:
 @noindent
 (There is actually some logic behind this result but that doesn't help
 too much.) So, if you suspect the result of an integer operation to
-exceed the range of representable values, convert the values to floating
-point type (using the function @code{float()}) before you do the
-potentially problematic arithmetic operation.
+exceed the range of representable values, convert the values to
+floating point type (using the function @code{@ref{float()}}) before
+you do the potentially problematic arithmetic operation.
 
 Of course, there are also limits to the range of numbers representable
 by a floating point number. Fortunately, these limits are much larger -
@@ -875,9 +877,9 @@ are
 @cindex / (division operator)
 @cindex integer division
 @noindent
-To avoid this truncation convert at least one of the values used in the
-division to a floating point type by using the @code{float()} function,
-i.e.@:
+To avoid this truncation convert at least one of the values used in
+the division to a floating point type by using the
+@code{@ref{float()}} function, i.e.@:
 @example
 float( 7 ) / 2 = 3.5    8 / float( 3 ) = 2.666666667
 @end example
@@ -1234,13 +1236,13 @@ the resulting array is then subtracted from each of the sub-arrays of
 @code{M}.
 
 
-Further, the built-in arithmetic functions can (as far as this makes any
-sense) be applied to arrays and matrices. In every case the function is
-applied to each element of the array or matrix, thus the result is
-another array or matrix of the same rank with its elements being the
-results of applying the function to each of the input array
+Further, the built-in arithmetic functions can (as far as this makes
+any sense) be applied to arrays and matrices. In every case the
+function is applied to each element of the array or matrix, thus the
+result is another array or matrix of the same rank with its elements
+being the results of applying the function to each of the input array
 elements. For example, again using the array @code{a} defined above,
-applying the @code{sqrt()} function results in:
+applying the @code{@ref{sqrt()}} function results in:
 @example
   sqrt( a )  ->   @{ 0.7071068, 1.0, 1.1414215 @}
 @end example
@@ -1548,9 +1550,10 @@ depend on the second comparison. The same holds for expressions like
 A != 0 AND lockin_phase( ) > 90.0
 @end example
 @noindent
-If @code{A} equals @code{0} the value of the whole expression is already
-known to be false even though the lock-ins phase may be less then 90 degrees.
-Thus no call of the function @code{lockin_phase()} will be done.
+If @code{A} equals @code{0} the value of the whole expression is
+already known to be false even though the lock-ins phase may be less
+then 90 degrees. Thus no call of the function
+@code{@ref{lockin_phase()}} will be done.
 
 @b{Thus the sequence in conditions containing the logical "or" and "and"
 operator is important.}
@@ -1770,10 +1773,11 @@ simple example:
 @}
 @end example
 @noindent
-Here the variable @code{x} is multiplied by @code{-1.0} only if @code{x}
-is negative, i.e.@: it basically just sets @code{x} to its absolute
-value (there's also the built-in function @code{abs()} for calculating
-the absolute value of variable which probably is a lot faster).
+Here the variable @code{x} is multiplied by @code{-1.0} only if
+@code{x} is negative, i.e.@: it basically just sets @code{x} to its
+absolute value (there's also the built-in function @code{@ref{abs()}}
+for calculating the absolute value of variable which probably is a lot
+faster).
 
 By using the @code{ELSE} statement you can specify an alternative with
 statements to be executed if the @code{IF} condition is not being met.

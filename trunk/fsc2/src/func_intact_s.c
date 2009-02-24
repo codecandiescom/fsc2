@@ -201,7 +201,7 @@ f_screate( Var_T * var )
     too_many_arguments( v );
 
     /* Now that we're done with checking the parameters we can create the new
-       button - if the Toolbox doesn't exist yet we've got to create it now */
+       slider - if the Toolbox doesn't exist yet we've got to create it now */
 
     TRY
     {
@@ -389,7 +389,7 @@ f_sdelete( Var_T * v )
     }
 
     /* Loop over all slider IDs - since the child has no control over the
-       sliders, it has to ask the parent process to delete the button */
+       sliders, it has to ask the parent process to delete the slider */
 
     do
     {

@@ -56,23 +56,24 @@ that supply new mathematical functions or other functionalities. But the
 following discussion will concentrate on modules for new devices, writing
 other kinds of modules is even simpler.
 
-I want to start with a short summary of what a module usually consists of and
-how to make @code{fsc2} aware of its existence. The most important things
-are, of course, the functions that are going to be invoked from @code{EDL}
-script. Their names (in the @code{C} code) are identical to the ones
-that are used as @code{EDL} function names. Thus, while you are in
-principle free to chose whatever names you fancy, it is probably
-reasonable to use names that fit the convention to pick names that start
-with the type of the device (not its name), followed by an underscore
-and a descriptive name. If there are already devices similar to the one
-you're writing the module for it's best to use names identical to the
-ones in these other modules and also to try to use the same arguments if
-possible. This reduces the problems for users when they have to switch
-devices, they simply can exchange the device name in the @code{DEVICES}
-section and don't have to check each and every function call for the
-device. So, if you're writing a driver for a lock-in amplifier stick for
-example with the name @code{lockin_get_data()} and don't make up new
-ones like @code{lockin_fetch_data()} when the functionality is the same.
+I want to start with a short summary of what a module usually consists
+of and how to make @code{fsc2} aware of its existence. The most
+important things are, of course, the functions that are going to be
+invoked from @code{EDL} script. Their names (in the @code{C} code) are
+identical to the ones that are used as @code{EDL} function names.
+Thus, while you are in principle free to chose whatever names you
+fancy, it is probably reasonable to use names that fit the convention
+to pick names that start with the type of the device (not its name),
+followed by an underscore and a descriptive name. If there are already
+devices similar to the one you're writing the module for it's best to
+use names identical to the ones in these other modules and also to try
+to use the same arguments if possible. This reduces the problems for
+users when they have to switch devices, they simply can exchange the
+device name in the @code{DEVICES} section and don't have to check each
+and every function call for the device. So, if you're writing a driver
+for a lock-in amplifier stick for example with the name
+@code{lockin_get_data()} and don't make up new ones like
+@code{lockin_fetch_data()} when the functionality is the same.
 
 Of course, a module will usually also contain other utility functions.
 Here you're free to use whatever name you like. To avoid trouble I

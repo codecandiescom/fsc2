@@ -61,92 +61,95 @@ const char *show_fselector( const char * /* message   */,
 const char *show_input( const char * /* content */,
                         const char * /* label   */  );
 
-bool exp_layout( char *    /* buffer */,
-                 ptrdiff_t /* len    */  );
+bool exp_layout( char      * /* buffer */,
+                 ptrdiff_t   /* len    */  );
 
-long *exp_bcreate( char *    /* buffer */,
-                   ptrdiff_t /* len    */  );
+long *exp_bcreate( char      * /* buffer */,
+                   ptrdiff_t   /* len    */  );
 
-bool exp_bdelete( char *    /* buffer */,
-                  ptrdiff_t /* len    */  );
+bool exp_bdelete( char      * /* buffer */,
+                  ptrdiff_t   /* len    */  );
 
-long *exp_bstate( char *    /* buffer */,
-                  ptrdiff_t /* len    */  );
+long *exp_bstate( char      * /* buffer */,
+                  ptrdiff_t   /* len    */  );
 
-long *exp_bchanged( char *    /* buffer */,
-                    ptrdiff_t /* len    */  );
+long *exp_bchanged( char      * /* buffer */,
+                    ptrdiff_t   /* len    */  );
 
-long *exp_screate( char *    /* buffer */,
-                   ptrdiff_t /* len    */  );
+long *exp_screate( char      * /* buffer */,
+                   ptrdiff_t   /* len    */  );
 
-bool exp_sdelete( char *    /* buffer */,
-                  ptrdiff_t /* len    */  );
+bool exp_sdelete( char      * /* buffer */,
+                  ptrdiff_t   /* len    */  );
 
-double *exp_sstate( char *    /* buffer */,
-                    ptrdiff_t /* len    */  );
+double *exp_sstate( char      * /* buffer */,
+                    ptrdiff_t   /* len    */  );
 
-long *exp_schanged( char *    /* buffer */,
-                    ptrdiff_t /* len    */  );
+long *exp_schanged( char      * /* buffer */,
+                    ptrdiff_t   /* len    */  );
 
-long *exp_icreate( char *    /* buffer */,
-                   ptrdiff_t /* len    */  );
+long *exp_icreate( char      * /* buffer */,
+                   ptrdiff_t   /* len    */  );
 
-bool exp_idelete( char *    /* buffer */,
-                  ptrdiff_t /* len    */  );
+bool exp_idelete( char      * /* buffer */,
+                  ptrdiff_t   /* len    */  );
 
-Input_Res_T *exp_istate( char *    /* buffer */,
-                         ptrdiff_t /* len    */  );
+Input_Res_T *exp_istate( char      * /* buffer */,
+                         ptrdiff_t   /* len    */  );
 
-long *exp_ichanged( char *    /* buffer */,
-                    ptrdiff_t /* len    */  );
+long *exp_ichanged( char      * /* buffer */,
+                    ptrdiff_t   /* len    */  );
 
-long *exp_mcreate( char *    /* buffer */,
-                   ptrdiff_t /* len    */  );
+long *exp_mcreate( char      * /* buffer */,
+                   ptrdiff_t   /* len    */  );
 
-bool exp_mdelete( char *    /* buffer */,
-                  ptrdiff_t /* len    */  );
+bool exp_madd( char      * /* buffer */,
+               ptrdiff_t   /* len    */ );
 
-long *exp_mchoice( char *    /* buffer */,
-                   ptrdiff_t /* len    */  );
+bool exp_mdelete( char      * /* buffer */,
+                  ptrdiff_t   /* len    */  );
 
-long *exp_mchanged( char *    /* buffer */,
-                    ptrdiff_t /* len    */  );
+long *exp_mchoice( char      * /* buffer */,
+                   ptrdiff_t   /* len    */  );
 
-long *exp_tbchanged( char *    /* buffer */,
-                     ptrdiff_t /* len    */  );
+long *exp_mchanged( char      * /* buffer */,
+                    ptrdiff_t   /* len    */  );
 
-long *exp_tbwait( char *    /* buffer */,
-                  ptrdiff_t /* len    */  );
+long *exp_tbchanged( char      * /* buffer */,
+                     ptrdiff_t   /* len    */  );
 
-bool exp_objdel( char *    /* buffer */,
-                 ptrdiff_t /* len    */  );
+long *exp_tbwait( char      * /* buffer */,
+                  ptrdiff_t   /* len    */  );
 
-bool exp_clabel( char *    /* buffer */,
-                 ptrdiff_t /* len    */  );
+bool exp_objdel( char      * /* buffer */,
+                 ptrdiff_t   /* len    */  );
 
-bool exp_xable( char *    /* buffer */,
-                ptrdiff_t /* len    */  );
+bool exp_clabel( char      * /* buffer */,
+                 ptrdiff_t   /* len    */  );
 
-double *exp_getpos( char *    /* buffer */,
-                    ptrdiff_t /* len    */  );
+bool exp_xable( char      * /* buffer */,
+                ptrdiff_t   /* len    */  );
 
-bool exp_cb_1d( char *    /* buffer */,
-                ptrdiff_t /* len    */  );
+double *exp_getpos( char      * /* buffer */,
+                    ptrdiff_t   /* len    */  );
 
-bool exp_cb_2d( char *    /* buffer */,
-                ptrdiff_t /* len    */  );
+bool exp_cb_1d( char      * /* buffer */,
+                ptrdiff_t   /* len    */  );
 
-bool exp_zoom_1d( char *    /* buffer */,
-                  ptrdiff_t /* len    */  );
+bool exp_cb_2d( char      * /* buffer */,
+                ptrdiff_t   /* len    */  );
 
-bool exp_zoom_2d( char *    /* buffer */,
-                  ptrdiff_t /* len    */  );
+bool exp_zoom_1d( char      * /* buffer */,
+                  ptrdiff_t   /* len    */  );
 
-bool exp_fsb_1d( char *    /* buffer */,
-                 ptrdiff_t /* len    */  );
+bool exp_zoom_2d( char      * /* buffer */,
+                  ptrdiff_t   /* len    */  );
 
-bool exp_fsb_2d( char *    /* buffer */,
-                 ptrdiff_t /* len    */  );
+bool exp_fsb_1d( char      * /* buffer */,
+                 ptrdiff_t   /* len    */  );
+
+bool exp_fsb_2d( char      * /* buffer */,
+                 ptrdiff_t   /* len    */  );
 
 
 #endif  /* ! CHLD_FUNC_HEADER */

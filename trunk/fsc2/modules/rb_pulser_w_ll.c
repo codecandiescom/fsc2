@@ -395,7 +395,6 @@ rb_pulser_w_synthesizer_init( void )
 {
     Function_T *f = rb_pulser_w.function + PULSER_CHANNEL_RF;
     Var_T *func_ptr;
-    Var_T *res;
     int acc;
 
 

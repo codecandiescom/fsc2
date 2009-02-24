@@ -3571,6 +3571,132 @@ f_reverse( Var_T * v )
 }
 
 
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
+
+static int
+sort_long_up( const void * a,
+              const void * b )
+{
+    long x = * ( long * ) a;
+    long y = * ( long * ) b;
+
+    return x > y ? -1 : ( x == y ? 0 : 1 );
+}
+
+
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
+
+static int
+sort_long_down( const void * a,
+                const void * b )
+{
+    long x = * ( long * ) a;
+    long y = * ( long * ) b;
+
+    return x < y ? -1 : ( x == y ? 0 : 1 );
+}
+
+
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
+
+static int
+sort_double_up( const void * a,
+                const void * b )
+{
+    double x = * ( double * ) a;
+    double y = * ( double * ) b;
+
+    return x > y ? -1 : ( x == y ? 0 : 1 );
+}
+
+
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
+
+static int
+sort_double_down( const void * a,
+                  const void * b )
+{
+    double x = * ( double * ) a;
+    double y = * ( double * ) b;
+
+    return x < y ? -1 : ( x == y ? 0 : 1 );
+}
+
+
+/*------------------------------------------------------------*
+ *------------------------------------------------------------*/
+
+Var_T *
+f_sort( Var_T * v )
+{
+    Var_T *new_var = NULL;
+    bool dir = 0;
+
+
+    if ( v == NULL )
+    {
+        print( FATAL, "Missing argument.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( v->type & ( INT_VAR | FLOAT_VAR | STR_VAR | INT_REF | FLOAT_REF ) )
+    {
+        print( FATAL, "Argument isn't a one-dimensiobal array.\n" );
+        THROW( EXCEPTION );
+    }
+
+    vars_check( v, INT_ARR | FLOAT_ARR );
+
+    if ( v->next != NULL )
+    {
+        vars_check( v->next, INT_VAR | FLOAT_VAR | STR_VAR );
+
+        if ( v->next->type == INT_VAR )
+            dir = v->next->val.lval ? SET : UNSET;
+        else if ( v->next->type == FLOAT_VAR )
+            dir = v->next->val.dval ? SET : UNSET;
+        else
+        {
+            if (    ! strcmp( v->next->val.sptr, "UP" )
+                 || ! strcmp( v->next->val.sptr, "UPWARDS" ) )
+                dir = UNSET;
+            else if (    ! strcmp( v->next->val.sptr, "DOWN" )
+                 || ! strcmp( v->next->val.sptr, "DOWNWARDS" ) )
+                dir = SET;
+            else
+            {
+                print( FATAL, "Invalid second argument.\n" );
+                THROW( EXCEPTION );
+            }
+        }
+    }
+
+    switch ( v->type )
+    {
+        case INT_ARR :
+            new_var = vars_push( INT_ARR, v->val.lpnt, v->len );
+            qsort( new_var->val.lpnt, new_var->len, sizeof *new_var->val.lpnt,
+                   dir ? sort_long_up : sort_long_down );
+            break;
+
+        case FLOAT_ARR :
+            new_var = vars_push( FLOAT_ARR, v->val.dpnt, v->len );
+            qsort( new_var->val.dpnt, new_var->len, sizeof *new_var->val.dpnt,
+                   dir ? sort_double_up : sort_double_down );
+            break;
+
+        default :
+            fsc2_impossible( );
+    }
+
+    return new_var;
+}
+
+
 /*--------------------------------------------*
  * Function is used in the calculation of the
  * asinh(), acosh() and atanh() functions.

@@ -31,6 +31,7 @@
 /* exported functions */
 
 Var_T *f_mcreate(  Var_T * /* v */ );
+Var_T *f_madd(     Var_T * /* v */ );
 Var_T *f_mdelete(  Var_T * /* v */ );
 Var_T *f_mchoice(  Var_T * /* v */ );
 Var_T *f_mchanged( Var_T * /* v */ );

@@ -31,8 +31,6 @@ const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-#define DIO_MAX_CHANNEL  8
-
 static int query_flags[ ]  = { ME_CAPS_DIO_DIR_BIT,
 							   ME_CAPS_DIO_DIR_BYTE };
 static const char *mode_name[ ] = { "8 1-bit DIO channels",
@@ -719,116 +717,155 @@ me_dio_#_out( int           ch,
 static long
 me_dio_#_translate_channel( long channel )
 {
+    long ret;
+
     switch ( channel )
     {
         case CHANNEL_CH1 :
-            return 0;
+            ret = 0;
+            break;
 
         case CHANNEL_CH2 :
-            return 1;
+            ret = 1;
+            break;
 
         case CHANNEL_CH3 :
-            return 2;
+            ret = 2;
+            break;
 
         case CHANNEL_CH4 :
-            return 3;
+            ret = 3;
+            break;
 
         case CHANNEL_CH5 :
-            return 4;
+            ret = 4;
+            break;
 
         case CHANNEL_CH6 :
-            return 5;
+            ret = 5;
+            break;
 
         case CHANNEL_CH7 :
-            return 6;
+            ret = 6;
+            break;
 
         case CHANNEL_CH8 :
-            return 7;
+            ret = 7;
+            break;
 
         case CHANNEL_CH9 :
-            return 8;
-
+            ret = 8;
+            break;
+ 
         case CHANNEL_CH10 :
-            return 9;
+            ret = 9;
+            break;
 
         case CHANNEL_CH11 :
-            return 10;
+            ret = 10;
+            break;
 
         case CHANNEL_CH12 :
-            return 11;
+            ret = 11;
+            break;
 
         case CHANNEL_CH13 :
-            return 12;
+            ret = 12;
+            break;
 
         case CHANNEL_CH14 :
-            return 13;
+            ret = 13;
+            break;
 
         case CHANNEL_CH15 :
-            return 14;
+            ret = 14;
+            break;
 
         case CHANNEL_CH16 :
-            return 15;
+            ret = 15;
+            break;
 
         case CHANNEL_CH17 :
-            return 16;
+            ret = 16;
+            break;
 
         case CHANNEL_CH18 :
-            return 17;
+            ret = 17;
+            break;
 
         case CHANNEL_CH19 :
-            return 18;
+            ret = 18;
+            break;
 
         case CHANNEL_CH20 :
-            return 19;
+            ret = 19;
+            break;
 
         case CHANNEL_CH21 :
-            return 20;
+            ret = 20;
+            break;
 
         case CHANNEL_CH22 :
-            return 21;
+            ret = 21;
+            break;
 
         case CHANNEL_CH23 :
-            return 22;
+            ret = 22;
+            break;
 
         case CHANNEL_CH24 :
-            return 23;
+            ret = 23;
+            break;
 
         case CHANNEL_CH25 :
-            return 24;
+            ret = 24;
+            break;
 
         case CHANNEL_CH26 :
-            return 25;
+            ret = 25;
+            break;
 
         case CHANNEL_CH27 :
-            return 26;
+            ret = 26;
+            break;
 
         case CHANNEL_CH28 :
-            return 27;
+            ret = 27;
+            break;
 
         case CHANNEL_CH29 :
-            return 28;
+            ret = 28;
+            break;
 
         case CHANNEL_CH30 :
-            return 29;
+            ret = 29;
+            break;
 
         case CHANNEL_CH31 :
-            return 30;
+            ret = 30;
+            break;
 
         case CHANNEL_CH32 :
-            return 31;
+            ret = 31;
+            break;
 
         default :
             print( FATAL, "Invalid channel channel, DIO has no channel "
-                   "named %s, use either 'CH1' to 'CH32' (depending on"
-                   "model of card.\n", Channel_Names[ channel ] );
+                   "named %s, use 'CH1' to 'CH%ld'.\n",
+                   Channel_Names[ channel ], MAX_CHANNELS );
             THROW( EXCEPTION );
     }
 
-    fsc2_impossible( );
+    if ( ret >= MAX_CHANNELS )
+    {
+        print( FATAL, "Invalid channel channel, DIO has no channel "
+               "named %s, use 'CH1' to 'CH%ld'.\n",
+               Channel_Names[ channel ], MAX_CHANNELS );
+        THROW( EXCEPTION );
+    }
 
-    return -1;        /* we can't end up here */
+    return ret;
 }
-
 
 
 /*

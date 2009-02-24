@@ -527,7 +527,7 @@ f_ocreate_child( Var_T *        v,
 Var_T *
 f_odelete( Var_T * v )
 {
-    /* We need the ID of the button to delete */
+    /* We need the ID of the input/output object to delete */
 
     if ( v == NULL )
     {

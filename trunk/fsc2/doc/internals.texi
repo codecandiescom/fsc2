@@ -274,8 +274,9 @@ are to be expected during the real experiment and thus invalid field
 settings can be detected ilready in this "dry" run. Doing a test run
 is much faster than running the experiment itself because during the
 test run the devices will not be accessed (which usually uses at least
-90% of the whole time), calls of the @code{wait()} function do not make
-the program sleep for the requested time, no graphics are drawn etc.
+90% of the whole time), calls of the @code{@ref{wait()}} function do
+not make the program sleep for the requested time, no graphics are
+drawn etc.
 
 
 The writers of modules have an important responsibility to make running
@@ -336,7 +337,7 @@ experiment, i.e.@: to interpret the @code{EXPERIMENT} section.
 
 But there is a twist. Just before starting to interpret the
 @code{EXPERIMENT} section @code{fsc2} splits itself into two independent
-processes by calling @code{fork()}. If you use the @code{ps} command to
+processes by calling @code{fork(2)}. If you use the @code{ps} command to
 list all your running processes suddenly a new instance of @code{fsc2}
 will be listed@footnote{Please note that already before the experiment
 gets started you will find that there are three instances of @code{fsc2}
@@ -461,13 +462,14 @@ jens@@crowley:~/Lab/fsc2> export FSC2_CHILD_DEBUG=1
 @end example
 @noindent
 When this environment variable is defined (what you set it to doesn't
-matter if it's not an empty string) the child process will @code{sllep()}
-for about 10 hours or until it receives a signal, e.g.@: due to the debugger
-attaching to it. Moreover, when @code{FSC2_CHILD_DEBUG} is set a line
-telling you the PID of the child process is printed out when the child
-process gets started. All you have to do is to start the debugger with
-the PID to attach to. Here's an example of a typical session where I start
-to debug the child process using @code{gdb}:
+matter if it's not an empty string) the child process will
+@code{sleep(3)} for about 10 hours or until it receives a signal,
+e.g.@: due to the debugger attaching to it. Moreover, when
+@code{FSC2_CHILD_DEBUG} is set a line telling you the PID of the child
+process is printed out when the child process gets started. All you
+have to do is to start the debugger with the PID to attach to. Here's
+an example of a typical session where I start to debug the child
+process using @code{gdb}:
 @example
 jens@@crowley:~/Lab/fsc2 > export FSC2_CHILD_DEBUG=1
 jens@@crowley:~/Lab/fsc2 > src/fsc2 &

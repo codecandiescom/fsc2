@@ -326,13 +326,13 @@ is loaded.
 @strong{Status}: Tested
 
 @paragraphindent 0
-@strong{Please note}: If a field resolution other than @w{0.1 G} is set
-at the front panel of the device, the function
-@code{gaussmeter_resolution()} must be called, otherwise the field values
-returned by the module will be wrong. Also note that for a resolution
-setting of @w{0.01 G} the kG part of the field will be missing, i.e.@: a
-field of @w{3125.63 G} will be reported as being @w{125.63 G} for the
-highest resolution setting.
+@strong{Please note}: If a field resolution other than @w{0.1 G} is
+set at the front panel of the device, the function
+@code{@ref{gaussmeter_resolution()}} must be called, otherwise the
+field values returned by the module will be wrong. Also note that for
+a resolution setting of @w{0.01 G} the kG part of the field will be
+missing, i.e.@: a field of @w{3125.63 G} will be reported as being
+@w{125.63 G} for the highest resolution setting.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1234,13 +1234,13 @@ In the GPIB configuration file use @code{"HP8672A"} as the device name,
 @strong{Description}: Home-built computer controlled microwave
 attenuator from the
 @uref{http://www.macromol.uni-osnabrueck.de/index.php,group of H.-J.@:
-Steinhoff} at the University of Osnabrueck. Works with a stepper
-motor to mechanically adjust a microwave attenuator. Requires a
-default calibration table file that gets read in when the module is
-loaded. The name of the file can be set in the configuration file for
-the module. During the @code{PREPARATIONS} section the function
-@code{mw_attenuator_initial_attenuation()} @strong{must} be called to
-tell the module about the initial attenuation setting.
+Steinhoff} at the University of Osnabrueck. Works with a stepper motor
+to mechanically adjust a microwave attenuator. Requires a default
+calibration table file that gets read in when the module is loaded.
+The name of the file can be set in the configuration file for the
+module. During the @code{PREPARATIONS} section the function
+@code{@ref{mw_attenuator_initial_attenuation()}} @strong{must} be
+called to tell the module about the initial attenuation setting.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -2585,11 +2585,13 @@ library are part of the @code{fsc2} package)
 @strong{Module name}: @code{me_dio_X}
 
 @paragraphindent 0
-Most cards have more than a single DI/DO/DIO subsystem and for each
-of them a module is needed, where the @code{X} in the module name
-stands for a number for the subsystem. As many modules are generated
-automatically as there are configuration files of the name
-@file{config/me_dio_X.config} (replace @code{X} by a number).
+Most cards have more than a single DI/DO/DIO subsystem and for each of
+them a module is needed. The @code{X} in the module name stands for
+the number of the subsystem. As many modules are generated
+automatically as there are configuration files with a name of
+@file{config/me_dio_X.config} (replace @code{X} by a number between
+@code{0} and one less than the number of DI/DO/DIO subsystem of the
+card).
 
 @paragraphindent 0
 In the configuration file the board number, the subdevice number,
