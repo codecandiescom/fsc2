@@ -29,7 +29,7 @@ static double gauss_random( void );
 static double datanh( double arg );
 static void avg_data_check( Var_T * avg,
                             Var_T * data,
-                            long count );
+                            long    count );
 
 
 #define C2K_OFFSET   273.16
@@ -3349,51 +3349,22 @@ Var_T *
 f_islice( Var_T * v )
 {
     long size;
-    Var_T *ret;
-    Var_T *cv;
-    int dim;
 
 
     size = get_long( v, "array size" );
 
-    if ( size <= 0 )
+    if ( size < 0 )
     {
         if ( v->type == INT_VAR )
-            print( FATAL, "Negative or zero value (%ld) used as array size.\n",
+            print( FATAL, "Negative value (%ld) used as array size.\n",
                    v->val.lval );
         else
-            print( FATAL, "Negative or zero value (%f) used as array size.\n",
+            print( FATAL, "Negative value (%f) used as array size.\n",
                    v->val.dval );
         THROW( EXCEPTION );
     }
 
-    if ( v->next== NULL )
-        ret = vars_push( INT_ARR, NULL, ( ssize_t ) size );
-    else
-    {
-        for ( dim = 1, cv = v->next; cv != NULL; cv = cv->next )
-            dim++;
-
-        /* Create a new reference on the stack and move it from the end
-           of the stack to the position just before the first variable
-           with the sizes */
-
-        ret = vars_push( INT_REF, NULL );
-
-        v->prev->next = ret;
-        ret->next = v;
-        v->prev = ret;
-        for ( cv = v; cv->next != ret; cv = cv->next )
-            /* empty */ ;
-        cv->next = NULL;
-
-        vars_arr_create( ret, v, dim, SET );
-
-        while ( ( v = vars_pop( v ) ) != NULL )
-            /* empty */ ;
-    }
-        
-    return ret;
+    return vars_push( INT_ARR, NULL, ( ssize_t ) size );
 }
 
 
@@ -3404,51 +3375,22 @@ Var_T *
 f_fslice( Var_T * v )
 {
     long size;
-    Var_T *ret;
-    Var_T *cv;
-    int dim;
 
 
     size = get_long( v, "array size" );
 
-    if ( size <= 0 )
+    if ( size < 0 )
     {
         if ( v->type == INT_VAR )
-            print( FATAL, "Negative or zero value (%ld) used as array size.\n",
+            print( FATAL, "Negative value (%ld) used as array size.\n",
                    v->val.lval );
         else
-            print( FATAL, "Negative or zero value (%f) used as array size.\n",
+            print( FATAL, "Negative value (%f) used as array size.\n",
                    v->val.dval );
         THROW( EXCEPTION );
     }
 
-    if ( v->next== NULL )
-        ret = vars_push( FLOAT_ARR, NULL, ( ssize_t ) size );
-    else
-    {
-        for ( dim = 1, cv = v->next; cv != NULL; cv = cv->next )
-            dim++;
-
-        /* Create a new reference on the stack and move it from the end
-           of the stack to the position just before the first variable
-           with the sizes */
-
-        ret = vars_push( FLOAT_REF, NULL );
-
-        v->prev->next = ret;
-        ret->next = v;
-        v->prev = ret;
-        for ( cv = v; cv->next != ret; cv = cv->next )
-            /* empty */ ;
-        cv->next = NULL;
-
-        vars_arr_create( ret, v, dim, SET );
-
-        while ( ( v = vars_pop( v ) ) != NULL )
-            /* empty */ ;
-    }
-        
-    return ret;
+    return vars_push( FLOAT_ARR, NULL, ( ssize_t ) size );
 }
 
 

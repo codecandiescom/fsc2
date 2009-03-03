@@ -7891,10 +7891,11 @@ calibrations.
 This function allows to find the name of a calibration by its index in
 the list of calibrations (a number between @code{1} and the number of
 known calibrations). The function takes a single argument, the
-calibration's index (and invalid index will result in an exception
+calibration's index (an invalid index will result in an exception
 getting thrown). The function can be used to in conjunction with the
 @ref{epr_modulation_calibration_count()} to obtain the names of all
 known calibrations.
+
 
 @anchor{epr_modulation_calibration_frequencies()}
 @findex epr_modulation_calibration_frequencies()

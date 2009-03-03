@@ -83,6 +83,8 @@ enum {
     C_MCREATE_REPLY,
     C_MADD,
     C_MADD_REPLY,
+    C_MTEXT,
+    C_MTEXT_REPLY,
     C_MDELETE,
     C_MDELETE_REPLY,
     C_MCHOICE,

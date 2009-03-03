@@ -33,6 +33,8 @@ static Var_T * f_mcreate_child( Var_T  * v,
                                 long     num_strs );
 static void f_madd_child( Var_T * v );
 static void f_madd_parent( Var_T * v );
+static Var_T * f_mtext_child( Var_T *v );
+static Var_T * f_mtext_parent( Var_T *v );
 static void f_mdelete_child( Var_T * v );
 static void f_mdelete_parent( Var_T * v );
 static Var_T * f_mchoice_child( Var_T * v );
@@ -178,7 +180,8 @@ f_mcreate_child( Var_T  * v,
                  size_t   len,
                  long     num_strs )
 {
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     long new_ID;
     long *result;
     size_t l;
@@ -234,8 +237,9 @@ f_mcreate_child( Var_T  * v,
 }
 
 
-/*---------------------------------------------------------*
- *---------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Function for adding one or more lines to a menu object
+ *--------------------------------------------------------*/
 
 Var_T *
 f_madd( Var_T * v )
@@ -263,7 +267,8 @@ f_madd( Var_T * v )
 static void
 f_madd_child( Var_T * v )
 {
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     size_t len;
     size_t l;
     long ID;
@@ -393,6 +398,203 @@ f_madd_parent( Var_T * v )
 }
 
 
+/*-------------------------------------------------------------*
+ * Function for changing the text of an entry of a menu object
+ *-------------------------------------------------------------*/
+
+Var_T *
+f_mtext( Var_T * v )
+{
+    /* At least a menu ID and an item number are needed... */
+
+    if ( v == NULL || v->next == NULL)
+    {
+        print( FATAL, "Missing arguments.\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* If there's another argument it must be a non-empty string */
+
+    if ( v->next->next != NULL )
+    {
+        if ( ! ( v->next->next->type & STR_VAR ) )
+        {
+            print( FATAL, "Invald third argument, must be a string.\n" );
+            THROW( EXCEPTION );
+        }
+        else if ( *v->next->next->val.sptr == '\0' )
+        {
+            print( FATAL, "Can't set menu item text to an empty string.\n" );
+            THROW( EXCEPTION );
+        }
+    }
+
+    if ( Fsc2_Internals.I_am == CHILD )
+        return f_mtext_child( v );
+    else
+        return f_mtext_parent( v );
+}
+
+
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
+
+static Var_T *
+f_mtext_child( Var_T * v )
+{
+    char *buffer,
+         *pos;
+    size_t len;
+    long ID;
+    long item;
+    char *result;
+
+
+    /* Basic check of menu identifier - always the first parameter */
+
+    ID = get_strict_long( v, "menu ID" );
+
+    if ( ID < ID_OFFSET )
+    {
+        print( FATAL, "Invalid menu identifier.\n" );
+        THROW( EXCEPTION );
+    }
+
+    v = vars_pop( v );
+
+    /* Get and rudimentarily check the second required argument */
+
+    item = get_strict_long( v, "menu item number" );
+
+    if ( item <= 0 )
+    {
+        print( FATAL, "Invalid menu item number %ld.\n", item );
+        THROW( EXCEPTION );
+    }
+
+    v = vars_pop( v );
+
+    len = sizeof EDL.Lc + 2 * sizeof( long );
+
+    if ( EDL.Fname )
+        len += strlen( EDL.Fname ) + 1;
+    else
+        len++;
+
+    if ( v != NULL )
+        len += strlen( v->val.sptr ) + 1;
+    else
+        len++;
+
+    pos = buffer = T_malloc( len );
+
+    memcpy( pos, &EDL.Lc, sizeof EDL.Lc );      /* current line number */
+    pos += sizeof EDL.Lc;
+
+    memcpy( pos, &ID, sizeof ID );              /* menu ID */
+    pos += sizeof ID;
+
+    memcpy( pos, &item, sizeof item );          /* item number */
+    pos += sizeof item;
+
+    if ( EDL.Fname )
+    {
+        strcpy( pos, EDL.Fname );               /* current file name */
+        pos += strlen( EDL.Fname ) + 1;
+    }
+    else
+        *pos++ = '\0';
+
+    if ( v != NULL )
+    {
+        strcpy( pos, v->val.sptr );             /* items text */
+        pos += strlen( v->val.sptr ) + 1;
+    }
+    else
+        *pos++ = '\0';
+
+    /* Ask parent process to return or set the menu items text - bomb out if
+       it returns NULL, indicating a severe error */
+
+    result = exp_mtext( buffer, pos - buffer );
+
+    if ( result == NULL )                       /* failure -> bomb out */
+    {
+        T_free( result );
+        THROW( EXCEPTION );
+    }
+
+    v = vars_push( STR_VAR, result );
+    T_free( result );           /* free result buffer */
+
+    return v;
+}
+
+
+/*---------------------------------------------------------*
+ *---------------------------------------------------------*/
+
+static Var_T *
+f_mtext_parent( Var_T *v )
+{
+    Iobject_T *io;
+    long item;
+
+
+    /* No tool box -> no menu we could add entries to */
+
+    if ( Toolbox == NULL || Toolbox->objs == NULL )
+    {
+        print( FATAL, "No menus have been defined yet.\n" );
+        THROW( EXCEPTION );
+    }
+
+    /* Check that menu with the ID exists */
+
+    io = find_object_from_ID( get_strict_long( v, "menu ID" ) );
+
+    if ( io == NULL || io->type != MENU )
+    {
+        print( FATAL, "Invalid menu identifier.\n" );
+        THROW( EXCEPTION );
+    }
+
+    v = vars_pop( v );
+
+    /* Get the item number and check for validity */
+
+    item = get_strict_long( v, "menu item number" );
+
+    if ( item <= 0 )
+    {
+        print( FATAL, "Invalid menu item number %ld.\n", item );
+        THROW( EXCEPTION );
+    }
+
+    if ( item > io->num_items )
+    {
+        print( FATAL, "Invalid menu item number %ld, there are only %ld "
+               "items.\n", item, io->num_items );
+        THROW( EXCEPTION );
+    }
+
+    v = vars_pop( v );
+
+    if ( v != NULL )
+    {
+        io->menu_items[ item - 1 ] = T_free( io->menu_items[ item - 1 ] );
+        io->menu_items[ item - 1 ] = T_strdup( v->val.sptr );
+
+        if ( Fsc2_Internals.mode != TEST )
+            fl_replace_choice( io->self, item, v->val.sptr );
+    }
+
+    too_many_arguments( v );
+
+    return vars_push( STR_VAR, io->menu_items[ item - 1 ] );
+}
+
+
 /*--------------------------------------------------------------------------*
  * Deletes one or more menu objects, parameter(s) are one or more menu IDs.
  *--------------------------------------------------------------------------*/
@@ -441,7 +643,8 @@ f_mdelete( Var_T * v )
 static void
 f_mdelete_child( Var_T * v )
 {
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     size_t len;
     long ID;
 
@@ -658,7 +861,8 @@ static Var_T *
 f_mchoice_child( Var_T * v )
 {
     long ID;
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     size_t len;
     long *result;
     long select_item = 0;
@@ -798,7 +1002,8 @@ static Var_T *
 f_mchanged_child( Var_T * v )
 {
     long ID;
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     size_t len;
     long *result;
     long changed;

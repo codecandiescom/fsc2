@@ -154,8 +154,8 @@ T_calloc( size_t nmemb,
  *-----------------------------------------------------------------*/
 
 void *
-T_realloc( void * ptr,
-           size_t size )
+T_realloc( void   * ptr,
+           size_t   size )
 {
     void *new_ptr;
 #if defined FSC2_MDEBUG

@@ -635,9 +635,9 @@ stands for the number of two modules for DIOs or DOs of a Meilhaus
 card).
 
 @paragraphindent 0
-@strong{Description}: Goniometer is cntrolled via the output of a
-DIO subsystem on a Meilhaus card, using some additional home-built
-electronics for latching data.
+@strong{Description}: Goniometer is cntrolled via the output of a DIO
+subsystem of (currently) a Meilhaus card, using some additional
+home-built electronics for latching data.
 
 @paragraphindent 0
 @strong{Status}: Untested

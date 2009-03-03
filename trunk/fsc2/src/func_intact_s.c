@@ -28,11 +28,11 @@
 extern Toolbox_T *Toolbox;        /* defined in func_intact.c */
 
 
-static Var_T *f_screate_child( Var_T *        v,
-                               Iobject_Type_T type,
-                               double         start_val,
-                               double         end_val,
-                               double         step );
+static Var_T *f_screate_child( Var_T          * v,
+                               Iobject_Type_T   type,
+                               double           start_val,
+                               double           end_val,
+                               double           step );
 static void f_sdelete_child( Var_T * v );
 static void f_sdelete_parent( Var_T * v );
 static Var_T *f_svalue_child( Var_T * v );
@@ -50,7 +50,8 @@ f_screate( Var_T * var )
     Iobject_T *new_io = NULL;
     Iobject_T *ioi;
     Iobject_Type_T type;
-    double start_val, end_val;
+    double start_val,
+           end_val;
     double step = 0.0;
     char *label = NULL;
     char *help_text = NULL;
@@ -265,13 +266,14 @@ f_screate( Var_T * var )
  *-----------------------------------------------------------------*/
 
 static Var_T *
-f_screate_child( Var_T *        v,
-                 Iobject_Type_T type,
-                 double         start_val,
-                 double         end_val,
-                 double         step )
+f_screate_child( Var_T          * v,
+                 Iobject_Type_T   type,
+                 double           start_val,
+                 double           end_val,
+                 double           step )
 {
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     long new_ID;
     long *result;
     size_t len;
@@ -421,7 +423,8 @@ f_sdelete( Var_T * v )
 static void
 f_sdelete_child( Var_T * v )
 {
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     size_t len;
     long ID;
 
@@ -627,7 +630,8 @@ f_svalue_child( Var_T * v )
     long ID;
     long state = 0;
     double val = 0.0;
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     double *res;
     size_t len;
 
@@ -758,7 +762,8 @@ static Var_T *
 f_schanged_child( Var_T * v )
 {
     long ID;
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     long *res;
     long val;
     size_t len;

@@ -68,22 +68,22 @@ static double smsmotor_get_acceleration( long  dev );
 
 
 static struct {
-	bool is_open;
-	double position[ DEVICE_COUNT ];
-	double lower_limit[ DEVICE_COUNT ];
-	double upper_limit[ DEVICE_COUNT ];
-	double abs_min_position[ DEVICE_COUNT ];
-	double abs_max_position[ DEVICE_COUNT ];
-	double rel_min_position[ DEVICE_COUNT ];
-	double rel_max_position[ DEVICE_COUNT ];
-    bool is_rel_mode[ DEVICE_COUNT ];
-    double init_speed[ DEVICE_COUNT ];
-    double speed[ DEVICE_COUNT ];
-    bool speed_is_set[ DEVICE_COUNT ];
-    double init_acceleration[ DEVICE_COUNT ];
-    double acceleration[ DEVICE_COUNT ];
-    bool acceleration_is_set[ DEVICE_COUNT ];
-    struct termios *tio;
+	bool             is_open;
+	double           position[ DEVICE_COUNT ];
+	double           lower_limit[ DEVICE_COUNT ];
+	double           upper_limit[ DEVICE_COUNT ];
+	double           abs_min_position[ DEVICE_COUNT ];
+	double           abs_max_position[ DEVICE_COUNT ];
+	double           rel_min_position[ DEVICE_COUNT ];
+	double           rel_max_position[ DEVICE_COUNT ];
+    bool             is_rel_mode[ DEVICE_COUNT ];
+    double           init_speed[ DEVICE_COUNT ];
+    double           speed[ DEVICE_COUNT ];
+    bool             speed_is_set[ DEVICE_COUNT ];
+    double           init_acceleration[ DEVICE_COUNT ];
+    double           acceleration[ DEVICE_COUNT ];
+    bool             acceleration_is_set[ DEVICE_COUNT ];
+    struct termios * tio;
 } smsmotor;
 
 
@@ -91,13 +91,6 @@ static struct {
 
 
 #define WAIT_TIME 100000
-
-
-/* Defines for the parity used by the device */
-
-#define NO_PARITY         0
-#define ODD_PARITY        1
-#define EVEN_PARITY       2
 
 
 /* Values for speed and acceleration reported during test run */

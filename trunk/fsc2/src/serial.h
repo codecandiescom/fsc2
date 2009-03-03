@@ -28,6 +28,13 @@
 #include <termios.h>
 
 
+/* Defines for the parity used by devices */
+
+#define NO_PARITY         0
+#define ODD_PARITY        1
+#define EVEN_PARITY       2
+
+
 /* Routines to be used from modules */
 
 void fsc2_request_serial_port( int          /* sn       */,

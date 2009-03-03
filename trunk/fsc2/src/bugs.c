@@ -218,7 +218,9 @@ bug_report_callback( FL_OBJECT * a,
     notify_conn( UNBUSY_SIGNAL );
 }
 #else
-void bug_report_callback( FL_OBJECT *a UNUSED_ARG, long b UNUSED_ARG )
+void
+bug_report_callback( FL_OBJECT * a UNUSED_ARG,
+                     long        b UNUSED_ARG )
 {
 }
 #endif
@@ -325,7 +327,8 @@ death_mail( void )
     fclose( mail );
 }
 #else
-void death_mail( void )
+void
+death_mail( void )
 {
 }
 #endif

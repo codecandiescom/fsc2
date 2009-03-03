@@ -559,12 +559,6 @@ vars_arr_assign_1d( Var_T * src,
 
     if ( dest->flags & IS_DYNAMIC && dest->len != src->len )
     {
-        if ( src->len == 0 && dest->len > 0 )
-        {
-            dest->len = 0;
-            return 0;
-        }
-
         if ( dest->len != 0 )
         {
             if ( INT_TYPE( dest ) )
@@ -574,6 +568,9 @@ vars_arr_assign_1d( Var_T * src,
         }
 
         dest->len = src->len;
+
+        if ( src->len == 0 )
+            return 0;
 
         if ( INT_TYPE( dest ) )
             dest->val.lpnt = T_malloc( dest->len * sizeof *dest->val.lpnt );
@@ -624,20 +621,14 @@ vars_arr_assign_nd( Var_T * src,
     {
         if ( dest->len > src->len )
         {
-            for ( i = dest->len - 1; i >= src->len; i-- )
-            {
+            for ( i = dest->len - 1; i >= src->len; dest->len--, i-- )
                 vars_free( dest->val.vptr[ i ], SET );
-                dest->len--;
-            }
 
             if ( src->len > 0 )
                 dest->val.vptr = T_realloc( dest->val.vptr,
                                             src->len * sizeof *dest->val.vptr );
             else
-            {
                 dest->val.vptr = T_free( dest->val.vptr );
-                dest->len = 0;
-            }
         }
         else if ( dest->len < src->len )
         {

@@ -1503,6 +1503,84 @@ exp_madd( char      * buffer,
 
 /*--------------------------------------------------------------*
  * Child and parent side function for passing the arguments and
+ * the return values of the menu_text() function.
+ *--------------------------------------------------------------*/
+
+char *
+exp_mtext( char      * buffer,
+           ptrdiff_t   len )
+{
+    if ( Fsc2_Internals.I_am == CHILD )
+    {
+        char *ret;
+
+        if ( ! writer( C_MTEXT, len, buffer ) )
+        {
+            T_free( buffer );
+            return FAIL;
+        }
+        T_free( buffer );
+        reader( ( void * ) &ret );
+        return ret;
+    }
+    else
+    {
+        char *old_Fname = EDL.Fname;
+        long old_Lc = EDL.Lc;
+        Var_T *func_ptr;
+        int acc;
+        char *pos;
+        long ID;
+        long item;
+        Var_T *ret;
+
+
+        TRY
+        {
+            /* Get function to change an entry of a menu object */
+
+            func_ptr = func_get( "menu_text", &acc );
+
+            /* Unpack parameter and push them onto the stack */
+
+            pos = buffer;
+
+            memcpy( &EDL.Lc, pos, sizeof EDL.Lc );   /* current line number */
+            pos += sizeof EDL.Lc;
+
+            memcpy( &ID, pos, sizeof ID );           /* menu ID */
+            pos += sizeof ID;
+
+            vars_push( INT_VAR, ID );
+
+            memcpy( &item, pos, sizeof item );       /* entry ID */
+            pos += sizeof item;
+
+            vars_push( INT_VAR, item );
+
+            EDL.Fname = pos;                         /* current file name */
+            pos += strlen( pos ) + 1;
+
+            if ( *pos != '\0' )                      /* empty string means */
+                vars_push( STR_VAR, pos );           /* no third argument */
+
+            ret = func_call( func_ptr );
+            writer( C_MTEXT_REPLY, ret->val.sptr );
+            vars_pop( ret );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+            writer( C_MTEXT_REPLY, NULL );
+
+        EDL.Fname = old_Fname;
+        EDL.Lc = old_Lc;
+        return NULL;
+    }
+}
+
+
+/*--------------------------------------------------------------*
+ * Child and parent side function for passing the arguments and
  * the return value of the menu_delete() function.
  *--------------------------------------------------------------*/
 

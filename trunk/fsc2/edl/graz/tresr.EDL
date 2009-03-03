@@ -90,7 +90,7 @@ EXPERIMENT:
 
 Trace_Len = digitizer_record_length( ACQ_CH );
 
-background= float_slice( Trace_Len );
+background[ Trace_Len ] = 0.0;     // initialize array
 
 /* Now get the timebase and the corresponding time resolution */
 
@@ -182,8 +182,8 @@ FOREVER {
 
         IF Scan_No == 1 {
 
-			mdata[ I ] = float_slice( Trace_Len );
-			mdata_g[ I ] = float_slice( Trace_Len );
+			mdata[ I, Trace_Len ] = 0.0;      // initialize i-th rows
+			mdata_g[ I, Trace_Len ] = 0.0;
 
 			IF input_changed( B5 ) {
 				new_end_field = input_value( B5 );

@@ -832,7 +832,7 @@ vars_lhs_pointer( Var_T * v,
     if ( dim > a->dim )
     {
         print( FATAL, "Array '%s' has only %d dimensions but there are "
-               "%d indices.\n", a->dim, dim );
+               "%d indices.\n", a->name, a->dim, dim );
         THROW( EXCEPTION );
     }
 

@@ -27,21 +27,21 @@
 typedef struct dpoint dpoint_T;
 
 struct dpoint {
-    long       nx;
-    long       ny;
-    long       nc;
-    Var_Type_T type;
-    long       len;
-    long       lval;
-    double     dval;
-    void *     ptr;
-    Var_T *    vptr;
+    long         nx;
+    long         ny;
+    long         nc;
+    Var_Type_T   type;
+    long         len;
+    long         lval;
+    double       dval;
+    void       * ptr;
+    Var_T      * vptr;
 };
 
 
 static dpoint_T * eval_display_args( Var_T * v,
                                      int     dim,
-                                     int *   npoints );
+                                     int   * npoints );
 
 extern sigjmp_buf Alrm_Env;                   /* defined in run.c */
 extern volatile sig_atomic_t Can_Jmp_Alrm;    /* defined in run.c */
@@ -2629,7 +2629,7 @@ f_display_2d( Var_T * v )
 static dpoint_T *
 eval_display_args( Var_T * v,
                    int     dim,
-                   int *   nsets )
+                   int   * nsets )
 {
     dpoint_T *dp = NULL;
     long i;

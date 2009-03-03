@@ -559,22 +559,22 @@ h[ *, 2 ];  /* WRONG! */
 
 The length of the 1-dimensional array @code{M} from the above example
 remains undetermined until a value has been assigned to at least one
-of the array element. If you now assign a value to the 25th element
-like this
+of the arrays elements. If you assign a value to the 25th element of a
+previously uninitialized variable length array
 @example
 M[ 25 ] = 42;
 @end example
 @noindent
-the array will suddenly have 25 elements with the first 24 being set to
-zero and the 25th set to @code{42}. You can also lengthen the array at
-a later time by assigning a value to an element with an higher index,
-e.g.
+the array will suddenly have 25 elements with the first 24 being set
+to zero and the 25th set to @code{42}. You can also make the array
+longer at a later time by assigning a value to an element with an
+higher index, e.g.
 @example
 M[ 50 ] = 84;
 @end example
 @noindent
 Now the array has 50 elements, the newly added elements between and
-including the 26th and 49th being initialized to zero.
+including the 26th and 49th element being initialized to zero.
 
 But there's also another way to change the size of the array. You can
 assign another array to @code{M} and in this case the length of @code{M}
@@ -597,7 +597,7 @@ variable sized array by assigning another array to it. If @code{M}
 had already been given a length by e.g.@: assigning a value to its 25th
 element then assigning it the shorter array @code{H} will automatically
 shorten it to 10 elements and the values stored in the 11th to the 25th
-element are lost!
+element are removed!
 
 To understand how more-dimensional, variable sized arrays work it is
 probably best to think of them not in terms of matrices but of arrays
@@ -615,7 +615,7 @@ j[ 7, 9 ] = 3.1415927;
 @noindent
 the 7th sub-array of @code{j} will suddenly spring into existence,
 having a length of 9 (with all elements of this sub-array except the 9th
-being initialized to 0). But this does @strong{not} also create other
+being initialized to 0.0). But this does @strong{not} also create other
 sub-arrays -- the 1st to the 6th sub-array are still undefined (having a
 length of 0).
 

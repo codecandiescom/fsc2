@@ -33,24 +33,24 @@ typedef struct Call_Stack Call_Stack_T;
 
 
 struct Lib_Struct {
-    void *handle;
-    char *lib_name;
-    int ( * init_hook ) ( void );
-    bool is_init_hook;
-    int ( * test_hook ) ( void );
-    bool is_test_hook;
-    int ( * end_of_test_hook ) ( void );
-    bool is_end_of_test_hook;
-    int ( * exp_hook ) ( void );
-    bool is_exp_hook;
-    int ( * end_of_exp_hook ) ( void );
-    bool is_end_of_exp_hook;
-    bool exp_hook_is_run;
-    void ( * exit_hook ) ( void );
-    bool is_exit_hook;
-    void ( * child_exit_hook ) ( void );
-    bool is_child_exit_hook;
-    bool init_hook_is_run;
+    void * handle;
+    char * lib_name;
+    int    ( * init_hook ) ( void );
+    bool   is_init_hook;
+    int    ( * test_hook ) ( void );
+    bool   is_test_hook;
+    int    ( * end_of_test_hook ) ( void );
+    bool   is_end_of_test_hook;
+    int    ( * exp_hook ) ( void );
+    bool   is_exp_hook;
+    int    ( * end_of_exp_hook ) ( void );
+    bool   is_end_of_exp_hook;
+    bool   exp_hook_is_run;
+    void   ( * exit_hook ) ( void );
+    bool   is_exit_hook;
+    void   ( * child_exit_hook ) ( void );
+    bool   is_child_exit_hook;
+    bool   init_hook_is_run;
 };
 
 
@@ -64,22 +64,22 @@ struct Lib_Struct {
    be specified. */
 
 struct Func {
-    const char *name;                 /* name of the function */
-    Var_T * ( * fnct )( Var_T * );    /* pointer to the function */
-    int nargs;                        /* number of arguments */
-    int access_flag;                  /* accessibility flag */
-    Device_T *device;                 /* handle of defining device module */
-    bool to_be_loaded;                /* set if function has to be loaded */
+    const char * name;                   /* name of the function */
+    Var_T *      ( * fnct )( Var_T * );  /* pointer to the function */
+    int          nargs;                  /* number of arguments */
+    int          access_flag;            /* accessibility flag */
+    Device_T   * device;                 /* handle of defining device module */
+    bool         to_be_loaded;           /* set if function has to be loaded */
 };
 
 
 struct Call_Stack {
-    Func_T *f;
-    Device_T *device;
-    const char *dev_name;
-    int dev_count;
-    long Cur_Pulser;
-    Call_Stack_T *next;
+    Func_T       * f;
+    Device_T     * device;
+    const char   * dev_name;
+    int            dev_count;
+    long           Cur_Pulser;
+    Call_Stack_T * next;
 };
 
 
@@ -90,18 +90,18 @@ void functions_exit( void );
 int func_exists( const char * /* name */ );
 
 Var_T *func_get( const char * /* name */,
-                 int *        /* acc  */  );
+                 int        * /* acc  */  );
 
 Var_T *func_get_long( const char * /* name */,
-                      int *        /* acc  */,
+                      int        * /* acc  */,
                       bool         /* flag */  );
 
 Var_T *func_call( Var_T * /* f */ );
 
 void close_all_files( void );
 
-Call_Stack_T *call_push( Func_T *     /* f           */,
-                         Device_T *   /* device      */,
+Call_Stack_T *call_push( Func_T     * /* f           */,
+                         Device_T   * /* device      */,
                          const char * /* device_name */,
                          int          /* dev_count   */  );
 

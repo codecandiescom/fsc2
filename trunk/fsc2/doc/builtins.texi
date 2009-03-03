@@ -1721,6 +1721,7 @@ pixels smaller than the default size use the label string
 @item @ref{output_value()}
 @item @ref{menu_create()}
 @item @ref{menu_add()}
+@item @ref{menu_text()}
 @item @ref{menu_delete()}
 @item @ref{menu_choice()}
 @item @ref{menu_changed()}
@@ -2123,6 +2124,17 @@ This function allows to add one or more entries to an already existing
 popup-menu, created by @code{@ref{menu_create()}}. The first argument
 must be the ID of the menu and the following arguments must be
 strings, one for each new entry to add.
+
+
+@anchor{menu_text()}
+@findex menu_text()
+@item menu_text()
+The function allows to either obtain or change the text of a menu
+entry. If called with two arguments, first the menu ID and the the
+number of the entry (between @code{1} and the total number of entries
+in the menu) the text of that entry gets returned. If called with
+another argument, a (non-empty) string the text of the corresponding
+entry gets set to this string.
 
 
 @anchor{menu_delete()}
@@ -2803,7 +2815,9 @@ array (@pxref{Array ranges}).
 @item int_slice()
 Creates an integer array of the size of the first and only argument
 with every element set to @code{0} which then can be assigned to an
-integer array of variable length.
+integer array of variable length. The size argument can also be
+@code{0} to allow the removal f all elements of the array the result
+is assigned to.
 
 
 @anchor{float_slice()}
@@ -2811,7 +2825,9 @@ integer array of variable length.
 @item float_slice()
 Creates an float array of the size of the first and only argument with
 every element set to @code{0.0} which then can be assigned to a float
-array of variable length.
+array of variable length. The size argument can also be @code{0} to
+allow the removal f all elements of the array the result is assigned
+to.
 
 
 @anchor{dim()}

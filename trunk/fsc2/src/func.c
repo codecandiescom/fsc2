@@ -154,8 +154,8 @@ static Func_T Def_fncts[ ] =                  /* List of built-in functions */
     { "WN_to_WL",            f_WN2WL,            1, ACCESS_ALL,  NULL, UNSET },
     { "F_to_WN",             f_F2WN,             1, ACCESS_ALL,  NULL, UNSET },
     { "WN_to_F" ,            f_WN2F,             1, ACCESS_ALL,  NULL, UNSET },
-    { "int_slice",           f_islice,     INT_MIN, ACCESS_ALL,  NULL, UNSET },
-    { "float_slice",         f_fslice,     INT_MIN, ACCESS_ALL,  NULL, UNSET },
+    { "int_slice",           f_islice,           1, ACCESS_ALL,  NULL, UNSET },
+    { "float_slice",         f_fslice,           1, ACCESS_ALL,  NULL, UNSET },
     { "lin_space",           f_lspace,           3, ACCESS_ALL,  NULL, UNSET },
     { "reverse",             f_reverse,          1, ACCESS_ALL,  NULL, UNSET },
     { "sort",                f_sort,            -2, ACCESS_ALL,  NULL, UNSET },
@@ -188,7 +188,8 @@ static Func_T Def_fncts[ ] =                  /* List of built-in functions */
     { "output_delete",       f_odelete,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
     { "output_value",        f_ovalue,          -2, ACCESS_EXP,  NULL, UNSET },
     { "menu_create",         f_mcreate,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
-    { "menu_add",            f_madd ,      INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "menu_add",            f_madd,       INT_MIN, ACCESS_EXP,  NULL, UNSET },
+    { "menu_text",           f_mtext,           -3, ACCESS_EXP,  NULL, UNSET },
     { "menu_delete",         f_mdelete,    INT_MIN, ACCESS_EXP,  NULL, UNSET },
     { "menu_choice",         f_mchoice,         -2, ACCESS_EXP,  NULL, UNSET },
     { "menu_changed",        f_mchanged,         1, ACCESS_EXP,  NULL, UNSET },
@@ -364,7 +365,7 @@ func_exists( const char * name )
 
 Var_T *
 func_get( const char * name,
-          int *        acc )
+          int        * acc )
 {
     char *sec_name;
     Var_T *func_ptr;
@@ -434,7 +435,7 @@ func_get( const char * name,
 
 Var_T *
 func_get_long( const char * name,
-               int *        acc,
+               int        * acc,
                bool         flag )
 {
     Func_T *f;
@@ -696,8 +697,8 @@ func_call( Var_T * f )
  *-----------------------------------------------------------------------*/
 
 Call_Stack_T *
-call_push( Func_T *     f,
-           Device_T *   device,
+call_push( Func_T     * f,
+           Device_T   * device,
            const char * device_name,
            int          dev_count )
 {

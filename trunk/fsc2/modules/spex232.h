@@ -37,15 +37,6 @@
 #define SPEX232_TEST
 */
 
-/* Defines for the parity used by the device */
-
-#define NO_PARITY      0
-#define ODD_PARITY     1
-#define EVEN_PARITY    2
-#define ALWAYS_1       3
-#define ALWAYS_0       4
-
-
 /* Defines for the way the device is driven */
 
 #define WAVENUMBER     0

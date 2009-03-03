@@ -67,10 +67,10 @@ static Var_T *f_obj_clabel_child( long   ID,
 static Var_T *f_obj_xable_child( long ID,
                                  long state );
 static int toolbox_close_handler( FL_FORM * a,
-                                  void *    b );
+                                  void    * b );
 static FL_OBJECT *append_object_to_form( Iobject_T * io,
-                                         int *       w,
-                                         int *       h );
+                                         int       * w,
+                                         int       * h );
 static void normal_button_setup( Iobject_T * io );
 static void push_button_setup( Iobject_T * io );
 static void radio_button_setup( Iobject_T * io );
@@ -1042,7 +1042,7 @@ recreate_Toolbox( void )
 
 static int
 toolbox_close_handler( FL_FORM * a  UNUSED_ARG,
-                       void *    b  UNUSED_ARG )
+                       void    * b  UNUSED_ARG )
 {
     return FL_IGNORE;
 }
@@ -1056,8 +1056,8 @@ toolbox_close_handler( FL_FORM * a  UNUSED_ARG,
 
 static FL_OBJECT *
 append_object_to_form( Iobject_T * io,
-                       int *       w,
-                       int *       h )
+                       int       * w,
+                       int       * h )
 {
     int old_w;
     int old_h;

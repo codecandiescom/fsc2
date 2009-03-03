@@ -98,12 +98,12 @@
 /* locally used routines */
 
 static bool parent_reader( Comm_Struct_T * header );
-static bool child_reader( void *          ret,
+static bool child_reader( void          * ret,
                           Comm_Struct_T * header );
-static void pipe_read( char * buf,
-                       size_t bytes_to_read );
-static bool pipe_write( char * buf,
-                        size_t bytes_to_write );
+static void pipe_read( char   * buf,
+                       size_t   bytes_to_read );
+static bool pipe_write( char   * buf,
+                        size_t   bytes_to_write );
 static bool send_browser( FL_OBJECT * browser );
 
 static bool Comm_is_setup = UNSET;
@@ -847,6 +847,22 @@ parent_reader( Comm_Struct_T * header )
             T_free( data );
             break;
 
+        case C_MTEXT :
+            TRY
+            {
+                data = T_malloc( ( size_t ) header->data.len );
+                pipe_read( data, ( size_t ) header->data.len );
+                exp_mtext( data, header->data.len );
+                TRY_SUCCESS;
+            }
+            OTHERWISE
+            {
+                T_free( data );
+                return FAIL;
+            }
+            T_free( data );
+            break;
+
         case C_MDELETE :
             TRY
             {
@@ -1103,7 +1119,7 @@ parent_reader( Comm_Struct_T * header )
  *--------------------------------------------------------------*/
 
 static bool
-child_reader( void *          ret,
+child_reader( void          * ret,
               Comm_Struct_T * header )
 {
     char *retstr = NULL;
@@ -1161,6 +1177,32 @@ child_reader( void *          ret,
         case C_DOUBLE :
             if ( ret != NULL )
                 *( ( double * ) ret ) = header->data.double_data;
+            return OK;
+
+        case C_MTEXT_REPLY :
+            * ( char ** ) ret = NULL;
+
+            TRY
+            {
+                if ( header->data.str_len[ 0 ] > 0 )
+                {
+                    * ( char ** ) ret =
+                         T_malloc( ( size_t ) header->data.str_len[ 0 ] + 1 );
+                    pipe_read( * ( char ** ) ret,
+                               ( size_t ) header->data.str_len[ 0 ] );
+                    * ( * ( char ** ) ret +  header->data.str_len[ 0 ] ) = '\0';
+                }
+                else if ( header->data.str_len[ 0 ] == 0 )
+                    * ( char ** ) ret = T_strdup( "" );
+
+                TRY_SUCCESS;
+            }
+            OTHERWISE
+            {
+                if ( * ( char ** ) ret )
+                    T_free( * ( char ** ) ret );
+                return FAIL;
+            }
             return OK;
 
         case C_BCREATE_REPLY   : case C_BSTATE_REPLY  : case C_BCHANGED_REPLY :
@@ -1399,17 +1441,17 @@ writer( int type,
                         return FAIL;
                 break;
 
-            case C_LAYOUT    : case C_BCREATE  : case C_BDELETE  :
-            case C_BSTATE    : case C_BCHANGED : case C_SCREATE  :
-            case C_SDELETE   : case C_SSTATE   : case C_SCHANGED :
-            case C_ICREATE   : case C_IDELETE  : case C_ISTATE   :
-            case C_ICHANGED  : case C_MCREATE  : case C_MADD     :
-            case C_MDELETE   : case C_MCHOICE  : case C_MCHANGED :
-            case C_TBCHANGED : case C_TBWAIT   : case C_ODELETE  :
-            case C_CLABEL    : case C_XABLE    : case C_GETPOS   :
-            case C_CB_1D     : case C_CB_2D    : case C_ZOOM_1D  :
-            case C_ZOOM_2D   : case C_FSB_1D   : case C_FSB_2D   :
-
+            case C_LAYOUT   : case C_BCREATE   : case C_BDELETE  :
+            case C_BSTATE   : case C_BCHANGED  : case C_SCREATE  :
+            case C_SDELETE  : case C_SSTATE    : case C_SCHANGED :
+            case C_ICREATE  : case C_IDELETE   : case C_ISTATE   :
+            case C_ICHANGED : case C_MCREATE   : case C_MADD     :
+            case C_MTEXT    : case C_MDELETE   : case C_MCHOICE  :
+            case C_MCHANGED : case C_TBCHANGED : case C_TBWAIT   :
+            case C_ODELETE  : case C_CLABEL    : case C_XABLE    :
+            case C_GETPOS   : case C_CB_1D     : case C_CB_2D    :
+            case C_ZOOM_1D  : case C_ZOOM_2D   : case C_FSB_1D   :
+            case C_FSB_2D   :
                 header.data.len = va_arg( ap, ptrdiff_t );
                 if ( ! pipe_write( ( char * ) &header, sizeof header ) )
                 {
@@ -1448,10 +1490,6 @@ writer( int type,
             case C_TBCHANGED_REPLY : case C_TBWAIT_REPLY   :
             case C_GETPOS_REPLY    :
                 header.data.len = va_arg( ap, ptrdiff_t );
-
-                /* Don't try to continue writing on EPIPE (SIGPIPE is
-                   ignored) */
-
                 if (    ! pipe_write( ( char * ) &header, sizeof header )
                      && errno == EPIPE )
                 {
@@ -1464,12 +1502,26 @@ writer( int type,
                 return pipe_write( ( char * ) data,
                                    ( size_t ) header.data.len );
 
+            case C_MTEXT_REPLY :
+                str[ 0 ] = va_arg( ap, char * );
+                va_end( ap );
+                if ( str[ 0 ] == NULL )
+                    header.data.str_len[ 0 ] = -1;
+                else if ( *str[ 0 ] == '\0' )
+                    header.data.str_len[ 0 ] = 0;
+                else
+                    header.data.str_len[ 0 ] = strlen( str[ 0 ] );
+
+                if (    ! pipe_write( ( char * ) &header, sizeof header )
+                     && errno == EPIPE )
+                    return FAIL;
+
+                if ( header.data.str_len[ 0 ] > 0 )
+                    return pipe_write( str[ 0 ], ( size_t ) header.data.len );
+                break;
+
             case C_ISTATE_STR_REPLY :
                 header.data.len = va_arg( ap, ptrdiff_t );
-
-                /* Don't try to continue writing on EPIPE (SIGPIPE is
-                   ignored) */
-
                 if (    ! pipe_write( ( char * ) &header, sizeof header )
                      && errno == EPIPE )
                 {
@@ -1576,8 +1628,8 @@ send_browser( FL_OBJECT * browser )
  *--------------------------------------------------------------*/
 
 static void
-pipe_read( char * buf,
-           size_t bytes_to_read )
+pipe_read( char   * buf,
+           size_t   bytes_to_read )
 {
     long bytes_read;
     long already_read = 0;
@@ -1633,8 +1685,8 @@ pipe_read( char * buf,
  *--------------------------------------------------------------*/
 
 static bool
-pipe_write( char * buf,
-            size_t bytes_to_write )
+pipe_write( char   * buf,
+            size_t   bytes_to_write )
 {
     long bytes_written;
     long already_written = 0;

@@ -310,7 +310,8 @@ multimeter_lock_keyboard, -1, EXP;          // Schlumberger 7150 only
 multimeter_command, 1, EXP;
 
 
-/* Functions exported by the temperature controller (Lakeshore 330) */
+/* Functions exported by the temperature controllers (Lakeshore 330,
+   Oxford ITC503, Eurotherm 902S) */
 
 temp_contr_name, 0, ALL;
 temp_contr_lock_keyboard, -1, EXP;

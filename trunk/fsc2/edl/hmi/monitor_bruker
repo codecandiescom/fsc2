@@ -44,6 +44,9 @@ STOPPED = 0;
 UP = 1;
 DOWN = -1;
 
+min_ampl = 0.001;
+max_ampl = 100.0;
+
 tc;
 sens;
 mod_freq;
@@ -136,6 +139,12 @@ IF lockin_rg( ) > 56 {
 
 menu_choice( Sens1, ( lockin_rg( ) - 7 ) % 10 + 1 );
 menu_choice( Sens2, ( lockin_rg( ) - 7 ) / 10 + 1 );
+
+R = menu_create( "Resonator", "Unspecified, "Doppelmode", "Hochtemperatur",
+                 "Tieftemperatur", "Zylinder", "Raumtemperatur 1",
+				  "Raumtemperatur 2a", "Raumtemperatur 2b" );
+
+menu_choice( R, 1 );
 
 MF = menu_create( "Modulation frequency", "100 kHz", "50 kHz", "25 kHz",
                   "12.5 kHz", "6.25 kHz", "3.125 kHz", "1.5635 kHz" );
@@ -290,10 +299,11 @@ FOREVER {
 
 	IF input_changed( MA ) {
 		dval = input_value( MA );
-		IF dval < 0.001 OR dval > 100 {
+		IF dval < min_ampl OR dval > max_ampl {
 			input_value( MA, mod_amp );
 		} ELSE {
-			mod_amp = dval;
+			IF menu_choice( R, 1 ) {
+			    mod_amp = dval;
 			lockin_ref_level( mod_amp );
 		}
 	}

@@ -89,7 +89,7 @@ typedef unsigned int socklen_t;
 extern int mkstemp( char * template );
 extern int fchmod( int    fildes,
                    mode_t mode );
-extern int snprintf( char *        str,
+extern int snprintf( char        * str,
                      size_t        size,
                      const  char * format,
                      ... );
@@ -117,9 +117,9 @@ void clean_up( const char * fname,
 ssize_t writen( int          fd,
                 const void * vptr,
                 size_t       n );
-ssize_t read_line( int    fd,
-                   void * vptr,
-                   size_t max_len );
+ssize_t read_line( int      fd,
+                   void   * vptr,
+                   size_t   max_len );
 ssize_t do_read( int    fd,
                  char * ptr );
 
@@ -456,9 +456,9 @@ clean_up( const char * fname,
  *-----------------------------------------------------------*/
 
 ssize_t
-read_line( int    fd,
-           void * vptr,
-           size_t max_len )
+read_line( int      fd,
+           void   * vptr,
+           size_t   max_len )
 {
     ssize_t n,
             rc;

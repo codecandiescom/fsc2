@@ -61,11 +61,11 @@
 extern char *Prog_Name;        /* defined in global.c */
 
 struct Exception_Struct {
-    const char        *file;
-    unsigned int      line;
-    Exception_Types_T type;
-    unsigned char     is_thrown;
-    jmp_buf           env;
+    const char        * file;
+    unsigned int        line;
+    Exception_Types_T   type;
+    unsigned char       is_thrown;
+    jmp_buf             env;
 };
 
 static struct Exception_Struct Exception_stack[ MAX_NESTED_EXCEPTION ],

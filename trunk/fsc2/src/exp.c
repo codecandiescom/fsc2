@@ -78,19 +78,19 @@ static bool pop_curly_brace( void );
 static void loop_setup( void );
 static void setup_while_or_repeat( int   type,
                                    long * pos );
-static void setup_if_else( long *        pos,
+static void setup_if_else( long        * pos,
                            Prg_Token_T * cur_wr );
 static void setup_else( Prg_Token_T * cur,
                         long          i,
                         bool          in_if,
-                        bool *        dont_need_close_parens );
+                        bool        * dont_need_close_parens );
 static void setup_open_brace_in_if_else( Prg_Token_T * cur,
                                          long          i,
                                          bool          in_if );
-static bool setup_close_brace_in_if_else( long *        pos,
+static bool setup_close_brace_in_if_else( long        * pos,
                                           Prg_Token_T * cur,
                                           long          i,
-                                          bool *        in_if );
+                                          bool        * in_if );
 static void exp_syntax_check( void );
 static void deal_with_token_in_test( void );
 static const char *get_construct_name( int token_type );
@@ -695,7 +695,7 @@ setup_while_or_repeat( int    type,
  *----------------------------------------------------------------------*/
 
 static void
-setup_if_else( long *        pos,
+setup_if_else( long        *  pos,
                Prg_Token_T * cur_wr )
 {
     Prg_Token_T *cur = EDL.prg_token + *pos;
@@ -784,7 +784,7 @@ static void
 setup_else( Prg_Token_T * cur,
             long          i,
             bool          in_if,
-            bool *        dont_need_close_parens )
+            bool        * dont_need_close_parens )
 {
     if ( i + 1 == EDL.prg_length )
     {
@@ -849,10 +849,10 @@ setup_open_brace_in_if_else( Prg_Token_T * cur,
  *---------------------------------------------------*/
 
 static bool
-setup_close_brace_in_if_else( long *        pos,
+setup_close_brace_in_if_else( long        * pos,
                               Prg_Token_T * cur,
                               long          i,
-                              bool *        in_if )
+                              bool        * in_if )
 {
     if ( *in_if )
     {

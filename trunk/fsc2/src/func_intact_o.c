@@ -28,11 +28,11 @@
 extern Toolbox_T *Toolbox;        /* defined in func_intact.c */
 
 
-static Var_T *f_ocreate_child( Var_T *        v,
-                               Iobject_Type_T type,
-                               long           lval,
-                               double         dval,
-                               char *         sptr );
+static Var_T *f_ocreate_child( Var_T          * v,
+                               Iobject_Type_T   type,
+                               long             lval,
+                               double           dval,
+                               char           *sptr );
 static void f_odelete_child( Var_T * v );
 static void f_odelete_parent( Var_T * v );
 static Var_T *f_ovalue_child( Var_T * v );
@@ -355,13 +355,14 @@ f_ocreate( Var_T * var )
  *-----------------------------------------------------------------*/
 
 static Var_T *
-f_ocreate_child( Var_T *        v,
-                 Iobject_Type_T type,
-                 long           lval,
-                 double         dval,
-                 char *         sptr )
+f_ocreate_child( Var_T          * v,
+                 Iobject_Type_T   type,
+                 long             lval,
+                 double           dval,
+                 char           * sptr )
 {
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     long new_ID;
     long *result;
     size_t len;
@@ -572,7 +573,8 @@ f_odelete( Var_T * v )
 static void
 f_odelete_child( Var_T * v )
 {
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     size_t len;
     long ID;
 
@@ -830,7 +832,8 @@ f_ovalue_child( Var_T * v )
     long lval = 0;
     double dval = 0.0;
     char *sptr = NULL;
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     Input_Res_T *input_res;
     size_t len;
 
@@ -1017,7 +1020,8 @@ f_ochanged_child( Var_T * v )
 {
     long ID;
     long changed;
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     long *res;
     size_t len;
 

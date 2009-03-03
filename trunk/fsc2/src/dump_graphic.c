@@ -33,7 +33,7 @@ static Pixmap get_2d_window( unsigned int * width,
                              unsigned int * height );
 static Pixmap get_cut_window( unsigned int * width,
                               unsigned int * height );
-static void dump_as_ppm( FILE *   dp,
+static void dump_as_ppm( FILE   * dp,
                          XImage * image );
 
 
@@ -293,7 +293,7 @@ get_cut_window( unsigned int * width,
  *----------------------------------------------------------------*/
 
 static void
-dump_as_ppm( FILE *   fp,
+dump_as_ppm( FILE   * fp,
              XImage * image )
 {
     int i, j;

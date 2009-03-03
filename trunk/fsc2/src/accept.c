@@ -25,30 +25,30 @@
 #include "fsc2.h"
 
 
-static void unpack_and_accept( int  dim,
+static void unpack_and_accept( int    dim,
                                char * ptr );
 static void other_data_request( int    dim,
                                 int    type,
                                 char * ptr );
-static void accept_1d_data( long        x_index,
-                            long       curve,
-                            Var_Type_T type,
-                            char *     ptr );
-static void accept_1d_data_sliding( long       curve,
-                                    Var_Type_T type,
-                                    char *     ptr );
-static void accept_2d_data( long        x_index,
-                            long        y_index,
-                            long        curve,
-                            Var_Type_T  type,
-                            char *      ptr );
-static long get_number_of_new_points( char **    ptr,
-                                      Var_Type_T type );
-static bool get_new_extrema( double *   max,
-                             double *   min,
-                             char *     ptr,
-                             long       len,
-                             Var_Type_T type );
+static void accept_1d_data( long         x_index,
+                            long         curve,
+                            Var_Type_T   type,
+                            char       * ptr );
+static void accept_1d_data_sliding( long         curve,
+                                    Var_Type_T   type,
+                                    char       * ptr );
+static void accept_2d_data( long         x_index,
+                            long         y_index,
+                            long         curve,
+                            Var_Type_T   type,
+                            char       * ptr );
+static long get_number_of_new_points( char       ** ptr,
+                                      Var_Type_T    type );
+static bool get_new_extrema( double     * max,
+                             double     * min,
+                             char       * ptr,
+                             long         len,
+                             Var_Type_T   type );
 static bool incr_x( long x_index,
                     long len );
 static bool incr_y( long y_index );
@@ -459,10 +459,10 @@ other_data_request( int    dim,
  *--------------------------------------------------------*/
 
 static void
-accept_1d_data( long       x_index,
-                long       curve,
-                Var_Type_T type,
-                char *     ptr )
+accept_1d_data( long         x_index,
+                long         curve,
+                Var_Type_T   type,
+                char       * ptr )
 {
     long len = 0;
     char *cur_ptr;
@@ -649,7 +649,7 @@ accept_1d_data( long       x_index,
 static void
 accept_1d_data_sliding( long         curve,
                         Var_Type_T   type,
-                        char *       ptr )
+                        char       * ptr )
 {
     long len = 0;
     char *cur_ptr;
@@ -841,11 +841,11 @@ accept_1d_data_sliding( long         curve,
  * a bit of work has gone into getting it as fast as possible...)
  *----------------------------------------------------------------*/
 
-static void accept_2d_data( long       x_index,
-                            long       y_index,
-                            long       curve,
-                            Var_Type_T type,
-                            char *     ptr )
+static void accept_2d_data( long         x_index,
+                            long         y_index,
+                            long         curve,
+                            Var_Type_T   type,
+                            char       * ptr )
 {
     long x_len = 0;
     long y_len = 0;
@@ -1114,8 +1114,8 @@ static void accept_2d_data( long       x_index,
  *---------------------------------------------------------------------*/
 
 static long
-get_number_of_new_points( char **    ptr,
-                          Var_Type_T type )
+get_number_of_new_points( char       ** ptr,
+                          Var_Type_T    type )
 {
     long len = 0;
     char *ptr_2d;
@@ -1174,11 +1174,11 @@ get_number_of_new_points( char **    ptr,
  *----------------------------------------------------------*/
 
 static bool
-get_new_extrema( double *   max,
-                 double *   min,
-                 char *     ptr,
-                 long       len,
-                 Var_Type_T type )
+get_new_extrema( double     * max,
+                 double     * min,
+                 char       * ptr,
+                 long         len,
+                 Var_Type_T   type )
 {
     double data;
     long i, j;

@@ -106,6 +106,9 @@ long *exp_mcreate( char      * /* buffer */,
 bool exp_madd( char      * /* buffer */,
                ptrdiff_t   /* len    */ );
 
+char * exp_mtext( char      * /* buffer */,
+                  ptrdiff_t   /* len    */ );
+
 bool exp_mdelete( char      * /* buffer */,
                   ptrdiff_t   /* len    */  );
 

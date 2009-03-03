@@ -61,8 +61,8 @@ static bool get_edl_file( char * fname );
 static void check_run( void );
 static void no_gui_run( void );
 static void test_machine_type( void );
-static int scan_args( int *   argc,
-                      char *  argv[ ],
+static int scan_args( int   * argc,
+                      char  * argv[ ],
                       char ** fname );
 static void final_exit_handler( void );
 static bool display_file( char * name,
@@ -748,8 +748,8 @@ test_machine_type( void )
  *-------------------------------------------------------*/
 
 static int
-scan_args( int *   argc,
-           char *  argv[ ],
+scan_args( int   * argc,
+           char  * argv[ ],
            char ** fname )
 {
     int flags = getenv( "FSC2_LOCAL_EXEC" ) != NULL ? LOCAL_EXEC : 0;

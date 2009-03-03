@@ -28,9 +28,9 @@
 extern Toolbox_T *Toolbox;        /* defined in func_intact.c */
 
 
-static Var_T *f_bcreate_child( Var_T *        v,
-                               Iobject_Type_T type,
-                               long           coll );
+static Var_T *f_bcreate_child( Var_T          * v,
+                               Iobject_Type_T   type,
+                               long             coll );
 static void f_bdelete_child( Var_T * v );
 static void f_bdelete_parent( Var_T * v );
 static Var_T *f_bstate_child( Var_T * v );
@@ -418,7 +418,8 @@ f_bdelete( Var_T * v )
 static void
 f_bdelete_child( Var_T * v )
 {
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     size_t len;
     long ID;
 
@@ -473,7 +474,8 @@ f_bdelete_child( Var_T * v )
 static void
 f_bdelete_parent( Var_T * v )
 {
-    Iobject_T *io, *nio;
+    Iobject_T *io,
+              *nio;
     long new_anchor = 0;
 
 
@@ -560,7 +562,8 @@ f_bdelete_parent( Var_T * v )
 Var_T *
 f_bstate( Var_T * v )
 {
-    Iobject_T *io, *oio;
+    Iobject_T *io,
+              *oio;
     int state;
 
 
@@ -673,7 +676,8 @@ f_bstate_child( Var_T * v )
 {
     long ID;
     long chld_state = -1;
-    char *buffer, *pos;
+    char *buffer,
+         *pos;
     size_t len;
     long *result;
 
@@ -800,8 +804,9 @@ f_bchanged( Var_T * v )
 static Var_T *
 f_bchanged_child( Var_T * v )
 {
+    char *buffer,
+         *pos;
     long ID;
-    char *buffer, *pos;
     size_t len;
     long *result;
     int chld_changed;

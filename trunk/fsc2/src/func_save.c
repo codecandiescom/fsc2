@@ -37,28 +37,28 @@ static int get_save_file( Var_T ** /* v */ );
 
 static Var_T * batch_mode_file_open( char * /* name */ );
 
-static long arr_save( const char * /* sep      */,
-                      long         /* file_num */,
-                      Var_T *      /* v        */ );
+static long arr_save( const char * sep,
+                      long         file_num,
+                      Var_T      * v );
 
-static void f_format_check( Var_T * /* v */ );
+static void f_format_check( Var_T * v );
 
-static void ff_format_check( Var_T * /* v */ );
+static void ff_format_check( Var_T * v );
 
-static long do_printf( long    /* file_num */,
-                       Var_T * /* v        */ );
+static long do_printf( long    file_num,
+                       Var_T * v );
 
-static long print_browser( int          /* browser */,
-                           int          /* fid     */,
-                           const char * /* comment */ );
+static long print_browser( int          browser,
+                           int          fid,
+                           const char * comment );
 
-static long print_include( int          /* fid      */,
-                           char *       /* cp       */,
-                           const char * /* comment  */,
-                           const char * /* cur_file */ );
+static long print_include( int          fid,
+                           char       * cp,
+                           const char * comment,
+                           const char * cur_file );
 
-static long T_fprintf( long         /* fn  */,
-                       const char * /* fmt */,
+static long T_fprintf( long         fn,
+                       const char * fmt,
                        ... );
 
 
@@ -524,7 +524,8 @@ f_clonef( Var_T * v )
 {
     char *fn;
     char *n;
-    Var_T *new_v, *arg[ 6 ];
+    Var_T *new_v,
+          *arg[ 6 ];
     int i;
     long file_num;
 
@@ -1046,7 +1047,7 @@ f_save( Var_T * v )
 static long
 arr_save( const char * sep,
           long         file_num,
-          Var_T *      v )
+          Var_T      * v )
 {
     ssize_t i;
     long count = 0;
@@ -1503,7 +1504,8 @@ ff_format_check( Var_T * v )
  *-----------------------------------------------------------------------*/
 
 static long
-do_printf( long file_num, Var_T * v )
+do_printf( long    file_num,
+           Var_T * v )
 {
     char *fmt_start,
          *fmt_end,
@@ -1945,7 +1947,7 @@ print_browser( int          browser,
 
 static long
 print_include( int          fid,
-               char *       cp,
+               char       * cp,
                const char * comment,
                const char * cur_file )
 {
@@ -2128,7 +2130,8 @@ f_save_c( Var_T * v )
     char *c = NULL,
          *l = NULL,
          *r = NULL,
-         *cl, *nl;
+         *cl,
+         *nl;
 
     /* Determine the file identifier */
 
@@ -2231,7 +2234,8 @@ T_fprintf( long         fn,
     va_list ap;
     char *new_name;
     FILE *new_fp;
-    struct stat old_stat, new_stat;
+    struct stat old_stat,
+                new_stat;
     size_t rw;
     char *mess;
     long count;

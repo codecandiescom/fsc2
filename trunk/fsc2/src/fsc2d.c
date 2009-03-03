@@ -53,9 +53,9 @@ typedef struct Fsc2_Instance Fsc2_Instance_T;
 
 struct Fsc2_Instance {
     unsigned long pid;
-    char user_name[ MAX_LOGIN_NAME + 1 ];
-    bool exclusive;
-    bool with_conn;
+    char          user_name[ MAX_LOGIN_NAME + 1 ];
+    bool          exclusive;
+    bool          with_conn;
 };
 
 

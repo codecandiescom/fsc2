@@ -81,24 +81,24 @@ static void fsps25_wrong_data( void );
 
 
 typedef struct {
-	bool is_open;
-	bool is_expert_mode;
-	int state;
-	bool sweep_state;
-    int  heater_state;
-	bool is_matched;
-	long act_current;
-	bool act_current_is_set;
-    bool act_current_need_request;
-	long super_current;
-    bool super_current_need_request;
-	long max_current;       /* maximum current (in mA) */
-	bool max_current_is_set;
-	long max_speed;         /* maximum sweep speed (in mA/min) */
-	bool max_speed_is_set;
-	long act_speed;         /* actual speed (in mA/min) */
-	bool act_speed_is_set;
-    struct termios *tio;    /* serial port terminal interface structure */
+	bool             is_open;
+	bool             is_expert_mode;
+	int              state;
+	bool             sweep_state;
+    int              heater_state;
+	bool             is_matched;
+	long             act_current;
+	bool             act_current_is_set;
+    bool             act_current_need_request;
+	long             super_current;
+    bool             super_current_need_request;
+	long             max_current;         /* maximum current (in mA) */
+	bool             max_current_is_set;
+	long             max_speed;           /* maximum sweep speed (in mA/min) */
+	bool             max_speed_is_set;
+	long             act_speed;           /* actual speed (in mA/min) */
+	bool             act_speed_is_set;
+    struct termios * tio;         /* serial port terminal interface structure */
 } FSPS25;
 
 FSPS25 fsps25, fsps25_stored;
@@ -109,12 +109,6 @@ FSPS25 fsps25, fsps25_stored;
 #define HEATER_ON_DELAY        1500000   /* 1.5 s */
 
 #define MAX_CURRENT_DIFF       12         /* 12 mA */
-
-/* Defines for the parity used by the device */
-
-#define NO_PARITY         0
-#define ODD_PARITY        1
-#define EVEN_PARITY       2
 
 
 /* The different states the device can be in */
@@ -139,11 +133,6 @@ FSPS25 fsps25, fsps25_stored;
 
 #define UNMATCHED         0
 #define MATCHED           1
-
-
-/* The sweep rate with the heater being off */
-
-#define  MAX_HEATER_OFF_SPEED  6000   /* 6000 mA/min */
 
 
 #define FSPS25_TEST_CURRENT  0
@@ -228,8 +217,9 @@ fsps25_end_of_exp_hook( void )
 }
 
 
-/*----------------------------------------------------------------*
- *----------------------------------------------------------------*/
+/*-------------------------------*
+ * Returns device name as string 
+ *-------------------------------*/
 
 Var_T *
 magnet_name( Var_T * v  UNUSED_ARG )
@@ -238,8 +228,11 @@ magnet_name( Var_T * v  UNUSED_ARG )
 }
 
 
-/*----------------------------------------------------------------*
- *----------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Requests that module is switched to "expert mode", a mode in
+ * which certain, potntially dangerous commands can be send to
+ * the devicee
+ *--------------------------------------------------------------*/
 
 Var_T *
 magnet_request_expert_mode( Var_T * v  UNUSED_ARG )
@@ -249,8 +242,9 @@ magnet_request_expert_mode( Var_T * v  UNUSED_ARG )
 }
 
 
-/*----------------------------------------------------------------*
- *----------------------------------------------------------------*/
+/*--------------------------------------*
+ * Returns the current through the coil
+ *--------------------------------------*/
 
 Var_T *
 magnet_coil_current( Var_T * v  UNUSED_ARG )
@@ -259,8 +253,10 @@ magnet_coil_current( Var_T * v  UNUSED_ARG )
 }
 
 
-/*----------------------------------------------------------------*
- *----------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * Switch off the heater, reduce device current to 0 and bring
+ * device into off state.
+ *--------------------------------------------------------------*/
 
 Var_T *
 magnet_shutdown( Var_T * v  UNUSED_ARG )
@@ -270,8 +266,9 @@ magnet_shutdown( Var_T * v  UNUSED_ARG )
 }
 
 
-/*------------------------------------------------------------------------*
- *------------------------------------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for querying or setting a certain field
+ *--------------------------------------------------*/
 
 Var_T *
 magnet_field( Var_T * v )
@@ -336,8 +333,9 @@ magnet_field( Var_T * v )
 }
 
 
-/*------------------------------------------------------------------------*
- *------------------------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Function for querying or setting the field sweep rate
+ *-------------------------------------------------------*/
 
 Var_T *
 magnet_sweep_rate( Var_T * v )
@@ -382,8 +380,10 @@ magnet_sweep_rate( Var_T * v )
 }
 
 
-/*------------------------------------------------------------------------*
- *------------------------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * Function to query or set the maximum current the device
+ * is allowed to output
+ *---------------------------------------------------------*/
 
 Var_T *
 magnet_max_current( Var_T * v )
@@ -450,8 +450,10 @@ magnet_max_current( Var_T * v )
 }
 
 
-/*------------------------------------------------------------------------*
- *------------------------------------------------------------------------*/
+/*-----------------------------------------------------*
+ * Function to query or set the maximum sweep rate the
+ * device is allowed to produce
+ *-----------------------------------------------------*/
 
 Var_T *
 magnet_max_sweep_rate( Var_T *v )
@@ -499,8 +501,11 @@ magnet_max_sweep_rate( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------------*
- *------------------------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Function to query or set the state of the switch heater.
+ * Please note: the heater state can only be set if "expert
+ * mode" is switched on.
+ *----------------------------------------------------------*/
 
 Var_T *
 magnet_heater_state( Var_T * v )
@@ -525,8 +530,9 @@ magnet_heater_state( Var_T * v )
 }
 
 
-/*------------------------------------------------------------------------*
- *------------------------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function to query or set the actual current the device outputs
+ *----------------------------------------------------------------*/
 
 Var_T *
 magnet_act_current( Var_T * v )
@@ -1426,9 +1432,9 @@ fsps25_get_max_current( void )
 }
 
 
-/*------------------------------------------*
- * Function for setting the maximum current
- *------------------------------------------*/
+/*--------------------------------------------------*
+ * Function for setting the maximum current (in mA)
+ *--------------------------------------------------*/
 
 static long
 fsps25_set_max_current( long current )
@@ -1489,9 +1495,9 @@ fsps25_set_max_current( long current )
 }
 
 
-/*-----------------------------------------------------------*
- * Function for querying the sweep speed of the power supply
- *-----------------------------------------------------------*/
+/*-----------------------------------------------------------------------*
+ * Function for querying the sweep speed (in mA/min) of the power supply
+ *-----------------------------------------------------------------------*/
 
 static long
 fsps25_get_sweep_speed( void )
