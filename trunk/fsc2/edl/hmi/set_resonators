@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+
+# $Id$
+
+use strict;
+use warnings;
+
+unless ( @ARGV == 2 ) {
+	print "Usage: set_resonators type file\n" .
+		  "       with type [ER023M|SR830]\n";
+	exit 1;
+}
+
+if ( $ARGV[ 0 ] !~ /^(ER023M)|(SR830)$/ ) {
+	print "First argument must be 'ER023M' or 'SR830'\n";
+	exit 1;
+}
+
+open my $f, '<', $ARGV[ 1 ] or die "Can't open $ARGV[ 1 ] for reading\n";
+
+my @content;
+my $lino = 0;
+while ( <$f> ) {
+	push @content, $_;
+	next unless /^=== RESONATOR .*? "Resonator"$/;
+	$lino = $.;
+}
+
+close $f;
+die "No line for resonator found in $ARGV[ 1 ]\n" unless $lino;
+
+open $f, '<', '/usr/local/lib/fsc2/epr_mod.state'
+	or die "Can't open file /usr/local/lib/fsc2/epr_mod.state for reading\n";
+
+my @res;
+
+for ( <$f> ) {
+	next unless /^calibration:\s"(.*?) \($ARGV[0]\)"$/;
+	push @res, $1;
+}
+close $f;
+
+my $line = '=== RESONATOR menu [ "Unspecified"';
+$line .= ", \"$_\"" for @res;
+$line .= " ] [ 1 ] \"Resonator\"\n";
+
+$content[ $lino - 1 ] = $line;
+
+print $_ for @content;
