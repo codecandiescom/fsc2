@@ -1,0 +1,341 @@
+=== RESONATOR menu [ "Unspecified", "Doppelmode", "Hochtemperatur", "Tieftemperatur", "Zylinder", "Raumtemperatur 1", "Raumtemperatur 2a", "Raumtemperatur 2b" ] [ 1 ] "Resonator"
+DEVICES:
+
+er032m;
+er023m;
+=== if RESONATOR ne "Unspecified"
+epr_mod;
+=== endif
+
+
+VARIABLES:
+
+current_field;
+max_field = 23000 G;
+min_field = -50 G;
+field_step = 0.25 G;
+min_field_step = 1 mG;
+max_field_step = 1600 G;
+Sweep_State = 0;
+
+Acq_State = 0,
+STOPPED = 0;
+UP = 1;
+DOWN = -1;
+
+min_ampl = 0.001;
+max_ampl = 100.0;
+
+tc;
+sens;
+mod_freq;
+mod_ampl;
+phase;
+CT;
+
+tcs[ * ] = { 2.56 ms, 5.12 ms, 10.24 ms, 20.48 ms, 40.96 ms, 81.92 ms,
+	         163.84 ms, 327.68 ms, 655.360 ms, 1.31072 s, 2.62144,
+             5.24288 s };
+
+senses1[ * ] = { 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0, 8.0 };
+senses2[ * ] = { 1.0e2, 1.0e3, 1.0e4, 1.0e5, 1.0e6 };
+
+=== if RESONATOR eq "Unspecified"
+freqs[ * ] = { 100 kHz, 50 kHz, 25 kHz, 12.5 kHz, 6.25 kHz, 3.125 kHz,
+               1.5625 kHz };
+=== else
+freqs[ * ] =
+	   sort( epr_modulation_calibration_frequencies( "RESONATOR" " (ER023M)" ),
+	         "DOWNWARDS" );
+=== endif
+
+I, J;
+data;
+dval;
+
+Current_Field,
+New_Field,
+Set_Field,
+Field_Step,
+Sweep_Up,
+Sweep_Stop,
+Sweep_Down,
+Pause,
+Clear,
+TC,
+Sens1,
+Sens2,
+MF,
+MA,
+Phase;
+
+
+PREPARATIONS:
+
+init_1d( 2, 64, "Points", "Signal [uV]" );
+
+
+EXPERIMENT:
+
+/* Get current field and write it into the corresponding output field */
+
+current_field = magnet_field( );
+tc = lockin_time_constant( );
+sens = lockin_sensitivity( );
+mod_freq = lockin_ref_freq( );
+mod_ampl = lockin_ref_level( );
+phase = lockin_phase( );
+
+/* Finally, create the form with the buttons for sweeping etc. */
+
+hide_toolbox( "ON" );
+Current_Field = output_create( "FLOAT_OUTPUT", current_field,
+                               "Current field [G]" );
+New_Field  = input_create( "FLOAT_INPUT", current_field, "New field [G]" );
+Set_Field  = button_create( "NORMAL_BUTTON", "Set new field" );
+Field_Step = input_create( "FLOAT_INPUT", field_step, "Field step size [G]" );
+
+Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
+Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
+Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
+button_state( Sweep_Stop, "ON" );
+
+TC = menu_create( "Time constant", "2.5 ms", "5 ms", "10 ms",
+                  "20 ms", "40 ms", "80 ms", "160 ms", "320 ms", "640 ms",
+				  "1.25 s", "2.5 s", "5 s" );
+FOR I = 1 : size( tcs ) {
+	IF tcs[ I ] == tc {
+	    menu_choice( TC, I );
+		BREAK;
+	}
+}
+
+Sens1 = menu_create( "Receiver gain (factor)", "1.0", "1.25", "1.5",
+	                 "2.0", "2.5", "3.0", "4.0", "5.0", "6.0", "8.0" );
+Sens2 = menu_create( "Receiver gain (magnitude)", "1.0e2", "1.0e3", "1.0e4",
+	                 "1.0e5", "1.0e6" );
+
+IF lockin_rg( ) < 7 {
+    lockin_sensitivity( 1.0e2 );
+}
+IF lockin_rg( ) > 56 {
+    lockin_sensitivity( 8.0e6 );
+}
+
+menu_choice( Sens1, ( lockin_rg( ) - 7 ) % 10 + 1 );
+menu_choice( Sens2, ( lockin_rg( ) - 7 ) / 10 + 1 );
+
+=== if RESONATOR eq "Unspecified"
+MF = menu_create( "Modulation frequency", "100.000 kHz", "50.000 kHz",
+                  "25.000 kHz", "12.500 kHz", "6.250 kHz", "3.125 kHz",
+				   "1.5635 kHz" );
+FOR I = 1 : size( freqs ) {
+	IF mod_freq == freqs[ I ] {
+	    menu_choice( MF, I );
+		BREAK;
+	}
+}
+MA = input_create( "FLOAT_INPUT", mod_ampl, "Modulation amplitude [%]" );
+=== else
+MF = menu_create( "Modulation frequency",
+                  sprint( "# kHz", freqs[ 1 ] / 1 kHz ) );
+menu_choice( MF, 1 );
+FOR I = 2 : size( freqs ) {
+	menu_add( MF, sprint( "# kHz", freqs[ I ] / 1 kHz ) );
+	IF mod_freq == freqs[ I ] {
+	    menu_choice( MF, I );
+    }
+}
+mod_freq = freqs[ menu_choice( MF ) ];
+lockin_ref_freq( mod_freq );
+mod_ampl *= epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
+min_ampl *= epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
+max_ampl *= epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
+MA = input_create( "FLOAT_INPUT", mod_ampl, "Modulation amplitude [G]" );
+=== endif
+
+Phase = input_create( "FLOAT_INPUT", phase, "Modulation phase" );
+
+Pause = button_create( "PUSH_BUTTON", "Pause acquisition" );
+button_state( Pause, Acq_State ? 0 : 1 );
+Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
+hide_toolbox( "OFF" );
+
+I = 1;
+
+FOREVER {
+	IF Acq_State == 0 AND Sweep_State == 0 {
+		toolbox_wait( );
+	}
+
+	IF Acq_State {
+		wait( tc );
+		data = lockin_get_data( );
+		display_1d( I, data / 1 uV );
+		I += 1;
+	}
+
+    IF Sweep_State != STOPPED {
+		IF Sweep_State == UP {
+			IF current_field + field_step <= max_field {
+				current_field = magnet_field( current_field + field_step );
+				output_value( Current_Field, current_field );
+			} ELSE {
+                Sweep_State = STOPPED;
+                button_state( Sweep_Stop, "ON" );
+			    draw_marker( I, "YELLOW" );
+				object_enable( Sweep_Up, "OFF" );
+				object_enable( Sweep_Stop, "OFF" );
+			}
+		} ELSE {
+			IF current_field - field_step >= min_field {
+				current_field = magnet_field( current_field - field_step );
+				output_value( Current_Field, current_field );
+			} ELSE {
+                Sweep_State = STOPPED;
+                button_state( Sweep_Stop, "ON" );
+			    draw_marker( I, "YELLOW" );
+				object_enable( Sweep_Down, "OFF" );
+				object_enable( Sweep_Stop, "OFF" );
+			}
+		}
+	}
+
+	IF ! toolbox_changed( ) {
+		NEXT;
+	}
+
+	IF input_changed( New_Field ) {
+		dval = input_value( New_Field );
+		IF dval > max_field OR dval < min_field {
+			object_enable( Set_Field, "OFF" );
+		} ELSE {
+			object_enable( Set_Field, "ON" );
+		}
+	}
+
+	IF button_changed( Set_Field ) AND button_state( Set_Field ) {
+		dval = input_value( New_Field );
+		IF dval > max_field OR dval < min_field {
+			object_enable( Set_Field, "OFF" );
+			NEXT;
+		}
+		IF dval < max_field {
+			object_enable( Sweep_Up, "ON" );
+		}
+		IF dval > min_field {
+			object_enable( Sweep_Down, "ON" );
+		}
+
+		current_field = magnet_field( dval );
+		output_value( Current_Field, current_field );
+		draw_marker( I, "BLUE" );
+	}
+
+	IF input_changed( Field_Step ) {
+		dval = input_value( Field_Step );
+		IF dval < min_field_step OR dval > max_field_step {
+			input_value( Field_Step, field_step );
+			NEXT;
+		}
+
+		field_step = dval;
+	}
+
+	IF     button_changed( Sweep_Up )
+	   AND button_state( Sweep_Up )
+       AND current_field < max_field {
+		Sweep_State = UP;
+        draw_marker( I, "RED" );
+		object_enable( Sweep_Down, "ON" );
+		object_enable( Sweep_Stop, "ON" );
+	}
+
+	IF     button_changed( Sweep_Down )
+	   AND button_state( Sweep_Down )
+	   AND current_field > min_field {
+		Sweep_State = DOWN;
+        draw_marker( I, "GREEN" );
+		object_enable( Sweep_Up, "ON" );
+		object_enable( Sweep_Stop, "ON" );
+	}
+
+	IF button_changed( Sweep_Stop ) AND button_state( Sweep_Stop ) {
+	    Sweep_State = STOPPED;
+	    draw_marker( I, "YELLOW" );
+		IF current_field > min_field {
+			object_enable( Sweep_Up, "ON" );
+		}
+		IF current_field - field_step < max_field {
+			object_enable( Sweep_Down, "ON" );
+		}
+	}
+
+	IF menu_changed( TC ) {
+	    tc = tcs[ menu_choice( TC ) ];
+		lockin_time_constant( tc );
+		CT = round( tc / 0.32 ms );
+		IF CT < 10 {
+    		CT = 10;
+		} ELSE IF CT > 9999 {
+		    CT = 9999;
+		}
+		lockin_conversion_time( CT * 0.32 ms );
+	}
+
+	IF menu_changed( Sens1 ) OR menu_changed( Sens2 ) {
+	    sens =   senses1[ menu_choice( Sens1 ) ]
+	           * senses2[ menu_choice( Sens2 ) ];
+		lockin_sensitivity( sens );
+	}
+
+	IF menu_changed( MF ) {
+=== if RESONATOR eq "Unspecified"
+		mod_freq = freqs[ menu_choice( MF ) ];
+		lockin_ref_freq( mod_freq );
+=== else
+		mod_freq = freqs[ menu_choice( MF ) ];
+		lockin_ref_freq( mod_freq );
+		min_ampl = 0.001 *
+		              epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
+        max_ampl = 100.0 *
+                      epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
+		lockin_ref_level( mod_ampl /
+                    epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq ) );
+=== endif
+	}
+
+	IF input_changed( MA ) {
+		dval = input_value( MA );
+		IF dval < min_ampl OR dval > max_ampl {
+			input_value( MA, mod_ampl );
+		} ELSE {
+		    mod_ampl = dval;
+=== if RESONATOR eq "Unspecified"
+			lockin_ref_level( mod_ampl );
+=== else
+			lockin_ref_level( mod_ampl /
+			        epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq ) );
+=== endif
+		}
+	}
+
+	IF input_changed( Phase ) {
+		dval = input_value( Phase );
+		phase = dval % 360.0;
+		input_value( Phase, phase );
+		lockin_phase( phase );
+	}
+
+	IF button_changed( Pause ) {
+		Acq_State = button_state( Pause ) ? 0 : 1;
+	}
+
+	IF button_changed( Clear ) {
+	    button_state( Clear );
+        clear_curve_1d( 1, 2 );
+        clear_marker_1d( );
+        I = 1;
+        rescale_1d( 64 );
+    }
+}

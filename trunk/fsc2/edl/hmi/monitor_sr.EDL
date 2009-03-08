@@ -1,0 +1,381 @@
+=== RESONATOR menu [ "Unspecified", "Doppelmode", "Hochtemperatur", "Tieftemperatur", "Zylinder", "Raumtemperatur 1", "Raumtemperatur 2a", "Raumtemperatur 2b" ] [ 1 ] "Resonator"
+DEVICES:
+
+er032m;
+sr830;
+=== if RESONATOR ne "Unspecified"
+epr_mod;
+=== endif
+
+
+VARIABLES:
+
+current_field;
+max_field = 23000 G;
+min_field = -50 G;
+field_step = 0.25 G;
+min_field_step = 1 mG;
+max_field_step = 1600 G;
+Sweep_State = 0;
+
+=== if RESONATOR ne 'Unspecified'
+Can_extrapolate = 0;
+Can_interpolate = 0;
+
+raw_ampl, new_raw_ampl, mod_ampl;
+min_ampl = 0.004 V;
+max_ampl = 5.0 V;
+
+mod_freq, new_mod_freq;
+min_freq, max_freq;
+freqs[ * ];
+MF, MA;
+C;
+=== endif
+
+Acq_State = 0, STOPPED = 0; UP = 1; DOWN = -1;
+
+I;
+data[ 2 ];
+dval;
+
+Current_Field, New_Field, Set_Field, Field_Step, Sweep_Up,
+Sweep_Stop, Sweep_Down, Pause, Clear;
+
+
+PREPARATIONS:
+
+init_1d( 2, 64, "Points", "Signal [uV]" );
+
+
+EXPERIMENT:
+
+current_field = magnet_field( );
+
+/* Create the toolbox with the buttons for sweeping etc. */
+
+hide_toolbox( "ON" );
+Current_Field = output_create( "FLOAT_OUTPUT", current_field,
+                               "Current field [G]" );
+New_Field  = input_create( "FLOAT_INPUT", current_field, "New field [G]" );
+Set_Field  = button_create( "NORMAL_BUTTON", "Set new field" );
+Field_Step = input_create( "FLOAT_INPUT", field_step, "Field step size [G]" );
+Sweep_Up   = button_create( "RADIO_BUTTON", "Sweep up" );
+Sweep_Stop = button_create( "RADIO_BUTTON", Sweep_Up, "Stop sweep" );
+Sweep_Down = button_create( "RADIO_BUTTON", Sweep_Up, "Sweep Down" );
+button_state( Sweep_Stop, "ON" );
+
+=== if RESONATOR ne 'Unspecified'
+/* If the modulation settings for the resonator allow extrapolation just show
+   an input field for the modulation amplitide. If not distinguish between the
+   cases of resonators for which interpolation is allowed and those that only
+   have calibrations for discrete frequencies. In the first case we have an
+   input field for the modulation frequency, in the second a menu for picking
+   one of the allowed frequencies. Then we have to make sure that the
+   modulation frequency set at the lock-in fits the restrictions gue to the
+   calibration and change the freqency as necessary. */
+
+mod_freq = lockin_ref_freq( );
+raw_ampl = lockin_ref_level( );
+
+IF epr_modulation_calibration_can_extrapolate( "RESONATOR" " (SR830)" ) {
+    Can_extrapolate = 1;
+} ELSE {
+	freqs = epr_modulation_calibration_frequencies( "RESONATOR" " (SR830)" );
+    IF ! epr_modulation_calibration_can_interpolate( "RESONATOR" " (SR830)" ) {
+		Can_interpolate = 0;
+		MF = menu_create( "Modulation frequency",
+                          sprint( "# kHz", freqs[ 1 ] / 1 kHz ) );
+        C = 0;
+		IF mod_freq == freqs[ 1 ] {
+			C = 1;
+		}
+		FOR I = 2 : size( freqs ) {
+			menu_add( MF, sprint( "# kHz", freqs[ I ] / 1 kHz ) );
+			IF mod_freq == freqs[ I ] {
+	    		C = I;
+			}
+    	}
+		IF C != 0 {
+			menu_choice( MF, C );
+		} ELSE {
+			FOR I = 1 : size( freqs ) {
+				IF mod_freq > freqs[ I ] {
+					mod_freq = lockin_ref_freq( freqs[ I ] );
+					C = I;
+					menu_choice( MF, I );
+					BREAK;
+				}
+			}
+			IF C == 0 {
+				mod_freq = lockin_ref_freq( freqs[ size( freqs ) ] );
+				menu_choice( MF, size( freqs ) );
+			}
+		}
+	} ELSE {
+        min_freq = freqs[ size( freqs ) ];
+	    max_freq = freqs[ 1 ];
+	    IF mod_freq > max_freq {
+			mod_freq = lockin_ref_freq( max_freq );
+		} ELSE IF mod_freq < min_freq {
+			mod_freq = lockin_ref_freq( min_freq );
+		}
+		MF = input_create( "FLOAT_INPUT", mod_freq / 1 kHz,
+		   	 			   "Modulation frequency [kHz]" );
+	}
+}
+
+/* Create the input field for the modulation amplitude (in G) */
+
+mod_ampl =   raw_ampl
+           * epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
+MA = input_create( "FLOAT_INPUT", mod_ampl, "Modulation amplitude [G]" );
+=== endif
+
+Pause = button_create( "PUSH_BUTTON", "Pause acquisition" );
+button_state( Pause, Acq_State ? 0 : 1 );
+Clear = button_create( "NORMAL_BUTTON", "Clear screen" );
+hide_toolbox( "OFF" );
+
+lockin_lock_keyboard( "OFF" );
+
+I = 1;
+
+FOREVER {
+	/* If acquisition is stopped and sweep is off wait a bit */
+
+	IF Acq_State == 0 AND Sweep_State == 0 {
+		wait( 0.2 s );
+	}
+
+	/* If acquisition isn't stopped get new value from lock-in and display it */
+
+	IF Acq_State {
+		wait( lockin_time_constant( ) );
+		data = lockin_get_data( 1, 2 ) / 1uV;
+		display_1d( I, data[ 1 ], 1,
+		            I, data[ 2 ], 2 );
+		I += 1;
+	}
+
+	/* Sweep up or down after checking that the field does not reach the upper
+	   or lower limits (stop sweep in that case) */
+
+    IF Sweep_State != STOPPED {
+		IF Sweep_State == UP {
+			IF current_field + field_step <= max_field {
+				current_field = magnet_field( current_field + field_step );
+				output_value( Current_Field, current_field );
+			} ELSE {
+                Sweep_State = STOPPED;
+                button_state( Sweep_Stop, "ON" );
+			    draw_marker( I, "YELLOW" );
+				object_enable( Sweep_Up, "OFF" );
+				object_enable( Sweep_Stop, "OFF" );
+			}
+		} ELSE {
+			IF current_field - field_step >= min_field {
+				current_field = magnet_field( current_field - field_step );
+				output_value( Current_Field, current_field );
+			} ELSE {
+                Sweep_State = STOPPED;
+                button_state( Sweep_Stop, "ON" );
+			    draw_marker( I, "YELLOW" );
+				object_enable( Sweep_Down, "OFF" );
+				object_enable( Sweep_Stop, "OFF" );
+			}
+		}
+	}
+
+=== if RESONATOR ne 'Unspecified'
+	/* If we've got a resonator with a calibration we have to monitor manual
+	   changes to the modulation frequency and amplitude */
+
+	new_mod_freq = lockin_ref_freq( );	
+	new_raw_ampl = lockin_ref_level( );
+
+	IF new_mod_freq != mod_freq {
+	    /* For a resonator that doesn't allow extrapolation don't allow
+		   manual changes of the modulation frequency (just reset any changes
+		   that have been made). For a resonator with extrapolation the
+		   modulation voltage of the lock-in must be changed so that the
+		   modulation amplitude in G stays the same (at least as far as
+		   possible) */
+
+		IF ! Can_extrapolate {
+			mod_freq = lockin_ref_freq( mod_freq );
+		} ELSE {
+			mod_freq = new_mod_freq;
+			mod_ampl = output_value( MA );
+			raw_ampl =   mod_ampl
+                    / epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
+			IF raw_ampl > max_ampl {
+				raw_ampl = max_ampl;
+			} ELSE IF raw_ampl < min_ampl {
+				raw_ampl = min_ampl;
+			}
+			new_raw_ampl = raw_ampl;
+			lockin_ref_level( raw_ampl );
+			mod_ampl = raw_ampl
+                   * epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
+			output_value( MA, mod_ampl );
+		}
+	}
+
+	/* If the amplitude got changed manually show it in the modulation amplitude
+	   input field */
+
+	IF raw_ampl != new_raw_ampl {
+		raw_ampl = new_raw_ampl;
+		mod_ampl =   raw_ampl
+                   * epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
+		output_value( MA, mod_ampl );
+	}
+=== endif
+
+	/* If nothing in the toolbox changed we're done */
+
+	IF ! toolbox_changed( ) {
+		NEXT;
+	}
+
+	/* If a new field has been set enable the "Set field" button if the
+	   value is within limits, otherwise disable it */
+
+	IF input_changed( New_Field ) {
+		dval = input_value( New_Field );
+		IF dval > max_field OR dval < min_field {
+			object_enable( Set_Field, "OFF" );
+		} ELSE {
+			object_enable( Set_Field, "ON" );
+		}
+	}
+
+	/* If "Set field" button was clicked on set the new field (if possible) */
+
+	IF button_changed( Set_Field ) AND button_state( Set_Field ) {
+		dval = input_value( New_Field );
+		IF dval > max_field OR dval < min_field {
+			object_enable( Set_Field, "OFF" );
+			NEXT;
+		}
+		IF dval < max_field {
+			object_enable( Sweep_Up, "ON" );
+		}
+		IF dval > min_field {
+			object_enable( Sweep_Down, "ON" );
+		}
+
+		current_field = magnet_field( dval );
+		output_value( Current_Field, current_field );
+		draw_marker( I, "BLUE" );
+	}
+
+	/* Handle changes of the "Field step" input field */
+
+	IF input_changed( Field_Step ) {
+		dval = input_value( Field_Step );
+		IF dval < min_field_step OR dval > max_field_step {
+			input_value( Field_Step, field_step );
+			NEXT;
+		}
+
+		field_step = dval;
+	}
+
+	IF     button_changed( Sweep_Up )
+	   AND button_state( Sweep_Up )
+       AND current_field < max_field {
+		Sweep_State = UP;
+        draw_marker( I, "RED" );
+		object_enable( Sweep_Down, "ON" );
+		object_enable( Sweep_Stop, "ON" );
+	}
+
+	IF     button_changed( Sweep_Down )
+	   AND button_state( Sweep_Down )
+	   AND current_field > min_field {
+		Sweep_State = DOWN;
+        draw_marker( I, "GREEN" );
+		object_enable( Sweep_Up, "ON" );
+		object_enable( Sweep_Stop, "ON" );
+	}
+
+	IF button_changed( Sweep_Stop ) AND button_state( Sweep_Stop ) {
+	    Sweep_State = STOPPED;
+	    draw_marker( I, "YELLOW" );
+		IF current_field > min_field {
+			object_enable( Sweep_Up, "ON" );
+		}
+		IF current_field - field_step < max_field {
+			object_enable( Sweep_Down, "ON" );
+		}
+	}
+
+=== if RESONATOR ne 'Unspecified'
+	/* If the modulation amplitude input field was changed set the new
+	   amplitude at the lock-in after making sure the new value is within
+	   the limits the lock-in can produce */
+
+	IF input_changed( MA ) {
+		raw_ampl = input_value( MA )
+                   / epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
+		IF raw_ampl > max_ampl {
+			raw_ampl = max_ampl;
+		} ELSE IF raw_ampl < min_ampl {
+			raw_ampl = min_ampl;
+		}
+		raw_ampl = lockin_ref_level( raw_ampl );
+		mod_ampl = raw_ampl
+                   * epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
+		input_value( MA, mod_ampl );
+	}
+
+	/* Changes of the modulation frequency input field can only happen for
+	   resonators for which extrapolation isn't allowed. For those the do
+	   allow interpolation and input field has to be checked, for those
+	   without interpolation a menu. After changing the frequency also the
+       modulation set at the lock-in has to be changed to keep the modulation
+	   amplitude (in G) constant. */
+
+	IF     ! Can_extrapolate
+	   AND (    (   Can_interpolate AND input_changed( MF ) )
+	         OR ( ! Can_interpolate AND menu_changed( MF )  ) ) {
+		IF Can_interpolate {
+			mod_freq = input_value( MF ) * 1 kHz;
+			IF mod_freq < min_freq {
+				mod_freq = min_freq;
+			} ELSE IF new_mod_freq > max_freq {
+				mod_freq = max_freq;
+			}
+			mod_freq = lockin_ref_freq( mod_freq );
+		} ELSE {
+			mod_freq = freqs[ menu_choice( MF ) ];
+			mod_freq = lockin_ref_freq( mod_freq );
+		}
+
+		raw_ampl =   mod_ampl
+                   / epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
+		IF raw_ampl > max_ampl {
+			raw_ampl = max_ampl;
+		} ELSE IF raw_ampl < min_ampl {
+			raw_ampl = min_ampl;
+		}
+		mod_ampl =   raw_ampl
+                   * epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
+		input_value( MA, mod_ampl );
+	}
+=== endif	
+
+	IF button_changed( Pause ) {
+		Acq_State = button_state( Pause ) ? 0 : 1;
+	}
+
+	IF button_changed( Clear ) {
+	    button_state( Clear );
+        clear_curve_1d( 1, 2 );
+        clear_marker_1d( );
+        I = 1;
+        rescale_1d( 64 );
+    }
+}
