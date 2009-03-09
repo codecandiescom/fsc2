@@ -384,6 +384,7 @@ f_madd_parent( Var_T * v )
 
     for  ( i = io->num_items - add_count; i < io->num_items; i++ )
         io->menu_items[ i ] = NULL;
+
     for ( i = io->num_items - add_count; v != NULL && i < io->num_items;
           i++, v = vars_pop( v ) )
     {
