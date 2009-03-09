@@ -102,6 +102,7 @@
 * tegam2714a_p::    TEGAM 2714A Arbitrary Waveform Generator (as pulser)
 * thurlby330::      Thurlby & Thandar Power Supply PL330DP
 * witio_48::        Wasco WITIO-48 DIO card
+* epr_mod::         EPR Modulation Module
 @end menu
 
 @end ifnottex
@@ -4100,7 +4101,7 @@ In the GPIB configuration file use @code{"THURLBY330"} as the device name,
 
 @c #############################################################
 
-@node witio_48, ,thurlby330, Device Reference
+@node witio_48, epr_mod, thurlby330, Device Reference
 @iftex
 @subheading Wasco WITIO-48 DIO card
 @end iftex
@@ -4130,4 +4131,52 @@ library are part of the @code{fsc2} package)
 @item @ref{dio_reserve_dio()}
 @item @ref{dio_mode()}
 @item @ref{dio_value()}
+@end table
+
+
+@c #############################################################
+
+@node epr_mod, , witio_48, Device Reference
+@iftex
+@subheading EPR Modulation Module
+@end iftex
+@ifnottex
+@section EPR Modulation Module
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{epr_mod}
+
+@paragraphindent 0
+@strong{Description}: This is a pseudo-device that can be used to
+store and retrieve information about modulation settings for
+combinations of a lock-in and a resonator, like the ratio between the
+modulation voltage set at the lock-in and the resulting modulation
+amplitude at the resonator etc.
+
+@paragraphindent 0
+@strong{Note}: See the @file{epr_modulation} utility that lets you
+edit the settings for already existing resonators and create new ones.
+
+@paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{epr_modulation_name()}
+@item @ref{epr_modulation_name()}
+@item @ref{epr_modulation_ratio()}
+@item @ref{epr_modulation_phase()}
+@item @ref{epr_modulation_has_phase()}
+@item @ref{epr_modulation_calibration_interpolate()}
+@item @ref{epr_modulation_calibration_can_interpolate()}
+@item @ref{epr_modulation_calibration_extrapolate()}
+@item @ref{epr_modulation_calibration_can_extrapolate()}
+@item @ref{epr_modulation_add_calibration()}
+@item @ref{epr_modulation_delete_calibration()}
+@item @ref{epr_modulation_calibration_count()}
+@item @ref{epr_modulation_calibration_name()}
+@item @ref{epr_modulation_calibration_frequencies()}
+@item @ref{epr_modulation_store()}
 @end table

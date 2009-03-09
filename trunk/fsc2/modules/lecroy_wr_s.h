@@ -22,6 +22,10 @@
  */
 
 
+#if ! defined LECROY_WR_S_HEADER
+#define LECROY_WR_HEADER_S
+
+
 #include "fsc2_module.h"
 #include "serial.h"
 
@@ -116,7 +120,7 @@
 /* Total number of channels */
 
 #define LECROY_WR_MAX_CHANNELS       12
-#define LECROY_WR_TOTAL_CHANNELS     14
+#define LECROY_WR_TOTAL_CHANNELS     15
 
 
 /* Maximum and minimum sensitivity (in V/div) */
@@ -145,7 +149,8 @@
 
 
 /* Include a file with model dependend settings (it needs to be included
- * here since it relies on some of the above definitions */
+ * here since it relies on some of the above definitions. This only is to
+ * be included after the configuration file for the device! */
 
 #include "lecroy_wr_models.h"
 
@@ -468,6 +473,9 @@ void lecroy_wr_tbas_prep( void );
 void lecroy_wr_hori_res_prep( void );
 
 void lecroy_wr_clean_up( void );
+
+
+#endif /* ! defined LECROY_WR_S_HEADER */
 
 
 /*

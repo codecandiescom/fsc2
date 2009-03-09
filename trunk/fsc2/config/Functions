@@ -496,7 +496,7 @@ epr_modulation_calibration_name, 1, ALL;
 epr_modulation_calibration_interpolate, -1, ALL;
 epr_modulation_calibration_can_interpolate, 1, ALL;
 epr_modulation_calibration_extrapolate, -1, ALL;
-epr_modulation_calibration_can_extrapolate, 11, ALL;
+epr_modulation_calibration_can_extrapolate, 1, ALL;
 epr_modulation_calibration_frequencies, 1, ALL;
 epr_modulation_store, 0, ALL;
 

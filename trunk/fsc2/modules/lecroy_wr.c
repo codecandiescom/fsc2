@@ -1359,9 +1359,9 @@ digitizer_trigger_coupling( Var_T * v )
 
             case EXPERIMENT :
                 lecroy_wr.trigger_coupling[ channel ] =
-                                      lecroy_wr_get_trigger_coupling( channel );
+                                     lecroy_wr_get_trigger_coupling( channel );
                 return vars_push( INT_VAR,
-                               ( long ) lecroy_wr.trigger_coupling[ channel ] );
+                              ( long ) lecroy_wr.trigger_coupling[ channel ] );
         }
 
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
@@ -1802,7 +1802,7 @@ digitizer_get_curve( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD
+    if (    ch >= LECROY_WR_TA && ch <= LECROY_WR_TD
          && ! lecroy_wr.is_avg_setup[ ch ] )
     {
         print( FATAL, "Averaging has not been initialized for "
@@ -2055,7 +2055,7 @@ digitizer_get_amplitude( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD
+    if (    ch >= LECROY_WR_TA && ch <= LECROY_WR_TD
          && ! lecroy_wr.is_avg_setup[ ch ] )
     {
         print( FATAL, "Averaging has not been initialized for "

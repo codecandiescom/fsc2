@@ -7714,12 +7714,14 @@ Returns a string with the name of the pseudo-device.
 @anchor{epr_modulation_ratio()}
 @findex epr_modulation_ratio()
 @item epr_modulation_ratio()
-This function is for quering or setting the modulation field to voltage
-ratio for a certain frequency and calibration. Expects at least two
-arguments, first the calibration name (a string) and a positive, non-zero
-frequency. If the there is no further argument the function returns the
-ratio of the modulation field to the modulation frequency (in G/V) if
-possible.
+This function is for quering or setting the modulation field to
+voltage (or whatever the default unit for the device is) ratio for a
+certain frequency and calibration. The function requires at least two
+arguments, first the calibration name (a string) and a positive,
+non-zero frequency. If the there is no further argument the function
+returns the ratio of the modulation field to the modulation frequency
+(in G/V or the ratio of the modulation field in Gauss to the unit used
+by the device for specifying modulation amplitudes) if possible.
 
 The following algorithm is used to determine the field/voltage ratio:
 If the frequency is identical to one known for the calibration the
@@ -7783,24 +7785,24 @@ frequencies and a phase is known for this frequency the function returns
 @anchor{epr_modulation_calibration_interpolate()}
 @findex epr_modulation_calibration_interpolate()
 @item epr_modulation_calibration_interpolate()
-The function allows tp either query or set if interpolation (for
+The function allows to either query or set if interpolation (for
 modulation field to voltage ratios) is allowed for a certain
 calibration. The function expects at least one argument, the name
 of the calibration (as a string). If there's no further argument
 the function returns @code{1} if interpolation is allowed for
-the calibration, otherwise @code{1}.
+the calibration, otherwise @code{0}.
 
 If there's another argument it must be of boolean type, i.e.@: either
 @code{"ON"} or @code{1} to permit interpolation or @code{"OFF"} or
 @code{0} to disable interpolation. Please note that allowing
-interpolation does not gurantee that interpolation can be done since
+interpolation does not guaqrantee that interpolation can be done since
 this also requires that there are at least 3 known frequencies and
 that the correlation coefficient of a least square fit is at least as
 large as set in the configuration file. Whether interpolation is
 possible for a certain calibration can be determined by calling the
 function @code{@ref{epr_modulation_calibration_can_interpolate()}}.
 Please note also that allowing or disabling intrepolation for a
-frequency only is in effect until the @code{EDL} script ends unless
+calibration only is in effect until the @code{EDL} script ends unless
 the function @ref{epr_modulation_store()} is called afterwards to make
 this setting permanent.
 
@@ -7813,31 +7815,31 @@ a calibration. The function requires a single rgument, the name of
 the calibration (as a string). Itt returns @code{1} if interpolation
 can be done, otherwise @code{0}. Interpolation is possible if it's
 allowed for the calibration, ratios for at least 3 frequencies are
-known and the correlation coeficient for a least square fit is
+known and the correlation coefficient for a least square fit is
 at least as large as set in the configuration file for the device.
 
 
 @anchor{epr_modulation_calibration_extrapolate()}
 @findex epr_modulation_calibration_extrapolate()
 @item epr_modulation_calibration_extrapolate()
-The function allows tp either query or set if extrapolation (for
-modulation field to voltage ratios) is allowed for a certain
-calibration. The function expects at least one argument, the name
-of the calibration (as a string). If there's no further argument
-the function returns @code{1} if extrapolation is allowed for
-the calibration, otherwise @code{1}.
+The function allows to query or set if extrapolation (for modulation
+field to voltage ratios) is allowed for a certain calibration. The
+function expects at least one argument, the name of the calibration
+(as a string). If there's no further argument the function returns
+@code{1} if extrapolation is allowed for the calibration, otherwise
+@code{0}.
 
 If there's another argument it must be of boolean type, i.e.@: either
 @code{"ON"} or @code{1} to permit extrapolation or @code{"OFF"} or
 @code{0} to disable extrapolation. Please note that allowing
 extrapolation does not gurantee that extrapolation can be done since
 this also requires that there are at least 3 known frequencies and
-that the correlation coefficient of a least square fit is at least as
-large as set in the configuration file. Whether extrapolation is
+that the correlation coefficient of the least square fit is at least
+as large as set in the configuration file. Whether extrapolation is
 possible for a certain calibration can be determined by calling the
 function @code{@ref{epr_modulation_calibration_can_extrapolate()}}.
 Please note also that allowing or disabling intrepolation for a
-frequency only is in effect until the @code{EDL} script ends unless
+calibration only is in effect until the @code{EDL} script ends unless
 the function @code{@ref{epr_modulation_store()}} is called afterwards
 to make this setting permanent.
 
@@ -7845,13 +7847,13 @@ to make this setting permanent.
 @anchor{epr_modulation_calibration_can_extrapolate()}
 @findex epr_modulation_calibration_can_extrapolate()
 @item epr_modulation_calibration_can_extrapolate()
-This function allows to determine if extrapolation is possible for
-a calibration. The function requires a single rgument, the name of
-the calibration (as a string). Itt returns @code{1} if extrapolation
-can be done, otherwise @code{0}. Extrapolation is possible if it's
-allowed for the calibration, ratios for at least 3 frequencies are
-known and the correlation coeficient for a least square fit is
-at least as large as set in the configuration file for the device.
+This function allows to determine if extrapolation is possible for a
+calibration. The function requires a single rgument, the name of the
+calibration (as a string). Itt returns @code{1} if extrapolation can
+be done, otherwise @code{0}. Extrapolation is possible if it's allowed
+for the calibration, ratios for at least 3 frequencies are known and
+the correlation coefficient for the least square fit is at least as
+large as set in the configuration file for the device.
 
 
 @anchor{epr_modulation_add_calibration()}

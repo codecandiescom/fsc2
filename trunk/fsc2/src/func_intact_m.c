@@ -62,9 +62,9 @@ f_mcreate( Var_T * var )
     CLOBBER_PROTECT( new_io );
     CLOBBER_PROTECT( ioi );
 
-    /* At least a label and two menu entries must be specified */
+    /* At least a label and one menu entry must be specified */
 
-    if ( v == NULL || v->next == NULL || v->next->next == NULL )
+    if ( v == NULL || v->next == NULL )
     {
         print( FATAL, "Missing arguments.\n" );
         THROW( EXCEPTION );

@@ -125,8 +125,8 @@
 
 /* Maximum and minimum sensitivity (in V/div) */
 
-#define LECROY_WR_MAX_SENS     2.0e-3     /* 2 mV */
-#define LECROY_WR_MIN_SENS     10.0       /* 10 V */
+#define LECROY_WR_MAX_SENS           2.0e-3     /* 2 mV */
+#define LECROY_WR_MIN_SENS           10.0       /* 10 V */
 
 
 /* The trigger delay can be set with a resolution of 1/10 of the timebase */

@@ -308,7 +308,6 @@ lecroy_wr_get_timebase( void )
 
 
     lecroy_wr_talk( "TDIV?", reply, &length );
-    reply[ length - 1 ] = '\0';
     timebase = T_atod( reply );
 
     for ( i = 0; i < lecroy_wr.num_tbas; i++ )
@@ -403,8 +402,6 @@ lecroy_wr_get_memory_size( void )
 
 
     lecroy_wr_talk( "MSIZ?\r", reply, &length );
-    reply[ length - 1 ] = '\0';
-
     mem_size = strtol( reply, &end_p, 10 );
 
     if ( errno == ERANGE )
@@ -478,7 +475,6 @@ lecroy_wr_get_sens( int channel )
 
     sprintf( cmd, "C%1d:VDIV?", channel + 1 );
     lecroy_wr_talk( cmd, reply, &length );
-    reply[ length - 1 ] = '\0';
     return lecroy_wr.sens[ channel ] = T_atod( reply );
 }
 
@@ -523,7 +519,6 @@ lecroy_wr_get_offset( int channel )
 
     sprintf( buf, "C%1d:OFST?", channel + 1 );
     lecroy_wr_talk( buf, buf, &length );
-    buf[ length - 1 ] = '\0';
     return  lecroy_wr.offset[ channel ] = T_atod( buf );
 }
 
@@ -569,7 +564,6 @@ lecroy_wr_get_coupling( int channel )
 
     sprintf( buf, "C%1d:CPL?", channel + 1 );
     lecroy_wr_talk( buf, buf, &length );
-    buf[ length - 1 ] = '\0';
 
     if ( buf[ 0 ] == 'A' )
         type = LECROY_WR_CPL_AC_1_MOHM;
@@ -638,7 +632,6 @@ lecroy_wr_get_bandwidth_limiter( int channel )
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
     lecroy_wr_talk( buf, buf, &length );
-    buf[ length - 1 ] = '\0';
 
     /* We have to distinguish two cases: if the global bandwith limiter is
        on or if all channels have the same limiter setting only a single
@@ -720,7 +713,6 @@ lecroy_wr_set_bandwidth_limiter( int channel,
     /* We first need to check if the global bandwidth limiter is on or off. */
 
     lecroy_wr_talk( buf, buf, &length );
-    buf[ length - 1 ] = '\0';
 
     fsc2_assert( buf[ 1 ] == 'N' || buf[ 1 ] == 'F' );
 
@@ -806,7 +798,6 @@ lecroy_wr_get_trigger_source( void )
 
 
     lecroy_wr_talk( "TRSE?", reply, &length );
-    reply[ length - 1 ] = '\0';
 
     if (    strncmp( reply, "STD,SR,", 7 )
          && strncmp( reply, "EDGE,SR,", 8 ) )
@@ -893,7 +884,6 @@ lecroy_wr_get_trigger_level( int channel )
         strcpy( buf, "EX10:TRLV?\r" );
 
     lecroy_wr_talk( buf, buf, &length );
-    buf[ length - 1 ] = '\0';
     return lecroy_wr.trigger_level[ channel ] = T_atod( buf );
 }
 
@@ -1164,7 +1154,6 @@ lecroy_wr_get_trigger_delay( void )
 
 
     lecroy_wr_talk( "TRDL?\r", reply, &length );
-    reply[ length - 1 ] = '\0';
     lecroy_wr.trigger_delay = T_atod( reply );
 
     /* Positive delays (i.e. when pretrigger is on) get returned from the
@@ -1507,7 +1496,7 @@ lecroy_wr_get_prep( int              ch,
         /* ...and fetch 'em */
 
         *data = lecroy_wr_get_data( length );
-        *length = ( *length - 2 ) / 4; /* we got hex encoded 16 bit data
+        *length = ( *length - 2 ) / 4; /* we get hex encoded 16 bit data
                                           (MSB first) with trailing <LF><CR> */
 
         /* Get the gain factor and offset for the date we just fetched */
@@ -1813,7 +1802,6 @@ lecroy_wr_get_int_value( int          ch,
         fsc2_impossible( );
 
     lecroy_wr_talk( cmd, cmd, &length );
-    cmd[ length - 1 ] = '\0';
 
     while ( *ptr && *ptr++ != ':' )
         /* empty */ ;
@@ -1863,7 +1851,6 @@ lecroy_wr_get_float_value( int          ch,
         fsc2_impossible( );
 
     lecroy_wr_talk( cmd, cmd, &length );
-    cmd[ length - 1 ] = '\0';
 
     while ( *ptr && *ptr++ != ':' )
         /* empty */ ;
@@ -1917,7 +1904,6 @@ lecroy_wr_get_inr( void )
 
 
     lecroy_wr_talk( "INR?\r", reply, &length );
-    reply[ length - 1 ] = '\0';
     return ( unsigned int ) T_atoi( reply );
 }
 
@@ -1935,10 +1921,11 @@ lecroy_wr_talk( const char * cmd,
 
     if (    fsc2_serial_write( SERIAL_PORT, cmd, to_send,
                                TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send
-         || ( *length = fsc2_serial_read( SERIAL_PORT, reply, *length, NULL,
+         || ( *length = fsc2_serial_read( SERIAL_PORT, reply, *length, "\r",
                                         TIMEOUT_FROM_LENGTH( *length ), SET ) )
                                                                          <= 0 )
         lecroy_wr_comm_failure( );
+    reply[ *length - 1 ] = '\0';
     return OK;
 }
 
