@@ -363,8 +363,6 @@ sub get_menu_entries {
         $mstr =~ /^"((\\"|[^"])*)"/og;
         push @menu_entries, $1;
         push @menu_entries, $1 while $mstr =~ /\G\s*,\s*"((\\\"|[^\"])*)"/go;
-        die "Less than 2 entries in menu descriptor starting at line $lino\n"
-            if @menu_entries < 2;
         die "Syntax error in menu descriptor starting at line $lino\n"
             unless $' =~ /^\s*$/;
         $hr->{ menu_entries } = \@menu_entries;

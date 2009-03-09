@@ -382,9 +382,9 @@ f_madd_parent( Var_T * v )
     io->menu_items = T_realloc( io->menu_items,
                                 io->num_items * sizeof *io->menu_items );
 
-    for  ( i = add_count; i < io->num_items; i++ )
+    for  ( i = io->num_items - add_count; i < io->num_items; i++ )
         io->menu_items[ i ] = NULL;
-    for ( i = add_count; v != NULL && i < io->num_items;
+    for ( i = io->num_items - add_count; v != NULL && i < io->num_items;
           i++, v = vars_pop( v ) )
     {
         io->menu_items[ i ] = T_strdup( v->val.sptr );

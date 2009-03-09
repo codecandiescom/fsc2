@@ -1,4 +1,4 @@
-=== RESONATOR menu [ "Unspecified", "Doppelmode" ] [ 1 ] "Resonator"
+=== RESONATOR menu [ "Unspecified", "Raumtemperatur 1" ] [ 1 ] "Resonator"
 DEVICES:
 
 er032m;
@@ -139,6 +139,7 @@ MA = input_create( "FLOAT_INPUT", mod_ampl, "Modulation amplitude [%]" );
 === else
 MF = menu_create( "Modulation frequency",
                   sprint( "# kHz", freqs[ 1 ] / 1 kHz ) );
+print( "YYY #\n", mod_freq );
 menu_choice( MF, 1 );
 FOR I = 2 : size( freqs ) {
 	menu_add( MF, sprint( "# kHz", freqs[ I ] / 1 kHz ) );

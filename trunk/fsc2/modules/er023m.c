@@ -131,9 +131,10 @@ er023m_test_hook( void )
 int
 er023m_exp_hook( void )
 {
-    /* Store the current state and initialize the lock-in */
+    /* Reset device structure to what i was before the last run and
+       initialize the lock-in */
 
-    er023m_store = er023m;
+    er023m = er023m_store;
 
     if ( ! er023m_init( DEVICE_NAME ) )
     {

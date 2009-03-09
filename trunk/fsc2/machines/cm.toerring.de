@@ -1,0 +1,39 @@
+# -*-Makefile-*-
+#
+# $Id: gpt.toerring.de 8019 2007-01-06 18:31:15Z jens $
+
+IS_NOT_A_I386        := yes
+OWNER                := fsc2
+GROUP                := dialout
+EDITOR               := emacs
+GPIB_LIBRARY         := SLG
+GPIB_HEADER_DIR      := /usr/local/include/gpib
+GPIB_LOG_FILE        := /tmp/fsc2_gpib.log
+GPIB_LOG_LEVEL       := HIGH
+NUM_SERIAL_PORTS     := 3
+SERIAL_LOCK_DIR      := /var/lock
+SERIAL_LOG_FILE      := /tmp/fsc2_serial.log
+SERIAL_LOG_LEVEL     := HIGH
+LAN_LOG_FILE         := /tmp/fsc2_lan.log
+LAN_LOG_LEVEL        := HIGH
+WITH_NI6601          := yes
+ni6601_libs          := libni6601.so
+WITH_ME6000          := yes
+me6000_libs          := libme6x00.so
+#WITH_RS_SPEC10       := yes
+#rs_spec10_libs       := libpvcam.so
+WITH_WITIO_48        := yes
+witio_48_libs        := libwitio_48.so
+WITH_PCI_MIO_16E_1   := yes
+pci_mio_16e_1_libs   := libni_daq.so
+WITH_RULBUS          := yes
+rulbus_incl_path     := /usr/local/include
+rulbus_lib_path      := /usr/local/lib
+WITH_MEDRIVER        := yes
+medriver_incl_path   := /usr/local/include/medriver
+medriver_lib_path    := /usr/lib/local
+WITH_LIBUSB          := yes
+NO_MAIL              := yes
+MAIL_ADDRESS         := jt@toerring.de
+BROWSER              := /usr/bin/firefox 
+DESCRIPTION          := "Test machine"

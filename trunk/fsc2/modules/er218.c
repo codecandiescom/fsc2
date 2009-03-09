@@ -78,7 +78,7 @@ static void er218_go_cmd( int          dir,
 static void er218_toggle( unsigned char bit );
 static void er218_strobe_wait( unsigned int duration );
 static void er218_position_wait( unsigned int steps );
-static void er218_set_dio( int           ch,
+static void er218_set_dio( int           dio,
                            unsigned char data );
 
 
@@ -281,6 +281,7 @@ er218_exit_hook( void )
 {
     int i;
 
+
     for ( i = 0; i < 2; i++ )
     {
         if ( er218.dio_out_func[ i ] )
@@ -309,6 +310,7 @@ Var_T *
 goniometer_backslash_correction( Var_T * v )
 {
     bool bc;
+
 
     if ( v != NULL )
     {
@@ -406,6 +408,7 @@ Var_T *
 goniometer_increment_angle( Var_T * v )
 {
     double delta;
+
 
     if ( v == NULL )
     {
@@ -612,7 +615,7 @@ static void
 er218_go_cmd( int          dir,
               unsigned int data )
 {
-    /* Step 1: send the number of steps (vaku emust be sent inverted) */
+    /* Step 1: send the number of steps (value emust be sent inverted) */
 
     er218.dio1_data = DATA_CMD;
     er218_set_dio( 0, er218.dio1_data );
@@ -656,6 +659,7 @@ er218_go_cmd( int          dir,
     er218.dio1_data = STORE_DATA & 0xFF;
     er218_set_dio( 0, er218.dio1_data );
 
+    er218.dio2_data = STORE_DATA >> 8 & 0x0F;
     er218_set_dio( 1, er218.dio2_data );
 
     er218_toggle( DATA_LATCH );
@@ -679,7 +683,6 @@ er218_toggle( unsigned char bit )
     er218_set_dio( 1, er218.dio2_data | bit );
     er218_strobe_wait( STROBE_WAIT );
     er218_set_dio( 1, er218.dio2_data );
-    er218_strobe_wait( STROBE_WAIT );
 }
 
 

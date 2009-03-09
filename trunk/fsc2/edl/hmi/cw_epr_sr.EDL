@@ -3,7 +3,7 @@
 === FIELD_STEP float [ 0.001 : 1600 ] [ 1 ] "Field step size" "G"
 === NUM_SCANS int [ 0 : ][ 0 ] "Number of scans"
 === FACTOR float [ 1.0e-3 : 100 ] [ 1.0  ] "Waiting time"  "* tc"
-=== RESONATOR menu [ "Unspecified", "Doppelmode", "Hochtemperatur", "Tieftemperatur" ] [ 1 ] "Resonator"
+=== RESONATOR menu [ "Unspecified" ] [ 1 ] "Resonator"
 === MODFREQ float_empty [ 0.000001 : 102 ] [ 100 ] "Modulation frequncy" "kHz"
 === MODAMP float_empty [ 0 : ] [ 1 ] "Modulation amplitude" "G"
 === MODPHASE float_empty [ -360 : 360 ] "Modulation phase" "°"
