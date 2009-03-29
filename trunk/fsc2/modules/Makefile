@@ -90,6 +90,7 @@ rb_pulser_w     := rb_pulser_w.c rb_pulser_w_gen.c rb_pulser_w_pulse.c \
 				   rb_pulser_w_ll.c rb_pulser_w_lexer.c
 oriel_matrix    := oriel_matrix.c oriel_matrix_ll.c
 epr_mod         := epr_mod.c epr_mod_util.c epr_mod_lexer.c
+bvt3000         := bvt3000.c bvt3000_ll.c eurotherm902s_ll.c
 
 
 # List of all "complicated" modules that are to be made from more than a
@@ -118,13 +119,16 @@ comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a        \
 				   lecroy_ws epr_mod
 endif
 
+
 # Support for devices controlled via the serial port
 
 ifneq ($(NUM_SERIAL_PORTS),0)
 simp_modules    += aeg_s_band aeg_x_band er035m_s er035m_sas hjs_daadc  \
-				   $(s_band_list) fsps25 smsmotor bvt3000
-comp_modules    += hjs_attenuator spectrapro_300i spex_cd2a spex232 lecroy_wr_s
+				   $(s_band_list) fsps25 smsmotor
+comp_modules    += hjs_attenuator spectrapro_300i spex_cd2a spex232 \
+                   lecroy_wr_s bvt3000
 endif
+
 
 # Support for the National Instruments 6601 General Purpose Counter
 # and Timer board
@@ -133,6 +137,7 @@ ifdef WITH_NI6601
 simp_modules    += ni6601
 endif
 
+
 # Support for the Wasco WITIO-48 DIO card
 
 ifdef WITH_WITIO_48
@@ -140,17 +145,20 @@ simp_modules    += witio_48 bnm12
 comp_modules    += hjs_fc
 endif
 
+
 # Support for the Roper Scientific Spec-10 CCD camera
 
 ifdef WITH_RS_SPEC10
 comp_modules    += rs_spec10
 endif
 
+
 # Support for the National Instruments PCI MIO 16E-1 DAQ card
 
 ifdef WITH_PCI_MIO_16E_1
 comp_modules    += pci_mio_16e_1
 endif
+
 
 # Support for devices controlled via the RULBUS
 
@@ -159,6 +167,7 @@ simp_modules    += rb8509 rb8510_0 rb8510_1
 comp_modules    += rb_pulser_j rb_pulser_w
 endif
 
+
 # Support for Meihaus data acquisition card (via Meilhaus supplied library)
 
 ifdef WITH_MEDRIVER
@@ -166,11 +175,13 @@ me_dio          :=  $(patsubst $(cdir)/%.conf,%,$(wildcard $(cdir)/me_dio_*.conf
 simp_modules    += $(me_dio) er218
 endif
 
+
 # Support for the Meilhaus ME-6000 DAC card (using library coming with fsc2)
 
 ifdef WITH_ME6000
 simp_modules    += me6000
 endif
+
 
 # Support Newport Oriel MMSS spectrometer
 
