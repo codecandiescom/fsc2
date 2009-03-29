@@ -1,8 +1,7 @@
 # -*-Makefile-*-
 #
-# $Id: gpt.toerring.de 8019 2007-01-06 18:31:15Z jens $
+# $Id$
 
-IS_NOT_A_I386        := yes
 OWNER                := fsc2
 GROUP                := dialout
 EDITOR               := emacs
@@ -33,7 +32,7 @@ WITH_MEDRIVER        := yes
 medriver_incl_path   := /usr/local/include/medriver
 medriver_lib_path    := /usr/lib/local
 WITH_LIBUSB          := yes
-NO_MAIL              := yes
+#NO_MAIL              := yes
 MAIL_ADDRESS         := jt@toerring.de
 BROWSER              := /usr/bin/firefox 
 DESCRIPTION          := "Test machine"

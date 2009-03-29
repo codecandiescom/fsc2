@@ -3,7 +3,7 @@
 #
 # $Id$
 #
-# Copyright (C) 2003-2009 Jens Thoms Toerring
+# Copyright (C) 2003-2008 Jens Thoms Toerring
 #
 # This file is part of fsc2.
 #
@@ -31,18 +31,18 @@ my @version = split /\./, $Tk::VERSION;
 die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
 	if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
 
-my $start_field      = "";
-my $end_field	       = "";
+my $start_field        = '';
+my $end_field	       = '';
 my $opt_end_fld        = $end_field;
-my $num_points         = "";
-my $tc			       = "300 ms";
-my $kd                 = "   2 Hz";
-my $how                = "Start experiment";
-my $method             = "Unidirectional";
-my $sweep_rate         = "";
+my $num_points         = '';
+my $tc			       = '300 ms';
+my $kd                 = '   2 Hz';
+my $how                = 'Start experiment';
+my $method             = 'Unidirectional';
+my $sweep_rate         = '';
 my $tau_per_point;
 my $sweep_time;
-my $kdt                = "";
+my $kdt                = '';
 my $old_kd = $kd;
 my $sleep_time         = 5;
 my @tcs                = ( '100 s', ' 30 s', ' 10 s', '  3 s', '  1 s',
@@ -55,33 +55,34 @@ my @kds                = ( '512 Hz', ' 256 Hz', ' 128 Hz', '  64 Hz',
 						   '   2 Hz', '   1 Hz', ' 1/2 Hz', ' 1/4 Hz',
 						   ' 1/8 Hz', '1/16 Hz' );
 
-my %fp = ( '-side' => 'top',
-		   '-fill' => 'x',
-		   '-padx' => '2m',
-		   '-pady' => '2m' );
+my %fp = ( -side => 'top',
+		   -fill => 'x',
+		   -padx => '2m',
+		   -pady => '2m' );
 
-my %wp = ( '-side' => 'left',
-		   '-fill' => 'x',
-		   '-expand' => 1 );
+my %wp = ( -side   => 'left',
+		   -fill   => 'x',
+		   -expand => 1 );
 
 # Create all the graphic stuff
 
 my $mw = MainWindow->new( );
-$mw->title( "cw_epr" );
+$mw->title( 'cw_epr' );
 
-my $mf = $mw->Frame( '-relief' => 'ridge', '-borderwidth' => '1m' );
+my $mf = $mw->Frame( -relief      => 'ridge',
+					 -borderwidth => '1m' );
 
 my $f1 = $mf->Frame( );
-my $f1_l1 = $f1->Label( '-text'           => 'Start field:',
-						'-width'          => '20',
-						'anchor'          => 'w' );
-my $f1_v = $f1->Entry( '-textvariable'    => \$start_field,
-					   '-width'           => '8',
-					   '-validate'        => 'key',
-					   '-validatecommand' => \&field_check,
-					   '-relief'          => 'sunken' );
-my $f1_l2 = $f1->Label( '-text'           => 'G',
-						'-width'          => 5 );
+my $f1_l1 = $f1->Label( -text           => 'Start field:',
+						-width          => '20',
+						-anchor         => 'w' );
+my $f1_v = $f1->Entry( -textvariable    => \$start_field,
+					   -width           => '8',
+					   -validate        => 'key',
+					   -validatecommand => \&field_check,
+					   -relief          => 'sunken' );
+my $f1_l2 = $f1->Label( -text           => 'G',
+						-width          => 5 );
 
 $f1->pack( %fp );
 $f1_l1->pack( %wp );
@@ -90,16 +91,16 @@ $f1_l2->pack( %wp );
 
 
 my $f2 = $mf->Frame( );
-my $f2_l1 = $f2->Label( '-text'          => 'End field:',
-						'-width'         => '20',
-						'anchor'         => 'w' );
-my $f2_v = $f2->Entry( '-textvariable'   => \$end_field,
-					   '-width'          => '8',
-					   '-validate'       => 'key',
-					   '-validatecommand'=> \&end_field_check,
-					   '-relief'         => 'sunken' );
-my $f2_l2 = $f2->Label( '-text'          => 'G',
-						'-width'         => 5 );
+my $f2_l1 = $f2->Label( -text           => 'End field:',
+						-width          => '20',
+						-anchor         => 'w' );
+my $f2_v = $f2->Entry( -textvariable    => \$end_field,
+					   -width           => '8',
+					   -validate        => 'key',
+					   -validatecommand => \&end_field_check,
+					   -relief          => 'sunken' );
+my $f2_l2 = $f2->Label( -text           => 'G',
+						-width          => 5 );
 
 $f2->pack( %fp );
 $f2_l1->pack( %wp );
@@ -108,16 +109,16 @@ $f2_l2->pack( %wp );
 
 
 my $f4 = $mf->Frame( );
-my $f4_l1 = $f4->Label( '-text'           => 'Number of points:',
-						'-width'          => '20',
-						'anchor'          => 'w' );
-my $f4_v = $f4->Entry( '-textvariable'    => \$num_points,
-					   '-width'           => '8',
-					   '-validate'        => 'key',
-					   '-validatecommand' => \&num_points_check,
-					   '-relief'          => 'sunken' );
-my $f4_l2 = $f4->Label( '-text'           => '',
-						'-width'          => 5 );
+my $f4_l1 = $f4->Label( -text           => 'Number of points:',
+						-width          => '20',
+						-anchor         => 'w' );
+my $f4_v = $f4->Entry( -textvariable    => \$num_points,
+					   -width           => '8',
+					   -validate        => 'key',
+					   -validatecommand => \&num_points_check,
+					   -relief          => 'sunken' );
+my $f4_l2 = $f4->Label( -text           => '',
+						-width          => 5 );
 
 $f4->pack( %fp );
 $f4_l1->pack( %wp );
@@ -126,60 +127,61 @@ $f4_l2->pack( %wp );
 
 
 my $f6 = $mf->Frame( );
-my $f6_l = $f6->Label( '-text'          => 'Time constant (tc):',
-					   '-width'         => '20',
-					   'anchor'         => 'w' );
-my $f6_m = $f6->Optionmenu( '-options'      => \@tcs,
-							'-width'        => 9,
-							'-command'      => \&tc_check,
-							'-textvariable' => \$tc );
+my $f6_l = $f6->Label( -text              => 'Time constant (tc):',
+					   -width             => '20',
+					   -anchor            => 'w' );
+my $f6_m = $f6->Optionmenu( -options      => \@tcs,
+							-width        => 9,
+							-command      => \&tc_check,
+							-textvariable => \$tc );
 $f6->pack( %fp );
 $f6_l->pack( %wp );
 $f6_m->pack( %wp );
 
 
 my $f7 = $mf->Frame( );
-my $f7_l = $f7->Label( '-text'          => 'Acquisition rate (kd):',
-					   '-width'         => '20',
-					   'anchor'         => 'w' );
-my $f7_m = $f7->Optionmenu( '-options'      => \@kds,
-							'-command'      => \&tpp_set,
-							'-width'        => 9,
-							'-textvariable' => \$kd );
+my $f7_l = $f7->Label( -text              => 'Acquisition rate (kd):',
+					   -width             => '20',
+					   -anchor            => 'w' );
+my $f7_m = $f7->Optionmenu( -options      => \@kds,
+							-command      => \&tpp_set,
+							-width        => 9,
+							-textvariable => \$kd );
 $f7->pack( %fp );
 $f7_l->pack( %wp );
 $f7_m->pack( %wp );
 
 
-$mf->pack( %fp, '-pady' => '1m' );
+$mf->pack( %fp, -pady => '1m' );
 
 my $f13 = $mf->Frame( );
-my $f13_l = $f13->Label( '-text'          => 'Sweep method:',
-						 '-width'         => '20',
-						 'anchor'         => 'w' );
-my $f13_m = $f13->Optionmenu( '-options'  => [ "Unidirectional",
-							                   "Bidirectional" ],
-							'-width'        => 9,
-							'-textvariable' => \$method );
+my $f13_l = $f13->Label( -text              => 'Sweep method:',
+						 -width             => '20',
+						 -anchor            => 'w' );
+my $f13_m = $f13->Optionmenu( -options      => [ "Unidirectional",
+												 "Bidirectional" ],
+							  -width        => 9,
+							  -textvariable => \$method );
 $f13->pack( %fp );
 $f13_l->pack( %wp );
 $f13_m->pack( %wp );
 
 
 
-my $mf2 = $mw->Frame( '-relief' => 'ridge', '-borderwidth' => '1m' );
+my $mf2 = $mw->Frame( -relief      => 'ridge',
+					  -borderwidth => '1m' );
 
 
 my $f3 = $mf2->Frame( );
-my $f3_l1 = $f3->Label( '-text'           => 'Sweep rate:',
-						'-width'          => '20',
-						'anchor'          => 'w' );
-my $f3_v = $f3->Entry( '-textvariable'    => \$sweep_rate,
-					   '-width'           => '8',
-					   '-state'           => 'disabled',
-					   '-relief'          => 'sunken' );
-my $f3_l2 = $f3->Label( '-text'           => 'G/s',
-						'-width'          => 5 );
+my $f3_l1 = $f3->Label( -text           => 'Sweep rate:',
+						-width          => '20',
+						-anchor         => 'w' );
+my $f3_v = $f3->Entry( -textvariable    => \$sweep_rate,
+					   -width           => '8',
+					   -state           => 'disabled',
+					   -relief          => 'sunken' );
+my $f3_l2 = $f3->Label( -text           => 'G/s',
+						-width          => 5 );
 
 $f3->pack( %fp );
 $f3_l1->pack( %wp );
@@ -188,56 +190,56 @@ $f3_l2->pack( %wp );
 
 
 my $f8 = $mf2->Frame( );
-my $f8_l1 = $f8->Label( '-text'           => 'tc\'s per point:',
-						'-width'          => '20',
-						'anchor'          => 'w' );
-my $f8_v = $f8->Entry( '-textvariable'    => \$tau_per_point,
-					   '-width'           => '8',
-					   '-state'           => 'disabled',
-					   '-relief'          => 'sunken' );
+my $f8_l1 = $f8->Label( -text           => 'tc\'s per point:',
+						-width          => '20',
+						-anchor         => 'w' );
+my $f8_v = $f8->Entry( -textvariable    => \$tau_per_point,
+					   -width           => '8',
+					   -state           => 'disabled',
+					   -relief          => 'sunken' );
 
 $f8->pack( %fp );
 $f8_l1->pack( %wp );
 $f8_v->pack( %wp );
 
 my $f12 = $mf2->Frame( );
-my $f12_l1 = $f12->Label( '-text'           => 'Time for single sweep:',
-						'-width'          => '20',
-						'anchor'          => 'w' );
-my $f12_v = $f12->Entry( '-textvariable'    => \$sweep_time,
-					   '-width'           => '8',
-					   '-state'           => 'disabled',
-					   '-relief'          => 'sunken' );
-my $f12_l2 = $f12->Label( '-text'           => '',
-						'-width'          => 5 );
+my $f12_l1 = $f12->Label( -text        => 'Time for single sweep:',
+						  -width       => '20',
+						  -anchor      => 'w' );
+my $f12_v = $f12->Entry( -textvariable => \$sweep_time,
+						 -width        => '8',
+						 -state        => 'disabled',
+						 -relief       => 'sunken' );
+my $f12_l2 = $f12->Label( -text        => '',
+						  -width       => 5 );
 
 $f12->pack( %fp );
 $f12_l1->pack( %wp );
 $f12_v->pack( %wp );
 $f12_l2->pack( %wp );
 
-my $f10 = $mf2->Button( '-text'    => 'Evaluate',
-						'-state'   => 'disabled',
-						'-command' => \&evaluate );
-$f10->pack( '-side' => 'top',
-			'-pady' => '3m' );
-$f10->bind( 'all', '<Control-e>' => \&evaluate );
+my $f10 = $mf2->Button( -text    => 'Evaluate',
+						-state   => 'disabled',
+						-command => \&evaluate );
+$f10->pack( -side => 'top',
+			-pady => '3m' );
+$f10->bind( 'all', <Control-e> => \&evaluate );
 
 
-$mf2->pack( %fp, '-pady' => '1m' );
+$mf2->pack( %fp, -pady => '1m' );
 
 
 my $f9 = $mf2->Frame( );
-my $f9_l1 = $f9->Label( '-text'           => 'Magnet wait time:',
-						'-width'          => '20',
-						'anchor'          => 'w' );
-my $f9_v = $f9->Entry( '-textvariable'    => \$sleep_time,
-					   '-width'           => '8',
-					   '-validate'        => 'key',
-					   '-validatecommand' => \&sleep_time_check,
-					   '-relief'          => 'sunken' );
-my $f9_l2 = $f9->Label( '-text'           => 's',
-						'-width'          => 5 );
+my $f9_l1 = $f9->Label( -text           => 'Magnet wait time:',
+						-width          => '20',
+						-anchor         => 'w' );
+my $f9_v = $f9->Entry( -textvariable    => \$sleep_time,
+					   -width           => '8',
+					   -validate        => 'key',
+					   -validatecommand => \&sleep_time_check,
+					   -relief          => 'sunken' );
+my $f9_l2 = $f9->Label( -text           => 's',
+						-width          => 5 );
 
 $f9->pack( %fp );
 $f9_l1->pack( %wp );
@@ -245,27 +247,28 @@ $f9_v->pack( %wp );
 $f9_l2->pack( %wp );
 
 
-$mw->Optionmenu( '-options' => [ ( 'Start experiment', 'Test program',
-								   'Load into fsc2' ) ],
-				 '-textvariable' => \$how,
-			   )->pack( '-padx' => '3m',
-						'-pady' => '3m' );
+$mw->Optionmenu( -options      => [ ( 'Start experiment',
+									  'Test program',
+									  'Load into fsc2' ) ],
+				 -textvariable => \$how,
+			   )->pack( -padx => '3m',
+						-pady => '3m' );
 
 my $f11 = $mw->Frame( );
-my $f11_a = $mw->Button( '-text'    => 'Apply',
-						 '-state'   => 'disabled',
-						 '-command' => \&write_out );
-$f11_a->bind( 'all', '<Control-a>' => \&write_out );
+my $f11_a = $mw->Button( -text    => 'Apply',
+						 -state   => 'disabled',
+						 -command => \&write_out );
+$f11_a->bind( 'all', <Control-a> => \&write_out );
 
-my $f11_q = $mw->Button( '-text' => 'Quit',
-						 '-command' => sub { &store_defs; $mw->destroy } );
-$f11_q->bind( 'all', '<Control-q>' => sub { &store_defs; $mw->destroy } );
+my $f11_q = $mw->Button( -text    => 'Quit',
+						 -command => sub { &store_defs; $mw->destroy } );
+$f11_q->bind( 'all', <Control-q> => sub { &store_defs; $mw->destroy } );
 
-$f11->pack( '-side' => 'top',
-			'-fill' => 'x',
-			'-padx' => '4m' );
-$f11_a->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
-$f11_q->pack( %wp, 'padx' => '5m', '-pady' => '3m' );
+$f11->pack( -side => 'top',
+			-fill => 'x',
+			-padx => '4m' );
+$f11_a->pack( %wp, -padx => '5m', -pady => '3m' );
+$f11_q->pack( %wp, -padx => '5m', -pady => '3m' );
 
 
 # Setup defaults
@@ -294,23 +297,23 @@ sub get_defs {
 
 	goto done_reading unless defined( $ne = <F> ) and $ne =~ /^#/;
 
-	goto done_reading unless defined( $ne = <F> )
-		and ( is_float1( $ne ) or $ne =~ /^$/ );
+	goto done_reading unless     defined( $ne = <F> )
+		                     and ( is_float1( $ne ) or $ne =~ /^$/ );
 	chomp $ne;
 	$start_field = $ne;
 
-	goto done_reading unless defined( $ne = <F> )
-			  and ( is_float2( $ne ) or $ne =~ /^$/ );
+	goto done_reading unless     defined( $ne = <F> )
+			                 and ( is_float2( $ne ) or $ne =~ /^$/ );
 	chomp $ne;
 	$end_field = $ne;
 
-	goto done_reading unless defined( $ne = <F> )
-			  and ( is_float2( $ne ) or $ne =~ /^$/ );
+	goto done_reading unless     defined( $ne = <F> )
+			                 and ( is_float2( $ne ) or $ne =~ /^$/ );
 	chomp $ne;
 	$opt_end_fld = $ne;
 
-	goto done_reading unless defined( $ne = <F> )
-			  and ( is_int( $ne ) or $ne =~ /^$/ );
+	goto done_reading unless     defined( $ne = <F> )
+			                 and ( is_int( $ne ) or $ne =~ /^$/ );
 	chomp $ne;
 	$num_points = $ne;
 
@@ -332,19 +335,23 @@ sub get_defs {
 	$kd = $ne;
 	$old_kd = $kd;
 
-	goto done_reading unless ( defined( $ne = <F> ) and
-		   ( $ne =~/^$/ or ( is_float2( $ne ) and $ne >= 0 ) ) );
+	goto done_reading unless ( defined( $ne = <F> )
+							   and
+							   (    $ne =~/^$/
+								 or ( is_float2( $ne ) and $ne >= 0 ) ) );
 	chomp $ne;
 	$sleep_time = $ne;
 
 
-	goto done_reading unless defined( $ne = <F> ) and
-		$ne =~ /^(Start experiment)|(Test program)|(Load into fsc2)$/;
+	goto done_reading
+		unless     defined( $ne = <F> )
+			   and $ne =~ /^(Start experiment)|(Test program)|(Load into fsc2)$/;
 	chomp $ne;
 	$how = $ne;
 
-	goto done_reading unless defined( $ne = <F> ) and
-		$ne =~ /^(Unidirectional)|(Bidirectional)$/;
+	goto done_reading
+		unless     defined( $ne = <F> )
+			   and $ne =~ /^(Unidirectional)|(Bidirectional)$/;
 	chomp $ne;
 	$method = $ne;
 
@@ -417,8 +424,8 @@ sub end_field_check {
 sub num_points_check {
 
 	if ( $_[ 0 ] =~ /^$/ or
-		 ( is_int( $_[ 0 ] ) and
-		   $_[ 0 ] <= 8191 ) ) {
+		 (     is_int( $_[ 0 ] )
+		   and $_[ 0 ] <= 8191 ) ) {
 		check_eval( $start_field, $end_field, $_[ 0 ] );
 		st_set( $_[ 0 ] );
 		$f11_a->configure( '-state' => 'disabled' )
@@ -542,9 +549,11 @@ sub is_int {
 sub check_eval {
 
 	my ( $s, $e, $n ) = @_;
-	my $is_ok = ( is_float1( $s ) and is_float2( $e )
+	my $is_ok = (     is_float1( $s ) 
+				  and is_float2( $e )
 				  and abs( $e - $s ) >= 0.0000999999
-				  and is_int( $n ) and $n > 1 ) ? 1 : 0;
+				  and is_int( $n )
+				  and $n > 1 ) ? 1 : 0;
 	$f10->configure( '-state' => $is_ok ? 'normal' : 'disabled' );
 	return $is_ok;
 }

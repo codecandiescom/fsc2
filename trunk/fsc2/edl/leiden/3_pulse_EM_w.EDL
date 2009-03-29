@@ -149,7 +149,7 @@ ON_STOP:
 fsave( File,
 	   "\n"
 	   "% Date:                   # #\n"
-	   "% Script:                 3_pulse_EM (J-band, Leiden)\n"
+	   "% Script:                 3_pulse_EM (W-band, Leiden)\n"
 	   "% Field:                  # G\n"
 	   "% Repetition time:        # ms\n"
 	   "% Length of 1st MW pulse: # ns\n"
@@ -158,6 +158,7 @@ fsave( File,
 	   "% P1-P2 separation:       # ns\n"
 	   "% Init. P2-P3 separation: # ns\n"
 	   "% P2-P3 increment:        # ns\n"
+	   "% Detection pulse delay:  DET_OFFSET ns\n"
 	   "% Number of averages:     >= #\n"
 	   "% ADC gain:               4\n"
 	   "% ADC channel(s):         ADC_CHANNELS\n",

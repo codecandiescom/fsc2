@@ -230,7 +230,7 @@ bug_report_callback( FL_OBJECT * a UNUSED_ARG,
  * This function sends an email to me when fsc2 crashes.
  *-------------------------------------------------------*/
 
-#if ! defined( NDEBUG ) && defined ( MAIL_ADDRESS )
+#if ! defined NDEBUG && defined MAIL_ADDRESS
 void
 death_mail( void )
 {

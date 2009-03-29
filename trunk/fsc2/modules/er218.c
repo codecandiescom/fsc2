@@ -47,7 +47,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define DOWN_CMD       0x1C
 
 #define SSTROBE        0x80
-#define ADDRESS_LATCH  0x10
+#define CMD_LATCH      0x10
 #define DATA_LATCH     0x20
 
 #define GO_UP    0
@@ -293,8 +293,9 @@ er218_exit_hook( void )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*------------------------*
+ * Return the device name
+ *------------------------*/
 
 Var_T *
 goniometer_name( Var_T * v  UNUSED_ARG )
@@ -303,8 +304,9 @@ goniometer_name( Var_T * v  UNUSED_ARG )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*---------------------------------------*
+ * Switch backslash correction on or off
+ *---------------------------------------*/
 
 Var_T *
 goniometer_backslash_correction( Var_T * v )
@@ -332,8 +334,9 @@ goniometer_backslash_correction( Var_T * v )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*------------------------------------*
+ * Go to a certain angle (in degrees)
+ *------------------------------------*/
 
 Var_T *
 goniometer_angle( Var_T * v )
@@ -401,8 +404,9 @@ goniometer_angle( Var_T * v )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*-------------------------*
+ * Move by a certain angle 
+ *-------------------------*/
 
 Var_T *
 goniometer_increment_angle( Var_T * v )
@@ -430,8 +434,10 @@ goniometer_increment_angle( Var_T * v )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*------------------------------------------------------*
+ * Send reset command, making the device go to an angle
+ * it considers to be the zero position.
+ *------------------------------------------------------*/
 
 Var_T *
 goniometer_reset( Var_T * v  UNUSED_ARG )
@@ -452,8 +458,9 @@ goniometer_reset( Var_T * v  UNUSED_ARG )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*----------------------------------------------------------------------*
+ * Make the current angle the angle the module considers the zero angle
+ *----------------------------------------------------------------------*/
 
 Var_T *
 goniometer_set_zero_angle( Var_T * v  UNUSED_ARG )
@@ -579,9 +586,9 @@ er218_write_config( double angle )
 }
 
 
-/*----------------------------------------------*
- * Sends the command to go to the zero position
- *----------------------------------------------*/
+/*--------------------------------------------------------------------*
+ * Sends command to go to what the device considers the zero position
+ *--------------------------------------------------------------------*/
 
 static void
 er218_init_cmd( void )
@@ -589,7 +596,7 @@ er218_init_cmd( void )
     er218.dio1_data = INIT_CMD;
     er218_set_dio( 0, er218.dio1_data );
 
-    er218_toggle( ADDRESS_LATCH );
+    er218_toggle( CMD_LATCH );
 
     er218.dio1_data = INIT_DATA & 0xFF;
     er218_set_dio( 0, er218.dio1_data );
@@ -620,7 +627,7 @@ er218_go_cmd( int          dir,
     er218.dio1_data = DATA_CMD;
     er218_set_dio( 0, er218.dio1_data );
 
-    er218_toggle( ADDRESS_LATCH );
+    er218_toggle( CMD_LATCH );
 
     er218.dio1_data = ~ data & 0xFF;
     er218_set_dio( 0, er218.dio1_data );
@@ -637,7 +644,7 @@ er218_go_cmd( int          dir,
     er218.dio1_data = STORE_CMD;
     er218_set_dio( 0, er218.dio1_data );
 
-    er218_toggle( ADDRESS_LATCH );
+    er218_toggle( CMD_LATCH );
 
     er218.dio1_data = STORE_DATA & 0xFF;
     er218_set_dio( 0, er218.dio1_data );
@@ -654,15 +661,7 @@ er218_go_cmd( int          dir,
     er218.dio1_data = dir == GO_UP ? UP_CMD : DOWN_CMD;
     er218_set_dio( 0, er218.dio1_data );
 
-    er218_toggle( ADDRESS_LATCH );
-
-    er218.dio1_data = STORE_DATA & 0xFF;
-    er218_set_dio( 0, er218.dio1_data );
-
-    er218.dio2_data = STORE_DATA >> 8 & 0x0F;
-    er218_set_dio( 1, er218.dio2_data );
-
-    er218_toggle( DATA_LATCH );
+    er218_toggle( CMD_LATCH );
 
     er218_toggle( SSTROBE );
 
@@ -674,7 +673,7 @@ er218_go_cmd( int          dir,
 
 /*--------------------------------------------------*
  * Function toggles a strobe or latch line by first
- * setting it to high, then to low.
+ * setting it to high, then back to low.
  *--------------------------------------------------*/
 
 static void
@@ -686,11 +685,10 @@ er218_toggle( unsigned char bit )
 }
 
 
-/*------------------------------------------------------*
- * Function to wait for the time a strobe or latch line
- * has to be kept in the same state - expects the time
- * in milli-seconds
- *------------------------------------------------------*/
+/*----------------------------------------------------------------*
+ * Function to wait for the time a strobe or latch line has to be
+ * kept in the same state - expects the time in milli-seconds
+ *----------------------------------------------------------------*/
 
 static void
 er218_strobe_wait( unsigned int duration )

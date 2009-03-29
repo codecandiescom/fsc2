@@ -1236,26 +1236,13 @@ run_child( void )
 
 #ifndef NDEBUG
     /* Setting the environment variable FSC2_CHILD_DEBUG to a non-empty
-       string will induce the child to sleep for about 10 hours or until it
-       receives a signal, e.g. from the debugger attaching to it. In the case
-       that this environment variable isn't set make the process ignore
-       SIGTRAP signals, that could lead to a premature termination of the
-       process if the parent process is being debugged and a breakpoint has
-       been set in a part of code that is shared between parent and child. */
+       string will induce the child to stop, making it possible to attach
+       with a debugger at this point. */
 
     if ( ( fcd = getenv( "FSC2_CHILD_DEBUG" ) ) != NULL && *fcd != '\0' )
     {
         fprintf( stderr, "Child process pid = %d\n", getpid( ) );
-        sleep( 36000 );
-    }
-    else
-    {
-        struct sigaction sact;
-
-        sact.sa_handler = child_sig_handler;
-        sigemptyset( &sact.sa_mask );
-        sact.sa_flags = 0;
-        sigaction( SIGTRAP, &sact, NULL );
+        raise( SIGSTOP );
     }
 #endif
 
@@ -1392,42 +1379,9 @@ child_sig_handler( int signo )
          && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
     {
         Crash.already_crashed = SET;
-
-        if ( Fsc2_Internals.is_linux_i386 )
-        {
-            unsigned int *EBP;        /* assumes size equals that of pointer */
-
-            asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-            EBP += CRASH_ADDRESS_OFFSET;
-            Crash.trace[ 0 ] = ( void * ) * EBP;
-
-            if ( * ( ( unsigned int * ) ( * ( EBP - 7 ) ) ) == * ( EBP - 8 ) )
-                Crash.trace_length =
-                          create_backtrace( ( unsigned int * ) * ( EBP - 7 ) );
-            else
-                Crash.trace_length =
-                          create_backtrace( ( unsigned int * ) * ( EBP - 8 ) );
-        }
-        else
-        {
-            void *trace[ MAX_TRACE_LEN ];
-            int size;
-
-            Crash.trace[ 0 ] = NULL;       /* don't know how to gt at it */
-            Crash.trace_length = 1;
-            size = backtrace( trace, MAX_TRACE_LEN );
-            if ( size > 3 )
-            {
-                memcpy( Crash.trace + 1, trace + 3,
-                        ( size - 3 ) * sizeof *trace );
-                Crash.trace_length += size - 3;
-            }
-        }
-
+        Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
         death_mail( );
     }
-
-    Crash.already_crashed = SET;
 #endif
 
     Crash.already_crashed = SET;
@@ -1479,7 +1433,7 @@ wait_for_confirmation( void )
         _exit( EXIT_FAILURE );
 
     /* Tell parent that we're done and just wait for its DO_QUIT signal - if
-       we can't send the signal to the parent stop the child. */
+       we can't send the signal to the parent stop the child immediately. */
 
     if ( getppid( ) == 1 || kill( getppid( ), QUITTING ) == -1 )
         _exit( Child_return_status );           /* commit controlled suicide */

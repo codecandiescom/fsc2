@@ -30,8 +30,6 @@
 
 void dump_stack( FILE * /* fp */ );
 
-int create_backtrace( unsigned int * /* bt */ );
-
 #endif
 
 

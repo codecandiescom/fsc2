@@ -79,10 +79,10 @@ main( void )
 			return EXIT_FAILURE;
 		fprintf( stdout, "%s", buf );
 
-		if ( fgets( buf, MAX_FILE_LEN, fp ) == NULL )
-			return EXIT_FAILURE;
-		fprintf( stdout, "%s", buf );
-		fflush( stdout );
+        if ( fgets( buf, MAX_FILE_LEN, fp ) == NULL )
+            return EXIT_FAILURE;
+        fprintf( stdout, "%s", buf );
+        fflush( stdout );
 
 		pclose( fp );
 	}

@@ -109,7 +109,7 @@ lockin_conversion_time( CT * 0.32 ms );
 li_tc = lockin_time_constant( );
 === endif
 
-li_sens = lockin_sensitivity( ) / 1 mV;
+li_sens = lockin_sensitivity( );
 === if RESONATOR ne "Unspecified"
 mod_amp =   lockin_ref_level( ) 
           * epr_modulation_ratio( "RESONATOR" " (ER023M)", lockin_ref_freq( ) );
@@ -202,15 +202,15 @@ FOREVER {
                        "\# Number of points    = #\n"
                        "\# No. of scans        = #\n"
                        "\# MW frequency        = # GHz\n"
-                       "\# Lockin-In           = Bruker signal channel ER023M\n"
-                       "\# Sensitivity         = # mV\n"
+                       "\# Lockin-In           = Bruker ER023M\n"
+                       "\# Sensitivity         = #\n"
                        "\# Time constant       = # ms\n"
                        "\# Waiting time factor = #\n"
 === if RESONATOR ne "Unspecified"
-                       "\# Resonator           = RESONATOR\n"
-                       "\# Modulation ampl.    = # G (raw: # G)\n"
+                       "\# Resonator           = RESONATOR (ER023M)\n"
+                       "\# Modulation ampl.    = # G (raw: # %)\n"
 === else
-                       "\# Modulation ampl.    = # G (raw)\n"
+                       "\# Modulation ampl.    = # % (raw)\n"
 === endif
                        "\# Modulation freq.    = # kHz\n"
                        "\# Phase               = #\n",
@@ -226,6 +226,7 @@ FOREVER {
            mod_amp,
 === endif
            li_amp, li_freq, li_phase );
+	fsave( Files[ 1 ], "\n" );
 
     FOR K = 1 : Num_Points {
 === if START_FIELD <= END_FIELD
@@ -289,15 +290,15 @@ FOR K = 1 : 2 {
                        "\# Number of points    = #\n"
                        "\# No. of scans        = #\n"
                        "\# MW frequency        = # GHz\n"
-                       "\# Lockin-In           = Stanford Research SR830\n"
-                       "\# Sensitivity         = # mV\n"
+                       "\# Lockin-In           = Bruker ER023M\n"
+                       "\# Sensitivity         = #\n"
                        "\# Time constant       = # ms\n"
                        "\# Waiting time factor = #\n"
 === if RESONATOR ne "Unspecified"
-                       "\# Resonator           = RESONATOR\n"
-                       "\# Modulation ampl.    = # G (raw: #)\n"
+                       "\# Resonator           = RESONATOR (ER023M)\n"
+                       "\# Modulation ampl.    = # G (raw: # %)\n"
 === else
-                       "\# Modulation ampl.    = # G (raw)\n"
+                       "\# Modulation ampl.    = # % (raw)\n"
 === endif
                        "\# Modulation freq.    = # kHz\n"
                        "\# Phase               = #\n",
@@ -315,7 +316,11 @@ FOR K = 1 : 2 {
            li_amp, li_freq, li_phase );
 }
 
-save_comment( Files[ 1 ], "# ", "Sample: \nTemperature: \nCavity: " );
+=== if RESONATOR ne "Unspecified"
+save_comment( Files[ 1 ], "# ", "Sample: \nTemperature: " );
+=== else
+save_comment( Files[ 1 ], "# ", "Sample: \nTemperature: \nResonator: " );
+=== endif
 
 FOR K = 1 : Num_Points {
 === if START_FIELD <= END_FIELD

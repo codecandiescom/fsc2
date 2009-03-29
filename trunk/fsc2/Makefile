@@ -67,16 +67,6 @@ prefix             := /usr/local
 # GROUP              := uucp
 
 
-# Uncomment the following only if you compile the program for a non-i386 type
-# processor, i.e. a 64-bit processor or a processor not by Intel or AMD
-# (undefining the variable disables sending me a mail with informations
-# about the place were it happened in case the program crashes - this requires
-# a bit of assembler, which only works on i386 type processors but makes
-# compiling the program otherwise fail).
-
-# IS_NOT_A_I386       :+ yes
-
-
 # The next variable should only be set for very old Linux systems where
 # linker map files don't work and the program crashes after loading
 # a module. Only in that case the following line should be activated.

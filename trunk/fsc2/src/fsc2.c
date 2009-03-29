@@ -83,15 +83,8 @@ main( int    argc,
     int conn_pid;
 
 
-#if defined( FSC2_MDEBUG ) || defined( LIBC_MDEBUG )
-    if ( mcheck( NULL ) != 0 )
-    {
-        fprintf( stderr, "Can't start mcheck() !\n" );
-        return EXIT_FAILURE;
-    }
-#endif
-
 #if defined LIBC_MDEBUG
+    mcheck( NULL );
     mtrace( );
 #endif
 
@@ -2141,44 +2134,13 @@ void main_sig_handler( int signo )
            the right thing. */
 
         default :
-#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+#if ! defined NDEBUG && defined ADDR2LINE
             if (    ! Crash.already_crashed
                  && signo != SIGABRT
                  && ! ( Fsc2_Internals.cmdline_flags & NO_MAIL ) )
             {
                 Crash.already_crashed = SET;
-
-                if ( Fsc2_Internals.is_linux_i386 )
-                {
-                    unsigned int *EBP;   /* assumes that sizeof(unsigned int)
-                                            equals that of a pointer */
-                    asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-                    EBP += CRASH_ADDRESS_OFFSET;
-                    Crash.trace[ 0 ] = ( void * ) * EBP;
-
-                    if ( * ( ( unsigned int * ) ( * ( EBP - 7 ) ) ) ==
-                                                               * ( EBP - 8 ) )
-                        Crash.trace_length =
-                          create_backtrace( ( unsigned int * ) * ( EBP - 7 ) );
-                    else
-                        Crash.trace_length =
-                          create_backtrace( ( unsigned int * ) * ( EBP - 8 ) );
-                }
-                else
-                {
-                    void *trace[ MAX_TRACE_LEN ];
-                    int size;
-
-                    Crash.trace[ 0 ] = NULL;  /* don't know how to get at it */
-                    Crash.trace_length = 1;
-                    size = backtrace( trace, MAX_TRACE_LEN );
-                    if ( size > 3 )
-                    {
-                        memcpy( Crash.trace + 1, trace + 3,
-                                ( size - 3 ) * sizeof *trace );
-                        Crash.trace_length += size - 3;
-                    }
-                }
+                Crash.trace_length = backtrace( Crash.trace, MAX_TRACE_LEN );
             }
 #endif
 

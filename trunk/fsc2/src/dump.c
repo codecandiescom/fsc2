@@ -23,12 +23,12 @@
 
 
 #include "fsc2.h"
-
+#include <dlfcn.h>
 
 /* The functions defined here are only needed in builts where NDEBUG
    and ADDR2LINE are defined ! */
 
-#if ! defined( NDEBUG ) && defined( ADDR2LINE )
+#if ! defined NDEBUG && defined ADDR2LINE
 
 static int write_dump( int  * pipe_fd,
                        FILE * fp,
@@ -57,9 +57,8 @@ dump_stack( FILE * fp )
 {
     int pipe_fd[ 4 ];
     pid_t pid;
-    int i;
+    size_t i;
     struct sigaction sact;
-    Device_T *cd;
 
 
     /* Childs death signal isn't needed anymore */
@@ -117,8 +116,8 @@ dump_stack( FILE * fp )
 
     /* Now we're ready to write the backtrace into the file we got passed */
 
-    for ( i = 0; i < Crash.trace_length; i++ )
-        if ( write_dump( pipe_fd, fp, i, Crash.trace[ i ] ) == -1 )
+    for ( i = 2; i < Crash.trace_length - 2; i++ )
+        if ( write_dump( pipe_fd, fp, i - 2, Crash.trace[ i ] ) == -1 )
             break;
 
     /* Pipes to the child aren't needed anymore, closing them will also
@@ -126,27 +125,16 @@ dump_stack( FILE * fp )
 
     close( pipe_fd[ DUMP_PARENT_READ ] );
     close( pipe_fd[ DUMP_PARENT_WRITE ] );
-
-    if ( EDL.Device_List != NULL )
-    {
-        fprintf( fp, "\nDevice handles:\n" );
-
-        for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
-        {
-            if ( ! cd->is_loaded )
-                continue;
-            fprintf( fp, "%s.so: %p\n",
-                     cd->name, ( void * ) * ( int * ) cd->driver.handle );
-        }
-    }
 }
 
 /*-----------------------------------------------------------------------*
  * Function converts the address information into something we can feed
- * to the process that in the end calls the addr2line, writes it to the
- * pipe to that process, reads the answer and puts the answer, after a
- * few modifications, into the the file we got passed.
+ * to the process that in the end calls addr2line, writes it to the pipe
+ * to that process, reads the answer and puts the answer, after a few
+ * modifications, into the the file we got passed.
  *-----------------------------------------------------------------------*/
+
+#define MAX_STR_BUF  512
 
 static int
 write_dump( int  * pipe_fd,
@@ -154,75 +142,49 @@ write_dump( int  * pipe_fd,
             int    k,
             void * addr )
 {
-    char buf[ 256 ] = "";
+    char buf[ MAX_STR_BUF ] = "";
     ssize_t ret;
     char c;
-    Device_T *cd1, *cd2;
+    Dl_info info;
+    void *start_addr = addr;
+    int dont_print = 0;
 
 
-    if ( addr == NULL )
+    if ( addr == NULL || ! dladdr( addr, &info ) )
     {
         fprintf( fp, "#%-3d Address unknown\n", k );
         return 0;
     }
 
-    /* We need to figure out if the crash happened in one of the modules
-       or not in order to be able to pass the the file name beside the
-       crash address to the process deling with addr2line. We can only
-       distinguish between crashes in the fsc2 executable or in the
-       modules, so traces into some library will (falsly) treated as
-       being within the fsc2 executable and the output in the mail will
-       show nothing really useful. */
-
-    for ( cd1 = EDL.Device_List; cd1 != NULL; cd1 = cd1->next )
-        if ( cd1->is_loaded )
-            break;
-
-    if ( cd1 != NULL )
+    if ( info.dli_fname[ 0 ] == '/' )
     {
-        for ( cd2 = cd1->next; cd2 != NULL; cd2 = cd2->next )
-        {
-            if ( ! cd2->is_loaded )
-                continue;
+        /* For fsc2 itself we need the address as it is, for librries we
+           have to subtract the base address */
 
-            if (    addr >= ( void * ) * ( int * ) cd1->driver.handle
-                 && addr <  ( void * ) * ( int * ) cd2->driver.handle )
-                break;
-
-            cd1 = cd2;
-        }
-
-        if (    cd1->is_loaded
-             && ( char * ) addr >= ( char * ) * ( int * ) cd1->driver.handle )
-        {
-            if ( cd1->driver.lib_name[ 0 ] == '/' )
-                sprintf( buf, "%s\n", cd1->driver.lib_name );
-            else if ( Fsc2_Internals.cmdline_flags &
-                      ( DO_CHECK | LOCAL_EXEC ) )
-                sprintf( buf, moddir "%s\n", cd1->driver.lib_name );
-            else
-                sprintf( buf, libdir "%s\n", cd1->driver.lib_name );
-            write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
-            sprintf( buf, "%p\n",
-                     ( void * ) ( ( char * ) addr -
-                                  ( char * ) * ( int * ) cd1->driver.handle) );
-        }
+        if ( strcmp( info.dli_fname + strlen( info.dli_fname ) - 4, "fsc2" ) )
+            start_addr =
+                ( void * ) ( ( char * ) addr - ( char * ) info.dli_fbase );
+        sprintf( buf, "%s\n", info.dli_fname );
     }
-
-    if ( *buf == '\0' )
+    else
     {
-        if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
-            write( pipe_fd[ DUMP_PARENT_WRITE ], srcdir "fsc2\n",
-                   strlen( srcdir ) + 5 );
+        if ( strchr( info.dli_fname, '/' ) )
+        {
+            if ( ! getcwd( buf, MAX_STR_BUF - strlen( info.dli_fname ) - 2 ) )
+                *buf = '\0';
+            sprintf( buf + strlen( buf ), "/%s\n", info.dli_fname );
+        }
+        else if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
+            sprintf( buf, srcdir "%s\n", info.dli_fname );
         else
-            write( pipe_fd[ DUMP_PARENT_WRITE ], bindir "fsc2\n",
-                   strlen( bindir ) + 5 );
-        sprintf( buf, "%p\n", addr );
+            sprintf( buf, bindir "%s\n", info.dli_fname );
     }
+    
+    ret = write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
+    sprintf( buf, "%p\n", start_addr );
+    ret = write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
 
-    write( pipe_fd[ DUMP_PARENT_WRITE ], buf, strlen( buf ) );
-
-    fprintf( fp, "#%-3d %-10p  ", k, addr );
+    fprintf( fp, "#%-3d %-16p  ", k, addr );
 
     /* Copy reply to the answer pipe */
 
@@ -242,7 +204,7 @@ write_dump( int  * pipe_fd,
 
     fputs( "() at ", fp );
 
-    do 
+    do
     {
         if ( ( ret = read( pipe_fd[ DUMP_PARENT_READ ], &c, 1 ) ) == -1 )
         {
@@ -250,44 +212,19 @@ write_dump( int  * pipe_fd,
             return -1;
         }
 
-        if ( ret )
+        if ( ret && ! dont_print && c == '?' )
+        {
+            fprintf( fp, "unknown line in %s\n", info.dli_fname );
+            dont_print = 1;
+        }
+
+        if ( ret && ! dont_print )
             fputc( c, fp );
     } while ( c != '\n' );
 
     return 0;
 }
 
-
-/*-----------------------------------------------------*
- * Function to assemble the addresses for a backtrace,
- * the argument is a pointer to where the next stack
- * frame is.
- *-----------------------------------------------------*/
-
-int
-create_backtrace( unsigned int * bt )
-{
-    unsigned int *EBP = bt;         /* assumes size equals that of pointers */
-    int size = 1;
-
-
-    /* Loop over all stackframes, working up the way to the top - the topmost
-       stack frame would be reached when the content of EBP is zero, but this
-       is already _libc_start_main(), so stop one frame earlier */
-
-    while ( size < MAX_TRACE_LEN && * ( unsigned int * ) * EBP != 0 )
-    {
-        /* Get return address of current subroutine and ask the process
-           finally running ADDR2LINE to convert it into function name,
-           source file and line number. (This fails for programs competely
-           stripped of all debugging information.) */
-
-        Crash.trace[ size++ ] = ( void * ) * ( EBP + 1 );
-        EBP = ( unsigned int * ) * EBP;
-    }
-
-    return size;
-}
 
 #endif
 

@@ -120,9 +120,9 @@ schlum7150    // Schlumberger 7150
 
 // Temperature controllers
 
-lakeshore330  // Lakeshore 330 temperature controller
-itc503        // Oxford ITC503 temperature controller
-eurother902s  // Eurotherm 902S with Bruker BVT3000
+lakeshore330   // Lakeshore 330 temperature controller
+itc503         // Oxford ITC503 temperature controller
+bvt3000        // Bruker BVT3000 temperature controller (with Eurotherm 902S)
 
 
 // Frequency counter

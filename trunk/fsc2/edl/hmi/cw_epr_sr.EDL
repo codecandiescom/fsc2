@@ -3,7 +3,7 @@
 === FIELD_STEP float [ 0.001 : 1600 ] [ 1 ] "Field step size" "G"
 === NUM_SCANS int [ 0 : ][ 0 ] "Number of scans"
 === FACTOR float [ 1.0e-3 : 100 ] [ 1.0  ] "Waiting time"  "* tc"
-=== RESONATOR menu [ "Unspecified" ] [ 1 ] "Resonator"
+=== RESONATOR menu [ "Unspecified", "XXX", "YYY", "ZZZ" ] [ 1 ] "Resonator"
 === MODFREQ float_empty [ 0.000001 : 102 ] [ 100 ] "Modulation frequncy" "kHz"
 === MODAMP float_empty [ 0 : ] [ 1 ] "Modulation amplitude" "G"
 === MODPHASE float_empty [ -360 : 360 ] "Modulation phase" "°"
@@ -242,7 +242,7 @@ FOREVER {
                        "\# Time constant       = # ms\n"
                        "\# Waiting time factor = #\n"
 === if RESONATOR ne "Unspecified"
-                       "\# Resonator           = RESONATOR\n"
+                       "\# Resonator           = RESONATOR (SR830)\n"
                        "\# Modulation ampl.    = # G (raw: # V)\n"
 === else
                        "\# Modulation ampl.    = # V (raw)\n"
@@ -354,7 +354,7 @@ FOR K = 1 : 2 {
                        "\# Time constant       = # ms\n"
                        "\# Waiting time factor = #\n"
 === if RESONATOR ne "Unspecified"
-                       "\# Resonator           = RESONATOR\n"
+                       "\# Resonator           = RESONATOR (SR830)\n"
                        "\# Modulation ampl.    = # G (raw: # V)\n"
 === else
                        "\# Modulation ampl.    = # V (raw)\n"
@@ -375,7 +375,11 @@ FOR K = 1 : 2 {
            li_amp, li_freq, li_phase );
 }
 
-save_comment( Files[ 1 ], "# ", "Sample: \nTemperature: \nCavity: " );
+=== if RESONATOR ne "Unspecified"
+save_comment( Files[ 1 ], "# ", "Sample: \nTemperature: " );
+=== else
+save_comment( Files[ 1 ], "# ", "Sample: \nTemperature: \nResonator: " );
+=== endif
 
 FOR K = 1 : Num_Points {
 === if CHANNELS eq 'X only'

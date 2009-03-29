@@ -286,7 +286,7 @@ IF I != 0 {
 	        fsave( File2,
 				   "\n"
 	               "% Date:                   # #\n"
-	               "% Script:                 3_pulse_endor (J-band, Leiden)\n"
+	               "% Script:                 3_pulse_endor (W-band, Leiden)\n"
 	               "% Field:                  # G\n"
 	               "% Start frequency:        # MHz\n"
 	               "% End frequency:          # MHz\n"
@@ -300,6 +300,7 @@ IF I != 0 {
 	               "% P2-P3 separation:       # ns\n"
 	               "% RF pulse position:      # ns\n"
 	               "% RF pulse length:        # ns\n"
+		           "% Detection pulse delay:  DET_OFFSET ns\n"
 	               "% Number of averages:     >= #\n"
 	               "% ADC gain:               4\n"
 				   "% ADC channel(s):         ADC_CHANNELS\n",
@@ -337,7 +338,7 @@ IF I != 0 {
     fsave( File1,
 		   "\n"
            "% Date:                   # #\n"
-           "% Script:                 3_pulse_endor (J-band, Leiden)\n"
+           "% Script:                 3_pulse_endor (W-band, Leiden)\n"
            "% Field:                  # G\n"
            "% Start frequency:        # MHz\n"
            "% End frequency:          # MHz\n"
@@ -351,6 +352,7 @@ IF I != 0 {
            "% P2-P3 separation:       # ns\n"
            "% RF pulse position:      # ns\n"
            "% RF pulse length:        # ns\n"
+		   "% Detection pulse delay:  DET_OFFSET ns\n"
            "% Number of averages:     >= #\n"
            "% ADC gain:               4\n"
 		   "% ADC channel(s):         ADC_CHANNELS\n",

@@ -2,18 +2,18 @@
 
 === TRIG_MODE menu [ "EXTERNAL", "INTERNAL" ] [ 1 ] "Trigger mode"
 === REP_TIME float [ 0.001 : ] [ 50 ] "Repetition time" "ms"
-=== P1_POS int [ 200 : 167772150 ] [ 200 ] "Position of 1st MW pulse" "ns"
+=== P1_POS int [ 200 : 167772150 ] [ 200 ] "Pos. of 1st MW pulse" "ns"
 === P1_LEN int [ 10 : 167772150 ] [ 100 ] "Length of 1st MW pulse" "ns"
 === P2_LEN int [ 10 : 167772150 ] [ 200 ] "Length of 2nd MW pulse" "ns"
 === P3_LEN int [ 10 : 167772150 ] [ 200 ] "Length of 3rd MW pulse" "ns"
-=== P1_P2_DIST int [ 70 : 167772150 ] [ 400 ] "P1-P2 distance" "ns"
-=== P2_P3_DIST int [ 70 : 167772150 ] [ 2000 ] "P2-P3 distance" "ns"
-=== P2_RF_DEL int [ 0 : 167772150 ] [ 100 ] "P2-1stRF pulse delay" "ns"
-=== RF_P3_DEL int [ 0 : 167772150 ] [ 100 ] "1stRF-P3 pulse delay" "ns"
-=== RF2_POS int [ 200 : 167772150 ] [ 1000 ] "Position of recovery pulse" "ns"
+=== P1_P2_DIST int [ 70 : 167772150 ] [ 400 ] "1st to 2nd MW pulse\ndistance (C2C)" "ns"
+=== P2_P3_DIST int [ 70 : 167772150 ] [ 2000 ] "2nd to 3rd MW pulse\ndistance (C2C)" "ns"
+=== P2_RF_DEL int [ 0 : 167772150 ] [ 100 ] "2nd MW to 1st RF pulse\ndelay (E2E)" "ns"
+=== RF_P3_DEL int [ 0 : 167772150 ] [ 100 ] "1st RF to 3rd MW pulse\ndelay (E2E)" "ns"
+=== P3_RF2_DIST int [ 200 : 167772150 ] [ 1000 ] "3rd MW to recovery\npulse delay (C2C)" "ns"
 === DET_OFFSET int [ -167772150 : 167772150 ] [ 0 ] "Detection offset" "ns"
 === CREATE_DEFENSE button [ ON ] "Create defense pulse"
-=== PULSE_2_DEFENSE float [ 0 : ] [ 50 ] "End of MW pulse to\nend of defense\npulse distance" "ns"
+=== PULSE_2_DEFENSE float [ 0 : ] [ 50 ] "End of MW pulse to end\nof defense pulse distance" "ns"
 === N_AVG menu [ "1", "3", "10", "30", "100", "300", "1000", \
 ===              "3000", "10000" ] [ 3 ] "Number of averages"
 === FIELD float [ 0 : 48370.8 ] [ 35000 ] "Field" "G"
@@ -106,11 +106,11 @@ P3:  FUNCTION = MICROWAVE,
 
 P4:  FUNCTION = RF,
      START    = P2.START + P2.LENGTH + p2_rf_delay,
-     LENGTH   = p2_to_p3_dist - 0.5 * ( P2.LENGTH + P3.LENGTH )
+     LENGTH   =   p2_to_p3_dist - 0.5 * ( P2.LENGTH + P3.LENGTH )
                 - p2_rf_delay - rf_p3_delay;
 
 P5:  FUNCTION = RF,
-	 START    = RF2_POS ns,
+	 START    = P3.START + 0.5 * ( P3.LENGTH - P4.LENGTH ) + P3_RF2_DIST ns, 
 	 LENGTH   = P4.LENGTH;
 
 P6:  FUNCTION = DETECTION,
@@ -290,31 +290,34 @@ IF I != 0 {
 
 	        fsave( File2,
 				   "\n"
-	               "% Date:                   # #\n"
-	               "% Script:                 3_pulse_endor (J-band, Leiden)\n"
-	               "% Field:                  # G\n"
-	               "% Start frequency:        # MHz\n"
-	               "% End frequency:          # MHz\n"
-	               "% Frequency step:         # MHz\n"
-	               "% Attenuation:            # dB\n"
-	               "% Repetition time:        # ms\n"
-	               "% Length of 1st MW pulse: # ns\n"
-	               "% Length of 2nd MW pulse: # ns\n"
-	               "% Length of 3rd MW pulse: # ns\n"
-	               "% P1-P2 separation:       # ns\n"
-	               "% P2-P3 separation:       # ns\n"
-	               "% RF pulse position:      # ns\n"
-	               "% RF pulse length:        # ns\n"
-		           "% Recovery pulse position: # ns\n"
-	               "% Number of averages:     >= #\n"
-	               "% ADC gain:               4\n"
-				   "% ADC channel(s):         ADC_CHANNELS\n",
+	               "% Date:                     # #\n"
+	               "% Script:                   m3_pulse_endor (W-band, Leiden)\n"
+	               "% Field:                    # G\n"
+	               "% Start frequency:          # MHz\n"
+	               "% End frequency:            # MHz\n"
+	               "% Frequency step:           # MHz\n"
+	               "% Attenuation:              # dB\n"
+	               "% Repetition time:          # ms\n"
+	               "% Length of 1st MW pulse:   # ns\n"
+	               "% Length of 2nd MW pulse:   # ns\n"
+	               "% Length of 3rd MW pulse:   # ns\n"
+				   "% Position of 1st MW pulse: # ns\n"
+	               "% P1-P2 separation:         # ns\n"
+	               "% P2-P3 separation:         # ns\n"
+	               "% 1st RF pulse position:    # ns\n"
+	               "% Length of RF pulses:      # ns\n"
+		           "% Recovery pulse position:  # ns\n"
+		           "% Detection pulse delay:    DET_OFFSET ns\n"
+	               "% Number of averages:       >= #\n"
+	               "% ADC gain:                 4\n"
+				   "% ADC channel(s):           ADC_CHANNELS\n",
 	               date( ), time( ), field, start_freq / 1 MHz, freq / 1 MHz,
 	               freq_step / 1 MHz, att, repeat_time / 1 ms,
-	               int( P1.LENGTH / 1 MHz ), int( P2.LENGTH / 1 ns ),
-	               int( P3.LENGTH / 1 ns ), int( p1_to_p2_dist / 1 ns ),
-	               int( p2_to_p3_dist / 1 ns ), int( P4.START / 1 ns ),
-	               int( P4.LENGTH / 1 ns ), int( P5.START / 1 ns ), N_Avg );
+	               int( P1.LENGTH / 1 ns ), int( P2.LENGTH / 1 ns ),
+	               int( P3.LENGTH / 1 ns ), int( P1.START / 1 ns ),
+				   int( p1_to_p2_dist / 1 ns ), int( p2_to_p3_dist / 1 ns ),
+				   int( P4.START / 1 ns ), int( P4.LENGTH / 1 ns ),
+				   int( P5.START / 1 ns ), N_Avg );
         }
 
         FOR I = 1 : N_Points {
@@ -342,31 +345,34 @@ IF I != 0 {
 
     fsave( File1,
 		   "\n"
-           "% Date:                    # #\n"
-           "% Script:                  3_pulse_endor (J-band, Leiden)\n"
-           "% Field:                   # G\n"
-           "% Start frequency:         # MHz\n"
-           "% End frequency:           # MHz\n"
-           "% Frequency step:          # MHz\n"
-           "% Attenuation:             # dB\n"
-           "% Repetition time:         # ms\n"
-           "% Length of 1st MW pulse:  # ns\n"
-           "% Length of 2nd MW pulse:  # ns\n"
-           "% Length of 3rd MW pulse:  # ns\n"
-           "% P1-P2 separation:        # ns\n"
-           "% P2-P3 separation:        # ns\n"
-           "% RF pulse position:       # ns\n"
-           "% RF pulse length:         # ns\n"
-		   "% Recovery pulse position: # ns\n"
-           "% Number of averages:      >= #\n"
-           "% ADC gain:                4\n"
-		   "% ADC channel(s):          ADC_CHANNELS\n",
+           "% Date:                     # #\n"
+           "% Script:                   m3_pulse_endor (W-band, Leiden)\n"
+           "% Field:                    # G\n"
+           "% Start frequency:          # MHz\n"
+           "% End frequency:            # MHz\n"
+           "% Frequency step:           # MHz\n"
+           "% Attenuation:              # dB\n"
+           "% Repetition time:          # ms\n"
+           "% Length of 1st MW pulse:   # ns\n"
+           "% Length of 2nd MW pulse:   # ns\n"
+           "% Length of 3rd MW pulse:   # ns\n"
+		   "% Position of 1st MW pulse: # ns\n
+           "% P1-P2 separation:         # ns\n"
+           "% P2-P3 separation:         # ns\n"
+           "% 1st RF pulse position:    # ns\n"
+           "% Length of RF pulses:      # ns\n"
+		   "% Recovery pulse position:  # ns\n"
+		   "% Detection pulse delay:    DET_OFFSET ns\n"
+           "% Number of averages:       >= #\n"
+           "% ADC gain:                 4\n"
+		   "% ADC channel(s):           ADC_CHANNELS\n",
            date( ), time( ), field, start_freq / 1 MHz, freq / 1 MHz,
            freq_step / 1 MHz, att, repeat_time / 1 ms,
-           int( P1.LENGTH / 1 MHz ), int( P2.LENGTH / 1 ns ),
-           int( P3.LENGTH / 1 ns ), int( p1_to_p2_dist / 1 ns ),
-           int( p2_to_p3_dist / 1 ns ), int( P4.START / 1 ns ),
-           int( P4.LENGTH / 1 ns ), int( P5.START / 1 ns ), N_Avg );
+           int( P1.LENGTH / 1 ns ), int( P2.LENGTH / 1 ns ),
+           int( P3.LENGTH / 1 ns ), int( P1.START / 1 ns ),
+           int( p1_to_p2_dist / 1 ns ), int( p2_to_p3_dist / 1 ns ),
+		   int( P4.START / 1 ns ), int( P4.LENGTH / 1 ns ),
+		   int( P5.START / 1 ns ), N_Avg );
 
     save_comment( File1, "%" );
 }

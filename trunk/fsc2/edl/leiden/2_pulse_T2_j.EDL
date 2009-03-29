@@ -129,6 +129,7 @@ fsave( File,
        "% Length of 2nd MW pulse: # ns\n"
        "% Init. P1-P2 separation: # ns\n"
        "% P1-P2 increment:        # ns\n"
+	   "% Detection pulse delay:  DET_OFFSET ns\n"
        "% Number of averages:     >= #\n"
        "% ADC gain:               4\n"
        "% Temperature at start:   # K\n"

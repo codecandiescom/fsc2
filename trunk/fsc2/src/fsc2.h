@@ -377,7 +377,7 @@ struct Crash_Info {
     volatile sig_atomic_t signo;  /* signal indicating the type of crash */
     void *address;                /* address the crash happened */
     void *trace[ MAX_TRACE_LEN ]; /* addresses of backtrace */
-    int trace_length;             /* length of backtrace */
+    size_t trace_length;          /* length of backtrace */
 };
 
 

@@ -7563,13 +7563,14 @@ Returns a string with the name of the goniometer being used.
 @anchor{goniometer_angle()}
 @findex goniometer_angle()
 @item goniometer_angle()
-This function allows to either query the angle the goniometer is at
-or to move it to a new angle. If called without an argument the
-function returns the angle it is at the moment. If called with an
-(floating point) argument this is taken to be the new angle to move
-the goniometer to. The new angle must a multiple of @w{0.125 degree},
-otherwise the nearest angle to the specified value is used. The
-function return value is the new angle the goniometer is set to.
+This function allows to either query the angle the goniometer is at or
+to move it to a new angle. If called without an argument the function
+returns the angle (in degrees) it is at the moment. If called with an
+(floating point) argument this is taken to be the new angle (in
+degrees) to move the goniometer to. The new angle must a multiple of
+@w{0.125 degree}, otherwise the nearest angle to the specified value
+is used. The function return value is the new angle the goniometer is
+set to.
 
 Please note: Setting a new angle may take some time and the operation
 cannot be stopped until the goniometer has arrived at its new
@@ -7582,9 +7583,9 @@ This function can only be used in the @code{EXPERIMENT} section.
 @findex goniometer_increment_angle()
 @item goniometer_increment_angle()
 The function expects a single argument, which is taken as the angle
-by which the goniometer is to be rotated. Both positive (for
-clockwise) and negative (for counterclockwise rotation) values are
-allowed, but they must be multiples of @w{0.125 degrees} (or the
+(in degres) by which the goniometer is to be rotated. Both positive
+(for clockwise) and negative (for counterclockwise rotation) values
+are allowed, but they must be multiples of @w{0.125 degrees} (or the
 argument is adapted to the nearest possible increment angle). The
 function return value is the new angle the goniometer is set to.
 
@@ -7619,11 +7620,12 @@ longer times required to go to a new angular position.
 @anchor{goniometer_reset()}
 @findex goniometer_reset()
 @item goniometer_reset()
-This function can be called to move the goniometer to built-in
-zero position. After a call of this function (which doesn't
-expect any arguments) angles used as arguments or returned
-by the function @ref{goniometer_angle()} are relative to this
-zero position.
+This function can be called to move the goniometer to built-in zero
+position. After a call of this function (which doesn't expect any
+arguments) angles used as arguments or returned by the function
+@ref{goniometer_angle()} are relative to this zero position. Please
+note that calling this function requires at least @w{72 s} and that it
+can't be stopped once the command has been issued.
 
 This function can only be used in the @code{EXPERIMENT} section.
 
@@ -7631,10 +7633,10 @@ This function can only be used in the @code{EXPERIMENT} section.
 @anchor{goniometer_set_zero_angle()}
 @findex goniometer_set_zero_angle()
 @item goniometer_set_zero_amgle()
-This function, taking no arguments, allows to set a new zero position
-of the goniometer, i.e. angles used as arguments or returned
-by the function @ref{goniometer_angle()} are relative to this
-new zero position.
+This function, taking no arguments, allows to set a new zeqro position
+of the goniometer, i.e.@: angles used as arguments or returned by the
+function @ref{goniometer_angle()} later on are relative to this new
+zero position.
 
 This function can only be used in the @code{EXPERIMENT} section.
 
