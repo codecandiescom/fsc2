@@ -95,7 +95,7 @@ extern int snprintf( char        * str,
                      ... );
 #endif
 
-/* FSC2_SOCKET must be identical to the definition in fsc2.h ! */
+/* FSC2_SOCKET must be identical to the definition in global.h ! */
 
 #define FSC2_SOCKET  "/tmp/fsc2.uds"
 

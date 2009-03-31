@@ -1147,18 +1147,18 @@ fsc2_serial_read( int          sn,
 }
 
 
-/*--------------------------------------------------------------*
+/*---------------------------------------------------------------*
  * Tries to create a UUCP style lock file for a serial port.
- * According to version 2.2 of the Filesystem Hierachy Standard
- * the lock files must be stored in /var/lock following the
- * naming convention that the file name starts with "LCK..",
+ * According to version 2.2 of the Filesystem Hierarchy
+ * Standard the lock files must be stored in /var/lock following
+ * the naming convention that the file name starts with "LCK..",
  * followed by the base name of the device file. E.g. for the
  * device file '/dev/ttyS0' the lock file 'LCK..ttyS0' has to
  * be created.
  * According to the same standard, the lockfile must contain
  * the process identifier (PID) as a ten byte ASCII decimal
  * number, with a trailing newline (HDB UUCP format).
- *--------------------------------------------------------------*/
+ *---------------------------------------------------------------*/
 
 #ifdef SERIAL_LOCK_DIR
 static bool
