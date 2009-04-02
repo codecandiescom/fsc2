@@ -686,7 +686,6 @@ fsps25_init( void )
             THROW( EXCEPTION );
         }
 	}
-    else
 
 	/* If a start current had been given set in now */
 

@@ -203,6 +203,11 @@ epr_mod
 smsmotor
 
 
+// Frankfurt frequency controller
+
+ffc;
+
+
 /*
  * Local variables:
  * tab-width: 4

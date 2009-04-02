@@ -180,7 +180,9 @@ html_pack:
 	fi
 	cp -f *.html *.png fsc2.gif *.ico fsc2.css fsc2_html
 	cd fsc2_html;
-	ln -s fsc2.html index.html;
+	if [ ! -e index.html ]; then                           \
+		ln -s fsc2.html index.html;                       \
+	fi
 	cd ..;
 	tar -c fsc2_html | gzip -c -9 > fsc2_html.tar.gz
 	-$(RM) $(RMFLAGS) fsc2_html/*

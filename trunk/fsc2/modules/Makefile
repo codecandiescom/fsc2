@@ -124,7 +124,7 @@ endif
 
 ifneq ($(NUM_SERIAL_PORTS),0)
 simp_modules    += aeg_s_band aeg_x_band er035m_s er035m_sas hjs_daadc  \
-				   $(s_band_list) fsps25 smsmotor
+				   $(s_band_list) fsps25 smsmotor ffc
 comp_modules    += hjs_attenuator spectrapro_300i spex_cd2a spex232 \
                    lecroy_wr_s bvt3000
 endif

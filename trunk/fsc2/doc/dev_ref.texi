@@ -547,7 +547,7 @@ In the GPIB configuration file use @code{"EIP371"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
-@strong{Status}: Untested
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -639,6 +639,11 @@ card).
 @strong{Description}: Goniometer is cntrolled via the output of a DIO
 subsystem of (currently) a Meilhaus card, using some additional
 home-built electronics for latching data.
+
+@paragraphindent 0
+Many thanks to Marc A. Gluba (Helmholtz-Zentrum Berlin für Materialien
+und Energie GmbH) for providing me with detailed and precise
+informations about the bit patterns to be send to the device.
 
 @paragraphindent 0
 @strong{Status}: Untested
@@ -3263,9 +3268,6 @@ J.-W.-Goethe University in Frankfurt/Main. Field range is @w{0 G} to
 @end ifnottex
 
 @paragraphindent 0
-@strong{Author}: Sergey Veber (International Tomography Center, Novosibirsk)
-
-@paragraphindent 0
 @strong{Module name}: @code{s_band_magnet_narrow}
 
 @paragraphindent 0
@@ -3309,6 +3311,9 @@ to @w{1479.5 G} with a resolution of @w{0.1 G}.
 @ifnottex
 @section Schlumberger Solartron 7150 Multimeter
 @end ifnottex
+
+@paragraphindent 0
+@strong{Author}: Sergey Veber (International Tomography Center, Novosibirsk)
 
 @paragraphindent 0
 @strong{Module name}: @code{schlum7150}
