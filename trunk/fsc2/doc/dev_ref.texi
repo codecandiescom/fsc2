@@ -109,6 +109,14 @@
 @end ifnottex
 
 
+Please note: Some of the devices listed above are typically parts of
+complete spectrometers like the Bruker ESP300 and thus the complete
+spectrometer can be controlled (and often extended) via @code{fsc2}
+For example @code{fsc2} is being used to replace the legacy software
+for a number of ESP300 spectrometers, also allowing them to be used
+for all kinds of other techniques (ENDOR, time-resolved EPR etc.).
+
+
 @c #############################################################
 
 @node aeg_s_band, aeg_x_band, Device Reference, Device Reference
@@ -763,8 +771,9 @@ informations about the bit patterns to be send to the device.
 
 @paragraphindent 0
 @strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
-Signal Channel ER 023 M used in older Bruker EPR spectrometers --
-lock-in amplifier with built-in analog-to-digital converter.
+Signal Channel ER 023 M used in older Bruker EPR (ESP300)
+spectrometers -- lock-in amplifier with built-in analog-to-digital
+converter.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -814,8 +823,8 @@ In the GPIB configuration file use  @code{"ER023M"} as the device name,
 @paragraphindent 0
 @strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
 @w{ER 032 M} field controller, used to control the field in older
-Bruker EPR spectrometers. Maximum field range is from@w{-50 G} to
-@w{23000 G}, minimum field step width is @w{1 mG}.
+Bruker EPR (ESP300) spectrometers. Maximum field range is from@w{-50
+G} to @w{23000 G}, minimum field step width is @w{1 mG}.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -860,7 +869,7 @@ In the GPIB configuration file use @code{"ER032M"} as the device name,
 
 @paragraphindent 0
 @strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker} NMR
-gaussmeter @w{ER 035 M} used n conjunction with the magnet power
+gaussmeter @w{ER 035 M} used in conjunction with the magnet power
 supply controllers @code{aeg_s_band} and @code{aeg_x_band}. Field
 range depends on probe used, with @code{F0} probe it is @w{460 G} to
 @w{2390 G}, with @code{F1} probe the range is @w{1460 G} to @w{19900

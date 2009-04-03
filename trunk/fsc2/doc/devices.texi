@@ -255,8 +255,8 @@ because it does not have any access to a gaussmeter while the second
 uses the Bruker BNM12 gaussmeter. Both modules require the DA
 converter of the home-built DA and AD converter (module
 @ref{hjs_daadc}, see below). The @ref{hjs_fc} module also depends on
-the module for the the Bruker BNM12 gaussmeter (@ref{bnm12}) and the
-WITIO-48 DIO card (module @ref{witio_48}, also see below) for reading
+the module for the the @ref{bnm12, Bruker BNM12 gaussmeter} and the
+@ref{witio_48, Wasco WITIO-48} DIO card, also see below) for reading
 values from the Bruker BNM12 gaussmeter. These required modules have
 to be listed @strong{before} the module itself, so in the
 @code{DEVICES} section they would appear as
@@ -849,7 +849,7 @@ For this purpose a different module exists, @ref{bh15_fc}. The module
 device as a gaussmeter.
 @end table
 
-The three gaussmeter modules, @ref{er035m}, @ref{er035m}@code{_s} and
+The three gaussmeter modules, @ref{er035m}, @ref{er035m, er035m_s} and
 @ref{bh15} can be used in conjunction with the modules for controlling
 a magnet, @ref{aeg_s_band} and @ref{aeg_x_band}. In that case the
 gaussmeter module to be used for this purpose must be listed in the
@@ -857,12 +857,12 @@ gaussmeter module to be used for this purpose must be listed in the
 if more than one of these gausmeter modules is to be used, as the
 first gaussmeter module.
 
-The remaining modules, @ref{er035m}@code{_sa},
-@ref{er035m}@code{_sas}, @ref{pt2025} and @ref{bnm12}, are only to be
-used for field measurements but are not involved in field control.
+The remaining modules, @ref{er035m_sa}, @ref{er035m_sa, er035m_sas},
+@ref{pt2025} and @ref{bnm12}, are only to be used for field
+measurements but are not involved in field control.
 
 The @ref{bnm12, Bruker BNM12} NMR gaussmeter can only be read out when
-the @ref{witio_48, WITIO-48 DIO} card and the @ref{hjs_daadc,
+the @ref{witio_48, Wasco WITIO-48 DIO} card and the @ref{hjs_daadc,
 home-built DA/AD converter} are available and their modules have
 already been loaded.
 
@@ -913,12 +913,12 @@ gets cut off, i.e.@: with this resolution setting a field of
 @anchor{gaussmeter_resolution()}
 @findex gaussmeter_resolution()
 @item gaussmeter_resolution()
-This function is defined in the device drivers for the @strong{Bruker}
-NMR gaussmeters (@ref{er035m}, @ref{er035m}@code{_s},
-@ref{er035m}@code{_sa} and @ref{er035m}@code{_sas}), the @ref{pt2025,
-Metrolab 2025} NMR gaussmeter and for the @ref{bnm12, Bruker BNM12}
-NMR gaussmeter. It can be used to set or query the resolution in Gauss
-used in measurements of the magnetic field.
+This function is defined in the modules for the @strong{Bruker} NMR
+gaussmeters (@ref{er035m}, @ref{er035m, er035m_s}, @ref{er035m_sa} and
+@ref{er035m_sa, er035m_sas}), the @ref{pt2025, Metrolab 2025} NMR
+gaussmeter and for the @ref{bnm12, Bruker BNM12} NMR gaussmeter. It
+can be used to set or query the resolution in Gauss used in
+measurements of the magnetic field.
 
 To set a resolution the values @code{0.1 G}, @code{0.01 G} and
 @code{0.001 G} can be used for the @ref{bnm12, Bruker NMR}
@@ -929,7 +929,7 @@ gaussmeters. For the @ref{pt2025, Metrolab 2025} gaussmeter only
 
 @table @strong
 @item Please note:
-For the modules @ref{er035m} and @ref{er035m}@code{_s}, i.e.@: the
+For the modules @ref{er035m} and @ref{er035m, er035m_s}, i.e.@: the
 modules for direct field control, the resolution will be increased
 automatically from @code{0.1 G} to @code{0.01 G} at the initialization
 (i.e.@: at the very start of the experiment) unless the low resolution
@@ -964,17 +964,17 @@ in the @code{EXPERIMENT} section for queries.
 @findex gaussmeter_upper_search_limit()
 @item gaussmeter_upper_search_limit()
 This function can be called to set of query the upper search limit (in
-Gauss) for the modules @ref{er035m}, @ref{er035m}@code{_s},
-@ref{er035m}@code{_sa} and @ref{er035m}@code{_sas}. The function can
-only be called in the @code{EXPERIMENT} section.
+Gauss) for the modules @ref{er035m}, @ref{er035m, er035m_s},
+@ref{er035m_sa} and @ref{er035m_sa, er035m_sas}. The function can only
+be called in the @code{EXPERIMENT} section.
 
 
 @anchor{gaussmeter_lower_search_limit()}
 @findex gaussmeter_lower_search_limit()
 @item gaussmeter_lower_search_limit()
 This function can be called to set of query the lower search limit (in
-Gauss) for the modules @ref{er035m}, @ref{er035m}@code{_s},
-@ref{er035m}@code{_sa} and @ref{er035m}@code{_sas}. The function can
+Gauss) for the modules @ref{er035m}, @ref{er035m, er035m_s},
+@ref{er035m_sa} and @ref{er035m_sa, er035m_sas}. The function can
 only be called in the @code{EXPERIMENT} section.
 
 
@@ -1243,7 +1243,9 @@ side of the lock-in amplifier. Allowed values of the required argument
 are between @code{1} and @code{4}, corresponding to the port numbering.
 
 This function can only be used with the @strong{Stanford Research}
-lock-in amplifiers and can only be called in the @code{EXPERIMENT} section.
+lock-in amplifiers (@ref{sr510, SR510}, @ref{sr530, SR530},
+@ref{sr810, SR810}, @ref{sr830, SR830}) and can only be called in the
+@code{EXPERIMENT} section.
 
 
 @anchor{lockin_dac_voltage()}
@@ -1251,7 +1253,7 @@ lock-in amplifiers and can only be called in the @code{EXPERIMENT} section.
 @item lockin_dac_voltage()
 The function can be used to set or query the voltage at one of the DAC
 ports at the back side of the @strong{Stanford Research} lock-in
-amplifier. While for the models @ref{sr510, SR510} and @ref{sr530,
+amplifiers  While for the models @ref{sr510, SR510} and @ref{sr530,
 SR530} the allowed values for the required arguments are @code{5} or
 @code{6}, for the models @ref{sr810, SR810} and @ref{sr830, SR830} the
 values can range from @code{1} to @code{4}, corresponding to the
@@ -1270,7 +1272,8 @@ the models @ref{sr810, SR810} and @ref{sr830, SR830} the allowed
 voltage range is @w{-10.5V} to @w{+10.5 V}.
 
 This function can only be used with the @strong{Stanford Research}
-lock-in amplifiers. 
+lock-in amplifiers (@ref{sr510, SR510}, @ref{sr530, SR530},
+@ref{sr810, SR810}, @ref{sr830, SR830}).
 
 In the @code{PREPARATIONS} section this function can only be called
 with two argument, i.e@: to set the output voltage of one of the DACs
@@ -1391,12 +1394,13 @@ This function can be only used with the models @ref{sr810, SR810},
 @ref{sr830, SR830} and the @ref{er023m, ER023M}. It queries (if called
 with no argument) or sets (if called with an argument) the level of
 the modulation frequency. For the @strong{Stanford Research} lock-in
-amplifiers the allowed levels are between @w{4 mV} and @w{5 V}, if the
-argument is not within this range an error message is printed and the
-experiment is stopped. For the @ref{er023m, Bruker ER023M} signal
-channel the range is (as long as no calibration has been done) between
-@w{10 mG} and @w{100 G} (but don't expect the values to have any real
-meaning without a calibration).
+amplifiers (@ref{sr510, SR510}, @ref{sr530, SR530}, @ref{sr810,
+SR810}, @ref{sr830, SR830}) the allowed levels are between @w{4 mV}
+and @w{5 V}, if the argument is not within this range an error message
+is printed and the experiment is stopped. For the @ref{er023m, Bruker
+ER023M} signal channel the range is (as long as no calibration has
+been done) between @w{10 mG} and @w{100 G} (but don't expect the
+values to have any real meaning without a calibration).
 
 In the @code{PREPARATIONS} section this function can't be called in query
 mode, i.e.@: without an argument.
@@ -1430,7 +1434,8 @@ an argument of @code{0} or @code{"OFF"}, to re-lock the keyboard call it
 again with a non-zero argument, @code{"ON"} or no argument at all.
 
 This function can only be used with the @strong{Stanford Research}
-lock-in amplifiers.
+lock-in amplifiers (@ref{sr510, SR510}, @ref{sr530, SR530},
+@ref{sr810, SR810}, @ref{sr830, SR830}).
 
 
 @anchor{lockin_conversion_time()}
@@ -1783,12 +1788,12 @@ The function queries (if called with no argument) or sets (if called
 with an argument) the timebase setting of the oscilloscope. The
 possible timebases depend on the model, please check the manual.
 
-For the @strong{LeCroy} digitizers (except the @ref{lecroy9400, 9400}
-model) interleaved sample (RIS) mode will be automatically switched on
-if the selected timebase requires it (see the manuals at which
-timebase settings RIS or single shot mode is only possible). Changing
-the timebase for these digitizers may thus also lead to a change in
-the number of points of a trace.
+For all @strong{LeCroy} digitizers (except the @ref{lecroy9400, 9400})
+interleaved sample (RIS) mode will be automatically switched on if the
+selected timebase requires it (see the manuals at which timebase
+settings RIS or single shot mode is only possible). Changing the
+timebase for these digitizers may thus also lead to a change in the
+number of points of a trace.
 
 Please note that trying to change the timebase may lead to the program
 getting aborted if the new timebase setting isn't compatible with a
@@ -1811,7 +1816,7 @@ measured by the digitizer.
 @findex digitizer_interleave_mode()
 @item digitizer_interleave_mode()
 This function is only available for the @strong{LeCroy} digitizers
-(except the @ref{lecroy9400, 9400} model). It allows to switch between
+(except the @ref{lecroy9400, 9400}). It allows to switch between
 interleaved (RIS) and single shot (SS) mode, given that setting the
 mode is compatible with the currently selected timebase. Please note
 that by changing the timebase interleaved mode may get switched on or
@@ -4344,7 +4349,7 @@ argument at all.
 @cindex Multimeter Functions
 The only currently supported digital multimeters are the
 @ref{kontron4060, Kontron 4060} and the @ref{schlum7150, Schlumberger
-7150}. The modules are loaded by specifying
+7150}. The modules are loaded by specifying one of
 @example
 kontron4060
 schlumberger7140
@@ -4740,18 +4745,17 @@ only by used in the @code{EXPERIMENT} section.
 @cindex DAQ Functions
 Currently, the supported data acquisition (DAQ) devices are the
 @ref{pci_mio_16e_1, National Instruments PCI-MIO-16E-1} card, the
-@ref{me6000, Meilhaus Electronic GmbH} digital-to-analog converter
-cards @strong{ME-6000} and @strong{ME-6100}, a home-built DA and AD
-converter from the group of H.-J.@: Steinhoff at the University of
+@ref{me6000, Meilhaus Electronic GmbH ME-6000 and ME-6100}
+digital-to-analog converter cards, a @ref{hjs_daadc, home-built DA and
+AD converter} from the group of H.-J.@: Steinhoff at the University of
 Osnabrueck and the 12-bit @ref{rb8509, RB8509 ADC} and the 12-bit
 @ref{rb8510, RB8510 DAC} card connected via the @strong{Rulbus}
 (Rijksuniversiteit Leiden BUS).
 
 Both the @ref{pci_mio_16e_1, National Instruments PCI-MIO-16E-1} and
-the @ref{me6000, Meilhaus} cards, @strong{ME-6000} and
-@strong{ME-6100}, require that a kernel module and an additional
-library (both coming with @code{fsc2}) have been successfully
-installed.
+the @ref{me6000, Meilhaus ME-6000 and ME-6100} cards, require that a
+kernel module and an additional library (both coming with @code{fsc2})
+have been successfully installed.
 
 The Rulbus @ref{rb8509} and @ref{rb8510} ADC and DAC cards both
 require that the Rulbus kernel module and an additional library
@@ -5453,11 +5457,11 @@ accdentally changing the output of the DAC.
 This function is not implemented for the @ref{rb8509, Rulbus RB8509
 ADC} card.
 
-For the @strong{ME-6000} and @strong{ME-6100} card the function expects an
-output port as the first argument specified by one of the symbolic values
-between @code{CH0} and @code{CH15} (don't try to use simple numbers instead!).
-For the home-built AD and DA converter this argument can't be specified since
-it has only a single output.
+For the @ref{me6000, ME-6000 and ME-6100} card the function expects an
+output port as the first argument specified by one of the symbolic
+values between @code{CH0} and @code{CH15} (don't try to use simple
+numbers instead!). For the home-built AD and DA converter this
+argument can't be specified since it has only a single output.
 
 If there is no further argument (or, in the case of the home-built AD
 and DA converter, no argument) an integer is returned. If it @code{1}
@@ -5485,15 +5489,15 @@ operation failed.
 @findex daq_set_voltage()
 @item daq_set_voltage()
 This function has to be used to output a voltage at (one of) the
-output ports. For the @ref{pci_mio_16e_1, PCI-MIO-16E-1},
-@strong{ME-6000} and @strong{ME-6100} cards the first argument has to
-be the output port, specified by one of the symbolic values between
-@code{CH0} and and @code{CH1} for the @ref{pci_mio_16e_1,
-PCI-MIO-16E-1} card and between @code{CH1} and @code{CH15} for the
-@strong{ME-6000} and @strong{ME-6100} cards (don't try to use simple
-numbers instead!). For the home-built AD and DA converter as well as
-the @ref{rb8510, RB8510 DAC} card this argument can't be specified
-since both have only a single output.
+output ports. For the @ref{pci_mio_16e_1, PCI-MIO-16E-1}, @ref{me6000,
+ME-6000 and ME-6100} cards the first argument has to be the output
+port, specified by one of the symbolic values between @code{CH0} and
+and @code{CH1} for the @ref{pci_mio_16e_1, PCI-MIO-16E-1} card and
+between @code{CH1} and @code{CH15} for the @ref{me6000, ME-6000 and
+ME-6100} cards (don't try to use simple numbers instead!). For the
+home-built AD and DA converter as well as the @ref{rb8510, RB8510 DAC}
+card this argument can't be specified since both have only a single
+output.
 
 If the @ref{pci_mio_16e_1, PCI-MIO-16E-1} card he channel is in
 biploar mode and uses the internal voltage reference the second
@@ -5504,12 +5508,13 @@ voltage the argument must be be either between @w{-1} and @w{+1} or
 @w{0} and @w{1}, standing for the fraction of the external reference
 voltage to be output.
 
-For the @strong{ME-6000} and @strong{ME-6100} cards the second argument is the
-output voltage to be output in the range between @w{-10 V} and @w{+10 V}.
+For the @ref{me6000, ME-6000 and ME-6100} cards the second argument is
+the output voltage to be output in the range between @w{-10 V} and
+@w{+10 V}.
 
 In contrast, for the home-built AD and DA converter card, the only
 argument is the output voltage. It must be between @w{0 V} and the
-maximum voltage that has been spcified in the call of the function
+maximum voltage that has been specified in the call of the function
 @ref{daq_maximum_output_voltage()}. If this function hasn't been called
 the default maximum output voltage is @w{+10 V}.
 
@@ -5645,14 +5650,15 @@ want to be able to read in the voltage at the ADC.
 @anchor{daq_dac_parameter()}
 @findex daq_dac_parameter()
 @item daq_dac_parameter()
-This function is available only for the @strong{ME-6000} and @strong{ME-6100}
-cards and the home-built AD and DA converter. It can be used to determine the
-current parameter of a DAC (channel). It returns an array of three floating
-point values. The first element of the array is the minimum voltage that can
-be output by the DAC, the second is the maximum output voltage and the third
-is the voltage resolution. If the device has more than one DAC channel, the
-function expects a channel as the only argument (which can be omitted if
-settings for alll channels must be identical).
+This function is available only for the @ref{me6000, ME-6000 and
+ME-6100} cards and the home-built AD and DA converter. It can be used
+to determine the current parameter of a DAC (channel). It returns an
+array of three floating point values. The first element of the array
+is the minimum voltage that can be output by the DAC, the second is
+the maximum output voltage and the third is the voltage resolution. If
+the device has more than one DAC channel, the function expects a
+channel as the only argument (which can be omitted if settings for
+alll channels must be identical).
 
 
 @anchor{daq_trigger_mode()}
@@ -5738,12 +5744,12 @@ can only be used with a pass-phrase. This will mainly be used by modules
 for other devices that require a DIO to keep an @code{EDL} script from
 accdentally changing the output or reading the input of the DIO.
 
-In the case of the Wasco @ref{witio_48} card the first argument is the
-DIO to be reserved (or released). This must be either a number,
-@code{1} or @code{2} or, better, a symbolic name, @code{DIO1} or
-@code{DIO2}. For the @ref{me_dio_X, Meilhaus DIO subsystem} the whole
-subsystem gets locked or unlocked, so no DIO number can be passed to
-the function.
+In the case of the Wasco @ref{witio_48, Wasco WITIO-48} card the first
+argument is the DIO to be reserved (or released). This must be either
+a number, @code{1} or @code{2} or, better, a symbolic name,
+@code{DIO1} or @code{DIO2}. For the @ref{me_dio_X, Meilhaus DIO
+subsystem} the whole subsystem gets locked or unlocked, so no DIO
+number can be passed to the function.
 
 If there is no further argument an integer is returned. If it is
 @code{1} the DIO or subsystem is reserved, if it's @code{0} it's not
@@ -5767,22 +5773,23 @@ is @code{0} the operation failed.
 @anchor{dio_mode()}
 @findex dio_mode()
 @item dio_mode()
-The WITIO-48 card has two DIO chips, both allowing 24 bit wide input and
-output. These DIOs can be further split up into sub-DIOs of smaller
-width. By calling this function you can set the way a DIO is split up.
+The @ref{witio_48, Wasco WITIO-48} card has two DIO chips, both
+allowing 24 bit wide input and output. These DIOs can be further split
+up into sub-DIOs of smaller width. By calling this function you can
+set the way a DIO is split up.
 
 In contrast, the Meilhaus card DIO subsystem has a single 32-bit wide
 DIO which can be split up into either 32 1-bit wide DIO channels,
 4 8-bit wide channels, 2 16-bit wide channels or 1 32-wide channel.
 
-For the @ref{witio_48} card the function expects at least one
-argument, the DIO to be used with the function. This must be either a
-number, @code{1} or @code{2} or, better, a symbolic name, @code{DIO1}
-or @code{DIO2}. When called without another argument the current mode
-is returned as an integer number (as they could also be specified to
-set a mode, see below). If there is a second argument this is the mode
-to be set. You can use either a number or a string to specify the new
-mode:
+For the @ref{witio_48, Wasco WITIO 48} card the function expects at
+least one argument, the DIO to be used with the function. This must be
+either a number, @code{1} or @code{2} or, better, a symbolic name,
+@code{DIO1} or @code{DIO2}. When called without another argument the
+current mode is returned as an integer number (as they could also be
+specified to set a mode, see below). If there is a second argument
+this is the mode to be set. You can use either a number or a string to
+specify the new mode:
 @table @samp
 @item @code{0} or @code{"3x8"}
 The DIO is split up into three independent 8-bit DIOs, which then can be
@@ -5825,16 +5832,16 @@ you want to be able to change the mode of the DIO.
 @findex dio_value()
 @item dio_value()
 This function is used to either input or output a value. For the
-WITIO-48 card the first arguments must be the DIO to be used
-(preferably use the symbolic names @code{DIO1} and @code{DIO2}). and a
-channel. For both modules the channels to be used must be specified.
-Depending on the mode the DIO has been set to using the function
-@ref{dio_mode()}, for the WITIO-48 either one, two or three channels
-can be used, for the Meilhaus card DIO subsystem one, two, four or 32
-can be available. Always use the symbolic names @code{CH1},
-@code{CH2}, @code{CH3} etc. If there is no further argument data will
-be read in from the DIO and passed back to the @code{EDL} script as
-the return value of the function.
+@ref{witio_48, Wasco WITIO-48} card the first arguments must be the
+DIO to be used (preferably use the symbolic names @code{DIO1} and
+@code{DIO2}). and a channel. For both modules the channels to be used
+must be specified. Depending on the mode the DIO has been set to using
+the function @ref{dio_mode()}, for the @ref{witio_48, Wasco WITIO-48}
+either one, two or three channels can be used, for the Meilhaus card
+DIO subsystem one, two, four or 32 can be available. Always use the
+symbolic names @code{CH1}, @code{CH2}, @code{CH3} etc. If there is no
+further argument data will be read in from the DIO and passed back to
+the @code{EDL} script as the return value of the function.
 
 If there's a third argument it is taken as the value to output at the
 DIO (or, to be precise, the channel of the DIO). How many channels can
@@ -5842,7 +5849,7 @@ be used, what range of data can be output and how each bit the value
 is mapped to the output pins depends on the mode the DIO is been set
 to.
 
-For the WITIO-48 we have:
+For the @ref{witio_48, Wasco WITIO-48} card we have:
 
 @table @samp
 @item @code{"3x8"} mode
@@ -5938,7 +5945,7 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @node Event Counter Functions, CCD Camera Functions, DIO Functions, Device Functions
 @section Event Counter Functions
 @cindex Event Counter Functions
-The only currently supported event counter is the @strong{ni6601,
+The only currently supported event counter is the @ref{ni6601,
 National Instruments GPCT 6601} card. It can be used for counting as
 well as for creating pulses. The module for this card is loaded by
 specifying
@@ -6652,10 +6659,11 @@ the number of pixels in the (vertical) @i{y}-direction.
 
 Currently the @ref{spectrapro_300i, SpectraPro-300i} series of
 monochromator (actually, the module has only been tested with the
-@strong{308i}) by @strong{Acton Research Corporation} and
-monochromators by @strong{SPEX} controlled via either the CD2A
-Compudrive or the SPEX232 interface are supported. The modules for the
-monochromators get loaded by specifying
+@ref{spectrapro_300i, 308i} by @strong{Acton Research Corporation} and
+monochromators by @strong{SPEX} controlled via either the
+@ref{spex_cd2a, CD2A Compudrive} or the @ref{spex232, SPEX232}
+interface are supported. The modules for the monochromators get loaded
+by specifying
 @example
 spectrapro_300i
 spex_cd2a
@@ -6747,12 +6755,12 @@ Returns a string with the name of the monochromator being used.
 @findex monochromator_wavelength()
 @item monochromator_wavelength()
 If called with no argument the function returns the current center
-wavelength (in m) of the grating. If called with an argument the grating
-is moved to the specified center wavelength (which must be in the range
-covered by the monochromator and the current grating).
+wavelength (in m) of the grating. If called with an argument the
+grating is moved to the specified center wavelength (which must be in
+the range covered by the monochromator and the current grating).
 
-Please note: for @strong{SPEX} monochromators doing a scan calling this
-function automatically aborts the currently running scan.
+Please note: for @strong{SPEX} monochromators doing a scan calling
+this function automatically aborts the currently running scan.
 
 
 @anchor{monochromator_wavenumber()}
@@ -6767,8 +6775,8 @@ specified center wavenumber, which must be given in absolute units if no
 laser line position has been set, otherwise in relative units. The
 possible range depends on the grating being used.
 
-Please note: for @strong{SPEX} monochromators doing a scan calling this
-function automatically aborts the currently running scan.
+Please note: for @strong{SPEX} monochromators doing a scan calling
+this function automatically aborts the currently running scan.
 
 
 @anchor{monochromator_laser_line()}
@@ -6776,8 +6784,8 @@ function automatically aborts the currently running scan.
 @item monochromator_laser_line()
 The function is only supported for wavenumber-driven @strong{SPEX}
 monochromators. It allows to set (or query if the function is called
-without an argument) to set a laser line position. If such a laser line
-has been set the device automatically switches to using relative
+without an argument) to set a laser line position. If such a laser
+line has been set the device automatically switches to using relative
 wavenumbers, i.e.@: differences between the laser line position and
 absolute wavenumbers. All @code{EDL} functions accepting or returning
 spectral positions will then also switch to such relative wavenumbers.
@@ -6805,20 +6813,20 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_scan_setup()}
 @findex monochromator_scan_setup()
 @item monochromator_scan_setup()
-The function is only supported for @strong{SPEX} monochromators. These have
-a special scan mode, where scans can be done going from low to high
-wavelengths or from high to low wavenumbers (during a scan the
-monochromator doesn't have to do backslash removal, making the slew to a
-new position faster). For being able to start a scan the start position
-and the step width for the scan must be defined, which can be done using
-this function. To set the scan parameter the function expects to
-arguments, first the start position of the scan, given in wavelength
-units for wavelength-driven monochromators and in wavenumbers (absolute,
-if no laser line position is set, otherwise in relative units). The
-second argument is the step width, which must be a positive wavelength
-or wavenumber step size (even though for wavenumber-driven
-monochromators the scan is always in the direction of lower
-wavenumbers!).
+The function is only supported for @strong{SPEX} monochromators. These
+have a special scan mode, where scans can be done going from low to
+high wavelengths or from high to low wavenumbers (during a scan the
+monochromator doesn't have to do backslash removal, making the slew to
+a new position faster). For being able to start a scan the start
+position and the step width for the scan must be defined, which can be
+done using this function. To set the scan parameter the function
+expects to arguments, first the start position of the scan, given in
+wavelength units for wavelength-driven monochromators and in
+wavenumbers (absolute, if no laser line position is set, otherwise in
+relative units). The second argument is the step width, which must be
+a positive wavelength or wavenumber step size (even though for
+wavenumber-driven monochromators the scan is always in the direction
+of lower wavenumbers!).
 
 If called without an argument, the function returns a two-dinemsional
 array, with the first argument being the start position and the second
@@ -6831,13 +6839,14 @@ automatically aborts the currently running scan.
 @anchor{monochromator_start_scan()}
 @findex monochromator_start_scan()
 @item monochromator_start_scan()
-The function is only supported for @strong{SPEX} monochromators and requires
-that the function @ref{monochromator_scan_setup()} has been called previously
-to define the scan parameters. It slews the monochromator to the start
-position of the scan, switches to scan mode and returns the spectral position
-of the monochromator, either in wavelength units for wavelength driven
-monochromators or wavenumbers for wavenumber driven ones (in absolute units,
-if no laser line position has been set, otherwise in relative units).
+The function is only supported for @strong{SPEX} monochromators and
+requires that the function @ref{monochromator_scan_setup()} has been
+called previously to define the scan parameters. It slews the
+monochromator to the start position of the scan, switches to scan mode
+and returns the spectral position of the monochromator, either in
+wavelength units for wavelength driven monochromators or wavenumbers
+for wavenumber driven ones (in absolute units, if no laser line
+position has been set, otherwise in relative units).
 
 Please note: if the monochromators is already doing a scan calling this
 function automatically aborts the running scan.
@@ -6849,14 +6858,15 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_scan_step()}
 @findex monochromator_scan_step()
 @item monochromator_scan_step()
-The function is only supported for @strong{SPEX} monochromators and requires
-that both the function @ref{monochromator_scan_setup()} has been called
-previously to define the scan parameters and that the monochromator has been
-switched to scan mode by calling @ref{monochromator_start_scan()}.  The
-function slews the monochromator to the next spectral position by the scan
-step size and returns the new position, either in wavelength units for
-wavelength driven monochromators or wavenumbers for wavenumber driven ones (in
-absolute units, if no laser line position has been set, otherwise in relative
+The function is only supported for @strong{SPEX} monochromators and
+requires that both the function @ref{monochromator_scan_setup()} has
+been called previously to define the scan parameters and that the
+monochromator has been switched to scan mode by calling
+@ref{monochromator_start_scan()}. The function slews the monochromator
+to the next spectral position by the scan step size and returns the
+new position, either in wavelength units for wavelength driven
+monochromators or wavenumbers for wavenumber driven ones (in absolute
+units, if no laser line position has been set, otherwise in relative
 units).
 
 The function can only be used in the @code{EXPERIMENT} section of an
@@ -6870,7 +6880,8 @@ The function does not take any arguments and returns an array with two
 elements, the first being the lower scan limit in absolute wavenumbers
 (in @code{cm^-1}) and the second the upper scan limit.
 
-Currently this function is only available for @strong{SPEX} monochromators.
+Currently this function is only available for @strong{SPEX}
+monochromators.
 
 
 @anchor{monochromator_wavelength_scan_limits()}
@@ -6880,7 +6891,8 @@ The function does not take any arguments and returns an array with two
 elements, the first being the lower scan limit in wavelengths (in
 @code{m}) and the second the upper scan limit.
 
-Currently this function is only available for @strong{SPEX} monochromators.
+Currently this function is only available for @strong{SPEX}
+monochromators.
 
 
 @anchor{monochromator_shutter_limits()}
@@ -6892,11 +6904,11 @@ to protect the PMT or APD etc.@: from excitation light in a certain
 frequency range. The function can be used to query or set these
 shutter limits. To set the shutter limits the function expects two
 arguments, the lower and the upper shutter limit. If a laser line
-position has been set the function won't allow to set the shutter limits
-to values that don't cover the laser line. When called without an
-argument the function returns a two-dimensional array, with the first
-element being the lower shutter limit and the second the upper shutter
-limit.
+position has been set the function won't allow to set the shutter
+limits to values that don't cover the laser line. When called without
+an argument the function returns a two-dimensional array, with the
+first element being the lower shutter limit and the second the upper
+shutter limit.
 
 Please note: for monochromators doing a scan calling this function
 automatically aborts the currently running scan.
@@ -6918,13 +6930,14 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_grating()}
 @findex monochromator_grating()
 @item monochromator_grating()
-The function is only supported for @strong{SpectraPro-300i} monochromators. It
-queries or sets a new grating. If called with no argument the function
-returns the number of the currently used grating (an integer between 1
-and the maximum number of installed gratings). If called with an integer
-argument the monochromator switches to the grating indexed by the number
-if it is available. The center wavelength the new grating is set to
-remains the same as for the previous grating.
+The function is only supported for @ref{spectrapro_300i,
+SpectraPro-300i} monochromators. It queries or sets a new grating. If
+called with no argument the function returns the number of the
+currently used grating (an integer between 1 and the maximum number of
+installed gratings). If called with an integer argument the
+monochromator switches to the grating indexed by the number if it is
+available. The center wavelength the new grating is set to remains the
+same as for the previous grating.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -6933,43 +6946,42 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_turret()}
 @findex monochromator_turret()
 @item monochromator_turret()
-The function is only supported for @strong{SpectraPro-300i} monochromators. If
-called with no argument the function returns the number of the currently
-used turret of the monochromator (an integer number starting at 1). If
-called with an integer argument it switches the monochromator to the
-indexed turret.
+The function is only supported for @ref{spectrapro_300i,
+SpectraPro-300i} monochromators. If called with no argument the
+function returns the number of the currently used turret of the
+monochromator (an integer number starting at 1). If called with an
+integer argument it switches the monochromator to the indexed turret.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
 
 
-@c @anchor{monochromator_entry_mirror()}
-@c @findex monochromator_entry_mirror()
-@c @item monochromator_entry_mirror()
-@c The function is only supported for @strong{SpectraPro-300i}
-@c monochromators. If called with no argument the function returns the
-@c position of the entry divertor mirror, where @code{0} stands for front and
-@c @code{1} for side. If called with an string argument of @code{"FRONT"}
-@c or an integer argument of @code{0} it moves entry diverter mirror to
-@c position the beam to the front port position, of called with a string
-@c argument of @code{"SIDE"} or an integer argument of @code{1} it
-@c moves the mirror to position the beam to the side port.
-@c 
-@c The function can only be used in the @code{EXPERIMENT} section of an
-@c @code{EDL} script.
+@c @anchor{monochromator_entry_mirror()} @findex
+@c monochromator_entry_mirror() @item monochromator_entry_mirror() The
+@c function is only supported for @ref{spectrapro_300i,
+@c SpectraPro-300i} monochromators. If called with no argument the
+@c function returns the position of the entry divertor mirror, where
+@c @code{0} stands for front and @code{1} for side. If called with an
+@c string argument of @code{"FRONT"} or an integer argument of
+@c @code{0} it moves entry diverter mirror to position the beam to the
+@c front port position, of called with a string argument of
+@c @code{"SIDE"} or an integer argument of @code{1} it moves the
+@c mirror to position the beam to the side port. The function can only
+@c be used in the @code{EXPERIMENT} section of an @code{EDL} script.
 
 
 @anchor{monochromator_exit_mirror()}
 @findex monochromator_exit_mirror()
 @item monochromator_exit_mirror()
-The function is only supported for @strong{SpectraPro-300i}
-monochromators. If called with no argument the function returns the
-position of the exit divertor mirror, where @code{0} stands for front and
-@code{1} for side. If called with an string argument of @code{"FRONT"}
-or an integer argument of @code{0} it moves exit diverter mirror to
-position the beam to the front port position, of called with a string
-argument of @code{"SIDE"} or an integer argument of @code{1} it
-moves the mirror to position the beam to the side port.
+The function is only supported for @ref{spectrapro_300i,
+SpectraPro-300i} monochromators. If called with no argument the
+function returns the position of the exit divertor mirror, where
+@code{0} stands for front and @code{1} for side. If called with an
+string argument of @code{"FRONT"} or an integer argument of @code{0}
+it moves exit diverter mirror to position the beam to the front port
+position, of called with a string argument of @code{"SIDE"} or an
+integer argument of @code{1} it moves the mirror to position the beam
+to the side port.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -6992,24 +7004,24 @@ into account, while the fourth value is the wavelength difference
 between data points (which will be different from the difference
 between neighbouring pixels when horizontal binning is used).
 
-For the @strong{SpectraPro-300i} monochronator the function can be
+For the @ref{spectrapro_300i, SpectraPro-300i} monochronator the function can be
 called with up to two arguments, an integer for the grating number
 and the wavelength at the center of the chip. If these arguments
 aren't given, the currently used grating and wavelength of the
 monochromator are used.
 
-For the @strong{SPEX_CD2A} and @strong{ SPEX232} monochromators the
-function accepts a single argument, the the wavelength at the center
-of the chip. If no argument is given the currently set wavelength of
-the monochromator is used.
+For the @ref{spex_cd2a, SPEX_CD2A} and @ref{spex232, SPEX232}
+monochromators the function accepts a single argument, the the
+wavelength at the center of the chip. If no argument is given the
+currently set wavelength of the monochromator is used.
 
-For @strong{SpectraPro-300i} monochromators it is required that a
-calibration for the grating has been loaded, either by calling
-@ref{monochromator_set_calibration()} or
-@ref{monochromator_load_calibration()}. If no calibration
-has been loaded for the grating a warning is printed and the returned
-scaling values represent pixel numbers relative to the center of the CCD
-chip, not wavelengths.
+For @ref{spectrapro_300i, SpectraPro-300i} monochromators it is
+required that a calibration for the grating has been loaded, either by
+calling @ref{monochromator_set_calibration()} or
+@ref{monochromator_load_calibration()}. If no calibration has been
+loaded for the grating a warning is printed and the returned scaling
+values represent pixel numbers relative to the center of the CCD chip,
+not wavelengths.
 
 The function is mostly meant to make it easy to obtain a wavelength
 scale to be used with the functions @ref{change_scale_1d()} and
@@ -7057,17 +7069,18 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_calc_wavelength()}
 @findex monochromator_calc_wavelength()
 @item monochromator_calc_wavelength()
-The function is only supported for @strong{SpectraPro-300i} monochromators. It
-requires that the module for a CCD camera is available that returns
-information about the number of pixels of the CCD chip and the distance
-between pixels. It accepts a pixel position or an array of pixel
-positions on the CCD chip (relative to the left edge of the chip and
-starting with 1) and returns, depending on the type of the argument,
-either a number or an array with the exact wavelengths for the pixel
-position(s). The function also accepts up to two arguments, an integer
-for the grating number and the wavelength at the center of the chip. If
-these arguments aren't given, the currently used grating and wavelength
-of the monochromator are used.
+The function is only supported for @ref{spectrapro_300i,
+SpectraPro-300i} monochromators. It requires that the module for a CCD
+camera is available that returns information about the number of
+pixels of the CCD chip and the distance between pixels. It accepts a
+pixel position or an array of pixel positions on the CCD chip
+(relative to the left edge of the chip and starting with 1) and
+returns, depending on the type of the argument, either a number or an
+array with the exact wavelengths for the pixel position(s). The
+function also accepts up to two arguments, an integer for the grating
+number and the wavelength at the center of the chip. If these
+arguments aren't given, the currently used grating and wavelength of
+the monochromator are used.
 
 To be able to work the function also requires that a calibration for the
 grating has been loaded, either by calling
@@ -7083,10 +7096,10 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_load_calibration()}
 @findex monochromator_load_calibration()
 @item monochromator_load_calibration()
-The function is only supported for @strong{SpectraPro-300i} monochromators. It
-tries to load a file with calibration data for one or more of the
-gratings. For each grating three values are required for a complete
-calibration.
+The function is only supported for @ref{spectrapro_300i,
+SpectraPro-300i} monochromators. It tries to load a file with
+calibration data for one or more of the gratings. For each grating
+three values are required for a complete calibration.
 
 The first value is the inclusion angle (i.e.@: the angle between the
 incident and the reflected beam for the center wavelength of the
@@ -7124,10 +7137,10 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_set_calibration()}
 @findex monochromator_set_calibration()
 @item monochromator_set_calibration()
-The function is only supported for @strong{SpectraPro-300i} monochromators. It
-allows to set calibration data for a grating directly instead of reading
-them from a file. It can also used to reset the calibration for a
-grating.
+The function is only supported for @ref{spectrapro_300i,
+SpectraPro-300i} monochromators. It allows to set calibration data for
+a grating directly instead of reading them from a file. It can also
+used to reset the calibration for a grating.
 
 The function expects 4 arguments, the grating number (an integer between
 1 and the maximum number of installed gratings), the inclusion angle (in
@@ -7144,19 +7157,20 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_install_grating()}
 @findex monochromator_install_grating()
 @item monochromator_install_grating()
-The function is only supported for @strong{SpectraPro-300i} monochromators. It
-can be used to tell the monochromator about a new grating.  It expects
-two arguments, the grating number (an integer between 1 and the maximum
-number of installable gratings) and a string with the part number of the
-newly installed grating. All part numbers are expected to start with a
+The function is only supported for @ref{spectrapro_300i,
+SpectraPro-300i} monochromators. It can be used to tell the
+monochromator about a new grating. It expects two arguments, the
+grating number (an integer between 1 and the maximum number of
+installable gratings) and a string with the part number of the newly
+installed grating. All part numbers are expected to start with a
 single digit, followed by a dash, a three-digit number with the number
 grooves per thenth of a mm (if necessary left-filled with zeros),
 another dash and an identifier for the blaze wavelength or type of the
 grating. Thus a valid part number string would be e.g.@:
-@code{"1-120-750"} for a grating with 1200 grooves per mm and a blazing
-wavelength of @w{750 nm}. Another possible part number string is
-@code{"2-030-HVIS"}. The total length of the string may not excceed 13
-characters.
+@code{"1-120-750"} for a grating with 1200 grooves per mm and a
+blazing wavelength of @w{750 nm}. Another possible part number string
+is @code{"2-030-HVIS"}. The total length of the string may not excceed
+13 characters.
 
 Alternatively, the function can also be used to tell the monochromator
 that a grating has been removed. In this case the part number string has
@@ -7176,14 +7190,14 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_zero_offset()}
 @findex monochromator_zero_offset()
 @item monochromator_zero_offset()
-The function is only supported for @strong{SpectraPro-300i} monochromators. It
-allows to either query or set the zero offset of a grating. The zero
-offset is basically an angle that results from misalignments of the
-grating (and the CCD chip) and leads to the zero order peak not
-appearing exactly at the center of the CCD chip. By setting the zero
-offset value correctly this misalignments can be compensated for. It is
-expressed as a number in the interval @code{[-1,+1]} and the correct
-value can only be found experimentally.
+The function is only supported for @ref{spectrapro_300i,
+SpectraPro-300i} monochromators. It allows to either query or set the
+zero offset of a grating. The zero offset is basically an angle that
+results from misalignments of the grating (and the CCD chip) and leads
+to the zero order peak not appearing exactly at the center of the CCD
+chip. By setting the zero offset value correctly this misalignments
+can be compensated for. It is expressed as a number in the interval
+@code{[-1,+1]} and the correct value can only be found experimentally.
 
 The function expects at least one argument, an integer number
 designating the grating (an integer between 1 and the maximum number of
@@ -7206,14 +7220,15 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_grating_adjust()}
 @findex monochromator_grating_adjust()
 @item monochromator_grating_adjust()
-The function is only supported for @strong{SpectraPro-300i} monochromators. The
-value that can be queried or set by this function is used to adjust the
-angle by which the grating is rotated when moving it to a certain
-wavelength. The monochromator has a built-in default value for the ratio
-between the angle and the wavelength which can be changed by the grating
-adjust value. If this value (and also the zero offset, see above) is set
-correctly, a line will appear at the center of the CCD chip when the
-monochronator is set to the wavelength of the line.
+The function is only supported for @ref{spectrapro_300i,
+SpectraPro-300i} monochromators. The value that can be queried or set
+by this function is used to adjust the angle by which the grating is
+rotated when moving it to a certain wavelength. The monochromator has
+a built-in default value for the ratio between the angle and the
+wavelength which can be changed by the grating adjust value. If this
+value (and also the zero offset, see above) is set correctly, a line
+will appear at the center of the CCD chip when the monochronator is
+set to the wavelength of the line.
 
 The grating adjust value is a number in the interval @code{[-1,+1]} and
 can the correct setting can only be found experimentally.
@@ -7239,17 +7254,18 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{monochromator_calibrate()}
 @findex monochromator_calibrate()
 @item monochromator_calibrate()
-The function is takes different arguments for the @strong{SpectraPro-300i} and
-the @strong{SPEX} monochromator.
+The function is takes different arguments for the
+@ref{spectrapro_300i, SpectraPro 300i} and the @strong{SPEX}
+monochromators.
 
-For the @strong{SpectraPro-300i} it is for use in the dispersion
-calibration of a grating, i.e.@: the procedure where from a set of at
-least 4 measured positions of known lines (at at least two different
-center wavelengths) the optimum values for the inclusion angle, the
-focal length and the detector angle are determined.  This function
-requires that the module for a CCD camera is available that returns
-information about the number of pixels of the CCD chip and the distance
-between pixels.
+For the @ref{spectrapro_300i, SpectraPro-300i} it is for use in the
+dispersion calibration of a grating, i.e.@: the procedure where from a
+set of at least 4 measured positions of known lines (at at least two
+different center wavelengths) the optimum values for the inclusion
+angle, the focal length and the detector angle are determined. This
+function requires that the module for a CCD camera is available that
+returns information about the number of pixels of the CCD chip and the
+distance between pixels.
 
 The function expects a minimum of 5 arguments. The first is the grating
 number (an integer between 1 and the maximum number of installed
@@ -7281,52 +7297,54 @@ returns an (1-dimensional) array with three elements, where the first
 element is the inclusion angle (in degrees), the second element is the
 focal length (in m) and the third is the detector angle (in degrees).
 
-When called without an argument for @strong{SpectraPro-300i}
-monochromators the function returns an array with three elements, which
-are the current calibration settings for the inclusion angle (in
-degree), the focal length (in @code{m}) and the detector angle (in degree).
+When called without an argument for @ref{spectrapro_300i,
+SpectraPro-300i} monochromators the function returns an array with
+three elements, which are the current calibration settings for the
+inclusion angle (in degree), the focal length (in @code{m}) and the
+detector angle (in degree).
 
 For the @strong{SPEX} monochromators it can be used to set an offset
-between the wavelength or -number used to set the monochromator to
-the current position and the "real", i.e.@: experimentally determined
-wavelength or (absolute) wavenumber. Once it has been set, all functions
-will take this offset into account when talking with the device.
+between the wavelength or -number used to set the monochromator to the
+current position and the "real", i.e.@: experimentally determined
+wavelength or (absolute) wavenumber. Once it has been set, all
+functions will take this offset into account when talking with the
+device.
 
-The second calibration value (the optional second argument) to be set by
-the function for @strong{SPEX} monochromators is the wavelength (even for
-wavenumber driven monochromators) difference between two pixels of an
-attached CCD camera.
+The second calibration value (the optional second argument) to be set
+by the function for @strong{SPEX} monochromators is the wavelength
+(even for wavenumber driven monochromators) difference between two
+pixels of an attached CCD camera.
 
-The offset is taken to be the difference between the "real" position of
-a line and the position where it appears when measured with @code{fsc2}.
-Thus the usual procedure to set the offset is to measure the position of
-a well-known line using @code{fsc2} and then to call the function with
-the difference between the "real" position and the observed position.
-Afterwards @code{fsc2} will automatically take the offset into account
-and, after a further call to @ref{monochromator_wavelength()} or
-@ref{monochromator_wavenumber()}, the line should seem to appear at the
-expected position.
+The offset is taken to be the difference between the "real" position
+of a line and the position where it appears when measured with
+@code{fsc2}. Thus the usual procedure to set the offset is to measure
+the position of a well-known line using @code{fsc2} and then to call
+the function with the difference between the "real" position and the
+observed position. Afterwards @code{fsc2} will automatically take the
+offset into account and, after a further call to
+@ref{monochromator_wavelength()} or @ref{monochromator_wavenumber()},
+the line should seem to appear at the expected position.
 
 Please note that the offset can @strong{only} be set for wavenumber
-driven monochromators while using absolute wavenumbers, i.e.@: while no
-laser line position is set! If you want to determine and set a new
-offset first store the current laser line position, switch off use of a
-laser line position by calling @ref{monochromator_laser_line()} with a
-zero argument and only after measuring and setting a new offset set the
-laser line position again.
+driven monochromators while using absolute wavenumbers, i.e.@: while
+no laser line position is set! If you want to determine and set a new
+offset first store the current laser line position, switch off use of
+a laser line position by calling @ref{monochromator_laser_line()} with
+a zero argument and only after measuring and setting a new offset set
+the laser line position again.
 
 If called without an argument for @strong{SPEX} monochromators the
 function returns an array with two elements, representing the current
-calibration setting of the offset (in @code{m} for wavelength driven and
-in @code{cm^-1} for wavenumber driven monochromators) and the wavelength
-or -number difference between two adjacent CCD camera pixels (or
-@code{0} if the value isn't known).
+calibration setting of the offset (in @code{m} for wavelength driven
+and in @code{cm^-1} for wavenumber driven monochromators) and the
+wavelength or -number difference between two adjacent CCD camera
+pixels (or @code{0} if the value isn't known).
 
 Please note: To set the offset of a @strong{SPEX} monochromator to
 @code{0} @strong{don't} pass a zero argument for the offset to the
-function. Instead determine the current offset setting by a call without
-arguments and then call the function again with that offset as the first
-argument!.
+function. Instead determine the current offset setting by a call
+without arguments and then call the function again with that offset as
+the first argument!.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -7336,26 +7354,26 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @findex monochromator_init_motor()
 @item monochromator_init_motor()
 This function onky exists for @strong{SPEX} monochromators controlled
-via the @strong{SPEX232} interface and only for those that have
+via the @ref{spex232, SPEX232} interface and only for those that have
 autocalibration capabiliy. If for these types of monochromators the
 function is called in the @code{PREPARATIONS} section an
 autocalibration is executed when the monochromator is initialized.
-Please note that this is usually not necessary and can take a
-rather long time.
+Please note that this is usually not necessary and can take a rather
+long time.
 
 
 @anchor{monochromator_enforce_wavelength()}
 @findex monochromator_enforce_wavelength()
 @item monochromator_enforce_wavelength()
 This function only exists for @strong{SPEX} monochromators controlled
-via the @strong{SPEX232} interface. It allows, when called in the
-@code{PREPARATIONS} section, to set the wavelength the monochromator
-is currently set to, which then overrules the setting read from
-the file in which the state of the monochromator in the last run of
-the program is stored. This function should only be used when the
-data in the state file have gotten out of synch from the real setting
-of the monochromator (e.g.@: because  different program was used
-in between that drove the monochromator to a different wavelength
+via the @ref{spex232, SPEX232} interface. It allows, when called in
+the @code{PREPARATIONS} section, to set the wavelength the
+monochromator is currently set to, which then overrules the setting
+read from the file in which the state of the monochromator in the last
+run of the program is stored. This function should only be used when
+the data in the state file have gotten out of synch from the real
+setting of the monochromator (e.g.@: because different program was
+used in between that drove the monochromator to a different wavelength
 from the one stored in the state file).
 
 
@@ -7363,14 +7381,14 @@ from the one stored in the state file).
 @findex monochromator_enforce_wavenumber()
 @item monochromator_enforce_wavenumber()
 This function only exists for @strong{SPEX} monochromators controlled
-via the @strong{SPEX232} interface. It allows, when called in the
-@code{PREPARATIONS} section, to set the wavenumber the monochromator
-is currently set to, which then overrules the setting read from
-the file in which the state of the monochromator in the last run of
-the program is stored. This function should only be used when the
-data in the state file have gotten out of synch from the real setting
-of the monochromator (e.g.@: because  different program was used
-in between that drove the monochromator to a different wavenumber
+via the @ref{spex232, SPEX232} interface. It allows, when called in
+the @code{PREPARATIONS} section, to set the wavenumber the
+monochromator is currently set to, which then overrules the setting
+read from the file in which the state of the monochromator in the last
+run of the program is stored. This function should only be used when
+the data in the state file have gotten out of synch from the real
+setting of the monochromator (e.g.@: because different program was
+used in between that drove the monochromator to a different wavenumber
 from the one stored in the state file).
 
 
@@ -7381,10 +7399,10 @@ from the one stored in the state file).
 @section Power Supply Functions
 @cindex Power Supply Functions
 
-The currently supplied power supplies are the @strong{Thurlby&Thandar
-PL330DP} and the @strong{F.u.G. Elektronik GmbH MCN700-2000}. The modules
-for these power supplies are loaded
-by specifying
+The currently supplied power supplies are the @ref{thurlby330,
+Thurlby&Thandar PL330DP} and the @ref{mcn700_2000, F.u.G. Elektronik
+GmbH MCN700-2000}. The modules for these power supplies are loaded by
+specifying
 @example
 thurlby330
 mcn700_2000
@@ -7423,12 +7441,12 @@ Returns a string with the name of the power supply being used.
 @anchor{powersupply_channel_state()}
 @findex powersupply_channel_state()
 @item powersupply_channel_state()
-This function exists only for the @strong{Thurlby&Thandar} power supply and
-allows to switch the channels of the power supply on or off. It requires two
-arguments. The first one is the channel, which must be either @code{CH1} or
-@code{CH2} (don't try use simple numbers instead!). The second argument is
-the state, i.e.@: either @code{"ON"} or @code{"OFF"} (or @code{1} for on
-and @code{0} for off).
+This function exists only for the @ref{thurlby330, Thurlby&Thandar}
+power supply and allows to switch the channels of the power supply on
+or off. It requires two arguments. The first one is the channel, which
+must be either @code{CH1} or @code{CH2} (don't try use simple numbers
+instead!). The second argument is the state, i.e.@: either @code{"ON"}
+or @code{"OFF"} (or @code{1} for on and @code{0} for off).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -7437,12 +7455,13 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{powersupply_damping()}
 @findex powersupply_damping()
 @item powersupply_damping()
-This function exists only for the @strong{Thurlby&Thandar} power supply and
-allows to switch damping of the output of one of the channels of the power
-supply on or off. It requires two arguments. The first one is the channel,
-which must be either @code{CH1} or @code{CH2} (don't use simple numbers
-instead!).  The second argument is the damping state, i.e.@: either
-@code{"ON"} or @code{"OFF"} (or @code{1} for on and @code{0} for off).
+This function exists only for the @ref{thurlby330, Thurlby&Thandar}
+power supply and allows to switch damping of the output of one of the
+channels of the power supply on or off. It requires two arguments. The
+first one is the channel, which must be either @code{CH1} or
+@code{CH2} (don't use simple numbers instead!). The second argument is
+the damping state, i.e.@: either @code{"ON"} or @code{"OFF"} (or
+@code{1} for on and @code{0} for off).
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -7453,17 +7472,17 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item powersupply_voltage()
 This function allows to either set or query the output voltage.
 
-For the @strong{MCN700-2000} when called with no argument the
-output voltage is returned, when called with an argument the voltage
-is set to this value in the range between 0 and @w{2000 V} (unless the
-current limiter kicks in - the returned value is the voltage that really
-go set).
+For the @ref{mcn700_2000, MCN700-2000} when called with no argument
+the output voltage is returned, when called with an argument the
+voltage is set to this value in the range between 0 and @w{2000 V}
+(unless the current limiter kicks in - the returned value is the
+voltage that really go set).
 
-For the @strong{Thurlby&Thandar} it sets the output volatge for one of
-its channels. For a query only one argument is required, the channel,
-which must be specified as either @code{CH1} or @code{CH2} (don't use
-simple numbers instead!). If there is no second argument the output
-voltage at the channel is returned.
+For the @ref{thurlby330, Thurlby&Thandar} it sets the output volatge
+for one of its channels. For a query only one argument is required,
+the channel, which must be specified as either @code{CH1} or
+@code{CH2} (don't use simple numbers instead!). If there is no second
+argument the output voltage at the channel is returned.
 
 If there is a second argument, being a voltage in the range between @w{0
 V} and @w{32 V}, the output voltage is set instead. Please note that this
@@ -7477,10 +7496,11 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{powersupply_voltage_limit()}
 @findex powersupply_voltage_limit()
 @item powersupply_voltage_limit()
-This function exists only for the @strong{Thurlby&Thandar} power supply and
-allows to query the current setting of the voltage limit. It expects one
-argument, the channel, which must be specified as either @code{CH1} or
-@code{CH2} (don't use simple numbers instead!).
+This function exists only for the @ref{thurlby330, Thurlby&Thandar}
+power supply and allows to query the current setting of the voltage
+limit. It expects one argument, the channel, which must be specified
+as either @code{CH1} or @code{CH2} (don't use simple numbers
+instead!).
 
 If there is a second argument, being a voltage in the range between @w{0
 V} and @w{32 V}, this value is used as the new voltage limit. The same
@@ -7496,17 +7516,18 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @item powersupply_current()
 This function allows to either set or query the output current
 
-For the @strong{MCN700-2000} when called with no argument the
-output current is returned, when called with an argument the current
-is set to this value in the range between 0 and @w{300 mA} (unless the
-voltage limiter kicks in - the returned value is the current that really
-go set).
+For the @ref{mcn700_2000, MCN700-2000} when called with no argument
+the output current is returned, when called with an argument the
+current is set to this value in the range between 0 and @w{300 mA}
+(unless the voltage limiter kicks in - the returned value is the
+current that really go set).
 
-For the @strong{Thurlby&Thandar} power supply the function sets or queries
-the current of one of the channels. For a query only one argument is
-required, the channel, which must be specified as either @code{CH1} or
-@code{CH2} (don't use simple numbers instead!). If there is no second
-argument the output current at the channel is returned.
+For the @ref{thurlby330, Thurlby&Thandar} power supply the function
+sets or queries the current of one of the channels. For a query only
+one argument is required, the channel, which must be specified as
+either @code{CH1} or @code{CH2} (don't use simple numbers instead!).
+If there is no second argument the output current at the channel is
+returned.
 
 If there is a second argument, being a current in the range between @w{0
 A} and @w{3 A}, the output current is set instead. Please note that this
@@ -7520,10 +7541,11 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{powersupply_current_limit()}
 @findex powersupply_current_limit()
 @item powersupply_current_limit()
-This function exists only for the @strong{Thurlby&Thandar} power supply and
-allows to query the current setting of the current limit. It expects one
-argument, the channel, which must be specified as either @code{CH1} or
-@code{CH2} (don't use simple numbers instead!).
+This function exists only for the @ref{thurlby330, Thurlby&Thandar}
+power supply and allows to query the current setting of the current
+limit. It expects one argument, the channel, which must be specified
+as either @code{CH1} or @code{CH2} (don't use simple numbers
+instead!).
 
 If there is a second argument, being a current in the range between @w{0
 A} and @w{3 A}, this value is used as the new current limit. The same
@@ -7676,8 +7698,8 @@ gg_chopper
 @end example
 @noindent
 in the @code{DEVICES} section. Please note that the name of the module
-for the DAQ device (@code{pci_mio_16e_1}) must be listed before this
-module.
+for the DAQ device (@ref{pci_mio_16e_1, PCI-MIO-16E-1}) must be listed
+before this module.
 
 Unless a choppers frequency has already been set during the
 @code{PREPARATIONS} section the chopper will only start to rotate
@@ -7753,7 +7775,8 @@ er218
 @end example
 @noindent
 in the @code{DEVICES} section. Please note that the name of the module
-for the DIO device (@code{me_do}) must be listed before this module.
+for the DIO device (@ref{me_dio_X, Meilhaus DIO subsystem}) must be
+listed before this module.
 
 @noindent
 @strong{List of all goniometer functions}:
@@ -8022,11 +8045,11 @@ this also requires that there are at least 3 known frequencies and
 that the correlation coefficient of a least square fit is at least as
 large as set in the configuration file. Whether interpolation is
 possible for a certain calibration can be determined by calling the
-function @code{@ref{epr_modulation_calibration_can_interpolate()}}.
-Please note also that allowing or disabling intrepolation for a
-calibration only is in effect until the @code{EDL} script ends unless
-the function @ref{epr_modulation_store()} is called afterwards to make
-this setting permanent.
+function @ref{epr_modulation_calibration_can_interpolate()}. Please
+note also that allowing or disabling intrepolation for a calibration
+only is in effect until the @code{EDL} script ends unless the function
+@ref{epr_modulation_store()} is called afterwards to make this setting
+permanent.
 
 
 @anchor{epr_modulation_calibration_can_interpolate()}
@@ -8059,11 +8082,11 @@ this also requires that there are at least 3 known frequencies and
 that the correlation coefficient of the least square fit is at least
 as large as set in the configuration file. Whether extrapolation is
 possible for a certain calibration can be determined by calling the
-function @code{@ref{epr_modulation_calibration_can_extrapolate()}}.
-Please note also that allowing or disabling intrepolation for a
-calibration only is in effect until the @code{EDL} script ends unless
-the function @code{@ref{epr_modulation_store()}} is called afterwards
-to make this setting permanent.
+function @ref{epr_modulation_calibration_can_extrapolate()}. Please
+note also that allowing or disabling intrepolation for a calibration
+only is in effect until the @code{EDL} script ends unless the function
+@ref{epr_modulation_store()} is called afterwards to make this setting
+permanent.
 
 
 @anchor{epr_modulation_calibration_can_extrapolate()}
@@ -8276,7 +8299,7 @@ signals areas for both digitizer window areas. In the next step it
 switched the pulser to the pulse pattern for the next phase and repeat
 the measurement of both the signal areas and subtract them from the
 values measured in the first step (because in the
-@code{ACQUISITION_SEQUNCE} command requires subtraction of the data).
+@code{ACQUISITION_SEQUENCE} command requires subtraction of the data).
 Then, again the pulse pattern is switched to the third phase and a
 third set of data for both windows is measured. Also these data are
 subtracted according to the settings of acquisition sequence. Finally,
