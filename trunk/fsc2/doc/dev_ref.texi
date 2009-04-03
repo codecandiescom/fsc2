@@ -28,6 +28,7 @@
 @menu
 * aeg_s_band::      S-band AEG Magnet Power Supply
 * aeg_x_band::      X-band AEG Magnet Power Supply
+* agilent_53181a::  Agilent Frequency Counter 53181A
 * bh15::            Bruker Hall Effect Field Controller BH 15 (as gaussmeter)
 * bh15_fc::         Bruker Hall Effect Field Controller BH 15 (as field controller)
 * bnm12::           Bruker NMR Gaussmeter BNM12
@@ -36,16 +37,17 @@
 * egg4402::         EG&G PARC Box-Car Integrator 4402
 * eip371::          EIP Microwave Counter 371
 * ep385::           Bruker Pulse Programmer EP385
+* epr_mod::         EPR Modulation Module
 * er218::           Bruker Goniometer ER218 PG1
 * er023m::          Bruker Signal Channel ER 023 M
 * er032m::          Bruker Field controller ER 032 M 
 * er035m::          Bruker NMR Gaussmeter ER 035 M
 * er035m_sa::       Bruker NMR Gaussmeter ER 035 M (Stand-Alone)
+* fsps25::          Frankfurt Sweep Power Supply
 * gg_chopper::      Light chopper (Gescheidt group, Graz)
 * hfs9000::         Tektronix Stimulus System HFS9000 (Berlin W-Band)
 * hp5340a::         HP Frequency Counter HP5340A
 * hp5342a::         HP Frequency Counter HP5342A
-* agilent_53181a::  Agilent Frequency Counter 53181A
 * hp8647a::         HP RF Synthesizer HP8647A
 * hp8648b::         HP RF Synthesizer HP8648B
 * hp8672a::         HP RF Synthesizer HP8672A
@@ -102,7 +104,6 @@
 * tegam2714a_p::    TEGAM 2714A Arbitrary Waveform Generator (as pulser)
 * thurlby330::      Thurlby & Thandar Power Supply PL330DP
 * witio_48::        Wasco WITIO-48 DIO card
-* epr_mod::         EPR Modulation Module
 @end menu
 
 @end ifnottex
@@ -161,7 +162,7 @@ gaussmeter used, with @code{er035m} or @code{er035m_s} the range is
 
 @c #############################################################
 
-@node aeg_x_band, bh15, aeg_s_band, Device Reference
+@node aeg_x_band, agilent_53181a, aeg_s_band, Device Reference
 @iftex
 @subheading X-band AEG Magnet Power Supply
 @end iftex
@@ -213,7 +214,46 @@ to @w{23000 G}.
 
 @c #############################################################
 
-@node bh15, bh15_fc, aeg_x_band, Device Reference
+@node agilent_53181a, bh15, aeg_x_band, Device Reference
+@iftex
+@subheading Agilent Frequency Counter 53181A
+@end iftex
+@ifnottex
+@section Agilent Frequency Counter 53181A
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hp5342a}
+
+@paragraphindent 0
+@strong{Description}: @uref{http://www.home.agilent.com/,Agilent})
+frequency counter 53181A.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+@c In the GPIB configuration file use @code{"AGILENT_53181A"} as the
+@c device name, @code{'\n'} or @code{0xa} as the EOS character and set
+@c @code{set-reos} @code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Untested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_coupling()}
+@item @ref{freq_counter_timebase()}
+@item @ref{freq_counter_mode()}
+@item @ref{freq_counter_digits()}
+@item @ref{freq_counter_gate_time()}
+@item @ref{freq_counter_measure()}
+@end table
+
+
+@c #############################################################
+
+@node bh15, bh15_fc, agilent_53181a, Device Reference
 @iftex
 @subheading Bruker Hall Effect Field Controller BH 15 (as gaussmeter)
 @end iftex
@@ -562,7 +602,7 @@ In the GPIB configuration file use @code{"EIP371"} as the device name,
 
 @c #############################################################
 
-@node ep385, er218, eip371, Device Reference
+@node ep385, epr_mod, eip371, Device Reference
 @iftex
 @subheading Bruker Pulse Programmer EP385
 @end iftex
@@ -619,7 +659,55 @@ In the GPIB configuration file use @code{"EP385"} as the device name,
 
 @c #############################################################
 
-@node er218, er023m, ep385, Device Reference
+@node epr_mod, er218, ep385, Device Reference
+@iftex
+@subheading EPR Modulation Module
+@end iftex
+@ifnottex
+@section EPR Modulation Module
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{epr_mod}
+
+@paragraphindent 0
+@strong{Description}: This is a pseudo-device that can be used to
+store and retrieve information about modulation settings for
+combinations of a lock-in and a resonator, like the ratio between the
+modulation voltage set at the lock-in and the resulting modulation
+amplitude at the resonator etc.
+
+@paragraphindent 0
+@strong{Note}: See the @file{epr_modulation} utility that lets you
+edit the settings for already existing resonators and create new ones.
+
+@paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{epr_modulation_name()}
+@item @ref{epr_modulation_name()}
+@item @ref{epr_modulation_ratio()}
+@item @ref{epr_modulation_phase()}
+@item @ref{epr_modulation_has_phase()}
+@item @ref{epr_modulation_calibration_interpolate()}
+@item @ref{epr_modulation_calibration_can_interpolate()}
+@item @ref{epr_modulation_calibration_extrapolate()}
+@item @ref{epr_modulation_calibration_can_extrapolate()}
+@item @ref{epr_modulation_add_calibration()}
+@item @ref{epr_modulation_delete_calibration()}
+@item @ref{epr_modulation_calibration_count()}
+@item @ref{epr_modulation_calibration_name()}
+@item @ref{epr_modulation_calibration_frequencies()}
+@item @ref{epr_modulation_store()}
+@end table
+
+
+@c #############################################################
+
+@node er218, er023m, epr_mod, Device Reference
 @iftex
 @subheading Bruker Goniometer ER218 PG1
 @end iftex
@@ -809,7 +897,7 @@ In the GPIB configuration file use @code{"ER035M"} as the device name,
 
 @c #############################################################
 
-@node er035m_sa, gg_chopper, er035m, Device Reference
+@node er035m_sa, fsps25, er035m, Device Reference
 @iftex
 @subheading Bruker NMR Gaussmeter ER 035 M (Stand-Alone)
 @end iftex
@@ -857,7 +945,49 @@ In the GPIB configuration file use @code{"ER035M"} as the device name,
 
 @c #############################################################
 
-@node gg_chopper, hfs9000, er035m_sa, Device Reference
+@node fsps25, gg_chopper, er035m_sa, Device Reference
+@iftex
+@subheading Frankfurt Sweep Power Supply (Prisner group, Frankfurt)
+@end iftex
+@ifnottex
+@section Frankfurt Sweep Power Supply (Prisner group, Frankfurt)
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{fsps25}
+
+@paragraphindent 0
+@strong{Description}: This module controls a home-built power supply,
+delivering the current through the additional sweep coil of a
+superconducting magnet. The power supply was developed by Bernhard
+Thiem in the @uref{http://www.prisner.de/,group of T.@: Prisner},
+based on a device by B. Kinzer.
+
+@paragraphindent 0
+@strong{Controlled via} USB (USB-to-serial converter)
+
+@paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{magnet_name()}
+@item @ref{magnet_field()}
+@item @ref{magnet_sweep_rate()}
+@item @ref{magnet_max_current()}
+@item @ref{magnet_max_sweep_rate()}
+@item @ref{magnet_act_current()}
+@item @ref{magnet_coil_current()}
+@item @ref{magnet_heater_state()}
+@item @ref{magnet_request_expert_mode()}
+@item @ref{magnet_shutdown()}
+@end table
+
+
+@c #############################################################
+
+@node gg_chopper, hfs9000, fsps25, Device Reference
 @iftex
 @subheading Light chopper (Gescheidt group, Graz)
 @end iftex
@@ -989,7 +1119,7 @@ In the GPIB configuration file use @code{"HP5340A"} as the device name,
 
 @c #############################################################
 
-@node hp5342a, agilent_53181a, hp5340a, Device Reference
+@node hp5342a, hp8647a, hp5340a, Device Reference
 @iftex
 @subheading HP Frequency Counter HP5342A
 @end iftex
@@ -1025,46 +1155,7 @@ In the GPIB configuration file use @code{"HP5342A"} as the device name,
 
 @c #############################################################
 
-@node agilent_53181a, hp8647a, hp5342a, Device Reference
-@iftex
-@subheading Agilent Frequency Counter 53181A
-@end iftex
-@ifnottex
-@section Agilent Frequency Counter 53181A
-@end ifnottex
-
-@paragraphindent 0
-@strong{Module name}: @code{hp5342a}
-
-@paragraphindent 0
-@strong{Description}: @uref{http://www.home.agilent.com/,Agilent})
-frequency counter 53181A.
-
-@paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).@*
-@c In the GPIB configuration file use @code{"AGILENT_53181A"} as the
-@c device name, @code{'\n'} or @code{0xa} as the EOS character and set
-@c @code{set-reos} @code{set-xeos} and @code{set-bin} to @code{no}.
-
-@paragraphindent 0
-@strong{Status}: Untested
-
-@paragraphindent 0
-@strong{Supported functions}:
-@table @samp
-@item @ref{freq_counter_name()}
-@item @ref{freq_counter_coupling()}
-@item @ref{freq_counter_timebase()}
-@item @ref{freq_counter_mode()}
-@item @ref{freq_counter_digits()}
-@item @ref{freq_counter_gate_time()}
-@item @ref{freq_counter_measure()}
-@end table
-
-
-@c #############################################################
-
-@node hp8647a, hp8648b, agilent_53181a, Device Reference
+@node hp8647a, hp8648b, hp5342a, Device Reference
 @iftex
 @subheading HP RF Synthesizer HP8647A
 @end iftex
@@ -4106,7 +4197,7 @@ In the GPIB configuration file use @code{"THURLBY330"} as the device name,
 
 @c #############################################################
 
-@node witio_48, epr_mod, thurlby330, Device Reference
+@node witio_48, , thurlby330, Device Reference
 @iftex
 @subheading Wasco WITIO-48 DIO card
 @end iftex
@@ -4136,52 +4227,4 @@ library are part of the @code{fsc2} package)
 @item @ref{dio_reserve_dio()}
 @item @ref{dio_mode()}
 @item @ref{dio_value()}
-@end table
-
-
-@c #############################################################
-
-@node epr_mod, , witio_48, Device Reference
-@iftex
-@subheading EPR Modulation Module
-@end iftex
-@ifnottex
-@section EPR Modulation Module
-@end ifnottex
-
-@paragraphindent 0
-@strong{Module name}: @code{epr_mod}
-
-@paragraphindent 0
-@strong{Description}: This is a pseudo-device that can be used to
-store and retrieve information about modulation settings for
-combinations of a lock-in and a resonator, like the ratio between the
-modulation voltage set at the lock-in and the resulting modulation
-amplitude at the resonator etc.
-
-@paragraphindent 0
-@strong{Note}: See the @file{epr_modulation} utility that lets you
-edit the settings for already existing resonators and create new ones.
-
-@paragraphindent 0
-@strong{Status}: Tested
-
-@paragraphindent 0
-@strong{Supported functions}:
-@table @samp
-@item @ref{epr_modulation_name()}
-@item @ref{epr_modulation_name()}
-@item @ref{epr_modulation_ratio()}
-@item @ref{epr_modulation_phase()}
-@item @ref{epr_modulation_has_phase()}
-@item @ref{epr_modulation_calibration_interpolate()}
-@item @ref{epr_modulation_calibration_can_interpolate()}
-@item @ref{epr_modulation_calibration_extrapolate()}
-@item @ref{epr_modulation_calibration_can_extrapolate()}
-@item @ref{epr_modulation_add_calibration()}
-@item @ref{epr_modulation_delete_calibration()}
-@item @ref{epr_modulation_calibration_count()}
-@item @ref{epr_modulation_calibration_name()}
-@item @ref{epr_modulation_calibration_frequencies()}
-@item @ref{epr_modulation_store()}
 @end table
