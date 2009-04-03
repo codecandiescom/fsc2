@@ -1656,7 +1656,7 @@ First digitizer channel (all models)
 Second digitizer channel (all models)
 @item CH3
 Third digitizer channel (Tektronix TDS540, TDS744A, TDS754A, LeCroy 9424, 
-LeCroy 9424E, some models of the 93xx, Waverunner and Wavesurfer series)
+LeCroy 9424E, some models of the 93xx, Waverunner and WaveSurfer series)
 @item CH4
 Fourth digitizer channel (Tektronix TDS540, TDS744A, TDS754A, LeCroy 9424, 
 LeCroy 9424E, some models of the 93xx, Waverunner and WaveSurfer series)
@@ -2076,10 +2076,10 @@ Alternatively, for all digitizers except the @ref{lecroy9400, LeCroy
 won't be necessary unless you want to fetch a curve acquired in
 @code{SINGLE} trigger mode.
 
-The @ref{lecroy_ws, WaveSurfer} line of oscilloscopes is somewhat
-special in that it allows the "normal" channels to be used for
-(continuous) averaging. I.e.@: the first argument can be one of the
-measurement channels and the second argument thn must be the same
+The @ref{lecroy_ws, LeCroy WaveSurfer} line of oscilloscopes is
+somewhat special in that it allows the "normal" channels to be used
+for (continuous) averaging. I.e.@: the first argument can be one of
+the measurement channels and the second argument thn must be the same
 channel. In this case continuous averaging (in contrast to summed
 averaging as it's done via the @code{MATH} channel) using no
 @code{MATH} channel is done. Please note that when you do continuous
@@ -2111,7 +2111,7 @@ For the @ref{lecroy_wr, LeCroy Waverunner} this also can be an
 arbitrary number with an upper limit of @code{4,000} (or
 @code{1,000,000} if it is fitted with the WaveAnalyzer option).
 
-Finally, for the @ref{lecroy_ws, LeCroyWaveSurfer} the number of
+Finally, for the @ref{lecroy_ws, LeCroy WaveSurfer} the number of
 averages can be set to a number with an upper limit of
 @code{1,000,000}. If the number of averages for continuous averaging
 of a non-@code{MATH} channel is set to @code{1} this is treated as
@@ -2340,9 +2340,9 @@ been called with an argument or when in the @code{EXPERIMENT} section.
 @findex digitizer_memory_size()
 @item digitizer_memory_size()
 This function is only available for the @ref{lecroy_wr, LeCroy
-Waverunner} and the @code{LeCroy WaveSurfer} and can be used to query
-or set the memory size to be used for storing curves. If the function
-gets called with an (integer) argument the memory size is set
+Waverunner} and the @ref{lecroy_ws, LeCroy WaveSurfer} and can be used
+to query or set the memory size to be used for storing curves. If the
+function gets called with an (integer) argument the memory size is set
 accordingly. Please note that memory sizes can only be set according
 to an 1-2.5-5 scheme, starting with a minimum memory size of
 @code{500} samples (i.e. the lowest memory sizes are @code{500},
