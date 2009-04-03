@@ -3611,8 +3611,7 @@ of an @code{EDL} script.
 @findex pulser_pulse_minimum_specs()
 @item pulser_pulse_minimum_specs()
 This function is available only for the @strong{Rulbus pulser}
-modules, i.e.@: the pulsers used the @ref{rb_pulser_j, J-band} and
-@ref{rb_pulser_w, W-band} spectrometers in Leiden. It expects a single
+(@ref{rb_pulser_w} and @ref{rb_pulser_j}) modules. It expects a single
 argument, a pulse, e.g. @code{P1}. If it is the first pulse of a
 function (i.e.@: @code{MICROWAVE}, @code{RF} or @code{DETECTION}), the
 function returns the earliest possible absolute position of the pulse.
@@ -5451,7 +5450,8 @@ can only be used with a pass-phrase. This will mainly be used by modules
 for other devices that require a DAC to keep an @code{EDL} script from
 accdentally changing the output of the DAC.
 
-This function is not implemented for the Rulbus @strong{RB8905 ADC} card.
+This function is not implemented for the @ref{rb8509, Rulbus RB8509
+ADC} card.
 
 For the @strong{ME-6000} and @strong{ME-6100} card the function expects an
 output port as the first argument specified by one of the symbolic values
@@ -5492,8 +5492,8 @@ be the output port, specified by one of the symbolic values between
 PCI-MIO-16E-1} card and between @code{CH1} and @code{CH15} for the
 @strong{ME-6000} and @strong{ME-6100} cards (don't try to use simple
 numbers instead!). For the home-built AD and DA converter as well as
-the @strong{RB8510 DAC} card this argument can't be specified since
-both have only a single output.
+the @ref{rb8510, RB8510 DAC} card this argument can't be specified
+since both have only a single output.
 
 If the @ref{pci_mio_16e_1, PCI-MIO-16E-1} card he channel is in
 biploar mode and uses the internal voltage reference the second
@@ -5513,10 +5513,10 @@ maximum voltage that has been spcified in the call of the function
 @ref{daq_maximum_output_voltage()}. If this function hasn't been called
 the default maximum output voltage is @w{+10 V}.
 
-Also the module for the Rulbus @strong{RB8510 12-bit DAC} allows only a single
-argument, the output voltage. Since there are different versions of the
-card with different output voltage ranges the possible range can only be
-determined at the start of the experiment.
+Also the module for the Rulbus @ref{rb8510, RB8510 12-bit DAC} allows
+only a single argument, the output voltage. Since there are different
+versions of the card with different output voltage ranges the possible
+range can only be determined at the start of the experiment.
 
 If an output voltage has already been set for an output port the last
 set voltage is returned when the function is called without a second
@@ -5658,15 +5658,15 @@ settings for alll channels must be identical).
 @anchor{daq_trigger_mode()}
 @findex daq_trigger_mode()
 @item daq_trigger_mode()
-Some of the Rulbus @strong{RB8509 ADC} cards allow to trigger a conversion on
-receipt of an external trigger. When in internal trigger mode a
-conversion is triggered automatically by calling the function
+Some of the Rulbus @ref{rb8509, RB8509 ADC} cards allow to trigger a
+conversion on receipt of an external trigger. When in internal trigger
+mode a conversion is triggered automatically by calling the function
 @ref{daq_get_voltage()}. In external trigger mode the conversion is
-triggered by an external event and the @ref{daq_get_voltage()} function
-only returns after such a trigger as been received. The function expects
-a string argument, either @code{"INT"} or @code{"INTERNAL"} to select
-internal trigger mode, or @code{"EXT"} or @code{"EXTERNAL"} to switch to
-external trigger mode.
+triggered by an external event and the @ref{daq_get_voltage()}
+function only returns after such a trigger as been received. The
+function expects a string argument, either @code{"INT"} or
+@code{"INTERNAL"} to select internal trigger mode, or @code{"EXT"} or
+@code{"EXTERNAL"} to switch to external trigger mode.
 
 
 @anchor{daq_gain()}
@@ -5685,8 +5685,8 @@ immediately.
 @node DIO Functions, Event Counter Functions, DAQ Functions, Device Functions
 @section DIO Functions
 @cindex DIO Functions
-Currently, the the @strong{Wasco WITIO-48} ISA DIO card by Messcomp
-Datentechnik GmbH and the DIO subsystem of cards by Meilhaus
+Currently, the the @ref{witio_48, Wasco WITIO-48} ISA DIO card by
+Messcomp Datentechnik GmbH and the DIO subsystem of cards by Meilhaus
 Electronic GmbH are supported. The module for the cards get loaded by
 specifying
 @example
@@ -5697,8 +5697,8 @@ in the @code{DEVICES} section.
 
 Both cards reqyuire the use of of a kernel module and an additional
 library that have been successfully installed. The driver and library
-for the @strong{Wasco WITIO-48} card comes with @code{fsc2}, the one
-for the ones for the Meihaus cards can be downloaded from the
+for the @ref{witio_48, Wasco WITIO-48} card comes with @code{fsc2},
+the one for the ones for the Meihaus cards can be downloaded from the
 @uref{http://www.meilhaus.de/index.php?id=255,Meilhaus web site}.
 
 
@@ -5741,7 +5741,7 @@ accdentally changing the output or reading the input of the DIO.
 In the case of the Wasco @ref{witio_48} card the first argument is the
 DIO to be reserved (or released). This must be either a number,
 @code{1} or @code{2} or, better, a symbolic name, @code{DIO1} or
-@code{DIO2}. For the @strong{Meilhaus DIO subsystem} the whole
+@code{DIO2}. For the @ref{me_dio_X, Meilhaus DIO subsystem} the whole
 subsystem gets locked or unlocked, so no DIO number can be passed to
 the function.
 
@@ -5938,9 +5938,10 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @node Event Counter Functions, CCD Camera Functions, DIO Functions, Device Functions
 @section Event Counter Functions
 @cindex Event Counter Functions
-The only currently supported event counter is the @strong{National
-Instruments GPCT 6601} card. It can be used for counting as well as for
-creating pulses. The module for this card is loaded by specifying
+The only currently supported event counter is the @strong{ni6601,
+National Instruments GPCT 6601} card. It can be used for counting as
+well as for creating pulses. The module for this card is loaded by
+specifying
 @example
 ni6601
 @end example
@@ -6361,48 +6362,49 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @section CCD Camera Functions
 @cindex CCD Camera Functions
 
-Currently supplied CCD camera are the @strong{Roper Scientific
-Spec-10} (without a shutter and with LN cooling) and the
-@strong{Newport Oriel Matrix Sprectrometer}. Their modules are loaded
-by specifying
+Currently supplied CCD camera are the @ref{rs_spec10, Roper
+Scientific Spec-10} (without a shutter and with LN cooling) and the
+@ref{oriel_matrix, Newport Oriel Matrix Sprectrometer}. Their modules
+are loaded by specifying
 @example
 rs_spec10
 oriel_matrix
 @end example
 in the @code{DEVICES} section. 
 
-The module for the @strong{Roper Scientific Spec-10} requires the
-PVCAM library supplied by @strong{Roper Scientific} to be installed.
-To to be able to work with the camera also the Linux device driver for
-the PCI board used for the communication with camera, also supplied by
-Roper Scientific, must be installed.
+The module for the @ref{rs_spec10, Roper Scientific Spec-10} requires
+the PVCAM library supplied by @ref{rs_spec10, Roper Scientific} to be
+installed. To to be able to work with the camera also the Linux device
+driver for the PCI board used for the communication with camera, also
+supplied by Roper Scientific, must be installed.
 
-The @strong{Newport Oriel Matrix Sprectrometer} is controlled via the
-USB bus and requires cthe @code{libusb} library (currently version
-0.1).
+The @ref{oriel_matrix, Newport Oriel Matrix Sprectrometer} is
+controlled via the USB bus and requires cthe @code{libusb} library
+(currently version 0.1).
 
 @table @strong
 @item Please note:
-By setting two variables the configuration file for the @strong{Roper
-Scientific Spec-10} the orientation of the spectra or images taken by
-the camera can be influenced. They allow to mirror the spectra or
-images (i.e. exchanging right and left side) and/or turn images
-upside-down. Since some functions assume spectra to have an increasing
-wavelength or relative wavenumber axis (or decreasing absolute
-wavenumber axis) this option can be used to satisfy the requirement.
+By setting two variables the configuration file for the
+@ref{rs_spec10, Roper Scientific Spec-10} the orientation of the
+spectra or images taken by the camera can be influenced. They allow to
+mirror the spectra or images (i.e. exchanging right and left side)
+and/or turn images upside-down. Since some functions assume spectra to
+have an increasing wavelength or relative wavenumber axis (or
+decreasing absolute wavenumber axis) this option can be used to
+satisfy the requirement.
 
 @item Please note also:
-For the @strong{Roper Scientific Spec-10} at the start of the
+For the @ref{rs_spec10, Roper Scientific Spec-10} at the start of the
 experiment the target temperature for the camera is set to the lowest
 possible value unless a target temperature is explicitely set using
 the function @ref{ccd_camera_temperature()} (see below).
 @end table
 
-For the @strong{Roper Scientific Spec-10} the values for the region of
-interest, the binning values, the binning mode and the number of clear
-cycles are stored internally between experiments, so at the start of
-an experiment these values are set automatically to the ones they had
-in the previously run experiment.
+For the @ref{rs_spec10, Roper Scientific Spec-10} the values for the
+region of interest, the binning values, the binning mode and the
+number of clear cycles are stored internally between experiments, so
+at the start of an experiment these values are set automatically to
+the ones they had in the previously run experiment.
 
 
 @noindent
@@ -6439,17 +6441,17 @@ Returns a string with the name of the CCD camera being used.
 @anchor{ccd_camera_roi()}
 @findex ccd_camera_roi()
 @item ccd_camera_roi()
-The function is only supported for the @strong{Roper Scientific
-Spec-10} and is used to query or set the region of interest (ROI) of
-the CCD chip to be used when fetching spectra or images from the
-camera. When no arguments are specified the function returns an array
-with 4 elements. Its first element is the @i{x}-coordinate of the
-lower left hand of the ROI, the second element the @i{y}-coordinate of
-the same point and the third and fourth element are the @i{x}- and
-@i{y}-coordonate of the right hand upper corner of the ROI. The
-coordinate of the lower left hand pixel of the CCD chip is @w{@code{1,
-1}}, the coordinates of the upper right hand corner are the width and
-height of the chip.
+The function is only supported for the @ref{rs_spec10, Roper
+Scientific Spec-10} and is used to query or set the region of interest
+(ROI) of the CCD chip to be used when fetching spectra or images from
+the camera. When no arguments are specified the function returns an
+array with 4 elements. Its first element is the @i{x}-coordinate of
+the lower left hand of the ROI, the second element the
+@i{y}-coordinate of the same point and the third and fourth element
+are the @i{x}- and @i{y}-coordonate of the right hand upper corner of
+the ROI. The coordinate of the lower left hand pixel of the CCD chip
+is @w{@code{1, 1}}, the coordinates of the upper right hand corner are
+the width and height of the chip.
 
 If there is an argument this must be either an array with 4 elements that
 specify the ROI as explained above or the string @code{"ALL"} to set the
@@ -6475,13 +6477,13 @@ previously run experiment.
 @anchor{ccd_camera_binning()}
 @findex ccd_camera_binning()
 @item ccd_camera_binning()
-The function is only supported for the @strong{Roper Scientific
-Spec-10} and allows to set or query the binning (i.e.@: the combining
-of several pixels) done by the camera. If called with no arguments the
-function returns an array with 2 elements. The first element is the
-number of pixels that get binned in the (horizontal) @i{x}-direction,
-the second element is the binning factor in (vertical)
-@i{y}-direction.
+The function is only supported for the @ref{rs_spec10, Roper
+Scientific Spec-10} and allows to set or query the binning (i.e.@: the
+combining of several pixels) done by the camera. If called with no
+arguments the function returns an array with 2 elements. The first
+element is the number of pixels that get binned in the (horizontal)
+@i{x}-direction, the second element is the binning factor in
+(vertical) @i{y}-direction.
 
 If the function is called with arguments the first argument must be an
 either an array with 2 elements or a string. If the argument is an array
@@ -6522,17 +6524,17 @@ the one they had in a previously run experiment.
 @anchor{ccd_camera_binning_method()}
 @findex ccd_camera_binning_method()
 @item ccd_camera_binning_method()
-This function is only supported for the @strong{Roper Scientific
-Spec-10} and lets you query or set the binning method to be used. You
-can use either hardware binning, i.e.@: binning is done by the camera
-itself, or binning can be done by the software, in which case the
-whole image or spectrum is fetched from the camera and the binning is
-done numerically on the received data). Wile hardware binning is
-faster (mainly due to the reduced time required for the transfer) in
-some cases it might lead to artifacts when the sum of the values of
-all pixels combined in binning would be larger than 65535. In this
-case the value after binning is always 65536, leading to an effect
-that looks like saturation of the region of the chip.
+This function is only supported for the @ref{rs_spec10, Roper
+Scientific Spec-10} and lets you query or set the binning method to be
+used. You can use either hardware binning, i.e.@: binning is done by
+the camera itself, or binning can be done by the software, in which
+case the whole image or spectrum is fetched from the camera and the
+binning is done numerically on the received data). Wile hardware
+binning is faster (mainly due to the reduced time required for the
+transfer) in some cases it might lead to artifacts when the sum of the
+values of all pixels combined in binning would be larger than 65535.
+In this case the value after binning is always 65536, leading to an
+effect that looks like saturation of the region of the chip.
 
 If called with no argument the function returns the number @code{0}
 when hardware binning is used and @code{1} for software binning.
@@ -6565,13 +6567,13 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{ccd_camera_clear_cycles()}
 @findex ccd_camera_clear_cycles()
 @item ccd_camera_clear_cycles()
-The function is only supported for the @strong{Roper Scientific
-Spec-10a} and allows to determine or set the number of clear cycles of
-the CCD chip to be done before an exposure is started. If called
-without an argument the function returns the number of clear cycles.
-If an argument is passd to the function it must be a number between 0
-and the maximum number of clear cycles (which is 7 for the Spec-10
-camera). The default value of clear cycles is 1.
+The function is only supported for the @ref{rs_spec10, Roper
+Scientific Spec-10a} and allows to determine or set the number of
+clear cycles of the CCD chip to be done before an exposure is started.
+If called without an argument the function returns the number of clear
+cycles. If an argument is passd to the function it must be a number
+between 0 and the maximum number of clear cycles (which is 7 for the
+Spec-10 camera). The default value of clear cycles is 1.
 
 The number of clear cycles is stored between experiments, so when a new
 experiment is started its setting is identical to the it had in a
@@ -6585,12 +6587,13 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{ccd_camera_get_image()}
 @findex ccd_camera_get_image()
 @item ccd_camera_get_image()
-The function is only supported for the @strong{Roper Scientific
-Spec-10} and starts an exposure, fetches the resulting image from the
-camera and returns it to the @code{EDL} script as a 2-dimensional
-array. The size of the image depends on the setting of the region of
-interest (ROI) and the settings for binning. When no ROI or binning
-has been set the image returned is the whole area of the CCD chip.
+The function is only supported for the @ref{rs_spec10, Roper
+Scientific Spec-10} and starts an exposure, fetches the resulting
+image from the camera and returns it to the @code{EDL} script as a
+2-dimensional array. The size of the image depends on the setting of
+the region of interest (ROI) and the settings for binning. When no ROI
+or binning has been set the image returned is the whole area of the
+CCD chip.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -6626,9 +6629,9 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @anchor{ccd_camera_pixel_size()}
 @findex ccd_camera_pixel_size()
 @item ccd_camera_pixel_size()
-The function is only supported for the @strong{Roper Scientific
-Spec-10}, taking no arguments and returning the width of a pixel of
-the CCD chip.
+The function is only supported for the @ref{rs_spec10, Roper
+Scientific Spec-10}, taking no arguments and returning the width of a
+pixel of the CCD chip.
 
 
 @anchor{ccd_camera_pixel_area()}
@@ -6647,10 +6650,11 @@ the number of pixels in the (vertical) @i{y}-direction.
 @section Monochromator Functions
 @cindex Monochromator Functions
 
-Currently the @strong{SpectraPro-300i} series of monochromator (actually, the
-module has only been tested with the @strong{308i}) by @strong{Acton Research
-Corporation} and monochromators by @strong{SPEX} controlled via either the
-CD2A Compudrive or the SPEX232 interface are supported. The modules for the
+Currently the @ref{spectrapro_300i, SpectraPro-300i} series of
+monochromator (actually, the module has only been tested with the
+@strong{308i}) by @strong{Acton Research Corporation} and
+monochromators by @strong{SPEX} controlled via either the CD2A
+Compudrive or the SPEX232 interface are supported. The modules for the
 monochromators get loaded by specifying
 @example
 spectrapro_300i
@@ -6659,17 +6663,17 @@ spex232
 @end example
 in the @code{DEVICES} section. 
 
-There are two different types of monochromators by @strong{SPEX}. They are
-either wavelength- or wavenumber-driven. In case of wavelength-driven
-monochromators functions accepting or returning spectral positions
-etc.@: expect or return them in units of wavelengths, i.e.@: in
-@code{m}. In contrast, for wavenumber-driven monochromators the
-functions expect or return values in wavenumber units, i.e.@: in
-@code{cm^-1}. To make things even more interesting, for wavenumber
-driven monochromators a laser line position can be set. If such a laser
-line position is set values are expected or returned in relative
-wavenumber units, i.e.@: as differences between the wavenumber of the
-laser line and the absolute wavenumber.
+There are two different types of monochromators by @strong{SPEX}. They
+are either wavelength- or wavenumber-driven. In case of
+wavelength-driven monochromators functions accepting or returning
+spectral positions etc.@: expect or return them in units of
+wavelengths, i.e.@: in @code{m}. In contrast, for wavenumber-driven
+monochromators the functions expect or return values in wavenumber
+units, i.e.@: in @code{cm^-1}. To make things even more interesting,
+for wavenumber driven monochromators a laser line position can be set.
+If such a laser line position is set values are expected or returned
+in relative wavenumber units, i.e.@: as differences between the
+wavenumber of the laser line and the absolute wavenumber.
 
 Another important point is that for @strong{SPEX} type monochromators an
 offset (between the wavelength or -number displayed by the CD2A unit and
@@ -6686,10 +6690,10 @@ file for the device). This file automatically gets read in when the
 module is loaded and at the start of each experiment and rewritten at
 the end of the experiment.
 
-Some of the functions listed below will only work when a monochromator is used
-in conjunction with a CCD camera (and have been tested only with the
-@strong{Spec-10} CCD camera by @strong{Roper Scientific} in conjunction with
-the supported monochromatore).
+Some of the functions listed below will only work when a monochromator
+is used in conjunction with a CCD camera (and have been tested only
+with the @ref{rs_spec10, Roper Scientific Spec-10} CCD camera in
+conjunction with the supported monochromatore).
 
 
 @noindent
