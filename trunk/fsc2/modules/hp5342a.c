@@ -126,7 +126,12 @@ hp5342a_exp_hook( void )
 int
 hp5342a_end_of_exp_hook( void )
 {
-    hp5342a.device = -1;
+    if ( hp5342a.device != -1 )
+    {
+        gpib_local( hp5342a.device );
+        hp5342a.device = -1;
+    }
+
     return 1;
 }
 

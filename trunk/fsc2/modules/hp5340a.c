@@ -123,9 +123,16 @@ hp5340a_end_of_exp_hook( void )
 {
     /* Do a reset and switch device to local mode */
 
-    gpib_write( hp5340a.device, "NH", 2 );
+    /* Do a reset and switch device to local mode */
 
-    hp5340a.device = -1;
+    if ( hp5340a.device != -1 )
+    {
+        gpib_write( hp5340a.device, "NH", 2 );
+
+        gpib_local( hp5340a.device );
+        hp5340a.device = -1;
+    }
+
     return 1;
 }
 
