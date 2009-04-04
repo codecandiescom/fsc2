@@ -60,7 +60,7 @@ static float device_2_float( unsigned char * src );
 static void float_2_device( unsigned char * dest,
                             float           val );
 
-/* Commented sinc only used in development/debugging */
+/* Commented since only used in development/debugging */
 
 #if 0
 static char * oriel_matrix_get_model_number( void );

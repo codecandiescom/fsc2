@@ -109,9 +109,9 @@
 @end ifnottex
 
 
-Please note: Some of the devices listed above are typically parts of
+Please note: Some of the devices listed above are typically part of
 complete spectrometers like the Bruker ESP300 and thus the complete
-spectrometer can be controlled (and often extended) via @code{fsc2}
+spectrometer can be controlled (and often extended) via @code{fsc2}.
 For example @code{fsc2} is being used to replace the legacy software
 for a number of ESP300 spectrometers, also allowing them to be used
 for all kinds of other techniques (ENDOR, time-resolved EPR etc.).
@@ -2796,7 +2796,7 @@ library are part of the @code{fsc2} package)
 @end ifnottex
 
 @paragraphindent 0
-@strong{Author}: Clinton Jermaine Mccrowey (California State
+@strong{Author}: Clinton Jermaine McCrowey (California State
 University Northridge)
 
 @paragraphindent 0
@@ -2811,7 +2811,9 @@ University Northridge)
 
 @paragraphindent 0
 @strong{Controlled via}: USB (requires
-@uref{http://libusb.wiki.sourceforge.net/,libusb v0.1} library)
+@uref{http://libusb.wiki.sourceforge.net/,libusb v0.1} library, if
+version 0.1 isn't available anymore try
+@url{http://libusb.wiki.sourceforge.net/LibusbCompat0.1,libusbcompat})
 
 @paragraphindent 0
 @strong{Status}: Tested
