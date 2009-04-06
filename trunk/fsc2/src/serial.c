@@ -27,6 +27,8 @@
 #include <sys/timeb.h>
 
 
+#if ! defined WITHOUT_SERIAL_PORTS
+
 /* Definition of log levels allowed in calls of fsc2_serial_exp_init().
    Since they already may have been defined in the GPIB module only
    define them if they aren't already known */
@@ -44,8 +46,6 @@
 #define  LL_ALL   3    /* log calls with parameters and function exits */
 #endif
 
-
-#if ! defined WITHOUT_SERIAL_PORTS
 
 static struct {
     char           * dev_file;
@@ -614,7 +614,7 @@ fsc2_serial_write( int          sn,
  * Function for reading data from one of the serial ports. It expects
  * 6 arguments, first the number of the serial port, then a buffer and
  * its maximum length for returning the read in data, an (optional
- * string with the character(s) that act as terminator for the data
+ * string with the character(s) that act as termination for the data
  * send by the device, a timeout in micro-seconds we are supposed to
  * wait for data to be read from the serial port and finally a flag
  * that tells if the function is to return immediately if a signal
@@ -769,6 +769,12 @@ fsc2_serial_read( int          sn,
  
         raise_permissions( );
 
+        /* Now we finally come to really trying to read from the serial port.
+           If there's no termination string be prepared to read as many bytes
+           as fit into the buffer. Otherwise we can read only one byte to be
+           able to check if, with this byte, we got the the termination string
+           and not read past that... */
+
         while (    ( read_count = read( Serial_Ports[ sn ].fd, p,
                                 term_len ? 1 : ( count - total_count  ) ) ) < 0
                 && errno == EINTR
@@ -777,8 +783,8 @@ fsc2_serial_read( int          sn,
         
         lower_permissions( );
 
-        /* Getting no bytes is most likely if we were asked to read without
-           waiting and then is ok, but under strange circumstances it could
+        /* Getting no bytes is possible if we were asked to read without
+           waiting and then it's ok, but under strange circumstances it could
            also happen despite select() telling us there's something to read,
            in which case this has to be considered an error */
 
@@ -813,7 +819,7 @@ fsc2_serial_read( int          sn,
         total_count += read_count;
         p += read_count;
 
-        /* Check if we read in the terminator sequence */
+        /* Check if we read in the termination sequence */
 
         if (    term
              && term_len
@@ -1389,17 +1395,18 @@ fsc2_serial_log_message( const char * fmt,
    these outdated modules would result in a failure with an error message
    telling that fsc2 is missing some serial port functions without an
    explanation that they aren't compiled in anymore. By supplying dummy
-   functions loading these modules still works but once they try to call a
-   function needing a serial port they fail with a error message the user can
-   understand, i.e. one that tells him/her that fsc2 was compiled without
-   support for serial ports... */
+   functions loading these modules still works but once the modules try to
+   call a function needing a serial port they fail with a error message the
+   user can understand, i.e. one that tells him/her that fsc2 was compiled
+   without support for serial ports... */
 
 int
 fsc2_request_serial_port( const char * dev_file  UNUSED_ARG,
                           const char * dev_name )
 {
     eprint( FATAL, UNSET, "Module for device '%s' requires support "
-            "for serial ports but fsc2 was compiled without.\n", dev_name );
+            "for serial ports but fsc2 was compiled without.\n",
+            ( dev_name && *dev_name ) ? dev_name : "UNKNOWN" );
     THROW( EXCEPTION );
 
     return -1;
@@ -1409,10 +1416,7 @@ struct termios *
 fsc2_serial_open( int          sn        UNUSED_ARG,
                   int          flags     UNUSED_ARG )
 {
-    eprint( FATAL, UNSET, "Module for device '%s' requires support "
-            "for serial ports but fsc2 was compiled without.\n", dev_name );
-    THROW( EXCEPTION );
-
+    errno = EACCES;
     return NULL;
 }
 
@@ -1420,9 +1424,6 @@ fsc2_serial_open( int          sn        UNUSED_ARG,
 void
 fsc2_serial_close( int sn  UNUSED_ARG )
 {
-    eprint( FATAL, UNSET, "Module for device '%s' requires support "
-            "for serial ports but fsc2 was compiled without.\n", dev_name );
-    THROW( EXCEPTION );
 }
 
 
@@ -1433,10 +1434,7 @@ fsc2_serial_write( int          sn              UNUSED_ARG,
                    long         us_wait         UNUSED_ARG,
                    bool         quit_on_signal  UNUSED_ARG )
 {
-    eprint( FATAL, UNSET, "Module for device '%s' requires support "
-            "for serial ports but fsc2 was compiled without.\n", dev_name );
-    THROW( EXCEPTION );
-
+    errno = EBADF;
     return -1;
 }
 
@@ -1449,10 +1447,7 @@ fsc2_serial_read( int          sn              UNUSED_ARG,
                   long         us_wait         UNUSED_ARG,
                   bool         quit_on_signal  UNUSED_ARG )
 {
-    eprint( FATAL, UNSET, "Module for device '%s' requires support "
-            "for serial ports but fsc2 was compiled without.\n", dev_name );
-    THROW( EXCEPTION );
-
+    errno = EBADF;
     return -1;
 }
 
@@ -1461,10 +1456,7 @@ int
 fsc2_tcgetattr( int              sn         UNUSED_ARG,
                 struct termios * termios_p  UNUSED_ARG )
 {
-    eprint( FATAL, UNSET, "Module for device '%s' requires support "
-            "for serial ports but fsc2 was compiled without.\n", dev_name );
-    THROW( EXCEPTION );
-
+    errno = EBADF;
     return -1;
 }
 
@@ -1474,10 +1466,7 @@ fsc2_tcsetattr( int              sn                UNUSED_ARG,
                 int              optional_actions  UNUSED_ARG,
                 struct termios * termios_p         UNUSED_ARG )
 {
-    eprint( FATAL, UNSET, "Module for device '%s' requires support "
-            "for serial ports but fsc2 was compiled without.\n", dev_name );
-    THROW( EXCEPTION );
-
+    errno = EBADF;
     return -1;
 }
 
@@ -1486,10 +1475,7 @@ int
 fsc2_tcsendbreak( int sn        UNUSED_ARG,
                   int duration  UNUSED_ARG )
 {
-    eprint( FATAL, UNSET, "Module for device '%s' requires support "
-            "for serial ports but fsc2 was compiled without.\n", dev_name );
-    THROW( EXCEPTION );
-
+    errno = EBADF;
     return -1;
 }
 
@@ -1497,10 +1483,7 @@ fsc2_tcsendbreak( int sn        UNUSED_ARG,
 int
 fsc2_tcdrain( int sn UNUSED_ARG )
 {
-    eprint( FATAL, UNSET, "Module for device '%s' requires support "
-            "for serial ports but fsc2 was compiled without.\n", dev_name );
-    THROW( EXCEPTION );
-
+    errno = EBADF;
     return -1;
 }
 
@@ -1509,10 +1492,7 @@ int
 fsc2_tcflush( int sn              UNUSED_ARG,
               int queue_selector  UNUSED_ARG )
 {
-    eprint( FATAL, UNSET, "Module for device '%s' requires support "
-            "for serial ports but fsc2 was compiled without.\n", dev_name );
-    THROW( EXCEPTION );
-
+    errno = EBADF;
     return -1;
 }
 
@@ -1520,10 +1500,7 @@ int
 fsc2_tcflow( int sn      UNUSED_ARG,
              int action  UNUSED_ARG )
 {
-    eprint( FATAL, UNSET, "Module for device '%s' requires support "
-            "for serial ports but fsc2 was compiled without.\n", dev_name );
-    THROW( EXCEPTION );
-
+    errno = EBADF;
     return -1;
 }
 
