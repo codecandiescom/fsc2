@@ -156,6 +156,7 @@ struct Spex232 {
 
     long int backslash_steps;       /* steps to be used for backslash */
 
+    int sn;
     struct termios *tio;            /* serial port terminal interface
                                        structure */
 

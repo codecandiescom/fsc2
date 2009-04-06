@@ -5,6 +5,5 @@
 OWNER              := fsc2
 GROUP              := dialout
 GPIB_LIBRARY       := JTT
-NUM_SERIAL_PORTS   := 2
 SERIAL_LOCK_DIR    := /var/lock
 BROWSER            := firefox

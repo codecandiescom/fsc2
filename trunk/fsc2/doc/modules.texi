@@ -1073,16 +1073,22 @@ You don't need to set a special variable to advertise your intention
 of using one of them. Instead, in the init hook function you must try to
 request the serial port you need by calling the function
 @example
-fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 @end example
 @noindent
-with the number of the serial port (0 stands for the device file
-@file{/dev/ttyS0}, which is what is called @code{COM1} in DOS-speak, 1
-for @file{/dev/ttyS1} or for @code{COM2} etc.@:) as the first and the
-device name as the second argument. If the requested serial port has
-already been claimed by a different device the function will print an
-error message and stop the @code{EDL} script, so you don't have to
-deal with error handling.
+with the number of the device file for the serial port (the first
+serial port is at @file{/dev/ttyS0}, which is what's called
+@code{COM1} in DOS-speak, the second is @file{/dev/ttyS1} or for
+@code{COM2} etc.@:) as the first and the device name as the second
+argument. @code{DEVICE_NAME} is the name to be used for the device
+in log files etc.
+
+If the requested serial port has already been claimed by a different
+device or can't be accessed (either because the device file doesn't
+exist or the program has no permissions to open it) the function will
+print an error message and stop the @code{EDL} script, so you don't
+have to deal with error handling. Otherwise it returns an @code{int}
+that in all other functions identifies the serial port.
 
 All the other function may not be called before the @code{exp_hook}
 function.
@@ -1131,21 +1137,19 @@ The only functions that are different from their normal counterparts are
 
 @code{fsc2_serial_open()} is defined as
 @example
-struct termios * fsc2_serial_open( int          sn,
-                                   const char * devname,
-                                   int          flags )
+struct termios * fsc2_serial_open( int sn,
+                                   int flags )
 @end example
 @noindent
-where @code{sn} is the number of the serial port as already used in
-@code{fsc2_request_serial_port()}, @code{devname} has to be the same
-device name as used in the call of @code{fsc2_request_serial_port()} and
-@code{flags} are the same flags you would pass to a normal @code{open()}
-call. The function not only opens the file but also creates the
-necessary lock file and determines the current communication parameter
-settings for the serial port. These are returned via a pointer to a
-@code{termios} structure, that can be freely changed within the
-module. If the function returns a @code{NULL} pointer opening the device
-file failed and you can determine the reasons by checking @code{errno}.
+where @code{sn} is the number for the serial port as returned by
+@code{fsc2_request_serial_port()} and @code{flags} are the same flags
+you would pass to a normal @code{open()} call. The function not only
+opens the file but also creates the necessary lock file and determines
+the current communication parameter settings for the serial port.
+These are returned via a pointer to a @code{termios} structure, that
+can be freely changed within the module. If the function returns a
+@code{NULL} pointer opening the device file failed and you can
+determine the reasons by checking @code{errno}.
 
 @code{fsc2_serial_write()} and @code{fsc2_serial_read()} are defined as
 @example

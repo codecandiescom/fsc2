@@ -37,11 +37,10 @@
 
 /* Routines to be used from modules */
 
-void fsc2_request_serial_port( int          /* sn       */,
-                               const char * /* dev_name */  );
+int fsc2_request_serial_port( const char * /* dev_file */,
+                              const char * /* dev_name */  );
 
 struct termios *fsc2_serial_open( int          /* sn       */,
-                                  const char * /* dev_name */,
                                   int          /* flags    */  );
 
 void fsc2_serial_close( int /* sn */ );
@@ -81,8 +80,6 @@ void fsc2_serial_log_message( const char * /* fmt */,
                               ...                     );
 
 /* Routines for internal use only */
-
-void fsc2_serial_init( void );
 
 void fsc2_serial_exp_init( const char * /* log_file_name */,
                            int          /* log_level     */  );

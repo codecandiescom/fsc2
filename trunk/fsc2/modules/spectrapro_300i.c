@@ -62,7 +62,7 @@ spectrapro_300i_init_hook( void )
 
     /* Claim the serial port (throws exception on failure) */
 
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    spectrapro_300i.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
     spectrapro_300i.is_needed = SET;
     spectrapro_300i.is_open = UNSET;

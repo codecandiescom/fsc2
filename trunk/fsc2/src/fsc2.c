@@ -378,10 +378,6 @@ globals_init( const char * pname )
     GUI.is_init = UNSET;
 
     G.color_hash = NULL;
-
-    /* Setup a structure used when dealing with serial ports */
-
-    fsc2_serial_init( );
 }
 
 

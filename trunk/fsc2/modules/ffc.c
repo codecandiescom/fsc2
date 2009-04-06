@@ -50,12 +50,11 @@ static void ffc_open( void );
 static void ffc_comm_fail( void );
 
 
-typedef struct {
+static struct {
+    int              sn;
 	bool             is_open;
     struct termios * tio;         /* serial port terminal interface structure */
-} FFC;
-
-FFC ffc;
+} ffc;
 
 #define RESPONSE_TIME          50000    /* 50 ms (for "normal commands) */
 
@@ -73,7 +72,7 @@ ffc_init_hook( void )
 {
     /* Claim the serial port (throws exception on failure) */
 
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    ffc.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
 	ffc.is_open = UNSET;
 
@@ -100,7 +99,7 @@ ffc_end_of_exp_hook( void )
 {
     if ( ffc.is_open )
     {
-        fsc2_serial_close( SERIAL_PORT );
+        fsc2_serial_close( ffc.sn );
         ffc.is_open = UNSET;
     }
 
@@ -170,10 +169,9 @@ ffc_change( int dir )
 	char data = dir ? 'p' : 'm';
 
 
-	if (    fsc2_serial_write( SERIAL_PORT, &data, 1,
-							   RESPONSE_TIME, UNSET ) != 1
-		 || fsc2_serial_read( SERIAL_PORT, &data, 1, NULL,
-								 RESPONSE_TIME, UNSET ) != 1
+	if (    fsc2_serial_write( ffc.sn, &data, 1, RESPONSE_TIME, UNSET ) != 1
+		 || fsc2_serial_read( ffc.sn, &data, 1, NULL,
+                              RESPONSE_TIME, UNSET ) != 1
 		 || data != dir ? 'p' : 'm' )
 		ffc_comm_fail( );
 }
@@ -195,7 +193,7 @@ ffc_open( void )
        controlling terminal, otherwise line noise read as a CTRL-C might kill
        the program. */
 
-    if ( ( ffc.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+    if ( ( ffc.tio = fsc2_serial_open( ffc.sn,
                           O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
     {
         print( FATAL, "Can't open device file for power supply.\n" );
@@ -218,7 +216,7 @@ ffc_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( ffc.sn );
             print( FATAL, "Invalid setting for parity bit in "
                    "configuration file for the device.\n" );
             THROW( EXCEPTION );
@@ -234,7 +232,7 @@ ffc_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( ffc.sn );
             print( FATAL, "Invalid setting for number of stop bits in "
                    "configuration file for the device.\n" );
             THROW( EXCEPTION );
@@ -259,7 +257,7 @@ ffc_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( ffc.sn );
             print( FATAL, "Invalid setting for number of bits per "
                    "in character configuration file for the device.\n" );
 			THROW( EXCEPTION );
@@ -277,9 +275,8 @@ ffc_open( void )
 
     ffc.tio->c_lflag = 0;
 
-    fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, ffc.tio );
-
+    fsc2_tcflush( ffc.sn, TCIOFLUSH );
+    fsc2_tcsetattr( ffc.sn, TCSANOW, ffc.tio );
 #endif
 
     ffc.is_open = SET;

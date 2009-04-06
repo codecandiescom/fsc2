@@ -136,7 +136,7 @@ spex232_comm_init( void )
 	   to the MAIN program (the trailing '\0' at the end of the string must
 	   also be send!). */
 
-	if ( fsc2_serial_write( SERIAL_PORT, buf, sizeof buf, SERIAL_WAIT, SET )
+	if ( fsc2_serial_write( spex232.sn, buf, sizeof buf, SERIAL_WAIT, SET )
 		                                                        != sizeof buf )
 		spex232_comm_fail( );
 
@@ -144,7 +144,7 @@ spex232_comm_init( void )
 
 	/* The device now should react by sending '*' */
 
-	if (    fsc2_serial_read( SERIAL_PORT, buf, 1, NULL,
+	if (    fsc2_serial_read( spex232.sn, buf, 1, NULL,
                               SERIAL_WAIT, SET )  != 1
          || buf[ 0 ] != '*' )
 		spex232_comm_fail( );
@@ -153,8 +153,8 @@ spex232_comm_init( void )
 	/* Test if the device is really running the MAIN program */
 
 	buf[ 0 ] = ' ';
-	if (    fsc2_serial_write( SERIAL_PORT, buf, 1, SERIAL_WAIT, SET ) != 1
-         || fsc2_serial_read( SERIAL_PORT, buf, 1, NULL,
+	if (    fsc2_serial_write( spex232.sn, buf, 1, SERIAL_WAIT, SET ) != 1
+         || fsc2_serial_read( spex232.sn, buf, 1, NULL,
                               SERIAL_WAIT, SET ) != 1 )
 		spex232_comm_fail( );
 
@@ -199,7 +199,7 @@ spex232_autobaud( void )
 
 		/* Send autobaud command */
 
-		if ( fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1 )
+		if ( fsc2_serial_write( spex232.sn, &buf, 1, SERIAL_WAIT, SET ) != 1 )
 			spex232_comm_fail( );
 
 		/* Try to read reply and if there's one of the expected characters
@@ -207,7 +207,7 @@ spex232_autobaud( void )
 
 		fsc2_usleep( 500000, UNSET );
 
-		if ( fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+		if ( fsc2_serial_read( spex232.sn, &buf, 1, NULL,
                                SERIAL_WAIT, SET ) == 1 )
 		{
 			/* If the device is already in "intelligent communication mode" it
@@ -255,15 +255,15 @@ spex232_autobaud( void )
 	   communication mode". The device is supposed to react by sending '='. */
 
 	buf = 247;
-	if (    fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1
-         || fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+	if (    fsc2_serial_write( spex232.sn, &buf, 1, SERIAL_WAIT, SET ) != 1
+         || fsc2_serial_read( spex232.sn, &buf, 1, NULL,
                               SERIAL_WAIT, SET )  != 1
          || buf != '=' )
 		spex232_comm_fail( );
 
 	buf = ' ';
-	if (    fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1
-         || fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+	if (    fsc2_serial_write( spex232.sn, &buf, 1, SERIAL_WAIT, SET ) != 1
+         || fsc2_serial_read( spex232.sn, &buf, 1, NULL,
                               SERIAL_WAIT, SET )  != 1 )
 		spex232_comm_fail( );
 
@@ -289,7 +289,7 @@ spex232_reboot( void )
 
 	/* Switch to "inteligent communication mode", then wait for 200 ms*/
 
-	if ( fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1 )
+	if ( fsc2_serial_write( spex232.sn, &buf, 1, SERIAL_WAIT, SET ) != 1 )
 		spex232_comm_fail( );
 
 	fsc2_usleep( 200000, UNSET );
@@ -297,7 +297,7 @@ spex232_reboot( void )
 	/* Send the reboot command */
 
 	buf = 222;
-	if ( fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1 )
+	if ( fsc2_serial_write( spex232.sn, &buf, 1, SERIAL_WAIT, SET ) != 1 )
 		spex232_comm_fail( );
 }
 
@@ -313,7 +313,7 @@ spex232_discard_response( void )
 	unsigned char buf;
 
 
-	while ( fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+	while ( fsc2_serial_read( spex232.sn, &buf, 1, NULL,
                               SERIAL_WAIT, SET ) == 1 )
 		/* empty */ ;
 }
@@ -335,7 +335,7 @@ spex232_switch_to_int_mode( void )
 	/* Send command to switch the device to "intelligent communication mode" */
 
 	buf = 248;
-	if ( fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1 )
+	if ( fsc2_serial_write( spex232.sn, &buf, 1, SERIAL_WAIT, SET ) != 1 )
 		spex232_comm_fail( );
 
 	fsc2_usleep( 200000, UNSET );
@@ -343,8 +343,8 @@ spex232_switch_to_int_mode( void )
 	/* Check if this worked and which program we're talking to */
 
 	buf = ' ';
-	if (    fsc2_serial_write( SERIAL_PORT, &buf, 1, SERIAL_WAIT, SET ) != 1
-         || fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+	if (    fsc2_serial_write( spex232.sn, &buf, 1, SERIAL_WAIT, SET ) != 1
+         || fsc2_serial_read( spex232.sn, &buf, 1, NULL,
                               SERIAL_WAIT, SET )  != 1 )
 		spex232_comm_fail( );
 
@@ -363,7 +363,7 @@ spex232_check_confirmation( void )
 {
 	unsigned char buf;
 
-	if (    fsc2_serial_read( SERIAL_PORT, &buf, 1, NULL,
+	if (    fsc2_serial_read( spex232.sn, &buf, 1, NULL,
                               SERIAL_WAIT, SET )  != 1
          || ( buf != 'o' && buf != 'b' ) )
 		spex232_comm_fail( );
@@ -401,7 +401,7 @@ spex232_motor_init( void )
 #if defined AUTOCALIBRATION_POSITION
 	if ( spex232.need_motor_init )
 	{
-		if (    fsc2_serial_write( SERIAL_PORT, buf, 1, 100000000, SET ) != 1
+		if (    fsc2_serial_write( spex232.sn, buf, 1, 100000000, SET ) != 1
              || ! spex232_check_confirmation( ) )
 			spex232_comm_fail( );
 		if ( spex232.mode = WL )
@@ -430,7 +430,7 @@ spex232_motor_init( void )
 					MIN_STEPS_PER_SECOND, MAX_STEPS_PER_SECOND, RAMP_TIME );
 	SPEX232_ASSERT( len < MOTOR_INIT_BUF_SIZE );
 
-	if (    fsc2_serial_write( SERIAL_PORT, buf, len, SERIAL_WAIT, SET ) != len
+	if (    fsc2_serial_write( spex232.sn, buf, len, SERIAL_WAIT, SET ) != len
          || ! spex232_check_confirmation( ) )
 		spex232_comm_fail( );
 }
@@ -549,7 +549,7 @@ spex232_set_motor_position( long int pos )
 
 
 	sprintf( buf, "G0,%ld\r", pos );
-	if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+	if (    fsc2_serial_write( spex232.sn, buf, strlen( buf ),
 						   SERIAL_WAIT, UNSET ) != ( ssize_t ) strlen( buf )
          || ! spex232_check_confirmation( ) )
 		spex232_comm_fail( );
@@ -570,10 +570,10 @@ spex232_get_motor_position( void )
 	ssize_t len = 0;
 
 
-	if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+	if (    fsc2_serial_write( spex232.sn, buf, strlen( buf ),
                                SERIAL_WAIT, UNSET ) != ( ssize_t )strlen( buf )
          || ! spex232_check_confirmation( )
-         || ( len = fsc2_serial_read( SERIAL_PORT, buf, sizeof buf, NULL,
+         || ( len = fsc2_serial_read( spex232.sn, buf, sizeof buf, NULL,
                                       SERIAL_WAIT, UNSET ) ) < 2 )
 		spex232_comm_fail( );
 
@@ -598,8 +598,8 @@ spex232_move_relative( long int steps )
        send earlier the interface doesn't answer and we get a timeout) */
 
 	sprintf( buf, "F0,%ld\r", steps );
-	if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
-                              SERIAL_WAIT, UNSET ) != ( ssize_t ) strlen( buf )
+	if (    fsc2_serial_write( spex232.sn, buf, strlen( buf ),
+                               SERIAL_WAIT, UNSET ) != ( ssize_t ) strlen( buf )
          || ! spex232_check_confirmation( ) )
 		spex232_comm_fail( );
 
@@ -620,9 +620,9 @@ spex232_motor_is_busy( void )
 {
 	char cmd = 'E';
 
-	if (    fsc2_serial_write( SERIAL_PORT, &cmd, 1, SERIAL_WAIT, UNSET ) != 1
+	if (    fsc2_serial_write( spex232.sn, &cmd, 1, SERIAL_WAIT, UNSET ) != 1
          || ! spex232_check_confirmation( )
-         || fsc2_serial_read( SERIAL_PORT, &cmd, 1, NULL,
+         || fsc2_serial_read( spex232.sn, &cmd, 1, NULL,
                               SERIAL_WAIT, UNSET ) != 1
          || ( cmd != 'q' && cmd != 'z' ) )
 		spex232_comm_fail( );
@@ -647,7 +647,7 @@ spex232_open( void )
        controlling terminal, otherwise line noise read as a CTRL-C might kill
        the program. */
 
-    if ( ( spex232.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+    if ( ( spex232.tio = fsc2_serial_open( spex232.sn,
                           O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
     {
         print( FATAL, "Can't open device file for monochromator.\n" );
@@ -670,7 +670,7 @@ spex232_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( spex232.sn );
             print( FATAL, "Invalid setting for parity bit in "
                    "configuration file for the device.\n" );
             SPEX232_THROW( EXCEPTION );
@@ -686,7 +686,7 @@ spex232_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( spex232.sn );
             print( FATAL, "Invalid setting for number of stop bits in "
                    "configuration file for the device.\n" );
             SPEX232_THROW( EXCEPTION );
@@ -711,7 +711,7 @@ spex232_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( spex232.sn );
             print( FATAL, "Invalid setting for number of bits per "
                    "in character configuration file for the device.\n" );
             SPEX232_THROW( EXCEPTION );
@@ -729,8 +729,8 @@ spex232_open( void )
 
     spex232.tio->c_lflag = 0;
 
-    fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, spex232.tio );
+    fsc2_tcflush( spex232.sn, TCIOFLUSH );
+    fsc2_tcsetattr( spex232.sn, TCSANOW, spex232.tio );
 #endif
 
     spex232.is_open = SET;
@@ -746,7 +746,7 @@ spex232_close( void )
 {
 #ifndef SPEX232_TEST
     if ( spex232.is_open )
-        fsc2_serial_close( SERIAL_PORT );
+        fsc2_serial_close( spex232.sn );
 #endif
     spex232.is_open = UNSET;
 }

@@ -191,6 +191,7 @@ struct HORI_RES {
 
 
 struct LECROY_WR {
+    int sn;
     struct termios *tio;    /* serial port terminal interface structure */
 
     unsigned int INR;

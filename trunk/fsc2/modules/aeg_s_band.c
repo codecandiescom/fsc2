@@ -77,27 +77,28 @@ static bool magnet_do( int command );
 
 static struct
 {
-    double field;           /* the start field given by the user */
-    double field_step;      /* the field steps to be used */
+    double           field;         /* the start field given by the user */
+    double           field_step;    /* the field steps to be used */
 
-    bool is_field;          /* flag, set if start field is defined */
-    bool is_field_step;     /* flag, set if field step size is defined */
+    bool             is_field;      /* flag, set if start field is defined */
+    bool             is_field_step; /* flag, set if field step size is
+                                       defined */
+    double           mini_step;     /* the smallest possible field step */
 
-    double mini_step;       /* the smallest possible field step */
+    double           target_field;  /* used internally */
+    double           act_field;     /* used internally */
 
-    double target_field;    /* used internally */
-    double act_field;       /* used internally */
+    double           meas_field;    /* result of last field measurement */
+    double           max_deviation; /* maximum acceptable deviation between
+                                       measured and required field */
+    double           step;          /* the current step width (in bits) */
+    int              int_step;      /* used internally */
 
-    double meas_field;      /* result of last field measurement */
-    double max_deviation;   /* maximum acceptable deviation between measured */
-                            /* and required field */
-    double step;            /* the current step width (in bits) */
-    int int_step;           /* used internally */
-
-    bool is_opened;
-    struct termios *tio;    /* serial port terminal interface structures */
-
-    bool fast_init;         /* if set do a fast initialization */
+    int              sn;            /* serial port index */
+    bool             is_opened;
+    struct termios * tio;           /* serial port terminal interface
+                                       structures */
+    bool             fast_init;     /* if set do a fast initialization */
 } magnet;
 
 enum {
@@ -191,7 +192,7 @@ aeg_s_band_init_hook( void )
 
     /* Claim the serial port (throws an exception on errors) */
 
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    magnet.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
     /* Finally initialize some variables */
 
@@ -1091,7 +1092,7 @@ magnet_do( int command )
                should not become the controlling terminal, otherwise line
                noise read as a CTRL-C might kill the program. */
 
-            if ( ( magnet.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+            if ( ( magnet.tio = fsc2_serial_open( magnet.sn,
                         O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
                 return FAIL;
 
@@ -1102,13 +1103,13 @@ magnet_do( int command )
             cfsetispeed( magnet.tio, SERIAL_BAUDRATE );
             cfsetospeed( magnet.tio, SERIAL_BAUDRATE );
 
-            fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
-            fsc2_tcsetattr( SERIAL_PORT, TCSANOW, magnet.tio );
+            fsc2_tcflush( magnet.sn, TCIFLUSH );
+            fsc2_tcsetattr( magnet.sn, TCSANOW, magnet.tio );
             break;
 
         case SERIAL_TRIGGER :                 /* send trigger pattern */
             data[ 0 ] = 0x20;
-            fsc2_serial_write( SERIAL_PORT, data, 1, 0, SET );
+            fsc2_serial_write( magnet.sn, data, 1, 0, SET );
             fsc2_usleep( SERIAL_TIME, UNSET );
             break;
 
@@ -1117,11 +1118,11 @@ magnet_do( int command )
             data[ 0 ] = ( unsigned char )
                 ( 0x40 | ( ( volt >> 8 ) & 0xF ) | ( ( volt >> 3 ) & 0x10 ) );
             data[ 1 ] = ( unsigned char ) ( 0x80 | ( volt & 0x07F ) );
-            fsc2_serial_write( SERIAL_PORT, data, 2, 0, SET );
+            fsc2_serial_write( magnet.sn, data, 2, 0, SET );
             break;
 
         case SERIAL_EXIT :                    /* reset and close serial port */
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( magnet.sn );
             break;
 
         default :

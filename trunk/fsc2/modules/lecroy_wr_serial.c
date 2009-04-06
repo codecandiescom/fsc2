@@ -109,7 +109,7 @@ lecroy_wr_init( void )
 
     TRY
     {
-        if ( fsc2_serial_write( SERIAL_PORT,
+        if ( fsc2_serial_write( lecroy_wr.sn,
                               "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,HEX;CORD HI\r",
                               45, TIMEOUT_FROM_LENGTH( 45 ), SET ) != 45 )
             THROW( EXCEPTION );
@@ -145,7 +145,7 @@ lecroy_wr_init( void )
 
         /* Make sure the internal timebase is used */
 
-        if ( fsc2_serial_write( SERIAL_PORT, "SCLK INT\r", 9,
+        if ( fsc2_serial_write( lecroy_wr.sn, "SCLK INT\r", 9,
                                 TIMEOUT_FROM_LENGTH( 9 ), SET ) != 9 )
             THROW( EXCEPTION );
 
@@ -340,7 +340,7 @@ lecroy_wr_set_timebase( double timebase )
 
     strcat( gcvt( timebase, 8, cmd + strlen( cmd ) ), "\r" );
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -379,7 +379,7 @@ lecroy_wr_set_interleaved( bool state )
 
     strcat( cmd, state ? "ON\r" : "OFF\r" );
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -451,7 +451,7 @@ lecroy_wr_set_memory_size( long mem_size )
 
     sprintf( cmd, "MSIZ %ld\r", mem_size );
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -496,7 +496,7 @@ lecroy_wr_set_sens( int    channel,
     sprintf( cmd, "C%1d:VDIV ", channel + 1 );
     strcat( gcvt( sens, 8, cmd + strlen( cmd ) ), "\r" );
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -540,7 +540,7 @@ lecroy_wr_set_offset( int    channel,
     sprintf( cmd, "C%1d:OFST ", channel + 1 );
     strcat( gcvt( offset, 8, cmd + strlen( cmd ) ), "\r" );
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -606,7 +606,7 @@ lecroy_wr_set_coupling( int channel,
 
     sprintf( cmd, "C%1d:CPL %s\r", channel + 1, cpl[ type ] );
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -740,7 +740,7 @@ lecroy_wr_set_bandwidth_limiter( int channel,
             strcat( buf, "200MHZ\r" );
         
         to_send = strlen( buf );
-        if ( fsc2_serial_write( SERIAL_PORT, buf, to_send,
+        if ( fsc2_serial_write( lecroy_wr.sn, buf, to_send,
                                 TIMEOUT_FROM_LENGTH( to_send ), SET ) 
                                                                    != to_send )
             lecroy_wr_comm_failure( );
@@ -755,7 +755,7 @@ lecroy_wr_set_bandwidth_limiter( int channel,
 
     strcpy( buf, "GBWL OFF\r" );
     to_send = strlen( buf );
-    if ( fsc2_serial_write( SERIAL_PORT, buf, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, buf, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -776,7 +776,7 @@ lecroy_wr_set_bandwidth_limiter( int channel,
     buf[ strlen( buf ) - 1 ] = '\0';
 
     to_send = strlen( buf );
-    if ( fsc2_serial_write( SERIAL_PORT, buf, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, buf, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -852,7 +852,7 @@ lecroy_wr_set_trigger_source( int channel )
         strcat( cmd, "EX10\r" );
 
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -915,7 +915,7 @@ lecroy_wr_set_trigger_level( int    channel,
     strcat( gcvt( level, 6, cmd + strlen( cmd ) ), "\r" );
 
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -988,7 +988,7 @@ lecroy_wr_set_trigger_slope( int channel,
     strcat( cmd, slope ? "POS\r" : "NEG\r" );
 
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -1079,7 +1079,7 @@ lecroy_wr_set_trigger_coupling( int channel,
     strcat( cmd, cpl_str[ cpl ] );
 
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -1134,7 +1134,7 @@ lecroy_wr_set_trigger_mode( int mode )
     strcat( cmd, mode_str[ mode ] );
 
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -1187,7 +1187,7 @@ lecroy_wr_set_trigger_delay( double delay )
     strcat( gcvt( delay, 8, cmd + strlen( cmd ) ), "\r" );
 
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -1265,7 +1265,7 @@ lecroy_wr_display( int ch,
     }
 
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -1290,9 +1290,9 @@ lecroy_wr_display( int ch,
 void
 lecroy_wr_finished( void )
 {
-    fsc2_serial_write( SERIAL_PORT, GO_TO_LOCAL, strlen( GO_TO_LOCAL ),
+    fsc2_serial_write( lecroy_wr.sn, GO_TO_LOCAL, strlen( GO_TO_LOCAL ),
                        TIMEOUT_FROM_STRING( GO_TO_LOCAL ), SET );
-    fsc2_serial_close( SERIAL_PORT );
+    fsc2_serial_close( lecroy_wr.sn );
 }
 
 
@@ -1311,7 +1311,7 @@ lecroy_wr_start_acquisition( void )
 
     /* Stop the digitizer (also switches to "STOPPED" trigger mode) */
 
-    if ( fsc2_serial_write( SERIAL_PORT, "STOP\r", 5,
+    if ( fsc2_serial_write( lecroy_wr.sn, "STOP\r", 5,
                             TIMEOUT_FROM_LENGTH( 5 ), SET ) != 5 )
         lecroy_wr_comm_failure( );
 
@@ -1332,7 +1332,7 @@ lecroy_wr_start_acquisition( void )
                   lecroy_wr.num_avg[ ch ] );
 
         to_send = strlen( cmd );
-        if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+        if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                                 TIMEOUT_FROM_LENGTH( to_send ), SET )
                                                                    != to_send )
             lecroy_wr_comm_failure( );
@@ -1350,7 +1350,7 @@ lecroy_wr_start_acquisition( void )
                  'A' + LECROY_WR_TA - ch ) ;
 
         to_send = strlen( cmd );
-        if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+        if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                                 TIMEOUT_FROM_LENGTH( to_send ), SET )
                                                                    != to_send )
             lecroy_wr_comm_failure( );
@@ -1361,7 +1361,7 @@ lecroy_wr_start_acquisition( void )
         sprintf( cmd, "T%c:FRST\r", 'A' + LECROY_WR_TA - ch );
 
         to_send = strlen( cmd );
-        if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+        if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                                 TIMEOUT_FROM_LENGTH( to_send ), SET )
                                                                    != to_send )
             lecroy_wr_comm_failure( );
@@ -1391,7 +1391,7 @@ lecroy_wr_start_acquisition( void )
         lecroy_wr.trigger_mode = LECROY_WR_TRG_MODE_NORMAL;
 
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -1465,7 +1465,7 @@ lecroy_wr_get_prep( int              ch,
                  lecroy_wr_curve_length( ) );
 
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 
@@ -1488,7 +1488,7 @@ lecroy_wr_get_prep( int              ch,
         strcpy( cmd, ch_str );
         strcat( cmd, ":WF? DAT1\r" );
         to_send = strlen( cmd );
-        if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+        if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                                 TIMEOUT_FROM_LENGTH( to_send ), SET )
                                                                    != to_send )
             lecroy_wr_comm_failure( );
@@ -1723,7 +1723,7 @@ lecroy_wr_copy_curve( long src,
     sprintf( cmd + strlen( cmd ), "M%ld\r", dest - LECROY_WR_M1 + 1 );
 
     to_send = strlen( cmd );
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
 }
@@ -1742,7 +1742,7 @@ lecroy_wr_get_data( long * len )
     /* First thing we read is something like "DAT1,#[0-9]" where the number
        following the '#' is the number of bytes to be read next */
 
-    if ( fsc2_serial_read( SERIAL_PORT, len_str, 7, NULL,
+    if ( fsc2_serial_read( lecroy_wr.sn, len_str, 7, NULL,
                            TIMEOUT_FROM_LENGTH( 7 ), SET ) != 7 )
         lecroy_wr_comm_failure( );
 
@@ -1753,7 +1753,7 @@ lecroy_wr_get_data( long * len )
 
     /* Now get the number of bytes to read */
 
-    if ( fsc2_serial_read( SERIAL_PORT, len_str, *len, NULL,
+    if ( fsc2_serial_read( lecroy_wr.sn, len_str, *len, NULL,
                            TIMEOUT_FROM_LENGTH( *len ), SET ) != *len )
         lecroy_wr_comm_failure( );
     
@@ -1766,7 +1766,7 @@ lecroy_wr_get_data( long * len )
 
     data = T_malloc( *len );
 
-    if ( fsc2_serial_read( SERIAL_PORT, data, *len, NULL,
+    if ( fsc2_serial_read( lecroy_wr.sn, data, *len, NULL,
                            TIMEOUT_FROM_LENGTH( *len ), SET ) != *len )
         lecroy_wr_comm_failure( );
 
@@ -1881,7 +1881,7 @@ lecroy_wr_command( const char * cmd )
     ssize_t to_send = strlen( cmd );
 
 
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if ( fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                             TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send )
         lecroy_wr_comm_failure( );
     return OK;
@@ -1919,9 +1919,9 @@ lecroy_wr_talk( const char * cmd,
     ssize_t to_send = strlen( cmd );
 
 
-    if (    fsc2_serial_write( SERIAL_PORT, cmd, to_send,
+    if (    fsc2_serial_write( lecroy_wr.sn, cmd, to_send,
                                TIMEOUT_FROM_LENGTH( to_send ), SET ) != to_send
-         || ( *length = fsc2_serial_read( SERIAL_PORT, reply, *length, "\r",
+         || ( *length = fsc2_serial_read( lecroy_wr.sn, reply, *length, "\r",
                                         TIMEOUT_FROM_LENGTH( *length ), SET ) )
                                                                          <= 0 )
         lecroy_wr_comm_failure( );
@@ -2027,7 +2027,7 @@ lecroy_wr_serial_open( void )
             return FAIL;
     }
 
-    if ( ( lecroy_wr.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+    if ( ( lecroy_wr.tio = fsc2_serial_open( lecroy_wr.sn,
                         O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
         return FAIL;
 
@@ -2066,14 +2066,14 @@ lecroy_wr_serial_open( void )
     lecroy_wr.tio->c_cc[ VMIN ]   = 0;          /* non-blocking read */
     lecroy_wr.tio->c_cc[ VTIME ]  = 0;          /* non-blocking read */
 
-    fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
-    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, lecroy_wr.tio );
+    fsc2_tcflush( lecroy_wr.sn, TCIFLUSH );
+    fsc2_tcsetattr( lecroy_wr.sn, TCSANOW, lecroy_wr.tio );
 
     /* Send command to enable either hardware or software flow control */
 
     if ( SERIAL_HARDWARE_FLOW_CONTROL )
     {
-        if ( fsc2_serial_write( SERIAL_PORT, XON_XOFF_OFF,
+        if ( fsc2_serial_write( lecroy_wr.sn, XON_XOFF_OFF,
                                 strlen( XON_XOFF_OFF ),
                                 TIMEOUT_FROM_STRING( XON_XOFF_OFF ), SET )
                                                     != strlen( XON_XOFF_OFF ) )
@@ -2084,7 +2084,7 @@ lecroy_wr_serial_open( void )
     }
     else
     {
-        if ( fsc2_serial_write( SERIAL_PORT, XON_XOFF_ON,
+        if ( fsc2_serial_write( lecroy_wr.sn, XON_XOFF_ON,
                                 strlen( XON_XOFF_ON ),
                                 TIMEOUT_FROM_STRING( XON_XOFF_ON ), SET )
                                                      != strlen( XON_XOFF_ON ) )
@@ -2099,24 +2099,24 @@ lecroy_wr_serial_open( void )
        sending of SRQ messages and splitting of lines. Check that communication
        works by asking for the status byte. */
 
-    if (    fsc2_serial_write( SERIAL_PORT, ECHO_OFF, strlen( ECHO_OFF ),
+    if (    fsc2_serial_write( lecroy_wr.sn, ECHO_OFF, strlen( ECHO_OFF ),
                                TIMEOUT_FROM_STRING( ECHO_OFF ), SET )
                                                           != strlen( ECHO_OFF )
-         || fsc2_serial_write( SERIAL_PORT, ECHO_OFF, strlen( XON_XOFF_OFF ),
+         || fsc2_serial_write( lecroy_wr.sn, ECHO_OFF, strlen( XON_XOFF_OFF ),
                                TIMEOUT_FROM_STRING( XON_XOFF_OFF ), SET )
                                                       != strlen( XON_XOFF_OFF )
-         || fsc2_serial_write( SERIAL_PORT, REMOTE_ENABLE,
+         || fsc2_serial_write( lecroy_wr.sn, REMOTE_ENABLE,
                                strlen( REMOTE_ENABLE ),
                                TIMEOUT_FROM_STRING( REMOTE_ENABLE ), SET )
                                                      != strlen( REMOTE_ENABLE )
-         || fsc2_serial_write( SERIAL_PORT, LOCAL_LOCKOUT,
+         || fsc2_serial_write( lecroy_wr.sn, LOCAL_LOCKOUT,
                                strlen( LOCAL_LOCKOUT ),
                                TIMEOUT_FROM_STRING( LOCAL_LOCKOUT ), SET )
                                                      != strlen( LOCAL_LOCKOUT )
-         || fsc2_serial_write( SERIAL_PORT,
+         || fsc2_serial_write( lecroy_wr.sn,
                           "CORS EO,\"\n\r\",EI,\"\r\",SRQ,\"\",LS,OFF;*STB?\r",
                           40, TIMEOUT_FROM_LENGTH( 40 ), SET ) != 40
-         || fsc2_serial_read( SERIAL_PORT, buf, 10, NULL,
+         || fsc2_serial_read( lecroy_wr.sn, buf, 10, NULL,
                               TIMEOUT_FROM_LENGTH( 10 ), SET ) <= 0 )
     {
         lecroy_wr_finished( );

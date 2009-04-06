@@ -68,6 +68,7 @@ static double smsmotor_get_acceleration( long  dev );
 
 
 static struct {
+    int              sn;
 	bool             is_open;
 	double           position[ DEVICE_COUNT ];
 	double           lower_limit[ DEVICE_COUNT ];
@@ -111,8 +112,7 @@ smsmotor_init_hook( void )
 
     /* Request the seral port for the module */
 
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
-
+    smsmotor.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 	smsmotor.is_open = UNSET;
 
     /* Initialize the device structure */
@@ -159,7 +159,7 @@ smsmotor_end_of_exp_hook( void )
     if ( smsmotor.is_open )
 	{
 #ifndef SMSMOTOR_TEST
-        fsc2_serial_close( SERIAL_PORT );
+        fsc2_serial_close( smsmotor.sn );
 #endif
         smsmotor.is_open = UNSET;
     }
@@ -572,9 +572,9 @@ smsmotor_init( void )
         /* Ask for the current position */
 
 		sprintf( buf, "%ld npos ", i + 1 );
-		if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+		if (    fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
 								   WAIT_TIME, UNSET ) <= 0
-			 || ( len = fsc2_serial_read( SERIAL_PORT, reply, sizeof reply,
+			 || ( len = fsc2_serial_read( smsmotor.sn, reply, sizeof reply,
 										  " \r\n", WAIT_TIME, UNSET ) ) <= 3
              || strncmp( reply + len - 3, " \r\n", 3 ) )
 			smsmotor_fail( );
@@ -628,7 +628,7 @@ smsmotor_init( void )
 
 		sprintf( buf, "%f %f %ld setnlimit ", smsmotor.lower_limit[ i ],
                  smsmotor.upper_limit[ i ], i + 1 );
-		if ( fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+		if ( fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
                                 WAIT_TIME, UNSET ) <= 0 )
 			smsmotor_fail( );
 
@@ -666,7 +666,7 @@ smsmotor_open( void )
        controlling terminal, otherwise line noise read as a CTRL-C might kill
        the program. */
 
-    if ( ( smsmotor.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+    if ( ( smsmotor.tio = fsc2_serial_open( smsmotor.sn,
                           O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
     {
         print( FATAL, "Can't open device file for power supply.\n" );
@@ -689,7 +689,7 @@ smsmotor_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( smsmotor.sn );
             print( FATAL, "Invalid setting for parity bit in "
                    "configuration file for the device.\n" );
             THROW( EXCEPTION );
@@ -705,7 +705,7 @@ smsmotor_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( smsmotor.sn );
             print( FATAL, "Invalid setting for number of stop bits in "
                    "configuration file for the device.\n" );
             THROW( EXCEPTION );
@@ -730,7 +730,7 @@ smsmotor_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( smsmotor.sn );
             print( FATAL, "Invalid setting for number of bits per character "
                    "in configuration file for the device.\n" );
 			THROW( EXCEPTION );
@@ -748,8 +748,8 @@ smsmotor_open( void )
 
     smsmotor.tio->c_lflag = 0;
 
-    fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, smsmotor.tio );
+    fsc2_tcflush( smsmotor.sn, TCIOFLUSH );
+    fsc2_tcsetattr( smsmotor.sn, TCSANOW, smsmotor.tio );
 
 #endif
 
@@ -776,7 +776,7 @@ smsmotor_goto( long   dev,
 	sprintf( buf, "%.6f %ld nm ", pos, dev + 1 );
 	len = strlen( buf );
 
-	if ( fsc2_serial_write( SERIAL_PORT, buf, len, WAIT_TIME, UNSET ) != len )
+	if ( fsc2_serial_write( smsmotor.sn, buf, len, WAIT_TIME, UNSET ) != len )
 		smsmotor_fail( );
 
 	/* Now wait until the device reports that the final position has been
@@ -787,9 +787,9 @@ smsmotor_goto( long   dev,
 
 	while ( 1 )
 	{
-		if (    fsc2_serial_write( SERIAL_PORT, buf, len,
+		if (    fsc2_serial_write( smsmotor.sn, buf, len,
 								   WAIT_TIME, UNSET ) != len
-			 || fsc2_serial_read( SERIAL_PORT, reply, 4, " \r\n",
+			 || fsc2_serial_read( smsmotor.sn, reply, 4, " \r\n",
 								  WAIT_TIME, UNSET ) != 4 )
 			smsmotor_fail( );
 
@@ -799,7 +799,7 @@ smsmotor_goto( long   dev,
 		if ( check_user_request ( ) )
 		{
 			sprintf( buf, "%ld nabort ", dev + 1 );
-			fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+			fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
 							   WAIT_TIME, UNSET );
 			THROW( USER_BREAK_EXCEPTION );
 		}
@@ -808,9 +808,9 @@ smsmotor_goto( long   dev,
 	/* Get the new position value from the device */
 
 	sprintf( buf, "%ld npos ", dev + 1 );
-	if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+	if (    fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
 							   WAIT_TIME, UNSET ) <= 0
-		 || ( len = fsc2_serial_read( SERIAL_PORT, reply, sizeof reply,
+		 || ( len = fsc2_serial_read( smsmotor.sn, reply, sizeof reply,
                                       " \r\n", WAIT_TIME, UNSET ) ) < 2
 		 || strncmp( reply + len - 3, " \r\n", 3 ) )
 			smsmotor_fail( );
@@ -836,7 +836,7 @@ smsmotor_set_speed( long   dev,
 
 
     sprintf( buf, "%f %ld snv ", speed, dev + 1 );
-    if ( fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+    if ( fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
                                     WAIT_TIME, UNSET ) <= 0 )
         smsmotor_fail( );
 #endif
@@ -857,9 +857,9 @@ smsmotor_get_speed( long  dev )
 
 
     sprintf( buf, "%ld gnv ", dev + 1 );
-    if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+    if (    fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
                                WAIT_TIME, UNSET ) <= 0
-         || ( len = fsc2_serial_read( SERIAL_PORT, reply, sizeof reply,
+         || ( len = fsc2_serial_read( smsmotor.sn, reply, sizeof reply,
                                       " \r\n", WAIT_TIME, UNSET ) ) <= 3
          || strncmp( reply + len - 3, " \r\n", 3 ) )
         smsmotor_fail( );
@@ -885,8 +885,8 @@ smsmotor_set_acceleration( long   dev,
 
 
     sprintf( buf, "%f %ld sna ", acceleration, dev + 1 );
-    if ( fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
-                                    WAIT_TIME, UNSET ) <= 0 )
+    if ( fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
+                            WAIT_TIME, UNSET ) <= 0 )
         smsmotor_fail( );
 #endif
 }
@@ -906,9 +906,9 @@ smsmotor_get_acceleration( long  dev )
 
 
     sprintf( buf, "%ld gna ", dev + 1 );
-    if (    fsc2_serial_write( SERIAL_PORT, buf, strlen( buf ),
+    if (    fsc2_serial_write( smsmotor.sn, buf, strlen( buf ),
                                WAIT_TIME, UNSET ) <= 0
-         || ( len = fsc2_serial_read( SERIAL_PORT, reply, sizeof reply,
+         || ( len = fsc2_serial_read( smsmotor.sn, reply, sizeof reply,
                                       " \r\n", WAIT_TIME, UNSET ) ) <= 3
          || strncmp( reply + len - 3, " \r\n", 3 ) )
         smsmotor_fail( );

@@ -69,7 +69,7 @@ static long hjs_attenuator_att_to_step( double att );
 int
 hjs_attenuator_init_hook( void )
 {
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    hjs_attenuator.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
     hjs_attenuator.is_open       = UNSET;
     hjs_attenuator.is_step       = UNSET;
@@ -122,9 +122,11 @@ int
 hjs_attenuator_end_of_exp_hook( void )
 {
     if ( hjs_attenuator.is_open )
-        fsc2_serial_close( SERIAL_PORT );
+    {
+        fsc2_serial_close( hjs_attenuator.sn );
+        hjs_attenuator.is_open = UNSET;
+    }
 
-    hjs_attenuator.is_open = UNSET;
     return 1;
 }
 
@@ -359,7 +361,7 @@ mw_attenuator_attenuation( Var_T * v )
 static bool
 hjs_attenuator_serial_init( void )
 {
-    if ( ( hjs_attenuator.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+    if ( ( hjs_attenuator.tio = fsc2_serial_open( hjs_attenuator.sn,
                                  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) )
                                                                       == NULL )
         return FAIL;
@@ -379,8 +381,8 @@ hjs_attenuator_serial_init( void )
     cfsetispeed( hjs_attenuator.tio, SERIAL_BAUDRATE );
     cfsetospeed( hjs_attenuator.tio, SERIAL_BAUDRATE );
 
-    fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, hjs_attenuator.tio );
+    fsc2_tcflush( hjs_attenuator.sn, TCIOFLUSH );
+    fsc2_tcsetattr( hjs_attenuator.sn, TCSANOW, hjs_attenuator.tio );
 
     return OK;
 }
@@ -410,7 +412,7 @@ hjs_attenuator_set_attenuation( long new_step )
     cmd = get_string( "@01\n@0A %+ld,300\n", steps );
     len = ( ssize_t ) strlen( cmd );
 
-    if ( fsc2_serial_write( SERIAL_PORT, cmd, ( size_t ) len,
+    if ( fsc2_serial_write( hjs_attenuator.sn, cmd, ( size_t ) len,
                             100000L, UNSET ) != len )
     {
         T_free( cmd );
@@ -431,13 +433,13 @@ hjs_attenuator_set_attenuation( long new_step )
     if ( steps < 0 )
         return;
 
-    if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A +50,100\n", 16,
+    if ( fsc2_serial_write( hjs_attenuator.sn, "@01\n@0A +50,100\n", 16,
                             100000L, UNSET ) != 16 )
         hjs_attenuator_comm_failure( );
 
     fsc2_usleep( 500000, UNSET );
 
-    if ( fsc2_serial_write( SERIAL_PORT, "@01\n@0A -50,300\n", 16,
+    if ( fsc2_serial_write( hjs_attenuator.sn, "@01\n@0A -50,300\n", 16,
                             100000L, UNSET ) != 16 )
         hjs_attenuator_comm_failure( );
 

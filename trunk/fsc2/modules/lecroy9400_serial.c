@@ -594,7 +594,7 @@ void
 lecroy9400_finished( void )
 {
     lecroy9400_local( );
-    fsc2_serial_close( SERIAL_PORT );
+    fsc2_serial_close( lecroy9400.device );
     is_acquiring = UNSET;
 }
 
@@ -786,7 +786,7 @@ lecroy9400_serial_init( void )
        should not become the controlling terminal, otherwise line
        noise read as a CTRL-C might kill the program. */
 
-    if ( ( lecroy9400.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+    if ( ( lecroy9400.tio = fsc2_serial_open( lecroy9400.device,
                           O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
         return FAIL;
 
@@ -802,8 +802,8 @@ lecroy9400_serial_init( void )
     lecroy9400.tio->c_oflag = 0;
     lecroy9400.tio->c_lflag = 0;
 
-    fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, lecroy9400.tio );
+    fsc2_tcflush( lecroy9400.device, TCIOFLUSH );
+    fsc2_tcsetattr( lecroy9400.device, TCSANOW, lecroy9400.tio );
 
     /* Set up the device to not echo characters */
 
@@ -821,7 +821,8 @@ static bool
 lecroy9400_write( const char * buffer,
                   long         length )
 {
-    if ( fsc2_serial_write( SERIAL_PORT, buffer, length, 0, SET ) != length )
+    if ( fsc2_serial_write( lecroy9400.device, buffer, length,
+                            0, SET ) != length )
     {
         if ( length == 0 )
             stop_on_user_request( );
@@ -838,7 +839,7 @@ static bool
 lecroy9400_read( char * buffer,
                  long * length )
 {
-    if ( ( *length = fsc2_serial_read( SERIAL_PORT, buffer, *length, NULL,
+    if ( ( *length = fsc2_serial_read( lecroy9400.device, buffer, *length, NULL,
                                        0, UNSET ) ) <= 0 )
     {
         if ( *length == 0 )

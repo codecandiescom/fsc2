@@ -94,7 +94,7 @@ spex_cd2a_init( void )
     {
         TRY
         {
-            fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
+            fsc2_tcflush( spex_cd2a.sn, TCIOFLUSH );
             spex_cd2a_write( PARAMETER, "TYB" );
             TRY_SUCCESS;
         }
@@ -435,7 +435,7 @@ spex_cd2a_open( void )
        controlling terminal, otherwise line noise read as a CTRL-C might kill
        the program. */
 
-    if ( ( spex_cd2a.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+    if ( ( spex_cd2a.tio = fsc2_serial_open( spex_cd2a.sn,
                           O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
     {
         print( FATAL, "Can't open device file for monochromator.\n" );
@@ -458,7 +458,7 @@ spex_cd2a_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( spex_cd2a.sn );
             print( FATAL, "Invalid setting for parity bit in "
                    "configuration file for the device.\n" );
             SPEX_CD2A_THROW( EXCEPTION );
@@ -474,7 +474,7 @@ spex_cd2a_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( spex_cd2a.sn );
             print( FATAL, "Invalid setting for number of stop bits in "
                    "configuration file for the device.\n" );
             SPEX_CD2A_THROW( EXCEPTION );
@@ -499,7 +499,7 @@ spex_cd2a_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( spex_cd2a.sn );
             print( FATAL, "Invalid setting for number of bits per "
                    "in character configuration file for the device.\n" );
             SPEX_CD2A_THROW( EXCEPTION );
@@ -517,8 +517,8 @@ spex_cd2a_open( void )
 
     spex_cd2a.tio->c_lflag = 0;
 
-    fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, spex_cd2a.tio );
+    fsc2_tcflush( spex_cd2a.sn, TCIOFLUSH );
+    fsc2_tcsetattr( spex_cd2a.sn, TCSANOW, spex_cd2a.tio );
 
 #endif
 
@@ -572,7 +572,7 @@ spex_cd2a_write( int          type,
     if ( type == COMMAND )
         fsc2_usleep( 10000, UNSET );
 
-    if ( ( written = fsc2_serial_write( SERIAL_PORT, tmx, len, 0, UNSET ) )
+    if ( ( written = fsc2_serial_write( spex_cd2a.sn, tmx, len, 0, UNSET ) )
          <= 0 )
     {
         T_free( tmx );
@@ -607,13 +607,13 @@ spex_cd2a_read_ack( void )
        good reasons (at least in contrast to what's written in the manual) */
 
     do {
-        if ( ( received = fsc2_serial_read( SERIAL_PORT, buf, 1, NULL,
+        if ( ( received = fsc2_serial_read( spex_cd2a.sn, buf, 1, NULL,
                                             1000000, UNSET ) ) <= 0 )
             spex_cd2a_comm_fail( );
     } while ( *buf == CAN );
 
     if (    *buf != NAK
-         && ( received = fsc2_serial_read( SERIAL_PORT, buf + 1, 1, NULL,
+         && ( received = fsc2_serial_read( spex_cd2a.sn, buf + 1, 1, NULL,
                                            1000000, UNSET ) ) <= 0 )
         spex_cd2a_comm_fail( );
 
@@ -647,7 +647,7 @@ spex_cd2a_read_ack( void )
 
         while ( len > 0 )
         {
-            if ( ( received = fsc2_serial_read( SERIAL_PORT, buf + count + 2,
+            if ( ( received = fsc2_serial_read( spex_cd2a.sn, buf + count + 2,
                                                 len - count, NULL,
                                                 1000000, UNSET ) )
                  <= 0 )
@@ -691,7 +691,7 @@ spex_cd2a_read_mess( ssize_t to_be_read )
         old_already_read = already_read;
 
         if ( ( already_read +=
-               				fsc2_serial_read( SERIAL_PORT, buf + already_read,
+               				fsc2_serial_read( spex_cd2a.sn, buf + already_read,
                                               to_be_read - already_read, NULL,
                                               1000000, UNSET ) ) < 0 )
             spex_cd2a_comm_fail( );
@@ -896,7 +896,7 @@ void
 spex_cd2a_close( void )
 {
     if ( spex_cd2a.is_open )
-        fsc2_serial_close( SERIAL_PORT );
+        fsc2_serial_close( spex_cd2a.sn );
     spex_cd2a.is_open = UNSET;
 }
 

@@ -75,19 +75,18 @@ static int hjs_daadc_in_out( int out );
 static void hjs_daadc_comm_failure( void );
 
 
-struct HJS_DAADC {
-    bool is_open;
-    struct termios *tio;    /* serial port terminal interface structure */
-    double max_volts;
-    double volts_out;
-    bool is_volts_out;
-    int out_val;
+static struct {
+    int              sn;
+    bool             is_open;
+    struct termios * tio;    /* serial port terminal interface structure */
+    double           max_volts;
+    double           volts_out;
+    bool             is_volts_out;
+    int              out_val;
 
-    char *dac_reserved_by;
-    char *adc_reserved_by;
-};
-
-struct HJS_DAADC hjs_daadc, hjs_daadc_stored;
+    char           * dac_reserved_by;
+    char           * adc_reserved_by;
+} hjs_daadc, hjs_daadc_stored;
 
 
 /*-------------------------------------------*/
@@ -103,7 +102,7 @@ struct HJS_DAADC hjs_daadc, hjs_daadc_stored;
 int
 hjs_daadc_init_hook( void )
 {
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    hjs_daadc.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
     hjs_daadc.is_open   = UNSET;
     hjs_daadc.out_val   = DEF_OUT_VAL;
@@ -182,8 +181,11 @@ int
 hjs_daadc_end_of_exp_hook( void )
 {
     if ( hjs_daadc.is_open )
-        fsc2_serial_close( SERIAL_PORT );
-    hjs_daadc.is_open = UNSET;
+    {
+        fsc2_serial_close( hjs_daadc.sn );
+        hjs_daadc.is_open = UNSET;
+    }
+
     return 1;
 }
 
@@ -651,7 +653,7 @@ hjs_daadc_val_to_ad_volts( int val )
 static bool
 hjs_daadc_serial_init( void )
 {
-    if ( ( hjs_daadc.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+    if ( ( hjs_daadc.tio = fsc2_serial_open( hjs_daadc.sn,
                                  O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) )
          == NULL )
         return FAIL;
@@ -667,8 +669,8 @@ hjs_daadc_serial_init( void )
     cfsetispeed( hjs_daadc.tio, SERIAL_BAUDRATE );
     cfsetospeed( hjs_daadc.tio, SERIAL_BAUDRATE );
 
-    fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, hjs_daadc.tio );
+    fsc2_tcflush( hjs_daadc.sn, TCIOFLUSH );
+    fsc2_tcsetattr( hjs_daadc.sn, TCSANOW, hjs_daadc.tio );
 
     return OK;
 }
@@ -724,8 +726,8 @@ hjs_daadc_in_out( int out )
        cosmetics ;-). The data from the ADC should have arrived within
        20 ms. */
 
-    if (    fsc2_serial_write( SERIAL_PORT, out_bytes, 4, 0, UNSET ) != 4
-         || fsc2_serial_read( SERIAL_PORT, in_bytes, 4, NULL,
+    if (    fsc2_serial_write( hjs_daadc.sn, out_bytes, 4, 0, UNSET ) != 4
+         || fsc2_serial_read( hjs_daadc.sn, in_bytes, 4, NULL,
                               20000, UNSET ) != 4 )
         hjs_daadc_comm_failure( );
 

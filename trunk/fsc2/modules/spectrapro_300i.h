@@ -35,6 +35,7 @@
 
 
 struct SPECTRAPRO_300I {
+    int sn;
     bool is_needed;         /* is the monochromator needed at all? */
     bool is_open;           /* is the device file open ? */
     struct termios *tio;    /* serial port terminal interface structure */

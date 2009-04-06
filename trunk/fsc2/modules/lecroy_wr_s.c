@@ -72,7 +72,7 @@ lecroy_wr_s_init_hook( void )
 
     /* Claim the serial port (throws exception on failure) */
 
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    lecroy_wr.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
     /* Initialize some variables in the digitizers structure */
 

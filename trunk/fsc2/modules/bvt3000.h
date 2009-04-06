@@ -65,13 +65,14 @@
 
 
 typedef struct {
-	bool             is_open;
     double           setpoint;
     double           min_setpoint;
     double           max_setpoint;
     double           heater_power_limit;
     double           heater_power;
     double           flow_rate;
+    int              sn;
+	bool             is_open;
     struct termios * tio;
 } BVT3000;
 

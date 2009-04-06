@@ -91,22 +91,23 @@ static bool er035m_sas_comm( int type,
 static void er035m_sas_comm_fail( void );
 
 
-struct NMR {
-    bool is_needed;         /* is the gaussmter needed at all? */
-    int state;              /* current state of the gaussmeter */
-    double field;           /* last measured field */
-    int resolution;         /* set to either RES_VERY_LOW = 0.1 G,
-                               RES_LOW = 0.01 G or RES_HIGH = 0.001 G */
-    struct termios *tio;    /* serial port terminal interface structure */
-    char prompt;            /* prompt character send on each reply */
-    int probe_orientation;
-    int probe_type;
-    long upper_search_limit;
-    long lower_search_limit;
-};
+static struct {
+    bool             is_needed;  /* is the gaussmter needed at all? */
+    int              state;      /* current state of the gaussmeter */
+    double           field;      /* last measured field */
+    int              resolution; /* set to either RES_VERY_LOW = 0.1 G,
+									RES_LOW = 0.01 G or RES_HIGH = 0.001 G */
+	int              sn;
+    struct termios * tio;        /* serial port terminal interface structure */
+    char             prompt;     /* prompt character send on each reply */
+    int              probe_orientation;
+    int              probe_type;
+    long             upper_search_limit;
+    long             lower_search_limit;
+} nmr, nmr_stored;
 
-static struct NMR nmr, nmr_stored;
 static const char *er035m_sas_eol = "\r\n";
+
 static double res_list[ 3 ] = { 0.1, 0.01, 0.001 };
 
 enum {
@@ -141,8 +142,8 @@ enum {
 #define PROBE_TYPE_F1 1
 
 
-long upper_search_limits[ 2 ] = { 2400, 20000 };
-long lower_search_limits[ 2 ] = { 450, 1450 };
+static long upper_search_limits[ 2 ] = { 2400, 20000 };
+static long lower_search_limits[ 2 ] = { 450, 1450 };
 
 
 enum {
@@ -179,7 +180,7 @@ er035m_sas_init_hook( void )
 {
     /* Claim the serial port (throws exception on failure) */
 
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    nmr.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
     nmr.is_needed = SET;
     nmr.state = ER035M_SAS_UNKNOWN;
@@ -1138,7 +1139,7 @@ er035m_sas_comm( int type,
                should not become the controlling terminal, otherwise line
                noise read as a CTRL-C might kill the program. */
 
-            if ( ( nmr.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+            if ( ( nmr.tio = fsc2_serial_open( nmr.sn,
                           O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
                 return FAIL;
 
@@ -1154,13 +1155,13 @@ er035m_sas_comm( int type,
             nmr.tio->c_iflag = IGNBRK;
             nmr.tio->c_oflag = 0;
             nmr.tio->c_lflag = 0;
-            fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-            fsc2_tcsetattr( SERIAL_PORT, TCSANOW, nmr.tio );
+            fsc2_tcflush( nmr.sn, TCIOFLUSH );
+            fsc2_tcsetattr( nmr.sn, TCSANOW, nmr.tio );
             break;
 
         case SERIAL_EXIT :
             er035m_sas_write( "LOC" );
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( nmr.sn );
             break;
 
         case SERIAL_WRITE :
@@ -1169,7 +1170,7 @@ er035m_sas_comm( int type,
             va_end( ap );
 
             len = strlen( buf );
-            if ( fsc2_serial_write( SERIAL_PORT, buf, len, 0, SET ) != len )
+            if ( fsc2_serial_write( nmr.sn, buf, len, 0, SET ) != len )
             {
                 if ( len == 0 )
                     stop_on_user_request( );
@@ -1191,7 +1192,7 @@ er035m_sas_comm( int type,
             /* Try to read from the gaussmeter, give it up to 2 seconds time
                to respond */
 
-            if ( ( len = fsc2_serial_read( SERIAL_PORT, buf, *lptr, NULL,
+            if ( ( len = fsc2_serial_read( nmr.sn, buf, *lptr, NULL,
                                          10 * ER035M_SAS_WAIT, UNSET ) ) <= 0 )
             {
                 if ( len == 0 )

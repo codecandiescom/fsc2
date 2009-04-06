@@ -81,6 +81,7 @@ static void fsps25_wrong_data( void );
 
 
 typedef struct {
+    int              sn;
 	bool             is_open;
 	bool             is_expert_mode;
 	int              state;
@@ -101,7 +102,7 @@ typedef struct {
     struct termios * tio;         /* serial port terminal interface structure */
 } FSPS25;
 
-FSPS25 fsps25, fsps25_stored;
+static FSPS25 fsps25, fsps25_stored;
 
 #define RESPONSE_TIME          50000    /* 50 ms (for "normal commands) */
 
@@ -146,7 +147,7 @@ fsps25_init_hook( void )
 {
     /* Claim the serial port (throws exception on failure) */
 
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    fsps25.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
 	fsps25.is_open = UNSET;
 	fsps25.state = STATE_OFF;
@@ -209,7 +210,7 @@ fsps25_end_of_exp_hook( void )
         if ( fsps25.heater_state == HEATER_FAIL )
             fsps25_off( );
 
-        fsc2_serial_close( SERIAL_PORT );
+        fsc2_serial_close( fsps25.sn );
         fsps25.is_open = UNSET;
     }
 
@@ -707,7 +708,7 @@ fsps25_on( void )
     if ( fsps25.state == STATE_ON || fsps25.state == STATE_PFAIL )
         return;
 
-	if ( fsc2_serial_write( SERIAL_PORT, "ON!\r", 4,
+	if ( fsc2_serial_write( fsps25.sn, "ON!\r", 4,
 							RESPONSE_TIME, UNSET ) != 4 )
 		fsps25_comm_fail( );
 
@@ -771,9 +772,9 @@ fsps25_off( void )
 
 	/* Send it the command to shut down */
 
-	if (    fsc2_serial_write( SERIAL_PORT, "DSD!\r", 5,
-							   RESPONSE_TIME, UNSET ) != 5
-         || fsc2_serial_read( SERIAL_PORT, buf, 5, "\r",
+	if (    fsc2_serial_write( fsps25.sn, "DSD!\r", 5,
+                               RESPONSE_TIME, UNSET ) != 5
+         || fsc2_serial_read( fsps25.sn, buf, 5, "\r",
 							  RESPONSE_TIME, UNSET ) != 5
          || buf[ 4 ] != '\r' )
 		fsps25_comm_fail( );
@@ -818,7 +819,7 @@ fsps25_off( void )
 static void
 fsps25_get_state( void )
 {
-	if ( fsc2_serial_write( SERIAL_PORT, "GCS?\r", 5, RESPONSE_TIME,
+	if ( fsc2_serial_write( fsps25.sn, "GCS?\r", 5, RESPONSE_TIME,
                             UNSET ) != 5 )
         fsps25_comm_fail( );
 
@@ -872,7 +873,7 @@ fsps25_read_state( void )
           STATE_PFAIL, STOPPED, HEATER_FAIL, UNMATCHED },
     };
 
-    if ( ( count = fsc2_serial_read( SERIAL_PORT, buf, sizeof buf, "\r",
+    if ( ( count = fsc2_serial_read( fsps25.sn, buf, sizeof buf, "\r",
                                      RESPONSE_TIME, UNSET ) ) <= 0 )
         fsps25_comm_fail( );
 
@@ -923,8 +924,8 @@ fsps25_get_heater_state( void )
         return fsps25.heater_state;
 
 
-	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-         || fsc2_serial_read( SERIAL_PORT, buf, 6, "\r",
+	if (    fsc2_serial_write( fsps25.sn, buf, 5, RESPONSE_TIME, UNSET ) != 5
+         || fsc2_serial_read( fsps25.sn, buf, 6, "\r",
                               RESPONSE_TIME, UNSET ) <= 0 )
 		fsps25_comm_fail( );
 
@@ -1012,7 +1013,7 @@ fsps25_set_heater_state( int state )
 		}
 	}
 
-	if ( fsc2_serial_write( SERIAL_PORT, state ? "AHS 1;\r" : "AHS 0;\r", 7,
+	if ( fsc2_serial_write( fsps25.sn, state ? "AHS 1;\r" : "AHS 0;\r", 7,
                             RESPONSE_TIME, UNSET ) != 7 )
 		fsps25_comm_fail( );
 
@@ -1065,7 +1066,7 @@ fsps25_set_heater_state( int state )
 static void
 fsps25_set_expert_mode( bool state )
 {
-	if ( fsc2_serial_write( SERIAL_PORT, state ? "SEM 1;\r" : "SEM 0\r", 7,
+	if ( fsc2_serial_write( fsps25.sn, state ? "SEM 1;\r" : "SEM 0\r", 7,
                             RESPONSE_TIME, UNSET ) != 7 )
 		fsps25_comm_fail( );
 
@@ -1100,8 +1101,8 @@ fsps25_abort_sweep( void )
 		return OK;
 	}
 
-	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-         || fsc2_serial_read( SERIAL_PORT, buf, 5, "\r",
+	if (    fsc2_serial_write( fsps25.sn, buf, 5, RESPONSE_TIME, UNSET ) != 5
+         || fsc2_serial_read( fsps25.sn, buf, 5, "\r",
                               RESPONSE_TIME, UNSET ) < 4 )
 		fsps25_comm_fail( );
 
@@ -1155,8 +1156,8 @@ fsps25_get_act_current( void )
          || ! fsps25.act_current_need_request )
 		return fsps25.act_current;
 
-	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-         || fsc2_serial_read( SERIAL_PORT, buf, 11, "\r",
+	if (    fsc2_serial_write( fsps25.sn, buf, 5, RESPONSE_TIME, UNSET ) != 5
+         || fsc2_serial_read( fsps25.sn, buf, 11, "\r",
                               RESPONSE_TIME, UNSET ) != 11 )
 		fsps25_comm_fail( );
 
@@ -1226,7 +1227,7 @@ fsps25_set_act_current( long current )
     }
 
 	sprintf( buf, "GTC %+06ld;\r", current );
-	if ( fsc2_serial_write( SERIAL_PORT, buf, 12, RESPONSE_TIME, UNSET ) != 12 )
+	if ( fsc2_serial_write( fsps25.sn, buf, 12, RESPONSE_TIME, UNSET ) != 12 )
 		fsps25_comm_fail( );
 		
 	if ( ! fsps25_get_command_reply( ) )
@@ -1356,8 +1357,8 @@ fsps25_get_super_current( void )
          || ! fsps25.super_current_need_request )
 		return fsps25.super_current;
 
-	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-         || fsc2_serial_read( SERIAL_PORT, buf, 11, "\r",
+	if (    fsc2_serial_write( fsps25.sn, buf, 5, RESPONSE_TIME, UNSET ) != 5
+         || fsc2_serial_read( fsps25.sn, buf, 11, "\r",
                               RESPONSE_TIME, UNSET ) != 11 )
 		fsps25_comm_fail( );
 
@@ -1406,8 +1407,8 @@ fsps25_get_max_current( void )
 	if ( FSC2_MODE != EXPERIMENT )
 		return fsps25.max_current;
 
-	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-         || fsc2_serial_read( SERIAL_PORT, buf, 10, "\r",
+	if (    fsc2_serial_write( fsps25.sn, buf, 5, RESPONSE_TIME, UNSET ) != 5
+         || fsc2_serial_read( fsps25.sn, buf, 10, "\r",
                               RESPONSE_TIME, UNSET ) != 10 )
 		fsps25_comm_fail( );
 
@@ -1480,7 +1481,7 @@ fsps25_set_max_current( long current )
 
     sprintf( buf, "SMC %05ld;\r", current );
 
-    if ( fsc2_serial_write( SERIAL_PORT, buf, 11,
+    if ( fsc2_serial_write( fsps25.sn, buf, 11,
                             RESPONSE_TIME, UNSET ) != 11 )
         fsps25_comm_fail( );
 
@@ -1508,8 +1509,8 @@ fsps25_get_sweep_speed( void )
 	if ( FSC2_MODE != EXPERIMENT )
 		return fsps25.act_speed;
 
-	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-         || fsc2_serial_read( SERIAL_PORT, buf, 9, "\r",
+	if (    fsc2_serial_write( fsps25.sn, buf, 5, RESPONSE_TIME, UNSET ) != 5
+         || fsc2_serial_read( fsps25.sn, buf, 9, "\r",
                               RESPONSE_TIME, UNSET ) != 9 )
 		fsps25_comm_fail( );
 
@@ -1546,7 +1547,7 @@ fsps25_set_sweep_speed( long speed )
 		return fsps25.act_speed = speed;
 
 	sprintf( buf, "SAS %04ld;\r", speed );
-	if ( fsc2_serial_write( SERIAL_PORT, buf, 10, RESPONSE_TIME, UNSET ) != 10 )
+	if ( fsc2_serial_write( fsps25.sn, buf, 10, RESPONSE_TIME, UNSET ) != 10 )
 		fsps25_comm_fail( );
 
 	if ( ! fsps25_get_command_reply( ) )
@@ -1572,8 +1573,8 @@ fsps25_get_max_sweep_speed( void )
 	if ( FSC2_MODE != EXPERIMENT )
 		return fsps25.max_speed;
 
-	if (    fsc2_serial_write( SERIAL_PORT, buf, 5, RESPONSE_TIME, UNSET ) != 5
-	     || fsc2_serial_read( SERIAL_PORT, buf, 9, "\r",
+	if (    fsc2_serial_write( fsps25.sn, buf, 5, RESPONSE_TIME, UNSET ) != 5
+	     || fsc2_serial_read( fsps25.sn, buf, 9, "\r",
                               RESPONSE_TIME, UNSET ) != 9 )
 		fsps25_comm_fail( );
 
@@ -1608,7 +1609,7 @@ fsps25_set_max_sweep_speed( long max_speed )
 		return fsps25.max_speed = max_speed;
 
 	sprintf( buf, "SMS %04ld;\r", max_speed );
-	if ( fsc2_serial_write( SERIAL_PORT, buf, 10, RESPONSE_TIME, UNSET ) != 10 )
+	if ( fsc2_serial_write( fsps25.sn, buf, 10, RESPONSE_TIME, UNSET ) != 10 )
 		fsps25_comm_fail( );
 
 	if ( ! fsps25_get_command_reply( ) )
@@ -1643,7 +1644,7 @@ fsps25_open( void )
        controlling terminal, otherwise line noise read as a CTRL-C might kill
        the program. */
 
-    if ( ( fsps25.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+    if ( ( fsps25.tio = fsc2_serial_open( fsps25.sn,
                           O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
     {
         print( FATAL, "Can't open device file for power supply.\n" );
@@ -1666,7 +1667,7 @@ fsps25_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( fsps25.sn );
             print( FATAL, "Invalid setting for parity bit in "
                    "configuration file for the device.\n" );
             THROW( EXCEPTION );
@@ -1682,7 +1683,7 @@ fsps25_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( fsps25.sn );
             print( FATAL, "Invalid setting for number of stop bits in "
                    "configuration file for the device.\n" );
             THROW( EXCEPTION );
@@ -1707,7 +1708,7 @@ fsps25_open( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( fsps25.sn );
             print( FATAL, "Invalid setting for number of bits per "
                    "in character configuration file for the device.\n" );
 			THROW( EXCEPTION );
@@ -1725,8 +1726,8 @@ fsps25_open( void )
 
     fsps25.tio->c_lflag = 0;
 
-    fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, fsps25.tio );
+    fsc2_tcflush( fsps25.sn, TCIOFLUSH );
+    fsc2_tcsetattr( fsps25.sn, TCSANOW, fsps25.tio );
 
 #endif
 
@@ -1744,7 +1745,7 @@ fsps25_get_command_reply( void )
 {
 	char reply[ 2 ];
 
-	if ( fsc2_serial_read( SERIAL_PORT, reply, 2, "\r",
+	if ( fsc2_serial_read( fsps25.sn, reply, 2, "\r",
                            RESPONSE_TIME, UNSET ) != 2 )
 		fsps25_comm_fail( );
 

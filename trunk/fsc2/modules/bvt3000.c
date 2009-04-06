@@ -45,7 +45,7 @@ bvt3000_init_hook( void )
 {
     /* Claim the serial port (throws exception on failure) */
 
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    bvt3000.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
     bvt3000.is_open            = UNSET;
     bvt3000.setpoint           = TEST_SETPOINT;
@@ -66,7 +66,6 @@ int
 bvt3000_exp_hook( void )
 {
 	bvt3000_init( );
-
 	return 1;
 }
 
@@ -78,7 +77,10 @@ int
 bvt3000_end_of_exp_hook( void )
 {
     if ( bvt3000.is_open )
-		fsc2_serial_close( SERIAL_PORT );
+    {
+		fsc2_serial_close( bvt3000.sn );
+        bvt3000.is_open = UNSET;
+    }
 
 	return 1;
 }

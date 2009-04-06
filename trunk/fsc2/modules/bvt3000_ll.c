@@ -39,7 +39,7 @@ bvt3000_init( void )
 
 	/* Try to open the device file */
 
-    if ( ( bvt3000.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+    if ( ( bvt3000.tio = fsc2_serial_open( bvt3000.sn,
 						   O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
     {
         print( FATAL, "Can't open device file for device.\n" );
@@ -64,7 +64,7 @@ bvt3000_init( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( bvt3000.sn );
             print( FATAL, "Invalid setting for parity bit in "
                    "configuration file for the device.\n" );
             THROW( EXCEPTION );
@@ -80,7 +80,7 @@ bvt3000_init( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( bvt3000.sn );
             print( FATAL, "Invalid setting for number of stop bits in "
                    "configuration file for the device.\n" );
             THROW( EXCEPTION );
@@ -105,7 +105,7 @@ bvt3000_init( void )
             break;
 
         default :
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( bvt3000.sn );
             print( FATAL, "Invalid setting for number of bits per character "
                    "in configuration file for the device.\n" );
 			THROW( EXCEPTION );
@@ -123,8 +123,8 @@ bvt3000_init( void )
 
     bvt3000.tio->c_lflag = 0;
 
-    fsc2_tcflush( SERIAL_PORT, TCIOFLUSH );
-    fsc2_tcsetattr( SERIAL_PORT, TCSANOW, bvt3000.tio );
+    fsc2_tcflush( bvt3000.sn, TCIOFLUSH );
+    fsc2_tcsetattr( bvt3000.sn, TCSANOW, bvt3000.tio );
 
     bvt3000.is_open = SET;
 
@@ -302,9 +302,9 @@ bvt3000_query( const char * cmd )
 	   with STX, followed by the 2-char command, then data and finally an
 	   ETX and the BCC (block check character) gets send. */
 
-    if (    fsc2_serial_write( SERIAL_PORT, buf, len,
+    if (    fsc2_serial_write( bvt3000.sn, buf, len,
 						      SERIAL_WAIT, UNSET ) != len
-         || ( len = fsc2_serial_read( SERIAL_PORT, buf, sizeof buf - 1, NULL,
+         || ( len = fsc2_serial_read( bvt3000.sn, buf, sizeof buf - 1, NULL,
 									  SERIAL_WAIT, UNSET ) ) < 5
 		 || len == sizeof buf - 1                        /* reply too long */
 		 || buf[ 0 ] != STX                              /* missing STX */
@@ -344,7 +344,7 @@ bvt3000_send_command( const char * cmd )
 
 	/* Send string and check for ACK */
 
-	if (    fsc2_serial_write( SERIAL_PORT, buf, len,
+	if (    fsc2_serial_write( bvt3000.sn, buf, len,
 							   SERIAL_WAIT, UNSET ) != len
 		 || ! bvt3000_check_ack( ) )
 		bvt3000_comm_fail( );
@@ -360,8 +360,7 @@ bvt3000_check_ack( void )
 {
 	unsigned char r;
 
-	return    fsc2_serial_read( SERIAL_PORT, &r, 1, NULL,
-								ACK_WAIT, UNSET ) == 1
+	return    fsc2_serial_read( bvt3000.sn, &r, 1, NULL, ACK_WAIT, UNSET ) == 1
 		   && r == ACK;
 }
 

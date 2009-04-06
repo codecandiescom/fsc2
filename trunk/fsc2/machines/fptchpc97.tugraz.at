@@ -8,7 +8,6 @@ GROUP              := dialout
 GPIB_LIBRARY       := SLG
 GPIB_HEADER_DIR    := /usr/local/include/gpib
 GPIB_CARD_NAME     .= "gpib0"
-NUM_SERIAL_PORTS   := 1
 SERIAL_LOCK_DIR    := /var/lock
 BROWSER            := iceweasel
 NO_MAIL            := yes

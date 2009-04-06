@@ -10,7 +10,6 @@ GPIB_CONF_FILE     := /etc/gpib.conf
 GPIB_LOG_FILE      := /tmp/fsc2_gpib.log
 GPIB_LOG_LEVEL     := HIGH
 GPIB_HEADER_DIR    := /usr/local/include/gpib
-NUM_SERIAL_PORTS   := 2
 SERIAL_LOCK_DIR    := /var/lock
 SERIAL_LOG_FILE    := /tmp/fsc2_serial.log
 SERIAL_LOG_LEVEL   := HIGH

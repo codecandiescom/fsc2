@@ -157,18 +157,18 @@ GPIB_LOG_LEVEL     := HIGH
 # GPIB_CIB_FILE      := /usr/local/src/ni488223L/driver/lib/cib.o
 
 
-# NUM_SERIAL_PORTS defines the number of serial ports that are available on
-# the computer (or how many you want to allow fsc2 to use) and defaults to 0
-# if not set (in which case no serial ports can be used).
+# WITHOUT_SERIAL_PORTS should be set if there are no serial ports (or
+# e.g. USB-serial converters on the machine. In that case modules for
+# devices controlled via serial ports are not created.
 
-NUM_SERIAL_PORTS   := 2
+# WITHOUT_SERIAL_PORTS   := yes
 
 
-# The second variable, SERIAL_LOCK_DIR, is the directory where UUCP style
-# lock files for the serial ports are created. This should be '/var/lock'
-# according to version 2.2 of the File-system Hierachy Standard. Either fsc2
-# itself or all its users must have read and write permissions for this
-# directory. Also see the longer discussion in section C of the INSTALL file.
+# The variable, SERIAL_LOCK_DIR, is the directory where UUCP style lockfiles
+# for the serial ports are created. This should be '/var/lock' according to
+# version 2.2 of the File-system Hierachy Standard. Either fsc2 itself or all
+# its users must have read and write permissions for this directory. Also see
+# the longer discussion in section C of the INSTALL file.
 
 SERIAL_LOCK_DIR    := /var/lock
 
@@ -702,36 +702,34 @@ endif
 
 # Make sure settings for the serial ports are reasonable
 
-ifdef NUM_SERIAL_PORTS
-	CONFFLAGS += -DNUM_SERIAL_PORTS=$(patsubst % ,%,$(NUM_SERIAL_PORTS))
+ifdef WITHOUT_SERIAL_PORTS
+	CONFFLAGS += -DWITHOUT_SERIAL_PORTS
 else
-	CONFFLAGS += -DNUM_SERIAL_PORTS=0
-endif
+	ifdef SERIAL_LOCK_DIR
+		CONFFLAGS += -DSERIAL_LOCK_DIR=\"$(patsubst % ,%,$(SERIAL_LOCK_DIR))\"
+	endif
 
-ifdef SERIAL_LOCK_DIR
-	CONFFLAGS += -DSERIAL_LOCK_DIR=\"$(patsubst % ,%,$(SERIAL_LOCK_DIR))\"
-endif
-
-ifdef SERIAL_LOG_FILE
-	CONFFLAGS += -DSERIAL_LOG_FILE=\"$(patsubst % ,%,$(SERIAL_LOG_FILE))\"
-else
-	CONFFLAGS += -DSERIAL_LOG_FILE=\"/tmp/fsc2_serial.log\"
-endif
-
-ifdef SERIAL_LOG_LEVEL
-	SERIAL_LOG_FILE = $(patsubst % ,%,$(SERIAL_LOG_LEVEL))
-endif
-
-ifeq ($(SERIAL_LOG_LEVEL),HIGH)
-	CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_ALL
-else
-	ifeq ($(SERIAL_LOG_LEVEL),MEDIUM)
-		CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_CE
+	ifdef SERIAL_LOG_FILE
+		CONFFLAGS += -DSERIAL_LOG_FILE=\"$(patsubst % ,%,$(SERIAL_LOG_FILE))\"
 	else
-		ifeq ($(SERIAL_LOG_LEVEL),OFF)
-			CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_NONE
+		CONFFLAGS += -DSERIAL_LOG_FILE=\"/tmp/fsc2_serial.log\"
+	endif
+
+	ifdef SERIAL_LOG_LEVEL
+		SERIAL_LOG_FILE = $(patsubst % ,%,$(SERIAL_LOG_LEVEL))
+	endif
+
+	ifeq ($(SERIAL_LOG_LEVEL),HIGH)
+		CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_ALL
+	else
+		ifeq ($(SERIAL_LOG_LEVEL),MEDIUM)
+			CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_CE
 		else
-			CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_ERR
+			ifeq ($(SERIAL_LOG_LEVEL),OFF)
+				CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_NONE
+			else
+				CONFFLAGS += -DSERIAL_LOG_LEVEL=LL_ERR
+			endif
 		endif
 	endif
 endif

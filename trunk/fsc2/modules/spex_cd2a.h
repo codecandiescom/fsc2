@@ -145,6 +145,7 @@ struct Spex_CD2A {
     double shutter_high_limit;      /* wavelength in m */
     bool shutter_limits_are_set;
 
+    int sn;
     struct termios *tio;            /* serial port terminal interface
                                        structure */
 

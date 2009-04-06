@@ -19,7 +19,6 @@ else
 endif
 
 BROWSER            := mozilla
-NUM_SERIAL_PORTS   := 1
 SERIAL_LOCK_DIR    := /var/lock
 WITH_RULBUS        := yes
 rulbus_incl_path   := /usr/local/include

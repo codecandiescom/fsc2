@@ -62,7 +62,7 @@ static double magnet_goto_field( double field );
 static bool magnet_do( int command );
 
 
-struct MAGNET {
+static struct {
     double start_field;     /* the start field given by the user */
     double field_step;      /* the field steps to be used */
 
@@ -77,12 +77,10 @@ struct MAGNET {
     double field;           /* used internally */
     int DAC_value;
 
+    int sn;
     bool is_opened;
     struct termios *tio;    /* serial port terminal interface structures */
-};
-
-
-static struct MAGNET magnet, magnet_saved;
+} magnet, magnet_saved;
 
 
 enum {
@@ -113,7 +111,7 @@ s_band_magnet_tmpl_init_hook( void )
 {
     /* Claim the serial port (throws an exception on errors) */
 
-    fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+    magnet.sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
 
     /* Finally initialize some variables */
 
@@ -638,7 +636,7 @@ magnet_do( int command )
                should not become the controlling terminal, otherwise line
                noise read as a CTRL-C might kill the program. */
 
-            if ( ( magnet.tio = fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+            if ( ( magnet.tio = fsc2_serial_open( magnet.sn,
                         O_WRONLY | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
                 return FAIL;
 
@@ -649,8 +647,8 @@ magnet_do( int command )
             cfsetispeed( magnet.tio, SERIAL_BAUDRATE );
             cfsetospeed( magnet.tio, SERIAL_BAUDRATE );
 
-            fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
-            fsc2_tcsetattr( SERIAL_PORT, TCSANOW, magnet.tio );
+            fsc2_tcflush( magnet.sn, TCIFLUSH );
+            fsc2_tcsetattr( magnet.sn, TCSANOW, magnet.tio );
             break;
 
         case SERIAL_VOLTAGE :                 /* send voltage data pattern */
@@ -659,11 +657,11 @@ magnet_do( int command )
                   ( ( magnet.DAC_value >> 3 ) & 0x10 ) );
             data[ 1 ] = ( unsigned char ) ( 0x80 |
                                             ( magnet.DAC_value & 0x07F ) );
-            fsc2_serial_write( SERIAL_PORT, data, 2, 0, SET );
+            fsc2_serial_write( magnet.sn, data, 2, 0, SET );
             break;
 
         case SERIAL_EXIT :                    /* reset and close serial port */
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( magnet.sn );
             break;
 
         default :

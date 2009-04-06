@@ -1360,7 +1360,7 @@ spectrapro_300i_comm( int type,
                noise read as CTRL-C might kill the program. */
 
             if ( ( spectrapro_300i.tio =
-                        fsc2_serial_open( SERIAL_PORT, DEVICE_NAME,
+                        fsc2_serial_open( spectrapro_300i.sn,
                           O_RDWR | O_EXCL | O_NOCTTY | O_NONBLOCK ) ) == NULL )
                 return FAIL;
 
@@ -1375,12 +1375,12 @@ spectrapro_300i_comm( int type,
             cfsetispeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
             cfsetospeed( spectrapro_300i.tio, SERIAL_BAUDRATE );
 
-            fsc2_tcflush( SERIAL_PORT, TCIFLUSH );
-            fsc2_tcsetattr( SERIAL_PORT, TCSANOW, spectrapro_300i.tio );
+            fsc2_tcflush( spectrapro_300i.sn, TCIFLUSH );
+            fsc2_tcsetattr( spectrapro_300i.sn, TCSANOW, spectrapro_300i.tio );
             break;
 
         case SERIAL_EXIT :                    /* reset and close serial port */
-            fsc2_serial_close( SERIAL_PORT );
+            fsc2_serial_close( spectrapro_300i.sn );
             break;
 
         case SERIAL_WRITE :
@@ -1389,7 +1389,8 @@ spectrapro_300i_comm( int type,
             va_end( ap );
 
             len = strlen( buf );
-            if ( fsc2_serial_write( SERIAL_PORT, buf, len, 0, UNSET ) != len )
+            if ( fsc2_serial_write( spectrapro_300i.sn, buf, len,
+                                    0, UNSET ) != len )
                 return FAIL;
             break;
 
@@ -1399,7 +1400,7 @@ spectrapro_300i_comm( int type,
             lptr = va_arg( ap, size_t * );
             va_end( ap );
 
-            len = fsc2_serial_read( SERIAL_PORT, buf, *lptr, NULL,
+            len = fsc2_serial_read( spectrapro_300i.sn, buf, *lptr, NULL,
                                     SPECTRAPRO_300I_WAIT, UNSET );
             if ( len < 0 )
                 return FAIL;
