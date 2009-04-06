@@ -25,8 +25,8 @@
 #include <dlfcn.h>
 #include <execinfo.h>
 #include "fsc2.h"
-#include "serial.h"
 #include "gpib_if.h"
+#include "serial.h"
 
 #if defined WITH_RULBUS
 #include <rulbus.h>
@@ -293,7 +293,6 @@ start_gpib_and_rulbus( void )
     }
 #endif
 
-
 #if defined WITH_LIBUSB
     /* If there are devices that are controlled via USB initialize library */
 
@@ -309,7 +308,9 @@ start_gpib_and_rulbus( void )
     }
 #endif
 
+#if ! defined WITHOUT_SERIAL_PORTS
     fsc2_serial_exp_init( SERIAL_LOG_FILE, SERIAL_LOG_LEVEL );
+#endif
 
     if ( Need_LAN )
         fsc2_lan_exp_init( LAN_LOG_FILE, LAN_LOG_LEVEL );
@@ -335,7 +336,9 @@ start_gpib_and_rulbus( void )
             if ( Need_LAN )
                 fsc2_lan_cleanup( );
 
+#if ! defined WITHOUT_SERIAL_PORTS
             fsc2_serial_cleanup( );
+#endif
 
 #if defined WITH_RULBUS
             if ( Need_RULBUS )
@@ -428,7 +431,9 @@ no_prog_to_run( void )
     if ( Need_LAN )
         fsc2_lan_cleanup( );
 
+#if ! defined WITHOUT_SERIAL_PORTS
     fsc2_serial_cleanup( );
+#endif
 
 #if defined WITH_RULBUS
     if ( Need_RULBUS )
@@ -552,7 +557,9 @@ init_devs_and_graphics( void )
         }
 #endif
 
+#if ! defined WITHOUT_SERIAL_PORTS
         fsc2_serial_cleanup( );
+#endif
 
         if ( Need_LAN )
             fsc2_lan_cleanup( );
@@ -699,7 +706,9 @@ fork_failure( int stored_errno )
     if ( Need_LAN )
         fsc2_lan_cleanup( );
 
+#if ! defined WITHOUT_SERIAL_PORTS
     fsc2_serial_cleanup( );
+#endif
 
 #if defined WITH_RULBUS
     if ( Need_RULBUS )
@@ -1019,7 +1028,9 @@ run_sigchld_callback( FL_OBJECT * a,
     if ( Need_LAN )
         fsc2_lan_cleanup( );
 
+#if ! defined WITHOUT_SERIAL_PORTS
     fsc2_serial_cleanup( );
+#endif
 
 #if defined WITH_RULBUS
     if ( Need_RULBUS )

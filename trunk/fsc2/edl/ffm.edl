@@ -38,9 +38,9 @@ GRACE_PERIOD: 10ns;
 
 PHASES:
 
-PHASE_SEQUENCE_1     = -y,x,-y,-y;
-PHASE_SEQUENCE_2     = x,x,x,-y;
-ACQUISITION_SEQUENCE = +,-,-,+;
+PHASE_SEQUENCE_1     = -y, x, -y, -y;
+PHASE_SEQUENCE_2     = x, x, x, -y;
+ACQUISITION_SEQUENCE = +, -, -, +;
 
 
 PREPARATIONS:

@@ -504,7 +504,7 @@ rs690_set_phase_reference( int phs,
     Function_T *f;
 
 
-    fsc2_assert ( Cur_PHS == - 1 || Cur_PHS == phs );
+    fsc2_assert( Cur_PHS == - 1 || Cur_PHS == phs );
     Cur_PHS = phs;
 
     /* Phase function can't be used with this driver... */

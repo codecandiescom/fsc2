@@ -45,6 +45,8 @@
 #endif
 
 
+#if ! defined WITHOUT_SERIAL_PORTS
+
 static struct {
     char           * dev_file;
     char           * dev_name;
@@ -59,6 +61,7 @@ static struct {
 static int Num_Serial_Ports = 0;
 
 static int ll;                       /* log level                            */
+
 static FILE *fsc2_serial_log = NULL; /* file pointer of serial port log file */
 
 
@@ -91,7 +94,6 @@ int
 fsc2_request_serial_port( const char * dev_file,
                           const char * dev_name )
 {
-#if ! defined WITHOUT_SERIAL_PORTS
     int i;
 
 
@@ -166,14 +168,6 @@ fsc2_request_serial_port( const char * dev_file,
 #endif
 
 	return Num_Serial_Ports++;
-#else
-    eprint( FATAL, UNSET, "%s: Device needs serial port '%s' but fsc2 was "
-            "not compiled with support for serial port access.\n",
-            dev_name, dev_file );
-    THROW( EXCEPTION );
-
-	return -1;
-#endif
 }
 
 
@@ -1387,6 +1381,153 @@ fsc2_serial_log_message( const char * fmt,
     lower_permissions( );
 }
 
+#else
+
+/* Here follow dummy functions for the case that fsc2 was compiled without
+   support for serial ports. They are needed for the case that from a previous
+   install meodules using the serial port still exist - an attempt to load
+   these outdated modules would result in a failure with an error message
+   telling that fsc2 is missing some serial port functions without an
+   explanation that they aren't compiled in anymore. By supplying dummy
+   functions loading these modules still works but once they try to call a
+   function needing a serial port they fail with a error message the user can
+   understand, i.e. one that tells him/her that fsc2 was compiled without
+   support for serial ports... */
+
+int
+fsc2_request_serial_port( const char * dev_file  UNUSED_ARG,
+                          const char * dev_name )
+{
+    eprint( FATAL, UNSET, "Module for device '%s' requires support "
+            "for serial ports but fsc2 was compiled without.\n", dev_name );
+    THROW( EXCEPTION );
+
+    return -1;
+}
+
+struct termios *
+fsc2_serial_open( int          sn        UNUSED_ARG,
+                  int          flags     UNUSED_ARG )
+{
+    eprint( FATAL, UNSET, "Module for device '%s' requires support "
+            "for serial ports but fsc2 was compiled without.\n", dev_name );
+    THROW( EXCEPTION );
+
+    return NULL;
+}
+
+
+void
+fsc2_serial_close( int sn  UNUSED_ARG )
+{
+    eprint( FATAL, UNSET, "Module for device '%s' requires support "
+            "for serial ports but fsc2 was compiled without.\n", dev_name );
+    THROW( EXCEPTION );
+}
+
+
+ssize_t
+fsc2_serial_write( int          sn              UNUSED_ARG,
+                   const void * buf             UNUSED_ARG ,
+                   size_t       count           UNUSED_ARG,
+                   long         us_wait         UNUSED_ARG,
+                   bool         quit_on_signal  UNUSED_ARG )
+{
+    eprint( FATAL, UNSET, "Module for device '%s' requires support "
+            "for serial ports but fsc2 was compiled without.\n", dev_name );
+    THROW( EXCEPTION );
+
+    return -1;
+}
+
+
+ssize_t
+fsc2_serial_read( int          sn              UNUSED_ARG,
+                  void       * buf             UNUSED_ARG,
+                  size_t       count           UNUSED_ARG,
+                  const char * term            UNUSED_ARG,
+                  long         us_wait         UNUSED_ARG,
+                  bool         quit_on_signal  UNUSED_ARG )
+{
+    eprint( FATAL, UNSET, "Module for device '%s' requires support "
+            "for serial ports but fsc2 was compiled without.\n", dev_name );
+    THROW( EXCEPTION );
+
+    return -1;
+}
+
+
+int
+fsc2_tcgetattr( int              sn         UNUSED_ARG,
+                struct termios * termios_p  UNUSED_ARG )
+{
+    eprint( FATAL, UNSET, "Module for device '%s' requires support "
+            "for serial ports but fsc2 was compiled without.\n", dev_name );
+    THROW( EXCEPTION );
+
+    return -1;
+}
+
+
+int
+fsc2_tcsetattr( int              sn                UNUSED_ARG,
+                int              optional_actions  UNUSED_ARG,
+                struct termios * termios_p         UNUSED_ARG )
+{
+    eprint( FATAL, UNSET, "Module for device '%s' requires support "
+            "for serial ports but fsc2 was compiled without.\n", dev_name );
+    THROW( EXCEPTION );
+
+    return -1;
+}
+
+
+int
+fsc2_tcsendbreak( int sn        UNUSED_ARG,
+                  int duration  UNUSED_ARG )
+{
+    eprint( FATAL, UNSET, "Module for device '%s' requires support "
+            "for serial ports but fsc2 was compiled without.\n", dev_name );
+    THROW( EXCEPTION );
+
+    return -1;
+}
+
+
+int
+fsc2_tcdrain( int sn UNUSED_ARG )
+{
+    eprint( FATAL, UNSET, "Module for device '%s' requires support "
+            "for serial ports but fsc2 was compiled without.\n", dev_name );
+    THROW( EXCEPTION );
+
+    return -1;
+}
+
+
+int
+fsc2_tcflush( int sn              UNUSED_ARG,
+              int queue_selector  UNUSED_ARG )
+{
+    eprint( FATAL, UNSET, "Module for device '%s' requires support "
+            "for serial ports but fsc2 was compiled without.\n", dev_name );
+    THROW( EXCEPTION );
+
+    return -1;
+}
+
+int
+fsc2_tcflow( int sn      UNUSED_ARG,
+             int action  UNUSED_ARG )
+{
+    eprint( FATAL, UNSET, "Module for device '%s' requires support "
+            "for serial ports but fsc2 was compiled without.\n", dev_name );
+    THROW( EXCEPTION );
+
+    return -1;
+}
+
+#endif
 
 /*
  * Local variables:

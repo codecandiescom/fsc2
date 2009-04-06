@@ -291,7 +291,7 @@ ffc_open( void )
 static void
 ffc_comm_fail( void )
 {
-	print( FATAL, "Can't access the power supply.\n" );
+	print( FATAL, "Can't access the frequency controller.\n" );
     THROW( EXCEPTION );
 }
 

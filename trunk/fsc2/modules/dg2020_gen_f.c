@@ -534,17 +534,19 @@ dg2020_set_max_seq_len( double seq_len )
  *----------------------------------------------------*/
 
 bool
-dg2020_set_phase_reference( int phase,
+dg2020_set_phase_reference( int phs,
                             int function )
 {
-    Function_T *p, *f;
+    Function_T *p,
+               *f;
 
 
-    fsc2_assert( Cur_PHS == -1 || Cur_PHS == phase );
-    fsc2_assert( phase == 0 || phase == 1 );
-    Cur_PHS = phase;
+    fsc2_assert( Cur_PHS == -1 || Cur_PHS == phs );
+    fsc2_assert(    phs == PULSER_CHANNEL_PHASE_1
+                 || phs == PULSER_CHANNEL_PHASE_2 );
+    Cur_PHS = phs - PULSER_CHANNEL_PHASE_1;
 
-    /* The phase function can't be phase cycled... */
+    /* The phase function can't be phase cycled */
 
     if (    function == PULSER_CHANNEL_PHASE_1
          || function == PULSER_CHANNEL_PHASE_2 )
@@ -554,7 +556,7 @@ dg2020_set_phase_reference( int phase,
     }
 
     f = dg2020.function + function;
-    p = dg2020.function + phase;
+    p = dg2020.function + phs;
 
     if ( p->phase_func != NULL )
     {
@@ -583,7 +585,7 @@ dg2020_set_phase_reference( int phase,
  * channels and each of the 4 phase types has to be realized by a
  * different combination (i.e. both off, both on or one off and the
  * other on).
- * 'function' is the phase function the data are to be used for (i.e. 0
+ * 'func' is the phase function the data are to be used for (i.e. 0
  *   means PHASE_1, 1 means PHASE_2)
  * 'type' means the type of phase, see global.h (PHASE_PLUS/MINUX_X/Y)
  * 'pod' tells if the value is for the first or the second pod channel
