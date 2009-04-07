@@ -127,21 +127,6 @@ fsc2_request_serial_port( const char * dev_file,
 			THROW( EXCEPTION );
 		}
 
-    /* Preliminary check that the device file exists and we have access
-       permissions (don't try to open it yet!) */
-
-	raise_permissions( );
-
-	if ( euidaccess( dev_file, R_OK | W_OK ) )
-	{
-		lower_permissions( );
-		eprint( FATAL, UNSET, "%s: Device file '%s' does not exist or "
-                "missing permissions to access it.\n", dev_name, dev_file );
-		THROW( EXCEPTION );
-	}
-
-	lower_permissions( );
-
     /* Get memory fir another structure */
 
 	Serial_Ports = T_realloc( Serial_Ports,

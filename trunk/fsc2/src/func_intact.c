@@ -593,26 +593,25 @@ f_obj_clabel( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    /* We first need the ID of the button */
+    /* We first need the ID of the object */
 
-    if ( Fsc2_Internals.mode != TEST )
+    ID = get_strict_long( v, "object ID" );
+
+    if ( ID < ID_OFFSET )
     {
-        ID = get_strict_long( v, "object ID" );
-
-        if ( ID < ID_OFFSET )
-        {
-            print( FATAL, "Invalid object identifier.\n" );
-            THROW( EXCEPTION );
-        }
-
-        v = vars_pop( v );
+        print( FATAL, "Invalid object identifier.\n" );
+        THROW( EXCEPTION );
     }
+
+    v = vars_pop( v );
 
     if ( v->type != STR_VAR )
     {
         print( FATAL, "Second argument isn't a string.\n" );
         THROW( EXCEPTION );
     }
+
+    check_label( v->val.sptr );
 
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, 1 );

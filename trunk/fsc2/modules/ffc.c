@@ -172,7 +172,7 @@ ffc_change( int dir )
 	if (    fsc2_serial_write( ffc.sn, &data, 1, RESPONSE_TIME, UNSET ) != 1
 		 || fsc2_serial_read( ffc.sn, &data, 1, NULL,
                               RESPONSE_TIME, UNSET ) != 1
-		 || data != dir ? 'p' : 'm' )
+         || data != ( dir ? 'p' : 'm' ) )
 		ffc_comm_fail( );
 }
 
