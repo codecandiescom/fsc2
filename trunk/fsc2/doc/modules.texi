@@ -1054,9 +1054,9 @@ communication on the GPIB bus:
 void gpib_log_message( const char * fmt, ... );
 @end example
 @noindent
-It expects a format string as you would use in the @code{C printf()}
-function plus arguments corresponding to the conversion specifiers in
-the format string.
+It expects a format string like the @code{C printf()} function plus
+arguments corresponding to the conversion specifiers in the format
+string.
 
 
 @node Serial Port Handling, Handling devices connected via the LAN, Handling GPIB Devices, Writing New Modules
@@ -1073,22 +1073,19 @@ You don't need to set a special variable to advertise your intention
 of using one of them. Instead, in the init hook function you must try to
 request the serial port you need by calling the function
 @example
-sn = fsc2_request_serial_port( SERIAL_PORT, DEVICE_NAME );
+int fsc2_request_serial_port( const char * device_file,
+                              const char * device_name );
 @end example
 @noindent
-with the number of the device file for the serial port (the first
-serial port is at @file{/dev/ttyS0}, which is what's called
-@code{COM1} in DOS-speak, the second is @file{/dev/ttyS1} or for
-@code{COM2} etc.@:) as the first and the device name as the second
-argument. @code{DEVICE_NAME} is the name to be used for the device
-in log files etc.
+with the name of the device file for the serial port as the first and
+the device name as the second argument. The device name is used for
+the device in log files etc.
 
 If the requested serial port has already been claimed by a different
-device or can't be accessed (either because the device file doesn't
-exist or the program has no permissions to open it) the function will
-print an error message and stop the @code{EDL} script, so you don't
-have to deal with error handling. Otherwise it returns an @code{int}
-that in all other functions identifies the serial port.
+device or the function will print an error message and stop the
+@code{EDL} script, so you don't have to deal with error handling.
+Otherwise it returns an integer number that in calls of all other
+functions identifies the serial port.
 
 All the other function may not be called before the @code{exp_hook}
 function.
@@ -1130,6 +1127,10 @@ with their replacements:
 @findex fsc2_tcflow()
 @end table
 
+Note that all functions that normally expect a a file descriptor now
+must be called with the number returned by
+@ref{fsc2_request_serial_port()}.
+
 The only functions that are different from their normal counterparts are
 @code{fsc2_serial_open()}, @code{fsc2_serial_write()},
 @code{fsc2_serial_read()} and
@@ -1148,8 +1149,10 @@ opens the file but also creates the necessary lock file and determines
 the current communication parameter settings for the serial port.
 These are returned via a pointer to a @code{termios} structure, that
 can be freely changed within the module. If the function returns a
-@code{NULL} pointer opening the device file failed and you can
-determine the reasons by checking @code{errno}.
+@code{NULL} pointer opening the device file (or the lock file) failed
+and you can determine the reasons by checking @code{errno}. In case
+@ref{fsc2_request_serial_port()} function wasn't called before an
+exception gets thrown.
 
 @code{fsc2_serial_write()} and @code{fsc2_serial_read()} are defined as
 @example
