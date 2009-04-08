@@ -1385,6 +1385,7 @@ fsc2_serial_log_message( const char * fmt,
    user can understand, i.e. one that tells him/her that fsc2 was compiled
    without support for serial ports... */
 
+
 int
 fsc2_request_serial_port( const char * dev_file  UNUSED_ARG,
                           const char * dev_name )
@@ -1398,8 +1399,8 @@ fsc2_request_serial_port( const char * dev_file  UNUSED_ARG,
 }
 
 struct termios *
-fsc2_serial_open( int          sn        UNUSED_ARG,
-                  int          flags     UNUSED_ARG )
+fsc2_serial_open( int sn     UNUSED_ARG,
+                  int flags  UNUSED_ARG )
 {
     errno = EACCES;
     return NULL;
