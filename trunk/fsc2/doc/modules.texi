@@ -1182,13 +1182,13 @@ becoming ready for writing or reading the data. Specifying a negative
 value is interpreted to mean that you want to wait indefinitely for
 data, while a value of @code{0} for @code{us_timeout} means not to
 wait at all. Finally, @code{quit_on_signal} determines if the function
-returns immediately when a signal has been received before any data
-could be read. This might for example happen when the user pressed the
-@code{Stop} button while the function was waiting for data. For
-@code{fsc2_serial_read()} the @code{term} argument is a (optional)
-string that contains a termination sequence on which reading stops. If
-the device does not send a termination sequence at the end of the data
-simple pass a @code{NULL} pointer or an empty string to the function.
+returns immediately when a signal has been received. This might for
+example happen when the user pressed the @code{Stop} button while the
+function was waiting for data. For @code{fsc2_serial_read()} the
+@code{term} argument is a (optional) string that contains a
+termination sequence on which reading stops. If the device does not
+send a termination sequence at the end of the data simple pass a
+@code{NULL} pointer or an empty string to the function.
 
 The functions return on success the number of bytes written or read,
 @code{0} if no data could be written or read (e.g.@: because the
