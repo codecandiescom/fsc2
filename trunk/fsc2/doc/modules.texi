@@ -1072,6 +1072,8 @@ For serial ports things are handled a bit differently from GPIB devices.
 You don't need to set a special variable to advertise your intention
 of using one of them. Instead, in the init hook function you must try to
 request the serial port you need by calling the function
+@anchor{fsc2_request_serial_port()}
+@findex fsc2_request_serial_port()
 @example
 int fsc2_request_serial_port( const char * device_file,
                               const char * device_name );
@@ -1091,9 +1093,9 @@ All the other function may not be called before the @code{exp_hook}
 function.
 
 For all functions that deal directly with file descriptors for the
-serial port device files there are replacements functions. The following
-table lists all functions that are used with respect to serial ports
-with their replacements:
+serial port device files there are replacement functions. The
+following table lists all functions that are used with respect to
+serial ports with their replacements:
 @table @samp
 @item open()
 @code{fsc2_serial_open()}
