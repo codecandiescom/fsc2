@@ -38,13 +38,13 @@ Alexander Schnegg (HMI Berlin) supported the development by employing
 me to extend and improve the program and write further device drivers.
 
 Special thanks go to Anton Savitsky (Freie Universit@"at Berlin) for
-writing the module for the @w{Thurlby 330} programable power supply.
-Sergey Veber (International Tomography Center, Novosibirsk) wrote the
-the module for the @w{Schlumberger 7510} multimeter. Clinton Jermaine
-Mccrowey (California State University, Northridge) contributed the
-module for the Newport Oriel Matrix Spectrometer. Christoph
-Oelm@"uller (Freie Universit@"at Berlin) wrote the @code{EDL} mode for
-@code{vim}.
+writing the modules for the @w{Thurlby 330} and @w{F.u.E. Elektronik}
+@w{MCN 700-2000} power supplies, Sergey Veber (International
+Tomography Center, Novosibirsk), who wrote the the module for the
+@w{Schlumberger 7510} multimeter, and Clinton Jermaine Mccrowey
+(California State University, Northridge) for contributing the module
+for the Newport Oriel Matrix Spectrometer. Christoph Oelm@"uller
+(Freie Universit@"at Berlin) wrote the @code{EDL} mode for @code{vim}.
 
 All the people using the program so far have from time to time been
 (mis)used as alpha-testers. The first one accepting this unpleasant
