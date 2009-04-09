@@ -2812,8 +2812,8 @@ University Northridge)
 
 @paragraphindent 0
 @strong{Controlled via}: USB (requires
-@uref{http://libusb.wiki.sourceforge.net/,libusb v1.0} or
-@uref{http://libusb.wiki.sourceforge.net/,libusb v0.1} library)
+@uref{http://libusb.wiki.sourceforge.net/,libusb-1.0} or
+@uref{http://libusb.wiki.sourceforge.net/,libusb-0.1} library)
 
 @paragraphindent 0
 @strong{Status}: Tested (with libusb v0.1)
