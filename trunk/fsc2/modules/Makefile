@@ -185,7 +185,10 @@ endif
 
 # Support Newport Oriel MMSS spectrometer
 
-ifdef WITH_LIBUSB
+ifdef WITH_LIBUSB_0_1
+comp_modules    += oriel_matrix
+endif
+ifdef WITH_LIBUSB_1_0
 comp_modules    += oriel_matrix
 endif
 

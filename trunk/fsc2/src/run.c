@@ -36,8 +36,10 @@
 #include <medriver.h>
 #endif
 
-#if defined WITH_LIBUSB
+#if defined WITH_LIBUSB_0_1
 #include <usb.h>
+#elif defined WITH_LIBUSB_1_0
+#include <libusb-1.0/libusb.h>
 #endif
 
 
@@ -249,16 +251,7 @@ start_gpib_and_rulbus( void )
     {
         eprint( FATAL, UNSET, "Can't initialize GPIB bus: %s\n",
                 gpib_error_msg );
-
-        if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-        {
-            set_buttons_for_run( 0 );
-            fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-            XFlush( fl_get_display( ) );
-        }
-
-        Fsc2_Internals.state = STATE_IDLE;
-        return FAIL;
+        goto gpib_fail;
     }
 
 #if defined WITH_RULBUS
@@ -271,38 +264,34 @@ start_gpib_and_rulbus( void )
         if ( ( retval = rulbus_open( O_EXCL ) ) < 0 )
         {
             lower_permissions( );
-
             eprint( FATAL, UNSET, "Failed to initialize RULBUS: %s.\n",
                     rulbus_strerror( ) );
-
-            if ( Need_GPIB )
-                gpib_shutdown( );
-
-            if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-            {
-                set_buttons_for_run( 0 );
-                fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-                XFlush( fl_get_display( ) );
-            }
-
-            Fsc2_Internals.state = STATE_IDLE;
-            return FAIL;
+            goto rulbus_fail;
         }
 
         lower_permissions( );
     }
 #endif
 
-#if defined WITH_LIBUSB
+#if defined WITH_LIBUSB_0_1 || defined WITH_LIBUSB_1_0
     /* If there are devices that are controlled via USB initialize library */
 
     if ( Need_USB )
     {
         raise_permissions( );
 
+#if defined WITH_LIBUSB_0_1
         usb_init( );
         usb_find_busses( );
         usb_find_devices( );
+#else
+        if ( libusb_init( NULL ) != 0 )
+        {
+            lower_permissions( );
+            eprint( FATAL, UNSET, "Failed to initialize USB.\n" );
+            goto libusb_fail;
+        }
+#endif
 
         lower_permissions( );
     }
@@ -327,36 +316,10 @@ start_gpib_and_rulbus( void )
             char msg[ ME_ERROR_MSG_MAX_COUNT ];
 
             meErrorGetMessage( retval, msg, sizeof msg );
-
             lower_permissions( );
-
             eprint( FATAL, UNSET, "Failed to initialize Meilhaus driver: "
                     "%s\n", msg );
-
-            if ( Need_LAN )
-                fsc2_lan_cleanup( );
-
-#if ! defined WITHOUT_SERIAL_PORTS
-            fsc2_serial_cleanup( );
-#endif
-
-#if defined WITH_RULBUS
-            if ( Need_RULBUS )
-                rulbus_close( );
-#endif
-
-            if ( Need_GPIB )
-                gpib_shutdown( );
-
-            if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
-            {
-                set_buttons_for_run( 0 );
-                fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
-                XFlush( fl_get_display( ) );
-            }
-
-            Fsc2_Internals.state = STATE_IDLE;
-            return FAIL;
+            goto medriver_fail;
         }
 
         lower_permissions( );
@@ -364,6 +327,47 @@ start_gpib_and_rulbus( void )
 #endif
 
     return OK;
+
+    /* The following is for de-intialization of all initialzed subsystens
+       in case of failures */
+
+#if defined WITH_MEDRIVER
+ medriver_fail:
+#endif
+
+    if ( Need_LAN )
+        fsc2_lan_cleanup( );
+
+#if ! defined WITHOUT_SERIAL_PORTS
+    fsc2_serial_cleanup( );
+#endif
+
+#if defined WITH_LIBUSB_1_0
+    libusb_exit( NULL );
+
+ libusb_fail:
+#endif
+
+#if defined WITH_RULBUS
+    if ( Need_RULBUS )
+        rulbus_close( );
+
+ rulbus_fail:
+#endif
+
+    if ( Need_GPIB )
+        gpib_shutdown( );
+
+ gpib_fail:
+    if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
+    {
+        set_buttons_for_run( 0 );
+        fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
+        XFlush( fl_get_display( ) );
+    }
+
+    Fsc2_Internals.state = STATE_IDLE;
+    return FAIL;
 }
 
 
@@ -433,6 +437,11 @@ no_prog_to_run( void )
 
 #if ! defined WITHOUT_SERIAL_PORTS
     fsc2_serial_cleanup( );
+#endif
+
+#if defined WITH_LIBUSB_1_0
+    if ( Need_USB )
+        libusb_exit( NULL );
 #endif
 
 #if defined WITH_RULBUS
@@ -563,6 +572,11 @@ init_devs_and_graphics( void )
 
         if ( Need_LAN )
             fsc2_lan_cleanup( );
+
+#if defined WITH_LIBUSB_1_0
+    if ( Need_USB )
+        libusb_exit( NULL );
+#endif
 
 #if defined WITH_RULBUS
         if ( Need_RULBUS )
@@ -708,6 +722,11 @@ fork_failure( int stored_errno )
 
 #if ! defined WITHOUT_SERIAL_PORTS
     fsc2_serial_cleanup( );
+#endif
+
+#if defined WITH_LIBUSB_1_0
+    if ( Need_USB )
+        libusb_exit( NULL );
 #endif
 
 #if defined WITH_RULBUS
@@ -1030,6 +1049,11 @@ run_sigchld_callback( FL_OBJECT * a,
 
 #if ! defined WITHOUT_SERIAL_PORTS
     fsc2_serial_cleanup( );
+#endif
+
+#if defined WITH_LIBUSB_1_0
+    if ( Need_USB )
+        libusb_exit( NULL );
 #endif
 
 #if defined WITH_RULBUS

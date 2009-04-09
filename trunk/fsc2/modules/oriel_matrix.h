@@ -4,9 +4,7 @@
  * Newport Oriel MMS Spectrometer Driver
  *
  * Notes:
- *    Requires libusb 0.1 or greater
- *    Tested only on x86 machines, may not work on other machines.
- *    (Will not work on 64-bit machines as-is)
+ *    Requires libusb 0.1
  *    Needs root privileges to access USB devices.
  *.   This driver has been modified [hacked :-)] to work with fsc2.
  *
@@ -51,7 +49,11 @@
 
 #include "oriel_matrix.conf"
 
+#if defined WITH_LIBUSB_0_1
 #include <usb.h>
+#elif defined WITH_LIBUSB_1_0
+#include <libusb-1.0/libusb.h>
+#endif
 
 
 /* Define the maximum size of USB packages to be send and read */
@@ -304,7 +306,11 @@ struct temperature
 /* Structure with some information about the device */
 
 struct ORIEL_MATRIX {
+#if defined WITH_LIBUSB_0_1
     usb_dev_handle *udev;        /* USB device hande */
+#elif defined WITH_LIBUSB_1_0
+    libusb_device_handle *udev;  /* USB device hande */
+#endif
 
     bool has_shutter_support;    /* Do the shutter commands work? */
 

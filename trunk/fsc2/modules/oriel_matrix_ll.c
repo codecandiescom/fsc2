@@ -5,8 +5,6 @@
  *
  * Notes:
  *    File requires oriel_matrix.h
- *    Tested only on x86 machines, may not work on other machines.
- *    (Will not work on 64-bit machines as-is)
  *    Needs root privileges to access USB devices
  *.   This driver has been modified [hacked :-)] to work with fsc2.
  *
@@ -60,7 +58,7 @@ static float device_2_float( unsigned char * src );
 static void float_2_device( unsigned char * dest,
                             float           val );
 
-/* Commented since only used in development/debugging */
+/* Commented out since only used in development/debugging */
 
 #if 0
 static char * oriel_matrix_get_model_number( void );
@@ -80,6 +78,7 @@ static unsigned int * oriel_matrix_get_last_error( void );
  * Return Value: none, ob failure an exception is thrown
  *----------------------------------------------------------------*/
 
+#if defined WITH_LIBUSB_0_1
 void
 oriel_matrix_init( void )
 {
@@ -142,6 +141,91 @@ oriel_matrix_init( void )
     oriel_matrix_get_info( );
     oriel_matrix_set_reconstruction( );
 }
+#else
+void
+oriel_matrix_init( void )
+{
+    libusb_device **list;
+    libusb_device *dev = NULL;
+    ssize_t cnt;
+    ssize_t i;
+
+
+    fsc2_assert( oriel_matrix.udev == NULL );
+
+    raise_permissions( );
+
+    if ( ( cnt = libusb_get_device_list( NULL, &list ) ) < 0 )
+    {
+        print( FATAL, "Failure to find USB devices.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( cnt == 0 )
+    {
+        libusb_free_device_list( list, 1 );
+        print( FATAL, "No USB devices found.\n" );
+        THROW( EXCEPTION );
+    }
+
+    for ( i = 0; i < cnt; i++ )
+    {
+        struct libusb_device_descriptor desc;
+
+        if (    libusb_get_device_descriptor( list[ i ], &desc ) == 0
+             && desc.idVendor == VENDOR_ID
+             && desc.idProduct == PRODUCT_ID )
+        {
+            dev = list[ i ];
+            break;
+        }
+    }
+
+    if ( ! dev )
+    {
+        libusb_free_device_list( list, 1 );
+        lower_permissions( );
+        print( FATAL, "Device not found on USB.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( libusb_open( dev, &oriel_matrix.udev ) )
+    {
+        libusb_free_device_list( list, 1 );
+        lower_permissions( );
+        print( FATAL, "Can't open connection to device.\n" );
+        THROW( EXCEPTION );
+    }
+
+    libusb_free_device_list( list, 1 );
+
+    if ( libusb_set_configuration( oriel_matrix.udev, 1 ) )
+    {
+        lower_permissions( );
+        print( FATAL, "Can't set configuration for USB device.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( libusb_claim_interface( oriel_matrix.udev, 0 ) )
+    {
+        lower_permissions( );
+        print( FATAL, "Can't claim interface for USB device.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( libusb_set_interface_alt_setting( oriel_matrix.udev, 0, 0 ) )
+    {
+        lower_permissions( );
+        print( FATAL, "Can't set alternate interface for USB device.\n" );
+        THROW( EXCEPTION );
+    }
+
+    lower_permissions( );
+
+    oriel_matrix_get_info( );
+    oriel_matrix_set_reconstruction( );
+}
+#endif
 
 
 /*----------------------------------------------------------------------*
@@ -392,15 +476,23 @@ oriel_matrix_close( void )
 {
     oriel_matrix_close_CCD_shutter( );
     raise_permissions( );
+
+#if defined WITH_LIBUSB_0_1
     usb_reset( oriel_matrix.udev );
     usb_close( oriel_matrix.udev );
+#elif defined WITH_LIBUSB_1_0
+    libusb_reset_device( oriel_matrix.udev );
+    libusb_release_interface( oriel_matrix.udev, 0 );
+    libusb_close( oriel_matrix.udev );
+#endif
+
     lower_permissions( );
     oriel_matrix.udev = NULL;
 }
 
 
 /*----------------------------------------------------------------*
- * Returns the pixel hieght and width of the spectrometer in use.
+ * Returns the pixel height and width of the spectrometer in use.
  *
  * Input: None
  *
@@ -477,6 +569,10 @@ oriel_matrix_get_exposure( void )
     unsigned char *readbuf;
     static struct exposure pix;
     size_t i;
+#if defined WITH_LIBUSB_1_0
+    int cnt;
+    size_t left;
+#endif
 
     pix.width = oriel_matrix.pixel_width;
     pix.height = oriel_matrix.pixel_height;
@@ -495,10 +591,20 @@ oriel_matrix_get_exposure( void )
     /* Read in the data in chunks of USB_READ_BUF_SIZE bytes since the device
        always sends them that way */ 
 
+#if defined WITH_LIBUSB_0_1
     for ( i = 0; i < pix.image_size; i += USB_READ_BUF_SIZE )
         if ( usb_bulk_read( oriel_matrix.udev, EP6,
                             ( char * ) ( pix.image + i ),
                             USB_READ_BUF_SIZE, 0 ) <= 0 )
+#elif defined WITH_LIBUSB_1_0
+    for ( i = 0, left = pix.image_size; i < pix.image_size;
+          i += USB_READ_BUF_SIZE, left -= USB_READ_BUF_SIZE )
+        if (    libusb_bulk_transfer( oriel_matrix.udev, EP6,
+                                      pix.image + i,
+                                      s_min( left, USB_READ_BUF_SIZE ),
+                                      &cnt, 0 )
+                || cnt != ( int ) s_min( USB_READ_BUF_SIZE, left ) )
+#endif
         {
             lower_permissions( );
             print( FATAL, "Failed to get exposure.\n" );
@@ -566,7 +672,9 @@ oriel_matrix_get_reconstruction( unsigned char recon_type )
     unsigned char *readbuf;
     static struct reconstruction recon;    /* reconstruction struct */
     size_t i;
-
+#if defined WITH_LIBUSB_1_0
+    int cnt;
+#endif
 
     fsc2_assert(    recon_type >= RECON_TYPE_LIGHT
                  && recon_type <= RECON_TYPE_REFERENCE );
@@ -599,9 +707,16 @@ oriel_matrix_get_reconstruction( unsigned char recon_type )
        always sends them that way */ 
 
     for ( i = 0; i < recon.response_size; i += USB_READ_BUF_SIZE )
+#if defined WITH_LIBUSB_0_1
         if ( usb_bulk_read( oriel_matrix.udev, EP8,
                             ( char * ) recon.intensity + i,
                             USB_READ_BUF_SIZE, 0 ) <= 0 )
+#elif defined WITH_LIBUSB_1_0
+        if (    libusb_bulk_transfer( oriel_matrix.udev, EP8,
+                                      ( unsigned char * ) recon.intensity + i,
+                                      USB_READ_BUF_SIZE, &cnt, 0 )
+             || cnt != USB_READ_BUF_SIZE )
+#endif
         {
             lower_permissions( );
             print( FATAL, "Failed to get reconstruction.\n" );
@@ -890,7 +1005,7 @@ oriel_matrix_get_AFE_parameters( void )
 /*---------------------------------------------------------*
  * Function dealing with most of the comunication with the
  * device. Needs at least one argument, the command to be
- * send and then as many arguments as the command expect.
+ * send and then as many arguments as the command expects.
  * Returns a pointer to a static buffer with the reply or
  * throws an exception on failure to communicate with the
  * device.
@@ -902,13 +1017,16 @@ oriel_matrix_communicate( unsigned char cmd,
 {
     unsigned char writebuf[ USB_WRITE_BUF_SIZE ];
     static unsigned char readbuf[ USB_READ_BUF_SIZE ];
-    unsigned int len = 6;
+    int len = 6;
     int rep = EP8;
     unsigned char uc;
     unsigned short int us;
     float f;
     va_list ap;
     const char *err = NULL;
+#if defined WITH_LIBUSB_1_0
+    int cnt;
+#endif
 
 
     switch ( cmd )
@@ -1074,10 +1192,19 @@ oriel_matrix_communicate( unsigned char cmd,
 
     raise_permissions( );
 
+#if defined WITH_LIBUSB_0_1
     if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
                             len, 0 ) != ( int ) len
          || usb_bulk_read( oriel_matrix.udev, rep, ( char * ) readbuf,
                            sizeof readbuf, 0) <= 0
+#elif defined WITH_LIBUSB_1_0
+    if (    libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
+                                  len, &cnt, 0 )
+         || cnt != len
+         || libusb_bulk_transfer( oriel_matrix.udev, rep, readbuf,
+                                  sizeof readbuf, &cnt, 0 )
+         || cnt < 7
+#endif
          || readbuf[ 6 ] == 0x00 )
     {
         lower_permissions( );
@@ -1148,8 +1275,10 @@ device_2_short( unsigned char * src )
 static unsigned int
 device_2_uint( unsigned char * src )
 {
-    return    ( src[ 3 ] << 24 ) | ( src[ 2 ] << 16 )
-           |  ( src[ 1 ] <<  8 ) | src[ 0 ];
+    return   ( src[ 3 ] << 24 )
+           | ( src[ 2 ] << 16 )
+           | ( src[ 1 ] <<  8 )
+           |   src[ 0 ];
 }
 
 

@@ -5,8 +5,6 @@
  *
  * Notes:
  *    File requires oriel_matrix.h
- *    Tested only on x86 machines, may not work on other machines.
- *    (Will not work on 64-bit machines as-is)
  *    Needs root privileges to access USB devices
  *.   This driver has been modified [hacked :-)] to work with fsc2.
  *

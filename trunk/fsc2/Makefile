@@ -217,11 +217,13 @@ LAN_LOG_FILE    := /tmp/fsc2_lan.log
 LAN_LOG_LEVEL   := HIGH
 
 
-# The next line must be uncommented if you want support for devices controlled
-# via USB and the libusb library. If the include file for the library isn't in
-# one of the standard places (i.e. # '/usr/include' or '/usr/local/include')
-# you must also uncomment the line starting with 'libusb_incl_path and specify
-# the complete path to the place where it installed (e.g. '/usr/xxx/yyy). If
+# One of the two next lines must be uncommented if you want support for
+# devices controlled via USB and the libusb library. There is the older
+# libusb version 0.1 and the newer version 1.0. You must select one of
+# them. If the include file for the library isn't in one of the standard
+# places (i.e. # '/usr/include' or '/usr/local/include') you must also
+# uncomment the line starting with 'libusb_incl_path' and specify the
+# complete path to the place where it installed (e.g. '/usr/xxx/yyy'). If
 # the library for the card isn't in a place where the linker will find it
 # automatically (e.g. '/usr/lib' and '/usr/local/lib') you need also to specify
 # the full absolute path for the library by uncommenting the line starting with
@@ -229,7 +231,9 @@ LAN_LOG_LEVEL   := HIGH
 # the libusb library is already properly installed if you want to build fsc2
 # with support for it.
 
-# WITH_LIBUSB        := yes
+# WITH_LIBUSB_0_1    := yes
+# WITH_LIBUSB_1_0    := yes
+
 # libusb_incl_path   := /usr/local/include
 # libusb_lib_path    := /usr/lib/local
 
@@ -762,7 +766,16 @@ else
 endif
 
 
-ifdef WITH_LIBUSB
+# Take care of the settings for USB support - both libusb-0.1 and
+# libusb-1.0 can be used (but not both at once!)
+
+ifdef WITH_LIBUSB_0_1
+    ifdef WITH_LIBUSB_1_0
+		LIBUSB_FAIL = 1;
+    endif
+endif
+
+ifdef WITH_LIBUSB_0_1
 	ifdef libusb_incl_path
 		INCLUDES += -I$(libusb_incl_path)
 	endif
@@ -770,7 +783,18 @@ ifdef WITH_LIBUSB
 		LIBS += -L$(libusb_lib_path)
 	endif
 	LIBS      += -lusb
-	CONFFLAGS += -DWITH_LIBUSB
+	CONFFLAGS += -DWITH_LIBUSB_0_1
+endif
+
+ifdef WITH_LIBUSB_1_0
+	ifdef libusb_incl_path
+		INCLUDES += -I$(libusb_incl_path)
+	endif
+	ifdef libusb_lib_path
+		LIBS += -L$(libusb_lib_path)
+	endif
+	LIBS      += -lusb-1.0
+	CONFFLAGS += -DWITH_LIBUSB_1_0
 endif
 
 
@@ -929,6 +953,13 @@ export            # export all variables to sub-makes
 # some other, more or less useful stuff
 
 all release debug mdebug:
+ifdef LIBUSB_FAIL
+	@echo "************************************************";     \
+	echo "*   Either WITH_LIBUSB_0_1 or WITH_LIBUSB_1_0  *";     \
+    echo "*     can be set, but not both at once!        *";     \
+	echo "************************************************";     \
+	exit 2;
+endif
 	$(MAKE) config
 	$(MAKE) -C $(sdir) src
 	$(MAKE) -C $(sdir) modules

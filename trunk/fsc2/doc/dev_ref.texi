@@ -2812,12 +2812,11 @@ University Northridge)
 
 @paragraphindent 0
 @strong{Controlled via}: USB (requires
-@uref{http://libusb.wiki.sourceforge.net/,libusb v0.1} library, if
-version 0.1 isn't available anymore try
-@url{http://libusb.wiki.sourceforge.net/LibusbCompat0.1,libusbcompat})
+@uref{http://libusb.wiki.sourceforge.net/,libusb v1.0} or
+@uref{http://libusb.wiki.sourceforge.net/,libusb v0.1} library)
 
 @paragraphindent 0
-@strong{Status}: Tested
+@strong{Status}: Tested (with libusb v0.1)
 
 @paragraphindent 0
 @strong{Supported functions}:
