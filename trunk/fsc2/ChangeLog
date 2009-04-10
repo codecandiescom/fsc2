@@ -1,0 +1,22 @@
+2009-04-09
+
+1) Support for serial port has changed: in all former versions
+   the 'number' of the serial port to be used had to be specified
+   in calls for functions dealing with a serial port (i.e. '0'
+   stood for the device file '/dev/ttyS0' etc.). This has been
+   wasn't too good an idea when you also have to deal with e.g.
+   USB-serial converters that appear under a device file with a
+   name like '/dev/ttyUSB0' or '/dev/ttyUSB1' etc. So now in the
+   call of fsc2_request_serial_port() the name of the device file
+   has to be passed as the first argument instead of a number.
+   The function now returns an integer that in all following calls
+   is used as the 'handle' for the serial port for the serial port.
+
+2) Changed libusb support to allow both libusb-0.1 and libusb-1.0.
+   Which one of the two versions is linked in is controlled by the
+   'WITH_LIBUSB_0_1' and 'WITH_LIBUSB_1_0' variable, to be set in
+   the configuration settings for the machine fsc2 is to be compiled
+   for (these variables replace the former 'WITH_LIBUSB' variable
+   from previous versions of fsc2). Note: only use one of the
+   versions of the library an be used, setting both variables
+   will abort compilation!
