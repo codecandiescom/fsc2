@@ -956,9 +956,14 @@ GPIB bus.
 For devices that use the Rulbus another global variable, @code{Need_RULBUS}
 and also of type @code{bool}, has to be set in the init hook function.
 
-Finally, for devices where the LAN is used for communicaation the variable
-@code{Need_LAN} (again of type @code{bool}) need to be set in the init hook
-function.
+For devices that are connected via a USB port and require support via
+the @code{libusb-0.1} or @code{libusb-1.0} library the global
+variable @code{Need_USB} (again of type @code{bool}) must be set in
+the init hook function.
+
+Finally, for devices for which the LAN is used for communicaation the
+variable @code{Need_LAN} (also of type @code{bool}) need to be set in
+the init hook function.
 
 
 @node Handling GPIB Devices, Serial Port Handling, Global variables, Writing New Modules
@@ -1068,10 +1073,10 @@ include the appropriate header file, i.e.@: you need
 #include "serial.h"
 @end example
 @noindent
-For serial ports things are handled a bit differently from GPIB devices.
-You don't need to set a special variable to advertise your intention
-of using one of them. Instead, in the init hook function you must try to
-request the serial port you need by calling the function
+For serial ports things are handled a bit differently from GPIB
+devices. You don't need to set a special variable to advertise your
+intention of using one of them. Instead, in the init hook function you
+must try to request the serial port you need by calling the function
 @anchor{fsc2_request_serial_port()}
 @findex fsc2_request_serial_port()
 @example
@@ -1086,13 +1091,13 @@ the first and the device name as the second argument. The device name
 is for use in log files, error messages etc.
 
 If the requested serial port has already been claimed by a different
-device or the function will print an error message and stop the
-@code{EDL} script, so you don't have to deal with error handling.
-Otherwise it returns an integer number that in calls of all other
-functions identifies the serial port.
+device the function will print an error message and stop the
+@code{EDL} script, so you don't have to deal with error handling
+yourself. In case of success it returns an integer number that in
+calls of all other functions identifies the serial port.
 
-All the other function may not be called before the @code{exp_hook}
-function.
+No other serial port function may not be called before the
+@code{exp_hook} function.
 
 For all functions that deal directly with file descriptors for the
 serial port device files there are replacement functions. The

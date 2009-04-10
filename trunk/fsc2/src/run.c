@@ -49,7 +49,7 @@ extern int exp_runparser_init( void );        /* from exp_run_parser.y */
 
 /* Routines of the main process exclusively used in this file */
 
-static bool start_gpib_and_rulbus( void );
+static bool start_comm_libs( void );
 static void error_while_iconified( void );
 static bool no_prog_to_run( void );
 static bool init_devs_and_graphics( void );
@@ -128,24 +128,23 @@ run( void )
         return FAIL;
     }
 
-    /* Start the GPIB bus (and do some changes to the graphics) */
+    /* Initilaize libraries for communication with the devices and do some
+       changes to the graphics */
 
-    if ( ! start_gpib_and_rulbus( ) )
+    if ( ! start_comm_libs( ) )
     {
         if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
             error_while_iconified( );
-
         return FAIL;
     }
 
-    /* If there are no commands but an EXPERIMENT section label we just run
-       all the init hooks, then the exit hooks and are already done. */
+    /* If there are no commands except an EXPERIMENT section label we just
+       run all the init hooks, then the exit hooks and are already done. */
 
     if ( EDL.prg_token == NULL )
     {
         if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
             error_while_iconified( );
-
         return no_prog_to_run( );
     }
 
@@ -155,7 +154,6 @@ run( void )
     {
         if ( Fsc2_Internals.cmdline_flags & ICONIFIED_RUN )
             error_while_iconified( );
-
         return FAIL;
     }
 
@@ -168,7 +166,7 @@ run( void )
     if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
         fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_left_ptr );
 
-    /* We have to be careful: When the child process gets forked it may
+    /* We have to be careful: when the child process gets forked it may
        already be finished running *before* the fork() call returns in the
        parent. In this case the signal handlers of the parent don't know the
        PID of the child process and thus won't work correctly. Therefore all
@@ -212,11 +210,12 @@ run( void )
 }
 
 
-/*----------------------------------------------------------*
+/*------------------------------------------------------------*
  * Called when the program was started with the main window
- * being iconified and an error happened, in which case the
- * the main window must be de-iconified.
- *----------------------------------------------------------*/
+ * being iconified and an error happened. In this case the
+ * main window must be de-iconified to make the error message
+ * visible.
+ *------------------------------------------------------------*/
 
 static void
 error_while_iconified( void )
@@ -227,14 +226,14 @@ error_while_iconified( void )
 }
 
 
-/*-------------------------------------------------------------------*
+/*--------------------------------------------------------------------*
  * This function first does some smaller changes to the GUI and then
- * starts the GPIB bus, the RULBUS and does some initialization for
- * serial port subsystem.
- *-------------------------------------------------------------------*/
+ * initializes the libraries that deal with GPIB, RULBUS, USB, serial
+ * ports, LAN and Meilhaus cards.
+ *--------------------------------------------------------------------*/
 
 static bool
-start_gpib_and_rulbus( void )
+start_comm_libs( void )
 {
 #if defined WITH_RULBUS || defined WITH_MEDRIVER
     int retval;
@@ -343,7 +342,8 @@ start_gpib_and_rulbus( void )
 #endif
 
 #if defined WITH_LIBUSB_1_0
-    libusb_exit( NULL );
+    if ( Need_USB )
+        libusb_exit( NULL );
 
  libusb_fail:
 #endif
@@ -372,9 +372,8 @@ start_gpib_and_rulbus( void )
 
 
 /*----------------------------------------------------------------------*
- * This all to be done when the experiment section does not contain any
- * commands: devices get initialized, again de-initialized, and then we
- * already return.
+ * This is all to be done when the experiment section does not contain
+ * any commands: devices get initialized and then de-initialized again.
  *----------------------------------------------------------------------*/
 
 static bool
@@ -574,8 +573,8 @@ init_devs_and_graphics( void )
             fsc2_lan_cleanup( );
 
 #if defined WITH_LIBUSB_1_0
-    if ( Need_USB )
-        libusb_exit( NULL );
+        if ( Need_USB )
+            libusb_exit( NULL );
 #endif
 
 #if defined WITH_RULBUS
