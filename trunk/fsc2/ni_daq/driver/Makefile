@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Makefile.pci_e_series 8062 2007-08-04 14:25:41Z jens $
 #
 # Makefile for drivers for National Instruments PCI E Series DAQ boards
 # (based on the a DAQ-STC)
@@ -102,7 +102,7 @@ clean:
 	$(MAKE) -C pci_e_series cleanup
 	$(MAKE) -C daq_stc cleanup
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
-	$(RM) $(RMFLAGS) Module.symvers svn-* *~
+	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order svn-* *~
 
 endif
 
@@ -157,7 +157,7 @@ cleanup:
 
 clean:
 	$(MAKE) cleanup
-	$(RM) $(RMFLAGS) pci_e_series.o Module.symvers
+	$(RM) $(RMFLAGS) pci_e_series.o Module.symvers *~
 
 endif
 endif
