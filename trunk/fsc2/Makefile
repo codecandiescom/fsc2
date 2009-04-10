@@ -1168,6 +1168,8 @@ endif
 	-$(MAKE) -C rulbus clean
 	-$(MAKE) -C witio_48 clean
 	-$(MAKE) -C edl/leiden clean
+	-$(MAKE) -C edl/frankfurt clean
+	-$(MAKE) -C edl/hmi clean
 
 
 # Create a tags file to be used with emacs

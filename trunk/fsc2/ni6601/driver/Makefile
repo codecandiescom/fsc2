@@ -103,7 +103,8 @@ install:
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M="$(PWD)" clean
-	$(RM) $(RMFLAGS) autoconf.h Module.symvers svn-* *~
+	$(RM) $(RMFLAGS) autoconf.h Module.symvers Module.markers \
+					 modules.order svn-* *~
 
 endif
 

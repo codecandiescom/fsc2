@@ -197,5 +197,5 @@ cleanup:
 
 clean:
 	$(MAKE) cleanup
-	-$(RM) $(RMFLAGS) *.html *.ps *.eps *.pdf *.info*  \
+	-$(RM) $(RMFLAGS) *.html *.ps *.eps *.pdf *.info*   \
 					  *.gz cursor*.png *_arrow.png

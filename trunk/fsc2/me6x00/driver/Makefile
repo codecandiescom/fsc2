@@ -98,7 +98,7 @@ install:
 
 clean:
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
-	$(RM) $(RMFLAGS) Module.symvers svn-* *~
+	$(RM) $(RMFLAGS) Module.symvers Module.markers modules.order svn-* *~
 
 endif
 
