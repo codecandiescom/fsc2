@@ -189,11 +189,11 @@ load_all_drivers( void )
             if ( Need_USB == UNSET && saved_need_USB == SET )
                 Need_USB = SET;
 
-#if ! defined WITH_LIBUSB
+#if ! defined WITH_LIBUSB_1_0 && ! defined WITH_LIBUSB_0_1
             if ( Need_USB )
             {
                 eprint( FATAL, UNSET, "Module '%s' requires LIBUSB but fsc2 "
-                        "hasn't been built with LIBUSB support.\n",
+                        "hasn't been built with LIBUSB (0.1 or 1.0) support.\n",
                         cd->name );
                 THROW( EXCEPTION );
             }
