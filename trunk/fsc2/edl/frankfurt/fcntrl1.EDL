@@ -1,0 +1,83 @@
+=== TARGET_FREQ float [ 10.0 : 20.0 ] [ 16.5 ] "Target frequency" "GHz"
+DEVICES:
+
+hp5342a;
+ffc;
+
+
+VARIABLES:
+
+lock_freq = TARGET_FREQ GHz;
+freq;
+last_freq;
+max_dev = 10 kHz;
+jump_dev = 50 MHz;
+I = 1;
+Crazy_count = 0;
+dt;
+UNLOCKED = 0;
+LOCKED = 1;
+State = LOCKED;
+AF, LF, LB, CC, DT;
+
+
+PREPARATIONS:
+
+init_1d( 1, "", "Deviation [kHz]" );
+
+
+EXPERIMENT:
+
+freq_counter_resolution( 100 Hz );
+freq = freq_counter_measure( );
+
+IF abs( lock_freq - freq ) < jump_dev {
+    hide_toolbox( "ON" );
+    AF = output_create( "FLOAT_OUTPUT", freq / 1 GHz,
+                        "Actual frequency [GHz]" );
+    LF = output_create( "FLOAT_OUTPUT", lock_freq / 1 GHz,
+                        "Lock frequency [GHz]" );
+    LB = button_create( "PUSH_BUTTON", "Lock state" );
+    button_state( LB, State );
+    CC = output_create( "INT_OUTPUT", 0, "No. of lost locks" );
+    DT = output_create( "FLOAT_OUTPUT", 0.0, "Time with lost locks [s]" );
+    hide_toolbox( "OFF" );
+
+    FOREVER {
+        IF State == LOCKED {
+            last_freq = freq;
+        }
+    
+        freq = freq_counter_measure( );
+        output_value( AF, freq / 1 GHz );
+        display_1d( I, ( freq - lock_freq ) / 1 kHz );
+        I += 1;
+    
+        button_state( LB, State );
+    
+        IF State == LOCKED {
+            IF abs( last_freq - freq ) > jump_dev {
+                draw_marker( I - 1, "RED" );
+                State = UNLOCKED;
+                Crazy_count += 1;
+                output_value( CC, Crazy_count );
+                delta_time( );
+            } ELSE IF abs( lock_freq - freq ) > max_dev {
+                freq_contr_change_freq( lock_freq > freq ? "UP" : "DOWN" );
+            } ELSE {
+                wait( 2 s );
+            }
+        } ELSE {
+            IF abs( last_freq - freq ) < jump_dev {
+                draw_marker( I - 1, "GREEN" );
+                State = LOCKED;
+            }
+    
+            dt += delta_time( );
+            output_value( DT, dt );
+        }
+    }
+} ELSE {
+   print( "Deviation between lock frequency (# GHz) and current "
+          "frequency (# GHz) too large.\n", lock_freq / 1 GHz, freq / 1 GHz );
+}

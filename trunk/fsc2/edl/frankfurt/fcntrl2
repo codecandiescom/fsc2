@@ -1,0 +1,116 @@
+#!/usr/local/bin/fsc2 -S
+
+DEVICES:
+
+hp5342a;
+ffc;
+
+
+VARIABLES:
+
+I = 0;
+UNLOCKED = 0;
+LOCKED = 1;
+LOCKED_BUT_OFF = 2;
+Crazy_count = 0;
+State = UNLOCKED;
+freq = 0.0;
+last_freq = 0.0;
+lock_freq = 0.0;
+max_dev = 10 kHz;
+jump_dev = 50 MHz;
+dt;
+AF, LF, CC, DT, LB;
+
+
+PREPARATIONS:
+
+init_1d( 1, "", "Deviation [kHz]" );
+
+EXPERIMENT:
+
+hide_toolbox( "ON" );
+AF = output_create( "FLOAT_OUTPUT", 0.0, "Actual frequency [GHz]" );
+LF = output_create( "FLOAT_OUTPUT", 0.0, "Lock frequency [GHz]" );
+CC = output_create( "INT_OUTPUT", 0, "No. of lost locks" );
+DT = output_create( "FLOAT_OUTPUT", 0.0, "Time with lost locks [s]" );
+LB = button_create( "PUSH_BUTTON", "Lock" );
+hide_toolbox( "OFF" );
+
+freq_counter_resolution( 100 Hz );
+freq = freq_counter_measure( );
+last_freq = freq;
+
+FOREVER {
+	// Get a new frequency value and show it in the toolbox
+
+    IF State == LOCKED {
+   		last_freq = freq;
+	}
+    freq = freq_counter_measure( );
+    output_value( AF, freq / 1 GHz );
+
+    IF State == UNLOCKED {
+
+	    // Check if "Lock" button has been clicked on
+
+        IF LB == toolbox_wait( 0.5 s, LB ) AND button_state( LB ) {
+            lock_freq = freq;
+            output_value( LF, lock_freq / 1 GHz );
+            State = LOCKED;
+        }
+
+        NEXT;
+
+    } ELSE IF State == LOCKED {
+
+        // Display new deviation and if there was an obvious jump switch to
+        // "locked but off" mode and if deviation is not too large but larger
+        // then acceptable adjust frequency
+
+        I += 1;
+        display_1d( I, ( freq - lock_freq ) / 1 kHz );
+
+        IF abs( last_freq - freq ) > jump_dev {
+            delta_time( );
+            object_change_label( LB, "Out of lock!" );
+            Crazy_count += 1;
+            output_value( CC, Crazy_count );
+            State = LOCKED_BUT_OFF;
+            draw_marker_1d( I, "RED" );
+        } ELSE IF abs( lock_freq - freq ) > max_dev {
+            freq_contr_change_freq( lock_freq > freq ? "UP" : "DOWN" );
+        } ELSE {
+            wait( 0.5 s );
+        }
+    } ELSE {
+        // In "locked but off" mode draw new deviation and check if frequency
+		// came back into the "reasonable" range - if it did switch back to
+        // "locked" mode
+
+        I += 1;
+        display_1d( I, ( freq - lock_freq ) / 1 kHz );
+
+        dt += delta_time( );
+        output_value( DT, dt );
+
+        IF abs( last_freq - freq ) < jump_dev {
+            object_change_label( LB, "Lock" );
+            State = LOCKED;
+            draw_marker( I, "GREEN" );
+        }
+    }
+
+    // Check for "Lock" button having become unset by the user
+
+    IF button_changed( LB ) AND ! button_state( LB ) {
+        IF State == LOCKED_BUT_OFF {
+            dt += delta_time( );
+            output_value( DT, dt );
+            object_change_label( LB, "Lock" );
+            draw_marker( I, "WHITE" );
+        }
+        State = UNLOCKED;
+        output_value( LF, 0.0 );
+    }
+}

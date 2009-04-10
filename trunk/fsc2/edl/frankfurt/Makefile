@@ -1,6 +1,6 @@
 EDL           := $(wildcard *.EDL)
 MACHINE       := hyperion.memphys.uni-frankfurt.de
-ALL           := $(patsubst %.EDL,%,$(EDL)) epr monitor_mode fsps25_shutdown fsps25_shutdown_zero pfail_recover freq_check
+ALL           := $(patsubst %.EDL,%,$(EDL)) epr monitor_mode fsps25_shutdown fsps25_shutdown_zero pfail_recover freq_check fcntrl2
 
 all: $(patsubst %.EDL,%,$(EDL))
 
