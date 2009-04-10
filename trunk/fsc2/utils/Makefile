@@ -107,4 +107,4 @@ cleanup:
 
 clean:
 	$(MAKE) cleanup
-	-$(RM) $(RMFLAGS) edl-mod.elc edl-mod.el edl.vim
+	-$(RM) $(RMFLAGS) me_dio_get_subdevices edl-mod.elc edl-mod.el edl.vim
