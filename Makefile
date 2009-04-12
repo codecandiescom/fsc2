@@ -1204,10 +1204,6 @@ packages:
 MANIFEST:
 	@$(MAKE) clean
 	@echo '# List of all (necessary) files of the package' > MANIFEST
-	@echo '#' >> MANIFEST
-	@echo -n '# $$Id' >> MANIFEST
-	@echo '$$' >> MANIFEST
-	@echo '#' >> MANIFEST
 
 	@for dir in . $(ldir) $(adir) $(cdir) $(ddir) $(mdir) scripts $(sdir)  \
 		tests $(udir) me6x00 me6x00/driver me6x00/lib me6x00/utils ni6601  \
