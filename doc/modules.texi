@@ -955,9 +955,11 @@ For devices that use the Rulbus another global variable, @code{Need_RULBUS}
 and also of type @code{bool}, has to be set in the init hook function.
 
 For devices that are connected via a USB port and require support via
-the @code{libusb-0.1} or @code{libusb-1.0} library the global
-variable @code{Need_USB} (again of type @code{bool}) must be set in
-the init hook function.
+the @code{libusb-0.1} or @code{libusb-1.0} library the global variable
+@code{Need_USB} (again of type @code{bool}) must be set in the init
+hook function. @code{libusb} library initialization is then done by
+@code{fsc2}, the module just has to find and open the device and then
+should be able to communicate with it.
 
 Finally, for devices for which the LAN is used for communicaation the
 variable @code{Need_LAN} (also of type @code{bool}) need to be set in

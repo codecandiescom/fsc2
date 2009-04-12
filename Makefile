@@ -1181,7 +1181,7 @@ test:
 
 pack:
 	@$(MAKE) clean
-	cd ..; tar -c fsc2 --exclude=.git | gzip -c -9 > fsc2.tar.gz
+	cd ..; tar -c fsc2 --exclude=.git* | gzip -c -9 > fsc2.tar.gz
 
 pack-with-git:
 	@$(MAKE) clean
