@@ -1,0 +1,28 @@
+DEVICES:
+
+epr_mod;
+
+
+VARIABLES:
+
+I, J;
+f[ * ];
+
+
+EXPERIMENT:
+
+FOR I = 1 : epr_modulation_resonator_count( ) {
+	print( "resonator: \"#\"\n", epr_modulation_resonator_name( I ) );
+	print( "  interpolate: #\n", epr_modulation_resonator_interpolate( epr_modulation_resonator_name( I ) ) ? "yes" : "no");
+	print( "  extrapolate: #\n", epr_modulation_resonator_extrapolate( epr_modulation_resonator_name( I ) ) ? "yes" : "no" );
+	epr_modulation_resonator_interpolate( epr_modulation_resonator_name( I ), "OFF" );
+	f = epr_modulation_resonator_frequencies( epr_modulation_resonator_name( I ) );
+	FOR J = 1 : size( f ) {
+		print( "  freq: # kHz\n", f[ J ] / 1 kHz );
+		print( "    ratio: # G/V\n", epr_modulation_ratio( epr_modulation_resonator_name( I ), f[ J ] ) );
+		IF ( epr_modulation_has_phase( epr_modulation_resonator_name( I ), f[ J ] ) ) {
+			print( "    phase: #\n", epr_modulation_phase( epr_modulation_resonator_name( I ), f[ J ] ) );
+		}
+	}
+	print( "\n" );
+}

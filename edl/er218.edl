@@ -1,0 +1,24 @@
+DEVICES:
+
+me_dio_2;
+me_dio_3;
+er218;
+
+VARIABLES:
+
+a = 0.0;
+
+EXPERIMENT:
+
+goniometer_backslash_correction( "ON" );
+
+goniometer_angle( 180.0 );
+
+goniometer_reset( );
+
+FOREVER {
+	goniometer_angle( a );
+	a += 0.125;
+	wait( 0.5 s );
+}
+

@@ -1,0 +1,7 @@
+DEVICES:
+
+spectrapro_300i;
+
+EXPERIMENT:
+
+monochromator_install_grating(3, "1-060-750");

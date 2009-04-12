@@ -1,0 +1,32 @@
+=== LOCKIN menu [ "SR510", "SR530", "SR810" ] [ 2 ] "Lock-in amplifier:"
+DEVICES:
+  er035m_s;              // gaussmeter module
+  aeg_x_band;            // magnet module
+  LOCKIN;                // lock-in amplifier module
+
+VARIABLES:
+=== START_FIELD float [ 2000 : 5000 ] [ 3360 ] "Start field:" "G"
+  start_field = START_FIELD G;
+=== END_FIELD float [ 2000 : 5000 ] [ 3450 ] "End field:" "G"
+  end_field   = END_FIELD G;
+=== FIELD_STEP float [ 0.002 : 100 ] [ 0.5 ] "Field step:" "G"
+  field_step  = FIELD_STEP G;
+
+  field = start_field;
+  I = 1;
+  data;
+
+PREPARATIONS:
+  magnet_setup( start_field, field_step );
+  init_1d( );
+
+EXPERIMENT:
+  WHILE field <= end_field
+  {
+      data = lockin_get_data( );
+      display( I, data );
+      save( data );
+      I = I + 1;
+      field = sweep_up( );
+      wait( lockin_time_constant( ) );
+  }

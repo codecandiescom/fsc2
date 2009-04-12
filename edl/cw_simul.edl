@@ -1,0 +1,76 @@
+#!/usr/local/bin/fsc2
+
+DEVICES:
+
+VARIABLES:
+
+f, df = 1.0 / 3, sf = 3400, ef = 3500;
+I, J;
+N = int ( ( ef - sf ) / df ) + 1;
+d1[ N ], d2[ N ];
+p = 0.0;
+np;
+Phase, Done, S;
+s, c;
+
+PREPARATIONS:
+
+init_1d( 2, N, sf * 0.1, df * 0.1, "Field [mT]", "Signal [uV]" );
+
+EXPERIMENT:
+
+FOR I = 1 : N {
+	d1[ I ] = grandom( ) + - 0.5 * ( I - N / 2 ) *
+ 			  exp( - ( I - N / 2 )^2 / 55.0^2 );
+	d2[ I ] = grandom( ) + 0.5 * ( I - N / 2 ) *
+		      exp( - ( I - N / 2 )^2 / 55.0^2 );
+	display( I, d1[ I ], 1, I, d2[ I ], 2 );
+	wait( 0.02 );
+}
+
+ON_STOP:
+
+hide_toolbox( "ON" );
+S     = slider_create( "NORMAL_SLIDER", -180.0, 180.0, "Phase (coarse)" );
+Phase = input_create( "FLOAT_INPUT", 0, "Phase (venier)" );
+Done = button_create( "NORMAL_BUTTON", "Done" );
+hide_toolbox( "OFF" );
+
+FOREVER {
+	toolbox_wait( 1.0e9 s );
+
+	IF button_state( Done ) {
+		BREAK;
+	}
+
+	IF slider_changed( S ) {
+		np = slider_value( S );
+	} ELSE {
+		np = input_value( Phase );
+		IF abs( np ) > 10000.0 {
+			input_value( Phase, p );
+			NEXT;
+		}
+
+		WHILE np > 180.0 {
+			np -= 360.0;
+		}
+
+		WHILE np < -180.0 {
+			np += 360.0;
+		}
+	}
+
+	input_value( Phase, np );
+	slider_value( S, np );
+
+	IF np == p {
+		NEXT;
+	}
+
+	p = np;
+	s = sin( D_to_R( p ) );
+	c = cos( D_to_R( p ) );
+	display( 1,  c * d1 + s * d2, 1,
+			 1, -s * d1 + c * d2, 2 );
+}

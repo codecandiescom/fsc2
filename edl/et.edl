@@ -1,0 +1,48 @@
+DEVICES:
+
+eurotherm902s;
+
+EXPERIMENT:
+
+print( "II #\n", temp_contr_command( "II" ) );
+print( "V0 #\n", temp_contr_command( "V0" ) );
+print( "IM #\n", temp_contr_command( "IM" ) );
+print( "EE #\n", temp_contr_command( "EE" ) );
+print( "1H #\n", temp_contr_command( "1H" ) );
+print( "1L #\n", temp_contr_command( "1L" ) );
+print( "PV #\n", temp_contr_command( "PV" ) );
+print( "SP #\n", temp_contr_command( "SP" ) );
+print( "OP #\n", temp_contr_command( "OP" ) );
+print( "SW #\n", temp_contr_command( "SW" ) );
+print( "OS #\n", temp_contr_command( "OS" ) );
+print( "XS #\n", temp_contr_command( "XS" ) );
+print( "ER #\n", temp_contr_command( "ER" ) );
+print( "SL #\n", temp_contr_command( "SL" ) );
+print( "S2 #\n", temp_contr_command( "S2" ) );
+print( "HO #\n", temp_contr_command( "HO" ) );
+print( "HS #\n", temp_contr_command( "HS" ) );
+print( "LS #\n", temp_contr_command( "LS" ) );
+print( "H2 #\n", temp_contr_command( "H2" ) );
+print( "L2 #\n", temp_contr_command( "L2" ) );
+print( "XP #\n", temp_contr_command( "XP" ) );
+print( "TI #\n", temp_contr_command( "TI" ) );
+print( "TD #\n", temp_contr_command( "TD" ) );
+print( "HB #\n", temp_contr_command( "HB" ) );
+print( "LB #\n", temp_contr_command( "LB" ) );
+print( "P2 #\n", temp_contr_command( "P2" ) );
+print( "BP #\n", temp_contr_command( "BP" ) );
+print( "TR #\n", temp_contr_command( "TR" ) );
+
+print( "\n" );
+print( "AF #\n", temp_contr_command( "AF" ) );
+print( "CO #\n", temp_contr_command( "CO" ) );
+print( "DL #\n", temp_contr_command( "DL" ) );
+print( "ES #\n", temp_contr_command( "ES" ) );
+print( "HP #\n", temp_contr_command( "HP" ) );
+print( "IS #\n", temp_contr_command( "IS" ) );
+print( "P1 #\n", temp_contr_command( "P1" ) );
+print( "P2 #\n", temp_contr_command( "P2" ) );
+print( "P3 #\n", temp_contr_command( "P3" ) );
+print( "P4 #\n", temp_contr_command( "P4" ) );
+print( "SV #\n", temp_contr_command( "SV" ) );
+print( "XR #\n", temp_contr_command( "XR" ) );
