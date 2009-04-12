@@ -60,7 +60,6 @@ static void fsc2_save_conf( void );
 static bool get_edl_file( char * fname );
 static void check_run( void );
 static void no_gui_run( void );
-static void test_machine_type( void );
 static int scan_args( int   * argc,
                       char  * argv[ ],
                       char ** fname );
@@ -290,7 +289,7 @@ globals_init( const char * pname )
     /* As the very first action the effective UID and GID gets stored and
        then the program lowers the permissions to the ones of the real UID
        and GID, only switching back when creating or attaching to shared
-       memory segments or accessing log files. */
+       memory segments or accessing device or log files. */
 
     Fsc2_Internals.EUID = geteuid( );
     Fsc2_Internals.EGID = getegid( );
@@ -315,7 +314,6 @@ globals_init( const char * pname )
     Fsc2_Internals.rsc_handle = NULL;
     Fsc2_Internals.http_server_died = UNSET;
     Fsc2_Internals.conn_request = UNSET;
-    Fsc2_Internals.is_linux_i386 = UNSET;
     Fsc2_Internals.conn_child_replied = UNSET;
     Fsc2_Internals.title = NULL;
     Fsc2_Internals.child_is_quitting = QUITTING_UNSET;
@@ -338,11 +336,6 @@ globals_init( const char * pname )
 
     fsc2_get_conf( );
 
-    /* Figure out if the machine has an INTEL i386 type processor and we're
-       running under Linux */
-
-    test_machine_type( );
-
     if ( pname != NULL )
         Prog_Name = pname;
     else
@@ -359,6 +352,9 @@ globals_init( const char * pname )
     EDL.do_quit = UNSET;
     EDL.react_to_do_quit = SET;
 
+    /* Initialize list of open files EDL scripts can write to. Per default
+       two are open, one is stdout and the other stderr. */
+
     EDL.File_List = T_malloc( 2 * sizeof *EDL.File_List );
     EDL.File_List_Len = 2;
     EDL.File_List[ 0 ].fp = stdout;
@@ -367,9 +363,14 @@ globals_init( const char * pname )
     EDL.File_List[ 1 ].fp = stderr;
     EDL.File_List[ 1 ].name = ( char * ) "stderr";
 
+    /* The list of used devices is still empty */
+
     EDL.Device_List = NULL;
     EDL.Device_Name_List = NULL;
     EDL.Num_Pulsers = 0;
+
+    /* Channels for communication with process spawned to do an experiment
+       aren't open yet. */
 
     Comm.mq_semaphore = -1;
     Comm.MQ = NULL;
@@ -435,22 +436,21 @@ fsc2_get_conf( void )
     if ( Fsc2_Internals.def_directory == NULL )
         return;
     
-    /* Don't use the name when it's either obviously unvalid (i.e. just an
-       empty string, which shouldn't be possible), a stat() on it fails,
-       or if it's neither a directory or a symbolic link (we better don't
-       try to follow symbolic links, we could end up in a loop and it's not
-       worth trying to implement a detection mechanism) or if not at least
-       on of the permissions allows read access (we can't know here if the
-       directory is going to be used for reading only or also writing, so
-       we only check for the lowest hurdle). */
+    /* Don't use the default directory's name when it's either obviously
+       unvalid (i.e. just an empty string, which shouldn't be possible), a
+       stat() on it fails, or if it's neither a directory or a symbolic link
+       (we better don't try to follow symbolic links, we could end up in a
+       loop and it's not worth trying to implement a detection mechanism) or
+       if not at least one of the permissions allows read access (we can't
+       know here if the directory is going to be used for reading only or also
+       writing, so we only check for the lowest hurdle). */
 
     if (    *Fsc2_Internals.def_directory == '\0'
          || stat( Fsc2_Internals.def_directory, &buf ) < 0
-         || ( ! S_ISDIR( buf.st_mode ) && ! S_ISLNK( buf.st_mode ) )
+         || ! ( S_ISDIR( buf.st_mode ) || S_ISLNK( buf.st_mode ) )
          || ! ( buf.st_mode & ( S_IRUSR | S_IRGRP | S_IROTH ) ) )
     {
-        Fsc2_Internals.def_directory =
-                                        T_free( Fsc2_Internals.def_directory );
+        Fsc2_Internals.def_directory = T_free( Fsc2_Internals.def_directory );
         return;
     }
 
@@ -701,31 +701,6 @@ check_run( void )
     }
 
     exit( EXIT_SUCCESS );
-}
-
-
-/*------------------------------------------------------------------*
- * Figure out the machine type from the value returned by uname(),
- * currently i[3-6]86 will be treated as having an Intel compatible
- * processor. Only for these types of processors (which also must
- * have the same size for ints and pointers) and when running Linux
- * some stuff needing assembler and used to help with debugging can
- * be used.
- *------------------------------------------------------------------*/
-
-static void
-test_machine_type( void )
-{
-    struct utsname utsbuf;
-
-
-    if (    sizeof( int ) == sizeof( void * )
-         && uname( &utsbuf ) == 0
-         && utsbuf.machine[ 0 ] == 'i'
-         && utsbuf.machine[ 1 ] >= '3' && utsbuf.machine[ 1 ] <= '6'
-         && ! strncmp( utsbuf.machine + 2, "86", 2 )
-         && ! strcasecmp( utsbuf.sysname, "linux" ) )
-        Fsc2_Internals.is_linux_i386 = SET;
 }
 
 

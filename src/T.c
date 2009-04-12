@@ -26,6 +26,7 @@
 
 #if defined FSC2_MDEBUG
 #include <mcheck.h>
+#include <execinfo.h>
 #endif
 
 
@@ -44,7 +45,7 @@ T_malloc( size_t size )
 {
     void *mem;
 #if defined FSC2_MDEBUG
-    int *EBP;             /* assumes sizeof(int) equals size of pointers */
+    void *trace_buf[ 2 ];
 #endif
 
 
@@ -64,17 +65,14 @@ T_malloc( size_t size )
         THROW( OUT_OF_MEMORY_EXCEPTION );
     }
 
-#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-    if ( Fsc2_Internals.is_linux_i386 )
-    {
-        asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-        fprintf( stderr, "(%d) malloc:  %p (%u) from %p\n",
-                 Fsc2_Internals.I_am == CHILD, mem, size,
-                 ( void * ) * ( EBP + 1 ) );
-    }
+#if defined FSC2_MDEBUG
+    if ( backtrace( trace_buf, 2 ) == 2 )
+        fprintf( stderr, "(%d) malloc:  %p (%lu) at %s\n",
+                 Fsc2_Internals.I_am == CHILD, mem, ( unsigned long ) size,
+                 backtrace_symbols( trace_buf + 1, 1 )[ 0 ] );
     else
-        fprintf( stderr, "(%d) malloc:  %p (%u)\n",
-                 Fsc2_Internals.I_am == CHILD, mem, size );
+        fprintf( stderr, "(%d) calloc:  %p (%lu)\n",
+                 Fsc2_Internals.I_am == CHILD, mem, ( unsigned long ) size );
 #endif
 
     return mem;
@@ -97,7 +95,7 @@ T_calloc( size_t nmemb,
 {
     void *mem;
 #if defined FSC2_MDEBUG
-    int *EBP;             /* assumes sizeof(int) equals size of pointers */
+    void *trace_buf[ 2 ];
 #endif
 
 
@@ -126,17 +124,16 @@ T_calloc( size_t nmemb,
         THROW( OUT_OF_MEMORY_EXCEPTION );
     }
 
-#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-    if ( Fsc2_Internals.is_linux_i386 )
-    {
-        asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-        fprintf( stderr, "(%d) calloc:  %p (%u) from %p\n",
-                 Fsc2_Internals.I_am == CHILD, mem, nmemb * size,
-                 ( void * ) * ( EBP + 1 ) );
-    }
+#if defined FSC2_MDEBUG
+    if ( backtrace( trace_buf, 2 ) == 2 )
+        fprintf( stderr, "(%d) calloc:  %p (%lu) at %s\n",
+                 Fsc2_Internals.I_am == CHILD, mem,
+                 ( unsigned long ) ( nmemb * size ),
+                 backtrace_symbols( trace_buf + 1, 1 )[ 0 ] );
     else
-        fprintf( stderr, "(%d) calloc:  %p (%u)\n",
-                 Fsc2_Internals.I_am == CHILD, mem, nmemb * size );
+        fprintf( stderr, "(%d) calloc:  %p (%lu)\n",
+                 Fsc2_Internals.I_am == CHILD, mem,
+                 ( unsigned long ) ( nmemb * size ) );
 #endif
 
     return mem;
@@ -159,7 +156,7 @@ T_realloc( void   * ptr,
 {
     void *new_ptr;
 #if defined FSC2_MDEBUG
-    int *EBP;             /* assumes sizeof(int) equals size of pointers */
+    void *trace_buf[ 2 ];
 #endif
 
 
@@ -179,17 +176,16 @@ T_realloc( void   * ptr,
         THROW( OUT_OF_MEMORY_EXCEPTION );
     }
 
-#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-    if ( Fsc2_Internals.is_linux_i386 )
-    {
-        asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-        fprintf( stderr, "(%d) realloc: %p -> %p (%u) from %p\n",
-                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size,
-                 ( void * ) * ( EBP + 1 ) );
-    }
+#if defined FSC2_MDEBUG
+    if ( backtrace( trace_buf, 2 ) == 2 )
+        fprintf( stderr, "(%d) realloc: %p -> %p (%lu) at %s\n",
+                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr,
+                 ( unsigned long )size,
+                 backtrace_symbols( trace_buf + 1, 1 )[ 0 ] );
     else
-        fprintf( stderr, "(%d) realloc: %p -> %p (%u)\n",
-                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size );
+        fprintf( stderr, "(%d) realloc: %p -> %p (%lu)\n",
+                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr,
+                 ( unsigned long ) size );
 #endif
 
     return new_ptr;
@@ -213,7 +209,7 @@ T_realloc_or_free( void   * ptr,
 {
     void *new_ptr;
 #if defined FSC2_MDEBUG
-    int *EBP;             /* assumes sizeof(int) equals size of pointers */
+    void *trace_buf[ 2 ];
 #endif
 
 
@@ -237,17 +233,16 @@ T_realloc_or_free( void   * ptr,
         THROW( OUT_OF_MEMORY_EXCEPTION );
     }
 
-#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-    if ( Fsc2_Internals.is_linux_i386 )
-    {
-        asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-        fprintf( stderr, "(%d) realloc: %p -> %p (%u) from %p\n",
-                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size,
-                 ( void * ) * ( EBP + 1 ) );
-    }
+#if defined FSC2_MDEBUG
+    if ( backtrace( trace_buf, 2 ) == 2 )
+        fprintf( stderr, "(%d) realloc: %p -> %p (%lu) at %s\n",
+                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr,
+                 ( unsigned long ) size,
+                 backtrace_symbols( trace_buf + 1, 1 )[ 0 ] );
     else
-        fprintf( stderr, "(%d) realloc: %p -> %p (%u)\n",
-                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr, size );
+        fprintf( stderr, "(%d) realloc: %p -> %p (%lu)\n",
+                 Fsc2_Internals.I_am == CHILD, ptr, new_ptr,
+                 ( unsigned long ) size );
 #endif
 
     return new_ptr;
@@ -265,19 +260,17 @@ void *
 T_free( void * ptr )
 {
 #if defined FSC2_MDEBUG
-    int *EBP;             /* assumes sizeof(int) equals size of pointers */
+    void *trace_buf[ 2 ];
 #endif
 
     if ( ptr == NULL )
         return NULL;
 
-#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-    if ( Fsc2_Internals.is_linux_i386 )
-    {
-        asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-        fprintf( stderr, "(%d) free:    %p from %p\n",
-                 Fsc2_Internals.I_am == CHILD, ptr, ( void * ) * ( EBP + 1 ) );
-    }
+#if defined FSC2_MDEBUG
+    if ( backtrace( trace_buf, 2 ) == 2 )
+        fprintf( stderr, "(%d) free:    %p at %s\n",
+                 Fsc2_Internals.I_am == CHILD, ptr,
+                 backtrace_symbols( trace_buf + 1, 1 )[ 0 ] );
     else
         fprintf( stderr, "(%d) free:    %p\n",
                  Fsc2_Internals.I_am == CHILD, ptr );
@@ -305,7 +298,7 @@ T_strdup( const char * str )
     size_t len;
 
 #if defined FSC2_MDEBUG
-    int *EBP;             /* assumes sizeof(int) equals size of pointers */
+    void *trace_buf[ 2 ];
 #endif
 
 
@@ -322,17 +315,16 @@ T_strdup( const char * str )
 
     strcpy( new_str, str );
 
-#if defined FSC2_MDEBUG && ! defined __STRICT_ANSI__
-    if ( Fsc2_Internals.is_linux_i386 )
-    {
-        asm( "mov %%ebp, %0" : "=g" ( EBP ) );
-        fprintf( stderr, "(%d) strdup:  %p (%u) from %p\n",
-                 Fsc2_Internals.I_am == CHILD, ( void * ) new_str, len + 1,
-                 ( void * ) * ( EBP + 1 ) );
-    }
+#if defined FSC2_MDEBUG
+    if ( backtrace( trace_buf, 2 ) == 2 )
+        fprintf( stderr, "(%d) strdup:  %p (%lu) at %s\n",
+                 Fsc2_Internals.I_am == CHILD, ( void * ) new_str,
+                 ( unsigned long ) ( len + 1 ),
+                 backtrace_symbols( trace_buf + 1, 1 )[ 0 ] );
     else
-        fprintf( stderr, "(%d) strdup:  %p (%u)\n",
-             Fsc2_Internals.I_am == CHILD, ( void * ) new_str, len + 1 );
+        fprintf( stderr, "(%d) strdup:  %p (%lu)\n",
+                 Fsc2_Internals.I_am == CHILD, ( void * ) new_str,
+                 ( unsigned long ) ( len + 1 ) );
 #endif
 
     return new_str;

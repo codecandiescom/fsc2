@@ -25,8 +25,8 @@
 #include "fsc2.h"
 
 /* Sets the maximum number of lines from the end of the error browser that
-   get included into the HTTP page the server sends - avoids possibly sending
-   hundreds and hundreds of unimportant warning messages. */
+   get included into the HTTP page the server sends - avoids possibly
+   sending hundreds and hundreds of unimportant warning messages. */
 
 #define MAX_LINES_TO_SEND 30
 
