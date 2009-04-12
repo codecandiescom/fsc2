@@ -1,6 +1,4 @@
 # -*-Makefile-*-
-#
-# $Id$
 
 install-spex.mvl.local:
 	$(MAKE) $(UNINSTALL_MACHINE)

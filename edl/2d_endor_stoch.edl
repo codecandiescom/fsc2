@@ -1,10 +1,6 @@
 /*
     EDL program for time-resolved ENDOR on transient radicals
-
-    $Id$
 */
-    
-
 DEVICES:
 
 hp8647a;                     // RF synthesizer

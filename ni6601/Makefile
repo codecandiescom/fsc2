@@ -1,7 +1,3 @@
-#
-# $Id$
-#
-#
 # Makefile for NI6601 driver and library
 #
 # Copyright (C) 2002-2009 Jens Thoms Toerring

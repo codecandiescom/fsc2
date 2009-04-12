@@ -1,8 +1,6 @@
 #!/usr/bin/perl
 # -*- cperl -*-
 #
-# $Id$
-#
 # Function to extract all the device function names from the configuration
 # file they are listed in
 

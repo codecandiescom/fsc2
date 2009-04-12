@@ -1,6 +1,4 @@
 /*
- * $Id$
- *
  * Newport Oriel MMS Spectrometer Driver
  *
  * Notes:
@@ -8,7 +6,7 @@
  *    Needs root privileges to access USB devices
  *.   This driver has been modified [hacked :-)] to work with fsc2.
  *
- * Last updated August 19, 2008
+ * Last updated April 9, 2009
  *
  * This driver was developed using the ClearShotII - USB port interface
  * communications and control information specification provided by Centice

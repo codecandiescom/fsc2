@@ -1,6 +1,3 @@
-#
-# $Id$
-#
 # Makefile for driver for National Instruments DAQ boards based on a DAQ-STC
 #
 # Copyright (C) 2003-2009 Jens Thoms Toerring

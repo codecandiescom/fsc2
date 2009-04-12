@@ -1,6 +1,4 @@
 # -*-Makefile-*-
-#
-# $Id$
 
 prefix                  := /usr/local
 OWNER                   := fsc2

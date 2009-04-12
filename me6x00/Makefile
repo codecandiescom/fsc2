@@ -1,7 +1,3 @@
-#
-# $Id$
-#
-#
 # Makefile for ME-6000 and ME-6100 driver and library
 #
 # Copyright (C) 2002-2009 Jens Thoms Toerring

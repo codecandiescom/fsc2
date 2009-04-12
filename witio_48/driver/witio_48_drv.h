@@ -1,6 +1,4 @@
 /*
- *  $Id$
- * 
  *  Kernel module for Wasco WITIO-48 DIO ISA card
  * 
  *  Copyright (C) 2003-2009 Jens Thoms Toerring

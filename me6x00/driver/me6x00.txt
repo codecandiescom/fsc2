@@ -1,7 +1,3 @@
-#
-# $Id$
-#
-
 ME6X00 Device Driver Description
 ================================
 

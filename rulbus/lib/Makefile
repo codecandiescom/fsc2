@@ -1,5 +1,3 @@
-# $Id$
-#
 # Library for Rulbus (Rijksuniversiteit Leiden BUS)
 #
 # Copyright (C) 2003-2009 Jens Thoms Toerring

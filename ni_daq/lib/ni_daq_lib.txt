@@ -1,7 +1,3 @@
-#
-# $Id$
-#
-
  NI_DAQ Library Manual
  =====================
 

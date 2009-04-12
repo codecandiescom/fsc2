@@ -1,7 +1,5 @@
 \input texinfo   @c -*-texinfo-*-
 
-@c  $Id$
-@c
 @c  Copyright (C) 1999-2009 Jens Thoms Toerring
 @c
 @c  This file is part of fsc2.

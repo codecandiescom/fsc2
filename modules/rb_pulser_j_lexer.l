@@ -1,6 +1,4 @@
 /* -*-C-*-
- *  $Id$
- *
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
  *
  *  This file is part of fsc2.

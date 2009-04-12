@@ -1,6 +1,3 @@
-@c $Id$
-
-
 @node Copying, , Acknowledgments, fsc2
 @appendix Copying
 @center @strong{GNU GENERAL PUBLIC LICENSE}

@@ -1,6 +1,4 @@
 /*
- *  $Id$
- * 
  *  Driver for National Instruments DAQ boards with a DAQ-STC
  * 
  *  Copyright (C) 2003-2009 Jens Thoms Toerring

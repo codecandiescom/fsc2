@@ -1,8 +1,6 @@
 #!/usr/bin/perl
 # -*- cperl -*-
 #
-# $Id$
-#
 # Copyright (C) 2003-2008 Jens Thoms Toerring
 #
 # This file is part of fsc2.

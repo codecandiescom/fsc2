@@ -1,7 +1,3 @@
-/*
- *  $Id$
- */
-
 /* Device driver for Meilhaus me6x00 boards
  * ========================================
  *

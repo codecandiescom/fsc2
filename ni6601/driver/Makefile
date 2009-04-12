@@ -1,6 +1,3 @@
-#
-# $Id$
-#
 # Makefile for National Instruments 6601 board
 #
 # Copyright (C) 2002-2009 Jens Thoms Toerring

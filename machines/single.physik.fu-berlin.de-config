@@ -1,6 +1,4 @@
 # -*-sh-*-
-#
-# $Id$
 
 grep -E '^[ \t]*#define[ \t]+CCD_PIXEL_WIDTH[ \t]+1340[[:space:]]*$' \
 	 $cdir/rs_spec10.conf > /dev/null

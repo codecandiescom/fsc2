@@ -1,6 +1,4 @@
 /*
- *  $Id$
- * 
  *  Copyright (C) 2003-2009 Jens Thoms Toerring
  * 
  *  This program is free software; you can redistribute it and/or modify

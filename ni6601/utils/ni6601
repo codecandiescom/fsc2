@@ -1,7 +1,5 @@
 #! /bin/sh
 #
-# $Id$
-#
 # Copyright (C) 2002-2009 Jens Thoms Toerring
 #
 # This init script tries to be conformant to LSB (Linux Standard Base

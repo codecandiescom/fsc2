@@ -1,6 +1,4 @@
 # -*-sh-*-
-#
-# $Id$
 
 sed 's/^[ \t]*#define[ \t]+SERIAL_PORT[ \t]+"\/dev\/ttyS[013-9].*"/#define SERIAL_PORT     "\dev\/ttyS2"/'  \
 	$cdir/hjs_attenuator.conf > $cdir/hjs_attenuator.conf.new

@@ -1,6 +1,4 @@
 # -*-Makefile-*-
-#
-# $Id$
 
 install-sunone.chemie.unibas.ch:
 	$(MAKE) $(UNINSTALL_MACHINE)

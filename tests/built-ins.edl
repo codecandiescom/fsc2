@@ -3,8 +3,6 @@
 	fsc2 when applied to both single numbers and array slices (as far
 	as applicable). No warnings or errors should occur or something
 	is seriously broken.
-
-	$Id$
 -------------------------------------------------------------------------*/ 
 
 VARIABLES:

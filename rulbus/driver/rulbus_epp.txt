@@ -1,7 +1,3 @@
-#
-# $Id$
-#
-
 Rulbus EPP Device Driver Description
 ====================================
 

@@ -11,8 +11,6 @@
  * Drivers" by Alessandro Rubini and Jonathan Corbet, published
  * by O'Reilly & Associates.   No warranty is attached;
  * we cannot take responsibility for errors or fitness for use.
- *
- * $Id$
  */
 
 

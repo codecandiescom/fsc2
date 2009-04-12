@@ -1,6 +1,3 @@
-#
-# $Id$
-#
 # Makefile for Wasco WITIO-48 ISA DIO card kernel module
 #
 # Copyright (C) 2003-2009 Jens Thoms Toerring

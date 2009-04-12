@@ -1,6 +1,4 @@
 /*
- * $Id$
- *
  * Newport Oriel MMS Spectrometer Driver
  *
  * Notes:

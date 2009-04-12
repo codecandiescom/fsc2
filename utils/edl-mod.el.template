@@ -1,7 +1,5 @@
 ;;; edl-mod.el.template --- template file for emacs EDL mode 
 ;;
-;;  $Id$
-;;
 ;;  Copyright (C) 1999-2009 Jens Thoms Törring
 ;;
 ;;  Author: Jens Thoms Törring <jt@toerring.de>

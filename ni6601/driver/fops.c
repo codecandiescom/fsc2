@@ -1,6 +1,4 @@
 /*
- *  $Id$
- * 
  *  Driver for National Instruments 6601 boards
  * 
  *  Copyright (C) 2002-2009 Jens Thoms Toerring

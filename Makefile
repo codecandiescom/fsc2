@@ -1,5 +1,3 @@
-#  $Id$
-#
 #  Copyright (C) 1999-2009 Jens Thoms Toerring
 #
 #  This file is part of fsc2.
@@ -937,11 +935,11 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 
-.PHONY: all config src modules utils docs built          \
-		install-strip install uninstall http_server      \
-		version test cleanup clean pack pack-with-svn    \
-		packages packages-with-svn tags MANIFEST me6x00  \
-		ni6601 ni_daq rulbus witio_48
+.PHONY: all config src modules utils docs built        \
+		install-strip install uninstall http_server    \
+		version test cleanup clean pack pack-with-git  \
+		packages tags MANIFEST me6x00 ni6601 ni_daq    \
+		rulbus witio_48
 
 
 ############## End of configuration section ##############
@@ -1161,7 +1159,7 @@ ifdef WITH_HTTP_SERVER
 	fi
 endif
 	$(MAKE) -C $(udir) clean
-	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h svn-* *~
+	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h *~
 	-$(MAKE) -C me6x00 clean
 	-$(MAKE) -C ni6601 clean
 	-$(MAKE) -C ni_daq clean
@@ -1192,26 +1190,20 @@ test:
 
 pack:
 	@$(MAKE) clean
-	cd ..; tar -c fsc2 --exclude=.svn | gzip -c -9 > fsc2.tar.gz
+	cd ..; tar -c fsc2 --exclude=.git | gzip -c -9 > fsc2.tar.gz
 
-pack-with-svn:
+pack-with-git:
 	@$(MAKE) clean
-	cd ..; tar -c fsc2 | gzip -c -9 > fsc2-with-svn.tar.gz
+	git-gc
+	cd ..; tar -c fsc2 | gzip -c -9 > fsc2-with-git.tar.gz
 
 
 # Make distributions of the device modules etc.
 
 packages:
 	@for dir in me6x00 ni6601 ni_daq rulbus witio_48; do  \
-		$(MAKE) -C $$dir clean;                                      \
-		tar -c $$dir --exclude=.svn | gzip -c -9 > ../$$dir.tar.gz;  \
-	done
-	$(MAKE) -C FcntlLock realclean
-
-packages-with-svn:
-	@for dir in FcntlLock me6x00 ni6601 ni_daq rulbus witio_48; do  \
-		$(MAKE) -C $$dir clean;                                      \
-		tar -c $$dir | gzip -c -9 > ../$$dir-with-svn.tar.gz;        \
+		$(MAKE) -C $$dir clean;                           \
+		tar -c $$dir | gzip -c -9 > ../$$dir.tar.gz;      \
 	done
 	$(MAKE) -C FcntlLock realclean
 

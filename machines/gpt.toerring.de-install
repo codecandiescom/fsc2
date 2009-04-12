@@ -1,6 +1,4 @@
 # -*-Makefile-*-
-#
-# $Id: gpt.toerring.de-install 6899 2004-04-04 14:17:40Z jens $
 
 install-gpt.toerring.de:
 	$(MAKE) $(UNINSTALL_MACHINE)

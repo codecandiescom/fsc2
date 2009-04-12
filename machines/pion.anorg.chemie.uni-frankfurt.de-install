@@ -1,6 +1,4 @@
 # -*-Makefile-*-
-#
-# $Id$
 
 install-pion.anorg.chemie.uni-frankfurt.de:
 	$(MAKE) $(UNINSTALL_MACHINE)

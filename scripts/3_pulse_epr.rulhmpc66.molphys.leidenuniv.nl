@@ -686,9 +686,7 @@ sub write_out {
     my $SHOW_PREV = $SHOW_PREV{ value };
     my $WAIT_TIME = $WAIT_TIME{ value };
 
-    print $fh "/* \$Id: 3_pulse_epr_j.EDL 8150 2008-09-14 11:55:06Z jens \$ */
-
-DEVICES:
+    print $fh "DEVICES:
 
 ips120_10;
 itc503;

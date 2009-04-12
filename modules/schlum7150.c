@@ -1,6 +1,4 @@
 /*
- *  $Id$
- * 
  *  Copyright (C) 2006-2009 Sergey Veber, Jens Thoms Toerring
  *
  *  This file is part of fsc2.

@@ -9,7 +9,6 @@
 === ACQ_CH menu [ "CH1", "CH2" ] [ 1 ] "Acquisition channel"
 === AVG_CH menu [ "FUNC_E", "FUNC_F" ] [ 1 ] "Averaging channel"
 === TRG_CH menu [ "CH1", "CH2", "EXT", "EXT10" ] [ 3 ] "Trigger channel"
-
 DEVICES:
 
 er032m;                                   // Field controller

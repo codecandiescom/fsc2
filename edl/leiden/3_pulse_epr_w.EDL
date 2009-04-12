@@ -1,5 +1,3 @@
-/* $Id$ */
-
 === TRIG_MODE menu [ "EXTERNAL", "INTERNAL" ] [ 1 ] "Trigger mode"
 === REP_TIME float [ 0.001 : ] [ 50 ] "Repetition time" "ms"
 === P1_POS int [ 200 : 167772150 ] [ 200 ] "Position of 1st MW pulse" "ns"

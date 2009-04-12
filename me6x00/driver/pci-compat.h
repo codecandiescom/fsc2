@@ -1,4 +1,3 @@
-
 /* This header only makes sense when included in a 2.0 compile */
 
 /*

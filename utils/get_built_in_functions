@@ -1,11 +1,8 @@
 #!/usr/bin/perl
 # -*- cperl -*-
 #
-# $Id$
-#
 # Function to extract all the built-in function names from the source file
 # where they are listed as elements of an array of Func_T type structures
-
 
 use strict;
 use warnings;

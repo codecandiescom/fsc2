@@ -1,6 +1,4 @@
 /*
-  $Id$
- 
   Driver for National Instruments PCI E Series DAQ boards
 
   Copyright (C) 2003-2009 Jens Thoms Toerring

@@ -1,6 +1,4 @@
 /*
-  $Id$
-
   Copyright (C) 1999-2009 Anton Savitsky
 
   This file is part of fsc2.

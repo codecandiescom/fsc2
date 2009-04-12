@@ -1,6 +1,4 @@
 # -*-Makefile-*-
-#
-# $Id: gpt.toerring.de 8019 2007-01-06 18:31:15Z jens $
 
 OWNER                := fsc2
 GROUP                := dialout

@@ -1,5 +1,3 @@
-# $Id: Makefile.pci_e_series 8062 2007-08-04 14:25:41Z jens $
-#
 # Makefile for drivers for National Instruments PCI E Series DAQ boards
 # (based on the a DAQ-STC)
 #

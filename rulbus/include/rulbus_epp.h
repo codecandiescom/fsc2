@@ -1,6 +1,4 @@
 /*
- *  $Id$
- * 
  *  In clude file for the driver for the Rulbus (Rijksuniversiteit Leiden
  *  BUS) EPP interface
  *

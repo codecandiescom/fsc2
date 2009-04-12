@@ -276,10 +276,7 @@ sub write_out {
     my $CREATE_DEFENSE = $CREATE_DEFENSE{ value };
     my $PULSE_2_DEFENSE = $PULSE_2_DEFENSE{ value };
 
-    print $fh "/* \$Id: pulse_monitor_w.EDL 8051 2007-07-08 23:09:47Z jens \$ */
-
-
-DEVICES:
+    print $fh "DEVICES:
 
 rs_sml01;
 rb_pulser_w;

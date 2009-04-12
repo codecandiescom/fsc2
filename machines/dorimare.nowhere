@@ -1,6 +1,4 @@
 # -*-Makefile-*-
-#
-# $Id$
 
 OWNER                := fsc2
 GROUP                := dialout

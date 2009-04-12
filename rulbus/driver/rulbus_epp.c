@@ -1,6 +1,4 @@
 /*
- *	$Id$
- * 
  *	Driver for the RULBUS EPP interface
  *
  *	Copyright (C) 2003-2009 Jens Thoms Toerring

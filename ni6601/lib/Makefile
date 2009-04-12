@@ -1,6 +1,3 @@
-#
-# $Id$
-#
 #  Makefile for NI6601 library
 #
 #  Copyright (C) 2002-2009 Jens Thoms Toerring

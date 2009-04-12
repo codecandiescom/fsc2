@@ -1,6 +1,3 @@
-#
-# $Id$
-#
 #  Makefile for WITIO-48 library
 #
 #  Copyright (C) 2003-2009 Jens Thoms Toerring

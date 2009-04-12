@@ -1,8 +1,6 @@
 /*-----------------------------------------------------------------------
     This script is for testing some aspects of 1D-graphics of fsc2.
     No warnings or errors should occur or something is seriously broken.
-
-    $Id$
 -------------------------------------------------------------------------*/ 
 
 VARIABLES:

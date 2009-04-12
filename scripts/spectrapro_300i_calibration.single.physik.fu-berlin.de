@@ -1,5 +1,4 @@
 #!/usr/local/bin/fsc2 -T
-
 /*-----------------------------------------------------------------------*/
 /* EDL script for calibration of the Acton SpectraPro 300i monochromator */
 /* in combination with the Roper Scientific Spec-10 CCD camera.          */
@@ -57,9 +56,6 @@
 /* 7. When the script gets stopped by clicking on the "Stop" select a    */
 /*    file for writing out the calibration parameter.  The default file  */
 /*    extension is ".calib".                                             */
-/*                                                                       */
-/*                                                                       */
-/* $Id$ */
 /*                                                                       */
 /* Copyright (C) 1999-2009 Jens Thoms Toerring                           */
 /*                                                                       */

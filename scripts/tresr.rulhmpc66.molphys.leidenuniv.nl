@@ -479,9 +479,7 @@ sub write_out {
     my $ACQ_CH = $ACQ_CH{ value };
     my $AVG_CH = $AVG_CH{ value };
 
-    print $fh "/* \$Id: tresr_j.EDL 8150 2008-09-14 11:55:06Z jens \$ */
-
-DEVICES:
+    print $fh "DEVICES:
 
 ips120_10;
 itc503;

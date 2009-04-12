@@ -1,6 +1,4 @@
 # -*-Makefile-*-
-#
-# $Id$
 
 install-moebpc3.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)

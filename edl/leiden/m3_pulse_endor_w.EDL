@@ -1,5 +1,3 @@
-/* $Id: 3_pulse_endor_w.EDL 8121 2008-05-14 20:22:15Z jens $ */
-
 === TRIG_MODE menu [ "EXTERNAL", "INTERNAL" ] [ 1 ] "Trigger mode"
 === REP_TIME float [ 0.001 : ] [ 50 ] "Repetition time" "ms"
 === P1_POS int [ 200 : 167772150 ] [ 200 ] "Pos. of 1st MW pulse" "ns"

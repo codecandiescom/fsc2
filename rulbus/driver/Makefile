@@ -1,6 +1,3 @@
-#
-# $Id$
-#
 # Makefile for the RULBUS EPP kernel driver
 #
 # Copyright (C) 2003-2009 Jens Thoms Toerring

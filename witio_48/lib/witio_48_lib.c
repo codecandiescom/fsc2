@@ -1,6 +1,4 @@
 /*
- *  $Id$
- * 
  *  Copyright (C) 2003-2009 Jens Thoms Toerring
  * 
  *  This library should simplify accessing the WITIO-48 DIO board by Wasco

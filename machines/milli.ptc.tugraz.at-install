@@ -1,6 +1,4 @@
 # -*-Makefile-*-
-#
-# $Id$
 
 install-milli.ptc.tugraz.at:
 	$(MAKE) $(UNINSTALL_MACHINE)

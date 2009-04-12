@@ -1,6 +1,4 @@
 # -*-Makefile-*-
-#
-# $Id$
 
 OWNER              := exp
 GROUP              := exp

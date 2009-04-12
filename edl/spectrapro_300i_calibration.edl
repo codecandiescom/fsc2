@@ -49,8 +49,6 @@
 /*    file for writing out the calibration parameter.  The default file  */
 /*    extension is ".calib".                                             */
 /*                                                                       */
-/* $Id$ */
-/*                                                                       */
 /* Copyright (C) 1999-2008 Jens Thoms Toerring                           */
 /*                                                                       */
 /* This file is part of fsc2.                                            */

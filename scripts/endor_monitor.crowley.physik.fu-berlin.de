@@ -1,7 +1,4 @@
-#!/usr/local/bin/fsc2
-
-/* $Id$ */
-
+#!/usr/local/bin/fsc2 -S
 DEVICES:
 
 hp8647a;

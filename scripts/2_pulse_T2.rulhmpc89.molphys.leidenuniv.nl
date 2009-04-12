@@ -614,9 +614,7 @@ sub write_out {
     my $ADC_CHANNELS = $ADC_CHANNELS{ value };
     my $SHOW_PREV = $SHOW_PREV{ value };
 
-    print $fh "/* \$Id: 2_pulse_T2_w.EDL 8121 2008-05-14 20:22:15Z jens \$ */
-
-DEVICES:
+    print $fh "DEVICES:
 
 ips120_10;
 rb8509;

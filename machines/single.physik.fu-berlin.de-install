@@ -1,6 +1,4 @@
 # -*-Makefile-*-
-#
-# $Id$
 
 install-single.physik.fu-berlin.de:
 	$(MAKE) $(UNINSTALL_MACHINE)

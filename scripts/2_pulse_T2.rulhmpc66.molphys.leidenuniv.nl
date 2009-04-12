@@ -539,9 +539,7 @@ sub write_out {
     my $FIELD = $FIELD{ value };
     my $SHOW_PREV = $SHOW_PREV{ value };
 
-    print $fh "/* \$Id: 2_pulse_T2_j.EDL 8150 2008-09-14 11:55:06Z jens \$ */
-
-DEVICES:
+    print $fh "DEVICES:
 
 ips120_10;
 itc503;

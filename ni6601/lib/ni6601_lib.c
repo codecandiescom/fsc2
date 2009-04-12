@@ -1,6 +1,4 @@
 /*
- *  $Id$
- * 
  *  Copyright (C) 2002-2009 Jens Thoms Toerring
  * 
  *  This library should simplify accessing NI6601 GBCT boards by National

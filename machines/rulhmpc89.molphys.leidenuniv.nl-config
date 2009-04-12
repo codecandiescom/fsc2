@@ -1,5 +1,3 @@
 # -*-sh-*-
-#
-# $Id$
 
 cp -f $cdir/ips120_10_w.conf $cdir/ips120_10.conf
