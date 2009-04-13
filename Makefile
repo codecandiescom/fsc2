@@ -935,10 +935,10 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 
-.PHONY: all config src modules utils docs built        \
-		install-strip install uninstall http_server    \
-		version test cleanup clean pack pack-with-git  \
-		packages tags MANIFEST me6x00 ni6601 ni_daq    \
+.PHONY: all config src modules utils docs built       \
+		install-strip install uninstall http_server   \
+		version test cleanup clean pack pack-git      \
+		packages tags MANIFEST me6x00 ni6601 ni_daq   \
 		rulbus witio_48
 
 
@@ -1183,10 +1183,11 @@ pack:
 	@$(MAKE) clean
 	cd ..; tar -c fsc2 --exclude=.git* | gzip -c -9 > fsc2.tar.gz
 
-pack-with-git:
-	@$(MAKE) clean
-	git-gc
-	cd ..; tar -c fsc2 | gzip -c -9 > fsc2-with-git.tar.gz
+pack-git:
+	cd ..
+	git-clone --bare fsc2 fsc2.git
+	tar -c fsc2.git | gzip -c -9 > fsc2.git.tar.gz
+	rm -rf fsc2.git
 
 
 # Make distributions of the device modules etc.
