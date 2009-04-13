@@ -1,0 +1,3338 @@
+#!/usr/bin/perl
+#
+# $Id$
+#
+#  Copyright (C) 1999-2006 Jens Thoms Toerring
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2, or (at your option)
+#  any later version.
+#
+#  The program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with fsc2; see the file COPYING.  If not, write to
+#  the Free Software Foundation, 59 Temple Place - Suite 330,
+#  Boston, MA 02111-1307, USA.
+#
+# To contact the author send an email to <jt@toerring.de>
+
+
+use strict;
+use warnings;
+use Tk;
+
+# Set these variables to determine the modifier keys to be used
+
+my $medium = 'Shift';
+my $fast   = 'Shift-Control';
+
+
+my @version = split /\./, $Tk::VERSION;
+die "Installed Perl-Tk version is $Tk::VERSION but Tk800.022 is required.\n"
+	if $version[ 0 ] + 0.001 * $version[ 1 ] < 800.022;
+
+# Create the "main" window (that's the one with the buttons only)
+
+my $mw = MainWindow->new( );
+$mw->title( 'xinetg' );
+$mw->geometry( '+0+560' );
+$mw->resizable( 0, 0 );
+
+# Read in the data and set everything up for the Curve_2d object storing them
+
+my $curve = Curve_2d->new( $mw, $ARGV[ 0 ] );
+
+# Create the windows with the time and the field traces
+
+my $tw = Time_Window->new( $curve );
+my $fw = Field_Window->new( $curve );
+
+# Create the buttons in the "main" window
+
+my $blc  = $mw->Button( -text => 'Baseline correction' );
+my $bgc  = $mw->Button( -text => 'Background correction' );
+my $rl   = $mw->Button( -text => 'Reload file' );
+my $l    = $mw->Button( -text => 'Load file' );
+my $s    = $mw->Button( -text => 'Save' );
+my $quit = $mw->Button( -text => 'Quit',
+						-command => sub { $fw->destroy;
+										  $tw->destroy;
+										  $curve->destroy;
+										  $mw->destroy; } );
+
+$blc->configure( -command => sub { if ( $curve->baseline_correction( $tw ) ) {
+								       $fw->draw;
+					                   $tw->draw;
+					                   $blc->configure( -state => 'disabled' );
+							       } } );
+$bgc->configure( -command =>
+				            sub { if ( $curve->background_correction( $fw ) ) {
+								      $fw->draw;
+								      $tw->draw;
+								      $bgc->configure( -state => 'disabled' );
+								  } } );
+$rl->configure( -command => sub { $fw->destroy;
+								  $tw->destroy;
+								  $curve->destroy;
+								  $curve = Curve_2d->new( $mw,
+													  $curve->{ 'filename' } );
+								  $tw = Time_Window->new( $curve );
+								  $fw = Field_Window->new( $curve );
+								  $blc->configure( -state => 'normal' );
+								  $bgc->configure( -state => 'normal' ); } );
+$l->configure( -command =>  sub { $fw->destroy;
+								  $tw->destroy;
+								  $curve->destroy;
+								  $curve = Curve_2d->new( $mw );
+								  $tw = Time_Window->new( $curve );
+								  $fw = Field_Window->new( $curve );
+								  $blc->configure( -state => 'normal' );
+								  $bgc->configure( -state => 'normal' ); } );
+
+$s->configure( -command => sub { $curve->write; } );
+
+$blc->pack(  -fill => 'x' );
+$bgc->pack(  -fill => 'x' );
+$rl->pack(   -fill => 'x' );
+$l->pack(    -fill => 'x' );
+$s->pack(    -fill => 'x' );
+$quit->pack( -fill => 'x' );
+
+# Now wait for user input
+
+MainLoop;
+
+
+
+################################################################
+
+sub show_message {
+    my $text = shift;
+
+    $mw->messageBox( -icon => 'error',
+					 -type => 'Ok',
+					 -title => 'Error',
+					 -message => $text );
+}
+
+
+1;
+
+
+################################################################
+# Package for a tie on a variable in the Time_Window package that
+# tells which time trace is currently shown. It just makes sure
+# that the variable won't get set to an impossible value and
+# updates two strings for displaying the value.
+
+package Field_Index;
+
+use strict;
+use warnings;
+
+our $tw;
+
+
+######################
+
+sub TIESCALAR {
+	my $self = -1;
+	$tw = $_[ 1 ];
+	bless \$self, shift;
+}
+
+
+######################
+
+sub STORE {
+	my $new_val = $_[ 1 ];
+
+	return $new_val if ${ $_[ 0 ] } == $new_val;
+
+	$new_val = 0 if $new_val < 0;
+	$new_val = $tw->num_traces - 1 if $new_val >= $tw->num_traces;
+	$tw->{ field_text } = sprintf "Field:   %.3f G",
+		                  $tw->start_field + $new_val * $tw->field_step;
+	$tw->{ index_text } = sprintf "Point:   %6d", $new_val;
+
+	${ $_[ 0 ] } = $new_val;
+	$tw->draw( $new_val );
+
+	return ${ $_[ 0 ] };
+}
+
+
+######################
+
+sub FETCH {
+	return ${ $_[ 0 ] };
+}
+
+
+1;
+
+
+################################################################
+# Package for a tie on a variable in the Time_Window package
+# that tells about the setting of one of the integration limits.
+
+package Time_Integration_Index;
+
+use strict;
+use warnings;
+
+our $curve;
+our $tw;
+
+
+######################
+
+sub TIESCALAR {
+	$tw = $_[ 1 ];
+	$curve = $tw->curve;
+	my $self = $tw->i_selected eq 'LEFT' ? $tw->integration_range_start :
+		                                   $tw->integration_range_end;
+	bless \$self, shift;
+}
+
+
+######################
+
+sub STORE {
+	my $new_val = $_[ 1 ];
+
+	return $new_val if ${ $_[ 0 ] } == $new_val;
+
+	if ( $tw->i_selected eq 'LEFT' ) {
+		${ $_[ 0 ] } = $tw->integration_range_start( $new_val );
+		$tw->{ int_start_time_text } =
+			sprintf 'Start of integration: %.4f 탎 (#%d)',
+				    $tw->start_time
+					+ ${ $_[ 0 ] } * $tw->delta_time, ${ $_[ 0 ] };
+	} else {
+		${ $_[ 0 ] } = $tw->integration_range_end( $new_val );
+		$tw->{ int_end_time_text } =
+			sprintf 'End of integration: %.4f 탎 (#%d)',
+				    $tw->start_time
+					+ ${ $_[ 0 ] } * $tw->delta_time, ${ $_[ 0 ] };
+	}
+
+	$tw->draw( );
+
+	return ${ $_[ 0 ] };
+}
+
+
+######################
+
+sub FETCH {
+	return ${ $_[ 0 ] };
+}
+
+
+1;
+
+
+################################################################
+# Package for displaying the window with the time traces and
+# calculating and storing integrated slices in field direction.
+
+package Time_Window;
+
+use strict;
+use warnings;
+use Tk;
+
+our $canavs_width = -1;
+
+
+######################
+
+sub new {
+    my $inv = shift;
+    my $class = ref( $inv ) || $inv;
+	die "Missing curve.\n" unless defined @_;
+	my $self = { curve      => shift,
+			     i_selected => undef };
+	bless $self, $class;
+	$self->init;
+	return $self;
+}
+
+
+######################
+
+sub destroy {
+	my $self = shift;
+	$self->{ iw }->destroy if defined $self->i_selected;
+	$self->top->destroy;
+}
+
+
+######################
+
+sub init {
+	my $self = shift;
+	my $c = $self->{ curve };
+
+	$self->start_time( - $c->trig_pos );
+	$self->end_time( $self->start_time + 10 * $c->timebase );
+	$self->delta_time( $c->time_res );
+	$self->start_field( $c->start_field );
+	$self->end_field( $c->end_field );
+	$self->field_step( $c->field_step );
+	$self->num_points( $c->trace_len );
+	$self->num_traces( $c->num_traces );
+
+	if ( $self->num_traces <= 200 ) {
+		$self->{ vmi } = 5;
+		$self->{ vli } = 50;
+	} elsif ( $self->num_traces <= 1000 ) {
+		$self->{ vmi } = 10;
+		$self->{ vli } = 100;
+	} else {
+		$self->{ vmi } = 20;
+		$self->{ vli } = 200;
+	}
+
+	if ( $self->num_points <= 200 ) {
+		$self->{ hmi } = 5;
+		$self->{ hli } = 50;
+	} elsif ( $self->num_points <= 1000 ) {
+		$self->{ hmi } = 10;
+		$self->{ hli } = 100;
+	} else {
+		$self->{ hmi } = 20;
+		$self->{ hli } = 200;
+	}
+
+	$self->{ canvas_top_border }    = 30;
+	$self->{ canvas_bottom_border } = 30;
+	$self->{ canvas_left_border }   = 50;
+	$self->{ canvas_right_border }  = 20;
+
+	tie $self->{ shown_index }, 'Field_Index', $self;
+
+	$self->{ shown_index } = 0;
+	$self->{ index_text } = "Point:     0";
+	$self->{ field_text } = sprintf "Field:   %.3f G", $self->start_field;
+}
+
+
+######################
+
+sub top {
+	my $self = shift;
+	unless ( exists $self->{ top } ) {
+		( my $name = $self->{ curve }->file ) =~ s/^.*?([^\/]*)$/$1/;
+
+		$self->{ top } = $mw->Toplevel( -title => 'Time trace: ' . $name );
+		$self->{ top }->geometry( '500x530+0+0' );
+
+		$self->top->bind( '<Key-Home>' =>
+						   sub { $self->{ shown_index } = 0; } );
+		$self->top->bind( '<Key-End>' =>
+						   sub { $self->{ shown_index } =
+									         $self->curve->num_traces - 1; } );
+		$self->top->bind( '<Key-Up>' =>
+						   sub { $self->{ shown_index } += 1; } );
+		$self->top->bind( "<$medium-Key-Up>" =>
+						   sub { $self->{ shown_index } += $self->{ vmi }; } );
+		$self->top->bind( "<$fast-Key-Up>" =>
+						   sub { $self->{ shown_index } += $self->{ vli }; } );
+		$self->top->bind( '<Key-Down>' =>
+						   sub { $self->{ shown_index } -= 1; } );
+		$self->top->bind( "<$medium-Key-Down>" =>
+						   sub { $self->{ shown_index } -= $self->{ vmi }; } );
+		$self->top->bind( "<$fast-Key-Down>" =>
+					       sub { $self->{ shown_index } -= $self->{ vli }; } );
+
+		$self->top->bind( '<Configure>' => sub { $self->draw; } );
+	}
+	return $self->{ top };
+}
+
+
+######################
+
+sub canvas {
+	my $self = shift;
+	return $self->{ canvas } if exists $self->{ canvas };
+
+	$self->{ fc } = $self->top->Frame;
+	my $c = $self->{ canvas } = $self->{ fc }->Canvas( -background => 'black' );
+
+	$c->CanvasBind( '<Button-5>' =>
+					sub { $self->{ shown_index } += 1;
+						  $c->yviewMoveto( 0 ); } );
+	$c->CanvasBind( '<Shift-Button-5>' =>
+					sub { $self->{ shown_index } += $self->{ vmi };
+						  $c->xviewMoveto( 0 ); } );
+	$c->CanvasBind( '<Control-Button-5>' =>
+					sub { $self->{ shown_index } += $self->{ vli };
+						  $c->yviewMoveto( 0 ); } );
+	$c->CanvasBind( '<Button-4>' =>
+					sub { $self->{ shown_index } -= 1;
+						  $c->yviewMoveto( 0 ); } );
+	$c->CanvasBind( '<Shift-Button-4>' =>
+					sub { $self->{ shown_index } -= $self->{ vmi };
+						  $c->xviewMoveto( 0 ); } );
+	$c->CanvasBind( '<Control-Button-4>' =>
+					sub { $self->{ shown_index } -= $self->{ vli };
+						  $c->yviewMoveto( 0 ); } );
+
+	my $fw = $self->top->Frame;
+	my $p = $fw->Label( -width        => 15,
+						-textvariable => \$self->{ index_text } );
+	my $f = $fw->Label( -width        => 20,
+						-textvariable => \$self->{ field_text } );
+	my $b = $fw->Button( -text    => 'Integration',
+						 -command => sub { $self->integrate; } );
+
+	$self->{ fc }->pack( -side   => 'top',
+						 -fill   => 'both',
+						 -expand => 1 );
+	$self->{ canvas }->pack( -side   => 'top',
+							 -fill   => 'both',
+							 -expand => 1 );
+
+	$fw->pack( -side   => 'bottom',
+			   -fill   => 'x' );
+	$p->pack(  -side   => 'left',
+			   -expand => 1 );
+	$f->pack(  -side   => 'left',
+			   -expand => 1 );
+	$b->pack(  -side   => 'right',
+			   -expand => 1 );
+
+ 	return $self->{ canvas };
+}
+
+
+######################
+
+sub curve {
+	return ( shift )->{ curve };
+}
+
+
+######################
+
+sub draw {
+	my ( $self, $index ) = @_;
+
+	return unless $self->canvas->width > 1 and $self->canvas->height > 1;
+
+	unless ( defined $index ) {
+		$self->draw_frame;
+		$index = $self->{ shown_index };
+	} else {
+		$self->canvas->delete( $self->{ line } ) if exists $self->{ line };
+	}
+
+	my $trace = $self->curve->trace( $index );
+	my $dx = ( $self->canvas->width - $self->{ canvas_left_border }
+			   - $self->{ canvas_right_border } ) / ( $self->num_points - 1 );
+	my $h  = $self->canvas->height - $self->{ canvas_top_border }
+		     - $self->{ canvas_bottom_border };
+	my $dy =  $h / ( $self->curve->max - $self->curve->min );
+
+	my $x = $self->{ canvas_left_border };
+	my $y = $h + $self->{ canvas_bottom_border };
+
+	my @l;
+	for ( 0 ... $self->num_points - 1 ) {
+		push @l, $x;
+		$x += $dx;
+		push @l, $y - ( $trace->[ $_ ] - $self->curve->min ) * $dy;
+	}
+
+	$self->{ line } = $self->canvas->createLine( @l, -fill => 'white' );
+}
+
+
+######################
+
+sub draw_frame {
+	my $self = shift;
+
+	$self->canvas->delete( 'all' );
+
+	# Draw the outer frame
+
+	my @ul = ( $self->{ canvas_left_border } - 1,
+			   $self->{ canvas_top_border } - 1 );
+
+	my @ur = ( $self->canvas->width - $self->{ canvas_right_border } + 1,
+			   $self->{ canvas_top_border } - 1 );
+
+	my @lr = ( $self->canvas->width - $self->{ canvas_right_border } + 1,
+			   $self->canvas->height - $self->{ canvas_bottom_border } + 1 );
+
+	my @ll = ( $self->{ canvas_left_border } - 1,
+			   $self->canvas->height - $self->{ canvas_bottom_border } + 1 );
+
+	$self->canvas->createLine( @ul, @ur, @lr, @ll, @ul,
+							   -fill => 'yellow' );
+
+	# Draw the upper markers with the point numbers
+
+	my $sw = $self->canvas->width - $self->{ canvas_right_border }
+		     - $self->{ canvas_left_border } - 1;
+	my @l;
+	$l[ 1 ] = $self->{ canvas_top_border } - 1;
+	$l[ 3 ] = $self->{ canvas_top_border } - 6;
+
+	for my $i ( 0 ... 10 ) {
+		$l[ 0 ] = $l[ 2 ] = $self->{ canvas_left_border } + $i * $sw / 10;
+		$self->canvas->createLine( @l, -fill => 'yellow' );
+
+		$self->canvas->createText( $l[ 0 ], $l[ 3 ] - 8,
+						 -text => sprintf( "%d", $i * $self->num_points / 10 ),
+						 -fill => 'yellow' );
+	}
+
+	# Draw the dashed line at the trigger position
+
+	my $x = 0.1 * $self->curve->trig_pos / $self->curve->timebase * $sw;
+
+	$l[ 1 ] = $self->canvas->height - $self->{ canvas_bottom_border } - 1;
+	$l[ 3 ] = $self->{ canvas_top_border } + 1;
+	$l[ 0 ] = $l[ 2 ] = $x + $self->{ canvas_left_border };
+
+	$self->canvas->createLine( @l, -fill => 'red', -dash => [ 1, 5 ] );
+
+	$l[ 1 ] = $self->canvas->height - $self->{ canvas_bottom_border } + 1;
+	$l[ 3 ] = $self->canvas->height- $self->{ canvas_bottom_border } + 6;
+
+	# Draw the lower markers with the times (relative to the trigger position)
+
+	my $v = 0.0;
+	while ( $x - $sw / 5 >= 0 ) {
+		$x -= $sw / 5;
+		$v -= 2 * $self->curve->timebase;
+	}
+
+	$x += $self->{ canvas_left_border };
+
+	for my $i ( 0 ... 5 ) {
+		$l[ 0 ] = $l[ 2 ] = $x;
+		$self->canvas->createLine( @l, -fill => 'yellow' );
+
+		$self->canvas->createText( $l[ 0 ], $l[ 3 ] + 9,
+								   -text => sprintf( "%.1f", $v ),
+								   -fill => 'yellow' );
+
+		$x +=  $sw / 5;
+		$v += 2 * $self->curve->timebase;
+	}
+
+	$x -= 3 * $sw / 10;
+
+	$self->canvas->createText( $x, $l[ 3 ] + 6,
+							   -text => '탎',
+							   -fill => 'yellow' );
+
+	# Draw the vertical scale
+
+	$l[ 0 ] = $self->{ canvas_left_border } - 1;
+	$l[ 2 ] = $self->{ canvas_left_border } - 6;
+
+	my $sh = $self->canvas->height - $self->{ canvas_top_border }
+		     - $self->{ canvas_bottom_border };
+
+	my $fac = 1;
+	my $vs_min;
+	my $vs_max;
+
+	while ( 1 ) {
+		$vs_min = int( $fac * $self->curve->min + 0.5 );
+		$vs_min += 1 if $vs_min < $fac * $self->curve->min;
+		$vs_max = int( $fac * $self->curve->max - 0.5 );
+		$vs_max -= 1 if $vs_max > $fac * $self->curve->max;
+		last if $vs_max - $vs_min >= 1;
+		$fac *= 1000;
+	}
+
+	my $v_range = $fac * ( $self->curve->max - $self->curve->min );
+	my $dv = 0.2 * ( $vs_max - $vs_min );
+	my $v_off = $vs_min - $fac * $self->curve->min;
+
+	my $yd = $sh * $dv / $v_range;
+	my $yo = $sh * $v_off / $v_range;
+
+	$l[ 1 ] = $l[ 3 ] =
+		      $self->canvas->height - $self->{ canvas_bottom_border } - $yo;
+
+	my $vs = $vs_min;
+
+	for my $i ( 0 ... 5 ) {
+		$self->canvas->createLine( @l, -fill => 'yellow' );
+		$self->canvas->createText( $l[ 2 ] - 20, $l[ 1 ],
+								   -text => sprintf( "%.1f", $vs, ),
+								   -fill => 'yellow' );
+		$vs += $dv;
+		$l[ 1 ] = $l[ 3 ] -= $yd;
+	}
+
+	my $unit;
+	if ( $fac == 1 ) {
+		$unit = "V";
+	} elsif ( $fac == 1000 ) {
+		$unit = "mV";
+	} elsif  ( $fac == 1000000 ) {
+		$unit = "킮";
+	}
+
+	$self->canvas->createText( $l[ 0 ] - 20, $l[ 3 ] + 1.5 * $yd,
+							   -text => $unit, -fill => 'yellow' );
+
+	# Draw zero line (if applicable)
+
+	if ( $self->curve->max > 0 and $self->curve->min < 0 ) {
+		$l[ 0 ] = $self->{ canvas_left_border };
+		$l[ 2 ] = $self->canvas->width - $self->{ canvas_right_border };
+		$l[ 1 ] = $l[ 3 ] =
+			         $self->canvas->height - $self->{ canvas_bottom_border }
+					 + $fac * $self->curve->min / $v_range * $sh;
+		$self->canvas->createLine( @l, -fill => 'green', -dash => [ 1, 5 ] );
+	}
+
+	# Draw the markers for the baseline correction region
+
+	if ( defined $self->curve->bl_selected ) {
+		$l[ 1 ] = $self->canvas->height - $self->{ canvas_bottom_border };
+		$l[ 3 ] = $self->{ canvas_top_border };
+
+		$l[ 0 ] = $l[ 2 ] = $self->{ canvas_left_border }
+			                + $sw * $self->curve->baseline_range_start
+							/ ( $self->num_points - 1 );
+
+		if ( $self->curve->bl_selected eq 'RIGHT' ) {
+			$self->canvas->createLine( @l, -fill => 'blue',
+									   -dash => [ 1, 5 ] );
+		} else {
+			$self->canvas->createLine( @l, -fill => 'blue' );
+		}
+
+		$l[ 0 ] = $l[ 2 ] = $self->{ canvas_left_border }
+			                + $sw * $self->curve->baseline_range_end
+							/ ( $self->num_points - 1 );
+
+		if ( $self->curve->bl_selected eq 'LEFT' ) {
+			$self->canvas->createLine( @l, -fill => 'blue',
+									   -dash => [ 1, 5 ] );
+		} else {
+			$self->canvas->createLine( @l, -fill => 'blue' );
+		}
+	}
+
+	# Draw the markers for the integration region
+
+	if ( defined $self->i_selected ) {
+		$l[ 1 ] = $self->canvas->height - $self->{ canvas_bottom_border };
+		$l[ 3 ] = $self->{ canvas_top_border };
+
+		$l[ 0 ] = $l[ 2 ] = $self->{ canvas_left_border }
+			                + $sw * $self->integration_range_start
+							/ ( $self->num_points - 1 );
+
+		if ( $self->i_selected eq 'RIGHT' ) {
+			$self->canvas->createLine( @l, -fill => 'orange',
+									   -dash => [ 1, 5 ] );
+		} else {
+			$self->canvas->createLine( @l, -fill => 'orange' );
+		}
+
+		$l[ 0 ] = $l[ 2 ] = $self->{ canvas_left_border }
+			                + $sw * $self->integration_range_end
+							/ ( $self->num_points - 1 );
+
+		if ( $self->i_selected eq 'LEFT' ) {
+			$self->canvas->createLine( @l, -fill => 'orange',
+									   -dash => [ 1, 5 ] );
+		} else {
+			$self->canvas->createLine( @l, -fill => 'orange' );
+		}
+	}
+}
+
+
+######################
+
+sub i_selected {
+	my $self = shift;
+	$self->{ i_selected } = shift if @_;
+	return $self->{ i_selected };
+}
+
+
+######################
+
+sub integrate {
+	my $self = shift;
+
+	return if defined $self->i_selected or defined $self->curve->bl_selected;
+
+	return unless $self->get_integration_range;
+
+	my $start = $self->{ integration_range_start };
+	my $end = $self->{ integration_range_end };
+	my $num_points = $end - $start + 1;
+
+	my @int;
+	foreach my $trace ( @{ $self->curve->{ traces } } ) {
+		my $sum = 0.0;
+		$sum += $_ foreach @{ $trace }[ $start ... $end ];
+		push @int, $sum / $num_points;
+	}
+
+	my $f;
+
+	while ( 1 ) {
+		my $file = Filesel::show( 1 );
+		return unless defined $file;
+		next if $file eq '';
+		last if open $f, ">$file";
+		show_message( "Can't open '$file' for writing" );
+	}
+
+	printf $f "# Filename          : %s\n" .
+		      "# Date              : %s\n" .
+			  "# Start field       = %.3f G\n" .
+			  "# End field         = %.3f G\n" .
+			  "# Field step size   = %.3f G\n" .
+              "# No. of scans      = %d\n" .
+              "# No. of averages   = %d\n" .
+			  "# Sensitivity       = %.3f mV\n" .
+			  "# Integration range = %.4f - %.4f us (using %d points)\n" .
+			  "%s" .
+			  "# Field in G, signal in mV\n",
+		   $self->curve->file,
+		   $self->curve->date,
+		   $self->start_field,
+		   $self->end_field,
+		   $self->field_step,
+		   $self->curve->num_scans,
+		   $self->curve->num_avg,
+		   $self->curve->sens,
+		   $self->start_time
+		   + $self->{ integration_range_start } * $self->curve->time_res,
+		   $self->start_time
+		   + $self->{ integration_range_end } * $self->curve->time_res,
+		   $num_points,
+		   $self->curve->lines;
+
+	printf $f "%.3f\t%f\n", $self->start_field + $_ * $self->field_step,
+		   1000 * shift @int foreach ( 0 ... $self->num_traces - 1 );
+
+	close $f;
+}
+
+
+######################
+
+sub get_integration_range {
+	my $self = shift;
+
+	$self->{ int_start_time_text } =
+		sprintf 'Start of integration: %.4f 탎 (#%d)',
+		$self->start_time + $self->integration_range_start * $self->delta_time,
+		$self->integration_range_start;
+	$self->{ int_end_time_text } = sprintf 'End of integration: %.4f 탎 (#%d)',
+		$self->start_time + $self->integration_range_end * $self->delta_time,
+		$self->integration_range_end;
+	my $res;
+
+	$self->{ iw } = $mw->Toplevel( -title => 'Time integration parameters' );
+	$self->{ iw }->geometry( '+200+560' );
+	$self->{ iw }->resizable( 0, 0 );
+
+	my $sb_val;
+	my $eb_val;
+
+	my $fs = $self->{ iw }->Frame;
+	my $sb = $fs->Checkbutton( -variable => \$sb_val );
+	my $s  = $fs->Label( -textvariable => \$self->{ int_start_time_text },
+						 -width => 36 );
+	my $fe = $self->{ iw }->Frame;
+	my $eb = $fe->Checkbutton( -variable => \$eb_val );
+	my $e = $fe->Label( -textvariable => \$self->{ int_end_time_text },
+						-width => 36 );
+	my $fb = $self->{ iw }->Frame;
+	my $d = $fb->Button( -text => 'Integrate',
+						  -command => sub { $res = 1;
+										    $self->{ iw }->destroy; } );
+	my $q = $fb->Button( -text => 'Quit',
+						  -command => sub { $res = 0;
+										    $self->{ iw }->destroy; } );
+
+	$fs->pack( -side => 'top' );
+	$sb->pack( -side => 'left', -fill => 'x', -padx => 3 );
+	$s->pack(  -side => 'left', -fill => 'x' );
+	$fe->pack( -side => 'top' );
+	$eb->pack( -side => 'left', -fill => 'x', -padx => 3 );
+	$e->pack(  -side => 'left', -fill => 'x' );
+	$fb->pack( -side => 'top' );
+	$d->pack(  -fill => 'x' );
+	$q->pack(  -fill => 'x' );
+
+	$sb->configure( -command => sub { unless ( $sb_val and $eb_val ) {
+						                  $sb->select;
+										  return;
+									  }
+									  $eb->deselect;
+									  $self->change_integration_cursor; } );
+	$eb->configure( -command => sub { unless ( $sb_val and $eb_val ) {
+						                  $eb->select;
+										  return;
+									  }
+									  $sb->deselect;
+									  $self->change_integration_cursor; } );
+
+	$eb->select;
+	$eb_val = 1;
+	$self->change_integration_cursor;
+
+	$self->{ iw }->bind( '<Key-Up>' =>
+			               sub { $self->{ shown_index } += 1; } );
+	$self->{ iw }->bind( "<$medium-Key-Up>" =>
+			               sub { $self->{ shown_index } += $self->{ hmi }; } );
+	$self->{ iw }->bind( "<$fast-Key-Up>" =>
+					       sub { $self->{ shown_index } += $self->{ hli }; } );
+	$self->{ iw }->bind( '<Key-Down>' =>
+			               sub { $self->{ shown_index } -= 1; } );
+	$self->{ iw }->bind( "<$medium-Key-Down>" =>
+                           sub { $self->{ shown_index } -= $self->{ hmi }; } );
+	$self->{ iw }->bind( "<$fast-Key-Down>" =>
+						   sub { $self->{ shown_index } -= $self->{ hli }; } );
+
+	$self->top->bind( '<Key-Return>' => sub { $res = 1;
+											  $self->{ iw }->destroy; } );
+	$self->{ iw }->bind( '<Key-Return>' => sub { $res = 1;
+										         $self->{ iw }->destroy; } );
+
+	$self->top->bind( '<Key-Escape>' => sub { $res = 0;
+											  $self->{ iw }->destroy; } );
+	$self->{ iw }->bind( '<Key-Escape>' => sub { $res = 0;
+										         $self->{ iw }->destroy; } );
+
+	$self->top->bind( '<Key-F1>' =>
+					              sub { if ( $eb_val ) {
+						                    $eb_val = 0;
+								            $sb_val = 1;
+										} else {
+								            $sb_val = 0;
+								            $eb_val = 1;
+										}
+							            $self->change_integration_cursor; } );
+	$self->{ iw }->bind( '<Key-F1>' =>
+					               sub { if ( $eb_val ) {
+						                     $eb_val = 0;
+								             $sb_val = 1;
+							             } else {
+								             $sb_val = 0;
+								             $eb_val = 1; }
+							             $self->change_integration_cursor; } );
+
+    $self->{ iw }->waitWindow( $self->{ iw } );
+
+	if ( $self->top->state ) {
+		$self->top->bind( '<Key-Right>' => '' ) ;
+		$self->top->bind( "<$medium-Key-Right>" => '' );
+		$self->top->bind( "<$fast-Key-Right>" => '' );
+		$self->top->bind( '<Key-Left>' => '' );
+		$self->top->bind( "<$medium-Key-Left>" => '' );
+		$self->top->bind( "<$fast-Key-Left>" => '' );
+
+		$self->top->bind( '<Key-Return>' => '' );
+		$self->top->bind( '<Key-Escape>' => '' );
+		$self->top->bind( '<Key-F1>' => '' );
+	}
+
+	untie( $self->i_selected eq 'LEFT' ? $self->{ integration_range_start } :
+			                             $self->{ integration_range_end } );
+
+	$self->i_selected( undef );
+	$self->draw;
+
+	return $res;
+}
+
+
+######################
+
+sub change_integration_cursor {
+	my $self = shift;
+
+	if ( ! defined $self->i_selected or $self->i_selected eq 'LEFT' ) {
+		untie $self->{ integration_range_start }
+			if defined $self->i_selected;
+		$self->i_selected( 'RIGHT' );
+		tie $self->{ integration_range_end }, 'Time_Integration_Index', $self;
+		$self->top->bind( '<Key-Right>' =>
+			   sub { $self->{ integration_range_end } += 1; } );
+		$self->top->bind( "<$medium-Key-Right>" =>
+			   sub { $self->{ integration_range_end } += $self->{ hmi }; } );
+		$self->top->bind( "<$fast-Key-Right>" =>
+			   sub { $self->{ integration_range_end } += $self->{ hli }; } );
+		$self->top->bind( '<Key-Left>' =>
+			   sub { $self->{ integration_range_end } -= 1; } );
+		$self->top->bind( "<$medium-Key-Left>" =>
+			   sub { $self->{ integration_range_end } -= $self->{ hmi }; } );
+		$self->top->bind( "<$fast-Key-Left>" =>
+			   sub { $self->{ integration_range_end } -= $self->{ hli }; } );
+		$self->{ iw }->bind( '<Key-Right>' =>
+			   sub { $self->{ integration_range_end } += 1; } );
+		$self->{ iw }->bind( "<$medium-Key-Right>" =>
+			   sub { $self->{ integration_range_end } += $self->{ hmi }; } );
+		$self->{ iw }->bind( "<$fast-Key-Right>" =>
+			   sub { $self->{ integration_range_end } += $self->{ hli }; } );
+		$self->{ iw }->bind( '<Key-Left>' =>
+			   sub { $self->{ integration_range_end } -= 1; } );
+		$self->{ iw }->bind( "<$medium-Key-Left>" =>
+			   sub { $self->{ integration_range_end } -= $self->{ hmi }; } );
+		$self->{ iw }->bind( "<$fast-Key-Left>" =>
+			   sub { $self->{ integration_range_end } -= $self->{ hli }; } );
+	} else {
+		untie $self->{ integration_range_end };
+		$self->i_selected( 'LEFT' );
+		tie $self->{ integration_range_start }, 'Time_Integration_Index',
+			$self;
+		$self->top->bind( '<Key-Right>' =>
+			   sub { $self->{ integration_range_start } += 1; } );
+		$self->top->bind( "<$medium-Key-Right>" =>
+			   sub { $self->{ integration_range_start } += $self->{ hmi }; } );
+		$self->top->bind( "<$fast-Key-Right>" =>
+			   sub { $self->{ integration_range_start } += $self->{ hli }; } );
+		$self->top->bind( '<Key-Left>' =>
+			   sub { $self->{ integration_range_start } -= 1; } );
+		$self->top->bind( "<$medium-Key-Left>" =>
+			   sub { $self->{ integration_range_start } -= $self->{ hmi }; } );
+		$self->top->bind( "<$fast-Key-Left>" =>
+			   sub { $self->{ integration_range_start } -= $self->{ hli }; } );
+		$self->{ iw }->bind( '<Key-Right>' =>
+			   sub { $self->{ integration_range_start } += 1; } );
+		$self->{ iw }->bind( "<$medium-Key-Right>" =>
+			   sub { $self->{ integration_range_start } += $self->{ hmi }; } );
+		$self->{ iw }->bind( "<$fast-Key-Right>" =>
+			   sub { $self->{ integration_range_start } += $self->{ hli }; } );
+		$self->{ iw }->bind( '<Key-Left>' =>
+			   sub { $self->{ integration_range_start } -= 1; } );
+		$self->{ iw }->bind( "<$medium-Key-Left>" =>
+			   sub { $self->{ integration_range_start } -= $self->{ hmi }; } );
+		$self->{ iw }->bind( "<$fast-Key-Left>" =>
+			   sub { $self->{ integration_range_start } -= $self->{ hli }; } );
+	}
+
+	$self->draw;
+}
+
+
+######################
+
+sub integration_range_start {
+	my ( $self, $start ) = @_;
+
+	if ( defined $start ) {
+		$start = 0 if $start < 0;
+		$start = $self->integration_range_end
+			if $start > $self->integration_range_end;
+		$self->{ integration_range_start } = $start;
+	}
+
+	unless ( exists $self->{ integration_range_start } ) {
+		$self->{ integration_range_start } =
+			                              int( ( 0.5 + $self->curve->trig_pos )
+											   / $self->curve->time_res );
+
+		$self->{ integration_range_start } = $self->{ integration_range_end }
+			if     exists $self->{ integration_range_end }
+		       and $self->{ integration_range_start } >
+				                              $self->{ integration_range_end };
+	}
+
+	return $self->{ integration_range_start };
+}
+
+
+######################
+
+sub integration_range_end {
+	my ( $self, $end ) = @_;
+
+	if ( defined $end ) {
+		$end = $self->{ integration_range_start }
+			if $end < $self->{ integration_range_start };
+		$end = $self->num_points - 1 if $end >= $self->num_points;
+		$self->{ integration_range_end } = $end;
+	}
+
+	unless ( exists $self->{ integration_range_end } ) {
+		$self->{ integration_range_end } =
+			                              int( ( 1.5 + $self->curve->trig_pos )
+											   / $self->curve->time_res );
+
+		$self->{ integration_range_end } = $self->num_points - 1
+			if $self->{ integration_range_end } >= $self->num_points;
+
+		$self->{ integration_range_end } = $self->{ integration_range_start }
+			if     exists $self->{ integration_range_start }
+		       and $self->{ integration_range_end } <
+				                            $self->{ integration_range_start };
+	}
+
+	return $self->{ integration_range_end };
+}
+
+
+######################
+
+sub start_time {
+	my $self = shift;
+	$self->{ start_time } = shift if @_;
+	return $self->{ start_time };
+}
+
+
+######################
+
+sub end_time {
+	my $self = shift;
+	$self->{ end_time } = shift if @_;
+	return $self->{ end_time };
+}
+
+
+######################
+
+sub delta_time {
+	my $self = shift;
+	$self->{ delta_time } = shift if @_;
+	return $self->{ delta_time };
+}
+
+
+######################
+
+sub start_field {
+	my $self = shift;
+	$self->{ start_field } = shift if @_;
+	return $self->{ start_field };
+}
+
+
+######################
+
+sub end_field {
+	my $self = shift;
+	$self->{ end_field } = shift if @_;
+	return $self->{ end_field };
+}
+
+
+######################
+
+sub field_step {
+	my $self = shift;
+	$self->{ field_step } = shift if @_;
+	return $self->{ field_step };
+}
+
+
+######################
+
+sub num_points {
+	my $self = shift;
+	$self->{ num_points } = shift if @_;
+	return $self->{ num_points };
+}
+
+
+######################
+
+sub num_traces {
+	my $self = shift;
+	$self->{ num_traces } = shift if @_;
+	return $self->{ num_traces };
+}
+
+
+1;
+
+
+################################################################
+# Package for a tie on a variable in the Field_Window package that
+# tells which field trace is currently shown. It just makes sure
+# that the variable won't get set to an impossible value and
+# updates two strings for displaying the value.
+
+package Time_Index;
+
+use strict;
+use warnings;
+
+our $fw;
+
+
+######################
+
+sub TIESCALAR {
+	my $self = -1;
+	$fw = $_[ 1 ];
+	bless \$self, shift;
+}
+
+
+######################
+
+sub STORE {
+	my $new_val = $_[ 1 ];
+	$new_val =~ s/^Point:\s+(.*)/$1/;
+
+	return $new_val if ${ $_[ 0 ] } == $new_val;
+
+	$new_val = 0 if $new_val < 0;
+	$new_val = $fw->trace_len - 1 if $new_val >= $fw->trace_len;
+	$fw->{ time_text } = sprintf "Time:   %.4f 탎",
+		                 $fw->start_time + $new_val * $fw->delta_time;
+	$fw->draw( $new_val );
+	$fw->{ index_text } = sprintf "Point:   %4d", $new_val;
+
+	${ $_[ 0 ] } = $new_val;
+
+	return ${ $_[ 0 ] };
+}
+
+
+######################
+
+sub FETCH {
+	return ${ $_[ 0 ] };
+}
+
+
+1;
+
+
+################################################################
+# Package for a tie on a variable in the Field_Window package
+# that tells about the setting of one of the integration limits.
+
+package Field_Integration_Index;
+
+use strict;
+use warnings;
+
+our $curve;
+our $fw;
+
+
+######################
+
+sub TIESCALAR {
+	$fw = $_[ 1 ];
+	$curve = $fw->curve;
+	my $self = $fw->i_selected eq 'LEFT' ? $fw->integration_range_start :
+		                                   $fw->integration_range_end;
+	bless \$self, shift;
+}
+
+
+######################
+
+sub STORE {
+	my $new_val = $_[ 1 ];
+
+	return $new_val if ${ $_[ 0 ] } == $new_val;
+
+	if ( $fw->i_selected eq 'LEFT' ) {
+		${ $_[ 0 ] } = $fw->integration_range_start( $new_val );
+		$fw->{ int_start_field_text } =
+			sprintf 'Start of integration: %.3f G (#%d)',
+				    $curve->start_field + ${ $_[ 0 ] } * $curve->field_step,
+					${ $_[ 0 ] };
+	} else {
+		${ $_[ 0 ] } = $fw->integration_range_end( $new_val );
+		$fw->{ int_end_field_text } =
+			sprintf 'End of integration: %.3f G (#%d)',
+					$curve->start_field + ${ $_[ 0 ] } * $curve->field_step,
+					${ $_[ 0 ] };
+	}
+
+	$fw->draw( );
+	return ${ $_[ 0 ] };
+}
+
+
+######################
+
+sub FETCH {
+	return ${ $_[ 0 ] };
+}
+
+
+1;
+
+
+################################################################
+# Package for displaying the window with the field traces and
+# calculating and storing integrated slices in time direction.
+
+package Field_Window;
+
+use strict;
+use warnings;
+use Tk;
+
+
+######################
+
+sub new {
+    my $inv = shift;
+    my $class = ref( $inv ) || $inv;
+	die "Missing curve.\n" unless defined @_;
+	my $self = { curve      => shift,
+			     i_selected => undef };
+	bless $self, $class;
+	$self->init;
+	return $self;
+}
+
+
+######################
+
+sub destroy {
+	my $self = shift;
+	$self->{ iw }->destroy if defined $self->i_selected;
+	$self->top->destroy;
+}
+
+
+######################
+
+sub init {
+	my $self = shift;
+	my $c = $self->{ curve };
+
+	$self->start_field( $c->start_field );
+	$self->end_field( $c->end_field );
+	$self->field_step( $c->field_step );
+	$self->start_time( - $c->trig_pos );
+	$self->end_time( $self->start_time + 10 * $c->timebase );
+	$self->delta_time( $c->time_res );
+	$self->num_points( $c->num_traces );
+	$self->trace_len( $c->trace_len );
+
+	if ( $self->trace_len <= 200 ) {
+		$self->{ vmi } = 5;
+		$self->{ vli } = 50;
+	} elsif ( $self->trace_len <= 1000 ) {
+		$self->{ vmi } = 10;
+		$self->{ vli } = 100;
+	} else {
+		$self->{ vmi } = 20;
+		$self->{ vli } = 200;
+	}
+
+	if ( $self->num_points <= 200 ) {
+		$self->{ hmi } = 5;
+		$self->{ hli } = 50;
+	} elsif ( $self->num_points <= 1000 ) {
+		$self->{ hmi } = 10;
+		$self->{ hli } = 100;
+	} else {
+		$self->{ hmi } = 20;
+		$self->{ hli } = 200;
+	}
+
+	$self->{ canvas_top_border }    = 30;
+	$self->{ canvas_bottom_border } = 30;
+	$self->{ canvas_left_border }   = 50;
+	$self->{ canvas_right_border }  = 20;
+
+	tie $self->{ shown_index }, 'Time_Index', $self;
+
+	$self->{ shown_index } = $self->{ index_text } = sprintf "Point:   %5d",
+		                     0.1 * $self->trace_len
+		                     * $self->curve->trig_pos / $self->curve->timebase;
+	$self->{ time_text } = sprintf "Time:   %.4f 탎",
+		        $self->start_time + $self->{ shown_index } * $self->delta_time;
+}
+
+
+######################
+
+sub top {
+	my $self = shift;
+	unless ( exists $self->{ top } ) {
+		( my $name = $self->{ curve }->file ) =~ s/^.*?([^\/]*)$/$1/;
+
+		$self->{ top } = $mw->Toplevel( -title => 'Field trace: ' . $name );
+		$self->{ top }->geometry( '500x530+512+0' );
+
+		$self->top->bind( '<Key-Home>' =>
+						   sub { $self->{ shown_index } = 0; } );
+		$self->top->bind( '<Key-End>' =>
+						   sub { $self->{ shown_index } =
+											  $self->curve->trace_len - 1; } );
+		$self->top->bind( '<Key-Up>' =>
+						   sub { $self->{ shown_index } += 1; } );
+		$self->top->bind( "<$medium-Key-Up>" =>
+						   sub { $self->{ shown_index } += $self->{ vmi }; } );
+		$self->top->bind( "<$fast-Key-Up>" =>
+						   sub { $self->{ shown_index } += $self->{ vli }; } );
+		$self->top->bind( '<Key-Down>' =>
+						   sub { $self->{ shown_index } -= 1; } );
+		$self->top->bind( "<$medium-Key-Down>" =>
+						   sub { $self->{ shown_index } -= $self->{ vmi }; } );
+		$self->top->bind( "<$fast-Key-Down>" =>
+						   sub { $self->{ shown_index } -= $self->{ vli }; } );
+
+		$self->top->bind( '<Configure>' => sub { $self->draw; } );
+	}
+	return $self->{ top };
+}
+
+
+######################
+
+sub canvas {
+	my $self = shift;
+	return $self->{ canvas } if exists $self->{ canvas };
+
+	$self->{ fc } = $self->top->Frame( -borderwidth => 0 );
+	my $c = $self->{ canvas } = $self->{ fc }->Canvas( background => 'black' );
+
+	$c->CanvasBind( '<Button-5>' =>
+					sub { $self->{ shown_index } += 1;
+						  $c->yviewMoveto( 0 ); } );
+	$c->CanvasBind( '<Shift-Button-5>' =>
+					sub { $self->{ shown_index } += $self->{ vmi };
+						  $c->xviewMoveto( 0 ); } );
+	$c->CanvasBind( '<Control-Button-5>' =>
+					sub { $self->{ shown_index } += $self->{ vli };
+						  $c->yviewMoveto( 0 ); } );
+	$c->CanvasBind( '<Button-4>' =>
+					sub { $self->{ shown_index } -= 1;
+						  $c->yviewMoveto( 0 ); } );
+	$c->CanvasBind( '<Shift-Button-4>' =>
+					sub { $self->{ shown_index } -= $self->{ vmi };
+						  $c->xviewMoveto( 0 ); } );
+	$c->CanvasBind( '<Control-Button-4>' =>
+					sub { $self->{ shown_index } -= $self->{ vli };
+						  $c->yviewMoveto( 0 ); } );
+
+	my $fw =  $self->top->Frame;
+	my $p = $fw->Label( -width        => 15,
+						-textvariable => \$self->{ index_text } );
+	my $f = $fw->Label( -width        => 20,
+						-textvariable => \$self->{ time_text } );
+	my $b = $fw->Button( -text    => 'Integration',
+						 -command => sub { $self->integrate; } );
+
+	$self->{ fc }->pack( -side   => 'top',
+						 -fill   => 'both',
+						 -expand => 1 );
+	$self->{ canvas }->pack( -side   => 'top',
+							 -fill   => 'both',
+							 -expand => 1 );
+
+	$fw->pack( -side   => 'bottom',
+			   -fill   => 'x' );
+	$p->pack(  -side   => 'left',
+			   -expand => 1 );
+	$f->pack(  -side   => 'left',
+			   -expand => 1 );
+	$b->pack(  -side   => 'right',
+			   -expand => 1 );
+
+	return $self->{ canvas };
+}
+
+
+######################
+
+sub draw {
+	my ( $self, $index ) = @_;
+
+	return unless $self->canvas->width > 1 and $self->canvas->height > 1;
+
+	if ( ! defined $index ) {
+		$self->{ frame } = $self->draw_frame;
+		$index = $self->{ shown_index };
+	} else {
+		$self->canvas->delete( $self->{ line } ) if exists $self->{ line };
+	}
+
+	my $signal = $self->curve->signal( $index );
+	my $dx = ( $self->canvas->width - $self->{ canvas_left_border }
+			   - $self->{ canvas_right_border } ) / ( $self->num_points - 1 );
+	my $h  = $self->canvas->height - $self->{ canvas_top_border }
+		     - $self->{ canvas_bottom_border };
+	my $dy =  $h / ( $self->curve->max - $self->curve->min );
+
+	my $x = $self->{ canvas_left_border };
+	my $y = $h + $self->{ canvas_bottom_border };
+
+	my @l;
+	for ( 0 ... $self->num_points - 1 ) {
+		push @l, $x;
+		$x += $dx;
+		push @l, $y - ( $signal->[ $_ ] - $self->curve->min ) * $dy;
+	}
+
+	$self->{ line } = $self->canvas->createLine( @l, -fill => 'white' );
+}
+
+
+######################
+
+sub draw_frame {
+	my $self = shift;
+
+
+	$self->canvas->delete( 'all' );
+
+	# Draw the outer frame
+
+	my @ul = ( $self->{ canvas_left_border } - 1,
+			   $self->{ canvas_top_border } - 1 );
+
+	my @ur = ( $self->canvas->width - $self->{ canvas_right_border } + 1,
+			   $self->{ canvas_top_border } - 1 );
+
+	my @lr = ( $self->canvas->width - $self->{ canvas_right_border } + 1,
+			   $self->canvas->height - $self->{ canvas_bottom_border } + 1 );
+
+	my @ll = ( $self->{ canvas_left_border } - 1,
+			   $self->canvas->height - $self->{ canvas_bottom_border } + 1 );
+
+	$self->canvas->createLine( @ul, @ur, @lr, @ll, @ul,
+							   -fill => 'yellow' );
+
+	# Draw the upper markers with the point numbers
+
+	my $sw = $self->canvas->width - $self->{ canvas_right_border }
+		     - $self->{ canvas_left_border } - 1;
+
+	my $dv = int( $self->num_points / 10 );
+	my $dsw = $dv / $self->num_points * $sw;
+
+	my @l;
+	$l[ 1 ] = $self->{ canvas_top_border } - 1;
+	$l[ 3 ] = $self->{ canvas_top_border } - 6;
+
+	for my $i ( 0 ... 10 ) {
+		$l[ 0 ] = $l[ 2 ] = $self->{ canvas_left_border } + $i * $dsw;
+		$self->canvas->createLine( @l, -fill => 'yellow' );
+
+		$self->canvas->createText( $l[ 0 ], $l[ 3 ] - 8,
+					  -text => sprintf( "%d", $i * $dv ),
+					  -fill => 'yellow' );
+	}
+
+	# Draw the lower markers with the times (relative to the trigger position)
+
+	my ( $start_b, $end_b );
+
+	if ( $self->end_field - $self->start_field < 10.0 ) {
+		$start_b = int( $self->start_field + 0.5 );
+		$end_b = int( $self->end_field );
+	} else {
+		$start_b = 10 * int( 0.1 * $self->start_field + 0.5 );
+		$end_b = 10 * int( 0.1 * $self->end_field );
+	}
+
+	$l[ 1 ] = $self->canvas->height - $self->{ canvas_bottom_border } + 1;
+	$l[ 3 ] = $self->canvas->height- $self->{ canvas_bottom_border } + 6;
+
+	$dv = ( $end_b - $start_b ) / 5;
+	$dsw = ( $end_b - $start_b ) / ( $self->end_field - $self->start_field  )
+		   * $sw * 0.2;
+	my $x = $self->{ canvas_left_border }
+		    + ( $start_b - $self->start_field ) / $sw;
+
+	for ( 0 ... 5 ) {
+		$l[ 0 ] = $l[ 2 ] = $x;
+		$self->canvas->createLine( @l, -fill => 'yellow' );
+
+		$self->canvas->createText( $l[ 0 ], $l[ 3 ] + 9,
+							  -text => sprintf( "%.1f", $start_b + $_ * $dv ),
+					          -fill => 'yellow' );
+		$x += $dsw;
+	}
+
+	$self->canvas->createText( $x - 1.5 * $dsw, $l[ 3 ] + 6, -text => 'G',
+								-fill => 'yellow' );
+
+	# Draw the vertical scale
+
+	$l[ 0 ] = $self->{ canvas_left_border } - 1;
+	$l[ 2 ] = $self->{ canvas_left_border } - 6;
+
+	my $sh = $self->canvas->height - $self->{ canvas_top_border }
+		     - $self->{ canvas_bottom_border };
+
+	my $fac = 1;
+	my $vs_min;
+	my $vs_max;
+
+	while ( 1 ) {
+		$vs_min = int( $fac * $self->curve->min + 0.5 );
+		$vs_min += 1 if $vs_min < $fac * $self->curve->min;
+		$vs_max = int( $fac * $self->curve->max - 0.5 );
+		$vs_max -= 1 if $vs_max > $fac * $self->curve->max;
+		last if $vs_max - $vs_min >= 1;
+		$fac *= 1000;
+	}
+
+	my $v_range = $fac * ( $self->curve->max - $self->curve->min );
+	$dv = 0.2 * ( $vs_max - $vs_min );
+	my $v_off = $vs_min - $fac * $self->curve->min;
+
+	my $yd = $sh * $dv / $v_range;
+	my $yo = $sh * $v_off / $v_range;
+
+	$l[ 1 ] = $l[ 3 ] =
+		      $self->canvas->height - $self->{ canvas_bottom_border } - $yo;
+
+	my $vs = $vs_min;
+
+	for my $i ( 0 ... 5 ) {
+		$self->canvas->createLine( @l, -fill => 'yellow' );
+		$self->canvas->createText( $l[ 2 ] - 20, $l[ 1 ],
+								   -text => sprintf( "%.1f", $vs, ),
+								   -fill => 'yellow' );
+		$vs += $dv;
+		$l[ 1 ] = $l[ 3 ] -= $yd;
+	}
+
+	my $unit;
+	if ( $fac == 1 ) {
+		$unit = "V";
+	} elsif ( $fac == 1000 ) {
+		$unit = "mV";
+	} elsif  ( $fac == 1000000 ) {
+		$unit = "킮";
+	}
+
+	$self->canvas->createText( $l[ 0 ] - 20, $l[ 3 ] + 1.5 * $yd,
+							   -text => $unit, -fill => 'yellow' );
+
+	# Draw zero line (if applicable)
+
+	if ( $self->curve->max > 0 and $self->curve->min < 0 ) {
+		$l[ 0 ] = $self->{ canvas_left_border };
+		$l[ 2 ] = $self->canvas->width - $self->{ canvas_right_border };
+		$l[ 1 ] = $l[ 3 ] =
+			         $self->canvas->height - $self->{ canvas_bottom_border }
+					 + $fac * $self->curve->min / $v_range * $sh;
+		$self->canvas->createLine( @l, -fill => 'green', -dash => [ 1, 5 ] );
+	}
+
+	# Draw the markers for the background correction region
+
+	if ( defined $self->curve->bg_selected ) {
+		$l[ 1 ] = $self->canvas->height - $self->{ canvas_bottom_border };
+		$l[ 3 ] = $self->{ canvas_top_border };
+
+		$l[ 0 ] = $l[ 2 ] = $self->{ canvas_left_border }
+			                + $sw * $self->curve->background_range_start
+					        / ( $self->num_points - 1 );
+
+		if ( $self->curve->bg_selected eq 'RIGHT' ) {
+			$self->canvas->createLine( @l, -fill => 'blue',
+									   -dash => [ 1, 5 ] );
+		} else {
+			$self->canvas->createLine( @l, -fill => 'blue' );
+		}
+
+		$l[ 0 ] = $l[ 2 ] = $self->{ canvas_left_border }
+			                + $sw * $self->curve->background_range_end
+				            / ( $self->num_points - 1 );
+
+		if ( $self->curve->bg_selected eq 'LEFT' ) {
+			$self->canvas->createLine( @l, -fill => 'blue',
+									   -dash => [ 1, 5 ] );
+		} else {
+			$self->canvas->createLine( @l, -fill => 'blue' );
+		}
+	}
+
+	# Draw the markers for the integration region
+
+	if ( defined $self->i_selected ) {
+		$l[ 1 ] = $self->canvas->height - $self->{ canvas_bottom_border };
+		$l[ 3 ] = $self->{ canvas_top_border };
+
+		$l[ 0 ] = $l[ 2 ] = $self->{ canvas_left_border }
+			                + $sw * $self->integration_range_start
+							/ ( $self->num_points - 1 );
+
+		if ( $self->i_selected eq 'RIGHT' ) {
+			$self->canvas->createLine( @l, -fill => 'orange',
+									   -dash => [ 1, 5 ] );
+		} else {
+			$self->canvas->createLine( @l, -fill => 'orange' );
+		}
+
+		$l[ 0 ] = $l[ 2 ] = $self->{ canvas_left_border }
+			                + $sw * $self->integration_range_end
+							/ ( $self->num_points - 1 );
+
+		if ( $self->i_selected eq 'LEFT' ) {
+			$self->canvas->createLine( @l, -fill => 'orange',
+									   -dash => [ 1, 5 ] );
+		} else {
+			$self->canvas->createLine( @l, -fill => 'orange' );
+		}
+	}
+}
+
+
+######################
+
+sub i_selected {
+	my $self = shift;
+	$self->{ i_selected } = shift if @_;
+	return $self->{ i_selected };
+}
+
+
+######################
+
+sub integrate {
+	my $self = shift;
+
+	return if defined $self->i_selected or defined $self->curve->bg_selected;
+
+	return unless $self->get_integration_range;
+
+	my $start = $self->{ integration_range_start };
+	my $end = $self->{ integration_range_end };
+	my $num_points = $end - $start + 1;
+
+	my @int;
+	foreach my $signal ( @{ $self->curve->{ signals } } ) {
+		my $sum = 0.0;
+		$sum += $_ foreach @{ $signal }[ $start ... $end ];
+		push @int, $sum / $num_points;
+	}
+
+	my $f;
+
+	while ( 1 ) {
+		my $file = Filesel::show( );
+		return unless defined $file;
+		next if $file eq '';
+		last if open $f, ">$file";
+		show_message( "Can't open '$file' for writing" );
+	}
+
+	printf $f "# Filename          : %s\n" .
+		      "# Date              : %s\n" .
+			  "# Timebase          : %.4f us\n" .
+              "# Time resolution   : %.1f ns\n" .
+			  "# Trigger position  : %.4f us\n" .
+              "# No. of scans      = %d\n" .
+              "# No. of averages   = %d\n" .
+			  "# Sensitivity       = %.3f mV\n" .
+			  "# Integration range = %.3f - %.3f G (using %d points)\n" .
+			  "%s" .
+			  "# Time in us, signal in mV\n",
+		   $self->curve->file,
+		   $self->curve->date,
+		   $self->curve->timebase,
+		   1000 * $self->delta_time,
+		   $self->curve->trig_pos,
+		   $self->curve->num_scans,
+		   $self->curve->num_avg,
+		   $self->curve->sens,
+		   $self->start_field
+		   + $self->{ integration_range_start } * $self->field_step,
+		   $self->start_field
+		   + $self->{ integration_range_end } * $self->field_step,
+	       $num_points, $self->curve->lines;
+
+	printf $f "%.4f\t%f\n", $self->start_time + $_ * $self->delta_time,
+		   1000 * shift @int foreach ( 0 ... $self->trace_len - 1 );
+
+	close $f;
+}
+
+
+######################
+
+sub get_integration_range {
+	my $self = shift;
+
+	$self->{ int_start_field_text } =
+		sprintf 'Start of integration: %.3f G (#%d)',
+		$self->start_field
+		+ $self->integration_range_start * $self->field_step,
+		$self->integration_range_start;
+	$self->{ int_end_field_text } =
+		sprintf 'End of integration: %.3f G (#%d)',
+		$self->start_field + $self->integration_range_end * $self->field_step,
+		$self->integration_range_end;
+	my $res;
+
+	$self->{ iw } = $mw->Toplevel( -title => 'Field integration parameters' );
+	$self->{ iw }->geometry( '+512+560' );
+	$self->{ iw }->resizable( 0, 0 );
+
+	my $sb_val;
+	my $eb_val;
+
+	my $fs = $self->{ iw }->Frame;
+	my $sb = $fs->Checkbutton( -variable => \$sb_val );
+	my $s  = $fs->Label( -textvariable => \$self->{ int_start_field_text },
+						 -width => 36 );
+	my $fe = $self->{ iw }->Frame;
+	my $eb = $fe->Checkbutton( -variable => \$eb_val );
+	my $e = $fe->Label( -textvariable => \$self->{ int_end_field_text },
+						-width => 36 );
+	my $fb = $self->{ iw }->Frame;
+	my $d = $fb->Button( -text => 'Integrate',
+						  -command => sub { $res = 1;
+										    $self->{ iw }->destroy; } );
+	my $q = $fb->Button( -text => 'Quit',
+						  -command => sub { $res = 0;
+										    $self->{ iw }->destroy; } );
+
+	$fs->pack( -side => 'top' );
+	$sb->pack( -side => 'left', -fill => 'x', -padx => 3 );
+	$s->pack(  -side => 'left', -fill => 'x' );
+	$fe->pack( -side => 'top' );
+	$eb->pack( -side => 'left', -fill => 'x', -padx => 3 );
+	$e->pack(  -side => 'left', -fill => 'x' );
+	$fb->pack( -side => 'top' );
+	$d->pack(  -fill => 'x' );
+	$q->pack(  -fill => 'x' );
+
+	$sb->configure( -command => sub { unless ( $sb_val and $eb_val ) {
+						                  $sb->select;
+										  return;
+									  }
+									  $eb->deselect;
+									  $self->change_integration_cursor; } );
+	$eb->configure( -command => sub { unless ( $sb_val and $eb_val ) {
+						                  $eb->select;
+										  return;
+									  }
+									  $sb->deselect;
+									  $self->change_integration_cursor; } );
+
+	$eb->select;
+	$eb_val = 1;
+	$self->change_integration_cursor;
+
+	$self->{ iw }->bind( '<Key-Up>' => sub { $self->{ shown_index } += 1; } );
+	$self->{ iw }->bind( "<$medium-Key-Up>" =>
+			               sub { $self->{ shown_index } += $self->{ hmi }; } );
+	$self->{ iw }->bind( "<$fast-Key-Up>" =>
+					       sub { $self->{ shown_index } += $self->{ hli }; } );
+	$self->{ iw }->bind( '<Key-Down>' =>
+			               sub { $self->{ shown_index } -= 1; } );
+	$self->{ iw }->bind( "<$medium-Key-Down>" =>
+			               sub { $self->{ shown_index } -= $self->{ hmi }; } );
+	$self->{ iw }->bind( "<$fast-Key-Down>" =>
+						   sub { $self->{ shown_index } -= $self->{ hli }; } );
+
+	$self->top->bind( '<Key-Return>' => sub { $res = 1;
+										    $self->{ iw }->destroy; } );
+	$self->{ iw }->bind( '<Key-Return>' => sub { $res = 1;
+										    $self->{ iw }->destroy; } );
+
+	$self->top->bind( '<Key-Escape>' => sub { $res = 0;
+										    $self->{ iw }->destroy; } );
+	$self->{ iw }->bind( '<Key-Escape>' => sub { $res = 0;
+										    $self->{ iw }->destroy; } );
+
+	$self->top->bind( '<Key-F1>' => 
+					               sub { if ( $eb_val ) {
+						                     $eb_val = 0;
+											 $sb_val = 1;
+										 } else {
+											 $sb_val = 0;
+											 $eb_val = 1;
+										 }
+							             $self->change_integration_cursor; } );
+	$self->{ iw }->bind( '<Key-F1>' =>
+					               sub { if ( $eb_val ) {
+						                     $eb_val = 0;
+											 $sb_val = 1;
+										 } else {
+											 $sb_val = 0;
+											 $eb_val = 1;
+										 }
+							             $self->change_integration_cursor; } );
+
+    $self->{ iw }->waitWindow( $self->{ iw } );
+
+	if ( $self->top->state ) {
+		$self->top->bind( '<Key-Right>' => '' );
+		$self->top->bind( "<$medium-Key-Right>" => '' );
+		$self->top->bind( "<$fast-Key-Right>" => '' );
+		$self->top->bind( '<Key-Left>' => '' );
+		$self->top->bind( "<$medium-Key-Left>" => '' );
+		$self->top->bind( "<$fast-Key-Left>" => '' );
+
+		$self->top->bind( '<Key-Return>' => '' );
+		$self->top->bind( '<Key-Escape>' => '' );
+		$self->top->bind( '<Key-F1>' => '' );
+	}
+
+	untie( $self->i_selected eq 'LEFT' ? $self->{ integration_range_start } :
+		                                 $self->{ integration_range_end } );
+
+	$self->i_selected( undef );
+	$self->draw;
+
+	return $res;
+}
+
+
+######################
+
+sub change_integration_cursor {
+	my $self = shift;
+
+	if ( ! defined $self->i_selected or $self->i_selected eq 'LEFT' ) {
+		untie $self->{ integration_range_start }
+			if defined $self->i_selected;
+		$self->i_selected( 'RIGHT' );
+		tie $self->{ integration_range_end }, 'Field_Integration_Index', $self;
+		$self->top->bind( '<Key-Right>' =>
+			   sub { $self->{ integration_range_end } += 1; } );
+		$self->top->bind( "<$medium-Key-Right>" =>
+			   sub { $self->{ integration_range_end } += $self->{ hmi }; } );
+		$self->top->bind( "<$fast-Key-Right>" =>
+			   sub { $self->{ integration_range_end } += $self->{ hli }; } );
+		$self->top->bind( '<Key-Left>' =>
+			   sub { $self->{ integration_range_end } -= 1; } );
+		$self->top->bind( "<$medium-Key-Left>" =>
+			   sub { $self->{ integration_range_end } -= $self->{ hmi }; } );
+		$self->top->bind( "<$fast-Key-Left>" =>
+			   sub { $self->{ integration_range_end } -= $self->{ hli }; } );
+		$self->{ iw }->bind( '<Key-Right>' =>
+			   sub { $self->{ integration_range_end } += 1; } );
+		$self->{ iw }->bind( "<$medium-Key-Right>" =>
+			   sub { $self->{ integration_range_end } += $self->{ hmi }; } );
+		$self->{ iw }->bind( "<$fast-Key-Right>" =>
+			   sub { $self->{ integration_range_end } += $self->{ hli }; } );
+		$self->{ iw }->bind( '<Key-Left>' =>
+			   sub { $self->{ integration_range_end } -= 1; } );
+		$self->{ iw }->bind( "<$medium-Key-Left>" =>
+			   sub { $self->{ integration_range_end } -= $self->{ hmi }; } );
+		$self->{ iw }->bind( "<$fast-Key-Left>" =>
+			   sub { $self->{ integration_range_end } -= $self->{ hli }; } );
+	} else {
+		untie $self->{ integration_range_end };
+		$self->i_selected( 'LEFT' );
+		tie $self->{ integration_range_start }, 'Field_Integration_Index',
+			$self;
+		$self->top->bind( '<Key-Right>' =>
+			   sub { $self->{ integration_range_start } += 1; } );
+		$self->top->bind( "<$medium-Key-Right>" =>
+			   sub { $self->{ integration_range_start } += $self->{ hmi }; } );
+		$self->top->bind( "<$fast-Key-Right>" =>
+			   sub { $self->{ integration_range_start } += $self->{ hli }; } );
+		$self->top->bind( '<Key-Left>' =>
+			   sub { $self->{ integration_range_start } -= 1; } );
+		$self->top->bind( "<$medium-Key-Left>" =>
+			   sub { $self->{ integration_range_start } -= $self->{ hmi }; } );
+		$self->top->bind( "<$fast-Key-Left>" =>
+			   sub { $self->{ integration_range_start } -= $self->{ hli }; } );
+		$self->{ iw }->bind( '<Key-Right>' =>
+			   sub { $self->{ integration_range_start } += 1; } );
+		$self->{ iw }->bind( "<$medium-Key-Right>" =>
+			   sub { $self->{ integration_range_start } += $self->{ hmi }; } );
+		$self->{ iw }->bind( "<$fast-Key-Right>" =>
+			   sub { $self->{ integration_range_start } += $self->{ hli }; } );
+		$self->{ iw }->bind( '<Key-Left>' =>
+			   sub { $self->{ integration_range_start } -= 1; } );
+		$self->{ iw }->bind( "<$medium-Key-Left>" =>
+			   sub { $self->{ integration_range_start } -= $self->{ hmi }; } );
+		$self->{ iw }->bind( "<$fast-Key-Left>" =>
+			   sub { $self->{ integration_range_start } -= $self->{ hli }; } );
+	}
+
+	$self->draw;
+}
+
+
+######################
+
+sub integration_range_start {
+	my ( $self, $start ) = @_;
+
+	if ( defined $start ) {
+		$start = 0 if $start < 0;
+		$start = $self->integration_range_end
+			if $start > $self->integration_range_end;
+		$self->{ integration_range_start } = $start;
+	}
+
+	unless ( exists $self->{ integration_range_start } ) {
+		$self->{ integration_range_start } = int( 0.45 * $self->num_points );
+		$self->{ integration_range_start } = $self->integration_range_end
+			if     exists $self->{ integration_range_end }
+		       and $self->{ integration_range_start } >
+				                                  $self->integration_range_end;
+	}
+
+	return $self->{ integration_range_start };
+}
+
+
+######################
+
+sub integration_range_end {
+	my ( $self, $end ) = @_;
+
+	if ( defined $end ) {
+		$end = $self->{ integration_range_start }
+			if $end < $self->{ integration_range_start };
+		$end = $self->num_points - 1 if $end >= $self->num_points;
+		$self->{ integration_range_end } = $end;
+	}
+
+	unless ( exists $self->{ integration_range_end } ) {
+		$self->{ integration_range_end } = int( 0.55 * $self->num_points );
+		$self->{ integration_range_end } = $self->integration_range_start
+			if     exists $self->{ integration_range_start }
+		       and $self->{ integration_range_end } <
+				                                $self->integration_range_start;
+	}
+
+	return $self->{ integration_range_end };
+}
+
+
+######################
+
+sub curve {
+	return ( shift )->{ curve };
+}
+
+
+######################
+
+sub start_field {
+	my $self = shift;
+	$self->{ start_field } = shift if @_;
+	return $self->{ start_field };
+}
+
+
+######################
+
+sub end_field {
+	my $self = shift;
+	$self->{ end_field } = shift if @_;
+	return $self->{ end_field };
+}
+
+
+######################
+
+sub field_step {
+	my $self = shift;
+	$self->{ field_step } = shift if @_;
+	return $self->{ field_step };
+}
+
+
+######################
+
+sub start_time {
+	my $self = shift;
+	$self->{ start_time } = shift if @_;
+	return $self->{ start_time };
+}
+
+
+######################
+
+sub end_time {
+	my $self = shift;
+	$self->{ end_time } = shift if @_;
+	return $self->{ end_time };
+}
+
+
+######################
+
+sub delta_time {
+	my $self = shift;
+	$self->{ delta_time } = shift if @_;
+	return $self->{ delta_time };
+}
+
+
+######################
+
+sub num_points {
+	my $self = shift;
+	$self->{ num_points } = shift if @_;
+	return $self->{ num_points };
+}
+
+
+######################
+
+sub trace_len {
+	my $self = shift;
+	$self->{ trace_len } = shift if @_;
+	return $self->{ trace_len };
+}
+
+
+1;
+
+
+################################################################
+# Package for tie on a variable in the Curve_2d package with one
+# of the limits of for baseline corrections
+
+package Baseline_Index;
+
+use strict;
+use warnings;
+
+our $curve,
+our $tw;
+
+
+######################
+
+sub TIESCALAR {
+	( $curve, $tw ) = @_[ 1 ... 2 ];
+	my $self = $curve->bl_selected eq 'LEFT' ? $curve->baseline_range_start :
+		                                       $curve->baseline_range_end;
+	bless \$self, shift;
+}
+
+
+######################
+
+sub STORE {
+	my $new_val = $_[ 1 ];
+
+	if ( ${ $_[ 0 ] } != $new_val ) {
+		if ( $curve->bl_selected eq 'LEFT' ) {
+			${ $_[ 0 ] } = $curve->baseline_range_start( $new_val );
+			$curve->{ start_time_text } =
+			sprintf 'Start of baseline: %.4f 탎 (#%d)',
+				    $tw->start_time + ${ $_[ 0 ] } * $tw->delta_time,
+						${ $_[ 0 ] };
+		} else {
+			${ $_[ 0 ] } = $curve->baseline_range_end( $new_val );
+			$curve->{ end_time_text } =
+				sprintf 'End of baseline: %.4f 탎 (#%d)',
+					    $tw->start_time + ${ $_[ 0 ] } * $tw->delta_time,
+						${ $_[ 0 ] };
+		}
+
+		$tw->draw( );
+	}
+	return ${ $_[ 0 ] };
+}
+
+
+######################
+
+sub FETCH {
+	return ${ $_[ 0 ] };
+}
+
+
+1;
+
+
+################################################################
+# Package for tie on a variable in the Curve_2d package with one
+# of the limits of for background corrections
+
+package Background_Index;
+
+use strict;
+use warnings;
+our $curve,
+our $fw;
+
+
+######################
+
+sub TIESCALAR {
+	( $curve, $fw ) = @_[ 1 ... 2 ];
+	my $self = $curve->bg_selected eq 'LEFT' ? $curve->background_range_start :
+		                                       $curve->background_range_end;
+	bless \$self, shift;
+}
+
+
+######################
+
+sub STORE {
+	my $new_val = $_[ 1 ];
+
+	if ( ${ $_[ 0 ] } != $new_val ) {
+		if ( $curve->bg_selected eq 'LEFT' ) {
+			${ $_[ 0 ] } = $curve->background_range_start( $new_val );
+			$curve->{ start_field_text } =
+				sprintf 'Start of background: %.3f G (#%d)',
+					   $curve->start_field + ${ $_[ 0 ] } * $curve->field_step,
+					   ${ $_[ 0 ] };
+		} else {
+			${ $_[ 0 ] } = $curve->background_range_end( $new_val );
+			$curve->{ end_field_text } =
+				sprintf 'End of background: %.3f G 탎 (#%d)',
+					   $curve->start_field + ${ $_[ 0 ] } * $curve->field_step,
+					   ${ $_[ 0 ] };
+		}
+
+		$fw->draw( );
+	}
+
+	return ${ $_[ 0 ] };
+}
+
+
+######################
+
+sub FETCH {
+	return ${ $_[ 0 ] };
+}
+
+
+1;
+
+
+################################################################
+# Package for reading a measured 2-dimensional curve from a data
+# file and manipulating these data (i.e. baseline and background
+# correction)
+
+package Curve_2d;
+
+use strict;
+use warnings;
+use Tk;
+
+
+######################
+
+sub new {
+    my ( $inv, $mw, $file ) = @_;
+    my $class = ref( $inv ) || $inv;
+	my $self = { bl_selected => undef,
+				 bg_selected => undef };
+	bless $self, $class;
+	$self->read( defined $file ? $file : undef, $mw );
+	return $self;
+}
+
+
+######################
+
+sub destroy {
+	my $self = shift;
+	$self->{ blw }->destroy if defined $self->bl_selected;
+	$self->{ bgw }->destroy if defined $self->bg_selected;
+}
+
+
+######################
+
+sub read {
+	my ( $self, $file ) = @_;
+	my $file_name;
+	my $f;
+    my $float_rep = '[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
+
+
+	# Get the file name (unless an existing and readable file was specified
+	# on the command line), then open the file.
+
+	while ( 1 ) {
+		( $file_name = $file ) =~ s/\.[a-z]{3}$// if $file;
+		last if defined $file and open $f, "<$file_name.par";
+		$file = Filesel::show( 1 );
+		exit 0 unless defined $file;
+	}
+
+	$self->file( $file );
+
+	# Read in the header section
+
+	while ( <$f> ) {
+		if ( /^#\ Date\s*: (.*)$/ ) {
+			$self->date( $1 );
+		} elsif ( /^Start field\s*= (.*) G$/ ) {
+			$self->start_field( $1 );
+		} elsif ( /^End field\s*= (.*) G$/ ) {
+			$self->end_field( $1 );
+		} elsif ( /^Field step size\s*= (.*) G$/ ) {
+			$self->field_step( $1 );
+		} elsif ( /^No\. of scans\s*= (.*)$/ ) {
+			$self->num_scans( $1 );
+		} elsif ( /^No\. of averages\s*= (.*)$/ ) {
+			$self->num_avg( $1 );
+		} elsif ( /^Signal channel\s*= (.*)/ ) {
+			$self->sig_channel( $1 );
+		} elsif ( /^Averaging channel\s*= (.*)/ ) {
+			$self->avg_channel( $1 );
+		} elsif ( /^Sensitivity\s*= (.*) mV$/ ) {
+			$self->sens( $1 );
+		} elsif ( /^Timebase\s*= (.*) us$/ ) {
+			$self->timebase( $1 );
+		} elsif ( /^Time resolution\s*= (.*) ns$/ ) {
+			$self->time_res( $1 );
+		} elsif ( /^Trigger channel\s*= (.*)$/ ) {
+			$self->trig_channel( $1 );
+		} elsif ( /^Trigger position\s*= (.*) us$/ ) {
+			$self->trig_pos( $1 );
+		} elsif ( /^Trigger mode\s*= (.*)$/ ) {
+			$self->trig_mode( $1 );
+		} elsif ( /^Trigger level \s*= (.*) V$/ ) {
+			$self->trig_level( $1 );
+		} elsif ( /^No\. of traces\s*= (.*)$/ ) {
+			$self->num_traces( $1 );
+		} elsif ( /^Trace length\s*= (.*)$/ ) {
+			$self->trace_len( $1 );
+		} elsif ( /^No signal traces\s*= (.*)$/ ) {
+			$self->background_range_end( $1 - 1 );
+		} else {
+			$self->lines( $_ );
+		}
+	}
+
+	# Check that all required header entries could be read correctly
+
+	die "Invalid file header format in '$file_name.par'\n"
+		unless $self->check( );
+
+	close $f;
+
+	# Open the file with the raw data
+
+	open $f, "<$file" or die "Can't open file $file for reading\n";
+
+	# Now loop over the rest of the file and read the traces
+
+	while ( <$f> ) {
+		next if /^$/;
+		my @trace = split /\s+/;
+		die "Wrong number of points at " . ( @trace + 1 ) .
+			". trace in '$file'.\n"
+			unless @trace == $self->trace_len;
+		push @{ $self->{ traces } }, \@trace;
+	}
+
+	die "Wrong number of traces in '$file'.\n"
+		unless @{ $self->{ traces } } == $self->num_traces;
+
+	close $f;
+
+	$self->{ filename } = $file_name;
+
+	$self->{ trace_index } = { };
+	$self->{ trace_index }->{ $self->{ traces }->[ $_ ] } = $_
+		for ( 0 ... $self->num_traces - 1 );
+
+	$self->signals;
+
+	$self->is_baseline_corrected( 0 );
+	$self->is_background_corrected( 0 );
+
+	$self->calc_min_max;
+}
+
+
+######################
+
+sub file {
+	my ( $self, $file ) = shift;
+	$self->{ file } = shift if @_;
+	return $self->{ file };
+}
+
+
+######################
+
+sub date {
+	my ( $self, $date ) = shift;
+	$self->{ date } = shift if @_;
+	return $self->{ date };
+}
+
+
+######################
+
+sub start_field {
+	my $self = shift;
+	$self->{ start_field } = shift if @_;
+	return $self->{ start_field };
+}
+
+
+######################
+
+sub end_field {
+	my $self = shift;
+	$self->{ end_field } = shift if @_;
+	return $self->{ end_field };
+}
+
+
+######################
+
+sub field_step {
+	my $self = shift;
+	$self->{ field_step } = shift if @_;
+	return $self->{ field_step };
+}
+
+
+######################
+
+sub num_scans {
+	my $self = shift;
+	$self->{ num_scans } = shift if @_;
+	$self->{ num_scans } = 1 unless exists $self->{ num_scans };
+	return $self->{ num_scans };
+}
+
+
+######################
+
+sub num_avg {
+	my $self = shift;
+	$self->{ num_avg } = shift if @_;
+	return $self->{ num_avg };
+}
+
+
+######################
+
+sub sig_channel {
+	my $self = shift;
+	$self->{ sig_channel } = shift if @_;
+	return $self->{ sig_channel };
+}
+
+
+######################
+
+sub avg_channel {
+	my $self = shift;
+	$self->{ avg_channel } = shift if @_;
+	return $self->{ avg_channel };
+}
+
+
+######################
+
+sub sens {
+	my $self = shift;
+	$self->{ sens } = shift if @_;
+	return $self->{ sens };
+}
+
+
+######################
+
+sub timebase {
+	my $self = shift;
+	$self->{ timebase } = shift if @_;
+	return $self->{ timebase };
+}
+
+
+######################
+
+sub time_res {
+	my $self = shift;
+	$self->{ time_res } = 0.001 * shift if @_;
+	return $self->{ time_res };
+}
+
+
+######################
+
+sub trig_channel {
+	my $self = shift;
+	$self->{ trig_channel } = shift if @_;
+	return $self->{ trig_channel };
+}
+
+
+######################
+
+sub trig_pos {
+	my $self = shift;
+	$self->{ trig_pos } = shift if @_;
+	return $self->{ trig_pos };
+}
+
+
+######################
+
+sub trig_level {
+	my $self = shift;
+	$self->{ trig_level } = shift if @_;
+	return $self->{ trig_level };
+}
+
+
+######################
+
+sub trig_mode {
+	my $self = shift;
+	$self->{ trig_mode } = shift if @_;
+	return $self->{ trig_mode };
+}
+
+
+######################
+
+sub trig_index {
+	my $self = shift;
+	return $self->trig_pos / $self->time_res - 1;
+}
+
+
+######################
+
+sub num_traces {
+	my $self = shift;
+	$self->{ num_traces } = shift if @_;
+	return $self->{ num_traces };
+}
+
+
+######################
+
+sub trace_len {
+	my $self = shift;
+	$self->{ trace_len } = shift if @_;
+	return $self->{ trace_len };
+}
+
+
+######################
+
+sub background_range_start {
+	my ( $self, $start ) = @_;
+
+	if ( defined $start ) {
+		die "Invalid value.\n" unless is_int( $start );
+		$start = 0 if $start < 0;
+		$start = $self->background_range_end
+			if $start > $self->background_range_end;
+		$self->{ background_range_start } = $start;
+	}
+
+	# Either return the stored index or, if the start index for the off-signal
+	# traces hadn't been set, the index of the very first trace
+
+	$self->{ background_range_start } = 0
+		unless defined $self->{ background_range_start };
+
+	return $self->{ background_range_start };
+}
+
+
+######################
+
+sub background_range_end {
+	my ( $self, $end ) = @_;
+
+	if ( defined $end ) {
+		die "Invalid value.\n" unless is_int( $end );
+		$end = $self->background_range_start
+			if $end < $self->background_range_start;
+		$end = $self->num_traces - 1 if $end >= $self->num_traces;
+		$self->{ background_range_end } = $end;
+	}
+
+	# Either return the stored index or, if the end index for the off-signal
+	# traces hadn't been set, the index of the trace at 10% of the spectrum
+
+	unless ( defined $self->{ background_range_end } ) {
+		$self->{ background_range_end } = $self->num_traces / 10 - 1;
+		$self->{ background_range_end } = $self->{ background_range_start }
+			if $self->{ background_range_end } >
+				                             $self->{ background_range_start };
+	}
+
+	return $self->{ background_range_end };
+}
+
+
+######################
+
+sub lines {
+	my ( $self, $line ) = @_;
+	if ( defined $line ) {
+		$self->{ lines } = '' unless exists $self->{ lines };
+		$self->{ lines } .= $line;
+	}
+	return exists $self->{ lines } ? $self->{ lines } : '';
+}
+
+
+######################
+
+sub baseline_range_start {
+	my ( $self, $offset ) = @_;
+
+	if ( defined $offset ) {
+		die "Invalid value.\n" unless is_int( $offset );
+		$offset = 0 if $offset < 0;
+		$offset = $self->baseline_range_end
+			if $offset > $self->baseline_range_end;
+		$self->{ baseline_range_start } = $offset;
+	}
+
+	$self->{ baseline_range_start } = 0
+		unless defined $self->{ baseline_range_end };
+
+	return $self->{ baseline_range_start };
+}
+
+
+######################
+
+sub baseline_range_end {
+	my ( $self, $offset ) = @_;
+
+	if ( defined $offset ) {
+		die "Invalid value.\n" unless is_int( $offset );
+		$offset = $self->baseline_range_start
+			if $offset < $self->baseline_range_start;
+		$offset = $self->trace_len - 1 if $offset >= $self->trace_len;
+		$self->{ baseline_range_end } = $offset;
+	}
+
+	unless ( defined $self->{ baseline_range_end } ) {
+		$self->{ baseline_range_end } = $self->trig_pos / $self->time_res - 6;
+		$self->{ baseline_range_end } = $self->{ baseline_range_start }
+			if $self->{ baseline_range_end } < $self->{ baseline_range_start };
+	}
+
+	return $self->{ baseline_range_end };
+}
+
+
+######################
+
+sub check {
+	my $self = shift;
+
+	return undef if     defined $self->{ background_range_end }
+                    and ! is_int( $self->{ background_range_end } );
+
+	return     defined $self->start_field  and is_float( $self->start_field )
+		   and defined $self->end_field    and is_float( $self->end_field )
+		   and defined $self->field_step   and is_float( $self->field_step )
+		   and defined $self->num_scans    and is_int( $self->num_scans )
+		   and defined $self->num_avg      and is_int( $self->num_avg )
+		   and defined $self->sig_channel  and is_int( $self->sig_channel )
+		   and defined $self->avg_channel  and is_int( $self->avg_channel )
+		   and defined $self->sens         and is_float( $self->sens )
+		   and defined $self->timebase     and is_float( $self->time_base )
+		   and defined $self->time_res     and is_float( $self->time_res )
+		   and defined $self->trig_channel and is_float( $self->trig_channel )
+		   and defined $self->trig_pos     and is_float( $self->trig_pos )
+		   and defined $self->trig_mode    and is_float( $self->trig_mode )
+		   and defined $self->trig_level   and is_float( $self->trig_mode )
+		   and defined $self->num_traces   and is_int( $self->num_traces );
+}
+
+
+######################
+
+sub bl_selected {
+	my $self = shift;
+	$self->{ bl_selected } = shift if @_;
+	return $self->{ bl_selected };
+}
+
+
+######################
+
+sub is_baseline_corrected {
+	my $self = shift;
+	$self->{ is_baseline_corrected } = shift if @_;
+	return $self->{ is_baseline_corrected };
+}
+
+
+######################
+
+sub baseline_correction {
+	my ( $self, $tw ) = @_;
+
+	return if $self->is_baseline_corrected or defined $self->bl_selected
+		      or defined $tw->i_selected;
+
+	return unless $self->get_baseline_range( $tw );
+
+	foreach my $trace ( @{ $self->{ traces } } ) {
+		my $sum = 0.0;
+		$sum += $_ foreach @{ $trace }[ $self->baseline_range_start ...
+										$self->baseline_range_end ];
+		$sum /= $self->baseline_range_end - $self->baseline_range_start + 1;
+		$_ -= $sum foreach @{ $trace };
+	}
+
+	$self->signals;
+	$self->calc_min_max;
+
+	$self->is_baseline_corrected( 1 );
+}
+
+
+######################
+
+sub get_baseline_range {
+	my ( $self, $tw ) = @_;
+
+	$self->{ start_time_text }= sprintf 'Start of baseline: %.4f 탎 (#%d)',
+		$tw->start_time + $self->baseline_range_start * $tw->delta_time,
+		$self->baseline_range_start;
+	$self->{ end_time_text } = sprintf 'End of baseline: %.4f 탎 (#%d)',
+		$tw->start_time + $self->baseline_range_end * $tw->delta_time,
+		$self->baseline_range_end;
+	my $res;
+
+	$self->{ blw } = $mw->Toplevel( -title => 'Baseline parameters' );
+	$self->{ blw }->geometry( '+200+560' );
+	$self->{ blw }->resizable( 0, 0 );
+
+	my $sb_val;
+	my $eb_val;
+
+	my $fs = $self->{ blw }->Frame;
+	my $sb = $fs->Checkbutton( -variable => \$sb_val );
+	my $s  = $fs->Label( -textvariable => \$self->{ start_time_text },
+						 -width => 30 );
+	my $fe = $self->{ blw }->Frame;
+	my $eb = $fe->Checkbutton( -variable => \$eb_val );
+	my $e = $fe->Label( -textvariable => \$self->{ end_time_text },
+						-width => 30 );
+	my $fb = $self->{ blw }->Frame;
+	my $d = $fb->Button( -text => 'Correct baseline',
+						  -command => sub { $res = 1;
+										    $self->{ blw }->destroy; } );
+	my $q = $fb->Button( -text => 'Quit',
+						  -command => sub { $res = 0;
+										    $self->{ blw }->destroy; } );
+
+	$fs->pack( -side => 'top' );
+	$sb->pack( -side => 'left', -fill => 'x', -padx => 3 );
+	$s->pack(  -side => 'left', -fill => 'x' );
+	$fe->pack( -side => 'top' );
+	$eb->pack( -side => 'left', -fill => 'x', -padx => 3 );
+	$e->pack(  -side => 'left', -fill => 'x' );
+	$fb->pack( -side => 'top' );
+	$d->pack(  -fill => 'x' );
+	$q->pack(  -fill => 'x' );
+
+	$sb->configure( -command =>
+					           sub { unless ( $sb_val and $eb_val ) {
+						                 $sb->select;
+										 return;
+									 }
+									 $eb->deselect;
+									 $self->change_baseline_cursor( $tw ); } );
+	$eb->configure( -command =>
+					           sub { unless ( $sb_val and $eb_val ) {
+						                 $eb->select;
+										 return;
+									 }
+									 $sb->deselect;
+						             $self->change_baseline_cursor( $tw ); } );
+
+	$eb->select;
+	$eb_val = 1;
+	$self->change_baseline_cursor( $tw );
+
+	$self->{ blw }->bind( '<Key-Up>' =>
+						       sub { $tw->{ shown_index } += 1; } );
+	$self->{ blw }->bind( "<$medium-Key-Up>" =>
+				               sub { $tw->{ shown_index } += $tw->{ hmi }; } );
+	$self->{ blw }->bind( "<$fast-Key-Up>" =>
+				               sub { $tw->{ shown_index } += $tw->{ hli }; } );
+	$self->{ blw }->bind( '<Key-Down>' =>
+				               sub { $tw->{ shown_index } -= 1; } );
+	$self->{ blw }->bind( "<$medium-Key-Down>" =>
+				               sub { $tw->{ shown_index } -= $tw->{ hmi }; } );
+	$self->{ blw }->bind( "<$fast-Key-Down>" =>
+						       sub { $tw->{ shown_index } -= $tw->{ hli }; } );
+
+	$self->{ blw }->bind( '<Key-Return>' => sub { $res = 1;
+										          $self->{ blw }->destroy; } );
+	$tw->top->bind( '<Key-Return>' => sub { $res = 1;
+										    $self->{ blw }->destroy; } );
+
+	$self->{ blw }->bind( '<Key-Escape>' => sub { $res = 0;
+										          $self->{ blw }->destroy; } );
+	$tw->top->bind( '<Key-Escape>' => sub { $res = 0;
+										    $self->{ blw }->destroy; } );
+
+	$self->{ blw }->bind( '<Key-F1>' =>
+					           sub { if ( $eb_val ) {
+						                 $eb_val = 0;
+										 $sb_val = 1;
+									 } else {
+									     $sb_val = 0;
+								         $eb_val = 1;
+							         }
+							         $self->change_baseline_cursor( $tw ); } );
+	$tw->top->bind( '<Key-F1>' =>
+					           sub { if ( $eb_val ) {
+						                 $eb_val = 0;
+										 $sb_val = 1;
+									 } else {
+										 $sb_val = 0;
+								         $eb_val = 1;
+							         }
+							         $self->change_baseline_cursor( $tw ); } );
+
+    $self->{ blw }->waitWindow( $self->{ blw } );
+
+	if ( $tw->top->state ) {
+		$tw->top->bind( '<Key-Right>' => '' );
+		$tw->top->bind( "<$medium-Key-Right>" => '' );
+		$tw->top->bind( "<$fast-Key-Right>" => '' );
+		$tw->top->bind( '<Key-Left>' => '' );
+		$tw->top->bind( "<$medium-Key-Left>" => '' );
+		$tw->top->bind( "<$fast-Key-Left>" => '' );
+
+		$tw->top->bind( '<Key-Return>' => '' );
+		$tw->top->bind( '<Key-Escape>' => '' );
+		$tw->top->bind( '<Key-F1>' => '' );
+	}
+
+	untie( $self->bl_selected eq 'LEFT' ? $self->{ baseline_range_start } :
+		                                  $self->{ baseline_range_end } );
+
+	$self->bl_selected( undef );
+	$tw->draw;
+
+	return $res;
+}
+
+
+######################
+
+sub change_baseline_cursor {
+	my ( $self, $tw ) = @_;
+
+	if ( ! defined $self->bl_selected or $self->bl_selected eq 'LEFT' ) {
+		untie $self->{ baseline_range_start } if defined $self->bl_selected;
+		$self->bl_selected( 'RIGHT' );
+		tie $self->{ baseline_range_end }, 'Baseline_Index', $self, $tw;
+		$tw->top->bind( '<Key-Right>' =>
+					sub { $self->{ baseline_range_end } += 1; } );
+		$tw->top->bind( "<$medium-Key-Right>" =>
+					sub { $self->{ baseline_range_end } += $tw->{ hmi }; } );
+		$tw->top->bind( "<$fast-Key-Right>" =>
+					sub { $self->{ baseline_range_end } += $tw->{ hli }; } );
+		$tw->top->bind( '<Key-Left>' =>
+					sub { $self->{ baseline_range_end } -= 1; } );
+		$tw->top->bind( "<$medium-Key-Left>" =>
+					sub { $self->{ baseline_range_end } -= $tw->{ hmi }; } );
+		$tw->top->bind( "<$fast-Key-Left>" =>
+					sub { $self->{ baseline_range_end } -= $tw->{ hli }; } );
+		$self->{ blw }->bind( '<Key-Right>' =>
+					sub { $self->{ baseline_range_end } += 1; } );
+		$self->{ blw }->bind( "<$medium-Key-Right>" =>
+					sub { $self->{ baseline_range_end } += $tw->{ hmi }; } );
+		$self->{ blw }->bind( "<$fast-Key-Right>" =>
+					sub { $self->{ baseline_range_end } += $tw->{ hli }; } );
+		$self->{ blw }->bind( '<Key-Left>' =>
+					sub { $self->{ baseline_range_end } -= 1; } );
+		$self->{ blw }->bind( "<$medium-Key-Left>" =>
+					sub { $self->{ baseline_range_end } -= $tw->{ hmi }; } );
+		$self->{ blw }->bind( "<$fast-Key-Left>" =>
+					sub { $self->{ baseline_range_end } -= $tw->{ hli }; } );
+	} else {
+		untie $self->{ baseline_range_end };
+		$self->bl_selected( 'LEFT' );
+		tie $self->{ baseline_range_start }, 'Baseline_Index', $self, $tw;
+		$tw->top->bind( '<Key-Right>' =>
+					sub { $self->{ baseline_range_start } += 1; } );
+		$tw->top->bind( "<$medium-Key-Right>" =>
+					sub { $self->{ baseline_range_start } += $tw->{ hmi }; } );
+		$tw->top->bind( "<$fast-Key-Right>" =>
+					sub { $self->{ baseline_range_start } += $tw->{ hli }; } );
+		$tw->top->bind( '<Key-Left>' =>
+					sub { $self->{ baseline_range_start } -= 1; } );
+		$tw->top->bind( "<$medium-Key-Left>" =>
+					sub { $self->{ baseline_range_start } -= $tw->{ hmi }; } );
+		$tw->top->bind( "<$fast-Key-Left>" =>
+					sub { $self->{ baseline_range_start } -= $tw->{ hli }; } );
+		$self->{ blw }->bind( '<Key-Right>' =>
+					sub { $self->{ baseline_range_start } += 1; } );
+		$self->{ blw }->bind( "<$medium-Key-Right>" =>
+					sub { $self->{ baseline_range_start } += $tw->{ hmi }; } );
+		$self->{ blw }->bind( "<$fast-Key-Right>" =>
+					sub { $self->{ baseline_range_start } += $tw->{ hli }; } );
+		$self->{ blw }->bind( '<Key-Left>' =>
+					sub { $self->{ baseline_range_start } -= 1; } );
+		$self->{ blw }->bind( "<$medium-Key-Left>" =>
+					sub { $self->{ baseline_range_start } -= $tw->{ hmi }; } );
+		$self->{ blw }->bind( "<$fast-Key-Left>" =>
+					sub { $self->{ baseline_range_start } -= $tw->{ hli }; } );
+	}
+
+	$tw->draw;
+}
+
+
+######################
+
+sub bg_selected {
+	my $self = shift;
+	$self->{ bg_selected } = shift if @_;
+	return $self->{ bg_selected };
+}
+
+
+######################
+
+sub is_background_corrected {
+	my $self = shift;
+	$self->{ is_background_corrected } = shift if @_;
+	return $self->{ is_background_corrected };
+}
+
+
+######################
+
+sub background_correction {
+	my ( $self, $fw ) = @_;
+
+	return if $self->is_background_corrected or defined $self->bg_selected
+		      or defined $fw->i_selected;
+
+	return unless $self->get_background_range( $fw );
+
+	my $start = $self->background_range_start;
+	my $end   = $self->background_range_end;
+
+	my @sum = ( 0.0 ) x $self->trace_len;
+
+	foreach my $trace ( @{ $self->{ traces } }[ $start ... $end ] ) {
+		$sum[ $_ ] += $trace->[ $_ ] foreach ( 0 ... $self->trace_len - 1 );
+	}
+
+	$sum[ $_ ] /= $end - $start + 1 foreach ( 0 ... $self->trace_len - 1 );
+
+	foreach my $trace ( @{ $self->{ traces } } ) {
+		$trace->[ $_ ] -= $sum[ $_ ] foreach ( 0 ... $self->trace_len - 1 );
+	}
+
+	$self->signals;
+	$self->calc_min_max;
+
+	$self->is_background_corrected( 1 );
+}
+
+
+######################
+
+sub get_background_range {
+	my ( $self, $fw ) = @_;
+
+	$self->{ start_field_text }= sprintf 'Start of background: %.3f G (#%d)',
+		$self->start_field + $self->background_range_start * $self->field_step,
+		$self->background_range_start;
+	$self->{ end_field_text } = sprintf 'End of background: %.3f G (#%d)',
+		$self->start_field + $self->background_range_end * $fw->field_step,
+		$self->background_range_end;
+	my $res;
+
+	$self->{ bgw } = $mw->Toplevel( -title => 'Background parameters' );
+	$self->{ bgw }->geometry( '+512+560' );
+	$self->{ bgw }->resizable( 0, 0 );
+
+	my $sb_val;
+	my $eb_val;
+
+	my $fs = $self->{ bgw }->Frame;
+	my $sb = $fs->Checkbutton( -variable => \$sb_val );
+	my $s  = $fs->Label( -textvariable => \$self->{ start_field_text },
+						 -width => 36 );
+	my $fe = $self->{ bgw }->Frame;
+	my $eb = $fe->Checkbutton( -variable => \$eb_val );
+	my $e = $fe->Label( -textvariable => \$self->{ end_field_text },
+						-width => 36 );
+	my $fb = $self->{ bgw }->Frame;
+	my $d = $fb->Button( -text => 'Correct background',
+						  -command => sub { $res = 1;
+										    $self->{ bgw }->destroy; } );
+	my $q = $fb->Button( -text => 'Quit',
+						  -command => sub { $res = 0;
+										    $self->{ bgw }->destroy; } );
+
+	$fs->pack( -side => 'top' );
+	$sb->pack( -side => 'left', -fill => 'x', -padx => 3 );
+	$s->pack(  -side => 'left', -fill => 'x' );
+	$fe->pack( -side => 'top' );
+	$eb->pack( -side => 'left', -fill => 'x', -padx => 3 );
+	$e->pack(  -side => 'left', -fill => 'x' );
+	$fb->pack( -side => 'top' );
+	$d->pack(  -fill => 'x' );
+	$q->pack(  -fill => 'x' );
+
+	$sb->configure( -command =>
+					         sub { unless ( $sb_val and $eb_val ) {
+						               $sb->select;
+									   return;
+								   }
+								   $eb->deselect;
+						           $self->change_background_cursor( $fw); } );
+	$eb->configure( -command =>
+					         sub { unless ( $sb_val and $eb_val ) {
+						               $eb->select;
+									   return;
+								   }
+								   $sb->deselect;
+						           $self->change_background_cursor( $fw ); } );
+
+	$eb->select;
+	$eb_val = 1;
+	$self->change_background_cursor( $fw );
+
+	$self->{ bgw }->bind( '<Key-Up>' =>
+						       sub { $fw->{ shown_index } += 1; } );
+	$self->{ bgw }->bind( "<$medium-Key-Up>" =>
+                               sub { $fw->{ shown_index } += $fw->{ hmi }; } );
+	$self->{ bgw }->bind( "<$fast-Key-Up>" =>
+                               sub { $fw->{ shown_index } += $fw->{ hli }; } );
+	$self->{ bgw }->bind( '<Key-Down>' =>
+				               sub { $fw->{ shown_index } -= 1; } );
+	$self->{ bgw }->bind( "<$medium-Key-Down>" =>
+                               sub { $fw->{ shown_index } -= $fw->{ hmi }; } );
+	$self->{ bgw }->bind( "<$fast-Key-Down>" =>
+						       sub { $fw->{ shown_index } -= $fw->{ hli }; } );
+
+	$self->{ bgw }->bind( '<Key-Return>' => sub { $res = 1;
+										          $self->{ bgw }->destroy; } );
+	$fw->top->bind( '<Key-Return>' => sub { $res = 1;
+										    $self->{ bgw }->destroy; } );
+
+	$self->{ bgw }->bind( '<Key-Escape>' => sub { $res = 0;
+										          $self->{ bgw }->destroy; } );
+	$fw->top->bind( '<Key-Escape>' => sub { $res = 0;
+										    $self->{ bgw }->destroy; } );
+
+	$self->{ bgw }->bind( '<Key-F1>' =>
+					         sub { if ( $eb_val ) {
+						               $eb_val = 0;
+									   $sb_val = 1;
+								   } else {
+									   $sb_val = 0;
+									   $eb_val = 1;
+								   }
+							       $self->change_background_cursor( $fw ); } );
+	$fw->top->bind( '<Key-F1>' =>
+					         sub { if ( $eb_val ) {
+						               $eb_val = 0;
+									   $sb_val = 1;
+								   } else {
+									   $sb_val = 0;
+									   $eb_val = 1;
+								   }
+								   $self->change_background_cursor( $fw ); } );
+
+    $self->{ bgw }->waitWindow( $self->{ bgw } );
+
+	if ( $fw->top->state ) {
+		$fw->top->bind( '<Key-Right>' => '' );
+		$fw->top->bind( "<$medium-Key-Right>" => '' );
+		$fw->top->bind( "<$fast-Key-Right>" => '' );
+		$fw->top->bind( '<Key-Left>' => '' );
+		$fw->top->bind( "<$medium-Key-Left>" => '' );
+		$fw->top->bind( "<$fast-Key-Left>" => '' );
+
+		$fw->top->bind( '<Key-Return>' => '' );
+		$fw->top->bind( '<Key-Escape>' => '' );
+		$fw->top->bind( '<Key-F1>' => '' );
+	}
+
+	untie( $self->bg_selected eq 'LEFT' ? $self->{ background_range_start } :
+		                                  $self->{ background_range_end } );
+	$self->bg_selected( undef );
+	$fw->draw;
+
+	return $res;
+}
+
+
+######################
+
+sub change_background_cursor {
+	my ( $self, $fw ) = @_;
+
+	if ( ! defined $self->bg_selected or $self->bg_selected eq 'LEFT' ) {
+		untie $self->{ background_range_start }
+		    if defined $self->bg_selected;
+		$self->bg_selected( 'RIGHT' );
+		tie $self->{ background_range_end }, 'Background_Index', $self, $fw;
+		$fw->top->bind( '<Key-Right>' =>
+				  sub { $self->{ background_range_end } += 1; } );
+		$fw->top->bind( "<$medium-Key-Right>" =>
+				  sub { $self->{ background_range_end } += $fw->{ hmi }; } );
+		$fw->top->bind( "<$fast-Key-Right>" =>
+				  sub { $self->{ background_range_end } += $fw->{ hli }; } );
+		$fw->top->bind( '<Key-Left>' =>
+				  sub { $self->{ background_range_end } -= 1; } );
+		$fw->top->bind( "<$medium-Key-Left>" =>
+				  sub { $self->{ background_range_end } -= $fw->{ hmi }; } );
+		$fw->top->bind( "<$fast-Key-Left>" =>
+				  sub { $self->{ background_range_end } -= $fw->{ hli }; } );
+		$self->{ bgw }->bind( '<Key-Right>' =>
+				  sub { $self->{ background_range_end } += 1; } );
+		$self->{ bgw }->bind( "<$medium-Key-Right>" =>
+				  sub { $self->{ background_range_end } += $fw->{ hmi }; } );
+		$self->{ bgw }->bind( "<$fast-Key-Right>" =>
+				  sub { $self->{ background_range_end } += $fw->{ hli }; } );
+		$self->{ bgw }->bind( '<Key-Left>' =>
+				  sub { $self->{ background_range_end } -= 1; } );
+		$self->{ bgw }->bind( "<$medium-Key-Left>" =>
+				  sub { $self->{ background_range_end } -= $fw->{ hmi }; } );
+		$self->{ bgw }->bind( "<$fast-Key-Left>" =>
+				  sub { $self->{ background_range_end } -= $fw->{ hli }; } );
+	} else {
+		untie $self->{ background_range_end };
+		$self->bg_selected( 'LEFT' );
+		tie $self->{ background_range_start }, 'Background_Index', $self, $fw;
+		$fw->top->bind( '<Key-Right>' =>
+				  sub { $self->{ background_range_start } += 1; } );
+		$fw->top->bind( "<$medium-Key-Right>" =>
+				  sub { $self->{ background_range_start } += $fw->{ hmi }; } );
+		$fw->top->bind( "<$fast-Key-Right>" =>
+				  sub { $self->{ background_range_start } += $fw->{ hli }; } );
+		$fw->top->bind( '<Key-Left>' =>
+				  sub { $self->{ background_range_start } -= 1; } );
+		$fw->top->bind( "<$medium-Key-Left>" =>
+				  sub { $self->{ background_range_start } -= $fw->{ hmi }; } );
+		$fw->top->bind( "<$fast-Key-Left>" =>
+				  sub { $self->{ background_range_start } -= $fw->{ hli }; } );
+		$self->{ bgw }->bind( '<Key-Right>' =>
+				  sub { $self->{ background_range_start } += 1; } );
+		$self->{ bgw }->bind( "<$medium-Key-Right>" =>
+				  sub { $self->{ background_range_start } += $fw->{ hmi }; } );
+		$self->{ bgw }->bind( "<$fast-Key-Right>" =>
+				  sub { $self->{ background_range_start } += $fw->{ hli }; } );
+		$self->{ bgw }->bind( '<Key-Left>' =>
+				  sub { $self->{ background_range_start } -= 1; } );
+		$self->{ bgw }->bind( "<$medium-Key-Left>" =>
+				  sub { $self->{ background_range_start } -= $fw->{ hmi }; } );
+		$self->{ bgw }->bind( "<$fast-Key-Left>" =>
+				  sub { $self->{ background_range_start } -= $fw->{ hli }; } );
+	}
+
+	$fw->draw;
+}
+
+
+######################
+
+sub trace {
+	my ( $self, $index ) = @_;
+	die "Missing trace index.\n" unless defined $index;
+	return $self->{ traces }->[ $index ];
+}
+
+
+######################
+
+sub signals {
+	my $self = shift;
+
+	$self->{ signals } = [ ];
+	$self->{ signal_index } = { };
+
+	for my $i ( 0 ... $self->trace_len - 1 ) {
+		my @signal = ( );
+		foreach ( 0 ... $self->num_traces - 1 ) {
+			push @signal, $self->{ traces }->[ $_ ]->[ $i ];
+		}
+		push @{ $self->{ signals } }, [ @signal ];
+		$self->{ signal_index }->{ $self->{ signals }->[ $i ] } = $i;
+	}
+}
+
+
+######################
+
+sub signal {
+	my ( $self, $index ) = @_;
+	die "Missing signal index.\n" unless defined $index;
+	return $self->{ signals }->[ $index ];
+}
+
+
+######################
+
+sub calc_min_max {
+	my $self = shift;
+
+	my ( $min, $max ) = ( $self->{ traces }->[ 0 ]->[ 0 ] ) x 2;
+
+	for my $trace ( @{ $self->{ traces } } ) {
+		foreach ( @{ $trace } ) {
+			$min = $_ if $min > $_;
+			$max = $_ if $max < $_;
+		}
+	}
+
+	$self->min( $min );
+	$self->max( $max );
+}
+
+
+######################
+
+sub min {
+	my $self = shift;
+	$self->{ min } = shift if @_;
+	return $self->{ min };
+}
+
+
+######################
+
+sub max {
+	my $self = shift;
+	$self->{ max } = shift if @_;
+	return $self->{ max };
+}
+
+
+######################
+
+sub is_int {
+	my $val = shift;
+	return defined $val and $val =~ /^[+-]?\d+$/;
+}
+
+
+######################
+
+sub is_float {
+	my $val = shift;
+    my $float_rep = '[+-]?((\d+(\.(\d+)?)?)|(\.\d+))([eE][+-]?\d+)?';
+
+	return defined $val and $val =~ /^$float_rep$/;
+}
+
+
+######################
+
+sub write {
+	my $self = shift;
+	my $f;
+
+	while ( 1 ) {
+		my $file = Filesel::show( );
+		return unless defined $file;
+		next if $file eq '';
+		last if open $f, ">$file";
+		show_message( "Can't open '$file' for writing" );
+	}
+
+	foreach my $trace ( @{ $self->{ traces } } ) {
+		printf $f "%f ", 1000 * $_
+			foreach @{ $trace }[ 0 ... $self->trace_len - 2 ];
+		printf $f "%f\n", 1000 * @{ $trace }[ $self->trace_len - 1 ];
+	}
+
+	close $f;
+}
+
+
+1;
+
+
+################################################################
+# Package for selecting a file name
+
+package Filesel;
+
+use Tk;
+use strict;
+use warnings;
+
+our $cur_dir,
+our $cur_file;
+
+
+######################
+
+BEGIN {
+    $cur_dir = `pwd`;
+    chomp $cur_dir;
+}
+
+
+######################
+
+# The only (optional) argument tells if the file listing is to be restricted
+# to readable files with an extension of 'raw' for which a file with the same
+# name and the extension 'par' exists. If it's not set all writable files get
+# listed instead.
+
+sub show {
+    my $restrict = shift || 0;
+
+    my $selected = undef;
+	$cur_file = "";
+
+    my %fs;
+
+    $fs{ top } = $mw->Toplevel( '-title' => 'File Select' );
+    $fs{ top }->grab;
+    $fs{ dir } = $fs{ top }->Entry( -textvariable => \$cur_dir,
+                                    -width => 35
+                                  )->pack( -side => 'top',
+                                           -fill => 'x',
+                                           -padx => '2m',
+                                           -pady => '1m',
+                                         );
+    $fs{ list } = $fs{ top }->Scrolled( 'Listbox',
+                                        -selectmode => 'single',
+                                        -scrollbars => 'osoe',
+                                      )->pack( -side => 'top',
+                                               -fill => 'both',
+                                               -anchor => 's',
+                                               -padx => '2m',
+                                               -pady => '1m',
+                                               -expand => 1 );
+    populate_fs( $fs{ list }, $cur_dir, $restrict );
+    $fs{ file } = $fs{ top }->Entry( -textvariable => \$cur_file
+                                   )->pack( -side => 'top',
+                                            -fill => 'x',
+                                            -padx => '2m',
+                                            -pady => '1m'
+                                          );
+    $fs{ frame } = $fs{ top }->Frame( )->pack( -side => 'bottom' );
+    $fs{ frame }->Button( -text => 'Cancel',
+                          -command => sub { $selected = "" }
+                        )->pack( -side => 'left',
+                                 -padx => '2m',
+                                 -pady => '1m'
+                               );
+    $fs{ frame }->Button( -text => 'Rescan',
+                          -command => [ \&populate_fs, $fs{ list },
+                                        $cur_dir, $restrict ]
+                        )->pack( -side => 'left',
+                                 -padx => '2m',
+                                 -pady => '1m'
+                                             );
+    $fs{ frame }-> Button( -text => '  Ok  ',
+                           -command => sub { $selected = $cur_file }
+                         )->pack( -side => 'right',
+                                  -padx => '2m',
+                                  -pady => '1m'
+                                );
+    $fs{ list }->bind( '<ButtonPress-1>' =>
+                       [ \&new_selection, $fs{ list }, Ev( 'y' ), $restrict ] );
+    $fs{ top }->bind( '<ButtonPress-4>' =>
+                       sub { $fs{ list }->yview( scroll => -1, 'units' ) } );
+    $fs{ top }->bind( '<Key-Up>' =>
+                       sub { $fs{ list }->yview( scroll => -1, 'units' ) } );
+    $fs{ top }->bind( '<Key-Prior>' =>
+                       sub { $fs{ list }->yview( scroll => -1, 'page' ) } );
+    $fs{ top }->bind( '<ButtonPress-5>' =>
+                       sub { $fs{ list }->yview( scroll => 1, 'units' ) } );
+    $fs{ top }->bind( '<Key-Down>' =>
+                       sub { $fs{ list }->yview( scroll => 1, 'units' ) } );
+    $fs{ top }->bind( '<Key-Next>' =>
+                       sub { $fs{ list }->yview( scroll => 1, 'page' ) } );
+    $fs{ top }->bind( '<Key-Home>' => sub { $fs{ list }->yview( 0 ) } );
+    $fs{ top }->bind( '<Key-End>' =>
+                      sub { $fs{ list }->yview( $fs{ list }->size - 1 ) } );
+    $fs{ top }->bind( '<Key-Return>' => sub { $selected = $cur_file } );
+
+    $fs{ top }->waitVariable( \$selected );
+    $fs{ top }->destroy;
+
+    return undef if $selected =~ /^$/o;
+
+    if ( $cur_dir =~ m|^/$|o ) {
+        return "/$selected";
+    } else {
+        return "$cur_dir/$selected";
+    }
+}
+
+
+######################
+
+sub new_selection {
+    my ( $d, $l, $y, $restrict ) = @_;
+    my $sel = $l->get( $l->nearest( $y ) );
+    if ( $sel =~ /^d (.*)$/o ) {
+        my $dir = $1;
+        $cur_file = "";
+        return if $dir =~ /^\.$/o;
+        if ( $dir =~ /^\.\.$/o ) {
+            $cur_dir =~ s|^(.*?)/[^/]+$|$1|;
+            $cur_dir = "/" if $cur_dir =~ /^$/o;
+            populate_fs( $l, $cur_dir, $restrict );
+        }
+        else {
+            if ( $cur_dir =~ m|^/$|o ) {
+                $cur_dir .= "$dir";
+            } else {
+                $cur_dir .= "/$dir";
+            }
+            populate_fs( $l, $cur_dir, $restrict );
+        }
+    } else {
+        $cur_file = $sel;
+        $cur_file =~ s/^[l ] (.*)$/$1/o;
+    }
+}
+
+
+######################
+
+sub populate_fs {
+    my ( $list, $dir, $restrict ) = @_;
+
+    $list->delete( 0, 'end' );
+	opendir my $dh, $dir or return;
+    my @ls = sort grep { ! /^\./ } readdir $dh;
+	closedir $dh;
+	unshift @ls, '..';
+
+	$list->insert( 'end', "d $_" ) for grep { -d "$dir/$_" } @ls;
+
+	if ( $restrict ) {
+		for ( grep { /\.(raw|dat)$/ and -r "$dir/$_" } @ls ) {
+			( my $par = $_ ) =~ s/\.(raw|dat)$/.par/;
+			$list->insert( 'end', "  $_" ) if -r "$dir/$par";
+		}
+	} else {
+		$list->insert( 'end', "  $_" )
+			for grep { ! -d "$dir/$_" and -w "$dir/$_" } @ls;
+	}
+}
+
+1;

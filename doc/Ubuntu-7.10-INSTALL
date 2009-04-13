@@ -1,0 +1,45 @@
+The following additiona; packages were required with a freshly installed
+Ubuntu 7.10 (Gutsy) in order to make the program and the documentation:
+
+  dialog
+  bison
+  flex
+  sharutils
+  libforms1
+  libforms-dev
+  libforms-bin
+  tetex-bin
+  texinfo
+  texlive-generic-recommended
+  perl-tk
+
+To avoid warnings while compiling the program you may have to delete
+the superfluous entry for the fl_hide_fselector() function at line
+5150 in /usr/include/X11/forms.h (it's already declared at line 5050).
+
+You also will need to install a driver and library for your GPIB card
+unless you switch off GPIB support.
+
+
+
+
+To install it download the compressed archive
+
+http://download.savannah.nongnu.org/releases/xforms/xforms-1.0.90.tar.gz
+
+After unpacking the archive go into the its main directory and do
+
+./configure --enable-optimization
+
+For this to work you may have to install the development version of the
+JPEG library first. To do so install the package
+
+  libjpeg62-dev
+
+When the configure script ended successfully do
+
+make
+make install
+
+(the last command has to be run with root permissions). Then make sure
+the library i

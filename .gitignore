@@ -21,8 +21,6 @@ doc/*.gz
 doc/*.info*
 doc/*.pdf
 doc/*.eps
-doc/OpenSuSE-10.3-INSTALL
-doc/Ubuntu-7.10-INSTALL
 fsc2_config.h
 *.cmd
 .tmp_versions/
