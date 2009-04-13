@@ -11,6 +11,6 @@ me6000_libs             := libme6x00.so
 WITH_RS_SPEC10          := yes
 rs_spec10_incl          := /usr/local/pvcam
 rs_spec10_libs          := libpvcam.so
-#rs_spec10_extra_libs   := yes
 FLEX_NEEDS_DECLARATIONS := yes
 MAIL_ADDRESS            := jens
+#rs_spec10_extra_libs   := yes
