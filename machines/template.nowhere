@@ -277,7 +277,8 @@ BROWSER            := firefox
 # PVCAM library (I don't know which is the exact version where the requirements
 # changed, but it's definitely needed since version 2.7.0.0). For these
 # versions of the PVCAM library fsc2 needs to be linked against the real-
-# time and a firewire library.
+# time and a firewire library and thus 'rs_spec10_extra_libs' must be
+# uncommented.
 
 # WITH_RS_SPEC10       := yes
 # rs_spec10_incl       := /usr/local/include/pvcam

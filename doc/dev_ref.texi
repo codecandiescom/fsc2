@@ -1671,7 +1671,7 @@ between @code{RS232C} and @code{IEEE488} is employed).
 @paragraphindent 0
 @strong{Description}: @uref{http://www.oxford-instruments.com/,Oxford
 Instruments} ITC503 temperature controller. Currently only temperature
-measurements are supported, no automatic adjustment of temperature.
+measurements are supported.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*

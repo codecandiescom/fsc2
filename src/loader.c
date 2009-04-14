@@ -65,8 +65,13 @@ load_all_drivers( void )
     bool saved_need_MEDRIVER;
 #endif
 
-
     CLOBBER_PROTECT( cd );
+
+    Need_GPIB     = UNSET;
+    Need_RULBUS   = UNSET;
+    Need_LAN      = UNSET;
+    Need_MEDRIVER = UNSET;
+    Need_USB      = UNSET;
 
     /* Treat "User_Functions" also as a kind of device driver and append
        the device structure to the end of the list of devices */
@@ -111,15 +116,15 @@ load_all_drivers( void )
     {
         for ( cd = EDL.Device_List; cd != NULL; cd = cd->next )
         {
-            saved_need_GPIB   = Need_GPIB;
+            saved_need_GPIB     = Need_GPIB;
+            saved_need_LAN      = Need_LAN;
+            saved_need_USB      = Need_USB;
 #if defined WITH_RULBUS
-            saved_need_RULBUS = Need_RULBUS;
+            saved_need_RULBUS   = Need_RULBUS;
 #endif
-            saved_need_LAN    = Need_LAN;
 #if defined WITH_MEDRIVER
             saved_need_MEDRIVER = Need_MEDRIVER;
 #endif
-            saved_need_USB = Need_USB;
 
             if ( cd->is_loaded && cd->driver.is_init_hook )
             {
@@ -153,11 +158,11 @@ load_all_drivers( void )
                 cd->driver.init_hook_is_run = SET;
             }
 
-            if ( Need_GPIB == UNSET && saved_need_GPIB == SET )
+            if ( ! Need_GPIB && saved_need_GPIB )
                 Need_GPIB = SET;
 
 #if defined WITH_RULBUS
-            if ( Need_RULBUS == UNSET && saved_need_RULBUS == SET )
+            if ( ! Need_RULBUS && saved_need_RULBUS )
                 Need_RULBUS = SET;
 #else
             if ( Need_RULBUS )
@@ -168,12 +173,12 @@ load_all_drivers( void )
             }
 #endif
 
-            if ( Need_LAN == UNSET && saved_need_LAN == SET )
+            if ( ! Need_LAN && saved_need_LAN )
                 Need_LAN = SET;
 
 
 #if defined WITH_MEDRIVER
-            if ( Need_MEDRIVER == UNSET && saved_need_MEDRIVER == SET )
+            if ( ! Need_MEDRIVER && saved_need_MEDRIVER )
                 Need_MEDRIVER = SET;
 #else
             if ( Need_MEDRIVER )
@@ -184,7 +189,7 @@ load_all_drivers( void )
                 THROW( EXCEPTION );
             }
 #endif
-            if ( Need_USB == UNSET && saved_need_USB == SET )
+            if ( ! Need_USB && saved_need_USB )
                 Need_USB = SET;
 
 #if ! defined WITH_LIBUSB_1_0 && ! defined WITH_LIBUSB_0_1

@@ -146,6 +146,7 @@ store_exp( FILE * in )
         is_restart = SET;
 
     EDL.prg_token = NULL;
+    Cb_stack = NULL;
 
     /* Get and store all tokens (if there are no program tokens at all return
        immediately, then there's nothing left to be done or checked). */

@@ -181,7 +181,7 @@ simp_modules    += me6000
 endif
 
 
-# Support Newport Oriel MMSS spectrometer
+# Support Newport Oriel MMS spectrometer
 
 ifdef WITH_LIBUSB_0_1
 comp_modules    += oriel_matrix
