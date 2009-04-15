@@ -52,10 +52,6 @@ enum {
     REMOTE_AND_UNLOCKED
 };
 
-#define UNIT_KELVIN            0
-#define UNIT_CELSIUS           1
-#define DEFAULT_UNIT           UNIT_KELVIN
-
 
 #define MAX_TEMP        1667.7    /* max. temperature in Kelvin */
 
@@ -65,12 +61,15 @@ enum {
     STATE_MANUAL,
     STATE_HEATER_AUTO,
     STATE_GAS_AUTO,
-    STATE_AUTO
+    STATE_AUTO,
+    STATE_AutoGFS
 };
+
 
 #define TEST_STATE           STATE_MANUAL
 
 #define MAX_HEATER_POWER     40.0    /* 40 V */
+
 
 #define TEST_HEATER_POWER    99.9
 #define TEST_GAS_FLOW        99.9
@@ -125,7 +124,6 @@ static struct {
     int    heater_sensor;
     double heater_power;
     double gas_flow;
-    int    unit;
 } itc503;
 
 
@@ -152,7 +150,6 @@ itc503_init_hook( void )
     itc503.heater_sensor    = DEFAULT_HEATER_SENSOR;
     itc503.heater_power     = TEST_HEATER_POWER;
     itc503.gas_flow         = TEST_GAS_FLOW;
-    itc503.unit             = DEFAULT_UNIT;
 
     return 1;
 }
@@ -205,18 +202,15 @@ temp_contr_name( Var_T * v  UNUSED_ARG )
 
 /*---------------------------------------------*
  * Returns temperature reading from controller
- * (in the currently selected units)
  *---------------------------------------------*/
 
 Var_T *
 temp_contr_temperature( Var_T * v  UNUSED_ARG )
 {
     if ( FSC2_MODE == TEST )
-        return vars_push( FLOAT_VAR,
-                          itc503.unit == UNIT_KELVIN ? 123.45 : -149.71 );
+        return vars_push( FLOAT_VAR, 123.45 );
 
-    return vars_push( FLOAT_VAR, itc503_sens_data( ) -
-                      ( itc503.unit == UNIT_KELVIN ? 0.0 : C2K_OFFSET ) );
+    return vars_push( FLOAT_VAR, itc503_sens_data( ) );
 }
 
 
@@ -343,10 +337,8 @@ temp_contr_setpoint( Var_T * v )
     if ( v == NULL )
     {
         if ( FSC2_MODE == TEST )
-            return vars_push( FLOAT_VAR, itc503.setpoint -
-                            ( itc503.unit == UNIT_KELVIN ? 0.0 : C2K_OFFSET ) );
-        return vars_push( FLOAT_VAR, itc503_get_setpoint( ) -
-                          ( itc503.unit == UNIT_KELVIN ? 0.0 : C2K_OFFSET ) );
+            return vars_push( FLOAT_VAR, itc503.setpoint );
+        return vars_push( FLOAT_VAR, itc503_get_setpoint( ) );
     }
 
     sp = get_double( v, "setpoint" );
@@ -362,13 +354,11 @@ temp_contr_setpoint( Var_T * v )
     if ( FSC2_MODE != EXPERIMENT )
     {
         itc503.setpoint = sp;
-        return vars_push( FLOAT_VAR, sp -
-                          ( itc503.unit == UNIT_KELVIN ? 0.0 : C2K_OFFSET ) );
+        return vars_push( FLOAT_VAR, sp );
     }
 
     itc503_set_setpoint( sp );
-    return vars_push( FLOAT_VAR, itc503_get_setpoint( ) -
-                      ( itc503.unit == UNIT_KELVIN ? 0.0 : C2K_OFFSET ) );
+    return vars_push( FLOAT_VAR, itc503_get_setpoint( ) );
 }
 
 
@@ -531,56 +521,6 @@ temp_contr_gas_flow( Var_T * v )
 
     itc503_set_gas_flow( gf );
     return vars_push( FLOAT_VAR, itc503_get_gas_flow( ) );
-}
-
-
-/*--------------------------------------------------------*
- * Select or determine which unit (K or degree C) is used
- * when reporting temperatures.
- *--------------------------------------------------------*/
-
-Var_T *
-temp_contr_sensor_unit( Var_T * v )
-{
-    long unit = 0;
-    const char *in_units  = "KC";
-    int i;
-
-
-    if ( v == NULL )
-        return vars_push( INT_VAR, itc503.unit );
-
-    vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-    if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-    {
-        unit = get_long( v, "unit number" );
-
-        if ( unit < UNIT_KELVIN || unit > UNIT_CELSIUS )
-        {
-            print( FATAL, "Invalid unit number (%d).\n", unit );
-            THROW( EXCEPTION );
-        }
-    }
-    else
-    {
-        for ( i = 0; i < ( long ) strlen( in_units ); i++ )
-            if ( toupper( ( unsigned char ) *v->val.sptr ) == in_units[ i ] )
-            {
-                unit = i;
-                break;
-            }
-
-        if ( strlen( v->val.sptr ) != 1 || i >= ( long ) strlen( in_units ) )
-        {
-            print( FATAL, "Invalid unit (\"%s\").\n", v->val.sptr );
-            THROW( EXCEPTION );
-        }
-    }
-
-    too_many_arguments( v );
-
-    return vars_push( INT_VAR, itc503.unit = unit );
 }
 
 
@@ -981,6 +921,12 @@ itc503_set_gas_flow( double gf )
 
 
     fsc2_assert( gf >= 0 && lrnd( 10 * gf ) <= 999 );
+
+    if ( itc503_get_state( ) > STATE_AUTO )
+    {
+        print( FATAL, "Can't set gas flow while in AutoGFS phase.\n" );
+        THROW( EXCEPTION );
+    }
 
     sprintf( cmd, "G%.1f\r", gf );
     if ( itc503_talk( cmd, buf, sizeof buf ) != 2 )

@@ -314,7 +314,6 @@ multimeter_command, 1, EXP;
 temp_contr_name, 0, ALL;
 temp_contr_lock_keyboard, -1, EXP;
 temp_contr_temperature, 0, EXP;
-temp_contr_sensor_unit, -1, EXP;
 temp_contr_sample_channel, -1, EXP;
 temp_contr_command, 1, EXP;
 temp_contr_heater_sensor, -1, EXP;

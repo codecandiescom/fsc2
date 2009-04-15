@@ -1688,7 +1688,6 @@ In the GPIB configuration file use @code{"ITC503"} as the device name,
 @item @ref{temp_contr_name()}
 @item @ref{temp_contr_temperature()}
 @item @ref{temp_contr_sample_channel()}
-@item @ref{temp_contr_sensor_unit()}
 @item @ref{temp_contr_lock_keyboard()}
 @end table
 
@@ -1822,7 +1821,6 @@ In the GPIB configuration file use @code{"LAKESHORE330"} as the device name,
 @item @ref{temp_contr_name()}
 @item @ref{temp_contr_temperature()}
 @item @ref{temp_contr_sample_channel()}
-@item @ref{temp_contr_sensor_unit()}
 @item @ref{temp_contr_lock_keyboard()}
 @end table
 

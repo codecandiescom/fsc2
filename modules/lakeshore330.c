@@ -40,17 +40,6 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define LOCK_STATE_REMOTE      1
 #define LOCK_STATE_REMOTE_LLO  2
 
-#define UNIT_KELVIN            0
-#define UNIT_CELSIUS           1
-#define UNIT_SENSOR            2
-
-#define UNIT_VOLTS             2
-#define UNIT_OHMS              3
-#define UNITS_MILLIVOLTS       4
-
-#define DEFAULT_UNIT           UNIT_KELVIN
-
-
 int lakeshore330_init_hook(       void );
 int lakeshore330_exp_hook(        void );
 int lakeshore330_end_of_exp_hook( void );
@@ -59,25 +48,15 @@ int lakeshore330_end_of_exp_hook( void );
 Var_T * temp_contr_name(           Var_T *v );
 Var_T * temp_contr_temperature(    Var_T *v );
 Var_T * temp_contr_sample_channel( Var_T *v );
-Var_T * temp_contr_sensor_unit(    Var_T *v );
 Var_T * temp_contr_lock_keyboard(  Var_T *v );
 Var_T * temp_contr_command(        Var_T *v );
 
 
 static bool lakeshore330_init( const char * name );
-
 static double lakeshore330_sens_data( void );
-
 static long lakeshore330_sample_channel( long channel );
-
-static void lakeshore330_set_unit( long unit );
-
-static long lakeshore330_get_unit( void );
-
 static void lakeshore330_lock( int state );
-
 static bool lakeshore330_command( const char * cmd );
-
 static bool lakeshore330_talk( const char * cmd,
                                char *       reply,
                                long *       length );
@@ -89,7 +68,6 @@ static struct {
     int device;
     int lock_state;
     int sample_channel;
-    long unit;
 } lakeshore330;
 
 
@@ -107,10 +85,10 @@ int
 lakeshore330_init_hook( void )
 {
     Need_GPIB = SET;
-    lakeshore330.device = -1;
-    lakeshore330.lock_state = LOCK_STATE_REMOTE_LLO;
+
+    lakeshore330.device         = -1;
+    lakeshore330.lock_state     = LOCK_STATE_REMOTE_LLO;
     lakeshore330.sample_channel = DEFAULT_SAMPLE_CHANNEL;
-    lakeshore330.unit = DEFAULT_UNIT;
 
     return 1;
 }
@@ -221,71 +199,6 @@ temp_contr_sample_channel( Var_T * v )
 
 
 /*---------------------------------------------------------*
- *---------------------------------------------------------*/
-
-Var_T *
-temp_contr_sensor_unit( Var_T * v )
-{
-    long unit = 0;
-    const char *in_units  = "KCS";
-    int i;
-
-
-    if ( v == NULL )
-    {
-        if ( FSC2_MODE == TEST )
-            return vars_push( INT_VAR, lakeshore330.unit );
-
-        return vars_push( INT_VAR, lakeshore330_get_unit( ) );
-    }
-
-    vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-
-    if ( v->type & ( INT_VAR | FLOAT_VAR ) )
-    {
-        unit = get_long( v, "unit number" );
-
-        if ( unit < UNIT_KELVIN || unit > UNIT_SENSOR )
-        {
-            print( FATAL, "Invalid unit number (%d).\n", unit );
-            THROW( EXCEPTION );
-        }
-    }
-    else
-    {
-        for ( i = 0; i < ( long ) strlen( in_units ); i++ )
-            if ( toupper( ( unsigned char ) *v->val.sptr ) == in_units[ i ] )
-            {
-                unit = i;
-                break;
-            }
-
-        if ( strlen( v->val.sptr ) != 1 || i > UNIT_SENSOR )
-        {
-            print( FATAL, "Invalid unit (\"%s\").\n", v->val.sptr );
-            THROW( EXCEPTION );
-        }
-    }
-
-
-    if ( ( v = vars_pop( v ) ) != NULL )
-    {
-        print( WARN, "Too many arguments, discarding superfluous "
-               "arguments.\n" );
-
-        while ( ( v = vars_pop( v ) ) != NULL )
-            /* empty */ ;
-    }
-
-    if ( FSC2_MODE == TEST )
-        return vars_push( INT_VAR, lakeshore330.unit = unit );
-
-    lakeshore330_set_unit( unit );
-    return vars_push( INT_VAR, lakeshore330_get_unit( ) );
-}
-
-
-/*---------------------------------------------------------*
  * If called with a non-zero argument the keyboard becomes
  * unlocked during an experiment.
  *---------------------------------------------------------*/
@@ -358,7 +271,6 @@ lakeshore330_init( const char * name )
 {
     char buf[ 20 ];
     long len = sizeof buf;
-    const char *in_units  = "KCS";
 
 
     /* Initialize GPIB communication with the temperature controller */
@@ -376,8 +288,9 @@ lakeshore330_init( const char * name )
          || gpib_read( lakeshore330.device, buf, &len ) == FAILURE )
         return FAIL;
 
-    sprintf( buf, "SUNI %c\n", in_units[ lakeshore330.unit ] );
-    if ( gpib_write( lakeshore330.device, buf, strlen( buf ) ) == FAILURE )
+    /* Set mode to Kelvin */
+
+    if ( gpib_write( lakeshore330.device, "SUNI K\n", 7 ) == FAILURE )
         return FAIL;
 
     /* Set default sample channel */
@@ -417,48 +330,6 @@ lakeshore330_sens_data( void )
 
     sscanf( buf, "%lf", &temp );
     return temp;
-}
-
-
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
-
-static void
-lakeshore330_set_unit( long unit )
-{
-    const char *in_units  = "KCS";
-    char buf[ 30 ];
-
-
-    fsc2_assert( unit >= UNIT_KELVIN && unit <= UNIT_SENSOR );
-
-    sprintf( buf, "SUNI %c\n", in_units[ unit ] );
-    lakeshore330_command( buf );
-}
-
-
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
-
-static long
-lakeshore330_get_unit( void )
-{
-    const char *out_units = "KCVRM";
-    char buf[ 30 ];
-    long len = sizeof buf;
-    long i;
-
-
-    lakeshore330_talk( "SUNI?\n", buf, &len );
-
-    for ( i = 0; i <= UNITS_MILLIVOLTS; i++ )
-        if ( *buf == out_units[ i ] )
-            return lakeshore330.unit = i;
-
-    print( FATAL, "Device returned invalid unit \"%s\".\n", *buf );
-    THROW( EXCEPTION );
-
-    return -1;
 }
 
 

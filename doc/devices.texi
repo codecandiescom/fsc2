@@ -4257,7 +4257,6 @@ the @code{EDL} script.
 @item @ref{temp_contr_name()}
 @item @ref{temp_contr_temperature()}
 @item @ref{temp_contr_sample_channel()}
-@item @ref{temp_contr_sensor_unit()}
 @item @ref{temp_contr_lock_keyboard()}
 @end table
 
@@ -4279,14 +4278,13 @@ Returns a string with the name of the temperature controller being used.
 @anchor{temp_contr_temperature()}
 @findex temp_contr_temperature()
 @item temp_contr_temperature()
-This function accepts no arguments and returns the temperature at the
-currently active sample channel and with the currently selected unit.
+This function accepts no arguments and returns the temperature (in
+Kelvin) at the currently active sample channel.
 
 If no sample channel has been selected for the @ref{lakeshore330, Lake
 Shore 330} channels @code{B} is used by default, while for the
 @ref{itc503, Oxford Instruments ITC503} the default channel is channel
-@code{1}. When no temperature unit has been selected temperatures are
-returned in Kelvin.
+@code{1}.
 
 
 @anchor{temp_contr_sample_channel()}
@@ -4299,7 +4297,7 @@ returns @code{1} for channel @code{A} and @code{2} for channel
 returned, indicating which of sample channel is selected. These values
 can also passed to the function to set a new sample channel.
 Alternatively, one may also use the strings @code{"A"} or @code{"B"}
-(and @code{"C"} for the third channel of the @ref{itc503}).
+(and @code{"C"} for the three channels of the @ref{itc503}).
 
 Please take note that setting a sample channel takes about half a
 second with the @ref{lakeshore330, Lake Shore 330}. For the
@@ -4307,24 +4305,6 @@ second with the @ref{lakeshore330, Lake Shore 330}. For the
 usable, there are models with different numbers of channels and this
 number is a compile time option that has to be set in the
 configuration file for the device.
-
-
-@anchor{temp_contr_sensor_unit()}
-@findex temp_contr_sensor_unit()
-@item temp_contr_sensor_unit()
-The function either returns or sets the units returned by the device
-on temperature readings. If used to set a unit the function must be
-called with the value @code{0} or @code{"K"} to set the unit to
-Kelvin, @code{1} or @code{"C"} to set to degree Celsius. The
-@ref{lakeshore330, Lake Shore 330} also allows to select the most
-appropriate unit for the sensor (volts for diodes, Ohms for RTD or
-milli-Volts for thermocouples) by passing the function an argument of
-@code{2} or @code{"S"}.
-
-The function always return the unit setting as an integer value with
-@code{0} for Kelvin, @code{1} for degree Celsius, or, for the
-@ref{lakeshore330, Lake Shore 330} only, @code{2} for Volts, @code{3}
-for Ohms and @code{4} for milli-Volts.
 
 
 @anchor{temp_contr_lock_keyboard()}
