@@ -40,7 +40,10 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define SAMPLE_CHANNEL_1        1
 #define SAMPLE_CHANNEL_2        2
 #define SAMPLE_CHANNEL_3        3
+
 #define DEFAULT_SAMPLE_CHANNEL  SAMPLE_CHANNEL_1
+#define DEFAULT_HEATER_SENSOR   SAMPLE_CHANNEL_1;
+
 
 enum {
     LOCAL_AND_LOCKED,
@@ -54,39 +57,75 @@ enum {
 #define DEFAULT_UNIT           UNIT_KELVIN
 
 
+#define MAX_TEMP        1667.7    /* max. temperature in Kelvin */
+
+#define TEST_SETPOINT   123.4
+
+enum {
+    STATE_MANUAL,
+    STATE_HEATER_AUTO,
+    STATE_GAS_AUTO,
+    STATE_AUTO
+};
+
+#define TEST_STATE           STATE_MANUAL
+
+#define MAX_HEATER_POWER     40.0    /* 40 V */
+
+#define TEST_HEATER_POWER    99.9
+#define TEST_GAS_FLOW        99.9
+
+
 int itc503_init_hook(       void );
 int itc503_exp_hook(        void );
 int itc503_end_of_exp_hook( void );
 
 
-Var_T * temp_contr_name(           Var_T * v );
-Var_T * temp_contr_temperature(    Var_T * v );
-Var_T * temp_contr_sample_channel( Var_T * v );
-Var_T * temp_contr_sensor_unit(    Var_T * v );
-Var_T * temp_contr_lock_keyboard(  Var_T * v );
-Var_T * temp_contr_command(        Var_T * v );
+Var_T * temp_contr_name(               Var_T * v );
+Var_T * temp_contr_temperature(        Var_T * v );
+Var_T * temp_contr_sample_channel(     Var_T * v );
+Var_T * temp_contr_heater_sensor(      Var_T * v );
+Var_T * temp_contr_setpoint(           Var_T * v );
+Var_T * temp_contr_state(              Var_T * v );
+Var_T * temp_contr_heater_power_limit( Var_T * v );
+Var_T * temp_contr_heater_power(       Var_T * v );
+Var_T * temp_contr_gas_flow(           Var_T * v );
+Var_T * temp_contr_sensor_unit(        Var_T * v );
+Var_T * temp_contr_lock_keyboard(      Var_T * v );
+Var_T * temp_contr_command(            Var_T * v );
 
 
 static bool itc503_init( const char * name );
-
+static int itc503_get_state( void );
+static void itc503_set_state( int state );
+static int itc503_get_heater_sensor( void );
+static void itc503_set_heater_sensor( int sensor );
+static double itc503_get_setpoint( void );
+static void itc503_set_setpoint( double setpoint );
 static double itc503_sens_data( void );
-
+static void itc503_set_heater_power_limit( double limit );
+static double itc503_get_heater_power(void );
+static void itc503_set_heater_power( double hp );
+static double itc503_get_gas_flow( void );
+static void itc503_set_gas_flow( double gf );
 static void itc503_lock( int state );
-
 static bool itc503_command( const char * cmd );
-
 static long itc503_talk( const char * message,
                          char *       reply,
                          long         length );
-
 static void itc503_gpib_failure( void );
 
 
 static struct {
-    int device;
-    int lock_state;
-    int sample_channel;
-    int unit;
+    int    device;
+    int    lock_state;
+    int    state;
+    int    sample_channel;
+    double setpoint;
+    int    heater_sensor;
+    double heater_power;
+    double gas_flow;
+    int    unit;
 } itc503;
 
 
@@ -104,10 +143,16 @@ int
 itc503_init_hook( void )
 {
     Need_GPIB = SET;
-    itc503.device = -1;
-    itc503.lock_state = REMOTE_AND_LOCKED;
-    itc503.sample_channel = DEFAULT_SAMPLE_CHANNEL;
-    itc503.unit = DEFAULT_UNIT;
+
+    itc503.device           = -1;
+    itc503.lock_state       = REMOTE_AND_LOCKED;
+    itc503.state            = TEST_STATE;
+    itc503.setpoint         = TEST_SETPOINT;
+    itc503.sample_channel   = DEFAULT_SAMPLE_CHANNEL;
+    itc503.heater_sensor    = DEFAULT_HEATER_SENSOR;
+    itc503.heater_power     = TEST_HEATER_POWER;
+    itc503.gas_flow         = TEST_GAS_FLOW;
+    itc503.unit             = DEFAULT_UNIT;
 
     return 1;
 }
@@ -176,7 +221,7 @@ temp_contr_temperature( Var_T * v  UNUSED_ARG )
 
 
 /*---------------------------------------------------------------------*
- * Sets or returns the currentyl used sample channel (function returns
+ * Sets or returns the currently used sample channel (function returns
  * either 1, 2 or 3 for channel A, B or C and accepts 1, 2, 3 or the
  * strings "A","B" or "C" as input arguments). Please note that the
  * number of sample channels that can be used is a compile time
@@ -205,15 +250,16 @@ temp_contr_sample_channel( Var_T * v )
     }
     else
     {
-        if (    (    *v->val.sptr != 'A'
+        if (    strlen( v->val.sptr ) != 1
+             || (    *v->val.sptr != 'A'
                   && *v->val.sptr != 'B'
-                  && *v->val.sptr != 'C' )
-             || strlen( v->val.sptr ) != 1 )
+                  && *v->val.sptr != 'C' ) )
         {
             print( FATAL, "Invalid sample channel (\"%s\").\n", v->val.sptr );
             THROW( EXCEPTION );
         }
-        channel = ( long ) ( *v->val.sptr - 'A' );
+
+        channel = ( long ) ( *v->val.sptr - 'A' + 1 );
     }
 
     if ( channel > NUM_SAMPLE_CHANNELS )
@@ -226,6 +272,265 @@ temp_contr_sample_channel( Var_T * v )
     itc503.sample_channel = channel;
 
     return vars_push( INT_VAR, itc503.sample_channel );
+}
+
+
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+Var_T *
+temp_contr_heater_sensor( Var_T * v )
+{
+    long sensor;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( INT_VAR, ( long ) itc503.heater_sensor );
+        return vars_push( INT_VAR, ( long ) itc503_get_heater_sensor );
+    }
+
+    if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+    {
+        sensor = get_long( v, "heater sensor" );
+
+        if ( sensor < SAMPLE_CHANNEL_1 && sensor > SAMPLE_CHANNEL_3 )
+        {
+            print( FATAL, "Invalid heater sensor number (%ld).\n", sensor );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        if (    strlen( v->val.sptr ) != 1
+             || (    *v->val.sptr != 'A'
+                  && *v->val.sptr != 'B'
+                  && *v->val.sptr != 'C' ) )
+        {
+            print( FATAL, "Invalid heater sensor \"%s\".\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+
+        sensor = ( long ) ( *v->val.sptr - 'A' + 1 );
+    }
+    
+    if ( sensor > NUM_SAMPLE_CHANNELS )
+    {
+        print( FATAL, "Device module is configured to use not more than %d "
+               "heater sensors channels.\n", NUM_SAMPLE_CHANNELS );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == TEST )
+        itc503.heater_sensor = sensor;
+    else
+        itc503_set_heater_sensor( sensor );
+
+    return vars_push( INT_VAR, ( long ) sensor );
+}
+
+
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+Var_T *
+temp_contr_setpoint( Var_T * v )
+{
+    double sp;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, itc503.setpoint -
+                            ( itc503.unit == UNIT_KELVIN ? 0.0 : C2K_OFFSET ) );
+        return vars_push( FLOAT_VAR, itc503_get_setpoint( ) -
+                          ( itc503.unit == UNIT_KELVIN ? 0.0 : C2K_OFFSET ) );
+    }
+
+    sp = get_double( v, "setpoint" );
+
+    too_many_arguments( v );
+
+    if ( sp < 0.0 || sp > MAX_TEMP )
+    {
+        print( FATAL, "Requested setpoint out of range\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        itc503.setpoint = sp;
+        return vars_push( FLOAT_VAR, sp -
+                          ( itc503.unit == UNIT_KELVIN ? 0.0 : C2K_OFFSET ) );
+    }
+
+    itc503_set_setpoint( sp );
+    return vars_push( FLOAT_VAR, itc503_get_setpoint( ) -
+                      ( itc503.unit == UNIT_KELVIN ? 0.0 : C2K_OFFSET ) );
+}
+
+
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+Var_T *
+temp_contr_state( Var_T * v )
+{
+    long state;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( INT_VAR, ( long ) TEST_STATE );
+        return vars_push( INT_VAR, ( long ) itc503_get_state( ) );
+    }
+
+    if ( v->type == STR_VAR )
+    {
+        if ( ! strcmp( v->val.sptr, "MANUAL" ) )
+            state = STATE_MANUAL;
+        else if ( ! strcmp( v->val.sptr, "HEATER_AUTO" ) )
+            state = STATE_HEATER_AUTO;
+        else if ( ! strcmp( v->val.sptr, "GAS_AUTO" ) )
+            state = STATE_GAS_AUTO;
+        else if ( ! strcmp( v->val.sptr, "AUTO" ) )
+            state = STATE_AUTO;
+        else
+        {
+            print( FATAL, "Invalid argument '%s'.\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        state = get_long( v, "state" );
+        if ( state < STATE_MANUAL || state > STATE_AUTO )
+        {
+            print( FATAL, "Invald argument '%ld\n", state );
+            THROW( EXCEPTION );
+        }
+    }
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE == TEST )
+        itc503.state = state;
+    else
+        itc503_set_state( state );
+
+    return vars_push( INT_VAR, state );
+}
+
+
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+Var_T *
+temp_contr_heater_power_limit( Var_T * v )
+{
+    double limit;
+
+
+    if ( v == NULL )
+    {
+        print( FATAL, "Heater power linit can't be queried.\n" );
+        THROW( EXCEPTION );
+    }
+
+    limit = get_double( v, "heater power limit" );
+
+    too_many_arguments( v );
+
+    if ( limit < 0.0 || limit > MAX_HEATER_POWER + 0.04 )
+    {
+        print( FATAL, "Heater power limit of %.1f V out of range, must be "
+               "between 0 and %.1f V.\n", limit, MAX_HEATER_POWER );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == EXPERIMENT )
+        itc503_set_heater_power_limit( limit );
+
+    return vars_push( FLOAT_VAR, 0.1 * lrnd( 10.0 * limit ) );
+}
+
+
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+Var_T *
+temp_contr_heater_power( Var_T * v )
+{
+    double hp;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, itc503.heater_power );
+        return vars_push( FLOAT_VAR, itc503_get_heater_power( ) );
+    }
+
+    hp = get_double( v, "heater power" );
+
+    too_many_arguments( v );
+
+    if ( hp < 0 || lrnd( 10 * hp ) > 999 )
+    {
+        print( FATAL, "Heater power of %.1f %% out of range, must be between "
+               "0 and 99.9 %%.\n", hp );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == TEST )
+    {
+        itc503.heater_power = 0.1 * lrnd( 10 * hp );
+        return vars_push( FLOAT_VAR, itc503.heater_power );
+    }
+
+    itc503_set_heater_power( hp );
+    return vars_push( FLOAT_VAR, itc503_get_heater_power( ) );
+}
+
+
+/*--------------------------------------------------------*
+ *--------------------------------------------------------*/
+
+Var_T *
+temp_contr_gas_flow( Var_T * v )
+{
+    double gf;
+
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, itc503.gas_flow );
+        return vars_push( FLOAT_VAR, itc503_get_gas_flow( ) );
+    }
+
+    gf = get_double( v, "gas flow" );
+
+    too_many_arguments( v );
+
+    if ( gf < 0 || lrnd( 10 * gf ) > 999 )
+    {
+        print( FATAL, "Gas flow of %.1f %% out of range, must be between "
+               "0 and 99.9 %%.\n", gf );
+        THROW( EXCEPTION );
+    }
+
+    if ( FSC2_MODE == TEST )
+    {
+        itc503.gas_flow = 0.1 * lrnd( 10 * gf );
+        return vars_push( FLOAT_VAR, itc503.gas_flow );
+    }
+
+    itc503_set_gas_flow( gf );
+    return vars_push( FLOAT_VAR, itc503_get_gas_flow( ) );
 }
 
 
@@ -358,7 +663,7 @@ itc503_init( const char * name )
     if ( gpib_init_device( name, &itc503.device ) == FAILURE )
         return FAIL;
 
-    /* Set end of EOS character to '\n' */
+    /* Set end of EOS character to '\r' */
 
     if ( gpib_write( itc503.device, "Q0\r", 3 ) == FAILURE )
         return FAIL;
@@ -368,7 +673,126 @@ itc503_init( const char * name )
     if ( itc503_talk( "C1\r", buf, sizeof buf ) != 2 )
         return FAIL;
 
+    itc503.state = itc503_get_state( );
+
+    itc503.heater_sensor = itc503_get_heater_sensor( );
+
     return OK;
+}
+
+
+/*--------------------------------------------*
+ *--------------------------------------------*/
+
+static int
+itc503_get_state( void )
+{
+    char buf[ 50 ];
+    int state;
+
+
+    if (    itc503_talk( "X\r", buf, sizeof buf ) < 4
+         || buf[ 2 ] != 'A' )
+    {
+        print( FATAL, "Device returns invalid state data.\n");
+        THROW( EXCEPTION );
+    }
+
+    state = T_atoi( buf + 3 );
+    if ( state < STATE_MANUAL || state > STATE_AUTO + 4 )
+    {
+        print( FATAL, "Device returns invalid state data.\n");
+        THROW( EXCEPTION );
+    }
+
+    return state;
+}
+
+
+/*--------------------------------------------*
+ *--------------------------------------------*/
+
+static void
+itc503_set_state( int state )
+{
+    char cmd[ ] = "A*\r";
+    char buf[ 10 ];
+
+
+    fsc2_assert( state >= STATE_MANUAL || state <= STATE_AUTO );
+
+    itc503.state = itc503_get_state( );
+
+    if ( itc503.state > STATE_AUTO && state >= STATE_GAS_AUTO )
+    {
+        print( FATAL, "Can't set state to GAS AUTO while in AutoGFS phase.\n" );
+        THROW( EXCEPTION );
+    }
+
+    cmd[ 1 ] = state + '0';
+    if ( itc503_talk( cmd, buf, sizeof buf ) != 2 )
+    {
+        print( FATAL, "Failure to set state.\n" );
+        THROW( EXCEPTION );
+    }
+}
+
+
+/*--------------------------------------------*
+ *--------------------------------------------*/
+
+static int
+itc503_get_heater_sensor( void )
+{
+    char buf[ 50 ];
+    int sensor;
+
+
+    if (    itc503_talk( "X\r", buf, sizeof buf ) != 14
+         || buf[ 9 ] != 'H' )
+    {
+        print( FATAL, "Device returns invalid heater sensor data.\n");
+        THROW( EXCEPTION );
+    }
+
+    sensor = T_atoi( buf + 10 );
+
+    if ( sensor < SAMPLE_CHANNEL_1 || sensor > SAMPLE_CHANNEL_3 )
+    {
+        print( FATAL, "Device returns invalid heater sensor data.\n");
+        THROW( EXCEPTION );
+    }
+
+    if ( sensor > NUM_SAMPLE_CHANNELS )
+    {
+        print( FATAL, "Device returns heater sensor %d which is higher than "
+               "what has been set as the upper sensor in the configuration "
+               "of the device (%d).\n", sensor, NUM_SAMPLE_CHANNELS );
+        THROW( EXCEPTION );
+    }
+
+    return sensor;
+}
+
+
+/*--------------------------------------------*
+ *--------------------------------------------*/
+
+static void
+itc503_set_heater_sensor( int sensor )
+{
+    char cmd[ 20 ];
+    char buf[ 20 ];
+
+
+    fsc2_assert( sensor >= SAMPLE_CHANNEL_1 && sensor <= NUM_SAMPLE_CHANNELS );
+
+    sprintf( cmd, "H%d\r", sensor );
+    if ( itc503_talk( cmd, buf, sizeof buf ) != 2 )
+    {
+        print( FATAL, "Failed to set heater sensor.\n" );
+        THROW( EXCEPTION );
+    }
 }
 
 
@@ -380,7 +804,7 @@ static double
 itc503_sens_data( void )
 {
     char buf[ 50 ];
-    long len = 50;
+    long len;
     double temp;
     char cmd[ ] = "R*\r";
 
@@ -388,9 +812,10 @@ itc503_sens_data( void )
     cmd[ 1 ] = itc503.sample_channel + '0';
     len = itc503_talk( cmd, buf, sizeof buf );
 
-    if (    buf[ 1 ] != '-'
-         && buf[ 1 ] != '+'
-         && ! isdigit( ( unsigned char ) buf[ 1 ] ) )
+    if (    len < 2
+         || (    buf[ 1 ] != '-'
+              && buf[ 1 ] != '+'
+              && ! isdigit( ( unsigned char ) buf[ 1 ] ) ) )
     {
         print( FATAL, "Error reading temperature.\n" );
         THROW( EXCEPTION );
@@ -399,12 +824,170 @@ itc503_sens_data( void )
     sscanf( buf + 1, "%lf", &temp );
 
     /* If the first character is a '+' or '-' the sensor is returning
-       temperatures om degree celsius */
+       temperatures in degree Celsius, otherwise in Kelvin */
 
     if ( ! isdigit( ( unsigned char ) buf[ 1 ] ) )
          temp += C2K_OFFSET;
 
     return temp;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static double
+itc503_get_setpoint( void )
+{
+    char buf[ 50 ];
+    long len;
+    double setpoint;
+
+
+    len = itc503_talk( "R0\r", buf, sizeof buf );
+
+    if (    len < 2
+         || (    buf[ 1 ] != '-'
+              && buf[ 1 ] != '+'
+              && ! isdigit( ( unsigned char ) buf[ 1 ] ) ) )
+    {
+        print( FATAL, "Error reading setpoint.\n" );
+        THROW( EXCEPTION );
+    }
+
+    sscanf( buf + 1, "%lf", &setpoint );
+
+    /* If the first character is a '+' or '-' the sensor is returning
+       setpointeratures in degree Celsius, otherwise in Kelvin */
+
+    if ( ! isdigit( ( unsigned char ) buf[ 1 ] ) )
+         setpoint += C2K_OFFSET;
+
+    return setpoint;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static void
+itc503_set_setpoint( double setpoint )
+{
+    char cmd[ 20 ];
+    char buf[ 20 ];
+
+
+    fsc2_assert( setpoint >= 0.0 && setpoint <= MAX_TEMP );
+
+    sprintf( buf, "T%.3f\r", setpoint );
+
+    if ( itc503_talk( cmd, buf, sizeof buf ) != 2 )
+    {
+        print( FATAL, "Failed to set setpoint.\n" );
+        THROW( EXCEPTION );
+    }
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static void
+itc503_set_heater_power_limit( double limit )
+{
+    char cmd[ 20 ];
+    char buf[ 20 ];
+
+
+    fsc2_assert(    limit >= 0.0
+                 && lrnd( 10 * limit ) <= lrnd( 10 * MAX_HEATER_POWER ) );
+
+    sprintf( cmd, "M%.1f\r", limit );
+    if ( itc503_talk( cmd, buf, sizeof buf ) != 2 )
+    {
+        print( FATAL, "Failed to set heater power limit.\n" );
+        THROW( EXCEPTION );
+    }
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static double
+itc503_get_heater_power( void )
+{
+    char buf[ 20 ];
+
+
+    if ( itc503_talk( "R5\r", buf, sizeof buf ) < 3 )
+    {
+        print( FATAL, "Failed to read heater power.\n" );
+        THROW( EXCEPTION );
+    }
+
+    return T_atod( buf + 1 );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static void
+itc503_set_heater_power( double hp )
+{
+    char cmd[ 20 ];
+    char buf[ 20 ];
+
+
+    fsc2_assert( hp >= 0 && lrnd( 10 * hp ) <= 999 );
+
+    sprintf( cmd, "O%.1f\r", hp );
+    if ( itc503_talk( cmd, buf, sizeof buf ) != 2 )
+    {
+        print( FATAL, "Failed to set heater power.\n" );
+        THROW( EXCEPTION );
+    }
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static double
+itc503_get_gas_flow( void )
+{
+    char buf[ 20 ];
+
+
+    if ( itc503_talk( "R7\r", buf, sizeof buf ) < 3 )
+    {
+        print( FATAL, "Failed to read gas flow.\n" );
+        THROW( EXCEPTION );
+    }
+
+    return T_atod( buf + 1 );
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static void
+itc503_set_gas_flow( double gf )
+{
+    char cmd[ 20 ];
+    char buf[ 20 ];
+
+
+    fsc2_assert( gf >= 0 && lrnd( 10 * gf ) <= 999 );
+
+    sprintf( cmd, "G%.1f\r", gf );
+    if ( itc503_talk( cmd, buf, sizeof buf ) != 2 )
+    {
+        print( FATAL, "Failed to set gas flow.\n" );
+        THROW( EXCEPTION );
+    }
 }
 
 
@@ -465,7 +1048,7 @@ itc503_talk( const char * message,
              char *       reply,
              long         length )
 {
-    long len = length;
+    long len;
     int retries = MAX_RETRIES;
 
 
@@ -478,7 +1061,7 @@ itc503_talk( const char * message,
 
     stop_on_user_request( );
 
-    len = length;
+    len = length - 1;
     if ( gpib_read( itc503.device, reply, &len ) == FAILURE )
         itc503_gpib_failure( );
 
@@ -504,6 +1087,8 @@ itc503_talk( const char * message,
         else
             itc503_gpib_failure( );
     }
+
+    reply[ len ] = '\0';
 
     return len;
 }
