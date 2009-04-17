@@ -197,12 +197,14 @@ oriel_matrix_init( void )
 
     libusb_free_device_list( list, 1 );
 
+#if 1        /* Is this really necessary? */
     if ( libusb_set_configuration( oriel_matrix.udev, 1 ) )
     {
         lower_permissions( );
         print( FATAL, "Can't set configuration for USB device.\n" );
         THROW( EXCEPTION );
     }
+#endif
 
     if ( libusb_claim_interface( oriel_matrix.udev, 0 ) )
     {
@@ -211,12 +213,14 @@ oriel_matrix_init( void )
         THROW( EXCEPTION );
     }
 
+#if 1        /* Is this really necessary? */
     if ( libusb_set_interface_alt_setting( oriel_matrix.udev, 0, 0 ) )
     {
         lower_permissions( );
         print( FATAL, "Can't set alternate interface for USB device.\n" );
         THROW( EXCEPTION );
     }
+#endif
 
     lower_permissions( );
 
@@ -1195,20 +1199,58 @@ oriel_matrix_communicate( unsigned char cmd,
                             len, 0 ) != ( int ) len
          || usb_bulk_read( oriel_matrix.udev, rep, ( char * ) readbuf,
                            sizeof readbuf, 0) <= 0
-#elif defined WITH_LIBUSB_1_0
-    if (    libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
-                                  len, &cnt, 0 )
-         || cnt != len
-         || libusb_bulk_transfer( oriel_matrix.udev, rep, readbuf,
-                                  sizeof readbuf, &cnt, 0 )
-         || cnt < 7
-#endif
          || readbuf[ 6 ] == 0x00 )
     {
         lower_permissions( );
         print( FATAL, err );
         THROW( EXCEPTION );
     }
+#elif defined WITH_LIBUSB_1_0
+    if ( libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
+                               len, &cnt, 0 ) )
+    {
+        lower_permissions( );
+        print( FATAL, err );
+        print( FATAL, "Sending data with libusb_bulk_transfer() failed.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( cnt != len )
+    {
+        lower_permissions( );
+        print( FATAL, err );
+        print( FATAL, "Expected to send %d bytes but only %d got send.\n",
+               len, cnt );
+        THROW( EXCEPTION );
+    }
+
+    if ( libusb_bulk_transfer( oriel_matrix.udev, rep, readbuf,
+                               sizeof readbuf, &cnt, 0 ) )
+    {
+        lower_permissions( );
+        print( FATAL, err );
+        print( FATAL, "Reading data with libusb_bulk_transfer() failed.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( cnt < 7 )
+    {
+        lower_permissions( );
+        print( FATAL, err );
+        print( FATAL, "Expected to read at last 7 bytes but only got %d.\n",
+               cnt );
+        THROW( EXCEPTION );
+    }
+
+    if ( readbuf[ 6 ] != 0x01 )
+    {
+        lower_permissions( );
+        print( FATAL, err );
+        print( FATAL, "Transfer succeded but data received indicate failure "
+               "(byte 6 is 0x%02x%).\n", (unsigned int ) readbuf[ 6 ] );
+        THROW( EXCEPTION );
+    }        
+#endif
 
     lower_permissions( );
 
