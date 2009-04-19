@@ -507,6 +507,32 @@ init_devs_and_graphics( void )
 
         run_exp_hooks( );
 
+#if defined WITH_LIBUSB_1_0
+        /* Set the close-on-exec flag on all file descriptors opened for
+           USB devices */
+
+        if ( Need_USB )
+        {
+            size_t i;
+            const struct libusb_pollfd **usb_list
+                                                   = libusb_get_pollfds( NULL );
+
+            if ( usb_list != NULL )
+            {
+                for ( i = 0; usb_list && usb_list != NULL; i++ )
+                {
+                    int fd_flags = fcntl( usb_list[ i ]->fd, F_GETFD );
+
+                    if ( fd_flags < 0 )
+                        fd_flags = 0;
+                    fcntl( usb_list[ i ]->fd, F_SETFD, fd_flags | FD_CLOEXEC );
+                }
+
+                free( usb_list );
+            }
+        }
+#endif
+
         EDL.react_to_do_quit = UNSET;
 
         if ( ! ( Fsc2_Internals.cmdline_flags & NO_GUI_RUN ) )
