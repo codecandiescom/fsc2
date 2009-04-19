@@ -153,6 +153,8 @@ oriel_matrix_init( void )
 
     raise_permissions( );
 
+    libusb_set_debug( NULL, 3 );
+
     if ( ( cnt = libusb_get_device_list( NULL, &list ) ) < 0 )
     {
         print( FATAL, "Failure to find USB devices.\n" );
@@ -589,18 +591,20 @@ oriel_matrix_get_exposure( void )
 
     raise_permissions( );
 
+#if defined WITH_LIBUSB_0_1
     /* Read in the data in chunks of USB_READ_BUF_SIZE bytes since the device
        always sends them that way */ 
 
-#if defined WITH_LIBUSB_0_1
     for ( i = 0; i < pix.image_size; i += USB_READ_BUF_SIZE )
         if ( usb_bulk_read( oriel_matrix.udev, EP6,
                             ( char * ) ( pix.image + i ),
                             USB_READ_BUF_SIZE, 0 ) <= 0 )
 #elif defined WITH_LIBUSB_1_0
+    /* Read in the all the data in one go */
+
     if (    libusb_bulk_transfer( oriel_matrix.udev, EP6, pix.image,
                                   pix.image_size, &cnt, 0 )
-            || ( unsigned int ) cnt != pix.image_size )
+         || ( unsigned int ) cnt != pix.image_size )
 #endif
       {
           lower_permissions( );
@@ -701,15 +705,17 @@ oriel_matrix_get_reconstruction( unsigned char recon_type )
       
     raise_permissions( );
 
+#if defined WITH_LIBUSB_0_1
     /* Read in the data in chunks of USB_READ_BUF_SIZE bytes since the device
        always sends them that way */ 
 
-#if defined WITH_LIBUSB_0_1
     for ( i = 0; i < recon.response_size; i += USB_READ_BUF_SIZE )
         if ( usb_bulk_read( oriel_matrix.udev, EP8,
                             ( char * ) recon.intensity + i,
                             USB_READ_BUF_SIZE, 0 ) <= 0 )
 #elif defined WITH_LIBUSB_1_0
+    /* Read in all data in one go */
+
     if (    libusb_bulk_transfer( oriel_matrix.udev, EP8,
                                   ( unsigned char * ) recon.intensity,
                                   recon.response_size, &cnt, 0 )
@@ -1016,7 +1022,6 @@ oriel_matrix_communicate( unsigned char cmd,
     unsigned char writebuf[ USB_WRITE_BUF_SIZE ];
     static unsigned char readbuf[ USB_READ_BUF_SIZE ];
     int len = 6;
-    int reply_len = 7;
     int reply_ep = EP8;
     unsigned char uc;
     unsigned short int us;
@@ -1025,7 +1030,7 @@ oriel_matrix_communicate( unsigned char cmd,
     const char *err = NULL;
 #if defined WITH_LIBUSB_1_0
     int cnt;
-    bool more_data_is_ok = UNSET;
+    int res;
 #endif
 
 
@@ -1033,7 +1038,6 @@ oriel_matrix_communicate( unsigned char cmd,
     {
         case CMD_GET_CCD_TEMPERATURE :
             err = "Failed to get CCD temperature.\n";
-            reply_len = 18;
             break;
 
         case CMD_SET_CCD_TEMPERATURE :
@@ -1057,7 +1061,6 @@ oriel_matrix_communicate( unsigned char cmd,
 
         case CMD_GET_EXPOSURE_TIME :
             err = "Failed to read exposure time.\n";
-            reply_len = 11;
             break;
 
         case CMD_SET_EXPOSURE_TIME :
@@ -1084,7 +1087,6 @@ oriel_matrix_communicate( unsigned char cmd,
 
         case CMD_QUERY_EXPOSURE :
             err = "Failed to query exposure state.\n";
-            reply_len = 8;
             break;
 
         case CMD_END_EXPOSURE :
@@ -1099,10 +1101,6 @@ oriel_matrix_communicate( unsigned char cmd,
         case CMD_GET_EXPOSURE :
             err = "Failed to get exposure.\n";
             reply_ep = EP6;
-            reply_len = sizeof readbuf;
-#if defined WITH_LIBUSB_1_0
-            more_data_is_ok = SET;
-#endif
             break;
 
         case CMD_GET_RECONSTRUCTION :
@@ -1126,33 +1124,22 @@ oriel_matrix_communicate( unsigned char cmd,
 
         case CMD_GET_LAST_ERROR :
             err = "Failed to get last error.\n";
-            reply_len = 11;
             break;
 
         case CMD_GET_MODEL_NUMBER :
             err = "Failed to get model number.\n";
-            reply_len = sizeof readbuf;
-#if defined WITH_LIBUSB_1_0
-            more_data_is_ok = SET;
-#endif
             break;
 
         case CMD_GET_SERIAL_NUMBER :
             err = "Failed to get serial number.\n";
-            reply_len = sizeof readbuf;
-#if defined WITH_LIBUSB_1_0
-            more_data_is_ok = SET;
-#endif
             break;
 
         case CMD_GET_SPECTROMETER_INFO :
             err = "Failed to read device info.\n";
-            reply_len = 58;
             break;
 
         case CMD_GET_CLOCK_RATE :
             err = "Failed to read clock rate.\n";
-            reply_len = 9;
             break;
 
         case CMD_SET_CLOCK_RATE :
@@ -1167,7 +1154,6 @@ oriel_matrix_communicate( unsigned char cmd,
 
         case CMD_GET_PIXEL_MODE :
             err = "Failed to get pixel mode.\n";
-            reply_len = 9;
             break;
 
         case CMD_SET_PIXEL_MODE :
@@ -1186,7 +1172,6 @@ oriel_matrix_communicate( unsigned char cmd,
 
         case CMD_GET_CCD_TEMEPRATURE_INFO :
             err = "Failed to get AFE parameters.\n";
-            reply_len = 13;
             break;
 
         case CMD_SET_CCD_TEMEPRATURE_INFO :
@@ -1216,7 +1201,7 @@ oriel_matrix_communicate( unsigned char cmd,
     if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
                             len, 0 ) != ( int ) len
          || usb_bulk_read( oriel_matrix.udev, reply_ep, ( char * ) readbuf,
-                           reply_len, 0 ) <= 0
+                           sizeof readbuf, 0 ) <= 0
          || readbuf[ 6 ] == 0x00 )
     {
         lower_permissions( );
@@ -1224,12 +1209,13 @@ oriel_matrix_communicate( unsigned char cmd,
         THROW( EXCEPTION );
     }
 #elif defined WITH_LIBUSB_1_0
-    if ( libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
-                               len, &cnt, 0 ) )
+    if ( ( res = libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
+                                       len, &cnt, 0 ) ) != 0 )
     {
         lower_permissions( );
         print( FATAL, err );
-        print( FATAL, "Sending data with libusb_bulk_transfer() failed.\n" );
+        print( FATAL, "Sending data with libusb_bulk_transfer() failed, "
+               "error code is %d.\n", res );
         THROW( EXCEPTION );
     }
 
@@ -1242,21 +1228,24 @@ oriel_matrix_communicate( unsigned char cmd,
         THROW( EXCEPTION );
     }
 
-    if ( libusb_bulk_transfer( oriel_matrix.udev, reply_ep, readbuf,
-                               reply_len, &cnt, 0 ) )
+    if ( ( res = libusb_bulk_transfer( oriel_matrix.udev, reply_ep, readbuf,
+                                       sizeof readbuf, &cnt, 0 ) ) != 0 )
     {
         lower_permissions( );
         print( FATAL, err );
-        print( FATAL, "Reading data with libusb_bulk_transfer() failed.\n" );
+        print( FATAL, "Reading data with libusb_bulk_transfer() failed, "
+               "error code is %d.\n", res );
         THROW( EXCEPTION );
     }
 
-    if ( cnt != reply_len )
+    /* Response must have at least 7 bytes (but could be more!) */
+
+    if ( cnt < 7 )
     {
         lower_permissions( );
         print( FATAL, err );
-        print( FATAL, "Expected to read at %d bytes but only got %d.\n",
-               reply_len, cnt );
+        print( FATAL, "Expected to read at least 7 bytes but only got %d.\n",
+               cnt );
         THROW( EXCEPTION );
     }
 
