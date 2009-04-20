@@ -513,13 +513,13 @@ init_devs_and_graphics( void )
 
         if ( Need_USB )
         {
-            size_t i;
-            const struct libusb_pollfd **usb_list
-                                                   = libusb_get_pollfds( NULL );
+            const struct libusb_pollfd **usb_list = libusb_get_pollfds( NULL );
 
             if ( usb_list != NULL )
             {
-                for ( i = 0; usb_list && usb_list != NULL; i++ )
+                size_t i;
+
+                for ( i = 0; usb_list[ i ] != NULL; i++ )
                 {
                     int fd_flags = fcntl( usb_list[ i ]->fd, F_GETFD );
 
