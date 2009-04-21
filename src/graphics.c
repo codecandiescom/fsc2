@@ -36,9 +36,6 @@
 #include "right_arrow.xbm"
 
 
-Graphics_T G;
-
-
 static void fonts_init( void );
 static void set_default_sizes( void );
 static void set_defaults( void );
@@ -55,12 +52,13 @@ static void canvas_off( Canvas_T *  c,
 static void graphics_free( void );
 
 
+Graphics_T G;
+
+extern FL_resource Xresources[ ];
+
 static Graphics_T *G_stored = NULL;
 static Graphics_1d_T *G_1d_stored = NULL;
 static Graphics_2d_T *G_2d_stored = NULL;
-
-
-extern FL_resource Xresources[ ];
 
 static bool display_has_been_shown = UNSET;
 
@@ -278,7 +276,7 @@ start_graphics( void )
 
 /*-----------------------------------------------------------------------*
  * Loads user defined font for the axis and label. If this font can't be
- * loaded tries some fonts hopefully available on all machines.
+ * loaded tries some default fonts hopefully available on all machines.
  *-----------------------------------------------------------------------*/
 
 static void

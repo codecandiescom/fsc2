@@ -1243,11 +1243,6 @@ push_button_setup( Iobject_T * io )
     io->self = fl_add_checkbutton( FL_PUSH_BUTTON, io->x, io->y,
                                    io->w, io->h, io->label );
 
-    /* Setting the alignment should not be necessary, but there
-       seems to be a bug in Xforms that makes symbols appear only
-       extremely tiny unless the alignment is explicitely set */
-
-    fl_set_object_lalign( io->self, FL_ALIGN_RIGHT );
     fl_set_object_lsize( io->self, GUI.toolboxFontSize );
 
     if ( io->label != NULL )
@@ -1301,11 +1296,6 @@ radio_button_setup( Iobject_T * io )
                                      io->w, io->h, io->label );
 
 
-    /* Setting the alignment should not be necessary, but there
-       seems to be a bug in Xforms that makes symbols appear only
-       extremely tiny unless the alignment is explicitely set */
-
-    fl_set_object_lalign( io->self, FL_ALIGN_RIGHT );
     fl_set_object_lsize( io->self, GUI.toolboxFontSize );
 
     if ( io->label != NULL )
@@ -1940,7 +1930,7 @@ tools_callback( FL_OBJECT * obj,
  *----------------------------------------------------------*/
 
 bool
-check_format_string( char * buf )
+check_format_string( const char * buf )
 {
     const char *bp = buf;
     const char *lcp;
@@ -2015,13 +2005,13 @@ convert_escapes( char * str )
  *-----------------------------------------------------------------*/
 
 void
-check_label( char * str )
+check_label( const char * str )
 {
     const char *sym[ ] = { "->", "<-", ">", "<", ">>", "<<", "<->", "->|",
                            ">|", "|>", "-->", "=", "arrow", "returnarrow",
                            "square", "circle", "line", "plus", "UpLine",
                            "DnLine", "UpArrow", "DnArrow" };
-    char *p = str;
+    const char *p = str;
     unsigned int i;
     bool is_ar = UNSET;
 
@@ -2106,7 +2096,7 @@ check_label( char * str )
 
   bad_label_string:
 
-    print( FATAL, "Invalid label string.\n" );
+    print( FATAL, "Invalid label string: '%s'.\n", str );
     THROW( EXCEPTION );
 }
 
