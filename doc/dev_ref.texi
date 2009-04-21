@@ -129,17 +129,18 @@ for all kinds of other techniques (ENDOR, time-resolved EPR etc.).
 @strong{Module name}: @code{aeg_s_band}
 
 @paragraphindent 0
-@strong{Additionally required modules}: @code{er035m} or @code{er035m_s}
-or @code{bh15}
+@strong{Additionally required modules}: @code{@ref{er035m}} or
+@code{@ref{er035m}_s} or @code{@ref{bh15}}
 
 @paragraphindent 0
 @strong{Description}: Power supply for AEG magnet with home-built
-computer control to be used with an S-band spectrometer. Requires either
-the @code{er035m} or @code{er035m_s} NMR gaussmeter (with @code{F0}
-probe) or the @code{bh15} Hall effect field controller, which must be
-listed before the magnet power supply module. Field range depends on the
-gaussmeter used, with @code{er035m} or @code{er035m_s} the range is
-@w{460 G} to @w{2390 G}, with @code{bh15} it is @w{-50 G} to @w{23000 G}.
+computer control to be used with an S-band spectrometer. Requires
+either the @code{@ref{er035m}} or @code{@ref{er035m}_s} NMR gaussmeter
+(with @code{F0} probe) or the @code{@ref{bh15}} Hall effect field
+controller, which must be listed before the magnet power supply
+module. Field range depends on the gaussmeter used, with
+@code{@ref{er035m}} or @code{@ref{er035m}_s} the range is @w{460 G} to
+@w{2390 G}, with @code{@ref{bh15}} it is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -180,18 +181,18 @@ gaussmeter used, with @code{er035m} or @code{er035m_s} the range is
 @strong{Module name}: @code{aeg_x_band}
 
 @paragraphindent 0
-@strong{Additionally required modules}: @code{er035m} or @code{er035m_s}
-or @code{bh15}
+@strong{Additionally required modules}: @code{@ref{er035m}},
+@code{@ref{er035m}_s} or @code{@ref{bh15}}
 
 @paragraphindent 0
 @strong{Description}: Power supply for AEG magnet with home-built
-computer control to be used with an X-band spectrometer. Requires either
-the @code{er035m} or @code{er035m_s} NMR gaussmeter (with @code{F1}
-probe) or the @code{bh15} Hall effect field controller to work, which
-must be listed before the magnet power supply module. Field range
-depends on the gaussmeter used, with @code{er035m} or @code{er035m_s}
-the range is @w{1460 G} to @w{19900 G}, with @code{bh15} it is @w{-50 G}
-to @w{23000 G}.
+computer control to be used with an X-band spectrometer. Requires
+either the @code{@ref{er035m}} or @code{@ref{er035m}_s} NMR gaussmeter
+(with @code{F1} probe) or the @code{@ref{bh15}} Hall effect field
+controller to work, which must be listed before the magnet power
+supply module. Field range depends on the gaussmeter used, with
+@code{@ref{er035m}} or @code{@ref{er035m}_s} the range is @w{1460 G}
+to @w{19900 G}, with @code{@ref{bh15}} it is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
@@ -272,11 +273,11 @@ frequency counter 53181A.
 
 @paragraphindent 0
 @strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
-BH15 Hall effect controller for measuring magnetic fields in
-combination with power supply controllers @code{aeg_s_band} and
-@code{aeg_x_band}. Field range that can be measured is from @w{-50 G}
-to @w{23000 G}. (For use as a field controller use module
-@code{bh15_fc}).
+BH15 Hall effect controller for measuring magnetic fields (e.g.@: in
+combination with power supply controllers @code{@ref{aeg_s_band}} and
+@code{@ref{aeg_x_band}}. Field range that can be measured is from
+@w{-50 G} to @w{23000 G}. (For use as a field controller use module
+@code{@ref{bh15_fc}}).
 
 
 @paragraphindent 0
@@ -315,7 +316,7 @@ In the GPIB configuration file use @code{"BH15"} as the device name,
 @paragraphindent 0
 @strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
 BH15 Hall effect controller. Field range: @w{-50 G} to @w{23000 G}.
-(For use as a gaussmeter only use module @code{bh15}).
+(For use as a gaussmeter only use module @code{@ref{bh15}}).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -358,13 +359,13 @@ In the GPIB configuration file use @code{"BH15_FC"} as the device name,
 @strong{Module name}: @code{bnm12}
 
 @paragraphindent 0
-@strong{Additionally required module}: @code{witio_48}
+@strong{Additionally required module}: @code{@ref{witio_48}}
 
 @paragraphindent 0
 @strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker}
 BNM12 NMR Gaussmeter can only be used to measure fields. Using it
-requires that the module for the WITIO-48 DIO card (@code{witio_48})
-is loaded.
+requires that the module for the @strong{WITIO-48 DIO} card
+(@code{@ref{witio_48}}) is loaded.
 
 @paragraphindent 0
 @strong{Controlled via}: Read only via WITIO-48 DIO card.
@@ -725,9 +726,9 @@ edit the settings for already existing resonators and create new ones.
 @strong{Module name}: @code{er218}
 
 @paragraphindent 0
-@strong{Additionally required module}: @code{me_dio_X} (where @code{X}
-stands for the number of two modules for DIOs or DOs of a Meilhaus
-card).
+@strong{Additionally required module}: @code{@ref{me_dio_X}} (where
+@code{X} stands for the number of two modules for DIOs or DOs of a
+Meilhaus card).
 
 @paragraphindent 0
 @strong{Description}: Goniometer is cntrolled via the output of a DIO
@@ -867,11 +868,11 @@ In the GPIB configuration file use @code{"ER032M"} as the device name,
 
 @paragraphindent 0
 @strong{Description}: @uref{http://www.bruker-biospin.com/,Bruker} NMR
-gaussmeter @w{ER 035 M} used in conjunction with the magnet power
-supply controllers @code{aeg_s_band} and @code{aeg_x_band}. Field
-range depends on probe used, with @code{F0} probe it is @w{460 G} to
-@w{2390 G}, with @code{F1} probe the range is @w{1460 G} to @w{19900
-G}.
+gaussmeter @w{ER 035 M} (e.g.@: used in conjunction with the magnet
+power supply controllers @code{@ref{aeg_s_band}} and
+@code{@ref{aeg_x_band}}. Field range depends on probe used, with
+@code{F0} probe it is @w{460 G} to @w{2390 G}, with @code{F1} probe
+the range is @w{1460 G} to @w{19900 G}.
 
 @paragraphindent 0
 @strong{Controlled via} (@code{er035m}): GPIB bus (IEEE 488).@*
@@ -1006,7 +1007,7 @@ based on a device by B. Kinzer.
 @strong{Module name}: @code{gg_chopper}
 
 @paragraphindent 0
-@strong{Additionally required module}: @code{pci_mio_16e_1}
+@strong{Additionally required module}: @code{@ref{pci_mio_16e_1}}
 
 @paragraphindent 0
 @strong{Description}: Light chopper used in the
@@ -1415,7 +1416,7 @@ can be reduced via a potentiometer at the front panel.
 @strong{Module name}: @code{hjs_sfc}
 
 @paragraphindent 0
-@strong{Additionally required module}: @code{hjs_daadc}
+@strong{Additionally required module}: @code{@ref{hjs_daadc}}
 
 @paragraphindent 0
 @strong{Description}: Pseudo-device module used for controlling
@@ -1424,13 +1425,13 @@ magnets in the
 Steinhoff} at the University of Osnabrueck. It's not for a device that
 gets controlled directly by this module but instead the magnetic field
 is controlled indirectly via the output voltage of a home-built DA and
-AD converter, using the module @code{hjs_daadc}. The module requires a
-previous calibration of the relation of the DAC output voltage and the
-resulting field, with these data getting set in the configuration file
-for the module. Because there's no gaussmeter to control the real
-field only this calibration can be used. When this module is used the
-DAC of the DA and AD converter can't be used, it gets reserved
-automatically for this module.
+AD converter, using the module @code{@ref{hjs_daadc}}. The module
+requires a previous calibration of the relation of the DAC output
+voltage and the resulting field, with these data getting set in the
+configuration file for the module. Because there's no gaussmeter to
+control the real field only this calibration can be used. When this
+module is used the DAC of the DA and AD converter can't be used, it
+gets reserved automatically for this module.
 
 @paragraphindent 0
 @strong{Status}: Tested
@@ -1468,8 +1469,8 @@ automatically for this module.
 @strong{Module name}: @code{hjs_fc}
 
 @paragraphindent 0
-@strong{Additionally required module}: @code{hjs_daadc}, @code{witio_48}
-and @code{bnm12}
+@strong{Additionally required module}: @code{@ref{hjs_daadc}},
+@code{@ref{witio_48}} and @code{@ref{bnm12}}
 
 @paragraphindent 0
 @strong{Description}: Pseudo-device module used for controlling
@@ -1478,12 +1479,13 @@ magnets in the
 Steinhoff} at the University of Osnabrueck. There's not just one
 device that gets controlled directly by this module but instead the
 magnetic field is controlled via the output voltage of a home-built DA
-and AD converter, using the module @code{hjs_daadc}, and the field is
-measured by the Bruker BNM12 gaussmeter (which in turn requires the
-@code{witio_48} module for the WITIO-48 DIO card for reading in the
-measured field). When this module is used neither the DAC of the DA
-and AD converter nor the first DIO (@code{DIO1}) of the WITIO-48 DIO
-card can be used, both get reserved automatically for this module.
+and AD converter, using the module @code{@ref{hjs_daadc}}, and the
+field is measured by the Bruker BNM12 gaussmeter @code{@ref{bnm12}}
+(which in turn requires the @code{@ref{witio_48}} module for the
+WITIO-48 DIO card for reading in the measured field). When this module
+is used neither the DAC of the DA and AD converter nor the first DIO
+(@code{DIO1}) of the WITIO-48 DIO card can be used, both get reserved
+automatically for this module.
 
 @paragraphindent 0
 @strong{Status}: Tested
@@ -1612,8 +1614,9 @@ In the GPIB configuration file use @code{"IPS120_10"} as the device name,
 @strong{Module name}: @code{ips120_10_mod}
 
 @paragraphindent 0
-@strong{Additionally required module}: @code{rb8510_0} or @code{rb8510_1} (to
-be selected via the devices configuration file)
+@strong{Additionally required module}: @code{@ref{rb8510}_0} or
+@code{@ref{rb8510}_1} (to be selected via the devices configuration
+file)
 
 @paragraphindent 0
 @strong{Description}: Power supply for the
@@ -1706,7 +1709,9 @@ In the GPIB configuration file use @code{"ITC503"} as the device name,
 @strong{Module name}: @code{keithley228a}
 
 @paragraphindent 0
-@strong{Additionally required module}: @code{sr510} (can be changed)
+@strong{Additionally required module}: @code{@ref{sr510}},
+@code{@ref{sr530}}, @code{@ref{sr810}} or @code{@ref{sr830}} (to be
+set via the configuration file for the device)
 
 @paragraphindent 0
 @strong{Description}: @uref{http://www.keithley.com/,Keithley} power
@@ -1714,10 +1719,10 @@ supply 228A, used as sweep coil power supply for the Berlin W-band
 spectrometer. In order to improve the current resolution an aditional
 voltage source is needed. Currently this done via the DAC output
 @code{6} (can be changed by one of the functions) of the Stanford
-Research lock-in amplifier SR510 and the module @code{sr510} must be
-listed before the power supply module. Alternatively, after minor
-changes to the configuration file, also other lock-in amplifiers can
-be used.
+Research lock-in amplifier SR510/SR530/SR810/SR830 (the corresponding
+module must be listed before the power supply module). Alternatively,
+after minor changes to the configuration file, also other lock-in
+amplifiers can be used.
 
 @paragraphindent 0
 Please note: With this module the functions expect arguments in terms of
@@ -3121,6 +3126,10 @@ library that are part of the @code{fsc2} package)
 @strong{Module name}: @code{rb_pulser_j}
 
 @paragraphindent 0
+@strong{Additionally required modules}: @code{@ref{rs_sml01}} if
+@code{RF} pulses are to be used.
+
+@paragraphindent 0
 @strong{Description}: Pseudo-pulser for J-band spectrometer in Leiden,
 using the
 @uref{http://www.eld.leidenuniv.nl/~moene/Home/projects/rulbus/,Rulbus
@@ -3178,6 +3187,10 @@ a function).
 
 @paragraphindent 0
 @strong{Module name}: @code{rb_pulser_w}
+
+@paragraphindent 0
+@strong{Additionally required modules}: @code{@ref{rs_sml01}} if
+@code{RF} pulses are to be used.
 
 @paragraphindent 0
 @strong{Description}: Pulser used for the W-band spectrometer in
