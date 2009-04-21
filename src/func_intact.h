@@ -162,9 +162,9 @@ void recreate_Toolbox( void );
 
 void convert_escapes( char * /* str */ );
 
-void check_label( char * /* str */ );
+void check_label( const char * /* str */ );
 
-bool check_format_string( char * /* buf */ );
+bool check_format_string( const char * /* buf */ );
 
 void parent_freeze( int /* freeze */ );
 
