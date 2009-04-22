@@ -1293,7 +1293,7 @@ Frequency range is @w{2 GHz} to @w{9 GHz}, attenuation range @w{-120 dB}
 to @w{10 dB} in @w{1 dB} steps.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{"HP8672A"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos},
 @code{set-xeos} and @code{set-bin} to @code{no}.
@@ -1849,7 +1849,7 @@ Oscilloscope 9400, 2 measurement channels, 2 function channels (needed
 for averaging), @w{125 MHz bandwidth}.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{"LECROY9400"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
@@ -2029,7 +2029,7 @@ Oscilloscope 9424, 4 measurement channels, 2 function channels (needed
 for averaging), 2 memory channels, 350 MHz bandwidth
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{"LECROY9424"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
@@ -2097,7 +2097,7 @@ instead.
 
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{"LECROY9424E"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
@@ -2162,7 +2162,7 @@ should also work with the 9450A, which seems to be just a 300 MHz
 bandwidth version of the 9450.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{"LECROY9450"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
@@ -2344,7 +2344,7 @@ information about further available options. All models have 4 function
 channels (used for averaging) and 4 memory channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
@@ -2410,7 +2410,8 @@ have such a model and you experience problems.
 @end ifnottex
 
 @paragraphindent 0
-@strong{Module name}: @code{lecroy_wr}
+@strong{Module name}: @code{lecroy_wr} (GPIB version),
+@code{lecroy_wr_l} (LAN version) or @code{lecroy_wr_s} (serial port version)
 
 @paragraphindent 0
 @strong{Description}: @uref{http://www.lecroy.com/,LeCroy} Digitizing
@@ -2491,20 +2492,34 @@ information about further available options. All models have 4 function
 channels (used for averaging) and 4 memory channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
 In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
 @code{yes}.
 
 @paragraphindent 0
-@strong{Status}: Due to the huge number of different models it
-was not possible to test the module with all those models. Moreover,
-specification data from the manuals as well as the LeCroy web site
-had to be used which sometimes contradict each other. Thus I can
-neither guarantee that the used data are correct nor that support
-for all the modules works flawlessly. Please send me a bug report
-if you have such a model and you experience problems.
+@strong{or}
+
+@paragraphindent 0
+@strong{Controlled via} (@code{lecroy_wr_l}): LAN
+
+@paragraphindent 0
+@strong{or}
+
+@paragraphindent 0
+@strong{Controlled via} (@code{lecroy_wr_s}): Serial port
+
+
+@paragraphindent 0
+@strong{Status}: Tested with control via GPIB.@*
+Due to the huge number of different models it was not possible to test
+the module with all those models. Moreover, specification data from
+the manuals as well as the LeCroy web site had to be used which
+sometimes contradict each other. Thus I can neither guarantee that the
+used data are correct nor that support for all the various models works
+flawlessly. Please send me a bug report if you have such a model and
+you experience problems.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -3159,6 +3174,7 @@ a function).
 
 @paragraphindent 0
 @strong{Controlled via}: Rulbus
+
 @paragraphindent 0
 @strong{Supported functions}:
 @table @samp
@@ -3239,6 +3255,7 @@ pulse sequence and the start of the first pulse of a function).
 
 @paragraphindent 0
 @strong{Controlled via}: Rulbus
+
 @paragraphindent 0
 @strong{Supported functions}:
 @table @samp

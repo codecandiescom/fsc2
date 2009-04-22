@@ -37,15 +37,15 @@ static double lecroy_ws_get_float_value( int          ch,
                                          const char * name );
 
 static void lecroy_ws_get_prep( int              ch,
-                                Window_T *       w,
+                                Window_T       * w,
                                 unsigned char ** data,
-                                long *           len,
-                                double *         gain,
-                                double *         offset );
+                                long           * len,
+                                double         * gain,
+                                double         * offset );
 
 static int lecroy_ws_talk( const char * cmd,
-                           char *       reply,
-                           ssize_t *    length );
+                           char       * reply,
+                           ssize_t    * length );
 
 static void lecroy_ws_lan_failure( void );
 
@@ -81,7 +81,7 @@ lecroy_ws_init( const char * name )
         len = 51;
         if ( lecroy_vicp_write( "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;"
                                 "CORD LO;*STB?\n", &len, SET, UNSET )
-             != SUCCESS )
+                                                                   != SUCCESS )
             lecroy_ws_lan_failure( );
 
         len = sizeof buffer;
@@ -1309,11 +1309,11 @@ lecroy_ws_start_acquisition( void )
 
 static void
 lecroy_ws_get_prep( int              ch,
-                    Window_T *       w,
+                    Window_T       * w,
                     unsigned char ** data,
-                    long *           length,
-                    double *         gain,
-                    double *         offset )
+                    long           * length,
+                    double         * gain,
+                    double         * offset )
 {
     char cmd[ 100 ];
     ssize_t len;
@@ -1413,10 +1413,10 @@ lecroy_ws_can_fetch( int ch )
  *-----------------------------------------------------*/
 
 void
-lecroy_ws_get_curve( int        ch,
-                     Window_T * w,
-                     double **  array,
-                     long *     length )
+lecroy_ws_get_curve( int         ch,
+                     Window_T  * w,
+                     double   ** array,
+                     long      * length )
 {
     double gain, offset;
     unsigned char *data;
@@ -1759,8 +1759,8 @@ lecroy_ws_get_inr( void )
 
 static int
 lecroy_ws_talk( const char * cmd,
-                char *       reply,
-                ssize_t *    length )
+                char       * reply,
+                ssize_t    * length )
 {
     ssize_t len = strlen( cmd );
     int ret = 0;

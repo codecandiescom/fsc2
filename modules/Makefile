@@ -67,6 +67,7 @@ lecroy9450      := lecroy9450.c lecroy9450_gpib.c lecroy9450_util.c
 lecroy93xx      := lecroy93xx.c lecroy93xx_gpib.c lecroy93xx_util.c
 lecroy_wr       := lecroy_wr.c lecroy_wr_gpib.c lecroy_wr_util.c
 lecroy_wr_s     := lecroy_wr_s.c lecroy_wr_serial.c lecroy_wr_util.c
+lecroy_wr_l     := lecroy_wr_l.c lecroy_wr_net.c lecroy_wr_util.c lecroy_vicp.c
 lecroy_ws       := lecroy_ws.c lecroy_ws_net.c lecroy_ws_util.c lecroy_vicp.c
 rs_spec10       := rs_spec10.c rs_spec10_int.c rs_spec10_util.c
 spectrapro_300i := spectrapro_300i.c spectrapro_300i_ll.c  \
@@ -95,7 +96,7 @@ bvt3000         := bvt3000.c bvt3000_ll.c eurotherm902s_ll.c
 # single source file (plus a header file) and that don't need any further
 # pre-installed software
 
-comp_modules    := hjs_sfc
+comp_modules    := hjs_sfc lecroy_ws lecroy_wr_l
 
 
 # Add modules that only get created on demand (they require either some
@@ -114,7 +115,7 @@ simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a hp5342a       \
 comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a        \
 				   $(hp864_list) lecroy9400 rs690 tegam2714a_p rs_sml01  \
 	               $(tds_list) $(lecroy94_list) lecroy93xx lecroy_wr     \
-				   lecroy_ws epr_mod
+				   epr_mod
 endif
 
 

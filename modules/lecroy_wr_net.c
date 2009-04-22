@@ -20,7 +20,8 @@
  */
 
 
-#include "lecroy_wr.h"
+#include "lecroy_wr_l.h"
+#include "lecroy_vicp.h"
 
 
 static unsigned char * lecroy_wr_get_data( long * len );
@@ -36,17 +37,17 @@ static double lecroy_wr_get_float_value( int          ch,
                                          const char * name );
 
 static void lecroy_wr_get_prep( int              ch,
-                                Window_T *       w,
+                                Window_T       * w,
                                 unsigned char ** data,
-                                long *           length,
-                                double *         gain,
-                                double *         offset );
+                                long           * length,
+                                double         * gain,
+                                double         * offset );
 
-static bool lecroy_wr_talk( const char * cmd,
-                            char *       reply,
-                            long *       length );
+static int lecroy_wr_talk( const char * cmd,
+						   char       * reply,
+						   ssize_t    * length );
 
-static void lecroy_wr_comm_failure( void );
+static void lecroy_wr_lan_failure( void );
 
 
 static unsigned int can_fetch = 0;
@@ -64,27 +65,33 @@ lecroy_wr_init( const char * name )
     char buf[ 100 ];
     long len = sizeof buf;
     int i;
+    bool with_eoi;
 
 
-    if ( gpib_init_device( name, &lecroy_wr.device ) == FAILURE )
-        return FAIL;
+    /* Open a socket to the device */
 
-    /* Disable the local button, set digitizer to short form of replies,
-       transmit data in one block in binary word (2 byte) format with LSB
-       first. Then ask for the status byte to make sure the device reacts. */
+    lecroy_vicp_init( name, NETWORK_ADDRESS, 100000, 1 );
 
-    if (    gpib_write( lecroy_wr.device,
-                        "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;CORD LO", 44 )
-                                                                     == FAILURE
-         || gpib_write( lecroy_wr.device, "*STB?", 5 ) == FAILURE
-         || gpib_read( lecroy_wr.device, buf, &len ) == FAILURE )
-    {
-        gpib_local( lecroy_wr.device );
-        return FAIL;
-    }
+    lecroy_vicp_set_timeout( READ, READ_TIMEOUT ); 
+    lecroy_vicp_set_timeout( WRITE, WRITE_TIMEOUT );
 
-    TRY
-    {
+	TRY
+	{
+		/* Disable the local button, set digitizer to short form of replies,
+		   transmit data in one block in binary word (2 byte) format with LSB
+		   first. Then ask for the status byte to make sure the device
+		   reacts. */
+
+		len = 51;
+		if ( lecroy_vicp_write( "CHDR OFF;CHLP OFF;CFMT DEF9,WORD,BIN;"
+								"CORD LO;*STB?\n", &len, SET, UNSET )
+			                                                      != SUCCESS )
+            lecroy_wr_lan_failure( );
+
+		len = sizeof buf;
+		if ( lecroy_vicp_read( buf, &len, &with_eoi, UNSET ) != SUCCESS )
+            lecroy_wr_lan_failure( );
+
         /* Figure out which traces are displayed (only 8 can be displayed
            at the same time and we must be able to check for this when
            the user asks for one more to be displayed) */
@@ -116,8 +123,10 @@ lecroy_wr_init( const char * name )
 
         /* Make sure the internal timebase is used */
 
-        if ( gpib_write( lecroy_wr.device, "SCLK INT", 8 ) == FAILURE )
-            lecroy_wr_comm_failure( );
+
+		len = 9;
+		if ( lecroy_vicp_write( "SCLK INT\n",&len, SET, UNSET ) != SUCCESS )
+            lecroy_wr_lan_failure( );
 
         /* Set or get the timebase (including the index in the table of
            possible timebases) while also taking care of the mode, i.e.
@@ -256,7 +265,7 @@ lecroy_wr_init( const char * name )
     }
     OTHERWISE
     {
-        gpib_local( lecroy_wr.device );
+		lecroy_vicp_close( );
         return FAIL;
     }
         
@@ -277,7 +286,7 @@ lecroy_wr_get_timebase( void )
     int i;
 
 
-    lecroy_wr_talk( "TDIV?", reply, &length );
+    lecroy_wr_talk( "TDIV?\n", reply, &length );
     reply[ length - 1 ] = '\0';
     timebase = T_atod( reply );
 
@@ -307,11 +316,14 @@ lecroy_wr_set_timebase( double timebase )
 {
     char cmd[ 40 ] = "TDIV ";
     char *dummy;
+	long len;
 
 
     dummy = gcvt( timebase, 8, cmd + strlen( cmd ) );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	strcat( cmd, "\n" );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -328,7 +340,7 @@ lecroy_wr_get_interleaved( void )
     long length = sizeof reply;
 
 
-    lecroy_wr_talk( "ILVD?", reply, &length );
+    lecroy_wr_talk( "ILVD?\n", reply, &length );
     lecroy_wr.interleaved = reply[ 1 ] == 'N';
 
     return lecroy_wr.interleaved;
@@ -343,10 +355,13 @@ bool
 lecroy_wr_set_interleaved( bool state )
 {
     char cmd[ 30 ] = "ILVD ";
+	long len;
 
-    strcat( cmd, state ? "ON" : "OFF" );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+
+    strcat( cmd, state ? "ON\n" : "OFF\n" );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -366,7 +381,7 @@ lecroy_wr_get_memory_size( void )
     char *end_p;
 
 
-    lecroy_wr_talk( "MSIZ?", reply, &length );
+    lecroy_wr_talk( "MSIZ?\n", reply, &length );
     reply[ length - 1 ] = '\0';
 
     mem_size = strtol( reply, &end_p, 10 );
@@ -413,11 +428,13 @@ bool
 lecroy_wr_set_memory_size( long mem_size )
 {
     char cmd[ 30 ];
+	long len;
 
 
-    sprintf( cmd, "MSIZ %ld", mem_size );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+    sprintf( cmd, "MSIZ %ld\n", mem_size );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -437,7 +454,7 @@ lecroy_wr_get_sens( int channel )
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( cmd, "C%1d:VDIV?", channel + 1 );
+    sprintf( cmd, "C%1d:VDIV?\n", channel + 1 );
     lecroy_wr_talk( cmd, reply, &length );
     reply[ length - 1 ] = '\0';
     return lecroy_wr.sens[ channel ] = T_atod( reply );
@@ -454,14 +471,17 @@ lecroy_wr_set_sens( int    channel,
 {
     char cmd[ 40 ];
     char *dummy;
+	long len;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
     sprintf( cmd, "C%1d:VDIV ", channel + 1 );
     dummy = gcvt( sens, 8, cmd + strlen( cmd ) );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	strcat( cmd, "\n" );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -480,7 +500,7 @@ lecroy_wr_get_offset( int channel )
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( buf, "C%1d:OFST?", channel + 1 );
+    sprintf( buf, "C%1d:OFST?\n", channel + 1 );
     lecroy_wr_talk( buf, buf, &length );
     buf[ length - 1 ] = '\0';
     return  lecroy_wr.offset[ channel ] = T_atod( buf );
@@ -497,14 +517,17 @@ lecroy_wr_set_offset( int    channel,
 {
     char cmd[ 40 ];
     char *dummy;
+	long len;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
     sprintf( cmd, "C%1d:OFST ", channel + 1 );
     dummy = gcvt( offset, 8, cmd + strlen( cmd ) );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	strcat( cmd, "\n" );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -524,7 +547,7 @@ lecroy_wr_get_coupling( int channel )
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
-    sprintf( buf, "C%1d:CPL?", channel + 1 );
+    sprintf( buf, "C%1d:CPL?\n", channel + 1 );
     lecroy_wr_talk( buf, buf, &length );
     buf[ length - 1 ] = '\0';
 
@@ -559,6 +582,7 @@ lecroy_wr_set_coupling( int channel,
                         int type )
 {
     char cmd[ 30 ];
+	long len;
     char const *cpl[ ] = { "A1M", "D1M", "D50", "GND" };
 
 
@@ -566,9 +590,10 @@ lecroy_wr_set_coupling( int channel,
     fsc2_assert(    type >= LECROY_WR_CPL_AC_1_MOHM
                  && type <= LECROY_WR_CPL_GND );
 
-    sprintf( cmd, "C%1d:CPL %s", channel + 1, cpl[ type ] );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+    sprintf( cmd, "C%1d:CPL %s\n", channel + 1, cpl[ type ] );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -581,7 +606,7 @@ lecroy_wr_set_coupling( int channel,
 int
 lecroy_wr_get_bandwidth_limiter( int channel )
 {
-    char buf[ 30 ] = "BWL?";
+    char buf[ 30 ] = "BWL?\n";
     long length = sizeof buf;
     int mode = -1;
     char *ptr;
@@ -662,7 +687,7 @@ bool
 lecroy_wr_set_bandwidth_limiter( int channel,
                                  int bwl )
 {
-    char buf[ 50 ] = "GBWL?";
+    char buf[ 50 ] = "GBWL?\n";
     long length = sizeof buf;
     int i;
 
@@ -695,14 +720,15 @@ lecroy_wr_set_bandwidth_limiter( int channel,
     {
         sprintf( buf, "BWL C%d,", channel + 1 );
         if ( bwl == LECROY_WR_BWL_OFF )
-            strcat( buf, "OFF" );
+            strcat( buf, "OFF\n" );
         else if ( bwl == LECROY_WR_BWL_ON )
-            strcat( buf, "ON" );
+            strcat( buf, "ON\n" );
         else
-            strcat( buf, "200MHZ" );
+            strcat( buf, "200MHZ\n" );
         
-        if ( gpib_write( lecroy_wr.device, buf, strlen( buf ) ) == FAILURE )
-            lecroy_wr_comm_failure( );
+		length = strlen( buf );
+		if ( lecroy_vicp_write( buf, &length, SET, UNSET ) != SUCCESS )
+            lecroy_wr_lan_failure( );
 
         return OK;
     }
@@ -712,9 +738,10 @@ lecroy_wr_set_bandwidth_limiter( int channel,
        interested in and set up the remaining channel to what the user asked
        us to */
 
-    strcpy( buf, "GBWL OFF" );
-    if ( gpib_write( lecroy_wr.device, buf, strlen( buf ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+    strcpy( buf, "GBWL OFF\n" );
+	length = strlen( buf );
+	if ( lecroy_vicp_write( buf, &length, SET, UNSET ) != SUCCESS )
+		lecroy_wr_lan_failure( );
 
     strcpy( buf, "BWL " );
 
@@ -729,10 +756,10 @@ lecroy_wr_set_bandwidth_limiter( int channel,
             strcat( buf, "200MHZ," );
     }
 
-    buf[ strlen( buf ) - 1 ] = '\0';
-
-    if ( gpib_write( lecroy_wr.device, buf, strlen( buf ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	length = strlen( buf );
+    buf[ length - 1 ] = '\n';
+	if ( lecroy_vicp_write( buf, &length, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -751,7 +778,7 @@ lecroy_wr_get_trigger_source( void )
     char *ptr = reply + 7;
 
 
-    lecroy_wr_talk( "TRSE?", reply, &length );
+    lecroy_wr_talk( "TRSE?\n", reply, &length );
     reply[ length - 1 ] = '\0';
 
     if (    strncmp( reply, "STD,SR,", 7 )
@@ -788,6 +815,7 @@ bool
 lecroy_wr_set_trigger_source( int channel )
 {
     char cmd[ 40 ] = "TRSE STD,SR,";
+	long len;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -797,16 +825,17 @@ lecroy_wr_set_trigger_source( int channel )
                  || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
-        sprintf( cmd + 11, "C%1d", channel + 1 );
+        sprintf( cmd + 11, "C%1d\n", channel + 1 );
     else if ( channel == LECROY_WR_LIN )
-        strcat( cmd, "LINE" );
+        strcat( cmd, "LINE\n" );
     else if ( channel == LECROY_WR_EXT )
-        strcat( cmd, "EX" );
+        strcat( cmd, "EX\n" );
     else
-        strcat( cmd, "EX10" );
+        strcat( cmd, "EX10\n" );
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -829,11 +858,11 @@ lecroy_wr_get_trigger_level( int channel )
                  || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
-        sprintf( buf, "C%1d:TRLV?", channel + 1 );
+        sprintf( buf, "C%1d:TRLV?\n", channel + 1 );
     else if ( channel == LECROY_WR_EXT )
-        strcpy( buf, "EX:TRLV?" );
+        strcpy( buf, "EX:TRLV?\n" );
     else
-        strcpy( buf, "EX10:TRLV?" );
+        strcpy( buf, "EX10:TRLV?\n" );
 
     lecroy_wr_talk( buf, buf, &length );
     buf[ length - 1 ] = '\0';
@@ -851,6 +880,7 @@ lecroy_wr_set_trigger_level( int    channel,
 {
     char cmd[ 40 ];
     char *dummy;
+	long len;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -866,8 +896,10 @@ lecroy_wr_set_trigger_level( int    channel,
         strcpy( cmd, "EX10:TRLV " );
 
     dummy = gcvt( level, 6, cmd + strlen( cmd ) );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	strcat( cmd, "\n" );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -891,11 +923,11 @@ lecroy_wr_get_trigger_slope( int channel )
                  || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
-        sprintf( buf, "C%1d:TRSL?", channel + 1 );
+        sprintf( buf, "C%1d:TRSL?\n", channel + 1 );
     else if ( channel == LECROY_WR_LIN )
-        strcpy( buf, "LINE:TRSL?" );
+        strcpy( buf, "LINE:TRSL?\n" );
     else if ( channel == LECROY_WR_EXT )
-        strcpy( buf, "EX:TRSL?" );
+        strcpy( buf, "EX:TRSL?\n" );
     else
         strcpy( buf, "EX10:TRSL?" );
 
@@ -917,6 +949,7 @@ lecroy_wr_set_trigger_slope( int channel,
                              bool slope )
 {
     char cmd[ 40 ];
+	long len;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -934,9 +967,10 @@ lecroy_wr_set_trigger_slope( int channel,
     else
         strcpy( cmd, "EX10:TRSL " );
 
-    strcat( cmd, slope ? "POS" : "NEG" );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+    strcat( cmd, slope ? "POS\n" : "NEG\n" );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -960,11 +994,11 @@ lecroy_wr_get_trigger_coupling( int channel )
                  || channel == LECROY_WR_EXT10 );
 
     if ( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX )
-        sprintf( buf, "C%1d:TRCP?", channel + 1 );
+        sprintf( buf, "C%1d:TRCP?\n", channel + 1 );
     else if ( channel == LECROY_WR_EXT )
-        strcpy( buf, "EX:TRCP?" );
+        strcpy( buf, "EX:TRCP?\n" );
     else
-        strcpy( buf, "EX10:TRCP?" );
+        strcpy( buf, "EX10:TRCP?\n" );
 
     lecroy_wr_talk( ( const char *) buf, buf, &length );
 
@@ -1005,7 +1039,8 @@ lecroy_wr_set_trigger_coupling( int channel,
                                 int cpl )
 {
     char cmd[ 40 ];
-    const char *cpl_str[ ] = { "AC", "DC", "LFREJ", "HFREJ" };
+    const char *cpl_str[ ] = { "AC\n", "DC\n", "LFREJ\n", "HFREJ\n" };
+	long len;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -1023,8 +1058,9 @@ lecroy_wr_set_trigger_coupling( int channel,
 
     strcat( cmd, cpl_str[ cpl ] );
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -1042,7 +1078,7 @@ lecroy_wr_get_trigger_mode( void )
     int mode = -1;
 
 
-    lecroy_wr_talk( "TRMD?", buf, &length );
+    lecroy_wr_talk( "TRMD?\n", buf, &length );
 
     if ( buf[ 0 ] == 'A' )
         mode = LECROY_WR_TRG_MODE_AUTO;
@@ -1067,15 +1103,18 @@ int
 lecroy_wr_set_trigger_mode( int mode )
 {
     char cmd[ 40 ] = "TRMD ";
-    const char *mode_str[ ] = { "AUTO", "NORM", "SINGLE", "STOP" };
+    const char *mode_str[ ] = { "AUTO\n", "NORM\n", "SINGLE\n", "STOP\n" };
+	long len;
 
 
     fsc2_assert(    mode >= LECROY_WR_TRG_MODE_AUTO
                  && mode <= LECROY_WR_TRG_MODE_STOP );
 
     strcat( cmd, mode_str[ mode ] );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -1092,7 +1131,7 @@ lecroy_wr_get_trigger_delay( void )
     long length = sizeof reply;
 
 
-    lecroy_wr_talk( "TRDL?", reply, &length );
+    lecroy_wr_talk( "TRDL?\n", reply, &length );
     reply[ length - 1 ] = '\0';
     lecroy_wr.trigger_delay = T_atod( reply );
 
@@ -1116,6 +1155,7 @@ lecroy_wr_set_trigger_delay( double delay )
 {
     char cmd[ 40 ] = "TRDL ";
     char *dummy;
+	long len;
 
 
     /* For positive delay (i.e. pretrigger) the delay must be set as a
@@ -1125,8 +1165,11 @@ lecroy_wr_set_trigger_delay( double delay )
         delay = 10.0 * delay / lecroy_wr.timebase;
 
     dummy = gcvt( delay, 8, cmd + strlen( cmd ) );
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	strcat( cmd, "\n" );
+
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return OK;
 }
@@ -1144,9 +1187,9 @@ lecroy_wr_is_displayed( int ch )
 
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
-        sprintf( cmd, "C%d:TRA?", ch - LECROY_WR_CH1 + 1 );
+        sprintf( cmd, "C%d:TRA?\n", ch - LECROY_WR_CH1 + 1 );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
-        sprintf( cmd, "T%c:TRA?", ch - LECROY_WR_TA + 'A' );
+        sprintf( cmd, "T%c:TRA?\n", ch - LECROY_WR_TA + 'A' );
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
     {
         print( FATAL, "A memory channel can't be displayed.\n");
@@ -1172,6 +1215,7 @@ lecroy_wr_display( int ch,
                    int on_off )
 {
     char cmd[ 30 ];
+	long len;
         
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
@@ -1189,8 +1233,6 @@ lecroy_wr_display( int ch,
         THROW( EXCEPTION );
     }
 
-    strcat( cmd, on_off ? "ON" : "OFF" );
-
     if (    on_off
          && lecroy_wr.num_used_channels >= LECROY_WR_MAX_USED_CHANNELS )
     {
@@ -1200,8 +1242,11 @@ lecroy_wr_display( int ch,
         THROW( EXCEPTION );
     }
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+    strcat( cmd, on_off ? "ON\n" : "OFF\n" );
+
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     if ( on_off )
     {
@@ -1224,7 +1269,7 @@ lecroy_wr_display( int ch,
 void
 lecroy_wr_finished( void )
 {
-    gpib_local( lecroy_wr.device );
+	lecroy_vicp_close( );
 }
 
 
@@ -1238,12 +1283,14 @@ lecroy_wr_start_acquisition( void )
     int ch;
     char cmd[ 100 ];
     bool do_averaging = UNSET;
+	long len;
 
 
     /* Stop the digitizer (also switches to "STOPPED" trigger mode) */
 
-    if ( gpib_write( lecroy_wr.device, "STOP", 4 ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	len = 5;
+	if ( lecroy_vicp_write( "STOP\n", &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     /* Set up the parameter to be used for averaging for the function channels
        (as far as they have been set by the user) */
@@ -1255,15 +1302,15 @@ lecroy_wr_start_acquisition( void )
 
         do_averaging = SET;
 
-        snprintf( cmd, 100, "T%c:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld",
+        snprintf( cmd, 100, "T%c:DEF EQN,'AVGS(C%ld)',MAXPTS,%ld,SWEEPS,%ld\n",
                   'A' + LECROY_WR_TA - ch,
                   lecroy_wr.source_ch[ ch ] - LECROY_WR_CH1 + 1,
                   lecroy_wr_curve_length( ),
                   lecroy_wr.num_avg[ ch ] );
 
-        if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) )
-             == FAILURE )
-            lecroy_wr_comm_failure( );
+		len = strlen( cmd );
+		if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+            lecroy_wr_lan_failure( );
 
         /* If we want to use a trace it must be switched on (but not the
            channel that gets averaged) */
@@ -1274,19 +1321,21 @@ lecroy_wr_start_acquisition( void )
         /* Switch off horizontal zoom and shift - if it's on the curve fetched
            from the device isn't what one would expect... */
 
-        sprintf( cmd, "T%c:HMAG 1;T%c:HPOS 5", 'A' + LECROY_WR_TA - ch,
+        sprintf( cmd, "T%c:HMAG 1;T%c:HPOS 5\n", 'A' + LECROY_WR_TA - ch,
                  'A' + LECROY_WR_TA - ch ) ;
 
-        if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-            lecroy_wr_comm_failure( );
+		len = strlen( cmd );
+		if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+            lecroy_wr_lan_failure( );
 
         /* Finally reset what's currently stored in the trace (otherwise a
            new acquisition may not get started) */
 
-        sprintf( cmd, "T%c:FRST", 'A' + LECROY_WR_TA - ch );
+        sprintf( cmd, "T%c:FRST\n", 'A' + LECROY_WR_TA - ch );
 
-        if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-            lecroy_wr_comm_failure( );
+		len = strlen( cmd );
+		if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+            lecroy_wr_lan_failure( );
     }
 
     /* Reset the bits in the word that tells us later that the data in the
@@ -1312,8 +1361,10 @@ lecroy_wr_start_acquisition( void )
     else
         lecroy_wr.trigger_mode = LECROY_WR_TRG_MODE_NORMAL;
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	strcat( cmd, "\n" );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
 }
 
@@ -1336,6 +1387,7 @@ lecroy_wr_get_prep( int              ch,
     char cmd[ 100 ];
     char ch_str[ 3 ];
     bool is_mem_ch = UNSET;
+	long len;
 
 
     CLOBBER_PROTECT( data );
@@ -1380,14 +1432,15 @@ lecroy_wr_get_prep( int              ch,
        thus we start with one point later than we could get from it.*/
 
     if ( w != NULL )
-        sprintf( cmd, "WFSU SP,0,NP,%ld,FP,%ld,SN,0",
+        sprintf( cmd, "WFSU SP,0,NP,%ld,FP,%ld,SN,0\n",
                  w->num_points, w->start_num + 1 );
     else
-        sprintf( cmd, "WFSU SP,0,NP,%ld,FP,1,SN,0",
+        sprintf( cmd, "WFSU SP,0,NP,%ld,FP,1,SN,0\n",
                  lecroy_wr_curve_length( ) );
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     /* When a non-memory curve is to be fetched and the acquisition isn't
        finished yet poll until the bit that tells that the acquisition for
@@ -1406,10 +1459,10 @@ lecroy_wr_get_prep( int              ch,
         /* Ask the device for the data... */
 
         strcpy( cmd, ch_str );
-        strcat( cmd, ":WF? DAT1" );
-        if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) )
-             == FAILURE )
-            lecroy_wr_comm_failure( );
+        strcat( cmd, ":WF? DAT1\n" );
+		len = strlen( cmd );
+		if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+            lecroy_wr_lan_failure( );
 
         /* ...and fetch 'em */
 
@@ -1566,6 +1619,7 @@ lecroy_wr_copy_curve( long src,
                       long dest )
 {
     char cmd[ 100 ] = "STO ";
+	long len;
 
 
     fsc2_assert(    ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX )
@@ -1579,10 +1633,11 @@ lecroy_wr_copy_curve( long src,
         sprintf( cmd + strlen( cmd ), "T%c,",
                  ( char ) ( src - LECROY_WR_TA + 'A' ) );
 
-    sprintf( cmd + strlen( cmd ), "M%ld", dest - LECROY_WR_M1 + 1 );
+    sprintf( cmd + strlen( cmd ), "M%ld\n", dest - LECROY_WR_M1 + 1 );
 
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	len = strlen( cmd );
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 }
 
 
@@ -1594,14 +1649,15 @@ lecroy_wr_get_data( long * len )
 {
     unsigned char *data;
     char len_str[ 10 ];
+    bool with_eoi;
 
 
     /* First thing we read is something like "DAT1,#[0-9]" where the number
        following the '#' is the number of bytes to be read next */
 
     *len = 7;
-    if ( gpib_read( lecroy_wr.device, len_str, len ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	if ( lecroy_vicp_read( len_str, len, &with_eoi, UNSET ) == FAILURE )
+        lecroy_wr_lan_failure( );
 
     len_str [ *len ] = '\0';
     *len = T_atol( len_str + 6 );
@@ -1610,20 +1666,20 @@ lecroy_wr_get_data( long * len )
 
     /* Now get the number of bytes to read */
 
-    if ( gpib_read( lecroy_wr.device, len_str, len ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	if ( lecroy_vicp_read( len_str, len, &with_eoi, UNSET ) == FAILURE )
+        lecroy_wr_lan_failure( );
     
     len_str[ *len ] = '\0';
     *len = T_atol( len_str );
 
     fsc2_assert( *len > 0 );
 
-    /* Obtain enough memory and then read the real data */
+    /* Obtain enough memory and then read all the data */
 
     data = T_malloc( *len );
 
-    if ( gpib_read( lecroy_wr.device, ( char * ) data, len ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	if ( lecroy_vicp_read( ( char * ) data, len, &with_eoi, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
 
     return data;
 }
@@ -1648,11 +1704,11 @@ lecroy_wr_get_int_value( int          ch,
     CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
-        sprintf( cmd, "C%d:INSP? '%s'", ch - LECROY_WR_CH1 + 1, name );
+        sprintf( cmd, "C%d:INSP? '%s'\n", ch - LECROY_WR_CH1 + 1, name );
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
-        sprintf( cmd, "M%c:INSP? '%s'", ch - LECROY_WR_M1 + 1, name );
+        sprintf( cmd, "M%c:INSP? '%s'\n", ch - LECROY_WR_M1 + 1, name );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
-        sprintf( cmd, "T%c:INSP? '%s'", ch - LECROY_WR_TA + 'A', name );
+        sprintf( cmd, "T%c:INSP? '%s'\n", ch - LECROY_WR_TA + 'A', name );
     else
         fsc2_impossible( );
 
@@ -1663,7 +1719,7 @@ lecroy_wr_get_int_value( int          ch,
         /* empty */ ;
 
     if ( ! *ptr )
-        lecroy_wr_comm_failure( );
+        lecroy_wr_lan_failure( );
 
     TRY
     {
@@ -1671,7 +1727,7 @@ lecroy_wr_get_int_value( int          ch,
         TRY_SUCCESS;
     }
     OTHERWISE
-        lecroy_wr_comm_failure( );
+        lecroy_wr_lan_failure( );
 
     return val;
 }
@@ -1696,11 +1752,11 @@ lecroy_wr_get_float_value( int          ch,
     CLOBBER_PROTECT( val );
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
-        sprintf( cmd, "C%d:INSP? '%s'", ch - LECROY_WR_CH1 + 1, name );
+        sprintf( cmd, "C%d:INSP? '%s'\n", ch - LECROY_WR_CH1 + 1, name );
     else if ( ch >= LECROY_WR_M1 && ch <= LECROY_WR_M4 )
-        sprintf( cmd, "M%c:INSP? '%s'", ch - LECROY_WR_M1 + 1, name );
+        sprintf( cmd, "M%c:INSP? '%s'\n", ch - LECROY_WR_M1 + 1, name );
     else if ( ch >= LECROY_WR_TA && ch <= LECROY_WR_TD )
-        sprintf( cmd, "T%c:INSP? '%s'", ch - LECROY_WR_TA + 'A', name );
+        sprintf( cmd, "T%c:INSP? '%s'\n", ch - LECROY_WR_TA + 'A', name );
     else
         fsc2_impossible( );
 
@@ -1711,7 +1767,7 @@ lecroy_wr_get_float_value( int          ch,
         /* empty */ ;
 
     if ( ! *ptr )
-        lecroy_wr_comm_failure( );
+        lecroy_wr_lan_failure( );
 
     TRY
     {
@@ -1719,7 +1775,7 @@ lecroy_wr_get_float_value( int          ch,
         TRY_SUCCESS;
     }
     OTHERWISE
-        lecroy_wr_comm_failure( );
+        lecroy_wr_lan_failure( );
 
     return val;
 }
@@ -1731,8 +1787,11 @@ lecroy_wr_get_float_value( int          ch,
 bool
 lecroy_wr_command( const char * cmd )
 {
-    if ( gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE )
-        lecroy_wr_comm_failure( );
+	long len = strlen( cmd );
+
+
+	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+        lecroy_wr_lan_failure( );
     return OK;
 }
 
@@ -1752,7 +1811,7 @@ lecroy_wr_get_inr( void )
     long length = sizeof reply;
 
 
-    lecroy_wr_talk( "INR?", reply, &length );
+    lecroy_wr_talk( "INR?\n", reply, &length );
     reply[ length - 1 ] = '\0';
     return ( unsigned int ) T_atoi( reply );
 }
@@ -1761,14 +1820,29 @@ lecroy_wr_get_inr( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool lecroy_wr_talk( const char * cmd,
-                            char *       reply,
-                            long *       length )
+static int
+lecroy_wr_talk( const char * cmd,
+                char       * reply,
+                ssize_t    * length )
 {
-    if (    gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE
-         || gpib_read( lecroy_wr.device, reply, length ) == FAILURE )
-        lecroy_wr_comm_failure( );
-    return OK;
+    ssize_t len = strlen( cmd );
+    int ret = 0;
+    bool with_eoi;
+
+
+    CLOBBER_PROTECT( ret );
+
+    TRY
+    {
+        if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
+            THROW( EXCEPTION );
+        ret = lecroy_vicp_read( reply, length, &with_eoi, UNSET );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+        lecroy_wr_lan_failure( );
+
+    return ret;
 }
 
 
@@ -1776,8 +1850,9 @@ static bool lecroy_wr_talk( const char * cmd,
  *-----------------------------------------------------------------*/
 
 static void
-lecroy_wr_comm_failure( void )
+lecroy_wr_lan_failure( void )
 {
+    lecroy_vicp_close( );
     print( FATAL, "Communication with device failed.\n" );
     THROW( EXCEPTION );
 }

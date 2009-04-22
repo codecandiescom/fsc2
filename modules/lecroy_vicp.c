@@ -466,9 +466,9 @@ void
 lecroy_vicp_lock_out( bool lock_state )
 {
     unsigned char op = LECROY_VICP_REMOTE;
-    unsigned char  header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
-    ssize_t        bytes_written;
-    long           us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
+    unsigned char header[ LECROY_VICP_HEADER_SIZE ] = { 0 };
+    ssize_t       bytes_written;
+    long          us_timeout = LECROY_VICP_DEFAULT_READ_WRITE_TIMEOUT;
 
 
     if ( lecroy_vicp.handle >= 0 )
