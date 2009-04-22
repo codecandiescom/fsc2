@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -450,8 +450,8 @@ spex232_wl2p( double wl )
 		return lrnd( ( spex232_wl2wn( spex232.abs_lower_limit )
 					   - spex232_wl2wn( wl ) ) / spex232.mini_step );
 }
-				
-		
+
+
 /*-------------------------------------------------------------------*
  * Converts a motor position to an (uncorrected absolute) wavelength
  *-------------------------------------------------------------------*/
@@ -468,7 +468,7 @@ spex232_p2wl( long int pos )
 
 
 /*-------------------------------*
- * Function for starting  a scan 
+ * Function for starting  a scan
  *-------------------------------*/
 
 void
@@ -480,7 +480,7 @@ spex232_scan_start( void )
 
 
 /*--------------------------------*
- * Function for doing a scan step 
+ * Function for doing a scan step
  *--------------------------------*/
 
 void
@@ -491,7 +491,7 @@ spex232_scan_step( void )
 		      spex232_set_wavelength( spex232.wavelength + spex232.scan_step );
     else
         spex232.wavelength =
-            spex232_set_wavelength( spex232_wn2wl( 
+            spex232_set_wavelength( spex232_wn2wl(
                                             spex232_wl2wn( spex232.wavelength )
                                             - spex232.scan_step ) );
 }
@@ -606,13 +606,13 @@ spex232_move_relative( long int steps )
 	while ( spex232_motor_is_busy( ) )
         fsc2_usleep( 100000, UNSET );
 }
-	
+
 
 /*------------------------------------------------------------*
  * Function tests if the motor is still busy and returns true
  * if it is, otherwise false
  *------------------------------------------------------------*/
- 
+
 static bool
 spex232_motor_is_busy( void )
 {
@@ -628,7 +628,7 @@ spex232_motor_is_busy( void )
 	return cmd == 'q';
 }
 
-	
+
 /*-----------------------------------------------------*
  * Function for opening the device file for the device
  * and setting up the communication parameters.

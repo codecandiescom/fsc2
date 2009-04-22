@@ -76,7 +76,7 @@ rb_pulser_j_init( void )
          || rulbus_rb8515_clock_set_frequency(
                                     rb_pulser_j.clock_card[ ERT_CLOCK ].handle,
                                     RULBUS_RB8515_CLOCK_FREQ_OFF )
-                                                                != RULBUS_OK ) 
+                                                                != RULBUS_OK )
         rb_pulser_j_failure( SET, "Failure to stop pulser" );
 
     /* In external trigger mode set the trigger input slope of the ERT delay
@@ -369,7 +369,7 @@ rb_pulser_j_run( bool state )
 
         lower_permissions( );
 
-        /* Wait until all cards are quiet, i.e. aren't outputting pulses 
+        /* Wait until all cards are quiet, i.e. aren't outputting pulses
            anymore (we don't test the cards directly since that takes
            about 8 ms per card but rely on the pulser being quit after
            the longest function) */

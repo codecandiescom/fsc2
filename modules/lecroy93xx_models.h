@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -34,7 +34,7 @@
  * far from being clear or complete and, moreover, contradictions exist
  * between the information from the manuals and the diverse web pages.
  * Thus the data below sometimes just represent a guess of which of the
- * data to be found in different sources are correct. 
+ * data to be found in different sources are correct.
  */
 
 
@@ -95,7 +95,7 @@
  * LECROY93XX_MAX_MEMORY_SIZE   maximum number of points per channel (single
  *                              channel, not combined channels)
  * LECROY93XX_HAS_200MHz_BW_LIMITER   define this only if the device has a
- *                              200 MHz bandwidth limiter 
+ *                              200 MHz bandwidth limiter
  * LECROY93XX_NUM_TBAS          total number of existing timebases, counting
  *                              all from the fastest up to the one before the
  *                              the device switches to roll mde
@@ -185,7 +185,7 @@
 	double fixed_sens[ ] = { 1.0e-2, 0.2, 5.0 };
 	double max_offsets[ ] = { 0.12, 1.2, 24.0 };
 #endif
-#endif 
+#endif
 
 
 /*-------- 9310 models --------*/
@@ -260,7 +260,7 @@
 	double fixed_sens[ ] = { 1.0e-2, 0.2, 5.0 };
 	double max_offsets[ ] = { 0.12, 1.2, 24.0 };
 #endif
-#endif 
+#endif
 
 
 /*-------- 9314 models --------*/
@@ -335,7 +335,7 @@
 	double fixed_sens[ ] = { 1.0e-2, 0.2, 5.0 };
 	double max_offsets[ ] = { 0.12, 1.2, 24.0 };
 #endif
-#endif 
+#endif
 
 
 /*-------- 9350 models --------*/
@@ -409,7 +409,7 @@
 	double fixed_sens[ ] = { 1.0e-2, 0.2, 5.0 };
 	double max_offsets[ ] = { 0.12, 1.2, 24.0 };
 #endif
-#endif 
+#endif
 
 
 #if    defined LECROY9350    \
@@ -513,7 +513,7 @@
 	double fixed_sens[ ] = { 1.0e-2, 0.2, 5.0 };
 	double max_offsets[ ] = { 0.12, 1.2, 24.0 };
 #endif
-#endif 
+#endif
 
 
 #if    defined LECROY9354    \
@@ -564,7 +564,7 @@
 #define LECROY93XX_CH_MAX            LECROY93XX_CH2     /* 2 channnels */
 #define LECROY93XX_NUM_RIS_TBAS                   0     /* # of RIS timebases */
 #define LECROY93XX_OFFSET_FACTOR                8.0
-#endif 
+#endif
 
 
 /*-------- 9370 models --------*/
@@ -640,7 +640,7 @@
 	double fixed_sens[ ] = { 5.0e-3, 0.1, 1.0, 10.0 };
 	double max_offsets[ ] = { 0.4, 1.0, 10.0, 100.0 };
 #endif
-#endif 
+#endif
 
 
 /*-------- 9374 models --------*/
@@ -732,7 +732,7 @@
 	double fixed_sens[ ] = { 5.0e-3, 0.1, 1.0, 10.0 };
 	double max_offsets[ ] = { 0.4, 1.0, 10.0, 100.0 };
 #endif
-#endif 
+#endif
 
 
 /*-------- 9384 models --------*/
@@ -824,7 +824,7 @@
 	double fixed_sens[ ] = { 5.0e-3, 0.1, 1.0, 10.0 };
 	double max_offsets[ ] = { 0.4, 1.0, 10.0, 100.0 };
 #endif
-#endif 
+#endif
 
 
 #endif /* ! defined LECROY93XX_MODELS_HEADER */

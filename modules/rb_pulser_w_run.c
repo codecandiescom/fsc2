@@ -127,7 +127,7 @@ rb_pulser_w_function_init( void )
                   && rb_pulser_w.defense_pulse_mode ) )
             continue;
 
-        f->old_num_active_pulses = f->num_active_pulses; 
+        f->old_num_active_pulses = f->num_active_pulses;
 
         for ( f->num_active_pulses = 0, j = 0; j < f->num_pulses; j++ )
             if ( f->pulses[ j ]->is_active )
@@ -451,7 +451,7 @@ rb_pulser_w_rf_channel_setup( void )
     delta = p->pos - start;
     dT = Ticks_rnd( delta / rb_pulser_w.timebase );
     shift = dT * rb_pulser_w.timebase - delta;
-            
+
     if ( dT > MAX_TICKS )
     {
         print( FATAL, "RF pulse #%ld starts too late.\n", p->num );
@@ -466,7 +466,7 @@ rb_pulser_w_rf_channel_setup( void )
     card->is_active = SET;
 
     /* Store the length of the pulse itself separately. there's no card for
-       this pulse, it gets set by the synthesizer directly */ 
+       this pulse, it gets set by the synthesizer directly */
 
 
     f->last_pulse_len = p->len * rb_pulser_w.timebase;
@@ -595,7 +595,7 @@ rb_pulser_w_detection_channel_setup( void )
     delta = p->pos - start;
     dT = Ticks_rnd( delta / rb_pulser_w.timebase );
     shift = dT * rb_pulser_w.timebase - delta;
-            
+
     if ( dT > MAX_TICKS )
     {
         print( FATAL, "Detection pulse #%ld starts too late.\n", p->num );

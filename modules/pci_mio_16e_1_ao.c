@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -253,7 +253,7 @@ daq_ao_channel_setup( Var_T * v )
             THROW( EXCEPTION );
         }
     }
-        
+
     if ( FSC2_MODE == EXPERIMENT )
     {
         NI_DAQ_STATE l_er = er;
@@ -327,7 +327,7 @@ daq_ao_channel_setup( Var_T * v )
     pci_mio_16e_1.ao_state.external_reference[ dac ] = ( NI_DAQ_STATE ) er;
     pci_mio_16e_1.ao_state.polarity[ dac ] = ( NI_DAQ_BU_POLARITY ) pol;
 
-    return vars_push( INT_VAR, 1L );    
+    return vars_push( INT_VAR, 1L );
 }
 
 
@@ -418,7 +418,7 @@ daq_set_voltage( Var_T * v )
     if ( FSC2_MODE == EXPERIMENT )
     {
         raise_permissions( );
-        ret = ni_daq_ao( pci_mio_16e_1.board, 1, &dac, &volts ); 
+        ret = ni_daq_ao( pci_mio_16e_1.board, 1, &dac, &volts );
         lower_permissions( );
 
         if ( ret < 0 )

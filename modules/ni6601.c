@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -686,7 +686,7 @@ counter_start_buffered_counter( Var_T * v )
 Var_T *
 counter_get_buffered_counts( Var_T * v )
 {
-    int counter; 
+    int counter;
     long num_points;
     double wait_secs = -1.0;
 
@@ -922,10 +922,10 @@ ni6601_get_data( long   to_fetch,
                     stop_on_user_request( );
                     if ( wait_secs > 0.0 )
                     {
-                            gettimeofday( &after, NULL );               
+                            gettimeofday( &after, NULL );
                             us_wait -=   (   after.tv_sec * 1000000
                                            + after.tv_usec  )
-                                       - (   before.tv_sec * 1000000 
+                                       - (   before.tv_sec * 1000000
                                            + before.tv_usec );
                     }
                     TRY_SUCCESS;

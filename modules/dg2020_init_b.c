@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -216,7 +216,7 @@ dg2020_basic_pulse_check( void )
         {
             if ( p->function->pm == NULL )      /* if it doesn't exist yet */
             {
-                p->function->pm = T_malloc(   p->pc->len 
+                p->function->pm = T_malloc(   p->pc->len
                                             * sizeof *p->function->pm
                                             * NUM_PHASE_TYPES );
 
@@ -640,7 +640,7 @@ dg2020_pulse_start_setup( void )
         {
             shape_p = fs->pulse_params;
             defense_p = fd->pulse_params + fd->num_params - 1;
-            add = Ticks_min( dg2020.defense_2_shape, shape_p->pos 
+            add = Ticks_min( dg2020.defense_2_shape, shape_p->pos
                              + Ticks_max( fd->max_seq_len, fs->max_seq_len )
                              - defense_p->pos - defense_p->len );
 

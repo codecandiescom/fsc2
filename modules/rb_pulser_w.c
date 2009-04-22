@@ -641,7 +641,7 @@ pulser_defense_pulse_mode( Var_T * v )
 
 
     if ( v == NULL )
-        return vars_push( INT_VAR, rb_pulser_w.defense_pulse_mode ); 
+        return vars_push( INT_VAR, rb_pulser_w.defense_pulse_mode );
 
     if ( FSC2_MODE != PREPARATION )
     {

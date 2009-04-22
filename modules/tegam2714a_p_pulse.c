@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -124,7 +124,7 @@ tegam2714a_p_set_pulse_function( long pnum,
 
 
 /*--------------------------------------------------*
- * Function for setting the position of a new pulse 
+ * Function for setting the position of a new pulse
  *--------------------------------------------------*/
 
 bool
@@ -156,7 +156,7 @@ tegam2714a_p_set_pulse_position( long   pnum,
 
 
 /*------------------------------------------------*
- * Function for setting the length of a new pulse 
+ * Function for setting the length of a new pulse
  *------------------------------------------------*/
 
 bool
@@ -188,8 +188,8 @@ tegam2714a_p_set_pulse_length( long   pnum,
 
 
 /*---------------------------------------------------------*
- * Function for setting the position change of a new pulse 
- *--------------------------------------------------------*/
+ * Function for setting the position change of a new pulse
+ *---------------------------------------------------------*/
 
 bool
 tegam2714a_p_set_pulse_position_change( long   pnum,
@@ -220,7 +220,7 @@ tegam2714a_p_set_pulse_position_change( long   pnum,
 
 
 /*-------------------------------------------------------*
- * Function for setting the length change of a new pulse 
+ * Function for setting the length change of a new pulse
  *-------------------------------------------------------*/
 
 bool
@@ -274,7 +274,7 @@ tegam2714a_p_get_pulse_function( long  pnum,
 
 
 /*-----------------------------------------*
- * Function returns the position of a pulse 
+ * Function returns the position of a pulse
  *-----------------------------------------*/
 
 bool
@@ -298,7 +298,7 @@ tegam2714a_p_get_pulse_position( long     pnum,
 
 
 /*----------------------------------------*
- * Function returns the length of a pulse 
+ * Function returns the length of a pulse
  *----------------------------------------*/
 
 bool
@@ -321,7 +321,7 @@ tegam2714a_p_get_pulse_length( long     pnum,
 
 
 /*-------------------------------------------------*
- * Function returns the position change of a pulse 
+ * Function returns the position change of a pulse
  *-------------------------------------------------*/
 
 bool
@@ -345,7 +345,7 @@ tegam2714a_p_get_pulse_position_change( long     pnum,
 
 
 /*-----------------------------------------------*
- * Function returns the length change of a pulse 
+ * Function returns the length change of a pulse
  *-----------------------------------------------*/
 
 bool
@@ -395,7 +395,7 @@ tegam2714a_p_change_pulse_position( long   pnum,
         TRY_SUCCESS;
     }
     CATCH( EXCEPTION )
-    {    
+    {
         if ( FSC2_MODE == EXPERIMENT )
             return FAIL;
         else
@@ -491,7 +491,7 @@ tegam2714a_p_change_pulse_position_change( long   pnum,
         TRY_SUCCESS;
     }
     CATCH( EXCEPTION )
-    {    
+    {
         if ( FSC2_MODE == EXPERIMENT )
             return FAIL;
         else

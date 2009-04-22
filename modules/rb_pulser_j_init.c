@@ -206,7 +206,7 @@ rb_pulser_j_rf_synth_init( void )
         func = T_strdup( SYNTHESIZER_PULSE_STATE );
     else
         func = get_string( SYNTHESIZER_PULSE_STATE "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
@@ -224,7 +224,7 @@ rb_pulser_j_rf_synth_init( void )
         func = T_strdup( SYNTHESIZER_PULSE_WIDTH );
     else
         func = get_string( SYNTHESIZER_PULSE_WIDTH "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
@@ -237,12 +237,12 @@ rb_pulser_j_rf_synth_init( void )
 
     vars_pop( func_ptr );
     rb_pulser_j.synth_pulse_width = func;
-    
+
     if ( dev_num == 1 )
         func = T_strdup( SYNTHESIZER_PULSE_DELAY );
     else
         func = get_string( SYNTHESIZER_PULSE_DELAY "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
@@ -261,7 +261,7 @@ rb_pulser_j_rf_synth_init( void )
         func = T_strdup( SYNTHESIZER_TRIG_SLOPE );
     else
         func = get_string( SYNTHESIZER_TRIG_SLOPE "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
@@ -281,7 +281,7 @@ rb_pulser_j_rf_synth_init( void )
         func = T_strdup( SYNTHESIZER_STATE );
     else
         func = get_string( SYNTHESIZER_STATE "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {

@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -217,7 +217,7 @@ fsps25_end_of_exp_hook( void )
 
 
 /*-------------------------------*
- * Returns device name as string 
+ * Returns device name as string
  *-------------------------------*/
 
 Var_T *
@@ -938,7 +938,7 @@ fsps25_get_heater_state( void )
         fsps25.heater_state = HEATER_OFF;
     else
 		fsps25_wrong_data( );
-         
+
 	return fsps25.heater_state;
 }
 
@@ -1078,7 +1078,7 @@ fsps25_set_expert_mode( bool state )
 
 
 /*------------------------------------------------------*
- * Function for aborting a sweep. Returns OK on success 
+ * Function for aborting a sweep. Returns OK on success
  * and FAIL on failure to stop the sweep.
  *------------------------------------------------------*/
 
@@ -1161,7 +1161,7 @@ fsps25_get_act_current( void )
 
 	if (    strncmp( buf, "AC ", 3 )
 		 || ( buf[ 3 ] != '+' && buf[ 3 ] != '-' )
-		 || buf[ 9 ] != ';' 
+		 || buf[ 9 ] != ';'
 		 || buf[ 10 ] != '\r' )
 		fsps25_wrong_data( );
 
@@ -1185,7 +1185,7 @@ fsps25_get_act_current( void )
 		THROW( EXCEPTION );
 	}
 
-    /* Indicate that this is a value fetched from the device by setting the 
+    /* Indicate that this is a value fetched from the device by setting the
        act_current_need_request member */
 
 	fsps25.act_current = current;
@@ -1193,7 +1193,7 @@ fsps25_get_act_current( void )
 
 	if ( fsps25.heater_state == HEATER_ON )
     {
-        fsps25.super_current_need_request = SET; 
+        fsps25.super_current_need_request = SET;
 		fsps25.super_current = current;
     }
 
@@ -1227,7 +1227,7 @@ fsps25_set_act_current( long current )
 	sprintf( buf, "GTC %+06ld;\r", current );
 	if ( fsc2_serial_write( fsps25.sn, buf, 12, RESPONSE_TIME, UNSET ) != 12 )
 		fsps25_comm_fail( );
-		
+
 	if ( ! fsps25_get_command_reply( ) )
     {
         print( FATAL, "Device did not accept GTC command.\n" );
@@ -1283,7 +1283,7 @@ fsps25_set_act_current( long current )
 
 		if ( fsps25.sweep_state == STOPPED )
 			break;
-		
+
 		fsc2_usleep( 100000, UNSET );
 
 		if ( check_user_request( ) )

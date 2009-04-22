@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -250,7 +250,7 @@ dg2020_get_max_seq_len( void )
              || f->self == PULSER_CHANNEL_PHASE_2 )
             continue;
 
-        max = Ticks_max( max, f->max_seq_len ); 
+        max = Ticks_max( max, f->max_seq_len );
     }
 
     if ( dg2020.is_max_seq_len )
@@ -532,9 +532,9 @@ dg2020_duty_check( void )
         f = dg2020.function + fns[ i ];
         if (    f->is_used
              && f->num_channels > 0
-             && dg2020_calc_max_length( f ) > 
+             && dg2020_calc_max_length( f ) >
                                         MAX_TWT_DUTY_CYCLE * dg2020.repeat_time
-             && f->max_duty_warning++ == 0 ) 
+             && f->max_duty_warning++ == 0 )
             print( SEVERE, "Duty cycle of TWT exceeded due to length of %s "
                    "pulses.\n", f->name );
     }

@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -182,7 +182,7 @@ rs_spec10_ccd_init( void )
          && ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY ) )
     {
         clear_mode = CLEAR_PRE_EXPOSURE;
-        if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_MODE, 
+        if ( ! pl_set_param( rs_spec10->handle, PARAM_CLEAR_MODE,
                              ( void_ptr ) &clear_mode ) )
             rs_spec10_error_handling( );
     }
@@ -194,7 +194,7 @@ rs_spec10_ccd_init( void )
          && ( acc == ACC_READ_WRITE || acc == ACC_WRITE_ONLY ) )
     {
         shutter_open_mode = OPEN_PRE_EXPOSURE;
-        if ( ! pl_set_param( rs_spec10->handle, PARAM_SHTR_OPEN_MODE, 
+        if ( ! pl_set_param( rs_spec10->handle, PARAM_SHTR_OPEN_MODE,
                              ( void_ptr ) &shutter_open_mode ) )
             rs_spec10_error_handling( );
     }
@@ -648,7 +648,7 @@ rs_spec10_get_pic( uns32 * size )
 
 #if defined RUNNING_WITH_ROOT_PRIVILEGES
         munlock( frame, *size );
-#endif 
+#endif
 
         T_free( frame );
         rs_spec10_error_handling( );
@@ -782,7 +782,7 @@ rs_spec10_set_temperature( double temp )
 
 #if ! defined RS_SPEC10_TEST
 
-    if ( ! pl_set_param( rs_spec10->handle, PARAM_TEMP_SETPOINT, 
+    if ( ! pl_set_param( rs_spec10->handle, PARAM_TEMP_SETPOINT,
                          &itemp ) )
         rs_spec10_error_handling( );
 

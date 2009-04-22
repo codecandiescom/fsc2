@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -246,7 +246,7 @@ hp8672a_set_attenuation( double att )
         sprintf( cmd, "K;%1d\n", a - 110 );
     else
         sprintf( cmd, "K;%c\n", ':' + ( a - 120 ) );
-        
+
     hp8672a_command( cmd );
 
     /* Switch between extra 10 db on and off if necessary */
@@ -281,7 +281,7 @@ hp8672a_set_modulation( void )
         hp8672a_command( cmd );
         fsc2_usleep( 15000, UNSET );
         return 1;
-    }       
+    }
 
     sprintf( cmd, "M0%d\n", 5 - hp8672a.mod_ampl[ hp8672a.mod_type ] );
     hp8672a_command( cmd );

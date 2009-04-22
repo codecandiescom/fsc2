@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -29,7 +29,7 @@ const char generic_type[ ] = DEVICE_TYPE;
 
 
 #define ANGLE_TO_STEPS( x )    irnd( 8 * ( x ) )
-#define STEPS_TO_ANGLE( x )    ( 0.125 * ( x ) ) 
+#define STEPS_TO_ANGLE( x )    ( 0.125 * ( x ) )
 
 #define USEC_PER_STEP  25000L   /* time (in us) for a step of the motor */
 
@@ -168,7 +168,7 @@ er218_init_hook( void )
                 er218.dio_mode_func[ 0 ] = T_free( er218.dio_mode_func[ 0 ] );
             }
             print( FATAL, "Function for setting a DIO value is missing from "
-                   "module '%s'.\n", dio_names[ i ] ); 
+                   "module '%s'.\n", dio_names[ i ] );
             THROW( EXCEPTION );
         }
 
@@ -185,7 +185,7 @@ er218_init_hook( void )
                 er218.dio_mode_func[ j ] = T_free( er218.dio_mode_func[ j ] );
             }
             print( FATAL, "Function for setting the DIOs mode is missing from "
-                   "module '%s'.\n", dio_names[ i ] ); 
+                   "module '%s'.\n", dio_names[ i ] );
             THROW( EXCEPTION );
         }
     }
@@ -403,7 +403,7 @@ goniometer_angle( Var_T * v )
 
 
 /*-------------------------*
- * Move by a certain angle 
+ * Move by a certain angle
  *-------------------------*/
 
 Var_T *

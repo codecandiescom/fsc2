@@ -1,21 +1,21 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  Thanks to Anton Savitsky for re-measuring the data for the corrections
  *  and including them into the code.
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -228,7 +228,7 @@ keithley228a_init_hook( void )
         keithley228a.dac_func = T_strdup( "lockin_dac_voltage" );
     else
         keithley228a.dac_func = get_string( "lockin_dac_voltage#%d", dev_num );
-    
+
     if ( ( func_ptr = func_get( keithley228a.dac_func, &acc ) ) == NULL )
     {
         print( FATAL, "No lock-in amplifier module loaded supplying a "
@@ -569,7 +569,7 @@ magnet_command( Var_T * v )
     CLOBBER_PROTECT( cmd );
 
     vars_check( v, STR_VAR );
-    
+
     if ( FSC2_MODE == EXPERIMENT )
     {
         TRY
@@ -1060,10 +1060,10 @@ keithley228a_get_corrected_current( double   c,
                          0.0,    -0.001027, 0.001396,  0.00429,   0.005472 },
         offsets[ ] =   { 0.00793, 0.007257,  0.004831,  0.000866, -0.000962,
                          0.0,     0.000252, -0.012237, -0.033361, -0.043436 },
-        pos_jumps[ ]=  { 0.0,  0.14, 0.53, 0.67, 1.06, 1.20, 1.59, 1.73, 
-                         2.25, 2.39, 2.78, 2.92, 3.31, 3.45, 3.84, 3.98, 
+        pos_jumps[ ]=  { 0.0,  0.14, 0.53, 0.67, 1.06, 1.20, 1.59, 1.73,
+                         2.25, 2.39, 2.78, 2.92, 3.31, 3.45, 3.84, 3.98,
                          4.5,  4.64, 5.03, 5.17, 5.56, 5.70, 6.09, 6.23,
-                         6.75, 6.89, 7.28, 7.42, 7.81, 7.95, 8.47, 8.61, 
+                         6.75, 6.89, 7.28, 7.42, 7.81, 7.95, 8.47, 8.61,
                          9.00, 9.14, 9.53, 9.67 },
 
         /* here the old jumps, new positions (above) measured 11.3.2003

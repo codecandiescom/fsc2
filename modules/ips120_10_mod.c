@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -217,7 +217,7 @@ ips120_10_mod_init_hook( void )
 		ips120_10_mod.dac_func = T_strdup( "daq_set_voltage" );
 	else
 		ips120_10_mod.dac_func = get_string( "daq_set_voltage#%d", dev_num );
-	
+
 	if ( ( func_ptr = func_get( ips120_10_mod.dac_func, &acc ) ) == NULL )
 	{
 		print( FATAL, "DAC module '%s' not supplying a function for setting "
@@ -234,7 +234,7 @@ ips120_10_mod_init_hook( void )
 		reserve_dac_func = T_strdup( "daq_reserve_dac" );
 	else
 		reserve_dac_func = get_string( "daq_reserve_dac#%d", dev_num );
-	
+
 	if ( ( func_ptr = func_get( reserve_dac_func, &acc ) ) == NULL )
 	{
 		print( FATAL, "DAC module '%s' not supplying a function for reserving "
@@ -809,7 +809,7 @@ magnet_command( Var_T * v )
 	CLOBBER_PROTECT( cmd );
 
 	vars_check( v, STR_VAR );
-	
+
 	if ( FSC2_MODE == EXPERIMENT )
 	{
 		TRY
@@ -987,7 +987,7 @@ ips120_10_mod_to_local( void )
 		ips120_10_mod_set_activity( TO_SET_POINT );
 	}
 	else
-	{	
+	{
 		ips120_10_mod_set_sweep_rate( ips120_10_mod.fast_sweep_rate );
 		ips120_10_mod_set_activity( HOLD );
 		ips120_10_mod.sweep_state = STOPPED;
@@ -1043,7 +1043,7 @@ ips120_10_mod_get_complete_status( void )
 
 		break;
 	}
-	
+
 	/* Check system status data (following the 'X') */
 
 	switch ( reply[ 1 ] )
@@ -1474,7 +1474,7 @@ ips120_10_mod_set_target_current( double current )
 	Var_T *func_ptr;
 	int acc;
 
-	
+
 	current = ips120_10_mod_current_check( current );
 
 	/* Split the current up into the part that can be set directly and the
@@ -1544,7 +1544,7 @@ ips120_10_mod_set_sweep_rate( double sweep_rate )
 
 	sweep_rate = ips120_10_mod_sweep_rate_check( sweep_rate );
 
-	/* Please note: the sweep rate must be set in units of 0.01 A/min 
+	/* Please note: the sweep rate must be set in units of 0.01 A/min
 	   (the minimum sweep rate) while the variable 'sweep_rate' is the
 	   sweep rate in A/s. */
 

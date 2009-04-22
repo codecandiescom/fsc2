@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -916,7 +916,7 @@ ep385_pulse_start_setup( void )
                                     Ticks_max( cd->function->max_seq_len,
                                                cs->function->max_seq_len )
                                     + ep385.defense_2_shape - add;
-    
+
             shape_p = cs->pulse_params + cs->num_active_pulses - 1;
             defense_p = cd->pulse_params;
             add = Ticks_min( ep385.shape_2_defense, defense_p->pos
@@ -925,7 +925,7 @@ ep385_pulse_start_setup( void )
                              - shape_p->pos - shape_p->len );
 
             if ( add < ep385.shape_2_defense )
-                cd->function->max_seq_len = cs->function->max_seq_len = 
+                cd->function->max_seq_len = cs->function->max_seq_len =
                                     Ticks_max( cd->function->max_seq_len,
                                                cs->function->max_seq_len )
                                     + ep385.shape_2_defense - add;

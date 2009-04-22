@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -69,7 +69,7 @@ lecroy_ws_init( const char * name )
 
     lecroy_vicp_init( name, NETWORK_ADDRESS, 100000, 1 );
 
-    lecroy_vicp_set_timeout( READ, READ_TIMEOUT ); 
+    lecroy_vicp_set_timeout( READ, READ_TIMEOUT );
     lecroy_vicp_set_timeout( WRITE, WRITE_TIMEOUT );
 
     TRY
@@ -210,7 +210,7 @@ lecroy_ws_init( const char * name )
                 lecroy_ws_set_bandwidth_limiter( i,
                                             lecroy_ws.bandwidth_limiter[ i ] );
             else
-                lecroy_ws.bandwidth_limiter[ i ] = 
+                lecroy_ws.bandwidth_limiter[ i ] =
                                           lecroy_ws_get_bandwidth_limiter( i );
         }
 
@@ -277,14 +277,14 @@ lecroy_ws_init( const char * name )
     }
     OTHERWISE
         return FAIL;
-        
+
     return OK;
 }
 
 
-/*-------------------------------------------------*
- * Function for determing the digitizers timebase 
- *-------------------------------------------------*/
+/*------------------------------------------------*
+ * Function for determing the digitizers timebase
+ *------------------------------------------------*/
 
 double
 lecroy_ws_get_timebase( void )
@@ -317,9 +317,9 @@ lecroy_ws_get_timebase( void )
 }
 
 
-/*-----------------------------------------------*
- * Function for setting the digitizers timebase 
- *-----------------------------------------------*/
+/*----------------------------------------------*
+ * Function for setting the digitizers timebase
+ *----------------------------------------------*/
 
 bool
 lecroy_ws_set_timebase( double timebase )
@@ -665,7 +665,7 @@ lecroy_ws_set_bandwidth_limiter( int channel,
     else
         strcat( buf, "200MHZ\n" );
 #endif
-        
+
     len = strlen( buf );
     if ( lecroy_vicp_write( buf, &len, SET, UNSET ) != SUCCESS )
         lecroy_ws_lan_failure( );
@@ -1007,7 +1007,7 @@ lecroy_ws_get_trigger_mode( void )
 
 
 /*---------------------------------------*
- * Function for setting the trigger mode 
+ * Function for setting the trigger mode
  *---------------------------------------*/
 
 int
@@ -1058,7 +1058,7 @@ lecroy_ws_get_trigger_delay( void )
 
 
 /*----------------------------------------*
- * Function for setting the trigger delay 
+ * Function for setting the trigger delay
  *----------------------------------------*/
 
 bool
@@ -1120,7 +1120,7 @@ lecroy_ws_display( int ch,
 {
     char cmd[ 30 ];
     ssize_t len;
-        
+
 
     if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
         sprintf( cmd, "C%d:TRA ", ch - LECROY_WS_CH1 + 1 );
@@ -1229,7 +1229,7 @@ lecroy_ws_start_acquisition( void )
         if ( lecroy_ws.is_avg_setup[ ch ] )
         {
             do_averaging = SET;
-            
+
             lecroy_normal_channel_averaging( ch, lecroy_ws.num_avg[ ch ] );
 
             /* If we want to use a trace it must be switched on */
@@ -1260,7 +1260,7 @@ lecroy_ws_start_acquisition( void )
     if ( lecroy_ws.is_avg_setup[ LECROY_WS_MATH ] )
     {
         do_averaging = SET;
-            
+
         snprintf( cmd, 100,
                   "F1:DEF EQN,'AVG(C%ld)',AVGTYPE,SUMMED,SWEEPS,%ld\n",
                   lecroy_ws.source_ch[ LECROY_WS_MATH ] - LECROY_WS_CH1 + 1,
@@ -1503,7 +1503,7 @@ lecroy_ws_get_area( int        ch,
     {
         val = dp[ 0 ] + 0x100 * dp[ 1 ];
 
-        if ( dp[ 1 ] & 0x80 ) 
+        if ( dp[ 1 ] & 0x80 )
             val -= 0x10000;
 
         area += gain * val - offset;
@@ -1608,7 +1608,7 @@ lecroy_ws_get_data( long * length )
     gotten = 0;
 
     while ( gotten < len )
-    { 
+    {
         if ( lecroy_vicp_read( len_str + gotten, &to_get, &with_eoi, UNSET )
                                                                    == FAILURE )
             lecroy_ws_lan_failure( );
@@ -1627,7 +1627,7 @@ lecroy_ws_get_data( long * length )
     gotten = 0;
 
     while ( gotten < len )
-    { 
+    {
         if ( lecroy_vicp_read( len_str + gotten, &to_get, &with_eoi, UNSET )
                                                                    == FAILURE )
             lecroy_ws_lan_failure( );
@@ -1652,7 +1652,7 @@ lecroy_ws_get_data( long * length )
     gotten = 0;
 
     while ( gotten < len )
-    { 
+    {
         if ( lecroy_vicp_read( ( char * ) data + gotten, &to_get,
                                &with_eoi, UNSET ) == FAILURE )
             lecroy_ws_lan_failure( );

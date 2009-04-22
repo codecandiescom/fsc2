@@ -620,7 +620,7 @@ pulser_automatic_shape_pulses( Var_T * v )
 
     too_many_arguments( v );
 
-    rs690.function[ func ].min_left_shape_padding = 
+    rs690.function[ func ].min_left_shape_padding =
                                      rs690.function[ func ].left_shape_padding;
     rs690.function[ func ].min_right_shape_padding =
                                     rs690.function[ func ].right_shape_padding;
@@ -740,7 +740,7 @@ pulser_automatic_twt_pulses( Var_T * v )
 
     too_many_arguments( v );
 
-    rs690.function[ func ].min_left_twt_padding = 
+    rs690.function[ func ].min_left_twt_padding =
                                        rs690.function[ func ].left_twt_padding;
     rs690.function[ func ].min_right_twt_padding =
                                       rs690.function[ func ].right_twt_padding;
@@ -1412,7 +1412,7 @@ pulser_command( Var_T * v )
     CLOBBER_PROTECT( cmd );
 
     vars_check( v, STR_VAR );
-    
+
     if ( FSC2_MODE == EXPERIMENT )
     {
         TRY

@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -139,7 +139,7 @@ hjs_sfc_init_hook( void )
 
     func = T_free( func );
     vars_push( STR_VAR, DEVICE_NAME );    /* push the new pass-phrase */
-    
+
     v = func_call( func_ptr );
 
     if ( v->type != FLOAT_ARR || v->len != 3 )
@@ -366,7 +366,6 @@ sweep_up( Var_T * v  UNUSED_ARG )
         THROW( EXCEPTION );
     }
 
-    
     field = hjs_sfc_field_check( hjs_sfc.act_field + hjs_sfc.field_step );
 
     hjs_sfc.act_field = hjs_sfc_set_field( field );
@@ -401,7 +400,6 @@ sweep_down( Var_T * v  UNUSED_ARG )
         THROW( EXCEPTION );
     }
 
-    
     field = hjs_sfc_field_check( hjs_sfc.act_field - hjs_sfc.field_step );
 
     hjs_sfc.act_field = hjs_sfc_set_field( field );
@@ -435,7 +433,7 @@ reset_field( Var_T * v  UNUSED_ARG )
 
     hjs_sfc.act_field = hjs_sfc_set_field( hjs_sfc.field );
     hjs_sfc.is_act_field = SET;
-    
+
     return vars_push( FLOAT_VAR, hjs_sfc.act_field );
 }
 
@@ -477,7 +475,7 @@ magnet_B0( Var_T * v )
     too_many_arguments( v );
 
     hjs_sfc.B0V = B0V;
-            
+
     return vars_push( FLOAT_VAR, hjs_sfc.B0V );
 }
 
@@ -520,7 +518,7 @@ magnet_slope( Var_T * v )
     too_many_arguments( v );
 
     hjs_sfc.slope = slope;
-            
+
     return vars_push( FLOAT_VAR, hjs_sfc.slope );
 }
 

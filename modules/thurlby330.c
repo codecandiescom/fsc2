@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Anton Savitsky / Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -167,7 +167,7 @@ powersupply_name( Var_T * v  UNUSED_ARG )
 
 Var_T *
 powersupply_damping( Var_T * v )
-{   
+{
     long channel;
     long status;
     char buffer[ 100 ];
@@ -182,7 +182,7 @@ powersupply_damping( Var_T * v )
         print( FATAL, "Missing damping status argument.\n" );
         THROW( EXCEPTION );
     }
-        
+
     /* Second argument must be 0 or "OFF" for OFF or not 0 or "ON" for ON */
 
     status = get_boolean( v );
@@ -203,7 +203,7 @@ powersupply_damping( Var_T * v )
 
 Var_T *
 powersupply_channel_state( Var_T * v )
-{   
+{
     long channel;
     long status;
     char buffer[ 100 ];
@@ -212,7 +212,7 @@ powersupply_channel_state( Var_T * v )
     /* First argument must be the channel number (1 or 2) */
 
     channel = thurlby330_get_channel( v );
-    
+
     if ( ( v = vars_pop( v ) ) == NULL )
     {
         print( FATAL, "Missing channel status argument.\n" );
@@ -472,7 +472,7 @@ powersupply_command( Var_T * v )
     CLOBBER_PROTECT( cmd );
 
     vars_check( v, STR_VAR );
-    
+
     if ( FSC2_MODE == EXPERIMENT )
     {
         TRY

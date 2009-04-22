@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -224,7 +224,7 @@ dg2020_do_checks( Function_T * f )
     memcpy( f->old_pulse_params, f->pulse_params,
             f->num_pulses * sizeof *f->pulse_params );
     f->num_params = f->num_active_pulses;
-    
+
     if ( f->num_active_pulses == 0 )
         return;
 
@@ -655,7 +655,7 @@ dg2020_twt_padding_check( Function_T * f )
                 pp = f->pulse_params + f->num_active_pulses - 1;
                 *pp = tmp_pp;
                 pp->pulse->pp = pp;
-                
+
                 pp->pulse->needs_update = SET;
                 pp = ppp;
             }
@@ -799,7 +799,7 @@ dg2020_defense_shape_check( Function_T * shape )
                 {
                     print( FATAL, "Distance between PULSE_SHAPE pulse %s#%ld "
                            "and DEFENSE pulse #%ld got shorter than %s.\n",
-                           shape_p->sp ? "for pulse " : "", 
+                           shape_p->sp ? "for pulse " : "",
                            shape_p->sp ? shape_p->sp->num : shape_p->num,
                            defense_p->num,
                            dg2020_pticks( dg2020.shape_2_defense ) );
@@ -809,7 +809,7 @@ dg2020_defense_shape_check( Function_T * shape )
                 if ( dg2020.in_setup )
                     print( FATAL, "Distance between PULSE_SHAPE pulse %s"
                            "#%ld and DEFENSE pulse #%ld is shorter than "
-                           "%s.\n", shape_p->sp ? "for pulse " : "", 
+                           "%s.\n", shape_p->sp ? "for pulse " : "",
                            shape_p->sp ? shape_p->sp->num : shape_p->num,
                            defense_p->num,
                            dg2020_pticks( dg2020.shape_2_defense ) );

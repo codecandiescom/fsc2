@@ -266,7 +266,7 @@ struct RB_Pulser_W {
                                 pulse and end of defense pulse */
     bool defense_pulse_mode; /* tells if defense pulses gets set */
     bool is_psd;
-    double psd;              /* minimum delay between start of phase pulse and 
+    double psd;              /* minimum delay between start of phase pulse and
                                 start of microwave pulse */
     bool is_grace_period;
     double grace_period;     /* minimum delay between end of microwave pulse

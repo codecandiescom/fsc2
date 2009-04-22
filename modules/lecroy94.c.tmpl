@@ -203,7 +203,7 @@ digitizer_define_window( Var_T * v )
     win_width = get_double( v, "window width" );
 
     /* Allow window width to be zero in test run... */
-    
+
     if (    ( FSC2_MODE == TEST && win_width < 0.0 )
          || ( FSC2_MODE != TEST && win_width <= 0.0 ) )
     {
@@ -529,7 +529,7 @@ digitizer_interleave_mode( Var_T * v )
 
     lecroy94_tmpl.interleaved = ilvd;
     lecroy94_tmpl.is_interleaved = SET;
-    lecroy94_tmpl.is_timebase = SET;              /* must be set to be able 
+    lecroy94_tmpl.is_timebase = SET;              /* must be set to be able
                                                      to set interleaved mode */
 
     lecroy94_tmpl.trigger_delay = lecroy94_tmpl_trigger_delay_check( );
@@ -641,7 +641,7 @@ digitizer_sensitivity( Var_T * v )
        sensitivity (if we're in the preparations phase we can only do the
        check if an offset has already been set) */
 
-    if ( FSC2_MODE != PREPARATION || lecroy94_tmpl.is_offset[ channel ] ) 
+    if ( FSC2_MODE != PREPARATION || lecroy94_tmpl.is_offset[ channel ] )
     {
         for ( i = 1; i < NUM_ELEMS( fixed_sens ); i++ )
             if ( sens < 0.9999 * fixed_sens[ i ] )
@@ -678,7 +678,7 @@ digitizer_sensitivity( Var_T * v )
 
 
 /*--------------------------------------------------------------*
- * Function for setting or query of input coupling of a channel 
+ * Function for setting or query of input coupling of a channel
  *--------------------------------------------------------------*/
 
 Var_T *
@@ -715,7 +715,7 @@ digitizer_coupling( Var_T * v )
                 if ( ! lecroy94_tmpl.is_coupling[ channel ] )
                     no_query_possible( );
                 /* Fall through */
-        
+
             case TEST:
                 return vars_push( INT_VAR,
                                   ( long ) lecroy94_tmpl.coupling[ channel ] );
@@ -866,7 +866,7 @@ digitizer_bandwidth_limiter( Var_T * v )
             case PREPARATION :
                 if ( ! lecroy94_tmpl.is_bandwidth_limiter )
                     no_query_possible( );
-                return vars_push( INT_VAR, 
+                return vars_push( INT_VAR,
                                   ( long ) lecroy94_tmpl.bandwidth_limiter );
 
             case TEST:
@@ -1025,7 +1025,7 @@ digitizer_trigger_level( Var_T * v )
 
             case TEST :
                 if ( lecroy94_tmpl.is_trigger_level[ channel ] )
-                    return vars_push( FLOAT_VAR, 
+                    return vars_push( FLOAT_VAR,
                                       lecroy94_tmpl.trigger_level[ channel ] );
                 else
                     return vars_push( FLOAT_VAR,
@@ -1196,7 +1196,7 @@ digitizer_trigger_slope( Var_T * v )
              || ! strcasecmp( v->val.sptr, "POS" ) )
             slope = 1;
         else if (    ! strcasecmp( v->val.sptr, "NEGATIVE" )
-                  || ! strcasecmp( v->val.sptr, "NEG" ) ) 
+                  || ! strcasecmp( v->val.sptr, "NEG" ) )
             slope = 0;
         else
         {
@@ -1303,7 +1303,7 @@ digitizer_trigger_coupling( Var_T * v )
     else
         cpl = get_long( v, "trigger coupling type" );
 
-    if (    cpl < LECROY94_TMPL_TRG_CPL_AC 
+    if (    cpl < LECROY94_TMPL_TRG_CPL_AC
 #if defined LECROY94_TMPL_TRG_CPL_HF
          || cpl > LECROY94_TMPL_TRG_CPL_HF )
 #else
@@ -1639,7 +1639,7 @@ digitizer_num_averages( Var_T * v )
                "without a previous acqusition setup.\n" );
         THROW( EXCEPTION );
     }
-            
+
     return vars_push( INT_VAR, lecroy94_tmpl.num_avg[ channel ] );
 }
 
@@ -2217,7 +2217,7 @@ digitizer_command( Var_T * v )
     CLOBBER_PROTECT( cmd );
 
     vars_check( v, STR_VAR );
-    
+
     if ( FSC2_MODE == EXPERIMENT )
     {
         TRY
