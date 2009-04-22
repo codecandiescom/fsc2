@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -40,7 +40,6 @@ enum {
    grooves per millimeter has to be "installed" and then the blaze wavelength
    to be corrected (actually, the blaze wavelength is irrelevant for the
    performance of the device as far as I was told by tech support). */
-   
 
 static const char *good_gratings[ ] = { "1-002-45",
                                         "1-050-12"
@@ -706,7 +705,7 @@ spectrapro_300i_get_gratings( void )
 
     T_free( ( void * ) reply );
 }
-    
+
 
 /*-----------------------------------------------------*
  * Function asks the monochromator for the zero offset
@@ -750,7 +749,7 @@ spectrapro_300i_get_offset( long gn )
     T_free( ( void * ) reply );
     return offset;
 }
-    
+
 
 /*----------------------------------------------------------*
  * Function sets a new zero offset for one of the gratings,
@@ -864,7 +863,7 @@ spectrapro_300i_get_adjust( long gn )
     T_free( ( void * ) reply );
     return gadjust;
 }
-    
+
 
 /*-------------------------------------------------------------------*
  * Function sets a new grating adjust value for one of the gratings,
@@ -1247,7 +1246,7 @@ bool spectrapro_300i_read( char *   buf,
     read_retry:
 
         TRY
-        {       
+        {
             stop_on_user_request( );
             TRY_SUCCESS;
         }

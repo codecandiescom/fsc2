@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -107,7 +107,7 @@ hjs_attenuator_exp_hook( void )
 
     if ( ! ( hjs_attenuator.is_open = hjs_attenuator_serial_init( ) ) )
         hjs_attenuator_comm_failure( );
-    
+
     return 1;
 }
 
@@ -222,7 +222,7 @@ mw_attenuator_load_calibration( Var_T * v )
                                                     slash( libdir ),
                                                     DEFAULT_CALIB_FILE );
 
-        if ( ( tfp = 
+        if ( ( tfp =
                hjs_attenuator_open_calibration( hjs_attenuator.calib_file ) )
              == NULL )
         {
@@ -618,7 +618,7 @@ hjs_attenuator_att_to_step( double att )
                            ( hjs_attenuator.att_table[ ind - 1 ].att
                              -  hjs_attenuator.att_table[ ind ].att ) *
                            ( att - hjs_attenuator.att_table[ ind - 1 ].att ) );
-                    
+
             max_index = ind;
             ind /= 2;
             continue;

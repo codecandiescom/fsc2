@@ -2,12 +2,12 @@
  *  Copyright (C) 2006-2009 Sergey Veber, Jens Thoms Toerring
  *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -196,7 +196,7 @@ multimeter_mode( Var_T * v )
     if ( v == NULL )
         return vars_push( INT_VAR, ( long ) schlum7150.mode );
 
-    /* Get and check the mode argument */ 
+    /* Get and check the mode argument */
 
     schlum7150.mode = SCHLUM7150_MODE_INVALID;
 
@@ -212,7 +212,7 @@ multimeter_mode( Var_T * v )
             schlum7150.mode = SCHLUM7150_MODE_IAC;
     }
     else
-        schlum7150.mode = ( int ) get_strict_long( v, "multimeter mode" ); 
+        schlum7150.mode = ( int ) get_strict_long( v, "multimeter mode" );
 
     too_many_arguments( v );
 
@@ -271,7 +271,7 @@ multimeter_precision( Var_T * v )
     if ( v == NULL )
         return vars_push( INT_VAR, ( long ) schlum7150.prec );
 
-    /* Get and check the precision argument */ 
+    /* Get and check the precision argument */
 
     schlum7150.prec = SCHLUM7150_PREC_INVALID;
 
@@ -352,7 +352,7 @@ multimeter_get_data( Var_T * v )
     {
         vars_check( v, STR_VAR );
 
-        /* Get and check the range argument */ 
+        /* Get and check the range argument */
 
         if ( ! strcasecmp( v->val.sptr, "0.2V" ) )
             schlum7150.range = SCHLUM7150_RANGE_02;
@@ -371,7 +371,7 @@ multimeter_get_data( Var_T * v )
                     "or no argument (for autorange).\n" );
             THROW( EXCEPTION );
         }
-    } 
+    }
     else
         schlum7150.range = SCHLUM7150_RANGE_AUTO;
 
@@ -391,19 +391,19 @@ multimeter_get_data( Var_T * v )
     if ( old_range != schlum7150.range )
     {
         cmd[ 1 ] = ( char ) ( schlum7150.range + '0' );
-        if ( gpib_write( schlum7150.device, cmd, strlen( cmd ) ) == FAILURE ) 
+        if ( gpib_write( schlum7150.device, cmd, strlen( cmd ) ) == FAILURE )
             schlum7150_failure( );
     }
 
     /* Set OFF Track mode */
 
-    if ( gpib_write( schlum7150.device, "T0\n", 3 ) == FAILURE ) 
-        schlum7150_failure( );  
+    if ( gpib_write( schlum7150.device, "T0\n", 3 ) == FAILURE )
+        schlum7150_failure( );
 
     /* Start a 'single-shot' measurement and wait for the result, looping
        until either the value is ready or a timeout is detected */
 
-    if ( gpib_write( schlum7150.device, "G\n", 2 ) == FAILURE) 
+    if ( gpib_write( schlum7150.device, "G\n", 2 ) == FAILURE)
         schlum7150_failure( );
 
     fsc2_usleep ( 20000, UNSET );
@@ -439,8 +439,8 @@ multimeter_get_data( Var_T * v )
 
     /* Switch back to ON Track mode */
 
-    if ( gpib_write( schlum7150.device, "T1\n", 3 ) == FAILURE ) 
-        schlum7150_failure( );  
+    if ( gpib_write( schlum7150.device, "T1\n", 3 ) == FAILURE )
+        schlum7150_failure( );
 
     return vars_push( FLOAT_VAR, T_atod( reply ) );
 }
@@ -487,7 +487,7 @@ multimeter_command( Var_T * v )
     CLOBBER_PROTECT( cmd );
 
     vars_check( v, STR_VAR );
-    
+
     if ( FSC2_MODE == EXPERIMENT )
     {
         TRY

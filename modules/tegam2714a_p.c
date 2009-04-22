@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -82,8 +82,7 @@ tegam2714a_p_init_hook( void )
     Pulser_Struct.set_max_seq_len = tegam2714a_p_set_max_seq_len;
     Pulser_Struct.set_function_high_level =
                                           tegam2714a_p_set_function_high_level;
-    Pulser_Struct.set_function_low_level = 
-                                           tegam2714a_p_set_function_low_level;
+    Pulser_Struct.set_function_low_level = tegam2714a_p_set_function_low_level;
 
     tegam2714a_p.is_needed = SET;
     tegam2714a_p.is_timebase = UNSET;

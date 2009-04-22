@@ -240,7 +240,7 @@ digitizer_define_window( Var_T * v )
     win_width = get_double( v, "window width" );
 
     /* Allow window width to be zero in test run only... */
-    
+
     if (    ( FSC2_MODE == TEST && win_width < 0.0 )
          || ( FSC2_MODE != TEST && win_width <= 0.0 ) )
     {
@@ -497,7 +497,7 @@ digitizer_timebase( Var_T * v )
         lecroy_ws.cur_hres = hres[ 0 ] + lecroy_ws.tb_index;
     else
         lecroy_ws.cur_hres = hres[ 1 ] + lecroy_ws.tb_index;
- 
+
     /* Now check if the trigger delay (in case it's set) fits with the new
        timebase setting, and, based on this, the window positions and widths */
 
@@ -750,7 +750,7 @@ digitizer_sensitivity( Var_T * v )
             sens = LECROY_WS_MIN_SENS_50OHM;
         else
             lecroy_ws.need_high_imp[ channel ] = SET;
-    }                       
+    }
 
     if ( FSC2_MODE == EXPERIMENT )
         lecroy_ws_set_sens( channel, sens );
@@ -885,7 +885,7 @@ digitizer_coupling( Var_T * v )
                 if ( ! lecroy_ws.is_coupling[ channel ] )
                     no_query_possible( );
                 /* Fall through */
-        
+
             case TEST:
                 return vars_push( INT_VAR,
                                   ( long ) lecroy_ws.coupling[ channel ] );
@@ -1148,7 +1148,7 @@ digitizer_trigger_level( Var_T * v )
                 /* Fall through */
 
             case TEST :
-                return vars_push( FLOAT_VAR, 
+                return vars_push( FLOAT_VAR,
                                   lecroy_ws.trigger_level[ channel ] );
 
             case EXPERIMENT :
@@ -1275,7 +1275,7 @@ digitizer_trigger_slope( Var_T * v )
              || ! strcasecmp( v->val.sptr, "POS" ) )
             slope = 1;
         else if (    ! strcasecmp( v->val.sptr, "NEGATIVE" )
-                  || ! strcasecmp( v->val.sptr, "NEG" ) ) 
+                  || ! strcasecmp( v->val.sptr, "NEG" ) )
             slope = 0;
         else
         {
@@ -2214,7 +2214,7 @@ digitizer_command( Var_T * v )
     CLOBBER_PROTECT( cmd );
 
     vars_check( v, STR_VAR );
-    
+
     if ( FSC2_MODE == EXPERIMENT )
     {
         TRY

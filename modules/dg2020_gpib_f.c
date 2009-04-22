@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -37,10 +37,10 @@
  *  quartered, hanged and burned. Not only did they introduce some very
  *  annoying bugs but also made live a hell for the programmers that have no
  *  choice but to try to use their piece of crap.
- * 
+ *
  *  Here a few of the bugs as far as I found them yet (text taken from an email
  *  I sent to Tektronix/Sony):
- * 
+ *
  *  In run mode : Repeat
  *   When I create a data pattern starting with a high state (1) at the very
  *   first address in one of the channels and then start data pattern output
@@ -50,7 +50,7 @@
  *   sequence defined or not, the 250 us pulse is always there and is easy
  *   visible with a digital oscilloscope when using resolutions and data
  *   pattern lengths in the nanosecond range.
- * 
+ *
  *  In run mode : Single
  *   In the same situation as above, i.e. a data pattern starting with high at
  *   the very first address, pressing the START/STOP button leads to an
@@ -58,11 +58,11 @@
  *   pattern output is to be seen. If there is no data pattern bit set to high
  *   at the first address there is no output at all. This renders the Single
  *   mode complete unusable.
- * 
+ *
  *  I also had lots of problems using the GBIP commands as given in the
  *  manual. Some of the ones I tried to use don't work as described there.
  *  For example:
- * 
+ *
  *     a.) DATA:BLOCK:DEFINE <Blockinfo>
  *         this command works if one defines just one block but if one tries to
  *         define several blocks at once as described in the manual the command
@@ -135,7 +135,7 @@
  *  been bought up by Sony much seems to have gone down the drain. Obviously,
  *  people at Sony have a problem understanding the difference between a
  *  walkman and a pulse data generator...
- * 
+ *
  *  </RANT>
  */
 

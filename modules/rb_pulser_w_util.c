@@ -349,7 +349,7 @@ rb_pulser_w_write_pulses( FILE * fp )
 
         fprintf( fp, "%s: ", f->name );
         for ( j = 0; j < f->num_active_pulses; j++ )
-        {            
+        {
             fprintf( fp, " %ld %ld %ld", f->pulses[ j ]->num,
                      Ticks_rnd( f->pulses[ j ]->pos / rb_pulser_w.timebase ),
                      f->delay_card->next != NULL ? f->pulses[ j ]->len  :

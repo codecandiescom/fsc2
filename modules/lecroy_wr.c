@@ -98,7 +98,7 @@ lecroy_wr_init_hook( void )
     lecroy_wr.trigger_source = LECROY_WR_TEST_TRIG_SOURCE;
     lecroy_wr.trigger_mode   = LECROY_WR_TEST_TRIG_MODE;
     lecroy_wr.trigger_delay  = LECROY_WR_TEST_TRIG_DELAY;
-    lecroy_wr.cur_hres      = 
+    lecroy_wr.cur_hres      =
                   lecroy_wr.hres[ lecroy_wr.ms_index ] + lecroy_wr.tb_index;
 
     for ( i = LECROY_WR_CH1; i < LECROY_WR_CH_MAX; i++ )
@@ -241,7 +241,7 @@ digitizer_define_window( Var_T * v )
     win_width = get_double( v, "window width" );
 
     /* Allow window width to be zero in test run only... */
-    
+
     if (    ( FSC2_MODE == TEST && win_width < 0.0 )
          || ( FSC2_MODE != TEST && win_width <= 0.0 ) )
     {
@@ -495,9 +495,9 @@ digitizer_timebase( Var_T * v )
     lecroy_wr.timebase = lecroy_wr.tbas[ tb_index ];
     lecroy_wr.tb_index = tb_index;
     lecroy_wr.is_timebase = SET;
-    lecroy_wr.cur_hres = 
+    lecroy_wr.cur_hres =
                   lecroy_wr.hres[ lecroy_wr.ms_index ] + lecroy_wr.tb_index;
- 
+
     /* Now check if the trigger delay (in case it's set) fits with the new
        timebase setting, and, based on this, the window positions and widths */
 
@@ -1000,7 +1000,7 @@ digitizer_coupling( Var_T * v )
                 if ( ! lecroy_wr.is_coupling[ channel ] )
                     no_query_possible( );
                 /* Fall through */
-        
+
             case TEST:
                 return vars_push( INT_VAR,
                                   ( long ) lecroy_wr.coupling[ channel ] );
@@ -1155,7 +1155,7 @@ digitizer_trigger_level( Var_T * v )
                 /* Fall through */
 
             case TEST :
-                return vars_push( FLOAT_VAR, 
+                return vars_push( FLOAT_VAR,
                                   lecroy_wr.trigger_level[ channel ] );
 
             case EXPERIMENT :
@@ -1287,7 +1287,7 @@ digitizer_trigger_slope( Var_T * v )
              || ! strcasecmp( v->val.sptr, "POS" ) )
             slope = 1;
         else if (    ! strcasecmp( v->val.sptr, "NEGATIVE" )
-                  || ! strcasecmp( v->val.sptr, "NEG" ) ) 
+                  || ! strcasecmp( v->val.sptr, "NEG" ) )
             slope = 0;
         else
         {
@@ -2186,7 +2186,7 @@ digitizer_command( Var_T * v )
     CLOBBER_PROTECT( cmd );
 
     vars_check( v, STR_VAR );
-    
+
     if ( FSC2_MODE == EXPERIMENT )
     {
         TRY

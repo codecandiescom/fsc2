@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -89,7 +89,7 @@ static PCI_MIO_16E_1_AI_TRIG_ARGS trig;
  * default) and, finally, if hardware dithering is to be enabled for the
  * channel (argument must be either "DITHER_OFF" or "DITHER_ON" - the test
  * is case insensitive and default is dithering disabled). The Function
- * returns the number of channels that have been set up on success. 
+ * returns the number of channels that have been set up on success.
  * Please note: the allowed settings for the ranges depend on the
  *              polarity setting of the channel!
  *---------------------------------------------------------------------*/
@@ -384,7 +384,7 @@ daq_ai_channel_setup( Var_T * v )
     for ( i = 0; i < ( size_t ) num_channels; i++ )
     {
         if ( i != 0 && polarities[ i ] != polarities[ i - 1 ] )
-            pci_mio_16e_1.ai_state.ampl_switch_needed = SET;            
+            pci_mio_16e_1.ai_state.ampl_switch_needed = SET;
 
         if ( types[ i ] == NI_DAQ_AI_TYPE_Differential )
         {
@@ -450,7 +450,6 @@ daq_ai_channel_setup( Var_T * v )
         THROW( EXCEPTION );
     }
 
-    
     if ( FSC2_MODE == TEST )
     {
         pci_mio_16e_1.ai_state.ranges = ranges;
@@ -465,7 +464,7 @@ daq_ai_channel_setup( Var_T * v )
     pci_mio_16e_1.ai_state.num_channels = num_channels;
     pci_mio_16e_1.ai_state.is_channel_setup = SET;
 
-    return vars_push( INT_VAR, ( long ) num_channels ); 
+    return vars_push( INT_VAR, ( long ) num_channels );
 }
 
 
@@ -510,7 +509,7 @@ daq_ai_acq_setup( Var_T * v )
                num_scans, MAX_NUM_SCANS );
         THROW( EXCEPTION );
     }
-        
+
     v = vars_pop( v );
 
     pci_mio_16e_1_ai_get_trigger_args( v );
@@ -741,7 +740,7 @@ daq_ai_get_curve( Var_T * v  UNUSED_ARG )
                 r *= 0.5;
                 o = r;
             }
-                
+
             for ( j = 0;
                   j < ( size_t ) pci_mio_16e_1.ai_state.data_per_channel; j++ )
                 *( volts[ i ] + j ) = r * sin( M_PI * j / 122.0 ) + o;
@@ -892,7 +891,7 @@ pci_mio_16e_1_ai_get_S_start( Var_T * v )
     NI_DAQ_POLARITY pol;
 
 
-    if ( v == NULL )    
+    if ( v == NULL )
     {
         print( FATAL, "Missing arguments\n" );
         THROW( EXCEPTION );
@@ -950,7 +949,7 @@ pci_mio_16e_1_ai_get_S_scan( Var_T * v )
     NI_DAQ_POLARITY pol;
 
 
-    if ( v == NULL )    
+    if ( v == NULL )
     {
         print( FATAL, "Missing arguments\n" );
         THROW( EXCEPTION );
@@ -1008,7 +1007,7 @@ pci_mio_16e_1_ai_get_S_conv( Var_T * v )
     NI_DAQ_POLARITY pol;
 
 
-    if ( v == NULL )    
+    if ( v == NULL )
     {
         print( FATAL, "Missing arguments\n" );
         THROW( EXCEPTION );
@@ -1113,7 +1112,7 @@ pci_mio_16e_1_ai_get_polarity( const char *      pname,
 static void
 pci_mio_16e_1_ai_check_T_scan( double t )
 {
-    if ( t / pci_mio_16e_1.ai_state.num_channels < 
+    if ( t / pci_mio_16e_1.ai_state.num_channels <
          ( pci_mio_16e_1.ai_state.ampl_switch_needed ?
            PCI_MIO_16E_1_AMPL_SWITCHING_TIME : PCI_MIO_16E_1_MIN_CONV_TIME ) )
     {

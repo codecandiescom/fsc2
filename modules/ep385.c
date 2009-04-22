@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -637,7 +637,7 @@ pulser_automatic_shape_pulses( Var_T * v )
 
     too_many_arguments( v );
 
-    ep385.function[ func ].min_left_shape_padding = 
+    ep385.function[ func ].min_left_shape_padding =
                                      ep385.function[ func ].left_shape_padding;
     ep385.function[ func ].min_right_shape_padding =
                                     ep385.function[ func ].right_shape_padding;
@@ -761,7 +761,7 @@ pulser_automatic_twt_pulses( Var_T * v )
 
     too_many_arguments( v );
 
-    ep385.function[ func ].min_left_twt_padding = 
+    ep385.function[ func ].min_left_twt_padding =
                                        ep385.function[ func ].left_twt_padding;
     ep385.function[ func ].min_right_twt_padding =
                                       ep385.function[ func ].right_twt_padding;
@@ -1420,7 +1420,7 @@ pulser_command( Var_T * v )
     CLOBBER_PROTECT( cmd );
 
     vars_check( v, STR_VAR );
-    
+
     if ( FSC2_MODE == EXPERIMENT )
     {
         TRY

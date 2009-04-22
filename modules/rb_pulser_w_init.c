@@ -198,7 +198,7 @@ rb_pulser_w_basic_functions_init( void )
             if ( f->num_pulses > SYNTHESIZER_MAX_PULSES )
             {
                 print( FATAL, "Pulser function '%s' allows only %d pulse%s but "
-                       "%d are defined.\n", Function_Names[ i ], 
+                       "%d are defined.\n", Function_Names[ i ],
                        SYNTHESIZER_MAX_PULSES,
                        SYNTHESIZER_MAX_PULSES > 1 ? "s" : "", f->num_pulses );
                 THROW( EXCEPTION );
@@ -212,9 +212,9 @@ rb_pulser_w_basic_functions_init( void )
                 {
                     if (    IS_ACTIVE( f->pulses[ j ] )
                          && IS_ACTIVE( f->pulses[ j -1 ] )
-                         && f->pulses[ j ]->pos < 
+                         && f->pulses[ j ]->pos <
                                  f->pulses[ j - 1 ]->pos
-                               + f->pulses[ j - 1 ]->len * rb_pulser_w.timebase 
+                               + f->pulses[ j - 1 ]->len * rb_pulser_w.timebase
                                + SYNTHESIZER_MIN_PULSE_SEPARATION )
                     {
                         print( FATAL, "Pulser function '%s' requires minimum "
@@ -329,7 +329,7 @@ rb_pulser_w_defense_pulse_create( void )
     cp->pc = NULL;
 
     cp->has_been_active = cp->was_active = UNSET;
-        
+
     def->pulses = T_malloc( sizeof *def->pulses );
     *def->pulses = cp;
 
@@ -374,7 +374,7 @@ rb_pulser_w_rf_synth_init( void )
         func = T_strdup( SYNTHESIZER_PULSE_STATE );
     else
         func = get_string( SYNTHESIZER_PULSE_STATE "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
@@ -392,7 +392,7 @@ rb_pulser_w_rf_synth_init( void )
         func = T_strdup( SYNTHESIZER_PULSE_WIDTH );
     else
         func = get_string( SYNTHESIZER_PULSE_WIDTH "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
@@ -405,12 +405,12 @@ rb_pulser_w_rf_synth_init( void )
 
     vars_pop( func_ptr );
     rb_pulser_w.synth_pulse_width = func;
-    
+
     if ( dev_num == 1 )
         func = T_strdup( SYNTHESIZER_PULSE_DELAY );
     else
         func = get_string( SYNTHESIZER_PULSE_DELAY "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
@@ -429,7 +429,7 @@ rb_pulser_w_rf_synth_init( void )
         func = T_strdup( SYNTHESIZER_TRIG_SLOPE );
     else
         func = get_string( SYNTHESIZER_TRIG_SLOPE "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
@@ -449,7 +449,7 @@ rb_pulser_w_rf_synth_init( void )
         func = T_strdup( SYNTHESIZER_STATE );
     else
         func = get_string( SYNTHESIZER_STATE "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
@@ -471,7 +471,7 @@ rb_pulser_w_rf_synth_init( void )
         func = T_strdup( SYNTHESIZER_DOUBLE_PULSE_MODE );
     else
         func = get_string( SYNTHESIZER_DOUBLE_PULSE_MODE "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {
@@ -494,7 +494,7 @@ rb_pulser_w_rf_synth_init( void )
         func = T_strdup( SYNTHESIZER_DOUBLE_PULSE_DELAY );
     else
         func = get_string( SYNTHESIZER_DOUBLE_PULSE_DELAY "#%d", dev_num );
-    
+
     if (    ! func_exists( func )
          || ( func_ptr = func_get( func, &acc ) ) == NULL )
     {

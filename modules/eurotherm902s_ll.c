@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -158,7 +158,7 @@ eurotherm902s_set_sw( unsigned int sw )
 
 
 /*---------------------------------------*
- * Function returns value of status word 
+ * Function returns value of status word
  *---------------------------------------*/
 
 unsigned int
@@ -194,7 +194,7 @@ eurotherm902s_set_os( unsigned int os )
 
 
 /*------------------------------------------------*
- * Function returns value of optional status word 
+ * Function returns value of optional status word
  *------------------------------------------------*/
 
 unsigned int
@@ -231,7 +231,7 @@ eurotherm902s_set_xs( unsigned int xs )
 
 
 /*------------------------------------------------*
- * Function returns value of extended status word 
+ * Function returns value of extended status word
  *------------------------------------------------*/
 
 unsigned int
@@ -332,7 +332,7 @@ eurotherm902s_set_proportional_band( double pb )
     sprintf( buf, "XP% 6.1f", pb );
     bvt3000_send_command( buf );
 }
-    
+
 
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
@@ -356,7 +356,7 @@ eurotherm902s_set_integral_time( double t )
     sprintf( buf, "TI% 6.1f", t );
     bvt3000_send_command( buf );
 }
-    
+
 
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
@@ -380,7 +380,7 @@ eurotherm902s_set_derivative_time( double t )
     sprintf( buf, "TD% 6.1f", t );
     bvt3000_send_command( buf );
 }
-    
+
 
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
@@ -404,7 +404,7 @@ eurotherm902s_set_cutback_high( double cb )
     sprintf( buf, "HB% 6.1f", cb );
     bvt3000_send_command( buf );
 }
-    
+
 
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/
@@ -428,7 +428,7 @@ eurotherm902s_set_cutback_low( double cb )
     sprintf( buf, "LB% 6.1f", cb );
     bvt3000_send_command( buf );
 }
-    
+
 
 /*---------------------------------------------------------------*
  *---------------------------------------------------------------*/

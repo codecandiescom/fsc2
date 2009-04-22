@@ -1,18 +1,18 @@
 /* -*-C-*-
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -238,7 +238,7 @@ NAME_VAL "\""[^\"]*"\""
                     case 'M' :
                         dval = 1.0e6;
                         break;
-                        
+
                     case 'k' :
                         dval = 1.0e3;
                         break;
@@ -348,7 +348,7 @@ epr_mod_read_state( void )
     cal.is_interpolate = UNSET;
     cal.extrapolate = UNSET;
     cal.is_extrapolate = UNSET;
-    
+
     tok = epr_mod_lex( );
 
     while ( tok != END_TOK )
@@ -374,7 +374,7 @@ epr_mod_get_new_cal( int tok )
 
     if ( tok != CAL_TOK )
         epr_mod_state_file_err( 1 );
-        
+
     tok = epr_mod_lex( );
 
     if ( tok == CAL_TOK || tok == END_TOK )
@@ -398,7 +398,7 @@ epr_mod_get_new_cal( int tok )
 
         if ( cal.count > 0 )
         {
-            epr_mod.calibrations[ last ].fe = 
+            epr_mod.calibrations[ last ].fe =
                 T_malloc(   cal.count
                           * sizeof *epr_mod.calibrations[ 0 ].fe );
 
@@ -622,7 +622,7 @@ epr_mod_get_freq( int tok )
                 }
                 return tok;
         }
-        
+
     fsc2_impossible( );
     return tok;
 }
@@ -679,7 +679,7 @@ epr_mod_get_val( int tok )
                    cal.name );
             epr_mod_state_file_err( 0 );
         }
-            
+
         if (    fabs( cal.fe[ i ].freq - cal.fe[ last ].freq )
                     / cal.fe[ i ].freq < 1.0e-2 * EPR_MOD_MIN_DEVIATION
              || fabs( cal.fe[ i ].freq - cal.fe[ last ].freq )

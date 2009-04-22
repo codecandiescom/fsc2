@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -153,7 +153,7 @@ lecroy_wr_init( const char * name )
         else
             lecroy_wr.mem_size = lecroy_wr_get_memory_size( );
 
-        lecroy_wr.cur_hres = 
+        lecroy_wr.cur_hres =
                      lecroy_wr.hres[ lecroy_wr.ms_index ] + lecroy_wr.tb_index;
 
         /* Switch interleaved (RIS) mode on if the user asked for it and it
@@ -216,21 +216,21 @@ lecroy_wr_init( const char * name )
                 lecroy_wr_set_trigger_level( trg_channels[ i ],
                                 lecroy_wr.trigger_level[ trg_channels[ i ] ] );
             else
-                lecroy_wr.trigger_level[ trg_channels[ i ] ] = 
+                lecroy_wr.trigger_level[ trg_channels[ i ] ] =
                               lecroy_wr_get_trigger_level( trg_channels[ i ] );
 
             if ( lecroy_wr.is_trigger_slope[ trg_channels[ i ] ] )
                 lecroy_wr_set_trigger_slope( trg_channels[ i ],
                                 lecroy_wr.trigger_slope[ trg_channels[ i ] ] );
             else
-                lecroy_wr.trigger_slope[ trg_channels[ i ] ] = 
+                lecroy_wr.trigger_slope[ trg_channels[ i ] ] =
                               lecroy_wr_get_trigger_slope( trg_channels[ i ] );
 
             if ( lecroy_wr.is_trigger_coupling[ trg_channels[ i ] ] )
                 lecroy_wr_set_trigger_coupling( trg_channels[ i ],
                              lecroy_wr.trigger_coupling[ trg_channels[ i ] ] );
             else
-                lecroy_wr.trigger_coupling[ trg_channels[ i ] ] = 
+                lecroy_wr.trigger_coupling[ trg_channels[ i ] ] =
                            lecroy_wr_get_trigger_coupling( trg_channels[ i ] );
         }
 
@@ -259,14 +259,14 @@ lecroy_wr_init( const char * name )
         gpib_local( lecroy_wr.device );
         return FAIL;
     }
-        
+
     return OK;
 }
 
 
-/*-------------------------------------------------*
- * Function for determing the digitizers timebase 
- *-------------------------------------------------*/
+/*------------------------------------------------*
+ * Function for determing the digitizers timebase
+ *------------------------------------------------*/
 
 double
 lecroy_wr_get_timebase( void )
@@ -298,9 +298,9 @@ lecroy_wr_get_timebase( void )
 }
 
 
-/*-----------------------------------------------*
- * Function for setting the digitizers timebase 
- *-----------------------------------------------*/
+/*----------------------------------------------*
+ * Function for setting the digitizers timebase
+ *----------------------------------------------*/
 
 bool
 lecroy_wr_set_timebase( double timebase )
@@ -637,7 +637,7 @@ lecroy_wr_get_bandwidth_limiter( int channel )
         }
 
         fsc2_assert( --ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX );
-        
+
         if ( ptr[ 1 ] == 'F' )           /* OFF */
             mode = LECROY_WR_BWL_OFF;
         else if ( ptr[ 1 ] == 'N' )      /* ON */
@@ -700,7 +700,7 @@ lecroy_wr_set_bandwidth_limiter( int channel,
             strcat( buf, "ON" );
         else
             strcat( buf, "200MHZ" );
-        
+
         if ( gpib_write( lecroy_wr.device, buf, strlen( buf ) ) == FAILURE )
             lecroy_wr_comm_failure( );
 
@@ -1060,7 +1060,7 @@ lecroy_wr_get_trigger_mode( void )
 
 
 /*---------------------------------------*
- * Function for setting the trigger mode 
+ * Function for setting the trigger mode
  *---------------------------------------*/
 
 int
@@ -1108,7 +1108,7 @@ lecroy_wr_get_trigger_delay( void )
 
 
 /*----------------------------------------*
- * Function for setting the trigger delay 
+ * Function for setting the trigger delay
  *----------------------------------------*/
 
 bool
@@ -1172,7 +1172,7 @@ lecroy_wr_display( int ch,
                    int on_off )
 {
     char cmd[ 30 ];
-        
+
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
         sprintf( cmd, "C%d:TRA ", ch - LECROY_WR_CH1 + 1 );
@@ -1501,7 +1501,7 @@ lecroy_wr_get_area( int        ch,
     {
         val = dp[ 0 ] + 0x100 * dp[ 1 ];
 
-        if ( dp[ 1 ] & 0x80 ) 
+        if ( dp[ 1 ] & 0x80 )
             val -= 0x10000;
 
         area += gain * val - offset;
@@ -1612,7 +1612,7 @@ lecroy_wr_get_data( long * len )
 
     if ( gpib_read( lecroy_wr.device, len_str, len ) == FAILURE )
         lecroy_wr_comm_failure( );
-    
+
     len_str[ *len ] = '\0';
     *len = T_atol( len_str );
 

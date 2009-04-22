@@ -1,23 +1,23 @@
 /*
-  Copyright (C) 1999-2009 Anton Savitsky
-
-  This file is part of fsc2.
-
-  Fsc2 is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2, or (at your option)
-  any later version.
-
-  Fsc2 is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with fsc2; see the file COPYING.  If not, write to
-  the Free Software Foundation, 59 Temple Place - Suite 330,
-  Boston, MA 02111-1307, USA.
-*/
+ *  Copyright (C) 1999-2009 Anton Savitsky
+ *
+ *  This file is part of fsc2.
+ *
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2; see the file COPYING.  If not, write to
+ *  the Free Software Foundation, 59 Temple Place - Suite 330,
+ *  Boston, MA 02111-1307, USA.
+ */
 
 
 #include "fsc2_module.h"
@@ -30,6 +30,7 @@
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
+
 
 #define AG54830B_TEST_REC_LEN        1000   /* in points */
 #define AG54830B_TEST_NUM_AVG        16
@@ -54,8 +55,8 @@ const char generic_type[ ] = DEVICE_TYPE;
 #define MAX_CHANNELS    11         /* number of channel names */
 
 #define NUM_NORMAL_CHANNELS       ( AG54830B_CH2 + 1 )
-#define NUM_MEAS_CHANNELS         ( AG54830B_F4 + 1 )
-#define NUM_DISPLAYABLE_CHANNELS  ( AG54830B_M4 + 1 )
+#define NUM_MEAS_CHANNELS         ( AG54830B_F4  + 1 )
+#define NUM_DISPLAYABLE_CHANNELS  ( AG54830B_M4  + 1 )
 
 
 /* Declaration of exported functions */
@@ -64,33 +65,35 @@ int ag54830b_init_hook( void );
 int ag54830b_exp_hook( void );
 int ag54830b_end_of_exp_hook( void );
 
-Var_T *digitizer_name( Var_T *v );
-Var_T *digitizer_show_channel( Var_T *v );
-Var_T *digitizer_timebase( Var_T *v );
-Var_T *digitizer_time_per_point( Var_T *v );
-Var_T *digitizer_sensitivity( Var_T *v );
-Var_T *digitizer_num_averages( Var_T *v );
-Var_T *digitizer_record_length( Var_T *v );
-Var_T *digitizer_trigger_position( Var_T *v );
-//Var_T *digitizer_meas_channel_ok( Var_T *v );
-//Var_T *digitizer_trigger_channel( Var_T *v );
-Var_T *digitizer_start_acquisition( Var_T *v );
-Var_T *digitizer_get_curve( Var_T *v );
-Var_T *digitizer_get_curve_fast( Var_T *v );
-Var_T *digitizer_run( Var_T *v );
-Var_T *digitizer_get_xorigin( Var_T *v );
-Var_T *digitizer_get_xincrement( Var_T *v );
-Var_T *digitizer_get_yorigin( Var_T *v );
-Var_T *digitizer_get_yincrement( Var_T *v );
-Var_T *digitizer_command( Var_T *v );
+Var_T *digitizer_name(              Var_T * v );
+Var_T *digitizer_show_channel(      Var_T * v );
+Var_T *digitizer_timebase(          Var_T * v );
+Var_T *digitizer_time_per_point(    Var_T * v );
+Var_T *digitizer_sensitivity(       Var_T * v );
+Var_T *digitizer_num_averages(      Var_T * v );
+Var_T *digitizer_record_length(     Var_T * v );
+Var_T *digitizer_trigger_position(  Var_T * v );
+//Var_T *digitizer_meas_channel_ok( Var_T * v );
+//Var_T *digitizer_trigger_channel( Var_T * v );
+Var_T *digitizer_start_acquisition( Var_T * v );
+Var_T *digitizer_get_curve(         Var_T * v );
+Var_T *digitizer_get_curve_fast(    Var_T * v );
+Var_T *digitizer_run(               Var_T * v );
+Var_T *digitizer_get_xorigin(       Var_T * v );
+Var_T *digitizer_get_xincrement(    Var_T * v );
+Var_T *digitizer_get_yorigin(       Var_T * v );
+Var_T *digitizer_get_yincrement(    Var_T * v );
+Var_T *digitizer_command(           Var_T * v );
 
 
 /* Locally used functions */
 
 static bool   ag54830b_init( const char *name );
-static bool   ag54830b_command( const char *cmd );
-static bool   ag54830b_command_retry( const char *cmd );
-static bool   ag54830b_talk( const char *cmd, char *reply, long *length );
+static bool   ag54830b_command( const char * cmd );
+static bool   ag54830b_command_retry( const char * cmd );
+static bool   ag54830b_talk( const char * cmd,
+							 char       * reply,
+							 long        *length );
 static void   ag54830b_failure( void );
 static double ag54830b_get_timebase( void );
 static void   ag54830b_set_timebase( double timebase );
@@ -100,10 +103,16 @@ static int    ag54830b_get_acq_mode( void );
 static void   ag54830b_set_record_length( long num_points );
 static long   ag54830b_get_record_length( void );
 static double ag54830b_get_sens( int channel );
-static void   ag54830b_set_sens( int channel, double sens );
-static long   ag54830b_translate_channel( int dir, long channel, bool flag );
+static void   ag54830b_set_sens( int    channel,
+								 double sens );
+static long   ag54830b_translate_channel( int  dir,
+										  long channel,
+										  bool flag );
 static void   ag54830b_acq_completed( void );
-static void   ag54830b_get_curve( int channel, double **data, long *length, bool get_scaling);
+static void   ag54830b_get_curve( int       channel,
+								  double ** data,
+								  long    * length,
+								  bool      get_scaling );
 static double ag54830b_get_xorigin( int channel );
 static double ag54830b_get_xincrement( int channel );
 static double ag54830b_get_yorigin( int channel );
@@ -111,7 +120,6 @@ static double ag54830b_get_yincrement( int channel );
 static void   ag54830b_set_trigger_pos( double pos );
 static double ag54830b_get_trigger_pos( void );
 static bool   ag54830b_display_channel_state( int channel );
-
 
 
 static struct {
@@ -128,7 +136,7 @@ static struct {
 
 	long num_avg;
 	bool is_num_avg;
-	
+
 	long rec_len;
 	bool is_rec_len;
 
@@ -142,6 +150,7 @@ static struct {
 	bool channels_in_use[ NUM_DISPLAYABLE_CHANNELS ];
 } ag54830b;
 
+
 enum {
 	GENERAL_TO_AG54830B,
 	AG54830B_TO_GENERAL
@@ -152,7 +161,7 @@ static bool acquisition_is_running;
 /* Agilent 54830b limits */
 
 static long min_rec_len = 16;
-static long max_rec_len = 32768;  
+static long max_rec_len = 32768;
 static long min_num_avg = 1;
 static long max_num_avg = 4096;
 static double min_timebase = 500e-12;
@@ -161,34 +170,33 @@ static double min_sens = 5;
 static double min_sens50 = 1;
 static double max_sens = 1e-3;
 
-const char *AG54830B_Channel_Names[ MAX_CHANNELS  ] = {
+static const char *AG54830B_Channel_Names[ MAX_CHANNELS  ] = {
 											"CHAN1", "CHAN2", "FUNC1", "FUNC2",
 								 			"FUNC3", "FUNC4", "WMEM1", "WMEM2",
 								 			"WMEM3", "WMEM4", "LINE" };
 static bool in_init = UNSET;
 
 
+/*-----------------------------------*
+ * Init hook function for the module
+ *-----------------------------------*/
 
-
-/*------------------------------------*/
-/* Init hook function for the module. */
-/*------------------------------------*/
-
-int ag54830b_init_hook( void )
+int
+ag54830b_init_hook( void )
 {
 	int i;
-	
+
     /* Set global variable to indicate that GPIB bus is needed */
 
 	Need_GPIB = SET;
-	
+
 	/* Initialize some variables in the digitizers structure */
 	ag54830b.is_num_avg        = UNSET;
 	ag54830b.is_time_per_point = UNSET;
 	ag54830b.is_rec_len        = UNSET;
 	ag54830b.is_trig_pos       = UNSET;
 	ag54830b.data_source       = AG54830B_UNDEF;
-	
+
 	for ( i = 0; i < NUM_DISPLAYABLE_CHANNELS; i++ )
 		ag54830b.channels_in_use[ i ] = UNSET;
     /* Reset several variables in the structure describing the device */
@@ -199,11 +207,12 @@ int ag54830b_init_hook( void )
 }
 
 
-/*--------------------------------------------------*/
-/* Start of experiment hook function for the module */
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ * Start of experiment hook function for the module
+ *--------------------------------------------------*/
 
-int ag54830b_exp_hook( void )
+int
+ag54830b_exp_hook( void )
 {
 	/* Initialize the digitizer*/
 
@@ -213,22 +222,22 @@ int ag54830b_exp_hook( void )
 			   gpib_error_msg );
 		THROW( EXCEPTION );
 	}
-	
 
 	return 1;
 }
 
 
-/*------------------------------------------------*/
-/* End of experiment hook function for the module */
-/*------------------------------------------------*/
+/*------------------------------------------------*
+ * End of experiment hook function for the module
+ *------------------------------------------------*/
 
-int ag54830b_end_of_exp_hook( void )
+int
+ag54830b_end_of_exp_hook( void )
 {
 	/* Switch digitizer back to local mode */
 	gpib_clear_device( ag54830b.device );
 	ag54830b_command( ":CDIS;:RUN\n" );
-		
+
 	if ( ag54830b.device >= 0 )
 		gpib_local( ag54830b.device );
 
@@ -238,20 +247,23 @@ int ag54830b_end_of_exp_hook( void )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
-Var_T *digitizer_name( Var_T *v )
+Var_T *
+digitizer_name( Var_T * v )
 {
 	UNUSED_ARGUMENT( v );
 	return vars_push( STR_VAR, DEVICE_NAME );
 }
 
-/*-------------------------------------------------------------------*/
-/* Switches the channe ON or OFF                                     */
-/*-------------------------------------------------------------------*/
 
-Var_T *digitizer_show_channel( Var_T *v )
+/*-------------------------------*
+ * Switches the channe ON or OFF
+ *-------------------------------*/
+
+Var_T *
+digitizer_show_channel( Var_T * v )
 {
 	long channel;
 	bool state;
@@ -301,10 +313,10 @@ Var_T *digitizer_show_channel( Var_T *v )
 				ag54830b.channels_in_use[ channel ] = SET;
 				return vars_push( INT_VAR, ag54830b.channel_is_on[ channel ] );
 		}
-	
+
 	  state = get_boolean( v );
 	  /*print( SEVERE, "state is %ld   .\n", state);*/
-	
+
 	too_many_arguments( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
@@ -322,10 +334,11 @@ Var_T *digitizer_show_channel( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
-Var_T *digitizer_timebase( Var_T *v )
+Var_T *
+digitizer_timebase( Var_T * v )
 {
 	double timebase;
 
@@ -354,14 +367,14 @@ Var_T *digitizer_timebase( Var_T *v )
 			    timebase );
 		THROW( EXCEPTION );
 	}
-	
+
 	if ( timebase > max_timebase )
 		{
 			print( SEVERE, "Timebase %6.3e too long, using %6.3e instead.\n",
 				  timebase, max_timebase);
 			timebase = max_timebase;
 		}
-		
+
 		if ( timebase < min_timebase )
 		{
 			print( SEVERE, "Timebase %6.3e too short, using %6.3e instead.\n",
@@ -383,10 +396,11 @@ Var_T *digitizer_timebase( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
-Var_T *digitizer_time_per_point( Var_T *v )
+Var_T *
+digitizer_time_per_point( Var_T * v )
 {
 	double tpp;
 
@@ -415,10 +429,11 @@ Var_T *digitizer_time_per_point( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
-Var_T *digitizer_sensitivity( Var_T *v )
+Var_T *
+digitizer_sensitivity( Var_T * v )
 {
 	long channel;
 	double sens;
@@ -479,10 +494,11 @@ Var_T *digitizer_sensitivity( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
-Var_T *digitizer_num_averages( Var_T *v )
+Var_T *
+digitizer_num_averages( Var_T * v )
 {
 	long num_avg;
 
@@ -512,7 +528,7 @@ Var_T *digitizer_num_averages( Var_T *v )
 				   "instead.\n", num_avg, max_num_avg );
 			num_avg = max_num_avg;
 		}
-		
+
 		if ( num_avg < min_num_avg )
 		{
 			print( SEVERE, "Record length %ld too small, using %ld instead.\n",
@@ -533,13 +549,14 @@ Var_T *digitizer_num_averages( Var_T *v )
 }
 
 
-/*------------------------------------------------------------------*/
-/* Function either sets or returns the current record length of the */
-/* digitizer. When trying to set a record length that does not fit  */
-/* the possible settings the next larger is used instead.           */
-/*------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function either sets or returns the current record length of the
+ * digitizer. When trying to set a record length that does not fit
+ * the possible settings the next larger is used instead.
+ *------------------------------------------------------------------*/
 
-Var_T *digitizer_record_length( Var_T *v )
+Var_T *
+digitizer_record_length( Var_T * v )
 {
 	long rec_len;
 
@@ -581,9 +598,9 @@ Var_T *digitizer_record_length( Var_T *v )
 	}
 
 	ag54830b.is_rec_len = SET;
-	
+
 	too_many_arguments( v );
-	
+
 	if ( FSC2_MODE == EXPERIMENT )
 		ag54830b_set_record_length( rec_len );
 	else
@@ -593,11 +610,12 @@ Var_T *digitizer_record_length( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function sets or gets trigger position (0-1) for full time scale*/ 
-/*-----------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Function sets or gets trigger position (0-1) for full time scale
+ *------------------------------------------------------------------*/
 
-Var_T *digitizer_trigger_position( Var_T *v )
+Var_T *
+digitizer_trigger_position( Var_T * v )
 {
 	double trig_pos;
 
@@ -649,18 +667,19 @@ Var_T *digitizer_trigger_position( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*  Function starts acqisition                                       */
-/*-------------------------------------------------------------------*/
+/*-----------------------------*
+ *  Function starts acqisition
+ *-----------------------------*/
 
-Var_T *digitizer_start_acquisition( Var_T *v )
+Var_T *
+digitizer_start_acquisition( Var_T * v )
 {
 	UNUSED_ARGUMENT( v );
 
 	if ( FSC2_MODE == EXPERIMENT )
 
 
-	{	
+	{
 	    /*ag54830b_command( ":CDISPLAY;*CLS\n");*/
 	    /*ag54830b_command( "*CLS; *SRE 32; *ESE 1\n");*/
 	    /*gpib_clear_device( ag54830b.device );*/
@@ -675,10 +694,11 @@ Var_T *digitizer_start_acquisition( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
-Var_T *digitizer_get_curve( Var_T *v )
+Var_T *
+digitizer_get_curve( Var_T * v )
 {
 	int ch, i;
 	double *array;
@@ -733,10 +753,11 @@ Var_T *digitizer_get_curve( Var_T *v )
 }
 
 
-/*----------------------------------------------------*/
-/*----------------------------------------------------*/
+/*----------------------------------------------------*
+ *----------------------------------------------------*/
 
-Var_T *digitizer_get_curve_fast( Var_T *v )
+Var_T *
+digitizer_get_curve_fast( Var_T * v )
 {
 	int ch, i;
 	double *array;
@@ -791,11 +812,12 @@ Var_T *digitizer_get_curve_fast( Var_T *v )
 }
 
 
-/*-------------------------------------------------------------------*/
-/*  Function switches digitizer to continuouse running               */
-/*-------------------------------------------------------------------*/
+/*----------------------------------------------------*
+ * Function switches digitizer to continuouse running
+ *----------------------------------------------------*/
 
-Var_T *digitizer_run( Var_T *v )
+Var_T *
+digitizer_run( Var_T * v )
 {
 	UNUSED_ARGUMENT( v );
 
@@ -806,10 +828,11 @@ Var_T *digitizer_run( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
-Var_T *digitizer_get_xorigin( Var_T *v )
+Var_T *
+digitizer_get_xorigin( Var_T * v )
 {
 	long channel;
 	double xorg = 1.0;
@@ -840,10 +863,11 @@ Var_T *digitizer_get_xorigin( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
-Var_T *digitizer_get_xincrement( Var_T *v )
+Var_T *
+digitizer_get_xincrement( Var_T * v )
 {
 	long channel;
 	double xinc = 1.0;
@@ -874,10 +898,11 @@ Var_T *digitizer_get_xincrement( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
-Var_T *digitizer_get_yorigin( Var_T *v )
+Var_T *
+digitizer_get_yorigin( Var_T * v )
 {
 	long channel;
 	double yorg = 1.0;
@@ -908,10 +933,11 @@ Var_T *digitizer_get_yorigin( Var_T *v )
 }
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
-Var_T *digitizer_get_yincrement( Var_T *v )
+Var_T *
+digitizer_get_yincrement( Var_T * v )
 {
 	long channel;
 	double yinc = 1.0;
@@ -941,11 +967,12 @@ Var_T *digitizer_get_yincrement( Var_T *v )
 	return vars_push( FLOAT_VAR, yinc );
 }
 
-/*--------------------------------------------------------------*/
-/* Function for sending a GPIB command directly to digitizer    */
-/*--------------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Function for sending a GPIB command directly to digitizer
+ *-----------------------------------------------------------*/
 
-Var_T *digitizer_command( Var_T *v )
+Var_T *
+digitizer_command( Var_T * v )
 {
 	char *cmd = NULL;
 
@@ -953,7 +980,7 @@ Var_T *digitizer_command( Var_T *v )
 	CLOBBER_PROTECT( cmd );
 
 	vars_check( v, STR_VAR );
-	
+
 	if ( FSC2_MODE == EXPERIMENT )
 	{
 		TRY
@@ -976,12 +1003,13 @@ Var_T *digitizer_command( Var_T *v )
 
 /************************************************************************/
 
-/*-------------------------------------------------------------*/
-/* Internal functions for initialization of digitizer          */ 
-/*-------------------------------------------------------------*/
+/*----------------------------------------------------*
+ * Internal functions for initialization of digitizer
+ *----------------------------------------------------*/
 
-static bool ag54830b_init( const char *name )
-{	
+static bool
+ag54830b_init( const char * name )
+{
 	if ( gpib_init_device( name, &ag54830b.device ) == FAILURE )
         return FAIL;
 
@@ -998,10 +1026,11 @@ static bool ag54830b_init( const char *name )
 }
 
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
-static bool ag54830b_command( const char *cmd )
+static bool
+ag54830b_command( const char * cmd )
 {
 	if ( gpib_write( ag54830b.device, cmd, strlen( cmd ) ) == FAILURE )
 		ag54830b_failure( );
@@ -1011,14 +1040,14 @@ static bool ag54830b_command( const char *cmd )
 	return OK;
 }
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
-static bool ag54830b_command_retry( const char *cmd )
+static bool
+ag54830b_command_retry( const char * cmd )
 {
-	
 	if ( gpib_write( ag54830b.device, cmd, strlen( cmd ) ) == FAILURE )
-		{ 
+		{
 			print( SEVERE, "One more try.\n");
 			fsc2_usleep( 4000, UNSET );
 			if ( gpib_write( ag54830b.device, cmd, strlen( cmd ) ) == FAILURE )
@@ -1034,10 +1063,13 @@ static bool ag54830b_command_retry( const char *cmd )
 	return OK;
 }
 
-/*--------------------------------------------------------------*/
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
 
-static bool ag54830b_talk( const char *cmd, char *reply, long *length )
+static bool
+ag54830b_talk( const char * cmd,
+			   char       * reply,
+			   long       * length )
 {
 	if ( gpib_write( ag54830b.device, cmd, strlen( cmd ) ) == FAILURE )
 		ag54830b_failure( );
@@ -1053,21 +1085,23 @@ static bool ag54830b_talk( const char *cmd, char *reply, long *length )
 }
 
 
-/*--------------------------------------------------*/
-/*--------------------------------------------------*/
+/*--------------------------------------------------*
+ *--------------------------------------------------*/
 
-static void ag54830b_failure( void )
+static void
+ag54830b_failure( void )
 {
 	print( FATAL, "Communication with Agilent failed.\n" );
 	THROW( EXCEPTION );
 }
 
 
-/*---------------------------------*/
-/* Returns the digitizers timebase */
-/*---------------------------------*/
+/*---------------------------------*
+ * Returns the digitizers timebase
+ *---------------------------------*/
 
-double ag54830b_get_timebase( void )
+static double
+ag54830b_get_timebase( void )
 {
 	char reply[ 30 ];
 	long length = sizeof reply;
@@ -1079,11 +1113,12 @@ double ag54830b_get_timebase( void )
 }
 
 
-/*-------------------------------------*/
-/* Sets the timebase of the digitizer */
-/*-------------------------------------*/
+/*------------------------------------*
+ * Sets the timebase of the digitizer
+ *------------------------------------*/
 
-void ag54830b_set_timebase( double timebase )
+static void
+ag54830b_set_timebase( double timebase )
 {
 	char cmd[ 40 ];
 
@@ -1093,11 +1128,12 @@ void ag54830b_set_timebase( double timebase )
 }
 
 
-/*-----------------------------------------*/
-/* Function returns the number of averages */
-/*-----------------------------------------*/
+/*-----------------------------------------*
+ * Function returns the number of averages
+ *-----------------------------------------*/
 
-long ag54830b_get_num_avg( void )
+static long
+ag54830b_get_num_avg( void )
 {
 	char reply[ 30 ];
 	long length = sizeof reply;
@@ -1113,11 +1149,12 @@ long ag54830b_get_num_avg( void )
 		return 1;
 }
 
-/*--------------------------------------*/
-/* Function sets the number of averages */
-/*--------------------------------------*/
+/*--------------------------------------*
+ * Function sets the number of averages
+ *--------------------------------------*/
 
-void ag54830b_set_num_avg( long num_avg )
+static void
+ag54830b_set_num_avg( long num_avg )
 {
 	char cmd[ 30 ];
 
@@ -1140,12 +1177,13 @@ void ag54830b_set_num_avg( long num_avg )
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function returns the data acquisition mode. If the digitizer is neither */
-/* in average nor in sample mode, it is switched to sample mode.           */
-/*-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------*
+ * Function returns the data acquisition mode. If the digitizer is neither
+ * in average nor in sample mode, it is switched to sample mode.
+ *-------------------------------------------------------------------------*/
 
-int ag54830b_get_acq_mode( void )
+static int
+ag54830b_get_acq_mode( void )
 {
 	char reply[ 30 ];
 	long length = sizeof reply;
@@ -1159,17 +1197,17 @@ int ag54830b_get_acq_mode( void )
 
 /*	if ( reply == 0 )	 sample mode set it */
 /*		return SAMPLE; */
-	
 }
 
 
-/*-------------------------------------------------------------------------*/
-/* Function returns if acquisition is complited.                           */
-/*-------------------------------------------------------------------------*/
+/*----------------------------------------------*
+ * Function returns if acquisition is complited
+ *----------------------------------------------*/
 
-void ag54830b_acq_completed( void )
+static void
+ag54830b_acq_completed( void )
 {
-	unsigned char stb = 0; 
+	unsigned char stb = 0;
 
 	if ( acquisition_is_running )
 	{
@@ -1179,7 +1217,7 @@ void ag54830b_acq_completed( void )
 			if ( gpib_serial_poll( ag54830b.device, &stb ) == FAILURE )
 				ag54830b_failure( );
 
-			if ( stb & 0x20 ) 
+			if ( stb & 0x20 )
 			{
 				acquisition_is_running = UNSET;
 				fsc2_usleep( 10000, UNSET );
@@ -1190,15 +1228,17 @@ void ag54830b_acq_completed( void )
 			/*fsc2_usleep( 10000, UNSET );*/
 		}
 	}
-}	
-	
+}
 
 
-/*-----------------------------------------------------------------*/
-/*-----------------------------------------------------------------*/
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
 
-void ag54830b_get_curve( int channel, double **data, long *length,
-						 bool get_scaling )
+static void
+ag54830b_get_curve( int       channel,
+					double ** data,
+					long    * length,
+					bool      get_scaling )
 {
 	char cmd[ 50 ];
 	char reply[ 32 ];
@@ -1207,8 +1247,6 @@ void ag54830b_get_curve( int channel, double **data, long *length,
 	long i;
 	double yinc;
 	double yorg;
-	
-
 	long bites;
 	char cDATA[ 2 ];
 	long BytesToRead;
@@ -1224,7 +1262,7 @@ void ag54830b_get_curve( int channel, double **data, long *length,
 
 	/* Calculate the scale factor for converting the data returned by the
 	   digitizer (2-byte integers) into real voltage levels */
-	
+
     /* Set the source of the data */
 
 	if ( channel != ag54830b.data_source )
@@ -1240,10 +1278,11 @@ void ag54830b_get_curve( int channel, double **data, long *length,
        enough memory (data are 2-byte integers) and get all the adat bites*/
 
 	TRY
-	{	
-		ag54830b_command_retry(":WAV:DATA?\n"); 
-		
-		do {
+	{
+		ag54830b_command_retry(":WAV:DATA?\n");
+
+		do
+		{
 			bites = 1;
 			if ( gpib_read( ag54830b.device, cDATA, &bites ) == FAILURE )
 				ag54830b_failure( );
@@ -1270,21 +1309,21 @@ void ag54830b_get_curve( int channel, double **data, long *length,
 		THROW( EXCEPTION );
 		}
         /*print( SEVERE, "BytesToRead are %ld   .\n", BytesToRead);*/
-				
+
 		buffer = T_malloc( BytesToRead );
-		
+
 		/* read all data into buffer */
 
 		if ( gpib_read( ag54830b.device, buffer, &BytesToRead ) == FAILURE )
 			ag54830b_failure( );
-				
+
 		*length = BytesToRead / 2;
 		*data = T_malloc( *length * sizeof **data );
 
         /* read termination */
 
 		bites = 2;
-		if ( gpib_read( ag54830b.device, cDATA, &bites ) == FAILURE ) 
+		if ( gpib_read( ag54830b.device, cDATA, &bites ) == FAILURE )
 			ag54830b_failure( );
 
 		TRY_SUCCESS;
@@ -1320,7 +1359,7 @@ void ag54830b_get_curve( int channel, double **data, long *length,
 		yorg = T_atod( reply );
 		fsc2_usleep( 1000, UNSET );
 	}
-	
+
 	/* ....and copy them to the final destination (the data are INTEL format
 	   2-byte integers, so the following requires sizeof( short ) == 2 and
 	   only works on a machine with INTEL format - there got to be better ways
@@ -1337,11 +1376,12 @@ void ag54830b_get_curve( int channel, double **data, long *length,
 }
 
 
-/*-----------------------------------------------------------------*/
-/* Function returns the current record length.                     */
-/*-----------------------------------------------------------------*/
+/*--------------------------------------------*
+ * Function returns the current record length
+ *--------------------------------------------*/
 
-long ag54830b_get_record_length( void )
+static long
+ag54830b_get_record_length( void )
 {
     char reply[ 30 ];
     long length = sizeof reply;
@@ -1354,11 +1394,12 @@ long ag54830b_get_record_length( void )
 }
 
 
-/*-----------------------------------------------------*/
-/* Function sets the record length.                    */
-/*-----------------------------------------------------*/
+/*---------------------------------*
+ * Function sets the record length
+ *---------------------------------*/
 
-void ag54830b_set_record_length( long num_points )
+static void
+ag54830b_set_record_length( long num_points )
 {
     char cmd[ 100 ];
 
@@ -1368,11 +1409,12 @@ void ag54830b_set_record_length( long num_points )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Returns the sensitivity of the channel passed as argument */
-/*-----------------------------------------------------------*/
+/*-----------------------------------------------------------*
+ * Returns the sensitivity of the channel passed as argument
+ *-----------------------------------------------------------*/
 
-double ag54830b_get_sens( int channel )
+static double
+ag54830b_get_sens( int channel )
 {
     char cmd[ 30 ];
     char reply[ 30 ];
@@ -1391,11 +1433,12 @@ double ag54830b_get_sens( int channel )
 }
 
 
-/*--------------------------------------------------------*/
-/* Sets the sensitivity of one of the digitizers channels */
-/*--------------------------------------------------------*/
+/*--------------------------------------------------------*
+ * Sets the sensitivity of one of the digitizers channels
+ *--------------------------------------------------------*/
 
-void ag54830b_set_sens( int channel, double sens )
+static void
+ag54830b_set_sens( int channel, double sens )
 {
     char cmd[ 40 ];
 	char reply[ 40 ];
@@ -1434,11 +1477,12 @@ void ag54830b_set_sens( int channel, double sens )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Returns the Xorigin of the channel passed as argument */
-/*-----------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Returns the Xorigin of the channel passed as argument
+ *-------------------------------------------------------*/
 
-double ag54830b_get_xorigin( int channel )
+static double
+ag54830b_get_xorigin( int channel )
 {
 	char cmd[ 30 ];
 	char reply[ 30 ];
@@ -1456,7 +1500,7 @@ double ag54830b_get_xorigin( int channel )
 		ag54830b_command( cmd );
 		ag54830b.data_source = channel;
 	 }
-	
+
 	ag54830b_talk( ":WAV:XOR?\n", reply, &length );
 	ag54830b.data_source=channel;
     reply[ length - 1 ] = '\0';
@@ -1465,11 +1509,12 @@ double ag54830b_get_xorigin( int channel )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Returns the Xincrement of the channel passed as argument */
-/*-----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Returns the Xincrement of the channel passed as argument
+ *----------------------------------------------------------*/
 
-double ag54830b_get_xincrement( int channel )
+static double
+ag54830b_get_xincrement( int channel )
 {
 	char cmd[ 30 ];
 	char reply[ 30 ];
@@ -1478,7 +1523,7 @@ double ag54830b_get_xincrement( int channel )
 
 	fsc2_assert(    channel >= AG54830B_CH1
 				 && channel < NUM_DISPLAYABLE_CHANNELS );
-    
+
     /* Set the source of the data if not set */
 
 	if ( channel != ag54830b.data_source )
@@ -1487,7 +1532,7 @@ double ag54830b_get_xincrement( int channel )
 		ag54830b_command( cmd );
 		ag54830b.data_source = channel;
 	}
-	
+
 	ag54830b_talk(  ":WAV:XINC?\n", reply, &length );
 	ag54830b.data_source=channel;
     reply[ length - 1 ] = '\0';
@@ -1496,11 +1541,12 @@ double ag54830b_get_xincrement( int channel )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Returns the Yorigin of the channel passed as argument */
-/*-----------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Returns the Yorigin of the channel passed as argument
+ *-------------------------------------------------------*/
 
-double ag54830b_get_yorigin( int channel )
+static double
+ag54830b_get_yorigin( int channel )
 {
 	char cmd[ 30 ];
 	char reply[ 30 ];
@@ -1518,7 +1564,7 @@ double ag54830b_get_yorigin( int channel )
 		ag54830b_command( cmd );
 		ag54830b.data_source = channel;
 	 }
-	
+
 	ag54830b_talk( ":WAV:YOR?\n", reply, &length );
 	ag54830b.data_source=channel;
     reply[ length - 1 ] = '\0';
@@ -1527,11 +1573,12 @@ double ag54830b_get_yorigin( int channel )
 }
 
 
-/*-----------------------------------------------------------*/
-/* Returns the Xincrement of the channel passed as argument */
-/*-----------------------------------------------------------*/
+/*----------------------------------------------------------*
+ * Returns the Xincrement of the channel passed as argument
+ *----------------------------------------------------------*/
 
-double ag54830b_get_yincrement( int channel )
+static double
+ag54830b_get_yincrement( int channel )
 {
 	char cmd[ 30 ];
 	char reply[ 30 ];
@@ -1540,7 +1587,7 @@ double ag54830b_get_yincrement( int channel )
 
 	fsc2_assert(    channel >= AG54830B_CH1
 				 && channel < NUM_DISPLAYABLE_CHANNELS );
-    
+
     /* Set the source of the data if not set */
 
 	if ( channel != ag54830b.data_source )
@@ -1549,7 +1596,7 @@ double ag54830b_get_yincrement( int channel )
 		ag54830b_command( cmd );
 		ag54830b.data_source = channel;
 	 }
-	
+
 	ag54830b_talk(  ":WAV:YINC?\n", reply, &length );
 	ag54830b.data_source=channel;
     reply[ length - 1 ] = '\0';
@@ -1558,11 +1605,12 @@ double ag54830b_get_yincrement( int channel )
 }
 
 
-/*--------------------------------------------*/
-/* Function tests if a channel is switched on */
-/*--------------------------------------------*/
+/*--------------------------------------------*
+ * Function tests if a channel is switched on
+ *--------------------------------------------*/
 
-bool ag54830b_display_channel_state( int channel )
+static bool
+ag54830b_display_channel_state( int channel )
 {
 	char cmd[ 30 ];
     char reply[ 10 ];
@@ -1574,19 +1622,20 @@ bool ag54830b_display_channel_state( int channel )
 
 	sprintf( cmd, ":%s:DISP?\n", AG54830B_Channel_Names[ channel ] );
 	ag54830b_talk( cmd, reply, &length );
-	
+
 	reply[ length - 1 ] = '\0';
 	ag54830b.channel_is_on[ channel ] = T_atoi( reply );
 	return ag54830b.channel_is_on[ channel ];
 }
 
 
-/*--------------------------------------------------------------*/
-/* Sets the trigger position, range of paramters is [0,1] where */
-/* 0 means no pretrigger while 1 indicates maximum pretrigger   */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * Sets the trigger position, range of paramters is [0,1] where
+ * 0 means no pretrigger while 1 indicates maximum pretrigger
+ *--------------------------------------------------------------*/
 
-void ag54830b_set_trigger_pos( double pos )
+static void
+ag54830b_set_trigger_pos( double pos )
 {
     char   reply[ 30 ];
     long   length = sizeof reply;
@@ -1605,12 +1654,13 @@ void ag54830b_set_trigger_pos( double pos )
 }
 
 
-/*-------------------------------------------------------------------*/
-/* Returns the current trigger position in the intervall [0,1] where */
-/* 0 means no pretrigger while 1 indicates maximum pretrigger        */
-/*-------------------------------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Returns the current trigger position in the intervall [0,1] where
+ * 0 means no pretrigger while 1 indicates maximum pretrigger
+ *-------------------------------------------------------------------*/
 
-double ag54830b_get_trigger_pos( void )
+static double
+ag54830b_get_trigger_pos( void )
 {
     char   reply[ 30 ];
     long   length = sizeof reply;
@@ -1630,18 +1680,21 @@ double ag54830b_get_trigger_pos( void )
 }
 
 
-/*--------------------------------------------------------------*/
-/* The function is used to translate back and forth between the */
-/* channel numbers the way the user specifies them in the EDL   */
-/* program and the channel numbers as specified in the header   */
-/* file. When the channel number can't be mapped correctly, the */
-/* way the function reacts depends on the value of the third    */
-/* argument: If this is UNSET, an error message gets printed    */
-/* and an exception is thrown. If it is SET -1 is returned to   */
-/* indicate the error.                                          */
-/*--------------------------------------------------------------*/
+/*--------------------------------------------------------------*
+ * The function is used to translate back and forth between the
+ * channel numbers the way the user specifies them in the EDL
+ * program and the channel numbers as specified in the header
+ * file. When the channel number can't be mapped correctly, the
+ * way the function reacts depends on the value of the third
+ * argument: If this is UNSET, an error message gets printed
+ * and an exception is thrown. If it is SET -1 is returned to
+ * indicate the error.
+ *--------------------------------------------------------------*/
 
-long ag54830b_translate_channel( int dir, long channel, bool flag )
+static long
+ag54830b_translate_channel( int  dir,
+							long channel,
+							bool flag )
 {
 	if ( dir == GENERAL_TO_AG54830B )
 	{
@@ -1679,7 +1732,7 @@ long ag54830b_translate_channel( int dir, long channel, bool flag )
 
 			case CHANNEL_LINE :
 				return AG54830B_LIN;
-		}		
+		}
 
 		if ( channel > CHANNEL_INVALID && channel < NUM_CHANNEL_NAMES )
 		{
@@ -1741,7 +1794,6 @@ long ag54830b_translate_channel( int dir, long channel, bool flag )
 
 	return -1;
 }
-
 
 
 /*

@@ -90,7 +90,7 @@ lecroy93xx_init_hook( void )
     lecroy93xx.trigger_source = LECROY93XX_TEST_TRIG_SOURCE;
     lecroy93xx.trigger_mode   = LECROY93XX_TEST_TRIG_MODE;
     lecroy93xx.trigger_delay  = LECROY93XX_TEST_TRIG_DELAY;
-    lecroy93xx.cur_hres       = 
+    lecroy93xx.cur_hres       =
                   lecroy93xx.hres[ lecroy93xx.ms_index ] + lecroy93xx.tb_index;
 
     lecroy93xx.is_bandwidth_limiter = UNSET;
@@ -234,7 +234,7 @@ digitizer_define_window( Var_T * v )
     win_width = get_double( v, "window width" );
 
     /* Allow window width to be zero in test run only... */
-    
+
     if (    ( FSC2_MODE == TEST && win_width < 0.0 )
          || ( FSC2_MODE != TEST && win_width <= 0.0 ) )
     {
@@ -488,9 +488,9 @@ digitizer_timebase( Var_T * v )
     lecroy93xx.timebase = lecroy93xx.tbas[ tb_index ];
     lecroy93xx.tb_index = tb_index;
     lecroy93xx.is_timebase = SET;
-    lecroy93xx.cur_hres = 
+    lecroy93xx.cur_hres =
                   lecroy93xx.hres[ lecroy93xx.ms_index ] + lecroy93xx.tb_index;
- 
+
     /* Now check if the trigger delay (in case it's set) fits with the new
        timebase setting, and, based on this, the window positions and widths */
 
@@ -898,7 +898,7 @@ digitizer_bandwidth_limiter( Var_T * v )
 #if LECROY93XX_HAS_NO_BW_LIMITER
 	print( FATAL, "This model doesn't have a bandwidth limiter.\n" );
 	THROW( EXCEPTION );
-#endif 
+#endif
 
     if ( v == NULL )
         switch ( FSC2_MODE )
@@ -1006,7 +1006,7 @@ digitizer_coupling( Var_T * v )
                 if ( ! lecroy93xx.is_coupling[ channel ] )
                     no_query_possible( );
                 /* Fall through */
-        
+
             case TEST:
                 return vars_push( INT_VAR,
                                   ( long ) lecroy93xx.coupling[ channel ] );
@@ -1175,7 +1175,7 @@ digitizer_trigger_level( Var_T * v )
                 /* Fall through */
 
             case TEST :
-                return vars_push( FLOAT_VAR, 
+                return vars_push( FLOAT_VAR,
                                   lecroy93xx.trigger_level[ channel ] );
 
             case EXPERIMENT :
@@ -1307,7 +1307,7 @@ digitizer_trigger_slope( Var_T * v )
              || ! strcasecmp( v->val.sptr, "POS" ) )
             slope = 1;
         else if (    ! strcasecmp( v->val.sptr, "NEGATIVE" )
-                  || ! strcasecmp( v->val.sptr, "NEG" ) ) 
+                  || ! strcasecmp( v->val.sptr, "NEG" ) )
             slope = 0;
         else
         {
@@ -2211,7 +2211,7 @@ digitizer_command( Var_T * v )
     CLOBBER_PROTECT( cmd );
 
     vars_check( v, STR_VAR );
-    
+
     if ( FSC2_MODE == EXPERIMENT )
     {
         TRY

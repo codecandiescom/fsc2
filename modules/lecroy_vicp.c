@@ -75,9 +75,9 @@
                            const char * address,
                            long         us_timeout,
                            bool         quit_on_signal )
-   
+
     void lecroy_vicp_close( void )
-   
+
     void lecroy_vicp_lock_out( bool lock_out )
 
     void lecroy_vicp_set_timeout( int  dir,
@@ -355,7 +355,7 @@ lecroy_vicp_init( const char * dev_name,
     lecroy_vicp.name             =
     lecroy_vicp.address          = NULL;
 
-    /* Also store name and address for the device, this information is 
+    /* Also store name and address for the device, this information is
        needed in case we have to dis- and then reconnect. */
 
     TRY
@@ -461,7 +461,7 @@ lecroy_vicp_close( void )
  *    1. boolean value, if set lock out device,
  *       otherwise unlock it
  *------------------------------------------------------*/
- 
+
 void
 lecroy_vicp_lock_out( bool lock_state )
 {
@@ -487,7 +487,7 @@ lecroy_vicp_lock_out( bool lock_state )
 
     if ( lecroy_vicp.eoi_was_set )
         op |= LECROY_VICP_EOI;
-            
+
     lecroy_vicp_set_operation( header, op );
     lecroy_vicp_set_version( header );
     lecroy_vicp_set_length( header, 0 );

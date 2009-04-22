@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -285,7 +285,7 @@ epr_modulation_has_phase( Var_T * v )
                                  && fe->is_phase ) );
 }
 
-       
+
 /*-----------------------------------------------*
  * Function for creating a new calibration entry
  *-----------------------------------------------*/
@@ -386,7 +386,7 @@ epr_modulation_delete_calibration( Var_T * v )
 				 ( epr_mod.count - i - 1 ) * sizeof *epr_mod.calibrations );
 
     if ( --epr_mod.count > 0 )
-        epr_mod.calibrations = 
+        epr_mod.calibrations =
             T_realloc( epr_mod.calibrations,
                        epr_mod.count * sizeof *epr_mod.calibrations );
     else
@@ -489,7 +489,7 @@ epr_modulation_calibration_can_interpolate( Var_T * v  UNUSED_ARG )
                       ( long ) (    res->interpolate
                                  && res->count > 2
                                  && res->r2 >= EPR_MOD_MIN_REGRESSION ) );
-}    
+}
 
 
 /*--------------------------------------------------------------------*
@@ -526,7 +526,7 @@ epr_modulation_calibration_can_extrapolate( Var_T * v  UNUSED_ARG )
                       ( long ) (    res->extrapolate
                                  && res->count > 2
                                  && res->r2 >= EPR_MOD_MIN_REGRESSION ) );
-}    
+}
 
 
 /*-----------------------------------------------------------*

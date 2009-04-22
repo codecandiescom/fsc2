@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -32,11 +32,11 @@ struct RS_SPEC10 *rs_spec10 = NULL,
                   rs_spec10_exp;
 
 
-/*----------------------------------------------------------------*
- * This function is called directly after all modules are loaded
- * Its main function is to initialize all global variables tha
- * are needed in the module
- *----------------------------------------------------------------*/
+/*-------------------------------------------------------------*
+ * This function is called directly after all modules are have
+ * been loaded. Its main function is to initialize all global
+ * variables that are needed in the module
+ *-------------------------------------------------------------*/
 
 int
 rs_spec10_init_hook( void )
@@ -63,7 +63,7 @@ rs_spec10_init_hook( void )
     /* Try to initialize the library */
 
     if ( ! pl_pvcam_init( ) )
-        rs_spec10_error_handling( );        
+        rs_spec10_error_handling( );
 
     rs_spec10->lib_is_init = SET;
 
@@ -179,10 +179,10 @@ ccd_camera_name( Var_T * v  UNUSED_ARG )
 
 
 /*----------------------------------------------------------------*
- * Function for setting the region of interest (ROI) for the nex
- * image or spectrum to be fetched. The function expects an arra
- * with 4 elements with the coordinates of the lower left han
- * and the upper right hand corner. If one of the elements is 
+ * Function for setting the region of interest (ROI) for the next
+ * image or spectrum to be fetched. The function expects an array
+ * with 4 elements with the coordinates of the lower left hand
+ * and the upper right hand corner. If one of the elements is 0
  * the corresponding ROI value remains unchanged.
  *----------------------------------------------------------------*/
 
@@ -284,12 +284,12 @@ ccd_camera_roi( Var_T * v )
 
 
 /*-----------------------------------------------------------------------*
- * Function for setting the binning used with the next image or spectru
- * to be returned by the camera. The function expects to get an array o
- * 2 elements, the vertical and horizontal binning factors. A value of 
+ * Function for setting the binning used with the next image or spectrum
+ * to be returned by the camera. The function expects to get an array of
+ * 2 elements, the vertical and horizontal binning factors. A value of
  * indicates that the current binning value should remain unchanged
- * Optionally, the function can get passed a second argument, a numbe
- * or string for the type of binning (i.e. in hardware or software) t
+ * Optionally, the function can get passed a second argument, a number
+ * or string for the type of binning (i.e. in hardware or software) to
  * be used
  *-----------------------------------------------------------------------*/
 
@@ -366,10 +366,10 @@ ccd_camera_binning( Var_T * v )
 
 
 /*-----------------------------------------------------------------------*
- * Function for setting the binning method (i.e. either via hardware o
- * software) for the next pictures fetched from the camera. The functio
- * expects either a number (where 0 stands for hardware binning whil
- * any other number for software binning) or a string, either "SOFT" o
+ * Function for setting the binning method (i.e. either via hardware or
+ * software) for the next pictures fetched from the camera. The function
+ * expects either a number (where 0 stands for hardware binning while
+ * any other number for software binning) or a string, either "SOFT" or
  * "SOFTWARE" or "HARD" or "HARDWARE".
  *-----------------------------------------------------------------------*/
 
@@ -476,7 +476,7 @@ ccd_camera_exposure_time( Var_T * v )
 
 
 /*-----------------------------------------------------*
- * Function to query or set the number of clear cycle
+ * Function to query or set the number of clear cycles
  * to be done before an exposure
  *-----------------------------------------------------*/
 
@@ -770,7 +770,7 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
                bin[ X ], rs_spec10->ccd.bin[ X ] );
 
     /* Reduce the horizontal ROI area to what we really need (in case the ROI
-       sizes aren't integer multiples of the binning sizes) by moving the 
+       sizes aren't integer multiples of the binning sizes) by moving the
        right hand limit nearer to the left side in order to speed up fetching
        the picture a bit (before the function returns the ROI is set back to
        it's original size) */
@@ -874,7 +874,7 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
 
 
 /*------------------------------------------------------*
- * Function for determining the current CCD temperatur
+ * Function for determining the current CCD temperature
  * or to set a target temperature (setpoint)
  *------------------------------------------------------*/
 
@@ -965,7 +965,7 @@ ccd_camera_pixel_size( Var_T * v  UNUSED_ARG )
 
 
 /*----------------------------------------------*
- * Function returns an array with the width an
+ * Function returns an array with the width and
  * height of the CCD chip as its element
  *----------------------------------------------*/
 

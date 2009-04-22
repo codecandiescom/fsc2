@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -311,7 +311,7 @@ monochromator_turret( Var_T * v )
     spectrapro_300i.tn = tn;
 
     spectrapro_300i_set_grating( new_gn );
-    spectrapro_300i.current_gn = new_gn;    
+    spectrapro_300i.current_gn = new_gn;
 
     return vars_push( INT_VAR, turret );
 }
@@ -540,7 +540,7 @@ monochromator_install_grating( Var_T * v )
 
     if (    strcmp( v->val.sptr, "UNINSTALL" )
          && (    ! isdigit( ( unsigned char ) v->val.sptr[ 0 ] )
-              || v->val.sptr[ 1 ] != '-'         
+              || v->val.sptr[ 1 ] != '-'
               || ! isdigit( ( unsigned char ) v->val.sptr[ 2 ] )
               || ! isdigit( ( unsigned char ) v->val.sptr[ 3 ] )
               || ! isdigit( ( unsigned char ) v->val.sptr[ 4 ] )
@@ -596,7 +596,7 @@ monochromator_groove_density( Var_T * v )
 
         too_many_arguments( v );
     }
-    
+
     if ( ! spectrapro_300i.grating[ gn ].is_installed )
     {
         print( FATAL, "Grating #%ld isn't installed.\n", gn + 1 );
@@ -992,7 +992,7 @@ monochromator_calc_wavelength( Var_T * v )
     }
     else
         gn = spectrapro_300i.current_gn;
-        
+
     if ( ! spectrapro_300i.grating[ gn ].is_calib )
     {
         print( SEVERE, "No (complete) calibration for current grating #%ld "
@@ -1023,7 +1023,7 @@ monochromator_calc_wavelength( Var_T * v )
     }
 
     if ( v->next != NULL && v->next->next != NULL )
-    {  
+    {
         cwl = get_double( v->next->next, "center wavelength" );
         if ( cwl < 0.0 )
         {
@@ -1253,7 +1253,7 @@ monochromator_set_calibration( Var_T * v )
             print( FATAL, "Invalid second argument.\n" );
             THROW( EXCEPTION );
         }
-        
+
         too_many_arguments( v );
 
         spectrapro_300i.grating[ gn ].is_calib = UNSET;
@@ -1292,7 +1292,7 @@ monochromator_set_calibration( Var_T * v )
         print( FATAL, "Missing arguments.\n" );
         THROW( EXCEPTION );
     }
-    
+
     detector_angle = get_double( v, "detector angle" );
     detector_angle *= atan( 1.0 ) / 45.0;
 
@@ -1670,7 +1670,7 @@ monochromator_calibrate( Var_T * v )
         /* Get the grating constant */
 
         c.d = 1.0 / spectrapro_300i.grating[ gn ].grooves;
-    
+
         /* Get the pixel size of the camera */
 
         if ( ! func_exists( "ccd_camera_pixel_size" ) )

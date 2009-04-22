@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -134,7 +134,7 @@ spex232_init_hook( void )
             print( FATAL, "Invalid setting for lower wavelength limit in "
                    "configuration file for the device.\n" );
         SPEX232_THROW( EXCEPTION );
-    }           
+    }
 
     if ( spex232.mode & WN_MODES )
     {
@@ -495,7 +495,7 @@ monochromator_enforce_wavelength( Var_T * v )
 
     spex232.do_enforce_position = SET;
     spex232.enforced_position = spex232_wl2p( wl );
- 
+
     return vars_push( INT_VAR, 1L );
 }
 
@@ -543,7 +543,7 @@ monochromator_enforce_wavenumber( Var_T * v )
 
     spex232.do_enforce_position = SET;
     spex232.enforced_position = spex232_wl2p( wl );
- 
+
     return vars_push( INT_VAR, 1L );
 }
 
@@ -570,11 +570,11 @@ monochromator_wavenumber_scan_limits( Var_T *v  UNUSED_ARG )
 }
 
 
-/*----------------------------------------------------------------------*
- * Returns an array with the scan limits in wavelengths /in m) with the 
+/*-----------------------------------------------------------------------*
+ * Returns an array with the scan limits in wavelengths /in m) with the
  * lower scan limit as the first and the upper limit as the second array
  * element.
- *----------------------------------------------------------------------*/
+ *-----------------------------------------------------------------------*/
 
 Var_T *
 monochromator_wavelength_scan_limits( Var_T *v  UNUSED_ARG )
@@ -881,7 +881,7 @@ monochromator_scan_setup( Var_T * v )
     /* All SPEX monochromators scan from low to high wavelengths and high
        to low (absolute) wavenumbers. */
 
-    if ( step <= 0.0 ) 
+    if ( step <= 0.0 )
     {
         print( FATAL, "Step size must be positive.\n" );
         SPEX232_THROW( EXCEPTION );
@@ -1416,8 +1416,8 @@ monochromator_wavenumber_axis( Var_T * v )
 
     bin = lround( cv->val.dpnt[ 3 ] / cv->val.dpnt[ 1 ] );
 
-    cv->val.dpnt[ 1 ] = 
-                  (   spex232_wl2wn(   cv->val.dpnt[ 0 ] 
+    cv->val.dpnt[ 1 ] =
+                  (   spex232_wl2wn(   cv->val.dpnt[ 0 ]
                                      + ( num_pixels - 1 ) * cv->val.dpnt[ 1 ] )
                     - spex232_wl2wn( cv->val.dpnt[ 0 ] ) )
                   / ( num_pixels - 1 );

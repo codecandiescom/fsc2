@@ -41,7 +41,7 @@ static void rb_pulser_w_failure( bool         rb_flag,
  * setting. */
 
 #if ! defined RB_PULSER_W_TEST
-static int phase_settings[ 4 ][ 2 ][ 2 ] = { 
+static int phase_settings[ 4 ][ 2 ][ 2 ] = {
               /* PHASE_PLUS_X  */     { { RULBUS_RB8514_DELAY_OUTPUT_1,
                                           RULBUS_RB8514_DELAY_START_PULSE },
                                         { RULBUS_RB8514_DELAY_OUTPUT_2,
@@ -346,7 +346,7 @@ rb_pulser_w_phase_init( void )
         if ( rulbus_errno != RULBUS_OK )
             rb_pulser_w_failure( SET, "Failure to inititialize pulser" );
     } while ( is_busy );
-    
+
     /* Set all the phase cards to produce no output pulse, thus keeping them
        from influencing the phase switch (in case they are needed they will
        become set up when they do) */
@@ -476,7 +476,7 @@ rb_pulser_w_synthesizer_init( void )
     f->old_num_active_pulses = f->pulses[ 0 ]->is_active ? 1 : 0;
     if ( f->num_pulses > 1 )
     {
-        f->pulses[ 1 ]->was_active = f->pulses[ 1 ]->is_active; 
+        f->pulses[ 1 ]->was_active = f->pulses[ 1 ]->is_active;
         f->old_num_active_pulses += f->pulses[ 1 ]->is_active ? 1 : 0;
     }
 }
@@ -602,7 +602,7 @@ rb_pulser_w_run( bool state )
 
         lower_permissions( );
 
-        /* Wait until all cards are quiet, i.e. aren't outputting pulses 
+        /* Wait until all cards are quiet, i.e. aren't outputting pulses
            anymore (we don't test the cards directly since that takes
            about 8 ms per card but rely on the pulser being quit after
            the longest function) */
@@ -772,14 +772,14 @@ rb_pulser_w_delay_card_state( Rulbus_Delay_Card_T * card,
     if (    state == STOP
          && rulbus_rb8514_delay_set_raw_delay( card->handle, 0, 1 )
                                                                  != RULBUS_OK )
-        rb_pulser_w_failure( SET, "Failure to set card state" );    
+        rb_pulser_w_failure( SET, "Failure to set card state" );
 
     /* For activating the card also set the delay to the required value */
 
     if (    state == START
          && rulbus_rb8514_delay_set_raw_delay( card->handle, card->delay, 1 )
                                                                  != RULBUS_OK )
-        rb_pulser_w_failure( SET, "Failure to set card state" );    
+        rb_pulser_w_failure( SET, "Failure to set card state" );
 
     lower_permissions( );
 
