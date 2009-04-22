@@ -2492,7 +2492,7 @@ information about further available options. All models have 4 function
 channels (used for averaging) and 4 memory channels.
 
 @paragraphindent 0
-@strong{Controlled via}: GPIB bus (IEEE 488).@*
+@strong{Controlled via}: GPIB bus (IEEE 488) (module @code{lecroy_wr})@*
 In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
 @code{'\n'} or @code{0xa} as the EOS character, set @code{set-reos} and
 @code{set-xeos} to @code{no} and @code{set-bin} and @code{set-eot} to
@@ -2502,13 +2502,13 @@ In the GPIB configuration file use @code{"LECROY_WR"} as the device name,
 @strong{or}
 
 @paragraphindent 0
-@strong{Controlled via} (@code{lecroy_wr_l}): LAN
+@strong{Controlled via}: LAN (module @code{lecroy_wr_l})
 
 @paragraphindent 0
 @strong{or}
 
 @paragraphindent 0
-@strong{Controlled via} (@code{lecroy_wr_s}): Serial port
+@strong{Controlled via}: Serial port (module @code{lecroy_wr_s})
 
 
 @paragraphindent 0
