@@ -2808,16 +2808,16 @@ University Northridge)
 @strong{Module name}: @code{oriel_matrix}
 
 @paragraphindent 0
-@strong{Description}: CCD camera
+@strong{Description}: CCD camera (Clear Shot II by Centice Corp.)
 @uref{http://www.newport.com/file_store/PDFs/tempPDFs/e6063_Oriel-Matrix-Spectrometers.pdf}
 
 @paragraphindent 0
 @strong{Controlled via}: USB (requires
-@uref{http://libusb.wiki.sourceforge.net/,libusb-1.0} or
-@uref{http://libusb.wiki.sourceforge.net/,libusb-0.1} library)
+@uref{http://libusb.wiki.sourceforge.net/,libusb-0.1} or
+@uref{http://libusb.wiki.sourceforge.net/,libusb-1.0} library)
 
 @paragraphindent 0
-@strong{Status}: Tested (with libusb v0.1)
+@strong{Status}: Tested (with libusb v0.1 only!)
 
 @paragraphindent 0
 @strong{Supported functions}:
