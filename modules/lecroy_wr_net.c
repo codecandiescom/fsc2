@@ -315,12 +315,10 @@ bool
 lecroy_wr_set_timebase( double timebase )
 {
     char cmd[ 40 ] = "TDIV ";
-    char *dummy;
 	long len;
 
 
-    dummy = gcvt( timebase, 8, cmd + strlen( cmd ) );
-	strcat( cmd, "\n" );
+    strcat( gcvt( timebase, 8, cmd + strlen( cmd ) ), "\n" );
 	len = strlen( cmd );
 	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
@@ -470,15 +468,13 @@ lecroy_wr_set_sens( int    channel,
                     double sens )
 {
     char cmd[ 40 ];
-    char *dummy;
 	long len;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
     sprintf( cmd, "C%1d:VDIV ", channel + 1 );
-    dummy = gcvt( sens, 8, cmd + strlen( cmd ) );
-	strcat( cmd, "\n" );
+    strcat( gcvt( sens, 8, cmd + strlen( cmd ) ), "\n" );
 	len = strlen( cmd );
 	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
@@ -516,15 +512,13 @@ lecroy_wr_set_offset( int    channel,
                       double offset )
 {
     char cmd[ 40 ];
-    char *dummy;
 	long len;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
 
     sprintf( cmd, "C%1d:OFST ", channel + 1 );
-    dummy = gcvt( offset, 8, cmd + strlen( cmd ) );
-	strcat( cmd, "\n" );
+    strcat( gcvt( offset, 8, cmd + strlen( cmd ) ), "\n" );
 	len = strlen( cmd );
 	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
@@ -879,7 +873,6 @@ lecroy_wr_set_trigger_level( int    channel,
                              double level )
 {
     char cmd[ 40 ];
-    char *dummy;
 	long len;
 
 
@@ -895,8 +888,7 @@ lecroy_wr_set_trigger_level( int    channel,
     else
         strcpy( cmd, "EX10:TRLV " );
 
-    dummy = gcvt( level, 6, cmd + strlen( cmd ) );
-	strcat( cmd, "\n" );
+    strcat( gcvt( level, 6, cmd + strlen( cmd ) ), "\n" );
 	len = strlen( cmd );
 	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );
@@ -1154,7 +1146,6 @@ bool
 lecroy_wr_set_trigger_delay( double delay )
 {
     char cmd[ 40 ] = "TRDL ";
-    char *dummy;
 	long len;
 
 
@@ -1164,9 +1155,7 @@ lecroy_wr_set_trigger_delay( double delay )
     if ( delay > 0.0 )
         delay = 10.0 * delay / lecroy_wr.timebase;
 
-    dummy = gcvt( delay, 8, cmd + strlen( cmd ) );
-	strcat( cmd, "\n" );
-
+    strcat( gcvt( delay, 8, cmd + strlen( cmd ) ), "\n" );
 	len = strlen( cmd );
 	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
         lecroy_wr_lan_failure( );

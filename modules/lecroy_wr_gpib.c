@@ -1761,9 +1761,10 @@ lecroy_wr_get_inr( void )
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/
 
-static bool lecroy_wr_talk( const char * cmd,
-                            char *       reply,
-                            long *       length )
+static bool
+lecroy_wr_talk( const char * cmd,
+                char       * reply,
+                long       * length )
 {
     if (    gpib_write( lecroy_wr.device, cmd, strlen( cmd ) ) == FAILURE
          || gpib_read( lecroy_wr.device, reply, length ) == FAILURE )
