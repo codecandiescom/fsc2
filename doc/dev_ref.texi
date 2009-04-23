@@ -146,6 +146,10 @@ module. Field range depends on the gaussmeter used, with
 @strong{Controlled via}: Serial port
 
 @paragraphindent 0
+@strong{Please note}: Some of the devices the modules were tested with
+for unknown reasons didn't work correctly when controlled via GPIB.
+
+@paragraphindent 0
 @strong{Status}: Tested
 
 @paragraphindent 0
@@ -196,6 +200,10 @@ to @w{19900 G}, with @code{@ref{bh15}} it is @w{-50 G} to @w{23000 G}.
 
 @paragraphindent 0
 @strong{Controlled via}: Serial port
+
+@paragraphindent 0
+@strong{Please note}: Some of the devices the modules were tested with
+for unknown reasons didn't work correctly when controlled via GPIB.
 
 @paragraphindent 0
 @strong{Status}: Tested
