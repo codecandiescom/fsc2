@@ -1,24 +1,24 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
  *  Boston, MA 02111-1307, USA.
- * 
- * 
+ *
+ *
  *  This program expects an EDL program on standard input. It will then read it
  *  in, write it to a temporary file and try to connect to fsc2 via a socket on
  *  which fsc2 is supposed to listen. If this succeeds it sends fsc2 the
@@ -33,20 +33,20 @@
  *  can indicate that it is either run by a user with a different UID, that it
  *  is busy, or that it couldn't read the messages, which in turn is returned
  *  by this program via its return value (see list below).
- * 
+ *
  *  If, on the other hand, the program finds that fsc2 isn't running (because
  *  it can't connect to fsc2) it will try to start fsc2 with the '--delete'
  *  flag (to make fsc2 delete its input file when done with it) and, depending
  *  on the name this program was invocated with, with the '-S' or '-T' flag or
  *  no flag and the name of the temporary file. If fsc2 can't be started
  *  properly this program will return a return value to indicate it.
- * 
+ *
  *  The best way to use this program is to create the EDL program to send to
  *  fsc2 and send it to this program using a popen() call. The success can be
  *  obtained by examining the return status of the following call of pclose().
- * 
+ *
  *  Return codes:
- * 
+ *
  *   0: Everything ok
  *  -1: Internal error
  *   1: Different user is running fsc2

@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -69,7 +69,7 @@ extern Token_Val_T conditionlval;         /* from condition_parser.y */
 
 /* local functions */
 
-static void get_and_store_tokens( long * parenthesis_count, 
+static void get_and_store_tokens( long * parenthesis_count,
                                   long * square_brace_count );
 static void push_curly_brace( Prg_Token_T * where );
 static bool pop_curly_brace( void );
@@ -210,7 +210,7 @@ store_exp( FILE * in )
  *---------------------------------------------------------------------*/
 
 static void
-get_and_store_tokens( long * parenthesis_count, 
+get_and_store_tokens( long * parenthesis_count,
                       long * square_brace_count )
 {
     int token;
@@ -1133,7 +1133,7 @@ deal_with_token_in_test( void )
         case IF_TOK : case UNLESS_TOK :
             EDL.cur_prg_token = test_condition( cur ) ? cur->start : cur->end;
             break;
-            
+
         case ELSE_TOK :
             if ( ( ++EDL.cur_prg_token )->token == '{' )
                 EDL.cur_prg_token++;

@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -2250,7 +2250,7 @@ f_display_1d( Var_T * v )
 
     len =   sizeof len                  /* length field itself */
           + sizeof nsets                /* number of sets to be sent */
-          + nsets * (   sizeof dp->nx + sizeof dp->nc 
+          + nsets * (   sizeof dp->nx + sizeof dp->nc
                       + sizeof dp->type );  /* x-, y-index, number,data type */
 
 
@@ -3312,7 +3312,7 @@ f_setmark_1d( Var_T * v )
 
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, 1L );
-    
+
     /* Now starts the code only to be executed by the child, i.e. while the
        measurement is running. */
 
@@ -3477,7 +3477,7 @@ f_setmark_2d( Var_T * v )
 
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, 1L );
-    
+
     /* Now starts the code only to be executed by the child, i.e. while the
        measurement is running. */
 
@@ -3515,7 +3515,7 @@ f_setmark_2d( Var_T * v )
     ptr += sizeof color;
 
     memcpy( ptr, &curve, sizeof curve );
-    
+
     /* Detach from the segment with the data */
 
     detach_shm( buf, NULL );
@@ -3620,7 +3620,7 @@ f_clearmark_1d( Var_T * v )
 
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, 1L );
-    
+
     /* Now starts the code only to be executed by the child, i.e. while the
        measurement is running. */
 
@@ -3659,7 +3659,7 @@ f_clearmark_1d( Var_T * v )
 
     return vars_push( INT_VAR, 1L );
 }
-    
+
 
 /*---------------------------------*
  * Function deletes all 2D markers
@@ -3725,7 +3725,7 @@ f_clearmark_2d( Var_T * v  UNUSED_ARG )
 
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, 1L );
-    
+
     /* Now starts the code only to be executed by the child, i.e. while the
        measurement is running. */
 
@@ -3855,7 +3855,7 @@ f_get_pos( Var_T * v )
     result = exp_getpos( buffer, pos - buffer );
 
     memcpy( nv->val.dpnt, result, ( 2 * MAX_CURVES + 2 ) * sizeof *result );
-    T_free( result ); 
+    T_free( result );
 
     return nv;
 }
@@ -3972,7 +3972,7 @@ f_curve_button_1d( Var_T * v )
 
         return vars_push( INT_VAR, old_state );
     }
-    
+
     /* Now starts the code only to be executed by the child, i.e. while the
        measurement is running. */
 
@@ -4215,7 +4215,7 @@ f_fs_button_1d( Var_T * v )
 
     if ( Fsc2_Internals.mode == TEST )
         return vars_push( INT_VAR, 1L );
-    
+
     /* Now starts the code only to be executed by the child, i.e. while the
        measurement is running. */
 
@@ -4422,7 +4422,7 @@ f_zoom_1d( Var_T * v )
         print( FATAL, "There's no 1D display, use zoom_2d() instead.\n" );
         THROW( EXCEPTION );
     }
-    
+
     if ( v == NULL )
     {
         print( FATAL, "Missing arguments.\n" );
@@ -4434,7 +4434,7 @@ f_zoom_1d( Var_T * v )
             break;
 
         vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-        
+
         if ( v->type != STR_VAR )
         {
             d[ 2 * i ] = get_double( v, NULL );
@@ -4447,7 +4447,7 @@ f_zoom_1d( Var_T * v )
             break;
 
         vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-        
+
         if ( v->type != STR_VAR )
         {
             d[ 2 * i + 1 ] = get_double( v, NULL );
@@ -4586,7 +4586,7 @@ f_zoom_2d( Var_T * v )
             break;
 
         vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-        
+
         if ( v->type != STR_VAR )
         {
             d[ 2 * i ] = get_double( v, NULL );
@@ -4599,7 +4599,7 @@ f_zoom_2d( Var_T * v )
             break;
 
         vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
-        
+
         if ( v->type != STR_VAR )
         {
             d[ 2 * i + 1 ] = get_double( v, NULL );
@@ -4708,7 +4708,7 @@ f_find_peak( Var_T * v )
        make the derivative have a mean value of zero */
 
     arr[ 0 ] = v->type == INT_ARR ?
-               ( double ) ( v->val.lpnt[ 1 ] - v->val.lpnt[ 0 ] ) : 
+               ( double ) ( v->val.lpnt[ 1 ] - v->val.lpnt[ 0 ] ) :
                ( v->val.dpnt[ 1 ] - v->val.dpnt[ 0 ] );
     sum = arr[ 0 ];
 
@@ -4726,7 +4726,7 @@ f_find_peak( Var_T * v )
         }
 
     arr[ len - 1 ] = v->type == INT_ARR ?
-              ( double ) ( v->val.lpnt[ len - 1 ] - v->val.lpnt[ len - 2 ] ) : 
+              ( double ) ( v->val.lpnt[ len - 1 ] - v->val.lpnt[ len - 2 ] ) :
               ( v->val.dpnt[ len - 1 ] - v->val.dpnt[ len - 2 ] );
 
     sum = ( sum + arr[ len - 1 ] ) / len;
@@ -5169,7 +5169,7 @@ f_spike_rem( Var_T * v )
              || ol_indices[ 1 ] == -1
              || ol_indices[ 1 ] - start > max_spike_width )
         {
-            for ( i = 0; i <= start; i++ ) 
+            for ( i = 0; i <= start; i++ )
                 if ( v->type == INT_ARR )
                     nv->val.lpnt[ i ] = nv->val.lpnt[ start + 1 ];
                 else
@@ -5214,7 +5214,7 @@ f_spike_rem( Var_T * v )
              || ol_indices[ ol_count - 2 ] == -1
              || end - ol_indices[ ol_count - 2 ] > max_spike_width )
         {
-            for ( i = end + 1; i < nv->len; i++ ) 
+            for ( i = end + 1; i < nv->len; i++ )
                 if ( v->type == INT_ARR )
                     nv->val.lpnt[ i ] = nv->val.lpnt[ end  ];
                 else

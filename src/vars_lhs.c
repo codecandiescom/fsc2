@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -144,7 +144,7 @@ vars_check_lhs_indices( Var_T ** v,
                 cv->val.lval = lrnd( cv->val.dval ) - ARRAY_OFFSET;
                 cv->type = INT_VAR;
             }
-                                 
+
             if ( cv->val.lval < 0 )
             {
                 if ( cv->next == NULL || cv->next->type != STR_VAR )
@@ -197,7 +197,7 @@ vars_check_lhs_indices( Var_T ** v,
             cv->val.lval = lrnd( cv->val.dval ) - ARRAY_OFFSET;
             cv->type = INT_VAR;
         }
-                                 
+
         if ( cv->val.lval < 0 )
         {
             print( FATAL, "Invalid end of range for array '%s'.\n",
@@ -367,7 +367,7 @@ vars_arr_create( Var_T * a,
         a->len = len;
         return;
     }
-    
+
     /* Otherwise we need an array of references to arrays of lower dimensions
        which then in turn must be created */
 
@@ -862,7 +862,7 @@ vars_lhs_sub_pointer( Var_T * v,
     ssize_t i;
 
 
-    v = vars_pop( v );  
+    v = vars_pop( v );
 
     /* Check that there aren't too many indices or ranges */
 
@@ -936,7 +936,7 @@ vars_lhs_simple_pointer( Var_T * a,
                 if ( dim > 2 )
                     cv->val.vptr[ i ]->type = cv->type;
                 else
-                    cv->val.vptr[ i ]->type = 
+                    cv->val.vptr[ i ]->type =
                                      cv->type == INT_REF ? INT_ARR : FLOAT_ARR;
                 cv->val.vptr[ i ]->dim      = dim - 1;
                 cv->val.vptr[ i ]->len      = 0;
@@ -1045,7 +1045,7 @@ vars_lhs_range_pointer( Var_T * a,
                 if ( dim > 2 )
                     cv->val.vptr[ i ]->type = cv->type;
                 else
-                    cv->val.vptr[ i ]->type = 
+                    cv->val.vptr[ i ]->type =
                                      cv->type == INT_REF ? INT_ARR : FLOAT_ARR;
                 cv->val.vptr[ i ]->dim      = dim - 1;
                 cv->val.vptr[ i ]->len      = 0;

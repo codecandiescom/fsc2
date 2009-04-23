@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -971,11 +971,11 @@ zoom_x_2d( Canvas_T * c )
        factor. */
 
     if ( G.start[ X ] > c->ppos[ X ] )
-        cv->s2d[ X ] *= 3 * d_min( 1.0, 
+        cv->s2d[ X ] *= 3 * d_min( 1.0,
                                    ( double ) ( G.start[ X ] - c->ppos[ X ] )
                                    / G_2d.x_axis.w ) + 1;
     else
-        cv->s2d[ X ] /= 3 * d_min( 1.0, 
+        cv->s2d[ X ] /= 3 * d_min( 1.0,
                                    ( double ) ( c->ppos[ X ] - G.start[ X ] )
                                    / G_2d.x_axis.w ) + 1;
 
@@ -1498,7 +1498,7 @@ redraw_canvas_2d( Canvas_T * c )
 
                 for ( m = cv->marker_2d; m != NULL; m = m->next )
                 {
-                    points[ 0 ].x =   s15rnd( cv->s2d[ X ] 
+                    points[ 0 ].x =   s15rnd( cv->s2d[ X ]
                                               * ( m->x_pos + cv->shift[ X ] ) )
                                     - dw;
                     if (    points[ 0 ].x + 2 * dw < 0
@@ -1506,7 +1506,7 @@ redraw_canvas_2d( Canvas_T * c )
                         continue;
 
                     points[ 0 ].y =   i2s15( G_2d.canvas.h ) - 1
-                                    - s15rnd( cv->s2d[ Y ] 
+                                    - s15rnd( cv->s2d[ Y ]
                                               * ( m->y_pos + cv->shift[ Y ] ) )
                                     - dh;
                     if (    points[ 1 ].y + 2 * dh < 0

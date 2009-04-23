@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -61,7 +61,7 @@ static long T_fprintf( long         fn,
 
 
 /*----------------------------------------------------------------*
- * Returns if a file number passed to the function stands for an 
+ * Returns if a file number passed to the function stands for an
  * open file.
  *----------------------------------------------------------------*/
 
@@ -744,7 +744,7 @@ batch_mode_file_open( char * name )
         else
             new_name = T_strdup( name );
     }
-        
+
     /* Now try to open the new file, if this fails we must give up */
 
     if ( ( fp = fopen( new_name, "w+" ) ) == NULL )
@@ -1061,7 +1061,7 @@ arr_save( const char * sep,
                                        v->val.lpnt[ i ], sep );
                 count += T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
             }
-            else 
+            else
                 for ( i = 0; i < v->len; i++ )
                     count += T_fprintf( file_num, "%ld\n", v->val.lpnt[ i ] );
             break;
@@ -2015,7 +2015,7 @@ print_include( int          fid,
        the '~' gets replaced by the users home directory. If we find only
        a name or a relative path we prepend the name of the directory the
        EDL file is from in which we found the '#INCLUDE' directive. */
-       
+
     TRY
     {
         if ( delim == '"' )
@@ -2464,7 +2464,7 @@ get_repl_retry:
 
                 break;
             }
-            
+
             if( fwrite( buffer, 1, rw, new_fp ) != rw )
             {
                 mess = get_string( "Failed to write to replacement file\n%s\n"

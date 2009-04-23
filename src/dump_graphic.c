@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -158,7 +158,7 @@ get_1d_window( unsigned int * width,
     XFreeGC( G.d, gc );
 
     return pm;
-} 
+}
 
 
 /*--------------------------------------------------------------*
@@ -215,7 +215,7 @@ get_2d_window( unsigned int * width,
     XFreeGC( G.d, gc );
 
     return pm;
-} 
+}
 
 
 /*---------------------------------------------------------------------*
@@ -324,7 +324,7 @@ dump_as_ppm( FILE   * fp,
 
     if ( bits_per_pixel == 32 )
         pixel_mask = ~ ( ( unsigned long ) 0 );
-    else 
+    else
         pixel_mask = ( ( ( unsigned long ) 1 ) << bits_per_pixel ) - 1;
 
     bit_order = image->bitmap_bit_order;
@@ -345,11 +345,11 @@ dump_as_ppm( FILE   * fp,
         for ( j = 0; j < image->width; j++ )
         {
             if ( bits_used == bits_per_item )
-            {  
+            {
                 bptr++;
                 sptr++;
                 lptr++;
-           
+
                 bits_used = 0;
 
                 if ( bit_order == MSBFirst )

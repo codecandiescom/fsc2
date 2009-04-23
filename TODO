@@ -4,14 +4,3 @@
    if this also happens when fetching a curve and how to solve the
    problem. Could it be that we always fetch one point less than people
    asked for? (Unlikely)
-
-2. When increasing the magnification of the display of the measured data
-   further and further there is a point after which rubish will get
-   displayed (but the program does not crash). Since it will probably
-   take a lot of work to get this resolved and, on the other hand, it
-   only shows up under unreasonable situations (i.e. when doing stress
-   tests) solving the problem has a rather low position on my priority
-   list...
-
-3. See:
-   http://groups.google.com/groups?hl=en&lr=&ie=UTF-8&frame=right&th=20571fe38e8be72&seekm=3FBD235C.5AEC3D00%40daimi.au.dk

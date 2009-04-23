@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -1857,7 +1857,7 @@ exp_tbchanged( char      * buffer,
                 vars_push( INT_VAR, ID );
                 pos += sizeof ID;
             }
-                
+
             EDL.Fname = pos;                         /* current file name */
 
             /* Call the function */
@@ -1942,7 +1942,7 @@ exp_tbwait( char      * buffer,
                 vars_push( INT_VAR, ID );
                 pos += sizeof ID;
             }
-                
+
             EDL.Fname = pos;                         /* current file name */
 
             /* Call the function */
@@ -2539,7 +2539,7 @@ exp_zoom_2d( char      * buffer,
 
         EDL.Fname = pos;                          /* current file name */
 
-        writer( C_ZOOM_2D_REPLY, 
+        writer( C_ZOOM_2D_REPLY,
                 ( long ) user_zoom_2d( curve,
                                        d[ 0 ], keep[ 0 ],
                                        d[ 1 ], keep[ 1 ],

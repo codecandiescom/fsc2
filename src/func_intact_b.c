@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -210,7 +210,7 @@ f_bcreate( Var_T * var )
         T_free( label );
         RETHROW( );
     }
-        
+
     if ( Toolbox->objs == NULL )
     {
         Toolbox->objs = new_io;
@@ -257,7 +257,7 @@ f_bcreate( Var_T * var )
 
 static Var_T *
 f_bcreate_child( Var_T          * v,
-                 Iobject_Type_T   type, 
+                 Iobject_Type_T   type,
                  long             coll )
 {
     char *buffer,
@@ -285,7 +285,7 @@ f_bcreate_child( Var_T          * v,
             help_text = v->next->val.sptr;
 
             /* Warn and get rid of superfluous arguments */
-            
+
             if ( v->next->next != NULL )
                 print( WARN, "Too many arguments, discarding superfluous "
                        "arguments.\n" );
@@ -421,7 +421,7 @@ f_bdelete_child( Var_T * v )
     size_t len;
     long ID;
 
-        
+
     /* Do all possible checking of the parameter */
 
     ID = get_strict_long( v, "button ID" );
@@ -808,7 +808,7 @@ f_bchanged_child( Var_T * v )
     size_t len;
     long *result;
     int chld_changed;
-    
+
 
     /* Basic check of button identifier - always the first parameter */
 
