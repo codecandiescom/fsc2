@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -40,7 +40,7 @@
    will grow if necessary to allow storing the new element). The 'len'
    field of the Var structures allows to determine the current length of
    the array (for dynamically sized arrays it's legal to have 'len' set
-   to 0, in this case the size hasn't been set yet). 
+   to 0, in this case the size hasn't been set yet).
 
    To allow for two- and more dimensional arrays there are two further
    variable types
@@ -89,7 +89,7 @@
    is pushed on the stack. The 'val.lpnt' or 'val.dpnt' field of the Var
    structure is pointing to the element of the array that needs to be
    changed. If on the left hand side an array or (sub-) matrix is found a
-   variable of type 
+   variable of type
 
      REF_PTR
 
@@ -229,7 +229,7 @@ vars_new( const char * name )
     if ( EDL.Var_List != NULL )      /* set previous pointer in successor */
         EDL.Var_List->prev = vp;     /* (if this isn't the very first) */
     EDL.Var_List = vp;               /* make it the head of the list */
-    
+
     return vp;
 }
 
@@ -436,7 +436,7 @@ vars_push_matrix( Var_Type_T type,
     sizes = T_malloc( dim * sizeof *sizes );
 
     va_start( ap, dim );
-    
+
     for ( i = 0; i < dim; i++ )
     {
         sizes[ i ] = ( ssize_t ) va_arg( ap, long );
@@ -846,7 +846,7 @@ vars_ref_copy_create( Var_T * nsv,
                 nsv->type = INT_ARR;
                 if ( nsv->len != 0 )
                 {
-                    nsv->val.lpnt = T_malloc(   nsv->len 
+                    nsv->val.lpnt = T_malloc(   nsv->len
                                               * sizeof *nsv->val.lpnt );
                     memcpy( nsv->val.lpnt, src->val.lpnt,
                             nsv->len * sizeof *nsv->val.lpnt );

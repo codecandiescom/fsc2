@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -159,7 +159,7 @@ send_mail( const char * subject,
 
         pclose( mail );
         T_free( cmd );
-        
+
         if ( cc_to == NULL )
             return 0;
 
@@ -234,7 +234,7 @@ do_send( const char * rec_host,
     int mfd;
     char line[ MAX_LINE_LENGTH ];
     ssize_t len;
-    
+
 
     if ( ( mfd = open_mail_socket( rec_host, local_host ) ) < 0 )
         return -1;
@@ -263,7 +263,7 @@ do_send( const char * rec_host,
     }
 
     /* Read reply, it must start with "250" to indicate success */
-    
+
     do
     {
         if (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4
@@ -285,7 +285,7 @@ do_send( const char * rec_host,
     }
 
     /* Read reply, must start with "250" to indicate success */
-    
+
     do
     {
         if (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4
@@ -307,7 +307,7 @@ do_send( const char * rec_host,
     }
 
     /* Read reply, must start with "250" to indicate success */
-    
+
     do
     {
         if (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4
@@ -327,7 +327,7 @@ do_send( const char * rec_host,
     }
 
     /* Read reply, must start with "354" to indicate success */
-    
+
     do
     {
         if (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4
@@ -384,7 +384,7 @@ do_send( const char * rec_host,
     }
 
     /* Read reply, must start with "250" to indicate success */
-    
+
     do
     {
         if (    ( len = read_line( mfd, line, MAX_LINE_LENGTH ) ) <= 4
@@ -394,7 +394,7 @@ do_send( const char * rec_host,
             return -1;
         }
     } while ( line[ 3 ] == '-' );
-    
+
     if ( writen( mfd, "QUIT\r\n", 6 ) < 6 )
     {
         close( mfd );
@@ -849,7 +849,7 @@ weed_out( unsigned char * buf,
     {
         if ( get_name( buf, len, &cur_pos ) == NULL )
             return -1;
-        
+
         non_local_prior = ( unsigned short * ) ( cur_pos + 10 );
         rpq = get_ushort( cur_pos + 10 );
 
@@ -914,7 +914,7 @@ get_host( unsigned char * buf,
         return NULL;
 
     *this_one++ = 0xFF;
-    *this_one++ = 0xFF;     
+    *this_one++ = 0xFF;
     return get_name( buf, len, &this_one );
 }
 

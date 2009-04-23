@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -1721,7 +1721,7 @@ menu_setup( Iobject_T * io )
 
     io->self = fl_add_choice( FL_NORMAL_CHOICE2, io->x, io->y,
                               io->w, io->h, io->label );
-    
+
     fl_set_object_lalign( io->self, FL_ALIGN_BOTTOM );
     fl_set_object_lsize( io->self, GUI.toolboxFontSize );
     fl_setpup_default_fontsize( GUI.toolboxFontSize );
@@ -2135,7 +2135,7 @@ f_tb_changed( Var_T * v )
     /* No toolbox -> no objects -> no object can have changed */
 
     if ( Toolbox == NULL )
-        return vars_push( INT_VAR, 0L );    
+        return vars_push( INT_VAR, 0L );
 
     /* If there's a list of objects loop over it until the first changed one
        is found. If none of them were changed return 0. Don't tell about
@@ -2367,7 +2367,7 @@ f_tb_wait( Var_T * v )
     /* If the duration is a real time (i.e. larger than 1 ms) set up a timer */
 
     if ( duration > 0.0 )
-    { 
+    {
         sleepy.it_interval.tv_sec = sleepy.it_interval.tv_usec = 0;
         sleepy.it_value.tv_usec = lrnd( modf( duration, &secs ) * 1.0e6 );
         sleepy.it_value.tv_sec = lrnd( secs );

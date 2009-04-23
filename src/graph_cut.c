@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -2578,7 +2578,7 @@ cut_make_scale( Canvas_T * c,
                                       * ( 1.0 - G_cut.index /
                                           ( G_2d.nx - 1.0 ) ) );
         else
-            triangle[ 0 ].y = 
+            triangle[ 0 ].y =
                          s15rnd( ( G_2d.cut_z_axis.h - 1 )
                                  * ( 1.0 - G_cut.index / ( G_2d.ny - 1.0 ) ) );
 
@@ -3114,7 +3114,7 @@ delete_cut_marker( long x_pos )
         G_2d.curve_2d[ G_cut.curve ]->cut_marker = m->next;
     else
         mn->next = m->next;
-        
+
     XFreeGC( G.d, m->gc );
     T_free( m );
 

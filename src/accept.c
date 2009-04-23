@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -287,7 +287,7 @@ unpack_and_accept( int    dim,
                 ptr_next = ptr + len;
                 break;
 
-        default :            
+        default :
             fsc2_impossible( );       /* This can't happen... */
         }
 
@@ -358,7 +358,7 @@ other_data_request( int    dim,
             {
                 change_scale_2d( is_set, ( void * ) ptr );
                 Scale_2d_changed[ X ] =
-                    Scale_2d_changed[ Y ] = 
+                    Scale_2d_changed[ Y ] =
                         Scale_2d_changed[ Z ] = SET;
             }
             break;
@@ -387,7 +387,7 @@ other_data_request( int    dim,
             {
                 change_label_2d( label );
                 Scale_2d_changed[ X ] =
-                    Scale_2d_changed[ Y ] = 
+                    Scale_2d_changed[ Y ] =
                         Scale_2d_changed[ Z ] = SET;
             }
             break;
@@ -898,7 +898,7 @@ static void accept_2d_data( long         x_index,
         else
         {
             Need_cut_redraw |= incr_x( x_index, x_len );
-            Scale_2d_changed[ X ] |= 
+            Scale_2d_changed[ X ] |=
                               ( cv->active && cv->is_fs )
                            || (    G_2d.active_curve != -1
                                 && G_2d.curve_2d[ G_2d.active_curve ]->is_fs );
@@ -909,7 +909,7 @@ static void accept_2d_data( long         x_index,
     else if ( y_index + y_len >= G_2d.ny )
     {
         Need_cut_redraw |= incr_y( y_index + y_len );
-        Scale_2d_changed[ Y ] |= 
+        Scale_2d_changed[ Y ] |=
                               ( cv->active && cv->is_fs )
                            || (    G_2d.active_curve != -1
                                 && G_2d.curve_2d[ G_2d.active_curve ]->is_fs );

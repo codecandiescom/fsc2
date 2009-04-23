@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -384,7 +384,7 @@ func_get( const char * name,
        2. The function which is still running comes from a module - in this
           case the device member of the last call stack element isn't NULL.
        3. The function that's still running came from a device that's not
-          the first of a set of devices with the same generic type, indicated 
+          the first of a set of devices with the same generic type, indicated
           by the dev_count member of the last call stack element being
           larger than 1.
        4. The functions name we got as the argument hasn't already a '#'

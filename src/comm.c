@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -56,7 +56,7 @@
  *   box, and possibly return the users input. The protocol for requests is
  *   quite simple - the child sends the request and waits for the answer by
  *   the parent, knowing exactly what kind of data to expect.
- * 
+ *
  *   The exchange of data for REQUESTs isn't done via shared memory segments
  *   but using a pair of pipes. For a request the child has first to put a
  *   REQUEST message into the mesage queue. The parent, in turn, will execute
@@ -1335,7 +1335,7 @@ writer( int type,
 
                 if ( ! pipe_write( ( char * ) &header, sizeof header ) )
                     return FAIL;
-                 
+
                 if (    header.data.str_len[ 0 ] > 0
                      && ! pipe_write( str[ 0 ], ( size_t ) header.data.len ) )
                     return FAIL;
@@ -1474,7 +1474,7 @@ writer( int type,
     else                   /* if this is the parent process */
     {
         switch ( type )
-        {       
+        {
             case C_ACK :
                 va_end( ap );
                 return pipe_write( ( char * ) &header, sizeof header );

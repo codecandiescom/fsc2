@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2; see the file COPYING.  If not, write to
  *  the Free Software Foundation, 59 Temple Place - Suite 330,
@@ -114,7 +114,7 @@ f_ocreate( Var_T * var )
     /* Next argument could be a value to be set in the input or output
        object */
 
-    if ( ( v = vars_pop( v ) ) != NULL ) 
+    if ( ( v = vars_pop( v ) ) != NULL )
     {
         switch ( v->type )
         {
@@ -305,7 +305,7 @@ f_ocreate( Var_T * var )
         T_free( sptr );
         RETHROW( );
     }
-        
+
     if ( Toolbox->objs == NULL )
     {
         Toolbox->objs = new_io;
@@ -377,7 +377,7 @@ f_ocreate_child( Var_T          * v,
         label = v->val.sptr;
 
         /* Next argument can be a help text */
-        
+
         if ( v->next != NULL )
         {
             vars_check( v->next, STR_VAR );

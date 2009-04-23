@@ -1,18 +1,18 @@
 /*
  *  Copyright (C) 1999-2009 Jens Thoms Toerring
- * 
+ *
  *  This file is part of fsc2.
- * 
+ *
  *  Fsc2 is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  *  Fsc2 is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
- * 
+ *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -116,7 +116,7 @@ main( int    argc,
         fprintf( stderr, "Graphic setup failed.\n" );
         return EXIT_FAILURE;
     }
-    
+
     /* If we don't know yet about an input file and there are command
        line arguments left take it to be the input file */
 
@@ -432,7 +432,7 @@ fsc2_get_conf( void )
 
     if ( Fsc2_Internals.def_directory == NULL )
         return;
-    
+
     /* Don't use the default directory's name when it's either obviously
        unvalid (i.e. just an empty string, which shouldn't be possible), a
        stat() on it fails, or if it's neither a directory or a symbolic link
@@ -1138,7 +1138,7 @@ scan_args( int   * argc,
                       argv[ cur_arg ][ i ] != '\0'; i++ )
                     if ( isdigit( argv[ cur_arg ][ i ] ) )
                         Fsc2_Internals.num_test_runs =
-                                             Fsc2_Internals.num_test_runs * 10 
+                                             Fsc2_Internals.num_test_runs * 10
                                            + ( argv[ cur_arg ][ i ] - '0' );
                     else
                     {
@@ -1230,7 +1230,7 @@ final_exit_handler( void )
         sema_destroy( Comm.mq_semaphore );
 
     /* If the program was killed by a signal indicating an unrecoverable
-       error print out a message and (if this feature isn't switched off) 
+       error print out a message and (if this feature isn't switched off)
        send an email */
 
     if ( Crash.signo != 0 && Crash.signo != SIGTERM )
