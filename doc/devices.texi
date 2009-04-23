@@ -830,11 +830,11 @@ The modules with names starting with @ref{er035m} are for the
 GPIB bus while @code{er035m_s} and @code{er035m_sas} expect the device
 to be connected to a serial port of the computer. (If you're wondering
 why there are versions for both the GPIB bus and the serial port, the
-simple explanation is that some of the @ref{er035m, ER035M}
-gaussmeters simple don't work with the GPIB bus even though they
-should.) The @ref{bh15} module is for the Hall controller used in some
-setups, the @ref{pt2025} module is for the @ref{pt2025, Metrolab 2025}
-NMR gaussmeter. The last module, @ref{bnm12}, is for the @ref{bnm12,
+explanation is that some of the @ref{er035m, ER035M} gaussmeters
+simple don't seem to work with the GPIB bus even though they should.)
+The @ref{bh15} module is for the Hall controller used in some setups,
+the @ref{pt2025} module is for the @ref{pt2025, Metrolab 2025} NMR
+gaussmeter. The last module, @ref{bnm12}, is for the @ref{bnm12,
 Bruker BNM12} gaussmeter.
 
 @table @strong
@@ -1643,8 +1643,11 @@ lecroy9424
 lecroy9424e
 lecroy9450
 lecroy93xx
-lecroy_wr
-lecroy_ws
+lecroy_wr   (GPIB)
+lecroy_wr_l (LAN)
+lecroy_wr_s (serial port)
+lecroy_ws   (LAN)
+lecroy_ws_g (GPIB)
 @end example
 
 When specifying digitizer channels or trigger inputs you should use only
