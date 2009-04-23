@@ -199,14 +199,12 @@ oriel_matrix_init( void )
 
     libusb_free_device_list( list, 1 );
 
-#if 1        /* Is this really necessary? */
     if ( libusb_set_configuration( oriel_matrix.udev, 1 ) )
     {
         lower_permissions( );
         print( FATAL, "Can't set configuration for USB device.\n" );
         THROW( EXCEPTION );
     }
-#endif
 
     if ( libusb_claim_interface( oriel_matrix.udev, 0 ) )
     {
@@ -215,14 +213,12 @@ oriel_matrix_init( void )
         THROW( EXCEPTION );
     }
 
-#if 1        /* Is this really necessary? */
     if ( libusb_set_interface_alt_setting( oriel_matrix.udev, 0, 0 ) )
     {
         lower_permissions( );
         print( FATAL, "Can't set alternate interface for USB device.\n" );
         THROW( EXCEPTION );
     }
-#endif
 
     lower_permissions( );
 
