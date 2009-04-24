@@ -6,7 +6,7 @@
  *    Needs root privileges to access USB devices
  *.   This driver has been modified [hacked :-)] to work with fsc2.
  *
- * Last updated April 9, 2009
+ * Last updated April 24, 2009
  *
  * This driver was developed using the ClearShotII - USB port interface
  * communications and control information specification provided by Centice
@@ -390,7 +390,7 @@ oriel_matrix_query_exposure( void )
 
     if ( readbuf[ 7 ] == EXPOSURE_FAILED )
     {
-        print( FATAL, "Exposur failed, aborting experiment.\n" );
+        print( FATAL, "Exposure failed.\n" );
         THROW( EXCEPTION );
     }
 
@@ -401,10 +401,11 @@ oriel_matrix_query_exposure( void )
 /*-----------------------------------------------------------------------*
  * This function ends the use of the spectrometer's camera in regards
  * to acquiring an exposure. This function should be called only after
- * calls to Ystart_exposure() and when all spectrometer exposure related
- * commands have completed. Execution of this function will cause all
- * future oriel_matrix_query_exposure() function commands to fail until
- * the next oriel_matrix_start_exposure() command successfully completes.
+ * calls to oriel_matrix_start_exposure() and when all spectrometer
+ * exposure related commands have completed. Execution of this function
+ * will cause all future oriel_matrix_query_exposure() function commands
+ * to fail until the next oriel_matrix_start_exposure() command
+ * successfully completes.
  *
  * Input:
  *   unsigned char shutter_state:
@@ -524,8 +525,8 @@ oriel_matrix_get_pixel_hw( void )
 
 
 /*----------------------------------------------------------------*
- * This function returns an unsigned char which indicates the
- * number of CCD byte per pixel
+ * This function returns an unsigned char which is the number of
+ * CCD bytes per pixel
  *
  * Input: None
  *
@@ -567,11 +568,8 @@ oriel_matrix_get_exposure( void )
 {
     unsigned char *readbuf;
     static struct exposure pix;
-#if defined WITH_LIBUSB_0_1
-    size_t i;
-#elif defined WITH_LIBUSB_1_0
     int cnt;
-#endif
+
 
     pix.width = oriel_matrix.pixel_width;
     pix.height = oriel_matrix.pixel_height;
@@ -588,28 +586,22 @@ oriel_matrix_get_exposure( void )
     raise_permissions( );
 
 #if defined WITH_LIBUSB_0_1
-    /* Read in the data in chunks of USB_READ_BUF_SIZE bytes since the device
-       always sends them that way */ 
-
-    for ( i = 0; i < pix.image_size; i += USB_READ_BUF_SIZE )
-        if ( usb_bulk_read( oriel_matrix.udev, EP6,
-                            ( char * ) ( pix.image + i ),
-                            USB_READ_BUF_SIZE, 0 ) <= 0 )
+    if (    ( cnt = usb_bulk_read( oriel_matrix.udev, EP6, ( char * ) pix.image,
+                                   pix.image_size, 0 ) ) < 0
 #elif defined WITH_LIBUSB_1_0
-    /* Read in the all the data in one go */
-
     if (    libusb_bulk_transfer( oriel_matrix.udev, EP6, pix.image,
                                   pix.image_size, &cnt, 0 )
-         || ( unsigned int ) cnt != pix.image_size )
 #endif
-      {
-          lower_permissions( );
-          print( FATAL, "Failed to get exposure.\n" );
-          T_free( pix.image );
-          THROW( EXCEPTION );
-      }
+         || ( unsigned int ) cnt != pix.image_size )
+    {
+        lower_permissions( );
+        print( FATAL, "Failed to get exposure.\n" );
+        T_free( pix.image );
+        THROW( EXCEPTION );
+    }
 
     lower_permissions( );
+
     return &pix;
 }
 
@@ -668,11 +660,8 @@ oriel_matrix_get_reconstruction( unsigned char recon_type )
 {
     unsigned char *readbuf;
     static struct reconstruction recon;    /* reconstruction struct */
-#if defined WITH_LIBUSB_0_1
-    size_t i;
-#elif defined WITH_LIBUSB_1_0
     int cnt;
-#endif
+
 
     fsc2_assert(    recon_type >= RECON_TYPE_LIGHT
                  && recon_type <= RECON_TYPE_REFERENCE );
@@ -702,27 +691,21 @@ oriel_matrix_get_reconstruction( unsigned char recon_type )
     raise_permissions( );
 
 #if defined WITH_LIBUSB_0_1
-    /* Read in the data in chunks of USB_READ_BUF_SIZE bytes since the device
-       always sends them that way */ 
-
-    for ( i = 0; i < recon.response_size; i += USB_READ_BUF_SIZE )
-        if ( usb_bulk_read( oriel_matrix.udev, EP8,
-                            ( char * ) recon.intensity + i,
-                            USB_READ_BUF_SIZE, 0 ) <= 0 )
+    if (    ( cnt = usb_bulk_read( oriel_matrix.udev, EP8,
+                                   ( char * ) recon.intensity,
+                                   recon.response_size, 0 ) ) < 0
 #elif defined WITH_LIBUSB_1_0
-    /* Read in all data in one go */
-
     if (    libusb_bulk_transfer( oriel_matrix.udev, EP8,
                                   ( unsigned char * ) recon.intensity,
                                   recon.response_size, &cnt, 0 )
-         || ( unsigned int ) cnt != recon.response_size )
 #endif
-      {
-          lower_permissions( );
-          print( FATAL, "Failed to get reconstruction.\n" );
-          T_free( recon.intensity );
-          THROW( EXCEPTION );
-      }
+         || ( unsigned int ) cnt != recon.response_size )
+    {
+        lower_permissions( );
+        print( FATAL, "Failed to get reconstruction.\n" );
+        T_free( recon.intensity );
+        THROW( EXCEPTION );
+    }
 
     lower_permissions( );
 
@@ -905,11 +888,10 @@ oriel_matrix_set_CCD_temp( double temperature )
     struct temperature *temp;
 
 
-    fsc2_assert( oriel_matrix.has_temp_control );
+    fsc2_assert( oriel_matrix.has_temp_control && temperature >= -273.15 );
 
     oriel_matrix_communicate( CMD_SET_CCD_TEMPERATURE, 0x01,
                               temperature );
-
     temp = oriel_matrix_get_CCD_temp( );
     return temp->set_point;
 }
@@ -945,7 +927,7 @@ oriel_matrix_disable_CCD_temp_regulation( void )
  * Return value: none, function thrwos exception on failure
  *
  * ****NOTE**** I have yet to get this function to work properly with
- *              my spectrometer my guess is that not all spectrometers
+ *              my spectrometer. My guess is that not all spectrometers
  *              support this function. Unfortunatley there is no way to
  *              test if your spectrometer supports this function other
  *              than trying the funnction yourself and seeing if the
@@ -959,7 +941,7 @@ oriel_matrix_set_AFE_parameters( unsigned short offset,
     fsc2_assert( offset <= MAX_AFE_OFFSET );
     fsc2_assert( gain <= MAX_AFE_GAIN );
 
-    oriel_matrix_communicate( CMD_SET_CCD_TEMEPRATURE_INFO, offset, gain );
+    oriel_matrix_communicate( CMD_SET_CCD_TEMPERATURE_INFO, offset, gain );
 }
 
 
@@ -986,7 +968,7 @@ oriel_matrix_get_AFE_parameters( void )
     static unsigned short AFEPram[ 2 ];
 
 
-    readbuf = oriel_matrix_communicate( CMD_GET_CCD_TEMEPRATURE_INFO );
+    readbuf = oriel_matrix_communicate( CMD_GET_CCD_TEMPERATURE_INFO );
 
     AFEPram[ 0 ] = device_2_ushort( readbuf + 9 );
     AFEPram[ 1 ] = device_2_ushort( readbuf + 11 );
@@ -1166,11 +1148,11 @@ oriel_matrix_communicate( unsigned char cmd,
             err = "Failed to reset device.\n";
             break;
 
-        case CMD_GET_CCD_TEMEPRATURE_INFO :
+        case CMD_GET_CCD_TEMPERATURE_INFO :
             err = "Failed to get AFE parameters.\n";
             break;
 
-        case CMD_SET_CCD_TEMEPRATURE_INFO :
+        case CMD_SET_CCD_TEMPERATURE_INFO :
             len = 13;
             va_start( ap, cmd );
             us = va_arg( ap, int );                   /* offset */
@@ -1384,8 +1366,9 @@ static char *
 oriel_matrix_get_model_number( void )
 {
     unsigned char *readbuf;
-    char * model_number;
-    size_t len;
+    char *model_number;
+    int len;
+    int cnt;
 
 
     readbuf = oriel_matrix_communicate( CMD_GET_MODEL_NUMBER );
@@ -1393,7 +1376,40 @@ oriel_matrix_get_model_number( void )
     len = device_2_ushort( readbuf + 7 );
     model_number = T_malloc( len + 1 );
     model_number[ len ] = '\0';
-    memcpy( model_number, readbuf + 9, len );
+
+    /* Note: the string returned could be too long to fit into the buffer
+       returned by oriel_matrix_communicate() and in this case we must
+       continue with reading! */
+
+    if ( len <= USB_READ_BUF_SIZE - 9 )
+        memcpy( model_number, readbuf + 9, len );
+    else
+    {
+        memcpy( model_number, readbuf + 9, USB_READ_BUF_SIZE - 9 );
+        len -= USB_READ_BUF_SIZE - 9;
+
+        raise_permissions( );
+
+#if defined WITH_LIBUSB_0_1
+        if (    ( cnt = usb_bulk_read( oriel_matrix.udev, EP8,
+                                       model_number + USB_READ_BUF_SIZE - 9,
+                                       len, 0 ) ) < 0
+#elif defined WITH_LIBUSB_1_0
+        if (    libusb_bulk_transfer( oriel_matrix.udev, EP8,
+                                      ( unsigned char * ) model_number
+                                      + USB_READ_BUF_SIZE - 9,
+                                      len, &cnt, 0 )
+#endif
+             || cnt != len )
+        {
+            lower_permissions( );
+            print( FATAL, "Failed to read model number.\n" );
+            T_free( model_number );
+            THROW( EXCEPTION );
+        }
+
+        lower_permissions( );
+    }
 
     return model_number;
 }
@@ -1412,14 +1428,48 @@ oriel_matrix_get_serial_number( void )
 {
     unsigned char *readbuf;
     char *serial_number;
-    size_t len;
+    int len;
+    int cnt;
 
 
     readbuf = oriel_matrix_communicate( CMD_GET_SERIAL_NUMBER );
     len = device_2_ushort( readbuf + 7 );
     serial_number = T_malloc( len + 1 );
     serial_number[ len ] = '\0';
-    memcpy( serial_number, readbuf + 9, len );
+
+    /* Note: the string returned could be too long to fit into the buffer
+       returned by oriel_matrix_communicate() and in this case we must
+       continue with reading! */
+
+    if ( len <= USB_READ_BUF_SIZE - 9 )
+        memcpy( serial_number, readbuf + 9, len );
+    else
+    {
+        memcpy( serial_number, readbuf + 9, USB_READ_BUF_SIZE - 9 );
+        len -= USB_READ_BUF_SIZE - 9;
+
+        raise_permissions( );
+
+#if defined WITH_LIBUSB_0_1
+        if (    ( cnt = usb_bulk_read( oriel_matrix.udev, EP8,
+                                       serial_number + USB_READ_BUF_SIZE - 9,
+                                       len, 0 ) ) < 0
+#elif defined WITH_LIBUSB_1_0
+        if (    libusb_bulk_transfer( oriel_matrix.udev, EP8,
+                                      ( unsigned char * ) serial_number
+                                      + USB_READ_BUF_SIZE - 9,
+                                      len, &cnt, 0 )
+#endif
+             || cnt != len )
+        {
+            lower_permissions( );
+            print( FATAL, "Failed to read serial number.\n" );
+            T_free( serial_number );
+            THROW( EXCEPTION );
+        }
+
+        lower_permissions( );
+    }
 
     return serial_number;
 }

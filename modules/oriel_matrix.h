@@ -6,7 +6,7 @@
  *    Needs root privileges to access USB devices.
  *.   This driver has been modified [hacked :-)] to work with fsc2.
  *
- * Last updated August 19, 2008
+ * Last updated April 23, 2009
  *
  * This driver was developed using the ClearShotII - USB port interface
  * communications and control information specification provided by
@@ -65,11 +65,11 @@
 #define SCHEME_NUMBER      0x01
 
 
-/* Defines for endpoints */
+/* Define endpoint addresses */
 
-#define EP4  4   /* Endpoint 4 (instrument input) */
-#define EP6  6   /* Endpoint 6 (CCD image data stream) */
-#define EP8  8   /* Endpoint 8 (instrument output) */
+#define EP4 0x04   /* Endpoint 4 (instrument input) */
+#define EP6 0x86   /* Endpoint 6 (CCD image data out) */
+#define EP8 0x88   /* Endpoint 8 (instrument output) */
 
 
 /* Defines of commands that can be send to the device */
@@ -95,8 +95,8 @@
 #define CMD_GET_PIXEL_MODE            0x1D
 #define CMD_SET_PIXEL_MODE            0x1E
 #define CMD_RESET                     0x1F
-#define CMD_GET_CCD_TEMEPRATURE_INFO  0x2A
-#define CMD_SET_CCD_TEMEPRATURE_INFO  0x2B
+#define CMD_GET_CCD_TEMPERATURE_INFO  0x2A
+#define CMD_SET_CCD_TEMPERATURE_INFO  0x2B
 
 
 /* Defines of states for shutter related commands */

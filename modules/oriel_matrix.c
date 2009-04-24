@@ -1,14 +1,14 @@
 /*
- * Newport Oriel MMS Spectrometer Driver
+ * Newport Oriel MMS Spectrometer Module
  *
  * Notes:
  *    File requires oriel_matrix.h
  *    Needs root privileges to access USB devices
  *.   This driver has been modified [hacked :-)] to work with fsc2.
  *
- * Last updated August 19, 2008
+ * Last updated April 24, 2009
  *
- * This driver was developed using the ClearShotII - USB port interface
+ * This module was developed using the ClearShotII - USB port interface
  * communications and control information specification provided by Centice
  * Corporation (http://www.centice.com)
  *
@@ -61,19 +61,19 @@ int oriel_matrix_init_hook( void )
 
     oriel_matrix.udev                  = NULL;
 
-    oriel_matrix.has_shutter_support   = SET;
+    oriel_matrix.has_shutter_support      = SET;
 
-    oriel_matrix.is_temp               = UNSET;
-    oriel_matrix.has_temp_control      = SET;
-    oriel_matrix.requires_temp_control = UNSET;
+    oriel_matrix.is_temp                  = UNSET;
+    oriel_matrix.has_temp_control         = SET;
+    oriel_matrix.requires_temp_control    = UNSET;
 
-    oriel_matrix.min_test_temp         = HUGE_VAL;
-    oriel_matrix.max_test_temp         = - HUGE_VAL;
+    oriel_matrix.min_test_temp            = HUGE_VAL;
+    oriel_matrix.max_test_temp            = - HUGE_VAL;
 
-    oriel_matrix.is_exp_time           = UNSET;
+    oriel_matrix.is_exp_time              = UNSET;
 
-    oriel_matrix.min_test_exp_time     = HUGE_VAL;
-    oriel_matrix.max_test_exp_time     = - HUGE_VAL;
+    oriel_matrix.min_test_exp_time        = HUGE_VAL;
+    oriel_matrix.max_test_exp_time        = - HUGE_VAL;
 
     return 1;
 }
@@ -312,8 +312,8 @@ ccd_camera_get_spectrum( Var_T * v  UNUSED_ARG )
  * EDL function which returns the exposure time if v is NULL. 
  * If v is a float this function will set that as the CCD exposure time.
  *
- * Input:Var_T * v - a fsc2 variable which is either NULL or contains
- * a float
+ * Input: Var_T * v - a fsc2 variable which is either NULL or contains
+ *        a float
  *
  * Return value: Returns a fsc2 float which is the exposure time.
  *-----------------------------------------------------------------------*/
@@ -391,10 +391,10 @@ ccd_camera_exposure_time( Var_T * v )
 /*--------------------------------------------------------------*
  * EDL function which returns the temperature if v is NULL. 
  * If v is a float this function will set that as the
- * temperature.
+ * temperature (in Kelvin).
  *
- * Input:Var_T * v - a fsc2 variable which is either NULL or
- * contains a float
+ * Input: Var_T * v - a fsc2 variable which is either NULL or
+ *        contains a float
  *
  * Return value: Returns a fsc2 float which is the temperature.
  *--------------------------------------------------------------*/
