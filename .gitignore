@@ -104,3 +104,7 @@ utils/edl-mod.elc
 utils/edl.vim
 utils/me_dio_get_subdevices
 version.ugz
+edl/hmi/cw_epr_bruker
+edl/hmi/cw_epr_sr
+edl/hmi/monitor_bruker
+edl/hmi/monitor_sr
