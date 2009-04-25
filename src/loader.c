@@ -821,7 +821,7 @@ run_end_of_exp_hooks( void )
         TRY
         {
             call_push( NULL, cd, cd->device_name, cd->count );
-            if( ! cd->driver.end_of_exp_hook( ) )
+            if ( ! cd->driver.end_of_exp_hook( ) )
                 eprint( SEVERE, UNSET, "Resetting module '%s' after "
                         "experiment failed.\n", cd->name );
             call_pop( );

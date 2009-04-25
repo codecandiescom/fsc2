@@ -357,6 +357,7 @@ Var_T * ccd_camera_get_spectrum(  Var_T * /* v */ );
 
 
 void oriel_matrix_init( void );
+void oriel_matrix_close( void );
 double oriel_matrix_set_exposure_time( double /* time */ );
 double oriel_matrix_get_exposure_time( void );
 void oriel_matrix_reset( void );
@@ -366,7 +367,6 @@ unsigned char oriel_matrix_query_exposure( void );
 void oriel_matrix_end_exposure( unsigned char /* shutter_state */ );
 void oriel_matrix_open_CCD_shutter( void );
 void oriel_matrix_close_CCD_shutter( void );
-void oriel_matrix_close( void );
 unsigned short * oriel_matrix_get_pixel_hw( void );
 unsigned char oriel_matrix_get_CCD_BPP( void );
 struct exposure * oriel_matrix_get_exposure( void );

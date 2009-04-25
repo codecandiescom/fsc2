@@ -83,9 +83,11 @@ oriel_matrix_init( void )
     struct usb_bus *busses,
                    *bus;
     struct usb_device *dev = NULL;
-  
+
 
     fsc2_assert( oriel_matrix.udev == NULL );
+
+    oriel_matrix.udev = NULL;
 
     raise_permissions( );
 
@@ -115,6 +117,8 @@ oriel_matrix_init( void )
 
     if ( usb_set_configuration( oriel_matrix.udev, 1 ) < 0 )
     {
+        usb_close( oriel_matrix.udev );
+        oriel_matrix.udev = NULL;
         lower_permissions( );
         print( FATAL, "Can't set active configuration.\n" );
         THROW( EXCEPTION );
@@ -122,6 +126,8 @@ oriel_matrix_init( void )
 
     if ( usb_claim_interface( oriel_matrix.udev, 0 ) < 0 )
     {
+        usb_close( oriel_matrix.udev );
+        oriel_matrix.udev = NULL;
         lower_permissions( );
         print( FATAL, "Can't claim interface.\n" );
         THROW( EXCEPTION );
@@ -129,6 +135,9 @@ oriel_matrix_init( void )
 
     if ( usb_set_altinterface( oriel_matrix.udev, 0 ) < 0 )
     {
+        usb_release_interface( oriel_matrix.udev, 0 );
+        usb_close( oriel_matrix.udev );
+        oriel_matrix.udev = NULL;
         lower_permissions( );
         print( FATAL, "Can't set alternate interface.\n" );
         THROW( EXCEPTION );
@@ -139,7 +148,7 @@ oriel_matrix_init( void )
     oriel_matrix_get_info( );
     oriel_matrix_set_reconstruction( );
 }
-#else
+#elif defined WITH_LIBUSB_1_0
 void
 oriel_matrix_init( void )
 {
@@ -150,6 +159,8 @@ oriel_matrix_init( void )
 
 
     fsc2_assert( oriel_matrix.udev == NULL );
+
+    oriel_matrix.udev = NULL;
 
     raise_permissions( );
 
@@ -191,6 +202,7 @@ oriel_matrix_init( void )
 
     if ( libusb_open( dev, &oriel_matrix.udev ) )
     {
+        oriel_matrix.udev = NULL;
         libusb_free_device_list( list, 1 );
         lower_permissions( );
         print( FATAL, "Can't open connection to device.\n" );
@@ -201,6 +213,8 @@ oriel_matrix_init( void )
 
     if ( libusb_set_configuration( oriel_matrix.udev, 1 ) )
     {
+        libusb_close( oriel_matrix.udev );
+        oriel_matrix.udev = NULL;
         lower_permissions( );
         print( FATAL, "Can't set configuration for USB device.\n" );
         THROW( EXCEPTION );
@@ -208,6 +222,8 @@ oriel_matrix_init( void )
 
     if ( libusb_claim_interface( oriel_matrix.udev, 0 ) )
     {
+        libusb_close( oriel_matrix.udev );
+        oriel_matrix.udev = NULL;
         lower_permissions( );
         print( FATAL, "Can't claim interface for USB device.\n" );
         THROW( EXCEPTION );
@@ -215,6 +231,9 @@ oriel_matrix_init( void )
 
     if ( libusb_set_interface_alt_setting( oriel_matrix.udev, 0, 0 ) )
     {
+        libusb_release_interface( oriel_matrix.udev, 0 );
+        libusb_close( oriel_matrix.udev );
+        oriel_matrix.udev = NULL;
         lower_permissions( );
         print( FATAL, "Can't set alternate interface for USB device.\n" );
         THROW( EXCEPTION );
@@ -226,6 +245,37 @@ oriel_matrix_init( void )
     oriel_matrix_set_reconstruction( );
 }
 #endif
+
+
+/*-----------------------------------------------------------*
+ * This function will release the interface close the device
+ *
+ * Inputs: None
+ * 
+ * Return value: none
+ *-----------------------------------------------------------*/
+
+void
+oriel_matrix_close( void )
+{
+   if ( oriel_matrix.udev == NULL )
+       return;
+
+   oriel_matrix_close_CCD_shutter( );
+
+   raise_permissions( );
+
+#if defined WITH_LIBUSB_0_1
+   usb_release_interface( oriel_matrix.udev, 0 );
+   usb_close( oriel_matrix.udev );
+#elif defined WITH_LIBUSB_1_0
+   libusb_release_interface( oriel_matrix.udev, 0 );
+   libusb_close( oriel_matrix.udev );
+#endif
+
+   lower_permissions( );
+   oriel_matrix.udev = NULL;
+}
 
 
 /*----------------------------------------------------------------------*
@@ -459,35 +509,6 @@ void
 oriel_matrix_close_CCD_shutter( void )
 {
     oriel_matrix_communicate( CMD_CLOSE_CCD_SHUTTER );
-}
-
-
-/*-----------------------------------------------------*
- * This function will reset the device and release the
- * spectrometer's udev handle.
- *
- * Inputs: None
- * 
- * Return value: none
- *-----------------------------------------------------*/
-
-void
-oriel_matrix_close( void )
-{
-    oriel_matrix_close_CCD_shutter( );
-    raise_permissions( );
-
-#if defined WITH_LIBUSB_0_1
-    usb_reset( oriel_matrix.udev );
-    usb_close( oriel_matrix.udev );
-#elif defined WITH_LIBUSB_1_0
-    libusb_reset_device( oriel_matrix.udev );
-    libusb_release_interface( oriel_matrix.udev, 0 );
-    libusb_close( oriel_matrix.udev );
-#endif
-
-    lower_permissions( );
-    oriel_matrix.udev = NULL;
 }
 
 
@@ -1008,7 +1029,6 @@ oriel_matrix_communicate( unsigned char cmd,
     const char *err = NULL;
 #if defined WITH_LIBUSB_1_0
     int cnt;
-    int res;
 #endif
 
 
@@ -1179,63 +1199,21 @@ oriel_matrix_communicate( unsigned char cmd,
     if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
                             len, 0 ) != ( int ) len
          || usb_bulk_read( oriel_matrix.udev, reply_ep, ( char * ) readbuf,
-                           sizeof readbuf, 0 ) <= 0
-         || readbuf[ 6 ] == 0x00 )
-    {
-        lower_permissions( );
-        print( FATAL, err );
-        THROW( EXCEPTION );
-    }
+                           sizeof readbuf, 0 ) < 7
 #elif defined WITH_LIBUSB_1_0
-    if ( ( res = libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
-                                       len, &cnt, 0 ) ) != 0 )
+    if (    libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
+                                  len, &cnt, 0 )
+         || cnt != len
+         || libusb_bulk_transfer( oriel_matrix.udev, reply_ep, readbuf,
+                                  sizeof readbuf, &cnt, 0 )
+         || cnt < 7
+#endif
+         || readbuf[ 6 ] != 0x01 )
     {
         lower_permissions( );
         print( FATAL, err );
-        print( FATAL, "Sending data with libusb_bulk_transfer() failed, "
-               "error code is %d.\n", res );
-        THROW( EXCEPTION );
-    }
-
-    if ( cnt != len )
-    {
-        lower_permissions( );
-        print( FATAL, err );
-        print( FATAL, "Expected to send %d bytes but only %d got send.\n",
-               len, cnt );
-        THROW( EXCEPTION );
-    }
-
-    if ( ( res = libusb_bulk_transfer( oriel_matrix.udev, reply_ep, readbuf,
-                                       sizeof readbuf, &cnt, 0 ) ) != 0 )
-    {
-        lower_permissions( );
-        print( FATAL, err );
-        print( FATAL, "Reading data with libusb_bulk_transfer() failed, "
-               "error code is %d.\n", res );
-        THROW( EXCEPTION );
-    }
-
-    /* Response must have at least 7 bytes (but could be more!) */
-
-    if ( cnt < 7 )
-    {
-        lower_permissions( );
-        print( FATAL, err );
-        print( FATAL, "Expected to read at least 7 bytes but only got %d.\n",
-               cnt );
-        THROW( EXCEPTION );
-    }
-
-    if ( readbuf[ 6 ] != 0x01 )
-    {
-        lower_permissions( );
-        print( FATAL, err );
-        print( FATAL, "Transfer succeded but data received indicate failure "
-               "(byte 6 is 0x%02x%).\n", (unsigned int ) readbuf[ 6 ] );
         THROW( EXCEPTION );
     }        
-#endif
 
     lower_permissions( );
 

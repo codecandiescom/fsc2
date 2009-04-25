@@ -1638,9 +1638,9 @@ pipe_read( char   * buf,
        reading some data to return -1 (with errno set to EINTR) or to return
        the number of bytes already read.  The latter happens on newer Linux
        system with e.g. kernel 2.2.12 while on older systems, e.g. 2.0.36,
-       -1 is returned when the read is interrupted. Blocking all expected
-       signals while reading and using this rather lengthy loop tries to get
-       it right in both cases. */
+       -1 is returned when read got interrupted. Blocking all expected
+       signals while reading and using this rather lengthy loop tries to
+       get it right in both cases. */
 
     sigemptyset( &new_mask );
     if ( Fsc2_Internals.I_am == CHILD )
