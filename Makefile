@@ -451,6 +451,7 @@ adir             := $(fdir)/aux
 udir             := $(fdir)/utils
 ddir             := $(fdir)/doc
 cdir             := $(fdir)/config
+edir             := $(fdir)/edl
 ldir             := $(fdir)/FcntlLock
 mchdir           := $(fdir)/machines
 
@@ -965,6 +966,7 @@ endif
 	$(MAKE) http_server
 	$(MAKE) utils
 	$(MAKE) docs
+	$(MAKE) -C $(edir)
 
 config: fsc2_config.h
 	echo $(CONFFLAGS)
@@ -1085,8 +1087,8 @@ ifdef WITH_HTTP_SERVER
 	$(MAKE) -C FcntlLock install
 endif
 	$(MAKE) -C $(udir) install
-	$(MAKE) -C scripts install
 	$(MAKE) -C $(ddir) install
+	$(MAKE) -C $(edir) install
 
 
 # How to get rid of everything that got installed - requires that the
@@ -1104,8 +1106,8 @@ uninstall:
 	$(MAKE) -C $(sdir) uninstall
 	$(MAKE) -C $(mdir) uninstall
 	$(MAKE) -C $(udir) uninstall
-	$(MAKE) -C scripts uninstall
 	$(MAKE) -C $(ddir) uninstall
+	$(MAKE) -C $(edir) uninstall
 	if [ -z "`ls -A $(bindir)`" ]; then   \
 		rmdir $(bindir);                  \
 	fi
@@ -1152,14 +1154,12 @@ ifdef WITH_HTTP_SERVER
 endif
 	$(MAKE) -C $(udir) clean
 	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h *~
+	-$(MAKE) -C $(edir) clean
 	-$(MAKE) -C me6x00 clean
 	-$(MAKE) -C ni6601 clean
 	-$(MAKE) -C ni_daq clean
 	-$(MAKE) -C rulbus clean
 	-$(MAKE) -C witio_48 clean
-	-$(MAKE) -C edl/leiden clean
-	-$(MAKE) -C edl/frankfurt clean
-	-$(MAKE) -C edl/hmi clean
 
 
 # Create a tags file to be used with emacs
@@ -1207,7 +1207,7 @@ MANIFEST:
 	@$(MAKE) clean
 	@echo '# List of all (necessary) files of the package' > MANIFEST
 
-	@for dir in . $(ldir) $(adir) $(cdir) $(ddir) $(mdir) scripts $(sdir)  \
+	@for dir in . $(ldir) $(adir) $(cdir) $(ddir) $(mdir) $(sdir)          \
 		tests $(udir) me6x00 me6x00/driver me6x00/lib me6x00/utils ni6601  \
 		ni6601/driver ni6601/lib ni6601/utils witio_48 witio_48/driver     \
 		witio_48/lib witio_48/utils ni_daq ni_daq/driver                   \
