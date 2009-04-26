@@ -7,15 +7,14 @@
 === MODFREQ float_empty [ 0.000001 : 102 ] [ 100 ] "Modulation frequncy" "kHz"
 === MODAMP float_empty [ 0 : ] [ 1 ] "Modulation amplitude" "G"
 === MODPHASE float_empty [ -360 : 360 ] "Modulation phase" "°"
+=== PHASE_AS_OFFSET button [ OFF ] "Use phase as relative\nto calibration setting"
 === CHANNELS menu [ "X only", "X and Y" ] [ 2 ] "Lock-In channel(s)"
 DEVICES:
 
 er032m;
 sr830;
 eip371;
-=== if RESONATOR ne "Unspecified"
 epr_mod;
-=== endif
 
 
 VARIABLES:
@@ -49,6 +48,11 @@ mod_amp;
 li_freq;
 li_phase;
 TT;
+=== if defined MODPHASE
+phase = float( MODPHASE );
+=== else
+phase = 0.0;
+=== endif
 
 
 PREPARATIONS:
@@ -70,6 +74,22 @@ init_1d( 4, Num_Points, end_field, field_step, "Field [G]", "Signal [uV]" );
 
 EXPERIMENT:
 
+=== if PHASE_AS_OFFSET
+===   if RESONATOR eq "Unspecified"
+show_message( "Resonator is unspecified,\nso no phase calibration exists." );
+abort( );
+===   else
+===     if MODFREQ eq "Don't set" 
+IF ! epr_modulation_has_phase( "RESONATOR" " (ER023M)", lockin_ref_freq( ) ) {
+===     else
+IF ! epr_modulation_has_phase( "RESONATOR" " (ER023M)", MODFREQ ) {
+===     endif
+   show_message( "No calibration phase exists\nfor the selected resonator\nand modulation frequency." );
+   abort( );
+}
+===   endif
+=== endif
+
 /* Set up magnet related stuff */
 
 start_field = magnet_field( );
@@ -81,23 +101,32 @@ change_scale_1d( start_field, field_step );
 === else
 end_field = start_field - ( Num_Points - 1 ) * field_step;
 change_scale_1d( end_field, field_step );
+=== endif
 
 /* Set up the lock-in and get its settings */
 
-=== endif
 li_tc = lockin_time_constant( );
+
 === if defined MODPHASE
-lockin_phase( float( MODPHASE ) );
+===   if PHASE_AS_OFFSET and RESONATOR ne "Unspecified"
+===     if MODFREQ eq "Don't set"
+phase += epr_modulation_phase( "RESONATOR" " (ER023M)", lockin_ref_freq( ) );
+===     else
+phase += epr_modulation_phase( "RESONATOR" " (ER023M)", MODFREQ );
+===     endif
+===   endif
+lockin_phase( phase );
 === endif
+
 === if defined MODFREQ
 lockin_ref_freq( MODFREQ kHz );
 === endif
 === if defined MODAMP
 ===   if RESONATOR ne "Unspecified"
-lockin_ref_level( MODAMP G / epr_modulation_ratio( "RESONATOR" " (SR830)",
-                                                   lockin_ref_freq( ) ) );
+lockin_ref_level( MODAMP / epr_modulation_ratio( "RESONATOR" " (SR830)",
+                                                 lockin_ref_freq( ) ) );
 ===   else
-lockin_ref_level( MODAMP V );
+lockin_ref_level( MODAMP );
 ===   endif
 === endif
 li_sens = lockin_sensitivity( ) / 1 mV;

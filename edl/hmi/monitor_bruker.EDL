@@ -68,7 +68,10 @@ Sens2,
 MF,
 MA,
 Phase;
-
+=== if RESONATOR ne "Unspecified"
+PAO;
+PAO_state;
+=== endif
 
 PREPARATIONS:
 
@@ -139,7 +142,6 @@ MA = input_create( "FLOAT_INPUT", mod_ampl, "Modulation amplitude [%]" );
 === else
 MF = menu_create( "Modulation frequency",
                   sprint( "# kHz", freqs[ 1 ] / 1 kHz ) );
-print( "YYY #\n", mod_freq );
 menu_choice( MF, 1 );
 FOR I = 2 : size( freqs ) {
 	menu_add( MF, sprint( "# kHz", freqs[ I ] / 1 kHz ) );
@@ -156,6 +158,16 @@ MA = input_create( "FLOAT_INPUT", mod_ampl, "Modulation amplitude [G]" );
 === endif
 
 Phase = input_create( "FLOAT_INPUT", phase, "Modulation phase" );
+
+=== if RESONATOR ne "Unspecified"
+PAO = button_create( "PUSH_BUTTON",
+			         "Use phase as relative\nto calibration setting" );
+button_state( PAO, 0 );
+PAO_state = epr_modulation_has_phase( "RESONATOR" " (ER023M)", mod_freq );
+IF ! PAO_state {
+   object_enable( PAO, "OFF" );
+}
+=== endif
 
 Pause = button_create( "PUSH_BUTTON", "Pause acquisition" );
 button_state( Pause, Acq_State ? 0 : 1 );
@@ -303,6 +315,18 @@ FOREVER {
                       epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq );
 		lockin_ref_level( mod_ampl /
                     epr_modulation_ratio( "RESONATOR" " (ER023M)", mod_freq ) );
+
+        PAO_state = epr_modulation_has_phase( "RESONATOR" " (ER023M)",
+                                              mod_freq );
+		object_enable( PAO, PAO_state );
+		IF PAO_state AND button_state( PAO ) {
+			phase =   input_value( Phase )
+				    + epr_modulation_phase( "RESONATOR" " (ER023M)",
+                    	                    mod_freq );
+			lockin_phase( phase % 360.0 );
+		} ELSE {
+			input_value( Phase, lockin_phase( ) );
+		}
 === endif
 	}
 
@@ -322,11 +346,25 @@ FOREVER {
 	}
 
 	IF input_changed( Phase ) {
-		dval = input_value( Phase );
-		phase = dval % 360.0;
+		phase = input_value( Phase ) % 360.0;
 		input_value( Phase, phase );
-		lockin_phase( phase );
+=== if RESONATOR ne "Unspecified"
+		IF PAO_state AND button_state( PAO ) {
+			phase += epr_modulation_phase( "RESONATOR" " (ER023M)", mod_freq );
+		}
+=== endif
+		lockin_phase( phase % 360.0 );
 	}
+
+=== if RESONATOR ne "Unspecified"
+	IF button_changed( PAO ) {
+		phase = lockin_phase( );
+		IF button_state( PAO ) {
+			phase -= epr_modulation_phase( "RESONATOR" " (ER023M)", mod_freq );
+		} 
+		input_value( Phase, phase % 360.0 );
+	}
+=== endif
 
 	IF button_changed( Pause ) {
 		Acq_State = button_state( Pause ) ? 0 : 1;

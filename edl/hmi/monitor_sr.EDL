@@ -32,6 +32,8 @@ max_freq = 102 kHz;
 freqs[ * ];
 MF, MA;
 C;
+phase, raw_phase, new_phase;
+Phase, PAO, PAO_state;
 === endif
 
 Acq_State = 0, STOPPED = 0; UP = 1; DOWN = -1;
@@ -117,6 +119,17 @@ IF epr_modulation_calibration_can_extrapolate( "RESONATOR" " (SR830)" ) {
 mod_ampl =   raw_ampl
            * epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
 MA = input_create( "FLOAT_INPUT", mod_ampl, "Modulation amplitude [G]" );
+
+phase = lockin_phase( );
+raw_phase = phase;
+Phase = input_create( "FLOAT_INPUT", phase, "Modulation phase" );
+PAO = button_create( "PUSH_BUTTON",
+			         "Use phase as relative\nto calibration setting" );
+button_state( PAO, 0 );
+PAO_state = epr_modulation_has_phase( "RESONATOR" " (ER023M)", mod_freq );
+IF ! PAO_state {
+   object_enable( PAO, "OFF" );
+}
 === endif
 
 Pause = button_create( "PUSH_BUTTON", "Pause acquisition" );
@@ -176,10 +189,11 @@ FOREVER {
 
 === if RESONATOR ne 'Unspecified'
 	/* If we've got a resonator with a calibration we have to monitor manual
-	   changes to the modulation frequency and amplitude */
+	   changes to the modulation frequency, amplitude and phase */
 
 	new_mod_freq = lockin_ref_freq( );	
 	new_raw_ampl = lockin_ref_level( );
+	new_phase = lockin_phase( );
 
 	IF new_mod_freq != mod_freq {
 	    /* For a resonator that doesn't allow extrapolation don't allow
@@ -216,6 +230,16 @@ FOREVER {
                    * epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
 			output_value( MA, mod_ampl );
 		}
+
+		PAO_state = epr_modulation_has_phase( "RESONATOR" " (SR830)",
+		                                      mod_freq );
+		object_enable( PAO, PAO_state );
+		phase = lockin_phase( );
+		IF PAO_state AND button_state( PAO ) {
+			phase -= epr_modulation_phase( "RESONATOR" " (SR830)", mod_freq );
+			phase %= 360.0;
+		}
+		input_value( Phase, phase );
 	}
 
 	/* If the amplitude got changed manually show it in the modulation amplitude
@@ -226,6 +250,18 @@ FOREVER {
 		mod_ampl =   raw_ampl
                    * epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
 		output_value( MA, mod_ampl );
+	}
+
+	IF raw_phase != new_phase {
+		raw_phase = new_phase;
+		IF PAO_state AND button_state( PAO ) {
+			phase =  (   raw_phase
+			           - epr_modulation_phase( "RESONATOR" " (SR830)",
+					                           mod_freq ) ) % 360.0;
+		} ELSE {
+			phase = raw_phase;
+		}
+		input_value( Phase, phase );
 	}
 === endif
 
@@ -361,7 +397,31 @@ FOREVER {
                    * epr_modulation_ratio( "RESONATOR" " (SR830)", mod_freq );
 		input_value( MA, mod_ampl );
 	}
-=== endif	
+
+	IF input_changed( Phase ) {
+		new_phase = input_value( Phase );
+		IF new_phase != phase {
+			phase = new_phase % 360.0;
+			input_value( Phase, phase );
+			IF PAO_state AND button_state( PAO ) {
+				raw_phase = (   phase
+						  	  + epr_modulation_phase( "RESONATOR" " (SR830)",
+				                                      mod_freq ) ) % 360.0;
+			} ELSE {
+				raw_phase = phase;
+			}
+			lockin_phase( raw_phase );
+		}
+	}
+
+	IF button_changed( PAO ) {
+		phase = lockin_phase( );
+		IF button_state( PAO ) {
+			phase -= epr_modulation_phase( "RESONATOR" " (ER023M)", mod_freq );
+		} 
+		input_value( Phase, phase % 360.0 );
+	}
+=== endif
 
 	IF button_changed( Pause ) {
 		Acq_State = button_state( Pause ) ? 0 : 1;
