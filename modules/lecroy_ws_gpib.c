@@ -44,7 +44,7 @@ static void lecroy_ws_get_prep( int              ch,
 
 static bool lecroy_ws_talk( const char * cmd,
 							char       * reply,
-							ssize_t    * length );
+							long       * length );
 
 static void lecroy_ws_comm_failure( void );
 

@@ -63,7 +63,7 @@ bool
 lecroy_wr_init( const char * name )
 {
     char buf[ 100 ];
-    long len = sizeof buf;
+    ssize_t len = sizeof buf;
     int i;
     bool with_eoi;
 
@@ -125,7 +125,7 @@ lecroy_wr_init( const char * name )
 
 
 		len = 9;
-		if ( lecroy_vicp_write( "SCLK INT\n",&len, SET, UNSET ) != SUCCESS )
+		if ( lecroy_vicp_write( "SCLK INT\n", &len, SET, UNSET ) != SUCCESS )
             lecroy_wr_lan_failure( );
 
         /* Set or get the timebase (including the index in the table of
@@ -281,7 +281,7 @@ double
 lecroy_wr_get_timebase( void )
 {
     char reply[ 30 ];
-    long length = sizeof reply;
+    ssize_t length = sizeof reply;
     double timebase;
     int i;
 
@@ -315,7 +315,7 @@ bool
 lecroy_wr_set_timebase( double timebase )
 {
     char cmd[ 40 ] = "TDIV ";
-	long len;
+	ssize_t len;
 
 
     strcat( gcvt( timebase, 8, cmd + strlen( cmd ) ), "\n" );
@@ -335,7 +335,7 @@ bool
 lecroy_wr_get_interleaved( void )
 {
     char reply[ 30 ];
-    long length = sizeof reply;
+    ssize_t length = sizeof reply;
 
 
     lecroy_wr_talk( "ILVD?\n", reply, &length );
@@ -353,7 +353,7 @@ bool
 lecroy_wr_set_interleaved( bool state )
 {
     char cmd[ 30 ] = "ILVD ";
-	long len;
+	ssize_t len;
 
 
     strcat( cmd, state ? "ON\n" : "OFF\n" );
@@ -373,7 +373,7 @@ long
 lecroy_wr_get_memory_size( void )
 {
     char reply[ 30 ];
-    long length = sizeof reply;
+    ssize_t length = sizeof reply;
     long mem_size;
     long i;
     char *end_p;
@@ -426,7 +426,7 @@ bool
 lecroy_wr_set_memory_size( long mem_size )
 {
     char cmd[ 30 ];
-	long len;
+	ssize_t len;
 
 
     sprintf( cmd, "MSIZ %ld\n", mem_size );
@@ -447,7 +447,7 @@ lecroy_wr_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
-    long length = sizeof reply;
+    ssize_t length = sizeof reply;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -468,7 +468,7 @@ lecroy_wr_set_sens( int    channel,
                     double sens )
 {
     char cmd[ 40 ];
-	long len;
+	ssize_t len;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -491,7 +491,7 @@ double
 lecroy_wr_get_offset( int channel )
 {
     char buf[ 30 ];
-    long length = sizeof buf;
+    ssize_t length = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -512,7 +512,7 @@ lecroy_wr_set_offset( int    channel,
                       double offset )
 {
     char cmd[ 40 ];
-	long len;
+	ssize_t len;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -536,7 +536,7 @@ lecroy_wr_get_coupling( int channel )
 {
     int type = LECROY_WR_CPL_INVALID;
     char buf[ 100 ];
-    long length = sizeof buf;
+    ssize_t length = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY_WR_CH1 && channel <= LECROY_WR_CH_MAX );
@@ -576,7 +576,7 @@ lecroy_wr_set_coupling( int channel,
                         int type )
 {
     char cmd[ 30 ];
-	long len;
+	ssize_t len;
     char const *cpl[ ] = { "A1M", "D1M", "D50", "GND" };
 
 
@@ -601,7 +601,7 @@ int
 lecroy_wr_get_bandwidth_limiter( int channel )
 {
     char buf[ 30 ] = "BWL?\n";
-    long length = sizeof buf;
+    ssize_t length = sizeof buf;
     int mode = -1;
     char *ptr;
     const char *delim = " ";
@@ -682,7 +682,7 @@ lecroy_wr_set_bandwidth_limiter( int channel,
                                  int bwl )
 {
     char buf[ 50 ] = "GBWL?\n";
-    long length = sizeof buf;
+    ssize_t length = sizeof buf;
     int i;
 
 
@@ -767,7 +767,7 @@ int
 lecroy_wr_get_trigger_source( void )
 {
     char reply[ 100 ];
-    long length = sizeof reply;
+    ssize_t length = sizeof reply;
     int src = LECROY_WR_UNDEF;
     char *ptr = reply + 7;
 
@@ -809,7 +809,7 @@ bool
 lecroy_wr_set_trigger_source( int channel )
 {
     char cmd[ 40 ] = "TRSE STD,SR,";
-	long len;
+	ssize_t len;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -843,7 +843,7 @@ double
 lecroy_wr_get_trigger_level( int channel )
 {
     char buf[ 30 ];
-    long length = sizeof buf;
+    ssize_t length = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -873,7 +873,7 @@ lecroy_wr_set_trigger_level( int    channel,
                              double level )
 {
     char cmd[ 40 ];
-	long len;
+	ssize_t len;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -905,7 +905,7 @@ bool
 lecroy_wr_get_trigger_slope( int channel )
 {
     char buf[ 30 ];
-    long length = sizeof buf;
+    ssize_t length = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -941,7 +941,7 @@ lecroy_wr_set_trigger_slope( int channel,
                              bool slope )
 {
     char cmd[ 40 ];
-	long len;
+	ssize_t len;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -976,7 +976,7 @@ int
 lecroy_wr_get_trigger_coupling( int channel )
 {
     char buf[ 40 ];
-    long length = sizeof buf;
+    ssize_t length = sizeof buf;
     int cpl = -1;
 
 
@@ -1032,7 +1032,7 @@ lecroy_wr_set_trigger_coupling( int channel,
 {
     char cmd[ 40 ];
     const char *cpl_str[ ] = { "AC\n", "DC\n", "LFREJ\n", "HFREJ\n" };
-	long len;
+	ssize_t len;
 
 
     fsc2_assert(    (    channel >= LECROY_WR_CH1
@@ -1066,7 +1066,7 @@ int
 lecroy_wr_get_trigger_mode( void )
 {
     char buf[ 40 ];
-    long length = sizeof buf;
+    ssize_t length = sizeof buf;
     int mode = -1;
 
 
@@ -1096,7 +1096,7 @@ lecroy_wr_set_trigger_mode( int mode )
 {
     char cmd[ 40 ] = "TRMD ";
     const char *mode_str[ ] = { "AUTO\n", "NORM\n", "SINGLE\n", "STOP\n" };
-	long len;
+	ssize_t len;
 
 
     fsc2_assert(    mode >= LECROY_WR_TRG_MODE_AUTO
@@ -1120,7 +1120,7 @@ double
 lecroy_wr_get_trigger_delay( void )
 {
     char reply[ 40 ];
-    long length = sizeof reply;
+    ssize_t length = sizeof reply;
 
 
     lecroy_wr_talk( "TRDL?\n", reply, &length );
@@ -1146,7 +1146,7 @@ bool
 lecroy_wr_set_trigger_delay( double delay )
 {
     char cmd[ 40 ] = "TRDL ";
-	long len;
+	ssize_t len;
 
 
     /* For positive delay (i.e. pretrigger) the delay must be set as a
@@ -1172,7 +1172,7 @@ bool
 lecroy_wr_is_displayed( int ch )
 {
     char cmd[ 30 ];
-    long length = sizeof cmd;
+    ssize_t length = sizeof cmd;
 
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
@@ -1204,7 +1204,7 @@ lecroy_wr_display( int ch,
                    int on_off )
 {
     char cmd[ 30 ];
-	long len;
+	ssize_t len;
 
 
     if ( ch >= LECROY_WR_CH1 && ch <= LECROY_WR_CH_MAX )
@@ -1272,7 +1272,7 @@ lecroy_wr_start_acquisition( void )
     int ch;
     char cmd[ 100 ];
     bool do_averaging = UNSET;
-	long len;
+	ssize_t len;
 
 
     /* Stop the digitizer (also switches to "STOPPED" trigger mode) */
@@ -1376,7 +1376,7 @@ lecroy_wr_get_prep( int              ch,
     char cmd[ 100 ];
     char ch_str[ 3 ];
     bool is_mem_ch = UNSET;
-	long len;
+	ssize_t len;
 
 
     CLOBBER_PROTECT( data );
@@ -1608,7 +1608,7 @@ lecroy_wr_copy_curve( long src,
                       long dest )
 {
     char cmd[ 100 ] = "STO ";
-	long len;
+	ssize_t len;
 
 
     fsc2_assert(    ( src >= LECROY_WR_CH1 && src <= LECROY_WR_CH_MAX )
@@ -1639,37 +1639,40 @@ lecroy_wr_get_data( long * len )
     unsigned char *data;
     char len_str[ 10 ];
     bool with_eoi;
+    ssize_t length;
 
 
     /* First thing we read is something like "DAT1,#[0-9]" where the number
        following the '#' is the number of bytes to be read next */
 
-    *len = 7;
-	if ( lecroy_vicp_read( len_str, len, &with_eoi, UNSET ) == FAILURE )
+    length = 7;
+	if ( lecroy_vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE )
         lecroy_wr_lan_failure( );
 
-    len_str [ *len ] = '\0';
-    *len = T_atol( len_str + 6 );
+    len_str [ length ] = '\0';
+    length = T_atol( len_str + 6 );
 
-    fsc2_assert( *len > 0 );
+    fsc2_assert( length > 0 );
 
     /* Now get the number of bytes to read */
 
-	if ( lecroy_vicp_read( len_str, len, &with_eoi, UNSET ) == FAILURE )
+	if ( lecroy_vicp_read( len_str, &length, &with_eoi, UNSET ) == FAILURE )
         lecroy_wr_lan_failure( );
 
-    len_str[ *len ] = '\0';
-    *len = T_atol( len_str );
+    len_str[ length ] = '\0';
+    length = T_atol( len_str );
 
-    fsc2_assert( *len > 0 );
+    fsc2_assert( length > 0 );
 
     /* Obtain enough memory and then read all the data */
 
-    data = T_malloc( *len );
+    data = T_malloc( length );
 
-	if ( lecroy_vicp_read( ( char * ) data, len, &with_eoi, UNSET ) != SUCCESS )
+	if ( lecroy_vicp_read( ( char * ) data, &length, &with_eoi, UNSET )
+                                                                   != SUCCESS )
         lecroy_wr_lan_failure( );
 
+    *len = length;
     return data;
 }
 
@@ -1684,7 +1687,7 @@ lecroy_wr_get_int_value( int          ch,
                          const char * name )
 {
     char cmd[ 100 ];
-    long length = sizeof cmd;
+    ssize_t length = sizeof cmd;
     char *ptr = cmd;
     long val = 0;
 
@@ -1732,7 +1735,7 @@ lecroy_wr_get_float_value( int          ch,
                            const char * name )
 {
     char cmd[ 100 ];
-    long length = sizeof cmd;
+    ssize_t length = sizeof cmd;
     char *ptr = cmd;
     double val = 0.0;
 
@@ -1776,7 +1779,7 @@ lecroy_wr_get_float_value( int          ch,
 bool
 lecroy_wr_command( const char * cmd )
 {
-	long len = strlen( cmd );
+	ssize_t len = strlen( cmd );
 
 
 	if ( lecroy_vicp_write( cmd, &len, SET, UNSET ) != SUCCESS )
@@ -1797,7 +1800,7 @@ static unsigned int
 lecroy_wr_get_inr( void )
 {
     char reply[ 10 ] = "INR?";
-    long length = sizeof reply;
+    ssize_t length = sizeof reply;
 
 
     lecroy_wr_talk( "INR?\n", reply, &length );
