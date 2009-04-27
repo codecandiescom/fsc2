@@ -282,7 +282,7 @@ double
 lecroy_ws_get_timebase( void )
 {
     char reply[ 30 ];
-    ssize_t len = sizeof reply;
+    long len = sizeof reply;
     double timebase;
     size_t i;
 
@@ -336,7 +336,7 @@ bool
 lecroy_ws_get_interleaved( void )
 {
     char reply[ 30 ];
-    ssize_t len = sizeof reply;
+    long len = sizeof reply;
 
 
     if ( ! lecroy_ws_talk( "ILVD?", reply, &len ) )
@@ -373,7 +373,7 @@ long
 lecroy_ws_get_memory_size( void )
 {
     char reply[ 30 ];
-    ssize_t len = sizeof reply;
+    long len = sizeof reply;
     long mem_size;
 
 
@@ -425,7 +425,7 @@ lecroy_ws_get_sens( int channel )
 {
     char cmd[ 20 ];
     char reply[ 30 ];
-    ssize_t len = sizeof reply;
+    long len = sizeof reply;
 
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
@@ -469,7 +469,7 @@ double
 lecroy_ws_get_offset( int channel )
 {
     char buf[ 30 ];
-    ssize_t len = sizeof buf;
+    long len = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
@@ -514,7 +514,7 @@ lecroy_ws_get_coupling( int channel )
 {
     int type = LECROY_WS_CPL_INVALID;
     char buf[ 100 ];
-    ssize_t len = sizeof buf;
+    long len = sizeof buf;
 
 
     fsc2_assert( channel >= LECROY_WS_CH1 && channel <= LECROY_WS_CH_MAX );
@@ -578,7 +578,7 @@ int
 lecroy_ws_get_bandwidth_limiter( int channel )
 {
     char buf[ 30 ] = "BWL?";
-    ssize_t len = sizeof buf;
+    long len = sizeof buf;
     int mode = -1;
     char *ptr;
     char look_for[ 4 ];
@@ -663,7 +663,7 @@ int
 lecroy_ws_get_trigger_source( void )
 {
     char reply[ 100 ];
-    ssize_t len = sizeof reply;
+    long len = sizeof reply;
     int src;
     char *ptr = reply + 7;
 
@@ -738,7 +738,7 @@ double
 lecroy_ws_get_trigger_level( int channel )
 {
     char buf[ 30 ];
-    ssize_t len = sizeof buf;
+    long len = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY_WS_CH1
@@ -800,7 +800,7 @@ bool
 lecroy_ws_get_trigger_slope( int channel )
 {
     char buf[ 30 ];
-    ssize_t len = sizeof buf;
+    long len = sizeof buf;
 
 
     fsc2_assert(    (    channel >= LECROY_WS_CH1
@@ -869,7 +869,7 @@ int
 lecroy_ws_get_trigger_coupling( int channel )
 {
     char buf[ 40 ];
-    ssize_t len = sizeof buf;
+    long len = sizeof buf;
     int cpl = -1;
 
 
@@ -957,7 +957,7 @@ int
 lecroy_ws_get_trigger_mode( void )
 {
     char buf[ 40 ];
-    ssize_t len = sizeof buf;
+    long len = sizeof buf;
     int mode = -1;
 
 
@@ -1009,7 +1009,7 @@ double
 lecroy_ws_get_trigger_delay( void )
 {
     char reply[ 40 ];
-    ssize_t len = sizeof reply;
+    long len = sizeof reply;
 
 
     if ( ! lecroy_ws_talk( "TRDL?", reply, &len ) )
@@ -1061,7 +1061,7 @@ bool
 lecroy_ws_is_displayed( int ch )
 {
     char cmd[ 130 ];
-    ssize_t len = sizeof cmd;
+    long len = sizeof cmd;
 
 
     if ( ch >= LECROY_WS_CH1 && ch <= LECROY_WS_CH_MAX )
@@ -1540,9 +1540,9 @@ lecroy_ws_get_data( long * length )
 {
     unsigned char *data;
     char len_str[ 10 ];
-    ssize_t len;
-    ssize_t gotten;
-    ssize_t to_get;
+    long len;
+    long gotten;
+    long to_get;
 
 
     /* First thing we read is something like "DAT1,#[0-9]" where the number
@@ -1620,7 +1620,7 @@ lecroy_ws_get_int_value( int          ch,
                          const char * name )
 {
     char cmd[ 100 ];
-    ssize_t len = sizeof cmd;
+    long len = sizeof cmd;
     char *ptr;
 
 
@@ -1655,7 +1655,7 @@ lecroy_ws_get_float_value( int          ch,
                            const char * name )
 {
     char cmd[ 100 ];
-    ssize_t len = sizeof cmd;
+    long len = sizeof cmd;
     char *ptr = cmd;
 
 
@@ -1707,7 +1707,7 @@ static unsigned int
 lecroy_ws_get_inr( void )
 {
     char reply[ 10 ];
-    ssize_t len = sizeof reply;
+    long len = sizeof reply;
 
 
     if ( ! lecroy_ws_talk( "INR?", reply, &len ) )
