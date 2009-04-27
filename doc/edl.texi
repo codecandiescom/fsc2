@@ -532,8 +532,8 @@ There are some situations where one doesn't know the size of an array in
 advance, e.g.@: the size of an array to be used for storing a trace
 from a digitizer or the size of a 2-dimensional field for a complete
 picture from a CCD-camera. So declaring the size in advance in the
-@code{VARIABLES} section is harly possible. To handle these kinds o
-situations one can create arrays with sizes that change automatically
+@code{VARIABLES} section is harly possible. To handle this kind of
+situation one can create arrays with sizes that change automatically
 when required. This is done by specifying a @code{*} instead of a number
 for the size:
 @example
@@ -542,7 +542,7 @@ h[ 2, * ];
 I[ *, *, * ];
 @end example
 @noindent
-These three statements define an 1-dimensional integer array @code{G} with
+These three statements define a 1-dimensional integer array @code{G} with
 a non-fixed (and still unknown) number of elements, a 2-dimensional
 floating point matrix @code{h} with two rows of unknown length and a
 3-dimensional array with all sizes being variable sized.
@@ -595,7 +595,7 @@ variable sized array by assigning another array to it. If @code{M}
 had already been given a length by e.g.@: assigning a value to its 25th
 element then assigning it the shorter array @code{H} will automatically
 shorten it to 10 elements and the values stored in the 11th to the 25th
-element are removed!
+element are lost!
 
 To understand how more-dimensional, variable sized arrays work it is
 probably best to think of them not in terms of matrices but of arrays
@@ -700,7 +700,7 @@ the array is automatically assigned to all of the sub-arrays of the
 matrix. If you have in the @code{VARIABLES} section:
 @example
 z1[ 2 ] = @{ 3, 5 @};
-z2[ 2, * ] = xx;
+z2[ 2, * ] = z1;
 @end example
 @noindent
 this will set up both the sub-arrays of @code{z2} to have 2 elements each
