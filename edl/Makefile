@@ -17,6 +17,7 @@
 #  the Free Software Foundation, 59 Temple Place - Suite 330,
 #  Boston, MA 02111-1307, USA.
 
+
 all:
 	for d in `ls`; do                            \
 		if [ -d $$d -a -r $$d/Makefile ]; then   \
@@ -25,18 +26,16 @@ all:
 	done
 
 install:
-	if [    -d $(machine_name)
+	if [    -d $(machine_name)                   \
 	     -a -r $(machine_name)/Makefile ]; then  \
 		$(MAKE) -C $(machine_name) install;      \
-		fi                                       \
-	done
+	fi
 
 uninstall:
-	if [    -d $(machine_name)
+	if [    -d $(machine_name)                   \
 	     -a -r $(machine_name)/Makefile ]; then  \
 		$(MAKE) -C $(machine_name) uninstall;    \
-		fi                                       \
-	done
+	fi
 
 clean:
 	for d in `ls`; do                            \

@@ -28,14 +28,20 @@ all: $(scripts)
 
 install:
 	@for f in `ls`; do                                      \
-		if [ -x $f ]; then  \
+		if [ -x $f ]; then                                  \
 			echo "cp $$f $(bindir)/$$f.$(machine_name)";    \
 	    	cp $$f $(bindir)/$$f.$(machine_name);           \
-		fi;                                                 \
+		fi                                                  \
 	done
 
 uninstall:
-	$(RM) $(RMFLAGS) $(bindir)/*.$(machine_name)
+	@for f in `ls`; do                                              \
+		if [    -x $$f                                              \
+			 -a -f $(bindir)/$$f                                    \
+			 -a ! diff $$f $(bindir)/$$f > /dev/null 2>&1 ]; then   \
+			$(RM) $(RMFLAGS) $(bindir)/$$f;                         \
+		fi                                                          \
+	done
 
 clean:
 	$(RM) $(RMFLAGS) $(patsubst %.EDL,%,$(EDL)) *~
