@@ -20,8 +20,7 @@
 
 all:
 	-@export LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:$(sdir):$(mdir):$(cdir);  \
-	for f in *.edl; do              \
-		echo "Running $$f";         \
-		$(fdir)/src/fsc2 -X2 $$f;   \
-	done; \
-	echo "Tests completed succesfully."
+	for f in *.edl; do                                                   \
+		echo "Running $$f";                                              \
+		$(fdir)/src/fsc2 -X2 $$f;                                        \
+	done;
