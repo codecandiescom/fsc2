@@ -39,7 +39,7 @@ static long spectrapro_300i_Lc,
 
 static struct {
     double val[ 3 ];
-    bool is_calib[ 3 ];
+    bool   is_calib[ 3 ];
 } spectrapro_300i_calibs[ MAX_GRATINGS ];
 
 

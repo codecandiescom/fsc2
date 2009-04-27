@@ -552,17 +552,31 @@ rs_spec10_get_pic( uns32 * size )
        found. Thus we must make sure they can get loaded by temporarily
        switching to the directory where the files reside.  Hopefully, this
        problem will go away in the future versions of the library (but don't
-       hold your breath, since the bug report I send more than one year ago
+       hold your breath, since the bug report I sent more than one year ago
        nothing seems to have changed...) */
 
-    getcwd( cur_dir, PATH_MAX );
-    chdir( PVCAM_DATA_DIR );
+    if ( getcwd( cur_dir, PATH_MAX ) == NULL )
+    {
+        lower_permissions( );
+        print( FATAL, "Can record current working directory.\n" );
+        THROW( EXCEPTION );
+    }
+
+    if ( chdir( PVCAM_DATA_DIR ) )
+    {
+        lower_permissions( );
+        print( FATAL, "Can go to directory with PVCAM specific data '%s'.\n",
+               PVCAM_DATA_DIR );
+        THROW( EXCEPTION );
+    }        
 
 #if ! defined RS_SPEC10_TEST
 
     if ( ! pl_exp_init_seq( ) )
     {
-        chdir( cur_dir );
+        if ( chdir( cur_dir ) )
+            print( SEVERE, "Can't go to previous working directory, be very "
+                   "careful!\n" );
         rs_spec10_error_handling( );
     }
 
@@ -570,7 +584,9 @@ rs_spec10_get_pic( uns32 * size )
                              rs_spec10->ccd.exp_time, size ) )
     {
         pl_exp_uninit_seq( );
-        chdir( cur_dir );
+        if ( chdir( cur_dir ) )
+            print( SEVERE, "Can't go to previous working directory, be very "
+                   "careful!\n" );
         rs_spec10_error_handling( );
     }
 
@@ -596,10 +612,12 @@ rs_spec10_get_pic( uns32 * size )
 #endif /* ! defined RS_SPEC10_TEST */
 
         lower_permissions( );
-
-        chdir( cur_dir );
+        if ( chdir( cur_dir ) )
+            print( SEVERE, "Can't go to previous working directory, be very "
+                   "careful!\n" );
         THROW( EXCEPTION );
     }
+
 #endif
 
     /* Now we need memory for storing the new picture. The manual requires
@@ -625,7 +643,9 @@ rs_spec10_get_pic( uns32 * size )
     }
     OTHERWISE
     {
-        chdir( cur_dir );
+        if ( chdir( cur_dir ) )
+            print( SEVERE, "Can't go to previous working directory, be very "
+                   "careful!\n" );
 
 #if ! defined RS_SPEC10_TEST
 
@@ -642,7 +662,9 @@ rs_spec10_get_pic( uns32 * size )
 #if ! defined RS_SPEC10_TEST
     if ( ! pl_exp_start_seq( rs_spec10->handle, frame ) )
     {
-        chdir( cur_dir );
+        if ( chdir( cur_dir ) )
+            print( SEVERE, "Can't go to previous working directory, be very "
+                   "careful!\n" );
         pl_exp_abort( rs_spec10->handle, CCS_HALT );
         pl_exp_uninit_seq( );
 
@@ -681,7 +703,9 @@ rs_spec10_get_pic( uns32 * size )
 
         lower_permissions( );
         T_free( frame );
-        chdir( cur_dir );
+        if ( chdir( cur_dir ) )
+            print( SEVERE, "Can't go to previous working directory, be very "
+                   "careful!\n" );
         RETHROW( );
     }
 
@@ -722,7 +746,9 @@ rs_spec10_get_pic( uns32 * size )
 #endif
 
     lower_permissions( );
-    chdir( cur_dir );
+    if ( chdir( cur_dir ) )
+        print( SEVERE, "Can't go to previous working directory, be very "
+               "careful!\n" );
     return frame;
 }
 

@@ -3038,7 +3038,8 @@ Scientific} Spec-10 CCD camera, LN-cooled
 the PVCAM library (at least version 2.6.4-2) that are both available
 from Roper Scientific. Please note that @code{fsc2} needs to be linked
 against librt and libraw1394 when newer versions (2.7 and above) of the
-PVCAM library are used.
+PVCAM library are used. Please also note that currently only 2-bit
+versions of the libraries seem to be available. 
 
 @paragraphindent 0
 Note: Several important parameters of the camera need to be set in the
