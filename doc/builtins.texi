@@ -465,7 +465,7 @@ window (originally set in the call of @code{@ref{init_1d()}}) after an
 experiment has been started. The function can be passed a maximum of
 two arguments, the new start value of the @i{x}-axis and the new
 @i{x}-increment.If one of these values should remain unchanged a
-string (e.g.@ @code{"keep"}) instead of a value can be passed as the
+string (e.g.@: @code{"keep"}) instead of a value can be passed as the
 argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
@@ -481,7 +481,7 @@ experiment has been started. The function accepts up to four
 arguments, the new start value of the @i{x}-axis, the new
 @i{x}-increment, a new start value for the @i{y}-axis as well as the
 @i{y}-increment. If one of these values should remain unchanged a
-string (e.g.@ @code{"keep"}) instead of a value can be passed as the
+string (e.g.@: @code{"keep"}) instead of a value can be passed as the
 argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
@@ -499,7 +499,7 @@ function can be passed a maximum of two arguments, the new start value
 of the @i{x}-axis and the new @i{x}-increment. For two-dimensional
 display the function also accepts a new start value for the @i{y}-axis
 as well as the @i{y}-increment. If one of these values should remain
-unchanged a string (e.g.@ @code{"keep"}) instead of a value can be
+unchanged a string (e.g.@: @code{"keep"}) instead of a value can be
 passed as the argument.
 
 This function can only be used in the @code{EXPERIMENT} section of an
@@ -549,7 +549,7 @@ This function can only be used in the @code{EXPERIMENT} section of an
 Using this function the labels at the axis of the 1D-display window can
 be changed from within as @code{EDL} script. It accepts up to two
 strings for the @i{x}- and @i{y}-axis labels. To leave a label unchanged
-pass the function an empty string, i.e.@ @code{""}. If no label should
+pass the function an empty string, i.e.@: @code{""}. If no label should
 be drawn pass it a string that just contains one (or more) space
 characters, i.e.@: @w{@code{" "}}.
 
@@ -564,7 +564,7 @@ Using this function the labels at the axis of the 2D-display window
 (and, if shown, of the cross section window) can be changed from within
 as @code{EDL} script. It accepts up to three strings for the @i{x}-,
 @i{y}-axis and @i{z}-axis label. To leave a label unchanged pass the
-function an empty string, i.e.@ @code{""}. If no label should be drawn
+function an empty string, i.e.@: @code{""}. If no label should be drawn
 pass it a string that just contains one (or more) space characters,
 i.e.@: @w{@code{" "}}.
 
@@ -581,7 +581,7 @@ if shown, of the cross section window) can be changed from within as
 used (but not both). For 1D-display it accepts up to two strings for the
 @i{x}- and @i{y}-axis labels, for 2D-display up to three, the third for
 the @i{z}-axis label. To leave a label unchanged pass the function an
-empty string, i.e.@ @code{""}. If no label should be drawn pass it a
+empty string, i.e.@: @code{""}. If no label should be drawn pass it a
 string that just contains one (or more) space characters, i.e.@:
 @w{@code{" "}}.
 
@@ -650,18 +650,18 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{zoom_1d()}
 @findex zoom_1d()
 @item zoom_1d()
-This function can be used to zoom into (or out of) the 1D display window
-as well as shifting the contents of the window, just like you can do
-using the mouse. It expects at least one and up to four arguments. The
-first one is either the point number of the point to show at the leftmost
-position in the window. The second is the number of points to be shown
-within the 1D window. The third value is the smallest @i{y}-value still
-to be shown in the 1D window. The fourth and last optional argument is
-the span of @i{y}-values to show in the 1D window. The number of points
-to be shown in @i{x}-direction must be larger than @code{1} and the
-@i{y}-span must be larger than @code{0}. If an argument is not given or
-is given as an arbitrary string (e.g. @code{"KEEP"}) the corresponding
-value remains unchanged.
+This function can be used to zoom into (or out of) the 1D display
+window as well as shifting the contents of the window, just like you
+can do using the mouse. It expects at least one and up to four
+arguments. The first one is either the point number of the point to
+show at the leftmost position in the window. The second is the number
+of points to be shown within the 1D window. The third value is the
+smallest @i{y}-value still to be shown in the 1D window. The fourth
+and last optional argument is the span of @i{y}-values to show in the
+1D window. The number of points to be shown in @i{x}-direction must be
+larger than @code{1} and the @i{y}-span must be larger than @code{0}.
+If an argument is not given or is given as an arbitrary string (e.g.@:
+@code{"KEEP"}) the corresponding value remains unchanged.
 
 The function returns the value @code{1} to indicate success or @code{0}
 if it is impossible to set the zoom (since no scaling has been set for
@@ -689,7 +689,7 @@ determine the @i{z}-range to be displayed, the sixth argument being
 the lowest-valued @i{z}-value and the last argument the @i{z}-span.
 Both the number of points in @i{x}- and @i{y}-direction must be
 numbers larger than @code{1} and the @i{z}-span larger than @code{0}.
-If an argument is not given or is given as an arbitrary string (e.g.
+If an argument is not given or is given as an arbitrary string (e.g.@:
 @code{"KEEP"}) the corresponding value remains unchanged.
 
 The function returns the value @code{1} to indicate success or @code{0}
@@ -859,13 +859,14 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex curve_button_1d()
 @item curve_button_1d()
 If invoked with a single argument, a number between @code{1} and the
-maximum number of curves displayed in the 1D display window, it returns
-@code{0} if the button for that curve (at the upper left hand side of
-the 1D display window) is switched off (i.e. the curve is exempt from
-rescaling operations) and @code{1} if its on. If called with a second,
-boolean argument (i.e. either a string,@code{"ON"} or @code{"OFF"}, or
-a number with @code{0} standing for off and a non-zero number for on),
-the state of the button for the curve is changed accordingly.
+maximum number of curves displayed in the 1D display window, it
+returns @code{0} if the button for that curve (at the upper left hand
+side of the 1D display window) is switched off (i.e.@: the curve is
+exempt from rescaling operations) and @code{1} if its on. If called
+with a second, boolean argument (i.e.@: either a string,@code{"ON"} or
+@code{"OFF"}, or a number with @code{0} standing for off and a
+non-zero number for on), the state of the button for the curve is
+changed accordingly.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -874,20 +875,21 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @anchor{curve_button_2d()}
 @findex curve_button_2d()
 @item curve_button_2d()
-If invoked with no argument the number of the currently displaye 2D curve
-(i.e. a number between @code{1} and the maximum number of curves displayed
-in the 2D display window) is returned, or @code{0} if no curve is displayed
-at the moment.
+If invoked with no argument the number of the currently displaye 2D
+curve (i.e.@: a number between @code{1} and the maximum number of
+curves displayed in the 2D display window) is returned, or @code{0} if
+no curve is displayed at the moment.
 
 If invoked with a single argument, a number between @code{1} and the
-maximum number of curves displayed in the 2D display window, it returns
-@code{0} if the button for that curve (at the upper left hand side of
-the 1D display window) is switched off (i.e. the curve is not shown) and
-@code{1} if the curve is currently shown.
+maximum number of curves displayed in the 2D display window, it
+returns @code{0} if the button for that curve (at the upper left hand
+side of the 1D display window) is switched off (i.e.@: the curve is
+not shown) and @code{1} if the curve is currently shown.
 
-If called with a second, boolean argument (i.e. either a string,@code{"ON"}
-or @code{"OFF"}, or a number with @code{0} standing for off and a non-zero
-number for on), the state of the button for the curve is changed accordingly.
+If called with a second, boolean argument (i.e.@: either a
+string,@code{"ON"} or @code{"OFF"}, or a number with @code{0} standing
+for off and a non-zero number for on), the state of the button for the
+curve is changed accordingly.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -908,10 +910,10 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex fs_button_1d()
 @item fs_button_1d()
 If invoked without an argument the function returns @code{1} if the
-@code{FS} (Full Scale) button is switched on (automatic rescaling
-is enabled) and @code{0} if it's switched off. If called with a
-boolean argument (i.e. either a string,@code{"ON"} or @code{"OFF"},
-or a number with @code{0} standing for off and a non-zero number for on),
+@code{FS} (Full Scale) button is switched on (automatic rescaling is
+enabled) and @code{0} if it's switched off. If called with a boolean
+argument (i.e.@: either a string,@code{"ON"} or @code{"OFF"}, or a
+number with @code{0} standing for off and a non-zero number for on),
 the state of the button is changed accordingly and automatic rescaling
 enabled or disabled.
 
@@ -923,16 +925,16 @@ This function can only be used in the @code{EXPERIMENT} section of an
 @findex fs_button_2d()
 @item fs_button_2d()
 If invoked with a single argument, a number between @code{1} and the
-maximum number of curves displayed in the 2D display window, it returns
-@code{1} if the @code{FS} (Full Scale) button for that curve is switched
-on (i.e. the curve will be rescaled automatically) and @code{0} if
-the @code{FS} button for the curve is switched off.
+maximum number of curves displayed in the 2D display window, it
+returns @code{1} if the @code{FS} (Full Scale) button for that curve
+is switched on (i.e.@: the curve will be rescaled automatically) and
+@code{0} if the @code{FS} button for the curve is switched off.
 
-If called with a second, boolean argument (i.e. either a string,@code{"ON"}
-or @code{"OFF"}, or a number with @code{0} standing for off and a non-zero
-number for on), the state of the @code{FS} button for the curve designated
-by the first argument is changed accordingly and automatic rescaling is
-enabled or disabled.
+If called with a second, boolean argument (i.e.@: either a
+string,@code{"ON"} or @code{"OFF"}, or a number with @code{0} standing
+for off and a non-zero number for on), the state of the @code{FS}
+button for the curve designated by the first argument is changed
+accordingly and automatic rescaling is enabled or disabled.
 
 This function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -2329,7 +2331,7 @@ Returns the inverse of the hyperbolic tangent function of the argument
 @item ceil()
 Converts a floating point number (or all the elements of an 1- or
 more-dimensional array) to the smallest integer that is not less than
-the argument, i.e.@:
+the argument, i.e.
 
 @example
 round( 8.6 ) = 9     round( -8.6 ) = -8
@@ -2363,7 +2365,7 @@ array) to floating point type.
 @item floor()
 Converts a floating point number (or all the elements of an 1- or
 more-dimensional array) to the largest integer that is not larger than
-the argument, i.e.@:
+the argument, i.e.
 
 @example
 floor( 8.6 ) = 8    floor( -8.6 ) = -9
@@ -2412,7 +2414,7 @@ point.
 @findex round()
 @item round()
 Converts a floating point number (or all the elements of an 1- or
-more-dimensional array) to the nearest integer, i.e.@:
+more-dimensional array) to the nearest integer, i.e.
 
 @example
 round( 8.5 ) = 9    round( 8.49 ) = 8    round( -1.75 ) = -2
@@ -3066,7 +3068,7 @@ restrictions in mind.
 
 The function calculates numerically the first derivative of the 1-dimensional
 arrays by computing the differences between neighboring points of the array.
-It then goes on the calculate the mean and the standard deviation of the
+It then goes on calculating the mean and the standard deviation of the
 derivatives and picks the points where the derivative deviates by more than
 a certain factor (to be specified as one of the arguments to the function)
 of the standard deviation from the mean value. These "outliers" are further
@@ -3076,37 +3078,39 @@ In the next step all points are discarded where no other "outlier" with the
 opposite derivative is within its vicinity (another argument to be passed
 to the function). Only the remaining points are taken to be spikes.
 
-To summarize: a structure in the spectrum to be recognized as a spike must
-satisfy two conditions. First, there must be an usually large derivative and,
-at the same time, another unusually large derivative, but with opposite sign,
-must exist in the near vicinity (and there's some special treatment for
-spikes at the very fringes of the spectrum in case it starts or ends with a
-spike). The algorithm fails often rather miserably when e.g. a "positive"
-spike is directly followed by a "negative" spike.
+To summarize: a structure in the spectrum to be recognized as a spike
+must satisfy two conditions. First, there must be an usually large
+derivative and, at the same time, another unusually large derivative,
+but with opposite sign, must exist in the near vicinity (and there's
+some special treatment for spikes at the very fringes of the spectrum
+in case it starts or ends with a spike). The algorithm fails often
+rather miserably when e.g.@: a "positive" spike is directly followed
+by a "negative" spike.
 
 When a spike has been identified the points of the spike are replaced by the
 a straight line starting from the point on the left to the point to the right
 of the spike.
 
 The arguments the function takes are the 1-dimensional-array and,
-optionally, the factor by which the standard deviation is multiplied to
-determine what should be taken to be "outliers" (which defaults to @code{5})
-and the maximum width a spike can have (in number of points, defaulting to
-@code{3}). What to pick as the second and third argument depends a lot on
-the circumstances. When the spikes don't have a large amplitude (compared
-to the signal) or there are lots of spikes a factor lower than the default
-value must be taken, otherwise most of the spikes will make it through the
-filter. The maximum spike width can only be determined from experience and
-must always be lower than the width of any significant feature of the
-spectrum.
+optionally, the factor by which the standard deviation is multiplied
+to determine what should be taken to be "outliers" (which defaults to
+@code{5.0}) and the maximum width a spike can have (in number of
+points, defaulting to @code{3}). What to pick as the second and third
+argument depends a lot on the circumstances. When the spikes don't
+have a large amplitude (compared to the signal) or there are lots of
+spikes a factor lower than the default value should be taken, otherwise
+most of the spikes will make it through the filter. The maximum spike
+width can only be determined from experience and must always be lower
+than the width of any significant feature in the spectrum.
 
-@strong{Please note}: Never, ever use this function on data you intend to
-store as results of an experiment. It is only meant for situations where
-one wants to display data during the experiment to get a first impression
-of what's happening (e.g. to get rid of the spike one sometimes gets in
-spectra from a CCD camera when cosmic radiation hits the detector). It is
-no replacement at all for a careful analysis of a spectrum where one can
-use @i{a priori} knowledge to determine what are spikes and what not (and
-even the eye is often a much better guide than a stupid program)!
+@strong{Please note}: Never, ever use this function on data you intend
+to store as results of an experiment. It is only meant for situations
+where one wants to display data during the experiment to get a first
+impression of what's happening (e.g.@: to get rid of the spikes one
+sometimes gets in spectra from a CCD camera when cosmic radiation hits
+the detector). It is no replacement at all for a careful analysis of a
+spectrum where one can use @i{a priori} knowledge to determine what
+are spikes and what not (and even the eye is often a much better guide
+than a stupid program)!
 
 @end table

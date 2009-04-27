@@ -841,7 +841,7 @@ interval @w{[-2147483648, +2147483647]}, i.e.@: @w{[-2^31, 2^31 - 1]}
 (at least on a 32-bit processor). Thus, it isn't to difficult to create
 numbers with greater values, e.g.@: by multiplication, that can't be
 represented by an integer! In this case the result of the operation will
-be completely bogus, e.g.@:
+be completely bogus, e.g.
 @example
 1000000 * 3000 = -1294967296
 @end example
@@ -888,12 +888,12 @@ operations, the modulo function and the exponentiation. For the modulo
 operation the percent sign @code{%}
 @findex % (modulo operator)
 @cindex modulo operator
-is used and the result is the remainder of the division, e.g.@
+is used and the result is the remainder of the division, e.g.
 @example
 7 % 3 = 1         6.5 % 2.5 = 1.5 
 @end example
 @noindent
-For the exponentiation the caret character @code{^} is to be used, e.g.@:
+For the exponentiation the caret character @code{^} is to be used, e.g.
 @findex ^ @r{(exponentiation)}
 @cindex exponentiation
 @example
@@ -963,7 +963,7 @@ defining the sign of a number, have the highest precedence. There is a
 further operator, to be discussed later, having the same precedence, the
 logical negation operator, `@code{!}'. The evaluation of an expression
 with more than one of these operators is from the right to the left,
-i.e.@:
+i.e.
 @example
  !-x    @r{will be treated as if written as}    ! ( - x )
 @end example
@@ -982,7 +982,7 @@ evaluated from the right to the left:
 
 The operator with the next lower precedence is the modulo operator,
 `@code{%}'. Expressions with more than one `@code{%}' in a row will be
-evaluated left to right, i.e.@:
+evaluated left to right, i.e.
 @example
  31 % 6 % 2    @r{will be treated as if written as}    ( 31 % 6 ) % 2
 @end example
@@ -991,7 +991,7 @@ evaluated left to right, i.e.@:
 Now follow the multiplication and division operators, `@code{*}' and
 `@code{/}. Both have exactly the same precedence and expressions
 involving more than one of these operators are evaluated left to right,
-i.e.@:
+i.e.
 @example
  3 * 20 / 7    @r{will be treated as if written as}    ( 3 * 20 ) / 7
 @end example
@@ -1049,8 +1049,8 @@ expression_1 ? expression_2 : expression_3
 @noindent
 It tests @code{expression_1} and then results in @code{expression_2}
 being evaluated if the result of the test was non-zero, or in
-@code{expression_3} being calculated if the test failed (i.e. resulted
-in a zero value), a more detailed explanation is given below.
+@code{expression_3} being calculated if the test failed (i.e.@:
+resulted in a zero value), a more detailed explanation is given below.
 
 Actually, there are also the assignment operators. But these are only
 used after all of the other operators have been evaluated, so there is
@@ -1175,15 +1175,15 @@ a matrix of rank 4x5).
 
 But you can also add a whole 1-dimensional array to each of the
 sub-arrays of a matrix. Lets again assume that @code{M} 3-dimensional,
-e.g. a matrix of rank 3x4x5. If @code{a} is now an 1-dimensional array
-of length 5 you can add it to all of @code{M}'s 12 sub-sub-arrays by
-writing
+e.g.@: a matrix of rank 3x4x5. If @code{a} is now an 1-dimensional
+array of length 5 you can add it to all of @code{M}'s 12
+sub-sub-arrays by writing
 @example
 M += a;
 @end example
 @noindent
 If you would have to write the same using just the elements you would
-have to write 60 additions instead, i.e.@:
+have to write 60 additions instead, i.e.
 @example
 M[ 1, 1, 1 ] += a[ 1 ];
 M[ 1, 1, 2 ] += a[ 2 ];
@@ -1716,7 +1716,7 @@ starts directly after the @code{FOREVER} keyword.
 There is a disadvantage of using a @code{FOREVER} loop: because
 @code{fsc2} can't determine in advance when the @code{FOREVER} loop is
 going to be terminated it is not possible to test the loop thoroughly in
-the test run, i.e.@ before the experiment is started. Instead, in the
+the test run, i.e.@: before the experiment is started. Instead, in the
 test run a @code{FOREVER} loop is just run once to do a plausibility
 check, but further tests are not feasible. Thus, it can not be
 guaranteed that the experiment will run without errors.  Therefore the

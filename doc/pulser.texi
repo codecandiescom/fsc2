@@ -262,17 +262,18 @@ TRIGGER_MODE: EXTERNAL;
 
 Especially when using the internal trigger it is useful to be able to
 set the rate or the frequency with which the experiment is to be
-repeated. Thus for the @strong{Sony/Tektronix DG2020}, the @strong{Bruker
-EP385}, the @strong{Interface Technology RS690} as well as the @strong{Rulbus
-pulsers} an additional keyword can be specified, either @code{REPEAT_TIME} or
+repeated. Thus for the @strong{Sony/Tektronix DG2020}, the
+@strong{Bruker EP385}, the @strong{Interface Technology RS690} as well
+as the @strong{Rulbus pulsers} an additional keyword can be specified,
+either @code{REPEAT_TIME} or
 @code{REPEAT_FREQUENCY}@footnote{@code{REPEAT_TIME} and
 @code{REPEAT_FREQUENCY} may also be abbreviated to @code{REPT},
 @code{REP_T}, @code{REPTIME}, @code{REPEAT_TIME}, @code{REPEAT_T},
 @code{REPEATT} or @code{REPEATTIME} and @code{REPF}, @code{REP_F},
 @code{REPFREQ}, @code{REP_FREQ}, @code{REPFREQUENCY},
 @code{REP_FREQUENCY}, @code{REPEATF}, @code{REPEAT_F},
-@code{REPEATFREQ}, @code{REPEAT_FREQ} or @code{REPEATFREQUENCY}.}, i.e.@
-one may use:
+@code{REPEATFREQ}, @code{REPEAT_FREQ} or @code{REPEATFREQUENCY}.},
+i.e.@: one may use:
 @example
 TRIGGER_MODE: INTERNAL, REPEAT_TIME = 10 ms;
 @end example

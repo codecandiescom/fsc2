@@ -222,12 +222,13 @@ graphical output.
 
 @item @option{--delete}
 Starts @code{fsc2} in graphics mode and loads FILE (or also tests
-and/or starts the program when used in conjunction with the @code{-T} or
-@code{-S} flags). The input file will be @strong{automatically deleted}
-when @code{fsc2} is done with it, i.e.@ when either @code{fsc2}
-exits or a new file is loaded. This flag is only useful for cases where
-the input file is a temporary file that needs to be deleted when it
-isn't needed anymore, so better be @strong{really careful}.
+and/or starts the program when used in conjunction with the @code{-T}
+or @code{-S} flags). The input file will be @strong{automatically
+deleted} when @code{fsc2} is done with it, i.e.@: when either
+@code{fsc2} exits or a new file is loaded. This flag is only useful
+for cases where the input file is a temporary file that needs to be
+deleted when it isn't needed anymore, so better be @strong{really
+careful}.
 
 @item @option{-non-exclusive}
 When started with this option you are able to run several instances
@@ -326,9 +327,10 @@ set.
 
 @end table
 
-All of the above options can also be set from within the @file{.Xdefaults}
-or @file{.Xresources} files. To e.g. set the size and position of the main
-window from within one of these files you would need a line like
+All of the above options can also be set from within the
+@file{.Xdefaults} or @file{.Xresources} files. To e.g.@: set the size
+and position of the main window from within one of these files you
+would need a line like
 @example
 fsc2.geometry:         800x600+200+200
 @end example

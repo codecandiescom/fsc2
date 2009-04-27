@@ -101,7 +101,7 @@ statements, deals with units, adds information about line numbers and
 file names, deals with physical units etc.@:, and then passes this
 cleaned-up input to @code{fsc2}. If you are interested what @code{fsc2}
 really sees of an @code{EDL} file you can run @code{fsc2_clean} with the
-@code{EDL} file as its standard input, i.e.@:
+@code{EDL} file as its standard input, i.e.
 @example
 fsc2_clean < edl_script.edl
 @end example
@@ -454,7 +454,7 @@ Debugging the child process that runs the experiment requires the
 debugger to attach to the newly created child process. To be able to do
 so without the child process already starting to run the experiment while
 you're still in the process of attaching to it you have to set the
-environment variable @code{FSC2_CHILD_DEBUG}, e.g.@:
+environment variable @code{FSC2_CHILD_DEBUG}, e.g.
 @example
 jens@@crowley:~/Lab/fsc2> export FSC2_CHILD_DEBUG=1
 @end example
@@ -718,15 +718,15 @@ error is detected).
 
 
 But these lexers don't work alone. The lexers main job is to split up
-the source in reasonably chunks. These would e.g. keywords, variable and
-function names, numbers, arithmetic operators, parentheses, semicolons,
-commas etc. But that's not enough to be able to understand what the
-@code{EDL} script means. We also need a parser, that tries to make sense
-from the stream of tokens created by the lexer by checking if the
-sequences of tokens make up syntactically correct statements that then
-get executed by calling some appropriate @code{C} code. These parsers
-are created by another tool, @code{bison}, from files with names ending
-in @code{.y}. These are
+the source in reasonably chunks. These would e.g.@: keywords, variable
+and function names, numbers, arithmetic operators, parentheses,
+semicolons, commas etc. But that's not enough to be able to understand
+what the @code{EDL} script means. We also need a parser, that tries to
+make sense from the stream of tokens created by the lexer by checking
+if the sequences of tokens make up syntactically correct statements
+that then get executed by calling some appropriate @code{C} code.
+These parsers are created by another tool, @code{bison}, from files
+with names ending in @code{.y}. These are
 @example
 devices_parser.y        DEVICES section
 vars_parser.y           VARIABLES section
@@ -1067,19 +1067,19 @@ dealt with before the function is ever called, see below).
 
 
 The function now has to do it's work and, when it's done, creates
-another temporary variable on the stack with the result (this is done by
-a call of the function @code{vars_push()} in @file{variables.c}). In the
-process it may remove the function arguments from the stack (using
-@code{vars_pop()} also in @file{variables.c}), if it doesn't do so it
-will be done automatically when the function returns. Note that there's
-a restriction in that a function never can return more than a pointer to
-a single variable, i.e. the variable pointed to must have its
-@code{next} member set to @code{NULL}, being the last variable on the
-stack. A function may also chose to return @code{NULL}, but it's good
-practice to always return a value, if there isn't really anything to be
-returned, i.e.@: the function always get invoked for its side effects
-only, it should simply return an integer variable with a value of @code{1}
-to indicate that it succeeded.
+another temporary variable on the stack with the result (this is done
+by a call of the function @code{vars_push()} in @file{variables.c}).
+In the process it may remove the function arguments from the stack
+(using @code{vars_pop()} also in @file{variables.c}), if it doesn't do
+so it will be done automatically when the function returns. Note that
+there's a restriction in that a function never can return more than a
+pointer to a single variable, i.e.@: the variable pointed to must have
+its @code{next} member set to @code{NULL}, being the last variable on
+the stack. A function may also chose to return @code{NULL}, but it's
+good practice to always return a value, if there isn't really anything
+to be returned, i.e.@: the function always get invoked for its side
+effects only, it should simply return an integer variable with a value
+of @code{1} to indicate that it succeeded.
 
 
 Again I have to admit that I wasn't completely honest when I wrote above
@@ -1244,14 +1244,14 @@ tested code.
 
 
 And that's why the tokens of the @code{EXPERIMENT } section are stored
-in memory e.g.@: in an array. It's done in the function @code{store_exp()}
-in @file{exp.c} (which is called from the @code{C} code in
-@file{exp_lexer.l}). The function repeatedly calls the lexer generated
-from @file{exp_lexer.l} for new tokens, storing each one in a new
-structure, until the end end of the @code{EDL} code is reached. The
-array of structures is pointed to by @code{EDL.prg_token}. While it does
-so it already runs some simple checks, e.g. for unbalances parentheses
-and braces.
+in memory e.g.@: in an array. It's done in the function
+@code{store_exp()} in @file{exp.c} (which is called from the @code{C}
+code in @file{exp_lexer.l}). The function repeatedly calls the lexer
+generated from @file{exp_lexer.l} for new tokens, storing each one in
+a new structure, until the end end of the @code{EDL} code is reached.
+The array of structures is pointed to by @code{EDL.prg_token}. While
+it does so it already runs some simple checks, e.g.@: for unbalances
+parentheses and braces.
 
 
 When all tokens have been stored the function calls @code{loop_setup()}.
@@ -1805,9 +1805,9 @@ enumerated values.
 With a few exceptions function names are always in all lower case.
 
 
-Of course, these conventions only hold for my own variables etc. When I use
-symbols from libraries I have to use what I get, so e.g. @code{XPoint} is
-some @code{typedef}'ed type from X, even though it looks a bit like a global
-variable. But I didn't want to go as far as redefining everything else
-because it would make things unreasonably difficult to read for people
-with experience with the other libraries.
+Of course, these conventions only hold for my own variables etc. When
+I use symbols from libraries I have to use what I get, so e.g.@:
+@code{XPoint} is some @code{typedef}'ed type from X, even though it
+looks a bit like a global variable. But I didn't want to go as far as
+redefining everything else because it would make things unreasonably
+difficult to read for people with experience with the other libraries.

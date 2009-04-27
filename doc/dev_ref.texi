@@ -3558,11 +3558,11 @@ via the CD2A Compudrive (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 @strong{Controlled via}:  Serial port
 
 @paragraphindent 0
-The state of the device (i.e. current wavelength setting, offset
+The state of the device (i.e.@: current wavelength setting, offset
 correction, setting of laser line, width of a pixel of an attached
-camera) are stored in a state file, in a normal installation this
-is @file{/usr/local/lib/fsc2/spex_cd2a.state}. In case this file
-has been deleted or has become garbled use the file
+camera) are stored in a state file, in a normal installation this is
+@file{/usr/local/lib/fsc2/spex_cd2a.state}. In case this file has been
+deleted or has become garbled use the file
 @file{config/spex_cd2a.state} to replace it. Take care to set the
 permissions and ownership of the file correctly.
 
@@ -3614,13 +3614,13 @@ via the SPEX232 interface (i.e.@: 1249, 1403, 1404, 1680B, 1681B, 1701,
 @strong{Status}: Tested
 
 @paragraphindent 0
-The state of the device (i.e. current wavelength setting, offset
+The state of the device (i.e.@: current wavelength setting, offset
 correction, setting of laser line, width of a pixel of an attached
-camera) are stored in a state file, in a normal installation this
-is @file{/usr/local/lib/fsc2/spex232.state}. In case this file
-has been deleted or has become garbled use the file
-@file{config/spex232.state} to replace it. Take care to set the
-permissions and ownership of the file correctly.
+camera) are stored in a state file, in a normal installation this is
+@file{/usr/local/lib/fsc2/spex232.state}. In case this file has been
+deleted or has become garbled use the file @file{config/spex232.state}
+to replace it. Take care to set the permissions and ownership of the
+file correctly.
 
 @paragraphindent 0
 @strong{Supported functions}:

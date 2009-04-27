@@ -751,10 +751,10 @@ last time (which is stored in non-volatile RAM of the device).
 @findex magnet_heater_state()
 @item magnet_heater_state()
 This function only exists for the Frankfurt Sweep Power Supply
-(@ref{fsps25}). It determine the state of the heater switch
-connecting the power supply to the sweep coil. It returns @code{1} if
-the switch is closed (i.e. power supply and sweep coil are connected)
-and @code{0} otherwise.
+(@ref{fsps25}). It determine the state of the heater switch connecting
+the power supply to the sweep coil. It returns @code{1} if the switch
+is closed (i.e.@: power supply and sweep coil are connected) and
+@code{0} otherwise.
 
 The function can also be used to set the state of the heater switch.
 This should not done as part of any normal procedure (the heater
@@ -1825,10 +1825,10 @@ off automatically.
 
 If called without an argument the function returns the requested mode
 (independent of the mode the digitizer is currently in due to the
-timebase setting, i.e. it reflects the prefered setting, not the actual
-setting, which might be different due to requeirements from the current
-timebase setting), @code{1} when interleaved (RIS) mode is requested,
-and @code{0} for single shot (SS) mode.
+timebase setting, i.e.@: it reflects the prefered setting, not the
+actual setting, which might be different due to requeirements from the
+current timebase setting), @code{1} when interleaved (RIS) mode is
+requested, and @code{0} for single shot (SS) mode.
 
 
 @anchor{digitizer_sensitivity()}
@@ -2031,7 +2031,7 @@ the @ref{lecroy_ws, Waverunner}.
 @table @strong
 @item Please note:
 Anton Savitzky noticed that there seems to be firmware bug in the
-@strong{Tektronix} digitzers from the 500 series (i.e. @ref{tds520,
+@strong{Tektronix} digitzers from the 500 series (i.e.@: @ref{tds520,
 TDS520}, @ref{tds520a, TDS520A}, @ref{tds520c, TDS520C} and
 @ref{tds540, TDS540}). For numbers of averages above about 16 only
 half of the number of averages seem to be taken by the device it has
@@ -2061,7 +2061,7 @@ The first argument is the channel to be used to do the averaging, i.e.@:
 @itemx LeCroy WaveSurfer
 @code{CH1}, @code{CH2}, @code{CH3} or @code{CH4}, @code{MATH}
 @end table
-The second is the source channel to be averaged, i.e.@:
+The second is the source channel to be averaged, i.e.
 @table @samp
 @itemx LeCroy 9400
 @itemx LeCroy 9410
@@ -2351,7 +2351,7 @@ to query or set the memory size to be used for storing curves. If the
 function gets called with an (integer) argument the memory size is set
 accordingly. Please note that memory sizes can only be set according
 to an 1-2.5-5 scheme, starting with a minimum memory size of
-@code{500} samples (i.e. the lowest memory sizes are @code{500},
+@code{500} samples (i.e.@: the lowest memory sizes are @code{500},
 @code{1000}, @code{2500} etc.). If the argument doesn't fit into this
 scheme the next larger memory size is used and a warning is printed.
 If called without an argument the function returns the currently set
@@ -2390,12 +2390,12 @@ only if either it has already been called with an argument or in the
 @item digitizer_trigger_delay()
 The function queries (if called with no argument) or sets (if called
 with an argument) the amount of pre- or post-triggering (in seconds),
-i.e. the time difference between the start of the acquisition and the
-trigger. Thus, if called with a positive value, the acquisitions starts
-by the specified value before the trigger is received (pre-trigger
-acquisition), if called with a negative value start of the acquisition
-is delayed by that value relative to the trigger position (post-trigger
-acquisition).
+i.e.@: the time difference between the start of the acquisition and
+the trigger. Thus, if called with a positive value, the acquisitions
+starts by the specified value before the trigger is received
+(pre-trigger acquisition), if called with a negative value start of
+the acquisition is delayed by that value relative to the trigger
+position (post-trigger acquisition).
 
 Please note that the @strong{Tektronix} oscilloscopes don't allow
 post-trigger acquisitions, post-trigger acquisitions can only done
@@ -3618,7 +3618,7 @@ of an @code{EDL} script.
 @item pulser_pulse_minimum_specs()
 This function is available only for the @strong{Rulbus pulser}
 (@ref{rb_pulser_w} and @ref{rb_pulser_j}) modules. It expects a single
-argument, a pulse, e.g. @code{P1}. If it is the first pulse of a
+argument, a pulse, e.g.@: @code{P1}. If it is the first pulse of a
 function (i.e.@: @code{MICROWAVE}, @code{RF} or @code{DETECTION}), the
 function returns the earliest possible absolute position of the pulse.
 For all later pulses, the minimum distance to the end of the previous
@@ -4870,13 +4870,13 @@ may look like this:
 daq_ai_channel_setup( CH3, 5 V, "Differential", "BIPLOAR",
                       CH1, 500 mV, "UNIPOLAR", "DITHER_ON" );
 @end example
-In this case @code{CH3} and @code{CH11} will be used together (remember
-that for differential measurements always a second channel must be used
-automatically) for a signal in the range between @w{-5 V} and @w{+5V}
-(i.e. in bipolar mode), where the sampled voltage is the difference
-between both channels, and @code{CH1} is going to be used in unipolar
-mode for a voltage between @w{0 V} and @w{500 mV} in @code{"Ground"}
-coupling mode and with dithering switched on.
+In this case @code{CH3} and @code{CH11} will be used together
+(remember that for differential measurements always a second channel
+must be used automatically) for a signal in the range between @w{-5 V}
+and @w{+5V} (i.e.@: in bipolar mode), where the sampled voltage is the
+difference between both channels, and @code{CH1} is going to be used
+in unipolar mode for a voltage between @w{0 V} and @w{500 mV} in
+@code{"Ground"} coupling mode and with dithering switched on.
 
 The function can only be used in the @code{EXPERIMENT} section of an
 @code{EDL} script.
@@ -6375,7 +6375,7 @@ controlled via the USB bus and requires cthe @code{libusb} library
 By setting two variables the configuration file for the
 @ref{rs_spec10, Roper Scientific Spec-10} the orientation of the
 spectra or images taken by the camera can be influenced. They allow to
-mirror the spectra or images (i.e. exchanging right and left side)
+mirror the spectra or images (i.e.@: exchanging right and left side)
 and/or turn images upside-down. Since some functions assume spectra to
 have an increasing wavelength or relative wavenumber axis (or
 decreasing absolute wavenumber axis) this option can be used to
@@ -6449,7 +6449,7 @@ return pictures or spectra from the ROI specified by the command. If one
 of the elements of the array specifying the ROI is @code{0} the
 corresponding setting for the ROI remains unchanged.
 
-If the ROI sizes do not fit the binning factors (i.e. the width or
+If the ROI sizes do not fit the binning factors (i.e.@: the width or
 height in pixels of the ROI isn't an integer multiple of the
 corresponding binning factor) the upper right hand corner of the ROI
 gets adjusted automatically when an image or spectrum is fetched from
@@ -8085,7 +8085,7 @@ large as set in the configuration file for the device.
 @anchor{epr_modulation_add_calibration()}
 @findex epr_modulation_add_calibration()
 @item epr_modulation_add_calibration()
-This function allows to create an new calibration (i.e. a data
+This function allows to create an new calibration (i.e.@: a data
 structure that represents informations about a calibration). IIt
 expects a single arguemnt, the name of the new calibration (as a
 string). Informations for this calibration can be set by the functions

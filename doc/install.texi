@@ -223,29 +223,32 @@ compiled and installed @strong{before} trying to compile @code{fsc2}
 @node Support for other devices, , GPIB support, Requirements
 @subsection Support for other devices
 
-Devices that are controlled via the serial port are always supported (at
-least as long as the number of serial ports to be used by @code{fsc2} isn't
-set to 0 in the configuration of @code{fsc2}, see below). As already
-described in the preceeding section, controlling devices via the GPIB bus
-requires one of several GPIB libraries plus the corresponding kernel driver
-to be installed correctly before an attempt is made to build @code{fsc2}.
+Devices that are controlled via the serial port are always supported
+(at least as long as the number of serial ports to be used by
+@code{fsc2} isn't set to 0 in the configuration of @code{fsc2}, see
+below). As already described in the preceeding section, controlling
+devices via the GPIB bus requires one of several GPIB libraries plus
+the corresponding kernel driver to be installed correctly before an
+attempt is made to build @code{fsc2}.
 
 
-The same holds for several other devices that are ISA or PCI cards (or are
-controlled via an ISA or PCI card) or are controlled via the Rulbus
-(Rijksuniversiteit Leiden BUS). All of these require an additional library and
-a kernel driver to be installed prior to building @code{fsc2}. If these come
-from the makers of the device (e.g. Roper Scientific Spec-10 CCD camera)
-please see the documentation coming with the device on how to do that. For the
-other devices the sources for the libraries and kernel drivers are part of
+The same holds for several other devices that are ISA or PCI cards (or
+are controlled via an ISA or PCI card) or are controlled via the
+Rulbus (Rijksuniversiteit Leiden BUS). All of these require an
+additional library and a kernel driver to be installed prior to
+building @code{fsc2}. If these come from the makers of the device
+(e.g.@: Roper Scientific Spec-10 CCD camera) please see the
+documentation coming with the device on how to do that. For the other
+devices the sources for the libraries and kernel drivers are part of
 @code{fsc2}, see the subdirectories @file{me6x00}, @file{ni6601},
-@code{ni_daq}, @file{rulbus} and @file{witio_48}). If you need them you must
-create and install the libraries and kernel drivers before you can create
-@code{fsc2}. Typically it's as easy as going into the subdirectory, typing
-@code{./INSTALL} and answering a few questions. Please refer to the
-documentation (@file{README} files) in these subdirectories for more details.
-After a successful installation @code{fsc2} should be able to find the
-libraries and include support for the devices.
+@code{ni_daq}, @file{rulbus} and @file{witio_48}). If you need them
+you must create and install the libraries and kernel drivers before
+you can create @code{fsc2}. Typically it's as easy as going into the
+subdirectory, typing @code{./INSTALL} and answering a few questions.
+Please refer to the documentation (@file{README} files) in these
+subdirectories for more details. After a successful installation
+@code{fsc2} should be able to find the libraries and include support
+for the devices.
 
 
 
@@ -288,33 +291,35 @@ In the most simple case where you didn't set these variables (or both to
 has you don't have to care about the permission settings for the device files.
 
 
-In all other cases you have to make sure that either the account the program
-belongs to or the group it belongs to has the necessary permissions to read
-and write the required device files. If both @code{OWNER} and @code{GROUP} are
-set, the device files must be readable and writable by either that account or
-that group (or both). If only @code{OWNER} but not @code{GROUP} is set they
-must be accessible by the account specified by @code{OWNER}.  And if only
-@code{GROUP} but not @code{OWNER} is set the must be readable and writable by
-that group. Please note that if you change the access permissions of the
-device files on some systems they may get reset by the system to what it
-believes to be more secure, e.g. on a reboot or as part of some daily system
-maintenance tasks etc. (or because you use @code{udev} and the device files
-get deleted on shutdown and re-created on boot - but this can be handled by
-setting up @code{udev} correctly, i.e.@: to create the device files with the
-necessary permissions and ownerships being set).
+In all other cases you have to make sure that either the account the
+program belongs to or the group it belongs to has the necessary
+permissions to read and write the required device files. If both
+@code{OWNER} and @code{GROUP} are set, the device files must be
+readable and writable by either that account or that group (or both).
+If only @code{OWNER} but not @code{GROUP} is set they must be
+accessible by the account specified by @code{OWNER}. And if only
+@code{GROUP} but not @code{OWNER} is set the must be readable and
+writable by that group. Please note that if you change the access
+permissions of the device files on some systems they may get reset by
+the system to what it believes to be more secure, e.g.@: on a reboot
+or as part of some daily system maintenance tasks etc. (or because you
+use @code{udev} and the device files get deleted on shutdown and
+re-created on boot - but this can be handled by setting up @code{udev}
+correctly, i.e.@: to create the device files with the necessary
+permissions and ownerships being set).
 
 
-One possible scenario is to create an account for @code{fsc2} with extremely
-low permissions (even logging in can be disabled) and set USER to that
-account, but set @code{GROUP} to a group that has read and write access
-permissions for the device files that are going to be required. This
-could be the @code{uucp} (or @code{dialout}) group that typically has the
-necessary permissions for the accessing the device files for the
-serial ports. Of course, you need to allow read and write access for
-all other device files (e.g. GPIB card, PCI data acquisition cards
-etc.) for this group or make the account @code{fsc2} is running under member
-of the groups that have read and write access permissions to these
-device files.
+One possible scenario is to create an account for @code{fsc2} with
+extremely low permissions (even logging in can be disabled) and set
+USER to that account, but set @code{GROUP} to a group that has read
+and write access permissions for the device files that are going to be
+required. This could be the @code{uucp} (or @code{dialout}) group that
+typically has the necessary permissions for the accessing the device
+files for the serial ports. Of course, you need to allow read and
+write access for all other device files (e.g.@: GPIB card, PCI data
+acquisition cards etc.) for this group or make the account @code{fsc2}
+is running under member of the groups that have read and write access
+permissions to these device files.
 
 
 @node Preparing for installation, Compiling and Installation, Security issues, Installation
@@ -569,11 +574,12 @@ changing it would be that the machine isn't connected to the internet.
 
 For each device there exists a configuration file in the @file{config}
 subdirectory. In most cases you don't have to change anything there,
-but e.g. for devices controlled via a serial port by may have to
-set the number of the port in the device's configuration file and
-for devices controlled via the LAN its IP number. Please take the time
-and have a look at the configuration files for the devices you are planning
-to use, what can be adjusted should be documented in the individual files.
+but e.g.@: for devices controlled via a serial port by may have to set
+the number of the port in the device's configuration file and for
+devices controlled via the LAN its IP number. Please take the time and
+have a look at the configuration files for the devices you are
+planning to use, what can be adjusted should be documented in the
+individual files.
 
 
 @node Compiling and Installation, , Preparing for installation, Installation
@@ -599,11 +605,11 @@ some cases this might work, i.e.@: things in the subdirectory will be
 created, in most cases it won't even work that far.
 
 
-If you get more than a few warnings (about problems with @code{fsc2}, not
-header files included by @code{fsc2}) during the compilation stage of the
-program or if the make process fails completely please send me an email with
-the output of make. You can save the output of make to a file,
-e.g. @file{makelog}, by running make with the command line
+If you get more than a few warnings (about problems with @code{fsc2},
+not header files included by @code{fsc2}) during the compilation stage
+of the program or if the make process fails completely please send me
+an email with the output of make. You can save the output of make to a
+file, e.g.@: @file{makelog}, by running make with the command line
 @example
 make > makelog 2>&1
 @end example

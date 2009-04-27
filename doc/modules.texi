@@ -230,7 +230,7 @@ you, @code{vars_check()}.
 @findex vars_check()
 All you have to do is to call @code{vars_check()}
 with the pointer to the variable and the type you expect it to have,
-e.g.@:
+e.g.
 @example
 vars_check( var, INT_VAR );
 vars_check( var->next, FLOAT_VAR );
@@ -250,7 +250,7 @@ i.e.@: just logically or the types of variables you're prepared to
 accept in your function. 
 
 You can also check if the argument is a string by testing a type
-of @code{STR_VAR}, i.e.@:
+of @code{STR_VAR}, i.e.
 @example
 vars_check( var, STR_VAR );
 @end example
@@ -521,7 +521,7 @@ the indexed array or sub-matrix.
 If your function just wants to return an integer or a float, things are
 very easy: just call the function @code{vars_push()} with the type of
 the return value as the first and the value itself as the second
-argument, e.g.@:
+argument, e.g.
 @example
 return vars_push( INT_VAR, i_value );
 @end example
@@ -690,7 +690,7 @@ Var_T * my_function_2( Var_T * v )
 
 
 Alternatively, you also could write the function in a way that it counts the
-number of times it has been called and returns values accordingly, e.g.@: 
+number of times it has been called and returns values accordingly, e.g.
 @example
 V1 = my_function( );
 v2 = my_function( );
@@ -852,14 +852,15 @@ type string, otherwise pick a new and descriptive name.
 @node Variables a module must define, Global variables, Files to be included, Writing New Modules
 @subsection Variables a module must define
 
-In the previous section the meanings of the device name and type strings
-have already been discussed. While the definitions of the strings should
-go into the configuration file for the device, no memory has been allocated
-for these strings yet. This should be done as one of the first things after
-the include files have been included. Each and every device module should 
-define two constant character arrays called @code{device_name} and
-@code{generic_type}, that contain the device name and type strings, i.e.@:
-one of the first lines should always be
+In the previous section the meanings of the device name and type
+strings have already been discussed. While the definitions of the
+strings should go into the configuration file for the device, no
+memory has been allocated for these strings yet. This should be done
+as one of the first things after the include files have been included.
+Each and every device module should define two constant character
+arrays called @code{device_name} and @code{generic_type}, that contain
+the device name and type strings, i.e.@: one of the first lines should
+always be
 @example
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
@@ -1235,8 +1236,8 @@ There are some functions for the communication with devices connected
 via the LAN (@code{TCP} only, there's no support for @code{UDP} yet)
 provided by @code{fsc2}. They allow you to connect to a device, send
 and receive data and finally close the connection. To be able to use
-these functions you need to include the appropriate header file, i.e.@:
-you need
+these functions you need to include the appropriate header file,
+i.e.@: you need
 @example
 #include "lan.h"
 @end example
@@ -2040,21 +2041,21 @@ on signals.  The function is actually nothing else than a wrapper around
 At least during development it usually is helpful to also test for
 conditions that should never happen but may anyway due to bugs. In
 this case often the standard C macro @code{assert()} is used.
-@code{fsc2} comes with two variants of this macro, @code{fsc2_assert()}
-and @code{fsc2_impossible()}. The first one is basically identical to
-@code{assert()}, the only difference being that in case the assertions
-tests true not only a text, showing the the file and line number, gets
-printed to the standard error channel but also an email is sent
-(including the text of the currently running @code{EDL} script and some
-more relevant information) to whatever email address has been set
-during the installation as the one for receiving such mails about
-crashes and other fatal states of the program. The macro
-@code{fsc2_impossible()} is for the same purpose but doesn't take an
-expression as its argument, it is meant for situations in the code
-where one would end up in in a branch that (at least theoretically)
-can never be reached - e.g. if you test in a switch all possible cases
-you could add a @code{default:} case to catch a situation where you
-actually forgot about a possible case.
+@code{fsc2} comes with two variants of this macro,
+@code{fsc2_assert()} and @code{fsc2_impossible()}. The first one is
+basically identical to @code{assert()}, the only difference being that
+in case the assertions tests true not only a text, showing the the
+file and line number, gets printed to the standard error channel but
+also an email is sent (including the text of the currently running
+@code{EDL} script and some more relevant information) to whatever
+email address has been set during the installation as the one for
+receiving such mails about crashes and other fatal states of the
+program. The macro @code{fsc2_impossible()} is for the same purpose
+but doesn't take an expression as its argument, it is meant for
+situations in the code where one would end up in in a branch that (at
+least theoretically) can never be reached - e.g.@: if you test in a
+switch all possible cases you could add a @code{default:} case to
+catch a situation where you actually forgot about a possible case.
 
 If, as in the case of the @code{assert()} macro, the macro @code{NDEBUG}
 is defined (before you include @file{fsc2_module.h}) both functions don't
@@ -2380,7 +2381,7 @@ f the normal @code{strdup()}. And, to make things complete, the replacement
 for @code{free()} is called @code{T_free()}.
 
  All functions accept the same input and return values as their normal
-counterparts, i.e.@ they have the prototypes:
+counterparts, i.e.@: they have the prototypes:
 @example
 void * T_malloc( size_t size );
 
@@ -2673,7 +2674,7 @@ of the padding needed to set a fixed repeat time for the experiment.
 @item bool assign_channel_to_function(int function, long channel)
 This function is called when in the @code{ASSIGNMENTS} section in the
 description of a pulse function the @code{CHANNEL} (or @code{CH})
-keyword is found, i.e.@:
+keyword is found, i.e.
 @example
 ASSIGNMENTS:
 MW: CH = 1, ....
@@ -2817,7 +2818,7 @@ integer, either @code{TTL_LEVEL} or @code{ECL_LEVEL}.
 
 @item bool set_trigger_mode(int mode)
 This function gets called when a trigger mode description is found in
-the assignments section, i.e.@:
+the assignments section, i.e.
 @example
 ASSIGNMENTS:
   TRIGGER_MODE: EXTERNAL;
@@ -3104,7 +3105,7 @@ The function gets called when the length of a pulse is set in the
 @end example
 @noindent
 within the @code{PREPARATIONS} section or, within the @code{EXPERIMENT}
-section, to directly change the length of a pulse, e.g.@:
+section, to directly change the length of a pulse, e.g.
 @example
   P13_LENGTH = 2.1 us;
 @end example
@@ -3224,7 +3225,7 @@ stating that it has no channel of the name @code{Channel_Names[channel]}.
 
 @item bool set_max_seq_len(double seq_len)
 This function is called when the @code{MAXIMUM_SEQUENCE_LENGTH} is found
-in the  @code{ASSIGNMENTS} section, i.e.@:
+in the  @code{ASSIGNMENTS} section, i.e.
 @example
 ASSIGNMENTS:
   MAXIMUM_SEQUENCE_LENGTH: 10 us;
