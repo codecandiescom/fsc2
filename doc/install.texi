@@ -241,7 +241,7 @@ Other USB-controlled devices can be used via the
 verson 0.1 or 1.0 (which has to be installed on your machine).
 
 Devices controlled via LAN can be used if you have a network card and
-networking support enabled in the kernel (which is te default).
+networking support enabled in the kernel (which it usually is).
 
 Also devices that are ISA or PCI cards (or connected to dedicated ISA
 or PCI card) or athat re controlled via the Rulbus (Rijksuniversiteit
@@ -249,16 +249,18 @@ Leiden BUS) can be used. All of those require additional libraries and
 kernel drivers to be installed prior to building @code{fsc2}. If these
 come from the makers of the device (e.g.@: Roper Scientific Spec-10
 CCD camera) please see the documentation coming with the device on how
-to do that. For others the sources for the required libraries and
-kernel drivers are part of @code{fsc2}, see the subdirectories
-@file{me6x00}, @file{ni6601}, @code{ni_daq}, @file{rulbus} and
-@file{witio_48}). If you need any of them you must create and install
-the libraries and kernel drivers before you can create @code{fsc2}.
-Typically it's as easy as going into the subdirectory, typing
-@code{./INSTALL} and answering a few questions. Please refer to the
-documentation (@file{README} files) in these subdirectories for more
-details. After a successful installation @code{fsc2} should be able to
-find the libraries and include support for the devices.
+to do that (and make sure that they are available for your kernel
+version and CPU architecture). For others the sources for the required
+libraries and kernel drivers are part of @code{fsc2}, see the
+subdirectories @file{me6x00}, @file{ni6601}, @code{ni_daq},
+@file{rulbus} and @file{witio_48}). If you need any of them you must
+create and install the libraries and kernel drivers before you can
+create @code{fsc2}. Typically it's as easy as going into the
+subdirectory, typing @code{./INSTALL} and answering a few questions.
+Please refer to the documentation (@file{README} files) in these
+subdirectories for more details. After a successful installation
+@code{fsc2} should be able to find the libraries and include support
+for the devices.
 
 
 
