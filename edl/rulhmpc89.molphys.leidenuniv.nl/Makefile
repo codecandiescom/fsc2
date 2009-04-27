@@ -20,7 +20,7 @@
 
 EDL         := $(wildcard *.EDL)
 EDL_SCRIPTS := $(patsubst %.EDL,%,$(EDL))
-SCRIPTS     := $(EDL_SCRIPTS) cw_epr tresr
+SCRIPTS     := $(EDL_SCRIPTS) pulsed_exp
 
 
 all: $(EDL_SCRIPTS)

@@ -341,7 +341,7 @@ endif
 
 install:
 	$(INSTALL) -d $(libdir)
-	$(EXEC_INSTALL) -m 755 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
+	$(INSTALL) -m 755 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
 	if [ -r $(mchdir)/$(machine_name)-install ]; then  \
 		$(MAKE) -f $(mchdir)/$(machine_name)-install   \
 				install-$(machine_name);               \

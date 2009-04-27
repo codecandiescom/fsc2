@@ -187,20 +187,20 @@ install:
 	$(INSTALL) -d $(libdir)
 
 ifdef ONLY_SETGID
-	$(EXEC_INSTALL) -m 2755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+	$(INSTALL) -m 2755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
 else
 ifdef ONLY_SETUID
-	$(EXEC_INSTALL) -m 4755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+	$(INSTALL) -m 4755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
 else
-	$(EXEC_INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
+	$(INSTALL) -m 6755 -o $(OWNER) -g $(GROUP) fsc2 $(bindir)
 endif
 endif
-	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_clean $(bindir)
-	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_connect $(bindir)
+	$(INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_clean $(bindir)
+	$(INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_connect $(bindir)
 ifdef ADDR2LINE
-	$(EXEC_INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_addr2line $(bindir)
+	$(INSTALL) -m  755 -o $(OWNER) -g $(GROUP) fsc2_addr2line $(bindir)
 endif
-	$(EXEC_INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
+	$(INSTALL) -m  644 -o $(OWNER) -g $(GROUP) *.fsc2_so $(libdir)
 
 	$(RM) $(RMFLAGS) $(bindir)/fsc2_start $(bindir)/fsc2_test        \
 					 $(bindir)/fsc2_load $(bindir)/fsc2_iconic_start

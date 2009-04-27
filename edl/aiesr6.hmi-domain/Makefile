@@ -18,10 +18,12 @@
 #  Boston, MA 02111-1307, USA.
 
 
-EDL      := $(wildcard *.EDL)
-scripts  := $(patsubst %.EDL,%,$(EDL))
+EDL         := $(wildcard *.EDL)
+EDL_SCRIPTS := $(patsubst %.EDL,%,$(EDL))
+SCRIPTS     := $(EDL_SCRIPTS)
 
-all: $(scripts)
+
+all: $(EDL_SRIPTS)
 
 %: %.EDL
 	../../utils/fsc2_guify $< $@
@@ -37,21 +39,14 @@ set_res:
 	mv cw_epr_sr.EDLx cw_epr_sr.EDL
 
 install:
-	@for f in `ls`; do                                      \
-		if [ -x $f ]; then                                  \
-			echo "cp $$f $(bindir)/$$f.$(machine_name)";    \
-	    	cp $$f $(bindir)/$$f.$(machine_name);           \
-		fi                                                  \
+	for f in $$(SCRIPTS); do               \
+		$(INSTALL) -m 0755 $$f $(bindir);  \
 	done
 
 uninstall:
-	@for f in `ls`; do                                              \
-		if [    -x $$f                                              \
-			 -a -f $(bindir)/$$f                                    \
-			 -a ! diff $$f $(bindir)/$$f > /dev/null 2>&1 ]; then   \
-			$(RM) $(RMFLAGS) $(bindir)/$$f;                         \
-		fi                                                          \
+	for f in $$(SCRIPTS); do               \
+		$(RM) $(RMFLAGS) $(bindir)/$$f;    \
 	done
 
 clean:
-	$(RM) $(RMFLAGS) $(patsubst %.EDL,%,$(EDL)) *~
+	$(RM) $(RMFLAGS) $(EDL_SCRIPTS) *~

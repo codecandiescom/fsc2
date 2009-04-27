@@ -73,7 +73,7 @@ install: edl-mod.elc
 		$(INSTALL) -m 644 edl.vim $(vim_dir)/plugin;  \
 	fi
 ifdef WITH_HTTP_SERVER
-	$(EXEC_INSTALL) -m 755 -o $(OWNER) -g $(GROUP) fsc2_http_server $(bindir)
+	$(INSTALL) -m 755 -o $(OWNER) -g $(GROUP) fsc2_http_server $(bindir)
 endif
 
 

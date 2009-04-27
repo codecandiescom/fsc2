@@ -486,7 +486,6 @@ RMFLAGS       := -f
 LN            := ln
 LNFLAGS       := -s
 INSTALL       := install
-EXEC_INSTALL  := install
 
 
 ############################################################################
@@ -937,11 +936,9 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 
-.PHONY: all config src modules utils docs built       \
-		install-strip install uninstall http_server   \
-		version test cleanup clean pack pack-git      \
-		packages tags MANIFEST me6x00 ni6601 ni_daq   \
-		rulbus witio_48
+.PHONY: all config src modules utils docs built nstall uninstall     \
+		http_server version test cleanup clean pack pack-git         \
+		packages tags MANIFEST me6x00 ni6601 ni_daq rulbus witio_48
 
 
 ############## End of configuration section ##############
@@ -1061,9 +1058,6 @@ endif
 
 
 # Install the program and everything else
-
-install-strip:
-	$(MAKE) EXEC_INSTALL='$(INSTALL) -s' install
 
 install:
 	$(INSTALL) -d $(libdir)
