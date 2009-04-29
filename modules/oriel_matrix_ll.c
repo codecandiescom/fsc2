@@ -205,8 +205,16 @@ oriel_matrix_init( void )
     {
         struct libusb_device_descriptor desc;
 
-        if (    libusb_get_device_descriptor( list[ i ], &desc ) == 0
-             && desc.idVendor == VENDOR_ID
+        if ( libusb_get_device_descriptor( list[ i ], &desc ) )
+        {
+            libusb_free_device_list( list, 1 );
+            sigprocmask( SIG_SETMASK, &old_mask, NULL );
+            lower_permissions( );
+            print( FATAL, "Device not found on USB.\n" );
+            THROW( EXCEPTION );
+        }
+
+        if (    desc.idVendor == VENDOR_ID
              && desc.idProduct == PRODUCT_ID )
         {
             dev = list[ i ];
@@ -274,34 +282,42 @@ oriel_matrix_init( void )
 #endif
 
 
-/*-----------------------------------------------------------*
- * This function will release the interface close the device
+/*---------------------------------------------------------------*
+ * This function will release the interface and close the device
  *
  * Inputs: None
  * 
  * Return value: none
- *-----------------------------------------------------------*/
+ *---------------------------------------------------------------*/
 
 void
 oriel_matrix_close( void )
 {
-   if ( oriel_matrix.udev == NULL )
-       return;
+    sigset_t new_mask,
+             old_mask;
 
-   oriel_matrix_close_CCD_shutter( );
 
-   raise_permissions( );
+    if ( oriel_matrix.udev == NULL )
+        return;
+
+    oriel_matrix_close_CCD_shutter( );
+
+    raise_permissions( );
+    sigemptyset( &new_mask );
+    sigaddset( &new_mask, DO_QUIT );
+    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
 #if defined WITH_LIBUSB_0_1
-   usb_release_interface( oriel_matrix.udev, 0 );
-   usb_close( oriel_matrix.udev );
+    usb_release_interface( oriel_matrix.udev, 0 );
+    usb_close( oriel_matrix.udev );
 #elif defined WITH_LIBUSB_1_0
-   libusb_release_interface( oriel_matrix.udev, 0 );
-   libusb_close( oriel_matrix.udev );
+    libusb_release_interface( oriel_matrix.udev, 0 );
+    libusb_close( oriel_matrix.udev );
 #endif
 
-   lower_permissions( );
-   oriel_matrix.udev = NULL;
+    sigprocmask( SIG_SETMASK, &old_mask, NULL );
+    lower_permissions( );
+    oriel_matrix.udev = NULL;
 }
 
 
@@ -1291,15 +1307,16 @@ ushort_2_device( unsigned char * dest,
 }
 
 
-/*--------------------------------------------------------*
- * This requires to work that the machine this is running
- * is using 2s-complement
- *--------------------------------------------------------*/
+/*---------------------------------------------------------*
+ * This function requires that the machine this is running
+ * is using 2s-complement and sizeof(int) is at least 2
+ *---------------------------------------------------------*/
 
 static short int
 device_2_short( unsigned char * src )
 {
     unsigned short int val;
+
 
     if ( sizeof( short int ) < 2 )
     {
