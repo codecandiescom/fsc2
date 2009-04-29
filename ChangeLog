@@ -3,15 +3,14 @@
 	* Support for serial port has changed: in all former versions
 	the 'number' of the serial port to be used had to be specified
 	in calls for functions dealing with a serial port (i.e. '0'
-	stood for the device file '/dev/ttyS0' etc.). This has been
-	wasn't too good an idea when you also have to deal with e.g.
-	USB-serial converters that appear under a device file with a
-	name like '/dev/ttyUSB0' or '/dev/ttyUSB1' etc. So now in the
-	call of fsc2_request_serial_port() the name of the device file
-	has to be passed as the first argument instead of a number.
-	The function now returns an integer that in all following
-	calls is used as the 'handle' for the serial port for the
-	serial port.
+	stood for the device file '/dev/ttyS0' etc.). This wasn't too
+	good an idea when you also have to deal with e.g. USB-serial
+	converters that appear under a device file with a name like
+	'/dev/ttyUSB0' or '/dev/ttyUSB1' etc. So now in the call of
+	fsc2_request_serial_port() the name of the device file has to
+	be passed as the first argument instead of a number. The
+	function now returns an integer that in all following calls is
+	used as the 'handle' for the serial port for the serial port.
 
 	* Changed libusb support to allow both libusb-0.1 and
 	libusb-1.0. Which one of the two versions is linked in is
@@ -22,4 +21,4 @@
 	fsc2). Note: only use one of the versions of the library an be
 	used, setting both variables will abort compilation!
 
-	* Switched version control from svn to git.
+	* Switched version control from SVN to git.

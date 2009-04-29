@@ -408,6 +408,8 @@ int
 gpib_local( int device )
 {
     char *dev_name;
+    sigset_t new_mask,
+             old_mask;
 
 
     fsc2_assert(    Fsc2_Internals.state == STATE_RUNNING
@@ -425,7 +427,13 @@ gpib_local( int device )
         gpib_log_function_start( "gpib_local", dev_name );
 
     raise_permissions( );
+    sigemptyset( &new_mask );
+    sigaddset( &new_mask, DO_QUIT );
+    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
     ibloc( device );
+
+    sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
     if ( ibsta & IBERR )
@@ -474,7 +482,8 @@ gpib_timeout( int device,
               int period )
 {
     char *dev_name;
-    sigset_t new_mask, old_mask;
+    sigset_t new_mask,
+             old_mask;
     const char tc[ ][ 9 ] = { "infinity", "10us", "30us", "100us",
                               "300us", "1ms", "3ms", "10ms", "30ms",
                               "100ms", "300ms", "1s", "3s", "10s",
@@ -514,9 +523,12 @@ gpib_timeout( int device,
     }
 
     raise_permissions( );
+    sigemptyset( &new_mask );
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
     ibtmo( device, period );
+
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
@@ -555,7 +567,8 @@ int
 gpib_clear_device( int device )
 {
     char *dev_name;
-    sigset_t new_mask, old_mask;
+    sigset_t new_mask,
+             old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -579,9 +592,12 @@ gpib_clear_device( int device )
         gpib_log_function_start( "gpib_clear_device", dev_name );
 
     raise_permissions( );
+    sigemptyset( &new_mask );
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
     ibclr( device );
+
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
@@ -612,7 +628,8 @@ int
 gpib_trigger( int device )
 {
     char *dev_name;
-    sigset_t new_mask, old_mask;
+    sigset_t new_mask,
+             old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -636,9 +653,12 @@ gpib_trigger( int device )
         gpib_log_function_start( "gpib_trigger", dev_name );
 
     raise_permissions( );
+    sigemptyset( &new_mask );
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
     ibtrg( device );
+
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
@@ -682,7 +702,8 @@ gpib_wait( int   device,
 {
     int old_timeout = timeout;
     char *dev_name;
-    sigset_t new_mask, old_mask;
+    sigset_t new_mask,
+             old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -720,9 +741,12 @@ gpib_wait( int   device,
         gpib_timeout( device, TNONE );
 
     raise_permissions( );
+    sigemptyset( &new_mask );
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
     ibwait( device, mask );
+
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
@@ -766,7 +790,8 @@ gpib_write( int          device,
 {
     char     * dev_name;
     char     * buf;
-    sigset_t   new_mask, old_mask;
+    sigset_t   new_mask,
+               old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -810,9 +835,12 @@ gpib_write( int          device,
         gpib_write_start( dev_name, buf, length );
 
     raise_permissions( );
+    sigemptyset( &new_mask );
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
     ibwrt( device, buf, length );
+
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
@@ -882,7 +910,8 @@ gpib_read( int    device,
 {
     long       expected = *length;
     char     * dev_name;
-    sigset_t   new_mask, old_mask;
+    sigset_t   new_mask,
+               old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -928,9 +957,12 @@ gpib_read( int    device,
     }
 
     raise_permissions( );
+    sigemptyset( &new_mask );
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
     ibrd( device, buffer, expected );
+
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
     *length = ibcnt;
@@ -996,7 +1028,8 @@ gpib_serial_poll( int             device,
                   unsigned char * stb )
 {
     char     * dev_name;
-    sigset_t   new_mask, old_mask;
+    sigset_t   new_mask,
+               old_mask;
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -1020,9 +1053,12 @@ gpib_serial_poll( int             device,
         gpib_log_function_start( "gpib_serial_poll", dev_name );
 
     raise_permissions( );
+    sigemptyset( &new_mask );
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
     ibrsp( device, ( char * ) stb );
+
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 

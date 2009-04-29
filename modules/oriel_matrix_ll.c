@@ -83,6 +83,8 @@ oriel_matrix_init( void )
     struct usb_bus *busses,
                    *bus;
     struct usb_device *dev = NULL;
+    sigset_t new_mask,
+             old_mask;
 
 
     fsc2_assert( oriel_matrix.udev == NULL );
@@ -90,6 +92,9 @@ oriel_matrix_init( void )
     oriel_matrix.udev = NULL;
 
     raise_permissions( );
+    sigemptyset( &new_mask );
+    sigaddset( &new_mask, DO_QUIT );
+    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
     busses = usb_get_busses( );
 
@@ -103,6 +108,7 @@ oriel_matrix_init( void )
 
     if ( ! dev )
     {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, "Device not found on USB.\n" );
         THROW( EXCEPTION );
@@ -110,6 +116,7 @@ oriel_matrix_init( void )
 
     if ( ! ( oriel_matrix.udev = usb_open( dev ) ) )
     {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, "Can't open connection to device.\n" );
         THROW( EXCEPTION );
@@ -119,6 +126,7 @@ oriel_matrix_init( void )
     {
         usb_close( oriel_matrix.udev );
         oriel_matrix.udev = NULL;
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, "Can't set active configuration.\n" );
         THROW( EXCEPTION );
@@ -128,6 +136,7 @@ oriel_matrix_init( void )
     {
         usb_close( oriel_matrix.udev );
         oriel_matrix.udev = NULL;
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, "Can't claim interface.\n" );
         THROW( EXCEPTION );
@@ -138,11 +147,13 @@ oriel_matrix_init( void )
         usb_release_interface( oriel_matrix.udev, 0 );
         usb_close( oriel_matrix.udev );
         oriel_matrix.udev = NULL;
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, "Can't set alternate interface.\n" );
         THROW( EXCEPTION );
     }
 
+    sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
     oriel_matrix_get_info( );
@@ -156,6 +167,8 @@ oriel_matrix_init( void )
     libusb_device *dev = NULL;
     ssize_t cnt;
     ssize_t i;
+    sigset_t new_mask,
+             old_mask;
 
 
     fsc2_assert( oriel_matrix.udev == NULL );
@@ -163,11 +176,18 @@ oriel_matrix_init( void )
     oriel_matrix.udev = NULL;
 
     raise_permissions( );
+    sigemptyset( &new_mask );
+    sigaddset( &new_mask, DO_QUIT );
+    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
+#if 0
     libusb_set_debug( NULL, 3 );
+#endif
 
     if ( ( cnt = libusb_get_device_list( NULL, &list ) ) < 0 )
     {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
         print( FATAL, "Failure to find USB devices.\n" );
         THROW( EXCEPTION );
     }
@@ -175,6 +195,8 @@ oriel_matrix_init( void )
     if ( cnt == 0 )
     {
         libusb_free_device_list( list, 1 );
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
         print( FATAL, "No USB devices found.\n" );
         THROW( EXCEPTION );
     }
@@ -195,6 +217,7 @@ oriel_matrix_init( void )
     if ( ! dev )
     {
         libusb_free_device_list( list, 1 );
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, "Device not found on USB.\n" );
         THROW( EXCEPTION );
@@ -204,6 +227,7 @@ oriel_matrix_init( void )
     {
         oriel_matrix.udev = NULL;
         libusb_free_device_list( list, 1 );
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, "Can't open connection to device.\n" );
         THROW( EXCEPTION );
@@ -215,6 +239,7 @@ oriel_matrix_init( void )
     {
         libusb_close( oriel_matrix.udev );
         oriel_matrix.udev = NULL;
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, "Can't set configuration for USB device.\n" );
         THROW( EXCEPTION );
@@ -234,11 +259,13 @@ oriel_matrix_init( void )
         libusb_release_interface( oriel_matrix.udev, 0 );
         libusb_close( oriel_matrix.udev );
         oriel_matrix.udev = NULL;
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, "Can't set alternate interface for USB device.\n" );
         THROW( EXCEPTION );
     }
 
+    sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
     oriel_matrix_get_info( );
