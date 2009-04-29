@@ -1,6 +1,14 @@
 Please take the time to read the following carefully before trying to
 install and run fsc2.
 
+fsc2 supports too many devices and configurations to use a one-
+fits-all compilation process. Thus some manual configuration has
+to be done before compilation and installaion can be started. On
+the one hand, some changes to the main Makefile may be required,
+on the other hand some parameters for the devices to be used may
+need to be adjusted.
+
+
 A) Requirements
 ===============
 
@@ -161,25 +169,27 @@ support built into fsc2).
 A2) Support for other devices
 -----------------------------
 
-Devices that are controlled via the serial port are always supported (at
-least as long as the number of serial ports to be used by fsc2 isn't set
-to 0 in the configuration of fsc2, see below). As already described in the
-preceeding section, controlling devices via the GPIB bus requires one of
-several GPIB libraries plus the corresponding kernel driver to be installed
-correctly before an attempt is made to build fsc2.
+Devices that are controlled via the serial port (or USB-serial con-
+verters) are always supported (at least as long as the variable
+'WITHOUT_SERIAL_PORTS isn't set).
 
+Normal USB-controlled devices can be used via the libusb package,
+either verson 0.1 or 1.0 (which has to be installed on your machine).
 
-The same holds for several other devices that are ISA or PCI cards (or
-are controlled via an ISA or PCI card) or are controlled via the Rulbus
-(Rijksuniversiteit Leiden BUS). All of these require an additional library
-and a kernel driver to be installed prior to building fsc2. If these come
-from the makers of the device (e.g. Roper Scientific Spec-10 CCD camera)
-please see the documentation coming with the device on how to do that. For
-the other devices the sources for the libraries and kernel drivers are
-part of fsc2, see the subdirectories 'me6x00', 'ni6601', 'ni_daq',
-'rulbus' and 'witio_48'). You must create and install the libraries and
-kernel drivers before you can make fsc2. Typically it's as easy as going
-into the subdirectory, typing "./INSTALL" and answering a few questions.
+Devices controlled via LAN can be used if you have a network card and
+networking support enabled in the kernel (which it usually is).
+
+Also devices that are ISA or PCI cards (or connected to dedicated ISA
+or PCI card) or are controlled via the Rulbus (Rijksuniversiteit Leiden
+BUS). All of these require an additional library and a kernel driver to
+be installed prior to building fsc2. If these come from the makers of
+ the device (e.g. Roper Scientific Spec-10 CCD camera) please see the
+documentation coming with the device on how to do that. For the other
+devices the sources for the libraries and kernel drivers are part of
+fsc2, see the subdirectories 'me6x00', 'ni6601', 'ni_daq', 'rulbus'
+and 'witio_48'). You must create and install the libraries and kernel
+drivers before you can make fsc2. Typically it's as easy as going into
+the subdirectory, typing "./INSTALL" and answering a few questions.
 Please refer to the documentation (README files) in these subdirectories
 for more details. After a successful installation fsc2 should be able to
 find the libraries and include support for the devices.
@@ -189,36 +199,36 @@ find the libraries and include support for the devices.
 B) Security issues
 ==================
 
-
 To be able to read from and write to the device files for the devices
-fsc2 is supposed to control it needs permissions that often only the
-root account has. Therefore fsc2 per default gets installed setuid'ed
-to root (i.e. it starts running with the privileges of the root account,
-i.e. with the user and group ID of the root account). But most of the
-time fsc2 drops those privileges and runs with only the effective user
-ID (EUID) and group ID (EGID) of the users that started fsc2, i.e. with
-the permissions that user normally as. Care has been taken drop the extra
-privileges the root account has except for the few places where either
-device files are accessed or log files get written to.
+fsc2 is supposed to control it needs permissions that often per default
+only the root account has. Therefore fsc2 per default gets installed
+setuid'ed to root (i.e. it starts running with the privileges of the
+root account, i.e. with the user and group ID of the root account).
+But most of the time fsc2 drops those privileges and runs with only
+the effective user ID (EUID) and group ID (EGID) of the users that
+started fsc2, i.e. with the permissions that user normally as. Care
+has been taken drop the extra privileges the root account has except
+for the few places where either device files are accessed or log files
+get written to.
 
 
 Should you feel uneasy about running a program setuid'ed to root
-(and I would sympathize with you if you do;-) there are alternatives,
-but which may requires some extra work. There are two variables in
-the Makefile, OWNER and GROUP, that can be used to avoid running
-fsc2 with the full permissions of the root account. If both are
-set the program runs with the UID and GID of the account and group
-specified by these variables. If neither of them is set then they
-default to 'root' and the program gets setuid'ed to root, i.e. as
-in the default case discussed above. But if only GROUP is set then
-the program becomes setgid'ed to this group, i.e. it will run with
-the UID of the user but with the GID of the group specified by
+(and I would sympathize strongly with you if you do;-) there are
+alternatives, but which may requires some extra work. There are
+two variables in the Makefile, OWNER and GROUP, that can be used
+to avoid running fsc2 with the full permissions of the root account.
+If both are set the program runs with the UID and GID of the account
+and group specified by these variables. If neither of them is set
+then they default to 'root' and the program gets setuid'ed to root,
+i.e. as in the default case discussed above. But if only GROUP is set
+then the program becomes setgid'ed to this group, i.e. it will run
+with the UID of the user but with the GID of the group specified by
 GROUP - this may already give it high enough access permissions for
-the device files if the device files are set up accordingly (i.e. their
-permission bits are set to allow read and write access to members of
-this group). It's also possible to specify OWNER alone and in this
-case the program runs with the UID of that process but the GID of the
-user.
+the device files if the device files are set up accordingly (i.e.
+their permission bits are set to allow read and write access to
+members of this group). It's also possible to specify OWNER alone
+and in this case the program runs with the UID of that process but
+the GID of the user.
 
 
 In the most simple case where you didn't set these variables (or both
@@ -348,11 +358,10 @@ or '/usr/local/include' you will have to tell fsc2 where to look for
 them by setting the variable GPIB_HEADER_DIR accordingly.
 
 
-The next two variables, NUM_SERIAL_PORTS and SERIAL_LOCK_DIR, are used
-for dealing with the serial ports. NUM_SERIAL_PORTS should be set to
-the number of serial ports that your computer has (or to the number you
-want fsc2 to have access to). If the variable is not set (or set to 0)
-serial ports can't be used.
+The next variable, WITHOUT_SERIAL_PORTS can be used to surpress
+support for devices controlled via serial ports and USB-serial
+converters. Otherwise the three variables SERIAL_LOCK_DIR,
+SERIAL_LOG_FILE and SERIAL_LOG_LEVEL allow finer-grained control.
 
 
 SERIAL_LOCK_DIR must be a string with the name of the directory where
@@ -466,12 +475,15 @@ C1) Device setup
 ----------------
 
 For each device there exists a configuration file in the @file{config}
-subdirectory. In most cases you don't have to change anything there,
+subdirectory. In many cases you don't have to change anything there,
 but e.g. for devices controlled via a serial port by may have to
 set the number of the port in the device's configuration file and
-for devices controlled via the LAN its IP number. Please take the time
-and have a look at the configuration files for the devices you are planning
-to use, what can be adjusted should be documented in the individual files.
+for devices controlled via the LAN its IP number. And then there are
+a number of modules that support serveral models of a device series,
+and in that case you may have to set the model type in the configuration
+file for the device. Please take the time and have a look at the
+configuration files for the devices you are planning to use, the
+adjustable parameters should be documented in the individual files.
 
 
 
@@ -538,7 +550,7 @@ devices, writing a test suite for the supported devices is still on my
 to-do list.
 
 
-    November 28, 2008                      Much luck, Jens
+    April 29, 2009                      Much luck, Jens
 
 --
   \   Jens Thoms Toerring  ___    jt@toerring.de

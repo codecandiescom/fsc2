@@ -951,7 +951,7 @@ export            # export all variables to sub-makes
 
 all release debug mdebug:
 ifdef LIBUSB_FAIL
-	@echo "************************************************";     \
+	@echo "************************************************";    \
 	echo "*   Either WITH_LIBUSB_0_1 or WITH_LIBUSB_1_0  *";     \
     echo "*     can be set, but not both at once!        *";     \
 	echo "************************************************";     \
@@ -962,8 +962,8 @@ endif
 	$(MAKE) -C $(sdir) modules
 	$(MAKE) http_server
 	$(MAKE) utils
-	$(MAKE) docs
 	$(MAKE) -C $(edir)
+	$(MAKE) docs
 
 config: fsc2_config.h
 	echo $(CONFFLAGS)

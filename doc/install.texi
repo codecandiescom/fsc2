@@ -226,15 +226,11 @@ compiled and installed @strong{before} trying to compile @code{fsc2}
 
 Devices that are controlled via the serial port are always supported
 (at least as long as the variable @code{WITHOUT_SERIAL_PORTS} isn't
-set in the configuration for @code{fsc2}, see below). As already
-described in the preceeding section, controlling devices via the GPIB
-bus requires one of several GPIB libraries plus the corresponding
-kernel driver to be installed correctly before an attempt is made to
-build @code{fsc2}.
+set in the configuration for @code{fsc2}).
 
-Devices using USB-serial converters can be used as far there's
-support in kernel for them (in that case they can be used like
-a normal serial port, just using a "funnny" for the device file).
+Devices using USB-serial converters can be used as far there's support
+in kernel for them (in that case they can be used like a normal serial
+port devices).
 
 Other USB-controlled devices can be used via the
 @url{http://libusb.wiki.sourceforge.net/,libusb} package, either
@@ -244,7 +240,7 @@ Devices controlled via LAN can be used if you have a network card and
 networking support enabled in the kernel (which it usually is).
 
 Also devices that are ISA or PCI cards (or connected to dedicated ISA
-or PCI card) or athat re controlled via the Rulbus (Rijksuniversiteit
+or PCI card) or that re controlled via the Rulbus (Rijksuniversiteit
 Leiden BUS) can be used. All of those require additional libraries and
 kernel drivers to be installed prior to building @code{fsc2}. If these
 come from the makers of the device (e.g.@: Roper Scientific Spec-10
@@ -455,54 +451,59 @@ or '/usr/local/include' you will have to tell @code{fsc2} where to look for
 them by setting the variable GPIB_HEADER_DIR accordingly.
 
 
-The next two variables, @code{NUM_SERIAL_PORTS} and @code{SERIAL_LOCK_DIR} are
-used for dealing with the serial ports. @code{NUM_SERIAL_PORTS} should be set
-to the number of serial ports that your computer has (or to the number you
-want @code{fsc2} to have access to). If the variable is not set (or set to 0)
-serial ports can't be used.
+With the variable @code{WITHOUT_SERIAL_PORTS} you can set if modules
+controlled via serial ports (or via USB-serial converters) are to
+created. If this variable is not set (i.e.@: serial port suppor is
+enabled) the next three variables, @code{SERIAL_LOCK_DIR},
+@code{SERIAL_LOG_FILE} and @code{SERIAL_LOG_LEVEL} allow finer-grained
+control.
 
 
-@code{SERIAL_LOCK_DIR} must be a string with the name of the directory where
-@code{UUCP} type lock files for the serial ports are created (there is a
-convention that programs opening a serial port create such a lock file that
-contains the process ID (PID) of the program as a decimal ASCII number, so
-that other programs can check if the port is already in use and by
-whom). According to version 2.2 of the Filesystem Hierarchy Standard this
-directory should be @file{/var/lock}, but on old systems also
-@file{/usr/spool/locks} and @file{/usr/spool/uucp} were commonly used, so this
-can be adjusted via this variable. If you don't want lock files for the serial
-port to be created simply don't define this variable. A possible problem
-arises if you use programs creating lock files not in the HDB UUCP format (the
-PID being stored in a ten byte string, left-padded with spaces and with a
-trailing newline). In this case @code{fsc2} will not try to remove stale lock
-files and instead print an error message to the terminal that the lock file
-has to be removed manually.
+If set @code{SERIAL_LOCK_DIR} must be a string with the name of the
+directory where @code{UUCP} type lock files for the serial ports are
+created (there is a convention that programs opening a serial port
+create such a lock file that contains the process ID (PID) of the
+program as a decimal ASCII number, so that other programs can check if
+the port is already in use and by whom). According to version 2.2 of
+the Filesystem Hierarchy Standard this directory should be
+@file{/var/lock}, but on old systems also @file{/usr/spool/locks} and
+@file{/usr/spool/uucp} were commonly used, so this can be adjusted via
+this variable. If you don't want lock files for the serial port to be
+created simply don't define this variable. A possible problem arises
+if you use programs creating lock files not in the HDB UUCP format
+(the PID being stored in a ten byte string, left-padded with spaces
+and with a trailing newline). In this case @code{fsc2} will not try to
+remove stale lock files and instead print an error message to the
+terminal that the lock file has to be removed manually.
 
 
-While running @code{fsc2} may write out information about the activity on the
-serial ports into a log file. You can change the default log file
-@file{/tmp/fsc2_serial.log} to something appropriate for your setup via the
-variable @code{SERIAL_LOG_FILE} (if it's not set logs will be written to
-stderr unless @code{SERIAL_LOG_LEVEL} is set to @code{OFF}). You can set the
-verbosity of the logs by changing the variable @code{SERIAL_LOG_LEVEL} to
-either @code{HIGH} (logs everything including messages passed between the
-computer and the device), @code{MEDIUM} (logs function calls and errors),
-@code{LOW} (the default, just logs errors) or @code{OFF} (no logging at all).
+While running @code{fsc2} may write out information about the activity
+on the serial ports into a log file. You can change the default log
+file @file{/tmp/fsc2_serial.log} to something appropriate for your
+setup via the variable @code{SERIAL_LOG_FILE} (if it's not set logs
+will be written to stderr unless @code{SERIAL_LOG_LEVEL} is set to
+@code{OFF}). You can set the verbosity of the logs by changing the
+variable @code{SERIAL_LOG_LEVEL} to either @code{HIGH} (logs
+everything including messages passed between the computer and the
+device), @code{MEDIUM} (logs function calls and errors), @code{LOW}
+(the default, just logs errors) or @code{OFF} (no logging at all).
 Please note that the file can get rather large, so better have it on a
-partition with enough free space. In order not to have it grow indefinitely
-each time a new experiment is started the log file is truncated to zero
-length, so it contains only information about the last experiment you run.
+partition with enough free space. In order not to have it grow
+indefinitely each time a new experiment is started the log file is
+truncated to zero length, so it contains only information about the
+last experiment you run.
 
 
-If there are devices controlled via the LAN also a log file will get generated
-for keeping track of the communications. Again, you can change the default log
-file @file{/tmp/fsc2_lan.log} to something else via the variable
-@code{LAN_LOG_FILE} (if it's not set logs will be written to stderr unless
-@code{LAN_LOG_LEVEL} is set to @code{OFF}). You can set the verbosity of the
-logs by changing the variable @code{LAN_LOG_LEVEL} to either @code{HIGH} (logs
-everything including data exchanged over the network), @code{MEDIUM} (logs
-function calls and errors), @code{LOW} (the default, just logs errors) or
-@code{OFF} (no logging at all).
+If there are devices controlled via LAN also a log file will get
+generated for keeping track of the communications. Again, you can
+change the default log file @file{/tmp/fsc2_lan.log} to something else
+via the variable @code{LAN_LOG_FILE} (if it's not set logs will be
+written to stderr unless @code{LAN_LOG_LEVEL} is set to @code{OFF}).
+You can set the verbosity of the logs by changing the variable
+@code{LAN_LOG_LEVEL} to either @code{HIGH} (logs everything including
+data exchanged over the network), @code{MEDIUM} (logs function calls
+and errors), @code{LOW} (the default, just logs errors) or @code{OFF}
+(no logging at all).
 
 
 Via the @code{EDITOR} variable you can set the editor that gets invoked
@@ -585,13 +586,15 @@ changing it would be that the machine isn't connected to the internet.
 @subsection Device setup
 
 For each device there exists a configuration file in the @file{config}
-subdirectory. In most cases you don't have to change anything there,
+subdirectory. In some cases you don't have to change anything there,
 but e.g.@: for devices controlled via a serial port by may have to set
 the number of the port in the device's configuration file and for
-devices controlled via the LAN its IP number. Please take the time and
-have a look at the configuration files for the devices you are
-planning to use, what can be adjusted should be documented in the
-individual files.
+devices controlled via the LAN its IP number. There are also a number
+of modules with support for several models of a certain device and in
+this case typically the models type must be set correctly. Please take
+the time and have a look at the configuration files for all devices
+you're planning to use, the adjustable parameters should be documented
+clearly in the individual files.
 
 
 @node Compiling and Installation, , Preparing for installation, Installation
