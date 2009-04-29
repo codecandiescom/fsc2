@@ -735,7 +735,8 @@ correct sequence, so it's not completely foolproof.
 * Global variables::
 * Handling GPIB Devices::
 * Serial Port Handling::
-* Handling devices connected via the LAN::
+* Handling devices connected via USB::
+* Handling devices connected via LAN::
 * Hook functions::
 * Caveats for the test run::
 * How to compile a module::
@@ -795,7 +796,7 @@ The module may also have to include a header file for a library dealing
 with the interface used for connecting the device to the computer. If
 you're using a device on the GPIB bus you need to include @file{gpib_if.h},
 if it's connected to one of the serial ports @file{serial.h} or, if the
-device is controlled via the LAN, the file @file{lan.h} (all these files
+device is controlled via LAN, the file @file{lan.h} (all these files
 are in the source directory of @code{fsc2}, so just put the file name
 into double quotes and it will be found automatically). For other devices
 some other include file may be required, e.g.@: @file{rulbus.h} for the
@@ -962,7 +963,7 @@ hook function. @code{libusb} library initialization is then done by
 @code{fsc2}, the module just has to find and open the device and then
 should be able to communicate with it.
 
-Finally, for devices for which the LAN is used for communicaation the
+Finally, for devices for which LAN is used for communication the
 variable @code{Need_LAN} (also of type @code{bool}) need to be set in
 the init hook function.
 
@@ -1065,7 +1066,7 @@ arguments corresponding to the conversion specifiers in the format
 string.
 
 
-@node Serial Port Handling, Handling devices connected via the LAN, Handling GPIB Devices, Writing New Modules
+@node Serial Port Handling, Handling devices connected via USB, Handling GPIB Devices, Writing New Modules
 @subsection Serial Port Handling
 
 To be able use @code{fsc2}'s interface to the serial ports you must
@@ -1229,11 +1230,44 @@ function plus arguments corresponding to the conversion specifiers in
 the format string.
 
 
-@node Handling devices connected via the LAN, Hook functions, Serial Port Handling, Writing New Modules
-@subsection Handling devices connected via the LAN
+@node Handling devices connected via USB, Handling devices connected via LAN, Serial Port Handling, Writing New Modules
+@subsection Handling devices connected via USB
+
+Currently, versions 1.0 and 0.1 of the @code{libusb} library are
+supported for communication with devices controlled via USB. You can
+recognize within your module which one gets compiled in by testing the
+macros @code{WITH_LIBUSB_1_0} and @code{WITH_LIBUSB_0_1} for existence
+(only one of them will be set, never both).
+
+Please note: make sure that the @code{DO_QUIT} signal is blocked
+during calls of the functions from @code{libusb}, i.e.@: do something
+like this:
+@example
+sigset_t new_mask,
+         old_mask;
+
+raise_permissions( );
+sigemptyset( &new_mask );
+sigaddset( &new_mask, DO_QUIT );
+sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
+
+libusb_do_something( );
+
+sigprocmask( SIG_SETMASK, &old_mask, NULL );
+lower_permissions( );
+@end example
+Otherwise it might happen that this signal (that is raised when the
+user clicks onto the @code{Stop} button) gets received. And in this
+case communication with the device may be interruted and the device
+left in an unknown and potentially unresponsive state. By blocking
+the signal this can be avoided.
+
+
+@node Handling devices connected via LAN, Hook functions, Handling devices connected via USB, Writing New Modules
+@subsection Handling devices connected via LAN
 
 There are some functions for the communication with devices connected
-via the LAN (@code{TCP} only, there's no support for @code{UDP} yet)
+via LAN (@code{TCP} only, there's no support for @code{UDP} yet)
 provided by @code{fsc2}. They allow you to connect to a device, send
 and receive data and finally close the connection. To be able to use
 these functions you need to include the appropriate header file,
@@ -1383,7 +1417,7 @@ function plus arguments corresponding to the conversion specifiers in
 the format string.
 
 
-@node Hook functions, Caveats for the test run, Handling devices connected via the LAN, Writing New Modules
+@node Hook functions, Caveats for the test run, Handling devices connected via LAN, Writing New Modules
 @subsection Hook functions
 @cindex hook functions
 @findex init_hook()
