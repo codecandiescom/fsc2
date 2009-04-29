@@ -38,6 +38,7 @@
 #include <locale.h>
 #include <math.h>
 #include <errno.h>
+#include <signal.h>
 #include <limits.h>
 #include <time.h>
 #include <fcntl.h>
@@ -62,6 +63,7 @@
 #include "loader.h"
 #include "phases.h"
 #include "pulser.h"
+#include "run.h"
 #include "module_util.h"
 
 

@@ -590,6 +590,8 @@ oriel_matrix_get_exposure( void )
     unsigned char *readbuf;
     static struct exposure pix;
     int cnt;
+    sigset_t new_mask,
+             old_mask;
 
 
     pix.width = oriel_matrix.pixel_width;
@@ -605,6 +607,9 @@ oriel_matrix_get_exposure( void )
     pix.image = T_malloc( pix.image_size );
 
     raise_permissions( );
+    sigemptyset( &new_mask );
+    sigaddset( &new_mask, DO_QUIT );
+    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
 #if defined WITH_LIBUSB_0_1
     if (    ( cnt = usb_bulk_read( oriel_matrix.udev, EP6, ( char * ) pix.image,
@@ -615,12 +620,14 @@ oriel_matrix_get_exposure( void )
 #endif
          || ( unsigned int ) cnt != pix.image_size )
     {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, "Failed to get exposure.\n" );
         T_free( pix.image );
         THROW( EXCEPTION );
     }
 
+    sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
     return &pix;
@@ -682,6 +689,8 @@ oriel_matrix_get_reconstruction( unsigned char recon_type )
     unsigned char *readbuf;
     static struct reconstruction recon;    /* reconstruction struct */
     int cnt;
+    sigset_t new_mask,
+             old_mask;
 
 
     fsc2_assert(    recon_type >= RECON_TYPE_LIGHT
@@ -710,6 +719,9 @@ oriel_matrix_get_reconstruction( unsigned char recon_type )
     }
       
     raise_permissions( );
+    sigemptyset( &new_mask );
+    sigaddset( &new_mask, DO_QUIT );
+    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
 #if defined WITH_LIBUSB_0_1
     if (    ( cnt = usb_bulk_read( oriel_matrix.udev, EP8,
@@ -722,12 +734,14 @@ oriel_matrix_get_reconstruction( unsigned char recon_type )
 #endif
          || ( unsigned int ) cnt != recon.response_size )
     {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, "Failed to get reconstruction.\n" );
         T_free( recon.intensity );
         THROW( EXCEPTION );
     }
 
+    sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
     return &recon;
@@ -1027,6 +1041,8 @@ oriel_matrix_communicate( unsigned char cmd,
     float f;
     va_list ap;
     const char *err = NULL;
+    sigset_t new_mask,
+             old_mask;
 #if defined WITH_LIBUSB_1_0
     int cnt;
 #endif
@@ -1194,6 +1210,9 @@ oriel_matrix_communicate( unsigned char cmd,
     writebuf[ 5 ] = SCHEME_NUMBER;
 
     raise_permissions( );
+    sigemptyset( &new_mask );
+    sigaddset( &new_mask, DO_QUIT );
+    sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
 #if defined WITH_LIBUSB_0_1
     if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
@@ -1210,11 +1229,13 @@ oriel_matrix_communicate( unsigned char cmd,
 #endif
          || readbuf[ 6 ] != 0x01 )
     {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
         print( FATAL, err );
         THROW( EXCEPTION );
     }        
 
+    sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
     return readbuf;
@@ -1346,7 +1367,11 @@ oriel_matrix_get_model_number( void )
     unsigned char *readbuf;
     char *model_number;
     int len;
+    sigset_t new_mask,
+             old_mask;
+#if defined WITH_LIBUSB_1_0
     int cnt;
+#endif
 
 
     readbuf = oriel_matrix_communicate( CMD_GET_MODEL_NUMBER );
@@ -1367,6 +1392,9 @@ oriel_matrix_get_model_number( void )
         len -= USB_READ_BUF_SIZE - 9;
 
         raise_permissions( );
+        sigemptyset( &new_mask );
+        sigaddset( &new_mask, DO_QUIT );
+        sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
 #if defined WITH_LIBUSB_0_1
         if (    ( cnt = usb_bulk_read( oriel_matrix.udev, EP8,
@@ -1380,12 +1408,14 @@ oriel_matrix_get_model_number( void )
 #endif
              || cnt != len )
         {
+            sigprocmask( SIG_SETMASK, &old_mask, NULL );
             lower_permissions( );
             print( FATAL, "Failed to read model number.\n" );
             T_free( model_number );
             THROW( EXCEPTION );
         }
 
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
     }
 
@@ -1407,7 +1437,11 @@ oriel_matrix_get_serial_number( void )
     unsigned char *readbuf;
     char *serial_number;
     int len;
+    sigset_t new_mask,
+             old_mask;
+#if defined WITH_LIBUSB_1_0
     int cnt;
+#endif
 
 
     readbuf = oriel_matrix_communicate( CMD_GET_SERIAL_NUMBER );
@@ -1427,6 +1461,9 @@ oriel_matrix_get_serial_number( void )
         len -= USB_READ_BUF_SIZE - 9;
 
         raise_permissions( );
+        sigemptyset( &new_mask );
+        sigaddset( &new_mask, DO_QUIT );
+        sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
 #if defined WITH_LIBUSB_0_1
         if (    ( cnt = usb_bulk_read( oriel_matrix.udev, EP8,
@@ -1440,12 +1477,14 @@ oriel_matrix_get_serial_number( void )
 #endif
              || cnt != len )
         {
+            sigprocmask( SIG_SETMASK, &old_mask, NULL );
             lower_permissions( );
             print( FATAL, "Failed to read serial number.\n" );
             T_free( serial_number );
             THROW( EXCEPTION );
         }
 
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
     }
 
