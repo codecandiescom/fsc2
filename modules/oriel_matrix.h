@@ -2,8 +2,7 @@
  * Newport Oriel MMS Spectrometer Driver
  *
  * Notes:
- *    Requires libusb 0.1
- *    Needs root privileges to access USB devices.
+ *    Requires libusb 0.1 or libusb 1.0
  *.   This driver has been modified [hacked :-)] to work with fsc2.
  *
  * Last updated April 23, 2009

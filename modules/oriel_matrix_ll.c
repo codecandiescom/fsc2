@@ -3,7 +3,6 @@
  *
  * Notes:
  *    File requires oriel_matrix.h
- *    Needs root privileges to access USB devices
  *.   This driver has been modified [hacked :-)] to work with fsc2.
  *
  * Last updated April 24, 2009
@@ -45,16 +44,16 @@
 static void oriel_matrix_get_info( void );
 static unsigned char * oriel_matrix_communicate( unsigned char cmd,
                                                  ... );
-static unsigned short int device_2_ushort( unsigned char *src );
-static void ushort_2_device( unsigned char * dest,
-                             unsigned short  val );
-static short int device_2_short( unsigned char * src );
-static unsigned int device_2_uint( unsigned char * src );
-static void uint_2_device( unsigned char * dest,
-                           unsigned int    val );
-static float device_2_float( unsigned char * src );
-static void float_2_device( unsigned char * dest,
-                            float           val );
+static unsigned short int device_to_ushort( unsigned char *src );
+static void ushort_to_device( unsigned char * dest,
+                              unsigned short  val );
+static short int device_to_short( unsigned char * src );
+static unsigned int device_to_uint( unsigned char * src );
+static void uint_to_device( unsigned char * dest,
+                            unsigned int    val );
+static float device_to_float( unsigned char * src );
+static void float_to_device( unsigned char * dest,
+                             float           val );
 
 /* Commented out since only used in development/debugging */
 
@@ -317,6 +316,7 @@ oriel_matrix_close( void )
 
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
+
     oriel_matrix.udev = NULL;
 }
 
@@ -333,18 +333,18 @@ oriel_matrix_get_info( void )
 
     oriel_matrix.has_shutter_support = readbuf[ 13 ];
 
-    oriel_matrix.min_exp_time = 1.0e-3 * device_2_uint( readbuf + 14 );
-    oriel_matrix.max_exp_time = 1.0e-3 * device_2_uint( readbuf + 18 );
+    oriel_matrix.min_exp_time = 1.0e-3 * device_to_uint( readbuf + 14 );
+    oriel_matrix.max_exp_time = 1.0e-3 * device_to_uint( readbuf + 18 );
 
     oriel_matrix.has_temp_control = readbuf[ 24 ];
 
-    oriel_matrix.min_setpoint = device_2_short( readbuf + 25 ) + 273.15;
-    oriel_matrix.max_setpoint = device_2_short( readbuf + 27 ) + 273.15;
+    oriel_matrix.min_setpoint = device_to_short( readbuf + 25 ) + 273.15;
+    oriel_matrix.max_setpoint = device_to_short( readbuf + 27 ) + 273.15;
 
     oriel_matrix.ccd_bytes_per_pixel = readbuf[ 11 ] / 8;
 
-    oriel_matrix.pixel_width = device_2_ushort( readbuf + 7 );
-    oriel_matrix.pixel_height = device_2_ushort( readbuf + 9 );
+    oriel_matrix.pixel_width  = device_to_ushort( readbuf + 7 );
+    oriel_matrix.pixel_height = device_to_ushort( readbuf + 9 );
 }
 
 
@@ -389,7 +389,7 @@ oriel_matrix_get_exposure_time( void )
 {
     unsigned char *readbuf = oriel_matrix_communicate( CMD_GET_EXPOSURE_TIME );
 
-    return device_2_float( readbuf + 7 );
+    return device_to_float( readbuf + 7 );
 }
 
 
@@ -575,8 +575,8 @@ oriel_matrix_get_pixel_hw( void )
 
     readbuf = oriel_matrix_communicate( CMD_GET_SPECTROMETER_INFO );
 
-    pixelSize[ 0 ] = device_2_ushort( readbuf + 7 );
-    pixelSize[ 1 ] = device_2_ushort( readbuf + 9 );
+    pixelSize[ 0 ] = device_to_ushort( readbuf + 7 );
+    pixelSize[ 1 ] = device_to_ushort( readbuf + 9 );
 
     if ( pixelSize[ 0 ] == 0 || pixelSize[ 1 ] == 0 )
     {
@@ -646,7 +646,7 @@ oriel_matrix_get_exposure( void )
 
     pix.error = UNSET;
     pix.exposure_type = readbuf[ 7 ];
-    pix.image_size = device_2_uint( readbuf + 8 );
+    pix.image_size = device_to_uint( readbuf + 8 );
     pix.image = T_malloc( pix.image_size );
 
     raise_permissions( );
@@ -743,14 +743,14 @@ oriel_matrix_get_reconstruction( unsigned char recon_type )
 
     recon.error = UNSET;
     recon.saturation = readbuf[ 8 ];
-    recon.count = device_2_ushort( readbuf + 9 );
+    recon.count = device_to_ushort( readbuf + 9 );
     recon.schema = readbuf[ 5 ];
     recon.recon_type = readbuf[ 7 ];
 
     /* This is not the actual number of elements in the array since the
        last few elements are padded with 0s */
 
-    recon.response_size = device_2_uint( readbuf + 1 ) - USB_READ_BUF_SIZE;
+    recon.response_size = device_to_uint( readbuf + 1 ) - USB_READ_BUF_SIZE;
 
     recon.intensity = T_malloc( recon.response_size );
 
@@ -814,7 +814,7 @@ oriel_matrix_get_clock_rate( void )
 {
     unsigned char *readbuf = oriel_matrix_communicate( CMD_GET_CLOCK_RATE );
 
-    return device_2_ushort( readbuf + 7 );
+    return device_to_ushort( readbuf + 7 );
 }
 
 
@@ -906,7 +906,7 @@ oriel_matrix_get_pixel_mode( void )
 {
     unsigned char * readbuf = oriel_matrix_communicate( CMD_GET_PIXEL_MODE );
 
-    return device_2_ushort( readbuf + 7 );
+    return device_to_ushort( readbuf + 7 );
 }
 
 
@@ -933,8 +933,8 @@ oriel_matrix_get_CCD_temp( void )
     readbuf = oriel_matrix_communicate( CMD_GET_CCD_TEMPERATURE );
 
     temp.regulation   = readbuf[ 7 ];
-    temp.set_point    = device_2_float( readbuf + 8 );
-    temp.current_temp = device_2_float( readbuf + 12 );
+    temp.set_point    = device_to_float( readbuf + 8 );
+    temp.current_temp = device_to_float( readbuf + 12 );
     temp.therm_fault  = readbuf[ 16 ];
     temp.temp_lock    = readbuf[ 17 ];
 
@@ -1048,8 +1048,8 @@ oriel_matrix_get_AFE_parameters( void )
 
     readbuf = oriel_matrix_communicate( CMD_GET_CCD_TEMPERATURE_INFO );
 
-    AFEPram[ 0 ] = device_2_ushort( readbuf + 9 );
-    AFEPram[ 1 ] = device_2_ushort( readbuf + 11 );
+    AFEPram[ 0 ] = device_to_ushort( readbuf + 9 );
+    AFEPram[ 1 ] = device_to_ushort( readbuf + 11 );
 
     if (    AFEPram[ 0 ] > MAX_AFE_OFFSET
          || AFEPram[ 1 ] > MAX_AFE_GAIN )
@@ -1103,7 +1103,7 @@ oriel_matrix_communicate( unsigned char cmd,
             uc = va_arg( ap, int );
             writebuf[ 6 ] = uc;      /* enable/disable temp. regulation */
             f = va_arg( ap, double );
-            float_2_device( writebuf + 7, f );
+            float_to_device( writebuf + 7, f );
             va_end( ap );
             err = "Failed to set CCD temperature.\n";
             break;
@@ -1125,7 +1125,7 @@ oriel_matrix_communicate( unsigned char cmd,
             va_start( ap, cmd );
             f = va_arg( ap, double );             /* temperature as float */
             va_end( ap );
-            float_2_device( writebuf + 6, f );
+            float_to_device( writebuf + 6, f );
             err = "Failed to set exposure time.\n";
             break;
 
@@ -1204,7 +1204,7 @@ oriel_matrix_communicate( unsigned char cmd,
             va_start( ap, cmd );
             us = va_arg( ap, int );
             fsc2_assert( us <= AD_CLOCK_FREQ_1000kHz );
-            ushort_2_device( writebuf + 6, us );
+            ushort_to_device( writebuf + 6, us );
             va_end( ap );
             err = "Failed to set clock rate.\n";
             break;
@@ -1218,7 +1218,7 @@ oriel_matrix_communicate( unsigned char cmd,
             va_start( ap, cmd );
             us = va_arg( ap, int );
             fsc2_assert( us <= PIXEL_MODE_LINE_BINNING );
-            ushort_2_device( writebuf + 6, us );
+            ushort_to_device( writebuf + 6, us );
             va_end( ap );
             err = "Failed to set pixel mode.\n";
             break;
@@ -1236,10 +1236,10 @@ oriel_matrix_communicate( unsigned char cmd,
             va_start( ap, cmd );
             us = va_arg( ap, int );                   /* offset */
             fsc2_assert( us <= MAX_AFE_OFFSET );
-            ushort_2_device( writebuf + 9, us );
+            ushort_to_device( writebuf + 9, us );
             us = va_arg( ap, int );                   /* gain */
             fsc2_assert( us <= MAX_AFE_GAIN );
-            ushort_2_device( writebuf + 11, us );
+            ushort_to_device( writebuf + 11, us );
             va_end( ap );
             err = "Failed to set AFE parameters.\n";
             break;
@@ -1249,7 +1249,7 @@ oriel_matrix_communicate( unsigned char cmd,
     }
 
     writebuf[ 0 ] = cmd;
-    uint_2_device( writebuf + 1, len );
+    uint_to_device( writebuf + 1, len );
     writebuf[ 5 ] = SCHEME_NUMBER;
 
     raise_permissions( );
@@ -1289,7 +1289,7 @@ oriel_matrix_communicate( unsigned char cmd,
  *---------------------------------------------------------*/
 
 static unsigned short int
-device_2_ushort( unsigned char * src )
+device_to_ushort( unsigned char * src )
 {
     return ( src[ 1 ] << 8 ) | src[ 0 ];
 }
@@ -1299,41 +1299,31 @@ device_2_ushort( unsigned char * src )
  *---------------------------------------------------------*/
 
 static void
-ushort_2_device( unsigned char * dest,
-                 unsigned short  val )
+ushort_to_device( unsigned char * dest,
+                  unsigned short  val )
 {
-    dest[ 0 ] = val && 0xFF;
+    fsc2_assert( val < 0xFFFF );
+
+    dest[ 0 ] =   val        & 0xFF;
     dest[ 1 ] = ( val >> 8 ) & 0xFF;
 }
 
 
 /*---------------------------------------------------------*
- * This function requires that the machine this is running
- * is using 2s-complement and sizeof(int) is at least 2
  *---------------------------------------------------------*/
 
 static short int
-device_2_short( unsigned char * src )
+device_to_short( unsigned char * src )
 {
     unsigned short int val;
 
 
-    if ( sizeof( short int ) < 2 )
-    {
-        print( FATAL, "Module won't work on this machine, sizeof(short int) "
-               "is less than 2.\n" );
-        THROW( EXCEPTION );
-    }
+    val = ( src[ 1 ] << 8 ) | src[ 0 ];
 
-    val =  ( src[ 1 ] << 8 ) | src[ 0 ];
-
-    if ( sizeof( short int ) == 2 )
+    if ( val <= 0x7FFF )
         return val;
 
-    if ( src[ 1 ] & 0x80 )
-        val |= ~ 0U ^ 0xFFFF;
-
-    return val;
+    return - ( short int ) ( 0xFFFFU - val ) - 1;
 }
 
 
@@ -1341,7 +1331,7 @@ device_2_short( unsigned char * src )
  *---------------------------------------------------------*/
 
 static unsigned int
-device_2_uint( unsigned char * src )
+device_to_uint( unsigned char * src )
 {
     return   ( src[ 3 ] << 24 )
            | ( src[ 2 ] << 16 )
@@ -1354,10 +1344,12 @@ device_2_uint( unsigned char * src )
  *---------------------------------------------------------*/
 
 static void
-uint_2_device( unsigned char * dest,
-               unsigned int    val )
+uint_to_device( unsigned char * dest,
+                unsigned int    val )
 {
-    dest[ 0 ] = val & 0xFF;
+    fsc2_assert( val <= 0xFFFF );
+
+    dest[ 0 ] =   val         & 0xFF;
     dest[ 1 ] = ( val >>  8 ) & 0xFF;
     dest[ 2 ] = ( val >> 16 ) & 0xFF;
     dest[ 3 ] = ( val >> 24 ) & 0xFF;
@@ -1371,13 +1363,12 @@ uint_2_device( unsigned char * dest,
  *--------------------------------------------------------------*/
 
 static float
-device_2_float( unsigned char * src )
+device_to_float( unsigned char * src )
 {
     float val;
 
 
-    fsc2_assert( sizeof( val ) == 4 );
-
+    fsc2_assert( sizeof val == 4 );
     memcpy( &val, src, sizeof val );
     return val;
 }
@@ -1390,11 +1381,10 @@ device_2_float( unsigned char * src )
  *--------------------------------------------------------------*/
 
 static void
-float_2_device( unsigned char * dest,
-                float           val )
+float_to_device( unsigned char * dest,
+                 float           val )
 {
-    fsc2_assert( sizeof( val ) == 4 );
-
+    fsc2_assert( sizeof val == 4 );
     memcpy( dest, &val, sizeof val );
 }
 
@@ -1420,7 +1410,7 @@ oriel_matrix_get_model_number( void )
 
     readbuf = oriel_matrix_communicate( CMD_GET_MODEL_NUMBER );
 
-    len = device_2_ushort( readbuf + 7 );
+    len = device_to_ushort( readbuf + 7 );
     model_number = T_malloc( len + 1 );
     model_number[ len ] = '\0';
 
@@ -1489,7 +1479,7 @@ oriel_matrix_get_serial_number( void )
 
 
     readbuf = oriel_matrix_communicate( CMD_GET_SERIAL_NUMBER );
-    len = device_2_ushort( readbuf + 7 );
+    len = device_to_ushort( readbuf + 7 );
     serial_number = T_malloc( len + 1 );
     serial_number[ len ] = '\0';
 
@@ -1564,17 +1554,17 @@ oriel_matrix_print_info( void )
     readbuf = oriel_matrix_communicate( CMD_GET_SPECTROMETER_INFO );
 
     fprintf( stderr, "\n");
-    fprintf( stderr, "CCD pixel width: %u\n", device_2_ushort( readbuf + 7 ) );
+    fprintf( stderr, "CCD pixel width: %u\n", device_to_ushort( readbuf + 7 ) );
     fprintf( stderr, "CCD pixel height: %u\n",
-             device_2_ushort( readbuf + 9 ) );
+             device_to_ushort( readbuf + 9 ) );
     fprintf( stderr, "CCD bits per pixel: %u\n", readbuf[ 11 ] );
     fprintf( stderr, "CCD Type: %u\n", readbuf[ 12 ]);
     fprintf( stderr, "CCD Shutter support: %s\n",
              readbuf[ 13 ] ? "true" : "false");
     fprintf( stderr, "Minimum exposure time (s): %f\n",
-             1.0e-3 * device_2_uint( readbuf + 14 ));
+             1.0e-3 * device_to_uint( readbuf + 14 ));
     fprintf( stderr, "Maximum exposure time (s): %f\n",
-             1.0e-3 * device_2_uint( readbuf + 18 ) );
+             1.0e-3 * device_to_uint( readbuf + 18 ) );
     fprintf( stderr, "Calibration support: %s\n",
              readbuf[ 22 ] ? "true" : "false" );
     fprintf( stderr, "Spectra reconstruction support: %s\n",
@@ -1585,9 +1575,9 @@ oriel_matrix_print_info( void )
     if ( readbuf[ 24 ] )
     {
         fprintf( stderr, "   Minimum CCD setpoint (C): %d\n",
-                 device_2_short( readbuf + 25 ) );
+                 device_to_short( readbuf + 25 ) );
         fprintf( stderr, "   Maximum CCD setpoint (C): %d\n",
-                 device_2_short( readbuf + 27 ) );
+                 device_to_short( readbuf + 27 ) );
     }
 
     fprintf( stderr, "Number of supported lasers: %u\n", readbuf[ 29 ] );
@@ -1597,9 +1587,9 @@ oriel_matrix_print_info( void )
     if ( readbuf[ 30 ] )
     {
         fprintf( stderr, "   Minimum laser setpoint: %i\n",
-                 device_2_short( readbuf + 31 ) );
+                 device_to_short( readbuf + 31 ) );
         fprintf( stderr, "   Maximum laser setpoint: %i\n",
-                 device_2_short( readbuf + 33 ) );
+                 device_to_short( readbuf + 33 ) );
     }
 
     fprintf( stderr, "Laser Power Regulation: %s\n",
@@ -1608,30 +1598,30 @@ oriel_matrix_print_info( void )
     if ( readbuf[ 35 ] )
     {
         fprintf( stderr, "   Minimum laser power setpoint: %d\n",
-                 device_2_short( readbuf + 36 ) );
+                 device_to_short( readbuf + 36 ) );
         fprintf( stderr, "   Maximum laser power setpoint: %d\n",
-                 device_2_short( readbuf + 38 ) );
+                 device_to_short( readbuf + 38 ) );
     }
 
     /* DSP firmware info */
 
-    major = ( device_2_uint( readbuf + 40 ) >> 24 ) & 0xFF;
-    minor = ( device_2_uint( readbuf + 40 ) >> 16 ) & 0xFF;
-    build = device_2_uint( readbuf + 40 ) & 0x0000FFFF;
+    major = ( device_to_uint( readbuf + 40 ) >> 24 ) & 0xFF;
+    minor = ( device_to_uint( readbuf + 40 ) >> 16 ) & 0xFF;
+    build = device_to_uint( readbuf + 40 ) & 0x0000FFFF;
     fprintf( stderr, "DSP firmware version: %u.%u.%u\n", major, minor, build );
 
     /* FPGA firmware info */
 
-    major = ( device_2_uint( readbuf + 44 ) >> 24 ) & 0xFF;
-    minor = ( device_2_uint( readbuf + 44 ) >> 16 ) & 0xFF;
-    build = device_2_uint( readbuf + 44 ) & 0x0000FFFF;
+    major = ( device_to_uint( readbuf + 44 ) >> 24 ) & 0xFF;
+    minor = ( device_to_uint( readbuf + 44 ) >> 16 ) & 0xFF;
+    build = device_to_uint( readbuf + 44 ) & 0x0000FFFF;
     fprintf( stderr, "FPGA firmware version: %u.%u.%u\n", major, minor, build );
 
     /* USB firmware info */
 
-    major = ( device_2_uint( readbuf + 48 ) >> 24 ) & 0xFF;
-    minor = ( device_2_uint( readbuf + 48 ) >> 16 ) & 0xFF;
-    build = device_2_uint( readbuf + 48 ) & 0x0000FFFF;
+    major = ( device_to_uint( readbuf + 48 ) >> 24 ) & 0xFF;
+    minor = ( device_to_uint( readbuf + 48 ) >> 16 ) & 0xFF;
+    build = device_to_uint( readbuf + 48 ) & 0x0000FFFF;
     printf("USB firmware version: %u.%u.%u\n", major, minor, build);
 
     fprintf( stderr, "Number of general I/O lines: %d\n", readbuf[ 52 ] );
@@ -1875,8 +1865,8 @@ oriel_matrix_get_last_error( void )
     fprintf( stderr, "Error Code: %s\nError Type: %s\n",
              error_code, error_type );
 
-    error[ 0 ] = device_2_ushort( readbuf + 7 );
-    error[ 1 ] = device_2_ushort( readbuf + 9 );
+    error[ 0 ] = device_to_ushort( readbuf + 7 );
+    error[ 1 ] = device_to_ushort( readbuf + 9 );
 
     return error;
 }

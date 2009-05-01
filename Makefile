@@ -1038,7 +1038,7 @@ fsc2_config.h: Makefile $(MACHINE_INCLUDE_FILE)
 built:
 	-@cp -f fsc2_config.h version
 	-@echo >> version
-	-git-ls-tree -r master >> version
+	-git ls-tree -r master >> version
 	-@gzip -c -9 version | uuencode - > version.ugz
 	-@$(RM) $(RMFLAGS) version
 
@@ -1180,7 +1180,7 @@ pack:
 
 pack-git:
 	cd ..
-	git-clone --bare fsc2 fsc2.git
+	git clone --bare fsc2 fsc2.git
 	tar -c fsc2.git | gzip -c -9 > fsc2.git.tar.gz
 	rm -rf fsc2.git
 
