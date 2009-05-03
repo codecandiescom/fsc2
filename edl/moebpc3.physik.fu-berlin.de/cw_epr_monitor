@@ -236,7 +236,7 @@ FOREVER {
 		} ELSE {
 			lockin_auto_acquisition( "OFF" );
 			button_state( Sweep_Stop, "ON" );
-			current = smagnet_field( new_current );
+			current = magnet_field( new_current );
 			Sweep_State = STOPPED;
 			draw_marker( I + 1, "RED" );
 		}
