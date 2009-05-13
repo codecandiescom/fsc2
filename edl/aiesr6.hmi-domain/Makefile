@@ -23,7 +23,7 @@ EDL_SCRIPTS := $(patsubst %.EDL,%,$(EDL))
 SCRIPTS     := $(EDL_SCRIPTS)
 
 
-all: $(EDL_SRIPTS)
+all: $(EDL_SCRIPTS)
 
 %: %.EDL
 	../../utils/fsc2_guify $< $@
