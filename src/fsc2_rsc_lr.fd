@@ -257,7 +257,7 @@ callback: win_slider_callback
 argument: 0
 value: 0.172727
 slsize: 0.05
-return: FL_RETURN_END_CHANGED
+return: FL_RETURN_CHANGED
 
 --------------------
 class: FL_BUTTON

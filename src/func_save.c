@@ -634,15 +634,21 @@ f_resetf( Var_T * v )
         return vars_push( INT_VAR, FILE_NUMBER_STDERR );
     }
 
-    /* Check that a possibly available paranter is ok */
+    /* Check that a possibly available parameter is ok. Also consider the
+       case that the user didn't open the file that's now being reset. */
 
-    if (    v != NULL
-         && (    v->type != INT_VAR
-              || v->val.lval < FILE_NUMBER_OFFSET
-              || v->val.lval >= EDL.File_List_Len + FILE_NUMBER_OFFSET ) )
+    if ( v != NULL )
     {
-         print( FATAL, "Argument isn't a vaild file handle.\n" );
-         THROW( EXCEPTION );
+        if ( v->type == INT_VAR && v->val.lval == FILE_NUMBER_NOT_OPEN )
+            return vars_push( INT_VAR, FILE_NUMBER_NOT_OPEN );
+
+        if (    v->type != INT_VAR
+             || v->val.lval < FILE_NUMBER_OFFSET
+             || v->val.lval >= EDL.File_List_Len + FILE_NUMBER_OFFSET )
+        {
+            print( FATAL, "Argument isn't a valid file handle.\n" );
+            THROW( EXCEPTION );
+        }
     }
 
     if ( v != NULL )

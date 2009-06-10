@@ -44,7 +44,7 @@ FOREVER {
 		}
 		ELSE
 		{
-			wait( 0.05 );
+			wait( 0.1 );
 		}
 	}
 	J += 1;
