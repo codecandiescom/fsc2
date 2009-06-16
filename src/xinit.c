@@ -30,12 +30,6 @@ static int main_form_close_handler( FL_FORM * a ,
 static void setup_app_options( FL_CMD_OPT app_opt[ ] );
 static bool dl_fsc2_rsc( void );
 
-#if 0
-static int fsc2_x_error_handler( Display *d,
-                                 XErrorEvent *err );
-static int fsc2_xio_error_handler( Display *d );
-#endif
-
 
 /* Some variables needed for the X resources */
 
@@ -255,14 +249,6 @@ xforms_init( int  * argc,
         T_free( app_opt[ i ].specifier );
     }
 
-#if 0
-    /* Maybe we'll use homegrown X error handlers sometime, but currently
-       there's no reason to do so... */
-
-    XSetErrorHandler( fsc2_x_error_handler );
-    XSetIOErrorHandler( fsc2_xio_error_handler );
-#endif
-
     /* Find out the resolution we're going to run in */
 
     if ( fl_scrh >= 870 && fl_scrw >= 1152 )
@@ -289,7 +275,7 @@ xforms_init( int  * argc,
         XI_Sizes.NORMAL_FONT_SIZE = FL_SMALL_SIZE;
         XI_Sizes.SMALL_FONT_SIZE  = FL_TINY_SIZE;
         XI_Sizes.TOOLS_FONT_SIZE  = FL_SMALL_FONT;
-        XI_Sizes.SLIDER_SIZE      = 0.1;
+        XI_Sizes.SLIDER_SIZE      = 0.2;
     }
     else
     {
@@ -298,7 +284,7 @@ xforms_init( int  * argc,
         XI_Sizes.NORMAL_FONT_SIZE = FL_MEDIUM_SIZE;
         XI_Sizes.SMALL_FONT_SIZE  = FL_SMALL_SIZE;
         XI_Sizes.TOOLS_FONT_SIZE  = FL_MEDIUM_FONT;
-        XI_Sizes.SLIDER_SIZE      = 0.075;
+        XI_Sizes.SLIDER_SIZE      = 0.15;
     }
 
     /* Set some properties of goodies */
@@ -841,7 +827,8 @@ win_slider_callback( FL_OBJECT * a,
 {
     FL_Coord h, H;
     FL_Coord new_h1 ;
-    FL_Coord cx1, cy1, cw1, ch1, cx2, cy2, cw2, ch2;
+    FL_Coord cx1, cy1, cw1, ch1,
+             cx2, cy2, cw2, ch2;
     int old_nwgravity, old_segravity;
 
 
@@ -851,8 +838,9 @@ win_slider_callback( FL_OBJECT * a,
     fl_get_object_geometry( GUI.main_form->error_browser,
                             &cx2, &cy2, &cw2, &ch2 );
 
-    h = cy2 - cy1 - ch1;
-    H = cy2 - cy1 + ch2;
+    h = cy2 - cy1 - ch1;   /* height of strip between the browsers */
+    H = cy2 - cy1 + ch2;   /* height from top of upper browser to bottom
+                              of lower browser */
 
     new_h1 = lrnd( ( 1.0 - XI_Sizes.SLIDER_SIZE ) * H * fl_get_slider_value( a )
                    + 0.5 * ( H * XI_Sizes.SLIDER_SIZE - h ) );
@@ -922,39 +910,6 @@ is_iconic( Display * d,
     XFree(  property );
     return status;
 }
-
-
-#if 0
-
-
-/*------------------------------------------------------------*
- *------------------------------------------------------------*/
-
-static int
-fsc2_x_error_handler( Display *     d,
-                      XErrorEvent * err )
-{
-    char err_str[ 1024 ];
-
-
-    XGetErrorText( d, err->error_code, err_str, 1024 );
-    fprintf( stderr, "fsc2 (%d) killed by an X error: %s.\n",
-             getpid( ), err_str );
-    exit( EXIT_FAILURE );
-}
-
-
-/*------------------------------------------------------------*
- *------------------------------------------------------------*/
-
-static int
-fsc2_xio_error_handler( Display * d  UNUSED_ARG )
-{
-    fprintf( stderr, "fsc2 (%d) killed by a fatal X error.\n", getpid( ) );
-    exit( EXIT_FAILURE );
-}
-
-#endif
 
 
 /*
