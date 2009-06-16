@@ -179,7 +179,7 @@ oriel_matrix_init( void )
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
-#if 0
+#if 1
     libusb_set_debug( NULL, 3 );
 #endif
 
@@ -1088,6 +1088,7 @@ oriel_matrix_communicate( unsigned char cmd,
              old_mask;
 #if defined WITH_LIBUSB_1_0
     int cnt;
+    int ret;
 #endif
 
 
@@ -1257,6 +1258,7 @@ oriel_matrix_communicate( unsigned char cmd,
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
+#if 0
 #if defined WITH_LIBUSB_0_1
     if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
                             len, 0 ) != ( int ) len
@@ -1277,6 +1279,91 @@ oriel_matrix_communicate( unsigned char cmd,
         print( FATAL, err );
         THROW( EXCEPTION );
     }        
+#endif
+
+#if defined WITH_LIBUSB_0_1
+    if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
+                            len, 0 ) != ( int ) len
+         || usb_bulk_read( oriel_matrix.udev, reply_ep, ( char * ) readbuf,
+                           sizeof readbuf, 0 ) < 7
+         || readbuf[ 6 ] != 0x01 )
+    {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }        
+#endif
+
+#if defined WITH_LIBUSB_1_0
+    if ( ( ret = libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
+                                       len, &cnt, 0 ) ) != 0 )
+    {
+        int i;
+
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        fprintf( stderr, "%slibusb_bulk_transfer() for write to 0x%x failed "
+                 "with %d, intended length was %d\nTried to write",
+                 err, EP4, ret, len );
+        for ( i = 0; i < len; i++ )
+            fprintf( stderr, " 0x%x", writebuf[ i ] );
+        fprintf( stderr, "\n" );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }
+
+    if ( cnt != len )
+    {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        fprintf( stderr, "%sExpected to write %d bytes but only %d got "
+                 "written\n", err, len, cnt );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( ret = libusb_bulk_transfer( oriel_matrix.udev, reply_ep, readbuf,
+                                       sizeof readbuf, &cnt, 0 ) ) != 0 )
+    {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        fprintf( stderr, "%slibusb_bulk_transfer() for read to 0x%x failed "
+                 "with %d\n", err, reply_ep, ret );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }
+
+    if ( cnt < 7 )
+    {
+        int i;
+
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        fprintf( stderr, "%sRead only %d bytes instead of at least 7\nGot",
+                 err, cnt );
+        for ( i = 0; i < cnt; i++ )
+            fprintf( stderr, " 0x%x", writebuf[ i ] );
+        fprintf( stderr, "\n" );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }
+        
+    if ( readbuf[ 6 ] != 0x01 )
+    {
+        int i;
+
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        fprintf( stderr, "%sSeventh byte read isn't 1 but 0x%x\nGot",
+                 err, readbuf[ 6 ] );
+        for ( i = 0; i < cnt; i++ )
+            fprintf( stderr, " 0x%x", writebuf[ i ] );
+        fprintf( stderr, "\n" );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }
+#endif
 
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
