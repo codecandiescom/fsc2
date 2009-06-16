@@ -1276,7 +1276,7 @@ oriel_matrix_communicate( unsigned char cmd,
         lower_permissions( );
         print( FATAL, err );
         THROW( EXCEPTION );
-    }        
+    }     
 
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
