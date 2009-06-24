@@ -2494,6 +2494,20 @@ acquisition memory 1 Mpts/channel
 @item LT584L
 4 channels, bandwidth 1 GHz, sample rate 2 GS/s (SS) / 50 GS/s (RIS),
 acquisition memory 4 Mpts/channel
+@item 44Xi
+@item 44MXi
+4 channels, bandwidth 400 MHz, sample rate 5 GS/s, 12.5 Mpts/channel
+@item 62Xi
+2 channels, bandwidth 600 MHz, sample rate 5 GS/s, 12.5 Mpts/channel
+@item 64Xi
+@item 64MXi
+4 channels, bandwidth 600 MHz, sample rate 5 GS/s, 12.5 Mpts/channel
+@item 104Xi
+@item 104MXi
+4 channels, bandwidth 1 GHz, sample rate 5 GS/s, 12.5 Mpts/channel
+@item 204X
+@item 204MXi
+4 channels, bandwidth 2 GHz, sample rate 5 GS/s, 12.5 Mpts/channel
 @end table
 The exact model must be set in the configuration file, together with
 information about further available options. All models have 4 function

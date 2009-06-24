@@ -65,6 +65,11 @@ static unsigned int * oriel_matrix_get_last_error( void );
 #endif
 
 
+#if defined WITH_LIBUSB_1_0
+#define USB_TIMEOUT    1000     /* in milliseconds */
+#endif
+
+
 /*----------------------------------------------------------------*
  * This function detects and initializes the Newport spectrometer
  * and must be called before it can be used. All other functions
@@ -179,7 +184,7 @@ oriel_matrix_init( void )
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
-#if 0
+#if 1
     libusb_set_debug( NULL, 3 );
 #endif
 
@@ -275,8 +280,17 @@ oriel_matrix_init( void )
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
-    oriel_matrix_get_info( );
-    oriel_matrix_set_reconstruction( );
+    TRY
+    {
+        oriel_matrix_get_info( );
+        oriel_matrix_set_reconstruction( );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        oriel_matrix_close( );
+        RETHROW( );
+    }
 }
 #endif
 
@@ -299,7 +313,15 @@ oriel_matrix_close( void )
     if ( oriel_matrix.udev == NULL )
         return;
 
-    oriel_matrix_close_CCD_shutter( );
+    TRY
+    {
+        oriel_matrix_close_CCD_shutter( );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        /* empty */ ;       /* try to continue anyway */
+    }
 
     raise_permissions( );
     sigemptyset( &new_mask );
@@ -360,7 +382,7 @@ oriel_matrix_get_info( void )
  * Input:
  *   double time: the time that should be set (seconds)
  *
- * Return value: if successful returns a double of the exposure time
+ * Return value: if successful returns the exposure time as a double
  * (in seconds) else an exception is thrown
  *----------------------------------------------------------------------*/
 
@@ -380,8 +402,8 @@ oriel_matrix_set_exposure_time( double exp_time )
  *
  * Input: None
  *
- * Return value: if successful returns a double of the exposure
- * time (in seconds) or else an exception is thrown
+ * Return value: if successful returns the exposure time as a
+ * double (in seconds) or else an exception is thrown
  *---------------------------------------------------------------*/
 
 double
@@ -1088,6 +1110,7 @@ oriel_matrix_communicate( unsigned char cmd,
              old_mask;
 #if defined WITH_LIBUSB_1_0
     int cnt;
+    int ret;
 #endif
 
 
@@ -1252,11 +1275,15 @@ oriel_matrix_communicate( unsigned char cmd,
     uint_to_device( writebuf + 1, len );
     writebuf[ 5 ] = SCHEME_NUMBER;
 
+    /* Keep the signal to stop the process send from the parent process
+       from aborting the communication */
+
     raise_permissions( );
     sigemptyset( &new_mask );
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
+#if 0
 #if defined WITH_LIBUSB_0_1
     if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
                             len, 0 ) != ( int ) len
@@ -1264,10 +1291,10 @@ oriel_matrix_communicate( unsigned char cmd,
                            sizeof readbuf, 0 ) < 7
 #elif defined WITH_LIBUSB_1_0
     if (    libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
-                                  len, &cnt, 0 )
+                                  len, &cnt, USB_TIMEOUT )
          || cnt != len
          || libusb_bulk_transfer( oriel_matrix.udev, reply_ep, readbuf,
-                                  sizeof readbuf, &cnt, 0 )
+                                  sizeof readbuf, &cnt, USB_TIMEOUT )
          || cnt < 7
 #endif
          || readbuf[ 6 ] != 0x01 )
@@ -1276,7 +1303,99 @@ oriel_matrix_communicate( unsigned char cmd,
         lower_permissions( );
         print( FATAL, err );
         THROW( EXCEPTION );
-    }     
+    }        
+#endif
+
+#if defined WITH_LIBUSB_0_1
+    if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
+                            len, 0 ) != ( int ) len
+         || usb_bulk_read( oriel_matrix.udev, reply_ep, ( char * ) readbuf,
+                           sizeof readbuf, 0 ) < 7
+         || readbuf[ 6 ] != 0x01 )
+    {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }        
+#endif
+
+#if defined WITH_LIBUSB_1_0
+    if ( ( ret = libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
+                                       len, &cnt, USB_TIMEOUT ) ) != 0 )
+    {
+        int i;
+
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        fprintf( stderr, "%slibusb_bulk_transfer() for write to 0x%x failed "
+                 "with %d, intended length was %d\nTried to write",
+                 err, EP4, ret, len );
+        for ( i = 0; i < len; i++ )
+            fprintf( stderr, " 0x%x", writebuf[ i ] );
+        fprintf( stderr, "\n" );
+        if ( ret == LIBUSB_ERROR_TIMEOUT )
+            fprintf( stderr, "(Failed due to timeout after %u ms\n%d bytes "
+                     "got transfered before.)\n", USB_TIMEOUT, cnt );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }
+
+    if ( cnt != len )
+    {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        fprintf( stderr, "%sExpected to write %d bytes but only %d got "
+                 "written\n", err, len, cnt );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }
+
+    if ( ( ret = libusb_bulk_transfer( oriel_matrix.udev, reply_ep, readbuf,
+                                       sizeof readbuf, &cnt,
+                                       USB_TIMEOUT ) ) != 0 )
+    {
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        fprintf( stderr, "%slibusb_bulk_transfer() for read from 0x%x failed "
+                 "with %d\n", err, reply_ep, ret );
+        if ( ret == LIBUSB_ERROR_TIMEOUT )
+            fprintf( stderr, "(Failed due to timeout after %u ms\n%d bytes "
+                     "got transfered before.)\n", USB_TIMEOUT, cnt );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }
+
+    if ( cnt < 7 )
+    {
+        int i;
+
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        fprintf( stderr, "%sRead only %d bytes instead of at least 7\nGot",
+                 err, cnt );
+        for ( i = 0; i < cnt; i++ )
+            fprintf( stderr, " 0x%x", writebuf[ i ] );
+        fprintf( stderr, "\n" );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }
+        
+    if ( readbuf[ 6 ] != 0x01 )
+    {
+        int i;
+
+        sigprocmask( SIG_SETMASK, &old_mask, NULL );
+        lower_permissions( );
+        fprintf( stderr, "%sSeventh byte read isn't 1 but 0x%x\nGot",
+                 err, readbuf[ 6 ] );
+        for ( i = 0; i < cnt; i++ )
+            fprintf( stderr, " 0x%x", writebuf[ i ] );
+        fprintf( stderr, "\n" );
+        print( FATAL, err );
+        THROW( EXCEPTION );
+    }
+#endif
 
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );

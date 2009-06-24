@@ -2003,9 +2003,9 @@ conn_request_handler( void )
 /*-----------------------------------------------------------------------*
  * Sets up the signal handlers for all kinds of signals the main process
  * could receive. This probably looks a bit like overkill, but I just
- * wan't to sure it doesn't get killed by some meaningless singnals and,
- * on the other hand, that on deadly signals it still gets a chance to
- * try to get rid of shared memory and kill the other processes etc.
+ * want to make sure it doesn't get killed by some meaningless signals
+ * and, on the other hand, that on deadly signals it still gets a chance
+ * to try to get rid of shared memory and kill the other processes etc.
  *-----------------------------------------------------------------------*/
 
 static

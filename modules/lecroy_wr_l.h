@@ -131,14 +131,6 @@
 #define LECROY_WR_TRIG_DELAY_RESOLUTION 0.1
 
 
-/* Maximum factors or values for trigger levels */
-
-#define LECROY_WR_TRG_MAX_LEVEL_CH_FAC    5.0    /* 5 times sensitivity */
-#define LECROY_WR_TRG_MAX_LEVEL_EXT       0.5    /* 500 mV */
-#define LECROY_WR_TRG_MAX_LEVEL_EXT10     5.0    /* 5 V */
-
-
-
 /* Definition of the shortest possible record length (i.e. the number of
    samples for an aquisition) - this is identical for all models */
 
