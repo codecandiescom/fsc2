@@ -36,19 +36,19 @@ static double lecroy_wr_get_float_value( int          ch,
                                          const char * name );
 
 static void lecroy_wr_get_prep( int              ch,
-                                Window_T *       w,
+                                Window_T       * w,
                                 unsigned char ** data,
-                                long *           length,
-                                double *         gain,
-                                double *         offset );
+                                long           * length,
+                                double         * gain,
+                                double         * offset );
 
 static int lecroy_wr_s_hex_to_int( unsigned char * dp );
 
 static inline unsigned int lecroy_wr_s_hex_to_nibble( unsigned char c );
 
 static bool lecroy_wr_talk( const char * cmd,
-                            char *       reply,
-                            long *       length );
+                            char       * reply,
+                            long       * length );
 
 static void lecroy_wr_comm_failure( void );
 
@@ -1404,11 +1404,11 @@ lecroy_wr_start_acquisition( void )
 
 static void
 lecroy_wr_get_prep( int              ch,
-                    Window_T *       w,
+                    Window_T       * w,
                     unsigned char ** data,
-                    long *           length,
-                    double *         gain,
-                    double *         offset )
+                    long           * length,
+                    double         * gain,
+                    double         * offset )
 {
     unsigned int bit_to_test = 0;
     char cmd[ 100 ];
@@ -1518,10 +1518,10 @@ lecroy_wr_get_prep( int              ch,
  *-----------------------------------------------------*/
 
 void
-lecroy_wr_get_curve( int        ch,
-                     Window_T * w,
-                     double **  array,
-                     long *     length )
+lecroy_wr_get_curve( int         ch,
+                     Window_T  * w,
+                     double   ** array,
+                     long      * length )
 {
     double gain, offset;
     unsigned char *data;
@@ -1911,8 +1911,8 @@ lecroy_wr_get_inr( void )
 
 static bool
 lecroy_wr_talk( const char * cmd,
-                char *       reply,
-                long *       length )
+                char       * reply,
+                long       * length )
 {
     ssize_t to_send = strlen( cmd );
 

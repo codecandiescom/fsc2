@@ -65,6 +65,11 @@ static unsigned int * oriel_matrix_get_last_error( void );
 #endif
 
 
+#if defined WITH_LIBUSB_1_0
+#define USB_TIMEOUT    1000     /* in milliseconds */
+#endif
+
+
 /*----------------------------------------------------------------*
  * This function detects and initializes the Newport spectrometer
  * and must be called before it can be used. All other functions
@@ -275,8 +280,17 @@ oriel_matrix_init( void )
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
 
-    oriel_matrix_get_info( );
-    oriel_matrix_set_reconstruction( );
+    TRY
+    {
+        oriel_matrix_get_info( );
+        oriel_matrix_set_reconstruction( );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        oriel_matrix_close( );
+        RETHROW( );
+    }
 }
 #endif
 
@@ -299,7 +313,15 @@ oriel_matrix_close( void )
     if ( oriel_matrix.udev == NULL )
         return;
 
-    oriel_matrix_close_CCD_shutter( );
+    TRY
+    {
+        oriel_matrix_close_CCD_shutter( );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+    {
+        /* empty */ ;       /* try to continue anyway */
+    }
 
     raise_permissions( );
     sigemptyset( &new_mask );
@@ -360,7 +382,7 @@ oriel_matrix_get_info( void )
  * Input:
  *   double time: the time that should be set (seconds)
  *
- * Return value: if successful returns a double of the exposure time
+ * Return value: if successful returns the exposure time as a double
  * (in seconds) else an exception is thrown
  *----------------------------------------------------------------------*/
 
@@ -380,8 +402,8 @@ oriel_matrix_set_exposure_time( double exp_time )
  *
  * Input: None
  *
- * Return value: if successful returns a double of the exposure
- * time (in seconds) or else an exception is thrown
+ * Return value: if successful returns the exposure time as a
+ * double (in seconds) or else an exception is thrown
  *---------------------------------------------------------------*/
 
 double
@@ -1253,6 +1275,9 @@ oriel_matrix_communicate( unsigned char cmd,
     uint_to_device( writebuf + 1, len );
     writebuf[ 5 ] = SCHEME_NUMBER;
 
+    /* Keep the signal to stop the process send from the parent process
+       from aborting the communication */
+
     raise_permissions( );
     sigemptyset( &new_mask );
     sigaddset( &new_mask, DO_QUIT );
@@ -1266,10 +1291,10 @@ oriel_matrix_communicate( unsigned char cmd,
                            sizeof readbuf, 0 ) < 7
 #elif defined WITH_LIBUSB_1_0
     if (    libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
-                                  len, &cnt, 0 )
+                                  len, &cnt, USB_TIMEOUT )
          || cnt != len
          || libusb_bulk_transfer( oriel_matrix.udev, reply_ep, readbuf,
-                                  sizeof readbuf, &cnt, 0 )
+                                  sizeof readbuf, &cnt, USB_TIMEOUT )
          || cnt < 7
 #endif
          || readbuf[ 6 ] != 0x01 )
@@ -1297,7 +1322,7 @@ oriel_matrix_communicate( unsigned char cmd,
 
 #if defined WITH_LIBUSB_1_0
     if ( ( ret = libusb_bulk_transfer( oriel_matrix.udev, EP4, writebuf,
-                                       len, &cnt, 0 ) ) != 0 )
+                                       len, &cnt, USB_TIMEOUT ) ) != 0 )
     {
         int i;
 
@@ -1309,6 +1334,9 @@ oriel_matrix_communicate( unsigned char cmd,
         for ( i = 0; i < len; i++ )
             fprintf( stderr, " 0x%x", writebuf[ i ] );
         fprintf( stderr, "\n" );
+        if ( ret == LIBUSB_ERROR_TIMEOUT )
+            fprintf( stderr, "(Failed due to timeout after %u ms\n%d bytes "
+                     "got transfered before.)\n", USB_TIMEOUT, cnt );
         print( FATAL, err );
         THROW( EXCEPTION );
     }
@@ -1324,12 +1352,16 @@ oriel_matrix_communicate( unsigned char cmd,
     }
 
     if ( ( ret = libusb_bulk_transfer( oriel_matrix.udev, reply_ep, readbuf,
-                                       sizeof readbuf, &cnt, 0 ) ) != 0 )
+                                       sizeof readbuf, &cnt,
+                                       USB_TIMEOUT ) ) != 0 )
     {
         sigprocmask( SIG_SETMASK, &old_mask, NULL );
         lower_permissions( );
-        fprintf( stderr, "%slibusb_bulk_transfer() for read to 0x%x failed "
+        fprintf( stderr, "%slibusb_bulk_transfer() for read from 0x%x failed "
                  "with %d\n", err, reply_ep, ret );
+        if ( ret == LIBUSB_ERROR_TIMEOUT )
+            fprintf( stderr, "(Failed due to timeout after %u ms\n%d bytes "
+                     "got transfered before.)\n", USB_TIMEOUT, cnt );
         print( FATAL, err );
         THROW( EXCEPTION );
     }

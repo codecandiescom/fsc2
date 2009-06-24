@@ -36,15 +36,15 @@ static double lecroy_wr_get_float_value( int          ch,
                                          const char * name );
 
 static void lecroy_wr_get_prep( int              ch,
-                                Window_T *       w,
+                                Window_T       * w,
                                 unsigned char ** data,
-                                long *           length,
-                                double *         gain,
-                                double *         offset );
+                                long           * length,
+                                double         * gain,
+                                double         * offset );
 
 static bool lecroy_wr_talk( const char * cmd,
-                            char *       reply,
-                            long *       length );
+                            char       * reply,
+                            long       * length );
 
 static void lecroy_wr_comm_failure( void );
 
@@ -1326,11 +1326,11 @@ lecroy_wr_start_acquisition( void )
 
 static void
 lecroy_wr_get_prep( int              ch,
-                    Window_T *       w,
+                    Window_T       * w,
                     unsigned char ** data,
-                    long *           length,
-                    double *         gain,
-                    double *         offset )
+                    long           * length,
+                    double         * gain,
+                    double         * offset )
 {
     unsigned int bit_to_test;
     char cmd[ 100 ];
@@ -1437,10 +1437,10 @@ lecroy_wr_get_prep( int              ch,
  *-----------------------------------------------------*/
 
 void
-lecroy_wr_get_curve( int        ch,
-                     Window_T * w,
-                     double **  array,
-                     long *     length )
+lecroy_wr_get_curve( int         ch,
+                     Window_T  * w,
+                     double   ** array,
+                     long      * length )
 {
     double gain, offset;
     unsigned char *data;
