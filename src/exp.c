@@ -21,6 +21,7 @@
 
 
 #include "fsc2.h"
+#include "exp_parser_common.h"
 
 
 /* Number of program token structures to be allocated as a chunk */

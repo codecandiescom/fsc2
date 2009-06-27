@@ -25,6 +25,7 @@
 #include "fsc2.h"
 #include "gpib_if.h"
 #include "serial.h"
+#include "exp_parser_common.h"
 
 #if defined WITH_RULBUS
 #include <rulbus.h>

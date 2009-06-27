@@ -85,11 +85,13 @@ static bool In_cond;
 %token UNLESS_TOK           2051
 %token WHILE_TOK            2052
 %token UNTIL_TOK            2053
-%token CONT_TOK             2054
+%token NEXT_TOK             2054
 %token BREAK_TOK            2055
 %token REPEAT_TOK           2056
 %token FOR_TOK              2057
 %token FOREVER_TOK          2058
+%token ON_STOP_TOK          3333
+
 
 %left '?' ':'
 %left E_AND E_OR E_XOR
@@ -161,7 +163,7 @@ line:    E_VAR_TOKEN ass               { }
                                          THROW( EXCEPTION ); }
        | pt ass
        | BREAK_TOK
-       | CONT_TOK
+       | NEXT_TOK
 ;
 
 pt:      E_PPOS

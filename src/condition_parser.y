@@ -48,7 +48,7 @@ static void conditionerror( const char * s );
 
    A further problem are cases like 'expr1 | ( expr2 & expr3 ) | expr4'. If,
    e.g. expr2 is false expr3 must not evaluated but expr4 must (at least if
-   expr 1 was false). So, skipping all the rest after expr2 is not possible
+   expr 1 was false). So skipping all the rest after expr2 is not possible
    and thus 'Dont_exec' must work as a counter, incremented on expr2 and again
    decremented at the end of expr3. Thus it's again 0 when expr4 is dealt with
    which in turn is evaluated.
@@ -100,6 +100,19 @@ static int Dont_exec = 0;
 %token E_DIVA                 282
 %token E_MODA                 283
 %token E_EXPA                 284
+
+%token IF_TOK                2049
+%token ELSE_TOK              2050
+%token UNLESS_TOK            2051
+%token WHILE_TOK             2052
+%token UNTIL_TOK             2053
+%token NEXT_TOK              2054
+%token BREAK_TOK             2055
+%token REPEAT_TOK            2056
+%token FOR_TOK               2057
+%token FOREVER_TOK           2058
+%token ON_STOP_TOK           3333
+
 
 %type <vptr> expr list1 l1e ind strs
 

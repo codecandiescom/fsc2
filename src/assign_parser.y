@@ -28,6 +28,7 @@
 %{
 
 #include "fsc2.h"
+#include "exp.h"
 
 
 void assignparser_init( void );

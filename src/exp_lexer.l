@@ -50,7 +50,7 @@
 
 
 #include "fsc2.h"
-
+#include "exp_test_parser.h"
 
 extern Token_Val_T Exp_Val;        /* defined in exp.c */
 
