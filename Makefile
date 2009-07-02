@@ -418,6 +418,10 @@ MAIL_ADDRESS       := fsc2@toerring.de
 ##############################################################################
 
 
+# Version information
+
+VERSION          := 2.3.13
+
 # Set the optimization level
 
 OPTIMIZATION     := -O2
@@ -1176,7 +1180,7 @@ test:
 
 pack:
 	@$(MAKE) clean
-	cd ..; tar -c fsc2 --exclude=.git* | gzip -c -9 > fsc2.tar.gz
+	cd ..; tar -c fsc2-$(VERSION) --exclude=.git* | gzip -c -9 > fsc2-$(VERSION).tar.gz
 
 pack-git:
 	cd ..

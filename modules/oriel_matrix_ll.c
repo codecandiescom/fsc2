@@ -5,7 +5,7 @@
  *    File requires oriel_matrix.h
  *.   This driver has been modified [hacked :-)] to work with fsc2.
  *
- * Last updated July 1, 2009
+ * Last updated July 2, 2009
  *
  * This driver was developed using the ClearShotII - USB port interface
  * communications and control information specification provided by Centice
@@ -73,14 +73,18 @@ static unsigned int * oriel_matrix_get_last_error( void );
 /*----------------------------------------------------------------*
  * This function detects and initializes the Newport spectrometer
  * and must be called before it can be used. All other functions
- * will fail if called upon before calling this function.
+ * will fail if called before calling this function.
+ *
+ * Note: there are two versions of this function, one for use
+ * with libusb-0.1 and the other for libuseb-1.0
  *
  * Input: None.
  *
- * Return Value: none, ob failure an exception is thrown
+ * Return value: none, on failure an exception is thrown
  *----------------------------------------------------------------*/
 
 #if defined WITH_LIBUSB_0_1
+
 void
 oriel_matrix_init( void )
 {
@@ -163,7 +167,9 @@ oriel_matrix_init( void )
     oriel_matrix_get_info( );
     oriel_matrix_set_reconstruction( );
 }
+
 #elif defined WITH_LIBUSB_1_0
+
 void
 oriel_matrix_init( void )
 {
@@ -184,7 +190,9 @@ oriel_matrix_init( void )
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
-#if 0   /* enable for extra debugging output */
+    /* Enable this for extra debugging output */
+
+#if 0   
     libusb_set_debug( NULL, 3 );
 #endif
 
@@ -1112,9 +1120,9 @@ oriel_matrix_communicate( unsigned char cmd,
              old_mask;
 #if defined WITH_LIBUSB_1_0
     int cnt;
-#if 0    /* enable when extensive debugging output is needed */
+#if 0    /* enable when extensive debugging output is needed, see below */
     int ret;
-#endif   /* enable when extensive debugging output is needed */
+#endif
 #endif
 
 
@@ -1287,7 +1295,7 @@ oriel_matrix_communicate( unsigned char cmd,
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
-#if 1   /* disable when enabling debugging output, see below */
+#if 1   /* disable this when enabling debugging output, see below */
 #if defined WITH_LIBUSB_0_1
     if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
                             len, 0 ) != ( int ) len
@@ -1308,9 +1316,9 @@ oriel_matrix_communicate( unsigned char cmd,
         print( FATAL, err );
         THROW( EXCEPTION );
     }        
-#endif   /* disable when enabling debugging output, see below */
+#endif
 
-#if 0   /* enable for extensive debugging output */
+#if 0   /* enable this for extensive debugging output */
 #if defined WITH_LIBUSB_0_1
     if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
                             len, 0 ) != ( int ) len
@@ -1401,7 +1409,7 @@ oriel_matrix_communicate( unsigned char cmd,
         THROW( EXCEPTION );
     }
 #endif
-#endif   /* enable for extensive debugging output */
+#endif   /* end for case of extensive debugging output */
 
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
@@ -1481,11 +1489,11 @@ uint_to_device( unsigned char * dest,
 }
 
 
-/*--------------------------------------------------------------*
+/*------------------------------------------------------------*
  * This needs to be changed if the machine this is running on
- * has a different float representation than the one the device
- * is using!
- *--------------------------------------------------------------*/
+ * has a different floating point representation than the one
+ * the device is using!
+ *------------------------------------------------------------*/
 
 static float
 device_to_float( unsigned char * src )
@@ -1499,11 +1507,11 @@ device_to_float( unsigned char * src )
 }
 
 
-/*--------------------------------------------------------------*
+/*------------------------------------------------------------*
  * This needs to be changed if the machine this is running on
- * has a different float representation than the one the device
- * is using!
- *--------------------------------------------------------------*/
+ * has a different floating point representation than the one
+ * the device is using!
+ *------------------------------------------------------------*/
 
 static void
 float_to_device( unsigned char * dest,
@@ -1514,12 +1522,18 @@ float_to_device( unsigned char * dest,
 }
 
 
-/*---------------------------------------------------------*
+/*------------------------------------------------------------*
+ * Function for obtaining for the model number of the device.
+ * Takes no arguments and returns a pointer to a string with
+ * the serial number (or throws an exception on errors).
+ *
+ * Note: the memory for the string is allocated within the
+ * function and must be de-allocated by the caller!
+ *
  * Function is only used during development/debugging
- *---------------------------------------------------------*/
+ *------------------------------------------------------------*/
 
 #if 0
-
 static char *
 oriel_matrix_get_model_number( void )
 {
@@ -1580,16 +1594,21 @@ oriel_matrix_get_model_number( void )
 
     return model_number;
 }
-
 #endif
 
 
-/*---------------------------------------------------------*
+/*-------------------------------------------------------------*
+ * Function for obtaining for the serial number of the device.
+ * Takes no arguments and returns a pointer to a string with
+ * the serial number (or throws an exception on errors).
+ *
+ * Note: the memory for the string is allocated within the
+ * function and must be de-allocated by the caller!
+ *
  * Function is only used during development/debugging
- *---------------------------------------------------------*/
+ *-------------------------------------------------------------*/
 
 #if 0
-
 static char *
 oriel_matrix_get_serial_number( void )
 {
@@ -1649,7 +1668,6 @@ oriel_matrix_get_serial_number( void )
 
     return serial_number;
 }
-
 #endif
 
 
@@ -1665,7 +1683,6 @@ oriel_matrix_get_serial_number( void )
  *-----------------------------------------------------------*/
 
 #if 0
-
 static void
 oriel_matrix_print_info( void )
 {  
@@ -1815,7 +1832,6 @@ oriel_matrix_print_info( void )
  
     fprintf( stderr, "\n" );
 }
-
 #endif
 
 
@@ -1861,7 +1877,6 @@ oriel_matrix_print_info( void )
  *---------------------------------------------------------------------*/
 
 #if 0
-
 static unsigned int *
 oriel_matrix_get_last_error( void )
 {
@@ -1995,7 +2010,6 @@ oriel_matrix_get_last_error( void )
 
     return error;
 }
-
 #endif
 
 
