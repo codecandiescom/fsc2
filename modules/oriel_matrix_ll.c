@@ -184,7 +184,7 @@ oriel_matrix_init( void )
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
-#if 1
+#if 0   /* enable for extra debugging output */
     libusb_set_debug( NULL, 3 );
 #endif
 
@@ -1112,7 +1112,9 @@ oriel_matrix_communicate( unsigned char cmd,
              old_mask;
 #if defined WITH_LIBUSB_1_0
     int cnt;
+#if 0    /* enable when extensive debugging output is needed */
     int ret;
+#endif   /* enable when extensive debugging output is needed */
 #endif
 
 
@@ -1285,7 +1287,7 @@ oriel_matrix_communicate( unsigned char cmd,
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
-#if 0
+#if 1   /* disable when enabling debugging output, see below */
 #if defined WITH_LIBUSB_0_1
     if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
                             len, 0 ) != ( int ) len
@@ -1306,8 +1308,9 @@ oriel_matrix_communicate( unsigned char cmd,
         print( FATAL, err );
         THROW( EXCEPTION );
     }        
-#endif
+#endif   /* disable when enabling debugging output, see below */
 
+#if 0   /* enable for extensive debugging output */
 #if defined WITH_LIBUSB_0_1
     if (    usb_bulk_write( oriel_matrix.udev, EP4, ( char * ) writebuf,
                             len, 0 ) != ( int ) len
@@ -1398,6 +1401,7 @@ oriel_matrix_communicate( unsigned char cmd,
         THROW( EXCEPTION );
     }
 #endif
+#endif   /* enable for extensive debugging output */
 
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );
