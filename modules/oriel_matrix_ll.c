@@ -5,7 +5,7 @@
  *    File requires oriel_matrix.h
  *.   This driver has been modified [hacked :-)] to work with fsc2.
  *
- * Last updated April 24, 2009
+ * Last updated July 1, 2009
  *
  * This driver was developed using the ClearShotII - USB port interface
  * communications and control information specification provided by Centice
@@ -330,9 +330,11 @@ oriel_matrix_close( void )
 
 #if defined WITH_LIBUSB_0_1
     usb_release_interface( oriel_matrix.udev, 0 );
+    usb_reset( oriel_matrix.udev );
     usb_close( oriel_matrix.udev );
 #elif defined WITH_LIBUSB_1_0
     libusb_release_interface( oriel_matrix.udev, 0 );
+    libusb_reset_device( oriel_matrix.udev );
     libusb_close( oriel_matrix.udev );
 #endif
 

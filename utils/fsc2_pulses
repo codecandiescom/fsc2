@@ -49,8 +49,8 @@
 #  a bit of time to analyze its input before starting to displaying the pulses.
 
 
-use warnings;
 use strict;
+use warnings;
 use Tk;
 
 
@@ -218,15 +218,15 @@ package Pulse_Window;
 sub new {
     my $inv = shift;
     my $class = ref( $inv ) || $inv;
-    my $self = { 'top'   => MainWindow->new,
-                 'dw'    => undef,
-                 'step'  => 0,
-                 'mag'   => 2,
-                 'hstep' => 72,
-                 'delay' => 0,
-                 'delta' => 10,
-                 'shft'  => 0,
-                 'len'   => 0 };
+    my $self = { top   => MainWindow->new,
+                 dw    => undef,
+                 step  => 0,
+                 mag   => 2,
+                 hstep => 72,
+                 delay => 0,
+                 delta => 10,
+                 shft  => 0,
+                 len   => 0 };
 
     bless $self, $class;
     $self->init;
@@ -299,120 +299,121 @@ sub init {
     # Create a frame and with an embedded (scrolled) canvas
 
     my $f1 = $self->top->Frame;
-    $self->{ 'canvas' } =
+    $self->{ canvas } =
         $f1->Scrolled( 'Canvas',
-                       '-relief'       => 'sunken',
-                       '-scrollbars'   => 'osoe',
-                       '-bd'           => 1,
-                       '-width'        => $width,
-                       '-height'       => $height,
-                       '-background'   => 'black',
-                       '-scrollregion' => [ 0, 0, $w + 170, $h ] );
+                       -relief       => 'sunken',
+                       -scrollbars   => 'osoe',
+                       -bd           => 1,
+                       -width        => $width,
+                       -height       => $height,
+                       -background   => 'black',
+                       -scrollregion => [ 0, 0, $w + 170, $h ] );
     $self->top->bind( '<Left>' => sub {
-                          $self->{ 'canvas' }->xviewScroll( -1, 'unit' ); } );
+                            $self->{ canvas }->xviewScroll( -1, 'unit' ); } );
     $self->top->bind( '<Right>' => sub {
-                          $self->{ 'canvas' }->xviewScroll( 1, 'unit' ); } );
+                            $self->{ canvas }->xviewScroll( 1, 'unit' ); } );
     $self->top->bind( '<Up>' => sub {
-                          $self->{ 'canvas' }->yviewScroll( -1, 'unit' ); } );
+                            $self->{ canvas }->yviewScroll( -1, 'unit' ); } );
     $self->top->bind( '<Down>' => sub {
-                          $self->{ 'canvas' }->yviewScroll( 1, 'unit' ); } );
+                            $self->{ canvas }->yviewScroll( 1, 'unit' ); } );
 
     # Create a second frame with the buttons etc.
 
     my $f2 = $self->top->Frame;
-    $self->{ 'delay_button' } =
-        $f2->Checkbutton( '-state'    => 'active',
-                          '-text'     => 'Show delays',
-                          '-variable' => \$self->{ 'delay' },
-                          '-command'  => sub { $self->draw_scale;
-                                               $self->redraw } );
+    $self->{ delay_button } =
+        $f2->Checkbutton( -state    => 'active',
+                          -text     => 'Show delays',
+                          -variable => \$self->{ delay },
+                          -command  => sub { $self->draw_scale;
+                                             $self->redraw } );
     my $f3 = $f2->Frame;
-    $self->{ 'step_label' } = $f3->Label( '-text' => 'Step:' );
-    $self->{ 'step_ffb' } =
-        $f3->Button( '-text'    => '<<',
-                     '-width'   => '1',
-                     '-command' => sub { $self->pshift( -1, 1 ) } );
-    $self->{ 'step_fb' } =
-        $f3->Button( '-text'    => '<',
-                     '-width'   => '1',
-                     '-command' => sub { $self->pshift( -1 ) } );
-    $self->{ 'step_entry' } =
-        $f3->Entry( '-textvariable'    => \$self->{ 'step' },
-                    '-width'           => 6,
-                    '-validate'        => 'key',
-                    '-validatecommand' => sub { my $n = shift;
-                                            return 1 if $n eq "";
-                                            return 0 unless $n =~ /^\d+$/;
-                                            return ( $n >= 0 and
+    $self->{ step_label } = $f3->Label( -text => 'Step:' );
+    $self->{ step_ffb } =
+        $f3->Button( -text    => '<<',
+                     -width   => '1',
+                     -command => sub { $self->pshift( -1, 1 ) } );
+    $self->{ step_fb } =
+        $f3->Button( -text    => '<',
+                     -width   => '1',
+                     -command => sub { $self->pshift( -1 ) } );
+    $self->{ step_entry } =
+        $f3->Entry( -textvariable    => \$self->{ step },
+                    -width           => 6,
+                    -validate        => 'key',
+                    -validatecommand =>
+ 	                           sub { my $n = shift;
+                                     return 1 if $n eq "";
+                                     return 0 unless $n =~ /^\d+$/;
+                                     return ( $n >= 0 and
                                               $n <= $Channels->num_steps ) } );
-    $self->{ 'step_fw' } =
-        $f3->Button( '-text'    => '>',
-                     '-width'   => '1',
-                     '-command' => sub { $self->pshift( 1 ) } );
-    $self->{ 'step_ffw' } =
-        $f3->Button( '-text'    => '>>',
-                     '-width'   => '1',
-                     '-command' => sub { $self->pshift( 1, 1 ) } );
-    $self->{ 'close_button' } =
-        $f2->Button( '-text'    => 'Close',
-                     '-command' => [ destroy => $self->top ] );
+    $self->{ step_fw } =
+        $f3->Button( -text    => '>',
+                     -width   => '1',
+                     -command => sub { $self->pshift( 1 ) } );
+    $self->{ step_ffw } =
+        $f3->Button( -text    => '>>',
+                     -width   => '1',
+                     -command => sub { $self->pshift( 1, 1 ) } );
+    $self->{ close_button } =
+        $f2->Button( -text    => 'Close',
+                     -command => [ destroy => $self->top ] );
 
-    $f2->pack( '-side'  => 'bottom',
-               '-fill'  => 'x' );
-    $self->{ 'delay_button' }->pack( '-side' => 'left',
-                                     '-padx' => '4m',
-                                     '-pady' => '2m' );
-    $f3->pack( '-side' => 'left',
-               '-padx' => '15m',
-               '-pady' => '2m',
-               '-fill' => 'x' );
-    $self->{ 'step_label'   }->pack( '-side' => 'left',
-                                     '-padx' => '3m' );
-    $self->{ 'step_ffb'     }->pack( '-side' => 'left' );
-    $self->{ 'step_fb'      }->pack( '-side' => 'left' );
-    $self->{ 'step_entry'   }->pack( '-side' => 'left',
-                                     '-padx' => '2m' );
-    $self->{ 'step_fw'      }->pack( '-side' => 'left' );
-    $self->{ 'step_ffw'     }->pack( '-side' => 'left' );
-    $self->{ 'close_button' }->pack( '-side' => 'right',
-                                     '-padx' => '4m',
-                                     '-pady' => '2m' );
+    $f2->pack( -side  => 'bottom',
+               -fill  => 'x' );
+    $self->{ delay_button }->pack( -side => 'left',
+                                   -padx => '4m',
+                                   -pady => '2m' );
+    $f3->pack( -side => 'left',
+               -padx => '15m',
+               -pady => '2m',
+               -fill => 'x' );
+    $self->{ step_label   }->pack( -side => 'left',
+                                   -padx => '3m' );
+    $self->{ step_ffb     }->pack( -side => 'left' );
+    $self->{ step_fb      }->pack( -side => 'left' );
+    $self->{ step_entry   }->pack( -side => 'left',
+                                   -padx => '2m' );
+    $self->{ step_fw      }->pack( -side => 'left' );
+    $self->{ step_ffw     }->pack( -side => 'left' );
+    $self->{ close_button }->pack( -side => 'right',
+                                   -padx => '4m',
+                                   -pady => '2m' );
 
     # Pack the canvas frame only now, otherwise on reducing the window height
     # the frame with the buttons gets crushed while the canvas frame keeps
     # its size even though it's scrollable...
 
-    $f1->pack( '-fill'   => 'both',
-               '-expand' => 1 );
-    $self->{ 'canvas' }->pack( '-side'   => 'top',
-                               '-fill'   => 'both',
-                               '-expand' => 1 );
-    $self->{ 'dw' } = Display_Window->new( $self->top );
+    $f1->pack( -fill   => 'both',
+               -expand => 1 );
+    $self->{ canvas }->pack( -side   => 'top',
+                             -fill   => 'both',
+                             -expand => 1 );
+    $self->{ dw } = Display_Window->new( $self->top );
 
     # Lots of key bindings...
 
-    $self->{ 'canvas' }->CanvasBind( '<Button-2>' => sub {
-                                         $self->pshift( 1 ) } );
-    $self->{ 'canvas' }->CanvasBind( '<Button-4>' => sub {
-                                         $self->pshift( 1 ) } );
-    $self->{ 'canvas' }->CanvasBind( '<Button-3>' => sub {
-                                         $self->pshift( -1 ) } );
-    $self->{ 'canvas' }->CanvasBind( '<Button-5>' => sub {
-                                         $self->pshift( -1 ) } );
+    $self->{ canvas }->CanvasBind( '<Button-2>' => sub {
+                                       $self->pshift( 1 ) } );
+    $self->{ canvas }->CanvasBind( '<Button-4>' => sub {
+                                       $self->pshift( 1 ) } );
+    $self->{ canvas }->CanvasBind( '<Button-3>' => sub {
+                                       $self->pshift( -1 ) } );
+    $self->{ canvas }->CanvasBind( '<Button-5>' => sub {
+                                       $self->pshift( -1 ) } );
     $self->top->bind( '<End>' => sub { $self->pshift( -1, 1 ) } );
     $self->top->bind( '<Home>' => sub { $self->pshift( 1, 1 ) } );
-    $self->top->bind( '<Prior>' => sub { $self->pshift( 1 ) } );
+    $self->top->bind( '<Prior>' => sub { $self->pshift(  1 ) } );
     $self->top->bind( '<Next>' => sub { $self->pshift( -1 ) } );
-    $self->top->bind( '<Control-d>' => sub { $self->{ 'delay' } ^= 1;
+    $self->top->bind( '<Control-d>' => sub { $self->{ delay } ^= 1;
                                              $self->draw_scale;
                                              $self->redraw } );
-    $self->top->bind( '<Control-q>' => [ destroy => $self->{ 'top' } ] );
-    $self->{ 'step_entry' }->bind( '<Return>' => sub {
-                                             return if $self->{ 'step' } eq "";
-                                             $self->redraw; } );
-    $self->{ 'step_entry' }->bind( '<KP_Enter>' => sub {
-                                             return if $self->{ 'step' } eq "";
-                                             $self->redraw; } );
+    $self->top->bind( '<Control-q>' => [ destroy => $self->{ top } ] );
+    $self->{ step_entry }->bind( '<Return>' => sub {
+                                     return if $self->{ step } eq '';
+                                     $self->redraw; } );
+    $self->{ step_entry }->bind( '<KP_Enter>' => sub {
+                                     return if $self->{ step } eq '';
+                                     $self->redraw; } );
 
     # There are sometimes problems with the automatic redraw, if they get
     # solved the next binding becomes completely useless...
@@ -427,13 +428,13 @@ sub init {
 #---------------------------------------------------------
 
 sub top {
-    return shift->{ 'top' };
+    return shift->{ top };
 }
 
 #---------------------------------------------------------
 
 sub dw {
-    return shift->{ 'dw' };
+    return shift->{ dw };
 }
 
 #---------------------------------------------------------
@@ -441,8 +442,8 @@ sub dw {
 sub offset {
     my ( $self, $val ) = @_;
 
-    $self->{ 'offset' } = $val if defined $val;
-    return $self->{ 'offset' };
+    $self->{ offset } = $val if defined $val;
+    return $self->{ offset };
 }
 
 #---------------------------------------------------------
@@ -450,8 +451,8 @@ sub offset {
 sub mag {
     my ( $self, $val ) = @_;
 
-    $self->{ 'mag' } = $val if defined $val;
-    return $self->{ 'mag' };
+    $self->{ mag } = $val if defined $val;
+    return $self->{ mag };
 }
 
 #---------------------------------------------------------
@@ -459,8 +460,8 @@ sub mag {
 sub step {
     my ( $self, $val ) = @_;
 
-    $self->{ 'step' } = $val if defined $val;
-    return $self->{ 'step' };
+    $self->{ step } = $val if defined $val;
+    return $self->{ step };
 }
 
 #---------------------------------------------------------
@@ -468,8 +469,8 @@ sub step {
 sub hstep {
     my ( $self, $val ) = @_;
 
-    $self->{ 'hstep' } = $val if defined $val;
-    return $self->{ 'hstep' };
+    $self->{ hstep } = $val if defined $val;
+    return $self->{ hstep };
 }
 
 #---------------------------------------------------------
@@ -477,8 +478,8 @@ sub hstep {
 sub delay {
     my ( $self, $val ) = @_;
 
-    $self->{ 'delay' } = $val if defined $val;
-    return $self->{ 'delay' };
+    $self->{ delay } = $val if defined $val;
+    return $self->{ delay };
 }
 
 #---------------------------------------------------------
@@ -486,8 +487,8 @@ sub delay {
 sub shft {
     my ( $self, $val ) = @_;
 
-    $self->{ 'shft' } = $val if defined $val;
-    return $self->{ 'shft' };
+    $self->{ shft } = $val if defined $val;
+    return $self->{ shft };
 }
 
 #---------------------------------------------------------
@@ -495,8 +496,8 @@ sub shft {
 sub len {
     my ( $self, $val ) = @_;
 
-    $self->{ 'len' } = $val if defined $val;
-    return $self->{ 'len' };
+    $self->{ len } = $val if defined $val;
+    return $self->{ len };
 }
 
 #---------------------------------------------------------
@@ -504,8 +505,8 @@ sub len {
 sub delta {
     my ( $self, $val ) = @_;
 
-    $self->{ 'delta' } = $val if defined $val;
-    return $self->{ 'delta' };
+    $self->{ delta } = $val if defined $val;
+    return $self->{ delta };
 }
 
 #---------------------------------------------------------
@@ -540,7 +541,7 @@ sub pshift {
 sub primary_draw {
 
     my $self = shift;
-    my $c = $self->{ 'canvas' };
+    my $c = $self->{ canvas };
 
     $self->draw_scale;
     my $x1 = 150;
@@ -551,12 +552,12 @@ sub primary_draw {
         my $y = 10 + ( $i + 0.5 ) * $self->hstep;
 
         $c->create( 'text', 10, $y,
-                    '-anchor' => 'w',
-                    '-text'   => $ch->key,
-                    '-fill'   => 'green' );
+                    -anchor => 'w',
+                    -text   => $ch->key,
+                    -fill   => 'green' );
 
         $y -= 0.5 * $ch->inv * $self->hstep;
-        $c->create( 'line', $x1, $y, $x2, $y, '-fill' => 'white' );
+        $c->create( 'line', $x1, $y, $x2, $y, -fill => 'white' );
     }
 
     $self->redraw( );
@@ -568,20 +569,20 @@ sub primary_draw {
 sub draw_scale {
 
     my $self = shift;
-    my $c = $self->{ 'canvas' };
+    my $c = $self->{ canvas };
     my $factor;
     my $unit;
 
 
-    $self->{ 'canvas' }->delete( 'scale' );
+    $self->{ canvas }->delete( 'scale' );
 
     my $x1 = 150;
     my $x2 = 160 + $self->len;
     my $y1 = 10 + ( $Channels->num_channels + 0.2 ) * $self->hstep;
 
     $c->create( 'line', $x1, $y1, $x2, $y1,
-                '-fill' => 'yellow',
-                '-tags' => 'scale' );
+                -fill => 'yellow',
+                -tags => 'scale' );
 
     $y1 += 10;
     my $y2 = 10;
@@ -614,13 +615,13 @@ sub draw_scale {
 
     while ( $x1 <= $x2 - 5 ) {
         $c->create( 'line', $x1, $y1, $x1, $y2,
-                    '-fill' => 'yellow',
-                    '-tags' => 'scale',
-                    '-dash' => [ 2, 4 ] );
+                    -fill => 'yellow',
+                    -tags => 'scale',
+                    -dash => [ 2, 4 ] );
         $c->create( 'text', $x1, $y1 + 10,
-                    '-text' => $cx * $factor * $time_base . $unit,
-                    '-fill' => 'green',
-                    '-tags' => 'scale' );
+                    -text => $cx * $factor * $time_base . $unit,
+                    -fill => 'green',
+                    -tags => 'scale' );
         $x1 += $self->mag * $self->delta;
         $cx += $self->delta;
     }
@@ -633,7 +634,7 @@ sub draw_scale {
 sub redraw {
 
     my $self = shift;
-    my $c = $self->{ 'canvas' };
+    my $c = $self->{ canvas };
 
     $self->dw->Leave;
 
@@ -656,7 +657,7 @@ sub redraw {
             my $x2 = $cp->start + $cp->len - $self->offset
                      - $ch->delay + $Delay;
 
-            if ( $self->{ 'delay' } ) {
+            if ( $self->{ delay } ) {
                 $x1 += $ch->delay - $Delay;
                 $x2 += $ch->delay - $Delay;
             }
@@ -666,14 +667,14 @@ sub redraw {
 
             my $tag = $ch->key . ':' . $cp->num;
             $c->create( 'rectangle', $x1, $y2, $x2, $y1,
-                        '-tags'    => [ $ch->key, $tag ],
-                        '-outline' => 'white',
-                        '-fill'    => 'red' );
+                        -tags    => [ $ch->key, $tag ],
+                        -outline => 'white',
+                        -fill    => 'red' );
             if ( $cp->phase ne '' ) {
                 $c->create( 'text', 0.5 * ( $x1 + $x2 ), $yt2,
-                            '-text' => $cp->phase,
-                            '-fill' => 'green',
-                            '-tags'    => [ $ch->key, $tag ] );
+                            -text => $cp->phase,
+                            -fill => 'green',
+                            -tags    => [ $ch->key, $tag ] );
             }
 
             $c->bind( $tag, '<Enter>' => sub {
@@ -682,9 +683,9 @@ sub redraw {
             $c->bind( $tag, '<Leave>' => sub { $self->dw->Leave; } );
 
             $c->create( 'text', 0.5 * ( $x1 + $x2 ), $yt1,
-                        '-text' => $cp->num,
-                        '-tags' => [ $ch->key, $tag ],
-                        '-fill' => 'green' );
+                        -text => $cp->num,
+                        -tags => [ $ch->key, $tag ],
+                        -fill => 'green' );
         }
     }
 }
@@ -701,19 +702,19 @@ sub new{
 
     my ( $inv, $mw ) = @_;
     my $class = ref( $inv ) || $inv;
-    my $self = { 'w' => $mw->Toplevel,
-                 'num'   => '',
-                 'pos'   => '',
-                 'len'   => '',
-                 'func'  => '',
-                 'phase' => '',
-                 'ch'    => '',
-                 'dp'    => '',
-                 'dn'    => '',
-                 'pp'    => '',
-                 'pl'    => '',
-                 'pc'    => '',
-                 'pf'    => '' };
+    my $self = { w     => $mw->Toplevel,
+                 num   => '',
+                 pos   => '',
+                 len   => '',
+                 func  => '',
+                 phase => '',
+                 ch    => '',
+                 dp    => '',
+                 dn    => '',
+                 pp    => '',
+                 pl    => '',
+                 pc    => '',
+                 pf    => '' };
 
     bless $self, $class;
     $self->init;
@@ -727,131 +728,131 @@ sub init {
 
     my $self = shift;
 
-    $self->{ 'w' }->title( "Pulse parameters" .
-                           ( $ARGV[ 0 ] ? ":  $ARGV[ 0 ]" : "" ) );
+    $self->{ w }->title( "Pulse parameters" .
+                         ( $ARGV[ 0 ] ? ":  $ARGV[ 0 ]" : "" ) );
 
-    my $F = $self->{ 'w' }->Frame( '-relief'      => 'ridge',
-                                   '-borderwidth' => '1m' );
+    my $F = $self->{ w }->Frame( -relief      => 'ridge',
+                                 -borderwidth => '1m' );
     my $f = $F->Frame;
-    my $l = $f->Label( '-text'   => 'Pulse number: ',
-                       '-width'  => 20,
-                       '-anchor' => 'w' );
-    my $e = $f->Entry( '-textvariable' => \$self->{ 'num' },
-                        '-width'       => 20,
-                        '-relief'      => 'flat' );
-    $f->pack( '-side'  => 'top',
-              '-padx'  => 2,
-              '-pady'  => 2 );
-    $l->pack( '-side'  => 'left' );
-    $e->pack( '-side'  => 'right' );
+    my $l = $f->Label( -text   => 'Pulse number: ',
+                       -width  => 20,
+                       -anchor => 'w' );
+    my $e = $f->Entry( -textvariable => \$self->{ num },
+                       -width        => 20,
+                       -relief       => 'flat' );
+    $f->pack( -side  => 'top',
+              -padx  => 2,
+              -pady  => 2 );
+    $l->pack( -side  => 'left' );
+    $e->pack( -side  => 'right' );
 
     $f = $F->Frame;
-    $l = $f->Label( '-text'   => 'Pulse position: ',
-                    '-width'  => 20,
-                    '-anchor' => 'w' );
-    $e = $f->Entry( '-textvariable' => \$self->{ 'pos' },
-                     '-width'       => 20,
-                     '-relief'      => 'flat' );
-    $f->pack( '-side'  => 'top',
-              '-padx'  => 2,
-              '-pady'  => 2 );
-    $l->pack( '-side'  => 'left' );
-    $e->pack( '-side'  => 'right' );
+    $l = $f->Label( -text   => 'Pulse position: ',
+                    -width  => 20,
+                    -anchor => 'w' );
+    $e = $f->Entry( -textvariable => \$self->{ pos },
+                    -width        => 20,
+                    -relief       => 'flat' );
+    $f->pack( -side  => 'top',
+              -padx  => 2,
+              -pady  => 2 );
+    $l->pack( -side  => 'left' );
+    $e->pack( -side  => 'right' );
 
     $f = $F->Frame;
-    $l = $f->Label( '-text'         => 'Pulse length: ',
-                    '-width'        => 20,
-                    '-anchor'       => 'w' );
-    $e = $f->Entry( '-textvariable' => \$self->{ 'len' },
-                     '-width'       => 20,
-                     '-relief'      => 'flat' );
-    $f->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
-    $l->pack( '-side' => 'left' );
-    $e->pack( '-side' => 'right' );
+    $l = $f->Label( -text         => 'Pulse length: ',
+                    -width        => 20,
+                    -anchor       => 'w' );
+    $e = $f->Entry( -textvariable => \$self->{ len },
+                    -width        => 20,
+                    -relief       => 'flat' );
+    $f->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
+    $l->pack( -side => 'left' );
+    $e->pack( -side => 'right' );
 
     $f = $F->Frame;
-    $l = $f->Label( '-text'   => 'Pulse function: ',
-                    '-width'  => 20,
-                    '-anchor' => 'w' );
-    $e = $f->Entry( '-textvariable' => \$self->{ 'func' },
-                     '-width'       => 20,
-                     '-relief'      => 'flat' );
-    $f->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
-    $l->pack( '-side' => 'left' );
-    $e->pack( '-side' => 'right' );
+    $l = $f->Label( -text   => 'Pulse function: ',
+                    -width  => 20,
+                    -anchor => 'w' );
+    $e = $f->Entry( -textvariable => \$self->{ func },
+                    -width        => 20,
+                    -relief       => 'flat' );
+    $f->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
+    $l->pack( -side => 'left' );
+    $e->pack( -side => 'right' );
 
     if ( $with_phases ) {
         $f = $F->Frame;
-        $l = $f->Label( '-text'   => 'Pulse phase: ',
-                        '-width'  => 20,
-                        '-anchor' => 'w' );
-        $e = $f->Entry( '-textvariable' => \$self->{ 'phase' },
-                        '-width'       => 20,
-                        '-relief'      => 'flat' );
-        $f->pack( '-side' => 'top',
-                  '-padx' => 2,
-                  '-pady' => 2 );
-        $l->pack( '-side' => 'left' );
-        $e->pack( '-side' => 'right' );
+        $l = $f->Label( -text   => 'Pulse phase: ',
+                        -width  => 20,
+                        -anchor => 'w' );
+        $e = $f->Entry( -textvariable => \$self->{ phase },
+                        -width        => 20,
+                        -relief       => 'flat' );
+        $f->pack( -side => 'top',
+                  -padx => 2,
+                  -pady => 2 );
+        $l->pack( -side => 'left' );
+        $e->pack( -side => 'right' );
     }
 
     $f = $F->Frame;
-    $l = $f->Label( '-text'   => 'Pulse pod/channel: ',
-                    '-width'  => 20,
-                    '-anchor' => 'w' );
-    $e = $f->Entry( '-textvariable' => \$self->{ 'ch' },
-                     '-width'       => 20,
-                     '-relief'      => 'flat' );
-    $f->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
-    $l->pack( '-side' => 'left' );
-    $e->pack( '-side' => 'right' );
+    $l = $f->Label( -text   => 'Pulse pod/channel: ',
+                    -width  => 20,
+                    -anchor => 'w' );
+    $e = $f->Entry( -textvariable => \$self->{ ch },
+                    -width        => 20,
+                    -relief       => 'flat' );
+    $f->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
+    $l->pack( -side => 'left' );
+    $e->pack( -side => 'right' );
 
-    $F->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
+    $F->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
 
 
-    $F = $self->{ 'w' }->Frame( '-relief'      => 'ridge',
-                                '-borderwidth' => '1m' );
-
-    $f = $F->Frame;
-    $l = $f->Label( '-text'   => 'Distance to previous: ',
-                    '-width'  => 20,
-                    '-anchor' => 'w' );
-    $e = $f->Entry( '-textvariable' => \$self->{ 'dp' },
-                    '-width'        => 20,
-                    '-relief'       => 'flat' );
-    $f->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
-    $l->pack( '-side' => 'left' );
-    $e->pack( '-side' => 'right' );
+    $F = $self->{ w }->Frame( -relief      => 'ridge',
+                              -borderwidth => '1m' );
 
     $f = $F->Frame;
-    $l = $f->Label( '-text'   => 'Distance to next: ',
-                    '-width'  => 20,
-                    '-anchor' => 'w' );
-    $e = $f->Entry( '-textvariable' => \$self->{ 'dn' },
-                    '-width'        => 20,
-                    '-relief'       => 'flat' );
-    $f->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
-    $l->pack( '-side' => 'left' );
-    $e->pack( '-side' => 'right' );
+    $l = $f->Label( -text   => 'Distance to previous: ',
+                    -width  => 20,
+                    -anchor => 'w' );
+    $e = $f->Entry( -textvariable => \$self->{ dp },
+                    -width        => 20,
+                    -relief       => 'flat' );
+    $f->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
+    $l->pack( -side => 'left' );
+    $e->pack( -side => 'right' );
 
-    $F->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
+    $f = $F->Frame;
+    $l = $f->Label( -text   => 'Distance to next: ',
+                    -width  => 20,
+                    -anchor => 'w' );
+    $e = $f->Entry( -textvariable => \$self->{ dn },
+                    -width        => 20,
+                    -relief       => 'flat' );
+    $f->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
+    $l->pack( -side => 'left' );
+    $e->pack( -side => 'right' );
 
-    $F = $self->{ 'w' }->Frame( '-relief'      => 'ridge',
-                                '-borderwidth' => '1m' );
+    $F->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
+
+    $F = $self->{ w }->Frame( -relief      => 'ridge',
+                              -borderwidth => '1m' );
 
     # The field for showing parameters of parent pulses is only needed
     # if there are automatically created pulses
@@ -859,60 +860,60 @@ sub init {
     return unless $has_auto_pulses;
 
     $f = $F->Frame;
-    $l = $f->Label( '-text'   => 'Position of parent: ',
-                    '-width'  => 20,
-                    '-anchor' => 'w' );
-    $e = $f->Entry( '-textvariable' => \$self->{ 'pp' },
-                    '-width'        => 20,
-                    '-relief'       => 'flat' );
-    $f->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
-    $l->pack( '-side' => 'left' );
-    $e->pack( '-side' => 'right' );
+    $l = $f->Label( -text   => 'Position of parent: ',
+                    -width  => 20,
+                    -anchor => 'w' );
+    $e = $f->Entry( -textvariable => \$self->{ pp },
+                    -width        => 20,
+                    -relief       => 'flat' );
+    $f->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
+    $l->pack( -side => 'left' );
+    $e->pack( -side => 'right' );
 
     $f = $F->Frame;
-    $l = $f->Label( '-text'   => 'Length of parent: ',
-                    '-width'  => 20,
-                    '-anchor' => 'w' );
-    $e = $f->Entry( '-textvariable' => \$self->{ 'pl' },
-                    '-width'        => 20,
-                    '-relief'       => 'flat' );
-    $f->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
-    $l->pack( '-side' => 'left' );
-    $e->pack( '-side' => 'right' );
+    $l = $f->Label( -text   => 'Length of parent: ',
+                    -width  => 20,
+                    -anchor => 'w' );
+    $e = $f->Entry( -textvariable => \$self->{ pl },
+                    -width        => 20,
+                    -relief       => 'flat' );
+    $f->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
+    $l->pack( -side => 'left' );
+    $e->pack( -side => 'right' );
 
     $f = $F->Frame;
-    $l = $f->Label( '-text'   => 'Function of parent: ',
-                    '-width'  => 20,
-                    '-anchor' => 'w' );
-    $e = $f->Entry( '-textvariable' => \$self->{ 'pf' },
-                    '-width'        => 20,
-                    '-relief'       => 'flat' );
-    $f->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
-    $l->pack( '-side' => 'left' );
-    $e->pack( '-side' => 'right' );
+    $l = $f->Label( -text   => 'Function of parent: ',
+                    -width  => 20,
+                    -anchor => 'w' );
+    $e = $f->Entry( -textvariable => \$self->{ pf },
+                    -width        => 20,
+                    -relief       => 'flat' );
+    $f->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
+    $l->pack( -side => 'left' );
+    $e->pack( -side => 'right' );
 
     $f = $F->Frame;
-    $l = $f->Label( '-text'   => 'Pod/channel of parent: ',
-                    '-width'  => 20,
-                    '-anchor' => 'w' );
-    $e = $f->Entry( '-textvariable' => \$self->{ 'pc' },
-                    '-width'        => 20,
-                    '-relief'       => 'flat' );
-    $f->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
-    $l->pack( '-side' => 'left' );
-    $e->pack( '-side' => 'right' );
+    $l = $f->Label( -text   => 'Pod/channel of parent: ',
+                    -width  => 20,
+                    -anchor => 'w' );
+    $e = $f->Entry( -textvariable => \$self->{ pc },
+                    -width        => 20,
+                    -relief       => 'flat' );
+    $f->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
+    $l->pack( -side => 'left' );
+    $e->pack( -side => 'right' );
 
-    $F->pack( '-side' => 'top',
-              '-padx' => 2,
-              '-pady' => 2 );
+    $F->pack( -side => 'top',
+              -padx => 2,
+              -pady => 2 );
 }
 
 #---------------------------------------------------------
@@ -941,29 +942,29 @@ sub Enter {
 
     my ( $p1, $p2 ) = $self->pstart( $cp->start, $pod, $is_delay );
 
-    $self->{ 'pos' } = $p1;
-    $self->{ 'pos' } .= "  (" . $p2 . ")" if $p1 ne $p2;
-    $self->{ 'len' } = $self->ptime( $cp->len );
+    $self->{ pos } = $p1;
+    $self->{ pos } .= "  (" . $p2 . ")" if $p1 ne $p2;
+    $self->{ len } = $self->ptime( $cp->len );
 
-    $self->{ 'func' } = $f;
-    $self->{ 'phase' } = $cp->phase;
-    $self->{ 'ch' } = $ch;
+    $self->{ func }  = $f;
+    $self->{ phase } = $cp->phase;
+    $self->{ ch }    = $ch;
 
-    $self->{ 'dp' } = defined( $pp ) ?
+    $self->{ dp } = defined( $pp ) ?
                 $self->ptime( $cp->start - $pp->start - $pp->len ) . "  (" .
                 $self->ptime( $cp->start - $pp->start
                               + 0.5 * ( $cp->len - $pp->len ) ) .")" : '';
-    $self->{ 'dn' } = defined( $np ) ?
+    $self->{ dn } = defined( $np ) ?
                 $self->ptime( $np->start - $cp->start - $cp->len ) . "  (" .
                 $self->ptime( $np->start - $cp->start
                               + 0.5 * ( $np->len - $cp->len ) ) .")" : '';
 
     if ( $num =~ /^\((\d+)\)$/ ) {
-        $self->{ 'num' } = $num . "    [auto]";
+        $self->{ num } = $num . "    [auto]";
         $self->parent( $1, $step, $is_delay );
     }
     else {
-        $self->{ 'num' } = $num;
+        $self->{ num } = $num;
     }
 
 }
@@ -994,12 +995,12 @@ sub parent {
 
     my ( $p1, $p2 ) = $self->pstart( $cp->start, $pod, $is_delay );
 
-    $self->{ 'pp' } = $p1;
-    $self->{ 'pp' } .= "  (" . $p2 . ")" if $p1 ne $p2;
-    $self->{ 'pl' } = $self->ptime( $cp->len );
+    $self->{ pp } = $p1;
+    $self->{ pp } .= "  (" . $p2 . ")" if $p1 ne $p2;
+    $self->{ pl } = $self->ptime( $cp->len );
 
-    $self->{ 'pf' } = $pod->name;
-    $self->{ 'pc' } = $pod->num;
+    $self->{ pf } = $pod->name;
+    $self->{ pc } = $pod->num;
 }
 
 #---------------------------------------------------------
@@ -1061,8 +1062,8 @@ package Channels;
 sub new {
     my $inv = shift;
     my $class = ref( $inv ) || $inv;
-    my $self = { 'channels'     => [ ],
-                 'num_steps'    => -1 };
+    my $self = { channels  => [ ],
+                 num_steps => -1 };
     return bless $self, $class;
 }
 
@@ -1072,7 +1073,7 @@ sub new {
 sub add_channel {
 
     my $self = shift;
-    push @{ $self->{ 'channels' } }, Channel->new( @_ );
+    push @{ $self->{ channels } }, Channel->new( @_ );
 }
 
 #---------------------------------------------------------
@@ -1081,8 +1082,8 @@ sub add_channel {
 sub find_by_num {
 
     my ( $self, $num ) = ( shift, shift );
-    return undef if $num >= @{ $self->{ 'channels' } };
-    return $self->{ 'channels' }[ $num ];
+    return undef if $num >= @{ $self->{ channels } };
+    return $self->{ channels }[ $num ];
 }
 
 #---------------------------------------------------------
@@ -1094,7 +1095,7 @@ sub find_by_key {
 
     my ( $self, $key ) = ( shift, shift );
 
-    for ( @{ $self->{ 'channels' } } ) {
+    for ( @{ $self->{ channels } } ) {
         return $_ if $_->key =~ /^$key\s*$/;
     }
 
@@ -1105,14 +1106,14 @@ sub find_by_key {
 # Returns the total number of channels
 
 sub num_channels {
-    return scalar( @{ shift->{ 'channels' } } );
+    return scalar( @{ shift->{ channels } } );
 }
 
 #---------------------------------------------------------
 # Return the number of steps during the experiment
 
 sub num_steps {
-    return shift->{ 'num_steps' }
+    return shift->{ num_steps }
 }
 
 #---------------------------------------------------------
@@ -1129,7 +1130,7 @@ sub add_pulse_list {
         unless @_ % ( 3 + $ch->has_phases ) == 0;
 
     $ch->add_pulse_list( $step, $ch->has_phases, @_ );
-    $self->{ 'num_steps' } = $step if $step > $self->{ 'num_steps' };
+    $self->{ num_steps } = $step if $step > $self->{ num_steps };
 }
 
 #---------------------------------------------------------
@@ -1158,7 +1159,7 @@ sub first_pulse {
     my $self = shift;
     my $first;
 
-    for ( @{ $self->{ 'channels' } } ) {
+    for ( @{ $self->{ channels } } ) {
         my $e = $_->first_pulse;
         next unless defined $e;
         $first = $e if ! defined $first or $first > $e;
@@ -1183,19 +1184,19 @@ sub new_pulse {
 
 
 #=========================================================================
-# Intermediate data object: properties of a single chanel
+# Intermediate data object: properties of a single channel
 
 package Channel;
 
 sub new {
     my $inv = shift;
     my $class = ref( $inv ) || $inv;
-    my $self = { 'name'  => shift,
-                 'num'   => shift,
-                 'delay' => shift,
-                 'inv'   => shift,
-                 'phase' => shift,
-                 'plist' => [ ] };
+    my $self = { name  => shift,
+                 num   => shift,
+                 delay => shift,
+                 inv   => shift,
+                 phase => shift,
+                 plist => [ ] };
     return bless $self, $class;
 }
 
@@ -1203,37 +1204,37 @@ sub new {
 
 sub key {
     my $self = shift;
-    return ${ $self->{ 'name' } } . ":" . $self->{ 'num' };
+    return ${ $self->{ name } } . ":" . $self->{ num };
 }
 
 #---------------------------------------------------------
 
 sub name {
-    return ${ shift->{ 'name' } };
+    return ${ shift->{ name } };
 }
 
 #---------------------------------------------------------
 
 sub num {
-    return shift->{ 'num' };
+    return shift->{ num };
 }
 
 #---------------------------------------------------------
 
 sub has_phases {
-    return shift->{ 'phase' };
+    return shift->{ phase };
 }
 
 #---------------------------------------------------------
 
 sub delay  {
-    return shift->{ 'delay' };
+    return shift->{ delay };
 }
 
 #---------------------------------------------------------
 
 sub inv {
-    return shift->{ 'inv' };
+    return shift->{ inv };
 }
 
 #---------------------------------------------------------
@@ -1249,13 +1250,13 @@ sub add_pulse_list {
     my $pstep;
 
     for ( $pstep = $step - 1; $pstep > 0; $pstep-- ) {
-        last if defined $self->{ 'plist' }[ $pstep ];
+        last if defined $self->{ plist }[ $pstep ];
     }
 
-    $self->{ 'plist' }[ $step ] = $self->{ 'plist' }[ $pstep ]->comp( @_ )
+    $self->{ plist }[ $step ] = $self->{ plist }[ $pstep ]->comp( @_ )
         if $pstep > 0;
-    $self->{ 'plist' }[ $step ] = Pulse_List->new( $has_phases, @_ )
-        unless defined $self->{ 'plist' }[ $step ];
+    $self->{ plist }[ $step ] = Pulse_List->new( $has_phases, @_ )
+        unless defined $self->{ plist }[ $step ];
 }
 
 #---------------------------------------------------------
@@ -1267,9 +1268,9 @@ sub get_pulse_list {
 
     ::fail( "Invalid pulse list index\n" ) if $step < 0;
 
-    return $self->{ 'plist' }[ $step ]->{ 'list' }
-        if defined $self->{ 'plist' }[ $step ] and
-           exists $self->{ 'plist' }[ $step ]->{ 'list' };
+    return $self->{ plist }[ $step ]->{ list }
+        if defined $self->{ plist }[ $step ] and
+           exists $self->{ plist }[ $step ]->{ list };
     return undef;
 }
 
@@ -1281,12 +1282,12 @@ sub longest_sequence {
     my $self = shift;
     my @duration = ( 0, 0 );
 
-    for ( @{ $self->{ 'plist' } } ) {
+    for ( @{ $self->{ plist } } ) {
         next unless defined $_;
         my $len = $_->len;
         $duration[ 0 ] = $len if $duration[ 0 ] < $len;
-        $duration[ 1 ] = $len - $self->{ 'delay' } + $Delay
-            if $duration[ 1 ] < $len - $self->{ 'delay' } + $Delay;
+        $duration[ 1 ] = $len - $self->{ delay } + $Delay
+            if $duration[ 1 ] < $len - $self->{ delay } + $Delay;
     }
 
     return @duration;
@@ -1300,11 +1301,11 @@ sub first_pulse {
     my $self = shift;
     my $first;
 
-    for ( @{ $self->{ 'plist' } } ) {
+    for ( @{ $self->{ plist } } ) {
         next unless defined $_;
         my $e = $_->start;
         next unless defined $e;
-        $e -= $self->{ 'delay' };
+        $e -= $self->{ delay };
         $first = $e if ! defined $first or $first > $e;
     }
 
@@ -1324,23 +1325,23 @@ sub new {
     my $has_phases = shift;
     my ( $num, $start, $len, $phase );
     my $class = ref( $inv ) || $inv;
-    my $self = { 'list'  => [ ],
-                 'start' => undef,
-                 'len'   => 0 };
+    my $self = { list  => [ ],
+                 start => undef,
+                 len   => 0 };
     return bless $self, $class unless @_;
 
-    $self->{ 'start' } = $_[ 1 ];
+    $self->{ start } = $_[ 1 ];
     while ( @_ ) {
         my $tag;
         ( $num, $start, $len ) = ( shift, shift, shift );
-        $tag = $num . "," . $start . "," . $len;
+        $tag = "$num,$start,$len";
         if ( $has_phases ) {
-            $self->{ 'phase' } = shift;
-            $tag .= "," . $self->{ 'phase' };
+            $self->{ phase } = shift;
+            $tag .= ',' . $self->{ phase };
         }
-        push @{ $self->{ 'list' } }, $Channels->new_pulse( $tag );
+        push @{ $self->{ list } }, $Channels->new_pulse( $tag );
     }
-    $self->{ 'len' } = $start + $len;
+    $self->{ len } = $start + $len;
     return bless $self, $class;
 }
 
@@ -1352,8 +1353,8 @@ sub new {
 sub comp {
     my $self = shift;
 
-    return undef unless @{ $self->{ 'list' } } == @_ / 3;
-    for ( @{ $self->{ 'list' } } ) {
+    return undef unless @{ $self->{ list } } == @_ / 3;
+    for ( @{ $self->{ list } } ) {
         return undef unless $_->comp( @_ );
     }
     return $self;
@@ -1364,7 +1365,7 @@ sub comp {
 # length of the last pulse) or 0 if there's no pulse in the pulse list
 
 sub len {
-    return shift->{ 'len' };
+    return shift->{ len };
 }
 
 #---------------------------------------------------------
@@ -1372,7 +1373,7 @@ sub len {
 # there's no pulse in the pulse list
 
 sub start {
-    return shift->{ 'start' };
+    return shift->{ start };
 }
 
 1;
@@ -1395,10 +1396,10 @@ sub new {
 
 sub comp {
     if ( scalar @_ == 4 ) {
-        return ${ shift( ) } eq shift( ) . "," . shift( ) . "," . shift( );
+        return ${ shift( ) } eq shift( ) . ',' . shift( ) . ',' . shift( );
     }
-    return ${ shift( ) } eq shift( ) . "," . shift( ) . "," . shift( ) . "," .
-           shift( );
+    return ${ shift( ) } eq shift( ) . ',' . shift( ) . ',' . shift( )
+           . ',' . shift( );
 }
 
 #---------------------------------------------------------
