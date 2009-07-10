@@ -176,9 +176,9 @@ html_pack:
 	if [ ! -e fsc2_html ]; then                           \
 		mkdir fsc2_html;                                  \
 	fi
-	cp -f *.html *.png fsc2.gif *.ico fsc2.css fsc2_html
+	cp -f *.html *.png background.gif fsc2.gif *.ico fsc2.css fsc2_html
 	cd fsc2_html;
-	if [ ! -e index.html ]; then                           \
+	if [ ! -e index.html ]; then                          \
 		ln -s fsc2.html index.html;                       \
 	fi
 	cd ..;

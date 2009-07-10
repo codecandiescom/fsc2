@@ -205,7 +205,7 @@ manual, @pxref{Built-in Functions} and @pxref{Device Functions}.
 
 
 As you already have seen in the example above, an @code{EDL} script
-consists of section. There are up to 6 different types of
+consists of one or more sections. There are up to 6 different types of
 sections. These are specified by the following section keywords:
 @example
 DEVICES

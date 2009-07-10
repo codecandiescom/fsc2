@@ -33,16 +33,16 @@ being grey) while the web server is running.
 
 Normally web servers listen for incoming requests from the outside
 world on the port numbered 80. Thus you usually don't have to tell
-your browser to which port of the server to connect, it will use port
-80 by default. This is a bit different with @code{fsc2}. Because it
-does not run with very high privileges it can't use port 80 (ports
-in the range between 0 and 1023 can only be used by programs running
-with the rights of the root user, i.e.@: very high privileges).
-Instead per default it uses the alternate HTTP port, which has the
-number 8080. Thus you have to tell your browser explicitely to connect
-to this port instead of the default port 80. This is done by
-specifying the port number in the URL, you have to just add a colon
-and the port number to the machine name like this:
+your browser to which port of the server to connect to, it will use
+port 80 by default. This is a bit different with @code{fsc2}. Because
+it's not run with the privileges required for use of port 80 (ports in
+the range between 0 and 1023 can only be used by programs running with
+the rights of the root user). Instead per default it uses the
+alternate HTTP port, which has the number 8080. Thus you have to tell
+your browser explicitely to connect to this port instead of the
+default port 80. This is done by specifying the port number in the
+URL. To do so youjust have to add a colon and the port number to the
+machine name like this:
 @example
 http://name.of.computer:8080
 @end example
@@ -53,14 +53,14 @@ also may tell @code{fsc2} to use a different port instead of 8080
 through the @code{-httpPort} command line option.
 
 When @code{fsc2}'s web server is running your browser will display a
-page telling you @code{fsc2}'s current state, i.e.@: whether it is idle,
-running an experiment, waiting for user input (when e.g.@: a file
-selector is shown) or has finished the experiment. Furthermore, it
-displays a copy of the display window(s) and, if @code{fsc2} is showing
-it, of the cross section window. They are shown in exactly the same way
-as they are displayed on the screen. Finally, it shows the last 30 lines
-of the browser for error messages and other output from the running
-@code{EDL} program.
+page telling you @code{fsc2}'s current state, i.e.@: whether it is
+idle, running an experiment, waiting for user input (when e.g.@: a
+file selector is shown) or has finished the experiment. Furthermore,
+it displays a copy of the display window(s) and, if @code{fsc2} is
+showing it, of the cross section window. They are shown in exactly the
+same way as they are displayed on the screen. Finally, it shows the
+last 30 lines of the browser for error messages and other output from
+the running @code{EDL} program.
 
 Currently, graphics will only be sent in either PNG or JPEG format, thus
 your browser must support one of these formats (most do). While there
@@ -75,22 +75,22 @@ Please note that serving web pages is a rather low priority task. When
 time to a request for a new page might be long.
 
 Under certain conditions you may get a "Not available" message instead
-of a graphic with the current state of a window. This happens when you
-just reload a graphic (but not the complete page) and someone else,
-sitting directly at the computer where the experiment is running, has
-closed the corresponding window.
+of a graphic with the current state. This happens when you just reload
+a graphic (but not the complete page) and someone else, sitting
+directly at the computer where the experiment is running, has closed
+the corresponding window.
 
-Interacting directly with requests from the internet always raises some
-concerns about security. First of all, the web server built into
+Interacting directly with requests from the internet always raises
+some concerns about security. First of all, the web server built into
 @code{fsc2} is that simple (and is running with the privileges of the
 user only) that I am quite convinced that there are no bugs that could
 be exploited to gain access to data an outsider shouldn't be able to
 obtain. And because the server is written in Perl (and running in
-tainted mode) also buffer overflows shouldn't be an issue. All you have
-to worry about is that in principle everybody in the world can have a
-look at your measurement while the web server is up and running. If you
-are deeply concerned about this you can also build @code{fsc2} without
-support for the web server.
+tainted mode) also e.g.@: buffer overflows shouldn't be an issue. All
+you have to worry about is that in principle everybody in the world
+can have a look at your measurement while the web server is up and
+running. If you are deeply concerned about this you can also build
+@code{fsc2} without support for the web server.
 
 The only other conceivable problem would be that someone really
 malicious would constantly send requests to the server which, in turn,

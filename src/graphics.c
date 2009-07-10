@@ -1119,6 +1119,8 @@ G_init_curves_2d( void )
         cv->marker_2d  = NULL;
         cv->cut_marker = NULL;
 
+        cv->active = UNSET;
+
         cv->needs_recalc = UNSET;
         cv->w = cv->h = 0;
 
@@ -1528,7 +1530,7 @@ graphics_free( void )
  *---------------------------------------------------------*/
 
 static void
-canvas_off( Canvas_T *  c,
+canvas_off( Canvas_T  * c,
             FL_OBJECT * obj )
 {
     FL_HANDLE_CANVAS ch;
@@ -1562,7 +1564,7 @@ canvas_off( Canvas_T *  c,
  *--------------------------------------------------------------*/
 
 static void
-setup_canvas( Canvas_T *  c,
+setup_canvas( Canvas_T  * c,
               FL_OBJECT * obj )
 {
     XSetWindowAttributes attributes;
