@@ -90,32 +90,32 @@ typedef struct Graphics_2d Graphics_2d_T;
 
 struct Scaled_Point {
     double v;               /* value of the point (in interval [0,1] */
-    bool exist;             /* set if value has been set at all */
-    long xp_ref;            /* index of the associated XPoint */
+    bool   exist;           /* set if value has been set at all */
+    long   xp_ref;          /* index of the associated XPoint */
 };
 
 
 struct Marker_1d {
-    long x_pos;
-    long color;
-    GC gc;
-    Marker_1d_T *next;
+    long          x_pos;
+    long          color;
+    GC            gc;
+    Marker_1d_T * next;
 };
 
 
 struct Marker_2d {
-    long x_pos;
-    long y_pos;
-    long color;
-    GC gc;
-    Marker_2d_T *next;
+    long          x_pos;
+    long          y_pos;
+    long          color;
+    GC            gc;
+    Marker_2d_T * next;
 };
 
 
 struct Curve_1d {
-    Scaled_Point_T *points;
-    XPoint *xpoints;
-    long count;             /* points in curve */
+    Scaled_Point_T * points;
+    XPoint         * xpoints;
+    long           count;        /* points in curve */
 
     GC gc;
 
@@ -124,40 +124,41 @@ struct Curve_1d {
     double s2d[ 2 ];        /* scaled to display data scale factors */
     double shift[ 2 ];      /* offsets on scaled data */
 
-    bool up,                /* flag, set if data don't fit into canvas */
-         down,
-         left,
-         right;
+    bool   up,              /* flag, set if data don't fit into canvas */
+           down,
+           left,
+           right;
 
     Pixmap up_arrow,
            down_arrow,
            left_arrow,
            right_arrow;
 
-    bool can_undo;
+    bool   can_undo;
 
     double old_s2d[ 2 ];
     double old_shift[ 2 ];
 
-    GC font_gc;             /* gc for font */
+    GC     font_gc;                /* gc for font */
 };
 
 
 struct Curve_2d {
-    bool is_fs;
-    bool is_scale_set;
+    bool             is_fs;
+    bool             is_scale_set;
 
-    Scaled_Point_T *points;
-    XPoint *xpoints;
-    long count;             /* points in curve */
+    Scaled_Point_T * points;
+    XPoint         * xpoints;
+    long             count;        /* points in curve */
 
-    bool needs_recalc;
+    bool             needs_recalc;
 
-    unsigned short w, h;
+    unsigned short   w,
+                     h;
 
-    GC gc;
+    GC               gc;
 
-    bool active;
+    bool             active;
 
     double s2d[ 3 ];        /* scaled to display data scale factors */
     double shift[ 3 ];      /* offsets on scaled data */
@@ -185,15 +186,15 @@ struct Curve_2d {
     double old_shift[ 3 ];
     double old_z_factor;
 
-    Marker_2d_T *marker_2d;
-    Marker_1d_T *cut_marker;  /* linked list of markers in cut through curve */
+    Marker_2d_T * marker_2d;
+    Marker_1d_T * cut_marker; /* linked list of markers in cut through curve */
 
-    GC font_gc;             /* gc for font */
+    GC font_gc;               /* gc for font */
 };
 
 
 struct Canvas {
-    FL_OBJECT *obj;         /* canvas object pointer */
+    FL_OBJECT * obj;        /* canvas object pointer */
     Pixmap pm;              /* pixmap for double buffering */
     GC gc;                  /* GC for pixmap */
 
@@ -230,14 +231,15 @@ struct Graphics {
     long dim;               /* dimensionality of display, 1 for 1d only,
                                2 for 2d only, 3 for both 1d and 2d */
 
-    Display *d;             /* pointer to display structure */
+    Display * d;            /* pointer to display structure */
 
     unsigned focus;         /* tells which window has the focus */
 
     FL_COLOR colors[ MAX_CURVES ];
 
-    XFontStruct *font;            /* font used for drawing texts */
-    int font_asc, font_desc;
+    XFontStruct * font;           /* font used for drawing texts */
+    int font_asc,
+             font_desc;
 
     int coord_display;            /* set when coordinates are shown in one
                                      of the display windows */
@@ -272,7 +274,7 @@ struct Graphics {
     int z_line_width;       /* width of colour scale */
     int enlarge_box_width;  /* width of enlarge box */
 
-    G_Hash_Entry_T *color_hash;
+    G_Hash_Entry_T * color_hash;
     unsigned int color_hash_size;
 
 };
@@ -298,22 +300,22 @@ struct Graphics_1d {
     double rwc_delta_orig[ 2 ];
     char *label_orig[ 2 ];
 
-    double rw_min;          /* minimum of real world y- or z-coordinates */
-    double rw_max;          /* maximum of real world y- or z-coordinates */
+    double rw_min;            /* minimum of real world y- or z-coordinates */
+    double rw_max;            /* maximum of real world y- or z-coordinates */
 
-    Pixmap label_pm;        /* used for drawing of rotated text of the */
-    unsigned int label_w,   /* y-axis label */
+    Pixmap label_pm;          /* used for drawing of rotated text of the */
+    unsigned int label_w,     /* y-axis label */
                  label_h;
 
-    int cursor[ 7 ];        /* the different cursors */
+    int cursor[ 7 ];          /* the different cursors */
 
     Canvas_T x_axis;
     Canvas_T y_axis;
     Canvas_T canvas;
 
-    Curve_1d_T *curve[ MAX_CURVES ];
+    Curve_1d_T * curve[ MAX_CURVES ];
 
-    Marker_1d_T *marker_1d;   /* linked list of markers */
+    Marker_1d_T * marker_1d;  /* linked list of markers */
 };
 
 
@@ -358,7 +360,7 @@ struct Graphics_2d {
     Canvas_T cut_z_axis;
     Canvas_T cut_canvas;
 
-    Curve_2d_T *curve_2d[ MAX_CURVES ];
+    Curve_2d_T * curve_2d[ MAX_CURVES ];
     Curve_1d_T cut_curve;
 
     int active_curve;       /* curve shown in 2d display (or -1 if none) */

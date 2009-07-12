@@ -44,12 +44,12 @@ static void cut_calc_curve( int  dir,
                             long p_index,
                             bool has_been_shown );
 static void G_init_cut_curve( void );
-static void cut_setup_canvas( Canvas_T *  c,
+static void cut_setup_canvas( Canvas_T  * c,
                               FL_OBJECT * obj );
-static void cut_canvas_off( Canvas_T *  c,
+static void cut_canvas_off( Canvas_T  * c,
                             FL_OBJECT * obj );
 static int cut_form_close_handler( FL_FORM * a,
-                                   void * b );
+                                   void    * b );
 static void cut_recalc_XPoints( void );
 static void cut_integrate_point( long   p_index,
                                  double val );
@@ -57,23 +57,23 @@ static int cut_canvas_handler( FL_OBJECT * obj,
                                Window      window,
                                int         w,
                                int         h,
-                               XEvent *    ev,
-                               void *      udata );
+                               XEvent    * ev,
+                               void      * udata );
 static void cut_reconfigure_window( Canvas_T * c,
                                     int        w,
                                     int        h );
 static void cut_press_handler( FL_OBJECT * obj,
                                Window      window,
-                               XEvent *    ev,
-                               Canvas_T *  c );
+                               XEvent    * ev,
+                               Canvas_T  * c );
 static void cut_release_handler( FL_OBJECT * obj,
                                  Window      window,
-                                 XEvent *    ev,
-                                 Canvas_T *  c );
-static void cut_motion_handler( FL_OBJECT *  obj,
-                                Window       window,
-                                XEvent *     ev,
-                                Canvas_T *   c );
+                                 XEvent    * ev,
+                                 Canvas_T  * c );
+static void cut_motion_handler( FL_OBJECT * obj,
+                                Window      window,
+                                XEvent    * ev,
+                                Canvas_T  * c );
 static void redraw_cut_canvas( Canvas_T * c );
 static void repaint_cut_canvas( Canvas_T * c );
 static void cut_make_scale( Canvas_T * c,
@@ -306,7 +306,7 @@ cut_show( int  dir,
  *--------------------------------------------------------------*/
 
 static void
-cut_setup_canvas( Canvas_T *  c,
+cut_setup_canvas( Canvas_T  * c,
                   FL_OBJECT * obj )
 {
     XSetWindowAttributes attributes;
@@ -370,7 +370,7 @@ cut_setup_canvas( Canvas_T *  c,
  *----------------------------------------------------------*/
 
 static void
-cut_canvas_off( Canvas_T *  c,
+cut_canvas_off( Canvas_T  * c,
                 FL_OBJECT * obj )
 {
     FL_HANDLE_CANVAS ch = cut_canvas_handler;
@@ -1222,8 +1222,8 @@ cut_canvas_handler( FL_OBJECT * obj,
                     Window      window,
                     int         w,
                     int         h,
-                    XEvent *    ev,
-                    void *      udata )
+                    XEvent    * ev,
+                    void      * udata )
 {
     Canvas_T *c = udata;
 
@@ -1399,8 +1399,8 @@ cut_reconfigure_window( Canvas_T * c,
 static void
 cut_press_handler( FL_OBJECT * obj,
                    Window      window,
-                   XEvent *    ev,
-                   Canvas_T *  c )
+                   XEvent    * ev,
+                   Canvas_T  * c )
 {
     int old_button_state = G.button_state;
     unsigned int keymask;
@@ -1568,8 +1568,8 @@ cut_press_handler( FL_OBJECT * obj,
 static void
 cut_release_handler( FL_OBJECT * obj  UNUSED_ARG,
                      Window      window,
-                     XEvent *    ev,
-                     Canvas_T *  c )
+                     XEvent    * ev,
+                     Canvas_T  * c )
 {
     unsigned int keymask;
     bool scale_changed = UNSET;
@@ -1760,8 +1760,8 @@ cut_release_handler( FL_OBJECT * obj  UNUSED_ARG,
 static void
 cut_motion_handler( FL_OBJECT * obj  UNUSED_ARG,
                     Window      window,
-                    XEvent *    ev,
-                    Canvas_T *  c )
+                    XEvent    * ev,
+                    Canvas_T  * c )
 {
     XEvent new_ev;
     bool scale_changed = UNSET;
@@ -2191,7 +2191,7 @@ repaint_cut_canvas( Canvas_T * c )
  *----------------------------------------------------------*/
 
 int
-get_mouse_pos_cut( double *       pa,
+get_mouse_pos_cut( double       * pa,
                    unsigned int * keymask )
 {
     Curve_1d_T *cv = &G_2d.cut_curve;

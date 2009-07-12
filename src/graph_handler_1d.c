@@ -28,23 +28,23 @@ Graphics_1d_T G_1d;
 
 static void press_handler_1d( FL_OBJECT * obj,
                               Window      window,
-                              XEvent *    ev,
-                              Canvas_T *  c );
+                              XEvent    * ev,
+                              Canvas_T  * c );
 static void release_handler_1d( FL_OBJECT * obj,
                                 Window      window,
-                                XEvent *    ev,
-                                Canvas_T *  c );
-static void motion_handler_1d( FL_OBJECT *  obj,
-                               Window       window,
-                               XEvent *     ev,
-                               Canvas_T *   c );
+                                XEvent    * ev,
+                                Canvas_T  * c );
+static void motion_handler_1d( FL_OBJECT * obj,
+                               Window      window,
+                               XEvent    * ev,
+                               Canvas_T  * c );
 static bool change_x_range_1d( Canvas_T * c );
 static bool change_y_range_1d( Canvas_T * c );
 static bool change_xy_range_1d( Canvas_T * c );
 static bool zoom_x_1d( Canvas_T * c );
 static bool zoom_y_1d( Canvas_T * c );
 static bool zoom_xy_1d( Canvas_T * c );
-static bool shift_XPoints_of_curve_1d( Canvas_T *   c,
+static bool shift_XPoints_of_curve_1d( Canvas_T   * c,
                                        Curve_1d_T * cv );
 static void reconfigure_window_1d( Canvas_T * c,
                                    int        w,
@@ -62,8 +62,8 @@ canvas_handler_1d( FL_OBJECT * obj,
                    Window      window,
                    int         w,
                    int         h,
-                   XEvent *    ev,
-                   void *      udata )
+                   XEvent    * ev,
+                   void      * udata )
 {
     Canvas_T *c = udata;
 
@@ -105,8 +105,8 @@ canvas_handler_1d( FL_OBJECT * obj,
 static void
 press_handler_1d( FL_OBJECT * obj,
                   Window      window,
-                  XEvent *    ev,
-                  Canvas_T *  c )
+                  XEvent    * ev,
+                  Canvas_T  * c )
 {
     long i;
     Curve_1d_T *cv;
@@ -288,8 +288,8 @@ press_handler_1d( FL_OBJECT * obj,
 static void
 release_handler_1d( FL_OBJECT * obj  UNUSED_ARG,
                     Window      window,
-                    XEvent *    ev,
-                    Canvas_T *  c )
+                    XEvent    * ev,
+                    Canvas_T  * c )
 {
     unsigned int keymask;
     bool scale_changed = UNSET;
@@ -1030,7 +1030,7 @@ zoom_xy_1d( Canvas_T * c )
  *-----------------------------------------------------------------------*/
 
 static bool
-shift_XPoints_of_curve_1d( Canvas_T *   c,
+shift_XPoints_of_curve_1d( Canvas_T   * c,
                            Curve_1d_T * cv )
 {
     long j, k;
@@ -1500,7 +1500,7 @@ repaint_canvas_1d( Canvas_T * c )
  *----------------------------------------------------------*/
 
 int
-get_mouse_pos_1d( double *       pa,
+get_mouse_pos_1d( double       * pa,
                   unsigned int * keymask )
 {
     Curve_1d_T *cv;
@@ -1627,7 +1627,7 @@ fs_rescale_1d( bool vert_only )
 
 void
 make_scale_1d( Curve_1d_T * cv,
-               Canvas_T *   c,
+               Canvas_T   * c,
                int          coord )
 {
     double rwc_delta,          /* distance between small ticks (in rwc) */

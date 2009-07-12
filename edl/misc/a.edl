@@ -25,7 +25,7 @@ X[ 3, 3, 3 ] = { { {  9,  8,  7 }, {  6,  5,  4 }, {  3,  2,  1 } },
 
 dt1, dt2;
 
-F1;
+F;
 x = 0.5;
 
 PREP:
@@ -60,7 +60,7 @@ init_1d( 4, 0, 890, 0.1, "Price [µ¤]",
 EXP:
 
 
-F1 = magnet_file( );
+F = open_file( 1 );
 
 FOR K = 1 : 5 {
 	print( "\TRun \##\n", K );
@@ -99,18 +99,18 @@ FOR K = 1 : 5 {
 ON_STOP:
 
 
-save( F1, 1, 2, 3, X );
+save( F, 1, 2, 3, X );
 
 
-save_comment( F1, "% ", "Na, was denkst\ndu über das?\n", 
+save_comment( F, "% ", "Na, was denkst\ndu über das?\n", 
 			  "Ihre Meinung zählt:" );
-save_program( F1, "# ");
-save_output( F1, "% " );
-fsave( F1, "# # #, \n#\n\n\n", 1, 2, 3, X[ 2, 2, 2 ] );
+save_program( F, "# ");
+save_output( F, "% " );
+fsave( F, "# # #, \n#\n\n\n", 1, 2, 3, X[ 2, 2, 2 ] );
 
 FOR I = 1 : size( c ) {
 	FOR J = 1 : size( c[ 1 ] ) {
-		fsave( F1, "c[ #, # ] = #\n", I, J, c[ I, J ] );
+		fsave( F, "c[ #, # ] = #\n", I, J, c[ I, J ] );
 	}
 }
 

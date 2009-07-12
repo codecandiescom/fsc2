@@ -41,6 +41,8 @@ O3 = output_create( "STRING_OUTPUT", date( ) + " " + time( ),
 M = menu_create( "Menu", "Item1", "Item2", "Item3" );
 hide_toolbox( 0 );
 
+wait( 0.5 s );
+
 FOR I = 1 : 10 {
 	button_state( B2, ( button_state( B2 ) + 1 ) % 2 );
 	IF button_state( B3 ) {
@@ -56,6 +58,7 @@ FOR I = 1 : 10 {
 	output_value( O2, output_value( O2 ) / 2 );
 	output_value( O3, sprint( "# #", date( ) + " " + time( ), I ) );
 	menu_choice( M, menu_choice( M ) % 3 + 1 );
+	wait( 0.25 s );
 }
 
 button_delete( B1, B2 );
@@ -85,6 +88,8 @@ O3 = output_create( 4, date( ) + " " + time( ), "String output object",
 					"This is an output\nobject for strings" );
 M = menu_create( "Menu", "Item1", "Item2", "Item3" );
 
+wait( 0.5 s );
+
 FOR I = 1 : 10 {
 	button_state( B2, ( button_state( B2 ) + 1 ) % 2 );
 	IF button_state( B3 ) {
@@ -100,6 +105,9 @@ FOR I = 1 : 10 {
 	output_value( O2, output_value( O2 ) * 2 );
 	output_value( O3, sprint( "# #", date( ) + " " + time( ), I ) );
 	menu_choice( M, menu_choice( M ) % 3 + 1 );
+	wait( 0.25 s );
 }
+
+wait( 0.5 s );
 
 object_delete( M, O3, O2, O1, I2, I1, S2, S1, B4, B3, B2, B1 );

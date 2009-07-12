@@ -741,7 +741,7 @@ und Energie GmbH) for providing me with detailed and precise
 informations about the bit patterns to be send to the device.
 
 @paragraphindent 0
-@strong{Status}: Untested
+@strong{Status}: Tested
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -2618,7 +2618,7 @@ In the GPIB configuration file use @code{"LECROY_WS_G"} as the device name,
 @paragraphindent 0
 @strong{Status}: Tested with at least one of the models and LAN control
 
-@paragraphindent 0
+paragraphindent 0
 @strong{Supported functions}:
 @table @samp
 @item @ref{digitizer_name()}

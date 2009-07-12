@@ -27,16 +27,16 @@ Graphics_2d_T G_2d;
 
 static void press_handler_2d( FL_OBJECT * obj,
                               Window      window,
-                              XEvent *    ev,
-                              Canvas_T *  c );
+                              XEvent    * ev,
+                              Canvas_T  * c );
 static void release_handler_2d( FL_OBJECT * obj,
                                 Window      window,
-                                XEvent *    ev,
-                                Canvas_T *  c );
+                                XEvent    * ev,
+                                Canvas_T  * c );
 static void motion_handler_2d( FL_OBJECT * obj,
                                Window      window,
-                               XEvent *    ev,
-                               Canvas_T *  c );
+                               XEvent    * ev,
+                               Canvas_T  * c );
 static bool change_x_range_2d( Canvas_T * c );
 static bool change_y_range_2d( Canvas_T * c );
 static bool change_xy_range_2d( Canvas_T * c );
@@ -51,7 +51,7 @@ static void reconfigure_window_2d( Canvas_T * c,
                                    int        w,
                                    int        h );
 static void recalc_XPoints_2d( void );
-static void draw_2d_points( Canvas_T *   c,
+static void draw_2d_points( Canvas_T   * c,
                             Curve_2d_T * cv );
 static void make_color_scale( Canvas_T * c );
 static void delete_marker_2d( long x_pos,
@@ -69,8 +69,8 @@ canvas_handler_2d( FL_OBJECT * obj,
                    Window      window,
                    int         w,
                    int         h,
-                   XEvent *    ev,
-                   void *      udata )
+                   XEvent    * ev,
+                   void      * udata )
 {
     Canvas_T *c = udata;
 
@@ -111,8 +111,8 @@ canvas_handler_2d( FL_OBJECT * obj,
 static void
 press_handler_2d( FL_OBJECT * obj,
                   Window      window,
-                  XEvent *    ev,
-                  Canvas_T *  c )
+                  XEvent    * ev,
+                  Canvas_T  * c )
 {
     long i;
     Curve_2d_T *cv;
@@ -315,8 +315,8 @@ press_handler_2d( FL_OBJECT * obj,
 static void
 release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
                     Window      window,
-                    XEvent *    ev,
-                    Canvas_T *  c )
+                    XEvent    * ev,
+                    Canvas_T  * c )
 {
     unsigned int keymask;
     bool scale_changed = UNSET;
@@ -550,8 +550,8 @@ release_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
 static void
 motion_handler_2d( FL_OBJECT * obj  UNUSED_ARG,
                    Window      window,
-                   XEvent *    ev,
-                   Canvas_T *  c )
+                   XEvent    * ev,
+                   Canvas_T  * c )
 {
     XEvent new_ev;
     unsigned int keymask;
@@ -1573,7 +1573,7 @@ redraw_canvas_2d( Canvas_T * c )
  *------------------------------------------------------------------*/
 
 static void
-draw_2d_points( Canvas_T *   c,
+draw_2d_points( Canvas_T   * c,
                 Curve_2d_T * cv )
 
 {
@@ -1905,7 +1905,7 @@ repaint_canvas_2d( Canvas_T * c )
  *----------------------------------------------------------*/
 
 int
-get_mouse_pos_2d( double *       pa,
+get_mouse_pos_2d( double       * pa,
                   unsigned int * keymask )
 {
     Curve_2d_T *cv;
@@ -2035,7 +2035,7 @@ fs_rescale_2d( Curve_2d_T * cv,
 
 void
 make_scale_2d( Curve_2d_T * cv,
-               Canvas_T *   c,
+               Canvas_T   * c,
                int          coord )
 {
     double rwc_delta,          /* distance between small ticks (in rwc) */

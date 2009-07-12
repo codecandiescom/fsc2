@@ -47,7 +47,7 @@ static void G_init_curves_1d( void );
 static void G_init_curves_2d( void );
 static void setup_canvas( Canvas_T  * c,
                           FL_OBJECT * obj );
-static void canvas_off( Canvas_T *  c,
+static void canvas_off( Canvas_T  * c,
                         FL_OBJECT * obj );
 static void graphics_free( void );
 
@@ -1222,7 +1222,7 @@ G_init_curves_2d( void )
 void
 create_label_pixmap( Canvas_T * c,
                      int        coord,
-                     char *     label )
+                     char     * label )
 {
     Pixmap pm;
     int width, height;
@@ -1804,9 +1804,9 @@ redraw_axis_2d( int coord )
  *-----------------------------------------------------*/
 
 void
-make_label_string( char * lstr,
-                   double num,
-                   int    res )
+make_label_string( char   * lstr,
+                   double   num,
+                   int      res )
 {
     int n, mag;
 
@@ -2365,7 +2365,7 @@ curve_button_callback_2d( FL_OBJECT * obj,
 
 int
 form_event_handler( FL_FORM * form,
-                    void *    xevent )
+                    void    * xevent )
 {
     if ( ( ( XEvent * ) xevent )->type == FocusIn )
     {
