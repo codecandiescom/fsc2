@@ -530,40 +530,51 @@ main( int    argc,
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )
     {
+        yylex_destroy( );
         output( "\x03\n%s:%ld: Running out of memory.\n", Fname, Lc );
         exit( EXIT_FAILURE );
     }
     CATCH( TOO_DEEPLY_NESTED_EXCEPTION )
     {
+        yylex_destroy( );
         output( "\x03\n%s:%ld: Include levels too deeply nested.\n",
                 Fname, Lc );
         exit( EXIT_FAILURE );
     }
     CATCH( EOF_IN_COMMENT_EXCEPTION )
     {
+        yylex_destroy( );
         output( "\x03\n%s: End of file in comment starting at line %ld.\n",
                 Fname, Comm_Lc );
         exit( EXIT_FAILURE );
     }
     CATCH( EOF_IN_STRING_EXCEPTION )
     {
+        yylex_destroy( );
         output( "\x03\n%s: End of line in string constant starting at "
                 "line %ld.\n", Fname, Str_Lc );
         exit( EXIT_FAILURE );
     }
     CATCH( DANGLING_END_OF_COMMENT )
     {
+        yylex_destroy( );
         output( "\x03\n%s: End of comment found in program text at "
                 "line %ld.\n", Fname, Lc );
         exit( EXIT_FAILURE );
     }
     CATCH( MISPLACED_SHEBANG )
     {
+        yylex_destroy( );
         output( "\x03\n%s: '#!' must appear on the very first line instead of "
                 "line %ld.\n", Fname, Lc );
     }
     OTHERWISE
+    {
+        yylex_destroy( );
         exit( EXIT_FAILURE );
+    }
+
+    yylex_destroy( );
 
     /* Finished succesfully... */
 

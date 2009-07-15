@@ -228,6 +228,8 @@ devices_parser( FILE * in )
     devicesparse( );
     load_all_drivers( );
 
+    deviceslex_destroy( );
+
     return Devices_next_section;
 }
 

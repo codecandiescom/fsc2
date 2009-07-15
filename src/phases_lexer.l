@@ -300,11 +300,17 @@ phases_parser( FILE * in )
     }
     CATCH( INVALID_INPUT_EXCEPTION )
     {
+        phaseslex_destroy( );
         print( FATAL, "Invalid input near '%s'.\n", phasestext );
         THROW( EXCEPTION );
     }
     OTHERWISE
+    {
+        phaseslex_destroy( );
         RETHROW( );
+    }
+
+    phaseslex_destroy( );
 
     return Phases_next_section;
 }

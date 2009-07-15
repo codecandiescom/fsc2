@@ -217,6 +217,7 @@ scan_main( const char * name,
     split_error = ( bool ) splitlex( );
 
     fclose( splitin );
+    splitlex_destroy( );
 
     while ( ! Fsc2_Internals.fsc2_clean_died )
         fsc2_usleep( 10000, UNSET );

@@ -264,6 +264,7 @@ func_list_parse( Func_T ** fncts,
     OTHERWISE
     {
         fclose( func_listin );
+        func_listlex_destroy( );
         RETHROW( );
     }
 
@@ -272,6 +273,7 @@ func_list_parse( Func_T ** fncts,
     if ( num == 0 )
     {
         fclose( func_listin );
+        func_listlex_destroy( );
         return num_predef_func;
     }
 
@@ -304,10 +306,12 @@ func_list_parse( Func_T ** fncts,
     OTHERWISE
     {
         fclose( func_listin );
+        func_listlex_destroy( );
         RETHROW( );
     }
 
     fclose( func_listin );
+    func_listlex_destroy( );
     return nf;
 }
 

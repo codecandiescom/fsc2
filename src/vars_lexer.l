@@ -399,6 +399,8 @@ variables_parser( FILE * in )
 
     varsparse( );
 
+    varslex_destroy( );
+
     return Vars_next_section;
 }
 

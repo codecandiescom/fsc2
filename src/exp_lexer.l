@@ -404,11 +404,13 @@ experiment_parser( FILE * in )
 
     if ( Exp_next_section != NO_SECTION )
     {
+        explex_destroy( );
         print( FATAL, "EXPERIMENT section has to be the very last "
                "section.\n" );
         THROW( EXCEPTION );
     }
 
+    explex_destroy( );
     return Exp_next_section;
 }
 

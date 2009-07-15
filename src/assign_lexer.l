@@ -580,6 +580,8 @@ assignments_parser( FILE * in )
 
     assignparse( );
 
+    assignlex_destroy( );
+
     return Assign_next_section;
 }
 

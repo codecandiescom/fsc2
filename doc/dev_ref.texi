@@ -1643,8 +1643,8 @@ sweeps thus should probably be avoided when using this device).
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (the device has a (non-standard)
-serial port a @code{GPV24} interface for conversion
-between @code{RS232C} and @code{IEEE488} is employed).
+serial port, a @code{GPV24} interface for conversion between
+@code{RS232C} and @code{IEEE488} is employed).
 
 @paragraphindent 0
 @strong{Status}: Tested

@@ -521,6 +521,8 @@ preparations_parser( FILE * in )
 
     prepsparse( );
 
+    prepslex_destroy( );
+
     return Preps_next_section;
 }
 
