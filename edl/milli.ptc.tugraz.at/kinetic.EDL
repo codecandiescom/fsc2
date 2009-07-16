@@ -1,0 +1,186 @@
+=== START_FIELD float [ -50 : 23000 ] [ 3000 ] "Start field" "G"
+=== END_FIELD float [ -50 : 23000 ] [ 3500 ] "End field" "G"
+=== FIELD_STEP float [ 0.001 : 1600 ] [ 1 ] "Field step size" "G"
+=== SEC_FREQ float [ 39.22 : 200 ] [ 200 ] "Chopper sector freq." "Hz"
+=== N_SHOTS int [ 1 : ] [ 30 ] "Number of averages"
+=== N_RES int [ 1 : 6250 ] [ 500 ] "Points per rotation"
+=== SENS menu [ "10 V", "5 V", "2.5 V", "1 V", "500 mV",  "250 mV", "100 mV", "50 mV" ] [ 8 ]  "DAQ sensitivity"
+=== N_RUNS int [ 1 : ] [ 1 ] "Number of runs"
+=== MOD_OFF button [ ON ] "Switch off modulation"
+=== REC_ALL button [ ON ] "Store single scans"
+DEVICES:
+
+pci_mio_16e_1;
+gg_chopper;
+er032m;
+=== if MOD_OFF
+er023m;
+=== endif
+
+
+VARIABLES:
+
+start_field   = START_FIELD G;
+end_field     = END_FIELD G;
+field_step    = FIELD_STEP G;
+sec_freq      = SEC_FREQ Hz;
+N_res         = N_RES;
+N_shots       = N_SHOTS;
+N_runs        = N_RUNS;
+sens          = SENS;
+
+I, J, K, L;
+N_field_steps = ceil( abs( ( end_field - start_field ) / field_step ) ) + 1;
+dt = 1.0 / ( sec_freq * N_res );
+raw_data[ N_shots * N_res ];
+data[ N_field_steps, N_res ];
+tmp[ N_res ];
+avg_data[ N_field_steps, N_res ];
+field;
+F_all, F_params;
+=== if N_RUNS > 1 and REC_ALL
+F_cur;
+=== endif
+
+
+PREPARATIONS:
+
+init_2d( 2, N_res, N_field_steps, 0.0, dt * 1.0e3, start_field, field_step,
+         "Time [ms]", "Field [G]", "Signal [V]" );
+init_1d( 2, N_res, 0, dt * 1.0e3, "Time [ms]", "Signal [V]" );
+
+=== if START_FIELD <= END_FIELD
+field = start_field;
+magnet_setup( start_field, field_step );
+=== else
+field = end_field;
+magnet_setup( end_field, field_step );
+=== endif
+chopper_sector_frequency( sec_freq );
+
+
+EXPERIMENT:
+
+=== if MOD_OFF
+lockin_ref_level( 0 G );
+=== endif
+
+daq_ai_channel_setup( CH0, sens, "Ground", "Bipolar" );
+daq_ai_acq_setup( N_shots * N_res, "TRIGGER_START", "TRIG1", dt );
+daq_trigger_setup( "High_Window", 2 V );
+
+F_all = get_file( "", "*.dat", "", "", "dat" );
+F_params = clone_file( F_all, "dat", "par" );
+save_comment( F_all, "% " );
+
+FOR I = 1 : N_runs {
+    print( "Starting #. run\n", I );
+=== if N_RUNS > 1 and REC_ALL
+    F_cur = clone_file( F_all, "dat", sprint( "run_#.dat", I ) );
+=== endif
+
+    FOR J = 1 : N_field_steps {
+        daq_ai_start_acquisition( );
+        raw_data = daq_ai_get_curve( );
+
+=== if N_SHOTS > 1
+        data[ J ] = mean_part_array( raw_data, N_res );
+=== else
+		data[ J ] = raw_data;
+=== endif
+=== if N_RUNS > 1 and REC_ALL
+	    FOR L = 1 : N_res {
+			fsave( F_cur, "# ", data[ J, L ] );
+		}
+        fsave( F_cur, "\n" );
+=== endif
+
+        tmp = ( ( I - 1 ) * avg_data[ J ] + data[ J ] ) / I;
+=== if START_FIELD <= END_FIELD
+        display_2d( 1, J, data[ J ], 1, 1, J, tmp, 2 );
+=== else
+        display_2d( 1, N_field_steps - J + 1, data[ J ], 1,
+					1, N_field_steps - J + 1, tmp, 2 );
+=== endif
+
+        display_1d( 1, data[ J ], 1, 1, tmp, 2 );
+        change_label_1d( sprint( "Time [ms] (#. run at # G)", I, field ) );
+
+        IF J < N_field_steps {
+=== if START_FIELD <= END_FIELD
+            field = magnet_sweep_up( );
+=== else
+            field = magnet_sweep_down( );
+=== endif
+        }
+    }
+
+    avg_data = ( ( I - 1 ) * avg_data + data ) / I;
+    IF I < N_runs {
+        clear_curve_2d( 1 );
+        clear_curve_1d( 1, 2 );
+    }
+    data = 0.0;
+    field = magnet_reset_field( );
+}
+
+
+ON_STOP:
+
+fsave( F_params, "% Start field:          # G\n"
+                 "% End field:            # G\n"
+                 "% Field step size:      # G\n"
+                 "% Sector frequency:     #\n"
+                 "% Number of rotations:  #\n"
+                 "% Points per rotation:  #\n"
+                 "% DAQ sensitivity:      # V\n"
+                 "% Number of runs:       #\n",
+=== if START_FIELD <= END_FIELD
+
+       start_field, I == 1 ? field : end_field, field_step,
+=== else
+       end_field, I == 1 ? field : start_field, - field_step,
+=== endif
+
+       sec_freq, N_shots, N_res, sens,
+       I == 1 OR J == N_field_steps ? N_runs : N_runs - 1 );
+
+=== if START_FIELD <= END_FIELD
+field = start_field;
+=== else
+field = end_field;
+=== endif
+
+IF I == 1 {
+=== if START_FIELD <= END_FIELD
+    FOR K = 1 : J {
+=== else
+    FOR K = J : 1 : -1 {
+=== endif
+		FOR L = 1 : N_res {
+            fsave( F_all, "# ", data[ K, L ] );
+		}
+        fsave( F_all, "\n" );
+=== if START_FIELD <= END_FIELD
+        field += field_step;
+=== else
+        field -= field_step;
+=== endif
+    }
+} ELSE {
+=== if START_FIELD <= END_FIELD
+    FOR K = 1 : N_field_steps {
+=== else
+    FOR K = N_field_steps : 1 : -1 {
+=== endif
+		FOR L = 1 : N_res {
+            fsave( F_all, "# ", avg_data[ K, L ] );
+		}
+        fsave( F_all, "\n" );
+=== if START_FIELD <= END_FIELD
+        field += field_step;
+=== else
+        field -= field_step;
+=== endif
+    }
+}
