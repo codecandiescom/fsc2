@@ -83,6 +83,9 @@ won't be able to wrap a GUI around @code{EDL} scripts and the built-in web
 server (which also requires the next two utilities) and the utility for
 displaying pulse settings graphically won't work.
 
+If you want to compile the module for Fast Fourier Transformation
+you will need the @url{http://www.fftw.org/,FFTW library}. Make sure
+you install version 3 of the library!
 
 To create the complete documentation beside Perl you also need:
 @table @samp

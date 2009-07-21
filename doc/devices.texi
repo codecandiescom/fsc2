@@ -273,7 +273,7 @@ hjs_fc;
 
 
 @noindent
-@strong{List of all magnet functions}:
+@strong{List of magnet functions}:
 @table @samp
 @item @ref{magnet_name()}
 @item @ref{magnet_setup()}
@@ -866,7 +866,7 @@ already been loaded.
 
 
 @noindent
-@strong{List of all gaussmeter functions}:
+@strong{List of gaussmeter functions}:
 @table @samp
 @item @ref{gaussmeter_name()}
 @item @ref{gaussmeter_field()}
@@ -1023,7 +1023,7 @@ check the arguments to achieve the desired results.
 
 
 @noindent
-@strong{List of all lock-in functions}:
+@strong{List of lock-in functions}:
 @table @samp
 @item @ref{lockin_name()}
 @item @ref{lockin_get_data()}
@@ -1728,7 +1728,7 @@ WaveSurfer, Waverunner)
 
 
 @noindent
-@strong{List of all digitizer functions}:
+@strong{List of digitizer functions}:
 @table @samp
 @item @ref{digitizer_name()}
 @item @ref{digitizer_timebase()}
@@ -3055,7 +3055,7 @@ of the pulse sequence has to be committed explicitely by calling
 
 
 @noindent
-@strong{List of all pulser functions}:
+@strong{List of pulser functions}:
 @table @samp
 @item @ref{pulser_name()}
 @item @ref{pulser_state()}
@@ -3711,7 +3711,7 @@ in the @code{DEVICES} section.
 
 
 @noindent
-@strong{List of all synthesizer functions}:
+@strong{List of synthesizer functions}:
 @table @samp
 @item @ref{synthesizer_name()}
 @item @ref{synthesizer_state()}
@@ -4255,7 +4255,7 @@ the @code{EDL} script.
 
 
 @noindent
-@strong{List of all temperature controller functions}:
+@strong{List of temperature controller functions}:
 @table @samp
 @item @ref{temp_contr_name()}
 @item @ref{temp_contr_temperature()}
@@ -4339,7 +4339,7 @@ schlumberger7140
 in the @code{DEVICES} section.
 
 @noindent
-@strong{List of all multimeter functions}:
+@strong{List of multimeter functions}:
 @table @samp
 @item @ref{multimeter_name()}
 @item @ref{multimeter_mode()}
@@ -4454,7 +4454,7 @@ can only be used in the @code{EXPERIMENT} section of the @code{EDL}
 script.
 
 @noindent
-@strong{List of all boxcar functions}:
+@strong{List of boxcar functions}:
 @table @samp
 @item @ref{boxcar_name()}
 @item @ref{boxcar_curve_length()}
@@ -4557,7 +4557,7 @@ agilent_53181a
 in the @code{DEVICES} section. 
 
 @noindent
-@strong{List of all frequency counter functions}:
+@strong{List of frequency counter functions}:
 @table @samp
 @item @ref{freq_counter_name()}
 @item @ref{freq_counter_band()}
@@ -4755,7 +4755,7 @@ in the @code{DEVICES} section.
 
 
 @noindent
-@strong{List of all DAQ functions}:
+@strong{List of DAQ functions}:
 @table @samp
 @item @ref{daq_name()}
 @item @ref{daq_ai_channel_setup()}
@@ -5690,7 +5690,7 @@ the one for the ones for the Meihaus cards can be downloaded from the
 
 
 @noindent
-@strong{List of all DIO functions}:
+@strong{List of DIO functions}:
 @table @samp
 @item @ref{dio_name()}
 @item @ref{dio_reserve_dio()}
@@ -5942,7 +5942,7 @@ installed.
 
 
 @noindent
-@strong{List of all counter functions}:
+@strong{List of event counter functions}:
 @table @samp
 @item @ref{counter_name()}
 @item @ref{counter_start_continuous_counter()}
@@ -5960,7 +5960,7 @@ installed.
 @end table
 
 @noindent
-@strong{Descriptions of counter functions}:
+@strong{Descriptions of event counter functions}:
 
 @c The anchor and the findex must come before the start of the table,
 @c otherwise the created HTML isn't valid
@@ -6396,7 +6396,7 @@ the ones they had in the previously run experiment.
 
 
 @noindent
-@strong{List of all CCD camera functions}:
+@strong{List of CCD camera functions}:
 @table @samp
 @item @ref{ccd_camera_name()}
 @item @ref{ccd_camera_roi()}
@@ -6686,7 +6686,7 @@ conjunction with the supported monochromatore).
 
 
 @noindent
-@strong{List of all monochromator functions}:
+@strong{List of monochromator functions}:
 @table @samp
 @item @ref{monochromator_name()}
 @item @ref{monochromator_wavelength()}
@@ -7393,7 +7393,7 @@ in the @code{DEVICES} section.
 
 
 @noindent
-@strong{List of all power supply functions}:
+@strong{List of power supply functions}:
 @table @samp
 @item @ref{powersupply_name()}
 @item @ref{powersupply_channel_state()}
@@ -7560,7 +7560,7 @@ module.
 
 
 @noindent
-@strong{List of all microwave attenuator functions}:
+@strong{List of microwave attenuator functions}:
 @table @samp
 @item @ref{mw_attenuator_name()}
 @item @ref{mw_attenuator_load_calibration()}
@@ -7690,7 +7690,7 @@ the chopper gets stopped automatically.
 
 
 @noindent
-@strong{List of all chopper functions}:
+@strong{List of chopper functions}:
 @table @samp
 @item @ref{chopper_name()}
 @item @ref{chopper_sector_frequency()}
@@ -7760,7 +7760,7 @@ for the DIO device (@ref{me_dio_X, Meilhaus DIO subsystem}) must be
 listed before this module.
 
 @noindent
-@strong{List of all goniometer functions}:
+@strong{List of goniometer functions}:
 @table @samp
 @item @ref{goniometer_name()}
 @item @ref{goniometer_angle()}

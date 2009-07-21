@@ -42,8 +42,11 @@ Optionally, you should have
 11) perl (version 5.6 or higher) with the pTk (Tk support) package
 12) pnmtopng
 13) pnmtojpeg
+14) If you want to compile fsc2 with the FFT module you also need
+    the FFTW library, version 3, which can be downloaded e.g. from
+    http://www.fftw.org/
 
-but if it is missing the basic functionality is still there (without mail
+If these are missing the basic functionality is still there (without mail
 and addr2line no automatic bug reports can be sent and without Perl you
 won't be able to wrap a GUI around EDL scripts and the built-in web server
 won't work (which also requires the next two utilities).
@@ -51,16 +54,16 @@ won't work (which also requires the next two utilities).
 
 To create the complete documentation beside Perl you also need
 
-14) makeinfo
-15) install-info (see GNU texinfo)
-16) texi2html (at least version 1.78)
-17)
-18) TeX (if missing no PostScript and PDF documentation is created)
-19) convert and identify from the ImageMagick package (or no PostScript
+15) makeinfo
+16) install-info (see GNU texinfo)
+17) texi2html (at least version 1.78)
+18)
+19) TeX (if missing no PostScript and PDF documentation is created)
+20) convert and identify from the ImageMagick package (or no PostScript
 	and PDF documentation will be created)
-20) dvips (if missing no PostScript documentation is created)
-21) pdftex (if missing no PDF documentation will be created)
-22) gzip
+21) dvips (if missing no PostScript documentation is created)
+22) pdftex (if missing no PDF documentation will be created)
+23) gzip
 
 
 
@@ -550,7 +553,7 @@ devices, writing a test suite for the supported devices is still on my
 to-do list.
 
 
-    April 29, 2009                      Much luck, Jens
+    July 21, 2009                      Much luck, Jens
 
 --
   \   Jens Thoms Toerring  ___    jt@toerring.de

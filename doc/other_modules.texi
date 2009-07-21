@@ -57,8 +57,12 @@ fft;
 adds three @code{EDL} functions that allow to do Fast Fourier
 Transfirmations on real and complex data sets.
 
+Please note: calculating a discrete Fourier Transformation can be
+quite time consuming, so you may want to avoid using it on huge
+arrays.
+
 This module can only be compiled if the
-@url{http://www.fftw.org/,FFTW3 library} is installed (make sure it's
+@url{http://www.fftw.org/,FFTW library} is installed (make sure it's
 version 3 or higher). For this reason it isn't created by default but
 only if the variable @code{WITH_FFT} is set in the @code{Makefile} or
 configuration file that controls how @code{fsc2} gets compiled.
@@ -93,38 +97,39 @@ Returns a "device name" for the module that can be used in messages.
 @item fft_real()
 If called with a 1-dimensinal array as its only argument the function
 does a Fast Fourier Transformation of this array. The result is a
-2-dimensional array. The length of the sub-arrays of the result depend
-on the length of the input array. If the length of the input array is
-@code{N} then the lengths of the result arrays are @code{N/2+1} if
-@code{N} is even, and @code{(N+1)/2} if @code{N} is odd. The first
-sub-array is the real part of the result of the transformation (i.e.@:
-the coeficients of the @code{cos} functions), and the second sub-array
-the imaginary part (i.e.@: the @code{sin} coefficients). The
-coefficients stored in the output arrays start with the one for the
-zero frequency, followed by the coefficients for increasing
-frequencies.
+2-dimensional array of floating point values. The length of the
+sub-arrays of the result depend on the length of the input array. If
+the length of the input array is @code{N} then the lengths of the
+result arrays are @code{N/2+1} if @code{N} is even, and @code{(N+1)/2}
+if @code{N} is odd. The first sub-array is the real part of the result
+of the transformation (i.e.@: the coeficients of the @code{cos}
+functions), and the second sub-array the imaginary part (i.e.@: the
+@code{sin} coefficients). The coefficients stored in the output arrays
+start with the one for the zero frequency, followed by the
+coefficients for increasing frequencies.
 
 To do a back-transformation the same function must be called, but with
 either a 2-dimensional array (with sub-arrays of equal lengths) or two
 1-dimensional arrays (of equal lengths), with a 1-dimensional array as
 the result. The third argument must be an integer, the length of the
-result array. Passing this third argument is necessary since both a
-result length of @code{2N} as well as @code{2N + 1} (where @code{N} is
-the length of both input arrays) are possible. If used for a
-back-transformation care has to be taken that this argument is
-identical to the original array length (i.e.@: if an array of length
-@code{N} was forward-transformed using @code{fft_real()} and the
-result is again transformed backward this third argument must be set
-to @code{N} to reproduce the original array).
+1-dimensional floating point result array. Passing this third argument
+is necessary since both a result length of @code{2N} as well as
+@code{2N + 1} (where @code{N} is the length of both input arrays) are
+possible. If used for a back-transformation care has to be taken that
+this argument is identical to the original array length (i.e.@: if an
+array of length @code{N} was forward-transformed using
+@code{fft_real()} and the result is again transformed backward this
+third argument must be set to @code{N} to reproduce the original
+array).
 
 The FFT coefficients are normalized for the most typical application,
-tranforming from time to frequency domain, so that they can be
-directly used as the strengths of the contributing freqencies. For
-example, when Fourier-transforming an array of even length, consisting
-of alternating values of @code{1} and @code{-1}, the result will have
-a single coefficient of @code{1} in the entry for the highest
-frequency in the real (@code{cos}) array and all other elements of
-both output arrays are @code{0}.
+tranforming from time to frequency domain, so that they directly
+represent the strengths of the contributing freqencies. For example,
+when Fourier-transforming an array of even length, consisting of
+alternating values of @code{1} and @code{-1}, the result will have a
+single coefficient of @code{1} in the entry for the highest frequency
+in the real (@code{cos}) array and all other elements of both output
+arrays are @code{0}.
 
 
 @anchor{fft_power_spectrum()}
@@ -132,12 +137,12 @@ both output arrays are @code{0}.
 @item fft_power_spectrum()
 What this function does is very similar to @code{@ref{fft_real()}}
 (when used for a forward transformation). It takes a single argument,
-an 1-dimensional array and applies a real Fast Fourier Transformation.
+a 1-dimensional array and applies a real Fast Fourier Transformation.
 Afterwards the squares of the magnitudes of the frequency components
-are calculated, resulting in an array of values that are proportional
-to the energy of each frequency component. The result is a
-1-dimensional array. If the input array had @code{N} elements the
-output array has @code{N/2+1} if @code{N} is even, if @code{N} is odd
+are calculated, resulting in a 1-dimensional array of floating point
+values that are proportional to the energy of each frequency
+component. If the input array had @code{N} elements the output array
+has @code{N/2+1} if @code{N} is even, if @code{N} is odd
 @code{(N+1)/2}.
 
 
@@ -152,8 +157,8 @@ for the real and one for the imagary data). It expects either a single
 the direction of the transformation must be given. either the string
 @code{"FORWARD"} (or a value positive value) or the string
 @code{"BACKWARD"} (or a negative value). The result of the
-transformation is a 2-dimensional array with the sub-arrays having the
-same lengths as the input arrays.
+transformation is a 2-dimensional array of floating point numbers with
+the sub-arrays having the same lengths as the input arrays.
 
 The first sub-array of the result contains the real coefficients
 (i.e.@: for the @code{cos} functions) and the second the imaginary
@@ -192,8 +197,8 @@ calibrations get stored in a file (unless set differently in
 @file{/usr/local/lib/fsc2/epr_mod.state}). Each calibration in this
 file is characterised by its name, a (non-empty) string and applies to
 a certain hardware configuration (EPR resonator with modulation coils,
-lock-in amplifier and and, possibly modulation frequency generator and
-amplifier).
+lock-in amplifier and and, possibly, modulation frequency generator
+and amplifier).
 
 For the modulation field to voltage ratio inter- or even extrapolation
 can be done if the requested frequency doesn't match one of the ones
@@ -264,13 +269,12 @@ corresponding ratio is returned. If the frequency does not match a
 known frequency exactly but is within a confidence interval around a
 known frequency (the interval is set via the configuration file) and
 interpolation is not allowed or possible the ratio for the known
-frequency is returned, otherwise an interpolated value. If the
-requested frequency isn't within the confidence interval but is
-within the range of known values the interpolated value is also
-returned if interpolation is possible, otherwise an exception is
-thrown. If the frequency is outside the range of known frequencies
+frequency is returned. If the requested frequency isn't within the
+confidence interval but is within the range of known values and
+interpolation is allowed and possible, an interpolated value gets
+returned. If the frequency is outside the range of known frequencies
 and extrapolation is allowed and possible the extrapolated for the
-ratio is returned, otherwise an exception gets thrown.
+ratio is returned. Otherwise the script is stopped.
 
 If there's another argument this is taken to be a new ratio to be set.
 If the frequency given as the second argument is within the confidence
@@ -295,7 +299,7 @@ phase for the calibration and frequency if possible. This requires that
 the frequency matches one of the known frequencies within the confidence
 interval (as set in the configuration file for the module) and that
 a modulattion phase is known for this calibration and frequency. Otherwise
-an exception is thrown.
+the script is aborted.
 
 If there's nother argument this is taken to be a modulation phase.
 This requires that a ration already has been set for the frequency
@@ -428,10 +432,10 @@ calibrations.
 This function allows to find the name of a calibration by its index in
 the list of calibrations (a number between @code{1} and the number of
 known calibrations). The function takes a single argument, the
-calibration's index (an invalid index will result in an exception
-getting thrown and the experiment bein aborted). The function can be
-used in conjunction with the @ref{epr_modulation_calibration_count()}
-to obtain the names of all known calibrations.
+calibration's index (an invalid index will result in the experiment
+being aborted). The function can be used in conjunction with the
+@ref{epr_modulation_calibration_count()} to obtain the names of all
+known calibrations.
 
 
 @anchor{epr_modulation_calibration_frequencies()}

@@ -48,8 +48,15 @@ fft_name( Var_T * v  UNUSED_ARG )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Does a 1-dimensional DFT of real data. For a forward transform
+ * expects just a 1-dimensioal array. For backwar transform accepts
+ * either two 1-dimensional arrays or a single 2-dimensional one.
+ * For a backward transform also another argument with the number
+ * of points the resulting 1-dimensional array is to have must be
+ * given (which, in turn, must be either twice the length of the
+ * input arrays or one more).
+ *------------------------------------------------------------------*/
 
 Var_T *
 fft_real( Var_T * v )
@@ -68,6 +75,10 @@ fft_real( Var_T * v )
 		print( FATAL, "Missing arguments\n" );
 		THROW( EXCEPTION );
 	}
+
+    /* If we get a single 1D array this is a forward transformation,
+       if we get either a 2D array or two 1D arrays it's a backward
+       transformation */
 
     if ( v->type & ( FLOAT_REF | INT_REF ) )
     {
@@ -113,9 +124,11 @@ fft_real( Var_T * v )
         double norm;
 
 
+        CLOBBER_PROTECT( in );
+
         too_many_arguments( v );
 
-        CLOBBER_PROTECT( in );
+        /* Sanity checks */
 
         if ( r->len <= 0 )
         {
@@ -131,18 +144,30 @@ fft_real( Var_T * v )
 
         n = r->len;
 
-        /* Allocate memory for result data and make a plan */
+        /* Set up a pointer to the input data. If those are double values
+           we can use the array from the variable directly, otherwise we
+           need an extra array that we then have to initialize */
 
         if ( r->type == FLOAT_ARR )
             in = r->val.dpnt;
         else
         {
+            long *from;
+
             if ( ! ( in = fftw_malloc( n * sizeof *in ) ) )
             {
                 print( FATAL, "Running out of memory.\n" );
                 THROW( OUT_OF_MEMORY_EXCEPTION );
             }
+
+            dp = in;
+            from = r->val.lpnt;
+            
+            for ( i = 0; i < n; i++ )
+                *dp++ = *from++;
         }
+
+        /* Allocate memory for the result data and make a plan */
 
         if (    ! ( out = fftw_malloc( ( n / 2 + 1 ) * sizeof *out ) )
              || ! ( plan = fftw_plan_dft_r2c_1d( n, in, out,
@@ -215,7 +240,7 @@ fft_real( Var_T * v )
         }
 
         if (    ( v->type & FLOAT_VAR && v->val.dval > INT_MAX )
-             && ( v->type & INT_VAR && v->val.lval > INT_MAX ) )
+             && ( v->type & INT_VAR   && v->val.lval > INT_MAX ) )
         {
             print( FATAL, "Output size argument too large, must not larger "
                    "than %d.\n", INT_MAX );
@@ -226,7 +251,7 @@ fft_real( Var_T * v )
 
         if ( r->len <= 0 )
         {
-            print( FATAL, "Input data array(s) has no elements\n" );
+            print( FATAL, "Input data arrays have no elements\n" );
             THROW( EXCEPTION );
         }
 
@@ -260,6 +285,9 @@ fft_real( Var_T * v )
         /* Set up the input array */
 
         dp = ( double * ) in;
+
+        /* We need to distinguish four different types of combinations of
+           input array types. That's a bit lengthy but not avoidable... */
 
         if ( r->type == FLOAT_ARR && c->type == FLOAT_ARR )
         {
@@ -310,6 +338,8 @@ fft_real( Var_T * v )
 
         fftw_execute( plan );
 
+        /* Create a new variable with the output arrays data */
+
         nv = vars_push( FLOAT_ARR, out, n );
 
         /* Get rid of memory we used */
@@ -324,6 +354,10 @@ fft_real( Var_T * v )
 
 
 /*-----------------------------------------------------------------*
+ * Calculates the power spectrum of a real data array - basically
+ * the same what fft_real() does in a forward transformation, just
+ * with the squares of the magintudes of the frequency components
+ * calculated afterwards and those returned to the caller.
  *-----------------------------------------------------------------*/
 
 Var_T *
@@ -431,8 +465,13 @@ fft_power_spectrum( Var_T * v )
 }
 
 
-/*-----------------------------------------------------------------*
- *-----------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Does a complex 1-dimensional DFT. Expects either a 2-dimensional
+ * array or two 1-dimensional arrays as its input plus a string
+ * with either "FORWARD" or "BACKWARD" (or a positive or negative
+ * number) to specify the direction of the transformation. Returns
+ * a 2-dimensional array.
+ *------------------------------------------------------------------*/
 
 Var_T *
 fft_complex( Var_T * v )
@@ -571,15 +610,15 @@ fft_complex( Var_T * v )
         THROW( OUT_OF_MEMORY_EXCEPTION );
 	}
 
-	/* Copy data over to the input arrays. Two thingshave to be kept in
-       mind: first of all the input arrayss could be integers. And,
+	/* Copy data over to the input arrays. Two things have to be kept in
+       mind: first of all the input arrays could be integers. And,
        second, for the backward transform the FFTW3 library expects the
        data starting with the null frequency, followed by increasing
        positive frequencies, then the most negative and all the remaining
-       negative frequencies, becoming smaller and smaller. On the other
-       hand the input arrays are supposed to start with the most negative
-       frequencies and then ever increasing frequencies, ending with the
-       largest positive frequency (with null in the middle). */
+       negative frequencies in ascending order. On the other hand the input
+       arrays are supposed to start with the most negative frequencies and
+       then ever increasing frequencies, ending with the largest positive
+       frequency (with null in the middle). */
 
 	if ( r->type == FLOAT_ARR && c->type == FLOAT_ARR )
 	{
@@ -723,6 +762,13 @@ fft_complex( Var_T * v )
 		fftw_free( data );
 		RETHROW( );
 	}
+
+    /* For a forward transformation we wantthe array start with the most
+       negative frequency and the rest in strictly ascending order while
+       the FFTW3 library returns the data in a different order, starting
+       with the null frequency, then the positive frequencies and only
+       the the negative ones, starting with the most negative one.
+       It also returns unnormalized coefficients which we thus must scale. */
 
     rp = nv->val.vptr[ 0 ]->val.dpnt;
     cp = nv->val.vptr[ 1 ]->val.dpnt;
