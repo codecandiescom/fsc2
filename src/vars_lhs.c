@@ -868,8 +868,9 @@ vars_lhs_sub_pointer( Var_T * v,
 
     if ( dim > a->dim )
     {
-        print( FATAL, "Array '%s' has only %d dimensions but there are "
-               "%d indices/ranges.\n", a->dim, dim );
+        print( FATAL, "Array '%s' has only %d dimension%s but there are "
+               "%d indices/ranges.\n",
+               a->name, a->dim, a->dim > 1 ? "s" : "",dim );
         THROW( EXCEPTION );
     }
 

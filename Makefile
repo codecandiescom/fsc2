@@ -236,6 +236,12 @@ LAN_LOG_LEVEL   := HIGH
 # libusb_lib_path    := /usr/lib/local
 
 
+# If the following is defined the FFT pseudo-module is created. This requires
+# the the fftw3 library (and header its files) is installed
+
+# WITH_FFT           := yes
+
+
 # Define the default editor to use for editing when the "Edit" button gets
 # pressed or for writing a bug report  (but a user can still override this
 # by setting the 'EDITOR' environment variable).
@@ -831,6 +837,13 @@ endif
 
 ifdef rs_spec10_extra_libs
 	LIBS += -lrt -lraw1394
+endif
+
+
+# If fft pseudo-module is to be built we need the fftw3 library
+
+ifdef WITH_FFT
+	LIBS += -lfftw3
 endif
 
 

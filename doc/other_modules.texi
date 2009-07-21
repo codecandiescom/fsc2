@@ -1,0 +1,454 @@
+@c  Copyright (C) 1999-2009 Jens Thoms Toerring
+@c
+@c  This file is part of fsc2.
+@c
+@c  Fsc2 is free software; you can redistribute it and/or modify
+@c  it under the terms of the GNU General Public License as published by
+@c  the Free Software Foundation; either version 2, or (at your option)
+@c  any later version.
+@c
+@c  Fsc2 is distributed in the hope that it will be useful,
+@c  but WITHOUT ANY WARRANTY; without even the implied warranty of
+@c  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+@c  GNU General Public License for more details.
+@c
+@c  You should have received a copy of the GNU General Public License
+@c  along with fsc2; see the file COPYING.  If not, write to
+@c  the Free Software Foundation, 59 Temple Place - Suite 330,
+@c  Boston, MA 02111-1307, USA.
+
+
+@node Other Modules, Using Pulsers, Device Functions, fsc2
+@chapter Other Modules
+
+
+While modules are mostly used to add new devices they aren't necessarily
+related to devices. Instead, new functionalities can be added to
+@code{fsc2} via such modules. This chapter describes such modules as
+far as they currently exist.
+
+Since these modules don't access any hardware (diectly or indirectly)
+their functions can be called from all sections of an @code{EDL}
+script that allow invocation of @code{EDL} functions.
+
+@ifnottex
+
+@menu
+* FFT Functions::            Module for Fast Fourier Transformation
+* EPR Modulation Functions:: Storing and recalling modulation settings
+@end menu
+
+@end ifnottex
+
+
+@c ########################################################
+
+
+@node FFT Functions, EPR Modulation Functions, , Other Modules
+@section FFT Functions
+
+
+A module that can be loaded within the @code{DEVICES} section by
+adding
+@example
+fft;
+@end example
+@noindent
+adds three @code{EDL} functions that allow to do Fast Fourier
+Transfirmations on real and complex data sets.
+
+This module can only be compiled if the
+@url{http://www.fftw.org/,FFTW3 library} is installed (make sure it's
+version 3 or higher). For this reason it isn't created by default but
+only if the variable @code{WITH_FFT} is set in the @code{Makefile} or
+configuration file that controls how @code{fsc2} gets compiled.
+
+@noindent
+@strong{List of FFT functions}:
+@table @samp
+@item @ref{fft_name()}
+@item @ref{fft_real()}
+@item @ref{fft_power_spectrum()}
+@item @ref{fft_complex()}
+@end table
+
+
+@noindent
+@strong{Descriptions of FFT functions}:
+
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML isn't valid
+
+@anchor{fft_name()}
+@findex fft_name()
+
+@table @samp
+@item fft_name()
+
+Returns a "device name" for the module that can be used in messages.
+
+
+@anchor{fft_real()}
+@findex fft_real()
+@item fft_real()
+If called with a 1-dimensinal array as its only argument the function
+does a Fast Fourier Transformation of this array. The result is a
+2-dimensional array. The length of the sub-arrays of the result depend
+on the length of the input array. If the length of the input array is
+@code{N} then the lengths of the result arrays are @code{N/2+1} if
+@code{N} is even, and @code{(N+1)/2} if @code{N} is odd. The first
+sub-array is the real part of the result of the transformation (i.e.@:
+the coeficients of the @code{cos} functions), and the second sub-array
+the imaginary part (i.e.@: the @code{sin} coefficients). The
+coefficients stored in the output arrays start with the one for the
+zero frequency, followed by the coefficients for increasing
+frequencies.
+
+To do a back-transformation the same function must be called, but with
+either a 2-dimensional array (with sub-arrays of equal lengths) or two
+1-dimensional arrays (of equal lengths), with a 1-dimensional array as
+the result. The third argument must be an integer, the length of the
+result array. Passing this third argument is necessary since both a
+result length of @code{2N} as well as @code{2N + 1} (where @code{N} is
+the length of both input arrays) are possible. If used for a
+back-transformation care has to be taken that this argument is
+identical to the original array length (i.e.@: if an array of length
+@code{N} was forward-transformed using @code{fft_real()} and the
+result is again transformed backward this third argument must be set
+to @code{N} to reproduce the original array).
+
+The FFT coefficients are normalized for the most typical application,
+tranforming from time to frequency domain, so that they can be
+directly used as the strengths of the contributing freqencies. For
+example, when Fourier-transforming an array of even length, consisting
+of alternating values of @code{1} and @code{-1}, the result will have
+a single coefficient of @code{1} in the entry for the highest
+frequency in the real (@code{cos}) array and all other elements of
+both output arrays are @code{0}.
+
+
+@anchor{fft_power_spectrum()}
+@findex fft_power_spectrum()
+@item fft_power_spectrum()
+What this function does is very similar to @code{@ref{fft_real()}}
+(when used for a forward transformation). It takes a single argument,
+an 1-dimensional array and applies a real Fast Fourier Transformation.
+Afterwards the squares of the magnitudes of the frequency components
+are calculated, resulting in an array of values that are proportional
+to the energy of each frequency component. The result is a
+1-dimensional array. If the input array had @code{N} elements the
+output array has @code{N/2+1} if @code{N} is even, if @code{N} is odd
+@code{(N+1)/2}.
+
+
+
+@anchor{fft_complex()}
+@findex fft_complex()
+@item fft_complex()
+This function can be used for Fast Fourier Transformations (both
+forward and backward) of complex data (represented by two arrays, one
+for the real and one for the imagary data). It expects either a single
+2-dimensional array or 2 1-dimensional arrays. As a further argument
+the direction of the transformation must be given. either the string
+@code{"FORWARD"} (or a value positive value) or the string
+@code{"BACKWARD"} (or a negative value). The result of the
+transformation is a 2-dimensional array with the sub-arrays having the
+same lengths as the input arrays.
+
+The first sub-array of the result contains the real coefficients
+(i.e.@: for the @code{cos} functions) and the second the imaginary
+(@code{sin}) coefficients. The first element of the array is the
+coefficient for the lowest (most negative frequency), followed by the
+coefficient for higher frequencies. The coefficient for the zero
+frequency is in the middle of the array (or at @code{N/2-1} if the
+lengths @code{N} of the arrays are even).
+
+The scaling of the coefficients is chosen in a way that after a
+forward transformation from time to frequency domain the coefficents
+represent the strengths of the contributing frequencies.
+
+@end table
+
+
+@c ########################################################
+
+
+
+@node EPR Modulation Functions, , FFT Functions, Other Modules
+@section EPR Modulation Functions
+@cindex EPR Modulation Functions
+
+The following functions are for a pseudo-device that can be used to
+store informations about EPR modulation calibrations, the modulation
+field amplitude to modulation voltage ratios and modulation phase
+settings for different moduation frequencies. The module for this
+pseudo-device can be loaded by specifying
+@example
+epr_mod
+@end example
+@noindent
+in the @code{DEVICES} section. The information about properties of
+calibrations get stored in a file (unless set differently in
+@file{/usr/local/lib/fsc2/epr_mod.state}). Each calibration in this
+file is characterised by its name, a (non-empty) string and applies to
+a certain hardware configuration (EPR resonator with modulation coils,
+lock-in amplifier and and, possibly modulation frequency generator and
+amplifier).
+
+For the modulation field to voltage ratio inter- or even extrapolation
+can be done if the requested frequency doesn't match one of the ones
+known for a calibration (interpolation for frequencies within the
+range of known frequencies, extrapolation for frequencies that are
+outside of this range). This requires that inter- or extrapolation is
+allowed for a calibration, that there are at least three known values
+for the field/voltage ratio and that a linear-square fit (assuming
+that the modulation field is proportional to the inverse of the
+frequency, with an voltage offset being taken into consideration) has
+a correlation coefficient (@code{r^2}) that's at least as large as set
+in the configuration file for the module.
+
+
+@noindent
+@strong{List of EPR modulation functions}:
+@table @samp
+@item @ref{epr_modulation_name()}
+@item @ref{epr_modulation_name()}
+@item @ref{epr_modulation_ratio()}
+@item @ref{epr_modulation_phase()}
+@item @ref{epr_modulation_has_phase()}
+@item @ref{epr_modulation_calibration_interpolate()}
+@item @ref{epr_modulation_calibration_can_interpolate()}
+@item @ref{epr_modulation_calibration_extrapolate()}
+@item @ref{epr_modulation_calibration_can_extrapolate()}
+@item @ref{epr_modulation_add_calibration()}
+@item @ref{epr_modulation_delete_calibration()}
+@item @ref{epr_modulation_calibration_count()}
+@item @ref{epr_modulation_calibration_name()}
+@item @ref{epr_modulation_calibration_frequencies()}
+@item @ref{epr_modulation_store()}
+
+
+@end table
+
+@noindent
+@strong{Descriptions of EPR modulation functions}:
+
+@c The anchor and the findex must come before the start of the table,
+@c otherwise the created HTML isn't valid
+
+@anchor{epr_modulation_name()}
+@findex epr_modulation_name()
+
+@table @samp
+
+@item epr_modulation_name()
+Returns a "device name" for the module that can be used in messages.
+
+
+@anchor{epr_modulation_ratio()}
+@findex epr_modulation_ratio()
+@item epr_modulation_ratio()
+This function is for quering or setting the modulation field to
+voltage (or whatever the unit in the case under consideration is)
+ratio for a certain frequency and calibration. The function requires
+at least two arguments, first the calibration name (a string) and a
+positive, non-zero frequency. If the there is no further argument the
+function returns the ratio of the modulation field to the modulation
+frequency (in G/V or the ratio of the modulation field in Gauss to the
+unit used by the device for specifying modulation amplitudes) if
+possible.
+
+The following algorithm is used to determine the field/voltage ratio:
+If the frequency is identical to one known for the calibration the
+corresponding ratio is returned. If the frequency does not match a
+known frequency exactly but is within a confidence interval around a
+known frequency (the interval is set via the configuration file) and
+interpolation is not allowed or possible the ratio for the known
+frequency is returned, otherwise an interpolated value. If the
+requested frequency isn't within the confidence interval but is
+within the range of known values the interpolated value is also
+returned if interpolation is possible, otherwise an exception is
+thrown. If the frequency is outside the range of known frequencies
+and extrapolation is allowed and possible the extrapolated for the
+ratio is returned, otherwise an exception gets thrown.
+
+If there's another argument this is taken to be a new ratio to be set.
+If the frequency given as the second argument is within the confidence
+interval of an already known frequency the argument replaces the ratio
+value for this frequency, otherwise a new entry for the frequency is
+created. Please note that setting the ratio for a new frequency only
+is in effect until the @code{EDL} script ends unless the function
+@ref{epr_modulation_store()} is called afterwards to make this setting
+permanent.
+
+
+@anchor{epr_modulation_phase()}
+@findex epr_modulation_phase()
+@item epr_modulation_phase()
+This function is for quering or setting the modulation phase for a
+certain calibration and frequency. The function must be called with
+at least two arguments, the name of the calibration (as a string) and
+a frequency that has already been assigned a field/voltage ratio.
+
+If no further argument is given the function returns the modulation
+phase for the calibration and frequency if possible. This requires that
+the frequency matches one of the known frequencies within the confidence
+interval (as set in the configuration file for the module) and that
+a modulattion phase is known for this calibration and frequency. Otherwise
+an exception is thrown.
+
+If there's nother argument this is taken to be a modulation phase.
+This requires that a ration already has been set for the frequency
+given as the second argument (or for a frequency within the confidence
+interval). Please note that setting the phase for a new frequency only
+is in effect until the @code{EDL} script ends unless the function
+@ref{epr_modulation_store()} is called afterwards to make this setting
+permanent.
+
+
+@anchor{epr_modulation_has_phase()}
+@findex epr_modulation_has_phase()
+@item epr_modulation_has_phase()
+The function allows to query if a modulation phase for a certain
+calibration and (known) frequency is known. It takes two arguments, the
+name of the calibration (as a string) and a frequency. If the frequency is
+within the confidence interval of one of the known modulation
+frequencies and a phase is known for this frequency the function returns
+@code{1}, otherwise @code{0}.
+
+
+@anchor{epr_modulation_calibration_interpolate()}
+@findex epr_modulation_calibration_interpolate()
+@item epr_modulation_calibration_interpolate()
+The function allows to either query or set if interpolation (for
+modulation field to voltage ratios) is allowed for a certain
+calibration. The function expects at least one argument, the name
+of the calibration (as a string). If there's no further argument
+the function returns @code{1} if interpolation is allowed for
+the calibration, otherwise @code{0}.
+
+If there's another argument it must be of boolean type, i.e.@: either
+@code{"ON"} or @code{1} to permit interpolation or @code{"OFF"} or
+@code{0} to disable interpolation. Please note that allowing
+interpolation does not guaqrantee that interpolation can be done since
+this also requires that there are at least 3 known frequencies and
+that the correlation coefficient of a least square fit is at least as
+large as set in the configuration file. Whether interpolation is
+possible for a certain calibration can be determined by calling the
+function @ref{epr_modulation_calibration_can_interpolate()}. Please
+note also that allowing or disabling intrepolation for a calibration
+only is in effect until the @code{EDL} script ends unless the function
+@ref{epr_modulation_store()} is called afterwards to make this setting
+permanent.
+
+
+@anchor{epr_modulation_calibration_can_interpolate()}
+@findex epr_modulation_calibration_can_interpolate()
+@item epr_modulation_calibration_can_interpolate()
+This function allows to determine if interpolation is possible for
+a calibration. The function requires a single rgument, the name of
+the calibration (as a string). Itt returns @code{1} if interpolation
+can be done, otherwise @code{0}. Interpolation is possible if it's
+allowed for the calibration, ratios for at least 3 frequencies are
+known and the correlation coefficient for a least square fit is
+at least as large as set in the configuration file for the device.
+
+
+@anchor{epr_modulation_calibration_extrapolate()}
+@findex epr_modulation_calibration_extrapolate()
+@item epr_modulation_calibration_extrapolate()
+The function allows to query or set if extrapolation (for modulation
+field to voltage ratios) is allowed for a certain calibration. The
+function expects at least one argument, the name of the calibration
+(as a string). If there's no further argument the function returns
+@code{1} if extrapolation is allowed for the calibration, otherwise
+@code{0}.
+
+If there's another argument it must be of boolean type, i.e.@: either
+@code{"ON"} or @code{1} to permit extrapolation or @code{"OFF"} or
+@code{0} to disable extrapolation. Please note that allowing
+extrapolation does not gurantee that extrapolation can be done since
+this also requires that there are at least 3 known frequencies and
+that the correlation coefficient of the least square fit is at least
+as large as set in the configuration file. Whether extrapolation is
+possible for a certain calibration can be determined by calling the
+function @ref{epr_modulation_calibration_can_extrapolate()}. Please
+note also that allowing or disabling intrepolation for a calibration
+only is in effect until the @code{EDL} script ends unless the function
+@ref{epr_modulation_store()} is called afterwards to make this setting
+permanent.
+
+
+@anchor{epr_modulation_calibration_can_extrapolate()}
+@findex epr_modulation_calibration_can_extrapolate()
+@item epr_modulation_calibration_can_extrapolate()
+This function allows to determine if extrapolation is possible for a
+calibration. The function requires a single rgument, the name of the
+calibration (as a string). Itt returns @code{1} if extrapolation can
+be done, otherwise @code{0}. Extrapolation is possible if it's allowed
+for the calibration, ratios for at least 3 frequencies are known and
+the correlation coefficient for the least square fit is at least as
+large as set in the configuration file for the device.
+
+
+@anchor{epr_modulation_add_calibration()}
+@findex epr_modulation_add_calibration()
+@item epr_modulation_add_calibration()
+This function allows to create an new calibration (i.e.@: a data
+structure that represents informations about a calibration). IIt
+expects a single arguemnt, the name of the new calibration (as a
+string). Informations for this calibration can be set by the functions
+listed above. Please note that creating a new calibration and setting
+properties only is in effect until the @code{EDL} script ends unless
+the function @ref{epr_modulation_store()} is called afterwards to make
+this setting permanent.
+
+
+@anchor{epr_modulation_delete_calibration()}
+@findex epr_modulation_delete_calibration()
+@item epr_modulation_delete_calibration()
+This function allows to delete a calibration and all its properties.
+The function tales a single argument, the name of the calibration to
+delete (as a string). Please note that deleting a calibration only is
+in effect until the @code{EDL} script ends unless the function
+@ref{epr_modulation_store()} is called afterwards to make this setting
+permanent.
+
+
+@anchor{epr_modulation_calibration_count()}
+@findex epr_modulation_calibration_count()
+@item epr_modulation_calibration_count()
+This function takes no arguments and returns the number of known
+calibrations.
+
+
+@anchor{epr_modulation_calibration_name()}
+@findex epr_modulation_calibration_name()
+@item epr_modulation_calibration_name()
+This function allows to find the name of a calibration by its index in
+the list of calibrations (a number between @code{1} and the number of
+known calibrations). The function takes a single argument, the
+calibration's index (an invalid index will result in an exception
+getting thrown and the experiment bein aborted). The function can be
+used in conjunction with the @ref{epr_modulation_calibration_count()}
+to obtain the names of all known calibrations.
+
+
+@anchor{epr_modulation_calibration_frequencies()}
+@findex epr_modulation_calibration_frequencies()
+@item epr_modulation_calibration_frequencies()
+This function returns an array of all frequencies known for a certain
+calibration (in ascending order). It takes a single argument, the name
+of a calibration (as a string).
+
+
+@anchor{epr_modulation_store()}
+@findex epr_modulation_store()
+@item epr_modulation_store()
+This function takes no arguments and must be called to make changes to
+the settings for all calibrations permanent - without calling this
+function changes are discarded once the running @code{EDL} script
+ends.
+
+
+@end table

@@ -193,6 +193,11 @@ comp_modules    += oriel_matrix
 endif
 
 
+ifdef WITH_FFT
+simp_modules    += fft
+endif
+
+
 src_headers     := $(addprefix $(sdir)/,$(headers)) $(sdir)/fsc2_module.h
 
 INCLUDES        += -I$(sdir) -I$(cdir)

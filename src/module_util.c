@@ -105,7 +105,7 @@ too_many_arguments( Var_T * v )
     if ( v == NULL || ( v = vars_pop( v ) ) == NULL )
         return;
 
-    print( WARN, "Too many arguments, discarding superfluous arguments.\n",
+    print( WARN, "Too many arguments, discarding superfluous argument%s.\n",
            v->next != NULL ? "s" : "" );
 
     while ( ( v = vars_pop( v ) ) != NULL )

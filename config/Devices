@@ -206,6 +206,11 @@ smsmotor
 ffc;
 
 
+// FFT pseudo-module
+
+fft;
+
+
 /*
  * Local variables:
  * tab-width: 4

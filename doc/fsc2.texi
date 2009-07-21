@@ -92,6 +92,7 @@ and lots of further topics.
 * EDL::                         Description of the @code{EDL} language
 * Built-in Functions::          Description of all built-in functions
 * Device Functions::            Description of functions for accessing devices
+* Other Modules::               Modules for additional functionalities
 * Using Pulsers::               How to work with the pulsers
 * Example EDL Scripts::         A set of example scripts
 * Command Line Options::        How to invoke @code{fsc2}
@@ -143,6 +144,7 @@ translation approved by the Free Software Foundation.
 @include edl.texi
 @include builtins.texi
 @include devices.texi
+@include other_modules.texi
 @include pulser.texi
 @include examples.texi
 @include cmd.texi

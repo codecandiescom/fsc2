@@ -1,0 +1,43 @@
+DEVICES:
+
+fft;
+
+VARIABLES:
+
+N = 400;
+M = 200;
+a[ N ];
+b[ 2, N / 2 + 1 ];
+c[ * ];
+I;
+
+PREPARATIONS:
+
+init_1d( 4, 0, 0, 1.0 );
+
+EXPERIMENT:
+
+FOR I = 1 : N {
+//	a[ I ] =   cos( 5 * 2 * 3.1415 * ( I - 0.5 ) / float( N ) )
+//	         + sin( 3 * 2 * 3.1415 * ( I - 0.5 ) / float( N ) );
+//	a[ I ] = exp( - ( ( I - M ) / ( 0.07 * M ) )^2 );
+}
+
+//a = lin_space( 1, -1, N );
+
+a = -1;
+//a[ N / 2 ] = 0;
+a[ N / 2 + 1 : N ] = 1;
+
+//a = 1;
+//FOR I = 2 : N : 2 {
+//	a[ I ] = -1;
+//}
+
+
+b = fft_real( a );
+print( "\T# #\n", size( b[ 1 ] ), size( fft_real( b ) ) );
+c = fft_real( b );
+
+//display_1d( 1, b[ 1 ], 1, 1, b[ 2 ], 2 );
+display_1d( 1, a, 1, 1, c, 2 );

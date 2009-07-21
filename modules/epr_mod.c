@@ -171,7 +171,7 @@ epr_modulation_ratio( Var_T * v )
 
         if ( res->r2 < EPR_MOD_MIN_REGRESSION )
         {
-            print( FATAL, "Correlation coefficient to small for doing "
+            print( FATAL, "Correlation coefficient too small for doing "
                    "inter- or extrapolation.\n" );
             THROW( EXCEPTION );
         }
@@ -320,16 +320,9 @@ epr_modulation_add_calibration( Var_T * v )
 	for ( i = 0; i < epr_mod.count; i++ )
 		if ( ! strcmp( epr_mod.calibrations[ i ].name, v->val.sptr ) )
 		{
-			res = epr_mod.calibrations + i;
-			break;
+            print( FATAL, "Calibration entry with name '%s' already exists.\n",
+                   v->val.sptr );
 		}
-
-	if ( res != NULL )
-	{
-		print( FATAL, "Calibration entry with name '%s' already exists.\n",
-               v->val.sptr );
-		THROW( EXCEPTION );
-	}
 
 	TRY
 	{

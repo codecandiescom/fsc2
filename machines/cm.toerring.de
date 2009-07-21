@@ -32,6 +32,7 @@ medriver_incl_path   := /usr/local/include/medriver
 medriver_lib_path    := /usr/lib/local
 #WITH_LIBUSB_0_1      := yes
 WITH_LIBUSB_1_0      := yes
+WITH_FFT             := yes
 #NO_MAIL              := yes
 MAIL_ADDRESS         := jt@toerring.de
 BROWSER              := /usr/bin/firefox 

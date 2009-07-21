@@ -521,6 +521,14 @@ freq_contr_name, 0, ALL;
 freq_contr_change_freq, 1, EXP;
 
 
+/* Functions exported by the FFT pseudo-module */
+
+fft_name, 0, ALL;
+fft_real, -1, ALL;
+fft_power_spectrum, -1, ALL;
+fft_complex, -1, ALL;
+
+
 /*
  * Local variables:
  * tab-width: 4
