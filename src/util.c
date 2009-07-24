@@ -692,9 +692,11 @@ handle_escape( char * str )
 
 FILE *
 filter_edl( const char * name,
-            FILE       * fp )
+            FILE       * fp,
+            int        * serr )
 {
     int pd[ 2 ];
+    int ed[ 2 ];
     int pdt[ 2 ];
     fd_set rfds;
     int rs;
@@ -706,6 +708,16 @@ filter_edl( const char * name,
 
     if ( pipe( pd ) == -1 )
     {
+        if ( errno == EMFILE || errno == ENFILE )
+            print( FATAL, "Starting the test procedure failed, running out "
+                   "of system resources.\n" );
+        return NULL;
+    }
+
+    if ( pipe( ed ) == -1 )
+    {
+        close( pd[ 0 ] );
+        close( pd[ 1 ] );
         if ( errno == EMFILE || errno == ENFILE )
             print( FATAL, "Starting the test procedure failed, running out "
                    "of system resources.\n" );
@@ -726,6 +738,8 @@ filter_edl( const char * name,
     {
         close( pd[ 0 ] );
         close( pd[ 1 ] );
+        close( ed[ 0 ] );
+        close( ed[ 1 ] );
         if ( errno == EMFILE || errno == ENFILE )
             print( FATAL, "Starting the test procedure failed, running out "
                    "of system resources.\n" );
@@ -736,6 +750,8 @@ filter_edl( const char * name,
     {
         close( pd[ 0 ] );
         close( pd[ 1 ] );
+        close( ed[ 0 ] );
+        close( ed[ 1 ] );
         close( pdt[ 0 ] );
         close( pdt[ 1 ] );
         if ( errno == ENOMEM || errno == EAGAIN )
@@ -765,9 +781,11 @@ filter_edl( const char * name,
         lseek( fileno( fp ), 0, SEEK_SET );      /* paranoia... */
 
         close( pd[ 0 ] );
+        close( ed[ 0 ] );
 
         if (    dup2( fileno( fp ), STDIN_FILENO ) == -1
-             || dup2( pd[ 1 ], STDOUT_FILENO ) == -1 )
+             || dup2( pd[ 1 ], STDOUT_FILENO ) == -1
+             || dup2( ed[ 1 ], STDERR_FILENO ) == -1 )
         {
             if ( errno == EMFILE )
                 w = write( pd[ 1 ], "\x03\nStarting the test procedure failed, "
@@ -778,12 +796,14 @@ filter_edl( const char * name,
 
             fclose( fp );
             close( pd[ 1 ] );
+            close( ed[ 1 ] );
 
             goto filter_failure;
         }
 
         fclose( fp );
         close( pd[ 1 ] );
+        close( ed[ 1 ] );
 
         if ( Fsc2_Internals.cmdline_flags & ( DO_CHECK | LOCAL_EXEC ) )
         {
@@ -807,15 +827,16 @@ filter_edl( const char * name,
     }
 
     /* And finally the code for the parent: first thing to do is to send a
-       single byte to the child so it knows we already have its PID. */
+       single byte to the child so it knows we have its PID. */
 
     close( pdt[ 0 ] );
-    w = write( pdt[ 1 ], &c, 1);
+    w = write( pdt[ 1 ], &c, 1 );
     close( pdt[ 1 ] );
 
-    /* Close write side of the important pipe, we're only going to read */
+    /* Close write side of the pipes, we're only going to read */
 
     close( pd[ 1 ] );
+    close( ed[ 1 ] );
 
     /* Wait until the child process had a chance to write to the pipe. If the
        parent is too fast in trying to read on it it only may see an EOF. */
@@ -836,8 +857,11 @@ filter_edl( const char * name,
             fsc2_impossible( );
 #endif
         close( pd[ 0 ] );
+        close( ed[ 0 ] );
         return NULL;
     }
+
+    *serr = ed[ 0 ];
 
     return fdopen( pd[ 0 ], "r" );
 }

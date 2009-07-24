@@ -400,7 +400,6 @@ experiment_parser( FILE * in )
 
     EDL.prg_length = 0;
     store_exp( in );
-    exp_test_run( );
 
     if ( Exp_next_section != NO_SECTION )
     {

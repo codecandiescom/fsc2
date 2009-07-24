@@ -97,7 +97,7 @@ static const char *get_construct_name( int token_type );
 
 /*---------------------------------------------------------------------------*
  * This routine stores the experiment section of an EDL file in the form
- * of tokens together with their semantic values as returned by the
+ * of tokens, together with their semantic values as returned by the
  * lexer. This is necessary for two reasons: First, the experiment section
  * may contain loops. Without having the EDL program stored internally it
  * would be rather difficult to run through the loops since we would have
@@ -118,8 +118,8 @@ static const char *get_construct_name( int token_type );
  *    lexer) in the array of program tokens, prg_token.
  * 2. While doing so it also does a few preliminay tests - it checks that
  *    opening and closing parentheses and braces match, BREAK and NEXT
- *  statements only appear in within loops and that THE ON_STOP statement
- *  isn't in a block or within parentheses or braces.
+ *    statements only appear in within loops and that THE ON_STOP statement
+ *    isn't in a block or within parentheses or braces.
  * 3. When done with storing the program it does everything needed to set up
  *    loops, if-else and unless-else constructs.
  * 4. Finally, a syntax check of the program is run. In this check the whole

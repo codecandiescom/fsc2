@@ -40,6 +40,7 @@
 #include <sys/types.h>
 
 #include "fsc2_config.h"
+#include "sha1.h"
 
 
 #ifndef __cplusplus
@@ -103,12 +104,14 @@ static ssize_t output( const char * fmt,
 static void usage( void );
 
 
-long Lc,
-     Comm_Lc,
-     Incl_Lc,
-     Str_Lc;
-char *Fname;
-bool Eol;
+static long Lc,
+       Comm_Lc,
+       Incl_Lc,
+       Str_Lc;
+static char *Fname;
+static bool Eol;
+static SHA1Context context;
+static uint8_t digest[ SHA1HashSize ];
 
 
 /* The following declarations are to avoid unnecessary warnings from
@@ -207,12 +210,12 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 
             /* Drop characters used for internal purposes */
 
-\001        /* Indicates that next item is a file name */
-\002        /* Indicates that next item is a line number */
-\003        /* Indicates a fatal error */
-\004        /* Indicates a unit */
-\005        /* Indicates a start of string */
-\006        /* Indicates an end of string */
+\001        /* indicates that next item is a file name */
+\002        /* indicates that next item is a line number */
+\003        /* indicates a fatal error */
+\004        /* indicates a unit */
+\005        /* indicates start of a string */
+\006        /* indicates end of a string */
 
             /* Handling of string constants */
 \"          {
@@ -316,10 +319,10 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
                 output( "\n" );
             }
 
-            /* Reduces any amount of (other) white space to just one space */
+            /* Reduce any amount of (other) white space to just one space */
 {WS}        output( " " );
 
-            /* Writes out EOL character */
+            /* Increment line count and write out EOL character */
 \n          {
                 Lc++;
                 Eol = SET;
@@ -333,7 +336,16 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
             }
 
             /* "#QUIT" means that all following input is to be discarded */
-{QUIT}      exit( EXIT_SUCCESS );
+{QUIT}      {
+                /* Write SHA1 hash of output to stderr */
+
+                SHA1Result( &context, digest );
+                if ( write( STDERR_FILENO, digest, SHA1HashSize )
+                                                               != SHA1HashSize )
+                    exit( EXIT_FAILURE );
+
+    			exit( EXIT_SUCCESS );
+            }
 
             /* Handling of lines starting with "#INCLUDE" */
 {INCL}      {
@@ -349,8 +361,8 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 
             /*  Handling of file name */
 {IFN}       {
-                register char *q = yytext + yyleng - 1,
-                              *p = yytext;
+                char *q = yytext + yyleng - 1,
+                     *p = yytext;
 
                 if ( *q == '\n' )
                 {
@@ -469,6 +481,10 @@ main( int    argc,
 
     Prog_Name = argv[ 0 ];
 
+    /* Initialize SHA1 calculation */
+
+    SHA1Init( &context );
+
     if ( argc < 2 )
     {
         yyin = stdin;
@@ -520,65 +536,47 @@ main( int    argc,
     Lc = 1;
     Eol = SET;
 
-    /* Now try to clean up the input and output appropriate error messages
-       if there are problems */
+    /* Now try to clean up the input, output appropriate error messages if
+       there should be problems */
 
     TRY
     {
         yylex( );
-        TRY_SUCCESS;
+
+        yylex_destroy( );
+
+        /* Calculate and write out (to stderr) the SHA1 digest of the data */
+
+        SHA1Result( &context, digest );
+        if ( write( STDERR_FILENO, digest, SHA1HashSize ) != SHA1HashSize )
+            return EXIT_FAILURE;
+
+        /* Finished succesfully... */
+
+        return EXIT_SUCCESS;
     }
     CATCH( OUT_OF_MEMORY_EXCEPTION )
-    {
-        yylex_destroy( );
         output( "\x03\n%s:%ld: Running out of memory.\n", Fname, Lc );
-        exit( EXIT_FAILURE );
-    }
     CATCH( TOO_DEEPLY_NESTED_EXCEPTION )
-    {
-        yylex_destroy( );
         output( "\x03\n%s:%ld: Include levels too deeply nested.\n",
                 Fname, Lc );
-        exit( EXIT_FAILURE );
-    }
     CATCH( EOF_IN_COMMENT_EXCEPTION )
-    {
-        yylex_destroy( );
         output( "\x03\n%s: End of file in comment starting at line %ld.\n",
                 Fname, Comm_Lc );
-        exit( EXIT_FAILURE );
-    }
     CATCH( EOF_IN_STRING_EXCEPTION )
-    {
-        yylex_destroy( );
         output( "\x03\n%s: End of line in string constant starting at "
                 "line %ld.\n", Fname, Str_Lc );
-        exit( EXIT_FAILURE );
-    }
     CATCH( DANGLING_END_OF_COMMENT )
-    {
-        yylex_destroy( );
         output( "\x03\n%s: End of comment found in program text at "
                 "line %ld.\n", Fname, Lc );
-        exit( EXIT_FAILURE );
-    }
     CATCH( MISPLACED_SHEBANG )
-    {
-        yylex_destroy( );
         output( "\x03\n%s: '#!' must appear on the very first line instead of "
                 "line %ld.\n", Fname, Lc );
-    }
     OTHERWISE
-    {
-        yylex_destroy( );
-        exit( EXIT_FAILURE );
-    }
+        output( "\x03\n%s: Unknown error at line %ld.\n", Fname, Lc );
 
     yylex_destroy( );
-
-    /* Finished succesfully... */
-
-    return EXIT_SUCCESS;
+    return EXIT_FAILURE;
 }
 
 
@@ -707,6 +705,13 @@ include_handler( char * file )
         if ( incl_depth == -1 )
         {
             T_free( Fname );
+
+            /* Write SHA1 hash of output to stderr */
+
+            SHA1Result( &context, digest );
+            if ( write( STDERR_FILENO, digest, SHA1HashSize ) != SHA1HashSize )
+                exit( EXIT_FAILURE );
+
             exit( EXIT_SUCCESS );
         }
         else
@@ -1009,6 +1014,13 @@ output( const char * fmt,
         bytes_to_write -= last_written;
         total_bytes_written += last_written;
     }
+
+    /* Add output to the SHA1 hash data (unless the line starts with 0x01,
+       in which case it's a file name and names are insignificant and
+       vary variable) */
+
+    if ( *c != 0x01 )
+        SHA1Input( &context, ( uint8_t * ) c, total_bytes_written );
 
     return total_bytes_written;
 }

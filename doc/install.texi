@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Installation, Device Reference, Modules, fsc2
+@node Installation, Device Reference, Writing Modules, fsc2
 @appendix Installation
 
 @ifnottex
@@ -84,13 +84,13 @@ server (which also requires the next two utilities) and the utility for
 displaying pulse settings graphically won't work.
 
 If you want to compile the module for Fast Fourier Transformation
-you will need the @url{http://www.fftw.org/,FFTW library}. Make sure
-you install version 3 of the library!
+you will need the @url{http://www.fftw.org/,FFTaW library}. Make sure
+to install version 3 of the library!
 
 To create the complete documentation beside Perl you also need:
 @table @samp
 @item @code{makeinfo} and @code{install-info}
-the @uref{http://www.gnu.org/software/texinfo/GNU texinfo}
+the @uref{http://www.gnu.org/software/texinfo/,GNU texinfo}
 documentation format
 @item @code{TeX}
 The @uref{http://www.ctan.org/,TeX typesetting system} - if missing no
@@ -126,6 +126,13 @@ installed in your machine (if you don't have a GPIB card @code{fsc2} can
 also compiled without GPIB support, but many of the devices will then be
 not usable). You can choose between the following ones:
 @table @samp
+@item SourceForge driver and library
+This is the successor to the Linux Lab Project library and drivers. It
+exists in versions for 2.4 and 2.6 kernels and supports an impressive
+number of different GPIB cards and I would recommend youtry this
+first. You can download it from
+@url{http://linux-gpib.sourceforge.net/}
+
 @item National Instruments driver and library
 There exist two versions of the library if have been trying. The
 older, beta driver and library (version 0.86) works fine, but only
@@ -141,13 +148,7 @@ from the @uref{http://www.natinst.com/,National Instruments web site}.
 @item Linux Lab Project driver and library
 This is a very old driver (only working with 2.0 kernels) and library,
 so you probably don't really want to use it anymore. I don't even know
-ifit can be downloaded anymore.
-
-@item SourceForge driver and library
-This is the successor to the Linux Lab Project library and drivers. It
-exists in versions for 2.4 and 2.6 kernels and supports an impressive
-number of different GPIB cards. You can download it from
-@url{http://linux-gpib.sourceforge.net/}
+if it can still be downloaded...
 
 @item my own driver and library
 This driver and library should work for 2.0 to 2.6 kernels and supports
@@ -165,12 +166,12 @@ file all devices to be used with must be listed with their respective
 properties.
 
 
-For the National Instruments libraries such a configuration file isn't
-needed, but @code{fsc2} does require it to find out about the available
-devices. So you have to create one, following the conventions used in
-the configuration files for the Linux Lab Project library, which I also
-(mostly) used for my library. A typical entry in this file looks like
-the following
+For the National Instruments libraries itself such a configuration
+file isn't needed, but @code{fsc2} does require it to find out about
+the available devices. So you have to create one, following the
+conventions used in the configuration files for the Linux Lab Project
+library, which I also (mostly) used for my library. A typical entry in
+this file looks like the following
 @example
 device @{
         name        = "TDS744A"   /* symbolic name */
@@ -184,23 +185,25 @@ device @{
 @}
 @end example
 @noindent
-It specifies a symbolic name for the device, the primary GPIB address (you may
-also specify a secondary GPIB address, following the keyword 'sad'), the
-timeout to be used for communication with the device and a few more settings
-controlling the determination of the end of messages send to and read from the
-device. 'eos' is the character to be used as the end of transmission (EOS)
-character (none has to be set when no such character is to be used). When
-'set-reos' is set he driver stops reading from a device whenever the EOS
-character is encountered in the message, even when the EOI line did not get
-raised while receiving the EOS character. When 'set-xeos' is set the EOI line
-is automatically raised when the EOS character is found in a message send to
-the device (even when there are more characters in the message). Setting
-'set-bin' will make the driver check all 8 bits of each character for identity
-with the EOS character, while, when unset, only the lower 7 bits are tested
-(the top-most bit is excluded from the comparison).  Finally, setting
-'set-eot' makes the driver raise the EOI line automatically with the last byte
-of a message send to a device (which is also the default), while unsetting it
-will keep the driver from doing so.
+It specifies a symbolic name for the device, the primary GPIB address
+(you may also specify a secondary GPIB address, following the keyword
+'sad'), the timeout to be used for communication with the device and a
+few more settings controlling the determination of the end of messages
+send to and read from the device. 'eos' is the character to be used as
+the end of transmission (EOS) character (none has to be set when no
+such character is to be used). When 'set-reos' is set he driver stops
+reading from a device whenever the EOS character is encountered in the
+message, even when the EOI line did not get raised while receiving the
+EOS character. When 'set-xeos' is set the EOI line is automatically
+raised when the EOS character is found in a message send to the device
+(even when there are more characters in the message). Setting
+'set-bin' will make the driver check all 8 bits of each character for
+identity with the EOS character, while, when unset, only the lower 7
+bits are tested (the top-most bit is excluded from the comparison).
+Finally, setting 'set-eot' makes the driver raise the EOI line
+automatically with the last byte of a message send to a device (which
+is also the default), while unsetting it will keep the driver from
+doing so.
 
 Beside the entries for the devices another one for the GPIB board itself
 is required:
@@ -214,10 +217,10 @@ device @{
 @}
 @end example
 @noindent
-Here a symbolic name and the primary and secondary GPIB address are set
-for the board. The 'master' flag tells the driver that the board is the
-device controlling the GPIB bus and 'file' sets the name of the device
-file used for the board.
+Here a symbolic name and the primary and secondary GPIB address are
+set for the board. The 'master' flag tells the driver that the board
+is the device controlling the GPIB bus and 'file' sets the name of the
+device file used for the board.
 
 Please make sure that the GPIB library you want to use is already
 compiled and installed @strong{before} trying to compile @code{fsc2}
@@ -233,7 +236,7 @@ set in the configuration for @code{fsc2}).
 
 Devices using USB-serial converters can be used as far there's support
 in kernel for them (in that case they can be used like a normal serial
-port devices).
+port device).
 
 Other USB-controlled devices can be used via the
 @url{http://libusb.wiki.sourceforge.net/,libusb} package, either
@@ -243,7 +246,7 @@ Devices controlled via LAN can be used if you have a network card and
 networking support enabled in the kernel (which it usually is).
 
 Also devices that are ISA or PCI cards (or connected to dedicated ISA
-or PCI card) or that re controlled via the Rulbus (Rijksuniversiteit
+or PCI card) or that are controlled via the Rulbus (Rijksuniversiteit
 Leiden BUS) can be used. All of those require additional libraries and
 kernel drivers to be installed prior to building @code{fsc2}. If these
 come from the makers of the device (e.g.@: Roper Scientific Spec-10

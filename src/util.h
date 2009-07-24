@@ -57,7 +57,8 @@ void lower_permissions( void );
 char *handle_escape( char * /* str */ );
 
 FILE *filter_edl( const char * /* name */,
-                  FILE *       /* fp   */  );
+                  FILE *       /* fp   */,
+                  int *        /* serr */ );
 
 int fsc2_usleep( unsigned long /* us_dur         */,
                  bool          /* quit_on_signal */  );

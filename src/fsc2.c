@@ -377,6 +377,8 @@ globals_init( const char * pname )
     GUI.is_init = UNSET;
 
     G.color_hash = NULL;
+
+    digest_init( );
 }
 
 
@@ -1210,6 +1212,10 @@ final_exit_handler( void )
         kill( Fsc2_Internals.http_pid, SIGTERM );
 
     fsc2_save_conf( );
+
+    /* Safe digests of new, error-free EDL scripts */
+
+    digest_at_exit( );
 
     /* Do everything necessary to end the program */
 
@@ -2072,6 +2078,7 @@ void main_sig_handler( int signo )
                     Fsc2_Internals.fsc2_clean_pid = 0;
                     Fsc2_Internals.fsc2_clean_died = SET;
                     Fsc2_Internals.fsc2_clean_status_ok = WIFEXITED( status );
+                    Fsc2_Internals.fsc2_clean_status = WEXITSTATUS( status );
                 }
             }
             errno = errno_saved;

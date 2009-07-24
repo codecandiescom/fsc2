@@ -28,7 +28,7 @@ c_sources      = fsc2.c xinit.c pulser.c util.c exceptions.c variables.c     \
 				 mail.c ipc.c print.c serial.c lan.c graphics.c              \
 				 graphics_edl.c graph_handler_1d.c graph_handler_2d.c        \
 				 graph_cut.c bugs.c fsc2_assert.c dump.c module_util.c       \
-				 fsc2d.c global.c help.c edit.c
+				 fsc2d.c global.c help.c edit.c sha1.c digest.c
 ifdef WITH_HTTP_SERVER
 c_sources     += http.c dump_graphic.c
 endif
@@ -99,7 +99,7 @@ fsc2: $(objects)
 
 # Make the primary lexer (which does the cleanup of the input EDL files)
 
-fsc2_clean: fsc2_clean.o exceptions.o
+fsc2_clean: fsc2_clean.o exceptions.o sha1.o
 	$(CC) -o $@ $^ -lm
 
 
@@ -209,6 +209,18 @@ endif
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_load
 	$(LN) $(LNFLAGS) $(bindir)/fsc2_connect $(bindir)/fsc2_iconic_start
 
+	$(RM) $(RMFLAGS) $(libdir)/Digests
+	touch $(libdir)/Digests
+ifdef ONLY_SETGID
+	chgrp $(GROUP) $(libdir)/Digests
+else
+ifdef ONLY_SETUID
+	chown $(OWNER) $(libdir)/Digests
+else
+	chgrp $(GROUP) $(libdir)/Digests
+	chown $(OWNER) $(libdir)/Digests
+endif
+endif
 
 uninstall:
 	$(RM) $(RMFLAGS) $(bindir)/fsc2 $(bindir)/fsc2_clean           \

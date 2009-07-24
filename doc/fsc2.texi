@@ -99,7 +99,7 @@ and lots of further topics.
 * GUI-fying::                   How to add a GUI to an @code{EDL} script
 * Cloning Devices::             Creating modules for identical devices
 * Internals::                   How @code{fsc2} works internally
-* Modules::                     How to create new modules
+* Writing Modules::             How to write new modules
 * Installation::                How to install the program
 * Device Reference::            List of devices and their functions
 * Reserved Words::              List of all reserved words

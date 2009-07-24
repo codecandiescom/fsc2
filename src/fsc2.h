@@ -117,6 +117,8 @@
 #include "func_intact_m.h"
 #include "lan.h"
 #include "conn.h"
+#include "sha1.h"
+#include "digest.h"
 #if defined WITH_HTTP_SERVER
 #include "dump_graphic.h"
 #include "http.h"
@@ -205,8 +207,9 @@ struct Internals {
     gid_t EGID;                  /* started with */
 
     pid_t fsc2_clean_pid;
-    volatile sig_atomic_t fsc2_clean_status_ok;
     volatile sig_atomic_t fsc2_clean_died;
+    volatile sig_atomic_t fsc2_clean_status;
+    volatile sig_atomic_t fsc2_clean_status_ok;
 
     pid_t child_pid;             /* pid of child process doing the
                                     measurement */
@@ -267,6 +270,8 @@ struct EDL_Info {
     Compilation_T compilation;   /* structure with infos about compilation
                                     states and errors (see also global.h) */
     Prg_Token_T *prg_token;      /* array of predigested program tokens */
+
+    bool needs_test_run;         /* set if full test run is required */
 
     long prg_length;             /* number of array elements in predigested
                                     program (negative value indicates that

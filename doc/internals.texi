@@ -18,7 +18,7 @@
 @c  Boston, MA 02111-1307, USA.
 
 
-@node Internals, Modules, Cloning Devices, fsc2
+@node Internals, Writing Modules, Cloning Devices, fsc2
 @chapter Internals
 
 
@@ -106,8 +106,9 @@ really sees of an @code{EDL} file you can run @code{fsc2_clean} with the
 fsc2_clean < edl_script.edl
 @end example
 @noindent
-(please note that the output of @code{fsc2_clean} program contains some
-non-printable characters).
+Please note that the output of @code{fsc2_clean} program contains some
+non-printable characters. Moreover it writes the SHA1 hash value to
+@code{stderr} for what it did output when successfully done.
 
 
 The lines of @code{EDL} script in the sections preceeding the
@@ -277,21 +278,33 @@ not make the program sleep for the requested time, no graphics are
 drawn etc.
 
 
-The writers of modules have an important responsibility to make running
-the test run possible. During the test run the devices can't be
-accessed. Despite that the modules have to deal in a reasonable way with
-requests for returning data from the devices. Thus the modules must,
-during the test run, "invent" data for the real ones. This can be a bit
-tricky and special care must be taken to insure that these "invented"
-data are consistent. For example, if a module for a lock-in amplifier
-first gets asked for the sensitivity setting and then for measured data
-it may not return data that represent voltages larger than the
-sensitivity setting it "invented". There may even be situations where
-the module has no chance to find out if the arguments it gets passed for
-a function are acceptable without determining the real state of the
-device. If possible, incidents like this should be stored by the module
-and the module should test at the time of device initialization if these
-arguments were really acceptable and, if not, stop the experiment.
+Of course, running a complete test of an experiment can be a bit time
+consuming. Thus a test run is only done for the first time a new
+@code{EDL} script is analyzed. @code{fsc2} keeps a kind of database of
+scripts it already has tested successfully, thus it can avoid re-doing
+tests if not necessary. (Actually, @code{fsc2} calculates the SHA1
+hash of a script after it has been run through the @code{fsc2_clean}
+utility and stores the SHA1 keys of all scripts in the file
+@file{/usr/local/lib/fsc2/Digests} that successfully made it through
+the test run. Scripts listed in there won't get tested fully again.)
+
+
+The writers of modules have an important responsibility to make
+running the test run possible. During the test run the devices can't
+be accessed. Despite that the modules have to deal with requests for
+data to be returned from the devices in a reasonable way. Thus the
+modules must, during the test run, "make up" data for the real ones.
+This can be a bit tricky and special care must be taken to insure that
+these "invented" data are consistent. For example, if a module for a
+lock-in amplifier first gets asked for the sensitivity setting and
+then for measured data it may not return data that represent voltages
+larger than the sensitivity setting it "invented". There may even be
+situations where the module has no chance to find out if the arguments
+it gets passed for a function are acceptable without determining the
+real state of the device. If possible, incidents like this should be
+stored by the module and the module should test at the time of device
+initialization if these arguments were really acceptable and, if not,
+stop the experiment.
 
 
 A typical example of this case are the settings for a "window" for the

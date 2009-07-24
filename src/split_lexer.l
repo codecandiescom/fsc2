@@ -182,7 +182,12 @@ scan_main( const char * name,
            FILE       * fp )
 {
     bool split_error;
+    int d_fd;
+    bool is_digest = UNSET;
+    Digest_T digest;
 
+
+    CLOBBER_PROTECT( split_error );
 
     fsc2_assert( fp != NULL );
 
@@ -195,28 +200,29 @@ scan_main( const char * name,
     if ( ! functions_init( ) || ! device_list_parse( ) )
         return FAIL;
 
-    /* Setting the program length to -1 means that no EXPERIMENT section has
-       been found yet. */
+    /* A program length of -1 indicates that no EXPERIMENT section has been
+       found yet. */
 
     EDL.prg_length = -1;
 
     /* Make the lexer read its input from the output of fsc2_clean */
 
     Fsc2_Internals.fsc2_clean_died = UNSET;
-    if ( ( splitin = filter_edl( name, fp ) ) == NULL )
+    if ( ( splitin = filter_edl( name, fp, &d_fd ) ) == NULL )
     {
         Fsc2_Internals.fsc2_clean_died = SET;
         return FAIL;
     }
 
     /* The next rather simple looking line is were the predigested EDL file,
-       i.e. what we get back from fsc2_clean, is read in and tested for
+       i.e. what we got back from fsc2_clean, is read in and tested for
        syntactical correctness. The code of the EXPERIMENT section is stored
        in memory when the splitlex() function returns successfully. */
 
     split_error = ( bool ) splitlex( );
 
     fclose( splitin );
+
     splitlex_destroy( );
 
     while ( ! Fsc2_Internals.fsc2_clean_died )
@@ -227,6 +233,30 @@ scan_main( const char * name,
         print( FATAL, "Parsing the EDL script '%s' failed due to some "
                "internal problems.\n", name );
         split_error = FAIL;
+    }
+
+    /* Get the SHA1 digest for the EDL script if available */
+
+    if (    split_error == OK
+         && Fsc2_Internals.fsc2_clean_status == 0
+         && read( d_fd, digest, SHA1HashSize ) == SHA1HashSize )
+        is_digest = SET;
+
+    close( d_fd );
+
+    /* If there's no SHA1 digest or it's not known do a test run */
+
+    if ( ! is_digest || ( is_digest && ! digest_check_if_tested( digest ) ) )
+    {
+        TRY
+        {
+            exp_test_run( );
+            if ( is_digest )
+                digest_add( digest );
+            TRY_SUCCESS;
+        }
+        OTHERWISE
+            split_error = FAIL;
     }
 
     /* In case there was an error and the input file wasn't read until the
@@ -270,7 +300,7 @@ section_parser( int section )
     {
         do
         {
-            /* First run the appropriate lexer/parser combination */
+            /* Run the appropriate lexer/parser combination */
 
             switch ( section )
             {
