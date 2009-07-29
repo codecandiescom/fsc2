@@ -110,8 +110,8 @@ static long Lc,
        Str_Lc;
 static char *Fname;
 static bool Eol;
-static SHA1Context context;
-static uint8_t digest[ SHA1HashSize ];
+static SHA1_Context context;
+static unsigned char digest[ SHA1_HASH_SIZE ];
 
 
 /* The following declarations are to avoid unnecessary warnings from
@@ -339,9 +339,9 @@ KEEP     [^\t" \n(\/*),;:=%\^\-\+]+
 {QUIT}      {
                 /* Write SHA1 hash of output to stderr */
 
-                SHA1Result( &context, digest );
-                if ( write( STDERR_FILENO, digest, SHA1HashSize )
-                                                               != SHA1HashSize )
+                sha1_calculate( &context, digest );
+                if ( write( STDERR_FILENO, digest, SHA1_HASH_SIZE )
+                                                            != SHA1_HASH_SIZE )
                     exit( EXIT_FAILURE );
 
     			exit( EXIT_SUCCESS );
@@ -483,7 +483,7 @@ main( int    argc,
 
     /* Initialize SHA1 calculation */
 
-    SHA1Init( &context );
+    sha1_initialize( &context );
 
     if ( argc < 2 )
     {
@@ -547,8 +547,8 @@ main( int    argc,
 
         /* Calculate and write out (to stderr) the SHA1 digest of the data */
 
-        SHA1Result( &context, digest );
-        if ( write( STDERR_FILENO, digest, SHA1HashSize ) != SHA1HashSize )
+        sha1_calculate( &context, digest );
+        if ( write( STDERR_FILENO, digest, SHA1_HASH_SIZE ) != SHA1_HASH_SIZE )
             return EXIT_FAILURE;
 
         /* Finished succesfully... */
@@ -708,8 +708,9 @@ include_handler( char * file )
 
             /* Write SHA1 hash of output to stderr */
 
-            SHA1Result( &context, digest );
-            if ( write( STDERR_FILENO, digest, SHA1HashSize ) != SHA1HashSize )
+            sha1_calculate( &context, digest );
+            if ( write( STDERR_FILENO, digest, SHA1_HASH_SIZE )
+                                                            != SHA1_HASH_SIZE )
                 exit( EXIT_FAILURE );
 
             exit( EXIT_SUCCESS );
@@ -1016,11 +1017,11 @@ output( const char * fmt,
     }
 
     /* Add output to the SHA1 hash data (unless the line starts with 0x01,
-       in which case it's a file name and names are insignificant and
+       in which case it's a file name, and names are insignificant and
        vary variable) */
 
     if ( *c != 0x01 )
-        SHA1Input( &context, ( uint8_t * ) c, total_bytes_written );
+        sha1_add_data( &context, c, total_bytes_written );
 
     return total_bytes_written;
 }

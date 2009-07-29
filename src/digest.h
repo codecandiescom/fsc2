@@ -24,7 +24,7 @@
 #define DIGEST_HEADER
 
 
-typedef uint8_t Digest_T[ SHA1HashSize ];
+typedef uint8_t Digest_T[ SHA1_HASH_SIZE ];
 
 void digest_init( void );
 bool digest_check_if_tested( Digest_T digest );

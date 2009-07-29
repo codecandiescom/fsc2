@@ -1,86 +1,82 @@
 /*
- * The code in this file is taken (with minor modifications) from the
- * hashgen utility. It was written by Szabó Péter (pts@fazekas.hu,
- * http://www.inf.bme.hu/~pts/index__en.html), Department of Control
- * Engineering and Information Technology, Budapest University of
- * Technology and is available under the GPL either from the project
- * page at Freshmeat
+ *  Copyright (C) 1999-2009 Jens Thoms Toerring
  *
- * http://freshmeat.net/projects/hashgen
+ *  This file is part of fsc2.
  *
- * or directly from
+ *  Fsc2 is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * http://www.inf.bme.hu/~pts/hashgen-latest.tar.gz
+ *  Fsc2 is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with fsc2.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *  A lot of ideas for this SHA1 implementation came from the example
+ *  implementation from RFC 3174 by D. Eastlake, 3rd (Motorola) and P.
+ *  Jones (Cisco Systems), see e.g.
+ *
+ *  http://www.faqs.org/rfcs/rfc3174.html
+ *
+ *  The part for dealing with 64-bit numbers on systems that lack such
+ *  a type has directly been taken from code written by Paul Eggert,
+ *  and which is part of the GNU Coreutils in the file 'lib/u64.h'
+ *  and can be downloaded e.g. from
+ *
+ *  http://www.gnu.org/software/coreutils/
  */
 
-/*
- *  Description:
- *      This is the header file for code which implements the Secure
- *      Hashing Algorithm 1 as defined in FIPS PUB 180-1 published
- *      April 17, 1995.
- *
- *      Many of the variable names in this code, especially the
- *      single character names, were used because those were the names
- *      used in the publication.
- *
- *      Please read the file sha1.c for more information.
- */
 
+#if ! defined SHA1_HASH_HEADER_
+#define SHA1_HASH_HEADER_
 
-#if ! defined SHA1_HEADER
-#define SHA1_HEADER
-
-#include <stdint.h>
+#include "sha_types.h"
+#include <stdlib.h>
 #include <string.h>
 
-/* If you do not have the ISO standard stdint.h header file, then you
- * must typdef the following:
- *    name              meaning
- *  uint32_t         unsigned 32 bit integer
- *  uint8_t          unsigned 8 bit integer (i.e. unsigned char)
- */
-
-enum
-{
-    shaSuccess = 0,
-    shaNull,            /* Null pointer parameter */
-    shaInputTooLong,    /* input data too long */
-    shaStateError       /* called input after Result */
-};
-
-#define SHA1HashSize 20
+#define SHA1_HASH_SIZE        20
 
 
-/* This structure will hold context information for the SHA-1
- * hashing operation */
-
-typedef struct SHA1Context
-{
-    uint32_t Intermediate_Hash[ SHA1HashSize / 4 ]; /* message Digest */
-
-    uint32_t Length_Low;            /* message length in bits */
-    uint32_t Length_High;           /* message length in bits */
-
-    int Message_Block_Index;        /* index into message block array */
-    uint8_t Message_Block[ 64 ];    /* 512-bit message blocks */
-
-    int Computed;                   /* has the digest been computed? */
-    int Corrupted;                  /* is the message digest corrupted? */
-} SHA1Context;
+#if ! defined SHA_DIGEST_OK
+#define SHA_DIGEST_OK               0
+#endif
+#if ! defined SHA_DIGEST_INVALID
+#define SHA_DIGEST_INVALID_ARG      1
+#endif
+#if ! defined SHA_DIGEST_INPUT_TOO_LONG
+#define SHA_DIGEST_INPUT_TOO_LONG   2
+#endif
+#if ! defined SHA_DIGEST_NO_MORE_DATA
+#define SHA_DIGEST_NO_MORE_DATA     3
+#endif
 
 
-/* Function Prototypes */
+typedef struct {
+	sha_u32       H[ 5 ];
+    sha_u64       count;
+	unsigned char buf[ 64 ];
+	size_t        index;
+	int           is_calculated;
+	int           error;
+} SHA1_Context;
 
-int SHA1Init( SHA1Context * );
-int SHA1Input( SHA1Context *, const uint8_t *, unsigned int );
-int SHA1Result( SHA1Context *, uint8_t * );
 
+int sha1_initialize( SHA1_Context * context );
+int sha1_add_data( SHA1_Context * context,
+				   const void   * data,
+				   size_t         length );
+int sha1_calculate( SHA1_Context  * context,
+					unsigned char   digest[ SHA1_HASH_SIZE ] );
 
-#endif /* ! SHA1_HEADER */
+#endif /* ! SHA1_HASH_HEADER_ */
+
 
 /*
  * Local variables:
- * tags-file-name: "../TAGS"
  * tab-width: 4
  * indent-tabs-mode: nil
  * End:

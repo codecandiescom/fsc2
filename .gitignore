@@ -9,6 +9,8 @@
 *_parser.h
 *_parser.output
 *.bak
+#*
+.#*
 [Mm]akelog
 FcntlLock/FcntlLock.bs
 FcntlLock/FcntlLock.c

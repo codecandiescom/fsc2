@@ -164,7 +164,8 @@ parameters. The chapters (@pxref{Cloning Devices} tells how to deal
 with the case that you want to use two (or more) identical devices
 but there's only a single module for that type of device.
 
-The final two capters, @pxref{Internals} and @pxref{Modules}) first
-give you a short overview how @code{fsc2} works internally, which may
-help you when writing a new module (but is not required), and then
-explain in detail everything there is to know about writing new modules.
+The final two capters, @pxref{Internals} and @pxref{Writing Modules})
+first give you a short overview how @code{fsc2} works internally,
+which may help you when writing a new module (but is not required),
+and then explain in detail everything there is to know about writing
+new modules.

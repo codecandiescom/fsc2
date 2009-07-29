@@ -239,7 +239,7 @@ scan_main( const char * name,
 
     if (    split_error == OK
          && Fsc2_Internals.fsc2_clean_status == 0
-         && read( d_fd, digest, SHA1HashSize ) == SHA1HashSize )
+            && read( d_fd, digest, SHA1_HASH_SIZE ) == SHA1_HASH_SIZE )
         is_digest = SET;
 
     close( d_fd );

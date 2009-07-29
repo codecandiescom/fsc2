@@ -37,22 +37,24 @@ This chapter tries to describe how to write new modules for use with
 
 @end ifnottex
 
-@node Module Overview, fsc2's Variables, Modules, Modules
+@node Module Overview, fsc2's Variables, Writing Modules, Writing Modules
 @section What modules are good for
 
 
 Modules allow to extend the set of commands that can be used in an
-@code{EDL} script. This is especially important if a new device needs to
-be integrated into @code{fsc2}. You don't have to change @code{fsc2}
-itself but just write a new module for the device. To do so you don't
-have to understand in all details how @code{fsc2} works. You only must have
-a working knowledge of the @code{C} programming language and understand a
-few basics about @code{fsc2}'s variables (and, of course, you must know how
-your device works and how to communicate with it). But modules may also be
-used for other purposes beside handling devices, one could also write modules
-that supply new mathematical functions or other functionalities. But the
-following discussion will concentrate on modules for new devices, writing
-other kinds of modules is even simpler.
+@code{EDL} script. This is especially important if a new device needs
+to be integrated into @code{fsc2}. You don't have to change
+@code{fsc2} itself but just write a new module for the device. To do
+so you don't have to understand in all the details of how @code{fsc2}
+works. You only must have a working knowledge of the @code{C}
+programming language and understand a few basics about @code{fsc2}'s
+variables (and, of course, you must know how your device works and how
+to communicate with it). But modules may also be used for other
+purposes beside handling devices, one could also write modules that
+supply new mathematical functions or other functionalities (as for
+example the module for FFT functions demonstrates). The following
+discussion will concentrate on modules for new devices, writing other
+kinds of modules is even simpler.
 
 I want to start with a short summary of what a module usually consists
 of and how to make @code{fsc2} aware of its existence. The most
@@ -61,13 +63,14 @@ invoked from @code{EDL} script. Their names (in the @code{C} code) are
 identical to the ones that are used as @code{EDL} function names.
 Thus, while you are in principle free to chose whatever names you
 fancy, it is probably reasonable to use names that fit the convention
-to pick names that start with the type of the device (not its name),
-followed by an underscore and a descriptive name. If there are already
+used throughout the rest of the package to pick names that start with
+the type of the device (not its name), followed by an underscore and a
+descriptive name of what the function does. If there are already
 devices similar to the one you're writing the module for it's best to
 use names identical to the ones in these other modules and also to try
 to use the same arguments if possible. This reduces the problems for
-users when they have to switch devices, they simply can exchange the
-device name in the @code{DEVICES} section and don't have to check each
+users that have to switch devices, they simply can exchange the device
+name in the @code{DEVICES} section and don't have to worry about each
 and every function call for the device. So, if you're writing a driver
 for a lock-in amplifier stick for example with the name
 @code{lockin_get_data()} and don't make up new ones like
@@ -82,29 +85,33 @@ Moreover, I use so-called version scripts (see the files with the exension
 module.
 
 There usually are a few functions in a module beside the ones that are
-going to be invoked from @code{EDL} scripts that get called from
-@code{fsc2}. These are the so-called hook functions that (if they exist)
-get invoked at certain stages of the execution of an @code{EDL} script,
-i.e.@: after loading the module, before and after the test run, at the
-start and the end of an experiment and, finally, just before the module
-is unloaded. From within these functions you can initialize the internal
-data of the module, initialize the device you're controlling and finally
-bring it back into a well defined state when the experiment is done.
+going to be invoked from @code{EDL} scripts and that get called from
+@code{fsc2} if they exist. These are the so-called hook functions that
+(if they exist) get invoked at certain stages of the execution of an
+@code{EDL} script, i.e.@: after loading the module, before and after
+the test run, at the start and the end of an experiment and, finally,
+just before the module is unloaded. From within these functions you
+can initialize the internal data of the module, initialize the device
+you're controlling and finally bring it back into a well defined state
+when the experiment is done.
 
-Once you have written the module you must make @code{fsc2} aware of the
-new device it's supposed to control and inform it of the additional @code{EDL}
-functions that can be used with the device. For this purpose there are
-two files in the @file{config} directory, called @file{Devices} and
-@file{Functions} where you have to enter the name of the device and
-append the new functions to the list of the already known functions.
+Once you have written the module you must make @code{fsc2} aware of
+the new device it's supposed to control and inform it of the
+additional @code{EDL} functions that can be used with the device. For
+this purpose there are two files in the @file{config} directory,
+called @file{Devices} and @file{Functions} where you have to enter the
+name of the device and append the new functions to the list of the
+already known functions. (Both these files get copied to the
+same directory as the modules on installation, typically to
+@file{/usr/local/lib/fsc2/}.
 
-All these subjects are discussed in detail in the following. But before 
-I do so I want to start with an explanation of the special type of
-variables used within @code{fsc2}.
+All these subjects are discussed in detail in the following. But
+before we continue I want to start with an explanation of the special
+type of variables used within @code{fsc2}.
 
 
 
-@node fsc2's Variables, Writing New Modules, Module Overview, Modules
+@node fsc2's Variables, Writing New Modules, Module Overview, Writing Modules
 @section How fsc2's variables work and how to use them
 
 All functions in a module that are going to be invoked from @code{EDL}
@@ -112,9 +119,9 @@ scripts get their input parameters in the form of a special type of
 variable and @code{fsc2} also expects that each function returns a
 value in this form.
 
-Let's start with a look at the way @code{fsc2} internally stores
-variables. Here is the (actually somewhat simplified) @code{typedef} of
-the structure for variables:
+Let's start with a look at the way @code{fsc2} internally stores these
+variables. Here is the (actually somewhat simplified) @code{typedef}
+of the structure for such variables:
 @example
 typedef struct Var
 @{
@@ -146,40 +153,40 @@ type @code{Var_Type_T}) you have to know about:
 @item @code{FLOAT_REF} @tab a 2- or more-dimensional array of floating point values
 @end multitable
 @noindent
-Actually, there are a few more, but they are only used by @code{fsc2}
-internally. If you test for variable types in an @code{switch} you may
-get compiler warnings because @code{Var_Type_T} is an @code{enum}. To
-avoid the warning simply add a @code{default} for all the other types,
-you should never receive a variable of such a type and if you do just
-throw an exception (see below) - that happening would be an obvious big
-in @code{fsc2}.
+Actually, there are a few more, but those are only used by @code{fsc2}
+internally. If you test for a variables type in an @code{switch} you
+may get compiler warnings because @code{Var_Type_T} is an @code{enum}.
+To avoid the warning simply add a @code{default} for all the other
+types, you should never receive a variable of such a type and if you
+should do you should throw an exception (see below) - for that to
+a serious bug in @code{fsc2} must have been triggered.
 
-To give you a better idea what these variables are good for let's assume
-that you want to write a function that returns the curve between the two
-cursor bars of your shiny new LeCronix digitizer. For that you may want to
-write a function that has the two positions of the cursor bars as input
-arguments and which returns the data of the curve between the cursor bars.
-Let's call this function
+To give you a better idea what these variables are good for let's
+assume that you want to write a function that returns the curve
+between the two cursor bars of your new LeCronix digitizer. For that
+you may want to write a function that has the two positions of the
+cursor bars as input arguments and which returns the data of the curve
+between the cursor bars. Let's call this function
 @example
-get_curve_between_cursors( cursor_1, cursor_2 )
+digitizer_get_curve_between_cursors( cursor_1, cursor_2 )
 @end example
 @noindent
 A typical C declaration for this function is
 @example
-Var_T * get_curve_between_cursors( Var_T * var );
+Var_T * digitizer_get_curve_between_cursors( Var_T * var );
 @end example
 @noindent
-Surprisingly, there seems to be only a single argument! And how to return
-an array of data?
+Perhaps surprisingly, there seems to be only a single argument! And
+how to return an array of data?
 
-Actually, it's not too complicated. The pointer to the variable
-structure @code{var} points to the first of the two parameters. And if
-you look back at the typedef for @code{fsc2}'s variables, there is a
-@code{next} pointer. This is the key to accessing the further function
-argument -- @code{var->next} points to next of the input parameters. If
-the function expects even more arguments, @code{var->next->next} etc.@:
-let's you get them, i.e.@: the input variables are organized as a linked
-list:
+Actually, it's not very complicated. The pointer to the variable
+structure @code{var} points to the variable with the first of the two
+parameters. And if you look back at the @code{typedef} for
+@code{fsc2}'s variables above, it contains a @code{next} pointer. This
+is the key to accessing further function arguments -- @code{var->next}
+points to next of the input parameters. If the function expects
+further arguments, @code{var->next->next} etc.@: let's you get at
+them. I.e.@: the input variables are organized as a linked list:
 @example
   var                               pointer passed to function
    |                                  |
@@ -197,40 +204,40 @@ list:
                         NULL        no more parameters...
 @end example
 @noindent
-This method allows to pass the function an arbitrary number of arguments
-and you can check how many you got by simply counting while following
-the pointers until the @code{next} pointer of a parameter is @code{NULL}.
+This method allows to pass the function an arbitrary number of
+arguments and you can check how many you've got by simply counting
+while following the pointers until the @code{next} pointer of a
+variable is @code{NULL}.
 
-When you later tell @code{fsc2} about the function (by adding it to the
-@file{Functions} file, see below) you can explicitely state if the
-functions allows a variable number of arguments or only a certain fixed
-number. A function that only accepts e.g.@: 3 arguments will always get
-3 -- when the @code{EDL} function is called with less arguments an error
-message is printed and executing the @code{EDL} script is stopped; if it
-is called with too many arguments the superfluous ones are discarded and
-an error message is printed before your function gets invoked with the
-correct number of arguments.
+When you later tell @code{fsc2} about the function (by adding it to
+the @file{Functions} file, see below) you can explicitely state if the
+functions allows a variable number of arguments or only a certain
+fixed number. A function that only accepts e.g.@: 3 arguments will
+always get 3 -- when the @code{EDL} function is called with less
+arguments an error message gets printed and executing the @code{EDL}
+script is stopped. And if it is called with too many arguments the
+superfluous ones are discarded and an error message is printed before
+your function gets invoked with the correct number of arguments.
 
-In case you defined the function to accept a variable number of
+But in case you defined the function to accept a variable number of
 arguments you probably better check in your function that there aren't
 too many and if necessary print out a warning.
 
 One word of warning: @strong{Never ever change the variables you get
 passed to your functions in any way, especially the
-@code{next}-pointer!} Even though the variables get thrown away
+@code{next}-pointers!} Even though the variables get thrown away
 automatically when you return from the function changing something
 within the variables may break the mechanism for clearing up the
 variables and lead to all kinds of weird errors.
 
 What @code{fsc2} can't check is if the arguments it passes to your
-function have the type you expect. Let's assume that you expect two
-integer values. What you should do first is to check if the parameters
-you got are really integers. There is a function that can do this for
-you, @code{vars_check()}.
+function have the types you expect them to have. Let's assume that you
+expect two integer values. What you should do first is to check if the
+parameters you got are really integers. There is a function that can
+do this for you, @code{vars_check()}.
 @findex vars_check()
-All you have to do is to call @code{vars_check()}
-with the pointer to the variable and the type you expect it to have,
-e.g.
+All you have to do is to call @code{vars_check()} with the pointer to
+the variable and the type you expect it to have, e.g.
 @example
 vars_check( var, INT_VAR );
 vars_check( var->next, FLOAT_VAR );
@@ -240,56 +247,61 @@ If @code{vars_check()} finds that everything is ok it simply returns,
 otherwise an error message will be printed (telling the user that a
 variable of an unexpected type was detected in the function call) and
 the program stops, so you don't have to take care of error handling.
-If you're prepared to accept integers as well as floating point data,
-call @code{vars_check()} instead with
+If you're prepared to accept integers as well as floating point
+numbers, call @code{vars_check()} instead with
 @example
 vars_check( var, INT_VAR | FLOAT_VAR );
 @end example
 @noindent
-i.e.@: just logically or the types of variables you're prepared to
-accept in your function. 
+i.e.@: just logically @code{or} the types of variables you're prepared
+to accept in your function.
 
 You can also check if the argument is a string by testing a type
 of @code{STR_VAR}, i.e.
 @example
 vars_check( var, STR_VAR );
 @end example
+And the same holds, of course, for variables of type @code{INT_ARR},
+@code{FLOAT_ARR}, @code{INT_REF} and @code{FLOAT_REF}.
 
 @code{vars_check()} not only checks that the variables has the correct
 type but also does some internal consistency checks to make sure that
-the variable actually exists and has been assigned a value.
+the variable actually exists and has been assigned a value. Failure
+of these tests also lead to the function not returning and instead
+aborting the execution of the @code{EDL} script.
 
-A function that expects just integer arguments could start like the
-following example, just running through the linked list of parameters:
+A function that expects just integer arguments could start like this,
+just running through the linked list of parameters:
 @example
 Var_T * my_function( Var_T * var )
 @{
-    Var_T * current;
+    Var_T * cur;
 
-    for ( current = var; current != NULL; current = current->next )
-        vars_check( current, INT_VAR );
+    for ( cur = var; cur != NULL; cur = cur->next )
+        vars_check( cur, INT_VAR );
 
     ....
 @}
 @end example
 
-The next question is how to access the value of the variable. As you can
-see the typedef for variables above the value is stored in the union
-@code{val}.  If the variable has integer type, you can access it as
+The next question is how to access the value of the variable. As you
+can see from the @code{typedef} for variables above the value is
+stored in a @code{union} called @code{val}. If the variable has
+integer type, you can access it as
 @quotation
-    @code{var->INT}@ @ @ @ (which is a macro standing for @code{var->val.lval})
+    @code{var->val.lval}@ @ @ @ or the macro @code{var->INT}
 @end quotation
 @noindent
 and what you get is a value of type @code{long int} -- @code{fsc2}
 is using long integers internally. On the other hand, if the type of the
 variable is @code{FLOAT_VAR} you get at the data with
 @quotation
-    @code{var->FLOAT}@ @ @ @ (i.e.@: a macro for @code{var->val.dval})
+    @code{var->val.dval}@ @ @ @ or the macro @code{var->FLOAT}
 @end quotation
 @noindent
 in which case you get a value of type @code{double}. Finally you may use
 @quotation
-    @code{var->STRING}@ @ @ @ (a macro standing for @code{var->val.sptr})
+    @code{var->val.sptr}@ @ @ @ or @code{var->STRING}
 @end quotation
 to get the address of the start of a string variable.
 
@@ -309,34 +321,36 @@ to get the address of the start of a string variable.
 @subsection Utility functions to determine variables values
 
 There are some utility functions that make it even easier to evaluate
-the parameters your function receives (and, if you use those, you don't
-need to check them with the @code{var_check()} function). The first one
-is for the case that you expect an integer variable but would also be
-prepared to deal with a floating point number after it has been rounded
-to the nearest integer. This is the function @code{get_long()}, declared
-as
+the parameters your function receives (and, if you use those, you
+don't need to check them with the @code{var_check()} function). The
+first one is for the case that you expect an integer variable but
+would also be prepared to deal with a floating point number after it
+has been rounded to the nearest integer. This is the function
+@code{get_long()}, declared as
 @example
 long get_long( Var_T *      var,
                const char * snippet );
 @end example
 @noindent
-The first argument is a pointer to the variable you want to
-evaluate. The second parameter is used to create a warning message when
-the variable isn't an integer variable but a float value. This message
+The first argument is a pointer to the variable you want to evaluate.
+The second parameter is used to create a warning message when the
+variable isn't an integer variable but a float value. This message
 always starts with the name of the currently interpreted @code{EDL}
-file, followed by the line number in the @code{EDL} script your function
-was invoked from and the device name. The second parameter is a string
-that gets embedded into the message. For example, if the currently
-interpreted @code{EDL} file is @file{foo.edl}, the line where your
-function is called is line 17 and the device name is @code{LECRONIX},
-your function (that expects an integer but got a floating point number)
-is named @code{abc()} and the string you pass to the function
-@code{get_long()} as the second argument is @code{"channel number"}, i.e.
+file, followed by the line number in the @code{EDL} script your
+function was invoked from and the device name. The second parameter is
+a string that gets embedded into the message. For example, if the
+currently interpreted @code{EDL} file is named @file{foo.edl}, the
+line where your function is called is 17 and the device name is
+@code{LECRONIX}, your function (that expects an integer but got a
+floating point number) is named @code{abc()} and the string you pass
+to the function @code{get_long()} as the second argument is
+@code{"channel number"}, then on calling
 @example
 get_long( var, "channel number" );
 @end example
 @noindent
-the following warning message will be printed:
+with a @code{FLOAT_VAR} instead of an @code{INT_VAR} the following
+warning message will be printed:
 @example
 foo.edl:17: LECRONIX: abc(): Floating point number used as channel number.
 @end example
@@ -361,18 +375,19 @@ long get_strict_long( Var_T *      var,
 @end example
 @noindent
 This function has the same arguments as the two other functions but it
-will throw an exception (see below what this means) when getting passed
-a floating point number, stopping the interpretation of the @code{EDL}
-script. Only while doing the experiment only a warning message is
-printed and the floating point number is converted to the nearest
-integer, which is then returned, thus avoiding the termination of a
-running experiment. But usually the wrong parameter should already have
-been found during the test run, forcing the user to correct the script.
+will throw an exception (see below what this means) when getting
+passed a floating point number, stopping the interpretation of the
+@code{EDL} script. That's actually only true for the test run, during
+the real experiment only a warning message is printed and the floating
+point number is converted to the nearest integer, which then is
+returned, thus avoiding the termination of a running experiment. But
+usually the wrong parameter should already have been found during the
+test run, forcing the user to correct the script.
 
-There's no function for requirung a double variable only because basically
-all functions should accept an integer in place of a double and the
-@code{get_double()} function always returns a double, if necessary
-after converting the integer value.
+There's no function for requirung a double variable only because
+basically all functions should accept an integer in place of a double
+and the @code{get_double()} function always returns a double, if
+necessary after converting the integer value.
 
 Then there is a function for the case where you want a boolean
 variable, i.e.@: a variable that can be either true or false. This
@@ -384,9 +399,9 @@ This function will return true (i.e.@: a value of @code{1}) when the
 variable passed to it is either an integer variable with a non-zero
 value or a string variable with the string @code{"ON"} (it is
 case-insensitive, so @code{"on"}, @code{"On"} or even @code{"oN"} will
-also do). False (i.e.@: @code{0} is returned when it receives an integer
-variable with a value of @code{0} or a string with the text @code{"OFF"}
-(again this is checked in a case-insensitive manner).
+also do). False (i.e.@: @code{0} is returned when it receives an
+integer variable with a value of @code{0} or a string with the text
+@code{"OFF"} (again this is checked in a case-insensitive manner).
 
 If the variable passed to the function is a floating point variable
 normally an error message like
@@ -410,8 +425,9 @@ foo.edl:17: LECRONIX: abc(): Invalid boolean argument ("bla").
 @end example
 @noindent
 (assuming that the string passed to the function was @code{"bla"}) and
-an exception is thrown in all cases, even during the experiment, since
-there is no obvious way how to determine the truth value of some string.
+an exception is thrown in all cases, even during the experiment since
+there is no obvious way how to define the truth value of an arbitrary
+string.
 
 
 @node Getting at the data of one-dimensional arrays, More-dimensional arrays, Utility functions to determine variables values, fsc2's Variables
@@ -427,51 +443,52 @@ the variable structure. Dynamically sized arrays can have a still
 undefined length, in which case the @code{len} field has a value of
 @code{0}, make sure you check for this possibility in your code.
 
-The actual data of the array can be accessed via the @code{lpnt} or the
-@code{dpnt} elements of the @code{val} union in the variables structure.
-When you have to deal with an array of integer values (i.e.@: a variable
-named @code{var} of type @code{INT_ARR}) the values (of type
-@w{@code{long int}}) are in @w{@code{var->val.lpnt[0]}} to
-@w{@code{var->val.lpnt[var->len - 1]}}. For an array of floating point
-numbers the values (of type @code{double}) are stored in
-@w{@code{val->var.dpnt[0]}} to @w{@code{var->val.dpnt[var->len - 1]}}.
+The actual data of the array can be accessed via the @code{lpnt} or
+the @code{dpnt} elements of the @code{union} named @code{val} in the
+variables structure. When you have to deal with an array of integer
+values (i.e.@: a variable named @code{var} of type @code{INT_ARR}) the
+values (of type @w{@code{long int}}) are in
+@w{@code{var->val.lpnt[0]}} to @w{@code{var->val.lpnt[var->len - 1]}}.
+For an array of floating point numbers the values (of type
+@code{double}) are stored in @w{@code{val->var.dpnt[0]}} to
+@w{@code{var->val.dpnt[var->len - 1]}}.
 
 
 @node More-dimensional arrays, Returning data from EDL functions, Getting at the data of one-dimensional arrays, fsc2's Variables
 @subsection More-dimensional arrays
 
 For arrays of 2 or more dimensions (i.e.@: variables of type
-@code{INT_REF} and @code{FLOAT_REF}) the dimension of the array is
-stored in the @code{dim} field of the variables structure (i.e.@:
-@code{fsc2} doesn't have real more-dimensional arrays but fakes
-them in a similar way like e.g.@: Perl by using arrays of pointers).
-For the data of such arrays the @code{vptr} field in the @code{val}
-union of the variable structure is relevant. @code{vptr} then points
-to an array of variable pointers, each pointing to the next
-lower-dimension sub-arrays. How many of such sub-arrays exist can
-be determined from the @code{len} field of the variable structure.
-As already for the one-dimensional arrays care has to be taken to
-check that @code{len} isn't @code{0} in case none of the sub-arrays
-have been defined yet for variable sized arrays.
+@code{INT_REF} and @code{FLOAT_REF}) the rank of the "matrix" is
+stored in the @code{dim} field of the variables structure. @code{fsc2}
+doesn't have real more-dimensional arrays but fakes them in a similar
+way like e.g.@: Perl by using arrays of pointers. For the data of such
+arrays the @code{vptr} field in the @code{val} union of the variable
+structure is relevant. @code{vptr} points to an array of variable
+pointers, each pointing to the next lower-dimension sub-arrays. How
+many of such sub-arrays exist can be determined from the @code{len}
+field of the variable structure. As already for the one-dimensional
+arrays care has to be taken to check that @code{len} isn't @code{0} in
+case none of the sub-arrays have been defined yet for variable sized
+arrays.
 
-If the dimension of a variable is 2 all the sub-arrays are
-one-dimensional arrays (i.e.@: have a type of @code{INT_ARR} or
-@code{FLOAT_ARR} and one can the values of these sub-arrays as described
-in the previous section.
+If the rank of a variable is 2 all the sub-arrays are one-dimensional
+arrays (i.e.@: have a type of @code{INT_ARR} or @code{FLOAT_ARR} and
+one can the values of these sub-arrays as described in the previous
+section.
 
-For arrays of higher dimensions the pointers in the @code{val.vptr}
-array point to variables that also have a type of @code{INT_REF} or
-@code{FLOAT_REF}.
+For arrays of higher rank the pointers in the @code{val.vptr} array
+point to variables that again have a type of @code{INT_REF} or
+@code{FLOAT_REF} and a rank of one less.
 
 Thus to find out the element @code{[3][2][5]} of variable @code{var}
 pointing a three-dimensional floating point array one would have to use
 @example
   var->val.vptr[ 3 ]->val.vptr[ 2 ]->val.dpnt[ 5 ]
 @end example
-Of course, before one tries to access the element one always should check
-that @code{var->len} is at least @code{4}, @code{var->val.vptr[3]->len}
-is at least @code{3} and @code{var->val.vptr[3]->val.vptr[2]->len} is
-at least @code{6}.
+Of course, before one tries to access the element one always should
+check that @code{var->len} is at least @code{4},
+@code{var->val.vptr[3]->len} is at least @code{3} and
+@code{var->val.vptr[3]->val.vptr[2]->len} is at least @code{6}.
 
 
 But there's also a function that does all the required checks
@@ -481,27 +498,28 @@ and is declared as
    Var_T * get_element( Var_T * v, int len, ... );
 @end example
 @noindent
-It takes a variable number of arguments, but at least three. The
-first one is a pointer to the array or matrix from which you want an
-element and the second is the number of arguments to follow. This number
-may not be larger than the dimension of the array or matrix. All the
-remaining arguments are indices into the array.
+It takes a variable number of arguments (but requires at least three).
+The first one is a pointer to the array or matrix from which you want
+an element and the second is the number of arguments to follow. This
+number may not be larger than the rank of the array or matrix. All the
+remaining arguments are indices into the array or matrix.
 
-The function returns on success a variable that is either an integer or
-float value or a pointer to an array or matrix. On failure (e.g.@:
+The function returns on success a variable that is either an integer
+or float value or a pointer to an array or matrix. On failure (e.g.@:
 because the accessed element does not exist) an exception is thrown.
 
-If you have a 1-dimensional array of integers named @code{i_arr_1d} and
-you want to determine its fourth element you can call this function like
-this
+If you have a 1-dimensional array of integers named @code{i_arr_1d}
+and you want to determine its fourth element you can call this
+function like this
 @example
-    elem = get_element( i_arr_1d, 1, 3 );
+    Var_T elem = get_element( i_arr_1d, 1, 3 );
 @end example
 @noindent
-and the returned variable @code{elem} will be of type @code{INT_VAR},
-having the value of the fourth element of the array (please remember
-that array indices start at @code{0}, so the fourth element has the
-index @code{3}).
+and the returned pointer to a new @code{fsc2} variable named
+@code{elem} will be of type @code{INT_VAR}, having the value of the
+fourth element of the array (please remember that array indices start
+at @code{0}, you're now writting @code{C} not @code{EDL}, so the
+fourth element has the index @code{3})
 
 If, in contrast, you want the element @code{[3][2][5]} of the variable
 @code{f_arr_3d}, pointing to a three-dimensional floating point matrix,
@@ -510,18 +528,18 @@ you would call the function as
     elem = get_element( f_arr_3d, 3, 3, 2, 5 );
 @end example
 
-You can also call the function with less indices than the matrix has
-dimensions. In this case the function returns a variable pointing to
-the indexed array or sub-matrix.
+You can also call the function with less indices than the rank of a
+matrix. In this case the function returns a variable pointing to the
+indexed array or sub-matrix.
 
 
 @node Returning data from EDL functions, , More-dimensional arrays, fsc2's Variables
 @subsection Returning data from EDL functions
 
-If your function just wants to return an integer or a float, things are
-very easy: just call the function @code{vars_push()} with the type of
-the return value as the first and the value itself as the second
-argument, e.g.
+If your function just wants to return an integer or a floating point
+value, things are very simple: just call the function
+@code{vars_push()} with the type of the value to be returned as the
+first and the value itself as the second argument, e.g.
 @example
 return vars_push( INT_VAR, i_value );
 @end example
@@ -532,16 +550,17 @@ return vars_push( FLOAT_VAR, f_value );
 @end example
 @noindent
 where @code{i_value} is a @code{long int} and @code{f_value} must be a
-value of type @code{double} (take care not to get this wrong). Of
-course, you don't have to use @code{vars_push()} in return statements
-only, it simply returns a pointer to the new variable holding the value.
+value of type @code{double} (take good care not to get this wrong!).
+Of course, you don't have to use @code{vars_push()} in return
+statements only, it simply returns a pointer to a new variable holding
+the value.
 
 For arrays @code{vars_push()} the first argument is either
-@code{INT_ARRAY} or @code{FLOAT_ARRAY}, The second argument is a pointer
-to the array (i.e.@: its first argument). For creation of an array
-variable also third argument is needed, the length of the array (a
-@code{long} integer). If you want to return an array with two integer
-arguments you would use for example
+@code{INT_ARRAY} or @code{FLOAT_ARRAY}, The second argument is a
+pointer to the array (i.e.@: its first argument). For creation of an
+array variable also third argument is needed, the length of the array
+(a @code{long} integer). If you want to return an array with two
+integer arguments you would use for example
 @example
 data[ 0 ] = 1;
 data[ 1 ] = 2;
@@ -723,7 +742,7 @@ correct sequence, so it's not completely foolproof.
 
 
 
-@node Writing New Modules, Programming Utils, fsc2's Variables, Modules
+@node Writing New Modules, Programming Utils, fsc2's Variables, Writing Modules
 @section How to write a new module
 
 @ifnottex
@@ -1927,7 +1946,7 @@ care about appending a @code{#} and a device number to the function name
 -- @code{fsc2} will do this automatically when necessary.
 
 
-@node Programming Utils, Pulser Modules, Writing New Modules, Modules
+@node Programming Utils, Pulser Modules, Writing New Modules, Writing Modules
 @section Additional utilities provided by fsc2
 
 When writing a module some of the following information might be useful:
@@ -2520,7 +2539,7 @@ modified). If you plan to check for an out-of-range error you thus have to
 zero-out errno before calling the functions.
 
 
-@node Pulser Modules, , Programming Utils, Modules
+@node Pulser Modules, , Programming Utils, Writing Modules
 @section Writing modules for pulsers
 
 Modules for pulsers are a bit more difficult to write than drivers for
