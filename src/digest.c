@@ -32,8 +32,11 @@ static int digest_cmp( const void * a,
 static char * digest_file_name( bool need_one );
 
 
-/*-------------------------------------------*
- *-------------------------------------------*/
+/*-------------------------------------------------------------------*
+ * Called on initialization of program, tries to read in a file with
+ * SHA1 digest values of already tested EDL scripts and makes up a
+ * (sorted) list of all these digest values.
+ *-------------------------------------------------------------------*/
 
 void
 digest_init( void )
@@ -87,8 +90,9 @@ digest_init( void )
 }
 
 
-/*-------------------------------------------*
- *-------------------------------------------*/
+/*------------------------------------------*
+ * Returns if a digest value is in the list
+ *------------------------------------------*/
 
 bool
 digest_check_if_tested( Digest_T digest )
@@ -101,8 +105,9 @@ digest_check_if_tested( Digest_T digest )
 }
 
 
-/*-------------------------------------------*
- *-------------------------------------------*/
+/*-------------------------------------*
+ * Adds a new digest value to the list
+ *-------------------------------------*/
 
 void
 digest_add( Digest_T digest )
@@ -114,8 +119,10 @@ digest_add( Digest_T digest )
 }
 
 
-/*-------------------------------------------*
- *-------------------------------------------*/
+/*----------------------------------------------------------*
+ * Called when program ends, writes out the list of digests
+ * and then releases memory
+ *----------------------------------------------------------*/
 
 void
 digest_at_exit( void )
@@ -148,13 +155,15 @@ digest_at_exit( void )
 }
 	
 
-/*-------------------------------------------*
- *-------------------------------------------*/
+/*---------------------------------------------------------------------*
+ * Tries to find the name of the file with the SHA1 digests of scripts
+ * that already have been tested.
+ *---------------------------------------------------------------------*/
 
 static char *
 digest_file_name( bool need_one )
 {
-	char * digest_name;
+	char *digest_name = NULL;
     struct stat buf;
     char *ld_path;
     char *ld = NULL;
@@ -207,8 +216,9 @@ digest_file_name( bool need_one )
 }
 
 
-/*-------------------------------------------*
- *-------------------------------------------*/
+/*------------------------------------------*
+ * Function for comparing two digest values
+ *------------------------------------------*/
 
 static int
 digest_cmp( const void * a,

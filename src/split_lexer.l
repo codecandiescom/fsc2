@@ -188,6 +188,7 @@ scan_main( const char * name,
 
 
     CLOBBER_PROTECT( split_error );
+    CLOBBER_PROTECT( is_digest );
 
     fsc2_assert( fp != NULL );
 
