@@ -884,6 +884,7 @@ fsps25_read_state( void )
         fsps25_wrong_data( );
 
     if ( strncmp( buf, "CS ", 3 ) )
+        fsps25_wrong_data( );
 
     for ( i = 0; i < ( ssize_t ) NUM_ELEMS( states ); i++ )
         if ( ! strcasecmp( buf + 3, states[ i ].response ) )

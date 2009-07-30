@@ -21,9 +21,9 @@
 #include "fsc2.h"
 
 static struct {
-	size_t     count;
-	size_t     orig_count;
-	Digest_T * data;
+	size_t     count;          /* count of digests */
+	size_t     orig_count;     /* number of digests at start-up */
+	Digest_T * data;           /* list of digests */
 } digests = { 0, 0, NULL };
 
 
@@ -157,7 +157,8 @@ digest_at_exit( void )
 
 /*---------------------------------------------------------------------*
  * Tries to find the name of the file with the SHA1 digests of scripts
- * that already have been tested.
+ * that already have been tested (makes up a name if no accessible
+ * file exists in case 'need_one' is set)
  *---------------------------------------------------------------------*/
 
 static char *
