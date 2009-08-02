@@ -15,24 +15,12 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  A lot of ideas for this SHA1 implementation came from the example
- *  implementation from RFC 3174 by D. Eastlake, 3rd (Motorola) and P.
- *  Jones (Cisco Systems), see e.g.
- *
- *  http://www.faqs.org/rfcs/rfc3174.html
- *
- *  The part for dealing with 64-bit numbers on systems that lack such
- *  a type has directly been taken from code written by Paul Eggert,
- *  and which is part of the GNU Coreutils in the file 'lib/u64.h'
- *  and can be downloaded e.g. from
- *
- *  http://www.gnu.org/software/coreutils/
  */
 
 
 #define NEED_U64_SET
 #define NEED_U64_PLUS
+#define NEED_U64_SIZET_PLUS
 #define NEED_U64_LT
 #define NEED_U64_SHR
 #define NEED_U64_LOW
@@ -68,7 +56,7 @@ static void sha1_evaluate( SHA1_Context * context );
 
 
 /*----------------------------------------------------------------*
- * Sets up the context structure (or resets it)
+ * Sets up the context structure (or resets it to be used anew)
  *----------------------------------------------------------------*/
 
 int
@@ -79,6 +67,7 @@ sha1_initialize( SHA1_Context * context )
 
     memcpy( context->H, H, sizeof H );
     context->count         = sha_u64_set( 0, 0 );
+    context->off_count     = 0;
     context->index         = 0;
     context->is_calculated = 0;
     context->error         = SHA_DIGEST_OK;
@@ -88,14 +77,19 @@ sha1_initialize( SHA1_Context * context )
 
 
 /*----------------------------------------------------------------*
- * Adds data for the calculation of the hash
+ * Adds byte-oriented data for the calculation of the hash
  *----------------------------------------------------------------*/
 
 int
-sha1_add_data( SHA1_Context * context,
-			   const void   * data,
-			   size_t         length )
+sha1_add_bytes( SHA1_Context * context,
+                const void   * data,
+                size_t         num_bytes )
 {
+    /* If necessary use bit-oriented routine */
+
+    if ( context->off_count != 0 )
+        return sha1_add_bits( context, data, 8 * num_bytes );
+
     if ( ! context || ! data )
         return SHA_DIGEST_INVALID_ARG;
 
@@ -108,14 +102,12 @@ sha1_add_data( SHA1_Context * context,
     /* Split up the input into 512 bit sized chunks from which the hash
        value gets calculated */
 
-    while ( length )
+    while ( num_bytes )
     {
-        size_t len = length >= 64 ? 64 : length;
+        unsigned int len = num_bytes >= 64 ? 64 : num_bytes;
 
         if ( context->index + len > 64 )
             len = 64 - context->index;
-
-        memcpy( context->buf + context->index, data, len );
 
         /* Increment bit count, abort on input of 2^64 or more bits */
 
@@ -124,11 +116,113 @@ sha1_add_data( SHA1_Context * context,
         if ( sha_u64_lt( context->count, sha_u64_set( 0, 8 * len ) ) )
              return context->error = SHA_DIGEST_INPUT_TOO_LONG;
 
-        data    = ( unsigned char * ) data + len;
-        length -= len;
+        memcpy( context->buf + context->index, data, len );
+        data       = ( unsigned char * ) data + len;
+        num_bytes -= len;
 
         if ( ( context->index += len ) == 64 )
             sha1_process_block( context );
+    }
+
+    return SHA_DIGEST_OK;
+}
+
+
+/*----------------------------------------------------------------*
+ * Adds bit-oriented data for the calculation of the hash
+ *----------------------------------------------------------------*/
+
+int
+sha1_add_bits( SHA1_Context * context,
+               const void   * data,
+               size_t         num_bits )
+{
+    const unsigned char *d = data;
+    unsigned char shift = 8 - context->off_count;
+
+
+    /* Always try to use the byte-oriented routine as far as possible */
+
+    if ( context->off_count == 0 && num_bits > 7 )
+    {
+        int ret = sha1_add_bytes( context, data, num_bits / 8 );
+
+        d += num_bits / 8;
+
+        if ( ( num_bits &= 0x07 ) == 0 || ret != SHA_DIGEST_OK )
+            return ret;
+    }
+    else
+    {
+        if ( ! context || ! data )
+            return SHA_DIGEST_INVALID_ARG;
+
+        if ( context->error )
+            return context->error;
+
+        if ( context->is_calculated )
+            return context->error = SHA_DIGEST_NO_MORE_DATA;
+    }
+
+    if ( num_bits == 0 )
+        return SHA_DIGEST_OK;
+
+    /* Increment bit count, abort on input of 2^64 or more bits (note:
+       sha_u64_sizet_add() returns a 0 value on overflow!) */
+
+    context->count = sha_u64_sizet_plus( context->count, num_bits );
+    if ( sha_u64_eq( context->count, sha_u64_set( 0, 0 ) ) )
+        return context->error = SHA_DIGEST_INPUT_TOO_LONG;
+
+    /* Deal with all full (8-bit) bytes of input */
+
+    while ( num_bits > 7 )
+    {
+        context->buf[ context->index++ ] |= SHA_T8( *d ) >> context->off_count;
+        context->buf[ context->index   ]  = *d++ << shift;
+        num_bits -= 8;
+
+        if ( context->index == 64 )
+        {
+            sha1_process_block( context );
+            context->buf[ 0 ] = context->buf[ 64 ];
+        }
+    }
+
+    /* Now we're left with no more that 7 bits, they may or may not fit into
+       the current byte of the context's buffer */
+
+    if ( num_bits > 0 )
+    {
+        if ( num_bits <= shift )
+        {
+            if ( context->off_count == 0 )
+                context->buf[ context->index ] = 0;
+
+            context->buf[ context->index ] |=
+                  ( SHA_T8( *d ) >> ( 8 - num_bits ) ) << ( shift - num_bits );
+
+            if ( ( context->off_count += num_bits ) == 8 )
+            {
+                context->off_count = 0;
+                if ( ++context->index == 64 )
+                    sha1_process_block( context );
+            }
+        }
+        else
+        {
+            context->buf[ context->index++ ] |=
+                                            SHA_T8( *d ) >> context->off_count;
+            context->buf[ context->index   ]  = *d << shift;
+
+            context->off_count = ( context->off_count + num_bits ) % 8;
+
+            if ( context->index == 64 )
+            {
+                sha1_process_block( context );
+                context->buf[ 0 ] = context->buf[ 64 ];
+            }
+        }
     }
 
     return SHA_DIGEST_OK;
@@ -200,10 +294,10 @@ sha1_process_block( SHA1_Context * context )
 
     for ( t = 0; t < 16; t++ )
     {
-		W[ t ]  = SHA_T8( *buf++ ) << 24;
-		W[ t ] |= SHA_T8( *buf++ ) << 16;
-		W[ t ] |= SHA_T8( *buf++ ) <<  8;
-		W[ t ] |= SHA_T8( *buf++ );
+		W[ t ]  = SHA_T8L( *buf++ ) << 24;
+		W[ t ] |= SHA_T8L( *buf++ ) << 16;
+		W[ t ] |= SHA_T8L( *buf++ ) <<  8;
+		W[ t ] |= SHA_T8L( *buf++ );
 
         tmp = SHA_T32( ROTL( 5, A ) + f1 + E + W[ t ] + K[ 0 ] );
         E = D;
@@ -291,20 +385,19 @@ sha1_evaluate( SHA1_Context * context )
      * bit count as a 64-bit number) padd to the end of the block with 0
      * and then start a new block that contains just 0 and the bit count. */
 
-    if ( context->index > 55 )
+    if ( context->off_count == 0 )
+        context->buf[ context->index++ ] = 0x80;
+    else
+        context->buf[ context->index++ ] |= 0x80 >> context->off_count;
+
+    if ( context->index > 56 )
     {
-        context->buf[ context->index ] = 0x80;
-        memset( context->buf + context->index + 1, 0, 63 - context->index );
-
+        memset( context->buf + context->index, 0, 64 - context->index );
         sha1_process_block( context );
-
         memset( context->buf, 0, 56 );
     }
     else
-    {
-        context->buf[ context->index ] = 0x80;
-        memset( context->buf + context->index + 1, 0, 55 - context->index );
-    }
+        memset( context->buf + context->index, 0, 56 - context->index );
 
     /* Store bit count at end and do the final round of the calculation */
 
@@ -313,12 +406,11 @@ sha1_evaluate( SHA1_Context * context )
         context->buf[ i ] = sha_u64_low( count );
 
     sha1_process_block( context );
+    context->is_calculated = 1;
 
     /* Wipe memory used for storing data supplied by user */
 
     memset( context->buf, 0, sizeof context->buf );
-
-    context->is_calculated = 1;
 }
 
 

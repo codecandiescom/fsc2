@@ -15,19 +15,6 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with fsc2.  If not, see <http://www.gnu.org/licenses/>.
- *
- *  A lot of ideas for this SHA1 implementation came from the example
- *  implementation from RFC 3174 by D. Eastlake, 3rd (Motorola) and P.
- *  Jones (Cisco Systems), see e.g.
- *
- *  http://www.faqs.org/rfcs/rfc3174.html
- *
- *  The part for dealing with 64-bit numbers on systems that lack such
- *  a type has directly been taken from code written by Paul Eggert,
- *  and which is part of the GNU Coreutils in the file 'lib/u64.h'
- *  and can be downloaded e.g. from
- *
- *  http://www.gnu.org/software/coreutils/
  */
 
 
@@ -58,17 +45,24 @@
 typedef struct {
 	sha_u32       H[ 5 ];
     sha_u64       count;
-	unsigned char buf[ 64 ];
+    unsigned char off_count;
+	unsigned char buf[ 65 ];
 	size_t        index;
 	int           is_calculated;
 	int           error;
 } SHA1_Context;
 
 
+#define sha1_add_data  sha1_add_bytes
+
+
 int sha1_initialize( SHA1_Context * context );
-int sha1_add_data( SHA1_Context * context,
-				   const void   * data,
-				   size_t         length );
+int sha1_add_bytes( SHA1_Context * context,
+                    const void   * data,
+                    size_t         num_bytes );
+int sha1_add_bits( SHA1_Context * context,
+                   const void   * data,
+                   size_t         num_bits );
 int sha1_calculate( SHA1_Context  * context,
 					unsigned char   digest[ SHA1_HASH_SIZE ] );
 
