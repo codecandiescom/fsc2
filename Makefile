@@ -1193,7 +1193,7 @@ test:
 
 pack:
 	@$(MAKE) clean
-	cd ..; tar -c fsc2-$(VERSION) --exclude=.git* | gzip -c -9 > fsc2-$(VERSION).tar.gz
+	cd ..; tar -c fsc2-$(VERSION) --exclude=(.git*|.gdb.hist) | gzip -c -9 > fsc2-$(VERSION).tar.gz
 
 pack-git:
 	cd ..

@@ -46,9 +46,9 @@ needs to do an experiment the program was not written for. One either
 has to find some ways to "trick" the program into doing something it
 wasn't intended for or, if this fails, to change the program itself.
 This not only tends to take a lot of time (especially if the person
-who wrote the program isn't around anymore) but often also leads to
+that wrote the program isn't around anymore) but often also leads to
 the introduction of new bugs or even the realization that the program
-has not written in a way that allows it to be adapted to the new
+has not been written in a way that allows it to be adapted to the new
 requirements. In that case the old program becomes useless and a new
 one has to be written from scratch.
 
@@ -65,20 +65,20 @@ learn. And when this hurdle has been taken you will have complete
 control over the way your experiments is going to be done and you're
 not anymore at the mercy of the person that wrote the program.
 
-Just to give a few trivial examples: sometimes e.g.@: EPR signals are
+Just to give a trivial example: sometimes e.g.@: EPR signals are
 distributed over a large field range with nothing of interest in
 between, so it would be rather useful to skip those regions. Most
 normal programs won't allow this and you have to either record all the
-uninteresting field regions (thus losing lots of time) or to manually
+uninteresting field regions (thus losing lots of time) or manually
 restart the experiment for each of the regions of interest. In
 contrast, with @code{fsc2} it shouldn't take more than a few minutes
 to write an @code{EDL} script, consisting of just a few lines of code,
 that can not only skip these regions but also repeat the experiment as
 often as needed, and if necessary do different numbers of
-accumulations of the different parts (if, for example, the signals are
-huge in some of the regions while in others they are hardly detectable
-above the noise floor) or with automatically changing the lock-in
-amplifiers sensitivity or its time constant in between.
+accumulations of different field regions (if, for example, the signals
+are huge in some while hardly detectable above the noise floor at
+others) or with automatically changing the lock-in amplifiers
+sensitivity or its time constant in between.
 
 But one does not have to write a new script for every experiment one
 is going to do -- for standard experiments, once such a script has
@@ -136,7 +136,7 @@ starting an @code{EDL} script and displaying the measured data. The
 following chapter (@pxref{Web Server}) explains how to monitor
 @code{fsc2}'s progress via the internet, just using a browser. Then
 follows a chapter (@pxref{EDL}) that explains all about the @code{EDL}
-language. To give you an expression how easy writing an @code{EDL}
+language. To give you an impression of how easy writing an @code{EDL}
 script is you may have a look at the first example (@pxref{Basics})
 which discusses a script for doing a simple cw-detected EPR experiment.
 
