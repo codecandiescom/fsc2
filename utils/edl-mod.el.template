@@ -2,10 +2,6 @@
 ;;
 ;;  Copyright (C) 1999-2009 Jens Thoms Törring
 ;;
-;;  Author: Jens Thoms Törring <jt@toerring.de>
-;;  Maintainer: Jens Thoms Törring <jt@toerring.de>
-;;  Keywords: languages
-;;
 ;;  This file is part of fsc2.
 ;;
 ;;  Fsc2 is free software; you can redistribute it and/or modify
@@ -277,30 +273,39 @@
 
 (defun edl-calculate-indentation ()
   "Return the column to which the current line should be indented"
-  (save-excursion
+  (save-excursion          ; don't forget were we started of
 	(beginning-of-line)
 	(if (bobp)
 		0         ; no identation of first line
 		(cond
+		          ; leave comments alone
 		  ((eq (get-text-property (point) 'face) 'font-lock-comment-face)
 		   (current-indentation))  ; do nothing if this is a comment
+		          ; lines starting with '}' are indented like line with
+				  ; corresponding opening '{'
 		  ((looking-at "[ \t]*}")
 		   (let ((opened (count-matches "{" 0 (point)))
 				 (closed (count-matches "}" 0 (point))))
 			 (* tab-width (1- (- opened closed)))))
-		  ((looking-at "[ \t]*\\(\)\\|\\[\\)")
+			      ; lines starting with ')' or ']' are indented to the
+                  ; position of the opening '(' or '['
+  		  ((looking-at "[ \t]*\\(\)\\|\\[\\)")
 		   (backward-up-list)
 		   (current-column))
 		  (t
+		          ; go back to enclosing '{', '(' or '[' (if there's one)
 		   (backward-up-list)
 		   (cond
+		          ; if this is '{' indent as far as that line + tab width
+			 ((looking-at "{")
+			  (beginning-of-line-text)
+			  (+ tab-width (current-column)))
+			      ; for '(' and '[' indent to behind that + possible spaces
 			 ((looking-at "\\(\(\\|\\[\\)")
 			  (forward-char)
 			  (skip-chars-forward " \t")
 			  (current-column))
-			 ((looking-at "{")
-			  (beginning-of-line-text)
-			  (+ tab-width (current-column)))
+			      ; nothing matched yet? Don't indent at all.
 			 (t
 			  0)))))))
 
