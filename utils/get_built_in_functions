@@ -19,7 +19,7 @@ die unless <$f> =~ /\s*\{\s*$/;
 my @l;
 
 while ( <$f> ) {
-	next unless /\s*\{\s*\"([a-zA-Z][a-zA-Z0-9_]*)\",\s*f_[a-zA-Z0-9_]+,\s*((-?\d+)|INT_MIN),\s*ACCESS_(ALL|PREPS|EXP),\s*NULL,\s*UNSET\s*\},\s*$/;
+	next unless /^\s*\{\s*\"([a-zA-Z][a-zA-Z0-9_]*)\",\s*f_[a-zA-Z0-9_]+,\s*((-?\d+)|INT_MIN),\s*ACCESS_(ALL|PREP|EXP),\s*NULL,\s*UNSET\s*\},\s*$/;
 	push @l, $1;
 }
 

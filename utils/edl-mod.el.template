@@ -22,211 +22,290 @@
 ;;  along with fsc2; see the file COPYING.  If not, write to
 ;;  the Free Software Foundation, 59 Temple Place - Suite 330,
 ;;  Boston, MA 02111-1307, USA.
-
-;;; Commentary:
-
-;; This package provides Emacs support for editing EDL files. But please note:
-;; First, it's even pre-alpha (I'm at a very early stage of learning elisp),
-;; and second, nearly all it does yet is taking care of highlighting EDL
-;; keywords and it's not too good at it... On the other hand, for less than
-;; one day of learning elisp and how to write a mode it may be good enough ;-)
-
-;; The currently most annoying bugs are that a `"' in a commment will switch
-;; off displaying the comment in comment-face.
 ;;
-;; To get support for EDL mode being loaded automatically for all files with
-;; the extension ".edl" add the following lines to your .emacs file:
-;; (autoload 'edl-mode "edl-mod.elc"
-;;  "edl-mod.el -- editing EDL files with Emacs")
+;;  This file provides emacs support for editing EDL files.
+;;
+;;  To get support for EDL mode being loaded automatically for all files
+;;  with ;; the extension ".edl" add the following lines to your .emacs
+;;  file:
+;;  (autoload 'edl-mode "edl-mod.elc"
+;;            "edl-mod.el -- editing EDL files with Emacs")
 ;; (setq auto-mode-alist (append (list (cons "\\.edl\\'" 'edl-mode))
 ;;                                auto-mode-alist))
-;;
 
 
 (defconst edl-maintainer-address
-  "Jens Thoms Törring <jt@toerring.de>" )
+  "Jens Thoms Törring <jt@toerring.de>")
 
 (defgroup edl nil
-  "Major mode for editing EDL source files."
+  "Major mode for editing EDL source files"
   :group 'edl)
 
 (defcustom edl-mode-hook nil
-  "*Hook to be run when EDL mode is started."
+  "*Hook to be run when EDL mode is started"
   :type 'hook
   :group 'edl)
 
+(defvar edl-tab-width nil
+  "Tab width for EDL scripts")
+
+(if edl-tab-width
+	()
+	(setq edl-tab-width 4))
+
+;; Syntax Table (stolen from c-mode)
+
 (defvar edl-mode-syntax-table nil
-  "Syntax table in use in edl-mode buffers.")
+  "Syntax table used in EDL-mode buffers")
+
 (if edl-mode-syntax-table
     ()
-  (let ((table (make-syntax-table)))
-    (modify-syntax-entry ?\r " "  table)
-    (modify-syntax-entry ?+ "."   table)
-    (modify-syntax-entry ?- "."   table)
-    (modify-syntax-entry ?= "."   table)
-    (modify-syntax-entry ?* "."   table)
-    (modify-syntax-entry ?/ "."   table)
-    (modify-syntax-entry ?> "."   table)
-    (modify-syntax-entry ?< "."   table)
-    (modify-syntax-entry ?& "."   table)
-    (modify-syntax-entry ?| "."   table)
-    (modify-syntax-entry ?! "."   table)
-    (modify-syntax-entry ?\\ "\\" table)
-    (modify-syntax-entry ?\' "."  table)
-    (modify-syntax-entry ?\` "w"  table)
-    (modify-syntax-entry ?\" "\"" table)
-    (modify-syntax-entry ?. "w"   table)
-    (modify-syntax-entry ?_ "w"   table)
-    (modify-syntax-entry ?\% "."  table)
-    (modify-syntax-entry ?\n ">"  table)
-    (setq edl-mode-syntax-table table)))
+  	(setq edl-mode-syntax-table (make-syntax-table))
+	(modify-syntax-entry ?_   "_"       edl-mode-syntax-table)
+	(modify-syntax-entry ?\\  "\\"      edl-mode-syntax-table)
+    (modify-syntax-entry ?+   "."       edl-mode-syntax-table)
+    (modify-syntax-entry ?-   "."       edl-mode-syntax-table)
+    (modify-syntax-entry ?=   "."       edl-mode-syntax-table)
+    (modify-syntax-entry ?%   "."       edl-mode-syntax-table)
+    (modify-syntax-entry ?<   "."       edl-mode-syntax-table)
+    (modify-syntax-entry ?>   "."       edl-mode-syntax-table)
+    (modify-syntax-entry ?\(  "()"      edl-mode-syntax-table)
+    (modify-syntax-entry ?\)  ")("      edl-mode-syntax-table)
+    (modify-syntax-entry ?\{  "(}"      edl-mode-syntax-table)
+    (modify-syntax-entry ?\}  "){"      edl-mode-syntax-table)
+    (modify-syntax-entry ?\[  "(]"      edl-mode-syntax-table)
+    (modify-syntax-entry ?\]  ")["      edl-mode-syntax-table)
+    (modify-syntax-entry ?&   "."       edl-mode-syntax-table)
+    (modify-syntax-entry ?"   "\""      edl-mode-syntax-table)
+    (modify-syntax-entry ?!   "."       edl-mode-syntax-table)
+    (modify-syntax-entry ?\'  "."       edl-mode-syntax-table)
+	(modify-syntax-entry ?/   ". 124b"  edl-mode-syntax-table)
+	(modify-syntax-entry ?*   ". 23"    edl-mode-syntax-table)
+	(modify-syntax-entry ?\n  "> b"     edl-mode-syntax-table)
+	(modify-syntax-entry ?\^m "> b"     edl-mode-syntax-table)
+	(set-syntax-table edl-mode-syntax-table))
+
+
+;; Various variables for font locking
 
 (defvar edl-comments
-  '( "\\/\\/.*"                                               ; C++ style
-     "\\/\\*\\(\\([^\\*]*\\)\\|\\(\\*[^\\/]\\)*\\)\\*\\/" ) ) ; C style
+  (concat "\\("
+		  (mapconcat 
+		   'identity
+		   '("\\/\\/.*"                                             ; C++ style
+			 "\\/\\*\\(\\([^\\*]*\\)\\|\\(\\*[^\\/]\\)*\\)\\*\\/")  ; C style
+		   "\\|")
+		  "\\)")
+  "REGEXP for comments")
 
 (defvar edl-strings
-  '( "\\\"[^\"]*\\\"" ))
+  "\\\"[^\"]*\\\""
+  "REGEXP for strings")
 
 (defvar edl-reserved-words
-  '( "P\\(ULSE\\)?_?[0-9]+\\(\\(#[0-9]+\\)?\\|\\.\\|\\b\\)"
-     "PH\\(ASE\\)?\\(_?[12]\\)?_?S\\(ET\\)?\\(U\\(P\\)?\\)?\\(_[0-9]+\\)?:?"
-     "PH\\(ASE\\)?_?C\\(YC\\(LE\\)?\\)?"
-     "PH\\(ASE\\)?_?S\\(EQ\\(UENCE\\)?\\)?\\(_?[0-9]+\\)?"
-     "PH\\(ASE\\)?_?S\\(W\\(ITCH\\)?\\)?_?D\\(EL\\(AY\\)?\\)?\\(_?[12]\\)?"
-     "A\\(CQ\\(UISITION\\)?\\)?_?S\\(EQ\\(UENCE\\)?\\)?\\(_?[XY]\\)?"
-     "M\\(ICRO\\)?_?W\\(AVE\\)?\\(#[0-9]+\\)?"
-     "T\\(RAVELING\\)?_?W\\(AVE\\)?_?T\\(UBE\\)?_?G\\(ATE\\)?\\(#[0-9]+\\)?"
-     "T\\(RAVELING\\)?_?W\\(AVE\\)?_?T\\(UBE\\)?\\(#[0-9]+\\)?"
-     "DET\\(ECTION\\)?_?G\\(ATE\\)?\\(#[0-9]+\\)?"
-     "DET\\(ECTION\\)?\\(#[0-9]+\\)?"
-	 "DEF\\(ENSE\\)?\\(#[0-9]+\\)?"
-	 "P\\(ULSE\\)?_?SH\\(APE\\(R\\)?\\)?\\(#[0-9]+\\)?"
-     "R\\(ADIO\\)?_?F\\(REQ\\(UENCY\\)?\\)?_?G\\(ATE\\)?\\(#[0-9]+\\)?"
-     "R\\(ADIO\\)?_?F\\(REQ\\(UENCY\\)?\\)?\\(#[0-9]+\\)?"
-     "PH\\(ASE\\)?\\(_?[12]\\)?\\(#[0-9]+\\)?"
-     "O\\(THER\\)?\\(_?[1-4]\\)?\\(#[0-9]+\\)?"
-     "F\\(UNC\\(TION\\)?\\)?"
-     "S\\(TART\\)?"
-     "L\\(EN\\(GTH\\)?\\)?"
-     "D\\(EL\\(TA\\)?\\)?_?S\\(TART\\)?"
-     "D\\(EL\\(TA\\)?\\)?_?L\\(EN\\(GTH\\)?\\)?"
-     "M\\(AX\\(IMUM\\)?\\)?_?L\\(EN\\(GTH\\)?\\)?"
-     "DEL\\(AY\\)?"
-     "G\\(RACE\\)?_?P\\(ERIOD\\)?"
-     "P\\(OD\\)?_?[12]"
-     "P\\(OD\\)?"
-     "CH\\(ANNEL\\)"
-     "CH[0-9]"
-     "CH1[0-5]"
-	 "SOURCE_[0-3]"
-	 "DIO[1-2]"
-	 "DEFAULT_SOURCE"
-	 "NEXT_GATE"
-     "MATH[1-3]?"
-     "REF[1-4]"
-     "AUX[12]?"
-     "TRACE_[A-D]"
-     "M[1-4]"
-     "F[1-8]"
-     "LIN\\(E\\)?"
-	 "EXT\\(10\\)?"
-	 "FUNC_[EF]"
-	 "MEM_[CD]"
-     "INV\\(ERT\\(ED\\)?\\)?"
-     "V_?H\\(IGH\\)?"
-     "V_?L\\(OW\\)?"
-     "T\\(IME\\)?_?B\\(ASE\\)?\\(#[0-9]+\\)?"
-     "T\\(RIG\\(GER\\)?\\)?_?M\\(ODE\\)?\\(#[0-9]+\\)?"
-	 "MAX\\(IMUM\\)?_?PATT\\(ERN\\)?_?LEN\\(GTH\\)?\\(#[0-9]+\\)?"
-     "MODE"
-     "INT\\(ERN\\(AL\\)?\\)?"
-     "EXT\\(ERN\\(AL\\)?\\)?"
-     "SL\\(OPE\\)?"
-     "NEG\\(ATIVE\\)?"
-     "POS\\(ITIVE\\)?"
-     "LEV\\(EL\\)?"
-     "REP\\(EAT\\)?_?T\\(IME\\)?"
-     "REP\\(EAT\\)?_?F\\(REQ\\(UENCY\\)?\\)?"
-     "WHILE"
-	 "UNTIL"
-     "BREAK"
-     "NEXT"
-     "IF"
-     "ELSE"
-     "UNLESS"
-     "REPEAT"
-     "FOR"
-     "FOREVER"
-     "ON"
-     "OFF"
-     "TTL"
-     "ECL"
-	 "AND"
-	 "OR"
-	 "NOT"
-	 "XOR"
-     "[+-]?[xX]"
-     "[+-]?[yY]"
-	 "[cC][wW]" ) )
+  (concat "\\<\\("
+		  (mapconcat 
+		   'identity
+		   '("P\\(ULSE\\)?_?[0-9]+\\(\\(#[0-9]+\\)?\\|\\.\\|\\b\\)"
+			 "PH\\(ASE\\)?\\(_?[12]\\)?_?S\\(ET\\)?\\(U\\(P\\)?\\)?\\(_[0-9]+\\)?:?"
+			 "PH\\(ASE\\)?_?C\\(YC\\(LE\\)?\\)?"
+			 "PH\\(ASE\\)?_?S\\(EQ\\(UENCE\\)?\\)?\\(_?[0-9]+\\)?"
+			 "PH\\(ASE\\)?_?S\\(W\\(ITCH\\)?\\)?_?D\\(EL\\(AY\\)?\\)?\\(_?[12]\\)?"
+			 "A\\(CQ\\(UISITION\\)?\\)?_?S\\(EQ\\(UENCE\\)?\\)?\\(_?[XY]\\)?"
+			 "M\\(ICRO\\)?_?W\\(AVE\\)?\\(#[0-9]+\\)?"
+			 "T\\(RAVELING\\)?_?W\\(AVE\\)?_?T\\(UBE\\)?_?G\\(ATE\\)?\\(#[0-9]+\\)?"
+			 "T\\(RAVELING\\)?_?W\\(AVE\\)?_?T\\(UBE\\)?\\(#[0-9]+\\)?"
+			 "DET\\(ECTION\\)?_?G\\(ATE\\)?\\(#[0-9]+\\)?"
+			 "DET\\(ECTION\\)?\\(#[0-9]+\\)?"
+			 "DEF\\(ENSE\\)?\\(#[0-9]+\\)?"
+			 "P\\(ULSE\\)?_?SH\\(APE\\(R\\)?\\)?\\(#[0-9]+\\)?"
+			 "R\\(ADIO\\)?_?F\\(REQ\\(UENCY\\)?\\)?_?G\\(ATE\\)?\\(#[0-9]+\\)?"
+			 "R\\(ADIO\\)?_?F\\(REQ\\(UENCY\\)?\\)?\\(#[0-9]+\\)?"
+			 "PH\\(ASE\\)?\\(_?[12]\\)?\\(#[0-9]+\\)?"
+			 "O\\(THER\\)?\\(_?[1-4]\\)?\\(#[0-9]+\\)?"
+			 "F\\(UNC\\(TION\\)?\\)?"
+			 "S\\(TART\\)?"
+			 "L\\(EN\\(GTH\\)?\\)?"
+			 "D\\(EL\\(TA\\)?\\)?_?S\\(TART\\)?"
+			 "D\\(EL\\(TA\\)?\\)?_?L\\(EN\\(GTH\\)?\\)?"
+			 "M\\(AX\\(IMUM\\)?\\)?_?L\\(EN\\(GTH\\)?\\)?"
+			 "DEL\\(AY\\)?"
+			 "G\\(RACE\\)?_?P\\(ERIOD\\)?"
+			 "P\\(OD\\)?_?[12]"
+			 "P\\(OD\\)?"
+			 "CH\\(ANNEL\\)"
+			 "CH[0-9]"
+			 "CH1[0-5]"
+			 "SOURCE_[0-3]"
+			 "DIO[1-2]"
+			 "DEFAULT_SOURCE"
+			 "NEXT_GATE"
+			 "MATH[1-3]?"
+			 "REF[1-4]"
+			 "AUX[12]?"
+			 "TRACE_[A-D]"
+			 "M[1-4]"
+			 "F[1-8]"
+			 "LIN\\(E\\)?"
+			 "EXT\\(10\\)?"
+			 "FUNC_[EF]"
+			 "MEM_[CD]"
+			 "INV\\(ERT\\(ED\\)?\\)?"
+			 "V_?H\\(IGH\\)?"
+			 "V_?L\\(OW\\)?"
+			 "T\\(IME\\)?_?B\\(ASE\\)?\\(#[0-9]+\\)?"
+			 "T\\(RIG\\(GER\\)?\\)?_?M\\(ODE\\)?\\(#[0-9]+\\)?"
+			 "MAX\\(IMUM\\)?_?PATT\\(ERN\\)?_?LEN\\(GTH\\)?\\(#[0-9]+\\)?"
+			 "MODE"
+			 "INT\\(ERN\\(AL\\)?\\)?"
+			 "EXT\\(ERN\\(AL\\)?\\)?"
+			 "SL\\(OPE\\)?"
+			 "NEG\\(ATIVE\\)?"
+			 "POS\\(ITIVE\\)?"
+			 "LEV\\(EL\\)?"
+			 "REP\\(EAT\\)?_?T\\(IME\\)?"
+			 "REP\\(EAT\\)?_?F\\(REQ\\(UENCY\\)?\\)?"
+			 "WHILE"
+			 "UNTIL"
+			 "BREAK"
+			 "NEXT"
+			 "IF"
+			 "ELSE"
+			 "UNLESS"
+			 "REPEAT"
+			 "FOR"
+			 "FOREVER"
+			 "ON"
+			 "OFF"
+			 "TTL"
+			 "ECL"
+			 "[+-]?[xX]"
+			 "[+-]?[yY]"
+			 "[cC][wW]")
+		   "\\|")
+		  "\\)\\>\\|{\\|}")
+  "REGEXP for reserved words")
 
 (defvar edl-section-keywords
-  '( "DEV\\(ICE\\)?S?:"
-	 "VAR\\(IABLE\\)?S?:"
-	 "ASS\\(IGNMENT\\)?S?:"
-	 "PHA\\(SE\\)?S?:"
-	 "PREP\\(ARATION\\)?S?:"
-	 "EXP\\(ERIMENT\\)?:"
-	 "ON_STOP:"
-     "#EXIT"
-     "#exit"
-	 "#QUIT"
-	 "#quit"
-	 "#INCLUDE"
-	 "#include" ) )
-
+  (concat "\\<\\("
+		  (mapconcat 
+		   'identity
+		   '("DEV\\(ICE\\)?S?:"
+			 "VAR\\(IABLE\\)?S?:"
+			 "ASS\\(IGNMENT\\)?S?:"
+			 "PHA\\(SE\\)?S?:"
+			 "PREP\\(ARATION\\)?S?:"
+			 "EXP\\(ERIMENT\\)?:"
+			 "ON_STOP:"
+			 "#EXIT"
+			 "#exit"
+			 "#QUIT"
+			 "#quit"
+			 "#INCLUDE"
+			 "#include")
+		   "\\|")
+		  "\\)")
+  "REGEXP for section keywords")
 
 (defvar edl-unit-keywords
-  "[+-]?\\(\\([0-9]+\\(\\.\\([0-9]+\\)?\\)?\\)\\|\\(\\.[0-9]\\)\\)\\([eE][\\+\\-]?[0-9]+\\)?[ 	]?\\(\\([numkM]?\\(s\\|m\\|G\\|V\\|A\\|db\\|dB\\|Hz\\|T\\|K\\|C\\)\\)\\|cm^-1\\)" )
+  (concat 
+   "[+-]?"                                                     ; sign
+   "\\(\\([0-9]+\\(\\.\\([0-9]+\\)?\\)?\\)"                    ; int
+   "\\|\\(\\.[0-9]\\)\\)\\([eE][\\+\\-]?[0-9]+\\)?[ 	]?"    ;
+   "\\(\\([numkMG]?"
+   "\\(s\\|m\\|G\\|V\\|A\\|db\\|dB\\|Hz\\|T\\|K\\|C\\)\\)"
+   "\\|cm^-1\\)"
+   "\\>")
+  "REGEXP for number with unit")
+
+;; Note: the list of built-in functions is put in here when make is run
 
 (defvar edl-built-in-functions
-  '(BUILTIN_FUNCTION_LIST ) )
+  (concat "\\<\\("
+		  (mapconcat 'identity '(BUILTIN_FUNCTION_LIST) "\\|")
+		  "\\)\\>")
+  "REGEXP for EDL built-in functions")
+
+(defun append-func-number (word)
+  (concat word "\\(#[0-9]+\\)?"))
+
+;; Note: the list of device functions is put in here when make is run
 
 (defvar edl-device-functions
-  '(DEVICE_FUNCTION_LIST ) )
+  (concat "\\<\\("
+		  (mapconcat 'identity 
+					 (mapcar 'append-func-number
+							 '(DEVICE_FUNCTION_LIST))
+					 "\\|")
+		  "\\)\\>")
+  "REGEXP for EDL device functions")
 
-(defun append_func_number (word)
-  (concat word "\\(#[0-9]\\)?"))
+(defvar edl-extra-operators
+  (concat "\\("
+		  (mapconcat
+		   'identity
+		   '("AND"
+			 "OR"
+			 "NOT"
+			 "XOR")
+		   "\\|")
+		  "\\)")
+  "REGEXP for EDL extra operators")
 
 (defvar edl-font-lock-keywords
-  (list
-   (cons (concat "\\(" (mapconcat 'identity edl-comments "\\|") "\\)")
-		 'font-lock-comment-face )
-   (cons (mapconcat 'identity edl-strings "\\|")
-		 'font-lock-string-face )
-   (cons (concat "\\<\\("
-				 (mapconcat 'identity edl-section-keywords "\\|") "\\)")
-		 'font-lock-warning-face )
-   (cons (concat "\\<\\("
-				 (mapconcat
-				  'identity (mapcar 'append_func_number
-									(identity edl-device-functions))
-				  "\\|")
-				 "\\)\\>")
-		 'font-lock-function-name-face )
-   (cons (concat "\\<\\("
-				 (mapconcat 'identity edl-built-in-functions "\\|")
-				 "\\)\\>")
-		 'font-lock-builtin-face )
-   (cons (concat "\\<\\("
-				 (mapconcat 'identity edl-reserved-words "\\|") "\\)\\>\\|{\\|}")
-		 'font-lock-keyword-face)
-   (cons "\\(=\\|<=\\|>=\\|==\\|!=\\|<\\|>\\|&\\||\\|!\\|~\\|?\\|:\\)" 'font-lock-builtin-face)
-   (cons (concat edl-unit-keywords "\\>")
-		 'font-lock-type-face))
-  "EDL expressions to highlight." )
+  (list (cons edl-strings            'font-lock-string-face)
+		(cons edl-comments           'font-lock-comment-face)
+		(cons edl-section-keywords   'font-lock-warning-face)
+		(cons edl-device-functions   'font-lock-function-name-face)
+		(cons edl-built-in-functions 'font-lock-builtin-face)
+		(cons edl-reserved-words     'font-lock-keyword-face)
+		(cons edl-extra-operators    'font-lock-builtin-face)
+		(cons edl-unit-keywords      'font-lock-type-face))
+  "List of EDL keywords for font locking")
+
+(defun edl-indent-line ()
+   "Indent current line of EDL code"
+   (interactive)
+   (message "%d %d" (current-column) (current-indentation))
+   (let ((savep (> (current-column) (current-indentation)))
+		 (indent (condition-case nil (max (edl-calculate-indentation) 0)
+				   (error 0))))
+     (if savep
+		 (save-excursion (indent-line-to indent))
+		 (indent-line-to indent))))
+
+
+(defun edl-calculate-indentation ()
+  "Return the column to which the current line should be indented"
+  (save-excursion
+	(beginning-of-line)
+	(if (bobp)
+		0         ; no identation of first line
+		(cond
+		  ((eq (get-text-property (point) 'face) 'font-lock-comment-face)
+		   (current-indentation))  ; do nothing if this is a comment
+		  ((looking-at "[ \t]*}")
+		   (let ((opened (count-matches "{" 0 (point)))
+				 (closed (count-matches "}" 0 (point))))
+			 (* tab-width (1- (- opened closed)))))
+		  ((looking-at "[ \t]*\\(\)\\|\\[\\)")
+		   (backward-up-list)
+		   (current-column))
+		  (t
+		   (backward-up-list)
+		   (cond
+			 ((looking-at "\\(\(\\|\\[\\)")
+			  (forward-char)
+			  (skip-chars-forward " \t")
+			  (current-column))
+			 ((looking-at "{")
+			  (beginning-of-line-text)
+			  (+ tab-width (current-column)))
+			 (t
+			  0)))))))
 
 ;;;###autoload
+
 (defun edl-mode ()
   "Major mode for editing EDL files"
 
@@ -240,13 +319,16 @@
   (make-local-variable 'font-lock-defaults)
   (setq font-lock-defaults '(edl-font-lock-keywords nil nil))
 
-  (setq tab-width 4)
+  (setq tab-width edl-tab-width)
+
+  (make-local-variable 'indent-line-function)
+  (setq indent-line-function 'edl-indent-line)
 
   ;; this is necessary for 'comment-region'
 
-  (setq comment-start "//" )
+  (setq comment-start "//")
 
-  (run-hooks 'edl-mode-hook) )
+  (run-hooks 'edl-mode-hook))
 
 (provide 'edl-mode)
 

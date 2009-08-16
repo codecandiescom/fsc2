@@ -289,24 +289,25 @@ FOREVER {
 	   problems and we need to make sure data are saved for that case) */
 
 	reset_file( File_p );
-	fsave( File_p, "Date              : # #\n"
-    	           "Start field       = # G\n"
-                   "End field         = # G\n"
-                   "Field step size   = # G\n"
-                   "No. of scans      = #\n"
-                   "No. of averages   = #\n"
-                   "Signal channel    = ACQ_CH\n"
-                   "Averaging channel = AVG_CH\n"
-                   "Sensitivity       = # mV\n"
-                   "Timebase          = # us\n"
-                   "Time resolution   = # ns\n"
-                   "Trigger channel   = TRG_CH\n"
-                   "Trigger position  = # us\n"
-                   "Trigger mode      = NORM\n"
-                   "Trigger level     = # V\n"
-                   "No. of traces     = #\n"
-                   "Trace length      = #\n"
-                   "No signal traces  = #\n",
+	fsave( File_p,
+		   "Date              : # #\n"
+    	   "Start field       = # G\n"
+           "End field         = # G\n"
+           "Field step size   = # G\n"
+           "No. of scans      = #\n"
+           "No. of averages   = #\n"
+           "Signal channel    = ACQ_CH\n"
+           "Averaging channel = AVG_CH\n"
+           "Sensitivity       = # mV\n"
+           "Timebase          = # us\n"
+           "Time resolution   = # ns\n"
+           "Trigger channel   = TRG_CH\n"
+           "Trigger position  = # us\n"
+           "Trigger mode      = NORM\n"
+           "Trigger level     = # V\n"
+           "No. of traces     = #\n"
+           "Trace length      = #\n"
+           "No signal traces  = #\n",
            date( ), time( ), field[ 1 ], field[ Num_Traces ], field_step,
            Scan_No, Num_Avg, digitizer_sensitivity( ACQ_CH ) / 1 mV,
            timebase / 1 us, time_res / 1 ns, pretrigger / 1 us,
@@ -345,24 +346,25 @@ reset_file( File_p );
 reset_file( File_f );
 reset_file( File_r );
 
-fsave( File_p, "Date              : # #\n"
-               "Start field       = # G\n"
-               "End field         = # G\n"
-               "Field step size   = # G\n"
-               "No. of scans      = #\n"
-               "No. of averages   = #\n"
-               "Signal channel    = ACQ_CH\n"
-               "Averaging channel = AVG_CH\n"
-               "Sensitivity       = # mV\n"
-               "Timebase          = # us\n"
-               "Time resolution   = # ns\n"
-               "Trigger channel   = TRG_CH\n"
-               "Trigger position  = # us\n"
-               "Trigger mode      = NORM\n"
-               "Trigger level     = # V\n"
-               "No. of traces     = #\n"
-               "Trace length      = #\n"
-               "No signal traces  = #\n",
+fsave( File_p,
+	   "Date              : # #\n"
+       "Start field       = # G\n"
+       "End field         = # G\n"
+       "Field step size   = # G\n"
+       "No. of scans      = #\n"
+       "No. of averages   = #\n"
+       "Signal channel    = ACQ_CH\n"
+       "Averaging channel = AVG_CH\n"
+       "Sensitivity       = # mV\n"
+       "Timebase          = # us\n"
+       "Time resolution   = # ns\n"
+       "Trigger channel   = TRG_CH\n"
+       "Trigger position  = # us\n"
+       "Trigger mode      = NORM\n"
+       "Trigger level     = # V\n"
+       "No. of traces     = #\n"
+       "Trace length      = #\n"
+       "No signal traces  = #\n",
        date( ), time( ), field[ 1 ],
        Scans_Done == 0 ? field[ I - 1 ] : field[ Num_Traces ], field_step,
        Scans_Done == 0 ? 1 : Scans_Done, Num_Avg,

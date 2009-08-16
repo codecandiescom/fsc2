@@ -21,10 +21,8 @@
 @node EDL Mode for Emacs and VIM, Acknowledgments, Reserved Words, fsc2
 @appendix EDL Mode for Emacs and VIM
 
-There exists a still not too useful @emph{emacs} mode for editing
-@code{EDL} scripts. It currently only does syntax highlighting.  This
-makes reserved words stand out and can help e.g.@: avoiding accidentally
-using reserved words as variable names.
+There exists an @emph{emacs} mode for editing @code{EDL} scripts. It
+currently does indentation and syntax highlighting.
 
 To automatically have emacs switch to @code{EDL} mode whenever you load a
 file with the extension @code{edl} you need to add the following lines
