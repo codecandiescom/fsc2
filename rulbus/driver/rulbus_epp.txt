@@ -2,40 +2,44 @@ Rulbus EPP Device Driver Description
 ====================================
 
 The driver supports the parallel port EPP interface for the Rulbus
-(Rijksuniversiteit Leiden BUS). The driver supports the open(), close()
-and ioctl() system calls. Please note that that driver will probably
-work with PC style hardware only. It also requires the parallel port
-being set up to EPP mode (probably from BIOS)!
+(Rijksuniversiteit Leiden BUS). The driver supports the open(),
+close() and ioctl() system calls. Please note that that the driver
+will probably work with PC style hardware only. It also requires the
+parallel port being set up to EPP mode (probably from BIOS)!
 
 
 The open() and close() system calls
 ===================================
 
-The device file can be opened from more than one process/thread at a time.
-If you call open() with the O_NONBLOCK or O_NDELAY flags and some other
-process is just in the process of opening the device you will receive a
-return value of EAGAIN. Otherwise the call may return EINTR if your process
-receives a signal before it was able to open the device. The same holds
-for the close() call. Moreover, if you try to close an already closed
-device file you will receive a return value of ENODEV.
+The device file can be opened from more than one process/thread at a
+time. If you call open() with the O_NONBLOCK or O_NDELAY flags and
+some other process is just in the process of opening the device you
+will receive a return value indicating failure (i.e. -1) with
+'errno' set to EAGAIN. Otherwise the call may fail with 'errno' set
+to EINTR if your process receives a signal before it was able to
+open the device. The same holds for the close() call. Moreover, if
+you try to close an already closed device file it will fail with
+'errno' set to ENODEV.
 
-Moreover, you can open the device with the O_EXCL flag which is treated
-to mean that you want exclusive access to the device. If exclusive access
-can't be granted (because some other process or thread already opened the
-device file) EEXIST will be returned. Even if you try to open device file
-without specifying the O_EXCL flag you must be prepared to receive a
-return value of EEXIST when some other process or thread already has been
-granted exclusive access to the file.
+Moreover, you can open the device with the O_EXCL flag which is
+treated to mean that you want exclusive access to the device. If
+exclusive access can't be granted (because some other process or
+thread already opened the device file) open() will fail with 'errno'
+being set to EEXIST. Even if you try to open device file without
+specifying the O_EXCL flag you must be prepared for the call to fail
+with 'errno' set to EEXIST if some other process or thread already
+has been granted exclusive access to the file.
 
 
-The ioctl() calls
-=================
+The ioctl() system call
+=======================
 
-If you call ioctl() on the device file that was opened with the O_NONBLOCK
-or O_NDELAY flags and some other process is just in the process also of
-doing an ioctl() call on the device you will receive a return value of
-EAGAIN. Otherwise the call may return EINTR if your process did receive a
-signal before it was able to read from or write to the device.
+If you call ioctl() on the device file that was opened with the
+O_NONBLOCK or O_NDELAY flags and some other process is just in the
+process also of doing an ioctl() call on the device the call will
+fail and 'errno'be set to EAGAIN. Otherwise the call may also fail
+with 'errno' being EINTR if your process did receive a signal before
+it was able to read from or write to the device.
 
 All ioctl() data are passed via the following structure
 
@@ -47,104 +51,138 @@ typedef struct {
     size_t len;
 } RULBUS_EPP_IOCTL_ARGS;
 
-There are only four ioctl() requests, RULBUS_EPP_IOC_READ to read one or
-more bytes from a single address, RULBUS_EPP_IOC_READ_RANGE to read one
-byte each from a set of consecutive addresses, RULBUS_EPP_IOC_WRITE to
-write one or more bytes and RULBUS_EPP_IOC_WRITE_RANGE to write a byte
-to a each of set of consecutive addresses.
+There are only four ioctl() requests, RULBUS_EPP_IOC_READ to read
+one or more bytes from a single address, RULBUS_EPP_IOC_READ_RANGE
+to read one byte each from a set of consecutive addresses,
+RULBUS_EPP_IOC_WRITE to write one or more bytes and
+RULBUS_EPP_IOC_WRITE_RANGE to write a byte to a each of set of
+consecutive addresses.
 
 
 RULBUS_EPP_IOC_READ
 -------------------
 
-When called with this request value, the 'rack' member of the structure
-must be set to the racks Rulbus rack number (between 0 and 15) and the
-'offset' member to the Rulbus address offset of the card to be read from,
-a number between 1 and 0xFE. The 'len' member must be set to the number
-of bytes to be read from the address, which must be at least 1. If 'len'
-is 1 the byte that has been read is returned in the 'byte' member of the
-structure, if 'len' is larger than 1 the bytes read are copied to the
-user supplied buffer pointed to by the 'data' member.
+When called with this request value, the 'rack' member of the
+structure must be set to the racks Rulbus rack number (between 0 and
+15) and the 'offset' member to the Rulbus address offset of the card
+to be read from, a number between 1 and 0xFE. The 'len' member must
+be set to the number of bytes to be read from the address, which
+must be at least 1. If 'len' is 1 the byte that has been read is
+returned in the 'byte' member of the structure, if 'len' is larger
+than 1 the bytes read are copied to the user supplied buffer pointed
+to by the 'data' member.
 
-On failure the ioctl() function returns -1 and 'errno' is set to a value
-indicating the reasons for the failure. If the device isn't open errno is
-set to ENODEV. If the 'rack' member is larger than 15, 'offset' not between
-1 and 0xFE or 'len' is less than 1 or, while 'len' is larger than 1, 'data'
-is NULL errno is set to EINVAL. If not enough memory can be allocated for
-internal buffers errno is set to ENOMEM. If the communication with the
-interface fails (usually due to a timeout) errno is set to EIO. On failure
-to copy the read data to the user supplied buffer errno is set to EACCES.
+On failure the ioctl() function returns -1 and 'errno' is set to a
+value indicating the reasons for the failure:
+
+ ENODEV   device isn't open
+
+ EINVAL   invalid arguments ('rack' member is larger than 15,
+          'offset' not between 1 and 0xFE or 'len' is less than
+          1 or, while 'len' is larger than 1, 'data' is NULL)
+
+ ENOMEM   not enough memory for internal buffers
+
+ EIO      communication with interface failed (usually due to
+          a timeout)
+
+ EACCES   failure to copy data read to the user supplied buffer
 
 
 RULBUS_EPP_IOC_READ_RANGE
 -------------------------
 
-When called with this request value, the 'rack' member of the structure
-must be set to the racks Rulbus rack number (between 0 and 15) and the
-'offset' member to the first Rulbus address offset of a consecutive range
-of addresses to be read from, a number between 1 and 0xFE. The sum of the
-'offset' and the 'len' member may not be larger than 0xFE. The 'len'
-member must be set to the number of addresses a bytes is to be read from,
-which must be at least 1. If 'len' is 1 the byte that has been read is
-returned in the 'byte' member of the structure, if 'len' is larger than
-1 the bytes read from the consecutive addresses are copied to the user 
-supplied buffer pointed to by the 'data' member.
+When called with this request value, the 'rack' member of the
+structure must be set to the racks Rulbus rack number (between 0 and
+15) and the 'offset' member to the first Rulbus address offset of a
+consecutive range of addresses to be read from, a number between 1
+and 0xFE. The sum of the 'offset' and the 'len' member may not be
+larger than 0xFE. The 'len' member must be set to the number of
+addresses a bytes is to be read from, which must be at least 1. If
+'len' is 1 the byte that has been read is returned in the 'byte'
+member of the structure, if 'len' is larger than 1 the bytes read
+from the consecutive addresses are copied to the user supplied
+buffer pointed to by the 'data' member.
 
-On failure the ioctl() function returns -1 and 'errno' is set to a value
-indicating the reasons for the failure. If the device isn't open errno is
-set to ENODEV. If the 'rack' member is larger than 15, 'offset' not between
-1 and 0xFE, the sum of 'offset' and 'len' is larger than 0xFE or 'len' is
-less than 1 or, while 'len' is larger than 1, 'data' is NULL errno is set
-to EINVAL. If not enough memory can be allocated for internal buffers errno
-is set to ENOMEM. If the communication with the interface fails (usually
-due to a timeout) errno is set to EIO. On failure to copy the read data to
-the user supplied buffer errno is set to EACCES.
+On failure the ioctl() function returns -1 and 'errno' is set to a
+value indicating the reasons for the failure:
+
+ ENODEV   device isn't open
+
+ EINVAL   invalid arguments ('rack' member is larger than 15,
+          'offset' not between 1 and 0xFE, the sum of 'offset'
+          and 'len' is larger than 0xFE or 'len' is less than
+          1 or, while 'len' is larger than 1, 'data' is NULL)
+
+ ENOMEM   not enough memory for internal buffers
+
+ EIO      communication with interface failed (usually due to
+          a timeout)
+
+ EACCES   failure to copy data read to the user supplied buffer
 
 
 RULBUS_EPP_IOC_WRITE
 --------------------
 
-When called with this request value, the 'rack' member of the structure
-must be set to the racks Rulbus rack number (between 0 and 15) and the
-'offset' member to the Rulbus address offset of the card to be read from,
-a number between 1 and 0xFE. The 'len' member must be set to the number
-of bytes to be written to the address, which must be at least 1. If 'len'
-is 1 the byte that will be written is expected to be stored in the 'byte'
-member of the structure, if 'len' is larger than 1 the bytes to be written
-are copied from the user supplied buffer pointed to by the 'data' member.
+When called with this request value, the 'rack' member of the
+structure must be set to the racks Rulbus rack number (between 0 and
+15) and the 'offset' member to the Rulbus address offset of the card
+to be read from, a number between 1 and 0xFE. The 'len' member must
+be set to the number of bytes to be written to the address, which
+must be at least 1. If 'len' is 1 the byte that will be written is
+expected to be stored in the 'byte' member of the structure, if
+'len' is larger than 1 the bytes to be written are copied from the
+user supplied buffer pointed to by the 'data' member.
 
-On failure the ioctl() function returns -1 and 'errno' is set to a value
-indicating the reasons for the failure. If the device isn't open errno is
-set to ENODEV. If the 'rack' member is larger than 15, 'offset' not between
-1 and 0xFE or 'len' is less than 1, or, while 'len' is larger than 1, 'data'
-is NULL errno is set to EINVAL. If not enough memory can be allocated for
-internal buffers errno is set to ENOMEM. On failure to copy the data to
-be written from the user supplied buffer errno is set to EACCES. If the
-communication with the interface fails (usually due to a timeout) errno
-is set to EIO.
+On failure the ioctl() function returns -1 and 'errno' is set to a
+value indicating the reasons for the failure:
+
+ ENODEV   device isn't open
+
+ EINVAL   invalid arguments ('rack' member is larger than 15,
+          'offset' not between 1 and 0xFE or 'len' is less than
+          1, or, while 'len' is larger than 1, 'data' is NULL)
+
+ ENOMEM   not enough memory for internal buffers
+
+ EIO      communication with interface failed (usually due to
+          a timeout)
+
+ EACCES   failure to copy data to be written from the user
+          supplied buffer
 
 
 RULBUS_EPP_IOC_WRITE_RANGE
 --------------------------
 
-When called with this request value, the 'rack' member of the structure
-must be set to the racks Rulbus rack number (between 0 and 15) and the
-'offset' member to the first Rulbus address offset of the consecutive
-set of addresses of the card to be read from, a number between 1 and
-0xFE. The sum of the 'offset' and the 'len' member may not be larger
-than 0xFE.  The 'len' member must be set to the number of addresses a
-byte is to be written to. which must be at least 1. If 'len' is 1 the
-byte that will be written is expected to be stored in the 'byte' member
-of the structure, if 'len' is larger than 1 the bytes to be written to
-the consecutive addresses are copied from the user supplied buffer
-pointed to by the 'data' member.
+When called with this request value, the 'rack' member of the
+structure must be set to the racks Rulbus rack number (between 0 and
+15) and the 'offset' member to the first Rulbus address offset of
+the consecutive set of addresses of the card to be read from, a
+number between 1 and 0xFE. The sum of the 'offset' and the 'len'
+member may not be larger than 0xFE. The 'len' member must be set to
+the number of addresses a byte is to be written to. which must be at
+least 1. If 'len' is 1 the byte that will be written is expected to
+be stored in the 'byte' member of the structure, if 'len' is larger
+than 1 the bytes to be written to the consecutive addresses are
+copied from the user supplied buffer pointed to by the 'data'
+member.
 
-On failure the ioctl() function returns -1 and 'errno' is set to a value
-indicating the reasons for the failure. If the device isn't open errno is
-set to ENODEV. If the 'rack' member is larger than 15, 'offset' not between
-1 and 0xFE, th sum of 'offset' and 'len' is larger than 0xFE or 'len' is
-less than 1, or, while 'len' is larger than 1, 'data' is NULL errno is se
-to EINVAL. If not enough memory can be allocated for internal buffers errno
-is set to ENOMEM. On failure to copy the data to be written from the user
-supplied buffer errno is set to EACCES. If the communication with the
-interface fails (usually due to a timeout) errno is set to EIO.
+On failure the ioctl() function returns -1 and 'errno' is set to a
+value indicating the reasons for the failure:
+
+ ENODEV   device isn't open
+
+ EINVAL   invalid arguments ('rack' member is larger than 15,
+          'offset' not between 1 and 0xFE, th sum of 'offset'
+          and 'len' is larger than 0xFE or 'len' is less than
+          1, or, while 'len' is larger than 1, 'data' is NULL)
+
+ ENOMEM   not enough memory for internal buffers
+
+ EIO      communication with interface failed (usually due to
+          a timeout)
+
+ EACCES   failure to copy data to be written from the user
+          supplied buffer
