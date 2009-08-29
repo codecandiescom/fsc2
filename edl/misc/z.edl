@@ -7,7 +7,7 @@ N = 400,
 M = 250;
 j[ 4, N ];
 k[ N ];
-a[ N ], b[ N ];
+a[ N ], b[ N ], c[ N ], z[ N ];
 FILE;
 t;
 xN[ N ];
@@ -15,11 +15,16 @@ xN[ N ];
 PREP:
 
 init_2d( 4, N, M, -0.1 s, 5 ms, 3325 G, 2.0 G, "Time after laser flash [µs]",
-		 "Magnetic field [G]", "Signal intensity [V]" );
+		 "Magnetic field [G]", "Signal intensity [mV]" );
 
 EXP:
 
 t = delta_time( );
+
+FOR K = 20 : N {
+	z[ K ] = 1.0 - exp( - ( K - 20 ) / 3.0 );
+}
+
 set_seed( 23423 );
 xN = lin_space( 1, N, N ) - 20.0;
 
@@ -28,6 +33,9 @@ FOR K = 1 : M {
 		* exp( - 3.0 * xN / N );
    	b = 0.07 * exp( - ( ( K - 0.3 * M ) / ( 0.1 * M ) )^2 )
 		* exp( - 1.5 * xN / N );
+
+	a *= z;
+	b *= z;
 
 	FOR I = 1 : 20
 	{

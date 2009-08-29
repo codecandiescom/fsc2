@@ -1273,7 +1273,7 @@ get_fd_list( void )
 
     while ( ( de = readdir( dir ) ) != NULL )
     {
-        for ( dn = de->d_name; *dn && isdigit( *dn ); dn++ )
+        for ( dn = de->d_name; *dn && isdigit( ( unsigned char ) *dn ); dn++ )
             /* empty */ ;
 
         if ( *dn != '\0' )

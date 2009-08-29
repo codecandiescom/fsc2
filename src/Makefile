@@ -74,7 +74,7 @@ modules:
 # the dynamically loaded libraries need to see at least some of them.
 
 fsc2: $(objects)
-	$(CC) -o $@ $(objects) $(LIBS) -Wl,-E
+	$(CC) -o $@ $^ $(LIBS) -Wl,-E
 
 %.o: %.c $(headers)
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $<
@@ -112,23 +112,23 @@ fsc2_clean.c: fsc2_clean.l
 # Make utility for interfacing with fsc2
 
 fsc2_connect: fsc2_connect.o
-	$(CC) -o $@ $^
+	$(CC) -o $@ $<
 
 
 # Make utility for interfacing with fsc2
 
 fsc2_addr2line: fsc2_addr2line.o
-	$(CC) -o $@ $^
+	$(CC) -o $@ $<
 
 
 # Create libraries for the graphical interface
 
 %.fsc2_so: %.o
-	$(CC) $(LFLAGS) $^ -o $@
+	$(CC) $(LFLAGS) -o $@ $<
 	chmod 644 $@
 
 $(resources:.fd=.o): %.o: %.c %.h
-	$(CC) $(CFLAGS) $(INCLUDES) $(LFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) $(LFLAGS) -c -o $@ $<
 
 %.c %.h: %.fd
 	fdesign -convert $<

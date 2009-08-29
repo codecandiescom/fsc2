@@ -196,7 +196,7 @@ get_print_command( void )
             return NULL;
         }
 
-        for ( p = line; *p && isspace( ( int) *p ); p++ )
+        for ( p = line; *p && isspace( ( unsigned char ) *p ); p++ )
             /* empty */ ;
 
         if ( *p && *p != '#' )

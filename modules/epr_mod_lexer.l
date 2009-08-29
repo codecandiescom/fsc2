@@ -226,7 +226,7 @@ NAME_VAL "\""[^\"]*"\""
 {FUNIT}     {
                 char *u = epr_mod_text;
 
-                while ( isspace( ( int ) *u ) )
+                while ( isspace( ( unsigned char ) *u ) )
                     u++;
 
                 switch ( *u )

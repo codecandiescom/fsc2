@@ -428,7 +428,7 @@ multimeter_get_data( Var_T * v )
 
             reply[ length - 1 ] = '\0';
 
-            if ( ! isspace( reply[ 10 ] ) )
+            if ( ! isspace( ( unsigned char ) reply[ 10 ] ) )
                 print( WARN, "Multimeter overloaded, please adjust range.\n" );
 
             break;

@@ -1141,7 +1141,7 @@ scan_args( int   * argc,
             else
                 for ( Fsc2_Internals.num_test_runs = 0, i = 2;
                       argv[ cur_arg ][ i ] != '\0'; i++ )
-                    if ( isdigit( argv[ cur_arg ][ i ] ) )
+                    if ( isdigit( ( unsigned char ) argv[ cur_arg ][ i ] ) )
                         Fsc2_Internals.num_test_runs =
                                              Fsc2_Internals.num_test_runs * 10
                                            + ( argv[ cur_arg ][ i ] - '0' );

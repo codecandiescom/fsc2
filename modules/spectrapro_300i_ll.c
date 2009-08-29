@@ -1012,19 +1012,19 @@ spectrapro_300i_install_grating( long         gn,
     strncpy( blaze, blaze_id, strlen( blaze_id ) );
 
     if (    strlen( blaze_id ) == 3
-         && isdigit( ( int ) blaze_id[ 0 ] )
-         && isdigit( ( int ) blaze_id[ 1 ] )
-         && isdigit( ( int ) blaze_id[ 2 ] ) )
+         && isdigit( ( unsigned char ) blaze_id[ 0 ] )
+         && isdigit( ( unsigned char ) blaze_id[ 1 ] )
+         && isdigit( ( unsigned char ) blaze_id[ 2 ] ) )
         strncpy( blaze + 4, "nm", 2 );
     else if (    ( strlen( blaze_id ) == 1 &&
                    isdigit( ( int ) blaze_id[ 0 ] ) )
               || (   strlen( blaze_id ) == 2
-                   && isdigit( ( int ) blaze_id[ 0 ] )
-                   && isdigit( ( int ) blaze_id[ 1 ] ) )
+                   && isdigit( ( unsigned char ) blaze_id[ 0 ] )
+                   && isdigit( ( unsigned char ) blaze_id[ 1 ] ) )
                  || ( strlen( blaze_id ) == 3
-                   && isdigit( ( int ) blaze_id[ 0 ] )
+                   && isdigit( ( unsigned char ) blaze_id[ 0 ] )
                    && blaze_id[ 1 ] == '.'
-                   && isdigit( ( int ) blaze_id[ 2 ] ) ) )
+                   && isdigit( ( unsigned char ) blaze_id[ 2 ] ) ) )
         strncpy( blaze + strlen( blaze_id ) + 1, "um", 2 );
 
     /* Setting the blaze wavelenght is a bit of bother since the BLAZE command
