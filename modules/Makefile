@@ -394,6 +394,6 @@ clean:
 	done;
 	$(RM) $(RMFLAGS) *.fsc2_so
 
-# don't automatically delete intermediate files created by flex
+# Don't automatically delete intermediate files created by flex
 
 .PRECIOUS: %.c

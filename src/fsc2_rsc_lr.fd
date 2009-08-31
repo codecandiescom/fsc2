@@ -796,7 +796,7 @@ type: MULTILINE_INPUT
 box: 10 30 345 205
 boxtype: FL_DOWN_BOX
 colors: FL_COL1 FL_MCOL
-alignment: FL_ALIGN_TOP_LEFT
+alignment: FL_ALIGN_LEFT_TOP
 style: FL_NORMAL_STYLE
 size: FL_SMALL_SIZE
 lcol: FL_BLACK
@@ -1748,7 +1748,7 @@ type: MULTILINE_INPUT
 box: 10 30 345 75
 boxtype: FL_DOWN_BOX
 colors: FL_COL1 FL_MCOL
-alignment: FL_ALIGN_TOP_LEFT
+alignment: FL_ALIGN_LEFT_TOP
 style: FL_NORMAL_STYLE
 size: FL_DEFAULT_SIZE
 lcol: FL_BLACK
