@@ -30,9 +30,22 @@ const char generic_type[ ] = DEVICE_TYPE;
 BVT3000 bvt3000;
 
 
-static double flow_rates[ ] = { 0.0, 135.0, 270.0, 400.0, 535.0, 670.0, 800.0,
-                                935.0, 1070.0, 1200.0, 1335.0, 1470.0, 1600.0,
-                                1735.0, 1870.0, 2000.0 };
+static double flow_rates[ ] = {    0.0,    /* in l/h */
+                                 135.0,
+                                 270.0,
+                                 400.0,
+                                 535.0,
+                                 670.0,
+                                 800.0,
+                                 935.0,
+                                1070.0,
+                                1200.0,
+                                1335.0,
+                                1470.0,
+                                1600.0,
+                                1735.0,
+                                1870.0,
+                                2000.0 };
 
 
 /*---------------------------------------------------------------*
@@ -49,6 +62,7 @@ bvt3000_init_hook( void )
     bvt3000.setpoint           = TEST_SETPOINT;
     bvt3000.min_setpoint       = MIN_SETPOINT;
     bvt3000.max_setpoint       = MAX_SETPOINT;
+    bvt3000.heater_state       = SET;
     bvt3000.heater_power_limit = TEST_HEATER_POWER_LIMIT;
     bvt3000.heater_power       = TEST_HEATER_POWER;
     bvt3000.flow_rate          = TEST_FLOW_RATE;
@@ -142,8 +156,8 @@ temp_contr_setpoint( Var_T * v )
         return vars_push( FLOAT_VAR, sp );
     }
 
-    eurotherm902s_set_setpoint( sp );
-    return vars_push( FLOAT_VAR, eurotherm902s_get_setpoint( ) );
+    eurotherm902s_set_setpoint( SP1, sp );
+    return vars_push( FLOAT_VAR, eurotherm902s_get_setpoint( SP1 ) );
 }
 
 
@@ -151,7 +165,40 @@ temp_contr_setpoint( Var_T * v )
  *---------------------------------------------------------------*/
 
 Var_T *
-temp_contr_heater_power_limit( Var_T *v )
+temp_contr_heater_state( Var_T * v )
+{
+    bool state;
+
+    if ( v == NULL )
+    {
+        if ( FSC2_MODE == TEST )
+            return vars_push( INT_VAR, ( long ) bvt3000.heater_state );
+        return vars_push( FLOAT_VAR, ( long ) bvt3000_get_heater_state( ) );
+    }
+
+    state = get_boolean( v );
+
+    too_many_arguments( v );
+
+    if ( FSC2_MODE != EXPERIMENT )
+    {
+        bvt3000.heater_state = state;
+        return vars_push( INT_VAR, ( long ) state );
+    }
+
+    bvt3000_set_heater_power_limit( state );
+    bvt3000.heater_state = state;
+    return vars_push( INT_VAR,
+                      ( long ) ( bvt3000.heater_state =
+                                               bvt3000_get_heater_state( ) ) );
+}
+
+
+/*---------------------------------------------------------------*
+ *---------------------------------------------------------------*/
+
+Var_T *
+temp_contr_heater_power_limit( Var_T * v )
 {
     double hp;
 
@@ -273,6 +320,15 @@ temp_contr_flow_rate( Var_T * v )
          && fabs( ( flow_rate - flow_rates[ fr_index ] ) / flow_rate ) > 0.01 )
         print( WARN, "Flow rate had to be adjusted from %.1f l/h to "
                "%.1f l/h.\n", flow_rate, flow_rates[ fr_index ] );
+
+    /* Take care: when heater is of flow rate gets autoatically changed
+       to the default rate and changes aren't possible */
+
+    if ( ! bvt3000.heater_state )
+    {
+        print( FATAL, "Can't set flow rate while heater is off.\n" );
+        THROW( EXCEPTION );
+    }
 
     if ( FSC2_MODE != EXPERIMENT )
     {

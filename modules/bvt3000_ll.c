@@ -128,7 +128,7 @@ bvt3000_init( void )
 
     /* Check that during the test run no out of range setpoint was requested */
 
-    sp = eurotherm902s_get_min_setpoint( );
+    sp = eurotherm902s_get_min_setpoint( SP1 );
     if ( bvt3000.min_setpoint < sp )
     {
         print( FATAL, "During test run a setpoint of %f K was requested "
@@ -138,7 +138,7 @@ bvt3000_init( void )
     }
     bvt3000.min_setpoint = sp;
 
-    sp = eurotherm902s_get_max_setpoint( );
+    sp = eurotherm902s_get_max_setpoint( SP1 );
     if ( bvt3000.max_setpoint > sp )
     {
         print( FATAL, "During test run a setpoint of %f K was requested "
@@ -155,6 +155,10 @@ bvt3000_init( void )
         print( FATAL, "No temperature sensor connected or sensor broken.\n" );
         THROW( EXCEPTION );
     }
+
+    /* Check if the heater is on or off (must be on for setting flow rate) */
+
+    bvt3000.heater_state = bvt3000_get_heater_state( );
 }
 
 
@@ -162,17 +166,18 @@ bvt3000_init( void )
  *---------------------------------------------------------------*/
 
 void
-bvt3000_set_flow_rate( unsigned int fr )
+bvt3000_set_flow_rate( unsigned int flow_rate )
 {
     char buf[ 20 ];
 
 
-    fsc2_assert( fr <= 0x0F );
+    fsc2_assert( flow_rate <= 0x0F );
+    fsc2_assert( bvt3000.heater_state == SET );
 
-    sprintf( buf, "AF>%c%c%c%c", fr & 0x8 ? '1' : '0',
-                                 fr & 0x4 ? '1' : '0',
-                                 fr & 0x2 ? '1' : '0',
-                                 fr & 0x1 ? '1' : '0' );
+    sprintf( buf, "AF>%c%c%c%c", flow_rate & 0x8 ? '1' : '0',
+                                 flow_rate & 0x4 ? '1' : '0',
+                                 flow_rate & 0x2 ? '1' : '0',
+                                 flow_rate & 0x1 ? '1' : '0' );
     bvt3000_send_command( buf );
 }
 
@@ -183,7 +188,7 @@ bvt3000_set_flow_rate( unsigned int fr )
 unsigned int
 bvt3000_get_flow_rate( void )
 {
-    unsigned int fr = 0;
+    unsigned int flow_rate = 0;
     char *reply = bvt3000_query( "AF" );
     unsigned int i;
 
@@ -197,10 +202,10 @@ bvt3000_get_flow_rate( void )
             bvt3000_comm_fail( );
 
         if ( *reply == '1' )
-            fr |= 1 << ( 4 - i );
+            flow_rate |= 1 << ( 4 - i );
     }
 
-    return fr;
+    return flow_rate;
 }
 
 
@@ -246,12 +251,15 @@ bvt300_get_port( int port )
 
 
     fsc2_assert( port >= 1 && port <= 4 );
+
     buf[ 1 ] += port;
     reply = bvt3000_query( buf );
+
     if (    reply[ 0 ] != '>'
          || sscanf( reply + 1, "%x", &x ) != 1
          || x > 0x0F )
         bvt3000_comm_fail( );
+
     return ( unsigned char ) x;
 }
 
@@ -272,6 +280,7 @@ bvt3000_get_interface_status( void )
          || is & 0x0002
          || ! ( is & 0x0200 ) )
         bvt3000_comm_fail( );
+
     return is;
 }
 
@@ -323,6 +332,61 @@ bvt3000_query( const char * cmd )
 }
 
 
+/*---------------------------------------------------------------*
+ * Checks if a command is available, argument must be 2 char command
+ * that, if the command is implemented, would result in a reply
+ *---------------------------------------------------------------*/
+
+bool
+bvt3000_check_cmd( const char * cmd )
+{
+	char buf[ 100 ];
+	unsigned char bc;
+	ssize_t len;
+
+
+	fsc2_assert( cmd && cmd[ 2 ] == '\0' );
+
+	/* Assemble string to be send */
+
+	len = sprintf( buf, "%c%02d%02d%s%c", EOT, GROUP_ID, DEVICE_ID, cmd, ENQ );
+
+	/* Send string and read and analyze response. The response must start
+	   with STX, followed by the 2-char command, then data and finally an
+	   ETX and the BCC (block check character) gets send. */
+
+    if (    fsc2_serial_write( bvt3000.sn, buf, len,
+						      SERIAL_WAIT, UNSET ) != len
+         || ( len = fsc2_serial_read( bvt3000.sn, buf, sizeof buf - 1, NULL,
+									  SERIAL_WAIT, UNSET ) ) < 5
+         || len == sizeof buf - 1 )                      /* reply too long */
+        bvt3000_comm_fail( );
+
+    /* The following indicates a non-valid mnemonic */
+
+    if (    ( len == 1 && *buf == EOT )                  /* for 900 ESP */
+         || (    len == 4
+              && buf[ 0 ] == STX
+              && buf[ 1 ] == GROUP_ID
+              && buf[ 2 ] == DEVICE_ID
+              && buf[ 3 ] == EOT ) )
+        return FAIL;
+
+    if (    buf[ 0 ] != STX                              /* missing STX */
+         || buf[ len - 2 ] != ETX                        /* missing ETX */
+         || strncmp( buf + 1, cmd, 2 ) )                 /* wrong command */
+        bvt3000_comm_fail( );
+
+    bc = buf[ len - 1 ];
+    buf[ len - 1 ] = '\0';
+
+    if ( ! bvt3000_check_bcc( ( unsigned char * ) ( buf + 1 ), bc ) )
+        bvt3000_comm_fail( );
+
+    return OK;
+}
+
+
 /*-------------------------------*
  * Sends a command to the device
  *-------------------------------*/
@@ -334,7 +398,7 @@ bvt3000_send_command( const char * cmd )
 	ssize_t len;
 
 
-	/* Assemble string to be send */
+	/* Assemble the string to be send */
 
 	sprintf( buf, "%c%02d%02d%c%s%c",
              EOT, GROUP_ID, DEVICE_ID, STX, cmd, ETX );
@@ -365,7 +429,7 @@ bvt3000_check_ack( void )
 
 /*-------------------------------------------------------------*
  * Adds BCC (block check character) to the end of the command.
- * The BCC is calculated by doing a XOR on all bytes. The
+ * The BCC is calculated by doing a XOR of all bytes. The
  * function returns the length.
  *-------------------------------------------------------------*/
 
@@ -395,7 +459,7 @@ bvt3000_add_bcc( unsigned char * data )
 
 bool
 bvt3000_check_bcc( unsigned char * data,
-						 unsigned char   bcc )
+                   unsigned char   bcc )
 {
 	while ( *data != ETX )
 		bcc ^= *data++;
