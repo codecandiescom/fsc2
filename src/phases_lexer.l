@@ -84,6 +84,7 @@ int Phases_next_section;
 FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
+INCL        \x7.*\n
 
 DEV         ^[ \t]*DEV(ICE)?S?:
 ASS         ^[ \t]*((ASS(IGNMENT)?)|(ASSIGNMENTS)):
@@ -115,67 +116,73 @@ WS          [\n=,:. ]+
         /*---------------*/
 
 
-            /* handling of file name lines */
+            /* Handling of file name lines */
 {FILE}      {
                 *( phasestext + phasesleng - 1 ) = '\0';
                 EDL.Fname = T_free( EDL.Fname );
                 EDL.Fname = T_strdup( phasestext + 2 );
             }
 
-            /* handling of line number lines */
+            /* Handling of line number lines */
 {LNUM}      {
                 *( phasestext + phasesleng - 1 ) = '\0';
                 EDL.Lc = atol( phasestext + 2 );
             }
 
-            /* handling of error messages from the cleaner */
+            /* Handling of error messages from the cleaner */
 {ERR}       {
                 eprint( FATAL, UNSET, "%s\n", phasestext + 2 );
                 return 0;
             }
 
-            /* handling of DEVICES: labels */
+            /* Handling of new file included via #INCLUDE */
+{INCL}      {
+                phasestext[ strlen( phasestext ) - 1 ] = '\0';
+                get_edl_file( phasestext + 1 );
+            }
+
+            /* Handling of DEVICES: labels */
 {DEV}       {
                 Phases_next_section = DEVICES_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of ASSIGNMENTS: label */
+            /* Handling of ASSIGNMENTS: label */
 {ASS}       {
                 Phases_next_section = ASSIGNMENTS_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of VARIABLES: label */
+            /* Handling of VARIABLES: label */
 {VAR}       {
                 Phases_next_section = VARIABLES_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of PHASES: label */
+            /* Handling of PHASES: label */
 {PHAS}      {
                 Phases_next_section = PHASES_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of PREPARATIONS: label */
+            /* Handling of PREPARATIONS: label */
 {PREP}      {
                 Phases_next_section = PREPARATIONS_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of EXPERIMENT: label */
+            /* Handling of EXPERIMENT: label */
 {EXP}       {
                 Phases_next_section = EXPERIMENT_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of PHASE_SEQUENCE with (optional) sequence number
+            /* Handling of PHASE_SEQUENCE with (optional) sequence number
                (if sequence number is left out 0 is used as the default) */
 {PS}        {
                 char *cp = phasestext + phasesleng - 1;
 
-                /* determine number of phase sequence (0 to ...)*/
+                /* Determine number of phase sequence (0 to ...)*/
 
                 phaseslval.lval = 0;
                 if ( isdigit( ( unsigned char ) *cp ) )
@@ -187,14 +194,14 @@ WS          [\n=,:. ]+
                 return PS_TOKEN;
             }
 
-            /* handling of ACQUISITION_SEQUENCE */
+            /* Handling of ACQUISITION_SEQUENCE */
 {AS}        {
                 char *cp = phasestext + phasesleng - 1;
 
                 if ( *cp == '_' )
                     THROW( INVALID_INPUT_EXCEPTION );
 
-                /* determine type of acquisition sequence (A or B) */
+                /* Determine type of acquisition sequence (A or B) */
 
                 phaseslval.lval = 0;
                 if ( *cp == '2')
@@ -203,7 +210,7 @@ WS          [\n=,:. ]+
                 return AS_TOKEN;
             }
 
-            /* handling of phase cycle identifiers */
+            /* Handling of phase cycle identifiers */
 {PX}        {
                 phaseslval.lval = PHASE_PLUS_X;
                 return P_TOKEN;
@@ -221,7 +228,7 @@ WS          [\n=,:. ]+
                 return P_TOKEN;
             }
 
-            /* handling of acquisition cycle identifiers */
+            /* Handling of acquisition cycle identifiers */
 {PA}       {
                 phaseslval.lval = ACQ_PLUS_A;
                 return A_TOKEN;
@@ -249,11 +256,11 @@ WS          [\n=,:. ]+
                 return A_TOKEN;
            }
 
-{WS}        /* skip prettifying characters */
+{WS}        /* Skip prettifying characters */
 
 ";"         return ';';              /* end of statement character */
 
-            /* handling of invalid input */
+            /* Handling of invalid input */
 .           THROW( INVALID_INPUT_EXCEPTION );
 
 <<EOF>>     {

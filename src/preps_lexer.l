@@ -86,6 +86,7 @@ int Preps_next_section;
 FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
+INCL        \x7.*\n
 
 DEV         ^[ \t]*DEV(ICE)?S?:
 ASS         ^[ \t]*((ASS(IGNMENT)?)|(ASSIGNMENTS)):
@@ -163,6 +164,12 @@ FUNC        {IDENT}"#"[0-9]+
 {ERR}       {
                 eprint( FATAL, UNSET, "%s\n", prepstext + 2 );
                 THROW( EXCEPTION );
+            }
+
+            /* Handling of new file included via #INCLUDE */
+{INCL}      {
+                prepstext[ strlen( prepstext ) - 1 ] = '\0';
+                get_edl_file( prepstext + 1 );
             }
 
 {ESTR}      {
@@ -255,7 +262,7 @@ FUNC        {IDENT}"#"[0-9]+
                 return STR_TOKEN;
             }
 
-            /* all pulse related keywords... */
+            /* All pulse related keywords... */
 
 {F}         return F_TOK;
 {S}         return S_TOK;
@@ -317,7 +324,8 @@ FUNC        {IDENT}"#"[0-9]+
                 return P_TOK;
             }
 
-{PS}        {   /* Phase sequence */
+            /* Phase sequence */
+{PS}        {
                 long val = 0;
                 char *cp = prepstext + prepsleng - 1;
 
@@ -338,30 +346,37 @@ FUNC        {IDENT}"#"[0-9]+
                 prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_MW );
                 return VAR_REF;
             }
+
 {TWT}       {
                 prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT );
                 return VAR_REF;
             }
+
 {TWT_GATE}  {
                 prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_TWT_GATE );
                 return VAR_REF;
             }
+
 {DET}       {
                 prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET );
                 return VAR_REF;
             }
+
 {DET_GATE}  {
                 prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DET_GATE );
                 return VAR_REF;
             }
+
 {DEF}       {
                 prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_DEFENSE );
                 return VAR_REF;
             }
+
 {RF}        {
                 prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF );
                 return VAR_REF;
             }
+
 {RF_GATE}   {
                 prepslval.vptr = vars_push( INT_VAR, PULSER_CHANNEL_RF_GATE );
                 return VAR_REF;

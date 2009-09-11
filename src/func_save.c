@@ -725,7 +725,8 @@ batch_mode_file_open( char * name )
                 if ( new_name != NULL )
                     new_name = T_free( new_name );
                 new_name = get_string( "%s.batch_output.%lu",
-                                       strrchr( EDL.in_file, '/' ) + 1, cn++ );
+                                       strrchr( EDL.files->name, '/' ) + 1,
+                                       cn++ );
             }
             else
                 new_name[ strlen( new_name ) - 1 ] += 1;
@@ -1917,7 +1918,7 @@ print_browser( int          browser,
                 {
                     count += T_fprintf( fid, "%s// %s\n", comment, lp );
                     count += print_include( fid, cp + 8, comment,
-                                            EDL.in_file );
+                                            EDL.files->name );
                     continue;
                 }
             }
@@ -1969,7 +1970,7 @@ print_include( int          fid,
     CLOBBER_PROTECT( file_name );
     CLOBBER_PROTECT( cp );
 
-    if ( ! strcmp( cur_file, EDL.in_file ) )
+    if ( ! strcmp( cur_file, EDL.files->name ) )
     {
         level = 0;
         count = 0L;

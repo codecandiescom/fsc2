@@ -76,7 +76,7 @@ int assignlex_destroy( void );
 #endif
 
 
-/* locally used global variables */
+/* Locally used global variables */
 
 static int Assign_next_section;
 static bool In_phs = UNSET;
@@ -91,6 +91,7 @@ static void set_cur_pulser( void );
 FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
+INCL        \x7.*\n
 
 DEV         ^[ \t]*DEV(ICE)?S?:
 ASS         ^[ \t]*((ASS(IGNMENT)?)|(ASSIGNMENTS)):
@@ -187,23 +188,29 @@ WS          [\n=: ]+
         /*---------------*/
 
 
-            /* handling of file name lines */
+            /* Handling of file name lines */
 {FILE}      {
                 *( assigntext + assignleng - 1 ) = '\0';
                 EDL.Fname = T_free( EDL.Fname );
                 EDL.Fname = T_strdup( assigntext + 2 );
             }
 
-            /* handling of line number lines */
+            /* Handling of line number lines */
 {LNUM}      {
                 *( assigntext + assignleng - 1 ) = '\0';
                 EDL.Lc = T_atol( assigntext + 2 );
             }
 
-            /* handling of error messages from the cleaner */
+            /* Handling of error messages from the cleaner */
 {ERR}       {
                 eprint( FATAL, UNSET, "%s\n", assigntext + 2 );
                 THROW( EXCEPTION );
+            }
+
+            /* Handling of new file included via #INCLUDE */
+{INCL}      {
+                assigntext[ strlen( assigntext ) - 1 ] = '\0';
+                get_edl_file( assigntext + 1 );
             }
 
 {ESTR}      {
@@ -212,19 +219,19 @@ WS          [\n=: ]+
                 THROW( EXCEPTION );
             }
 
-            /* handling of DEVICES: labels */
+            /* Handling of DEVICES: labels */
 {DEV}       {
                 Assign_next_section = DEVICES_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of ASSIGNMENTS: labels */
+            /* Handling of ASSIGNMENTS: labels */
 {ASS}       {
                 Assign_next_section = ASSIGNMENTS_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of VARIABLES: labels */
+            /* Handling of VARIABLES: labels */
 {VAR}       {
                 Assign_next_section = VARIABLES_SECTION;
                 return SECTION_LABEL;
@@ -236,13 +243,13 @@ WS          [\n=: ]+
                 return SECTION_LABEL;
             }
 
-            /* handling of PREPARATIONS: labels */
+            /* Handling of PREPARATIONS: labels */
 {PREP}      {
                 Assign_next_section = PREPARATIONS_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of EXPERIMENT: labels */
+            /* Handling of EXPERIMENT: labels */
 {EXP}       {
                 Assign_next_section = EXPERIMENT_SECTION;
                 return SECTION_LABEL;
@@ -391,7 +398,7 @@ WS          [\n=: ]+
 
 {VL}        return VL_TOKEN;
 
-            /* keywords related to time base and trigger mode */
+            /* Keywords related to time base and trigger mode */
 
 {TB}        {
                 set_cur_pulser( );
@@ -452,7 +459,7 @@ WS          [\n=: ]+
                 return FLOAT_TOKEN;
             }
 
-            /* handling of string constants (to be used as format strings in
+            /* Handling of string constants (to be used as format strings in
                the print() function only */
 {STR}       {
                 assigntext[ strlen( assigntext ) - 1 ] = '\0';
@@ -466,16 +473,16 @@ WS          [\n=: ]+
                 THROW( EXCEPTION );
             }
 
-            /* handling of function, variable and array identifiers */
+            /* Handling of function, variable and array identifiers */
 {IDENT}     {
                 int acc;
 
-                /* first check if the identifier is a function name */
+                /* First check if the identifier is a function name */
 
                 assignlval.vptr = func_get( assigntext, &acc );
                 if ( assignlval.vptr != NULL )
                 {
-                    /* if it's a function check that the function can be used
+                    /* If it's a function check that the function can be used
                        in the current context */
 
                     if ( acc == ACCESS_EXP )
@@ -487,7 +494,7 @@ WS          [\n=: ]+
                     return FUNC_TOKEN;
                 }
 
-                /* if it's not a function it should be a variable */
+                /* If it's not a function it should be a variable */
 
                 if ( ( assignlval.vptr = vars_get( assigntext ) ) == NULL )
                 {
@@ -499,7 +506,7 @@ WS          [\n=: ]+
                 return VAR_TOKEN;
             }
 
-            /* stuff used with functions, arrays and math */
+            /* Stuff used with functions, arrays and math */
 
 "=="        return EQ;        /* equal */
 "!="        return NE;        /* unequal */
@@ -524,14 +531,14 @@ WS          [\n=: ]+
 "?"         return '?';
 ":"         return ':';
 
-{WS}        /* skip prettifying characters */
+{WS}        /* Skip prettifying characters */
 
 ";"         {
                 In_phs = UNSET;
                 return ';';
             }
 
-            /* handling of invalid input (i.e. everything else) */
+            /* Handling of invalid input (i.e. everything else) */
 .           {
                 print( FATAL, "Invalid input near '%s'.\n",
                        assigntext );

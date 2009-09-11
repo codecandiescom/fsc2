@@ -598,7 +598,7 @@ include_handler( char * file )
     struct passwd *pwe;
 
 
-    if ( file != NULL )           /* at the start of an include file */
+    if ( file != NULL )           /* we're at the start of an include file */
     {
         /* If all the files the program is prepared to open are already open
            this is a fatal error (most probably it's due to an infinite
@@ -610,7 +610,7 @@ include_handler( char * file )
         /* Now check if file name is enclosed by '"' or '<' and '>' - in the
            later case prepend the default directory */
 
-        if ( file[ 0 ] == '"' )
+        if ( *file == '"' )
         {
             *( file + strlen( file ) - 1 ) = '\0';
 
@@ -658,6 +658,7 @@ include_handler( char * file )
 #endif
         }
 
+        output( "\x07%s\n", incl_file );
 
         /* The same holds for the case that the file can't be opened. */
 

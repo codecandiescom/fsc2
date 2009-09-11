@@ -35,7 +35,6 @@ static bool Is_loaded       = UNSET;    /* set when EDL file is loaded */
 static bool Is_tested       = UNSET;    /* set when EDL file has been tested */
 static bool Parse_result    = UNSET;    /* set when EDL passed the tests */
 static FILE *In_file_fp     = NULL;
-static time_t In_file_mod   = 0;
 static bool Delete_file     = UNSET;
 static bool Delete_old_file = UNSET;
 
@@ -55,7 +54,6 @@ extern int fsc2_confparse( void );        /* from fsc2_conf_parser.y */
 static void globals_init( const char * pname );
 static void fsc2_get_conf( void );
 static void fsc2_save_conf( void );
-static bool get_edl_file( char * fname );
 static void check_run( void );
 static void no_gui_run( void );
 static int scan_args( int   * argc,
@@ -87,7 +85,7 @@ main( int    argc,
 
     /* Initialization of global variables */
 
-    globals_init( argv[ 0 ] );
+    globals_init( *argv );
 
     /* Run a first test of the command line arguments */
 
@@ -100,8 +98,8 @@ main( int    argc,
        care of shared memory segments. */
 
     if ( ( Fsc2_Internals.conn_pid =
-                ( pid_t ) check_spawn_fsc2d( ! ( Fsc2_Internals.cmdline_flags &
-                                                 NON_EXCLUSIVE ),
+                ( pid_t ) check_spawn_fsc2d( ! (   Fsc2_Internals.cmdline_flags
+                                                 & NON_EXCLUSIVE ),
                                              In_file_fp ) ) == -1 )
     {
         fprintf( stderr, "Failed to start or connect to daemon process for "
@@ -121,7 +119,7 @@ main( int    argc,
     /* If we don't know yet about an input file and there are command
        line arguments left take it to be the input file */
 
-    if ( argc > 1 && fname == NULL )
+    if ( argc > 1 && ! fname )
     {
         Fsc2_Internals.cmdline_flags |= DO_LOAD;
         fname = argv[ 1 ];
@@ -139,14 +137,21 @@ main( int    argc,
     {
         if ( ! get_edl_file( fname ) )
         {
-            fprintf( stderr, "Failed to set up full name of EDL file.\n" );
-            return EXIT_FAILURE;
+            if ( access( fname, R_OK ) == -1 )
+                fl_show_alert( "Error", "Can't access file", fname, 1 );
+            else
+            {
+                fprintf( stderr, "Failed to set up full name of EDL file.\n" );
+                return EXIT_FAILURE;
+            }
         }
-
-        conn_pid = Fsc2_Internals.conn_pid;
-        Fsc2_Internals.conn_pid = 0;
-        load_file( GUI.main_form->browser, 1 );
-        Fsc2_Internals.conn_pid = conn_pid;
+        else
+        {
+            conn_pid = Fsc2_Internals.conn_pid;
+            Fsc2_Internals.conn_pid = 0;
+            load_file( GUI.main_form->browser, 1 );
+            Fsc2_Internals.conn_pid = conn_pid;
+        }
     }
 
     /* In batch mode try to get the next file if the first input file
@@ -162,19 +167,32 @@ main( int    argc,
             return EXIT_FAILURE;
         }
 
-        EDL.in_file = T_free( EDL.in_file );
+        if ( EDL.files )
+        {
+            while ( EDL.file_count > 0 )
+                T_free( EDL.files[ --EDL.file_count ].name );
+            EDL.files = T_free( EDL.files );
+        }
+
         fname = argv[ 1 ];
 
         if ( ! get_edl_file( fname ) )
         {
-            fprintf( stderr, "Failed to set up full name of EDL file.\n" );
-            return EXIT_FAILURE;
+            if ( access( fname, R_OK ) == -1 )
+                fl_show_alert( "Error", "Can't access file", fname, 1 );
+            else
+            {
+                fprintf( stderr, "Failed to set up full name of EDL file.\n" );
+                return EXIT_FAILURE;
+            }
         }
-
-        conn_pid = Fsc2_Internals.conn_pid;
-        Fsc2_Internals.conn_pid = 0;
-        load_file( GUI.main_form->browser, 1 );
-        Fsc2_Internals.conn_pid = conn_pid;
+        else
+        {
+            conn_pid = Fsc2_Internals.conn_pid;
+            Fsc2_Internals.conn_pid = 0;
+            load_file( GUI.main_form->browser, 1 );
+            Fsc2_Internals.conn_pid = conn_pid;
+        }
 
         for ( i = 1; i < argc; i++ )
             argv[ i ] = argv[ i + 1 ];
@@ -243,7 +261,13 @@ main( int    argc,
             {
                 int i;
 
-                EDL.in_file = T_free( EDL.in_file );
+                if ( EDL.files )
+                {
+                    while ( EDL.file_count > 0 )
+                        T_free( EDL.files[ --EDL.file_count ].name );
+                    EDL.files = T_free( EDL.files );
+                }
+
                 fname = argv[ 1 ];
 
                 if ( ! get_edl_file( fname ) )
@@ -340,7 +364,8 @@ globals_init( const char * pname )
         Prog_Name = "fsc2";
 
     EDL.Lc = 0;
-    EDL.in_file = NULL;
+    EDL.files = NULL;
+    EDL.file_count = 0;
     EDL.Fname = NULL;
     EDL.Call_Stack = NULL;
     EDL.prg_token = NULL;
@@ -355,10 +380,13 @@ globals_init( const char * pname )
 
     EDL.File_List = T_malloc( 2 * sizeof *EDL.File_List );
     EDL.File_List_Len = 2;
+
     EDL.File_List[ 0 ].fp = stdout;
     setbuf( stdout, NULL );
     EDL.File_List[ 0 ].name = ( char * ) "stdout";
+
     EDL.File_List[ 1 ].fp = stderr;
+    setbuf( stderr, NULL );
     EDL.File_List[ 1 ].name = ( char * ) "stderr";
 
     /* The list of used devices is still empty */
@@ -397,9 +425,9 @@ fsc2_get_conf( void )
     Fsc2_Internals.use_def_directory = UNSET;
     Fsc2_Internals.def_directory = NULL;
 
-    if (    ( ue = getpwuid( getuid( ) ) ) == NULL
-         || ue->pw_dir == NULL
-         || *ue->pw_dir == '\0' )
+    if (    ! ( ue = getpwuid( getuid( ) ) )
+         || ! ue->pw_dir
+         || ! *ue->pw_dir  )
          return;
 
     TRY
@@ -410,7 +438,7 @@ fsc2_get_conf( void )
     OTHERWISE
         return;
 
-    if ( ( fsc2_confin = fopen( fname, "r" ) ) == NULL )
+    if ( ! ( fsc2_confin = fopen( fname, "r" ) ) )
     {
         T_free( fname );
         return;
@@ -435,7 +463,7 @@ fsc2_get_conf( void )
         return;
     }
 
-    if ( Fsc2_Internals.def_directory == NULL )
+    if ( ! Fsc2_Internals.def_directory )
         return;
 
     /* Don't use the default directory's name when it's either obviously
@@ -447,7 +475,7 @@ fsc2_get_conf( void )
        know here if the directory is going to be used for reading only or also
        writing, so we only check for the lowest hurdle). */
 
-    if (    *Fsc2_Internals.def_directory == '\0'
+    if (    ! *Fsc2_Internals.def_directory
          || stat( Fsc2_Internals.def_directory, &buf ) < 0
          || ! ( S_ISDIR( buf.st_mode ) || S_ISLNK( buf.st_mode ) )
          || ! ( buf.st_mode & ( S_IRUSR | S_IRGRP | S_IROTH ) ) )
@@ -474,9 +502,9 @@ fsc2_save_conf( void )
     FILE *fp;
 
 
-    if (    ( ue = getpwuid( getuid( ) ) ) == NULL
-         || ue->pw_dir == NULL
-         || *ue->pw_dir == '\0' )
+    if (    ! ( ue = getpwuid( getuid( ) ) )
+         || ! ue->pw_dir
+         || ! *ue->pw_dir )
     {
          if ( Fsc2_Internals.def_directory != NULL )
              Fsc2_Internals.def_directory =
@@ -492,7 +520,7 @@ fsc2_save_conf( void )
     OTHERWISE
         return;
 
-    if ( ( fp = fopen( fname, "w" ) ) == NULL )
+    if ( ! ( fp = fopen( fname, "w" ) ) )
     {
         T_free( fname );
          if ( Fsc2_Internals.def_directory != NULL )
@@ -555,19 +583,33 @@ fsc2_save_conf( void )
  * Function sets 'EDL.infile' to the complete name of an EDL input file
  *----------------------------------------------------------------------*/
 
-static bool
-get_edl_file( char * fname )
+bool
+get_edl_file( const char * fname )
 {
+    struct stat file_stat;
+
+
+    TRY
+    {
+        EDL.files = T_realloc( EDL.files,
+                               ( EDL.file_count + 1 ) * sizeof *EDL.files );
+        TRY_SUCCESS;
+    }
+    OTHERWISE
+        return FAIL;
+    
+    EDL.files[ EDL.file_count ].name = NULL;
+    EDL.files[ EDL.file_count++ ].mod_date = 0;
+
     TRY
     {
         /* We need the name of the file with the full path name (which
            needs to be passed on to fsc2_clean to allow include files
-           in scripts be specified relative to the path of the script
-           instead of relative to the current working directory fsc2
-           was started from. */
+           in scripts to be specified relative to the path of the script
+           instead of relative to the directory fsc2 was started in. */
 
-        if ( fname[ 0 ] == '/' )
-            EDL.in_file = T_strdup( fname );
+        if ( *fname == '/' )
+            EDL.files[ EDL.file_count - 1 ].name = T_strdup( fname );
         else
         {
             size_t size;
@@ -575,15 +617,34 @@ get_edl_file( char * fname )
 
             size = ( size_t ) pathconf( ".", _PC_PATH_MAX );
             buf = T_malloc( size );
-            EDL.in_file = get_string( "%s/%s",
-                                      getcwd( buf, size ), fname );
+            EDL.files[ EDL.file_count - 1 ].name =
+                            get_string( "%s/%s", getcwd( buf, size ), fname );
             T_free( buf );
         }
+
+        if ( stat( EDL.files[ EDL.file_count - 1 ].name, &file_stat ) == -1 )
+        {
+            TRY_SUCCESS;
+            return FAIL;
+        }
+
+        EDL.files[ EDL.file_count - 1 ].mod_date = file_stat.st_mtime;
 
         TRY_SUCCESS;
     }
     OTHERWISE
+    {
+        if ( EDL.file_count > 1 )
+            EDL.files = T_realloc( EDL.files,
+                                   --EDL.file_count * sizeof *EDL.files );
+        else
+        {
+            EDL.files = T_free( EDL.files );
+            EDL.file_count = 0;
+        }
+
         return FAIL;
+    }
 
     return OK;
 }
@@ -598,7 +659,7 @@ no_gui_run( void )
 {
     /* Read in the EDL file and analyze it */
 
-    if (    ! scan_main( EDL.in_file, In_file_fp )
+    if (    ! scan_main( EDL.files->name, In_file_fp )
          || EDL.compilation.error[ FATAL ]  != 0
          || EDL.compilation.error[ SEVERE ] != 0
          || EDL.compilation.error[ WARN ]   != 0 )
@@ -656,7 +717,7 @@ check_run( void )
     fl_deactivate_object( GUI.main_form->test_file );
     fl_set_object_lcol( GUI.main_form->test_file, FL_INACTIVE_COL );
 
-    if ( ( In_file_fp = fopen( EDL.in_file, "r" ) ) == NULL )
+    if ( ! ( In_file_fp = fopen( EDL.files->name, "r" ) )  )
         exit( EXIT_FAILURE );
 
     if ( ( fd_flags = fcntl( fileno( In_file_fp ), F_GETFD ) ) < 0 )
@@ -667,7 +728,7 @@ check_run( void )
 
     fl_set_cursor( FL_ObjWin( GUI.main_form->run ), XC_watch );
 
-    if (    ! scan_main( EDL.in_file, In_file_fp )
+    if (    ! scan_main( EDL.files->name, In_file_fp )
          || user_break
          || EDL.compilation.error[ FATAL ]  != 0
          || EDL.compilation.error[ SEVERE ] != 0
@@ -764,7 +825,7 @@ scan_args( int   * argc,
 
             /* no file name with "-t" option ? */
 
-            if ( argv[ ++cur_arg ] == NULL )
+            if ( ! argv[ ++cur_arg ] )
             {
                 fprintf( stderr, "fsc2 -t: No input file.\n" );
                 exit( EXIT_FAILURE );
@@ -775,12 +836,13 @@ scan_args( int   * argc,
             seteuid( getuid( ) );
             setegid( getgid( ) );
 
-            if ( ( In_file_fp = fopen( argv[ cur_arg ], "r" ) ) == NULL )
+            if (    ! get_edl_file( argv[ cur_arg ] )
+                 || ! ( In_file_fp = fopen( EDL.files->name, "r" ) ) )
                 exit( EXIT_FAILURE );
 
             set_main_signals( );
 
-            exit( scan_main( argv[ cur_arg ], In_file_fp ) ?
+            exit( scan_main( EDL.files->name, In_file_fp ) ?
                   EXIT_SUCCESS : EXIT_FAILURE );
         }
 
@@ -811,18 +873,21 @@ scan_args( int   * argc,
 
             /* No file name with "-ng" or "-nw" option ? */
 
-            if ( argv[ ++cur_arg ] == NULL )
+            if ( ! argv[ ++cur_arg ] )
             {
                 fprintf( stderr, "fsc2 -ng (or '-nw'): No input file.\n" );
                 exit( EXIT_FAILURE );
             }
 
-            if ( ! get_edl_file( argv[ cur_arg ] ) )
+            if ( ! get_edl_file( argv[ cur_arg ] )
+                 && access( argv[ cur_arg ], R_OK ) == -1
+                 && errno != ENOENT )
                 return EXIT_FAILURE;
 
-            if ( ( In_file_fp = fopen( EDL.in_file, "r" ) ) == NULL )
+            if ( ! ( In_file_fp = fopen( EDL.files->name, "r" ) ) )
             {
-                fprintf( stderr, "Can't open file '%s'.\n", EDL.in_file );
+                fprintf( stderr, "Can't open file '%s'.\n",
+                         EDL.files->name );
                 exit( EXIT_FAILURE );
             }
 
@@ -1172,9 +1237,10 @@ scan_args( int   * argc,
 
                 seteuid( getuid( ) );
                 setegid( getgid( ) );
-                if ( ( In_file_fp = fopen( *fname, "r" ) ) == NULL )
+                if (    ! get_edl_file( *fname )
+                     || ! ( In_file_fp = fopen( EDL.files->name, "r" ) ) )
                     exit( EXIT_FAILURE );
-                exit( scan_main( *fname, In_file_fp ) ?
+                exit( scan_main( EDL.files->name, In_file_fp ) ?
                       EXIT_SUCCESS : EXIT_FAILURE );
             }
 
@@ -1224,11 +1290,16 @@ final_exit_handler( void )
     if ( In_file_fp != NULL )
         fclose( In_file_fp );
 
-    if ( Delete_old_file && EDL.in_file != NULL )
-        unlink( EDL.in_file );
+    if ( Delete_old_file && EDL.files->name )
+        unlink( EDL.files->name );
     unlink( FSC2_SOCKET );
 
-    T_free( EDL.in_file );
+    if ( EDL.files )
+    {
+        while ( EDL.file_count > 0 )
+            T_free( EDL.files[ --EDL.file_count ].name );
+        EDL.files = T_free( EDL.files );
+    }
 
     T_free( G.color_hash );
 
@@ -1275,65 +1346,74 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
            long        reload )
 {
     const char *fn;
-    static char *old_in_file;
+    EDL_Files_T *old_list = EDL.files;
+    size_t old_count = EDL.file_count;
     FILE *fp;
     int fd_flags;
-    struct stat file_stat;
     char tmp_file[ ] = P_tmpdir "/fsc2.stash.XXXXXX";
     int c;
     int tmp_fd;
     FILE *tmp_fp;
 
 
+    CLOBBER_PROTECT( old_count );
+
     notify_conn( BUSY_SIGNAL );
-    old_in_file = NULL;
 
     /* If new file is to be loaded get its name and store it, otherwise use
        the previous name */
 
     if ( ! reload )
     {
-        if (    GUI.main_form->Load->u_ldata == 0
-             && GUI.main_form->Load->u_cdata == NULL )
+        if (    ! GUI.main_form->Load->u_ldata
+             && ! GUI.main_form->Load->u_cdata )
         {
             fn = fsc2_show_fselector( "Select input file:", NULL, "*.edl",
                                       NULL );
-            if ( fn == NULL || *fn == '\0' )
+            if ( ! fn || ! *fn )
             {
-                notify_conn( UNBUSY_SIGNAL );
-                return;
-            }
-
-            old_in_file = EDL.in_file;
-
-            TRY
-            {
-                EDL.in_file = T_strdup( fn );
-                TRY_SUCCESS;
-            }
-            OTHERWISE
-            {
-                EDL.in_file = old_in_file;
                 notify_conn( UNBUSY_SIGNAL );
                 return;
             }
         }
         else
         {
-            old_in_file = EDL.in_file;
-
-            EDL.in_file = GUI.main_form->Load->u_cdata;
+            fn = GUI.main_form->Load->u_cdata;
             GUI.main_form->Load->u_cdata = NULL;
+        }
+
+        EDL.files = NULL;
+        EDL.file_count = 0;
+
+        if ( ! get_edl_file( fn ) )
+        {
+            EDL.files = old_list;
+            EDL.file_count = old_count;
+            notify_conn( UNBUSY_SIGNAL );
+            return;
         }
     }
     else                              /* call via reload button */
     {
-        /* Quit if name of previous file is empty */
+        /* Quit if no file was loaded */
 
-        if ( EDL.in_file == '\0' )
+        if ( ! EDL.files )
         {
-            fl_show_alert( "Error", "Sorry, no file is loaded yet.", NULL, 1 );
-            old_in_file = T_free( old_in_file );
+            fl_show_alert( "Error", "No file is loaded yet.", NULL, 1 );
+            notify_conn( UNBUSY_SIGNAL );
+            return;
+        }
+
+        EDL.files = NULL;
+        EDL.file_count = 0;
+
+        if ( ! get_edl_file( old_list->name ) )
+        {
+            if ( access( old_list->name, R_OK ) == -1 )
+                fl_show_alert( "Error", "Can't reload, file isn't readable "
+                               "anymore.", old_list->name, 1 );
+            EDL.files = old_list;
+            EDL.file_count = old_count;
             notify_conn( UNBUSY_SIGNAL );
             return;
         }
@@ -1345,26 +1425,59 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         }
     }
 
-    /* Test if the file is readable and can be opened */
+    /* Test if we've got a chance to open the file for reading */
 
-    if ( access( EDL.in_file, R_OK ) == -1 )
+    if ( access( EDL.files->name, R_OK ) == -1 )
     {
         if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+        {
+            if ( old_list && old_list != EDL.files )
+            {
+                while ( old_count > 0 )
+                    T_free( old_list[ --old_count ].name );
+                T_free( old_list );
+            }
+
             exit( EXIT_FAILURE );
+        }
 
         if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
         {
-            fprintf( stderr, "Input file not found: '%s'.\n", EDL.in_file );
+            fprintf( stderr, "%s: '%s'.\n",
+                     errno == ENOENT ?
+                     "File not found" : "Can't open file for reading",
+                     EDL.files->name );
+
             Is_loaded = UNSET;
+            Is_tested = UNSET;
+
+            if ( old_list && old_list != EDL.files )
+            {
+                while ( old_count > 0 )
+                    T_free( old_list[ --old_count ].name );
+                T_free( old_list );
+            }
+
+            T_free( EDL.files[ --EDL.file_count ].name );
+            T_free( EDL.files );
+
             return;
         }
 
-        if ( errno == ENOENT )
-            fl_show_alert( "Error", "Sorry, file not found:", EDL.in_file, 1 );
-        else
-            fl_show_alert( "Error", "Sorry, no permission to read file:",
-                           EDL.in_file, 1 );
-        old_in_file = T_free( old_in_file );
+        fl_show_alert( "Error",
+                       errno == ENOENT ? "File not found:" :
+                                         "Can't open file for reading:",
+                       EDL.files->name, 1 );
+
+        if ( old_list && old_list != EDL.files )
+        {
+            T_free( EDL.files[ --EDL.file_count ].name );
+            T_free( EDL.files );
+        }   
+
+        EDL.file_count = old_count;
+        EDL.files = old_list;
+
         notify_conn( UNBUSY_SIGNAL );
         return;
     }
@@ -1373,24 +1486,54 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
        file in the currently loaded form at later times even when the user
        changes the file in between. In all the following we work on the
        file pointer 'fp' of this temporary file even though the file name
-       'EDL.in_file' shown to the user still refers to the original file... */
+       'EDL.files->name' shown to the user still refers to the original file */
 
     if ( ( tmp_fd = mkstemp( tmp_file ) ) < 0 )
     {
         if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+        {
+            if ( old_list && old_list != EDL.files )
+            {
+                while ( old_count > 0 )
+                    T_free( old_list[ --old_count ].name );
+                T_free( old_list );
+            }
             exit( EXIT_FAILURE );
+        }
 
         if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
         {
             fprintf( stderr, "Can't open a temporary file, skipping input "
-                     "file '%s'.\n", EDL.in_file );
+                     "file '%s'.\n", EDL.files->name );
+
             Is_loaded = UNSET;
+            Is_tested = UNSET;
+
+            if ( old_list && old_list != EDL.files )
+            {
+                while ( old_count > 0 )
+                    T_free( old_list[ --old_count ].name );
+                T_free( old_list );
+            }
+
+            T_free( EDL.files[ --EDL.file_count ].name );
+            T_free( EDL.files );
+
             return;
         }
 
         fl_show_alert( "Error", "Sorry, can't open a temporary file.",
                        NULL, 1 );
-        old_in_file = T_free( old_in_file );
+
+        if ( old_list && old_list != EDL.files )
+        {
+            T_free( EDL.files[ --EDL.file_count ].name );
+            T_free( EDL.files );
+        }
+            
+        EDL.file_count = old_count;
+        EDL.files = old_list;
+
         notify_conn( UNBUSY_SIGNAL );
         return;
     }
@@ -1404,47 +1547,108 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
     if ( ( tmp_fp = fdopen( tmp_fd, "w+" ) ) == 0 )
     {
         close( tmp_fd );
+
         if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+        {
+            if ( old_list && old_list != EDL.files )
+            {
+                while ( old_count > 0 )
+                    T_free( old_list[ --old_count ].name );
+                T_free( old_list );
+            }
+
             exit( EXIT_FAILURE );
+        }
 
         if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
         {
             fprintf( stderr, "Can't open a temporary file, skipping input "
-                     "file '%s'.\n", EDL.in_file );
+                     "file '%s'.\n", EDL.files->name );
+
             Is_loaded = UNSET;
+            Is_tested = UNSET;
+
+            if ( old_list && old_list != EDL.files )
+            {
+                while ( old_count > 0 )
+                    T_free( old_list[ --old_count ].name );
+                T_free( old_list );
+            }
+
+            T_free( EDL.files[ --EDL.file_count ].name );
+            T_free( EDL.files );
+
             return;
         }
 
         fl_show_alert( "Error", "Sorry, can't open a temporary file.",
                        NULL, 1 );
-        old_in_file = T_free( old_in_file );
+
+        if ( old_list && old_list != EDL.files )
+        {
+            T_free( EDL.files[ --EDL.file_count ].name );
+            T_free( EDL.files );
+        }
+            
+        EDL.file_count = old_count;
+        EDL.files = old_list;
+
         notify_conn( UNBUSY_SIGNAL );
         return;
     }
 
-    if ( ( fp = fopen( EDL.in_file, "r" ) ) == NULL )
+    if ( ! ( fp = fopen( EDL.files->name, "r" ) ) )
     {
         fclose( tmp_fp );
+
         if ( Fsc2_Internals.cmdline_flags & DO_CHECK )
+        {
+            if ( old_list && old_list != EDL.files )
+            {
+                while ( old_count > 0 )
+                    T_free( old_list[ --old_count ].name );
+                T_free( old_list );
+            }
+
             exit( EXIT_FAILURE );
+        }
 
         if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
         {
-            fprintf( stderr, "Can't open input file: '%s'.\n", EDL.in_file );
+            fprintf( stderr, "Can't open input file: '%s'.\n",
+                     EDL.files->name );
+
             Is_loaded = UNSET;
+            Is_tested = UNSET;
+
+            if ( old_list && old_list != EDL.files )
+            {
+                while ( old_count > 0 )
+                    T_free( old_list[ --old_count ].name );
+                T_free( old_list );
+            }
+
+            T_free( EDL.files[ --EDL.file_count ].name );
+            T_free( EDL.files );
+
             return;
         }
 
-        fl_show_alert( "Error", "Sorry, can't open file:", EDL.in_file, 1 );
-        old_in_file = T_free( old_in_file );
+        fl_show_alert( "Error", "Sorry, can't open file:",
+                       EDL.files->name, 1 );
+
+        if ( old_list && old_list != EDL.files )
+        {
+            T_free( EDL.files[ --EDL.file_count ].name );
+            T_free( EDL.files );
+        }
+            
+        EDL.file_count = old_count;
+        EDL.files = old_list;
+
         notify_conn( UNBUSY_SIGNAL );
         return;
     }
-
-    /* Get modification time of file */
-
-    stat( EDL.in_file, &file_stat );
-    In_file_mod = file_stat.st_mtime;
 
     /* Copy the contents of the EDL file into our temporary file */
 
@@ -1457,39 +1661,42 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
     rewind( fp );
     lseek( tmp_fd, 0, SEEK_SET );           /* paranoia... */
 
-    /* Now that we're sure that we can read the new file we can delete the
-       old file (but only if the new and the old file are different !) */
+    /* Now that we're sure that we can work with the new file we can delete
+       the old file (but only if the new and the old file are different !) */
 
-    if ( old_in_file != NULL )
+    if ( old_list && old_list != EDL.files )
     {
-        if ( strcmp( old_in_file, EDL.in_file ) )
+        if ( strcmp( old_list->name, EDL.files->name ) )
         {
             if ( Delete_old_file )
-                unlink( old_in_file );
+                unlink( old_list->name );
             Delete_old_file = Delete_file;
         }
         else      /* don't delete reloaded files - they may have been edited */
             Delete_old_file = UNSET;
 
-        if ( In_file_fp != NULL )
+        while ( old_count > 0 )
+            T_free( old_list[ --old_count ].name );
+        T_free( old_list );
+
+        if ( In_file_fp )
             fclose( In_file_fp );
     }
 
     In_file_fp = fp;
 
     Delete_file = UNSET;
-    old_in_file = T_free( old_in_file );
 
     /* Set a new window title */
 
     if ( Fsc2_Internals.title )
         Fsc2_Internals.title = T_free( Fsc2_Internals.title );
-    Fsc2_Internals.title = get_string( "fsc2: %s", EDL.in_file );
+    Fsc2_Internals.title = get_string( "fsc2: %s", EDL.files->name );
     fl_set_form_title( GUI.main_form->fsc2, Fsc2_Internals.title );
 
     /* Read in and display the new file */
 
-    Is_loaded = display_file( EDL.in_file, In_file_fp );
+    Is_loaded = display_file( EDL.files->name, In_file_fp );
 
     fl_activate_object( GUI.main_form->reload );
     fl_set_object_lcol( GUI.main_form->reload, FL_BLACK );
@@ -1580,14 +1787,16 @@ test_file( FL_OBJECT * a,
         return;
     }
 
-    /* Before scanning the file reload it if the file on disk has changed in
-       between and the user wants the new version - quit if file can't be read
-       again. */
+    /* Before scanning the file reload it if the file (here we only care
+       for the main EDL files, included files haven't been read in yet,
+       that only happens during testing) on disk has changed in between and
+       the user wants the new version - quit if file can't be read again. */
 
-    stat( EDL.in_file, &file_stat );
-    if (    In_file_mod != file_stat.st_mtime
-         && 2 == fl_show_choice( "EDL file on disk is newer than the loaded ",
-                                 "file. Reload file from disk?",
+    stat( EDL.files->name, &file_stat );
+
+    if (    EDL.files->mod_date != file_stat.st_mtime
+         && 2 == fl_show_choice( "EDL file on disk is newer than the",
+                                 "loaded file. Reload file from disk?",
                                  "", 2, "No", "Yes", "", 1 ) )
     {
         load_file( GUI.main_form->browser, 1 );
@@ -1627,7 +1836,7 @@ test_file( FL_OBJECT * a,
        relevant is now stored in memory (unless the parsing was interrupted
        by the user) */
 
-    Parse_result = scan_main( EDL.in_file, In_file_fp );
+    Parse_result = scan_main( EDL.files->name, In_file_fp );
     if ( ! user_break )
     {
         fclose( In_file_fp );
@@ -1702,20 +1911,35 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
     }
     else
     {
-        stat( EDL.in_file, &file_stat );
-        if (    In_file_mod != file_stat.st_mtime
-             && 2 == fl_show_choice( "EDL file on disk is newer than loaded",
-                                     "file. Reload the file from disk?",
-                                     "", 2, "No", "Yes", "", 1 ) )
+        size_t i;
+
+        /* Test the files making up the EDL progam aren't newer than what
+           we tested, otherwise ask user if (s)he want a reload (and a new
+           test) first */
+
+        for ( i = 0; i < EDL.file_count; i++ )
         {
-            load_file( GUI.main_form->browser, 1 );
-            if ( ! Is_loaded )
-                return;
-            Is_tested = UNSET;
-            test_file( GUI.main_form->test_file, 1 );
-            if ( GUI.main_form->test_file->u_ldata == 1 )/* user break ? */
-                return;
-            notify_conn( BUSY_SIGNAL );
+
+            if ( stat( EDL.files[ i ].name, &file_stat ) == -1 )
+                continue;
+
+            if (    EDL.files[ i ].mod_date != file_stat.st_mtime
+                 && 2 == fl_show_choice( "EDL file (or an included file) on "
+                                         "disk", "is newer than the loaded "
+                                         "EDL script.",
+                                         "Reload the file from disk?",
+                                         2, "No", "Yes", "", 1 ) )
+            {
+                load_file( GUI.main_form->browser, 1 );
+                if ( ! Is_loaded )
+                    return;
+                Is_tested = UNSET;
+                test_file( GUI.main_form->test_file, 1 );
+                if ( GUI.main_form->test_file->u_ldata == 1 ) /* user break ? */
+                    return;
+                notify_conn( BUSY_SIGNAL );
+                break;
+            }
         }
     }
 
@@ -1727,12 +1951,12 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
 
         if ( Fsc2_Internals.cmdline_flags & BATCH_MODE )
         {
-            fprintf( stderr, "Sorry, but test of file failed: '%s'.\n",
-                     EDL.in_file );
+            fprintf( stderr, "Test of file failed: '%s'.\n",
+                     EDL.files->name );
             fl_trigger_object( GUI.main_form->quit );
         }
         else
-            fl_show_alert( "Error", "Sorry, but test of file failed.",
+            fl_show_alert( "Error", "Test of file failed.",
                            NULL, 1 );
         notify_conn( UNBUSY_SIGNAL );
         return;
@@ -1758,14 +1982,14 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
             {
                 sprintf( str1, "There where %d severe warnings.",
                          EDL.compilation.error[ SEVERE ] );
-                str2[ 0 ] = '\0';
+                *str2 = '\0';
             }
         }
         else
         {
             sprintf( str1, "There where %d warnings.",
                      EDL.compilation.error[ WARN ] );
-            str2[ 0 ] = '\0';
+            *str2 = '\0';
         }
 
         if ( 1 == fl_show_choice( str1, str2, "Continue to run the program?",
@@ -1784,7 +2008,7 @@ run_file( FL_OBJECT * a  UNUSED_ARG,
         TRY_SUCCESS;
     }
     CATCH( EXCEPTION )
-        fl_show_alert( "Error", "Sorry, can't run the experiment.",
+        fl_show_alert( "Error", "Can't run the experiment.",
                        "See browser for more information.", 1 );
 }
 
@@ -2001,7 +2225,7 @@ conn_request_handler( void )
             && errno == EINTR )
         /* empty */ ;
     line[ count - 1 ] = '\0';
-    GUI.main_form->Load->u_ldata = ( long ) line[ 0 ];
+    GUI.main_form->Load->u_ldata = ( long ) *line;
     if ( line[ 1 ] == 'd' )
         Delete_file = SET;
     GUI.main_form->Load->u_cdata = T_strdup( line + 2 );

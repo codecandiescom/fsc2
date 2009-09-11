@@ -84,7 +84,7 @@ start_editor( void )
         argv[ 0 ] = ( char * ) "xterm";
         argv[ 1 ] = ( char * ) "-e";
         argv[ 2 ] = ( char * ) "vi";
-        argv[ 3 ] = EDL.in_file;
+        argv[ 3 ] = EDL.files->name;
         argv[ 4 ] = NULL;
     }
     else              /* otherwise use the one given by EDITOR */
@@ -103,7 +103,7 @@ start_editor( void )
             argv[ 0 ] = ( char * ) "xterm";
             argv[ 1 ] = ( char * ) "-e";
             argv[ 2 ] = ed;
-            argv[ 3 ] = EDL.in_file;
+            argv[ 3 ] = EDL.files->name;
             argv[ 4 ] = NULL;
         }
         else
@@ -129,7 +129,7 @@ start_editor( void )
                     /* empty */ ;
             }
 
-            argv[ i ]   = EDL.in_file;
+            argv[ i ]   = EDL.files->name;
             argv[ ++i ] = NULL;
         }
     }

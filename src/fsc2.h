@@ -163,6 +163,8 @@ extern int fileno( FILE * /* stream */ );
 
 /* Some global functions */
 
+bool get_edl_file( const char * fname );
+
 void clean_up( void );
 
 bool scan_main( const char * /* name */,
@@ -196,6 +198,7 @@ int idle_handler( void );
    file the modules have to include) */
 
 typedef struct Internals Internals_T;
+typedef struct EDL_Files EDL_Files_T;
 typedef struct EDL_Info EDL_Info_T;
 typedef struct Communication Communication_T;
 typedef struct GUI_Info GUI_Info_T;
@@ -259,9 +262,17 @@ struct Internals {
 };
 
 
+struct EDL_Files {
+    char *name;                  /* name of EDL file */
+    time_t mod_date;             /* last modification date when read in */
+};
+
+
 struct EDL_Info {
+    EDL_Files_T *files;          /* List of EDL files being used */ 
+    size_t file_count;           /* Number of EDL files in list */
+
     long Lc;                     /* line number in currently parsed EDL file */
-    char *in_file;               /* name of input file */
     char *Fname;                 /* name of currently parsed EDL file */
 
     Call_Stack_T *Call_Stack;    /* stack for storing some kind of frame

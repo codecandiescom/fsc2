@@ -76,6 +76,7 @@ static bool section_parser( int section );
 FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
+INCL        \x7.*\n
 
 DEV         ^[\t ]*DEV(ICE)?S?:
 ASS         ^[\t ]*((ASS(IGNMENT)?)|(ASSIGNMENTS)):
@@ -89,14 +90,14 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
 %%      /*     Rules     */
         /*---------------*/
 
-            /* handling of file name lines */
+            /* Handling of file name lines */
 {FILE}      {
                 *( splittext + splitleng - 1 ) = '\0';
                 EDL.Fname = T_free( EDL.Fname );
                 EDL.Fname = T_strdup( splittext + 2 );
             }
 
-            /* handling of line number lines */
+            /* Handling of line number lines */
 {LNUM}      {
                 *( splittext + splitleng - 1 ) = '\0';
                 EDL.Lc = atol( splittext + 2 );
@@ -108,51 +109,57 @@ EXP         ^[\t ]*EXP(ERIMENT)?:
                 return FAIL;
             }
 
-            /* handling of DEVICES: label */
+            /* Handling of new file included via #INCLUDE */
+{INCL}      {
+                splittext[ strlen( splittext ) - 1 ] = '\0';
+                get_edl_file( splittext + 1 );
+            }
+
+            /* Handling of DEVICES: label */
 {DEV}       {
                 if ( ! section_parser( DEVICES_SECTION ) )
                     return FAIL;
             }
 
-            /* handling of ASSIGNMENTS: label */
+            /* Handling of ASSIGNMENTS: label */
 {ASS}       {
                 if ( ! section_parser( ASSIGNMENTS_SECTION ) )
                     return FAIL;
             }
 
-            /* handling of VARIABLES: label */
+            /* Handling of VARIABLES: label */
 {VAR}       {
                 if ( ! section_parser( VARIABLES_SECTION ) )
                     return FAIL;
             }
 
-            /* handling of PHASES: label */
+            /* Handling of PHASES: label */
 {PHAS}      {
                 if ( ! section_parser( PHASES_SECTION ) )
                     return FAIL;
             }
 
-            /* handling of PREPARATIONS: label */
+            /* Handling of PREPARATIONS: label */
 {PREP}      {
                 if ( ! section_parser( PREPARATIONS_SECTION ) )
                     return FAIL;
             }
 
-            /* handling of EXPERIMENT: label */
+            /* Handling of EXPERIMENT: label */
 {EXP}       {
                 if ( ! section_parser( EXPERIMENT_SECTION ) )
                     return FAIL;
             }
 
-            /* handling of unknown label */
+            /* Handling of unknown label */
 .+":"       {
                 print( FATAL, "Unknown label: '%s'.\n", splittext );
                 return FAIL;
             }
 
-[\t \n]+    /* dump white space */
+[\t \n]+    /* Dump white space */
 
-            /* handling of invalid input */
+            /* Handling of invalid input */
 .           {
                 print( FATAL, "Missing section label at start of file.\n" );
                 return FAIL;

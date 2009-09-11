@@ -83,6 +83,7 @@ int Devices_next_section;
 FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
+INCL        \x7.*\n
 
 DEV         ^[ \t]*DEV(ICE)?S?:
 ASS         ^[ \t]*((ASS(IGNMENT)?)|(ASSIGNMENTS)):
@@ -105,23 +106,29 @@ WS          [\n\t ]+
         /*---------------*/
 
 
-            /* handling of file name lines */
+            /* Handling of file name lines */
 {FILE}      {
                 *( devicestext + devicesleng - 1 ) = '\0';
                 EDL.Fname = T_free( EDL.Fname );
                 EDL.Fname = T_strdup( devicestext + 2 );
             }
 
-            /* handling of line number lines */
+            /* Handling of line number lines */
 {LNUM}      {
                 *( devicestext + devicesleng - 1 ) = '\0';
                 EDL.Lc = atol( devicestext + 2 );
             }
 
-            /* handling of error messages from the cleaner */
+            /* Handling of error messages from the cleaner */
 {ERR}       {
                 eprint( FATAL, UNSET, "%s\n", devicestext + 2 );
                 THROW( EXCEPTION );
+            }
+
+            /* Handling of new file included via #INCLUDE */
+{INCL}      {
+                devicestext[ strlen( devicestext ) - 1 ] = '\0';
+                get_edl_file( devicestext + 1 );
             }
 
 {ESTR}      {
@@ -130,37 +137,37 @@ WS          [\n\t ]+
                 THROW( EXCEPTION );
             }
 
-            /* handling of DEVICES: labels */
+            /* Handling of DEVICES: labels */
 {DEV}       {
                 Devices_next_section = DEVICES_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of ASSIGNMENTS: labels */
+            /* Handling of ASSIGNMENTS: labels */
 {ASS}       {
                 Devices_next_section = ASSIGNMENTS_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of VARIABLES: labels */
+            /* Handling of VARIABLES: labels */
 {VAR}       {
                 Devices_next_section = VARIABLES_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of PHASES: labels */
+            /* Handling of PHASES: labels */
 {PHAS}      {
                 Devices_next_section = PHASES_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of PREPARATIONS: labels */
+            /* Handling of PREPARATIONS: labels */
 {PREP}      {
                 Devices_next_section = PREPARATIONS_SECTION;
                 return SECTION_LABEL;
             }
 
-            /* handling of EXPERIMENT: labels */
+            /* Handling of EXPERIMENT: labels */
 {EXP}       {
                 Devices_next_section = EXPERIMENT_SECTION;
                 return SECTION_LABEL;
@@ -173,9 +180,9 @@ WS          [\n\t ]+
 
 ;           return ';';
 
-{WS}        /* skip prettifying characters */
+{WS}        /* Skip prettifying characters */
 
-            /* handling of invalid input (i.e. everything else) */
+            /* Handling of invalid input (i.e. everything else) */
 .           {
                 print( FATAL, "Invalid input in DEVICES section: '%s'.\n",
                        devicestext );

@@ -84,6 +84,7 @@ int Exp_next_section;
 FILE        \x1\n.+\n
 LNUM        \x2\n[0-9]+\n
 ERR         \x3\n.+\n
+INCL        \x7.*\n
 
 ESTR        \x5.*\x3\n.*\n
 STR         \x5[^\x6]*\x6
@@ -143,6 +144,12 @@ FUNC        {IDENT}"#"[0-9]+
 {ERR}       {
                 eprint( FATAL, UNSET, "%s\n", exptext + 2 );
                 THROW( EXCEPTION );
+            }
+
+            /* Handling of new file included via #INCLUDE */
+{INCL}      {
+                exptext[ strlen( exptext ) - 1 ] = '\0';
+                get_edl_file( exptext + 1 );
             }
 
 {ESTR}      {

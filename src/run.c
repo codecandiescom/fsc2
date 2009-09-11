@@ -1005,7 +1005,7 @@ run_sigchld_callback( FL_OBJECT * a,
 
         if ( Fsc2_Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
             fprintf( stderr, "Fatal Error: Experiment stopped unexpectedly: "
-                     "'%s'.\n", EDL.in_file );
+                     "'%s'.\n", EDL.files->name );
 
         mess = "Experiment stopped unexpectedly after ";
         state = EXIT_FAILURE;
@@ -1025,7 +1025,7 @@ run_sigchld_callback( FL_OBJECT * a,
 
         if ( Fsc2_Internals.cmdline_flags & ( BATCH_MODE | NO_GUI_RUN ) )
             fprintf( stderr, "Fatal Error: Experiment had to be stopped: "
-                     "'%s'.\n", EDL.in_file );
+                     "'%s'.\n", EDL.files->name );
 
         mess = "Experiment had to be stopped after ";
         state = EXIT_FAILURE;
