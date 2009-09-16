@@ -426,7 +426,7 @@ MAIL_ADDRESS       := fsc2@toerring.de
 
 # Version information
 
-VERSION          := 2.3.15
+VERSION          := 2.3.16
 
 # Set the optimization level
 
@@ -953,9 +953,9 @@ export            # export all variables to sub-makes
 
 .SUFFIXES:
 
-.PHONY: all config src modules utils docs built nstall uninstall     \
-		http_server version test cleanup clean pack pack-git         \
-		packages tags MANIFEST me6x00 ni6601 ni_daq rulbus witio_48
+.PHONY: all config src modules utils docs install uninstall     \
+		http_server test cleanup clean pack pack-git packages   \
+		tags MANIFEST me6x00 ni6601 ni_daq rulbus witio_48
 
 
 ############## End of configuration section ##############
@@ -993,7 +993,6 @@ config: fsc2_config.h
 		echo "Using default configuration";                \
 	fi
 	$(MAKE) -C $(sdir) gpib_setup
-	$(MAKE) built
 
 
 src:
@@ -1049,17 +1048,6 @@ fsc2_config.h: Makefile $(MACHINE_INCLUDE_FILE)
 		    >> fsc2_config.h
 
 
-# Create a file with as much as possible information about the files
-# involved in the make process
-
-built:
-	-@cp -f fsc2_config.h version
-	-@echo >> version
-	-git ls-tree -r master >> version
-	-@gzip -c -9 version | uuencode - > version.ugz
-	-@$(RM) $(RMFLAGS) version
-
-
 # Creates everything that allows the web server to be run (on condition that
 # the use of the web server isn't switched off)
 
@@ -1093,7 +1081,6 @@ install:
 	$(MAKE) -C $(sdir) install
 	$(MAKE) -C $(mdir) install
 	$(MAKE) -C $(cdir) install
-	$(INSTALL) -m 644 -o $(OWNER) -g $(GROUP) version.ugz $(libdir)
 ifdef WITH_HTTP_SERVER
 	$(MAKE) -C FcntlLock install
 endif
@@ -1107,7 +1094,6 @@ endif
 # significantly since the installation!
 
 uninstall:
-	$(RM) $(RMFLAGS) $(libdir)/version.ugz
 	$(RM) $(RMFLAGS) $(libdir)/Functions
 	$(RM) $(RMFLAGS) $(libdir)/Devices
 	$(MAKE) -C $(cdir) uninstall
@@ -1127,14 +1113,6 @@ uninstall:
 	fi
 	if [ -z "`ls -A $(libdir)`" ]; then   \
 		rmdir $(libdir);                  \
-	fi
-
-
-# Unpack the (local) version file and write its contents to stdout
-
-version:
-	-@if [ -e version.ugz ]; then             \
-		uudecode version.ugz | gunzip -c -q;  \
 	fi
 
 
@@ -1164,7 +1142,7 @@ ifdef WITH_HTTP_SERVER
 	fi
 endif
 	$(MAKE) -C $(udir) clean
-	$(RM) $(RMFLAGS) version.ugz $(tagsfile) makelog fsc2_config.h *~
+	$(RM) $(RMFLAGS) $(tagsfile) makelog fsc2_config.h *~
 	-$(MAKE) -C $(edir) clean
 	-$(MAKE) -C me6x00 clean
 	-$(MAKE) -C ni6601 clean
@@ -1193,7 +1171,7 @@ test:
 
 pack:
 	@$(MAKE) clean
-	cd ..; tar -c fsc2-$(VERSION) --exclude=(.git*|.gdb.hist) | gzip -c -9 > fsc2-$(VERSION).tar.gz
+	cd ..; tar -c fsc2-$(VERSION) --exclude=.git* --exclude=.gdb.hist | gzip -c -9 > fsc2-$(VERSION).tar.gz
 
 pack-git:
 	cd ..

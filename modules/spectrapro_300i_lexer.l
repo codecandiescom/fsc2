@@ -64,7 +64,6 @@ void spectrapro_300i_set_in( FILE * );
 void spectrapro_300i_set_out( FILE * );
 int spectrapro_300i_get_debug( void );
 void spectrapro_300i_set_debug( int );
-int spectrapro_300i_lex_destroy( void );
 #endif
 
 %}

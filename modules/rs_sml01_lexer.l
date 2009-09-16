@@ -65,7 +65,6 @@ void rs_sml01_set_in( FILE * );
 void rs_sml01_set_out( FILE * );
 int rs_sml01_get_debug( void );
 void rs_sml01_set_debug( int );
-int rs_sml01_lex_destroy( void );
 #endif
 
 %}

@@ -69,7 +69,6 @@ void phasesset_in( FILE * );
 void phasesset_out( FILE * );
 int phasesget_debug( void );
 void phasesset_debug( int );
-int phaseslex_destroy( void );
 #endif
 
 
@@ -307,17 +306,9 @@ phases_parser( FILE * in )
     }
     CATCH( INVALID_INPUT_EXCEPTION )
     {
-        phaseslex_destroy( );
         print( FATAL, "Invalid input near '%s'.\n", phasestext );
         THROW( EXCEPTION );
     }
-    OTHERWISE
-    {
-        phaseslex_destroy( );
-        RETHROW( );
-    }
-
-    phaseslex_destroy( );
 
     return Phases_next_section;
 }

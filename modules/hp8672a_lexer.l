@@ -65,7 +65,6 @@ void hp8672a_set_in( FILE * );
 void hp8672a_set_out( FILE * );
 int hp8672a_get_debug( void );
 void hp8672a_set_debug( int );
-int hp8672a_lex_destroy( void );
 #endif
 
 %}

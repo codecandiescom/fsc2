@@ -71,7 +71,6 @@ void prepsset_in( FILE * );
 void prepsset_out( FILE * );
 int prepsget_debug( void );
 void prepsset_debug( int );
-int prepslex_destroy( void );
 #endif
 
 
@@ -535,8 +534,6 @@ preparations_parser( FILE * in )
     prepsparser_init( );
 
     prepsparse( );
-
-    prepslex_destroy( );
 
     return Preps_next_section;
 }

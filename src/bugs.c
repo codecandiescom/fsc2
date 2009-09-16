@@ -143,21 +143,6 @@ bug_report_callback( FL_OBJECT * a,
     ret = system( cmd );
     T_free( cmd );
 
-    /* Finally append the file with the version informations so that I'll know
-       what the sender is really using */
-
-    cmd = get_string( "echo \"\nVersion (use uudecode file "
-                      "| gunzip -c to unpack):\n\" >> %s", filename );
-    fflush( tmp );
-    ret = system( cmd );
-    T_free( cmd );
-
-    cmd = get_string( "cat " libdir "version.ugz >> %s", filename );
-    fflush( tmp );
-    ret = system( cmd );
-    T_free( cmd );
-    fflush( tmp );
-
     /* Assemble the command for invoking the editor */
 
     ed = getenv( "EDITOR" );
@@ -232,17 +217,11 @@ bug_report_callback( FL_OBJECT * a UNUSED_ARG,
 void
 death_mail( void )
 {
-#define DM_BUF_SIZE 512
-
     FILE *mail;
     char cur_line[ FL_BROWSER_LINELENGTH ];
     char *clp;
     int lines;
     int i;
-    char buffer[ DM_BUF_SIZE ];
-    size_t count;
-    char vfn[ PATH_MAX + 20 ];
-    FILE *vfp;
 
 
     if ( ( mail = tmpfile( ) ) == NULL )
@@ -307,17 +286,6 @@ death_mail( void )
                    mail );
             fputc( ( int ) '\n', mail );
         }
-    }
-
-    snprintf( vfn, PATH_MAX + 20, libdir "version.ugz" );
-
-    if ( ( vfp = fopen( vfn, "r" ) ) != NULL )
-    {
-        fputs( "\n\nVersion:\n\n", mail );
-        while (    ( count = fread( buffer, 1, DM_BUF_SIZE, vfp ) ) != 0
-                && fwrite( buffer, 1, count, mail ) == count )
-            /* empty */;
-        fclose( vfp );
     }
 
     rewind( mail );

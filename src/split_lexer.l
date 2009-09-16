@@ -62,7 +62,6 @@ void splitset_in( FILE * );
 void splitset_out( FILE * );
 int splitget_debug( void );
 void splitset_debug( int );
-int splitlex_destroy( void );
 #endif
 
 
@@ -230,8 +229,6 @@ scan_main( const char * name,
     split_error = ( bool ) splitlex( );
 
     fclose( splitin );
-
-    splitlex_destroy( );
 
     while ( ! Fsc2_Internals.fsc2_clean_died )
         fsc2_usleep( 10000, UNSET );

@@ -64,7 +64,6 @@ void hjs_attenuator_set_in( FILE * );
 void hjs_attenuator_set_out( FILE * );
 int hjs_attenuator_get_debug( void );
 void hjs_attenuator_set_debug( int );
-int hjs_attenuator_lex_destroy( void );
 #endif
 
 %}

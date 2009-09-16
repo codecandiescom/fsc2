@@ -58,8 +58,11 @@ static int xbrowserfs,
            xtoolboxfs,
            xfileselectorfs,
            xhelpfs,
-           xnocm,
-           xport;
+#if defined WITH_HTTP_SERVER
+           xport,
+#endif
+		   xnocm;
+
 
 FL_resource Xresources[ ] = {
     {                         /* geometry of main window */
@@ -182,7 +185,7 @@ FL_resource Xresources[ ] = {
         &xport,
         "0",
         sizeof xport
-    },
+    }
 #endif
 };
 

@@ -72,7 +72,6 @@ void assignset_in( FILE * );
 void assignset_out( FILE * );
 int assignget_debug( void );
 void assignset_debug( int );
-int assignlex_destroy( void );
 #endif
 
 
@@ -586,8 +585,6 @@ assignments_parser( FILE * in )
     Cur_Pulser = 0;
 
     assignparse( );
-
-    assignlex_destroy( );
 
     return Assign_next_section;
 }

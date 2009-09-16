@@ -60,7 +60,6 @@ void func_listset_in( FILE * );
 void func_listset_out( FILE * );
 int func_listget_debug( void );
 void func_listset_debug( int );
-int func_listlex_destroy( void );
 #endif
 
 
@@ -264,7 +263,6 @@ func_list_parse( Func_T ** fncts,
     OTHERWISE
     {
         fclose( func_listin );
-        func_listlex_destroy( );
         RETHROW( );
     }
 
@@ -273,7 +271,6 @@ func_list_parse( Func_T ** fncts,
     if ( num == 0 )
     {
         fclose( func_listin );
-        func_listlex_destroy( );
         return num_predef_func;
     }
 
@@ -306,12 +303,11 @@ func_list_parse( Func_T ** fncts,
     OTHERWISE
     {
         fclose( func_listin );
-        func_listlex_destroy( );
         RETHROW( );
     }
 
     fclose( func_listin );
-    func_listlex_destroy( );
+
     return nf;
 }
 

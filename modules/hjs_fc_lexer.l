@@ -48,7 +48,6 @@ void hjs_fc_set_in( FILE * );
 void hjs_fc_set_out( FILE * );
 int hjs_fc_get_debug( void );
 void hjs_fc_set_debug( int );
-int hjs_fc_lex_destroy( void );
 #endif
 
 

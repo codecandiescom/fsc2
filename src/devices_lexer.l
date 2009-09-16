@@ -69,7 +69,6 @@ void devicesset_in( FILE * );
 void devicesset_out( FILE * );
 int devicesget_debug( void );
 void devicesset_debug( int );
-int deviceslex_destroy( void );
 #endif
 
 
@@ -234,8 +233,6 @@ devices_parser( FILE * in )
 
     devicesparse( );
     load_all_drivers( );
-
-    deviceslex_destroy( );
 
     return Devices_next_section;
 }

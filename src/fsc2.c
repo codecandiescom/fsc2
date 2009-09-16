@@ -44,7 +44,6 @@ static bool Delete_old_file = UNSET;
 extern FL_resource Xresources[ ];         /* defined in xinit.c */
 extern const char *Prog_Name;             /* defined in global.c */
 extern FILE *fsc2_confin;                 /* defined in fsc2_conf_lexer.l */
-extern int fsc2_conflex_destroy( void );  /* defined in fsc2_conf_lexer.l */
 
 extern int fsc2_confparse( void );        /* from fsc2_conf_parser.y */
 
@@ -450,13 +449,11 @@ fsc2_get_conf( void )
     {
         fsc2_confparse( );
         fclose( fsc2_confin );
-        fsc2_conflex_destroy( );
         TRY_SUCCESS;
     }
     OTHERWISE
     {
         fclose( fsc2_confin );
-        fsc2_conflex_destroy( );
         if ( Fsc2_Internals.def_directory != NULL )
             Fsc2_Internals.def_directory =
                                         T_free( Fsc2_Internals.def_directory );

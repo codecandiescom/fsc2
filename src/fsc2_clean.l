@@ -128,7 +128,6 @@ void yyset_in( FILE * );
 void yyset_out( FILE * );
 int yyget_debug( void );
 void yyset_debug( int );
-int yylex_destroy( void );
 #endif
 
 
@@ -543,8 +542,6 @@ main( int    argc,
     {
         yylex( );
 
-        yylex_destroy( );
-
         /* Calculate and write out (to stderr) the SHA1 digest of the data */
 
         sha1_calculate( &context, digest );
@@ -575,7 +572,6 @@ main( int    argc,
     OTHERWISE
         output( "\x03\n%s: Unknown error at line %ld.\n", Fname, Lc );
 
-    yylex_destroy( );
     return EXIT_FAILURE;
 }
 

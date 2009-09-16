@@ -48,7 +48,6 @@ void fsc2_confset_in( FILE * );
 void fsc2_confset_out( FILE * );
 int fsc2_confget_debug( void );
 void fsc2_confset_debug( int );
-int fsc2_conflex_destroy( void );
 #endif
 
 
