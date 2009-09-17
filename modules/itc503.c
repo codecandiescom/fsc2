@@ -101,13 +101,17 @@ static int itc503_get_heater_sensor( void );
 static void itc503_set_heater_sensor( int sensor );
 static double itc503_get_setpoint( void );
 static void itc503_set_setpoint( double setpoint );
-static double itc503_sens_data( void );
+static double itc503_sens_data( long channel );
 static void itc503_set_heater_power_limit( double limit );
 static double itc503_get_heater_power(void );
 static void itc503_set_heater_power( double hp );
 static double itc503_get_gas_flow( void );
 static void itc503_set_gas_flow( double gf );
 static void itc503_lock( int state );
+#if 0
+static void itc503_auto_pid_mode( bool state );
+static bool itc503_get_auto_pid_state( void );
+#endif
 static bool itc503_command( const char * cmd );
 static long itc503_talk( const char * message,
                          char *       reply,
@@ -205,27 +209,72 @@ temp_contr_name( Var_T * v  UNUSED_ARG )
  *---------------------------------------------*/
 
 Var_T *
-temp_contr_temperature( Var_T * v  UNUSED_ARG )
+temp_contr_temperature( Var_T * v )
 {
+    long channel;
+
+
     if ( FSC2_MODE == TEST )
         return vars_push( FLOAT_VAR, 123.45 );
 
-    return vars_push( FLOAT_VAR, itc503_sens_data( ) );
+    if ( v == NULL )
+        return vars_push( FLOAT_VAR,
+                          itc503_sens_data( itc503.sample_channel ) );
+
+    vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+    if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+    {
+        channel = get_long( v, "channel number" );
+
+        if ( channel < SAMPLE_CHANNEL_1 && channel > SAMPLE_CHANNEL_3 )
+        {
+            print( FATAL, "Invalid sample channel number (%ld).\n", channel );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        if (    strlen( v->val.sptr ) != 1
+             || (    *v->val.sptr != 'A'
+                  && *v->val.sptr != 'B'
+                  && *v->val.sptr != 'C' ) )
+        {
+            print( FATAL, "Invalid sample channel (\"%s\").\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+
+        channel = ( long ) ( *v->val.sptr - 'A' + 1 );
+    }
+
+    if ( channel > NUM_SAMPLE_CHANNELS )
+    {
+        print( FATAL, "Device module is configured to use not more than %d "
+               "sample channels.\n", NUM_SAMPLE_CHANNELS );
+        THROW( EXCEPTION );
+    }
+
+    itc503.sample_channel = channel - 1;
+
+    return vars_push( FLOAT_VAR,
+                      itc503_sens_data( itc503.sample_channel ) );
 }
 
 
-/*---------------------------------------------------------------------*
- * Sets or returns the currently used sample channel (function returns
- * either 1, 2 or 3 for channel A, B or C and accepts 1, 2, 3 or the
- * strings "A","B" or "C" as input arguments). Please note that the
- * number of sample channels that can be used is a compile time
- * constant that can be changed in the configuration file.
- *---------------------------------------------------------------------*/
+/*------------------------------------------------------------------*
+ * Sets or returns the currently used sample channel for returning
+ * measured temperatures. The function returns either 1, 2 or 3 for
+ * channel A, B or C and accepts 1, 2, 3 or the strings "A","B" or
+ * "C" as input arguments). Please note that the number of sample
+ * channels that can be used is a compile time constant that can be
+ * changed in the configuration file.
+ *------------------------------------------------------------------*/
 
 Var_T *
 temp_contr_sample_channel( Var_T * v )
 {
     long channel;
+
 
     if ( v == NULL )
         return vars_push( INT_VAR, ( long ) itc503.sample_channel );
@@ -269,8 +318,15 @@ temp_contr_sample_channel( Var_T * v )
 }
 
 
-/*--------------------------------------------------------*
- *--------------------------------------------------------*/
+/*-------------------------------------------------------*
+ * Sets or returns the currently used channel for active
+ * temerature control. The (function returns either 1, 2
+ * or 3 for channel A, B or C and accepts 1, 2, 3 or the
+ * strings "A","B" or "C" as input arguments). Please
+ * note that the number of sample channels that can be
+ * used is a compile time constant that can be changed
+ * in the configuration file.
+ *-------------------------------------------------------*/
 
 Var_T *
 temp_contr_heater_sensor( Var_T * v )
@@ -434,6 +490,13 @@ temp_contr_heater_power_limit( Var_T * v )
 
     too_many_arguments( v );
 
+    if ( itc503.state == STATE_MANUAL )
+    {
+        print( SEVERE, "Heater power limit can only be set while device "
+               "is in manual state.\n" );
+        return vars_push( FLOAT_VAR, -1.0 );
+    }
+
     if ( limit < 0.0 || limit > MAX_HEATER_POWER + 0.04 )
     {
         print( FATAL, "Heater power limit of %.1f V out of range, must be "
@@ -467,6 +530,15 @@ temp_contr_heater_power( Var_T * v )
     hp = get_double( v, "heater power" );
 
     too_many_arguments( v );
+
+    if ( itc503.state == STATE_HEATER_AUTO || itc503.state == STATE_AUTO )
+    {
+        print( SEVERE, "Can't change heater power while heater power is "
+               "controlled by the device.\n" );
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, itc503.heater_power );
+        return vars_push( FLOAT_VAR, itc503_get_heater_power( ) );
+    }
 
     if ( hp < 0 || lrnd( 10 * hp ) > 999 )
     {
@@ -505,6 +577,15 @@ temp_contr_gas_flow( Var_T * v )
     gf = get_double( v, "gas flow" );
 
     too_many_arguments( v );
+
+    if ( itc503.state == STATE_GAS_AUTO || itc503.state == STATE_AUTO )
+    {
+        print( SEVERE, "Can't change gas flow while gas flow is "
+               "controlled by the device.\n" );
+        if ( FSC2_MODE == TEST )
+            return vars_push( FLOAT_VAR, itc503.heater_power );
+        return vars_push( FLOAT_VAR, itc503_get_heater_power( ) );
+    }
 
     if ( gf < 0 || lrnd( 10 * gf ) > 999 )
     {
@@ -741,7 +822,7 @@ itc503_set_heater_sensor( int sensor )
  *--------------------------------------------*/
 
 static double
-itc503_sens_data( void )
+itc503_sens_data( long channel )
 {
     char buf[ 50 ];
     long len;
@@ -749,7 +830,9 @@ itc503_sens_data( void )
     char cmd[ ] = "R*\r";
 
 
-    cmd[ 1 ] = itc503.sample_channel + '0';
+    fsc2_assert( channel >= 0 && channel < NUM_SAMPLE_CHANNELS );
+
+    cmd[ 1 ] = channel + '0';
     len = itc503_talk( cmd, buf, sizeof buf );
 
     if (    len < 2
@@ -972,6 +1055,47 @@ itc503_lock( int state )
     itc503.lock_state = state;
 }
 
+
+#if 0
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+static void
+itc503_set_auto_pid_state( bool state )
+{
+    char cmd[ ] = "L*\r";
+    char buf[ 10 ];
+
+    cmd[ 1 ] = state ? '1' : '0';
+
+    if ( itc503_talk( cmd, buf, sizeof buf ) != 2 )
+    {
+        print( FATAL, "Failure to set auto-pid.\n" );
+        THROW( EXCEPTION );
+    }
+}
+
+
+/*--------------------------------------------*
+ *--------------------------------------------*/
+
+static bool
+itc503_get_auto_pid_state( void )
+{
+    char buf[ 50 ];
+
+
+    if (    itc503_talk( "X\r", buf, sizeof buf ) < 12
+         || buf[ 11 ] != 'L'
+         || ( buf[ 12 ] != '0' && buf[ 12 ] != '1' ) )
+    {
+        print( FATAL, "Device returns invalid state data.\n");
+        THROW( EXCEPTION );
+    }
+
+    return buf[ 12 ] == '1';
+}
+#endif
 
 /*--------------------------------------------------------------*
  *--------------------------------------------------------------*/

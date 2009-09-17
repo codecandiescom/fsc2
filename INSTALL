@@ -108,8 +108,8 @@ their respective properties.
 
 For the NI libraries the GPIB library doesn't need such a configuration file,
 but fsc2 does. So you have to create one, following the conventions used in
-the configuration files for the LLP library, which I also (mostly) used for
-my library). A typical entry in this file looks like the following
+the configuration files for the LLP and SLG library, which I also (mostly)
+used for my library). A typical entry in this file looks like the following
 
 device {
         name        = "TDS744A"

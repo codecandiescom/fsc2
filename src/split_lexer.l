@@ -189,12 +189,9 @@ scan_main( const char * name,
 {
     bool split_error;
     int d_fd;
-    bool is_digest = UNSET;
-    Digest_T digest;
 
 
     CLOBBER_PROTECT( split_error );
-    CLOBBER_PROTECT( is_digest );
 
     fsc2_assert( fp != NULL );
 
@@ -240,29 +237,17 @@ scan_main( const char * name,
         split_error = FAIL;
     }
 
-    /* Get the SHA1 digest for the EDL script if available */
-
-    if (    split_error == OK
-         && Fsc2_Internals.fsc2_clean_status == 0
-            && read( d_fd, digest, SHA1_HASH_SIZE ) == SHA1_HASH_SIZE )
-        is_digest = SET;
-
     close( d_fd );
 
-    /* If there's no SHA1 digest or it's not known do a test run */
+    /* Do the test run */
 
-    if ( ! is_digest || ( is_digest && ! digest_check_if_tested( digest ) ) )
+    TRY
     {
-        TRY
-        {
-            exp_test_run( );
-            if ( is_digest )
-                digest_add( digest );
-            TRY_SUCCESS;
-        }
-        OTHERWISE
-            split_error = FAIL;
+        exp_test_run( );
+        TRY_SUCCESS;
     }
+    OTHERWISE
+        split_error = FAIL;
 
     /* In case there was an error and the input file wasn't read until the
        end it's sometimes necessary to flush the lexer's input buffer */

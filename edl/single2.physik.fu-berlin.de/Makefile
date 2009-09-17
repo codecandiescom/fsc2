@@ -29,12 +29,12 @@ all: $(EDL_SCRIPTS)
 	../../utils/fsc2_guify $< $@
 
 install:
-	for f in $$(SCRIPTS); do               \
+	for f in $(SCRIPTS); do                \
 		$(INSTALL) -m 0755 $$f $(bindir);  \
 	done
 
 uninstall:
-	for f in $$(SCRIPTS); do               \
+	for f in $(SCRIPTS); do                \
 		$(RM) $(RMFLAGS) $(bindir)/$$f;    \
 	done
 

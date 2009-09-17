@@ -118,7 +118,6 @@
 #include "lan.h"
 #include "conn.h"
 #include "sha1.h"
-#include "digest.h"
 #if defined WITH_HTTP_SERVER
 #include "dump_graphic.h"
 #include "http.h"

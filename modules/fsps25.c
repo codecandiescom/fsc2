@@ -229,7 +229,7 @@ magnet_name( Var_T * v  UNUSED_ARG )
 
 /*--------------------------------------------------------------*
  * Requests that module is switched to "expert mode", a mode in
- * which certain, potntially dangerous commands can be send to
+ * which certain, potentially dangerous commands can be send to
  * the devicee
  *--------------------------------------------------------------*/
 
@@ -610,13 +610,13 @@ fsps25_init( void )
         THROW( EXCEPTION );
     }
 
-    /* There's no reason to keep the expert mode if the device isn't in
-       PFail state */
-
 	/* Switch to ON state if necessary */
 
 	if ( fsps25.state != STATE_ON )
 		fsps25_on( );
+
+    /* There's no reason to stay in expert mode if the device isn't in
+       PFail state */
 
     if ( fsps25.state != STATE_PFAIL )
         fsps25.is_expert_mode = UNSET;

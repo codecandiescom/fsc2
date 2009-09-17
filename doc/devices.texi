@@ -1364,13 +1364,13 @@ an argument, i.e.@: as a query.
 @findex lockin_ref_freq()
 @item lockin_ref_freq()
 The function can be used to query the modulation frequency and, for
-the @ref{sr810, SR810}, @ref{sr830, SR830} and @ref{er023m, ER023M}
+the @ref{sr810, SR810}, @ref{sr830, SR830} and @ref{er023m, ER023M},
 also to set the modulation frequency (both the other @strong{Stanford
-Research} models need an external modulation). If called with no
+Research} models require external modulation). If called with no
 argument the current modulation frequency is returned. If called with
 an argument the modulation frequency is set.
 
-If for the @ref{sr810, SR810} and @ref{sr830, qSR830} the frequency is
+If for the @ref{sr810, SR810} and @ref{sr830, SR830} the frequency is
 not within the admissible range an error message is printed and the
 experiment is stopped. The admissible range depends on the harmonics
 setting, see the manuals for full details.
@@ -4260,6 +4260,12 @@ the @code{EDL} script.
 @item @ref{temp_contr_name()}
 @item @ref{temp_contr_temperature()}
 @item @ref{temp_contr_sample_channel()}
+@item @ref{temp_contr_heater_sensor()}
+@item @ref{temp_contr_setpoint()}
+@item @ref{temp_contr_state()}
+@item @ref{temp_contr_heater_power()}
+@item @ref{temp_contr_heater_power_limit()}
+@item @ref{temp_contr_gas_flow()}
 @item @ref{temp_contr_lock_keyboard()}
 @end table
 
@@ -4281,33 +4287,142 @@ Returns a string with the name of the temperature controller being used.
 @anchor{temp_contr_temperature()}
 @findex temp_contr_temperature()
 @item temp_contr_temperature()
-This function accepts no arguments and returns the temperature (in
-Kelvin) at the currently active sample channel.
+This function returns the temperature (in Kelvin). If the device has
+only a single sample channel the function accepts no arguments.
+Otherwise it accepts an option argument, the sampel channel to be
+used. This then becomes the default sample channel that is used when
+the function is called again, that time without an argument. If no
+sample channel has been set before (either by a call of this function
+or @code{@ref{temp_contr_sample_channel()}}) the default sample channel
+is used. This is channel @code{1} for the @ref{itc503, Oxford
+Instruments ITC503} and the channel before the program start at the
+front panel for the @ref{lakeshore330, Lake Shore 330}.
 
-If no sample channel has been selected for the @ref{lakeshore330, Lake
-Shore 330} channels @code{B} is used by default, while for the
-@ref{itc503, Oxford Instruments ITC503} the default channel is channel
-@code{1}.
+The function returned is always in Kelvin.
 
 
 @anchor{temp_contr_sample_channel()}
 @findex temp_contr_sample_channel()
 @item temp_contr_sample_channel()
-This function returns, when called with no argument, the currently
+This function returns when called with no argument the currently
 selected sample channel. For the @ref{lakeshore330, Lake Shore 330} it
 returns @code{1} for channel @code{A} and @code{2} for channel
-@code{B} while for the @ref{itc503} @code{1}, @code{2} or @code{3} get
-returned, indicating which of sample channel is selected. These values
-can also passed to the function to set a new sample channel.
-Alternatively, one may also use the strings @code{"A"} or @code{"B"}
-(and @code{"C"} for the three channels of the @ref{itc503}).
+@code{B} while for the @ref{itc503, Oxford Instruments ITC503}
+@code{1}, @code{2} or @code{3} get returned, indicating which of
+sample channel is selected.
 
-Please take note that setting a sample channel takes about half a
-second with the @ref{lakeshore330, Lake Shore 330}. For the
-@ref{itc503, Oxford Instruments ITC503} not all sample channels may be
-usable, there are models with different numbers of channels and this
-number is a compile time option that has to be set in the
-configuration file for the device.
+Otherwise it can be used to select a new default sample channel. In
+that case it expects a single argument. This must either be an integer
+(@code{1} or @code{2} for the @ref{lakeshore330, Lake Shore 330} and
+also @code{3} (if available) for the @ref{itc503, Oxford Instruments
+ITC503} or a string with a single letter (@code{"A"} or @code{"B"}
+(and @code{"C"} for the three channels of the @ref{itc503, , Oxford
+Instruments ITC503}).
+
+Please note that the default sample channel can also be changed via
+a call of @code{@ref{temp_contr_temperature()}}.
+
+Setting a sample channel takes about half a second with the
+@ref{lakeshore330, Lake Shore 330}. For the @ref{itc503, Oxford
+Instruments ITC503} not all sample channels may be usable, there are
+models with different numbers of channels and this number is a compile
+time option that has to be set in the configuration file for the
+device.
+
+
+@anchor{temp_contr_heater_sensor()}
+@findex temp_contr_heater_sensor()
+@item temp_contr_heater_sensor()
+This function allows to set or query the sensor that is used for
+active control of the temperature when comparing to the setpoint
+(the target temperature). It may differ from the sensor used when
+calling @code{@ref{temp_contr_temperature()}}.
+
+The function currently only is implemented for the @ref{itc503, Oxford
+Instruments ITC503}. If called without an argument it returns
+@code{1} or @code{2} or @code{3} (as far as available).
+To set a different sensor call it with one of these numbers
+or with a single letter string @code{"A"}, @code{"B"} or @code{"C"}.
+
+Please note: not all sensor channels may be usable, there are models
+with different numbers of channels and this number is a compile time
+option that has to be set in the configuration file for the device.
+
+
+@anchor{temp_contr_setpoint()}
+@findex temp_contr_setpoint()
+@item temp_contr_setpoint()
+The function allows to query or set the setpoint, i.e.@: the
+target temperature the device will try to achieve and maintain
+when active control is one. If called without an argument it
+returns the setpoint temperature in Kelvin. To set a new setpoint
+value call it with the ew target temperature in Kelvin.
+
+This function is currently only available for the @ref{itc503, Oxford
+Instruments ITC503}.
+
+
+@anchor{temp_contr_state()}
+@findex temp_contr_state()
+@item temp_contr_state()
+This function can be used to change the state of the device,
+i.e.@: if active temperature control is on or off.
+
+This function is currently only available for the @ref{itc503, Oxford
+Instruments ITC503}. If called without an argument it returns an
+integer between @code{0} and @code{5}, where @code{1} stands for
+manual control, @code{1} for automatic control of the heater power,
+@code{2} for automatic control of the gas flow, @code{3} for full
+automatic control (both heater power and flow rate). To set the state
+call it with a single argument, either with one of the above numbers
+or one of the strings @code{"MANUAL"}, @code{"HEATER_AUTO"},
+@code{"GAS_AUTO"} or @code{"AUTO"} (both heater and gas flow are
+controlled by the device).
+
+
+@anchor{temp_contr_heater_power()}
+@findex temp_contr_heater_power()
+@item temp_contr_heater_power()
+This function is currently only available for the @ref{itc503, Oxford
+Instruments ITC503}. If in manual mode or when only the gas flow
+is controlled this function allows to adjust the heater power
+by calling it with an argument between @code{0} and @code{99.9},
+representing the percentage of the heater power limit that can
+be set via @code{@ref{temp_contr_heater_power_limit()}}. If the
+device isn't in manual or gas flow control mode a warning gets
+printed out and the heater power remains unchanged.
+
+If called without an argument the function returns the current
+setting of the heater power.
+
+
+@anchor{temp_contr_heater_power_limit()}
+@findex temp_contr_heater_power_limit()
+@item temp_contr_heater_power_limit()
+This function is currently only available for the @ref{itc503, Oxford
+Instruments ITC503}. It allows to set a limit in the heater power.
+The function expects a single argument, a value between @code{0.0}
+and @code{99.9}, where @code{99.9} corresponds to the maximum
+possible output voltage of @w{40 V}.
+
+The function can only be called while the device is in manual
+mode, otherwise only a warning message is output (and the function
+returns @code{-1.0} instead of the new value of the limit).
+
+It is not powssible to query the heater power limit.
+
+
+@anchor{temp_contr_gas_flow()}
+@findex temp_contr_gas_flow()
+@item temp_contr_gas_flow()
+This function is currently only available for the @ref{itc503, Oxford
+Instruments ITC503}. It allows to set or query the gas flow. The
+function expects a single argument, a value between @code{0.0} and
+@code{99.9}, representing the percentage of the maximum gas flow. If
+the device isn't in manual or heater power control mode a warning gets
+printed out and the heater power remains unchanged.
+
+To determine the current gas flow call the function without an argument.
 
 
 @anchor{temp_contr_lock_keyboard()}
@@ -4320,6 +4435,7 @@ re-locked) from within the script. To unlock the keyboard call this
 function with an argument of @code{0} or @code{"OFF"}, to re-lock the
 keyboard call it again with a non-zero argument, @code{"ON"} or no
 argument at all.
+
 
 @end table
 

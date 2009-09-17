@@ -26,15 +26,15 @@
 
 /* Include configuration information for the device */
 
-#include "hp5342a.conf"
+#include "hp5343a.conf"
 
 const char device_name[ ]  = DEVICE_NAME;
 const char generic_type[ ] = DEVICE_TYPE;
 
 
-int hp5342a_init_hook(       void );
-int hp5342a_exp_hook(        void );
-int hp5342a_end_of_exp_hook( void );
+int hp5343a_init_hook(       void );
+int hp5343a_exp_hook(        void );
+int hp5343a_end_of_exp_hook( void );
 
 
 Var_T * freq_counter_name(       Var_T * v );
@@ -43,24 +43,24 @@ Var_T * freq_counter_resolution( Var_T * v );
 Var_T * freq_counter_command(    Var_T * v );
 
 
-static bool hp5342a_init( const char * name );
+static bool hp5343a_init( const char * name );
 
-static double hp5342a_get_freq( void );
+static double hp5343a_get_freq( void );
 
-static double hp5342a_set_resolution( int );
-static bool hp5342a_command( const char * );
+static double hp5343a_set_resolution( int );
+static bool hp5343a_command( const char * );
 
 
 static struct {
     int device;
 	int res;
 	bool is_res;
-} hp5342a;
+} hp5343a;
 
 
 /* Define the frequency that the driver returns during the test run */
 
-#define HP5342A_TEST_FREQUENCY  2.6e9
+#define HP5343A_TEST_FREQUENCY  2.6e9
 
 
 
@@ -74,14 +74,14 @@ static struct {
  *--------------------------------------------------------*/
 
 int
-hp5342a_init_hook( void )
+hp5343a_init_hook( void )
 {
     /* Set global variable to indicate that GPIB bus is needed */
 
     Need_GPIB = SET;
 
-    hp5342a.device = -1;
-	hp5342a.is_res = UNSET;
+    hp5343a.device = -1;
+	hp5343a.is_res = UNSET;
     return 1;
 }
 
@@ -90,9 +90,9 @@ hp5342a_init_hook( void )
  *--------------------------------------------------------*/
 
 int
-hp5342a_exp_hook( void )
+hp5343a_exp_hook( void )
 {
-    if ( ! hp5342a_init( device_name ) )
+    if ( ! hp5343a_init( device_name ) )
     {
         print( FATAL, "Initialization of device failed: %s\n",
                gpib_error_msg );
@@ -107,12 +107,12 @@ hp5342a_exp_hook( void )
  *--------------------------------------------------------*/
 
 int
-hp5342a_end_of_exp_hook( void )
+hp5343a_end_of_exp_hook( void )
 {
-    if ( hp5342a.device != -1 )
+    if ( hp5343a.device != -1 )
     {
-        gpib_local( hp5342a.device );
-        hp5342a.device = -1;
+        gpib_local( hp5343a.device );
+        hp5343a.device = -1;
     }
 
     return 1;
@@ -144,9 +144,9 @@ freq_counter_measure( Var_T * v )
     too_many_arguments( v );
 
     if ( FSC2_MODE == TEST )
-        return vars_push( FLOAT_VAR, HP5342A_TEST_FREQUENCY );
+        return vars_push( FLOAT_VAR, HP5343A_TEST_FREQUENCY );
 
-    return vars_push( FLOAT_VAR, hp5342a_get_freq( ) );
+    return vars_push( FLOAT_VAR, hp5343a_get_freq( ) );
 }
 
 
@@ -198,11 +198,11 @@ freq_counter_resolution( Var_T * v )
 				   "using %.3f Hz  instead.\n", resolution, res[ i ] );
 	}
 
-	hp5342a.res = i;
-	hp5342a.is_res = SET;
+	hp5343a.res = i;
+	hp5343a.is_res = SET;
 
 	if ( FSC2_MODE == EXPERIMENT )
-		hp5342a_set_resolution( i );
+		hp5343a_set_resolution( i );
 
 	return vars_push( FLOAT_VAR, res[ i ] );
 }
@@ -226,7 +226,7 @@ freq_counter_command( Var_T * v )
         TRY
         {
             cmd = translate_escape_sequences( T_strdup( v->val.sptr ) );
-            hp5342a_command( cmd );
+            hp5343a_command( cmd );
             T_free( cmd );
             TRY_SUCCESS;
         }
@@ -252,23 +252,23 @@ freq_counter_command( Var_T * v )
  *--------------------------------------------------------*/
 
 static bool
-hp5342a_init( const char * name )
+hp5343a_init( const char * name )
 {
-    if ( gpib_init_device( name, &hp5342a.device ) == FAILURE )
+    if ( gpib_init_device( name, &hp5343a.device ) == FAILURE )
         return FAIL;
 
     /* Tell device to use internal sample rate and to output data only if
        addressed as talker(don't lock the keyboard, the user is supposed
        to do settings at the front panel) */
 
-    if ( gpib_write( hp5342a.device, "ST1", 3 ) == FAILURE )
+    if ( gpib_write( hp5343a.device, "ST1", 3 ) == FAILURE )
         return FAIL;
 
-    if ( gpib_write( hp5342a.device, "T2", 2 ) == FAILURE )
+    if ( gpib_write( hp5343a.device, "T2", 2 ) == FAILURE )
         return FAIL;
 
-    if ( hp5342a.is_res )
-        hp5342a_set_resolution( hp5342a.res );
+    if ( hp5343a.is_res )
+        hp5343a_set_resolution( hp5343a.res );
 
     return OK;
 }
@@ -278,13 +278,13 @@ hp5342a_init( const char * name )
  *--------------------------------------------------------*/
 
 static double
-hp5342a_get_freq( void )
+hp5343a_get_freq( void )
 {
     char buf[ 22 ];
     long len = sizeof buf;
 
 
-    if (    gpib_read( hp5342a.device, buf, &len ) == FAILURE
+    if (    gpib_read( hp5343a.device, buf, &len ) == FAILURE
          || len != sizeof buf
          || strncmp( buf, " F  ", 4 ) )
     {
@@ -301,7 +301,7 @@ hp5342a_get_freq( void )
  *--------------------------------------------------------*/
 
 static double
-hp5342a_set_resolution( int res )
+hp5343a_set_resolution( int res )
 {
 	char cmd[ 3 ] = "SR";
 
@@ -309,7 +309,7 @@ hp5342a_set_resolution( int res )
 	fsc2_assert( res >= 0 && res <= 6 );
 
 	cmd[ 2 ] = '3' + res;
-    if ( gpib_write( hp5342a.device, cmd, 3 ) == FAILURE )
+    if ( gpib_write( hp5343a.device, cmd, 3 ) == FAILURE )
     {
         print( FATAL, "Communication with device failed.\n" );
         THROW( EXCEPTION );
@@ -322,9 +322,9 @@ hp5342a_set_resolution( int res )
  *--------------------------------------------------------------*/
 
 static bool
-hp5342a_command( const char * cmd )
+hp5343a_command( const char * cmd )
 {
-    if ( gpib_write( hp5342a.device, cmd, strlen( cmd ) ) == FAILURE )
+    if ( gpib_write( hp5343a.device, cmd, strlen( cmd ) ) == FAILURE )
     {
         print( FATAL, "Communication with device failed.\n" );
         THROW( EXCEPTION );

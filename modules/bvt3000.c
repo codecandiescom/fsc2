@@ -186,8 +186,7 @@ temp_contr_heater_state( Var_T * v )
         return vars_push( INT_VAR, ( long ) state );
     }
 
-    bvt3000_set_heater_power_limit( state );
-    bvt3000.heater_state = state;
+    bvt3000_set_heater_state( state );
     return vars_push( INT_VAR,
                       ( long ) ( bvt3000.heater_state =
                                                bvt3000_get_heater_state( ) ) );

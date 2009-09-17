@@ -39,12 +39,12 @@ set_res:
 	mv cw_epr_sr.EDLx cw_epr_sr.EDL
 
 install:
-	for f in $$(SCRIPTS); do               \
+	for f in $(SCRIPTS); do                \
 		$(INSTALL) -m 0755 $$f $(bindir);  \
 	done
 
 uninstall:
-	for f in $$(SCRIPTS); do               \
+	for f in $(SCRIPTS); do                \
 		$(RM) $(RMFLAGS) $(bindir)/$$f;    \
 	done
 

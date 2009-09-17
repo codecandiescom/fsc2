@@ -46,6 +46,7 @@
 * hfs9000::         Tektronix Stimulus System HFS9000 (Berlin W-Band)
 * hp5340a::         HP Frequency Counter HP5340A
 * hp5342a::         HP Frequency Counter HP5342A
+* hp5343a::         HP Frequency Counter HP5343A
 * hp8647a::         HP RF Synthesizer HP8647A
 * hp8648b::         HP RF Synthesizer HP8648B
 * hp8672a::         HP RF Synthesizer HP8672A
@@ -1135,7 +1136,7 @@ In the GPIB configuration file use @code{"HP5340A"} as the device name,
 
 @c #############################################################
 
-@node hp5342a, hp8647a, hp5340a, Device Reference
+@node hp5342a, hp5343a, hp5340a, Device Reference
 @iftex
 @subheading HP Frequency Counter HP5342A
 @end iftex
@@ -1149,8 +1150,9 @@ In the GPIB configuration file use @code{"HP5340A"} as the device name,
 @paragraphindent 0
 @strong{Description}: Former Hewlett-Packard (now
 @uref{http://www.home.agilent.com/,Agilent}) frequency counter
-HP5342A. This is a very old device even pre-dating the GPIB-standard.
-Only its capability to return the measured frequency can be used.
+HP5342A, frequency range @w{500 MHz} to @w{18 GHz}. This is a
+very old device even pre-dating the GPIB-standard. Only its
+capability to return the measured frequency can be used.
 
 @paragraphindent 0
 @strong{Controlled via}: GPIB bus (IEEE 488).@*
@@ -1172,7 +1174,45 @@ In the GPIB configuration file use @code{"HP5342A"} as the device name,
 
 @c #############################################################
 
-@node hp8647a, hp8648b, hp5342a, Device Reference
+@node hp5343a, hp8647a, hp5342a, Device Reference
+@iftex
+@subheading HP Frequency Counter HP5343A
+@end iftex
+@ifnottex
+@section HP Frequency Counter HP5343A
+@end ifnottex
+
+@paragraphindent 0
+@strong{Module name}: @code{hp5343a}
+
+@paragraphindent 0
+@strong{Description}: Former Hewlett-Packard (now
+@uref{http://www.home.agilent.com/,Agilent}) frequency counter
+HP5343A, frequency range @w{500 MHz} to @w{26.5 GHz}. This is a
+very old device even pre-dating the GPIB-standard. Only its
+capability to return the measured frequency can be used.
+
+@paragraphindent 0
+@strong{Controlled via}: GPIB bus (IEEE 488).@*
+In the GPIB configuration file use @code{"HP5342A"} as the device name,
+@code{'\n'} or @code{0xa} as the EOS character and set @code{set-reos}
+@code{set-xeos} and @code{set-bin} to @code{no}.
+
+@paragraphindent 0
+@strong{Status}: Tested
+
+@paragraphindent 0
+@strong{Supported functions}:
+@table @samp
+@item @ref{freq_counter_name()}
+@item @ref{freq_counter_measure()}
+@item @ref{freq_counter_resolution()}
+@end table
+
+
+@c #############################################################
+
+@node hp8647a, hp8648b, hp5343a, Device Reference
 @iftex
 @subheading HP RF Synthesizer HP8647A
 @end iftex
@@ -1691,7 +1731,8 @@ In the GPIB configuration file use @code{"ITC503"} as the device name,
 @code{set-xeos} to @code{yes} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
-@strong{Status}: Tested
+@strong{Status}: Tested for functions that measure the temperature,
+untested for function to automatically control the temperature.
 
 @paragraphindent 0
 @strong{Supported functions}:
@@ -1699,6 +1740,12 @@ In the GPIB configuration file use @code{"ITC503"} as the device name,
 @item @ref{temp_contr_name()}
 @item @ref{temp_contr_temperature()}
 @item @ref{temp_contr_sample_channel()}
+@item @ref{temp_contr_heater_sensor()}
+@item @ref{temp_contr_setpoint()}
+@item @ref{temp_contr_state()}
+@item @ref{temp_contr_heater_power()}
+@item @ref{temp_contr_heater_power_limit()}
+@item @ref{temp_contr_gas_flow()}
 @item @ref{temp_contr_lock_keyboard()}
 @end table
 

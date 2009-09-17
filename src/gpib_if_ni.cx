@@ -467,8 +467,10 @@ int
 gpib_local_lockout( int device )
 {
     int i;
+#if defined GPIB_LIRARY_NI_OLD
     sigset_t new_mask,
              old_mask;
+#endif
 
 
     /* Keep the module writers from calling the function anywhere else
@@ -1120,7 +1122,7 @@ gpib_serial_poll( int             device,
     sigaddset( &new_mask, DO_QUIT );
     sigprocmask( SIG_BLOCK, &new_mask, &old_mask );
 
-    ibrsp( device, stb );
+    ibrsp( device, ( char * ) stb );
 
     sigprocmask( SIG_SETMASK, &old_mask, NULL );
     lower_permissions( );

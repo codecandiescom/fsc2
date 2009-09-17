@@ -50,7 +50,7 @@ FOREVER {
 			NEXT;
 		}
 
-		magnet_field( current );
+		magnet_act_current( current );
 		magnet_heater_state( "ON" );
 		BREAK;
 	}

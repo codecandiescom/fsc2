@@ -53,8 +53,9 @@ Var_T * temp_contr_command(        Var_T *v );
 
 
 static bool lakeshore330_init( const char * name );
-static double lakeshore330_sens_data( void );
-static long lakeshore330_sample_channel( long channel );
+static double lakeshore330_sens_data( long channel );
+static long lakeshore330_set_sample_channel( long channel );
+static long lakeshore330_get_sample_channel( void );
 static void lakeshore330_lock( int state );
 static bool lakeshore330_command( const char * cmd );
 static bool lakeshore330_talk( const char * cmd,
@@ -67,7 +68,7 @@ static void lakeshore330_gpib_failure( void );
 static struct {
     int device;
     int lock_state;
-    int sample_channel;
+    int channel;
 } lakeshore330;
 
 
@@ -86,9 +87,9 @@ lakeshore330_init_hook( void )
 {
     Need_GPIB = SET;
 
-    lakeshore330.device         = -1;
-    lakeshore330.lock_state     = LOCK_STATE_REMOTE_LLO;
-    lakeshore330.sample_channel = DEFAULT_SAMPLE_CHANNEL;
+    lakeshore330.device     = -1;
+    lakeshore330.lock_state = LOCK_STATE_REMOTE_LLO;
+    lakeshore330.channel    = DEFAULT_SAMPLE_CHANNEL;
 
     return 1;
 }
@@ -143,10 +144,41 @@ temp_contr_name( Var_T * v  UNUSED_ARG )
 Var_T *
 temp_contr_temperature( Var_T * v  UNUSED_ARG )
 {
+    long channel;
+
+
     if ( FSC2_MODE == TEST )
         return vars_push( FLOAT_VAR, 123.45 );
 
-    return vars_push( FLOAT_VAR, lakeshore330_sens_data( ) );
+    if ( v == NULL )
+        return vars_push( FLOAT_VAR,
+                          lakeshore330_sens_data( lakeshore330.channel ) );
+
+    vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
+
+    if ( v->type & ( INT_VAR | FLOAT_VAR ) )
+    {
+        channel = get_long( v, "channel number" ) - 1;
+
+        if ( channel != SAMPLE_CHANNEL_A && channel != SAMPLE_CHANNEL_B )
+        {
+            print( FATAL, "Invalid sample channel number (%ld).\n", channel );
+            THROW( EXCEPTION );
+        }
+    }
+    else
+    {
+        if (    ( *v->val.sptr != 'A' && *v->val.sptr != 'B' )
+             || strlen( v->val.sptr ) != 1 )
+        {
+            print( FATAL, "Invalid sample channel (\"%s\").\n", v->val.sptr );
+            THROW( EXCEPTION );
+        }
+
+        channel = ( long ) ( *v->val.sptr - 'A' );
+    }
+
+    return vars_push( FLOAT_VAR, lakeshore330_sens_data( channel ) );
 }
 
 
@@ -161,8 +193,9 @@ temp_contr_sample_channel( Var_T * v )
 {
     long channel;
 
+
     if ( v == NULL )
-        return vars_push( INT_VAR, ( long ) lakeshore330.sample_channel );
+        return vars_push( INT_VAR, ( long ) lakeshore330.channel );
 
     vars_check( v, INT_VAR | FLOAT_VAR | STR_VAR );
 
@@ -189,12 +222,12 @@ temp_contr_sample_channel( Var_T * v )
 
     if ( FSC2_MODE == TEST )
     {
-        lakeshore330.sample_channel = channel;
+        lakeshore330.channel = channel;
         return vars_push( INT_VAR, channel + 1 );
     }
 
     return vars_push( INT_VAR,
-                     ( long ) ( lakeshore330_sample_channel( channel ) + 1 ) );
+                     ( long ) lakeshore330_set_sample_channel( channel ) + 1 );
 }
 
 
@@ -293,17 +326,14 @@ lakeshore330_init( const char * name )
     if ( gpib_write( lakeshore330.device, "SUNI K\n", 7 ) == FAILURE )
         return FAIL;
 
-    /* Set default sample channel */
-
-    sprintf(buf, "SCHN %c\n", ( char ) ( lakeshore330.sample_channel + 'A' ) );
-    if ( gpib_write( lakeshore330.device, buf, strlen( buf ) ) == FAILURE )
-        return FAIL;
-    fsc2_usleep( 500000, UNSET );
-
     /* Switch device to remote state with local lockout */
 
     if ( gpib_write( lakeshore330.device, "MODE 2\n", 7 ) == FAILURE )
         return FAIL;
+
+    /* Get the currently used sensor */
+
+    lakeshore330_get_sample_channel( );
 
     return OK;
 }
@@ -313,12 +343,15 @@ lakeshore330_init( const char * name )
  *-----------------------------------------------------------------*/
 
 static double
-lakeshore330_sens_data( void )
+lakeshore330_sens_data( long channel )
 {
     char buf[ 50 ];
     long len = sizeof buf;
     double temp;
 
+
+    if ( channel != lakeshore330.channel )
+        lakeshore330_set_sample_channel( channel );
 
     lakeshore330_talk( "SDAT?\n", buf, &len );
 
@@ -337,7 +370,7 @@ lakeshore330_sens_data( void )
  *-----------------------------------------------------------------*/
 
 static long
-lakeshore330_sample_channel( long channel )
+lakeshore330_set_sample_channel( long channel )
 {
     char buf[ 20 ];
 
@@ -347,7 +380,25 @@ lakeshore330_sample_channel( long channel )
     sprintf( buf, "SCHN %c\n", ( char ) ( channel + 'A' ) );
     lakeshore330_command( buf );
     fsc2_usleep( 500000, UNSET );
-    return lakeshore330.sample_channel = channel;
+    return lakeshore330.channel = channel;
+}
+
+
+/*-----------------------------------------------------------------*
+ *-----------------------------------------------------------------*/
+
+static long
+lakeshore330_get_sample_channel( void )
+{
+    char buf[ 20 ];
+    long len = sizeof buf;
+
+
+    lakeshore330_talk( "SCHN?\n", buf, &len );
+    if ( *buf != 'A' && *buf != 'B' )
+        lakeshore330_gpib_failure( );
+
+    return lakeshore330.channel = *buf - 'A';
 }
 
 

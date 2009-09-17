@@ -404,8 +404,6 @@ globals_init( const char * pname )
     GUI.is_init = UNSET;
 
     G.color_hash = NULL;
-
-    digest_init( );
 }
 
 
@@ -1275,10 +1273,6 @@ final_exit_handler( void )
         kill( Fsc2_Internals.http_pid, SIGTERM );
 
     fsc2_save_conf( );
-
-    /* Safe digests of new, error-free EDL scripts */
-
-    digest_at_exit( );
 
     /* Do everything necessary to end the program */
 
