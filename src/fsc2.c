@@ -874,14 +874,14 @@ scan_args( int   * argc,
                 exit( EXIT_FAILURE );
             }
 
-            if ( ! get_edl_file( argv[ cur_arg ] )
-                 && access( argv[ cur_arg ], R_OK ) == -1
+            if (    ! get_edl_file( argv[ cur_arg ] )
+                 && access( EDL.files->name, R_OK ) == -1
                  && errno != ENOENT )
                 return EXIT_FAILURE;
 
             if ( ! ( In_file_fp = fopen( EDL.files->name, "r" ) ) )
             {
-                fprintf( stderr, "Can't open file '%s'.\n",
+                fprintf( stderr, "Can't open file '%s' for reading.\n",
                          EDL.files->name );
                 exit( EXIT_FAILURE );
             }
@@ -1178,7 +1178,7 @@ scan_args( int   * argc,
             if ( flags & DO_TEST )
             {
                 fprintf( stderr, "fsc2: Can't have both flags '-X' and "
-                        "'-T' at once.\n" );
+                         "'-T' at once.\n" );
                 usage( EXIT_FAILURE );
             }
 
@@ -1229,9 +1229,8 @@ scan_args( int   * argc,
             if ( Fsc2_Internals.num_test_runs == 0 )
             {
                 Fsc2_Internals.cmdline_flags |= TEST_ONLY | NO_MAIL;
-
-                seteuid( getuid( ) );
-                setegid( getgid( ) );
+                
+                lower_permissions( );
                 if (    ! get_edl_file( *fname )
                      || ! ( In_file_fp = fopen( EDL.files->name, "r" ) ) )
                     exit( EXIT_FAILURE );

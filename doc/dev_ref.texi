@@ -1199,7 +1199,8 @@ In the GPIB configuration file use @code{"HP5342A"} as the device name,
 @code{set-xeos} and @code{set-bin} to @code{no}.
 
 @paragraphindent 0
-@strong{Status}: Tested
+@strong{Status}: Untested (but rather likely works since it's
+extremely similar to the @ref{hp5342a}.
 
 @paragraphindent 0
 @strong{Supported functions}:
