@@ -1359,7 +1359,7 @@ load_file( FL_OBJECT * a  UNUSED_ARG,
         if (    ! GUI.main_form->Load->u_ldata
              && ! GUI.main_form->Load->u_cdata )
         {
-            fn = fsc2_show_fselector( "Select input file:", NULL, "*.edl",
+            fn = fsc2_show_fselector( "Select EDL file:", NULL, "*.edl",
                                       NULL );
             if ( ! fn || ! *fn )
             {

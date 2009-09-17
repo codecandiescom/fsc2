@@ -30,7 +30,6 @@ vim_dir := $(shell if [ -d /usr/local/share/vim/current ]; then   \
 						     echo /usr/share/vim/current;         \
 					 	  fi                                      \
 					 fi )
-
 all:
 	$(MAKE) utils
 
@@ -47,7 +46,9 @@ edl-mod.el: edl-mod.el.template $(sdir)/func.c $(cdir)/Functions
 
 
 edl-mod.elc: edl-mod.el
-	emacs -batch -f batch-byte-compile edl-mod.el;
+	if [ -n "`which emacs 2>/dev/null`" ]; then         \
+		emacs -batch -f batch-byte-compile edl-mod.el;  \
+	fi
 
 
 edl.vim: edl.vim.template $(sdir)/func.c $(cdir)/Functions
@@ -65,12 +66,12 @@ install: edl-mod.elc
 	$(INSTALL) -m 755 fsc2_pulses $(bindir)
 	$(INSTALL) -m 755 epr_modulation $(bindir)
 	$(INSTALL) -d $(emacs_dir)
-	if [ -n "$(emacs_dir)" ]; then                   \
-		$(INSTALL) -m 644 edl-mod.el $(emacs_dir);   \
-		$(INSTALL) -m 444 edl-mod.elc $(emacs_dir);  \
+	if [ -e edl-mod.elc -a -n "$(emacs_dir)" ]; then   \
+		$(INSTALL) -m 644 edl-mod.el $(emacs_dir);     \
+		$(INSTALL) -m 444 edl-mod.elc $(emacs_dir);    \
 	fi
-	if [ -n "$(vim_dir)" ]; then                      \
-		$(INSTALL) -m 644 edl.vim $(vim_dir)/plugin;  \
+	if [ -n "$(vim_dir)" ]; then                       \
+		$(INSTALL) -m 644 edl.vim $(vim_dir)/plugin;   \
 	fi
 ifdef WITH_HTTP_SERVER
 	$(INSTALL) -m 755 -o $(OWNER) -g $(GROUP) fsc2_http_server $(bindir)
