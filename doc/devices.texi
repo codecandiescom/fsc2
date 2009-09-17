@@ -4661,8 +4661,8 @@ The function can only be used in the @code{EXPERIMENT} section of an
 @section Frequency Counter Functions
 @cindex Frequency Counter Functions
 Currently three frequency counters are supported, the Hewlett-Packard
-counters HP5340A, HP5342A, EIP Microwave Inc.@: EIP371 and the Agilent
-53181A. The modules get loaded by specifying
+counters HP5340A, HP5342A, HP5343A, EIP Microwave Inc.@: EIP371 and
+the Agilent 53181A. The modules get loaded by specifying
 @example
 hp5340a
 hp5342a
@@ -4716,14 +4716,14 @@ MHz} to @w{300 MHz}, @code{2} for the band between @w{100 MHz} and
 @anchor{freq_counter_resolution()}
 @findex freq_counter_resolution()
 @item freq_counter_resolution()
-This function only exists for the @ref{eip371} and the @ref{hp5342a}.
-It allows to set (but not query) the resolution frequency measurements
-are done with. It expects a single floating point argument, the
-resolution in @code{Hz}. Since the devices only accepts resolutions of
-@w{1 Hz}, @w{10 Hz}, @w{100 Hz}, @w{1 kHz}, @w{10 kHz}, @w{100 kHz}
-and @w{1 MHz}, values differing from these resolutions will be
-adjusted to the next higher resolution (if there's a deviation of more
-than @w{1%} an warning is printed out).
+This function only exists for the @ref{eip371} and the @ref{hp5342a}
+and @ref{hp5343a}. It allows to set (but not query) the resolution
+frequency measurements are done with. It expects a single floating
+point argument, the resolution in @code{Hz}. Since the devices only
+accepts resolutions of @w{1 Hz}, @w{10 Hz}, @w{100 Hz}, @w{1 kHz},
+@w{10 kHz}, @w{100 kHz} and @w{1 MHz}, values differing from these
+resolutions will be adjusted to the next higher resolution (if there's
+a deviation of more than @w{1%} an warning is printed out).
 
 
 @anchor{freq_counter_coupling()}

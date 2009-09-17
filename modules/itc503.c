@@ -75,6 +75,10 @@ enum {
 #define TEST_GAS_FLOW        99.9
 
 
+#define MAX_INTEGRAL_TIME     8400   /* 140 minutes */
+#define MAX_DERIVATIVE_TIME  16380   /* 273 minutes */ 
+
+
 int itc503_init_hook(       void );
 int itc503_exp_hook(        void );
 int itc503_end_of_exp_hook( void );
@@ -111,6 +115,12 @@ static void itc503_lock( int state );
 #if 0
 static void itc503_auto_pid_mode( bool state );
 static bool itc503_get_auto_pid_state( void );
+static void itc503_set_proportional_band( double prop_bnd );
+static double itc503_get_proportional_band( void );
+static void itc503_set_integral_time( double int_time );
+static double itc503_get_integral_time( void );
+static void itc503_set_derivative_time( double deriv_time );
+static double itc503_get_derivative_time( void );
 #endif
 static bool itc503_command( const char * cmd );
 static long itc503_talk( const char * message,
@@ -134,7 +144,7 @@ static struct {
 
 /**********************************************************/
 /*                                                        */
-/*                  hook functions                        */
+/*                  Hook functions                        */
 /*                                                        */
 /**********************************************************/
 
@@ -881,7 +891,7 @@ itc503_get_setpoint( void )
     sscanf( buf + 1, "%lf", &setpoint );
 
     /* If the first character is a '+' or '-' the sensor is returning
-       setpointeratures in degree Celsius, otherwise in Kelvin */
+       setpoint temperatures in degree Celsius, otherwise in Kelvin */
 
     if ( ! isdigit( ( unsigned char ) buf[ 1 ] ) )
          setpoint += C2K_OFFSET;
@@ -1094,6 +1104,135 @@ itc503_get_auto_pid_state( void )
     }
 
     return buf[ 12 ] == '1';
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+static void
+itc503_set_proportional_band( double prop_bnd )
+{
+
+    char cmd[ 30 ];
+    char buf[ 10 ];
+
+    sprintf( cnd, "P%.3lf\r", prop_band );
+
+    if ( itc503_talk( cmd, buf, sizeof buf ) != 2 )
+    {
+        print( FATAL, "Failure to set proportional band.\n" );
+        THROW( EXCEPTION );
+    }
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+static double
+itc503_get_proportional_band( void )
+{
+    char buf[ 50 ];
+    double prop_band;
+
+
+    if (    itc503_talk( "R8\r", buf, sizeof buf ) < 2
+         || sscanf( buf + 1, "%lf", &prop_band ) != 1 )a
+    {
+        print( FATAL, "Device returns invalid data.\n");
+        THROW( EXCEPTION );
+    }
+
+    return prop_band;
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+static void
+itc503_set_integral_time( double int_time )
+{
+
+    char cmd[ 30 ];
+    char buf[ 10 ];
+
+
+    fsc2_assert( int_time >= 0 && int_time < MAX_INTEGRAL_TIME );
+
+    sprintf( cmd, "I%.1d\r", int_time / 6.0 );
+
+    if ( itc503_talk( cmd, buf, sizeof buf ) != 2 )
+    {
+        print( FATAL, "Failure to set integral time.\n" );
+        THROW( EXCEPTION );
+    }
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+static double
+itc503_get_integral_time( void )
+{
+    char buf[ 50 ];
+    double int_time;
+
+
+    if (    itc503_talk( "R9\r", buf, sizeof buf ) < 5
+         || sscanf( buf + 1, "%lf", &int_time ) != 1 )
+    {
+        print( FATAL, "Device returns invalid data.\n");
+        THROW( EXCEPTION );
+    }
+
+    return 6.0 * int_time;
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+static void
+itc503_set_derivative_time( double deriv_time )
+{
+
+    char cmd[ 30 ];
+    char buf[ 10 ];
+
+
+    fsc2_assert( deriv_time >= 0 && deriv_time < MAX_DERIVATIVE_TIME );
+
+    sprintf( cmd, "D%d\r", irnd( deriv_time / 60 ) );
+
+    if ( itc503_talk( cmd, buf, sizeof buf ) != 2 )
+    {
+        print( FATAL, "Failure to set derivative time.\n" );
+        THROW( EXCEPTION );
+    }
+}
+
+
+/*--------------------------------------------------------------*
+ *--------------------------------------------------------------*/
+
+static double
+itc503_get_derivative_time( void )
+{
+    char buf[ 50 ];
+    double deriv_time;
+
+
+    if (    itc503_talk( "R10\r", buf, sizeof buf ) < 2
+         || sscanf( buf + 1, "%lf", &deriv_time ) != 1 )
+    {
+        print( FATAL, "Device returns invalid data.\n");
+        THROW( EXCEPTION );
+    }
+
+    return 60.0 * deriv_time;
 }
 #endif
 

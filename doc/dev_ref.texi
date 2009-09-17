@@ -1732,7 +1732,8 @@ In the GPIB configuration file use @code{"ITC503"} as the device name,
 
 @paragraphindent 0
 @strong{Status}: Tested for functions that measure the temperature,
-untested for function to automatically control the temperature.
+untested (and not yet complete) for function to automatically control
+the temperature.
 
 @paragraphindent 0
 @strong{Supported functions}:
