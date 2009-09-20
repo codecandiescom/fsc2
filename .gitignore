@@ -38,6 +38,8 @@ rulbus/lib/lexer.c
 rulbus/lib/parser.c
 rulbus/lib/parser.h
 rulbus/lib/parser.output
+modules/hp5342a.c
+modules/hp5343a.c
 modules/hp864*.c
 modules/hp864*.map
 modules/hp864*_gpib.c

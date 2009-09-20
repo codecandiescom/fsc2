@@ -828,8 +828,7 @@ scan_args( int   * argc,
 
             Fsc2_Internals.cmdline_flags |= TEST_ONLY;
 
-            seteuid( getuid( ) );
-            setegid( getgid( ) );
+            lower_permissions( );
 
             if (    ! get_edl_file( argv[ cur_arg ] )
                  || ! ( In_file_fp = fopen( EDL.files->name, "r" ) ) )
