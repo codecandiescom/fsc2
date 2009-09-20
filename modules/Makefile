@@ -23,6 +23,7 @@
 s_band_list     := s_band_magnet_narrow s_band_magnet_broad
 tds_list        := tds754a tds744a tds540 tds520c tds520a tds520
 hp864_list      := hp8647a hp8648b
+hp534_list      := hp5342a hp5343a
 lecroy94_list   := lecroy9410 lecroy9420 lecroy9424 lecroy9424e lecroy9450
 
 
@@ -107,10 +108,10 @@ comp_modules    := hjs_sfc lecroy_ws lecroy_wr_l
 # Support for devices contolled via GPIB
 
 ifneq ($(GPIB_LIBRARY),none)
-simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a hp5342a       \
-				   hp5343a ips20_4 ips120_10 ips120_10_mod itc503             \
-				   keithley228a kontron4060 lakeshore330 pt2025 sr510 sr530   \
-				   sr810 sr830 thurlby330 mcn700_2000 schlum7150 ag54830b     \
+simp_modules    += bh15 egg4402 er032m er035m er035m_sa hp5340a              \
+				   $(hp534_list) ips20_4 ips120_10 ips120_10_mod itc503      \
+				   keithley228a kontron4060 lakeshore330 pt2025 sr510 sr530  \
+				   sr810 sr830 thurlby330 mcn700_2000 schlum7150 ag54830b    \
 				   bh15_fc eip371 agilent_53181a
 
 comp_modules    += dg2020_f dg2020_b ep385 er023m hfs9000 hp8672a        \
@@ -220,7 +221,6 @@ all:
 	$(MAKE) -C .. modules
 
 modules:
-	$(MAKE) $(addsuffix .fsc2_so,$(simp_modules))
 	@for n in $(tds_list); do                                       \
 		o=`echo $$n | tr "a-z" "A-Z"`;                              \
 		for m in "" _util _gpib; do                                 \
@@ -269,11 +269,20 @@ modules:
 					hp864.map.tmpl > $$n.map;                       \
 		fi;                                                         \
 	done;
+	@for n in $(hp534_list); do                                     \
+		o=`echo $$n | tr "a-z" "A-Z"`;                              \
+		if [ ! -e $$n.x -o hp534.c.tmpl -nt $$n.c ]; then           \
+			sed -e "s/hp534_tmpl/$$n/g"                             \
+				-e "s/HP534_TMPL/$$o/g"                             \
+				hp534.c.tmpl > $$n.c;                               \
+		fi;                                                         \
+	done;
 	@for m in $(shell echo $(comp_modules) | cut -f1- -d' '); do    \
 		sed "s/##/$$m/g" Makefile.tmpl > $$m.make &&                \
 		$(MAKE) -f $$m.make;                                        \
 		$(RM) $(RMFLAGS) $$m.make;                                  \
 	done;
+	$(MAKE) $(addsuffix .fsc2_so,$(simp_modules))
 
 
 # The following rule looks a bit complicated because we have to check if
@@ -390,6 +399,9 @@ clean:
 		$(RM) $(RMFLAGS) $$n.map;                 \
 	done;
 	-for n in $(s_band_list); do                  \
+		$(RM) $(RMFLAGS) $$n.c;                   \
+	done;
+	-for n in $(hp534_list); do                   \
 		$(RM) $(RMFLAGS) $$n.c;                   \
 	done;
 	$(RM) $(RMFLAGS) *.fsc2_so
