@@ -34,6 +34,7 @@ medriver_lib_path    := /usr/lib/local
 WITH_LIBUSB_1_0      := yes
 WITH_FFT             := yes
 #NO_MAIL              := yes
+#ADD_LIB_PATHS        := /usr/lib64 /usr/local/xyz/def
 MAIL_ADDRESS         := jt@toerring.de
 BROWSER              := /usr/bin/firefox 
 DESCRIPTION          := "Test machine"

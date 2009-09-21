@@ -211,6 +211,12 @@ LAN_LOG_LEVEL   := HIGH
 # libusb_lib_path    := /usr/lib/local
 
 
+# If the following is defined the FFT pseudo-module is created. This requires
+# the the fftw3 library (and header its files) is installed
+
+# WITH_FFT           := yes
+
+
 # Define the default editor to use for editing when the "Edit" button gets
 # pressed or for writing a bug report  (but a user can still override this
 # by setting the 'EDITOR' environment variable named).
@@ -332,6 +338,14 @@ BROWSER            := firefox
 # WITH_MEDRIVER      := yes
 # medriver_incl_path := /usr/local/include/medriver
 # medriver_lib_path  := /usr/lib/local
+
+
+# If there are libraries to be linked against that for some reason
+# aren't in the path the linker checks in by itself and are not already
+# checked for by the Makefile you can here set up a list of such paths.
+# Those paths are set first before all others.
+
+# ADD_LIB_PATHS      := /usr/lib64 /usr/local/xyz/def
 
 
 # Comment out the next two lines if you don't want the ability to run a HTTP

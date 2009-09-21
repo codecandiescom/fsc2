@@ -365,6 +365,14 @@ BROWSER            := firefox
 # medriver_lib_path  := /usr/lib/local
 
 
+# If there are libraries to be linked against that for some reason
+# aren't in the path the linker checks in by itself and are not already
+# checked for by the Makefile you can here set up a list of such paths.
+# Those paths are set first before all others.
+
+# ADD_LIB_PATHS      := /usr/lib64 /usr/local/xyz/def
+
+
 # Comment out the next two lines if you don't want the ability to run a HTTP
 # server that allows to monitor fsc2s current state via the Internet. The
 # default port number the HTTP server will listen on can be set via the second
@@ -552,15 +560,12 @@ INCLUDES := -I$(fdir) -I$(adir)  -I/usr/local/include     \
 LFLAGS	 := -shared -fpic
 
 
+LIBS := $(foreach path,$(ADD_LIB_PATHS),-L$(path)) -L/usr/local/lib \
+		-L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl
+
 ifeq ($(MPATROL),YES)
 	CONFFLAGS := -DMPATROL
-	LIBS      := -L/usr/local/lib -lmpatrol -lelf -L/usr/X11R6/lib -lforms \
-				 -lX11 -lXpm -lm -ldl
-else
-	CONFFLAGS :=
-	LIBS      := -L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl -L/usr/local/lib
-				 # -lmcheck   # enable for malloc debugging
-				 # -lefence   # enable to run with efence
+	LIBS      += -lmpatrol -lelf
 endif
 
 
