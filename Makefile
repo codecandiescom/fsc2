@@ -560,7 +560,7 @@ INCLUDES := -I$(fdir) -I$(adir)  -I/usr/local/include     \
 LFLAGS	 := -shared -fpic
 
 
-LIBS := $(foreach path,$(ADD_LIB_PATHS),-L$(path)) -L/usr/local/lib \
+LIBS := -L/usr/local/lib \
 		-L/usr/X11R6/lib -lforms -lX11 -lXpm -lm -ldl
 
 ifeq ($(MPATROL),YES)
@@ -614,6 +614,8 @@ MACHINE_INCLUDE_FILE := $(shell if [ -n "$(machine_name)" ]; then \
 ifneq ($(MACHINE_INCLUDE_FILE),)
 	include $(MACHINE_INCLUDE_FILE)
 endif
+
+LIBS := $(foreach path,$(ADD_LIB_PATHS),-L$(path)) $(LIBS)
 
 
 # Pass lots of variables to the source files...
